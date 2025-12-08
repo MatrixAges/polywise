@@ -1,0 +1,9 @@
+export default {
+	plugins: {
+		'postcss-import': {},
+		'postcss-nesting': {},
+		'postcss-calc': {},
+		'@tailwindcss/postcss': {},
+		'@csstools/postcss-is-pseudo-class': {}
+	}
+}

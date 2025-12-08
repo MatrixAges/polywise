@@ -1,0 +1,105 @@
+@import 'tailwindcss';
+
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+
+@theme {
+	--color-std-50: oklch(96.47% 0.006 237.9);
+	--color-std-100: oklch(90.54% 0.012 240.2);
+	--color-std-200: oklch(82.69% 0.021 242.4);
+	--color-std-300: oklch(74.45% 0.031 241.9);
+	--color-std-400: oklch(65.91% 0.043 241.5);
+	--color-std-500: oklch(56.12% 0.057 241.9);
+	--color-std-600: oklch(47.24% 0.063 242.4);
+	--color-std-700: oklch(39.06% 0.063 243.6);
+	--color-std-800: oklch(32.48% 0.06 245.2);
+	--color-std-900: oklch(25.68% 0.061 247.7);
+	--color-std-950: oklch(13% 0 0);
+	--color-std-black: #000;
+	--color-std-white: #fff;
+
+	--color-gold-1: oklch(71.86% 0.106 79.54);
+	--color-gold-2: oklch(65.18% 0.101 79.28);
+
+	--text-xsm: 13px;
+	--text-xsm--line-height: 1.25rem;
+
+	--color-dark: oklch(from var(--color-std-900) l c h / 0.9);
+	--color-solid: oklch(from var(--color-std-900) l c h / 0.7);
+	--color-gray: oklch(from var(--color-std-900) l c h / 0.4);
+	--color-light: oklch(from var(--color-std-600) l c h / 0.6);
+	--color-soft: oklch(from var(--color-std-600) l c h / 0.4);
+	--color-softlight: oklch(from var(--color-std-900) l c h / 0.3);
+
+	--color-bg-main: oklch(from var(--color-std-white) l c h / 0.6);
+	--color-bg-main-hover: oklch(from var(--color-std-100) l c h / 0.2);
+	--color-bg-main-active: oklch(from var(--color-std-300) l c h / 0.1);
+	--color-bg-hover: oklch(from var(--color-std-300) l c h / 0.15);
+	--color-bg-active: oklch(from var(--color-std-400) l c h / 0.15);
+
+	--color-border-solid: oklch(from var(--color-std-900) l c h / 0.2);
+	--color-border-solid-active: oklch(from var(--color-std-900) l c h / 0.5);
+	--color-border-gray: oklch(from var(--color-std-600) l c h / 0.1);
+	--color-border-light: oklch(from var(--color-std-400) l c h / 0.1);
+}
+
+[data-theme='dark'] {
+	--color-std-50: oklch(0.13 0 0);
+	--color-std-100: oklch(0.27 0 0);
+	--color-std-200: oklch(0.378 0 0);
+	--color-std-300: oklch(0.473 0 0);
+	--color-std-400: oklch(0.546 0 0);
+	--color-std-500: oklch(0.651 0 0);
+	--color-std-600: oklch(0.707 0 0);
+	--color-std-700: oklch(0.872 0 0);
+	--color-std-800: oklch(0.928 0 0);
+	--color-std-900: oklch(0.967 0 0);
+	--color-std-950: oklch(0.985 0 0);
+	--color-std-black: #fff;
+	--color-std-white: #000;
+}
+
+@utility clickable {
+	@apply cursor-pointer select-none active:scale-95 transition-all;
+}
+
+@layer components {
+	.btn {
+		@apply clickable flex justify-center items-center gap-1.5 hover:bg-bg-hover active:bg-bg-active;
+	}
+
+	.no-scrollbar::-webkit-scrollbar {
+		display: none;
+	}
+
+	.no-scrollbar {
+		-ms-overflow-style: none;
+		scrollbar-width: none;
+	}
+}
+
+:root {
+	--font_family:
+		'IBMPlexSans', -apple-system, BlinkMacSystemFont, ui-sans-serif, 'Segoe UI', 'Helvetica Neue', Arial,
+		'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+	--font_serif: 'STIXTwoText', Georgia, 'Times New Roman', Times, '宋体', SimSun, 'Songti', serif;
+	--font_mono: 'Menlo', 'Consolas', monospace;
+	--font_stiff: 'Tektur';
+	--font_emoji: 'NotoEmoji';
+}
+
+#root {
+	isolation: isolate;
+}
+
+.is_drag {
+	-webkit-app-region: drag;
+}
+
+.no_drag {
+	-webkit-app-region: no-drag;
+}
+
+.disabled {
+	opacity: 0.3;
+	pointer-events: none;
+}

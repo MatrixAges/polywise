@@ -1,0 +1,77 @@
+@reference '../../../../styles/index.css';
+
+._local {
+	padding: 16px 0;
+	font-size: 12px;
+	margin-block: var(--margin_y);
+
+	&:hover {
+		:global {
+			.btn_copy {
+				opacity: 1;
+			}
+		}
+	}
+
+	@apply rounded-xl;
+
+	:global {
+		.lang {
+			z-index: 10;
+			top: 12px;
+			right: 12px;
+			line-height: 1;
+
+			@apply text-std-400;
+		}
+
+		.btn_copy {
+			z-index: 10;
+			top: 12px;
+			right: 12px;
+			width: 24px;
+			height: 24px;
+			line-height: 1;
+			padding: 0;
+			border-radius: var(--radius);
+			outline: none;
+			opacity: 0;
+			background-color: transparent;
+			transition-property: opacity;
+			font-size: 15px;
+
+			&:hover {
+				@apply bg-std-300;
+			}
+
+			@apply bg-std-200;
+		}
+
+		.pre_wrap {
+			.line_numbers_wrap {
+				display: flex;
+				flex-direction: column;
+				width: 30px;
+				margin-right: 12px;
+				user-select: none;
+
+				.line_number {
+					display: inline-block;
+					width: 100%;
+					text-align: right;
+
+					@apply text-std-400;
+				}
+			}
+
+			.pre {
+				overflow-x: scroll;
+				width: calc(100% - 42px);
+				padding-right: 12px;
+				margin: 0;
+				word-break: keep-all;
+				white-space: pre;
+			}
+		}
+	}
+}

@@ -1,0 +1,21 @@
+{
+	"compilerOptions": {
+		"target": "ESNext",
+		"module": "ESNext",
+		"skipLibCheck": true,
+		"lib": ["ESNEXT"],
+		"moduleResolution": "Bundler",
+		"strict": true,
+		"baseUrl": "../",
+		"esModuleInterop": true,
+		"isolatedModules": true,
+		"forceConsistentCasingInFileNames": true,
+		"paths": {
+			"@desktop/*": ["./desktop/src/*"],
+			"@app/*": ["./app/*"]
+		},
+		"emitDecoratorMetadata": true,
+		"experimentalDecorators": true
+	},
+	"include": ["src", "typings"]
+}

@@ -1,0 +1,33 @@
+# dependencies
+node_modules
+npm-debug.log*
+*-lock.json
+
+# production
+**/dist
+.next
+.open-next
+.vercel
+.wrangler
+.turbo
+
+# misc
+.DS_Store
+.idea
+.svn
+.swc
+@mf-types
+
+# temp
+**/.tmp
+
+# Electron
+release
+src/main/bundle.js
+src/main/bundle.js.map
+
+# VSCodeCounter
+.VSCodeCounter/**/details.md
+.VSCodeCounter/**/diff**
+.VSCodeCounter/**/results**
+!.VSCodeCounter/**/results.md

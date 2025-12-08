@@ -1,0 +1,72 @@
+/** Songti */
+@font-face {
+	font-family: 'Songti';
+	font-weight: 400;
+	src: local('STSongti-SC-Regular');
+}
+@font-face {
+	font-family: 'Songti';
+	font-weight: 500;
+	src: local('STSongti-SC-Bold');
+}
+@font-face {
+	font-family: 'Songti';
+	font-weight: 700;
+	src: local('STSongti-SC-Black');
+}
+
+/** IBMPlexSans */
+@font-face {
+	font-family: 'IBMPlexSans';
+	font-style: normal;
+	src:
+		local('IBMPlexSans'),
+		url('../font/IBMPlexSans/IBMPlexSans.ttf') format('truetype');
+}
+@font-face {
+	font-family: 'IBMPlexSans';
+	font-style: italic;
+	src:
+		local('IBMPlexSans'),
+		url('../font/IBMPlexSans/IBMPlexSans-Italic.ttf') format('truetype');
+}
+
+/** STIXTwoText */
+@font-face {
+	font-family: 'STIXTwoText';
+	font-style: normal;
+	src:
+		local('STIXTwoText'),
+		url('../font/STIXTwoText/STIXTwoText.ttf') format('truetype');
+
+	descent-override: 6%;
+}
+@font-face {
+	font-family: 'STIXTwoText';
+	font-style: italic;
+	src:
+		local('STIXTwoText'),
+		url('../font/STIXTwoText/STIXTwoText-Italic.ttf') format('truetype');
+
+	descent-override: 6%;
+}
+
+/** Tektur */
+@font-face {
+	font-family: 'Tektur';
+	font-style: normal;
+	src:
+		local('Tektur'),
+		url('../font/Tektur.ttf') format('truetype');
+
+	descent-override: 24%;
+}
+
+/** NotoEmoji */
+@font-face {
+	font-family: 'NotoEmoji';
+	font-style: normal;
+	src:
+		local('NotoEmoji'),
+		url('../font/NotoEmoji.ttf') format('truetype');
+}

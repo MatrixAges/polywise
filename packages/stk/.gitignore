@@ -1,0 +1,14 @@
+# dependencies
+node_modules
+npm-debug.log*
+package-lock.json
+
+# production
+
+# misc
+.DS_Store
+.idea
+.vscode
+.svn
+.npmrc
+.yarnrc
