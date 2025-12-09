@@ -15,7 +15,7 @@ const config = {
 	lazyCompilation: { entries: false, imports: true },
 	server: { open: false, port: 666, cors: { origin: ['http://localhost:8787'] } },
 	html: {
-		title: 'Intake',
+		title: 'Polywise - Your second brain.',
 		template: './public/index.html'
 	},
 	tools: {

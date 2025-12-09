@@ -3,22 +3,19 @@
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 
 @theme {
-	--color-std-50: oklch(96.47% 0.006 237.9);
-	--color-std-100: oklch(90.54% 0.012 240.2);
-	--color-std-200: oklch(82.69% 0.021 242.4);
-	--color-std-300: oklch(74.45% 0.031 241.9);
-	--color-std-400: oklch(65.91% 0.043 241.5);
-	--color-std-500: oklch(56.12% 0.057 241.9);
-	--color-std-600: oklch(47.24% 0.063 242.4);
-	--color-std-700: oklch(39.06% 0.063 243.6);
-	--color-std-800: oklch(32.48% 0.06 245.2);
-	--color-std-900: oklch(25.68% 0.061 247.7);
+	--color-std-50: oklch(98.5% 0 0);
+	--color-std-100: oklch(96.7% 0 0);
+	--color-std-200: oklch(92.8% 0 0);
+	--color-std-300: oklch(87.2% 0 0);
+	--color-std-400: oklch(70.7% 0 0);
+	--color-std-500: oklch(55.1% 0 0);
+	--color-std-600: oklch(44.6% 0 0);
+	--color-std-700: oklch(37.3% 0 0);
+	--color-std-800: oklch(27.8% 0 0);
+	--color-std-900: oklch(21% 0 0);
 	--color-std-950: oklch(13% 0 0);
 	--color-std-black: #000;
 	--color-std-white: #fff;
-
-	--color-gold-1: oklch(71.86% 0.106 79.54);
-	--color-gold-2: oklch(65.18% 0.101 79.28);
 
 	--text-xsm: 13px;
 	--text-xsm--line-height: 1.25rem;
@@ -64,7 +61,7 @@
 
 @layer components {
 	.btn {
-		@apply clickable flex justify-center items-center gap-1.5 hover:bg-bg-hover active:bg-bg-active;
+		@apply clickable flex justify-center items-center gap-1.5 text-gray hover:text-dark hover:bg-bg-hover active:bg-bg-active;
 	}
 
 	.no-scrollbar::-webkit-scrollbar {
@@ -75,31 +72,4 @@
 		-ms-overflow-style: none;
 		scrollbar-width: none;
 	}
-}
-
-:root {
-	--font_family:
-		'IBMPlexSans', -apple-system, BlinkMacSystemFont, ui-sans-serif, 'Segoe UI', 'Helvetica Neue', Arial,
-		'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
-	--font_serif: 'STIXTwoText', Georgia, 'Times New Roman', Times, '宋体', SimSun, 'Songti', serif;
-	--font_mono: 'Menlo', 'Consolas', monospace;
-	--font_stiff: 'Tektur';
-	--font_emoji: 'NotoEmoji';
-}
-
-#root {
-	isolation: isolate;
-}
-
-.is_drag {
-	-webkit-app-region: drag;
-}
-
-.no_drag {
-	-webkit-app-region: no-drag;
-}
-
-.disabled {
-	opacity: 0.3;
-	pointer-events: none;
 }

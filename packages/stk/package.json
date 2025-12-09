@@ -1,96 +1,98 @@
 {
-	"name": "stk",
-	"version": "0.0.0",
-	"description": "Shared tookkit for web apps.",
-	"author": "1yasa",
-	"license": "MIT",
-	"sideEffects": false,
-	"keywords": [
-		"react",
-		"nodejs",
-		"web",
-		"utils",
-		"typescript"
-	],
-	"files": [
-		"./dist",
-		"./package.json",
-		"./README.md"
-	],
-	"scripts": {
-		"build": "rslib build"
-	},
-	"exports": {
-		"./common": {
-			"types": "./dist/common/index.d.ts",
-			"import": "./dist/common/index.js",
-			"default": "./dist/common/index.js"
-		},
-		"./dnd": {
-			"types": "./dist/dnd/index.d.ts",
-			"import": "./dist/dnd/index.js",
-			"default": "./dist/dnd/index.js"
-		},
-		"./emittery": {
-			"types": "./dist/emittery/index.d.ts",
-			"import": "./dist/emittery/index.js",
-			"default": "./dist/emittery/index.js"
-		},
-		"./mobx": {
-			"types": "./dist/mobx/index.d.ts",
-			"import": "./dist/mobx/index.js",
-			"default": "./dist/mobx/index.js"
-		},
-		"./react": {
-			"types": "./dist/react/index.d.ts",
-			"import": "./dist/react/index.js",
-			"default": "./dist/react/index.js"
-		},
-		"./storage": {
-			"types": "./dist/storage/index.d.ts",
-			"import": "./dist/storage/index.js",
-			"default": "./dist/storage/index.js"
-		},
-		"./dom": {
-			"types": "./dist/dom/index.d.ts",
-			"import": "./dist/dom/index.js",
-			"default": "./dist/dom/index.js"
-		},
-		"./graph": {
-			"types": "./dist/graph/index.d.ts",
-			"import": "./dist/graph/index.js",
-			"default": "./dist/graph/index.js"
-		},
-		"./utils": {
-			"types": "./dist/utils/index.d.ts",
-			"import": "./dist/utils/index.js",
-			"default": "./dist/utils/index.js"
-		}
-	},
-	"dependencies": {
-		"@swc/helpers": "^0.5.17",
-		"ahooks": "catalog:",
-		"classix": "^2.2.2",
-		"fast-equals": "^5.2.2",
-		"es-toolkit": "catalog:",
-		"mobx": "^6.13.7",
-		"react": "catalog:",
-		"react-dom": "catalog:",
-		"rfdc": "^1.4.1",
-		"scheduler": "^0.26.0"
-	},
-	"devDependencies": {
-		"@rslib/core": "catalog:",
-		"@types/fs-extra": "^11.0.4",
-		"@types/node": "^24.1.0",
-		"@types/react": "catalog:",
-		"@types/react-dom": "catalog:",
-		"@types/scheduler": "^0.26.0",
-		"bun": "catalog:",
-		"bun-types": "catalog:",
-		"deepmerge-ts": "^7.1.5",
-		"fast-glob": "^3.3.3",
-		"fs-extra": "catalog:",
-		"typescript": "^5.9.2"
-	}
+  "name": "stk",
+  "version": "0.0.0",
+  "description": "Shared tookkit for web apps.",
+  "author": "1yasa",
+  "license": "MIT",
+  "sideEffects": false,
+  "keywords": [
+    "react",
+    "nodejs",
+    "web",
+    "utils",
+    "typescript"
+  ],
+  "files": [
+    "./dist",
+    "./package.json",
+    "./README.md"
+  ],
+  "scripts": {
+    "build": "rslib build"
+  },
+  "exports": {
+    "./common": {
+      "types": "./dist/common/index.d.ts",
+      "import": "./dist/common/index.js",
+      "default": "./dist/common/index.js"
+    },
+    "./dnd": {
+      "types": "./dist/dnd/index.d.ts",
+      "import": "./dist/dnd/index.js",
+      "default": "./dist/dnd/index.js"
+    },
+    "./emittery": {
+      "types": "./dist/emittery/index.d.ts",
+      "import": "./dist/emittery/index.js",
+      "default": "./dist/emittery/index.js"
+    },
+    "./mobx": {
+      "types": "./dist/mobx/index.d.ts",
+      "import": "./dist/mobx/index.js",
+      "default": "./dist/mobx/index.js"
+    },
+    "./react": {
+      "types": "./dist/react/index.d.ts",
+      "import": "./dist/react/index.js",
+      "default": "./dist/react/index.js"
+    },
+    "./storage": {
+      "types": "./dist/storage/index.d.ts",
+      "import": "./dist/storage/index.js",
+      "default": "./dist/storage/index.js"
+    },
+    "./dom": {
+      "types": "./dist/dom/index.d.ts",
+      "import": "./dist/dom/index.js",
+      "default": "./dist/dom/index.js"
+    },
+    "./graph": {
+      "types": "./dist/graph/index.d.ts",
+      "import": "./dist/graph/index.js",
+      "default": "./dist/graph/index.js"
+    },
+    "./utils": {
+      "types": "./dist/utils/index.d.ts",
+      "import": "./dist/utils/index.js",
+      "default": "./dist/utils/index.js"
+    }
+  },
+  "dependencies": {
+    "@swc/helpers": "^0.5.17",
+    "ahooks": "catalog:",
+    "classix": "^2.2.2",
+    "fast-equals": "^5.2.2",
+    "es-toolkit": "catalog:",
+    "mobx": "^6.13.7",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "rfdc": "^1.4.1",
+    "scheduler": "^0.26.0"
+  },
+  "devDependencies": {
+    "@rslib/core": "catalog:",
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "^24.1.0",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@types/scheduler": "^0.26.0",
+    "bun": "catalog:",
+    "bun-types": "catalog:",
+    "deepmerge-ts": "^7.1.5",
+    "fast-glob": "^3.3.3",
+    "fs-extra": "catalog:",
+    "typescript": "^5.9.2"
+  },
+  "peerDependencies": {},
+  "optionalDependencies": {}
 }

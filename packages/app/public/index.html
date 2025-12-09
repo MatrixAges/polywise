@@ -10,11 +10,11 @@
 		<script type="module">
 			if (window.$shell?.type === 'electron') {
 				setTimeout(() => window.$shell?.stopLoading(), 300)
+
+				const res = await window.$shell.getEnv()
+
+				window.$env = res
 			}
-
-			const res = await window.$shell.getEnv()
-
-			window.$env = res
 		</script>
 	</head>
 	<body>
