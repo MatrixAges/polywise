@@ -1,16 +1,16 @@
 import { singleton } from 'tsyringe'
 
-import { App } from '@/models'
+import { Settings } from '@/models'
 
 @singleton()
 export default class GlobalModel {
-	constructor(public app: App) {}
+	constructor(public settings: Settings) {}
 
 	init() {
-		this.app.init()
+		this.settings.init()
 	}
 
 	off() {
-		this.app.off()
+		this.settings.off()
 	}
 }

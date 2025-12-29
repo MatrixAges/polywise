@@ -4,9 +4,11 @@ import { nav_items } from '@/appdata'
 import Logo from '@/svgs/bare.svg?react'
 import { memo } from '@/utils'
 
-const active = 0
+import type { IPropsSidebar } from '../types'
 
-const Index = () => {
+const Index = (props: IPropsSidebar) => {
+	const { openSettings } = props
+
 	return (
 		<nav
 			className='
@@ -39,15 +41,14 @@ const Index = () => {
 			>
 				{nav_items.map(({ key, Icon }, index) => (
 					<div
-						className={`
+						className='
 							flex
 							items-center justify-center
 							w-10 h-10
 							rounded-full
 							hover:bg-std-700 hover:text-std-100
 							no_drag clickable
-							${active === index && 'text-std-100! bg-std-700/60'}
-						`}
+						'
 						key={key}
 					>
 						<Icon size={20}></Icon>
@@ -57,7 +58,7 @@ const Index = () => {
 			<div
 				className='
 					absolute
-					bottom-2
+					bottom-3
 					flex
 					items-center justify-center
 					w-10 h-10
@@ -66,6 +67,7 @@ const Index = () => {
 					hover:bg-std-600 hover:text-std-100
 					no_drag clickable
 				'
+				onClick={openSettings}
 			>
 				<Settings size={20}></Settings>
 			</div>
