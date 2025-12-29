@@ -1,33 +1,12 @@
-import { platform } from 'os'
-
+import { TEAM_ID } from './metadata'
 import { productName } from './package.json'
 
 import type { Configuration } from 'electron-builder'
 
 const { ZIP } = process.env
-const OS = platform()
-
-// const arch = ['x64', 'arm64']
-const arch = ['x64']
-const condition_config = {} as any
-const condition_darwin = {} as any
-
-if (OS === 'darwin') {
-	// condition_config['afterSign'] = './dist/notarize.js'
-	condition_config['dmg'] = { sign: false }
-
-	condition_darwin['identity'] = null
-	condition_darwin['hardenedRuntime'] = true
-	condition_darwin['gatekeeperAssess'] = false
-	condition_darwin['target'] = ZIP ? { target: 'zip', arch } : { target: 'dmg', arch }
-}
-
-if (OS === 'win32') {
-	// condition_config['electronLanguages'] = ['en', 'zh-CN']
-}
+const arch = ['x64', 'arm64']
 
 export default {
-	...condition_config,
 	productName,
 	asar: true,
 	compression: 'normal',
@@ -36,26 +15,28 @@ export default {
 	extraResources: [{ from: '../app/dist', to: 'app_dist' }],
 	artifactName: '${productName}-${version}-${arch}.${ext}',
 	mac: {
-		...condition_darwin,
-		entitlements: './Entitlements.plist',
-		icon: 'public/icons/icon.icns',
+		target: ZIP ? { target: 'zip', arch } : { target: 'dmg', arch },
+		hardenedRuntime: true,
+		gatekeeperAssess: false,
+		icon: 'public/icons/app.icns',
+		entitlements: './metadata/entitlements.plist',
+		entitlementsInherit: './metadata/entitlements.plist',
 		extendInfo: {
-			'com.apple.security.cs.allow-jit': true,
-			'Bundle name': productName,
-			ElectronTeamID: '84LQHT5G2Z',
+			ElectronTeamID: TEAM_ID,
+			CFBundleName: productName,
+			CFBundleDisplayName: productName,
 			LSHasLocalizedDisplayName: true,
-			ITSAppUsesNonExemptEncryption: 'NO'
-		}
+			LSMultipleInstancesProhibited: true,
+			ITSAppUsesNonExemptEncryption: false
+		},
+		fileAssociations: [{ ext: 'elefile', icon: 'public/icons/logo.icns' }]
 	},
+	dmg: { sign: true },
 	win: {
-		target: [
-			{
-				target: 'nsis',
-				arch: ['x64']
-			}
-		],
+		target: [{ target: 'nsis', arch: ['x64'] }],
 		icon: 'public/icons/icon.ico',
-		compression: 'maximum'
+		compression: 'maximum',
+		fileAssociations: [{ ext: 'elefile', icon: 'public/icons/icon.ico' }]
 	},
 	nsis: {
 		oneClick: false,
@@ -69,17 +50,6 @@ export default {
 		installerHeader: 'public/icons/icon.ico',
 		installerHeaderIcon: 'public/icons/icon.ico'
 	},
-	fileAssociations: [
-		{
-			name: productName,
-			ext: 'elefile',
-			icon: 'public/icons/icon.ico'
-		}
-	],
-	publish: [
-		{
-			provider: 'generic',
-			url: 'http://localhost:8080/release/'
-		}
-	]
+	fileAssociations: [{ name: productName, ext: 'elefile' }],
+	publish: [{ provider: 'generic', url: 'http://localhost:8080/release/' }]
 } as Configuration

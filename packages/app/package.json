@@ -62,7 +62,7 @@
 	},
 	"devDependencies": {
 		"@csstools/postcss-is-pseudo-class": "^5.0.3",
-		"@rsbuild/core": "^1.6.15",
+		"@rsbuild/core": "^1.7.0-beta.2",
 		"@rsbuild/plugin-react": "^1.4.2",
 		"@rsbuild/plugin-svgr": "^1.2.3",
 		"@tailwindcss/postcss": "^4.1.18",

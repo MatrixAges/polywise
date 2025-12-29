@@ -20,9 +20,6 @@ export default {
 		},
 		externals: ['react', 'react-dom'],
 		...prod_output
-	},
-	performance: {
-		chunkSplit: { strategy: 'split-by-experience' }
 	}
 } as RslibConfig
 

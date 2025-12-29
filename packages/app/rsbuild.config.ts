@@ -13,9 +13,14 @@ const config = {
 	plugins: [pluginReact(), pluginSvgr()],
 	performance: { removeConsole: false },
 	lazyCompilation: { entries: false, imports: true },
-	server: { open: false, port: 666, cors: { origin: ['http://localhost:8787'] } },
+	server: {
+		open: false,
+		port: 666,
+		cors: { origin: ['http://localhost:8787'] },
+		printUrls: ({ port }) => [`http://localhost:${port}`]
+	},
 	html: {
-		title: 'Polywise - Your second brain.',
+		title: 'Polywise - Your Second Brain.',
 		template: './public/index.html'
 	},
 	tools: {

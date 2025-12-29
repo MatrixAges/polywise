@@ -5,8 +5,9 @@
 	"packageManager": "pnpm@10.26.2",
 	"scripts": {
 		"deps": "ncu -i",
-		"dev": "turbo run dev",
 		"build:deps": "turbo run deps",
+		"build:mac": "turbo run desktop#pack:mac",
+		"build:win": "turbo run desktop#pack:win",
 		"submodule:init": "git submodule update --init --recursive",
 		"submodule:update": "git submodule sync && git submodule update --recursive --remote --merge",
 		"deps:catalog": "pcu -i"
@@ -20,6 +21,7 @@
 		"prettier": "^3.7.4",
 		"turbo": "^2.7.2",
 		"@ianvs/prettier-plugin-sort-imports": "^4.7.0",
+		"prettier-plugin-tailwindcss-pro": "^0.2.0",
 		"pnpm-catalog-updates": "^1.0.3"
 	}
 }

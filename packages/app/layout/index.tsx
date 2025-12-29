@@ -7,6 +7,8 @@ import { container } from 'tsyringe'
 import { GlobalProvider } from '@/context'
 import GlobalModel from '@/models/global'
 
+import { Chat, Content, Sidebar } from './components'
+
 const Index = () => {
 	const [global] = useState(() => container.resolve(GlobalModel))
 
@@ -18,7 +20,20 @@ const Index = () => {
 
 	return (
 		<GlobalProvider value={global}>
-			<div></div>
+			<div className='text-std-300 flex'>
+				<Sidebar></Sidebar>
+				<div
+					className='
+						flex flex-1
+						gap-3
+						p-3.5
+						pl-0
+					'
+				>
+					<Content></Content>
+					<Chat></Chat>
+				</div>
+			</div>
 		</GlobalProvider>
 	)
 }

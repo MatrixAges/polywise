@@ -7,8 +7,8 @@ settings:
 catalogs:
   default:
     '@rslib/core':
-      specifier: 0.18.6
-      version: 0.18.6
+      specifier: 0.19.0
+      version: 0.19.0
     '@types/react':
       specifier: 19.2.7
       version: 19.2.7
@@ -68,6 +68,9 @@ importers:
       prettier:
         specifier: ^3.7.4
         version: 3.7.4
+      prettier-plugin-tailwindcss-pro:
+        specifier: ^0.2.0
+        version: 0.2.0(@ianvs/prettier-plugin-sort-imports@4.7.0(prettier@3.7.4))(prettier@3.7.4)
       pretty-quick:
         specifier: ^4.2.2
         version: 4.2.2(prettier@3.7.4)
@@ -235,14 +238,14 @@ importers:
         specifier: ^5.0.3
         version: 5.0.3(postcss@8.5.6)
       '@rsbuild/core':
-        specifier: ^1.6.15
-        version: 1.6.15
+        specifier: ^1.7.0-beta.2
+        version: 1.7.0-beta.2
       '@rsbuild/plugin-react':
         specifier: ^1.4.2
-        version: 1.4.2(@rsbuild/core@1.6.15)
+        version: 1.4.2(@rsbuild/core@1.7.0-beta.2)
       '@rsbuild/plugin-svgr':
         specifier: ^1.2.3
-        version: 1.2.3(@rsbuild/core@1.6.15)(typescript@5.9.3)
+        version: 1.2.3(@rsbuild/core@1.7.0-beta.2)(typescript@5.9.3)
       '@tailwindcss/postcss':
         specifier: ^4.1.18
         version: 4.1.18
@@ -372,7 +375,7 @@ importers:
         version: 3.1.1
       '@rslib/core':
         specifier: 'catalog:'
-        version: 0.18.6(typescript@5.9.3)
+        version: 0.19.0(typescript@5.9.3)
       '@types/fs-extra':
         specifier: ^11.0.4
         version: 11.0.4
@@ -414,7 +417,7 @@ importers:
     devDependencies:
       '@rslib/core':
         specifier: 'catalog:'
-        version: 0.18.6(typescript@5.9.3)
+        version: 0.19.0(typescript@5.9.3)
       '@trpc/client':
         specifier: ^11.8.1
         version: 11.8.1(@trpc/server@11.8.1(typescript@5.9.3))(typescript@5.9.3)
@@ -466,7 +469,7 @@ importers:
     devDependencies:
       '@rslib/core':
         specifier: 'catalog:'
-        version: 0.18.6(typescript@5.9.3)
+        version: 0.19.0(typescript@5.9.3)
       '@types/fs-extra':
         specifier: ^11.0.4
         version: 11.0.4
@@ -1486,11 +1489,6 @@ packages:
       react: '>=16.9.0'
       react-dom: '>=16.9.0'
 
-  '@rsbuild/core@1.6.15':
-    resolution: {integrity: sha512-LvoOF53PL6zXgdzEhgnnP51S4FseDFH1bHrobK4EK6zZX/tN8qgf5tdlmN7h4OkMv/Qs1oUfvj0QcLWSstnnvA==}
-    engines: {node: '>=18.12.0'}
-    hasBin: true
-
   '@rsbuild/core@1.7.0-beta.2':
     resolution: {integrity: sha512-sPJ21GTJiX9dTj9xtB10ZFbWMdX2PML0MgF98msaLLVDpwYGa8kvS6jFGO+L2T+zbuWFxfMYdU7a8jX6G4JRsQ==}
     engines: {node: '>=18.12.0'}
@@ -1506,8 +1504,8 @@ packages:
     peerDependencies:
       '@rsbuild/core': 1.x
 
-  '@rslib/core@0.18.6':
-    resolution: {integrity: sha512-mMjfmtXRPHOCzO1A8KcAQckIHi/vA+qOHT/zK4M8Nnr5h1eAO6HIEN7AvJdgbIf5YXsVH6bXonrXdAwwP0gHow==}
+  '@rslib/core@0.19.0':
+    resolution: {integrity: sha512-t94QnZGU8YSn5xQ8vNqxIpee5Mo+S77SEVA/0Tjft0I0dLmU6GZHeYAmoztNfWLudSUl4KrvilnxGPlySMdPvw==}
     engines: {node: '>=18.12.0'}
     hasBin: true
     peerDependencies:
@@ -4295,6 +4293,61 @@ packages:
     engines: {node: '>=14.0.0'}
     hasBin: true
 
+  prettier-plugin-tailwindcss-pro@0.2.0:
+    resolution: {integrity: sha512-8itt5Hh6+1X8ju/sr/F8saK0aI9xSAlk1ygIu5zIELmcgWt6IwhZHP7oy12WZRxcBYeveNqXty4apTEQzH+22g==}
+    engines: {node: '>=20.19'}
+    peerDependencies:
+      '@ianvs/prettier-plugin-sort-imports': '*'
+      '@prettier/plugin-hermes': '*'
+      '@prettier/plugin-oxc': '*'
+      '@prettier/plugin-pug': '*'
+      '@shopify/prettier-plugin-liquid': '*'
+      '@trivago/prettier-plugin-sort-imports': '*'
+      '@zackad/prettier-plugin-twig': '*'
+      prettier: ^3.0
+      prettier-plugin-astro: '*'
+      prettier-plugin-css-order: '*'
+      prettier-plugin-jsdoc: '*'
+      prettier-plugin-marko: '*'
+      prettier-plugin-multiline-arrays: '*'
+      prettier-plugin-organize-attributes: '*'
+      prettier-plugin-organize-imports: '*'
+      prettier-plugin-sort-imports: '*'
+      prettier-plugin-svelte: '*'
+    peerDependenciesMeta:
+      '@ianvs/prettier-plugin-sort-imports':
+        optional: true
+      '@prettier/plugin-hermes':
+        optional: true
+      '@prettier/plugin-oxc':
+        optional: true
+      '@prettier/plugin-pug':
+        optional: true
+      '@shopify/prettier-plugin-liquid':
+        optional: true
+      '@trivago/prettier-plugin-sort-imports':
+        optional: true
+      '@zackad/prettier-plugin-twig':
+        optional: true
+      prettier-plugin-astro:
+        optional: true
+      prettier-plugin-css-order:
+        optional: true
+      prettier-plugin-jsdoc:
+        optional: true
+      prettier-plugin-marko:
+        optional: true
+      prettier-plugin-multiline-arrays:
+        optional: true
+      prettier-plugin-organize-attributes:
+        optional: true
+      prettier-plugin-organize-imports:
+        optional: true
+      prettier-plugin-sort-imports:
+        optional: true
+      prettier-plugin-svelte:
+        optional: true
+
   prettier@3.7.4:
     resolution: {integrity: sha512-v6UNi1+3hSlVvv8fSaoUbggEM5VErKmmpGA7Pl3HF8V6uKY7rvClBOJlH6yNwQtfTueNkGVpOv/mtWL9L4bgRA==}
     engines: {node: '>=14'}
@@ -4525,8 +4578,8 @@ packages:
   roughjs@4.6.6:
     resolution: {integrity: sha512-ZUz/69+SYpFN/g/lUlo2FXcIjRkSu3nDarreVdGGndHEBJ6cXPdKguS8JGxwj5HA5xIbVKSmLgr5b3AWxtRfvQ==}
 
-  rsbuild-plugin-dts@0.18.6:
-    resolution: {integrity: sha512-E0KxiXxY5T3D+DjMMQS3/DMlNwjzNp1xEYyH68gwI7Ptm3a1ChawvlZ1DqVW5m8NWkdbCbcAyazwOnDD3yVOLQ==}
+  rsbuild-plugin-dts@0.19.0:
+    resolution: {integrity: sha512-5NkHONFDMBXv0qr1voHQigVhPmqai2icbJtckXJSCrpSTAJO0eXkGsHNVR8QvnsZEZWXL+KsIgNEJ7C8tYginQ==}
     engines: {node: '>=18.12.0'}
     peerDependencies:
       '@microsoft/api-extractor': ^7
@@ -6294,14 +6347,6 @@ snapshots:
       react: 19.2.3
       react-dom: 19.2.3(react@19.2.3)
 
-  '@rsbuild/core@1.6.15':
-    dependencies:
-      '@rspack/core': 1.6.8(@swc/helpers@0.5.18)
-      '@rspack/lite-tapable': 1.1.0
-      '@swc/helpers': 0.5.18
-      core-js: 3.47.0
-      jiti: 2.6.1
-
   '@rsbuild/core@1.7.0-beta.2':
     dependencies:
       '@rspack/core': 1.7.0-beta.1(@swc/helpers@0.5.18)
@@ -6310,18 +6355,18 @@ snapshots:
       core-js: 3.47.0
       jiti: 2.6.1
 
-  '@rsbuild/plugin-react@1.4.2(@rsbuild/core@1.6.15)':
+  '@rsbuild/plugin-react@1.4.2(@rsbuild/core@1.7.0-beta.2)':
     dependencies:
-      '@rsbuild/core': 1.6.15
+      '@rsbuild/core': 1.7.0-beta.2
       '@rspack/plugin-react-refresh': 1.5.3(react-refresh@0.18.0)
       react-refresh: 0.18.0
     transitivePeerDependencies:
       - webpack-hot-middleware
 
-  '@rsbuild/plugin-svgr@1.2.3(@rsbuild/core@1.6.15)(typescript@5.9.3)':
+  '@rsbuild/plugin-svgr@1.2.3(@rsbuild/core@1.7.0-beta.2)(typescript@5.9.3)':
     dependencies:
-      '@rsbuild/core': 1.6.15
-      '@rsbuild/plugin-react': 1.4.2(@rsbuild/core@1.6.15)
+      '@rsbuild/core': 1.7.0-beta.2
+      '@rsbuild/plugin-react': 1.4.2(@rsbuild/core@1.7.0-beta.2)
       '@svgr/core': 8.1.0(typescript@5.9.3)
       '@svgr/plugin-jsx': 8.1.0(@svgr/core@8.1.0(typescript@5.9.3))
       '@svgr/plugin-svgo': 8.1.0(@svgr/core@8.1.0(typescript@5.9.3))(typescript@5.9.3)
@@ -6332,10 +6377,10 @@ snapshots:
       - typescript
       - webpack-hot-middleware
 
-  '@rslib/core@0.18.6(typescript@5.9.3)':
+  '@rslib/core@0.19.0(typescript@5.9.3)':
     dependencies:
       '@rsbuild/core': 1.7.0-beta.2
-      rsbuild-plugin-dts: 0.18.6(@rsbuild/core@1.7.0-beta.2)(typescript@5.9.3)
+      rsbuild-plugin-dts: 0.19.0(@rsbuild/core@1.7.0-beta.2)(typescript@5.9.3)
     optionalDependencies:
       typescript: 5.9.3
     transitivePeerDependencies:
@@ -6417,6 +6462,7 @@ snapshots:
       '@rspack/binding-win32-arm64-msvc': 1.6.8
       '@rspack/binding-win32-ia32-msvc': 1.6.8
       '@rspack/binding-win32-x64-msvc': 1.6.8
+    optional: true
 
   '@rspack/binding@1.7.0-beta.1':
     optionalDependencies:
@@ -6438,6 +6484,7 @@ snapshots:
       '@rspack/lite-tapable': 1.1.0
     optionalDependencies:
       '@swc/helpers': 0.5.18
+    optional: true
 
   '@rspack/core@1.7.0-beta.1(@swc/helpers@0.5.18)':
     dependencies:
@@ -9662,6 +9709,12 @@ snapshots:
       commander: 9.5.0
     optional: true
 
+  prettier-plugin-tailwindcss-pro@0.2.0(@ianvs/prettier-plugin-sort-imports@4.7.0(prettier@3.7.4))(prettier@3.7.4):
+    dependencies:
+      prettier: 3.7.4
+    optionalDependencies:
+      '@ianvs/prettier-plugin-sort-imports': 4.7.0(prettier@3.7.4)
+
   prettier@3.7.4: {}
 
   pretty-quick@4.2.2(prettier@3.7.4):
@@ -9918,7 +9971,7 @@ snapshots:
       points-on-curve: 0.2.0
       points-on-path: 0.2.1
 
-  rsbuild-plugin-dts@0.18.6(@rsbuild/core@1.7.0-beta.2)(typescript@5.9.3):
+  rsbuild-plugin-dts@0.19.0(@rsbuild/core@1.7.0-beta.2)(typescript@5.9.3):
     dependencies:
       '@ast-grep/napi': 0.37.0
       '@rsbuild/core': 1.7.0-beta.2

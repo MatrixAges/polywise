@@ -1,5 +1,4 @@
 import 'dotenv/config'
-import './initSettings'
 
 import { app } from 'electron'
 

@@ -19,11 +19,7 @@ export default defineConfig({
 	source: {
 		entry: { index: './src/index.ts' },
 		define: {
-			// 'process.env.DEVTOOL': JSON.stringify(is_dev ? '1' : '0'),
-			'process.env.DEVTOOL': JSON.stringify('1'),
-			'process.env.RECALLAI_API_URL': JSON.stringify(process.env.RECALLAI_API_URL),
-			'process.env.RECALLAI_API_KEY': JSON.stringify(process.env.RECALLAI_API_KEY),
-			'process.env.OPENAI_API_KEY': JSON.stringify(process.env.OPENAI_API_KEY)
+			'process.env.DEVTOOL': JSON.stringify(process.env.DEVTOOL)
 		},
 		decorators: { version: 'legacy' }
 	},

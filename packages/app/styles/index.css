@@ -1,4 +1,6 @@
 @import 'tailwindcss';
+@import './vars.css';
+@import './global.css';
 
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 
@@ -56,12 +58,19 @@
 }
 
 @utility clickable {
-	@apply cursor-pointer select-none active:scale-95 transition-all;
+	@apply cursor-pointer transition-all select-none active:scale-95;
 }
 
 @layer components {
 	.btn {
-		@apply clickable flex justify-center items-center gap-1.5 text-gray hover:text-dark hover:bg-bg-hover active:bg-bg-active;
+		@apply 
+				flex
+				items-center justify-center
+				gap-1.5
+				text-gray
+				hover:text-dark hover:bg-bg-hover active:bg-bg-active
+				clickable
+			;
 	}
 
 	.no-scrollbar::-webkit-scrollbar {

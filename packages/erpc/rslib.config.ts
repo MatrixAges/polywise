@@ -16,7 +16,8 @@ export default deepmerge(rslib, {
 		{
 			source: { entry: { renderer: './src/renderer/index.ts' } },
 			format: 'esm',
-			dts: true
+			dts: true,
+			experiments: { advancedEsm: true }
 		}
 	],
 	output: {

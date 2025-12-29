@@ -1,13 +1,13 @@
 import { deepmerge } from 'deepmerge-ts'
 
-import { build } from '@rslib/core'
+import { createRslib } from '@rslib/core'
 
 import { rslib } from '../../../config'
 
 import type { RslibConfig } from '@rslib/core'
 
-build(
-	deepmerge(rslib, {
+const { build } = await createRslib({
+	config: deepmerge(rslib, {
 		lib: [
 			{
 				source: { entry: { preload: `${process.cwd()}/scripts/preload.ts` } },
@@ -15,11 +15,6 @@ build(
 				bundle: true,
 				autoExternal: false,
 				tools: { rspack: { target: 'electron-preload' } }
-			},
-			{
-				source: { entry: { notarize: `${process.cwd()}/scripts/notarize.ts` } },
-				externals: ['@electron/notarize', 'electron-builder'],
-				format: 'cjs'
 			}
 		],
 		output: {
@@ -29,6 +24,8 @@ build(
 			filename: { js: '[name].js' }
 		}
 	} as RslibConfig)
-).catch(err => {
+})
+
+await build().catch(err => {
 	console.log(err)
 })

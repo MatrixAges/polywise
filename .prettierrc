@@ -1,6 +1,6 @@
 {
 	"$schema": "https://json.schemastore.org/prettierrc",
-	"plugins": ["@ianvs/prettier-plugin-sort-imports"],
+	"plugins": ["@ianvs/prettier-plugin-sort-imports", "prettier-plugin-tailwindcss-pro"],
 	"singleQuote": true,
 	"trailingComma": "none",
 	"printWidth": 120,
@@ -25,5 +25,6 @@
 		"<TYPES>^(node:)",
 		"<TYPES>",
 		"<TYPES>^[.]"
-	]
+	],
+	"useTailwindFormat": true
 }
