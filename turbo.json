@@ -1,12 +1,28 @@
 {
 	"$schema": "https://turborepo.org/schema.json",
 	"tasks": {
-		"dev": {
-			"cache": false
+		"erpc#build": {
+			"outputs": ["dist/**"],
+			"cache": true
 		},
-		"build": {
-			"dependsOn": ["^build"],
-			"outputs": []
+		"stk#build": {
+			"outputs": ["dist/**"],
+			"cache": true
+		},
+		"deps": {
+			"dependsOn": ["erpc#build", "stk#build"]
+		},
+		"app#build": {
+			"dependsOn": ["deps"],
+			"outputs": ["dist/**"]
+		},
+		"desktop#pack:mac": {
+			"dependsOn": ["app#build"],
+			"outputs": ["dist/**"]
+		},
+		"desktop#pack:win": {
+			"dependsOn": ["app#build"],
+			"outputs": ["dist/**"]
 		}
 	}
 }

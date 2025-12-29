@@ -1,35 +1,32 @@
 {
-  "name": "erpc",
-  "description": "Trpc support for electron",
-  "version": "0.0.0",
-  "exports": {
-    "./main": {
-      "types": "./dist/main/index.d.ts",
-      "require": "./dist/main/index.js",
-      "default": "./dist/main/index.js"
-    },
-    "./renderer": {
-      "types": "./dist/renderer/index.d.ts",
-      "require": "./dist/renderer/index.js",
-      "default": "./dist/renderer/index.js"
-    }
-  },
-  "license": "MIT",
-  "files": [
-    "dist"
-  ],
-  "scripts": {
-    "build": "rslib build"
-  },
-  "devDependencies": {
-    "@rslib/core": "catalog:",
-    "@trpc/client": "^11.4.3",
-    "@trpc/server": "^11.4.3",
-    "@types/node": "^24.1.0",
-    "deepmerge-ts": "^7.1.5",
-    "electron": "^37.2.5"
-  },
-  "dependencies": {},
-  "peerDependencies": {},
-  "optionalDependencies": {}
+	"name": "erpc",
+	"description": "Trpc support for electron",
+	"version": "0.0.0",
+	"exports": {
+		"./main": {
+			"types": "./dist/main/index.d.ts",
+			"require": "./dist/main/index.js",
+			"default": "./dist/main/index.js"
+		},
+		"./renderer": {
+			"types": "./dist/renderer/index.d.ts",
+			"require": "./dist/renderer/index.js",
+			"default": "./dist/renderer/index.js"
+		}
+	},
+	"license": "MIT",
+	"files": [
+		"dist"
+	],
+	"scripts": {
+		"build": "rslib build"
+	},
+	"devDependencies": {
+		"@rslib/core": "catalog:",
+		"@trpc/client": "^11.8.1",
+		"@trpc/server": "^11.8.1",
+		"@types/node": "^25.0.3",
+		"deepmerge-ts": "^7.1.5",
+		"electron": "^39.2.7"
+	}
 }

@@ -2,14 +2,14 @@
 	"name": "monorepo",
 	"author": "1yasa",
 	"private": true,
+	"packageManager": "pnpm@10.26.2",
 	"scripts": {
+		"deps": "ncu -i",
 		"dev": "turbo run dev",
-		"build": "turbo run build",
-		"dev:app": "turbo run dev --filter=app",
-		"build:app": "turbo run build --filter=app",
+		"build:deps": "turbo run deps",
 		"submodule:init": "git submodule update --init --recursive",
 		"submodule:update": "git submodule sync && git submodule update --recursive --remote --merge",
-		"update:deps": "pcu -i"
+		"deps:catalog": "pcu -i"
 	},
 	"simple-git-hooks": {
 		"pre-commit": "pnpm pretty-quick --pattern \"**/*.*(md|css|js|jsx|ts|tsx)\" --staged"
@@ -18,8 +18,8 @@
 		"pretty-quick": "^4.2.2",
 		"simple-git-hooks": "^2.13.1",
 		"prettier": "^3.7.4",
-		"turbo": "^2.6.3",
+		"turbo": "^2.7.2",
 		"@ianvs/prettier-plugin-sort-imports": "^4.7.0",
-		"pnpm-catalog-updates": "^0.7.18"
+		"pnpm-catalog-updates": "^1.0.3"
 	}
 }
