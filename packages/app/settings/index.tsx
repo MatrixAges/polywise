@@ -1,12 +1,12 @@
 import { useLayoutEffect } from 'react'
 import { useMemoizedFn } from 'ahooks'
 import { Button, Form, Radio, Select, Switch, Tooltip } from 'antd'
+import { Languages, Moon, Palette, Spotlight, Sun } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { locale_options, themes } from '@/appdata'
 import { Modal } from '@/components'
 import { useGlobal } from '@/context'
-import { AppWindowIcon, MoonIcon, PaletteIcon, SunIcon, TranslateIcon } from '@phosphor-icons/react'
 
 import { Item } from './components'
 
@@ -38,19 +38,23 @@ const Index = () => {
 	return (
 		<Modal
 			title='Settings'
-			width='max(510px,64%)'
+			width='max(510px,60%)'
 			mask_closable
 			max_width={810}
 			open={x.open}
 			onClose={x.toggleSettings}
 		>
 			<Form
-				className='flex w-full flex-col gap-4'
+				className='
+					flex flex-col
+					w-full
+					gap-4
+				'
 				layout='inline'
 				form={form}
 				onValuesChange={onValuesChange}
 			>
-				<Item name='lang' Icon={TranslateIcon} title='Language'>
+				<Item name='lang' Icon={Languages} title='Language'>
 					<Select
 						className='select'
 						options={locale_options}
@@ -59,7 +63,7 @@ const Index = () => {
 				</Item>
 				<Item
 					name='theme'
-					Icon={PaletteIcon}
+					Icon={Palette}
 					title='Theme'
 					extra={
 						<Tooltip
@@ -73,24 +77,19 @@ const Index = () => {
 									`
 									flex
 									bg-std-200!
-									border-0!
+									border-none!
+									hover:text-std-black!
 									justify_center align_center clickable mr_12
 								`,
-									x.auto_theme && 'active'
+									x.auto_theme && 'bg-std-800! text-std-100! hover:text-std-white!'
 								)}
 								onClick={x.toggleAutoTheme}
 								shape='circle'
 							>
 								{x.theme_value === 'light' ? (
-									<MoonIcon
-										size={18}
-										weight={x.auto_theme ? 'fill' : 'regular'}
-									></MoonIcon>
+									<Moon size={16}></Moon>
 								) : (
-									<SunIcon
-										size={18}
-										weight={x.auto_theme ? 'fill' : 'regular'}
-									></SunIcon>
+									<Sun size={16}></Sun>
 								)}
 							</Button>
 						</Tooltip>
@@ -105,7 +104,7 @@ const Index = () => {
 						popupMatchSelectWidth={false}
 					></Select>
 				</Item>
-				<Item name='glass' Icon={AppWindowIcon} title='Glass'>
+				<Item name='glass' Icon={Spotlight} title='Glass'>
 					<Switch size='small'></Switch>
 				</Item>
 			</Form>

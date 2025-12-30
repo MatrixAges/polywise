@@ -30,9 +30,7 @@ const config = {
 		},
 		rspack: {
 			experiments: {
-				lazyBarrel: true,
-				nativeWatcher: true,
-				typeReexportsPresence: true
+				nativeWatcher: true
 			}
 		}
 	}

@@ -29,6 +29,7 @@ const Index = () => {
 		() => ({
 			prefixCls: 'pw',
 			variant: 'filled',
+			wave: { disabled: true },
 			theme: getAntdTheme(settings.theme_value)
 		}),
 		[settings.theme_value]
@@ -38,18 +39,14 @@ const Index = () => {
 		toggleSettings: settings.toggleSettings
 	}
 
-	const props_content: IPropsContent = {
-		glass: settings.glass
-	}
+	const props_content: IPropsContent = {}
 
-	const props_chat: IPropsChat = {
-		glass: settings.glass
-	}
+	const props_chat: IPropsChat = {}
 
 	return (
 		<ConfigProvider {...props_config_provider}>
 			<GlobalProvider value={global}>
-				<div className={$cx(`flex`, global.settings.glass ? 'bg-std-100/30' : 'bg-std-100')}>
+				<div className='flex'>
 					<Sidebar {...props_sidebar}></Sidebar>
 					<div
 						className='

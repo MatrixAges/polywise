@@ -1,11 +1,11 @@
-import { Clipboard, FolderInput, House, NotebookPen, SquareMousePointer } from 'lucide-react'
+import { Clipboard, Compass, FolderInput, House, NotebookPen } from 'lucide-react'
 
 export const nav_items = [
 	{ key: 'home', Icon: House },
-	{ key: 'writer', Icon: NotebookPen },
-	{ key: 'canvas', Icon: Clipboard },
 	{ key: 'importer', Icon: FolderInput },
-	{ key: 'broswer', Icon: SquareMousePointer }
+	{ key: 'broswer', Icon: Compass },
+	{ key: 'writer', Icon: NotebookPen },
+	{ key: 'canvas', Icon: Clipboard }
 ] as const
 
 export const locales = ['en', 'zh-cn'] as const

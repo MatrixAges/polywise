@@ -1,4 +1,5 @@
 :root {
+	--line_height: 1.62;
 	--font_family:
 		'IBMPlexSans', -apple-system, BlinkMacSystemFont, ui-sans-serif, 'Segoe UI', 'Helvetica Neue', Arial,
 		'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
@@ -6,4 +7,16 @@
 	--font_mono: 'Menlo', 'Consolas', monospace;
 	--font_stiff: 'Tektur';
 	--font_emoji: 'NotoEmoji';
+
+	--color_std: white;
+	--color_std_rgb: 255, 255, 255;
+	--color_contrast: black;
+	--color_contrast_rgb: 0, 0, 0;
+}
+
+[data-theme='dark'] {
+	--color_std: black;
+	--color_std_rgb: 0, 0, 0;
+	--color_contrast: white;
+	--color_contrast_rgb: 255, 255, 255;
 }

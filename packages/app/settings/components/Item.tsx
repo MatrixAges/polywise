@@ -1,10 +1,10 @@
 import { Form } from 'antd'
 
-import type { Icon } from '@phosphor-icons/react'
+import type { LucideIcon } from 'lucide-react'
 import type { PropsWithChildren, ReactNode } from 'react'
 
 interface IProps extends PropsWithChildren {
-	Icon: Icon
+	Icon: LucideIcon
 	title: ReactNode
 	name?: string
 	desc?: ReactNode

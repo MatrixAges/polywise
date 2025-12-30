@@ -2,7 +2,8 @@
 @import './vars.css';
 @import './global.css';
 
-@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+@custom-variant glass (&:where([data-glass='1'], [data-glass='1'] *));
 
 @theme {
 	--color-std-50: oklch(98.5% 0 0);

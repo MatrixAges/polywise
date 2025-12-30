@@ -3,19 +3,18 @@ import { memo } from '@/utils'
 import type { IPropsContent } from '../../types'
 
 const Index = (props: IPropsContent) => {
-	const { glass } = props
+	const {} = props
 
 	return (
 		<div
-			className={$cx(
-				`
+			className='
 				flex flex-1
 				h-full
 				rounded-xl
-				dark:bg-std-200/30
-			`,
-				glass ? 'bg-std-white/48' : 'bg-std-white'
-			)}
+				bg-std-white
+				dark:bg-std-200/30!
+				glass:bg-std-white/48
+			'
 		></div>
 	)
 }

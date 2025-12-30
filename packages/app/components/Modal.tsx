@@ -144,7 +144,6 @@ const Index = (props: IProps) => {
 						flex
 						items-center
 						w-full h-full
-						p-12
 						select-none
 						${on_body ? 'fixed' : 'absolute'}
 						${flexiable && 'max-[720px]:p-0'}

@@ -1,6 +1,15 @@
-html,
 body {
-	@apply text-std-800;
+	@apply text-std-800 bg-std-100;
+}
+
+[data-glass='1'] {
+	body {
+		@apply bg-std-100/30;
+	}
+}
+
+.lucide {
+	stroke-width: 1.8px;
 }
 
 .is_drag {
@@ -9,8 +18,4 @@ body {
 
 .no_drag {
 	-webkit-app-region: no-drag;
-}
-
-.lucide {
-	stroke-width: 1.8px;
 }
