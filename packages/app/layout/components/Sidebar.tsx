@@ -7,7 +7,7 @@ import { memo } from '@/utils'
 import type { IPropsSidebar } from '../types'
 
 const Index = (props: IPropsSidebar) => {
-	const { openSettings } = props
+	const { toggleSettings } = props
 
 	return (
 		<nav
@@ -15,7 +15,7 @@ const Index = (props: IPropsSidebar) => {
 				relative
 				flex flex-col
 				items-center justify-center
-				w-16 h-screen
+				w-18 h-screen
 				is_drag
 			'
 		>
@@ -26,8 +26,8 @@ const Index = (props: IPropsSidebar) => {
 					flex
 					items-center justify-center
 					w-full h-12
-					p-4
-					fill-std-200
+					p-4.5
+					fill-std-800
 				'
 			>
 				<Logo></Logo>
@@ -39,14 +39,14 @@ const Index = (props: IPropsSidebar) => {
 					gap-3
 				'
 			>
-				{nav_items.map(({ key, Icon }, index) => (
+				{nav_items.map(({ key, Icon }) => (
 					<div
 						className='
 							flex
 							items-center justify-center
-							w-10 h-10
+							w-12 h-12
 							rounded-full
-							hover:bg-std-700 hover:text-std-100
+							hover:bg-std-300/60 hover:text-std-900
 							no_drag clickable
 						'
 						key={key}
@@ -61,13 +61,13 @@ const Index = (props: IPropsSidebar) => {
 					bottom-3
 					flex
 					items-center justify-center
-					w-10 h-10
+					w-12 h-12
 					rounded-full
-					text-xl text-std-400
-					hover:bg-std-600 hover:text-std-100
+					text-xl
+					hover:bg-std-300/60 hover:text-std-900
 					no_drag clickable
 				'
-				onClick={openSettings}
+				onClick={toggleSettings}
 			>
 				<Settings size={20}></Settings>
 			</div>

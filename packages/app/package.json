@@ -12,6 +12,7 @@
 		"@abraham/reflection": "^0.13.0",
 		"@ai-sdk/provider-utils": "^4.0.1",
 		"@ai-sdk/react": "^3.0.3",
+		"@formatjs/intl-localematcher": "^0.7.3",
 		"@microflash/rehype-figure": "^2.1.4",
 		"@phosphor-icons/react": "^2.1.10",
 		"@swc/helpers": "^0.5.18",
@@ -80,11 +81,8 @@
 		"postcss-import": "^16.1.1",
 		"postcss-loader": "^8.2.0",
 		"postcss-nesting": "^13.0.2",
-		"swc-plugin-jsx-control-statements": "^0.7.1",
 		"tailwindcss": "^4.1.18",
 		"tinyglobby": "^0.2.15",
 		"typescript": "^5.9.3"
-	},
-	"peerDependencies": {},
-	"optionalDependencies": {}
+	}
 }

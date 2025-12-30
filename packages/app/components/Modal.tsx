@@ -14,6 +14,7 @@ export interface IProps {
 	mask_class_name?: string
 	title?: ReactNode
 	width?: string | number
+	max_width?: string | number
 	min_height?: string | number
 	height?: string | number
 	mask_closable?: boolean
@@ -33,6 +34,7 @@ const Index = (props: IProps) => {
 		mask_class_name,
 		title,
 		width,
+		max_width,
 		min_height,
 		height,
 		mask_closable,
@@ -89,14 +91,15 @@ const Index = (props: IProps) => {
 					leading-none
 				'
 			>
-				<span className='text-[14px] font-medium'>{title}</span>
+				<span className='font-medium'>{title}</span>
 				<span
 					className='
 						flex
 						items-center justify-center
-						w-[21px] h-[21px]
-						transition-colors
-						-mr-[3px] cursor-pointer
+						w-6 h-6
+						rounded-full
+						hover:bg-std-200/60
+						-mr-2 clickable
 					'
 					onClick={onClose}
 				>
@@ -118,6 +121,7 @@ const Index = (props: IProps) => {
 							left-0
 							w-full h-full
 							bg-black/48
+							backdrop-blur-sm
 							select-none
 							${on_body ? 'fixed' : 'absolute'}
 							${mask_class_name}
@@ -153,14 +157,13 @@ const Index = (props: IProps) => {
 							<motion.div
 								className={`
 									relative
-									box-border
 									overflow-hidden
 									flex flex-col
 									max-h-full
 									px-6 py-4
 									mx-auto
 									rounded-xl
-									bg-std-200
+									bg-std-100
 									${flexiable && 'max-[720px]:m-0 max-[720px]:ml-[36px] max-[720px]:w-[calc(100vw-72px)]'}
 									${className}
 								`}
@@ -171,6 +174,7 @@ const Index = (props: IProps) => {
 								transition={{ duration: 0.18, ease: 'easeInOut' }}
 								style={{
 									width: width ?? 360,
+									maxWidth: max_width,
 									minHeight: min_height,
 									height
 								}}

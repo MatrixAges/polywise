@@ -1,3 +1,8 @@
+html,
+body {
+	@apply text-std-800;
+}
+
 .is_drag {
 	-webkit-app-region: drag;
 }
