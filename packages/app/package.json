@@ -14,7 +14,6 @@
 		"@ai-sdk/react": "^3.0.3",
 		"@formatjs/intl-localematcher": "^0.7.3",
 		"@microflash/rehype-figure": "^2.1.4",
-		"@phosphor-icons/react": "^2.1.10",
 		"@swc/helpers": "^0.5.18",
 		"@trpc/client": "^11.8.1",
 		"ahooks": "^3.9.6",
