@@ -1,8 +1,7 @@
 import { useLayoutEffect, useRef } from 'react'
 import katex from 'katex'
+import { TriangleAlert } from 'lucide-react'
 import { ErrorBoundary } from 'react-error-boundary'
-
-import { WarningIcon } from '@phosphor-icons/react'
 
 import type { PropsWithChildren } from 'react'
 
@@ -29,7 +28,7 @@ const Index = (props: IProps) => {
 		<ErrorBoundary
 			fallback={
 				<div>
-					<WarningIcon size={18}></WarningIcon>
+					<TriangleAlert size={18}></TriangleAlert>
 				</div>
 			}
 		>
@@ -37,7 +36,10 @@ const Index = (props: IProps) => {
 				<span className='math_wrap inline' ref={ref} spellCheck={false} tabIndex={-1} />
 			) : (
 				<div
-					className='math_wrap md_block w_100 text_center border_box justify_center'
+					className='
+						border_box
+						math_wrap md_block w_100 text_center justify_center
+					'
 					ref={ref}
 					spellCheck={false}
 					tabIndex={-1}

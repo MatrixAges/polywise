@@ -65,6 +65,7 @@ export default (theme: Theme) => {
 			Select: {
 				borderRadius: 999,
 				borderRadiusSM: 999,
+				borderRadiusLG: 16,
 				optionSelectedBg: 'var(--color-std-200)',
 				colorBgContainer: 'var(--color-std-200)',
 				activeBorderColor: 'transparent'

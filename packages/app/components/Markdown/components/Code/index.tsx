@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useMemoizedFn } from 'ahooks'
+import { Check, Copy } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { highlight } from '@/utils'
-import { CheckIcon, CopyIcon } from '@phosphor-icons/react'
 
 import styles from './index.module.css'
 
@@ -34,19 +34,19 @@ const Index = (props: IProps) => {
 	})
 
 	return (
-		<div className={`w_100 border_box relative ${styles._local}`}>
-			<span className='absolute lang'>{language}</span>
+		<div className={`w_100 border_box relative${styles._local}`}>
+			<span className='lang absolute'>{language}</span>
 			<button
 				className='
-					flex
 					absolute
+					flex
 					btn_copy justify_center align_center clickable
 				'
 				onClick={copy}
 			>
-				{copyied ? <CheckIcon></CheckIcon> : <CopyIcon></CopyIcon>}
+				{copyied ? <Check></Check> : <Copy></Copy>}
 			</button>
-			<div className='flex pre_wrap w_100' dangerouslySetInnerHTML={{ __html: html }}></div>
+			<div className='pre_wrap w_100 flex' dangerouslySetInnerHTML={{ __html: html }}></div>
 		</div>
 	)
 }

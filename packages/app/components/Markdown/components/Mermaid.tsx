@@ -1,9 +1,9 @@
 import { useLayoutEffect, useRef } from 'react'
+import { TriangleAlert } from 'lucide-react'
 import { ErrorBoundary } from 'react-error-boundary'
 
 import { useSize } from '@/hooks'
 import { mermaidRender } from '@/utils'
-import { WarningIcon } from '@phosphor-icons/react'
 
 import type { PropsWithChildren } from 'react'
 
@@ -20,7 +20,7 @@ const Index = (props: PropsWithChildren) => {
 		<ErrorBoundary
 			fallback={
 				<div>
-					<WarningIcon size={18}></WarningIcon>
+					<TriangleAlert size={18}></TriangleAlert>
 				</div>
 			}
 		>

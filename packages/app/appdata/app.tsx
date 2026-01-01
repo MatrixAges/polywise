@@ -1,11 +1,11 @@
-import { Clipboard, Compass, FolderInput, House, NotebookPen } from 'lucide-react'
+import { Compass, FolderInput, House, NotebookPen, SquareChartGantt } from 'lucide-react'
 
 export const nav_items = [
 	{ key: 'home', Icon: House },
 	{ key: 'importer', Icon: FolderInput },
 	{ key: 'broswer', Icon: Compass },
 	{ key: 'writer', Icon: NotebookPen },
-	{ key: 'canvas', Icon: Clipboard }
+	{ key: 'project', Icon: SquareChartGantt }
 ] as const
 
 export const locales = ['en', 'zh-cn'] as const

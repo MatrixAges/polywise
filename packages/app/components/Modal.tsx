@@ -1,9 +1,8 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
 import { useClickAway } from 'ahooks'
+import { X } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import { createPortal } from 'react-dom'
-
-import { XIcon } from '@phosphor-icons/react'
 
 import type { MouseEvent, ReactNode } from 'react'
 
@@ -103,7 +102,7 @@ const Index = (props: IProps) => {
 					'
 					onClick={onClose}
 				>
-					<XIcon size={14} />
+					<X size={14} />
 				</span>
 			</div>
 		)
