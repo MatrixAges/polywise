@@ -24,15 +24,13 @@ const Index = () => {
 
 		setFieldsValue({
 			lang: x.lang,
-			theme: x.theme_source,
-			glass: x.glass
+			theme: x.theme_source
 		})
 	}, [x.open])
 
 	const onValuesChange = useMemoizedFn(v => {
 		if ('lang' in v) x.setLang(v.lang)
 		if ('theme' in v) x.setTheme(v.theme)
-		if ('glass' in v) x.setGlass(v.glass)
 	})
 
 	return (
@@ -103,9 +101,6 @@ const Index = () => {
 						}))}
 						popupMatchSelectWidth={false}
 					></Select>
-				</Item>
-				<Item name='glass' Icon={Spotlight} title='Glass'>
-					<Switch size='small'></Switch>
 				</Item>
 			</Form>
 		</Modal>

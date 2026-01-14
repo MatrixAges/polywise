@@ -1,17 +1,5 @@
 body {
-	@apply text-std-800 bg-std-100;
-}
-
-[data-glass='1'] {
-	body {
-		@apply bg-std-100/15;
-	}
-
-	&[data-theme='dark'] {
-		body {
-			@apply bg-std-100/30;
-		}
-	}
+	@apply text-std-800;
 }
 
 .lucide {

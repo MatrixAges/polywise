@@ -1,6 +1,4 @@
-import { platform } from 'process'
-
-import { conf, getAppPath, getPath, is_dev, show_devtool } from '@desktop/utils'
+import { getAppPath, getPath, is_dev, show_devtool } from '@desktop/utils'
 
 import { productName } from './package.json'
 
@@ -19,7 +17,7 @@ export const window_options = {
 	visualEffectState: 'active',
 	vibrancy: 'under-window',
 	backgroundMaterial: 'tabbed',
-	trafficLightPosition: { x: 6, y: -20 },
+	trafficLightPosition: { x: 12.5, y: 12.5 },
 	webPreferences: {
 		sandbox: false,
 		enableWebSQL: false,
@@ -28,21 +26,6 @@ export const window_options = {
 		devTools: show_devtool
 	}
 } as BrowserWindowConstructorOptions
-
-const glass = conf.get('glass')
-
-if (glass || glass === undefined) {
-	switch (platform) {
-		case 'darwin':
-			window_options['vibrancy'] = 'under-window'
-
-			break
-
-		case 'win32':
-			window_options['backgroundMaterial'] = 'tabbed'
-			break
-	}
-}
 
 export default {
 	window_options: {

@@ -66,10 +66,6 @@ export default {
 				},
 				auto_theme: '自动切换主题，6点到18点浅色主题，其余时间深色主题'
 			},
-			glass: {
-				title: '毛玻璃窗口',
-				desc: '开启窗口毛玻璃效果'
-			},
 			cache: {
 				title: '应用缓存',
 				clear: '清除缓存',

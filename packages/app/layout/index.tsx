@@ -10,10 +10,10 @@ import GlobalModel from '@/models/Global'
 import Settings from '@/settings'
 import { getAntdTheme } from '@/theme'
 
-import { Chat, Content, Sidebar } from './components'
+import { Page, Panel, Tab } from './components'
 
 import type { ConfigProviderProps } from 'antd'
-import type { IPropsChat, IPropsContent, IPropsSidebar } from './types'
+import type { IPropsPage, IPropsPanel, IPropsTab } from './types'
 
 const Index = () => {
 	const [global] = useState(() => container.resolve(GlobalModel))
@@ -35,30 +35,26 @@ const Index = () => {
 		[settings.theme_value]
 	)
 
-	const props_sidebar: IPropsSidebar = {
-		toggleSettings: settings.toggleSettings
-	}
+	const props_tab: IPropsTab = {}
 
-	const props_content: IPropsContent = {}
+	const props_page: IPropsPage = {}
 
-	const props_chat: IPropsChat = {}
+	const props_right_panel: IPropsPanel = {}
 
 	return (
 		<ConfigProvider {...props_config_provider}>
 			<GlobalProvider value={global}>
-				<div className='flex'>
-					<Sidebar {...props_sidebar}></Sidebar>
+				<div className='flex h-screen'>
 					<div
 						className='
-							flex flex-1
-							gap-2
-							p-2
-							pl-0
+							flex flex-1 flex-col
+							h-full
 						'
 					>
-						<Content {...props_content}></Content>
-						<Chat {...props_chat}></Chat>
+						<Tab {...props_tab}></Tab>
+						<Page {...props_page}></Page>
 					</div>
+					<Panel {...props_right_panel}></Panel>
 				</div>
 				<Settings></Settings>
 			</GlobalProvider>

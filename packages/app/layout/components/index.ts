@@ -1,3 +1,3 @@
-export { default as Sidebar } from './Sidebar'
-export { default as Content } from './Content'
-export { default as Chat } from './Chat'
+export { default as Tab } from './Tab'
+export { default as Page } from './Page'
+export { default as Panel } from './Panel'

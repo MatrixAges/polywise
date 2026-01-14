@@ -3,11 +3,11 @@
 @import './global.css';
 
 @custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
-@custom-variant glass (&:where([data-glass='1'], [data-glass='1'] *));
 
 @theme {
 	--color-std-50: oklch(98.5% 0 0);
 	--color-std-100: oklch(96.7% 0 0);
+	--color-std-150: oklch(94.2% 0 0);
 	--color-std-200: oklch(92.8% 0 0);
 	--color-std-300: oklch(87.2% 0 0);
 	--color-std-400: oklch(70.7% 0 0);
@@ -45,6 +45,7 @@
 [data-theme='dark'] {
 	--color-std-50: oklch(0.13 0 0);
 	--color-std-100: oklch(0.27 0 0);
+	--color-std-150: oklch(0.32 0 0);
 	--color-std-200: oklch(0.378 0 0);
 	--color-std-300: oklch(0.473 0 0);
 	--color-std-400: oklch(0.546 0 0);

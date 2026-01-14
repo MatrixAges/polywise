@@ -1,7 +1,5 @@
-import type { Settings } from '@/models'
+export interface IPropsTab {}
 
-export interface IPropsSidebar extends Pick<Settings, 'toggleSettings'> {}
+export interface IPropsPage {}
 
-export interface IPropsContent {}
-
-export interface IPropsChat {}
+export interface IPropsPanel {}

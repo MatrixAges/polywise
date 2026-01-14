@@ -27,22 +27,21 @@ export default class Index {
 	theme_source = 'system' as Theme
 	theme_value = 'light' as Exclude<Theme, 'system'>
 	auto_theme = false
-	glass = false
 	open = false
+	sidebar_fold = false
 
 	constructor(public util: Util) {
 		makeAutoObservable(this, { util: false }, { autoBind: true })
 	}
 
 	async init() {
-		const off = await setStoreWhenChange(['lang', 'theme_source', 'glass'], this)
+		const off = await setStoreWhenChange(['lang', 'theme_source'], this)
 
 		this.util.acts = [off]
 
 		await this.setLocale(this.lang ?? getLang(navigator.language))
 
 		this.setTheme(this.theme_source || 'system', true)
-		this.setGlass(this.glass ?? true)
 
 		this.checkTheme()
 		this.on()
@@ -151,20 +150,12 @@ export default class Index {
 		this.setTheme(hour >= 6 && hour < 18 ? 'light' : 'dark')
 	}
 
-	setGlass(v: Index['glass']) {
-		this.glass = v
-
-		if (this.glass) {
-			document.documentElement.setAttribute('data-glass', '1')
-		} else {
-			document.documentElement.removeAttribute('data-glass')
-		}
-
-		if (is_electron) ipc.app.setGlass.mutate({ glass: v })
-	}
-
 	toggleSettings() {
 		this.open = !this.open
+	}
+
+	toggleSidebar() {
+		this.sidebar_fold = !this.sidebar_fold
 	}
 
 	on() {}
