@@ -45,7 +45,7 @@ const Index = (props: IPropsSidebar) => {
 						rounded-full
 						hover:bg-std-300/60 hover:text-std-900
 						clickable
-						${fold ? 'absolute opacity-0 group-hover:opacity-100' : '-mr-1'}
+						${fold ? 'absolute opacity-0 group-hover:opacity-100' : '-mr-1.5'}
 					`}
 					onClick={toggleSidebar}
 				>

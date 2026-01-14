@@ -60,7 +60,7 @@
 }
 
 @utility clickable {
-	@apply cursor-pointer transition-all select-none active:scale-95;
+	@apply cursor-pointer transition-all select-none active:scale-90;
 }
 
 @layer components {
