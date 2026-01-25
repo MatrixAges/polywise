@@ -1,0 +1,44 @@
+# Open Source License
+
+Polywise is licensed under a modified version of the Apache License 2.0, with the following additional conditions:
+
+## 1. Commercial Usage
+
+a. Polywise may be utilized commercially, including as a backend service for other applications or as an application development platform for enterprises, without modifying the source code.
+
+b. A commercial license must be obtained from Polywise if you want to develop and distribute a derivative work based on Polywise.
+
+c. Should the conditions below be met, a commercial license must be obtained from Polywise:
+
+   - **Multi-tenant Service**: Unless explicitly authorized by Polywise in writing, you may not use the Polywise source code to operate a multi-tenant service where multiple users or organizations share a single deployment.
+
+   - **Logo and Copyright Information**: In the process of using Polywise's frontend, you may not remove or modify the logo or copyright information in the Polywise interface. This restriction is inapplicable to uses of Polywise that do not involve its frontend.
+     - Frontend Definition: For the purposes of this license, the "frontend" of Polywise includes all components located in the `packages/app` directory when running Polywise from the source code.
+
+## 2. Contributor Agreement
+
+As a contributor, you agree that:
+
+a. Polywise may adjust the open-source agreement to be more strict or relaxed as deemed necessary.
+
+b. Your contributed code may be used for commercial purposes, including but not limited to cloud services and enterprise editions operated by Polywise.
+
+## 3. Restrictions
+
+a. You may not use the Polywise name, logo, or trademarks to promote derivative products without prior written consent.
+
+b. You may not represent your derivative work as being endorsed or certified by Polywise.
+
+## 4. Apache License 2.0
+
+Apart from the specific conditions mentioned above, all other rights and restrictions follow the Apache License 2.0. Detailed information about the Apache License 2.0 can be found at http://www.apache.org.
+
+## 5. Disclaimer
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+---
+
+For licensing inquiries, please contact: xiewendao@gmail.com
+
+© 2026 Polywise. All rights reserved.
