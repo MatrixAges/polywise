@@ -40,7 +40,12 @@ trigger: always_on
 
 ## 极简之道
 
-...footer_kasec_1
+- **代码即文档 (Code as Documentation)**：严禁编写冗余的注释。通过直观的变量命名（`snake_case`）、函数命名（`camelCase`）以及清晰的逻辑流（`if-return` 早期返回）来表达意图。如果代码需要注释才能理解，说明代码需要重构。
+- **单一抽象层次 (Single Level of Abstraction)**：一个函数或组件只做一件事，且保持在同一抽象层次。避免在复杂的渲染逻辑中混入底层的 DOM 操作。
+- **无状态优先 (Stateless First)**：优先编写纯函数（Pure Functions）和无状态组件。只有在确实需要持久化或多组件共享时，才考虑引入响应式状态或 Model。
+- **按需引入 (On-demand)**：不引入未使用的依赖。工具函数（`utils`）应保持轻量且无依赖，避免形成沉重的全量引入。
+- **配置驱动 (Config-driven)**：对于多变的需求，通过配置文件（如 `locales` 或 `presets`）来驱动功能，而非硬编码逻辑分支。
+- **原子化逻辑 (Atomic Logic)**：逻辑块应尽可能小。对于 React 中的副作用（`useEffect`），应拆分为多个单一职责的 hook，而非一个巨大的副作用函数。
 
 ## 结构化设计
 
