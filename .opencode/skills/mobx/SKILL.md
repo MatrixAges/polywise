@@ -102,7 +102,64 @@ export default class ComplexFeatureModel {
 }
 ```
 
-## 4. Lifecycle Management
+## 4. Parent-Child Model Communication
+
+### 4.1 Accessing Singleton GlobalModel
+
+In sub-models, you can access the singleton `GlobalModel` by declaring a non-observable property and binding it in the constructor using the `getGlobal` utility.
+
+```typescript
+import { injectable } from 'tsyringe'
+import { getGlobal } from '@/utils'
+import type { GlobalModel } from '@/models'
+
+@injectable()
+export default class SubModel {
+	// ✅ Declare as non-observable
+	global = null as unknown as GlobalModel
+
+	constructor() {
+		makeAutoObservable(this, { global: false }, { autoBind: true })
+
+		// ✅ Bind instance via utility
+		getGlobal(this.global)
+	}
+}
+```
+
+### 4.2 Accessing Parent in Transient Models
+
+In non-singleton (Transient) models, `container.resolve()` creates new instances. To ensure sub-models access the correct parent instance, the parent must explicitly pass its reference.
+
+```typescript
+@injectable()
+class SubModel {
+	public parent?: ParentModel
+
+	// ✅ Method to accept parent reference
+	setParent(parent: ParentModel) {
+		this.parent = parent
+	}
+}
+
+@injectable()
+class ParentModel {
+	constructor(public sub_instance: SubModel) {
+		makeAutoObservable(this, { sub_instance: false }, { autoBind: true })
+
+		// ✅ Establish parent reference manually
+		this.sub_instance.setParent(this)
+	}
+}
+```
+
+**Key Principles:**
+
+1. **Avoid Recursion**: Never call `container.resolve(ParentModel)` inside a sub-model's constructor if the parent depends on that sub-model.
+2. **Proactive Assignment**: The parent model is responsible for establishing the reference relationship.
+3. **Cross-Sibling Communication**: A sub-model can communicate with its siblings via the parent reference (e.g., `this.parent.other_sub_instance`).
+
+## 5. Lifecycle Management
 
 Models should implement `init()` and `off()` methods for setup and cleanup.
 
