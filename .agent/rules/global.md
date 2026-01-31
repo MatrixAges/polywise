@@ -36,35 +36,50 @@ Note: The code must be concise, without any irrelevant template code. Only reply
 - All names should be professional and concise, not too long.
 - Code line break logic: Use blank lines to separate code context for better readability; use a blank line if the execution style of the previous and next statements differs.
 - The output code should not contain any comments!!! (Important!!!) Good code naming doesn't require comments.
-- All pages and components use PascalCase naming (first letter capitalized).
+- All pages and components use PascalCase naming.
 
 ## The Minimalist Approach
 
-...footer_kasec_1
+- **Code as Documentation:** Redundant comments are strictly prohibited. Express intent through intuitive variable naming (`snake_case`), function naming (`camelCase`), and clear logic flow (`if-return` early returns). If code requires comments to be understood, it needs refactoring.
+- **Single Level of Abstraction:** A function or component should only do one thing and remain at the same level of abstraction. Avoid mixing low-level DOM manipulation with complex rendering logic.
+- **Stateless First:** Prioritize writing pure functions and stateless components. Only consider introducing reactive state or models when persistence or multi-component sharing is truly necessary.
+- **On-demand Loading:** Do not introduce unused dependencies. Utility functions (`utils`) should remain lightweight and dependency-free, avoiding heavy full-package imports.
+- **Config-driven:** For variable requirements, drive functionality through configuration files (such as `locales` or `presets`) rather than hardcoding logic branches.
+- **Atomic Logic:** Logic blocks should be as small as possible. For side effects in React (`useEffect`), split them into multiple single-responsibility hooks instead of one large side-effect function.
 
 ## Structured Design
 
+- **Fractal Architecture:** Organize resources using the "proximity principle." Large functional modules (such as `pages` or `layout` in `packages/app`) should contain their private `components/`, `models/`, `types/`, and `styles/` folders. Only truly globally shared resources should be placed in the corresponding folders at the root level.
+- **Process Isolation and Communication:** Strictly distinguish between the rendering process (`app`), the main process (`desktop`), and the shared utility library (`stk`). Inter-process communication must be conducted through type-safe channels defined by `erpc`, and direct cross-process dependencies on business logic are strictly prohibited. - **Single Responsibility Principle**:
+- `models/`: Only responsible for reactive state management and pure business logic, without involving DOM or UI interaction.
+- `components/`: Only responsible for view rendering and user interaction logic; complex logic should be delegated to `models`.
+- `utils/`: Only contains pure utility functions without side effects.
+- **Dependency Injection (DI)**: Use `tsyringe` to manage object lifecycles. Manage global state using `singleton` and instantiable functional modules using `injectable`, avoiding the coupling caused by manual instantiation.
+- **Atomic Components**:
+- Avoid writing large list items in the main file.
+- Content within `map` loops must be extracted into independent child components.
+- If a component's internal logic exceeds 4 reactive variables, it must be split into a local Model.
+
 ## File Handling Specifications
 
-- If the number of code lines exceeds 80 lines, modular splitting is required. When splitting modules, don't put everything in the same level directory; put them in the `components` folder of their respective location. Component names within the `components` folder should be as concise as possible (because they are scoped, so there's no need to add prefixes like `TaskDetail**` to the names; just declare the component itself).
+- If the code exceeds 80 lines, modular splitting is required. When splitting modules, do not put everything in the same level directory; place them in the `components` folder of their respective location. Component names within the `components` folder should be as concise as possible (because they are scoped, so there's no need to prefix them with something like `TaskDetail**`, just declare their name directly).
 - Actively create `components` folders for large modules to maintain code style; one component per file.
-- For components rendered in a loop, the content being looped should be made into a separate component, allowing the component itself to be looped, which is clearer.
+- For components rendered in a loop, the content being rendered should be made into a separate component, allowing the component itself to be looped, which is clearer.
 
 Generated code must conform to the existing project's style. Mimic how the existing project organizes its code to maintain consistency.
 
 ## Coding Standards
 
-Related skills are located in the `.opencode/skills` directory.
+Relevant skills are located in the `.opencode/skills` directory.
 
 - TypeScript: typescript/SKILL.md
-- React coding best practices: react/SKILL.md
-- MobX state management best practices: mobx/SKILL.md
-- Tailwind CSS + CSS Modules styling best practices: css/SKILL.md
-- i18n best practices: i18n/SKILL.md
-- Electron main process and renderer process data interaction best practices: erpc/SKILL.md
+- React coding best practices: See react/SKILL.md
+- MobX state management best practices: See mobx/SKILL.md
+- Tailwind CSS + CSS Modules styling best practices: See css/SKILL.md
+- i18n best practices: See i18n/SKILL.md
+- Electron main process and renderer process data interaction best practices: See erpc/SKILL.md
 
-## Final Guarantees
+## Final Guarantee
 
-- **Important:** Do not write any comments to explain the code!!!
-- Do not modify any modules not mentioned. If you realize you need to modify an unmentioned page or module, you need to confirm with the user before performing the relevant operation.
-- Never execute any non-read-only Git commands in the command line.
+- **Important:** Do not write any comments to explain the code!!! - Do not make modifications to modules that are not mentioned. If you realize that you need to modify pages or modules that are not mentioned, you must confirm with the user before performing the relevant operations.
+- Never execute any non-read-only Git commands from the command line at any time.
