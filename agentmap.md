@@ -205,7 +205,8 @@ The project is a monorepo organized using a workspace structure, primarily built
 					"setGlobalAnimation.ts": { "desc": "Global animation controller", "role": "Utility" },
 					"shiki.ts": { "desc": "Shiki code highlighting utility", "role": "Utility" },
 					"sleep.ts": { "desc": "Async sleep utility", "role": "Utility" },
-					"theme.ts": { "desc": "Theme management utility", "role": "Utility" }
+					"theme.ts": { "desc": "Theme management utility", "role": "Utility" },
+					"time.ts": { "desc": "Time formatting utilities", "role": "Utility" }
 				}
 			},
 			"package.json": { "desc": "App package configuration", "role": "Config" },

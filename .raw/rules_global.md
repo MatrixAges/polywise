@@ -2,6 +2,16 @@
 trigger: always_on
 ---
 
+## 工具调用
+
+- 当使用 edit 工具时，必须确保 filePath 是相对于项目根目录的完整路径。
+- 禁止生成不完整的 newString，必须提供替换后的完整文件内容。
+- 如果不确定文件路径，请先调用 ls 或 find 工具确认，严禁猜测。
+
+- 每次调用 bash 工具时，必须严格遵守参数 Schema。
+- **必须**包含 'description' 字段，简要说明该命令的意图。
+- 示例格式：bash(command="ls", description="列出当前目录文件")
+
 ## 保存上下文
 
 用户输入（prompt）原封不动的保存到 .prompts/[发送日期：YYYY-MM-DD]/[HH-mm-ss].md 文件中，例子：.prompts/2026-01-22/11-43-50.md。
