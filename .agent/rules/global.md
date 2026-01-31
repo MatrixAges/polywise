@@ -2,6 +2,16 @@
 trigger: always_on
 ---
 
+## Saving Context (CRITICAL)
+
+BEFORE executing ANY other tool or responding to the user, you MUST save the raw user input (the current prompt) verbatim to the `.prompts/[YYYY-MM-DD]/[HH-mm-ss].md` file. If the input is not in English, it MUST be translated into English before saving.
+
+- **Time Retrieval:** You MUST use the `bash` tool with `date "+%H-%M-%S"` to get the current timestamp for the filename. Do not rely on internal time.
+- **Strict Order:** This is the absolute first action for every new turn.
+- **Dependency:** You are prohibited from using `read`, `edit`, or any other tool for the user's task until this context file is successfully written. `bash` is only allowed initially for `date` retrieval.
+- **Path Example:** `.prompts/2026-01-22/11-43-50.md`.
+- **Read Restriction:** Unless explicitly instructed, reading files in the `.prompts` folder is prohibited; only writing is allowed.
+
 ## Tool Calls
 
 - When using the `edit` tool, ensure that `filePath` is the complete path relative to the project root directory.
@@ -11,12 +21,6 @@ trigger: always_on
 - When calling the `bash` tool, strictly adhere to the parameter schema.
 - The `description` field **must** be included, briefly explaining the command's purpose.
 - Example format: `bash(command="ls", description="List files in the current directory")`
-
-## Saving Context
-
-User input (prompt) is saved verbatim to the `.prompts/[Send Date: YYYY-MM-DD]/[HH-mm-ss].md` file, for example: `.prompts/2026-01-22/11-43-50.md`.
-
-Unless explicitly instructed, reading the contents of files in the `.prompts` folder is prohibited; only writing is allowed.
 
 ## Important Instructions
 
