@@ -1,1 +1,1 @@
-opencode web
+opencode web --port 4096

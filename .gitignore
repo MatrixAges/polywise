@@ -21,13 +21,7 @@ npm-debug.log*
 # temp
 **/.tmp
 
-# Electron
+# electron
 release
 src/main/bundle.js
 src/main/bundle.js.map
-
-# VSCodeCounter
-.VSCodeCounter/**/details.md
-.VSCodeCounter/**/diff**
-.VSCodeCounter/**/results**
-!.VSCodeCounter/**/results.md
