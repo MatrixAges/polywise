@@ -44,6 +44,18 @@ trigger: always_on
 
 ## 结构化设计
 
+- **分型架构 (Fractal Architecture)**：采用“就近原则”组织资源。大的功能模块（如 `packages/app` 中的 `pages` 或 `layout`）应包含其私有的 `components/`、`models/`、`types/` 和 `styles/` 文件夹。只有真正全局通用的资源才放入根部的对应文件夹中。
+- **进程隔离与通信 (Process Isolation)**：严格区分渲染进程 (`app`)、主进程 (`desktop`) 和共享工具库 (`stk`)。进程间通信必须通过 `erpc` 定义的类型安全通道进行，严禁跨进程直接依赖业务逻辑。
+- **职责单一性 (Single Responsibility)**：
+     - `models/`：仅负责响应式状态管理和纯业务逻辑，不涉及 DOM 或 UI 交互。
+     - `components/`：仅负责视图渲染和用户交互逻辑，复杂逻辑应委托给 `models`。
+     - `utils/`：仅包含无副作用的纯工具函数。
+- **依赖注入 (DI)**：使用 `tsyringe` 管理对象生命周期。通过 `singleton` 管理全局状态，通过 `injectable` 管理可实例化的功能模块，避免手动实例化带来的耦合。
+- **原子化组件 (Atomic Components)**：
+     - 严禁在主文件中编写大型列表项。
+     - 必须将 `map` 循环中的内容提取为独立的子组件。
+     - 组件内部逻辑超过 4 个响应式变量时，必须拆分为局部 Model。
+
 ## 文件处理规范
 
 - 如果代码行数超过80行，就需要进行模块化拆分，模块拆分时，不要全丢到平级目录，放到所在位置的components文件夹里，components里面的组件命名尽可能的间接（因为这是有作用域的，所以不同都带个什么TaskDetail\*\*前缀来命名，直接声明其本身）
