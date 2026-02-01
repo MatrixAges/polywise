@@ -1,6 +1,6 @@
 import { Polywise } from './Polywise'
 
-export class BrainController {
+export class Brain {
 	private poly: Polywise
 	private state: 'FRESH' | 'LEARNING' | 'TIRED' | 'SLEEPING' = 'FRESH'
 	private shadow_interval?: any

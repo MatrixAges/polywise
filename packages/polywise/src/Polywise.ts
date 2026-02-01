@@ -194,4 +194,82 @@ export class Polywise {
 
 		await this.exec('CREATE SCHEMA IF NOT EXISTS user_space;')
 	}
+
+	// --- Input-related functionality (moved from Input.ts) ---
+
+	async processArticle(
+		title: string,
+		content: string,
+		triples: Array<{
+			subject: string
+			predicate: string
+			object: string
+			learning_rate: number
+			decay_resistance: number
+		}>
+	): Promise<void> {
+		const res = await this.query(
+			'INSERT INTO knowledge.articles (title, content) VALUES ($1, $2) RETURNING id',
+			[title, content]
+		)
+		const article_id = res[0].id
+
+		await this.injectTriples(triples, article_id)
+	}
+
+	private async injectTriples(
+		triples: Array<{
+			subject: string
+			predicate: string
+			object: string
+			learning_rate: number
+			decay_resistance: number
+		}>,
+		article_id: number
+	): Promise<void> {
+		await this.exec('BEGIN')
+
+		for (const t of triples) {
+			const sub_id = await this.upsertNode(t.subject, article_id)
+			const obj_id = await this.upsertNode(t.object, article_id)
+
+			await this.exec(`
+        INSERT INTO brain.edges (source_id, target_id, weight, type, learning_rate, decay_resistance)
+        VALUES (${sub_id}, ${obj_id}, ${0.5 * t.learning_rate}, '${t.predicate}', ${t.learning_rate}, ${t.decay_resistance})
+        ON CONFLICT DO NOTHING;
+      `)
+
+			await this.exec(`
+        UPDATE brain.edges 
+        SET 
+          learning_rate = GREATEST(learning_rate, ${t.learning_rate}),
+          decay_resistance = GREATEST(decay_resistance, ${t.decay_resistance}),
+          weight = LEAST(weight + ${0.5 * t.learning_rate}, 5.0) 
+        WHERE source_id = ${sub_id} AND target_id = ${obj_id};
+      `)
+		}
+
+		await this.exec('COMMIT')
+	}
+
+	private async upsertNode(label: string, article_id: number): Promise<number> {
+		await this.query(
+			`
+      INSERT INTO brain.nodes (label, x, y, potential)
+      VALUES ($1, random() * 800, random() * 600, 1.0)
+      ON CONFLICT (label) DO UPDATE SET potential = brain.nodes.potential + 0.5;
+    `,
+			[label]
+		)
+
+		const res = await this.query('SELECT id FROM brain.nodes WHERE label = $1', [label])
+		const nid = res[0].id
+
+		await this.query(
+			'INSERT INTO brain.node_sources (node_id, article_id) VALUES ($1, $2) ON CONFLICT DO NOTHING;',
+			[nid, article_id]
+		)
+
+		return nid
+	}
 }
