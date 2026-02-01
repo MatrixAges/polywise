@@ -11,7 +11,7 @@ export class Polywise {
 		})
 	}
 
-	async initSchema(): Promise<void> {
+	async init() {
 		await this.exec([
 			sql.sql_create_schema_brain,
 			sql.sql_create_table_nodes,
@@ -27,16 +27,16 @@ export class Polywise {
 		])
 	}
 
-	async addNode(label: string, x: number, y: number, threshold = 0.5): Promise<number> {
+	async addNode(label: string, x: number, y: number, threshold = 0.5) {
 		const rows = await this.query<{ id: number }>(sql.sql_add_node, [label, x, y, threshold])
 		return rows[0].id
 	}
 
-	async connect(source_id: number, target_id: number, weight = 0.1): Promise<void> {
+	async connect(source_id: number, target_id: number, weight = 0.1) {
 		await this.query(sql.sql_connect, [source_id, target_id, weight])
 	}
 
-	async stimulate(node_id: number, intensity = 1.0): Promise<void> {
+	async stimulate(node_id: number, intensity = 1.0) {
 		await this.query(sql.sql_stimulate, [intensity, node_id])
 	}
 
@@ -50,17 +50,17 @@ export class Polywise {
 		return await this.query('SELECT id, label, x, y, activation, potential FROM brain.nodes')
 	}
 
-	async tick(threshold_override?: number): Promise<void> {
+	async tick(threshold_override?: number) {
 		const threshold = threshold_override ?? 0.5
 		await this.exec(sql.sql_tick(threshold))
 	}
 
-	async runShadowTick(): Promise<void> {
+	async runShadowTick() {
 		await this.exec(sql.sql_run_shadow_tick)
 		await this.tick(0.8)
 	}
 
-	async triggerSleepTick(): Promise<void> {
+	async triggerSleepTick() {
 		await this.exec([
 			sql.sql_sleep_tick_begin,
 			sql.sql_sleep_tick_clean_noise,
@@ -81,13 +81,13 @@ export class Polywise {
 			learning_rate: number
 			decay_resistance: number
 		}>
-	): Promise<void> {
+	) {
 		const res = await this.query(sql.sql_process_article, [title, content])
 		const article_id = res[0].id
 		await this.inject_triples(triples, article_id)
 	}
 
-	private async exec(sql_input: string | Array<string>): Promise<void> {
+	private async exec(sql_input: string | Array<string>) {
 		if (!this.db) throw new Error('DB not initialized')
 
 		if (Array.isArray(sql_input)) {
@@ -99,10 +99,10 @@ export class Polywise {
 		}
 	}
 
-	private async query<T = any>(sql_str: string, params?: any[]): Promise<T[]> {
+	private async query<T = any>(sql_str: string, params?: any[]) {
 		if (!this.db) throw new Error('DB not initialized')
 		const res = await this.db.query(sql_str, params)
-		return JSON.parse(JSON.stringify(res.rows))
+		return JSON.parse(JSON.stringify(res.rows)) as T[]
 	}
 
 	private async inject_triples(
@@ -114,7 +114,7 @@ export class Polywise {
 			decay_resistance: number
 		}>,
 		article_id: number
-	): Promise<void> {
+	) {
 		await this.exec(sql.sql_inject_triples_begin)
 
 		for (const t of triples) {
@@ -145,11 +145,18 @@ export class Polywise {
 		await this.exec(sql.sql_inject_triples_commit)
 	}
 
-	private async upsert_node(label: string, article_id: number): Promise<number> {
+	private async upsert_node(label: string, article_id: number) {
 		await this.query(sql.sql_upsert_node, [label])
-		const res = await this.query(sql.sql_upsert_node_select, [label])
+		const res = await this.query<{ id: number }>(sql.sql_upsert_node_select, [label])
 		const nid = res[0].id
 		await this.query(sql.sql_node_sources, [nid, article_id])
 		return nid
+	}
+
+	off() {
+		if (this.db) {
+			this.db.close()
+			this.db = null
+		}
 	}
 }

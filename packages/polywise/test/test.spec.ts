@@ -9,7 +9,7 @@ describe('Polywise Brain System', () => {
 
 	beforeAll(async () => {
 		poly = new Polywise(':polywise:')
-		await poly.initSchema()
+		await poly.init()
 
 		brain = new Brain(poly, async () => {
 			const { nodes, edges } = await poly.getSnapshot()

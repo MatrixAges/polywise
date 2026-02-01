@@ -83,6 +83,65 @@ Relevant skills are located in the `.opencode/skills` directory.
 - i18n best practices: See i18n/SKILL.md
 - Electron main process and renderer process data interaction best practices: See erpc/SKILL.md
 
+## Type Inference Over Explicit Types
+
+Unless necessary for complex scenarios or public API clarity, do not explicitly specify function return types. Let the TypeScript compiler infer types automatically.
+
+**Good:**
+
+```typescript
+async function fetchData() {
+  return await api.get('/data')
+}
+
+async processItem(item: Item) {
+  await this.save(item)
+}
+```
+
+**Avoid (unless necessary):**
+
+```typescript
+async function fetchData(): Promise<Data[]> {
+  return await api.get('/data')
+}
+
+async processItem(item: Item): Promise<void> {
+  await this.save(item)
+}
+```
+
+## Class Function Ordering
+
+When organizing class functions, follow this strict order:
+
+1. **constructor** - Instance initialization
+2. **init** - Initialization/setup methods (e.g., `init`, `setup`, `configure`)
+3. **Public methods** - All public API methods
+4. **Private methods** - Internal utility methods (prefixed with `_` or `private`)
+5. **Helper methods** - Private helper/auxiliary methods
+6. **off/destroy** - Cleanup methods at the end (e.g., `off`, `destroy`, `dispose`, `cleanup`)
+
+Example:
+
+```typescript
+export class MyClass {
+	constructor() {}
+
+	async init() {}
+
+	async publicMethod1() {}
+	async publicMethod2() {}
+
+	private async _privateMethod1() {}
+	private async _privateMethod2() {}
+
+	private async _helper() {}
+
+	off() {}
+}
+```
+
 ## Final Guarantee
 
 - **Important:** Do not write any comments to explain the code!!! - Do not make modifications to modules that are not mentioned. If you realize that you need to modify pages or modules that are not mentioned, you must confirm with the user before performing the relevant operations.
