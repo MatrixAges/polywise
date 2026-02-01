@@ -171,7 +171,7 @@ Brain 在以下状态中运行：
 pnpm install
 
 # 运行测试
-pnpm --filter polywise run test:memory
+pnpm --filter polywise run test
 
 # 启动开发
 pnpm dev

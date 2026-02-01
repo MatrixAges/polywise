@@ -249,7 +249,7 @@ it('should calculate node magnitude from coordinates', async () => {
 })
 
 // Step 2: Run test (should fail)
-// pnpm run test:memory
+// pnpm run test
 
 // Step 3: Implement minimal code
 async getNodeMagnitude(node_id: number) {

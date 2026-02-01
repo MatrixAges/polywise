@@ -142,7 +142,7 @@ await brain.triggerSleepTick()
 ## 运行测试
 
 ```bash
-pnpm --filter polywise run test:memory
+pnpm --filter polywise run test
 ```
 
 ## 开源协议

@@ -171,7 +171,7 @@ The Brain operates in states:
 pnpm install
 
 # Run tests
-pnpm --filter polywise run test:memory
+pnpm --filter polywise run test
 
 # Start development
 pnpm dev

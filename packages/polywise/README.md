@@ -142,7 +142,7 @@ await brain.triggerSleepTick()
 ## Run Tests
 
 ```bash
-pnpm --filter polywise run test:memory
+pnpm --filter polywise run test
 ```
 
 ## License
