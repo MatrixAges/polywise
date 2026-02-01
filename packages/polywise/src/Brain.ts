@@ -1,4 +1,4 @@
-import { Polywise } from './Polywise'
+import Polywise from './Polywise'
 import { calculateFatigue, isIdle } from './utils'
 
 import type { BrainState } from './types'

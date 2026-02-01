@@ -6,9 +6,19 @@ import * as sql from './sql'
 import * as sql_meta from './sql/meta'
 import { calculateWeight } from './utils'
 
-import type { Edge, Node, Snapshot, Triple } from './types'
+import type {
+	AddNodeParams,
+	ConnectParams,
+	Edge,
+	InjectTriplesParams,
+	Node,
+	ProcessArticleParams,
+	Snapshot,
+	Triple,
+	UpsertNodeParams
+} from './types'
 
-export class Polywise {
+export default class Polywise {
 	private db: PGlite | null = null
 	public article: Article
 
@@ -37,43 +47,28 @@ export class Polywise {
 		}
 	}
 
-	async addNode(
-		label: string,
-		x: number,
-		y: number,
-		threshold = 0.5,
-		idol_id?: string,
-		root_ids?: string[],
-		metrics_ids?: string[]
-	) {
+	async addNode(params: AddNodeParams) {
 		const rows = await this.query<{ id: number }>(sql.sql_add_node, [
-			label,
-			x,
-			y,
-			threshold,
-			idol_id ?? null,
-			root_ids ?? null,
-			metrics_ids ?? null
+			params.label,
+			params.x,
+			params.y,
+			params.threshold ?? 0.5,
+			params.idol_id ?? null,
+			params.root_ids ?? null,
+			params.metrics_ids ?? null
 		])
 
 		return rows[0].id
 	}
 
-	async connect(
-		source_id: number,
-		target_id: number,
-		weight = 0.1,
-		idol_id?: string,
-		root_ids?: string[],
-		metrics_ids?: string[]
-	) {
+	async connect(params: ConnectParams) {
 		await this.query(sql.sql_connect, [
-			source_id,
-			target_id,
-			weight,
-			idol_id ?? null,
-			root_ids ?? null,
-			metrics_ids ?? null
+			params.source_id,
+			params.target_id,
+			params.weight ?? 0.1,
+			params.idol_id ?? null,
+			params.root_ids ?? null,
+			params.metrics_ids ?? null
 		])
 	}
 
@@ -133,23 +128,21 @@ export class Polywise {
 		])
 	}
 
-	async processArticle(
-		title: string,
-		content: string,
-		triples: Triple[],
-		idol_id?: string,
-		root_ids?: string[],
-		metrics_ids?: string[],
-		generate_embedding = true
-	) {
-		const res = await this.query<{ id: number }>(sql.sql_process_article, [title, content])
+	async processArticle(params: ProcessArticleParams) {
+		const res = await this.query<{ id: number }>(sql.sql_process_article, [params.title, params.content])
 		const article_id = res[0].id
 
-		if (generate_embedding) {
-			await this.article.addEmbedding(article_id, content)
+		if (params.generate_embedding ?? true) {
+			await this.article.addEmbedding(article_id, params.content)
 		}
 
-		await this.inject_triples(triples, article_id, idol_id, root_ids, metrics_ids)
+		await this.inject_triples({
+			triples: params.triples,
+			article_id,
+			idol_id: params.idol_id,
+			root_ids: params.root_ids,
+			metrics_ids: params.metrics_ids
+		})
 	}
 
 	private async exec(sql_input: string | Array<string>) {
@@ -172,18 +165,24 @@ export class Polywise {
 		return JSON.parse(JSON.stringify(res.rows)) as T
 	}
 
-	private async inject_triples(
-		triples: Triple[],
-		article_id: number,
-		idol_id?: string,
-		root_ids?: string[],
-		metrics_ids?: string[]
-	) {
+	private async inject_triples(params: InjectTriplesParams) {
 		await this.exec(sql.sql_inject_triples_begin)
 
-		for (const t of triples) {
-			const sub_id = await this.upsert_node(t.subject, article_id, idol_id, root_ids, metrics_ids)
-			const obj_id = await this.upsert_node(t.object, article_id, idol_id, root_ids, metrics_ids)
+		for (const t of params.triples) {
+			const sub_id = await this.upsert_node({
+				label: t.subject,
+				article_id: params.article_id,
+				idol_id: params.idol_id,
+				root_ids: params.root_ids,
+				metrics_ids: params.metrics_ids
+			})
+			const obj_id = await this.upsert_node({
+				label: t.object,
+				article_id: params.article_id,
+				idol_id: params.idol_id,
+				root_ids: params.root_ids,
+				metrics_ids: params.metrics_ids
+			})
 			const weight = calculateWeight(t.learning_rate)
 
 			await this.exec(
@@ -194,9 +193,9 @@ export class Polywise {
 					t.decay_resistance,
 					t.predicate,
 					weight,
-					idol_id,
-					root_ids,
-					metrics_ids
+					params.idol_id,
+					params.root_ids,
+					params.metrics_ids
 				)
 			)
 			await this.exec(
@@ -206,9 +205,9 @@ export class Polywise {
 					t.learning_rate,
 					t.decay_resistance,
 					weight,
-					idol_id,
-					root_ids,
-					metrics_ids
+					params.idol_id,
+					params.root_ids,
+					params.metrics_ids
 				)
 			)
 		}
@@ -216,19 +215,18 @@ export class Polywise {
 		await this.exec(sql.sql_inject_triples_commit)
 	}
 
-	private async upsert_node(
-		label: string,
-		article_id: number,
-		idol_id?: string,
-		root_ids?: string[],
-		metrics_ids?: string[]
-	) {
-		await this.query(sql.sql_upsert_node, [label, idol_id ?? null, root_ids ?? null, metrics_ids ?? null])
+	private async upsert_node(params: UpsertNodeParams) {
+		await this.query(sql.sql_upsert_node, [
+			params.label,
+			params.idol_id ?? null,
+			params.root_ids ?? null,
+			params.metrics_ids ?? null
+		])
 
-		const res = await this.query<{ id: number }>(sql.sql_upsert_node_select, [label])
+		const res = await this.query<{ id: number }>(sql.sql_upsert_node_select, [params.label])
 		const nid = res[0].id
 
-		await this.query(sql.sql_node_sources, [nid, article_id])
+		await this.query(sql.sql_node_sources, [nid, params.article_id])
 
 		return nid
 	}
