@@ -1,8 +1,11 @@
 import { Polywise } from './Polywise'
+import { calculateFatigue, isIdle } from './utils'
+
+import type { BrainState } from './types'
 
 export class Brain {
 	private poly: Polywise
-	private state: 'FRESH' | 'LEARNING' | 'TIRED' | 'SLEEPING' = 'FRESH'
+	private state: BrainState = 'FRESH'
 	private shadow_interval?: any
 	private last_user_interaction = Date.now()
 	private current_fatigue = 0
@@ -24,15 +27,14 @@ export class Brain {
 
 	addSynapticLoad(load: number) {
 		this.current_fatigue += load
-		if (this.current_fatigue >= this.FATIGUE_THRESHOLD && this.state === 'FRESH') {
+		if (calculateFatigue(load, this.current_fatigue - load, this.FATIGUE_THRESHOLD) && this.state === 'FRESH') {
 			this.state = 'TIRED'
 		}
 	}
 
 	private startLifeCycleLoop() {
 		this.shadow_interval = setInterval(async () => {
-			const now = Date.now()
-			const is_idle = now - this.last_user_interaction > this.IDLE_TIMEOUT_MS
+			const is_idle = isIdle(this.last_user_interaction, this.IDLE_TIMEOUT_MS)
 
 			if (this.state === 'TIRED' && is_idle) {
 				await this.triggerSleepTick()

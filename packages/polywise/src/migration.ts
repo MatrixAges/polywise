@@ -1,16 +1,7 @@
-import * as sql_meta from './sql/meta'
 import * as sql_schema from './sql/schema'
+import { migrate as migrateFn, validateMigrations as validateMigrationsFn } from './utils'
 
-export type MigrationFn = (
-	exec: (sql: string | string[]) => Promise<void>,
-	query: <T = any>(sql: string, params?: any[]) => Promise<T[]>
-) => Promise<void>
-
-export interface Migration {
-	version: number
-	description: string
-	up: MigrationFn
-}
+import type { Migration } from './types'
 
 export const CURRENT_SCHEMA_VERSION = 1
 
@@ -45,30 +36,9 @@ export async function migrate(
 	exec: (sql: string | string[]) => Promise<void>,
 	query: <T = any>(sql: string, params?: any[]) => Promise<T[]>
 ) {
-	const pending_migrations = migrations.filter(m => m.version > current_version)
-
-	if (pending_migrations.length === 0) {
-		return
-	}
-
-	for (const migration of pending_migrations) {
-		await migration.up(exec, query)
-
-		await query(sql_meta.sql_insert_version, [migration.version])
-	}
+	return migrateFn(migrations, current_version, exec, query)
 }
 
 export function validateMigrations() {
-	const versions = migrations.map(m => m.version)
-	const unique_versions = new Set(versions)
-
-	if (versions.length !== unique_versions.size) {
-		throw new Error('Duplicate migration versions detected')
-	}
-
-	for (let i = 0; i < versions.length; i++) {
-		if (versions[i] !== i + 1) {
-			throw new Error(`Migration versions must be sequential. Expected ${i + 1}, got ${versions[i]}`)
-		}
-	}
+	return validateMigrationsFn(migrations)
 }

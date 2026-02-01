@@ -271,6 +271,87 @@ async getNodeMagnitude(node_id: number) {
 - [ ] Did you refactor while keeping tests passing?
 - [ ] Are all tests passing before committing?
 
+## Utils Export Convention (CRITICAL)
+
+All utility functions in `utils/` folders MUST follow this pattern:
+
+### Export Rule:
+
+- Use `export default` with arrow function syntax: `export default () => {}`
+- Do NOT write function return type annotations (let TypeScript infer)
+- Use anonymous arrow functions (no function name after `default`)
+
+**Good:**
+
+```typescript
+// utils/calculateWeight.ts
+export default (learning_rate: number) => 0.5 * learning_rate
+
+// utils/generateNodePosition.ts
+export default () => ({
+	x: Math.random() * 800,
+	y: Math.random() * 600
+})
+
+// utils/index.ts
+export { default as calculateWeight } from './calculateWeight'
+```
+
+**Avoid:**
+
+```typescript
+// Don't use named exports
+export function calculateWeight(learning_rate: number): number {
+	return 0.5 * learning_rate
+}
+
+// Don't use function declaration syntax
+export default function calculateWeight(learning_rate: number) {
+	return 0.5 * learning_rate
+}
+
+// Don't specify return types
+export default (learning_rate: number): number => 0.5 * learning_rate
+```
+
+## Types File Organization (CRITICAL)
+
+When organizing `types/` folders:
+
+### Splitting Rule:
+
+- If a types file exceeds **50 lines**, split it into separate files by category
+
+### Merging Rule:
+
+- If multiple types files are each under **20 lines**, merge them into a single file
+
+### Example Structure:
+
+```
+types/
+├── index.ts          # Re-exports all types
+├── node.ts           # Node-related types (if > 50 lines)
+├── edge.ts           # Edge-related types (if > 50 lines)
+└── common.ts         # Shared types (merged if all < 20 lines)
+```
+
+## No Return Type Annotations (CRITICAL)
+
+**NEVER** explicitly specify function return types unless absolutely necessary for complex scenarios or public API clarity. Let TypeScript infer types automatically.
+
+This applies to:
+
+- All utility functions in `utils/`
+- All private methods
+- All internal functions
+
+Only consider explicit return types for:
+
+- Public library APIs
+- Complex recursive types
+- Overload signatures
+
 ## Final Guarantee
 
 - **Important:** Do not write any comments to explain the code!!! - Do not make modifications to modules that are not mentioned. If you realize that you need to modify pages or modules that are not mentioned, you must confirm with the user before performing the relevant operations.

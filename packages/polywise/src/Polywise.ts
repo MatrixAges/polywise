@@ -3,6 +3,9 @@ import { PGlite } from '@electric-sql/pglite'
 import { CURRENT_SCHEMA_VERSION, migrate, validateMigrations } from './migration'
 import * as sql from './sql'
 import * as sql_meta from './sql/meta'
+import { calculateWeight } from './utils'
+
+import type { Edge, Node, Snapshot, Triple } from './types'
 
 export class Polywise {
 	private db: PGlite | null = null
@@ -71,33 +74,33 @@ export class Polywise {
 		await this.query(sql.sql_stimulate, [intensity, node_id])
 	}
 
-	async getSnapshot(weight_threshold = 0.2) {
-		const nodes = await this.query(sql.sql_get_snapshot_nodes(weight_threshold))
-		const edges = await this.query(sql.sql_get_snapshot_edges(weight_threshold))
+	async getSnapshot(weight_threshold = 0.2): Promise<Snapshot> {
+		const nodes = await this.query<Node[]>(sql.sql_get_snapshot_nodes(weight_threshold))
+		const edges = await this.query<Edge[]>(sql.sql_get_snapshot_edges(weight_threshold))
 
 		return { nodes, edges }
 	}
 
-	async getAllNodes() {
-		return await this.query(
+	async getAllNodes(): Promise<Node[]> {
+		return await this.query<Node[]>(
 			'SELECT id, label, x, y, activation, potential, idol_id, root_ids, metrics_ids FROM brain.nodes'
 		)
 	}
 
-	async getNodesByIdol(idol_id: string) {
-		return await this.query(sql.sql_get_nodes_by_idol, [idol_id])
+	async getNodesByIdol(idol_id: string): Promise<Node[]> {
+		return await this.query<Node[]>(sql.sql_get_nodes_by_idol, [idol_id])
 	}
 
-	async getNodesByRoot(root_id: string) {
-		return await this.query(sql.sql_get_nodes_by_root, [root_id])
+	async getNodesByRoot(root_id: string): Promise<Node[]> {
+		return await this.query<Node[]>(sql.sql_get_nodes_by_root, [root_id])
 	}
 
-	async getEdgesByIdol(idol_id: string) {
-		return await this.query(sql.sql_get_edges_by_idol, [idol_id])
+	async getEdgesByIdol(idol_id: string): Promise<Edge[]> {
+		return await this.query<Edge[]>(sql.sql_get_edges_by_idol, [idol_id])
 	}
 
-	async getEdgesByRoot(root_id: string) {
-		return await this.query(sql.sql_get_edges_by_root, [root_id])
+	async getEdgesByRoot(root_id: string): Promise<Edge[]> {
+		return await this.query<Edge[]>(sql.sql_get_edges_by_root, [root_id])
 	}
 
 	async tick(threshold_override?: number) {
@@ -126,13 +129,7 @@ export class Polywise {
 	async processArticle(
 		title: string,
 		content: string,
-		triples: Array<{
-			subject: string
-			predicate: string
-			object: string
-			learning_rate: number
-			decay_resistance: number
-		}>,
+		triples: Triple[],
 		idol_id?: string,
 		root_ids?: string[],
 		metrics_ids?: string[]
@@ -155,22 +152,16 @@ export class Polywise {
 		}
 	}
 
-	private async query<T = any>(sql_str: string, params?: any[]) {
+	private async query<T = any>(sql_str: string, params?: any[]): Promise<T> {
 		if (!this.db) throw new Error('DB not initialized')
 
 		const res = await this.db.query(sql_str, params)
 
-		return JSON.parse(JSON.stringify(res.rows)) as T[]
+		return JSON.parse(JSON.stringify(res.rows)) as T
 	}
 
 	private async inject_triples(
-		triples: Array<{
-			subject: string
-			predicate: string
-			object: string
-			learning_rate: number
-			decay_resistance: number
-		}>,
+		triples: Triple[],
 		article_id: number,
 		idol_id?: string,
 		root_ids?: string[],
@@ -181,6 +172,7 @@ export class Polywise {
 		for (const t of triples) {
 			const sub_id = await this.upsert_node(t.subject, article_id, idol_id, root_ids, metrics_ids)
 			const obj_id = await this.upsert_node(t.object, article_id, idol_id, root_ids, metrics_ids)
+			const weight = calculateWeight(t.learning_rate)
 
 			await this.exec(
 				sql.sql_inject_triples_insert_edge(
@@ -189,7 +181,7 @@ export class Polywise {
 					t.learning_rate,
 					t.decay_resistance,
 					t.predicate,
-					0.5 * t.learning_rate,
+					weight,
 					idol_id,
 					root_ids,
 					metrics_ids
@@ -201,7 +193,7 @@ export class Polywise {
 					obj_id,
 					t.learning_rate,
 					t.decay_resistance,
-					0.5 * t.learning_rate,
+					weight,
 					idol_id,
 					root_ids,
 					metrics_ids

@@ -339,6 +339,50 @@ The project is a monorepo organized using a workspace structure, primarily built
 			},
 			"tsconfig.json": { "desc": "TypeScript configuration", "role": "Config" }
 		},
+		"packages/polywise": {
+			"desc": "Neuroscience-inspired knowledge graph and memory system",
+			"architecture": "PGlite + TypeScript",
+			"package.json": { "desc": "Polywise package configuration", "role": "Config" },
+			"rslib.config.ts": { "desc": "Rslib configuration", "role": "Config" },
+			"rstest.config.ts": { "desc": "RSTest configuration", "role": "Config" },
+			"src": {
+				"Brain.ts": { "desc": "Brain lifecycle manager with fatigue state machine", "role": "Class" },
+				"Polywise.ts": { "desc": "Core database API for knowledge graph operations", "role": "Class" },
+				"index.ts": { "desc": "Main exports", "role": "Index" },
+				"migration.ts": { "desc": "Database schema migration system", "role": "Module" },
+				"sql": {
+					"Brain.ts": { "desc": "Brain SQL operations", "role": "SQL" },
+					"Polywise.ts": { "desc": "Polywise SQL operations", "role": "SQL" },
+					"index.ts": { "desc": "SQL exports", "role": "Index" },
+					"meta.ts": { "desc": "Metadata SQL operations", "role": "SQL" },
+					"schema.ts": { "desc": "Database schema definitions", "role": "Schema" }
+				},
+				"types": {
+					"index.ts": { "desc": "Types exports", "role": "Index" },
+					"polywise.ts": {
+						"desc": "All types merged (Node, Edge, Triple, Snapshot, BrainState, Migration, etc.)",
+						"role": "Type"
+					}
+				},
+				"utils": {
+					"calculateFatigue.ts": { "desc": "Fatigue calculation utility", "role": "Utility" },
+					"calculateWeight.ts": { "desc": "Weight calculation utility", "role": "Utility" },
+					"generateNodePosition.ts": {
+						"desc": "Random node position generator",
+						"role": "Utility"
+					},
+					"index.ts": { "desc": "Utils exports", "role": "Index" },
+					"isIdle.ts": { "desc": "Idle state checker", "role": "Utility" },
+					"migrate.ts": { "desc": "Migration execution utility", "role": "Utility" },
+					"validateMigrations.ts": { "desc": "Migration validation utility", "role": "Utility" }
+				}
+			},
+			"test": {
+				"migration.spec.ts": { "desc": "Migration tests", "role": "Test" },
+				"test.spec.ts": { "desc": "Core functionality tests", "role": "Test" }
+			},
+			"tsconfig.json": { "desc": "TypeScript configuration", "role": "Config" }
+		},
 		"packages/stk": {
 			"desc": "Shared toolkit and utilities",
 			"architecture": "Modular utility library",
