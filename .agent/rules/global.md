@@ -352,6 +352,75 @@ Only consider explicit return types for:
 - Complex recursive types
 - Overload signatures
 
+## Class Export Convention
+
+Each class MUST be in its own file with a default export:
+
+**Good:**
+
+```typescript
+// Article.ts
+export default class Article {
+	constructor(params: ArticleParams) {}
+}
+
+// Polywise.ts
+export default class Polywise {
+	public article: Article
+	constructor() {
+		this.article = new Article({ exec, query })
+	}
+}
+```
+
+**Avoid:**
+
+```typescript
+// Don't use named exports for classes
+export class Article {}
+
+// Don't put multiple classes in one file
+export class Article {}
+export class AnotherClass {}
+```
+
+## Function Parameters Convention
+
+When a function has more than 2 parameters, use an object parameter for better flexibility:
+
+**Good:**
+
+```typescript
+interface CreateNodeParams {
+	label: string
+	x: number
+	y: number
+	threshold?: number
+	idol_id?: string
+	root_ids?: string[]
+	metrics_ids?: string[]
+}
+
+async createNode(params: CreateNodeParams) {
+	await this.query(sql.createNode, [params.label, params.x, params.y])
+}
+```
+
+**Avoid:**
+
+```typescript
+// More than 2 positional parameters
+async createNode(
+	label: string,
+	x: number,
+	y: number,
+	threshold = 0.5,
+	idol_id?: string,
+	root_ids?: string[],
+	metrics_ids?: string[]
+) {}
+```
+
 ## Final Guarantee
 
 - **Important:** Do not write any comments to explain the code!!! - Do not make modifications to modules that are not mentioned. If you realize that you need to modify pages or modules that are not mentioned, you must confirm with the user before performing the relevant operations.

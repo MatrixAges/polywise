@@ -3,19 +3,21 @@ import getEmbedding from './utils/embedding'
 
 import type { ArticleEntity, ArticleWithSimilarity } from './types'
 
-export class ArticleManager {
+interface ArticleConstructorParams {
+	exec: (sql: string | string[]) => Promise<void>
+	query: <T = any>(sql: string, params?: any[]) => Promise<T>
+	embeddingCacheDir?: string
+}
+
+export default class Article {
 	private exec: (sql: string | string[]) => Promise<void>
 	private query: <T = any>(sql: string, params?: any[]) => Promise<T>
 	private embeddingCacheDir?: string
 
-	constructor(
-		exec: (sql: string | string[]) => Promise<void>,
-		query: <T = any>(sql: string, params?: any[]) => Promise<T>,
-		embeddingCacheDir?: string
-	) {
-		this.exec = exec
-		this.query = query
-		this.embeddingCacheDir = embeddingCacheDir
+	constructor(params: ArticleConstructorParams) {
+		this.exec = params.exec
+		this.query = params.query
+		this.embeddingCacheDir = params.embeddingCacheDir
 	}
 
 	async add(title: string, content: string) {
@@ -35,7 +37,7 @@ export class ArticleManager {
 	}
 
 	async get(article_id: number) {
-		return await this.query<ArticleEntity>(sql.sql_get_article, [article_id])
+		return await this.query<ArticleEntity[]>(sql.sql_get_article, [article_id])
 	}
 
 	async getAll() {

@@ -1,6 +1,6 @@
 import { PGlite } from '@electric-sql/pglite'
 
-import { ArticleManager } from './Article'
+import Article from './Article'
 import { CURRENT_SCHEMA_VERSION, migrate, validateMigrations } from './migration'
 import * as sql from './sql'
 import * as sql_meta from './sql/meta'
@@ -10,13 +10,17 @@ import type { Edge, Node, Snapshot, Triple } from './types'
 
 export class Polywise {
 	private db: PGlite | null = null
-	public article: ArticleManager
+	public article: Article
 
 	constructor(data_dir?: string, embeddingCacheDir?: string) {
 		this.db = new PGlite(data_dir || ':polywise:', {
 			relaxedDurability: true
 		})
-		this.article = new ArticleManager(this.exec.bind(this), this.query.bind(this), embeddingCacheDir)
+		this.article = new Article({
+			exec: this.exec.bind(this),
+			query: this.query.bind(this),
+			embeddingCacheDir
+		})
 	}
 
 	async init() {
