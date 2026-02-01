@@ -7,7 +7,7 @@
 _<p align="center"><strong>🧠 A neuroscience-inspired knowledge graph and memory system</strong></p>_
 
 <p align="center">
-<a href="README.md">English</a> |
+English |
 <a href="README.zh.md">简体中文</a>
 </p>
 

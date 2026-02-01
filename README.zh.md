@@ -8,7 +8,7 @@ _<p align="center"><strong>🧠 神经科学启发的知识图谱与记忆系统
 
 <p align="center">
   <a href="README.md">English</a> |
-  <a href="README.zh.md">简体中文</a>
+  简体中文
 </p>
 
 ## 💡 为什么构建 Polywise？
