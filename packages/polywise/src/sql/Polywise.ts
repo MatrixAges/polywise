@@ -134,3 +134,36 @@ export const sql_get_edges_by_root = `
   FROM brain.edges
   WHERE $1 = ANY(root_ids)
 `
+
+export const sql_insert_article_embedding = `
+  INSERT INTO knowledge.article_embeddings (article_id, embedding)
+  VALUES ($1, $2)
+  RETURNING id
+`
+
+export const sql_get_article_embedding = `SELECT embedding FROM knowledge.article_embeddings WHERE article_id = $1`
+
+export const sql_search_articles_by_vector = `
+  SELECT 
+    a.id,
+    a.title,
+    a.content,
+    a.created_at,
+    knowledge.cosine_similarity(e.embedding, $1) AS similarity
+  FROM knowledge.articles a
+  JOIN knowledge.article_embeddings e ON a.id = e.article_id
+  ORDER BY similarity DESC
+  LIMIT $2
+`
+
+export const sql_search_articles_by_text = `
+  SELECT id, title, content, created_at
+  FROM knowledge.articles
+  WHERE to_tsvector('english', coalesce(title,'') || ' ' || coalesce(content,'')) @@ plainto_tsquery('english', $1)
+  ORDER BY ts_rank(to_tsvector('english', coalesce(title,'') || ' ' || coalesce(content,'')), plainto_tsquery('english', $1)) DESC
+  LIMIT $2
+`
+
+export const sql_get_article = `SELECT id, title, content, created_at FROM knowledge.articles WHERE id = $1`
+
+export const sql_get_all_articles = `SELECT id, title, content, created_at FROM knowledge.articles ORDER BY created_at DESC`

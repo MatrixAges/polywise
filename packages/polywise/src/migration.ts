@@ -3,7 +3,7 @@ import { migrate as migrateFn, validateMigrations as validateMigrationsFn } from
 
 import type { Migration } from './types'
 
-export const CURRENT_SCHEMA_VERSION = 1
+export const CURRENT_SCHEMA_VERSION = 2
 
 export const migrations: Migration[] = [
 	{
@@ -26,6 +26,18 @@ export const migrations: Migration[] = [
 				sql_schema.sql_create_table_articles,
 				sql_schema.sql_create_table_node_sources,
 				sql_schema.sql_create_schema_user_space
+			])
+		}
+	},
+	{
+		version: 2,
+		description: 'Add article embeddings for vector search and full-text search',
+		up: async exec => {
+			await exec([
+				sql_schema.sql_create_table_article_embeddings,
+				sql_schema.sql_create_index_article_embeddings_gin,
+				sql_schema.sql_create_index_article_content_gin,
+				sql_schema.sql_create_function_cosine_similarity
 			])
 		}
 	}

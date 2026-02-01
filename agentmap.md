@@ -367,6 +367,10 @@ The project is a monorepo organized using a workspace structure, primarily built
 				"utils": {
 					"calculateFatigue.ts": { "desc": "Fatigue calculation utility", "role": "Utility" },
 					"calculateWeight.ts": { "desc": "Weight calculation utility", "role": "Utility" },
+					"embedding.ts": {
+						"desc": "HuggingFace transformer embedding generator",
+						"role": "Utility"
+					},
 					"generateNodePosition.ts": {
 						"desc": "Random node position generator",
 						"role": "Utility"

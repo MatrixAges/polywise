@@ -56,3 +56,26 @@ export interface Migration {
 	description: string
 	up: MigrationFn
 }
+
+export interface Article {
+	id: number
+	title: string
+	content: string
+	created_at: string
+}
+
+export interface ArticleWithSimilarity extends Article {
+	similarity: number
+}
+
+export interface ArticleEmbedding {
+	id: number
+	article_id: number
+	embedding: number[]
+	model_name: string
+	created_at: string
+}
+
+export interface ArticleWithTriples extends Article {
+	triples: Triple[]
+}
