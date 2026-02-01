@@ -1,6 +1,6 @@
 import { defineConfig } from '@rstest/core'
 
 export default defineConfig({
-	root: './src',
+	root: './test',
 	testTimeout: 30000
 })

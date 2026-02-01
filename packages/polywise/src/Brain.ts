@@ -1,4 +1,5 @@
 import { Polywise } from './Polywise'
+import * as sql from './sql'
 
 export class Brain {
 	private poly: Polywise
@@ -43,11 +44,7 @@ export class Brain {
 	}
 
 	private async runShadowTick() {
-		await (this.poly as any).db.exec(`
-      UPDATE brain.nodes 
-      SET potential = potential + 0.1 
-      WHERE id IN (SELECT id FROM brain.nodes ORDER BY random() LIMIT (SELECT count(*)/100 + 1 FROM brain.nodes));
-    `)
+		await (this.poly as any).db.exec(sql.sql_runShadowTick)
 		await this.poly.tick(0.8)
 		this.on_tick?.()
 	}
@@ -74,34 +71,12 @@ export class Brain {
 		this.state = 'SLEEPING'
 		const db = (this.poly as any).db
 
-		await db.exec('BEGIN')
-
-		// 1. Noise Cleaning: Only delete absolute noise (below retrieval threshold of any kind)
-		await db.exec(`
-      DELETE FROM brain.edges 
-      WHERE weight < 0.001; 
-    `)
-
-		// 2. Long-Term Depression (LTD): Further decay weak memories to "subconscious" level
-		await db.exec(`
-      UPDATE brain.edges
-      SET weight = GREATEST(weight - 0.01, 0.001)
-      WHERE weight < 0.2;
-    `)
-
-		// Replay high impact memories (Dreaming)
-		await db.exec(`
-      UPDATE brain.edges 
-      SET weight = LEAST(weight + 0.2, 5.0)
-      WHERE id IN (
-        SELECT id FROM brain.edges 
-        WHERE learning_rate > 1.5 
-        ORDER BY random() LIMIT 5
-      );
-    `)
-
-		await db.exec('UPDATE brain.nodes SET potential = 0, activation = 0;')
-		await db.exec('COMMIT')
+		await db.exec(sql.sql_sleepTickBegin)
+		await db.exec(sql.sql_sleepTickCleanNoise)
+		await db.exec(sql.sql_sleepTickDecay)
+		await db.exec(sql.sql_sleepTickReplay)
+		await db.exec(sql.sql_sleepTickResetNodes)
+		await db.exec(sql.sql_sleepTickCommit)
 
 		this.current_fatigue = 0
 		this.state = 'FRESH'

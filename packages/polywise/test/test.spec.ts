@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 
-import { Brain } from './Brain'
-import { Polywise } from './Polywise'
+import { Brain } from '../src/Brain'
+import { Polywise } from '../src/Polywise'
 
 describe('Polywise Brain System', () => {
 	let poly: Polywise
