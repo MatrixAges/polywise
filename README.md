@@ -2,7 +2,7 @@
 <img src="packages/app/public/icon.svg" width="120" height="120" alt="Polywise Logo">
 </p>
 
-# <p align="center">Atom.css</p>
+# <p align="center">Polywise</p>
 
 _<p align="center"><strong>🧠 A neuroscience-inspired knowledge graph and memory system</strong></p>_
 

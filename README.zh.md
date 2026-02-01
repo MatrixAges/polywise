@@ -2,7 +2,7 @@
   <img src="packages/app/public/icon.svg" width="120" height="120" alt="Polywise Logo">
 </p>
 
-# <p align="center">Atom.css</p>
+# <p align="center">Polywise</p>
 
 _<p align="center"><strong>🧠 神经科学启发的知识图谱与记忆系统</strong></p>_
 
