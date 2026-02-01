@@ -1,41 +1,95 @@
-import { GoogleGenerativeAI } from '@google/generative-ai'
+import type { ExecutableCodePart, FunctionCall, Part, TextPart } from './types'
 
-import { Polywise } from './Polywise'
+export type ParsedOutput = {
+	text: string
+	parts: Part[]
+	functionCalls: Array<{ name: string; args: Record<string, unknown> }>
+	executableCode: Array<{ language: string; code: string }>
+}
 
 export class Output {
-	private poly: Polywise
-	private model: any
+	/**
+	 * Parse AI response parts
+	 */
+	static parse(parts: Part[]): ParsedOutput {
+		const result: ParsedOutput = {
+			text: '',
+			parts,
+			functionCalls: [],
+			executableCode: []
+		}
 
-	constructor(poly: Polywise, apiKey: string) {
-		this.poly = poly
-		const genAI = new GoogleGenerativeAI(apiKey)
-		this.model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
+		for (const part of parts) {
+			if ('text' in part) {
+				result.text += part.text
+			} else if ('functionCall' in part) {
+				result.functionCalls.push({
+					name: part.functionCall.name,
+					args: part.functionCall.args
+				})
+			} else if ('executableCode' in part) {
+				result.executableCode.push({
+					language: part.executableCode.language,
+					code: part.executableCode.code
+				})
+			}
+		}
+
+		return result
 	}
 
-	async query(question: string) {
-		const snapshot = await this.poly.getSnapshot()
-		const context = JSON.stringify(snapshot)
-
-		const prompt = `
-      Answer the question based on the following knowledge graph (SVO triples).
-      Context: ${context}
-      Question: ${question}
-    `
-
-		const result = await this.model.generateContent(prompt)
-		return result.response.text()
+	/**
+	 * Extract text content from parts
+	 */
+	static extractText(parts: Part[]): string {
+		return parts
+			.filter((part): part is TextPart => 'text' in part)
+			.map(part => part.text)
+			.join('')
 	}
 
-	async getInsights() {
-		const snapshot = await this.poly.getSnapshot()
-		const context = JSON.stringify(snapshot)
+	/**
+	 * Extract function calls from parts
+	 */
+	static extractFunctionCalls(parts: Part[]): Array<{ name: string; args: Record<string, unknown> }> {
+		return parts
+			.filter((part): part is FunctionCall => 'functionCall' in part)
+			.map(part => ({
+				name: part.functionCall.name,
+				args: part.functionCall.args
+			}))
+	}
 
-		const prompt = `
-      Analyze the following knowledge graph and provide 3 key insights or unexpected connections.
-      Context: ${context}
-    `
+	/**
+	 * Extract executable code from parts
+	 */
+	static extractExecutableCode(parts: Part[]): Array<{ language: string; code: string }> {
+		return parts
+			.filter((part): part is ExecutableCodePart => 'executableCode' in part)
+			.map(part => ({
+				language: part.executableCode.language,
+				code: part.executableCode.code
+			}))
+	}
 
-		const result = await this.model.generateContent(prompt)
-		return result.response.text()
+	/**
+	 * Check if parts contain function calls
+	 */
+	static hasFunctionCalls(parts: Part[]): boolean {
+		return parts.some(part => 'functionCall' in part)
+	}
+
+	/**
+	 * Check if parts contain executable code
+	 */
+	static hasExecutableCode(parts: Part[]): boolean {
+		return parts.some(part => 'executableCode' in part)
+	}
+
+	/**
+	 * Check if parts contain only text
+	 */
+	static isTextOnly(parts: Part[]): boolean {
+		return parts.every(part => 'text' in part)
 	}
 }

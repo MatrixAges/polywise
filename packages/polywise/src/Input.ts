@@ -1,98 +1,141 @@
-import { GoogleGenerativeAI } from '@google/generative-ai'
+import type { CodeExecutionResult, ExecutableCodePart, FunctionCall, FunctionResponse, Part, TextPart } from './types'
 
-import { Polywise } from './Polywise'
+export type InputPart = TextPart | FunctionCall | FunctionResponse | ExecutableCodePart | CodeExecutionResult
+
+export type Message = {
+	role: 'user' | 'model'
+	parts: InputPart[]
+}
+
+export type ProcessedInput = {
+	messages: Message[]
+	systemInstruction?: string
+}
 
 export class Input {
-	private poly: Polywise
-	private model: any
+	private messages: Message[] = []
+	private systemInstruction?: string
 
-	constructor(poly: Polywise, apiKey: string) {
-		this.poly = poly
-		const genAI = new GoogleGenerativeAI(apiKey)
-		this.model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
+	/**
+	 * Set system instruction
+	 */
+	setSystemInstruction(instruction: string): this {
+		this.systemInstruction = instruction
+		return this
 	}
 
-	async processArticle(title: string, content: string) {
-		const res = await (this.poly as any).query(
-			'INSERT INTO knowledge.articles (title, content) VALUES ($1, $2) RETURNING id',
-			[title, content]
-		)
-		const article_id = res[0].id
+	/**
+	 * Add user message
+	 */
+	addUserMessage(parts: InputPart | InputPart[]): this {
+		this.messages.push({
+			role: 'user',
+			parts: Array.isArray(parts) ? parts : [parts]
+		})
+		return this
+	}
 
-		const prompt = `
-      Analyze the following text and extract core knowledge as Subject-Predicate-Object (SVO) triples.
-      
-      CRITICAL: For each relationship, determine two physics parameters based on CONTEXT:
-      1. "learning_rate" (0.1 - 3.0): How impactful/active is this action? 
-         - High (2.0+): "crashes", "destroys", "invents", "saves".
-         - Low (0.5): "is", "has", "includes".
-      2. "decay_resistance" (0.1 - 3.0): How fundamental/permanent is this truth?
-         - High (2.0+): Core principles, laws.
-         - Low (0.5): Temporary states, random details.
+	/**
+	 * Add model message
+	 */
+	addModelMessage(parts: InputPart | InputPart[]): this {
+		this.messages.push({
+			role: 'model',
+			parts: Array.isArray(parts) ? parts : [parts]
+		})
+		return this
+	}
 
-      Return ONLY a JSON array: 
-      [{"subject": "Electron", "predicate": "uses", "object": "Chromium", "learning_rate": 0.8, "decay_resistance": 2.0}]
-      
-      Text: ${content.substring(0, 8000)}
-    `
+	/**
+	 * Add text message (user by default)
+	 */
+	addText(text: string, role: 'user' | 'model' = 'user'): this {
+		const textPart: TextPart = { text }
+		if (role === 'user') {
+			this.addUserMessage(textPart)
+		} else {
+			this.addModelMessage(textPart)
+		}
+		return this
+	}
 
-		const result = await this.model.generateContent(prompt)
-		const response_text = result.response.text()
-		const clean_json = response_text.replace(/```json|```/g, '').trim()
+	/**
+	 * Add function call
+	 */
+	addFunctionCall(name: string, args: Record<string, unknown>): this {
+		const functionCall: FunctionCall = {
+			functionCall: { name, args }
+		}
+		this.addModelMessage(functionCall)
+		return this
+	}
 
-		try {
-			const triples: any[] = JSON.parse(clean_json)
-			await this.injectTriples(triples, article_id)
-			return triples
-		} catch (e) {
-			console.error('Failed to parse Gemini SVO output', e)
+	/**
+	 * Add function response
+	 */
+	addFunctionResponse(name: string, response: Record<string, unknown>): this {
+		const functionResponse: FunctionResponse = {
+			functionResponse: { name, response }
+		}
+		this.addUserMessage(functionResponse)
+		return this
+	}
+
+	/**
+	 * Add executable code
+	 */
+	addExecutableCode(language: string, code: string): this {
+		const executableCode: ExecutableCodePart = {
+			executableCode: { language, code }
+		}
+		this.addModelMessage(executableCode)
+		return this
+	}
+
+	/**
+	 * Add code execution result
+	 */
+	addCodeExecutionResult(
+		outcome: 'OUTCOME_OK' | 'OUTCOME_FAILED' | 'OUTCOME_DEADLINE_EXCEEDED',
+		output: string
+	): this {
+		const codeExecutionResult: CodeExecutionResult = {
+			codeExecutionResult: { outcome, output }
+		}
+		this.addUserMessage(codeExecutionResult)
+		return this
+	}
+
+	/**
+	 * Get processed input data
+	 */
+	build(): ProcessedInput {
+		return {
+			messages: this.messages,
+			systemInstruction: this.systemInstruction
 		}
 	}
 
-	private async injectTriples(triples: any[], article_id: number) {
-		await this.poly.exec('BEGIN')
-
-		for (const t of triples) {
-			const sub_id = await this.upsertNode(t.subject, article_id)
-			const obj_id = await this.upsertNode(t.object, article_id)
-
-			await this.poly.exec(`
-        INSERT INTO brain.edges (source_id, target_id, weight, type, learning_rate, decay_resistance)
-        VALUES (${sub_id}, ${obj_id}, ${0.5 * t.learning_rate}, '${t.predicate}', ${t.learning_rate}, ${t.decay_resistance})
-        ON CONFLICT DO NOTHING;
-      `)
-
-			await this.poly.exec(`
-        UPDATE brain.edges 
-        SET 
-          learning_rate = GREATEST(learning_rate, ${t.learning_rate}),
-          decay_resistance = GREATEST(decay_resistance, ${t.decay_resistance}),
-          weight = LEAST(weight + ${0.5 * t.learning_rate}, 5.0) 
-        WHERE source_id = ${sub_id} AND target_id = ${obj_id};
-      `)
-		}
-
-		await this.poly.exec('COMMIT')
+	/**
+	 * Clear all messages and system instruction
+	 */
+	clear(): this {
+		this.messages = []
+		this.systemInstruction = undefined
+		return this
 	}
 
-	private async upsertNode(label: string, article_id: number): Promise<number> {
-		await this.poly.query(
-			`
-      INSERT INTO brain.nodes (label, x, y, potential)
-      VALUES ($1, random() * 800, random() * 600, 1.0)
-      ON CONFLICT (label) DO UPDATE SET potential = brain.nodes.potential + 0.5;
-    `,
-			[label]
-		)
+	/**
+	 * Get current messages
+	 */
+	getMessages(): Message[] {
+		return this.messages
+	}
 
-		const res = await this.poly.query('SELECT id FROM brain.nodes WHERE label = $1', [label])
-		const nid = res[0].id
-
-		await this.poly.query(
-			'INSERT INTO brain.node_sources (node_id, article_id) VALUES ($1, $2) ON CONFLICT DO NOTHING;',
-			[nid, article_id]
-		)
-
-		return nid
+	/**
+	 * Get system instruction
+	 */
+	getSystemInstruction(): string | undefined {
+		return this.systemInstruction
 	}
 }
