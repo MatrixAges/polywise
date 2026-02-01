@@ -384,21 +384,30 @@ export class Article {}
 export class AnotherClass {}
 ```
 
-## Function Parameters Convention
+## Function & Class Model Parameters Convention
 
-When a function has more than 2 parameters, use an object parameter for better flexibility:
+When a function or class constructor has more than 2 parameters, use an object parameter for better flexibility. The properties within the object must follow a strict ordering:
+
+**Ordering Rule:** `Required Variables` > `Optional Variables` > `Required Functions` > `Optional Functions`
 
 **Good:**
 
 ```typescript
 interface CreateNodeParams {
+	// Required Variables
 	label: string
 	x: number
 	y: number
+
+	// Optional Variables
 	threshold?: number
 	idol_id?: string
-	root_ids?: string[]
-	metrics_ids?: string[]
+
+	// Required Functions
+	onCreated: (id: number) => void
+
+	// Optional Functions
+	onFired?: () => void
 }
 
 async createNode(params: CreateNodeParams) {
@@ -409,16 +418,20 @@ async createNode(params: CreateNodeParams) {
 **Avoid:**
 
 ```typescript
-// More than 2 positional parameters
+// Mixed order or positional parameters
 async createNode(
 	label: string,
 	x: number,
 	y: number,
 	threshold = 0.5,
-	idol_id?: string,
-	root_ids?: string[],
-	metrics_ids?: string[]
+	idol_id?: string
 ) {}
+
+interface BadParams {
+	onCreated: () => void // Function before variables
+	label: string
+	threshold?: number
+}
 ```
 
 ## Final Guarantee

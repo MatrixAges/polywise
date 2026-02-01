@@ -27,7 +27,6 @@ export default class Polywise {
 			relaxedDurability: true
 		})
 		this.article = new Article({
-			exec: this.exec.bind(this),
 			query: this.query.bind(this),
 			embeddingCacheDir
 		})
