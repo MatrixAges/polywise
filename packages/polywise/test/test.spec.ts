@@ -3,7 +3,7 @@ import * as path from 'path'
 
 import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 
-import { Brain } from '../src/Brain'
+import Brain from '../src/Brain'
 import Polywise from '../src/Polywise'
 
 describe('Polywise Brain System', () => {
@@ -16,18 +16,21 @@ describe('Polywise Brain System', () => {
 
 		await poly.init()
 
-		brain = new Brain(poly, async () => {
-			const { nodes, edges } = await poly.getSnapshot()
-			const active = nodes.filter((n: any) => n.activation > 0).map((n: any) => n.label)
+		brain = new Brain({
+			poly,
+			onTick: async () => {
+				const { nodes, edges } = await poly.getSnapshot()
+				const active = nodes.filter((n: any) => n.activation > 0).map((n: any) => n.label)
 
-			if (active.length > 0) {
-				console.log(`Active Nodes: [${active.join(', ')}] | Total Edges: ${edges.length}`)
+				if (active.length > 0) {
+					console.log(`Active Nodes: [${active.join(', ')}] | Total Edges: ${edges.length}`)
+				}
 			}
 		})
 	})
 
 	afterAll(() => {
-		brain?.stop()
+		brain?.off()
 		poly.off()
 
 		const files = fs.readdirSync('.')

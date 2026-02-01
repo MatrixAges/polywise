@@ -14,21 +14,22 @@ import type {
 	Node,
 	ProcessArticleParams,
 	Snapshot,
-	Triple,
 	UpsertNodeParams
 } from './types'
 
 export default class Polywise {
 	private db: PGlite | null = null
+
 	public article: Article
 
-	constructor(data_dir?: string, embeddingCacheDir?: string) {
+	constructor(data_dir?: string, embedding_cache_dir?: string) {
 		this.db = new PGlite(data_dir || ':polywise:', {
 			relaxedDurability: true
 		})
+
 		this.article = new Article({
 			query: this.query.bind(this),
-			embeddingCacheDir
+			embedding_cache_dir
 		})
 	}
 
@@ -75,32 +76,32 @@ export default class Polywise {
 		await this.query(sql.sql_stimulate, [intensity, node_id])
 	}
 
-	async getSnapshot(weight_threshold = 0.2): Promise<Snapshot> {
+	async getSnapshot(weight_threshold = 0.2) {
 		const nodes = await this.query<Node[]>(sql.sql_get_snapshot_nodes(weight_threshold))
 		const edges = await this.query<Edge[]>(sql.sql_get_snapshot_edges(weight_threshold))
 
 		return { nodes, edges }
 	}
 
-	async getAllNodes(): Promise<Node[]> {
+	async getAllNodes() {
 		return await this.query<Node[]>(
 			'SELECT id, label, x, y, activation, potential, idol_id, root_ids, metrics_ids FROM brain.nodes'
 		)
 	}
 
-	async getNodesByIdol(idol_id: string): Promise<Node[]> {
+	async getNodesByIdol(idol_id: string) {
 		return await this.query<Node[]>(sql.sql_get_nodes_by_idol, [idol_id])
 	}
 
-	async getNodesByRoot(root_id: string): Promise<Node[]> {
+	async getNodesByRoot(root_id: string) {
 		return await this.query<Node[]>(sql.sql_get_nodes_by_root, [root_id])
 	}
 
-	async getEdgesByIdol(idol_id: string): Promise<Edge[]> {
+	async getEdgesByIdol(idol_id: string) {
 		return await this.query<Edge[]>(sql.sql_get_edges_by_idol, [idol_id])
 	}
 
-	async getEdgesByRoot(root_id: string): Promise<Edge[]> {
+	async getEdgesByRoot(root_id: string) {
 		return await this.query<Edge[]>(sql.sql_get_edges_by_root, [root_id])
 	}
 
@@ -135,7 +136,7 @@ export default class Polywise {
 			await this.article.addEmbedding(article_id, params.content)
 		}
 
-		await this.inject_triples({
+		await this._injectTriples({
 			triples: params.triples,
 			article_id,
 			idol_id: params.idol_id,
@@ -144,44 +145,26 @@ export default class Polywise {
 		})
 	}
 
-	private async exec(sql_input: string | Array<string>) {
-		if (!this.db) throw new Error('DB not initialized')
-
-		if (Array.isArray(sql_input)) {
-			for (const sql_str of sql_input) {
-				await this.db.exec(sql_str)
-			}
-		} else {
-			await this.db.exec(sql_input)
-		}
-	}
-
-	private async query<T = any>(sql_str: string, params?: any[]): Promise<T> {
-		if (!this.db) throw new Error('DB not initialized')
-
-		const res = await this.db.query(sql_str, params)
-
-		return JSON.parse(JSON.stringify(res.rows)) as T
-	}
-
-	private async inject_triples(params: InjectTriplesParams) {
+	private async _injectTriples(params: InjectTriplesParams) {
 		await this.exec(sql.sql_inject_triples_begin)
 
 		for (const t of params.triples) {
-			const sub_id = await this.upsert_node({
+			const sub_id = await this._upsertNode({
 				label: t.subject,
 				article_id: params.article_id,
 				idol_id: params.idol_id,
 				root_ids: params.root_ids,
 				metrics_ids: params.metrics_ids
 			})
-			const obj_id = await this.upsert_node({
+
+			const obj_id = await this._upsertNode({
 				label: t.object,
 				article_id: params.article_id,
 				idol_id: params.idol_id,
 				root_ids: params.root_ids,
 				metrics_ids: params.metrics_ids
 			})
+
 			const weight = calculateWeight(t.learning_rate)
 
 			await this.exec(
@@ -197,6 +180,7 @@ export default class Polywise {
 					params.metrics_ids
 				)
 			)
+
 			await this.exec(
 				sql.sql_inject_triples_update_edge(
 					sub_id,
@@ -214,7 +198,7 @@ export default class Polywise {
 		await this.exec(sql.sql_inject_triples_commit)
 	}
 
-	private async upsert_node(params: UpsertNodeParams) {
+	private async _upsertNode(params: UpsertNodeParams) {
 		await this.query(sql.sql_upsert_node, [
 			params.label,
 			params.idol_id ?? null,
@@ -228,6 +212,32 @@ export default class Polywise {
 		await this.query(sql.sql_node_sources, [nid, params.article_id])
 
 		return nid
+	}
+
+	private async exec(sql_input: string | Array<string>) {
+		if (!this.db) {
+			throw new Error('DB not initialized')
+		}
+
+		if (Array.isArray(sql_input)) {
+			for (const sql_str of sql_input) {
+				await this.db.exec(sql_str)
+			}
+
+			return
+		}
+
+		await this.db.exec(sql_input)
+	}
+
+	private async query<T = any>(sql_str: string, params?: any[]) {
+		if (!this.db) {
+			throw new Error('DB not initialized')
+		}
+
+		const res = await this.db.query(sql_str, params)
+
+		return JSON.parse(JSON.stringify(res.rows)) as T
 	}
 
 	off() {

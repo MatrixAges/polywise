@@ -1,8 +1,8 @@
 import { env, pipeline } from '@huggingface/transformers'
 
-export default async function getEmbedding(text: string, cacheDir?: string): Promise<number[]> {
-	if (cacheDir) {
-		env.cacheDir = cacheDir
+export default async (text: string, cache_dir?: string) => {
+	if (cache_dir) {
+		env.cacheDir = cache_dir
 	}
 
 	const extractor = await pipeline('feature-extraction', 'onnx-community/Qwen3-Embedding-0.6B-ONNX', {
@@ -10,5 +10,6 @@ export default async function getEmbedding(text: string, cacheDir?: string): Pro
 	})
 
 	const output = await extractor(text, { pooling: 'mean', normalize: true })
+
 	return Array.from(output.data)
 }
