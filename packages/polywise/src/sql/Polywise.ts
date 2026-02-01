@@ -149,10 +149,10 @@ export const sql_search_articles_by_vector = `
     a.title,
     a.content,
     a.created_at,
-    knowledge.cosine_similarity(e.embedding, $1) AS similarity
+    1 - (e.embedding <=> $1) AS similarity
   FROM knowledge.articles a
   JOIN knowledge.article_embeddings e ON a.id = e.article_id
-  ORDER BY similarity DESC
+  ORDER BY e.embedding <=> $1
   LIMIT $2
 `
 

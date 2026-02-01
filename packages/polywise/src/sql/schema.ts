@@ -1,3 +1,5 @@
+export const sql_create_extension_vector = `CREATE EXTENSION IF NOT EXISTS vector;`
+
 export const sql_create_schema_brain = `CREATE SCHEMA IF NOT EXISTS brain;`
 
 export const sql_create_table_nodes = `
@@ -78,21 +80,15 @@ export const sql_create_table_article_embeddings = `
   CREATE TABLE IF NOT EXISTS knowledge.article_embeddings (
     id SERIAL PRIMARY KEY,
     article_id INTEGER REFERENCES knowledge.articles(id) ON DELETE CASCADE,
-    embedding REAL[] NOT NULL,
+    embedding vector(1024) NOT NULL,
     model_name TEXT DEFAULT 'onnx-community/Qwen3-Embedding-0.6B-ONNX',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   );
 `
 
-export const sql_create_index_article_embeddings_gin = `CREATE INDEX IF NOT EXISTS idx_article_embeddings_gin ON knowledge.article_embeddings USING GIN(embedding);`
+export const sql_create_index_article_embeddings_hnsw = `
+  CREATE INDEX IF NOT EXISTS idx_article_embeddings_hnsw 
+  ON knowledge.article_embeddings USING hnsw (embedding vector_cosine_ops);
+`
 
 export const sql_create_index_article_content_gin = `CREATE INDEX IF NOT EXISTS idx_article_content_gin ON knowledge.articles USING GIN(to_tsvector('english', coalesce(title,'') || ' ' || coalesce(content,'')));`
-
-export const sql_create_function_cosine_similarity = `
-  CREATE OR REPLACE FUNCTION knowledge.cosine_similarity(v1 REAL[], v2 REAL[])
-  RETURNS REAL AS $$
-    SELECT (
-      SELECT SUM(a * b) FROM unnest(v1, v2) AS t(a, b)
-    ) / (SQRT((SELECT SUM(a * a) FROM unnest(v1) AS t(a))) * SQRT((SELECT SUM(b * b) FROM unnest(v2) AS t(b))))
-  $$ LANGUAGE SQL;
-`

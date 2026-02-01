@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises'
 
 import { PGlite } from '@electric-sql/pglite'
+import { vector } from '@electric-sql/pglite/vector'
 import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 
 import * as sql_meta from '../src/sql/meta'
@@ -26,7 +27,7 @@ describe('Migration System', () => {
 		const db_path = ':polywise_migration_main:'
 
 		beforeAll(async () => {
-			db = new PGlite(db_path)
+			db = new PGlite(db_path, { extensions: { vector } })
 
 			await db.exec(sql_meta.sql_create_schema_meta)
 			await db.exec(sql_meta.sql_create_table_schema_version)
@@ -103,7 +104,7 @@ describe('Migration System', () => {
 		const db_path = ':polywise_migration_add_col:'
 
 		beforeAll(async () => {
-			db = new PGlite(db_path)
+			db = new PGlite(db_path, { extensions: { vector } })
 
 			await db.exec(sql_meta.sql_create_schema_meta)
 			await db.exec(sql_meta.sql_create_table_schema_version)
@@ -174,7 +175,7 @@ describe('Migration System', () => {
 		const db_path = `:polywise_migration_rename_col_${Date.now()}:`
 
 		beforeAll(async () => {
-			db = new PGlite(db_path)
+			db = new PGlite(db_path, { extensions: { vector } })
 
 			await db.exec(sql_meta.sql_create_schema_meta)
 			await db.exec(sql_meta.sql_create_table_schema_version)
@@ -231,7 +232,7 @@ describe('Migration System', () => {
 		const db_path = `:polywise_migration_modify_type_${Date.now()}:`
 
 		beforeAll(async () => {
-			db = new PGlite(db_path)
+			db = new PGlite(db_path, { extensions: { vector } })
 
 			await db.exec(sql_meta.sql_create_schema_meta)
 			await db.exec(sql_meta.sql_create_table_schema_version)
@@ -293,7 +294,7 @@ describe('Migration System', () => {
 		const db_path = ':polywise_migration_drop_col:'
 
 		beforeAll(async () => {
-			db = new PGlite(db_path)
+			db = new PGlite(db_path, { extensions: { vector } })
 
 			await db.exec(sql_meta.sql_create_schema_meta)
 			await db.exec(sql_meta.sql_create_table_schema_version)
@@ -344,7 +345,7 @@ describe('Migration System', () => {
 		const db_path = ':polywise_migration_complex:'
 
 		beforeAll(async () => {
-			db = new PGlite(db_path)
+			db = new PGlite(db_path, { extensions: { vector } })
 
 			await db.exec(sql_meta.sql_create_schema_meta)
 			await db.exec(sql_meta.sql_create_table_schema_version)

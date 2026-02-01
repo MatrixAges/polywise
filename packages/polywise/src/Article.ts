@@ -30,7 +30,7 @@ export default class Article {
 	async addEmbedding(article_id: number, content: string) {
 		const embedding = await getEmbedding(content, this.embedding_cache_dir)
 
-		await this.db.query(sql.sql_insert_article_embedding, [article_id, embedding])
+		await this.db.query(sql.sql_insert_article_embedding, [article_id, JSON.stringify(embedding)])
 	}
 
 	async addWithEmbedding(params: AddArticleParams) {
@@ -66,7 +66,7 @@ export default class Article {
 		const embedding = await getEmbedding(params.query, this.embedding_cache_dir)
 
 		const res = await this.db.query<ArticleWithSimilarity>(sql.sql_search_articles_by_vector, [
-			embedding,
+			JSON.stringify(embedding),
 			params.limit ?? 10
 		])
 

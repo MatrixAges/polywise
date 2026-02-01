@@ -12,6 +12,7 @@ export const migrations: Migration[] = [
 		description: 'Initial schema: brain nodes, edges, knowledge articles with idol_id, root_ids, metrics_ids',
 		up: async exec => {
 			await exec([
+				sql_schema.sql_create_extension_vector,
 				sql_schema.sql_create_schema_brain,
 				sql_schema.sql_create_table_nodes,
 				sql_schema.sql_create_table_edges,
@@ -32,13 +33,12 @@ export const migrations: Migration[] = [
 	},
 	{
 		version: 2,
-		description: 'Add article embeddings for vector search and full-text search',
+		description: 'Add article embeddings for vector search (using pgvector) and full-text search',
 		up: async exec => {
 			await exec([
 				sql_schema.sql_create_table_article_embeddings,
-				sql_schema.sql_create_index_article_embeddings_gin,
-				sql_schema.sql_create_index_article_content_gin,
-				sql_schema.sql_create_function_cosine_similarity
+				sql_schema.sql_create_index_article_embeddings_hnsw,
+				sql_schema.sql_create_index_article_content_gin
 			])
 		}
 	}

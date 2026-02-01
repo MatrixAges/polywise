@@ -1,4 +1,5 @@
 import { PGlite } from '@electric-sql/pglite'
+import { vector } from '@electric-sql/pglite/vector'
 
 import Article from './Article'
 import * as sql from './sql'
@@ -22,7 +23,8 @@ export default class Polywise {
 
 	constructor(data_dir?: string, embedding_cache_dir?: string) {
 		this.db = new PGlite(data_dir || ':polywise:', {
-			relaxedDurability: true
+			relaxedDurability: true,
+			extensions: { vector }
 		})
 
 		this.article = new Article({
