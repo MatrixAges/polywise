@@ -43,9 +43,9 @@ describe('Polywise Brain System', () => {
 			]
 
 			for (const concept of concepts) {
-				const nodeId = await poly.addNode(concept.label, concept.x, concept.y, 0.3)
+				const node_id = await poly.addNode(concept.label, concept.x, concept.y, 0.3)
 
-				nodes.push(nodeId)
+				nodes.push(node_id)
 			}
 
 			const connections = [
@@ -150,11 +150,11 @@ describe('Polywise Brain System', () => {
 			expect(nodes.length).toBeGreaterThanOrEqual(8)
 			expect(edges.length).toBeGreaterThanOrEqual(8)
 
-			const nodeLabels = nodes.map((n: any) => n.label)
+			const node_labels = nodes.map((n: any) => n.label)
 
-			expect(nodeLabels).toContain('Quantum Computing')
-			expect(nodeLabels).toContain('Qubits')
-			expect(nodeLabels).toContain('Superposition')
+			expect(node_labels).toContain('Quantum Computing')
+			expect(node_labels).toContain('Qubits')
+			expect(node_labels).toContain('Superposition')
 		})
 
 		it('should handle large scale knowledge network', async () => {
@@ -168,9 +168,9 @@ describe('Polywise Brain System', () => {
 
 				concepts.push(concept)
 
-				const nodeId = await poly.addNode(concept, i * 10, i * 5, 0.4)
+				const node_id = await poly.addNode(concept, i * 10, i * 5, 0.4)
 
-				node_ids.push(nodeId)
+				node_ids.push(node_id)
 			}
 
 			for (let i = 0; i < node_ids.length; i++) {
@@ -196,7 +196,7 @@ describe('Polywise Brain System', () => {
 		})
 
 		it('should process multiple articles with overlapping concepts', async () => {
-			const article1Triples = [
+			const article1_triples = [
 				{
 					subject: 'Artificial Intelligence',
 					predicate: 'includes',
@@ -220,7 +220,7 @@ describe('Polywise Brain System', () => {
 				}
 			]
 
-			const article2Triples = [
+			const article2_triples = [
 				{
 					subject: 'Machine Learning',
 					predicate: 'uses',
@@ -244,7 +244,7 @@ describe('Polywise Brain System', () => {
 				}
 			]
 
-			const article3Triples = [
+			const article3_triples = [
 				{
 					subject: 'Deep Learning',
 					predicate: 'is_a',
@@ -261,19 +261,19 @@ describe('Polywise Brain System', () => {
 				}
 			]
 
-			await poly.processArticle('AI Overview', 'Introduction to AI...', article1Triples)
-			await poly.processArticle('Neural Networks', 'Understanding neural networks...', article2Triples)
-			await poly.processArticle('Deep Learning', 'Deep learning concepts...', article3Triples)
+			await poly.processArticle('AI Overview', 'Introduction to AI...', article1_triples)
+			await poly.processArticle('Neural Networks', 'Understanding neural networks...', article2_triples)
+			await poly.processArticle('Deep Learning', 'Deep learning concepts...', article3_triples)
 
 			const { nodes, edges } = await poly.getSnapshot(0.05)
 
 			expect(nodes.length).toBeGreaterThanOrEqual(8)
 			expect(edges.length).toBeGreaterThanOrEqual(8)
 
-			const mlNode = nodes.find((n: any) => n.label === 'Machine Learning')
+			const ml_node = nodes.find((n: any) => n.label === 'Machine Learning')
 
-			expect(mlNode).toBeDefined()
-			expect(mlNode?.potential).toBeGreaterThan(0)
+			expect(ml_node).toBeDefined()
+			expect(ml_node?.potential).toBeGreaterThan(0)
 		})
 	})
 
@@ -282,9 +282,9 @@ describe('Polywise Brain System', () => {
 			const chain: number[] = []
 
 			for (let i = 0; i < 8; i++) {
-				const nodeId = await poly.addNode(`Chain_Node_${i}`, i * 50, 100, 0.3)
+				const node_id = await poly.addNode(`Chain_Node_${i}`, i * 50, 100, 0.3)
 
-				chain.push(nodeId)
+				chain.push(node_id)
 			}
 
 			for (let i = 0; i < chain.length - 1; i++) {
@@ -333,9 +333,9 @@ describe('Polywise Brain System', () => {
 			await brain.triggerInputBurst(100)
 
 			const { nodes } = await poly.getSnapshot(0.1)
-			const outputNode = nodes.find((n: any) => n.label === 'Output_Layer')
+			const output_node = nodes.find((n: any) => n.label === 'Output_Layer')
 
-			expect(outputNode).toBeDefined()
+			expect(output_node).toBeDefined()
 		})
 
 		it('should maintain and strengthen important connections', async () => {
@@ -411,13 +411,13 @@ describe('Polywise Brain System', () => {
 			expect(new Set(node_ids).size).toBe(15)
 
 			const nodes = await poly.getAllNodes()
-			const concurrentNodes = nodes.filter((n: any) => n.label.startsWith('Concurrent_'))
+			const concurrent_nodes = nodes.filter((n: any) => n.label.startsWith('Concurrent_'))
 
-			expect(concurrentNodes.length).toBe(15)
+			expect(concurrent_nodes.length).toBe(15)
 		})
 
 		it('should build complete semantic network', async () => {
-			const semanticTriples = [
+			const semantic_triples = [
 				{
 					subject: 'Human',
 					predicate: 'has',
@@ -462,7 +462,7 @@ describe('Polywise Brain System', () => {
 				}
 			]
 
-			await poly.processArticle('Cognitive Science', 'Understanding the mind...', semanticTriples)
+			await poly.processArticle('Cognitive Science', 'Understanding the mind...', semantic_triples)
 
 			const { nodes, edges } = await poly.getSnapshot(0.05)
 
@@ -470,6 +470,7 @@ describe('Polywise Brain System', () => {
 
 			for (const label of path) {
 				const node = nodes.find((n: any) => n.label === label)
+
 				expect(node).toBeDefined()
 			}
 

@@ -16,6 +16,7 @@ describe('Migration System', () => {
 	describe('CURRENT_SCHEMA_VERSION', () => {
 		it('should match the highest migration version', () => {
 			const max_version = Math.max(...migrations.map(m => m.version))
+
 			expect(CURRENT_SCHEMA_VERSION).toBe(max_version)
 		})
 	})
@@ -49,6 +50,7 @@ describe('Migration System', () => {
 
 		const query = async <T = any>(sql: string, params?: any[]): Promise<T[]> => {
 			const res = await db.query(sql, params)
+
 			return JSON.parse(JSON.stringify(res.rows))
 		}
 
@@ -56,6 +58,7 @@ describe('Migration System', () => {
 			await migrate(0, exec, query)
 
 			const version_result = await query<{ version: number }>(sql_meta.sql_get_current_version)
+
 			expect(version_result[0].version).toBe(CURRENT_SCHEMA_VERSION)
 		})
 
@@ -66,6 +69,7 @@ describe('Migration System', () => {
 			await migrate(current_version, exec, query)
 
 			const version_result_after = await query<{ version: number }>(sql_meta.sql_get_current_version)
+
 			expect(version_result_after[0].version).toBe(current_version)
 		})
 
@@ -123,6 +127,7 @@ describe('Migration System', () => {
 
 		const query = async <T = any>(sql: string, params?: any[]): Promise<T[]> => {
 			const res = await db.query(sql, params)
+
 			return JSON.parse(JSON.stringify(res.rows))
 		}
 
@@ -134,6 +139,7 @@ describe('Migration System', () => {
 			)
 
 			const unique_label = `TestNode_${Date.now()}`
+
 			await exec(`INSERT INTO brain.nodes (label, x, y) VALUES ('${unique_label}', 0, 0)`)
 
 			const nodes = await query<{ label: string; description: string }>(
@@ -150,6 +156,7 @@ describe('Migration System', () => {
 
 			for (const node of nodes) {
 				const magnitude = Math.sqrt(node.x ** 2 + node.y ** 2)
+
 				await query(`UPDATE brain.nodes SET magnitude = $1 WHERE id = $2`, [magnitude, node.id])
 			}
 
@@ -191,6 +198,7 @@ describe('Migration System', () => {
 
 		const query = async <T = any>(sql: string, params?: any[]): Promise<T[]> => {
 			const res = await db.query(sql, params)
+
 			return JSON.parse(JSON.stringify(res.rows))
 		}
 
@@ -247,6 +255,7 @@ describe('Migration System', () => {
 
 		const query = async <T = any>(sql: string, params?: any[]): Promise<T[]> => {
 			const res = await db.query(sql, params)
+
 			return JSON.parse(JSON.stringify(res.rows))
 		}
 
@@ -308,6 +317,7 @@ describe('Migration System', () => {
 
 		const query = async <T = any>(sql: string, params?: any[]): Promise<T[]> => {
 			const res = await db.query(sql, params)
+
 			return JSON.parse(JSON.stringify(res.rows))
 		}
 
@@ -358,6 +368,7 @@ describe('Migration System', () => {
 
 		const query = async <T = any>(sql: string, params?: any[]): Promise<T[]> => {
 			const res = await db.query(sql, params)
+
 			return JSON.parse(JSON.stringify(res.rows))
 		}
 
@@ -405,6 +416,7 @@ describe('Migration System', () => {
 
 			for (const article of articles) {
 				const summary = article.content ? article.content.substring(0, 100) + '...' : 'No content'
+
 				await query(`INSERT INTO knowledge.articles_v2 (title, content, summary) VALUES ($1, $2, $3)`, [
 					article.title,
 					article.content,
@@ -413,6 +425,7 @@ describe('Migration System', () => {
 			}
 
 			const v2_articles = await query(`SELECT * FROM knowledge.articles_v2`)
+
 			expect(v2_articles.length).toBeGreaterThanOrEqual(0)
 		})
 	})
