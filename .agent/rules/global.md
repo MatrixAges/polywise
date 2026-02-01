@@ -201,7 +201,7 @@ When organizing class functions, follow this strict order:
 
 Example:
 
-````typescript
+```typescript
 export class MyClass {
 	constructor() {}
 
@@ -215,8 +215,9 @@ export class MyClass {
 
 	private async _helper() {}
 
-  off() {}
+	off() {}
 }
+```
 
 ## Database Schema Migration (CRITICAL)
 
@@ -236,27 +237,24 @@ When modifying database schema in the polywise package, you MUST update the migr
 export const CURRENT_SCHEMA_VERSION = 2
 
 export const migrations: Migration[] = [
-  // ... existing migrations
+	// ... existing migrations
 
-  {
-    version: 2,
-    description: 'Add metadata column to nodes',
-    up: async (exec, query) => {
-      // Schema change
-      await exec(`ALTER TABLE brain.nodes ADD COLUMN IF NOT EXISTS metadata JSONB;`)
+	{
+		version: 2,
+		description: 'Add metadata column to nodes',
+		up: async (exec, query) => {
+			// Schema change
+			await exec(`ALTER TABLE brain.nodes ADD COLUMN IF NOT EXISTS metadata JSONB;`)
 
-      // Data migration
-      const nodes = await query<{ id: number }>('SELECT id FROM brain.nodes')
-      for (const node of nodes) {
-        await query(
-          `UPDATE brain.nodes SET metadata = $1 WHERE id = $2`,
-          [JSON.stringify({}), node.id]
-        )
-      }
-    }
-  }
+			// Data migration
+			const nodes = await query<{ id: number }>('SELECT id FROM brain.nodes')
+			for (const node of nodes) {
+				await query(`UPDATE brain.nodes SET metadata = $1 WHERE id = $2`, [JSON.stringify({}), node.id])
+			}
+		}
+	}
 ]
-````
+```
 
 ### Automatic Migration on Init:
 
@@ -267,6 +265,63 @@ The `Polywise.init()` method automatically:
 3. Records applied versions
 
 **CRITICAL**: Always update `CURRENT_SCHEMA_VERSION` when modifying table structure!
+
+## Test-Driven Development (TDD) for packages/polywise
+
+When working on `packages/polywise`, you MUST follow TDD principles:
+
+### TDD Cycle (Red-Green-Refactor):
+
+1. **Red**: Write a failing test first
+2. **Green**: Write minimal code to make the test pass
+3. **Refactor**: Clean up while keeping tests green
+
+### TDD Rules:
+
+1. **Test First**: Never write implementation code without a failing test
+2. **Atomic Tests**: Each test should verify ONE specific behavior
+3. **Descriptive Names**: Test names should describe behavior, not implementation
+4. **Independent Tests**: Tests should not depend on each other
+5. **Run Tests**: Always run tests after each change
+
+### Test File Structure:
+
+- Main test file: `test/test.spec.ts` - Core functionality tests
+- Migration tests: `test/migration.spec.ts` - Database migration tests
+- New features: Create dedicated `test/[feature].spec.ts` files
+
+### Example TDD Workflow:
+
+```typescript
+// Step 1: Write failing test
+it('should calculate node magnitude from coordinates', async () => {
+	const node_id = await poly.addNode('Test', 3, 4, 0.5)
+	const magnitude = await poly.getNodeMagnitude(node_id)
+	expect(magnitude).toBe(5) // 3-4-5 triangle
+})
+
+// Step 2: Run test (should fail)
+// pnpm run test:memory
+
+// Step 3: Implement minimal code
+async getNodeMagnitude(node_id: number) {
+	const node = await this.query('SELECT x, y FROM brain.nodes WHERE id = $1', [node_id])
+	return Math.sqrt(node[0].x ** 2 + node[0].y ** 2)
+}
+
+// Step 4: Run test (should pass)
+// Step 5: Refactor if needed
+```
+
+### TDD Checklist:
+
+- [ ] Did you write the test BEFORE the implementation?
+- [ ] Does the test name describe WHAT not HOW?
+- [ ] Is the test independent (no shared state with other tests)?
+- [ ] Did you run the test and see it fail first (Red)?
+- [ ] Did you write minimal code to make it pass (Green)?
+- [ ] Did you refactor while keeping tests passing?
+- [ ] Are all tests passing before committing?
 
 ## Final Guarantee
 

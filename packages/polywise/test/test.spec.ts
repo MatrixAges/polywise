@@ -9,11 +9,13 @@ describe('Polywise Brain System', () => {
 
 	beforeAll(async () => {
 		poly = new Polywise(':polywise:')
+
 		await poly.init()
 
 		brain = new Brain(poly, async () => {
 			const { nodes, edges } = await poly.getSnapshot()
 			const active = nodes.filter((n: any) => n.activation > 0).map((n: any) => n.label)
+
 			if (active.length > 0) {
 				console.log(`Active Nodes: [${active.join(', ')}] | Total Edges: ${edges.length}`)
 			}
@@ -71,9 +73,9 @@ describe('Polywise Brain System', () => {
 				await poly.tick(0.25)
 			}
 
-			const { nodes: snapshotNodes, edges } = await poly.getSnapshot(0.1)
+			const { nodes: snapshot_nodes, edges } = await poly.getSnapshot(0.1)
 
-			expect(snapshotNodes.length).toBeGreaterThanOrEqual(10)
+			expect(snapshot_nodes.length).toBeGreaterThanOrEqual(10)
 			expect(edges.length).toBeGreaterThanOrEqual(10)
 		})
 
@@ -156,7 +158,7 @@ describe('Polywise Brain System', () => {
 		})
 
 		it('should handle large scale knowledge network', async () => {
-			const nodeIds: number[] = []
+			const node_ids: number[] = []
 			const categories = ['Technology', 'Science', 'Philosophy', 'History', 'Mathematics']
 			const concepts: string[] = []
 
@@ -168,20 +170,20 @@ describe('Polywise Brain System', () => {
 
 				const nodeId = await poly.addNode(concept, i * 10, i * 5, 0.4)
 
-				nodeIds.push(nodeId)
+				node_ids.push(nodeId)
 			}
 
-			for (let i = 0; i < nodeIds.length; i++) {
-				for (let j = i + 1; j < Math.min(i + 4, nodeIds.length); j++) {
+			for (let i = 0; i < node_ids.length; i++) {
+				for (let j = i + 1; j < Math.min(i + 4, node_ids.length); j++) {
 					const weight = 0.3 + (j - i) * 0.1
 
-					await poly.connect(nodeIds[i], nodeIds[j], Math.min(weight, 0.9))
+					await poly.connect(node_ids[i], node_ids[j], Math.min(weight, 0.9))
 				}
 			}
 
-			await poly.stimulate(nodeIds[0], 5.0)
-			await poly.stimulate(nodeIds[5], 4.0)
-			await poly.stimulate(nodeIds[10], 3.5)
+			await poly.stimulate(node_ids[0], 5.0)
+			await poly.stimulate(node_ids[5], 4.0)
+			await poly.stimulate(node_ids[10], 3.5)
 
 			for (let i = 0; i < 50; i++) {
 				await poly.tick(0.25)
@@ -309,24 +311,24 @@ describe('Polywise Brain System', () => {
 				{ label: 'Output_Layer', x: 600, y: 200 }
 			]
 
-			const nodeIds: number[] = []
+			const node_ids: number[] = []
 
 			for (const concept of concepts) {
 				const id = await poly.addNode(concept.label, concept.x, concept.y, 0.35)
 
-				nodeIds.push(id)
+				node_ids.push(id)
 			}
 
-			await poly.connect(nodeIds[0], nodeIds[1], 0.9)
-			await poly.connect(nodeIds[0], nodeIds[2], 0.9)
-			await poly.connect(nodeIds[1], nodeIds[3], 0.85)
-			await poly.connect(nodeIds[2], nodeIds[3], 0.85)
-			await poly.connect(nodeIds[3], nodeIds[4], 0.9)
+			await poly.connect(node_ids[0], node_ids[1], 0.9)
+			await poly.connect(node_ids[0], node_ids[2], 0.9)
+			await poly.connect(node_ids[1], node_ids[3], 0.85)
+			await poly.connect(node_ids[2], node_ids[3], 0.85)
+			await poly.connect(node_ids[3], node_ids[4], 0.9)
 
 			brain.reportUserActivity()
 			brain.addSynapticLoad(800)
 
-			await poly.stimulate(nodeIds[0], 5.0)
+			await poly.stimulate(node_ids[0], 5.0)
 
 			await brain.triggerInputBurst(100)
 
@@ -403,10 +405,10 @@ describe('Polywise Brain System', () => {
 				promises.push(poly.addNode(`Concurrent_${i}`, i * 20, i * 10, 0.5))
 			}
 
-			const nodeIds = await Promise.all(promises)
+			const node_ids = await Promise.all(promises)
 
-			expect(nodeIds.length).toBe(15)
-			expect(new Set(nodeIds).size).toBe(15)
+			expect(node_ids.length).toBe(15)
+			expect(new Set(node_ids).size).toBe(15)
 
 			const nodes = await poly.getAllNodes()
 			const concurrentNodes = nodes.filter((n: any) => n.label.startsWith('Concurrent_'))

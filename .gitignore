@@ -23,6 +23,7 @@ npm-debug.log*
 
 # polywise
 **:polywise:
+**:memory:
 **:polywise_migration_*:
 
 # electron

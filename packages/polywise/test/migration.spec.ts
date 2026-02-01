@@ -1,3 +1,5 @@
+import fs from 'node:fs/promises'
+
 import { PGlite } from '@electric-sql/pglite'
 import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 
@@ -24,12 +26,15 @@ describe('Migration System', () => {
 
 		beforeAll(async () => {
 			db = new PGlite(db_path)
+
 			await db.exec(sql_meta.sql_create_schema_meta)
 			await db.exec(sql_meta.sql_create_table_schema_version)
 		})
 
 		afterAll(async () => {
 			await db.close()
+
+			await fs.rm(db_path, { recursive: true, force: true })
 		})
 
 		const exec = async (sql: string | string[]) => {
@@ -95,12 +100,15 @@ describe('Migration System', () => {
 
 		beforeAll(async () => {
 			db = new PGlite(db_path)
+
 			await db.exec(sql_meta.sql_create_schema_meta)
 			await db.exec(sql_meta.sql_create_table_schema_version)
 		})
 
 		afterAll(async () => {
 			await db.close()
+
+			await fs.rm(db_path, { recursive: true, force: true })
 		})
 
 		const exec = async (sql: string | string[]) => {
@@ -125,10 +133,11 @@ describe('Migration System', () => {
 				`ALTER TABLE brain.nodes ADD COLUMN IF NOT EXISTS description TEXT DEFAULT 'No description';`
 			)
 
-			await exec(`INSERT INTO brain.nodes (label, x, y) VALUES ('TestNode', 0, 0)`)
+			const unique_label = `TestNode_${Date.now()}`
+			await exec(`INSERT INTO brain.nodes (label, x, y) VALUES ('${unique_label}', 0, 0)`)
 
 			const nodes = await query<{ label: string; description: string }>(
-				`SELECT label, description FROM brain.nodes WHERE label = 'TestNode'`
+				`SELECT label, description FROM brain.nodes WHERE label = '${unique_label}'`
 			)
 
 			expect(nodes[0].description).toBe('No description')
@@ -155,16 +164,19 @@ describe('Migration System', () => {
 
 	describe('Schema Changes - Rename Column', () => {
 		let db: PGlite
-		const db_path = ':polywise_migration_rename_col:'
+		const db_path = `:polywise_migration_rename_col_${Date.now()}:`
 
 		beforeAll(async () => {
 			db = new PGlite(db_path)
+
 			await db.exec(sql_meta.sql_create_schema_meta)
 			await db.exec(sql_meta.sql_create_table_schema_version)
 		})
 
 		afterAll(async () => {
 			await db.close()
+
+			await fs.rm(db_path, { recursive: true, force: true })
 		})
 
 		const exec = async (sql: string | string[]) => {
@@ -208,16 +220,19 @@ describe('Migration System', () => {
 
 	describe('Schema Changes - Modify Column Type', () => {
 		let db: PGlite
-		const db_path = ':polywise_migration_modify_type:'
+		const db_path = `:polywise_migration_modify_type_${Date.now()}:`
 
 		beforeAll(async () => {
 			db = new PGlite(db_path)
+
 			await db.exec(sql_meta.sql_create_schema_meta)
 			await db.exec(sql_meta.sql_create_table_schema_version)
 		})
 
 		afterAll(async () => {
 			await db.close()
+
+			await fs.rm(db_path, { recursive: true, force: true })
 		})
 
 		const exec = async (sql: string | string[]) => {
@@ -237,6 +252,17 @@ describe('Migration System', () => {
 
 		it('should modify column type with USING clause', async () => {
 			await migrate(0, exec, query)
+
+			await exec(`INSERT INTO brain.nodes (label, x, y) VALUES ('SourceNode', 0, 0)`)
+			await exec(`INSERT INTO brain.nodes (label, x, y) VALUES ('TargetNode', 10, 10)`)
+
+			const nodes = await query<{ id: number; label: string }>(`SELECT id, label FROM brain.nodes`)
+			const source_id = nodes.find(n => n.label === 'SourceNode')!.id
+			const target_id = nodes.find(n => n.label === 'TargetNode')!.id
+
+			await exec(
+				`INSERT INTO brain.edges (source_id, target_id, weight) VALUES (${source_id}, ${target_id}, 0.8)`
+			)
 
 			await exec(`ALTER TABLE brain.edges ADD COLUMN temp_weight TEXT;`)
 			await exec(`UPDATE brain.edges SET temp_weight = CAST(COALESCE(weight, 0.5) AS TEXT);`)
@@ -259,12 +285,15 @@ describe('Migration System', () => {
 
 		beforeAll(async () => {
 			db = new PGlite(db_path)
+
 			await db.exec(sql_meta.sql_create_schema_meta)
 			await db.exec(sql_meta.sql_create_table_schema_version)
 		})
 
 		afterAll(async () => {
 			await db.close()
+
+			await fs.rm(db_path, { recursive: true, force: true })
 		})
 
 		const exec = async (sql: string | string[]) => {
@@ -306,12 +335,15 @@ describe('Migration System', () => {
 
 		beforeAll(async () => {
 			db = new PGlite(db_path)
+
 			await db.exec(sql_meta.sql_create_schema_meta)
 			await db.exec(sql_meta.sql_create_table_schema_version)
 		})
 
 		afterAll(async () => {
 			await db.close()
+
+			await fs.rm(db_path, { recursive: true, force: true })
 		})
 
 		const exec = async (sql: string | string[]) => {

@@ -34,40 +34,13 @@ export const migrations: Migration[] = [
 			])
 		}
 	}
-	// Example of future migrations:
-	// {
-	// 	version: 2,
-	// 	description: 'Add metadata column to nodes',
-	// 	up: async (exec, query) => {
-	// 		// Add new column
-	// 		await exec(`ALTER TABLE brain.nodes ADD COLUMN IF NOT EXISTS metadata JSONB;`)
-	//
-	// 		// Migrate existing data
-	// 		const nodes = await query<{ id: number }>('SELECT id FROM brain.nodes')
-	// 		for (const node of nodes) {
-	// 			await query(
-	// 				`UPDATE brain.nodes SET metadata = $1 WHERE id = $2`,
-	// 				[JSON.stringify({}), node.id]
-	// 			)
-	// 		}
-	// 	}
-	// },
-	// {
-	// 	version: 3,
-	// 	description: 'Rename edge weight to strength',
-	// 	up: async (exec) => {
-	// 		await exec(`
-	// 			ALTER TABLE brain.edges RENAME COLUMN weight TO strength;
-	// 		`)
-	// 	}
-	// }
 ]
 
 export async function migrate(
 	current_version: number,
 	exec: (sql: string | string[]) => Promise<void>,
 	query: <T = any>(sql: string, params?: any[]) => Promise<T[]>
-): Promise<void> {
+) {
 	const pending_migrations = migrations.filter(m => m.version > current_version)
 
 	if (pending_migrations.length === 0) {
@@ -76,11 +49,12 @@ export async function migrate(
 
 	for (const migration of pending_migrations) {
 		await migration.up(exec, query)
+
 		await query(sql_meta.sql_insert_version, [migration.version])
 	}
 }
 
-export function validateMigrations(): void {
+export function validateMigrations() {
 	const versions = migrations.map(m => m.version)
 	const unique_versions = new Set(versions)
 
