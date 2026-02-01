@@ -14,7 +14,7 @@ export class Polywise {
 			this.pool = new Piscina({
 				filename: new URL('./worker.ts', import.meta.url).href
 			})
-			this.init_promise = this.runTask('initDB', [dataDir || ':memory:'])
+			this.init_promise = this.runTask('initDB', [dataDir || ':polywise:'])
 		} else {
 			this.db = new PGlite(dataDir, {
 				relaxedDurability: true

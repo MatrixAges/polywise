@@ -21,6 +21,9 @@ npm-debug.log*
 # temp
 **/.tmp
 
+# polywise
+**:polywise:
+
 # electron
 release
 src/main/bundle.js
