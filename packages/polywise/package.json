@@ -15,7 +15,7 @@
 	"scripts": {
 		"dev": "cross-env NODE_ENV=development rslib build --watch",
 		"build": "rslib build",
-		"test:memory": "rstest run"
+		"test": "rstest run"
 	},
 	"dependencies": {
 		"@electric-sql/pglite": "^0.3.15"
