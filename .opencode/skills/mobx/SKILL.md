@@ -249,6 +249,24 @@ The project uses shared utilities for common MobX patterns.
 - **camelCase**: Use camelCase for methods
 - **PascalCase**: Use PascalCase for Class names
 - **AutoBind**: ALWAYS use `{ autoBind: true }` in `makeAutoObservable`
+- **Code Spacing**: Use blank lines to separate code with different execution styles (e.g., between data fetching and usage, variable calculation and action calls)
+
+**Example:**
+
+```typescript
+async init() {
+	const disposer = await setStoreWhenChange(['theme'], this)
+
+	this.util.acts.push(disposer)
+}
+
+async fetchData() {
+	const data = await api.get('/data')
+	const processed = this.process(data)
+
+	this.items = processed
+}
+```
 
 ### 7.4 Performance
 

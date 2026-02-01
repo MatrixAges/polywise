@@ -39,6 +39,73 @@ Note: The code must be concise, without any irrelevant template code. Only reply
 - All functions use camelCase (if it's a sub-component alias within a component, use PascalCase).
 - All names should be professional and concise, not too long.
 - Code line break logic: Use blank lines to separate code context for better readability; use a blank line if the execution style of the previous and next statements differs.
+
+## Code Spacing
+
+Use blank lines to separate code with different execution styles or visual appearances. The fundamental principle: **if two consecutive statements look different in terms of execution style, add a blank line between them.**
+
+Common scenarios:
+
+1. **Data fetching and return** - Separate async operations from return statements
+2. **Variable calculation and usage** - Separate setup logic from execution
+3. **Multiple sequential operations** - Separate distinct steps in a workflow
+4. **Before early returns** - Separate validation logic from main execution
+5. **Different operation types** - Variable declarations vs function calls, sync vs async, queries vs mutations, etc.
+6. **State changes** - Separate before/after state transitions
+
+**Good:**
+
+```typescript
+async getSnapshot(weight_threshold = 0.2) {
+	const nodes = await this.query(sql.sql_get_snapshot_nodes(weight_threshold))
+	const edges = await this.query(sql.sql_get_snapshot_edges(weight_threshold))
+
+	return { nodes, edges }
+}
+
+async tick(threshold_override?: number) {
+	const threshold = threshold_override ?? 0.5
+
+	await this.exec(sql.sql_tick(threshold))
+}
+
+async processItem(item: Item) {
+	if (!item.isValid()) {
+		return
+	}
+
+	const processed = await this.transform(item)
+
+	await this.save(processed)
+}
+
+async addNode(label: string, x: number, y: number, threshold = 0.5) {
+	const rows = await this.query<{ id: number }>(sql.sql_add_node, [label, x, y, threshold])
+
+	return rows[0].id
+}
+```
+
+**Avoid:**
+
+```typescript
+async getSnapshot(weight_threshold = 0.2) {
+	const nodes = await this.query(sql.sql_get_snapshot_nodes(weight_threshold))
+	const edges = await this.query(sql.sql_get_snapshot_edges(weight_threshold))
+	return { nodes, edges }
+}
+
+async tick(threshold_override?: number) {
+	const threshold = threshold_override ?? 0.5
+	await this.exec(sql.sql_tick(threshold))
+}
+
+async addNode(label: string, x: number, y: number, threshold = 0.5) {
+	const rows = await this.query<{ id: number }>(sql.sql_add_node, [label, x, y, threshold])
+	return rows[0].id
+}
+```
+
 - The output code should not contain any comments!!! (Important!!!) Good code naming doesn't require comments.
 - All pages and components use PascalCase naming.
 

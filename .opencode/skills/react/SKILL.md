@@ -185,7 +185,47 @@ import(`@/locales/${lang}/index`).then(data => {
 })
 ```
 
-## 5. Summary Checklist for Developers
+## 5. Code Spacing and Readability
+
+Use blank lines to separate code with different execution styles. **If two consecutive statements look different, add a blank line between them.**
+
+**When to add blank lines:**
+
+- Variable declarations and JSX/expressions
+- Data fetching and usage
+- Different operation types
+- Before return statements
+
+**Good:**
+
+```typescript
+const Index = (props: IProps) => {
+	const { data } = props
+	const processed = useMemo(() => processData(data), [data])
+
+	return (
+		<div className='flex flex-col p-4'>
+			{processed}
+		</div>
+	)
+}
+```
+
+**Avoid:**
+
+```typescript
+const Index = (props: IProps) => {
+	const { data } = props
+	const processed = useMemo(() => processData(data), [data])
+	return (
+		<div className='flex flex-col p-4'>
+			{processed}
+		</div>
+	)
+}
+```
+
+## 6. Summary Checklist for Developers
 
 - [ ] Is the component exported via `$app.handle` or `$app.memo`?
 - [ ] Are all functions wrapped with `useMemoizedFn`?
@@ -193,3 +233,4 @@ import(`@/locales/${lang}/index`).then(data => {
 - [ ] Are loop items extracted into separate components?
 - [ ] Does the component have >4 state variables? (If yes, move to a Model)
 - [ ] Is the directory structure following the fractal pattern?
+- [ ] Are blank lines used to separate different execution styles?

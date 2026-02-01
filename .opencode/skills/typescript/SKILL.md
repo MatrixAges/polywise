@@ -87,6 +87,57 @@ export interface IThemeConfig {
 }
 ```
 
+## 3.3 Code Spacing and Line Breaks
+
+Use blank lines to separate code with different execution styles or visual appearances. **If two consecutive statements look different, add a blank line between them.**
+
+**When to add blank lines:**
+
+- Data fetching and return statements
+- Variable calculation and usage
+- Multiple sequential operations (distinct steps)
+- Before early returns
+- Different operation types (sync vs async, queries vs mutations)
+- State changes
+
+**Good:**
+
+```typescript
+async getSnapshot(weight_threshold = 0.2) {
+	const nodes = await this.query(sql.sql_get_snapshot_nodes(weight_threshold))
+	const edges = await this.query(sql.sql_get_snapshot_edges(weight_threshold))
+
+	return { nodes, edges }
+}
+
+async tick(threshold_override?: number) {
+	const threshold = threshold_override ?? 0.5
+
+	await this.exec(sql.sql_tick(threshold))
+}
+
+async addNode(label: string, x: number, y: number, threshold = 0.5) {
+	const rows = await this.query<{ id: number }>(sql.sql_add_node, [label, x, y, threshold])
+
+	return rows[0].id
+}
+```
+
+**Avoid:**
+
+```typescript
+async getSnapshot(weight_threshold = 0.2) {
+	const nodes = await this.query(sql.sql_get_snapshot_nodes(weight_threshold))
+	const edges = await this.query(sql.sql_get_snapshot_edges(weight_threshold))
+	return { nodes, edges }
+}
+
+async tick(threshold_override?: number) {
+	const threshold = threshold_override ?? 0.5
+	await this.exec(sql.sql_tick(threshold))
+}
+```
+
 ## 5. Summary Checklist
 
 - [ ] Are variable names in `snake_case`?
@@ -95,3 +146,5 @@ export interface IThemeConfig {
 - [ ] Is `import type` used for type-only imports?
 - [ ] Are local types placed in a `types.ts` file?
 - [ ] Is `any` avoided in favor of strict typing or `unknown`?
+- [ ] Are blank lines used to separate different execution styles?
+- [ ] Is there a blank line before return statements after async operations?

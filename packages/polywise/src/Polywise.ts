@@ -29,6 +29,7 @@ export class Polywise {
 
 	async addNode(label: string, x: number, y: number, threshold = 0.5) {
 		const rows = await this.query<{ id: number }>(sql.sql_add_node, [label, x, y, threshold])
+
 		return rows[0].id
 	}
 
@@ -43,6 +44,7 @@ export class Polywise {
 	async getSnapshot(weight_threshold = 0.2) {
 		const nodes = await this.query(sql.sql_get_snapshot_nodes(weight_threshold))
 		const edges = await this.query(sql.sql_get_snapshot_edges(weight_threshold))
+
 		return { nodes, edges }
 	}
 
@@ -52,11 +54,13 @@ export class Polywise {
 
 	async tick(threshold_override?: number) {
 		const threshold = threshold_override ?? 0.5
+
 		await this.exec(sql.sql_tick(threshold))
 	}
 
 	async runShadowTick() {
 		await this.exec(sql.sql_run_shadow_tick)
+
 		await this.tick(0.8)
 	}
 
@@ -84,6 +88,7 @@ export class Polywise {
 	) {
 		const res = await this.query(sql.sql_process_article, [title, content])
 		const article_id = res[0].id
+
 		await this.inject_triples(triples, article_id)
 	}
 
@@ -101,7 +106,9 @@ export class Polywise {
 
 	private async query<T = any>(sql_str: string, params?: any[]) {
 		if (!this.db) throw new Error('DB not initialized')
+
 		const res = await this.db.query(sql_str, params)
+
 		return JSON.parse(JSON.stringify(res.rows)) as T[]
 	}
 
@@ -147,9 +154,12 @@ export class Polywise {
 
 	private async upsert_node(label: string, article_id: number) {
 		await this.query(sql.sql_upsert_node, [label])
+
 		const res = await this.query<{ id: number }>(sql.sql_upsert_node_select, [label])
 		const nid = res[0].id
+
 		await this.query(sql.sql_node_sources, [nid, article_id])
+
 		return nid
 	}
 
