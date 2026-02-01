@@ -11,24 +11,6 @@ export class Polywise {
 		})
 	}
 
-	private async exec(sql_input: string | Array<string>): Promise<void> {
-		if (!this.db) throw new Error('DB not initialized')
-
-		if (Array.isArray(sql_input)) {
-			for (const sql_str of sql_input) {
-				await this.db.exec(sql_str)
-			}
-		} else {
-			await this.db.exec(sql_input)
-		}
-	}
-
-	private async query<T = any>(sql_str: string, params?: any[]): Promise<T[]> {
-		if (!this.db) throw new Error('DB not initialized')
-		const res = await this.db.query(sql_str, params)
-		return JSON.parse(JSON.stringify(res.rows))
-	}
-
 	async initSchema(): Promise<void> {
 		await this.exec([
 			sql.sql_create_schema_brain,
@@ -73,6 +55,22 @@ export class Polywise {
 		await this.exec(sql.sql_tick(threshold))
 	}
 
+	async runShadowTick(): Promise<void> {
+		await this.exec(sql.sql_run_shadow_tick)
+		await this.tick(0.8)
+	}
+
+	async triggerSleepTick(): Promise<void> {
+		await this.exec([
+			sql.sql_sleep_tick_begin,
+			sql.sql_sleep_tick_clean_noise,
+			sql.sql_sleep_tick_decay,
+			sql.sql_sleep_tick_replay,
+			sql.sql_sleep_tick_reset_nodes,
+			sql.sql_sleep_tick_commit
+		])
+	}
+
 	async processArticle(
 		title: string,
 		content: string,
@@ -89,20 +87,22 @@ export class Polywise {
 		await this.inject_triples(triples, article_id)
 	}
 
-	async runShadowTick(): Promise<void> {
-		await this.exec(sql.sql_run_shadow_tick)
-		await this.tick(0.8)
+	private async exec(sql_input: string | Array<string>): Promise<void> {
+		if (!this.db) throw new Error('DB not initialized')
+
+		if (Array.isArray(sql_input)) {
+			for (const sql_str of sql_input) {
+				await this.db.exec(sql_str)
+			}
+		} else {
+			await this.db.exec(sql_input)
+		}
 	}
 
-	async triggerSleepTick(): Promise<void> {
-		await this.exec([
-			sql.sql_sleep_tick_begin,
-			sql.sql_sleep_tick_clean_noise,
-			sql.sql_sleep_tick_decay,
-			sql.sql_sleep_tick_replay,
-			sql.sql_sleep_tick_reset_nodes,
-			sql.sql_sleep_tick_commit
-		])
+	private async query<T = any>(sql_str: string, params?: any[]): Promise<T[]> {
+		if (!this.db) throw new Error('DB not initialized')
+		const res = await this.db.query(sql_str, params)
+		return JSON.parse(JSON.stringify(res.rows))
 	}
 
 	private async inject_triples(
