@@ -40,27 +40,23 @@ export class Polywise {
 			return result.data
 		}
 
-		// Engine mode logic
-		// @ts-ignore
-		return await this[task](...args)
+		return await (this as any)[task](...args)
 	}
-
-	// --- Task Handlers (Internal/Engine Mode) ---
 
 	async initDB(dataDir?: string) {
 		return 'DB Initialized'
 	}
 
-	async exec(sql: string): Promise<void> {
-		if (this.pool) return await this.runTask('exec', [sql])
+	async exec(sql_str: string): Promise<void> {
+		if (this.pool) return await this.runTask('exec', [sql_str])
 		if (!this.db) throw new Error('DB not initialized')
-		await this.db.exec(sql)
+		await this.db.exec(sql_str)
 	}
 
-	async query<T = any>(sql: string, params?: any[]): Promise<T[]> {
-		if (this.pool) return await this.runTask('query', [sql, params || []])
+	async query<T = any>(sql_str: string, params?: any[]): Promise<T[]> {
+		if (this.pool) return await this.runTask('query', [sql_str, params || []])
 		if (!this.db) throw new Error('DB not initialized')
-		const res = await this.db.query(sql, params)
+		const res = await this.db.query(sql_str, params)
 		return JSON.parse(JSON.stringify(res.rows))
 	}
 
@@ -70,8 +66,6 @@ export class Polywise {
 		const threshold = threshold_override ?? 0.5
 		await this.db.exec(sql.sql_tick(threshold))
 	}
-
-	// --- Public API ---
 
 	async addNode(label: string, x: number, y: number, threshold = 0.5): Promise<number> {
 		const rows = await this.query<{ id: number }>(sql.sql_addNode, [label, x, y, threshold])
@@ -111,8 +105,6 @@ export class Polywise {
 
 		await this.exec(sql.sql_createSchemaUserSpace)
 	}
-
-	// --- Input-related functionality (moved from Input.ts) ---
 
 	async processArticle(
 		title: string,
