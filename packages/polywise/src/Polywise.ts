@@ -238,9 +238,9 @@ export default class Polywise {
 		return JSON.parse(JSON.stringify(res.rows)) as T
 	}
 
-	off() {
+	async off() {
 		if (this.db) {
-			this.db.close()
+			await this.db.close()
 			this.db = null
 		}
 	}

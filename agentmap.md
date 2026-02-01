@@ -506,7 +506,7 @@ The project is a monorepo organized using a workspace structure, primarily built
 
 ## 4. Operational Guidelines
 
-- **Updating**: When adding new files or refactoring directories, update the JSON tree in section 3.
+- **Polywise.off()**: Now an `async` method. ALWAYS `await poly.off()` when closing the database connection.
 - **IPC**: ALWAYS check `packages/desktop/src/rpcs` when adding new cross-process features.
 - **Shared Logic**: If a utility can be reused, place it in `packages/stk` rather than `packages/app/utils`.
 - **Typing**: Use `import type` where possible to maintain clean boundaries between processes.

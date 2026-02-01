@@ -22,10 +22,9 @@ npm-debug.log*
 **/.tmp
 
 # polywise
-**:polywise:
 **:memory:
-**:polywise_test_*:
-**:polywise_migration_*:
+**:polywise:
+**:polywise_*:
 
 # electron
 release

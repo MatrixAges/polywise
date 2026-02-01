@@ -14,8 +14,8 @@ describe('Full-Text Search and Vector Search', () => {
 		await poly.init()
 	})
 
-	afterAll(() => {
-		poly?.off()
+	afterAll(async () => {
+		await poly?.off()
 
 		const files = fs.readdirSync('.')
 
@@ -277,7 +277,7 @@ describe('Full-Text Search and Vector Search', () => {
 			expect(text_results.length).toBe(0)
 			expect(vector_results.length).toBe(0)
 
-			empty_poly.off()
+			await empty_poly.off()
 
 			const files = fs.readdirSync('.')
 

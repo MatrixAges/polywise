@@ -29,9 +29,9 @@ describe('Polywise Brain System', () => {
 		})
 	})
 
-	afterAll(() => {
+	afterAll(async () => {
 		brain?.off()
-		poly.off()
+		await poly.off()
 
 		const files = fs.readdirSync('.')
 		for (const file of files) {
