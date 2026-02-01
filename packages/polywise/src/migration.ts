@@ -17,7 +17,7 @@ export const CURRENT_SCHEMA_VERSION = 1
 export const migrations: Migration[] = [
 	{
 		version: 1,
-		description: 'Initial schema: brain nodes, edges, knowledge articles',
+		description: 'Initial schema: brain nodes, edges, knowledge articles with idol_id, root_ids, metrics_ids',
 		up: async exec => {
 			await exec([
 				sql_schema.sql_create_schema_brain,
@@ -27,6 +27,10 @@ export const migrations: Migration[] = [
 				sql_schema.sql_create_index_edge_tgt,
 				sql_schema.sql_create_index_active_edges,
 				sql_schema.sql_create_index_core_truth,
+				sql_schema.sql_create_index_nodes_idol,
+				sql_schema.sql_create_index_edges_idol,
+				sql_schema.sql_create_index_nodes_roots,
+				sql_schema.sql_create_index_edges_roots,
 				sql_schema.sql_create_schema_knowledge,
 				sql_schema.sql_create_table_articles,
 				sql_schema.sql_create_table_node_sources,

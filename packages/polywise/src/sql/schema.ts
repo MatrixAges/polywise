@@ -4,12 +4,15 @@ export const sql_create_table_nodes = `
   CREATE TABLE IF NOT EXISTS brain.nodes (
     id SERIAL PRIMARY KEY,
     label TEXT UNIQUE,
-    x REAL, 
+    x REAL,
     y REAL,
     potential REAL DEFAULT 0.0,
-    activation REAL DEFAULT 0.0, 
+    activation REAL DEFAULT 0.0,
     threshold REAL DEFAULT 0.5,
-    last_fired_at TIMESTAMP
+    last_fired_at TIMESTAMP,
+    idol_id TEXT,
+    root_ids TEXT[] DEFAULT '{}',
+    metrics_ids TEXT[] DEFAULT '{}'
   );
 `
 
@@ -22,7 +25,10 @@ export const sql_create_table_edges = `
     distance REAL DEFAULT 1.0,
     type TEXT,
     learning_rate REAL DEFAULT 1.0,
-    decay_resistance REAL DEFAULT 1.0
+    decay_resistance REAL DEFAULT 1.0,
+    idol_id TEXT,
+    root_ids TEXT[] DEFAULT '{}',
+    metrics_ids TEXT[] DEFAULT '{}'
   );
 `
 
@@ -38,6 +44,14 @@ export const sql_create_index_core_truth = `
   ON brain.edges (source_id, target_id)
   WHERE decay_resistance > 1.5;
 `
+
+export const sql_create_index_nodes_idol = `CREATE INDEX IF NOT EXISTS idx_nodes_idol ON brain.nodes(idol_id);`
+
+export const sql_create_index_edges_idol = `CREATE INDEX IF NOT EXISTS idx_edges_idol ON brain.edges(idol_id);`
+
+export const sql_create_index_nodes_roots = `CREATE INDEX IF NOT EXISTS idx_nodes_roots ON brain.nodes USING GIN(root_ids);`
+
+export const sql_create_index_edges_roots = `CREATE INDEX IF NOT EXISTS idx_edges_roots ON brain.edges USING GIN(root_ids);`
 
 export const sql_create_schema_knowledge = `CREATE SCHEMA IF NOT EXISTS knowledge;`
 

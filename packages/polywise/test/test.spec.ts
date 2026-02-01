@@ -477,4 +477,131 @@ describe('Polywise Brain System', () => {
 			expect(edges.length).toBeGreaterThanOrEqual(6)
 		})
 	})
+
+	describe('Node and Edge Filtering with idol_id, root_ids, metrics_ids', () => {
+		it('should create nodes with idol_id and filter by idol', async () => {
+			const idol_a = 'idol_001'
+			const idol_b = 'idol_002'
+
+			const node_a = await poly.addNode('Concept_A', 0, 0, 0.5, idol_a, ['root_1'], ['metric_1'])
+			const node_b = await poly.addNode('Concept_B', 100, 0, 0.5, idol_a, ['root_2'], ['metric_2'])
+			const node_c = await poly.addNode('Concept_C', 200, 0, 0.5, idol_b, ['root_1'], ['metric_3'])
+
+			await poly.connect(node_a, node_b, 0.8, idol_a, ['root_1'], ['metric_1'])
+			await poly.connect(node_b, node_c, 0.6, idol_b, ['root_2'], ['metric_2'])
+
+			const nodes_idol_a = await poly.getNodesByIdol(idol_a)
+			const nodes_idol_b = await poly.getNodesByIdol(idol_b)
+
+			expect(nodes_idol_a.length).toBe(2)
+			expect(nodes_idol_b.length).toBe(1)
+			expect(nodes_idol_a.some((n: any) => n.label === 'Concept_A')).toBe(true)
+			expect(nodes_idol_a.some((n: any) => n.label === 'Concept_B')).toBe(true)
+			expect(nodes_idol_b[0].label).toBe('Concept_C')
+		})
+
+		it('should filter nodes by root_id', async () => {
+			const root_1 = 'root_knowledge'
+			const root_2 = 'root_science'
+
+			await poly.addNode('Knowledge_A', 0, 0, 0.5, undefined, [root_1], undefined)
+			await poly.addNode('Knowledge_B', 100, 0, 0.5, undefined, [root_1, root_2], undefined)
+			await poly.addNode('Science_A', 200, 0, 0.5, undefined, [root_2], undefined)
+
+			const nodes_root_1 = await poly.getNodesByRoot(root_1)
+			const nodes_root_2 = await poly.getNodesByRoot(root_2)
+
+			expect(nodes_root_1.length).toBe(2)
+			expect(nodes_root_2.length).toBe(2)
+			expect(nodes_root_1.some((n: any) => n.label === 'Knowledge_A')).toBe(true)
+			expect(nodes_root_1.some((n: any) => n.label === 'Knowledge_B')).toBe(true)
+			expect(nodes_root_2.some((n: any) => n.label === 'Science_A')).toBe(true)
+		})
+
+		it('should filter edges by idol_id', async () => {
+			const idol = 'idol_edges_test'
+			const node_1 = await poly.addNode('Edge_Test_1', 0, 0, 0.5, idol)
+			const node_2 = await poly.addNode('Edge_Test_2', 100, 0, 0.5, idol)
+			const node_3 = await poly.addNode('Edge_Test_3', 200, 0, 0.5)
+
+			await poly.connect(node_1, node_2, 0.9, idol)
+			await poly.connect(node_2, node_3, 0.7)
+
+			const edges_with_idol = await poly.getEdgesByIdol(idol)
+
+			expect(edges_with_idol.length).toBe(1)
+			expect(edges_with_idol[0].source_id).toBe(node_1)
+			expect(edges_with_idol[0].target_id).toBe(node_2)
+		})
+
+		it('should filter edges by root_id', async () => {
+			const root = 'root_edge_test'
+			const node_1 = await poly.addNode('Root_Edge_1', 0, 0)
+			const node_2 = await poly.addNode('Root_Edge_2', 100, 0)
+			const node_3 = await poly.addNode('Root_Edge_3', 200, 0)
+
+			await poly.connect(node_1, node_2, 0.8, undefined, [root])
+			await poly.connect(node_2, node_3, 0.6, undefined, ['other_root'])
+
+			const edges_with_root = await poly.getEdgesByRoot(root)
+
+			expect(edges_with_root.length).toBe(1)
+			expect(edges_with_root[0].source_id).toBe(node_1)
+			expect(edges_with_root[0].target_id).toBe(node_2)
+		})
+
+		it('should process article with filtering metadata', async () => {
+			const idol = 'article_idol_001'
+			const root_ids = ['article_root_1', 'article_root_2']
+			const metrics_ids = ['metric_quality', 'metric_relevance']
+
+			const triples = [
+				{
+					subject: 'AI_Technology',
+					predicate: 'uses',
+					object: 'Machine_Learning',
+					learning_rate: 2.0,
+					decay_resistance: 1.5
+				},
+				{
+					subject: 'Machine_Learning',
+					predicate: 'includes',
+					object: 'Deep_Learning',
+					learning_rate: 2.2,
+					decay_resistance: 1.8
+				}
+			]
+
+			await poly.processArticle('AI Article', 'Content about AI...', triples, idol, root_ids, metrics_ids)
+
+			const nodes = await poly.getNodesByIdol(idol)
+			const edges = await poly.getEdgesByIdol(idol)
+
+			expect(nodes.length).toBeGreaterThanOrEqual(3)
+			expect(edges.length).toBeGreaterThanOrEqual(2)
+
+			const ai_node = nodes.find((n: any) => n.label === 'AI_Technology')
+			expect(ai_node).toBeDefined()
+			expect(ai_node.idol_id).toBe(idol)
+			expect(ai_node.root_ids).toContain('article_root_1')
+			expect(ai_node.metrics_ids).toContain('metric_quality')
+		})
+
+		it('should include new fields in snapshot', async () => {
+			const idol = 'snapshot_test'
+			const root_ids = ['root_snapshot']
+			const metrics_ids = ['metric_snapshot']
+
+			const node = await poly.addNode('Snapshot_Node', 0, 0, 0.5, idol, root_ids, metrics_ids)
+			await poly.connect(node, node, 0.5, idol, root_ids, metrics_ids)
+
+			const { nodes, edges } = await poly.getSnapshot(0.1)
+
+			const snapshot_node = nodes.find((n: any) => n.label === 'Snapshot_Node')
+			expect(snapshot_node).toBeDefined()
+			expect(snapshot_node.idol_id).toBe(idol)
+			expect(snapshot_node.root_ids).toEqual(root_ids)
+			expect(snapshot_node.metrics_ids).toEqual(metrics_ids)
+		})
+	})
 })

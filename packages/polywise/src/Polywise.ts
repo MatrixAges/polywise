@@ -27,14 +27,44 @@ export class Polywise {
 		}
 	}
 
-	async addNode(label: string, x: number, y: number, threshold = 0.5) {
-		const rows = await this.query<{ id: number }>(sql.sql_add_node, [label, x, y, threshold])
+	async addNode(
+		label: string,
+		x: number,
+		y: number,
+		threshold = 0.5,
+		idol_id?: string,
+		root_ids?: string[],
+		metrics_ids?: string[]
+	) {
+		const rows = await this.query<{ id: number }>(sql.sql_add_node, [
+			label,
+			x,
+			y,
+			threshold,
+			idol_id ?? null,
+			root_ids ?? null,
+			metrics_ids ?? null
+		])
 
 		return rows[0].id
 	}
 
-	async connect(source_id: number, target_id: number, weight = 0.1) {
-		await this.query(sql.sql_connect, [source_id, target_id, weight])
+	async connect(
+		source_id: number,
+		target_id: number,
+		weight = 0.1,
+		idol_id?: string,
+		root_ids?: string[],
+		metrics_ids?: string[]
+	) {
+		await this.query(sql.sql_connect, [
+			source_id,
+			target_id,
+			weight,
+			idol_id ?? null,
+			root_ids ?? null,
+			metrics_ids ?? null
+		])
 	}
 
 	async stimulate(node_id: number, intensity = 1.0) {
@@ -49,7 +79,25 @@ export class Polywise {
 	}
 
 	async getAllNodes() {
-		return await this.query('SELECT id, label, x, y, activation, potential FROM brain.nodes')
+		return await this.query(
+			'SELECT id, label, x, y, activation, potential, idol_id, root_ids, metrics_ids FROM brain.nodes'
+		)
+	}
+
+	async getNodesByIdol(idol_id: string) {
+		return await this.query(sql.sql_get_nodes_by_idol, [idol_id])
+	}
+
+	async getNodesByRoot(root_id: string) {
+		return await this.query(sql.sql_get_nodes_by_root, [root_id])
+	}
+
+	async getEdgesByIdol(idol_id: string) {
+		return await this.query(sql.sql_get_edges_by_idol, [idol_id])
+	}
+
+	async getEdgesByRoot(root_id: string) {
+		return await this.query(sql.sql_get_edges_by_root, [root_id])
 	}
 
 	async tick(threshold_override?: number) {
@@ -84,12 +132,15 @@ export class Polywise {
 			object: string
 			learning_rate: number
 			decay_resistance: number
-		}>
+		}>,
+		idol_id?: string,
+		root_ids?: string[],
+		metrics_ids?: string[]
 	) {
 		const res = await this.query(sql.sql_process_article, [title, content])
 		const article_id = res[0].id
 
-		await this.inject_triples(triples, article_id)
+		await this.inject_triples(triples, article_id, idol_id, root_ids, metrics_ids)
 	}
 
 	private async exec(sql_input: string | Array<string>) {
@@ -120,13 +171,16 @@ export class Polywise {
 			learning_rate: number
 			decay_resistance: number
 		}>,
-		article_id: number
+		article_id: number,
+		idol_id?: string,
+		root_ids?: string[],
+		metrics_ids?: string[]
 	) {
 		await this.exec(sql.sql_inject_triples_begin)
 
 		for (const t of triples) {
-			const sub_id = await this.upsert_node(t.subject, article_id)
-			const obj_id = await this.upsert_node(t.object, article_id)
+			const sub_id = await this.upsert_node(t.subject, article_id, idol_id, root_ids, metrics_ids)
+			const obj_id = await this.upsert_node(t.object, article_id, idol_id, root_ids, metrics_ids)
 
 			await this.exec(
 				sql.sql_inject_triples_insert_edge(
@@ -135,7 +189,10 @@ export class Polywise {
 					t.learning_rate,
 					t.decay_resistance,
 					t.predicate,
-					0.5 * t.learning_rate
+					0.5 * t.learning_rate,
+					idol_id,
+					root_ids,
+					metrics_ids
 				)
 			)
 			await this.exec(
@@ -144,7 +201,10 @@ export class Polywise {
 					obj_id,
 					t.learning_rate,
 					t.decay_resistance,
-					0.5 * t.learning_rate
+					0.5 * t.learning_rate,
+					idol_id,
+					root_ids,
+					metrics_ids
 				)
 			)
 		}
@@ -152,8 +212,14 @@ export class Polywise {
 		await this.exec(sql.sql_inject_triples_commit)
 	}
 
-	private async upsert_node(label: string, article_id: number) {
-		await this.query(sql.sql_upsert_node, [label])
+	private async upsert_node(
+		label: string,
+		article_id: number,
+		idol_id?: string,
+		root_ids?: string[],
+		metrics_ids?: string[]
+	) {
+		await this.query(sql.sql_upsert_node, [label, idol_id ?? null, root_ids ?? null, metrics_ids ?? null])
 
 		const res = await this.query<{ id: number }>(sql.sql_upsert_node_select, [label])
 		const nid = res[0].id
