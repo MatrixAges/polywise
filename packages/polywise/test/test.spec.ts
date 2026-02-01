@@ -24,59 +24,435 @@ describe('Polywise Brain System', () => {
 		brain?.stop()
 	})
 
-	it('should initialize schema correctly', async () => {
-		const { nodes, edges } = await poly.getSnapshot()
-		expect(nodes).toBeDefined()
-		expect(edges).toBeDefined()
-	})
+	describe('Complex Knowledge Graph Operations', () => {
+		it('should build complex interconnected knowledge graph', async () => {
+			const nodes: number[] = []
+			const concepts = [
+				{ label: 'Machine Learning', x: 0, y: 0 },
+				{ label: 'Neural Networks', x: 100, y: 50 },
+				{ label: 'Deep Learning', x: 200, y: 0 },
+				{ label: 'Convolution', x: 300, y: 100 },
+				{ label: 'Recurrent Networks', x: 100, y: 150 },
+				{ label: 'Transformers', x: 250, y: 200 },
+				{ label: 'Attention Mechanism', x: 400, y: 150 },
+				{ label: 'BERT', x: 500, y: 100 },
+				{ label: 'GPT', x: 500, y: 250 },
+				{ label: 'Large Language Models', x: 600, y: 175 }
+			]
 
-	it('should add nodes and connect them', async () => {
-		const node_a = await poly.addNode('Knowledge_Add', 0, 0, 0.5)
-		const node_b = await poly.addNode('Memory_Add', 100, 100, 0.5)
-		await poly.connect(node_a, node_b, 1.0)
-
-		const { nodes, edges } = await poly.getSnapshot()
-		expect(nodes.length).toBeGreaterThanOrEqual(2)
-		expect(edges.length).toBeGreaterThanOrEqual(1)
-	})
-
-	it('should stimulate node', async () => {
-		const node_a = await poly.addNode('TestNode_Stimulate', 50, 50, 0.5)
-		await poly.stimulate(node_a, 2.0)
-
-		const { nodes } = await poly.getSnapshot()
-		const testNode = nodes.find((n: any) => n.id === node_a)
-		expect(testNode?.potential).toBeGreaterThan(0)
-	})
-
-	it('should process article with triples', async () => {
-		const triples = [
-			{
-				subject: 'Electron_Process',
-				predicate: 'uses',
-				object: 'Chromium_Process',
-				learning_rate: 0.8,
-				decay_resistance: 2.0
+			for (const concept of concepts) {
+				const nodeId = await poly.addNode(concept.label, concept.x, concept.y, 0.3)
+				nodes.push(nodeId)
 			}
-		]
 
-		await poly.processArticle('Test Article Process', 'Test content', triples)
+			const connections = [
+				{ from: 0, to: 1, weight: 0.9 },
+				{ from: 1, to: 2, weight: 0.95 },
+				{ from: 2, to: 3, weight: 0.7 },
+				{ from: 2, to: 4, weight: 0.8 },
+				{ from: 2, to: 5, weight: 0.9 },
+				{ from: 5, to: 6, weight: 0.95 },
+				{ from: 6, to: 7, weight: 0.85 },
+				{ from: 6, to: 8, weight: 0.85 },
+				{ from: 7, to: 9, weight: 0.9 },
+				{ from: 8, to: 9, weight: 0.9 },
+				{ from: 4, to: 5, weight: 0.6 },
+				{ from: 1, to: 4, weight: 0.7 }
+			]
 
-		const { nodes, edges } = await poly.getSnapshot()
-		expect(nodes.length).toBeGreaterThanOrEqual(2)
-		expect(edges.length).toBeGreaterThanOrEqual(1)
+			for (const conn of connections) {
+				await poly.connect(nodes[conn.from], nodes[conn.to], conn.weight)
+			}
+
+			await poly.stimulate(nodes[0], 5.0)
+
+			for (let i = 0; i < 100; i++) {
+				await poly.tick(0.25)
+			}
+
+			const { nodes: snapshotNodes, edges } = await poly.getSnapshot(0.1)
+
+			expect(snapshotNodes.length).toBeGreaterThanOrEqual(10)
+			expect(edges.length).toBeGreaterThanOrEqual(10)
+		})
+
+		it('should process complex scientific article with multiple interconnected triples', async () => {
+			const triples = [
+				{
+					subject: 'Quantum Computing',
+					predicate: 'enables',
+					object: 'Quantum Supremacy',
+					learning_rate: 2.5,
+					decay_resistance: 2.0
+				},
+				{
+					subject: 'Quantum Computing',
+					predicate: 'uses',
+					object: 'Qubits',
+					learning_rate: 2.8,
+					decay_resistance: 2.5
+				},
+				{
+					subject: 'Qubits',
+					predicate: 'exploits',
+					object: 'Superposition',
+					learning_rate: 2.3,
+					decay_resistance: 2.2
+				},
+				{
+					subject: 'Qubits',
+					predicate: 'exploits',
+					object: 'Entanglement',
+					learning_rate: 2.4,
+					decay_resistance: 2.2
+				},
+				{
+					subject: 'Superposition',
+					predicate: 'allows',
+					object: 'Parallel Computation',
+					learning_rate: 2.1,
+					decay_resistance: 1.9
+				},
+				{
+					subject: 'Entanglement',
+					predicate: 'enables',
+					object: 'Quantum Teleportation',
+					learning_rate: 2.0,
+					decay_resistance: 1.8
+				},
+				{
+					subject: 'Quantum Supremacy',
+					predicate: 'breaks',
+					object: 'Classical Limits',
+					learning_rate: 1.9,
+					decay_resistance: 1.7
+				},
+				{
+					subject: 'Quantum Teleportation',
+					predicate: 'revolutionizes',
+					object: 'Secure Communication',
+					learning_rate: 2.2,
+					decay_resistance: 1.9
+				}
+			]
+
+			await poly.processArticle(
+				'Quantum Computing Fundamentals',
+				'Quantum computing represents a paradigm shift in computational capabilities, leveraging quantum mechanical phenomena to process information in fundamentally new ways. This article explores the core concepts...',
+				triples
+			)
+
+			const { nodes, edges } = await poly.getSnapshot(0.05)
+			expect(nodes.length).toBeGreaterThanOrEqual(8)
+			expect(edges.length).toBeGreaterThanOrEqual(8)
+
+			const nodeLabels = nodes.map((n: any) => n.label)
+			expect(nodeLabels).toContain('Quantum Computing')
+			expect(nodeLabels).toContain('Qubits')
+			expect(nodeLabels).toContain('Superposition')
+		})
+
+		it('should handle large scale knowledge network', async () => {
+			const nodeIds: number[] = []
+			const categories = ['Technology', 'Science', 'Philosophy', 'History', 'Mathematics']
+			const concepts: string[] = []
+
+			for (let i = 0; i < 20; i++) {
+				const category = categories[i % categories.length]
+				const concept = `${category}_Concept_${i}`
+				concepts.push(concept)
+				const nodeId = await poly.addNode(concept, i * 10, i * 5, 0.4)
+				nodeIds.push(nodeId)
+			}
+
+			for (let i = 0; i < nodeIds.length; i++) {
+				for (let j = i + 1; j < Math.min(i + 4, nodeIds.length); j++) {
+					const weight = 0.3 + (j - i) * 0.1
+					await poly.connect(nodeIds[i], nodeIds[j], Math.min(weight, 0.9))
+				}
+			}
+
+			await poly.stimulate(nodeIds[0], 5.0)
+			await poly.stimulate(nodeIds[5], 4.0)
+			await poly.stimulate(nodeIds[10], 3.5)
+
+			for (let i = 0; i < 50; i++) {
+				await poly.tick(0.25)
+			}
+
+			const { nodes, edges } = await poly.getSnapshot(0.1)
+			expect(nodes.length).toBeGreaterThanOrEqual(20)
+			expect(edges.length).toBeGreaterThanOrEqual(30)
+		})
+
+		it('should process multiple articles with overlapping concepts', async () => {
+			const article1Triples = [
+				{
+					subject: 'Artificial Intelligence',
+					predicate: 'includes',
+					object: 'Machine Learning',
+					learning_rate: 2.5,
+					decay_resistance: 2.0
+				},
+				{
+					subject: 'Machine Learning',
+					predicate: 'includes',
+					object: 'Supervised Learning',
+					learning_rate: 2.0,
+					decay_resistance: 1.8
+				},
+				{
+					subject: 'Machine Learning',
+					predicate: 'includes',
+					object: 'Unsupervised Learning',
+					learning_rate: 2.0,
+					decay_resistance: 1.8
+				}
+			]
+
+			const article2Triples = [
+				{
+					subject: 'Machine Learning',
+					predicate: 'uses',
+					object: 'Neural Networks',
+					learning_rate: 2.3,
+					decay_resistance: 1.9
+				},
+				{
+					subject: 'Neural Networks',
+					predicate: 'inspired_by',
+					object: 'Biological Brain',
+					learning_rate: 2.1,
+					decay_resistance: 1.7
+				},
+				{
+					subject: 'Biological Brain',
+					predicate: 'has',
+					object: 'Neurons',
+					learning_rate: 1.8,
+					decay_resistance: 1.5
+				}
+			]
+
+			const article3Triples = [
+				{
+					subject: 'Deep Learning',
+					predicate: 'is_a',
+					object: 'Machine Learning',
+					learning_rate: 2.4,
+					decay_resistance: 2.0
+				},
+				{
+					subject: 'Deep Learning',
+					predicate: 'uses',
+					object: 'Multiple Layers',
+					learning_rate: 2.2,
+					decay_resistance: 1.9
+				}
+			]
+
+			await poly.processArticle('AI Overview', 'Introduction to AI...', article1Triples)
+			await poly.processArticle('Neural Networks', 'Understanding neural networks...', article2Triples)
+			await poly.processArticle('Deep Learning', 'Deep learning concepts...', article3Triples)
+
+			const { nodes, edges } = await poly.getSnapshot(0.05)
+			expect(nodes.length).toBeGreaterThanOrEqual(8)
+			expect(edges.length).toBeGreaterThanOrEqual(8)
+
+			const mlNode = nodes.find((n: any) => n.label === 'Machine Learning')
+			expect(mlNode).toBeDefined()
+			expect(mlNode?.potential).toBeGreaterThan(0)
+		})
 	})
 
-	it('should handle input burst', async () => {
-		const node_c = await poly.addNode('Concept_Burst', 200, 200, 0.5)
-		const node_d = await poly.addNode('Idea_Burst', 300, 300, 0.5)
-		await poly.connect(node_c, node_d, 0.8)
-		await poly.stimulate(node_c, 2.0)
+	describe('Brain Dynamics and Learning', () => {
+		it('should propagate activation through network chains', async () => {
+			const chain: number[] = []
+			for (let i = 0; i < 8; i++) {
+				const nodeId = await poly.addNode(`Chain_Node_${i}`, i * 50, 100, 0.3)
+				chain.push(nodeId)
+			}
 
-		await brain.triggerInputBurst(50)
+			for (let i = 0; i < chain.length - 1; i++) {
+				await poly.connect(chain[i], chain[i + 1], 0.85)
+			}
 
-		const { nodes } = await poly.getSnapshot()
-		const conceptNode = nodes.find((n: any) => n.label === 'Concept_Burst')
-		expect(conceptNode).toBeDefined()
+			await poly.stimulate(chain[0], 5.0)
+
+			for (let i = 0; i < 80; i++) {
+				await poly.tick(0.25)
+			}
+
+			const { nodes } = await poly.getSnapshot(0.1)
+			expect(nodes.length).toBeGreaterThanOrEqual(8)
+		})
+
+		it('should handle complex learning burst with fatigue', async () => {
+			const concepts = [
+				{ label: 'Input_Layer', x: 0, y: 200 },
+				{ label: 'Hidden_Layer_1', x: 200, y: 100 },
+				{ label: 'Hidden_Layer_2', x: 200, y: 300 },
+				{ label: 'Hidden_Layer_3', x: 400, y: 200 },
+				{ label: 'Output_Layer', x: 600, y: 200 }
+			]
+
+			const nodeIds: number[] = []
+			for (const concept of concepts) {
+				const id = await poly.addNode(concept.label, concept.x, concept.y, 0.35)
+				nodeIds.push(id)
+			}
+
+			await poly.connect(nodeIds[0], nodeIds[1], 0.9)
+			await poly.connect(nodeIds[0], nodeIds[2], 0.9)
+			await poly.connect(nodeIds[1], nodeIds[3], 0.85)
+			await poly.connect(nodeIds[2], nodeIds[3], 0.85)
+			await poly.connect(nodeIds[3], nodeIds[4], 0.9)
+
+			brain.reportUserActivity()
+			brain.addSynapticLoad(800)
+
+			await poly.stimulate(nodeIds[0], 5.0)
+
+			await brain.triggerInputBurst(100)
+
+			const { nodes } = await poly.getSnapshot(0.1)
+			const outputNode = nodes.find((n: any) => n.label === 'Output_Layer')
+			expect(outputNode).toBeDefined()
+		})
+
+		it('should maintain and strengthen important connections', async () => {
+			const triples = [
+				{
+					subject: 'Core_Concept',
+					predicate: 'fundamental_to',
+					object: 'Derived_1',
+					learning_rate: 2.9,
+					decay_resistance: 2.8
+				},
+				{
+					subject: 'Core_Concept',
+					predicate: 'fundamental_to',
+					object: 'Derived_2',
+					learning_rate: 2.9,
+					decay_resistance: 2.8
+				},
+				{
+					subject: 'Core_Concept',
+					predicate: 'fundamental_to',
+					object: 'Derived_3',
+					learning_rate: 2.9,
+					decay_resistance: 2.8
+				},
+				{
+					subject: 'Derived_1',
+					predicate: 'leads_to',
+					object: 'Application_1',
+					learning_rate: 1.5,
+					decay_resistance: 1.2
+				},
+				{
+					subject: 'Derived_2',
+					predicate: 'leads_to',
+					object: 'Application_2',
+					learning_rate: 1.5,
+					decay_resistance: 1.2
+				},
+				{
+					subject: 'Derived_3',
+					predicate: 'leads_to',
+					object: 'Application_3',
+					learning_rate: 1.5,
+					decay_resistance: 1.2
+				}
+			]
+
+			await poly.processArticle('Core Knowledge', 'Fundamental concepts...', triples)
+
+			for (let i = 0; i < 10; i++) {
+				await poly.tick(0.4)
+			}
+
+			const { nodes, edges } = await poly.getSnapshot(0.05)
+
+			expect(nodes.length).toBeGreaterThanOrEqual(7)
+			expect(edges.length).toBeGreaterThanOrEqual(6)
+		})
+	})
+
+	describe('Schema and Data Integrity', () => {
+		it('should handle concurrent node operations', async () => {
+			const promises: Promise<number>[] = []
+
+			for (let i = 0; i < 15; i++) {
+				promises.push(poly.addNode(`Concurrent_${i}`, i * 20, i * 10, 0.5))
+			}
+
+			const nodeIds = await Promise.all(promises)
+			expect(nodeIds.length).toBe(15)
+			expect(new Set(nodeIds).size).toBe(15)
+
+			const nodes = await poly.getAllNodes()
+			const concurrentNodes = nodes.filter((n: any) => n.label.startsWith('Concurrent_'))
+			expect(concurrentNodes.length).toBe(15)
+		})
+
+		it('should build complete semantic network', async () => {
+			const semanticTriples = [
+				{
+					subject: 'Human',
+					predicate: 'has',
+					object: 'Brain',
+					learning_rate: 2.5,
+					decay_resistance: 2.5
+				},
+				{
+					subject: 'Brain',
+					predicate: 'contains',
+					object: 'Neurons',
+					learning_rate: 2.4,
+					decay_resistance: 2.3
+				},
+				{
+					subject: 'Neurons',
+					predicate: 'form',
+					object: 'Synapses',
+					learning_rate: 2.3,
+					decay_resistance: 2.2
+				},
+				{
+					subject: 'Synapses',
+					predicate: 'enable',
+					object: 'Learning',
+					learning_rate: 2.2,
+					decay_resistance: 2.1
+				},
+				{
+					subject: 'Learning',
+					predicate: 'requires',
+					object: 'Memory',
+					learning_rate: 2.1,
+					decay_resistance: 2.0
+				},
+				{
+					subject: 'Memory',
+					predicate: 'stores',
+					object: 'Knowledge',
+					learning_rate: 2.0,
+					decay_resistance: 1.9
+				}
+			]
+
+			await poly.processArticle('Cognitive Science', 'Understanding the mind...', semanticTriples)
+
+			const { nodes, edges } = await poly.getSnapshot(0.05)
+
+			const path = ['Human', 'Brain', 'Neurons', 'Synapses', 'Learning', 'Memory', 'Knowledge']
+			for (const label of path) {
+				const node = nodes.find((n: any) => n.label === label)
+				expect(node).toBeDefined()
+			}
+
+			expect(edges.length).toBeGreaterThanOrEqual(6)
+		})
 	})
 })

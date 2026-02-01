@@ -55,6 +55,10 @@ export class Polywise {
 		return { nodes, edges }
 	}
 
+	async getAllNodes() {
+		return await this.query('SELECT id, label, x, y, activation, potential FROM brain.nodes')
+	}
+
 	async tick(threshold_override?: number): Promise<void> {
 		const threshold = threshold_override ?? 0.5
 		await this.exec(sql.sql_tick(threshold))
