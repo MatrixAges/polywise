@@ -5,15 +5,22 @@ import * as sql from './sql'
 export class Polywise {
 	private db: PGlite | null = null
 
-	constructor(dataDir?: string) {
-		this.db = new PGlite(dataDir || ':polywise:', {
+	constructor(data_dir?: string) {
+		this.db = new PGlite(data_dir || ':polywise:', {
 			relaxedDurability: true
 		})
 	}
 
-	private async exec(sql_str: string): Promise<void> {
+	private async exec(sql_input: string | Array<string>): Promise<void> {
 		if (!this.db) throw new Error('DB not initialized')
-		await this.db.exec(sql_str)
+
+		if (Array.isArray(sql_input)) {
+			for (const sql_str of sql_input) {
+				await this.db.exec(sql_str)
+			}
+		} else {
+			await this.db.exec(sql_input)
+		}
 	}
 
 	private async query<T = any>(sql_str: string, params?: any[]): Promise<T[]> {
@@ -23,17 +30,19 @@ export class Polywise {
 	}
 
 	async initSchema(): Promise<void> {
-		await this.exec(sql.sql_create_schema_brain)
-		await this.exec(sql.sql_create_table_nodes)
-		await this.exec(sql.sql_create_table_edges)
-		await this.exec(sql.sql_create_index_edge_src)
-		await this.exec(sql.sql_create_index_edge_tgt)
-		await this.exec(sql.sql_create_index_active_edges)
-		await this.exec(sql.sql_create_index_core_truth)
-		await this.exec(sql.sql_create_schema_knowledge)
-		await this.exec(sql.sql_create_table_articles)
-		await this.exec(sql.sql_create_table_node_sources)
-		await this.exec(sql.sql_create_schema_user_space)
+		await this.exec([
+			sql.sql_create_schema_brain,
+			sql.sql_create_table_nodes,
+			sql.sql_create_table_edges,
+			sql.sql_create_index_edge_src,
+			sql.sql_create_index_edge_tgt,
+			sql.sql_create_index_active_edges,
+			sql.sql_create_index_core_truth,
+			sql.sql_create_schema_knowledge,
+			sql.sql_create_table_articles,
+			sql.sql_create_table_node_sources,
+			sql.sql_create_schema_user_space
+		])
 	}
 
 	async addNode(label: string, x: number, y: number, threshold = 0.5): Promise<number> {
@@ -86,12 +95,14 @@ export class Polywise {
 	}
 
 	async triggerSleepTick(): Promise<void> {
-		await this.exec(sql.sql_sleep_tick_begin)
-		await this.exec(sql.sql_sleep_tick_clean_noise)
-		await this.exec(sql.sql_sleep_tick_decay)
-		await this.exec(sql.sql_sleep_tick_replay)
-		await this.exec(sql.sql_sleep_tick_reset_nodes)
-		await this.exec(sql.sql_sleep_tick_commit)
+		await this.exec([
+			sql.sql_sleep_tick_begin,
+			sql.sql_sleep_tick_clean_noise,
+			sql.sql_sleep_tick_decay,
+			sql.sql_sleep_tick_replay,
+			sql.sql_sleep_tick_reset_nodes,
+			sql.sql_sleep_tick_commit
+		])
 	}
 
 	private async inject_triples(
