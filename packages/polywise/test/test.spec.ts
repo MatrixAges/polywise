@@ -1,3 +1,6 @@
+import * as fs from 'fs'
+import * as path from 'path'
+
 import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 
 import { Brain } from '../src/Brain'
@@ -6,9 +9,10 @@ import Polywise from '../src/Polywise'
 describe('Polywise Brain System', () => {
 	let poly: Polywise
 	let brain: Brain
+	const dbName = `polywise_test_${Date.now()}_${Math.random().toString(36).slice(2)}`
 
 	beforeAll(async () => {
-		poly = new Polywise(':polywise:')
+		poly = new Polywise(dbName)
 
 		await poly.init()
 
@@ -24,6 +28,19 @@ describe('Polywise Brain System', () => {
 
 	afterAll(() => {
 		brain?.stop()
+		poly.off()
+
+		const files = fs.readdirSync('.')
+		for (const file of files) {
+			if (file.startsWith('polywise_test_') && (file.includes(dbName) || file.includes('polywise'))) {
+				const fullPath = path.join('.', file)
+				if (fs.statSync(fullPath).isDirectory()) {
+					fs.rmSync(fullPath, { recursive: true })
+				} else {
+					fs.unlinkSync(fullPath)
+				}
+			}
+		}
 	})
 
 	describe('Complex Knowledge Graph Operations', () => {
