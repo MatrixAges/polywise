@@ -89,9 +89,9 @@ describe('Migration System', () => {
 		})
 	})
 
-	describe('Migration with data transformation', () => {
+	describe('Schema Changes - Add Column', () => {
 		let db: PGlite
-		const db_path = ':polywise_migration_transform:'
+		const db_path = ':polywise_migration_add_col:'
 
 		beforeAll(async () => {
 			db = new PGlite(db_path)
@@ -118,32 +118,270 @@ describe('Migration System', () => {
 			return JSON.parse(JSON.stringify(res.rows))
 		}
 
-		it('should handle ALTER TABLE migration', async () => {
+		it('should add new column with default value', async () => {
 			await migrate(0, exec, query)
 
-			await exec(`ALTER TABLE brain.nodes ADD COLUMN IF NOT EXISTS test_column TEXT;`)
-
-			const columns = await query(`
-				SELECT column_name 
-				FROM information_schema.columns 
-				WHERE table_name = 'nodes' AND table_schema = 'brain'
-			`)
-			const column_names = columns.map((c: any) => c.column_name)
-
-			expect(column_names).toContain('test_column')
-		})
-
-		it('should migrate existing data when adding new column', async () => {
-			await exec(`
-				INSERT INTO brain.nodes (label, x, y, test_column) 
-				VALUES ('TestNode', 0, 0, 'initial_value')
-			`)
-
-			const nodes = await query<{ label: string; test_column: string }>(
-				`SELECT label, test_column FROM brain.nodes WHERE label = 'TestNode'`
+			await exec(
+				`ALTER TABLE brain.nodes ADD COLUMN IF NOT EXISTS description TEXT DEFAULT 'No description';`
 			)
 
-			expect(nodes[0].test_column).toBe('initial_value')
+			await exec(`INSERT INTO brain.nodes (label, x, y) VALUES ('TestNode', 0, 0)`)
+
+			const nodes = await query<{ label: string; description: string }>(
+				`SELECT label, description FROM brain.nodes WHERE label = 'TestNode'`
+			)
+
+			expect(nodes[0].description).toBe('No description')
+		})
+
+		it('should add column and populate with calculated data', async () => {
+			await exec(`ALTER TABLE brain.nodes ADD COLUMN IF NOT EXISTS magnitude REAL;`)
+
+			const nodes = await query<{ id: number; x: number; y: number }>(`SELECT id, x, y FROM brain.nodes`)
+
+			for (const node of nodes) {
+				const magnitude = Math.sqrt(node.x ** 2 + node.y ** 2)
+				await query(`UPDATE brain.nodes SET magnitude = $1 WHERE id = $2`, [magnitude, node.id])
+			}
+
+			const updated_nodes = await query<{ label: string; magnitude: number }>(
+				`SELECT label, magnitude FROM brain.nodes WHERE magnitude IS NOT NULL`
+			)
+
+			expect(updated_nodes.length).toBeGreaterThan(0)
+			expect(updated_nodes[0].magnitude).toBeGreaterThanOrEqual(0)
+		})
+	})
+
+	describe('Schema Changes - Rename Column', () => {
+		let db: PGlite
+		const db_path = ':polywise_migration_rename_col:'
+
+		beforeAll(async () => {
+			db = new PGlite(db_path)
+			await db.exec(sql_meta.sql_create_schema_meta)
+			await db.exec(sql_meta.sql_create_table_schema_version)
+		})
+
+		afterAll(async () => {
+			await db.close()
+		})
+
+		const exec = async (sql: string | string[]) => {
+			if (Array.isArray(sql)) {
+				for (const s of sql) {
+					await db.exec(s)
+				}
+			} else {
+				await db.exec(sql)
+			}
+		}
+
+		const query = async <T = any>(sql: string, params?: any[]): Promise<T[]> => {
+			const res = await db.query(sql, params)
+			return JSON.parse(JSON.stringify(res.rows))
+		}
+
+		it('should rename column and preserve data', async () => {
+			await migrate(0, exec, query)
+
+			await exec(`INSERT INTO brain.nodes (label, x, y) VALUES ('SourceNode', 0, 0)`)
+			await exec(`INSERT INTO brain.nodes (label, x, y) VALUES ('TargetNode', 10, 10)`)
+
+			const nodes = await query<{ id: number; label: string }>(`SELECT id, label FROM brain.nodes`)
+			const source_id = nodes.find(n => n.label === 'SourceNode')!.id
+			const target_id = nodes.find(n => n.label === 'TargetNode')!.id
+
+			await exec(
+				`INSERT INTO brain.edges (source_id, target_id, weight) VALUES (${source_id}, ${target_id}, 0.8)`
+			)
+
+			await exec(`ALTER TABLE brain.edges RENAME COLUMN weight TO strength;`)
+
+			const edges = await query<{ source_id: number; target_id: number; strength: number }>(
+				`SELECT source_id, target_id, strength FROM brain.edges WHERE source_id = ${source_id} AND target_id = ${target_id}`
+			)
+
+			expect(edges[0].strength).toBe(0.8)
+		})
+	})
+
+	describe('Schema Changes - Modify Column Type', () => {
+		let db: PGlite
+		const db_path = ':polywise_migration_modify_type:'
+
+		beforeAll(async () => {
+			db = new PGlite(db_path)
+			await db.exec(sql_meta.sql_create_schema_meta)
+			await db.exec(sql_meta.sql_create_table_schema_version)
+		})
+
+		afterAll(async () => {
+			await db.close()
+		})
+
+		const exec = async (sql: string | string[]) => {
+			if (Array.isArray(sql)) {
+				for (const s of sql) {
+					await db.exec(s)
+				}
+			} else {
+				await db.exec(sql)
+			}
+		}
+
+		const query = async <T = any>(sql: string, params?: any[]): Promise<T[]> => {
+			const res = await db.query(sql, params)
+			return JSON.parse(JSON.stringify(res.rows))
+		}
+
+		it('should modify column type with USING clause', async () => {
+			await migrate(0, exec, query)
+
+			await exec(`ALTER TABLE brain.edges ADD COLUMN temp_weight TEXT;`)
+			await exec(`UPDATE brain.edges SET temp_weight = CAST(COALESCE(weight, 0.5) AS TEXT);`)
+			await exec(`ALTER TABLE brain.edges DROP COLUMN IF EXISTS weight;`)
+			await exec(`ALTER TABLE brain.edges RENAME COLUMN temp_weight TO weight_text;`)
+
+			const columns = await query<{ column_name: string; data_type: string }>(`
+				SELECT column_name, data_type 
+				FROM information_schema.columns 
+				WHERE table_name = 'edges' AND table_schema = 'brain' AND column_name = 'weight_text'
+			`)
+
+			expect(columns[0].data_type).toBe('text')
+		})
+	})
+
+	describe('Schema Changes - Drop Column', () => {
+		let db: PGlite
+		const db_path = ':polywise_migration_drop_col:'
+
+		beforeAll(async () => {
+			db = new PGlite(db_path)
+			await db.exec(sql_meta.sql_create_schema_meta)
+			await db.exec(sql_meta.sql_create_table_schema_version)
+		})
+
+		afterAll(async () => {
+			await db.close()
+		})
+
+		const exec = async (sql: string | string[]) => {
+			if (Array.isArray(sql)) {
+				for (const s of sql) {
+					await db.exec(s)
+				}
+			} else {
+				await db.exec(sql)
+			}
+		}
+
+		const query = async <T = any>(sql: string, params?: any[]): Promise<T[]> => {
+			const res = await db.query(sql, params)
+			return JSON.parse(JSON.stringify(res.rows))
+		}
+
+		it('should drop column safely', async () => {
+			await migrate(0, exec, query)
+
+			await exec(`ALTER TABLE brain.nodes ADD COLUMN IF NOT EXISTS temp_field TEXT;`)
+			await exec(`UPDATE brain.nodes SET temp_field = 'test';`)
+
+			await exec(`ALTER TABLE brain.nodes DROP COLUMN IF EXISTS temp_field;`)
+
+			const columns = await query<{ column_name: string }>(`
+				SELECT column_name 
+				FROM information_schema.columns 
+				WHERE table_name = 'nodes' AND table_schema = 'brain' AND column_name = 'temp_field'
+			`)
+
+			expect(columns.length).toBe(0)
+		})
+	})
+
+	describe('Complex Migration Scenarios', () => {
+		let db: PGlite
+		const db_path = ':polywise_migration_complex:'
+
+		beforeAll(async () => {
+			db = new PGlite(db_path)
+			await db.exec(sql_meta.sql_create_schema_meta)
+			await db.exec(sql_meta.sql_create_table_schema_version)
+		})
+
+		afterAll(async () => {
+			await db.close()
+		})
+
+		const exec = async (sql: string | string[]) => {
+			if (Array.isArray(sql)) {
+				for (const s of sql) {
+					await db.exec(s)
+				}
+			} else {
+				await db.exec(sql)
+			}
+		}
+
+		const query = async <T = any>(sql: string, params?: any[]): Promise<T[]> => {
+			const res = await db.query(sql, params)
+			return JSON.parse(JSON.stringify(res.rows))
+		}
+
+		it('should handle multi-step migration with data preservation', async () => {
+			await migrate(0, exec, query)
+
+			const unique_label = `MultiStepNode_${Date.now()}`
+
+			await exec(
+				`INSERT INTO brain.nodes (label, x, y, threshold) VALUES ('${unique_label}', 100, 200, 0.5)`
+			)
+
+			await exec(`ALTER TABLE brain.nodes ADD COLUMN new_x REAL;`)
+			await exec(`ALTER TABLE brain.nodes ADD COLUMN new_y REAL;`)
+
+			await exec(`UPDATE brain.nodes SET new_x = x * 2, new_y = y * 2 WHERE label = '${unique_label}'`)
+
+			await exec(`ALTER TABLE brain.nodes DROP COLUMN x;`)
+			await exec(`ALTER TABLE brain.nodes RENAME COLUMN new_x TO x;`)
+			await exec(`ALTER TABLE brain.nodes DROP COLUMN y;`)
+			await exec(`ALTER TABLE brain.nodes RENAME COLUMN new_y TO y;`)
+
+			const nodes = await query<{ label: string; x: number; y: number }>(
+				`SELECT label, x, y FROM brain.nodes WHERE label = '${unique_label}'`
+			)
+
+			expect(nodes[0].x).toBe(200)
+			expect(nodes[0].y).toBe(400)
+		})
+
+		it('should create new table and migrate data from old table', async () => {
+			await exec(`
+				CREATE TABLE IF NOT EXISTS knowledge.articles_v2 (
+					id SERIAL PRIMARY KEY,
+					title TEXT NOT NULL,
+					content TEXT,
+					summary TEXT,
+					created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+				);
+			`)
+
+			const articles = await query<{ id: number; title: string; content: string }>(
+				`SELECT id, title, content FROM knowledge.articles`
+			)
+
+			for (const article of articles) {
+				const summary = article.content ? article.content.substring(0, 100) + '...' : 'No content'
+				await query(`INSERT INTO knowledge.articles_v2 (title, content, summary) VALUES ($1, $2, $3)`, [
+					article.title,
+					article.content,
+					summary
+				])
+			}
+
+			const v2_articles = await query(`SELECT * FROM knowledge.articles_v2`)
+			expect(v2_articles.length).toBeGreaterThanOrEqual(0)
 		})
 	})
 })

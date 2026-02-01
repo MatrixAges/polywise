@@ -23,8 +23,7 @@ npm-debug.log*
 
 # polywise
 **:polywise:
-**:polywise_migration_main:
-**:polywise_migration_transform:
+**:polywise_migration_*:
 
 # electron
 release
