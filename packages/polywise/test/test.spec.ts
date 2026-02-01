@@ -42,6 +42,7 @@ describe('Polywise Brain System', () => {
 
 			for (const concept of concepts) {
 				const nodeId = await poly.addNode(concept.label, concept.x, concept.y, 0.3)
+
 				nodes.push(nodeId)
 			}
 
@@ -143,10 +144,12 @@ describe('Polywise Brain System', () => {
 			)
 
 			const { nodes, edges } = await poly.getSnapshot(0.05)
+
 			expect(nodes.length).toBeGreaterThanOrEqual(8)
 			expect(edges.length).toBeGreaterThanOrEqual(8)
 
 			const nodeLabels = nodes.map((n: any) => n.label)
+
 			expect(nodeLabels).toContain('Quantum Computing')
 			expect(nodeLabels).toContain('Qubits')
 			expect(nodeLabels).toContain('Superposition')
@@ -160,14 +163,18 @@ describe('Polywise Brain System', () => {
 			for (let i = 0; i < 20; i++) {
 				const category = categories[i % categories.length]
 				const concept = `${category}_Concept_${i}`
+
 				concepts.push(concept)
+
 				const nodeId = await poly.addNode(concept, i * 10, i * 5, 0.4)
+
 				nodeIds.push(nodeId)
 			}
 
 			for (let i = 0; i < nodeIds.length; i++) {
 				for (let j = i + 1; j < Math.min(i + 4, nodeIds.length); j++) {
 					const weight = 0.3 + (j - i) * 0.1
+
 					await poly.connect(nodeIds[i], nodeIds[j], Math.min(weight, 0.9))
 				}
 			}
@@ -181,6 +188,7 @@ describe('Polywise Brain System', () => {
 			}
 
 			const { nodes, edges } = await poly.getSnapshot(0.1)
+
 			expect(nodes.length).toBeGreaterThanOrEqual(20)
 			expect(edges.length).toBeGreaterThanOrEqual(30)
 		})
@@ -256,10 +264,12 @@ describe('Polywise Brain System', () => {
 			await poly.processArticle('Deep Learning', 'Deep learning concepts...', article3Triples)
 
 			const { nodes, edges } = await poly.getSnapshot(0.05)
+
 			expect(nodes.length).toBeGreaterThanOrEqual(8)
 			expect(edges.length).toBeGreaterThanOrEqual(8)
 
 			const mlNode = nodes.find((n: any) => n.label === 'Machine Learning')
+
 			expect(mlNode).toBeDefined()
 			expect(mlNode?.potential).toBeGreaterThan(0)
 		})
@@ -268,8 +278,10 @@ describe('Polywise Brain System', () => {
 	describe('Brain Dynamics and Learning', () => {
 		it('should propagate activation through network chains', async () => {
 			const chain: number[] = []
+
 			for (let i = 0; i < 8; i++) {
 				const nodeId = await poly.addNode(`Chain_Node_${i}`, i * 50, 100, 0.3)
+
 				chain.push(nodeId)
 			}
 
@@ -284,6 +296,7 @@ describe('Polywise Brain System', () => {
 			}
 
 			const { nodes } = await poly.getSnapshot(0.1)
+
 			expect(nodes.length).toBeGreaterThanOrEqual(8)
 		})
 
@@ -297,8 +310,10 @@ describe('Polywise Brain System', () => {
 			]
 
 			const nodeIds: number[] = []
+
 			for (const concept of concepts) {
 				const id = await poly.addNode(concept.label, concept.x, concept.y, 0.35)
+
 				nodeIds.push(id)
 			}
 
@@ -317,6 +332,7 @@ describe('Polywise Brain System', () => {
 
 			const { nodes } = await poly.getSnapshot(0.1)
 			const outputNode = nodes.find((n: any) => n.label === 'Output_Layer')
+
 			expect(outputNode).toBeDefined()
 		})
 
@@ -388,11 +404,13 @@ describe('Polywise Brain System', () => {
 			}
 
 			const nodeIds = await Promise.all(promises)
+
 			expect(nodeIds.length).toBe(15)
 			expect(new Set(nodeIds).size).toBe(15)
 
 			const nodes = await poly.getAllNodes()
 			const concurrentNodes = nodes.filter((n: any) => n.label.startsWith('Concurrent_'))
+
 			expect(concurrentNodes.length).toBe(15)
 		})
 
@@ -447,6 +465,7 @@ describe('Polywise Brain System', () => {
 			const { nodes, edges } = await poly.getSnapshot(0.05)
 
 			const path = ['Human', 'Brain', 'Neurons', 'Synapses', 'Learning', 'Memory', 'Knowledge']
+
 			for (const label of path) {
 				const node = nodes.find((n: any) => n.label === label)
 				expect(node).toBeDefined()
