@@ -59,7 +59,7 @@ packages/polywise/
 ### Tech Stack
 
 - **Storage**: [PGlite](https://github.com/electric-sql/pglite) - WebAssembly PostgreSQL
-- **Testing**: [RSTest](https://github.com/j，托马斯-z/rstest) - Rust-style testing framework
+- **Testing**: [RSTest](https://github.com/web-infra-dev/rstest) - Rust-style testing framework
 - **Build**: [Rslib](https://github.com/web-infra-dev/rslib) - High-performance bundler
 
 ### Core Modules

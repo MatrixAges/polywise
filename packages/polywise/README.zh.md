@@ -59,7 +59,7 @@ packages/polywise/
 ### 技术栈
 
 - **存储**：[PGlite](https://github.com/electric-sql/pglite) - WebAssembly PostgreSQL
-- **测试**：[RSTest](https://github.com/j，托马斯-z/rstest) - Rust 风格的测试框架
+- **测试**：[RSTest](https://github.com/web-infra-dev/rstest) - Rust 风格的测试框架
 - **构建**：[Rslib](https://github.com/web-infra-dev/rslib) - 高性能打包工具
 
 ### 核心模块
