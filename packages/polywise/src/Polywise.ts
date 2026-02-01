@@ -23,21 +23,21 @@ export class Polywise {
 	}
 
 	async initSchema(): Promise<void> {
-		await this.exec(sql.sql_createSchemaBrain)
-		await this.exec(sql.sql_createTableNodes)
-		await this.exec(sql.sql_createTableEdges)
-		await this.exec(sql.sql_createIndexEdgeSrc)
-		await this.exec(sql.sql_createIndexEdgeTgt)
-		await this.exec(sql.sql_createIndexActiveEdges)
-		await this.exec(sql.sql_createIndexCoreTruth)
-		await this.exec(sql.sql_createSchemaKnowledge)
-		await this.exec(sql.sql_createTableArticles)
-		await this.exec(sql.sql_createTableNodeSources)
-		await this.exec(sql.sql_createSchemaUserSpace)
+		await this.exec(sql.sql_create_schema_brain)
+		await this.exec(sql.sql_create_table_nodes)
+		await this.exec(sql.sql_create_table_edges)
+		await this.exec(sql.sql_create_index_edge_src)
+		await this.exec(sql.sql_create_index_edge_tgt)
+		await this.exec(sql.sql_create_index_active_edges)
+		await this.exec(sql.sql_create_index_core_truth)
+		await this.exec(sql.sql_create_schema_knowledge)
+		await this.exec(sql.sql_create_table_articles)
+		await this.exec(sql.sql_create_table_node_sources)
+		await this.exec(sql.sql_create_schema_user_space)
 	}
 
 	async addNode(label: string, x: number, y: number, threshold = 0.5): Promise<number> {
-		const rows = await this.query<{ id: number }>(sql.sql_addNode, [label, x, y, threshold])
+		const rows = await this.query<{ id: number }>(sql.sql_add_node, [label, x, y, threshold])
 		return rows[0].id
 	}
 
@@ -50,8 +50,8 @@ export class Polywise {
 	}
 
 	async getSnapshot(weight_threshold = 0.2) {
-		const nodes = await this.query(sql.sql_getSnapshotNodes(weight_threshold))
-		const edges = await this.query(sql.sql_getSnapshotEdges(weight_threshold))
+		const nodes = await this.query(sql.sql_get_snapshot_nodes(weight_threshold))
+		const edges = await this.query(sql.sql_get_snapshot_edges(weight_threshold))
 		return { nodes, edges }
 	}
 
@@ -75,26 +75,26 @@ export class Polywise {
 			decay_resistance: number
 		}>
 	): Promise<void> {
-		const res = await this.query(sql.sql_processArticle, [title, content])
+		const res = await this.query(sql.sql_process_article, [title, content])
 		const article_id = res[0].id
-		await this.injectTriples(triples, article_id)
+		await this.inject_triples(triples, article_id)
 	}
 
 	async runShadowTick(): Promise<void> {
-		await this.exec(sql.sql_runShadowTick)
+		await this.exec(sql.sql_run_shadow_tick)
 		await this.tick(0.8)
 	}
 
 	async triggerSleepTick(): Promise<void> {
-		await this.exec(sql.sql_sleepTickBegin)
-		await this.exec(sql.sql_sleepTickCleanNoise)
-		await this.exec(sql.sql_sleepTickDecay)
-		await this.exec(sql.sql_sleepTickReplay)
-		await this.exec(sql.sql_sleepTickResetNodes)
-		await this.exec(sql.sql_sleepTickCommit)
+		await this.exec(sql.sql_sleep_tick_begin)
+		await this.exec(sql.sql_sleep_tick_clean_noise)
+		await this.exec(sql.sql_sleep_tick_decay)
+		await this.exec(sql.sql_sleep_tick_replay)
+		await this.exec(sql.sql_sleep_tick_reset_nodes)
+		await this.exec(sql.sql_sleep_tick_commit)
 	}
 
-	private async injectTriples(
+	private async inject_triples(
 		triples: Array<{
 			subject: string
 			predicate: string
@@ -104,14 +104,14 @@ export class Polywise {
 		}>,
 		article_id: number
 	): Promise<void> {
-		await this.exec(sql.sql_injectTriplesBegin)
+		await this.exec(sql.sql_inject_triples_begin)
 
 		for (const t of triples) {
-			const sub_id = await this.upsertNode(t.subject, article_id)
-			const obj_id = await this.upsertNode(t.object, article_id)
+			const sub_id = await this.upsert_node(t.subject, article_id)
+			const obj_id = await this.upsert_node(t.object, article_id)
 
 			await this.exec(
-				sql.sql_injectTriplesInsertEdge(
+				sql.sql_inject_triples_insert_edge(
 					sub_id,
 					obj_id,
 					t.learning_rate,
@@ -121,7 +121,7 @@ export class Polywise {
 				)
 			)
 			await this.exec(
-				sql.sql_injectTriplesUpdateEdge(
+				sql.sql_inject_triples_update_edge(
 					sub_id,
 					obj_id,
 					t.learning_rate,
@@ -131,14 +131,14 @@ export class Polywise {
 			)
 		}
 
-		await this.exec(sql.sql_injectTriplesCommit)
+		await this.exec(sql.sql_inject_triples_commit)
 	}
 
-	private async upsertNode(label: string, article_id: number): Promise<number> {
-		await this.query(sql.sql_upsertNode, [label])
-		const res = await this.query(sql.sql_upsertNodeSelect, [label])
+	private async upsert_node(label: string, article_id: number): Promise<number> {
+		await this.query(sql.sql_upsert_node, [label])
+		const res = await this.query(sql.sql_upsert_node_select, [label])
 		const nid = res[0].id
-		await this.query(sql.sql_nodeSources, [nid, article_id])
+		await this.query(sql.sql_node_sources, [nid, article_id])
 		return nid
 	}
 }

@@ -29,13 +29,13 @@ export const sql_tick = (threshold: number) => `
   SET distance = GREATEST(1.0 / (weight + 0.1), 0.2);
 `
 
-export const sql_addNode = `INSERT INTO brain.nodes (label, x, y, threshold) VALUES ($1, $2, $3, $4) RETURNING id`
+export const sql_add_node = `INSERT INTO brain.nodes (label, x, y, threshold) VALUES ($1, $2, $3, $4) RETURNING id`
 
 export const sql_connect = `INSERT INTO brain.edges (source_id, target_id, weight) VALUES ($1, $2, $3)`
 
 export const sql_stimulate = `UPDATE brain.nodes SET potential = potential + $1 WHERE id = $2`
 
-export const sql_getSnapshotNodes = (weight_threshold: number) => `
+export const sql_get_snapshot_nodes = (weight_threshold: number) => `
   SELECT id, label, x, y, activation, potential 
   FROM brain.nodes 
   WHERE potential > 0.05 
@@ -43,7 +43,7 @@ export const sql_getSnapshotNodes = (weight_threshold: number) => `
   OR id IN (SELECT target_id FROM brain.edges WHERE weight > ${weight_threshold})
 `
 
-export const sql_getSnapshotEdges = (weight_threshold: number) => `
+export const sql_get_snapshot_edges = (weight_threshold: number) => `
   SELECT source_id, target_id, weight, distance, type 
   FROM brain.edges 
   WHERE weight > ${weight_threshold} 
@@ -51,11 +51,11 @@ export const sql_getSnapshotEdges = (weight_threshold: number) => `
   LIMIT 500
 `
 
-export const sql_processArticle = `INSERT INTO knowledge.articles (title, content) VALUES ($1, $2) RETURNING id`
+export const sql_process_article = `INSERT INTO knowledge.articles (title, content) VALUES ($1, $2) RETURNING id`
 
-export const sql_injectTriplesBegin = `BEGIN`
+export const sql_inject_triples_begin = `BEGIN`
 
-export const sql_injectTriplesInsertEdge = (
+export const sql_inject_triples_insert_edge = (
 	sub_id: number,
 	obj_id: number,
 	learning_rate: number,
@@ -68,7 +68,7 @@ export const sql_injectTriplesInsertEdge = (
   ON CONFLICT DO NOTHING;
 `
 
-export const sql_injectTriplesUpdateEdge = (
+export const sql_inject_triples_update_edge = (
 	sub_id: number,
 	obj_id: number,
 	learning_rate: number,
@@ -83,14 +83,14 @@ export const sql_injectTriplesUpdateEdge = (
   WHERE source_id = ${sub_id} AND target_id = ${obj_id};
 `
 
-export const sql_injectTriplesCommit = `COMMIT`
+export const sql_inject_triples_commit = `COMMIT`
 
-export const sql_upsertNode = `
+export const sql_upsert_node = `
   INSERT INTO brain.nodes (label, x, y, potential)
   VALUES ($1, random() * 800, random() * 600, 1.0)
   ON CONFLICT (label) DO UPDATE SET potential = brain.nodes.potential + 0.5;
 `
 
-export const sql_upsertNodeSelect = `SELECT id FROM brain.nodes WHERE label = $1`
+export const sql_upsert_node_select = `SELECT id FROM brain.nodes WHERE label = $1`
 
-export const sql_nodeSources = `INSERT INTO brain.node_sources (node_id, article_id) VALUES ($1, $2) ON CONFLICT DO NOTHING;`
+export const sql_node_sources = `INSERT INTO brain.node_sources (node_id, article_id) VALUES ($1, $2) ON CONFLICT DO NOTHING;`

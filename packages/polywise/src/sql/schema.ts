@@ -1,6 +1,6 @@
-export const sql_createSchemaBrain = `CREATE SCHEMA IF NOT EXISTS brain;`
+export const sql_create_schema_brain = `CREATE SCHEMA IF NOT EXISTS brain;`
 
-export const sql_createTableNodes = `
+export const sql_create_table_nodes = `
   CREATE TABLE IF NOT EXISTS brain.nodes (
     id SERIAL PRIMARY KEY,
     label TEXT UNIQUE,
@@ -13,7 +13,7 @@ export const sql_createTableNodes = `
   );
 `
 
-export const sql_createTableEdges = `
+export const sql_create_table_edges = `
   CREATE TABLE IF NOT EXISTS brain.edges (
     id SERIAL PRIMARY KEY,
     source_id INTEGER REFERENCES brain.nodes(id),
@@ -26,22 +26,22 @@ export const sql_createTableEdges = `
   );
 `
 
-export const sql_createIndexEdgeSrc = `CREATE INDEX IF NOT EXISTS idx_edge_src ON brain.edges(source_id);`
-export const sql_createIndexEdgeTgt = `CREATE INDEX IF NOT EXISTS idx_edge_tgt ON brain.edges(target_id);`
-export const sql_createIndexActiveEdges = `
+export const sql_create_index_edge_src = `CREATE INDEX IF NOT EXISTS idx_edge_src ON brain.edges(source_id);`
+export const sql_create_index_edge_tgt = `CREATE INDEX IF NOT EXISTS idx_edge_tgt ON brain.edges(target_id);`
+export const sql_create_index_active_edges = `
   CREATE INDEX IF NOT EXISTS idx_active_edges 
   ON brain.edges (source_id, target_id, weight) 
   WHERE weight > 0.1;
 `
-export const sql_createIndexCoreTruth = `
+export const sql_create_index_core_truth = `
   CREATE INDEX IF NOT EXISTS idx_core_truth
   ON brain.edges (source_id, target_id)
   WHERE decay_resistance > 1.5;
 `
 
-export const sql_createSchemaKnowledge = `CREATE SCHEMA IF NOT EXISTS knowledge;`
+export const sql_create_schema_knowledge = `CREATE SCHEMA IF NOT EXISTS knowledge;`
 
-export const sql_createTableArticles = `
+export const sql_create_table_articles = `
   CREATE TABLE IF NOT EXISTS knowledge.articles (
     id SERIAL PRIMARY KEY,
     title TEXT,
@@ -50,7 +50,7 @@ export const sql_createTableArticles = `
   );
 `
 
-export const sql_createTableNodeSources = `
+export const sql_create_table_node_sources = `
   CREATE TABLE IF NOT EXISTS brain.node_sources (
     node_id INTEGER REFERENCES brain.nodes(id),
     article_id INTEGER REFERENCES knowledge.articles(id),
@@ -58,4 +58,4 @@ export const sql_createTableNodeSources = `
   );
 `
 
-export const sql_createSchemaUserSpace = `CREATE SCHEMA IF NOT EXISTS user_space;`
+export const sql_create_schema_user_space = `CREATE SCHEMA IF NOT EXISTS user_space;`
