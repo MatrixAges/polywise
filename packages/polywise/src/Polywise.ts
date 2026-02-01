@@ -1,6 +1,8 @@
 import { PGlite } from '@electric-sql/pglite'
 
+import { CURRENT_SCHEMA_VERSION, migrate, validateMigrations } from './migration'
 import * as sql from './sql'
+import * as sql_meta from './sql/meta'
 
 export class Polywise {
 	private db: PGlite | null = null
@@ -12,19 +14,17 @@ export class Polywise {
 	}
 
 	async init() {
-		await this.exec([
-			sql.sql_create_schema_brain,
-			sql.sql_create_table_nodes,
-			sql.sql_create_table_edges,
-			sql.sql_create_index_edge_src,
-			sql.sql_create_index_edge_tgt,
-			sql.sql_create_index_active_edges,
-			sql.sql_create_index_core_truth,
-			sql.sql_create_schema_knowledge,
-			sql.sql_create_table_articles,
-			sql.sql_create_table_node_sources,
-			sql.sql_create_schema_user_space
-		])
+		validateMigrations()
+
+		await this.exec(sql_meta.sql_create_schema_meta)
+		await this.exec(sql_meta.sql_create_table_schema_version)
+
+		const version_result = await this.query<{ version: number }>(sql_meta.sql_get_current_version)
+		const current_version = version_result[0]?.version ?? 0
+
+		if (current_version < CURRENT_SCHEMA_VERSION) {
+			await migrate(current_version, this.exec.bind(this), this.query.bind(this))
+		}
 	}
 
 	async addNode(label: string, x: number, y: number, threshold = 0.5) {

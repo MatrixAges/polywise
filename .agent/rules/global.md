@@ -201,7 +201,7 @@ When organizing class functions, follow this strict order:
 
 Example:
 
-```typescript
+````typescript
 export class MyClass {
 	constructor() {}
 
@@ -215,9 +215,58 @@ export class MyClass {
 
 	private async _helper() {}
 
-	off() {}
+  off() {}
 }
-```
+
+## Database Schema Migration (CRITICAL)
+
+When modifying database schema in the polywise package, you MUST update the migration system:
+
+### Migration Rules:
+
+1. **Version Increment**: Increment `CURRENT_SCHEMA_VERSION` in `migration.ts`
+2. **Add Migration**: Add a new migration object to the `migrations` array
+3. **Migration Content**: Use `up` function for schema changes (CREATE, ALTER, DROP) and data migration
+4. **Sequential Versions**: Migration versions must be sequential (1, 2, 3...)
+
+### Example Migration:
+
+```typescript
+// In migration.ts
+export const CURRENT_SCHEMA_VERSION = 2
+
+export const migrations: Migration[] = [
+  // ... existing migrations
+
+  {
+    version: 2,
+    description: 'Add metadata column to nodes',
+    up: async (exec, query) => {
+      // Schema change
+      await exec(`ALTER TABLE brain.nodes ADD COLUMN IF NOT EXISTS metadata JSONB;`)
+
+      // Data migration
+      const nodes = await query<{ id: number }>('SELECT id FROM brain.nodes')
+      for (const node of nodes) {
+        await query(
+          `UPDATE brain.nodes SET metadata = $1 WHERE id = $2`,
+          [JSON.stringify({}), node.id]
+        )
+      }
+    }
+  }
+]
+````
+
+### Automatic Migration on Init:
+
+The `Polywise.init()` method automatically:
+
+1. Checks current schema version from `meta.schema_version` table
+2. Applies all pending migrations
+3. Records applied versions
+
+**CRITICAL**: Always update `CURRENT_SCHEMA_VERSION` when modifying table structure!
 
 ## Final Guarantee
 
