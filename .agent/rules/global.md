@@ -22,12 +22,22 @@ BEFORE executing ANY other tool or responding to the user, you MUST save the raw
 - The `description` field **must** be included, briefly explaining the command's purpose.
 - Example format: `bash(command="ls", description="List files in the current directory")`
 
-## Important Instructions
+## Read Agentmap (CRITICAL)
 
-Prioritize reading `agentmap.md`:
+After saving context, BEFORE reading any other files or executing tasks, you MUST read `agentmap.md` from the root directory.
 
-- Before executing any task, the Agent must first read `agentmap.md` in the root directory to understand the latest project architecture and code standards.
-- After completing a task, if any project files are changed (added/renamed/deleted files or directories), `agentmap.md` must be updated with the file tree and descriptions.
+- **Strict Order**: This is the SECOND action (after saving context) for every task involving file operations.
+- **Dependency**: You are prohibited from using `read`, `edit`, or any other tool for file operations until `agentmap.md` has been successfully read.
+- **Purpose**: Understand the latest project architecture and code standards.
+- **Path**: `/agentmap.md` (relative to project root).
+
+## Update Agentmap (CRITICAL)
+
+After completing ANY task that changes project files (adds, renames, deletes files or directories), you MUST update `agentmap.md` with the updated file tree and descriptions.
+
+- **When**: After all file changes are complete.
+- **What**: Update the JSON tree in section 3 of agentmap.md.
+- **Dependency**: Do not consider the task complete until agentmap.md is updated.
 
 Answer questions accurately and concisely, providing the optimal solution and offering multiple solutions or possibilities.
 
