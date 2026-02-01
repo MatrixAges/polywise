@@ -71,3 +71,11 @@ export interface SearchArticleParams {
 	// Optional Variables
 	limit?: number
 }
+
+export interface ArticleParams {
+	// Required Variables
+	db: import('@electric-sql/pglite').PGlite
+
+	// Optional Variables
+	embedding_cache_dir?: string
+}

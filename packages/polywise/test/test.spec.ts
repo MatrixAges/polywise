@@ -9,7 +9,7 @@ import Polywise from '../src/Polywise'
 describe('Polywise Brain System', () => {
 	let poly: Polywise
 	let brain: Brain
-	const dbName = `polywise_test_${Date.now()}_${Math.random().toString(36).slice(2)}`
+	const dbName = `:polywise_test_${Date.now()}_${Math.random().toString(36).slice(2)}:`
 
 	beforeAll(async () => {
 		poly = new Polywise(dbName)

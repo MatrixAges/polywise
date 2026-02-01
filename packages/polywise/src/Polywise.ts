@@ -1,10 +1,9 @@
 import { PGlite } from '@electric-sql/pglite'
 
 import Article from './Article'
-import { CURRENT_SCHEMA_VERSION, migrate, validateMigrations } from './migration'
 import * as sql from './sql'
 import * as sql_meta from './sql/meta'
-import { calculateWeight } from './utils'
+import { calculateWeight, CURRENT_SCHEMA_VERSION, migrate, validateMigrations } from './utils'
 
 import type {
 	AddNodeParams,
@@ -13,7 +12,6 @@ import type {
 	InjectTriplesParams,
 	Node,
 	ProcessArticleParams,
-	Snapshot,
 	UpsertNodeParams
 } from './types'
 
@@ -28,7 +26,7 @@ export default class Polywise {
 		})
 
 		this.article = new Article({
-			query: this.query.bind(this),
+			db: this.db,
 			embedding_cache_dir
 		})
 	}

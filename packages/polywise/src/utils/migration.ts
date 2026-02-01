@@ -1,7 +1,8 @@
-import * as sql_schema from './sql/schema'
-import { migrate as migrateFn, validateMigrations as validateMigrationsFn } from './utils'
+import * as sql_schema from '../sql/schema'
+import { default as migrateFn } from './migrate'
+import { default as validateMigrationsFn } from './validateMigrations'
 
-import type { Migration } from './types'
+import type { Migration } from '../types'
 
 export const CURRENT_SCHEMA_VERSION = 2
 

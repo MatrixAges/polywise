@@ -3,8 +3,8 @@ import fs from 'node:fs/promises'
 import { PGlite } from '@electric-sql/pglite'
 import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 
-import { CURRENT_SCHEMA_VERSION, migrate, migrations, validateMigrations } from '../src/migration'
 import * as sql_meta from '../src/sql/meta'
+import { CURRENT_SCHEMA_VERSION, migrate, migrations, validateMigrations } from '../src/utils/migration'
 
 describe('Migration System', () => {
 	describe('validateMigrations', () => {

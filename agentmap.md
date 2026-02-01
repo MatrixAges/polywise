@@ -353,7 +353,6 @@ The project is a monorepo organized using a workspace structure, primarily built
 				"Brain.ts": { "desc": "Brain lifecycle manager with fatigue state machine", "role": "Class" },
 				"Polywise.ts": { "desc": "Core database API for knowledge graph operations", "role": "Class" },
 				"index.ts": { "desc": "Main exports", "role": "Index" },
-				"migration.ts": { "desc": "Database schema migration system", "role": "Module" },
 				"sql": {
 					"Brain.ts": { "desc": "Brain SQL operations", "role": "SQL" },
 					"Polywise.ts": { "desc": "Polywise SQL operations", "role": "SQL" },
@@ -363,8 +362,9 @@ The project is a monorepo organized using a workspace structure, primarily built
 				},
 				"types": {
 					"index.ts": { "desc": "Types exports", "role": "Index" },
+					"params.ts": { "desc": "Parameter types for functions and constructors", "role": "Type" },
 					"polywise.ts": {
-						"desc": "All types merged (Node, Edge, Triple, Snapshot, BrainState, Migration, etc.)",
+						"desc": "Core types (Node, Edge, Triple, Snapshot, BrainState, Migration, etc.)",
 						"role": "Type"
 					}
 				},
@@ -382,7 +382,8 @@ The project is a monorepo organized using a workspace structure, primarily built
 					"index.ts": { "desc": "Utils exports", "role": "Index" },
 					"isIdle.ts": { "desc": "Idle state checker", "role": "Utility" },
 					"migrate.ts": { "desc": "Migration execution utility", "role": "Utility" },
-					"validateMigrations.ts": { "desc": "Migration validation utility", "role": "Utility" }
+					"validateMigrations.ts": { "desc": "Migration validation utility", "role": "Utility" },
+					"migration.ts": { "desc": "Database schema migration system", "role": "Module" }
 				}
 			},
 			"test": {
