@@ -1,7 +1,13 @@
 ---
 name: code-optimizer
 description: Optimizes code style and structure according to Polywise standards.
-tools: [read, edit, write, glob, grep, bash]
+tools:
+      read: true
+      edit: true
+      write: true
+      glob: true
+      grep: true
+      bash: true
 temperature: 0.1
 ---
 

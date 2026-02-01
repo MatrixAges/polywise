@@ -1,43 +1,104 @@
 import Piscina from 'piscina'
 
+import { PGlite } from '@electric-sql/pglite'
+
 import type { WorkerResult, WorkerTask } from './worker'
 
 export class Polywise {
-	private pool: Piscina
-	private init_promise: Promise<void>
+	private pool: Piscina | null = null
+	private db: PGlite | null = null
+	private init_promise: Promise<any> | null = null
 
-	constructor(dataDir?: string) {
-		this.pool = new Piscina({
-			filename: new URL('./worker.ts', import.meta.url).href
-		})
-
-		this.init_promise = this.runTask('initDB', [dataDir || ':memory:'])
+	constructor(dataDir?: string, mode: 'proxy' | 'engine' = 'proxy') {
+		if (mode === 'proxy') {
+			this.pool = new Piscina({
+				filename: new URL('./worker.ts', import.meta.url).href
+			})
+			this.init_promise = this.runTask('initDB', [dataDir || ':memory:'])
+		} else {
+			this.db = new PGlite(dataDir, {
+				relaxedDurability: true
+			})
+			this.init_promise = Promise.resolve()
+		}
 	}
 
 	private async runTask<T extends WorkerTask['task']>(
 		task: T,
 		args: Extract<WorkerTask, { task: T }>['args']
 	): Promise<any> {
-		if (task !== 'initDB') {
-			await this.init_promise
+		if (this.pool) {
+			if (task !== 'initDB') {
+				await this.init_promise
+			}
+			const result: WorkerResult = await this.pool.run({ task, args })
+			if (result.status === 'error') {
+				throw new Error(result.message)
+			}
+			return result.data
 		}
 
-		const result: WorkerResult = await this.pool.run({ task, args })
+		// Engine mode logic
+		// @ts-ignore
+		return await this[task](...args)
+	}
 
-		if (result.status === 'error') {
-			throw new Error(result.message)
-		}
+	// --- Task Handlers (Internal/Engine Mode) ---
 
-		return result.data
+	async initDB(dataDir?: string) {
+		return 'DB Initialized'
 	}
 
 	async exec(sql: string): Promise<void> {
-		await this.runTask('exec', [sql])
+		if (this.pool) return await this.runTask('exec', [sql])
+		if (!this.db) throw new Error('DB not initialized')
+		await this.db.exec(sql)
 	}
 
 	async query<T = any>(sql: string, params?: any[]): Promise<T[]> {
-		return await this.runTask('query', [sql, params || []])
+		if (this.pool) return await this.runTask('query', [sql, params || []])
+		if (!this.db) throw new Error('DB not initialized')
+		const res = await this.db.query(sql, params)
+		return JSON.parse(JSON.stringify(res.rows))
 	}
+
+	async tick(threshold_override?: number): Promise<void> {
+		if (this.pool) return await this.runTask('tick', [threshold_override ?? 0.5])
+		if (!this.db) throw new Error('DB not initialized')
+		const threshold = threshold_override ?? 0.5
+		await this.db.exec(`
+      WITH incoming_signals AS (
+        SELECT 
+          e.target_id, 
+          SUM(n.activation * e.weight / (e.distance + 0.1)) as total_input
+        FROM brain.edges e
+        JOIN brain.nodes n ON e.source_id = n.id
+        WHERE n.activation > 0
+        GROUP BY e.target_id
+      )
+      UPDATE brain.nodes
+      SET potential = LEAST(potential + COALESCE((SELECT total_input FROM incoming_signals WHERE incoming_signals.target_id = brain.nodes.id), 0), 2.0);
+
+      UPDATE brain.nodes
+      SET 
+        activation = CASE WHEN potential > ${threshold} THEN 1.0 ELSE 0.0 END,
+        potential = CASE WHEN potential > ${threshold} THEN 0.0 ELSE potential * 0.9 END,
+        last_fired_at = CASE WHEN potential > ${threshold} THEN CURRENT_TIMESTAMP ELSE last_fired_at END;
+
+      UPDATE brain.edges e
+      SET weight = CASE 
+        WHEN (SELECT activation FROM brain.nodes WHERE id = e.source_id) > 0 
+             AND (SELECT activation FROM brain.nodes WHERE id = e.target_id) > 0 
+        THEN LEAST(weight + (0.2 * e.learning_rate), 5.0)
+        ELSE GREATEST(weight - (0.001 / e.decay_resistance), 0.1)
+      END;
+
+      UPDATE brain.edges
+      SET distance = GREATEST(1.0 / (weight + 0.1), 0.2);
+    `)
+	}
+
+	// --- Public API ---
 
 	async addNode(label: string, x: number, y: number, threshold = 0.5): Promise<number> {
 		const rows = await this.query<{ id: number }>(
@@ -57,11 +118,6 @@ export class Polywise {
 
 	async stimulate(node_id: number, intensity = 1.0): Promise<void> {
 		await this.query('UPDATE brain.nodes SET potential = potential + $1 WHERE id = $2', [intensity, node_id])
-	}
-
-	async tick(threshold_override?: number): Promise<void> {
-		const threshold = threshold_override ?? 0.5
-		await this.runTask('tick', [threshold])
 	}
 
 	async getSnapshot(weight_threshold = 0.2) {

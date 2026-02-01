@@ -1,6 +1,6 @@
-import { PolywiseEngine } from './engine'
+import { Polywise } from './Polywise'
 
-const engine = new PolywiseEngine()
+const poly = new Polywise(undefined, 'engine')
 
 export type WorkerTask =
 	| { task: 'initDB'; args: [dataDir?: string] }
@@ -11,10 +11,10 @@ export type WorkerTask =
 export type WorkerResult<T = any> = { status: 'ok'; data?: T } | { status: 'error'; message: string }
 
 const handlers: Record<string, (...args: any[]) => Promise<any>> = {
-	initDB: engine.initDB.bind(engine),
-	exec: engine.exec.bind(engine),
-	query: engine.query.bind(engine),
-	tick: engine.tick.bind(engine)
+	initDB: poly.initDB.bind(poly),
+	exec: poly.exec.bind(poly),
+	query: poly.query.bind(poly),
+	tick: poly.tick.bind(poly)
 }
 
 export default async function ({ task, args }: WorkerTask): Promise<WorkerResult> {
