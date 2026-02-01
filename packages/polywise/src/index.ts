@@ -1,4 +1,5 @@
 export * from './Polywise'
 export * from './Brain'
-export * from './types'
+export { ArticleManager } from './Article'
+export type { ArticleEntity, ArticleWithSimilarity, ArticleEmbedding, ArticleWithTriples } from './types'
 export * from './utils'

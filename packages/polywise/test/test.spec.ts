@@ -604,4 +604,77 @@ describe('Polywise Brain System', () => {
 			expect(snapshot_node.metrics_ids).toEqual(metrics_ids)
 		})
 	})
+
+	describe('Article CRUD and Search', () => {
+		it('should add article and retrieve by id', async () => {
+			const title = 'Test Article'
+			const content = 'This is a test article about artificial intelligence and machine learning.'
+			const article_id = await poly.article.add(title, content)
+
+			expect(article_id).toBeGreaterThan(0)
+
+			const articles = await poly.article.get(article_id)
+			expect(articles.length).toBe(1)
+			expect(articles[0].title).toBe(title)
+			expect(articles[0].content).toBe(content)
+		})
+
+		it('should add article with embedding', async () => {
+			const title = 'Embedding Test Article'
+			const content = 'Deep learning is a subset of machine learning that uses neural networks.'
+			const article_id = await poly.article.addWithEmbedding(title, content)
+
+			expect(article_id).toBeGreaterThan(0)
+		})
+
+		it('should get all articles', async () => {
+			await poly.article.add('Article 1', 'Content 1')
+			await poly.article.add('Article 2', 'Content 2')
+			await poly.article.add('Article 3', 'Content 3')
+
+			const articles = await poly.article.getAll()
+
+			expect(articles.length).toBeGreaterThanOrEqual(3)
+		})
+
+		it('should search articles by full-text search', async () => {
+			await poly.article.addWithEmbedding(
+				'Python Programming',
+				'Python is a popular programming language for data science.'
+			)
+			await poly.article.addWithEmbedding('JavaScript Basics', 'JavaScript is used for web development.')
+			await poly.article.addWithEmbedding(
+				'Data Science',
+				'Data science combines statistics and computer science.'
+			)
+
+			const results = await poly.article.searchByText('programming language', 10)
+
+			expect(results.length).toBeGreaterThan(0)
+			const titles = results.map((a: any) => a.title)
+			expect(titles).toContain('Python Programming')
+		})
+
+		it('should search articles by vector similarity', async () => {
+			await poly.article.addWithEmbedding(
+				'Machine Learning Guide',
+				'Machine learning algorithms enable computers to learn from data.'
+			)
+			await poly.article.addWithEmbedding(
+				'Web Development',
+				'HTML CSS and JavaScript are the building blocks of websites.'
+			)
+			await poly.article.addWithEmbedding(
+				'Database Systems',
+				'Relational databases store structured data using SQL.'
+			)
+
+			const results = await poly.article.searchByVector('artificial intelligence and neural networks', 10)
+
+			expect(results.length).toBeGreaterThanOrEqual(1)
+			const titles = results.map((a: any) => a.title)
+			expect(titles).toContain('Machine Learning Guide')
+			expect(results[0].similarity).toBeGreaterThan(0.5)
+		})
+	})
 })

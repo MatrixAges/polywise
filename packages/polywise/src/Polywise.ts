@@ -1,21 +1,22 @@
 import { PGlite } from '@electric-sql/pglite'
 
+import { ArticleManager } from './Article'
 import { CURRENT_SCHEMA_VERSION, migrate, validateMigrations } from './migration'
 import * as sql from './sql'
 import * as sql_meta from './sql/meta'
-import { calculateWeight, getEmbedding } from './utils'
+import { calculateWeight } from './utils'
 
-import type { Article, ArticleWithSimilarity, Edge, Node, Snapshot, Triple } from './types'
+import type { Edge, Node, Snapshot, Triple } from './types'
 
 export class Polywise {
 	private db: PGlite | null = null
-	private embeddingCacheDir?: string
+	public article: ArticleManager
 
 	constructor(data_dir?: string, embeddingCacheDir?: string) {
 		this.db = new PGlite(data_dir || ':polywise:', {
 			relaxedDurability: true
 		})
-		this.embeddingCacheDir = embeddingCacheDir
+		this.article = new ArticleManager(this.exec.bind(this), this.query.bind(this), embeddingCacheDir)
 	}
 
 	async init() {
@@ -128,39 +129,6 @@ export class Polywise {
 		])
 	}
 
-	async addArticle(title: string, content: string) {
-		const res = await this.query<{ id: number }>(sql.sql_process_article, [title, content])
-		return res[0].id
-	}
-
-	async addArticleEmbedding(article_id: number, content: string) {
-		const embedding = await getEmbedding(content, this.embeddingCacheDir)
-		await this.query(sql.sql_insert_article_embedding, [article_id, embedding])
-	}
-
-	async addArticleWithEmbedding(title: string, content: string) {
-		const article_id = await this.addArticle(title, content)
-		await this.addArticleEmbedding(article_id, content)
-		return article_id
-	}
-
-	async getArticle(article_id: number) {
-		return await this.query<Article>(sql.sql_get_article, [article_id])
-	}
-
-	async getAllArticles() {
-		return await this.query<Article[]>(sql.sql_get_all_articles)
-	}
-
-	async searchArticlesByText(query: string, limit = 10) {
-		return await this.query<Article[]>(sql.sql_search_articles_by_text, [query, limit])
-	}
-
-	async searchArticlesByVector(query: string, limit = 10) {
-		const embedding = await getEmbedding(query, this.embeddingCacheDir)
-		return await this.query<ArticleWithSimilarity[]>(sql.sql_search_articles_by_vector, [embedding, limit])
-	}
-
 	async processArticle(
 		title: string,
 		content: string,
@@ -174,7 +142,7 @@ export class Polywise {
 		const article_id = res[0].id
 
 		if (generate_embedding) {
-			await this.addArticleEmbedding(article_id, content)
+			await this.article.addEmbedding(article_id, content)
 		}
 
 		await this.inject_triples(triples, article_id, idol_id, root_ids, metrics_ids)

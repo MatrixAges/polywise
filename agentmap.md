@@ -346,6 +346,10 @@ The project is a monorepo organized using a workspace structure, primarily built
 			"rslib.config.ts": { "desc": "Rslib configuration", "role": "Config" },
 			"rstest.config.ts": { "desc": "RSTest configuration", "role": "Config" },
 			"src": {
+				"Article.ts": {
+					"desc": "Article manager class for CRUD and search operations",
+					"role": "Class"
+				},
 				"Brain.ts": { "desc": "Brain lifecycle manager with fatigue state machine", "role": "Class" },
 				"Polywise.ts": { "desc": "Core database API for knowledge graph operations", "role": "Class" },
 				"index.ts": { "desc": "Main exports", "role": "Index" },

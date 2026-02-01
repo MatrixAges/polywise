@@ -57,14 +57,14 @@ export interface Migration {
 	up: MigrationFn
 }
 
-export interface Article {
+export interface ArticleEntity {
 	id: number
 	title: string
 	content: string
 	created_at: string
 }
 
-export interface ArticleWithSimilarity extends Article {
+export interface ArticleWithSimilarity extends ArticleEntity {
 	similarity: number
 }
 
@@ -76,6 +76,6 @@ export interface ArticleEmbedding {
 	created_at: string
 }
 
-export interface ArticleWithTriples extends Article {
+export interface ArticleWithTriples extends ArticleEntity {
 	triples: Triple[]
 }
