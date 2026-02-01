@@ -18,7 +18,7 @@ export class Polywise {
 			})
 			this.init_promise = this.runTask('initDB', [dataDir || ':polywise:'])
 		} else {
-			this.db = new PGlite(dataDir, {
+			this.db = new PGlite(dataDir || ':polywise:', {
 				relaxedDurability: true
 			})
 			this.init_promise = Promise.resolve()
@@ -43,67 +43,64 @@ export class Polywise {
 		return await (this as any)[task](...args)
 	}
 
-	async initDB(dataDir?: string) {
-		return 'DB Initialized'
-	}
-
-	async exec(sql_str: string): Promise<void> {
-		if (this.pool) return await this.runTask('exec', [sql_str])
-		if (!this.db) throw new Error('DB not initialized')
-		await this.db.exec(sql_str)
-	}
-
-	async query<T = any>(sql_str: string, params?: any[]): Promise<T[]> {
-		if (this.pool) return await this.runTask('query', [sql_str, params || []])
-		if (!this.db) throw new Error('DB not initialized')
-		const res = await this.db.query(sql_str, params)
-		return JSON.parse(JSON.stringify(res.rows))
-	}
-
-	async tick(threshold_override?: number): Promise<void> {
-		if (this.pool) return await this.runTask('tick', [threshold_override ?? 0.5])
-		if (!this.db) throw new Error('DB not initialized')
-		const threshold = threshold_override ?? 0.5
-		await this.db.exec(sql.sql_tick(threshold))
+	async initSchema(): Promise<void> {
+		if (this.pool) {
+			await this.runTask('initSchema', [])
+		} else {
+			await this.exec(sql.sql_createSchemaBrain)
+			await this.exec(sql.sql_createTableNodes)
+			await this.exec(sql.sql_createTableEdges)
+			await this.exec(sql.sql_createIndexEdgeSrc)
+			await this.exec(sql.sql_createIndexEdgeTgt)
+			await this.exec(sql.sql_createIndexActiveEdges)
+			await this.exec(sql.sql_createIndexCoreTruth)
+			await this.exec(sql.sql_createSchemaKnowledge)
+			await this.exec(sql.sql_createTableArticles)
+			await this.exec(sql.sql_createTableNodeSources)
+			await this.exec(sql.sql_createSchemaUserSpace)
+		}
 	}
 
 	async addNode(label: string, x: number, y: number, threshold = 0.5): Promise<number> {
-		const rows = await this.query<{ id: number }>(sql.sql_addNode, [label, x, y, threshold])
+		if (this.pool) {
+			return await this.runTask('addNode', [label, x, y, threshold])
+		}
+		const rows = await this.query(sql.sql_addNode, [label, x, y, threshold])
 		return rows[0].id
 	}
 
 	async connect(source_id: number, target_id: number, weight = 0.1): Promise<void> {
-		await this.query(sql.sql_connect, [source_id, target_id, weight])
-	}
-
-	async stimulate(node_id: number, intensity = 1.0): Promise<void> {
-		await this.query(sql.sql_stimulate, [intensity, node_id])
-	}
-
-	async getSnapshot(weight_threshold = 0.2) {
-		const nodes = await this.query(sql.sql_getSnapshotNodes(weight_threshold))
-		const edges = await this.query(sql.sql_getSnapshotEdges(weight_threshold))
-
-		return {
-			nodes,
-			edges
+		if (this.pool) {
+			await this.runTask('connect', [source_id, target_id, weight])
+		} else {
+			await this.query(sql.sql_connect, [source_id, target_id, weight])
 		}
 	}
 
-	async initSchema(): Promise<void> {
-		await this.exec(sql.sql_createSchemaBrain)
-		await this.exec(sql.sql_createTableNodes)
-		await this.exec(sql.sql_createTableEdges)
-		await this.exec(sql.sql_createIndexEdgeSrc)
-		await this.exec(sql.sql_createIndexEdgeTgt)
-		await this.exec(sql.sql_createIndexActiveEdges)
-		await this.exec(sql.sql_createIndexCoreTruth)
+	async stimulate(node_id: number, intensity = 1.0): Promise<void> {
+		if (this.pool) {
+			await this.runTask('stimulate', [node_id, intensity])
+		} else {
+			await this.query(sql.sql_stimulate, [intensity, node_id])
+		}
+	}
 
-		await this.exec(sql.sql_createSchemaKnowledge)
-		await this.exec(sql.sql_createTableArticles)
-		await this.exec(sql.sql_createTableNodeSources)
+	async getSnapshot(weight_threshold = 0.2) {
+		if (this.pool) {
+			return await this.runTask('getSnapshot', [weight_threshold])
+		}
+		const nodes = await this.query(sql.sql_getSnapshotNodes(weight_threshold))
+		const edges = await this.query(sql.sql_getSnapshotEdges(weight_threshold))
+		return { nodes, edges }
+	}
 
-		await this.exec(sql.sql_createSchemaUserSpace)
+	async tick(threshold_override?: number): Promise<void> {
+		if (this.pool) {
+			await this.runTask('tick', [threshold_override ?? 0.5])
+		} else {
+			const threshold = threshold_override ?? 0.5
+			await this.db!.exec(sql.sql_tick(threshold))
+		}
 	}
 
 	async processArticle(
@@ -117,10 +114,48 @@ export class Polywise {
 			decay_resistance: number
 		}>
 	): Promise<void> {
-		const res = await this.query(sql.sql_processArticle, [title, content])
-		const article_id = res[0].id
+		if (this.pool) {
+			await this.runTask('processArticle', [title, content, triples])
+		} else {
+			const res = await this.query(sql.sql_processArticle, [title, content])
+			const article_id = res[0].id
+			await this.injectTriples(triples, article_id)
+		}
+	}
 
-		await this.injectTriples(triples, article_id)
+	async runShadowTick(): Promise<void> {
+		if (this.pool) {
+			await this.runTask('runShadowTick', [])
+		} else {
+			await this.db!.exec(sql.sql_runShadowTick)
+			await this.tick(0.8)
+		}
+	}
+
+	async triggerSleepTick(): Promise<void> {
+		if (this.pool) {
+			await this.runTask('triggerSleepTick', [])
+		} else {
+			await this.db!.exec(sql.sql_sleepTickBegin)
+			await this.db!.exec(sql.sql_sleepTickCleanNoise)
+			await this.db!.exec(sql.sql_sleepTickDecay)
+			await this.db!.exec(sql.sql_sleepTickReplay)
+			await this.db!.exec(sql.sql_sleepTickResetNodes)
+			await this.db!.exec(sql.sql_sleepTickCommit)
+		}
+	}
+
+	private async exec(sql_str: string): Promise<void> {
+		if (this.pool) return await this.runTask('exec', [sql_str])
+		if (!this.db) throw new Error('DB not initialized')
+		await this.db.exec(sql_str)
+	}
+
+	private async query<T = any>(sql_str: string, params?: any[]): Promise<T[]> {
+		if (this.pool) return await this.runTask('query', [sql_str, params || []])
+		if (!this.db) throw new Error('DB not initialized')
+		const res = await this.db.query(sql_str, params)
+		return JSON.parse(JSON.stringify(res.rows))
 	}
 
 	private async injectTriples(
@@ -165,12 +200,9 @@ export class Polywise {
 
 	private async upsertNode(label: string, article_id: number): Promise<number> {
 		await this.query(sql.sql_upsertNode, [label])
-
 		const res = await this.query(sql.sql_upsertNodeSelect, [label])
 		const nid = res[0].id
-
 		await this.query(sql.sql_nodeSources, [nid, article_id])
-
 		return nid
 	}
 }

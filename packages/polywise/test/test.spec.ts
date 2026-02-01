@@ -8,7 +8,6 @@ describe('Polywise Brain System', () => {
 	let brain: Brain
 
 	beforeAll(async () => {
-		// Use 'engine' mode to avoid Piscina worker issues in test environment
 		poly = new Polywise(':polywise:', 'engine')
 		await poly.initSchema()
 

@@ -1,5 +1,4 @@
 import { Polywise } from './Polywise'
-import * as sql from './sql'
 
 export class Brain {
 	private poly: Polywise
@@ -44,8 +43,7 @@ export class Brain {
 	}
 
 	private async runShadowTick() {
-		await (this.poly as any).db.exec(sql.sql_runShadowTick)
-		await this.poly.tick(0.8)
+		await this.poly.runShadowTick()
 		this.on_tick?.()
 	}
 
@@ -69,15 +67,7 @@ export class Brain {
 
 	async triggerSleepTick() {
 		this.state = 'SLEEPING'
-		const db = (this.poly as any).db
-
-		await db.exec(sql.sql_sleepTickBegin)
-		await db.exec(sql.sql_sleepTickCleanNoise)
-		await db.exec(sql.sql_sleepTickDecay)
-		await db.exec(sql.sql_sleepTickReplay)
-		await db.exec(sql.sql_sleepTickResetNodes)
-		await db.exec(sql.sql_sleepTickCommit)
-
+		await this.poly.triggerSleepTick()
 		this.current_fatigue = 0
 		this.state = 'FRESH'
 	}
