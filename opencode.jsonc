@@ -1,4 +1,12 @@
 {
 	"$schema": "https://opencode.ai/config.json",
-	"instructions": [".agent/rules/*.md", "agentmap.md"]
+	"instructions": [".agent/rules/*.md", "agentmap.md"],
+	"formatter": {
+		"prettier": {
+			"command": ["pnpx", "prettier", "--write", "$FILE"],
+			"environment": {
+				"NODE_ENV": "development"
+			}
+		}
+	}
 }
