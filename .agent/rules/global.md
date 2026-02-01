@@ -62,17 +62,6 @@ The blank line creates **visual grouping** that mirrors the logical grouping of 
 - **Execution paragraph**: The actual work being done (async operations, calculations)
 - **Result paragraph**: Return statements, conditional logic, or state verification
 
-### Common scenarios:
-
-1. **Data fetching and return** - Separate async operations from return statements
-2. **Variable calculation and usage** - Separate setup logic from execution
-3. **Multiple sequential operations** - Separate distinct steps in a workflow
-4. **Before early returns** - Separate validation logic from main execution
-5. **Different operation types** - Variable declarations vs function calls, sync vs async, queries vs mutations, etc.
-6. **State changes** - Separate before/after state transitions
-7. **Before callbacks** - Separate the setup from callback definition
-8. **Before conditional blocks** - Separate data preparation from decision logic
-
 **CRITICAL: After generating any code, you MUST call the `code-optimizer` agent to optimize the code style, spacing, and naming conventions. The code-optimizer will enforce all spacing rules, snake_case naming, and remove unnecessary comments.**
 
 - The output code should not contain any comments!!! (Important!!!) Good code naming doesn't require comments.
