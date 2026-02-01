@@ -1,0 +1,24 @@
+{
+	"name": "polywise",
+	"version": "0.0.0",
+	"main": "./dist/index.js",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js",
+			"default": "./dist/index.js"
+		}
+	},
+	"files": [
+		"dist"
+	],
+	"scripts": {
+		"dev": "cross-env NODE_ENV=development rslib build --watch",
+		"build": "rslib build"
+	},
+	"devDependencies": {
+		"@rslib/core": "catalog:",
+		"cross-env": "^10.1.0",
+		"deepmerge-ts": "^7.1.5"
+	}
+}

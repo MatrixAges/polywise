@@ -301,6 +301,18 @@ importers:
         specifier: ^5.9.3
         version: 5.9.3
 
+  packages/chaosbench:
+    devDependencies:
+      '@rslib/core':
+        specifier: 'catalog:'
+        version: 0.19.4(typescript@5.9.3)
+      cross-env:
+        specifier: ^10.1.0
+        version: 10.1.0
+      deepmerge-ts:
+        specifier: ^7.1.5
+        version: 7.1.5
+
   packages/desktop:
     dependencies:
       '@ai-sdk/openai':
@@ -430,6 +442,18 @@ importers:
       electron:
         specifier: ^40.1.0
         version: 40.1.0
+
+  packages/polywise:
+    devDependencies:
+      '@rslib/core':
+        specifier: 'catalog:'
+        version: 0.19.4(typescript@5.9.3)
+      cross-env:
+        specifier: ^10.1.0
+        version: 10.1.0
+      deepmerge-ts:
+        specifier: ^7.1.5
+        version: 7.1.5
 
   packages/stk:
     dependencies:
