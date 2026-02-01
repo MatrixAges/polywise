@@ -1,3 +1,4 @@
 export * from './Polywise'
-export * from './SensoryCortex'
+export * from './Input'
+export * from './Output'
 export * from './BrainController'

@@ -2,14 +2,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 
 import { Polywise } from './Polywise'
 
-interface SVOExtract {
-	subject: string
-	predicate: string
-	object: string
-	confidence: number
-}
-
-export class SensoryCortex {
+export class Input {
 	private poly: Polywise
 	private model: any
 
@@ -20,11 +13,11 @@ export class SensoryCortex {
 	}
 
 	async processArticle(title: string, content: string) {
-		const res = await (this.poly as any).db.query(
+		const res = await (this.poly as any).query(
 			'INSERT INTO knowledge.articles (title, content) VALUES ($1, $2) RETURNING id',
 			[title, content]
 		)
-		const article_id = res.rows[0].id
+		const article_id = res[0].id
 
 		const prompt = `
       Analyze the following text and extract core knowledge as Subject-Predicate-Object (SVO) triples.
@@ -57,41 +50,33 @@ export class SensoryCortex {
 	}
 
 	private async injectTriples(triples: any[], article_id: number) {
-		const db = (this.poly as any).db
-		await db.exec('BEGIN')
+		await this.poly.exec('BEGIN')
 
 		for (const t of triples) {
 			const sub_id = await this.upsertNode(t.subject, article_id)
 			const obj_id = await this.upsertNode(t.object, article_id)
 
-			await db.query(
-				`
+			await this.poly.exec(`
         INSERT INTO brain.edges (source_id, target_id, weight, type, learning_rate, decay_resistance)
-        VALUES ($1, $2, $3, $4, $5, $6)
+        VALUES (${sub_id}, ${obj_id}, ${0.5 * t.learning_rate}, '${t.predicate}', ${t.learning_rate}, ${t.decay_resistance})
         ON CONFLICT DO NOTHING;
-      `,
-				[sub_id, obj_id, 0.5 * t.learning_rate, t.predicate, t.learning_rate, t.decay_resistance]
-			)
+      `)
 
-			await db.query(
-				`
+			await this.poly.exec(`
         UPDATE brain.edges 
         SET 
-          learning_rate = GREATEST(learning_rate, $3),
-          decay_resistance = GREATEST(decay_resistance, $4),
-          weight = LEAST(weight + (0.5 * $3), 5.0) 
-        WHERE source_id = $1 AND target_id = $2;
-      `,
-				[sub_id, obj_id, t.learning_rate, t.decay_resistance]
-			)
+          learning_rate = GREATEST(learning_rate, ${t.learning_rate}),
+          decay_resistance = GREATEST(decay_resistance, ${t.decay_resistance}),
+          weight = LEAST(weight + ${0.5 * t.learning_rate}, 5.0) 
+        WHERE source_id = ${sub_id} AND target_id = ${obj_id};
+      `)
 		}
 
-		await db.exec('COMMIT')
+		await this.poly.exec('COMMIT')
 	}
 
 	private async upsertNode(label: string, article_id: number): Promise<number> {
-		const db = (this.poly as any).db
-		await db.query(
+		await this.poly.query(
 			`
       INSERT INTO brain.nodes (label, x, y, potential)
       VALUES ($1, random() * 800, random() * 600, 1.0)
@@ -100,10 +85,10 @@ export class SensoryCortex {
 			[label]
 		)
 
-		const res = await db.query('SELECT id FROM brain.nodes WHERE label = $1', [label])
-		const nid = res.rows[0].id
+		const res = await this.poly.query('SELECT id FROM brain.nodes WHERE label = $1', [label])
+		const nid = res[0].id
 
-		await db.query(
+		await this.poly.query(
 			'INSERT INTO brain.node_sources (node_id, article_id) VALUES ($1, $2) ON CONFLICT DO NOTHING;',
 			[nid, article_id]
 		)
