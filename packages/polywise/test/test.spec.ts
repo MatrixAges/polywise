@@ -8,7 +8,7 @@ describe('Polywise Brain System', () => {
 	let brain: Brain
 
 	beforeAll(async () => {
-		poly = new Polywise(':polywise:', 'engine')
+		poly = new Polywise(':polywise:')
 		await poly.initSchema()
 
 		brain = new Brain(poly, async () => {
@@ -26,7 +26,6 @@ describe('Polywise Brain System', () => {
 
 	it('should initialize schema correctly', async () => {
 		const { nodes, edges } = await poly.getSnapshot()
-		// Schema is initialized, database is ready
 		expect(nodes).toBeDefined()
 		expect(edges).toBeDefined()
 	})
