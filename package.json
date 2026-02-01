@@ -2,7 +2,7 @@
 	"name": "monorepo",
 	"author": "1yasa",
 	"private": true,
-	"packageManager": "pnpm@10.26.2",
+	"packageManager": "pnpm@10.28.2",
 	"scripts": {
 		"deps": "ncu -i",
 		"build:deps": "turbo run deps",
@@ -18,10 +18,10 @@
 	"devDependencies": {
 		"pretty-quick": "^4.2.2",
 		"simple-git-hooks": "^2.13.1",
-		"prettier": "^3.7.4",
-		"turbo": "^2.7.2",
+		"prettier": "^3.8.1",
+		"turbo": "^2.8.1",
 		"@ianvs/prettier-plugin-sort-imports": "^4.7.0",
 		"prettier-plugin-tailwindcss-pro": "^0.2.0",
-		"pnpm-catalog-updates": "^1.0.3"
+		"pnpm-catalog-updates": "^1.1.8"
 	}
 }
