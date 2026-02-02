@@ -7,8 +7,6 @@ import type { EmbeddingConfig, RerankerConfig, PipelineArgs } from './types'
 
 @singleton()
 export default class Pipeline {
-	private embedding: any = null
-	private reranker: any = null
 	private embedding_config: EmbeddingConfig = DEFAULT_EMBEDDING_CONFIG
 	private reranker_config: RerankerConfig = DEFAULT_RERANKER_CONFIG
 	private cache_dir: string | null = null
@@ -34,24 +32,24 @@ export default class Pipeline {
 
 	async loadEmbeddingModel() {
 		if (this.embedding_config.type !== 'local') {
-			return
+			return null
 		}
 
 		const { model, dtype } = this.embedding_config
 
-		this.embedding = await pipeline('feature-extraction', model, {
+		return await pipeline('feature-extraction', model, {
 			dtype: dtype as any
 		})
 	}
 
 	async loadRerankerModel() {
 		if (this.reranker_config.type !== 'local') {
-			return
+			return null
 		}
 
 		const { model, dtype } = this.reranker_config
 
-		this.reranker = await pipeline('text-classification' as any, model, {
+		return await pipeline('text-classification' as any, model, {
 			dtype: dtype as any
 		})
 	}
@@ -61,8 +59,6 @@ export default class Pipeline {
 
 		if (config.type === 'local') {
 			await this.loadEmbeddingModel()
-		} else {
-			this.embedding = null
 		}
 	}
 
@@ -71,8 +67,6 @@ export default class Pipeline {
 
 		if (config.type === 'local') {
 			await this.loadRerankerModel()
-		} else {
-			this.reranker = null
 		}
 	}
 
@@ -83,11 +77,9 @@ export default class Pipeline {
 			return await fn(text)
 		}
 
-		if (!this.embedding) {
-			await this.loadEmbeddingModel()
-		}
+		const embedding = await this.loadEmbeddingModel()
 
-		const output = await this.embedding(text, {
+		const output = await embedding(text, {
 			pooling: POOLING_MEAN,
 			normalize: true
 		})
@@ -102,11 +94,9 @@ export default class Pipeline {
 			return await fn(query, documents)
 		}
 
-		if (!this.reranker) {
-			await this.loadRerankerModel()
-		}
+		const reranker = await this.loadRerankerModel()
 
-		const output = await this.reranker(query, documents)
+		const output = await reranker(query, documents)
 
 		return output
 	}
@@ -126,10 +116,5 @@ export default class Pipeline {
 	setCacheDir(dir: string) {
 		this.cache_dir = dir
 		env.cacheDir = dir
-	}
-
-	off() {
-		this.embedding = null
-		this.reranker = null
 	}
 }

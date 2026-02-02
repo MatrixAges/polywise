@@ -216,6 +216,32 @@ function getUser(id: number): Promise<User | null>
 function getUser(id: number): Promise<any>
 ```
 
+### Empty Function Rule
+
+Do not keep empty functions. If a function body is empty (no implementation), remove it entirely.
+
+**Good:**
+
+```typescript
+export default class MyClass {
+	init() {
+		this.value = 42
+	}
+}
+```
+
+**Avoid:**
+
+```typescript
+export default class MyClass {
+	value: number
+
+	constructor() {}
+
+	off() {}
+}
+```
+
 ## Database Schema Migration (CRITICAL)
 
 When modifying database schema in the polywise package, you MUST update the migration system:
