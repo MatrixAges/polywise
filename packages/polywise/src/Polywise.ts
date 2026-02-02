@@ -38,9 +38,9 @@ export default class Polywise {
 	public pipeline: Pipeline
 
 	constructor() {
+		this.pipeline = new Pipeline()
 		this.article = new Article(this.pipeline)
 		this.brain = new Brain()
-		this.pipeline = new Pipeline()
 	}
 
 	async init(args: PolywiseArgs = {}) {
@@ -85,13 +85,13 @@ export default class Polywise {
 			}
 
 			const check_result = await this.query<{ count: string }>(
-				"SELECT COUNT(*) as count FROM information_schema.tables WHERE table_schema = 'brain' AND table_name = 'articles'"
+				"SELECT COUNT(*) as count FROM information_schema.tables WHERE table_schema = 'knowledge' AND table_name = 'articles'"
 			)
 
 			if (parseInt(check_result[0]?.count || '0') === 0) {
 				await this.exec([
 					sql.sql_create_extension_vector,
-					sql.sql_create_schema_brain,
+					sql.sql_create_schema_knowledge,
 					sql.sql_create_table_articles
 				])
 			}
@@ -320,6 +320,8 @@ export default class Polywise {
 
 		if (currentDepth < maxDepth) {
 			setImmediate(() => {
+				if (!this.db) return
+
 				this.executeChainOfThought({
 					query: emergedQuery,
 					initialResults: emergedFinalResults,
@@ -371,83 +373,51 @@ export default class Polywise {
 	}
 
 	private async recallNodesByKeywords(keywords: string[]): Promise<Node[]> {
-		if (keywords.length === 0) return []
+		if (!this.db || keywords.length === 0) return []
 
 		const results: Node[] = []
 		for (const keyword of keywords) {
 			const nodes = await this.query<Node[]>(sql_brain.sql_recall_nodes_by_label, [`%${keyword}%`, 10])
-			if (nodes) {
-				results.push(...nodes)
-			}
+			results.push(...nodes)
 		}
 
-		const unique = Array.from(new Map(results.map(n => [n.id, n])).values())
-		return unique.sort((a, b) => b.potential - a.potential).slice(0, 20)
+		const uniqueNodes = Array.from(new Map(results.map(n => [n.id, n])).values())
+
+		return uniqueNodes
 	}
 
 	private async recallRelatedNodes(nodeIds: number[], maxDepth: number): Promise<Node[]> {
-		if (nodeIds.length === 0) return []
+		if (!this.db || nodeIds.length === 0 || maxDepth <= 0) return []
 
-		const result = await this.query<Node[]>(sql_brain.sql_recall_related_nodes, [nodeIds, maxDepth, 50])
-		return result || []
+		const res = await this.query<Node[]>(sql_brain.sql_recall_related_nodes, [nodeIds, maxDepth, 20])
+
+		return res
 	}
 
-	private async stimulateNodes(nodeIds: number[], intensity: number): Promise<void> {
-		if (nodeIds.length === 0) return
+	private async getNodeContexts(nodeIds: number[]): Promise<any[]> {
+		if (!this.db || nodeIds.length === 0) return []
 
-		await this.query(sql_brain.sql_stimulate_nodes_batch, [intensity, nodeIds])
+		const res = await this.query<any[]>(sql_brain.sql_get_node_contexts, [nodeIds])
+
+		return res
 	}
 
-	private async strengthenRelatedEdges(matchedNodes: Node[], relatedNodes: Node[]): Promise<void> {
-		const sourceIds = matchedNodes.slice(0, 10).map(n => n.id)
-		const targetIds = relatedNodes.slice(0, 20).map(n => n.id)
+	private async stimulateNodes(nodeIds: number[], intensity: number) {
+		if (!this.db || nodeIds.length === 0 || intensity <= 0) return
 
-		if (sourceIds.length > 0 && targetIds.length > 0) {
-			await this.query(sql_brain.sql_strengthen_edges_batch, [0.1, sourceIds, targetIds])
+		for (const id of nodeIds) {
+			await this.query(sql.sql_stimulate, [intensity, id])
 		}
 	}
 
-	private async getNodeContexts(
-		nodeIds: number[]
-	): Promise<{ idol_id?: string; root_ids?: string[]; relevance_score: number; article_ids: number[] }[]> {
-		if (nodeIds.length === 0) return []
+	private async strengthenRelatedEdges(matchedNodes: Node[], relatedNodes: Node[]) {
+		if (!this.db) return
 
-		const articles = await this.query<{ id: number; title: string; content: string }[]>(
-			sql_brain.sql_get_node_articles,
-			[nodeIds]
-		)
-		const articlesList = articles || []
+		const allNodeIds = [...matchedNodes, ...relatedNodes].map(n => n.id)
 
-		const nodeArticles = await this.query<{ id: number; idol_id?: string; root_ids?: string[] }[]>(
-			`SELECT id, idol_id, root_ids FROM brain.nodes WHERE id = ANY($1)`,
-			[nodeIds]
-		)
-		const nodeArticlesList = nodeArticles || []
+		if (allNodeIds.length < 2) return
 
-		const nodeArticleMap = new Map<number, { idol_id?: string; root_ids?: string[] }>()
-		for (const na of nodeArticlesList) {
-			nodeArticleMap.set(na.id, { idol_id: na.idol_id, root_ids: na.root_ids })
-		}
-
-		const contextMap = new Map<
-			string,
-			{ idol_id?: string; root_ids?: string[]; relevance_score: number; article_ids: number[] }
-		>()
-
-		for (const article of articlesList) {
-			const key = `ctx_${article.id}`
-			if (!contextMap.has(key)) {
-				contextMap.set(key, {
-					idol_id: undefined,
-					root_ids: [],
-					relevance_score: 1.0,
-					article_ids: []
-				})
-			}
-			contextMap.get(key)!.article_ids.push(article.id)
-		}
-
-		return Array.from(contextMap.values())
+		await this.query(sql.sql_strengthen_edges_batch, [0.1, allNodeIds, allNodeIds])
 	}
 
 	private aggregateResults(recallResult: MemoryRecallResult, searchResults: SearchResult[]): AggregatedCandidate[] {
@@ -713,7 +683,7 @@ export default class Polywise {
 		const [nodeResult, edgeResult, articleResult] = await Promise.all([
 			this.query<{ count: string }>('SELECT COUNT(*) as count FROM brain.nodes'),
 			this.query<{ count: string }>('SELECT COUNT(*) as count FROM brain.edges'),
-			this.query<{ count: string }>('SELECT COUNT(*) as count FROM brain.articles')
+			this.query<{ count: string }>('SELECT COUNT(*) as count FROM knowledge.articles')
 		])
 
 		const memoryUsage = process.memoryUsage()

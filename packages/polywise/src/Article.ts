@@ -53,11 +53,11 @@ export default class Article {
 	}
 
 	async get(article_id: number) {
-		if (!this.db) return []
+		if (!this.db) return null
 
 		const res = await this.db.query<ArticleEntity>(sql.sql_get_article, [article_id])
 
-		return res.rows
+		return res.rows.length > 0 ? res.rows : null
 	}
 
 	async getAll() {
@@ -86,11 +86,19 @@ export default class Article {
 		const embedding = await this.pipeline.embed(query)
 
 		const res = await this.db.query<ArticleWithSimilarity>(sql.sql_search_articles_by_vector, [
-			JSON.stringify(embedding),
+			`[${embedding.join(',')}]`,
 			limit ?? 10
 		])
 
 		return res.rows
+	}
+
+	async addEmbedding(article_id: number, content: string) {
+		if (!this.db || !this.pipeline) return
+
+		const embedding = await this.pipeline.embed(content)
+
+		await this.db.query(sql.sql_insert_article_embedding, [article_id, `[${embedding.join(',')}]`])
 	}
 
 	async process(args: AddArticleArgs) {
@@ -103,7 +111,28 @@ export default class Article {
 		await this.db.query(sql.sql_process_article, [title, content])
 
 		const res = await this.db.query<ArticleEntity>(
-			'SELECT * FROM brain.articles WHERE title = $1 ORDER BY id DESC LIMIT 1',
+			'SELECT * FROM knowledge.articles WHERE title = $1 ORDER BY id DESC LIMIT 1',
+			[title]
+		)
+
+		if (res.rows.length > 0 && embedding) {
+			await this.db.query(sql.sql_insert_article_embedding, [res.rows[0].id, `[${embedding.join(',')}]`])
+		}
+
+		return res.rows[0]
+	}
+
+	async process(args: AddArticleArgs) {
+		if (!this.db) return null
+
+		const { title, content } = args
+
+		const embedding = this.pipeline ? await this.pipeline.embed(content) : null
+
+		await this.db.query(sql.sql_process_article, [title, content])
+
+		const res = await this.db.query<ArticleEntity>(
+			'SELECT * FROM knowledge.articles WHERE title = $1 ORDER BY id DESC LIMIT 1',
 			[title]
 		)
 
@@ -121,7 +150,7 @@ export default class Article {
 
 		await this.db.query(sql.sql_update_article, [id, title, content])
 
-		const res = await this.db.query<ArticleEntity>('SELECT * FROM brain.articles WHERE id = $1', [id])
+		const res = await this.db.query<ArticleEntity>('SELECT * FROM knowledge.articles WHERE id = $1', [id])
 
 		return res.rows[0]
 	}
@@ -129,8 +158,8 @@ export default class Article {
 	async delete(article_id: number) {
 		if (!this.db) return
 
-		await this.db.query('DELETE FROM brain.article_embeddings WHERE article_id = $1', [article_id])
-		await this.db.query('DELETE FROM brain.articles WHERE id = $1', [article_id])
+		await this.db.query('DELETE FROM knowledge.article_embeddings WHERE article_id = $1', [article_id])
+		await this.db.query('DELETE FROM knowledge.articles WHERE id = $1', [article_id])
 	}
 
 	async searchFts(args: SearchArticleArgs) {

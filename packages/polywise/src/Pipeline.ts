@@ -22,6 +22,9 @@ export default class Pipeline {
 	private embedding_concurrency: number = DEFAULT_CONCURRENCY
 	private reranker_concurrency: number = DEFAULT_CONCURRENCY
 
+	private embedding_pipeline: any = null
+	private reranker_pipeline: any = null
+
 	private embedding_queue: PQueue
 	private reranker_queue: PQueue
 
@@ -46,10 +49,12 @@ export default class Pipeline {
 
 		if (embedding_config) {
 			this.embedding_config = embedding_config
+			this.embedding_pipeline = null
 		}
 
 		if (reranker_config) {
 			this.reranker_config = reranker_config
+			this.reranker_pipeline = null
 		}
 
 		if (embedding_concurrency !== undefined) {
@@ -63,32 +68,66 @@ export default class Pipeline {
 		}
 	}
 
+	private embedding_promise: Promise<any> | null = null
+	private reranker_promise: Promise<any> | null = null
+
 	async loadEmbeddingModel() {
+		if (this.embedding_pipeline) {
+			return this.embedding_pipeline
+		}
+
+		if (this.embedding_promise) {
+			return this.embedding_promise
+		}
+
 		if (this.embedding_config.type !== 'local') {
 			return null
 		}
 
 		const { model, dtype } = this.embedding_config
 
-		return await pipeline('feature-extraction', model, {
+		this.embedding_promise = pipeline('feature-extraction', model, {
 			dtype: dtype as any
 		})
+
+		try {
+			this.embedding_pipeline = await this.embedding_promise
+			return this.embedding_pipeline
+		} finally {
+			this.embedding_promise = null
+		}
 	}
 
 	async loadRerankerModel() {
+		if (this.reranker_pipeline) {
+			return this.reranker_pipeline
+		}
+
+		if (this.reranker_promise) {
+			return this.reranker_promise
+		}
+
 		if (this.reranker_config.type !== 'local') {
 			return null
 		}
 
 		const { model, dtype } = this.reranker_config
 
-		return await pipeline('text-classification' as any, model, {
+		this.reranker_promise = pipeline('text-classification' as any, model, {
 			dtype: dtype as any
 		})
+
+		try {
+			this.reranker_pipeline = await this.reranker_promise
+			return this.reranker_pipeline
+		} finally {
+			this.reranker_promise = null
+		}
 	}
 
 	async setEmbeddingConfig(config: EmbeddingConfig) {
 		this.embedding_config = config
+		this.embedding_pipeline = null
 
 		if (config.type === 'local') {
 			await this.loadEmbeddingModel()
@@ -97,6 +136,7 @@ export default class Pipeline {
 
 	async setRerankerConfig(config: RerankerConfig) {
 		this.reranker_config = config
+		this.reranker_pipeline = null
 
 		if (config.type === 'local') {
 			await this.loadRerankerModel()
