@@ -1,4 +1,6 @@
 import { env, pipeline } from '@huggingface/transformers'
+import fs from 'fs-extra'
+import path from 'path'
 import os from 'os'
 import PQueue from 'p-queue'
 import { injectable } from 'tsyringe'
@@ -265,5 +267,30 @@ export default class Pipeline {
 		}))
 
 		return results.sort((a, b) => b.rerankScore - a.rerankScore).slice(0, rerankLimit)
+	}
+
+	async checkModels() {
+		const cache_dir = this.cache_dir || `${os.homedir()}/.Polywise/.models`
+
+		const checkModel = async (modelName: string) => {
+			const modelPath = path.join(cache_dir, modelName)
+			return await fs.pathExists(modelPath)
+		}
+
+		if (this.embedding_config.type === 'local') {
+			const exists = await checkModel(this.embedding_config.model)
+			if (!exists) {
+				console.log(`Embedding model ${this.embedding_config.model} not found, downloading...`)
+				await this.loadEmbeddingModel()
+			}
+		}
+
+		if (this.reranker_config.type === 'local') {
+			const exists = await checkModel(this.reranker_config.model)
+			if (!exists) {
+				console.log(`Reranker model ${this.reranker_config.model} not found, downloading...`)
+				await this.loadRerankerModel()
+			}
+		}
 	}
 }
