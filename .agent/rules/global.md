@@ -81,7 +81,11 @@ The blank line creates **visual grouping** that mirrors the logical grouping of 
 - `models/`: Only responsible for reactive state management and pure business logic, without involving DOM or UI interaction.
 - `components/`: Only responsible for view rendering and user interaction logic; complex logic should be delegated to `models`.
 - `utils/`: Only contains pure utility functions without side effects.
-- **Dependency Injection (DI)**: Use `tsyringe` to manage object lifecycles. Manage global state using `singleton` and instantiable functional modules using `injectable`, avoiding the coupling caused by manual instantiation.
+- **Dependency Injection (DI)**: Use `tsyringe` with `@abraham/reflection` to manage object lifecycles.
+     - **Annotations**: Use `@singleton()` for global state (e.g., `GlobalModel`, `Settings`) and `@injectable()` for instantiable functional modules.
+     - **Constructor Injection**: All dependencies must be injected through the class constructor. Avoid manual instantiation using `new`.
+     - **Initialization (init)**: Each class should provide an `init()` method for logic that cannot be handled in the constructor (e.g., async setup, setting up observers). Parent classes are responsible for calling `init()` on their injected dependencies within their own `init()` method.
+     - **Cleanup (off)**: Each class should provide an `off()` method to handle resource cleanup, such as removing event listeners or disposing of MobX observers.
 - **Atomic Components**:
 - Avoid writing large list items in the main file.
 - Content within `map` loops must be extracted into independent child components.
