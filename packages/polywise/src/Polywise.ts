@@ -4,6 +4,7 @@ import { singleton } from 'tsyringe'
 
 import Article from './Article'
 import Brain from './Brain'
+import Pipeline from './Pipeline'
 import * as sql from './sql'
 import * as sql_meta from './sql/meta'
 import { calculateWeight, CURRENT_SCHEMA_VERSION, migrate, validateMigrations } from './utils'
@@ -25,7 +26,8 @@ export default class Polywise {
 
 	constructor(
 		public article: Article,
-		public brain: Brain
+		public brain: Brain,
+		public pipeline: Pipeline
 	) {}
 
 	async init(args: PolywiseArgs = {}) {
@@ -36,9 +38,12 @@ export default class Polywise {
 			extensions: { vector }
 		})
 
+		await this.pipeline.init({
+			cache_dir: embedding_cache_dir
+		})
+
 		this.article.init({
-			db: this.db,
-			embedding_cache_dir
+			db: this.db
 		})
 
 		this.brain.init({
@@ -276,6 +281,7 @@ export default class Polywise {
 	async off() {
 		this.brain.off()
 		this.article.off()
+		this.pipeline.off()
 
 		if (this.db) {
 			await this.db.close()

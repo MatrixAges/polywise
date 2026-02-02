@@ -13,6 +13,42 @@ export interface PolywiseArgs {
 	onTick?: () => void
 }
 
+export interface LocalEmbeddingConfig {
+	type: 'local'
+	model: string
+	dtype?: string
+}
+
+export interface APIEmbeddingConfig {
+	type: 'api'
+	api_url: string
+	api_key?: string
+	model?: string
+}
+
+export type EmbeddingConfig = LocalEmbeddingConfig | APIEmbeddingConfig
+
+export interface LocalRerankerConfig {
+	type: 'local'
+	model: string
+	dtype?: string
+}
+
+export interface APIRerankerConfig {
+	type: 'api'
+	api_url: string
+	api_key?: string
+	model?: string
+}
+
+export type RerankerConfig = LocalRerankerConfig | APIRerankerConfig
+
+export interface PipelineArgs {
+	cache_dir?: string
+	embedding_config?: EmbeddingConfig
+	reranker_config?: RerankerConfig
+}
+
 export interface AddNodeArgs {
 	label: string
 	x: number
@@ -73,5 +109,4 @@ export interface SearchArticleArgs {
 
 export interface ArticleArgs {
 	db: PGlite
-	embedding_cache_dir?: string
 }

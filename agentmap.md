@@ -351,8 +351,12 @@ The project is a monorepo organized using a workspace structure, primarily built
 					"role": "Class"
 				},
 				"Brain.ts": { "desc": "Brain lifecycle manager with fatigue state machine", "role": "Class" },
+				"Pipeline.ts": {
+					"desc": "Local model manager with embedding and reranking pipelines. Supports local models and API endpoints.",
+					"role": "Class"
+				},
 				"Polywise.ts": {
-					"desc": "Core database API for knowledge graph operations. Includes public instances of Brain and Article.",
+					"desc": "Core database API for knowledge graph operations. Includes public instances of Brain, Article, and Pipeline.",
 					"role": "Class"
 				},
 				"index.ts": { "desc": "Main exports", "role": "Index" },
@@ -377,10 +381,6 @@ The project is a monorepo organized using a workspace structure, primarily built
 				"utils": {
 					"calculateFatigue.ts": { "desc": "Fatigue calculation utility", "role": "Utility" },
 					"calculateWeight.ts": { "desc": "Weight calculation utility", "role": "Utility" },
-					"embedding.ts": {
-						"desc": "HuggingFace transformer embedding generator",
-						"role": "Utility"
-					},
 					"generateNodePosition.ts": {
 						"desc": "Random node position generator",
 						"role": "Utility"

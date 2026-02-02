@@ -3,23 +3,23 @@ import { injectable } from 'tsyringe'
 import type { PGlite } from '@electric-sql/pglite'
 
 import * as sql from './sql'
-import getEmbedding from './utils/embedding'
+import Pipeline from './Pipeline'
 
 import type { AddArticleArgs, ArticleArgs, ArticleEntity, ArticleWithSimilarity, SearchArticleArgs } from './types'
 
 @injectable()
 export default class Article {
-	private embedding_cache_dir?: string
-
 	private db: PGlite | null = null
 
-	constructor() {}
+	private pipeline: Pipeline | null = null
+
+	constructor(private pipeline_instance: Pipeline) {}
 
 	init(args: ArticleArgs) {
-		const { db, embedding_cache_dir } = args
+		const { db } = args
 
 		this.db = db
-		this.embedding_cache_dir = embedding_cache_dir
+		this.pipeline = this.pipeline_instance
 	}
 
 	async add(args: AddArticleArgs) {
@@ -33,9 +33,9 @@ export default class Article {
 	}
 
 	async addEmbedding(article_id: number, content: string) {
-		if (!this.db) return
+		if (!this.db || !this.pipeline) return
 
-		const embedding = await getEmbedding(content, this.embedding_cache_dir)
+		const embedding = await this.pipeline.embed(content)
 
 		await this.db.query(sql.sql_insert_article_embedding, [article_id, JSON.stringify(embedding)])
 	}
@@ -79,11 +79,11 @@ export default class Article {
 	}
 
 	async searchByVector(args: SearchArticleArgs) {
-		if (!this.db) return []
+		if (!this.db || !this.pipeline) return []
 
 		const { query, limit } = args
 
-		const embedding = await getEmbedding(query, this.embedding_cache_dir)
+		const embedding = await this.pipeline.embed(query)
 
 		const res = await this.db.query<ArticleWithSimilarity>(sql.sql_search_articles_by_vector, [
 			JSON.stringify(embedding),
@@ -95,5 +95,6 @@ export default class Article {
 
 	off() {
 		this.db = null
+		this.pipeline = null
 	}
 }
