@@ -397,7 +397,7 @@ export default class Polywise {
 	private async getNodeContexts(nodeIds: number[]): Promise<any[]> {
 		if (!this.db || nodeIds.length === 0) return []
 
-		const res = await this.query<any[]>(sql_brain.sql_get_node_contexts, [nodeIds])
+		const res = await this.query<any[]>(sql_brain.sql_get_node_articles, [nodeIds])
 
 		return res
 	}
@@ -431,21 +431,20 @@ export default class Polywise {
 		}
 
 		for (const context of recallResult.related_contexts) {
-			for (const articleId of context.article_ids) {
-				const article = searchResults.find(r => r.id === articleId)
-				if (article) {
-					const memoryStrength = this.calculateMemoryStrength(context, recallResult.nodes)
-					candidates.push({
-						id: article.id,
-						title: article.title,
-						content: article.content,
-						source: 'memory',
-						rerankScore: article.rerankScore,
-						relevance_score: context.relevance_score * 1.5,
-						stimulated: true,
-						memory_strength: memoryStrength
-					})
-				}
+			const articleId = context.id
+			const article = searchResults.find(r => r.id === articleId)
+			if (article) {
+				const memoryStrength = this.calculateMemoryStrength(context, recallResult.nodes)
+				candidates.push({
+					id: article.id,
+					title: article.title,
+					content: article.content,
+					source: 'memory',
+					rerankScore: article.rerankScore,
+					relevance_score: 1.0 * 1.5,
+					stimulated: true,
+					memory_strength: memoryStrength
+				})
 			}
 		}
 
@@ -488,10 +487,10 @@ export default class Polywise {
 	}
 
 	private calculateMemoryStrength(
-		context: { idol_id?: string; root_ids?: string[]; relevance_score: number; article_ids: number[] },
+		context: { idol_id?: string; root_ids?: string[]; relevance_score?: number; id: number },
 		nodes: Node[]
 	): number {
-		return context.relevance_score * 0.5 + 0.5
+		return (context.relevance_score ?? 1.0) * 0.5 + 0.5
 	}
 
 	private async rerankResults(
@@ -669,7 +668,7 @@ export default class Polywise {
 			throw new Error('DB not initialized')
 		}
 
-		const res = await this.db.query(sql_str, params)
+		const res = params ? await this.db.query(sql_str, params) : await this.db.query(sql_str)
 
 		return JSON.parse(JSON.stringify(res.rows)) as T
 	}

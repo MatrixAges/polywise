@@ -1,35 +1,34 @@
-import { injectable } from 'tsyringe'
+import { PGlite } from '@electric-sql/pglite'
 
-import type { PGlite } from '@electric-sql/pglite'
-
-import * as sql from './sql'
 import Pipeline from './Pipeline'
+import * as sql from './sql'
+import { ArticleArgs, ArticleEntity, ArticleWithSimilarity, SearchArticleArgs } from './types'
 
-import type { AddArticleArgs, ArticleArgs, ArticleEntity, ArticleWithSimilarity, SearchArticleArgs } from './types'
-
-@injectable()
 export default class Article {
 	private db: PGlite | null = null
-
 	private pipeline: Pipeline | null = null
 
 	constructor(private pipeline_instance: Pipeline) {}
 
 	init(args: ArticleArgs) {
 		const { db } = args
-
 		this.db = db
 		this.pipeline = this.pipeline_instance
 	}
 
-	async add(args: AddArticleArgs) {
-		if (!this.db) return
+	async add(article: { title: string; content: string }) {
+		const res = await this.process(article)
+		return res?.id || null
+	}
 
-		const { title, content } = args
+	async process(article: { title: string; content: string }) {
+		if (!this.db) return null
 
-		const res = await this.db.query<{ id: number }>(sql.sql_process_article, [title, content])
+		const { title, content } = article
+		const res = await this.db.query<ArticleEntity>(sql.sql_process_article, [title, content])
 
-		return res.rows[0].id
+		if (res.rows.length === 0) return null
+		return res.rows[0]
 	}
 
 	async addEmbedding(article_id: number, content: string) {
@@ -37,19 +36,16 @@ export default class Article {
 
 		const embedding = await this.pipeline.embed(content)
 
-		await this.db.query(sql.sql_insert_article_embedding, [article_id, JSON.stringify(embedding)])
+		await this.db.query(sql.sql_insert_article_embedding, [article_id, `[${embedding.join(',')}]`])
 	}
 
-	async addWithEmbedding(args: AddArticleArgs) {
-		const { content } = args
-
-		const article_id = await this.add(args)
-
-		if (!article_id) return
-
-		await this.addEmbedding(article_id, content)
-
-		return article_id
+	async addWithEmbedding(article: { title: string; content: string }) {
+		const result = await this.process(article)
+		if (result && result.id) {
+			await this.addEmbedding(result.id, article.content)
+			return result.id
+		}
+		return null
 	}
 
 	async get(article_id: number) {
@@ -68,14 +64,27 @@ export default class Article {
 		return res.rows
 	}
 
-	async searchByText(args: SearchArticleArgs) {
-		if (!this.db) return []
+	async update(article: { id: number; title: string; content: string }) {
+		if (!this.db) return null
 
-		const { query, limit } = args
+		const { id, title, content } = article
+		const res = await this.db.query<ArticleEntity>(sql.sql_update_article, [id, title, content])
 
-		const res = await this.db.query<ArticleEntity>(sql.sql_search_articles_by_text, [query, limit ?? 10])
+		return res.rows.length > 0 ? res.rows[0] : null
+	}
 
-		return res.rows
+	async delete(article_id: number) {
+		if (!this.db) return
+
+		await this.db.query('DELETE FROM knowledge.articles WHERE id = $1', [article_id])
+	}
+
+	async searchVector(args: SearchArticleArgs) {
+		return this.searchByVector(args)
+	}
+
+	async searchFts(args: SearchArticleArgs) {
+		return this.searchByText(args)
 	}
 
 	async searchByVector(args: SearchArticleArgs) {
@@ -93,81 +102,20 @@ export default class Article {
 		return res.rows
 	}
 
-	async addEmbedding(article_id: number, content: string) {
-		if (!this.db || !this.pipeline) return
+	async searchByText(args: SearchArticleArgs) {
+		if (!this.db) return []
 
-		const embedding = await this.pipeline.embed(content)
+		const { query, limit } = args
 
-		await this.db.query(sql.sql_insert_article_embedding, [article_id, `[${embedding.join(',')}]`])
-	}
+		const res = await this.db.query<ArticleWithSimilarity>(sql.sql_search_articles_by_text, [
+			query,
+			limit ?? 10
+		])
 
-	async process(args: AddArticleArgs) {
-		if (!this.db) return null
-
-		const { title, content } = args
-
-		const embedding = this.pipeline ? await this.pipeline.embed(content) : null
-
-		await this.db.query(sql.sql_process_article, [title, content])
-
-		const res = await this.db.query<ArticleEntity>(
-			'SELECT * FROM knowledge.articles WHERE title = $1 ORDER BY id DESC LIMIT 1',
-			[title]
-		)
-
-		if (res.rows.length > 0 && embedding) {
-			await this.db.query(sql.sql_insert_article_embedding, [res.rows[0].id, `[${embedding.join(',')}]`])
-		}
-
-		return res.rows[0]
-	}
-
-	async process(args: AddArticleArgs) {
-		if (!this.db) return null
-
-		const { title, content } = args
-
-		const embedding = this.pipeline ? await this.pipeline.embed(content) : null
-
-		await this.db.query(sql.sql_process_article, [title, content])
-
-		const res = await this.db.query<ArticleEntity>(
-			'SELECT * FROM knowledge.articles WHERE title = $1 ORDER BY id DESC LIMIT 1',
-			[title]
-		)
-
-		if (res.rows.length > 0 && embedding) {
-			await this.db.query(sql.sql_insert_article_embedding, [res.rows[0].id, JSON.stringify(embedding)])
-		}
-
-		return res.rows[0]
-	}
-
-	async update(args: AddArticleArgs & { id: number }) {
-		if (!this.db) return null
-
-		const { id, title, content } = args
-
-		await this.db.query(sql.sql_update_article, [id, title, content])
-
-		const res = await this.db.query<ArticleEntity>('SELECT * FROM knowledge.articles WHERE id = $1', [id])
-
-		return res.rows[0]
-	}
-
-	async delete(article_id: number) {
-		if (!this.db) return
-
-		await this.db.query('DELETE FROM knowledge.article_embeddings WHERE article_id = $1', [article_id])
-		await this.db.query('DELETE FROM knowledge.articles WHERE id = $1', [article_id])
-	}
-
-	async searchFts(args: SearchArticleArgs) {
-		return this.searchByText(args)
-	}
-
-	async searchVector(args: SearchArticleArgs) {
-		return this.searchByVector(args)
+		return res.rows.map(r => ({
+			...r,
+			similarity: (r as any).rank || 0
+		}))
 	}
 
 	off() {

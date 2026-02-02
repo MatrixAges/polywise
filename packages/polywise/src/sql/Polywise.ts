@@ -58,7 +58,16 @@ export const sql_get_snapshot_edges = (weight_threshold: number) => `
   LIMIT 500
 `
 
-export const sql_process_article = `INSERT INTO knowledge.articles (title, content) VALUES ($1, $2) RETURNING id`
+export const sql_process_article = `INSERT INTO knowledge.articles (title, content) VALUES ($1, $2) RETURNING *`
+
+export const sql_search_articles_by_text = `
+  SELECT id, title, content, created_at,
+    ts_rank(to_tsvector('english', coalesce(title,'') || ' ' || coalesce(content,'')), plainto_tsquery('english', $1)) AS rank
+  FROM knowledge.articles
+  WHERE to_tsvector('english', coalesce(title,'') || ' ' || coalesce(content,'')) @@ plainto_tsquery('english', $1)
+  ORDER BY rank DESC
+  LIMIT $2
+`
 
 export const sql_inject_triples_begin = `BEGIN`
 
@@ -74,9 +83,9 @@ export const sql_inject_triples_insert_edge = (
 	metrics_ids?: string[],
 	metadata?: any
 ) => `
-  INSERT INTO brain.edges (source_id, target_id, weight, type, learning_rate, decay_resistance, idol_id, root_ids, metrics_ids, metadata)
-  VALUES (${sub_id}, ${obj_id}, ${weight}, '${predicate}', ${learning_rate}, ${decay_resistance}, ${idol_id ? `'${idol_id}'` : 'NULL'}, ${root_ids && root_ids.length > 0 ? `ARRAY[${root_ids.map(id => `'${id}'`).join(',')}]` : 'NULL'}, ${metrics_ids && metrics_ids.length > 0 ? `ARRAY[${metrics_ids.map(id => `'${id}'`).join(',')}]` : 'NULL'}, '${JSON.stringify(metadata ?? {})}')
-  ON CONFLICT DO NOTHING;
+  INSERT INTO brain.edges (source_id, target_id, learning_rate, decay_resistance, type, weight, idol_id, root_ids, metrics_ids, metadata)
+  SELECT ${sub_id}, ${obj_id}, ${learning_rate}, ${decay_resistance}, '${predicate}', ${weight}, ${idol_id ? `'${idol_id}'` : 'NULL'}, ${root_ids && root_ids.length > 0 ? `ARRAY[${root_ids.map(id => `'${id}'`).join(',')}]` : 'NULL'}, ${metrics_ids && metrics_ids.length > 0 ? `ARRAY[${metrics_ids.map(id => `'${id}'`).join(',')}]` : 'NULL'}, '${JSON.stringify(metadata ?? {})}'::jsonb
+  WHERE NOT EXISTS (SELECT 1 FROM brain.edges WHERE source_id = ${sub_id} AND target_id = ${obj_id});
 `
 
 export const sql_inject_triples_update_edge = (
@@ -156,14 +165,6 @@ export const sql_search_articles_by_vector = `
   FROM knowledge.articles a
   JOIN knowledge.article_embeddings e ON a.id = e.article_id
   ORDER BY e.embedding <=> $1
-  LIMIT $2
-`
-
-export const sql_search_articles_by_text = `
-  SELECT id, title, content, created_at
-  FROM knowledge.articles
-  WHERE to_tsvector('english', coalesce(title,'') || ' ' || coalesce(content,'')) @@ plainto_tsquery('english', $1)
-  ORDER BY ts_rank(to_tsvector('english', coalesce(title,'') || ' ' || coalesce(content,'')), plainto_tsquery('english', $1)) DESC
   LIMIT $2
 `
 

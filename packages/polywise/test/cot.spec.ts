@@ -12,7 +12,7 @@ describe('Chain of Thought (CoT) Mechanism', () => {
 	const dbName = `:polywise_cot_${uniqueId}:`
 
 	const mockEmbedding = async (text: string): Promise<number[]> => {
-		return Array(384)
+		return Array(1024)
 			.fill(0)
 			.map((_, i) => Math.sin(i + text.length) * 0.1)
 	}
