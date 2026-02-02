@@ -128,3 +128,44 @@ export interface SearchResult {
 	source: 'vector' | 'fulltext'
 	rerankScore: number
 }
+
+export interface RecallArgs {
+	query: string
+	query_embedding?: number[]
+	max_nodes?: number
+	max_depth?: number
+	stimulate_intensity?: number
+	recall_idol_id?: string
+	recall_root_ids?: string[]
+}
+
+export interface QueryArgs {
+	query: string
+	recall_depth?: number
+	search_limit?: number
+	rerank_limit?: number
+	stimulate_on_recall?: boolean
+}
+
+export interface AggregatedCandidate {
+	id: number
+	title: string
+	content: string
+	source: 'memory' | 'external' | 'implicit'
+	rerankScore: number
+	relevance_score: number
+	stimulated: boolean
+	memory_strength: number
+}
+
+export interface HybridSearchResult {
+	id: number
+	title: string
+	content: string
+	source: 'memory' | 'external' | 'implicit'
+	rerankScore: number
+	relevanceScore: number
+	combinedScore: number
+	stimulated: boolean
+	memoryStrength: number
+}

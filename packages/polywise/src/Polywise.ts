@@ -5,17 +5,24 @@ import Article from './Article'
 import Brain from './Brain'
 import Pipeline from './Pipeline'
 import * as sql from './sql'
+import * as sql_brain from './sql/Brain'
 import * as sql_meta from './sql/meta'
 import { calculateWeight, CURRENT_SCHEMA_VERSION, migrate, validateMigrations } from './utils'
 
 import type {
 	AddNodeArgs,
+	AggregatedCandidate,
 	ConnectArgs,
 	Edge,
+	HybridSearchResult,
 	InjectTriplesArgs,
+	MemoryRecallResult,
 	Node,
 	PolywiseArgs,
 	ProcessArticleArgs,
+	QueryArgs,
+	RecallArgs,
+	SearchResult,
 	UpsertNodeArgs
 } from './types'
 
@@ -177,6 +184,247 @@ export default class Polywise {
 			sql.sql_sleep_tick_reset_nodes,
 			sql.sql_sleep_tick_commit
 		])
+	}
+
+	async search(args: QueryArgs): Promise<HybridSearchResult[]> {
+		const { query, recall_depth = 2, search_limit = 20, rerank_limit = 10, stimulate_on_recall = true } = args
+
+		const recallResult = await this.recallFromMemory({
+			query,
+			max_depth: recall_depth,
+			stimulate_intensity: stimulate_on_recall ? 0.3 : 0
+		})
+
+		const searchResults = await this.pipeline.search({
+			query,
+			vectorSearch: () => this.article.searchVector({ query, limit: search_limit }),
+			fulltextSearch: () => this.article.searchFts({ query, limit: search_limit }),
+			rerankLimit: search_limit
+		})
+
+		const aggregated = this.aggregateResults(recallResult, searchResults)
+
+		const finalResults = await this.rerankResults(query, aggregated, rerank_limit)
+
+		return finalResults
+	}
+
+	async recallFromMemory(args: RecallArgs): Promise<MemoryRecallResult> {
+		const { query, max_depth = 2, stimulate_intensity = 0.3 } = args
+
+		const keywords = this.extractKeywords(query)
+		const matchedNodes = await this.recallNodesByKeywords(keywords)
+
+		const relatedNodes = await this.recallRelatedNodes(
+			matchedNodes.map(n => n.id),
+			max_depth
+		)
+
+		if (stimulate_intensity > 0) {
+			const allNodes = [...matchedNodes, ...relatedNodes]
+			const nodeIds = allNodes.map(n => n.id)
+			await this.stimulateNodes(nodeIds, stimulate_intensity)
+			await this.strengthenRelatedEdges(matchedNodes, relatedNodes)
+		}
+
+		const contexts = await this.getNodeContexts([...matchedNodes, ...relatedNodes].map(n => n.id))
+
+		return {
+			nodes: [...matchedNodes, ...relatedNodes],
+			edges: [],
+			stimulated_nodes: [...matchedNodes, ...relatedNodes].map(n => n.id),
+			related_contexts: contexts
+		}
+	}
+
+	private extractKeywords(query: string): string[] {
+		return query
+			.toLowerCase()
+			.split(/\s+/)
+			.filter(w => w.length > 2)
+	}
+
+	private async recallNodesByKeywords(keywords: string[]): Promise<Node[]> {
+		if (keywords.length === 0) return []
+
+		const results: Node[] = []
+		for (const keyword of keywords) {
+			const nodes = await this.query<Node[]>(sql_brain.sql_recall_nodes_by_label, [`%${keyword}%`, 10])
+			if (nodes) {
+				results.push(...nodes)
+			}
+		}
+
+		const unique = Array.from(new Map(results.map(n => [n.id, n])).values())
+		return unique.sort((a, b) => b.potential - a.potential).slice(0, 20)
+	}
+
+	private async recallRelatedNodes(nodeIds: number[], maxDepth: number): Promise<Node[]> {
+		if (nodeIds.length === 0) return []
+
+		const result = await this.query<Node[]>(sql_brain.sql_recall_related_nodes, [nodeIds, maxDepth, 50])
+		return result || []
+	}
+
+	private async stimulateNodes(nodeIds: number[], intensity: number): Promise<void> {
+		if (nodeIds.length === 0) return
+
+		await this.query(sql_brain.sql_stimulate_nodes_batch, [intensity, nodeIds])
+	}
+
+	private async strengthenRelatedEdges(matchedNodes: Node[], relatedNodes: Node[]): Promise<void> {
+		const sourceIds = matchedNodes.slice(0, 10).map(n => n.id)
+		const targetIds = relatedNodes.slice(0, 20).map(n => n.id)
+
+		if (sourceIds.length > 0 && targetIds.length > 0) {
+			await this.query(sql_brain.sql_strengthen_edges_batch, [0.1, sourceIds, targetIds])
+		}
+	}
+
+	private async getNodeContexts(
+		nodeIds: number[]
+	): Promise<{ idol_id?: string; root_ids?: string[]; relevance_score: number; article_ids: number[] }[]> {
+		if (nodeIds.length === 0) return []
+
+		const articles = await this.query<{ id: number; title: string; content: string }[]>(
+			sql_brain.sql_get_node_articles,
+			[nodeIds]
+		)
+		const articlesList = articles || []
+
+		const nodeArticles = await this.query<{ id: number; idol_id?: string; root_ids?: string[] }[]>(
+			`SELECT id, idol_id, root_ids FROM brain.nodes WHERE id = ANY($1)`,
+			[nodeIds]
+		)
+		const nodeArticlesList = nodeArticles || []
+
+		const nodeArticleMap = new Map<number, { idol_id?: string; root_ids?: string[] }>()
+		for (const na of nodeArticlesList) {
+			nodeArticleMap.set(na.id, { idol_id: na.idol_id, root_ids: na.root_ids })
+		}
+
+		const contextMap = new Map<
+			string,
+			{ idol_id?: string; root_ids?: string[]; relevance_score: number; article_ids: number[] }
+		>()
+
+		for (const article of articlesList) {
+			const key = `ctx_${article.id}`
+			if (!contextMap.has(key)) {
+				contextMap.set(key, {
+					idol_id: undefined,
+					root_ids: [],
+					relevance_score: 1.0,
+					article_ids: []
+				})
+			}
+			contextMap.get(key)!.article_ids.push(article.id)
+		}
+
+		return Array.from(contextMap.values())
+	}
+
+	private aggregateResults(recallResult: MemoryRecallResult, searchResults: SearchResult[]): AggregatedCandidate[] {
+		const candidates: AggregatedCandidate[] = []
+
+		const stimulatedNodeIds = new Set(recallResult.stimulated_nodes)
+
+		const nodePotentialMap = new Map<number, number>()
+		for (const node of recallResult.nodes) {
+			nodePotentialMap.set(node.id, node.potential)
+		}
+
+		for (const context of recallResult.related_contexts) {
+			for (const articleId of context.article_ids) {
+				const article = searchResults.find(r => r.id === articleId)
+				if (article) {
+					const memoryStrength = this.calculateMemoryStrength(context, recallResult.nodes)
+					candidates.push({
+						id: article.id,
+						title: article.title,
+						content: article.content,
+						source: 'memory',
+						rerankScore: article.rerankScore,
+						relevance_score: context.relevance_score * 1.5,
+						stimulated: true,
+						memory_strength: memoryStrength
+					})
+				}
+			}
+		}
+
+		for (const result of searchResults) {
+			if (!candidates.find(c => c.id === result.id)) {
+				const isStimulated = stimulatedNodeIds.has(result.id)
+				const memoryStrength = nodePotentialMap.get(result.id) ?? 0
+
+				candidates.push({
+					id: result.id,
+					title: result.title,
+					content: result.content,
+					source: isStimulated ? 'memory' : 'external',
+					rerankScore: result.rerankScore,
+					relevance_score: result.rerankScore,
+					stimulated: isStimulated,
+					memory_strength: memoryStrength
+				})
+			}
+		}
+
+		const highPotentialNodes = recallResult.nodes
+			.filter(n => n.potential > 0.5 && !candidates.find(c => c.id === n.id))
+			.slice(0, 5)
+
+		for (const node of highPotentialNodes) {
+			candidates.push({
+				id: node.id,
+				title: node.label,
+				content: node.metadata?.desc || `概念: ${node.label}`,
+				source: 'implicit',
+				rerankScore: node.potential,
+				relevance_score: node.potential * 0.8,
+				stimulated: true,
+				memory_strength: node.potential
+			})
+		}
+
+		return candidates
+	}
+
+	private calculateMemoryStrength(
+		context: { idol_id?: string; root_ids?: string[]; relevance_score: number; article_ids: number[] },
+		nodes: Node[]
+	): number {
+		return context.relevance_score * 0.5 + 0.5
+	}
+
+	private async rerankResults(
+		query: string,
+		candidates: AggregatedCandidate[],
+		limit: number
+	): Promise<HybridSearchResult[]> {
+		if (candidates.length === 0) return []
+
+		const documents = candidates.map(c => {
+			const sourceInfo = `[来源:${c.source}${c.stimulated ? ',已激活' : ''},记忆强度:${c.memory_strength.toFixed(2)}]`
+			return `${c.title}\n${sourceInfo}\n${c.content}`
+		})
+
+		const rerankScores = await this.pipeline.rerank(query, documents)
+
+		const results: HybridSearchResult[] = candidates.map((candidate, index) => ({
+			id: candidate.id,
+			title: candidate.title,
+			content: candidate.content,
+			source: candidate.source,
+			rerankScore: rerankScores[index]?.score ?? 0,
+			relevanceScore: candidate.relevance_score,
+			combinedScore: (rerankScores[index]?.score ?? 0) * 0.6 + candidate.relevance_score * 0.4,
+			stimulated: candidate.stimulated,
+			memoryStrength: candidate.memory_strength
+		}))
+
+		return results.sort((a, b) => b.combinedScore - a.combinedScore).slice(0, limit)
 	}
 
 	async processArticle(args: ProcessArticleArgs) {

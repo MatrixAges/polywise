@@ -90,3 +90,17 @@ export interface ArticleWithTriples extends ArticleEntity {
 }
 
 export type RerankerPipeline = (query: string, documents: string[]) => Promise<{ index: number; score: number }[]>
+
+export interface ContextResult {
+	idol_id?: string
+	root_ids?: string[]
+	relevance_score: number
+	article_ids: number[]
+}
+
+export interface MemoryRecallResult {
+	nodes: Node[]
+	edges: Edge[]
+	stimulated_nodes: number[]
+	related_contexts: ContextResult[]
+}

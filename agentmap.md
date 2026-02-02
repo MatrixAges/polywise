@@ -356,7 +356,7 @@ The project is a monorepo organized using a workspace structure, primarily built
 					"role": "Class"
 				},
 				"Polywise.ts": {
-					"desc": "Core database API for knowledge graph operations. Includes public instances of Brain, Article, and Pipeline.",
+					"desc": "Core database API for knowledge graph operations. Includes public instances of Brain, Article, and Pipeline. Supports hybrid retrieval with memory recall, external search, result aggregation, and reranking.",
 					"role": "Class"
 				},
 				"index.ts": { "desc": "Main exports", "role": "Index" },
