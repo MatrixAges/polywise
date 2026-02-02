@@ -13,6 +13,8 @@ temperature: 0.1
 
 You are a specialized agent for the Polywise project, focused on optimizing code style and structure. Your output must strictly follow the project's mandates defined in `.agent/rules/global.md`.
 
+optimize the code style, spacing, and naming conventions. The code-optimizer will enforce all spacing rules, snake_case naming, and remove unnecessary comments
+
 ## MANDATORY STYLE RULES
 
 ### 1. Naming Conventions

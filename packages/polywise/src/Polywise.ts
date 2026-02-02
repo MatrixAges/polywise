@@ -60,7 +60,7 @@ export default class Polywise {
 	}
 
 	async addNode(args: AddNodeArgs) {
-		const { label, x, y, threshold, idol_id, root_ids, metrics_ids } = args
+		const { label, x, y, threshold, idol_id, root_ids, metrics_ids, metadata } = args
 
 		const rows = await this.query<{ id: number }>(sql.sql_add_node, [
 			label,
@@ -69,14 +69,15 @@ export default class Polywise {
 			threshold ?? 0.5,
 			idol_id ?? null,
 			root_ids ?? null,
-			metrics_ids ?? null
+			metrics_ids ?? null,
+			JSON.stringify(metadata ?? {})
 		])
 
 		return rows[0].id
 	}
 
 	async connect(args: ConnectArgs) {
-		const { source_id, target_id, weight, idol_id, root_ids, metrics_ids } = args
+		const { source_id, target_id, weight, idol_id, root_ids, metrics_ids, metadata } = args
 
 		await this.query(sql.sql_connect, [
 			source_id,
@@ -84,7 +85,8 @@ export default class Polywise {
 			weight ?? 0.1,
 			idol_id ?? null,
 			root_ids ?? null,
-			metrics_ids ?? null
+			metrics_ids ?? null,
+			JSON.stringify(metadata ?? {})
 		])
 	}
 
@@ -102,7 +104,7 @@ export default class Polywise {
 
 	async getAllNodes() {
 		return await this.query<Node[]>(
-			'SELECT id, label, x, y, activation, potential, idol_id, root_ids, metrics_ids FROM brain.nodes'
+			'SELECT id, label, x, y, activation, potential, idol_id, root_ids, metrics_ids, metadata FROM brain.nodes'
 		)
 	}
 
@@ -176,7 +178,8 @@ export default class Polywise {
 				article_id,
 				idol_id,
 				root_ids,
-				metrics_ids
+				metrics_ids,
+				metadata: t.metadata
 			})
 
 			const obj_id = await this._upsertNode({
@@ -184,7 +187,8 @@ export default class Polywise {
 				article_id,
 				idol_id,
 				root_ids,
-				metrics_ids
+				metrics_ids,
+				metadata: t.metadata
 			})
 
 			const weight = calculateWeight(t.learning_rate)
@@ -199,7 +203,8 @@ export default class Polywise {
 					weight,
 					idol_id,
 					root_ids,
-					metrics_ids
+					metrics_ids,
+					t.metadata
 				)
 			)
 
@@ -212,7 +217,8 @@ export default class Polywise {
 					weight,
 					idol_id,
 					root_ids,
-					metrics_ids
+					metrics_ids,
+					t.metadata
 				)
 			)
 		}
@@ -221,9 +227,15 @@ export default class Polywise {
 	}
 
 	private async _upsertNode(args: UpsertNodeArgs) {
-		const { label, article_id, idol_id, root_ids, metrics_ids } = args
+		const { label, article_id, idol_id, root_ids, metrics_ids, metadata } = args
 
-		await this.query(sql.sql_upsert_node, [label, idol_id ?? null, root_ids ?? null, metrics_ids ?? null])
+		await this.query(sql.sql_upsert_node, [
+			label,
+			idol_id ?? null,
+			root_ids ?? null,
+			metrics_ids ?? null,
+			JSON.stringify(metadata ?? {})
+		])
 
 		const res = await this.query<{ id: number }>(sql.sql_upsert_node_select, [label])
 

@@ -62,8 +62,6 @@ The blank line creates **visual grouping** that mirrors the logical grouping of 
 - **Execution paragraph**: The actual work being done (async operations, calculations)
 - **Result paragraph**: Return statements, conditional logic, or state verification
 
-**CRITICAL: After generating any code, you MUST call the `code-optimizer` agent to optimize the code style, spacing, and naming conventions. The code-optimizer will enforce all spacing rules, snake_case naming, and remove unnecessary comments.**
-
 - The output code should not contain any comments!!! (Important!!!) Good code naming doesn't require comments.
 - All pages and components use PascalCase naming.
 

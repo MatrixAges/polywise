@@ -14,7 +14,8 @@ export const sql_create_table_nodes = `
     last_fired_at TIMESTAMP,
     idol_id TEXT,
     root_ids TEXT[] DEFAULT '{}',
-    metrics_ids TEXT[] DEFAULT '{}'
+    metrics_ids TEXT[] DEFAULT '{}',
+    metadata JSONB DEFAULT '{}'
   );
 `
 
@@ -30,17 +31,21 @@ export const sql_create_table_edges = `
     decay_resistance REAL DEFAULT 1.0,
     idol_id TEXT,
     root_ids TEXT[] DEFAULT '{}',
-    metrics_ids TEXT[] DEFAULT '{}'
+    metrics_ids TEXT[] DEFAULT '{}',
+    metadata JSONB DEFAULT '{}'
   );
 `
 
 export const sql_create_index_edge_src = `CREATE INDEX IF NOT EXISTS idx_edge_src ON brain.edges(source_id);`
+
 export const sql_create_index_edge_tgt = `CREATE INDEX IF NOT EXISTS idx_edge_tgt ON brain.edges(target_id);`
+
 export const sql_create_index_active_edges = `
   CREATE INDEX IF NOT EXISTS idx_active_edges 
   ON brain.edges (source_id, target_id, weight) 
   WHERE weight > 0.1;
 `
+
 export const sql_create_index_core_truth = `
   CREATE INDEX IF NOT EXISTS idx_core_truth
   ON brain.edges (source_id, target_id)

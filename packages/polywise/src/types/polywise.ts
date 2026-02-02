@@ -4,6 +4,13 @@ export interface Triple {
 	object: string
 	learning_rate: number
 	decay_resistance: number
+	metadata?: Metadata
+}
+
+export interface Metadata {
+	desc?: string
+	links?: string[]
+	files?: string[]
 }
 
 export interface Node {
@@ -18,6 +25,7 @@ export interface Node {
 	idol_id?: string
 	root_ids?: string[]
 	metrics_ids?: string[]
+	metadata?: Metadata
 }
 
 export interface Edge {
@@ -31,6 +39,7 @@ export interface Edge {
 	idol_id?: string
 	root_ids?: string[]
 	metrics_ids?: string[]
+	metadata?: Metadata
 }
 
 export interface Snapshot {

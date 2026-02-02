@@ -3,10 +3,7 @@ import fs from 'fs-extra'
 import { globSync } from 'glob'
 
 export const cleanupTestDatabases = () => {
-	const patterns = [
-		path.join(process.cwd(), ':polywise_*'),
-		path.join(process.cwd(), 'packages/polywise/:polywise_*')
-	]
+	const patterns = [path.join(process.cwd(), ':memory*'), path.join(process.cwd(), ':polywise*')]
 
 	for (const pattern of patterns) {
 		const files = globSync(pattern)
@@ -15,9 +12,7 @@ export const cleanupTestDatabases = () => {
 			if (fs.pathExistsSync(file)) {
 				try {
 					fs.removeSync(file)
-				} catch (error) {
-					// Ignore errors if the file is already gone or busy
-				}
+				} catch (error) {}
 			}
 		}
 	}

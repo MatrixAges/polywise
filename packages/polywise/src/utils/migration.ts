@@ -4,7 +4,7 @@ import { default as validateMigrationsFn } from './validateMigrations'
 
 import type { Migration } from '../types'
 
-export const CURRENT_SCHEMA_VERSION = 2
+export const CURRENT_SCHEMA_VERSION = 3
 
 export const migrations: Migration[] = [
 	{
@@ -39,6 +39,16 @@ export const migrations: Migration[] = [
 				sql_schema.sql_create_table_article_embeddings,
 				sql_schema.sql_create_index_article_embeddings_hnsw,
 				sql_schema.sql_create_index_article_content_gin
+			])
+		}
+	},
+	{
+		version: 3,
+		description: 'Add metadata column to nodes and edges',
+		up: async exec => {
+			await exec([
+				"ALTER TABLE brain.nodes ADD COLUMN IF NOT EXISTS metadata JSONB DEFAULT '{}';",
+				"ALTER TABLE brain.edges ADD COLUMN IF NOT EXISTS metadata JSONB DEFAULT '{}';"
 			])
 		}
 	}

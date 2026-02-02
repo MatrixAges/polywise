@@ -361,7 +361,10 @@ The project is a monorepo organized using a workspace structure, primarily built
 					"Polywise.ts": { "desc": "Polywise SQL operations", "role": "SQL" },
 					"index.ts": { "desc": "SQL exports", "role": "Index" },
 					"meta.ts": { "desc": "Metadata SQL operations", "role": "SQL" },
-					"schema.ts": { "desc": "Database schema definitions", "role": "Schema" }
+					"schema.ts": {
+						"desc": "Database schema definitions (Nodes/Edges now include JSONB metadata)",
+						"role": "Schema"
+					}
 				},
 				"types": {
 					"index.ts": { "desc": "Types exports", "role": "Index" },
