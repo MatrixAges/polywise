@@ -28,7 +28,7 @@ export default class Brain {
 
 	constructor() {}
 
-	async init(args: BrainArgs) {
+	init(args: BrainArgs) {
 		const { poly, onTick } = args
 
 		this.poly = poly

@@ -36,12 +36,12 @@ export default class Polywise {
 			extensions: { vector }
 		})
 
-		await this.article.init({
+		this.article.init({
 			db: this.db,
 			embedding_cache_dir
 		})
 
-		await this.brain.init({
+		this.brain.init({
 			poly: this,
 			onTick
 		})
@@ -274,9 +274,8 @@ export default class Polywise {
 	}
 
 	async off() {
-		await this.brain.off()
-
-		await this.article.off()
+		this.brain.off()
+		this.article.off()
 
 		if (this.db) {
 			await this.db.close()

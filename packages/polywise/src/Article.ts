@@ -15,7 +15,7 @@ export default class Article {
 
 	constructor() {}
 
-	async init(args: ArticleArgs) {
+	init(args: ArticleArgs) {
 		const { db, embedding_cache_dir } = args
 
 		this.db = db

@@ -59,7 +59,7 @@ Use blank lines to separate code with different execution styles or visual appea
 The blank line creates **visual grouping** that mirrors the logical grouping of code operations. Think of it as creating "paragraphs" in your code:
 
 - **Setup paragraph**: Variable declarations and initial configuration.
-- **Execution paragraph**: The actual work being done. **Consecutive similar statements (e.g., multiple `await this.exec(...)` or similar async calls) should be grouped together without blank lines.** Add a blank line only when the execution style or visual pattern changes significantly.
+- **Execution paragraph**: The actual work being done. **Consecutive statements with the same execution style (e.g., multiple synchronous calls like `this.a.off(); this.b.off();` or multiple asynchronous calls like `await this.exec(); await this.exec();`) MUST be grouped together without blank lines.** Add a blank line only when the execution style (async vs sync), functional responsibility, or visual pattern changes significantly.
 - **Result paragraph**: Return statements, conditional logic, or state verification.
 
 - The output code should not contain any comments!!! (Important!!!) Good code naming doesn't require comments.
