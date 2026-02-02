@@ -117,4 +117,6 @@ export default class Pipeline {
 		this.cache_dir = dir
 		env.cacheDir = dir
 	}
+
+	off() {}
 }

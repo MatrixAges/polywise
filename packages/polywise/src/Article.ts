@@ -97,4 +97,52 @@ export default class Article {
 		this.db = null
 		this.pipeline = null
 	}
+
+	async process(args: AddArticleArgs) {
+		if (!this.db) return null
+
+		const { title, content } = args
+
+		const embedding = this.pipeline ? await this.pipeline.embed(content) : null
+
+		await this.db.query(sql.sql_process_article, [title, content])
+
+		const res = await this.db.query<ArticleEntity>(
+			'SELECT * FROM brain.articles WHERE title = $1 ORDER BY id DESC LIMIT 1',
+			[title]
+		)
+
+		if (res.rows.length > 0 && embedding) {
+			await this.db.query(sql.sql_insert_article_embedding, [res.rows[0].id, JSON.stringify(embedding)])
+		}
+
+		return res.rows[0]
+	}
+
+	async update(args: AddArticleArgs & { id: number }) {
+		if (!this.db) return null
+
+		const { id, title, content } = args
+
+		await this.db.query(sql.sql_update_article, [id, title, content])
+
+		const res = await this.db.query<ArticleEntity>('SELECT * FROM brain.articles WHERE id = $1', [id])
+
+		return res.rows[0]
+	}
+
+	async delete(article_id: number) {
+		if (!this.db) return
+
+		await this.db.query('DELETE FROM brain.article_embeddings WHERE article_id = $1', [article_id])
+		await this.db.query('DELETE FROM brain.articles WHERE id = $1', [article_id])
+	}
+
+	async searchFts(args: SearchArticleArgs) {
+		return this.searchByText(args)
+	}
+
+	async searchVector(args: SearchArticleArgs) {
+		return this.searchByVector(args)
+	}
 }

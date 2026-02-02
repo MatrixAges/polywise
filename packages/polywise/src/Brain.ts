@@ -1,6 +1,7 @@
 import { injectable } from 'tsyringe'
 
 import { calculateFatigue, isIdle } from './utils'
+import { SHADOW_INTERVAL_MS, FATIGUE_THRESHOLD, IDLE_TIMEOUT_MS } from './consts'
 
 import type Polywise from './Polywise'
 import type { BrainState } from './types'
@@ -9,24 +10,12 @@ import type { BrainArgs } from './types/args'
 @injectable()
 export default class Brain {
 	private poly: Polywise | null = null
-
 	private state: BrainState = 'FRESH'
-
 	private shadow_interval?: any
-
 	private last_user_interaction = Date.now()
-
 	private current_fatigue = 0
 
 	private on_tick?: () => void
-
-	private readonly SHADOW_INTERVAL_MS = 60 * 1000
-
-	private readonly FATIGUE_THRESHOLD = 1000
-
-	private readonly IDLE_TIMEOUT_MS = 5 * 60 * 1000
-
-	constructor() {}
 
 	init(args: BrainArgs) {
 		const { poly, onTick } = args
@@ -44,7 +33,7 @@ export default class Brain {
 	addSynapticLoad(load: number) {
 		this.current_fatigue += load
 
-		if (calculateFatigue(load, this.current_fatigue - load, this.FATIGUE_THRESHOLD) && this.state === 'FRESH') {
+		if (calculateFatigue(load, this.current_fatigue - load, FATIGUE_THRESHOLD) && this.state === 'FRESH') {
 			this.state = 'TIRED'
 		}
 	}
@@ -70,7 +59,7 @@ export default class Brain {
 
 		this.state = prev_state === 'SLEEPING' ? 'FRESH' : prev_state
 
-		if (this.current_fatigue >= this.FATIGUE_THRESHOLD) {
+		if (this.current_fatigue >= FATIGUE_THRESHOLD) {
 			this.state = 'TIRED'
 		}
 	}
@@ -89,7 +78,7 @@ export default class Brain {
 
 	private startLifeCycleLoop() {
 		this.shadow_interval = setInterval(async () => {
-			const is_idle = isIdle(this.last_user_interaction, this.IDLE_TIMEOUT_MS)
+			const is_idle = isIdle(this.last_user_interaction, IDLE_TIMEOUT_MS)
 
 			if (this.state === 'TIRED' && is_idle) {
 				await this.triggerSleepTick()
@@ -100,7 +89,7 @@ export default class Brain {
 			if (this.state !== 'SLEEPING' && this.state !== 'LEARNING') {
 				await this.runShadowTick()
 			}
-		}, this.SHADOW_INTERVAL_MS)
+		}, SHADOW_INTERVAL_MS)
 	}
 
 	private async runShadowTick() {

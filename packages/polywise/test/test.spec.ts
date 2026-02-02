@@ -1,11 +1,13 @@
+import 'reflect-metadata'
+
 import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 
 import Polywise from '../src/Polywise'
-import { cleanupDatabase } from './utils'
 
 describe('Polywise Brain System', () => {
 	let poly: Polywise
-	const dbName = `:polywise_test_${Date.now()}_${Math.random().toString(36).slice(2)}:`
+	const uniqueId = Math.random().toString(36).slice(2)
+	const dbName = `:polywise_test_${uniqueId}:`
 
 	beforeAll(async () => {
 		poly = new Polywise({
@@ -31,16 +33,16 @@ describe('Polywise Brain System', () => {
 		it('should build complex interconnected knowledge graph', async () => {
 			const nodes: number[] = []
 			const concepts = [
-				{ label: 'Machine Learning', x: 0, y: 0 },
-				{ label: 'Neural Networks', x: 100, y: 50 },
-				{ label: 'Deep Learning', x: 200, y: 0 },
-				{ label: 'Convolution', x: 300, y: 100 },
-				{ label: 'Recurrent Networks', x: 100, y: 150 },
-				{ label: 'Transformers', x: 250, y: 200 },
-				{ label: 'Attention Mechanism', x: 400, y: 150 },
-				{ label: 'BERT', x: 500, y: 100 },
-				{ label: 'GPT', x: 500, y: 250 },
-				{ label: 'Large Language Models', x: 600, y: 175 }
+				{ label: `ML_${uniqueId}`, x: 0, y: 0 },
+				{ label: `NeuralNetworks_${uniqueId}`, x: 100, y: 50 },
+				{ label: `DeepLearning_${uniqueId}`, x: 200, y: 0 },
+				{ label: `Convolution_${uniqueId}`, x: 300, y: 100 },
+				{ label: `RecurrentNetworks_${uniqueId}`, x: 100, y: 150 },
+				{ label: `Transformers_${uniqueId}`, x: 250, y: 200 },
+				{ label: `Attention_${uniqueId}`, x: 400, y: 150 },
+				{ label: `BERT_${uniqueId}`, x: 500, y: 100 },
+				{ label: `GPT_${uniqueId}`, x: 500, y: 250 },
+				{ label: `LLM_${uniqueId}`, x: 600, y: 175 }
 			]
 
 			for (const concept of concepts) {

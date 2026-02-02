@@ -1,6 +1,5 @@
 import { PGlite } from '@electric-sql/pglite'
 import { vector } from '@electric-sql/pglite/vector'
-import { singleton } from 'tsyringe'
 
 import Article from './Article'
 import Brain from './Brain'
@@ -20,15 +19,20 @@ import type {
 	UpsertNodeArgs
 } from './types'
 
-@singleton()
 export default class Polywise {
 	private db: PGlite | null = null
 
-	constructor(
-		public article: Article,
-		public brain: Brain,
-		public pipeline: Pipeline
-	) {}
+	public article: Article
+
+	public brain: Brain
+
+	public pipeline: Pipeline
+
+	constructor() {
+		this.article = new Article(this.pipeline)
+		this.brain = new Brain()
+		this.pipeline = new Pipeline()
+	}
 
 	async init(args: PolywiseArgs = {}) {
 		const { data_dir, embedding_cache_dir, onTick } = args
@@ -38,30 +42,52 @@ export default class Polywise {
 			extensions: { vector }
 		})
 
-		await this.pipeline.init({
+		await this.pipeline?.init({
 			cache_dir: embedding_cache_dir
 		})
 
-		this.article.init({
+		this.article?.init({
 			db: this.db
 		})
 
-		this.brain.init({
+		this.brain?.init({
 			poly: this,
 			onTick
 		})
 
-		validateMigrations()
+		try {
+			validateMigrations()
+		} catch (e) {
+			console.error('Migration validation error:', e)
+		}
 
-		await this.exec(sql_meta.sql_create_schema_meta)
-		await this.exec(sql_meta.sql_create_table_schema_version)
+		try {
+			await this.exec(sql_meta.sql_create_schema_meta)
+			await this.exec(sql_meta.sql_create_table_schema_version)
 
-		const version_result = await this.query<{ version: number }>(sql_meta.sql_get_current_version)
+			const version_result = await this.query<{ version: number }>(sql_meta.sql_get_current_version)
 
-		const current_version = version_result[0]?.version ?? 0
+			const current_version = version_result[0]?.version ?? 0
 
-		if (current_version < CURRENT_SCHEMA_VERSION) {
-			await migrate(current_version, this.exec.bind(this), this.query.bind(this))
+			if (current_version < CURRENT_SCHEMA_VERSION) {
+				await migrate(current_version, this.exec.bind(this), this.query.bind(this))
+			}
+
+			const check_result = await this.query<{ count: string }>(
+				"SELECT COUNT(*) as count FROM information_schema.tables WHERE table_schema = 'brain' AND table_name = 'articles'"
+			)
+
+			if (parseInt(check_result[0]?.count || '0') === 0) {
+				const { sql_create_extension_vector, sql_create_schema_brain, sql_create_table_articles } =
+					await import('./sql/schema')
+				await this.exec([
+					sql_create_extension_vector,
+					sql_create_schema_brain,
+					sql_create_table_articles
+				])
+			}
+		} catch (e) {
+			console.error('Migration error:', e)
 		}
 	}
 
@@ -279,9 +305,9 @@ export default class Polywise {
 	}
 
 	async off() {
-		this.brain.off()
-		this.article.off()
-		this.pipeline.off()
+		this.brain?.off()
+		this.article?.off()
+		this.pipeline?.off()
 
 		if (this.db) {
 			await this.db.close()

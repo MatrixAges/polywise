@@ -33,6 +33,7 @@
 		"deepmerge-ts": "^7.1.5",
 		"fs-extra": "catalog:",
 		"glob": "^13.0.0",
+		"reflect-metadata": "^0.2.2",
 		"tsx": "^4.21.0"
 	}
 }

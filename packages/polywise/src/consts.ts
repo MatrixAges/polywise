@@ -16,3 +16,7 @@ export const DEFAULT_RERANKER_CONFIG: RerankerConfig = {
 	model: DEFAULT_RERANKER_MODEL,
 	dtype: DEFAULT_DTYPE
 }
+
+export const SHADOW_INTERVAL_MS = 60 * 1000
+export const FATIGUE_THRESHOLD = 1000
+export const IDLE_TIMEOUT_MS = 5 * 60 * 1000

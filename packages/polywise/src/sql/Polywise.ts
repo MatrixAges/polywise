@@ -170,3 +170,5 @@ export const sql_search_articles_by_text = `
 export const sql_get_article = `SELECT id, title, content, created_at FROM knowledge.articles WHERE id = $1`
 
 export const sql_get_all_articles = `SELECT id, title, content, created_at FROM knowledge.articles ORDER BY created_at DESC`
+
+export const sql_update_article = `UPDATE knowledge.articles SET title = $2, content = $3 WHERE id = $1 RETURNING id, title, content, created_at`
