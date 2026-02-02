@@ -1,11 +1,14 @@
+import { injectable } from 'tsyringe'
+
 import { calculateFatigue, isIdle } from './utils'
 
 import type Polywise from './Polywise'
 import type { BrainState } from './types'
 import type { BrainArgs } from './types/args'
 
+@injectable()
 export default class Brain {
-	private poly: Polywise
+	private poly: Polywise | null = null
 
 	private state: BrainState = 'FRESH'
 
@@ -23,7 +26,9 @@ export default class Brain {
 
 	private readonly IDLE_TIMEOUT_MS = 5 * 60 * 1000
 
-	constructor(args: BrainArgs) {
+	constructor() {}
+
+	async init(args: BrainArgs) {
 		const { poly, onTick } = args
 
 		this.poly = poly
@@ -45,6 +50,8 @@ export default class Brain {
 	}
 
 	async triggerInputBurst(load = 50) {
+		if (!this.poly) return
+
 		const prev_state = this.state
 
 		this.state = 'LEARNING'
@@ -69,6 +76,8 @@ export default class Brain {
 	}
 
 	async triggerSleepTick() {
+		if (!this.poly) return
+
 		this.state = 'SLEEPING'
 
 		await this.poly.triggerSleepTick()
@@ -95,6 +104,8 @@ export default class Brain {
 	}
 
 	private async runShadowTick() {
+		if (!this.poly) return
+
 		await this.poly.runShadowTick()
 
 		this.on_tick?.()
@@ -104,5 +115,7 @@ export default class Brain {
 		if (this.shadow_interval) {
 			clearInterval(this.shadow_interval)
 		}
+
+		this.poly = null
 	}
 }

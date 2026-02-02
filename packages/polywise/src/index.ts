@@ -1,3 +1,5 @@
+import '@abraham/reflection'
+
 export { default as Polywise } from './Polywise'
 export { default as Brain } from './Brain'
 export { default as Article } from './Article'

@@ -1,5 +1,6 @@
 import { PGlite } from '@electric-sql/pglite'
 import { vector } from '@electric-sql/pglite/vector'
+import { singleton } from 'tsyringe'
 
 import Article from './Article'
 import Brain from './Brain'
@@ -18,13 +19,16 @@ import type {
 	UpsertNodeArgs
 } from './types'
 
+@singleton()
 export default class Polywise {
 	private db: PGlite | null = null
 
-	public article: Article
-	public brain: Brain
+	constructor(
+		public article: Article,
+		public brain: Brain
+	) {}
 
-	constructor(args: PolywiseArgs = {}) {
+	async init(args: PolywiseArgs = {}) {
 		const { data_dir, embedding_cache_dir, onTick } = args
 
 		this.db = new PGlite(data_dir || ':polywise:', {
@@ -32,18 +36,16 @@ export default class Polywise {
 			extensions: { vector }
 		})
 
-		this.article = new Article({
+		await this.article.init({
 			db: this.db,
 			embedding_cache_dir
 		})
 
-		this.brain = new Brain({
+		await this.brain.init({
 			poly: this,
 			onTick
 		})
-	}
 
-	async init() {
 		validateMigrations()
 
 		await this.exec(sql_meta.sql_create_schema_meta)
@@ -273,7 +275,9 @@ export default class Polywise {
 	}
 
 	async off() {
-		this.brain.off()
+		await this.brain.off()
+
+		await this.article.off()
 
 		if (this.db) {
 			await this.db.close()
