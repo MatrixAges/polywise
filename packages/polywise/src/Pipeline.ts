@@ -1,4 +1,5 @@
 import { env, pipeline } from '@huggingface/transformers'
+import PQueue from 'p-queue'
 import { singleton } from 'tsyringe'
 
 import { DEFAULT_EMBEDDING_CONFIG, DEFAULT_RERANKER_CONFIG, POOLING_MEAN } from './consts'
@@ -12,14 +13,26 @@ import type {
 	SearchCandidate
 } from './types'
 
+const DEFAULT_CONCURRENCY = 6
+
 @singleton()
 export default class Pipeline {
 	private embedding_config: EmbeddingConfig = DEFAULT_EMBEDDING_CONFIG
 	private reranker_config: RerankerConfig = DEFAULT_RERANKER_CONFIG
 	private cache_dir: string | null = null
+	private embedding_concurrency: number = DEFAULT_CONCURRENCY
+	private reranker_concurrency: number = DEFAULT_CONCURRENCY
+
+	private embedding_queue: PQueue
+	private reranker_queue: PQueue
+
+	constructor() {
+		this.embedding_queue = new PQueue({ concurrency: this.embedding_concurrency })
+		this.reranker_queue = new PQueue({ concurrency: this.reranker_concurrency })
+	}
 
 	async init(args: PipelineArgs = {}) {
-		const { cache_dir, embedding_config, reranker_config } = args
+		const { cache_dir, embedding_config, reranker_config, embedding_concurrency, reranker_concurrency } = args
 
 		if (cache_dir) {
 			this.cache_dir = cache_dir
@@ -32,6 +45,16 @@ export default class Pipeline {
 
 		if (reranker_config) {
 			this.reranker_config = reranker_config
+		}
+
+		if (embedding_concurrency !== undefined) {
+			this.embedding_concurrency = embedding_concurrency
+			this.embedding_queue = new PQueue({ concurrency: this.embedding_concurrency })
+		}
+
+		if (reranker_concurrency !== undefined) {
+			this.reranker_concurrency = reranker_concurrency
+			this.reranker_queue = new PQueue({ concurrency: this.reranker_concurrency })
 		}
 
 		await this.loadEmbeddingModel()
@@ -78,34 +101,36 @@ export default class Pipeline {
 	}
 
 	async embed(text: string) {
-		if (this.embedding_config.type === 'custom') {
-			const { fn } = this.embedding_config
+		return this.embedding_queue.add(async () => {
+			if (this.embedding_config.type === 'custom') {
+				const { fn } = this.embedding_config
+				return await fn(text)
+			}
 
-			return await fn(text)
-		}
+			const embedding = await this.loadEmbeddingModel()
 
-		const embedding = await this.loadEmbeddingModel()
+			const output = await embedding(text, {
+				pooling: POOLING_MEAN,
+				normalize: true
+			})
 
-		const output = await embedding(text, {
-			pooling: POOLING_MEAN,
-			normalize: true
+			return Array.from((output as any).data)
 		})
-
-		return Array.from((output as any).data)
 	}
 
 	async rerank(query: string, documents: string[]) {
-		if (this.reranker_config.type === 'custom') {
-			const { fn } = this.reranker_config
+		return this.reranker_queue.add(async () => {
+			if (this.reranker_config.type === 'custom') {
+				const { fn } = this.reranker_config
+				return await fn(query, documents)
+			}
 
-			return await fn(query, documents)
-		}
+			const reranker = await this.loadRerankerModel()
 
-		const reranker = await this.loadRerankerModel()
+			const output = await reranker(query, documents)
 
-		const output = await reranker(query, documents)
-
-		return output
+			return output
+		})
 	}
 
 	getEmbeddingConfig() {
@@ -125,7 +150,28 @@ export default class Pipeline {
 		env.cacheDir = dir
 	}
 
-	off() {}
+	getEmbeddingConcurrency() {
+		return this.embedding_concurrency
+	}
+
+	setEmbeddingConcurrency(concurrency: number) {
+		this.embedding_concurrency = concurrency
+		this.embedding_queue = new PQueue({ concurrency: this.embedding_concurrency })
+	}
+
+	getRerankerConcurrency() {
+		return this.reranker_concurrency
+	}
+
+	setRerankerConcurrency(concurrency: number) {
+		this.reranker_concurrency = concurrency
+		this.reranker_queue = new PQueue({ concurrency: this.reranker_concurrency })
+	}
+
+	off() {
+		this.embedding_queue.clear()
+		this.reranker_queue.clear()
+	}
 
 	async search(args: {
 		query: string

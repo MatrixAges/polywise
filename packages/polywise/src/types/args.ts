@@ -45,6 +45,8 @@ export interface PipelineArgs {
 	cache_dir?: string
 	embedding_config?: EmbeddingConfig
 	reranker_config?: RerankerConfig
+	embedding_concurrency?: number
+	reranker_concurrency?: number
 }
 
 export interface AddNodeArgs {
