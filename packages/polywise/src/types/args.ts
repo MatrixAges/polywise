@@ -169,3 +169,25 @@ export interface HybridSearchResult {
 	stimulated: boolean
 	memoryStrength: number
 }
+
+export interface COTDepthResult {
+	depth: number
+	query: string
+	results: HybridSearchResult[]
+	emerged_nodes: number[]
+	emerged_edges: number[]
+}
+
+export interface ChainOfThought {
+	on: (callback: (data: COTDepthResult) => void) => ChainOfThought
+	off: () => void
+}
+
+export interface QueryArgs {
+	query: string
+	recall_depth?: number
+	search_limit?: number
+	rerank_limit?: number
+	stimulate_on_recall?: boolean
+	cot_depth?: number
+}

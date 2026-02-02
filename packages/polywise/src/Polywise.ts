@@ -7,12 +7,14 @@ import Pipeline from './Pipeline'
 import * as sql from './sql'
 import * as sql_brain from './sql/Brain'
 import * as sql_meta from './sql/meta'
-import { calculateWeight, CURRENT_SCHEMA_VERSION, migrate, validateMigrations } from './utils'
+import { calculateWeight, ChainEmitter, CURRENT_SCHEMA_VERSION, migrate, validateMigrations } from './utils'
 
 import type {
 	AddNodeArgs,
 	AggregatedCandidate,
+	ChainOfThought,
 	ConnectArgs,
+	COTDepthResult,
 	Edge,
 	HybridSearchResult,
 	InjectTriplesArgs,
@@ -85,12 +87,10 @@ export default class Polywise {
 			)
 
 			if (parseInt(check_result[0]?.count || '0') === 0) {
-				const { sql_create_extension_vector, sql_create_schema_brain, sql_create_table_articles } =
-					await import('./sql/schema')
 				await this.exec([
-					sql_create_extension_vector,
-					sql_create_schema_brain,
-					sql_create_table_articles
+					sql.sql_create_extension_vector,
+					sql.sql_create_schema_brain,
+					sql.sql_create_table_articles
 				])
 			}
 		} catch (e) {
@@ -186,8 +186,53 @@ export default class Polywise {
 		])
 	}
 
-	async search(args: QueryArgs): Promise<HybridSearchResult[]> {
-		const { query, recall_depth = 2, search_limit = 20, rerank_limit = 10, stimulate_on_recall = true } = args
+	async search(args: QueryArgs): Promise<{ result: HybridSearchResult[]; cot: ChainOfThought }> {
+		const {
+			query,
+			recall_depth = 2,
+			search_limit = 20,
+			rerank_limit = 10,
+			stimulate_on_recall = true,
+			cot_depth = 0
+		} = args
+
+		const emitter = new ChainEmitter()
+
+		const initialResult = await this.executeSingleSearch({
+			query,
+			recall_depth,
+			search_limit,
+			rerank_limit,
+			stimulate_on_recall
+		})
+
+		if (cot_depth <= 0) {
+			return { result: initialResult, cot: emitter }
+		}
+
+		this.executeChainOfThought({
+			query,
+			initialResults: initialResult,
+			emitter,
+			maxDepth: cot_depth,
+			baseRecallDepth: recall_depth,
+			searchLimit: search_limit,
+			rerankLimit: rerank_limit,
+			stimulateOnRecall: stimulate_on_recall,
+			currentDepth: 1
+		})
+
+		return { result: initialResult, cot: emitter }
+	}
+
+	private async executeSingleSearch(args: {
+		query: string
+		recall_depth: number
+		search_limit: number
+		rerank_limit: number
+		stimulate_on_recall: boolean
+	}): Promise<HybridSearchResult[]> {
+		const { query, recall_depth, search_limit, rerank_limit, stimulate_on_recall } = args
 
 		const recallResult = await this.recallFromMemory({
 			query,
@@ -207,6 +252,85 @@ export default class Polywise {
 		const finalResults = await this.rerankResults(query, aggregated, rerank_limit)
 
 		return finalResults
+	}
+
+	private async executeChainOfThought(args: {
+		query: string
+		initialResults: HybridSearchResult[]
+		emitter: ChainEmitter
+		maxDepth: number
+		baseRecallDepth: number
+		searchLimit: number
+		rerankLimit: number
+		stimulateOnRecall: boolean
+		currentDepth: number
+	}): Promise<void> {
+		const {
+			query,
+			initialResults,
+			emitter,
+			maxDepth,
+			baseRecallDepth,
+			searchLimit,
+			rerankLimit,
+			stimulateOnRecall,
+			currentDepth
+		} = args
+
+		if (!emitter.isActiveStatus() || currentDepth > maxDepth) {
+			return
+		}
+
+		const depthRecallDepth = baseRecallDepth + currentDepth
+
+		const topResult = initialResults[0]
+		const emergedQuery = `${query} [基于: ${topResult?.title || '相关上下文'}]`
+
+		const emergedNodeIds = initialResults.slice(0, 3).map(r => r.id)
+		await this.stimulateNodes(emergedNodeIds, 0.2 * currentDepth)
+
+		const emergedRecallResult = await this.recallFromMemory({
+			query: emergedQuery,
+			max_depth: depthRecallDepth,
+			stimulate_intensity: stimulateOnRecall ? currentDepth : 0
+		})
+
+		const emergedSearchResults = await this.pipeline.search({
+			query: emergedQuery,
+			vectorSearch: () => this.article.searchVector({ query: emergedQuery, limit: searchLimit }),
+			fulltextSearch: () => this.article.searchFts({ query: emergedQuery, limit: searchLimit }),
+			rerankLimit: searchLimit
+		})
+
+		const emergedAggregated = this.aggregateResults(emergedRecallResult, emergedSearchResults)
+
+		const emergedFinalResults = await this.rerankResults(emergedQuery, emergedAggregated, rerankLimit)
+
+		const cotResult: COTDepthResult = {
+			depth: currentDepth,
+			query: emergedQuery,
+			results: emergedFinalResults,
+			emerged_nodes: emergedRecallResult.nodes.map(n => n.id),
+			emerged_edges: []
+		}
+
+		emitter.emit(cotResult)
+
+		if (currentDepth < maxDepth) {
+			setImmediate(() => {
+				this.executeChainOfThought({
+					query: emergedQuery,
+					initialResults: emergedFinalResults,
+					emitter,
+					maxDepth,
+					baseRecallDepth,
+					searchLimit,
+					rerankLimit,
+					stimulateOnRecall,
+					currentDepth: currentDepth + 1
+				})
+			})
+		}
 	}
 
 	async recallFromMemory(args: RecallArgs): Promise<MemoryRecallResult> {
