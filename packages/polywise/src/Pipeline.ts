@@ -20,7 +20,7 @@ import type {
 export default class Pipeline {
 	private embedding_config: EmbeddingConfig = DEFAULT_EMBEDDING_CONFIG
 	private reranker_config: RerankerConfig = DEFAULT_RERANKER_CONFIG
-	private cache_dir: string | null = null
+	private cache_dir: string | null = `${os.homedir()}/.Polywise/.models`
 	private embedding_concurrency: number = DEFAULT_CONCURRENCY
 	private reranker_concurrency: number = DEFAULT_CONCURRENCY
 
@@ -36,18 +36,13 @@ export default class Pipeline {
 	}
 
 	async init(args: PipelineArgs = {}) {
-		const {
-			cache_dir = `${os.homedir()}/.Polywise/.models`,
-			embedding_config,
-			reranker_config,
-			embedding_concurrency,
-			reranker_concurrency
-		} = args
+		const { cache_dir, embedding_config, reranker_config, embedding_concurrency, reranker_concurrency } = args
 
 		if (cache_dir) {
 			this.cache_dir = cache_dir
-			env.cacheDir = cache_dir
 		}
+
+		env.cacheDir = this.cache_dir
 
 		if (embedding_config) {
 			this.embedding_config = embedding_config
@@ -270,7 +265,7 @@ export default class Pipeline {
 	}
 
 	async checkModels() {
-		const cache_dir = this.cache_dir || `${os.homedir()}/.Polywise/.models`
+		const cache_dir = this.cache_dir
 
 		const checkAndDownload = async (config: EmbeddingConfig | RerankerConfig, loadFn: () => Promise<any>) => {
 			if (config.type === 'local') {
