@@ -11,6 +11,8 @@ export interface PolywiseArgs {
 	data_dir?: string
 	embedding_cache_dir?: string
 	onTick?: () => void
+	embedding_config?: EmbeddingConfig
+	reranker_config?: RerankerConfig
 }
 
 export interface LocalEmbeddingConfig {
