@@ -541,6 +541,26 @@ export interface BrainArgs {
 }
 ```
 
+## Default Import Convention (CRITICAL)
+
+Always use direct default import syntax `import X from '...'` instead of `import { default as X } from '...'`.
+
+**Good:**
+
+```typescript
+import Polywise from '../Polywise'
+import migrateFn from './migrate'
+import validateMigrationsFn from './validateMigrations'
+```
+
+**Avoid:**
+
+```typescript
+import { default as Polywise } from '../Polywise'
+import { default as migrateFn } from './migrate'
+import { default as validateMigrationsFn } from './validateMigrations'
+```
+
 ## Final Guarantee
 
 - **Important:** Do not write any comments to explain the code!!! - Do not make modifications to modules that are not mentioned. If you realize that you need to modify pages or modules that are not mentioned, you must confirm with the user before performing the relevant operations.

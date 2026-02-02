@@ -24,6 +24,7 @@ export default class ModelManager {
 		await fs.ensureDir(this.models_dir)
 		await fs.ensureDir(this.downloads_dir)
 		await this.scanLocalModels()
+
 		return this
 	}
 

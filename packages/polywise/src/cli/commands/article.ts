@@ -1,6 +1,6 @@
 import { Command } from 'commander'
 
-import { default as Polywise } from '../../Polywise'
+import Polywise from '../../Polywise'
 
 export function createArticleCommand(): Command {
 	const command = new Command('article')

@@ -1,6 +1,6 @@
 import * as sql_schema from '../sql/schema'
-import { default as migrateFn } from './migrate'
-import { default as validateMigrationsFn } from './validateMigrations'
+import migrateFn from './migrate'
+import validateMigrationsFn from './validateMigrations'
 
 import type { Migration } from '../types'
 

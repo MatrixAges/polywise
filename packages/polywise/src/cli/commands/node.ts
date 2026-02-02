@@ -1,6 +1,6 @@
 import { Command } from 'commander'
 
-import { default as Polywise } from '../../Polywise'
+import Polywise from '../../Polywise'
 
 export function createNodeCommand(): Command {
 	const command = new Command('node')
