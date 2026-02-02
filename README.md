@@ -11,38 +11,16 @@ English |
 <a href="README.zh.md">简体中文</a>
 </p>
 
-## 💡 Why Build Polywise?
+## 💡 Why Polywise?
 
-### 🤖 The Problem with Current AI Systems
+Current AI systems lack **true memory**. Each interaction is isolated, meaning knowledge doesn't evolve—it's just stored. Polywise changes this by implementing a **neuroscience-inspired memory engine**:
 
-Today's AI systems, despite their impressive capabilities, suffer from a fundamental limitation: **they lack true memory**. Each conversation starts fresh, each query exists in isolation, and the system cannot form persistent, evolving understanding from interactions over time.
+- 🧠 **Cumulative Learning**: AI that remembers and grows with every conversation.
+- 🔗 **Associative Graph**: Knowledge is stored as interconnected concepts, not isolated bits.
+- 🌙 **Consolidation**: Like human sleep, it reinforces important memories and prunes noise.
+- ⚡ **Activation Spreading**: One thought naturally triggers related ones through organic flow.
 
-This creates several critical issues:
-
-1. 📚 **No Cumulative Learning** - AI doesn't remember what it learned from you yesterday
-2. 🌐 **Context Fragmentation** - Knowledge exists in isolated sessions rather than interconnected networks
-3. ⏸️ **Static Understanding** - The model's knowledge is frozen at training time, unable to adapt to new information dynamically
-4. 🌫️ **Ephemeral Interactions** - Every conversation is a blank slate, wasting the potential of accumulated wisdom
-
-### 🎯 Our Vision: A Brain for AI
-
-Polywise was built to solve these problems by creating a **neuroscience-inspired memory system** that mimics how the human brain works:
-
-- 🔗 **Associative Memory**: Knowledge stored as interconnected concepts (nodes) with weighted relationships (edges)
-- ⚡ **Activation Spreading**: Stimulating one concept naturally flows to related concepts, just like human thought
-- 💪 **Hebbian Learning**: Connections strengthen with use - "neurons that fire together, wire together"
-- 🌙 **Memory Consolidation**: A sleep-like process that reinforces important memories and prunes noise
-- 😴 **Fatigue & Recovery**: The system gets "tired" from intense learning and needs to "rest" to consolidate
-
-### ✨ What Makes Polywise Different
-
-Unlike traditional databases or vector stores, Polywise implements:
-
-- 🕸️ **Dynamic Knowledge Graphs** - Concepts form organic networks that evolve
-- 🌊 **Spreading Activation Theory** - Thoughts flow naturally from one concept to related concepts
-- 🔄 **Bidirectional Learning** - Both reading (stimulation) and sleeping (consolidation) strengthen memory
-- 🎯 **Contextual Retrieval** - Memory retrieval is context-sensitive and associative
-- 📈 **Persistent Evolution** - The knowledge graph grows and adapts continuously
+> We're not just building a database. We're building a **digital hippocampus** for AI.
 
 ---
 
