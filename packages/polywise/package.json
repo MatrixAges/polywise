@@ -19,7 +19,6 @@
 		"dev": "cross-env NODE_ENV=development rslib build --watch",
 		"build": "rslib build",
 		"test": "rstest run && bun ./scripts/cleanupTestFiles.ts",
-		"test:modelmanager": "rstest test/modelmanager.spec.ts",
 		"cli": "bun src/cli/index.ts"
 	},
 	"dependencies": {

@@ -4,7 +4,6 @@ export { default as Polywise } from './Polywise'
 export { default as Brain } from './Brain'
 export { default as Article } from './Article'
 export { default as Pipeline } from './Pipeline'
-export { default as ModelManager } from './ModelManager'
 export type {
 	ArticleEntity,
 	ArticleWithSimilarity,
@@ -21,11 +20,6 @@ export type {
 	CustomEmbeddingConfig,
 	LocalRerankerConfig,
 	CustomRerankerConfig,
-	ModelStatus,
-	LocalModel,
-	ModelDownloadProgress,
-	ModelManagerArgs,
-	DownloadOptions,
 	ModelInfo
 } from './types'
 export * from './utils'

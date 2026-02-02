@@ -5,7 +5,6 @@ import { Command } from 'commander'
 import Polywise from '../Polywise'
 import { createArticleCommand } from './commands/article'
 import { createConfigCommand } from './commands/config'
-import { createModelsCommand } from './commands/models'
 import { createNodeCommand } from './commands/node'
 import { createSearchCommand } from './commands/search'
 
@@ -14,7 +13,6 @@ async function main() {
 
 	program.name('polywise').description('Polywise CLI - Knowledge graph and memory system').version('0.1.0')
 
-	program.addCommand(createModelsCommand())
 	program.addCommand(createSearchCommand())
 	program.addCommand(createArticleCommand())
 	program.addCommand(createNodeCommand())

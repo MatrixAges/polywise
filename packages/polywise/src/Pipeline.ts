@@ -3,7 +3,6 @@ import PQueue from 'p-queue'
 import { injectable } from 'tsyringe'
 
 import { DEFAULT_EMBEDDING_CONFIG, DEFAULT_RERANKER_CONFIG, POOLING_MEAN, DEFAULT_CONCURRENCY } from './consts'
-import ModelManager from './ModelManager'
 
 import type {
 	EmbeddingConfig,
@@ -16,7 +15,6 @@ import type {
 
 @injectable()
 export default class Pipeline {
-	private modelManager: ModelManager
 	private embedding_config: EmbeddingConfig = DEFAULT_EMBEDDING_CONFIG
 	private reranker_config: RerankerConfig = DEFAULT_RERANKER_CONFIG
 	private cache_dir: string | null = null
@@ -26,8 +24,7 @@ export default class Pipeline {
 	private embedding_queue: PQueue
 	private reranker_queue: PQueue
 
-	constructor(modelManager?: ModelManager) {
-		this.modelManager = modelManager || new ModelManager()
+	constructor() {
 		this.embedding_queue = new PQueue({ concurrency: this.embedding_concurrency })
 		this.reranker_queue = new PQueue({ concurrency: this.reranker_concurrency })
 	}
@@ -57,8 +54,6 @@ export default class Pipeline {
 			this.reranker_concurrency = reranker_concurrency
 			this.reranker_queue = new PQueue({ concurrency: this.reranker_concurrency })
 		}
-
-		await this.modelManager.init()
 	}
 
 	async loadEmbeddingModel() {
@@ -67,16 +62,8 @@ export default class Pipeline {
 		}
 
 		const { model, dtype } = this.embedding_config
-		const localModel = await this.modelManager.getModel(model)
 
-		if (!localModel || localModel.status !== 'available') {
-			console.warn(`Embedding model ${model} not available, downloading...`)
-			await this.modelManager.downloadModel(model, { dtype })
-		}
-
-		const modelPath = (await this.modelManager.getModel(model))?.path
-
-		return await pipeline('feature-extraction', modelPath || model, {
+		return await pipeline('feature-extraction', model, {
 			dtype: dtype as any
 		})
 	}
@@ -87,16 +74,8 @@ export default class Pipeline {
 		}
 
 		const { model, dtype } = this.reranker_config
-		const localModel = await this.modelManager.getModel(model)
 
-		if (!localModel || localModel.status !== 'available') {
-			console.warn(`Reranker model ${model} not available, downloading...`)
-			await this.modelManager.downloadModel(model, { dtype })
-		}
-
-		const modelPath = (await this.modelManager.getModel(model))?.path
-
-		return await pipeline('text-classification' as any, modelPath || model, {
+		return await pipeline('text-classification' as any, model, {
 			dtype: dtype as any
 		})
 	}
