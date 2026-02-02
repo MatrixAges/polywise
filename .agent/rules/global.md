@@ -24,20 +24,20 @@ BEFORE executing ANY other tool or responding to the user, you MUST save the raw
 
 ## Read Agentmap (CRITICAL)
 
-After saving context, BEFORE reading any other files or executing tasks, you MUST read `agentmap.md` from the root directory.
+After saving context, BEFORE reading any other files or executing tasks, you MUST read the relevant package's `agentmap.md` file.
 
 - **Strict Order**: This is the SECOND action (after saving context) for every task involving file operations.
-- **Dependency**: You are prohibited from using `read`, `edit`, or any other tool for file operations until `agentmap.md` has been successfully read.
-- **Purpose**: Understand the latest project architecture and code standards.
-- **Path**: `/agentmap.md` (relative to project root).
+- **Dependency**: You are prohibited from using `read`, `edit`, or any other tool for file operations until the relevant package's `agentmap.md` has been successfully read.
+- **Purpose**: Understand the latest package architecture and code standards.
+- **Path**: `packages/{package_name}/agentmap.md` (relative to project root).
 
 ## Update Agentmap (CRITICAL)
 
-After completing ANY task that changes project files (adds, renames, deletes files or directories), you MUST update `agentmap.md` with the updated file tree and descriptions.
+After completing ANY task that changes project files (adds, renames, deletes files or directories) within a package, you MUST update that package's `agentmap.md` with the updated file tree and descriptions.
 
 - **When**: After all file changes are complete.
-- **What**: Update the JSON tree in section 3 of agentmap.md.
-- **Dependency**: Do not consider the task complete until agentmap.md is updated.
+- **What**: Update the JSON tree in section 2 of the relevant package's agentmap.md.
+- **Dependency**: Do not consider the task complete until the package's agentmap.md is updated.
 
 Answer questions accurately and concisely, providing the optimal solution and offering multiple solutions or possibilities.
 
