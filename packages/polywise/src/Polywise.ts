@@ -424,7 +424,33 @@ export default class Polywise {
 			memoryStrength: candidate.memory_strength
 		}))
 
-		return results.sort((a, b) => b.combinedScore - a.combinedScore).slice(0, limit)
+		const sortedResults = results.sort((a, b) => b.combinedScore - a.combinedScore).slice(0, limit)
+
+		await this.stimulateByRanking(sortedResults)
+
+		return sortedResults
+	}
+
+	private async stimulateByRanking(results: HybridSearchResult[]): Promise<void> {
+		if (results.length === 0) return
+
+		const maxStimulation = 0.5
+		const minStimulation = 0.05
+		const decayRate = (maxStimulation - minStimulation) / Math.max(results.length - 1, 1)
+
+		const stimulationMap = new Map<number, number>()
+
+		for (let i = 0; i < results.length; i++) {
+			const intensity = Math.max(maxStimulation - i * decayRate, minStimulation)
+			stimulationMap.set(results[i].id, intensity)
+		}
+
+		const nodeIds = Array.from(stimulationMap.keys())
+		const intensities = nodeIds.map(id => stimulationMap.get(id)!)
+
+		for (let i = 0; i < nodeIds.length; i++) {
+			await this.query(sql_brain.sql_stimulate_nodes_batch, [intensities[i], [nodeIds[i]]])
+		}
 	}
 
 	async processArticle(args: ProcessArticleArgs) {
