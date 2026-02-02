@@ -10,7 +10,8 @@ describe('Polywise Brain System', () => {
 	const dbName = `:polywise_test_${uniqueId}:`
 
 	beforeAll(async () => {
-		poly = new Polywise({
+		poly = new Polywise()
+		await poly.init({
 			data_dir: dbName,
 			onTick: async () => {
 				const { nodes, edges } = await poly.getSnapshot()
@@ -21,8 +22,6 @@ describe('Polywise Brain System', () => {
 				}
 			}
 		})
-
-		await poly.init()
 	})
 
 	afterAll(async () => {

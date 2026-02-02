@@ -1,12 +1,9 @@
-import fsp from 'node:fs/promises'
-
 import { PGlite } from '@electric-sql/pglite'
 import { vector } from '@electric-sql/pglite/vector'
 import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 
 import * as sql_meta from '../src/sql/meta'
 import { CURRENT_SCHEMA_VERSION, migrate, migrations, validateMigrations } from '../src/utils/migration'
-import { cleanupDatabase } from './utils'
 
 describe('Migration System', () => {
 	describe('validateMigrations', () => {

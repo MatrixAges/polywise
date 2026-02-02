@@ -1,9 +1,8 @@
-export { default as generateNodePosition } from './generateNodePosition'
-export { default as calculateWeight } from './calculateWeight'
-export { default as calculateFatigue } from './calculateFatigue'
-export { default as isIdle } from './isIdle'
-export { default as ChainEmitter } from './ChainEmitter'
-export { CURRENT_SCHEMA_VERSION, migrations, migrate, validateMigrations } from './migration'
+import path from 'path'
+
+export function getProjectRoot(): string {
+	return process.cwd()
+}
 
 export function formatSize(bytes: number): string {
 	if (bytes === 0) return '0 B'
@@ -22,4 +21,8 @@ export function formatProgress(downloaded: number, total: number): string {
 	const downloadedStr = formatSize(downloaded)
 	const totalStr = formatSize(total)
 	return `${downloadedStr} / ${totalStr} (${percent}%)`
+}
+
+export function resolveModelPath(modelsDir: string, modelId: string): string {
+	return path.resolve(modelsDir, modelId)
 }

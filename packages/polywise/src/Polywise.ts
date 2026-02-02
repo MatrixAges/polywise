@@ -704,6 +704,38 @@ export default class Polywise {
 		return JSON.parse(JSON.stringify(res.rows)) as T
 	}
 
+	async getDataDir() {
+		const dataDir = process.env.POLYWISE_DATA_DIR || ':polywise:'
+		return dataDir
+	}
+
+	async getStats() {
+		const [nodeResult, edgeResult, articleResult] = await Promise.all([
+			this.query<{ count: string }>('SELECT COUNT(*) as count FROM brain.nodes'),
+			this.query<{ count: string }>('SELECT COUNT(*) as count FROM brain.edges'),
+			this.query<{ count: string }>('SELECT COUNT(*) as count FROM brain.articles')
+		])
+
+		const memoryUsage = process.memoryUsage()
+
+		return {
+			node_count: parseInt(nodeResult[0]?.count || '0', 10),
+			edge_count: parseInt(edgeResult[0]?.count || '0', 10),
+			article_count: parseInt(articleResult[0]?.count || '0', 10),
+			memory_usage: memoryUsage.heapUsed
+		}
+	}
+
+	async reset() {
+		await this.off()
+
+		const dataDir = await this.getDataDir()
+		if (dataDir !== ':memory:' && dataDir !== ':polywise:') {
+			const fs = await import('fs-extra')
+			await fs.remove(dataDir)
+		}
+	}
+
 	async off() {
 		this.brain?.off()
 		this.article?.off()

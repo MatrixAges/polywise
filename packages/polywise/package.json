@@ -2,6 +2,9 @@
 	"name": "polywise",
 	"version": "0.0.0",
 	"main": "./dist/index.js",
+	"bin": {
+		"polywise": "./dist/cli/index.js"
+	},
 	"exports": {
 		".": {
 			"types": "./dist/index.d.ts",
@@ -15,12 +18,15 @@
 	"scripts": {
 		"dev": "cross-env NODE_ENV=development rslib build --watch",
 		"build": "rslib build",
-		"test": "rstest run && bun ./scripts/cleanupTestFiles.ts"
+		"test": "rstest run && bun ./scripts/cleanupTestFiles.ts",
+		"cli": "tsx src/cli/index.ts"
 	},
 	"dependencies": {
 		"@abraham/reflection": "^0.13.0",
 		"@electric-sql/pglite": "^0.3.15",
+		"@huggingface/hub": "^0.15.0",
 		"@huggingface/transformers": "^3.3.2",
+		"commander": "^14.0.0",
 		"ofetch": "^1.4.1",
 		"p-queue": "^8.1.0",
 		"tslib": "^2.8.1",
@@ -30,6 +36,7 @@
 		"@rslib/core": "catalog:",
 		"@rstest/core": "^0.8.0",
 		"@types/fs-extra": "^11.0.4",
+		"@types/node": "^20.0.0",
 		"cross-env": "^10.1.0",
 		"deepmerge-ts": "^7.1.5",
 		"fs-extra": "catalog:",

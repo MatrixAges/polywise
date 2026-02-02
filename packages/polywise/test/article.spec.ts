@@ -47,8 +47,8 @@ describe('Article CRUD Operations', () => {
 
 		const article = await poly.article.get(articles[0].id)
 
-		expect(article).not.toBeNull()
-		expect(article?.title).toBe('Article to Retrieve')
+		expect(article.length).toBeGreaterThan(0)
+		expect(article[0]?.title).toBe('Article to Retrieve')
 	})
 
 	it('should update article', async () => {
@@ -67,7 +67,7 @@ describe('Article CRUD Operations', () => {
 		expect(updated.content).toBe('Updated content.')
 
 		const fetched = await poly.article.get(created.id)
-		expect(fetched?.title).toBe('Updated Title')
+		expect(fetched[0]?.title).toBe('Updated Title')
 	})
 
 	it('should delete article', async () => {

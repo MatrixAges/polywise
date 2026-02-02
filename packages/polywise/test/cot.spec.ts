@@ -326,7 +326,8 @@ describe('Chain of Thought (CoT) Mechanism', () => {
 	]
 
 	beforeAll(async () => {
-		poly = new Polywise({
+		poly = new Polywise()
+		await poly.init({
 			data_dir: dbName,
 			onTick: async () => {
 				const { nodes, edges } = await poly.getSnapshot()
@@ -336,10 +337,7 @@ describe('Chain of Thought (CoT) Mechanism', () => {
 						`CoT Test - Active: [${active.slice(0, 5).join(', ')}] | Edges: ${edges.length}`
 					)
 				}
-			}
-		})
-
-		await poly.init({
+			},
 			embedding_config: { type: 'custom', fn: mockEmbedding },
 			reranker_config: { type: 'custom', fn: mockRerank }
 		})
@@ -879,8 +877,8 @@ describe('Chain of Thought (CoT) Mechanism', () => {
 
 	describe('Edge Cases and Error Handling', () => {
 		it('should handle empty knowledge graph gracefully', async () => {
-			const emptyPoly = new Polywise({ data_dir: `:polywise_cot_empty_${uniqueId}:` })
-			await emptyPoly.init()
+			const emptyPoly = new Polywise()
+			await emptyPoly.init({ data_dir: `:polywise_cot_empty_${uniqueId}:` })
 
 			const { result, cot } = await emptyPoly.search({
 				query: 'nonexistent concept xyz',
