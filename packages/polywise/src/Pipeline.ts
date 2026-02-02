@@ -1,4 +1,5 @@
 import { env, pipeline } from '@huggingface/transformers'
+import os from 'os'
 import PQueue from 'p-queue'
 import { injectable } from 'tsyringe'
 
@@ -30,7 +31,13 @@ export default class Pipeline {
 	}
 
 	async init(args: PipelineArgs = {}) {
-		const { cache_dir, embedding_config, reranker_config, embedding_concurrency, reranker_concurrency } = args
+		const {
+			cache_dir = `${os.homedir()}/.Models`,
+			embedding_config,
+			reranker_config,
+			embedding_concurrency,
+			reranker_concurrency
+		} = args
 
 		if (cache_dir) {
 			this.cache_dir = cache_dir
