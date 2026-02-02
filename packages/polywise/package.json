@@ -24,8 +24,10 @@
 	"devDependencies": {
 		"@rslib/core": "catalog:",
 		"@rstest/core": "^0.8.0",
+		"@types/fs-extra": "^11.0.4",
 		"cross-env": "^10.1.0",
 		"deepmerge-ts": "^7.1.5",
+		"fs-extra": "catalog:",
 		"glob": "^13.0.0",
 		"tsx": "^4.21.0"
 	}

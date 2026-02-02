@@ -477,12 +477,18 @@ importers:
       '@rstest/core':
         specifier: ^0.8.0
         version: 0.8.1
+      '@types/fs-extra':
+        specifier: ^11.0.4
+        version: 11.0.4
       cross-env:
         specifier: ^10.1.0
         version: 10.1.0
       deepmerge-ts:
         specifier: ^7.1.5
         version: 7.1.5
+      fs-extra:
+        specifier: 'catalog:'
+        version: 11.3.3
       glob:
         specifier: ^13.0.0
         version: 13.0.0

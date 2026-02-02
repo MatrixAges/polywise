@@ -1,5 +1,5 @@
-import * as fs from 'node:fs'
 import * as path from 'node:path'
+import fs from 'fs-extra'
 import { globSync } from 'glob'
 
 export const cleanupTestDatabases = () => {
@@ -12,13 +12,9 @@ export const cleanupTestDatabases = () => {
 		const files = globSync(pattern)
 
 		for (const file of files) {
-			if (fs.existsSync(file)) {
+			if (fs.pathExistsSync(file)) {
 				try {
-					if (fs.statSync(file).isDirectory()) {
-						fs.rmSync(file, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 })
-					} else {
-						fs.unlinkSync(file)
-					}
+					fs.removeSync(file)
 				} catch (error) {
 					// Ignore errors if the file is already gone or busy
 				}
