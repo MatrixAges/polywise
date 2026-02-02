@@ -12,16 +12,6 @@ BEFORE executing ANY other tool or responding to the user, you MUST save the raw
 - **Path Example:** `.prompts/2026-01-22/11-43-50.md`.
 - **Read Restriction:** Unless explicitly instructed, reading files in the `.prompts` folder is prohibited; only writing is allowed.
 
-## Tool Calls
-
-- When using the `edit` tool, ensure that `filePath` is the complete path relative to the project root directory.
-- Do not generate incomplete `newString`; the complete file content after replacement must be provided.
-- If unsure of the file path, use the `ls` or `find` tool to confirm; guessing is strictly prohibited.
-
-- When calling the `bash` tool, strictly adhere to the parameter schema.
-- The `description` field **must** be included, briefly explaining the command's purpose.
-- Example format: `bash(command="ls", description="List files in the current directory")`
-
 ## Read Agentmap (CRITICAL)
 
 After saving context, BEFORE reading any other files or executing tasks, you MUST read the relevant package's `agentmap.md` file.
@@ -42,6 +32,16 @@ After completing ANY task that changes project files (adds, renames, deletes fil
 Answer questions accurately and concisely, providing the optimal solution and offering multiple solutions or possibilities.
 
 Note: The code must be concise, without any irrelevant template code. Only reply with the core code relevant to the question, and the code must be enclosed in Markdown code blocks.
+
+## Tool Calls
+
+- When using the `edit` tool, ensure that `filePath` is the complete path relative to the project root directory.
+- Do not generate incomplete `newString`; the complete file content after replacement must be provided.
+- If unsure of the file path, use the `ls` or `find` tool to confirm; guessing is strictly prohibited.
+
+- When calling the `bash` tool, strictly adhere to the parameter schema.
+- The `description` field **must** be included, briefly explaining the command's purpose.
+- Example format: `bash(command="ls", description="List files in the current directory")`
 
 ## Output Code Style:
 
