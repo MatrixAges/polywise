@@ -386,14 +386,17 @@ export class AnotherClass {}
 
 ## Function & Class Model Parameters Convention
 
-When a function or class constructor has more than 2 parameters, use an object parameter for better flexibility. The properties within the object must follow a strict ordering:
+When a function or class constructor has more than 2 parameters, use an object parameter for better flexibility. The parameters must follow these style rules:
 
-**Ordering Rule:** `Required Variables` > `Optional Variables` > `Required Functions` > `Optional Functions`
+- **Parameter Name**: Always use `args` for the object parameter.
+- **Type Name**: Always use `*Args` for the interface/type name (e.g., `CreateNodeArgs`).
+- **Destructuring**: Always destructure the `args` object at the beginning of the function or constructor.
+- **Ordering Rule**: `Required Variables` > `Optional Variables` > `Required Functions` > `Optional Functions`
 
 **Good:**
 
 ```typescript
-interface CreateNodeParams {
+interface CreateNodeArgs {
 	// Required Variables
 	label: string
 	x: number
@@ -410,14 +413,24 @@ interface CreateNodeParams {
 	onFired?: () => void
 }
 
-async createNode(params: CreateNodeParams) {
-	await this.query(sql.createNode, [params.label, params.x, params.y])
+async createNode(args: CreateNodeArgs) {
+	const { label, x, y, threshold, idol_id, onCreated, onFired } = args
+
+	await this.query(sql.createNode, [label, x, y])
 }
 ```
 
 **Avoid:**
 
 ```typescript
+// Using 'params' instead of 'args'
+async createNode(params: CreateNodeArgs) {}
+
+// Missing destructuring
+async createNode(args: CreateNodeArgs) {
+	await this.query(sql.createNode, [args.label, args.x, args.y])
+}
+
 // Mixed order or positional parameters
 async createNode(
 	label: string,
@@ -426,12 +439,6 @@ async createNode(
 	threshold = 0.5,
 	idol_id?: string
 ) {}
-
-interface BadParams {
-	onCreated: () => void // Function before variables
-	label: string
-	threshold?: number
-}
 ```
 
 ## Final Guarantee

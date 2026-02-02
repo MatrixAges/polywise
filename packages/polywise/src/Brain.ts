@@ -1,7 +1,8 @@
 import { calculateFatigue, isIdle } from './utils'
 
+import type Polywise from './Polywise'
 import type { BrainState } from './types'
-import type { BrainParams } from './types/params'
+import type { BrainArgs } from './types/params'
 
 export default class Brain {
 	private poly: Polywise
@@ -22,9 +23,11 @@ export default class Brain {
 
 	private readonly IDLE_TIMEOUT_MS = 5 * 60 * 1000
 
-	constructor(params: BrainParams) {
-		this.poly = params.poly
-		this.on_tick = params.onTick
+	constructor(args: BrainArgs) {
+		const { poly, onTick } = args
+
+		this.poly = poly
+		this.on_tick = onTick
 
 		this.startLifeCycleLoop()
 	}

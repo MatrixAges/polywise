@@ -1,98 +1,79 @@
-export interface BrainParams {
-	// Required Variables
+export interface BrainArgs {
 	poly: import('../Polywise').default
 
-	// Optional Functions
 	onTick?: () => void
 }
 
-export interface PolywiseParams {
-	// Optional Variables
+export interface PolywiseArgs {
 	data_dir?: string
 	embedding_cache_dir?: string
 
-	// Optional Functions
 	onTick?: () => void
 }
 
-export interface AddNodeParams {
-	// Required Variables
+export interface AddNodeArgs {
 	label: string
 	x: number
 	y: number
 
-	// Optional Variables
 	threshold?: number
 	idol_id?: string
 	root_ids?: string[]
 	metrics_ids?: string[]
 }
 
-export interface ConnectParams {
-	// Required Variables
+export interface ConnectArgs {
 	source_id: number
 	target_id: number
 
-	// Optional Variables
 	weight?: number
 	idol_id?: string
 	root_ids?: string[]
 	metrics_ids?: string[]
 }
 
-export interface ProcessArticleParams {
-	// Required Variables
+export interface ProcessArticleArgs {
 	title: string
 	content: string
 	triples: import('./polywise').Triple[]
 
-	// Optional Variables
 	idol_id?: string
 	root_ids?: string[]
 	metrics_ids?: string[]
 	generate_embedding?: boolean
 }
 
-export interface InjectTriplesParams {
-	// Required Variables
+export interface InjectTriplesArgs {
 	triples: import('./polywise').Triple[]
 	article_id: number
 
-	// Optional Variables
 	idol_id?: string
 	root_ids?: string[]
 	metrics_ids?: string[]
 }
 
-export interface UpsertNodeParams {
-	// Required Variables
+export interface UpsertNodeArgs {
 	label: string
 	article_id: number
 
-	// Optional Variables
 	idol_id?: string
 	root_ids?: string[]
 	metrics_ids?: string[]
 }
 
-export interface AddArticleParams {
-	// Required Variables
+export interface AddArticleArgs {
 	title: string
 	content: string
 }
 
-export interface SearchArticleParams {
-	// Required Variables
+export interface SearchArticleArgs {
 	query: string
 
-	// Optional Variables
 	limit?: number
 }
 
-export interface ArticleParams {
-	// Required Variables
+export interface ArticleArgs {
 	db: import('@electric-sql/pglite').PGlite
 
-	// Optional Variables
 	embedding_cache_dir?: string
 }

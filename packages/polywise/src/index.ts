@@ -6,9 +6,9 @@ export type {
 	ArticleWithSimilarity,
 	ArticleEmbedding,
 	ArticleWithTriples,
-	ArticleParams,
-	AddNodeParams,
-	ConnectParams,
-	ProcessArticleParams
+	ArticleArgs,
+	AddNodeArgs,
+	ConnectArgs,
+	ProcessArticleArgs
 } from './types'
 export * from './utils'

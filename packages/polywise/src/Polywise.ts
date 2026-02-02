@@ -8,14 +8,14 @@ import * as sql_meta from './sql/meta'
 import { calculateWeight, CURRENT_SCHEMA_VERSION, migrate, validateMigrations } from './utils'
 
 import type {
-	AddNodeParams,
-	ConnectParams,
+	AddNodeArgs,
+	ConnectArgs,
 	Edge,
-	InjectTriplesParams,
+	InjectTriplesArgs,
 	Node,
-	PolywiseParams,
-	ProcessArticleParams,
-	UpsertNodeParams
+	PolywiseArgs,
+	ProcessArticleArgs,
+	UpsertNodeArgs
 } from './types'
 
 export default class Polywise {
@@ -24,20 +24,22 @@ export default class Polywise {
 	public article: Article
 	public brain: Brain
 
-	constructor(params: PolywiseParams = {}) {
-		this.db = new PGlite(params.data_dir || ':polywise:', {
+	constructor(args: PolywiseArgs = {}) {
+		const { data_dir, embedding_cache_dir, onTick } = args
+
+		this.db = new PGlite(data_dir || ':polywise:', {
 			relaxedDurability: true,
 			extensions: { vector }
 		})
 
 		this.article = new Article({
 			db: this.db,
-			embedding_cache_dir: params.embedding_cache_dir
+			embedding_cache_dir
 		})
 
 		this.brain = new Brain({
 			poly: this,
-			onTick: params.onTick
+			onTick
 		})
 	}
 
@@ -45,9 +47,11 @@ export default class Polywise {
 		validateMigrations()
 
 		await this.exec(sql_meta.sql_create_schema_meta)
+
 		await this.exec(sql_meta.sql_create_table_schema_version)
 
 		const version_result = await this.query<{ version: number }>(sql_meta.sql_get_current_version)
+
 		const current_version = version_result[0]?.version ?? 0
 
 		if (current_version < CURRENT_SCHEMA_VERSION) {
@@ -55,28 +59,32 @@ export default class Polywise {
 		}
 	}
 
-	async addNode(params: AddNodeParams) {
+	async addNode(args: AddNodeArgs) {
+		const { label, x, y, threshold, idol_id, root_ids, metrics_ids } = args
+
 		const rows = await this.query<{ id: number }>(sql.sql_add_node, [
-			params.label,
-			params.x,
-			params.y,
-			params.threshold ?? 0.5,
-			params.idol_id ?? null,
-			params.root_ids ?? null,
-			params.metrics_ids ?? null
+			label,
+			x,
+			y,
+			threshold ?? 0.5,
+			idol_id ?? null,
+			root_ids ?? null,
+			metrics_ids ?? null
 		])
 
 		return rows[0].id
 	}
 
-	async connect(params: ConnectParams) {
+	async connect(args: ConnectArgs) {
+		const { source_id, target_id, weight, idol_id, root_ids, metrics_ids } = args
+
 		await this.query(sql.sql_connect, [
-			params.source_id,
-			params.target_id,
-			params.weight ?? 0.1,
-			params.idol_id ?? null,
-			params.root_ids ?? null,
-			params.metrics_ids ?? null
+			source_id,
+			target_id,
+			weight ?? 0.1,
+			idol_id ?? null,
+			root_ids ?? null,
+			metrics_ids ?? null
 		])
 	}
 
@@ -86,6 +94,7 @@ export default class Polywise {
 
 	async getSnapshot(weight_threshold = 0.2) {
 		const nodes = await this.query<Node[]>(sql.sql_get_snapshot_nodes(weight_threshold))
+
 		const edges = await this.query<Edge[]>(sql.sql_get_snapshot_edges(weight_threshold))
 
 		return { nodes, edges }
@@ -136,41 +145,46 @@ export default class Polywise {
 		])
 	}
 
-	async processArticle(params: ProcessArticleParams) {
-		const res = await this.query<{ id: number }>(sql.sql_process_article, [params.title, params.content])
+	async processArticle(args: ProcessArticleArgs) {
+		const { title, content, triples, idol_id, root_ids, metrics_ids, generate_embedding } = args
+
+		const res = await this.query<{ id: number }>(sql.sql_process_article, [title, content])
+
 		const article_id = res[0].id
 
-		if (params.generate_embedding ?? true) {
-			await this.article.addEmbedding(article_id, params.content)
+		if (generate_embedding ?? true) {
+			await this.article.addEmbedding(article_id, content)
 		}
 
 		await this._injectTriples({
-			triples: params.triples,
+			triples,
 			article_id,
-			idol_id: params.idol_id,
-			root_ids: params.root_ids,
-			metrics_ids: params.metrics_ids
+			idol_id,
+			root_ids,
+			metrics_ids
 		})
 	}
 
-	private async _injectTriples(params: InjectTriplesParams) {
+	private async _injectTriples(args: InjectTriplesArgs) {
+		const { triples, article_id, idol_id, root_ids, metrics_ids } = args
+
 		await this.exec(sql.sql_inject_triples_begin)
 
-		for (const t of params.triples) {
+		for (const t of triples) {
 			const sub_id = await this._upsertNode({
 				label: t.subject,
-				article_id: params.article_id,
-				idol_id: params.idol_id,
-				root_ids: params.root_ids,
-				metrics_ids: params.metrics_ids
+				article_id,
+				idol_id,
+				root_ids,
+				metrics_ids
 			})
 
 			const obj_id = await this._upsertNode({
 				label: t.object,
-				article_id: params.article_id,
-				idol_id: params.idol_id,
-				root_ids: params.root_ids,
-				metrics_ids: params.metrics_ids
+				article_id,
+				idol_id,
+				root_ids,
+				metrics_ids
 			})
 
 			const weight = calculateWeight(t.learning_rate)
@@ -183,9 +197,9 @@ export default class Polywise {
 					t.decay_resistance,
 					t.predicate,
 					weight,
-					params.idol_id,
-					params.root_ids,
-					params.metrics_ids
+					idol_id,
+					root_ids,
+					metrics_ids
 				)
 			)
 
@@ -196,9 +210,9 @@ export default class Polywise {
 					t.learning_rate,
 					t.decay_resistance,
 					weight,
-					params.idol_id,
-					params.root_ids,
-					params.metrics_ids
+					idol_id,
+					root_ids,
+					metrics_ids
 				)
 			)
 		}
@@ -206,18 +220,16 @@ export default class Polywise {
 		await this.exec(sql.sql_inject_triples_commit)
 	}
 
-	private async _upsertNode(params: UpsertNodeParams) {
-		await this.query(sql.sql_upsert_node, [
-			params.label,
-			params.idol_id ?? null,
-			params.root_ids ?? null,
-			params.metrics_ids ?? null
-		])
+	private async _upsertNode(args: UpsertNodeArgs) {
+		const { label, article_id, idol_id, root_ids, metrics_ids } = args
 
-		const res = await this.query<{ id: number }>(sql.sql_upsert_node_select, [params.label])
+		await this.query(sql.sql_upsert_node, [label, idol_id ?? null, root_ids ?? null, metrics_ids ?? null])
+
+		const res = await this.query<{ id: number }>(sql.sql_upsert_node_select, [label])
+
 		const nid = res[0].id
 
-		await this.query(sql.sql_node_sources, [nid, params.article_id])
+		await this.query(sql.sql_node_sources, [nid, article_id])
 
 		return nid
 	}
@@ -253,6 +265,7 @@ export default class Polywise {
 
 		if (this.db) {
 			await this.db.close()
+
 			this.db = null
 		}
 	}

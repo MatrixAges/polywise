@@ -58,6 +58,33 @@ You are a specialized agent for the Polywise project, focused on optimizing code
 **Examples:**
 
 ```typescript
+// Good - insert blank lines between different types of code.
+export default class Polywise {
+	private db: PGlite | null = null
+
+	public article: Article
+	public brain: Brain
+
+	constructor(args: PolywiseArgs = {}) {
+		const { data_dir, embedding_cache_dir, onTick } = args
+
+		this.db = new PGlite(data_dir || ':polywise:', {
+			relaxedDurability: true,
+			extensions: { vector }
+		})
+
+		this.article = new Article({
+			db: this.db,
+			embedding_cache_dir
+		})
+
+		this.brain = new Brain({
+			poly: this,
+			onTick
+		})
+	}
+}
+
 // Good - blank line between async operations and return
 async getSnapshot(weight_threshold = 0.2) {
 	const nodes = await this.query(sql.sql_get_snapshot_nodes(weight_threshold))
