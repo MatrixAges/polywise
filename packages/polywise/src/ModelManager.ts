@@ -1,7 +1,7 @@
 import { injectable } from 'tsyringe'
 import fs from 'fs-extra'
 import path from 'path'
-import { fileURLToPath } from 'url'
+import os from 'os'
 import { DEFAULT_DTYPE } from './consts'
 
 import type { ModelStatus, LocalModel, ModelDownloadProgress, ModelManagerArgs, DownloadOptions } from './types/model'
@@ -15,9 +15,8 @@ export default class ModelManager {
 	private downloads_dir: string
 
 	constructor(args?: ModelManagerArgs) {
-		const __dirname = path.dirname(fileURLToPath(import.meta.url))
 		this.default_dtype = args?.default_dtype || DEFAULT_DTYPE
-		this.models_dir = args?.models_dir || path.join(process.cwd(), 'models')
+		this.models_dir = args?.models_dir || path.join(os.homedir(), '.Models')
 		this.downloads_dir = path.join(this.models_dir, '.downloads')
 	}
 
