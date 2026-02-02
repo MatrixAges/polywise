@@ -1,14 +1,7 @@
 import { env, pipeline } from '@huggingface/transformers'
 import { singleton } from 'tsyringe'
 
-import {
-	DEFAULT_EMBEDDING_CONFIG,
-	DEFAULT_RERANKER_CONFIG,
-	DEFAULT_API_EMBEDDING_MODEL,
-	DEFAULT_API_RERANKER_MODEL,
-	POOLING_MEAN,
-	HTTP_HEADERS
-} from './consts'
+import { DEFAULT_EMBEDDING_CONFIG, DEFAULT_RERANKER_CONFIG, POOLING_MEAN } from './consts'
 
 import type { EmbeddingConfig, RerankerConfig, PipelineArgs } from './types'
 
@@ -68,7 +61,7 @@ export default class Pipeline {
 
 		if (config.type === 'local') {
 			await this.loadEmbeddingModel()
-		} else if (config.type === 'api' || config.type === 'custom') {
+		} else {
 			this.embedding = null
 		}
 	}
@@ -78,7 +71,7 @@ export default class Pipeline {
 
 		if (config.type === 'local') {
 			await this.loadRerankerModel()
-		} else if (config.type === 'api' || config.type === 'custom') {
+		} else {
 			this.reranker = null
 		}
 	}
@@ -88,34 +81,6 @@ export default class Pipeline {
 			const { fn } = this.embedding_config
 
 			return await fn(text)
-		}
-
-		if (this.embedding_config.type === 'api') {
-			const { api_url, api_key, model } = this.embedding_config
-
-			if (!api_url) {
-				throw new Error('API URL not configured for embedding')
-			}
-
-			const response = await fetch(api_url, {
-				method: 'POST',
-				headers: {
-					[HTTP_HEADERS.CONTENT_TYPE]: HTTP_HEADERS.CONTENT_TYPE_JSON,
-					...(api_key && { [HTTP_HEADERS.AUTHORIZATION]: `Bearer ${api_key}` })
-				},
-				body: JSON.stringify({
-					model: model || DEFAULT_API_EMBEDDING_MODEL,
-					input: text
-				})
-			})
-
-			if (!response.ok) {
-				throw new Error(`Embedding API error: ${response.statusText}`)
-			}
-
-			const data = await response.json()
-
-			return data.data[0].embedding
 		}
 
 		if (!this.embedding) {
@@ -135,35 +100,6 @@ export default class Pipeline {
 			const { fn } = this.reranker_config
 
 			return await fn(query, documents)
-		}
-
-		if (this.reranker_config.type === 'api') {
-			const { api_url, api_key, model } = this.reranker_config
-
-			if (!api_url) {
-				throw new Error('API URL not configured for reranking')
-			}
-
-			const response = await fetch(api_url, {
-				method: 'POST',
-				headers: {
-					[HTTP_HEADERS.CONTENT_TYPE]: HTTP_HEADERS.CONTENT_TYPE_JSON,
-					...(api_key && { [HTTP_HEADERS.AUTHORIZATION]: `Bearer ${api_key}` })
-				},
-				body: JSON.stringify({
-					model: model || DEFAULT_API_RERANKER_MODEL,
-					query,
-					documents
-				})
-			})
-
-			if (!response.ok) {
-				throw new Error(`Reranker API error: ${response.statusText}`)
-			}
-
-			const data = await response.json()
-
-			return data.results
 		}
 
 		if (!this.reranker) {

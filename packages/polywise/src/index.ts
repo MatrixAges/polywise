@@ -17,8 +17,8 @@ export type {
 	EmbeddingConfig,
 	RerankerConfig,
 	LocalEmbeddingConfig,
-	APIEmbeddingConfig,
+	CustomEmbeddingConfig,
 	LocalRerankerConfig,
-	APIRerankerConfig
+	CustomRerankerConfig
 } from './types'
 export * from './utils'
