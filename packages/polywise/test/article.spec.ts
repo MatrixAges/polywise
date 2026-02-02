@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 
 import Polywise from '../src/Polywise'
-import { cleanupTestDatabases } from './utils'
+import { cleanupDatabase } from './utils'
 
 describe('Full-Text Search and Vector Search', () => {
 	let poly: Polywise
@@ -14,8 +14,6 @@ describe('Full-Text Search and Vector Search', () => {
 
 	afterAll(async () => {
 		await poly?.off()
-
-		cleanupTestDatabases()
 	})
 
 	describe('Full-Text Search', () => {
@@ -262,8 +260,6 @@ describe('Full-Text Search and Vector Search', () => {
 			expect(vector_results.length).toBe(0)
 
 			await empty_poly.off()
-
-			cleanupTestDatabases()
 		})
 
 		it('should handle very short query strings', async () => {

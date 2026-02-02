@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 
 import Polywise from '../src/Polywise'
-import { cleanupTestDatabases } from './utils'
+import { cleanupDatabase } from './utils'
 
 describe('Polywise Brain System', () => {
 	let poly: Polywise
@@ -25,8 +25,6 @@ describe('Polywise Brain System', () => {
 
 	afterAll(async () => {
 		await poly.off()
-
-		cleanupTestDatabases()
 	})
 
 	describe('Complex Knowledge Graph Operations', () => {

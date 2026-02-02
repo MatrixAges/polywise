@@ -6,7 +6,7 @@ import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 
 import * as sql_meta from '../src/sql/meta'
 import { CURRENT_SCHEMA_VERSION, migrate, migrations, validateMigrations } from '../src/utils/migration'
-import { cleanupTestDatabases } from './utils'
+import { cleanupDatabase } from './utils'
 
 describe('Migration System', () => {
 	describe('validateMigrations', () => {
@@ -36,10 +36,6 @@ describe('Migration System', () => {
 
 		afterAll(async () => {
 			await db.close()
-
-			await fsp.rm(db_path, { recursive: true, force: true })
-
-			cleanupTestDatabases()
 		})
 
 		const exec = async (sql: string | string[]) => {
@@ -115,10 +111,6 @@ describe('Migration System', () => {
 
 		afterAll(async () => {
 			await db.close()
-
-			await fsp.rm(db_path, { recursive: true, force: true })
-
-			cleanupTestDatabases()
 		})
 
 		const exec = async (sql: string | string[]) => {
@@ -188,10 +180,6 @@ describe('Migration System', () => {
 
 		afterAll(async () => {
 			await db.close()
-
-			await fsp.rm(db_path, { recursive: true, force: true })
-
-			cleanupTestDatabases()
 		})
 
 		const exec = async (sql: string | string[]) => {
@@ -247,10 +235,6 @@ describe('Migration System', () => {
 
 		afterAll(async () => {
 			await db.close()
-
-			await fsp.rm(db_path, { recursive: true, force: true })
-
-			cleanupTestDatabases()
 		})
 
 		const exec = async (sql: string | string[]) => {
@@ -311,10 +295,6 @@ describe('Migration System', () => {
 
 		afterAll(async () => {
 			await db.close()
-
-			await fsp.rm(db_path, { recursive: true, force: true })
-
-			cleanupTestDatabases()
 		})
 
 		const exec = async (sql: string | string[]) => {
@@ -364,10 +344,6 @@ describe('Migration System', () => {
 
 		afterAll(async () => {
 			await db.close()
-
-			await fsp.rm(db_path, { recursive: true, force: true })
-
-			cleanupTestDatabases()
 		})
 
 		const exec = async (sql: string | string[]) => {
