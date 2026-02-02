@@ -473,6 +473,9 @@ importers:
       '@huggingface/transformers':
         specifier: ^3.3.2
         version: 3.8.1
+      tslib:
+        specifier: ^2.8.1
+        version: 2.8.1
       tsyringe:
         specifier: ^4.10.0
         version: 4.10.0
