@@ -195,6 +195,27 @@ export default class MyClass {
 }
 ```
 
+### No Any Rule
+
+Avoid using `any` type unless absolutely necessary. Use specific types, `unknown`, or generics instead.
+
+**Good:**
+
+```typescript
+interface User {
+	id: number
+	name: string
+}
+
+function getUser(id: number): Promise<User | null>
+```
+
+**Avoid:**
+
+```typescript
+function getUser(id: number): Promise<any>
+```
+
 ## Database Schema Migration (CRITICAL)
 
 When modifying database schema in the polywise package, you MUST update the migration system:

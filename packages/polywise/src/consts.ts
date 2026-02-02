@@ -1,5 +1,4 @@
-export const PIPELINE_TASK_FEATURE_EXTRACTION = 'feature-extraction'
-export const PIPELINE_TASK_RERANKING = 'reranking'
+import type { EmbeddingConfig, RerankerConfig } from './types'
 
 export const DEFAULT_EMBEDDING_MODEL = 'onnx-community/Qwen3-Embedding-0.6B-ONNX'
 export const DEFAULT_RERANKER_MODEL = 'onnx-community/Qwen3-Reranker-0.6B-ONNX'
@@ -17,4 +16,16 @@ export const HTTP_HEADERS = {
 	CONTENT_TYPE: 'Content-Type',
 	AUTHORIZATION: 'Authorization',
 	CONTENT_TYPE_JSON: 'application/json'
+}
+
+export const DEFAULT_EMBEDDING_CONFIG: EmbeddingConfig = {
+	type: 'local',
+	model: DEFAULT_EMBEDDING_MODEL,
+	dtype: DEFAULT_DTYPE
+}
+
+export const DEFAULT_RERANKER_CONFIG: RerankerConfig = {
+	type: 'local',
+	model: DEFAULT_RERANKER_MODEL,
+	dtype: DEFAULT_DTYPE
 }

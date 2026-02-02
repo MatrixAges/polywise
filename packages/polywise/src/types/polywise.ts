@@ -88,3 +88,5 @@ export interface ArticleEmbedding {
 export interface ArticleWithTriples extends ArticleEntity {
 	triples: Triple[]
 }
+
+export type RerankerPipeline = (query: string, documents: string[]) => Promise<{ index: number; score: number }[]>

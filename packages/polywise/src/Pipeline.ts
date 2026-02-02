@@ -2,11 +2,8 @@ import { env, pipeline } from '@huggingface/transformers'
 import { singleton } from 'tsyringe'
 
 import {
-	PIPELINE_TASK_FEATURE_EXTRACTION,
-	PIPELINE_TASK_RERANKING,
-	DEFAULT_EMBEDDING_MODEL,
-	DEFAULT_RERANKER_MODEL,
-	DEFAULT_DTYPE,
+	DEFAULT_EMBEDDING_CONFIG,
+	DEFAULT_RERANKER_CONFIG,
 	DEFAULT_API_EMBEDDING_MODEL,
 	DEFAULT_API_RERANKER_MODEL,
 	POOLING_MEAN,
@@ -14,18 +11,6 @@ import {
 } from './consts'
 
 import type { EmbeddingConfig, RerankerConfig, PipelineArgs } from './types'
-
-const DEFAULT_EMBEDDING_CONFIG: EmbeddingConfig = {
-	type: 'local',
-	model: DEFAULT_EMBEDDING_MODEL,
-	dtype: DEFAULT_DTYPE
-}
-
-const DEFAULT_RERANKER_CONFIG: RerankerConfig = {
-	type: 'local',
-	model: DEFAULT_RERANKER_MODEL,
-	dtype: DEFAULT_DTYPE
-}
 
 @singleton()
 export default class Pipeline {
@@ -61,7 +46,7 @@ export default class Pipeline {
 
 		const { model, dtype } = this.embedding_config
 
-		this.embedding = await pipeline(PIPELINE_TASK_FEATURE_EXTRACTION as any, model, {
+		this.embedding = await pipeline('feature-extraction', model, {
 			dtype: dtype as any
 		})
 	}
@@ -73,7 +58,7 @@ export default class Pipeline {
 
 		const { model, dtype } = this.reranker_config
 
-		this.reranker = await pipeline(PIPELINE_TASK_RERANKING as any, model, {
+		this.reranker = await pipeline('text-classification' as any, model, {
 			dtype: dtype as any
 		})
 	}
@@ -142,7 +127,7 @@ export default class Pipeline {
 			normalize: true
 		})
 
-		return Array.from(output.data)
+		return Array.from((output as any).data)
 	}
 
 	async rerank(query: string, documents: string[]) {
