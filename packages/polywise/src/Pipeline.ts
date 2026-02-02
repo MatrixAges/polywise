@@ -3,7 +3,14 @@ import { singleton } from 'tsyringe'
 
 import { DEFAULT_EMBEDDING_CONFIG, DEFAULT_RERANKER_CONFIG, POOLING_MEAN } from './consts'
 
-import type { EmbeddingConfig, RerankerConfig, PipelineArgs } from './types'
+import type {
+	EmbeddingConfig,
+	RerankerConfig,
+	PipelineArgs,
+	ArticleSearchResult,
+	SearchResult,
+	SearchCandidate
+} from './types'
 
 @singleton()
 export default class Pipeline {
@@ -119,4 +126,55 @@ export default class Pipeline {
 	}
 
 	off() {}
+
+	async search(args: {
+		query: string
+		vectorSearch: () => Promise<ArticleSearchResult[]>
+		fulltextSearch: () => Promise<ArticleSearchResult[]>
+		rerankLimit?: number
+	}) {
+		const { query, vectorSearch, fulltextSearch, rerankLimit = 20 } = args
+
+		const [vectorResults, fulltextResults] = await Promise.all([vectorSearch(), fulltextSearch()])
+
+		const candidatesMap = new Map<number, SearchCandidate>()
+
+		for (const r of vectorResults) {
+			if (!candidatesMap.has(r.id)) {
+				candidatesMap.set(r.id, {
+					id: r.id,
+					title: r.title,
+					content: r.content,
+					source: 'vector'
+				})
+			}
+		}
+
+		for (const r of fulltextResults) {
+			if (!candidatesMap.has(r.id)) {
+				candidatesMap.set(r.id, {
+					id: r.id,
+					title: r.title,
+					content: r.content,
+					source: 'fulltext'
+				})
+			}
+		}
+
+		const candidates = Array.from(candidatesMap.values())
+
+		const documents = candidates.map(c => c.content)
+
+		const rerankScores = await this.rerank(query, documents)
+
+		const results: SearchResult[] = candidates.map((candidate, index) => ({
+			id: candidate.id,
+			title: candidate.title,
+			content: candidate.content,
+			source: candidate.source,
+			rerankScore: rerankScores[index]?.score ?? 0
+		}))
+
+		return results.sort((a, b) => b.rerankScore - a.rerankScore).slice(0, rerankLimit)
+	}
 }

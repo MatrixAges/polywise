@@ -93,11 +93,6 @@ export default class Article {
 		return res.rows
 	}
 
-	off() {
-		this.db = null
-		this.pipeline = null
-	}
-
 	async process(args: AddArticleArgs) {
 		if (!this.db) return null
 
@@ -144,5 +139,10 @@ export default class Article {
 
 	async searchVector(args: SearchArticleArgs) {
 		return this.searchByVector(args)
+	}
+
+	off() {
+		this.db = null
+		this.pipeline = null
 	}
 }

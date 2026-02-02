@@ -106,3 +106,25 @@ export interface SearchArticleArgs {
 export interface ArticleArgs {
 	db: PGlite
 }
+
+export interface SearchCandidate {
+	id: number
+	content: string
+	title: string
+	source: 'vector' | 'fulltext'
+}
+
+export interface ArticleSearchResult {
+	id: number
+	title: string
+	content: string
+	similarity?: number
+}
+
+export interface SearchResult {
+	id: number
+	title: string
+	content: string
+	source: 'vector' | 'fulltext'
+	rerankScore: number
+}
