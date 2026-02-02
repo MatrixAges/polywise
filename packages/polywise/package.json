@@ -15,7 +15,8 @@
 	"scripts": {
 		"dev": "cross-env NODE_ENV=development rslib build --watch",
 		"build": "rslib build",
-		"test": "rstest run && bun ./scripts/cleanupTestFiles.ts"
+		"clean": "bun ./scripts/cleanupTestFiles.ts",
+		"test": "rstest run && pnpm run clean"
 	},
 	"dependencies": {
 		"@abraham/reflection": "^0.13.0",
