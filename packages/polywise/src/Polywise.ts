@@ -49,7 +49,6 @@ export default class Polywise {
 		validateMigrations()
 
 		await this.exec(sql_meta.sql_create_schema_meta)
-
 		await this.exec(sql_meta.sql_create_table_schema_version)
 
 		const version_result = await this.query<{ version: number }>(sql_meta.sql_get_current_version)
