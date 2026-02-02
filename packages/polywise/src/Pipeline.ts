@@ -267,34 +267,46 @@ export default class Pipeline {
 	async checkModels() {
 		const cache_dir = this.cache_dir || `${os.homedir()}/.Polywise/.models`
 		env.cacheDir = cache_dir
+		// Ensure transformers doesn't try to use its own default cache
+		env.allowLocalModels = true
 
 		const checkAndDownload = async (config: EmbeddingConfig | RerankerConfig, loadFn: () => Promise<any>) => {
 			if (config.type === 'local') {
 				const modelPath = path.join(cache_dir, config.model)
-				const exists = await fs.pathExists(modelPath)
 
-				try {
-					if (!exists) {
-						console.log(`Model ${config.model} not found, downloading...`)
+				const run = async (retryCount = 0) => {
+					try {
+						// Small delay to ensure OS file handles are settled if we just deleted
+						if (retryCount > 0) {
+							await new Promise(resolve => setTimeout(resolve, 2000))
+						}
 						await loadFn()
-					} else {
-						// Try to load it to see if it's corrupted
-						await loadFn()
+						console.log(`Model ${config.model} is ready.`)
+					} catch (err) {
+						if (retryCount === 0) {
+							console.error(
+								`Failed to load model ${config.model}: ${err.message}. Deleting cache and retrying...`
+							)
+							await fs.remove(modelPath)
+							await run(retryCount + 1)
+						} else {
+							console.error(`Failed to load model ${config.model} after retry:`, err)
+							throw err
+						}
 					}
-				} catch (err) {
-					console.error(
-						`Failed to load model ${config.model}, it might be corrupted. Deleting and retrying...`
-					)
-					await fs.remove(modelPath)
-					console.log(`Model ${config.model} deleted, re-downloading...`)
-					await loadFn()
 				}
+
+				await run()
 			}
 		}
 
+		// Run in parallel but with a small stagger to avoid race conditions in ONNX initialization
 		await Promise.all([
 			checkAndDownload(this.embedding_config, this.loadEmbeddingModel.bind(this)),
-			checkAndDownload(this.reranker_config, this.loadRerankerModel.bind(this))
+			(async () => {
+				await new Promise(resolve => setTimeout(resolve, 500))
+				await checkAndDownload(this.reranker_config, this.loadRerankerModel.bind(this))
+			})()
 		])
 	}
 }
