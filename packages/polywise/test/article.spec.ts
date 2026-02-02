@@ -1,9 +1,7 @@
-import * as fs from 'fs'
-import * as path from 'path'
-
 import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 
 import Polywise from '../src/Polywise'
+import { cleanupTestDatabases } from './utils'
 
 describe('Full-Text Search and Vector Search', () => {
 	let poly: Polywise
@@ -17,21 +15,7 @@ describe('Full-Text Search and Vector Search', () => {
 	afterAll(async () => {
 		await poly?.off()
 
-		const files = fs.readdirSync('.')
-
-		for (const file of files) {
-			if (file.includes('polywise_search_test') || (file.includes('polywise') && file.includes('search'))) {
-				const full_path = path.join('.', file)
-
-				if (fs.existsSync(full_path)) {
-					if (fs.statSync(full_path).isDirectory()) {
-						fs.rmSync(full_path, { recursive: true })
-					} else {
-						fs.unlinkSync(full_path)
-					}
-				}
-			}
-		}
+		cleanupTestDatabases()
 	})
 
 	describe('Full-Text Search', () => {
@@ -279,21 +263,7 @@ describe('Full-Text Search and Vector Search', () => {
 
 			await empty_poly.off()
 
-			const files = fs.readdirSync('.')
-
-			for (const file of files) {
-				if (file.includes('polywise_empty_test')) {
-					const full_path = path.join('.', file)
-
-					if (fs.existsSync(full_path)) {
-						if (fs.statSync(full_path).isDirectory()) {
-							fs.rmSync(full_path, { recursive: true })
-						} else {
-							fs.unlinkSync(full_path)
-						}
-					}
-				}
-			}
+			cleanupTestDatabases()
 		})
 
 		it('should handle very short query strings', async () => {

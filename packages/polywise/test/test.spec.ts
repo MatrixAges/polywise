@@ -1,10 +1,8 @@
-import * as fs from 'fs'
-import * as path from 'path'
-
 import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 
 import Brain from '../src/Brain'
 import Polywise from '../src/Polywise'
+import { cleanupTestDatabases } from './utils'
 
 describe('Polywise Brain System', () => {
 	let poly: Polywise
@@ -33,17 +31,7 @@ describe('Polywise Brain System', () => {
 		brain?.off()
 		await poly.off()
 
-		const files = fs.readdirSync('.')
-		for (const file of files) {
-			if (file.startsWith('polywise_test_') && (file.includes(dbName) || file.includes('polywise'))) {
-				const fullPath = path.join('.', file)
-				if (fs.statSync(fullPath).isDirectory()) {
-					fs.rmSync(fullPath, { recursive: true })
-				} else {
-					fs.unlinkSync(fullPath)
-				}
-			}
-		}
+		cleanupTestDatabases()
 	})
 
 	describe('Complex Knowledge Graph Operations', () => {

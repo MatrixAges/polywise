@@ -1,4 +1,4 @@
-import fs from 'node:fs/promises'
+import fsp from 'node:fs/promises'
 
 import { PGlite } from '@electric-sql/pglite'
 import { vector } from '@electric-sql/pglite/vector'
@@ -6,6 +6,7 @@ import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 
 import * as sql_meta from '../src/sql/meta'
 import { CURRENT_SCHEMA_VERSION, migrate, migrations, validateMigrations } from '../src/utils/migration'
+import { cleanupTestDatabases } from './utils'
 
 describe('Migration System', () => {
 	describe('validateMigrations', () => {
@@ -36,7 +37,9 @@ describe('Migration System', () => {
 		afterAll(async () => {
 			await db.close()
 
-			await fs.rm(db_path, { recursive: true, force: true })
+			await fsp.rm(db_path, { recursive: true, force: true })
+
+			cleanupTestDatabases()
 		})
 
 		const exec = async (sql: string | string[]) => {
@@ -113,7 +116,9 @@ describe('Migration System', () => {
 		afterAll(async () => {
 			await db.close()
 
-			await fs.rm(db_path, { recursive: true, force: true })
+			await fsp.rm(db_path, { recursive: true, force: true })
+
+			cleanupTestDatabases()
 		})
 
 		const exec = async (sql: string | string[]) => {
@@ -184,7 +189,9 @@ describe('Migration System', () => {
 		afterAll(async () => {
 			await db.close()
 
-			await fs.rm(db_path, { recursive: true, force: true })
+			await fsp.rm(db_path, { recursive: true, force: true })
+
+			cleanupTestDatabases()
 		})
 
 		const exec = async (sql: string | string[]) => {
@@ -241,7 +248,9 @@ describe('Migration System', () => {
 		afterAll(async () => {
 			await db.close()
 
-			await fs.rm(db_path, { recursive: true, force: true })
+			await fsp.rm(db_path, { recursive: true, force: true })
+
+			cleanupTestDatabases()
 		})
 
 		const exec = async (sql: string | string[]) => {
@@ -303,7 +312,9 @@ describe('Migration System', () => {
 		afterAll(async () => {
 			await db.close()
 
-			await fs.rm(db_path, { recursive: true, force: true })
+			await fsp.rm(db_path, { recursive: true, force: true })
+
+			cleanupTestDatabases()
 		})
 
 		const exec = async (sql: string | string[]) => {
@@ -354,7 +365,9 @@ describe('Migration System', () => {
 		afterAll(async () => {
 			await db.close()
 
-			await fs.rm(db_path, { recursive: true, force: true })
+			await fsp.rm(db_path, { recursive: true, force: true })
+
+			cleanupTestDatabases()
 		})
 
 		const exec = async (sql: string | string[]) => {
