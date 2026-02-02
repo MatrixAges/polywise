@@ -2,7 +2,7 @@ import { calculateFatigue, isIdle } from './utils'
 
 import type Polywise from './Polywise'
 import type { BrainState } from './types'
-import type { BrainArgs } from './types/params'
+import type { BrainArgs } from './types/args'
 
 export default class Brain {
 	private poly: Polywise

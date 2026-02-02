@@ -1,5 +1,9 @@
+import type { PGlite } from '@electric-sql/pglite'
+import type Polywise from '../Polywise'
+import type { Metadata, Triple } from './polywise'
+
 export interface BrainArgs {
-	poly: import('../Polywise').default
+	poly: Polywise
 	onTick?: () => void
 }
 
@@ -17,7 +21,7 @@ export interface AddNodeArgs {
 	idol_id?: string
 	root_ids?: string[]
 	metrics_ids?: string[]
-	metadata?: import('./polywise').Metadata
+	metadata?: Metadata
 }
 
 export interface ConnectArgs {
@@ -27,13 +31,13 @@ export interface ConnectArgs {
 	idol_id?: string
 	root_ids?: string[]
 	metrics_ids?: string[]
-	metadata?: import('./polywise').Metadata
+	metadata?: Metadata
 }
 
 export interface ProcessArticleArgs {
 	title: string
 	content: string
-	triples: import('./polywise').Triple[]
+	triples: Triple[]
 	idol_id?: string
 	root_ids?: string[]
 	metrics_ids?: string[]
@@ -41,7 +45,7 @@ export interface ProcessArticleArgs {
 }
 
 export interface InjectTriplesArgs {
-	triples: import('./polywise').Triple[]
+	triples: Triple[]
 	article_id: number
 	idol_id?: string
 	root_ids?: string[]
@@ -54,7 +58,7 @@ export interface UpsertNodeArgs {
 	idol_id?: string
 	root_ids?: string[]
 	metrics_ids?: string[]
-	metadata?: import('./polywise').Metadata
+	metadata?: Metadata
 }
 
 export interface AddArticleArgs {
@@ -68,6 +72,6 @@ export interface SearchArticleArgs {
 }
 
 export interface ArticleArgs {
-	db: import('@electric-sql/pglite').PGlite
+	db: PGlite
 	embedding_cache_dir?: string
 }

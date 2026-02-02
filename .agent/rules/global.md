@@ -439,6 +439,31 @@ async createNode(
 ) {}
 ```
 
+## Type Import Convention (CRITICAL)
+
+Always use `import type` for type-only imports. Avoid inline `import()` statements within interfaces or type definitions. Place all type imports at the top of the file.
+
+**Good:**
+
+```typescript
+import type Polywise from '../Polywise'
+import type { Metadata } from './polywise'
+
+export interface BrainArgs {
+	poly: Polywise
+	onTick?: () => void
+}
+```
+
+**Avoid:**
+
+```typescript
+export interface BrainArgs {
+	poly: import('../Polywise').default
+	onTick?: () => void
+}
+```
+
 ## Final Guarantee
 
 - **Important:** Do not write any comments to explain the code!!! - Do not make modifications to modules that are not mentioned. If you realize that you need to modify pages or modules that are not mentioned, you must confirm with the user before performing the relevant operations.

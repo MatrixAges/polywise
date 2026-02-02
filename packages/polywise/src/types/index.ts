@@ -1,2 +1,2 @@
 export * from './polywise'
-export * from './params'
+export * from './args'

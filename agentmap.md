@@ -367,8 +367,8 @@ The project is a monorepo organized using a workspace structure, primarily built
 					}
 				},
 				"types": {
+					"args.ts": { "desc": "Parameter types for functions and constructors", "role": "Type" },
 					"index.ts": { "desc": "Types exports", "role": "Index" },
-					"params.ts": { "desc": "Parameter types for functions and constructors", "role": "Type" },
 					"polywise.ts": {
 						"desc": "Core types (Node, Edge, Triple, Snapshot, BrainState, Migration, etc.)",
 						"role": "Type"
