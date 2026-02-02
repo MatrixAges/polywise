@@ -2,9 +2,67 @@ import { injectable } from 'tsyringe'
 import fs from 'fs-extra'
 import path from 'path'
 import os from 'os'
-import { DEFAULT_DTYPE } from './consts'
+import { listFiles, downloadFile } from '@huggingface/hub'
+import { DEFAULT_DTYPE, DEFAULT_EMBEDDING_MODEL, DEFAULT_RERANKER_MODEL } from './consts'
 
 import type { ModelStatus, LocalModel, ModelDownloadProgress, ModelManagerArgs, DownloadOptions } from './types/model'
+
+async function downloadModelFromHub(
+	repo: string,
+	localDir: string,
+	options?: {
+		revision?: string
+		allowPatterns?: string[]
+		onProgress?: (progress: { downloadedBytes: number; totalBytes: number }) => void
+	}
+) {
+	await fs.ensureDir(localDir)
+
+	const files: Array<{ path: string; size: number }> = []
+	let totalBytes = 0
+
+	for await (const file of listFiles({ repo: { type: 'model', name: repo }, recursive: true })) {
+		if (file.type !== 'file') continue
+
+		const shouldDownload = options?.allowPatterns
+			? options.allowPatterns.some(pattern => {
+					if (pattern.includes('*')) {
+						const regex = new RegExp(pattern.replace(/\*/g, '.*'))
+						return regex.test(file.path)
+					}
+					return file.path.endsWith(pattern)
+				})
+			: true
+
+		if (shouldDownload) {
+			files.push({ path: file.path, size: file.size })
+			totalBytes += file.size
+		}
+	}
+
+	let downloadedBytes = 0
+
+	for (const file of files) {
+		const filePath = path.join(localDir, file.path)
+		await fs.ensureDir(path.dirname(filePath))
+
+		const response = await downloadFile({
+			repo: { type: 'model', name: repo },
+			path: file.path,
+			revision: options?.revision || 'main'
+		})
+
+		if (!response) {
+			throw new Error(`Failed to download file: ${file.path}`)
+		}
+
+		const buffer = await response.arrayBuffer()
+		await fs.writeFile(filePath, Buffer.from(buffer))
+
+		downloadedBytes += file.size
+		options?.onProgress?.({ downloadedBytes, totalBytes })
+	}
+}
 
 @injectable()
 export default class ModelManager {
@@ -12,19 +70,15 @@ export default class ModelManager {
 	private default_dtype: string
 	private models: Map<string, LocalModel> = new Map()
 	private download_progress: Map<string, ModelDownloadProgress> = new Map()
-	private downloads_dir: string
 
 	constructor(args?: ModelManagerArgs) {
 		this.default_dtype = args?.default_dtype || DEFAULT_DTYPE
 		this.models_dir = args?.models_dir || path.join(os.homedir(), '.Models')
-		this.downloads_dir = path.join(this.models_dir, '.downloads')
 	}
 
 	async init() {
 		await fs.ensureDir(this.models_dir)
-		await fs.ensureDir(this.downloads_dir)
 		await this.scanLocalModels()
-
 		return this
 	}
 
@@ -42,17 +96,17 @@ export default class ModelManager {
 				continue
 			}
 
-			const modelPath = path.join(this.models_dir, entry.name)
-			const model = await this.verifyModel完整性(entry.name, modelPath)
+			const model_path = path.join(this.models_dir, entry.name)
+			const model = await this.verifyModelIntegrity(entry.name, model_path)
 
 			this.models.set(entry.name, model)
 		}
 	}
 
-	async verifyModel完整性(model_id: string, modelPath?: string): Promise<LocalModel> {
-		const actualPath = modelPath || path.join(this.models_dir, model_id)
+	async verifyModelIntegrity(model_id: string, model_path?: string): Promise<LocalModel> {
+		const actual_path = model_path || path.join(this.models_dir, model_id)
 
-		if (!(await fs.pathExists(actualPath))) {
+		if (!(await fs.pathExists(actual_path))) {
 			const existing = this.models.get(model_id)
 			if (existing) {
 				existing.status = 'incomplete'
@@ -62,33 +116,23 @@ export default class ModelManager {
 			return {
 				id: model_id,
 				name: model_id,
-				path: actualPath,
+				path: actual_path,
 				size: 0,
 				status: 'incomplete',
 				last_checked: new Date().toISOString()
 			}
 		}
 
-		const modelJsonPath = path.join(actualPath, 'model.json')
-		const configPath = path.join(actualPath, 'config.json')
-		const hasModelJson = await fs.pathExists(modelJsonPath)
-		const hasConfig = await fs.pathExists(configPath)
+		const size = await this.calculateFolderSize(actual_path)
 
-		let size = 0
-		try {
-			size = await this.folderSize(actualPath)
-		} catch {
-			size = 0
-		}
-
-		const isValid = hasModelJson || hasConfig
-		const status: ModelStatus = isValid ? 'available' : 'incomplete'
+		const is_valid = await this.isOnnxModelValid(actual_path)
+		const status: ModelStatus = is_valid ? 'available' : 'incomplete'
 
 		const existing = this.models.get(model_id)
 		const model: LocalModel = {
 			id: model_id,
 			name: model_id,
-			path: actualPath,
+			path: actual_path,
 			size,
 			status,
 			last_checked: new Date().toISOString(),
@@ -99,25 +143,52 @@ export default class ModelManager {
 		return model
 	}
 
-	private async folderSize(dirPath: string): Promise<number> {
-		if (!(await fs.pathExists(dirPath))) {
-			return 0
+	async isOnnxModelValid(model_path: string): Promise<boolean> {
+		const onnx_dir = path.join(model_path, 'onnx')
+
+		if (!(await fs.pathExists(onnx_dir))) {
+			return false
 		}
 
-		const entries = await fs.readdir(dirPath, { withFileTypes: true })
-		let totalSize = 0
+		const onnx_files = [
+			'model_quantized.onnx',
+			'model.onnx',
+			'model_int8.onnx',
+			'model_fp16.onnx',
+			'model_q4.onnx'
+		]
 
-		for (const entry of entries) {
-			const fullPath = path.join(dirPath, entry.name)
-			if (entry.isDirectory()) {
-				totalSize += await this.folderSize(fullPath)
-			} else {
-				const stats = await fs.stat(fullPath)
-				totalSize += stats.size
+		for (const file of onnx_files) {
+			if (await fs.pathExists(path.join(onnx_dir, file))) {
+				const stats = await fs.stat(path.join(onnx_dir, file))
+				if (stats.size > 1000000) {
+					return true
+				}
 			}
 		}
 
-		return totalSize
+		return false
+	}
+
+	async calculateFolderSize(dir_path: string): Promise<number> {
+		if (!(await fs.pathExists(dir_path))) {
+			return 0
+		}
+
+		const entries = await fs.readdir(dir_path, { withFileTypes: true })
+		let total_size = 0
+
+		for (const entry of entries) {
+			const full_path = path.join(dir_path, entry.name)
+			if (entry.isDirectory()) {
+				total_size += await this.calculateFolderSize(full_path)
+			} else {
+				const stats = await fs.stat(full_path)
+				total_size += stats.size
+			}
+		}
+
+		return total_size
 	}
 
 	async listModels(): Promise<LocalModel[]> {
@@ -135,7 +206,6 @@ export default class ModelManager {
 
 	setModelsDir(dir: string) {
 		this.models_dir = dir
-		this.downloads_dir = path.join(this.models_dir, '.downloads')
 	}
 
 	getModelsDir(): string {
@@ -143,13 +213,13 @@ export default class ModelManager {
 	}
 
 	async downloadModel(model_id: string, options?: DownloadOptions): Promise<LocalModel> {
-		const existingModel = this.models.get(model_id)
-		if (existingModel?.status === 'downloading') {
-			return existingModel
+		const existing_model = this.models.get(model_id)
+		if (existing_model?.status === 'downloading') {
+			return existing_model
 		}
 
 		const dtype = options?.dtype || this.default_dtype
-		const modelPath = path.join(this.models_dir, model_id)
+		const model_path = path.join(this.models_dir, model_id)
 
 		const progress: ModelDownloadProgress = {
 			model_id,
@@ -163,66 +233,36 @@ export default class ModelManager {
 		this.models.set(model_id, {
 			id: model_id,
 			name: model_id,
-			path: modelPath,
+			path: model_path,
 			size: 0,
 			status: 'downloading'
 		})
 
 		try {
-			await fs.ensureDir(this.downloads_dir)
+			console.log(`Downloading model: ${model_id}`)
 
-			const repoId = model_id
-			const commitHash = options?.revision || 'main'
+			await fs.ensureDir(model_path)
 
-			const files = ['model.json', 'config.json', 'tokenizer.json', 'tokenizer_config.json']
-
-			const cacheDir = path.join(this.downloads_dir, `${repoId}_${commitHash}`)
-			await fs.ensureDir(cacheDir)
-
-			let totalSize = 0
-
-			for (const fileName of files) {
-				const url = `https://huggingface.co/${repoId}/resolve/${commitHash}/${fileName}`
-				const filePath = path.join(cacheDir, fileName)
-
-				try {
-					const fileSize = await this.downloadFile(
-						url,
-						filePath,
-						progress,
-						options?.progress_callback
-					)
-					totalSize += fileSize
-				} catch (error) {
-					console.warn(`Failed to download ${fileName}:`, error)
+			await downloadModelFromHub(model_id, model_path, {
+				revision: options?.revision || 'main',
+				allowPatterns: ['*.json', '*.txt', '*.onnx', '*.md'],
+				onProgress: (progress_data: { downloadedBytes: number; totalBytes: number }) => {
+					progress.downloaded = progress_data.downloadedBytes
+					progress.total = progress_data.totalBytes
+					progress.speed = progress_data.totalBytes > 0 ? progress_data.downloadedBytes / 1000 : 0
+					options?.progress_callback?.(progress)
 				}
-			}
+			})
 
-			const safetensorsUrl = `https://huggingface.co/${repoId}/resolve/${commitHash}/model.safetensors`
-			const safetensorsPath = path.join(cacheDir, 'model.safetensors')
-
-			try {
-				const safetensorsSize = await this.downloadFile(
-					safetensorsUrl,
-					safetensorsPath,
-					progress,
-					options?.progress_callback
-				)
-				totalSize += safetensorsSize
-			} catch {
-				console.warn('Safetensors file not found or failed to download')
-			}
-
-			progress.total = totalSize
-			progress.downloaded = totalSize
+			progress.downloaded = progress.total
 			progress.status = 'completed'
 
-			if (await fs.pathExists(cacheDir)) {
-				await fs.copy(cacheDir, modelPath)
-			}
-
-			const model = await this.verifyModel完整性(model_id, modelPath)
+			const model = await this.verifyModelIntegrity(model_id, model_path)
 			model.dtype = dtype
+
+			if (model.status !== 'available') {
+				throw new Error('Downloaded model is incomplete or missing ONNX files')
+			}
 
 			return model
 		} catch (error) {
@@ -232,7 +272,7 @@ export default class ModelManager {
 			this.models.set(model_id, {
 				id: model_id,
 				name: model_id,
-				path: modelPath,
+				path: model_path,
 				size: 0,
 				status: 'error',
 				error: progress.error
@@ -244,79 +284,17 @@ export default class ModelManager {
 		}
 	}
 
-	private async downloadFile(
-		url: string,
-		destPath: string,
-		progress: ModelDownloadProgress,
-		callback?: (p: ModelDownloadProgress) => void
-	): Promise<number> {
-		const destDir = path.dirname(destPath)
-		await fs.ensureDir(destDir)
-
-		const response = await fetch(url, {
-			method: 'GET',
-			headers: {}
-		})
-
-		if (!response.ok) {
-			throw new Error(`HTTP ${response.status}: ${response.statusText}`)
-		}
-
-		const contentLength = response.headers.get('content-length')
-		const totalSize = contentLength ? parseInt(contentLength, 10) : 0
-
-		if (totalSize > 0) {
-			progress.total += totalSize
-		}
-
-		const fileStream = fs.createWriteStream(destPath)
-		const reader = response.body?.getReader()
-
-		if (!reader) {
-			fileStream.close()
-			throw new Error('Response body is null')
-		}
-
-		let downloaded = 0
-
-		while (true) {
-			const { done, value } = await reader.read()
-
-			if (done) {
-				break
-			}
-
-			fileStream.write(value)
-			downloaded += value.length
-			progress.downloaded += value.length
-
-			if (totalSize > 0) {
-				progress.speed = downloaded / 1000
-			}
-
-			callback?.(progress)
-		}
-
-		fileStream.end()
-
-		return downloaded
-	}
-
 	async deleteModel(model_id: string): Promise<boolean> {
 		const model = this.models.get(model_id)
 		if (!model) {
 			return false
 		}
 
-		const modelPath = model.path
-		const downloadsPath = path.join(this.downloads_dir, model_id)
+		const model_path = model.path
 
 		try {
-			if (await fs.pathExists(modelPath)) {
-				await fs.remove(modelPath)
-			}
-			if (await fs.pathExists(downloadsPath)) {
-				await fs.remove(downloadsPath)
+			if (await fs.pathExists(model_path)) {
+				await fs.remove(model_path)
 			}
 
 			this.models.delete(model_id)
@@ -334,7 +312,7 @@ export default class ModelManager {
 	}
 
 	async refreshModelStatus(model_id: string): Promise<LocalModel> {
-		return this.verifyModel完整性(model_id)
+		return this.verifyModelIntegrity(model_id)
 	}
 
 	async getModelSize(model_id: string): Promise<number> {
@@ -345,5 +323,38 @@ export default class ModelManager {
 	off() {
 		this.models.clear()
 		this.download_progress.clear()
+	}
+
+	async ensureDefaultModels() {
+		const embedding_model = await this.getModel(DEFAULT_EMBEDDING_MODEL)
+
+		if (!embedding_model || embedding_model.status !== 'available') {
+			console.log(`Downloading embedding model: ${DEFAULT_EMBEDDING_MODEL}`)
+			await this.downloadModel(DEFAULT_EMBEDDING_MODEL)
+		} else {
+			console.log(`Embedding model already available: ${DEFAULT_EMBEDDING_MODEL}`)
+		}
+
+		const reranker_model = await this.getModel(DEFAULT_RERANKER_MODEL)
+
+		if (!reranker_model || reranker_model.status !== 'available') {
+			console.log(`Downloading reranker model: ${DEFAULT_RERANKER_MODEL}`)
+			await this.downloadModel(DEFAULT_RERANKER_MODEL)
+		} else {
+			console.log(`Reranker model already available: ${DEFAULT_RERANKER_MODEL}`)
+		}
+
+		return {
+			embedding_model: DEFAULT_EMBEDDING_MODEL,
+			reranker_model: DEFAULT_RERANKER_MODEL
+		}
+	}
+
+	async reinstallModel(model_id: string, options?: DownloadOptions): Promise<LocalModel> {
+		console.log(`Reinstalling model: ${model_id}`)
+
+		await this.deleteModel(model_id)
+
+		return this.downloadModel(model_id, options)
 	}
 }
