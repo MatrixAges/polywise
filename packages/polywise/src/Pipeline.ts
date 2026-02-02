@@ -272,25 +272,20 @@ export default class Pipeline {
 	async checkModels() {
 		const cache_dir = this.cache_dir || `${os.homedir()}/.Polywise/.models`
 
-		const checkModel = async (modelName: string) => {
-			const modelPath = path.join(cache_dir, modelName)
-			return await fs.pathExists(modelPath)
-		}
-
-		if (this.embedding_config.type === 'local') {
-			const exists = await checkModel(this.embedding_config.model)
-			if (!exists) {
-				console.log(`Embedding model ${this.embedding_config.model} not found, downloading...`)
-				await this.loadEmbeddingModel()
+		const checkAndDownload = async (config: EmbeddingConfig | RerankerConfig, loadFn: () => Promise<any>) => {
+			if (config.type === 'local') {
+				const modelPath = path.join(cache_dir, config.model)
+				const exists = await fs.pathExists(modelPath)
+				if (!exists) {
+					console.log(`Model ${config.model} not found, downloading...`)
+					await loadFn()
+				}
 			}
 		}
 
-		if (this.reranker_config.type === 'local') {
-			const exists = await checkModel(this.reranker_config.model)
-			if (!exists) {
-				console.log(`Reranker model ${this.reranker_config.model} not found, downloading...`)
-				await this.loadRerankerModel()
-			}
-		}
+		await Promise.all([
+			checkAndDownload(this.embedding_config, this.loadEmbeddingModel.bind(this)),
+			checkAndDownload(this.reranker_config, this.loadRerankerModel.bind(this))
+		])
 	}
 }
