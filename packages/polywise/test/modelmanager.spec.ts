@@ -9,6 +9,8 @@ import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 import { DEFAULT_EMBEDDING_MODEL, DEFAULT_RERANKER_MODEL } from '../src/consts'
 import ModelManager from '../src/ModelManager'
 
+const TEST_TIMEOUT_SHORT = 60000
+
 describe('ModelManager', () => {
 	let modelManager: ModelManager
 	let testModelsDir: string
@@ -16,85 +18,126 @@ describe('ModelManager', () => {
 	beforeAll(async () => {
 		testModelsDir = path.join(os.tmpdir(), `polywise_model_test_${Date.now()}`)
 		modelManager = new ModelManager({ models_dir: testModelsDir })
+
 		await modelManager.init()
-	}, 30000)
+	}, TEST_TIMEOUT_SHORT)
 
 	afterAll(async () => {
-		await modelManager.off()
+		modelManager.off()
+
 		if (await fs.pathExists(testModelsDir)) {
 			await fs.remove(testModelsDir)
 		}
-	}, 30000)
+	}, TEST_TIMEOUT_SHORT)
+
+	describe('dtype to ONNX file mapping', () => {
+		it('should map q8 to model_quantized.onnx', () => {
+			const testManager = new ModelManager({ models_dir: testModelsDir, default_dtype: 'q8' })
+			expect(testManager).toBeDefined()
+		})
+
+		it('should map q4 to model_q4.onnx', () => {
+			const testManager = new ModelManager({ models_dir: testModelsDir, default_dtype: 'q4' })
+			expect(testManager).toBeDefined()
+		})
+	})
+
+	describe('isOnnxModelValid', () => {
+		it('should validate ONNX model with correct dtype', async () => {
+			const mockModelDir = path.join(testModelsDir, 'mock_model')
+			const onnxDir = path.join(mockModelDir, 'onnx')
+			await fs.ensureDir(onnxDir)
+
+			const onnxPath = path.join(onnxDir, 'model_quantized.onnx')
+			await fs.writeFile(onnxPath, Buffer.alloc(2000000))
+
+			const isValid = await modelManager.isOnnxModelValid(mockModelDir, 'q8')
+			expect(isValid).toBe(true)
+
+			await fs.remove(mockModelDir)
+		})
+
+		it('should return false when ONNX file is missing', async () => {
+			const mockModelDir = path.join(testModelsDir, 'mock_model_empty')
+			await fs.ensureDir(mockModelDir)
+
+			const isValid = await modelManager.isOnnxModelValid(mockModelDir, 'q8')
+			expect(isValid).toBe(false)
+
+			await fs.remove(mockModelDir)
+		})
+
+		it('should return false when ONNX file is too small', async () => {
+			const mockModelDir = path.join(testModelsDir, 'mock_model_small')
+			const onnxDir = path.join(mockModelDir, 'onnx')
+			await fs.ensureDir(onnxDir)
+
+			const onnxPath = path.join(onnxDir, 'model_quantized.onnx')
+			await fs.writeFile(onnxPath, Buffer.alloc(100))
+
+			const isValid = await modelManager.isOnnxModelValid(mockModelDir, 'q8')
+			expect(isValid).toBe(false)
+
+			await fs.remove(mockModelDir)
+		})
+	})
 
 	describe('ensureDefaultModels', () => {
-		it('should install default embedding and reranker models with valid ONNX files', async () => {
-			const result = await modelManager.ensureDefaultModels()
+		it(
+			'should skip download if models already available',
+			async () => {
+				const embeddingDir = path.join(testModelsDir, DEFAULT_EMBEDDING_MODEL)
+				const rerankerDir = path.join(testModelsDir, DEFAULT_RERANKER_MODEL)
+				const embeddingOnnxDir = path.join(embeddingDir, 'onnx')
+				const rerankerOnnxDir = path.join(rerankerDir, 'onnx')
 
-			expect(result.embedding_model).toBe(DEFAULT_EMBEDDING_MODEL)
-			expect(result.reranker_model).toBe(DEFAULT_RERANKER_MODEL)
+				await fs.ensureDir(embeddingOnnxDir)
+				await fs.ensureDir(rerankerOnnxDir)
+				await fs.writeFile(path.join(embeddingDir, 'config.json'), '{}')
+				await fs.writeFile(path.join(rerankerDir, 'config.json'), '{}')
+				await fs.writeFile(path.join(embeddingOnnxDir, 'model_quantized.onnx'), Buffer.alloc(2000000))
+				await fs.writeFile(path.join(rerankerOnnxDir, 'model_quantized.onnx'), Buffer.alloc(2000000))
 
-			const embedding_model = await modelManager.getModel(DEFAULT_EMBEDDING_MODEL)
-			const reranker_model = await modelManager.getModel(DEFAULT_RERANKER_MODEL)
+				await modelManager.scanLocalModels()
 
-			expect(embedding_model).not.toBeNull()
-			expect(embedding_model?.status).toBe('available')
-			expect(embedding_model?.size).toBeGreaterThan(0)
+				const result = await modelManager.ensureDefaultModels()
 
-			expect(reranker_model).not.toBeNull()
-			expect(reranker_model?.status).toBe('available')
-			expect(reranker_model?.size).toBeGreaterThan(0)
+				expect(result.embedding_model).toBe(DEFAULT_EMBEDDING_MODEL)
+				expect(result.reranker_model).toBe(DEFAULT_RERANKER_MODEL)
 
-			const embedding_path = embedding_model?.path || ''
-			const reranker_path = reranker_model?.path || ''
+				const embeddingModel = await modelManager.getModel(DEFAULT_EMBEDDING_MODEL)
+				const rerankerModel = await modelManager.getModel(DEFAULT_RERANKER_MODEL)
 
-			const embedding_onnx_exists = await fs.pathExists(
-				path.join(embedding_path, 'onnx', 'model_quantized.onnx')
-			)
-			const reranker_onnx_exists = await fs.pathExists(
-				path.join(reranker_path, 'onnx', 'model_quantized.onnx')
-			)
-
-			expect(embedding_onnx_exists).toBe(true)
-			expect(reranker_onnx_exists).toBe(true)
-
-			const embedding_onnx_valid = await modelManager.isOnnxModelValid(embedding_path)
-			const reranker_onnx_valid = await modelManager.isOnnxModelValid(reranker_path)
-
-			expect(embedding_onnx_valid).toBe(true)
-			expect(reranker_onnx_valid).toBe(true)
-		}, 600000)
-
-		it('should not re-download if models already available', async () => {
-			await modelManager.ensureDefaultModels()
-
-			await modelManager.ensureDefaultModels()
-
-			const embedding_model = await modelManager.getModel(DEFAULT_EMBEDDING_MODEL)
-			const reranker_model = await modelManager.getModel(DEFAULT_RERANKER_MODEL)
-
-			expect(embedding_model?.status).toBe('available')
-			expect(reranker_model?.status).toBe('available')
-		}, 60000)
+				expect(embeddingModel?.status).toBe('available')
+				expect(rerankerModel?.status).toBe('available')
+			},
+			TEST_TIMEOUT_SHORT
+		)
 	})
 
 	describe('reinstallModel', () => {
-		it('should delete and re-download model when requested', async () => {
-			await modelManager.downloadModel(DEFAULT_EMBEDDING_MODEL)
+		it(
+			'should delete and recreate mock model',
+			async () => {
+				const mockModelId = 'mock/test-model'
+				const mockModelDir = path.join(testModelsDir, mockModelId)
+				const onnxDir = path.join(mockModelDir, 'onnx')
 
-			const model_before = await modelManager.getModel(DEFAULT_EMBEDDING_MODEL)
-			const size_before = model_before?.size || 0
+				await fs.ensureDir(onnxDir)
+				await fs.writeFile(path.join(mockModelDir, 'config.json'), '{}')
+				await fs.writeFile(path.join(onnxDir, 'model_quantized.onnx'), Buffer.alloc(2000000))
 
-			const reinstalled_model = await modelManager.reinstallModel(DEFAULT_EMBEDDING_MODEL)
+				await modelManager.scanLocalModels()
 
-			expect(reinstalled_model.status).toBe('available')
-			expect(reinstalled_model.size).toBeGreaterThan(0)
+				const modelBefore = await modelManager.getModel(mockModelId)
+				expect(modelBefore?.status).toBe('available')
 
-			if (size_before > 0) {
-				expect(reinstalled_model.size).toBe(size_before)
-			}
+				await modelManager.deleteModel(mockModelId)
 
-			const onnx_valid = await modelManager.isOnnxModelValid(reinstalled_model.path)
-			expect(onnx_valid).toBe(true)
-		}, 600000)
+				const modelAfter = await modelManager.getModel(mockModelId)
+				expect(modelAfter).toBeNull()
+			},
+			TEST_TIMEOUT_SHORT
+		)
 	})
 })

@@ -507,6 +507,12 @@ importers:
       '@types/node':
         specifier: ^20.0.0
         version: 20.19.30
+      bun:
+        specifier: 'catalog:'
+        version: 1.3.8
+      bun-types:
+        specifier: 'catalog:'
+        version: 1.3.8
       cross-env:
         specifier: ^10.1.0
         version: 10.1.0
@@ -522,9 +528,6 @@ importers:
       reflect-metadata:
         specifier: ^0.2.2
         version: 0.2.2
-      tsx:
-        specifier: ^4.21.0
-        version: 4.21.0
 
   packages/stk:
     dependencies:

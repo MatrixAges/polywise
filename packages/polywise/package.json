@@ -19,7 +19,8 @@
 		"dev": "cross-env NODE_ENV=development rslib build --watch",
 		"build": "rslib build",
 		"test": "rstest run && bun ./scripts/cleanupTestFiles.ts",
-		"cli": "tsx src/cli/index.ts"
+		"test:modelmanager": "rstest test/modelmanager.spec.ts",
+		"cli": "bun src/cli/index.ts"
 	},
 	"dependencies": {
 		"@abraham/reflection": "^0.13.0",
@@ -37,11 +38,12 @@
 		"@rstest/core": "^0.8.0",
 		"@types/fs-extra": "^11.0.4",
 		"@types/node": "^20.0.0",
+		"bun": "catalog:",
+		"bun-types": "catalog:",
 		"cross-env": "^10.1.0",
 		"deepmerge-ts": "^7.1.5",
 		"fs-extra": "catalog:",
 		"glob": "^13.0.0",
-		"reflect-metadata": "^0.2.2",
-		"tsx": "^4.21.0"
+		"reflect-metadata": "^0.2.2"
 	}
 }

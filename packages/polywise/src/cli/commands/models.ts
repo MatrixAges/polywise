@@ -170,7 +170,7 @@ export function createModelsCommand(): Command {
 			const mm = new ModelManager()
 			await mm.init()
 
-			const model = await mm.verifyModel完整性(modelId)
+			const model = await mm.verifyModelIntegrity(modelId)
 
 			console.log('\nModel Verification:')
 			console.log('─'.repeat(80))

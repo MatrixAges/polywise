@@ -7,12 +7,46 @@ import { DEFAULT_DTYPE, DEFAULT_EMBEDDING_MODEL, DEFAULT_RERANKER_MODEL } from '
 
 import type { ModelStatus, LocalModel, ModelDownloadProgress, ModelManagerArgs, DownloadOptions } from './types/model'
 
+const ONNX_FILE_MAP: Record<string, string> = {
+	q8: 'onnx/model_quantized.onnx',
+	q4: 'onnx/model_q4.onnx',
+	fp16: 'onnx/model_fp16.onnx',
+	int8: 'onnx/model_int8.onnx',
+	fp32: 'onnx/model.onnx'
+}
+
+function getOnnxFileByDtype(dtype?: string): string {
+	return ONNX_FILE_MAP[dtype || DEFAULT_DTYPE] || ONNX_FILE_MAP.q8
+}
+
+function shouldDownloadFile(filePath: string, dtype?: string): boolean {
+	if (filePath.endsWith('.json') || filePath.endsWith('.txt') || filePath.endsWith('.md')) {
+		return true
+	}
+
+	if (!filePath.endsWith('.onnx')) {
+		return false
+	}
+
+	if (!filePath.startsWith('onnx/')) {
+		return false
+	}
+
+	const targetOnnxFile = getOnnxFileByDtype(dtype)
+
+	if (filePath === targetOnnxFile) {
+		return true
+	}
+
+	return false
+}
+
 async function downloadModelFromHub(
 	repo: string,
 	localDir: string,
 	options?: {
 		revision?: string
-		allowPatterns?: string[]
+		dtype?: string
 		onProgress?: (progress: { downloadedBytes: number; totalBytes: number }) => void
 	}
 ) {
@@ -24,17 +58,7 @@ async function downloadModelFromHub(
 	for await (const file of listFiles({ repo: { type: 'model', name: repo }, recursive: true })) {
 		if (file.type !== 'file') continue
 
-		const shouldDownload = options?.allowPatterns
-			? options.allowPatterns.some(pattern => {
-					if (pattern.includes('*')) {
-						const regex = new RegExp(pattern.replace(/\*/g, '.*'))
-						return regex.test(file.path)
-					}
-					return file.path.endsWith(pattern)
-				})
-			: true
-
-		if (shouldDownload) {
+		if (shouldDownloadFile(file.path, options?.dtype)) {
 			files.push({ path: file.path, size: file.size })
 			totalBytes += file.size
 		}
@@ -97,13 +121,13 @@ export default class ModelManager {
 			}
 
 			const model_path = path.join(this.models_dir, entry.name)
-			const model = await this.verifyModelIntegrity(entry.name, model_path)
+			const model = await this.verifyModelIntegrity(entry.name, model_path, this.default_dtype)
 
 			this.models.set(entry.name, model)
 		}
 	}
 
-	async verifyModelIntegrity(model_id: string, model_path?: string): Promise<LocalModel> {
+	async verifyModelIntegrity(model_id: string, model_path?: string, dtype?: string): Promise<LocalModel> {
 		const actual_path = model_path || path.join(this.models_dir, model_id)
 
 		if (!(await fs.pathExists(actual_path))) {
@@ -125,7 +149,7 @@ export default class ModelManager {
 
 		const size = await this.calculateFolderSize(actual_path)
 
-		const is_valid = await this.isOnnxModelValid(actual_path)
+		const is_valid = await this.isOnnxModelValid(actual_path, dtype)
 		const status: ModelStatus = is_valid ? 'available' : 'incomplete'
 
 		const existing = this.models.get(model_id)
@@ -136,31 +160,39 @@ export default class ModelManager {
 			size,
 			status,
 			last_checked: new Date().toISOString(),
-			dtype: existing?.dtype
+			dtype: existing?.dtype || dtype
 		}
 
 		this.models.set(model_id, model)
 		return model
 	}
 
-	async isOnnxModelValid(model_path: string): Promise<boolean> {
+	async isOnnxModelValid(model_path: string, dtype?: string): Promise<boolean> {
 		const onnx_dir = path.join(model_path, 'onnx')
 
 		if (!(await fs.pathExists(onnx_dir))) {
 			return false
 		}
 
-		const onnx_files = [
-			'model_quantized.onnx',
-			'model.onnx',
-			'model_int8.onnx',
-			'model_fp16.onnx',
-			'model_q4.onnx'
+		const target_onnx = getOnnxFileByDtype(dtype)
+		const target_path = path.join(model_path, target_onnx)
+
+		if (await fs.pathExists(target_path)) {
+			const stats = await fs.stat(target_path)
+			return stats.size > 1000000
+		}
+
+		const fallback_files = [
+			'onnx/model_quantized.onnx',
+			'onnx/model.onnx',
+			'onnx/model_int8.onnx',
+			'onnx/model_fp16.onnx',
+			'onnx/model_q4.onnx'
 		]
 
-		for (const file of onnx_files) {
-			if (await fs.pathExists(path.join(onnx_dir, file))) {
-				const stats = await fs.stat(path.join(onnx_dir, file))
+		for (const file of fallback_files) {
+			if (await fs.pathExists(path.join(model_path, file))) {
+				const stats = await fs.stat(path.join(model_path, file))
 				if (stats.size > 1000000) {
 					return true
 				}
@@ -245,7 +277,7 @@ export default class ModelManager {
 
 			await downloadModelFromHub(model_id, model_path, {
 				revision: options?.revision || 'main',
-				allowPatterns: ['*.json', '*.txt', '*.onnx', '*.md'],
+				dtype,
 				onProgress: (progress_data: { downloadedBytes: number; totalBytes: number }) => {
 					progress.downloaded = progress_data.downloadedBytes
 					progress.total = progress_data.totalBytes
@@ -257,7 +289,7 @@ export default class ModelManager {
 			progress.downloaded = progress.total
 			progress.status = 'completed'
 
-			const model = await this.verifyModelIntegrity(model_id, model_path)
+			const model = await this.verifyModelIntegrity(model_id, model_path, dtype)
 			model.dtype = dtype
 
 			if (model.status !== 'available') {
