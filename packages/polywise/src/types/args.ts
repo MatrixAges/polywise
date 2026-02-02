@@ -149,6 +149,7 @@ export interface QueryArgs {
 	search_limit?: number
 	rerank_limit?: number
 	stimulate_on_recall?: boolean
+	cot_depth?: number
 }
 
 export interface AggregatedCandidate {
@@ -185,13 +186,4 @@ export interface COTDepthResult {
 export interface ChainOfThought {
 	on: (callback: (data: COTDepthResult) => void) => ChainOfThought
 	off: () => void
-}
-
-export interface QueryArgs {
-	query: string
-	recall_depth?: number
-	search_limit?: number
-	rerank_limit?: number
-	stimulate_on_recall?: boolean
-	cot_depth?: number
 }

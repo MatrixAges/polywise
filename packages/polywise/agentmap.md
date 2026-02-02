@@ -30,20 +30,6 @@ This document provides an overview of the packages/polywise module structure and
 				"role": "Class"
 			},
 			"index.ts": { "desc": "Main exports", "role": "Index" },
-			"cli": {
-				"index.ts": { "desc": "CLI entry point using commander", "role": "CLI" },
-				"utils.ts": { "desc": "CLI utility functions", "role": "Utility" },
-				"commands": {
-					"models.ts": {
-						"desc": "Model management commands (list, download, delete, status, verify)",
-						"role": "CLI"
-					},
-					"search.ts": { "desc": "Search command", "role": "CLI" },
-					"article.ts": { "desc": "Article commands (add, get, list, process)", "role": "CLI" },
-					"node.ts": { "desc": "Node commands (add, connect, get, list)", "role": "CLI" },
-					"config.ts": { "desc": "Configuration commands (show, set, reset)", "role": "CLI" }
-				}
-			},
 			"sql": {
 				"Brain.ts": { "desc": "Brain SQL operations", "role": "SQL" },
 				"Polywise.ts": { "desc": "Polywise SQL operations", "role": "SQL" },
@@ -99,42 +85,5 @@ This document provides an overview of the packages/polywise module structure and
 - **TDD**: Follow TDD principles for new features (see global.md rules)
 - **Database**: Uses PGlite for embedded PostgreSQL
 - **Migration**: Database schema changes require migration updates (see global.md rules)
-- **CLI**: Run with `pnpm polywise cli` or after build `polywise`
 - **ModelManager**: Handles local model management with status tracking (available, downloading, incomplete, error)
 - **断点下载**: Uses native fetch with Range header for resuming downloads
-
-## 4. CLI Commands
-
-```bash
-# Models
-polywise models list                           # 列出本地模型
-polywise models download <model_id> [--dtype] # 下载模型
-polywise models delete <model_id>             # 删除模型
-polywise models status <model_id>             # 查看模型状态
-polywise models verify <model_id>             # 验证模型完整性
-
-# Search
-polywise search <query> [-l, --limit]         # 搜索文章
-
-# Article
-polywise article add <title> <content>        # 添加文章
-polywise article get <id>                     # 获取文章
-polywise article list [-l, --limit]           # 列出文章
-polywise article process <id>                 # 处理文章生成嵌入
-
-# Node
-polywise node add <label> <x> <y> [-t, --threshold] # 添加节点
-polywise node connect <source_id> <target_id> [-w, --weight] # 连接节点
-polywise node get <id>                        # 获取节点
-polywise node list [-l, --limit]              # 列出节点
-
-# Config
-polywise config show                          # 显示配置
-polywise config set <key> <value>            # 设置配置
-polywise config reset                         # 重置配置
-
-# System
-polywise stats                                # 显示统计信息
-polywise init                                 # 初始化数据库
-polywise reset                                # 重置数据库
-```
