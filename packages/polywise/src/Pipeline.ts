@@ -265,14 +265,28 @@ export default class Pipeline {
 	}
 
 	async checkModels() {
-		const cache_dir = this.cache_dir
+		const cache_dir = this.cache_dir || `${os.homedir()}/.Polywise/.models`
+		env.cacheDir = cache_dir
 
 		const checkAndDownload = async (config: EmbeddingConfig | RerankerConfig, loadFn: () => Promise<any>) => {
 			if (config.type === 'local') {
 				const modelPath = path.join(cache_dir, config.model)
 				const exists = await fs.pathExists(modelPath)
-				if (!exists) {
-					console.log(`Model ${config.model} not found, downloading...`)
+
+				try {
+					if (!exists) {
+						console.log(`Model ${config.model} not found, downloading...`)
+						await loadFn()
+					} else {
+						// Try to load it to see if it's corrupted
+						await loadFn()
+					}
+				} catch (err) {
+					console.error(
+						`Failed to load model ${config.model}, it might be corrupted. Deleting and retrying...`
+					)
+					await fs.remove(modelPath)
+					console.log(`Model ${config.model} deleted, re-downloading...`)
 					await loadFn()
 				}
 			}
