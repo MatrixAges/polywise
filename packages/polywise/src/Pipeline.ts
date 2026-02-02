@@ -1,25 +1,39 @@
-import { env, pipeline, PipelineType } from '@huggingface/transformers'
+import { env, pipeline } from '@huggingface/transformers'
 import { singleton } from 'tsyringe'
+
+import {
+	PIPELINE_TASK_FEATURE_EXTRACTION,
+	PIPELINE_TASK_RERANKING,
+	DEFAULT_EMBEDDING_MODEL,
+	DEFAULT_RERANKER_MODEL,
+	DEFAULT_DTYPE,
+	DEFAULT_API_EMBEDDING_MODEL,
+	DEFAULT_API_RERANKER_MODEL,
+	POOLING_MEAN,
+	HTTP_HEADERS
+} from './consts'
 
 import type { EmbeddingConfig, RerankerConfig, PipelineArgs } from './types'
 
+const DEFAULT_EMBEDDING_CONFIG: EmbeddingConfig = {
+	type: 'local',
+	model: DEFAULT_EMBEDDING_MODEL,
+	dtype: DEFAULT_DTYPE
+}
+
+const DEFAULT_RERANKER_CONFIG: RerankerConfig = {
+	type: 'local',
+	model: DEFAULT_RERANKER_MODEL,
+	dtype: DEFAULT_DTYPE
+}
+
 @singleton()
 export default class Pipeline {
-	private embedding_pipeline: any = null
-	private reranker_pipeline: any = null
-	private embedding_config: EmbeddingConfig = {
-		type: 'local',
-		model: 'onnx-community/Qwen3-Embedding-0.6B-ONNX',
-		dtype: 'q8'
-	}
-	private reranker_config: RerankerConfig = {
-		type: 'local',
-		model: 'onnx-community/Qwen3-Reranker-0.6B-ONNX',
-		dtype: 'q8'
-	}
+	private embedding: any = null
+	private reranker: any = null
+	private embedding_config: EmbeddingConfig = DEFAULT_EMBEDDING_CONFIG
+	private reranker_config: RerankerConfig = DEFAULT_RERANKER_CONFIG
 	private cache_dir: string | null = null
-
-	constructor() {}
 
 	async init(args: PipelineArgs = {}) {
 		const { cache_dir, embedding_config, reranker_config } = args
@@ -41,25 +55,25 @@ export default class Pipeline {
 	}
 
 	async loadEmbeddingModel() {
-		if (this.embedding_config.type === 'api') {
+		if (this.embedding_config.type !== 'local') {
 			return
 		}
 
 		const { model, dtype } = this.embedding_config
 
-		this.embedding_pipeline = await pipeline('feature-extraction', model, {
+		this.embedding = await pipeline(PIPELINE_TASK_FEATURE_EXTRACTION as any, model, {
 			dtype: dtype as any
 		})
 	}
 
 	async loadRerankerModel() {
-		if (this.reranker_config.type === 'api') {
+		if (this.reranker_config.type !== 'local') {
 			return
 		}
 
 		const { model, dtype } = this.reranker_config
 
-		this.reranker_pipeline = await pipeline('text-reranking', model, {
+		this.reranker = await pipeline(PIPELINE_TASK_RERANKING as any, model, {
 			dtype: dtype as any
 		})
 	}
@@ -69,8 +83,8 @@ export default class Pipeline {
 
 		if (config.type === 'local') {
 			await this.loadEmbeddingModel()
-		} else {
-			this.embedding_pipeline = null
+		} else if (config.type === 'api' || config.type === 'custom') {
+			this.embedding = null
 		}
 	}
 
@@ -79,12 +93,18 @@ export default class Pipeline {
 
 		if (config.type === 'local') {
 			await this.loadRerankerModel()
-		} else {
-			this.reranker_pipeline = null
+		} else if (config.type === 'api' || config.type === 'custom') {
+			this.reranker = null
 		}
 	}
 
 	async embed(text: string) {
+		if (this.embedding_config.type === 'custom') {
+			const { fn } = this.embedding_config
+
+			return await fn(text)
+		}
+
 		if (this.embedding_config.type === 'api') {
 			const { api_url, api_key, model } = this.embedding_config
 
@@ -95,11 +115,11 @@ export default class Pipeline {
 			const response = await fetch(api_url, {
 				method: 'POST',
 				headers: {
-					'Content-Type': 'application/json',
-					...(api_key && { Authorization: `Bearer ${api_key}` })
+					[HTTP_HEADERS.CONTENT_TYPE]: HTTP_HEADERS.CONTENT_TYPE_JSON,
+					...(api_key && { [HTTP_HEADERS.AUTHORIZATION]: `Bearer ${api_key}` })
 				},
 				body: JSON.stringify({
-					model: model || 'text-embedding-3-small',
+					model: model || DEFAULT_API_EMBEDDING_MODEL,
 					input: text
 				})
 			})
@@ -113,12 +133,12 @@ export default class Pipeline {
 			return data.data[0].embedding
 		}
 
-		if (!this.embedding_pipeline) {
+		if (!this.embedding) {
 			await this.loadEmbeddingModel()
 		}
 
-		const output = await this.embedding_pipeline(text, {
-			pooling: 'mean',
+		const output = await this.embedding(text, {
+			pooling: POOLING_MEAN,
 			normalize: true
 		})
 
@@ -126,6 +146,12 @@ export default class Pipeline {
 	}
 
 	async rerank(query: string, documents: string[]) {
+		if (this.reranker_config.type === 'custom') {
+			const { fn } = this.reranker_config
+
+			return await fn(query, documents)
+		}
+
 		if (this.reranker_config.type === 'api') {
 			const { api_url, api_key, model } = this.reranker_config
 
@@ -136,11 +162,11 @@ export default class Pipeline {
 			const response = await fetch(api_url, {
 				method: 'POST',
 				headers: {
-					'Content-Type': 'application/json',
-					...(api_key && { Authorization: `Bearer ${api_key}` })
+					[HTTP_HEADERS.CONTENT_TYPE]: HTTP_HEADERS.CONTENT_TYPE_JSON,
+					...(api_key && { [HTTP_HEADERS.AUTHORIZATION]: `Bearer ${api_key}` })
 				},
 				body: JSON.stringify({
-					model: model || 'rerank-english-v2.0',
+					model: model || DEFAULT_API_RERANKER_MODEL,
 					query,
 					documents
 				})
@@ -155,11 +181,11 @@ export default class Pipeline {
 			return data.results
 		}
 
-		if (!this.reranker_pipeline) {
+		if (!this.reranker) {
 			await this.loadRerankerModel()
 		}
 
-		const output = await this.reranker_pipeline(query, documents)
+		const output = await this.reranker(query, documents)
 
 		return output
 	}
@@ -182,7 +208,7 @@ export default class Pipeline {
 	}
 
 	off() {
-		this.embedding_pipeline = null
-		this.reranker_pipeline = null
+		this.embedding = null
+		this.reranker = null
 	}
 }

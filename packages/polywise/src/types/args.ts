@@ -26,7 +26,12 @@ export interface APIEmbeddingConfig {
 	model?: string
 }
 
-export type EmbeddingConfig = LocalEmbeddingConfig | APIEmbeddingConfig
+export interface CustomEmbeddingConfig {
+	type: 'custom'
+	fn: (text: string) => Promise<number[]>
+}
+
+export type EmbeddingConfig = LocalEmbeddingConfig | APIEmbeddingConfig | CustomEmbeddingConfig
 
 export interface LocalRerankerConfig {
 	type: 'local'
@@ -41,7 +46,12 @@ export interface APIRerankerConfig {
 	model?: string
 }
 
-export type RerankerConfig = LocalRerankerConfig | APIRerankerConfig
+export interface CustomRerankerConfig {
+	type: 'custom'
+	fn: (query: string, documents: string[]) => Promise<{ index: number; score: number }[]>
+}
+
+export type RerankerConfig = LocalRerankerConfig | APIRerankerConfig | CustomRerankerConfig
 
 export interface PipelineArgs {
 	cache_dir?: string

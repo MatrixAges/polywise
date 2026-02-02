@@ -169,6 +169,32 @@ export class MyClass {
 }
 ```
 
+### Empty Constructor Rule
+
+If the constructor body is empty, remove the constructor entirely. Only define a constructor when it has actual initialization logic.
+
+**Good:**
+
+```typescript
+export default class MyClass {
+	private value: number
+
+	init() {
+		this.value = 42
+	}
+}
+```
+
+**Avoid:**
+
+```typescript
+export default class MyClass {
+	private value: number
+
+	constructor() {}
+}
+```
+
 ## Database Schema Migration (CRITICAL)
 
 When modifying database schema in the polywise package, you MUST update the migration system:
