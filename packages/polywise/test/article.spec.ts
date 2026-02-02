@@ -8,7 +8,7 @@ describe('Full-Text Search and Vector Search', () => {
 	const db_name = `:polywise_search_test_${Date.now()}_${Math.random().toString(36).slice(2)}:`
 
 	beforeAll(async () => {
-		poly = new Polywise(db_name)
+		poly = new Polywise({ data_dir: db_name })
 		await poly.init()
 	})
 
@@ -251,7 +251,7 @@ describe('Full-Text Search and Vector Search', () => {
 	describe('Search Performance and Edge Cases', () => {
 		it('should handle search with no articles in database', async () => {
 			const empty_db_name = `:polywise_empty_test_${Date.now()}:`
-			const empty_poly = new Polywise(empty_db_name)
+			const empty_poly = new Polywise({ data_dir: empty_db_name })
 
 			await empty_poly.init()
 

@@ -63,7 +63,7 @@ Current AI architectures are missing a critical component: **a hippocampus-like 
 
 ```typescript
 // AI agent remembers previous interactions
-const poly = new Polywise(':memory:')
+const poly = new Polywise({ data_dir: ':memory:' })
 
 // Process knowledge from conversation
 await poly.processArticle('User Preferences', 'User likes dark mode, prefers TypeScript, works late at night', [

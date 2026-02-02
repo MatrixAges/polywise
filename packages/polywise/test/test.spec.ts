@@ -1,21 +1,15 @@
 import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 
-import Brain from '../src/Brain'
 import Polywise from '../src/Polywise'
 import { cleanupTestDatabases } from './utils'
 
 describe('Polywise Brain System', () => {
 	let poly: Polywise
-	let brain: Brain
 	const dbName = `:polywise_test_${Date.now()}_${Math.random().toString(36).slice(2)}:`
 
 	beforeAll(async () => {
-		poly = new Polywise(dbName)
-
-		await poly.init()
-
-		brain = new Brain({
-			poly,
+		poly = new Polywise({
+			data_dir: dbName,
 			onTick: async () => {
 				const { nodes, edges } = await poly.getSnapshot()
 				const active = nodes.filter((n: any) => n.activation > 0).map((n: any) => n.label)
@@ -25,10 +19,11 @@ describe('Polywise Brain System', () => {
 				}
 			}
 		})
+
+		await poly.init()
 	})
 
 	afterAll(async () => {
-		brain?.off()
 		await poly.off()
 
 		cleanupTestDatabases()
@@ -368,12 +363,12 @@ describe('Polywise Brain System', () => {
 			await poly.connect({ source_id: node_ids[2], target_id: node_ids[3], weight: 0.85 })
 			await poly.connect({ source_id: node_ids[3], target_id: node_ids[4], weight: 0.9 })
 
-			brain.reportUserActivity()
-			brain.addSynapticLoad(800)
+			poly.brain.reportUserActivity()
+			poly.brain.addSynapticLoad(800)
 
 			await poly.stimulate(node_ids[0], 5.0)
 
-			await brain.triggerInputBurst(100)
+			await poly.brain.triggerInputBurst(100)
 
 			const { nodes } = await poly.getSnapshot(0.1)
 			const output_node = nodes.find((n: any) => n.label === 'Output_Layer')

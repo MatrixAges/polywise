@@ -2,6 +2,7 @@ import { PGlite } from '@electric-sql/pglite'
 import { vector } from '@electric-sql/pglite/vector'
 
 import Article from './Article'
+import Brain from './Brain'
 import * as sql from './sql'
 import * as sql_meta from './sql/meta'
 import { calculateWeight, CURRENT_SCHEMA_VERSION, migrate, validateMigrations } from './utils'
@@ -12,6 +13,7 @@ import type {
 	Edge,
 	InjectTriplesParams,
 	Node,
+	PolywiseParams,
 	ProcessArticleParams,
 	UpsertNodeParams
 } from './types'
@@ -20,16 +22,22 @@ export default class Polywise {
 	private db: PGlite | null = null
 
 	public article: Article
+	public brain: Brain
 
-	constructor(data_dir?: string, embedding_cache_dir?: string) {
-		this.db = new PGlite(data_dir || ':polywise:', {
+	constructor(params: PolywiseParams = {}) {
+		this.db = new PGlite(params.data_dir || ':polywise:', {
 			relaxedDurability: true,
 			extensions: { vector }
 		})
 
 		this.article = new Article({
 			db: this.db,
-			embedding_cache_dir
+			embedding_cache_dir: params.embedding_cache_dir
+		})
+
+		this.brain = new Brain({
+			poly: this,
+			onTick: params.onTick
 		})
 	}
 
@@ -241,6 +249,8 @@ export default class Polywise {
 	}
 
 	async off() {
+		this.brain.off()
+
 		if (this.db) {
 			await this.db.close()
 			this.db = null

@@ -1,13 +1,7 @@
-import Polywise from './Polywise'
 import { calculateFatigue, isIdle } from './utils'
 
 import type { BrainState } from './types'
-
-interface BrainParams {
-	poly: Polywise
-
-	onTick: () => void
-}
+import type { BrainParams } from './types/params'
 
 export default class Brain {
 	private poly: Polywise

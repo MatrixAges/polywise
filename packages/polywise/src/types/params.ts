@@ -1,3 +1,20 @@
+export interface BrainParams {
+	// Required Variables
+	poly: import('../Polywise').default
+
+	// Optional Functions
+	onTick?: () => void
+}
+
+export interface PolywiseParams {
+	// Optional Variables
+	data_dir?: string
+	embedding_cache_dir?: string
+
+	// Optional Functions
+	onTick?: () => void
+}
+
 export interface AddNodeParams {
 	// Required Variables
 	label: string

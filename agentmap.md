@@ -351,7 +351,10 @@ The project is a monorepo organized using a workspace structure, primarily built
 					"role": "Class"
 				},
 				"Brain.ts": { "desc": "Brain lifecycle manager with fatigue state machine", "role": "Class" },
-				"Polywise.ts": { "desc": "Core database API for knowledge graph operations", "role": "Class" },
+				"Polywise.ts": {
+					"desc": "Core database API for knowledge graph operations. Includes public instances of Brain and Article.",
+					"role": "Class"
+				},
 				"index.ts": { "desc": "Main exports", "role": "Index" },
 				"sql": {
 					"Brain.ts": { "desc": "Brain SQL operations", "role": "SQL" },

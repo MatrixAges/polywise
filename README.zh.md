@@ -63,7 +63,7 @@ Polywise 的构建初衷是通过创建一个**神经科学启发的记忆系统
 
 ```typescript
 // AI 智能体记住之前的交互
-const poly = new Polywise(':memory:')
+const poly = new Polywise({ data_dir: ':memory:' })
 
 // 从对话中处理知识
 await poly.processArticle('用户偏好', '用户喜欢深色模式，偏爱 TypeScript，工作时间较晚', [
