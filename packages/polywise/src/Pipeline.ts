@@ -35,7 +35,7 @@ export default class Pipeline {
 
 	async init(args: PipelineArgs = {}) {
 		const {
-			cache_dir = `${os.homedir()}/.Models`,
+			cache_dir = `${os.homedir()}/.Polywise/.models`,
 			embedding_config,
 			reranker_config,
 			embedding_concurrency,
