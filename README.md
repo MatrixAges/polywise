@@ -4,7 +4,7 @@
 
 # <p align="center">Polywise</p>
 
-_<p align="center"><strong>🧠 A neuroscience-inspired knowledge graph and memory system</strong></p>_
+_<p align="center"><strong>Agentic memory engine for AI</strong></p>_
 
 <p align="center">
 English |

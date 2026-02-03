@@ -4,7 +4,7 @@
 
 # <p align="center">Polywise</p>
 
-_<p align="center"><strong>🧠 神经科学启发的知识图谱与记忆系统</strong></p>_
+_<p align="center"><strong>用于人工智能的智能体记忆引擎</strong></p>_
 
 <p align="center">
   <a href="README.md">English</a> |
