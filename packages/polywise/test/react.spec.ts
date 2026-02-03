@@ -48,7 +48,7 @@ describe.concurrent('Polywise React System', () => {
 		}
 
 		const fire_item = behavioral_stimuli.find(s => s.label.includes('Fire'))!
-		const result = await poly.react(fire_item.stimulus)
+		const { result } = await poly.react(fire_item.stimulus)
 
 		expect(result).toBeDefined()
 		expect(result?.action).toBe(fire_item.action)
@@ -98,10 +98,10 @@ describe.concurrent('Polywise React System', () => {
 
 		await poly_pfc.stimulate(stimulus_id, 0.5)
 
-		const fast_result = await poly_pfc.react(fire_stimulus.stimulus)
+		const { result: fast_result, cot } = await poly_pfc.react(fire_stimulus.stimulus)
 		expect(fast_result?.action).toBe(fire_stimulus.action)
 
-		await new Promise(resolve => setTimeout(resolve, 8000))
+		await cot.toPromise()
 
 		expect(action_received).toBeDefined()
 		expect(action_received.source).toBe('act')
@@ -128,10 +128,10 @@ describe.concurrent('Polywise React System', () => {
 		})
 
 		const thirst_stimulus = behavioral_stimuli.find(s => s.label.includes('Thirsty'))!
-		const fast_result = await poly_act.react(thirst_stimulus.stimulus)
+		const { result: fast_result, cot } = await poly_act.react(thirst_stimulus.stimulus)
 		expect(fast_result).toBeNull()
 
-		await new Promise(resolve => setTimeout(resolve, 8000))
+		await cot.toPromise()
 
 		expect(action_received).toBeDefined()
 		expect(action_received.action).toContain('中暑')

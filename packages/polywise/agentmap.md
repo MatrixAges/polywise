@@ -77,6 +77,7 @@ This document provides an overview of the packages/polywise module structure and
 			"article.spec.ts": { "desc": "Article tests", "role": "Test" },
 			"cot.spec.ts": { "desc": "Chain of thought tests", "role": "Test" },
 			"learning.spec.ts": { "desc": "Pure text learning and large scale dataset tests", "role": "Test" },
+			"react.spec.ts": { "desc": "React system and habitual behavior tests", "role": "Test" },
 			"datasets": {
 				"text": {
 					"desc": "Large-scale pure text datasets (Neuroscience, Philosophy, Legal, Physics, etc.)",

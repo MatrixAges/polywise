@@ -183,14 +183,17 @@ export default class Polywise {
 		}
 	}
 
-	public async react(input: string, args: ReactArgs = {}): Promise<ReactResult | null> {
+	public async react(
+		input: string,
+		args: ReactArgs = {}
+	): Promise<{ result: ReactResult | null; cot: ChainEmitter }> {
 		this.brain.reportUserActivity()
 
 		const { habit_threshold = 0.5 } = args
 
 		const embedding = await this.pipeline.embed(input)
 
-		if (!embedding) return null
+		if (!embedding) return { result: null, cot: new ChainEmitter().finish() as any }
 
 		const nearest_stimulus = await this.query_raw<any[]>(sql.sql_find_nearest_node, [
 			`[${embedding.join(',')}]`
@@ -225,9 +228,11 @@ export default class Polywise {
 			await this.stimulate(stimulus.id, 0.5)
 		}
 
-		setImmediate(() => this._deepThink(input, fast_result))
+		const emitter = new ChainEmitter()
 
-		return fast_result
+		setImmediate(() => this._deepThink(input, fast_result, emitter))
+
+		return { result: fast_result, cot: emitter }
 	}
 
 	async save(args: ProcessArticleArgs) {
@@ -606,36 +611,39 @@ export default class Polywise {
 		}
 	}
 
-	private async _deepThink(input: string, fast_result: ReactResult | null) {
-		if (!this.db) return
+	private async _deepThink(input: string, fast_result: ReactResult | null, emitter: ChainEmitter) {
+		if (!this.db) {
+			emitter.finish()
+			return
+		}
 
 		try {
-			const { result } = await this.query({
+			const { result, cot } = await this.query({
 				query: input,
 				cot_depth: 1,
 				search_limit: 5,
 				rerank_limit: 3
 			})
 
-			if (!this.db) return
+			cot.onFinish(() => emitter.finish())
 
 			if (result.length > 0 && this._onAction) {
-				const top = result[0]
+				const best_action = result[0]
 
 				const slow_result: ReactResult = {
-					action: top.content.slice(0, 50),
-					description: top.content.split('\n')[0] || 'Slow system decision',
-					metadata: top.metadata || {},
-					confidence: top.combinedScore,
+					action: best_action.content,
+					description: best_action.metadata?.desc || `Acted on ${input}`,
+					metadata: best_action.metadata || {},
+					confidence: best_action.rerankScore,
 					source: 'act'
 				}
 
-				if (!fast_result || slow_result.confidence > fast_result.confidence + 0.2) {
+				if (!fast_result || slow_result.confidence >= fast_result.confidence) {
 					this._onAction(slow_result)
 				}
 			}
 		} catch (e) {
-			console.error('Deep think error:', e)
+			emitter.finish()
 		}
 	}
 
