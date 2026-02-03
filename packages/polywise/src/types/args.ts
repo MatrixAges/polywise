@@ -1,7 +1,7 @@
 import type { PGlite } from '@electric-sql/pglite'
 import type Polywise from '../Polywise'
 import type { ChainEmitter } from '../utils'
-import type { HybridSearchResult, Metadata, Triple } from './polywise'
+import type { HybridSearchResult, Metadata, ReactResult, Triple } from './polywise'
 
 export interface BrainArgs {
 	poly: Polywise
@@ -16,6 +16,10 @@ export interface PolywiseArgs {
 	embedding_concurrency?: number
 	reranker_concurrency?: number
 	onTick?: () => void
+}
+
+export interface ReactArgs {
+	habit_threshold?: number
 }
 
 export interface LocalEmbeddingConfig {
@@ -61,6 +65,8 @@ export interface AddNodeArgs {
 	root_ids?: string[]
 	metrics_ids?: string[]
 	metadata?: Metadata
+	embedding?: number[]
+	is_action?: boolean
 }
 
 export interface ConnectArgs {
@@ -71,6 +77,7 @@ export interface ConnectArgs {
 	root_ids?: string[]
 	metrics_ids?: string[]
 	metadata?: Metadata
+	is_habit?: boolean
 }
 
 export interface ProcessArticleArgs {
@@ -99,6 +106,8 @@ export interface UpsertNodeArgs {
 	root_ids?: string[]
 	metrics_ids?: string[]
 	metadata?: Metadata
+	embedding?: number[]
+	is_action?: boolean
 }
 
 export interface AddArticleArgs {
@@ -165,6 +174,7 @@ export interface AggregatedCandidate {
 	memory_strength: number
 	source: 'memory' | 'external' | 'implicit'
 	stimulated: boolean
+	metadata?: Metadata
 }
 
 // Optimized parameter interface definition, ensuring variables come before functions
@@ -199,6 +209,13 @@ export interface ExecuteCotArgs {
 export interface RecallNodesByKeywordsArgs {
 	keywords: string[]
 	limit?: number
+}
+
+export interface HabituateArgs {
+	stimulus: string
+	action_label: string
+	weight?: number
+	metadata?: Metadata
 }
 
 export interface StrengthenRelatedEdgesArgs {

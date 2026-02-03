@@ -26,6 +26,8 @@ export interface Node {
 	root_ids?: string[]
 	metrics_ids?: string[]
 	metadata?: Metadata
+	embedding?: number[]
+	is_action?: boolean
 }
 
 export interface Edge {
@@ -40,6 +42,16 @@ export interface Edge {
 	root_ids?: string[]
 	metrics_ids?: string[]
 	metadata?: Metadata
+	is_habit?: boolean
+	reaction_count?: number
+}
+
+export interface ReactResult {
+	action: string
+	description: string
+	metadata: Metadata
+	confidence: number
+	source: 'react' | 'act'
 }
 
 export interface Snapshot {
@@ -108,6 +120,7 @@ export interface HybridSearchResult {
 	combinedScore: number
 	stimulated: boolean
 	memoryStrength: number
+	metadata?: Metadata
 }
 
 export interface COTDepthResult {

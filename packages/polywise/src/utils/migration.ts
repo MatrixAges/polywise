@@ -5,7 +5,7 @@ import validateMigrationsFn from './validateMigrations'
 
 import type { Migration } from '../types'
 
-export const CURRENT_SCHEMA_VERSION = 3
+export const CURRENT_SCHEMA_VERSION = 4
 
 export const migrations: Migration[] = [
 	{
@@ -50,6 +50,19 @@ export const migrations: Migration[] = [
 			await exec([
 				`ALTER TABLE ${SCHEMA_BRAIN}.nodes ADD COLUMN IF NOT EXISTS metadata JSONB DEFAULT '{}';`,
 				`ALTER TABLE ${SCHEMA_BRAIN}.edges ADD COLUMN IF NOT EXISTS metadata JSONB DEFAULT '{}';`
+			])
+		}
+	},
+	{
+		version: 4,
+		description: 'Add React system columns: embedding, is_action for nodes; is_habit, reaction_count for edges',
+		up: async exec => {
+			await exec([
+				`ALTER TABLE ${SCHEMA_BRAIN}.nodes ADD COLUMN IF NOT EXISTS embedding vector(1024);`,
+				`ALTER TABLE ${SCHEMA_BRAIN}.nodes ADD COLUMN IF NOT EXISTS is_action BOOLEAN DEFAULT false;`,
+				`ALTER TABLE ${SCHEMA_BRAIN}.edges ADD COLUMN IF NOT EXISTS is_habit BOOLEAN DEFAULT false;`,
+				`ALTER TABLE ${SCHEMA_BRAIN}.edges ADD COLUMN IF NOT EXISTS reaction_count INTEGER DEFAULT 0;`,
+				sql_schema.sql_create_index_nodes_embedding
 			])
 		}
 	}

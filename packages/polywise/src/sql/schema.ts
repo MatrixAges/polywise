@@ -17,7 +17,9 @@ export const sql_create_table_nodes = `
     idol_id TEXT,
     root_ids TEXT[] DEFAULT '{}',
     metrics_ids TEXT[] DEFAULT '{}',
-    metadata JSONB DEFAULT '{}'
+    metadata JSONB DEFAULT '{}',
+    embedding vector(1024),
+    is_action BOOLEAN DEFAULT false
   );
 `
 
@@ -34,8 +36,15 @@ export const sql_create_table_edges = `
     idol_id TEXT,
     root_ids TEXT[] DEFAULT '{}',
     metrics_ids TEXT[] DEFAULT '{}',
-    metadata JSONB DEFAULT '{}'
+    metadata JSONB DEFAULT '{}',
+    is_habit BOOLEAN DEFAULT false,
+    reaction_count INTEGER DEFAULT 0
   );
+`
+
+export const sql_create_index_nodes_embedding = `
+  CREATE INDEX IF NOT EXISTS idx_nodes_embedding 
+  ON ${SCHEMA_BRAIN}.nodes USING hnsw (embedding vector_cosine_ops);
 `
 
 export const sql_create_index_edge_src = `CREATE INDEX IF NOT EXISTS idx_edge_src ON ${SCHEMA_BRAIN}.edges(source_id);`

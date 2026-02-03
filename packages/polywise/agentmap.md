@@ -26,7 +26,7 @@ This document provides an overview of the packages/polywise module structure and
 				"role": "Class"
 			},
 			"Polywise.ts": {
-				"desc": "Core database API for knowledge graph operations. Includes public instances of Brain, Article, and Pipeline. Supports hybrid retrieval with memory recall, external search, result aggregation, and reranking.",
+				"desc": "Core database API for knowledge graph operations. Includes public instances of Brain, Article, and Pipeline. Supports hybrid retrieval with memory recall, external search, result aggregation, reranking, and the React (fast decision) system.",
 				"role": "Class"
 			},
 			"consts": {

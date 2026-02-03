@@ -31,12 +31,16 @@ import type {
 	ExecuteCotArgs,
 	RecallNodesByKeywordsArgs,
 	StrengthenRelatedEdgesArgs,
-	ContextResult
+	ContextResult,
+	ReactArgs,
+	ReactResult
 } from './types'
 
 @singleton()
 export default class Polywise {
 	private db: PGlite | null = null
+
+	private _onAction: ((result: ReactResult) => void) | null = null
 
 	public article: Article
 	public brain: Brain
@@ -130,6 +134,10 @@ export default class Polywise {
 		}
 	}
 
+	public onAction(cb: (result: ReactResult) => void) {
+		this._onAction = cb
+	}
+
 	async query(args: QueryArgs) {
 		this.brain.reportUserActivity()
 		this.brain.setBusy(true)
@@ -177,6 +185,53 @@ export default class Polywise {
 		}
 	}
 
+	public async react(input: string, args: ReactArgs = {}): Promise<ReactResult | null> {
+		this.brain.reportUserActivity()
+
+		const { habit_threshold = 0.5 } = args
+
+		const embedding = await this.pipeline.embed(input)
+
+		if (!embedding) return null
+
+		const nearest_stimulus = await this.query_raw<any[]>(sql.sql_find_nearest_node, [
+			`[${embedding.join(',')}]`
+		])
+
+		let fast_result: ReactResult | null = null
+
+		if (nearest_stimulus.length > 0) {
+			const stimulus = nearest_stimulus[0]
+
+			if (
+				stimulus.similarity > 0.8 &&
+				(stimulus.activation >= stimulus.threshold || stimulus.potential >= stimulus.threshold)
+			) {
+				const habit = await this.query_raw<any[]>(sql.sql_find_strongest_habit, [stimulus.id])
+
+				if (habit.length > 0 && habit[0].weight >= habit_threshold) {
+					const h = habit[0]
+
+					fast_result = {
+						action: h.action,
+						description: h.action_metadata?.desc || `Reacted to ${stimulus.label}`,
+						metadata: h.action_metadata || {},
+						confidence: h.weight,
+						source: 'react'
+					}
+
+					await this.query_raw(sql.sql_increment_reaction_count, [stimulus.id, h.target_id])
+				}
+			}
+
+			await this.stimulate(stimulus.id, 0.5)
+		}
+
+		setImmediate(() => this._deepThink(input, fast_result))
+
+		return fast_result
+	}
+
 	async save(args: ProcessArticleArgs) {
 		this.brain.reportUserActivity()
 		this.brain.setBusy(true)
@@ -218,7 +273,7 @@ export default class Polywise {
 	}
 
 	public async addNode(args: AddNodeArgs) {
-		const { label, x, y, threshold, idol_id, root_ids, metrics_ids, metadata } = args
+		const { label, x, y, threshold, idol_id, root_ids, metrics_ids, metadata, embedding, is_action } = args
 
 		const rows = await this.query_raw<{ id: number }>(sql.sql_add_node, [
 			label,
@@ -228,14 +283,16 @@ export default class Polywise {
 			idol_id ?? null,
 			root_ids ?? null,
 			metrics_ids ?? null,
-			JSON.stringify(metadata ?? {})
+			JSON.stringify(metadata ?? {}),
+			embedding ? `[${embedding.join(',')}]` : null,
+			is_action ?? false
 		])
 
 		return rows[0].id
 	}
 
 	public async connect(args: ConnectArgs) {
-		const { source_id, target_id, weight, idol_id, root_ids, metrics_ids, metadata } = args
+		const { source_id, target_id, weight, idol_id, root_ids, metrics_ids, metadata, is_habit } = args
 
 		await this.query_raw(sql.sql_connect, [
 			source_id,
@@ -244,7 +301,8 @@ export default class Polywise {
 			idol_id ?? null,
 			root_ids ?? null,
 			metrics_ids ?? null,
-			JSON.stringify(metadata ?? {})
+			JSON.stringify(metadata ?? {}),
+			is_habit ?? false
 		])
 	}
 
@@ -261,16 +319,22 @@ export default class Polywise {
 
 	public async getAllNodes() {
 		return await this.query_raw<Node[]>(
-			`SELECT id, label, x, y, activation, potential, idol_id, root_ids, metrics_ids, metadata FROM ${SCHEMA_BRAIN}.nodes`
+			`SELECT id, label, x, y, activation, potential, idol_id, root_ids, metrics_ids, metadata, is_action FROM ${SCHEMA_BRAIN}.nodes`
 		)
 	}
 
 	public async getNodesByIdol(idol_id: string) {
-		return await this.query_raw<Node[]>(sql.sql_get_nodes_by_idol, [idol_id])
+		return await this.query_raw<Node[]>(
+			`SELECT id, label, x, y, activation, potential, idol_id, root_ids, metrics_ids, metadata, is_action FROM ${SCHEMA_BRAIN}.nodes WHERE idol_id = $1`,
+			[idol_id]
+		)
 	}
 
 	public async getNodesByRoot(root_id: string) {
-		return await this.query_raw<Node[]>(sql.sql_get_nodes_by_root, [root_id])
+		return await this.query_raw<Node[]>(
+			`SELECT id, label, x, y, activation, potential, idol_id, root_ids, metrics_ids, metadata, is_action FROM ${SCHEMA_BRAIN}.nodes WHERE $1 = ANY(root_ids)`,
+			[root_id]
+		)
 	}
 
 	public async getEdgesByIdol(idol_id: string) {
@@ -284,6 +348,48 @@ export default class Polywise {
 	public async tick(threshold_override?: number) {
 		const threshold = threshold_override ?? 0.5
 		await this.exec(sql.sql_tick(threshold))
+	}
+
+	public async habituate(args: HabituateArgs) {
+		const { stimulus, action_label, weight = 0.9, metadata } = args
+
+		const embedding = await this.pipeline.embed(stimulus)
+		if (!embedding) return
+
+		const stimulus_id = await this.addNode({
+			label: `Stimulus: ${stimulus.slice(0, 50)}`,
+			x: Math.random() * 800,
+			y: Math.random() * 600,
+			threshold: 0.1,
+			embedding,
+			metadata: { desc: stimulus }
+		})
+
+		const action_rows = await this.query_raw<{ id: number }>(
+			`SELECT id FROM ${SCHEMA_BRAIN}.nodes WHERE label = $1`,
+			[action_label]
+		)
+
+		let action_id: number
+
+		if (action_rows.length > 0) {
+			action_id = action_rows[0].id
+		} else {
+			action_id = await this.addNode({
+				label: action_label,
+				x: Math.random() * 800,
+				y: Math.random() * 600,
+				is_action: true,
+				metadata: metadata ?? {}
+			})
+		}
+
+		await this.connect({
+			source_id: stimulus_id,
+			target_id: action_id,
+			weight,
+			is_habit: true
+		})
 	}
 
 	public async runShadowTick() {
@@ -502,6 +608,35 @@ export default class Polywise {
 		}
 	}
 
+	private async _deepThink(input: string, fast_result: ReactResult | null) {
+		try {
+			const { result } = await this.query({
+				query: input,
+				cot_depth: 1,
+				search_limit: 5,
+				rerank_limit: 3
+			})
+
+			if (result.length > 0 && this._onAction) {
+				const top = result[0]
+
+				const slow_result: ReactResult = {
+					action: top.title,
+					description: top.content.split('\n')[0] || 'Slow system decision',
+					metadata: top.metadata || {},
+					confidence: top.combinedScore,
+					source: 'act'
+				}
+
+				if (!fast_result || slow_result.confidence > fast_result.confidence + 0.2) {
+					this._onAction(slow_result)
+				}
+			}
+		} catch (e) {
+			console.error('Deep think error:', e)
+		}
+	}
+
 	private async strengthenRelatedEdges(args: StrengthenRelatedEdgesArgs) {
 		const { matched_nodes, related_nodes } = args
 
@@ -536,7 +671,8 @@ export default class Polywise {
 						relevance_score: 1.5,
 						memory_strength,
 						source: 'memory',
-						stimulated: true
+						stimulated: true,
+						metadata: (article as any).metadata
 					})
 				}
 			}
@@ -555,7 +691,8 @@ export default class Polywise {
 					relevance_score: result.rerankScore,
 					memory_strength,
 					source: is_stimulated ? 'memory' : 'external',
-					stimulated: is_stimulated
+					stimulated: is_stimulated,
+					metadata: (result as any).metadata
 				})
 			}
 		}
@@ -573,7 +710,8 @@ export default class Polywise {
 				relevance_score: node.potential * 0.8,
 				memory_strength: node.potential,
 				source: 'implicit',
-				stimulated: true
+				stimulated: true,
+				metadata: node.metadata
 			})
 		}
 
@@ -603,7 +741,8 @@ export default class Polywise {
 			relevanceScore: candidate.relevance_score,
 			combinedScore: (rerank_scores[index]?.score ?? 0) * 0.6 + candidate.relevance_score * 0.4,
 			stimulated: candidate.stimulated,
-			memoryStrength: candidate.memory_strength
+			memoryStrength: candidate.memory_strength,
+			metadata: candidate.metadata
 		}))
 
 		const sorted_results = results.sort((a, b) => b.combinedScore - a.combinedScore).slice(0, limit)
@@ -693,14 +832,16 @@ export default class Polywise {
 	}
 
 	private async upsertNode(args: UpsertNodeArgs) {
-		const { label, article_id, idol_id, root_ids, metrics_ids, metadata } = args
+		const { label, article_id, idol_id, root_ids, metrics_ids, metadata, embedding, is_action } = args
 
 		await this.query_raw(sql.sql_upsert_node, [
 			label,
 			idol_id ?? null,
 			root_ids ?? null,
 			metrics_ids ?? null,
-			JSON.stringify(metadata ?? {})
+			JSON.stringify(metadata ?? {}),
+			embedding ? `[${embedding.join(',')}]` : null,
+			is_action ?? false
 		])
 
 		const res = await this.query_raw<{ id: number }>(sql.sql_upsert_node_select, [label])

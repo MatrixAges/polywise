@@ -23,6 +23,8 @@ npm-debug.log*
 **/.prompts
 
 # polywise
+**:pfc*
+**:act*
 **:memory*
 **:polywise*
 
