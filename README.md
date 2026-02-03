@@ -13,34 +13,25 @@ English |
 
 ## 💡 Why Polywise?
 
-Current AI systems lack **true memory**. Each interaction is isolated, meaning knowledge doesn't evolve—it's just stored. Polywise changes this by implementing a **neuroscience-inspired memory engine**:
+Current AI architectures are missing a critical component: **a hippocampus-like memory system**. While LLMs excel at pattern matching and text generation, they lack true, evolving memory. Each interaction is often isolated, meaning knowledge doesn't evolve—it's just stored.
 
-- 🧠 **Cumulative Learning**: AI that remembers and grows with every conversation.
+Polywise changes this by implementing a **neuroscience-inspired memory engine** that serves as the "digital hippocampus" for modern AI:
+
+- 🎭 **Episodic & Semantic Memory**: Remembers specific interactions and understands how concepts relate to each other.
 - 🔗 **Associative Graph**: Knowledge is stored as interconnected concepts, not isolated bits.
-- 🌙 **Consolidation**: Like human sleep, it reinforces important memories and prunes noise.
-- ⚡ **Activation Spreading**: One thought naturally triggers related ones through organic flow.
-
-> We're not just building a database. We're building a **digital hippocampus** for AI.
+- ⚡ **Spreading Activation**: One thought naturally triggers related ones through organic flow, enabling associative recall through connections rather than just vector similarity.
+- 🌙 **Consolidation**: Like human sleep, it reinforces important memories and prunes noise through a structured lifecycle.
+- 🔄 **Actionable Decisions**: Mimics the dual-process theory of the brain (Fast React/Slow Act) to provide adaptive behavior.
 
 ---
 
-## 🤝 Polywise & AI
-
-### 🧩 The Missing Piece
-
-Current AI architectures are missing a critical component: **a hippocampus-like memory system**. While LLMs excel at pattern matching and text generation, they lack:
-
-- 🎭 **Episodic Memory** - Remembering specific interactions and events
-- 🌐 **Semantic Networks** - Understanding how concepts relate to each other
-- 🔄 **Consolidation Mechanisms** - Converting short-term interactions into long-term knowledge
-- 🔍 **Associative Recall** - Retrieving information through connections rather than just similarity
-
-### 🚀 How Polywise Enhances AI
+## 🚀 How Polywise Enhances AI
 
 #### 1. 🧠 **Long-Term Memory for AI Agents**
 
+Polywise allows AI agents to remember and grow with every conversation, converting short-term interactions into long-term knowledge.
+
 ```typescript
-// AI agent remembers previous interactions
 const poly = new Polywise()
 await poly.init({ data_dir: './my-memory' })
 
@@ -59,13 +50,27 @@ const { result } = await poly.query({ query: 'What does the user like?' })
 // Automatically retrieves: Dark Mode, TypeScript, etc.
 ```
 
-#### 2. 📚 **Knowledge Accumulation**
+#### 2. ⚡ **Fast React & Deep Think (STR/PFC)**
 
-...
+Polywise implements a dual-process system mimicking the Prefrontal Cortex (PFC) and Striatum (STR) for adaptive behavior:
+
+```typescript
+// 1. Subscribe to the Slow System (PFC) for refined decisions
+poly.onAction(result => {
+	console.log('PFC updated decision:', result)
+})
+
+// 2. Trigger a reaction (STR - Fast Path)
+const response = await poly.react('Detected critical system failure')
+// Returns instantly if a "habit" exists in memory
+```
+
+- **React**: Instant stimulus-response based on "muscle memory" (Habitual Edges).
+- **Act**: Asynchronous deep reasoning that kicks in after a reaction to refine or correct the initial response.
 
 #### 3. 🎯 **Context-Aware Retrieval**
 
-Instead of simple vector similarity, Polywise uses **spreading activation** internally during queries:
+Instead of simple vector similarity, Polywise uses **spreading activation** internally during queries to explore the semantic neighborhood of a concept.
 
 ```typescript
 // Query triggers internal activation spreading
@@ -81,27 +86,6 @@ const { result, cot } = await poly.query({
 #### 4. 🌙 **Memory Consolidation**
 
 Polywise manages its own lifecycle. Maintenance tasks like "sleep" consolidation run automatically when the system is idle and yield to foreground tasks.
-
-#### 5. ⚡ **Fast React & Deep Think (STR/PFC)**
-
-Polywise implements a dual-process system mimicking the Prefrontal Cortex (PFC) and Striatum (STR) for adaptive behavior:
-
-```typescript
-const poly = new Polywise()
-await poly.init()
-
-// 1. Subscribe to the Slow System (PFC) for refined decisions
-poly.onAction(result => {
-	console.log('PFC updated decision:', result)
-})
-
-// 2. Trigger a reaction (STR - Fast Path)
-const response = await poly.react('Detected critical system failure')
-// Returns instantly if a "habit" exists in memory
-```
-
-- **React**: Instant stimulus-response based on "muscle memory" (Habitual Edges).
-- **Act**: Asynchronous deep reasoning that kicks in after a reaction to refine or correct the initial response.
 
 ---
 
@@ -167,15 +151,7 @@ pnpm dev
 
 ## 💭 Philosophy
 
-Polywise is built on the belief that **truly intelligent AI needs truly intelligent memory**. Not just storage, but a system that:
-
-- Forms connections organically
-- Strengthens with use
-- Forgets strategically
-- Dreams to consolidate
-- Evolves continuously
-
-We're not just building a database. We're building a **digital hippocampus**.
+Polywise is built on the belief that **truly intelligent AI needs truly intelligent memory**. Not just storage, but a system that forms connections organically, strengthens with use, forgets strategically, and evolves continuously.
 
 ---
 
@@ -183,23 +159,13 @@ We're not just building a database. We're building a **digital hippocampus**.
 
 This project is inspired by the following research papers:
 
-- [Long-lasting potentiation of synaptic transmission (1973)](<papers/Long-lasting%20potentiation%20of%20synaptic%20transmission%20(1973).pdf>) - The foundation of Hebbian learning
-- [The Organization of Behavior (1949)](<papers/The%20Organization%20of%20Behavior%20(1949).pdf>) - Donald Hebb's seminal work
-- [A Spreading-Activation Theory of Semantic Processing (1975)](<papers/A%20Spreading-Activation%20Theory%20of%20Semantic%20Processing%20(1975).pdf>) - Collins & Loftus
-- [Spreading Activation in Emotional Memory Networks (2016)](<papers/Spreading%20Activation%20in%20Emotional%20Memory%20Networks%20(2016).pdf>) - Modern activation theory
+- [Long-lasting potentiation of synaptic transmission (1973)](<papers/Long-lasting%20potentiation%20of%20synaptic%20transmission%20(1973).pdf>)
+- [The Organization of Behavior (1949)](<papers/The%20Organization%20of%20Behavior%20(1949).pdf>)
+- [A Spreading-Activation Theory of Semantic Processing (1975)](<papers/A%20Spreading-Activation%20Theory%20of%20Semantic%20Processing%20(1975).pdf>)
 
 ## 🙏 Credits
 
-Polywise is built on top of these amazing technologies:
-
-- 🗄️ [PGlite](https://github.com/electric-sql/pglite) - In-browser PostgreSQL
-- ⚛️ [React](https://react.dev/) - UI framework
-- 📱 [Electron](https://www.electronjs.org/) - Cross-platform desktop apps
-- 🔄 [tRPC](https://trpc.io/) - End-to-end typesafe APIs
-- 🎯 [MobX](https://mobx.js.org/) - State management
-- 🎨 [Tailwind CSS](https://tailwindcss.com/) - Styling
-- 🌊 [Hono](https://hono.dev/) - Web framework
-- 🏗️ [Rsbuild](https://rsbuild.dev/) & [Rslib](https://rslib.dev/) - Build tools
+Polywise is built on top of [PGlite](https://github.com/electric-sql/pglite), [React](https://react.dev/), [Electron](https://www.electronjs.org/), [tRPC](https://trpc.io/), [MobX](https://mobx.js.org/), [Tailwind CSS](https://tailwindcss.com/), [Hono](https://hono.dev/), [Rsbuild](https://rsbuild.dev/), and [Rslib](https://rslib.dev/).
 
 ## 📜 License
 
