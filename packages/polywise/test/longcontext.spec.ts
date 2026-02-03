@@ -1,5 +1,3 @@
-import '@abraham/reflection'
-
 import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 
 import Polywise from '../src/Polywise'

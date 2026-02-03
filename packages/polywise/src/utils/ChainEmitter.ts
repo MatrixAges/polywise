@@ -1,4 +1,4 @@
-import type { COTDepthResult } from '../types/args'
+import type { COTDepthResult } from '../types'
 
 export default class ChainEmitter {
 	private callbacks: Set<(data: COTDepthResult) => void> = new Set()

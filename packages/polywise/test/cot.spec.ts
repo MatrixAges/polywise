@@ -1,5 +1,3 @@
-import '@abraham/reflection'
-
 import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 
 import { PERCEIVE_COMMAND } from '../src/consts'
@@ -47,11 +45,11 @@ describe('Chain of Thought (CoT) Mechanism', () => {
 		})
 
 		for (const article of software_articles) {
-			await (poly as any).article.addWithEmbedding(article)
+			await poly.article.addWithEmbedding(article)
 		}
 
 		for (const article of cognitive_articles) {
-			await (poly as any).article.addWithEmbedding(article)
+			await poly.article.addWithEmbedding(article)
 		}
 
 		await poly.save({

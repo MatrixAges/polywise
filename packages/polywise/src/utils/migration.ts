@@ -1,3 +1,4 @@
+import { SCHEMA_BRAIN } from '../consts'
 import * as sql_schema from '../sql/schema'
 import migrateFn from './migrate'
 import validateMigrationsFn from './validateMigrations'
@@ -47,8 +48,8 @@ export const migrations: Migration[] = [
 		description: 'Add metadata column to nodes and edges',
 		up: async exec => {
 			await exec([
-				"ALTER TABLE brain.nodes ADD COLUMN IF NOT EXISTS metadata JSONB DEFAULT '{}';",
-				"ALTER TABLE brain.edges ADD COLUMN IF NOT EXISTS metadata JSONB DEFAULT '{}';"
+				`ALTER TABLE ${SCHEMA_BRAIN}.nodes ADD COLUMN IF NOT EXISTS metadata JSONB DEFAULT '{}';`,
+				`ALTER TABLE ${SCHEMA_BRAIN}.edges ADD COLUMN IF NOT EXISTS metadata JSONB DEFAULT '{}';`
 			])
 		}
 	}

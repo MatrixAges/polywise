@@ -1,5 +1,6 @@
 import { PGlite } from '@electric-sql/pglite'
 
+import { SCHEMA_KNOWLEDGE } from './consts'
 import Pipeline from './Pipeline'
 import * as sql from './sql'
 import { ArticleArgs, ArticleEntity, ArticleWithSimilarity, SearchArticleArgs } from './types'
@@ -77,7 +78,7 @@ export default class Article {
 	async delete(article_id: number) {
 		if (!this.db) return
 
-		await this.db.query('DELETE FROM knowledge.articles WHERE id = $1', [article_id])
+		await this.db.query(`DELETE FROM ${SCHEMA_KNOWLEDGE}.articles WHERE id = $1`, [article_id])
 	}
 
 	async searchVector(args: SearchArticleArgs) {
