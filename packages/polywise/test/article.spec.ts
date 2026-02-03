@@ -22,7 +22,7 @@ describe('Article CRUD Operations', () => {
 	})
 
 	it('should create article with title and content', async () => {
-		const article = await poly.article.process({
+		const article = await (poly as any).article.process({
 			title: 'Test Article',
 			content: 'This is test content for the article.'
 		})
@@ -34,31 +34,31 @@ describe('Article CRUD Operations', () => {
 	})
 
 	it('should get article by ID', async () => {
-		await poly.article.process({
+		await (poly as any).article.process({
 			title: 'Article to Retrieve',
 			content: 'Content for retrieval test.'
 		})
 
-		const articles = await poly.article.searchFts({
+		const articles = await (poly as any).article.searchFts({
 			query: 'Retrieve',
 			limit: 1
 		})
 
 		expect(articles.length).toBe(1)
 
-		const article = await poly.article.get(articles[0].id)
+		const article = await (poly as any).article.get(articles[0].id)
 
 		expect(article.length).toBeGreaterThan(0)
 		expect(article[0]?.title).toBe('Article to Retrieve')
 	})
 
 	it('should update article', async () => {
-		const created = await poly.article.process({
+		const created = await (poly as any).article.process({
 			title: 'Article to Update',
 			content: 'Original content.'
 		})
 
-		const updated = await poly.article.update({
+		const updated = await (poly as any).article.update({
 			id: created.id,
 			title: 'Updated Title',
 			content: 'Updated content.'
@@ -67,36 +67,36 @@ describe('Article CRUD Operations', () => {
 		expect(updated.title).toBe('Updated Title')
 		expect(updated.content).toBe('Updated content.')
 
-		const fetched = await poly.article.get(created.id)
+		const fetched = await (poly as any).article.get(created.id)
 
 		expect(fetched[0]?.title).toBe('Updated Title')
 	})
 
 	it('should delete article', async () => {
-		const created = await poly.article.process({
+		const created = await (poly as any).article.process({
 			title: 'Article to Delete',
 			content: 'Content for deletion test.'
 		})
 
-		await poly.article.delete(created.id)
+		await (poly as any).article.delete(created.id)
 
-		const fetched = await poly.article.get(created.id)
+		const fetched = await (poly as any).article.get(created.id)
 
 		expect(fetched).toBeNull()
 	})
 
 	it('should get all articles', async () => {
-		await poly.article.process({
+		await (poly as any).article.process({
 			title: 'Article 1',
 			content: 'Content 1'
 		})
 
-		await poly.article.process({
+		await (poly as any).article.process({
 			title: 'Article 2',
 			content: 'Content 2'
 		})
 
-		const articles = await poly.article.getAll()
+		const articles = await (poly as any).article.getAll()
 
 		expect(articles.length).toBeGreaterThanOrEqual(2)
 	})
@@ -138,17 +138,17 @@ describe('Full-Text Search and Vector Search', () => {
 
 	describe('Full-Text Search', () => {
 		it('should find articles matching exact keywords', async () => {
-			await poly.article.process({
+			await (poly as any).article.process({
 				title: 'Getting Started with TypeScript',
 				content: 'TypeScript is a typed superset of JavaScript that compiles to plain JavaScript.'
 			})
 
-			await poly.article.process({
+			await (poly as any).article.process({
 				title: 'Advanced TypeScript Patterns',
 				content: 'This article covers advanced TypeScript patterns and best practices.'
 			})
 
-			const results = await poly.article.searchFts({
+			const results = await (poly as any).article.searchFts({
 				query: 'TypeScript',
 				limit: 10
 			})
@@ -158,17 +158,17 @@ describe('Full-Text Search and Vector Search', () => {
 		})
 
 		it('should search in both title and content', async () => {
-			await poly.article.process({
+			await (poly as any).article.process({
 				title: 'Database Systems',
 				content: 'PostgreSQL is a powerful open-source relational database management system.'
 			})
 
-			await poly.article.process({
+			await (poly as any).article.process({
 				title: 'Web Development',
 				content: 'JavaScript frameworks like React and Vue are popular for web development.'
 			})
 
-			const title_results = await poly.article.searchFts({
+			const title_results = await (poly as any).article.searchFts({
 				query: 'Database',
 				limit: 10
 			})
@@ -178,12 +178,12 @@ describe('Full-Text Search and Vector Search', () => {
 		})
 
 		it('should return empty array for non-matching query', async () => {
-			await poly.article.process({
+			await (poly as any).article.process({
 				title: 'Random Article',
 				content: 'This has nothing to do with the search query.'
 			})
 
-			const results = await poly.article.searchFts({
+			const results = await (poly as any).article.searchFts({
 				query: 'XYZ123NonExistent',
 				limit: 10
 			})
@@ -193,13 +193,13 @@ describe('Full-Text Search and Vector Search', () => {
 
 		it('should respect the limit parameter', async () => {
 			for (let i = 0; i < 5; i++) {
-				await poly.article.process({
+				await (poly as any).article.process({
 					title: `Article ${i}`,
 					content: `Content ${i}`
 				})
 			}
 
-			const results = await poly.article.searchFts({
+			const results = await (poly as any).article.searchFts({
 				query: 'Article',
 				limit: 3
 			})
@@ -208,12 +208,12 @@ describe('Full-Text Search and Vector Search', () => {
 		})
 
 		it('should handle case-insensitive search', async () => {
-			await poly.article.process({
+			await (poly as any).article.process({
 				title: 'lowercase search test',
 				content: 'This has LOWERCASE in content'
 			})
 
-			const results = await poly.article.searchFts({
+			const results = await (poly as any).article.searchFts({
 				query: 'LOWERCASE',
 				limit: 10
 			})
@@ -222,12 +222,12 @@ describe('Full-Text Search and Vector Search', () => {
 		})
 
 		it('should search partial word matches', async () => {
-			await poly.article.process({
+			await (poly as any).article.process({
 				title: 'JavaScript Programming',
 				content: 'I love programming in JavaScript.'
 			})
 
-			const results = await poly.article.searchFts({
+			const results = await (poly as any).article.searchFts({
 				query: 'program',
 				limit: 10
 			})

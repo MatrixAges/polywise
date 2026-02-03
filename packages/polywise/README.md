@@ -73,71 +73,52 @@ packages/polywise/
 
 ## Use Cases
 
-### 1. Knowledge Graph Management
+### 1. Save Content to Memory
+
+Inject knowledge from articles or structured data:
 
 ```typescript
-const poly = new Polywise(':memory:')
-await poly.init()
+const poly = new Polywise()
+await poly.init({ data_dir: './my-memory' })
 
-// Add concept node
-const nodeId = await poly.addNode('Machine Learning', 0, 0, 0.5)
-
-// Establish semantic connection
-await poly.connect(nodeA, nodeB, 0.9)
-
-// Stimulate node, trigger activation diffusion
-await poly.stimulate(nodeId, 5.0)
+await poly.save({
+	title: 'Quantum Computing',
+	content: 'Quantum computing exploits quantum mechanical phenomena...',
+	triples: [
+		{ subject: 'Qubits', predicate: 'exploits', object: 'Superposition', learning_rate: 2.5 },
+		{ subject: 'Qubits', predicate: 'exploits', object: 'Entanglement', learning_rate: 2.4 }
+	]
+})
 ```
 
-### 2. Article Knowledge Extraction
+### 2. Query from Memory
 
-Inject knowledge from articles in SPO triple form:
-
-```typescript
-await poly.processArticle('Quantum Computing', 'Content...', [
-	{ subject: 'Qubits', predicate: 'exploits', object: 'Superposition', learning_rate: 2.5, decay_resistance: 2.0 },
-	{ subject: 'Qubits', predicate: 'exploits', object: 'Entanglement', learning_rate: 2.4, decay_resistance: 2.2 }
-])
-```
-
-### 3. Continuous Learning & Memory Consolidation
+Retrieve relevant information based on natural language or concepts:
 
 ```typescript
-const brain = new Brain(poly, onTick)
+const { result, cot } = await poly.query({
+	query: 'How do qubits work?',
+	recall_depth: 2,
+	cot_depth: 1
+})
 
-// Call on user interaction
-brain.reportUserActivity()
-brain.addSynapticLoad(50)
-
-// Trigger learning burst
-await brain.triggerInputBurst()
-
-// Trigger sleep consolidation
-await brain.triggerSleepTick()
+console.log(result) // Related nodes and contexts
 ```
 
 ## API Quick Reference
 
 ### Polywise
 
-| Method                                    | Description                    |
-| ----------------------------------------- | ------------------------------ |
-| `addNode(label, x, y, threshold)`         | Create concept node            |
-| `connect(source, target, weight)`         | Establish semantic connection  |
-| `stimulate(node, intensity)`              | Activate node                  |
-| `tick(threshold)`                         | Execute activation propagation |
-| `processArticle(title, content, triples)` | Inject knowledge triples       |
-| `getSnapshot(weight_threshold)`           | Get current memory snapshot    |
+| Method                           | Description                                        |
+| -------------------------------- | -------------------------------------------------- |
+| `save(args: ProcessArticleArgs)` | Save content and knowledge triples to memory       |
+| `query(args: QueryArgs)`         | Query relevant concepts and context from memory    |
+| `init(args: PolywiseArgs)`       | Initialize the database and background brain       |
+| `off()`                          | Gracefully shut down background tasks and close DB |
 
-### Brain
+## Background Mechanism
 
-| Method                  | Description                 |
-| ----------------------- | --------------------------- |
-| `reportUserActivity()`  | Report user interaction     |
-| `addSynapticLoad(load)` | Add learning load           |
-| `triggerInputBurst()`   | Trigger learning burst      |
-| `triggerSleepTick()`    | Trigger sleep consolidation |
-| `stop()`                | Stop background tasks       |
+Polywise runs an internal "Brain" that handles maintenance tasks like memory consolidation (Sleep Tick) and reinforcement (Shadow Tick) during idle time. These tasks automatically yield when `save` or `query` is called.
 
 ## Run Tests
 

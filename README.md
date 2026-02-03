@@ -41,57 +41,51 @@ Current AI architectures are missing a critical component: **a hippocampus-like 
 
 ```typescript
 // AI agent remembers previous interactions
-const poly = new Polywise({ data_dir: ':memory:' })
+const poly = new Polywise()
+await poly.init({ data_dir: './my-memory' })
 
-// Process knowledge from conversation
-await poly.processArticle('User Preferences', 'User likes dark mode, prefers TypeScript, works late at night', [
-	{ subject: 'User', predicate: 'prefers', object: 'Dark Mode', learning_rate: 2.0 },
-	{ subject: 'User', predicate: 'likes', object: 'TypeScript', learning_rate: 2.5 }
-])
+// Save knowledge from conversation
+await poly.save({
+	title: 'User Preferences',
+	content: 'User likes dark mode, prefers TypeScript, works late at night',
+	triples: [
+		{ subject: 'User', predicate: 'prefers', object: 'Dark Mode', learning_rate: 2.0 },
+		{ subject: 'User', predicate: 'likes', object: 'TypeScript', learning_rate: 2.5 }
+	]
+})
 
-// Later, the AI recalls related preferences
-const related = await poly.getNodesByIdol('user_001')
-// Automatically includes: Dark Mode, TypeScript, Late Night Work
+// Later, the AI queries related preferences
+const { result } = await poly.query({ query: 'What does the user like?' })
+// Automatically retrieves: Dark Mode, TypeScript, etc.
 ```
 
 #### 2. 📚 **Knowledge Accumulation**
 
-Every interaction strengthens the knowledge graph:
-
-- **Repeated concepts** form stronger connections
-- **Related topics** cluster together organically
-- **Important information** (high learning_rate) persists longer
-- **Noise** naturally decays and gets pruned during "sleep"
+...
 
 #### 3. 🎯 **Context-Aware Retrieval**
 
-Instead of simple vector similarity, Polywise uses **spreading activation**:
+Instead of simple vector similarity, Polywise uses **spreading activation** internally during queries:
 
 ```typescript
-// Stimulate a concept
-await poly.stimulate(node_id, 5.0)
+// Query triggers internal activation spreading
+const { result, cot } = await poly.query({
+	query: 'How does the system handle memory?',
+	recall_depth: 2,
+	cot_depth: 1 // Enable Chain of Thought exploration
+})
 
-// Activation spreads through the network
-await poly.tick() // Thoughts flow to connected concepts
-
-// Retrieve activated context
-const { nodes, edges } = await poly.getSnapshot()
-// Returns not just the query, but semantically related concepts
+// result contains semantically related concepts and their source contexts
 ```
 
 #### 4. 🌙 **Memory Consolidation**
 
-Like human sleep, Polywise has a consolidation phase:
+Polywise manages its own lifecycle. Maintenance tasks like "sleep" consolidation run automatically when the system is idle and yield to foreground tasks:
 
 ```typescript
-const brain = new Brain(poly)
-
-// After intense learning
-await brain.triggerInputBurst(100)
-
-// During idle time, brain enters "sleep"
-await brain.triggerSleepTick()
-// Strengthens important memories, prunes weak connections
+// No manual management needed.
+// The internal Brain monitors activity and performs consolidation
+// during idle periods to reinforce important memories.
 ```
 
 ---

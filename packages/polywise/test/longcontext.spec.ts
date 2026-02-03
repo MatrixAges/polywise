@@ -42,27 +42,27 @@ describe('Long Context and Language Traps', () => {
 		})
 
 		for (const article of long_context_articles) {
-			await poly.article.addWithEmbedding(article)
+			await (poly as any).article.addWithEmbedding(article)
 		}
 
 		for (const article of multi_hop_articles) {
-			await poly.article.addWithEmbedding(article)
+			await (poly as any).article.addWithEmbedding(article)
 		}
 
 		for (const article of homonym_traps) {
-			await poly.article.addWithEmbedding(article)
+			await (poly as any).article.addWithEmbedding(article)
 		}
 
 		for (const article of negation_traps) {
-			await poly.article.addWithEmbedding(article)
+			await (poly as any).article.addWithEmbedding(article)
 		}
 
 		for (const article of temporal_traps) {
-			await poly.article.addWithEmbedding(article)
+			await (poly as any).article.addWithEmbedding(article)
 		}
 
 		for (const article of similarity_traps) {
-			await poly.article.addWithEmbedding(article)
+			await (poly as any).article.addWithEmbedding(article)
 		}
 	}, TEST_TIMEOUT)
 
@@ -72,7 +72,7 @@ describe('Long Context and Language Traps', () => {
 
 	describe('Long Context Scenarios', () => {
 		it('should find the "needle" in a 15,000 character article', async () => {
-			const results = await poly.article.searchFts({
+			const results = await (poly as any).article.searchFts({
 				query: 'stealth mode private memory',
 				limit: 5
 			})
@@ -83,7 +83,7 @@ describe('Long Context and Language Traps', () => {
 		})
 
 		it('should handle multi-hop retrieval across long documents', async () => {
-			const step1 = await poly.search({
+			const step1 = await poly.query({
 				query: 'Where is the key for Phase 2 stored?',
 				recall_depth: 2
 			})
@@ -92,7 +92,7 @@ describe('Long Context and Language Traps', () => {
 
 			expect(has_onyx_vault).toBe(true)
 
-			const step2 = await poly.search({
+			const step2 = await poly.query({
 				query: 'What are the requirements for Onyx Vault?',
 				recall_depth: 2
 			})
@@ -107,14 +107,14 @@ describe('Long Context and Language Traps', () => {
 
 	describe('Language Traps', () => {
 		it('should distinguish between different meanings of "Mercury"', async () => {
-			const planet_results = await poly.article.searchFts({
+			const planet_results = await (poly as any).article.searchFts({
 				query: 'Mercury planet orbit days',
 				limit: 1
 			})
 
 			expect(planet_results[0].title).toBe('Mercury (Planet)')
 
-			const element_results = await poly.article.searchFts({
+			const element_results = await (poly as any).article.searchFts({
 				query: 'Mercury metallic element liquid',
 				limit: 1
 			})
@@ -123,7 +123,7 @@ describe('Long Context and Language Traps', () => {
 		})
 
 		it('should not be fooled by negation traps in full-text search', async () => {
-			const results = await poly.article.searchFts({
+			const results = await (poly as any).article.searchFts({
 				query: 'Polywise supports MySQL',
 				limit: 5
 			})
@@ -132,7 +132,7 @@ describe('Long Context and Language Traps', () => {
 		})
 
 		it('should prioritize current version over deprecated version in temporal traps', async () => {
-			const results = await poly.article.searchFts({
+			const results = await (poly as any).article.searchFts({
 				query: 'Polywise specification synchronization method',
 				limit: 10
 			})
@@ -149,14 +149,14 @@ describe('Long Context and Language Traps', () => {
 		})
 
 		it('should distinguish between Polywise and Polly-Wise/Poly-Wise', async () => {
-			const project_results = await poly.article.searchFts({
+			const project_results = await (poly as any).article.searchFts({
 				query: 'Polywise architecture',
 				limit: 5
 			})
 
 			expect(project_results.every(r => !r.title.includes('Parrot'))).toBe(true)
 
-			const parrot_results = await poly.article.searchFts({
+			const parrot_results = await (poly as any).article.searchFts({
 				query: 'Polly-Wise parrot language',
 				limit: 1
 			})

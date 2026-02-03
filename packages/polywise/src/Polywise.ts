@@ -38,9 +38,9 @@ import type {
 export default class Polywise {
 	private db: PGlite | null = null
 
-	public article: Article
-	public brain: Brain
-	public pipeline: Pipeline
+	private article: Article
+	private brain: Brain
+	private pipeline: Pipeline
 
 	constructor() {
 		this.pipeline = new Pipeline()
@@ -56,17 +56,17 @@ export default class Polywise {
 			extensions: { vector }
 		})
 
-		await this.pipeline?.init({
+		await this.pipeline.init({
 			cache_dir,
 			embedding_config,
 			reranker_config
 		})
 
-		this.article?.init({
+		this.article.init({
 			db: this.db
 		})
 
-		this.brain?.init({
+		this.brain.init({
 			poly: this,
 			onTick
 		})
@@ -81,15 +81,15 @@ export default class Polywise {
 			await this.exec(sql_meta.sql_create_schema_meta)
 			await this.exec(sql_meta.sql_create_table_schema_version)
 
-			const version_result = await this.query<{ version: number }>(sql_meta.sql_get_current_version)
+			const version_result = await this.query_raw<{ version: number }>(sql_meta.sql_get_current_version)
 
 			const current_version = version_result[0]?.version ?? 0
 
 			if (current_version < CURRENT_SCHEMA_VERSION) {
-				await migrate(current_version, this.exec.bind(this), this.query.bind(this))
+				await migrate(current_version, this.exec.bind(this), this.query_raw.bind(this))
 			}
 
-			const check_result = await this.query<{ count: string }>(
+			const check_result = await this.query_raw<{ count: string }>(
 				"SELECT COUNT(*) as count FROM information_schema.tables WHERE table_schema = 'knowledge' AND table_name = 'articles'"
 			)
 
@@ -97,7 +97,22 @@ export default class Polywise {
 				await this.exec([
 					sql.sql_create_extension_vector,
 					sql.sql_create_schema_knowledge,
-					sql.sql_create_table_articles
+					sql.sql_create_table_articles,
+					sql.sql_create_table_article_embeddings,
+					sql.sql_create_index_article_embeddings_hnsw,
+					sql.sql_create_index_article_content_gin,
+					sql.sql_create_schema_brain,
+					sql.sql_create_table_nodes,
+					sql.sql_create_table_edges,
+					sql.sql_create_index_edge_src,
+					sql.sql_create_index_edge_tgt,
+					sql.sql_create_index_active_edges,
+					sql.sql_create_index_core_truth,
+					sql.sql_create_index_nodes_idol,
+					sql.sql_create_index_edges_idol,
+					sql.sql_create_index_nodes_roots,
+					sql.sql_create_index_edges_roots,
+					sql.sql_create_table_node_sources
 				])
 			}
 		} catch (e) {
@@ -105,10 +120,96 @@ export default class Polywise {
 		}
 	}
 
-	async addNode(args: AddNodeArgs) {
+	async query(args: QueryArgs) {
+		this.brain.reportUserActivity()
+		this.brain.setBusy(true)
+
+		try {
+			const {
+				query,
+				recall_depth = 2,
+				search_limit = 20,
+				rerank_limit = 10,
+				cot_depth = 0,
+				stimulate_on_recall = true
+			} = args
+
+			const emitter = new ChainEmitter()
+
+			const initial_results = await this.executeSingleSearch({
+				query,
+				recall_depth,
+				search_limit,
+				rerank_limit,
+				stimulate_on_recall
+			})
+
+			if (cot_depth <= 0) {
+				return { result: initial_results, cot: emitter }
+			}
+
+			this.executeCot({
+				query,
+				current_depth: 1,
+				max_depth: cot_depth,
+				base_recall_depth: recall_depth,
+				search_limit,
+				rerank_limit,
+				stimulate_on_recall,
+				initial_results,
+				emitter,
+				history_ids: new Set(initial_results.map(r => r.id))
+			})
+
+			return { result: initial_results, cot: emitter }
+		} finally {
+			this.brain.setBusy(false)
+		}
+	}
+
+	async save(args: ProcessArticleArgs) {
+		this.brain.reportUserActivity()
+		this.brain.setBusy(true)
+
+		try {
+			const { title, content, triples, article_id, idol_id, root_ids, metrics_ids, generate_embedding } =
+				args
+
+			const res = await this.query_raw<{ id: number }>(sql.sql_process_article, [title, content])
+
+			const aid = article_id ?? res[0].id
+
+			if (generate_embedding ?? true) {
+				await this.article.addEmbedding(aid, content)
+			}
+
+			await this.injectTriples({
+				article_id: aid,
+				triples,
+				idol_id,
+				root_ids,
+				metrics_ids
+			})
+		} finally {
+			this.brain.setBusy(false)
+		}
+	}
+
+	async off() {
+		this.brain?.off()
+		this.article?.off()
+		this.pipeline?.off()
+
+		if (this.db) {
+			await this.db.close()
+			this.db = null
+		}
+	}
+
+	private async addNode(args: AddNodeArgs) {
 		const { label, x, y, threshold, idol_id, root_ids, metrics_ids, metadata } = args
 
-		const rows = await this.query<{ id: number }>(sql.sql_add_node, [
+		const rows = await this.query_raw<{ id: number }>(sql.sql_add_node, [
 			label,
 			x,
 			y,
@@ -122,10 +223,10 @@ export default class Polywise {
 		return rows[0].id
 	}
 
-	async connect(args: ConnectArgs) {
+	private async connect(args: ConnectArgs) {
 		const { source_id, target_id, weight, idol_id, root_ids, metrics_ids, metadata } = args
 
-		await this.query(sql.sql_connect, [
+		await this.query_raw(sql.sql_connect, [
 			source_id,
 			target_id,
 			weight ?? 0.1,
@@ -136,53 +237,49 @@ export default class Polywise {
 		])
 	}
 
-	async stimulate(node_id: number, intensity = 1.0) {
-		await this.query(sql.sql_stimulate, [intensity, node_id])
+	private async stimulate(node_id: number, intensity = 1.0) {
+		await this.query_raw(sql.sql_stimulate, [intensity, node_id])
 	}
 
-	async getSnapshot(weight_threshold = 0.2) {
-		const nodes = await this.query<Node[]>(sql.sql_get_snapshot_nodes(weight_threshold))
-
-		const edges = await this.query<Edge[]>(sql.sql_get_snapshot_edges(weight_threshold))
-
+	private async getSnapshot(weight_threshold = 0.2) {
+		const nodes = await this.query_raw<Node[]>(sql.sql_get_snapshot_nodes(weight_threshold))
+		const edges = await this.query_raw<Edge[]>(sql.sql_get_snapshot_edges(weight_threshold))
 		return { nodes, edges }
 	}
 
-	async getAllNodes() {
-		return await this.query<Node[]>(
+	private async getAllNodes() {
+		return await this.query_raw<Node[]>(
 			'SELECT id, label, x, y, activation, potential, idol_id, root_ids, metrics_ids, metadata FROM brain.nodes'
 		)
 	}
 
-	async getNodesByIdol(idol_id: string) {
-		return await this.query<Node[]>(sql.sql_get_nodes_by_idol, [idol_id])
+	private async getNodesByIdol(idol_id: string) {
+		return await this.query_raw<Node[]>(sql.sql_get_nodes_by_idol, [idol_id])
 	}
 
-	async getNodesByRoot(root_id: string) {
-		return await this.query<Node[]>(sql.sql_get_nodes_by_root, [root_id])
+	private async getNodesByRoot(root_id: string) {
+		return await this.query_raw<Node[]>(sql.sql_get_nodes_by_root, [root_id])
 	}
 
-	async getEdgesByIdol(idol_id: string) {
-		return await this.query<Edge[]>(sql.sql_get_edges_by_idol, [idol_id])
+	private async getEdgesByIdol(idol_id: string) {
+		return await this.query_raw<Edge[]>(sql.sql_get_edges_by_idol, [idol_id])
 	}
 
-	async getEdgesByRoot(root_id: string) {
-		return await this.query<Edge[]>(sql.sql_get_edges_by_root, [root_id])
+	private async getEdgesByRoot(root_id: string) {
+		return await this.query_raw<Edge[]>(sql.sql_get_edges_by_root, [root_id])
 	}
 
-	async tick(threshold_override?: number) {
+	private async tick(threshold_override?: number) {
 		const threshold = threshold_override ?? 0.5
-
 		await this.exec(sql.sql_tick(threshold))
 	}
 
-	async runShadowTick() {
+	private async runShadowTick() {
 		await this.exec(sql.sql_run_shadow_tick)
-
 		await this.tick(0.8)
 	}
 
-	async triggerSleepTick() {
+	private async triggerSleepTick() {
 		await this.exec([
 			sql.sql_sleep_tick_begin,
 			sql.sql_sleep_tick_clean_noise,
@@ -193,47 +290,7 @@ export default class Polywise {
 		])
 	}
 
-	async search(args: QueryArgs) {
-		const {
-			query,
-			recall_depth = 2,
-			search_limit = 20,
-			rerank_limit = 10,
-			cot_depth = 0,
-			stimulate_on_recall = true
-		} = args
-
-		const emitter = new ChainEmitter()
-
-		const initial_results = await this.executeSingleSearch({
-			query,
-			recall_depth,
-			search_limit,
-			rerank_limit,
-			stimulate_on_recall
-		})
-
-		if (cot_depth <= 0) {
-			return { result: initial_results, cot: emitter }
-		}
-
-		this.executeCot({
-			query,
-			current_depth: 1,
-			max_depth: cot_depth,
-			base_recall_depth: recall_depth,
-			search_limit,
-			rerank_limit,
-			stimulate_on_recall,
-			initial_results,
-			emitter,
-			history_ids: new Set(initial_results.map(r => r.id))
-		})
-
-		return { result: initial_results, cot: emitter }
-	}
-
-	async recallFromMemory(args: RecallArgs) {
+	private async recallFromMemory(args: RecallArgs) {
 		const { query, max_depth = 2, stimulate_intensity = 0.3 } = args
 
 		const keywords = this.extractKeywords(query)
@@ -247,11 +304,8 @@ export default class Polywise {
 
 		if (stimulate_intensity > 0) {
 			const all_nodes = [...matched_nodes, ...related_nodes]
-
 			const node_ids = all_nodes.map(n => n.id)
-
 			await this.stimulateNodes(node_ids, stimulate_intensity)
-
 			await this.strengthenRelatedEdges({ matched_nodes, related_nodes })
 		}
 
@@ -262,59 +316,6 @@ export default class Polywise {
 			edges: [],
 			stimulated_nodes: [...matched_nodes, ...related_nodes].map(n => n.id),
 			related_contexts: contexts
-		}
-	}
-
-	async processArticle(args: ProcessArticleArgs) {
-		const { title, content, triples, article_id, idol_id, root_ids, metrics_ids, generate_embedding } = args
-
-		const res = await this.query<{ id: number }>(sql.sql_process_article, [title, content])
-
-		const aid = article_id ?? res[0].id
-
-		if (generate_embedding ?? true) {
-			await this.article.addEmbedding(aid, content)
-		}
-
-		await this.injectTriples({
-			article_id: aid,
-			triples,
-			idol_id,
-			root_ids,
-			metrics_ids
-		})
-	}
-
-	async getDataDir() {
-		return process.env.POLYWISE_DATA_DIR || ':polywise:'
-	}
-
-	async getStats() {
-		const [node_result, edge_result, article_result] = await Promise.all([
-			this.query<{ count: string }>('SELECT COUNT(*) as count FROM brain.nodes'),
-			this.query<{ count: string }>('SELECT COUNT(*) as count FROM brain.edges'),
-			this.query<{ count: string }>('SELECT COUNT(*) as count FROM knowledge.articles')
-		])
-
-		const memory_usage = process.memoryUsage()
-
-		return {
-			node_count: parseInt(node_result[0]?.count || '0', 10),
-			edge_count: parseInt(edge_result[0]?.count || '0', 10),
-			article_count: parseInt(article_result[0]?.count || '0', 10),
-			memory_usage: memory_usage.heapUsed
-		}
-	}
-
-	async reset() {
-		await this.off()
-
-		const data_dir = await this.getDataDir()
-
-		if (data_dir !== ':memory:' && data_dir !== ':polywise:') {
-			const fs = await import('fs-extra')
-
-			await fs.remove(data_dir)
 		}
 	}
 
@@ -359,13 +360,9 @@ export default class Polywise {
 			}
 
 			const depth_recall_depth = base_recall_depth + current_depth
-
 			const top_results = initial_results.slice(0, 3)
-
 			const insights = top_results.map(r => r.title).join(', ')
-
 			const emerged_query = formatPerceiveQuery(query, insights)
-
 			const emerged_node_ids = top_results.map(r => r.id)
 
 			if (!this.db || !emitter.isActiveStatus()) return
@@ -416,7 +413,6 @@ export default class Polywise {
 			if (current_depth < max_depth && emerged_final_results.length > 0) {
 				setImmediate(() => {
 					if (!this.db) return
-
 					this.executeCot({
 						query: emerged_query,
 						current_depth: current_depth + 1,
@@ -432,7 +428,6 @@ export default class Polywise {
 				})
 			}
 		} catch (e: any) {
-			// Silently handle DB shutdown errors in background CoT execution
 			if (
 				e.message?.includes('DB not initialized') ||
 				e.message?.includes('closed') ||
@@ -446,31 +441,26 @@ export default class Polywise {
 
 	private async recallNodesByKeywords(args: RecallNodesByKeywordsArgs) {
 		const { keywords, limit = 10 } = args
-
 		if (!this.db || keywords.length === 0) return []
-
 		const results: Node[] = []
-
 		for (const keyword of keywords) {
-			const nodes = await this.query<Node[]>(sql_brain.sql_recall_nodes_by_label, [`%${keyword}%`, limit])
-
+			const nodes = await this.query_raw<Node[]>(sql_brain.sql_recall_nodes_by_label, [
+				`%${keyword}%`,
+				limit
+			])
 			results.push(...nodes)
 		}
-
 		return Array.from(new Map(results.map(n => [n.id, n])).values())
 	}
 
 	private async recallRelatedNodes(node_ids: number[], max_depth: number) {
 		if (!this.db || node_ids.length === 0 || max_depth <= 0) return []
-
-		return await this.query<Node[]>(sql_brain.sql_recall_related_nodes, [node_ids, max_depth, 20])
+		return await this.query_raw<Node[]>(sql_brain.sql_recall_related_nodes, [node_ids, max_depth, 20])
 	}
 
 	private async getNodeContexts(node_ids: number[]): Promise<ContextResult[]> {
 		if (!this.db || node_ids.length === 0) return []
-
-		const articles = await this.query<any[]>(sql_brain.sql_get_node_articles, [node_ids])
-
+		const articles = await this.query_raw<any[]>(sql_brain.sql_get_node_articles, [node_ids])
 		return articles.map(article => ({
 			article_ids: [article.id],
 			relevance_score: 1.0
@@ -479,29 +469,22 @@ export default class Polywise {
 
 	private async stimulateNodes(node_ids: number[], intensity: number) {
 		if (!this.db || node_ids.length === 0 || intensity <= 0) return
-
 		for (const id of node_ids) {
-			await this.query(sql.sql_stimulate, [intensity, id])
+			await this.query_raw(sql.sql_stimulate, [intensity, id])
 		}
 	}
 
 	private async strengthenRelatedEdges(args: StrengthenRelatedEdgesArgs) {
 		const { matched_nodes, related_nodes } = args
-
 		if (!this.db) return
-
 		const node_ids = [...matched_nodes, ...related_nodes].map(n => n.id)
-
 		if (node_ids.length < 2) return
-
-		await this.query(sql.sql_strengthen_edges_batch, [0.1, node_ids, node_ids])
+		await this.query_raw(sql.sql_strengthen_edges_batch, [0.1, node_ids, node_ids])
 	}
 
 	private aggregateResults(recall_result: MemoryRecallResult, search_results: SearchResult[]) {
 		const candidates: AggregatedCandidate[] = []
-
 		const stimulated_node_ids = new Set(recall_result.stimulated_nodes)
-
 		const node_potential_map = new Map<number, number>()
 
 		for (const node of recall_result.nodes) {
@@ -511,10 +494,8 @@ export default class Polywise {
 		for (const context of recall_result.related_contexts) {
 			for (const article_id of context.article_ids) {
 				const article = search_results.find(r => r.id === article_id)
-
 				if (article) {
 					const memory_strength = this.calculateMemoryStrength(context)
-
 					candidates.push({
 						id: article.id,
 						title: article.title,
@@ -532,9 +513,7 @@ export default class Polywise {
 		for (const result of search_results) {
 			if (!candidates.find(c => c.id === result.id)) {
 				const is_stimulated = stimulated_node_ids.has(result.id)
-
 				const memory_strength = node_potential_map.get(result.id) ?? 0
-
 				candidates.push({
 					id: result.id,
 					title: result.title,
@@ -574,10 +553,8 @@ export default class Polywise {
 
 	private async rerankResults(query: string, candidates: AggregatedCandidate[], limit: number) {
 		if (candidates.length === 0) return []
-
 		const documents = candidates.map(c => {
 			const source_info = formatSourceInfo(c.source, c.stimulated, c.memory_strength)
-
 			return `${c.title}\n${source_info}\n${c.content}`
 		})
 
@@ -596,41 +573,32 @@ export default class Polywise {
 		}))
 
 		const sorted_results = results.sort((a, b) => b.combinedScore - a.combinedScore).slice(0, limit)
-
 		await this.stimulateByRanking(sorted_results)
-
 		return sorted_results
 	}
 
 	private async stimulateByRanking(results: HybridSearchResult[]) {
 		if (results.length === 0) return
-
 		const max_stimulation = 0.5
-
 		const min_stimulation = 0.05
-
 		const decay_rate = (max_stimulation - min_stimulation) / Math.max(results.length - 1, 1)
-
 		const stimulation_map = new Map<number, number>()
 
 		for (let i = 0; i < results.length; i++) {
 			const intensity = Math.max(max_stimulation - i * decay_rate, min_stimulation)
-
 			stimulation_map.set(results[i].id, intensity)
 		}
 
 		const node_ids = Array.from(stimulation_map.keys())
-
 		const intensities = node_ids.map(id => stimulation_map.get(id)!)
 
 		for (let i = 0; i < node_ids.length; i++) {
-			await this.query(sql_brain.sql_stimulate_nodes_batch, [intensities[i], [node_ids[i]]])
+			await this.query_raw(sql_brain.sql_stimulate_nodes_batch, [intensities[i], [node_ids[i]]])
 		}
 	}
 
 	private async injectTriples(args: InjectTriplesArgs) {
 		const { article_id, triples, idol_id, root_ids, metrics_ids } = args
-
 		await this.exec(sql.sql_inject_triples_begin)
 
 		for (const t of triples) {
@@ -689,8 +657,7 @@ export default class Polywise {
 
 	private async upsertNode(args: UpsertNodeArgs) {
 		const { label, article_id, idol_id, root_ids, metrics_ids, metadata } = args
-
-		await this.query(sql.sql_upsert_node, [
+		await this.query_raw(sql.sql_upsert_node, [
 			label,
 			idol_id ?? null,
 			root_ids ?? null,
@@ -698,12 +665,9 @@ export default class Polywise {
 			JSON.stringify(metadata ?? {})
 		])
 
-		const res = await this.query<{ id: number }>(sql.sql_upsert_node_select, [label])
-
+		const res = await this.query_raw<{ id: number }>(sql.sql_upsert_node_select, [label])
 		const node_id = res[0].id
-
-		await this.query(sql.sql_node_sources, [node_id, article_id])
-
+		await this.query_raw(sql.sql_node_sources, [node_id, article_id])
 		return node_id
 	}
 
@@ -716,20 +680,18 @@ export default class Polywise {
 			for (const sql_str of sql_input) {
 				await this.db.exec(sql_str)
 			}
-
 			return
 		}
 
 		await this.db.exec(sql_input)
 	}
 
-	private async query<T = any>(sql_str: string, params?: any[]) {
+	private async query_raw<T = any>(sql_str: string, params?: any[]) {
 		if (!this.db) {
 			throw new Error('DB not initialized')
 		}
 
 		const res = params ? await this.db.query(sql_str, params) : await this.db.query(sql_str)
-
 		return JSON.parse(JSON.stringify(res.rows)) as T
 	}
 
@@ -738,17 +700,5 @@ export default class Polywise {
 			.toLowerCase()
 			.split(/\s+/)
 			.filter(w => w.length > 2)
-	}
-
-	async off() {
-		this.brain?.off()
-		this.article?.off()
-		this.pipeline?.off()
-
-		if (this.db) {
-			await this.db.close()
-
-			this.db = null
-		}
 	}
 }

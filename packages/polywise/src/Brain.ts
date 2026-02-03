@@ -17,6 +17,8 @@ export default class Brain {
 
 	private on_tick?: () => void
 
+	private is_busy = false
+
 	init(args: BrainArgs) {
 		const { poly, onTick } = args
 
@@ -24,6 +26,10 @@ export default class Brain {
 		this.on_tick = onTick
 
 		this.startLifeCycleLoop()
+	}
+
+	setBusy(busy: boolean) {
+		this.is_busy = busy
 	}
 
 	reportUserActivity() {
@@ -78,6 +84,8 @@ export default class Brain {
 
 	private startLifeCycleLoop() {
 		this.shadow_interval = setInterval(async () => {
+			if (this.is_busy) return
+
 			const is_idle = isIdle(this.last_user_interaction, IDLE_TIMEOUT_MS)
 
 			if (this.state === 'TIRED' && is_idle) {

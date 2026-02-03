@@ -73,71 +73,52 @@ packages/polywise/
 
 ## 用途
 
-### 1. 知识图谱管理
+### 1. 将内容保存到记忆中
+
+从文章或结构化数据中注入知识：
 
 ```typescript
-const poly = new Polywise(':memory:')
-await poly.init()
+const poly = new Polywise()
+await poly.init({ data_dir: './my-memory' })
 
-// 添加概念节点
-const nodeId = await poly.addNode('机器学习', 0, 0, 0.5)
-
-// 建立语义连接
-await poly.connect(nodeA, nodeB, 0.9)
-
-// 刺激节点，引发激活扩散
-await poly.stimulate(nodeId, 5.0)
+await poly.save({
+	title: '量子计算',
+	content: '量子计算利用量子力学现象...',
+	triples: [
+		{ subject: '量子比特', predicate: '利用', object: '叠加态', learning_rate: 2.5 },
+		{ subject: '量子比特', predicate: '利用', object: '纠缠态', learning_rate: 2.4 }
+	]
+})
 ```
 
-### 2. 文章知识提取
+### 2. 从记忆中查询
 
-将文章中的知识以 SPO 三元组形式注入：
-
-```typescript
-await poly.processArticle('量子计算', '内容...', [
-	{ subject: '量子位', predicate: '利用', object: '叠加态', learning_rate: 2.5, decay_resistance: 2.0 },
-	{ subject: '量子位', predicate: '利用', object: '纠缠态', learning_rate: 2.4, decay_resistance: 2.2 }
-])
-```
-
-### 3. 持续学习与记忆巩固
+根据自然语言或概念检索相关信息：
 
 ```typescript
-const brain = new Brain(poly, onTick)
+const { result, cot } = await poly.query({
+	query: '量子比特是如何工作的？',
+	recall_depth: 2,
+	cot_depth: 1
+})
 
-// 用户交互时调用
-brain.reportUserActivity()
-brain.addSynapticLoad(50)
-
-// 触发学习突发
-await brain.triggerInputBurst()
-
-// 触发睡眠巩固
-await brain.triggerSleepTick()
+console.log(result) // 相关节点和上下文
 ```
 
 ## API 速览
 
 ### Polywise
 
-| 方法                                      | 描述             |
-| ----------------------------------------- | ---------------- |
-| `addNode(label, x, y, threshold)`         | 创建概念节点     |
-| `connect(source, target, weight)`         | 建立语义连接     |
-| `stimulate(node, intensity)`              | 激活节点         |
-| `tick(threshold)`                         | 执行激活传播     |
-| `processArticle(title, content, triples)` | 注入知识三元组   |
-| `getSnapshot(weight_threshold)`           | 获取当前记忆快照 |
+| 方法                             | 描述                           |
+| -------------------------------- | ------------------------------ |
+| `save(args: ProcessArticleArgs)` | 将内容和知识三元组保存到记忆中 |
+| `query(args: QueryArgs)`         | 从记忆中查询相关的概念和上下文 |
+| `init(args: PolywiseArgs)`       | 初始化数据库和后台大脑         |
+| `off()`                          | 优雅地关闭后台任务并关闭数据库 |
 
-### Brain
+## 后台机制
 
-| 方法                    | 描述         |
-| ----------------------- | ------------ |
-| `reportUserActivity()`  | 报告用户交互 |
-| `addSynapticLoad(load)` | 增加学习负载 |
-| `triggerInputBurst()`   | 触发学习突发 |
-| `triggerSleepTick()`    | 触发睡眠巩固 |
-| `stop()`                | 停止后台任务 |
+Polywise 运行一个内部“大脑”，在空闲时间处理维护任务，如记忆巩固（Sleep Tick）和强化（Shadow Tick）。当调用 `save` 或 `query` 时，这些任务会自动暂停或让出资源。
 
 ## 运行测试
 

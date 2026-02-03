@@ -41,57 +41,51 @@ _<p align="center"><strong>🧠 神经科学启发的知识图谱与记忆系统
 
 ```typescript
 // AI 智能体记住之前的交互
-const poly = new Polywise({ data_dir: ':memory:' })
+const poly = new Polywise()
+await poly.init({ data_dir: './my-memory' })
 
-// 从对话中处理知识
-await poly.processArticle('用户偏好', '用户喜欢深色模式，偏爱 TypeScript，工作时间较晚', [
-	{ subject: '用户', predicate: '偏爱', object: '深色模式', learning_rate: 2.0 },
-	{ subject: '用户', predicate: '喜欢', object: 'TypeScript', learning_rate: 2.5 }
-])
+// 从对话中保存知识
+await poly.save({
+	title: '用户偏好',
+	content: '用户喜欢深色模式，偏爱 TypeScript，工作时间较晚',
+	triples: [
+		{ subject: '用户', predicate: '偏爱', object: '深色模式', learning_rate: 2.0 },
+		{ subject: '用户', predicate: '喜欢', object: 'TypeScript', learning_rate: 2.5 }
+	]
+})
 
-// 之后，AI 回忆起相关偏好
-const related = await poly.getNodesByIdol('user_001')
-// 自动包括：深色模式、TypeScript、夜间工作
+// 之后，AI 查询相关偏好
+const { result } = await poly.query({ query: '用户喜欢什么？' })
+// 自动检索出：深色模式、TypeScript 等
 ```
 
 #### 2. 📚 **知识累积**
 
-每次交互都会强化知识图谱：
-
-- **重复的概念** 形成更强的连接
-- **相关主题** 有机地聚集在一起
-- **重要信息**（高 learning_rate）持续更久
-- **噪声** 在"睡眠"期间自然衰减并被修剪
+...
 
 #### 3. 🎯 **情境感知检索**
 
-Polywise 不是简单的向量相似性，而是使用**扩散激活**：
+Polywise 不是简单的向量相似性，而是在查询过程中通过**扩散激活**进行内部检索：
 
 ```typescript
-// 刺激一个概念
-await poly.stimulate(node_id, 5.0)
+// 查询触发内部的扩散激活
+const { result, cot } = await poly.query({
+	query: '系统如何处理记忆？',
+	recall_depth: 2,
+	cot_depth: 1 // 启用思维链（CoT）探索
+})
 
-// 激活通过网络传播
-await poly.tick() // 思维流向连接的概念
-
-// 检索激活的上下文
-const { nodes, edges } = await poly.getSnapshot()
-// 返回的不仅是查询，还有语义相关的概念
+// result 包含语义相关的概念及其来源上下文
 ```
 
 #### 4. 🌙 **记忆巩固**
 
-像人类睡眠一样，Polywise 有一个巩固阶段：
+Polywise 自主管理其生命周期。诸如“睡眠”巩固之类的维护任务在系统空闲时自动运行，并在前台任务到达时自动让出资源：
 
 ```typescript
-const brain = new Brain(poly)
-
-// 高强度学习后
-await brain.triggerInputBurst(100)
-
-// 空闲时，大脑进入"睡眠"
-await brain.triggerSleepTick()
-// 强化重要记忆，修剪弱连接
+// 无需手动管理。
+// 内部“大脑”会监控活跃度，并在空闲期间执行巩固任务，
+// 以强化重要记忆并修剪冗余信息。
 ```
 
 ---
