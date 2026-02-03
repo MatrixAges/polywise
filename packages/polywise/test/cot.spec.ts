@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
+import { afterAll, beforeAll, describe, expect, it, test } from '@rstest/core'
 
 import { PERCEIVE_COMMAND } from '../src/consts'
 import Polywise from '../src/Polywise'
@@ -7,7 +7,7 @@ import { software_architecture_triples, software_articles } from './datasets/sof
 
 const TEST_TIMEOUT = 60000
 
-describe('Chain of Thought (CoT) Mechanism', () => {
+describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
 	let poly: Polywise
 	const unique_id = Math.random().toString(36).slice(2)
 	const db_name = `:polywise_cot_${unique_id}:`
@@ -69,8 +69,8 @@ describe('Chain of Thought (CoT) Mechanism', () => {
 		await poly.off()
 	})
 
-	describe('Basic CoT Functionality', () => {
-		it('should return immediate result with CoT emitter', async () => {
+	describe.concurrent('Basic CoT Functionality', () => {
+		test('should return immediate result with CoT emitter', async () => {
 			const { result, cot } = await poly.query({
 				query: 'microservices',
 				cot_depth: 2
@@ -82,7 +82,7 @@ describe('Chain of Thought (CoT) Mechanism', () => {
 			expect(typeof cot.off).toBe('function')
 		})
 
-		it('should return empty cot emitter when cot_depth is 0', async () => {
+		test('should return empty cot emitter when cot_depth is 0', async () => {
 			const { cot } = await poly.query({
 				query: 'kubernetes',
 				cot_depth: 0
@@ -93,7 +93,7 @@ describe('Chain of Thought (CoT) Mechanism', () => {
 			expect(typeof cot.off).toBe('function')
 		})
 
-		it('should contain hybrid search results with multiple sources', async () => {
+		test('should contain hybrid search results with multiple sources', async () => {
 			const { result } = await poly.query({
 				query: 'docker',
 				recall_depth: 3,
@@ -110,8 +110,8 @@ describe('Chain of Thought (CoT) Mechanism', () => {
 		})
 	})
 
-	describe('Multi-Depth Exploration', () => {
-		it('should emit exactly one event when cot_depth is 1', async () => {
+	describe.concurrent('Multi-Depth Exploration', () => {
+		test('should emit exactly one event when cot_depth is 1', async () => {
 			const received_events: any[] = []
 
 			const { cot } = await poly.query({
@@ -133,7 +133,7 @@ describe('Chain of Thought (CoT) Mechanism', () => {
 			expect(received_events[0].results.length).toBeGreaterThan(0)
 		})
 
-		it('should emit sequential events for depth 2', async () => {
+		test('should emit sequential events for depth 2', async () => {
 			const received_events: any[] = []
 
 			const { cot } = await poly.query({
@@ -155,7 +155,7 @@ describe('Chain of Thought (CoT) Mechanism', () => {
 			expect(received_events[1].depth).toBe(2)
 		})
 
-		it('should emit events in correct order (ascending depth)', async () => {
+		test('should emit events in correct order (ascending depth)', async () => {
 			const received_events: any[] = []
 			const depths: number[] = []
 
@@ -181,7 +181,7 @@ describe('Chain of Thought (CoT) Mechanism', () => {
 			expect(depths).toEqual([1, 2, 3])
 		})
 
-		it('should include emerged_nodes in each depth result', async () => {
+		test('should include emerged_nodes in each depth result', async () => {
 			const received_events: any[] = []
 
 			const { cot } = await poly.query({
@@ -203,7 +203,7 @@ describe('Chain of Thought (CoT) Mechanism', () => {
 			expect(received_events[1].emerged_nodes.length).toBeGreaterThanOrEqual(0)
 		})
 
-		it('should build query progression with depth', async () => {
+		test('should build query progression with depth', async () => {
 			const received_events: any[] = []
 
 			const { cot } = await poly.query({
@@ -227,8 +227,8 @@ describe('Chain of Thought (CoT) Mechanism', () => {
 		})
 	})
 
-	describe('Memory Strengthening During CoT', () => {
-		it('should increase node potential after CoT stimulation', async () => {
+	describe.concurrent('Memory Strengthening During CoT', () => {
+		test('should increase node potential after CoT stimulation', async () => {
 			const all_nodes = await poly.getAllNodes()
 			const docker_node = all_nodes.find((n: any) => n.label === 'Docker')
 			const node_id = docker_node?.id
@@ -243,7 +243,7 @@ describe('Chain of Thought (CoT) Mechanism', () => {
 			expect(stimulated_node?.potential).toBeGreaterThan(0)
 		})
 
-		it('should accumulate memory strength with repeated queries', async () => {
+		test('should accumulate memory strength with repeated queries', async () => {
 			const { result: first_result } = await poly.query({
 				query: 'istio service mesh',
 				cot_depth: 1,
@@ -272,7 +272,7 @@ describe('Chain of Thought (CoT) Mechanism', () => {
 			expect(second_has_results).toBe(true)
 		})
 
-		it('should show stimulated flag for CoT-activated results', async () => {
+		test('should show stimulated flag for CoT-activated results', async () => {
 			const received_events: any[] = []
 
 			const { cot } = await poly.query({
@@ -295,7 +295,7 @@ describe('Chain of Thought (CoT) Mechanism', () => {
 			expect(stimulated_results.length).toBeGreaterThan(0)
 		})
 
-		it('should track memory strength across CoT depths', async () => {
+		test('should track memory strength across CoT depths', async () => {
 			const received_events: any[] = []
 
 			const { cot } = await poly.query({
@@ -323,8 +323,8 @@ describe('Chain of Thought (CoT) Mechanism', () => {
 		})
 	})
 
-	describe('Event Emitter Lifecycle', () => {
-		it('should stop emitting after off() is called', async () => {
+	describe.concurrent('Event Emitter Lifecycle', () => {
+		test('should stop emitting after off() is called', async () => {
 			let event_count = 0
 
 			const { cot } = await poly.query({
@@ -346,7 +346,7 @@ describe('Chain of Thought (CoT) Mechanism', () => {
 			expect(event_count).toBeLessThan(5)
 		})
 
-		it('should support multiple subscribers', async () => {
+		test('should support multiple subscribers', async () => {
 			const received_by_first: any[] = []
 			const received_by_second: any[] = []
 
@@ -372,7 +372,7 @@ describe('Chain of Thought (CoT) Mechanism', () => {
 			expect(received_by_first.length).toBeGreaterThan(0)
 		})
 
-		it('should return self from on() for chaining', async () => {
+		test('should return self from on() for chaining', async () => {
 			const { cot } = await poly.query({
 				query: 'oauth jwt authentication',
 				cot_depth: 1,
@@ -387,8 +387,8 @@ describe('Chain of Thought (CoT) Mechanism', () => {
 		})
 	})
 
-	describe('Complex Real-World Scenarios', () => {
-		it('should explore software architecture knowledge chain', async () => {
+	describe.concurrent('Complex Real-World Scenarios', () => {
+		test('should explore software architecture knowledge chain', async () => {
 			const received_events: any[] = []
 
 			const { cot } = await poly.query({
@@ -421,7 +421,7 @@ describe('Chain of Thought (CoT) Mechanism', () => {
 			expect(sources.size).toBeGreaterThanOrEqual(2)
 		})
 
-		it('should explore cognitive science to AI connection', async () => {
+		test('should explore cognitive science to AI connection', async () => {
 			const received_events: any[] = []
 
 			const { cot } = await poly.query({
@@ -455,7 +455,7 @@ describe('Chain of Thought (CoT) Mechanism', () => {
 			).toBe(true)
 		})
 
-		it('should handle cross-domain knowledge exploration', async () => {
+		test('should handle cross-domain knowledge exploration', async () => {
 			const received_events: any[] = []
 
 			const { cot } = await poly.query({
@@ -480,8 +480,8 @@ describe('Chain of Thought (CoT) Mechanism', () => {
 		})
 	})
 
-	describe('Integration with Hybrid Search', () => {
-		it('should respect search_limit and rerank_limit in CoT', async () => {
+	describe.concurrent('Integration with Hybrid Search', () => {
+		test('should respect search_limit and rerank_limit in CoT', async () => {
 			const received_events: any[] = []
 
 			const { cot } = await poly.query({
@@ -503,7 +503,7 @@ describe('Chain of Thought (CoT) Mechanism', () => {
 			}
 		})
 
-		it('should include results from memory recall at each depth', async () => {
+		test('should include results from memory recall at each depth', async () => {
 			const received_events: any[] = []
 
 			const { cot } = await poly.query({
@@ -529,7 +529,7 @@ describe('Chain of Thought (CoT) Mechanism', () => {
 			expect(memory_results.length).toBeGreaterThan(0)
 		})
 
-		it('should combine vector and fulltext search results', async () => {
+		test('should combine vector and fulltext search results', async () => {
 			const received_events: any[] = []
 
 			const { cot } = await poly.query({
@@ -553,7 +553,7 @@ describe('Chain of Thought (CoT) Mechanism', () => {
 			expect(all_results.length).toBeGreaterThan(0)
 		})
 
-		it('should produce higher combined scores for relevant results', async () => {
+		test('should produce higher combined scores for relevant results', async () => {
 			const { result } = await poly.query({
 				query: 'kubernetes container orchestration',
 				recall_depth: 3,
@@ -572,8 +572,8 @@ describe('Chain of Thought (CoT) Mechanism', () => {
 		})
 	})
 
-	describe('Edge Cases and Error Handling', () => {
-		it('should handle empty knowledge graph gracefully', async () => {
+	describe.concurrent('Edge Cases and Error Handling', () => {
+		test('should handle empty knowledge graph gracefully', async () => {
 			const empty_poly = new Polywise()
 
 			await empty_poly.init({ data_dir: `:polywise_cot_empty_${unique_id}:` })
@@ -600,7 +600,7 @@ describe('Chain of Thought (CoT) Mechanism', () => {
 			await empty_poly.off()
 		})
 
-		it('should handle very high cot_depth gracefully', async () => {
+		test('should handle very high cot_depth gracefully', async () => {
 			const received_events: any[] = []
 
 			const { cot } = await poly.query({

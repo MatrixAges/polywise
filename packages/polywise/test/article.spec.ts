@@ -2,7 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 
 import Polywise from '../src/Polywise'
 
-describe('Article CRUD Operations', () => {
+describe.concurrent('Article CRUD Operations', () => {
 	let poly: Polywise
 	const unique_id = Math.random().toString(36).slice(2)
 	const db_name = `:polywise_article_test_${unique_id}:`
@@ -117,7 +117,7 @@ describe('Article CRUD Operations', () => {
 	})
 })
 
-describe('Full-Text Search and Vector Search', () => {
+describe.concurrent('Full-Text Search and Vector Search', () => {
 	let poly: Polywise
 	const unique_id = Math.random().toString(36).slice(2)
 	const db_name = `:polywise_search_test_${unique_id}:`
@@ -134,7 +134,7 @@ describe('Full-Text Search and Vector Search', () => {
 		await poly.off()
 	})
 
-	describe('Full-Text Search', () => {
+	describe.concurrent('Full-Text Search', () => {
 		it('should find articles matching exact keywords', async () => {
 			await poly.article.process({
 				title: 'Getting Started with TypeScript',

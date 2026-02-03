@@ -202,6 +202,7 @@ export default class Polywise {
 
 		if (this.db) {
 			await this.db.close()
+
 			this.db = null
 		}
 	}
@@ -244,6 +245,7 @@ export default class Polywise {
 	public async getSnapshot(weight_threshold = 0.2) {
 		const nodes = await this.query_raw<Node[]>(sql.sql_get_snapshot_nodes(weight_threshold))
 		const edges = await this.query_raw<Edge[]>(sql.sql_get_snapshot_edges(weight_threshold))
+
 		return { nodes, edges }
 	}
 
@@ -365,17 +367,14 @@ export default class Polywise {
 			const emerged_query = formatPerceiveQuery(query, insights)
 			const emerged_node_ids = top_results.map(r => r.id)
 
-			if (!this.db || !emitter.isActiveStatus()) return
 			await this.stimulateNodes(emerged_node_ids, 0.2 * (1 + current_depth * 0.5))
 
-			if (!this.db || !emitter.isActiveStatus()) return
 			const emerged_recall_result = await this.recallFromMemory({
 				query: emerged_query,
 				max_depth: depth_recall_depth,
 				stimulate_intensity: stimulate_on_recall ? 0.3 * (1 + current_depth) : 0
 			})
 
-			if (!this.db || !emitter.isActiveStatus()) return
 			const emerged_search_results = await this.pipeline.search({
 				query: emerged_query,
 				rerank_limit: search_limit * 2,
@@ -389,7 +388,6 @@ export default class Polywise {
 				emerged_search_results
 			).filter(c => !history_ids.has(c.id))
 
-			if (!this.db || !emitter.isActiveStatus()) return
 			const emerged_final_results = await this.rerankResults(
 				emerged_query,
 				emerged_aggregated,
@@ -435,6 +433,7 @@ export default class Polywise {
 			) {
 				return
 			}
+
 			console.error('CoT Execution Error:', e)
 		}
 	}

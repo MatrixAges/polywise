@@ -6,14 +6,14 @@ import { SCHEMA_BRAIN, SCHEMA_KNOWLEDGE } from '../src/consts'
 import * as sql_meta from '../src/sql/meta'
 import { CURRENT_SCHEMA_VERSION, migrate, migrations, validateMigrations } from '../src/utils/migration'
 
-describe('Migration System', () => {
-	describe('validateMigrations', () => {
+describe.concurrent('Migration System', () => {
+	describe.concurrent('validateMigrations', () => {
 		it('should pass with valid sequential migrations', () => {
 			expect(() => validateMigrations()).not.toThrow()
 		})
 	})
 
-	describe('CURRENT_SCHEMA_VERSION', () => {
+	describe.concurrent('CURRENT_SCHEMA_VERSION', () => {
 		it('should match the highest migration version', () => {
 			const max_version = Math.max(...migrations.map(m => m.version))
 
@@ -21,7 +21,7 @@ describe('Migration System', () => {
 		})
 	})
 
-	describe('migrate function', () => {
+	describe.concurrent('migrate function', () => {
 		let db: PGlite
 		const db_path = ':polywise_migration_main:'
 
@@ -98,7 +98,7 @@ describe('Migration System', () => {
 		})
 	})
 
-	describe('Schema Changes - Add Column', () => {
+	describe.concurrent('Schema Changes - Add Column', () => {
 		let db: PGlite
 		const db_path = ':polywise_migration_add_col:'
 
@@ -174,7 +174,7 @@ describe('Migration System', () => {
 		})
 	})
 
-	describe('Schema Changes - Rename Column', () => {
+	describe.concurrent('Schema Changes - Rename Column', () => {
 		let db: PGlite
 		const db_path = `:polywise_migration_rename_col_${Date.now()}:`
 
@@ -233,7 +233,7 @@ describe('Migration System', () => {
 		})
 	})
 
-	describe('Schema Changes - Modify Column Type', () => {
+	describe.concurrent('Schema Changes - Modify Column Type', () => {
 		let db: PGlite
 		const db_path = `:polywise_migration_modify_type_${Date.now()}:`
 
@@ -297,7 +297,7 @@ describe('Migration System', () => {
 		})
 	})
 
-	describe('Schema Changes - Drop Column', () => {
+	describe.concurrent('Schema Changes - Drop Column', () => {
 		let db: PGlite
 		const db_path = `:polywise_migration_drop_col:`
 
@@ -348,7 +348,7 @@ describe('Migration System', () => {
 		})
 	})
 
-	describe('Complex Migration Scenarios', () => {
+	describe.concurrent('Complex Migration Scenarios', () => {
 		let db: PGlite
 		const db_path = `:polywise_migration_complex:`
 

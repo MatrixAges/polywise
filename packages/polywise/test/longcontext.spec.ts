@@ -6,7 +6,7 @@ import { homonym_traps, negation_traps, similarity_traps, temporal_traps } from 
 
 const TEST_TIMEOUT = 120000
 
-describe('Long Context and Language Traps', () => {
+describe.concurrent('Long Context and Language Traps', () => {
 	let poly: Polywise
 	const unique_id = Math.random().toString(36).slice(2)
 	const db_name = `:polywise_longcontext_test_${unique_id}:`
@@ -68,7 +68,7 @@ describe('Long Context and Language Traps', () => {
 		await poly.off()
 	})
 
-	describe('Long Context Scenarios', () => {
+	describe.concurrent('Long Context Scenarios', () => {
 		it('should find the "needle" in a 15,000 character article', async () => {
 			const results = await (poly as any).article.searchFts({
 				query: 'stealth mode private memory',
@@ -103,7 +103,7 @@ describe('Long Context and Language Traps', () => {
 		})
 	})
 
-	describe('Language Traps', () => {
+	describe.concurrent('Language Traps', () => {
 		it('should distinguish between different meanings of "Mercury"', async () => {
 			const planet_results = await (poly as any).article.searchFts({
 				query: 'Mercury planet orbit days',

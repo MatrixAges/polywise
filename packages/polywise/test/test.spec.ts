@@ -2,7 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 
 import Polywise from '../src/Polywise'
 
-describe('Polywise Brain System', () => {
+describe.concurrent('Polywise Brain System', () => {
 	let poly: Polywise
 	const unique_id = Math.random().toString(36).slice(2)
 	const db_name = `:polywise_test_${unique_id}:`
@@ -27,7 +27,7 @@ describe('Polywise Brain System', () => {
 		await poly.off()
 	})
 
-	describe('Complex Knowledge Graph Operations', () => {
+	describe.concurrent('Complex Knowledge Graph Operations', () => {
 		it('should build complex interconnected knowledge graph', async () => {
 			const nodes: number[] = []
 			const concepts = [
@@ -310,7 +310,7 @@ describe('Polywise Brain System', () => {
 		})
 	})
 
-	describe('Brain Dynamics and Learning', () => {
+	describe.concurrent('Brain Dynamics and Learning', () => {
 		it('should propagate activation through network chains', async () => {
 			const chain: number[] = []
 
@@ -440,7 +440,7 @@ describe('Polywise Brain System', () => {
 		})
 	})
 
-	describe('Schema and Data Integrity', () => {
+	describe.concurrent('Schema and Data Integrity', () => {
 		it('should handle concurrent node operations', async () => {
 			const promises: Promise<number>[] = []
 
@@ -525,7 +525,7 @@ describe('Polywise Brain System', () => {
 		})
 	})
 
-	describe('Node and Edge Filtering with idol_id, root_ids, metrics_ids', () => {
+	describe.concurrent('Node and Edge Filtering with idol_id, root_ids, metrics_ids', () => {
 		it('should create nodes with idol_id and filter by idol', async () => {
 			const idol_a = 'idol_001'
 			const idol_b = 'idol_002'
@@ -737,7 +737,7 @@ describe('Polywise Brain System', () => {
 		})
 	})
 
-	describe('Article CRUD and Search', () => {
+	describe.concurrent('Article CRUD and Search', () => {
 		it('should add article and retrieve by id', async () => {
 			const title = 'Test Article'
 			const content = 'This is a test article about artificial intelligence and machine learning.'
