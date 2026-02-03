@@ -221,7 +221,8 @@ export default class Polywise {
 			searchLimit: search_limit,
 			rerankLimit: rerank_limit,
 			stimulateOnRecall: stimulate_on_recall,
-			currentDepth: 1
+			currentDepth: 1,
+			historyIds: new Set<number>(initialResult.map(r => r.id))
 		})
 
 		return { result: initialResult, cot: emitter }
@@ -266,6 +267,7 @@ export default class Polywise {
 		rerankLimit: number
 		stimulateOnRecall: boolean
 		currentDepth: number
+		historyIds: Set<number>
 	}): Promise<void> {
 		const {
 			query,
@@ -276,37 +278,51 @@ export default class Polywise {
 			searchLimit,
 			rerankLimit,
 			stimulateOnRecall,
-			currentDepth
+			currentDepth,
+			historyIds
 		} = args
 
-		if (!emitter.isActiveStatus() || currentDepth > maxDepth) {
+		if (!emitter.isActiveStatus() || currentDepth > maxDepth || !this.db) {
 			return
 		}
 
 		const depthRecallDepth = baseRecallDepth + currentDepth
 
-		const topResult = initialResults[0]
-		const emergedQuery = `${query} [基于: ${topResult?.title || '相关上下文'}]`
+		// 提取这一层的核心洞察：结合 Top 3 结果的标题
+		const topResults = initialResults.slice(0, 3)
+		const insights = topResults.map(r => r.title).join(', ')
 
-		const emergedNodeIds = initialResults.slice(0, 3).map(r => r.id)
-		await this.stimulateNodes(emergedNodeIds, 0.2 * currentDepth)
+		// 构造更具启发性的 emergedQuery
+		// 不再是简单的字符串叠加，而是将之前的 query 作为背景，将当前的 insights 作为新的搜索方向
+		const emergedQuery = `${query} [洞察: ${insights}]`
 
+		const emergedNodeIds = topResults.map(r => r.id)
+		// 刺激力度随深度增加，模拟思维的深入
+		await this.stimulateNodes(emergedNodeIds, 0.2 * (1 + currentDepth * 0.5))
+
+		// 执行下一层搜索
 		const emergedRecallResult = await this.recallFromMemory({
 			query: emergedQuery,
 			max_depth: depthRecallDepth,
-			stimulate_intensity: stimulateOnRecall ? currentDepth : 0
+			stimulate_intensity: stimulateOnRecall ? 0.3 * (1 + currentDepth) : 0
 		})
 
 		const emergedSearchResults = await this.pipeline.search({
 			query: emergedQuery,
-			vectorSearch: () => this.article.searchVector({ query: emergedQuery, limit: searchLimit }),
-			fulltextSearch: () => this.article.searchFts({ query: emergedQuery, limit: searchLimit }),
-			rerankLimit: searchLimit
+			vectorSearch: () => this.article.searchVector({ query: emergedQuery, limit: searchLimit * 2 }),
+			fulltextSearch: () => this.article.searchFts({ query: emergedQuery, limit: searchLimit * 2 }),
+			rerankLimit: searchLimit * 2
 		})
 
-		const emergedAggregated = this.aggregateResults(emergedRecallResult, emergedSearchResults)
+		let emergedAggregated = this.aggregateResults(emergedRecallResult, emergedSearchResults)
+
+		// 过滤掉已经在历史中出现过的结果
+		emergedAggregated = emergedAggregated.filter(c => !historyIds.has(c.id))
 
 		const emergedFinalResults = await this.rerankResults(emergedQuery, emergedAggregated, rerankLimit)
+
+		// 记录新发现的结果
+		emergedFinalResults.forEach(r => historyIds.add(r.id))
 
 		const cotResult: COTDepthResult = {
 			depth: currentDepth,
@@ -318,7 +334,7 @@ export default class Polywise {
 
 		emitter.emit(cotResult)
 
-		if (currentDepth < maxDepth) {
+		if (currentDepth < maxDepth && emergedFinalResults.length > 0) {
 			setImmediate(() => {
 				if (!this.db) return
 
@@ -331,7 +347,8 @@ export default class Polywise {
 					searchLimit,
 					rerankLimit,
 					stimulateOnRecall,
-					currentDepth: currentDepth + 1
+					currentDepth: currentDepth + 1,
+					historyIds
 				})
 			})
 		}
