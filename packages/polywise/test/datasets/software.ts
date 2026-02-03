@@ -1,4 +1,4 @@
-export const softwareArchitectureTriples = [
+export const software_architecture_triples = [
 	{
 		subject: 'Microservices',
 		predicate: 'uses',
@@ -27,7 +27,13 @@ export const softwareArchitectureTriples = [
 		learning_rate: 2.2,
 		decay_resistance: 1.8
 	},
-	{ subject: 'REST APIs', predicate: 'uses', object: 'JSON', learning_rate: 2.1, decay_resistance: 1.7 },
+	{
+		subject: 'REST APIs',
+		predicate: 'uses',
+		object: 'JSON',
+		learning_rate: 2.1,
+		decay_resistance: 1.7
+	},
 	{
 		subject: 'gRPC',
 		predicate: 'uses',
@@ -35,7 +41,13 @@ export const softwareArchitectureTriples = [
 		learning_rate: 2.3,
 		decay_resistance: 1.9
 	},
-	{ subject: 'Message Queues', predicate: 'uses', object: 'AMQP', learning_rate: 2.0, decay_resistance: 1.6 },
+	{
+		subject: 'Message Queues',
+		predicate: 'uses',
+		object: 'AMQP',
+		learning_rate: 2.0,
+		decay_resistance: 1.6
+	},
 	{
 		subject: 'Docker',
 		predicate: 'containerizes',
@@ -134,7 +146,13 @@ export const softwareArchitectureTriples = [
 		learning_rate: 2.3,
 		decay_resistance: 1.9
 	},
-	{ subject: 'Kubernetes', predicate: 'manages', object: 'Pods', learning_rate: 2.4, decay_resistance: 2.0 },
+	{
+		subject: 'Kubernetes',
+		predicate: 'manages',
+		object: 'Pods',
+		learning_rate: 2.4,
+		decay_resistance: 2.0
+	},
 	{
 		subject: 'Service Mesh',
 		predicate: 'provides',
@@ -151,7 +169,7 @@ export const softwareArchitectureTriples = [
 	}
 ]
 
-export const softwareArticles = [
+export const software_articles = [
 	{
 		title: 'Introduction to Microservices Architecture',
 		content: 'Microservices architecture is an approach to application development where a large application is built as a suite of modular services. Each module supports a specific business goal and uses a well-defined interface to communicate with other sets of services. This architectural style has gained significant popularity in enterprise environments due to its flexibility and scalability.'

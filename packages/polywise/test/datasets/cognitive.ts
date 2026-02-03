@@ -1,4 +1,4 @@
-export const cognitiveScienceTriples = [
+export const cognitive_science_triples = [
 	{
 		subject: 'Human Brain',
 		predicate: 'contains',
@@ -41,7 +41,13 @@ export const cognitiveScienceTriples = [
 		learning_rate: 2.0,
 		decay_resistance: 1.6
 	},
-	{ subject: 'Memory', predicate: 'stores', object: 'Knowledge', learning_rate: 2.5, decay_resistance: 2.1 },
+	{
+		subject: 'Memory',
+		predicate: 'stores',
+		object: 'Knowledge',
+		learning_rate: 2.5,
+		decay_resistance: 2.1
+	},
 	{
 		subject: 'Knowledge',
 		predicate: 'organized_in',
@@ -100,7 +106,7 @@ export const cognitiveScienceTriples = [
 	}
 ]
 
-export const cognitiveArticles = [
+export const cognitive_articles = [
 	{
 		title: 'How the Human Brain Works',
 		content: 'The human brain is a complex organ containing approximately 86 billion neurons. These neurons communicate through synapses, forming neural networks that underlie all cognitive functions. Understanding brain architecture helps us design better artificial intelligence systems.'

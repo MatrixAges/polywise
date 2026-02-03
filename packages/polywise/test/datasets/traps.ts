@@ -1,10 +1,4 @@
-/**
- * Language Traps Dataset
- * Contains scenarios designed to trick simple keyword-based search or
- * naive semantic retrieval.
- */
-
-export const homonymTraps = [
+export const homonym_traps = [
 	{
 		title: 'Mercury (Planet)',
 		content: "Mercury is the smallest planet in the Solar System and the closest to the Sun. Its orbit around the Sun takes 87.97 Earth days, the shortest of all the Sun's planets."
@@ -19,7 +13,7 @@ export const homonymTraps = [
 	}
 ]
 
-export const negationTraps = [
+export const negation_traps = [
 	{
 		title: 'Database Compatibility Statement',
 		content: 'It is a common misconception that Polywise supports MySQL directly. However, we must clarify that Polywise does NOT support MySQL or any other traditional relational database for its core memory storage. It uses a custom graph-based vector engine instead.'
@@ -30,7 +24,7 @@ export const negationTraps = [
 	}
 ]
 
-export const temporalTraps = [
+export const temporal_traps = [
 	{
 		title: 'Polywise v0.1 Specification (DEPRECATED)',
 		content: 'In version 0.1, the primary synchronization method is through manual polling of the memory state. This is the official way to keep nodes in sync.'
@@ -41,7 +35,7 @@ export const temporalTraps = [
 	}
 ]
 
-export const similarityTraps = [
+export const similarity_traps = [
 	{
 		title: "Polly-Wise: The Parrot Trainer's Manual",
 		content: "The Polly-Wise method is the world's most effective way to teach your parrot to speak human languages. It focuses on repetition and positive reinforcement using high-frequency vocal patterns."

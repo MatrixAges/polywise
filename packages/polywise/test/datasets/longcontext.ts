@@ -1,4 +1,4 @@
-const generateLongText = (topic: string, length: number, needle?: string): string => {
+const generateLongText = (topic: string, length: number, needle?: string) => {
 	let text = `Detailed exploration of ${topic}.\n`
 	const filler = `This is a filler sentence about ${topic} to increase the context length and test the system's ability to handle large volumes of data while maintaining high retrieval accuracy and relevance scoring mechanisms. `
 
@@ -6,12 +6,14 @@ const generateLongText = (topic: string, length: number, needle?: string): strin
 		if (needle && text.length > length / 2 && !text.includes(needle)) {
 			text += `\nCRITICAL FACT: ${needle}\n`
 		}
+
 		text += filler
 	}
+
 	return text
 }
 
-export const longContextArticles = [
+export const long_context_articles = [
 	{
 		title: 'Polywise Architecture Deep Dive',
 		content: generateLongText(
@@ -38,7 +40,7 @@ export const longContextArticles = [
 	}
 ]
 
-export const multiHopArticles = [
+export const multi_hop_articles = [
 	{
 		title: 'Project Genesis: Part 1',
 		content: generateLongText(

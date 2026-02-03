@@ -6,13 +6,14 @@ import Polywise from '../src/Polywise'
 
 describe('Article CRUD Operations', () => {
 	let poly: Polywise
-	const uniqueId = Math.random().toString(36).slice(2)
-	const dbName = `:polywise_article_test_${uniqueId}:`
+	const unique_id = Math.random().toString(36).slice(2)
+	const db_name = `:polywise_article_test_${unique_id}:`
 
 	beforeAll(async () => {
 		poly = new Polywise()
+
 		await poly.init({
-			data_dir: dbName
+			data_dir: db_name
 		})
 	})
 
@@ -67,6 +68,7 @@ describe('Article CRUD Operations', () => {
 		expect(updated.content).toBe('Updated content.')
 
 		const fetched = await poly.article.get(created.id)
+
 		expect(fetched[0]?.title).toBe('Updated Title')
 	})
 
@@ -79,6 +81,7 @@ describe('Article CRUD Operations', () => {
 		await poly.article.delete(created.id)
 
 		const fetched = await poly.article.get(created.id)
+
 		expect(fetched).toBeNull()
 	})
 
@@ -100,8 +103,9 @@ describe('Article CRUD Operations', () => {
 
 	it('should search articles with empty database', async () => {
 		const poly2 = new Polywise()
+
 		await poly2.init({
-			data_dir: `:polywise_empty_test_${uniqueId}:`
+			data_dir: `:polywise_empty_test_${unique_id}:`
 		})
 
 		const results = await poly2.article.searchFts({
@@ -117,13 +121,14 @@ describe('Article CRUD Operations', () => {
 
 describe('Full-Text Search and Vector Search', () => {
 	let poly: Polywise
-	const uniqueId = Math.random().toString(36).slice(2)
-	const dbName = `:polywise_search_test_${uniqueId}:`
+	const unique_id = Math.random().toString(36).slice(2)
+	const db_name = `:polywise_search_test_${unique_id}:`
 
 	beforeAll(async () => {
 		poly = new Polywise()
+
 		await poly.init({
-			data_dir: dbName
+			data_dir: db_name
 		})
 	})
 
@@ -163,13 +168,13 @@ describe('Full-Text Search and Vector Search', () => {
 				content: 'JavaScript frameworks like React and Vue are popular for web development.'
 			})
 
-			const titleResults = await poly.article.searchFts({
+			const title_results = await poly.article.searchFts({
 				query: 'Database',
 				limit: 10
 			})
 
-			expect(titleResults.length).toBeGreaterThanOrEqual(1)
-			expect(titleResults[0].title).toBe('Database Systems')
+			expect(title_results.length).toBeGreaterThanOrEqual(1)
+			expect(title_results[0].title).toBe('Database Systems')
 		})
 
 		it('should return empty array for non-matching query', async () => {

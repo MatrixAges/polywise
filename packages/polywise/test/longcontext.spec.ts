@@ -3,56 +3,65 @@ import '@abraham/reflection'
 import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 
 import Polywise from '../src/Polywise'
-import { longContextArticles, multiHopArticles } from './datasets/longcontext'
-import { homonymTraps, negationTraps, similarityTraps, temporalTraps } from './datasets/traps'
+import { long_context_articles, multi_hop_articles } from './datasets/longcontext'
+import { homonym_traps, negation_traps, similarity_traps, temporal_traps } from './datasets/traps'
 
 const TEST_TIMEOUT = 120000
 
 describe('Long Context and Language Traps', () => {
 	let poly: Polywise
-	const uniqueId = Math.random().toString(36).slice(2)
-	const dbName = `:polywise_longcontext_test_${uniqueId}:`
+	const unique_id = Math.random().toString(36).slice(2)
+	const db_name = `:polywise_longcontext_test_${unique_id}:`
 
-	const mockEmbedding = async (text: string): Promise<number[]> => {
+	const mockEmbedding = async (text: string) => {
 		const vec = Array(1024).fill(0)
 		const words = text.toLowerCase().split(/\W+/)
+
 		words.forEach((word, i) => {
 			if (i < 1024) {
 				let hash = 0
+
 				for (let j = 0; j < word.length; j++) {
 					hash = (hash << 5) - hash + word.charCodeAt(j)
 					hash |= 0
 				}
+
 				vec[Math.abs(hash) % 1024] += 0.1
 			}
 		})
+
 		return vec
 	}
 
 	beforeAll(async () => {
 		poly = new Polywise()
+
 		await poly.init({
-			data_dir: dbName,
+			data_dir: db_name,
 			embedding_config: { type: 'custom', fn: mockEmbedding }
 		})
 
-		for (const article of longContextArticles) {
-			await poly.article.addWithEmbedding(article)
-		}
-		for (const article of multiHopArticles) {
+		for (const article of long_context_articles) {
 			await poly.article.addWithEmbedding(article)
 		}
 
-		for (const article of homonymTraps) {
+		for (const article of multi_hop_articles) {
 			await poly.article.addWithEmbedding(article)
 		}
-		for (const article of negationTraps) {
+
+		for (const article of homonym_traps) {
 			await poly.article.addWithEmbedding(article)
 		}
-		for (const article of temporalTraps) {
+
+		for (const article of negation_traps) {
 			await poly.article.addWithEmbedding(article)
 		}
-		for (const article of similarityTraps) {
+
+		for (const article of temporal_traps) {
+			await poly.article.addWithEmbedding(article)
+		}
+
+		for (const article of similarity_traps) {
 			await poly.article.addWithEmbedding(article)
 		}
 	}, TEST_TIMEOUT)
@@ -74,39 +83,43 @@ describe('Long Context and Language Traps', () => {
 		})
 
 		it('should handle multi-hop retrieval across long documents', async () => {
-			// First hop: find where Phase 2 key is stored
 			const step1 = await poly.search({
 				query: 'Where is the key for Phase 2 stored?',
 				recall_depth: 2
 			})
 
-			const hasOnyxVault = step1.result.some(r => r.content.includes('Onyx Vault'))
-			expect(hasOnyxVault).toBe(true)
+			const has_onyx_vault = step1.result.some(r => r.content.includes('Onyx Vault'))
 
-			// Second hop: find requirements for Onyx Vault
+			expect(has_onyx_vault).toBe(true)
+
 			const step2 = await poly.search({
 				query: 'What are the requirements for Onyx Vault?',
 				recall_depth: 2
 			})
 
-			const hasQuantumSignature = step2.result.some(r => r.content.includes('quantum-resistant signature'))
-			expect(hasQuantumSignature).toBe(true)
+			const has_quantum_signature = step2.result.some(r =>
+				r.content.includes('quantum-resistant signature')
+			)
+
+			expect(has_quantum_signature).toBe(true)
 		})
 	})
 
 	describe('Language Traps', () => {
 		it('should distinguish between different meanings of "Mercury"', async () => {
-			const planetResults = await poly.article.searchFts({
+			const planet_results = await poly.article.searchFts({
 				query: 'Mercury planet orbit days',
 				limit: 1
 			})
-			expect(planetResults[0].title).toBe('Mercury (Planet)')
 
-			const elementResults = await poly.article.searchFts({
+			expect(planet_results[0].title).toBe('Mercury (Planet)')
+
+			const element_results = await poly.article.searchFts({
 				query: 'Mercury metallic element liquid',
 				limit: 1
 			})
-			expect(elementResults[0].title).toBe('Mercury (Element)')
+
+			expect(element_results[0].title).toBe('Mercury (Element)')
 		})
 
 		it('should not be fooled by negation traps in full-text search', async () => {
@@ -115,8 +128,6 @@ describe('Long Context and Language Traps', () => {
 				limit: 5
 			})
 
-			// It should find the document because it contains the words,
-			// but we test if the content correctly contains the negation
 			expect(results.some(r => r.content.includes('NOT support MySQL'))).toBe(true)
 		})
 
@@ -127,10 +138,9 @@ describe('Long Context and Language Traps', () => {
 			})
 
 			const titles = results.map(r => r.title)
+
 			expect(titles).toContain('Polywise v0.8 Specification (CURRENT)')
 
-			// In a real scenario, we'd want CURRENT to have a higher score.
-			// Here we just check if both are retrieved and can be distinguished.
 			const current = results.find(r => r.title.includes('CURRENT'))
 			const deprecated = results.find(r => r.title.includes('DEPRECATED'))
 
@@ -139,18 +149,19 @@ describe('Long Context and Language Traps', () => {
 		})
 
 		it('should distinguish between Polywise and Polly-Wise/Poly-Wise', async () => {
-			const projectResults = await poly.article.searchFts({
+			const project_results = await poly.article.searchFts({
 				query: 'Polywise architecture',
 				limit: 5
 			})
 
-			expect(projectResults.every(r => !r.title.includes('Parrot'))).toBe(true)
+			expect(project_results.every(r => !r.title.includes('Parrot'))).toBe(true)
 
-			const parrotResults = await poly.article.searchFts({
+			const parrot_results = await poly.article.searchFts({
 				query: 'Polly-Wise parrot language',
 				limit: 1
 			})
-			expect(parrotResults[0].title).toContain('Parrot')
+
+			expect(parrot_results[0].title).toContain('Parrot')
 		})
 	})
 })
