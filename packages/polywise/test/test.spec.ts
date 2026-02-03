@@ -1,4 +1,4 @@
-import 'reflect-metadata'
+import '@abraham/reflection'
 
 import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 

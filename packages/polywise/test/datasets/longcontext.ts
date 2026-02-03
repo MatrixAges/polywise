@@ -1,9 +1,3 @@
-/**
- * Long Context Dataset
- * This dataset contains long articles to test retrieval performance and
- * needle-in-a-haystack scenarios.
- */
-
 const generateLongText = (topic: string, length: number, needle?: string): string => {
 	let text = `Detailed exploration of ${topic}.\n`
 	const filler = `This is a filler sentence about ${topic} to increase the context length and test the system's ability to handle large volumes of data while maintaining high retrieval accuracy and relevance scoring mechanisms. `

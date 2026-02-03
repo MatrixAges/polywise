@@ -1,4 +1,4 @@
-import 'reflect-metadata'
+import '@abraham/reflection'
 
 import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 
@@ -6,14 +6,13 @@ import Polywise from '../src/Polywise'
 import { longContextArticles, multiHopArticles } from './datasets/longcontext'
 import { homonymTraps, negationTraps, similarityTraps, temporalTraps } from './datasets/traps'
 
-const TEST_TIMEOUT = 120000 // Longer timeout for long context
+const TEST_TIMEOUT = 120000
 
 describe('Long Context and Language Traps', () => {
 	let poly: Polywise
 	const uniqueId = Math.random().toString(36).slice(2)
 	const dbName = `:polywise_longcontext_test_${uniqueId}:`
 
-	// Simple mock embedding that preserves some keyword information
 	const mockEmbedding = async (text: string): Promise<number[]> => {
 		const vec = Array(1024).fill(0)
 		const words = text.toLowerCase().split(/\W+/)
@@ -37,7 +36,6 @@ describe('Long Context and Language Traps', () => {
 			embedding_config: { type: 'custom', fn: mockEmbedding }
 		})
 
-		// Load long context data
 		for (const article of longContextArticles) {
 			await poly.article.addWithEmbedding(article)
 		}
@@ -45,7 +43,6 @@ describe('Long Context and Language Traps', () => {
 			await poly.article.addWithEmbedding(article)
 		}
 
-		// Load trap data
 		for (const article of homonymTraps) {
 			await poly.article.addWithEmbedding(article)
 		}
