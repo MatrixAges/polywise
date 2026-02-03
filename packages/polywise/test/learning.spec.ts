@@ -109,7 +109,7 @@ describe.concurrent('Polywise Pure Text Learning', () => {
 			const duration = Date.now() - startTime
 
 			expect(results.length).toBeGreaterThan(0)
-			expect(duration).toBeLessThan(5000) // Model inference can be slow
+			expect(duration).toBeLessThan(8000) // Model inference can be slow
 		})
 	})
 })

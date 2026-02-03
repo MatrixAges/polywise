@@ -21,20 +21,25 @@ describe.concurrent('Polywise React System', () => {
 
 	it('should react instantly to a habitual stimulus using real models', async () => {
 		for (const item of behavioral_stimuli) {
+			const [stimulus_part, action_part, desc_part] = item.split('; ')
+			const stimulus = stimulus_part.replace('刺激: ', '')
+			const action = action_part.replace('动作: ', '')
+			const desc = desc_part.replace('描述: ', '')
+
 			const action_id = await poly.addNode({
-				label: item.action,
+				label: action,
 				x: Math.random() * 800,
 				y: Math.random() * 600,
 				is_action: true,
-				metadata: { desc: item.action_desc, ...item.metadata }
+				metadata: { desc }
 			})
 
 			const stimulus_id = await poly.addNode({
-				label: item.label,
+				label: stimulus,
 				x: Math.random() * 800,
 				y: Math.random() * 600,
 				threshold: 0.1,
-				embedding: (await poly.pipeline.embed(item.stimulus)) as number[]
+				embedding: (await poly.pipeline.embed(stimulus)) as number[]
 			})
 
 			await poly.connect({
@@ -47,11 +52,14 @@ describe.concurrent('Polywise React System', () => {
 			await poly.stimulate(stimulus_id, 0.5)
 		}
 
-		const fire_item = behavioral_stimuli.find(s => s.label.includes('Fire'))!
-		const { result } = await poly.react(fire_item.stimulus)
+		const fire_item_str = behavioral_stimuli.find(s => s.includes('火灾'))!
+		const fire_stimulus = fire_item_str.split('; ')[0].replace('刺激: ', '')
+		const fire_action = fire_item_str.split('; ')[1].replace('动作: ', '')
+
+		const { result } = await poly.react(fire_stimulus)
 
 		expect(result).toBeDefined()
-		expect(result?.action).toBe(fire_item.action)
+		expect(result?.action).toBe(fire_action)
 		expect(result?.source).toBe('react')
 		expect(result?.confidence).toBeGreaterThanOrEqual(0.9)
 	})
@@ -73,20 +81,23 @@ describe.concurrent('Polywise React System', () => {
 			content: fire_safety_content
 		})
 
-		const fire_stimulus = behavioral_stimuli.find(s => s.label.includes('Fire'))!
+		const fire_item_str = behavioral_stimuli.find(s => s.includes('火灾'))!
+		const fire_stimulus = fire_item_str.split('; ')[0].replace('刺激: ', '')
+		const fire_action = fire_item_str.split('; ')[1].replace('动作: ', '')
+
 		const action_id = await poly_pfc.addNode({
-			label: fire_stimulus.action,
+			label: fire_action,
 			x: 100,
 			y: 100,
 			is_action: true
 		})
 
 		const stimulus_id = await poly_pfc.addNode({
-			label: fire_stimulus.label,
+			label: fire_stimulus,
 			x: 0,
 			y: 0,
 			threshold: 0.1,
-			embedding: (await poly_pfc.pipeline.embed(fire_stimulus.stimulus)) as number[]
+			embedding: (await poly_pfc.pipeline.embed(fire_stimulus)) as number[]
 		})
 
 		await poly_pfc.connect({
@@ -98,8 +109,8 @@ describe.concurrent('Polywise React System', () => {
 
 		await poly_pfc.stimulate(stimulus_id, 0.5)
 
-		const { result: fast_result, cot } = await poly_pfc.react(fire_stimulus.stimulus)
-		expect(fast_result?.action).toBe(fire_stimulus.action)
+		const { result: fast_result, cot } = await poly_pfc.react(fire_stimulus)
+		expect(fast_result?.action).toBe(fire_action)
 
 		await cot.toPromise()
 
@@ -127,8 +138,10 @@ describe.concurrent('Polywise React System', () => {
 			content: thirst_knowledge_content
 		})
 
-		const thirst_stimulus = behavioral_stimuli.find(s => s.label.includes('Thirsty'))!
-		const { result: fast_result, cot } = await poly_act.react(thirst_stimulus.stimulus)
+		const thirst_item_str = behavioral_stimuli.find(s => s.includes('口渴'))!
+		const thirst_stimulus = thirst_item_str.split('; ')[0].replace('刺激: ', '')
+
+		const { result: fast_result, cot } = await poly_act.react(thirst_stimulus)
 		expect(fast_result).toBeNull()
 
 		await cot.toPromise()
