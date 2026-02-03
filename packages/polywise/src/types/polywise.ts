@@ -98,6 +98,26 @@ export interface ContextResult {
 	article_ids: number[]
 }
 
+export interface HybridSearchResult {
+	id: number
+	title: string
+	content: string
+	source: 'memory' | 'external' | 'implicit'
+	rerankScore: number
+	relevanceScore: number
+	combinedScore: number
+	stimulated: boolean
+	memoryStrength: number
+}
+
+export interface COTDepthResult {
+	depth: number
+	query: string
+	results: HybridSearchResult[]
+	emerged_nodes: number[]
+	emerged_edges: number[]
+}
+
 export interface MemoryRecallResult {
 	nodes: Node[]
 	edges: Edge[]

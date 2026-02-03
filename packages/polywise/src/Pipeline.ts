@@ -11,9 +11,9 @@ import type {
 	EmbeddingConfig,
 	RerankerConfig,
 	PipelineArgs,
-	ArticleSearchResult,
 	SearchResult,
-	SearchCandidate
+	SearchCandidate,
+	PipelineSearchArgs
 } from './types'
 
 @injectable()
@@ -118,13 +118,8 @@ export default class Pipeline {
 		})
 	}
 
-	async search(args: {
-		query: string
-		vector_search: () => Promise<ArticleSearchResult[]>
-		fulltext_search: () => Promise<ArticleSearchResult[]>
-		rerank_limit?: number
-	}) {
-		const { query, vector_search, fulltext_search, rerank_limit = 20 } = args
+	async search(args: PipelineSearchArgs) {
+		const { query, rerank_limit = 20, vector_search, fulltext_search } = args
 
 		const [vector_results, fulltext_results] = await Promise.all([vector_search(), fulltext_search()])
 

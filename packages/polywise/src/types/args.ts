@@ -1,6 +1,7 @@
 import type { PGlite } from '@electric-sql/pglite'
 import type Polywise from '../Polywise'
-import type { Metadata, Triple } from './polywise'
+import type { ChainEmitter } from '../utils'
+import type { COTDepthResult, HybridSearchResult, Metadata, Triple } from './polywise'
 
 export interface BrainArgs {
 	poly: Polywise
@@ -10,9 +11,9 @@ export interface BrainArgs {
 export interface PolywiseArgs {
 	data_dir?: string
 	cache_dir?: string
-	onTick?: () => void
 	embedding_config?: EmbeddingConfig
 	reranker_config?: RerankerConfig
+	onTick?: () => void
 }
 
 export interface LocalEmbeddingConfig {
@@ -74,6 +75,7 @@ export interface ProcessArticleArgs {
 	title: string
 	content: string
 	triples: Triple[]
+	article_id?: number
 	idol_id?: string
 	root_ids?: string[]
 	metrics_ids?: string[]
@@ -81,8 +83,8 @@ export interface ProcessArticleArgs {
 }
 
 export interface InjectTriplesArgs {
-	triples: Triple[]
 	article_id: number
+	triples: Triple[]
 	idol_id?: string
 	root_ids?: string[]
 	metrics_ids?: string[]
@@ -113,8 +115,8 @@ export interface ArticleArgs {
 
 export interface SearchCandidate {
 	id: number
-	content: string
 	title: string
+	content: string
 	source: 'vector' | 'fulltext'
 }
 
@@ -135,10 +137,10 @@ export interface SearchResult {
 
 export interface RecallArgs {
 	query: string
-	query_embedding?: number[]
 	max_nodes?: number
 	max_depth?: number
 	stimulate_intensity?: number
+	query_embedding?: number[]
 	recall_idol_id?: string
 	recall_root_ids?: string[]
 }
@@ -148,42 +150,56 @@ export interface QueryArgs {
 	recall_depth?: number
 	search_limit?: number
 	rerank_limit?: number
-	stimulate_on_recall?: boolean
 	cot_depth?: number
+	stimulate_on_recall?: boolean
 }
 
 export interface AggregatedCandidate {
 	id: number
 	title: string
 	content: string
-	source: 'memory' | 'external' | 'implicit'
 	rerankScore: number
 	relevance_score: number
-	stimulated: boolean
 	memory_strength: number
-}
-
-export interface HybridSearchResult {
-	id: number
-	title: string
-	content: string
 	source: 'memory' | 'external' | 'implicit'
-	rerankScore: number
-	relevanceScore: number
-	combinedScore: number
 	stimulated: boolean
-	memoryStrength: number
 }
 
-export interface COTDepthResult {
-	depth: number
+// 优化的参数接口定义，确保变量在前，函数在后
+export interface PipelineSearchArgs {
 	query: string
-	results: HybridSearchResult[]
-	emerged_nodes: number[]
-	emerged_edges: number[]
+	rerank_limit?: number
+	vector_search: () => Promise<ArticleSearchResult[]>
+	fulltext_search: () => Promise<ArticleSearchResult[]>
 }
 
-export interface ChainOfThought {
-	on: (callback: (data: COTDepthResult) => void) => ChainOfThought
-	off: () => void
+export interface SingleSearchArgs {
+	query: string
+	recall_depth: number
+	search_limit: number
+	rerank_limit: number
+	stimulate_on_recall: boolean
+}
+
+export interface ExecuteCotArgs {
+	query: string
+	current_depth: number
+	max_depth: number
+	base_recall_depth: number
+	search_limit: number
+	rerank_limit: number
+	stimulate_on_recall: boolean
+	initial_results: HybridSearchResult[]
+	emitter: ChainEmitter
+	history_ids: Set<number>
+}
+
+export interface RecallNodesByKeywordsArgs {
+	keywords: string[]
+	limit?: number
+}
+
+export interface StrengthenRelatedEdgesArgs {
+	matched_nodes: any[]
+	related_nodes: any[]
 }

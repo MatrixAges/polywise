@@ -13,7 +13,6 @@ import { calculateWeight, ChainEmitter, CURRENT_SCHEMA_VERSION, migrate, validat
 import type {
 	AddNodeArgs,
 	AggregatedCandidate,
-	ChainOfThought,
 	ConnectArgs,
 	COTDepthResult,
 	Edge,
@@ -26,7 +25,11 @@ import type {
 	QueryArgs,
 	RecallArgs,
 	SearchResult,
-	UpsertNodeArgs
+	UpsertNodeArgs,
+	SingleSearchArgs,
+	ExecuteCotArgs,
+	RecallNodesByKeywordsArgs,
+	StrengthenRelatedEdgesArgs
 } from './types'
 
 @singleton()
@@ -44,7 +47,7 @@ export default class Polywise {
 	}
 
 	async init(args: PolywiseArgs = {}) {
-		const { data_dir, cache_dir, onTick, embedding_config, reranker_config } = args
+		const { data_dir, cache_dir, embedding_config, reranker_config, onTick } = args
 
 		this.db = new PGlite(data_dir || ':polywise:', {
 			relaxedDurability: true,
@@ -194,8 +197,8 @@ export default class Polywise {
 			recall_depth = 2,
 			search_limit = 20,
 			rerank_limit = 10,
-			stimulate_on_recall = true,
-			cot_depth = 0
+			cot_depth = 0,
+			stimulate_on_recall = true
 		} = args
 
 		const emitter = new ChainEmitter()
@@ -214,14 +217,14 @@ export default class Polywise {
 
 		this.executeCot({
 			query,
-			initial_results,
-			emitter,
+			current_depth: 1,
 			max_depth: cot_depth,
 			base_recall_depth: recall_depth,
 			search_limit,
 			rerank_limit,
 			stimulate_on_recall,
-			current_depth: 1,
+			initial_results,
+			emitter,
 			history_ids: new Set(initial_results.map(r => r.id))
 		})
 
@@ -233,7 +236,7 @@ export default class Polywise {
 
 		const keywords = this.extractKeywords(query)
 
-		const matched_nodes = await this.recallNodesByKeywords(keywords)
+		const matched_nodes = await this.recallNodesByKeywords({ keywords })
 
 		const related_nodes = await this.recallRelatedNodes(
 			matched_nodes.map(n => n.id),
@@ -247,7 +250,7 @@ export default class Polywise {
 
 			await this.stimulateNodes(node_ids, stimulate_intensity)
 
-			await this.strengthenRelatedEdges(matched_nodes, related_nodes)
+			await this.strengthenRelatedEdges({ matched_nodes, related_nodes })
 		}
 
 		const contexts = await this.getNodeContexts([...matched_nodes, ...related_nodes].map(n => n.id))
@@ -261,19 +264,19 @@ export default class Polywise {
 	}
 
 	async processArticle(args: ProcessArticleArgs) {
-		const { title, content, triples, idol_id, root_ids, metrics_ids, generate_embedding } = args
+		const { title, content, triples, article_id, idol_id, root_ids, metrics_ids, generate_embedding } = args
 
 		const res = await this.query<{ id: number }>(sql.sql_process_article, [title, content])
 
-		const article_id = res[0].id
+		const aid = article_id ?? res[0].id
 
 		if (generate_embedding ?? true) {
-			await this.article.addEmbedding(article_id, content)
+			await this.article.addEmbedding(aid, content)
 		}
 
 		await this.injectTriples({
+			article_id: aid,
 			triples,
-			article_id,
 			idol_id,
 			root_ids,
 			metrics_ids
@@ -313,13 +316,7 @@ export default class Polywise {
 		}
 	}
 
-	private async executeSingleSearch(args: {
-		query: string
-		recall_depth: number
-		search_limit: number
-		rerank_limit: number
-		stimulate_on_recall: boolean
-	}) {
+	private async executeSingleSearch(args: SingleSearchArgs) {
 		const { query, recall_depth, search_limit, rerank_limit, stimulate_on_recall } = args
 
 		const recall_result = await this.recallFromMemory({
@@ -330,9 +327,9 @@ export default class Polywise {
 
 		const search_results = await this.pipeline.search({
 			query,
+			rerank_limit: search_limit,
 			vector_search: () => this.article.searchVector({ query, limit: search_limit }),
-			fulltext_search: () => this.article.searchFts({ query, limit: search_limit }),
-			rerank_limit: search_limit
+			fulltext_search: () => this.article.searchFts({ query, limit: search_limit })
 		})
 
 		const aggregated = this.aggregateResults(recall_result, search_results)
@@ -340,28 +337,17 @@ export default class Polywise {
 		return await this.rerankResults(query, aggregated, rerank_limit)
 	}
 
-	private async executeCot(args: {
-		query: string
-		initial_results: HybridSearchResult[]
-		emitter: ChainEmitter
-		max_depth: number
-		base_recall_depth: number
-		search_limit: number
-		rerank_limit: number
-		stimulate_on_recall: boolean
-		current_depth: number
-		history_ids: Set<number>
-	}) {
+	private async executeCot(args: ExecuteCotArgs) {
 		const {
 			query,
-			initial_results,
-			emitter,
+			current_depth,
 			max_depth,
 			base_recall_depth,
 			search_limit,
 			rerank_limit,
 			stimulate_on_recall,
-			current_depth,
+			initial_results,
+			emitter,
 			history_ids
 		} = args
 
@@ -375,7 +361,7 @@ export default class Polywise {
 
 		const insights = top_results.map(r => r.title).join(', ')
 
-		const emerged_query = `${query} [洞察: ${insights}]`
+		const emerged_query = `${query} [perceive: ${insights}]`
 
 		const emerged_node_ids = top_results.map(r => r.id)
 
@@ -389,9 +375,9 @@ export default class Polywise {
 
 		const emerged_search_results = await this.pipeline.search({
 			query: emerged_query,
+			rerank_limit: search_limit * 2,
 			vector_search: () => this.article.searchVector({ query: emerged_query, limit: search_limit * 2 }),
-			fulltext_search: () => this.article.searchFts({ query: emerged_query, limit: search_limit * 2 }),
-			rerank_limit: search_limit * 2
+			fulltext_search: () => this.article.searchFts({ query: emerged_query, limit: search_limit * 2 })
 		})
 
 		const emerged_aggregated = this.aggregateResults(emerged_recall_result, emerged_search_results).filter(
@@ -418,27 +404,29 @@ export default class Polywise {
 
 				this.executeCot({
 					query: emerged_query,
-					initial_results: emerged_final_results,
-					emitter,
+					current_depth: current_depth + 1,
 					max_depth,
 					base_recall_depth,
 					search_limit,
 					rerank_limit,
 					stimulate_on_recall,
-					current_depth: current_depth + 1,
+					initial_results: emerged_final_results,
+					emitter,
 					history_ids
 				})
 			})
 		}
 	}
 
-	private async recallNodesByKeywords(keywords: string[]) {
+	private async recallNodesByKeywords(args: RecallNodesByKeywordsArgs) {
+		const { keywords, limit = 10 } = args
+
 		if (!this.db || keywords.length === 0) return []
 
 		const results: Node[] = []
 
 		for (const keyword of keywords) {
-			const nodes = await this.query<Node[]>(sql_brain.sql_recall_nodes_by_label, [`%${keyword}%`, 10])
+			const nodes = await this.query<Node[]>(sql_brain.sql_recall_nodes_by_label, [`%${keyword}%`, limit])
 
 			results.push(...nodes)
 		}
@@ -466,7 +454,9 @@ export default class Polywise {
 		}
 	}
 
-	private async strengthenRelatedEdges(matched_nodes: Node[], related_nodes: Node[]) {
+	private async strengthenRelatedEdges(args: StrengthenRelatedEdgesArgs) {
+		const { matched_nodes, related_nodes } = args
+
 		if (!this.db) return
 
 		const node_ids = [...matched_nodes, ...related_nodes].map(n => n.id)
@@ -498,11 +488,11 @@ export default class Polywise {
 						id: article.id,
 						title: article.title,
 						content: article.content,
-						source: 'memory',
 						rerankScore: article.rerankScore,
 						relevance_score: 1.5,
-						stimulated: true,
-						memory_strength
+						memory_strength,
+						source: 'memory',
+						stimulated: true
 					})
 				}
 			}
@@ -518,11 +508,11 @@ export default class Polywise {
 					id: result.id,
 					title: result.title,
 					content: result.content,
-					source: is_stimulated ? 'memory' : 'external',
 					rerankScore: result.rerankScore,
 					relevance_score: result.rerankScore,
-					stimulated: is_stimulated,
-					memory_strength
+					memory_strength,
+					source: is_stimulated ? 'memory' : 'external',
+					stimulated: is_stimulated
 				})
 			}
 		}
@@ -536,11 +526,11 @@ export default class Polywise {
 				id: node.id,
 				title: node.label,
 				content: node.metadata?.desc || `概念: ${node.label}`,
-				source: 'implicit',
 				rerankScore: node.potential,
 				relevance_score: node.potential * 0.8,
-				stimulated: true,
-				memory_strength: node.potential
+				memory_strength: node.potential,
+				source: 'implicit',
+				stimulated: true
 			})
 		}
 
@@ -608,7 +598,7 @@ export default class Polywise {
 	}
 
 	private async injectTriples(args: InjectTriplesArgs) {
-		const { triples, article_id, idol_id, root_ids, metrics_ids } = args
+		const { article_id, triples, idol_id, root_ids, metrics_ids } = args
 
 		await this.exec(sql.sql_inject_triples_begin)
 
