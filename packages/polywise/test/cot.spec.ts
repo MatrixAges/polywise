@@ -2,6 +2,7 @@ import '@abraham/reflection'
 
 import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 
+import { PERCEIVE_COMMAND } from '../src/consts'
 import Polywise from '../src/Polywise'
 import { cognitive_articles, cognitive_science_triples } from './datasets/cognitive'
 import { software_architecture_triples, software_articles } from './datasets/software'
@@ -223,8 +224,8 @@ describe('Chain of Thought (CoT) Mechanism', () => {
 
 			expect(received_events.length).toBe(3)
 			expect(received_events[0].query).toContain('circuit breaker')
-			expect(received_events[1].query).toContain('perceive')
-			expect(received_events[2].query).toContain('perceive')
+			expect(received_events[1].query).toContain(PERCEIVE_COMMAND)
+			expect(received_events[2].query).toContain(PERCEIVE_COMMAND)
 		})
 	})
 
@@ -410,7 +411,7 @@ describe('Chain of Thought (CoT) Mechanism', () => {
 			expect(received_events[0].query).toContain('microservices')
 
 			for (let i = 1; i < received_events.length; i++) {
-				expect(received_events[i].query).toContain('perceive')
+				expect(received_events[i].query).toContain(PERCEIVE_COMMAND)
 			}
 
 			const all_results = received_events.flatMap(e => e.results)

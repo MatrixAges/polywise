@@ -363,7 +363,7 @@ export default class Polywise {
 
 		const insights = top_results.map(r => r.title).join(', ')
 
-		const emerged_query = `${query} [perceive: ${insights}]`
+		const emerged_query = formatPerceiveQuery(query, insights)
 
 		const emerged_node_ids = top_results.map(r => r.id)
 
