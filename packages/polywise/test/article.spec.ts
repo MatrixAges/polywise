@@ -25,7 +25,7 @@ describe.concurrent('Article CRUD Operations', () => {
 
 	it('should create article using real-world software documentation', async () => {
 		const content = software_architecture_datasets[0]
-		const article = await poly.article.process({ content })
+		const article = await poly.article.process(content)
 
 		expect(article.id).toBeGreaterThan(0)
 		expect(article.content).toBe(content)
@@ -34,12 +34,9 @@ describe.concurrent('Article CRUD Operations', () => {
 
 	it('should get article by searching for its real content', async () => {
 		const content = cognitive_science_datasets[0]
-		await poly.article.process({ content })
+		await poly.article.process(content)
 
-		const articles = await poly.article.searchFts({
-			query: 'Understanding brain architecture',
-			limit: 1
-		})
+		const articles = await poly.article.searchFts('Understanding brain architecture', 1)
 
 		expect(articles.length).toBe(1)
 
@@ -50,12 +47,9 @@ describe.concurrent('Article CRUD Operations', () => {
 	})
 
 	it('should update real-world article content', async () => {
-		const created = await poly.article.process({ content: software_architecture_datasets[1] })
+		const created = await poly.article.process(software_architecture_datasets[1])
 
-		const updated = await poly.article.update({
-			id: created.id,
-			content: 'Updated content for containerization...'
-		})
+		const updated = await poly.article.update(created.id, 'Updated content for containerization...')
 
 		expect(updated.content).toBe('Updated content for containerization...')
 
@@ -65,9 +59,7 @@ describe.concurrent('Article CRUD Operations', () => {
 	})
 
 	it('should delete article', async () => {
-		const created = await poly.article.process({
-			content: 'Content for deletion test.'
-		})
+		const created = await poly.article.process('Content for deletion test.')
 
 		await poly.article.delete(created.id)
 
@@ -77,13 +69,9 @@ describe.concurrent('Article CRUD Operations', () => {
 	})
 
 	it('should get all articles', async () => {
-		await poly.article.process({
-			content: 'Content 1'
-		})
+		await poly.article.process('Content 1')
 
-		await poly.article.process({
-			content: 'Content 2'
-		})
+		await poly.article.process('Content 2')
 
 		const articles = await poly.article.getAll()
 
@@ -98,10 +86,7 @@ describe.concurrent('Article CRUD Operations', () => {
 			reranker_concurrency: 10
 		})
 
-		const results = await empty_poly.article.searchFts({
-			query: 'test',
-			limit: 10
-		})
+		const results = await empty_poly.article.searchFts('test', 10)
 
 		expect(results).toEqual([])
 
@@ -131,13 +116,10 @@ describe.concurrent('Full-Text Search and Vector Search', () => {
 	describe.concurrent('Full-Text Search', () => {
 		it('should find real-world articles matching specific technical keywords', async () => {
 			for (const content of software_architecture_datasets) {
-				await poly.article.process({ content })
+				await poly.article.process(content)
 			}
 
-			const results = await poly.article.searchByText({
-				query: 'Microservices architecture',
-				limit: 10
-			})
+			const results = await poly.article.searchByText('Microservices architecture', 10)
 
 			expect(results.length).toBeGreaterThanOrEqual(1)
 			expect(results.some(r => r.content.includes('Microservices'))).toBe(true)
@@ -145,23 +127,17 @@ describe.concurrent('Full-Text Search and Vector Search', () => {
 
 		it('should search for cognitive science concepts in content', async () => {
 			for (const content of cognitive_science_datasets) {
-				await poly.article.process({ content })
+				await poly.article.process(content)
 			}
 
-			const results = await poly.article.searchFts({
-				query: 'billion neurons',
-				limit: 10
-			})
+			const results = await poly.article.searchFts('billion neurons', 10)
 
 			expect(results.length).toBeGreaterThanOrEqual(1)
 			expect(results[0].content).toContain('neurons')
 		})
 
 		it('should return empty array for non-existent technical terms', async () => {
-			const results = await poly.article.searchFts({
-				query: 'NonExistentQuantumServiceMesh',
-				limit: 10
-			})
+			const results = await poly.article.searchFts('NonExistentQuantumServiceMesh', 10)
 
 			expect(results).toEqual([])
 		})

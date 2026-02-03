@@ -467,9 +467,9 @@ export class AnotherClass {}
 
 ## Function & Class Model Parameters Convention
 
-When a function or class constructor has more than 2 parameters, use an object parameter for better flexibility. The parameters must follow these style rules:
+When a function or class constructor has more than 2 parameters, use an object parameter for better flexibility. If there are only 1 or 2 parameters, use positional parameters directly. The parameters must follow these style rules:
 
-- **Parameter Name**: Always use `args` for the object parameter.
+- **Parameter Name**: Always use `args` for the object parameter (when there are more than 2 parameters).
 - **Type Name**: Always use `*Args` for the interface/type name (e.g., `CreateNodeArgs`).
 - **Destructuring**: Always destructure the `args` object at the beginning of the function or constructor.
 - **Ordering Rule**: `Required Variables` > `Optional Variables` > `Required Functions` > `Optional Functions`
@@ -477,49 +477,40 @@ When a function or class constructor has more than 2 parameters, use an object p
 **Good:**
 
 ```typescript
+// More than 2 parameters: use object
 interface CreateNodeArgs {
-	// Required Variables
 	label: string
 	x: number
 	y: number
-
-	// Optional Variables
 	threshold?: number
-	idol_id?: string
-
-	// Required Functions
-	onCreated: (id: number) => void
-
-	// Optional Functions
-	onFired?: () => void
 }
 
 async createNode(args: CreateNodeArgs) {
-	const { label, x, y, threshold, idol_id, onCreated, onFired } = args
-
+	const { label, x, y, threshold } = args
 	await this.query(sql.createNode, [label, x, y])
+}
+
+// 1 or 2 parameters: use positional
+async updateArticle(id: number, content: string) {
+	await this.query(sql.updateArticle, [id, content])
+}
+
+async addArticle(content: string) {
+	await this.query(sql.addArticle, [content])
 }
 ```
 
 **Avoid:**
 
 ```typescript
+// Avoid object for single parameter
+async addArticle(args: { content: string }) {}
+
+// Avoid object for two parameters
+async updateArticle(args: { id: number, content: string }) {}
+
 // Using 'params' instead of 'args'
 async createNode(params: CreateNodeArgs) {}
-
-// Missing destructuring
-async createNode(args: CreateNodeArgs) {
-	await this.query(sql.createNode, [args.label, args.x, args.y])
-}
-
-// Mixed order or positional parameters
-async createNode(
-	label: string,
-	x: number,
-	y: number,
-	threshold = 0.5,
-	idol_id?: string
-) {}
 ```
 
 ## Type Import Convention (CRITICAL)

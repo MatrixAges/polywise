@@ -32,11 +32,11 @@ describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
 		})
 
 		for (const content of software_architecture_datasets) {
-			await poly.article.addWithEmbedding({ content })
+			await poly.article.addWithEmbedding(content)
 		}
 
 		for (const content of cognitive_science_datasets) {
-			await poly.article.addWithEmbedding({ content })
+			await poly.article.addWithEmbedding(content)
 		}
 
 		await poly.save({

@@ -11,21 +11,19 @@ export default class Article {
 
 	constructor(private pipeline_instance: Pipeline) {}
 
-	init(args: ArticleArgs) {
-		const { db } = args
+	init(db: PGlite) {
 		this.db = db
 		this.pipeline = this.pipeline_instance
 	}
 
-	async add(article: { content: string }) {
-		const res = await this.process(article)
+	async add(content: string) {
+		const res = await this.process(content)
 		return res?.id || null
 	}
 
-	async process(article: { content: string }) {
+	async process(content: string) {
 		if (!this.db) return null
 
-		const { content } = article
 		const res = await this.db.query<ArticleEntity>(sql.sql_process_article, [content])
 
 		if (res.rows.length === 0) return null
@@ -41,10 +39,10 @@ export default class Article {
 		await this.db.query(sql.sql_insert_article_embedding, [article_id, `[${embedding.join(',')}]`])
 	}
 
-	async addWithEmbedding(article: { content: string }) {
-		const result = await this.process(article)
+	async addWithEmbedding(content: string) {
+		const result = await this.process(content)
 		if (result && result.id) {
-			await this.addEmbedding(result.id, article.content)
+			await this.addEmbedding(result.id, content)
 			return result.id
 		}
 		return null
@@ -66,10 +64,9 @@ export default class Article {
 		return res.rows
 	}
 
-	async update(article: { id: number; content: string }) {
+	async update(id: number, content: string) {
 		if (!this.db) return null
 
-		const { id, content } = article
 		const res = await this.db.query<ArticleEntity>(sql.sql_update_article, [id, content])
 
 		return res.rows.length > 0 ? res.rows[0] : null
@@ -81,18 +78,16 @@ export default class Article {
 		await this.db.query(`DELETE FROM ${SCHEMA_KNOWLEDGE}.articles WHERE id = $1`, [article_id])
 	}
 
-	async searchVector(args: SearchArticleArgs) {
-		return this.searchByVector(args)
+	async searchVector(query: string, limit?: number) {
+		return this.searchByVector(query, limit)
 	}
 
-	async searchFts(args: SearchArticleArgs) {
-		return this.searchByText(args)
+	async searchFts(query: string, limit?: number) {
+		return this.searchByText(query, limit)
 	}
 
-	async searchByVector(args: SearchArticleArgs) {
+	async searchByVector(query: string, limit?: number) {
 		if (!this.db || !this.pipeline) return []
-
-		const { query, limit } = args
 
 		const embedding = await this.pipeline.embed(query)
 		if (!embedding) return []
@@ -105,10 +100,8 @@ export default class Article {
 		return res.rows
 	}
 
-	async searchByText(args: SearchArticleArgs) {
+	async searchByText(query: string, limit?: number) {
 		if (!this.db) return []
-
-		const { query, limit } = args
 
 		const res = await this.db.query<ArticleWithSimilarity>(sql.sql_search_articles_by_text, [
 			query,

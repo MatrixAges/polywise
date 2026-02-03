@@ -76,9 +76,7 @@ export default class Polywise {
 			reranker_concurrency
 		})
 
-		this.article.init({
-			db: this.db
-		})
+		this.article.init(this.db)
 
 		this.brain.init({
 			poly: this,
@@ -450,8 +448,8 @@ export default class Polywise {
 		const search_results = await this.pipeline.search({
 			query,
 			rerank_limit: search_limit,
-			vector_search: () => this.article.searchVector({ query, limit: search_limit }),
-			fulltext_search: () => this.article.searchFts({ query, limit: search_limit })
+			vector_search: () => this.article.searchVector(query, search_limit),
+			fulltext_search: () => this.article.searchFts(query, search_limit)
 		})
 
 		const aggregated = this.aggregateResults(recall_result, search_results)
@@ -497,9 +495,8 @@ export default class Polywise {
 			const emerged_search_results = await this.pipeline.search({
 				query: emerged_query,
 				rerank_limit: search_limit * 2,
-				vector_search: () =>
-					this.article.searchVector({ query: emerged_query, limit: search_limit * 2 }),
-				fulltext_search: () => this.article.searchFts({ query: emerged_query, limit: search_limit * 2 })
+				vector_search: () => this.article.searchVector(emerged_query, search_limit * 2),
+				fulltext_search: () => this.article.searchFts(emerged_query, search_limit * 2)
 			})
 
 			const emerged_aggregated = this.aggregateResults(

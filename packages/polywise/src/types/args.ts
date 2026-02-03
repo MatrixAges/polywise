@@ -113,11 +113,6 @@ export interface AddArticleArgs {
 	content: string
 }
 
-export interface SearchArticleArgs {
-	query: string
-	limit?: number
-}
-
 export interface ArticleArgs {
 	db: PGlite
 }

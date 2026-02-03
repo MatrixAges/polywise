@@ -47,15 +47,13 @@ describe.concurrent('Polywise Pure Text Learning', () => {
 			const chunks = chunkText(text, 1500).slice(0, 20) // Take first 20 chunks for performance in tests
 
 			for (let i = 0; i < chunks.length; i++) {
-				await poly.article.addWithEmbedding({
-					content: chunks[i]
-				})
+				await poly.article.addWithEmbedding(chunks[i])
 			}
 
-			const results = await poly.article.searchByVector({
-				query: 'What are the main social interactions described in the text?',
-				limit: 5
-			})
+			const results = await poly.article.searchByVector(
+				'What are the main social interactions described in the text?',
+				5
+			)
 
 			expect(results.length).toBeGreaterThan(0)
 			expect(results[0].similarity).toBeGreaterThan(0.3)
@@ -65,25 +63,15 @@ describe.concurrent('Polywise Pure Text Learning', () => {
 			const neuro_text = await loadDataset('neuroscience')
 			const phil_text = await loadDataset('philosophy')
 
-			await poly.article.addWithEmbedding({
-				content: `Neuroscience Overview: ${neuro_text.slice(0, 5000)}`
-			})
+			await poly.article.addWithEmbedding(`Neuroscience Overview: ${neuro_text.slice(0, 5000)}`)
 
-			await poly.article.addWithEmbedding({
-				content: `Philosophy Overview: ${phil_text.slice(0, 5000)}`
-			})
+			await poly.article.addWithEmbedding(`Philosophy Overview: ${phil_text.slice(0, 5000)}`)
 
-			const neuro_results = await poly.article.searchByText({
-				query: 'nervous system and brain functions',
-				limit: 5
-			})
+			const neuro_results = await poly.article.searchByText('nervous system and brain functions', 5)
 
 			expect(neuro_results.some(r => r.content.includes('Neuroscience'))).toBe(true)
 
-			const phil_results = await poly.article.searchByVector({
-				query: 'nature of reality and existence',
-				limit: 5
-			})
+			const phil_results = await poly.article.searchByVector('nature of reality and existence', 5)
 
 			expect(phil_results.some(r => r.content.includes('Philosophy'))).toBe(true)
 		})
@@ -93,9 +81,7 @@ describe.concurrent('Polywise Pure Text Learning', () => {
 			const chunks = chunkText(ai_text, 1200).slice(0, 10)
 
 			for (const chunk of chunks) {
-				await poly.article.addWithEmbedding({
-					content: chunk
-				})
+				await poly.article.addWithEmbedding(chunk)
 			}
 
 			const query = 'transformer architecture and self-attention mechanism'
@@ -114,15 +100,12 @@ describe.concurrent('Polywise Pure Text Learning', () => {
 			const physics_text = await loadDataset('physics')
 
 			await Promise.all([
-				poly.article.addWithEmbedding({ content: `Legal Foundations: ${legal_text.slice(0, 8000)}` }),
-				poly.article.addWithEmbedding({ content: `Physics Principles: ${physics_text.slice(0, 8000)}` })
+				poly.article.addWithEmbedding(`Legal Foundations: ${legal_text.slice(0, 8000)}`),
+				poly.article.addWithEmbedding(`Physics Principles: ${physics_text.slice(0, 8000)}`)
 			])
 
 			const startTime = Date.now()
-			const results = await poly.article.searchByVector({
-				query: 'quantum mechanics and constitutional law',
-				limit: 10
-			})
+			const results = await poly.article.searchByVector('quantum mechanics and constitutional law', 10)
 			const duration = Date.now() - startTime
 
 			expect(results.length).toBeGreaterThan(0)

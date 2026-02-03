@@ -428,7 +428,7 @@ describe.concurrent('Polywise Brain System', () => {
 	describe.concurrent('Article CRUD and Search', () => {
 		it('should add article and retrieve by id', async () => {
 			const content = 'This is a test article about artificial intelligence and machine learning.'
-			const article_id = await poly.article.add({ content })
+			const article_id = await poly.article.add(content)
 
 			expect(article_id).toBeGreaterThan(0)
 
@@ -440,15 +440,15 @@ describe.concurrent('Polywise Brain System', () => {
 
 		it('should add article with embedding', async () => {
 			const content = 'Deep learning is a subset of machine learning that uses neural networks.'
-			const article_id = await poly.article.addWithEmbedding({ content })
+			const article_id = await poly.article.addWithEmbedding(content)
 
 			expect(article_id).toBeGreaterThan(0)
 		})
 
 		it('should get all articles', async () => {
-			await poly.article.add({ content: 'Content 1' })
-			await poly.article.add({ content: 'Content 2' })
-			await poly.article.add({ content: 'Content 3' })
+			await poly.article.add('Content 1')
+			await poly.article.add('Content 2')
+			await poly.article.add('Content 3')
 
 			const articles = await poly.article.getAll()
 
@@ -456,17 +456,15 @@ describe.concurrent('Polywise Brain System', () => {
 		})
 
 		it('should search articles by full-text search', async () => {
-			await poly.article.addWithEmbedding({
-				content: 'Python Programming: Python is a popular programming language for data science.'
-			})
-			await poly.article.addWithEmbedding({
-				content: 'JavaScript Basics: JavaScript is used for web development.'
-			})
-			await poly.article.addWithEmbedding({
-				content: 'Data Science: Data science combines statistics and computer science.'
-			})
+			await poly.article.addWithEmbedding(
+				'Python Programming: Python is a popular programming language for data science.'
+			)
+			await poly.article.addWithEmbedding('JavaScript Basics: JavaScript is used for web development.')
+			await poly.article.addWithEmbedding(
+				'Data Science: Data science combines statistics and computer science.'
+			)
 
-			const results = await poly.article.searchByText({ query: 'programming language', limit: 10 })
+			const results = await poly.article.searchByText('programming language', 10)
 
 			expect(results.length).toBeGreaterThan(0)
 
@@ -476,20 +474,17 @@ describe.concurrent('Polywise Brain System', () => {
 		})
 
 		it('should search articles by vector similarity', async () => {
-			await poly.article.addWithEmbedding({
-				content: 'Machine Learning Guide: Machine learning algorithms enable computers to learn from data.'
-			})
-			await poly.article.addWithEmbedding({
-				content: 'Web Development: HTML CSS and JavaScript are the building blocks of websites.'
-			})
-			await poly.article.addWithEmbedding({
-				content: 'Database Systems: Relational databases store structured data using SQL.'
-			})
+			await poly.article.addWithEmbedding(
+				'Machine Learning Guide: Machine learning algorithms enable computers to learn from data.'
+			)
+			await poly.article.addWithEmbedding(
+				'Web Development: HTML CSS and JavaScript are the building blocks of websites.'
+			)
+			await poly.article.addWithEmbedding(
+				'Database Systems: Relational databases store structured data using SQL.'
+			)
 
-			const results = await poly.article.searchByVector({
-				query: 'artificial intelligence and neural networks',
-				limit: 10
-			})
+			const results = await poly.article.searchByVector('artificial intelligence and neural networks', 10)
 
 			expect(results.length).toBeGreaterThanOrEqual(1)
 
