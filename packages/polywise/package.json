@@ -26,9 +26,7 @@
 		"ofetch": "^1.4.1",
 		"p-queue": "^8.1.0",
 		"tslib": "^2.8.1",
-		"tsyringe": "^4.10.0",
-		"lmdb": "^3.5.1",
-		"@lancedb/lancedb": "^0.23.0"
+		"tsyringe": "^4.10.0"
 	},
 	"devDependencies": {
 		"@rslib/core": "catalog:",
