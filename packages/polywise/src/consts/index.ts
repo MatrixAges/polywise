@@ -32,10 +32,10 @@ export const formatSourceInfo = (source: string, stimulated: boolean, memoryStre
 
 export const PERCEIVE_COMMAND = 'perceive'
 
+export const SCHEMA_META = 'meta'
 export const SCHEMA_BRAIN = 'brain'
 export const SCHEMA_KNOWLEDGE = 'knowledge'
-export const SCHEMA_USER_SPACE = 'user_space'
-export const SCHEMA_META = 'meta'
+export const SCHEMA_USER = 'user'
 
 export const formatPerceiveQuery = (query: string, insights: string) => {
 	return `${query} [${PERCEIVE_COMMAND}: ${insights}]`

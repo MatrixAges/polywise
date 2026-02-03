@@ -1,4 +1,4 @@
-import { SCHEMA_BRAIN, SCHEMA_KNOWLEDGE, SCHEMA_USER_SPACE } from '../consts'
+import { SCHEMA_BRAIN, SCHEMA_KNOWLEDGE, SCHEMA_USER } from '../consts'
 
 export const sql_create_extension_vector = `CREATE EXTENSION IF NOT EXISTS vector;`
 
@@ -81,7 +81,7 @@ export const sql_create_table_node_sources = `
   );
 `
 
-export const sql_create_schema_user_space = `CREATE SCHEMA IF NOT EXISTS ${SCHEMA_USER_SPACE};`
+export const sql_create_schema_user_space = `CREATE SCHEMA IF NOT EXISTS ${SCHEMA_USER};`
 
 export const sql_create_table_article_embeddings = `
   CREATE TABLE IF NOT EXISTS ${SCHEMA_KNOWLEDGE}.article_embeddings (
