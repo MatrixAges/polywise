@@ -29,7 +29,8 @@ import type {
 	SingleSearchArgs,
 	ExecuteCotArgs,
 	RecallNodesByKeywordsArgs,
-	StrengthenRelatedEdgesArgs
+	StrengthenRelatedEdgesArgs,
+	ContextResult
 } from './types'
 
 @singleton()
