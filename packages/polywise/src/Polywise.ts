@@ -237,10 +237,9 @@ export default class Polywise {
 		this.brain.setBusy(true)
 
 		try {
-			const { title, content, triples, article_id, idol_id, root_ids, metrics_ids, generate_embedding } =
-				args
+			const { content, triples, article_id, idol_id, root_ids, metrics_ids, generate_embedding } = args
 
-			const res = await this.query_raw<{ id: number }>(sql.sql_process_article, [title, content])
+			const res = await this.query_raw<{ id: number }>(sql.sql_process_article, [content])
 
 			const aid = article_id ?? res[0].id
 
@@ -248,13 +247,15 @@ export default class Polywise {
 				await this.article.addEmbedding(aid, content)
 			}
 
-			await this.injectTriples({
-				article_id: aid,
-				triples,
-				idol_id,
-				root_ids,
-				metrics_ids
-			})
+			if (triples && triples.length > 0) {
+				await this.injectTriples({
+					article_id: aid,
+					triples,
+					idol_id,
+					root_ids,
+					metrics_ids
+				})
+			}
 		} finally {
 			this.brain.setBusy(false)
 		}
@@ -481,7 +482,7 @@ export default class Polywise {
 
 			const depth_recall_depth = base_recall_depth + current_depth
 			const top_results = initial_results.slice(0, 3)
-			const insights = top_results.map(r => r.title).join(', ')
+			const insights = top_results.map(r => r.content.slice(0, 50)).join(', ')
 			const emerged_query = formatPerceiveQuery(query, insights)
 			const emerged_node_ids = top_results.map(r => r.id)
 
@@ -625,7 +626,7 @@ export default class Polywise {
 				const top = result[0]
 
 				const slow_result: ReactResult = {
-					action: top.title,
+					action: top.content.slice(0, 50),
 					description: top.content.split('\n')[0] || 'Slow system decision',
 					metadata: top.metadata || {},
 					confidence: top.combinedScore,
@@ -669,7 +670,6 @@ export default class Polywise {
 
 					candidates.push({
 						id: article.id,
-						title: article.title,
 						content: article.content,
 						rerankScore: article.rerankScore,
 						relevance_score: 1.5,
@@ -689,7 +689,6 @@ export default class Polywise {
 
 				candidates.push({
 					id: result.id,
-					title: result.title,
 					content: result.content,
 					rerankScore: result.rerankScore,
 					relevance_score: result.rerankScore,
@@ -708,7 +707,6 @@ export default class Polywise {
 		for (const node of high_potential_nodes) {
 			candidates.push({
 				id: node.id,
-				title: node.label,
 				content: formatNodeContent(node.label, node.metadata?.desc),
 				rerankScore: node.potential,
 				relevance_score: node.potential * 0.8,
@@ -731,14 +729,13 @@ export default class Polywise {
 
 		const documents = candidates.map(c => {
 			const source_info = formatSourceInfo(c.source, c.stimulated, c.memory_strength)
-			return `${c.title}\n${source_info}\n${c.content}`
+			return `${source_info}\n${c.content}`
 		})
 
 		const rerank_scores = await this.pipeline.rerank(query, documents)
 
 		const results: HybridSearchResult[] = candidates.map((candidate, index) => ({
 			id: candidate.id,
-			title: candidate.title,
 			content: candidate.content,
 			source: candidate.source,
 			rerankScore: rerank_scores[index]?.score ?? 0,

@@ -1,8 +1,8 @@
 import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 
 import Polywise from '../src/Polywise'
-import { cognitive_articles } from './datasets/cognitive'
-import { software_articles } from './datasets/software'
+import { cognitive_science_datasets } from './datasets/cognitive'
+import { software_architecture_datasets } from './datasets/software'
 
 describe.concurrent('Article CRUD Operations', () => {
 	let poly: Polywise
@@ -24,21 +24,20 @@ describe.concurrent('Article CRUD Operations', () => {
 	})
 
 	it('should create article using real-world software documentation', async () => {
-		const article_data = software_articles[0]
-		const article = await poly.article.process(article_data)
+		const content = software_architecture_datasets[0]
+		const article = await poly.article.process({ content })
 
 		expect(article.id).toBeGreaterThan(0)
-		expect(article.title).toBe(article_data.title)
-		expect(article.content).toBe(article_data.content)
-		expect(article.created_at).toBeInstanceOf(Date)
+		expect(article.content).toBe(content)
+		expect(article.created_at).toBeDefined()
 	})
 
-	it('should get article by searching for its real title', async () => {
-		const article_data = cognitive_articles[0]
-		await poly.article.process(article_data)
+	it('should get article by searching for its real content', async () => {
+		const content = cognitive_science_datasets[0]
+		await poly.article.process({ content })
 
 		const articles = await poly.article.searchFts({
-			query: 'Cognitive functions architecture',
+			query: 'Understanding brain architecture',
 			limit: 1
 		})
 
@@ -47,29 +46,26 @@ describe.concurrent('Article CRUD Operations', () => {
 		const article = await poly.article.get(articles[0].id)
 
 		expect(article.length).toBeGreaterThan(0)
-		expect(article[0]?.title).toBe(article_data.title)
+		expect(article[0]?.content).toBe(content)
 	})
 
 	it('should update real-world article content', async () => {
-		const created = await poly.article.process(software_articles[1])
+		const created = await poly.article.process({ content: software_architecture_datasets[1] })
 
 		const updated = await poly.article.update({
 			id: created.id,
-			title: 'Docker Best Practices (Updated)',
 			content: 'Updated content for containerization...'
 		})
 
-		expect(updated.title).toBe('Docker Best Practices (Updated)')
 		expect(updated.content).toBe('Updated content for containerization...')
 
 		const fetched = await poly.article.get(created.id)
 
-		expect(fetched[0]?.title).toBe('Docker Best Practices (Updated)')
+		expect(fetched[0]?.content).toBe('Updated content for containerization...')
 	})
 
 	it('should delete article', async () => {
 		const created = await poly.article.process({
-			title: 'Article to Delete',
 			content: 'Content for deletion test.'
 		})
 
@@ -82,12 +78,10 @@ describe.concurrent('Article CRUD Operations', () => {
 
 	it('should get all articles', async () => {
 		await poly.article.process({
-			title: 'Article 1',
 			content: 'Content 1'
 		})
 
 		await poly.article.process({
-			title: 'Article 2',
 			content: 'Content 2'
 		})
 
@@ -136,31 +130,31 @@ describe.concurrent('Full-Text Search and Vector Search', () => {
 
 	describe.concurrent('Full-Text Search', () => {
 		it('should find real-world articles matching specific technical keywords', async () => {
-			for (const article of software_articles.slice(0, 3)) {
-				await poly.article.process(article)
+			for (const content of software_architecture_datasets) {
+				await poly.article.process({ content })
 			}
 
-			const results = await poly.article.searchFts({
-				query: 'Microservices scalability',
+			const results = await poly.article.searchByText({
+				query: 'Microservices architecture',
 				limit: 10
 			})
 
 			expect(results.length).toBeGreaterThanOrEqual(1)
-			expect(results.some(r => r.title.includes('Microservices'))).toBe(true)
+			expect(results.some(r => r.content.includes('Microservices'))).toBe(true)
 		})
 
-		it('should search for cognitive science concepts in title and content', async () => {
-			for (const article of cognitive_articles) {
-				await poly.article.process(article)
+		it('should search for cognitive science concepts in content', async () => {
+			for (const content of cognitive_science_datasets) {
+				await poly.article.process({ content })
 			}
 
 			const results = await poly.article.searchFts({
-				query: '86 billion neurons communication synapses',
+				query: 'billion neurons',
 				limit: 10
 			})
 
 			expect(results.length).toBeGreaterThanOrEqual(1)
-			expect(results[0].title).toBe('How the Human Brain Works')
+			expect(results[0].content).toContain('neurons')
 		})
 
 		it('should return empty array for non-existent technical terms', async () => {

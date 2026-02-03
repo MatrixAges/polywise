@@ -1,8 +1,13 @@
 import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 
 import Polywise from '../src/Polywise'
-import { long_context_articles, multi_hop_articles } from './datasets/longcontext'
-import { homonym_traps, negation_traps, similarity_traps, temporal_traps } from './datasets/traps'
+import { long_context_datasets, multi_hop_datasets } from './datasets/longcontext'
+import {
+	homonym_traps_datasets,
+	negation_traps_datasets,
+	similarity_traps_datasets,
+	temporal_traps_datasets
+} from './datasets/traps'
 
 const TEST_TIMEOUT = 120000
 
@@ -20,28 +25,28 @@ describe.concurrent('Long Context and Language Traps', () => {
 			reranker_concurrency: 10
 		})
 
-		for (const article of long_context_articles) {
-			await (poly as any).article.addWithEmbedding(article)
+		for (const content of long_context_datasets) {
+			await poly.article.addWithEmbedding({ content })
 		}
 
-		for (const article of multi_hop_articles) {
-			await (poly as any).article.addWithEmbedding(article)
+		for (const content of multi_hop_datasets) {
+			await poly.article.addWithEmbedding({ content })
 		}
 
-		for (const article of homonym_traps) {
-			await (poly as any).article.addWithEmbedding(article)
+		for (const content of homonym_traps_datasets) {
+			await poly.article.addWithEmbedding({ content })
 		}
 
-		for (const article of negation_traps) {
-			await (poly as any).article.addWithEmbedding(article)
+		for (const content of negation_traps_datasets) {
+			await poly.article.addWithEmbedding({ content })
 		}
 
-		for (const article of temporal_traps) {
-			await (poly as any).article.addWithEmbedding(article)
+		for (const content of temporal_traps_datasets) {
+			await poly.article.addWithEmbedding({ content })
 		}
 
-		for (const article of similarity_traps) {
-			await (poly as any).article.addWithEmbedding(article)
+		for (const content of similarity_traps_datasets) {
+			await poly.article.addWithEmbedding({ content })
 		}
 	}, TEST_TIMEOUT)
 
@@ -51,13 +56,13 @@ describe.concurrent('Long Context and Language Traps', () => {
 
 	describe.concurrent('Long Context Scenarios', () => {
 		it('should find the "needle" in a 15,000 character article', async () => {
-			const results = await (poly as any).article.searchFts({
+			const results = await poly.article.searchFts({
 				query: 'stealth mode private memory',
 				limit: 5
 			})
 
 			expect(results.length).toBeGreaterThan(0)
-			expect(results[0].title).toBe('Polywise Architecture Deep Dive')
+			expect(results[0].content).toContain('Polywise Architecture Deep Dive')
 			expect(results[0].content).toContain('stealth mode')
 		})
 
@@ -86,23 +91,23 @@ describe.concurrent('Long Context and Language Traps', () => {
 
 	describe.concurrent('Language Traps', () => {
 		it('should distinguish between different meanings of "Mercury"', async () => {
-			const planet_results = await (poly as any).article.searchFts({
+			const planet_results = await poly.article.searchFts({
 				query: 'Mercury planet orbit days',
 				limit: 1
 			})
 
-			expect(planet_results[0].title).toBe('Mercury (Planet)')
+			expect(planet_results[0].content).toContain('Mercury (Planet)')
 
-			const element_results = await (poly as any).article.searchFts({
+			const element_results = await poly.article.searchFts({
 				query: 'Mercury metallic element liquid',
 				limit: 1
 			})
 
-			expect(element_results[0].title).toBe('Mercury (Element)')
+			expect(element_results[0].content).toContain('Mercury (Element)')
 		})
 
 		it('should not be fooled by negation traps in full-text search', async () => {
-			const results = await (poly as any).article.searchFts({
+			const results = await poly.article.searchFts({
 				query: 'Polywise supports MySQL',
 				limit: 5
 			})
@@ -111,36 +116,31 @@ describe.concurrent('Long Context and Language Traps', () => {
 		})
 
 		it('should prioritize current version over deprecated version in temporal traps', async () => {
-			const results = await (poly as any).article.searchFts({
+			const results = await poly.article.searchFts({
 				query: 'Polywise specification synchronization method',
 				limit: 10
 			})
 
-			const titles = results.map(r => r.title)
+			const contents = results.map(r => r.content)
 
-			expect(titles).toContain('Polywise v0.8 Specification (CURRENT)')
-
-			const current = results.find(r => r.title.includes('CURRENT'))
-			const deprecated = results.find(r => r.title.includes('DEPRECATED'))
-
-			expect(current).toBeDefined()
-			expect(deprecated).toBeDefined()
+			expect(contents.some(c => c.includes('CURRENT'))).toBe(true)
+			expect(contents.some(c => c.includes('DEPRECATED'))).toBe(true)
 		})
 
 		it('should distinguish between Polywise and Polly-Wise/Poly-Wise', async () => {
-			const project_results = await (poly as any).article.searchFts({
+			const project_results = await poly.article.searchFts({
 				query: 'Polywise architecture',
 				limit: 5
 			})
 
-			expect(project_results.every(r => !r.title.includes('Parrot'))).toBe(true)
+			expect(project_results.every(r => !r.content.includes('Parrot'))).toBe(true)
 
-			const parrot_results = await (poly as any).article.searchFts({
+			const parrot_results = await poly.article.searchFts({
 				query: 'Polly-Wise parrot language',
 				limit: 1
 			})
 
-			expect(parrot_results[0].title).toContain('Parrot')
+			expect(parrot_results[0].content).toContain('Parrot')
 		})
 	})
 })

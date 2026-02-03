@@ -73,7 +73,7 @@ export const sql_stimulate_nodes_batch = `
 `
 
 export const sql_get_node_articles = `
-	SELECT DISTINCT a.id, a.title, a.content
+	SELECT DISTINCT a.id, a.content
 	FROM ${SCHEMA_KNOWLEDGE}.articles a
 	JOIN ${SCHEMA_BRAIN}.node_sources ns ON a.id = ns.article_id
 	WHERE ns.node_id = ANY($1)

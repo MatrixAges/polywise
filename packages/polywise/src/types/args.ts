@@ -81,9 +81,8 @@ export interface ConnectArgs {
 }
 
 export interface ProcessArticleArgs {
-	title: string
 	content: string
-	triples: Triple[]
+	triples?: Triple[]
 	article_id?: number
 	idol_id?: string
 	root_ids?: string[]
@@ -111,7 +110,6 @@ export interface UpsertNodeArgs {
 }
 
 export interface AddArticleArgs {
-	title: string
 	content: string
 }
 
@@ -126,21 +124,18 @@ export interface ArticleArgs {
 
 export interface SearchCandidate {
 	id: number
-	title: string
 	content: string
 	source: 'vector' | 'fulltext'
 }
 
 export interface ArticleSearchResult {
 	id: number
-	title: string
 	content: string
 	similarity?: number
 }
 
 export interface SearchResult {
 	id: number
-	title: string
 	content: string
 	source: 'vector' | 'fulltext'
 	rerankScore: number
@@ -167,7 +162,6 @@ export interface QueryArgs {
 
 export interface AggregatedCandidate {
 	id: number
-	title: string
 	content: string
 	rerankScore: number
 	relevance_score: number

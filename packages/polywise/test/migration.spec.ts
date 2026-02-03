@@ -414,24 +414,23 @@ describe('Migration System', () => {
 			await exec(`
 				CREATE TABLE IF NOT EXISTS ${SCHEMA_KNOWLEDGE}.articles_v2 (
 					id SERIAL PRIMARY KEY,
-					title TEXT NOT NULL,
 					content TEXT,
 					summary TEXT,
 					created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 				);
 			`)
 
-			const articles = await query<{ id: number; title: string; content: string }>(
-				`SELECT id, title, content FROM ${SCHEMA_KNOWLEDGE}.articles`
+			const articles = await query<{ id: number; content: string }>(
+				`SELECT id, content FROM ${SCHEMA_KNOWLEDGE}.articles`
 			)
 
 			for (const article of articles) {
 				const summary = article.content ? article.content.substring(0, 100) + '...' : 'No content'
 
-				await query(
-					`INSERT INTO ${SCHEMA_KNOWLEDGE}.articles_v2 (title, content, summary) VALUES ($1, $2, $3)`,
-					[article.title, article.content, summary]
-				)
+				await query(`INSERT INTO ${SCHEMA_KNOWLEDGE}.articles_v2 (content, summary) VALUES ($1, $2)`, [
+					article.content,
+					summary
+				])
 			}
 
 			const v2_articles = await query(`SELECT * FROM ${SCHEMA_KNOWLEDGE}.articles_v2`)

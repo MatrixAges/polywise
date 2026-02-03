@@ -60,13 +60,13 @@ export const sql_get_snapshot_edges = (weight_threshold: number) => `
   LIMIT 500
 `
 
-export const sql_process_article = `INSERT INTO ${SCHEMA_KNOWLEDGE}.articles (title, content) VALUES ($1, $2) RETURNING *`
+export const sql_process_article = `INSERT INTO ${SCHEMA_KNOWLEDGE}.articles (content) VALUES ($1) RETURNING *`
 
 export const sql_search_articles_by_text = `
-  SELECT id, title, content, created_at,
-    ts_rank(to_tsvector('english', coalesce(title,'') || ' ' || coalesce(content,'')), plainto_tsquery('english', $1)) AS rank
+  SELECT id, content, created_at,
+    ts_rank(to_tsvector('english', coalesce(content,'')), plainto_tsquery('english', $1)) AS rank
   FROM ${SCHEMA_KNOWLEDGE}.articles
-  WHERE to_tsvector('english', coalesce(title,'') || ' ' || coalesce(content,'')) @@ plainto_tsquery('english', $1)
+  WHERE to_tsvector('english', coalesce(content,'')) @@ plainto_tsquery('english', $1)
   ORDER BY rank DESC
   LIMIT $2
 `
@@ -160,7 +160,6 @@ export const sql_get_article_embedding = `SELECT embedding FROM ${SCHEMA_KNOWLED
 export const sql_search_articles_by_vector = `
   SELECT 
     a.id,
-    a.title,
     a.content,
     a.created_at,
     1 - (e.embedding <=> $1) AS similarity
@@ -170,11 +169,11 @@ export const sql_search_articles_by_vector = `
   LIMIT $2
 `
 
-export const sql_get_article = `SELECT id, title, content, created_at FROM ${SCHEMA_KNOWLEDGE}.articles WHERE id = $1`
+export const sql_get_article = `SELECT id, content, created_at FROM ${SCHEMA_KNOWLEDGE}.articles WHERE id = $1`
 
-export const sql_get_all_articles = `SELECT id, title, content, created_at FROM ${SCHEMA_KNOWLEDGE}.articles ORDER BY created_at DESC`
+export const sql_get_all_articles = `SELECT id, content, created_at FROM ${SCHEMA_KNOWLEDGE}.articles ORDER BY created_at DESC`
 
-export const sql_update_article = `UPDATE ${SCHEMA_KNOWLEDGE}.articles SET title = $2, content = $3 WHERE id = $1 RETURNING id, title, content, created_at`
+export const sql_update_article = `UPDATE ${SCHEMA_KNOWLEDGE}.articles SET content = $2 WHERE id = $1 RETURNING id, content, created_at`
 
 export const sql_find_nearest_node = `
   SELECT id, label, activation, potential, threshold, metadata, is_action, 1 - (embedding <=> $1) AS similarity

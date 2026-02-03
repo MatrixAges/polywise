@@ -68,11 +68,9 @@ describe.concurrent('Polywise React System', () => {
 			action_received = res
 		})
 
-		const fire_safety = behavioral_knowledge.find(k => k.title.includes('火灾'))!
+		const fire_safety_content = behavioral_knowledge.find(k => k.includes('火灾'))!
 		await poly_pfc.save({
-			title: fire_safety.title,
-			content: fire_safety.content,
-			triples: []
+			content: fire_safety_content
 		})
 
 		const fire_stimulus = behavioral_stimuli.find(s => s.label.includes('Fire'))!
@@ -107,7 +105,7 @@ describe.concurrent('Polywise React System', () => {
 
 		expect(action_received).toBeDefined()
 		expect(action_received.source).toBe('act')
-		expect(action_received.action).toBe(fire_safety.title)
+		expect(action_received.action).toContain('火灾')
 
 		await poly_pfc.off()
 	}, 60000)
@@ -124,11 +122,9 @@ describe.concurrent('Polywise React System', () => {
 			action_received = res
 		})
 
-		const thirst_knowledge = behavioral_knowledge.find(k => k.title.includes('中暑'))!
+		const thirst_knowledge_content = behavioral_knowledge.find(k => k.includes('中暑'))!
 		await poly_act.save({
-			title: thirst_knowledge.title,
-			content: thirst_knowledge.content,
-			triples: []
+			content: thirst_knowledge_content
 		})
 
 		const thirst_stimulus = behavioral_stimuli.find(s => s.label.includes('Thirsty'))!
@@ -138,7 +134,7 @@ describe.concurrent('Polywise React System', () => {
 		await new Promise(resolve => setTimeout(resolve, 8000))
 
 		expect(action_received).toBeDefined()
-		expect(action_received.action).toBe(thirst_knowledge.title)
+		expect(action_received.action).toContain('中暑')
 		expect(action_received.source).toBe('act')
 
 		await poly_act.off()

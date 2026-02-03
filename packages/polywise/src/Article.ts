@@ -17,16 +17,16 @@ export default class Article {
 		this.pipeline = this.pipeline_instance
 	}
 
-	async add(article: { title: string; content: string }) {
+	async add(article: { content: string }) {
 		const res = await this.process(article)
 		return res?.id || null
 	}
 
-	async process(article: { title: string; content: string }) {
+	async process(article: { content: string }) {
 		if (!this.db) return null
 
-		const { title, content } = article
-		const res = await this.db.query<ArticleEntity>(sql.sql_process_article, [title, content])
+		const { content } = article
+		const res = await this.db.query<ArticleEntity>(sql.sql_process_article, [content])
 
 		if (res.rows.length === 0) return null
 		return res.rows[0]
@@ -41,7 +41,7 @@ export default class Article {
 		await this.db.query(sql.sql_insert_article_embedding, [article_id, `[${embedding.join(',')}]`])
 	}
 
-	async addWithEmbedding(article: { title: string; content: string }) {
+	async addWithEmbedding(article: { content: string }) {
 		const result = await this.process(article)
 		if (result && result.id) {
 			await this.addEmbedding(result.id, article.content)
@@ -66,11 +66,11 @@ export default class Article {
 		return res.rows
 	}
 
-	async update(article: { id: number; title: string; content: string }) {
+	async update(article: { id: number; content: string }) {
 		if (!this.db) return null
 
-		const { id, title, content } = article
-		const res = await this.db.query<ArticleEntity>(sql.sql_update_article, [id, title, content])
+		const { id, content } = article
+		const res = await this.db.query<ArticleEntity>(sql.sql_update_article, [id, content])
 
 		return res.rows.length > 0 ? res.rows[0] : null
 	}

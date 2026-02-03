@@ -130,7 +130,6 @@ export default class Pipeline {
 
 			candidates_map.set(r.id, {
 				id: r.id,
-				title: r.title,
 				content: r.content,
 				source: 'vector'
 			})
@@ -141,7 +140,6 @@ export default class Pipeline {
 
 			candidates_map.set(r.id, {
 				id: r.id,
-				title: r.title,
 				content: r.content,
 				source: 'fulltext'
 			})
@@ -155,7 +153,6 @@ export default class Pipeline {
 
 		const results: SearchResult[] = candidates.map((candidate, index) => ({
 			id: candidate.id,
-			title: candidate.title,
 			content: candidate.content,
 			source: candidate.source,
 			rerankScore: rerank_scores[index]?.score ?? 0

@@ -76,7 +76,6 @@ export const sql_create_schema_knowledge = `CREATE SCHEMA IF NOT EXISTS ${SCHEMA
 export const sql_create_table_articles = `
   CREATE TABLE IF NOT EXISTS ${SCHEMA_KNOWLEDGE}.articles (
     id SERIAL PRIMARY KEY,
-    title TEXT,
     content TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   );
@@ -107,4 +106,4 @@ export const sql_create_index_article_embeddings_hnsw = `
   ON ${SCHEMA_KNOWLEDGE}.article_embeddings USING hnsw (embedding vector_cosine_ops);
 `
 
-export const sql_create_index_article_content_gin = `CREATE INDEX IF NOT EXISTS idx_article_content_gin ON ${SCHEMA_KNOWLEDGE}.articles USING GIN(to_tsvector('english', coalesce(title,'') || ' ' || coalesce(content,'')));`
+export const sql_create_index_article_content_gin = `CREATE INDEX IF NOT EXISTS idx_article_content_gin ON ${SCHEMA_KNOWLEDGE}.articles USING GIN(to_tsvector('english', coalesce(content,'')));`

@@ -80,7 +80,6 @@ export interface Migration {
 
 export interface ArticleEntity {
 	id: number
-	title: string
 	content: string
 	created_at: string
 }
@@ -112,7 +111,6 @@ export interface ContextResult {
 
 export interface HybridSearchResult {
 	id: number
-	title: string
 	content: string
 	source: 'memory' | 'external' | 'implicit'
 	rerankScore: number

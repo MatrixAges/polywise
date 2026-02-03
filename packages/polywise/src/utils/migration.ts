@@ -1,11 +1,11 @@
-import { SCHEMA_BRAIN } from '../consts'
+import { SCHEMA_BRAIN, SCHEMA_KNOWLEDGE } from '../consts'
 import * as sql_schema from '../sql/schema'
 import migrateFn from './migrate'
 import validateMigrationsFn from './validateMigrations'
 
 import type { Migration } from '../types'
 
-export const CURRENT_SCHEMA_VERSION = 4
+export const CURRENT_SCHEMA_VERSION = 5
 
 export const migrations: Migration[] = [
 	{
@@ -63,6 +63,16 @@ export const migrations: Migration[] = [
 				`ALTER TABLE ${SCHEMA_BRAIN}.edges ADD COLUMN IF NOT EXISTS is_habit BOOLEAN DEFAULT false;`,
 				`ALTER TABLE ${SCHEMA_BRAIN}.edges ADD COLUMN IF NOT EXISTS reaction_count INTEGER DEFAULT 0;`,
 				sql_schema.sql_create_index_nodes_embedding
+			])
+		}
+	},
+	{
+		version: 5,
+		description: 'Optimization: Ensure pure text article index is up to date',
+		up: async exec => {
+			await exec([
+				`DROP INDEX IF EXISTS idx_article_content_gin;`,
+				sql_schema.sql_create_index_article_content_gin
 			])
 		}
 	}
