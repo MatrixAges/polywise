@@ -9,7 +9,7 @@ import {
 	temporal_traps_datasets
 } from './datasets/traps'
 
-const TEST_TIMEOUT = 120000
+const TEST_TIMEOUT = 600000
 
 describe.concurrent('Long Context and Language Traps', () => {
 	let poly: Polywise

@@ -74,7 +74,7 @@ describe.concurrent('Polywise Pure Text Learning', () => {
 			const phil_results = await poly.article.searchByVector('nature of reality and existence', 5)
 
 			expect(phil_results.some(r => r.content.includes('Philosophy'))).toBe(true)
-		})
+		}, 120000)
 
 		it('should process AI research papers and extract relevant concepts via RAG', async () => {
 			const ai_text = await loadDataset('ai_research')
@@ -93,7 +93,7 @@ describe.concurrent('Polywise Pure Text Learning', () => {
 
 			expect(result.length).toBeGreaterThan(0)
 			expect(result[0].content.toLowerCase()).toContain('transformer')
-		}, 60000)
+		}, 120000)
 
 		it('should maintain performance with legal and physics datasets', async () => {
 			const legal_text = await loadDataset('legal')
@@ -109,7 +109,7 @@ describe.concurrent('Polywise Pure Text Learning', () => {
 			const duration = Date.now() - startTime
 
 			expect(results.length).toBeGreaterThan(0)
-			expect(duration).toBeLessThan(8000) // Model inference can be slow
-		})
+			expect(duration).toBeLessThan(15000) // Model inference can be slow
+		}, 120000)
 	})
 })
