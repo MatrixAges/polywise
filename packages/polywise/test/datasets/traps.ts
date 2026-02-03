@@ -31,7 +31,7 @@ export const temporal_traps = [
 	},
 	{
 		title: 'Polywise v0.8 Specification (CURRENT)',
-		content: 'As of version 0.8, manual polling has been replaced by a real-time reactive streaming architecture. Polling is no longer supported and will cause synchronization errors.'
+		content: 'As of version 0.8, the manual polling method has been replaced by a real-time reactive streaming architecture. Polling is no longer supported and will cause synchronization errors.'
 	}
 ]
 

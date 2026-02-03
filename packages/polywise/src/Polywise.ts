@@ -440,10 +440,15 @@ export default class Polywise {
 		return await this.query<Node[]>(sql_brain.sql_recall_related_nodes, [node_ids, max_depth, 20])
 	}
 
-	private async getNodeContexts(node_ids: number[]) {
+	private async getNodeContexts(node_ids: number[]): Promise<ContextResult[]> {
 		if (!this.db || node_ids.length === 0) return []
 
-		return await this.query<any[]>(sql_brain.sql_get_node_articles, [node_ids])
+		const articles = await this.query<any[]>(sql_brain.sql_get_node_articles, [node_ids])
+
+		return articles.map(article => ({
+			article_ids: [article.id],
+			relevance_score: 1.0
+		}))
 	}
 
 	private async stimulateNodes(node_ids: number[], intensity: number) {

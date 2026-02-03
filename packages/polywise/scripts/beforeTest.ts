@@ -1,3 +1,4 @@
+import 'reflect-metadata'
 import '@abraham/reflection'
 
 import { container } from 'tsyringe'
