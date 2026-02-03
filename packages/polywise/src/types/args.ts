@@ -1,7 +1,7 @@
 import type { PGlite } from '@electric-sql/pglite'
 import type Polywise from '../Polywise'
 import type { ChainEmitter } from '../utils'
-import type { COTDepthResult, HybridSearchResult, Metadata, Triple } from './polywise'
+import type { HybridSearchResult, Metadata, Triple } from './polywise'
 
 export interface BrainArgs {
 	poly: Polywise
