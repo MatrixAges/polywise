@@ -35,6 +35,7 @@ export default class Article {
 		if (!this.db || !this.pipeline) return
 
 		const embedding = await this.pipeline.embed(content)
+		if (!embedding) return
 
 		await this.db.query(sql.sql_insert_article_embedding, [article_id, `[${embedding.join(',')}]`])
 	}
@@ -93,6 +94,7 @@ export default class Article {
 		const { query, limit } = args
 
 		const embedding = await this.pipeline.embed(query)
+		if (!embedding) return []
 
 		const res = await this.db.query<ArticleWithSimilarity>(sql.sql_search_articles_by_vector, [
 			`[${embedding.join(',')}]`,
