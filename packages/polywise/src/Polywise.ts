@@ -368,6 +368,8 @@ export default class Polywise {
 
 		try {
 			if (!emitter.isActiveStatus() || current_depth > max_depth || !this.db) {
+				emitter.finish()
+
 				return
 			}
 
@@ -420,7 +422,12 @@ export default class Polywise {
 
 			if (current_depth < max_depth && emerged_final_results.length > 0) {
 				setImmediate(() => {
-					if (!this.db) return
+					if (!this.db) {
+						emitter.finish()
+
+						return
+					}
+
 					this.executeCot({
 						query: emerged_query,
 						current_depth: current_depth + 1,
@@ -434,8 +441,12 @@ export default class Polywise {
 						history_ids
 					})
 				})
+			} else {
+				emitter.finish()
 			}
 		} catch (e: any) {
+			emitter.finish()
+
 			if (
 				e.message?.includes('DB not initialized') ||
 				e.message?.includes('closed') ||

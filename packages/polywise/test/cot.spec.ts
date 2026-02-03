@@ -30,8 +30,8 @@ describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
 
 		await poly.init({
 			data_dir: db_name,
-			embedding_concurrency: 10,
-			reranker_concurrency: 10,
+			embedding_concurrency: 20,
+			reranker_concurrency: 20,
 			onTick: async () => {
 				const { nodes, edges } = await poly.getSnapshot()
 				const active = nodes.filter((n: any) => n.activation > 0).map((n: any) => n.label)
@@ -128,7 +128,7 @@ describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
 				received_events.push(data)
 			})
 
-			await new Promise(resolve => setTimeout(resolve, 3000))
+			await cot.toPromise()
 
 			expect(received_events.length).toBe(1)
 			expect(received_events[0].depth).toBe(1)
@@ -150,7 +150,7 @@ describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
 				received_events.push(data)
 			})
 
-			await new Promise(resolve => setTimeout(resolve, 5000))
+			await cot.toPromise()
 
 			expect(received_events.length).toBe(2)
 			expect(received_events[0].depth).toBe(1)
@@ -174,7 +174,7 @@ describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
 				depths.push(data.depth)
 			})
 
-			await new Promise(resolve => setTimeout(resolve, 7000))
+			await cot.toPromise()
 
 			expect(received_events.length).toBe(3)
 			expect(depths[0]).toBe(1)
@@ -198,7 +198,7 @@ describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
 				received_events.push(data)
 			})
 
-			await new Promise(resolve => setTimeout(resolve, 5000))
+			await cot.toPromise()
 
 			expect(received_events.length).toBe(2)
 			expect(received_events[0].emerged_nodes.length).toBeGreaterThanOrEqual(0)
@@ -220,7 +220,7 @@ describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
 				received_events.push(data)
 			})
 
-			await new Promise(resolve => setTimeout(resolve, 7000))
+			await cot.toPromise()
 
 			expect(received_events.length).toBe(3)
 			expect(received_events[0].query).toContain('circuit breaker')
@@ -290,7 +290,7 @@ describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
 				received_events.push(data)
 			})
 
-			await new Promise(resolve => setTimeout(resolve, 5000))
+			await cot.toPromise()
 
 			const stimulated_results = received_events.flatMap(e => e.results.filter((r: any) => r.stimulated))
 
@@ -313,7 +313,7 @@ describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
 				received_events.push(data)
 			})
 
-			await new Promise(resolve => setTimeout(resolve, 5000))
+			await cot.toPromise()
 
 			expect(received_events.length).toBe(2)
 
@@ -343,7 +343,7 @@ describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
 
 			cot.off()
 
-			await new Promise(resolve => setTimeout(resolve, 5000))
+			await new Promise(resolve => setTimeout(resolve, 100))
 
 			expect(event_count).toBeLessThan(5)
 		})
@@ -368,7 +368,7 @@ describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
 				received_by_second.push(data)
 			})
 
-			await new Promise(resolve => setTimeout(resolve, 5000))
+			await cot.toPromise()
 
 			expect(received_by_first.length).toBe(received_by_second.length)
 			expect(received_by_first.length).toBeGreaterThan(0)
@@ -405,7 +405,7 @@ describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
 				received_events.push(data)
 			})
 
-			await new Promise(resolve => setTimeout(resolve, 10000))
+			await cot.toPromise()
 
 			expect(received_events.length).toBeGreaterThanOrEqual(3)
 			expect(received_events[0].query).toContain('microservices')
@@ -438,7 +438,7 @@ describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
 				received_events.push(data)
 			})
 
-			await new Promise(resolve => setTimeout(resolve, 8000))
+			await cot.toPromise()
 
 			expect(received_events.length).toBe(3)
 
@@ -472,7 +472,7 @@ describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
 				received_events.push(data)
 			})
 
-			await new Promise(resolve => setTimeout(resolve, 8000))
+			await cot.toPromise()
 
 			expect(received_events.length).toBe(3)
 
@@ -498,7 +498,7 @@ describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
 				received_events.push(data)
 			})
 
-			await new Promise(resolve => setTimeout(resolve, 5000))
+			await cot.toPromise()
 
 			for (const event of received_events) {
 				expect(event.results.length).toBeLessThanOrEqual(3)
@@ -520,7 +520,7 @@ describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
 				received_events.push(data)
 			})
 
-			await new Promise(resolve => setTimeout(resolve, 5000))
+			await cot.toPromise()
 
 			expect(received_events.length).toBe(2)
 
@@ -546,7 +546,7 @@ describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
 				received_events.push(data)
 			})
 
-			await new Promise(resolve => setTimeout(resolve, 5000))
+			await cot.toPromise()
 
 			expect(received_events.length).toBe(2)
 
@@ -580,8 +580,10 @@ describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
 
 			await empty_poly.init({
 				data_dir: `:polywise_cot_empty_${unique_id}:`,
-				embedding_concurrency: 10,
-				reranker_concurrency: 10
+				embedding_concurrency: 20,
+				reranker_concurrency: 20,
+				embedding_config: { type: 'custom', fn: mockEmbedding },
+				reranker_config: { type: 'custom', fn: mockRerank }
 			})
 
 			const { result, cot } = await empty_poly.query({
@@ -601,7 +603,7 @@ describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
 				received_events.push(data)
 			})
 
-			await new Promise(resolve => setTimeout(resolve, 3000))
+			await cot.toPromise()
 
 			await empty_poly.off()
 		})
@@ -621,7 +623,7 @@ describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
 				received_events.push(data)
 			})
 
-			await new Promise(resolve => setTimeout(resolve, 15000))
+			await cot.toPromise()
 
 			expect(received_events.length).toBeLessThanOrEqual(10)
 		})
