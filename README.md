@@ -37,7 +37,6 @@ await poly.init({ data_dir: './my-memory' })
 
 // Save knowledge from conversation
 await poly.save({
-	title: 'User Preferences',
 	content: 'User likes dark mode, prefers TypeScript, works late at night',
 	triples: [
 		{ subject: 'User', predicate: 'prefers', object: 'Dark Mode', learning_rate: 2.0 },
@@ -124,6 +123,14 @@ polywise/
 3. 🌙 **Consolidation**: Sleep phase reinforces important memories
 4. ⚡ **Stimulation**: External input activates nodes and spreads
 5. 🔄 **Habituation**: Successful "Act" decisions can be automated into "React" habits
+
+### 🛠️ Key API Changes
+
+- **Polywise.init()**: Now accepts comprehensive configuration including `embedding_concurrency` and `reranker_concurrency`.
+- **Polywise.off()**: Now an `async` method. Always `await poly.off()` for clean database shutdown.
+- **Polywise.save()**: Parameters optimized to use an object `args: ProcessArticleArgs`.
+- **Pipeline Search**: Integrated `truncation: true` and `max_length: 2048` for robust handling of long contexts.
+- **Full-Text Search**: Upgraded to `websearch_to_tsquery` for better natural language handling.
 
 ### 🔄 State Machine
 

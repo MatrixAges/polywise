@@ -37,7 +37,6 @@ await poly.init({ data_dir: './my-memory' })
 
 // 从对话中保存知识
 await poly.save({
-	title: '用户偏好',
 	content: '用户喜欢深色模式，偏爱 TypeScript，工作时间较晚',
 	triples: [
 		{ subject: '用户', predicate: '偏爱', object: '深色模式', learning_rate: 2.0 },
@@ -124,6 +123,14 @@ polywise/
 3. 🌙 **巩固**：睡眠阶段强化重要记忆
 4. ⚡ **刺激**：外部输入激活节点并传播
 5. 🔄 **习惯化**：成功的“行动”决策可被自动转化为“反应”习惯
+
+### 🛠️ 关键 API 变更
+
+- **Polywise.init()**：现在接受更全面的配置，包括 `embedding_concurrency` 和 `reranker_concurrency` 并发控制。
+- **Polywise.off()**：现在是 `async` 方法。务必 `await poly.off()` 以确保数据库安全关闭。
+- **Polywise.save()**：参数优化为使用对象结构 `args: ProcessArticleArgs`。
+- **Pipeline 搜索**：集成了 `truncation: true` 和 `max_length: 2048`，可稳健处理超长上下文。
+- **全文检索**：升级为 `websearch_to_tsquery`，提供更好的自然语言处理能力。
 
 ### 🔄 状态机
 

@@ -17,7 +17,7 @@
 		"build": "rslib build",
 		"before_test": "bun ./scripts/beforeTest.ts",
 		"after_test": "bun ./scripts/afterTest.ts",
-		"test": "pnpm run before_test && rstest run test/longcontext.spec.ts && pnpm run after_test"
+		"test": "pnpm run before_test && rstest run && pnpm run after_test"
 	},
 	"dependencies": {
 		"@abraham/reflection": "^0.13.0",
