@@ -6,13 +6,14 @@ import Polywise from '../src/Polywise'
 
 describe('Polywise Brain System', () => {
 	let poly: Polywise
-	const uniqueId = Math.random().toString(36).slice(2)
-	const dbName = `:polywise_test_${uniqueId}:`
+	const unique_id = Math.random().toString(36).slice(2)
+	const db_name = `:polywise_test_${unique_id}:`
 
 	beforeAll(async () => {
 		poly = new Polywise()
+
 		await poly.init({
-			data_dir: dbName,
+			data_dir: db_name,
 			onTick: async () => {
 				const { nodes, edges } = await poly.getSnapshot()
 				const active = nodes.filter((n: any) => n.activation > 0).map((n: any) => n.label)
@@ -32,16 +33,16 @@ describe('Polywise Brain System', () => {
 		it('should build complex interconnected knowledge graph', async () => {
 			const nodes: number[] = []
 			const concepts = [
-				{ label: `ML_${uniqueId}`, x: 0, y: 0 },
-				{ label: `NeuralNetworks_${uniqueId}`, x: 100, y: 50 },
-				{ label: `DeepLearning_${uniqueId}`, x: 200, y: 0 },
-				{ label: `Convolution_${uniqueId}`, x: 300, y: 100 },
-				{ label: `RecurrentNetworks_${uniqueId}`, x: 100, y: 150 },
-				{ label: `Transformers_${uniqueId}`, x: 250, y: 200 },
-				{ label: `Attention_${uniqueId}`, x: 400, y: 150 },
-				{ label: `BERT_${uniqueId}`, x: 500, y: 100 },
-				{ label: `GPT_${uniqueId}`, x: 500, y: 250 },
-				{ label: `LLM_${uniqueId}`, x: 600, y: 175 }
+				{ label: `ML_${unique_id}`, x: 0, y: 0 },
+				{ label: `NeuralNetworks_${unique_id}`, x: 100, y: 50 },
+				{ label: `DeepLearning_${unique_id}`, x: 200, y: 0 },
+				{ label: `Convolution_${unique_id}`, x: 300, y: 100 },
+				{ label: `RecurrentNetworks_${unique_id}`, x: 100, y: 150 },
+				{ label: `Transformers_${unique_id}`, x: 250, y: 200 },
+				{ label: `Attention_${unique_id}`, x: 400, y: 150 },
+				{ label: `BERT_${unique_id}`, x: 500, y: 100 },
+				{ label: `GPT_${unique_id}`, x: 500, y: 250 },
+				{ label: `LLM_${unique_id}`, x: 600, y: 175 }
 			]
 
 			for (const concept of concepts) {
@@ -281,11 +282,13 @@ describe('Polywise Brain System', () => {
 				content: 'Introduction to AI...',
 				triples: article1_triples
 			})
+
 			await poly.processArticle({
 				title: 'Neural Networks',
 				content: 'Understanding neural networks...',
 				triples: article2_triples
 			})
+
 			await poly.processArticle({
 				title: 'Deep Learning',
 				content: 'Deep learning concepts...',
@@ -673,6 +676,7 @@ describe('Polywise Brain System', () => {
 			expect(edges.length).toBeGreaterThanOrEqual(2)
 
 			const ai_node = nodes.find((n: any) => n.label === 'AI_Technology')
+
 			expect(ai_node).toBeDefined()
 			expect(ai_node.idol_id).toBe(idol)
 			expect(ai_node.root_ids).toContain('article_root_1')
@@ -705,6 +709,7 @@ describe('Polywise Brain System', () => {
 			const { nodes, edges } = await poly.getSnapshot(0.1)
 
 			const snapshot_node = nodes.find((n: any) => n.label === 'Snapshot_Node')
+
 			expect(snapshot_node).toBeDefined()
 			expect(snapshot_node.idol_id).toBe(idol)
 			expect(snapshot_node.root_ids).toEqual(root_ids)
@@ -721,6 +726,7 @@ describe('Polywise Brain System', () => {
 			expect(article_id).toBeGreaterThan(0)
 
 			const articles = await poly.article.get(article_id)
+
 			expect(articles.length).toBe(1)
 			expect(articles[0].title).toBe(title)
 			expect(articles[0].content).toBe(content)
@@ -761,7 +767,9 @@ describe('Polywise Brain System', () => {
 			const results = await poly.article.searchByText({ query: 'programming language', limit: 10 })
 
 			expect(results.length).toBeGreaterThan(0)
+
 			const titles = results.map((a: any) => a.title)
+
 			expect(titles).toContain('Python Programming')
 		})
 
@@ -785,7 +793,9 @@ describe('Polywise Brain System', () => {
 			})
 
 			expect(results.length).toBeGreaterThanOrEqual(1)
+
 			const titles = results.map((a: any) => a.title)
+
 			expect(titles).toContain('Machine Learning Guide')
 			expect(results[0].similarity).toBeGreaterThan(0.5)
 		})

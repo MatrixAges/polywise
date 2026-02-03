@@ -40,15 +40,17 @@ describe('Migration System', () => {
 				for (const s of sql) {
 					await db.exec(s)
 				}
-			} else {
-				await db.exec(sql)
+
+				return
 			}
+
+			await db.exec(sql)
 		}
 
-		const query = async <T = any>(sql: string, params?: any[]): Promise<T[]> => {
+		const query = async <T = any>(sql: string, params?: any[]) => {
 			const res = await db.query(sql, params)
 
-			return JSON.parse(JSON.stringify(res.rows))
+			return JSON.parse(JSON.stringify(res.rows)) as T[]
 		}
 
 		it('should apply all migrations from version 0', async () => {
@@ -115,15 +117,17 @@ describe('Migration System', () => {
 				for (const s of sql) {
 					await db.exec(s)
 				}
-			} else {
-				await db.exec(sql)
+
+				return
 			}
+
+			await db.exec(sql)
 		}
 
-		const query = async <T = any>(sql: string, params?: any[]): Promise<T[]> => {
+		const query = async <T = any>(sql: string, params?: any[]) => {
 			const res = await db.query(sql, params)
 
-			return JSON.parse(JSON.stringify(res.rows))
+			return JSON.parse(JSON.stringify(res.rows)) as T[]
 		}
 
 		it('should add new column with default value', async () => {
@@ -184,15 +188,17 @@ describe('Migration System', () => {
 				for (const s of sql) {
 					await db.exec(s)
 				}
-			} else {
-				await db.exec(sql)
+
+				return
 			}
+
+			await db.exec(sql)
 		}
 
-		const query = async <T = any>(sql: string, params?: any[]): Promise<T[]> => {
+		const query = async <T = any>(sql: string, params?: any[]) => {
 			const res = await db.query(sql, params)
 
-			return JSON.parse(JSON.stringify(res.rows))
+			return JSON.parse(JSON.stringify(res.rows)) as T[]
 		}
 
 		it('should rename column and preserve data', async () => {
@@ -239,15 +245,17 @@ describe('Migration System', () => {
 				for (const s of sql) {
 					await db.exec(s)
 				}
-			} else {
-				await db.exec(sql)
+
+				return
 			}
+
+			await db.exec(sql)
 		}
 
-		const query = async <T = any>(sql: string, params?: any[]): Promise<T[]> => {
+		const query = async <T = any>(sql: string, params?: any[]) => {
 			const res = await db.query(sql, params)
 
-			return JSON.parse(JSON.stringify(res.rows))
+			return JSON.parse(JSON.stringify(res.rows)) as T[]
 		}
 
 		it('should modify column type with USING clause', async () => {
@@ -299,15 +307,17 @@ describe('Migration System', () => {
 				for (const s of sql) {
 					await db.exec(s)
 				}
-			} else {
-				await db.exec(sql)
+
+				return
 			}
+
+			await db.exec(sql)
 		}
 
-		const query = async <T = any>(sql: string, params?: any[]): Promise<T[]> => {
+		const query = async <T = any>(sql: string, params?: any[]) => {
 			const res = await db.query(sql, params)
 
-			return JSON.parse(JSON.stringify(res.rows))
+			return JSON.parse(JSON.stringify(res.rows)) as T[]
 		}
 
 		it('should drop column safely', async () => {
@@ -348,15 +358,17 @@ describe('Migration System', () => {
 				for (const s of sql) {
 					await db.exec(s)
 				}
-			} else {
-				await db.exec(sql)
+
+				return
 			}
+
+			await db.exec(sql)
 		}
 
-		const query = async <T = any>(sql: string, params?: any[]): Promise<T[]> => {
+		const query = async <T = any>(sql: string, params?: any[]) => {
 			const res = await db.query(sql, params)
 
-			return JSON.parse(JSON.stringify(res.rows))
+			return JSON.parse(JSON.stringify(res.rows)) as T[]
 		}
 
 		it('should handle multi-step migration with data preservation', async () => {
