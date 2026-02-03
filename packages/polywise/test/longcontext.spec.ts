@@ -36,6 +36,8 @@ describe.concurrent('Long Context and Language Traps', () => {
 
 		await poly.init({
 			data_dir: db_name,
+			embedding_concurrency: 10,
+			reranker_concurrency: 10,
 			embedding_config: { type: 'custom', fn: mockEmbedding }
 		})
 

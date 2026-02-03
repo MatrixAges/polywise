@@ -49,7 +49,15 @@ export default class Polywise {
 	}
 
 	async init(args: PolywiseArgs = {}) {
-		const { data_dir, cache_dir, embedding_config, reranker_config, onTick } = args
+		const {
+			data_dir,
+			cache_dir,
+			embedding_config,
+			reranker_config,
+			embedding_concurrency,
+			reranker_concurrency,
+			onTick
+		} = args
 
 		this.db = new PGlite(data_dir || ':polywise:', {
 			relaxedDurability: true,
@@ -59,7 +67,9 @@ export default class Polywise {
 		await this.pipeline.init({
 			cache_dir,
 			embedding_config,
-			reranker_config
+			reranker_config,
+			embedding_concurrency,
+			reranker_concurrency
 		})
 
 		this.article.init({

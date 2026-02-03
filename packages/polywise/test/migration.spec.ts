@@ -6,7 +6,7 @@ import { SCHEMA_BRAIN, SCHEMA_KNOWLEDGE } from '../src/consts'
 import * as sql_meta from '../src/sql/meta'
 import { CURRENT_SCHEMA_VERSION, migrate, migrations, validateMigrations } from '../src/utils/migration'
 
-describe.concurrent('Migration System', () => {
+describe('Migration System', () => {
 	describe.concurrent('validateMigrations', () => {
 		it('should pass with valid sequential migrations', () => {
 			expect(() => validateMigrations()).not.toThrow()
@@ -21,7 +21,7 @@ describe.concurrent('Migration System', () => {
 		})
 	})
 
-	describe.concurrent('migrate function', () => {
+	describe('migrate function', () => {
 		let db: PGlite
 		const db_path = ':polywise_migration_main:'
 
@@ -98,7 +98,7 @@ describe.concurrent('Migration System', () => {
 		})
 	})
 
-	describe.concurrent('Schema Changes - Add Column', () => {
+	describe('Schema Changes - Add Column', () => {
 		let db: PGlite
 		const db_path = ':polywise_migration_add_col:'
 
@@ -174,7 +174,7 @@ describe.concurrent('Migration System', () => {
 		})
 	})
 
-	describe.concurrent('Schema Changes - Rename Column', () => {
+	describe('Schema Changes - Rename Column', () => {
 		let db: PGlite
 		const db_path = `:polywise_migration_rename_col_${Date.now()}:`
 
@@ -233,7 +233,7 @@ describe.concurrent('Migration System', () => {
 		})
 	})
 
-	describe.concurrent('Schema Changes - Modify Column Type', () => {
+	describe('Schema Changes - Modify Column Type', () => {
 		let db: PGlite
 		const db_path = `:polywise_migration_modify_type_${Date.now()}:`
 
@@ -297,7 +297,7 @@ describe.concurrent('Migration System', () => {
 		})
 	})
 
-	describe.concurrent('Schema Changes - Drop Column', () => {
+	describe('Schema Changes - Drop Column', () => {
 		let db: PGlite
 		const db_path = `:polywise_migration_drop_col:`
 
@@ -348,7 +348,7 @@ describe.concurrent('Migration System', () => {
 		})
 	})
 
-	describe.concurrent('Complex Migration Scenarios', () => {
+	describe('Complex Migration Scenarios', () => {
 		let db: PGlite
 		const db_path = `:polywise_migration_complex:`
 

@@ -11,7 +11,9 @@ describe.concurrent('Article CRUD Operations', () => {
 		poly = new Polywise()
 
 		await poly.init({
-			data_dir: db_name
+			data_dir: db_name,
+			embedding_concurrency: 10,
+			reranker_concurrency: 10
 		})
 	})
 
@@ -100,20 +102,21 @@ describe.concurrent('Article CRUD Operations', () => {
 	})
 
 	it('should search articles with empty database', async () => {
-		const poly2 = new Polywise()
-
-		await poly2.init({
-			data_dir: `:polywise_empty_test_${unique_id}:`
+		const empty_poly = new Polywise()
+		await empty_poly.init({
+			data_dir: ':polywise_article_test_empty:',
+			embedding_concurrency: 10,
+			reranker_concurrency: 10
 		})
 
-		const results = await poly2.article.searchFts({
+		const results = await empty_poly.article.searchFts({
 			query: 'test',
 			limit: 10
 		})
 
 		expect(results).toEqual([])
 
-		await poly2.off()
+		await empty_poly.off()
 	})
 })
 
@@ -126,7 +129,9 @@ describe.concurrent('Full-Text Search and Vector Search', () => {
 		poly = new Polywise()
 
 		await poly.init({
-			data_dir: db_name
+			data_dir: db_name,
+			embedding_concurrency: 10,
+			reranker_concurrency: 10
 		})
 	})
 

@@ -9,9 +9,10 @@ describe.concurrent('Polywise Brain System', () => {
 
 	beforeAll(async () => {
 		poly = new Polywise()
-
 		await poly.init({
 			data_dir: db_name,
+			embedding_concurrency: 10,
+			reranker_concurrency: 10,
 			onTick: async () => {
 				const { nodes, edges } = await poly.getSnapshot()
 				const active = nodes.filter((n: any) => n.activation > 0).map((n: any) => n.label)

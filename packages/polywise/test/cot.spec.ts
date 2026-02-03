@@ -30,6 +30,8 @@ describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
 
 		await poly.init({
 			data_dir: db_name,
+			embedding_concurrency: 10,
+			reranker_concurrency: 10,
 			onTick: async () => {
 				const { nodes, edges } = await poly.getSnapshot()
 				const active = nodes.filter((n: any) => n.activation > 0).map((n: any) => n.label)
@@ -576,7 +578,11 @@ describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
 		test('should handle empty knowledge graph gracefully', async () => {
 			const empty_poly = new Polywise()
 
-			await empty_poly.init({ data_dir: `:polywise_cot_empty_${unique_id}:` })
+			await empty_poly.init({
+				data_dir: `:polywise_cot_empty_${unique_id}:`,
+				embedding_concurrency: 10,
+				reranker_concurrency: 10
+			})
 
 			const { result, cot } = await empty_poly.query({
 				query: 'nonexistent concept xyz',
