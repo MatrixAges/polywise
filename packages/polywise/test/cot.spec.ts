@@ -519,8 +519,8 @@ describe('Chain of Thought (CoT) Mechanism', () => {
 
 			expect(receivedEvents.length).toBe(3)
 			expect(receivedEvents[0].query).toContain('circuit breaker')
-			expect(receivedEvents[1].query).toContain('洞察')
-			expect(receivedEvents[2].query).toContain('洞察')
+			expect(receivedEvents[1].query).toContain('insight')
+			expect(receivedEvents[2].query).toContain('insight')
 		})
 	})
 
@@ -707,7 +707,7 @@ describe('Chain of Thought (CoT) Mechanism', () => {
 
 			expect(receivedEvents[0].query).toContain('microservices')
 			for (let i = 1; i < receivedEvents.length; i++) {
-				expect(receivedEvents[i].query).toContain('洞察')
+				expect(receivedEvents[i].query).toContain('insight')
 			}
 
 			const allResults = receivedEvents.flatMap(e => e.results)

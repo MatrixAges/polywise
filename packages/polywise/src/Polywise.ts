@@ -222,7 +222,7 @@ export default class Polywise {
 			rerankLimit: rerank_limit,
 			stimulateOnRecall: stimulate_on_recall,
 			currentDepth: 1,
-			historyIds: new Set<number>(initialResult.map(r => r.id))
+			historyIds: new Set(initialResult.map(r => r.id))
 		})
 
 		return { result: initialResult, cot: emitter }
@@ -292,15 +292,11 @@ export default class Polywise {
 		const topResults = initialResults.slice(0, 3)
 		const insights = topResults.map(r => r.title).join(', ')
 
-		// 构造更具启发性的 emergedQuery
-		// 不再是简单的字符串叠加，而是将之前的 query 作为背景，将当前的 insights 作为新的搜索方向
 		const emergedQuery = `${query} [洞察: ${insights}]`
 
 		const emergedNodeIds = topResults.map(r => r.id)
-		// 刺激力度随深度增加，模拟思维的深入
 		await this.stimulateNodes(emergedNodeIds, 0.2 * (1 + currentDepth * 0.5))
 
-		// 执行下一层搜索
 		const emergedRecallResult = await this.recallFromMemory({
 			query: emergedQuery,
 			max_depth: depthRecallDepth,
@@ -316,12 +312,10 @@ export default class Polywise {
 
 		let emergedAggregated = this.aggregateResults(emergedRecallResult, emergedSearchResults)
 
-		// 过滤掉已经在历史中出现过的结果
 		emergedAggregated = emergedAggregated.filter(c => !historyIds.has(c.id))
 
 		const emergedFinalResults = await this.rerankResults(emergedQuery, emergedAggregated, rerankLimit)
 
-		// 记录新发现的结果
 		emergedFinalResults.forEach(r => historyIds.add(r.id))
 
 		const cotResult: COTDepthResult = {
@@ -448,20 +442,21 @@ export default class Polywise {
 		}
 
 		for (const context of recallResult.related_contexts) {
-			const articleId = context.id
-			const article = searchResults.find(r => r.id === articleId)
-			if (article) {
-				const memoryStrength = this.calculateMemoryStrength(context, recallResult.nodes)
-				candidates.push({
-					id: article.id,
-					title: article.title,
-					content: article.content,
-					source: 'memory',
-					rerankScore: article.rerankScore,
-					relevance_score: 1.0 * 1.5,
-					stimulated: true,
-					memory_strength: memoryStrength
-				})
+			for (const articleId of context.article_ids) {
+				const article = searchResults.find(r => r.id === articleId)
+				if (article) {
+					const memoryStrength = this.calculateMemoryStrength(context, recallResult.nodes)
+					candidates.push({
+						id: article.id,
+						title: article.title,
+						content: article.content,
+						source: 'memory',
+						rerankScore: article.rerankScore,
+						relevance_score: 1.0 * 1.5,
+						stimulated: true,
+						memory_strength: memoryStrength
+					})
+				}
 			}
 		}
 
@@ -504,7 +499,7 @@ export default class Polywise {
 	}
 
 	private calculateMemoryStrength(
-		context: { idol_id?: string; root_ids?: string[]; relevance_score?: number; id: number },
+		context: { idol_id?: string; root_ids?: string[]; relevance_score?: number },
 		nodes: Node[]
 	): number {
 		return (context.relevance_score ?? 1.0) * 0.5 + 0.5

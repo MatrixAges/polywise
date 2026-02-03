@@ -20,7 +20,7 @@ import type {
 export default class Pipeline {
 	private embedding_config: EmbeddingConfig = DEFAULT_EMBEDDING_CONFIG
 	private reranker_config: RerankerConfig = DEFAULT_RERANKER_CONFIG
-	private cache_dir: string | null = `${os.homedir()}/.Polywise/.models`
+	private cache_dir: string | null = `${os.homedir()}/.polywise/.models`
 	private embedding_concurrency: number = DEFAULT_CONCURRENCY
 	private reranker_concurrency: number = DEFAULT_CONCURRENCY
 
@@ -265,9 +265,9 @@ export default class Pipeline {
 	}
 
 	async checkModels() {
-		const cache_dir = this.cache_dir || `${os.homedir()}/.Polywise/.models`
+		const cache_dir = this.cache_dir
+
 		env.cacheDir = cache_dir
-		// Ensure transformers doesn't try to use its own default cache
 		env.allowLocalModels = true
 
 		const checkAndDownload = async (config: EmbeddingConfig | RerankerConfig, loadFn: () => Promise<any>) => {
@@ -276,17 +276,19 @@ export default class Pipeline {
 
 				const run = async (retryCount = 0) => {
 					try {
-						// Small delay to ensure OS file handles are settled if we just deleted
 						if (retryCount > 0) {
 							await new Promise(resolve => setTimeout(resolve, 2000))
 						}
+
 						await loadFn()
+
 						console.log(`Model ${config.model} is ready.`)
 					} catch (err) {
 						if (retryCount === 0) {
 							console.error(
 								`Failed to load model ${config.model}: ${err.message}. Deleting cache and retrying...`
 							)
+
 							await fs.remove(modelPath)
 							await run(retryCount + 1)
 						} else {
@@ -300,7 +302,6 @@ export default class Pipeline {
 			}
 		}
 
-		// Run in parallel but with a small stagger to avoid race conditions in ONNX initialization
 		await Promise.all([
 			checkAndDownload(this.embedding_config, this.loadEmbeddingModel.bind(this)),
 			(async () => {
