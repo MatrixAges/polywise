@@ -9,6 +9,7 @@ import * as sql from './sql'
 import * as sql_brain from './sql/Brain'
 import * as sql_meta from './sql/meta'
 import { calculateWeight, ChainEmitter, CURRENT_SCHEMA_VERSION, migrate, validateMigrations } from './utils'
+import { formatNodeContent, formatSourceInfo, formatPerceiveQuery } from './consts'
 
 import type {
 	AddNodeArgs,
@@ -531,7 +532,7 @@ export default class Polywise {
 			candidates.push({
 				id: node.id,
 				title: node.label,
-				content: node.metadata?.desc || `概念: ${node.label}`,
+				content: formatNodeContent(node.label, node.metadata?.desc),
 				rerankScore: node.potential,
 				relevance_score: node.potential * 0.8,
 				memory_strength: node.potential,
@@ -551,7 +552,7 @@ export default class Polywise {
 		if (candidates.length === 0) return []
 
 		const documents = candidates.map(c => {
-			const source_info = `[来源:${c.source}${c.stimulated ? ',已激活' : ''},记忆强度:${c.memory_strength.toFixed(2)}]`
+			const source_info = formatSourceInfo(c.source, c.stimulated, c.memory_strength)
 
 			return `${c.title}\n${source_info}\n${c.content}`
 		})

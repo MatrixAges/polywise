@@ -165,7 +165,7 @@ export interface AggregatedCandidate {
 	stimulated: boolean
 }
 
-// 优化的参数接口定义，确保变量在前，函数在后
+// Optimized parameter interface definition, ensuring variables come before functions
 export interface PipelineSearchArgs {
 	query: string
 	rerank_limit?: number

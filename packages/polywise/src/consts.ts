@@ -21,3 +21,17 @@ export const DEFAULT_CONCURRENCY = 6
 export const SHADOW_INTERVAL_MS = 60 * 1000
 export const FATIGUE_THRESHOLD = 1000
 export const IDLE_TIMEOUT_MS = 5 * 60 * 1000
+
+export const formatNodeContent = (label: string, desc?: string) => {
+	return desc || `Concept: ${label}`
+}
+
+export const formatSourceInfo = (source: string, stimulated: boolean, memoryStrength: number) => {
+	return `[Source:${source}${stimulated ? ',Activated' : ''},Memory Strength:${memoryStrength.toFixed(2)}]`
+}
+
+export const PERCEIVE_COMMAND = 'perceive'
+
+export const formatPerceiveQuery = (query: string, insights: string) => {
+	return `${query} [${PERCEIVE_COMMAND}: ${insights}]`
+}
