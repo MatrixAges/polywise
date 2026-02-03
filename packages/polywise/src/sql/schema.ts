@@ -81,7 +81,7 @@ export const sql_create_table_node_sources = `
   );
 `
 
-export const sql_create_schema_user_space = `CREATE SCHEMA IF NOT EXISTS ${SCHEMA_USER};`
+export const sql_create_schema_user_space = `CREATE SCHEMA IF NOT EXISTS "${SCHEMA_USER}";`
 
 export const sql_create_table_article_embeddings = `
   CREATE TABLE IF NOT EXISTS ${SCHEMA_KNOWLEDGE}.article_embeddings (
