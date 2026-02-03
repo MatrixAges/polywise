@@ -95,7 +95,9 @@ export default class Pipeline {
 
 			const output = await embedding(text, {
 				pooling: POOLING_MEAN,
-				normalize: true
+				normalize: true,
+				truncation: true,
+				max_length: 2048
 			})
 
 			return Array.from((output as any).data)
@@ -112,7 +114,10 @@ export default class Pipeline {
 
 			const reranker = await this.loadRerankerModel()
 
-			const output = await reranker(query, documents)
+			const output = await reranker(query, documents, {
+				truncation: true,
+				max_length: 2048
+			})
 
 			return output
 		})

@@ -3,7 +3,7 @@ import { PGlite } from '@electric-sql/pglite'
 import { SCHEMA_KNOWLEDGE } from './consts'
 import Pipeline from './Pipeline'
 import * as sql from './sql'
-import { ArticleArgs, ArticleEntity, ArticleWithSimilarity, SearchArticleArgs } from './types'
+import { ArticleEntity, ArticleWithSimilarity } from './types'
 
 export default class Article {
 	private db: PGlite | null = null
@@ -27,6 +27,7 @@ export default class Article {
 		const res = await this.db.query<ArticleEntity>(sql.sql_process_article, [content])
 
 		if (res.rows.length === 0) return null
+
 		return res.rows[0]
 	}
 
@@ -34,6 +35,7 @@ export default class Article {
 		if (!this.db || !this.pipeline) return
 
 		const embedding = await this.pipeline.embed(content)
+
 		if (!embedding) return
 
 		await this.db.query(sql.sql_insert_article_embedding, [article_id, `[${embedding.join(',')}]`])
@@ -41,10 +43,13 @@ export default class Article {
 
 	async addWithEmbedding(content: string) {
 		const result = await this.process(content)
+
 		if (result && result.id) {
 			await this.addEmbedding(result.id, content)
+
 			return result.id
 		}
+
 		return null
 	}
 

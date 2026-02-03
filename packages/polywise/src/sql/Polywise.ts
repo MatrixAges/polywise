@@ -64,9 +64,9 @@ export const sql_process_article = `INSERT INTO ${SCHEMA_KNOWLEDGE}.articles (co
 
 export const sql_search_articles_by_text = `
   SELECT id, content, created_at,
-    ts_rank(to_tsvector('english', coalesce(content,'')), plainto_tsquery('english', $1)) AS rank
+    ts_rank(to_tsvector('english', coalesce(content,'')), websearch_to_tsquery('english', $1)) AS rank
   FROM ${SCHEMA_KNOWLEDGE}.articles
-  WHERE to_tsvector('english', coalesce(content,'')) @@ plainto_tsquery('english', $1)
+  WHERE to_tsvector('english', coalesce(content,'')) @@ websearch_to_tsquery('english', $1)
   ORDER BY rank DESC
   LIMIT $2
 `

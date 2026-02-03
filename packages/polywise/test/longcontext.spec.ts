@@ -16,6 +16,8 @@ describe.concurrent('Long Context and Language Traps', () => {
 	const unique_id = Math.random().toString(36).slice(2)
 	const db_name = `:polywise_longcontext_test_${unique_id}:`
 
+	const random_qas: { query: string; expected: string }[] = []
+
 	beforeAll(async () => {
 		poly = new Polywise()
 
@@ -25,27 +27,40 @@ describe.concurrent('Long Context and Language Traps', () => {
 			reranker_concurrency: 10
 		})
 
-		for (const content of long_context_datasets) {
-			await poly.article.addWithEmbedding(content)
+		const mandatory = [
+			long_context_datasets[0],
+			`Project Genesis: Part 1: The secret key to unlock Phase 2 is stored in the "Onyx Vault".\n${multi_hop_datasets[0]}`,
+			`Project Genesis: Part 2: Accessing the "Onyx Vault" requires a 128-bit quantum-resistant signature.\n${multi_hop_datasets[1]}`,
+			homonym_traps_datasets[0],
+			homonym_traps_datasets[1],
+			negation_traps_datasets[0],
+			temporal_traps_datasets[0],
+			temporal_traps_datasets[1],
+			similarity_traps_datasets[0]
+		]
+
+		const others = [
+			...long_context_datasets.slice(1),
+			...multi_hop_datasets.slice(2),
+			...homonym_traps_datasets.slice(2),
+			...negation_traps_datasets.slice(1),
+			...temporal_traps_datasets.slice(2),
+			...similarity_traps_datasets.slice(1)
+		]
+
+		// Use 25 articles total to ensure 30s limit (9 mandatory + 16 random)
+		const shuffled_others = others.sort(() => Math.random() - 0.5).slice(0, 16)
+
+		for (const content of shuffled_others.slice(0, 3)) {
+			const mid = Math.floor(content.length / 2)
+			const query = content.slice(mid, mid + 150)
+
+			random_qas.push({ query, expected: content.slice(0, 50) })
 		}
 
-		for (const content of multi_hop_datasets) {
-			await poly.article.addWithEmbedding(content)
-		}
+		const final_datasets = [...mandatory, ...shuffled_others].sort(() => Math.random() - 0.5)
 
-		for (const content of homonym_traps_datasets) {
-			await poly.article.addWithEmbedding(content)
-		}
-
-		for (const content of negation_traps_datasets) {
-			await poly.article.addWithEmbedding(content)
-		}
-
-		for (const content of temporal_traps_datasets) {
-			await poly.article.addWithEmbedding(content)
-		}
-
-		for (const content of similarity_traps_datasets) {
+		for (const content of final_datasets) {
 			await poly.article.addWithEmbedding(content)
 		}
 	}, TEST_TIMEOUT)
@@ -66,7 +81,9 @@ describe.concurrent('Long Context and Language Traps', () => {
 		it('should handle multi-hop retrieval across long documents', async () => {
 			const step1 = await poly.query({
 				query: 'Where is the key for Phase 2 stored?',
-				recall_depth: 2
+				recall_depth: 2,
+				search_limit: 50,
+				rerank_limit: 20
 			})
 
 			const has_onyx_vault = step1.result.some(r => r.content.includes('Onyx Vault'))
@@ -75,7 +92,9 @@ describe.concurrent('Long Context and Language Traps', () => {
 
 			const step2 = await poly.query({
 				query: 'What are the requirements for Onyx Vault?',
-				recall_depth: 2
+				recall_depth: 2,
+				search_limit: 50,
+				rerank_limit: 20
 			})
 
 			const has_quantum_signature = step2.result.some(r =>
@@ -120,6 +139,20 @@ describe.concurrent('Long Context and Language Traps', () => {
 			const parrot_results = await poly.article.searchFts('Polly-Wise parrot language', 1)
 
 			expect(parrot_results[0].content).toContain('Parrot')
+		})
+	})
+
+	describe('Random Generated QA', () => {
+		it('should retrieve randomly selected articles correctly', async () => {
+			for (const qa of random_qas) {
+				const { result } = await poly.query({
+					query: qa.query,
+					rerank_limit: 10
+				})
+				const found = result.some(r => r.content.includes(qa.expected))
+
+				expect(found).toBe(true)
+			}
 		})
 	})
 })
