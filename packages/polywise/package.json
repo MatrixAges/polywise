@@ -38,6 +38,7 @@
 		"cross-env": "^10.1.0",
 		"deepmerge-ts": "^7.1.5",
 		"fs-extra": "catalog:",
-		"glob": "^13.0.0"
+		"glob": "^13.0.0",
+		"reflect-metadata": "^0.2.2"
 	}
 }

@@ -473,15 +473,9 @@ importers:
       '@electric-sql/pglite':
         specifier: ^0.3.15
         version: 0.3.15
-      '@huggingface/hub':
-        specifier: ^0.15.0
-        version: 0.15.2
       '@huggingface/transformers':
         specifier: ^3.3.2
         version: 3.8.1
-      commander:
-        specifier: ^14.0.0
-        version: 14.0.2
       ofetch:
         specifier: ^1.4.1
         version: 1.5.1
@@ -1125,16 +1119,9 @@ packages:
     peerDependencies:
       hono: ^4
 
-  '@huggingface/hub@0.15.2':
-    resolution: {integrity: sha512-MKu7RTkEBp8tvn0ZhBIjQwC1CHA+q8rzTYXAVklOTJEo/SZwCewVL+IcEuj4CoA5DnJ1IhyjkBquxN2dFVnEHg==}
-    engines: {node: '>=18'}
-
   '@huggingface/jinja@0.5.4':
     resolution: {integrity: sha512-VoQJywjpjy2D88Oj0BTHRuS8JCbUgoOg5t1UGgbtGh2fRia9Dx/k6Wf8FqrEWIvWK9fAkfJeeLB9fcSpCNPCpw==}
     engines: {node: '>=18'}
-
-  '@huggingface/tasks@0.12.30':
-    resolution: {integrity: sha512-A1ITdxbEzx9L8wKR8pF7swyrTLxWNDFIGDLUWInxvks2ruQ8PLRBZe8r0EcjC3CDdtlj9jV1V4cgV35K/iy3GQ==}
 
   '@huggingface/transformers@3.8.1':
     resolution: {integrity: sha512-tsTk4zVjImqdqjS8/AOZg2yNLd1z9S5v+7oUPpXaasDRwEDhB+xnglK1k5cad26lL5/ZIaeREgWWy0bs9y9pPA==}
@@ -6483,13 +6470,7 @@ snapshots:
     dependencies:
       hono: 4.11.7
 
-  '@huggingface/hub@0.15.2':
-    dependencies:
-      '@huggingface/tasks': 0.12.30
-
   '@huggingface/jinja@0.5.4': {}
-
-  '@huggingface/tasks@0.12.30': {}
 
   '@huggingface/transformers@3.8.1':
     dependencies:
