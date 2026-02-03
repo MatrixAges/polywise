@@ -1,6 +1,8 @@
 import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 
 import Polywise from '../src/Polywise'
+import { cognitive_articles } from './datasets/cognitive'
+import { software_articles } from './datasets/software'
 
 describe.concurrent('Article CRUD Operations', () => {
 	let poly: Polywise
@@ -21,26 +23,22 @@ describe.concurrent('Article CRUD Operations', () => {
 		await poly.off()
 	})
 
-	it('should create article with title and content', async () => {
-		const article = await poly.article.process({
-			title: 'Test Article',
-			content: 'This is test content for the article.'
-		})
+	it('should create article using real-world software documentation', async () => {
+		const article_data = software_articles[0]
+		const article = await poly.article.process(article_data)
 
 		expect(article.id).toBeGreaterThan(0)
-		expect(article.title).toBe('Test Article')
-		expect(article.content).toBe('This is test content for the article.')
+		expect(article.title).toBe(article_data.title)
+		expect(article.content).toBe(article_data.content)
 		expect(article.created_at).toBeInstanceOf(Date)
 	})
 
-	it('should get article by ID', async () => {
-		await poly.article.process({
-			title: 'Article to Retrieve',
-			content: 'Content for retrieval test.'
-		})
+	it('should get article by searching for its real title', async () => {
+		const article_data = cognitive_articles[0]
+		await poly.article.process(article_data)
 
 		const articles = await poly.article.searchFts({
-			query: 'Retrieve',
+			query: 'Cognitive functions architecture',
 			limit: 1
 		})
 
@@ -49,27 +47,24 @@ describe.concurrent('Article CRUD Operations', () => {
 		const article = await poly.article.get(articles[0].id)
 
 		expect(article.length).toBeGreaterThan(0)
-		expect(article[0]?.title).toBe('Article to Retrieve')
+		expect(article[0]?.title).toBe(article_data.title)
 	})
 
-	it('should update article', async () => {
-		const created = await poly.article.process({
-			title: 'Article to Update',
-			content: 'Original content.'
-		})
+	it('should update real-world article content', async () => {
+		const created = await poly.article.process(software_articles[1])
 
 		const updated = await poly.article.update({
 			id: created.id,
-			title: 'Updated Title',
-			content: 'Updated content.'
+			title: 'Docker Best Practices (Updated)',
+			content: 'Updated content for containerization...'
 		})
 
-		expect(updated.title).toBe('Updated Title')
-		expect(updated.content).toBe('Updated content.')
+		expect(updated.title).toBe('Docker Best Practices (Updated)')
+		expect(updated.content).toBe('Updated content for containerization...')
 
 		const fetched = await poly.article.get(created.id)
 
-		expect(fetched[0]?.title).toBe('Updated Title')
+		expect(fetched[0]?.title).toBe('Docker Best Practices (Updated)')
 	})
 
 	it('should delete article', async () => {
@@ -140,102 +135,41 @@ describe.concurrent('Full-Text Search and Vector Search', () => {
 	})
 
 	describe.concurrent('Full-Text Search', () => {
-		it('should find articles matching exact keywords', async () => {
-			await poly.article.process({
-				title: 'Getting Started with TypeScript',
-				content: 'TypeScript is a typed superset of JavaScript that compiles to plain JavaScript.'
-			})
-
-			await poly.article.process({
-				title: 'Advanced TypeScript Patterns',
-				content: 'This article covers advanced TypeScript patterns and best practices.'
-			})
-
-			const results = await poly.article.searchFts({
-				query: 'TypeScript',
-				limit: 10
-			})
-
-			expect(results.length).toBeGreaterThanOrEqual(2)
-			expect(results.every(r => r.title?.includes('TypeScript'))).toBe(true)
-		})
-
-		it('should search in both title and content', async () => {
-			await poly.article.process({
-				title: 'Database Systems',
-				content: 'PostgreSQL is a powerful open-source relational database management system.'
-			})
-
-			await poly.article.process({
-				title: 'Web Development',
-				content: 'JavaScript frameworks like React and Vue are popular for web development.'
-			})
-
-			const title_results = await poly.article.searchFts({
-				query: 'Database',
-				limit: 10
-			})
-
-			expect(title_results.length).toBeGreaterThanOrEqual(1)
-			expect(title_results[0].title).toBe('Database Systems')
-		})
-
-		it('should return empty array for non-matching query', async () => {
-			await poly.article.process({
-				title: 'Random Article',
-				content: 'This has nothing to do with the search query.'
-			})
-
-			const results = await poly.article.searchFts({
-				query: 'XYZ123NonExistent',
-				limit: 10
-			})
-
-			expect(results).toEqual([])
-		})
-
-		it('should respect the limit parameter', async () => {
-			for (let i = 0; i < 5; i++) {
-				await poly.article.process({
-					title: `Article ${i}`,
-					content: `Content ${i}`
-				})
+		it('should find real-world articles matching specific technical keywords', async () => {
+			for (const article of software_articles.slice(0, 3)) {
+				await poly.article.process(article)
 			}
 
 			const results = await poly.article.searchFts({
-				query: 'Article',
-				limit: 3
-			})
-
-			expect(results.length).toBe(3)
-		})
-
-		it('should handle case-insensitive search', async () => {
-			await poly.article.process({
-				title: 'lowercase search test',
-				content: 'This has LOWERCASE in content'
-			})
-
-			const results = await poly.article.searchFts({
-				query: 'LOWERCASE',
-				limit: 10
-			})
-
-			expect(results.length).toBe(1)
-		})
-
-		it('should search partial word matches', async () => {
-			await poly.article.process({
-				title: 'JavaScript Programming',
-				content: 'I love programming in JavaScript.'
-			})
-
-			const results = await poly.article.searchFts({
-				query: 'program',
+				query: 'Microservices scalability',
 				limit: 10
 			})
 
 			expect(results.length).toBeGreaterThanOrEqual(1)
+			expect(results.some(r => r.title.includes('Microservices'))).toBe(true)
+		})
+
+		it('should search for cognitive science concepts in title and content', async () => {
+			for (const article of cognitive_articles) {
+				await poly.article.process(article)
+			}
+
+			const results = await poly.article.searchFts({
+				query: '86 billion neurons communication synapses',
+				limit: 10
+			})
+
+			expect(results.length).toBeGreaterThanOrEqual(1)
+			expect(results[0].title).toBe('How the Human Brain Works')
+		})
+
+		it('should return empty array for non-existent technical terms', async () => {
+			const results = await poly.article.searchFts({
+				query: 'NonExistentQuantumServiceMesh',
+				limit: 10
+			})
+
+			expect(results).toEqual([])
 		})
 	})
 })

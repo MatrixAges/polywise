@@ -12,19 +12,6 @@ describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
 	const unique_id = Math.random().toString(36).slice(2)
 	const db_name = `:polywise_cot_${unique_id}:`
 
-	const mockEmbedding = async (text: string) => {
-		return Array(1024)
-			.fill(0)
-			.map((_, i) => Math.sin(i + text.length) * 0.1)
-	}
-
-	const mockRerank = async (query: string, documents: string[]) => {
-		return documents.map((_, index) => ({
-			index,
-			score: 1.0 - index * 0.1
-		}))
-	}
-
 	beforeAll(async () => {
 		poly = new Polywise()
 
@@ -41,9 +28,7 @@ describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
 						`CoT Test - Active: [${active.slice(0, 5).join(', ')}] | Edges: ${edges.length}`
 					)
 				}
-			},
-			embedding_config: { type: 'custom', fn: mockEmbedding },
-			reranker_config: { type: 'custom', fn: mockRerank }
+			}
 		})
 
 		for (const article of software_articles) {
@@ -581,9 +566,7 @@ describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
 			await empty_poly.init({
 				data_dir: `:polywise_cot_empty_${unique_id}:`,
 				embedding_concurrency: 20,
-				reranker_concurrency: 20,
-				embedding_config: { type: 'custom', fn: mockEmbedding },
-				reranker_config: { type: 'custom', fn: mockRerank }
+				reranker_concurrency: 20
 			})
 
 			const { result, cot } = await empty_poly.query({

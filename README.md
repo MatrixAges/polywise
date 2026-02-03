@@ -80,13 +80,28 @@ const { result, cot } = await poly.query({
 
 #### 4. 🌙 **Memory Consolidation**
 
-Polywise manages its own lifecycle. Maintenance tasks like "sleep" consolidation run automatically when the system is idle and yield to foreground tasks:
+Polywise manages its own lifecycle. Maintenance tasks like "sleep" consolidation run automatically when the system is idle and yield to foreground tasks.
+
+#### 5. ⚡ **Fast React & Deep Think (STR/PFC)**
+
+Polywise implements a dual-process system mimicking the Prefrontal Cortex (PFC) and Striatum (STR) for adaptive behavior:
 
 ```typescript
-// No manual management needed.
-// The internal Brain monitors activity and performs consolidation
-// during idle periods to reinforce important memories.
+const poly = new Polywise()
+await poly.init()
+
+// 1. Subscribe to the Slow System (PFC) for refined decisions
+poly.onAction(result => {
+	console.log('PFC updated decision:', result)
+})
+
+// 2. Trigger a reaction (STR - Fast Path)
+const response = await poly.react('Detected critical system failure')
+// Returns instantly if a "habit" exists in memory
 ```
+
+- **React**: Instant stimulus-response based on "muscle memory" (Habitual Edges).
+- **Act**: Asynchronous deep reasoning that kicks in after a reaction to refine or correct the initial response.
 
 ---
 
@@ -124,6 +139,7 @@ polywise/
 2. 📉 **Decay**: Unused connections weaken over time
 3. 🌙 **Consolidation**: Sleep phase reinforces important memories
 4. ⚡ **Stimulation**: External input activates nodes and spreads
+5. 🔄 **Habituation**: Successful "Act" decisions can be automated into "React" habits
 
 ### 🔄 State Machine
 

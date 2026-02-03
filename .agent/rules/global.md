@@ -342,6 +342,16 @@ async getNodeMagnitude(node_id: number) {
 - [ ] Did you refactor while keeping tests passing?
 - [ ] Are all tests passing before committing?
 
+## Unit Testing Rules (CRITICAL)
+
+All unit tests in the `packages/polywise` package MUST adhere to the following rules:
+
+1.    **No Mocks for Models**: Mocking embedding functions or rerankers is STRICTLY PROHIBITED. All tests must use the actual local models (Qwen3-Embedding, BGE-Reranker) to ensure real-world reasoning performance.
+2.    **Real-world Datasets**: Tests must use complex, realistic datasets stored in the `test/datasets` directory. Hardcoded simple strings should be replaced with meaningful domain knowledge.
+3.    **Concurrency**: Use `describe.concurrent` for all test suites to maximize performance.
+4.    **Database Isolation**: Each test must use a unique database name or directory to prevent state leakage between concurrent tests.
+5.    **Timeout Handling**: Set appropriate timeouts (e.g., 60s-120s) for tests involving model inference.
+
 ## Utils Export Convention (CRITICAL)
 
 All utility functions in `utils/` folders MUST follow this pattern:

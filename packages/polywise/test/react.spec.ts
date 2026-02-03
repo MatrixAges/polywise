@@ -103,14 +103,14 @@ describe.concurrent('Polywise React System', () => {
 		const fast_result = await poly_pfc.react(fire_stimulus.stimulus)
 		expect(fast_result?.action).toBe(fire_stimulus.action)
 
-		await new Promise(resolve => setTimeout(resolve, 3000))
+		await new Promise(resolve => setTimeout(resolve, 8000))
 
 		expect(action_received).toBeDefined()
 		expect(action_received.source).toBe('act')
 		expect(action_received.action).toBe(fire_safety.title)
 
 		await poly_pfc.off()
-	}, 10000)
+	}, 60000)
 
 	it('should fall back to act path for complex physiological needs', async () => {
 		let action_received: any = null
@@ -135,12 +135,12 @@ describe.concurrent('Polywise React System', () => {
 		const fast_result = await poly_act.react(thirst_stimulus.stimulus)
 		expect(fast_result).toBeNull()
 
-		await new Promise(resolve => setTimeout(resolve, 3000))
+		await new Promise(resolve => setTimeout(resolve, 8000))
 
 		expect(action_received).toBeDefined()
 		expect(action_received.action).toBe(thirst_knowledge.title)
 		expect(action_received.source).toBe('act')
 
 		await poly_act.off()
-	}, 10000)
+	}, 60000)
 })

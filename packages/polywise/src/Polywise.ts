@@ -609,6 +609,8 @@ export default class Polywise {
 	}
 
 	private async _deepThink(input: string, fast_result: ReactResult | null) {
+		if (!this.db) return
+
 		try {
 			const { result } = await this.query({
 				query: input,
@@ -616,6 +618,8 @@ export default class Polywise {
 				search_limit: 5,
 				rerank_limit: 3
 			})
+
+			if (!this.db) return
 
 			if (result.length > 0 && this._onAction) {
 				const top = result[0]

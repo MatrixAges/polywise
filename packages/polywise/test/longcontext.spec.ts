@@ -11,34 +11,13 @@ describe.concurrent('Long Context and Language Traps', () => {
 	const unique_id = Math.random().toString(36).slice(2)
 	const db_name = `:polywise_longcontext_test_${unique_id}:`
 
-	const mockEmbedding = async (text: string) => {
-		const vec = Array(1024).fill(0)
-		const words = text.toLowerCase().split(/\W+/)
-
-		words.forEach((word, i) => {
-			if (i < 1024) {
-				let hash = 0
-
-				for (let j = 0; j < word.length; j++) {
-					hash = (hash << 5) - hash + word.charCodeAt(j)
-					hash |= 0
-				}
-
-				vec[Math.abs(hash) % 1024] += 0.1
-			}
-		})
-
-		return vec
-	}
-
 	beforeAll(async () => {
 		poly = new Polywise()
 
 		await poly.init({
 			data_dir: db_name,
 			embedding_concurrency: 10,
-			reranker_concurrency: 10,
-			embedding_config: { type: 'custom', fn: mockEmbedding }
+			reranker_concurrency: 10
 		})
 
 		for (const article of long_context_articles) {
