@@ -353,70 +353,94 @@ export default class Polywise {
 			history_ids
 		} = args
 
-		if (!emitter.isActiveStatus() || current_depth > max_depth || !this.db) {
-			return
-		}
+		try {
+			if (!emitter.isActiveStatus() || current_depth > max_depth || !this.db) {
+				return
+			}
 
-		const depth_recall_depth = base_recall_depth + current_depth
+			const depth_recall_depth = base_recall_depth + current_depth
 
-		const top_results = initial_results.slice(0, 3)
+			const top_results = initial_results.slice(0, 3)
 
-		const insights = top_results.map(r => r.title).join(', ')
+			const insights = top_results.map(r => r.title).join(', ')
 
-		const emerged_query = formatPerceiveQuery(query, insights)
+			const emerged_query = formatPerceiveQuery(query, insights)
 
-		const emerged_node_ids = top_results.map(r => r.id)
+			const emerged_node_ids = top_results.map(r => r.id)
 
-		await this.stimulateNodes(emerged_node_ids, 0.2 * (1 + current_depth * 0.5))
+			if (!this.db || !emitter.isActiveStatus()) return
+			await this.stimulateNodes(emerged_node_ids, 0.2 * (1 + current_depth * 0.5))
 
-		const emerged_recall_result = await this.recallFromMemory({
-			query: emerged_query,
-			max_depth: depth_recall_depth,
-			stimulate_intensity: stimulate_on_recall ? 0.3 * (1 + current_depth) : 0
-		})
-
-		const emerged_search_results = await this.pipeline.search({
-			query: emerged_query,
-			rerank_limit: search_limit * 2,
-			vector_search: () => this.article.searchVector({ query: emerged_query, limit: search_limit * 2 }),
-			fulltext_search: () => this.article.searchFts({ query: emerged_query, limit: search_limit * 2 })
-		})
-
-		const emerged_aggregated = this.aggregateResults(emerged_recall_result, emerged_search_results).filter(
-			c => !history_ids.has(c.id)
-		)
-
-		const emerged_final_results = await this.rerankResults(emerged_query, emerged_aggregated, rerank_limit)
-
-		emerged_final_results.forEach(r => history_ids.add(r.id))
-
-		const cot_result: COTDepthResult = {
-			depth: current_depth,
-			query: emerged_query,
-			results: emerged_final_results,
-			emerged_nodes: emerged_recall_result.nodes.map(n => n.id),
-			emerged_edges: []
-		}
-
-		emitter.emit(cot_result)
-
-		if (current_depth < max_depth && emerged_final_results.length > 0) {
-			setImmediate(() => {
-				if (!this.db) return
-
-				this.executeCot({
-					query: emerged_query,
-					current_depth: current_depth + 1,
-					max_depth,
-					base_recall_depth,
-					search_limit,
-					rerank_limit,
-					stimulate_on_recall,
-					initial_results: emerged_final_results,
-					emitter,
-					history_ids
-				})
+			if (!this.db || !emitter.isActiveStatus()) return
+			const emerged_recall_result = await this.recallFromMemory({
+				query: emerged_query,
+				max_depth: depth_recall_depth,
+				stimulate_intensity: stimulate_on_recall ? 0.3 * (1 + current_depth) : 0
 			})
+
+			if (!this.db || !emitter.isActiveStatus()) return
+			const emerged_search_results = await this.pipeline.search({
+				query: emerged_query,
+				rerank_limit: search_limit * 2,
+				vector_search: () =>
+					this.article.searchVector({ query: emerged_query, limit: search_limit * 2 }),
+				fulltext_search: () => this.article.searchFts({ query: emerged_query, limit: search_limit * 2 })
+			})
+
+			const emerged_aggregated = this.aggregateResults(
+				emerged_recall_result,
+				emerged_search_results
+			).filter(c => !history_ids.has(c.id))
+
+			if (!this.db || !emitter.isActiveStatus()) return
+			const emerged_final_results = await this.rerankResults(
+				emerged_query,
+				emerged_aggregated,
+				rerank_limit
+			)
+
+			emerged_final_results.forEach(r => history_ids.add(r.id))
+
+			const cot_result: COTDepthResult = {
+				depth: current_depth,
+				query: emerged_query,
+				results: emerged_final_results,
+				emerged_nodes: emerged_recall_result.nodes.map(n => n.id),
+				emerged_edges: []
+			}
+
+			if (emitter.isActiveStatus()) {
+				emitter.emit(cot_result)
+			}
+
+			if (current_depth < max_depth && emerged_final_results.length > 0) {
+				setImmediate(() => {
+					if (!this.db) return
+
+					this.executeCot({
+						query: emerged_query,
+						current_depth: current_depth + 1,
+						max_depth,
+						base_recall_depth,
+						search_limit,
+						rerank_limit,
+						stimulate_on_recall,
+						initial_results: emerged_final_results,
+						emitter,
+						history_ids
+					})
+				})
+			}
+		} catch (e: any) {
+			// Silently handle DB shutdown errors in background CoT execution
+			if (
+				e.message?.includes('DB not initialized') ||
+				e.message?.includes('closed') ||
+				e.message?.includes('signature mismatch')
+			) {
+				return
+			}
+			console.error('CoT Execution Error:', e)
 		}
 	}
 
