@@ -1,0 +1,1466 @@
+Epistemics}}
+''Epistemology'' (album)}}
+
+}}
+
+'''Epistemology''' is the branch of  that examines the nature, origin, and limits of . Also called the '''theory of knowledge''', it explores different types of knowledge, such as  about facts,  in the form of skills, and  as a familiarity through experience. Epistemologists study the concepts of , , and justification to understand the nature of knowledge. To discover how knowledge arises, they investigate sources of justification, such as , , , , and .
+
+The school of skepticism questions the human ability to attain knowledge, while  says that knowledge is never certain. Empiricists hold that all knowledge comes from sense experience, whereas rationalists believe that some knowledge does not depend on it. Coherentists argue that a belief is justified if it is consistent with other beliefs. Foundationalists, by contrast, maintain that the justification of basic beliefs does not depend on other beliefs.  debate whether justification is determined solely by  or also by external circumstances.
+
+Separate branches of epistemology focus on knowledge in specific fields, like scientific, mathematical, moral, and religious knowledge.  relies on empirical methods and discoveries, whereas  uses formal tools from .  investigates the communal aspect of knowledge, and  examines its historical conditions. Epistemology is closely related to , which infers the beliefs people hold from their words and actions, while epistemology studies the norms governing the evaluation of beliefs. It also intersects with fields such as , , and .
+
+Early reflections on the nature, sources, and scope of knowledge are found in ancient Greek, Indian, and . The relation between reason and  was a central topic in the . The  was characterized by the contrasting perspectives of empiricism and rationalism. Epistemologists in the 20th century examined the components, structure, and value of knowledge while integrating insights from the  and .
+
+ Definition 
+
+Epistemology is the philosophical study of  and related concepts, such as justification. Also called ''theory of knowledge'',}} it examines the nature and types of knowledge. It further investigates the sources of knowledge, like , , and , to understand how knowledge is created. Another set of questions concerns the extent and limits of knowledge, addressing what people can and cannot know. |  |  |  |  }} Central concepts in epistemology include , , , and . |  }} As one of the main branches of philosophy, epistemology stands alongside fields like , , and . |2= |3= }} The term can also refer specific positions of philosophers within this branch, as in 's epistemology and 's epistemology. |  }}
+
+Epistemology explores how people should acquire beliefs. It determines which beliefs or forms of belief acquisition meet the standards or epistemic goals of knowledge and which ones fail, thereby providing an evaluation of beliefs. The fields of  and  are also interested in beliefs and related cognitive processes, but examine them from a different perspective. Unlike epistemology, they study the beliefs people actually have and how people acquire them instead of examining the evaluative norms of these processes. |  }} In this regard, epistemology is a normative discipline, |  }}}} whereas psychology and cognitive sociology are descriptive disciplines. According to one interpretation, the aim of naturalized epistemology is to answer descriptive questions, but this characterization is disputed. |  }}}} Epistemology is relevant to many descriptive and normative disciplines, such as the other branches of philosophy and the sciences, by exploring the principles of how they may arrive at knowledge. |  |  }}
+
+The word ''epistemology'' comes from the  terms  (, meaning ''knowledge'' or ''understanding'') and  (, meaning ''study of'' or ''reason''), literally, the study of knowledge. Despite its ancient roots, the word itself was coined only in the 19th century to designate this field as a distinct branch of philosophy. |  |  }} In a different context, the word was used as early as 1847 in New York's ''Eclectic Magazine''. As the term had not been coined before the 19th century, earlier philosophers did not explicitly label their theories as epistemology and often explored it in combination with . According to philosopher Thomas Sturm, it is an open question how relevant the epistemological problems addressed by past philosophers are to contemporary philosophy.}}
+
+Central concepts
+
+Epistemologists examine several foundational concepts to understand their essences and rely on them to formulate theories. Various epistemological disagreements have their roots in disputes about the nature and function of these concepts, like the controversies surrounding the definition of knowledge and the role of justification in it. |  |  }}
+
+ Knowledge 
+
+Knowledge is an awareness, familiarity, understanding, or skill. Its various forms all involve a cognitive success through which a person establishes epistemic contact with reality. |  | }} Epistemologists typically understand knowledge as an aspect of individuals, generally as a cognitive  that helps them understand, interpret, and interact with the world. While this core sense is of particular interest to epistemologists, the term also has other meanings. For example, the epistemology of groups examines knowledge as a characteristic of a group of people who share ideas. |  }} The term can also refer to  stored in documents and computers. |  |  |  }}
+
+Knowledge contrasts with , often simply defined as the absence of knowledge. Knowledge is usually accompanied by ignorance because people rarely have complete knowledge of a field, forcing them to rely on incomplete or uncertain information when making decisions. |  |  }} Even though many forms of ignorance can be mitigated through education and research, certain limits to human understanding result in inevitable ignorance. |  |  }} Some limitations are inherent in the human cognitive faculties themselves, such as the inability to know facts too complex for the  to conceive. |  |  }} Others depend on external circumstances when no access to the relevant information exists. |  }}
+
+Epistemologists disagree on how much people know, for example, whether fallible beliefs can amount to knowledge or whether absolute certainty is required. The most stringent position is taken by radical skeptics, who argue that there is no knowledge at all. |  |  }}
+
+ Types 
+
+thumb|upright=0.8|alt=Black and white photo of a man wearing a dark suit, a white shirt, and a tie|[[Bertrand Russell originated the distinction between propositional knowledge and knowledge by acquaintance. |  }}]]
+
+Epistemologists distinguish between different types of knowledge. |  |  }} Their primary interest is in knowledge of facts, called ''''. |  |  }} It is theoretical knowledge that can be expressed in declarative sentences using a that-clause, like "Ravi knows that kangaroos hop". For this reason, it is also called ''knowledge-that''. |  |  }}}} Epistemologists often understand it as a relation between a knower and a known , in the case above between the person Ravi and the proposition "kangaroos hop". It is use-independent since it is not tied to one specific purpose, unlike practical knowledge. It is a mental representation that embodies concepts and ideas to reflect reality. |  |  }} Because of its theoretical nature, it is typically held that only creatures with highly developed minds, such as humans, possess propositional knowledge.
+
+Propositional knowledge contrasts with non-propositional knowledge in the form of knowledge-how and . |  |  }} Knowledge-how is a practical ability or skill, like knowing how to read or how to prepare . |  }} It is usually tied to a specific goal and not mastered in the abstract without concrete practice. |  |  }} To know something by acquaintance means to have an immediate familiarity with or awareness of it, usually as a result of direct experiential contact. Examples are "familiarity with the city of ", "knowing the taste of ", and "knowing  personally". |  |  |  }}
+
+upright=0.8|alt=Painting of a man with gray hair in a formal dark attire|thumb|The analytic–synthetic distinction has its roots in the philosophy of [[Immanuel Kant.]]
+
+Another influential distinction in epistemology is between ''a posteriori'' and ''a priori'' knowledge. |  |  }}}} ''A posteriori'' knowledge is knowledge of  facts based on sensory experience, like "seeing that the sun is shining" and "smelling that a piece of meat has gone bad". |  }} This type of knowledge is associated with the empirical science and everyday affairs. ''A priori'' knowledge, by contrast, pertains to non-empirical facts and does not depend on evidence from sensory experience, like knowing that 2 + 2=4. It belongs to fields such as  and . |  | }} The distinction between ''a posteriori'' and ''a priori'' knowledge is central to the debate between empiricists and rationalists regarding whether all knowledge depends on sensory experience. |  }}
+
+A closely related contrast is between analytic and synthetic truths. A sentence is analytically true if its truth depends only on the meanings of the words it uses. For instance, the sentence "all bachelors are unmarried" is analytically true because the word "bachelor" already includes the meaning "unmarried". A sentence is synthetically true if its truth depends on additional facts. For example, the sentence "snow is white" is synthetically true because its truth depends on the color of snow in addition to the meanings of the words ''snow'' and ''white''. ''A priori'' knowledge is primarily associated with analytic sentences, whereas ''a posteriori'' knowledge is primarily associated with synthetic sentences. However, it is controversial whether this is true for all cases. Some philosophers, such as , reject the distinction, saying that there are no analytic truths. |  |  }}
+
+ Analysis 
+
+The analysis of knowledge is the attempt to identify the essential components or conditions of all and only propositional knowledge states. According to the so-called ''traditional analysis'', |  }}}} knowledge has three components: it is a belief that is justified and true. |  }} In the second half of the 20th century, this view was challenged by a series of thought experiments aiming to show that some justified true beliefs do not amount to knowledge. |  }} In one of them, a person is unaware of all the fake barns in their area. By coincidence, they stop in front of the only real barn and form a justified true belief that it is a real barn. |  |  |  }} Many epistemologists agree that this is not knowledge because the justification is not directly relevant to the truth. |  }} More specifically, this and similar counterexamples involve some form of epistemic luck, that is, a cognitive success that results from fortuitous circumstances rather than competence. |  }}
+
+thumb|alt=Venn diagram with circles for true beliefs, justified beliefs, and knowledge|The so-called ''traditional analysis'' says that knowledge is justified true belief. [[Edmund Gettier tried to show that some justified true beliefs do not amount to knowledge. |  }}]]
+
+Following these s, philosophers proposed various alternative definitions of knowledge by modifying or expanding the traditional analysis. According to one view, the known fact has to cause the belief in the right way. Another theory states that the belief is the product of a reliable belief formation process. Further approaches require that the person would not have the belief if it was false, that the belief is not inferred from a falsehood, |  }} that the justification cannot be undermined, or that the belief is . |  }} There is no consensus on which of the proposed modifications and reconceptualizations is correct. |  |  }} Some philosophers, such as , reject the basic assumption underlying the analysis of knowledge by arguing that propositional knowledge is a unique state that cannot be dissected into simpler components.
+
+ Value 
+
+The value of knowledge is the worth it holds by expanding understanding and guiding action. Knowledge can have  by helping a person achieve their goals. |  |  }} For example, knowledge of a disease helps a doctor cure their patient. The usefulness of a known fact depends on the circumstances. Knowledge of some facts may have little to no uses, like memorizing random phone numbers from an outdated phone book. Being able to assess the value of knowledge matters in choosing what information to acquire and share. It affects decisions like which subjects to teach at school and how to allocate funds to research projects. |  |   |  }}
+
+Epistemologists are particularly interested in whether knowledge is more valuable than a mere true opinion. |  |  }} Knowledge and true opinion often have a similar usefulness since both accurately represent reality. For example, if a person wants to go to , a true opinion about the directions can guide them as effectively as knowledge. |  |  }} Considering this problem, Plato proposed that knowledge is better because it is more stable. |  }} Another suggestion focuses on , arguing that people put more trust in knowledge than in mere true opinions when drawing conclusions and deciding what to do. A different response says that knowledge has intrinsic value in addition to instrumental value. This view asserts that knowledge is always valuable, whereas true opinion is only valuable in circumstances where it is useful. |  }}
+
+ Belief and truth 
+
+Beliefs are mental states about what is the case, like believing that snow is white or that . |  |  |  }} In epistemology, they are often understood as subjective attitudes that affirm or deny a proposition, which can be expressed in a . For instance, to believe that snow is white is to affirm the proposition "snow is white". According to this view, beliefs are representations of what the universe is like. They are stored in memory and retrieved when actively thinking about reality or deciding how to act. |  |  }} A different view understands beliefs as behavioral patterns or s to act rather than as representational items stored in the mind. According to this perspective, to believe that there is mineral water in the fridge is nothing more than a group of dispositions related to mineral water and the fridge. Examples are the dispositions to answer questions about the presence of mineral water affirmatively and to go to the fridge when thirsty. |  }} Some theorists deny the existence of beliefs, saying that this concept borrowed from  oversimplifies much more complex psychological or neurological processes. |  }} Beliefs are central to various epistemological debates, which cover their status as a component of propositional knowledge, the question of whether people have control over and responsibility for their beliefs, and the issue of whether beliefs have degrees, called credences. |  }}
+
+As propositional attitudes, beliefs are true or false depending on whether they affirm a true or a false proposition. |  |  }} According to the , to be true means to stand in the right relation to the world by accurately describing what it is like. This means that truth is objective: a belief is true if it corresponds to a . |  |  |  }} The  says that a belief is true if it belongs to a coherent system of beliefs. A result of this view is that truth is relative since it depends on other beliefs. |  |  |  }} Further  include pragmatist, semantic, pluralist, and deflationary theories. |  |  }} Truth plays a central role in epistemology as a goal of cognitive processes and an attribute of propositional knowledge. |  }}
+
+ Justification 
+
+In epistemology, justification is a property of beliefs that meet certain norms about what a person should believe. According to a common view, this means that the person has sufficient reasons for holding this belief because they have information that supports it. |  }} Another view states that a belief is justified if it is formed by a reliable belief formation process, such as perception. |  }} The terms ''reasonable'', ''warranted'', and ''supported'' are sometimes used as synonyms of the word ''justified''. |  }} Justification distinguishes well-founded beliefs from  and lucky guesses. However, it does not guarantee truth. For example, a person with strong but misleading evidence may form a justified belief that is false. |  }}
+
+Epistemologists often identify justification as a key component of knowledge. Usually, they are not only interested in whether a person has a sufficient reason to hold a belief, known as ''propositional justification'', but also in whether the person holds the belief because or based on}} this reason, known as ''doxastic justification''. For example, if a person has sufficient reason to believe that a neighborhood is dangerous but forms this belief based on superstition then they have propositional justification but lack doxastic justification. |  }}
+
+ Sources 
+
+Sources of justification are ways or cognitive capacities through which people acquire justification. Often-discussed sources include , , , , and , but there is no universal agreement to what extent they all provide valid justification. |  |  | }} Perception relies on sensory organs to gain empirical information. Distinct forms of perception correspond to different physical stimuli, such as visual, auditory, haptic, olfactory, and gustatory perception. |  }} Perception is not merely the reception of sense impressions but an active process that selects, organizes, and interprets sensory signals. |  }} Introspection is a closely related process focused on internal  rather than external physical objects. For example, seeing a bus at a bus station belongs to perception while feeling tired belongs to introspection.
+
+Rationalists understand reason as a source of justification for non-empirical facts, explaining how people can know about mathematical, logical, and conceptual truths. Reason is also responsible for inferential knowledge, in which one or more beliefs serve as premises to support another belief. |  |  |  }} Memory depends on information provided by other sources, which it retains and recalls, like remembering a phone number perceived earlier. |  |  |  }} Justification by testimony relies on information one person communicates to another person. This can happen by talking to each other but can also occur in other forms, like a letter, a newspaper, and a blog. |  |  }}
+
+ Other concepts 
+
+ is closely related to justification and the terms ''rational belief'' and ''justified belief'' are sometimes used interchangeably. However, rationality has a wider scope that encompasses both a theoretical side, covering beliefs, and a practical side, covering decisions, s, and actions. |  |  |  }} There are different conceptions about what it means for something to be rational. According to one view, a mental state is rational if it is based on or responsive to good reasons. Another view emphasizes the role of coherence, stating that rationality requires that the different mental states of a person are  and support each other. |  }} A slightly different approach holds that rationality is about achieving certain goals. Two goals of theoretical rationality are accuracy and comprehensiveness, meaning that a person has as few false beliefs and as many true beliefs as possible. |  }}
+
+Epistemologists rely on the concept of epistemic norms as criteria to assess the cognitive quality of beliefs, like their justification and rationality. They distinguish between deontic norms, which prescribe what people should believe, and  norms, which identify the goals and values of beliefs. |  }} Epistemic norms are closely linked to intellectual or s, which are character traits like  and . Epistemic virtues help individuals form true beliefs and acquire knowledge. They contrast with epistemic vices and act as foundational concepts of . |  |  }} |  }}}}
+
+Epistemologists understand  for a belief as information that favors or supports it. They conceptualize evidence primarily in terms of mental states, such as sensory impressions or other known propositions. But in a wider sense, it can also include physical objects, like bloodstains examined by forensic analysts or financial records studied by investigative journalists. |  |  |  }} Evidence is often understood in terms of : evidence for a belief makes it more likely that the belief is true. A  is evidence against a belief or evidence that undermines another piece of evidence. For instance,  linking a suspect to a crime is evidence of their guilt, while an  is a defeater. |  }} Evidentialists analyze justification in terms of evidence by asserting that for a belief to be justified, it needs to rest on adequate evidence. |  }}
+
+The presence of evidence usually affects  and , which are subjective attitudes toward propositions that differ regarding their level of confidence. Doubt involves questioning the validity or truth of a proposition. Certainty, by contrast, is a strong affirmative conviction, indicating an absence of doubt about the proposition's truth. Doubt and certainty are central to ancient Greek skepticism and its goal of establishing that no belief is immune to doubt. They are also crucial in attempts to find a secure foundation of all knowledge, such as ' foundationalist epistemology. |  |  }}
+
+While propositional knowledge is the main topic in epistemology, some theorists focus on  instead. Understanding is a more holistic notion that involves a wider grasp of a subject. To understand something, a person requires awareness of how different things are connected and why they are the way they are. For example, knowledge of isolated facts memorized from a textbook does not amount to understanding. According to one view, understanding is a unique epistemic good that, unlike propositional knowledge, is always intrinsically valuable. |  |  }}  is similar in this regard and is sometimes considered the highest epistemic good. It encompasses a reflective understanding with practical applications, helping people grasp and evaluate complex situations and lead a good life. |  |  }}
+
+In epistemology, knowledge ascription is the act of attributing knowledge to someone, expressed in sentences like "Sarah knows that it will rain today". According to invariantism, knowledge ascriptions have fixed standards across different contexts. Contextualists, by contrast, argue that knowledge ascriptions are context-dependent. From this perspective, Sarah may know about the weather in the context of an everyday conversation even though she is not sufficiently informed to know it in the context of a rigorous meteorological debate. |  }} , another view, argues that knowledge ascriptions are comparative, meaning that to know something involves distinguishing it from relevant alternatives. For example, if a person spots a bird in the garden, they may know that it is a sparrow rather than an eagle, but they may not know that it is a sparrow rather than an indistinguishable sparrow hologram. |  }}
+
+ Major schools of thought 
+
+ Skepticism and fallibilism 
+
+ questions the human ability to attain knowledge by challenging the foundations upon which knowledge claims rest. Some skeptics limit their criticism to specific domains of knowledge. For example, religious skeptics say that it is impossible to know about the existence of deities or the truth of other religious doctrines. Similarly, moral skeptics challenge the existence of moral knowledge and metaphysical skeptics say that humans cannot know ultimate reality. |  |  }} External world skepticism questions knowledge of external facts, |  }} whereas skepticism about other minds doubts knowledge of the mental states of others. |  }}
+
+Global skepticism is the broadest form of skepticism, asserting that there is no knowledge in any domain. |  |  }} In , this view was embraced by academic skeptics, whereas  recommended the suspension of belief to attain tranquility. |  }} Few epistemologists have explicitly defended global skepticism. The influence of this position stems from attempts by other philosophers to show that their theory overcomes the challenge of skepticism. For example,  used methodological doubt to find facts that cannot be doubted. |  }}
+
+One consideration in favor of global skepticism is the . It starts from the observation that, while people are dreaming, they are usually unaware of this. This inability to distinguish between dream and regular experience is used to argue that there is no certain knowledge since a person can never be sure that they are not dreaming. |  |  }} |  }}}} Some critics assert that global skepticism is self-refuting because denying the existence of knowledge is itself a knowledge claim. Another objection says that the abstract reasoning leading to skepticism is not convincing enough to overrule common sense. |  }}
+
+Fallibilism is another response to skepticism. Fallibilists agree with skeptics that absolute certainty is impossible. They reject the assumption that knowledge requires absolute certainty, leading them to the conclusion that fallible knowledge exists. |  }} They emphasize the need to keep an open and inquisitive mind, acknowledging that doubt can never be fully excluded, even for well-established knowledge claims like thoroughly tested scientific theories. |  }}
+
+Epistemic relativism is related to skepticism but differs in that it does not question the existence of knowledge in general. Instead, epistemic relativists only reject the notion of universal epistemic standards or absolute principles that apply equally to everyone. This means that what a person knows depends on subjective criteria or social conventions used to assess epistemic status. |  }}
+
+ Empiricism and rationalism 
+
+}}
+The debate between empiricism and rationalism centers on the origins of human knowledge. Empiricism emphasizes that  is the primary source of all knowledge. Some empiricists illustrate this view by describing the mind as a  that only develops ideas about the external world through the sense data received from the sensory organs. According to them, the mind can attain various additional insights by comparing impressions, combining them, generalizing to form more abstract ideas, and deducing new conclusions from them. Empiricists say that all these mental operations depend on sensory material and do not function on their own. |  }}
+
+Even though rationalists usually accept sense experience as one source of knowledge,}} they argue that certain forms of knowledge are directly accessed through  without sense experience, |  }} like knowledge of mathematical and logical truths. Some forms of rationalism state that the mind possesses inborn ideas, accessible without sensory assistance. Others assert that there is an additional cognitive faculty, sometimes called , through which people acquire nonempirical knowledge. |  |  }} Some rationalists limit their discussion to the origin of concepts, saying that the mind relies on inborn categories to understand the world and organize experience.
+
+ Foundationalism and coherentism 
+
+thumb|upright=1.5|alt=Diagram with sections for foundationalism, coherentism, and infinitism, each depicting the relations between beliefs|Diagram of foundationalism, coherentism, and infinitism with arrows symbolizing support between beliefs. According to foundationalism, some basic beliefs are justified without support from other beliefs. According to coherentism, justification requires that beliefs mutually support each other. According to infinitism, justification requires that beliefs form infinite support chains.
+Foundationalists and coherentists disagree about the structure of knowledge. |  |  |  }} In ancient philosophy, the underlying problem was discussed as . The trilemma distinguises three ways of providing reasons for a statement: finding a justification that needs no further reason, circular reasoning by repeating a justification stated earlier, or providing an infinite justification chain.}} Foundationalism distinguishes between basic and non-basic beliefs. A belief is basic if it is justified directly, meaning that its validity does not depend on the support of other beliefs.}} A belief is non-basic if it is justified by another belief. |  }} For example, the belief that it rained last night is a non-basic belief if it is inferred from the observation that the street is wet. According to foundationalism, basic beliefs are the foundation on which all other knowledge is built while non-basic beliefs act as the superstructure resting on this foundation.
+
+Coherentists reject the distinction between basic and non-basic beliefs, saying that the justification of any belief depends on other beliefs. They assert that a belief must align with other beliefs to amount to knowledge. This occurs when beliefs are consistent and support each other. According to coherentism, justification is a holistic aspect determined by the whole system of beliefs, which resembles an interconnected web. |  |  }}
+
+ is an intermediary position combining elements of both foundationalism and coherentism. It accepts the distinction between basic and non-basic beliefs while asserting that the justification of non-basic beliefs depends on coherence with other beliefs. |  }}
+
+ presents a less common alternative perspective on the structure of knowledge. It agrees with coherentism that there are no basic beliefs while rejecting the view that beliefs can support each other in a circular manner. Instead, it argues that beliefs form infinite justification chains, in which each link of the chain supports the belief following it and is supported by the belief preceding it. |  }}
+
+ Internalism and externalism 
+
+thumb|alt=Black and white photo of a bearded man wearing a suit and a tie|[[Alvin Goldman was an influential defender of externalism.]]
+The disagreement between internalism and externalism is about the sources of justification. |  |  }} |  }}}} Internalists say that justification depends only on factors within the individual, such as perceptual experience, memories, and other beliefs. This view emphasizes the importance of the cognitive perspective of the individual in the form of their mental states. It is commonly associated with the idea that the relevant factors are accessible, meaning that the individual can become aware of their reasons for holding a justified belief through introspection and reflection. |  |  }}
+
+ is an influential internalist view, asserting that justification depends on the possession of . |  |  }} In this context, evidence for a belief is any information in the individual's mind that supports the belief. For example, the perceptual experience of rain is evidence for the belief that it is raining. Evidentialists suggest various other forms of evidence, including memories, intuitions, and other beliefs. According to evidentialism, a belief is justified if the individual's evidence supports it and they hold the belief on the basis of this evidence.
+
+Externalism, by contrast, asserts that at least some relevant factors of knowledge are external to the individual. For instance, when considering the belief that a cup of coffee stands on the table, externalists are not primarily interested in the subjective perceptual experience that led to this belief. Instead, they focus on objective factors, like the quality of the person's eyesight, their ability to differentiate coffee from other beverages, and the circumstances under which they observed the cup. A key motivation of many forms of externalism is that justification makes it more likely that a belief is true. Based on this view, justification is external to the extent that some factors contributing to this likelihood are not part of the believer's cognitive perspective.
+
+ is an externalist theory asserting that a reliable connection between belief and truth is required for justification. |  }} Some reliabilists explain this in terms of reliable processes. According to this view, a belief is justified if it is produced by a reliable process, like perception. A belief-formation process is deemed reliable if most of the beliefs it generates are true. An alternative view focuses on beliefs rather than belief-formation processes, saying that a belief is justified if it is a reliable indicator of the fact it presents. This means that the belief tracks the fact: the person believes it because it is true but would not believe it otherwise. |  |  }}
+
+, another type of externalism, asserts that a belief is justified if it manifests intellectual virtues. Intellectual virtues are capacities or traits that perform cognitive functions and help people form true beliefs. Suggested examples include faculties, like vision, memory, and introspection, and s, like open-mindedness. |  }}
+
+ Branches and approaches 
+
+Some branches of epistemology are characterized by their research methods.  employs formal tools from logic and mathematics to investigate the nature of knowledge. |  }}}} For example,  represents beliefs as degrees of certainty and uses  to formally define norms of  governing how certain people should be. |  }} Experimental epistemologists base their research on empirical evidence about common knowledge practices.  focuses on the practical application of epistemological principles to diverse real-world problems, like the reliability of knowledge claims on the internet, how to assess  allegations, and how  may lead to . |  }}}} Metaepistemologists study the nature, goals, and research methods of epistemology. As a , it does not directly advocate for specific epistemological theories but examines their fundamental concepts and background assumptions. |  }}}}
+
+Particularism and generalism disagree about the right method of conducting epistemological research. Particularists start their inquiry by looking at specific cases. For example, to find a definition of knowledge, they rely on their intuitions about concrete instances of knowledge and particular thought experiments. They use these observations as methodological constraints that any theory of general principles needs to follow. Generalists proceed in the opposite direction. They prioritize general epistemic principles, saying that it is not possible to accurately identify and describe specific cases without a grasp of these principles. |  |  }} Other methods in contemporary epistemology aim to extract philosophical insights from ordinary language or look at the role of knowledge in making assertions and guiding actions. |  }}
+
+Phenomenological epistemology emphasizes the importance of first-person experience. It distinguishes between the natural and the phenomenological attitudes. The natural attitude focuses on objects belonging to common sense and natural science. The phenomenological attitude focuses on the experience of objects and aims to provide a presuppositionless description of how objects appear to the observer. |  }}
+
+ is closely associated with the , relying on their methods and theories to examine knowledge. Arguing that epistemological theories should rest on empirical observation, it is critical of ''a priori'' reasoning. |  |  }}  is a naturalistic approach that understands cognition as a product of , examining knowledge and the cognitive faculties responsible for it through the lens of . |  }}  focuses on the social dimension of knowledge. While traditional epistemology is mainly interested in the knowledge possessed by individuals, social epistemology covers knowledge acquisition, transmission, and evaluation within groups, with specific emphasis on how people rely on each other when seeking knowledge. |  }}
+
+Pragmatist epistemology is a form of fallibilism that emphasizes the close relation between knowing and acting. It sees the pursuit of knowledge as an ongoing process guided by common sense and experience while always open to revision. This approach reinterprets some core epistemological notions, for example, by conceptualizing beliefs as habits that shape actions rather than representations that mirror the world. |  }} Motivated by pragmatic considerations,  is a view about . It prioritizes pre-existing beliefs, asserting that a person should only change their beliefs if they have a good reason to. One argument for epistemic conservatism rests on the recognition that the cognitive resources of humans are limited, making it impractical to constantly reexamine every belief. |  }}
+
+ epistemology critiques the conditions of knowledge in advanced societies. This concerns in particular the  of a constant progress of scientific knowledge leading to a universal and foundational understanding of reality. |  }}}} Similarly,  epistemology adopts a critical perspective, focusing on the effect of  on knowledge. Among other topics, it explores how preconceptions about gender influence who has access to knowledge, how knowledge is produced, and which types of knowledge are valued in society. |  }} Some postmodern and feminist thinkers adopt a constructivist approach, arguing that the way people view the world is not a simple reflection of external reality but a social construction. This view emphasizes the creative role of interpretation while undermining objectivity since social constructions can vary across societies. |  |  }} Another critical approach, found in decolonial scholarship, opposes the global influence of Western knowledge systems. It seeks to undermine Western hegemony and decolonize knowledge. |  }}
+
+The decolonial outlook is also present in . Grounded in African , it emphasizes the interconnectedness of reality as a continuum between knowing subject and known object. It understands knowledge as a holistic phenomenon that includes sensory, emotional, intuitive, and rational aspects, extending beyond the limits of the physical domain. |  }}
+
+Another epistemological tradition is found in ancient . Its diverse schools of thought examine different sources of knowledge, called . Perception, inference, and testimony are sources discussed by most schools. Other sources only considered by some schools are non-perception, which leads to knowledge of absences, and presumption. |  |  }} |  }}}}  epistemology focuses on immediate experience, understood as the presentation of unique s without secondary cognitive processes, like thought and desire. |  }}  epistemology is a causal theory of knowledge, understanding sources of knowledge as reliable processes that cause episodes of truthful awareness. It sees perception as the primary source of knowledge and emphasizes its importance for successful action. |  }}  epistemology considers the holy scriptures known as the  as a key source of knowledge, addressing the problem of their right interpretation.  states that reality is many-sided, meaning that no single viewpoint can capture the entirety of truth. |  }}
+
+ examines how the understanding of knowledge and related concepts has changed over time. It asks whether the main issues in epistemology are perennial and to what extent past epistemological theories are relevant to contemporary debates. It is particularly concerned with scientific knowledge and practices associated with it. |  |  }} It contrasts with the history of epistemology, which presents, reconstructs, and evaluates epistemological theories of philosophers in the past.}}
+
+ Knowledge in particular domains 
+
+Some branches of epistemology focus on knowledge within specific academic disciplines. The  examines how scientific knowledge is generated and what problems arise in the process of validating, justifying, and interpreting scientific claims. A key issue concerns the problem of how individual observations can support universal scientific laws. Other topics include the nature of scientific evidence and the aims of science. |  |  }} The epistemology of mathematics studies the origin of mathematical knowledge. In exploring how mathematical theories are justified, it investigates the role of proofs and whether there are empirical sources of mathematical knowledge. |  }}
+
+Distinct areas of epistemology are dedicated to specific sources of knowledge. Examples are the epistemology of perception, the epistemology of memory, and the . In the epistemology of perception, direct and indirect realists debate the connection between the perceiver and the perceived object. Direct realists say that this connection is direct, meaning that there is no difference between the object present in perceptual experience and the physical object causing this experience. According to indirect realism, the connection is indirect, involving mental entities, like ideas or sense data, that mediate between the perceiver and the external world. The contrast between direct and indirect realism is important for explaining the nature of s. |  }}
+
+Epistemological issues are found in most areas of philosophy. The  examines how people know that an  is valid. For example, it explores how logicians justify that  is a correct  or that all  are false. Epistemologists of metaphysics investigate whether knowledge of the basic structure of reality is possible and what sources this knowledge could have. |  }} Knowledge of moral statements, like the claim that lying is wrong, belongs to the . It studies the role of ethical intuitions, coherence among moral beliefs, and the problem of moral disagreement. |  }} The  is a closely related field exploring the intersection of epistemology and . It examines the norms governing belief formation and asks whether violating them is morally wrong.  studies the role of knowledge and justification for religious doctrines and practices. It evaluates the reliability of evidence from  and holy scriptures while also asking whether the norms of reason should be applied to religious . |  }}
+
+Epistemologists of language explore the nature of linguistic knowledge. One of their topics is the role of tacit knowledge, for example, when native speakers have mastered the rules of  but are unable to explicitly articulate them. Epistemologists of modality examine knowledge about what is possible and necessary. Epistemic problems that arise when two people have diverging opinions on a topic are covered by the epistemology of disagreement. Epistemologists of ignorance are interested in epistemic faults and gaps in knowledge.
+
+ Related fields 
+
+Epistemology and  were not defined as distinct fields until the 19th century; earlier investigations about knowledge often do not fit neatly into today's academic categories. Both contemporary disciplines study beliefs and the mental processes responsible for their formation and change. One key contrast is that psychology describes what beliefs people have and how they acquire them, thereby explaining why someone has a specific belief. The focus of epistemology is on evaluating beliefs, leading to a judgment about whether a belief is justified and rational in a particular case. |  |  }} Epistemology also shares a close connection with , which understands mental events as processes that transform . |  }}  relies on the insights of epistemology and cognitive science to implement concrete solutions to problems associated with  and .
+
+ is the study of correct reasoning. For epistemology, it is relevant to inferential knowledge, which arises when a person reasons from one known fact to another. |  |  }} This is the case, for example, when inferring that it rained based on the observation that the streets are wet. Whether an inferential belief amounts to knowledge depends on the form of reasoning used, in particular, that the process does not violate the laws of logic. Another overlap between the two fields is found in the epistemic approach to fallacies. Fallacies are faulty arguments based on incorrect reasoning. |  }} The epistemic approach to fallacies explains why they are faulty, stating that arguments aim to expand knowledge. According to this view, an argument is a fallacy if it fails to do so. A further intersection is found in , which uses formal logical devices to study epistemological concepts like ''knowledge'' and ''belief''. |  }}
+
+Both  and epistemology are interested in the foundations of rational thought and the role of beliefs. Unlike many approaches in epistemology, the main focus of decision theory lies less in the theoretical and more in the practical side, exploring how beliefs are translated into action. |  |  }} Decision theorists examine the reasoning involved in decision-making and the standards of good decisions, identifying beliefs as a central aspect of decision-making. One of their innovations is to distinguish between weaker and stronger beliefs, which helps them consider the effects of uncertainty on decisions. |  }}
+
+Epistemology and  have a shared interest in knowledge, with one difference being that education focuses on the transmission of knowledge, exploring the roles of both learner and teacher. |  }} Learning theory examines how people acquire knowledge. |  }} Behavioral learning theories explain the process in terms of behavior changes, for example, by associating a certain response with a particular stimulus. Cognitive learning theories study how the cognitive processes that affect knowledge acquisition transform information.  looks at the transmission of knowledge from the teacher's perspective, exploring the s they may employ. |  |  }} In teacher-centered methods, the teacher serves as the main authority delivering knowledge and guiding the learning process. In student-centered methods, the teacher primarily supports and facilitates the learning process, allowing students to take a more active role. The beliefs students have about knowledge, called '''', influence their intellectual development and learning success. |  }}
+
+The  of knowledge examines how knowledge is acquired, stored, retrieved, and communicated. It studies the social and cultural circumstances that affect how knowledge is reproduced and changes, covering the role of institutions like university departments and scientific journals as well as face-to-face discussions and online communications. This field has a broad concept of knowledge, encompassing various forms of understanding and culture, including practical skills. Unlike epistemology, it is not interested in whether a belief is true or justified but in how understanding is reproduced in society. |  }} A closely related field, the  has a similar conception of knowledge. It explores how physical, demographic, economic, and sociocultural factors impact knowledge. This field examines in what sociohistorical contexts knowledge emerges and the effects it has on people, for example, how socioeconomic conditions are related to the  in a society. |  |  }}
+
+ History 
+
+Early reflections on the nature and sources of knowledge are found in ancient history. In ,  (427–347 BCE) studied what knowledge is, examining how it differs from true opinion by being based on good reasons. |  }} He proposed that learning is a form of recollection in which the soul remembers what it already knew but had forgotten. Plato's student  (384–322 BCE) was particularly interested in scientific knowledge, exploring the role of sensory experience and the process of making inferences from general principles. |  |  }} Aristotle's ideas influenced the Hellenistic schools of philosophy, which began to arise in the 4th century BCE and included , , and skepticism. The Epicureans had an empiricist outlook, stating that sensations are always accurate and act as the supreme standard of judgments. |  }} The Stoics defended a similar position but confined their trust to lucid and specific sensations, which they regarded as true. |  }} The skeptics questioned that knowledge is possible, recommending instead suspension of judgment to attain a state of tranquility. |  }} Emerging in the 3rd century CE and inspired by Plato's philosophy,  distinguished knowledge from true belief, arguing that knowledge is infallible and limited to the realm of immaterial forms.
+
+thumb|alt=Photo of a statue of a monk sitting in the lotus position|The Buddhist philosopher [[Dharmakirti developed a causal theory of knowledge.|left]]
+
+The , philosophical scriptures composed in  between 700 and 300 BCE, examined how people acquire knowledge, including the role of introspection, comparison, and deduction. In the 6th century BCE, the school of  developed a radical skepticism questioning the possibility and usefulness of knowledge. |  |  }} By contrast, the school of , which emerged around 200 CE, asserted that knowledge is possible. It provided a systematic treatment of how people acquire knowledge, distinguishing between valid and invalid sources. |  |  }} When Buddhist philosophers became interested in epistemology, they relied on concepts developed in Nyaya and other traditions. |  }} Buddhist philosopher  (6th or 7th century CE) analyzed the process of knowing as a series of causally related events.
+
+Ancient Chinese philosophers understood knowledge as an interconnected phenomenon fundamentally linked to ethical behavior and social involvement. Many saw wisdom as the goal of attaining knowledge. |  }}  (470–391 BCE) proposed a pragmatic approach to knowledge using historical records, sensory evidence, and practical outcomes to validate beliefs. |  }}  () explored analogical reasoning as a source of knowledge and employed this method to criticize Mozi. |  }} Xunzi () aimed to combine empirical observation and rational inquiry. He emphasized the importance of clarity and standards of reasoning without excluding the role of feeling and emotion. |  }}
+
+The relation between  and  was a central topic in the medieval period. |  }} In Arabic–Persian philosophy,  () and  (1126–1198) discussed how philosophy and  interact, debating which one is a better vehicle to truth. |  }}  () criticized many core teachings of previous Islamic philosophers, saying that they relied on unproven assumptions that did not amount to knowledge. |  }} Similarly in Western philosophy,  (1033–1109) proposed that theological teaching and philosophical inquiry are in harmony and complement each other. |  }} Formulating a more critical approach,  (1079–1142) argued against unquestioned theological authorities and said that all things are open to rational doubt. Influenced by Aristotle,  (1225–1274) developed an empiricist theory, stating that "nothing is in the intellect unless it first appeared in the senses". |  }} According to an early form of  proposed by  (), perception of mind-independent objects happens directly without intermediaries. |  }} Meanwhile, in 14th-century India,  developed a reliabilist theory of knowledge and considered the problems of testimony and fallacies. |  }} In China,  (1472–1529) explored the unity of knowledge and action, holding that moral knowledge is inborn and can be attained by overcoming self-interest. |  }}
+
+thumb|alt=Painting of a bearded man with long hair wearing a dark formal attire|[[René Descartes used methodological doubt to seek certain foundations for philosophy.|left]]
+
+The course of  was shaped by  (1596–1650), who stated that philosophy must begin from a position of indubitable knowledge of first principles. Inspired by skepticism, he aimed to find absolutely certain knowledge by encountering truths that cannot be doubted. He thought that this is the case for the assertion "", from which he constructed the rest of his philosophical system. |  }} Descartes, together with  (1632–1677) and  (1646–1716), belonged to the school of , which asserts that the mind possesses  independent of experience. |  }}  (1632–1704) rejected this view in favor of an empiricism according to which the mind is a . This means that all ideas depend on experience, either as "ideas of sense", which are directly presented through the senses, or as "ideas of reflection", which the mind creates by reflecting on its own activities. |  |  | }}  (1711–1776) used this idea to explore the limits of what people can know. He said that knowledge of facts is never certain, adding that knowledge of relations between ideas, like mathematical truths, can be certain but contains no information about the world. |  |  }}  (1724–1804) sought a middle ground between rationalism and empiricism by identifying a type of knowledge overlooked by Hume. For Kant, this knowledge pertains to principles that underlie and structure all experience, such as spatial and temporal relations and fundamental . |  |  }}
+
+In the 19th century and influenced by Kant's philosophy,  (1770–1831) rejected empiricism by arguing that sensory impressions alone cannot amount to knowledge since all knowledge is actively structured by the knowing subject. |  }}  (1806–1873), by contrast, defended a wide-sweeping form of empiricism and explained knowledge of general truths through . |  }}  (1839–1914) thought that all knowledge is , emphasizing that knowledge seekers should remain open to revising their beliefs in light of new . He used this idea to argue against Cartesian foundationalism, which seeks absolutely certain truths.
+
+In the 20th century, fallibilism was further explored by  (1911–1960) and  (1902–1994). |  }} In ,  (1859–1938) applied the skeptical idea of suspending judgment to the study of experience. By not judging whether an experience is accurate, he tried to describe its internal structure instead. |  |  }} Influenced by earlier empiricists, , like  (1910–1989), said that all knowledge is either empirical or analytic, rejecting any form of metaphysical knowledge. |  }}  (1872–1970) developed an empiricist sense-datum theory, distinguishing between direct  of sense data and indirect knowledge by description, which is inferred from knowledge by acquaintance. |  |  }}  had a central place in 's (1873–1958) epistemology. He used trivial observations, like the fact that he has two hands, to argue against abstract philosophical theories that deviate from common sense. |  }} , as practiced by the late  (1889–1951), is a similar approach that tries to extract epistemological insights from how ordinary language is used.
+
+ (1927–2021) conceived counterexamples against the idea that knowledge is justified true belief. These counterexamples prompted many philosophers to suggest alternative . |  |  }} Developed by philosophers such as  (1938–2024),  emerged as one of the alternatives, asserting that knowledge requires reliable sources and shifting the focus away from justification. |  }} Virtue epistemologists, such as  (1940–present) and  (1946–present), analyse belief formation in terms of the intellectual virtues or cognitive competencies involved in the process. |  |  }} , as conceived by  (1908–2000), employs concepts and ideas from the natural sciences to formulate its theories. Other developments in late 20th-century epistemology were the emergence of social, feminist, and . |  }}
+
+See also
+
+* 
+* 
+* 
+* 
+
+ References 
+
+Notes
+
+Citations
+
+ Bibliography 
+
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+*  
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+*  
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+
+External links
+
+thumb|alt=Incunabulum showing a text of the beginning of Aristotle's ''Metaphysics'' at the center of the picture. A group of people in colorful robes stands above it and below it are animals on grass.|The beginning of [[Metaphysics (Aristotle)|Aristotle's ''Metaphysics'', one of the foundational texts of the discipline]]
+'''Metaphysics''' is the branch of  that examines the basic structure of . It is traditionally seen as the study of mind-independent features of the world, but some theorists view it as an inquiry into the conceptual framework of human understanding. Some philosophers, including , designate metaphysics as '''first philosophy''' to suggest that it is more fundamental than other forms of philosophical inquiry.
+
+Metaphysics encompasses a wide range of general and abstract topics. It investigates the nature of , the features all entities have in common, and their division into . An influential division is between s and universals. Particulars are individual unique entities, like a specific apple. Universals are general features that different particulars have in common, like the color .  examines what it means for something to be possible or necessary. Metaphysicians also explore the concepts of space, time, and change, and their connection to  and the laws of nature. Other topics include how mind and matter are related, whether everything in the world is predetermined, and whether there is .
+
+Metaphysicians use various methods to conduct their inquiry. They typically rely on rational s and  but also include empirical approaches associated with scientific theories. Due to the abstract nature of its topic, metaphysics has received criticisms questioning the reliability of its methods and the meaningfulness of its theories. Metaphysics is relevant to many fields of inquiry that often implicitly rely on metaphysical concepts and assumptions.
+
+The roots of metaphysics lie in antiquity with speculations about the nature and origin of the universe, like those found in the  in ,  in , and  in . During the subsequent  in the West, discussions about the nature of universals were influenced by the philosophies of  and Aristotle. The  saw the emergence of various comprehensive systems of metaphysics, many of which embraced . In the 20th century, traditional metaphysics in general and idealism in particular faced various criticisms, which prompted new approaches to metaphysical inquiry.
+
+ Definition 
+
+Metaphysics is the study of the most elementary features of , including , objects and their properties, possibility and necessity,  and , change, causation, and the relation between  and . It is one of the oldest branches of . |  |  |  }} |  }} Outside the academic discourse, the term ''metaphysics'' is sometimes used in a different sense for the study of  and  phenomena, like metaphysical healing, auras, and the power of pyramids. |  }}}}
+
+The precise nature of metaphysics is disputed and its characterization has changed in the course of history. Some approaches see metaphysics as a unified field and give a wide-sweeping definition by understanding it as the study of "fundamental questions about the nature of reality" or as an inquiry into the s of things. Another approach doubts that the different areas of metaphysics share a set of underlying features and provides instead a fine-grained characterization by listing all the main topics investigated by metaphysicians. |  |  |  |  |  }} Some definitions are descriptive by providing an account of what metaphysicians do while others are normative and prescribe what metaphysicians ought to do.
+
+Two historically influential definitions in ancient and  understand metaphysics as the science of the s and as the study of being  being, that is, the topic of what all beings have in common and to what fundamental categories they belong. In the modern period, the scope of metaphysics expanded to include topics such as the distinction between mind and body and . |  }} Some philosophers follow  in describing metaphysics as "first philosophy", suggesting that it is the most basic inquiry upon which all other branches of philosophy depend in some way. |  }}}}
+
+thumb|alt=Oil painting showing Kant from the front against a dark background in a sitting position, leaning on a table with pens and ink and wearing brown formal dress|[[Immanuel Kant conceived metaphysics from the perspective of  as the study of the principles underlying all human thought and experience.]]
+
+Metaphysics is traditionally understood as a study of mind-independent features of reality. Starting with 's , an alternative conception gained prominence that focuses on conceptual schemes rather than external reality. Kant distinguishes transcendent metaphysics, which aims to describe the objective features of reality beyond sense experience, from the critical perspective on metaphysics, which outlines the aspects and principles underlying all human thought and experience. |  |  }} Philosopher  further explored the role of conceptual schemes, contrasting descriptive metaphysics, which articulates conceptual schemes commonly used to understand the world, with revisionary metaphysics, which aims to produce better conceptual schemes. |  }}
+
+Metaphysics differs from the individual sciences by studying the most general and abstract aspects of reality. The individual sciences, by contrast, examine more specific and concrete features and restrict themselves to certain classes of entities, such as the focus on physical things in , living entities in , and cultures in . |  |  }} It is disputed to what extent this contrast is a strict dichotomy rather than a gradual continuum.
+
+Etymology
+
+The word ''metaphysics'' has its origin in the ancient Greek words  (, meaning , , and ) and  (), as a short form of , meaning . This is often interpreted to mean that metaphysics discusses topics that, due to their generality and comprehensiveness, lie beyond the realm of physics and its focus on empirical observation. 
+
+Alternatively, metaphysics may have received its name by a historical accident when Aristotle's book on this subject, ''Metaphysics'', was published. |  |  |  }} Aristotle himself did not use the term ''metaphysics'' but an editor of his works some two centuries later (likely ) coined it for the title, presumably to indicate that this book should be studied after Aristotle's book ''Physics'': thus, literally . The term entered the English language in the mid 1500s through the Latin word . |  |  |  |  |  }}
+
+ Branches 
+
+The nature of metaphysics can also be characterized in relation to its main branches. An influential division from early  distinguishes between general and special or specific metaphysics. |  |  |  }} General metaphysics, also called '''',}} takes the widest perspective and studies the most fundamental aspects of being. It investigates the features that all entities share and how entities can be divided into different categories. Categories are the most general kinds, such as substance, property, relation, and . |  |  }} Ontologists research which categories there are, how they depend on one another, and how they form a system of categories that provides a comprehensive classification of all entities. |  |  }}
+
+Special metaphysics considers being from more narrow perspectives and is divided into subdisciplines based on the perspective they take.  examines changeable things and investigates how they are connected to form a  as a totality extending through space and time. |  }} Rational psychology focuses on metaphysical foundations and problems concerning the mind, such as its relation to matter and the freedom of the will. Natural theology studies the divine and its role as the first cause. The scope of special metaphysics overlaps with other philosophical disciplines, making it unclear whether a topic belongs to it or to areas like  and . |  }}
+
+Starting in the second half of the 20th century, applied metaphysics was conceived as the area of  examining the implications and uses of metaphysics, both within philosophy and other fields of inquiry. In areas like  and , it addresses topics like the ontological foundations of moral claims and religious doctrines. |  }} Beyond philosophy, its applications include the use of ontologies in , , and  to classify entities. In  and , it examines the metaphysical status of s.
+
+'''Meta-metaphysics'''}} is the  of metaphysics and investigates the nature and methods of metaphysics. It examines how metaphysics differs from other philosophical and scientific disciplines and assesses its relevance to them. Even though discussions of these topics have a long history in metaphysics, meta-metaphysics has only recently developed into a systematic field of inquiry. |  }}
+
+ Topics 
+
+ Existence and categories of being 
+
+Metaphysicians often regard existence or being as one of the most basic and general concepts. |  |  }} To exist means to be part of , distinguishing real entities from imaginary ones. |  }} According to a traditionally influential view, existence is a property of properties: if an entity exists then its properties are instantiated. |2= }} A different position states that existence is a property of individuals, meaning that it is similar to other properties, such as shape or size. |2= }} It is controversial whether all entities have this property. According to philosopher , there are , including merely possible objects like  and . |2= |3= }} A related question is whether existence is the same for all entities or whether there are different modes or degrees of existence. |2= }} For instance, Plato held that , which are perfect and immutable ideas, have a higher degree of existence than matter, which can only imperfectly reflect Platonic forms. |2= }} |  }}}}
+
+Another key concern in metaphysics is the division of entities into distinct groups based on underlying features they share. Theories of categories provide a system of the most fundamental kinds or the highest genera of being by establishing a comprehensive inventory of everything. |  |  }} One of the earliest theories of categories was proposed by Aristotle, who outlined a system of 10 categories. He argued that substances (e.g., man and horse), are the most important category since all other categories like  (e.g., four), quality (e.g., white), and place (e.g., in Athens) are said of substances and depend on them. |  |  }} Kant understood categories as fundamental principles underlying human understanding and developed a system of 12 categories, divided into the four classes: quantity, quality, relation, and modality. |  }} More recent theories of categories were proposed by C. S. Peirce, , , , and E. J. Lowe. |  }} Many philosophers rely on the contrast between concrete and abstract objects. According to a common view, concrete objects, like rocks, trees, and human beings, exist in space and time, undergo changes, and impact each other as cause and effect. They contrast with abstract objects, like s and sets, which do not exist in space and time, are immutable, and do not engage in causal relations. |  }}
+
+ Particulars 
+
+s are individual entities and include both concrete objects, like Aristotle, the Eiffel Tower, or a specific apple, and abstract objects, like the number 2 or a specific set in mathematics. They are unique, non-repeatable entities and contrast with universals, like the color red, which can at the same time exist in several places and characterize several particulars. |  |  |  |  }} A widely held view is that particulars instantiate universals but are not themselves instantiated by something else, meaning that they exist in themselves while universals exist in something else. Substratum theory, associated with 's philosophy, analyzes each particular as a substratum, also called ''bare particular'', together with various properties. The substratum confers individuality to the particular while the properties express its qualitative features or what it is like. This approach is rejected by bundle theorists. Inspired by 's philosophy, they state that particulars are only bundles of properties without an underlying substratum. Some bundle theorists include in the bundle an individual essence, called '''' following scholastic terminology, to ensure that each bundle is unique. Another proposal for concrete particulars is that they are individuated by their space-time location. |  |  |  }}
+
+Concrete particulars encountered in everyday life, like rocks, tables, and organisms, are complex entities composed of various parts. For example, a table consists of a tabletop and legs, each of which is itself made up of countless particles. The relation between parts and wholes is studied by . |  |  |  }}}} The problem of the many is a philosophical question about the conditions under which several individual things compose a larger whole. For example, a cloud comprises many droplets without a clear boundary, raising the question of which droplets form part of the cloud. According to mereological universalists, every collection of entities forms a whole. This means that what seems to be a single cloud is an overlay of countless clouds, one for each cloud-like collection of water droplets. Mereological moderatists hold that certain conditions must be met for a group of entities to compose a whole, for example, that the entities touch one another. Mereological nihilists reject the idea of wholes altogether, claiming that there are no clouds or tables but only particles that are arranged cloud-wise or table-wise. |  |  |  |  }} A related mereological problem is whether there are simple entities that have no parts, as atomists claim, or whether everything can be endlessly subdivided into smaller parts, as continuum theorists contend. |  }}
+
+ Universals 
+
+Universals are general entities, encompassing both properties and relations, that express what particulars are like and how they resemble one another. They are repeatable, meaning that they are not limited to a unique existent but can be instantiated by different particulars at the same time. For example, the particulars  and  instantiate the universal , similar to how a strawberry and a ruby instantiate the universal . |  |  |  }}
+
+A topic discussed since ancient philosophy, the  consists in the challenge of characterizing the ontological status of universals. |  |  }} Realists argue that universals are real, mind-independent entities that exist in addition to particulars. According to Platonic realists, universals exist independently of particulars, which implies that the universal  would continue to exist even if there were no red things. A more moderate form of realism, inspired by Aristotle, states that universals depend on particulars, meaning that they are only real if they are instantiated. Nominalists reject the idea that universals exist in either form. For them, the world is composed exclusively of particulars. Conceptualists offer an intermediate position, stating that universals exist, but only as s in the mind used to order experience by classifying entities. |  |  }}}}
+
+Natural and social kinds are often understood as special types of universals. Entities belonging to the same natural kind share certain fundamental features characteristic of the structure of the natural world. In this regard, natural kinds are not an artificially constructed classification but are discovered, |  }}}} usually by the natural sciences, and include kinds like , , and tigers. Scientific realists and anti-realists disagree about whether natural kinds exist. |  |  }} Social kinds, like  and , |  }} are studied by  and characterized as useful social constructions that, while not purely fictional, do not reflect the fundamental structure of mind-independent reality.| }}
+
+ Possibility and necessity 
+
+The concepts of possibility and necessity convey what can or must be the case, expressed in modal statements like "it is possible to find a cure for cancer" and "it is necessary that two plus two equals four". Modal metaphysics studies metaphysical problems surrounding possibility and necessity, for instance, why some modal statements are true while others are false. |  |  |  }} |  }}}} Some metaphysicians hold that modality is a fundamental aspect of reality, meaning that besides facts about what is the case, there are additional facts about what could or must be the case. |  }} A different view argues that modal truths are not about an independent aspect of reality but can be reduced to non-modal characteristics, for example, to facts about what properties or linguistic descriptions are compatible with each other or to fictional statements. |  |  }}
+
+Borrowing a term from German philosopher 's , many metaphysicians use the concept of s to analyze the meaning and ontological ramifications of modal statements. A possible world is a complete and consistent way the totality of things could have been. |  |  |  }} For example, the  were wiped out in the actual world but there are possible worlds in which they are still alive. According to possible world semantics, a statement is possibly true if it is true in at least one possible world, whereas it is necessarily true if it is true in all possible worlds. |  }} Modal realists argue that possible worlds exist as concrete entities in the same sense as the actual world, with the main difference being that the actual world is the world we live in while other possible worlds are inhabited by counterparts. This view is controversial and various alternatives have been suggested, for example, that possible worlds only exist as abstract objects or are similar to stories told in works of . |  |  }}
+
+ Space, time, and change 
+
+ and  are dimensions that entities occupy. Spacetime realists state that space and time are fundamental aspects of reality and exist independently of the human mind. Spacetime idealists, by contrast, hold that space and time are constructs of the human mind, created to organize and make sense of reality. |  |  }} Spacetime absolutism or substantivalism understands spacetime as a distinct object, with some metaphysicians conceptualizing it as a container that holds all other entities within it. Spacetime relationism sees spacetime not as an object but as a network of relations between objects, such as the spatial relation of  and the temporal relation of . |  |  }}
+
+In the metaphysics of time, an important contrast is between the A-series and the B-series. According to the A-series theory, the  is real, meaning that events are categorized into the past, present, and future. The present continually moves forward in time and events that are in the present now will eventually change their status and lie in the past. From the perspective of the B-series theory, time is static, and events are ordered by the temporal relations earlier-than and later-than without any essential difference between past, present, and future. |  |  }} Eternalism holds that past, present, and future are equally real, whereas presentism asserts that only entities in the present exist. |  |  }}
+
+Material objects persist through time and change in the process, like a tree that grows or loses leaves. |  |  }} The main ways of conceptualizing persistence through time are  and . According to endurantism, material objects are three-dimensional entities that are wholly present at each moment. As they change, they gain or lose properties but otherwise remain the same. Perdurantists see material objects as four-dimensional entities that extend through time and are made up of different . At each moment, only one part of the object is present, not the object as a whole. Change means that an earlier part is qualitatively different from a later part. For example, when a banana ripens, there is an unripe part followed by a ripe part. |  |  |  }}
+
+ Causality 
+
+Causality is the relation between cause and effect whereby one entity produces or alters another entity. |  }} For instance, if a person bumps a glass and spills its contents then the bump is the cause and the spill is the effect. Besides the single-case causation between particulars in this example, there is also general-case causation expressed in statements such as "smoking causes cancer". |  }} The term  is used when people and their actions cause something. |  }} Causation is usually interpreted deterministically, meaning that a cause always brings about its effect. However, some philosophers such as  have provided counterexamples to this idea.|}} Such counterexamples have inspired the development of probabilistic theories, which claim that the cause merely increases the probability that the effect occurs. This view can explain that smoking causes cancer even though this does not happen in every single case. |  }}
+
+The regularity theory of causation, inspired by 's philosophy, states that causation is nothing but a  in which the mind apprehends that one phenomenon, like putting one's hand in a fire, is always followed by another phenomenon, like a feeling of pain. |  |  }} According to nomic regularity theories, regularities manifest as laws of nature studied by science. Counterfactual theories focus not on regularities but on how effects depend on their causes. They state that effects owe their existence to the cause and would not occur without them. |  |  }} According to primitivism, causation is a basic concept that cannot be analyzed in terms of non-causal concepts, such as regularities or dependence relations. One form of primitivism identifies causal powers inherent in entities as the underlying mechanism. |  |  |  }} Eliminativists reject the above theories by holding that there is no causation.
+
+ Mind and free will 
+
+thumb|right|upright=1.3|alt=Diagram of approaches to the mind–body problem. It shows dualism in the form of Cartesian dualism on the left side. It presents monism in the forms of physicalism, idealism, and neutral monism on the right side.|Different approaches toward resolving the mind–body problem
+
+Mind encompasses phenomena like , , , and  as well as the underlying faculties responsible for these phenomena. The  is the challenge of clarifying the relation between physical and mental phenomena. According to , minds and bodies are distinct substances. They causally interact with each other in various ways but can, at least in principle, exist on their own. |  }} This view is rejected by monists, who argue that reality is made up of only one kind. According to metaphysical , everything is mental or dependent on the mind, including physical objects, which may be understood as ideas or perceptions of conscious minds. |  }}}} Materialists, by contrast, state that all reality is at its core material. Some deny that mind exists but the more common approach is to explain mind in terms of certain aspects of matter, such as brain states, behavioral s, or functional roles. |  |  |  }} Neutral monists argue that reality is fundamentally neither material nor mental and suggest that matter and mind are both derivative phenomena. |  }} A key aspect of the mind–body problem is the  or how to explain that physical systems like brains can produce phenomenal consciousness.
+
+The status of free will as the ability of a person to choose their actions is a central aspect of the mind–body problem. |  |  }} Metaphysicians are interested in the relation between free will and the view that everything in the universe, including human behavior, is determined by preceding events and laws of nature. It is controversial whether causal determinism is true, and, if so, whether this would imply that there is no free will. According to , free will cannot exist in a deterministic world since there is no true choice or control if everything is determined. |  }}}}  infer from this that there is no free will, whereas libertarians conclude that determinism must be false.  offer a third perspective, arguing that determinism and free will do not exclude each other, for instance, because a person can still act in tune with their motivation and choices even if they are determined by other forces. Free will plays a key role in ethics regarding the  people have for what they do. |  |  }}
+
+ Others 
+
+Identity is a relation that every entity has to itself as a form of sameness. It refers to numerical identity when the same entity is involved, as in the statement "the morning star is the evening star" (both are the planet ). In a slightly different sense, it encompasses qualitative identity, also called ''exact similarity'' and ''indiscernibility'', which occurs when two distinct entities are exactly alike, such as perfect identical twins. |  }} The principle of the indiscernibility of identicals is widely accepted and holds that numerically identical entities exactly resemble one another. The converse principle, known as the  or Leibniz's Law, is more controversial and states that two entities are numerically identical if they exactly resemble one another. |  |  }} Another distinction is between synchronic and diachronic identity. Synchronic identity relates an entity to itself at the same time, whereas diachronic identity is about the same entity at different times, as in statements like "the table I bought last year is the same as the table in my dining room now". |  }}  is a related topic in metaphysics that uses the term ''identity'' in a slightly different sense and concerns questions like what  is or what makes someone a person. |  |  }}
+
+Various contemporary metaphysicians rely on the concepts of , , and truthmaker to conduct their inquiry. |  }} Truth is a property of being in accord with reality. Truth-bearers are entities that can be true or false, such as linguistic statements and mental representations. A truthmaker of a statement is the entity whose existence makes the statement true. |  |  |  |  }} For example, the fact that a tomato exists and that it is red acts as a truthmaker for the statement "a tomato is red". |  |  }} Based on this observation, it is possible to pursue metaphysical research by asking what the truthmakers of statements are, with different areas of metaphysics being dedicated to different types of statements. According to this view, modal metaphysics asks what makes statements about what is possible and necessary true while the metaphysics of time is interested in the truthmakers of temporal statements about the past, present, and future. |  |  }} A closely related topic concerns the nature of truth. Theories of truth aim to determine this nature and include correspondence, coherence, pragmatic, semantic, and deflationary theories. |  }}
+
+ Methodology 
+
+Metaphysicians employ a variety of methods to develop metaphysical theories and formulate arguments for and against them. |  }} Traditionally, ''a priori'' methods have been the dominant approach. They rely on rational  and abstract reasoning from general principles rather than sensory . ''A posteriori'' approaches, by contrast, ground metaphysical theories in s and scientific theories. |  |  |  }} Some metaphysicians incorporate perspectives from fields such as , , , and  into their inquiry. The two approaches are not mutually exclusive: it is possible to combine elements from both. The method a metaphysician chooses often depends on their understanding of the nature of metaphysics, for example, whether they see it as an inquiry into the mind-independent structure of reality, as metaphysical realists claim, or the principles underlying thought and experience, as some metaphysical anti-realists contend. |  |  |  }}
+
+''A priori'' approaches often rely on intuitionsnon-inferential impressions about the correctness of specific claims or general principles. |  | }} |  }} The concept plays a central role in the philosophy of , who understands intuitions as conscious, objective representations closely associated with the sense of space and time. |  }}}} For example, arguments for the , which states that time flows from the past through the present and into the future, often rely on pre-theoretical intuitions associated with the sense of the passage of time. Some approaches use intuitions to establish a small set of  fundamental principles, known as s, and employ  to build complex metaphysical systems by drawing conclusions from these axioms. Intuition-based approaches can be combined with , which help evoke and clarify intuitions by linking them to imagined situations. They use  to assess the possible consequences of these situations. |  |  |  }} For example, to explore the relation between matter and consciousness, some theorists compare humans to hypothetical creatures identical to humans but without conscious experience. A related method relies on commonly accepted beliefs instead of intuitions to formulate arguments and theories. The common-sense approach is often used to criticize metaphysical theories that deviate significantly from how the average person thinks about an issue. For example, common-sense philosophers have argued that  is false since it implies that commonly accepted things, like tables, do not exist. |  }}
+
+, a method particularly prominent in , aims to decompose metaphysical concepts into component parts to clarify their meaning and identify essential relations. |  |  |  }} In phenomenology, the method of  is used to investigate essential structures underlying phenomena. This method involves imagining an object and varying its features to determine which ones are essential and cannot be changed. |  }} The transcendental method is a further approach and examines the metaphysical structure of reality by observing what entities there are and studying the conditions of possibility without which these entities could not exist. |  }}
+
+Some approaches give less importance to ''a priori'' reasoning and view metaphysics as a practice continuous with the empirical sciences that generalizes their insights while making their underlying assumptions explicit. This approach is known as ''naturalized metaphysics'' and is closely associated with the work of . |  |  }} He relies on the idea that true sentences from the sciences and other fields have , that is, they imply that certain entities exist. |  }} For example, if the sentence "some electrons are bonded to protons" is true then it can be used to justify that electrons and protons exist. Quine used this insight to argue that one can learn about metaphysics by closely analyzing}} scientific claims to understand what kind of metaphysical picture of the world they presuppose. |  }}
+
+In addition to methods of conducting metaphysical inquiry, there are various methodological principles used to decide between competing theories by comparing their theoretical virtues.  is a well-known principle that gives preference to simple theories, in particular, those that assume that few entities exist. Other principles consider , theoretical usefulness, and proximity to established beliefs. |  |  |  |  }}
+
+ Criticism 
+
+thumb|alt=Oil painting showing David Hume from the front against a dark background, dressed in a red coat with gold embroidery, his left arm resting on a surface|[[David Hume criticizes metaphysicians for trying to gain knowledge outside the field of sensory experience.]]
+
+Despite its status as one of the main branches of philosophy, metaphysics has received numerous criticisms questioning its legitimacy as a field of inquiry. |  }} One criticism argues that metaphysical inquiry is impossible because humans lack the cognitive capacities needed to access the ultimate nature of reality. This line of thought leads to  about the possibility of metaphysical knowledge. Empiricists often follow this idea, like Hume, who asserts that there is no good source of metaphysical knowledge since metaphysics lies outside the field of empirical knowledge and relies on dubious intuitions about the realm beyond sensory experience. Arguing that the mind actively structures experience, Kant criticizes traditional metaphysics for its attempt to gain insight into the mind-independent nature of reality. He asserts that knowledge is limited to the realm of possible experience, meaning that humans are not able to decide questions like whether the world has a beginning in time or is infinite. A related argument favoring the unreliability of metaphysical theorizing points to the deep and lasting disagreements about metaphysical issues, suggesting a lack of overall progress. |  |  |  |  }}
+
+Another criticism holds that the problem lies not with human cognitive abilities but with metaphysical statements themselves, which some claim are neither true nor false but meaningless. According to logical positivists, for instance, the meaning of a statement is given by the procedure used to verify it, usually through the  that would confirm it. Based on this controversial assumption, they argue that metaphysical statements are meaningless since they make no testable predictions about experience. |  |  |  }}
+
+A slightly weaker position allows metaphysical statements to have meaning while holding that metaphysical disagreements are merely verbal disputes about different ways to describe the world. According to this view, the disagreement in the metaphysics of composition about whether there are tables or only particles arranged table-wise is a trivial debate about linguistic preferences without any substantive consequences for the nature of reality. |  |  }} The position that metaphysical disputes have no meaning or no significant point is called ''metaphysical'' or ''ontological deflationism''. |  }} This view is opposed by so-called ''serious metaphysicians'', who contend that metaphysical disputes are about substantial features of the underlying structure of reality. |  }} A closely related debate between ontological realists and anti-realists concerns the question of whether there are any objective facts that determine which metaphysical theories are true. |  |  }} A different criticism, formulated by pragmatists, sees the fault of metaphysics not in its cognitive ambitions or the meaninglessness of its statements, but in its practical irrelevance and lack of usefulness. |  }}
+
+ criticized traditional metaphysics, saying that it fails to distinguish between individual entities and being as their ontological ground. His attempt to reveal the underlying assumptions and limitations in the history of metaphysics to "overcome metaphysics" influenced 's method of . |  |  |  |  }} Derrida employed this approach to criticize metaphysical texts for relying on opposing terms, like presence and absence, which he thought were inherently unstable and contradictory. |  |  }}
+
+There is no consensus about the validity of these criticisms and whether they affect metaphysics as a whole or only certain issues or approaches in it. For example, it could be the case that certain metaphysical disputes are merely verbal while others are substantive.
+
+ Relation to other disciplines 
+
+Metaphysics is related to many fields of inquiry by investigating their basic concepts and relation to the fundamental structure of reality. For example, the natural sciences rely on concepts such as law of nature, causation, necessity, and spacetime to formulate their theories and predict or explain the outcomes of experiments. |  |  }} While scientists primarily focus on applying these concepts to specific situations, metaphysics examines their general nature and how they depend on each other. For instance, physicists formulate laws of nature, like laws of gravitation and thermodynamics, to describe how physical systems behave under various conditions. Metaphysicians, by contrast, examine what all laws of nature have in common, asking whether they merely describe contingent regularities or express necessary relations. |  }} New scientific discoveries have also influenced existing metaphysical theories and inspired new ones. Einstein's , for instance, prompted various metaphysicians to conceive space and time as a unified dimension rather than as independent dimensions. Empirically focused metaphysicians often rely on scientific theories to ground their theories about the nature of reality in empirical observations.
+
+Similar issues arise in the  where metaphysicians investigate their basic concepts and analyze their metaphysical implications. This includes questions like whether social facts emerge from non-social facts, whether social groups and institutions have mind-independent existence, and how they persist through time. Metaphysical assumptions and topics in  and  include the questions about the relation between body and mind, whether the nature of the human mind is historically fixed, and what the metaphysical status of diseases is. |  }}
+
+Metaphysics is similar to both  and  in its exploration of the first causes and the universe as a whole. Key differences are that metaphysics relies on rational inquiry while physical cosmology gives more weight to empirical observations and theology incorporates divine  and other faith-based doctrines. |  }} Historically, cosmology and theology were considered subfields of metaphysics. |  }}
+
+|cladogram=
+    |1=Physical
+        |1=Object
+            |1=
+            |label2=Process
+            |2=
+            }}
+        |label2=Abstract
+        |2=Quantity    
+            |1=
+            |label2=Proposition
+            |2=
+            |label3=Attribute
+            |3=
+            |label4=Relation
+            |4=
+            |label5=Set or Class
+            |5=
+        }}
+    }}
+}}
+}}
+
+Computer scientists rely on metaphysics in the form of ontology to represent and classify objects. They develop conceptual frameworks, called ''ontologies'', for limited domains, |  }} such as a database with categories like ''person'', ''company'', ''address'', and ''name'' to represent information about clients and employees. Ontologies provide standards for encoding and storing information in a structured way, allowing computational processes to use the information for various purposes. Upper ontologies, such as  and , define concepts at a more abstract level, making it possible to integrate information belonging to different domains. |  }}
+
+ as the study of correct reasoning |2= |3= |4= }} is often used by metaphysicians to engage in their inquiry and express insights through precise s. |  }}}} Another relation between the two fields concerns the metaphysical assumptions associated with s. Many logical systems like  rely on s to express existential statements. For instance, in the logical formula \exists x \text{Horse}(x) the existential quantifier \exists is applied to the predicate \text{Horse} to express that there are horses. Following Quine, various metaphysicians assume that existential quantifiers carry s, meaning that existential statements imply that the entities over which one quantifies are part of reality. |2= |3= |4= }}
+
+ History 
+
+thumb|right|upright=0.8|alt=Symbol of yin and yang. It has a circular shape split into two swirling halves. One half is black with a white dot inside. The other half is white with a black dot inside.|The [[taijitu symbol shows , which are two correlated forces discussed in Chinese metaphysics to explore the nature and patterns of existence. |  }}]]
+
+Metaphysics originated in the ancient period from speculations about the nature and origin of the cosmos. |  }} In , starting in the 7th century BCE, the  were written as religious and philosophical texts that examine how ultimate reality constitutes the ground of all being. They further explore the nature of the self and how it can reach liberation by understanding ultimate reality. |  |  }} This period also saw the emergence of  in the 6th century BCE,}} which denies the existence of an independent self and understands the world as a cyclic process. |  |  }} At about the same time |  }}}} in , the school of  was formed and explored the natural order of the universe, known as , and how it is characterized by the interplay of  as two correlated forces. |  |  }}
+
+In , metaphysics emerged in the 6th century BCE with the  philosophers, who gave rational explanations of the cosmos as a whole by examining the s from which everything arises. |  |  }} Building on their work,  (427–347 BCE) formulated his , which states that eternal forms or ideas possess the highest kind of reality while the material world is only an imperfect reflection of them. |  |  }}  (384–322 BCE) accepted Plato's idea that there are universal forms but held that they cannot exist on their own but depend on matter. He also proposed a system of categories and developed a comprehensive framework of the natural world through his theory of the . |  |  }} Starting in the 4th century BCE,  explored the rational order underlying the cosmos and the laws governing it. |  }}  emerged towards the end of the ancient period in the 3rd century CE and introduced the idea of "the One" as the transcendent and ineffable source of all creation. |  |  }} |  }}}}
+
+Meanwhile, in , the Madhyamaka school developed the idea that all phenomena are inherently empty without a permanent essence. The consciousness-only doctrine of the Yogācāra school stated that experienced objects are mere transformations of consciousness and do not reflect external reality. |  |  }} The Hindu school of  philosophy |  }}}} introduced a metaphysical dualism with pure consciousness and matter as its fundamental categories. In China, the school of  explored metaphysical problems such as the contrast between being and non-being. |  }}
+
+thumb|alt=Medieval illustration showing Boethius from the front against a light background in a sitting position, dressed in green clothes with a red cloak|[[Boethius's theory of universals influenced many subsequent metaphysicians.]]
+
+Medieval Western philosophy was profoundly shaped by ancient Greek thought as philosophers integrated these ideas with Christian philosophical teachings.  (477–524 CE) sought to reconcile Plato's and Aristotle's theories of universals, proposing that universals can exist both in matter and mind. His theory inspired the development of nominalism and conceptualism, as in the thought of  (1079–1142 CE). |  |  |  }}  (1224–1274 CE) understood metaphysics as the discipline investigating different meanings of ''being'', such as the contrast between substance and accident, and principles applying to all beings, such as the . |  }}  (1285–1347 CE) developed a methodological principle, known as , to choose between competing metaphysical theories. |  }} Arabic–Persian philosophy flourished from the early 9th century CE to the late 12th century CE, integrating ancient Greek philosophies to interpret and clarify the teachings of the . |  }}  (980–1037 CE) developed a comprehensive philosophical system that examined the contrast between existence and essence and distinguished between contingent and necessary existence. |  }}  saw the emergence of the monist school of  in the 8th century CE, which holds that everything is one and that the idea of many entities existing independently is an illusion. |  |  |  }} In China,  arose in the 9th century CE and explored the concept of li as the rational principle that is the ground of being and reflects the order of the universe. |  | }}
+
+In the early modern period and following renewed interest in Platonism during the ,  (1596–1650) developed a substance dualism according to which body and mind exist as independent entities that causally interact. |  }} This idea was rejected by  (1632–1677), who formulated a monist philosophy suggesting that there is only one substance with both physical and mental attributes that develop side-by-side without interacting. |  }}  (1646–1716) introduced the concept of possible worlds and articulated a metaphysical system known as , which views the universe as a collection of simple substances synchronized without causal interaction. |  |  |  }} Christian Wolff (1679–1754), conceptualized the scope of metaphysics by distinguishing between general and special metaphysics. |  }} According to the  of  (1685–1753), everything is mental, including material objects, which are ideas perceived by the mind. |  }}  (1711–1776) made various contributions to metaphysics, including the regularity theory of causation and the idea that there are no necessary connections between distinct entities. Inspired by the  of  (1561–1626) and  (1632–1704), Hume criticized metaphysical theories that seek ultimate principles inaccessible to sensory experience. |  |  }} This critical outlook was embraced by  (1724–1804), who tried to reconceptualize metaphysics as an inquiry into the basic principles and categories of thought and understanding rather than seeing it as an attempt to comprehend mind-independent reality. |  |  |  }}
+
+Many developments in the later modern period were shaped by Kant's philosophy. German idealists adopted his idealistic outlook in their attempt to find a unifying principle as the foundation of all reality. |  |  }} 's (1770–1831) idealistic contention is that reality is conceptual all the way down, and being itself is rational. |  }} He inspired the  of  (1846–1924), who interpreted Hegel's concept of absolute spirit as the all-inclusive totality of being. |  |  }}  (1788–1860) was a strong critic of German idealism and articulated a different metaphysical vision, positing a blind and irrational will as the underlying principle of reality. |  |  }} Pragmatists like  (1839–1914) and   (1859–1952) conceived metaphysics as an observational science of the most general features of reality and experience. |  }}
+
+thumb|alt=Photo showing Alfred North Whitehead from the front against a dark background looking at the camera, dressed in formal dark-colored attire with a high-collared white shirt below|[[Alfred North Whitehead articulated the foundations of  in his work ''''.]]
+
+At the turn of the 20th century in , philosophers such as  (1872–1970) and  (1873–1958) led a "revolt against idealism", arguing for the existence of a mind-independent world aligned with common sense and empirical science. |  }} Logical atomists, like Russell and the early  (1889–1951), conceived the world as a multitude of atomic facts, which later inspired metaphysicians such as  (1926–2014).| | }}  (1861–1947) developed process metaphysics as an attempt to provide a holistic description of both the objective and the subjective realms.| }} 
+
+ (1891–1970) and other logical positivists formulated a wide-ranging criticism of metaphysical statements, arguing that they are meaningless because there is no way to verify them. |  |  }} Other criticisms of traditional metaphysics identified misunderstandings of ordinary language as the source of many traditional metaphysical problems or challenged complex metaphysical deductions by appealing to common sense. |  |  }}  
+
+The decline of logical positivism led to a revival of metaphysical theorizing.  (1908–2000) tried to naturalize metaphysics by connecting it to the empirical sciences. His student David Lewis (1941–2001) employed the concept of possible worlds to formulate his . |  |  }}  (1940–2022) helped revive discussions of identity and essentialism, distinguishing necessity as a metaphysical notion from the epistemic notion of ''a priori''. |  }}
+
+In ,  (1859–1938) engaged in ontology through a phenomenological description of experience, while his student  (1889–1976) developed  to clarify the meaning of being. |  |  }} Heidegger's philosophy inspired 's (1930–2004) criticism of metaphysics. |  }} 's (1925–1995) approach to metaphysics challenged traditionally influential concepts like substance, essence, and identity by reconceptualizing the field through alternative notions such as multiplicity, event, and difference. |  }}
+
+See also
+
+* 
+* 
+* Enrico Berti's classification of metaphysics
+* 
+* 
+* 
+* Metaphysical grounding
+
+References
+
+Notes
+
+Citations
+
+Sources
+
+* 
+*  }}
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+
+External links
+
+* 
+* 
+* 
+* [https://www.britannica.com/EBchecked/topic/377923/metaphysics Metaphysics] at 
+* 
+
+}}
+
+'''Phenomenology''' is a philosophical study and movement largely associated with the early 20th century that seeks to objectively investigate the nature of subjective,  experience and world-disclosure. It attempts to describe the universal features of consciousness while avoiding assumptions about the external world, aiming to describe  as they appear, and to explore the meaning and significance of .
+
+This approach, while philosophical, has found many applications in  across different scientific disciplines, especially in the s, , psychology, and , but also in fields as diverse as , architecture, and , among many others. The application of phenomenology in these fields aims to gain a deeper understanding of subjective experience, rather than focusing on behavior.
+
+Phenomenology is contrasted with , which reduces s and physical objects to complexes of sensations, and with , which treats s or  principles as the products of human psychology. In particular, , as outlined by , aims to arrive at an objective understanding of the world via the discovery of universal logical structures in human subjective experience.
+
+There are important differences in the ways that different branches of phenomenology approach . For example, according to , truths are contextually situated and dependent on the , , and  in which they emerge. Other types include , genetic, and embodied phenomenology. All these different branches of phenomenology may be seen as representing different philosophies despite sharing the common foundational approach of phenomenological inquiry; that is, investigating things just as they appear, independent of any particular theoretical framework.
+
+Etymology
+
+The term ''phenomenology'' derives from the Greek φαινόμενον, ''phainómenon'' ("that which appears") and λόγος, ''lógos'' ("study"). It entered the English language around the turn of the 18th century and first appeared in direct connection to Husserl's philosophy in a 1907 article in ''''.''OED'', 3rd ed. Accessed 27 July 2023
+
+In philosophy, "phenomenology" refers to the tradition inaugurated by Edmund Husserl at the beginning of the 20th century. The term, however, had been used in different senses in other philosophy texts since the 18th century. These include those by  (1728–1777),  (1724–1804),  (1770–1831), and  (1848–1936), among others.
+
+It was, however, the usage of  (and, as he later acknowledged, ) that would prove definitive for Husserl. From Brentano, Husserl took the conviction that philosophy must commit itself to ''description'' of what is "given in direct 'self-evidence'."
+
+Central to Brentano's phenomenological project was his theory of , which he developed from his reading of 's ''''. According to the phenomenological tradition, "the central structure of an experience is its intentionality, it being directed ''towards'' something, as it is an experience ''of'' or ''about'' some object." Also, on this theory, every intentional act is implicitly accompanied by a secondary, pre-reflective awareness of the act as one's own.
+
+Overview
+
+Phenomenology proceeds systematically, but it does not attempt to study consciousness from the perspective of clinical psychology or neurology. Instead, it seeks to determine the essential properties and structures of experience. Phenomenology is not a matter of individual introspection: ''a subjective account of experience'', which is the topic of psychology, must be distinguished from ''an account of subjective experience'', which is the topic of phenomenology. Its topic is not "mental states", but "worldly things considered in a certain way".
+
+Phenomenology is a direct reaction to the  and  of Husserl's time. It takes as its point of departure the question of how objectivity is possible at all when the experience of the world and its objects is thoroughly subjective.
+
+So far from being a form of subjectivism, phenomenologists argue that the scientific ideal of a purely objective third-person is a fantasy and falsity. The perspective and presuppositions of the scientist must be articulated and taken into account in the design of the experiment and the interpretation of its results. Inasmuch as phenomenology is able to accomplish this, it can help to improve the quality of empirical scientific research.
+
+Notwithstanding of the field's internal diversity,  and  argue that the phenomenological method is composed of four basic steps: the , the phenomenological reduction, the eidetic variation, and intersubjective corroboration.
+
+# The '''epoché''' is Husserl's term for the procedure by which the phenomenologist endeavors to suspend commonsense and theoretical assumptions about reality (what he terms the '''natural attitude''') in order to attend only to what is directly given in experience. This is not a skeptical move; reality is never in doubt. The purpose is to see it more closely as it truly is. The underlying insight is that objects are "experienced and disclosed in the ways they are, thanks to the way consciousness is structured."
+# The '''phenomenological reduction''' is closely linked to the epoché. The aim of the reduction is to analyze the correlations between what is given in experience and specific structures of subjectivity shaping and enabling this givenness. This "leads back" (Latin: ''re-ducere'') to the world.
+# '''Eidetic variation''' is the process of imaginatively stripping away the properties of things to determine what is essential to them, that is, what are the characteristics without which a thing would not be the thing that it is (''Eidos'' is 's Greek word for the essence of a thing). Significantly for the phenomenological researcher, eidetic variation can be practiced on acts of consciousness themselves to help clarify, for instance, the structure of perception or memory. Husserl openly acknowledges that the essences uncovered by this method include various degrees of vagueness and also that such analyses are defeasible. He contends, however, that this does not undermine the value of the method.
+# '''Intersubjective corroboration''' is simply the sharing of one's results with the larger research community. This allows for comparisons that help to sort out what is idiosyncratic to the individual from what might be essential to the structure of experience as such.
+
+According to phenomenologist , "The radicality of the phenomenological method is both continuous and discontinuous with philosophy's general effort to subject experience to fundamental, critical scrutiny: to take nothing for granted and to show the warranty for what we claim to know." Husserl says that the suspension of belief in what is ordinarily taken for granted or inferred by conjecture diminishes the power of what is customarily embraced as objective reality. In the words of philosopher , "[Husserl and his followers'] great ambition was to disregard anything that had until then been thought or said about consciousness or the world [while] on the lookout for a new way of letting the things [they investigated] approach them, without covering them up with what they already knew."
+
+History
+
+Edmund Husserl "set the phenomenological agenda" for even those who did not strictly adhere to his teachings, such as , , and , to name just the foremost. Each thinker has "different conceptions of phenomenology, different methods, and different results."
+
+Husserl's conceptions
+
+thumb|Edmund Husserl in 1900
+Husserl derived many important concepts central to phenomenology from the works and lectures of his teachers, the philosophers and psychologists  and . An important element of phenomenology that Husserl borrowed from Brentano is  (often described as "aboutness" or "directedness"), the notion that consciousness is always consciousness ''of'' something. The object of consciousness is called the ''intentional object'', and this object is constituted for consciousness in many different ways, through, for instance, , , signification, and so forth. Throughout these different intentionalities, though they have different structures and different ways of being "about" the object, an object is still constituted as the identical object; consciousness is directed at the same intentional object in direct perception as it is in the immediately-following retention of this object and the eventual remembering of it.
+
+As envisioned by Husserl, phenomenology is a method of philosophical inquiry that rejects the  bias that has dominated Western thought since  in favor of a method of reflective attentiveness that discloses the individual's "lived experience." Loosely rooted in an epistemological device called , Husserl's method entails the suspension of judgment while relying on the intuitive grasp of knowledge, free of presuppositions and intellectualizing. Sometimes depicted as the "science of experience," the phenomenological method, rooted in intentionality, represents an alternative to the representational theory of consciousness. That theory holds that reality cannot be grasped directly because it is available only through perceptions of reality that are representations in the mind. In Husserl's own words:
+
+experience is not an opening through which a world, existing prior to all experience, shines into a room of consciousness; it is not a mere taking of something alien to consciousness into consciousness... Experience is the performance in which for me, the experiencer, experienced being "is there", and is there ''as what'' it is, with the whole content and the mode of being that experience itself, by the performance going on in its intentionality, attributes to it.
+
+In effect, he counters that consciousness is not "in" the mind; rather, consciousness is conscious of something other than itself (the intentional object), regardless of whether the object is a physical thing or just a figment of the imagination.
+
+''Logical Investigations'' (1900/1901)
+
+In the first edition of the ''Logical Investigations'', under the influence of Brentano, Husserl describes his position as "descriptive psychology." Husserl analyzes the intentional structures of '''mental acts''' and how they are directed at both real and ideal objects. The first volume of the ''Logical Investigations'', the ''Prolegomena to Pure Logic'', begins with a critique of , that is, the attempt to subsume the ''a priori'' validity of the laws of logic under psychology. Husserl establishes a separate field for research in logic, philosophy, and phenomenology, independently from the empirical sciences.
+
+"'''Pre-reflective self-consciousness'''" is  and 's term for Husserl's (1900/1901) idea that  always involves a self-appearance or self-manifestation prior to . This is one point of nearly unanimous agreement among phenomenologists: "a minimal form of self-consciousness is a constant structural feature of conscious experience. Experience happens for the experiencing subject in an immediate way and as part of this immediacy, it is implicitly marked as ''my'' experience."
+
+''Ideas'' (1913)
+
+In 1913, Husserl published ''Ideas: General Introduction to Pure Phenomenology''. In this work, he presents phenomenology as a form of "". Although Husserl claimed to have always been a transcendental idealist, this was not how many of his admirers had interpreted the ''Logical Investigations'', and some were alienated as a result.
+
+This work introduced distinctions between the act of consciousness (''noesis'') and the phenomena at which it is directed (the ''ta''). ''Noetic'' refers to the intentional act of consciousness (believing, willing, etc.). ''Noematic'' refers to the object or content ''(noema)'', which appears in the noetic acts (the believed, wanted, hated, loved, etc.).
+
+What is observed is not the object as it is in itself, but how and inasmuch it is given in the intentional acts. Knowledge of s would only be possible by "bracketing" all assumptions about the existence of an external world and the inessential (subjective) aspects of how the object is concretely given to us. This ''phenomenological reduction'' is the second stage of Husserl's procedure of . That which is essential is then determined by the imaginative work of ''eidetic variation'', which is a method for clarifying the features of a thing without which it would not be what it is.
+
+Husserl concentrated more on the ideal, essential structures of consciousness. As he wanted to exclude any hypothesis on the existence of external objects, he introduced the method of phenomenological reduction to eliminate them. What was left over was the pure transcendental ego, as opposed to the concrete empirical ego.
+
+'''Transcendental phenomenology''' is the study of the essential structures that are left in pure consciousness: this amounts in practice to the study of the noemata and the relations among them.
+
+Munich phenomenology
+
+Some phenomenologists were critical of the new theories espoused in ''Ideas''. Members of the Munich group, such as  and , distanced themselves from Husserl's new transcendental phenomenology. Their theoretical allegiance was to the earlier, realist phenomenology of the first edition of ''Logical Investigations''.
+
+Heidegger's conception
+
+Martin Heidegger modified Husserl's conception of phenomenology because of what Heidegger perceived as Husserl's subjectivist tendencies. Whereas Husserl conceived humans as having been constituted by states of consciousness, Heidegger countered that consciousness is peripheral to the primacy of one's existence, for which he introduces  as a technical term, which cannot be reduced to a mode of consciousness. From this angle, one's state of mind is an "effect" rather than a determinant of existence, including those aspects of existence of which one is not conscious. By shifting the center of gravity to existence in what he calls , Heidegger altered the subsequent direction of phenomenology.
+
+According to Heidegger, ontologically-inflected phenomenology is more fundamental than modern scientific inquiry. According to him, science is only one way of knowing the world with no special access to truth. Furthermore, the scientific mindset itself is built on a much more "primordial" foundation of practical, everyday knowledge. This emphasis on the fundamental status of a person's pre-cognitive, practical orientation in the world, sometimes called "know-how", would be adopted by both Sartre and Merleau-Ponty.
+
+While for Husserl, in the epoché, being appeared only as a correlate of consciousness, for Heidegger the pre-conscious grasp of being is the starting point. For this reason, he replaces Husserl's concept of intentionality with the notion of ''comportment'', which is presented as "more primitive" than the "conceptually structured" acts analyzed by Husserl. Paradigmatic examples of comportment can be found in the unreflective ''dealing'' with ''equipment'' that presents itself as simply "ready-to-hand" in what Heidegger calls the normally ''circumspect'' mode of engagement within the world.
+
+For Husserl, all concrete determinations of the empirical ego would have to be abstracted in order to attain pure consciousness. By contrast, Heidegger claims that "the possibilities and destinies of philosophy are bound up with man's existence, and thus with temporality and with historicality." For this reason, all experience must be seen as shaped by social context, which for Heidegger joins phenomenology with philosophical .
+
+Husserl charged Heidegger with raising the question of ontology but failing to answer it, instead switching the topic to Dasein. That is neither ontology nor phenomenology, according to Husserl, but merely abstract anthropology.
+
+While '''' and other early works are clearly engaged with Husserlian issues, Heidegger's later philosophy has little relation to the problems and methods of classical phenomenology.
+
+Merleau-Ponty's conception
+
+Maurice Merleau-Ponty develops his distinctive mode of phenomenology by drawing, in particular, upon Husserl's unpublished writings, Heidegger's analysis of being-in-the-world, , and other contemporary psychology research. In his most famous work, '''', Merleau-Ponty critiques empiricist and intellectualist accounts to chart a "third way" that avoids their metaphysical assumptions about an objective, pre-given world.
+
+The central contentions of this work are that the body is the locus of engagement with the world, and that the body's modes of engagement are more fundamental than what phenomenology describes as consequent acts of objectification. Merleau-Ponty reinterprets concepts like intentionality, the phenomenological reduction, and the eidetic method to capture our inherence in the perceived world, that is, our embodied coexistence with things through a kind of reciprocal exchange. According to Merleau-Ponty, perception discloses a meaningful world that can never be completely determined, but which nevertheless aims at truth.
+
+Varieties
+
+Some scholars have differentiated phenomenology into seven types:
+# '''Transcendental constitutive phenomenology''' studies how objects are constituted in transcendental consciousness, setting aside questions of any relation to the natural world.
+# '''Naturalistic constitutive phenomenology''' studies how consciousness constitutes things in the world of nature, assuming with the natural attitude that consciousness is part of nature.
+# '''Generative historicist phenomenology''' studies how meaning—as found in human experience—is generated in historical processes of collective experience over time.
+# '''Genetic phenomenology''' (sometimes "'''phenomenology of genesis'''") studies the emergence of meanings of things within the stream of experience.
+# '''Hermeneutic''' '''phenomenology''' studies interpretive structures of experience. This approach was introduced in 's early work.
+#  studies concrete human existence, including human experience of free choice and/or action in concrete situations.
+# Realist(ic) phenomenology (sometimes "phenomenology of essences") studies the structure of consciousness and intentionality as "it occurs in a real world that is largely external to consciousness and not somehow brought into being by consciousness."
+
+The contrast between "constitutive phenomenology" (sometimes "'''static'''/'''descriptive phenomenology'''") and "genetic phenomenology" is due to Husserl.
+
+Modern scholarship also recognizes the existence of the following varieties:
+# Early-Heideggerian '''transcendental hermeneutic phenomenology'''
+# Late-Heideggerian '''destructive phenomenology''' (cf. '''')
+# 's '''dialectical phenomenology'''
+# 's '''embodied phenomenology'''
+# 's '''material phenomenology'''
+# 's '''linguistic phenomenology'''
+# 's '''analytic phenomenology'''
+# 's '''post-analytic phenomenology'''
+# 's '''critical phenomenology'''
+# ' and 's '''post-phenomenology''' emphasizes the significance of social analysis and views culture as the medium through which the human encounter with the broader world is articulated.
+
+Concepts
+
+Intentionality
+
+Intentionality refers to the notion that consciousness is always the consciousness ''of'' something. The word itself should not be confused with the "ordinary" use of the word intentional, but should rather be taken as playing on the etymological roots of the word. Originally, intention referred to a "stretching out" ("in tension," from Latin ''intendere''), and in this context it refers to consciousness "stretching out" towards its object. However, one should be careful with this image: there is not some consciousness first that, subsequently, stretches out to its object; rather, consciousness ''occurs as'' the simultaneity of a conscious act and its object.
+
+Intentionality is often summed up as "." Whether this ''something'' that consciousness is about is in direct perception or in fantasy is inconsequential to the concept of intentionality itself; whatever consciousness is directed at, ''that'' is what consciousness is conscious of. This means that the object of consciousness does not ''have'' to be a ''physical'' object apprehended in : it can just as well be a fantasy or a memory. Consequently, these "structures" of consciousness, such as perception, memory, fantasy, and so forth, are called ''intentionalities''.
+
+The term "intentionality" originated with the  in the medieval period and was resurrected by Brentano who in turn influenced Husserl's conception of phenomenology, who refined the term and made it the cornerstone of his theory of consciousness. The meaning of the term is complex and depends entirely on how it is conceived by a given philosopher. The term should not be confused with "intention" or the psychoanalytic conception of unconscious "motive" or "gain".
+
+Significantly, "intentionality is not a relation, but rather an intrinsic feature of intentional acts." This is because there are no independent relata. It is (at least in the first place) a matter of indifference to the phenomenologist whether the intentional object has any existence independent of the act.
+
+Intuition
+
+ in phenomenology refers to cases where the intentional object is directly present to the intentionality at play; if the intention is "filled" by the direct apprehension of the object, one has an intuited object. Having a cup of coffee in front of oneself, for instance, seeing it, feeling it, or even imagining it – these are all filled intentions, and the object is then ''intuited''. The same goes for the apprehension of mathematical formulae or a number. If one does not have the object as referred to directly, the object is not intuited, but still intended, but then ''emptily''. Examples of empty intentions can be signitive intentions – intentions that only ''imply'' or ''refer to'' their objects.
+
+Evidence
+
+In everyday language, the word  is used to signify a special sort of relation between a state of affairs and a proposition: State A is evidence for the proposition "A is true." In phenomenology, however, the concept of evidence is meant to signify the "subjective achievement of truth." This is not an attempt to reduce the objective sort of evidence to subjective "opinion," but rather an attempt to describe the structure of having something present in intuition with the addition of having it present as ''intelligible'': "Evidence is the successful presentation of an intelligible object, the successful presentation of something whose truth becomes manifest in the evidencing itself."
+
+In ''Ideas'', Husserl presents as the "Principle of All Principles" that, "every originary presentive intuition is a legitimizing source of cognition, that everything originally (so to speak, in its 'personal' actuality) offered to us in 'intuition' is to be accepted simply as what it is presented as being, but also only within the limits in which it is presented there." It is in this realm of phenomenological givenness, Husserl claims, that the search begins for "indubitable evidence that will ultimately serve as the foundation for every scientific discipline."
+
+Noesis and noema
+
+ distinguished between sensory and '''noetic consciousness''': the former concerns presentations of sensory objects or s, while the latter concerns the  of s.
+
+In Husserl's phenomenology, this pair of terms, derived from the Greek '''' (mind) designate respectively the real content, '''noesis''', and the ideal content, , of an intentional act (an act of consciousness). The noesis is the part of the act that gives it a particular sense or character (as in judging or perceiving something, loving or hating it, accepting or rejecting it, etc.). This is real in the sense that it is actually part of what takes place in the consciousness of the subject of the act. The noesis is always correlated with a noema. For Husserl, the full noema is a complex ideal structure comprising at least a noematic sense and a noematic core. The correct interpretation of what Husserl meant by the noema has long been controversial, but the noematic sense is generally understood as the ideal meaning of the act. For instance, if A loves B, loving is a real part of A's conscious activity – noesis – but gets its sense from the general concept of loving, which has an abstract or ideal meaning, as "loving" has a meaning in the English language independently of what an individual means by the word when they use it. The noematic core as the act's referent or object ''as it is meant in the act''. One element of controversy is whether this noematic object is the same as the actual object of the act (assuming it exists) or is some kind of ideal object.
+
+Empathy and intersubjectivity
+
+In phenomenology,  refers to the experience of one's own body ''as'' another. While people often identify others with their physical bodies, this type of phenomenology requires that they focus on the  of the other, as well as the intersubjective engagement with them. In Husserl's original account, this was done by a sort of  built on the experiences of one's own '''lived body'''. The lived body is one's own body as experienced by oneself, ''as'' oneself. One's own body manifests itself mainly as one's possibilities of acting in the world. It is what lets oneself reach out and grab something, for instance, but it also, and more importantly, allows for the possibility of changing one's point of view. This helps to differentiate one thing from another by the experience of moving around it, seeing new aspects of it (often referred to as making the absent present and the present absent), and still retaining the notion that this is the same thing that one saw other aspects of just a moment ago (it is identical). One's body is also experienced as a duality, both as object (one's ability to touch one's own hand) and as one's own subjectivity (one's experience of being touched).
+
+The experience of one's own body as one's own subjectivity is then applied to the experience of another's body, which, through apperception, is constituted as another subjectivity. One can thus recognise the Other's intentions and emotions. In 's research, a student of Husserl, my own "attributes declare the nature of my individual to me. We can designate this viewing inner perception of self".Stein, Edith. ''On the Problem of Empathy''. 3rd rev. ed. Translated by Waltraut Stein. Vol. 3 of ''The Collected Works of Edith Stein''. Washington, D.C.: ICS Publications, 1989. In the same book, from the "self" she deduces the characteristics of the spiritual person for oneself and for others. This experience of empathy is important in the phenomenological account of . In phenomenology, intersubjectivity constitutes objectivity (i.e., what one experiences as objective is experienced as being intersubjectively available – available to all other subjects). This does not imply that objectivity is reduced to subjectivity nor does it imply a relativist position; cf. for instance ). In the experience of intersubjectivity, one also experiences oneself as being a subject among other subjects, and one experiences oneself as existing objectively ''for'' these Others; one experiences oneself as the noema of Others' noeses, or as a subject in another's empathic experience. As such, one experiences oneself as objectively existing subjectivity. Intersubjectivity is also a part of the constitution of one's lifeworld, especially as "homeworld."
+
+Lifeworld
+
+The  (German: ''Lebenswelt'') is the "world" each one of us ''lives'' in. One could call it the "background" or "horizon" of all experience, and it is that on which each object stands out as itself (as different) and with the meaning it can only hold for us. According to Husserl, the lifeworld is both personal and  (it is then called a "homeworld"), and, as such, it avoids the threat of .
+
+In his 2002 book entitled ''Derrida and Husserl: The Basic Problem of Phenomenology'', American academic and author  uses the term "life-ism" to refer to a unified field within the philosophy of , , ,  and , that focuses on life and death, involving concepts such as 's '''' and 's ''''. This is echoed by  in his 2016 book ''Phenomenology and the Problem of Time'' in which he wrote that there is a certain life-ism in French phenomenology from the 1940s onwards, citing as examples 's ''Transcendence of the Ego'' which influenced Deleuze, Merleau-Ponty's idea of latent intentionality, the flesh, wild-being; 's monolith on life that starts with his ''Essence of Manifestation'', and 's ''Being Given''.
+
+Phenomenology and empirical science
+
+The phenomenological analysis of objects is notably different from traditional science. However, several frameworks do phenomenology with an empirical orientation or aim to unite it with the natural sciences or with .
+
+For a classical critical point of view,  argues for the wholesale uselessness of phenomenology considering ''phenomena'' as , which cannot be the object of scientific research or do not exist in the first place. Liliana Albertazzi counters such arguments by pointing out that empirical research on phenomena has been successfully carried out employing modern methodology. Human experience can be investigated by , and with  techniques. For example, ample research on color perception suggests that people with normal color vision see colors similarly and not each in their own way. Thus, it is possible to universalize phenomena of subjective experience on an empirical scientific basis.
+
+In the early twenty-first century, phenomenology has increasingly engaged with cognitive science and . Some approaches to the naturalization of phenomenology reduce consciousness to the physical-neuronal level and are therefore not widely acknowledged as representing phenomenology. These include the frameworks of , embodied constructivism, and the cognitive neuroscience of phenomenology. Other likewise controversial approaches aim to explain life-world experience on a sociological or  basis despite phenomenology being mostly considered descriptive rather than explanatory.
+
+See also
+
+References
+
+Citations
+
+Bibliography
+
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+
+External links
+
+* 
+* 
+* 
+* At the '''':
+** 
+* At the '''':
+** 
+* At the ''[https://historyofwomenphilosophers.org/ History of Women Philosophers and Scientists]'':
+** 
+
+'''Existentialism''' is a family of philosophical views and inquiry that explore the human individual's struggle to lead an authentic life despite the apparent absurdity or incomprehensibility of . In examining meaning, purpose, and value, existentialist thought often includes concepts such as existential crises, angst, , and .
+
+Existentialism is associated with several 19th- and 20th-century European philosophers who shared an emphasis on the human subject, despite often profound differences in thought. Among the 19th-century figures now associated with existentialism are philosophers  and , as well as novelist , all of whom critiqued  and concerned themselves with the problem of meaning. The word ''existentialism'', however, was not coined until the mid 20th century, during which it became most associated with contemporaneous philosophers , , , , , , and more controversially . 
+
+Many existentialists considered traditional systematic or academic philosophies, in style and content, to be too abstract and removed from concrete human experience. A primary virtue in existentialist thought is authenticity. Existentialism would influence many disciplines outside of philosophy, including , drama, art, literature, and psychology.
+
+Existentialist philosophy encompasses a range of perspectives, but it shares certain underlying concepts. Among these, a central tenet of existentialism is that personal freedom, individual responsibility, and deliberate choice are essential to the pursuit of self-discovery and the determination of life's meaning.
+
+ Etymology 
+
+The term ''existentialism'' () was coined by the French Catholic philosopher  in the mid-1940s. When Marcel first applied the term to , at a colloquium in 1945, Sartre rejected it.
+Ann Fulton, ''Apostles of Sartre: Existentialism in America, 1945–1963'', Evanston, IL: Northwestern University Press, 1999, p. 12-13 & 18–19. Sartre subsequently changed his mind and, on October 29, 1945, publicly adopted the existentialist label in a lecture to the Club Maintenant in Paris, published as  (''Existentialism Is a Humanism''), a short book that helped popularize existentialist thought.''L'Existentialisme est un Humanisme'' (Editions Nagel, 1946); ''English'' Jean-Paul Sartre, ''Existentialism and Humanism'' (Eyre Methuen, 1948). Marcel later came to reject the label himself in favour of ''Neo-Socratic'', in honor of Kierkegaard's essay "On the Concept of Irony".
+
+Some scholars argue that the term should be used to refer only to the cultural movement in Europe in the 1940s and 1950s associated with the works of the philosophers Sartre, , , and . Others extend the term to Kierkegaard, and yet others extend it as far back as . However, it is often identified with the philosophical views of Sartre.
+
+ Definitional issues and background 
+
+The labels ''existentialism'' and ''existentialist'' are often seen as historical conveniences in as much as they were first applied to many philosophers long after they had died. While existentialism is generally considered to have originated with Kierkegaard, the first prominent existentialist philosopher to adopt the term as a self-description was Sartre. Sartre posits the idea that "what all existentialists have in common is the fundamental doctrine that ", as the philosopher  explains. According to philosopher , defining existentialism has been relatively difficult, and he argues that it is better understood as a general approach used to reject certain systematic philosophies rather than as a systematic philosophy itself. In a lecture delivered in 1945, Sartre described existentialism as "the attempt to draw all the consequences from a position of consistent ".See James Wood's introduction to  For others, existentialism need not involve the rejection of God, but rather "examines mortal man's search for meaning in a meaningless universe", considering less "What is the good life?" (to feel, be, or do, good), instead asking "What is life good for?".
+
+Although many outside  consider the term existentialism to have originated from Kierkegaard, it is more likely that Kierkegaard adopted this term (or at least the term "existential" as a description of his philosophy) from the Norwegian poet and literary critic . This assertion comes from two sources:
+
+* The Norwegian philosopher Erik Lundestad refers to the Danish philosopher Fredrik Christian Sibbern. Sibbern is supposed to have had two conversations in 1841, the first with Welhaven and the second with Kierkegaard. It is in the first conversation that it is believed that Welhaven came up with "a word that he said covered a certain thinking, which had a close and positive attitude to life, a relationship he described as existential".Lundestad, 1998, p. 169. This was then brought to Kierkegaard by Sibbern.
+* The second claim comes from the Norwegian historian , who claimed to prove that Kierkegaard himself said the term ''existential'' was borrowed from the poet. He strongly believes that it was Kierkegaard himself who said that "Hegelians do not study philosophy 'existentially;' to use a phrase by Welhaven from one time when I spoke with him about philosophy."Slagstad, 2001, p. 89.
+
+ Concepts 
+
+ Existence precedes essence 
+
+Sartre argued that a central proposition of existentialism is that existence precedes essence, which is to say that individuals shape themselves by existing and cannot be perceived through preconceived and ''a priori'' categories, an "essence". The actual life of the individual is what constitutes what could be called their "true essence" instead of an arbitrarily attributed essence others use to define them. Human beings, through their own , create their own values and determine a meaning to their life.(Dictionary) "L'existencialisme" – see "l'identité de la personne" . This view is in contradiction to  and , who taught that essence precedes individual existence. Internet Encyclopedia of Philosophy |url=https://iep.utm.edu/thomas-aquinas-metaphysics/ |access-date=2022-11-10 |language=en-US}} Although it was Sartre who explicitly coined the phrase, similar notions can be found in the thought of existentialist philosophers such as Heidegger, and Kierkegaard:
+
+Some interpret the imperative to define oneself as meaning that anyone can wish to be anything. However, an existentialist philosopher would say such a wish constitutes an inauthentic existence – what Sartre would call "bad faith". Instead, the phrase should be taken to say that people are defined only insofar as they act and that they are responsible for their actions. Someone who acts cruelly towards other people is, by that act, defined as a cruel person. Such persons are themselves responsible for their new identity (cruel persons). This is opposed to their genes, or ''human nature'', bearing the blame.
+
+As Sartre said in his lecture '''': "Man first of all exists, encounters himself, surges up in the world—and defines himself afterwards." The more positive, therapeutic aspect of this is also implied: a person can choose to act in a different way, and to be a good person instead of a cruel person.
+
+Jonathan Webber interprets Sartre's usage of the term ''essence'' not in a modal fashion, i.e. as necessary features, but in a teleological fashion: "an essence is the relational property of having a set of parts ordered in such a way as to collectively perform some activity". For example, it belongs to the essence of a house to keep the bad weather out, which is why it has walls and a roof. Humans are different from houses because—unlike houses—they do not have an inbuilt purpose: they are free to ''choose'' their own purpose and thereby shape their essence; thus, ''their existence precedes their essence''.
+
+Sartre is committed to a radical conception of freedom: nothing fixes our purpose but we ourselves, our projects have no weight or inertia except for our endorsement of them. Simone de Beauvoir, on the other hand, holds that there are various factors, grouped together under the term ''sedimentation'', that offer resistance to attempts to change our direction in life. ''Sedimentations'' are themselves products of past choices and can be changed by choosing differently in the present, but such changes happen slowly. They are a force of inertia that shapes the agent's evaluative outlook on the world until the transition is complete.
+
+Sartre's definition of existentialism was based on Heidegger's magnum opus '''' (1927). In the correspondence with  later published as the '''', Heidegger implied that Sartre misunderstood him for his own purposes of subjectivism, and that he did not mean that actions take precedence over being so long as those actions were not reflected upon. Heidegger commented that "the reversal of a metaphysical statement remains a metaphysical statement", meaning that he thought Sartre had simply switched the roles traditionally attributed to essence and existence without interrogating these concepts and their history.
+
+ The absurd 
+
+thumb|[[Sisyphus, the symbol of the absurdity of existence, painting by  (1920)]]
+
+The notion of the absurd contains the idea that there is no meaning in the world beyond what meaning we give it. This meaninglessness also encompasses the amorality or "unfairness" of the world. This can be highlighted in the way it opposes the traditional Abrahamic religious perspective, which establishes that life's purpose is the fulfillment of God's commandments. To live the life of the absurd means rejecting a life that finds or pursues specific meaning for man's existence since there is nothing to be discovered. According to Albert Camus, the world or the human being is not in itself absurd. The concept only emerges through the  of the two; life becomes absurd due to the incompatibility between human beings and the world they inhabit. This view constitutes one of the two interpretations of the absurd in existentialist literature. The second view, first elaborated by , holds that absurdity is limited to actions and choices of human beings. These are considered absurd since they issue from human freedom, undermining their foundation outside of themselves.
+
+The absurd contrasts with the claim that "bad things don't happen to good people"; to the world, metaphorically speaking, there is no such thing as a good person or a bad person; what happens happens, and it may just as well happen to a "good" person as to a "bad" person. Because of the world's absurdity, anything can happen to anyone at any time and a tragic event could plummet someone into direct confrontation with the absurd. Many of the literary works of Kierkegaard, Beckett, Kafka, Dostoevsky, Ionesco, , , Sartre, , and Camus contain descriptions of people who encounter the absurdity of the world.
+
+It is because of the devastating awareness of meaninglessness that Camus claimed in '''' that "There is only one truly serious philosophical problem, and that is suicide." Although "prescriptions" against the possible deleterious consequences of these kinds of encounters vary, from Kierkegaard's religious "stage" to Camus' insistence on persevering in spite of absurdity, the concern with helping people avoid living their lives in ways that put them in the perpetual danger of having everything meaningful break down is common to most existentialist philosophers. The possibility of having everything meaningful break down poses a threat of quietism, which is inherently against the existentialist philosophy. It has been said that the possibility of  makes all humans existentialists. The ultimate hero of absurdism lives without meaning and faces suicide without succumbing to it.
+
+ Facticity 
+
+Facticity is defined by Sartre in '''' (1943) as the ''in-itself'', which for humans takes the form of being and not being. It is the facts of one's personal life and as per Heidegger, it is "the way in which we are thrown into the world." This can be more easily understood when considering facticity in relation to a person's past: one's past forms the person who exists in the present. However, to reduce a person to their past would ignore the change a person undergoes in the present and future, while saying that one's past is only what one was, would entirely detach it from the present self. A denial of one's concrete past constitutes an inauthentic lifestyle, and also applies to other kinds of facticity (having a human body with all its limitations, identity, values, etc.).
+
+Facticity is a limitation and a condition of freedom. It is a limitation in that a large part of a person's facticity consists of things they did not choose (birthplace, etc.), but a condition of freedom in the sense that one's values most likely depend on these factors. However, even though one's facticity is fixed, it cannot determine a person: they may choose to assign as much value to their facticity as they choose. As an example, consider two men, one of whom has no memory of his past and the other who remembers everything. Both have committed many crimes, but the first man, remembering nothing, leads a rather normal life while the second man, feeling trapped by his past, continues a life of crime, blaming his own past. There is nothing essential about his committing crimes, but he ascribes this meaning to his past.
+
+However, to disregard one's facticity during the evolution of one's sense of self would be a denial of the conditions shaping the present self and would be inauthentic. An example of the focus solely on possible projects without reflecting on one's current facticity would be continually thinking about future possibilities related to being rich (e.g. a better car, bigger house, better quality of life, etc.) without acknowledging the facticity of ''not currently having the financial means to do so''. In this example, considering both facticity and transcendence, an authentic mode of being would be considering future projects that might improve one's current finances (e.g. putting in extra hours, or investing savings) in order to arrive at a real future, or ''future-facticity'' of a modest pay rise, further leading to purchase of an affordable car.
+
+Another aspect of facticity is that it entails . Freedom "produces" angst when limited by facticity and the lack of the possibility of having facticity to "step in" and take responsibility for something one has done also produces angst.
+
+Another aspect of existential freedom is that one can change one's values. One is responsible for one's values, regardless of society's values. The focus on  in existentialism is related to the limits of responsibility one bears, as a result of one's freedom. The relationship between freedom and responsibility is one of interdependency and a clarification of freedom also clarifies that for which one is responsible.
+
+ Authenticity 
+
+Many noted existentialists consider the theme of authentic existence important. Authenticity involves the idea that one has to "create oneself" and live in accordance with this self. For an authentic existence, one should act as oneself, not as "one's acts" or as "one's genes" or as any other essence requires. The authentic act is one in accordance with one's freedom. A component of freedom is facticity, but not to the degree that this facticity determines one's transcendent choices (one could then blame one's background for making the choice one made [chosen project, from one's transcendence]). Facticity, in relation to authenticity, involves acting on one's actual values when making a choice (instead of, like Kierkegaard's Aesthete, "choosing" randomly), so that one takes responsibility for the act instead of choosing either-or without allowing the options to have different values.
+
+In contrast, the inauthentic is the denial to live in accordance with one's freedom. This can take many forms, from pretending choices are meaningless or random, convincing oneself that some form of  is true, or "mimicry" where one acts as "one should".
+
+How one "should" act is often determined by an image one has, of how one in such a role (bank manager, lion tamer, sex worker, etc.) acts. In ''Being and Nothingness'', Sartre uses the example of a waiter in "bad faith". He merely takes part in the "act" of being a typical waiter, albeit very convincingly.Jean-Paul Sartre, ''Being and Nothingness'', Routledge Classics (2003). This image usually corresponds to a social norm, but this does not mean that all acting in accordance with social norms is inauthentic. The main point is the attitude one takes to one's own freedom and responsibility and the extent to which one acts in accordance with this freedom. Internet Encyclopedia of Philosophy |url=https://iep.utm.edu/sartre-ex/ |access-date=2022-11-10 |language=en-US}}
+
+ The Other and the Look 
+
+The Other (written with a capital "O") is a concept more properly belonging to phenomenology and its account of . However, it has seen widespread use in existentialist writings, and the conclusions drawn differ slightly from the phenomenological accounts. The Other is the experience of another free subject who inhabits the same world as a person does. In its most basic form, it is this experience of the Other that constitutes intersubjectivity and objectivity. To clarify, when one experiences someone else, and this Other person experiences the world (the same world that a person experiences)—only from "over there"—the world is constituted as objective in that it is something that is "there" as identical for both of the subjects; a person experiences the other person as experiencing the same things. This experience of the Other's look is what is termed the Look (sometimes the ).
+
+While this experience, in its basic phenomenological sense, constitutes the world as objective and oneself as objectively existing subjectivity (one experiences oneself as seen in the Other's Look in precisely the same way that one experiences the Other as seen by him, as subjectivity), in existentialism, it also acts as a kind of limitation of freedom. This is because the Look tends to objectify what it sees. When one experiences oneself in the Look, one does not experience oneself as nothing (no thing), but as something (some thing). In Sartre's example of a man peeping at someone through a keyhole, the man is entirely caught up in the situation he is in. He is in a pre-reflexive state where his entire consciousness is directed at what goes on in the room. Suddenly, he hears a creaking floorboard behind him and he becomes aware of himself as seen by the Other. He is then filled with shame for he perceives himself as he would perceive someone else doing what he was doing—as a . For Sartre, this phenomenological experience of shame establishes proof for the existence of other minds and defeats the problem of . For the conscious state of shame to be experienced, one has to become aware of oneself as an object of another look, proving a priori, that other minds exist. The Look is then co-constitutive of one's facticity.
+
+Another characteristic feature of the Look is that no Other really needs to have been there: It is possible that the creaking floorboard was simply the movement of an old house; the Look is not some kind of mystical telepathic experience of the actual way the Other sees one (there may have been someone there, but he could have not noticed that person). It is only one's perception of the way another might perceive him. Internet Encyclopedia of Philosophy |url=https://iep.utm.edu/sartre-ex/ |access-date=2024-06-14 |language=en-US}}
+
+ Angst and dread 
+
+"Existential angst", sometimes called existential dread, anxiety, or , is a term common to many existentialist thinkers. It is generally held to be a negative feeling arising from the experience of human freedom and responsibility. The archetypal example is the experience one has when standing on a cliff where one not only fears falling off it, but also dreads the possibility of throwing oneself off. In this experience that "nothing is holding me back", one senses the lack of anything that predetermines one to either throw oneself off or to stand still, and one experiences one's own freedom.
+
+It can also be seen in relation to the previous point how angst is before nothing, and this is what sets it apart from fear that has an object. While one can take measures to remove an object of fear, for angst no such "constructive" measures are possible. The use of the word "nothing" in this context relates to the inherent insecurity about the consequences of one's actions and to the fact that, in experiencing freedom as angst, one also realizes that one is fully responsible for these consequences. There is nothing in people (genetically, for instance) that acts in their stead—that they can blame if something goes wrong. Therefore, not every choice is perceived as having dreadful possible consequences (and, it can be claimed, human lives would be unbearable if every choice facilitated dread). However, this does not change the fact that freedom remains a condition of every action.
+
+ Despair 
+
+Despair is generally defined as a loss of hope. In existentialism, it is more specifically a loss of hope in reaction to a breakdown in one or more of the defining qualities of one's self or identity. If a person is invested in being a particular thing, such as a bus driver or an upstanding citizen, and then finds their being-thing compromised, they would normally be found in a state of despair—a hopeless state. For example, a singer who loses the ability to sing may despair if they have nothing else to fall back on—nothing to rely on for their identity. They find themselves unable to be what defined their being.
+
+What sets the existentialist notion of despair apart from the conventional definition is that existentialist despair is a state one is in even when they are not overtly in despair. So long as a person's identity depends on qualities that can crumble, they are in perpetual despair—and as there is, in Sartrean terms, no human essence found in conventional reality on which to constitute the individual's sense of identity, despair is a universal human condition. As Kierkegaard defines it in ''Either/Or'': "Let each one learn what he can; both of us can learn that a person's unhappiness never lies in his lack of control over external conditions, since this would only make him completely unhappy."Either/Or Part II p. 188 Hong. In '''', he says:
+
+ Opposition to positivism and rationalism 
+
+Existentialists oppose defining human beings as primarily rational, and, therefore, oppose both  and . Existentialism asserts that people make decisions based on subjective meaning rather than pure rationality. 
+The rejection of reason as the source of meaning is a common theme of existentialist thought, as is the focus on the  and dread that we feel in the face of our own radical  and our awareness of death. Kierkegaard advocated rationality as a means to interact with the objective world (e.g., in the natural sciences), but when it comes to existential problems, reason is insufficient: "Human reason has boundaries".''Søren Kierkegaard's Journals and Papers'' Vol. 5, p. 5.
+
+Like Kierkegaard, Sartre saw problems with rationality, calling it a form of "bad faith", an attempt by the self to impose structure on a world of phenomena—"the Other"—that is fundamentally irrational and random. According to Sartre, rationality and other forms of bad faith hinder people from finding meaning in freedom. To try to suppress feelings of anxiety and dread, people confine themselves within everyday experience, Sartre asserted, thereby relinquishing their freedom and acquiescing to being possessed in one form or another by "the Look" of "the Other" (i.e., possessed by another person—or at least one's idea of that other person).
+
+ Religion 
+
+An existentialist reading of the  would demand that the reader recognize that they are an existing subject studying the words more as a recollection of events. This is in contrast to looking at a collection of "truths" that are outside and unrelated to the reader, but may develop a sense of reality/God. Such a reader is not obligated to follow the commandments as if an external agent is forcing these commandments upon them, but as though they are inside them and guiding them from inside. This is the task Kierkegaard takes up when he asks: "Who has the more difficult task: the teacher who lectures on earnest things a meteor's distance from everyday life—or the learner who should put it to use?"Kierkegaard, Soren. ''Works of Love''. Harper & Row, Publishers. New York, N.Y. 1962. p. 62. Philosophers such as  and  introduced the concept of existentialist  into the field of  and , respectively.Sariel, Aviram. "Jonasian Gnosticism." Harvard Theological Review 116.1 (2023): 91-122.
+
+ Confusion with nihilism 
+
+Although  and existentialism are distinct philosophies, they are often confused with one another since both are rooted in the human experience of anguish and confusion that stems from the apparent meaninglessness of a world in which humans are compelled to find or create meaning. A primary cause of confusion is that  was an important philosopher in both fields.
+
+Existentialist philosophers often stress the importance of angst as signifying the absolute lack of any objective ground for action, a move that is often reduced to moral or . A pervasive theme in existentialist philosophy, however, is to persist through encounters with the absurd, as seen in 's philosophical essay '''' (1942): "One must imagine Sisyphus happy".Camus, Albert. "The Myth of Sisyphus". [http://www.nyu.edu/classes/keefer/hell/camus.html NYU.edu]. It is only very rarely that existentialist philosophers dismiss morality or one's self-created meaning:  regained a sort of morality in the religious (although he would not agree that it was ethical; the religious suspends the ethical), and 's final words in '''' (1943): "All these questions, which refer us to a pure and not an accessory (or impure) reflection, can find their reply only on the ethical plane. We shall devote to them a future work."
+
+ History 
+
+ Precursors 
+
+Some have argued that existentialism has long been an element of European religious thought, even before the term came into use. William Barrett identified  and  as two specific examples.  also identified 's  (""), , , and  as existentialists. According to Wahl, "the origins of most great philosophies, like those of , , and , are to be found in existential reflections." Precursors to existentialism can also be identified in the works of Iranian Muslim philosopher  (c. 1571–1635), who would posit that "" becoming the principle expositor of the , which is described as "alive and active".
+
+ 19th century 
+
+ Kierkegaard and Nietzsche 
+
+Kierkegaard is generally considered to have been the first existentialist philosopher. He proposed that each individual—not reason, society, or religious orthodoxy—is solely tasked with giving meaning to life and living it sincerely, or "authentically".
+
+Kierkegaard and Nietzsche were two of the first philosophers considered fundamental to the existentialist movement, though neither used the term "existentialism" and it is unclear whether they would have supported the existentialism of the 20th century. They focused on subjective human experience rather than the objective truths of mathematics and science, which they believed were too detached or observational to truly get at the human experience. Like Pascal, they were interested in people's quiet struggle with the apparent meaninglessness of life and the use of diversion to escape from . Unlike Pascal, Kierkegaard and Nietzsche also considered the role of making free choices, particularly regarding fundamental values and beliefs, and how such choices change the nature and identity of the chooser. Kierkegaard's  and Nietzsche's  are representative of people who exhibit freedom, in that they define the nature of their own existence. Nietzsche's idealized individual invents his own values and creates the very terms they excel under. By contrast, Kierkegaard, opposed to the level of abstraction in Hegel, and not nearly as hostile (actually welcoming) to  as Nietzsche, argues through a pseudonym that the objective certainty of religious truths (specifically Christian) is not only impossible, but even founded on logical paradoxes. Yet he continues to imply that a  is a possible means for an individual to reach a higher stage of existence that transcends and contains both an aesthetic and ethical value of life. Kierkegaard and Nietzsche were also precursors to other intellectual movements, including , and various strands of psychotherapy. However, Kierkegaard believed that individuals should live in accordance with their thinking.
+
+In ''Twilight of the Idols'', Nietzsche's sentiments resonate the idea of "existence precedes essence." He writes, "no one ''gives''  man his qualities-- neither God, nor society, nor his parents and ancestors, nor he himself...No one is responsible for man's being there at all, for his being such-and-such, or for his being in these circumstances or in this environment...Man is not the effect of some special purpose of a will, and end..." Within this view, Nietzsche ties in his rejection of the existence of God, which he sees as a means to "redeem the world." By rejecting the existence of God, Nietzsche also rejects beliefs that claim humans have a predestined purpose according to what God has instructed.
+
+Dostoyevsky
+
+The first important literary author also important to existentialism was the Russian, Dostoyevsky.Hubben, William. ''Dostoyevsky, Kierkegaard, Nietzsche and Kafka, Jabber-wacky'', Scribner, 1997. Dostoyevsky's '''' portrays a man unable to fit into society and unhappy with the identities he creates for himself. Sartre, in his book on existentialism '''', quoted Dostoyevsky's '''' as an example of . Other Dostoyevsky novels covered issues raised in existentialist philosophy while presenting story lines divergent from secular existentialism: for example, in '''', the protagonist Raskolnikov experiences an existential crisis and then moves toward a Christian Orthodox worldview similar to that advocated by Dostoyevsky himself.
+
+ Early 20th century 
+
+In the first decades of the 20th century, a number of philosophers and writers explored existentialist ideas. The Spanish philosopher , in his 1913 book ''The Tragic Sense of Life in Men and Nations'', emphasized the life of "flesh and bone" as opposed to that of abstract rationalism. Unamuno rejected systematic philosophy in favor of the individual's quest for faith. He retained a sense of the tragic, even absurd nature of the quest, symbolized by his enduring interest in the eponymous character from the  novel ''''. A novelist, poet and dramatist as well as philosophy professor at the University of Salamanca, Unamuno wrote a short story about a priest's crisis of faith, ''Saint Manuel the Good, Martyr'', which has been collected in anthologies of existentialist fiction. Another Spanish thinker, , writing in 1914, held that human existence must always be defined as the individual person combined with the concrete circumstances of his life: "''Yo soy yo y mi circunstancia''" ("I am myself and my circumstances"). Sartre likewise believed that human existence is not an abstract matter, but is always situated ("''en situation''").
+
+Although  wrote his major philosophical works in German, and studied and taught at the Universities of Berlin and , he stands apart from the mainstream of German philosophy. Born into a Jewish family in Vienna in 1878, he was also a scholar of Jewish culture and involved at various times in  and Hasidism. In 1938, he moved permanently to . His best-known philosophical work was the short book '''', published in 1922. For Buber, the fundamental fact of human existence, too readily overlooked by scientific rationalism and abstract philosophical thought, is "man with man", a dialogue that takes place in the so-called "sphere of between" (''"das Zwischenmenschliche"'').Maurice S. Friedman, ''Martin Buber. The Life of Dialogue'', University of Chicago Press, 1955, p. 85.
+
+Two Russian philosophers,  and , became well known as existentialist thinkers during their post-Revolutionary exiles in Paris. Shestov had launched an attack on rationalism and systematization in philosophy as early as 1905 in his book of aphorisms ''All Things Are Possible''. Berdyaev drew a radical distinction between the world of spirit and the everyday world of objects. Human freedom, for Berdyaev, is rooted in the realm of spirit, a realm independent of scientific notions of causation. To the extent the individual human being lives in the objective world, he is estranged from authentic spiritual freedom. "Man" is not to be interpreted naturalistically, but as a being created in God's image, an originator of free, creative acts.Ernst Breisach, ''Introduction to Modern Existentialism'', New York (1962), pp. 173–76. He published a major work on these themes, ''The Destiny of Man'', in 1931.
+
+, long before coining the term "existentialism", introduced important existentialist themes to a French audience in his early essay "Existence and Objectivity" (1925) and in his ''Metaphysical Journal'' (1927).Samuel M. Keen, "Gabriel Marcel" in Paul Edwards (ed.) ''The Encyclopaedia of Philosophy'', Macmillan Publishing Co, 1967. A dramatist as well as a philosopher, Marcel found his philosophical starting point in a condition of metaphysical alienation: the human individual searching for harmony in a transient life. Harmony, for Marcel, was to be sought through "secondary reflection", a "dialogical" rather than "dialectical" approach to the world, characterized by "wonder and astonishment" and open to the "presence" of other people and of God rather than merely to "information" about them. For Marcel, such presence implied more than simply being there (as one thing might be in the presence of another thing); it connoted "extravagant" availability, and the willingness to put oneself at the disposal of the other.John Macquarrie, ''Existentialism'', Pelican, 1973, p. 110.
+
+Marcel contrasted ''secondary reflection'' with abstract, scientific-technical ''primary reflection'', which he associated with the activity of the abstract Cartesian ego. For Marcel, philosophy was a concrete activity undertaken by a sensing, feeling human being incarnate—embodied—in a concrete world.John Macquarrie, ''Existentialism'', Pelican, 1973, p. 96. Although Sartre adopted the term "existentialism" for his own philosophy in the 1940s, Marcel's thought has been described as "almost diametrically opposed" to that of Sartre. Unlike Sartre, Marcel was a Christian, and became a Catholic convert in 1929.
+
+In Germany, the psychiatrist and philosopher —who later described existentialism as a "phantom" created by the publicKarl Jaspers, "Philosophical Autobiography" in Paul Arthur Schilpp (ed.) ''The Philosophy of Karl Jaspers'' The Library of Living Philosophers IX, Tudor Publishing Company, 1957, p. 75/11.—called his own thought, heavily influenced by Kierkegaard and Nietzsche, ''Existenzphilosophie''. For Jaspers, "''Existenz''-philosophy is the way of thought by means of which man seeks to become himself...This way of thought does not cognize objects, but elucidates and makes actual the being of the thinker".Karl Jaspers, "Philosophical Autobiography" in Paul Arthur Schilpp (ed.) ''The Philosophy of Karl Jaspers'' The Library of Living Philosophers IX, Tudor Publishing Company, 1957, p. 40.
+
+Jaspers, a professor at the university of , was acquainted with Heidegger, who held a professorship at  before acceding to Husserl's chair at  in 1928. They held many philosophical discussions, but later became estranged over Heidegger's support of National Socialism. They shared an admiration for Kierkegaard,Karl Jaspers, "Philosophical Autobiography" in Paul Arthur Schilpp (ed.) ''The Philosophy of Karl Jaspers'' The Library of Living Philosophers IX, Tudor Publishing Company, 1957, p. 75/2 and following. and in the 1930s, Heidegger lectured extensively on Nietzsche. Nevertheless, the extent to which Heidegger should be considered an existentialist is debatable. In ''Being and Time'' he presented a method of rooting philosophical explanations in human existence (''Dasein'') to be analysed in terms of existential categories (''existentiale''); and this has led many commentators to treat him as an important figure in the existentialist movement.
+
+ After the Second World War 
+
+Following the Second World War, existentialism became a well-known and significant philosophical and cultural movement, mainly through the public prominence of two French writers,  and , who wrote best-selling novels, plays and widely read journalism as well as theoretical texts. These years also saw the growing reputation of ''Being and Time'' outside Germany.
+thumb|left|upright|French philosophers [[Jean-Paul Sartre and ]]
+
+Sartre dealt with existentialist themes in his 1938 novel ''Nausea'' and the short stories in his 1939 collection ''The Wall'', and had published his treatise on existentialism, ''Being and Nothingness'', in 1943, but it was in the two years following the liberation of Paris from the German occupying forces that he and his close associates—Camus, Simone de Beauvoir, Maurice Merleau-Ponty, and others—became internationally famous as the leading figures of a movement known as existentialism.Ronald Aronson, ''Camus and Sartre'', University of Chicago Press, 2004, Chapter 3 ''passim.'' In a very short period of time, Camus and Sartre in particular became the leading public intellectuals of post-war France, achieving by the end of 1945 "a fame that reached across all audiences."Ronald Aronson, ''Camus and Sartre'', University of Chicago Press, 2004, p. 44. Camus was an editor of the most popular leftist (former ) newspaper ''Combat''; Sartre launched his journal of leftist thought, '''', and two weeks later gave the widely reported lecture on existentialism and  to a packed meeting of the Club Maintenant. Beauvoir wrote that "not a week passed without the newspapers discussing us";Simone de Beauvoir, ''Force of Circumstance'', quoted in Ronald Aronson, ''Camus and Sartre'', University of Chicago Press, 2004, p. 48. existentialism became "the first media craze of the postwar era."Ronald Aronson, ''Camus and Sartre'', University of Chicago Press, 2004, p. 48.
+
+By the end of 1947, Camus' earlier fiction and plays had been reprinted, his new play ''Caligula'' had been performed and his novel ''The Plague'' published; the first two novels of Sartre's '''' trilogy had appeared, as had Beauvoir's novel ''''. Works by Camus and Sartre were already appearing in foreign editions. The Paris-based existentialists had become famous.
+
+Sartre had traveled to Germany in 1930 to study the phenomenology of  and ,Rüdiger Safranski, '''', Harvard University Press, 1998, p. 343. and he included critical comments on their work in his major treatise ''Being and Nothingness''. Heidegger's thought had also become known in French philosophical circles through its use by  in explicating Hegel in a series of lectures given in Paris in the 1930s.Entry on Kojève in Martin Cohen (editor), ''The Essentials of Philosophy and Ethics'' (Hodder Arnold, 2006, p. 158); see also Alexandre Kojève, ''Introduction to the Reading of Hegel: Lectures on the Phenomenology of Spirit'' (Cornell University Press, 1980). The lectures were highly influential; members of the audience included not only Sartre and Merleau-Ponty, but , , , , and .Entry on Kojève in Martin Cohen (editor), ''The Essentials of Philosophy and Ethics'' (Hodder Arnold, 2006, p. 158). A selection from ''Being and Time'' was published in French in 1938, and his essays began to appear in French philosophy journals.
+thumb|upright|French philosopher, novelist, and playwright [[Albert Camus]]
+
+Heidegger read Sartre's work and was initially impressed, commenting: "Here for the first time I encountered an independent thinker who, from the foundations up, has experienced the area out of which I think. Your work shows such an immediate comprehension of my philosophy as I have never before encountered."Martin Heidegger, letter, quoted in Rüdiger Safranski, ''Martin Heidegger – Between Good and Evil'' (Harvard University Press, 1998, p. 349). Later, however, in response to a question posed by his French follower ,Rüdiger Safranski, ''Martin Heidegger – Between Good and Evil'' (Harvard University Press, 1998, p. 356). Heidegger distanced himself from Sartre's position and existentialism in general in his ''''.William J. Richardson, ''Martin Heidegger: From Phenomenology to Thought'' (Martjinus Nijhoff, 1967, p. 351). Heidegger's reputation continued to grow in France during the 1950s and 1960s. In the 1960s, Sartre attempted to reconcile existentialism and  in his work ''''. A major theme throughout his writings was freedom and responsibility.
+
+Camus was a friend of Sartre, until their falling-out, and wrote several works with existential themes including ''The Rebel'', ''Summer in Algiers'', '''', and ''The Stranger'', the latter being "considered—to what would have been Camus's irritation—the exemplary existentialist novel." Camus, like many others, rejected the existentialist label, and considered his works concerned with facing the absurd. In the titular book, Camus uses the analogy of the Greek myth of  to demonstrate the futility of existence. In the myth, Sisyphus is condemned for eternity to roll a rock up a hill, but when he reaches the summit, the rock will roll to the bottom again. Camus believes that this existence is pointless but that Sisyphus ultimately finds meaning and purpose in his task, simply by continually applying himself to it. The first half of the book contains an extended rebuttal of what Camus took to be existentialist philosophy in the works of Kierkegaard, Shestov, Heidegger, and Jaspers.
+
+, an important existentialist who spent much of her life as Sartre's partner, wrote about  ethics in her works, including '''' and ''''. Although often overlooked due to her relationship with Sartre, de Beauvoir integrated existentialism with other forms of thinking such as , unheard of at the time, resulting in alienation from fellow writers such as Camus.
+
+, an important existentialist theologian following Kierkegaard and , applied existentialist concepts to , and helped introduce existential theology to the general public. His seminal work ''The Courage to Be'' follows Kierkegaard's analysis of anxiety and life's absurdity, but puts forward the thesis that modern humans must, via God, achieve selfhood in spite of life's absurdity.  used Kierkegaard's and Heidegger's philosophy of existence to demythologize Christianity by interpreting Christian mythical concepts into existentialist concepts.
+
+, an existential phenomenologist, was for a time a companion of Sartre. Merleau-Ponty's '''' (1945) was recognized as a major statement of French existentialism.Madison, G. B., in Robert Audi's ''The Cambridge Dictionary of Philosophy'' (Cambridge: Cambridge University Press, 1999, p. 559). It has been said that Merleau-Ponty's work ''Humanism and Terror'' greatly influenced Sartre. However, in later years they were to disagree irreparably, dividing many existentialists such as de Beauvoir, who sided with Sartre.
+
+, an English writer, published his study ''The Outsider'' in 1956, initially to critical acclaim. In this book and others (e.g. ''Introduction to the New Existentialism''), he attempted to reinvigorate what he perceived as a pessimistic philosophy and bring it to a wider audience. He was not, however, academically trained, and his work was attacked by professional philosophers for lack of rigor and critical standards.K. Gunnar Bergström, ''An Odyssey to Freedom'' University of Uppsala, 1983, p. 92. Colin Stanley, ''Colin Wilson, a Celebration: Essays and Recollections'' Cecil Woolf, 1988, p. 43.
+
+ Influence outside philosophy 
+
+ Art 
+
+ Film and television 
+
+thumb|left|[[Adolphe Menjou (''left'') and  (''right'') in '''' (1957)]]
+'s 1957  '''' "illustrates, and even illuminates...existentialism" by examining the "necessary absurdity of the " and the "horror of war".Holt, Jason. "Existential Ethics: Where do the Paths of Glory Lead?". In ''The Philosophy of Stanley Kubrick''. By Jerold J. Abrams. Published 2007. University Press of Kentucky. ISBN 0-8131-2445-X The film tells the story of a fictional World War I French army regiment ordered to attack an impregnable German stronghold; when the attack fails, three soldiers are chosen at random, court-martialed by a "", and executed by firing squad. The film examines existentialist ethics, such as the issue of whether objectivity is possible and the "problem of authenticity". 's 1962 film ''The Trial'', based upon Franz Kafka's book of the same name (''Der Prozeß''), is characteristic of both existentialist and absurdist themes in its depiction of a man (Joseph K.) arrested for a crime for which the charges are neither revealed to him nor to the reader.
+
+'''' is a Japanese  animation series created by the  studio  and was both directed and written by . Existential themes of individuality, consciousness, freedom, choice, and responsibility are heavily relied upon throughout the entire series, particularly through the philosophies of  and . Episode 16's title,  is a reference to Kierkegaard's book, ''''.
+
+Some contemporary films dealing with existentialist issues include ''Melancholia'', '''', '''', '''', '''', '''', ''Life in a Day'', ''Barbie'', and ''''. Likewise, films throughout the 20th century such as '''', '''', '''', the ''Toy Story'' films, '''', '''', ''Ghost in the Shell'', '''', '''', '''', ''One Flew Over the Cuckoo's Nest'', ''A Clockwork Orange'', ''Groundhog Day'', '''', ''Badlands'', and '''' also have existentialist qualities.
+
+Notable directors known for their existentialist films include , , , , , , , , , , , , , , and . 's '''' focuses on the protagonist's desire to find existential meaning. Similarly, in Kurosawa's '''', the protagonist's experiences as an intern in a rural health clinic in Japan lead him to an  whereby he questions his reason for being. This, in turn, leads him to a better understanding of humanity. The French film, ''Mood Indigo'' (directed by ) embraced various elements of existentialism. The film '''', released in 1994, depicts life in a prison in , United States to explore several existentialist concepts.For an examination of the existentialist elements within the film, see , issue 102, accessible [http://philosophynow.org/issues/102/The_Shawshank_Redemption here (link)], accessed 3 June 2014.
+
+ Literature 
+
+thumb|upright|First edition of ''[[The Trial'' by  (1925)|alt=A simple book cover in green displays the name of the author and the book]]
+Existential perspectives are also found in modern literature to varying degrees, especially since the 1920s. 's '''' (''Voyage au bout de la nuit'', 1932) celebrated by both Sartre and Beauvoir, contained many of the themes that would be found in later existential literature, and is in some ways, the proto-existential novel. Jean-Paul Sartre's 1938 novel ''Nausea'' was "steeped in Existential ideas", and is considered an accessible way of grasping his philosophical stance. Between 1900 and 1960, other authors such as , , , , , , , , and  composed literature or poetry that contained, to varying degrees, elements of existential or proto-existential thought. The philosophy's influence even reached pulp literature shortly after the turn of the 20th century, as seen in the existential disparity witnessed in Man's lack of control of his fate in the works of .
+
+ Theatre 
+
+Sartre wrote '''' in 1944, an existentialist play originally published in French as ''Huis Clos'' (meaning ''In Camera'' or "behind closed doors"), which is the source of the popular quote, "Hell is other people." (In French, "L'enfer, c'est les autres"). The play begins with a Valet leading a man into a room that the audience soon realizes is in hell. Eventually he is joined by two women. After their entry, the Valet leaves and the door is shut and locked. All three expect to be tortured, but no torturer arrives. Instead, they realize they are there to torture each other, which they do effectively by probing each other's sins, desires, and unpleasant memories.
+
+Existentialist themes are displayed in the , notably in 's '''', in which two men divert themselves while they wait expectantly for someone (or something) named Godot who never arrives. They claim Godot is an acquaintance, but in fact, hardly know him, admitting they would not recognize him if they saw him. Samuel Beckett, once asked who or what Godot is, replied, "If I knew, I would have said so in the play." To occupy themselves, the men eat, sleep, talk, argue, sing, play games, exercise, swap hats, and contemplate —anything "to hold the terrible silence at bay".''The Times'', 31 December 1964. Quoted in Knowlson, J., ''Damned to Fame: The Life of Samuel Beckett'' (London: Bloomsbury, 1996), p. 57 The play "exploits several archetypal forms and situations, all of which lend themselves to both comedy and ."Cronin, A., ''Samuel Beckett The Last Modernist'' (London: Flamingo, 1997), p. 391 The play also illustrates an attitude toward human experience on earth: the poignancy, oppression, camaraderie, hope, corruption, and bewilderment of human experience that can be reconciled only in the mind and art of the absurdist. The play examines questions such as death, the meaning of human existence and the place of God in human existence.
+
+'s '''' is an absurdist  first staged at the  in 1966. The play expands upon the exploits of two minor characters from Shakespeare's ''''. Comparisons have also been drawn to 's '''', for the presence of two central characters who appear almost as two halves of a single character. Many plot features are similar as well: the characters pass time by playing Questions, impersonating other characters, and interrupting each other or remaining silent for long periods of time. The two characters are portrayed as two clowns or fools in a world beyond their understanding. They stumble through philosophical arguments while not realizing the implications, and muse on the irrationality and randomness of the world.
+
+'s ''Antigone'' also presents arguments founded on existentialist ideas. It is a tragedy inspired by Greek mythology and the play of the same name (''Antigone'', by Sophocles) from the fifth century BC. In English, it is often distinguished from its antecedent by being pronounced in its original French form, approximately "Ante-GŌN." The play was first performed in Paris on 6 February 1944, during the Nazi occupation of France. Produced under Nazi censorship, the play is purposefully ambiguous with regards to the rejection of authority (represented by Antigone) and the acceptance of it (represented by Creon). The parallels to the French Resistance and the Nazi occupation have been drawn. Antigone rejects life as desperately meaningless but without affirmatively choosing a noble death. The crux of the play is the lengthy dialogue concerning the nature of power, fate, and choice, during which Antigone says that she is, "...&nbsp;disgusted with [the]...promise of a humdrum happiness." She states that she would rather die than live a mediocre existence.
+
+Critic  in his book ''Theatre of the Absurd'' pointed out how many contemporary playwrights such as , , , and  wove into their plays the existentialist belief that we are absurd beings loose in a universe empty of real meaning. Esslin noted that many of these playwrights demonstrated the philosophy better than did the plays by Sartre and Camus. Though most of such playwrights, subsequently labeled "Absurdist" (based on Esslin's book), denied affiliations with existentialism and were often staunchly anti-philosophical (for example Ionesco often claimed he identified more with  or with  than with existentialism), the playwrights are often linked to existentialism based on Esslin's observation.Kernan, Alvin B. ''The Modern American Theater: A Collection of Critical Essays''. Englewood Cliffs, New Jersey: , 1967.
+
+ Activism 
+
+ explores the existence and experiences of Black people in the world. Classical and contemporary thinkers include C.L.R James, , W.E.B DuBois, , , , , , Stuart Hall, , and .
+
+ Psychoanalysis and psychotherapy 
+
+A major offshoot of existentialism as a philosophy is existentialist psychology and psychoanalysis, which first crystallized in the work of , Freud's closest associate for 20 years. Without awareness of the writings of Rank,  was influenced by Freud, , Heidegger, and Sartre. A later figure was , who briefly met Freud as a young man. His  can be regarded as a form of existentialist therapy. The existentialists would also influence , antipositivist micro-, , and , with the work of thinkers such as  and . Foucault was a great reader of Kierkegaard even though he almost never refers to this author, who nonetheless had for him an importance as secret as it was decisive.
+
+An early contributor to existentialist psychology in the United States was , who was strongly influenced by  and . One of the most prolific writers on techniques and theory of existentialist psychology in the US is . Yalom states that
+ Note: The copyright year has not changed, but the book remains in print.}}
+
+A more recent contributor to the development of a European version of existentialist psychotherapy is the British-based .
+
+Anxiety's importance in existentialism makes it a popular topic in . Therapists often offer existentialist  as an explanation for anxiety. The assertion is that anxiety is manifested of an individual's complete freedom to decide, and complete responsibility for the outcome of such decisions. Psychotherapists using an existentialist approach believe that a patient can harness his anxiety and use it constructively. Instead of suppressing anxiety, patients are advised to use it as grounds for change. By embracing anxiety as inevitable, a person can use it to achieve his full potential in life.  also had major impetus from existentialist psychology and shares many of the fundamental tenets. , based on the writings of  and , is a developing area of study within the academic study of psychology. It looks at what researchers claim are implicit emotional reactions of people confronted with the knowledge that they will eventually die.
+
+Also,  has refreshed the Socratic tradition with his own blend of ; as did  with his Chromatiques Center in Belgium.
+
+ Criticisms 
+
+ General criticisms 
+
+Walter Kaufmann criticized "the profoundly unsound methods and the dangerous contempt for reason that have been so prominent in existentialism."Kaufmann, Walter Arnold, From Shakespeare To Existentialism (Princeton University Press 1979), p. xvi. Logical positivist philosophers, such as  and , assert that existentialists are often confused about the verb "to be" in their analyses of "being".Carnap, Rudolf, ''Uberwindung der Metaphysik durch logische Analyse der Sprache'' [''Overcoming Metaphysics by the Logical Analysis of Speech''], Erkenntnis (1932), pp. 219–41. Carnap's critique of Heidegger's "What is Metaphysics."
+ Specifically, they argue that the verb "is" is transitive and pre-fixed to a predicate (e.g., an apple ''is red'') (without a predicate, the word "is" is meaningless), and that existentialists frequently misuse the term in this manner. Colin Wilson has stated in his book ''The Angry Years'' that existentialism has created many of its own difficulties: "We can see how this question of freedom of the will has been vitiated by post-romantic philosophy, with its inbuilt tendency to laziness and , we can also see how it came about that existentialism found itself in a hole of its own digging, and how the philosophical developments since then have amounted to walking in circles round that hole."Colin, Wilson, ''The Angry Years'' (2007), p. 214
+
+ Sartre's philosophy 
+
+Many critics argue Sartre's philosophy is contradictory. Specifically, they argue that Sartre makes metaphysical arguments despite his claiming that his philosophical views ignore .  criticized ''Being and Nothingness'' for projecting anxiety and meaninglessness onto the nature of existence itself: "Insofar as Existentialism is a philosophical doctrine, it remains an idealistic doctrine: it hypostatizes specific historical conditions of human existence into ontological and metaphysical characteristics. Existentialism thus becomes part of the very ideology which it attacks, and its radicalism is illusory."Marcuse, Herbert. "Sartre's Existentialism". Printed in ''Studies in Critical Philosophy''. Translated by Joris De Bres. London: NLB, 1972. p. 161.
+
+In ''Letter on Humanism'', Heidegger criticized Sartre's existentialism:
+
+ See also 
+
+* 
+* 
+* 
+* 
+* 
+* 
+*  
+* 
+* 
+* 
+
+ References 
+
+ Citations 
+
+ Bibliography 
+
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+
+External links
+
+* 
+* 
+* [https://www.tameri.com/exist/ ''The Existential Primer'']
+*  by  &  (Icon Books, 2001)
+
+}}

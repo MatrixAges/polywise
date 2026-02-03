@@ -75,7 +75,20 @@ This document provides an overview of the packages/polywise module structure and
 			"migration.spec.ts": { "desc": "Migration tests", "role": "Test" },
 			"test.spec.ts": { "desc": "Core functionality tests", "role": "Test" },
 			"article.spec.ts": { "desc": "Article tests", "role": "Test" },
-			"cot.spec.ts": { "desc": "Chain of thought tests", "role": "Test" }
+			"cot.spec.ts": { "desc": "Chain of thought tests", "role": "Test" },
+			"learning.spec.ts": { "desc": "Pure text learning and large scale dataset tests", "role": "Test" },
+			"datasets": {
+				"text": {
+					"desc": "Large-scale pure text datasets (Neuroscience, Philosophy, Legal, Physics, etc.)",
+					"role": "Data"
+				}
+			}
+		},
+		"scripts": {
+			"fetch_datasets.ts": {
+				"desc": "Script to fetch and clean complex datasets from external sources",
+				"role": "Script"
+			}
 		},
 		"config": {
 			"package.json": { "desc": "Polywise package configuration", "role": "Config" },

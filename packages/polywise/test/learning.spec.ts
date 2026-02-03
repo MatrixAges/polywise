@@ -1,0 +1,142 @@
+import path from 'path'
+import fs from 'fs-extra'
+
+import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
+
+import Polywise from '../src/Polywise'
+
+describe.concurrent('Polywise Pure Text Learning', () => {
+	let poly: Polywise
+	const unique_id = Math.random().toString(36).slice(2)
+	const db_name = `:polywise_learning_${unique_id}:`
+	const datasets_dir = path.resolve(__dirname, './datasets/text')
+
+	beforeAll(async () => {
+		poly = new Polywise()
+		await poly.init({
+			data_dir: db_name,
+			embedding_concurrency: 20,
+			reranker_concurrency: 20
+		})
+	})
+
+	afterAll(async () => {
+		await poly.off()
+	})
+
+	const loadDataset = async (name: string) => {
+		const filePath = path.join(datasets_dir, `${name}.txt`)
+		return await fs.readFile(filePath, 'utf-8')
+	}
+
+	const chunkText = (text: string, size = 1000) => {
+		const chunks: string[] = []
+		let start = 0
+
+		while (start < text.length) {
+			chunks.push(text.slice(start, start + size))
+			start += size
+		}
+
+		return chunks
+	}
+
+	describe('Large Scale Text Ingestion and Retrieval', () => {
+		it('should ingest complex literature and perform semantic search', async () => {
+			const text = await loadDataset('complex_literature')
+			const chunks = chunkText(text, 1500).slice(0, 20) // Take first 20 chunks for performance in tests
+
+			for (let i = 0; i < chunks.length; i++) {
+				await poly.article.addWithEmbedding({
+					title: `Literature Chunk ${i}`,
+					content: chunks[i]
+				})
+			}
+
+			const results = await poly.article.searchByVector({
+				query: 'What are the main social interactions described in the text?',
+				limit: 5
+			})
+
+			expect(results.length).toBeGreaterThan(0)
+			expect(results[0].similarity).toBeGreaterThan(0.3)
+		})
+
+		it('should handle cross-domain knowledge retrieval (Neuroscience vs Philosophy)', async () => {
+			const neuro_text = await loadDataset('neuroscience')
+			const phil_text = await loadDataset('philosophy')
+
+			await poly.article.addWithEmbedding({
+				title: 'Neuroscience Overview',
+				content: neuro_text.slice(0, 5000)
+			})
+
+			await poly.article.addWithEmbedding({
+				title: 'Philosophy Overview',
+				content: phil_text.slice(0, 5000)
+			})
+
+			const neuro_results = await poly.article.searchByText({
+				query: 'nervous system and brain functions',
+				limit: 5
+			})
+
+			expect(neuro_results.some(r => r.title.includes('Neuroscience'))).toBe(true)
+
+			const phil_results = await poly.article.searchByVector({
+				query: 'nature of reality and existence',
+				limit: 5
+			})
+
+			expect(phil_results.some(r => r.title.includes('Philosophy'))).toBe(true)
+		})
+
+		it('should process AI research papers and extract relevant concepts via RAG', async () => {
+			const ai_text = await loadDataset('ai_research')
+			const chunks = chunkText(ai_text, 1200).slice(0, 10)
+
+			for (const chunk of chunks) {
+				await poly.article.addWithEmbedding({
+					title: 'AI Research Sample',
+					content: chunk
+				})
+			}
+
+			const query = 'transformer architecture and self-attention mechanism'
+			const { result } = await poly.query({
+				query,
+				search_limit: 5,
+				rerank_limit: 3
+			})
+
+			expect(result.length).toBeGreaterThan(0)
+			expect(result[0].content.toLowerCase()).toContain('transformer')
+		})
+
+		it('should maintain performance with legal and physics datasets', async () => {
+			const legal_text = await loadDataset('legal')
+			const physics_text = await loadDataset('physics')
+
+			await Promise.all([
+				poly.article.addWithEmbedding({
+					title: 'Legal Foundations',
+					content: legal_text.slice(0, 8000)
+				}),
+				poly.article.addWithEmbedding({
+					title: 'Physics Principles',
+					content: physics_text.slice(0, 8000)
+				})
+			])
+
+			const startTime = Date.now()
+			const results = await poly.article.searchByVector({
+				query: 'quantum mechanics and constitutional law',
+				limit: 10
+			})
+			const duration = Date.now() - startTime
+
+			expect(results.length).toBeGreaterThan(0)
+			expect(duration).toBeLessThan(2000) // Should be fast enough
+		})
+	})
+})

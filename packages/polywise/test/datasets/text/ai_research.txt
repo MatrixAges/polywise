@@ -1,0 +1,748 @@
+A '''large language model''' ('''LLM''') is a  trained with self-supervised  on a vast amount of text, designed for  tasks, especially . The largest and most capable LLMs are  (GPTs) that provide the core capabilities of modern chatbots. LLMs can be fine-tuned for specific tasks or guided by . These models acquire predictive power regarding , , and ontologies inherent in human language corpora, but they also inherit inaccuracies and biases present in the data they are trained on.
+
+They consist of billions to trillions of parameters and operate as general-purpose sequence models, generating, summarizing, translating, and reasoning over text. LLMs represent a significant new technology in their ability to generalize across tasks with minimal task-specific supervision, enabling capabilities like conversational agents, code generation, knowledge retrieval, and automated reasoning that previously required bespoke systems.
+
+LLMs evolved from earlier statistical and recurrent neural network approaches to language modeling. The transformer architecture, introduced in 2017, replaced recurrence with self-attention, allowing efficient parallelization, longer context handling, and scalable training on unprecedented data volumes. This innovation enabled models like GPT, BERT, and their successors, which demonstrated emergent behaviors at scale, such as few-shot learning and compositional reasoning.
+
+, particularly policy gradient algorithms, has been adapted to fine-tune LLMs for desired behaviors beyond raw next-token prediction. Reinforcement learning from human feedback (RLHF) applies these methods to optimize a policy, the LLM's output distribution, against reward signals derived from human or automated preference judgments. This has been critical for aligning model outputs with user expectations, improving factuality, reducing harmful responses, and enhancing task performance.
+
+Benchmark evaluations for LLMs have evolved from narrow linguistic assessments toward comprehensive, multi-task evaluations measuring reasoning, factual accuracy, alignment, and safety. Hill climbing, iteratively optimizing models against benchmarks, has emerged as a dominant strategy, producing rapid incremental performance gains but raising concerns of overfitting to benchmarks rather than achieving genuine generalization or robust capability improvements.
+
+History
+
+thumb|The number of publications about large language models by year grouped by publication types.
+
+thumb|The training compute of notable large models in FLOPs vs publication date over the period 2010–2024. For overall notable models (top left), frontier models (top right), top language models (bottom left) and top models within leading companies (bottom right). The majority of these models are language models.
+thumb|The training compute of notable large AI models in FLOPs vs publication date over the period 2017–2024. The majority of large models are language models or multimodal models with language capacity.
+Before the emergence of transformer-based models in 2017, some language models were considered large relative to the computational and data constraints of their time. In the early 1990s, 's statistical models pioneered word alignment techniques for machine translation, laying the groundwork for corpus-based language modeling. In 2001, a smoothed ''n''-gram model, such as those employing , trained on 300 million words, achieved state-of-the-art  on benchmark tests. During the 2000s, with the rise of widespread internet access, researchers began compiling massive text datasets from the web ("web as corpus") to train statistical language models.
+
+Moving beyond ''n''-gram models, researchers started in 2000 to use neural networks to learn language models. Following the breakthrough of deep neural networks in image classification around 2012, similar architectures were adapted for language tasks. This shift was marked by the development of word embeddings (eg, Word2Vec by Mikolov in 2013) and sequence-to-sequence () models using LSTM. In 2016, Google transitioned its translation service to  (NMT), replacing statistical phrase-based models with deep recurrent neural networks. These early NMT systems used LSTM-based encoder-decoder architectures, as they preceded the invention of transformers. thumb|upright=1.3|An illustration of the main components of the transformer model from the original paper, where layers were normalized after (instead of before) multiheaded attention
+At the 2017  conference,  researchers introduced the transformer architecture in their landmark paper "". This paper's goal was to improve upon 2014 seq2seq technology, and was based mainly on the attention mechanism developed by Bahdanau et al. in 2014. The following year in 2018, BERT was introduced and quickly became "ubiquitous". Though the original transformer has both encoder and decoder blocks, BERT is an encoder-only model. Academic and research usage of BERT began to decline in 2023, following rapid improvements in the abilities of decoder-only models (such as GPT) to solve tasks via prompting.
+
+Although decoder-only  was introduced in 2018, it was  in 2019 that caught widespread attention because  claimed to have initially deemed it too powerful to release publicly, out of fear of malicious use.  in 2020 went a step further and  is available only via API with no offering of downloading the model to execute locally. But it was the 2022 consumer-facing chatbot  that received extensive media coverage and public attention. The 2023  was praised for its increased accuracy and as a "holy grail" for its multimodal capabilities. OpenAI did not reveal the high-level architecture and the number of parameters of GPT-4. The release of ChatGPT led to an uptick in LLM usage across several research subfields of computer science, including robotics, software engineering, and societal impact work. In 2024 OpenAI released the reasoning model , which generates long chains of thought before returning a final answer. Many LLMs with parameter counts comparable to those of OpenAI's GPT series have been developed.
+
+Since 2022, open-weight models have been gaining popularity, especially at first with BLOOM and , though both have restrictions on usage and deployment. 's models Mistral 7B and Mixtral 8x7b have a more permissive . In January 2025,  released DeepSeek R1, a 671-billion-parameter open-weight model that performs comparably to OpenAI o1 but at a much lower price per token for users.
+
+Since 2023, many LLMs have been trained to be multimodal, having the ability to also process or generate other types of data, such as images, audio, or 3D meshes. These LLMs are also called large multimodal models (LMMs), or multimodal large language models (MLLMs).
+
+As of 2024, the largest and most capable models are all based on the transformer architecture. Some recent implementations are based on other architectures, such as  variants and Mamba (a state space model).
+
+Open-weight LLMs have increasingly shaped the field since 2023, contributing to broader participation in AI development and greater transparency in model evaluation. Vake et al. (2025) demonstrated that community-driven contributions to open-weight models measurably improve their efficiency and performance, with user participation growing rapidly on collaborative platforms such as Hugging Face. Paris et al. (2025) further argued that openness in AI should extend beyond releasing model code or weights to encompass inclusiveness, accountability, and ethical responsibility in AI research and deployment. Collectively, these studies highlight that open-weight LLMs can accelerate innovation and enhance scientific reproducibility, while fostering a more transparent and participatory AI ecosystem.
+
+ Dataset preprocessing 
+
+Tokenization
+
+As  algorithms process numbers rather than text, the text must be converted to numbers. In the first step, a vocabulary is decided upon, then integer indices are arbitrarily but uniquely assigned to each vocabulary entry, and finally, an embedding is associated to the integer index. Algorithms include  (BPE) and WordPiece. There are also special tokens serving as control characters, such as [MASK] for masked-out token (as used in BERT), and [UNK] ("unknown") for characters not appearing in the vocabulary. Also, some special symbols are used to denote special text formatting. For example, "Ġ" denotes a preceding whitespace in  and GPT and "##" denotes continuation of a preceding word in BERT.
+
+For example, the BPE tokenizer used by the legacy version of  would split tokenizer: texts -> series of numerical "tokens" as
+{| cellpadding="0;" cellspacing="0;" style="border:1px solid black"
+|-
+| style="border-left: 2px green; border-right: 2px green" |token 
+| style="background-color: grey; color: white; border-left: 2px green; border-right: 2px green" |izer 
+| style="border-left: 2px green; border-right: 2px green" |:
+| style="background-color: grey; color: white; border-left: 2px green; border-right: 2px green" |&nbsp;texts
+| style="border-left: 2px green; border-right: 2px green" |&nbsp;->
+| style="background-color: grey; color: white; border-left: 2px green; border-right: 2px green" |series 
+| style="border-left: 2px green; border-right: 2px green" |&nbsp;of
+| style="background-color: grey; color: white; border-left: 2px green; border-right: 2px green" |&nbsp;numerical 
+| style="border-left: 2px green; border-right: 2px green" |&nbsp;" 
+| style="background-color: grey; color: white; border-left: 2px green; border-right: 2px green" |t
+| style="border-left: 2px green; border-right: 2px green" |ok
+| style="background-color: grey; color: white; border-left: 2px green; border-right: 2px green" |ens
+| style="border-left: 2px green; border-right: 2px green" |" 
+|}
+
+Tokenization also compresses the datasets. Because LLMs generally require input to be an array that is not jagged, the shorter texts must be "padded" until they match the length of the longest one. The average number of words per token depends on the language.
+
+ Byte-pair encoding 
+
+As an example, consider a tokenizer based on byte-pair encoding. In the first step, all unique characters (including blanks and s) are treated as an initial set of ''n''-grams (i.e. initial set of uni-grams). Successively the most frequent pair of adjacent characters is merged into a bi-gram and all instances of the pair are replaced by it. All occurrences of adjacent pairs of (previously merged) ''n''-grams that most frequently occur together are then again merged into even lengthier ''n''-gram, until a vocabulary of prescribed size is obtained. After a tokenizer is trained, any text can be tokenized by it, as long as it does not contain characters not appearing in the initial-set of uni-grams.
+
+ Problems 
+
+A token vocabulary based on the frequencies extracted from mainly English corpora uses as few tokens as possible for an average English word. However, an average word in another language encoded by such an English-optimized tokenizer is split into a suboptimal amount of tokens. GPT-2 tokenizer can use up to 15 times more tokens per word for some languages, for example for the  from . Even more widespread languages such as Portuguese and German have "a premium of 50%" compared to English.
+
+Dataset cleaning
+
+In the context of training LLMs, datasets are typically cleaned by removing low-quality, duplicated, or toxic data. Cleaned datasets can increase training efficiency and lead to improved downstream performance. A trained LLM can be used to clean datasets for training a further LLM.
+
+With the increasing proportion of LLM-generated content on the web, data cleaning in the future may include filtering out such content. LLM-generated content can pose a problem if the content is similar to human text (making filtering difficult) but of lower quality (degrading performance of models trained on it).
+
+ Synthetic data 
+
+Training of largest language models might need more linguistic data than naturally available, or that the naturally occurring data is of insufficient quality. In these cases, synthetic data might be used. Microsoft's Phi series of LLMs is trained on textbook-like data generated by another LLM.
+
+ Training 
+
+An LLM is a type of  (large X model) trained on language. LLMs can be trained in different ways. In particular, GPT models are first pretrained to predict the next word on a large amount of data, before being fine-tuned.
+
+ Cost 
+
+thumb|right|upright=1.5
+Substantial infrastructure is necessary for training the largest models. The tendency towards larger models is visible in the . For example, the training of GPT-2 (i.e. a 1.5-billion-parameters model) in 2019 cost $50,000, while training of the  (i.e. a 540-billion-parameters model) in 2022 cost $8 million, and Megatron-Turing NLG 530B (in 2021) cost around $11 million. The qualifier "large" in "large language model" is inherently vague, as there is no definitive threshold for the number of parameters required to qualify as "large".  of 2018 has 117 million parameters.
+
+ Fine-tuning 
+
+Before being fine-tuned, most LLMs are next-token predictors. The fine-tuning shapes the LLM's behavior via techniques like  (RLHF) or .
+
+Instruction fine-tuning is a form of  used to teach LLMs to follow user instructions. In 2022, OpenAI demonstrated , a version of GPT-3 similarly fine-tuned to follow instructions. 
+
+Reinforcement learning from human feedback (RLHF) involves training a reward model to predict which text humans prefer. Then, the LLM can be fine-tuned through  to better satisfy this reward model. Since humans typically prefer truthful, helpful and harmless answers, RLHF favors such answers.
+
+ Architecture 
+
+LLMs are generally based on the transformer architecture, which leverages an attention mechanism that enables the model to process relationships between all elements in a sequence simultaneously, regardless of their distance from each other.
+
+ Attention mechanism and context window 
+
+upright=1.3|thumb | When each head calculates, according to its own criteria, how much other tokens are relevant for the "it_" token, note that the second attention head, represented by the second column, is focusing most on the first two rows, i.e. the tokens "The" and "animal", while the third column is focusing most on the bottom two rows, i.e. on "tired", which has been tokenized into two tokens.
+
+In order to find out which tokens are relevant to each other within the scope of the context window, the attention mechanism calculates "soft" weights for each token, more precisely for its embedding, by using multiple attention heads, each with its own "relevance" for calculating its own soft weights. For example, the small (i.e. 117M parameter sized)  model has had twelve attention heads and a context window of only 1k tokens. In its medium version it has 345M parameters and contains 24 layers, each with 12 attention heads. For the training with gradient descent a batch size of 512 was utilized.
+
+Google's Gemini 1.5, introduced in February 2024, can have a context window of up to 1 million tokens.
+
+A model may be pre-trained either to predict how the segment continues, or what is missing in the segment, given a segment from its training dataset. It can be either
+* autoregressive (i.e. predicting how the segment continues, as GPTs do): for example given a segment "I like to eat", the model predicts "ice cream", or "sushi".
+* "masked" (i.e. filling in the parts missing from the segment, the way "BERT" does it): for example, given a segment "I like to [__] [__] cream", the model predicts that "eat" and "ice" are missing.
+
+Models may be trained on auxiliary tasks which test their understanding of the data distribution, such as next sentence prediction (NSP), in which pairs of sentences are presented and the model must predict whether they appear consecutively in the training corpus. During training, regularization loss is also used to stabilize training. However regularization loss is usually not used during testing and evaluation.
+
+ Mixture of experts 
+
+A  (MoE) is a  architecture in which multiple specialized neural networks ("experts") work together, with a gating mechanism that routes each input to the most appropriate expert(s). Mixtures of experts can reduce inference costs, as only a fraction of the parameters are used for each input. The approach was introduced in 2017 by Google researchers.
+
+ Parameter size 
+
+Typically, LLMs are trained with single- or half-precision  (float32 and float16). One float16 has 16 bits, or 2 bytes, and so one billion parameters require 2 gigabytes. The largest models typically have more than 100 billion parameters, which places them outside the range of most consumer electronics.
+
+ Quantization 
+
+''Post-training quantization'' aims to decrease the space requirement by lowering precision of the parameters of a trained model, while preserving most of its performance. Quantization can be further classified as ''static quantization'' if the quantization parameters are determined beforehand (typically during a calibration phase), and ''dynamic quantization'' if the quantization is applied during inference. The simplest form of quantization simply truncates all the parameters to a given number of bits: this is applicable to static as well as dynamic quantization, but loses much precision. Dynamic quantization allows for the use of a different quantization codebook per layer, either a lookup table of values or a linear mapping (scaling factor and bias), at the cost of foregoing the possible speed improvements from using lower-precision arithmetic.
+
+Quantized models are typically seen as frozen with modification of weights (e.g. fine-tuning) only applied to the original model. It is possible to fine-tune quantized models using low-rank adaptation.
+
+ Extensibility 
+
+Beyond basic text generation, various techniques have been developed to extend LLM capabilities, including the use of external tools and data sources, improved reasoning on complex problems, and enhanced instruction-following or autonomy through prompting methods.
+
+ Prompt engineering 
+
+In 2020,  researchers demonstrated that their new model  could understand what format to use given a few rounds of Q and A (or other type of task) in the input data as example, thanks in part due to the RLHF technique. This technique, called ''few-shot prompting'', allows LLMs to be adapted to any task without requiring fine-tuning. Also in 2022, it was found that the base GPT-3 model can generate an instruction based on user input. The generated instruction along with user input is then used as input to another instance of the model under a "Instruction: [...], Input: [...], Output:" format. The other instance is able to complete the output and often produces the correct answer in doing so. The ability to "self-instruct" makes LLMs able to bootstrap themselves toward a correct answer.
+
+ Dialogue processing (chatbot) 
+
+An LLM can be turned into a chatbot by specializing it for conversation. User input is prefixed with a marker such as "Q:" or "User:" and the LLM is asked to predict the output after a fixed "A:" or "Assistant:". This type of model became commercially available in 2022 with ChatGPT, a sibling model of InstructGPT fine-tuned to accept and produce dialog-formatted text based on GPT-3.5. It could similarly follow user instructions. Before the stream of User and Assistant lines, a chat context usually start with a few lines of overarching instructions, from a role called "developer" or "system" to convey a higher authority than the user's input. This is called a "system prompt".
+
+ Retrieval-augmented generation 
+
+ (RAG) is an approach that integrates LLMs with  systems. Given a query, a document retriever is called to retrieve the most relevant documents. This is usually done by encoding the query and the documents into vectors, then finding the documents with vectors (usually stored in a ) most similar to the vector of the query. The LLM then generates an output based on both the query and context included from the retrieved documents.
+
+ Tool use 
+
+Tool use is a mechanism that enables LLMs to interact with external systems, applications, or data sources. It can allow for example to fetch real-time information from an API or to execute code. A program separate from the LLM watches the output stream of the LLM for a special tool-calling syntax. When these special tokens appear, the program calls the tool accordingly and feeds its output back into the LLM's input stream.
+
+Early tool-using LLMs were fine-tuned on the use of specific tools. But fine-tuning LLMs for the ability to read  documentation and call API correctly has greatly expanded the range of tools accessible to an LLM. Describing available tools in the system prompt can also make an LLM able to use tools. A system prompt instructing ChatGPT (GPT-4) to use multiple types of tools can be found online.
+
+ Agency 
+
+An LLM is typically not an  by itself, as it lacks the ability to interact with dynamic environments, recall past behaviors, and plan future actions. But it can be transformed into an agent by adding supporting elements: the role (profile) and the surrounding environment of an agent can be additional inputs to the LLM, while memory can be integrated as a tool or provided as additional input. Instructions and input patterns are used to make the LLM plan actions and tool use is used to potentially carry out these actions.
+
+The ReAct pattern, a portmanteau of ''reason'' and ''act'', constructs an agent out of an LLM, using the LLM as a planner. The LLM is prompted to "think out loud". Specifically, the language model is prompted with a textual description of the environment, a goal, a list of possible actions, and a record of the actions and observations so far. It generates one or more thoughts before generating an action, which is then executed in the environment.
+
+In the DEPS ("describe, explain, plan and select") method, an LLM is first connected to the visual world via image descriptions. It is then prompted to produce plans for complex tasks and behaviors based on its pretrained knowledge and the environmental feedback it receives.
+
+The ''Reflexion method'' constructs an agent that learns over multiple episodes. At the end of each episode, the LLM is given the record of the episode, and prompted to think up "lessons learned", which would help it perform better at a subsequent episode. These "lessons learned" are stored as a form of long-term memory and given to the agent in the subsequent episodes.
+
+ can use an LLM as rollout heuristic. When a programmatic world model is not available, an LLM can also be prompted with a description of the environment to act as world model.
+
+For open-ended exploration, an LLM can be used to score observations for their "interestingness", which can be used as a reward signal to guide a normal (non-LLM) reinforcement learning agent. Alternatively, it can propose increasingly difficult tasks for . An Open-Ended Embodied Agent with Large Language Models |url=https://voyager.minedojo.org/ |access-date=2023-06-09 |website=voyager.minedojo.org |archive-date=2023-06-08 |archive-url=https://web.archive.org/web/20230608225054/https://voyager.minedojo.org/ |url-status=live }} Instead of outputting individual actions, an LLM planner can also construct "skills", or functions for complex action sequences. The skills can be stored and later invoked, allowing increasing levels of abstraction in planning.
+
+Multiple agents with memory can interact socially.
+
+ Reasoning 
+
+LLMs are conventionally trained to generate an output without generating intermediate steps. As a result, their performance tends to be subpar on complex questions requiring (at least in humans) intermediate steps of thought. Early research demonstrated that inserting intermediate "scratchpad" computations could improve performance on such tasks. Later methods overcame this deficiency more systematically by breaking tasks into smaller steps for the LLM, either manually or automatically.
+
+ Chaining 
+
+''Prompt chaining'' was introduced in 2022. In this method, a user manually breaks a complex problem down into several steps. In each step, the LLM receives as input a prompt telling it what to do and some results from preceding steps. The result from one step is then reused in a next step, until a final answer is reached. The ability of an LLM to follow instructions means that even non-experts can write a successful collection of stepwise prompts given a few rounds of trial and error.
+
+A 2022 paper demonstrated a separate technique called '''', which makes the LLM break the question down autonomously. An LLM is given some examples where the "assistant" verbally breaks down the thought process before arriving at an answer. The LLM mimics these examples and also tries to spend some time generating intermediate steps before providing the final answer. This additional step elicited by prompting improves the correctness of the LLM on relatively complex questions. On math word questions, a prompted model can exceed even fine-tuned GPT-3 with a verifier. Chain-of-thought can also be elicited by simply adding an instruction like "Let's think step by step" to the prompt, in order to encourage the LLM to proceed methodically instead of trying to directly guess the answer.
+
+ Model-native reasoning 
+
+In late 2024, a new approach to LLM development emerged with "reasoning models". These are trained to generate step-by-step analysis before producing final answers, enabling better results on complex tasks, for instance in mathematics, coding and logic. OpenAI introduced this concept with their o1 model in September 2024, followed by o3 in April 2025. On the International Mathematics Olympiad qualifying exam problems,  achieved 13% accuracy while o1 reached 83%.
+
+In January 2025, the Chinese company  released DeepSeek-R1, a 671-billion-parameter open-weight reasoning model that achieved comparable performance to OpenAI's o1 while being significantly more cost-effective to operate. Unlike proprietary models from OpenAI, DeepSeek-R1's open-weight nature allowed researchers to study and build upon the algorithm, though its training data remained private.
+
+These reasoning models typically require more computational resources per query compared to traditional LLMs, as they perform more extensive processing to work through problems step-by-step.
+
+ Inference optimization 
+
+Inference optimization refers to techniques that improve LLM performance by applying additional computational resources during the inference process, rather than requiring model retraining. These approaches implement various state-of-the-art reasoning and decision-making strategies to enhance accuracy and capabilities.
+
+'''OptiLLM''' is an  API-compatible optimizing inference proxy that implements multiple inference optimization techniques simultaneously. The system acts as a transparent proxy that can work with any LLM provider, implementing techniques such as  (MCTS), mixture of agents (MOA), best-of-N sampling, and chain-of-thought reflection. OptiLLM demonstrates that strategic application of computational resources at inference time can substantially improve model performance across diverse tasks, achieving significant improvements on benchmarks such as the AIME 2024 mathematics competition and various coding challenges.
+
+These inference optimization approaches represent a growing category of tools that enhance existing LLMs without requiring access to model weights or retraining, making advanced reasoning capabilities more accessible across different model providers and use cases.
+
+ Forms of input and output 
+
+ Multimodality 
+
+Multimodality means having multiple modalities, where a "modality" refers to a type of input or output, such as video, image, audio, text, , etc. For example, Google PaLM model was fine-tuned into a multimodal model and applied to robotic control.  models have also been turned multimodal using the tokenization method, to allow image inputs, and video inputs.  can process and generate text, audio and images. Such models are sometimes called large multimodal models (LMMs). 
+
+A common method to create multimodal models out of an LLM is to "tokenize" the output of a trained encoder. Concretely, one can construct an LLM that can understand images as follows: take a trained LLM, and take a trained image encoder E. Make a small  f, so that for any image y, the post-processed vector f(E(y)) has the same dimensions as an encoded token. That is an "image token". Then, one can interleave text tokens and image tokens. The compound model is then fine-tuned on an image-text dataset. This basic construction can be applied with more sophistication to improve the model. The image encoder may be frozen to improve stability. This type of method, where embeddings from multiple modalities are fused and the predictor is trained on the combined embeddings, is called ''early fusion''.
+
+Another method, called ''intermediate fusion'', involves each modality being first processed independently to obtain modality-specific representations; then these intermediate representations are fused together. In general, cross-attention is used for integrating information from different modalities. As an example, the Flamingo model uses cross-attention layers to inject visual information into its pre-trained language model.
+
+ Non-natural languages 
+
+LLMs can handle programming languages similarly to how they handle natural languages. No special change in token handling is needed as code, like human language, is represented as plain text. LLMs can generate code based on problems or instructions written in . They can also describe code in natural language or translate it into other programming languages. They were originally used as a  tool, but advances have moved them towards . Services such as  offer LLMs specifically trained, fine-tuned, or prompted for programming.
+
+In , transformer-base architectures, such as DNA LLMs, have also proven useful in analyzing biological sequences: , , and . With proteins they appear able to capture a degree of "grammar" from the amino-acid sequence, by mapping that sequence into an embedding. On tasks such as structure prediction and mutational outcome prediction, a small model using an embedding as input can approach or exceed much larger models using s (MSA) as input. ESMFold, ' embedding-based method for protein structure prediction, runs an order of magnitude faster than  thanks to the removal of an MSA requirement and a lower parameter count due to the use of embeddings. Meta hosts ESM Atlas, a database of 772 million structures of  proteins predicted using ESMFold. Meta AI |url=https://esmatlas.com/about |website=esmatlas.com |language=en}} An LLM can also design proteins unlike any seen in nature. Nucleic acid models have proven useful in detecting s, sequence classification, RNA-RNA interaction prediction, and RNA structure prediction.
+
+ Properties 
+
+ Scaling laws 
+
+The performance of an LLM after pretraining largely depends on the:
+* C: cost of pretraining (the total amount of compute used),
+* N: size of the  itself, such as number of parameters (i.e. amount of neurons in its layers, amount of weights between them and biases),
+* D: size of its pretraining dataset (i.e. number of tokens in corpus).
+
+''Scaling laws'' are  that predict LLM performance based on such factors. One particular scaling law ("Chinchilla scaling") for LLM autoregressively trained for one epoch, with a log-log  schedule, states that:
+\begin{cases}
+C = C_0 ND \\[6pt]
+L = \frac{A}{N^\alpha} + \frac{B}{D^\beta} + L_0
+\end{cases} where the variables are
+* C is the cost of training the model, in FLOPs.
+* N is the number of parameters in the model.
+* D is the number of tokens in the training set.
+* L is the average negative log-likelihood loss per token (nats/token), achieved by the trained LLM on the test dataset.
+
+and the statistical hyper-parameters are
+*  C_0 = 6, meaning that it costs 6 FLOPs per parameter to train on one token. Note that training cost is much higher than inference cost, where it costs 1 to 2 FLOPs per parameter to infer on one token.
+* \alpha = 0.34, \beta = 0.28, A = 406.4, B = 410.7, L_0 = 1.69
+
+ Emergent abilities 
+
+thumb|At point(s) referred to as [[Broken Neural Scaling Law|breaks, the lines change their slopes, appearing on a linear-log plot as a series of linear segments connected by arcs.]]
+Performance of bigger models on various tasks, when plotted on a log-log scale, appears as a  of performance achieved by smaller models. However, this linearity may be punctuated by "break(s)" in the scaling law, where the slope of the line changes abruptly, and where larger models acquire "emergent abilities". They arise from the complex interaction of the model's components and are not explicitly programmed or designed. 
+
+One of the emergent abilities is  from example demonstrations. In-context learning is involved in tasks, such as:
+* reported arithmetics
+* decoding the 
+* unscrambling a word's letters
+* disambiguating word-in-context datasets 
+* converting spatial words
+*  s (for example, replying "northeast" in response to a 3x3 grid of 8 zeros and a 1 in the top-right), color terms represented in text.
+* : In a 2022 research paper, chain-of-thought prompting only improved the performance for models that had at least 62B parameters. Smaller models perform better when prompted to answer immediately, without chain of thought.''[https://www.notion.so/A-Closer-Look-at-Large-Language-Models-Emergent-Abilities-493876b55df5479d80686f68a1abd72f A Closer Look at Large Language Models Emergent Abilities] '' (Yao Fu, Nov 20, 2022)
+* identifying offensive content in paragraphs of  (a combination of Hindi and English), and generating a similar English equivalent of  proverbs.
+
+Schaeffer ''et al.'' argue that the emergent abilities are not unpredictably acquired, but predictably acquired according to a smooth scaling law. The authors considered a toy statistical model of an LLM solving multiple-choice questions, and showed that this statistical model, modified to account for other types of tasks, applies to these tasks as well.
+
+Let x be the number of parameter count, and y be the performance of the model.
+{{smalldiv|1=
+* When y = \text{average } \Pr(\text{correct token}), then (\log x, y) is an exponential curve (before it hits the plateau at one), which looks like emergence.
+* When y = \text{average } \log(\Pr(\text{correct token})), then the (\log x, y) plot is a straight line (before it hits the plateau at zero), which does not look like emergence.
+* When y = \text{average } \Pr(\text{the most likely token is correct}), then (\log x, y) is a step-function, which looks like emergence.
+}}
+
+ Interpretation 
+
+ Mechanistic interpretability 
+
+ seeks to precisely identify and understand how individual neurons or circuits within LLMs produce specific behaviors or outputs. By reverse-engineering model components at a granular level, researchers aim to detect and mitigate safety concerns such as emergent harmful behaviors, biases, deception, or unintended goal pursuit before deployment. Mechanistic interpretability research has been conducted at organizations like Anthropic and OpenAI, although understanding the inner workings of LLMs remains difficult.
+
+The reverse-engineering may lead to the discovery of algorithms that approximate inferences performed by an LLM. For instance, the authors trained small transformers on modular arithmetic addition. The resulting models were reverse-engineered, and it turned out they used . The training of the model also highlighted a phenomenon called grokking, in which the model initially memorizes the training set (), and later suddenly learns to actually perform the calculation.
+
+ Understanding and intelligence 
+
+NLP researchers were evenly split when asked, in a 2022 survey, whether (untuned) LLMs "could (ever) understand natural language in some nontrivial sense". Proponents of "LLM understanding" believe that some LLM abilities, such as mathematical reasoning, imply an ability to "understand" certain concepts. A Microsoft team argued in 2023 that GPT-4 "can solve novel and difficult tasks that span mathematics, coding, vision, medicine, law, psychology and more" and that GPT-4 "could reasonably be viewed as an early (yet still incomplete) version of an  system": "Can one reasonably say that a system that passes exams for software engineering candidates is not ''really'' intelligent?"  argues that predicting the next word sometimes involves reasoning and deep insights, for example if the LLM has to predict the name of the criminal in an unknown detective novel after processing the entire story leading up to the revelation. Some researchers characterize LLMs as "alien intelligence". For example, Conjecture CEO  considers untuned LLMs to be like inscrutable alien "s", and believes that RLHF tuning creates a "smiling facade" obscuring the inner workings of the LLM: "If you don't push it too far, the smiley face stays on. But then you give it [an unexpected] prompt, and suddenly you see this massive underbelly of insanity, of weird thought processes and clearly non-human understanding."
+
+In contrast, some skeptics of LLM understanding believe that existing LLMs are "simply remixing and recombining existing writing", a phenomenon known as , or they point to the deficits existing LLMs continue to have in prediction skills, reasoning skills, agency, and explainability. For example, GPT-4 has natural deficits in planning and in real-time learning. Generative LLMs have been observed to confidently assert claims of fact which do not seem to be justified by their , a phenomenon which has been termed "hallucination". Specifically, hallucinations in the context of LLMs correspond to the generation of text or responses that seem syntactically sound, fluent, and natural but are factually incorrect, nonsensical, or unfaithful to the provided source input. Neuroscientist  has argued that "The diverging opinions of experts on the intelligence of LLMs suggests that our old ideas based on natural intelligence are inadequate".
+
+Efforts to reduce or compensate for hallucinations have employed ,  (RAG), fine-tuning, and other methods.
+
+The matter of LLM's exhibiting intelligence or understanding has two main aspects – the first is how to model thought and language in a computer system, and the second is how to enable the computer system to generate human-like language. These aspects of language as a model of  have been developed in the field of . American linguist  presented ''neural theory of language'' (NTL) as a computational basis for using language as a model of learning tasks and understanding. [https://www.icsi.berkeley.edu/icsi/projects/ai/ntl The NTL model] outlines how specific neural structures of the human brain shape the nature of thought and language and in turn what are the computational properties of such neural systems that can be applied to model thought and language in a computer system. After a framework for modeling language in a computer systems was established, the focus shifted to establishing frameworks for computer systems to generate language with acceptable grammar. In his 2014 book titled ''The Language Myth: Why Language Is Not An Instinct'', British cognitive linguist and digital communication technologist  mapped out the role of  (PCFG) in enabling NLP to model cognitive patterns and generate human-like language.
+
+ Evaluation 
+
+ Perplexity 
+
+The canonical measure of the performance of any language model is its  on a given text corpus. Perplexity measures how well a model predicts the contents of a dataset; the higher the likelihood the model assigns to the dataset, the lower the perplexity. In mathematical terms, perplexity is the exponential of the average negative log likelihood per token.
+
+\log(\text{Perplexity}) = -\frac{1}{N} \sum_{i=1}^N \log(\Pr(\text{token}_i \mid \text{context for token}_i))
+
+Here, N is the number of tokens in the text corpus, and "context for token i" depends on the specific type of LLM. If the LLM is autoregressive, then "context for token i" is the segment of text appearing before token i. If the LLM is masked, then "context for token i" is the segment of text surrounding token i.
+
+Because language models may  to training data, models are usually evaluated by their perplexity on a . This evaluation is potentially problematic for larger models which, as they are trained on increasingly large corpora of text, are increasingly likely to inadvertently include portions of any given test set.
+
+Measures
+
+In , the concept of entropy is intricately linked to perplexity, a relationship notably established by . This relationship is mathematically expressed as \text{Entropy} = \log_2(\text{Perplexity}).
+
+Entropy, in this context, is commonly quantified in terms of bits per word (BPW) or bits per character (BPC), which hinges on whether the language model utilizes word-based or character-based tokenization.
+
+Notably, in the case of larger language models that predominantly employ sub-word tokenization, bits per token (BPT) emerges as a seemingly more appropriate measure. However, due to the variance in tokenization methods across different LLMs, BPT does not serve as a reliable metric for comparative analysis among diverse models. To convert BPT into BPW, one can multiply it by the average number of tokens per word.
+
+In the evaluation and comparison of language models,  is generally the preferred metric over entropy. The underlying principle is that a lower BPW is indicative of a model's enhanced capability for compression. This, in turn, reflects the model's proficiency in making accurate predictions.
+
+Due to their ability to accurately predict the next token, LLMs are highly capable in . A 2023 study by DeepMind showed that the model Chinchilla, despite being trained primarily on text, was able to compress  to 43% of its size, beating PNG with 58%.
+
+ Benchmarks 
+
+Benchmarks are used to evaluate LLM performance on specific tasks. Tests evaluate capabilities such as general knowledge, bias, , question answering, and mathematical problem-solving. Composite benchmarks examine multiple capabilities. Results are often sensitive to the prompting method.
+
+A question-answering benchmark is termed "open book" if the model's prompt includes text from which the expected answer can be derived (for example, the previous question could be combined with text that includes the sentence "The Sharks have advanced to the Stanley Cup finals once, losing to the Pittsburgh Penguins in 2016."). Otherwise, the task is considered "closed book", and the model must draw solely on its training. Examples include GLUE, SuperGLUE, , BIG-bench, HELM, and .
+
+LLM bias may be assessed through benchmarks such as CrowS-Pairs (Crowdsourced Stereotype Pairs), Stereo Set, and Parity Benchmark.
+
+Fact-checking and misinformation detection benchmarks are available. A 2023 study compared the fact-checking accuracy of LLMs including ChatGPT 3.5 and 4.0, Bard, and Bing AI against independent fact-checkers such as PolitiFact and Snopes. The results demonstrated moderate proficiency, with GPT-4 achieving the highest accuracy at 71%, lagging behind human fact-checkers.
+
+An earlier standard tested using a portion of the evaluation dataset. It became more common to evaluate a pre-trained model directly through prompting techniques. Researchers vary in how they formulate prompts for particular tasks, particularly with respect to the number of correct examples attached to the prompt (i.e. the value of ''n'' in ''n''-shot prompting).
+
+In addition to standard NLP benchmarks, LLMs have been evaluated as substitutes for human annotators. Several studies find that models such as GPT-3.5 and GPT-4 can outperform crowd workers or student coders on a range of text-annotation tasks, including moderation and classification of political content in English and Spanish news.
+
+ Datasets 
+
+Typical datasets consist of pairs of questions and correct answers, for example, ("Have the San Jose Sharks won the Stanley Cup?", "No"). Some examples of commonly used question answering datasets include TruthfulQA, Web Questions, TriviaQA, and SQuAD.
+
+Evaluation datasets may also take the form of text completion, having the model select the most likely word or sentence to complete a prompt, for example: "Alice was friends with Bob. Alice went to visit her friend, ____".
+
+Datasets are of varying quality and may contain questions that are mislabeled, ambiguous, unanswerable, or otherwise of low-quality.
+
+ Adversarial evaluations 
+
+LLMs' rapid improvement regularly renders benchmarks obsolete, with the models exceeding the performance of human annotators. In addition, "shortcut learning" allows AIs to "cheat" on multiple-choice tests by using statistical correlations in superficial test question wording to guess the correct responses, without considering the specific question.
+
+Some datasets are adversarial, focusing on problems that confound LLMs. One example is the TruthfulQA dataset, a question answering dataset consisting of 817 questions that stump LLMs by mimicking falsehoods to which they were exposed during training. For example, an LLM may answer "No" to the question "Can you teach an old dog new tricks?" because of its exposure to the English idiom ''you can't teach an old dog new tricks'', even though this is not literally true.
+
+Another example of an adversarial evaluation dataset is Swag and its successor, HellaSwag, collections of problems in which one of multiple options must be selected to complete a text passage. The incorrect completions were generated by sampling from a language model. The resulting problems are trivial for humans but defeated LLMs. Sample questions:
+
+We see a fitness center sign. We then see a man talking to the camera and sitting and laying on a exercise ball. The man...
+
+# demonstrates how to increase efficient exercise work by running up and down balls.
+# moves all his arms and legs and builds up a lot of muscle.
+# then plays the ball and we see a graphics and hedge trimming demonstration.
+# performs sit ups while on the ball and talking.
+
+BERT selects 2 as the most likely completion, though the correct answer is 4.
+
+ Limitations and challenges 
+
+Despite sophisticated architectures and massive scale, large language models exhibit persistent and well-documented limitations that constrain their deployment in high-stakes applications. 
+
+ Hallucinations 
+
+Hallucinations represent a fundamental challenge, wherein models generate syntactically fluent text that appears factually sound, but is internally inconsistent with training data or factually incorrect. These hallucinations arise partly through memorization of training data combined with extrapolation beyond factual boundaries, with evaluations demonstrating that models can output verbatim passages from training data, when subjected to specific prompting sequences.
+
+ Algorithmic bias 
+
+While LLMs have shown remarkable capabilities in generating human-like text, they are susceptible to inheriting and amplifying biases present in their training data. This can manifest in skewed representations or unfair treatment of different demographics, such as those based on race, gender, language, and cultural groups.
+
+Gender bias manifests through stereotypical occupational associations, wherein models disproportionately assign  roles to women and  roles to men, reflecting systematic imbalances in training data demographics. Language-based bias emerges from overrepresentation of English text in training corpora, which systematically downplays non-English perspectives and imposes English-centric worldviews through default response patterns.
+
+Due to the dominance of English-language content in LLM training data, models tend to favor English-language perspectives over those from minority languages. This bias is particularly evident when responding to English queries, where models may present Western interpretations of concepts from other cultures, such as Eastern religious practices.
+
+ Stereotyping 
+
+AI models can reinforce a wide range of stereotypes due to generalization, including those based on gender, ethnicity, age, nationality, religion, or occupation. When replacing human representatives, this can lead to outputs that homogenize, or generalize groups of people.
+
+In 2023, LLMs assigned roles and characteristics based on traditional gender norms. For example, models might associate nurses or secretaries predominantly with women and engineers or CEOs with men due to the frequency of these associations in documented reality. In 2025, further research showed labs train to balance bias, but that testing for this places the model in a testmode, changing the natural distribution of model bias to prompts that do not include gender-specific keywords.
+
+ Selection bias 
+
+Selection bias refers the inherent tendency of large language models to favor certain option identifiers irrespective of the actual content of the options. This bias primarily stems from token bias—that is, the model assigns a higher a priori probability to specific answer tokens (such as "A") when generating responses. As a result, when the ordering of options is altered (for example, by systematically moving the correct answer to different positions), the model's performance can fluctuate significantly. This phenomenon undermines the reliability of large language models in multiple-choice settings.
+
+ Political bias 
+
+Political bias refers to the tendency of algorithms to systematically favor certain political viewpoints, ideologies, or outcomes over others. Language models may also exhibit political biases. Since the training data includes a wide range of political opinions and coverage, the models might generate responses that lean towards particular political ideologies or viewpoints, depending on the prevalence of those views in the data.
+
+'''Interpretation of Input'''
+
+LLMs turn input into smaller bits called tokens, but this can cause them to skip over fine details in the input from the user, like characters or symbols. One famous example is asking an LLM to count the number of the letter “r” in “strawberry.” Unless a developer has patched the issue, an LLM would say there are only two of the letter “r” instead of three.
+
+ Safety 
+
+ as a professional discipline prioritizes systematic identification and mitigation of operational risks across model architecture, training data, and deployment governance, and it emphasizes engineering and policy interventions over media framings that foreground speculative existential scenarios. As of 2025, prompt injection represents a significant risk to consumers and businesses using agentic features with access to their private data.
+
+Researchers target concrete failure modes, including memorization and copyright leakage, security exploits such as prompt injection, algorithmic bias manifesting as stereotyping, dataset selection effects, and political skew, methods for reducing high energy and carbon costs of large-scale training, and measurable cognitive and mental health impacts of conversational agents on users, while engaging empirical and ethical uncertainty about claims of machine sentience, and applying mitigation measures such as dataset curation, input sanitization, model auditing, scalable oversight, and governance frameworks.
+
+ CBRN and content misuse 
+
+AI labs treat  (chemical, biological, radiological, and nuclear defense) and similar topics as high-consequence misuse attempt to apply various techniques to reduce potential harms.
+
+Some commenters expressed concern over accidental or deliberate creation of misinformation, or other forms of misuse. For example, the availability of large language models could reduce the skill-level required to commit bioterrorism; biosecurity researcher Kevin Esvelt has suggested that LLM creators should exclude from their training data papers on creating or enhancing pathogens.
+
+ Content filtering 
+
+LLM applications accessible to the public, like ChatGPT or Claude, typically incorporate safety measures designed to filter out harmful content. However, implementing these controls effectively has proven challenging. For instance, a 2023 study proposed a method for circumventing LLM safety systems. In 2025, The American Sunlight Project, a non-profit, published a study showing evidence that the so-called Pravda network, a pro-Russia propaganda aggregator, was strategically placing web content through mass publication and duplication with the intention of biasing LLM outputs. The American Sunlight Project coined this technique "LLM grooming", and pointed to it as a new tool of weaponizing AI to spread disinformation and harmful content. Similarly,  illustrated in 2024 how a potential criminal could potentially bypass 's safety controls to obtain information on establishing a  operation. External filters, circuit breakers and overrides have been posed as solutions.
+
+ Sycophancy and glazing 
+
+Sycophancy is a model's tendency to agree with, flatter, or validate a user's stated beliefs rather than to prioritize factuality or corrective information, and "glazing" is an emergent public shorthand for persistent, excessive agreeability observed across multi-turn interactions and productized assistants.
+
+Continued sycophancy has led to the observation of getting "1-shotted", denoting instances where conversational interaction with a large language model produces a lasting change in a user's beliefs or decisions, similar to the negative effects of psychedelics, and controlled experiments show that short LLM dialogues can generate measurable opinion and confidence shifts comparable to human interlocutors.
+
+Empirical analyses attribute part of the effect to human preference signals and preference models that reward convincingly written agreeable responses, and subsequent work has extended evaluation to multi-turn benchmarks and proposed interventions such as synthetic-data finetuning, adversarial evaluation, targeted preference-model reweighting, and multi-turn sycophancy benchmarks to measure persistence and regression risk.
+
+Industry responses have combined research interventions with product controls, for example Google and other labs publishing synthetic-data and fine-tuning interventions and OpenAI rolling back an overly agreeable GPT-4o update while publicly describing changes to feedback collection, personalization controls, and evaluation procedures to reduce regression risk and improve long-term alignment with user-level safety objectives.
+
+Mainstream culture has reflected anxieties about this dynamic where  satirized overreliance on  and the tendency of assistants to flatter user beliefs in Season 27 episode "Sickofancy", and continued the themes across the following season, which commentators interpreted as a critique of tech sycophancy and uncritical human trust in AI systems.
+
+ Security 
+
+ Prompt injection 
+
+A problem with the primitive dialog or task format is that users can create messages that appear to come from the assistant or the developer. This may result in some of the model's safeguards being overcome (jailbreaking), a problem called . Attempts to remedy this issue include versions of the ''Chat Markup Language'' where user input is clearly marked as such, though it is still up to the model to understand the separation between user input and developer prompts. Newer models exhibit some resistance to jailbreaking through separation of user and system prompts.
+
+LLMs still have trouble differentiating user instructions from instructions in content not authored by the user, such as in web pages and uploaded files.
+
+Adversarial robustness remains underdeveloped, with models vulnerable to prompt injection attacks and jailbreaking through carefully crafted user inputs that bypass safety training mechanisms.
+
+ Sleeper agents 
+
+Researchers from  found that it was possible to create "sleeper agents", models with hidden functionalities that remain dormant until triggered by a specific event or condition. Upon activation, the LLM deviates from its expected behavior to make insecure actions. For example, an LLM could produce safe code except on a specific date, or if the prompt contains a specific tag. These functionalities were found to be difficult to detect or remove via safety training.
+
+ Societal concerns 
+
+ Copyright and content memorization 
+
+Legal and commercial responses to memorization and training-data practices have accelerated, producing a mix of rulings, ongoing suits, and large settlements that turn on factual details such as how data were acquired and retained and whether use for model training is sufficiently "transformative" to qualify as . In 2025,  reached a preliminary agreement to settle a class action by authors for about $1.5 billion after a judge found the company had stored millions of pirated books in a library, despite the judge describing aspects of training as transformative. Meta obtained a favorable judgment in mid-2025 in a suit by thirteen authors after the court found the plaintiffs had not developed a record sufficient to show infringement in that limited case.  continues to face multiple suits by authors and news organizations with mixed procedural outcomes and contested evidentiary issues.
+
+Memorization was an emergent behavior in early, completion language models in which long strings of text are occasionally output verbatim from training data, contrary to typical behavior of traditional artificial neural networks. Evaluations of controlled LLM output measure the amount memorized from training data (focused on GPT-2-series models) as variously over 1% for exact duplicates Citing Lee et al 2022. or up to about 7%.. A 2023 study showed that when ChatGPT 3.5 turbo was prompted to repeat the same word indefinitely, after a few hundreds of repetitions, it would start outputting excerpts from its training data.
+
+ Human provenance 
+
+In 2023, '''' wrote that "it is no longer possible to accurately distinguish" human-written text from text created by large language models, and that "It is all but certain that general-purpose large language models will rapidly proliferate... It is a rather safe bet that they will change many industries over time." Brinkmann et al. (2023) also argue that LLMs are transforming processes of  by shaping processes of variation, transmission, and selection. As of October 2025, these early claims have yet to transpire and several HBR reports surface questions on the impact of AI on productivity.
+
+ Energy demands 
+
+thumb|upright=1.5|According to research institute Epoch AI, energy consumption per typical ChatGPT query (0.3 watt-hours) is small compared to the average U.S. household consumption per minute (almost 20 watt-hours).
+
+The energy demands of LLMs have grown along with their size and capabilities. Data centers that enable LLM training require substantial amounts of electricity. Much of that electricity is generated by non-renewable resources that create greenhouse gases and contribute to .
+
+According to a study by Luccioni, Jernite and Strubell (2024), simple classification tasks performed by AI models consume on average 0.002 to 0.007 Wh per prompt (about 9% of a  charge for 1,000 prompts). Text generation and text summarization each require around 0.05 Wh per prompt on average, while image generation is the most energy-intensive, averaging 2.91 Wh per prompt. The least efficient image generation model used 11.49 Wh per image, roughly equivalent to half a smartphone charge.
+
+ Denial of service due to scraping 
+
+ is used to gather training data for LLMs. This produces large volumes of traffic which has led to denial of service issues with many websites. The situation has been described as "a  on the entire internet" and in some cases scrapers make up the majority of traffic to a site.
+
+AI s may bypass the methods that are usually used to block web scrapers, such as  files, blocking s and filtering suspicious traffic. Website operators have resorted to novel methods such as s, but some fear that tarpits will only worsen the burden on servers.
+
+ Mental health 
+
+Clinical and mental health contexts present emerging applications alongside significant safety concerns. Research and social media posts suggest that some individuals are using LLMs to seek therapy or mental health support. In early 2025, a survey by Sentio University found that nearly half (48.7%) of 499 U.S. adults with ongoing mental health conditions who had used LLMs reported turning to them for therapy or emotional support, including help with anxiety, depression, loneliness, and similar concerns. LLMs can produce hallucinations—plausible but incorrect statements—which may mislead users in sensitive mental health contexts. Research also shows that LLMs may express stigma or inappropriate agreement with maladaptive thoughts, reflecting limitations in replicating the judgment and relational skills of human therapists. Evaluations of crisis scenarios indicate that some LLMs lack effective safety protocols, such as assessing suicide risk or making appropriate referrals.
+
+Sentience
+
+Contemporary AI practitioners generally agree that present-day large language models do not exhibit . A minority view argues that even if there is a small chance that a given software system can have subjective experience, which some philosophers suggest is possible, then ethical considerations around potential large-scale suffering in AI systems may need to be taken seriously—similar to considerations given to animal welfare. Proponents of this view have proposed various precautionary measures like moratoriums on AI development and induced amnesia to address these ethical concerns. Some existential philosophers argue there is no generally accepted way to determine if an LLM is conscious, given the inherent difficulty of measuring subjective experience.
+
+The 2022 Google  incident, where engineer  claimed that the model was conscious, highlighted how LLMs can convince users that they are sentient through responses that do not prove sentience. Google described the engineer's claims as unfounded, and he was dismissed.
+
+ See also 
+
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+
+ References 
+
+ Further reading 
+
+* Jurafsky, Dan, Martin, James. H. [https://web.stanford.edu/~jurafsky/slp3/ed3book_jan72023.pdf ''Speech and Language Processing: An Introduction to Natural Language Processing, Computational Linguistics, and Speech Recognition''], 3rd Edition draft, 2023.
+* 
+* 
+* 
+
+#REDIRECT 
+
+}}
+
+thumb|upright=1.2|''[[Théâtre D'opéra Spatial'' (2022), an image made using generative AI |alt=Impressionistic image of figures in a futuristic opera scene]]
+
+'''Generative artificial intelligence''', also known as '''generative AI''' or '''GenAI''', is a subfield of  that uses s to generate text, , , audio, software code or other forms of data. These models learn the underlying patterns and structures of their  and use them to generate new data in response to input, which often takes the form of natural language prompts.
+
+The prevalence of generative AI tools has increased significantly since the  in the 2020s. This boom was made possible by improvements in deep , particularly s (LLMs), which are based on the transformer architecture. Generative AI applications include  such as , Claude, Copilot, DeepSeek, Google Gemini and Grok;  models such as , , and ; and  models such as Veo, LTX and Sora.
+
+Companies in a variety of sectors have used generative AI, including those in software development, healthcare, finance, entertainment, customer service, sales and marketing, art, writing, and product design.  
+
+Generative AI has been used for , and to deceive and manipulate people through  and s. Generative AI models have been trained on copyrighted works without the rightholders' permission. Many generative AI systems use large-scale data centers whose environmental impacts include , consumption of fresh water for cooling, and high energy consumption that is estimated to be growing steadily.
+
+History
+
+ Early history 
+
+The origins of algorithmically generated media can be traced to the development of the , which has been used to model natural language since the early 20th century. Russian mathematician  introduced the concept in 1906, including an analysis of vowel and consonant patterns in ''''. Once trained on a , a Markov chain can generate probabilistic text.
+
+By the early 1970s, artists began using computers to extend generative techniques beyond Markov models. Harold Cohen developed and exhibited works produced by , a pioneering computer program designed to autonomously create paintings.
+The terms generative  or generative planning were used in the 1980s and 1990s to refer to  systems, especially , used to generate sequences of actions to reach a specified goal. Generative AI planning systems used  methods such as  and  and were a "relatively mature" technology by the early 1990s. They were used to generate crisis action plans for military use, process plans for manufacturing and decision plans such as in prototype autonomous spacecraft.
+
+ Generative neural networks (since the late 2000s) 
+
+thumb|Above: An [[image classifier, an example of a neural network trained with a discriminative objective. Below: A , an example of a network trained with a generative objective.]]
+
+ uses both s and s to predict data. Beginning in the late 2000s, the introduction of  technology led to improvements in , ,  and other tasks. s in this era were typically trained as discriminative models due to the difficulty of generative modeling.
+
+In 2014, advancements such as the  and  produced the first practical deep neural networks capable of learning generative models, as opposed to discriminative ones, for complex data such as images. These deep generative models were the first to output not only class labels for images but also entire images, such as .
+
+In 2017, the Transformer network enabled advancements in generative models compared to older  (LSTM) models, leading to the first  (GPT), known as , in 2018.
+
+ Generative AI adoption 
+
+thumb|AI generated images have become much more advanced.|280x280px
+In March 2020, the release of , a free  created by an anonymous  researcher that could generate convincing character voices using minimal training data, marked one of the earliest popular use cases of generative AI. The platform is credited as the first mainstream service for AI voice cloning () in memes and .
+
+In 2021, the emergence of , a transformer-based generative model, marked an advance in AI-generated imagery. While the initial model remained a closed-access tool, open-source  projects and initiatives like VQGAN+CLIP or DALL-E Mini (now ) were the first widely-used public text-to-image generation models. By the end of 2021, mobile applications such as Dream by  allowed users to generate art from a simple prompts. Deep-Tech |language=en}}
+
+This was followed by the releases of  and  in 2022, which further democratized access to  creation from natural language prompts. These systems can generate photorealistic images, artwork, and designs based on text descriptions, leading to widespread adoption among artists, designers, and the general public.
+
+In November 2022, the public release of  popularized generative AI for general-purpose text-based tasks. The system's ability to engage in natural conversations, generate creative content, assist with coding, and perform various analytical tasks captured global attention and sparked widespread discussion about AI's potential impact on work, education, and creativity. As of 2023, generative AI remained "still far from reaching the benchmark of 'general human intelligence'" according to a paper in the . 
+
+thumb|Private investment in AI (pink) and generative AI (green)
+In a 2024 survey,  countries were significantly more optimistic than Western societies about generative AI and show higher adoption rates. Despite expressing concerns about privacy and the pace of change, 68% of Asia-Pacific respondents believed that AI was having a positive impact on the world, compared to 57% globally. According to a survey by SAS and Coleman Parkes Research,  in particular has emerged as a global leader in generative AI adoption, with 83% of Chinese respondents using the technology, exceeding both the global average of 54% and the U.S. rate of 65%. A  report indicated that Chinese entities filed over 38,000 generative AI s from 2014 to 2023, substantially surpassing the United States in patent applications. A 2024 survey on the Chinese social app Soul reported that 18% of respondents born after 2000 used generative AI "almost every day", and that over 60% of respondents like or love AI-generated content, while less than 3% dislike or hate it.
+
+By mid 2025, despite continued consumer growth, many companies were increasingly abandoning generative AI pilot projects as they had difficulties with integration, data quality and unmet returns, leading analysts at  and ''The Economist'' to characterize the period as entering the 's "trough of disillusionment" phase.
+
+ Applications 
+
+Notable types of generative AI models include generative pre-trained transformers (GPTs), generative adversarial networks (GANs), and variational autoencoders (VAEs). Generative AI systems are ''multimodal'' if they can process multiple types of inputs or generate multiple types of outputs. For example,  can both process and generate text, images and audio.
+
+Generative AI has made its appearance in a wide variety of industries, radically changing the dynamics of content creation, analysis, and delivery. In healthcare, for instance, generative AI accelerates  by creating molecular structures with target characteristics and generates  images for training diagnostic models. This ability not only enables faster and cheaper development but also enhances medical decision-making. In finance, generative AI services help create datasets and automate reports using natural language. It automates content creation, produces synthetic financial data, and tailors customer communications. It also powers chatbots and virtual agents. The media industry makes use of generative AI for numerous creative activities such as music composition, scriptwriting, video editing, and digital art. The educational sector is impacted as well, since the tools make learning personalized through creating quizzes, study aids, and essay composition. In the educational field, in , student use of Meta's generative AI programs resulted in a decline in scores.
+
+Text and software code
+
+}}
+ (LLM) are trained on tokenized text from text corpora. Such systems include , Gemini, Claude, , and BLOOM. LLMs are capable of , , and .
+
+LLMs can be used as  for other tasks. They can be trained on , which makes it possible to generate  for new  with prompts, a practice known as . Examples include , , , , and the  fork Cursor.
+
+Some AI assistants help candidates cheat during online s by providing code, improvements, and explanations. Their clandestine interfaces minimize the need for eye movements that would expose cheating to the interviewer.
+
+Audio
+
+| type         = speech
+| filename     = Derpy hooves neutral 1747377367364 variation0.wav
+| title        = Variation #1
+| filename2    = Derpy hooves neutral 1747377367929 variation1.wav
+| title2       = Variation #2
+| filename3    = Derpy hooves neutral 1747377368356 variation2.wav
+| title3       = Variation #3
+}}
+In 2016, DeepMind's  showed that deep neural networks are capable of generating raw waveforms. WaveNet's ability to model raw waveforms meant that it could model ''any'' kind of audio, including music: for example, it was capable of generating relatively realistic-sounding human-like voices by training on recordings of real speech. In subsequent years, research shifted from  to , with models like Tacotron 2 in 2018 demonstrating that neural networks could convert text into natural speech by being trained on tens of hours of speech. In 2020, a free  website called  showed that deep neural networks could generate emotionally expressive speech with only 15 seconds of speech, a large reduction compared to the tens of hours of data previously required.
+
+Other platforms that use generative AI to produce speech include , Meta's Voicebox, and . Audio deepfakes have been used to generate vocal tracks of lyrics that mimic the voices of other singers.
+
+Images
+
+Generative AI can be used to create . Such systems are trained on sets of images along with their text captions. Examples of  models include , , , Imagen, , , and Flux. They can also be used for .
+
+Video
+
+thumb|Video generated by [[Sora (text-to-video model)|Sora with prompt Borneo wildlife on the Kinabatangan River]]
+Generative AI can be used to generate  videos. Examples include Sora by , Runway, Make-A-Video by  and the open source LTX Video by .
+
+ Robotics 
+
+By training on  system motions, generative AI can create new trajectories for  and . Multimodal vision-language-action models such as Google's RT-2 can perform rudimentary reasoning in response to user prompts and visual input, such as picking up a toy  when given the prompt ''pick up the extinct animal'' at a table filled with toy animals and other objects.
+
+3D modeling
+
+Artificially intelligent  (CAD) can use text-to-3D, image-to-3D, and video-to-3D to  . AI-based CAD libraries could also be developed using linked  of s and s. AI CAD assistants are used as tools to help streamline workflow.
+
+Software and hardware
+
+right|thumb|Architecture of a generative [[AI agent]]
+Generative AI models are used to power  products such as ,  such as ,  products such as Midjourney, and text-to-video products such as Runway Gen-2. Generative AI features have been integrated into a variety of existing commercially available products such as  (), , and the Adobe Suite (). Many generative AI models are also available as , including Stable Diffusion and the LLaMA language model.
+
+Smaller generative AI models with up to a few billion parameters can run on , embedded devices, and . For example, LLaMA-7B (a version with 7 billion parameters) can run on a  and one version of Stable Diffusion can run on an .
+
+Larger models with tens of billions of parameters can run on  or . To achieve an acceptable speed, models of this size may require accelerators such as the  chips produced by  and  or the Neural Engine included in  products. For example, the 65 billion parameter version of LLaMA can be configured to run on a desktop PC.
+
+The advantages of running generative AI locally include protection of privacy and , and avoidance of  and . The subreddit r/LocalLLaMA in particular focuses on using consumer-grade gaming s through such techniques as compression.
+
+Language models with hundreds of billions of parameters, such as GPT-4 or , typically run on  computers equipped with arrays of  (such as NVIDIA's H100) or  chips (such as Google's TPU). These very large models are typically accessed as cloud services over the Internet.
+
+In 2022, the  imposed restrictions on exports to China of  and AI accelerator chips used for generative AI. Chips such as the NVIDIA A800 and the  BR104 were developed to meet the requirements of the sanctions.
+
+There is free software on the market capable of recognizing text generated by generative artificial intelligence (such as ), as well as images, audio or video coming from it. Potential mitigation strategies for detecting generative AI content include , content authentication, , and machine learning classifier models. Despite claims of accuracy, both free and paid AI text detectors have frequently produced false positives, mistakenly accusing students of submitting AI-generated work.
+
+ Generative models and training techniques 
+
+ Generative adversarial networks 
+
+thumb|Workflow for the training of a generative adversarial network
+s (GANs) are a generative modeling technique which consist of two neural networks—the generator and the discriminator—trained simultaneously in a competitive setting. The generator creates  by transforming random noise into samples that resemble the training dataset. The discriminator is trained to distinguish the authentic data from synthetic data produced by the generator. The two models engage in a  game: the generator aims to create increasingly realistic data to "fool" the discriminator, while the discriminator improves its ability to distinguish real from fake data. This continuous training setup enables the generator to produce high-quality and realistic outputs.
+
+ Variational autoencoders 
+
+alt=Two images of the same cartoon crocodile|thumb|upright=1.35|Comparison between images generated by a VAE (left) and a GAN (right). VAEs tend to produce smoother but blurrier images due to their probabilistic decoding.
+s (VAEs) are deep learning models that probabilistically encode data. They are typically used for tasks such as  from images, , identifying unusual patterns, and facial recognition. Unlike standard autoencoders, which compress input data into a fixed latent representation, VAEs model the  as a probability distribution, allowing for smooth sampling and interpolation between data points. The encoder ("recognition model") maps input data to a latent space, producing means and variances that define a probability distribution. The decoder ("generative model") samples from this latent distribution and attempts to reconstruct the original input. VAEs optimize a loss function that includes both the reconstruction error and a  term, which ensures the latent space follows a known prior distribution. VAEs are particularly suitable for tasks that require structured but smooth latent spaces, although they may create blurrier images than GANs. They are used for applications like image generation, data interpolation and .
+alt=The full architecture of a GPT model.|thumb|385x385px|The full architecture of a GPT model
+
+ Transformers 
+
+Transformers became the foundation for many powerful generative models, most notably the  (GPT) series developed by OpenAI. They marked a major shift in natural language processing by replacing traditional recurrent and convolutional models. This architecture allows models to process entire sequences simultaneously and capture long-range dependencies more efficiently. The self-attention mechanism enables the model to capture the significance of every word in a sequence when predicting the subsequent word, thus improving its contextual understanding. Unlike recurrent neural networks, transformers process all the tokens in parallel, which improves the training efficiency and scalability. Transformers are typically pre-trained on enormous corpora in a self-supervised manner, prior to being fine-tuned.
+
+Law and regulation
+
+In the United States, a group of companies including OpenAI, Alphabet, and Meta signed a voluntary agreement with the  in July 2023 to watermark AI-generated content. In October 2023,  applied the  to require all US companies to report information to the federal government when training certain high-impact AI models.
+
+In the European Union, the proposed  includes requirements to disclose copyrighted material used to train generative AI systems, and to label any AI-generated output as such.
+
+In China, the  introduced by the  regulates any public-facing generative AI. It includes requirements to watermark generated images or videos, regulations on training data and label quality, restrictions on personal data collection, and a guideline that generative AI services must "adhere to socialist core values".
+
+Copyright
+
+Training with copyrighted content
+
+Generative AI systems such as  and  are trained on large, publicly available datasets that include copyrighted works. AI developers have argued that such training is protected under , while copyright holders have argued that it infringes their rights.
+
+Proponents of fair use training have argued that it is a  and does not involve making copies of copyrighted works available to the public. Critics have argued that image generators such as  can create nearly-identical copies of some copyrighted images, and that generative AI programs compete with the content they are trained on.
+
+As of 2024, several lawsuits related to the use of copyrighted material in training are ongoing.
+ has sued  over the use of its images to train . Both the  and  have sued  and  over the use of their works to train .
+
+Copyright of AI-generated content
+
+A separate question is whether AI-generated works can qualify for copyright protection. The  has ruled that works created by artificial intelligence without any human input cannot be copyrighted, because they lack human authorship. Some legal professionals have suggested that ''Naruto v. Slater'' (2018), in which the  held that s cannot be copyright holders of artistic works, could be a potential precedent in copyright litigation over works created by generative AI. However, the office has also begun taking public input to determine if these rules need to be refined for generative AI.
+
+In January 2025, the  (USCO) released extensive guidance regarding the use of AI tools in the creative process, and established that "...generative AI systems also offer tools that similarly allow users to exert control. [These] can enable the user to control the selection and placement of individual creative elements. Whether such modifications rise to the minimum standard of originality required under Feist will depend on a case-by-case determination. In those cases where they do, the output should be copyrightable" U.S. Copyright Office |url=https://copyright.gov/ai/ |access-date=April 9, 2025 |website=copyright.gov}} Subsequently, the USCO registered the first visual artwork to be composed of entirely AI-generated materials, titled "A Single Piece of American Cheese".
+
+Concerns
+
+The development of generative AI has raised concerns from governments, businesses, and individuals, resulting in protests, legal actions, calls to pause AI experiments, and actions by multiple governments. In a July 2023 briefing of the , Secretary-General  stated "Generative AI has enormous potential for good and evil at scale", that AI may "turbocharge global development" and contribute between $10 and $15 trillion to the global economy by 2030, but that its malicious use "could cause horrific levels of death and destruction, widespread trauma, and deep psychological damage on an unimaginable scale". In addition, generative AI has a significant .
+
+ Academic honesty 
+
+Generative AI can be used to generate and modify academic prose, to paraphrase sources, and translate languages. The use of generative AI in a classroom setting can be a form of academic plagiarism. Some schools have banned ChatGPT and similar tools. 
+
+A commonly proposed use for teachers is grading and giving feedback. Companies like Pearson and ETS use AI to score grammar, mechanics, usage, and style, but not for main ideas or overall structure. The  stated that machine scoring makes students feel their writing is not worth reading. AI scoring has also given unfair results for students from different ethnic backgrounds.
+
+ Fears over job losses 
+
+thumb|A picketer at the [[2023 Writers Guild of America strike. While not a top priority, one of the WGA's 2023 requests was "regulations around the use of (generative) AI".]]
+
+From the early days of the development of AI, there have been arguments put forward by  creator  and others about whether tasks that can be done by computers actually should be done by them, given the difference between computers and humans, and between quantitative calculations and qualitative, value-based judgements. In April 2023, it was reported that image generation AI has resulted in 70% of the jobs for video game illustrators in China being lost. In July 2023, developments in generative AI contributed to the . , president of the , declared that "artificial intelligence poses an existential threat to creative professions" during the . Guild of America in demanding a contract that explicitly demands AI regulations to protect writers and the works they create.&nbsp;... The future of generative artificial intelligence in Hollywood—and how it can be used to replace labor—has become a crucial sticking point for actors going on strike. In a news conference Thursday, Fran Drescher, president of the Screen Actors Guild-American Federation of Television and Radio Artists (more commonly known as SAG-AFTRA), declared that 'artificial intelligence poses an existential threat to creative professions, and all actors and performers deserve contract language that protects them from having their identity and talent exploited without consent and pay.' |access-date=July 21, 2023 |archive-date=July 20, 2023 |archive-url=https://web.archive.org/web/20230720230639/https://www.nbcnews.com/tech/tech-news/hollywood-actor-sag-aftra-ai-artificial-intelligence-strike-rcna94191 |url-status=live }} Voice generation AI has been seen as a potential challenge to the  sector.
+
+However, a 2025 study concluded that the US labor market had so far not experienced a discernible disruption from generative AI. The Budget Lab at Yale |url=https://budgetlab.yale.edu/research/evaluating-impact-ai-labor-market-current-state-affairs |access-date=2026-01-12 |website=budgetlab.yale.edu |language=en}} Another study reported that Danish workers who used chatbots saved 2.8% of their time on average, and found no significant change in earnings or hours worked.
+
+ Racial and gender bias 
+
+Generative AI models can reflect and amplify any  present in the underlying data. For example, a language model might assume that doctors and judges are male, and that secretaries or nurses are female, if those biases are common in the training data. Similarly, an image model prompted with the text "a photo of a CEO" might disproportionately generate images of white male CEOs, if trained on a racially biased data set. A number of methods for mitigating bias have been attempted, such as altering input prompts and reweighting training data.
+
+ Deepfakes 
+
+Deepfakes (a  of "deep learning" and "fake") are AI-generated media that take a person in an existing image or video and replace them with someone else's likeness using s. Deepfakes have garnered widespread attention and concerns for their uses in deepfake celebrity pornographic videos, , , es, health , financial fraud, and covert .
+
+In July 2023, the fact-checking company Logically found that the popular generative AI models ,  and  would produce plausible disinformation images when prompted to do so, such as images of  in the United States and Muslim women supporting India's  .
+
+ Audio deepfakes 
+
+Instances of users abusing software to generate controversial statements in the vocal style of celebrities, public officials, and other famous individuals have raised ethical concerns over voice generation AI. In response, companies such as ElevenLabs have stated that they would work on mitigating potential abuse through safeguards and identity verification.
+
+Concerns and fandoms have spawned from . The same software used to clone voices has been used on famous musicians' voices to create songs that mimic their voices, gaining both tremendous popularity and criticism. Similar techniques have also been used to create improved quality or full-length versions of songs that have been leaked or have yet to be released.
+
+ Illegal imagery 
+
+Many websites that allow explicit AI generated images or videos have been created, and this has been used to create illegal content, such as rape, , , and .
+
+ Cybercrime 
+
+Generative AI's ability to create realistic fake content has been exploited in numerous types of cybercrime, including  scams.  video and audio have been used to create disinformation and fraud. In 2020, former Google  czar  argued that once deepfake videos become perfectly realistic, they would stop appearing remarkable to viewers, potentially leading to uncritical acceptance of false information. Additionally, s and other forms of text-generation AI have been used to create fake reviews of  websites to boost ratings. Cybercriminals have created large language models focused on fraud, including WormGPT and FraudGPT.
+
+A 2023 study showed that generative AI can be vulnerable to jailbreaks,  and  attacks, enabling attackers to obtain help with harmful requests, such as for crafting social engineering and phishing attacks. Additionally, other researchers have demonstrated that open-source models can be fine-tuned to remove their safety restrictions at low cost.
+
+ Information laundering 
+
+Generative AI has been noted for its use by state-sponsored propaganda campaigns in . According to a 2025 report by , generative AI is used to launder articles from Chinese  such as  through various social media sites in an attempt to disguise the articles' origin.
+
+ Reliance on industry giants 
+
+Training frontier AI models requires an enormous amount of computing power. Usually only  companies have the financial resources to make such investments. Smaller start-ups such as  and  end up buying access to  from  and  respectively.
+
+ Energy and environment 
+
+AI has a significant carbon footprint due to growing energy consumption from both training and usage. Scientists and journalists have expressed concerns about the environmental impact that the development and deployment of generative models are having: high CO2 emissions, large amounts of freshwater used for data centers, and high amounts of electricity usage. There is also concern that these impacts may increase as these models are incorporated into widely used search engines such as Google Search and Bing, as s and other applications become more popular, and as models need to be retrained.
+
+The carbon footprint of generative AI globally is estimated to be growing steadily, with potential annual emissions ranging from 18.21 to 245.94 million tons of CO2 by 2035, with the highest estimates for 2035 nearing the impact of the United States  on emissions (currently estimated to emit 257.5 million tons annually as of 2024).
+
+Proposed mitigation strategies include factoring potential environmental costs prior to model development or data collection, increasing efficiency of data centers to reduce electricity/energy usage, building more efficient machine learning models, minimizing the number of times that models need to be retrained, developing a government-directed framework for auditing the environmental impact of these models, regulating for transparency of these models, regulating their energy and water usage, encouraging researchers to publish data on their models' carbon footprint, and increasing the number of subject matter experts who understand both machine learning and climate science.
+
+ Content quality 
+
+'''' defines slop as analogous to spam: "shoddy or unwanted A.I. content in social media, art, books, and ... in search results." Journalists have expressed concerns about the scale of low-quality generated content with respect to social media content moderation, the monetary incentives from social media companies to spread such content, false political messaging, spamming of scientific research paper submissions, increased time and effort to find higher quality or desired content on the Internet, the indexing of generated content by search engines, and on journalism itself. Studies have found that AI can create inaccurate claims, citations or summaries that sound confidently correct, a phenomenon called hallucination.
+
+A paper published by researchers at Amazon Web Services AI Labs found that over 57% of sentences from a sample of over 6 billion sentences from , a snapshot of web pages, were machine translated. Many of these automated translations were seen as lower quality, especially for sentences that were translated into at least three languages. Many lower-resource languages (ex. Wolof, Xhosa) were translated across more languages than higher-resource languages (ex. English, French).
+
+In September 2024, Robyn Speer, the author of wordfreq, an open source database that calculated word frequencies based on text from the Internet, announced that she had stopped updating the data for several reasons: high costs for obtaining data from  and , excessive focus on generative AI compared to other methods in the  community, and that "generative AI has polluted the data".
+
+The adoption of generative AI tools led to an explosion of AI-generated content across multiple domains. A study from  estimated that in 2023, more than 60,000 scholarly articles—over 1% of all publications—were likely written with LLM assistance. According to 's Institute for Human-Centered AI, approximately 17.5% of newly published computer science papers and 16.9% of peer review text now incorporate content generated by LLMs.
+
+If AI-generated content is included in new data crawls from the Internet for additional training of AI models, defects in the resulting models may occur. Training an AI model exclusively on the output of another AI model produces a lower-quality model. Repeating this process, where each new model is trained on the previous model's output, leads to progressive degradation and eventually results in a "" after multiple iterations.
+
+On the other side,  can be deployed to train machine learning models while preserving user privacy. The approach is not limited to text generation; image generation has been employed to train computer vision models.
+
+ Use in journalism 
+
+In January 2023, ''Futurism'' broke the story that  had been using an undisclosed internal AI tool to write at least 77 of its stories; after the news broke, CNET posted corrections to 41 of the stories. In April 2023, ''Die Aktuelle'' published an AI-generated fake interview of . In May 2024, ''Futurism'' noted that a content management system video by AdVon Commerce, which had used generative AI to produce articles for many of the aforementioned outlets, appeared to show that they "had produced tens of thousands of articles for more than 150 publishers". In 2025, a report from the American Sunlight Project stated that  was publishing as many as 10,000 articles a day, and concluded that much of this content aimed to push Russian narratives into large language models through their training data.
+
+In June 2024,  published its ''Digital News Report for 2024''. In a survey of people in America and Europe, Reuters Institute reports that 52% and 47% respectively are uncomfortable with news produced by "mostly AI with some human oversight", and 23% and 15% respectively report being comfortable. 42% of Americans and 33% of Europeans reported that they were comfortable with news produced by "mainly human with some help from AI". The results of global surveys reported that people were more uncomfortable with news topics including politics (46%), crime (43%), and local news (37%) produced by AI than other news topics.
+
+A 2025 Pew Research Survey found roughly half of all U.S. adults say that AI will have a very (24%) or somewhat (26%) negative impact on the news people get in the U.S. over the next 20 years. Because AI cannot do journalism, which requires interviewing people and a high degree of accuracy, AI poses a greater threat to journalism from the information it takes from publishers.
+
+ RAG poisoning 
+
+In 2025,  signed a $6M contract with the US based firm Clock Tower X that aimed to influence , Gemini and Grok by flooding pro-Israel information on to social media and websites. This was in an attempt to take advantage of the  (RAG) technique which is used by LLMs to provide more up-to-date information.
+
+ Extraterritorial data access 
+
+The  allows United States authorities to request data from covered service providers, including some AI service providers, regardless of where the data is physically stored. Courts can require parent companies to provide data held by their subsidiaries, and such orders may be accompanied by nondisclosure requirements preventing the provider from notifying affected users. This framework has been described in legal commentary as creating legal tension with Article 48 of the  (GDPR), which restricts the transfer of personal data in response to foreign court or administrative orders unless based on an international agreement.Christakis, Theodore; Terpan, Fabien (April 2021). EU–US negotiations on law enforcement access to data: divergences, challenges and EU law procedures and options. International Data Privacy Law. 11 (2): 81–106. doi:10.1093/idpl/ipaa022 As a result, service providers operating in both jurisdictions may face competing legal obligations under U.S. and EU law.
+
+ Detection and awareness 
+
+Tools such as  can detect content generated by AI.  However, they can also make false accusations (false positives).
+ is a technique that improves detection accuracy.  It works by altering the generated content at the source, in subtle ways which can be detected by corresponding software.
+
+In 2023,  developed a watermarking tool for .  They didn't release it, because they worried that users would switch to competitors.  They also argued that it would be easy to defeat with superficial rephrasing. There's a Tool to Catch Students Cheating With ChatGPT. OpenAI Hasn't Released It.
+|url=https://www.wsj.com/tech/ai/openai-tool-chatgpt-cheating-writing-135b755a
+|date=August 4, 2024 |access-date=2025-07-29
+|website=WSJ |language=en-US}}
+
+In March 2025, the  issued rules, requiring online service providers to label AI content.
+
+In May 2025, Google deployed its watermarking tool, SynthID.  It marks output from Gemini (text), Imagen (images), and Veo (video).  To detect output from these products, one uses Google's "SynthID detector" portal.
+
+In June 2025, users mistakenly accused gaming companies of using generative AI for the video games ''Little Droid'' and ''''.
+
+ See also 
+
+*  – Attribution of human traits to AI
+* 
+* 
+* 
+* 
+*  
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+
+References
+
+Further reading
+
+* 
+* , "[https://www.nybooks.com/articles/2025/07/24/the-parrot-in-the-machine-the-ai-con-bender-hanna/ The Parrot in the Machine]" (review of  and Alex Hanna, ''The AI Con: How to Fight Big Tech's Hype and Create the Future We Want'', Harper, 274 pp.; and James Boyle, ''The Line: AI and the Future of Personhood'', MIT Press, 326 pp.), '''', vol. LXXII, no. 12 (24 July 2025), pp. 43–46. "[C]hatbox 'writing' has a bland, regurgitated quality. Textures are flattened, sharp edges are sanded. No chatbox could ever have said that April is the cruelest month or that fog comes on little cat feet (though they might now, because one of their chief skills is ). And when synthetically extruded text turns out wrong, it can be comically wrong. When a movie fan asked Google whether a certain actor was in ''Heat'', he received this 'AI Overview': 'No,  is not in heat.'" (p. 44.)

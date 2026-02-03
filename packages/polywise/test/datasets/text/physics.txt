@@ -1,0 +1,1101 @@
+thumb|upright=1.35|[[Wave functions of the  in a hydrogen atom at different energy levels. Quantum mechanics cannot predict the exact location of a particle in space, only the probability of finding it at different locations. The brighter areas represent a higher probability of finding the electron.]]
+
+'''Quantum mechanics''' is the fundamental physical theory that describes the behavior of matter and of light; its unusual characteristics typically occur at and below the scale of s. Reprinted, Addison-Wesley, 1989,  It is the foundation of all '''quantum physics''', which includes , , , , and .
+
+Quantum mechanics can describe many systems that  cannot. Classical physics can describe many aspects of nature at an ordinary ( and (optical) microscopic) scale, but is not sufficient for describing them at very small  (atomic and ) scales. Classical mechanics can be derived from quantum mechanics as an approximation that is valid at ordinary scales.
+
+'''Quantum systems''' have bound states that are quantized to discrete values of , , , and other quantities, in contrast to classical systems where these quantities can be measured continuously. Measurements of quantum systems show characteristics of both s and s (), and there are limits to how accurately the value of a physical quantity can be predicted prior to its measurement, given a complete set of initial conditions (the ).
+
+Quantum mechanics arose gradually from theories to explain observations that could not be reconciled with , such as 's solution in 1900 to the  problem, and the correspondence between energy and frequency in 's 1905 paper, which explained the . These early attempts to understand microscopic phenomena, now known as the "", led to the full development of quantum mechanics in the mid-1920s by , , , ,  and others. The modern theory is formulated in various specially developed mathematical formalisms. In one of them, a mathematical entity called the  provides information, in the form of s, about what measurements of a particle's energy, momentum, and other physical properties may yield.
+
+ Overview and fundamental concepts 
+
+Quantum mechanics allows the calculation of properties and behaviour of . It is typically applied to microscopic systems: ,  and s. It has been demonstrated to hold for complex molecules with thousands of atoms, but its application to human beings raises philosophical problems, such as , and its application to the universe as a whole remains speculative. Predictions of quantum mechanics have been verified experimentally to an extremely high degree of . For example, the refinement of quantum mechanics for the interaction of light and matter, known as  (QED), has been shown to agree with experiment to within 1 part in 1012 when predicting the magnetic properties of an electron.
+
+A fundamental feature of the theory is that it usually cannot predict with certainty what will happen, but only gives probabilities. Mathematically, a probability is found by taking the square of the absolute value of a , known as a probability amplitude. This is known as the , named after physicist . For example, a quantum particle like an  can be described by a wave function, which associates to each point in space a probability amplitude. Applying the Born rule to these amplitudes gives a  for the position that the electron will be found to have when an experiment is performed to measure it. This is the best the theory can do; it cannot say for certain where the electron will be found. The  relates the collection of probability amplitudes that pertain to one moment of time to the collection of probability amplitudes that pertain to another.
+
+One consequence of the mathematical rules of quantum mechanics is a tradeoff in predictability between measurable quantities. The most famous form of this  says that no matter how a quantum particle is prepared or how carefully experiments upon it are arranged, it is impossible to have a precise prediction for a measurement of its position and also at the same time for a measurement of its .
+thumb|left|upright=1.2|An illustration of the [[double-slit experiment]]
+Another consequence of the mathematical rules of quantum mechanics is the phenomenon of , which is often illustrated with the . In the basic version of this experiment, a coherent light source, such as a  beam, illuminates a plate pierced by two parallel slits, and the light passing through the slits is observed on a screen behind the plate. The wave nature of light causes the light waves passing through the two slits to interfere, producing bright and dark bands on the screen – a result that would not be expected if light consisted of classical particles. However, the light is always found to be absorbed at the screen at discrete points, as individual particles rather than waves; the interference pattern appears via the varying density of these particle hits on the screen. Furthermore, versions of the experiment that include detectors at the slits find that each detected  passes through one slit (as would a classical particle), and not through both slits (as would a wave). However, such experiments demonstrate that particles do not form the interference pattern if one detects which slit they pass through.  This behavior is known as . In addition to light, , , and  are all found to exhibit the same dual behavior when fired towards a double slit.
+left|thumb|upright=1.2|A simplified diagram of [[quantum tunneling, a phenomenon by which a particle may move through a barrier which would be impossible under classical mechanics]]
+Another non-classical phenomenon predicted by quantum mechanics is : a particle that goes up against a  can cross it, even if its kinetic energy is smaller than the maximum of the potential. In classical mechanics this particle would be trapped. Quantum tunnelling has several important consequences, enabling ,  in stars, and applications such as ,  and .
+
+When quantum systems interact, the result can be the creation of : their properties become so intertwined that a description of the whole solely in terms of the individual parts is no longer possible. Erwin Schrödinger called entanglement "...the characteristic trait of quantum mechanics, the one that enforces its entire departure from classical lines of thought". Quantum entanglement enables  and is part of quantum communication protocols, such as  and . Contrary to popular misconception, entanglement does not allow sending signals , as demonstrated by the .
+
+Another possibility opened by entanglement is testing for "hidden variables", hypothetical properties more fundamental than the quantities addressed in quantum theory itself, knowledge of which would allow more exact predictions than quantum theory provides. A collection of results, most significantly , have demonstrated that broad classes of such hidden-variable theories are in fact incompatible with quantum physics. According to Bell's theorem, if nature actually operates in accord with any theory of local hidden variables, then the results of a  will be constrained in a particular, quantifiable way. Many Bell tests have been performed and they have shown results incompatible with the constraints imposed by local hidden variables.
+
+It is not possible to present these concepts in more than a superficial way without introducing the mathematics involved; understanding quantum mechanics requires not only manipulating complex numbers, but also , s, , and other more advanced subjects.roughly 15 years. ... The job of the popularizer of science, trying to get across some idea of quantum mechanics to a general audience that has not gone through these initiation rites, is daunting. Indeed, there are no successful popularizations of quantum mechanics in my opinionpartly for this reason.}} Accordingly, this article will present a mathematical formulation of quantum mechanics and survey its application to some useful and oft-studied examples.
+
+ Mathematical formulation 
+
+In the mathematically rigorous formulation of quantum mechanics, the state of a quantum mechanical system is a vector \psi belonging to a (separable) complex  \mathcal H. This vector is postulated to be normalized under the Hilbert space inner product, that is, it obeys \langle \psi,\psi \rangle = 1, and it is well-defined up to a complex number of modulus 1 (the global phase), that is, \psi and e^{i\alpha}\psi represent the same physical system. In other words, the possible states are points in the  of a Hilbert space, usually called the . The exact nature of this Hilbert space is dependent on the system&nbsp;– for example, for describing position and momentum the Hilbert space is the space of complex  functions L^2(\mathbb C), while the Hilbert space for the spin of a single proton is simply the space of two-dimensional complex vectors \mathbb C^2 with the usual inner product.
+
+Physical quantities of interestposition, momentum, energy, spinare represented by observables, which are Hermitian (more precisely, self-adjoint) linear operators acting on the Hilbert space. A quantum state can be an  of an observable, in which case it is called an , and the associated  corresponds to the value of the observable in that eigenstate. More generally, a quantum state will be a linear combination of the eigenstates, known as a . When an observable is measured, the result will be one of its eigenvalues with probability given by the : in the simplest case the eigenvalue \lambda is non-degenerate and the probability is given by |\langle \vec\lambda,\psi\rangle|^2, where  \vec\lambda is its associated unit-length eigenvector. More generally, the eigenvalue is degenerate and the probability is given by \langle \psi,P_\lambda\psi\rangle, where P_\lambda is the projector onto its associated eigenspace. In the continuous case, these formulas give instead the .
+
+After the measurement, if result \lambda was obtained, the quantum state is postulated to collapse to  \vec\lambda, in the non-degenerate case, or to P_\lambda\psi\big/\! \sqrt{\langle \psi,P_\lambda\psi\rangle}, in the general case. The  nature of quantum mechanics thus stems from the act of measurement. This is one of the most debated aspects of quantum theory, with different  giving radically different answers to questions regarding quantum-state collapse, as discussed below.
+
+ Time evolution of a quantum state 
+
+The time evolution of a quantum state is described by the Schrödinger equation:
+i\hbar {\frac {\partial}{\partial t}} \psi (t) =H \psi (t). 
+Here H denotes the Hamiltonian, the observable corresponding to the  of the system, and \hbar is the reduced . The constant i\hbar is introduced so that the Hamiltonian is reduced to the classical Hamiltonian in cases where the quantum system can be approximated by a classical system; the ability to make such an approximation in certain limits is called the .
+
+The solution of this differential equation is given by
+ \psi(t) = e^{-iHt/\hbar }\psi(0). 
+The operator U(t) = e^{-iHt/\hbar }  is known as the time-evolution operator, and has the crucial property that it is unitary. This time evolution is  in the sense that&nbsp;– given an initial quantum state \psi(0) – it makes a definite prediction of what the quantum state \psi(t) will be at any later time.
+
+thumb|upright=1.25|Fig. 1: [[Probability density function|Probability densities corresponding to the wave functions of an electron in a hydrogen atom possessing definite energy levels (increasing from the top of the image to the bottom: ''n'' = 1, 2, 3, ...) and angular momenta (increasing across from left to right: ''s'', ''p'', ''d'', ...). Denser areas correspond to higher probability density in a position measurement.Such wave functions are directly comparable to  of acoustic modes of vibration in classical physics and are modes of oscillation as well, possessing a sharp energy and thus, a definite frequency. The  and energy are quantized and take only discrete values like those shown – as is the case for  in acoustics.]]
+
+Some wave functions produce probability distributions that are independent of time, such as s of the Hamiltonian. Many systems that are treated dynamically in classical mechanics are described by such "static" wave functions. For example, a single electron in an unexcited atom is pictured classically as a particle moving in a circular trajectory around the , whereas in quantum mechanics, it is described by a static wave function surrounding the nucleus. For example, the electron wave function for an unexcited hydrogen atom is a spherically symmetric function known as an ''s'' orbital (Fig. 1).
+
+Analytic solutions of the Schrödinger equation are known for very few relatively simple model Hamiltonians including the , the , the , and the . Even the  atom&nbsp;– which contains just two electrons&nbsp;– has defied all attempts at a fully analytic treatment, admitting no solution in closed form.
+
+However, there are techniques for finding approximate solutions. One method, called perturbation theory, uses the analytic result for a simple quantum mechanical model to create a result for a related but more complicated model by (for example) the addition of a weak . Another approximation method applies to systems for which quantum mechanics produces only small deviations from classical behavior. These deviations can then be computed based on the classical motion.
+
+ Uncertainty principle 
+
+One consequence of the basic quantum formalism is the uncertainty principle. In its most familiar form, this states that no preparation of a quantum particle can imply simultaneously precise predictions both for a measurement of its position and for a measurement of its momentum. Both position and momentum are observables, meaning that they are represented by . The position operator \hat{X} and momentum operator \hat{P} do not commute, but rather satisfy the :
+[\hat{X}, \hat{P}] = i\hbar.
+Given a quantum state, the Born rule lets us compute expectation values for both X and P, and moreover for powers of them. Defining the uncertainty for an observable by a , we have
+\sigma_X={\textstyle \sqrt{\left\langle X^2 \right\rangle - \left\langle X \right\rangle^2}},
+and likewise for the momentum:
+\sigma_P=\sqrt{\left\langle P^2 \right\rangle - \left\langle P \right\rangle^2}.
+The uncertainty principle states that
+\sigma_X \sigma_P \geq \frac{\hbar}{2}.
+Either standard deviation can in principle be made arbitrarily small, but not both simultaneously.Section 3.2 of . This fact is experimentally well-known for example in quantum optics; see e.g. chap. 2 and Fig. 2.1 . This inequality generalizes to arbitrary pairs of self-adjoint operators A and B. The  of these two operators is
+[A,B]=AB-BA,
+and this provides the lower bound on the product of standard deviations:
+\sigma_A \sigma_B \geq \tfrac12 \left|\bigl\langle[A,B]\bigr\rangle \right|.
+
+Another consequence of the canonical commutation relation is that the position and momentum operators are Fourier transforms of each other, so that a description of an object according to its momentum is the Fourier transform of its description according to its position. The fact that dependence in momentum is the Fourier transform of the dependence in position means that the momentum operator is equivalent (up to an i/\hbar factor) to taking the derivative according to the position, since in Fourier analysis differentiation corresponds to multiplication in the dual space. This is why in quantum equations in position space, the momentum  p_i is replaced by -i \hbar \frac {\partial}{\partial x}, and in particular in the non-relativistic Schrödinger equation in position space the momentum-squared term is replaced with a Laplacian times -\hbar^2.
+
+ Composite systems and entanglement 
+
+When two different quantum systems are considered together, the Hilbert space of the combined system is the  of the Hilbert spaces of the two components. For example, let  and  be two quantum systems, with Hilbert spaces  \mathcal H_A  and  \mathcal H_B , respectively. The Hilbert space of the composite system is then
+ \mathcal H_{AB} = \mathcal H_A \otimes \mathcal H_B.
+If the state for the first system is the vector \psi_A and the state for the second system is \psi_B, then the state of the composite system is
+\psi_A \otimes \psi_B.
+Not all states in the joint Hilbert space \mathcal H_{AB} can be written in this form, however, because the superposition principle implies that linear combinations of these "separable" or "product states" are also valid. For example, if \psi_A and \phi_A are both possible states for system A, and likewise \psi_B and \phi_B are both possible states for system B, then
+\tfrac{1}{\sqrt{2}} \left ( \psi_A \otimes \psi_B + \phi_A \otimes \phi_B \right )
+is a valid joint state that is not separable. States that are not separable are called entangled.
+
+If the state for a composite system is entangled, it is impossible to describe either component system  or system  by a state vector. One can instead define reduced density matrices that describe the statistics that can be obtained by making measurements on either component system alone. This necessarily causes a loss of information, though: knowing the reduced density matrices of the individual systems is not enough to reconstruct the state of the composite system. Just as density matrices specify the state of a subsystem of a larger system, analogously, positive operator-valued measures (POVMs) describe the effect on a subsystem of a measurement performed on a larger system. POVMs are extensively used in quantum information theory.
+
+As described above, entanglement is a key feature of models of measurement processes in which an apparatus becomes entangled with the system being measured. Systems interacting with the environment in which they reside generally become entangled with that environment, a phenomenon known as . This can explain why, in practice, quantum effects are difficult to observe in systems larger than microscopic.
+
+ Equivalence between formulations 
+
+There are many mathematically equivalent formulations of quantum mechanics. One of the oldest and most common is the "transformation theory" proposed by , which unifies and generalizes the two earliest formulations of quantum mechanics&nbsp;–  (invented by ) and wave mechanics (invented by ). An alternative formulation of quantum mechanics is 's , in which a quantum-mechanical amplitude is considered as a sum over all possible classical and non-classical paths between the initial and final states. This is the quantum-mechanical counterpart of the  in classical mechanics.
+
+ Symmetries and conservation laws 
+
+The Hamiltonian H is known as the ''generator'' of time evolution, since it defines a unitary time-evolution operator U(t) = e^{-iHt/\hbar} for each value of t. From this relation between U(t) and H, it follows that any observable A that commutes with H will be conserved: its expectation value will not change over time. This statement generalizes, as mathematically, any Hermitian operator A can generate a family of unitary operators parameterized by a variable t. Under the evolution generated by A, any observable B that commutes with A will be conserved. Moreover, if B is conserved by evolution under A, then A is conserved under the evolution generated by B. This implies a quantum version of the result proven by  in classical (Lagrangian) mechanics: for every  symmetry of a Hamiltonian, there exists a corresponding .
+
+ Examples 
+
+ Free particle 
+
+360 px|thumb|right|Position space probability density of a Gaussian [[wave packet moving in one dimension in free space]]
+The simplest example of a quantum system with a position degree of freedom is a free particle in a single spatial dimension. A free particle is one which is not subject to external influences, so that its Hamiltonian consists only of its kinetic energy:
+H = \frac{1}{2m}P^2 = - \frac {\hbar ^2}{2m} \frac {d ^2}{dx^2}. 
+The general solution of the Schrödinger equation is given by
+\psi (x,t)=\frac {1}{\sqrt {2\pi }}\int _{-\infty}^\infty{\hat {\psi }}(k,0)e^{i(kx -\frac{\hbar k^2}{2m} t)}\mathrm{d}k,
+which is a superposition of all possible s e^{i(kx -\frac{\hbar k^2}{2m} t)}, which are eigenstates of the momentum operator with momentum p = \hbar k . The coefficients of the superposition are  \hat {\psi }(k,0) , which is the Fourier transform of the initial quantum state \psi(x,0).
+
+It is not possible for the solution to be a single momentum eigenstate, or a single position eigenstate, as these are not normalizable quantum states.}} Instead, we can consider a Gaussian :
+\psi(x,0) = \frac{1}{\sqrt[4]{\pi a}}e^{-\frac{x^2}{2a}} 
+which has Fourier transform, and therefore momentum distribution
+\hat \psi(k,0) = \sqrt[4]{\frac{a}{\pi}}e^{-\frac{a k^2}{2}}. 
+We see that as we make a smaller the spread in position gets smaller, but the spread in momentum gets larger. Conversely, by making a larger we make the spread in momentum smaller, but the spread in position gets larger. This illustrates the uncertainty principle.
+
+As we let the Gaussian wave packet evolve in time, we see that its center moves through space at a constant velocity (like a classical particle with no forces acting on it). However, the wave packet will also spread out as time progresses, which means that the position becomes more and more uncertain. The uncertainty in momentum, however, stays constant.
+
+ Particle in a box 
+
+thumb|1-dimensional potential energy box (or infinite potential well)
+
+The particle in a one-dimensional potential energy box is the most mathematically simple example where restraints lead to the quantization of energy levels. The box is defined as having zero potential energy everywhere inside a certain region, and therefore infinite potential energy everywhere outside that region. For the one-dimensional case in the x direction, the time-independent Schrödinger equation may be written
+ - \frac {\hbar ^2}{2m} \frac {d ^2 \psi}{dx^2} = E \psi.
+
+With the differential operator defined by
+ \hat{p}_x = -i\hbar\frac{d}{dx} the previous equation is evocative of the classic kinetic energy analogue,
+ \frac{1}{2m} \hat{p}_x^2 = E,
+with state \psi in this case having energy E coincident with the kinetic energy of the particle.
+
+The general solutions of the Schrödinger equation for the particle in a box are
+ \psi(x) = A e^{ikx} + B e ^{-ikx} \qquad\qquad E = \frac{\hbar^2 k^2}{2m}
+or, from ,
+ \psi(x) = C \sin(kx) + D \cos(kx).\!
+
+The infinite potential walls of the box determine the values of C, D,  and k at x=0 and x=L where \psi must be zero. Thus, at x=0,
+\psi(0) = 0 = C\sin(0) + D\cos(0) = D
+and D=0. At x=L,
+ \psi(L) = 0 = C\sin(kL),
+in which C cannot be zero as this would conflict with the postulate that \psi has norm 1. Therefore, since \sin(kL)=0, kL must be an integer multiple of \pi,
+k = \frac{n\pi}{L}\qquad\qquad n=1,2,3,\ldots.
+
+This constraint on k implies a constraint on the energy levels, yielding
+E_n = \frac{\hbar^2 \pi^2 n^2}{2mL^2} = \frac{n^2h^2}{8mL^2}.
+
+A  is the generalization of the infinite potential well problem to potential wells having finite depth. The finite potential well problem is mathematically more complicated than the infinite particle-in-a-box problem as the wave function is not pinned to zero at the walls of the well. Instead, the wave function must satisfy more complicated mathematical boundary conditions as it is nonzero in regions outside the well. Another related problem is that of the , which furnishes a model for the  effect that plays an important role in the performance of modern technologies such as  and .
+
+ Harmonic oscillator 
+
+thumb|upright=1.35|right|Some trajectories of a [[harmonic oscillator (i.e. a ball attached to a spring) in  (A-B) and quantum mechanics (C-H). In quantum mechanics, the position of the ball is represented by a  (called the wave function), with the  shown in blue and the  shown in red. Some of the trajectories (such as C, D, E, and F) are s (or "s"). Each standing-wave frequency is proportional to a possible  of the oscillator. This "energy quantization" does not occur in classical physics, where the oscillator can have ''any'' energy.]]
+
+As in the classical case, the potential for the quantum harmonic oscillator is given by
+V(x)=\frac{1}{2}m\omega^2x^2.
+
+This problem can either be treated by directly solving the Schrödinger equation, which is not trivial, or by using the more elegant "ladder method" first proposed by Paul Dirac. The s are given by
+ \psi_n(x) = \sqrt{\frac{1}{2^n\, n!}} \cdot \left(\frac{m\omega}{\pi \hbar}\right)^{1/4} \cdot e^{
+- \frac{m\omega x^2}{2 \hbar}} \cdot H_n\left(\sqrt{\frac{m\omega}{\hbar}} x \right), \qquad 
+n = 0,1,2,\ldots. 
+where ''Hn'' are the 
+H_n(x)=(-1)^n e^{x^2}\frac{d^n}{dx^n}\left(e^{-x^2}\right),
+and the corresponding energy levels are
+ E_n = \hbar \omega \left(n + {1\over 2}\right).
+
+This is another example illustrating the discretization of energy for s.
+
+ Mach–Zehnder interferometer 
+
+upright=1.3|thumb|right|Schematic of a Mach–Zehnder interferometer
+
+The  (MZI) illustrates the concepts of superposition and interference with linear algebra in dimension 2, rather than differential equations. It can be seen as a simplified version of the double-slit experiment, but it is of interest in its own right, for example in the , the , and in studies of quantum entanglement.
+
+We can model a photon going through the interferometer by considering that at each point it can be in a superposition of only two paths: the "lower" path which starts from the left, goes straight through both beam splitters, and ends at the top, and the "upper" path which starts from the bottom, goes straight through both beam splitters, and ends at the right. The quantum state of the photon is therefore a vector \psi \in \mathbb{C}^2 that is a superposition of the "lower" path \psi_l = \begin{pmatrix} 1 \\ 0 \end{pmatrix} and the "upper" path \psi_u = \begin{pmatrix} 0 \\ 1 \end{pmatrix}, that is, \psi = \alpha \psi_l + \beta \psi_u for complex \alpha,\beta. In order to respect the postulate that \langle \psi,\psi\rangle = 1 we require that |\alpha|^2+|\beta|^2 = 1.
+
+Both s are modelled as the unitary matrix B = \frac1{\sqrt2}\begin{pmatrix} 1 & i \\ i & 1 \end{pmatrix}, which means that when a photon meets the beam splitter it will either stay on the same path with a probability amplitude of 1/\sqrt{2}, or be reflected to the other path with a probability amplitude of i/\sqrt{2}. The phase shifter on the upper arm is modelled as the unitary matrix P = \begin{pmatrix} 1 & 0 \\ 0 & e^{i\Delta\Phi} \end{pmatrix}, which means that if the photon is on the "upper" path it will gain a relative phase of \Delta\Phi, and it will stay unchanged if it is in the lower path.
+
+A photon that enters the interferometer from the left will then be acted upon with a beam splitter B, a phase shifter P, and another beam splitter B, and so end up in the state
+BPB\psi_l = ie^{i\Delta\Phi/2} \begin{pmatrix} -\sin(\Delta\Phi/2) \\ \cos(\Delta\Phi/2) \end{pmatrix},
+and the probabilities that it will be detected at the right or at the top are given respectively by
+ p(u) = |\langle \psi_u, BPB\psi_l \rangle|^2 = \cos^2 \frac{\Delta \Phi}{2},
+ p(l) = |\langle \psi_l, BPB\psi_l \rangle|^2 = \sin^2 \frac{\Delta \Phi}{2}.
+One can therefore use the Mach–Zehnder interferometer to estimate the phase shift by estimating these probabilities.
+
+It is interesting to consider what would happen if the photon were definitely in either the "lower" or "upper" paths between the beam splitters. This can be accomplished by blocking one of the paths, or equivalently by removing the first beam splitter (and feeding the photon from the left or the bottom, as desired). In both cases, there will be no interference between the paths anymore, and the probabilities are given by p(u)=p(l) = 1/2, independently of the phase \Delta\Phi. From this we can conclude that the photon does not take one path or another after the first beam splitter, but rather that it is in a genuine quantum superposition of the two paths.
+
+ Applications 
+
+Quantum mechanics has had enormous success in explaining many of the features of our universe, with regard to small-scale and discrete quantities and interactions which cannot be explained by classical methods. Quantum mechanics is often the only theory that can reveal the individual behaviors of the subatomic particles that make up all forms of matter (electrons, s, s, s, and others).  and  are dependent upon quantum mechanics.
+
+In many aspects, modern technology operates at a scale where quantum effects are significant. Important applications of quantum theory include , , , s, s, the  and the laser, the  and s such as the , medical and research imaging such as  and . Explanations for many biological and physical phenomena are rooted in the nature of the chemical bond, most notably the macro-molecule .
+
+ Relation to other scientific theories 
+
+ Classical mechanics 
+
+The rules of quantum mechanics assert that the state space of a system is a Hilbert space and that observables of the system are Hermitian operators acting on vectors in that space&nbsp;– although they do not tell us which Hilbert space or which operators. These can be chosen appropriately in order to obtain a quantitative description of a quantum system, a necessary step in making physical predictions. An important guide for making these choices is the , a heuristic which states that the predictions of quantum mechanics reduce to those of  in the regime of large s. One can also start from an established classical model of a particular system, and then try to guess the underlying quantum model that would give rise to the classical model in the correspondence limit. This approach is known as quantization.
+
+When quantum mechanics was originally formulated, it was applied to models whose correspondence limit was non-relativistic classical mechanics. For instance, the well-known model of the  uses an explicitly non-relativistic expression for the  of the oscillator, and is thus a quantum version of the classical harmonic oscillator.
+
+Complications arise with , which do not have good quantum numbers, and  studies the relationship between classical and quantum descriptions in these systems.
+
+ is a mechanism through which quantum systems lose coherence, and thus become incapable of displaying many typically quantum effects: s become simply probabilistic mixtures, and quantum entanglement becomes simply classical correlations. Quantum coherence is not typically evident at macroscopic scales, though at temperatures approaching  quantum behavior may manifest macroscopically.
+
+Many macroscopic properties of a classical system are a direct consequence of the quantum behavior of its parts. For example, the stability of bulk matter (consisting of atoms and s which would quickly collapse under electric forces alone), the rigidity of solids, and the mechanical, thermal, chemical, optical and magnetic properties of matter are all results of the interaction of s under the rules of quantum mechanics.
+
+ Special relativity and electrodynamics 
+
+Early attempts to merge quantum mechanics with  involved the replacement of the Schrödinger equation with a covariant equation such as the  or the . While these theories were successful in explaining many experimental results, they had certain unsatisfactory qualities stemming from their neglect of the relativistic creation and annihilation of particles. A fully relativistic quantum theory required the development of quantum field theory, which applies quantization to a field (rather than a fixed set of particles). The first complete quantum field theory, , provides a fully quantum description of the . Quantum electrodynamics is, along with , one of the most accurate physical theories ever devised.
+
+The full apparatus of quantum field theory is often unnecessary for describing electrodynamic systems. A simpler approach, one that has been used since the inception of quantum mechanics, is to treat charged particles as quantum mechanical objects being acted on by a classical . For example, the elementary quantum model of the  describes the  of the hydrogen atom using a classical \textstyle -e^2/(4 \pi\epsilon_{_0}r) Coulomb potential. Likewise, in a , a charged particle is modeled as a quantum system, while the background magnetic field is described classically. This "semi-classical" approach fails if quantum fluctuations in the electromagnetic field play an important role, such as in the emission of photons by s.
+
+Quantum field theories for the  and the  have also been developed. The quantum field theory of the strong nuclear force is called , and describes the interactions of subnuclear particles such as s and s. The weak nuclear force and the electromagnetic force were unified, in their quantized forms, into a single quantum field theory (known as ), by the physicists ,  and .
+
+ Relation to general relativity 
+
+Even though the predictions of both quantum theory and general relativity have been supported by rigorous and repeated , their abstract formalisms contradict each other and they have proven extremely difficult to incorporate into one consistent, cohesive model. Gravity is negligible in many areas of particle physics, so that unification between general relativity and quantum mechanics is not an urgent issue in those particular applications. However, the lack of a correct theory of  is an important issue in  and the search by physicists for an elegant "" (TOE). Consequently, resolving the inconsistencies between both theories has been a major goal of 20th- and 21st-century physics. This TOE would combine not only the models of subatomic physics but also derive the four fundamental forces of nature from a single force or phenomenon.
+
+One proposal for doing so is , which posits that the point-like particles of  are replaced by one-dimensional objects called strings. String theory describes how these strings propagate through space and interact with each other. On distance scales larger than the string scale, a string looks just like an ordinary particle, with its , charge, and other properties determined by the al state of the string. In string theory, one of the many vibrational states of the string corresponds to the , a quantum mechanical particle that carries gravitational force.
+
+Another popular theory is  (LQG), which describes quantum properties of gravity and is thus a theory of . LQG is an attempt to merge and adapt standard quantum mechanics and standard general relativity. This theory describes space as an extremely fine fabric "woven" of finite loops called s. The evolution of a spin network over time is called a . The characteristic length scale of a spin foam is the , approximately 1.616×10−35 m, and so lengths shorter than the Planck length are not physically meaningful in LQG.
+
+ Philosophical implications 
+
+Since its inception, the many counter-intuitive aspects and results of quantum mechanics have provoked strong  debates and many interpretations. The arguments centre on the probabilistic nature of quantum mechanics, the difficulties with  and the related , and . Perhaps the only consensus that exists about these issues is that there is no consensus.  once said, "I think I can safely say that nobody understands quantum mechanics." According to , "There is now in my opinion no entirely satisfactory interpretation of quantum mechanics."
+
+The views of , Werner Heisenberg and other physicists are often grouped together as the "". According to these views, the probabilistic nature of quantum mechanics is not a temporary feature which will eventually be replaced by a deterministic theory, but is instead a final renunciation of the classical idea of "causality". Bohr in particular emphasized that any well-defined application of the quantum mechanical formalism must always make reference to the experimental arrangement, due to the complementary nature of evidence obtained under different experimental situations. Copenhagen-type interpretations were adopted by Nobel laureates in quantum physics, including Bohr, Heisenberg, Schrödinger, Feynman, and Zeilinger as well as 21st-century researchers in quantum foundations.
+
+, himself one of the founders of quantum theory, was troubled by its apparent failure to respect some cherished metaphysical principles, such as  and locality. Einstein's long-running exchanges with Bohr about the meaning and status of quantum mechanics are now known as the . Einstein believed that underlying quantum mechanics must be a theory that explicitly forbids . He argued that quantum mechanics was incomplete, a theory that was valid but not fundamental, analogous to how  is valid, but the fundamental theory behind it is . In 1935, Einstein and his collaborators  and  published an argument that the principle of locality implies the incompleteness of quantum mechanics, a  later termed the .}} In 1964, John Bell showed that EPR's principle of locality, together with determinism, was actually incompatible with quantum mechanics: they implied constraints on the correlations produced by distance systems, now known as , that can be violated by entangled particles. Since then several experiments have been performed to obtain these correlations, with the result that they do in fact violate Bell inequalities, and thus falsify the conjunction of locality with determinism.
+
+ shows that it is possible to reformulate quantum mechanics to make it deterministic, at the price of making it explicitly nonlocal. It attributes not only a wave function to a physical system, but in addition a real position, that evolves deterministically under a nonlocal guiding equation. The evolution of a physical system is given at all times by the Schrödinger equation together with the guiding equation; there is never a collapse of the wave function. This solves the measurement problem.
+thumb|upright=1|The [[Schrödinger's cat thought experiment can be used to visualize the many-worlds interpretation of quantum mechanics, where a branching of the universe occurs through a superposition of two quantum mechanical states.]]
+Everett's , formulated in 1956, holds that all the possibilities described by quantum theory simultaneously occur in a multiverse composed of mostly independent parallel universes. This is a consequence of removing the axiom of the collapse of the wave packet. All possible states of the measured system and the measuring apparatus, together with the observer, are present in a real physical quantum superposition. While the multiverse is deterministic, we perceive non-deterministic behavior governed by probabilities, because we do not observe the multiverse as a whole, but only one parallel universe at a time. Exactly how this is supposed to work has been the subject of much debate. Several attempts have been made to make sense of this and derive the Born rule, with no consensus on whether they have been successful.
+
+ appeared in the late 1990s as a modern derivative of Copenhagen-type ideas, and  was developed some years later.
+
+ History 
+
+Quantum mechanics was developed in the early decades of the 20th century, driven by the need to explain phenomena that, in some cases, had been observed in earlier times. Scientific inquiry into the wave nature of light began in the 17th and 18th centuries, when scientists such as ,  and  proposed a wave theory of light based on experimental observations. In 1803 English  Thomas Young described the famous double-slit experiment. This experiment played a major role in the general acceptance of the .
+
+During the early 19th century, chemical research by  and  lent weight to the  of matter, an idea that ,  and others built upon to establish the . The successes of kinetic theory gave further credence to the idea that matter is composed of atoms, yet the theory also had shortcomings that would only be resolved by the development of quantum mechanics. Reprinted, Addison-Wesley, 1989,   While the early conception of atoms from  had been that they were indivisible unitsthe word "atom" deriving from the Greek for 'uncuttable'the 19th century saw the formulation of hypotheses about subatomic structure. One important discovery in that regard was 's 1838 observation of a glow caused by an electrical discharge inside a glass tube containing gas at low pressure. ,  and  carried on and improved upon Faraday's work, leading to the identification of , which  found to consist of subatomic particles that would be called electrons.
+thumb|upright|[[Max Planck is considered the father of the quantum theory.]]
+
+The  problem was discovered by  in 1859. In 1900, Max Planck proposed the hypothesis that energy is radiated and absorbed in discrete "quanta" (or energy packets), yielding a calculation that precisely matched the observed patterns of black-body radiation. The word ''quantum'' derives from the , meaning "how great" or "how much". According to Planck, quantities of energy could be thought of as divided into "elements" whose size (''E'') would be proportional to their  (''ν''):
+ E = h \nu\ ,
+where ''h'' is the . Planck cautiously insisted that this was only an aspect of the processes of absorption and emission of radiation and was not the physical reality of the radiation. In fact, he considered his quantum hypothesis a mathematical trick to get the right answer rather than a sizable discovery. However, in 1905 Albert Einstein interpreted Planck's quantum hypothesis realistically and used it to explain the , in which shining light on certain materials can eject electrons from the material. Niels Bohr then developed Planck's ideas about radiation into a model of the hydrogen atom that successfully predicted the s of hydrogen. Einstein further developed this idea to show that an  such as light could also be described as a particle (later called the photon), with a discrete amount of energy that depends on its frequency. Reprinted in  See also "Einstein's early work on the quantum hypothesis", ibid. pp. 134–148. In his paper "On the Quantum Theory of Radiation", Einstein expanded on the interaction between energy and matter to explain the absorption and emission of energy by atoms. Although overshadowed at the time by his general theory of relativity, this paper articulated the mechanism underlying the stimulated emission of radiation, Translated in  which became the basis of the laser.
+
+left|thumb|upright=1.4|The 1927 [[Solvay Conference in  was the fifth world physics conference.]]
+This phase is known as the . Never complete or self-consistent, the old quantum theory was rather a set of  corrections to classical mechanics. The theory is now understood as a semi-classical approximation to modern quantum mechanics. Notable results from this period include, in addition to the work of Planck, Einstein and Bohr mentioned above, Einstein and 's work on the  of solids, Bohr and 's proof that classical physics cannot account for , and 's extension of the Bohr model to include special-relativistic effects.
+
+In the mid-1920s quantum mechanics was developed to become the standard formulation for atomic physics. In 1923, the French physicist  put forward his theory of matter waves by stating that particles can exhibit wave characteristics and vice versa. Building on de Broglie's approach, modern quantum mechanics was born in 1925, when the German physicists Werner Heisenberg, Max Born, and David Edwards, "The Mathematical Foundations of Quantum Mechanics", ''Synthese'', Volume 42, Number 1/September, 1979, pp.&nbsp;1–70.David Edwards, "The Mathematical Foundations of Quantum Field Theory: Fermions, Gauge Fields, and Super-symmetry, Part I: Lattice Field Theories", ''International Journal of Theoretical Physics'', Vol. 20, No. 7 (1981). developed  and the Austrian physicist Erwin Schrödinger invented wave mechanics. Born introduced the probabilistic interpretation of Schrödinger's wave function in July 1926. Thus, the entire field of quantum physics emerged, leading to its wider acceptance at the Fifth  in 1927.
+
+By 1930, quantum mechanics had been further unified and formalized by , Paul Dirac and  with greater emphasis on measurement, the statistical nature of our knowledge of reality, and philosophical speculation about the 'observer'. It has since permeated many disciplines, including quantum chemistry, , , and . It also provides a useful framework for many features of the modern , and describes the behaviors of  during ing and the flow of electrons in computer s, and therefore plays a crucial role in many modern technologies. While quantum mechanics was constructed to describe the world of the very small, it is also needed to explain some  phenomena such as  and s.
+
+ See also 
+
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+
+ Explanatory notes 
+
+ References 
+
+ Further reading 
+
+The following titles, all by working physicists, attempt to communicate quantum theory to lay people, using a minimum of technical apparatus:
+* Chester, Marvin (1987). ''Primer of Quantum Mechanics''. John Wiley. 
+* 
+* , 1985. '''', Princeton University Press. . Four elementary lectures on quantum electrodynamics and , yet containing many insights for the expert.
+* Ghirardi, GianCarlo, 2004. ''Sneaking a Look at God's Cards'', Gerald Malsbary, trans. Princeton Univ. Press. The most technical of the works cited here. Passages using , , and  can be passed over on a first reading.
+* , 1990, "Spooky actions at a distance: mysteries of the QT" in his ''Boojums All the Way Through''. Cambridge University Press: 110–76.
+* , 2000. ''Timeless Reality: Symmetry, Simplicity, and Multiple Universes''. Buffalo, New York: Prometheus Books. Chpts. 5–8. Includes cosmological and philosophical considerations.
+
+More technical:
+* 
+* 
+* 
+* 
+* , R. Neill Graham, eds., 1973. ''The Many-Worlds Interpretation of Quantum Mechanics'', Princeton Series in Physics, Princeton University Press. 
+* 
+* 
+* D. Greenberger, K. Hentschel, F. Weinert, eds., 2009. ''Compendium of quantum physics, Concepts, experiments, history and philosophy'', Springer-Verlag, Berlin, Heidelberg. Short articles on many QM topics.
+*  A standard undergraduate text.
+* , 1966. ''The Conceptual Development of Quantum Mechanics''. McGraw Hill.
+* , 2004. ''Path Integrals in Quantum Mechanics, Statistics, Polymer Physics, and Financial Markets'', 3rd ed. Singapore: World Scientific. [http://www.physik.fu-berlin.de/~kleinert/b5 Draft of 4th edition.] 
+*  [https://archive.org/details/QuantumMechanics_104 Online copy]
+* 
+* Gunther Ludwig, 1968. ''Wave Mechanics''. London: Pergamon Press. 
+*  (2004). ''The mathematical foundations of quantum mechanics''. Dover Publications. .
+* 
+* , 1966. ''Quantum Mechanics'' (Vol. I), English translation from French by G. M. Temmer. North Holland, John Wiley & Sons. Cf. chpt. IV, section III.
+* 
+*  Considers the extent to which chemistry and the periodic system have been reduced to quantum mechanics.
+* 
+* 
+* 
+* 
+* Veltman, Martinus J. G. (2003), ''Facts and Mysteries in Elementary Particle Physics''.
+
+ External links 
+
+* [https://interactivetextbooks.tudelft.nl/introduction-to-quantum-mechanics/ Introduction to quantum mechanics by Timon Idema]
+* [https://bethe.cornell.edu/ Quantum Physics Made Relatively Simple]: three video lectures by .
+
+''' Course material '''
+* [http://oyc.yale.edu/sites/default/files/notes_quantum_cookbook.pdf Quantum Cook Book] and [http://oyc.yale.edu/physics/phys-201#sessions PHYS 201: Fundamentals of Physics II] by , Yale OpenCourseware.
+* ''[https://lightandmatter.com/mod/ Modern Physics: With waves, thermodynamics, and optics]'' – an online textbook.
+* : [https://ocw.mit.edu/courses/chemistry/ Chemistry] and [https://ocw.mit.edu/courses/physics/ Physics]. See [https://ocw.mit.edu/courses/physics/8-04-quantum-physics-i-spring-2016/ 8.04], [https://ocw.mit.edu/courses/physics/8-05-quantum-physics-ii-fall-2013/index.htm 8.05] and [https://ocw.mit.edu/courses/physics/8-06-quantum-physics-iii-spring-2018/index.htm 8.06].
+* [http://physics.csbsju.edu/QM/  Examples in Quantum Mechanics].
+''' Philosophy '''
+* 
+* 
+
+''General Relativity'' (book)}}
+
+thumb|Slow motion computer simulation of the black hole [[binary system GW150914 as seen by a nearby observer, during 0.33 s of its final inspiral, merge, and ringdown. The star field behind the black holes is being heavily distorted and appears to rotate and move, due to extreme ing, as  itself is distorted and dragged around by the rotating s.]]
+
+'''General relativity''', also known as the '''general theory of relativity''', and as '''Einstein's theory of gravity''', is the geometric theory of  published by  in May 1916 and is the accepted description of gravitation in . General relativity generalizes  and refines , providing a unified description of gravity as a geometric property of  and time, or four-dimensional . In particular, the '' of spacetime'' is directly related to the ,  and stress of whatever is present, including  and . The relation is specified by the , a system of second-order s.
+
+, which describes gravity in classical mechanics, can be seen as a prediction of general relativity for the almost flat spacetime geometry around stationary mass distributions. Some predictions of general relativity, however, are beyond  in . These predictions concern the passage of time, the  of space, the motion of bodies in , and the propagation of light, and include , ing, the  of light, the  and singularities/s. So far, all  have been in agreement with the theory. The time-dependent solutions of general relativity enable us to extrapolate the history of the universe into the past and future, and have provided the modern framework for , thus leading to the discovery of the  and  radiation. Despite the introduction of a number of alternative theories, general relativity continues to be the simplest theory consistent with .
+
+Reconciliation of general relativity with the laws of quantum physics remains a problem, however, as no self-consistent theory of  has been found. It is not yet known how gravity can be unified with the three non-gravitational interactions: strong, weak and electromagnetic.
+
+Einstein's theory has  implications, including the prediction of s—regions of space in which space and time are distorted in such a way that nothing, not even light, can escape from them. Black holes are the end-state for s. s and active galactic nuclei are believed to be s and s. It also predicts , where the bending of light results in distorted and multiple images of the same distant astronomical phenomenon. Other predictions include the existence of s, which have been observed directly by the physics collaboration  and other observatories. In addition, general relativity has provided the basis for cosmological models of an expanding universe.
+
+Widely acknowledged as a theory of extraordinary beauty, general relativity has often been described as the most beautiful of all existing physical theories.
+
+ History 
+
+'s 1905 theory of the dynamics of the electron was a relativistic theory which he applied to all forces, including gravity.  While others thought that gravity was instantaneous or of electromagnetic origin, he suggested that relativity was "something due to our methods of measurement". In his theory, he showed that  propagate at the . Soon afterwards, Einstein started thinking about how to incorporate  into his relativistic framework. In 1907, beginning with a simple  involving an observer in free fall (FFO), he embarked on what would be an eight-year search for a relativistic theory of gravity. After numerous detours and false starts, his work culminated in the presentation to the  in November 1915 of what are known as the Einstein field equations, which form the core of Einstein's general theory of relativity.  These equations specify how the geometry of space and time is influenced by whatever matter and radiation are present., ; an up-to-date collection of current research, including reprints of many of the original articles, is ; an accessible overview can be found in . Einstein's original papers are found in [http://einsteinpapers.press.princeton.edu/ Digital Einstein], volumes 4 and 6. An early key article is , cf. . The publication featuring the field equations is , cf.  A version of , called , enabled Einstein to develop general relativity by providing the key mathematical framework on which he fit his physical ideas of gravity.Moshe Carmeli (2008).Relativity: Modern Large-Scale Structures of the Cosmos. pp. 92, 93.World Scientific Publishing This idea was pointed out by mathematician  and published by Grossmann and Einstein in 1913.Grossmann for the mathematical part and Einstein for the physical part (1913). Entwurf einer verallgemeinerten Relativitätstheorie und einer Theorie der Gravitation (Outline of a Generalized Theory of Relativity and of a Theory of Gravitation), Zeitschrift für Mathematik und Physik, 62, 225–261. [http://www.pitt.edu/~jdnorton/teaching/GR&Grav_2007/pdf/Einstein_Entwurf_1913.pdf English translate]
+
+The Einstein field equations are nonlinear and are considered difficult to solve. Einstein used approximation methods in working out initial predictions of the theory. But in 1916, the astrophysicist  found the first non-trivial exact solution to the Einstein field equations, the . This solution laid the groundwork for the description of the final stages of gravitational collapse, and the objects known today as black holes. In the same year, the first steps towards generalizing Schwarzschild's solution to electrically charged objects were taken, eventually resulting in the Reissner–Nordström solution, which is associated with electrically charged black holes.,  and  (later complemented in ) In 1917, Einstein applied his theory to the  as a whole, initiating the field of relativistic cosmology. In line with contemporary thinking, he assumed a static universe, adding a new parameter to his original field equations—the —to match that observational presumption., cf.  By 1929, however, the work of Hubble and others had shown that the universe is expanding. This is readily described by the expanding cosmological solutions found by Friedmann in 1922, which do not require a cosmological constant. Lemaître used these solutions to formulate the earliest version of the  models, in which the universe has evolved from an extremely hot and dense earlier state.Hubble's original article is ; an accessible overview is given in  Einstein later declared the cosmological constant the biggest blunder of his life.As reported in . Einstein's condemnation would prove to be premature, cf. section , below
+
+During that period, general relativity remained something of a curiosity among physical theories. It was clearly superior to , being consistent with special relativity and accounting for several effects unexplained by the Newtonian theory. Einstein showed in 1915 how his theory explained the anomalous perihelion advance of the planet Mercury without any arbitrary parameters ("fudge factors"), and in 1919 an expedition led by Eddington confirmed general relativity's prediction for the deflection of starlight by the Sun during the total ,,  instantly making Einstein famous. Yet the theory remained outside the mainstream of  and astrophysics until developments between approximately 1960 and 1975 known as the golden age of general relativity. Physicists began to understand the concept of a black hole, and to identify s as one of these objects' astrophysical manifestations.,  Ever more precise solar system tests confirmed the theory's predictive power,Sections ,  and , and references therein and relativistic cosmology also became amenable to direct observational tests.Section  and references therein; the historical development is in 
+
+General relativity has acquired a reputation as a theory of extraordinary beauty. "...&nbsp;the ''general theory of relativity'' ... was established by Einstein, and represents probably the most beautiful of all existing physical theories." "General relativity is not just an extraordinarily beautiful physical theory providing the best description of the gravitational interaction we have so far. It is more."  has noted that at multiple levels, general relativity exhibits what  has termed a "strangeness in the proportion" (''i.e.'' elements that excite wonderment and surprise). It juxtaposes fundamental concepts (space and time ''versus'' matter and motion) which had previously been considered as entirely independent. Chandrasekhar also noted that Einstein's only guides in his search for an exact theory were the principle of equivalence and his sense that a proper description of gravity should be geometrical at its basis, so that there was an "element of revelation" in the manner in which Einstein arrived at his theory. Other elements of beauty associated with the general theory of relativity are its simplicity and symmetry, the manner in which it incorporates invariance and unification, and its perfect logical consistency.
+
+In the preface to '''', Einstein said "The present book is intended, as far as possible, to give an exact insight into the theory of Relativity to those readers who, from a general scientific and philosophical point of view, are interested in the theory, but who are not conversant with the mathematical apparatus of theoretical physics. The work presumes a standard of education corresponding to that of a university matriculation examination, and, despite the shortness of the book, a fair amount of patience and force of will on the part of the reader. The author has spared himself no pains in his endeavour to present the main ideas in the simplest and most intelligible form, and on the whole, in the sequence and connection in which they actually originated." [https://books.google.com/books?id=yhN9CgAAQBAJ&pg=PT4 Extract of page 4]
+
+ From classical mechanics to general relativity 
+
+General relativity can be understood by examining its similarities with and departures from classical physics. The first step is the realization that classical mechanics and Newton's law of gravity admit a geometric description. The combination of this description with the laws of special relativity results in a  derivation of general relativity.The following exposition re-traces that of 
+
+ Geometry of Newtonian gravity  
+
+thumb|According to general relativity, objects in a gravitational field behave similarly to objects within an accelerating enclosure. For example, an observer will see a ball fall the same way in a rocket (left) as it does on Earth (right), provided that the acceleration of the rocket is equal to 9.8&nbsp;m/s2 (the acceleration due to gravity on the surface of the Earth).
+At the base of  is the notion that a body's motion can be described as a combination of free (or l) motion, and deviations from this free motion. Such deviations are caused by external forces acting on a body in accordance with Newton's second law of motion, which states that the net  acting on a body is equal to that body's (inertial)  multiplied by its . The preferred inertial motions are related to the geometry of space and time: in the standard reference frames of classical mechanics, objects in free motion move along straight lines at constant speed. In modern parlance, their paths are s, straight  in .
+
+Conversely, one might expect that inertial motions, once identified by observing the actual motions of bodies and making allowances for the external forces (such as  or ), can be used to define the geometry of space, as well as a time . However, there is an ambiguity once gravity comes into play. According to Newton's law of gravity, and independently verified by experiments such as that of Eötvös and its successors (see ''''), there is a universality of free fall (also known as the weak , or the universal equality of inertial and passive-gravitational mass): the trajectory of a  in free fall depends only on its position and initial speed, but not on any of its material properties.,  A simplified version of this is embodied in '''Einstein's elevator experiment''', illustrated in the figure on the right: for an observer in an enclosed room, it is impossible to decide, by mapping the trajectory of bodies such as a dropped ball, whether the room is stationary in a gravitational field and the ball accelerating, or in free space aboard a rocket that is accelerating at a rate equal to that of the gravitational field versus the ball which upon release has nil acceleration.
+
+Given the universality of free fall, there is no observable distinction between inertial motion and motion under the influence of the gravitational force. This suggests the definition of a new class of inertial motion, namely that of objects in free fall under the influence of gravity. This new class of preferred motions, too, defines a geometry of space and time—in mathematical terms, it is the geodesic motion associated with a specific connection which depends on the  of the . Space, in this construction, still has the ordinary . However, space''time'' as a whole is more complicated. As can be shown using simple thought experiments following the free-fall trajectories of different test particles, the result of transporting spacetime vectors that can denote a particle's velocity (time-like vectors) will vary with the particle's trajectory; mathematically speaking, the Newtonian connection is not integrable. From this, one can deduce that spacetime is curved. The resulting  is a geometric formulation of Newtonian gravity using only covariant concepts, i.e. a description which is valid in any desired coordinate system., , . The simple thought experiment in question was first described in  In this geometric description, s—the relative acceleration of bodies in free fall—are related to the derivative of the connection, showing how the modified geometry is caused by the presence of mass.
+
+ Relativistic generalization 
+
+thumb|left|upright|[[Light cone of event A]]
+As intriguing as geometric Newtonian gravity may be, its basis, classical mechanics, is merely a limiting case of (special) relativistic mechanics.Good introductions are, in order of increasing presupposed knowledge of mathematics, , , and ; for accounts of precision experiments, cf. part IV of  In the language of : where gravity can be neglected, physics is Lorentz invariant as in special relativity rather than Galilei invariant as in classical mechanics. (The defining symmetry of special relativity is the , which includes translations, rotations, boosts and reflections.) The differences between the two become significant when dealing with speeds approaching the , and with high-energy phenomena.An in-depth comparison between the two symmetry groups can be found in 
+
+With Lorentz symmetry, additional structures come into play. They are defined by the set of light cones (see image). The light-cones define a causal structure: for each event , there is a set of events that can, in principle, either influence or be influenced by  via signals or interactions that do not need to travel faster than light (such as event  in the image), and a set of events for which such an influence is impossible (such as event  in the image). These sets are observer-independent.,  In conjunction with the world-lines of freely falling particles, the light-cones can be used to reconstruct the spacetime's semi-Riemannian metric, at least up to a positive scalar factor. In mathematical terms, this defines a  or conformal geometry.
+
+Special relativity is defined in the absence of gravity. For practical applications, it is a suitable model whenever gravity can be neglected. Bringing gravity into play, and assuming the universality of free fall motion, an analogous reasoning as in the previous section applies: there are no global s. Instead there are approximate inertial frames moving alongside freely falling particles. Translated into the language of spacetime: the straight  lines that define a gravity-free inertial frame are deformed to lines that are curved relative to each other, suggesting that the inclusion of gravity necessitates a change in spacetime geometry., 
+
+A priori, it is not clear whether the new local frames in free fall coincide with the reference frames in which the laws of special relativity hold—that theory is based on the propagation of light, and thus on electromagnetism, which could have a different set of s. But using different assumptions about the special-relativistic frames (such as their being earth-fixed, or in free fall), one can derive different predictions for the gravitational redshift, that is, the way in which the frequency of light shifts as the light propagates through a gravitational field (cf. below). The actual measurements show that free-falling frames are the ones in which light propagates as it does in special relativity.; a derivation can be found in . For the experimental evidence, cf. the section Gravitational time dilation and frequency shift, below The generalization of this statement, namely that the laws of special relativity hold to good approximation in freely falling (and non-rotating) reference frames, is known as the Einstein equivalence principle, a crucial guiding principle for generalizing special-relativistic physics to include gravity.; for an elementary account, see ; there are, however, some differences between the modern version and Einstein's original concept used in the historical derivation of general relativity, cf. 
+
+The same experimental data shows that time as measured by clocks in a gravitational field—, to give the technical term—does not follow the rules of special relativity. In the language of spacetime geometry, it is not measured by the . As in the Newtonian case, this is suggestive of a more general geometry. At small scales, all reference frames that are in free fall are equivalent, and approximately Minkowskian. Consequently, we are dealing with a curved generalization of Minkowski space. The metric tensor that defines the geometry—in particular, how lengths and angles are measured—is not the Minkowski metric of special relativity, it is a generalization known as a semi- or  metric. Furthermore, each Riemannian metric is naturally associated with one particular kind of connection, the , and this is, in fact, the connection that satisfies the equivalence principle and makes space locally Minkowskian (that is, in suitable locally inertial coordinates, the metric is Minkowskian, and its first partial derivatives and the connection coefficients vanish). for the experimental evidence, see once more section Gravitational time dilation and frequency shift. Choosing a different connection with non-zero torsion leads to a modified theory known as 
+
+ Einstein's equations 
+
+Having formulated the relativistic, geometric version of the effects of gravity, the question of gravity's source remains. In Newtonian gravity, the source is mass. In special relativity, mass turns out to be part of a more general quantity called the , which includes both energy and momentum densities as well as stress:  and shear., ,  Using the equivalence principle, this tensor is readily generalized to curved spacetime. Drawing further upon the analogy with geometric Newtonian gravity, it is natural to assume that the  for gravity relates this tensor and the Ricci tensor, which describes a particular class of tidal effects: the change in volume for a small cloud of test particles that are initially at rest, and then fall freely. In special relativity, –momentum corresponds to the statement that the stress–energy tensor is -free. This formula, too, is readily generalized to curved spacetime by replacing partial derivatives with their curved- counterparts, s studied in differential geometry. With this additional condition—the covariant divergence of the stress–energy tensor, and hence of whatever is on the other side of the equation, is zero—the simplest nontrivial set of equations are what are called Einstein's (field) equations:
+{{Equation box 1
+|indent=:
+|title='''Einstein's field equations'''
+|equation=G_{\mu\nu}\equiv R_{\mu\nu} - {\textstyle 1 \over 2}R\,g_{\mu\nu} = \kappa T_{\mu\nu}\,
+|cellpadding
+|border
+|border colour = #50C878
+|background colour = #ECFCF4}}
+
+On the left-hand side is the , G_{\mu\nu}, which is symmetric and a specific divergence-free combination of the Ricci tensor R_{\mu\nu} and the metric. In particular,
+: R=g^{\mu\nu}R_{\mu\nu}
+is the curvature scalar. The Ricci tensor itself is related to the more general  as
+: R_{\mu\nu}={R^\alpha}_{\mu\alpha\nu}.
+
+On the right-hand side, \kappa is a constant and T_{\mu\nu} is the stress–energy tensor. All tensors are written in .; for similar derivations, see sections 1 and 2 of ch. 7 in . The Einstein tensor is the only divergence-free tensor that is a function of the metric coefficients, their first and second derivatives at most, and allows the spacetime of special relativity as a solution in the absence of sources of gravity, cf. . The tensors on both side are of second rank, that is, they can each be thought of as 4×4 matrices, each of which contains ten independent terms; hence, the above represents ten coupled equations. The fact that, as a consequence of geometric relations known as , the Einstein tensor satisfies a further four identities reduces these to six independent equations, e.g.  Matching the theory's prediction to observational results for ary s or, equivalently, assuring that the weak-gravity, low-speed limit is Newtonian mechanics, the proportionality constant \kappa is found to be \kappa={8\pi G}/{c^4}, where G is the  and c the speed of light in vacuum. When there is no matter present, so that the stress–energy tensor vanishes, the results are the vacuum Einstein equations,
+: R_{\mu\nu}=0.
+
+In general relativity, the  of a particle free from all external, non-gravitational force is a particular type of geodesic in curved spacetime. In other words, a freely moving or falling particle always moves along a geodesic.
+
+The geodesic equation is:
+:  {d^2 x^\mu \over ds^2}+\Gamma^\mu {}_{\alpha \beta}{d x^\alpha \over ds}{d x^\beta \over ds}=0,
+where s is a scalar parameter of motion (e.g. the ), and  \Gamma^\mu {}_{\alpha \beta} are  (sometimes called the  coefficients or  coefficients) which is symmetric in the two lower indices. Greek indices may take the values: 0, 1, 2, 3 and the  is used for repeated indices \alpha and \beta. The quantity on the left-hand-side of this equation is the acceleration of a particle, and so this equation is analogous to  which likewise provide formulae for the acceleration of a particle. This equation of motion employs the , meaning that repeated indices are summed (i.e. from zero to three). The Christoffel symbols are functions of the four spacetime coordinates, and so are independent of the velocity or acceleration or other characteristics of a  whose motion is described by the geodesic equation.
+
+ Total force in general relativity 
+
+In general relativity, the effective  of an object of mass ''m'' revolving around a massive central body ''M'' is given by
+: U_f(r) =-\frac{GMm}{r}+\frac{L^{2}}{2mr^{2}}-\frac{GML^{2}}{mc^{2}r^{3}}
+
+A conservative total  can then be obtained as its negative gradient
+: F_f(r)=-\frac{GMm}{r^{2}}+\frac{L^{2}}{mr^{3}}-\frac{3GML^{2}}{mc^{2}r^{4}}
+where ''L'' is the . The first term represents the force of Newtonian gravity, which is described by the inverse-square law. The second term represents the  in the circular motion. The third term represents the relativistic effect.
+
+ Alternatives to general relativity 
+
+There are  built upon the same premises, which include additional rules and/or constraints, leading to different field equations. Examples are Whitehead's theory, , , ''f''(''R'') gravity and ., , , and , respectively
+
+ Definition and basic applications 
+
+The derivation outlined in the previous section contains all the information needed to define general relativity, describe its key properties, and address a question of crucial importance in physics, namely how the theory can be used for model-building.
+
+ Definition and basic properties 
+
+General relativity is a metric theory of gravitation. At its core are , which describe the relation between the geometry of a four-dimensional  representing spacetime, and the distribution of energy, momentum and stress contained in that spacetime.,  or, in fact, any other textbook on general relativity Phenomena that in classical mechanics are ascribed to the action of the force of gravity (such as , orbital motion, and  trajectories), correspond to inertial motion within a curved geometry of spacetime in general relativity; there is no gravitational force deflecting objects from their natural, straight paths. Instead, gravity corresponds to changes in the properties of space and time, which in turn changes the straightest-possible paths that objects will naturally follow.At least approximately, cf.  The curvature is, in turn, caused by the stress–energy of matter. Paraphrasing the relativist , spacetime tells matter how to move; matter tells spacetime how to curve.
+
+While general relativity replaces the scalar gravitational potential of classical physics by a symmetric rank-two , the latter reduces to the former in certain limiting cases. For weak gravitational fields and low speed relative to the speed of light, the theory's predictions converge on those of Newton's law of universal gravitation.
+
+As it is constructed using tensors, general relativity exhibits : its laws—and further laws formulated within the general relativistic framework—take on the same form in all s. Furthermore, the theory does not contain any invariant geometric background structures, i.e. it is background-independent. It thus satisfies a more stringent , namely that the laws of physics are the same for all observers.For the (conceptual and historical) difficulties in defining a general principle of relativity and separating it from the notion of general covariance, see  Locally, as expressed in the equivalence principle, spacetime is Minkowskian, and the laws of physics exhibit .section 5 in ch. 12 of 
+
+ Model-building and basic applications
+
+The core concept of general-relativistic model-building is that of a solution of Einstein's equations. Given both Einstein's equations and suitable equations for the properties of matter, such a solution consists of a specific semi- (usually defined by giving the metric in specific coordinates), and specific matter fields defined on that manifold. Matter and geometry must satisfy Einstein's equations, so in particular, the matter's stress–energy tensor must be divergence-free. The matter must, of course, also satisfy whatever additional equations were imposed on its properties. In short, such a solution is a model universe that satisfies the laws of general relativity, and possibly additional laws governing whatever matter might be present.Introductory chapters of 
+
+Einstein's equations are nonlinear partial differential equations and, as such, difficult to solve exactly.A review showing Einstein's equation in the broader context of other PDEs with physical significance is  Nevertheless, a number of exact solutions are known, although only a few have direct physical applications.For background information and a list of solutions, cf. ; a more recent review can be found in  The best-known exact solutions, and also those most interesting from a physics point of view, are the , the  and the , each corresponding to a certain type of black hole in an otherwise empty universe, and the Friedmann–Lemaître–Robertson–Walker and s, each describing an expanding cosmos. Exact solutions of great theoretical interest include the Gödel universe (which opens up the intriguing possibility of  in curved spacetimes), the Taub–NUT solution (a model universe that is homogeneous, but ), and  (which has recently come to prominence in the context of what is called the ).Brief descriptions of these and further interesting solutions can be found in 
+
+Given the difficulty of finding exact solutions, Einstein's field equations are also solved frequently by  on a computer, or by considering small perturbations of exact solutions. In the field of , powerful computers are employed to simulate the geometry of spacetime and to solve Einstein's equations for interesting situations such as two colliding black holes. In principle, such methods may be applied to any system, given sufficient computer resources, and may address fundamental questions such as naked singularities. Approximate solutions may also be found by perturbation theories such as For instance  and its generalization, the , both of which were developed by Einstein. The latter provides a systematic approach to solving for the geometry of a spacetime that contains a distribution of matter that moves slowly compared with the speed of light. The expansion involves a series of terms; the first terms represent Newtonian gravity, whereas the later terms represent ever smaller corrections to Newton's theory due to general relativity. An extension of this expansion is the parametrized post-Newtonian (PPN) formalism, which allows quantitative comparisons between the predictions of general relativity and alternative theories., 
+
+ Consequences of Einstein's theory 
+
+General relativity has a number of physical consequences. Some follow directly from the theory's axioms, whereas others have become clear only in the course of many years of research that followed Einstein's initial publication.
+
+ Gravitational time dilation and frequency shift 
+
+thumb|Schematic representation of the gravitational redshift of a light wave escaping from the surface of a massive body
+Assuming that the equivalence principle holds, and . Einstein derived these effects using the equivalence principle as early as 1907, cf.  and the description in  gravity influences the passage of time. Light sent down into a  is ed, whereas light sent in the opposite direction (i.e., climbing out of the gravity well) is ed; collectively, these two effects are known as the gravitational frequency shift. More generally, processes close to a massive body run more slowly when compared with processes taking place farther away; this effect is known as gravitational time dilation.; 
+
+Gravitational redshift has been measured in the laboratory, see , ; ; a list of further experiments is given in  and using astronomical observations.; the most recent and most accurate Sirius B measurements are published in . Gravitational time dilation in the Earth's gravitational field has been measured numerous times using ,Starting with the ,  and , and culminating in the  experiment; an overview of experiments can be found in  while ongoing validation is provided as a side effect of the operation of the  (GPS).GPS is continually tested by comparing atomic clocks on the ground and aboard orbiting satellites; for an account of relativistic effects, see  and  Tests in stronger gravitational fields are provided by the observation of s. and  All results are in agreement with general relativity.General overviews can be found in section 2.1. of Will 2006; Will 2003, pp. 32–36;  However, at the existing level of accuracy, these observations cannot distinguish between general relativity and other theories in which the equivalence principle is valid.
+
+In the vicinity of a non-rotating sphere, the time dilation due to gravity, derived from the Schwarzschild metric, is 
+t_0 = t_f \sqrt{1 - \frac{2GM}{rc^2}}
+where
+* t_0 is the proper time between two events for an observer close to the massive sphere, i.e. deep within the gravitational field
+* t_f is the coordinate time between the events for an observer at an arbitrarily large distance from the massive object (this assumes the far-away observer is using , a coordinate system where a clock at infinite distance from the massive sphere would tick at one second per second of coordinate time, while closer clocks would tick at less than that rate),
+* G is the ,
+* M is the  of the object creating the gravitational field,
+* r is the radial coordinate of the observer within the gravitational field (this coordinate is analogous to the classical distance from the center of the object, but is actually a Schwarzschild coordinate; the equation in this form has real solutions for r > r_{\rm s}),
+* c is the .
+
+ Light deflection and gravitational time delay 
+
+thumb|left|upright|Deflection of light (sent out from the location shown in blue) near a compact body (shown in gray)
+General relativity predicts that the path of light will follow the curvature of spacetime as it passes near a massive object. This effect was initially confirmed by observing the light of stars or distant quasars being deflected as it passes the .Cf.  for the classic early measurements by Arthur Eddington's expeditions. For an overview of more recent measurements, see . For the most precise direct modern observations using quasars, cf. 
+
+This and related predictions follow from the fact that light follows what is called a light-like or null geodesic—a generalization of the straight lines along which light travels in classical physics. Such geodesics are the generalization of the invariance of lightspeed in special relativity.This is not an independent axiom; it can be derived from Einstein's equations and the Maxwell Lagrangian using a , cf.  As one examines suitable model spacetimes (either the exterior Schwarzschild solution or, for more than a single mass, the post-Newtonian expansion), several effects of gravity on light propagation emerge. Although the bending of light can also be derived by extending the universality of free fall to light,; for the historical examples, ; in fact, Einstein published one such derivation as . Such calculations tacitly assume that the geometry of space is Euclidean, cf.  the angle of deflection resulting from such calculations is only half the value given by general relativity.From the standpoint of Einstein's theory, these derivations take into account the effect of gravity on time, but not its consequences for the warping of space, cf. 
+
+Closely related to light deflection is the Shapiro time delay, the phenomenon that light signals take longer to move through a gravitational field than they would in the absence of that field. There have been numerous successful tests of this prediction.For the Sun's gravitational field using radar signals reflected from planets such as  and Mercury, cf. , ; for signals actively sent back by space probes ( measurements), cf. ; for an overview, see ; for more recent measurements using signals received from a  that is part of a binary system, the gravitational field causing the time delay being that of the other pulsar, cf.  In the  (PPN), measurements of both the deflection of light and the gravitational time delay determine a parameter called ''γ'', which encodes the influence of gravity on the geometry of space.
+
+ Gravitational waves 
+
+thumb|Ring of test particles deformed by a passing (linearized, amplified for better visibility) gravitational wave
+Predicted in 1916 by Albert Einstein, there are gravitational waves: ripples in the metric of spacetime that propagate at the speed of light. These are one of several analogies between weak-field gravity and electromagnetism in that, they are analogous to s. On 11 February 2016, the Advanced LIGO team announced that they had directly detected gravitational waves from a pair of black holes merging.
+
+The simplest type of such a wave can be visualized by its action on a ring of freely floating particles. A sine wave propagating through such a ring towards the reader distorts the ring in a characteristic, rhythmic fashion (animated image to the right).Most advanced textbooks on general relativity contain a description of these properties, e.g.  Since Einstein's equations are , arbitrarily strong gravitational waves do not obey , making their description difficult. However, linear approximations of gravitational waves are sufficiently accurate to describe the exceedingly weak waves that are expected to arrive here on Earth from far-off cosmic events, which typically result in relative distances increasing and decreasing by  or less. Data analysis methods routinely make use of the fact that these linearized waves can be Fourier decomposed.For example 
+
+Some exact solutions describe gravitational waves without any approximation, e.g., a wave train traveling through empty space or s, varieties of an expanding cosmos filled with gravitational waves.,  But for gravitational waves produced in astrophysically relevant situations, such as the merger of two black holes, numerical methods are the only way to construct appropriate models.See  for a brief introduction to the methods of numerical relativity, and  for the connection with gravitational wave astronomy
+
+ Orbital effects and the relativity of direction 
+
+General relativity differs from classical mechanics in a number of predictions concerning orbiting bodies. It predicts an overall rotation () of planetary orbits, as well as orbital decay caused by the emission of gravitational waves and effects related to the relativity of direction.
+
+ Precession of apsides 
+
+thumb|upright=1.05|Newtonian (red) vs. Einsteinian orbit (blue) of a lone planet orbiting a star. The influence of other planets is ignored.
+
+In general relativity, the apsides of any orbit (the point of the orbiting body's closest approach to the system's ) will precess; the orbit is not an , but akin to an ellipse that rotates on its focus, resulting in a rose curve-like shape (see image). Einstein first derived this result by using an approximate metric representing the Newtonian limit and treating the orbiting body as a . For him, the fact that his theory gave a straightforward explanation of Mercury's anomalous perihelion shift, discovered earlier by  in 1859, was important evidence that he had at last identified the correct form of the gravitational field equations., 
+
+The effect can also be derived by using either the exact Schwarzschild metric (describing spacetime around a spherical mass) or the much more general . It is due to the influence of gravity on the geometry of space and to the contribution of  to a body's gravity (encoded in the  of Einstein's equations).In consequence, in the parameterized post-Newtonian formalism (PPN), measurements of this effect determine a linear combination of the terms β and γ, cf.  and  Relativistic precession has been observed for all planets that allow for accurate precession measurements (Mercury, Venus, and Earth),The most precise measurements are  measurements of planetary positions; see , , ; for an overview,  as well as in binary pulsar systems, where it is larger by five orders of magnitude.
+
+In general relativity the perihelion shift \sigma, expressed in radians per revolution, is approximately given by:
+: \sigma=\frac {24\pi^3L^2} {T^2c^2(1-e^2)} \ ,
+where:
+* L is the 
+* T is the 
+* c is the speed of light in a vacuum
+* e is the 
+
+ Orbital decay 
+
+thumb|upright=0.8|Orbital decay for PSR J0737−3039: time shift, tracked over 16 years (2021).
+
+According to general relativity, a binary system will emit gravitational waves, thereby losing energy. Due to this loss, the distance between the two orbiting bodies decreases, and so does their orbital period. Within the  or for ordinary s, the effect is too small to be observable. This is not the case for a close binary pulsar, a system of two orbiting s, one of which is a : from the pulsar, observers on Earth receive a regular series of radio pulses that can serve as a highly accurate clock, which allows precise measurements of the orbital period. Because neutron stars are immensely compact, significant amounts of energy are emitted in the form of gravitational radiation., , 
+
+The first observation of a decrease in orbital period due to the emission of gravitational waves was made by Hulse and Taylor, using the binary pulsar  they had discovered in 1974. This was the first detection of gravitational waves, albeit indirect, for which they were awarded the 1993  in physics.; for the pulsar discovery, see ; for the initial evidence for gravitational radiation, see  Since then, several other binary pulsars have been found, in particular the double pulsar , where both stars are pulsars and which was last reported to also be in agreement with general relativity in 2021 after 16 years of observations.
+
+ Geodetic precession and frame-dragging 
+
+Several relativistic effects are directly related to the relativity of direction.,  One is geodetic precession: the axis direction of a  in free fall in curved spacetime will change when compared, for instance, with the direction of light received from distant stars—even though such a gyroscope represents the way of keeping a direction as stable as possible ("").,  For the Moon–Earth system, this effect has been measured with the help of .,  More recently, it has been measured for test masses aboard the satellite  to a precision of better than 0.3%.A mission description can be found in ; a first post-flight evaluation is given in ; further updates will be available on the mission website .
+
+Near a rotating mass, there are gravitomagnetic or  effects. A distant observer will determine that objects close to the mass get "dragged around". This is most extreme for rotating black holes where, for any object entering a zone known as the , rotation is inevitable.,  Such effects can again be tested through their influence on the orientation of gyroscopes in free fall., ; for a more recent review, see  Somewhat controversial tests have been performed using the  satellites, confirming the relativistic prediction., ,  Also the  probe around Mars has been used., 
+
+ Astrophysical applications 
+
+ Gravitational lensing 
+
+thumb|upright=0.88|[[Einstein cross: four images of the same astronomical object, produced by a gravitational lens]]
+The deflection of light by gravity is responsible for a new class of astronomical phenomena. If a massive object is situated between the astronomer and a distant target object with appropriate mass and relative distances, the astronomer will see multiple distorted images of the target. Such effects are known as gravitational lensing.For overviews of gravitational lensing and its applications, see  and  Depending on the configuration, scale, and mass distribution, there can be two or more images, a bright ring known as an , or partial rings called arcs.For a simple derivation, see ; cf. 
+The earliest example was discovered in 1979; since then, more than a hundred gravitational lenses have been observed.Images of all the known lenses can be found on the pages of the CASTLES project,  Even if the multiple images are too close to each other to be resolved, the effect can still be measured, e.g., as an overall brightening of the target object; a number of such " events" have been observed.
+
+Gravitational lensing has developed into a tool of . It is used to detect the presence and distribution of , provide a "natural telescope" for observing distant galaxies, and to obtain an independent estimate of the . Statistical evaluations of lensing data provide valuable insight into the structural evolution of galaxies.
+
+ Gravitational-wave astronomy 
+
+thumb|upright=0.8|Artist's impression of the space-borne gravitational wave detector [[Laser Interferometer Space Antenna|LISA]]
+Observations of binary pulsars provide strong indirect evidence for the existence of gravitational waves (see Orbital decay, above). Detection of these waves is a major goal of contemporary relativity-related research., ,  Several land-based s are in operation, for example the interferometric detectors ,  (two detectors),  and VIRGO. Various s are using s to detect gravitational waves in the 10−9 to 10−6  frequency range, which originate from binary supermassive blackholes. A European space-based detector, eLISA / NGO, is under development, with a precursor mission () having launched in December 2015.
+
+Observations of gravitational waves promise to complement observations in the . They are expected to yield information about black holes and other dense objects such as neutron stars and white dwarfs, about certain kinds of  implosions, and about processes in the very early universe, including the signature of certain types of hypothetical . In February 2016, the Advanced LIGO team announced that they had detected gravitational waves from a black hole merger.
+
+ Black holes and other compact objects 
+
+thumb|left|Simulation based on the equations of general relativity: a star collapsing to form a black hole while emitting gravitational waves
+Whenever the ratio of an object's mass to its radius becomes sufficiently large, general relativity predicts the formation of a black hole, a region of space from which nothing, not even light, can escape. In the accepted models of , neutron stars of around 1.4 es, and stellar black holes with a few to a few dozen solar masses, are thought to be the final state for the evolution of massive stars. Usually a galaxy has one  with a few million to a few billion solar masses in its center, and its presence is thought to have played an important role in the formation of the galaxy and larger cosmic structures. and the accompanying summary 
+
+Astronomically, the most important property of compact objects is that they provide a supremely efficient mechanism for converting gravitational energy into electromagnetic radiation. Accretion, the falling of dust or gaseous matter onto stellar or supermassive black holes, is thought to be responsible for some spectacularly luminous astronomical objects, especially diverse kinds of active galactic nuclei on galactic scales and stellar-size objects such as microquasars.For the basic mechanism, see ; for more about the different types of astronomical objects associated with this, cf.  In particular, accretion can lead to s, focused beams of highly energetic particles that are being flung into space at almost light speed.For a review, see . To a distant observer, some of these jets even appear to move faster than light; this, however, can be explained as an optical illusion that does not violate the tenets of relativity, see 
+General relativity plays a central role in modelling all these phenomena,For stellar end states, cf.  or, for more recent numerical work, ; for supernovae, there are still major problems to be solved, cf. ; for simulating accretion and the formation of jets, cf. . Also, relativistic lensing effects are thought to play a role for the signals received from s, cf.  and observations provide strong evidence for the existence of black holes with the properties predicted by the theory.The evidence includes limits on compactness from the observation of accretion-driven phenomena (""), see , observations of stellar dynamics in the center of our own  galaxy, cf. , and indications that at least some of the compact objects in question appear to have no solid surface, which can be deduced from the examination of s for which the central compact object is either a neutron star or a black hole; cf.  for an overview, . Observations of the "shadow" of the Milky Way galaxy's central black hole horizon are eagerly sought, cf. 
+
+Black holes are also sought-after targets in the search for gravitational waves (cf. section , above). Merging black hole binaries should lead to some of the strongest gravitational wave signals reaching detectors on Earth, and the phase directly before the merger ("chirp") could be used as a "" to deduce the distance to the merger events–and hence serve as a probe of cosmic expansion at large distances. The gravitational waves produced as a stellar black hole plunges into a supermassive one should provide direct information about the supermassive black hole's geometry.
+
+ Cosmology 
+
+thumb|This blue horseshoe is a distant galaxy that has been magnified and warped into a nearly complete ring by the strong gravitational pull of the massive foreground luminous red galaxy.
+The existing models of cosmology are based on , which include the cosmological constant \Lambda since it has important influence on the large-scale dynamics of the cosmos,
+: R_{\mu\nu} - {\textstyle 1 \over 2}R\,g_{\mu\nu} + \Lambda\ g_{\mu\nu} = \frac{8\pi G}{c^{4}}\, T_{\mu\nu} 
+where ''g_{\mu\nu}'' is the spacetime metric.; cf.   and homogeneous solutions of these enhanced equations, the Friedmann–Lemaître–Robertson–Walker solutions, allow physicists to model a universe that has evolved over the past 14&nbsp;billion&nbsp;years from a hot, early Big Bang phase.; use of these models is justified by the fact that, at large scales of around hundred million s and more, our universe indeed appears to be isotropic and homogeneous, cf.  Once a small number of parameters (for example the universe's mean matter density) have been fixed by astronomical observation,E.g. with  data, see  further observational data can be used to put the models to the test.These tests involve the separate observations detailed further on, see, e.g., fig. 2 in  Predictions, all successful, include the initial abundance of chemical elements formed in a period of primordial nucleosynthesis,; for a recent account of predictions, see ; an accessible account can be found in ; compare with the observations in , , , and  the large-scale structure of the universe,, ,  and the existence and properties of a "thermal echo" from the early cosmos, the ., for a pedagogical introduction, see ; for the initial detection, see  and, for precision measurements by satellite observatories,  (COBE) and  (WMAP). Future measurements could also reveal evidence about gravitational waves in the early universe; this additional information is contained in the background radiation's polarization, cf.  and 
+
+Astronomical observations of the cosmological expansion rate allow the total amount of matter in the universe to be estimated, although the nature of that matter remains mysterious in part. About 90% of all matter appears to be dark matter, which has mass (or, equivalently, gravitational influence), but does not interact electromagnetically and, hence, cannot be observed directly.Evidence for this comes from the determination of cosmological parameters and additional observations involving the dynamics of galaxies and galaxy clusters cf. , evidence from gravitational lensing, cf. , and simulations of large-scale structure formation, see  There is no generally accepted description of this new kind of matter, within the framework of known , ; in particular, observations indicate that all but a negligible portion of that matter is not in the form of the usual s ("non-ic matter"), cf.  or otherwise.Namely, some physicists have questioned whether or not the evidence for dark matter is, in fact, evidence for deviations from the Einsteinian (and the Newtonian) description of gravity cf. the overview in  Observational evidence from redshift surveys of distant supernovae and measurements of the cosmic background radiation also show that the evolution of the universe is significantly influenced by a cosmological constant resulting in an acceleration of cosmic expansion or, equivalently, by a form of energy with an unusual , known as , the nature of which remains unclear.; an accessible overview is given in . Here, too, scientists have argued that the evidence indicates not a new form of energy, but the need for modifications in our cosmological models, cf. ; aforementioned modifications need not be modifications of general relativity, they could, for example, be modifications in the way we treat the inhomogeneities in the universe, cf. 
+
+An inflationary phase,A good introduction is ; for a more recent review, see  an additional phase of strongly accelerated expansion at cosmic times of around 10−33 seconds, was hypothesized in 1980 to account for several puzzling observations that were unexplained by classical cosmological models, such as the nearly perfect homogeneity of the cosmic background radiation.More precisely, these are the , the , and the ; a pedagogical introduction can be found in , see also  Recent measurements of the cosmic background radiation have resulted in the first evidence for this scenario. However, there are a bewildering variety of possible inflationary scenarios, which cannot be restricted by existing observations.More concretely, the  function that is crucial to determining the dynamics of the  is simply postulated, but not derived from an underlying physical theory An even larger question is the physics of the earliest universe, prior to the inflationary phase and close to where the classical models predict the big bang singularity. An authoritative answer would require a complete theory of quantum gravity, which has not yet been developed (cf. the section on quantum gravity, below).
+
+ Exotic solutions: time travel, warp drives 
+
+ showed that solutions to Einstein's equations exist that contain s (CTCs), which allow for loops in time. The solutions require extreme physical conditions unlikely ever to occur in practice, and it remains an open question whether further laws of physics will eliminate them completely. Since then, other—similarly impractical—GR solutions containing CTCs have been found, such as the  and traversable wormholes.  introduced , which is an assumption beyond those of standard general relativity to prevent .
+
+Some  such as  offer examples of  but these solutions require exotic matter distribution, and generally suffer from semiclassical instability.
+
+ Advanced concepts 
+
+ Asymptotic symmetries 
+
+The spacetime symmetry group for  is the , which is a ten-dimensional group of three Lorentz boosts, three rotations, and four spacetime translations. It is logical to ask what symmetries, if any, might apply in General Relativity. A tractable case might be to consider the symmetries of spacetime as seen by observers located far away from all sources of the gravitational field. The naive expectation for asymptotically flat spacetime symmetries might be simply to extend and reproduce the symmetries of flat spacetime of special relativity, ''viz.'', the Poincaré group.
+
+In 1962 , M. G. van der Burg, A. W. Metzner and  addressed this asymptotic symmetry problem in order to investigate the flow of energy at infinity due to propagating s. Their first step was to decide on some physically sensible boundary conditions to place on the gravitational field at light-like infinity to characterize what it means to say a metric is asymptotically flat, making no ''a priori'' assumptions about the nature of the asymptotic symmetry group—not even the assumption that such a group exists. Then after designing what they considered to be the most sensible boundary conditions, they investigated the nature of the resulting asymptotic symmetry transformations that leave invariant the form of the boundary conditions appropriate for asymptotically flat gravitational fields. What they found was that the asymptotic symmetry transformations actually do form a group and the structure of this group does not depend on the particular gravitational field that happens to be present. This means that, as expected, one can separate the kinematics of spacetime from the dynamics of the gravitational field at least at spatial infinity. The puzzling surprise in 1962 was their discovery of a rich infinite-dimensional group (the so-called BMS group) as the asymptotic symmetry group, instead of the finite-dimensional Poincaré group, which is a subgroup of the BMS group. Not only are the Lorentz transformations asymptotic symmetry transformations, there are also additional transformations that are not Lorentz transformations but are asymptotic symmetry transformations. In fact, they found an additional infinity of transformation generators known as ''supertranslations''. This implies the conclusion that General Relativity (GR) does ''not'' reduce to special relativity in the case of weak fields at long distances. It turns out that the BMS symmetry, suitably modified, could be seen as a restatement of the universal  in  (QFT), which relates universal infrared (soft) QFT with GR asymptotic spacetime symmetries.
+
+ Causal structure and global geometry 
+
+thumb|Penrose–Carter diagram of an infinite [[Minkowski space|Minkowski universe]]
+In general relativity, no material body can catch up with or overtake a light pulse. No influence from an event ''A'' can reach any other location ''X'' before light sent out at ''A'' to ''X''. In consequence, an exploration of all light worldlines (null geodesics) yields key information about the spacetime's causal structure. This structure can be displayed using Penrose–Carter diagrams in which infinitely large regions of space and infinite time intervals are shrunk ("compactified") so as to fit onto a finite map, while light still travels along diagonals as in standard s., , 
+
+Aware of the importance of causal structure,  and others developed what is known as global geometry. In global geometry, the object of study is not one particular solution (or family of solutions) to Einstein's equations. Rather, relations that hold true for all geodesics, such as the , and additional non-specific assumptions about the nature of matter (usually in the form of ) are used to derive general results. and 
+
+ Event horizons 
+
+Using global geometry, some spacetimes can be shown to contain boundaries called horizons, which demarcate one region from the rest of spacetime. The best-known examples are black holes: if mass is compressed into a sufficiently compact region of space (as specified in the , the relevant length scale is the , given by the equation  r_\text{s} = \frac{2 G M}{c^2} ,; for more recent numerical studies, see ), no light from inside can escape to the outside. Since no object can overtake a light pulse, all interior matter is imprisoned as well. Passage from the exterior to the interior is still possible, showing that the boundary, the black hole's ''horizon'', is not a physical barrier.. A more exact mathematical description distinguishes several kinds of horizon, notably event horizons and s cf.  or ; there are also more intuitive definitions for isolated systems that do not require knowledge of spacetime properties at infinity, cf. 
+
+thumb|The ergosphere of a rotating black hole, which plays a key role when it comes to extracting energy from such a black hole
+Early studies of black holes relied on explicit solutions of Einstein's equations, notably the spherically symmetric Schwarzschild solution (used to describe a static black hole) and the axisymmetric  (used to describe a rotating, stationary black hole, and introducing interesting features such as the ergosphere). Using global geometry, later studies have revealed more general properties of black holes. With time they become rather simple objects characterized by eleven parameters specifying: electric charge, mass–energy, , , and location at a specified time. This is stated by the black hole uniqueness theorem: "black holes have no hair", that is, no distinguishing marks like the hairstyles of humans. Irrespective of the complexity of a gravitating object collapsing to form a black hole, the object that results (having emitted gravitational waves) is very simple.For first steps, cf. ; see  or  for a derivation, and  as well as  as overviews of more recent results
+
+Even more remarkably, there is a general set of laws known as , which is analogous to the . For instance, by the second law of black hole mechanics, the area of the event horizon of a general black hole will never decrease with time, analogous to the  of a thermodynamic system. This limits the energy that can be extracted by classical means from a rotating black hole (e.g. by the ).The laws of black hole mechanics were first described in ; a more pedagogical presentation can be found in ; for a more recent review, see . A thorough, book-length introduction including an introduction to the necessary mathematics . For the Penrose process, see  There is strong evidence that the laws of black hole mechanics are, in fact, a subset of the laws of thermodynamics, and that the black hole area is proportional to its entropy.,  This leads to a modification of the original laws of black hole mechanics: for instance, as the second law of black hole mechanics becomes part of the second law of thermodynamics, it is possible for the black hole area to decrease as long as other processes ensure that entropy increases overall. As thermodynamical objects with nonzero temperature, black holes should emit . Semiclassical calculations indicate that indeed they do, with the surface gravity playing the role of temperature in . This radiation is known as  (cf. the quantum theory section, below).The fact that black holes radiate, quantum mechanically, was first derived in ; a more thorough derivation can be found in . A review is given in 
+
+There are many other types of horizons. In an expanding universe, an observer may find that some regions of the past cannot be observed (""), and some regions of the future cannot be influenced (event horizon). Even in flat Minkowski space, when described by an accelerated observer (), there will be horizons associated with a semiclassical radiation known as Unruh radiation.Horizons: cf. . Unruh effect: , cf. 
+
+ Singularities 
+
+Another general feature of general relativity is the appearance of spacetime boundaries known as singularities. Spacetime can be explored by following up on timelike and lightlike geodesics—all possible ways that light and particles in free fall can travel. But some solutions of Einstein's equations have "ragged edges"—regions known as spacetime singularities, where the paths of light and falling particles come to an abrupt end, and geometry becomes ill-defined. In the more interesting cases, these are "curvature singularities", where geometrical quantities characterizing spacetime curvature, such as the , take on infinite values.,  Well-known examples of spacetimes with future singularities—where worldlines end—are the Schwarzschild solution, which describes a singularity inside an eternal static black hole,; a more extensive treatment of this solution can be found in  or the Kerr solution with its ring-shaped singularity inside an eternal rotating black hole.; for a more extensive treatment, cf.  The Friedmann–Lemaître–Robertson–Walker solutions and other spacetimes describing universes have past singularities on which worldlines begin, namely Big Bang singularities, and some have future singularities () as well.; a closer look at the singularity itself is taken in 
+
+Given that these examples are all highly symmetric—and thus simplified—it is tempting to conclude that the occurrence of singularities is an artifact of idealization.Here one should remind to the well-known fact that the important "quasi-optical" singularities of the so-called s of many wave equations, namely the "caustics", are resolved into finite peaks beyond that approximation. The famous , proved using the methods of global geometry, say otherwise: singularities are a generic feature of general relativity, and unavoidable once the collapse of an object with realistic matter properties has proceeded beyond a certain stageNamely when there are s, cf.  and also at the beginning of a wide class of expanding universes. However, the theorems say little about the properties of singularities, and much of current research is devoted to characterizing these entities' generic structure (hypothesized e.g. by the BKL conjecture).The conjecture was made in ; for a more recent review, see . An accessible exposition is given by  The  states that all realistic future singularities (no perfect symmetries, matter with realistic properties) are safely hidden away behind a horizon, and thus invisible to all distant observers. While no formal proof yet exists, numerical simulations offer supporting evidence of its validity.The restriction to future singularities naturally excludes initial singularities such as the big bang singularity, which in principle be visible to observers at later cosmic time. The cosmic censorship conjecture was first presented in ; a textbook-level account is given in . For numerical results, see the review 
+
+ Evolution equations 
+
+Each solution of Einstein's equation encompasses the whole history of a universe—it is not just some snapshot of how things are, but a whole, possibly matter-filled, spacetime. It describes the state of matter and geometry everywhere and at every moment in that particular universe. Due to its general covariance, Einstein's theory is not sufficient by itself to determine the  of the metric tensor. It must be combined with a , which is analogous to  in other field theories.
+
+To understand Einstein's equations as partial differential equations, it is helpful to formulate them in a way that describes the evolution of the universe over time. This is done in "3+1" formulations, where spacetime is split into three space dimensions and one time dimension. The best-known example is the .; for a pedagogical introduction, see  These decompositions show that the spacetime evolution equations of general relativity are well-behaved: solutions always exist, and are uniquely defined, once suitable initial conditions have been specified. and ; for a pedagogical introduction, see ; an online review can be found in  Such formulations of Einstein's field equations are the basis of numerical relativity.; for a review of the basics of numerical relativity, including the problems arising from the peculiarities of Einstein's equations, see 
+
+ Global and quasi-local quantities 
+
+The notion of evolution equations is intimately tied in with another aspect of general relativistic physics. In Einstein's theory, it turns out to be impossible to find a general definition for a seemingly simple property such as a system's total mass (or energy). The main reason is that the gravitational field—like any physical field—must be ascribed a certain energy, but that it proves to be fundamentally impossible to localize that energy.
+
+Nevertheless, there are possibilities to define a system's total mass, either using a hypothetical "infinitely distant observer" () or suitable symmetries ().; for a pedagogical introduction, see ; although defined in a totally different way, it can be shown to be equivalent to the ADM mass for stationary spacetimes, cf.  If one excludes from the system's total mass the energy being carried away to infinity by gravitational waves, the result is the Bondi mass at null infinity.For a pedagogical introduction, see  Just as in classical physics, it can be shown that these masses are positive.; this is important for questions of stability—if there were  states, then flat, empty Minkowski space, which has mass zero, could evolve into these states Corresponding global definitions exist for momentum and angular momentum. There have also been a number of attempts to define ''quasi-local'' quantities, such as the mass of an isolated system formulated using only quantities defined within a finite region of space containing that system. The hope is to obtain a quantity useful for general statements about s, such as a more precise formulation of the hoop conjecture.Such quasi-local mass–energy definitions are the , , or Penrose's quasi-local energy–momentum based on twistor methods; cf. the review article 
+
+ Relationship with quantum theory 
+
+If general relativity were considered to be one of the two pillars of modern physics, then quantum theory, the basis of understanding matter from elementary particles to , would be the other.An overview of quantum theory can be found in standard textbooks such as ; a more elementary account is given in  However, how to reconcile quantum theory with general relativity is still an open question.
+
+ Quantum field theory in curved spacetime 
+
+Ordinary quantum field theories, which form the basis of modern elementary particle physics, are defined in flat Minkowski space, which is an excellent approximation when it comes to describing the behavior of microscopic particles in weak gravitational fields like those found on Earth., , ; a more accessible overview is  In order to describe situations in which gravity is strong enough to influence (quantum) matter, yet not strong enough to require quantization itself, physicists have formulated quantum field theories in curved spacetime. These theories rely on general relativity to describe a curved background spacetime, and define a generalized quantum field theory to describe the behavior of quantum matter within that spacetime.,  Using this formalism, it can be shown that black holes emit a blackbody spectrum of particles known as  leading to the possibility that they evaporate over time.For Hawking radiation , ; an accessible introduction to black hole evaporation can be found in  As briefly mentioned above, this radiation plays an important role for the thermodynamics of black holes.
+
+ Quantum gravity 
+
+left|thumb|upright|Projection of a [[Calabi–Yau manifold, one of the ways of compactifying the extra dimensions posited by string theory]]
+
+The demand for consistency between a quantum description of matter and a geometric description of spacetime,Put simply, matter is the source of spacetime curvature, and once matter has quantum properties, we can expect spacetime to have them as well. Cf.  as well as the appearance of singularities (where curvature length scales become microscopic), indicate the need for a full theory of quantum gravity: for an adequate description of the interior of black holes, and of the very early universe, a theory is required in which gravity and the associated geometry of spacetime are described in the language of quantum physics. Despite major efforts, no complete and consistent theory of quantum gravity is currently known, even though a number of candidates exist.A timeline and overview can be found in 
+
+Attempts to generalize ordinary quantum field theories, used in elementary particle physics to describe fundamental interactions, so as to include gravity have led to serious problems. Some have argued that at low energies, this approach proves successful, in that it results in an acceptable effective (quantum) field theory of gravity. At very high energies, however, the perturbative results are badly divergent and lead to models devoid of predictive power ("perturbative non-renormalizability").In particular, a perturbative technique known as , an integral part of deriving predictions which take into account higher-energy contributions, cf. , fails in this case; cf. , ; for a recent comprehensive review of the failure of perturbative renormalizability for quantum gravity see 
+
+thumb|upright|Simple [[spin network of the type used in loop quantum gravity]]
+One attempt to overcome these limitations is , a quantum theory not of s, but of minute one-dimensional extended objects.An accessible introduction at the undergraduate level can be found in ; more complete overviews can be found in  and  The theory promises to be a unified description of all particles and interactions, including gravity;At the energies reached in current experiments, these strings are indistinguishable from point-like particles, but, crucially, different modes of oscillation of one and the same type of fundamental string appear as particles with different (electric and other) charges, e.g. . The theory is successful in that one mode will always correspond to a , the  of gravity, e.g.  the price to pay is unusual features such as six extra dimensions of space in addition to the usual three. In what is called the , it was conjectured that both string theory and a unification of general relativity and  known as  form part of a hypothesized eleven-dimensional model known as , which would constitute a uniquely defined and consistent theory of quantum gravity., 
+
+Another approach starts with the  procedures of quantum theory. Using the initial-value-formulation of general relativity (cf. evolution equations above), the result is the  (an analogue of the ) which turns out to be ill-defined without a proper ultraviolet (lattice) cutoff. However, with the introduction of what are now known as ,These variables represent geometric gravity using mathematical analogues of electric and s; cf. ,  this leads to a model known as . Space is represented by a web-like structure called a , evolving over time in discrete steps.For a review, see ; more extensive accounts can be found in ,  as well as in the lecture notes 
+
+Depending on which features of general relativity and quantum theory are accepted unchanged, and on what level changes are introduced,,  there are numerous other attempts to arrive at a viable theory of quantum gravity, some examples being the lattice theory of gravity based on the Feynman Path Integral approach and , dynamical triangulations, , twistor models or the path integral based models of .
+
+thumb|Observation of gravitational waves from binary black hole merger GW150914
+All candidate theories still have major formal and conceptual problems to overcome. They also face the common problem that, as yet, there is no way to put quantum gravity predictions to experimental tests (and thus to decide between the candidates where their predictions vary), although there is hope for this to change as future data from cosmological observations and particle physics experiments becomes available., 
+
+ Current status 
+
+General relativity has emerged as a highly successful model of gravitation and cosmology, which has so far unambiguously fitted observational and experimental data. However, there are strong theoretical reasons to consider the theory to be incomplete.;  The problem of quantum gravity and the question of the reality of spacetime singularities remain open., above Observational data that is taken as evidence for dark energy and dark matter could also indicate the need to consider alternatives or modifications of general relativity.
+
+Even taken as is, general relativity provides many possibilities for further exploration. Mathematical relativists seek to understand the nature of singularities and the fundamental properties of Einstein's equations, while numerical relativists run increasingly powerful computer simulations, such as those describing merging black holes.A review of the various problems and the techniques being developed to overcome them, see  In February 2016, it was announced that gravitational waves were directly detected by the Advanced LIGO team on 14 September 2015.See  for an account up to that year; up-to-date news can be found on the websites of major detector collaborations such as  and For the most recent papers on gravitational wave polarizations of inspiralling compact binaries, see , and ; for a review of work on compact binaries, see  and ; for a general review of experimental tests of general relativity, see . A century after its introduction, general relativity remains a highly active area of research.See, e.g., the journal ''''.
+
+ See also 
+
+*  (warp drive)
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+
+ References 
+
+ Bibliography 
+
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+}}
+* 
+* 
+* 
+* 
+* 
+* ; original paper in Russian: 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+*
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+}}
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+*  See also [https://einsteinpapers.press.princeton.edu/vol2-trans/266 English translation at Einstein Papers Project]
+
+*  See also [https://einsteinpapers.press.princeton.edu/vol6-trans/129 English translation at Einstein Papers Project]
+*  See also [https://einsteinpapers.press.princeton.edu/vol6-trans/433 English translation at Einstein Papers Project]
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* }}
+* }}
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+
+ Further reading 
+
+ Popular books 
+
+*  Reprint of the original 1916 title, with commentary by  and .
+* .
+* 
+* 
+* Foreword by .
+* .
+* 
+
+ Beginning undergraduate textbooks 
+
+*
+*
+
+ Advanced undergraduate textbooks 
+
+*
+*
+*
+*.
+*.
+*
+*.
+*
+*.
+*.
+*.
+*
+
+ Graduate textbooks 
+
+*. Reprinted 2019 by Cambridge University Press, .
+*
+*.
+*
+*.
+* Reprinted 2017 by Princeton University Press, .
+*  
+* 
+* 
+
+ Specialists' books 
+
+*
+*
+*
+*
+*
+
+ Journal articles 
+
+* See also [https://einsteinpapers.press.princeton.edu/vol6-trans/158 English translation at Einstein Papers Project]
+*
+*
+*
+*
+*
+
+ External links 
+
+*[http://www.einstein-online.info/ Einstein Online] &nbsp;– Articles on a variety of aspects of relativistic physics for a general audience; hosted by the 
+*[http://www.geo600.de/ GEO600 home page], the official website of the GEO600 project.
+*[http://www.ligo.caltech.edu/ LIGO Laboratory]
+*[https://web.archive.org/web/20150327100311/http://archive.ncsa.illinois.edu/Cyberia/NumRel/NumRelHome.html NCSA Spacetime Wrinkles]&nbsp;– produced by the numerical relativity group at the NCSA, with an elementary introduction to general relativity
+''''''
+*  (lecture by  recorded 22 September 2008 at ).
+*[https://web.archive.org/web/20160303175347/http://www.luth.obspm.fr/IHP06/ Series of lectures on General Relativity] given in 2006 at the  (introductory/advanced).
+*[https://web.archive.org/web/20070707011024/http://math.ucr.edu/home/baez/gr/ General Relativity Tutorials] by .
+*
+*
+*
+*
+*[https://feynmanlectures.caltech.edu/II_42.html The Feynman Lectures on Physics Vol. II Ch. 42: Curved Space]
+
+'''Particle physics''' or '''high-energy physics''' is the study of fundamental particles and forces that constitute  and . The field also studies combinations of elementary particles up to the scale of  and , while the study of combinations of protons and neutrons is called .
+
+The fundamental particles in the  are classified in the  as s (matter particles) and s (force-carrying particles). There are three generations of fermions, although ordinary matter is made only from the first fermion generation. The first generation consists of up and s which form s and s, and s and s. The three fundamental interactions known to be mediated by bosons are , the , and the .
+
+Quarks form s, but cannot exist on their own. Hadrons that contain an odd number of quarks are called s and those that contain an even number are called s. Two baryons, the  and the , make up most of the mass of ordinary matter. Mesons are unstable and the longest-lived last for only a few hundredths of a . They occur after collisions between particles made of quarks, such as fast-moving protons and neutrons in s. Mesons are also produced in s or other s.
+
+Particles have corresponding s with the same  but with opposite s. For example, the antiparticle of the  is the . The electron has a negative electric charge, the positron has a positive charge. These antiparticles can theoretically form a corresponding form of matter called . Some particles, such as the , are their own antiparticle.
+
+These s are excitations of the quantum fields that also govern their interactions. The dominant theory explaining these fundamental particles and fields, along with their dynamics, is called the . The reconciliation of gravity to the current particle physics theory is not solved; many theories have addressed this problem, such as ,  and supersymmetry theory.
+
+Experimental particle physics is the study of these particles in radioactive processes and in particle accelerators such as the . Theoretical particle physics is the study of these particles in the context of  and quantum theory. The two are closely interrelated: the  was postulated theoretically before being confirmed by experiments.
+
+ History 
+
+alt=see caption|thumb|The [[Geiger–Marsden experiments observed that a small fraction of the alpha particles experienced strong deflection when being struck by the gold foil.]]
+The idea that all  is fundamentally composed of s dates from at least the 6th century BC. In the 19th century, , through his work on , concluded that each element of nature was composed of a single, unique type of particle. The word '''', after the Greek word ''atomos'' meaning "indivisible", has since then denoted the smallest particle of a , but physicists later discovered that atoms are not, in fact, the fundamental particles of nature, but are conglomerates of even smaller particles, such as the . The early 20th century explorations of  and  led to proofs of  in 1939 by  (based on experiments by ), and  by  in that same year; both discoveries also led to the development of s. Bethe's 1947 calculation of the  is credited with having "opened the way to the modern era of particle physics".
+
+Throughout the 1950s and 1960s, a bewildering variety of particles was found in collisions of particles from beams of increasingly high energy. It was referred to informally as the "". Important discoveries such as the  by  and  brought new questions to matter-antimatter imbalance. After the formulation of the Standard Model during the 1970s, physicists clarified the origin of the particle zoo. The large number of particles was explained as combinations of a (relatively) small number of more fundamental particles and framed in the context of quantum field theories. This reclassification marked the beginning of modern particle physics.
+
+ Standard Model 
+
+The current state of the classification of all elementary particles is explained by the , which gained widespread acceptance in the mid-1970s after  of the existence of s. It describes the strong, weak, and electromagnetic s, using mediating s. The species of gauge bosons are eight s, ,  and  bosons, and the . The Standard Model also contains 24 fundamental s (12 particles and their associated anti-particles), which are the constituents of all . Finally, the Standard Model also predicted the existence of a type of  known as the . On 4 July 2012, physicists with the Large Hadron Collider at CERN announced they had found a new particle that behaves similarly to what is expected from the Higgs boson.
+
+The Standard Model, as currently formulated, has 61 elementary particles. Those elementary particles can combine to form composite particles, accounting for the hundreds of other species of particles that have been discovered since the 1960s. The Standard Model has been found to agree with almost all the al tests conducted to date. However, most particle physicists believe that it is an incomplete description of nature and that a more fundamental theory awaits discovery (See ). In recent years, measurements of  mass have provided the first experimental deviations from the Standard Model, since neutrinos do not have mass in the Standard Model.
+
+ Subatomic particles 
+
+{| class="wikitable" style="float:right; margin-left:1em; background:#FFF;"
+|+ Elementary Particles
+|-
+!
+! scope="col" | Types
+! scope="col" | Generations
+! scope="col" | 
+! scope="col" | Colours
+! scope="col" | Total
+|-
+! scope="row" style="background:#DAF;" | s
+| rowspan="2" align="center"| 2
+| rowspan="2" align="center"| 3
+| align="center"|Pair
+| align="center"|3
+| align="center"|36
+|-
+! scope="row" style="background:#AF7;" | s
+| align="center"|Pair
+| align="center"|None
+| align="center"|12
+|-
+! scope="row" style="background:#F97;" | s
+|rowspan="5" align="center"|1
+|rowspan="5" align="center"|None
+| align="center"|Own
+| align="center"|8
+| align="center"|8
+|-
+! scope="row" style="background:#F97;" | 
+| align="center"|Own
+| align="center" rowspan="4"|None
+| align="center"|1
+|-
+! scope="row" style="background:#F97;" | Z Boson
+| align="center"|Own
+| align="center"|1
+|-
+! scope="row" style="background:#F97;" | W Boson
+| align="center"|Pair
+| align="center"|2
+|-
+! scope="row" style="background:#FE7;" | Higgs
+| align="center"|Own
+| align="center"|1
+|-
+! colspan="5" align="right" ! scope="col" | Total number of (known) elementary particles:
+| align="center"|'''61'''
+|}
+Modern particle physics research is focused on s, including atomic constituents, such as s, s, and s (protons and neutrons are composite particles called s, made of s), that are produced by radioactive and  processes; such particles are s, s, and s, as well as a wide range of s. All particles and their interactions observed to date can be described almost entirely by the Standard Model.
+
+Dynamics of particles are also governed by ; they exhibit , displaying particle-like behaviour under certain experimental conditions and -like behaviour in others. In more technical terms, they are described by  vectors in a , which is also treated in . Following the convention of particle physicists, the term ''s'' is applied to those particles that are, according to current understanding, presumed to be indivisible and not composed of other particles.
+
+ Quarks and leptons 
+
+thumb|A [[Feynman diagram of the &nbsp;decay, showing a neutron (n, udd) converted into a proton (p, udu). "u" and "d" are the up and s, "" is the , and "" is the electron antineutrino.]]
+Ordinary  is made from first-generation quarks (up, down) and leptons (, ). Collectively, quarks and leptons are called s. They have a  of s (−1/2, 1/2, 3/2, etc.) and obey the , where no two particles may occupy the same . Quarks have fractional elementary electric charge (−1/3 or 2/3) and leptons have whole-numbered electric charge (0 or -1). Quarks also have , which is labeled arbitrarily with no correlation to actual light  as red, green and blue. Because the interactions between the quarks store energy which can convert to other particles when the quarks are far apart enough, quarks cannot be observed independently. This is called .
+
+There are three known generations of quarks (up and down, strange and charm, top and bottom) and leptons (electron and its neutrino,  and its neutrino, tau and its neutrino), with strong indirect evidence that a fourth generation of fermions does not exist.
+
+ Bosons 
+
+Bosons are the mediators or carriers of fundamental interactions, such as , the , and the . Electromagnetism is mediated by the , the quanta of ."Role as gauge boson and polarization" §5.1 in  |title=Gauge Theories in Particle Physics |last2=Hey |first2=A. J. G. |publisher= |year=1993 |isbn=978-0-85274-328-7}} The weak interaction is mediated by the . The strong interaction is mediated by the , which can link quarks together to form composite particles. Due to the aforementioned color confinement, gluons are never observed independently. The  gives mass to the W and Z bosons via the  – the gluon and photon are expected to be massless. All bosons have an integer quantum spin (0 and 1) and can have the same .
+
+ Antiparticles and color charge 
+
+Most aforementioned particles have corresponding s, which compose . Normal particles have positive lepton or , and antiparticles have these numbers negative. Most properties of corresponding antiparticles and particles are the same, with a few gets reversed; the electron's antiparticle, positron, has an opposite charge. To differentiate between antiparticles and particles, a plus or negative sign is added in . For example, the electron and the positron are denoted  and , respectively. However, in the case that the particle has a charge of 0 (equal to that of the antiparticle), the antiparticle is denoted with a line above the symbol. As such, an electron neutrino is }}, whereas its antineutrino is }}. When a particle and an antiparticle interact with each other, they are annihilated and convert to other particles. Some particles, such as the photon or gluon, have no antiparticles.
+
+Quarks and gluons additionally have color charges, which influences the strong interaction. Quark's color charges are called red, green and blue (though the particle itself have no physical color), and in antiquarks are called antired, antigreen and antiblue. The gluon can have eight color charges, which are the result of quarks' interactions to form composite particles (gauge symmetry ).Part III of 
+
+ Composite 
+
+thumb|A [[proton consists of two up quarks and one down quark, linked together by s. The quarks' color charge are also visible.]]
+The s and s in the atomic nuclei are s – the neutron is composed of two down quarks and one up quark, and the proton is composed of two up quarks and one down quark. A baryon is composed of three quarks, and a  is composed of two quarks (one normal, one anti). Baryons and mesons are collectively called s. Quarks inside hadrons are governed by the strong interaction, thus are subjected to  (color charges). The bounded quarks must have their color charge to be neutral, or "white" for analogy with mixing the primary colors. More s can have other types, arrangement or number of quarks (, ).
+
+An atom is made from protons, neutrons and electrons. By modifying the particles inside a normal atom, s can be formed.§1.8, ''Constituents of Matter: Atoms, Molecules, Nuclei and Particles'', Ludwig Bergmann, Clemens Schaefer, and Wilhelm Raith, Berlin, Germany: Walter de Gruyter, 1997, . A simple example would be the , which has one of its electrons replaced with a muon.
+
+ Hypothetical 
+
+The  is a hypothetical particle that can mediate the gravitational interaction, but it has not been detected or completely reconciled with current theories. Many other hypothetical particles have been proposed to address the limitations of the Standard Model. Notably, supersymmetric particles aim to solve the , s address the , and various other particles are proposed to explain the origins of  and .
+
+ Experimental laboratories 
+
+thumb|Fermi National Accelerator Laboratory, USA
+The world's major particle physics laboratories are:
+*  (, New York, ). Its main facility is the  (RHIC), which collides heavy ions such as gold ions and polarized protons. It is the world's first heavy ion collider, and the world's only polarized proton collider.
+*  (, ). Its main projects are now the electron-positron s , operated since 2006, and VEPP-4, started experiments in 1994. Earlier facilities include the first electron–electron beam–beam  VEP-1, which conducted experiments from 1964 to 1968; the electron-positron s VEPP-2, operated from 1965 to 1974; and, its successor VEPP-2M, performed experiments from 1974 to 2000.
+* thumb|[[Compact Muon Solenoid|CMS detector for LHC]] (European Organization for Nuclear Research) (Franco-Swiss border, near , Switzerland). Its main project is now the  (LHC), which had its first beam circulation on 10 September 2008, and is now the world's most energetic collider of protons. It also became the most energetic collider of heavy ions after it began colliding lead ions. Earlier facilities include the  (LEP), which was stopped on 2 November 2000 and then dismantled to give way for LHC; and the , which is being reused as a pre-accelerator for the LHC and for fixed-target experiments.
+*  (Deutsches Elektronen-Synchrotron) (, ). Its main facility was the  (HERA), which collided electrons and positrons with protons. The accelerator complex is now focused on the production of  with ,  and the .
+* Fermi National Accelerator Laboratory (Fermilab) (Batavia, Illinois, ). Its main facility until 2011 was the , which collided protons and antiprotons and was the highest-energy particle collider on earth until the Large Hadron Collider surpassed it on 29 November 2009.
+*  (IHEP) (, ). IHEP manages a number of China's major particle physics facilities, including the (BEPC II), the Beijing Spectrometer (BES), the Beijing Synchrotron Radiation Facility (BSRF), the International Cosmic-Ray Observatory at Yangbajing in Tibet, the , the , the  (HXMT), and the Accelerator-driven Sub-critical System (ADS) as well as the  (JUNO).
+*  (Tsukuba, ). It is the home of a number of experiments such as the  and its successor , a  experiment and Belle II, an experiment measuring the  of s.
+*  (Menlo Park, California, ). Its 2-mile-long linear particle accelerator began operating in 1962 and was the basis for numerous  and  collision experiments until 2008. Since then the linear accelerator is being used for the   as well as advanced accelerator design research. SLAC staff continue to participate in developing and building many s around the world.
+
+ Theory 
+
+Theoretical particle physics attempts to develop the models, theoretical framework, and mathematical tools to understand current experiments and make predictions for future experiments (see also ). There are several major interrelated efforts being made in theoretical particle physics today.
+
+One important branch attempts to better understand the  and its tests. Theorists make quantitative predictions of observables at  and astronomical experiments, which along with experimental measurements is used to extract the parameters of the Standard Model with less uncertainty. This work probes the limits of the Standard Model and therefore expands scientific understanding of nature's building blocks. Those efforts are made challenging by the difficulty of calculating high precision quantities in . Some theorists working in this area use the tools of perturbative  and , referring to themselves as phenomenologists. Others make use of  and call themselves ''lattice theorists''.
+
+Another major effort is in model building where model builders develop ideas for what physics may lie  (at higher energies or smaller distances). This work is often motivated by the  and is constrained by existing experimental data. It may involve work on , alternatives to the , extra spatial dimensions (such as the s),  theory, combinations of these, or other ideas. Vanishing-dimensions theory is a particle physics theory suggesting that systems with higher energy have a smaller number of dimensions.
+
+A third major effort in theoretical particle physics is . ''String theorists'' attempt to construct a unified description of  and  by building a theory based on small strings, and s rather than particles. If the theory is successful, it may be considered a "", or "TOE".
+
+There are other areas of work in theoretical particle physics ranging from particle cosmology to .
+
+ Practical applications 
+
+In principle, all physics (and practical applications developed therefrom) can be derived from the study of fundamental particles. In practice, even if "particle physics" is taken to mean only "high-energy atom smashers", many technologies have been developed during these pioneering investigations that later find wide uses in society. Particle accelerators are used to produce medical isotopes for research and treatment (for example, isotopes used in ), or used directly in . The development of s has been pushed forward by their use in particle physics. The  and  technology were initially developed at . Additional applications are found in medicine, national security, industry, computing, science, and workforce development, illustrating a long and growing list of beneficial practical applications with contributions from particle physics.
+
+ Future 
+
+Major efforts to look for  include the  proposed for CERN and the  (P5) in the US that will update the 2014 P5 study that recommended the , among other experiments.
+
+ See also 
+
+ References 
+
+ External links
