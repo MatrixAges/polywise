@@ -1,5 +1,6 @@
 import { PGlite } from '@electric-sql/pglite'
 import { vector } from '@electric-sql/pglite/vector'
+import { singleton } from 'tsyringe'
 
 import Article from './Article'
 import Brain from './Brain'
@@ -28,13 +29,12 @@ import type {
 	UpsertNodeArgs
 } from './types'
 
+@singleton()
 export default class Polywise {
 	private db: PGlite | null = null
 
 	public article: Article
-
 	public brain: Brain
-
 	public pipeline: Pipeline
 
 	constructor() {
@@ -188,7 +188,7 @@ export default class Polywise {
 		])
 	}
 
-	async search(args: QueryArgs): Promise<{ result: HybridSearchResult[]; cot: ChainOfThought }> {
+	async search(args: QueryArgs) {
 		const {
 			query,
 			recall_depth = 2,
@@ -200,7 +200,7 @@ export default class Polywise {
 
 		const emitter = new ChainEmitter()
 
-		const initialResult = await this.executeSingleSearch({
+		const initial_results = await this.executeSingleSearch({
 			query,
 			recall_depth,
 			search_limit,
@@ -209,23 +209,108 @@ export default class Polywise {
 		})
 
 		if (cot_depth <= 0) {
-			return { result: initialResult, cot: emitter }
+			return { result: initial_results, cot: emitter }
 		}
 
-		this.executeChainOfThought({
+		this.executeCot({
 			query,
-			initialResults: initialResult,
+			initial_results,
 			emitter,
-			maxDepth: cot_depth,
-			baseRecallDepth: recall_depth,
-			searchLimit: search_limit,
-			rerankLimit: rerank_limit,
-			stimulateOnRecall: stimulate_on_recall,
-			currentDepth: 1,
-			historyIds: new Set(initialResult.map(r => r.id))
+			max_depth: cot_depth,
+			base_recall_depth: recall_depth,
+			search_limit,
+			rerank_limit,
+			stimulate_on_recall,
+			current_depth: 1,
+			history_ids: new Set(initial_results.map(r => r.id))
 		})
 
-		return { result: initialResult, cot: emitter }
+		return { result: initial_results, cot: emitter }
+	}
+
+	async recallFromMemory(args: RecallArgs) {
+		const { query, max_depth = 2, stimulate_intensity = 0.3 } = args
+
+		const keywords = this.extractKeywords(query)
+
+		const matched_nodes = await this.recallNodesByKeywords(keywords)
+
+		const related_nodes = await this.recallRelatedNodes(
+			matched_nodes.map(n => n.id),
+			max_depth
+		)
+
+		if (stimulate_intensity > 0) {
+			const all_nodes = [...matched_nodes, ...related_nodes]
+
+			const node_ids = all_nodes.map(n => n.id)
+
+			await this.stimulateNodes(node_ids, stimulate_intensity)
+
+			await this.strengthenRelatedEdges(matched_nodes, related_nodes)
+		}
+
+		const contexts = await this.getNodeContexts([...matched_nodes, ...related_nodes].map(n => n.id))
+
+		return {
+			nodes: [...matched_nodes, ...related_nodes],
+			edges: [],
+			stimulated_nodes: [...matched_nodes, ...related_nodes].map(n => n.id),
+			related_contexts: contexts
+		}
+	}
+
+	async processArticle(args: ProcessArticleArgs) {
+		const { title, content, triples, idol_id, root_ids, metrics_ids, generate_embedding } = args
+
+		const res = await this.query<{ id: number }>(sql.sql_process_article, [title, content])
+
+		const article_id = res[0].id
+
+		if (generate_embedding ?? true) {
+			await this.article.addEmbedding(article_id, content)
+		}
+
+		await this.injectTriples({
+			triples,
+			article_id,
+			idol_id,
+			root_ids,
+			metrics_ids
+		})
+	}
+
+	async getDataDir() {
+		return process.env.POLYWISE_DATA_DIR || ':polywise:'
+	}
+
+	async getStats() {
+		const [node_result, edge_result, article_result] = await Promise.all([
+			this.query<{ count: string }>('SELECT COUNT(*) as count FROM brain.nodes'),
+			this.query<{ count: string }>('SELECT COUNT(*) as count FROM brain.edges'),
+			this.query<{ count: string }>('SELECT COUNT(*) as count FROM knowledge.articles')
+		])
+
+		const memory_usage = process.memoryUsage()
+
+		return {
+			node_count: parseInt(node_result[0]?.count || '0', 10),
+			edge_count: parseInt(edge_result[0]?.count || '0', 10),
+			article_count: parseInt(article_result[0]?.count || '0', 10),
+			memory_usage: memory_usage.heapUsed
+		}
+	}
+
+	async reset() {
+		await this.off()
+
+		const data_dir = await this.getDataDir()
+
+		if (data_dir !== ':memory:' && data_dir !== ':polywise:') {
+			const fs = await import('fs-extra')
+
+			await fs.remove(data_dir)
+		}
 	}
 
 	private async executeSingleSearch(args: {
@@ -234,255 +319,219 @@ export default class Polywise {
 		search_limit: number
 		rerank_limit: number
 		stimulate_on_recall: boolean
-	}): Promise<HybridSearchResult[]> {
+	}) {
 		const { query, recall_depth, search_limit, rerank_limit, stimulate_on_recall } = args
 
-		const recallResult = await this.recallFromMemory({
+		const recall_result = await this.recallFromMemory({
 			query,
 			max_depth: recall_depth,
 			stimulate_intensity: stimulate_on_recall ? 0.3 : 0
 		})
 
-		const searchResults = await this.pipeline.search({
+		const search_results = await this.pipeline.search({
 			query,
-			vectorSearch: () => this.article.searchVector({ query, limit: search_limit }),
-			fulltextSearch: () => this.article.searchFts({ query, limit: search_limit }),
-			rerankLimit: search_limit
+			vector_search: () => this.article.searchVector({ query, limit: search_limit }),
+			fulltext_search: () => this.article.searchFts({ query, limit: search_limit }),
+			rerank_limit: search_limit
 		})
 
-		const aggregated = this.aggregateResults(recallResult, searchResults)
+		const aggregated = this.aggregateResults(recall_result, search_results)
 
-		const finalResults = await this.rerankResults(query, aggregated, rerank_limit)
-
-		return finalResults
+		return await this.rerankResults(query, aggregated, rerank_limit)
 	}
 
-	private async executeChainOfThought(args: {
+	private async executeCot(args: {
 		query: string
-		initialResults: HybridSearchResult[]
+		initial_results: HybridSearchResult[]
 		emitter: ChainEmitter
-		maxDepth: number
-		baseRecallDepth: number
-		searchLimit: number
-		rerankLimit: number
-		stimulateOnRecall: boolean
-		currentDepth: number
-		historyIds: Set<number>
-	}): Promise<void> {
+		max_depth: number
+		base_recall_depth: number
+		search_limit: number
+		rerank_limit: number
+		stimulate_on_recall: boolean
+		current_depth: number
+		history_ids: Set<number>
+	}) {
 		const {
 			query,
-			initialResults,
+			initial_results,
 			emitter,
-			maxDepth,
-			baseRecallDepth,
-			searchLimit,
-			rerankLimit,
-			stimulateOnRecall,
-			currentDepth,
-			historyIds
+			max_depth,
+			base_recall_depth,
+			search_limit,
+			rerank_limit,
+			stimulate_on_recall,
+			current_depth,
+			history_ids
 		} = args
 
-		if (!emitter.isActiveStatus() || currentDepth > maxDepth || !this.db) {
+		if (!emitter.isActiveStatus() || current_depth > max_depth || !this.db) {
 			return
 		}
 
-		const depthRecallDepth = baseRecallDepth + currentDepth
+		const depth_recall_depth = base_recall_depth + current_depth
 
-		// 提取这一层的核心洞察：结合 Top 3 结果的标题
-		const topResults = initialResults.slice(0, 3)
-		const insights = topResults.map(r => r.title).join(', ')
+		const top_results = initial_results.slice(0, 3)
 
-		const emergedQuery = `${query} [洞察: ${insights}]`
+		const insights = top_results.map(r => r.title).join(', ')
 
-		const emergedNodeIds = topResults.map(r => r.id)
-		await this.stimulateNodes(emergedNodeIds, 0.2 * (1 + currentDepth * 0.5))
+		const emerged_query = `${query} [洞察: ${insights}]`
 
-		const emergedRecallResult = await this.recallFromMemory({
-			query: emergedQuery,
-			max_depth: depthRecallDepth,
-			stimulate_intensity: stimulateOnRecall ? 0.3 * (1 + currentDepth) : 0
+		const emerged_node_ids = top_results.map(r => r.id)
+
+		await this.stimulateNodes(emerged_node_ids, 0.2 * (1 + current_depth * 0.5))
+
+		const emerged_recall_result = await this.recallFromMemory({
+			query: emerged_query,
+			max_depth: depth_recall_depth,
+			stimulate_intensity: stimulate_on_recall ? 0.3 * (1 + current_depth) : 0
 		})
 
-		const emergedSearchResults = await this.pipeline.search({
-			query: emergedQuery,
-			vectorSearch: () => this.article.searchVector({ query: emergedQuery, limit: searchLimit * 2 }),
-			fulltextSearch: () => this.article.searchFts({ query: emergedQuery, limit: searchLimit * 2 }),
-			rerankLimit: searchLimit * 2
+		const emerged_search_results = await this.pipeline.search({
+			query: emerged_query,
+			vector_search: () => this.article.searchVector({ query: emerged_query, limit: search_limit * 2 }),
+			fulltext_search: () => this.article.searchFts({ query: emerged_query, limit: search_limit * 2 }),
+			rerank_limit: search_limit * 2
 		})
 
-		let emergedAggregated = this.aggregateResults(emergedRecallResult, emergedSearchResults)
+		const emerged_aggregated = this.aggregateResults(emerged_recall_result, emerged_search_results).filter(
+			c => !history_ids.has(c.id)
+		)
 
-		emergedAggregated = emergedAggregated.filter(c => !historyIds.has(c.id))
+		const emerged_final_results = await this.rerankResults(emerged_query, emerged_aggregated, rerank_limit)
 
-		const emergedFinalResults = await this.rerankResults(emergedQuery, emergedAggregated, rerankLimit)
+		emerged_final_results.forEach(r => history_ids.add(r.id))
 
-		emergedFinalResults.forEach(r => historyIds.add(r.id))
-
-		const cotResult: COTDepthResult = {
-			depth: currentDepth,
-			query: emergedQuery,
-			results: emergedFinalResults,
-			emerged_nodes: emergedRecallResult.nodes.map(n => n.id),
+		const cot_result: COTDepthResult = {
+			depth: current_depth,
+			query: emerged_query,
+			results: emerged_final_results,
+			emerged_nodes: emerged_recall_result.nodes.map(n => n.id),
 			emerged_edges: []
 		}
 
-		emitter.emit(cotResult)
+		emitter.emit(cot_result)
 
-		if (currentDepth < maxDepth && emergedFinalResults.length > 0) {
+		if (current_depth < max_depth && emerged_final_results.length > 0) {
 			setImmediate(() => {
 				if (!this.db) return
 
-				this.executeChainOfThought({
-					query: emergedQuery,
-					initialResults: emergedFinalResults,
+				this.executeCot({
+					query: emerged_query,
+					initial_results: emerged_final_results,
 					emitter,
-					maxDepth,
-					baseRecallDepth,
-					searchLimit,
-					rerankLimit,
-					stimulateOnRecall,
-					currentDepth: currentDepth + 1,
-					historyIds
+					max_depth,
+					base_recall_depth,
+					search_limit,
+					rerank_limit,
+					stimulate_on_recall,
+					current_depth: current_depth + 1,
+					history_ids
 				})
 			})
 		}
 	}
 
-	async recallFromMemory(args: RecallArgs): Promise<MemoryRecallResult> {
-		const { query, max_depth = 2, stimulate_intensity = 0.3 } = args
-
-		const keywords = this.extractKeywords(query)
-		const matchedNodes = await this.recallNodesByKeywords(keywords)
-
-		const relatedNodes = await this.recallRelatedNodes(
-			matchedNodes.map(n => n.id),
-			max_depth
-		)
-
-		if (stimulate_intensity > 0) {
-			const allNodes = [...matchedNodes, ...relatedNodes]
-			const nodeIds = allNodes.map(n => n.id)
-			await this.stimulateNodes(nodeIds, stimulate_intensity)
-			await this.strengthenRelatedEdges(matchedNodes, relatedNodes)
-		}
-
-		const contexts = await this.getNodeContexts([...matchedNodes, ...relatedNodes].map(n => n.id))
-
-		return {
-			nodes: [...matchedNodes, ...relatedNodes],
-			edges: [],
-			stimulated_nodes: [...matchedNodes, ...relatedNodes].map(n => n.id),
-			related_contexts: contexts
-		}
-	}
-
-	private extractKeywords(query: string): string[] {
-		return query
-			.toLowerCase()
-			.split(/\s+/)
-			.filter(w => w.length > 2)
-	}
-
-	private async recallNodesByKeywords(keywords: string[]): Promise<Node[]> {
+	private async recallNodesByKeywords(keywords: string[]) {
 		if (!this.db || keywords.length === 0) return []
 
 		const results: Node[] = []
+
 		for (const keyword of keywords) {
 			const nodes = await this.query<Node[]>(sql_brain.sql_recall_nodes_by_label, [`%${keyword}%`, 10])
+
 			results.push(...nodes)
 		}
 
-		const uniqueNodes = Array.from(new Map(results.map(n => [n.id, n])).values())
-
-		return uniqueNodes
+		return Array.from(new Map(results.map(n => [n.id, n])).values())
 	}
 
-	private async recallRelatedNodes(nodeIds: number[], maxDepth: number): Promise<Node[]> {
-		if (!this.db || nodeIds.length === 0 || maxDepth <= 0) return []
+	private async recallRelatedNodes(node_ids: number[], max_depth: number) {
+		if (!this.db || node_ids.length === 0 || max_depth <= 0) return []
 
-		const res = await this.query<Node[]>(sql_brain.sql_recall_related_nodes, [nodeIds, maxDepth, 20])
-
-		return res
+		return await this.query<Node[]>(sql_brain.sql_recall_related_nodes, [node_ids, max_depth, 20])
 	}
 
-	private async getNodeContexts(nodeIds: number[]): Promise<any[]> {
-		if (!this.db || nodeIds.length === 0) return []
+	private async getNodeContexts(node_ids: number[]) {
+		if (!this.db || node_ids.length === 0) return []
 
-		const res = await this.query<any[]>(sql_brain.sql_get_node_articles, [nodeIds])
-
-		return res
+		return await this.query<any[]>(sql_brain.sql_get_node_articles, [node_ids])
 	}
 
-	private async stimulateNodes(nodeIds: number[], intensity: number) {
-		if (!this.db || nodeIds.length === 0 || intensity <= 0) return
+	private async stimulateNodes(node_ids: number[], intensity: number) {
+		if (!this.db || node_ids.length === 0 || intensity <= 0) return
 
-		for (const id of nodeIds) {
+		for (const id of node_ids) {
 			await this.query(sql.sql_stimulate, [intensity, id])
 		}
 	}
 
-	private async strengthenRelatedEdges(matchedNodes: Node[], relatedNodes: Node[]) {
+	private async strengthenRelatedEdges(matched_nodes: Node[], related_nodes: Node[]) {
 		if (!this.db) return
 
-		const allNodeIds = [...matchedNodes, ...relatedNodes].map(n => n.id)
+		const node_ids = [...matched_nodes, ...related_nodes].map(n => n.id)
 
-		if (allNodeIds.length < 2) return
+		if (node_ids.length < 2) return
 
-		await this.query(sql.sql_strengthen_edges_batch, [0.1, allNodeIds, allNodeIds])
+		await this.query(sql.sql_strengthen_edges_batch, [0.1, node_ids, node_ids])
 	}
 
-	private aggregateResults(recallResult: MemoryRecallResult, searchResults: SearchResult[]): AggregatedCandidate[] {
+	private aggregateResults(recall_result: MemoryRecallResult, search_results: SearchResult[]) {
 		const candidates: AggregatedCandidate[] = []
 
-		const stimulatedNodeIds = new Set(recallResult.stimulated_nodes)
+		const stimulated_node_ids = new Set(recall_result.stimulated_nodes)
 
-		const nodePotentialMap = new Map<number, number>()
-		for (const node of recallResult.nodes) {
-			nodePotentialMap.set(node.id, node.potential)
+		const node_potential_map = new Map<number, number>()
+
+		for (const node of recall_result.nodes) {
+			node_potential_map.set(node.id, node.potential)
 		}
 
-		for (const context of recallResult.related_contexts) {
-			for (const articleId of context.article_ids) {
-				const article = searchResults.find(r => r.id === articleId)
+		for (const context of recall_result.related_contexts) {
+			for (const article_id of context.article_ids) {
+				const article = search_results.find(r => r.id === article_id)
+
 				if (article) {
-					const memoryStrength = this.calculateMemoryStrength(context, recallResult.nodes)
+					const memory_strength = this.calculateMemoryStrength(context)
+
 					candidates.push({
 						id: article.id,
 						title: article.title,
 						content: article.content,
 						source: 'memory',
 						rerankScore: article.rerankScore,
-						relevance_score: 1.0 * 1.5,
+						relevance_score: 1.5,
 						stimulated: true,
-						memory_strength: memoryStrength
+						memory_strength
 					})
 				}
 			}
 		}
 
-		for (const result of searchResults) {
+		for (const result of search_results) {
 			if (!candidates.find(c => c.id === result.id)) {
-				const isStimulated = stimulatedNodeIds.has(result.id)
-				const memoryStrength = nodePotentialMap.get(result.id) ?? 0
+				const is_stimulated = stimulated_node_ids.has(result.id)
+
+				const memory_strength = node_potential_map.get(result.id) ?? 0
 
 				candidates.push({
 					id: result.id,
 					title: result.title,
 					content: result.content,
-					source: isStimulated ? 'memory' : 'external',
+					source: is_stimulated ? 'memory' : 'external',
 					rerankScore: result.rerankScore,
 					relevance_score: result.rerankScore,
-					stimulated: isStimulated,
-					memory_strength: memoryStrength
+					stimulated: is_stimulated,
+					memory_strength
 				})
 			}
 		}
 
-		const highPotentialNodes = recallResult.nodes
+		const high_potential_nodes = recall_result.nodes
 			.filter(n => n.potential > 0.5 && !candidates.find(c => c.id === n.id))
 			.slice(0, 5)
 
-		for (const node of highPotentialNodes) {
+		for (const node of high_potential_nodes) {
 			candidates.push({
 				id: node.id,
 				title: node.label,
@@ -498,95 +547,73 @@ export default class Polywise {
 		return candidates
 	}
 
-	private calculateMemoryStrength(
-		context: { idol_id?: string; root_ids?: string[]; relevance_score?: number },
-		nodes: Node[]
-	): number {
+	private calculateMemoryStrength(context: { relevance_score?: number }) {
 		return (context.relevance_score ?? 1.0) * 0.5 + 0.5
 	}
 
-	private async rerankResults(
-		query: string,
-		candidates: AggregatedCandidate[],
-		limit: number
-	): Promise<HybridSearchResult[]> {
+	private async rerankResults(query: string, candidates: AggregatedCandidate[], limit: number) {
 		if (candidates.length === 0) return []
 
 		const documents = candidates.map(c => {
-			const sourceInfo = `[来源:${c.source}${c.stimulated ? ',已激活' : ''},记忆强度:${c.memory_strength.toFixed(2)}]`
-			return `${c.title}\n${sourceInfo}\n${c.content}`
+			const source_info = `[来源:${c.source}${c.stimulated ? ',已激活' : ''},记忆强度:${c.memory_strength.toFixed(2)}]`
+
+			return `${c.title}\n${source_info}\n${c.content}`
 		})
 
-		const rerankScores = await this.pipeline.rerank(query, documents)
+		const rerank_scores = await this.pipeline.rerank(query, documents)
 
 		const results: HybridSearchResult[] = candidates.map((candidate, index) => ({
 			id: candidate.id,
 			title: candidate.title,
 			content: candidate.content,
 			source: candidate.source,
-			rerankScore: rerankScores[index]?.score ?? 0,
+			rerankScore: rerank_scores[index]?.score ?? 0,
 			relevanceScore: candidate.relevance_score,
-			combinedScore: (rerankScores[index]?.score ?? 0) * 0.6 + candidate.relevance_score * 0.4,
+			combinedScore: (rerank_scores[index]?.score ?? 0) * 0.6 + candidate.relevance_score * 0.4,
 			stimulated: candidate.stimulated,
 			memoryStrength: candidate.memory_strength
 		}))
 
-		const sortedResults = results.sort((a, b) => b.combinedScore - a.combinedScore).slice(0, limit)
+		const sorted_results = results.sort((a, b) => b.combinedScore - a.combinedScore).slice(0, limit)
 
-		await this.stimulateByRanking(sortedResults)
+		await this.stimulateByRanking(sorted_results)
 
-		return sortedResults
+		return sorted_results
 	}
 
-	private async stimulateByRanking(results: HybridSearchResult[]): Promise<void> {
+	private async stimulateByRanking(results: HybridSearchResult[]) {
 		if (results.length === 0) return
 
-		const maxStimulation = 0.5
-		const minStimulation = 0.05
-		const decayRate = (maxStimulation - minStimulation) / Math.max(results.length - 1, 1)
+		const max_stimulation = 0.5
 
-		const stimulationMap = new Map<number, number>()
+		const min_stimulation = 0.05
+
+		const decay_rate = (max_stimulation - min_stimulation) / Math.max(results.length - 1, 1)
+
+		const stimulation_map = new Map<number, number>()
 
 		for (let i = 0; i < results.length; i++) {
-			const intensity = Math.max(maxStimulation - i * decayRate, minStimulation)
-			stimulationMap.set(results[i].id, intensity)
+			const intensity = Math.max(max_stimulation - i * decay_rate, min_stimulation)
+
+			stimulation_map.set(results[i].id, intensity)
 		}
 
-		const nodeIds = Array.from(stimulationMap.keys())
-		const intensities = nodeIds.map(id => stimulationMap.get(id)!)
+		const node_ids = Array.from(stimulation_map.keys())
 
-		for (let i = 0; i < nodeIds.length; i++) {
-			await this.query(sql_brain.sql_stimulate_nodes_batch, [intensities[i], [nodeIds[i]]])
+		const intensities = node_ids.map(id => stimulation_map.get(id)!)
+
+		for (let i = 0; i < node_ids.length; i++) {
+			await this.query(sql_brain.sql_stimulate_nodes_batch, [intensities[i], [node_ids[i]]])
 		}
 	}
 
-	async processArticle(args: ProcessArticleArgs) {
-		const { title, content, triples, idol_id, root_ids, metrics_ids, generate_embedding } = args
-
-		const res = await this.query<{ id: number }>(sql.sql_process_article, [title, content])
-
-		const article_id = res[0].id
-
-		if (generate_embedding ?? true) {
-			await this.article.addEmbedding(article_id, content)
-		}
-
-		await this._injectTriples({
-			triples,
-			article_id,
-			idol_id,
-			root_ids,
-			metrics_ids
-		})
-	}
-
-	private async _injectTriples(args: InjectTriplesArgs) {
+	private async injectTriples(args: InjectTriplesArgs) {
 		const { triples, article_id, idol_id, root_ids, metrics_ids } = args
 
 		await this.exec(sql.sql_inject_triples_begin)
 
 		for (const t of triples) {
-			const sub_id = await this._upsertNode({
+			const sub_id = await this.upsertNode({
 				label: t.subject,
 				article_id,
 				idol_id,
@@ -595,7 +622,7 @@ export default class Polywise {
 				metadata: t.metadata
 			})
 
-			const obj_id = await this._upsertNode({
+			const obj_id = await this.upsertNode({
 				label: t.object,
 				article_id,
 				idol_id,
@@ -639,7 +666,7 @@ export default class Polywise {
 		await this.exec(sql.sql_inject_triples_commit)
 	}
 
-	private async _upsertNode(args: UpsertNodeArgs) {
+	private async upsertNode(args: UpsertNodeArgs) {
 		const { label, article_id, idol_id, root_ids, metrics_ids, metadata } = args
 
 		await this.query(sql.sql_upsert_node, [
@@ -652,11 +679,11 @@ export default class Polywise {
 
 		const res = await this.query<{ id: number }>(sql.sql_upsert_node_select, [label])
 
-		const nid = res[0].id
+		const node_id = res[0].id
 
-		await this.query(sql.sql_node_sources, [nid, article_id])
+		await this.query(sql.sql_node_sources, [node_id, article_id])
 
-		return nid
+		return node_id
 	}
 
 	private async exec(sql_input: string | Array<string>) {
@@ -685,36 +712,11 @@ export default class Polywise {
 		return JSON.parse(JSON.stringify(res.rows)) as T
 	}
 
-	async getDataDir() {
-		const dataDir = process.env.POLYWISE_DATA_DIR || ':polywise:'
-		return dataDir
-	}
-
-	async getStats() {
-		const [nodeResult, edgeResult, articleResult] = await Promise.all([
-			this.query<{ count: string }>('SELECT COUNT(*) as count FROM brain.nodes'),
-			this.query<{ count: string }>('SELECT COUNT(*) as count FROM brain.edges'),
-			this.query<{ count: string }>('SELECT COUNT(*) as count FROM knowledge.articles')
-		])
-
-		const memoryUsage = process.memoryUsage()
-
-		return {
-			node_count: parseInt(nodeResult[0]?.count || '0', 10),
-			edge_count: parseInt(edgeResult[0]?.count || '0', 10),
-			article_count: parseInt(articleResult[0]?.count || '0', 10),
-			memory_usage: memoryUsage.heapUsed
-		}
-	}
-
-	async reset() {
-		await this.off()
-
-		const dataDir = await this.getDataDir()
-		if (dataDir !== ':memory:' && dataDir !== ':polywise:') {
-			const fs = await import('fs-extra')
-			await fs.remove(dataDir)
-		}
+	private extractKeywords(query: string) {
+		return query
+			.toLowerCase()
+			.split(/\s+/)
+			.filter(w => w.length > 2)
 	}
 
 	async off() {
