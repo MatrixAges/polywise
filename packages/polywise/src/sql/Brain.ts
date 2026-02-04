@@ -105,3 +105,5 @@ export const sql_get_node_by_id = `
 	FROM ${SCHEMA_BRAIN}.nodes
 	WHERE id = $1
 `
+
+export const sql_get_node_by_label = `SELECT id FROM ${SCHEMA_BRAIN}.nodes WHERE label = $1`

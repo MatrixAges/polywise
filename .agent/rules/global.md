@@ -108,7 +108,7 @@ Relevant skills are located in the `.opencode/skills` directory.
 
 ## Type Inference Over Explicit Types
 
-Unless necessary for complex scenarios or public API clarity, do not explicitly specify function return types. Let the TypeScript compiler infer types automatically.
+Unless necessary for complex scenarios or public API clarity, do not explicitly specify function return types. Let the TypeScript compiler infer types automatically. Do not pass generic types to functions if the type system can infer them from the arguments.
 
 **Good:**
 
@@ -120,6 +120,8 @@ async function fetchData() {
 async processItem(item: Item) {
   await this.save(item)
 }
+
+const rows = await db.query(sql, params)
 ```
 
 **Avoid (unless necessary):**
@@ -131,6 +133,40 @@ async function fetchData(): Promise<Data[]> {
 
 async processItem(item: Item): Promise<void> {
   await this.save(item)
+}
+
+const rows = await db.query<Row[]>(sql, params)
+```
+
+## SQL Definition Convention (CRITICAL)
+
+All SQL statements MUST be defined within the `sql/` directory and exported for use. Raw SQL strings are prohibited within business logic files (models, services, etc.).
+
+**Rules:**
+
+1. **Location**: Place SQL files in `src/sql/`.
+2. **Export**: Export SQL strings or functions that return SQL strings.
+3. **Import**: Import SQL using `import * as sql from './sql'`.
+
+**Good:**
+
+```typescript
+// src/sql/Brain.ts
+export const sql_get_nodes = `SELECT * FROM brain.nodes`
+
+// src/Polywise.ts
+import * as sql_brain from './sql/Brain'
+
+async getNodes() {
+    return await this.query(sql_brain.sql_get_nodes)
+}
+```
+
+**Avoid:**
+
+```typescript
+async getNodes() {
+    return await this.query(`SELECT * FROM brain.nodes`)
 }
 ```
 

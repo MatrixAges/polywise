@@ -204,3 +204,11 @@ export const sql_set_node_as_action = `UPDATE ${SCHEMA_BRAIN}.nodes SET is_actio
 export const sql_set_edge_as_habit = `UPDATE ${SCHEMA_BRAIN}.edges SET is_habit = $1 WHERE source_id = $2 AND target_id = $3`
 
 export const sql_increment_reaction_count = `UPDATE ${SCHEMA_BRAIN}.edges SET reaction_count = reaction_count + 1 WHERE source_id = $1 AND target_id = $2`
+
+export const sql_get_all_nodes = `SELECT id, label, x, y, activation, potential, idol_id, root_ids, metrics_ids, metadata, is_action FROM ${SCHEMA_BRAIN}.nodes`
+
+export const sql_check_articles_table_exists = `SELECT COUNT(*) as count FROM information_schema.tables WHERE table_schema = '${SCHEMA_KNOWLEDGE}' AND table_name = 'articles'`
+
+export const sql_create_extension_vector = 'CREATE EXTENSION IF NOT EXISTS vector;'
+
+export const sql_update_article_embedding = `UPDATE ${SCHEMA_KNOWLEDGE}.article_embeddings SET embedding = $1 WHERE article_id = $2`
