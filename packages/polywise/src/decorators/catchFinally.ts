@@ -1,16 +1,14 @@
-export default (on_error?: (error: any, ...args: any[]) => void) =>
+export default (on_finally?: (...args: any[]) => void) =>
 	(target: any, property: string, descriptor: PropertyDescriptor) => {
 		const original_method = descriptor.value
 
 		descriptor.value = async function (...args: any[]) {
 			try {
 				return await original_method.apply(this, args)
-			} catch (error) {
-				if (on_error) {
-					on_error.call(this, error, ...args)
+			} finally {
+				if (on_finally) {
+					on_finally.call(this, ...args)
 				}
-
-				throw error
 			}
 		}
 

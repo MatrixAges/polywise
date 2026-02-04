@@ -8,7 +8,7 @@ import Pipeline from './Pipeline'
 import * as sql from './sql'
 import * as sql_brain from './sql/Brain'
 import * as sql_meta from './sql/meta'
-import { catchError } from './decorators'
+import { catchError, catchFinally } from './decorators'
 import {
 	calculateWeight,
 	ChainEmitter,
@@ -173,6 +173,9 @@ export default class Polywise {
 	}
 
 	@catchError()
+	@catchFinally(function (this: Polywise) {
+		this.brain.setBusy(false)
+	})
 	async query(args: QueryArgs) {
 		this.brain.reportUserActivity()
 		this.brain.setBusy(true)
@@ -282,6 +285,9 @@ export default class Polywise {
 	}
 
 	@catchError()
+	@catchFinally(function (this: Polywise) {
+		this.brain.setBusy(false)
+	})
 	async save(args: ProcessArticleArgs) {
 		this.brain.reportUserActivity()
 		this.brain.setBusy(true)
@@ -514,9 +520,13 @@ export default class Polywise {
 		return (await this.queryRaw(sql.sql_find_nearest_node, [`[${query_embedding.join(',')}]`])) as any[]
 	}
 
-	@catchError({
-		onError: (error: any) => {
-			console.error('CoT Execution Error:', error)
+	@catchError(function (this: Polywise, error: any, args: ExecuteCotArgs) {
+		const { emitter } = args
+
+		console.error('CoT Execution Error:', error)
+
+		if (emitter.isActiveStatus()) {
+			emitter.finish()
 		}
 	})
 	private async executeCot(args: ExecuteCotArgs) {
