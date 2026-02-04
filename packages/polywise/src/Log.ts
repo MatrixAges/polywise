@@ -4,6 +4,8 @@ import { homedir } from 'os'
 import dayjs from 'dayjs'
 import { injectable } from 'tsyringe'
 
+import { DEFAULT_DATE_FORMAT, DEFAULT_TIMESTAMP_FORMAT, formatLogEntry } from './consts'
+
 export interface LogArgs {
 	dir?: string
 	log?: boolean
@@ -31,10 +33,10 @@ export default class Log {
 
 	write(input: object, output: object) {
 		const now = dayjs()
-		const timestamp = now.format('YYYY-MM-DD HH:mm:ss')
-		const date = now.format('YYYY-MM-DD')
+		const timestamp = now.format(DEFAULT_TIMESTAMP_FORMAT)
+		const date = now.format(DEFAULT_DATE_FORMAT)
 
-		const log_entry = `${timestamp} [INPUT]\n${JSON.stringify(input)}\n\n${timestamp} [OUTPUT]\n${JSON.stringify(output)}\n`
+		const log_entry = formatLogEntry(timestamp, input, output)
 		this.today_logs.push(log_entry)
 
 		if (!this.log_dir) return
@@ -66,7 +68,7 @@ export default class Log {
 
 	private writeLog(args: { timestamp: string; input: object; output: object; date: string }) {
 		const { timestamp, input, output, date } = args
-		const content = `${timestamp} [INPUT]\n${JSON.stringify(input)}\n\n${timestamp} [OUTPUT]\n${JSON.stringify(output)}\n`
+		const content = formatLogEntry(timestamp, input, output)
 		const file_path = join(this.log_dir, `${date}.log`)
 
 		writeFileSync(file_path, content, { flag: 'a' })

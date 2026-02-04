@@ -9,6 +9,10 @@ export const formatSourceInfo = (source: string, stimulated: boolean, memoryStre
 	return `[Source:${source}${stimulated ? ',Activated' : ''},Memory Strength:${strength.toFixed(2)}]`
 }
 
+export const formatLogEntry = (timestamp: string, input: any, output: any) => {
+	return `${timestamp} [INPUT]\n${JSON.stringify(input)}\n\n${timestamp} [OUTPUT]\n${JSON.stringify(output)}\n`
+}
+
 export const formatPerceiveQuery = (query: string, insights: string) => {
 	return `${query} [${PERCEIVE_COMMAND}: ${insights}]`
 }

@@ -41,6 +41,9 @@ export const HABIT_CONSOLIDATION_WEIGHT = 2.0
 export const MAX_HABIT_CONSOLIDATION = 5
 export const CONSOLIDATION_ENTRY_PREFIX = 'Core active concepts from session: '
 export const HABIT_LTM_PREFIX = 'Reinforced behavioral pattern: '
+export const NO_ACTIVITY_SUMMARY = 'No activity today.'
+export const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD'
+export const DEFAULT_TIMESTAMP_FORMAT = 'YYYY-MM-DD HH:mm:ss'
 export const PROACTIVE_EXAMPLES = [
 	'I am an artificial intelligence designed to assist with complex tasks.',
 	'You must follow safety guidelines at all times.',

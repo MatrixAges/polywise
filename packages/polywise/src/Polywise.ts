@@ -44,10 +44,12 @@ import {
 	DEFAULT_RECALL_DEPTH,
 	DEFAULT_RERANK_LIMIT,
 	DEFAULT_SEARCH_LIMIT,
+	DEFAULT_TIMESTAMP_FORMAT,
 	HABIT_CONSOLIDATION_WEIGHT,
 	HABIT_LTM_PREFIX,
 	MAX_HABIT_CONSOLIDATION,
 	MEMORY_RECALL_INTENSITY,
+	NO_ACTIVITY_SUMMARY,
 	PROACTIVE_EXAMPLES,
 	PROACTIVE_SIMILARITY_THRESHOLD,
 	SNAPSHOT_WEIGHT_THRESHOLD
@@ -507,9 +509,9 @@ export default class Polywise {
 	}
 
 	async triggerSleepTick() {
-		const timestamp = dayjs().format('YYYY-MM-DD HH:mm:ss')
+		const timestamp = dayjs().format(DEFAULT_TIMESTAMP_FORMAT)
 		const logs = this.log.getTodayLogs()
-		const summary = logs.length > 0 ? logs.join('\n\n') : 'No activity today.'
+		const summary = logs.length > 0 ? logs.join('\n\n') : NO_ACTIVITY_SUMMARY
 
 		const filters = {
 			idol_id: this.idol_id ?? undefined,
