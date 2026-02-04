@@ -1,7 +1,6 @@
 {
 	"name": "monorepo",
 	"author": "1yasa",
-	"private": true,
 	"packageManager": "pnpm@10.28.2",
 	"scripts": {
 		"deps": "ncu -i",
