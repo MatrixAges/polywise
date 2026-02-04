@@ -17,13 +17,11 @@ import type {
 	COTDepthResult,
 	Edge,
 	InjectTriplesArgs,
-	MemoryRecallResult,
 	Node,
 	PolywiseArgs,
 	ProcessArticleArgs,
 	QueryArgs,
 	RecallArgs,
-	SearchResult,
 	UpsertNodeArgs,
 	SingleSearchArgs,
 	ExecuteCotArgs,
@@ -130,7 +128,7 @@ export default class Polywise {
 		}
 	}
 
-	async query(args: QueryArgs): Promise<{ knowledges: Knowledge[]; actions: Action[]; cot: ChainEmitter }> {
+	async query(args: QueryArgs) {
 		this.brain.reportUserActivity()
 		this.brain.setBusy(true)
 
@@ -633,7 +631,7 @@ export default class Polywise {
 		return await this.query_raw<Node[]>(sql_brain.sql_recall_related_nodes, [node_ids, max_depth, 20])
 	}
 
-	private async getNodeContexts(node_ids: number[]): Promise<ContextResult[]> {
+	private async getNodeContexts(node_ids: number[]) {
 		if (node_ids.length === 0) return []
 
 		const articles = await this.query_raw<any[]>(sql_brain.sql_get_node_articles, [node_ids])
@@ -775,7 +773,7 @@ export default class Polywise {
 		return (context.relevance_score ?? 1.0) * 0.5 + 0.5
 	}
 
-	private async rerankKnowledges(query: string, candidates: Knowledge[], limit: number): Promise<Knowledge[]> {
+	private async rerankKnowledges(query: string, candidates: Knowledge[], limit: number) {
 		if (candidates.length === 0) return []
 
 		const documents = candidates.map(c => {
@@ -798,7 +796,7 @@ export default class Polywise {
 		return sorted_results
 	}
 
-	private async rerankActions(query: string, candidates: Action[], limit: number): Promise<Action[]> {
+	private async rerankActions(query: string, candidates: Action[], limit: number) {
 		if (candidates.length === 0) return []
 
 		const documents = candidates.map(c => {
@@ -844,6 +842,7 @@ export default class Polywise {
 
 	private async injectTriples(args: InjectTriplesArgs) {
 		const { article_id, triples, idol_id, root_ids, metrics_ids } = args
+
 		await this.exec(sql.sql_inject_triples_begin)
 
 		for (const t of triples) {
