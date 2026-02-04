@@ -125,7 +125,8 @@ export interface HybridSearchResult {
 export interface COTDepthResult {
 	depth: number
 	query: string
-	results: HybridSearchResult[]
+	knowledges: HybridSearchResult[]
+	actions: HybridSearchResult[]
 	emerged_nodes: number[]
 	emerged_edges: number[]
 }

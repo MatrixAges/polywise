@@ -32,16 +32,12 @@ import type {
 	RecallNodesByKeywordsArgs,
 	StrengthenRelatedEdgesArgs,
 	ContextResult,
-	ReactArgs,
-	ReactResult,
 	HabituateArgs
 } from './types'
 
 @singleton()
 export default class Polywise {
 	private db: PGlite | null = null
-
-	private _onAction: ((result: ReactResult) => void) | null = null
 
 	public article: Article
 	public brain: Brain
@@ -94,7 +90,7 @@ export default class Polywise {
 			await this.exec(sql_meta.sql_create_schema_meta)
 			await this.exec(sql_meta.sql_create_table_schema_version)
 
-			const version_result = await this.query_raw<{ version: number }>(sql_meta.sql_get_current_version)
+			const version_result = await this.query_raw<{ version: number }[]>(sql_meta.sql_get_current_version)
 
 			const current_version = version_result[0]?.version ?? 0
 
@@ -102,7 +98,7 @@ export default class Polywise {
 				await migrate(current_version, this.exec.bind(this), this.query_raw.bind(this))
 			}
 
-			const check_result = await this.query_raw<{ count: string }>(
+			const check_result = await this.query_raw<{ count: string }[]>(
 				`SELECT COUNT(*) as count FROM information_schema.tables WHERE table_schema = '${SCHEMA_KNOWLEDGE}' AND table_name = 'articles'`
 			)
 
@@ -133,11 +129,9 @@ export default class Polywise {
 		}
 	}
 
-	public onAction(cb: (result: ReactResult) => void) {
-		this._onAction = cb
-	}
-
-	async query(args: QueryArgs) {
+	async query(
+		args: QueryArgs
+	): Promise<{ knowledges: HybridSearchResult[]; actions: HybridSearchResult[]; cot: ChainEmitter }> {
 		this.brain.reportUserActivity()
 		this.brain.setBusy(true)
 
@@ -148,10 +142,13 @@ export default class Polywise {
 				search_limit = 20,
 				rerank_limit = 10,
 				cot_depth = 0,
-				stimulate_on_recall = true
+				stimulate_on_recall = true,
+				habit_threshold = 0.5
 			} = args
 
 			const emitter = new ChainEmitter()
+
+			const query_embedding = (await this.pipeline.embed(query)) as number[]
 
 			const initial_results = await this.executeSingleSearch({
 				query,
@@ -161,8 +158,63 @@ export default class Polywise {
 				stimulate_on_recall
 			})
 
+			const initial_knowledges = initial_results.filter(r => r.type === 'info')
+			const initial_actions = initial_results.filter(r => r.type === 'action')
+
+			if (query_embedding && this.db) {
+				const nearest_stimulus = await this.query_raw<any[]>(sql.sql_find_nearest_node, [
+					`[${query_embedding.join(',')}]`
+				])
+
+				if (nearest_stimulus.length > 0) {
+					const stimulus = nearest_stimulus[0]
+
+					if (
+						stimulus.similarity > 0.8 &&
+						(stimulus.activation >= stimulus.threshold ||
+							stimulus.potential >= stimulus.threshold)
+					) {
+						const habits = await this.query_raw<any[]>(sql.sql_find_strongest_habit, [
+							stimulus.id
+						])
+
+						if (habits.length > 0 && habits[0].weight >= habit_threshold) {
+							const h = habits[0]
+
+							const fast_action: HybridSearchResult = {
+								id: h.target_id,
+								content: h.action,
+								type: 'action',
+								source: 'memory',
+								rerankScore: 1.0,
+								relevanceScore: 1.0,
+								combinedScore: 1.0,
+								stimulated: true,
+								memoryStrength: h.weight,
+								metadata: h.action_metadata || {}
+							}
+
+							if (!initial_actions.find(a => a.id === fast_action.id)) {
+								initial_actions.unshift(fast_action)
+							}
+
+							await this.query_raw(sql.sql_increment_reaction_count, [
+								stimulus.id,
+								h.target_id
+							])
+						}
+					}
+
+					await this.stimulate(stimulus.id, 0.5)
+				}
+			}
+
 			if (cot_depth <= 0) {
-				return { result: initial_results, cot: emitter }
+				return {
+					knowledges: initial_knowledges,
+					actions: initial_actions,
+					cot: (emitter.finish() as any) || emitter
+				}
 			}
 
 			this.executeCot({
@@ -173,67 +225,16 @@ export default class Polywise {
 				search_limit,
 				rerank_limit,
 				stimulate_on_recall,
-				initial_results,
+				initial_knowledges,
+				initial_actions,
 				emitter,
 				history_ids: new Set(initial_results.map(r => r.id))
 			})
 
-			return { result: initial_results, cot: emitter }
+			return { knowledges: initial_knowledges, actions: initial_actions, cot: emitter }
 		} finally {
 			this.brain.setBusy(false)
 		}
-	}
-
-	public async react(
-		input: string,
-		args: ReactArgs = {}
-	): Promise<{ result: ReactResult | null; cot: ChainEmitter }> {
-		this.brain.reportUserActivity()
-
-		const { habit_threshold = 0.5 } = args
-
-		const embedding = await this.pipeline.embed(input)
-
-		if (!embedding) return { result: null, cot: new ChainEmitter().finish() as any }
-
-		const nearest_stimulus = await this.query_raw<any[]>(sql.sql_find_nearest_node, [
-			`[${embedding.join(',')}]`
-		])
-
-		let fast_result: ReactResult | null = null
-
-		if (nearest_stimulus.length > 0) {
-			const stimulus = nearest_stimulus[0]
-
-			if (
-				stimulus.similarity > 0.8 &&
-				(stimulus.activation >= stimulus.threshold || stimulus.potential >= stimulus.threshold)
-			) {
-				const habit = await this.query_raw<any[]>(sql.sql_find_strongest_habit, [stimulus.id])
-
-				if (habit.length > 0 && habit[0].weight >= habit_threshold) {
-					const h = habit[0]
-
-					fast_result = {
-						action: h.action,
-						description: h.action_metadata?.desc || `Reacted to ${stimulus.label}`,
-						metadata: h.action_metadata || {},
-						confidence: h.weight,
-						source: 'react'
-					}
-
-					await this.query_raw(sql.sql_increment_reaction_count, [stimulus.id, h.target_id])
-				}
-			}
-
-			await this.stimulate(stimulus.id, 0.5)
-		}
-
-		const emitter = new ChainEmitter()
-
-		setImmediate(() => this._deepThink(input, fast_result, emitter))
-
-		return { result: fast_result, cot: emitter }
 	}
 
 	async save(args: ProcessArticleArgs) {
@@ -261,7 +262,7 @@ export default class Polywise {
 				})
 			}
 
-			const query_embedding = await this.pipeline.embed(content)
+			const query_embedding = (await this.pipeline.embed(content)) as number[]
 
 			if (query_embedding) {
 				await this.query_raw(
@@ -488,7 +489,8 @@ export default class Polywise {
 			search_limit,
 			rerank_limit,
 			stimulate_on_recall,
-			initial_results,
+			initial_knowledges,
+			initial_actions,
 			emitter,
 			history_ids
 		} = args
@@ -501,7 +503,7 @@ export default class Polywise {
 			}
 
 			const depth_recall_depth = base_recall_depth + current_depth
-			const top_results = initial_results.slice(0, 3)
+			const top_results = [...initial_knowledges, ...initial_actions].slice(0, 3)
 			const insights = top_results.map(r => r.content.slice(0, 50)).join(', ')
 			const emerged_query = formatPerceiveQuery(query, insights)
 			const emerged_node_ids = top_results.map(r => r.id)
@@ -540,10 +542,14 @@ export default class Polywise {
 
 			emerged_final_results.forEach(r => history_ids.add(r.id))
 
+			const knowledges = emerged_final_results.filter(r => r.type === 'info')
+			const actions = emerged_final_results.filter(r => r.type === 'action')
+
 			const cot_result: COTDepthResult = {
 				depth: current_depth,
 				query: emerged_query,
-				results: emerged_final_results,
+				knowledges,
+				actions,
 				emerged_nodes: emerged_recall_result.nodes.map(n => n.id),
 				emerged_edges: []
 			}
@@ -568,7 +574,8 @@ export default class Polywise {
 						search_limit,
 						rerank_limit,
 						stimulate_on_recall,
-						initial_results: emerged_final_results,
+						initial_knowledges: knowledges,
+						initial_actions: actions,
 						emitter,
 						history_ids
 					})
@@ -631,56 +638,6 @@ export default class Polywise {
 
 		for (const id of node_ids) {
 			await this.query_raw(sql.sql_stimulate, [intensity, id])
-		}
-	}
-
-	private async _deepThink(input: string, fast_result: ReactResult | null, emitter: ChainEmitter) {
-		if (!this.db) {
-			emitter.finish()
-			return
-		}
-
-		try {
-			const { result, cot } = await this.query({
-				query: input,
-				cot_depth: 1,
-				search_limit: 10,
-				rerank_limit: 5
-			})
-
-			cot.onFinish(() => emitter.finish())
-
-			const action_results = result.filter(r => r.type === 'action')
-
-			if (action_results.length > 0 && this._onAction) {
-				const best_action = action_results[0]
-
-				const slow_result: ReactResult = {
-					action: best_action.content,
-					description: best_action.metadata?.desc || `Acted on ${input}`,
-					metadata: best_action.metadata || {},
-					confidence: best_action.rerankScore,
-					source: 'act'
-				}
-
-				if (!fast_result || slow_result.confidence >= fast_result.confidence) {
-					this._onAction(slow_result)
-				}
-			} else if (result.length > 0 && this._onAction) {
-				const best_info = result[0]
-
-				const slow_result: ReactResult = {
-					action: best_info.content,
-					description: `System 2 inference for: ${input}`,
-					metadata: best_info.metadata || {},
-					confidence: best_info.rerankScore,
-					source: 'act'
-				}
-
-				this._onAction(slow_result)
-			}
-		} catch (e) {
-			emitter.finish()
 		}
 	}
 

@@ -191,7 +191,8 @@ export interface ExecuteCotArgs {
 	search_limit: number
 	rerank_limit: number
 	stimulate_on_recall: boolean
-	initial_results: HybridSearchResult[]
+	initial_knowledges: HybridSearchResult[]
+	initial_actions: HybridSearchResult[]
 	emitter: ChainEmitter
 	history_ids: Set<number>
 }

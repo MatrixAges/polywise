@@ -85,14 +85,14 @@ describe.concurrent('Polywise Pure Text Learning', () => {
 			}
 
 			const query = 'transformer architecture and self-attention mechanism'
-			const { result } = await poly.query({
+			const { knowledges } = await poly.query({
 				query,
 				search_limit: 5,
 				rerank_limit: 3
 			})
 
-			expect(result.length).toBeGreaterThan(0)
-			expect(result[0].content.toLowerCase()).toContain('transformer')
+			expect(knowledges.length).toBeGreaterThan(0)
+			expect(knowledges[0].content.toLowerCase()).toContain('transformer')
 		}, 120000)
 
 		it('should maintain performance with legal and physics datasets', async () => {

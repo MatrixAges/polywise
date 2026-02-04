@@ -54,15 +54,15 @@ describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
 
 	describe.concurrent('Basic CoT Functionality', () => {
 		test('should return immediate result with CoT emitter', async () => {
-			const { result, cot } = await poly.query({
+			const { knowledges, actions, cot } = await poly.query({
 				query: 'microservices',
 				cot_depth: 2
 			})
 
-			expect(result.length).toBeGreaterThan(0)
+			expect(knowledges.length + actions.length).toBeGreaterThan(0)
 			expect(cot).toBeDefined()
-			expect(typeof cot.on).toBe('function')
-			expect(typeof cot.off).toBe('function')
+			expect(typeof cot?.on).toBe('function')
+			expect(typeof cot?.off).toBe('function')
 		})
 
 		test('should return empty cot emitter when cot_depth is 0', async () => {
@@ -72,22 +72,24 @@ describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
 			})
 
 			expect(cot).toBeDefined()
-			expect(typeof cot.on).toBe('function')
-			expect(typeof cot.off).toBe('function')
+			expect(typeof cot?.on).toBe('function')
+			expect(typeof cot?.off).toBe('function')
 		})
 
 		test('should contain hybrid search results with multiple sources', async () => {
-			const { result } = await poly.query({
+			const { knowledges, actions } = await poly.query({
 				query: 'docker',
 				recall_depth: 3,
 				search_limit: 20,
 				rerank_limit: 10
 			})
 
-			expect(result.length).toBeGreaterThan(0)
-			expect(result.length).toBeLessThanOrEqual(10)
+			const results = [...knowledges, ...actions]
 
-			const sources = new Set(result.map(r => r.source))
+			expect(results.length).toBeGreaterThan(0)
+			expect(results.length).toBeLessThanOrEqual(10)
+
+			const sources = new Set(results.map(r => r.source))
 
 			expect(sources.size).toBeGreaterThanOrEqual(1)
 		})
@@ -105,15 +107,15 @@ describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
 				rerank_limit: 5
 			})
 
-			cot.on(data => {
+			cot?.on(data => {
 				received_events.push(data)
 			})
 
-			await cot.toPromise()
+			await cot?.toPromise()
 
 			expect(received_events.length).toBe(1)
 			expect(received_events[0].depth).toBe(1)
-			expect(received_events[0].results.length).toBeGreaterThan(0)
+			expect(received_events[0].knowledges.length + received_events[0].actions.length).toBeGreaterThan(0)
 		})
 
 		test('should emit sequential events for depth 2', async () => {
@@ -127,11 +129,11 @@ describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
 				rerank_limit: 5
 			})
 
-			cot.on(data => {
+			cot?.on(data => {
 				received_events.push(data)
 			})
 
-			await cot.toPromise()
+			await cot?.toPromise()
 
 			expect(received_events.length).toBe(2)
 			expect(received_events[0].depth).toBe(1)
@@ -150,12 +152,12 @@ describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
 				rerank_limit: 5
 			})
 
-			cot.on(data => {
+			cot?.on(data => {
 				received_events.push(data)
 				depths.push(data.depth)
 			})
 
-			await cot.toPromise()
+			await cot?.toPromise()
 
 			expect(received_events.length).toBe(3)
 			expect(depths[0]).toBe(1)
@@ -175,11 +177,11 @@ describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
 				rerank_limit: 5
 			})
 
-			cot.on(data => {
+			cot?.on(data => {
 				received_events.push(data)
 			})
 
-			await cot.toPromise()
+			await cot?.toPromise()
 
 			expect(received_events.length).toBe(2)
 			expect(received_events[0].emerged_nodes.length).toBeGreaterThanOrEqual(0)
@@ -197,11 +199,11 @@ describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
 				rerank_limit: 5
 			})
 
-			cot.on(data => {
+			cot?.on(data => {
 				received_events.push(data)
 			})
 
-			await cot.toPromise()
+			await cot?.toPromise()
 
 			expect(received_events.length).toBe(3)
 			expect(received_events[0].query).toContain('circuit breaker')
@@ -222,14 +224,14 @@ describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
 				rerank_limit: 3
 			})
 
-			cot.on(data => {
+			cot?.on(data => {
 				received_events.push(data)
 			})
 
-			await cot.toPromise()
+			await cot?.toPromise()
 
 			for (const event of received_events) {
-				expect(event.results.length).toBeLessThanOrEqual(3)
+				expect(event.knowledges.length + event.actions.length).toBeLessThanOrEqual(3)
 			}
 		})
 	})
