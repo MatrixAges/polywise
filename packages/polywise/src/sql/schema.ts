@@ -81,6 +81,9 @@ export const sql_create_table_articles = `
   CREATE TABLE IF NOT EXISTS ${SCHEMA_KNOWLEDGE}.articles (
     id SERIAL PRIMARY KEY,
     content TEXT,
+    idol_id TEXT,
+    root_ids TEXT[] DEFAULT '{}',
+    metrics_ids TEXT[] DEFAULT '{}',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   );
 `
