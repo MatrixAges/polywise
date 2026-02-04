@@ -109,10 +109,21 @@ export interface ContextResult {
 	article_ids: number[]
 }
 
-export interface HybridSearchResult {
+export interface Knowledge {
 	id: number
 	content: string
-	type: 'info' | 'action'
+	source: 'memory' | 'external' | 'implicit'
+	rerankScore: number
+	relevanceScore: number
+	combinedScore: number
+	stimulated: boolean
+	memoryStrength: number
+	metadata?: Metadata
+}
+
+export interface Action {
+	id: number
+	content: string
 	source: 'memory' | 'external' | 'implicit'
 	rerankScore: number
 	relevanceScore: number
@@ -125,8 +136,8 @@ export interface HybridSearchResult {
 export interface COTDepthResult {
 	depth: number
 	query: string
-	knowledges: HybridSearchResult[]
-	actions: HybridSearchResult[]
+	knowledges: Knowledge[]
+	actions: Action[]
 	emerged_nodes: number[]
 	emerged_edges: number[]
 }

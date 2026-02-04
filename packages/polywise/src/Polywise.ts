@@ -17,7 +17,6 @@ import type {
 	ConnectArgs,
 	COTDepthResult,
 	Edge,
-	HybridSearchResult,
 	InjectTriplesArgs,
 	MemoryRecallResult,
 	Node,
@@ -32,7 +31,9 @@ import type {
 	RecallNodesByKeywordsArgs,
 	StrengthenRelatedEdgesArgs,
 	ContextResult,
-	HabituateArgs
+	HabituateArgs,
+	Knowledge,
+	Action
 } from './types'
 
 @singleton()
@@ -129,9 +130,7 @@ export default class Polywise {
 		}
 	}
 
-	async query(
-		args: QueryArgs
-	): Promise<{ knowledges: HybridSearchResult[]; actions: HybridSearchResult[]; cot: ChainEmitter }> {
+	async query(args: QueryArgs): Promise<{ knowledges: Knowledge[]; actions: Action[]; cot: ChainEmitter }> {
 		this.brain.reportUserActivity()
 		this.brain.setBusy(true)
 
@@ -158,8 +157,27 @@ export default class Polywise {
 				stimulate_on_recall
 			})
 
-			const initial_knowledges = initial_results.filter(r => r.type === 'info')
-			const initial_actions = initial_results.filter(r => r.type === 'action')
+			const initial_knowledges = initial_results
+				.filter(r => r.type === 'info')
+				.map(r => {
+					const { type, relevance_score, memory_strength, ...rest } = r
+					return {
+						...rest,
+						relevanceScore: relevance_score,
+						memoryStrength: memory_strength
+					} as Knowledge
+				})
+
+			const initial_actions = initial_results
+				.filter(r => r.type === 'action')
+				.map(r => {
+					const { type, relevance_score, memory_strength, ...rest } = r
+					return {
+						...rest,
+						relevanceScore: relevance_score,
+						memoryStrength: memory_strength
+					} as Action
+				})
 
 			if (query_embedding && this.db) {
 				const nearest_stimulus = await this.query_raw<any[]>(sql.sql_find_nearest_node, [
@@ -181,10 +199,9 @@ export default class Polywise {
 						if (habits.length > 0 && habits[0].weight >= habit_threshold) {
 							const h = habits[0]
 
-							const fast_action: HybridSearchResult = {
+							const fast_action: Action = {
 								id: h.target_id,
 								content: h.action,
-								type: 'action',
 								source: 'memory',
 								rerankScore: 1.0,
 								relevanceScore: 1.0,
@@ -225,8 +242,8 @@ export default class Polywise {
 				search_limit,
 				rerank_limit,
 				stimulate_on_recall,
-				initial_knowledges,
-				initial_actions,
+				initial_knowledges: initial_knowledges,
+				initial_actions: initial_actions,
 				emitter,
 				history_ids: new Set(initial_results.map(r => r.id))
 			})
@@ -542,8 +559,27 @@ export default class Polywise {
 
 			emerged_final_results.forEach(r => history_ids.add(r.id))
 
-			const knowledges = emerged_final_results.filter(r => r.type === 'info')
-			const actions = emerged_final_results.filter(r => r.type === 'action')
+			const knowledges = emerged_final_results
+				.filter(r => r.type === 'info')
+				.map(r => {
+					const { type, relevance_score, memory_strength, ...rest } = r
+					return {
+						...rest,
+						relevanceScore: relevance_score,
+						memoryStrength: memory_strength
+					} as Knowledge
+				})
+
+			const actions = emerged_final_results
+				.filter(r => r.type === 'action')
+				.map(r => {
+					const { type, relevance_score, memory_strength, ...rest } = r
+					return {
+						...rest,
+						relevanceScore: relevance_score,
+						memoryStrength: memory_strength
+					} as Action
+				})
 
 			const cot_result: COTDepthResult = {
 				depth: current_depth,
@@ -753,7 +789,11 @@ export default class Polywise {
 		return (context.relevance_score ?? 1.0) * 0.5 + 0.5
 	}
 
-	private async rerankResults(query: string, candidates: AggregatedCandidate[], limit: number) {
+	private async rerankResults(
+		query: string,
+		candidates: AggregatedCandidate[],
+		limit: number
+	): Promise<AggregatedCandidate[]> {
 		if (candidates.length === 0) return []
 
 		const documents = candidates.map(c => {
@@ -764,27 +804,20 @@ export default class Polywise {
 
 		const rerank_scores = await this.pipeline.rerank(query, documents)
 
-		const results: HybridSearchResult[] = candidates.map((candidate, index) => ({
-			id: candidate.id,
-			content: candidate.content,
-			type: candidate.type,
-			source: candidate.source,
+		const results: AggregatedCandidate[] = candidates.map((candidate, index) => ({
+			...candidate,
 			rerankScore: rerank_scores[index]?.score ?? 0,
-			relevanceScore: candidate.relevance_score,
-			combinedScore: (rerank_scores[index]?.score ?? 0) * 0.6 + candidate.relevance_score * 0.4,
-			stimulated: candidate.stimulated,
-			memoryStrength: candidate.memory_strength,
-			metadata: candidate.metadata
+			combinedScore: (rerank_scores[index]?.score ?? 0) * 0.6 + candidate.relevance_score * 0.4
 		}))
 
-		const sorted_results = results.sort((a, b) => b.combinedScore - a.combinedScore).slice(0, limit)
+		const sorted_results = results.sort((a: any, b: any) => b.combinedScore - a.combinedScore).slice(0, limit)
 
 		await this.stimulateByRanking(sorted_results)
 
 		return sorted_results
 	}
 
-	private async stimulateByRanking(results: HybridSearchResult[]) {
+	private async stimulateByRanking(results: AggregatedCandidate[]) {
 		if (results.length === 0) return
 
 		const max_stimulation = 0.5

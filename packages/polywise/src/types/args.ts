@@ -1,7 +1,7 @@
 import type { PGlite } from '@electric-sql/pglite'
 import type Polywise from '../Polywise'
 import type { ChainEmitter } from '../utils'
-import type { HybridSearchResult, Metadata, ReactResult, Triple } from './polywise'
+import type { Action, Knowledge, Metadata, ReactResult, Triple } from './polywise'
 
 export interface BrainArgs {
 	poly: Polywise
@@ -153,6 +153,7 @@ export interface QueryArgs {
 	rerank_limit?: number
 	cot_depth?: number
 	stimulate_on_recall?: boolean
+	habit_threshold?: number
 }
 
 export interface AggregatedCandidate {
@@ -191,8 +192,8 @@ export interface ExecuteCotArgs {
 	search_limit: number
 	rerank_limit: number
 	stimulate_on_recall: boolean
-	initial_knowledges: HybridSearchResult[]
-	initial_actions: HybridSearchResult[]
+	initial_knowledges: Knowledge[]
+	initial_actions: Action[]
 	emitter: ChainEmitter
 	history_ids: Set<number>
 }
