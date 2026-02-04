@@ -23,19 +23,32 @@ describe.concurrent('Polywise Unified Retrieval System', () => {
 		for (let i = 0; i < 10; i++) {
 			const qa = behavioral_qa[i]
 
-			await poly.habituate({
-				stimulus: qa.question,
-				action_label: qa.expected_action,
-				weight: 0.9
+			const embedding = (await poly.pipeline.embed(qa.question)) as number[]
+
+			const stimulus_id = await poly.addNode({
+				label: `Stimulus: ${qa.question.slice(0, 50)}`,
+				x: Math.random() * 800,
+				y: Math.random() * 600,
+				threshold: 0.1,
+				embedding,
+				metadata: { desc: qa.question }
 			})
 
-			const nodes = await poly.getAllNodes()
+			const action_id = await poly.addNode({
+				label: qa.expected_action,
+				x: Math.random() * 800,
+				y: Math.random() * 600,
+				is_action: true
+			})
 
-			const stimulus_node = nodes.find(n => n.label.includes(qa.question.slice(0, 20)))
+			await poly.connect({
+				source_id: stimulus_id,
+				target_id: action_id,
+				weight: 0.9,
+				is_habit: true
+			})
 
-			if (stimulus_node) {
-				await poly.stimulate(stimulus_node.id, 1.0)
-			}
+			await poly.stimulate(stimulus_id, 1.0)
 		}
 	}, 300000)
 
