@@ -69,12 +69,16 @@ import type {
 	HabituateArgs,
 	Knowledge,
 	Action,
-	AggregateResultsArgs
+	AggregateResultsArgs,
+	FiltersArgs
 } from './types'
 
 @singleton()
 export default class Polywise {
 	private db: PGlite | null = null
+	private idol_id: string | null = null
+	private root_ids: string[] | null = null
+	private metrics_ids: string[] | null = null
 
 	public article: Article
 	public brain: Brain
@@ -97,13 +101,20 @@ export default class Polywise {
 			embedding_concurrency,
 			reranker_concurrency,
 			onTick,
-			log
+			log,
+			idol_id,
+			root_ids,
+			metrics_ids
 		} = args
 
 		this.db = new PGlite(data_dir || ':polywise:', {
 			relaxedDurability: true,
 			extensions: { vector }
 		})
+
+		this.idol_id = idol_id ?? null
+		this.root_ids = root_ids ?? null
+		this.metrics_ids = metrics_ids ?? null
 
 		if (log) {
 			this.log.init(typeof log === 'boolean' ? {} : log)
@@ -125,6 +136,14 @@ export default class Polywise {
 		})
 
 		await this.initDatabase()
+	}
+
+	setFilters(args: FiltersArgs) {
+		const { idol_id, root_ids, metrics_ids } = args
+
+		if (idol_id !== undefined) this.idol_id = idol_id
+		if (root_ids !== undefined) this.root_ids = root_ids
+		if (metrics_ids !== undefined) this.metrics_ids = metrics_ids
 	}
 
 	private async initDatabase() {
@@ -200,7 +219,9 @@ export default class Polywise {
 			rerank_limit = DEFAULT_RERANK_LIMIT,
 			cot_depth = 0,
 			stimulate_on_recall = true,
-			habit_threshold = DEFAULT_HABIT_THRESHOLD
+			habit_threshold = DEFAULT_HABIT_THRESHOLD,
+			idol_id = this.idol_id,
+			root_ids = this.root_ids
 		} = args
 
 		const emitter = new ChainEmitter()
@@ -212,7 +233,9 @@ export default class Polywise {
 			recall_depth,
 			search_limit,
 			rerank_limit,
-			stimulate_on_recall
+			stimulate_on_recall,
+			idol_id: idol_id ?? undefined,
+			root_ids: root_ids ?? undefined
 		})
 
 		await this.handleHabitReaction({
@@ -247,7 +270,9 @@ export default class Polywise {
 			initial_knowledges,
 			initial_actions,
 			emitter,
-			history_ids
+			history_ids,
+			idol_id,
+			root_ids
 		})
 
 		const result = { knowledges: initial_knowledges, actions: initial_actions, cot: emitter }
@@ -313,7 +338,13 @@ export default class Polywise {
 		this.brain.reportUserActivity()
 		this.brain.setBusy(true)
 
-		const { content, article_id, idol_id, root_ids, metrics_ids } = args
+		const {
+			content,
+			article_id,
+			idol_id = this.idol_id,
+			root_ids = this.root_ids,
+			metrics_ids = this.metrics_ids
+		} = args
 
 		const res = (await this.queryRaw(sql.sql_process_article, [content])) as { id: number }[]
 
@@ -331,7 +362,18 @@ export default class Polywise {
 	}
 
 	async addNode(args: AddNodeArgs) {
-		const { label, x, y, threshold, idol_id, root_ids, metrics_ids, metadata, embedding, is_action } = args
+		const {
+			label,
+			x,
+			y,
+			threshold,
+			idol_id = this.idol_id,
+			root_ids = this.root_ids,
+			metrics_ids = this.metrics_ids,
+			metadata,
+			embedding,
+			is_action
+		} = args
 
 		const rows = (await this.queryRaw(sql.sql_add_node, [
 			label,
@@ -350,7 +392,16 @@ export default class Polywise {
 	}
 
 	async connect(args: ConnectArgs) {
-		const { source_id, target_id, weight, idol_id, root_ids, metrics_ids, metadata, is_habit } = args
+		const {
+			source_id,
+			target_id,
+			weight,
+			idol_id = this.idol_id,
+			root_ids = this.root_ids,
+			metrics_ids = this.metrics_ids,
+			metadata,
+			is_habit
+		} = args
 
 		await this.queryRaw(sql.sql_connect, [
 			source_id,
@@ -459,11 +510,21 @@ export default class Polywise {
 	}
 
 	private async recallFromMemory(args: RecallArgs) {
-		const { query, max_depth = DEFAULT_RECALL_DEPTH, stimulate_intensity = MEMORY_RECALL_INTENSITY } = args
+		const {
+			query,
+			max_depth = DEFAULT_RECALL_DEPTH,
+			stimulate_intensity = MEMORY_RECALL_INTENSITY,
+			idol_id = this.idol_id,
+			root_ids = this.root_ids
+		} = args
 
 		const keywords = extractKeywords(query)
 
-		const matched_nodes = await this.recallNodesByKeywords({ keywords })
+		const matched_nodes = await this.recallNodesByKeywords({
+			keywords,
+			idol_id,
+			root_ids
+		})
 
 		const related_nodes = await this.recallRelatedNodes(
 			matched_nodes.map(n => n.id),
@@ -489,7 +550,7 @@ export default class Polywise {
 	}
 
 	private async executeSingleSearch(args: SingleSearchArgs) {
-		const { query, recall_depth, search_limit, rerank_limit, stimulate_on_recall } = args
+		const { query, recall_depth, search_limit, rerank_limit, stimulate_on_recall, idol_id, root_ids } = args
 
 		const query_embedding = (await this.pipeline.embed(query)) as number[]
 
@@ -497,7 +558,9 @@ export default class Polywise {
 			query,
 			max_depth: recall_depth,
 			stimulate_intensity: stimulate_on_recall ? MEMORY_RECALL_INTENSITY : 0,
-			query_embedding: query_embedding ?? undefined
+			query_embedding: query_embedding ?? undefined,
+			idol_id,
+			root_ids
 		})
 
 		const search_results = await this.pipeline.search({
@@ -552,7 +615,9 @@ export default class Polywise {
 			initial_knowledges,
 			initial_actions,
 			emitter,
-			history_ids
+			history_ids,
+			idol_id,
+			root_ids
 		} = args
 
 		if (!emitter.isActiveStatus() || current_depth > max_depth || !this.db) {
@@ -574,7 +639,9 @@ export default class Polywise {
 			base_recall_depth,
 			search_limit,
 			stimulate_on_recall,
-			history_ids
+			history_ids,
+			idol_id,
+			root_ids
 		})
 
 		const reranked_knowledges = await this.rerankKnowledges(emerged_query, emerged_knowledges, rerank_limit)
@@ -604,7 +671,9 @@ export default class Polywise {
 			initial_knowledges: reranked_knowledges,
 			initial_actions: reranked_actions,
 			emitter,
-			history_ids
+			history_ids,
+			idol_id,
+			root_ids
 		})
 	}
 
@@ -615,9 +684,19 @@ export default class Polywise {
 		search_limit: number
 		stimulate_on_recall: boolean
 		history_ids: Set<number>
+		idol_id?: string
+		root_ids?: string[]
 	}) {
-		const { emerged_query, current_depth, base_recall_depth, search_limit, stimulate_on_recall, history_ids } =
-			args
+		const {
+			emerged_query,
+			current_depth,
+			base_recall_depth,
+			search_limit,
+			stimulate_on_recall,
+			history_ids,
+			idol_id,
+			root_ids
+		} = args
 
 		const depth_recall_depth = base_recall_depth + current_depth
 		const query_embedding = (await this.pipeline.embed(emerged_query)) as number[]
@@ -626,7 +705,9 @@ export default class Polywise {
 			query: emerged_query,
 			max_depth: depth_recall_depth,
 			stimulate_intensity: stimulate_on_recall ? MEMORY_RECALL_INTENSITY * (1 + current_depth) : 0,
-			query_embedding: query_embedding ?? undefined
+			query_embedding: query_embedding ?? undefined,
+			idol_id,
+			root_ids
 		})
 
 		const emerged_search_results = await this.pipeline.search({
@@ -694,7 +775,9 @@ export default class Polywise {
 			initial_knowledges,
 			initial_actions,
 			emitter,
-			history_ids
+			history_ids,
+			idol_id,
+			root_ids
 		} = args
 
 		if (current_depth < max_depth && (initial_knowledges.length > 0 || initial_actions.length > 0)) {
@@ -716,7 +799,9 @@ export default class Polywise {
 					initial_knowledges,
 					initial_actions,
 					emitter,
-					history_ids
+					history_ids,
+					idol_id,
+					root_ids
 				})
 			})
 		} else {
@@ -751,7 +836,7 @@ export default class Polywise {
 	}
 
 	private async recallNodesByKeywords(args: RecallNodesByKeywordsArgs) {
-		const { keywords, limit = 10 } = args
+		const { keywords, limit = 10, idol_id, root_ids } = args
 
 		if (keywords.length === 0) {
 			return []
@@ -762,7 +847,9 @@ export default class Polywise {
 		for (const keyword of keywords) {
 			const nodes = (await this.queryRaw(sql_brain.sql_recall_nodes_by_label, [
 				`%${keyword}%`,
-				limit
+				limit,
+				idol_id,
+				root_ids
 			])) as Node[]
 
 			results.push(...nodes)
@@ -1046,13 +1133,7 @@ export default class Polywise {
 		await this.exec(sql.sql_inject_triples_commit)
 	}
 
-	private async processSingleTriple(args: {
-		t: any
-		article_id: number
-		idol_id?: string
-		root_ids?: string[]
-		metrics_ids?: string[]
-	}) {
+	private async processSingleTriple(args: { t: any; article_id: number } & FiltersArgs) {
 		const { t, article_id, idol_id, root_ids, metrics_ids } = args
 
 		const sub_id = await this.upsertNode({
@@ -1106,7 +1187,16 @@ export default class Polywise {
 	}
 
 	private async upsertNode(args: UpsertNodeArgs) {
-		const { label, article_id, idol_id, root_ids, metrics_ids, metadata, embedding, is_action } = args
+		const {
+			label,
+			article_id,
+			idol_id = this.idol_id,
+			root_ids = this.root_ids,
+			metrics_ids = this.metrics_ids,
+			metadata,
+			embedding,
+			is_action
+		} = args
 
 		await this.queryRaw(sql.sql_upsert_node, [
 			label,

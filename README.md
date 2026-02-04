@@ -33,11 +33,25 @@ Polywise allows AI agents to remember and grow with every conversation, converti
 
 ```typescript
 const poly = new Polywise()
-await poly.init({ data_dir: './my-memory' })
+await poly.init({
+	data_dir: './my-memory',
+	idol_id: 'user_123',
+	root_ids: ['global_knowledge']
+})
+
+// Filters can be updated at any time
+poly.setFilters({ idol_id: 'user_456' })
 
 // Save episodic memory (content)
+// Uses class-level filters (idol_id, root_ids) by default
 await poly.save({
 	content: 'User prefers TypeScript and works late at night.'
+})
+
+// Returns both information and potential actions in a single pass
+// Query also respects class-level filters automatically
+const { knowledges, actions } = await poly.query({
+	query: 'What are the user preferences?'
 })
 ```
 

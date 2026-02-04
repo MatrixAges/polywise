@@ -14,7 +14,13 @@ export interface LogArgs {
 	json?: boolean
 }
 
-export interface PolywiseArgs {
+export interface FiltersArgs {
+	idol_id?: string
+	root_ids?: string[]
+	metrics_ids?: string[]
+}
+
+export interface PolywiseArgs extends FiltersArgs {
 	data_dir?: string
 	cache_dir?: string
 	embedding_config?: EmbeddingConfig
@@ -63,52 +69,37 @@ export interface PipelineArgs {
 	reranker_concurrency?: number
 }
 
-export interface AddNodeArgs {
+export interface AddNodeArgs extends FiltersArgs {
 	label: string
 	x: number
 	y: number
 	threshold?: number
-	idol_id?: string
-	root_ids?: string[]
-	metrics_ids?: string[]
 	metadata?: Metadata
 	embedding?: number[]
 	is_action?: boolean
 }
 
-export interface ConnectArgs {
+export interface ConnectArgs extends FiltersArgs {
 	source_id: number
 	target_id: number
 	weight?: number
-	idol_id?: string
-	root_ids?: string[]
-	metrics_ids?: string[]
 	metadata?: Metadata
 	is_habit?: boolean
 }
 
-export interface ProcessArticleArgs {
+export interface ProcessArticleArgs extends FiltersArgs {
 	content: string
 	article_id?: number
-	idol_id?: string
-	root_ids?: string[]
-	metrics_ids?: string[]
 }
 
-export interface InjectTriplesArgs {
+export interface InjectTriplesArgs extends FiltersArgs {
 	article_id: number
 	triples: Triple[]
-	idol_id?: string
-	root_ids?: string[]
-	metrics_ids?: string[]
 }
 
-export interface UpsertNodeArgs {
+export interface UpsertNodeArgs extends FiltersArgs {
 	label: string
 	article_id: number
-	idol_id?: string
-	root_ids?: string[]
-	metrics_ids?: string[]
 	metadata?: Metadata
 	embedding?: number[]
 	is_action?: boolean
@@ -141,17 +132,15 @@ export interface SearchResult {
 	rerankScore: number
 }
 
-export interface RecallArgs {
+export interface RecallArgs extends FiltersArgs {
 	query: string
 	max_nodes?: number
 	max_depth?: number
 	stimulate_intensity?: number
 	query_embedding?: number[]
-	recall_idol_id?: string
-	recall_root_ids?: string[]
 }
 
-export interface QueryArgs {
+export interface QueryArgs extends FiltersArgs {
 	query: string
 	recall_depth?: number
 	search_limit?: number
@@ -175,7 +164,7 @@ export interface PipelineSearchArgs {
 	fulltext_search: () => Promise<ArticleSearchResult[]>
 }
 
-export interface SingleSearchArgs {
+export interface SingleSearchArgs extends FiltersArgs {
 	query: string
 	recall_depth: number
 	search_limit: number
@@ -183,7 +172,7 @@ export interface SingleSearchArgs {
 	stimulate_on_recall: boolean
 }
 
-export interface ExecuteCotArgs {
+export interface ExecuteCotArgs extends FiltersArgs {
 	query: string
 	current_depth: number
 	max_depth: number
@@ -197,7 +186,7 @@ export interface ExecuteCotArgs {
 	history_ids: Set<number>
 }
 
-export interface RecallNodesByKeywordsArgs {
+export interface RecallNodesByKeywordsArgs extends FiltersArgs {
 	keywords: string[]
 	limit?: number
 }

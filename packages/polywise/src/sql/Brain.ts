@@ -36,7 +36,9 @@ export const sql_sleep_tick_commit = `COMMIT`
 export const sql_recall_nodes_by_label = `
 	SELECT id, label, x, y, activation, potential, idol_id, root_ids, metrics_ids, metadata
 	FROM ${SCHEMA_BRAIN}.nodes
-	WHERE label ILIKE $1 OR $1 ILIKE '%' || label || '%'
+	WHERE (label ILIKE $1 OR $1 ILIKE '%' || label || '%')
+	  AND ($3::text IS NULL OR idol_id = $3)
+	  AND ($4::text[] IS NULL OR root_ids && $4)
 	ORDER BY potential DESC, activation DESC
 	LIMIT $2
 `
