@@ -1,7 +1,9 @@
 import { injectable } from 'tsyringe'
+import to from 'await-to-js'
 
 import { calculateFatigue, isIdle } from './utils'
 import { SHADOW_INTERVAL_MS, FATIGUE_THRESHOLD, IDLE_TIMEOUT_MS } from './consts'
+import { catchFinally } from './decorators'
 
 import type Polywise from './Polywise'
 import type { BrainState } from './types'
@@ -44,6 +46,9 @@ export default class Brain {
 		}
 	}
 
+	@catchFinally(function (this: Brain) {
+		this.setBusy(false)
+	})
 	async triggerInputBurst(load = 50) {
 		if (!this.poly) return
 
@@ -70,6 +75,9 @@ export default class Brain {
 		}
 	}
 
+	@catchFinally(function (this: Brain) {
+		this.setBusy(false)
+	})
 	async triggerSleepTick() {
 		if (!this.poly) return
 
@@ -89,13 +97,15 @@ export default class Brain {
 			const is_idle = isIdle(this.last_user_interaction, IDLE_TIMEOUT_MS)
 
 			if (this.state === 'TIRED' && is_idle) {
-				await this.triggerSleepTick()
+				const [err] = await to(this.triggerSleepTick())
+
+				if (err) console.error('Brain sleep tick error:', err)
 
 				return
 			}
 
 			if (this.state !== 'SLEEPING' && this.state !== 'LEARNING') {
-				await this.runShadowTick()
+				await to(this.runShadowTick())
 			}
 		}, SHADOW_INTERVAL_MS)
 	}

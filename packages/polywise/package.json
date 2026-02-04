@@ -23,6 +23,7 @@
 		"@abraham/reflection": "^0.13.0",
 		"@electric-sql/pglite": "^0.3.15",
 		"@huggingface/transformers": "^3.3.2",
+		"await-to-js": "^3.0.0",
 		"ofetch": "^1.4.1",
 		"p-queue": "^8.1.0",
 		"tslib": "^2.8.1",

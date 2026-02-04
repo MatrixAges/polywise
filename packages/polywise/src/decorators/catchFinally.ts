@@ -1,4 +1,4 @@
-export default (on_finally?: (...args: any[]) => void) =>
+export default (onFinally?: (...args: any[]) => void) =>
 	(target: any, property: string, descriptor: PropertyDescriptor) => {
 		const original_method = descriptor.value
 
@@ -6,8 +6,8 @@ export default (on_finally?: (...args: any[]) => void) =>
 			try {
 				return await original_method.apply(this, args)
 			} finally {
-				if (on_finally) {
-					on_finally.call(this, ...args)
+				if (onFinally) {
+					onFinally.call(this, ...args)
 				}
 			}
 		}

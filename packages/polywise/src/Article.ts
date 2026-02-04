@@ -1,10 +1,13 @@
 import { PGlite } from '@electric-sql/pglite'
+import to from 'await-to-js'
 
 import { SCHEMA_KNOWLEDGE } from './consts'
 import Pipeline from './Pipeline'
 import * as sql from './sql'
+import { catchError } from './decorators'
 import { ArticleEntity, ArticleWithSimilarity } from './types'
 
+@catchError()
 export default class Article {
 	private db: PGlite | null = null
 	private pipeline: Pipeline | null = null
@@ -18,6 +21,7 @@ export default class Article {
 
 	async add(content: string) {
 		const res = await this.process(content)
+
 		return res?.id || null
 	}
 
@@ -42,15 +46,13 @@ export default class Article {
 	}
 
 	async addWithEmbedding(content: string) {
-		const result = await this.process(content)
+		const [err, result] = await to(this.process(content))
 
-		if (result && result.id) {
-			await this.addEmbedding(result.id, content)
+		if (err || !result?.id) return null
 
-			return result.id
-		}
+		await to(this.addEmbedding(result.id, content))
 
-		return null
+		return result.id
 	}
 
 	async get(article_id: number) {
@@ -95,6 +97,7 @@ export default class Article {
 		if (!this.db || !this.pipeline) return []
 
 		const embedding = await this.pipeline.embed(query)
+
 		if (!embedding) return []
 
 		const res = await this.db.query<ArticleWithSimilarity>(sql.sql_search_articles_by_vector, [

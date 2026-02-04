@@ -4,8 +4,10 @@ import path from 'path'
 import os from 'os'
 import PQueue from 'p-queue'
 import { injectable } from 'tsyringe'
+import to from 'await-to-js'
 
 import { DEFAULT_EMBEDDING_CONFIG, DEFAULT_RERANKER_CONFIG, POOLING_MEAN, DEFAULT_CONCURRENCY } from './consts'
+import { catchError, catchFinally } from './decorators'
 
 import type {
 	EmbeddingConfig,
@@ -17,6 +19,7 @@ import type {
 } from './types'
 
 @injectable()
+@catchError()
 export default class Pipeline {
 	private embedding_config: EmbeddingConfig = DEFAULT_EMBEDDING_CONFIG
 	private reranker_config: RerankerConfig = DEFAULT_RERANKER_CONFIG
@@ -167,64 +170,41 @@ export default class Pipeline {
 	}
 
 	async checkModels() {
-		const cache_dir = this.cache_dir
-
-		env.cacheDir = cache_dir
+		env.cacheDir = this.cache_dir
 		env.allowLocalModels = true
 
-		const check_and_download = async (
-			config: EmbeddingConfig | RerankerConfig,
-			load_fn: () => Promise<any>
-		) => {
-			if (config.type !== 'local') return
-
-			const model_path = path.join(cache_dir, config.model)
-
-			const run = async (retry_count = 0) => {
-				try {
-					if (retry_count > 0) {
-						await new Promise(resolve => setTimeout(resolve, 2000))
-					}
-
-					await load_fn()
-				} catch (err) {
-					if (retry_count === 0) {
-						await fs.remove(model_path)
-
-						await run(retry_count + 1)
-
-						return
-					}
-
-					throw err
-				}
-			}
-
-			await run()
-		}
-
 		await Promise.all([
-			check_and_download(this.embedding_config, this.loadEmbeddingModel.bind(this)),
+			this.checkAndDownload(this.embedding_config, this.loadEmbeddingModel.bind(this)),
 			(async () => {
 				await new Promise(resolve => setTimeout(resolve, 500))
-
-				await check_and_download(this.reranker_config, this.loadRerankerModel.bind(this))
+				await this.checkAndDownload(this.reranker_config, this.loadRerankerModel.bind(this))
 			})()
 		])
 	}
 
+	private async checkAndDownload(config: EmbeddingConfig | RerankerConfig, load_fn: () => Promise<any>) {
+		if (config.type !== 'local' || !this.cache_dir) return
+
+		const model_path = path.join(this.cache_dir, config.model)
+
+		const [err] = await to(load_fn())
+
+		if (err) {
+			await fs.remove(model_path)
+			await new Promise(resolve => setTimeout(resolve, 2000))
+			await load_fn()
+		}
+	}
+
+	@catchFinally(function (this: Pipeline) {
+		this.embedding_promise = null
+	})
 	async loadEmbeddingModel() {
-		if (this.embedding_pipeline) {
-			return this.embedding_pipeline
-		}
+		if (this.embedding_pipeline) return this.embedding_pipeline
 
-		if (this.embedding_promise) {
-			return this.embedding_promise
-		}
+		if (this.embedding_promise) return this.embedding_promise
 
-		if (this.embedding_config.type !== 'local') {
-			return null
-		}
+		if (this.embedding_config.type !== 'local') return null
 
 		const { model, dtype } = this.embedding_config
 
@@ -232,27 +212,20 @@ export default class Pipeline {
 			dtype: dtype as any
 		})
 
-		try {
-			this.embedding_pipeline = await this.embedding_promise
+		this.embedding_pipeline = await this.embedding_promise
 
-			return this.embedding_pipeline
-		} finally {
-			this.embedding_promise = null
-		}
+		return this.embedding_pipeline
 	}
 
+	@catchFinally(function (this: Pipeline) {
+		this.reranker_promise = null
+	})
 	async loadRerankerModel() {
-		if (this.reranker_pipeline) {
-			return this.reranker_pipeline
-		}
+		if (this.reranker_pipeline) return this.reranker_pipeline
 
-		if (this.reranker_promise) {
-			return this.reranker_promise
-		}
+		if (this.reranker_promise) return this.reranker_promise
 
-		if (this.reranker_config.type !== 'local') {
-			return null
-		}
+		if (this.reranker_config.type !== 'local') return null
 
 		const { model, dtype } = this.reranker_config
 
@@ -260,13 +233,9 @@ export default class Pipeline {
 			dtype: dtype as any
 		})
 
-		try {
-			this.reranker_pipeline = await this.reranker_promise
+		this.reranker_pipeline = await this.reranker_promise
 
-			return this.reranker_pipeline
-		} finally {
-			this.reranker_promise = null
-		}
+		return this.reranker_pipeline
 	}
 
 	getEmbeddingConfig() {

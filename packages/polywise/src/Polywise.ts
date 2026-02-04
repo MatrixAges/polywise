@@ -1,6 +1,7 @@
 import { PGlite } from '@electric-sql/pglite'
 import { vector } from '@electric-sql/pglite/vector'
 import { singleton } from 'tsyringe'
+import to from 'await-to-js'
 
 import Article from './Article'
 import Brain from './Brain'
@@ -119,29 +120,33 @@ export default class Polywise {
 	}
 
 	private async initDatabase() {
-		try {
-			validateMigrations()
-		} catch (e) {
-			console.error('Migration validation error:', e)
+		const [val_err] = await to(Promise.resolve(validateMigrations()))
+
+		if (val_err) {
+			console.error('Migration validation error:', val_err)
 		}
 
-		try {
-			await this.exec(sql_meta.sql_create_schema_meta)
-			await this.exec(sql_meta.sql_create_table_schema_version)
+		const [err] = await to(
+			(async () => {
+				await this.exec(sql_meta.sql_create_schema_meta)
+				await this.exec(sql_meta.sql_create_table_schema_version)
 
-			const version_result = (await this.queryRaw(sql_meta.sql_get_current_version)) as {
-				version: number
-			}[]
+				const version_result = (await this.queryRaw(sql_meta.sql_get_current_version)) as {
+					version: number
+				}[]
 
-			const current_version = version_result[0]?.version ?? 0
+				const current_version = version_result[0]?.version ?? 0
 
-			if (current_version < CURRENT_SCHEMA_VERSION) {
-				await migrate(current_version, this.exec.bind(this), this.queryRaw.bind(this))
-			}
+				if (current_version < CURRENT_SCHEMA_VERSION) {
+					await migrate(current_version, this.exec.bind(this), this.queryRaw.bind(this))
+				}
 
-			await this.initSchema()
-		} catch (e) {
-			console.error('Migration error:', e)
+				await this.initSchema()
+			})()
+		)
+
+		if (err) {
+			console.error('Migration error:', err)
 		}
 	}
 
