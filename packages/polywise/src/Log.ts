@@ -1,6 +1,7 @@
 import { existsSync, mkdirSync, writeFileSync } from 'fs'
 import { join } from 'path'
 import { homedir } from 'os'
+import dayjs from 'dayjs'
 import { injectable } from 'tsyringe'
 
 export interface LogArgs {
@@ -30,8 +31,9 @@ export default class Log {
 	write(input: object, output: object) {
 		if (!this.log_dir) return
 
-		const timestamp = this.getTimestamp()
-		const date = this.getDate()
+		const now = dayjs()
+		const timestamp = now.format('YYYY-MM-DD HH:mm:ss')
+		const date = now.format('YYYY-MM-DD')
 
 		if (this.enable_log) {
 			this.writeLog({
@@ -50,20 +52,6 @@ export default class Log {
 				date
 			})
 		}
-	}
-
-	private getTimestamp() {
-		const now = new Date()
-		const pad = (n: number) => String(n).padStart(2, '0')
-
-		return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`
-	}
-
-	private getDate() {
-		const now = new Date()
-		const pad = (n: number) => String(n).padStart(2, '0')
-
-		return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`
 	}
 
 	private writeLog(args: { timestamp: string; input: object; output: object; date: string }) {
