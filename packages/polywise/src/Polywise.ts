@@ -5,6 +5,7 @@ import to from 'await-to-js'
 
 import Article from './Article'
 import Brain from './Brain'
+import Log from './Log'
 import Pipeline from './Pipeline'
 import * as sql from './sql'
 import * as sql_brain from './sql/Brain'
@@ -78,8 +79,10 @@ export default class Polywise {
 	public article: Article
 	public brain: Brain
 	public pipeline: Pipeline
+	public log: Log
 
 	constructor() {
+		this.log = new Log()
 		this.pipeline = new Pipeline()
 		this.article = new Article(this.pipeline)
 		this.brain = new Brain()
@@ -93,13 +96,18 @@ export default class Polywise {
 			reranker_config,
 			embedding_concurrency,
 			reranker_concurrency,
-			onTick
+			onTick,
+			log
 		} = args
 
 		this.db = new PGlite(data_dir || ':polywise:', {
 			relaxedDurability: true,
 			extensions: { vector }
 		})
+
+		if (log) {
+			this.log.init(typeof log === 'boolean' ? {} : log)
+		}
 
 		await this.pipeline.init({
 			cache_dir,
@@ -215,11 +223,15 @@ export default class Polywise {
 		})
 
 		if (cot_depth <= 0) {
-			return {
+			const result = {
 				knowledges: initial_knowledges,
 				actions: initial_actions,
 				cot: (emitter.finish() as any) || emitter
 			}
+
+			this.log.write(args, result)
+
+			return result
 		}
 
 		const history_ids = new Set([...initial_knowledges, ...initial_actions].map(r => r.id))
@@ -238,7 +250,11 @@ export default class Polywise {
 			history_ids
 		})
 
-		return { knowledges: initial_knowledges, actions: initial_actions, cot: emitter }
+		const result = { knowledges: initial_knowledges, actions: initial_actions, cot: emitter }
+
+		this.log.write(args, result)
+
+		return result
 	}
 
 	private async handleHabitReaction(args: {
@@ -322,6 +338,8 @@ export default class Polywise {
 		if (query_embedding && query_embedding.length > 0) {
 			await this.queryRaw(sql.sql_update_article_embedding, [`[${query_embedding.join(',')}]`, aid])
 		}
+
+		this.log.write(args, { article_id: aid })
 	}
 
 	async addNode(args: AddNodeArgs) {
@@ -1148,6 +1166,7 @@ export default class Polywise {
 	}
 
 	async off() {
+		this.log?.off()
 		this.brain?.off()
 		this.article?.off()
 		this.pipeline?.off()

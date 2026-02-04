@@ -8,6 +8,12 @@ export interface BrainArgs {
 	onTick?: () => void
 }
 
+export interface LogArgs {
+	dir: string
+	log?: boolean
+	json?: boolean
+}
+
 export interface PolywiseArgs {
 	data_dir?: string
 	cache_dir?: string
@@ -16,6 +22,7 @@ export interface PolywiseArgs {
 	embedding_concurrency?: number
 	reranker_concurrency?: number
 	onTick?: () => void
+	log?: boolean | LogArgs
 }
 
 export interface ReactArgs {

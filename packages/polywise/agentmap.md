@@ -17,6 +17,10 @@ This document provides an overview of the packages/polywise module structure and
 		"src": {
 			"Article.ts": { "desc": "Article manager class for CRUD and search operations", "role": "Class" },
 			"Brain.ts": { "desc": "Brain lifecycle manager with fatigue state machine", "role": "Class" },
+			"Log.ts": {
+				"desc": "Logging module for query and save operations with .log and .json output",
+				"role": "Class"
+			},
 			"ModelManager.ts": {
 				"desc": "Local model manager with download, verify, delete, and status tracking",
 				"role": "Class"

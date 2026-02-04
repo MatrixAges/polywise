@@ -1,6 +1,7 @@
 import '@abraham/reflection'
 
 export { default as Polywise } from './Polywise'
+export { default as Log } from './Log'
 export type {
 	ArticleArgs,
 	ProcessArticleArgs,
@@ -10,6 +11,7 @@ export type {
 	MemoryRecallResult,
 	ContextResult,
 	PolywiseArgs,
+	LogArgs,
 	EmbeddingConfig,
 	RerankerConfig,
 	LocalEmbeddingConfig,
