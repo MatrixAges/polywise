@@ -12,7 +12,6 @@ import * as sql_brain from './sql/Brain'
 import * as sql_meta from './sql/meta'
 import { catchError, catchFinally } from './decorators'
 import {
-	calculateWeight,
 	ChainEmitter,
 	CURRENT_SCHEMA_VERSION,
 	migrate,
@@ -55,13 +54,11 @@ import type {
 	ConnectArgs,
 	COTDepthResult,
 	Edge,
-	InjectTriplesArgs,
 	Node,
 	PolywiseArgs,
 	ProcessArticleArgs,
 	QueryArgs,
 	RecallArgs,
-	UpsertNodeArgs,
 	SingleSearchArgs,
 	ExecuteCotArgs,
 	RecallNodesByKeywordsArgs,
@@ -371,7 +368,7 @@ export default class Polywise {
 			await this.queryRaw(sql.sql_update_article_embedding, [`[${query_embedding.join(',')}]`, aid])
 		}
 
-		this.log.write(args, { article_id: aid })
+		this.log.write({ ...args, idol_id, root_ids, metrics_ids }, { article_id: aid })
 	}
 
 	async addNode(args: AddNodeArgs) {
@@ -1190,108 +1187,6 @@ export default class Polywise {
 		for (let i = 0; i < node_ids.length; i++) {
 			await this.queryRaw(sql_brain.sql_stimulate_nodes_batch, [intensities[i], [node_ids[i]]])
 		}
-	}
-
-	private async injectTriples(args: InjectTriplesArgs) {
-		const { article_id, triples, idol_id, root_ids, metrics_ids } = args
-
-		await this.exec(sql.sql_inject_triples_begin)
-
-		for (const t of triples) {
-			await this.processSingleTriple({
-				t,
-				article_id,
-				idol_id,
-				root_ids,
-				metrics_ids
-			})
-		}
-
-		await this.exec(sql.sql_inject_triples_commit)
-	}
-
-	private async processSingleTriple(args: { t: any; article_id: number } & FiltersArgs) {
-		const { t, article_id, idol_id, root_ids, metrics_ids } = args
-
-		const sub_id = await this.upsertNode({
-			label: t.subject,
-			article_id,
-			idol_id,
-			root_ids,
-			metrics_ids,
-			metadata: t.metadata
-		})
-
-		const obj_id = await this.upsertNode({
-			label: t.object,
-			article_id,
-			idol_id,
-			root_ids,
-			metrics_ids,
-			metadata: t.metadata
-		})
-
-		const weight = calculateWeight(t.learning_rate)
-
-		await this.exec(
-			sql.sql_inject_triples_insert_edge(
-				sub_id,
-				obj_id,
-				t.learning_rate,
-				t.decay_resistance,
-				t.predicate,
-				weight,
-				idol_id,
-				root_ids,
-				metrics_ids,
-				t.metadata
-			)
-		)
-
-		await this.exec(
-			sql.sql_inject_triples_update_edge(
-				sub_id,
-				obj_id,
-				t.learning_rate,
-				t.decay_resistance,
-				weight,
-				idol_id,
-				root_ids,
-				metrics_ids,
-				t.metadata
-			)
-		)
-	}
-
-	private async upsertNode(args: UpsertNodeArgs) {
-		const {
-			label,
-			article_id,
-			idol_id = this.idol_id,
-			root_ids = this.root_ids,
-			metrics_ids = this.metrics_ids,
-			metadata,
-			embedding,
-			is_action
-		} = args
-
-		await this.queryRaw(sql.sql_upsert_node, [
-			label,
-			idol_id ?? null,
-			root_ids ?? null,
-			metrics_ids ?? null,
-			JSON.stringify(metadata ?? {}),
-			embedding ? `[${embedding.join(',')}]` : null,
-			is_action ?? false
-		])
-
-		const res = (await this.queryRaw(sql.sql_upsert_node_select, [label])) as { id: number }[]
-
-		const node_id = res[0].id
-
-		await this.queryRaw(sql.sql_node_sources, [node_id, article_id])
-
-		return node_id
 	}
 
 	private async exec(sql_input: string | Array<string>) {

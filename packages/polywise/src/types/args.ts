@@ -92,19 +92,6 @@ export interface ProcessArticleArgs extends FiltersArgs {
 	article_id?: number
 }
 
-export interface InjectTriplesArgs extends FiltersArgs {
-	article_id: number
-	triples: Triple[]
-}
-
-export interface UpsertNodeArgs extends FiltersArgs {
-	label: string
-	article_id: number
-	metadata?: Metadata
-	embedding?: number[]
-	is_action?: boolean
-}
-
 export interface AddArticleArgs {
 	content: string
 }
