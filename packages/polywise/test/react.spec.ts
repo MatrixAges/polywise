@@ -3,7 +3,7 @@ import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 import Polywise from '../src/Polywise'
 import { behavioral_knowledge, behavioral_qa } from './datasets/behavioral'
 
-describe('Polywise React System', () => {
+describe.concurrent('Polywise React System', () => {
 	let poly: Polywise
 	const unique_id = Math.random().toString(36).slice(2)
 	const db_name = `:polywise_react_test_${unique_id}:`
@@ -14,25 +14,25 @@ describe('Polywise React System', () => {
 			data_dir: db_name
 		})
 
-		// Load general knowledge into System 2 (Article/Slow path)
 		for (const knowledge of behavioral_knowledge) {
 			await poly.save({
 				content: knowledge
 			})
 		}
 
-		// Train habits for System 1 (React/Fast path) for the first 10 items
 		for (let i = 0; i < 10; i++) {
 			const qa = behavioral_qa[i]
+
 			await poly.habituate({
 				stimulus: qa.question,
 				action_label: qa.expected_action,
 				weight: 0.9
 			})
 
-			// Prime the brain: find the node and stimulate it so it can react on the first try
 			const nodes = await poly.getAllNodes()
+
 			const stimulus_node = nodes.find(n => n.label.includes(qa.question.slice(0, 20)))
+
 			if (stimulus_node) {
 				await poly.stimulate(stimulus_node.id, 1.0)
 			}
@@ -44,7 +44,6 @@ describe('Polywise React System', () => {
 	})
 
 	it('should handle multiple behavioral reactions (System 1 - Fast Path)', async () => {
-		// Test the first 10 habituated items
 		for (let i = 0; i < 10; i++) {
 			const qa = behavioral_qa[i]
 			const { result } = await poly.react(qa.question)
@@ -59,6 +58,7 @@ describe('Polywise React System', () => {
 		let actions_received: any[] = []
 
 		const poly_slow = new Polywise()
+
 		await poly_slow.init({
 			data_dir: `:polywise_slow_test_${unique_id}:`
 		})
@@ -67,13 +67,10 @@ describe('Polywise React System', () => {
 			actions_received.push(res)
 		})
 
-		// Load knowledge once
 		for (const knowledge of behavioral_knowledge) {
 			await poly_slow.save({ content: knowledge })
 		}
 
-		// Test items from 10 to 14 (not habituated)
-		// We use 5 items to satisfy the "15 test cases" requirement (10 fast + 5 slow)
 		for (let i = 10; i < 15; i++) {
 			const qa = behavioral_qa[i]
 			const { result: fast_result, cot } = await poly_slow.react(qa.question)

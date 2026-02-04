@@ -142,7 +142,7 @@ describe.concurrent('Long Context and Language Traps', () => {
 		})
 	})
 
-	describe('Random Generated QA', () => {
+	describe.concurrent('Random Generated QA', () => {
 		it('should retrieve randomly selected articles correctly', async () => {
 			for (const qa of random_qas) {
 				const { result } = await poly.query({

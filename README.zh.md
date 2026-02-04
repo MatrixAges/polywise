@@ -46,12 +46,12 @@ await poly.save({
 
 // 之后，AI 查询相关偏好
 const { result } = await poly.query({ query: '用户喜欢什么？' })
-// 自动检索出：深色模式、TypeScript 等
+// 自动检索出信息和行动：深色模式、TypeScript 等
 ```
 
-#### 2. ⚡ **快速反应与深度思考 (STR/PFC)**
+#### 2. ⚡ **统一检索与深度思考**
 
-Polywise 实现了模拟前额叶皮层 (PFC) 和纹状体 (STR) 的双重处理系统，用于适应性行为决策：
+Polywise 实现了模拟前额叶皮层 (PFC) 和纹状体 (STR) 的双重处理系统。检索系统现在是统一的，同时返回信息和潜在行动。
 
 ```typescript
 // 1. 订阅“慢系统”(PFC) 的优化决策回调
@@ -59,13 +59,24 @@ poly.onAction(result => {
 	console.log('PFC 优化决策:', result)
 })
 
-// 2. 触发反应 (STR - 快系统路径)
-const response = await poly.react('检测到严重系统故障')
-// 如果内存中存在“习惯规则”，将毫秒级立即返回
+// 2. 统一查询 (同时返回 info 和 action)
+const { result, cot } = await poly.query({
+	query: '检测到系统故障',
+	cot_depth: 1 // 开启思维探索
+})
+
+// result 是 HybridSearchResult 数组：
+// {
+//   id: number,
+//   content: string,
+//   type: 'info' | 'action', // 统一类型
+//   source: 'memory' | 'external',
+//   rerankScore: number
+// }
 ```
 
 - **React (反应)**：基于“肌肉记忆”（习惯边）的即时刺激响应。
-- **Act (行动)**：在反应后启动的异步深度推理，用于修正或优化初始响应。
+- **Act (行动)**：统一检索和异步深度推理，在反应后启动，用于修正或优化初始响应。
 
 #### 3. 🎯 **情境感知检索**
 
@@ -76,10 +87,13 @@ Polywise 不是简单的向量相似性，而是在查询过程中通过**扩散
 const { result, cot } = await poly.query({
 	query: '系统如何处理记忆？',
 	recall_depth: 2,
-	cot_depth: 1 // 启用思维链（CoT）探索
+	cot_depth: 1
 })
 
-// result 包含语义相关的概念及其来源上下文
+// cot 通过 ChainEmitter 发送 COTDepthResult 事件
+cot.on(event => {
+	console.log(`深度 ${event.depth}:`, event.results) // 每个深度都包含重排后的 info 和 action
+})
 ```
 
 #### 4. 🌙 **记忆巩固**
@@ -121,16 +135,15 @@ polywise/
 1. 💪 **赫布学习**：连接的活跃节点增强它们的纽带
 2. 📉 **衰减**：未使用的连接随时间减弱
 3. 🌙 **巩固**：睡眠阶段强化重要记忆
-4. ⚡ **刺激**：外部输入激活节点并传播
+4. ⚡ **刺激**：外部 input 激活节点并传播
 5. 🔄 **习惯化**：成功的“行动”决策可被自动转化为“反应”习惯
 
 ### 🛠️ 关键 API 变更
 
-- **Polywise.init()**：现在接受更全面的配置，包括 `embedding_concurrency` 和 `reranker_concurrency` 并发控制。
-- **Polywise.off()**：现在是 `async` 方法。务必 `await poly.off()` 以确保数据库安全关闭。
-- **Polywise.save()**：参数优化为使用对象结构 `args: ProcessArticleArgs`。
-- **Pipeline 搜索**：集成了 `truncation: true` 和 `max_length: 2048`，可稳健处理超长上下文。
-- **全文检索**：升级为 `websearch_to_tsquery`，提供更好的自然语言处理能力。
+- **Polywise.query()**：统一检索接口，返回 `info` 和 `action` 类型，内置全量重排（rerank）。
+- **Polywise.react()**：刺激大脑并触发快速习惯或深度思考过程。
+- **HybridSearchResult**：现在包含 `type` 字段，用于区分知识和可执行行为。
+- **COTDepthResult**：思维链的每个深度现在都返回重排后的信息和行动。
 
 ### 🔄 状态机
 

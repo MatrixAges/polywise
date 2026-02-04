@@ -112,6 +112,7 @@ export interface ContextResult {
 export interface HybridSearchResult {
 	id: number
 	content: string
+	type: 'info' | 'action'
 	source: 'memory' | 'external' | 'implicit'
 	rerankScore: number
 	relevanceScore: number

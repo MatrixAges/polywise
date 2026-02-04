@@ -82,12 +82,14 @@ describe.concurrent('Polywise Brain System', () => {
 			]
 
 			for (let i = 0; i < entities.length; i++) {
+				const embedding = (await poly.pipeline.embed(entities[i])) as number[]
+
 				const node_id = await poly.addNode({
 					label: `${entities[i]}_${i}`,
 					x: i * 10,
 					y: i * 5,
 					threshold: 0.4,
-					embedding: await poly.pipeline.embed(entities[i])
+					embedding
 				})
 
 				node_ids.push(node_id)
@@ -109,7 +111,7 @@ describe.concurrent('Polywise Brain System', () => {
 				await poly.tick(0.25)
 			}
 
-			const { nodes, edges } = await poly.getSnapshot(0.1)
+			const { nodes } = await poly.getSnapshot(0.1)
 
 			expect(nodes.length).toBeGreaterThanOrEqual(20)
 		})
@@ -127,7 +129,7 @@ describe.concurrent('Polywise Brain System', () => {
 				content: 'Deep Learning is a subset of Machine Learning. Deep Learning uses Multiple Layers.'
 			})
 
-			const { nodes, edges } = await poly.getSnapshot(0.05)
+			const { nodes } = await poly.getSnapshot(0.05)
 
 			expect(nodes.length).toBeGreaterThanOrEqual(0)
 		})
@@ -139,12 +141,14 @@ describe.concurrent('Polywise Brain System', () => {
 			const entities = ['Processor', 'Instruction', 'Memory', 'Address', 'Bus', 'Cache', 'RAM', 'Storage']
 
 			for (let i = 0; i < entities.length; i++) {
+				const embedding = (await poly.pipeline.embed(entities[i])) as number[]
+
 				const node_id = await poly.addNode({
 					label: `${entities[i]}_${unique_id}`,
 					x: i * 50,
 					y: 100,
 					threshold: 0.3,
-					embedding: await poly.pipeline.embed(entities[i])
+					embedding
 				})
 
 				chain.push(node_id)
@@ -177,12 +181,14 @@ describe.concurrent('Polywise Brain System', () => {
 			const node_ids: number[] = []
 
 			for (const concept of concepts) {
+				const embedding = (await poly.pipeline.embed(concept.label)) as number[]
+
 				const id = await poly.addNode({
 					label: `${concept.label}_${unique_id}`,
 					x: concept.x,
 					y: concept.y,
 					threshold: 0.35,
-					embedding: await poly.pipeline.embed(concept.label)
+					embedding
 				})
 
 				node_ids.push(id)
@@ -216,7 +222,7 @@ describe.concurrent('Polywise Brain System', () => {
 				await poly.tick(0.4)
 			}
 
-			const { nodes, edges } = await poly.getSnapshot(0.05)
+			const { nodes } = await poly.getSnapshot(0.05)
 
 			expect(nodes.length).toBeGreaterThanOrEqual(0)
 		})
@@ -414,7 +420,7 @@ describe.concurrent('Polywise Brain System', () => {
 				metrics_ids
 			})
 
-			const { nodes, edges } = await poly.getSnapshot(0.1)
+			const { nodes } = await poly.getSnapshot(0.1)
 
 			const snapshot_node = nodes.find((n: any) => n.label === 'Snapshot_Node')
 

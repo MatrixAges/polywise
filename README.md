@@ -46,12 +46,12 @@ await poly.save({
 
 // Later, the AI queries related preferences
 const { result } = await poly.query({ query: 'What does the user like?' })
-// Automatically retrieves: Dark Mode, TypeScript, etc.
+// Automatically retrieves information and actions: Dark Mode, TypeScript, etc.
 ```
 
-#### 2. ⚡ **Fast React & Deep Think (STR/PFC)**
+#### 2. ⚡ **Unified Retrieval & Deep Think**
 
-Polywise implements a dual-process system mimicking the Prefrontal Cortex (PFC) and Striatum (STR) for adaptive behavior:
+Polywise implements a dual-process system mimicking the Prefrontal Cortex (PFC) and Striatum (STR). The retrieval system is unified, returning both information and potential actions.
 
 ```typescript
 // 1. Subscribe to the Slow System (PFC) for refined decisions
@@ -59,13 +59,24 @@ poly.onAction(result => {
 	console.log('PFC updated decision:', result)
 })
 
-// 2. Trigger a reaction (STR - Fast Path)
-const response = await poly.react('Detected critical system failure')
-// Returns instantly if a "habit" exists in memory
+// 2. Unified Query (Returns both info and actions)
+const { result, cot } = await poly.query({
+	query: 'Detected system error',
+	cot_depth: 1 // Enable thought exploration
+})
+
+// result is an array of HybridSearchResult:
+// {
+//   id: number,
+//   content: string,
+//   type: 'info' | 'action', // Unified type
+//   source: 'memory' | 'external',
+//   rerankScore: number
+// }
 ```
 
 - **React**: Instant stimulus-response based on "muscle memory" (Habitual Edges).
-- **Act**: Asynchronous deep reasoning that kicks in after a reaction to refine or correct the initial response.
+- **Act**: Unified retrieval and asynchronous deep reasoning that kicks in after a reaction to refine or correct the initial response.
 
 #### 3. 🎯 **Context-Aware Retrieval**
 
@@ -76,10 +87,13 @@ Instead of simple vector similarity, Polywise uses **spreading activation** inte
 const { result, cot } = await poly.query({
 	query: 'How does the system handle memory?',
 	recall_depth: 2,
-	cot_depth: 1 // Enable Chain of Thought exploration
+	cot_depth: 1
 })
 
-// result contains semantically related concepts and their source contexts
+// cot emits COTDepthResult events through ChainEmitter
+cot.on(event => {
+	console.log(`Depth ${event.depth}:`, event.results) // Each depth includes reranked info and actions
+})
 ```
 
 #### 4. 🌙 **Memory Consolidation**
@@ -126,11 +140,10 @@ polywise/
 
 ### 🛠️ Key API Changes
 
-- **Polywise.init()**: Now accepts comprehensive configuration including `embedding_concurrency` and `reranker_concurrency`.
-- **Polywise.off()**: Now an `async` method. Always `await poly.off()` for clean database shutdown.
-- **Polywise.save()**: Parameters optimized to use an object `args: ProcessArticleArgs`.
-- **Pipeline Search**: Integrated `truncation: true` and `max_length: 2048` for robust handling of long contexts.
-- **Full-Text Search**: Upgraded to `websearch_to_tsquery` for better natural language handling.
+- **Polywise.query()**: Unified retrieval returning both `info` and `action` types, with built-in reranking for everything.
+- **Polywise.react()**: Stimulates the brain and triggers either a fast habit or a deep thought process.
+- **HybridSearchResult**: Now contains a `type` field to distinguish between knowledge and actionable behaviors.
+- **COTDepthResult**: Each depth in the Chain of Thought now returns reranked information and actions.
 
 ### 🔄 State Machine
 

@@ -41,10 +41,10 @@ describe.concurrent('Polywise Pure Text Learning', () => {
 		return chunks
 	}
 
-	describe('Large Scale Text Ingestion and Retrieval', () => {
+	describe.concurrent('Large Scale Text Ingestion and Retrieval', () => {
 		it('should ingest complex literature and perform semantic search', async () => {
 			const text = await loadDataset('complex_literature')
-			const chunks = chunkText(text, 1500).slice(0, 20) // Take first 20 chunks for performance in tests
+			const chunks = chunkText(text, 1500).slice(0, 20)
 
 			for (let i = 0; i < chunks.length; i++) {
 				await poly.article.addWithEmbedding(chunks[i])
@@ -109,7 +109,7 @@ describe.concurrent('Polywise Pure Text Learning', () => {
 			const duration = Date.now() - startTime
 
 			expect(results.length).toBeGreaterThan(0)
-			expect(duration).toBeLessThan(15000) // Model inference can be slow
+			expect(duration).toBeLessThan(15000)
 		}, 120000)
 	})
 })

@@ -158,6 +158,7 @@ export interface QueryArgs {
 export interface AggregatedCandidate {
 	id: number
 	content: string
+	type: 'info' | 'action'
 	rerankScore: number
 	relevance_score: number
 	memory_strength: number
