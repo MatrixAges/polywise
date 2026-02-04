@@ -8,6 +8,7 @@ import Pipeline from './Pipeline'
 import * as sql from './sql'
 import * as sql_brain from './sql/Brain'
 import * as sql_meta from './sql/meta'
+import { catchError } from './decorators'
 import {
 	calculateWeight,
 	ChainEmitter,
@@ -171,68 +172,65 @@ export default class Polywise {
 		}
 	}
 
+	@catchError()
 	async query(args: QueryArgs) {
 		this.brain.reportUserActivity()
 		this.brain.setBusy(true)
 
-		try {
-			const {
-				query,
-				recall_depth = DEFAULT_RECALL_DEPTH,
-				search_limit = DEFAULT_SEARCH_LIMIT,
-				rerank_limit = DEFAULT_RERANK_LIMIT,
-				cot_depth = 0,
-				stimulate_on_recall = true,
-				habit_threshold = DEFAULT_HABIT_THRESHOLD
-			} = args
+		const {
+			query,
+			recall_depth = DEFAULT_RECALL_DEPTH,
+			search_limit = DEFAULT_SEARCH_LIMIT,
+			rerank_limit = DEFAULT_RERANK_LIMIT,
+			cot_depth = 0,
+			stimulate_on_recall = true,
+			habit_threshold = DEFAULT_HABIT_THRESHOLD
+		} = args
 
-			const emitter = new ChainEmitter()
+		const emitter = new ChainEmitter()
 
-			const query_embedding = ((await this.pipeline.embed(query)) as number[]) || []
+		const query_embedding = ((await this.pipeline.embed(query)) as number[]) || []
 
-			const { knowledges: initial_knowledges, actions: initial_actions } = await this.executeSingleSearch({
-				query,
-				recall_depth,
-				search_limit,
-				rerank_limit,
-				stimulate_on_recall
-			})
+		const { knowledges: initial_knowledges, actions: initial_actions } = await this.executeSingleSearch({
+			query,
+			recall_depth,
+			search_limit,
+			rerank_limit,
+			stimulate_on_recall
+		})
 
-			await this.handleHabitReaction({
-				query,
-				query_embedding,
-				initial_actions,
-				habit_threshold
-			})
+		await this.handleHabitReaction({
+			query,
+			query_embedding,
+			initial_actions,
+			habit_threshold
+		})
 
-			if (cot_depth <= 0) {
-				return {
-					knowledges: initial_knowledges,
-					actions: initial_actions,
-					cot: (emitter.finish() as any) || emitter
-				}
+		if (cot_depth <= 0) {
+			return {
+				knowledges: initial_knowledges,
+				actions: initial_actions,
+				cot: (emitter.finish() as any) || emitter
 			}
-
-			const history_ids = new Set([...initial_knowledges, ...initial_actions].map(r => r.id))
-
-			this.executeCot({
-				query,
-				current_depth: 1,
-				max_depth: cot_depth,
-				base_recall_depth: recall_depth,
-				search_limit,
-				rerank_limit,
-				stimulate_on_recall,
-				initial_knowledges,
-				initial_actions,
-				emitter,
-				history_ids
-			})
-
-			return { knowledges: initial_knowledges, actions: initial_actions, cot: emitter }
-		} finally {
-			this.brain.setBusy(false)
 		}
+
+		const history_ids = new Set([...initial_knowledges, ...initial_actions].map(r => r.id))
+
+		this.executeCot({
+			query,
+			current_depth: 1,
+			max_depth: cot_depth,
+			base_recall_depth: recall_depth,
+			search_limit,
+			rerank_limit,
+			stimulate_on_recall,
+			initial_knowledges,
+			initial_actions,
+			emitter,
+			history_ids
+		})
+
+		return { knowledges: initial_knowledges, actions: initial_actions, cot: emitter }
 	}
 
 	private async handleHabitReaction(args: {
@@ -283,38 +281,35 @@ export default class Polywise {
 		await this.stimulate(stimulus.id, STIMULATION_MAX)
 	}
 
+	@catchError()
 	async save(args: ProcessArticleArgs) {
 		this.brain.reportUserActivity()
 		this.brain.setBusy(true)
 
-		try {
-			const { content, triples, article_id, idol_id, root_ids, metrics_ids, generate_embedding } = args
+		const { content, triples, article_id, idol_id, root_ids, metrics_ids, generate_embedding } = args
 
-			const res = (await this.queryRaw(sql.sql_process_article, [content])) as { id: number }[]
+		const res = (await this.queryRaw(sql.sql_process_article, [content])) as { id: number }[]
 
-			const aid = article_id ?? res[0].id
+		const aid = article_id ?? res[0].id
 
-			if (generate_embedding ?? true) {
-				await this.article.addEmbedding(aid, content)
-			}
+		if (generate_embedding ?? true) {
+			await this.article.addEmbedding(aid, content)
+		}
 
-			if (triples && triples.length > 0) {
-				await this.injectTriples({
-					article_id: aid,
-					triples,
-					idol_id,
-					root_ids,
-					metrics_ids
-				})
-			}
+		if (triples && triples.length > 0) {
+			await this.injectTriples({
+				article_id: aid,
+				triples,
+				idol_id,
+				root_ids,
+				metrics_ids
+			})
+		}
 
-			const query_embedding = (await this.pipeline.embed(content)) as number[]
+		const query_embedding = (await this.pipeline.embed(content)) as number[]
 
-			if (query_embedding && query_embedding.length > 0) {
-				await this.queryRaw(sql.sql_update_article_embedding, [`[${query_embedding.join(',')}]`, aid])
-			}
-		} finally {
-			this.brain.setBusy(false)
+		if (query_embedding && query_embedding.length > 0) {
+			await this.queryRaw(sql.sql_update_article_embedding, [`[${query_embedding.join(',')}]`, aid])
 		}
 	}
 
@@ -519,6 +514,11 @@ export default class Polywise {
 		return (await this.queryRaw(sql.sql_find_nearest_node, [`[${query_embedding.join(',')}]`])) as any[]
 	}
 
+	@catchError({
+		onError: (error: any) => {
+			console.error('CoT Execution Error:', error)
+		}
+	})
 	private async executeCot(args: ExecuteCotArgs) {
 		const {
 			query,
@@ -534,70 +534,57 @@ export default class Polywise {
 			history_ids
 		} = args
 
-		try {
-			if (!emitter.isActiveStatus() || current_depth > max_depth || !this.db) {
-				emitter.finish()
-
-				return
-			}
-
-			const emerged_query = await this.formEmergentQuery({
-				query,
-				current_depth,
-				initial_knowledges,
-				initial_actions
-			})
-
-			const { emerged_knowledges, emerged_actions, emerged_recall_result } =
-				await this.performEmergentSearch({
-					emerged_query,
-					current_depth,
-					base_recall_depth,
-					search_limit,
-					stimulate_on_recall,
-					history_ids
-				})
-
-			const reranked_knowledges = await this.rerankKnowledges(
-				emerged_query,
-				emerged_knowledges,
-				rerank_limit
-			)
-
-			const reranked_actions = await this.rerankActions(emerged_query, emerged_actions, rerank_limit)
-
-			reranked_knowledges.forEach(r => history_ids.add(r.id))
-			reranked_actions.forEach(r => history_ids.add(r.id))
-
-			this.emitCotResult({
-				emitter,
-				current_depth,
-				emerged_query,
-				reranked_knowledges,
-				reranked_actions,
-				emerged_recall_result
-			})
-
-			this.scheduleNextCotStep({
-				query: emerged_query,
-				current_depth,
-				max_depth,
-				base_recall_depth,
-				search_limit,
-				rerank_limit,
-				stimulate_on_recall,
-				initial_knowledges: reranked_knowledges,
-				initial_actions: reranked_actions,
-				emitter,
-				history_ids
-			})
-		} catch (e: any) {
+		if (!emitter.isActiveStatus() || current_depth > max_depth || !this.db) {
 			emitter.finish()
 
-			if (this.isDbError(e)) return
-
-			console.error('CoT Execution Error:', e)
+			return
 		}
+
+		const emerged_query = await this.formEmergentQuery({
+			query,
+			current_depth,
+			initial_knowledges,
+			initial_actions
+		})
+
+		const { emerged_knowledges, emerged_actions, emerged_recall_result } = await this.performEmergentSearch({
+			emerged_query,
+			current_depth,
+			base_recall_depth,
+			search_limit,
+			stimulate_on_recall,
+			history_ids
+		})
+
+		const reranked_knowledges = await this.rerankKnowledges(emerged_query, emerged_knowledges, rerank_limit)
+
+		const reranked_actions = await this.rerankActions(emerged_query, emerged_actions, rerank_limit)
+
+		reranked_knowledges.forEach(r => history_ids.add(r.id))
+		reranked_actions.forEach(r => history_ids.add(r.id))
+
+		this.emitCotResult({
+			emitter,
+			current_depth,
+			emerged_query,
+			reranked_knowledges,
+			reranked_actions,
+			emerged_recall_result
+		})
+
+		this.scheduleNextCotStep({
+			query: emerged_query,
+			current_depth,
+			max_depth,
+			base_recall_depth,
+			search_limit,
+			rerank_limit,
+			stimulate_on_recall,
+			initial_knowledges: reranked_knowledges,
+			initial_actions: reranked_actions,
+			emitter,
+			history_ids
+		})
 	}
 
 	private async performEmergentSearch(args: {
