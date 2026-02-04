@@ -66,7 +66,6 @@ import type {
 	ExecuteCotArgs,
 	RecallNodesByKeywordsArgs,
 	StrengthenRelatedEdgesArgs,
-	HabituateArgs,
 	Knowledge,
 	Action,
 	AggregateResultsArgs,
@@ -450,46 +449,6 @@ export default class Polywise {
 		const threshold = threshold_override ?? DEFAULT_NODE_THRESHOLD
 
 		await this.exec(sql.sql_tick(threshold))
-	}
-
-	async habituate(args: HabituateArgs) {
-		const { stimulus, action_label, weight = HABIT_LEARNING_WEIGHT, metadata } = args
-
-		const embedding = (await this.pipeline.embed(stimulus)) as number[]
-
-		if (!embedding) return
-
-		const stimulus_id = await this.addNode({
-			label: `Stimulus: ${stimulus.slice(0, 50)}`,
-			x: Math.random() * 800,
-			y: Math.random() * 600,
-			threshold: HABIT_THRESHOLD_LOW,
-			embedding,
-			metadata: { desc: stimulus }
-		})
-
-		const action_rows = await this.queryRaw(sql_brain.sql_get_node_by_label, [action_label])
-
-		let action_id: number
-
-		if (action_rows.length > 0) {
-			action_id = action_rows[0].id
-		} else {
-			action_id = await this.addNode({
-				label: action_label,
-				x: Math.random() * 800,
-				y: Math.random() * 600,
-				is_action: true,
-				metadata: metadata ?? {}
-			})
-		}
-
-		await this.connect({
-			source_id: stimulus_id,
-			target_id: action_id,
-			weight,
-			is_habit: true
-		})
 	}
 
 	async runShadowTick() {

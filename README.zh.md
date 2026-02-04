@@ -71,19 +71,13 @@ const { knowledges, actions } = await poly.query({
 
 #### 3. 🎯 **习惯性反应（快速路径）**
 
-模拟“肌肉记忆”，Polywise 可以学习习惯，使特定的刺激无需深度思考即可触发即时行动。
+模拟“肌肉记忆”，Polywise 会根据用户输入和行为自动学习习惯。系统会随着时间的推移强化刺激与成功行动之间的连接。
 
 ```typescript
-// 定义习惯：刺激 -> 行为
-await poly.habituate({
-	stimulus: '检测到系统错误',
-	action_label: '触发紧急疏散程序',
-	weight: 1.0
-})
-
-// 之后，相同或类似的刺激将立即触发该行为
+// 无需手动定义！
+// 习惯是通过交互和强化学习自动形成的。
 const { actions } = await poly.query({ query: '系统出错了！' })
-// 如果习惯权重足够强，actions[0] 将是 “触发紧急疏散程序”
+// 如果已经形成了强习惯，actions[0] 将是 “触发紧急疏散程序”
 ```
 
 #### 4. 🔭 **思维链（慢速路径）**
@@ -102,8 +96,6 @@ cot.on(event => {
 	console.log(`深度 ${event.depth}: 发现了 ${event.knowledges.length} 条见解`)
 })
 ```
-
-Polywise 自主管理其生命周期。诸如“睡眠”巩固之类的维护任务在系统空闲时自动运行，并在前台任务到达时自动让出资源。
 
 ---
 

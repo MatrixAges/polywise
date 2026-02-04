@@ -27,8 +27,8 @@ export interface PolywiseArgs extends FiltersArgs {
 	reranker_config?: RerankerConfig
 	embedding_concurrency?: number
 	reranker_concurrency?: number
-	onTick?: () => void
 	log?: boolean | LogArgs
+	onTick?: () => void
 }
 
 export interface ReactArgs {
@@ -189,13 +189,6 @@ export interface ExecuteCotArgs extends FiltersArgs {
 export interface RecallNodesByKeywordsArgs extends FiltersArgs {
 	keywords: string[]
 	limit?: number
-}
-
-export interface HabituateArgs {
-	stimulus: string
-	action_label: string
-	weight?: number
-	metadata?: Metadata
 }
 
 export interface StrengthenRelatedEdgesArgs {

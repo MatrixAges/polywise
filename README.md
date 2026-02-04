@@ -71,19 +71,13 @@ const { knowledges, actions } = await poly.query({
 
 #### 3. 🎯 **Habitual Reaction (The Fast Path)**
 
-Mimicking "muscle memory," Polywise can learn habits where specific stimuli trigger instant actions without deep reasoning.
+Mimicking "muscle memory," Polywise automatically learns habits where specific stimuli trigger instant actions. The system strengthens connections between stimuli and successful actions over time.
 
 ```typescript
-// Define a habit: Stimulus -> Action
-await poly.habituate({
-	stimulus: 'System error detected',
-	action_label: 'Trigger emergency evacuation',
-	weight: 1.0
-})
-
-// Later, the same or similar stimulus triggers the action instantly
+// No manual definition needed!
+// Habits are learned through interaction and reinforcement.
 const { actions } = await poly.query({ query: 'Error in system!' })
-// actions[0] will be 'Trigger emergency evacuation' if the habit weight is strong
+// actions[0] will be 'Trigger emergency evacuation' if a strong habit has formed.
 ```
 
 #### 4. 🔭 **Chain of Thought (The Slow Path)**
