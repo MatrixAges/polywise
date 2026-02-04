@@ -50,7 +50,7 @@ await poly.save({
 
 // Returns both information and potential actions in a single pass
 // Query also respects class-level filters automatically
-const { knowledges, actions } = await poly.query({
+const { knowledges, actions, metadatas } = await poly.query({
 	query: 'What are the user preferences?'
 })
 ```
@@ -60,13 +60,14 @@ const { knowledges, actions } = await poly.query({
 Polywise implements a unified retrieval system that returns both **Knowledges** (information) and **Actions** (behaviors), mimicking the brain's dual-process theory.
 
 ```typescript
-// Returns both information and potential actions in a single pass
-const { knowledges, actions } = await poly.query({
+// Returns information, actions, and merged metadata in a single pass
+const { knowledges, actions, metadatas } = await poly.query({
 	query: 'What are the user preferences?'
 })
 
-// knowledges[0] -> { content: '...', source: 'memory', combinedScore: 0.92 }
-// actions[0]    -> { content: '...', source: 'memory', combinedScore: 0.85 }
+// knowledges[0] -> "..." (String)
+// actions[0]    -> "..." (String)
+// metadatas[0]  -> { links: ["..."], files: ["..."], desc: "..." }
 ```
 
 #### 3. 🎯 **Habitual Reaction (The Fast Path)**
@@ -137,10 +138,9 @@ polywise/
 
 ### 🛠️ Key API Changes
 
-- **Polywise.query()**: Unified retrieval returning both `info` and `action` types, with built-in reranking for everything.
-- **Polywise.react()**: Stimulates the brain and triggers either a fast habit or a deep thought process.
-- **HybridSearchResult**: Now contains a `type` field to distinguish between knowledge and actionable behaviors.
-- **COTDepthResult**: Each depth in the Chain of Thought now returns reranked information and actions.
+- **Polywise.query()**: Unified retrieval interface returning simplified `knowledges` and `actions` (Array<string>), along with merged `metadatas`.
+- **COTDepthResult**: Each depth in the Chain of Thought now returns simplified string arrays and corresponding metadata.
+- **Field Removal**: Internal fields like `rerankScore`, `combinedScore`, and `source` are removed from the output to provide a cleaner API.
 
 ### 🔄 State Machine
 

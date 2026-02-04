@@ -76,7 +76,7 @@ describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
 			expect(typeof cot?.off).toBe('function')
 		})
 
-		test('should contain hybrid search results with multiple sources', async () => {
+		test('should contain hybrid search results', async () => {
 			const { knowledges, actions } = await poly.query({
 				query: 'docker',
 				recall_depth: 3,
@@ -88,10 +88,7 @@ describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
 
 			expect(results.length).toBeGreaterThan(0)
 			expect(results.length).toBeLessThanOrEqual(10)
-
-			const sources = new Set(results.map(r => r.source))
-
-			expect(sources.size).toBeGreaterThanOrEqual(1)
+			expect(typeof results[0]).toBe('string')
 		})
 	})
 
@@ -166,7 +163,7 @@ describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
 			expect(depths).toEqual([1, 2, 3])
 		})
 
-		test('should include emerged_nodes in each depth result', async () => {
+		test('should include metadatas in each depth result', async () => {
 			const received_events: any[] = []
 
 			const { cot } = await poly.query({
@@ -184,8 +181,8 @@ describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
 			await cot?.toPromise()
 
 			expect(received_events.length).toBe(2)
-			expect(received_events[0].emerged_nodes.length).toBeGreaterThanOrEqual(0)
-			expect(received_events[1].emerged_nodes.length).toBeGreaterThanOrEqual(0)
+			expect(Array.isArray(received_events[0].metadatas)).toBe(true)
+			expect(Array.isArray(received_events[1].metadatas)).toBe(true)
 		})
 
 		test('should build query progression with depth', async () => {

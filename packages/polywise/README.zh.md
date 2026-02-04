@@ -96,13 +96,14 @@ await poly.save({
 根据自然语言或概念检索相关信息：
 
 ```typescript
-const { result, cot } = await poly.query({
+const { knowledges, actions, metadatas, cot } = await poly.query({
 	query: '量子比特是如何工作的？',
 	recall_depth: 2,
 	cot_depth: 1
 })
 
-console.log(result) // 相关节点和上下文
+console.log(knowledges) // 简化后的知识字符串数组
+console.log(metadatas) // 合并后的元数据（链接、文件等）
 ```
 
 ## API 速览

@@ -69,7 +69,9 @@ import type {
 	Knowledge,
 	Action,
 	AggregateResultsArgs,
-	FiltersArgs
+	FiltersArgs,
+	FinalQueryResult,
+	Metadata
 } from './types'
 
 @singleton()
@@ -207,7 +209,7 @@ export default class Polywise {
 	@catchFinally(function (this: Polywise) {
 		this.brain.setBusy(false)
 	})
-	async query(args: QueryArgs) {
+	async query(args: QueryArgs): Promise<FinalQueryResult> {
 		this.brain.reportUserActivity()
 		this.brain.setBusy(true)
 
@@ -244,11 +246,20 @@ export default class Polywise {
 			habit_threshold
 		})
 
+		const {
+			knowledges: k_strings,
+			actions: a_strings,
+			metadatas
+		} = this._processResults(initial_knowledges, initial_actions)
+
 		if (cot_depth <= 0) {
 			const result = {
-				knowledges: initial_knowledges,
-				actions: initial_actions,
-				cot: (emitter.finish() as any) || emitter
+				knowledges: k_strings,
+				actions: a_strings,
+				metadatas,
+				cot:
+					(emitter.finish({ knowledges: k_strings, actions: a_strings, metadatas }) as any) ||
+					emitter
 			}
 
 			this.log.write(args, result)
@@ -274,7 +285,12 @@ export default class Polywise {
 			root_ids
 		})
 
-		const result = { knowledges: initial_knowledges, actions: initial_actions, cot: emitter }
+		const result = {
+			knowledges: k_strings,
+			actions: a_strings,
+			metadatas,
+			cot: emitter
+		}
 
 		this.log.write(args, result)
 
@@ -554,11 +570,11 @@ export default class Polywise {
 	}
 
 	@catchError(function (this: Polywise, error: any, args: ExecuteCotArgs) {
-		const { emitter } = args
+		const { emitter, initial_knowledges, initial_actions } = args
 
 		if (this.isDbError(error)) {
 			if (emitter.isActiveStatus()) {
-				emitter.finish()
+				emitter.finish(this._processResults(initial_knowledges, initial_actions))
 			}
 
 			return true
@@ -567,7 +583,7 @@ export default class Polywise {
 		console.error('CoT Execution Error:', error)
 
 		if (emitter.isActiveStatus()) {
-			emitter.finish()
+			emitter.finish(this._processResults(initial_knowledges, initial_actions))
 		}
 	})
 	private async executeCot(args: ExecuteCotArgs) {
@@ -588,7 +604,7 @@ export default class Polywise {
 		} = args
 
 		if (!emitter.isActiveStatus() || current_depth > max_depth || !this.db) {
-			emitter.finish()
+			emitter.finish(this._processResults(initial_knowledges, initial_actions))
 
 			return
 		}
@@ -707,22 +723,16 @@ export default class Polywise {
 		reranked_actions: Action[]
 		emerged_recall_result: any
 	}) {
-		const {
-			emitter,
-			current_depth,
-			emerged_query,
-			reranked_knowledges,
-			reranked_actions,
-			emerged_recall_result
-		} = args
+		const { emitter, current_depth, emerged_query, reranked_knowledges, reranked_actions } = args
+
+		const { knowledges, actions, metadatas } = this._processResults(reranked_knowledges, reranked_actions)
 
 		const cot_result: COTDepthResult = {
 			depth: current_depth,
 			query: emerged_query,
-			knowledges: reranked_knowledges,
-			actions: reranked_actions,
-			emerged_nodes: emerged_recall_result.nodes.map((n: any) => n.id),
-			emerged_edges: []
+			knowledges,
+			actions,
+			metadatas
 		}
 
 		if (emitter.isActiveStatus()) {
@@ -750,7 +760,7 @@ export default class Polywise {
 		if (current_depth < max_depth && (initial_knowledges.length > 0 || initial_actions.length > 0)) {
 			setImmediate(() => {
 				if (!this.db) {
-					emitter.finish()
+					emitter.finish(this._processResults(initial_knowledges, initial_actions))
 
 					return
 				}
@@ -772,7 +782,7 @@ export default class Polywise {
 				})
 			})
 		} else {
-			emitter.finish()
+			emitter.finish(this._processResults(initial_knowledges, initial_actions))
 		}
 	}
 
@@ -868,6 +878,56 @@ export default class Polywise {
 		}
 
 		await this.queryRaw(sql.sql_strengthen_edges_batch, [STRENGTHEN_EDGE_WEIGHT, node_ids, node_ids])
+	}
+
+	private _processResults(knowledges: Knowledge[], actions: Action[]) {
+		const k_strings = knowledges.map(k => k.content)
+		const a_strings = actions.map(a => a.content)
+
+		const metadatas: Metadata[] = []
+		const seen_links = new Set<string>()
+		const seen_files = new Set<string>()
+		const combined_metadata: Metadata = { links: [], files: [] }
+
+		const all_items = [...knowledges, ...actions]
+
+		for (const item of all_items) {
+			if (item.metadata) {
+				const m = item.metadata
+
+				if (m.desc && !combined_metadata.desc) {
+					combined_metadata.desc = m.desc
+				}
+
+				if (m.links) {
+					for (const link of m.links) {
+						if (!seen_links.has(link)) {
+							seen_links.add(link)
+							combined_metadata.links?.push(link)
+						}
+					}
+				}
+
+				if (m.files) {
+					for (const file of m.files) {
+						if (!seen_files.has(file)) {
+							seen_files.add(file)
+							combined_metadata.files?.push(file)
+						}
+					}
+				}
+			}
+		}
+
+		if (combined_metadata.desc || combined_metadata.links?.length || combined_metadata.files?.length) {
+			metadatas.push(combined_metadata)
+		}
+
+		return {
+			knowledges: k_strings,
+			actions: a_strings,
+			metadatas
+		}
 	}
 
 	private async aggregateResults(args: AggregateResultsArgs) {

@@ -64,8 +64,7 @@ describe.concurrent('Polywise Unified Retrieval System', () => {
 			})
 
 			expect(actions.length).toBeGreaterThan(0)
-			expect(actions[0].content).toContain(qa.expected_action)
-			expect(actions[0].source).toBe('memory')
+			expect(actions[0]).toContain(qa.expected_action)
 		}
 	}, 120000)
 
@@ -101,6 +100,6 @@ describe.concurrent('Polywise Unified Retrieval System', () => {
 		})
 
 		expect(actions.length).toBeGreaterThan(0)
-		expect(actions[0].content).toContain('疏散')
+		expect(actions[0]).toContain('疏散')
 	}, 120000)
 })

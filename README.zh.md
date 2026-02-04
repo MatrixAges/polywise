@@ -50,7 +50,7 @@ await poly.save({
 
 // 单次查询即可同时获取信息和潜在的行为建议
 // 查询也会自动应用类级别的筛选条件
-const { knowledges, actions } = await poly.query({
+const { knowledges, actions, metadatas } = await poly.query({
 	query: '用户的偏好是什么？'
 })
 ```
@@ -60,13 +60,14 @@ const { knowledges, actions } = await poly.query({
 Polywise 实现了统一检索系统，模拟大脑的双重加工理论，同时返回 **Knowledges**（知识信息）和 **Actions**（行为建议）。
 
 ```typescript
-// 单次查询即可同时获取信息和潜在的行为建议
-const { knowledges, actions } = await poly.query({
+// 单次查询即可同时获取信息、行为建议以及合并后的元数据
+const { knowledges, actions, metadatas } = await poly.query({
 	query: '用户的偏好是什么？'
 })
 
-// knowledges[0] -> { content: '...', source: 'memory', combinedScore: 0.92 }
-// actions[0]    -> { content: '...', source: 'memory', combinedScore: 0.85 }
+// knowledges[0] -> "..." (String)
+// actions[0]    -> "..." (String)
+// metadatas[0]  -> { links: ["..."], files: ["..."], desc: "..." }
 ```
 
 #### 3. 🎯 **习惯性反应（快速路径）**
@@ -137,10 +138,9 @@ polywise/
 
 ### 🛠️ 关键 API 变更
 
-- **Polywise.query()**：统一检索接口，返回 `info` 和 `action` 类型，内置全量重排（rerank）。
-- **Polywise.react()**：刺激大脑并触发快速习惯或深度思考过程。
-- **HybridSearchResult**：现在包含 `type` 字段，用于区分知识和可执行行为。
-- **COTDepthResult**：思维链的每个深度现在都返回重排后的信息和行动。
+- **Polywise.query()**：统一检索接口，返回简化后的 `knowledges` 和 `actions` (Array<string>)，以及合并后的 `metadatas`。
+- **COTDepthResult**：思维链的每个深度现在返回简化后的字符串数组和对应的元数据。
+- **字段移除**：输出中移除了 `rerankScore`、`combinedScore`、`source` 等内部细节字段，仅保留核心内容。
 
 ### 🔄 状态机
 

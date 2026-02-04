@@ -92,7 +92,7 @@ describe.concurrent('Polywise Pure Text Learning', () => {
 			})
 
 			expect(knowledges.length).toBeGreaterThan(0)
-			expect(knowledges[0].content.toLowerCase()).toContain('transformer')
+			expect(knowledges[0].toLowerCase()).toContain('transformer')
 		}, 120000)
 
 		it('should maintain performance with legal and physics datasets', async () => {

@@ -86,7 +86,7 @@ describe.concurrent('Long Context and Language Traps', () => {
 				rerank_limit: 20
 			})
 
-			const has_onyx_vault = step1.knowledges.some(r => r.content.includes('Onyx Vault'))
+			const has_onyx_vault = step1.knowledges.some(content => content.includes('Onyx Vault'))
 
 			expect(has_onyx_vault).toBe(true)
 
@@ -97,8 +97,8 @@ describe.concurrent('Long Context and Language Traps', () => {
 				rerank_limit: 20
 			})
 
-			const has_quantum_signature = step2.knowledges.some(r =>
-				r.content.includes('quantum-resistant signature')
+			const has_quantum_signature = step2.knowledges.some(content =>
+				content.includes('quantum-resistant signature')
 			)
 
 			expect(has_quantum_signature).toBe(true)
@@ -150,7 +150,7 @@ describe.concurrent('Long Context and Language Traps', () => {
 					rerank_limit: 10
 				})
 				const result = [...knowledges, ...actions]
-				const found = result.some(r => r.content.includes(qa.expected))
+				const found = result.some(content => content.includes(qa.expected))
 
 				expect(found).toBe(true)
 			}

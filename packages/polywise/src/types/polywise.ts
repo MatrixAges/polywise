@@ -136,10 +136,16 @@ export interface Action {
 export interface COTDepthResult {
 	depth: number
 	query: string
-	knowledges: Knowledge[]
-	actions: Action[]
-	emerged_nodes: number[]
-	emerged_edges: number[]
+	knowledges: string[]
+	actions: string[]
+	metadatas: Metadata[]
+}
+
+export interface FinalQueryResult {
+	knowledges: string[]
+	actions: string[]
+	metadatas: Metadata[]
+	cot: any
 }
 
 export interface MemoryRecallResult {
