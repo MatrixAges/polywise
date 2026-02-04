@@ -313,25 +313,13 @@ export default class Polywise {
 		this.brain.reportUserActivity()
 		this.brain.setBusy(true)
 
-		const { content, triples, article_id, idol_id, root_ids, metrics_ids, generate_embedding } = args
+		const { content, article_id, idol_id, root_ids, metrics_ids } = args
 
 		const res = (await this.queryRaw(sql.sql_process_article, [content])) as { id: number }[]
 
 		const aid = article_id ?? res[0].id
 
-		if (generate_embedding ?? true) {
-			await this.article.addEmbedding(aid, content)
-		}
-
-		if (triples && triples.length > 0) {
-			await this.injectTriples({
-				article_id: aid,
-				triples,
-				idol_id,
-				root_ids,
-				metrics_ids
-			})
-		}
+		await this.article.addEmbedding(aid, content)
 
 		const query_embedding = (await this.pipeline.embed(content)) as number[]
 

@@ -89,12 +89,10 @@ export interface ConnectArgs {
 
 export interface ProcessArticleArgs {
 	content: string
-	triples?: Triple[]
 	article_id?: number
 	idol_id?: string
 	root_ids?: string[]
 	metrics_ids?: string[]
-	generate_embedding?: boolean
 }
 
 export interface InjectTriplesArgs {

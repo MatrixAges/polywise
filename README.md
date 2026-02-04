@@ -35,25 +35,9 @@ Polywise allows AI agents to remember and grow with every conversation, converti
 const poly = new Polywise()
 await poly.init({ data_dir: './my-memory' })
 
-// Save episodic memory (content) and semantic triples
+// Save episodic memory (content)
 await poly.save({
-	content: 'User prefers TypeScript and works late at night.',
-	triples: [
-		{
-			subject: 'User',
-			predicate: 'prefers',
-			object: 'TypeScript',
-			learning_rate: 2.0,
-			decay_resistance: 1.0
-		},
-		{
-			subject: 'User',
-			predicate: 'works_at',
-			object: 'Late Night',
-			learning_rate: 1.5,
-			decay_resistance: 0.8
-		}
-	]
+	content: 'User prefers TypeScript and works late at night.'
 })
 ```
 
