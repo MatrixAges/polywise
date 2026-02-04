@@ -339,7 +339,8 @@ When working on `packages/polywise`, you MUST follow TDD principles:
 2. **Atomic Tests**: Each test should verify ONE specific behavior
 3. **Descriptive Names**: Test names should describe behavior, not implementation
 4. **Independent Tests**: Tests should not depend on each other
-5. **Run Tests**: Always run tests after each change
+5. **Run Tests**: Always run tests after each change. When testing specific functionality, use `pnpm test -- [test-file-path]` (e.g., `pnpm test -- test/temporal.spec.ts`) or `pnpx rstest test/abc.spec.ts` to accelerate the process and avoid full test suite execution.
+6. **Full Suite**: Run the full test suite (`pnpm test`) before final submission or major commits to ensure no regressions.
 
 ### Test File Structure:
 
