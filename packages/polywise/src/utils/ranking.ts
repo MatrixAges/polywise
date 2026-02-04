@@ -1,4 +1,5 @@
 import {
+	formatRerankDocument,
 	formatSourceInfo,
 	PRIORITY_WEIGHTS,
 	RELEVANCE_SCORE_WEIGHT,
@@ -23,7 +24,7 @@ export async function rerankKnowledges(
 	const documents = candidates.map(c => {
 		const source_info = formatSourceInfo(c.source, c.stimulated, c.memoryStrength)
 
-		return `\${source_info} [Type: info]\\n\${c.content}`
+		return formatRerankDocument(source_info, 'info', c.content)
 	})
 
 	const rerank_scores = await pipeline.rerank(query, documents)
@@ -62,7 +63,7 @@ export async function rerankActions(
 	const documents = candidates.map(c => {
 		const source_info = formatSourceInfo(c.source, c.stimulated, c.memoryStrength)
 
-		return `\${source_info} [Type: action]\\n\${c.content}`
+		return formatRerankDocument(source_info, 'action', c.content)
 	})
 
 	const rerank_scores = await pipeline.rerank(query, documents)

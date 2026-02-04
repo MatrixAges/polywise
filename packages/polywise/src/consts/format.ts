@@ -16,3 +16,7 @@ export const formatLogEntry = (timestamp: string, input: any, output: any) => {
 export const formatPerceiveQuery = (query: string, insights: string) => {
 	return `${query} [${PERCEIVE_COMMAND}: ${insights}]`
 }
+
+export const formatRerankDocument = (source_info: string, type: 'info' | 'action', content: string) => {
+	return `${source_info} [Type: ${type}]\n${content}`
+}
