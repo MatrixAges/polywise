@@ -1,7 +1,9 @@
 import {
 	formatNodeContent,
 	HABIT_REACTION_THRESHOLD,
+	HABIT_SCORE_BOOST,
 	MAX_IMPLICIT_RESULTS,
+	MEMORY_SCORE_BOOST,
 	POTENTIAL_THRESHOLD,
 	RELEVANCE_SCORE_FACTOR
 } from '../consts'
@@ -55,7 +57,7 @@ async function collectHabitActions(
 					id: h.target_id,
 					content: h.action,
 					rerankScore: h.weight,
-					relevanceScore: h.weight * 1.5,
+					relevanceScore: h.weight * HABIT_SCORE_BOOST,
 					memoryStrength: h.weight,
 					combinedScore: 0,
 					source: 'memory',
@@ -83,7 +85,7 @@ function collectMemoryKnowledges(
 					id: article.id,
 					content: article.content,
 					rerankScore: article.rerankScore,
-					relevanceScore: 1.5,
+					relevanceScore: MEMORY_SCORE_BOOST,
 					memoryStrength: memory_strength,
 					combinedScore: 0,
 					source: 'memory',

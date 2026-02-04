@@ -1,4 +1,16 @@
-import { SCHEMA_BRAIN, SCHEMA_KNOWLEDGE } from '../consts'
+import {
+	EDGE_DECAY_FACTOR,
+	EDGE_DISTANCE_MIN,
+	EDGE_LEARNING_FACTOR,
+	EDGE_WEIGHT_MAX,
+	EDGE_WEIGHT_MIN,
+	NODE_POTENTIAL_MIN,
+	SCHEMA_BRAIN,
+	SCHEMA_KNOWLEDGE,
+	SNAPSHOT_EDGES_LIMIT,
+	TICK_DECAY_RATE,
+	TICK_POTENTIAL_MAX
+} from '../consts'
 
 export const sql_tick = (threshold: number) => `
   WITH incoming_signals AS (
@@ -7,38 +19,38 @@ export const sql_tick = (threshold: number) => `
       SUM(
         n.activation * e.weight * (1.0 / (1.0 + ln(1.0 + EXTRACT(EPOCH FROM (CURRENT_TIMESTAMP - e.updated_at)) / 86400.0))) / (e.distance + 0.1)
       ) as total_input
-    FROM ${SCHEMA_BRAIN}.edges e
-    JOIN ${SCHEMA_BRAIN}.nodes n ON e.source_id = n.id
+    FROM \${SCHEMA_BRAIN}.edges e
+    JOIN \${SCHEMA_BRAIN}.nodes n ON e.source_id = n.id
     WHERE n.activation > 0
     GROUP BY e.target_id
   )
-  UPDATE ${SCHEMA_BRAIN}.nodes
-  SET potential = LEAST(potential + COALESCE((SELECT total_input FROM incoming_signals WHERE incoming_signals.target_id = ${SCHEMA_BRAIN}.nodes.id), 0), 2.0);
+  UPDATE \${SCHEMA_BRAIN}.nodes
+  SET potential = LEAST(potential + COALESCE((SELECT total_input FROM incoming_signals WHERE incoming_signals.target_id = \${SCHEMA_BRAIN}.nodes.id), 0), \${TICK_POTENTIAL_MAX});
 
-  UPDATE ${SCHEMA_BRAIN}.nodes
+  UPDATE \${SCHEMA_BRAIN}.nodes
   SET 
-    activation = CASE WHEN potential > ${threshold} THEN 1.0 ELSE 0.0 END,
-    potential = CASE WHEN potential > ${threshold} THEN 0.0 ELSE potential * 0.9 END,
-    last_fired_at = CASE WHEN potential > ${threshold} THEN CURRENT_TIMESTAMP ELSE last_fired_at END,
-    updated_at = CASE WHEN potential > ${threshold} THEN CURRENT_TIMESTAMP ELSE updated_at END;
+    activation = CASE WHEN potential > \${threshold} THEN 1.0 ELSE 0.0 END,
+    potential = CASE WHEN potential > \${threshold} THEN 0.0 ELSE potential * \${TICK_DECAY_RATE} END,
+    last_fired_at = CASE WHEN potential > \${threshold} THEN CURRENT_TIMESTAMP ELSE last_fired_at END,
+    updated_at = CASE WHEN potential > \${threshold} THEN CURRENT_TIMESTAMP ELSE updated_at END;
 
-  UPDATE ${SCHEMA_BRAIN}.edges e
+  UPDATE \${SCHEMA_BRAIN}.edges e
   SET 
     weight = CASE 
-      WHEN (SELECT activation FROM ${SCHEMA_BRAIN}.nodes WHERE id = e.source_id) > 0 
-           AND (SELECT activation FROM ${SCHEMA_BRAIN}.nodes WHERE id = e.target_id) > 0 
-      THEN LEAST(weight + (0.2 * e.learning_rate), 5.0)
-      ELSE GREATEST(weight - (0.001 / e.decay_resistance), 0.1)
+      WHEN (SELECT activation FROM \${SCHEMA_BRAIN}.nodes WHERE id = e.source_id) > 0 
+           AND (SELECT activation FROM \${SCHEMA_BRAIN}.nodes WHERE id = e.target_id) > 0 
+      THEN LEAST(weight + (\${EDGE_LEARNING_FACTOR} * e.learning_rate), \${EDGE_WEIGHT_MAX})
+      ELSE GREATEST(weight - (\${EDGE_DECAY_FACTOR} / e.decay_resistance), \${EDGE_WEIGHT_MIN})
     END,
     updated_at = CASE 
-      WHEN (SELECT activation FROM ${SCHEMA_BRAIN}.nodes WHERE id = e.source_id) > 0 
-           AND (SELECT activation FROM ${SCHEMA_BRAIN}.nodes WHERE id = e.target_id) > 0 
+      WHEN (SELECT activation FROM \${SCHEMA_BRAIN}.nodes WHERE id = e.source_id) > 0 
+           AND (SELECT activation FROM \${SCHEMA_BRAIN}.nodes WHERE id = e.target_id) > 0 
       THEN CURRENT_TIMESTAMP 
       ELSE updated_at 
     END;
 
-  UPDATE ${SCHEMA_BRAIN}.edges
-  SET distance = GREATEST(1.0 / (weight + 0.1), 0.2);
+  UPDATE \${SCHEMA_BRAIN}.edges
+  SET distance = GREATEST(1.0 / (weight + 0.1), \${EDGE_DISTANCE_MIN});
 `
 
 export const sql_add_node = `
@@ -56,18 +68,18 @@ export const sql_stimulate = `UPDATE ${SCHEMA_BRAIN}.nodes SET potential = poten
 
 export const sql_get_snapshot_nodes = (weight_threshold: number) => `
   SELECT id, label, x, y, activation, potential, idol_id, root_ids, metrics_ids, metadata, is_action, created_at, updated_at
-  FROM ${SCHEMA_BRAIN}.nodes
-  WHERE potential > 0.05
-  OR id IN (SELECT source_id FROM ${SCHEMA_BRAIN}.edges WHERE weight > ${weight_threshold})
-  OR id IN (SELECT target_id FROM ${SCHEMA_BRAIN}.edges WHERE weight > ${weight_threshold})
+  FROM \${SCHEMA_BRAIN}.nodes
+  WHERE potential > \${NODE_POTENTIAL_MIN}
+  OR id IN (SELECT source_id FROM \${SCHEMA_BRAIN}.edges WHERE weight > \${weight_threshold})
+  OR id IN (SELECT target_id FROM \${SCHEMA_BRAIN}.edges WHERE weight > \${weight_threshold})
 `
 
 export const sql_get_snapshot_edges = (weight_threshold: number) => `
   SELECT source_id, target_id, weight, distance, type, idol_id, root_ids, metrics_ids, metadata, is_habit, created_at, updated_at
-  FROM ${SCHEMA_BRAIN}.edges
-  WHERE weight > ${weight_threshold}
+  FROM \${SCHEMA_BRAIN}.edges
+  WHERE weight > \${weight_threshold}
   ORDER BY weight DESC
-  LIMIT 500
+  LIMIT \${SNAPSHOT_EDGES_LIMIT}
 `
 
 export const sql_process_article = `
@@ -77,11 +89,11 @@ export const sql_process_article = `
 `
 
 export const sql_upsert_node = `
-  INSERT INTO ${SCHEMA_BRAIN}.nodes (label, x, y, potential, idol_id, root_ids, metrics_ids, metadata, embedding, is_action)
+  INSERT INTO \${SCHEMA_BRAIN}.nodes (label, x, y, potential, idol_id, root_ids, metrics_ids, metadata, embedding, is_action)
   VALUES ($1, random() * 800, random() * 600, 1.0, $2, $3, $4, $5, $6, $7)
   ON CONFLICT (label) DO UPDATE SET 
-    potential = LEAST(${SCHEMA_BRAIN}.nodes.potential + 0.5, 2.0), 
-    metadata = ${SCHEMA_BRAIN}.nodes.metadata || EXCLUDED.metadata, 
+    potential = LEAST(\${SCHEMA_BRAIN}.nodes.potential + \${DEFAULT_HEBBIAN_REWARD}, \${TICK_POTENTIAL_MAX}), 
+    metadata = \${SCHEMA_BRAIN}.nodes.metadata || EXCLUDED.metadata, 
     embedding = COALESCE(EXCLUDED.embedding, ${SCHEMA_BRAIN}.nodes.embedding), 
     is_action = EXCLUDED.is_action,
     idol_id = COALESCE(EXCLUDED.idol_id, ${SCHEMA_BRAIN}.nodes.idol_id),
