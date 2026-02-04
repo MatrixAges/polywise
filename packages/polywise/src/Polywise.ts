@@ -8,7 +8,6 @@ import Brain from './Brain'
 import Log from './Log'
 import Pipeline from './Pipeline'
 import * as sql from './sql'
-import * as sql_brain from './sql/Brain'
 import * as sql_meta from './sql/meta'
 import { catchError, catchFinally } from './decorators'
 import {
@@ -17,14 +16,23 @@ import {
 	migrate,
 	validateMigrations,
 	extractKeywords,
-	calculateMemoryStrength,
-	processResults
+	processResults,
+	aggregateResults,
+	rerankKnowledges,
+	rerankActions,
+	recallNodesByKeywords,
+	recallRelatedNodes,
+	getNodeContexts,
+	stimulateNodes,
+	strengthenRelatedEdges,
+	handleHabitReaction,
+	getHabits,
+	formEmergentQuery,
+	performEmergentSearch,
+	emitCotResult
 } from './utils'
 
 import {
-	formatNodeContent,
-	formatSourceInfo,
-	formatPerceiveQuery,
 	DEFAULT_RECALL_DEPTH,
 	DEFAULT_SEARCH_LIMIT,
 	DEFAULT_RERANK_LIMIT,
@@ -32,22 +40,10 @@ import {
 	DEFAULT_NODE_THRESHOLD,
 	DEFAULT_EDGE_WEIGHT,
 	SNAPSHOT_WEIGHT_THRESHOLD,
-	HABIT_REACTION_THRESHOLD,
 	MEMORY_RECALL_INTENSITY,
-	COT_MAX_RESULTS,
-	COT_STIMULATE_BASE,
-	COT_STIMULATE_FACTOR,
-	SEARCH_LIMIT_FACTOR,
-	POTENTIAL_THRESHOLD,
-	MAX_IMPLICIT_RESULTS,
-	RELEVANCE_SCORE_FACTOR,
-	RERANK_SCORE_WEIGHT,
-	RELEVANCE_SCORE_WEIGHT,
-	STIMULATION_MAX,
-	STIMULATION_MIN,
+	HABIT_REACTION_THRESHOLD,
 	HABIT_LEARNING_WEIGHT,
-	HABIT_THRESHOLD_LOW,
-	STRENGTHEN_EDGE_WEIGHT
+	HABIT_THRESHOLD_LOW
 } from './consts'
 
 import type {
@@ -299,46 +295,9 @@ export default class Polywise {
 		initial_actions: Action[]
 		habit_threshold: number
 	}) {
-		const { query_embedding, initial_actions, habit_threshold } = args
-
-		if (!query_embedding || !this.db) return
-
-		const nearest_stimulus = await this.queryRaw(sql.sql_find_nearest_node, [`[${query_embedding.join(',')}]`])
-
-		if (nearest_stimulus.length === 0) return
-
-		const stimulus = nearest_stimulus[0]
-
-		if (
-			stimulus.similarity > HABIT_REACTION_THRESHOLD &&
-			(stimulus.activation >= stimulus.threshold || stimulus.potential >= stimulus.threshold)
-		) {
-			const habits = await this.queryRaw(sql.sql_find_strongest_habit, [stimulus.id])
-
-			if (habits.length > 0 && habits[0].weight >= habit_threshold) {
-				const h = habits[0]
-
-				const fast_action: Action = {
-					id: h.target_id,
-					content: h.action,
-					source: 'memory',
-					rerankScore: 1.0,
-					relevanceScore: 1.0,
-					combinedScore: 1.0,
-					stimulated: true,
-					memoryStrength: h.weight,
-					metadata: h.action_metadata || {}
-				}
-
-				if (!initial_actions.find(a => a.id === fast_action.id)) {
-					initial_actions.unshift(fast_action)
-				}
-
-				await this.queryRaw(sql.sql_increment_reaction_count, [stimulus.id, h.target_id])
-			}
-		}
-
-		await this.stimulate(stimulus.id, STIMULATION_MAX)
+		await handleHabitReaction(args, this.queryRaw.bind(this), (node_id, intensity) =>
+			this.stimulate(node_id, intensity)
+		)
 	}
 
 	@catchError()
@@ -548,15 +507,30 @@ export default class Polywise {
 
 		const habits = await this.getHabits(query_embedding)
 
-		const { knowledges, actions } = await this.aggregateResults({
-			recall_result,
-			search_results,
-			habits
-		})
+		const { knowledges, actions } = await aggregateResults(
+			{
+				recall_result,
+				search_results,
+				habits
+			},
+			this.queryRaw.bind(this)
+		)
 
-		const reranked_knowledges = await this.rerankKnowledges(query, knowledges, rerank_limit)
+		const reranked_knowledges = await rerankKnowledges(
+			query,
+			knowledges,
+			rerank_limit,
+			this.pipeline,
+			this.queryRaw.bind(this)
+		)
 
-		const reranked_actions = await this.rerankActions(query, actions, rerank_limit)
+		const reranked_actions = await rerankActions(
+			query,
+			actions,
+			rerank_limit,
+			this.pipeline,
+			this.queryRaw.bind(this)
+		)
 
 		return {
 			knowledges: reranked_knowledges,
@@ -565,9 +539,7 @@ export default class Polywise {
 	}
 
 	private async getHabits(query_embedding: number[]) {
-		if (!query_embedding) return []
-
-		return (await this.queryRaw(sql.sql_find_nearest_node, [`[${query_embedding.join(',')}]`])) as any[]
+		return await getHabits(query_embedding, this.queryRaw.bind(this))
 	}
 
 	@catchError(function (this: Polywise, error: any, args: ExecuteCotArgs) {
@@ -632,9 +604,21 @@ export default class Polywise {
 			root_ids
 		})
 
-		const reranked_knowledges = await this.rerankKnowledges(emerged_query, emerged_knowledges, rerank_limit)
+		const reranked_knowledges = await rerankKnowledges(
+			emerged_query,
+			emerged_knowledges,
+			rerank_limit,
+			this.pipeline,
+			this.queryRaw.bind(this)
+		)
 
-		const reranked_actions = await this.rerankActions(emerged_query, emerged_actions, rerank_limit)
+		const reranked_actions = await rerankActions(
+			emerged_query,
+			emerged_actions,
+			rerank_limit,
+			this.pipeline,
+			this.queryRaw.bind(this)
+		)
 
 		reranked_knowledges.forEach(r => history_ids.add(r.id))
 		reranked_actions.forEach(r => history_ids.add(r.id))
@@ -675,49 +659,7 @@ export default class Polywise {
 		idol_id?: string
 		root_ids?: string[]
 	}) {
-		const {
-			emerged_query,
-			current_depth,
-			base_recall_depth,
-			search_limit,
-			stimulate_on_recall,
-			history_ids,
-			idol_id,
-			root_ids
-		} = args
-
-		const depth_recall_depth = base_recall_depth + current_depth
-		const query_embedding = (await this.pipeline.embed(emerged_query)) as number[]
-
-		const emerged_recall_result = await this.recallFromMemory({
-			query: emerged_query,
-			max_depth: depth_recall_depth,
-			stimulate_intensity: stimulate_on_recall ? MEMORY_RECALL_INTENSITY * (1 + current_depth) : 0,
-			query_embedding: query_embedding ?? undefined,
-			idol_id,
-			root_ids
-		})
-
-		const emerged_search_results = await this.pipeline.search({
-			query: emerged_query,
-			rerank_limit: search_limit * SEARCH_LIMIT_FACTOR,
-			vector_search: () => this.article.searchVector(emerged_query, search_limit * SEARCH_LIMIT_FACTOR),
-			fulltext_search: () => this.article.searchFts(emerged_query, search_limit * SEARCH_LIMIT_FACTOR)
-		})
-
-		const habits = await this.getHabits(query_embedding)
-
-		const { knowledges, actions } = await this.aggregateResults({
-			recall_result: emerged_recall_result,
-			search_results: emerged_search_results,
-			habits
-		})
-
-		return {
-			emerged_knowledges: knowledges.filter(k => !history_ids.has(k.id)),
-			emerged_actions: actions.filter(a => !history_ids.has(a.id)),
-			emerged_recall_result
-		}
+		return await performEmergentSearch(args, this)
 	}
 
 	private async emitCotResult(args: {
@@ -728,24 +670,7 @@ export default class Polywise {
 		reranked_actions: Action[]
 		emerged_recall_result: any
 	}) {
-		const { emitter, emerged_query, reranked_knowledges, reranked_actions } = args
-
-		const { knowledges, actions, metadata } = await processResults(
-			emerged_query,
-			reranked_knowledges,
-			reranked_actions,
-			this.pipeline
-		)
-
-		const cot_result: COTDepthResult = {
-			knowledges,
-			actions,
-			metadata
-		}
-
-		if (emitter.isActiveStatus()) {
-			emitter.emit(cot_result)
-		}
+		await emitCotResult({ ...args, pipeline: this.pipeline })
 	}
 
 	private scheduleNextCotStep(args: ExecuteCotArgs) {
@@ -815,296 +740,27 @@ export default class Polywise {
 		initial_knowledges: Knowledge[]
 		initial_actions: Action[]
 	}) {
-		const { query, current_depth, initial_knowledges, initial_actions } = args
-
-		const top_results = [...initial_knowledges, ...initial_actions].slice(0, COT_MAX_RESULTS)
-		const insights = top_results.map(r => r.content.slice(0, 50)).join(', ')
-		const emerged_query = formatPerceiveQuery(query, insights)
-		const emerged_node_ids = top_results.map(r => r.id)
-
-		await this.stimulateNodes(emerged_node_ids, COT_STIMULATE_BASE * (1 + current_depth * COT_STIMULATE_FACTOR))
-
-		return emerged_query
+		return await formEmergentQuery(args, (node_ids, intensity) => this.stimulateNodes(node_ids, intensity))
 	}
 
 	private async recallNodesByKeywords(args: RecallNodesByKeywordsArgs) {
-		const { keywords, limit = 10, idol_id, root_ids } = args
-
-		if (keywords.length === 0) {
-			return []
-		}
-
-		const results: Node[] = []
-
-		for (const keyword of keywords) {
-			const nodes = (await this.queryRaw(sql_brain.sql_recall_nodes_by_label, [
-				`%${keyword}%`,
-				limit,
-				idol_id,
-				root_ids
-			])) as Node[]
-
-			results.push(...nodes)
-		}
-
-		return Array.from(new Map(results.map(n => [n.id, n])).values())
+		return await recallNodesByKeywords(args, this.queryRaw.bind(this))
 	}
 
 	private async recallRelatedNodes(node_ids: number[], max_depth: number) {
-		if (node_ids.length === 0 || max_depth <= 0) {
-			return []
-		}
-
-		return (await this.queryRaw(sql_brain.sql_recall_related_nodes, [node_ids, max_depth, 20])) as Node[]
+		return await recallRelatedNodes(node_ids, max_depth, this.queryRaw.bind(this))
 	}
 
 	private async getNodeContexts(node_ids: number[]) {
-		if (node_ids.length === 0) {
-			return []
-		}
-
-		const articles = (await this.queryRaw(sql_brain.sql_get_node_articles, [node_ids])) as any[]
-
-		return articles.map(article => ({
-			article_ids: [article.id],
-			relevance_score: 1.0
-		}))
+		return await getNodeContexts(node_ids, this.queryRaw.bind(this))
 	}
 
 	private async stimulateNodes(node_ids: number[], intensity: number) {
-		if (node_ids.length === 0 || intensity <= 0) {
-			return
-		}
-
-		for (const id of node_ids) {
-			await this.queryRaw(sql.sql_stimulate, [intensity, id])
-		}
+		await stimulateNodes(node_ids, intensity, this.queryRaw.bind(this))
 	}
 
 	private async strengthenRelatedEdges(args: StrengthenRelatedEdgesArgs) {
-		const { matched_nodes, related_nodes } = args
-		const node_ids = [...matched_nodes, ...related_nodes].map(n => n.id)
-
-		if (node_ids.length < 2) {
-			return
-		}
-
-		await this.queryRaw(sql.sql_strengthen_edges_batch, [STRENGTHEN_EDGE_WEIGHT, node_ids, node_ids])
-	}
-
-	private async aggregateResults(args: AggregateResultsArgs) {
-		const { recall_result, search_results, habits = [] } = args
-
-		const knowledges: Knowledge[] = []
-		const actions: Action[] = []
-
-		await this.collectHabitActions(habits, actions)
-
-		this.collectMemoryKnowledges(recall_result, search_results, knowledges)
-
-		this.collectExternalResults(recall_result, search_results, knowledges)
-
-		this.collectImplicitResults(recall_result, knowledges, actions)
-
-		return { knowledges, actions }
-	}
-
-	private async collectHabitActions(habits: any[], actions: Action[]) {
-		for (const stimulus of habits) {
-			if (
-				stimulus.similarity > HABIT_REACTION_THRESHOLD &&
-				(stimulus.activation >= stimulus.threshold || stimulus.potential >= stimulus.threshold)
-			) {
-				const strong_habits = (await this.queryRaw(sql.sql_find_strongest_habit, [
-					stimulus.id
-				])) as any[]
-
-				for (const h of strong_habits) {
-					actions.push({
-						id: h.target_id,
-						content: h.action,
-						rerankScore: h.weight,
-						relevanceScore: h.weight * 1.5,
-						memoryStrength: h.weight,
-						combinedScore: 0,
-						source: 'memory',
-						stimulated: true,
-						metadata: h.action_metadata || {}
-					})
-				}
-			}
-		}
-	}
-
-	private collectMemoryKnowledges(
-		recall_result: AggregateResultsArgs['recall_result'],
-		search_results: any[],
-		knowledges: Knowledge[]
-	) {
-		for (const context of recall_result.related_contexts) {
-			for (const article_id of context.article_ids) {
-				const article = search_results.find(r => r.id === article_id)
-
-				if (article) {
-					const memory_strength = calculateMemoryStrength(context)
-
-					knowledges.push({
-						id: article.id,
-						content: article.content,
-						rerankScore: article.rerankScore,
-						relevanceScore: 1.5,
-						memoryStrength: memory_strength,
-						combinedScore: 0,
-						source: 'memory',
-						stimulated: true,
-						metadata: (article as any).metadata
-					})
-				}
-			}
-		}
-	}
-
-	private collectExternalResults(
-		recall_result: AggregateResultsArgs['recall_result'],
-		search_results: any[],
-		knowledges: Knowledge[]
-	) {
-		const stimulated_node_ids = new Set(recall_result.stimulated_nodes)
-		const node_potential_map = new Map<number, number>()
-
-		for (const node of recall_result.nodes) {
-			node_potential_map.set(node.id, node.potential)
-		}
-
-		for (const result of search_results) {
-			if (!knowledges.find(c => c.id === result.id)) {
-				const is_stimulated = stimulated_node_ids.has(result.id)
-				const memory_strength = node_potential_map.get(result.id) ?? 0
-
-				knowledges.push({
-					id: result.id,
-					content: result.content,
-					rerankScore: result.rerankScore,
-					relevanceScore: result.rerankScore,
-					memoryStrength: memory_strength,
-					combinedScore: 0,
-					source: is_stimulated ? 'memory' : 'external',
-					stimulated: is_stimulated,
-					metadata: (result as any).metadata
-				})
-			}
-		}
-	}
-
-	private collectImplicitResults(
-		recall_result: AggregateResultsArgs['recall_result'],
-		knowledges: Knowledge[],
-		actions: Action[]
-	) {
-		const high_potential_nodes = recall_result.nodes
-			.filter(
-				n =>
-					n.potential > POTENTIAL_THRESHOLD &&
-					!knowledges.find(k => k.id === n.id) &&
-					!actions.find(a => a.id === n.id)
-			)
-			.slice(0, MAX_IMPLICIT_RESULTS)
-
-		for (const node of high_potential_nodes) {
-			const item = {
-				id: node.id,
-				content: formatNodeContent(node.label, node.metadata?.desc),
-				rerankScore: node.potential,
-				relevanceScore: node.potential * RELEVANCE_SCORE_FACTOR,
-				memoryStrength: node.potential,
-				combinedScore: 0,
-				source: 'implicit' as any,
-				stimulated: true,
-				metadata: node.metadata
-			}
-
-			if (node.is_action) {
-				actions.push(item)
-			} else {
-				knowledges.push(item)
-			}
-		}
-	}
-
-	private async rerankKnowledges(query: string, candidates: Knowledge[], limit: number) {
-		if (candidates.length === 0) return []
-
-		const documents = candidates.map(c => {
-			const source_info = formatSourceInfo(c.source, c.stimulated, c.memoryStrength)
-
-			return `${source_info} [Type: info]\n${c.content}`
-		})
-
-		const rerank_scores = await this.pipeline.rerank(query, documents)
-
-		const results: Knowledge[] = candidates.map((candidate, index) => ({
-			...candidate,
-			rerankScore: rerank_scores[index]?.score ?? 0,
-			combinedScore:
-				(rerank_scores[index]?.score ?? 0) * RERANK_SCORE_WEIGHT +
-				candidate.relevanceScore * RELEVANCE_SCORE_WEIGHT
-		}))
-
-		const sorted_results = results.sort((a, b) => b.combinedScore - a.combinedScore).slice(0, limit)
-
-		await this.stimulateByRanking(sorted_results)
-
-		return sorted_results
-	}
-
-	private async rerankActions(query: string, candidates: Action[], limit: number) {
-		if (candidates.length === 0) {
-			return []
-		}
-
-		const documents = candidates.map(c => {
-			const source_info = formatSourceInfo(c.source, c.stimulated, c.memoryStrength)
-
-			return `${source_info} [Type: action]\n${c.content}`
-		})
-
-		const rerank_scores = await this.pipeline.rerank(query, documents)
-
-		const results: Action[] = candidates.map((candidate, index) => ({
-			...candidate,
-			rerankScore: rerank_scores[index]?.score ?? 0,
-			combinedScore:
-				(rerank_scores[index]?.score ?? 0) * RERANK_SCORE_WEIGHT +
-				candidate.relevanceScore * RELEVANCE_SCORE_WEIGHT
-		}))
-
-		const sorted_results = results.sort((a, b) => b.combinedScore - a.combinedScore).slice(0, limit)
-
-		await this.stimulateByRanking(sorted_results)
-
-		return sorted_results
-	}
-
-	private async stimulateByRanking(results: (Knowledge | Action)[]) {
-		if (results.length === 0) return
-
-		const max_stimulation = STIMULATION_MAX
-		const min_stimulation = STIMULATION_MIN
-		const decay_rate = (max_stimulation - min_stimulation) / Math.max(results.length - 1, 1)
-		const stimulation_map = new Map<number, number>()
-
-		for (let i = 0; i < results.length; i++) {
-			const intensity = Math.max(max_stimulation - i * decay_rate, min_stimulation)
-
-			stimulation_map.set(results[i].id, intensity)
-		}
-
-		const node_ids = Array.from(stimulation_map.keys())
-		const intensities = node_ids.map(id => stimulation_map.get(id)!)
-
-		for (let i = 0; i < node_ids.length; i++) {
-			await this.queryRaw(sql_brain.sql_stimulate_nodes_batch, [intensities[i], [node_ids[i]]])
-		}
+		await strengthenRelatedEdges(args, this.queryRaw.bind(this))
 	}
 
 	private async exec(sql_input: string | Array<string>) {

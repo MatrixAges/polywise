@@ -6,6 +6,17 @@ export { default as ChainEmitter } from './ChainEmitter'
 export { default as calculateMemoryStrength } from './calculateMemoryStrength'
 export { default as extractKeywords } from './extractKeywords'
 export { processResults } from './processResults'
+export { aggregateResults } from './aggregation'
+export { rerankKnowledges, rerankActions } from './ranking'
+export {
+	recallNodesByKeywords,
+	recallRelatedNodes,
+	getNodeContexts,
+	stimulateNodes,
+	strengthenRelatedEdges
+} from './graph'
+export { handleHabitReaction, getHabits } from './habits'
+export { formEmergentQuery, performEmergentSearch, emitCotResult } from './cot'
 export { CURRENT_SCHEMA_VERSION, migrations, migrate, validateMigrations } from './migration'
 
 export function formatSize(bytes: number): string {
