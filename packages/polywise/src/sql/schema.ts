@@ -19,7 +19,9 @@ export const sql_create_table_nodes = `
     metrics_ids TEXT[] DEFAULT '{}',
     metadata JSONB DEFAULT '{}',
     embedding vector(1024),
-    is_action BOOLEAN DEFAULT false
+    is_action BOOLEAN DEFAULT false,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   );
 `
 
@@ -38,7 +40,9 @@ export const sql_create_table_edges = `
     metrics_ids TEXT[] DEFAULT '{}',
     metadata JSONB DEFAULT '{}',
     is_habit BOOLEAN DEFAULT false,
-    reaction_count INTEGER DEFAULT 0
+    reaction_count INTEGER DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   );
 `
 

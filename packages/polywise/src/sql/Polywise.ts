@@ -4,7 +4,9 @@ export const sql_tick = (threshold: number) => `
   WITH incoming_signals AS (
     SELECT 
       e.target_id, 
-      SUM(n.activation * e.weight / (e.distance + 0.1)) as total_input
+      SUM(
+        n.activation * e.weight * (1.0 / (1.0 + ln(1.0 + EXTRACT(EPOCH FROM (CURRENT_TIMESTAMP - e.updated_at)) / 86400.0))) / (e.distance + 0.1)
+      ) as total_input
     FROM ${SCHEMA_BRAIN}.edges e
     JOIN ${SCHEMA_BRAIN}.nodes n ON e.source_id = n.id
     WHERE n.activation > 0
@@ -17,15 +19,23 @@ export const sql_tick = (threshold: number) => `
   SET 
     activation = CASE WHEN potential > ${threshold} THEN 1.0 ELSE 0.0 END,
     potential = CASE WHEN potential > ${threshold} THEN 0.0 ELSE potential * 0.9 END,
-    last_fired_at = CASE WHEN potential > ${threshold} THEN CURRENT_TIMESTAMP ELSE last_fired_at END;
+    last_fired_at = CASE WHEN potential > ${threshold} THEN CURRENT_TIMESTAMP ELSE last_fired_at END,
+    updated_at = CASE WHEN potential > ${threshold} THEN CURRENT_TIMESTAMP ELSE updated_at END;
 
   UPDATE ${SCHEMA_BRAIN}.edges e
-  SET weight = CASE 
-    WHEN (SELECT activation FROM ${SCHEMA_BRAIN}.nodes WHERE id = e.source_id) > 0 
-         AND (SELECT activation FROM ${SCHEMA_BRAIN}.nodes WHERE id = e.target_id) > 0 
-    THEN LEAST(weight + (0.2 * e.learning_rate), 5.0)
-    ELSE GREATEST(weight - (0.001 / e.decay_resistance), 0.1)
-  END;
+  SET 
+    weight = CASE 
+      WHEN (SELECT activation FROM ${SCHEMA_BRAIN}.nodes WHERE id = e.source_id) > 0 
+           AND (SELECT activation FROM ${SCHEMA_BRAIN}.nodes WHERE id = e.target_id) > 0 
+      THEN LEAST(weight + (0.2 * e.learning_rate), 5.0)
+      ELSE GREATEST(weight - (0.001 / e.decay_resistance), 0.1)
+    END,
+    updated_at = CASE 
+      WHEN (SELECT activation FROM ${SCHEMA_BRAIN}.nodes WHERE id = e.source_id) > 0 
+           AND (SELECT activation FROM ${SCHEMA_BRAIN}.nodes WHERE id = e.target_id) > 0 
+      THEN CURRENT_TIMESTAMP 
+      ELSE updated_at 
+    END;
 
   UPDATE ${SCHEMA_BRAIN}.edges
   SET distance = GREATEST(1.0 / (weight + 0.1), 0.2);
@@ -45,7 +55,7 @@ export const sql_connect = `
 export const sql_stimulate = `UPDATE ${SCHEMA_BRAIN}.nodes SET potential = potential + $1 WHERE id = $2`
 
 export const sql_get_snapshot_nodes = (weight_threshold: number) => `
-  SELECT id, label, x, y, activation, potential, idol_id, root_ids, metrics_ids, metadata, is_action
+  SELECT id, label, x, y, activation, potential, idol_id, root_ids, metrics_ids, metadata, is_action, created_at, updated_at
   FROM ${SCHEMA_BRAIN}.nodes
   WHERE potential > 0.05
   OR id IN (SELECT source_id FROM ${SCHEMA_BRAIN}.edges WHERE weight > ${weight_threshold})
@@ -53,7 +63,7 @@ export const sql_get_snapshot_nodes = (weight_threshold: number) => `
 `
 
 export const sql_get_snapshot_edges = (weight_threshold: number) => `
-  SELECT source_id, target_id, weight, distance, type, idol_id, root_ids, metrics_ids, metadata, is_habit
+  SELECT source_id, target_id, weight, distance, type, idol_id, root_ids, metrics_ids, metadata, is_habit, created_at, updated_at
   FROM ${SCHEMA_BRAIN}.edges
   WHERE weight > ${weight_threshold}
   ORDER BY weight DESC
@@ -113,7 +123,8 @@ export const sql_inject_triples_update_edge = (
     idol_id = COALESCE(${idol_id ? `'${idol_id}'` : 'NULL'}, idol_id),
     root_ids = COALESCE(${root_ids && root_ids.length > 0 ? `ARRAY[${root_ids.map(id => `'${id}'`).join(',')}]` : 'NULL'}, root_ids),
     metrics_ids = COALESCE(${metrics_ids && metrics_ids.length > 0 ? `ARRAY[${metrics_ids.map(id => `'${id}'`).join(',')}]` : 'NULL'}, metrics_ids),
-    metadata = metadata || '${JSON.stringify(metadata ?? {})}'::jsonb
+    metadata = metadata || '${JSON.stringify(metadata ?? {})}'::jsonb,
+    updated_at = CURRENT_TIMESTAMP
   WHERE source_id = ${sub_id} AND target_id = ${obj_id};
 `
 
@@ -122,7 +133,12 @@ export const sql_inject_triples_commit = `COMMIT`
 export const sql_upsert_node = `
   INSERT INTO ${SCHEMA_BRAIN}.nodes (label, x, y, potential, idol_id, root_ids, metrics_ids, metadata, embedding, is_action)
   VALUES ($1, random() * 800, random() * 600, 1.0, $2, $3, $4, $5, $6, $7)
-  ON CONFLICT (label) DO UPDATE SET potential = ${SCHEMA_BRAIN}.nodes.potential + 0.5, metadata = ${SCHEMA_BRAIN}.nodes.metadata || EXCLUDED.metadata, embedding = COALESCE(EXCLUDED.embedding, ${SCHEMA_BRAIN}.nodes.embedding), is_action = EXCLUDED.is_action;
+  ON CONFLICT (label) DO UPDATE SET 
+    potential = ${SCHEMA_BRAIN}.nodes.potential + 0.5, 
+    metadata = ${SCHEMA_BRAIN}.nodes.metadata || EXCLUDED.metadata, 
+    embedding = COALESCE(EXCLUDED.embedding, ${SCHEMA_BRAIN}.nodes.embedding), 
+    is_action = EXCLUDED.is_action,
+    updated_at = CURRENT_TIMESTAMP;
 `
 
 export const sql_upsert_node_select = `SELECT id FROM ${SCHEMA_BRAIN}.nodes WHERE label = $1`
@@ -130,25 +146,25 @@ export const sql_upsert_node_select = `SELECT id FROM ${SCHEMA_BRAIN}.nodes WHER
 export const sql_node_sources = `INSERT INTO ${SCHEMA_BRAIN}.node_sources (node_id, article_id) VALUES ($1, $2) ON CONFLICT DO NOTHING;`
 
 export const sql_get_nodes_by_idol = `
-  SELECT id, label, x, y, activation, potential, idol_id, root_ids, metrics_ids, metadata, is_action
+  SELECT id, label, x, y, activation, potential, idol_id, root_ids, metrics_ids, metadata, is_action, created_at, updated_at
   FROM ${SCHEMA_BRAIN}.nodes
   WHERE idol_id = $1
 `
 
 export const sql_get_nodes_by_root = `
-  SELECT id, label, x, y, activation, potential, idol_id, root_ids, metrics_ids, metadata, is_action
+  SELECT id, label, x, y, activation, potential, idol_id, root_ids, metrics_ids, metadata, is_action, created_at, updated_at
   FROM ${SCHEMA_BRAIN}.nodes
   WHERE $1 = ANY(root_ids)
 `
 
 export const sql_get_edges_by_idol = `
-  SELECT source_id, target_id, weight, distance, type, idol_id, root_ids, metrics_ids, metadata, is_habit
+  SELECT source_id, target_id, weight, distance, type, idol_id, root_ids, metrics_ids, metadata, is_habit, created_at, updated_at
   FROM ${SCHEMA_BRAIN}.edges
   WHERE idol_id = $1
 `
 
 export const sql_get_edges_by_root = `
-  SELECT source_id, target_id, weight, distance, type, idol_id, root_ids, metrics_ids, metadata, is_habit
+  SELECT source_id, target_id, weight, distance, type, idol_id, root_ids, metrics_ids, metadata, is_habit, created_at, updated_at
   FROM ${SCHEMA_BRAIN}.edges
   WHERE $1 = ANY(root_ids)
 `
@@ -209,7 +225,7 @@ export const sql_set_edge_as_habit = `UPDATE ${SCHEMA_BRAIN}.edges SET is_habit 
 
 export const sql_increment_reaction_count = `UPDATE ${SCHEMA_BRAIN}.edges SET reaction_count = reaction_count + 1 WHERE source_id = $1 AND target_id = $2`
 
-export const sql_get_all_nodes = `SELECT id, label, x, y, activation, potential, idol_id, root_ids, metrics_ids, metadata, is_action FROM ${SCHEMA_BRAIN}.nodes`
+export const sql_get_all_nodes = `SELECT id, label, x, y, activation, potential, idol_id, root_ids, metrics_ids, metadata, is_action, created_at, updated_at FROM ${SCHEMA_BRAIN}.nodes`
 
 export const sql_check_articles_table_exists = `SELECT COUNT(*) as count FROM information_schema.tables WHERE table_schema = '${SCHEMA_KNOWLEDGE}' AND table_name = 'articles'`
 

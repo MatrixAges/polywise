@@ -5,7 +5,7 @@ import validateMigrationsFn from './validateMigrations'
 
 import type { Migration } from '../types'
 
-export const CURRENT_SCHEMA_VERSION = 6
+export const CURRENT_SCHEMA_VERSION = 7
 
 export const migrations: Migration[] = [
 	{
@@ -86,6 +86,18 @@ export const migrations: Migration[] = [
 				`ALTER TABLE ${SCHEMA_KNOWLEDGE}.articles ADD COLUMN IF NOT EXISTS metrics_ids TEXT[] DEFAULT '{}';`,
 				`CREATE INDEX IF NOT EXISTS idx_articles_idol ON ${SCHEMA_KNOWLEDGE}.articles(idol_id);`,
 				`CREATE INDEX IF NOT EXISTS idx_articles_roots ON ${SCHEMA_KNOWLEDGE}.articles USING GIN(root_ids);`
+			])
+		}
+	},
+	{
+		version: 7,
+		description: 'Add created_at and updated_at to nodes and edges',
+		up: async exec => {
+			await exec([
+				`ALTER TABLE ${SCHEMA_BRAIN}.nodes ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;`,
+				`ALTER TABLE ${SCHEMA_BRAIN}.nodes ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;`,
+				`ALTER TABLE ${SCHEMA_BRAIN}.edges ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;`,
+				`ALTER TABLE ${SCHEMA_BRAIN}.edges ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;`
 			])
 		}
 	}
