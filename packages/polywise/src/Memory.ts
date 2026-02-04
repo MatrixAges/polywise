@@ -1,11 +1,12 @@
-import type { PGlite } from '@electric-sql/pglite'
 import { injectable } from 'tsyringe'
 import dayjs from 'dayjs'
 
-import type Pipeline from './Pipeline'
 import { sql_memory } from './sql'
 import { LONG_TERM_CAPACITY, PRIORITY_WEIGHTS, TIME_DECAY_HALFLIFE_DAYS } from './consts'
+
 import type { FiltersArgs, Knowledge } from './types'
+import type Pipeline from './Pipeline'
+import type { PGlite } from '@electric-sql/pglite'
 
 @injectable()
 export default class Memory {
@@ -43,6 +44,18 @@ export default class Memory {
 		const { idol_id, root_ids, metrics_ids } = args
 		const embedding = (await this.pipeline.embed(content)) as number[]
 
+		if (!embedding) return
+
+		const vector_str = `[${embedding.join(',')}]`
+
+		const similar = (await this.queryRaw(sql_memory.sql_find_similar_long_term, [vector_str, 0.95])) as any[]
+
+		if (similar.length > 0) {
+			await this.exec(sql_memory.sql_update_long_term_frequency, [similar[0].id])
+			console.log(`[Memory] Merged similar long-term memory: ${similar[0].id}`)
+			return
+		}
+
 		const count_res = (await this.queryRaw(sql_memory.sql_get_long_term_count)) as { count: number }[]
 
 		if (count_res[0].count >= LONG_TERM_CAPACITY) {
@@ -51,7 +64,7 @@ export default class Memory {
 
 		await this.queryRaw(sql_memory.sql_insert_long_term, [
 			content,
-			embedding ? `[${embedding.join(',')}]` : null,
+			vector_str,
 			idol_id ?? null,
 			root_ids ?? null,
 			metrics_ids ?? null

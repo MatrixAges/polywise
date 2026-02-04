@@ -2,6 +2,7 @@ import { PGlite } from '@electric-sql/pglite'
 import { vector } from '@electric-sql/pglite/vector'
 import { singleton } from 'tsyringe'
 import to from 'await-to-js'
+import dayjs from 'dayjs'
 
 import Article from './Article'
 import Brain from './Brain'
@@ -41,7 +42,9 @@ import {
 	DEFAULT_NODE_THRESHOLD,
 	DEFAULT_EDGE_WEIGHT,
 	SNAPSHOT_WEIGHT_THRESHOLD,
-	MEMORY_RECALL_INTENSITY
+	MEMORY_RECALL_INTENSITY,
+	PROACTIVE_EXAMPLES,
+	PROACTIVE_SIMILARITY_THRESHOLD
 } from './consts'
 
 import type {
@@ -345,7 +348,7 @@ export default class Polywise {
 			aid = res[0].id
 		}
 
-		const query_embedding = (await this.pipeline.embed(content)) as number[]
+		const query_embedding = ((await this.pipeline.embed(content)) as number[]) || []
 
 		if (query_embedding && query_embedding.length > 0) {
 			const existing_embedding = await this.queryRaw(sql.sql_get_article_embedding, [aid])
@@ -355,9 +358,49 @@ export default class Polywise {
 			} else {
 				await this.queryRaw(sql.sql_insert_article_embedding, [aid, `[${query_embedding.join(',')}]`])
 			}
+
+			if (await this.isProactiveStatement(query_embedding)) {
+				await this.memory.saveLongTerm(content, {
+					idol_id: idol_id ?? undefined,
+					root_ids: root_ids ?? undefined,
+					metrics_ids: metrics_ids ?? undefined
+				})
+			}
 		}
 
 		this.log.write({ ...args, idol_id, root_ids, metrics_ids }, { article_id: aid })
+	}
+
+	private async isProactiveStatement(embedding: number[]) {
+		const proactive_embeddings_results = await Promise.all(
+			PROACTIVE_EXAMPLES.map(text => this.pipeline.embed(text))
+		)
+
+		const proactive_embeddings = proactive_embeddings_results.filter((emb): emb is number[] => emb !== null)
+
+		let max_similarity = 0
+
+		for (const p_emb of proactive_embeddings) {
+			if (!p_emb) continue
+
+			const sim = this.cosineSimilarity(embedding, p_emb)
+
+			if (sim > max_similarity) max_similarity = sim
+		}
+
+		return max_similarity > PROACTIVE_SIMILARITY_THRESHOLD
+	}
+
+	private cosineSimilarity(v1: number[], v2: number[]) {
+		let dot_product = 0
+		let norm_a = 0
+		let norm_b = 0
+		for (let i = 0; i < v1.length; i++) {
+			dot_product += v1[i] * v2[i]
+			norm_a += v1[i] * v1[i]
+			norm_b += v2[i] * v2[i]
+		}
+		return dot_product / (Math.sqrt(norm_a) * Math.sqrt(norm_b))
 	}
 
 	async addNode(args: AddNodeArgs) {
@@ -462,11 +505,15 @@ export default class Polywise {
 		const logs = this.log.getTodayLogs()
 		const summary = logs.length > 0 ? logs.join('\n\n') : 'No activity today.'
 
-		await this.memory.saveDiary(summary, timestamp, {
+		const filters = {
 			idol_id: this.idol_id ?? undefined,
 			root_ids: this.root_ids ?? undefined,
 			metrics_ids: this.metrics_ids ?? undefined
-		})
+		}
+
+		await this.memory.saveDiary(summary, timestamp, filters)
+
+		await this.consolidateLongTermMemory(filters)
 
 		await this.exec([
 			sql.sql_sleep_tick_begin,
@@ -476,6 +523,31 @@ export default class Polywise {
 			sql.sql_sleep_tick_reset_nodes,
 			sql.sql_sleep_tick_commit
 		])
+	}
+
+	private async consolidateLongTermMemory(filters: FiltersArgs) {
+		const snapshot = await this.getSnapshot(1.0)
+		const active_nodes = snapshot.nodes.filter(n => n.activation > 0.8 || n.potential > 1.2)
+
+		if (active_nodes.length === 0) return
+
+		const core_labels = active_nodes.map(n => n.label).join(', ')
+		const consolidation_entry = `Core active concepts from session: ${core_labels}`
+
+		await this.memory.saveLongTerm(consolidation_entry, filters)
+
+		const habits = (await this.queryRaw(`
+			SELECT n.label, e.weight 
+			FROM brain.edges e 
+			JOIN brain.nodes n ON e.target_id = n.id 
+			WHERE e.is_habit = true AND e.weight > 2.0
+			ORDER BY e.weight DESC LIMIT 5
+		`)) as { label: string; weight: number }[]
+
+		for (const habit of habits) {
+			const habit_ltm = `Reinforced behavioral pattern: ${habit.label} (Strength: ${habit.weight.toFixed(2)})`
+			await this.memory.saveLongTerm(habit_ltm, filters)
+		}
 	}
 
 	private async recallFromMemory(args: RecallArgs) {

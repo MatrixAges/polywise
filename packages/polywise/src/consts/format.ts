@@ -5,7 +5,8 @@ export const formatNodeContent = (label: string, desc?: string) => {
 }
 
 export const formatSourceInfo = (source: string, stimulated: boolean, memoryStrength: number) => {
-	return `[Source:${source}${stimulated ? ',Activated' : ''},Memory Strength:${memoryStrength.toFixed(2)}]`
+	const strength = memoryStrength ?? 0
+	return `[Source:${source}${stimulated ? ',Activated' : ''},Memory Strength:${strength.toFixed(2)}]`
 }
 
 export const formatPerceiveQuery = (query: string, insights: string) => {

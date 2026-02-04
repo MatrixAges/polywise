@@ -6,7 +6,7 @@ import {
 	RELEVANCE_SCORE_FACTOR
 } from '../consts'
 import * as sql from '../sql'
-import { calculateMemoryStrength } from './calculateMemoryStrength'
+import calculateMemoryStrength from './calculateMemoryStrength'
 
 import type { Action, AggregateResultsArgs, Knowledge } from '../types'
 

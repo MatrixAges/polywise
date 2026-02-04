@@ -114,6 +114,21 @@ cot.on(event => {
 })
 ```
 
+#### 5. 📜 **Long-Term Memory & Diary**
+
+Polywise manages a high-priority Long-Term Memory (LTM) and a chronological Diary to solve the "recency bias" of neural networks. LTM stores distilled identities and rules, while the Diary provides time-based context.
+
+- **Long-Term Memory**: Automatically distills proactive statements (identity, rules, constraints) and core concept patterns. It features a self-updating LRU mechanism to maintain limited capacity while retaining high-value associations.
+- **Diary**: Automatically generates session summaries during the **SLEEPING** state. Entries are indexed by time, allowing the system to "remember" the flow of events across days.
+
+```typescript
+// Retrieve distilled long-term context
+const ltm_text = await poly.getLongMemory()
+
+// Query diary entries with navigation
+const { current, prev, next } = await poly.getDailyMemory('2026-02-04 12:00:00')
+```
+
 ---
 
 ## 🏗️ Architecture

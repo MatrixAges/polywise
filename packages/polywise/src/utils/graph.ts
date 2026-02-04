@@ -1,7 +1,7 @@
 import { STRENGTHEN_EDGE_WEIGHT } from '../consts'
 import * as sql from '../sql'
 import * as sql_brain from '../sql/Brain'
-import { extractKeywords } from './extractKeywords'
+import extractKeywords from './extractKeywords'
 
 import type { Node, RecallNodesByKeywordsArgs, StrengthenRelatedEdgesArgs } from '../types'
 

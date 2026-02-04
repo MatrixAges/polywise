@@ -6,10 +6,9 @@ import validateMigrationsFn from './validateMigrations'
 
 import type { Migration } from '../types'
 
-export const CURRENT_SCHEMA_VERSION = 8
+export const CURRENT_SCHEMA_VERSION = 9
 
 export const migrations: Migration[] = [
-	// ... (omitted for brevity, keeping all existing migrations)
 	{
 		version: 1,
 		description: 'Initial schema: brain nodes, edges, knowledge articles with idol_id, root_ids, metrics_ids',
@@ -114,6 +113,15 @@ export const migrations: Migration[] = [
 				sql_memory.sql_create_index_long_term_embedding,
 				sql_memory.sql_create_index_diary_embedding,
 				sql_memory.sql_create_index_diary_timestamp
+			])
+		}
+	},
+	{
+		version: 9,
+		description: 'Add frequency to long-term memory for consolidation support',
+		up: async exec => {
+			await exec([
+				`ALTER TABLE ${SCHEMA_MEMORY}.long_term ADD COLUMN IF NOT EXISTS frequency INTEGER DEFAULT 1;`
 			])
 		}
 	}

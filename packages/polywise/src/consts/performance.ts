@@ -34,3 +34,19 @@ export const PRIORITY_WEIGHTS = {
 	external: 0.6
 }
 export const TIME_DECAY_HALFLIFE_DAYS = 30
+export const PROACTIVE_SIMILARITY_THRESHOLD = 0.7
+export const PROACTIVE_EXAMPLES = [
+	'I am an artificial intelligence designed to assist with complex tasks.',
+	'You must follow safety guidelines at all times.',
+	'We need to optimize the system for better performance.',
+	'Requirement: The system shall support multi-hop retrieval.',
+	'Identity: I am your personal assistant.',
+	'Rule: Never share sensitive credentials.',
+	'Constraint: Memory capacity is limited to 1000 entries.',
+	'Objective: Improve reasoning accuracy through chain-of-thought.',
+	'我是你的个人助手',
+	'我们需要遵守法律法规',
+	'系统必须保证数据的安全性',
+	'身份：我是一个人工智能程序',
+	'规则：严禁访问未经授权的资源'
+]

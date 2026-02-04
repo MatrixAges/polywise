@@ -8,10 +8,31 @@ CREATE TABLE IF NOT EXISTS ${SCHEMA_MEMORY}.long_term (
     content TEXT NOT NULL,
     embedding vector(1024),
     last_accessed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    frequency INTEGER DEFAULT 1,
     idol_id TEXT,
     root_ids TEXT[] DEFAULT '{}',
     metrics_ids TEXT[] DEFAULT '{}'
 );`
+
+export const sql_update_long_term_frequency = `
+UPDATE ${SCHEMA_MEMORY}.long_term 
+SET frequency = frequency + 1, last_accessed_at = CURRENT_TIMESTAMP
+WHERE id = $1;`
+
+export const sql_find_similar_long_term = `
+SELECT id, content, (1 - (embedding <=> $1)) as similarity
+FROM ${SCHEMA_MEMORY}.long_term
+WHERE (1 - (embedding <=> $1)) > $2
+ORDER BY similarity DESC
+LIMIT 1;`
+
+export const sql_upsert_long_term = `
+INSERT INTO ${SCHEMA_MEMORY}.long_term (content, embedding, idol_id, root_ids, metrics_ids)
+VALUES ($1, $2, $3, $4, $5)
+ON CONFLICT (id) DO UPDATE SET 
+    content = EXCLUDED.content,
+    frequency = ${SCHEMA_MEMORY}.long_term.frequency + 1,
+    last_accessed_at = CURRENT_TIMESTAMP;`
 
 export const sql_create_table_diary = `
 CREATE TABLE IF NOT EXISTS ${SCHEMA_MEMORY}.diary (

@@ -7,7 +7,8 @@ import Polywise from '../src/Polywise'
 
 describe('Polywise Temporal Mechanics', () => {
 	let poly: Polywise
-	const test_dir = join(process.cwd(), 'test-data-temporal')
+	const test_id = Math.random().toString(36).substring(7)
+	const test_dir = join(process.cwd(), `:polywise_temporal_test_${test_id}:`)
 
 	beforeEach(async () => {
 		if (existsSync(test_dir)) {
@@ -52,7 +53,7 @@ describe('Polywise Temporal Mechanics', () => {
 		await new Promise(resolve => setTimeout(resolve, 1100))
 
 		// Trigger update via manual SQL using the upsert logic (simulating save's node processing)
-		await poly.queryRaw(
+		await (poly as any).queryRaw(
 			`
 			INSERT INTO brain.nodes (label, x, y, potential, updated_at)
 			VALUES ($1, 0, 0, 1.0, CURRENT_TIMESTAMP)
@@ -75,7 +76,7 @@ describe('Polywise Temporal Mechanics', () => {
 		const start_a = await poly.addNode({ label: 'StartA', x: 0, y: 0, threshold: 0.1 })
 		const end_a = await poly.addNode({ label: 'EndA', x: 0, y: 100, threshold: 0.1 })
 		await poly.connect({ source_id: start_a, target_id: end_a, weight: 2.0 })
-		await poly.queryRaw(
+		await (poly as any).queryRaw(
 			"UPDATE brain.edges SET updated_at = CURRENT_TIMESTAMP - INTERVAL '365 days' WHERE source_id = $1",
 			[start_a]
 		)
@@ -86,7 +87,10 @@ describe('Polywise Temporal Mechanics', () => {
 		await poly.connect({ source_id: start_b, target_id: end_b, weight: 2.0 })
 
 		// Manually set activation to 1.0 to ensure they ACT as sources
-		await poly.queryRaw('UPDATE brain.nodes SET activation = 1.0 WHERE id IN ($1, $2)', [start_a, start_b])
+		await (poly as any).queryRaw('UPDATE brain.nodes SET activation = 1.0 WHERE id IN ($1, $2)', [
+			start_a,
+			start_b
+		])
 
 		// Run tick with a very low threshold to ensure potential is captured
 		// Signal = activation * weight * factor / (distance + 0.1)
@@ -109,11 +113,14 @@ describe('Polywise Temporal Mechanics', () => {
 		// So if potential > 0.01, it becomes 0.
 
 		// To test potential, we should use a threshold HIGHER than the expected potential.
-		await poly.queryRaw('UPDATE brain.nodes SET potential = 0, activation = 0 WHERE id IN ($1, $2)', [
+		await (poly as any).queryRaw('UPDATE brain.nodes SET potential = 0, activation = 0 WHERE id IN ($1, $2)', [
 			end_a,
 			end_b
 		])
-		await poly.queryRaw('UPDATE brain.nodes SET activation = 1.0 WHERE id IN ($1, $2)', [start_a, start_b])
+		await (poly as any).queryRaw('UPDATE brain.nodes SET activation = 1.0 WHERE id IN ($1, $2)', [
+			start_a,
+			start_b
+		])
 		await poly.tick(5.0) // Very high threshold so potential remains
 
 		const nodes_final = await poly.getAllNodes()
