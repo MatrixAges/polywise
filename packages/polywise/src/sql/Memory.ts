@@ -76,9 +76,15 @@ VALUES ($1, $2, $3, $4, $5);`
 export const sql_get_long_term_count = `
 SELECT count(*) as count FROM ${SCHEMA_MEMORY}.long_term;`
 
-export const sql_delete_oldest_long_term = `
+// S = frequency * exp(-lambda * (now - last_accessed_at_in_days))
+export const sql_delete_decayed_long_term = `
 DELETE FROM ${SCHEMA_MEMORY}.long_term 
-WHERE id = (SELECT id FROM ${SCHEMA_MEMORY}.long_term ORDER BY last_accessed_at ASC LIMIT 1);`
+WHERE id = (
+    SELECT id 
+    FROM ${SCHEMA_MEMORY}.long_term 
+    ORDER BY (frequency * exp(-$1 * EXTRACT(EPOCH FROM (CURRENT_TIMESTAMP - last_accessed_at)) / 86400.0)) ASC 
+    LIMIT 1
+);`
 
 export const sql_get_diary = `
 SELECT * FROM ${SCHEMA_MEMORY}.diary 

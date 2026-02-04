@@ -38,6 +38,7 @@ export const EDGE_LEARNING_FACTOR = 0.2
 export const EDGE_DECAY_FACTOR = 0.001
 export const EDGE_DISTANCE_MIN = 0.2
 export const LONG_TERM_CAPACITY = 1000
+export const LTM_DECAY_LAMBDA = 0.05 // Decay rate for biological memory eviction (approx 5% per day)
 export const PRIORITY_WEIGHTS = {
 	rules: 1.0,
 	brain: 0.9,

@@ -2,7 +2,7 @@ import { injectable } from 'tsyringe'
 import dayjs from 'dayjs'
 
 import { sql_memory } from './sql'
-import { LONG_TERM_CAPACITY, PRIORITY_WEIGHTS, TIME_DECAY_HALFLIFE_DAYS } from './consts'
+import { LONG_TERM_CAPACITY, LTM_DECAY_LAMBDA, PRIORITY_WEIGHTS, TIME_DECAY_HALFLIFE_DAYS } from './consts'
 
 import type { FiltersArgs, Knowledge } from './types'
 import type Pipeline from './Pipeline'
@@ -59,7 +59,7 @@ export default class Memory {
 		const count_res = (await this.queryRaw(sql_memory.sql_get_long_term_count)) as { count: number }[]
 
 		if (count_res[0].count >= LONG_TERM_CAPACITY) {
-			await this.exec(sql_memory.sql_delete_oldest_long_term)
+			await this.exec(sql_memory.sql_delete_decayed_long_term, [LTM_DECAY_LAMBDA])
 		}
 
 		await this.queryRaw(sql_memory.sql_insert_long_term, [
