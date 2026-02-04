@@ -1,4 +1,4 @@
-export default (onError?: (error: any, ...args: any[]) => void) =>
+export default (onError?: (error: any, ...args: any[]) => void | boolean) =>
 	(target: any, property?: string, descriptor?: PropertyDescriptor): any => {
 		if (property && descriptor) {
 			const original_method = descriptor.value
@@ -8,7 +8,9 @@ export default (onError?: (error: any, ...args: any[]) => void) =>
 					return await original_method.apply(this, args)
 				} catch (error) {
 					if (onError) {
-						onError.call(this, error, ...args)
+						const handled = onError.call(this, error, ...args)
+
+						if (handled === true) return
 					}
 
 					throw error
@@ -41,7 +43,9 @@ export default (onError?: (error: any, ...args: any[]) => void) =>
 								return result
 							} catch (error) {
 								if (onError) {
-									onError.call(this, error, ...method_args)
+									const handled = onError.call(this, error, ...method_args)
+
+									if (handled === true) return
 								}
 
 								throw error

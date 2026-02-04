@@ -556,6 +556,14 @@ export default class Polywise {
 	@catchError(function (this: Polywise, error: any, args: ExecuteCotArgs) {
 		const { emitter } = args
 
+		if (this.isDbError(error)) {
+			if (emitter.isActiveStatus()) {
+				emitter.finish()
+			}
+
+			return true
+		}
+
 		console.error('CoT Execution Error:', error)
 
 		if (emitter.isActiveStatus()) {
@@ -769,10 +777,13 @@ export default class Polywise {
 	}
 
 	private isDbError(e: any) {
+		const msg = e.message || ''
 		return (
-			e.message?.includes('DB not initialized') ||
-			e.message?.includes('closed') ||
-			e.message?.includes('signature mismatch')
+			msg.includes('DB not initialized') ||
+			msg.includes('closed') ||
+			msg.includes('signature mismatch') ||
+			msg.includes('null function') ||
+			e?.name === 'RuntimeError'
 		)
 	}
 
