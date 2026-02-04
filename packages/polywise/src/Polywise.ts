@@ -13,13 +13,10 @@ import {
 	formatNodeContent,
 	formatSourceInfo,
 	formatPerceiveQuery,
-	SCHEMA_BRAIN,
-	SCHEMA_KNOWLEDGE,
 	DEFAULT_RECALL_DEPTH,
 	DEFAULT_SEARCH_LIMIT,
 	DEFAULT_RERANK_LIMIT,
 	DEFAULT_HABIT_THRESHOLD,
-	DEFAULT_STIMULATE_INTENSITY,
 	DEFAULT_NODE_THRESHOLD,
 	DEFAULT_EDGE_WEIGHT,
 	SNAPSHOT_WEIGHT_THRESHOLD,
@@ -28,7 +25,6 @@ import {
 	COT_MAX_RESULTS,
 	COT_STIMULATE_BASE,
 	COT_STIMULATE_FACTOR,
-	COT_STIMULATE_DEPTH_FACTOR,
 	SEARCH_LIMIT_FACTOR,
 	POTENTIAL_THRESHOLD,
 	MAX_IMPLICIT_RESULTS,
@@ -119,17 +115,19 @@ export default class Polywise {
 			await this.exec(sql_meta.sql_create_schema_meta)
 			await this.exec(sql_meta.sql_create_table_schema_version)
 
-			const version_result = await this.queryRaw(sql_meta.sql_get_current_version)
+			const version_result = (await this.queryRaw(sql_meta.sql_get_current_version)) as {
+				version: number
+			}[]
 
-			const current_version = (version_result as any)[0]?.version ?? 0
+			const current_version = version_result[0]?.version ?? 0
 
 			if (current_version < CURRENT_SCHEMA_VERSION) {
 				await migrate(current_version, this.exec.bind(this), this.queryRaw.bind(this))
 			}
 
-			const check_result = await this.queryRaw(sql.sql_check_articles_table_exists)
+			const check_result = (await this.queryRaw(sql.sql_check_articles_table_exists)) as { count: string }[]
 
-			if (parseInt((check_result as any)[0]?.count || '0') === 0) {
+			if (parseInt(check_result[0]?.count || '0') === 0) {
 				await this.exec([
 					sql.sql_create_extension_vector,
 					sql.sql_create_schema_knowledge,
@@ -163,17 +161,17 @@ export default class Polywise {
 		try {
 			const {
 				query,
-				recall_depth = 2,
-				search_limit = 20,
-				rerank_limit = 10,
+				recall_depth = DEFAULT_RECALL_DEPTH,
+				search_limit = DEFAULT_SEARCH_LIMIT,
+				rerank_limit = DEFAULT_RERANK_LIMIT,
 				cot_depth = 0,
 				stimulate_on_recall = true,
-				habit_threshold = 0.5
+				habit_threshold = DEFAULT_HABIT_THRESHOLD
 			} = args
 
 			const emitter = new ChainEmitter()
 
-			const query_embedding = (await this.pipeline.embed(query)) as number[]
+			const query_embedding = await this.pipeline.embed(query)
 
 			const { knowledges: initial_knowledges, actions: initial_actions } = await this.executeSingleSearch({
 				query,
@@ -188,22 +186,18 @@ export default class Polywise {
 					`[${query_embedding.join(',')}]`
 				])
 
-				const nearest_stimulus_rows = nearest_stimulus as any[]
-
-				if (nearest_stimulus_rows.length > 0) {
-					const stimulus = nearest_stimulus_rows[0]
+				if (nearest_stimulus.length > 0) {
+					const stimulus = nearest_stimulus[0]
 
 					if (
-						stimulus.similarity > 0.8 &&
+						stimulus.similarity > HABIT_REACTION_THRESHOLD &&
 						(stimulus.activation >= stimulus.threshold ||
 							stimulus.potential >= stimulus.threshold)
 					) {
 						const habits = await this.queryRaw(sql.sql_find_strongest_habit, [stimulus.id])
 
-						const habit_rows = habits as any[]
-
-						if (habit_rows.length > 0 && habit_rows[0].weight >= habit_threshold) {
-							const h = habit_rows[0]
+						if (habits.length > 0 && habits[0].weight >= habit_threshold) {
+							const h = habits[0]
 
 							const fast_action: Action = {
 								id: h.target_id,
@@ -228,7 +222,7 @@ export default class Polywise {
 						}
 					}
 
-					await this.stimulate(stimulus.id, 0.5)
+					await this.stimulate(stimulus.id, STIMULATION_MAX)
 				}
 			}
 
@@ -269,9 +263,9 @@ export default class Polywise {
 		try {
 			const { content, triples, article_id, idol_id, root_ids, metrics_ids, generate_embedding } = args
 
-			const res = await this.queryRaw(sql.sql_process_article, [content])
+			const res = (await this.queryRaw(sql.sql_process_article, [content])) as { id: number }[]
 
-			const aid = article_id ?? (res as any)[0].id
+			const aid = article_id ?? res[0].id
 
 			if (generate_embedding ?? true) {
 				await this.article.addEmbedding(aid, content)
@@ -300,20 +294,20 @@ export default class Polywise {
 	async addNode(args: AddNodeArgs) {
 		const { label, x, y, threshold, idol_id, root_ids, metrics_ids, metadata, embedding, is_action } = args
 
-		const rows = await this.queryRaw(sql.sql_add_node, [
+		const rows = (await this.queryRaw(sql.sql_add_node, [
 			label,
 			x,
 			y,
-			threshold ?? 0.5,
+			threshold ?? DEFAULT_NODE_THRESHOLD,
 			idol_id ?? null,
 			root_ids ?? null,
 			metrics_ids ?? null,
 			JSON.stringify(metadata ?? {}),
 			embedding ? `[${embedding.join(',')}]` : null,
 			is_action ?? false
-		])
+		])) as { id: number }[]
 
-		return (rows as any)[0].id
+		return rows[0].id
 	}
 
 	async connect(args: ConnectArgs) {
@@ -322,7 +316,7 @@ export default class Polywise {
 		await this.queryRaw(sql.sql_connect, [
 			source_id,
 			target_id,
-			weight ?? 0.1,
+			weight ?? DEFAULT_EDGE_WEIGHT,
 			idol_id ?? null,
 			root_ids ?? null,
 			metrics_ids ?? null,
@@ -335,12 +329,11 @@ export default class Polywise {
 		await this.queryRaw(sql.sql_stimulate, [intensity, node_id])
 	}
 
-	async getSnapshot(weight_threshold = 0.2) {
+	async getSnapshot(weight_threshold = SNAPSHOT_WEIGHT_THRESHOLD) {
 		const nodes = await this.queryRaw(sql.sql_get_snapshot_nodes(weight_threshold))
-
 		const edges = await this.queryRaw(sql.sql_get_snapshot_edges(weight_threshold))
 
-		return { nodes: nodes as Node[], edges: edges as Edge[] }
+		return { nodes, edges }
 	}
 
 	async getAllNodes() {
@@ -364,37 +357,33 @@ export default class Polywise {
 	}
 
 	async tick(threshold_override?: number) {
-		const threshold = threshold_override ?? 0.5
+		const threshold = threshold_override ?? DEFAULT_NODE_THRESHOLD
 
 		await this.exec(sql.sql_tick(threshold))
 	}
 
 	async habituate(args: HabituateArgs) {
-		const { stimulus, action_label, weight = 0.9, metadata } = args
+		const { stimulus, action_label, weight = HABIT_LEARNING_WEIGHT, metadata } = args
 
 		const embedding = (await this.pipeline.embed(stimulus)) as number[]
 
-		if (!embedding) {
-			return
-		}
+		if (!embedding) return
 
 		const stimulus_id = await this.addNode({
 			label: `Stimulus: ${stimulus.slice(0, 50)}`,
 			x: Math.random() * 800,
 			y: Math.random() * 600,
-			threshold: 0.1,
+			threshold: HABIT_THRESHOLD_LOW,
 			embedding,
 			metadata: { desc: stimulus }
 		})
 
 		const action_rows = await this.queryRaw(sql_brain.sql_get_node_by_label, [action_label])
 
-		const action_rows_arr = action_rows as any[]
-
 		let action_id: number
 
-		if (action_rows_arr.length > 0) {
-			action_id = action_rows_arr[0].id
+		if (action_rows.length > 0) {
+			action_id = action_rows[0].id
 		} else {
 			action_id = await this.addNode({
 				label: action_label,
@@ -431,7 +420,7 @@ export default class Polywise {
 	}
 
 	private async recallFromMemory(args: RecallArgs) {
-		const { query, max_depth = 2, stimulate_intensity = 0.3 } = args
+		const { query, max_depth = DEFAULT_RECALL_DEPTH, stimulate_intensity = MEMORY_RECALL_INTENSITY } = args
 
 		const keywords = this.extractKeywords(query)
 
@@ -444,11 +433,9 @@ export default class Polywise {
 
 		if (stimulate_intensity > 0) {
 			const all_nodes = [...matched_nodes, ...related_nodes]
-
 			const node_ids = all_nodes.map(n => n.id)
 
 			await this.stimulateNodes(node_ids, stimulate_intensity)
-
 			await this.strengthenRelatedEdges({ matched_nodes, related_nodes })
 		}
 
@@ -470,7 +457,7 @@ export default class Polywise {
 		const recall_result = await this.recallFromMemory({
 			query,
 			max_depth: recall_depth,
-			stimulate_intensity: stimulate_on_recall ? 0.3 : 0,
+			stimulate_intensity: stimulate_on_recall ? MEMORY_RECALL_INTENSITY : 0,
 			query_embedding: query_embedding ?? undefined
 		})
 
@@ -482,13 +469,13 @@ export default class Polywise {
 		})
 
 		const habits = query_embedding
-			? await this.queryRaw(sql.sql_find_nearest_node, [`[${query_embedding.join(',')}]`])
+			? ((await this.queryRaw(sql.sql_find_nearest_node, [`[${query_embedding.join(',')}]`])) as any[])
 			: []
 
 		const { knowledges, actions } = await this.aggregateResults({
 			recall_result,
 			search_results,
-			habits: habits as any[]
+			habits
 		})
 
 		const reranked_knowledges = await this.rerankKnowledges(query, knowledges, rerank_limit)
@@ -524,45 +511,46 @@ export default class Polywise {
 			}
 
 			const depth_recall_depth = base_recall_depth + current_depth
-
-			const top_results = [...initial_knowledges, ...initial_actions].slice(0, 3)
-
+			const top_results = [...initial_knowledges, ...initial_actions].slice(0, COT_MAX_RESULTS)
 			const insights = top_results.map(r => r.content.slice(0, 50)).join(', ')
-
 			const emerged_query = formatPerceiveQuery(query, insights)
-
 			const emerged_node_ids = top_results.map(r => r.id)
 
-			await this.stimulateNodes(emerged_node_ids, 0.2 * (1 + current_depth * 0.5))
+			await this.stimulateNodes(
+				emerged_node_ids,
+				COT_STIMULATE_BASE * (1 + current_depth * COT_STIMULATE_FACTOR)
+			)
 
 			const query_embedding = (await this.pipeline.embed(emerged_query)) as number[]
 
 			const emerged_recall_result = await this.recallFromMemory({
 				query: emerged_query,
 				max_depth: depth_recall_depth,
-				stimulate_intensity: stimulate_on_recall ? 0.3 * (1 + current_depth) : 0,
+				stimulate_intensity: stimulate_on_recall ? MEMORY_RECALL_INTENSITY * (1 + current_depth) : 0,
 				query_embedding: query_embedding ?? undefined
 			})
 
 			const emerged_search_results = await this.pipeline.search({
 				query: emerged_query,
-				rerank_limit: search_limit * 2,
-				vector_search: () => this.article.searchVector(emerged_query, search_limit * 2),
-				fulltext_search: () => this.article.searchFts(emerged_query, search_limit * 2)
+				rerank_limit: search_limit * SEARCH_LIMIT_FACTOR,
+				vector_search: () =>
+					this.article.searchVector(emerged_query, search_limit * SEARCH_LIMIT_FACTOR),
+				fulltext_search: () => this.article.searchFts(emerged_query, search_limit * SEARCH_LIMIT_FACTOR)
 			})
 
 			const habits = query_embedding
-				? await this.queryRaw(sql.sql_find_nearest_node, [`[${query_embedding.join(',')}]`])
+				? ((await this.queryRaw(sql.sql_find_nearest_node, [
+						`[${query_embedding.join(',')}]`
+					])) as any[])
 				: []
 
 			const { knowledges: emerged_knowledges, actions: emerged_actions } = await this.aggregateResults({
 				recall_result: emerged_recall_result,
 				search_results: emerged_search_results,
-				habits: habits as any[]
+				habits
 			})
 
 			const filtered_knowledges = emerged_knowledges.filter(k => !history_ids.has(k.id))
-
 			const filtered_actions = emerged_actions.filter(a => !history_ids.has(a.id))
 
 			const reranked_knowledges = await this.rerankKnowledges(
@@ -574,7 +562,6 @@ export default class Polywise {
 			const reranked_actions = await this.rerankActions(emerged_query, filtered_actions, rerank_limit)
 
 			reranked_knowledges.forEach(r => history_ids.add(r.id))
-
 			reranked_actions.forEach(r => history_ids.add(r.id))
 
 			const cot_result: COTDepthResult = {
@@ -640,9 +627,12 @@ export default class Polywise {
 		const results: Node[] = []
 
 		for (const keyword of keywords) {
-			const nodes = await this.queryRaw(sql_brain.sql_recall_nodes_by_label, [`%${keyword}%`, limit])
+			const nodes = (await this.queryRaw(sql_brain.sql_recall_nodes_by_label, [
+				`%${keyword}%`,
+				limit
+			])) as Node[]
 
-			results.push(...(nodes as Node[]))
+			results.push(...nodes)
 		}
 
 		return Array.from(new Map(results.map(n => [n.id, n])).values())
@@ -653,9 +643,7 @@ export default class Polywise {
 			return []
 		}
 
-		const nodes = await this.queryRaw(sql_brain.sql_recall_related_nodes, [node_ids, max_depth, 20])
-
-		return nodes as Node[]
+		return (await this.queryRaw(sql_brain.sql_recall_related_nodes, [node_ids, max_depth, 20])) as Node[]
 	}
 
 	private async getNodeContexts(node_ids: number[]) {
@@ -663,11 +651,9 @@ export default class Polywise {
 			return []
 		}
 
-		const articles = await this.queryRaw(sql_brain.sql_get_node_articles, [node_ids])
+		const articles = (await this.queryRaw(sql_brain.sql_get_node_articles, [node_ids])) as any[]
 
-		const article_rows = articles as any[]
-
-		return article_rows.map(article => ({
+		return articles.map(article => ({
 			article_ids: [article.id],
 			relevance_score: 1.0
 		}))
@@ -685,14 +671,13 @@ export default class Polywise {
 
 	private async strengthenRelatedEdges(args: StrengthenRelatedEdgesArgs) {
 		const { matched_nodes, related_nodes } = args
-
 		const node_ids = [...matched_nodes, ...related_nodes].map(n => n.id)
 
 		if (node_ids.length < 2) {
 			return
 		}
 
-		await this.queryRaw(sql.sql_strengthen_edges_batch, [0.1, node_ids, node_ids])
+		await this.queryRaw(sql.sql_strengthen_edges_batch, [STRENGTHEN_EDGE_WEIGHT, node_ids, node_ids])
 	}
 
 	private async aggregateResults(args: AggregateResultsArgs) {
@@ -711,14 +696,14 @@ export default class Polywise {
 
 		for (const stimulus of habits) {
 			if (
-				stimulus.similarity > 0.8 &&
+				stimulus.similarity > HABIT_REACTION_THRESHOLD &&
 				(stimulus.activation >= stimulus.threshold || stimulus.potential >= stimulus.threshold)
 			) {
-				const strong_habits = await this.queryRaw(sql.sql_find_strongest_habit, [stimulus.id])
+				const strong_habits = (await this.queryRaw(sql.sql_find_strongest_habit, [
+					stimulus.id
+				])) as any[]
 
-				const strong_habit_rows = strong_habits as any[]
-
-				for (const h of strong_habit_rows) {
+				for (const h of strong_habits) {
 					actions.push({
 						id: h.target_id,
 						content: h.action,
@@ -779,18 +764,18 @@ export default class Polywise {
 		const high_potential_nodes = recall_result.nodes
 			.filter(
 				n =>
-					n.potential > 0.5 &&
+					n.potential > POTENTIAL_THRESHOLD &&
 					!knowledges.find(k => k.id === n.id) &&
 					!actions.find(a => a.id === n.id)
 			)
-			.slice(0, 5)
+			.slice(0, MAX_IMPLICIT_RESULTS)
 
 		for (const node of high_potential_nodes) {
 			const item = {
 				id: node.id,
 				content: formatNodeContent(node.label, node.metadata?.desc),
 				rerankScore: node.potential,
-				relevanceScore: node.potential * 0.8,
+				relevanceScore: node.potential * RELEVANCE_SCORE_FACTOR,
 				memoryStrength: node.potential,
 				combinedScore: 0,
 				source: 'implicit' as any,
@@ -813,9 +798,7 @@ export default class Polywise {
 	}
 
 	private async rerankKnowledges(query: string, candidates: Knowledge[], limit: number) {
-		if (candidates.length === 0) {
-			return []
-		}
+		if (candidates.length === 0) return []
 
 		const documents = candidates.map(c => {
 			const source_info = formatSourceInfo(c.source, c.stimulated, c.memoryStrength)
@@ -828,10 +811,12 @@ export default class Polywise {
 		const results: Knowledge[] = candidates.map((candidate, index) => ({
 			...candidate,
 			rerankScore: rerank_scores[index]?.score ?? 0,
-			combinedScore: (rerank_scores[index]?.score ?? 0) * 0.6 + candidate.relevanceScore * 0.4
+			combinedScore:
+				(rerank_scores[index]?.score ?? 0) * RERANK_SCORE_WEIGHT +
+				candidate.relevanceScore * RELEVANCE_SCORE_WEIGHT
 		}))
 
-		const sorted_results = results.sort((a: any, b: any) => b.combinedScore - a.combinedScore).slice(0, limit)
+		const sorted_results = results.sort((a, b) => b.combinedScore - a.combinedScore).slice(0, limit)
 
 		await this.stimulateByRanking(sorted_results)
 
@@ -854,10 +839,12 @@ export default class Polywise {
 		const results: Action[] = candidates.map((candidate, index) => ({
 			...candidate,
 			rerankScore: rerank_scores[index]?.score ?? 0,
-			combinedScore: (rerank_scores[index]?.score ?? 0) * 0.6 + candidate.relevanceScore * 0.4
+			combinedScore:
+				(rerank_scores[index]?.score ?? 0) * RERANK_SCORE_WEIGHT +
+				candidate.relevanceScore * RELEVANCE_SCORE_WEIGHT
 		}))
 
-		const sorted_results = results.sort((a: any, b: any) => b.combinedScore - a.combinedScore).slice(0, limit)
+		const sorted_results = results.sort((a, b) => b.combinedScore - a.combinedScore).slice(0, limit)
 
 		await this.stimulateByRanking(sorted_results)
 
@@ -865,16 +852,11 @@ export default class Polywise {
 	}
 
 	private async stimulateByRanking(results: (Knowledge | Action)[]) {
-		if (results.length === 0) {
-			return
-		}
+		if (results.length === 0) return
 
-		const max_stimulation = 0.5
-
-		const min_stimulation = 0.05
-
+		const max_stimulation = STIMULATION_MAX
+		const min_stimulation = STIMULATION_MIN
 		const decay_rate = (max_stimulation - min_stimulation) / Math.max(results.length - 1, 1)
-
 		const stimulation_map = new Map<number, number>()
 
 		for (let i = 0; i < results.length; i++) {
@@ -884,7 +866,6 @@ export default class Polywise {
 		}
 
 		const node_ids = Array.from(stimulation_map.keys())
-
 		const intensities = node_ids.map(id => stimulation_map.get(id)!)
 
 		for (let i = 0; i < node_ids.length; i++) {
@@ -964,9 +945,9 @@ export default class Polywise {
 			is_action ?? false
 		])
 
-		const res = await this.queryRaw(sql.sql_upsert_node_select, [label])
+		const res = (await this.queryRaw(sql.sql_upsert_node_select, [label])) as { id: number }[]
 
-		const node_id = (res as any)[0].id
+		const node_id = res[0].id
 
 		await this.queryRaw(sql.sql_node_sources, [node_id, article_id])
 
