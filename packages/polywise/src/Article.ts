@@ -5,7 +5,8 @@ import { SCHEMA_KNOWLEDGE } from './consts'
 import Pipeline from './Pipeline'
 import * as sql from './sql'
 import { catchError } from './decorators'
-import { ArticleEntity, ArticleWithSimilarity } from './types'
+
+import type { ArticleEntity, ArticleWithSimilarity } from './types'
 
 @catchError()
 export default class Article {

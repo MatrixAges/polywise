@@ -35,6 +35,12 @@ export const PRIORITY_WEIGHTS = {
 }
 export const TIME_DECAY_HALFLIFE_DAYS = 30
 export const PROACTIVE_SIMILARITY_THRESHOLD = 0.7
+export const CONSOLIDATION_ACTIVE_THRESHOLD = 0.8
+export const CONSOLIDATION_POTENTIAL_THRESHOLD = 1.2
+export const HABIT_CONSOLIDATION_WEIGHT = 2.0
+export const MAX_HABIT_CONSOLIDATION = 5
+export const CONSOLIDATION_ENTRY_PREFIX = 'Core active concepts from session: '
+export const HABIT_LTM_PREFIX = 'Reinforced behavioral pattern: '
 export const PROACTIVE_EXAMPLES = [
 	'I am an artificial intelligence designed to assist with complex tasks.',
 	'You must follow safety guidelines at all times.',

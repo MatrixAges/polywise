@@ -35,16 +35,22 @@ import {
 } from './utils'
 
 import {
-	DEFAULT_RECALL_DEPTH,
-	DEFAULT_SEARCH_LIMIT,
-	DEFAULT_RERANK_LIMIT,
+	CONSOLIDATION_ACTIVE_THRESHOLD,
+	CONSOLIDATION_ENTRY_PREFIX,
+	CONSOLIDATION_POTENTIAL_THRESHOLD,
+	DEFAULT_EDGE_WEIGHT,
 	DEFAULT_HABIT_THRESHOLD,
 	DEFAULT_NODE_THRESHOLD,
-	DEFAULT_EDGE_WEIGHT,
-	SNAPSHOT_WEIGHT_THRESHOLD,
+	DEFAULT_RECALL_DEPTH,
+	DEFAULT_RERANK_LIMIT,
+	DEFAULT_SEARCH_LIMIT,
+	HABIT_CONSOLIDATION_WEIGHT,
+	HABIT_LTM_PREFIX,
+	MAX_HABIT_CONSOLIDATION,
 	MEMORY_RECALL_INTENSITY,
 	PROACTIVE_EXAMPLES,
-	PROACTIVE_SIMILARITY_THRESHOLD
+	PROACTIVE_SIMILARITY_THRESHOLD,
+	SNAPSHOT_WEIGHT_THRESHOLD
 } from './consts'
 
 import type {
@@ -527,25 +533,24 @@ export default class Polywise {
 
 	private async consolidateLongTermMemory(filters: FiltersArgs) {
 		const snapshot = await this.getSnapshot(1.0)
-		const active_nodes = snapshot.nodes.filter(n => n.activation > 0.8 || n.potential > 1.2)
+		const active_nodes = snapshot.nodes.filter(
+			n => n.activation > CONSOLIDATION_ACTIVE_THRESHOLD || n.potential > CONSOLIDATION_POTENTIAL_THRESHOLD
+		)
 
-		if (active_nodes.length === 0) return
+		if (active_nodes.length > 0) {
+			const core_labels = active_nodes.map(n => n.label).join(', ')
+			const consolidation_entry = `${CONSOLIDATION_ENTRY_PREFIX}${core_labels}`
 
-		const core_labels = active_nodes.map(n => n.label).join(', ')
-		const consolidation_entry = `Core active concepts from session: ${core_labels}`
+			await this.memory.saveLongTerm(consolidation_entry, filters)
+		}
 
-		await this.memory.saveLongTerm(consolidation_entry, filters)
-
-		const habits = (await this.queryRaw(`
-			SELECT n.label, e.weight 
-			FROM brain.edges e 
-			JOIN brain.nodes n ON e.target_id = n.id 
-			WHERE e.is_habit = true AND e.weight > 2.0
-			ORDER BY e.weight DESC LIMIT 5
-		`)) as { label: string; weight: number }[]
+		const habits = (await this.queryRaw(sql.sql_get_strong_habits, [
+			HABIT_CONSOLIDATION_WEIGHT,
+			MAX_HABIT_CONSOLIDATION
+		])) as { label: string; weight: number }[]
 
 		for (const habit of habits) {
-			const habit_ltm = `Reinforced behavioral pattern: ${habit.label} (Strength: ${habit.weight.toFixed(2)})`
+			const habit_ltm = `${HABIT_LTM_PREFIX}${habit.label} (Strength: ${habit.weight.toFixed(2)})`
 			await this.memory.saveLongTerm(habit_ltm, filters)
 		}
 	}

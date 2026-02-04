@@ -112,3 +112,11 @@ export const sql_get_node_by_id = `
 `
 
 export const sql_get_node_by_label = `SELECT id FROM ${SCHEMA_BRAIN}.nodes WHERE label = $1`
+
+export const sql_get_strong_habits = `
+  SELECT n.label, e.weight 
+  FROM ${SCHEMA_BRAIN}.edges e 
+  JOIN ${SCHEMA_BRAIN}.nodes n ON e.target_id = n.id 
+  WHERE e.is_habit = true AND e.weight > $1
+  ORDER BY e.weight DESC LIMIT $2
+`
