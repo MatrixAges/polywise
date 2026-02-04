@@ -5,6 +5,7 @@ export { default as isIdle } from './isIdle'
 export { default as ChainEmitter } from './ChainEmitter'
 export { default as calculateMemoryStrength } from './calculateMemoryStrength'
 export { default as extractKeywords } from './extractKeywords'
+export { processResults } from './processResults'
 export { CURRENT_SCHEMA_VERSION, migrations, migrate, validateMigrations } from './migration'
 
 export function formatSize(bytes: number): string {

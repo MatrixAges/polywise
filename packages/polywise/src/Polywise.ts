@@ -17,7 +17,8 @@ import {
 	migrate,
 	validateMigrations,
 	extractKeywords,
-	calculateMemoryStrength
+	calculateMemoryStrength,
+	processResults
 } from './utils'
 
 import {
@@ -247,7 +248,7 @@ export default class Polywise {
 			knowledges: k_strings,
 			actions: a_strings,
 			metadata
-		} = await this.processResults(query, initial_knowledges, initial_actions)
+		} = await processResults(query, initial_knowledges, initial_actions, this.pipeline)
 
 		if (cot_depth <= 0) {
 			const result = {
@@ -574,7 +575,7 @@ export default class Polywise {
 
 		if (this.isDbError(error)) {
 			if (emitter.isActiveStatus()) {
-				this.processResults(query, initial_knowledges, initial_actions).then(data => {
+				processResults(query, initial_knowledges, initial_actions, this.pipeline).then(data => {
 					emitter.finish(data)
 				})
 			}
@@ -585,7 +586,7 @@ export default class Polywise {
 		console.error('CoT Execution Error:', error)
 
 		if (emitter.isActiveStatus()) {
-			this.processResults(query, initial_knowledges, initial_actions).then(data => {
+			processResults(query, initial_knowledges, initial_actions, this.pipeline).then(data => {
 				emitter.finish(data)
 			})
 		}
@@ -608,7 +609,7 @@ export default class Polywise {
 		} = args
 
 		if (!emitter.isActiveStatus() || current_depth > max_depth || !this.db) {
-			emitter.finish(await this.processResults(query, initial_knowledges, initial_actions))
+			emitter.finish(await processResults(query, initial_knowledges, initial_actions, this.pipeline))
 
 			return
 		}
@@ -729,10 +730,11 @@ export default class Polywise {
 	}) {
 		const { emitter, emerged_query, reranked_knowledges, reranked_actions } = args
 
-		const { knowledges, actions, metadata } = await this.processResults(
+		const { knowledges, actions, metadata } = await processResults(
 			emerged_query,
 			reranked_knowledges,
-			reranked_actions
+			reranked_actions,
+			this.pipeline
 		)
 
 		const cot_result: COTDepthResult = {
@@ -766,7 +768,9 @@ export default class Polywise {
 		if (current_depth < max_depth && (initial_knowledges.length > 0 || initial_actions.length > 0)) {
 			setImmediate(async () => {
 				if (!this.db) {
-					emitter.finish(await this.processResults(query, initial_knowledges, initial_actions))
+					emitter.finish(
+						await processResults(query, initial_knowledges, initial_actions, this.pipeline)
+					)
 
 					return
 				}
@@ -788,7 +792,7 @@ export default class Polywise {
 				})
 			})
 		} else {
-			this.processResults(query, initial_knowledges, initial_actions).then(data => {
+			processResults(query, initial_knowledges, initial_actions, this.pipeline).then(data => {
 				emitter.finish(data)
 			})
 		}
@@ -886,97 +890,6 @@ export default class Polywise {
 		}
 
 		await this.queryRaw(sql.sql_strengthen_edges_batch, [STRENGTHEN_EDGE_WEIGHT, node_ids, node_ids])
-	}
-
-	private async processResults(query: string, knowledges: Knowledge[], actions: Action[]) {
-		const k_strings = knowledges.map(k => k.content)
-		const a_strings = actions.map(a => a.content)
-
-		const descs: string[] = []
-		const links: string[] = []
-		const files: string[] = []
-		const seen_links = new Set<string>()
-		const seen_files = new Set<string>()
-		const metadata: Metadata = {}
-
-		for (const item of [...knowledges, ...actions]) {
-			if (item.metadata) {
-				const m = item.metadata
-
-				if (m.desc) descs.push(m.desc)
-
-				if (m.links) {
-					for (const link of m.links) {
-						if (!seen_links.has(link)) {
-							seen_links.add(link)
-							links.push(link)
-						}
-					}
-				}
-
-				if (m.files) {
-					for (const file of m.files) {
-						if (!seen_files.has(file)) {
-							seen_files.add(file)
-							files.push(file)
-						}
-					}
-				}
-			}
-		}
-
-		const promises: Promise<void>[] = []
-
-		if (descs.length > 0) {
-			promises.push(
-				(async () => {
-					const scores = (await this.pipeline.rerank(query, descs)) as {
-						index: number
-						score: number
-					}[]
-					const best_index =
-						scores.length > 0 ? scores.sort((a, b) => b.score - a.score)[0].index : 0
-
-					metadata.desc = descs[best_index]
-				})()
-			)
-		}
-
-		if (links.length > 0) {
-			promises.push(
-				(async () => {
-					const scores = (await this.pipeline.rerank(query, links)) as {
-						index: number
-						score: number
-					}[]
-					const sorted = scores.sort((a, b) => b.score - a.score).slice(0, 5)
-
-					metadata.links = sorted.map(s => links[s.index])
-				})()
-			)
-		}
-
-		if (files.length > 0) {
-			promises.push(
-				(async () => {
-					const scores = (await this.pipeline.rerank(query, files)) as {
-						index: number
-						score: number
-					}[]
-					const sorted = scores.sort((a, b) => b.score - a.score).slice(0, 5)
-
-					metadata.files = sorted.map(s => files[s.index])
-				})()
-			)
-		}
-
-		await Promise.all(promises)
-
-		return {
-			knowledges: k_strings,
-			actions: a_strings,
-			metadata
-		}
 	}
 
 	private async aggregateResults(args: AggregateResultsArgs) {
