@@ -73,7 +73,21 @@ export const sql_get_snapshot_edges = (weight_threshold: number) => `
 export const sql_process_article = `
   INSERT INTO ${SCHEMA_KNOWLEDGE}.articles (content, idol_id, root_ids, metrics_ids) 
   VALUES ($1, $2, $3, $4) 
-  RETURNING *
+  RETURNING id, content, created_at
+`
+
+export const sql_upsert_node = `
+  INSERT INTO ${SCHEMA_BRAIN}.nodes (label, x, y, potential, idol_id, root_ids, metrics_ids, metadata, embedding, is_action)
+  VALUES ($1, random() * 800, random() * 600, 1.0, $2, $3, $4, $5, $6, $7)
+  ON CONFLICT (label) DO UPDATE SET 
+    potential = LEAST(${SCHEMA_BRAIN}.nodes.potential + 0.5, 2.0), 
+    metadata = ${SCHEMA_BRAIN}.nodes.metadata || EXCLUDED.metadata, 
+    embedding = COALESCE(EXCLUDED.embedding, ${SCHEMA_BRAIN}.nodes.embedding), 
+    is_action = EXCLUDED.is_action,
+    idol_id = COALESCE(EXCLUDED.idol_id, ${SCHEMA_BRAIN}.nodes.idol_id),
+    root_ids = CASE WHEN EXCLUDED.root_ids IS NOT NULL THEN (SELECT ARRAY(SELECT DISTINCT unnest(${SCHEMA_BRAIN}.nodes.root_ids || EXCLUDED.root_ids))) ELSE ${SCHEMA_BRAIN}.nodes.root_ids END,
+    metrics_ids = CASE WHEN EXCLUDED.metrics_ids IS NOT NULL THEN (SELECT ARRAY(SELECT DISTINCT unnest(${SCHEMA_BRAIN}.nodes.metrics_ids || EXCLUDED.metrics_ids))) ELSE ${SCHEMA_BRAIN}.nodes.metrics_ids END,
+    updated_at = CURRENT_TIMESTAMP;
 `
 
 export const sql_search_articles_by_text = `
@@ -129,17 +143,6 @@ export const sql_inject_triples_update_edge = (
 `
 
 export const sql_inject_triples_commit = `COMMIT`
-
-export const sql_upsert_node = `
-  INSERT INTO ${SCHEMA_BRAIN}.nodes (label, x, y, potential, idol_id, root_ids, metrics_ids, metadata, embedding, is_action)
-  VALUES ($1, random() * 800, random() * 600, 1.0, $2, $3, $4, $5, $6, $7)
-  ON CONFLICT (label) DO UPDATE SET 
-    potential = ${SCHEMA_BRAIN}.nodes.potential + 0.5, 
-    metadata = ${SCHEMA_BRAIN}.nodes.metadata || EXCLUDED.metadata, 
-    embedding = COALESCE(EXCLUDED.embedding, ${SCHEMA_BRAIN}.nodes.embedding), 
-    is_action = EXCLUDED.is_action,
-    updated_at = CURRENT_TIMESTAMP;
-`
 
 export const sql_upsert_node_select = `SELECT id FROM ${SCHEMA_BRAIN}.nodes WHERE label = $1`
 

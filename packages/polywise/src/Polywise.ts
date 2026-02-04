@@ -307,24 +307,33 @@ export default class Polywise {
 			article_id,
 			idol_id = this.idol_id,
 			root_ids = this.root_ids,
-			metrics_ids = this.metrics_ids
+			metrics_ids = this.metrics_ids,
+			metadata
 		} = args
 
-		const res = (await this.queryRaw(sql.sql_process_article, [
-			content,
-			idol_id ?? null,
-			root_ids ?? null,
-			metrics_ids ?? null
-		])) as { id: number }[]
+		let aid = article_id
 
-		const aid = article_id ?? res[0].id
+		if (!aid) {
+			const res = (await this.queryRaw(sql.sql_process_article, [
+				content,
+				idol_id ?? null,
+				root_ids ?? null,
+				metrics_ids ?? null
+			])) as { id: number }[]
 
-		await this.article.addEmbedding(aid, content)
+			aid = res[0].id
+		}
 
 		const query_embedding = (await this.pipeline.embed(content)) as number[]
 
 		if (query_embedding && query_embedding.length > 0) {
-			await this.queryRaw(sql.sql_update_article_embedding, [`[${query_embedding.join(',')}]`, aid])
+			const existing_embedding = await this.queryRaw(sql.sql_get_article_embedding, [aid])
+
+			if (existing_embedding.length > 0) {
+				await this.queryRaw(sql.sql_update_article_embedding, [`[${query_embedding.join(',')}]`, aid])
+			} else {
+				await this.queryRaw(sql.sql_insert_article_embedding, [aid, `[${query_embedding.join(',')}]`])
+			}
 		}
 
 		this.log.write({ ...args, idol_id, root_ids, metrics_ids }, { article_id: aid })
