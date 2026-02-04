@@ -25,3 +25,12 @@ export const RELEVANCE_SCORE_WEIGHT = 0.4
 export const STIMULATION_MAX = 0.5
 export const STIMULATION_MIN = 0.05
 export const STRENGTHEN_EDGE_WEIGHT = 0.1
+export const LONG_TERM_CAPACITY = 1000
+export const PRIORITY_WEIGHTS = {
+	rules: 1.0,
+	brain: 0.9,
+	long_term: 0.8,
+	diary: 0.7,
+	external: 0.6
+}
+export const TIME_DECAY_HALFLIFE_DAYS = 30

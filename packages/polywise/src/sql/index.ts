@@ -1,4 +1,5 @@
 export * from './Polywise'
+export * as sql_memory from './Memory'
 export * from './Brain'
 export * from './schema'
 export * from './meta'

@@ -14,7 +14,7 @@ export async function aggregateResults(
 	args: AggregateResultsArgs,
 	queryRaw: (sql: string, params?: any[]) => Promise<any>
 ) {
-	const { recall_result, search_results, habits = [] } = args
+	const { recall_result, search_results, habits = [], memory_results = [] } = args
 
 	const knowledges: Knowledge[] = []
 	const actions: Action[] = []
@@ -27,7 +27,15 @@ export async function aggregateResults(
 
 	collectImplicitResults(recall_result, knowledges, actions)
 
+	collectMemorySystemResults(memory_results, knowledges)
+
 	return { knowledges, actions }
+}
+
+function collectMemorySystemResults(memory_results: Knowledge[], knowledges: Knowledge[]) {
+	for (const result of memory_results) {
+		knowledges.push(result)
+	}
 }
 
 async function collectHabitActions(

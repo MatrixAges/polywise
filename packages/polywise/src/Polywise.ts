@@ -7,6 +7,7 @@ import Article from './Article'
 import Brain from './Brain'
 import Log from './Log'
 import Pipeline from './Pipeline'
+import Memory from './Memory'
 import * as sql from './sql'
 import * as sql_meta from './sql/meta'
 import { catchError, catchFinally } from './decorators'
@@ -73,12 +74,14 @@ export default class Polywise {
 	public brain: Brain
 	public pipeline: Pipeline
 	public log: Log
+	public memory: Memory
 
 	constructor() {
 		this.log = new Log()
 		this.pipeline = new Pipeline()
 		this.article = new Article(this.pipeline)
 		this.brain = new Brain()
+		this.memory = new Memory()
 	}
 
 	async init(args: PolywiseArgs = {}) {
@@ -124,7 +127,25 @@ export default class Polywise {
 			onTick
 		})
 
+		this.memory.init(this.db, this.pipeline)
+
 		await this.initDatabase()
+	}
+
+	async getLongMemory(args: FiltersArgs = {}) {
+		return await this.memory.getLongMemory({
+			idol_id: args.idol_id ?? this.idol_id ?? undefined,
+			root_ids: args.root_ids ?? this.root_ids ?? undefined,
+			metrics_ids: args.metrics_ids ?? this.metrics_ids ?? undefined
+		})
+	}
+
+	async getDailyMemory(timestamp: string, args: FiltersArgs = {}) {
+		return await this.memory.getDailyMemory(timestamp, {
+			idol_id: args.idol_id ?? this.idol_id ?? undefined,
+			root_ids: args.root_ids ?? this.root_ids ?? undefined,
+			metrics_ids: args.metrics_ids ?? this.metrics_ids ?? undefined
+		})
 	}
 
 	setFilters(args: FiltersArgs) {
@@ -437,6 +458,16 @@ export default class Polywise {
 	}
 
 	async triggerSleepTick() {
+		const timestamp = dayjs().format('YYYY-MM-DD HH:mm:ss')
+		const logs = this.log.getTodayLogs()
+		const summary = logs.length > 0 ? logs.join('\n\n') : 'No activity today.'
+
+		await this.memory.saveDiary(summary, timestamp, {
+			idol_id: this.idol_id ?? undefined,
+			root_ids: this.root_ids ?? undefined,
+			metrics_ids: this.metrics_ids ?? undefined
+		})
+
 		await this.exec([
 			sql.sql_sleep_tick_begin,
 			sql.sql_sleep_tick_clean_noise,
@@ -508,13 +539,23 @@ export default class Polywise {
 			fulltext_search: () => this.article.searchFts(query, search_limit)
 		})
 
+		const memory_results = await this.memory.search(
+			query,
+			{
+				idol_id: idol_id ?? undefined,
+				root_ids: root_ids ?? undefined
+			},
+			search_limit
+		)
+
 		const habits = await this.getHabits(query_embedding)
 
 		const { knowledges, actions } = await aggregateResults(
 			{
 				recall_result,
 				search_results,
-				habits
+				habits,
+				memory_results
 			},
 			this.queryRaw.bind(this)
 		)
@@ -796,6 +837,7 @@ export default class Polywise {
 		this.brain?.off()
 		this.article?.off()
 		this.pipeline?.off()
+		this.memory?.off()
 
 		if (this.db) {
 			await this.db.close()

@@ -142,9 +142,9 @@ export interface AggregateResultsArgs {
 	recall_result: MemoryRecallResult
 	search_results: SearchResult[]
 	habits?: any[]
+	memory_results?: Knowledge[]
 }
 
-// Optimized parameter interface definition, ensuring variables come before functions
 export interface PipelineSearchArgs {
 	query: string
 	rerank_limit?: number

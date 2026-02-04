@@ -15,6 +15,7 @@ export default class Log {
 	private log_dir: string = ''
 	private enable_log: boolean = true
 	private enable_json: boolean = true
+	private today_logs: string[] = []
 
 	init(args: LogArgs) {
 		const { dir, log, json } = args
@@ -29,11 +30,14 @@ export default class Log {
 	}
 
 	write(input: object, output: object) {
-		if (!this.log_dir) return
-
 		const now = dayjs()
 		const timestamp = now.format('YYYY-MM-DD HH:mm:ss')
 		const date = now.format('YYYY-MM-DD')
+
+		const log_entry = `${timestamp} [INPUT]\n${JSON.stringify(input)}\n\n${timestamp} [OUTPUT]\n${JSON.stringify(output)}\n`
+		this.today_logs.push(log_entry)
+
+		if (!this.log_dir) return
 
 		if (this.enable_log) {
 			this.writeLog({
@@ -52,6 +56,12 @@ export default class Log {
 				date
 			})
 		}
+	}
+
+	getTodayLogs() {
+		const logs = [...this.today_logs]
+		this.today_logs = []
+		return logs
 	}
 
 	private writeLog(args: { timestamp: string; input: object; output: object; date: string }) {

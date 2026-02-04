@@ -2,6 +2,7 @@ import '@abraham/reflection'
 
 export { default as Polywise } from './Polywise'
 export { default as Log } from './Log'
+export { default as Memory } from './Memory'
 export type {
 	ArticleArgs,
 	ProcessArticleArgs,

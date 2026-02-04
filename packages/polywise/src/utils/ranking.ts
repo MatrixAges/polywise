@@ -1,5 +1,6 @@
 import {
 	formatSourceInfo,
+	PRIORITY_WEIGHTS,
 	RELEVANCE_SCORE_WEIGHT,
 	RERANK_SCORE_WEIGHT,
 	STIMULATION_MAX,
@@ -22,18 +23,23 @@ export async function rerankKnowledges(
 	const documents = candidates.map(c => {
 		const source_info = formatSourceInfo(c.source, c.stimulated, c.memoryStrength)
 
-		return `${source_info} [Type: info]\n${c.content}`
+		return `\${source_info} [Type: info]\\n\${c.content}`
 	})
 
 	const rerank_scores = await pipeline.rerank(query, documents)
 
-	const results: Knowledge[] = candidates.map((candidate, index) => ({
-		...candidate,
-		rerankScore: rerank_scores[index]?.score ?? 0,
-		combinedScore:
-			(rerank_scores[index]?.score ?? 0) * RERANK_SCORE_WEIGHT +
-			candidate.relevanceScore * RELEVANCE_SCORE_WEIGHT
-	}))
+	const results: Knowledge[] = candidates.map((candidate, index) => {
+		const rerankScore = rerank_scores[index]?.score ?? 0
+		const priority_weight = (PRIORITY_WEIGHTS as any)[candidate.source] ?? PRIORITY_WEIGHTS.external
+
+		return {
+			...candidate,
+			rerankScore,
+			combinedScore:
+				(rerankScore * RERANK_SCORE_WEIGHT + candidate.relevanceScore * RELEVANCE_SCORE_WEIGHT) *
+				priority_weight
+		}
+	})
 
 	const sorted_results = results.sort((a, b) => b.combinedScore - a.combinedScore).slice(0, limit)
 
@@ -56,18 +62,23 @@ export async function rerankActions(
 	const documents = candidates.map(c => {
 		const source_info = formatSourceInfo(c.source, c.stimulated, c.memoryStrength)
 
-		return `${source_info} [Type: action]\n${c.content}`
+		return `\${source_info} [Type: action]\\n\${c.content}`
 	})
 
 	const rerank_scores = await pipeline.rerank(query, documents)
 
-	const results: Action[] = candidates.map((candidate, index) => ({
-		...candidate,
-		rerankScore: rerank_scores[index]?.score ?? 0,
-		combinedScore:
-			(rerank_scores[index]?.score ?? 0) * RERANK_SCORE_WEIGHT +
-			candidate.relevanceScore * RELEVANCE_SCORE_WEIGHT
-	}))
+	const results: Action[] = candidates.map((candidate, index) => {
+		const rerankScore = rerank_scores[index]?.score ?? 0
+		const priority_weight = (PRIORITY_WEIGHTS as any)[candidate.source] ?? PRIORITY_WEIGHTS.external
+
+		return {
+			...candidate,
+			rerankScore,
+			combinedScore:
+				(rerankScore * RERANK_SCORE_WEIGHT + candidate.relevanceScore * RELEVANCE_SCORE_WEIGHT) *
+				priority_weight
+		}
+	})
 
 	const sorted_results = results.sort((a, b) => b.combinedScore - a.combinedScore).slice(0, limit)
 

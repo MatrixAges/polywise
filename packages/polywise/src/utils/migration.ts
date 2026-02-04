@@ -1,13 +1,15 @@
-import { SCHEMA_BRAIN, SCHEMA_KNOWLEDGE } from '../consts'
+import { SCHEMA_BRAIN, SCHEMA_KNOWLEDGE, SCHEMA_MEMORY } from '../consts'
+import * as sql_memory from '../sql/Memory'
 import * as sql_schema from '../sql/schema'
 import migrateFn from './migrate'
 import validateMigrationsFn from './validateMigrations'
 
 import type { Migration } from '../types'
 
-export const CURRENT_SCHEMA_VERSION = 7
+export const CURRENT_SCHEMA_VERSION = 8
 
 export const migrations: Migration[] = [
+	// ... (omitted for brevity, keeping all existing migrations)
 	{
 		version: 1,
 		description: 'Initial schema: brain nodes, edges, knowledge articles with idol_id, root_ids, metrics_ids',
@@ -98,6 +100,20 @@ export const migrations: Migration[] = [
 				`ALTER TABLE ${SCHEMA_BRAIN}.nodes ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;`,
 				`ALTER TABLE ${SCHEMA_BRAIN}.edges ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;`,
 				`ALTER TABLE ${SCHEMA_BRAIN}.edges ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;`
+			])
+		}
+	},
+	{
+		version: 8,
+		description: 'Add memory schema for long-term memory and diary',
+		up: async exec => {
+			await exec([
+				sql_memory.sql_create_schema_memory,
+				sql_memory.sql_create_table_long_term,
+				sql_memory.sql_create_table_diary,
+				sql_memory.sql_create_index_long_term_embedding,
+				sql_memory.sql_create_index_diary_embedding,
+				sql_memory.sql_create_index_diary_timestamp
 			])
 		}
 	}

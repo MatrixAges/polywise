@@ -116,25 +116,34 @@ export interface ContextResult {
 export interface Knowledge {
 	id: number
 	content: string
-	source: 'memory' | 'external' | 'implicit'
+	source: 'memory' | 'external' | 'implicit' | 'long_term' | 'diary' | 'rules'
 	rerankScore: number
 	relevanceScore: number
 	combinedScore: number
 	stimulated: boolean
 	memoryStrength: number
-	metadata?: Metadata
+	metadata?: any
 }
 
 export interface Action {
 	id: number
 	content: string
-	source: 'memory' | 'external' | 'implicit'
+	source: 'memory' | 'external' | 'implicit' | 'long_term' | 'diary' | 'rules'
 	rerankScore: number
 	relevanceScore: number
 	combinedScore: number
 	stimulated: boolean
 	memoryStrength: number
-	metadata?: Metadata
+	metadata?: any
+}
+
+export interface MemoryResult {
+	id: number
+	content: string
+	similarity: number
+	source: 'long_term' | 'diary'
+	timestamp?: string
+	last_accessed_at?: string
 }
 
 export interface COTDepthResult {
