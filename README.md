@@ -29,76 +29,82 @@ Polywise changes this by implementing a **neuroscience-inspired memory engine** 
 
 #### 1. 🧠 **Long-Term Memory for AI Agents**
 
-Polywise allows AI agents to remember and grow with every conversation, converting short-term interactions into long-term knowledge.
+Polywise allows AI agents to remember and grow with every conversation, converting episodic interactions into structured semantic knowledge.
 
 ```typescript
 const poly = new Polywise()
 await poly.init({ data_dir: './my-memory' })
 
-// Save knowledge from conversation
+// Save episodic memory (content) and semantic triples
 await poly.save({
-	content: 'User likes dark mode, prefers TypeScript, works late at night',
+	content: 'User prefers TypeScript and works late at night.',
 	triples: [
-		{ subject: 'User', predicate: 'prefers', object: 'Dark Mode', learning_rate: 2.0 },
-		{ subject: 'User', predicate: 'likes', object: 'TypeScript', learning_rate: 2.5 }
+		{
+			subject: 'User',
+			predicate: 'prefers',
+			object: 'TypeScript',
+			learning_rate: 2.0,
+			decay_resistance: 1.0
+		},
+		{
+			subject: 'User',
+			predicate: 'works_at',
+			object: 'Late Night',
+			learning_rate: 1.5,
+			decay_resistance: 0.8
+		}
 	]
 })
-
-// Later, the AI queries related preferences
-const { result } = await poly.query({ query: 'What does the user like?' })
-// Automatically retrieves information and actions: Dark Mode, TypeScript, etc.
 ```
 
-#### 2. ⚡ **Unified Retrieval & Deep Think**
+#### 2. ⚡ **Unified Retrieval (Fast & Slow)**
 
-Polywise implements a dual-process system mimicking the Prefrontal Cortex (PFC) and Striatum (STR). The retrieval system is unified, returning both information and potential actions.
+Polywise implements a unified retrieval system that returns both **Knowledges** (information) and **Actions** (behaviors), mimicking the brain's dual-process theory.
 
 ```typescript
-// 1. Subscribe to the Slow System (PFC) for refined decisions
-poly.onAction(result => {
-	console.log('PFC updated decision:', result)
+// Returns both information and potential actions in a single pass
+const { knowledges, actions } = await poly.query({
+	query: 'What are the user preferences?',
+	recall_depth: 1
 })
 
-// 2. Unified Query (Returns both info and actions)
-const { result, cot } = await poly.query({
-	query: 'Detected system error',
-	cot_depth: 1 // Enable thought exploration
-})
-
-// result is an array of HybridSearchResult:
-// {
-//   id: number,
-//   content: string,
-//   type: 'info' | 'action', // Unified type
-//   source: 'memory' | 'external',
-//   rerankScore: number
-// }
+// knowledges[0] -> { content: '...', source: 'memory', combinedScore: 0.92 }
+// actions[0]    -> { content: '...', source: 'memory', combinedScore: 0.85 }
 ```
 
-- **React**: Instant stimulus-response based on "muscle memory" (Habitual Edges).
-- **Act**: Unified retrieval and asynchronous deep reasoning that kicks in after a reaction to refine or correct the initial response.
+#### 3. 🎯 **Habitual Reaction (The Fast Path)**
 
-#### 3. 🎯 **Context-Aware Retrieval**
-
-Instead of simple vector similarity, Polywise uses **spreading activation** internally during queries to explore the semantic neighborhood of a concept.
+Mimicking "muscle memory," Polywise can learn habits where specific stimuli trigger instant actions without deep reasoning.
 
 ```typescript
-// Query triggers internal activation spreading
-const { result, cot } = await poly.query({
-	query: 'How does the system handle memory?',
-	recall_depth: 2,
-	cot_depth: 1
+// Define a habit: Stimulus -> Action
+await poly.habituate({
+	stimulus: 'System error detected',
+	action_label: 'Trigger emergency evacuation',
+	weight: 1.0
 })
 
-// cot emits COTDepthResult events through ChainEmitter
+// Later, the same or similar stimulus triggers the action instantly
+const { actions } = await poly.query({ query: 'Error in system!' })
+// actions[0] will be 'Trigger emergency evacuation' if the habit weight is strong
+```
+
+#### 4. 🔭 **Chain of Thought (The Slow Path)**
+
+For complex queries, Polywise can explore its memory network iteratively, spreading activation to discover hidden connections.
+
+```typescript
+// Enable Chain of Thought (CoT) with cot_depth
+const { knowledges, actions, cot } = await poly.query({
+	query: 'How to optimize memory usage?',
+	cot_depth: 2
+})
+
+// Subscribe to the thinking process
 cot.on(event => {
-	console.log(`Depth ${event.depth}:`, event.results) // Each depth includes reranked info and actions
+	console.log(`Depth ${event.depth}: Found ${event.knowledges.length} insights`)
 })
 ```
-
-#### 4. 🌙 **Memory Consolidation**
-
-Polywise manages its own lifecycle. Maintenance tasks like "sleep" consolidation run automatically when the system is idle and yield to foreground tasks.
 
 ---
 
@@ -156,18 +162,55 @@ The Brain operates in states:
 
 ---
 
-## 🚀 Getting Started
+## 🛠️ Usage
+
+### 1. Initialize Submodules
+
+Ensure all submodules are properly initialized:
 
 ```bash
-# Install dependencies
-pnpm install
-
-# Run tests
-pnpm --filter polywise run test
-
-# Start development
-pnpm dev
+pnpm submodule:init
 ```
+
+### 2. Install Dependencies
+
+```bash
+pnpm install
+```
+
+### 3. Run Core Tests
+
+Verify the core memory engine:
+
+```bash
+pnpm --filter polywise test
+```
+
+### 4. Development
+
+Polywise runs as an Electron application. You need to start both the frontend and the desktop process:
+
+```bash
+# In one terminal, start the React frontend
+pnpm --filter app dev
+
+# In another terminal, start the Electron shell
+pnpm --filter desktop dev
+```
+
+### 5. Build
+
+To package the application for your platform:
+
+```bash
+# Build for macOS
+pnpm build:mac
+
+# Build for Windows
+pnpm build:win
+```
+
+---
 
 ## 💭 Philosophy
 
@@ -185,7 +228,17 @@ This project is inspired by the following research papers:
 
 ## 🙏 Credits
 
-Polywise is built on top of [PGlite](https://github.com/electric-sql/pglite), [React](https://react.dev/), [Electron](https://www.electronjs.org/), [tRPC](https://trpc.io/), [MobX](https://mobx.js.org/), [Tailwind CSS](https://tailwindcss.com/), [Hono](https://hono.dev/), [Rsbuild](https://rsbuild.dev/), and [Rslib](https://rslib.dev/).
+Polywise is built on the shoulders of these amazing projects:
+
+- 🐘 **[PGlite](https://github.com/electric-sql/pglite)** - Wasm-based PostgreSQL for local-first apps
+- ⚛️ **[React](https://react.dev/)** - Frontend UI library
+- 🖥️ **[Electron](https://www.electronjs.org/)** - Desktop application framework
+- 🔗 **[tRPC](https://trpc.io/)** - End-to-end typesafe APIs
+- 📦 **[MobX](https://mobx.js.org/)** - Simple, scalable state management
+- 🎨 **[Tailwind CSS](https://tailwindcss.com/)** - Utility-first CSS framework
+- 🚀 **[Hono](https://hono.dev/)** - Ultrafast web framework
+- 🛠️ **[Rsbuild](https://rsbuild.dev/)** - Next-generation build tool based on Rspack
+- 📚 **[Rslib](https://rslib.dev/)** - Library build tool powered by Rsbuild
 
 ## 📜 License
 
