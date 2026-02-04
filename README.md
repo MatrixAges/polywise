@@ -48,11 +48,26 @@ await poly.save({
 	content: 'User prefers TypeScript and works late at night.'
 })
 
-// Returns both information and potential actions in a single pass
+// Returns information, potential actions, and reranked metadata in a single pass
 // Query also respects class-level filters automatically
-const { knowledges, actions, metadatas } = await poly.query({
+const { knowledges, actions, metadata } = await poly.query({
 	query: 'What are the user preferences?'
 })
+```
+
+#### 2. ⚡ **Unified Retrieval (Fast & Slow)**
+
+Polywise implements a unified retrieval system that returns both **Knowledges** (information) and **Actions** (behaviors), mimicking the brain's dual-process theory.
+
+```typescript
+// Returns information, actions, and merged metadata in a single pass
+const { knowledges, actions, metadata } = await poly.query({
+	query: 'What are the user preferences?'
+})
+
+// knowledges[0] -> "..." (String)
+// actions[0]    -> "..." (String)
+// metadata       -> { links: ["..."], files: ["..."], desc: "..." }
 ```
 
 #### 2. ⚡ **Unified Retrieval (Fast & Slow)**
@@ -138,8 +153,8 @@ polywise/
 
 ### 🛠️ Key API Changes
 
-- **Polywise.query()**: Unified retrieval interface returning simplified `knowledges` and `actions` (Array<string>), along with merged `metadatas`.
-- **COTDepthResult**: Each depth in the Chain of Thought now returns simplified string arrays and corresponding metadata.
+- **Polywise.query()**: Unified retrieval interface returning simplified `knowledges` and `actions` (Array<string>), along with a single `metadata` object containing the most relevant links, files, and descriptions selected via reranking.
+- **COTDepthResult**: Each depth in the Chain of Thought now returns simplified string arrays and the most relevant metadata.
 - **Field Removal**: Internal fields like `rerankScore`, `combinedScore`, and `source` are removed from the output to provide a cleaner API.
 
 ### 🔄 State Machine

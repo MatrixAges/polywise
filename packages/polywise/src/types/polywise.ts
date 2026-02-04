@@ -138,13 +138,13 @@ export interface COTDepthResult {
 	query: string
 	knowledges: string[]
 	actions: string[]
-	metadatas: Metadata[]
+	metadata: Metadata
 }
 
 export interface FinalQueryResult {
 	knowledges: string[]
 	actions: string[]
-	metadatas: Metadata[]
+	metadata: Metadata
 	cot: any
 }
 

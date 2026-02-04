@@ -163,7 +163,7 @@ describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
 			expect(depths).toEqual([1, 2, 3])
 		})
 
-		test('should include metadatas in each depth result', async () => {
+		test('should include metadata in each depth result', async () => {
 			const received_events: any[] = []
 
 			const { cot } = await poly.query({
@@ -181,8 +181,8 @@ describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
 			await cot?.toPromise()
 
 			expect(received_events.length).toBe(2)
-			expect(Array.isArray(received_events[0].metadatas)).toBe(true)
-			expect(Array.isArray(received_events[1].metadatas)).toBe(true)
+			expect(typeof received_events[0].metadata).toBe('object')
+			expect(typeof received_events[1].metadata).toBe('object')
 		})
 
 		test('should build query progression with depth', async () => {

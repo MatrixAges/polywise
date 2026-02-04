@@ -96,14 +96,14 @@ await poly.save({
 Retrieve relevant information based on natural language or concepts:
 
 ```typescript
-const { knowledges, actions, metadatas, cot } = await poly.query({
+const { knowledges, actions, metadata, cot } = await poly.query({
 	query: 'How do qubits work?',
 	recall_depth: 2,
 	cot_depth: 1
 })
 
 console.log(knowledges) // Simplified knowledge strings
-console.log(metadatas) // Merged metadata (links, files, etc.)
+console.log(metadata) // Merged and reranked metadata (links, files, etc.)
 ```
 
 ## API Quick Reference

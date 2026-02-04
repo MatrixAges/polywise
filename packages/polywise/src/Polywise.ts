@@ -249,17 +249,15 @@ export default class Polywise {
 		const {
 			knowledges: k_strings,
 			actions: a_strings,
-			metadatas
-		} = this._processResults(initial_knowledges, initial_actions)
+			metadata
+		} = await this._processResults(query, initial_knowledges, initial_actions)
 
 		if (cot_depth <= 0) {
 			const result = {
 				knowledges: k_strings,
 				actions: a_strings,
-				metadatas,
-				cot:
-					(emitter.finish({ knowledges: k_strings, actions: a_strings, metadatas }) as any) ||
-					emitter
+				metadata,
+				cot: (emitter.finish({ knowledges: k_strings, actions: a_strings, metadata }) as any) || emitter
 			}
 
 			this.log.write(args, result)
@@ -288,7 +286,7 @@ export default class Polywise {
 		const result = {
 			knowledges: k_strings,
 			actions: a_strings,
-			metadatas,
+			metadata,
 			cot: emitter
 		}
 
@@ -570,11 +568,13 @@ export default class Polywise {
 	}
 
 	@catchError(function (this: Polywise, error: any, args: ExecuteCotArgs) {
-		const { emitter, initial_knowledges, initial_actions } = args
+		const { query, emitter, initial_knowledges, initial_actions } = args
 
 		if (this.isDbError(error)) {
 			if (emitter.isActiveStatus()) {
-				emitter.finish(this._processResults(initial_knowledges, initial_actions))
+				this._processResults(query, initial_knowledges, initial_actions).then(data => {
+					emitter.finish(data)
+				})
 			}
 
 			return true
@@ -583,7 +583,9 @@ export default class Polywise {
 		console.error('CoT Execution Error:', error)
 
 		if (emitter.isActiveStatus()) {
-			emitter.finish(this._processResults(initial_knowledges, initial_actions))
+			this._processResults(query, initial_knowledges, initial_actions).then(data => {
+				emitter.finish(data)
+			})
 		}
 	})
 	private async executeCot(args: ExecuteCotArgs) {
@@ -604,7 +606,7 @@ export default class Polywise {
 		} = args
 
 		if (!emitter.isActiveStatus() || current_depth > max_depth || !this.db) {
-			emitter.finish(this._processResults(initial_knowledges, initial_actions))
+			emitter.finish(await this._processResults(query, initial_knowledges, initial_actions))
 
 			return
 		}
@@ -715,7 +717,7 @@ export default class Polywise {
 		}
 	}
 
-	private emitCotResult(args: {
+	private async emitCotResult(args: {
 		emitter: ChainEmitter
 		current_depth: number
 		emerged_query: string
@@ -725,14 +727,18 @@ export default class Polywise {
 	}) {
 		const { emitter, current_depth, emerged_query, reranked_knowledges, reranked_actions } = args
 
-		const { knowledges, actions, metadatas } = this._processResults(reranked_knowledges, reranked_actions)
+		const { knowledges, actions, metadata } = await this._processResults(
+			emerged_query,
+			reranked_knowledges,
+			reranked_actions
+		)
 
 		const cot_result: COTDepthResult = {
 			depth: current_depth,
 			query: emerged_query,
 			knowledges,
 			actions,
-			metadatas
+			metadata
 		}
 
 		if (emitter.isActiveStatus()) {
@@ -758,9 +764,9 @@ export default class Polywise {
 		} = args
 
 		if (current_depth < max_depth && (initial_knowledges.length > 0 || initial_actions.length > 0)) {
-			setImmediate(() => {
+			setImmediate(async () => {
 				if (!this.db) {
-					emitter.finish(this._processResults(initial_knowledges, initial_actions))
+					emitter.finish(await this._processResults(query, initial_knowledges, initial_actions))
 
 					return
 				}
@@ -782,7 +788,9 @@ export default class Polywise {
 				})
 			})
 		} else {
-			emitter.finish(this._processResults(initial_knowledges, initial_actions))
+			this._processResults(query, initial_knowledges, initial_actions).then(data => {
+				emitter.finish(data)
+			})
 		}
 	}
 
@@ -880,30 +888,28 @@ export default class Polywise {
 		await this.queryRaw(sql.sql_strengthen_edges_batch, [STRENGTHEN_EDGE_WEIGHT, node_ids, node_ids])
 	}
 
-	private _processResults(knowledges: Knowledge[], actions: Action[]) {
+	private async _processResults(query: string, knowledges: Knowledge[], actions: Action[]) {
 		const k_strings = knowledges.map(k => k.content)
 		const a_strings = actions.map(a => a.content)
 
-		const metadatas: Metadata[] = []
+		const descs: string[] = []
+		const links: string[] = []
+		const files: string[] = []
+
 		const seen_links = new Set<string>()
 		const seen_files = new Set<string>()
-		const combined_metadata: Metadata = { links: [], files: [] }
 
-		const all_items = [...knowledges, ...actions]
-
-		for (const item of all_items) {
+		for (const item of [...knowledges, ...actions]) {
 			if (item.metadata) {
 				const m = item.metadata
 
-				if (m.desc && !combined_metadata.desc) {
-					combined_metadata.desc = m.desc
-				}
+				if (m.desc) descs.push(m.desc)
 
 				if (m.links) {
 					for (const link of m.links) {
 						if (!seen_links.has(link)) {
 							seen_links.add(link)
-							combined_metadata.links?.push(link)
+							links.push(link)
 						}
 					}
 				}
@@ -912,21 +918,40 @@ export default class Polywise {
 					for (const file of m.files) {
 						if (!seen_files.has(file)) {
 							seen_files.add(file)
-							combined_metadata.files?.push(file)
+							files.push(file)
 						}
 					}
 				}
 			}
 		}
 
-		if (combined_metadata.desc || combined_metadata.links?.length || combined_metadata.files?.length) {
-			metadatas.push(combined_metadata)
+		const metadata: Metadata = {}
+
+		if (descs.length > 0) {
+			const scores = await this.pipeline.rerank(query, descs)
+			const best_index = scores.length > 0 ? scores.sort((a, b) => b.score - a.score)[0].index : 0
+
+			metadata.desc = descs[best_index]
+		}
+
+		if (links.length > 0) {
+			const scores = await this.pipeline.rerank(query, links)
+			const sorted = scores.sort((a, b) => b.score - a.score).slice(0, 5)
+
+			metadata.links = sorted.map(s => links[s.index])
+		}
+
+		if (files.length > 0) {
+			const scores = await this.pipeline.rerank(query, files)
+			const sorted = scores.sort((a, b) => b.score - a.score).slice(0, 5)
+
+			metadata.files = sorted.map(s => files[s.index])
 		}
 
 		return {
 			knowledges: k_strings,
 			actions: a_strings,
-			metadatas
+			metadata
 		}
 	}
 

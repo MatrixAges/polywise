@@ -45,12 +45,12 @@ poly.setFilters({ idol_id: 'user_456' })
 // 保存情景记忆（文本内容）
 // 默认使用类成员变量中的 idol_id 和 root_ids 进行标记
 await poly.save({
-	content: '用户偏好 TypeScript 并且习惯在深夜工作。'
+	content: '用户偏好 TypeScript 并且习惯在深夜 work。'
 })
 
-// 单次查询即可同时获取信息和潜在的行为建议
+// 单次查询即可同时获取信息、潜在的行为建议以及合并筛选后的元数据
 // 查询也会自动应用类级别的筛选条件
-const { knowledges, actions, metadatas } = await poly.query({
+const { knowledges, actions, metadata } = await poly.query({
 	query: '用户的偏好是什么？'
 })
 ```
@@ -60,14 +60,14 @@ const { knowledges, actions, metadatas } = await poly.query({
 Polywise 实现了统一检索系统，模拟大脑的双重加工理论，同时返回 **Knowledges**（知识信息）和 **Actions**（行为建议）。
 
 ```typescript
-// 单次查询即可同时获取信息、行为建议以及合并后的元数据
-const { knowledges, actions, metadatas } = await poly.query({
+// 单次查询即可同时获取信息、行为建议以及合并筛选后的元数据
+const { knowledges, actions, metadata } = await poly.query({
 	query: '用户的偏好是什么？'
 })
 
 // knowledges[0] -> "..." (String)
 // actions[0]    -> "..." (String)
-// metadatas[0]  -> { links: ["..."], files: ["..."], desc: "..." }
+// metadata       -> { links: ["..."], files: ["..."], desc: "..." }
 ```
 
 #### 3. 🎯 **习惯性反应（快速路径）**
@@ -138,8 +138,8 @@ polywise/
 
 ### 🛠️ 关键 API 变更
 
-- **Polywise.query()**：统一检索接口，返回简化后的 `knowledges` 和 `actions` (Array<string>)，以及合并后的 `metadatas`。
-- **COTDepthResult**：思维链的每个深度现在返回简化后的字符串数组和对应的元数据。
+- **Polywise.query()**：统一检索接口，返回简化后的 `knowledges` 和 `actions` (Array<string>)，以及通过 rerank 筛选后的单个 `metadata` 对象。
+- **COTDepthResult**：思维链的每个深度现在返回简化后的字符串数组和最相关的元数据对象。
 - **字段移除**：输出中移除了 `rerankScore`、`combinedScore`、`source` 等内部细节字段，仅保留核心内容。
 
 ### 🔄 状态机
