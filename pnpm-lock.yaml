@@ -479,6 +479,9 @@ importers:
       await-to-js:
         specifier: ^3.0.0
         version: 3.0.0
+      dayjs:
+        specifier: 'catalog:'
+        version: 1.11.19
       ofetch:
         specifier: ^1.4.1
         version: 1.5.1
