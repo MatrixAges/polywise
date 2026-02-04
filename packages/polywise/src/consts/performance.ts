@@ -24,6 +24,4 @@ export const RERANK_SCORE_WEIGHT = 0.6
 export const RELEVANCE_SCORE_WEIGHT = 0.4
 export const STIMULATION_MAX = 0.5
 export const STIMULATION_MIN = 0.05
-export const HABIT_LEARNING_WEIGHT = 0.9
-export const HABIT_THRESHOLD_LOW = 0.1
 export const STRENGTHEN_EDGE_WEIGHT = 0.1

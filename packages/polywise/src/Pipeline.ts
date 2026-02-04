@@ -201,9 +201,7 @@ export default class Pipeline {
 	})
 	async loadEmbeddingModel() {
 		if (this.embedding_pipeline) return this.embedding_pipeline
-
 		if (this.embedding_promise) return this.embedding_promise
-
 		if (this.embedding_config.type !== 'local') return null
 
 		const { model, dtype } = this.embedding_config
@@ -222,9 +220,7 @@ export default class Pipeline {
 	})
 	async loadRerankerModel() {
 		if (this.reranker_pipeline) return this.reranker_pipeline
-
 		if (this.reranker_promise) return this.reranker_promise
-
 		if (this.reranker_config.type !== 'local') return null
 
 		const { model, dtype } = this.reranker_config

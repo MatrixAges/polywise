@@ -40,16 +40,12 @@ import {
 	DEFAULT_NODE_THRESHOLD,
 	DEFAULT_EDGE_WEIGHT,
 	SNAPSHOT_WEIGHT_THRESHOLD,
-	MEMORY_RECALL_INTENSITY,
-	HABIT_REACTION_THRESHOLD,
-	HABIT_LEARNING_WEIGHT,
-	HABIT_THRESHOLD_LOW
+	MEMORY_RECALL_INTENSITY
 } from './consts'
 
 import type {
 	AddNodeArgs,
 	ConnectArgs,
-	COTDepthResult,
 	Edge,
 	Node,
 	PolywiseArgs,
@@ -62,10 +58,8 @@ import type {
 	StrengthenRelatedEdgesArgs,
 	Knowledge,
 	Action,
-	AggregateResultsArgs,
 	FiltersArgs,
-	FinalQueryResult,
-	Metadata
+	FinalQueryResult
 } from './types'
 
 @singleton()
