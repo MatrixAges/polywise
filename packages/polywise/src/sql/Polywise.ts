@@ -60,7 +60,11 @@ export const sql_get_snapshot_edges = (weight_threshold: number) => `
   LIMIT 500
 `
 
-export const sql_process_article = `INSERT INTO ${SCHEMA_KNOWLEDGE}.articles (content) VALUES ($1) RETURNING *`
+export const sql_process_article = `
+  INSERT INTO ${SCHEMA_KNOWLEDGE}.articles (content, idol_id, root_ids, metrics_ids) 
+  VALUES ($1, $2, $3, $4) 
+  RETURNING *
+`
 
 export const sql_search_articles_by_text = `
   SELECT id, content, created_at,

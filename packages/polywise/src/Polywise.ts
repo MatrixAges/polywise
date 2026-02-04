@@ -356,7 +356,12 @@ export default class Polywise {
 			metrics_ids = this.metrics_ids
 		} = args
 
-		const res = (await this.queryRaw(sql.sql_process_article, [content])) as { id: number }[]
+		const res = (await this.queryRaw(sql.sql_process_article, [
+			content,
+			idol_id ?? null,
+			root_ids ?? null,
+			metrics_ids ?? null
+		])) as { id: number }[]
 
 		const aid = article_id ?? res[0].id
 

@@ -5,7 +5,7 @@ import validateMigrationsFn from './validateMigrations'
 
 import type { Migration } from '../types'
 
-export const CURRENT_SCHEMA_VERSION = 5
+export const CURRENT_SCHEMA_VERSION = 6
 
 export const migrations: Migration[] = [
 	{
@@ -73,6 +73,19 @@ export const migrations: Migration[] = [
 			await exec([
 				`DROP INDEX IF EXISTS idx_article_content_gin;`,
 				sql_schema.sql_create_index_article_content_gin
+			])
+		}
+	},
+	{
+		version: 6,
+		description: 'Add context columns to articles: idol_id, root_ids, metrics_ids',
+		up: async exec => {
+			await exec([
+				`ALTER TABLE ${SCHEMA_KNOWLEDGE}.articles ADD COLUMN IF NOT EXISTS idol_id TEXT;`,
+				`ALTER TABLE ${SCHEMA_KNOWLEDGE}.articles ADD COLUMN IF NOT EXISTS root_ids TEXT[] DEFAULT '{}';`,
+				`ALTER TABLE ${SCHEMA_KNOWLEDGE}.articles ADD COLUMN IF NOT EXISTS metrics_ids TEXT[] DEFAULT '{}';`,
+				`CREATE INDEX IF NOT EXISTS idx_articles_idol ON ${SCHEMA_KNOWLEDGE}.articles(idol_id);`,
+				`CREATE INDEX IF NOT EXISTS idx_articles_roots ON ${SCHEMA_KNOWLEDGE}.articles USING GIN(root_ids);`
 			])
 		}
 	}

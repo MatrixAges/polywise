@@ -28,7 +28,7 @@ export default class Article {
 	async process(content: string) {
 		if (!this.db) return null
 
-		const res = await this.db.query<ArticleEntity>(sql.sql_process_article, [content])
+		const res = await this.db.query<ArticleEntity>(sql.sql_process_article, [content, null, null, null])
 
 		if (res.rows.length === 0) return null
 
