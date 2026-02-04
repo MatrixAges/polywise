@@ -137,12 +137,6 @@ polywise/
 4. ⚡ **刺激**：外部 input 激活节点并传播
 5. 🔄 **习惯化**：成功的“行动”决策可被自动转化为“反应”习惯
 
-### 🛠️ 关键 API 变更
-
-- **Polywise.query()**：统一检索接口，返回简化后的 `knowledges` 和 `actions` (Array<string>)，以及通过 rerank 筛选后的单个 `metadata` 对象。
-- **COTDepthResult**：思维链的每个深度现在返回简化后的字符串数组和最相关的元数据对象。
-- **字段移除**：输出中移除了 `rerankScore`、`combinedScore`、`source` 等内部细节字段，仅保留核心内容。
-
 ### 🔄 状态机
 
 Brain 在以下状态中运行：

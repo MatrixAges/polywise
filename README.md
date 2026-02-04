@@ -152,12 +152,6 @@ polywise/
 4. ⚡ **Stimulation**: External input activates nodes and spreads
 5. 🔄 **Habituation**: Successful "Act" decisions can be automated into "React" habits
 
-### 🛠️ Key API Changes
-
-- **Polywise.query()**: Unified retrieval interface returning simplified `knowledges` and `actions` (Array<string>), along with a single `metadata` object containing the most relevant links, files, and descriptions selected via reranking.
-- **COTDepthResult**: Each depth in the Chain of Thought now returns simplified string arrays and the most relevant metadata.
-- **Field Removal**: Internal fields like `rerankScore`, `combinedScore`, and `source` are removed from the output to provide a cleaner API.
-
 ### 🔄 State Machine
 
 The Brain operates in states:

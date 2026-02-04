@@ -893,9 +893,9 @@ export default class Polywise {
 		const descs: string[] = []
 		const links: string[] = []
 		const files: string[] = []
-
 		const seen_links = new Set<string>()
 		const seen_files = new Set<string>()
+		const metadata: Metadata = {}
 
 		for (const item of [...knowledges, ...actions]) {
 			if (item.metadata) {
@@ -923,28 +923,52 @@ export default class Polywise {
 			}
 		}
 
-		const metadata: Metadata = {}
+		const promises: Promise<void>[] = []
 
 		if (descs.length > 0) {
-			const scores = await this.pipeline.rerank(query, descs)
-			const best_index = scores.length > 0 ? scores.sort((a, b) => b.score - a.score)[0].index : 0
+			promises.push(
+				(async () => {
+					const scores = (await this.pipeline.rerank(query, descs)) as {
+						index: number
+						score: number
+					}[]
+					const best_index =
+						scores.length > 0 ? scores.sort((a, b) => b.score - a.score)[0].index : 0
 
-			metadata.desc = descs[best_index]
+					metadata.desc = descs[best_index]
+				})()
+			)
 		}
 
 		if (links.length > 0) {
-			const scores = await this.pipeline.rerank(query, links)
-			const sorted = scores.sort((a, b) => b.score - a.score).slice(0, 5)
+			promises.push(
+				(async () => {
+					const scores = (await this.pipeline.rerank(query, links)) as {
+						index: number
+						score: number
+					}[]
+					const sorted = scores.sort((a, b) => b.score - a.score).slice(0, 5)
 
-			metadata.links = sorted.map(s => links[s.index])
+					metadata.links = sorted.map(s => links[s.index])
+				})()
+			)
 		}
 
 		if (files.length > 0) {
-			const scores = await this.pipeline.rerank(query, files)
-			const sorted = scores.sort((a, b) => b.score - a.score).slice(0, 5)
+			promises.push(
+				(async () => {
+					const scores = (await this.pipeline.rerank(query, files)) as {
+						index: number
+						score: number
+					}[]
+					const sorted = scores.sort((a, b) => b.score - a.score).slice(0, 5)
 
-			metadata.files = sorted.map(s => files[s.index])
+					metadata.files = sorted.map(s => files[s.index])
+				})()
+			)
 		}
+
+		await Promise.all(promises)
 
 		return {
 			knowledges: k_strings,
