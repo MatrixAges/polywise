@@ -43,6 +43,8 @@ Note: The code must be concise, without any irrelevant template code. Only reply
 
 - All variable names use Rust-style snake_case.
 - All functions use camelCase (if it's a sub-component alias within a component, use PascalCase).
+- **No Underscore Prefix**: Function names (including private and helper methods) MUST NOT start with an underscore (`_`).
+- **Atomic Functions**: Functions should be kept concise. If a function's logic exceeds 40 lines, it MUST be split into smaller, atomic methods or extracted into utility functions.
 - All names should be professional and concise, not too long.
 - Code line break logic: Use blank lines to separate code context for better readability; use a blank line if the execution style of the previous and next statements differs.
 

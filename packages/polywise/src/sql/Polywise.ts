@@ -209,6 +209,4 @@ export const sql_get_all_nodes = `SELECT id, label, x, y, activation, potential,
 
 export const sql_check_articles_table_exists = `SELECT COUNT(*) as count FROM information_schema.tables WHERE table_schema = '${SCHEMA_KNOWLEDGE}' AND table_name = 'articles'`
 
-export const sql_create_extension_vector = 'CREATE EXTENSION IF NOT EXISTS vector;'
-
 export const sql_update_article_embedding = `UPDATE ${SCHEMA_KNOWLEDGE}.article_embeddings SET embedding = $1 WHERE article_id = $2`
