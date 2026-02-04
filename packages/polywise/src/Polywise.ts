@@ -13,7 +13,6 @@ import { formatNodeContent, formatSourceInfo, formatPerceiveQuery, SCHEMA_BRAIN,
 
 import type {
 	AddNodeArgs,
-	AggregatedCandidate,
 	ConnectArgs,
 	COTDepthResult,
 	Edge,
@@ -33,7 +32,8 @@ import type {
 	ContextResult,
 	HabituateArgs,
 	Knowledge,
-	Action
+	Action,
+	AggregateResultsArgs
 } from './types'
 
 @singleton()
@@ -149,35 +149,13 @@ export default class Polywise {
 
 			const query_embedding = (await this.pipeline.embed(query)) as number[]
 
-			const initial_results = await this.executeSingleSearch({
+			const { knowledges: initial_knowledges, actions: initial_actions } = await this.executeSingleSearch({
 				query,
 				recall_depth,
 				search_limit,
 				rerank_limit,
 				stimulate_on_recall
 			})
-
-			const initial_knowledges = initial_results
-				.filter(r => r.type === 'info')
-				.map(r => {
-					const { type, relevance_score, memory_strength, ...rest } = r
-					return {
-						...rest,
-						relevanceScore: relevance_score,
-						memoryStrength: memory_strength
-					} as Knowledge
-				})
-
-			const initial_actions = initial_results
-				.filter(r => r.type === 'action')
-				.map(r => {
-					const { type, relevance_score, memory_strength, ...rest } = r
-					return {
-						...rest,
-						relevanceScore: relevance_score,
-						memoryStrength: memory_strength
-					} as Action
-				})
 
 			if (query_embedding && this.db) {
 				const nearest_stimulus = await this.query_raw<any[]>(sql.sql_find_nearest_node, [
@@ -234,6 +212,8 @@ export default class Polywise {
 				}
 			}
 
+			const history_ids = new Set([...initial_knowledges, ...initial_actions].map(r => r.id))
+
 			this.executeCot({
 				query,
 				current_depth: 1,
@@ -242,10 +222,10 @@ export default class Polywise {
 				search_limit,
 				rerank_limit,
 				stimulate_on_recall,
-				initial_knowledges: initial_knowledges,
-				initial_actions: initial_actions,
+				initial_knowledges,
+				initial_actions,
 				emitter,
-				history_ids: new Set(initial_results.map(r => r.id))
+				history_ids
 			})
 
 			return { knowledges: initial_knowledges, actions: initial_actions, cot: emitter }
@@ -492,9 +472,19 @@ export default class Polywise {
 			? await this.query_raw<any[]>(sql.sql_find_nearest_node, [`[${query_embedding.join(',')}]`])
 			: []
 
-		const aggregated = await this.aggregateResults(recall_result, search_results, habits)
+		const { knowledges, actions } = await this.aggregateResults({
+			recall_result,
+			search_results,
+			habits
+		})
 
-		return await this.rerankResults(query, aggregated, rerank_limit)
+		const reranked_knowledges = await this.rerankKnowledges(query, knowledges, rerank_limit)
+		const reranked_actions = await this.rerankActions(query, actions, rerank_limit)
+
+		return {
+			knowledges: reranked_knowledges,
+			actions: reranked_actions
+		}
 	}
 
 	private async executeCot(args: ExecuteCotArgs) {
@@ -547,45 +537,30 @@ export default class Polywise {
 				? await this.query_raw<any[]>(sql.sql_find_nearest_node, [`[${query_embedding.join(',')}]`])
 				: []
 
-			const emerged_aggregated = (
-				await this.aggregateResults(emerged_recall_result, emerged_search_results, emerged_habits)
-			).filter(c => !history_ids.has(c.id))
+			const { knowledges: emerged_knowledges, actions: emerged_actions } = await this.aggregateResults({
+				recall_result: emerged_recall_result,
+				search_results: emerged_search_results,
+				habits: emerged_habits
+			})
 
-			const emerged_final_results = await this.rerankResults(
+			const filtered_knowledges = emerged_knowledges.filter(k => !history_ids.has(k.id))
+			const filtered_actions = emerged_actions.filter(a => !history_ids.has(a.id))
+
+			const reranked_knowledges = await this.rerankKnowledges(
 				emerged_query,
-				emerged_aggregated,
+				filtered_knowledges,
 				rerank_limit
 			)
+			const reranked_actions = await this.rerankActions(emerged_query, filtered_actions, rerank_limit)
 
-			emerged_final_results.forEach(r => history_ids.add(r.id))
-
-			const knowledges = emerged_final_results
-				.filter(r => r.type === 'info')
-				.map(r => {
-					const { type, relevance_score, memory_strength, ...rest } = r
-					return {
-						...rest,
-						relevanceScore: relevance_score,
-						memoryStrength: memory_strength
-					} as Knowledge
-				})
-
-			const actions = emerged_final_results
-				.filter(r => r.type === 'action')
-				.map(r => {
-					const { type, relevance_score, memory_strength, ...rest } = r
-					return {
-						...rest,
-						relevanceScore: relevance_score,
-						memoryStrength: memory_strength
-					} as Action
-				})
+			reranked_knowledges.forEach(r => history_ids.add(r.id))
+			reranked_actions.forEach(r => history_ids.add(r.id))
 
 			const cot_result: COTDepthResult = {
 				depth: current_depth,
 				query: emerged_query,
-				knowledges,
-				actions,
+				knowledges: reranked_knowledges,
+				actions: reranked_actions,
 				emerged_nodes: emerged_recall_result.nodes.map(n => n.id),
 				emerged_edges: []
 			}
@@ -594,7 +569,7 @@ export default class Polywise {
 				emitter.emit(cot_result)
 			}
 
-			if (current_depth < max_depth && emerged_final_results.length > 0) {
+			if (current_depth < max_depth && (reranked_knowledges.length > 0 || reranked_actions.length > 0)) {
 				setImmediate(() => {
 					if (!this.db) {
 						emitter.finish()
@@ -610,8 +585,8 @@ export default class Polywise {
 						search_limit,
 						rerank_limit,
 						stimulate_on_recall,
-						initial_knowledges: knowledges,
-						initial_actions: actions,
+						initial_knowledges: reranked_knowledges,
+						initial_actions: reranked_actions,
 						emitter,
 						history_ids
 					})
@@ -687,12 +662,12 @@ export default class Polywise {
 		await this.query_raw(sql.sql_strengthen_edges_batch, [0.1, node_ids, node_ids])
 	}
 
-	private async aggregateResults(
-		recall_result: MemoryRecallResult,
-		search_results: SearchResult[],
-		habits: any[] = []
-	) {
-		const candidates: AggregatedCandidate[] = []
+	private async aggregateResults(args: AggregateResultsArgs) {
+		const { recall_result, search_results, habits = [] } = args
+
+		const knowledges: Knowledge[] = []
+		const actions: Action[] = []
+
 		const stimulated_node_ids = new Set(recall_result.stimulated_nodes)
 		const node_potential_map = new Map<number, number>()
 
@@ -708,13 +683,13 @@ export default class Polywise {
 				const strong_habits = await this.query_raw<any[]>(sql.sql_find_strongest_habit, [stimulus.id])
 
 				for (const h of strong_habits) {
-					candidates.push({
+					actions.push({
 						id: h.target_id,
 						content: h.action,
-						type: 'action',
 						rerankScore: h.weight,
-						relevance_score: h.weight * 1.5,
-						memory_strength: h.weight,
+						relevanceScore: h.weight * 1.5,
+						memoryStrength: h.weight,
+						combinedScore: 0,
 						source: 'memory',
 						stimulated: true,
 						metadata: h.action_metadata || {}
@@ -730,13 +705,13 @@ export default class Polywise {
 				if (article) {
 					const memory_strength = this.calculateMemoryStrength(context)
 
-					candidates.push({
+					knowledges.push({
 						id: article.id,
 						content: article.content,
-						type: 'info',
 						rerankScore: article.rerankScore,
-						relevance_score: 1.5,
-						memory_strength,
+						relevanceScore: 1.5,
+						memoryStrength: memory_strength,
+						combinedScore: 0,
 						source: 'memory',
 						stimulated: true,
 						metadata: (article as any).metadata
@@ -746,17 +721,17 @@ export default class Polywise {
 		}
 
 		for (const result of search_results) {
-			if (!candidates.find(c => c.id === result.id)) {
+			if (!knowledges.find(c => c.id === result.id)) {
 				const is_stimulated = stimulated_node_ids.has(result.id)
 				const memory_strength = node_potential_map.get(result.id) ?? 0
 
-				candidates.push({
+				knowledges.push({
 					id: result.id,
 					content: result.content,
-					type: 'info',
 					rerankScore: result.rerankScore,
-					relevance_score: result.rerankScore,
-					memory_strength,
+					relevanceScore: result.rerankScore,
+					memoryStrength: memory_strength,
+					combinedScore: 0,
 					source: is_stimulated ? 'memory' : 'external',
 					stimulated: is_stimulated,
 					metadata: (result as any).metadata
@@ -765,49 +740,55 @@ export default class Polywise {
 		}
 
 		const high_potential_nodes = recall_result.nodes
-			.filter(n => n.potential > 0.5 && !candidates.find(c => c.id === n.id))
+			.filter(
+				n =>
+					n.potential > 0.5 &&
+					!knowledges.find(k => k.id === n.id) &&
+					!actions.find(a => a.id === n.id)
+			)
 			.slice(0, 5)
 
 		for (const node of high_potential_nodes) {
-			candidates.push({
+			const item = {
 				id: node.id,
 				content: formatNodeContent(node.label, node.metadata?.desc),
-				type: node.is_action ? 'action' : 'info',
 				rerankScore: node.potential,
-				relevance_score: node.potential * 0.8,
-				memory_strength: node.potential,
-				source: 'implicit',
+				relevanceScore: node.potential * 0.8,
+				memoryStrength: node.potential,
+				combinedScore: 0,
+				source: 'implicit' as any,
 				stimulated: true,
 				metadata: node.metadata
-			})
+			}
+
+			if (node.is_action) {
+				actions.push(item)
+			} else {
+				knowledges.push(item)
+			}
 		}
 
-		return candidates
+		return { knowledges, actions }
 	}
 
 	private calculateMemoryStrength(context: { relevance_score?: number }) {
 		return (context.relevance_score ?? 1.0) * 0.5 + 0.5
 	}
 
-	private async rerankResults(
-		query: string,
-		candidates: AggregatedCandidate[],
-		limit: number
-	): Promise<AggregatedCandidate[]> {
+	private async rerankKnowledges(query: string, candidates: Knowledge[], limit: number): Promise<Knowledge[]> {
 		if (candidates.length === 0) return []
 
 		const documents = candidates.map(c => {
-			const source_info = formatSourceInfo(c.source, c.stimulated, c.memory_strength)
-			const type_info = `[Type: ${c.type}]`
-			return `${source_info} ${type_info}\n${c.content}`
+			const source_info = formatSourceInfo(c.source, c.stimulated, c.memoryStrength)
+			return `${source_info} [Type: info]\n${c.content}`
 		})
 
 		const rerank_scores = await this.pipeline.rerank(query, documents)
 
-		const results: AggregatedCandidate[] = candidates.map((candidate, index) => ({
+		const results: Knowledge[] = candidates.map((candidate, index) => ({
 			...candidate,
 			rerankScore: rerank_scores[index]?.score ?? 0,
-			combinedScore: (rerank_scores[index]?.score ?? 0) * 0.6 + candidate.relevance_score * 0.4
+			combinedScore: (rerank_scores[index]?.score ?? 0) * 0.6 + candidate.relevanceScore * 0.4
 		}))
 
 		const sorted_results = results.sort((a: any, b: any) => b.combinedScore - a.combinedScore).slice(0, limit)
@@ -817,7 +798,30 @@ export default class Polywise {
 		return sorted_results
 	}
 
-	private async stimulateByRanking(results: AggregatedCandidate[]) {
+	private async rerankActions(query: string, candidates: Action[], limit: number): Promise<Action[]> {
+		if (candidates.length === 0) return []
+
+		const documents = candidates.map(c => {
+			const source_info = formatSourceInfo(c.source, c.stimulated, c.memoryStrength)
+			return `${source_info} [Type: action]\n${c.content}`
+		})
+
+		const rerank_scores = await this.pipeline.rerank(query, documents)
+
+		const results: Action[] = candidates.map((candidate, index) => ({
+			...candidate,
+			rerankScore: rerank_scores[index]?.score ?? 0,
+			combinedScore: (rerank_scores[index]?.score ?? 0) * 0.6 + candidate.relevanceScore * 0.4
+		}))
+
+		const sorted_results = results.sort((a: any, b: any) => b.combinedScore - a.combinedScore).slice(0, limit)
+
+		await this.stimulateByRanking(sorted_results)
+
+		return sorted_results
+	}
+
+	private async stimulateByRanking(results: (Knowledge | Action)[]) {
 		if (results.length === 0) return
 
 		const max_stimulation = 0.5

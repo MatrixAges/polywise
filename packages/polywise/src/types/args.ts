@@ -1,7 +1,7 @@
 import type { PGlite } from '@electric-sql/pglite'
 import type Polywise from '../Polywise'
 import type { ChainEmitter } from '../utils'
-import type { Action, Knowledge, Metadata, ReactResult, Triple } from './polywise'
+import type { Action, Knowledge, MemoryRecallResult, Metadata, Triple } from './polywise'
 
 export interface BrainArgs {
 	poly: Polywise
@@ -156,16 +156,10 @@ export interface QueryArgs {
 	habit_threshold?: number
 }
 
-export interface AggregatedCandidate {
-	id: number
-	content: string
-	type: 'info' | 'action'
-	rerankScore: number
-	relevance_score: number
-	memory_strength: number
-	source: 'memory' | 'external' | 'implicit'
-	stimulated: boolean
-	metadata?: Metadata
+export interface AggregateResultsArgs {
+	recall_result: MemoryRecallResult
+	search_results: SearchResult[]
+	habits?: any[]
 }
 
 // Optimized parameter interface definition, ensuring variables come before functions
