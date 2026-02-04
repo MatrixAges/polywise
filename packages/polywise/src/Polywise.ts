@@ -250,7 +250,7 @@ export default class Polywise {
 			knowledges: k_strings,
 			actions: a_strings,
 			metadata
-		} = await this._processResults(query, initial_knowledges, initial_actions)
+		} = await this.processResults(query, initial_knowledges, initial_actions)
 
 		if (cot_depth <= 0) {
 			const result = {
@@ -572,7 +572,7 @@ export default class Polywise {
 
 		if (this.isDbError(error)) {
 			if (emitter.isActiveStatus()) {
-				this._processResults(query, initial_knowledges, initial_actions).then(data => {
+				this.processResults(query, initial_knowledges, initial_actions).then(data => {
 					emitter.finish(data)
 				})
 			}
@@ -583,7 +583,7 @@ export default class Polywise {
 		console.error('CoT Execution Error:', error)
 
 		if (emitter.isActiveStatus()) {
-			this._processResults(query, initial_knowledges, initial_actions).then(data => {
+			this.processResults(query, initial_knowledges, initial_actions).then(data => {
 				emitter.finish(data)
 			})
 		}
@@ -606,7 +606,7 @@ export default class Polywise {
 		} = args
 
 		if (!emitter.isActiveStatus() || current_depth > max_depth || !this.db) {
-			emitter.finish(await this._processResults(query, initial_knowledges, initial_actions))
+			emitter.finish(await this.processResults(query, initial_knowledges, initial_actions))
 
 			return
 		}
@@ -725,17 +725,15 @@ export default class Polywise {
 		reranked_actions: Action[]
 		emerged_recall_result: any
 	}) {
-		const { emitter, current_depth, emerged_query, reranked_knowledges, reranked_actions } = args
+		const { emitter, emerged_query, reranked_knowledges, reranked_actions } = args
 
-		const { knowledges, actions, metadata } = await this._processResults(
+		const { knowledges, actions, metadata } = await this.processResults(
 			emerged_query,
 			reranked_knowledges,
 			reranked_actions
 		)
 
 		const cot_result: COTDepthResult = {
-			depth: current_depth,
-			query: emerged_query,
 			knowledges,
 			actions,
 			metadata
@@ -766,7 +764,7 @@ export default class Polywise {
 		if (current_depth < max_depth && (initial_knowledges.length > 0 || initial_actions.length > 0)) {
 			setImmediate(async () => {
 				if (!this.db) {
-					emitter.finish(await this._processResults(query, initial_knowledges, initial_actions))
+					emitter.finish(await this.processResults(query, initial_knowledges, initial_actions))
 
 					return
 				}
@@ -788,7 +786,7 @@ export default class Polywise {
 				})
 			})
 		} else {
-			this._processResults(query, initial_knowledges, initial_actions).then(data => {
+			this.processResults(query, initial_knowledges, initial_actions).then(data => {
 				emitter.finish(data)
 			})
 		}
@@ -888,7 +886,7 @@ export default class Polywise {
 		await this.queryRaw(sql.sql_strengthen_edges_batch, [STRENGTHEN_EDGE_WEIGHT, node_ids, node_ids])
 	}
 
-	private async _processResults(query: string, knowledges: Knowledge[], actions: Action[]) {
+	private async processResults(query: string, knowledges: Knowledge[], actions: Action[]) {
 		const k_strings = knowledges.map(k => k.content)
 		const a_strings = actions.map(a => a.content)
 

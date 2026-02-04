@@ -134,8 +134,6 @@ export interface Action {
 }
 
 export interface COTDepthResult {
-	depth: number
-	query: string
 	knowledges: string[]
 	actions: string[]
 	metadata: Metadata

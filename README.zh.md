@@ -94,7 +94,8 @@ const { knowledges, actions, cot } = await poly.query({
 
 // 订阅思考过程
 cot.on(event => {
-	console.log(`深度 ${event.depth}: 发现了 ${event.knowledges.length} 条见解`)
+	console.log(`发现了 ${event.knowledges.length} 条见解`)
+	console.log(`最相关描述: ${event.metadata.desc}`)
 })
 ```
 

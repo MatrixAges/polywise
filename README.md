@@ -109,7 +109,8 @@ const { knowledges, actions, cot } = await poly.query({
 
 // Subscribe to the thinking process
 cot.on(event => {
-	console.log(`Depth ${event.depth}: Found ${event.knowledges.length} insights`)
+	console.log(`Found ${event.knowledges.length} insights`)
+	console.log(`Top Description: ${event.metadata.desc}`)
 })
 ```
 
