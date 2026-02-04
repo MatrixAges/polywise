@@ -64,8 +64,7 @@ Polywise implements a unified retrieval system that returns both **Knowledges** 
 ```typescript
 // Returns both information and potential actions in a single pass
 const { knowledges, actions } = await poly.query({
-	query: 'What are the user preferences?',
-	recall_depth: 1
+	query: 'What are the user preferences?'
 })
 
 // knowledges[0] -> { content: '...', source: 'memory', combinedScore: 0.92 }
