@@ -27,7 +27,7 @@ export default class Log {
 		}
 	}
 
-	write(input: Record<string, unknown>, output: Record<string, unknown>) {
+	write(input: object, output: object) {
 		if (!this.log_dir) return
 
 		const timestamp = this.getTimestamp()
@@ -66,12 +66,7 @@ export default class Log {
 		return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`
 	}
 
-	private writeLog(args: {
-		timestamp: string
-		input: Record<string, unknown>
-		output: Record<string, unknown>
-		date: string
-	}) {
+	private writeLog(args: { timestamp: string; input: object; output: object; date: string }) {
 		const { timestamp, input, output, date } = args
 		const content = `${timestamp} [INPUT]\n${JSON.stringify(input)}\n\n${timestamp} [OUTPUT]\n${JSON.stringify(output)}\n`
 		const file_path = join(this.log_dir, `${date}.log`)
@@ -79,16 +74,13 @@ export default class Log {
 		writeFileSync(file_path, content, { flag: 'a' })
 	}
 
-	private writeJson(args: {
-		timestamp: string
-		input: Record<string, unknown>
-		output: Record<string, unknown>
-		date: string
-	}) {
+	private writeJson(args: { timestamp: string; input: object; output: object; date: string }) {
 		const { timestamp, input, output, date } = args
 		const entry = { timestamp, input, output }
 		const file_path = join(this.log_dir, `${date}.json`)
 
 		writeFileSync(file_path, JSON.stringify(entry) + '\n', { flag: 'a' })
 	}
+
+	off() {}
 }

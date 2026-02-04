@@ -1166,7 +1166,6 @@ export default class Polywise {
 	}
 
 	async off() {
-		this.log?.off()
 		this.brain?.off()
 		this.article?.off()
 		this.pipeline?.off()
