@@ -4,7 +4,7 @@
 
 # <p align="center">Polywise</p>
 
-<p align="center"><strong>Agentic memory engine for AI</strong></p>
+<p align="center"><strong>Agentic Memory Engine for AI</strong></p>
 
 ###### <p align="center">Build with AI, Build for AI</p>
 
