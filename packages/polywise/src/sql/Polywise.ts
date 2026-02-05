@@ -98,8 +98,8 @@ export const sql_upsert_node = `
     embedding = COALESCE(EXCLUDED.embedding, ${SCHEMA_BRAIN}.nodes.embedding), 
     is_action = EXCLUDED.is_action,
     idol_id = COALESCE(EXCLUDED.idol_id, ${SCHEMA_BRAIN}.nodes.idol_id),
-    root_ids = CASE WHEN EXCLUDED.root_ids IS NOT NULL THEN (SELECT ARRAY(SELECT DISTINCT unnest(${SCHEMA_BRAIN}.nodes.root_ids || EXCLUDED.root_ids))) ELSE ${SCHEMA_BRAIN}.nodes.root_ids END,
-    metrics_ids = CASE WHEN EXCLUDED.metrics_ids IS NOT NULL THEN (SELECT ARRAY(SELECT DISTINCT unnest(${SCHEMA_BRAIN}.nodes.metrics_ids || EXCLUDED.metrics_ids))) ELSE ${SCHEMA_BRAIN}.nodes.metrics_ids END,
+    root_ids = CASE WHEN EXCLUDED.root_ids IS NOT NULL THEN (SELECT ARRAY(SELECT DISTINCT unnest(COALESCE(${SCHEMA_BRAIN}.nodes.root_ids, '{}') || EXCLUDED.root_ids))) ELSE ${SCHEMA_BRAIN}.nodes.root_ids END,
+    metrics_ids = CASE WHEN EXCLUDED.metrics_ids IS NOT NULL THEN (SELECT ARRAY(SELECT DISTINCT unnest(COALESCE(${SCHEMA_BRAIN}.nodes.metrics_ids, '{}') || EXCLUDED.metrics_ids))) ELSE ${SCHEMA_BRAIN}.nodes.metrics_ids END,
     updated_at = CURRENT_TIMESTAMP;
 `
 
@@ -148,8 +148,8 @@ export const sql_inject_triples_update_edge = (
     decay_resistance = GREATEST(decay_resistance, ${decay_resistance}),
     weight = LEAST(weight + ${weight}, 5.0),
     idol_id = COALESCE(${idol_id ? `'${idol_id}'` : 'NULL'}, idol_id),
-    root_ids = COALESCE(${root_ids && root_ids.length > 0 ? `ARRAY[${root_ids.map(id => `'${id}'`).join(',')}]` : 'NULL'}, root_ids),
-    metrics_ids = COALESCE(${metrics_ids && metrics_ids.length > 0 ? `ARRAY[${metrics_ids.map(id => `'${id}'`).join(',')}]` : 'NULL'}, metrics_ids),
+    root_ids = CASE WHEN ${root_ids && root_ids.length > 0} THEN (SELECT ARRAY(SELECT DISTINCT unnest(COALESCE(root_ids, '{}') || ARRAY[${root_ids?.map(id => `'${id}'`).join(',')}]))) ELSE root_ids END,
+    metrics_ids = CASE WHEN ${metrics_ids && metrics_ids.length > 0} THEN (SELECT ARRAY(SELECT DISTINCT unnest(COALESCE(metrics_ids, '{}') || ARRAY[${metrics_ids?.map(id => `'${id}'`).join(',')}]))) ELSE metrics_ids END,
     metadata = metadata || '${JSON.stringify(metadata ?? {})}'::jsonb,
     updated_at = CURRENT_TIMESTAMP
   WHERE source_id = ${sub_id} AND target_id = ${obj_id};

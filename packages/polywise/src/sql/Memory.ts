@@ -32,6 +32,8 @@ VALUES ($1, $2, $3, $4, $5)
 ON CONFLICT (id) DO UPDATE SET 
     content = EXCLUDED.content,
     frequency = ${SCHEMA_MEMORY}.long_term.frequency + 1,
+    root_ids = (SELECT ARRAY(SELECT DISTINCT unnest(COALESCE(${SCHEMA_MEMORY}.long_term.root_ids, '{}') || EXCLUDED.root_ids))),
+    metrics_ids = (SELECT ARRAY(SELECT DISTINCT unnest(COALESCE(${SCHEMA_MEMORY}.long_term.metrics_ids, '{}') || EXCLUDED.metrics_ids))),
     last_accessed_at = CURRENT_TIMESTAMP;`
 
 export const sql_create_table_diary = `
