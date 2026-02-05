@@ -1,4 +1,3 @@
-export * from './command'
 export * from './format'
 export * from './model'
 export * from './performance'

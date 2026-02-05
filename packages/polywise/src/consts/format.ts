@@ -1,5 +1,3 @@
-import { PERCEIVE_COMMAND } from './command'
-
 export const formatNodeContent = (label: string, desc?: string) => {
 	return desc || `Concept: ${label}`
 }
@@ -14,7 +12,7 @@ export const formatLogEntry = (timestamp: string, input: any, output: any) => {
 }
 
 export const formatPerceiveQuery = (query: string, insights: string) => {
-	return `${query} [${PERCEIVE_COMMAND}: ${insights}]`
+	return `${query} [Perceive: ${insights}]`
 }
 
 export const formatRerankDocument = (source_info: string, type: 'info' | 'action', content: string) => {

@@ -1,13 +1,10 @@
 import { afterAll, beforeAll, describe, expect, it, test } from '@rstest/core'
 
 import { getTestRerank, getTestVectors } from '../scripts/getTestVectors'
-import { PERCEIVE_COMMAND } from '../src/consts'
 import Polywise from '../src/Polywise'
 import { cognitive_science_datasets } from './datasets/cognitive'
 import { software_architecture_datasets } from './datasets/software'
 import getDataDir from './utils/getDataDir'
-
-const TEST_TIMEOUT = 60000
 
 describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
 	let poly: Polywise
@@ -40,22 +37,21 @@ describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
 			}
 		})
 
-		for (const content of software_architecture_datasets) {
-			await poly.article.addWithEmbedding(content)
-		}
+		await getTestVectors('init')
 
-		for (const content of cognitive_science_datasets) {
-			await poly.article.addWithEmbedding(content)
-		}
+		await Promise.all(software_architecture_datasets.map(content => poly.article.addWithEmbedding(content)))
 
-		await poly.save({
-			content: 'Comprehensive knowledge graph covering microservices, containers, orchestration, and observability.'
-		})
+		await Promise.all(cognitive_science_datasets.map(content => poly.article.addWithEmbedding(content)))
 
-		await poly.save({
-			content: 'Understanding the relationship between brain structure, memory systems, and artificial intelligence.'
-		})
-	}, TEST_TIMEOUT)
+		await Promise.all([
+			poly.save({
+				content: 'Comprehensive knowledge graph covering microservices, containers, orchestration, and observability.'
+			}),
+			poly.save({
+				content: 'Understanding the relationship between brain structure, memory systems, and artificial intelligence.'
+			})
+		])
+	})
 
 	afterAll(async () => {
 		await poly.off()

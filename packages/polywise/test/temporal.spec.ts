@@ -47,10 +47,8 @@ describe('Polywise Temporal Mechanics', () => {
 		const node_initial = nodes_initial.find(n => n.label === label)
 		const initialUpdatedAt = new Date(node_initial!.updated_at!).getTime()
 
-		// Wait 1.1s to ensure timestamp difference
 		await new Promise(resolve => setTimeout(resolve, 1100))
 
-		// Trigger update via manual SQL using the upsert logic (simulating save's node processing)
 		await (poly as any).queryRaw(
 			`
 			INSERT INTO brain.nodes (label, x, y, potential, updated_at)

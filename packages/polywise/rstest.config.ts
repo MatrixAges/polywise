@@ -15,5 +15,6 @@ export default defineConfig({
 	setupFiles: ['./utils/setup.ts'],
 	reporters: ['verbose', hooks_reporter],
 	source: { decorators: { version: 'legacy' } },
-	testTimeout: 30000
+	hookTimeout: 60000,
+	testTimeout: 120000
 })

@@ -11,8 +11,6 @@ import {
 } from './datasets/traps'
 import getDataDir from './utils/getDataDir'
 
-const TEST_TIMEOUT = 600000
-
 describe.concurrent('Long Context and Language Traps', () => {
 	let poly: Polywise
 	const db_name = getDataDir()
@@ -72,7 +70,7 @@ describe.concurrent('Long Context and Language Traps', () => {
 		for (const content of final_datasets) {
 			await poly.article.addWithEmbedding(content)
 		}
-	}, TEST_TIMEOUT)
+	})
 
 	afterAll(async () => {
 		await poly.off()
