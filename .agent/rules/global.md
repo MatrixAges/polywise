@@ -1,3 +1,5 @@
+The answer should be in the same language as the input question. (CRITICAL)
+
 ## Saving Context (CRITICAL)
 
 BEFORE executing ANY other tool or responding to the user, you MUST save the raw user input (the current prompt) verbatim to the `.prompts/[YYYY-MM-DD]/[HH-mm-ss].md` file. If the input is not in English, it MUST be translated into English before saving.
