@@ -38,7 +38,7 @@ describe('Memory System', () => {
 	}, 20000)
 
 	it('should save and retrieve long-term memory', async () => {
-		await poly.memory.saveLongTerm('Important association')
+		await poly.setLongMemory('Important association')
 		const memory = await poly.getLongMemory()
 		expect(memory).toContain('Important association')
 	})

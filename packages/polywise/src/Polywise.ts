@@ -159,6 +159,14 @@ export default class Polywise {
 		})
 	}
 
+	async setLongMemory(content: string, args: FiltersArgs = {}) {
+		await this.memory.saveLongTerm(content, {
+			idol_id: args.idol_id ?? this.idol_id ?? undefined,
+			root_ids: args.root_ids ?? this.root_ids ?? undefined,
+			metrics_ids: args.metrics_ids ?? this.metrics_ids ?? undefined
+		})
+	}
+
 	setFilters(args: FiltersArgs) {
 		const { idol_id, root_ids, metrics_ids } = args
 
