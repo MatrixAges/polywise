@@ -392,16 +392,31 @@ export default class Polywise {
 	}
 
 	private async isProactiveStatement(content: string) {
-		const prompt = `Determine if the following input contains a long-term instruction, personal preference, or a specific fact about the user that is worth remembering for future sessions.
-Answer ONLY with "YES" or "NO".
+		const prompt = `Assess if the input is a personal preference, user instruction, or a significant fact worth remembering for future sessions.
+Respond with ONLY "YES" or "NO".
+
+Input: "I like coffee."
+Output: YES
+
+Input: "Please remember that I am allergic to peanuts."
+Output: YES
+
+Input: "Hello how are you?"
+Output: NO
+
+Input: "Just checking in."
+Output: NO
+
+Input: "What time is it?"
+Output: NO
 
 Input: "${content}"
+Output:`
 
-Is it worth remembering?`
+		const decision = await this.pipeline.decide(prompt, { max_new_tokens: 5 })
 
-		const decision = await this.pipeline.decide(prompt)
-
-		return decision.toUpperCase().includes('YES')
+		const normalized = decision.split('\n')[0].toUpperCase().trim()
+		return normalized === 'YES' || normalized.includes('YES')
 	}
 
 	private cosineSimilarity(v1: number[], v2: number[]) {

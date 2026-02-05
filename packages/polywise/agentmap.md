@@ -77,7 +77,8 @@ This document provides an overview of the packages/polywise module structure and
 		},
 		"test": {
 			"migration.spec.ts": { "desc": "Migration tests", "role": "Test" },
-			"test.spec.ts": { "desc": "Core functionality tests", "role": "Test" },
+			"brain.spec.ts": { "desc": "Knowledge graph dynamics and learning tests", "role": "Test" },
+			"decision.spec.ts": { "desc": "Cerebellum intelligence and decision logic tests", "role": "Test" },
 			"article.spec.ts": { "desc": "Article tests", "role": "Test" },
 			"cot.spec.ts": { "desc": "Chain of thought tests", "role": "Test" },
 			"learning.spec.ts": { "desc": "Pure text learning and large scale dataset tests", "role": "Test" },

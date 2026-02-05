@@ -52,25 +52,34 @@ export default class Memory {
 
 		if (similar.length > 0) {
 			const existing_content = similar[0].content
-			const prompt = `Determine the relationship between the NEW info and EXISTING memory.
-Answer ONLY with one choice: "DUPLICATE", "UPDATE", or "NEW".
+			const prompt = `Classify the relationship between the NEW info and EXISTING memory.
+Options: DUPLICATE, UPDATE, NEW.
 
-NEW: "${content}"
+EXISTING: "My name is John."
+NEW: "I am John."
+Relationship: DUPLICATE
+
+EXISTING: "I live in London."
+NEW: "I moved to Paris."
+Relationship: UPDATE
+
+EXISTING: "I like apples."
+NEW: "The sky is blue."
+Relationship: NEW
+
 EXISTING: "${existing_content}"
+NEW: "${content}"
+Relationship:`
 
-Choices:
-- DUPLICATE: Same meaning or redundant.
-- UPDATE: New info modifies, corrects, or adds significant detail to existing.
-- NEW: Different topic or distinct enough to be separate.`
+			const decision = await this.pipeline.decide(prompt, { max_new_tokens: 5 })
+			const normalized = decision.split('\n')[0].toUpperCase().trim()
 
-			const decision = await this.pipeline.decide(prompt)
-
-			if (decision.includes('DUPLICATE')) {
+			if (normalized.includes('DUPLICATE')) {
 				await this.exec(sql_memory.sql_update_long_term_frequency, [similar[0].id])
 				return
 			}
 
-			if (decision.includes('UPDATE')) {
+			if (normalized.includes('UPDATE')) {
 				await this.queryRaw(sql_memory.sql_update_long_term_content, [
 					content,
 					vector_str,
