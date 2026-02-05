@@ -7,8 +7,6 @@
 		"build:deps": "turbo run deps",
 		"build:mac": "turbo run desktop#pack:mac",
 		"build:win": "turbo run desktop#pack:win",
-		"submodule:init": "git submodule update --init --recursive",
-		"submodule:update": "git submodule sync && git submodule update --recursive --remote --merge",
 		"deps:catalog": "pcu -i"
 	},
 	"simple-git-hooks": {

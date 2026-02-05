@@ -163,23 +163,15 @@ Brain 在以下状态中运行：
 
 ---
 
-## 🛠️ 用法
+## 🛠️ 开发
 
-### 1. 初始化子模块
-
-确保所有子模块已正确初始化：
-
-```bash
-pnpm submodule:init
-```
-
-### 2. 安装依赖
+### 1. 安装依赖
 
 ```bash
 pnpm install
 ```
 
-### 3. 运行核心测试
+### 2. 运行核心测试
 
 验证核心记忆引擎：
 
@@ -187,7 +179,7 @@ pnpm install
 pnpm --filter polywise test
 ```
 
-### 4. 开发
+### 3. 调试
 
 Polywise 作为一个 Electron 应用程序运行。你需要同时启动前端和桌面进程：
 
@@ -199,7 +191,7 @@ pnpm --filter app dev
 pnpm --filter desktop dev
 ```
 
-### 5. 构建
+### 4. 构建
 
 为你的平台打包应用程序：
 

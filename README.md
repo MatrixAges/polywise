@@ -178,23 +178,15 @@ The Brain operates in states:
 
 ---
 
-## 🛠️ Usage
+## 🛠️ Development
 
-### 1. Initialize Submodules
-
-Ensure all submodules are properly initialized:
-
-```bash
-pnpm submodule:init
-```
-
-### 2. Install Dependencies
+### 1. Install Dependencies
 
 ```bash
 pnpm install
 ```
 
-### 3. Run Core Tests
+### 2. Run Core Tests
 
 Verify the core memory engine:
 
@@ -202,7 +194,7 @@ Verify the core memory engine:
 pnpm --filter polywise test
 ```
 
-### 4. Development
+### 3. Run
 
 Polywise runs as an Electron application. You need to start both the frontend and the desktop process:
 
@@ -214,7 +206,7 @@ pnpm --filter app dev
 pnpm --filter desktop dev
 ```
 
-### 5. Build
+### 4. Build
 
 To package the application for your platform:
 
