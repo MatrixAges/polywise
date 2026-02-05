@@ -1,5 +1,4 @@
 import { existsSync, rmSync } from 'fs'
-import { join } from 'path'
 
 import { afterEach, beforeEach, describe, expect, it } from '@rstest/core'
 
