@@ -6,7 +6,7 @@
 
 _<p align="center"><strong>用于人工智能的智能体记忆引擎</strong></p>_
 
-<p align="center"><strong>用 AI 造，为 AI 造</strong></p>
+##### <p align="center">用 AI 造，为 AI 造</p>
 
 <p align="center">
   <a href="README.md">English</a> |
