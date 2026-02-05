@@ -84,6 +84,12 @@ This document provides an overview of the packages/polywise module structure and
 			"learning.spec.ts": { "desc": "Pure text learning and large scale dataset tests", "role": "Test" },
 			"react.spec.ts": { "desc": "React system and habitual behavior tests", "role": "Test" },
 			"datasets": {
+				"behavioral.ts": { "desc": "Behavioral prompts and benchmarks", "role": "Data" },
+				"cognitive.ts": { "desc": "Cognitive and reasoning datasets", "role": "Data" },
+				"decision.ts": { "desc": "Decision logic and intelligence prompts", "role": "Data" },
+				"longcontext.ts": { "desc": "Long context retrieval datasets", "role": "Data" },
+				"software.ts": { "desc": "Software architecture and development datasets", "role": "Data" },
+				"traps.ts": { "desc": "Linguistic and logical traps for robustness testing", "role": "Data" },
 				"text": {
 					"desc": "Large-scale pure text datasets (Neuroscience, Philosophy, Legal, Physics, etc.)",
 					"role": "Data"
