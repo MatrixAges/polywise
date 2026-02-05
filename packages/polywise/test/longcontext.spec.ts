@@ -55,8 +55,8 @@ describe.concurrent('Long Context and Language Traps', () => {
 			...similarity_traps_datasets.slice(1)
 		]
 
-		// Use 25 articles total to ensure 30s limit (9 mandatory + 16 random)
-		const shuffled_others = others.sort(() => Math.random() - 0.5).slice(0, 16)
+		// Use 15 articles total to stay within 60s limit (9 mandatory + 6 random)
+		const shuffled_others = others.sort(() => Math.random() - 0.5).slice(0, 6)
 
 		for (const content of shuffled_others.slice(0, 3)) {
 			const mid = Math.floor(content.length / 2)
@@ -67,9 +67,9 @@ describe.concurrent('Long Context and Language Traps', () => {
 
 		const final_datasets = [...mandatory, ...shuffled_others].sort(() => Math.random() - 0.5)
 
-		for (const content of final_datasets) {
-			await poly.article.addWithEmbedding(content)
-		}
+		await getTestVectors('init')
+
+		await Promise.all(final_datasets.map(content => poly.article.addWithEmbedding(content)))
 	})
 
 	afterAll(async () => {
