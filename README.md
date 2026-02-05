@@ -4,6 +4,8 @@
 
 # <p align="center">Polywise</p>
 
+<p align="center"><strong>Build with AI, Build for AI</strong></p>
+
 _<p align="center"><strong>Agentic memory engine for AI</strong></p>_
 
 <p align="center">

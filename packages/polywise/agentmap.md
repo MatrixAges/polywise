@@ -4,7 +4,7 @@ This document provides an overview of the packages/polywise module structure and
 
 ## 1. Module Overview
 
-- **Description**: Neuroscience-inspired knowledge graph and memory system
+- **Description**: Build with AI, Build for AI - Neuroscience-inspired knowledge graph and memory system
 - **Architecture**: PGlite + TypeScript
 
 ## 2. File Tree & Metadata
