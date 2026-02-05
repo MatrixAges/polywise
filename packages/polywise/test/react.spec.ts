@@ -3,11 +3,11 @@ import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 import { getTestVectors } from '../scripts/getTestVectors'
 import Polywise from '../src/Polywise'
 import { behavioral_knowledge, behavioral_qa } from './datasets/behavioral'
+import getDataDir from './utils/getDataDir'
 
 describe.concurrent('Polywise Unified Retrieval System', () => {
 	let poly: Polywise
-	const unique_id = Math.random().toString(36).slice(2)
-	const db_name = `.test_db/:polywise_unified_test_${unique_id}:`
+	const db_name = getDataDir()
 
 	beforeAll(async () => {
 		poly = new Polywise()
@@ -77,7 +77,7 @@ describe.concurrent('Polywise Unified Retrieval System', () => {
 		const poly_slow = new Polywise()
 
 		await poly_slow.init({
-			data_dir: `.test_db/:polywise_slow_test_${unique_id}:`,
+			data_dir: getDataDir(),
 			embedding_config: {
 				type: 'custom',
 				fn: getTestVectors

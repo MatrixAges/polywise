@@ -1,19 +1,15 @@
 import '@abraham/reflection'
 
-import { existsSync, mkdirSync, rmSync } from 'fs'
-
 import { afterEach, beforeEach, describe, expect, it } from '@rstest/core'
 
 import Polywise from '../src/Polywise'
+import getDataDir from './utils/getDataDir'
 
 describe('Memory System', () => {
 	let poly: Polywise
-	const test_id = Math.random().toString(36).substring(7)
-	const data_dir = `.test_db/:polywise_memory_test_${test_id}:`
+	const data_dir = getDataDir()
 
 	beforeEach(async () => {
-		if (existsSync(data_dir)) rmSync(data_dir, { recursive: true, force: true })
-		mkdirSync(data_dir)
 		poly = new Polywise()
 		await poly.init({
 			data_dir,
@@ -31,7 +27,6 @@ describe('Memory System', () => {
 
 	afterEach(async () => {
 		await poly.off()
-		if (existsSync(data_dir)) rmSync(data_dir, { recursive: true, force: true })
 	}, 20000)
 
 	it('should save and retrieve long-term memory', async () => {

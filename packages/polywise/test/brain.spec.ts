@@ -1,18 +1,17 @@
-import path from 'path'
-
 import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 
 import { getTestVectors } from '../scripts/getTestVectors'
 import Polywise from '../src/Polywise'
 import { cognitive_science_datasets } from './datasets/cognitive'
 import { software_architecture_datasets } from './datasets/software'
+import getDataDir from './utils/getDataDir'
 
 const TEST_TIMEOUT = 120000
 
 describe('Polywise Brain System', () => {
 	let poly: Polywise
 	const unique_id = Math.random().toString(36).slice(2)
-	const db_name = path.resolve(__dirname, `../.test_db/brain_${unique_id}`)
+	const db_name = getDataDir()
 
 	beforeAll(async () => {
 		poly = new Polywise()

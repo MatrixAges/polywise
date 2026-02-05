@@ -1,18 +1,16 @@
-import path from 'path'
-
 import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 
 import Pipeline from '../src/Pipeline'
 import Polywise from '../src/Polywise'
 import * as datasets_decision from './datasets/decision'
+import getDataDir from './utils/getDataDir'
 
 const TEST_TIMEOUT = 120000
 
 describe('Decision Model & Intelligence', () => {
 	let poly: Polywise
 	let pipeline: Pipeline
-	const unique_id = Math.random().toString(36).slice(2)
-	const db_name = path.resolve(__dirname, `../.test_db/decision_${unique_id}`)
+	const db_name = getDataDir()
 
 	beforeAll(async () => {
 		poly = new Polywise()

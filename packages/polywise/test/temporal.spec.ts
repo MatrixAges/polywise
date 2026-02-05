@@ -1,19 +1,14 @@
-import { existsSync, rmSync } from 'fs'
-
 import { afterEach, beforeEach, describe, expect, it } from '@rstest/core'
 
 import { getTestVectors } from '../scripts/getTestVectors'
 import Polywise from '../src/Polywise'
+import getDataDir from './utils/getDataDir'
 
 describe('Polywise Temporal Mechanics', () => {
 	let poly: Polywise
-	const test_id = Math.random().toString(36).substring(7)
-	const test_dir = `.test_db/:polywise_temporal_test_${test_id}:`
+	const test_dir = getDataDir()
 
 	beforeEach(async () => {
-		if (existsSync(test_dir)) {
-			rmSync(test_dir, { recursive: true, force: true })
-		}
 		poly = new Polywise()
 		await poly.init({
 			data_dir: test_dir,
@@ -26,9 +21,6 @@ describe('Polywise Temporal Mechanics', () => {
 
 	afterEach(async () => {
 		await poly.off()
-		if (existsSync(test_dir)) {
-			rmSync(test_dir, { recursive: true, force: true })
-		}
 	})
 
 	it('should have created_at and updated_at for new nodes and edges', async () => {

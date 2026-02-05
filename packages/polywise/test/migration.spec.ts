@@ -5,6 +5,7 @@ import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 import { SCHEMA_BRAIN, SCHEMA_KNOWLEDGE } from '../src/consts'
 import * as sql_meta from '../src/sql/meta'
 import { CURRENT_SCHEMA_VERSION, migrate, migrations, validateMigrations } from '../src/utils/migration'
+import getDataDir from './utils/getDataDir'
 
 describe('Migration System', () => {
 	describe.concurrent('validateMigrations', () => {
@@ -23,7 +24,7 @@ describe('Migration System', () => {
 
 	describe('migrate function', () => {
 		let db: PGlite
-		const db_path = '.test_db/:polywise_migration_main:'
+		const db_path = getDataDir()
 
 		beforeAll(async () => {
 			db = new PGlite(db_path, { extensions: { vector } })
@@ -100,7 +101,7 @@ describe('Migration System', () => {
 
 	describe('Schema Changes - Add Column', () => {
 		let db: PGlite
-		const db_path = '.test_db/:polywise_migration_add_col:'
+		const db_path = getDataDir()
 
 		beforeAll(async () => {
 			db = new PGlite(db_path, { extensions: { vector } })
@@ -176,7 +177,7 @@ describe('Migration System', () => {
 
 	describe('Schema Changes - Rename Column', () => {
 		let db: PGlite
-		const db_path = `.test_db/:polywise_migration_rename_col_${Date.now()}:`
+		const db_path = getDataDir()
 
 		beforeAll(async () => {
 			db = new PGlite(db_path, { extensions: { vector } })
@@ -235,7 +236,7 @@ describe('Migration System', () => {
 
 	describe('Schema Changes - Modify Column Type', () => {
 		let db: PGlite
-		const db_path = `.test_db/:polywise_migration_modify_type_${Date.now()}:`
+		const db_path = getDataDir()
 
 		beforeAll(async () => {
 			db = new PGlite(db_path, { extensions: { vector } })
@@ -299,7 +300,7 @@ describe('Migration System', () => {
 
 	describe('Schema Changes - Drop Column', () => {
 		let db: PGlite
-		const db_path = `.test_db/:polywise_migration_drop_col:`
+		const db_path = getDataDir()
 
 		beforeAll(async () => {
 			db = new PGlite(db_path, { extensions: { vector } })
@@ -350,7 +351,7 @@ describe('Migration System', () => {
 
 	describe('Complex Migration Scenarios', () => {
 		let db: PGlite
-		const db_path = `.test_db/:polywise_migration_complex:`
+		const db_path = getDataDir()
 
 		beforeAll(async () => {
 			db = new PGlite(db_path, { extensions: { vector } })

@@ -5,13 +5,13 @@ import { PERCEIVE_COMMAND } from '../src/consts'
 import Polywise from '../src/Polywise'
 import { cognitive_science_datasets } from './datasets/cognitive'
 import { software_architecture_datasets } from './datasets/software'
+import getDataDir from './utils/getDataDir'
 
 const TEST_TIMEOUT = 60000
 
 describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
 	let poly: Polywise
-	const unique_id = Math.random().toString(36).slice(2)
-	const db_name = `.test_db/:polywise_cot_${unique_id}:`
+	const db_name = getDataDir()
 
 	beforeAll(async () => {
 		poly = new Polywise()

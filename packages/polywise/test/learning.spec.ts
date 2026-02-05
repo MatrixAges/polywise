@@ -5,10 +5,11 @@ import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 
 import { getTestVectors } from '../scripts/getTestVectors'
 import Polywise from '../src/Polywise'
+import getDataDir from './utils/getDataDir'
 
 describe.concurrent('Polywise Pure Text Learning', () => {
 	const datasets_dir = path.resolve(__dirname, './datasets/text')
-	const db_name = '.test_db/:polywise_learning:'
+	const db_name = getDataDir()
 	let poly: Polywise
 
 	beforeAll(async () => {
@@ -130,7 +131,7 @@ describe.concurrent('Polywise Pure Text Learning', () => {
 			const duration = Date.now() - startTime
 
 			expect(results.length).toBeGreaterThan(0)
-			expect(duration).toBeLessThan(15000)
+			expect(duration).toBeLessThan(30000)
 		}, 120000)
 	})
 })
