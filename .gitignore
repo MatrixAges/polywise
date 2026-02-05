@@ -27,6 +27,7 @@ npm-debug.log*
 **:act*
 **:memory*
 **:polywise*
+**/.test_vectors
 
 # electron
 release

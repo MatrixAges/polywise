@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 
+import { getTestVectors } from '../scripts/getTestVectors'
 import Polywise from '../src/Polywise'
 import { cognitive_science_datasets } from './datasets/cognitive'
 import { software_architecture_datasets } from './datasets/software'
@@ -14,6 +15,10 @@ describe.concurrent('Article CRUD Operations', () => {
 
 		await poly.init({
 			data_dir: db_name,
+			embedding_config: {
+				type: 'custom',
+				fn: getTestVectors
+			},
 			embedding_concurrency: 10,
 			reranker_concurrency: 10
 		})
@@ -104,6 +109,10 @@ describe.concurrent('Full-Text Search and Vector Search', () => {
 
 		await poly.init({
 			data_dir: db_name,
+			embedding_config: {
+				type: 'custom',
+				fn: getTestVectors
+			},
 			embedding_concurrency: 10,
 			reranker_concurrency: 10
 		})

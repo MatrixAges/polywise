@@ -3,6 +3,7 @@ import { join } from 'path'
 
 import { afterEach, beforeEach, describe, expect, it } from '@rstest/core'
 
+import { getTestVectors } from '../scripts/getTestVectors'
 import Polywise from '../src/Polywise'
 
 describe('Polywise Temporal Mechanics', () => {
@@ -15,7 +16,13 @@ describe('Polywise Temporal Mechanics', () => {
 			rmSync(test_dir, { recursive: true, force: true })
 		}
 		poly = new Polywise()
-		await poly.init({ data_dir: test_dir })
+		await poly.init({
+			data_dir: test_dir,
+			embedding_config: {
+				type: 'custom',
+				fn: getTestVectors
+			}
+		})
 	})
 
 	afterEach(async () => {

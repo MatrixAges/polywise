@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 
+import { getTestVectors } from '../scripts/getTestVectors'
 import Polywise from '../src/Polywise'
 
 describe('Polywise Save Implementation', () => {
@@ -11,6 +12,10 @@ describe('Polywise Save Implementation', () => {
 		poly = new Polywise()
 		await poly.init({
 			data_dir: db_name,
+			embedding_config: {
+				type: 'custom',
+				fn: getTestVectors
+			},
 			embedding_concurrency: 5,
 			reranker_concurrency: 5
 		})
