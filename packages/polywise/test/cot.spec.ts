@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it, test } from '@rstest/core'
 
-import { getTestVectors } from '../scripts/getTestVectors'
+import { getTestRerank, getTestVectors } from '../scripts/getTestVectors'
 import { PERCEIVE_COMMAND } from '../src/consts'
 import Polywise from '../src/Polywise'
 import { cognitive_science_datasets } from './datasets/cognitive'
@@ -21,6 +21,10 @@ describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
 			embedding_config: {
 				type: 'custom',
 				fn: getTestVectors
+			},
+			reranker_config: {
+				type: 'custom',
+				fn: getTestRerank
 			},
 			embedding_concurrency: 20,
 			reranker_concurrency: 20,

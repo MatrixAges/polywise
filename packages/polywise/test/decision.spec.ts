@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 
+import { getTestDecision } from '../scripts/getTestVectors'
 import Pipeline from '../src/Pipeline'
 import Polywise from '../src/Polywise'
 import * as datasets_decision from './datasets/decision'
@@ -16,11 +17,13 @@ describe('Decision Model & Intelligence', () => {
 		poly = new Polywise()
 		await poly.init({
 			data_dir: db_name,
+			decision_config: {
+				type: 'custom',
+				fn: getTestDecision
+			},
 			decision_concurrency: 1
 		})
 		pipeline = poly.pipeline
-
-		await pipeline.loadDecisionModel()
 	}, TEST_TIMEOUT)
 
 	afterAll(async () => {
@@ -29,11 +32,10 @@ describe('Decision Model & Intelligence', () => {
 
 	describe('Infrastructure & Model Loading', () => {
 		it(
-			'should load the decision model correctly',
+			'should verify decision capability is active',
 			async () => {
-				const model = await pipeline.loadDecisionModel()
-				expect(model).toBeDefined()
-				expect(typeof model).toBe('function')
+				const result = await pipeline.decide('test')
+				expect(result).toBeDefined()
 			},
 			TEST_TIMEOUT
 		)
@@ -75,7 +77,7 @@ describe('Decision Model & Intelligence', () => {
 				const content = 'I strictly prefer dark mode interfaces.'
 				const prompt = datasets_decision.prompt_assess_content(content)
 
-				const decision = await pipeline.decide(prompt, { max_new_tokens: 5 })
+				const decision = await pipeline.decide(prompt, { max_new_tokens: 5, temperature: 0 })
 				const normalized = decision.split('\n')[0].toUpperCase().trim()
 				expect(normalized.startsWith('YES')).toBe(true)
 			},
@@ -88,7 +90,7 @@ describe('Decision Model & Intelligence', () => {
 				const content = "How's it going?"
 				const prompt = datasets_decision.prompt_assess_content(content)
 
-				const decision = await pipeline.decide(prompt, { max_new_tokens: 5 })
+				const decision = await pipeline.decide(prompt, { max_new_tokens: 5, temperature: 0 })
 				const normalized = decision.split('\n')[0].toUpperCase().trim()
 				expect(normalized.startsWith('YES')).toBe(false)
 			},
@@ -102,7 +104,7 @@ describe('Decision Model & Intelligence', () => {
 				const existing_content = 'My favorite color is Blue.'
 				const prompt = datasets_decision.prompt_memory_relationship(existing_content, new_content)
 
-				const decision = await pipeline.decide(prompt, { max_new_tokens: 5 })
+				const decision = await pipeline.decide(prompt, { max_new_tokens: 5, temperature: 0 })
 				const normalized = decision.split('\n')[0].toUpperCase().trim()
 				expect(normalized.includes('DUPLICATE')).toBe(true)
 			},

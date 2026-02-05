@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 
-import { getTestVectors } from '../scripts/getTestVectors'
+import { getTestRerank, getTestVectors } from '../scripts/getTestVectors'
 import Polywise from '../src/Polywise'
 import { long_context_datasets, multi_hop_datasets } from './datasets/longcontext'
 import {
@@ -27,6 +27,10 @@ describe.concurrent('Long Context and Language Traps', () => {
 			embedding_config: {
 				type: 'custom',
 				fn: getTestVectors
+			},
+			reranker_config: {
+				type: 'custom',
+				fn: getTestRerank
 			},
 			embedding_concurrency: 10,
 			reranker_concurrency: 10
