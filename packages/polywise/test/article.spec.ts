@@ -8,7 +8,7 @@ import { software_architecture_datasets } from './datasets/software'
 describe.concurrent('Article CRUD Operations', () => {
 	let poly: Polywise
 	const unique_id = Math.random().toString(36).slice(2)
-	const db_name = `:polywise_article_test_${unique_id}:`
+	const db_name = `.test_db/:polywise_article_test_${unique_id}:`
 
 	beforeAll(async () => {
 		poly = new Polywise()
@@ -86,7 +86,7 @@ describe.concurrent('Article CRUD Operations', () => {
 	it('should search articles with empty database', async () => {
 		const empty_poly = new Polywise()
 		await empty_poly.init({
-			data_dir: ':polywise_article_test_empty:',
+			data_dir: '.test_db/:polywise_article_test_empty:',
 			embedding_concurrency: 10,
 			reranker_concurrency: 10
 		})
@@ -102,7 +102,7 @@ describe.concurrent('Article CRUD Operations', () => {
 describe.concurrent('Full-Text Search and Vector Search', () => {
 	let poly: Polywise
 	const unique_id = Math.random().toString(36).slice(2)
-	const db_name = `:polywise_search_test_${unique_id}:`
+	const db_name = `.test_db/:polywise_search_test_${unique_id}:`
 
 	beforeAll(async () => {
 		poly = new Polywise()

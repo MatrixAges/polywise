@@ -6,7 +6,7 @@ import Polywise from '../src/Polywise'
 describe('Polywise Save Implementation', () => {
 	let poly: Polywise
 	const unique_id = Math.random().toString(36).slice(2)
-	const db_name = `:polywise_save_test_${unique_id}:`
+	const db_name = `.test_db/:polywise_save_test_${unique_id}:`
 
 	beforeAll(async () => {
 		poly = new Polywise()

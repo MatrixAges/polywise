@@ -23,10 +23,7 @@ npm-debug.log*
 **/.prompts
 
 # polywise
-**:pfc*
-**:act*
-**:memory*
-**:polywise*
+**/.test_db
 **/.test_vectors
 
 # electron

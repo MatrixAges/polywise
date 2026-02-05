@@ -9,7 +9,7 @@ import Polywise from '../src/Polywise'
 describe('Polywise Temporal Mechanics', () => {
 	let poly: Polywise
 	const test_id = Math.random().toString(36).substring(7)
-	const test_dir = join(process.cwd(), `:polywise_temporal_test_${test_id}:`)
+	const test_dir = `.test_db/:polywise_temporal_test_${test_id}:`
 
 	beforeEach(async () => {
 		if (existsSync(test_dir)) {

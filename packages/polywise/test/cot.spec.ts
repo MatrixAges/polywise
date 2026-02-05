@@ -11,7 +11,7 @@ const TEST_TIMEOUT = 60000
 describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
 	let poly: Polywise
 	const unique_id = Math.random().toString(36).slice(2)
-	const db_name = `:polywise_cot_${unique_id}:`
+	const db_name = `.test_db/:polywise_cot_${unique_id}:`
 
 	beforeAll(async () => {
 		poly = new Polywise()

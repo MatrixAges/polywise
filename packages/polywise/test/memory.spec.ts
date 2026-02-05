@@ -1,8 +1,6 @@
 import '@abraham/reflection'
 
 import { existsSync, mkdirSync, rmSync } from 'fs'
-import { tmpdir } from 'os'
-import { join } from 'path'
 
 import { afterEach, beforeEach, describe, expect, it } from '@rstest/core'
 
@@ -11,7 +9,7 @@ import Polywise from '../src/Polywise'
 describe('Memory System', () => {
 	let poly: Polywise
 	const test_id = Math.random().toString(36).substring(7)
-	const data_dir = join(tmpdir(), `:polywise_memory_test_${test_id}:`)
+	const data_dir = `.test_db/:polywise_memory_test_${test_id}:`
 
 	beforeEach(async () => {
 		if (existsSync(data_dir)) rmSync(data_dir, { recursive: true, force: true })
@@ -22,7 +20,6 @@ describe('Memory System', () => {
 			embedding_config: {
 				type: 'custom',
 				fn: async (text: string) => {
-					// Use orthogonal vectors for different text to ensure no similarity
 					const index = parseInt(text.split(' ').pop() || '0')
 					const vec = new Array(1024).fill(0)
 					vec[index % 1024] = 1.0

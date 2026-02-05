@@ -15,7 +15,7 @@ const TEST_TIMEOUT = 600000
 describe.concurrent('Long Context and Language Traps', () => {
 	let poly: Polywise
 	const unique_id = Math.random().toString(36).slice(2)
-	const db_name = `:polywise_longcontext_test_${unique_id}:`
+	const db_name = `.test_db/:polywise_longcontext_test_${unique_id}:`
 
 	const random_qas: { query: string; expected: string }[] = []
 

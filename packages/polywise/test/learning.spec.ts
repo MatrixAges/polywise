@@ -8,7 +8,7 @@ import Polywise from '../src/Polywise'
 
 describe.concurrent('Polywise Pure Text Learning', () => {
 	const datasets_dir = path.resolve(__dirname, './datasets/text')
-	const db_name = ':polywise_learning:'
+	const db_name = '.test_db/:polywise_learning:'
 	let poly: Polywise
 
 	beforeAll(async () => {

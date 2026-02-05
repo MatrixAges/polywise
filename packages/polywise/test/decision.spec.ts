@@ -8,7 +8,7 @@ describe.concurrent('Decision Model & Intelligence', () => {
 	let poly: Polywise
 	let pipeline: Pipeline
 	const unique_id = Math.random().toString(36).slice(2)
-	const db_name = `:polywise_test_decision_${unique_id}:`
+	const db_name = `.test_db/:polywise_test_decision_${unique_id}:`
 
 	beforeAll(async () => {
 		poly = new Polywise()
