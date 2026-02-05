@@ -101,8 +101,10 @@ export default class Polywise {
 			cache_dir,
 			embedding_config,
 			reranker_config,
+			decision_config,
 			embedding_concurrency,
 			reranker_concurrency,
+			decision_concurrency,
 			onTick,
 			log,
 			idol_id,
@@ -127,8 +129,10 @@ export default class Polywise {
 			cache_dir,
 			embedding_config,
 			reranker_config,
+			decision_config,
 			embedding_concurrency,
-			reranker_concurrency
+			reranker_concurrency,
+			decision_concurrency
 		})
 
 		this.article.init(this.db)
@@ -375,7 +379,7 @@ export default class Polywise {
 				await this.queryRaw(sql.sql_insert_article_embedding, [aid, `[${query_embedding.join(',')}]`])
 			}
 
-			if (await this.isProactiveStatement(query_embedding)) {
+			if (await this.isProactiveStatement(content)) {
 				await this.memory.saveLongTerm(content, {
 					idol_id: idol_id ?? undefined,
 					root_ids: root_ids ?? undefined,
@@ -387,24 +391,17 @@ export default class Polywise {
 		this.log.write({ ...args, idol_id, root_ids, metrics_ids }, { article_id: aid })
 	}
 
-	private async isProactiveStatement(embedding: number[]) {
-		const proactive_embeddings_results = await Promise.all(
-			PROACTIVE_EXAMPLES.map(text => this.pipeline.embed(text))
-		)
+	private async isProactiveStatement(content: string) {
+		const prompt = `Determine if the following input contains a long-term instruction, personal preference, or a specific fact about the user that is worth remembering for future sessions.
+Answer ONLY with "YES" or "NO".
 
-		const proactive_embeddings = proactive_embeddings_results.filter((emb): emb is number[] => emb !== null)
+Input: "${content}"
 
-		let max_similarity = 0
+Is it worth remembering?`
 
-		for (const p_emb of proactive_embeddings) {
-			if (!p_emb) continue
+		const decision = await this.pipeline.decide(prompt)
 
-			const sim = this.cosineSimilarity(embedding, p_emb)
-
-			if (sim > max_similarity) max_similarity = sim
-		}
-
-		return max_similarity > PROACTIVE_SIMILARITY_THRESHOLD
+		return decision.toUpperCase().includes('YES')
 	}
 
 	private cosineSimilarity(v1: number[], v2: number[]) {

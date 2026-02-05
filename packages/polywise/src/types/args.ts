@@ -25,8 +25,10 @@ export interface PolywiseArgs extends FiltersArgs {
 	cache_dir?: string
 	embedding_config?: EmbeddingConfig
 	reranker_config?: RerankerConfig
+	decision_config?: DecisionConfig
 	embedding_concurrency?: number
 	reranker_concurrency?: number
+	decision_concurrency?: number
 	log?: boolean | LogArgs
 	onTick?: () => void
 }
@@ -61,12 +63,34 @@ export interface CustomRerankerConfig {
 
 export type RerankerConfig = LocalRerankerConfig | CustomRerankerConfig
 
+export interface DecisionOptions {
+	max_new_tokens?: number
+	temperature?: number
+	top_k?: number
+	top_p?: number
+}
+
+export interface LocalDecisionConfig {
+	type: 'local'
+	model: string
+	dtype?: string
+}
+
+export interface CustomDecisionConfig {
+	type: 'custom'
+	fn: (prompt: string, options?: DecisionOptions) => Promise<string>
+}
+
+export type DecisionConfig = LocalDecisionConfig | CustomDecisionConfig
+
 export interface PipelineArgs {
 	cache_dir?: string
 	embedding_config?: EmbeddingConfig
 	reranker_config?: RerankerConfig
+	decision_config?: DecisionConfig
 	embedding_concurrency?: number
 	reranker_concurrency?: number
+	decision_concurrency?: number
 }
 
 export interface AddNodeArgs extends FiltersArgs {

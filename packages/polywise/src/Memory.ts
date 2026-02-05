@@ -48,12 +48,36 @@ export default class Memory {
 
 		const vector_str = `[${embedding.join(',')}]`
 
-		const similar = (await this.queryRaw(sql_memory.sql_find_similar_long_term, [vector_str, 0.95])) as any[]
+		const similar = (await this.queryRaw(sql_memory.sql_find_similar_long_term, [vector_str, 0.8])) as any[]
 
 		if (similar.length > 0) {
-			await this.exec(sql_memory.sql_update_long_term_frequency, [similar[0].id])
-			console.log(`[Memory] Merged similar long-term memory: ${similar[0].id}`)
-			return
+			const existing_content = similar[0].content
+			const prompt = `Determine the relationship between the NEW info and EXISTING memory.
+Answer ONLY with one choice: "DUPLICATE", "UPDATE", or "NEW".
+
+NEW: "${content}"
+EXISTING: "${existing_content}"
+
+Choices:
+- DUPLICATE: Same meaning or redundant.
+- UPDATE: New info modifies, corrects, or adds significant detail to existing.
+- NEW: Different topic or distinct enough to be separate.`
+
+			const decision = await this.pipeline.decide(prompt)
+
+			if (decision.includes('DUPLICATE')) {
+				await this.exec(sql_memory.sql_update_long_term_frequency, [similar[0].id])
+				return
+			}
+
+			if (decision.includes('UPDATE')) {
+				await this.queryRaw(sql_memory.sql_update_long_term_content, [
+					content,
+					vector_str,
+					similar[0].id
+				])
+				return
+			}
 		}
 
 		const count_res = (await this.queryRaw(sql_memory.sql_get_long_term_count)) as { count: number }[]

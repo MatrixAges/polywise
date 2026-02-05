@@ -38,7 +38,7 @@ export const EDGE_LEARNING_FACTOR = 0.2
 export const EDGE_DECAY_FACTOR = 0.001
 export const EDGE_DISTANCE_MIN = 0.2
 export const LONG_TERM_CAPACITY = 1000
-export const LTM_DECAY_LAMBDA = 0.05 // Decay rate for biological memory eviction (approx 5% per day)
+export const LTM_DECAY_LAMBDA = 0.05
 export const PRIORITY_WEIGHTS = {
 	rules: 1.0,
 	brain: 0.9,
@@ -47,7 +47,6 @@ export const PRIORITY_WEIGHTS = {
 	external: 0.6
 }
 export const TIME_DECAY_HALFLIFE_DAYS = 30
-export const PROACTIVE_SIMILARITY_THRESHOLD = 0.7
 export const CONSOLIDATION_ACTIVE_THRESHOLD = 0.8
 export const CONSOLIDATION_POTENTIAL_THRESHOLD = 1.2
 export const HABIT_CONSOLIDATION_WEIGHT = 2.0
@@ -57,18 +56,3 @@ export const HABIT_LTM_PREFIX = 'Reinforced behavioral pattern: '
 export const NO_ACTIVITY_SUMMARY = 'No activity today.'
 export const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD'
 export const DEFAULT_TIMESTAMP_FORMAT = 'YYYY-MM-DD HH:mm:ss'
-export const PROACTIVE_EXAMPLES = [
-	'I am an artificial intelligence designed to assist with complex tasks.',
-	'You must follow safety guidelines at all times.',
-	'We need to optimize the system for better performance.',
-	'Requirement: The system shall support multi-hop retrieval.',
-	'Identity: I am your personal assistant.',
-	'Rule: Never share sensitive credentials.',
-	'Constraint: Memory capacity is limited to 1000 entries.',
-	'Objective: Improve reasoning accuracy through chain-of-thought.',
-	'我是你的个人助手',
-	'我们需要遵守法律法规',
-	'系统必须保证数据的安全性',
-	'身份：我是一个人工智能程序',
-	'规则：严禁访问未经授权的资源'
-]

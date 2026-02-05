@@ -19,6 +19,11 @@ UPDATE ${SCHEMA_MEMORY}.long_term
 SET frequency = frequency + 1, last_accessed_at = CURRENT_TIMESTAMP
 WHERE id = $1;`
 
+export const sql_update_long_term_content = `
+UPDATE ${SCHEMA_MEMORY}.long_term
+SET content = $1, embedding = $2, last_accessed_at = CURRENT_TIMESTAMP
+WHERE id = $3;`
+
 export const sql_find_similar_long_term = `
 SELECT id, content, (1 - (embedding <=> $1)) as similarity
 FROM ${SCHEMA_MEMORY}.long_term
