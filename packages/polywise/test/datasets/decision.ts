@@ -68,16 +68,16 @@ A: TRUE
 Q: If P implies Q, and P is true, is Q true?
 A: `
 
-export const prompt_temporal_logic = `Respond with ONLY "YES" or "NO".
+export const prompt_temporal_logic = `Identify the temporal relationship. Respond with ONLY "YES" or "NO".
 
-Q: Event A happened at 10:00. Event B happened at 11:00. Did A happen before B?
-A: YES
+Relationship: Did 10:00 happen before 11:00?
+Output: YES
 
-Q: Event A happened at 10:00. Event B happened at 09:00. Did A happen before B?
-A: NO
+Relationship: Did 10:00 happen before 09:00?
+Output: NO
 
-Q: Event A happened at 10:00. Event B happened at 11:00. Did A happen before B?
-A: `
+Relationship: Did 14:00 happen before 15:00?
+Output:`
 
 export const prompt_category_apple = 'Classify "Apple" into one category: Fruit, Vehicle, Planet.'
 
