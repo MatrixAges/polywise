@@ -6,7 +6,7 @@ import Pipeline from './Pipeline'
 import * as sql from './sql'
 import { catchError } from './decorators'
 
-import type { ArticleEntity, ArticleWithSimilarity } from './types'
+import type { ArticleEntity, ArticleWithSimilarity, ProcessArticleArgs, SearchArticlesArgs, FiltersArgs } from './types'
 
 @catchError()
 export default class Article {
@@ -21,15 +21,22 @@ export default class Article {
 	}
 
 	async add(content: string) {
-		const res = await this.process(content)
+		const res = await this.process({ content })
 
 		return res?.id || null
 	}
 
-	async process(content: string) {
+	async process(args: ProcessArticleArgs) {
 		if (!this.db) return null
 
-		const res = await this.db.query<ArticleEntity>(sql.sql_process_article, [content, null, null, null])
+		const { content, idol_id, root_ids, metrics_ids } = args
+
+		const res = await this.db.query<ArticleEntity>(sql.sql_process_article, [
+			content,
+			idol_id ?? null,
+			root_ids ?? null,
+			metrics_ids ?? null
+		])
 
 		if (res.rows.length === 0) return null
 
@@ -46,8 +53,9 @@ export default class Article {
 		await this.db.query(sql.sql_insert_article_embedding, [article_id, `[${embedding.join(',')}]`])
 	}
 
-	async addWithEmbedding(content: string) {
-		const [err, result] = await to(this.process(content))
+	async addWithEmbedding(content: string, args?: FiltersArgs | string) {
+		const filters = typeof args === 'string' ? { idol_id: args } : (args ?? {})
+		const [err, result] = await to(this.process({ content, ...filters }))
 
 		if (err || !result?.id) return null
 
@@ -86,16 +94,22 @@ export default class Article {
 		await this.db.query(`DELETE FROM ${SCHEMA_KNOWLEDGE}.articles WHERE id = $1`, [article_id])
 	}
 
-	async searchVector(query: string, limit?: number) {
-		return this.searchByVector(query, limit)
+	async searchVector(query: string, limit?: number, filters?: FiltersArgs) {
+		return this.searchByVector({ query, limit, ...filters })
 	}
 
-	async searchFts(query: string, limit?: number) {
-		return this.searchByText(query, limit)
+	async searchFts(query: string, limit?: number, filters?: FiltersArgs) {
+		return this.searchByText({ query, limit, ...filters })
 	}
 
-	async searchByVector(query: string, limit?: number) {
+	async searchByVector(args: SearchArticlesArgs | string, limit?: number) {
 		if (!this.db || !this.pipeline) return []
+
+		const query = typeof args === 'string' ? args : args.query
+		const search_limit = typeof args === 'string' ? limit : args.limit
+		const idol_id = typeof args === 'string' ? undefined : args.idol_id
+		const root_ids = typeof args === 'string' ? undefined : args.root_ids
+		const metrics_ids = typeof args === 'string' ? undefined : args.metrics_ids
 
 		const embedding = await this.pipeline.embed(query)
 
@@ -103,18 +117,30 @@ export default class Article {
 
 		const res = await this.db.query<ArticleWithSimilarity>(sql.sql_search_articles_by_vector, [
 			`[${embedding.join(',')}]`,
-			limit ?? 10
+			search_limit ?? 10,
+			idol_id ?? null,
+			root_ids ?? null,
+			metrics_ids ?? null
 		])
 
 		return res.rows
 	}
 
-	async searchByText(query: string, limit?: number) {
+	async searchByText(args: SearchArticlesArgs | string, limit?: number) {
 		if (!this.db) return []
+
+		const query = typeof args === 'string' ? args : args.query
+		const search_limit = typeof args === 'string' ? limit : args.limit
+		const idol_id = typeof args === 'string' ? undefined : args.idol_id
+		const root_ids = typeof args === 'string' ? undefined : args.root_ids
+		const metrics_ids = typeof args === 'string' ? undefined : args.metrics_ids
 
 		const res = await this.db.query<ArticleWithSimilarity>(sql.sql_search_articles_by_text, [
 			query,
-			limit ?? 10
+			search_limit ?? 10,
+			idol_id ?? null,
+			root_ids ?? null,
+			metrics_ids ?? null
 		])
 
 		return res.rows.map(r => ({

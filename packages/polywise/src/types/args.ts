@@ -93,8 +93,13 @@ export interface ProcessArticleArgs extends FiltersArgs {
 	metadata?: Metadata
 }
 
-export interface AddArticleArgs {
+export interface AddArticleArgs extends FiltersArgs {
 	content: string
+}
+
+export interface SearchArticlesArgs extends FiltersArgs {
+	query: string
+	limit?: number
 }
 
 export interface ArticleArgs {

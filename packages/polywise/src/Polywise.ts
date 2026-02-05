@@ -598,7 +598,16 @@ export default class Polywise {
 	}
 
 	private async executeSingleSearch(args: SingleSearchArgs) {
-		const { query, recall_depth, search_limit, rerank_limit, stimulate_on_recall, idol_id, root_ids } = args
+		const {
+			query,
+			recall_depth,
+			search_limit,
+			rerank_limit,
+			stimulate_on_recall,
+			idol_id,
+			root_ids,
+			metrics_ids
+		} = args
 
 		const query_embedding = (await this.pipeline.embed(query)) as number[]
 
@@ -608,21 +617,24 @@ export default class Polywise {
 			stimulate_intensity: stimulate_on_recall ? MEMORY_RECALL_INTENSITY : 0,
 			query_embedding: query_embedding ?? undefined,
 			idol_id,
-			root_ids
+			root_ids,
+			metrics_ids
 		})
 
 		const search_results = await this.pipeline.search({
 			query,
 			rerank_limit: search_limit,
-			vector_search: () => this.article.searchVector(query, search_limit),
-			fulltext_search: () => this.article.searchFts(query, search_limit)
+			vector_search: () =>
+				this.article.searchVector(query, search_limit, { idol_id, root_ids, metrics_ids }),
+			fulltext_search: () => this.article.searchFts(query, search_limit, { idol_id, root_ids, metrics_ids })
 		})
 
 		const memory_results = await this.memory.search(
 			query,
 			{
 				idol_id: idol_id ?? undefined,
-				root_ids: root_ids ?? undefined
+				root_ids: root_ids ?? undefined,
+				metrics_ids: metrics_ids ?? undefined
 			},
 			search_limit
 		)

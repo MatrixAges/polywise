@@ -30,7 +30,7 @@ describe.concurrent('Article CRUD Operations', () => {
 
 	it('should create article using real-world software documentation', async () => {
 		const content = software_architecture_datasets[0]
-		const article = await poly.article.process(content)
+		const article = await poly.article.process({ content })
 
 		expect(article.id).toBeGreaterThan(0)
 		expect(article.content).toBe(content)
@@ -39,7 +39,7 @@ describe.concurrent('Article CRUD Operations', () => {
 
 	it('should get article by searching for its real content', async () => {
 		const content = cognitive_science_datasets[0]
-		await poly.article.process(content)
+		await poly.article.process({ content })
 
 		const articles = await poly.article.searchFts('Understanding brain architecture', 1)
 
@@ -52,7 +52,7 @@ describe.concurrent('Article CRUD Operations', () => {
 	})
 
 	it('should update real-world article content', async () => {
-		const created = await poly.article.process(software_architecture_datasets[1])
+		const created = await poly.article.process({ content: software_architecture_datasets[1] })
 
 		const updated = await poly.article.update(created.id, 'Updated content for containerization...')
 
@@ -64,7 +64,7 @@ describe.concurrent('Article CRUD Operations', () => {
 	})
 
 	it('should delete article', async () => {
-		const created = await poly.article.process('Content for deletion test.')
+		const created = await poly.article.process({ content: 'Content for deletion test.' })
 
 		await poly.article.delete(created.id)
 
@@ -74,9 +74,9 @@ describe.concurrent('Article CRUD Operations', () => {
 	})
 
 	it('should get all articles', async () => {
-		await poly.article.process('Content 1')
+		await poly.article.process({ content: 'Content 1' })
 
-		await poly.article.process('Content 2')
+		await poly.article.process({ content: 'Content 2' })
 
 		const articles = await poly.article.getAll()
 
@@ -125,7 +125,7 @@ describe.concurrent('Full-Text Search and Vector Search', () => {
 	describe.concurrent('Full-Text Search', () => {
 		it('should find real-world articles matching specific technical keywords', async () => {
 			for (const content of software_architecture_datasets) {
-				await poly.article.process(content)
+				await poly.article.process({ content })
 			}
 
 			const results = await poly.article.searchByText('Microservices architecture', 10)
@@ -136,7 +136,7 @@ describe.concurrent('Full-Text Search and Vector Search', () => {
 
 		it('should search for cognitive science concepts in content', async () => {
 			for (const content of cognitive_science_datasets) {
-				await poly.article.process(content)
+				await poly.article.process({ content })
 			}
 
 			const results = await poly.article.searchFts('billion neurons', 10)

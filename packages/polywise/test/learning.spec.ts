@@ -7,10 +7,9 @@ import { getTestVectors } from '../scripts/getTestVectors'
 import Polywise from '../src/Polywise'
 
 describe.concurrent('Polywise Pure Text Learning', () => {
-	let poly: Polywise
-	const unique_id = Math.random().toString(36).slice(2)
-	const db_name = `:polywise_learning_${unique_id}:`
 	const datasets_dir = path.resolve(__dirname, './datasets/text')
+	const db_name = ':polywise_learning:'
+	let poly: Polywise
 
 	beforeAll(async () => {
 		poly = new Polywise()
@@ -48,52 +47,64 @@ describe.concurrent('Polywise Pure Text Learning', () => {
 
 	describe.concurrent('Large Scale Text Ingestion and Retrieval', () => {
 		it('should ingest complex literature and perform semantic search', async () => {
+			const idol_id = `lit_${Math.random().toString(36).slice(2)}`
 			const text = await loadDataset('complex_literature')
 			const chunks = chunkText(text, 1500).slice(0, 20)
 
 			for (let i = 0; i < chunks.length; i++) {
-				await poly.article.addWithEmbedding(chunks[i])
+				await poly.article.addWithEmbedding(chunks[i], idol_id)
 			}
 
-			const results = await poly.article.searchByVector(
-				'What are the main social interactions described in the text?',
-				5
-			)
+			const results = await poly.article.searchByVector({
+				query: 'What are the main social interactions described in the text?',
+				limit: 5,
+				idol_id
+			})
 
 			expect(results.length).toBeGreaterThan(0)
 			expect(results[0].similarity).toBeGreaterThan(0.3)
 		}, 120000)
 
 		it('should handle cross-domain knowledge retrieval (Neuroscience vs Philosophy)', async () => {
+			const idol_id = `cross_${Math.random().toString(36).slice(2)}`
 			const neuro_text = await loadDataset('neuroscience')
 			const phil_text = await loadDataset('philosophy')
 
-			await poly.article.addWithEmbedding(`Neuroscience Overview: ${neuro_text.slice(0, 5000)}`)
+			await poly.article.addWithEmbedding(`Neuroscience Overview: ${neuro_text.slice(0, 5000)}`, idol_id)
+			await poly.article.addWithEmbedding(`Philosophy Overview: ${phil_text.slice(0, 5000)}`, idol_id)
 
-			await poly.article.addWithEmbedding(`Philosophy Overview: ${phil_text.slice(0, 5000)}`)
-
-			const neuro_results = await poly.article.searchByText('nervous system and brain functions', 5)
+			const neuro_results = await poly.article.searchByText({
+				query: 'nervous system and brain functions',
+				limit: 5,
+				idol_id
+			})
 
 			expect(neuro_results.some(r => r.content.includes('Neuroscience'))).toBe(true)
 
-			const phil_results = await poly.article.searchByVector('nature of reality and existence', 5)
+			const phil_results = await poly.article.searchByVector({
+				query: 'nature of reality and existence',
+				limit: 5,
+				idol_id
+			})
 
 			expect(phil_results.some(r => r.content.includes('Philosophy'))).toBe(true)
 		}, 120000)
 
 		it('should process AI research papers and extract relevant concepts via RAG', async () => {
+			const idol_id = `ai_${Math.random().toString(36).slice(2)}`
 			const ai_text = await loadDataset('ai_research')
 			const chunks = chunkText(ai_text, 1200).slice(0, 10)
 
 			for (const chunk of chunks) {
-				await poly.article.addWithEmbedding(chunk)
+				await poly.article.addWithEmbedding(chunk, idol_id)
 			}
 
 			const query = 'transformer architecture and self-attention mechanism'
 			const { knowledges } = await poly.query({
 				query,
 				search_limit: 5,
-				rerank_limit: 3
+				rerank_limit: 3,
+				idol_id
 			})
 
 			expect(knowledges.length).toBeGreaterThan(0)
@@ -101,16 +112,21 @@ describe.concurrent('Polywise Pure Text Learning', () => {
 		}, 120000)
 
 		it('should maintain performance with legal and physics datasets', async () => {
+			const idol_id = `perf_${Math.random().toString(36).slice(2)}`
 			const legal_text = await loadDataset('legal')
 			const physics_text = await loadDataset('physics')
 
 			await Promise.all([
-				poly.article.addWithEmbedding(`Legal Foundations: ${legal_text.slice(0, 8000)}`),
-				poly.article.addWithEmbedding(`Physics Principles: ${physics_text.slice(0, 8000)}`)
+				poly.article.addWithEmbedding(`Legal Foundations: ${legal_text.slice(0, 8000)}`, idol_id),
+				poly.article.addWithEmbedding(`Physics Principles: ${physics_text.slice(0, 8000)}`, idol_id)
 			])
 
 			const startTime = Date.now()
-			const results = await poly.article.searchByVector('quantum mechanics and constitutional law', 10)
+			const results = await poly.article.searchByVector({
+				query: 'quantum mechanics and constitutional law',
+				limit: 10,
+				idol_id
+			})
 			const duration = Date.now() - startTime
 
 			expect(results.length).toBeGreaterThan(0)

@@ -108,6 +108,9 @@ export const sql_search_articles_by_text = `
     ts_rank(to_tsvector('english', coalesce(content,'')), websearch_to_tsquery('english', $1)) AS rank
   FROM ${SCHEMA_KNOWLEDGE}.articles
   WHERE to_tsvector('english', coalesce(content,'')) @@ websearch_to_tsquery('english', $1)
+    AND ($3::text IS NULL OR idol_id = $3)
+    AND ($4::text[] IS NULL OR root_ids && $4)
+    AND ($5::text[] IS NULL OR metrics_ids && $5)
   ORDER BY rank DESC
   LIMIT $2
 `
@@ -201,6 +204,9 @@ export const sql_search_articles_by_vector = `
     1 - (e.embedding <=> $1) AS similarity
   FROM ${SCHEMA_KNOWLEDGE}.articles a
   JOIN ${SCHEMA_KNOWLEDGE}.article_embeddings e ON a.id = e.article_id
+  WHERE ($3::text IS NULL OR a.idol_id = $3)
+    AND ($4::text[] IS NULL OR a.root_ids && $4)
+    AND ($5::text[] IS NULL OR a.metrics_ids && $5)
   ORDER BY e.embedding <=> $1
   LIMIT $2
 `
