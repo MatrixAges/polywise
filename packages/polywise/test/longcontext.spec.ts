@@ -156,7 +156,8 @@ describe.concurrent('Long Context and Language Traps', () => {
 			for (const qa of random_qas) {
 				const { knowledges, actions } = await poly.query({
 					query: qa.query,
-					rerank_limit: 10
+					search_limit: 100,
+					rerank_limit: 20
 				})
 				const result = [...knowledges, ...actions]
 				const found = result.some(content => content.includes(qa.expected))

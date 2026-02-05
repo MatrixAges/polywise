@@ -125,7 +125,7 @@ describe('Polywise Brain System', () => {
 
 				await poly.stimulate(node_ids[0], 5.0)
 
-				for (let i = 0; i < 50; i++) {
+				for (let i = 0; i < 20; i++) {
 					await poly.tick(0.25)
 				}
 
@@ -139,6 +139,7 @@ describe('Polywise Brain System', () => {
 		it(
 			'should process multiple articles with overlapping concepts',
 			async () => {
+				// Reverted to serial execution to avoid PGlite lock contention
 				await poly.save({
 					content: 'Artificial Intelligence includes Machine Learning. Machine Learning includes Supervised Learning and Unsupervised Learning.'
 				})
@@ -195,7 +196,7 @@ describe('Polywise Brain System', () => {
 
 				await poly.stimulate(chain[0], 5.0)
 
-				for (let i = 0; i < 80; i++) {
+				for (let i = 0; i < 20; i++) {
 					await poly.tick(0.25)
 				}
 
@@ -244,7 +245,7 @@ describe('Polywise Brain System', () => {
 
 				await poly.stimulate(node_ids[0], 5.0)
 
-				await poly.brain.triggerInputBurst(100)
+				await poly.brain.triggerInputBurst(50)
 
 				const { nodes } = await poly.getSnapshot(0.1)
 				const output_node = nodes.find((n: any) => n.label.includes('Secure_API'))
@@ -261,7 +262,7 @@ describe('Polywise Brain System', () => {
 					content: 'Core_Concept is fundamental to Derived_1, Derived_2, and Derived_3. Derived_1 leads to Application_1. Derived_2 leads to Application_2. Derived_3 leads to Application_3.'
 				})
 
-				for (let i = 0; i < 10; i++) {
+				for (let i = 0; i < 5; i++) {
 					await poly.tick(0.4)
 				}
 

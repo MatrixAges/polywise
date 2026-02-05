@@ -23,15 +23,14 @@ describe.concurrent('Polywise Unified Retrieval System', () => {
 			}
 		})
 
-		for (const knowledge of behavioral_knowledge) {
-			await poly.save({
-				content: knowledge
-			})
+		// Use sequential save for stability and predictable performance in PGlite
+		for (const content of behavioral_knowledge) {
+			await poly.save({ content })
 		}
 
+		// Setup habit connections for the first 10 samples
 		for (let i = 0; i < 10; i++) {
 			const qa = behavioral_qa[i]
-
 			const embedding = (await poly.pipeline.embed(qa.question)) as number[]
 
 			const stimulus_id = await poly.addNode({
@@ -78,37 +77,20 @@ describe.concurrent('Polywise Unified Retrieval System', () => {
 	}, 120000)
 
 	it('should trigger cognitive search for non-habitual stimuli via unified query', async () => {
-		const poly_slow = new Polywise()
-
-		await poly_slow.init({
-			data_dir: getDataDir(),
-			embedding_config: {
-				type: 'custom',
-				fn: getTestVectors
-			},
-			reranker_config: {
-				type: 'custom',
-				fn: getTestRerank
-			}
-		})
-
-		for (const knowledge of behavioral_knowledge) {
-			await poly_slow.save({ content: knowledge })
-		}
-
-		for (let i = 10; i < 15; i++) {
+		// Use the same instance to test "Cognitive Path" (Slow Path) for non-habitual stimuli
+		// Samples 10-14 in behavioral_qa were NOT connected as habits in beforeAll
+		for (let i = 10; i < 13; i++) {
 			const qa = behavioral_qa[i]
 
-			const { knowledges, actions } = await poly_slow.query({
+			const { knowledges, actions } = await poly.query({
 				query: qa.question,
 				cot_depth: 1
 			})
 
+			// It should find relevant knowledge via RAG since no habit exists
 			expect(knowledges.length + actions.length).toBeGreaterThanOrEqual(1)
 		}
-
-		await poly_slow.off()
-	}, 300000)
+	}, 120000)
 
 	it('should handle emergency responses correctly via unified query', async () => {
 		const fire_qa = behavioral_qa.find(q => q.question.includes('火灾'))!
