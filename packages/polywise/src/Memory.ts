@@ -55,6 +55,10 @@ export default class Memory {
 			const prompt = `Classify the relationship between the NEW info and EXISTING memory.
 Options: DUPLICATE, UPDATE, NEW.
 
+EXISTING: "I like Blue."
+NEW: "I like Blue."
+Relationship: DUPLICATE
+
 EXISTING: "My name is John."
 NEW: "I am John."
 Relationship: DUPLICATE
@@ -74,12 +78,12 @@ Relationship:`
 			const decision = await this.pipeline.decide(prompt, { max_new_tokens: 5 })
 			const normalized = decision.split('\n')[0].toUpperCase().trim()
 
-			if (normalized.includes('DUPLICATE')) {
+			if (normalized.startsWith('DUPLICATE')) {
 				await this.exec(sql_memory.sql_update_long_term_frequency, [similar[0].id])
 				return
 			}
 
-			if (normalized.includes('UPDATE')) {
+			if (normalized.startsWith('UPDATE')) {
 				await this.queryRaw(sql_memory.sql_update_long_term_content, [
 					content,
 					vector_str,

@@ -398,10 +398,13 @@ Respond with ONLY "YES" or "NO".
 Input: "I like coffee."
 Output: YES
 
-Input: "Please remember that I am allergic to peanuts."
+Input: "Please remember my birthday is June 1st."
 Output: YES
 
-Input: "Hello how are you?"
+Input: "I am a software engineer."
+Output: YES
+
+Input: "Hello!"
 Output: NO
 
 Input: "Just checking in."
@@ -410,13 +413,16 @@ Output: NO
 Input: "What time is it?"
 Output: NO
 
+Input: "The weather is nice."
+Output: NO
+
 Input: "${content}"
 Output:`
 
 		const decision = await this.pipeline.decide(prompt, { max_new_tokens: 5 })
 
 		const normalized = decision.split('\n')[0].toUpperCase().trim()
-		return normalized === 'YES' || normalized.includes('YES')
+		return normalized === 'YES' || normalized.startsWith('YES')
 	}
 
 	private cosineSimilarity(v1: number[], v2: number[]) {
