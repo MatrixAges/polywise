@@ -1,7 +1,9 @@
 import { singleton } from 'tsyringe'
 
 import { ChainEmitter, processResults, getRandomId } from './utils'
+import { getNextStepPrompt } from './consts'
 import type Polywise from './Polywise'
+
 import type { CortexProcessArgs, WorkingMemory, Step } from './types/cortex'
 import type { Knowledge, Action, FinalQueryResult } from './types/polywise'
 
@@ -178,15 +180,7 @@ export default class Cortex {
 			.map(s => `Thought: ${s.thought}\nQuery: ${s.query}\nResult: ${s.result_summary}`)
 			.join('\n---\n')
 
-		const prompt = `Goal: "${wm.original_goal}"
-History:
-${history}
-
-Task: Determine the single next search query needed to deepen understanding.
-If sufficient information is gathered, reply "DONE".
-Reply with ONLY the query or "DONE".
-
-Next Query:`
+		const prompt = getNextStepPrompt(wm.original_goal, history)
 
 		const decision = await this.poly.pipeline.decide(prompt, { max_new_tokens: 30, temperature: 0.3 })
 		const query = decision.trim().split('\n')[0].replace(/"/g, '')

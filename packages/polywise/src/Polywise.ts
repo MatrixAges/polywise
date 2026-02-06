@@ -44,7 +44,8 @@ import {
 	MAX_HABIT_CONSOLIDATION,
 	MEMORY_RECALL_INTENSITY,
 	NO_ACTIVITY_SUMMARY,
-	SNAPSHOT_WEIGHT_THRESHOLD
+	SNAPSHOT_WEIGHT_THRESHOLD,
+	getProactiveStatementPrompt
 } from './consts'
 
 import type {
@@ -314,32 +315,7 @@ export default class Polywise {
 	}
 
 	private async isProactiveStatement(content: string) {
-		const prompt = `Assess if the input is a personal preference, user instruction, or a significant fact worth remembering for future sessions.
-Respond with ONLY "YES" or "NO".
-
-Input: "I like coffee."
-Output: YES
-
-Input: "Please remember my birthday is June 1st."
-Output: YES
-
-Input: "I am a software engineer."
-Output: YES
-
-Input: "Hello!"
-Output: NO
-
-Input: "Just checking in."
-Output: NO
-
-Input: "What time is it?"
-Output: NO
-
-Input: "The weather is nice."
-Output: NO
-
-Input: "${content}"
-Output:`
+		const prompt = getProactiveStatementPrompt(content)
 
 		const decision = await this.pipeline.decide(prompt, { max_new_tokens: 5 })
 
