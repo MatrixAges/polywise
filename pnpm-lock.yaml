@@ -470,6 +470,9 @@ importers:
       '@abraham/reflection':
         specifier: ^0.13.0
         version: 0.13.0
+      '@chonkiejs/core':
+        specifier: ^0.0.7
+        version: 0.0.7
       '@electric-sql/pglite':
         specifier: ^0.3.15
         version: 0.3.15
@@ -827,6 +830,12 @@ packages:
 
   '@chevrotain/utils@11.0.3':
     resolution: {integrity: sha512-YslZMgtJUyuMbZ+aKvfF3x1f5liK4mWNxghFRv7jqRR9C3R3fAOGTTKvxXDa2Y1s9zSbcpuO0cAxDYsc9SrXoQ==}
+
+  '@chonkiejs/chunk@0.9.3':
+    resolution: {integrity: sha512-uUOeoFGY3s6kzAoKskI50weZN0zvW3oLwUijA1uX7Wxuy9yZStF2IvGuXRigMgP2g/L85lsotYGkjpBMLjQnrg==}
+
+  '@chonkiejs/core@0.0.7':
+    resolution: {integrity: sha512-R17OW9TT1x7B6lDKTCaMd6NluAObleN/cCQtUbMK2UcFOguJtQz/cL0n1t0AzJWBFMVgYP8EcqTFn/fcKhzPiA==}
 
   '@clack/core@0.5.0':
     resolution: {integrity: sha512-p3y0FIOwaYRUPRcMO7+dlmLh8PSRcrjuTndsiA0WAFbWES0mLZlrjVoBRZ9DzkPFJZG6KGkJmoEAY0ZcVWTkow==}
@@ -6221,6 +6230,12 @@ snapshots:
   '@chevrotain/types@11.0.3': {}
 
   '@chevrotain/utils@11.0.3': {}
+
+  '@chonkiejs/chunk@0.9.3': {}
+
+  '@chonkiejs/core@0.0.7':
+    dependencies:
+      '@chonkiejs/chunk': 0.9.3
 
   '@clack/core@0.5.0':
     dependencies:

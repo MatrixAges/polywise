@@ -22,6 +22,7 @@
 	},
 	"dependencies": {
 		"@abraham/reflection": "^0.13.0",
+		"@chonkiejs/core": "^0.0.7",
 		"@electric-sql/pglite": "^0.3.15",
 		"@huggingface/transformers": "^3.3.2",
 		"await-to-js": "^3.0.0",
