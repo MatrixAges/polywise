@@ -72,6 +72,10 @@ This document provides an overview of the packages/polywise module structure and
 				"index.ts": { "desc": "Utils exports", "role": "Index" },
 				"isIdle.ts": { "desc": "Idle state checker", "role": "Utility" },
 				"migrate.ts": { "desc": "Migration execution utility", "role": "Utility" },
+				"processText.ts": {
+					"desc": "Text processing utility for large text slicing",
+					"role": "Utility"
+				},
 				"validateMigrations.ts": { "desc": "Migration validation utility", "role": "Utility" },
 				"migration.ts": { "desc": "Database schema migration system", "role": "Module" }
 			}
@@ -83,12 +87,17 @@ This document provides an overview of the packages/polywise module structure and
 			"article.spec.ts": { "desc": "Article tests", "role": "Test" },
 			"cot.spec.ts": { "desc": "Chain of thought tests", "role": "Test" },
 			"learning.spec.ts": { "desc": "Pure text learning and large scale dataset tests", "role": "Test" },
+			"longembedding.spec.ts": {
+				"desc": "Long text embedding and fact preservation tests",
+				"role": "Test"
+			},
 			"react.spec.ts": { "desc": "React system and habitual behavior tests", "role": "Test" },
 			"datasets": {
 				"behavioral.ts": { "desc": "Behavioral prompts and benchmarks", "role": "Data" },
 				"cognitive.ts": { "desc": "Cognitive and reasoning datasets", "role": "Data" },
 				"decision.ts": { "desc": "Decision logic and intelligence prompts", "role": "Data" },
 				"longcontext.ts": { "desc": "Long context retrieval datasets", "role": "Data" },
+				"longembedding.ts": { "desc": "Large scale embedding datasets", "role": "Data" },
 				"software.ts": { "desc": "Software architecture and development datasets", "role": "Data" },
 				"traps.ts": { "desc": "Linguistic and logical traps for robustness testing", "role": "Data" },
 				"text": {

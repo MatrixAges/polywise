@@ -14,6 +14,7 @@ import {
 	DEFAULT_CONCURRENCY
 } from './consts'
 import { catchError, catchFinally } from './decorators'
+import processText from './utils/processText'
 
 import type {
 	EmbeddingConfig,
@@ -127,25 +128,47 @@ export default class Pipeline {
 		}
 	}
 
-	async embed(text: string) {
-		return this.embedding_queue.add(async () => {
-			if (this.embedding_config.type === 'custom') {
-				const { fn } = this.embedding_config
+	async embed(text: string): Promise<number[]> {
+		const chunks = await processText(text)
 
-				return await fn(text)
+		const results = await Promise.all(
+			chunks.map(chunk =>
+				this.embedding_queue.add(async () => {
+					if (this.embedding_config.type === 'custom') {
+						const { fn } = this.embedding_config
+
+						return (await fn(chunk)) as number[]
+					}
+
+					const embedding = await this.loadEmbeddingModel()
+
+					const output = await embedding(chunk, {
+						pooling: POOLING_MEAN,
+						normalize: true,
+						truncation: true,
+						max_length: 2048
+					})
+
+					return Array.from((output as any).data) as number[]
+				})
+			)
+		)
+
+		if (results.length === 1) {
+			return results[0] as number[]
+		}
+
+		const vectors = results as number[][]
+		const vector_length = vectors[0].length
+		const summed_vector = new Array(vector_length).fill(0)
+
+		for (const vec of vectors) {
+			for (let i = 0; i < vector_length; i++) {
+				summed_vector[i] += vec[i]
 			}
+		}
 
-			const embedding = await this.loadEmbeddingModel()
-
-			const output = await embedding(text, {
-				pooling: POOLING_MEAN,
-				normalize: true,
-				truncation: true,
-				max_length: 2048
-			})
-
-			return Array.from((output as any).data)
-		})
+		return summed_vector.map(val => val / vectors.length)
 	}
 
 	async rerank(query: string, documents: string[]) {
