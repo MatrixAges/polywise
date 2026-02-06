@@ -57,16 +57,24 @@ EXISTING: "${existing_content}"
 NEW: "${new_content}"
 Relationship:`
 
-export const prompt_boolean_logic = `Answer with TRUE or FALSE.
+export const prompt_boolean_logic = `Task: Logical Reasoning
+Instruction: Answer the question with ONLY "TRUE" or "FALSE".
 
+Example 1:
 Q: If P implies Q, and P is true, is Q true?
 A: TRUE
 
-Q: If it rains, ground is wet. It is raining. Is the ground wet?
+Example 2:
+Q: If it rains, the ground is wet. It is raining. Is the ground wet?
 A: TRUE
 
-Q: If P implies Q, and P is true, is Q true?
-A: `
+Example 3:
+Q: If P is false, is P true?
+A: FALSE
+
+Current Task:
+Q: If A implies B, and A is true, is B true?
+A:`
 
 export const prompt_temporal_logic = `Identify the temporal relationship. Respond with ONLY "YES" or "NO".
 
@@ -111,13 +119,18 @@ Sentiment: POSITIVE
 Text: "I love this product, it is amazing!"
 Sentiment:`
 
-export const prompt_negative_constraints = `List three colors. Do NOT mention Blue.
+export const prompt_negative_constraints = `Instruction: List three colors. Do NOT mention Red. Respond with ONLY the color names.
+
+Example 1:
+Input: List three colors. Do NOT mention Blue.
 Output: Red, Green, Yellow
 
-List three colors. Do NOT mention Red.
-Output: Blue, Green, Yellow
+Example 2:
+Input: List three colors. Do NOT mention Green.
+Output: Blue, Red, Yellow
 
-List three colors. Do NOT mention Blue.
+Current Task:
+Input: List three colors. Do NOT mention Red.
 Output:`
 
 export const prompt_json_format = `Return a JSON object.
@@ -140,7 +153,14 @@ A: 10
 Q: 2+2
 A: `
 
-export const prompt_sky_color = 'What color is the sky on a clear day?'
+export const prompt_sky_color = `Q: What is the primary color of the sky on a clear day?
+A: Blue
+
+Q: What color is the grass?
+A: Green
+
+Q: What color is the sky on a clear day?
+A: `
 
 export const prompt_causality = 'If it rains, does the ground get wet? Answer YES or NO.'
 

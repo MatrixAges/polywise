@@ -137,7 +137,7 @@ describe('Decision Model & Intelligence', () => {
 				const res = await pipeline.decide(datasets_decision.prompt_negative_constraints, {
 					max_new_tokens: 20
 				})
-				expect(res.toUpperCase()).not.toContain('BLUE')
+				expect(res.toUpperCase()).not.toContain('RED')
 			})
 
 			it('should format output as requested', async () => {
