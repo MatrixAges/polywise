@@ -9,11 +9,11 @@ import Brain from './Brain'
 import Log from './Log'
 import Pipeline from './Pipeline'
 import Memory from './Memory'
+import Cortex from './Cortex'
 import * as sql from './sql'
 import * as sql_meta from './sql/meta'
 import { catchError, catchFinally } from './decorators'
 import {
-	ChainEmitter,
 	CURRENT_SCHEMA_VERSION,
 	migrate,
 	validateMigrations,
@@ -28,10 +28,7 @@ import {
 	stimulateNodes,
 	strengthenRelatedEdges,
 	handleHabitReaction,
-	getHabits,
-	formEmergentQuery,
-	performEmergentSearch,
-	emitCotResult
+	getHabits
 } from './utils'
 
 import {
@@ -39,19 +36,14 @@ import {
 	CONSOLIDATION_ENTRY_PREFIX,
 	CONSOLIDATION_POTENTIAL_THRESHOLD,
 	DEFAULT_EDGE_WEIGHT,
-	DEFAULT_HABIT_THRESHOLD,
 	DEFAULT_NODE_THRESHOLD,
 	DEFAULT_RECALL_DEPTH,
-	DEFAULT_RERANK_LIMIT,
-	DEFAULT_SEARCH_LIMIT,
 	DEFAULT_TIMESTAMP_FORMAT,
 	HABIT_CONSOLIDATION_WEIGHT,
 	HABIT_LTM_PREFIX,
 	MAX_HABIT_CONSOLIDATION,
 	MEMORY_RECALL_INTENSITY,
 	NO_ACTIVITY_SUMMARY,
-	PROACTIVE_EXAMPLES,
-	PROACTIVE_SIMILARITY_THRESHOLD,
 	SNAPSHOT_WEIGHT_THRESHOLD
 } from './consts'
 
@@ -65,10 +57,8 @@ import type {
 	QueryArgs,
 	RecallArgs,
 	SingleSearchArgs,
-	ExecuteCotArgs,
 	RecallNodesByKeywordsArgs,
 	StrengthenRelatedEdgesArgs,
-	Knowledge,
 	Action,
 	FiltersArgs,
 	FinalQueryResult
@@ -86,6 +76,7 @@ export default class Polywise {
 	public pipeline: Pipeline
 	public log: Log
 	public memory: Memory
+	public cortex: Cortex
 
 	constructor() {
 		this.log = new Log()
@@ -93,6 +84,7 @@ export default class Polywise {
 		this.article = new Article(this.pipeline)
 		this.brain = new Brain()
 		this.memory = new Memory()
+		this.cortex = new Cortex()
 	}
 
 	async init(args: PolywiseArgs = {}) {
@@ -143,6 +135,7 @@ export default class Polywise {
 		})
 
 		this.memory.init(this.db, this.pipeline)
+		this.cortex.init(this)
 
 		await this.initDatabase()
 	}
@@ -245,89 +238,18 @@ export default class Polywise {
 		this.brain.reportUserActivity()
 		this.brain.setBusy(true)
 
-		const {
-			query,
-			recall_depth = DEFAULT_RECALL_DEPTH,
-			search_limit = DEFAULT_SEARCH_LIMIT,
-			rerank_limit = DEFAULT_RERANK_LIMIT,
-			cot_depth = 0,
-			stimulate_on_recall = true,
-			habit_threshold = DEFAULT_HABIT_THRESHOLD,
-			idol_id = this.idol_id,
-			root_ids = this.root_ids
-		} = args
-
-		const emitter = new ChainEmitter()
-
-		const query_embedding = ((await this.pipeline.embed(query)) as number[]) || []
-
-		const { knowledges: initial_knowledges, actions: initial_actions } = await this.executeSingleSearch({
-			query,
-			recall_depth,
-			search_limit,
-			rerank_limit,
-			stimulate_on_recall,
-			idol_id: idol_id ?? undefined,
-			root_ids: root_ids ?? undefined
+		const result = await this.cortex.process({
+			...args,
+			idol_id: args.idol_id ?? this.idol_id ?? undefined,
+			root_ids: args.root_ids ?? this.root_ids ?? undefined
 		})
-
-		await this.handleHabitReaction({
-			query,
-			query_embedding,
-			initial_actions,
-			habit_threshold
-		})
-
-		const {
-			knowledges: k_strings,
-			actions: a_strings,
-			metadata
-		} = await processResults(query, initial_knowledges, initial_actions, this.pipeline)
-
-		if (cot_depth <= 0) {
-			const result = {
-				knowledges: k_strings,
-				actions: a_strings,
-				metadata,
-				cot: (emitter.finish({ knowledges: k_strings, actions: a_strings, metadata }) as any) || emitter
-			}
-
-			this.log.write(args, result)
-
-			return result
-		}
-
-		const history_ids = new Set([...initial_knowledges, ...initial_actions].map(r => r.id))
-
-		this.executeCot({
-			query,
-			current_depth: 1,
-			max_depth: cot_depth,
-			base_recall_depth: recall_depth,
-			search_limit,
-			rerank_limit,
-			stimulate_on_recall,
-			initial_knowledges,
-			initial_actions,
-			emitter,
-			history_ids,
-			idol_id,
-			root_ids
-		})
-
-		const result = {
-			knowledges: k_strings,
-			actions: a_strings,
-			metadata,
-			cot: emitter
-		}
 
 		this.log.write(args, result)
 
 		return result
 	}
 
-	private async handleHabitReaction(args: {
+	async handleHabitReaction(args: {
 		query: string
 		query_embedding: number[]
 		initial_actions: Action[]
@@ -623,7 +545,7 @@ Output:`
 		}
 	}
 
-	private async executeSingleSearch(args: SingleSearchArgs) {
+	async executeSingleSearch(args: SingleSearchArgs) {
 		const {
 			query,
 			recall_depth,
@@ -699,209 +621,8 @@ Output:`
 		}
 	}
 
-	private async getHabits(query_embedding: number[]) {
+	async getHabits(query_embedding: number[]) {
 		return await getHabits(query_embedding, this.queryRaw.bind(this))
-	}
-
-	@catchError(function (this: Polywise, error: any, args: ExecuteCotArgs) {
-		const { query, emitter, initial_knowledges, initial_actions } = args
-
-		if (this.isDbError(error)) {
-			if (emitter.isActiveStatus()) {
-				processResults(query, initial_knowledges, initial_actions, this.pipeline).then(data => {
-					emitter.finish(data)
-				})
-			}
-
-			return true
-		}
-
-		console.error('CoT Execution Error:', error)
-
-		if (emitter.isActiveStatus()) {
-			processResults(query, initial_knowledges, initial_actions, this.pipeline).then(data => {
-				emitter.finish(data)
-			})
-		}
-	})
-	private async executeCot(args: ExecuteCotArgs) {
-		const {
-			query,
-			current_depth,
-			max_depth,
-			base_recall_depth,
-			search_limit,
-			rerank_limit,
-			stimulate_on_recall,
-			initial_knowledges,
-			initial_actions,
-			emitter,
-			history_ids,
-			idol_id,
-			root_ids
-		} = args
-
-		if (!emitter.isActiveStatus() || current_depth > max_depth || !this.db) {
-			emitter.finish(await processResults(query, initial_knowledges, initial_actions, this.pipeline))
-
-			return
-		}
-
-		const emerged_query = await this.formEmergentQuery({
-			query,
-			current_depth,
-			initial_knowledges,
-			initial_actions
-		})
-
-		const { emerged_knowledges, emerged_actions, emerged_recall_result } = await this.performEmergentSearch({
-			emerged_query,
-			current_depth,
-			base_recall_depth,
-			search_limit,
-			stimulate_on_recall,
-			history_ids,
-			idol_id,
-			root_ids
-		})
-
-		const reranked_knowledges = await rerankKnowledges(
-			emerged_query,
-			emerged_knowledges,
-			rerank_limit,
-			this.pipeline,
-			this.queryRaw.bind(this)
-		)
-
-		const reranked_actions = await rerankActions(
-			emerged_query,
-			emerged_actions,
-			rerank_limit,
-			this.pipeline,
-			this.queryRaw.bind(this)
-		)
-
-		reranked_knowledges.forEach(r => history_ids.add(r.id))
-		reranked_actions.forEach(r => history_ids.add(r.id))
-
-		this.emitCotResult({
-			emitter,
-			current_depth,
-			emerged_query,
-			reranked_knowledges,
-			reranked_actions,
-			emerged_recall_result
-		})
-
-		this.scheduleNextCotStep({
-			query: emerged_query,
-			current_depth,
-			max_depth,
-			base_recall_depth,
-			search_limit,
-			rerank_limit,
-			stimulate_on_recall,
-			initial_knowledges: reranked_knowledges,
-			initial_actions: reranked_actions,
-			emitter,
-			history_ids,
-			idol_id,
-			root_ids
-		})
-	}
-
-	private async performEmergentSearch(args: {
-		emerged_query: string
-		current_depth: number
-		base_recall_depth: number
-		search_limit: number
-		stimulate_on_recall: boolean
-		history_ids: Set<number>
-		idol_id?: string
-		root_ids?: string[]
-	}) {
-		return await performEmergentSearch(args, this)
-	}
-
-	private async emitCotResult(args: {
-		emitter: ChainEmitter
-		current_depth: number
-		emerged_query: string
-		reranked_knowledges: Knowledge[]
-		reranked_actions: Action[]
-		emerged_recall_result: any
-	}) {
-		await emitCotResult({ ...args, pipeline: this.pipeline })
-	}
-
-	private scheduleNextCotStep(args: ExecuteCotArgs) {
-		const {
-			query,
-			current_depth,
-			max_depth,
-			base_recall_depth,
-			search_limit,
-			rerank_limit,
-			stimulate_on_recall,
-			initial_knowledges,
-			initial_actions,
-			emitter,
-			history_ids,
-			idol_id,
-			root_ids
-		} = args
-
-		if (current_depth < max_depth && (initial_knowledges.length > 0 || initial_actions.length > 0)) {
-			setImmediate(async () => {
-				if (!this.db) {
-					emitter.finish(
-						await processResults(query, initial_knowledges, initial_actions, this.pipeline)
-					)
-
-					return
-				}
-
-				this.executeCot({
-					query,
-					current_depth: current_depth + 1,
-					max_depth,
-					base_recall_depth,
-					search_limit,
-					rerank_limit,
-					stimulate_on_recall,
-					initial_knowledges,
-					initial_actions,
-					emitter,
-					history_ids,
-					idol_id,
-					root_ids
-				})
-			})
-		} else {
-			processResults(query, initial_knowledges, initial_actions, this.pipeline).then(data => {
-				emitter.finish(data)
-			})
-		}
-	}
-
-	private isDbError(e: any) {
-		const msg = e.message || ''
-		return (
-			msg.includes('DB not initialized') ||
-			msg.includes('closed') ||
-			msg.includes('signature mismatch') ||
-			msg.includes('null function') ||
-			e?.name === 'RuntimeError'
-		)
-	}
-
-	private async formEmergentQuery(args: {
-		query: string
-		current_depth: number
-		initial_knowledges: Knowledge[]
-		initial_actions: Action[]
-	}) {
-		return await formEmergentQuery(args, (node_ids, intensity) => this.stimulateNodes(node_ids, intensity))
 	}
 
 	private async recallNodesByKeywords(args: RecallNodesByKeywordsArgs) {
