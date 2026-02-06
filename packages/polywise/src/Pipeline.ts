@@ -177,7 +177,7 @@ export default class Pipeline {
 
 			const decision = await this.loadDecisionModel()
 
-			const { max_new_tokens = 64, temperature = 0.1, top_k = 20, top_p = 0.9 } = options
+			const { max_new_tokens = 64, temperature = 0.6, top_k = 20, top_p = 0.9 } = options
 
 			const output = await decision(prompt, {
 				max_new_tokens,
