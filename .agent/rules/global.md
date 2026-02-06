@@ -174,6 +174,36 @@ async getNodes() {
 }
 ```
 
+### SQL Comments (CRITICAL)
+
+All exported SQL strings or functions in `src/sql/` MUST be preceded by a JSDoc-style comment (`/** ... */`). This comment must describe:
+
+1.    **Operation**: What specific database action is being performed.
+2.    **Role**: The purpose of this operation within the larger system architecture.
+
+**Good:**
+
+```typescript
+/**
+ * Decays the weight of weak edges.
+ * Role: Implements the "forgetting curve" for weak memories, allowing unused connections to fade over time.
+ */
+export const sql_sleep_tick_decay = `
+  UPDATE ${SCHEMA_BRAIN}.edges
+  SET weight = GREATEST(weight - 0.01, 0.001)
+  WHERE weight < 0.2;
+`
+```
+
+**Avoid:**
+
+```typescript
+// Updates edges
+export const sql_sleep_tick_decay = `...`
+
+export const sql_sleep_tick_decay = `...`
+```
+
 ## Class Function Ordering
 
 When organizing class functions, follow this strict order:

@@ -13,6 +13,14 @@ import {
 	TICK_POTENTIAL_MAX
 } from '../consts'
 
+/**
+ * The core simulation step for the neural graph.
+ * Role:
+ * 1. Propagates activation: Nodes fire if they cross a threshold, sending signals to connected neighbors.
+ * 2. Updates node states: Adjusts potential based on input, decay, and firing (reset).
+ * 3. Updates edge weights: Implements Hebbian learning (strengthens active-active connections) and decay (weakens unused ones).
+ * 4. Adjusts distances: Recalculates "distance" (cost) based on weight for pathfinding.
+ */
 export const sql_tick = (threshold: number) => `
   WITH incoming_signals AS (
     SELECT 
@@ -54,19 +62,35 @@ export const sql_tick = (threshold: number) => `
   SET distance = GREATEST(1.0 / (weight + 0.1), ${EDGE_DISTANCE_MIN});
 `
 
+/**
+ * Creates a new node in the graph.
+ * Role: Instantiates a new concept or entity within the brain.
+ */
 export const sql_add_node = `
   INSERT INTO ${SCHEMA_BRAIN}.nodes (label, x, y, threshold, idol_id, root_ids, metrics_ids, metadata, embedding, is_action)
   VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
   RETURNING id
 `
 
+/**
+ * Creates a directed edge between two nodes.
+ * Role: Establishes a relationship or association between two concepts.
+ */
 export const sql_connect = `
   INSERT INTO ${SCHEMA_BRAIN}.edges (source_id, target_id, weight, idol_id, root_ids, metrics_ids, metadata, is_habit)
   VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 `
 
+/**
+ * Manually injects potential into a specific node.
+ * Role: Provides external stimulation or "attention" to a concept.
+ */
 export const sql_stimulate = `UPDATE ${SCHEMA_BRAIN}.nodes SET potential = potential + $1 WHERE id = $2`
 
+/**
+ * Retrieves a snapshot of active or significant nodes.
+ * Role: Captures the current "state of mind" for visualization or analysis, filtering out dormant nodes.
+ */
 export const sql_get_snapshot_nodes = (weight_threshold: number) => `
   SELECT id, label, x, y, activation, potential, idol_id, root_ids, metrics_ids, metadata, is_action, created_at, updated_at
   FROM ${SCHEMA_BRAIN}.nodes
@@ -75,6 +99,10 @@ export const sql_get_snapshot_nodes = (weight_threshold: number) => `
   OR id IN (SELECT target_id FROM ${SCHEMA_BRAIN}.edges WHERE weight > ${weight_threshold})
 `
 
+/**
+ * Retrieves a snapshot of significant edges.
+ * Role: Captures the active wiring of the brain for visualization or analysis.
+ */
 export const sql_get_snapshot_edges = (weight_threshold: number) => `
   SELECT source_id, target_id, weight, distance, type, idol_id, root_ids, metrics_ids, metadata, is_habit, created_at, updated_at
   FROM ${SCHEMA_BRAIN}.edges
@@ -83,12 +111,20 @@ export const sql_get_snapshot_edges = (weight_threshold: number) => `
   LIMIT ${SNAPSHOT_EDGES_LIMIT}
 `
 
+/**
+ * Inserts a new article into the knowledge base.
+ * Role: Ingests raw textual knowledge/content into the system.
+ */
 export const sql_process_article = `
   INSERT INTO ${SCHEMA_KNOWLEDGE}.articles (content, idol_id, root_ids, metrics_ids) 
   VALUES ($1, $2, $3, $4) 
   RETURNING id, content, created_at
 `
 
+/**
+ * Inserts a new node or updates an existing one, boosting its potential.
+ * Role: Ensures a concept exists and reinforces it (learning), triggering activation if it's already present.
+ */
 export const sql_upsert_node = `
   INSERT INTO ${SCHEMA_BRAIN}.nodes (label, x, y, potential, idol_id, root_ids, metrics_ids, metadata, embedding, is_action)
   VALUES ($1, random() * 800, random() * 600, 1.0, $2, $3, $4, $5, $6, $7)
@@ -103,6 +139,10 @@ export const sql_upsert_node = `
     updated_at = CURRENT_TIMESTAMP;
 `
 
+/**
+ * Performs a full-text search on articles using PostgreSQL's text search vectors.
+ * Role: Traditional keyword-based document retrieval.
+ */
 export const sql_search_articles_by_text = `
   SELECT id, content, created_at,
     ts_rank(to_tsvector('english', coalesce(content,'')), websearch_to_tsquery('english', $1)) AS rank
@@ -115,8 +155,16 @@ export const sql_search_articles_by_text = `
   LIMIT $2
 `
 
+/**
+ * Begins a transaction for batch triple injection.
+ * Role: Ensures atomicity when ingesting large sets of structured knowledge (triples).
+ */
 export const sql_inject_triples_begin = `BEGIN`
 
+/**
+ * Inserts a new edge derived from a triple (Subject-Predicate-Object) if it doesn't exist.
+ * Role: Translates structured knowledge into graph connections.
+ */
 export const sql_inject_triples_insert_edge = (
 	sub_id: number,
 	obj_id: number,
@@ -134,6 +182,10 @@ export const sql_inject_triples_insert_edge = (
   WHERE NOT EXISTS (SELECT 1 FROM ${SCHEMA_BRAIN}.edges WHERE source_id = ${sub_id} AND target_id = ${obj_id});
 `
 
+/**
+ * Updates an existing edge derived from a triple.
+ * Role: Reinforces and updates metadata/properties of existing knowledge connections.
+ */
 export const sql_inject_triples_update_edge = (
 	sub_id: number,
 	obj_id: number,
@@ -158,44 +210,88 @@ export const sql_inject_triples_update_edge = (
   WHERE source_id = ${sub_id} AND target_id = ${obj_id};
 `
 
+/**
+ * Commits the triple injection transaction.
+ * Role: Finalizes the bulk knowledge ingestion.
+ */
 export const sql_inject_triples_commit = `COMMIT`
 
+/**
+ * Helper query to find a node ID by label during upsert.
+ * Role: Internal check to determine if an insert or update is needed.
+ */
 export const sql_upsert_node_select = `SELECT id FROM ${SCHEMA_BRAIN}.nodes WHERE label = $1`
 
+/**
+ * Links a node to its source article.
+ * Role: Establishes provenance, allowing the system to trace concepts back to the documents that generated them.
+ */
 export const sql_node_sources = `INSERT INTO ${SCHEMA_BRAIN}.node_sources (node_id, article_id) VALUES ($1, $2) ON CONFLICT DO NOTHING;`
 
+/**
+ * Retrieves all nodes associated with a specific Idol (namespace/context).
+ * Role: Scoped retrieval for multi-tenant or multi-context operations.
+ */
+/**
+ * Retrieves all nodes associated with a specific Idol (namespace/context).
+ * Role: Scoped retrieval for multi-tenant or multi-context operations.
+ */
 export const sql_get_nodes_by_idol = `
   SELECT id, label, x, y, activation, potential, idol_id, root_ids, metrics_ids, metadata, is_action, created_at, updated_at
   FROM ${SCHEMA_BRAIN}.nodes
   WHERE idol_id = $1
 `
 
+/**
+ * Retrieves all nodes associated with a specific Root ID (grouping).
+ * Role: Hierarchical or group-based retrieval.
+ */
 export const sql_get_nodes_by_root = `
   SELECT id, label, x, y, activation, potential, idol_id, root_ids, metrics_ids, metadata, is_action, created_at, updated_at
   FROM ${SCHEMA_BRAIN}.nodes
   WHERE $1 = ANY(root_ids)
 `
 
+/**
+ * Retrieves all edges associated with a specific Idol.
+ * Role: Context-scoped structure retrieval.
+ */
 export const sql_get_edges_by_idol = `
   SELECT source_id, target_id, weight, distance, type, idol_id, root_ids, metrics_ids, metadata, is_habit, created_at, updated_at
   FROM ${SCHEMA_BRAIN}.edges
   WHERE idol_id = $1
 `
 
+/**
+ * Retrieves all edges associated with a specific Root ID.
+ * Role: Group-scoped structure retrieval.
+ */
 export const sql_get_edges_by_root = `
   SELECT source_id, target_id, weight, distance, type, idol_id, root_ids, metrics_ids, metadata, is_habit, created_at, updated_at
   FROM ${SCHEMA_BRAIN}.edges
   WHERE $1 = ANY(root_ids)
 `
 
+/**
+ * Stores the vector embedding for an article.
+ * Role: Enables semantic search by mapping article content to a vector space.
+ */
 export const sql_insert_article_embedding = `
   INSERT INTO ${SCHEMA_KNOWLEDGE}.article_embeddings (article_id, embedding)
   VALUES ($1, $2)
   RETURNING id
 `
 
+/**
+ * Retrieves the stored embedding for an article.
+ * Role: Used for re-indexing or analysis.
+ */
 export const sql_get_article_embedding = `SELECT embedding FROM ${SCHEMA_KNOWLEDGE}.article_embeddings WHERE article_id = $1`
 
+/**
+ * Searches for articles similar to a query vector.
+ * Role: The core of the RAG (Retrieval-Augmented Generation) system, finding relevant knowledge based on meaning.
+ */
 export const sql_search_articles_by_vector = `
   SELECT 
     a.id,
@@ -211,12 +307,28 @@ export const sql_search_articles_by_vector = `
   LIMIT $2
 `
 
+/**
+ * Retrieves the full content of a single article.
+ * Role: Reading the actual text after a search result.
+ */
 export const sql_get_article = `SELECT id, content, created_at FROM ${SCHEMA_KNOWLEDGE}.articles WHERE id = $1`
 
+/**
+ * Retrieves all articles (metadata only).
+ * Role: Bulk export or maintenance listing.
+ */
 export const sql_get_all_articles = `SELECT id, content, created_at FROM ${SCHEMA_KNOWLEDGE}.articles ORDER BY created_at DESC`
 
+/**
+ * Updates an article's content.
+ * Role: Correction or refinement of stored knowledge.
+ */
 export const sql_update_article = `UPDATE ${SCHEMA_KNOWLEDGE}.articles SET content = $2 WHERE id = $1 RETURNING id, content, created_at`
 
+/**
+ * Finds the node most semantically similar to a query vector.
+ * Role: "Grounding" - mapping an abstract vector/thought to a concrete concept node in the graph.
+ */
 export const sql_find_nearest_node = `
   SELECT id, label, activation, potential, threshold, metadata, is_action, 1 - (embedding <=> $1) AS similarity
   FROM ${SCHEMA_BRAIN}.nodes
@@ -225,6 +337,10 @@ export const sql_find_nearest_node = `
   LIMIT 1
 `
 
+/**
+ * Finds the strongest habit (automatic association) from a given node.
+ * Role: Fast-path decision making (System 1 thinking), reacting immediately to a stimulus without deep search.
+ */
 export const sql_find_strongest_habit = `
   SELECT 
     e.target_id, 
@@ -239,16 +355,44 @@ export const sql_find_strongest_habit = `
   LIMIT 1
 `
 
+/**
+ * Updates the vector embedding of a node.
+ * Role: Refining the semantic meaning of a concept node.
+ */
 export const sql_update_node_embedding = `UPDATE ${SCHEMA_BRAIN}.nodes SET embedding = $1 WHERE id = $2`
 
+/**
+ * Marks a node as an "action" node.
+ * Role: Designates nodes that represent executable actions in the real world.
+ */
 export const sql_set_node_as_action = `UPDATE ${SCHEMA_BRAIN}.nodes SET is_action = $1 WHERE id = $2`
 
+/**
+ * Marks an edge as a "habit".
+ * Role: Consolidates a frequently used pathway into an automatic response.
+ */
 export const sql_set_edge_as_habit = `UPDATE ${SCHEMA_BRAIN}.edges SET is_habit = $1 WHERE source_id = $2 AND target_id = $3`
 
+/**
+ * Increments the reaction count on an edge.
+ * Role: Tracks how often a specific pathway triggers a reaction, used for habit formation logic.
+ */
 export const sql_increment_reaction_count = `UPDATE ${SCHEMA_BRAIN}.edges SET reaction_count = reaction_count + 1 WHERE source_id = $1 AND target_id = $2`
 
+/**
+ * Retrieves all nodes.
+ * Role: Full system dump/backup.
+ */
 export const sql_get_all_nodes = `SELECT id, label, x, y, activation, potential, idol_id, root_ids, metrics_ids, metadata, is_action, created_at, updated_at FROM ${SCHEMA_BRAIN}.nodes`
 
+/**
+ * Checks if the articles table exists.
+ * Role: Database integrity check during initialization.
+ */
 export const sql_check_articles_table_exists = `SELECT COUNT(*) as count FROM information_schema.tables WHERE table_schema = '${SCHEMA_KNOWLEDGE}' AND table_name = 'articles'`
 
+/**
+ * Updates an article's embedding vector.
+ * Role: Re-indexing content after updates or model changes.
+ */
 export const sql_update_article_embedding = `UPDATE ${SCHEMA_KNOWLEDGE}.article_embeddings SET embedding = $1 WHERE article_id = $2`
