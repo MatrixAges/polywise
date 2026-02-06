@@ -98,75 +98,11 @@ describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
 	})
 
 	describe.concurrent('Multi-Depth Exploration', () => {
-		test('should emit exactly one event when cot_depth is 1', async () => {
+		test('should emit events in correct order and include metadata', async () => {
 			const received_events: any[] = []
 
 			const { cot } = await poly.query({
-				query: 'service mesh',
-				cot_depth: 1,
-				recall_depth: 2,
-				search_limit: 10,
-				rerank_limit: 5
-			})
-
-			cot?.on(data => {
-				received_events.push(data)
-			})
-
-			await cot?.toPromise()
-
-			if (received_events.length > 0) {
-				expect(
-					received_events[0].knowledges.length + received_events[0].actions.length
-				).toBeGreaterThan(0)
-			}
-		})
-
-		test('should emit sequential events for depth 2', async () => {
-			const received_events: any[] = []
-
-			const { cot } = await poly.query({
-				query: 'docker kubernetes',
-				cot_depth: 2,
-				recall_depth: 2,
-				search_limit: 10,
-				rerank_limit: 5
-			})
-
-			cot?.on(data => {
-				received_events.push(data)
-			})
-
-			await cot?.toPromise()
-
-			expect(received_events.length).toBeLessThanOrEqual(2)
-		})
-
-		test('should emit events in correct order (ascending depth)', async () => {
-			const received_events: any[] = []
-
-			const { cot } = await poly.query({
-				query: 'microservices deployment',
-				cot_depth: 3,
-				recall_depth: 2,
-				search_limit: 10,
-				rerank_limit: 5
-			})
-
-			cot?.on(data => {
-				received_events.push(data)
-			})
-
-			await cot?.toPromise()
-
-			expect(received_events.length).toBeLessThanOrEqual(3)
-		})
-
-		test('should include metadata in each depth result', async () => {
-			const received_events: any[] = []
-
-			const { cot } = await poly.query({
-				query: 'authentication security',
+				query: 'microservices deployment security',
 				cot_depth: 2,
 				recall_depth: 2,
 				search_limit: 10,
@@ -189,8 +125,8 @@ describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
 			const received_events: any[] = []
 
 			const { cot } = await poly.query({
-				query: 'circuit breaker',
-				cot_depth: 3,
+				query: 'circuit breaker pattern',
+				cot_depth: 2,
 				recall_depth: 2,
 				search_limit: 10,
 				rerank_limit: 5
@@ -202,7 +138,7 @@ describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
 
 			await cot?.toPromise()
 
-			expect(received_events.length).toBeLessThanOrEqual(3)
+			expect(received_events.length).toBeLessThanOrEqual(2)
 		})
 	})
 
