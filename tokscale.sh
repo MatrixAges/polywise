@@ -7,4 +7,7 @@ tokscale --opencode --today --light
 # tokscale --opencode --month --light  
 # tokscale --opencode --month
 
+# tokscale --opencode --since 2026-01-01 --until 2027-01-01 --light  
+# tokscale --opencode --since 2026-01-01 --until 2027-01-01
+
 # tokscale wrapped
