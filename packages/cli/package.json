@@ -4,8 +4,8 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
-		"build": "bun build ./src/index.ts --compile --outfile polywise-server",
 		"dev": "bun run ./src/index.ts serve",
+		"build": "bun build ./src/index.ts --compile --outfile polywise-server",
 		"build:lib": "rslib build"
 	},
 	"dependencies": {

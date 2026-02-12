@@ -12,7 +12,9 @@ export const createServer = async (options: ServerOptions) => {
 	app.use('*', cors())
 
 	console.log('Initializing Polywise...')
+
 	await polywise.init(options.polywise)
+
 	console.log('Polywise initialized.')
 
 	app.get('/health', c => c.json({ status: 'ok', version: '1.0.0' }))
@@ -37,6 +39,7 @@ export const createServer = async (options: ServerOptions) => {
 			return c.json(result)
 		} catch (error) {
 			console.error('Query error:', error)
+
 			return c.json({ error: error instanceof Error ? error.message : 'Unknown error' }, 500)
 		}
 	})
@@ -58,6 +61,7 @@ export const createServer = async (options: ServerOptions) => {
 			return c.json({ success: true })
 		} catch (error) {
 			console.error('Save error:', error)
+
 			return c.json({ error: error instanceof Error ? error.message : 'Unknown error' }, 500)
 		}
 	})

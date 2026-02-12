@@ -36,8 +36,8 @@ export default class Cortex {
 		this.working_memory.set(task_id, wm)
 
 		if (process) {
-			emitter.on(data => {
-				process.emit('cot', data)
+			emitter.on((data, steps) => {
+				process.emit(`CoT Step ${steps.length + 1}`, data)
 			})
 		}
 
@@ -81,8 +81,8 @@ export default class Cortex {
 		const emitter = new ChainEmitter()
 
 		if (args.process) {
-			emitter.on(data => {
-				args.process?.emit('cot', data)
+			emitter.on((_data, steps) => {
+				args.process?.emit('cot', steps)
 			})
 		}
 

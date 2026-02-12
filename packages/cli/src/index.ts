@@ -31,7 +31,7 @@ const SaveSchema = z.object({
 	metadata: z.string().optional()
 })
 
-const DEFAULT_DATA_DIR = `${os.homedir()}/.polywise/:database:`
+const DEFAULT_DATA_DIR = `${os.homedir()}/.polywise/:server:`
 const DEFAULT_CACHE_DIR = `${os.homedir()}/.polywise/.models`
 
 program
@@ -135,11 +135,8 @@ program
 			query_process.on(event => {
 				const { key, value } = event
 
-				if (key === 'cot') {
-					console.log(
-						`[CoT Step]:`,
-						typeof value === 'object' ? JSON.stringify(value, null, 2) : value
-					)
+				if (key.startsWith('CoT')) {
+					console.log(`${key}:`, typeof value === 'object' ? JSON.stringify(value, null, 2) : value)
 				} else {
 					console.log(
 						`[Process] ${key}:`,
