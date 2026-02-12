@@ -118,7 +118,7 @@ cot.on(event => {
 
 Polywise manages a high-priority Long-Term Memory (LTM) and a chronological Diary to solve the "recency bias" of neural networks. LTM stores distilled identities and rules, while the Diary provides time-based context.
 
-- **Long-Term Memory**: Automatically distills proactive statements (identity, rules, constraints) and core concept patterns. It features a self-updating LRU mechanism to maintain limited capacity while retaining high-value associations.
+- **Long-Term Memory**: Automatically distills proactive statements (identity, rules, constraints) and core concept patterns. It features a decision-based retention mechanism to maintain limited capacity while retaining high-value associations.
 - **Diary**: Automatically generates session summaries during the **SLEEPING** state. Entries are indexed by time, allowing the system to "remember" the flow of events across days.
 
 ```typescript
