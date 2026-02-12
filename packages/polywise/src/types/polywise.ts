@@ -1,3 +1,6 @@
+import type Pipeline from '@/Pipeline'
+import type { PGlite } from '@electric-sql/pglite'
+
 export interface Triple {
 	subject: string
 	predicate: string

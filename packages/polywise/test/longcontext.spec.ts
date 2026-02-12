@@ -2,6 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 
 import { getTestRerank, getTestVectors } from '../scripts/getTestVectors'
 import Polywise from '../src/Polywise'
+import { getPolywise } from '../src/utils'
 import { long_context_datasets, multi_hop_datasets } from './datasets/longcontext'
 import {
 	homonym_traps_datasets,
@@ -18,7 +19,7 @@ describe.concurrent('Long Context and Language Traps', () => {
 	const random_qas: { query: string; expected: string }[] = []
 
 	beforeAll(async () => {
-		poly = new Polywise()
+		poly = getPolywise()
 
 		await poly.init({
 			data_dir: db_name,
@@ -78,7 +79,7 @@ describe.concurrent('Long Context and Language Traps', () => {
 
 	describe.concurrent('Long Context Scenarios', () => {
 		it('should find the "needle" in a 15,000 character article', async () => {
-			const results = await poly.article.searchFts('stealth mode private memory', 5)
+			const results = await poly.article.searchByText({ query: 'stealth mode private memory', limit: 5 })
 
 			expect(results.length).toBeGreaterThan(0)
 			expect(results[0].content).toContain('Polywise Architecture Deep Dive')
@@ -114,23 +115,32 @@ describe.concurrent('Long Context and Language Traps', () => {
 
 	describe.concurrent('Language Traps', () => {
 		it('should distinguish between different meanings of "Mercury"', async () => {
-			const planet_results = await poly.article.searchFts('Mercury planet orbit days', 1)
+			const planet_results = await poly.article.searchByText({
+				query: 'Mercury planet orbit days',
+				limit: 1
+			})
 
 			expect(planet_results[0].content).toContain('Mercury (Planet)')
 
-			const element_results = await poly.article.searchFts('Mercury metallic element liquid', 1)
+			const element_results = await poly.article.searchByText({
+				query: 'Mercury metallic element liquid',
+				limit: 1
+			})
 
 			expect(element_results[0].content).toContain('Mercury (Element)')
 		})
 
 		it('should not be fooled by negation traps in full-text search', async () => {
-			const results = await poly.article.searchFts('Polywise supports MySQL', 5)
+			const results = await poly.article.searchByText({ query: 'Polywise supports MySQL', limit: 5 })
 
 			expect(results.some(r => r.content.includes('NOT support MySQL'))).toBe(true)
 		})
 
 		it('should prioritize current version over deprecated version in temporal traps', async () => {
-			const results = await poly.article.searchFts('Polywise specification synchronization method', 10)
+			const results = await poly.article.searchByText({
+				query: 'Polywise specification synchronization method',
+				limit: 10
+			})
 
 			const contents = results.map(r => r.content)
 
@@ -139,11 +149,14 @@ describe.concurrent('Long Context and Language Traps', () => {
 		})
 
 		it('should distinguish between Polywise and Polly-Wise/Poly-Wise', async () => {
-			const project_results = await poly.article.searchFts('Polywise architecture', 5)
+			const project_results = await poly.article.searchByText({ query: 'Polywise architecture', limit: 5 })
 
 			expect(project_results.every(r => !r.content.includes('Parrot'))).toBe(true)
 
-			const parrot_results = await poly.article.searchFts('Polly-Wise parrot language', 1)
+			const parrot_results = await poly.article.searchByText({
+				query: 'Polly-Wise parrot language',
+				limit: 1
+			})
 
 			expect(parrot_results[0].content).toContain('Parrot')
 		})

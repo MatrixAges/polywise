@@ -9,6 +9,7 @@ import {
 import { aggregateResults } from './aggregation'
 import { processResults } from './processResults'
 
+import type Polywise from '@/Polywise'
 import type Pipeline from '../Pipeline'
 import type { Action, COTDepthResult, ExecuteCotArgs, Knowledge } from '../types'
 import type ChainEmitter from './ChainEmitter'
@@ -45,7 +46,7 @@ export async function performEmergentSearch(
 		idol_id?: string
 		root_ids?: string[]
 	},
-	poly: any // Passing poly to access its methods
+	poly: Polywise
 ) {
 	const {
 		emerged_query,
@@ -61,9 +62,6 @@ export async function performEmergentSearch(
 	const depth_recall_depth = base_recall_depth + current_depth
 	const query_embedding = (await poly.pipeline.embed(emerged_query)) as number[]
 
-	// Note: We are calling poly.recallFromMemory which is private, but we are passing poly as any.
-	// In a full refactor, recallFromMemory should also be extracted or exposed.
-	// For now, this runtime access works as long as poly has the method.
 	const emerged_recall_result = await poly.recallFromMemory({
 		query: emerged_query,
 		max_depth: depth_recall_depth,
@@ -76,8 +74,10 @@ export async function performEmergentSearch(
 	const emerged_search_results = await poly.pipeline.search({
 		query: emerged_query,
 		rerank_limit: search_limit * SEARCH_LIMIT_FACTOR,
-		vector_search: () => poly.article.searchVector(emerged_query, search_limit * SEARCH_LIMIT_FACTOR),
-		fulltext_search: () => poly.article.searchFts(emerged_query, search_limit * SEARCH_LIMIT_FACTOR)
+		vectorSearch: () =>
+			poly.article.searchByVector({ query: emerged_query, limit: search_limit * SEARCH_LIMIT_FACTOR }),
+		fulltextSearch: () =>
+			poly.article.searchByText({ query: emerged_query, limit: search_limit * SEARCH_LIMIT_FACTOR })
 	})
 
 	const habits = await poly.getHabits(query_embedding)

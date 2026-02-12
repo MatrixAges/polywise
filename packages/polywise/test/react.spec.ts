@@ -2,6 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 
 import { getTestRerank, getTestVectors } from '../scripts/getTestVectors'
 import Polywise from '../src/Polywise'
+import { getPolywise } from '../src/utils'
 import { behavioral_knowledge, behavioral_qa } from './datasets/behavioral'
 import getDataDir from './utils/getDataDir'
 
@@ -10,7 +11,8 @@ describe.concurrent('Polywise Unified Retrieval System', () => {
 	const db_name = getDataDir()
 
 	beforeAll(async () => {
-		poly = new Polywise()
+		poly = getPolywise()
+
 		await poly.init({
 			data_dir: db_name,
 			embedding_config: {

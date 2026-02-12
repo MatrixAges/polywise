@@ -1,3 +1,5 @@
+import { resolve } from 'path'
+
 import { defineConfig } from '@rstest/core'
 
 import afterTest from './scripts/afterTest'
@@ -14,6 +16,7 @@ export default defineConfig({
 	root: './test',
 	setupFiles: ['./utils/setup.ts'],
 	reporters: ['verbose', hooks_reporter],
+	resolve: { alias: { '@': resolve(`${process.cwd()}/src`) } },
 	source: { decorators: { version: 'legacy' } },
 	hookTimeout: 120000,
 	testTimeout: 120000

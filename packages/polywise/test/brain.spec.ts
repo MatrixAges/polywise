@@ -2,6 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 
 import { getTestVectors } from '../scripts/getTestVectors'
 import Polywise from '../src/Polywise'
+import { getPolywise } from '../src/utils'
 import { cognitive_science_datasets } from './datasets/cognitive'
 import { software_architecture_datasets } from './datasets/software'
 import getDataDir from './utils/getDataDir'
@@ -12,7 +13,8 @@ describe('Polywise Brain System', () => {
 	const db_name = getDataDir()
 
 	beforeAll(async () => {
-		poly = new Polywise()
+		poly = getPolywise()
+
 		await poly.init({
 			data_dir: db_name,
 			embedding_config: {
@@ -477,7 +479,7 @@ describe('Polywise Brain System', () => {
 				'Data Science: Data science combines statistics and computer science.'
 			)
 
-			const results = await poly.article.searchByText('programming language', 10)
+			const results = await poly.article.searchByText({ query: 'programming language', limit: 10 })
 
 			expect(results.length).toBeGreaterThan(0)
 
@@ -497,7 +499,10 @@ describe('Polywise Brain System', () => {
 				'Database Systems: Relational databases store structured data using SQL.'
 			)
 
-			const results = await poly.article.searchByVector('artificial intelligence and neural networks', 10)
+			const results = await poly.article.searchByVector({
+				query: 'artificial intelligence and neural networks',
+				limit: 10
+			})
 
 			expect(results.length).toBeGreaterThanOrEqual(1)
 

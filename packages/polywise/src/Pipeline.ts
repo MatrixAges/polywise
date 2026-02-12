@@ -47,12 +47,6 @@ export default class Pipeline {
 	private reranker_promise: Promise<any> | null = null
 	private decision_promise: Promise<any> | null = null
 
-	constructor() {
-		this.embedding_queue = new PQueue({ concurrency: this.embedding_concurrency })
-		this.reranker_queue = new PQueue({ concurrency: this.reranker_concurrency })
-		this.decision_queue = new PQueue({ concurrency: this.decision_concurrency })
-	}
-
 	async init(args: PipelineArgs = {}) {
 		const {
 			cache_dir,
@@ -63,6 +57,10 @@ export default class Pipeline {
 			reranker_concurrency,
 			decision_concurrency
 		} = args
+
+		this.embedding_queue = new PQueue({ concurrency: this.embedding_concurrency })
+		this.reranker_queue = new PQueue({ concurrency: this.reranker_concurrency })
+		this.decision_queue = new PQueue({ concurrency: this.decision_concurrency })
 
 		if (cache_dir) {
 			this.cache_dir = cache_dir
@@ -215,9 +213,9 @@ export default class Pipeline {
 	}
 
 	async search(args: PipelineSearchArgs) {
-		const { query, rerank_limit = 20, vector_search, fulltext_search } = args
+		const { query, rerank_limit = 20, vectorSearch, fulltextSearch } = args
 
-		const [vector_results, fulltext_results] = await Promise.all([vector_search(), fulltext_search()])
+		const [vector_results, fulltext_results] = await Promise.all([vectorSearch(), fulltextSearch()])
 
 		const candidates_map = new Map<number, SearchCandidate>()
 

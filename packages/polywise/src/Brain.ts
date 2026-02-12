@@ -5,27 +5,22 @@ import { calculateFatigue, isIdle } from './utils'
 import { SHADOW_INTERVAL_MS, FATIGUE_THRESHOLD, IDLE_TIMEOUT_MS } from './consts'
 import { catchFinally } from './decorators'
 
-import type Polywise from './Polywise'
+import Polywise from './Polywise'
+
 import type { BrainState } from './types'
-import type { BrainArgs } from './types/args'
 
 @injectable()
 export default class Brain {
-	private poly: Polywise | null = null
+	private p: Polywise
+
 	private state: BrainState = 'FRESH'
 	private shadow_interval?: any
 	private last_user_interaction = Date.now()
 	private current_fatigue = 0
-
-	private on_tick?: () => void
-
 	private is_busy = false
 
-	init(args: BrainArgs) {
-		const { poly, onTick } = args
-
-		this.poly = poly
-		this.on_tick = onTick
+	init(p: Polywise) {
+		this.p = p
 
 		this.startLifeCycleLoop()
 	}
@@ -50,8 +45,6 @@ export default class Brain {
 		this.setBusy(false)
 	})
 	async triggerInputBurst(load = 50) {
-		if (!this.poly) return
-
 		const prev_state = this.state
 
 		this.state = 'LEARNING'
@@ -61,9 +54,9 @@ export default class Brain {
 		this.addSynapticLoad(load)
 
 		for (let i = 0; i < 100; i++) {
-			await this.poly.tick(0.3)
+			await this.p.tick(0.3)
 
-			this.on_tick?.()
+			this.p.onTick?.()
 
 			await new Promise(resolve => setTimeout(resolve, 50))
 		}
@@ -79,11 +72,9 @@ export default class Brain {
 		this.setBusy(false)
 	})
 	async triggerSleepTick() {
-		if (!this.poly) return
-
 		this.state = 'SLEEPING'
 
-		await this.poly.triggerSleepTick()
+		await this.p.triggerSleepTick()
 
 		this.current_fatigue = 0
 
@@ -111,18 +102,14 @@ export default class Brain {
 	}
 
 	private async runShadowTick() {
-		if (!this.poly) return
+		await this.p.runShadowTick()
 
-		await this.poly.runShadowTick()
-
-		this.on_tick?.()
+		this.p.onTick?.()
 	}
 
 	off() {
 		if (this.shadow_interval) {
 			clearInterval(this.shadow_interval)
 		}
-
-		this.poly = null
 	}
 }

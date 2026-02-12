@@ -5,6 +5,7 @@ import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 
 import { getTestVectors } from '../scripts/getTestVectors'
 import Polywise from '../src/Polywise'
+import { getPolywise } from '../src/utils'
 import getDataDir from './utils/getDataDir'
 
 describe.concurrent('Polywise Pure Text Learning', () => {
@@ -13,7 +14,8 @@ describe.concurrent('Polywise Pure Text Learning', () => {
 	let poly: Polywise
 
 	beforeAll(async () => {
-		poly = new Polywise()
+		poly = getPolywise()
+
 		await poly.init({
 			data_dir: db_name,
 			embedding_config: {

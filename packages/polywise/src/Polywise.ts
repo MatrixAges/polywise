@@ -1,6 +1,6 @@
 import { PGlite } from '@electric-sql/pglite'
 import { vector } from '@electric-sql/pglite/vector'
-import { singleton } from 'tsyringe'
+import { singleton, inject, delay } from 'tsyringe'
 import to from 'await-to-js'
 import dayjs from 'dayjs'
 
@@ -13,24 +13,18 @@ import Cortex from './Cortex'
 import * as sql from './sql'
 import * as sql_meta from './sql/meta'
 import { catchError, catchFinally } from './decorators'
+import { CURRENT_SCHEMA_VERSION, migrate, validateMigrations } from './utils/migration'
+import extractKeywords from './utils/extractKeywords'
+import { aggregateResults } from './utils/aggregation'
+import { rerankKnowledges, rerankActions } from './utils/ranking'
 import {
-	CURRENT_SCHEMA_VERSION,
-	migrate,
-	validateMigrations,
-	extractKeywords,
-	processResults,
-	aggregateResults,
-	rerankKnowledges,
-	rerankActions,
 	recallNodesByKeywords,
 	recallRelatedNodes,
 	getNodeContexts,
 	stimulateNodes,
-	strengthenRelatedEdges,
-	handleHabitReaction,
-	getHabits
-} from './utils'
-
+	strengthenRelatedEdges
+} from './utils/graph'
+import { handleHabitReaction, getHabits } from './utils/habits'
 import {
 	CONSOLIDATION_ACTIVE_THRESHOLD,
 	CONSOLIDATION_ENTRY_PREFIX,
@@ -67,28 +61,23 @@ import type {
 
 @singleton()
 export default class Polywise {
-	private db: PGlite | null = null
-	private idol_id: string | null = null
-	private root_ids: string[] | null = null
-	private metrics_ids: string[] | null = null
+	db: PGlite
+	idol_id: string | null = null
+	root_ids: string[] | null = null
+	metrics_ids: string[] | null = null
 
-	public article: Article
-	public brain: Brain
-	public pipeline: Pipeline
-	public log: Log
-	public memory: Memory
-	public cortex: Cortex
+	onTick?: () => void
 
-	constructor() {
-		this.log = new Log()
-		this.pipeline = new Pipeline()
-		this.article = new Article(this.pipeline)
-		this.brain = new Brain()
-		this.memory = new Memory()
-		this.cortex = new Cortex()
-	}
+	constructor(
+		public pipeline: Pipeline,
+		public article: Article,
+		public brain: Brain,
+		public memory: Memory,
+		public cortex: Cortex,
+		public log: Log
+	) {}
 
-	async init(args: PolywiseArgs = {}) {
+	async init(args: PolywiseArgs) {
 		const {
 			data_dir,
 			cache_dir,
@@ -98,25 +87,25 @@ export default class Polywise {
 			embedding_concurrency,
 			reranker_concurrency,
 			decision_concurrency,
-			onTick,
 			log,
 			idol_id,
 			root_ids,
-			metrics_ids
-		} = args
+			metrics_ids,
+			onTick
+		} = args || {}
+
+		this.idol_id = idol_id ?? null
+		this.root_ids = root_ids ?? null
+		this.metrics_ids = metrics_ids ?? null
+
+		this.onTick = onTick
 
 		this.db = new PGlite(data_dir || ':polywise:', {
 			relaxedDurability: true,
 			extensions: { vector }
 		})
 
-		this.idol_id = idol_id ?? null
-		this.root_ids = root_ids ?? null
-		this.metrics_ids = metrics_ids ?? null
-
-		if (log) {
-			this.log.init(typeof log === 'boolean' ? {} : log)
-		}
+		await this.initDatabase()
 
 		await this.pipeline.init({
 			cache_dir,
@@ -128,17 +117,14 @@ export default class Polywise {
 			decision_concurrency
 		})
 
-		this.article.init(this.db)
-
-		this.brain.init({
-			poly: this,
-			onTick
-		})
-
-		this.memory.init(this.db, this.pipeline)
+		this.article.init(this)
+		this.brain.init(this)
+		this.memory.init(this)
 		this.cortex.init(this)
 
-		await this.initDatabase()
+		if (log) {
+			this.log.init(typeof log === 'boolean' ? {} : log)
+		}
 	}
 
 	async getLongMemory(args: FiltersArgs = {}) {
@@ -481,7 +467,7 @@ export default class Polywise {
 		}
 	}
 
-	private async recallFromMemory(args: RecallArgs) {
+	async recallFromMemory(args: RecallArgs) {
 		const {
 			query,
 			max_depth = DEFAULT_RECALL_DEPTH,
@@ -548,9 +534,10 @@ export default class Polywise {
 		const search_results = await this.pipeline.search({
 			query,
 			rerank_limit: search_limit,
-			vector_search: () =>
-				this.article.searchVector(query, search_limit, { idol_id, root_ids, metrics_ids }),
-			fulltext_search: () => this.article.searchFts(query, search_limit, { idol_id, root_ids, metrics_ids })
+			vectorSearch: () =>
+				this.article.searchByVector({ query, limit: search_limit, idol_id, root_ids, metrics_ids }),
+			fulltextSearch: () =>
+				this.article.searchByText({ query, limit: search_limit, idol_id, root_ids, metrics_ids })
 		})
 
 		const memory_results = await this.memory.search(
@@ -637,11 +624,7 @@ export default class Polywise {
 		await this.db.exec(sql_input)
 	}
 
-	private async queryRaw(sql_str: string, params?: any[]) {
-		if (!this.db) {
-			throw new Error('DB not initialized')
-		}
-
+	async queryRaw(sql_str: string, params?: any[]) {
 		const res = params ? await this.db.query(sql_str, params) : await this.db.query(sql_str)
 
 		return JSON.parse(JSON.stringify(res.rows))
@@ -649,9 +632,7 @@ export default class Polywise {
 
 	async off() {
 		this.brain?.off()
-		this.article?.off()
 		this.pipeline?.off()
-		this.memory?.off()
 
 		if (this.db) {
 			await this.db.close()

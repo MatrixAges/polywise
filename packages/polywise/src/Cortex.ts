@@ -2,35 +2,31 @@ import { singleton } from 'tsyringe'
 
 import { ChainEmitter, processResults, getRandomId } from './utils'
 import { getNextStepPrompt } from './consts'
-import type Polywise from './Polywise'
+import Polywise from './Polywise'
 
 import type { CortexProcessArgs, WorkingMemory, Step } from './types/cortex'
 import type { Knowledge, Action, FinalQueryResult } from './types/polywise'
 
 @singleton()
 export default class Cortex {
-	private poly: Polywise | null = null
+	private p: Polywise
+
 	private working_memory: Map<string, WorkingMemory> = new Map()
 
-	init(poly: Polywise) {
-		this.poly = poly
+	init(p: Polywise) {
+		this.p = p
 	}
 
 	async process(args: CortexProcessArgs): Promise<FinalQueryResult> {
-		if (!this.poly) throw new Error('Cortex not initialized')
-
 		const { cot_depth = 0 } = args
 
-		// Fast path: No CoT or simple query
 		if (cot_depth <= 0) {
 			return await this.executeFastPath(args)
 		}
 
-		// CoT Path: Iterative Planning
 		const emitter = new ChainEmitter()
 		const task_id = getRandomId()
 
-		// Initialize Working Memory
 		const wm: WorkingMemory = {
 			original_goal: args.query,
 			steps: [],
@@ -42,19 +38,16 @@ export default class Cortex {
 
 		this.working_memory.set(task_id, wm)
 
-		// Step 0: Initial Search (Base Context) - Executed immediately
 		const initial_data = await this.executeStep(args, args.query, wm)
+
 		this.updateMemory(wm, initial_data)
+		this.runPlanningLoop(task_id, args, emitter, wm)
 
-		// Start the async planning loop (fire and forget)
-		this.runPlanningLoop(task_id, args, emitter, wm) // Pass wm directly
-
-		// Return the initial structure (Step 0 results) with the emitter
 		const { knowledges, actions, metadata } = await processResults(
 			args.query,
 			initial_data.knowledges,
 			initial_data.actions,
-			this.poly.pipeline
+			this.p.pipeline
 		)
 
 		return {
@@ -66,8 +59,6 @@ export default class Cortex {
 	}
 
 	private async executeFastPath(args: CortexProcessArgs): Promise<FinalQueryResult> {
-		if (!this.poly) throw new Error('Cortex not initialized')
-
 		const {
 			query,
 			recall_depth,
@@ -80,10 +71,10 @@ export default class Cortex {
 			metrics_ids
 		} = args
 
-		const query_embedding = ((await this.poly.pipeline.embed(query)) as number[]) || []
+		const query_embedding = ((await this.p.pipeline.embed(query)) as number[]) || []
 		const emitter = new ChainEmitter()
 
-		const { knowledges: initial_knowledges, actions: initial_actions } = await this.poly.executeSingleSearch({
+		const { knowledges: initial_knowledges, actions: initial_actions } = await this.p.executeSingleSearch({
 			query,
 			recall_depth,
 			search_limit,
@@ -94,7 +85,7 @@ export default class Cortex {
 			metrics_ids: metrics_ids ?? undefined
 		})
 
-		await this.poly.handleHabitReaction({
+		await this.p.handleHabitReaction({
 			query,
 			query_embedding,
 			initial_actions,
@@ -105,7 +96,7 @@ export default class Cortex {
 			knowledges: k_strings,
 			actions: a_strings,
 			metadata
-		} = await processResults(query, initial_knowledges, initial_actions, this.poly.pipeline)
+		} = await processResults(query, initial_knowledges, initial_actions, this.p.pipeline)
 
 		const result = {
 			knowledges: k_strings,
@@ -123,49 +114,41 @@ export default class Cortex {
 		emitter: ChainEmitter,
 		wm: WorkingMemory
 	) {
-		if (!this.poly) return
-
 		const { cot_depth = 1 } = args
 
 		try {
-			// Iterative Steps
 			for (let i = 0; i < cot_depth; i++) {
 				if (!emitter.isActiveStatus()) break
 
-				// 1. Plan Next Step
 				const next_query = await this.planNextStep(wm)
 
 				if (next_query === 'DONE') break
 
-				// 2. Execute Step
 				const step_data = await this.executeStep(args, next_query, wm)
 
-				// 3. Update Memory
 				this.updateMemory(wm, step_data)
 
-				// 4. Emit Progress
 				if (step_data.knowledges.length > 0 || step_data.actions.length > 0) {
 					await this.emitProgress(emitter, step_data.knowledges, step_data.actions, next_query)
 				}
 			}
 
-			// Finalize
 			const { knowledges, actions, metadata } = await processResults(
 				wm.original_goal,
 				wm.accumulated_knowledges,
 				wm.accumulated_actions,
-				this.poly.pipeline
+				this.p.pipeline
 			)
 
 			emitter.finish({ knowledges, actions, metadata })
 		} catch (error) {
 			console.error('Cortex Planning Error:', error)
-			// Fallback: Return what we have
+
 			const { knowledges, actions, metadata } = await processResults(
 				wm.original_goal,
 				wm.accumulated_knowledges,
 				wm.accumulated_actions,
-				this.poly.pipeline
+				this.p.pipeline
 			)
 			emitter.finish({ knowledges, actions, metadata })
 		} finally {
@@ -174,15 +157,13 @@ export default class Cortex {
 	}
 
 	private async planNextStep(wm: WorkingMemory): Promise<string> {
-		if (!this.poly) return 'DONE'
-
 		const history = wm.steps
 			.map(s => `Thought: ${s.thought}\nQuery: ${s.query}\nResult: ${s.result_summary}`)
 			.join('\n---\n')
 
 		const prompt = getNextStepPrompt(wm.original_goal, history)
 
-		const decision = await this.poly.pipeline.decide(prompt, { max_new_tokens: 30, temperature: 0.3 })
+		const decision = await this.p.pipeline.decide(prompt, { max_new_tokens: 30, temperature: 0.3 })
 		const query = decision.trim().split('\n')[0].replace(/"/g, '')
 
 		return query.length < 3 ? 'DONE' : query
@@ -193,12 +174,10 @@ export default class Cortex {
 		query: string,
 		wm: WorkingMemory
 	): Promise<{ step: Step; knowledges: Knowledge[]; actions: Action[] }> {
-		if (!this.poly) throw new Error('Polywise lost')
-
 		const { recall_depth, search_limit, rerank_limit, stimulate_on_recall, idol_id, root_ids, metrics_ids } =
 			args
 
-		const { knowledges, actions } = await this.poly.executeSingleSearch({
+		const { knowledges, actions } = await this.p.executeSingleSearch({
 			query,
 			recall_depth,
 			search_limit,
@@ -209,11 +188,9 @@ export default class Cortex {
 			metrics_ids
 		})
 
-		// Filter duplicates
 		const new_knowledges = knowledges.filter(k => !wm.history_ids.has(k.id))
 		const new_actions = actions.filter(a => !wm.history_ids.has(a.id))
 
-		// Summarize results for the Planner
 		const top_results = [...new_knowledges, ...new_actions].slice(0, 3)
 		const summary =
 			top_results.length > 0
@@ -240,13 +217,11 @@ export default class Cortex {
 	}
 
 	private async emitProgress(emitter: ChainEmitter, knowledges: Knowledge[], actions: Action[], query: string) {
-		if (!this.poly) return
-
 		const {
 			knowledges: k_strings,
 			actions: a_strings,
 			metadata
-		} = await processResults(query, knowledges, actions, this.poly.pipeline)
+		} = await processResults(query, knowledges, actions, this.p.pipeline)
 
 		if (emitter.isActiveStatus()) {
 			emitter.emit({ knowledges: k_strings, actions: a_strings, metadata })

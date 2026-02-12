@@ -36,3 +36,29 @@ If sufficient information is gathered, reply "DONE".
 Reply with ONLY the query or "DONE".
 
 Next Query:`
+
+export const getClassifyPrompt = (
+	existing_content: string,
+	content: string
+) => `Classify the relationship between the NEW info and EXISTING memory.
+Options: DUPLICATE, UPDATE, NEW.
+
+EXISTING: "I like Blue."
+NEW: "I like Blue."
+Relationship: DUPLICATE
+
+EXISTING: "My name is John."
+NEW: "I am John."
+Relationship: DUPLICATE
+
+EXISTING: "I live in London."
+NEW: "I moved to Paris."
+Relationship: UPDATE
+
+EXISTING: "I like apples."
+NEW: "The sky is blue."
+Relationship: NEW
+
+EXISTING: "${existing_content}"
+NEW: "${content}"
+Relationship:`

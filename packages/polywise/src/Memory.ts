@@ -1,21 +1,19 @@
 import { injectable } from 'tsyringe'
 import dayjs from 'dayjs'
 
+import { getClassifyPrompt } from './consts'
 import { sql_memory } from './sql'
 import { LONG_TERM_CAPACITY, LTM_DECAY_LAMBDA, PRIORITY_WEIGHTS, TIME_DECAY_HALFLIFE_DAYS } from './consts'
+import Polywise from './Polywise'
 
 import type { FiltersArgs, Knowledge } from './types'
-import type Pipeline from './Pipeline'
-import type { PGlite } from '@electric-sql/pglite'
 
 @injectable()
 export default class Memory {
-	private db: PGlite | null = null
-	private pipeline: Pipeline | null = null
+	private p: Polywise
 
-	init(db: PGlite, pipeline: Pipeline) {
-		this.db = db
-		this.pipeline = pipeline
+	init(p: Polywise) {
+		this.p = p
 	}
 
 	async getLongMemory(args: FiltersArgs = {}) {
@@ -39,10 +37,8 @@ export default class Memory {
 	}
 
 	async saveLongTerm(content: string, args: FiltersArgs = {}) {
-		if (!this.pipeline) return
-
 		const { idol_id, root_ids, metrics_ids } = args
-		const embedding = (await this.pipeline.embed(content)) as number[]
+		const embedding = (await this.p.pipeline.embed(content)) as number[]
 
 		if (!embedding) return
 
@@ -52,30 +48,9 @@ export default class Memory {
 
 		if (similar.length > 0) {
 			const existing_content = similar[0].content
-			const prompt = `Classify the relationship between the NEW info and EXISTING memory.
-Options: DUPLICATE, UPDATE, NEW.
+			const prompt = getClassifyPrompt(existing_content, content)
 
-EXISTING: "I like Blue."
-NEW: "I like Blue."
-Relationship: DUPLICATE
-
-EXISTING: "My name is John."
-NEW: "I am John."
-Relationship: DUPLICATE
-
-EXISTING: "I live in London."
-NEW: "I moved to Paris."
-Relationship: UPDATE
-
-EXISTING: "I like apples."
-NEW: "The sky is blue."
-Relationship: NEW
-
-EXISTING: "${existing_content}"
-NEW: "${content}"
-Relationship:`
-
-			const decision = await this.pipeline.decide(prompt, { max_new_tokens: 5 })
+			const decision = await this.p.pipeline.decide(prompt, { max_new_tokens: 5 })
 			const normalized = decision.split('\n')[0].toUpperCase().trim()
 
 			if (normalized.startsWith('DUPLICATE')) {
@@ -142,10 +117,8 @@ Relationship:`
 	}
 
 	async saveDiary(content: string, timestamp: string, args: FiltersArgs = {}) {
-		if (!this.pipeline) return
-
 		const { idol_id, root_ids, metrics_ids } = args
-		const embedding = (await this.pipeline.embed(content)) as number[]
+		const embedding = (await this.p.pipeline.embed(content)) as number[]
 
 		await this.queryRaw(sql_memory.sql_insert_diary, [
 			content,
@@ -158,10 +131,8 @@ Relationship:`
 	}
 
 	async search(query: string, args: FiltersArgs = {}, limit = 5) {
-		if (!this.pipeline) return []
-
 		const { idol_id, root_ids, metrics_ids } = args
-		const embedding = (await this.pipeline.embed(query)) as number[]
+		const embedding = (await this.p.pipeline.embed(query)) as number[]
 
 		if (!embedding) return []
 
@@ -224,22 +195,16 @@ Relationship:`
 	}
 
 	private async exec(sql_str: string, params?: any[]) {
-		if (!this.db) return
 		if (params) {
-			await this.db.query(sql_str, params)
+			await this.p.db.query(sql_str, params)
 		} else {
-			await this.db.exec(sql_str)
+			await this.p.db.exec(sql_str)
 		}
 	}
 
 	private async queryRaw(sql_str: string, params?: any[]) {
-		if (!this.db) return []
-		const res = params ? await this.db.query(sql_str, params) : await this.db.query(sql_str)
-		return JSON.parse(JSON.stringify(res.rows))
-	}
+		const res = params ? await this.p.db.query(sql_str, params) : await this.p.db.query(sql_str)
 
-	off() {
-		this.db = null
-		this.pipeline = null
+		return JSON.parse(JSON.stringify(res.rows))
 	}
 }

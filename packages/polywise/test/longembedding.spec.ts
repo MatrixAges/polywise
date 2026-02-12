@@ -2,6 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 
 import { getTestVectors } from '../scripts/getTestVectors'
 import Polywise from '../src/Polywise'
+import { getPolywise } from '../src/utils'
 import processText from '../src/utils/processText'
 import { long_text } from './datasets/longembedding'
 import getDataDir from './utils/getDataDir'
@@ -11,7 +12,8 @@ describe.concurrent('Long Text Embedding & Fact Preservation', () => {
 	const db_name = getDataDir()
 
 	beforeAll(async () => {
-		poly = new Polywise()
+		poly = getPolywise()
+
 		await poly.init({
 			data_dir: db_name,
 			embedding_config: {
@@ -49,14 +51,20 @@ describe.concurrent('Long Text Embedding & Fact Preservation', () => {
 		})
 
 		it('should find the article when searching for the author "Jane Austen"', async () => {
-			const results = await poly.article.searchByVector('Who is the author of the book?', 1)
+			const results = await poly.article.searchByVector({
+				query: 'Who is the author of the book?',
+				limit: 1
+			})
 
 			expect(results.length).toBeGreaterThan(0)
 			expect(results[0].content).toContain('Jane Austen')
 		})
 
 		it('should find the article when searching for the publisher "George Allen"', async () => {
-			const results = await poly.article.searchByVector('Who published this book and where?', 1)
+			const results = await poly.article.searchByVector({
+				query: 'Who published this book and where?',
+				limit: 1
+			})
 
 			expect(results.length).toBeGreaterThan(0)
 			expect(results[0].content).toContain('GEORGE ALLEN')
@@ -64,7 +72,10 @@ describe.concurrent('Long Text Embedding & Fact Preservation', () => {
 		})
 
 		it('should find the article when searching for its original writing date "1796"', async () => {
-			const results = await poly.article.searchByVector('When was the first shape of this book written?', 1)
+			const results = await poly.article.searchByVector({
+				query: 'When was the first shape of this book written?',
+				limit: 1
+			})
 
 			expect(results.length).toBeGreaterThan(0)
 			expect(results[0].content).toContain('1796')

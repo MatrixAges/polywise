@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it } from '@rstest/core'
 
 import { getTestRerank, getTestVectors } from '../scripts/getTestVectors'
 import Polywise from '../src/Polywise'
+import { getPolywise } from '../src/utils'
 import { behavioral_knowledge, behavioral_qa } from './datasets/behavioral'
 import getDataDir from './utils/getDataDir'
 
@@ -12,7 +13,8 @@ describe('Memory System', () => {
 	const data_dir = getDataDir()
 
 	beforeEach(async () => {
-		poly = new Polywise()
+		poly = getPolywise()
+
 		await poly.init({
 			data_dir,
 			embedding_config: {

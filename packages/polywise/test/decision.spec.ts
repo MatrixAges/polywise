@@ -3,6 +3,7 @@ import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 import { getTestDecision } from '../scripts/getTestVectors'
 import Pipeline from '../src/Pipeline'
 import Polywise from '../src/Polywise'
+import { getPolywise } from '../src/utils'
 import * as datasets_decision from './datasets/decision'
 import getDataDir from './utils/getDataDir'
 
@@ -12,7 +13,8 @@ describe('Decision Model & Intelligence', () => {
 	const db_name = getDataDir()
 
 	beforeAll(async () => {
-		poly = new Polywise()
+		poly = getPolywise()
+
 		await poly.init({
 			data_dir: db_name,
 			decision_config: {

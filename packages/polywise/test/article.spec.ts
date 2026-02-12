@@ -2,6 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 
 import { getTestVectors } from '../scripts/getTestVectors'
 import Polywise from '../src/Polywise'
+import { getPolywise } from '../src/utils'
 import { cognitive_science_datasets } from './datasets/cognitive'
 import { software_architecture_datasets } from './datasets/software'
 import getDataDir from './utils/getDataDir'
@@ -11,7 +12,7 @@ describe.concurrent('Article CRUD Operations', () => {
 	const db_name = getDataDir()
 
 	beforeAll(async () => {
-		poly = new Polywise()
+		poly = getPolywise()
 
 		await poly.init({
 			data_dir: db_name,
@@ -41,7 +42,7 @@ describe.concurrent('Article CRUD Operations', () => {
 		const content = cognitive_science_datasets[0]
 		await poly.article.process({ content })
 
-		const articles = await poly.article.searchFts('Understanding brain architecture', 1)
+		const articles = await poly.article.searchByText({ query: 'Understanding brain architecture', limit: 1 })
 
 		expect(articles.length).toBe(1)
 
@@ -84,14 +85,15 @@ describe.concurrent('Article CRUD Operations', () => {
 	})
 
 	it('should search articles with empty database', async () => {
-		const empty_poly = new Polywise()
+		const empty_poly = getPolywise()
+
 		await empty_poly.init({
 			data_dir: getDataDir(),
 			embedding_concurrency: 10,
 			reranker_concurrency: 10
 		})
 
-		const results = await empty_poly.article.searchFts('test', 10)
+		const results = await empty_poly.article.searchByText({ query: 'test', limit: 10 })
 
 		expect(results).toEqual([])
 
@@ -104,7 +106,7 @@ describe.concurrent('Full-Text Search and Vector Search', () => {
 	const db_name = getDataDir()
 
 	beforeAll(async () => {
-		poly = new Polywise()
+		poly = getPolywise()
 
 		await poly.init({
 			data_dir: db_name,
@@ -127,7 +129,7 @@ describe.concurrent('Full-Text Search and Vector Search', () => {
 				await poly.article.process({ content })
 			}
 
-			const results = await poly.article.searchByText('Microservices architecture', 10)
+			const results = await poly.article.searchByText({ query: 'Microservices architecture', limit: 10 })
 
 			expect(results.length).toBeGreaterThanOrEqual(1)
 			expect(results.some(r => r.content.includes('Microservices'))).toBe(true)
@@ -138,14 +140,14 @@ describe.concurrent('Full-Text Search and Vector Search', () => {
 				await poly.article.process({ content })
 			}
 
-			const results = await poly.article.searchFts('billion neurons', 10)
+			const results = await poly.article.searchByText({ query: 'billion neurons', limit: 10 })
 
 			expect(results.length).toBeGreaterThanOrEqual(1)
 			expect(results[0].content).toContain('neurons')
 		})
 
 		it('should return empty array for non-existent technical terms', async () => {
-			const results = await poly.article.searchFts('NonExistentQuantumServiceMesh', 10)
+			const results = await poly.article.searchByText({ query: 'NonExistentQuantumServiceMesh', limit: 10 })
 
 			expect(results).toEqual([])
 		})

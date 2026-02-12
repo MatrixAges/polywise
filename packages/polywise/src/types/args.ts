@@ -177,8 +177,8 @@ export interface AggregateResultsArgs {
 export interface PipelineSearchArgs {
 	query: string
 	rerank_limit?: number
-	vector_search: () => Promise<ArticleSearchResult[]>
-	fulltext_search: () => Promise<ArticleSearchResult[]>
+	vectorSearch: () => Promise<ArticleSearchResult[]>
+	fulltextSearch: () => Promise<ArticleSearchResult[]>
 }
 
 export interface SingleSearchArgs extends FiltersArgs {
