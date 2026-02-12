@@ -2,7 +2,6 @@ import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 
 import { getTestVectors } from '../scripts/getTestVectors'
 import Polywise from '../src/Polywise'
-import { getPolywise } from '../src/utils'
 import processText from '../src/utils/processText'
 import { long_text } from './datasets/longembedding'
 import getDataDir from './utils/getDataDir'
@@ -12,7 +11,7 @@ describe.concurrent('Long Text Embedding & Fact Preservation', () => {
 	const db_name = getDataDir()
 
 	beforeAll(async () => {
-		poly = getPolywise()
+		poly = new Polywise()
 
 		await poly.init({
 			data_dir: db_name,

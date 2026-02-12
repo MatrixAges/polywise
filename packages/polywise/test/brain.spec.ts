@@ -2,7 +2,6 @@ import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 
 import { getTestVectors } from '../scripts/getTestVectors'
 import Polywise from '../src/Polywise'
-import { getPolywise } from '../src/utils'
 import { cognitive_science_datasets } from './datasets/cognitive'
 import { software_architecture_datasets } from './datasets/software'
 import getDataDir from './utils/getDataDir'
@@ -13,7 +12,7 @@ describe('Polywise Brain System', () => {
 	const db_name = getDataDir()
 
 	beforeAll(async () => {
-		poly = getPolywise()
+		poly = new Polywise()
 
 		await poly.init({
 			data_dir: db_name,

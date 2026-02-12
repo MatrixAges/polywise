@@ -2,7 +2,6 @@ import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 
 import { getTestRerank, getTestVectors } from '../scripts/getTestVectors'
 import Polywise from '../src/Polywise'
-import { getPolywise } from '../src/utils'
 import { long_context_datasets, multi_hop_datasets } from './datasets/longcontext'
 import {
 	homonym_traps_datasets,
@@ -19,7 +18,7 @@ describe.concurrent('Long Context and Language Traps', () => {
 	const random_qas: { query: string; expected: string }[] = []
 
 	beforeAll(async () => {
-		poly = getPolywise()
+		poly = new Polywise()
 
 		await poly.init({
 			data_dir: db_name,

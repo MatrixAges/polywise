@@ -1,6 +1,6 @@
 import { PGlite } from '@electric-sql/pglite'
 import { vector } from '@electric-sql/pglite/vector'
-import { singleton, inject, delay } from 'tsyringe'
+import { singleton, container } from 'tsyringe'
 import to from 'await-to-js'
 import dayjs from 'dayjs'
 
@@ -61,21 +61,19 @@ import type {
 
 @singleton()
 export default class Polywise {
+	public pipeline: Pipeline = container.resolve(Pipeline)
+	public article: Article = container.resolve(Article)
+	public brain: Brain = container.resolve(Brain)
+	public memory: Memory = container.resolve(Memory)
+	public cortex: Cortex = container.resolve(Cortex)
+	public log: Log = container.resolve(Log)
+
 	db: PGlite
 	idol_id: string | null = null
 	root_ids: string[] | null = null
 	metrics_ids: string[] | null = null
 
 	onTick?: () => void
-
-	constructor(
-		public pipeline: Pipeline,
-		public article: Article,
-		public brain: Brain,
-		public memory: Memory,
-		public cortex: Cortex,
-		public log: Log
-	) {}
 
 	async init(args: PolywiseArgs) {
 		const {

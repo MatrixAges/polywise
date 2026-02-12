@@ -2,7 +2,6 @@ import { afterEach, beforeEach, describe, expect, it } from '@rstest/core'
 
 import { getTestVectors } from '../scripts/getTestVectors'
 import Polywise from '../src/Polywise'
-import { getPolywise } from '../src/utils'
 import getDataDir from './utils/getDataDir'
 
 describe('Polywise Temporal Mechanics', () => {
@@ -10,7 +9,7 @@ describe('Polywise Temporal Mechanics', () => {
 	const test_dir = getDataDir()
 
 	beforeEach(async () => {
-		poly = getPolywise()
+		poly = new Polywise()
 
 		await poly.init({
 			data_dir: test_dir,

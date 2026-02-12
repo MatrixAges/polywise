@@ -2,7 +2,6 @@ import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 
 import { getTestVectors } from '../scripts/getTestVectors'
 import Polywise from '../src/Polywise'
-import { getPolywise } from '../src/utils'
 import getDataDir from './utils/getDataDir'
 
 describe('Polywise Save Implementation', () => {
@@ -10,7 +9,7 @@ describe('Polywise Save Implementation', () => {
 	const db_name = getDataDir()
 
 	beforeAll(async () => {
-		poly = getPolywise()
+		poly = new Polywise()
 
 		await poly.init({
 			data_dir: db_name,

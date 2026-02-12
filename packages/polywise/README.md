@@ -78,7 +78,7 @@ packages/polywise/
 Inject knowledge from articles or structured data:
 
 ```typescript
-const poly = getPolywise()
+const poly = new Polywise()
 await poly.init({ data_dir: './my-memory' })
 
 await poly.save({

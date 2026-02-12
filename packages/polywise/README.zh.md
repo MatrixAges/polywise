@@ -78,7 +78,7 @@ packages/polywise/
 从文章或结构化数据中注入知识：
 
 ```typescript
-const poly = getPolywise()
+const poly = new Polywise()
 await poly.init({ data_dir: './my-memory' })
 
 await poly.save({
