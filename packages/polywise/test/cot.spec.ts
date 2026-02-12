@@ -39,11 +39,9 @@ describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
 
 		await getTestVectors('init')
 
-		await Promise.all(software_architecture_datasets.map(content => poly.article.addWithEmbedding(content)))
-
-		await Promise.all(cognitive_science_datasets.map(content => poly.article.addWithEmbedding(content)))
-
 		await Promise.all([
+			software_architecture_datasets.map(content => poly.article.addWithEmbedding(content)),
+			cognitive_science_datasets.map(content => poly.article.addWithEmbedding(content)),
 			poly.save({
 				content: 'Comprehensive knowledge graph covering microservices, containers, orchestration, and observability.'
 			}),
@@ -66,8 +64,8 @@ describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
 
 			expect(knowledges.length + actions.length).toBeGreaterThan(0)
 			expect(cot).toBeDefined()
-			expect(typeof cot?.on).toBe('function')
-			expect(typeof cot?.off).toBe('function')
+			expect(typeof cot.on).toBe('function')
+			expect(typeof cot.off).toBe('function')
 		})
 
 		test('should return empty cot emitter when cot_depth is 0', async () => {
@@ -77,8 +75,8 @@ describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
 			})
 
 			expect(cot).toBeDefined()
-			expect(typeof cot?.on).toBe('function')
-			expect(typeof cot?.off).toBe('function')
+			expect(typeof cot.on).toBe('function')
+			expect(typeof cot.off).toBe('function')
 		})
 
 		test('should contain hybrid search results', async () => {
@@ -109,13 +107,14 @@ describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
 				rerank_limit: 5
 			})
 
-			cot?.on(data => {
+			cot.on(data => {
 				received_events.push(data)
 			})
 
-			await cot?.toPromise()
+			await cot.toPromise()
 
 			expect(received_events.length).toBeLessThanOrEqual(2)
+
 			if (received_events.length > 0) {
 				expect(typeof received_events[0].metadata).toBe('object')
 			}
@@ -136,7 +135,7 @@ describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
 				received_events.push(data)
 			})
 
-			await cot?.toPromise()
+			await cot.toPromise()
 
 			expect(received_events.length).toBeLessThanOrEqual(2)
 		})
@@ -157,7 +156,7 @@ describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
 				final_total = total
 			})
 
-			await cot?.toPromise()
+			await cot.toPromise()
 
 			if (steps.length > 0) {
 				expect(final_total.length).toBe(steps.length)

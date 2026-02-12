@@ -119,7 +119,7 @@ export default class Cortex {
 
 		try {
 			for (let i = 0; i < cot_depth; i++) {
-				if (!emitter.isActiveStatus()) break
+				if (!emitter.isActiveStatus() || !this.p.db) break
 
 				const next_query = await this.planNextStep(wm)
 
@@ -147,13 +147,17 @@ export default class Cortex {
 		} catch (error) {
 			console.error('Cortex Planning Error:', error)
 
-			const { knowledges, actions, metadata } = await processResults(
-				wm.original_goal,
-				wm.accumulated_knowledges,
-				wm.accumulated_actions,
-				this.p.pipeline
-			)
-			emitter.finish({ knowledges, actions, metadata })
+			if (this.p.db) {
+				const { knowledges, actions, metadata } = await processResults(
+					wm.original_goal,
+					wm.accumulated_knowledges,
+					wm.accumulated_actions,
+					this.p.pipeline
+				)
+				emitter.finish({ knowledges, actions, metadata })
+			} else {
+				emitter.finish({ knowledges: [], actions: [], metadata: {} as any })
+			}
 		} finally {
 			this.working_memory.delete(task_id)
 		}

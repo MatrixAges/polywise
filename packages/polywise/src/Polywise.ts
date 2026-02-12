@@ -66,12 +66,12 @@ import type {
 
 @singleton()
 export default class Polywise {
-	public pipeline: Pipeline = container.resolve(Pipeline)
-	public article: Article = container.resolve(Article)
-	public brain: Brain = container.resolve(Brain)
-	public memory: Memory = container.resolve(Memory)
-	public cortex: Cortex = container.resolve(Cortex)
-	public log: Log = container.resolve(Log)
+	pipeline = container.resolve(Pipeline)
+	article = container.resolve(Article)
+	brain = container.resolve(Brain)
+	memory = container.resolve(Memory)
+	cortex = container.resolve(Cortex)
+	log = container.resolve(Log)
 
 	db: PGlite
 	idol_id: string | null = null
@@ -637,14 +637,18 @@ export default class Polywise {
 	}
 
 	async queryRaw(sql_str: string, params?: Array<any>) {
-		const res = params ? await this.db.query(sql_str, params) : await this.db.query(sql_str)
+		if (!this.db) {
+			throw new Error('DB not initialized or already closed')
+		}
 
-		return JSON.parse(JSON.stringify(res.rows))
+		const res = await this.db.query(sql_str, params)
+
+		return res.rows
 	}
 
 	async off() {
-		this.brain?.off()
-		this.pipeline?.off()
+		this.brain.off()
+		this.pipeline.off()
 
 		await this.db.close()
 
