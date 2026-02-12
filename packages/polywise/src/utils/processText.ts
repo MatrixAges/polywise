@@ -1,4 +1,4 @@
-import { RecursiveChunker } from '@chonkiejs/core'
+import { RecursiveChunker, Tokenizer } from '@chonkiejs/core'
 
 export default async (text: string) => {
 	const byte_size = Buffer.byteLength(text, 'utf8')
@@ -7,9 +7,12 @@ export default async (text: string) => {
 		return [text]
 	}
 
+	const tokenizer = await Tokenizer.create('character')
+
 	const chunker = await RecursiveChunker.create({
 		chunkSize: 2048,
-		minCharactersPerChunk: 200
+		minCharactersPerChunk: 200,
+		tokenizer
 	})
 
 	const final_chunks: Array<string> = []

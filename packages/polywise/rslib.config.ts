@@ -9,10 +9,17 @@ export default deepmerge(rslib, {
 		{
 			source: { entry: { index: './src/index.ts' } },
 			format: 'esm',
-			dts: true
+			dts: true,
+			autoExternal: false
 		}
 	],
 	output: {
+		externals: {
+			'@img/sharp-wasm32/versions': 'module @img/sharp-wasm32/versions',
+			'@img/sharp-libvips-dev/include': 'module @img/sharp-libvips-dev/include',
+			'@img/sharp-libvips-dev/cplusplus': 'module @img/sharp-libvips-dev/cplusplus',
+			'@chonkiejs/token': '@chonkiejs/token'
+		},
 		filename: {
 			js: '[name].js'
 		}

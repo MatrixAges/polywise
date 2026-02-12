@@ -23,6 +23,7 @@ npm-debug.log*
 **/.prompts
 
 # polywise
+polywise-server
 **/.test_db
 **/.test_vectors
 
@@ -32,5 +33,4 @@ src/main/bundle.js
 src/main/bundle.js.map
 
 # opencode
-
 .opencode/plans

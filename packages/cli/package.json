@@ -4,11 +4,17 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
-		"build": "rslib build",
-		"dev": "rslib build --watch"
+		"build": "bun build ./src/index.ts --compile --outfile polywise-server",
+		"dev": "bun run ./src/index.ts serve",
+		"build:lib": "rslib build"
 	},
 	"dependencies": {
-		"commander": "^13.1.0"
+		"@abraham/reflection": "^0.13.0",
+		"@types/bun": "^1.3.9",
+		"commander": "^13.1.0",
+		"hono": "^4.11.7",
+		"polywise": "workspace:*",
+		"tsyringe": "^4.10.0"
 	},
 	"devDependencies": {
 		"@rslib/core": "catalog:",
