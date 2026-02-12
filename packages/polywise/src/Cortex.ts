@@ -71,7 +71,7 @@ export default class Cortex {
 			process
 		} = args
 
-		const query_embedding = ((await this.p.pipeline.embed(query)) as number[]) || []
+		const query_embedding = ((await this.p.pipeline.embed(query)) as Array<number>) || []
 		const emitter = new ChainEmitter()
 
 		const { knowledges: initial_knowledges, actions: initial_actions } = await this.p.executeSingleSearch({
@@ -177,7 +177,7 @@ export default class Cortex {
 		args: CortexProcessArgs,
 		query: string,
 		wm: WorkingMemory
-	): Promise<{ step: Step; knowledges: Knowledge[]; actions: Action[] }> {
+	): Promise<{ step: Step; knowledges: Array<Knowledge>; actions: Array<Action> }> {
 		const {
 			recall_depth,
 			search_limit,
@@ -220,7 +220,10 @@ export default class Cortex {
 		return { step, knowledges: new_knowledges, actions: new_actions }
 	}
 
-	private updateMemory(wm: WorkingMemory, data: { step: Step; knowledges: Knowledge[]; actions: Action[] }) {
+	private updateMemory(
+		wm: WorkingMemory,
+		data: { step: Step; knowledges: Array<Knowledge>; actions: Array<Action> }
+	) {
 		wm.steps.push(data.step)
 		wm.accumulated_knowledges.push(...data.knowledges)
 		wm.accumulated_actions.push(...data.actions)
@@ -229,7 +232,12 @@ export default class Cortex {
 		data.actions.forEach(a => wm.history_ids.add(a.id))
 	}
 
-	private async emitProgress(emitter: ChainEmitter, knowledges: Knowledge[], actions: Action[], query: string) {
+	private async emitProgress(
+		emitter: ChainEmitter,
+		knowledges: Array<Knowledge>,
+		actions: Array<Action>,
+		query: string
+	) {
 		const {
 			knowledges: k_strings,
 			actions: a_strings,

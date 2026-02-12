@@ -22,7 +22,7 @@ export async function recallNodesByKeywords(
 			limit,
 			idol_id,
 			root_ids
-		])) as Node[]
+		])) as Array<Node>
 
 		results.push(...nodes)
 	}
@@ -31,23 +31,26 @@ export async function recallNodesByKeywords(
 }
 
 export async function recallRelatedNodes(
-	node_ids: number[],
+	node_ids: Array<number>,
 	max_depth: number,
-	queryRaw: (sql: string, params?: any[]) => Promise<any>
+	queryRaw: (sql: string, params?: Array<any>) => Promise<any>
 ) {
 	if (node_ids.length === 0 || max_depth <= 0) {
 		return []
 	}
 
-	return (await queryRaw(sql_brain.sql_recall_related_nodes, [node_ids, max_depth, 20])) as Node[]
+	return (await queryRaw(sql_brain.sql_recall_related_nodes, [node_ids, max_depth, 20])) as Array<Node>
 }
 
-export async function getNodeContexts(node_ids: number[], queryRaw: (sql: string, params?: any[]) => Promise<any>) {
+export async function getNodeContexts(
+	node_ids: Array<number>,
+	queryRaw: (sql: string, params?: Array<any>) => Promise<any>
+) {
 	if (node_ids.length === 0) {
 		return []
 	}
 
-	const articles = (await queryRaw(sql_brain.sql_get_node_articles, [node_ids])) as any[]
+	const articles = (await queryRaw(sql_brain.sql_get_node_articles, [node_ids])) as Array<any>
 
 	return articles.map(article => ({
 		article_ids: [article.id],
@@ -56,9 +59,9 @@ export async function getNodeContexts(node_ids: number[], queryRaw: (sql: string
 }
 
 export async function stimulateNodes(
-	node_ids: number[],
+	node_ids: Array<number>,
 	intensity: number,
-	queryRaw: (sql: string, params?: any[]) => Promise<any>
+	queryRaw: (sql: string, params?: Array<any>) => Promise<any>
 ) {
 	if (node_ids.length === 0 || intensity <= 0) {
 		return

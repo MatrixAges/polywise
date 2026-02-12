@@ -8,7 +8,7 @@ import type { Migration } from '../types'
 
 export const CURRENT_SCHEMA_VERSION = 10
 
-export const migrations: Migration[] = [
+export const migrations: Array<Migration> = [
 	{
 		version: 1,
 		description: 'Initial schema: brain nodes, edges, knowledge articles with idol_id, root_ids, metrics_ids',

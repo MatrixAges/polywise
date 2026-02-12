@@ -64,7 +64,7 @@ describe('Polywise Brain System', () => {
 		})
 
 		it('should handle large scale knowledge network with real entities', async () => {
-			const node_ids: number[] = []
+			const node_ids: Array<number> = []
 			const entities = [
 				'PostgreSQL',
 				'Redis',
@@ -145,11 +145,11 @@ describe('Polywise Brain System', () => {
 
 	describe.concurrent('Brain Dynamics and Learning', () => {
 		it('should propagate activation through network chains using real entities', async () => {
-			const chain: number[] = []
+			const chain: Array<number> = []
 			const entities = ['Processor', 'Instruction', 'Memory', 'Address', 'Bus', 'Cache', 'RAM', 'Storage']
 
 			for (let i = 0; i < entities.length; i++) {
-				const embedding = (await poly.pipeline.embed(entities[i])) as number[]
+				const embedding = (await poly.pipeline.embed(entities[i])) as Array<number>
 
 				const node_id = await poly.addNode({
 					label: `${entities[i]}_${unique_id}`,
@@ -186,10 +186,10 @@ describe('Polywise Brain System', () => {
 				{ label: 'Secure_API', x: 600, y: 200 }
 			]
 
-			const node_ids: number[] = []
+			const node_ids: Array<number> = []
 
 			for (const concept of concepts) {
-				const embedding = (await poly.pipeline.embed(concept.label)) as number[]
+				const embedding = (await poly.pipeline.embed(concept.label)) as Array<number>
 
 				const id = await poly.addNode({
 					label: `${concept.label}_${unique_id}`,
@@ -238,7 +238,7 @@ describe('Polywise Brain System', () => {
 
 	describe.concurrent('Schema and Data Integrity', () => {
 		it('should handle concurrent node operations', async () => {
-			const promises: Promise<number>[] = []
+			const promises: Array<Promise<number>> = []
 
 			for (let i = 0; i < 15; i++) {
 				promises.push(poly.addNode({ label: `Concurrent_${i}`, x: i * 20, y: i * 10, threshold: 0.5 }))

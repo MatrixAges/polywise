@@ -1,9 +1,9 @@
-export default (onError?: (error: any, ...args: any[]) => void | boolean) =>
+export default (onError?: (error: any, ...args: Array<any>) => void | boolean) =>
 	(target: any, property?: string, descriptor?: PropertyDescriptor): any => {
 		if (property && descriptor) {
 			const original_method = descriptor.value
 
-			descriptor.value = async function (...args: any[]) {
+			descriptor.value = async function (...args: Array<any>) {
 				try {
 					return await original_method.apply(this, args)
 				} catch (error) {
@@ -21,7 +21,7 @@ export default (onError?: (error: any, ...args: any[]) => void | boolean) =>
 		}
 
 		return class extends target {
-			constructor(...args: any[]) {
+			constructor(...args: Array<any>) {
 				super(...args)
 
 				const proto = target.prototype
@@ -32,7 +32,7 @@ export default (onError?: (error: any, ...args: any[]) => void | boolean) =>
 					if (descriptor && typeof descriptor.value === 'function' && key !== 'constructor') {
 						const original_method = descriptor.value
 
-						this[key] = async (...method_args: any[]) => {
+						this[key] = async (...method_args: Array<any>) => {
 							try {
 								const result = original_method.apply(this, method_args)
 

@@ -16,12 +16,12 @@ export default class Log {
 	private today_logs: Array<string> = []
 
 	init(args: LogArgs) {
-		const { dir, log, json } = args
+		const { dir, log = true, json = false } = args
 
 		if (dir) this.log_dir = dir
 
-		this.enable_log = log ?? false
-		this.enable_json = json ?? false
+		this.enable_log = log
+		this.enable_json = json
 
 		if (!existsSync(this.log_dir)) {
 			mkdirSync(this.log_dir, { recursive: true })

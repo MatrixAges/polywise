@@ -1,13 +1,18 @@
 import type Pipeline from '../Pipeline'
 import type { Action, Knowledge, Metadata } from '../types'
 
-export async function processResults(query: string, knowledges: Knowledge[], actions: Action[], pipeline: Pipeline) {
+export async function processResults(
+	query: string,
+	knowledges: Array<Knowledge>,
+	actions: Array<Action>,
+	pipeline: Pipeline
+) {
 	const k_strings = knowledges.map(k => k.content)
 	const a_strings = actions.map(a => a.content)
 
-	const descs: string[] = []
-	const links: string[] = []
-	const files: string[] = []
+	const descs: Array<string> = []
+	const links: Array<string> = []
+	const files: Array<string> = []
 	const seen_links = new Set<string>()
 	const seen_files = new Set<string>()
 	const metadata: Metadata = {}
@@ -38,15 +43,15 @@ export async function processResults(query: string, knowledges: Knowledge[], act
 		}
 	}
 
-	const promises: Promise<void>[] = []
+	const promises: Array<Promise<void>> = []
 
 	if (descs.length > 0) {
 		promises.push(
 			(async () => {
-				const scores = (await pipeline.rerank(query, descs)) as {
+				const scores = (await pipeline.rerank(query, descs)) as Array<{
 					index: number
 					score: number
-				}[]
+				}>
 				const best_index = scores.length > 0 ? scores.sort((a, b) => b.score - a.score)[0].index : 0
 
 				metadata.desc = descs[best_index]
@@ -57,10 +62,10 @@ export async function processResults(query: string, knowledges: Knowledge[], act
 	if (links.length > 0) {
 		promises.push(
 			(async () => {
-				const scores = (await pipeline.rerank(query, links)) as {
+				const scores = (await pipeline.rerank(query, links)) as Array<{
 					index: number
 					score: number
-				}[]
+				}>
 				const sorted = scores.sort((a, b) => b.score - a.score).slice(0, 5)
 
 				metadata.links = sorted.map(s => links[s.index])
@@ -71,10 +76,10 @@ export async function processResults(query: string, knowledges: Knowledge[], act
 	if (files.length > 0) {
 		promises.push(
 			(async () => {
-				const scores = (await pipeline.rerank(query, files)) as {
+				const scores = (await pipeline.rerank(query, files)) as Array<{
 					index: number
 					score: number
-				}[]
+				}>
 				const sorted = scores.sort((a, b) => b.score - a.score).slice(0, 5)
 
 				metadata.files = sorted.map(s => files[s.index])

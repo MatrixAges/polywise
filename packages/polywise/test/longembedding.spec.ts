@@ -37,7 +37,7 @@ describe.concurrent('Long Text Embedding & Fact Preservation', () => {
 	})
 
 	it('should produce a valid aggregated embedding for long text through the pipeline', async () => {
-		const embedding = (await poly.pipeline.embed(long_text)) as number[]
+		const embedding = (await poly.pipeline.embed(long_text)) as Array<number>
 
 		expect(embedding).toBeInstanceOf(Array)
 		expect(embedding.length).toBe(1024)

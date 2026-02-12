@@ -36,7 +36,7 @@ describe.concurrent('Polywise Pure Text Learning', () => {
 	}
 
 	const chunkText = (text: string, size = 1000) => {
-		const chunks: string[] = []
+		const chunks: Array<string> = []
 		let start = 0
 
 		while (start < text.length) {

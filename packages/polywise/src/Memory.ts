@@ -33,7 +33,7 @@ export default class Memory {
 	async saveLongTerm(content: string, args: FiltersArgs = {}) {
 		const { idol_id, root_ids, metrics_ids } = args
 
-		const embedding = (await this.p.pipeline.embed(content)) as number[]
+		const embedding = (await this.p.pipeline.embed(content)) as Array<number>
 
 		if (!embedding) return
 
@@ -91,7 +91,7 @@ export default class Memory {
 
 	async saveDiary(content: string, timestamp: string, args: FiltersArgs = {}) {
 		const { idol_id, root_ids, metrics_ids } = args
-		const embedding = (await this.p.pipeline.embed(content)) as number[]
+		const embedding = (await this.p.pipeline.embed(content)) as Array<number>
 
 		await this.queryRaw(sql_memory.sql_insert_diary, [
 			content,
@@ -105,15 +105,15 @@ export default class Memory {
 
 	async search(query: string, args: FiltersArgs = {}, limit = 5) {
 		const { idol_id, root_ids, metrics_ids } = args
-		const embedding = (await this.p.pipeline.embed(query)) as number[]
+		const embedding = (await this.p.pipeline.embed(query)) as Array<number>
 
 		if (!embedding) return []
 
 		const vector_str = `[${embedding.join(',')}]`
 		const filters = [vector_str, idol_id ?? null, root_ids ?? null, metrics_ids ?? null, limit]
 
-		const lt_results = (await this.queryRaw(sql_memory.sql_search_long_term, filters)) as any[]
-		const diary_results = (await this.queryRaw(sql_memory.sql_search_diary, filters)) as any[]
+		const lt_results = (await this.queryRaw(sql_memory.sql_search_long_term, filters)) as Array<any>
+		const diary_results = (await this.queryRaw(sql_memory.sql_search_diary, filters)) as Array<any>
 		const knowledges: Array<Knowledge> = []
 
 		for (const r of lt_results) {
@@ -155,7 +155,7 @@ export default class Memory {
 		return Math.pow(0.5, days / TIME_DECAY_HALFLIFE_DAYS)
 	}
 
-	private async exec(sql_str: string, params?: any[]) {
+	private async exec(sql_str: string, params?: Array<any>) {
 		if (params) {
 			await this.p.db.query(sql_str, params)
 		} else {
@@ -163,7 +163,7 @@ export default class Memory {
 		}
 	}
 
-	private async queryRaw(sql_str: string, params?: any[]) {
+	private async queryRaw(sql_str: string, params?: Array<any>) {
 		const res = params ? await this.p.db.query(sql_str, params) : await this.p.db.query(sql_str)
 
 		return JSON.parse(JSON.stringify(res.rows))

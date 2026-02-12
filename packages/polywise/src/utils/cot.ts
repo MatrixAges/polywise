@@ -18,10 +18,10 @@ export async function formEmergentQuery(
 	args: {
 		query: string
 		current_depth: number
-		initial_knowledges: Knowledge[]
-		initial_actions: Action[]
+		initial_knowledges: Array<Knowledge>
+		initial_actions: Array<Action>
 	},
-	stimulateNodes: (node_ids: number[], intensity: number) => Promise<void>
+	stimulateNodes: (node_ids: Array<number>, intensity: number) => Promise<void>
 ) {
 	const { query, current_depth, initial_knowledges, initial_actions } = args
 
@@ -44,7 +44,7 @@ export async function performEmergentSearch(
 		stimulate_on_recall: boolean
 		history_ids: Set<number>
 		idol_id?: string
-		root_ids?: string[]
+		root_ids?: Array<string>
 	},
 	poly: Polywise
 ) {
@@ -60,7 +60,7 @@ export async function performEmergentSearch(
 	} = args
 
 	const depth_recall_depth = base_recall_depth + current_depth
-	const query_embedding = (await poly.pipeline.embed(emerged_query)) as number[]
+	const query_embedding = (await poly.pipeline.embed(emerged_query)) as Array<number>
 
 	const emerged_recall_result = await poly.recallFromMemory({
 		query: emerged_query,
@@ -101,8 +101,8 @@ export async function performEmergentSearch(
 export async function emitCotResult(args: {
 	emitter: ChainEmitter
 	emerged_query: string
-	reranked_knowledges: Knowledge[]
-	reranked_actions: Action[]
+	reranked_knowledges: Array<Knowledge>
+	reranked_actions: Array<Action>
 	pipeline: Pipeline
 }) {
 	const { emitter, emerged_query, reranked_knowledges, reranked_actions, pipeline } = args

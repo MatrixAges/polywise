@@ -32,7 +32,7 @@ describe.concurrent('Polywise Unified Retrieval System', () => {
 		// Setup habit connections for the first 10 samples
 		for (let i = 0; i < 10; i++) {
 			const qa = behavioral_qa[i]
-			const embedding = (await poly.pipeline.embed(qa.question)) as number[]
+			const embedding = (await poly.pipeline.embed(qa.question)) as Array<number>
 
 			const stimulus_id = await poly.addNode({
 				label: `Stimulus: ${qa.question.slice(0, 50)}`,

@@ -8,17 +8,11 @@ export { default as isIdle } from './isIdle'
 export { default as calculateMemoryStrength } from './calculateMemoryStrength'
 export { default as extractKeywords } from './extractKeywords'
 export { default as processText } from './processText'
-export { processResults } from './processResults'
-export { aggregateResults } from './aggregation'
-export { rerankKnowledges, rerankActions } from './ranking'
-export { handleHabitReaction, getHabits } from './habits'
-export { formEmergentQuery, performEmergentSearch, emitCotResult } from './cot'
-export { CURRENT_SCHEMA_VERSION, migrations, migrate, validateMigrations } from './migration'
 
-export {
-	recallNodesByKeywords,
-	recallRelatedNodes,
-	getNodeContexts,
-	stimulateNodes,
-	strengthenRelatedEdges
-} from './graph'
+export * from './processResults'
+export * from './aggregation'
+export * from './ranking'
+export * from './habits'
+export * from './cot'
+export * from './migration'
+export * from './graph'

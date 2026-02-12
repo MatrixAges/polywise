@@ -1,6 +1,6 @@
 import type { Migration } from '../types'
 
-export default (migrations: Migration[]) => {
+export default (migrations: Array<Migration>) => {
 	const versions = migrations.map(m => m.version)
 	const unique_versions = new Set(versions)
 

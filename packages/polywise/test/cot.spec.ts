@@ -99,7 +99,7 @@ describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
 
 	describe.concurrent('Multi-Depth Exploration', () => {
 		test('should emit events in correct order and include metadata', async () => {
-			const received_events: any[] = []
+			const received_events: Array<any> = []
 
 			const { cot } = await poly.query({
 				query: 'microservices deployment security',
@@ -122,7 +122,7 @@ describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
 		})
 
 		test('should build query progression with depth', async () => {
-			const received_events: any[] = []
+			const received_events: Array<any> = []
 
 			const { cot } = await poly.query({
 				query: 'circuit breaker pattern',
@@ -144,7 +144,7 @@ describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
 
 	describe.concurrent('Integration with Hybrid Search', () => {
 		test('should respect search_limit and rerank_limit in CoT', async () => {
-			const received_events: any[] = []
+			const received_events: Array<any> = []
 
 			const { cot } = await poly.query({
 				query: 'api gateway routing',

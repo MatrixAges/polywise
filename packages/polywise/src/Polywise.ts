@@ -4,28 +4,32 @@ import { singleton, container } from 'tsyringe'
 import to from 'await-to-js'
 import dayjs from 'dayjs'
 
+import * as sql from './sql'
+import * as sql_meta from './sql/meta'
 import Article from './Article'
 import Brain from './Brain'
 import Log from './Log'
 import Pipeline from './Pipeline'
 import Memory from './Memory'
 import Cortex from './Cortex'
-import * as sql from './sql'
-import * as sql_meta from './sql/meta'
 import Process from './Process'
 import { catchError, catchFinally } from './decorators'
-import { CURRENT_SCHEMA_VERSION, migrate, validateMigrations } from './utils/migration'
-import extractKeywords from './utils/extractKeywords'
-import { aggregateResults } from './utils/aggregation'
-import { rerankKnowledges, rerankActions } from './utils/ranking'
 import {
+	CURRENT_SCHEMA_VERSION,
+	migrate,
+	validateMigrations,
+	aggregateResults,
+	rerankKnowledges,
+	rerankActions,
+	extractKeywords,
 	recallNodesByKeywords,
 	recallRelatedNodes,
 	getNodeContexts,
 	stimulateNodes,
-	strengthenRelatedEdges
-} from './utils/graph'
-import { handleHabitReaction, getHabits } from './utils/habits'
+	strengthenRelatedEdges,
+	handleHabitReaction,
+	getHabits
+} from './utils'
 import {
 	CONSOLIDATION_ACTIVE_THRESHOLD,
 	CONSOLIDATION_ENTRY_PREFIX,
@@ -286,12 +290,12 @@ export default class Polywise {
 				root_ids ?? null,
 				metrics_ids ?? null,
 				JSON.stringify(metadata ?? {})
-			])) as { id: number }[]
+			])) as Array<{ id: number }>
 
 			aid = res[0].id
 		}
 
-		const query_embedding = ((await this.pipeline.embed(content)) as number[]) || []
+		const query_embedding = ((await this.pipeline.embed(content)) as Array<number>) || []
 
 		if (query_embedding && query_embedding.length > 0) {
 			const existing_embedding = await this.queryRaw(sql.sql_get_article_embedding, [aid])
@@ -348,7 +352,7 @@ export default class Polywise {
 			JSON.stringify(metadata ?? {}),
 			embedding ? `[${embedding.join(',')}]` : null,
 			is_action ?? false
-		])) as { id: number }[]
+		])) as Array<{ id: number }>
 
 		return rows[0].id
 	}
@@ -524,7 +528,7 @@ export default class Polywise {
 			process
 		} = args
 
-		const query_embedding = (await this.pipeline.embed(query)) as number[]
+		const query_embedding = (await this.pipeline.embed(query)) as Array<number>
 
 		const recall_result = await this.recallFromMemory({
 			query,

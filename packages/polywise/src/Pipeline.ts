@@ -124,7 +124,7 @@ export default class Pipeline {
 		}
 	}
 
-	async embed(text: string): Promise<number[]> {
+	async embed(text: string) {
 		const chunks = await processText(text)
 
 		const results = await Promise.all(
@@ -133,7 +133,7 @@ export default class Pipeline {
 					if (this.embedding_config.type === 'custom') {
 						const { fn } = this.embedding_config
 
-						return (await fn(chunk)) as number[]
+						return (await fn(chunk)) as Array<number>
 					}
 
 					const embedding = await this.loadEmbeddingModel()
@@ -145,16 +145,16 @@ export default class Pipeline {
 						max_length: 2048
 					})
 
-					return Array.from((output as any).data) as number[]
+					return Array.from((output as any).data) as Array<number>
 				})
 			)
 		)
 
 		if (results.length === 1) {
-			return results[0] as number[]
+			return results[0] as Array<number>
 		}
 
-		const vectors = results as number[][]
+		const vectors = results as Array<Array<number>>
 		const vector_length = vectors[0].length
 		const summed_vector = new Array(vector_length).fill(0)
 
@@ -167,7 +167,7 @@ export default class Pipeline {
 		return summed_vector.map(val => val / vectors.length)
 	}
 
-	async rerank(query: string, documents: string[]) {
+	async rerank(query: string, documents: Array<string>) {
 		return this.reranker_queue.add(async () => {
 			if (this.reranker_config.type === 'custom') {
 				const { fn } = this.reranker_config
@@ -243,7 +243,7 @@ export default class Pipeline {
 
 		const rerank_scores = await this.rerank(query, documents)
 
-		const results: SearchResult[] = candidates.map((candidate, index) => ({
+		const results: Array<SearchResult> = candidates.map((candidate, index) => ({
 			id: candidate.id,
 			content: candidate.content,
 			source: candidate.source,

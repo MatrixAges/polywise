@@ -15,7 +15,7 @@ describe.concurrent('Long Context and Language Traps', () => {
 	let poly: Polywise
 	const db_name = getDataDir()
 
-	const random_qas: { query: string; expected: string }[] = []
+	const random_qas: Array<{ query: string; expected: string }> = []
 
 	beforeAll(async () => {
 		poly = new Polywise()

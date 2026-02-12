@@ -10,7 +10,7 @@ export default async (text: string) => {
 		minCharactersPerChunk: 200
 	})
 
-	const final_chunks: string[] = []
+	const final_chunks: Array<string> = []
 	const safe_segment_size = 100 * 1024
 
 	for (let i = 0; i < text.length; i += safe_segment_size) {

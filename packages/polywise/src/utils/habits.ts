@@ -6,11 +6,11 @@ import type { Action } from '../types'
 export async function handleHabitReaction(
 	args: {
 		query: string
-		query_embedding: number[]
-		initial_actions: Action[]
+		query_embedding: Array<number>
+		initial_actions: Array<Action>
 		habit_threshold: number
 	},
-	queryRaw: (sql: string, params?: any[]) => Promise<any>,
+	queryRaw: (sql: string, params?: Array<any>) => Promise<any>,
 	stimulate: (node_id: number, intensity: number) => Promise<void>
 ) {
 	const { query_embedding, initial_actions, habit_threshold } = args
@@ -55,8 +55,11 @@ export async function handleHabitReaction(
 	await stimulate(stimulus.id, STIMULATION_MAX)
 }
 
-export async function getHabits(query_embedding: number[], queryRaw: (sql: string, params?: any[]) => Promise<any>) {
+export async function getHabits(
+	query_embedding: Array<number>,
+	queryRaw: (sql: string, params?: Array<any>) => Promise<any>
+) {
 	if (!query_embedding) return []
 
-	return (await queryRaw(sql.sql_find_nearest_node, [`[${query_embedding.join(',')}]`])) as any[]
+	return (await queryRaw(sql.sql_find_nearest_node, [`[${query_embedding.join(',')}]`])) as Array<any>
 }
