@@ -22,13 +22,14 @@ export default class Article {
 	}
 
 	async process(args: ProcessArticleArgs) {
-		const { content, idol_id, root_ids, metrics_ids } = args
+		const { content, idol_id, root_ids, metrics_ids, metadata } = args
 
 		const res = await this.p.db.query<ArticleEntity>(sql.sql_process_article, [
 			content,
 			idol_id ?? null,
 			root_ids ?? null,
-			metrics_ids ?? null
+			metrics_ids ?? null,
+			JSON.stringify(metadata ?? {})
 		])
 
 		if (res.rows.length === 0) return null

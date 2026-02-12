@@ -156,6 +156,7 @@ export const sql_create_table_articles = `
     idol_id TEXT,
     root_ids TEXT[] DEFAULT '{}',
     metrics_ids TEXT[] DEFAULT '{}',
+    metadata JSONB DEFAULT '{}',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   );
 `

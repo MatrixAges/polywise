@@ -269,7 +269,8 @@ export default class Polywise {
 				content,
 				idol_id ?? null,
 				root_ids ?? null,
-				metrics_ids ?? null
+				metrics_ids ?? null,
+				JSON.stringify(metadata ?? {})
 			])) as { id: number }[]
 
 			aid = res[0].id
@@ -305,18 +306,6 @@ export default class Polywise {
 
 		const normalized = decision.split('\n')[0].toUpperCase().trim()
 		return normalized === 'YES' || normalized.startsWith('YES')
-	}
-
-	private cosineSimilarity(v1: number[], v2: number[]) {
-		let dot_product = 0
-		let norm_a = 0
-		let norm_b = 0
-		for (let i = 0; i < v1.length; i++) {
-			dot_product += v1[i] * v2[i]
-			norm_a += v1[i] * v1[i]
-			norm_b += v2[i] * v2[i]
-		}
-		return dot_product / (Math.sqrt(norm_a) * Math.sqrt(norm_b))
 	}
 
 	async addNode(args: AddNodeArgs) {

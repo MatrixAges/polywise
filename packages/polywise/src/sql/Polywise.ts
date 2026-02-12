@@ -116,8 +116,8 @@ export const sql_get_snapshot_edges = (weight_threshold: number) => `
  * Role: Ingests raw textual knowledge/content into the system.
  */
 export const sql_process_article = `
-  INSERT INTO ${SCHEMA_KNOWLEDGE}.articles (content, idol_id, root_ids, metrics_ids) 
-  VALUES ($1, $2, $3, $4) 
+  INSERT INTO ${SCHEMA_KNOWLEDGE}.articles (content, idol_id, root_ids, metrics_ids, metadata) 
+  VALUES ($1, $2, $3, $4, $5) 
   RETURNING id, content, created_at
 `
 

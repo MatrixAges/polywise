@@ -45,11 +45,12 @@ This document provides an overview of the packages/polywise module structure and
 			"index.ts": { "desc": "Main exports", "role": "Index" },
 			"sql": {
 				"Brain.ts": { "desc": "Brain SQL operations", "role": "SQL" },
-				"Polywise.ts": { "desc": "Polywise SQL operations", "role": "SQL" },
+				"Memory.ts": { "desc": "Memory SQL operations", "role": "SQL" },
+				"Polywise.ts": { "desc": "Polywise SQL operations (Articles/Nodes/Edges)", "role": "SQL" },
 				"index.ts": { "desc": "SQL exports", "role": "Index" },
 				"meta.ts": { "desc": "Metadata SQL operations", "role": "SQL" },
 				"schema.ts": {
-					"desc": "Database schema definitions (Nodes/Edges now include JSONB metadata)",
+					"desc": "Database schema definitions (Nodes/Edges/Articles include JSONB metadata)",
 					"role": "Schema"
 				}
 			},

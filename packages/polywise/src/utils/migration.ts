@@ -6,7 +6,7 @@ import validateMigrationsFn from './validateMigrations'
 
 import type { Migration } from '../types'
 
-export const CURRENT_SCHEMA_VERSION = 9
+export const CURRENT_SCHEMA_VERSION = 10
 
 export const migrations: Migration[] = [
 	{
@@ -122,6 +122,15 @@ export const migrations: Migration[] = [
 		up: async exec => {
 			await exec([
 				`ALTER TABLE ${SCHEMA_MEMORY}.long_term ADD COLUMN IF NOT EXISTS frequency INTEGER DEFAULT 1;`
+			])
+		}
+	},
+	{
+		version: 10,
+		description: 'Add metadata column to articles table',
+		up: async exec => {
+			await exec([
+				`ALTER TABLE ${SCHEMA_KNOWLEDGE}.articles ADD COLUMN IF NOT EXISTS metadata JSONB DEFAULT '{}';`
 			])
 		}
 	}
