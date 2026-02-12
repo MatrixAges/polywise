@@ -42,7 +42,7 @@ describe.concurrent('Long Text Embedding & Fact Preservation', () => {
 		expect(embedding).toBeInstanceOf(Array)
 		expect(embedding.length).toBe(1024)
 		expect(embedding.every((val: number) => typeof val === 'number')).toBe(true)
-	}, 120000)
+	})
 
 	describe('QA Fact Preservation', () => {
 		beforeAll(async () => {

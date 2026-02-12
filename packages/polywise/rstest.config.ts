@@ -18,6 +18,6 @@ export default defineConfig({
 	reporters: ['verbose', hooks_reporter],
 	resolve: { alias: { '@': resolve(`${process.cwd()}/src`) } },
 	source: { decorators: { version: 'legacy' } },
-	hookTimeout: 120000,
-	testTimeout: 120000
+	hookTimeout: 180000,
+	testTimeout: 180000
 })

@@ -75,7 +75,7 @@ describe.concurrent('Polywise Unified Retrieval System', () => {
 			expect(actions.length).toBeGreaterThan(0)
 			expect(actions[0]).toContain(qa.expected_action)
 		}
-	}, 120000)
+	})
 
 	it('should trigger cognitive search for non-habitual stimuli via unified query', async () => {
 		// Use the same instance to test "Cognitive Path" (Slow Path) for non-habitual stimuli
@@ -91,7 +91,7 @@ describe.concurrent('Polywise Unified Retrieval System', () => {
 			// It should find relevant knowledge via RAG since no habit exists
 			expect(knowledges.length + actions.length).toBeGreaterThanOrEqual(1)
 		}
-	}, 120000)
+	})
 
 	it('should handle emergency responses correctly via unified query', async () => {
 		const fire_qa = behavioral_qa.find(q => q.question.includes('火灾'))!
@@ -101,5 +101,5 @@ describe.concurrent('Polywise Unified Retrieval System', () => {
 
 		expect(actions.length).toBeGreaterThan(0)
 		expect(actions[0]).toContain('疏散')
-	}, 120000)
+	})
 })

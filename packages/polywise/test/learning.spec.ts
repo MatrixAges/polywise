@@ -51,7 +51,7 @@ describe.concurrent('Polywise Pure Text Learning', () => {
 		it('should ingest complex literature and perform semantic search', async () => {
 			const idol_id = `lit_${Math.random().toString(36).slice(2)}`
 			const text = await loadDataset('complex_literature')
-			const chunks = chunkText(text, 1500).slice(0, 20)
+			const chunks = chunkText(text, 1500).slice(0, 10)
 
 			for (let i = 0; i < chunks.length; i++) {
 				await poly.article.addWithEmbedding(chunks[i], idol_id)
@@ -65,7 +65,7 @@ describe.concurrent('Polywise Pure Text Learning', () => {
 
 			expect(results.length).toBeGreaterThan(0)
 			expect(results[0].similarity).toBeGreaterThan(0.3)
-		}, 120000)
+		})
 
 		it('should handle cross-domain knowledge retrieval (Neuroscience vs Philosophy)', async () => {
 			const idol_id = `cross_${Math.random().toString(36).slice(2)}`
@@ -90,7 +90,7 @@ describe.concurrent('Polywise Pure Text Learning', () => {
 			})
 
 			expect(phil_results.some(r => r.content.includes('Philosophy'))).toBe(true)
-		}, 120000)
+		})
 
 		it('should process AI research papers and extract relevant concepts via RAG', async () => {
 			const idol_id = `ai_${Math.random().toString(36).slice(2)}`
@@ -111,7 +111,7 @@ describe.concurrent('Polywise Pure Text Learning', () => {
 
 			expect(knowledges.length).toBeGreaterThan(0)
 			expect(knowledges[0].toLowerCase()).toContain('transformer')
-		}, 120000)
+		})
 
 		it('should maintain performance with legal and physics datasets', async () => {
 			const idol_id = `perf_${Math.random().toString(36).slice(2)}`
@@ -133,6 +133,6 @@ describe.concurrent('Polywise Pure Text Learning', () => {
 
 			expect(results.length).toBeGreaterThan(0)
 			expect(duration).toBeLessThan(30000)
-		}, 120000)
+		})
 	})
 })

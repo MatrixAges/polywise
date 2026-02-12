@@ -1,7 +1,9 @@
 import { RecursiveChunker } from '@chonkiejs/core'
 
 export default async (text: string) => {
-	if (Buffer.byteLength(text, 'utf8') <= 90000) {
+	const byte_size = Buffer.byteLength(text, 'utf8')
+
+	if (byte_size <= 90000) {
 		return [text]
 	}
 
