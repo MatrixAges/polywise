@@ -1,15 +1,16 @@
 import type { COTDepthResult, Metadata } from '../types'
 
 export default class ChainEmitter {
-	private callbacks: Set<(data: COTDepthResult) => void> = new Set()
+	private callbacks: Set<(data: COTDepthResult, total: Array<COTDepthResult>) => void> = new Set()
 	private finish_callbacks: Set<
 		(data: { knowledges: Array<string>; actions: Array<string>; metadata: Metadata }) => void
 	> = new Set()
 	private isActive = true
 	private is_finished = false
+	private steps: Array<COTDepthResult> = []
 	private last_data: { knowledges: Array<string>; actions: Array<string>; metadata: Metadata } | null = null
 
-	on(callback: (data: COTDepthResult) => void): ChainEmitter {
+	on(callback: (data: COTDepthResult, total: Array<COTDepthResult>) => void): ChainEmitter {
 		if (this.isActive) {
 			this.callbacks.add(callback)
 		}
@@ -35,13 +36,16 @@ export default class ChainEmitter {
 		this.isActive = false
 		this.callbacks.clear()
 		this.finish_callbacks.clear()
+		this.steps = []
 	}
 
 	emit(data: COTDepthResult): void {
 		if (this.isActive) {
+			this.steps.push(data)
+
 			for (const callback of this.callbacks) {
 				try {
-					callback(data)
+					callback(data, this.steps)
 				} catch (error) {
 					console.error('ChainEmitter callback error:', error)
 				}

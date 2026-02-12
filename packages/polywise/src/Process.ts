@@ -5,10 +5,11 @@ import { getRandomId } from './utils'
 import type { ProcessCallback } from './types'
 
 export default class Process {
+	total: Record<string, any> = {}
+	hash: string
+	query: string
+
 	private callbacks: Set<ProcessCallback> = new Set()
-	public total: Record<string, any> = {}
-	public hash: string
-	public query: string
 
 	constructor(query: string) {
 		this.query = query

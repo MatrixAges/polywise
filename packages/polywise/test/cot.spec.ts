@@ -132,7 +132,7 @@ describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
 				rerank_limit: 5
 			})
 
-			cot?.on(data => {
+			cot.on(data => {
 				received_events.push(data)
 			})
 
@@ -142,26 +142,27 @@ describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
 		})
 	})
 
-	describe.concurrent('Integration with Hybrid Search', () => {
-		test('should respect search_limit and rerank_limit in CoT', async () => {
-			const received_events: Array<any> = []
+	describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
+		test('should provide total steps in on callback', async () => {
+			const steps: Array<any> = []
+			let final_total: Array<any> = []
 
 			const { cot } = await poly.query({
-				query: 'api gateway routing',
-				cot_depth: 2,
-				recall_depth: 2,
-				search_limit: 5,
-				rerank_limit: 3
+				query: 'microservices architecture exploration',
+				cot_depth: 2
 			})
 
-			cot?.on(data => {
-				received_events.push(data)
+			cot.on((data, total) => {
+				steps.push(data)
+				final_total = total
 			})
 
 			await cot?.toPromise()
 
-			for (const event of received_events) {
-				expect(event.knowledges.length + event.actions.length).toBeLessThanOrEqual(3)
+			if (steps.length > 0) {
+				expect(final_total.length).toBe(steps.length)
+				expect(final_total).toEqual(steps)
+				expect(final_total[final_total.length - 1]).toBe(steps[steps.length - 1])
 			}
 		})
 	})

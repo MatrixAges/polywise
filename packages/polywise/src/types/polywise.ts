@@ -1,5 +1,5 @@
-import type Pipeline from '@/Pipeline'
 import type { PGlite } from '@electric-sql/pglite'
+import type ChainEmitter from '../utils/ChainEmitter'
 
 export interface Triple {
 	subject: string
@@ -162,7 +162,7 @@ export interface FinalQueryResult {
 	knowledges: Array<string>
 	actions: Array<string>
 	metadata: Metadata
-	cot: any
+	cot: ChainEmitter
 }
 
 export interface MemoryRecallResult {
