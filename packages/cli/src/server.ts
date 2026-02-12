@@ -69,27 +69,6 @@ export const createServer = async (options: ServerOptions) => {
 		}
 	})
 
-	app.post('/memory/recall', async c => {
-		try {
-			const body = await c.req.json<{ query: string; max_depth?: number }>()
-			const { query, max_depth } = body
-
-			if (!query) {
-				return c.json({ error: 'Query is required' }, 400)
-			}
-
-			const result = await polywise.recallFromMemory({
-				query,
-				max_depth
-			})
-
-			return c.json(result)
-		} catch (error) {
-			console.error('Recall error:', error)
-			return c.json({ error: error instanceof Error ? error.message : 'Unknown error' }, 500)
-		}
-	})
-
 	return {
 		app,
 		polywise

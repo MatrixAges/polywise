@@ -7,7 +7,7 @@ import { container } from 'tsyringe'
 
 const program = new Command()
 
-const DEFAULT_DATA_DIR = ':polywise:'
+const DEFAULT_DATA_DIR = `${os.homedir()}/.polywise/:database:`
 const DEFAULT_CACHE_DIR = `${os.homedir()}/.polywise/.models`
 
 program
@@ -74,6 +74,54 @@ program
 			clearInterval(interval)
 			process.stdout.write('\n')
 			console.error('Failed to check/download models:', error)
+			process.exit(1)
+		}
+	})
+
+program
+	.command('query')
+	.description('Execute a query. Use --recall-depth > 0 for recall functionality.')
+	.argument('<query>', 'Query string')
+	.option('--recall-depth <number>', 'Depth of recall (default: 0)', '0')
+	.option('--search-limit <number>', 'Search limit (default: 20)', '20')
+	.option('--rerank-limit <number>', 'Rerank limit (default: 10)', '10')
+	.action(async (query, options) => {
+		const polywise = container.resolve(Polywise)
+		await polywise.init()
+
+		const process = polywise.process(query)
+
+		try {
+			const result = await polywise.query({
+				query,
+				recall_depth: parseInt(options.recallDepth),
+				search_limit: parseInt(options.searchLimit),
+				rerank_limit: parseInt(options.rerankLimit),
+				process
+			})
+
+			console.log(JSON.stringify(result, null, 2))
+		} catch (error) {
+			console.error('Query error:', error)
+			process.exit(1)
+		}
+	})
+
+program
+	.command('save')
+	.description('Save content to memory')
+	.argument('<content>', 'Content to save')
+	.action(async content => {
+		const polywise = container.resolve(Polywise)
+		await polywise.init()
+
+		try {
+			await polywise.save({
+				content
+			})
+			console.log('Content saved successfully.')
+		} catch (error) {
+			console.error('Save error:', error)
 			process.exit(1)
 		}
 	})

@@ -15,7 +15,10 @@ This document provides an overview of the packages/cli module structure and arch
 	"module": "packages/cli",
 	"structure": {
 		"src": {
-			"index.ts": { "desc": "Main entry point with checkModels and serve commands", "role": "Index" },
+			"index.ts": {
+				"desc": "Main entry point with checkModels, serve, query, and save commands",
+				"role": "Index"
+			},
 			"server.ts": { "desc": "Polywise server implementation using Hono", "role": "Server" },
 			"types.ts": { "desc": "CLI and server types", "role": "Type" }
 		},
