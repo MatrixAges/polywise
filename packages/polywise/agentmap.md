@@ -112,10 +112,16 @@ This document provides an overview of the packages/polywise module structure and
 			}
 		},
 		"scripts": {
+			"beforeTest.ts": { "desc": "Pre-test setup with precise cache pre-warming", "role": "Script" },
+			"afterTest.ts": { "desc": "Post-test cleanup", "role": "Script" },
 			"fetch_datasets.ts": {
 				"desc": "Script to fetch and clean complex datasets from external sources",
 				"role": "Script"
 			}
+		},
+		".test_vectors": {
+			"desc": "Persistent cache for model embeddings, reranking, and decisions",
+			"role": "Data"
 		},
 		"config": {
 			"package.json": { "desc": "Polywise package configuration", "role": "Config" },

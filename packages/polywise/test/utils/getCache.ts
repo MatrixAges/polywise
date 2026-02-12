@@ -5,9 +5,9 @@ import fs from 'fs-extra'
 
 import Pipeline from '../../src/Pipeline'
 
-const CACHE_DIR = path.resolve(__dirname, '../.test_vectors')
-const CACHE_RERANK_DIR = path.resolve(__dirname, '../.test_vectors/rerank')
-const CACHE_DECISION_DIR = path.resolve(__dirname, '../.test_vectors/decision')
+const CACHE_DIR = path.resolve(__dirname, '../../.test_vectors')
+const CACHE_RERANK_DIR = path.resolve(__dirname, '../../.test_vectors/rerank')
+const CACHE_DECISION_DIR = path.resolve(__dirname, '../../.test_vectors/decision')
 
 const memory_vector_cache = new Map<string, Array<number>>()
 const memory_rerank_cache = new Map<string, any>()
@@ -20,7 +20,10 @@ async function getPipeline() {
 		rawPipeline = new Pipeline()
 
 		await rawPipeline.init({
-			cache_dir: path.join(os.homedir(), '.polywise', '.models')
+			cache_dir: path.join(os.homedir(), '.polywise', '.models'),
+			embedding_concurrency: 20,
+			reranker_concurrency: 20,
+			decision_concurrency: 10
 		})
 	}
 
