@@ -1,7 +1,6 @@
 {
-	"name": "@polywise/opencode",
+	"name": "opencode",
 	"version": "0.0.1",
-	"private": true,
 	"type": "module",
 	"scripts": {
 		"build": "rslib build",

@@ -1,6 +1,5 @@
 {
-	"name": "@polywise/4xbench",
-	"version": "0.0.1",
+	"name": "4xbench",
 	"private": true,
 	"type": "module",
 	"scripts": {
