@@ -8,12 +8,12 @@ export default async (text: string) => {
 	}
 
 	const chunker = await RecursiveChunker.create({
-		chunkSize: 1024,
-		minCharactersPerChunk: 100
+		chunkSize: 2048,
+		minCharactersPerChunk: 200
 	})
 
 	const final_chunks: Array<string> = []
-	const safe_segment_size = 50 * 1024
+	const safe_segment_size = 100 * 1024
 
 	for (let i = 0; i < text.length; i += safe_segment_size) {
 		const segment = text.slice(i, i + safe_segment_size)
