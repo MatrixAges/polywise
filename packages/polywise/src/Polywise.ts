@@ -130,107 +130,6 @@ export default class Polywise {
 		}
 	}
 
-	process(query: string) {
-		const process = new Process(query)
-
-		this.query({ query, process }).catch(err => {
-			console.error('Process query error:', err)
-			process.emit('error', err)
-		})
-
-		return process
-	}
-
-	async getLongMemory(args: FiltersArgs = {}) {
-		return this.memory.getLongMemory({
-			idol_id: args.idol_id ?? this.idol_id ?? undefined,
-			root_ids: args.root_ids ?? this.root_ids ?? undefined,
-			metrics_ids: args.metrics_ids ?? this.metrics_ids ?? undefined
-		})
-	}
-
-	async getDailyMemory(timestamp: string, args: FiltersArgs = {}) {
-		return await this.memory.getDailyMemory(timestamp, {
-			idol_id: args.idol_id ?? this.idol_id ?? undefined,
-			root_ids: args.root_ids ?? this.root_ids ?? undefined,
-			metrics_ids: args.metrics_ids ?? this.metrics_ids ?? undefined
-		})
-	}
-
-	async setLongMemory(content: string, args: FiltersArgs = {}) {
-		await this.memory.saveLongTerm(content, {
-			idol_id: args.idol_id ?? this.idol_id ?? undefined,
-			root_ids: args.root_ids ?? this.root_ids ?? undefined,
-			metrics_ids: args.metrics_ids ?? this.metrics_ids ?? undefined
-		})
-	}
-
-	setFilters(args: FiltersArgs) {
-		const { idol_id, root_ids, metrics_ids } = args
-
-		if (idol_id !== undefined) this.idol_id = idol_id
-		if (root_ids !== undefined) this.root_ids = root_ids
-		if (metrics_ids !== undefined) this.metrics_ids = metrics_ids
-	}
-
-	private async initDatabase() {
-		const [val_err] = await to(Promise.resolve(validateMigrations()))
-
-		if (val_err) {
-			console.error('Migration validation error:', val_err)
-		}
-
-		const [err] = await to(
-			(async () => {
-				await this.exec(sql_meta.sql_create_schema_meta)
-				await this.exec(sql_meta.sql_create_table_schema_version)
-
-				const version_result = (await this.queryRaw(sql_meta.sql_get_current_version)) as Array<{
-					version: number
-				}>
-
-				const current_version = version_result[0]?.version ?? 0
-
-				if (current_version < CURRENT_SCHEMA_VERSION) {
-					await migrate(current_version, this.exec.bind(this), this.queryRaw.bind(this))
-				}
-
-				await this.initSchema()
-			})()
-		)
-
-		if (err) {
-			console.error('Migration error:', err)
-		}
-	}
-
-	private async initSchema() {
-		const check_result = (await this.queryRaw(sql.sql_check_articles_table_exists)) as Array<{ count: string }>
-
-		if (parseInt(check_result[0]?.count || '0') === 0) {
-			await this.exec([
-				sql.sql_create_extension_vector,
-				sql.sql_create_schema_knowledge,
-				sql.sql_create_table_articles,
-				sql.sql_create_table_article_embeddings,
-				sql.sql_create_index_article_embeddings_hnsw,
-				sql.sql_create_index_article_content_gin,
-				sql.sql_create_schema_brain,
-				sql.sql_create_table_nodes,
-				sql.sql_create_table_edges,
-				sql.sql_create_index_edge_src,
-				sql.sql_create_index_edge_tgt,
-				sql.sql_create_index_active_edges,
-				sql.sql_create_index_core_truth,
-				sql.sql_create_index_nodes_idol,
-				sql.sql_create_index_edges_idol,
-				sql.sql_create_index_nodes_roots,
-				sql.sql_create_index_edges_roots,
-				sql.sql_create_table_node_sources
-			])
-		}
-	}
-
 	@catchError()
 	@catchFinally(function (this: Polywise) {
 		this.brain.setBusy(false)
@@ -318,13 +217,47 @@ export default class Polywise {
 		this.log.write({ ...args, idol_id, root_ids, metrics_ids }, { article_id: aid })
 	}
 
-	private async isProactiveStatement(content: string) {
-		const prompt = getProactiveStatementPrompt(content)
+	setFilters(args: FiltersArgs) {
+		const { idol_id, root_ids, metrics_ids } = args
 
-		const decision = await this.pipeline.decide(prompt, { max_new_tokens: 5 })
+		if (idol_id !== undefined) this.idol_id = idol_id
+		if (root_ids !== undefined) this.root_ids = root_ids
+		if (metrics_ids !== undefined) this.metrics_ids = metrics_ids
+	}
 
-		const normalized = decision.split('\n')[0].toUpperCase().trim()
-		return normalized === 'YES' || normalized.startsWith('YES')
+	process(query: string) {
+		const process = new Process(query)
+
+		this.query({ query, process }).catch(err => {
+			console.error('Process query error:', err)
+			process.emit('error', err)
+		})
+
+		return process
+	}
+
+	async getLongMemory(args: FiltersArgs = {}) {
+		return this.memory.getLongMemory({
+			idol_id: args.idol_id ?? this.idol_id ?? undefined,
+			root_ids: args.root_ids ?? this.root_ids ?? undefined,
+			metrics_ids: args.metrics_ids ?? this.metrics_ids ?? undefined
+		})
+	}
+
+	async getDailyMemory(timestamp: string, args: FiltersArgs = {}) {
+		return await this.memory.getDailyMemory(timestamp, {
+			idol_id: args.idol_id ?? this.idol_id ?? undefined,
+			root_ids: args.root_ids ?? this.root_ids ?? undefined,
+			metrics_ids: args.metrics_ids ?? this.metrics_ids ?? undefined
+		})
+	}
+
+	async setLongMemory(content: string, args: FiltersArgs = {}) {
+		await this.memory.saveLongTerm(content, {
+			idol_id: args.idol_id ?? this.idol_id ?? undefined,
+			root_ids: args.root_ids ?? this.root_ids ?? undefined,
+			metrics_ids: args.metrics_ids ?? this.metrics_ids ?? undefined
+		})
 	}
 
 	async addNode(args: AddNodeArgs) {
@@ -447,32 +380,6 @@ export default class Polywise {
 			sql.sql_sleep_tick_reset_nodes,
 			sql.sql_sleep_tick_commit
 		])
-	}
-
-	private async consolidateLongTermMemory(filters: FiltersArgs) {
-		const snapshot = await this.getSnapshot(1.0)
-
-		const active_nodes = snapshot.nodes.filter(
-			n => n.activation > CONSOLIDATION_ACTIVE_THRESHOLD || n.potential > CONSOLIDATION_POTENTIAL_THRESHOLD
-		)
-
-		if (active_nodes.length > 0) {
-			const core_labels = active_nodes.map(n => n.label).join(', ')
-			const consolidation_entry = `${CONSOLIDATION_ENTRY_PREFIX}${core_labels}`
-
-			await this.memory.saveLongTerm(consolidation_entry, filters)
-		}
-
-		const habits = (await this.queryRaw(sql.sql_get_strong_habits, [
-			HABIT_CONSOLIDATION_WEIGHT,
-			MAX_HABIT_CONSOLIDATION
-		])) as Array<{ label: string; weight: number }>
-
-		for (const habit of habits) {
-			const habit_ltm = `${HABIT_LTM_PREFIX}${habit.label} (Strength: ${habit.weight.toFixed(2)})`
-
-			await this.memory.saveLongTerm(habit_ltm, filters)
-		}
 	}
 
 	async recallFromMemory(args: RecallArgs) {
@@ -600,6 +507,109 @@ export default class Polywise {
 		return await getHabits(query_embedding, this.queryRaw.bind(this))
 	}
 
+	async queryRaw(sql_str: string, params?: Array<any>) {
+		if (!this.db) {
+			throw new Error('DB not initialized or already closed')
+		}
+
+		const res = await this.db.query(sql_str, params)
+
+		return res.rows
+	}
+
+	private async initDatabase() {
+		const [val_err] = await to(Promise.resolve(validateMigrations()))
+
+		if (val_err) {
+			console.error('Migration validation error:', val_err)
+		}
+
+		const [err] = await to(
+			(async () => {
+				await this.exec(sql_meta.sql_create_schema_meta)
+				await this.exec(sql_meta.sql_create_table_schema_version)
+
+				const version_result = (await this.queryRaw(sql_meta.sql_get_current_version)) as Array<{
+					version: number
+				}>
+
+				const current_version = version_result[0]?.version ?? 0
+
+				if (current_version < CURRENT_SCHEMA_VERSION) {
+					await migrate(current_version, this.exec.bind(this), this.queryRaw.bind(this))
+				}
+
+				await this.initSchema()
+			})()
+		)
+
+		if (err) {
+			console.error('Migration error:', err)
+		}
+	}
+
+	private async initSchema() {
+		const check_result = (await this.queryRaw(sql.sql_check_articles_table_exists)) as Array<{ count: string }>
+
+		if (parseInt(check_result[0]?.count || '0') === 0) {
+			await this.exec([
+				sql.sql_create_extension_vector,
+				sql.sql_create_schema_knowledge,
+				sql.sql_create_table_articles,
+				sql.sql_create_table_article_embeddings,
+				sql.sql_create_index_article_embeddings_hnsw,
+				sql.sql_create_index_article_content_gin,
+				sql.sql_create_schema_brain,
+				sql.sql_create_table_nodes,
+				sql.sql_create_table_edges,
+				sql.sql_create_index_edge_src,
+				sql.sql_create_index_edge_tgt,
+				sql.sql_create_index_active_edges,
+				sql.sql_create_index_core_truth,
+				sql.sql_create_index_nodes_idol,
+				sql.sql_create_index_edges_idol,
+				sql.sql_create_index_nodes_roots,
+				sql.sql_create_index_edges_roots,
+				sql.sql_create_table_node_sources
+			])
+		}
+	}
+
+	private async isProactiveStatement(content: string) {
+		const prompt = getProactiveStatementPrompt(content)
+
+		const decision = await this.pipeline.decide(prompt, { max_new_tokens: 5 })
+
+		const normalized = decision.split('\n')[0].toUpperCase().trim()
+		return normalized === 'YES' || normalized.startsWith('YES')
+	}
+
+	private async consolidateLongTermMemory(filters: FiltersArgs) {
+		const snapshot = await this.getSnapshot(1.0)
+
+		const active_nodes = snapshot.nodes.filter(
+			n => n.activation > CONSOLIDATION_ACTIVE_THRESHOLD || n.potential > CONSOLIDATION_POTENTIAL_THRESHOLD
+		)
+
+		if (active_nodes.length > 0) {
+			const core_labels = active_nodes.map(n => n.label).join(', ')
+			const consolidation_entry = `${CONSOLIDATION_ENTRY_PREFIX}${core_labels}`
+
+			await this.memory.saveLongTerm(consolidation_entry, filters)
+		}
+
+		const habits = (await this.queryRaw(sql.sql_get_strong_habits, [
+			HABIT_CONSOLIDATION_WEIGHT,
+			MAX_HABIT_CONSOLIDATION
+		])) as Array<{ label: string; weight: number }>
+
+		for (const habit of habits) {
+			const habit_ltm = `${HABIT_LTM_PREFIX}${habit.label} (Strength: ${habit.weight.toFixed(2)})`
+
+			await this.memory.saveLongTerm(habit_ltm, filters)
+		}
+	}
+
 	private async recallNodesByKeywords(args: RecallNodesByKeywordsArgs) {
 		return await recallNodesByKeywords(args, this.queryRaw.bind(this))
 	}
@@ -634,16 +644,6 @@ export default class Polywise {
 		}
 
 		await this.db.exec(sql_input)
-	}
-
-	async queryRaw(sql_str: string, params?: Array<any>) {
-		if (!this.db) {
-			throw new Error('DB not initialized or already closed')
-		}
-
-		const res = await this.db.query(sql_str, params)
-
-		return res.rows
 	}
 
 	async off() {

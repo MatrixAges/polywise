@@ -56,14 +56,6 @@ program
 	.command('checkModels')
 	.description('Check and download required models')
 	.action(async () => {
-		const [init_err] = await to(polywise.init())
-
-		if (init_err) {
-			console.error('Failed to initialize Polywise:', init_err)
-
-			process.exit(1)
-		}
-
 		console.log('Checking models...')
 
 		const start_time = Date.now()
@@ -104,14 +96,6 @@ program
 	.option('--metrics-ids <string>', 'Comma-separated Metrics IDs')
 	.option('--verbose', 'Enable verbose process logging')
 	.action(async (query, options) => {
-		const [init_err] = await to(polywise.init())
-
-		if (init_err) {
-			console.error('Failed to initialize Polywise:', init_err)
-
-			process.exit(1)
-		}
-
 		const query_process = polywise.process(query)
 
 		if (options.verbose) {
@@ -164,19 +148,14 @@ program
 	.option('--metrics-ids <string>', 'Comma-separated Metrics IDs')
 	.option('--metadata <json>', 'Metadata JSON string')
 	.action(async (content, options) => {
-		const [init_err] = await to(polywise.init())
-
-		if (init_err) {
-			console.error('Failed to initialize Polywise:', init_err)
-			process.exit(1)
-		}
-
 		let metadata
+
 		if (options.metadata) {
 			try {
 				metadata = JSON.parse(options.metadata)
 			} catch (e) {
 				console.error('Invalid metadata JSON:', e)
+
 				process.exit(1)
 			}
 		}
@@ -194,6 +173,7 @@ program
 
 		if (save_err) {
 			console.error('Save error:', save_err)
+
 			process.exit(1)
 		}
 
