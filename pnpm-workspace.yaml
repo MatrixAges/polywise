@@ -2,7 +2,9 @@ packages:
       - packages/*
 
 catalog:
-      '@rslib/core': 0.19.4
+      '@rslib/core': 0.19.5
+      '@rsbuild/core': 1.7.3
+      '@rsbuild/plugin-react': 1.4.5
       '@types/node': 24.10.9
       '@types/react': 19.2.10
       '@types/react-dom': 19.2.3

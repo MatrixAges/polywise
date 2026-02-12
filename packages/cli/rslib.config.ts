@@ -14,7 +14,7 @@ export default deepmerge(rslib, {
 	],
 	output: {
 		filename: {
-			js: 'index.js'
+			js: '[name].js'
 		}
 	}
 } as Partial<RslibConfig>)

@@ -30,3 +30,7 @@ npm-debug.log*
 release
 src/main/bundle.js
 src/main/bundle.js.map
+
+# opencode
+
+.opencode/plans
