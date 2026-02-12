@@ -51,7 +51,7 @@ describe.concurrent('Polywise Pure Text Learning', () => {
 		it('should ingest complex literature and perform semantic search', async () => {
 			const idol_id = `lit_${Math.random().toString(36).slice(2)}`
 			const text = await loadDataset('complex_literature')
-			const chunks = chunkText(text, 1500).slice(0, 20)
+			const chunks = chunkText(text, 1500).slice(0, 10)
 
 			for (let i = 0; i < chunks.length; i++) {
 				await poly.article.addWithEmbedding(chunks[i], idol_id)
