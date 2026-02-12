@@ -1,11 +1,11 @@
 import os from 'os'
 import to from 'await-to-js'
 import { Command } from 'commander'
-import { Polywise } from 'polywise'
-import { container } from 'tsyringe'
+
+import polywise from './polywise'
+import { createServer } from './server'
 
 const program = new Command()
-const polywise = new Polywise()
 
 const DEFAULT_DATA_DIR = `${os.homedir()}/.polywise/:database:`
 const DEFAULT_CACHE_DIR = `${os.homedir()}/.polywise/.models`
@@ -29,26 +29,16 @@ program
 
 		console.log(`Starting Polywise server on port ${port}...`)
 
-		const [import_err, server_module] = await to(import('./server'))
-
-		if (import_err) {
-			console.error('Failed to import server module:', import_err)
-			process.exit(1)
-		}
-
-		const { createServer } = server_module
-
 		const [server_err, server] = await to(
 			createServer({
 				port,
-				polywise: {
-					log: options.log ? true : false
-				}
+				polywise: { log: options.log ? true : false }
 			})
 		)
 
 		if (server_err) {
 			console.error('Failed to create server:', server_err)
+
 			process.exit(1)
 		}
 
@@ -66,29 +56,33 @@ program
 	.command('checkModels')
 	.description('Check and download required models')
 	.action(async () => {
-		const polywise = container.resolve(Polywise)
 		const [init_err] = await to(polywise.init())
 
 		if (init_err) {
 			console.error('Failed to initialize Polywise:', init_err)
+
 			process.exit(1)
 		}
 
 		console.log('Checking models...')
 
 		const start_time = Date.now()
+
 		const interval = setInterval(() => {
 			const elapsed = ((Date.now() - start_time) / 1000).toFixed(1)
+
 			process.stdout.write(`\rDownload pending time: ${elapsed}s`)
 		}, 100)
 
 		const [check_err] = await to(polywise.pipeline.checkModels())
 
 		clearInterval(interval)
+
 		process.stdout.write('\n')
 
 		if (check_err) {
 			console.error('Failed to check/download models:', check_err)
+
 			process.exit(1)
 		}
 
@@ -114,6 +108,7 @@ program
 
 		if (init_err) {
 			console.error('Failed to initialize Polywise:', init_err)
+
 			process.exit(1)
 		}
 
@@ -122,10 +117,15 @@ program
 		if (options.verbose) {
 			query_process.on(event => {
 				const { key, value } = event
-				console.log(
-					`[Process] ${key}:`,
-					typeof value === 'object' ? JSON.stringify(value, null, 2) : value
-				)
+
+				if (key === 'cot') {
+					console.log(`[CoT]:`, typeof value === 'object' ? JSON.stringify(value, null, 2) : value)
+				} else {
+					console.log(
+						`[Process] ${key}:`,
+						typeof value === 'object' ? JSON.stringify(value, null, 2) : value
+					)
+				}
 			})
 		}
 
@@ -147,6 +147,7 @@ program
 
 		if (query_err) {
 			console.error('Query error:', query_err)
+
 			process.exit(1)
 		}
 
@@ -163,7 +164,6 @@ program
 	.option('--metrics-ids <string>', 'Comma-separated Metrics IDs')
 	.option('--metadata <json>', 'Metadata JSON string')
 	.action(async (content, options) => {
-		const polywise = container.resolve(Polywise)
 		const [init_err] = await to(polywise.init())
 
 		if (init_err) {

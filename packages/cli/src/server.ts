@@ -1,9 +1,8 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { logger } from 'hono/logger'
-import { Polywise } from 'polywise'
-import { container } from 'tsyringe'
 
+import polywise from './polywise'
 import { QueryRequest, SaveRequest, ServerOptions } from './types'
 
 export const createServer = async (options: ServerOptions) => {
@@ -11,8 +10,6 @@ export const createServer = async (options: ServerOptions) => {
 
 	app.use('*', logger())
 	app.use('*', cors())
-
-	const polywise = container.resolve(Polywise)
 
 	console.log('Initializing Polywise...')
 	await polywise.init(options.polywise)
@@ -29,10 +26,8 @@ export const createServer = async (options: ServerOptions) => {
 				return c.json({ error: 'Query is required' }, 400)
 			}
 
-			// Create a process object to track progress if needed
 			const process = polywise.process(query)
 
-			// Execute query
 			const result = await polywise.query({
 				query,
 				process,
