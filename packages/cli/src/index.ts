@@ -1,5 +1,3 @@
-import '@abraham/reflection'
-
 import os from 'os'
 import to from 'await-to-js'
 import { Command } from 'commander'
@@ -7,6 +5,7 @@ import { Polywise } from 'polywise'
 import { container } from 'tsyringe'
 
 const program = new Command()
+const polywise = new Polywise()
 
 const DEFAULT_DATA_DIR = `${os.homedir()}/.polywise/:database:`
 const DEFAULT_CACHE_DIR = `${os.homedir()}/.polywise/.models`
@@ -103,8 +102,14 @@ program
 	.option('--recall-depth <number>', 'Depth of recall (default: 0)', '0')
 	.option('--search-limit <number>', 'Search limit (default: 20)', '20')
 	.option('--rerank-limit <number>', 'Rerank limit (default: 10)', '10')
+	.option('--cot-depth <number>', 'Chain of Thought depth', '0')
+	.option('--stimulate-on-recall', 'Stimulate nodes on recall')
+	.option('--habit-threshold <number>', 'Habit threshold')
+	.option('--idol-id <string>', 'Idol ID')
+	.option('--root-ids <string>', 'Comma-separated Root IDs')
+	.option('--metrics-ids <string>', 'Comma-separated Metrics IDs')
+	.option('--verbose', 'Enable verbose process logging')
 	.action(async (query, options) => {
-		const polywise = container.resolve(Polywise)
 		const [init_err] = await to(polywise.init())
 
 		if (init_err) {
@@ -114,12 +119,28 @@ program
 
 		const query_process = polywise.process(query)
 
+		if (options.verbose) {
+			query_process.on(event => {
+				const { key, value } = event
+				console.log(
+					`[Process] ${key}:`,
+					typeof value === 'object' ? JSON.stringify(value, null, 2) : value
+				)
+			})
+		}
+
 		const [query_err, result] = await to(
 			polywise.query({
 				query,
 				recall_depth: parseInt(options.recallDepth),
 				search_limit: parseInt(options.searchLimit),
 				rerank_limit: parseInt(options.rerankLimit),
+				cot_depth: parseInt(options.cotDepth),
+				stimulate_on_recall: options.stimulateOnRecall,
+				habit_threshold: options.habitThreshold ? parseFloat(options.habitThreshold) : undefined,
+				idol_id: options.idolId,
+				root_ids: options.rootIds ? options.rootIds.split(',') : undefined,
+				metrics_ids: options.metricsIds ? options.metricsIds.split(',') : undefined,
 				process: query_process
 			})
 		)
@@ -136,7 +157,12 @@ program
 	.command('save')
 	.description('Save content to memory')
 	.argument('<content>', 'Content to save')
-	.action(async content => {
+	.option('--article-id <number>', 'Article ID')
+	.option('--idol-id <string>', 'Idol ID')
+	.option('--root-ids <string>', 'Comma-separated Root IDs')
+	.option('--metrics-ids <string>', 'Comma-separated Metrics IDs')
+	.option('--metadata <json>', 'Metadata JSON string')
+	.action(async (content, options) => {
 		const polywise = container.resolve(Polywise)
 		const [init_err] = await to(polywise.init())
 
@@ -145,9 +171,24 @@ program
 			process.exit(1)
 		}
 
+		let metadata
+		if (options.metadata) {
+			try {
+				metadata = JSON.parse(options.metadata)
+			} catch (e) {
+				console.error('Invalid metadata JSON:', e)
+				process.exit(1)
+			}
+		}
+
 		const [save_err] = await to(
 			polywise.save({
-				content
+				content,
+				article_id: options.articleId ? parseInt(options.articleId) : undefined,
+				idol_id: options.idolId,
+				root_ids: options.rootIds ? options.rootIds.split(',') : undefined,
+				metrics_ids: options.metricsIds ? options.metricsIds.split(',') : undefined,
+				metadata
 			})
 		)
 
