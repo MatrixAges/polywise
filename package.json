@@ -1,26 +1,52 @@
 {
-	"name": "monorepo",
-	"author": "1yasa",
-	"packageManager": "pnpm@10.28.2",
-	"scripts": {
-		"deps": "ncu -i",
-		"build:deps": "turbo run deps",
-		"build:mac": "turbo run desktop#pack:mac",
-		"build:win": "turbo run desktop#pack:win",
-		"deps:catalog": "pcu -i"
-	},
-	"simple-git-hooks": {
-		"pre-commit": "pnpm pretty-quick --pattern \"**/*.*(md|css|js|jsx|ts|tsx)\" --staged"
-	},
-	"devDependencies": {
-		"@ianvs/prettier-plugin-sort-imports": "^4.7.0",
-		"@types/node": "catalog:",
-		"pnpm-catalog-updates": "^1.1.8",
-		"prettier": "^3.8.1",
-		"prettier-plugin-tailwindcss-pro": "^0.2.0",
-		"pretty-quick": "^4.2.2",
-		"simple-git-hooks": "^2.13.1",
-		"tsx": "^4.21.0",
-		"turbo": "^2.8.1"
-	}
+  "name": "monorepo",
+  "author": "1yasa",
+  "packageManager": "pnpm@10.28.2",
+  "scripts": {
+    "deps": "ncu -i",
+    "build:deps": "turbo run deps",
+    "build:mac": "turbo run desktop#pack:mac",
+    "build:win": "turbo run desktop#pack:win",
+    "deps:catalog": "pcu -i"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "pnpm pretty-quick --pattern \"**/*.*(md|css|js|jsx|ts|tsx)\" --staged"
+  },
+  "devDependencies": {
+    "@ianvs/prettier-plugin-sort-imports": "^4.7.0",
+    "@types/node": "catalog:",
+    "pnpm-catalog-updates": "^1.1.8",
+    "prettier": "^3.8.1",
+    "prettier-plugin-tailwindcss-pro": "^0.2.0",
+    "pretty-quick": "^4.2.2",
+    "simple-git-hooks": "^2.13.1",
+    "tsx": "^4.21.0",
+    "turbo": "^2.8.1"
+  },
+  "workspaces": {
+    "packages": [
+      "packages/*"
+    ],
+    "catalog": {
+      "@rsbuild/core": "1.7.3",
+      "@rsbuild/plugin-react": "1.4.5",
+      "@rslib/core": "0.19.5",
+      "@types/node": "24.10.9",
+      "@types/react": "19.2.10",
+      "@types/react-dom": "19.2.3",
+      "ahooks": "^3.9.6",
+      "ai": "6.0.66",
+      "bun": "1.3.8",
+      "bun-types": "1.3.8",
+      "dayjs": "^1.11.19",
+      "es-toolkit": "1.44.0",
+      "fs-extra": "11.3.3",
+      "i18next": "25.8.0",
+      "react": "19.2.4",
+      "react-dom": "19.2.4",
+      "react-i18next": "16.5.4",
+      "shiki": "3.22.0",
+      "zod": "4.3.6"
+    }
+  }
 }

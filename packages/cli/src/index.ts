@@ -1,11 +1,35 @@
 import os from 'os'
 import to from 'await-to-js'
 import { Command } from 'commander'
+import { z } from 'zod'
 
 import polywise from './polywise'
 import { createServer } from './server'
 
 const program = new Command()
+
+const QuerySchema = z.object({
+	query: z.string().min(1),
+	recallDepth: z.coerce.number().int().nonnegative().default(0),
+	searchLimit: z.coerce.number().int().positive().default(20),
+	rerankLimit: z.coerce.number().int().positive().default(10),
+	cotDepth: z.coerce.number().int().nonnegative().default(0),
+	stimulateOnRecall: z.boolean().optional(),
+	habitThreshold: z.coerce.number().min(0).max(1).optional(),
+	idolId: z.string().optional(),
+	rootIds: z.string().optional(),
+	metricsIds: z.string().optional(),
+	verbose: z.boolean().optional()
+})
+
+const SaveSchema = z.object({
+	content: z.string().min(1),
+	articleId: z.coerce.number().int().positive().optional(),
+	idolId: z.string().optional(),
+	rootIds: z.string().optional(),
+	metricsIds: z.string().optional(),
+	metadata: z.string().optional()
+})
 
 const DEFAULT_DATA_DIR = `${os.homedir()}/.polywise/:database:`
 const DEFAULT_CACHE_DIR = `${os.homedir()}/.polywise/.models`
@@ -95,15 +119,27 @@ program
 	.option('--root-ids <string>', 'Comma-separated Root IDs')
 	.option('--metrics-ids <string>', 'Comma-separated Metrics IDs')
 	.option('--verbose', 'Enable verbose process logging')
-	.action(async (query, options) => {
-		const query_process = polywise.process(query)
+	.action(async (query_str, options) => {
+		const validation = QuerySchema.safeParse({ ...options, query: query_str })
 
-		if (options.verbose) {
+		if (!validation.success) {
+			console.error('Invalid input:', validation.error.format())
+
+			process.exit(1)
+		}
+
+		const data = validation.data
+		const query_process = polywise.process(data.query)
+
+		if (data.verbose) {
 			query_process.on(event => {
 				const { key, value } = event
 
 				if (key === 'cot') {
-					console.log(`[CoT]:`, typeof value === 'object' ? JSON.stringify(value, null, 2) : value)
+					console.log(
+						`[CoT Step]:`,
+						typeof value === 'object' ? JSON.stringify(value, null, 2) : value
+					)
 				} else {
 					console.log(
 						`[Process] ${key}:`,
@@ -115,16 +151,16 @@ program
 
 		const [query_err, result] = await to(
 			polywise.query({
-				query,
-				recall_depth: parseInt(options.recallDepth),
-				search_limit: parseInt(options.searchLimit),
-				rerank_limit: parseInt(options.rerankLimit),
-				cot_depth: parseInt(options.cotDepth),
-				stimulate_on_recall: options.stimulateOnRecall,
-				habit_threshold: options.habitThreshold ? parseFloat(options.habitThreshold) : undefined,
-				idol_id: options.idolId,
-				root_ids: options.rootIds ? options.rootIds.split(',') : undefined,
-				metrics_ids: options.metricsIds ? options.metricsIds.split(',') : undefined,
+				query: data.query,
+				recall_depth: data.recallDepth,
+				search_limit: data.searchLimit,
+				rerank_limit: data.rerankLimit,
+				cot_depth: data.cotDepth,
+				stimulate_on_recall: data.stimulateOnRecall,
+				habit_threshold: data.habitThreshold,
+				idol_id: data.idolId,
+				root_ids: data.rootIds ? data.rootIds.split(',') : undefined,
+				metrics_ids: data.metricsIds ? data.metricsIds.split(',') : undefined,
 				process: query_process
 			})
 		)
@@ -147,12 +183,21 @@ program
 	.option('--root-ids <string>', 'Comma-separated Root IDs')
 	.option('--metrics-ids <string>', 'Comma-separated Metrics IDs')
 	.option('--metadata <json>', 'Metadata JSON string')
-	.action(async (content, options) => {
-		let metadata
+	.action(async (content_str, options) => {
+		const validation = SaveSchema.safeParse({ ...options, content: content_str })
 
-		if (options.metadata) {
+		if (!validation.success) {
+			console.error('Invalid input:', validation.error.format())
+
+			process.exit(1)
+		}
+
+		const data = validation.data
+		let metadata: Record<string, any> | undefined
+
+		if (data.metadata) {
 			try {
-				metadata = JSON.parse(options.metadata)
+				metadata = JSON.parse(data.metadata)
 			} catch (e) {
 				console.error('Invalid metadata JSON:', e)
 
@@ -162,11 +207,11 @@ program
 
 		const [save_err] = await to(
 			polywise.save({
-				content,
-				article_id: options.articleId ? parseInt(options.articleId) : undefined,
-				idol_id: options.idolId,
-				root_ids: options.rootIds ? options.rootIds.split(',') : undefined,
-				metrics_ids: options.metricsIds ? options.metricsIds.split(',') : undefined,
+				content: data.content,
+				article_id: data.articleId,
+				idol_id: data.idolId,
+				root_ids: data.rootIds ? data.rootIds.split(',') : undefined,
+				metrics_ids: data.metricsIds ? data.metricsIds.split(',') : undefined,
 				metadata
 			})
 		)

@@ -15,7 +15,8 @@
 		"commander": "^13.1.0",
 		"hono": "^4.11.7",
 		"polywise": "workspace:*",
-		"tsyringe": "^4.10.0"
+		"tsyringe": "^4.10.0",
+		"zod": "catalog:"
 	},
 	"devDependencies": {
 		"@rslib/core": "catalog:",

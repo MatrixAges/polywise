@@ -35,6 +35,12 @@ export default class Cortex {
 
 		this.working_memory.set(task_id, wm)
 
+		if (process) {
+			emitter.on(data => {
+				process.emit('cot', data)
+			})
+		}
+
 		const initial_data = await this.executeStep(args, args.query, wm)
 
 		this.updateMemory(wm, initial_data)
@@ -73,6 +79,12 @@ export default class Cortex {
 
 		const query_embedding = ((await this.p.pipeline.embed(query)) as Array<number>) || []
 		const emitter = new ChainEmitter()
+
+		if (args.process) {
+			emitter.on(data => {
+				args.process?.emit('cot', data)
+			})
+		}
 
 		const { knowledges: initial_knowledges, actions: initial_actions } = await this.p.executeSingleSearch({
 			query,
