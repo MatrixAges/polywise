@@ -13,7 +13,7 @@ import {
 	POOLING_MEAN,
 	DEFAULT_CONCURRENCY
 } from './consts'
-import { catchError, catchFinally } from './decorators'
+import { catchFinally } from './decorators'
 import processText from './utils/processText'
 
 import type {
@@ -28,7 +28,6 @@ import type {
 } from './types'
 
 @injectable()
-@catchError()
 export default class Pipeline {
 	private embedding_config: EmbeddingConfig = DEFAULT_EMBEDDING_CONFIG
 	private reranker_config: RerankerConfig = DEFAULT_RERANKER_CONFIG
@@ -40,9 +39,9 @@ export default class Pipeline {
 	private embedding_pipeline: any = null
 	private reranker_pipeline: any = null
 	private decision_pipeline: any = null
-	private embedding_queue: PQueue
-	private reranker_queue: PQueue
-	private decision_queue: PQueue
+	private embedding_queue = new PQueue({ concurrency: this.embedding_concurrency })
+	private reranker_queue = new PQueue({ concurrency: this.reranker_concurrency })
+	private decision_queue = new PQueue({ concurrency: this.decision_concurrency })
 	private embedding_promise: Promise<any> | null = null
 	private reranker_promise: Promise<any> | null = null
 	private decision_promise: Promise<any> | null = null
@@ -57,10 +56,6 @@ export default class Pipeline {
 			reranker_concurrency,
 			decision_concurrency
 		} = args
-
-		this.embedding_queue = new PQueue({ concurrency: this.embedding_concurrency })
-		this.reranker_queue = new PQueue({ concurrency: this.reranker_concurrency })
-		this.decision_queue = new PQueue({ concurrency: this.decision_concurrency })
 
 		if (cache_dir) {
 			this.cache_dir = cache_dir
@@ -85,16 +80,19 @@ export default class Pipeline {
 
 		if (embedding_concurrency !== undefined) {
 			this.embedding_concurrency = embedding_concurrency
+
 			this.embedding_queue = new PQueue({ concurrency: this.embedding_concurrency })
 		}
 
 		if (reranker_concurrency !== undefined) {
 			this.reranker_concurrency = reranker_concurrency
+
 			this.reranker_queue = new PQueue({ concurrency: this.reranker_concurrency })
 		}
 
 		if (decision_concurrency !== undefined) {
 			this.decision_concurrency = decision_concurrency
+
 			this.decision_queue = new PQueue({ concurrency: this.decision_concurrency })
 		}
 	}

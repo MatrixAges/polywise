@@ -75,7 +75,7 @@ export default class Polywise {
 
 	onTick?: () => void
 
-	async init(args: PolywiseArgs) {
+	async init(args: PolywiseArgs = {}) {
 		const {
 			data_dir,
 			cache_dir,
@@ -90,7 +90,7 @@ export default class Polywise {
 			root_ids,
 			metrics_ids,
 			onTick
-		} = args || {}
+		} = args
 
 		this.idol_id = idol_id ?? null
 		this.root_ids = root_ids ?? null
@@ -126,7 +126,7 @@ export default class Polywise {
 	}
 
 	async getLongMemory(args: FiltersArgs = {}) {
-		return await this.memory.getLongMemory({
+		return this.memory.getLongMemory({
 			idol_id: args.idol_id ?? this.idol_id ?? undefined,
 			root_ids: args.root_ids ?? this.root_ids ?? undefined,
 			metrics_ids: args.metrics_ids ?? this.metrics_ids ?? undefined
@@ -169,9 +169,9 @@ export default class Polywise {
 				await this.exec(sql_meta.sql_create_schema_meta)
 				await this.exec(sql_meta.sql_create_table_schema_version)
 
-				const version_result = (await this.queryRaw(sql_meta.sql_get_current_version)) as {
+				const version_result = (await this.queryRaw(sql_meta.sql_get_current_version)) as Array<{
 					version: number
-				}[]
+				}>
 
 				const current_version = version_result[0]?.version ?? 0
 
@@ -189,7 +189,7 @@ export default class Polywise {
 	}
 
 	private async initSchema() {
-		const check_result = (await this.queryRaw(sql.sql_check_articles_table_exists)) as { count: string }[]
+		const check_result = (await this.queryRaw(sql.sql_check_articles_table_exists)) as Array<{ count: string }>
 
 		if (parseInt(check_result[0]?.count || '0') === 0) {
 			await this.exec([
@@ -378,30 +378,30 @@ export default class Polywise {
 	}
 
 	async getSnapshot(weight_threshold = SNAPSHOT_WEIGHT_THRESHOLD) {
-		const nodes = await this.queryRaw(sql.sql_get_snapshot_nodes(weight_threshold))
-		const edges = await this.queryRaw(sql.sql_get_snapshot_edges(weight_threshold))
+		const nodes = (await this.queryRaw(sql.sql_get_snapshot_nodes(weight_threshold))) as Array<Node>
+		const edges = (await this.queryRaw(sql.sql_get_snapshot_edges(weight_threshold))) as Array<Edge>
 
 		return { nodes, edges }
 	}
 
 	async getAllNodes() {
-		return (await this.queryRaw(sql.sql_get_all_nodes)) as Node[]
+		return (await this.queryRaw(sql.sql_get_all_nodes)) as Array<Node>
 	}
 
 	async getNodesByIdol(idol_id: string) {
-		return (await this.queryRaw(sql.sql_get_nodes_by_idol, [idol_id])) as Node[]
+		return (await this.queryRaw(sql.sql_get_nodes_by_idol, [idol_id])) as Array<Node>
 	}
 
 	async getNodesByRoot(root_id: string) {
-		return (await this.queryRaw(sql.sql_get_nodes_by_root, [root_id])) as Node[]
+		return (await this.queryRaw(sql.sql_get_nodes_by_root, [root_id])) as Array<Node>
 	}
 
 	async getEdgesByIdol(idol_id: string) {
-		return (await this.queryRaw(sql.sql_get_edges_by_idol, [idol_id])) as Edge[]
+		return (await this.queryRaw(sql.sql_get_edges_by_idol, [idol_id])) as Array<Edge>
 	}
 
 	async getEdgesByRoot(root_id: string) {
-		return (await this.queryRaw(sql.sql_get_edges_by_root, [root_id])) as Edge[]
+		return (await this.queryRaw(sql.sql_get_edges_by_root, [root_id])) as Array<Edge>
 	}
 
 	async tick(threshold_override?: number) {
@@ -443,6 +443,7 @@ export default class Polywise {
 
 	private async consolidateLongTermMemory(filters: FiltersArgs) {
 		const snapshot = await this.getSnapshot(1.0)
+
 		const active_nodes = snapshot.nodes.filter(
 			n => n.activation > CONSOLIDATION_ACTIVE_THRESHOLD || n.potential > CONSOLIDATION_POTENTIAL_THRESHOLD
 		)
@@ -457,10 +458,11 @@ export default class Polywise {
 		const habits = (await this.queryRaw(sql.sql_get_strong_habits, [
 			HABIT_CONSOLIDATION_WEIGHT,
 			MAX_HABIT_CONSOLIDATION
-		])) as { label: string; weight: number }[]
+		])) as Array<{ label: string; weight: number }>
 
 		for (const habit of habits) {
 			const habit_ltm = `${HABIT_LTM_PREFIX}${habit.label} (Strength: ${habit.weight.toFixed(2)})`
+
 			await this.memory.saveLongTerm(habit_ltm, filters)
 		}
 	}
@@ -632,10 +634,8 @@ export default class Polywise {
 		this.brain?.off()
 		this.pipeline?.off()
 
-		if (this.db) {
-			await this.db.close()
+		await this.db.close()
 
-			this.db = null
-		}
+		this.db = null
 	}
 }

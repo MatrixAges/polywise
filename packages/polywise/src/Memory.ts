@@ -4,9 +4,9 @@ import dayjs from 'dayjs'
 import { getClassifyPrompt } from './consts'
 import { sql_memory } from './sql'
 import { LONG_TERM_CAPACITY, LTM_DECAY_LAMBDA, PRIORITY_WEIGHTS, TIME_DECAY_HALFLIFE_DAYS } from './consts'
-import Polywise from './Polywise'
 
-import type { FiltersArgs, Knowledge } from './types'
+import type Polywise from './Polywise'
+import type { FiltersArgs, Knowledge, DataRows } from './types'
 
 @injectable()
 export default class Memory {
@@ -19,18 +19,12 @@ export default class Memory {
 	async getLongMemory(args: FiltersArgs = {}) {
 		const { idol_id, root_ids, metrics_ids } = args
 
-		const rows = (await this.queryRaw(sql_memory.sql_get_long_memory, [
-			idol_id ?? null,
-			root_ids ?? null,
-			metrics_ids ?? null
-		])) as { content: string }[]
+		const filters = [idol_id ?? null, root_ids ?? null, metrics_ids ?? null]
+
+		const rows = (await this.queryRaw(sql_memory.sql_get_long_memory, filters)) as DataRows
 
 		if (rows.length > 0) {
-			await this.exec(sql_memory.sql_update_long_term_access, [
-				idol_id ?? null,
-				root_ids ?? null,
-				metrics_ids ?? null
-			])
+			await this.exec(sql_memory.sql_update_long_term_access, filters)
 		}
 
 		return rows.map(r => r.content).join('\n')
@@ -38,13 +32,14 @@ export default class Memory {
 
 	async saveLongTerm(content: string, args: FiltersArgs = {}) {
 		const { idol_id, root_ids, metrics_ids } = args
+
 		const embedding = (await this.p.pipeline.embed(content)) as number[]
 
 		if (!embedding) return
 
 		const vector_str = `[${embedding.join(',')}]`
 
-		const similar = (await this.queryRaw(sql_memory.sql_find_similar_long_term, [vector_str, 0.8])) as any[]
+		const similar = (await this.queryRaw(sql_memory.sql_find_similar_long_term, [vector_str, 0.8])) as DataRows
 
 		if (similar.length > 0) {
 			const existing_content = similar[0].content
@@ -68,7 +63,7 @@ export default class Memory {
 			}
 		}
 
-		const count_res = (await this.queryRaw(sql_memory.sql_get_long_term_count)) as { count: number }[]
+		const count_res = (await this.queryRaw(sql_memory.sql_get_long_term_count)) as Array<{ count: number }>
 
 		if (count_res[0].count >= LONG_TERM_CAPACITY) {
 			await this.exec(sql_memory.sql_delete_decayed_long_term, [LTM_DECAY_LAMBDA])
@@ -85,33 +80,11 @@ export default class Memory {
 
 	async getDailyMemory(timestamp: string, args: FiltersArgs = {}) {
 		const { idol_id, root_ids, metrics_ids } = args
+		const filters = [timestamp, idol_id ?? null, root_ids ?? null, metrics_ids ?? null]
 
-		const current = (
-			await this.queryRaw(sql_memory.sql_get_diary, [
-				timestamp,
-				idol_id ?? null,
-				root_ids ?? null,
-				metrics_ids ?? null
-			])
-		)[0]
-
-		const prev = (
-			await this.queryRaw(sql_memory.sql_get_prev_diary, [
-				timestamp,
-				idol_id ?? null,
-				root_ids ?? null,
-				metrics_ids ?? null
-			])
-		)[0]
-
-		const next = (
-			await this.queryRaw(sql_memory.sql_get_next_diary, [
-				timestamp,
-				idol_id ?? null,
-				root_ids ?? null,
-				metrics_ids ?? null
-			])
-		)[0]
+		const current = (await this.queryRaw(sql_memory.sql_get_diary, filters))[0]
+		const prev = (await this.queryRaw(sql_memory.sql_get_prev_diary, filters))[0]
+		const next = (await this.queryRaw(sql_memory.sql_get_next_diary, filters))[0]
 
 		return { current, prev, next }
 	}
@@ -137,24 +110,11 @@ export default class Memory {
 		if (!embedding) return []
 
 		const vector_str = `[${embedding.join(',')}]`
+		const filters = [vector_str, idol_id ?? null, root_ids ?? null, metrics_ids ?? null, limit]
 
-		const lt_results = (await this.queryRaw(sql_memory.sql_search_long_term, [
-			vector_str,
-			idol_id ?? null,
-			root_ids ?? null,
-			metrics_ids ?? null,
-			limit
-		])) as any[]
-
-		const diary_results = (await this.queryRaw(sql_memory.sql_search_diary, [
-			vector_str,
-			idol_id ?? null,
-			root_ids ?? null,
-			metrics_ids ?? null,
-			limit
-		])) as any[]
-
-		const knowledges: Knowledge[] = []
+		const lt_results = (await this.queryRaw(sql_memory.sql_search_long_term, filters)) as any[]
+		const diary_results = (await this.queryRaw(sql_memory.sql_search_diary, filters)) as any[]
+		const knowledges: Array<Knowledge> = []
 
 		for (const r of lt_results) {
 			knowledges.push({
@@ -191,6 +151,7 @@ export default class Memory {
 
 	private calculateTimeDecay(timestamp: string | Date) {
 		const days = dayjs().diff(dayjs(timestamp), 'day')
+
 		return Math.pow(0.5, days / TIME_DECAY_HALFLIFE_DAYS)
 	}
 

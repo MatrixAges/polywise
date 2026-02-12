@@ -1,17 +1,12 @@
 import type { PGlite } from '@electric-sql/pglite'
 import type Polywise from '../Polywise'
 import type { ChainEmitter } from '../utils'
-import type { Action, Knowledge, MemoryRecallResult, Metadata, Triple } from './polywise'
+import type { LogArgs } from './log'
+import type { Action, Knowledge, MemoryRecallResult, Metadata } from './polywise'
 
 export interface BrainArgs {
 	poly: Polywise
 	onTick?: () => void
-}
-
-export interface LogArgs {
-	dir: string
-	log?: boolean
-	json?: boolean
 }
 
 export interface FiltersArgs {

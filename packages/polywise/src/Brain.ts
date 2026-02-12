@@ -50,7 +50,6 @@ export default class Brain {
 		this.state = 'LEARNING'
 
 		this.reportUserActivity()
-
 		this.addSynapticLoad(load)
 
 		for (let i = 0; i < 100; i++) {

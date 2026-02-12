@@ -6,25 +6,21 @@ import { injectable } from 'tsyringe'
 
 import { DEFAULT_DATE_FORMAT, DEFAULT_TIMESTAMP_FORMAT, formatLogEntry } from './consts'
 
-export interface LogArgs {
-	dir?: string
-	log?: boolean
-	json?: boolean
-}
+import type { LogArgs, WriteLogArgs } from './types'
 
 @injectable()
 export default class Log {
-	private log_dir: string = ''
-	private enable_log: boolean = true
-	private enable_json: boolean = true
-	private today_logs: string[] = []
+	private log_dir = ''
+	private enable_log = true
+	private enable_json = false
+	private today_logs: Array<string> = []
 
 	init(args: LogArgs) {
 		const { dir, log, json } = args
 
 		this.log_dir = dir ?? join(homedir(), '.polywise', 'log')
 		this.enable_log = log ?? true
-		this.enable_json = json ?? true
+		this.enable_json = json ?? false
 
 		if (!existsSync(this.log_dir)) {
 			mkdirSync(this.log_dir, { recursive: true })
@@ -32,26 +28,24 @@ export default class Log {
 	}
 
 	write(input: object, output: object) {
+		if (!this.enable_log) return
+
 		const now = dayjs()
 		const timestamp = now.format(DEFAULT_TIMESTAMP_FORMAT)
 		const date = now.format(DEFAULT_DATE_FORMAT)
-
 		const log_entry = formatLogEntry(timestamp, input, output)
+
 		this.today_logs.push(log_entry)
 
-		if (!this.log_dir) return
-
-		if (this.enable_log) {
-			this.writeLog({
+		if (this.enable_json) {
+			this.writeJson({
 				timestamp,
 				input,
 				output,
 				date
 			})
-		}
-
-		if (this.enable_json) {
-			this.writeJson({
+		} else {
+			this.writeLog({
 				timestamp,
 				input,
 				output,
@@ -62,25 +56,27 @@ export default class Log {
 
 	getTodayLogs() {
 		const logs = [...this.today_logs]
+
 		this.today_logs = []
+
 		return logs
 	}
 
-	private writeLog(args: { timestamp: string; input: object; output: object; date: string }) {
+	private writeLog(args: WriteLogArgs) {
 		const { timestamp, input, output, date } = args
 		const content = formatLogEntry(timestamp, input, output)
+
 		const file_path = join(this.log_dir, `${date}.log`)
 
 		writeFileSync(file_path, content, { flag: 'a' })
 	}
 
-	private writeJson(args: { timestamp: string; input: object; output: object; date: string }) {
+	private writeJson(args: WriteLogArgs) {
 		const { timestamp, input, output, date } = args
 		const entry = { timestamp, input, output }
+
 		const file_path = join(this.log_dir, `${date}.json`)
 
 		writeFileSync(file_path, JSON.stringify(entry) + '\n', { flag: 'a' })
 	}
-
-	off() {}
 }

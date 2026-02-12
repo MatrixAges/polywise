@@ -1,4 +1,5 @@
 import to from 'await-to-js'
+import { injectable } from 'tsyringe'
 
 import { SCHEMA_KNOWLEDGE } from './consts'
 import * as sql from './sql'
@@ -6,6 +7,7 @@ import * as sql from './sql'
 import type Polywise from './Polywise'
 import type { ArticleEntity, ArticleWithSimilarity, FiltersArgs, ProcessArticleArgs, SearchArticlesArgs } from './types'
 
+@injectable()
 export default class Article {
 	private p: Polywise
 

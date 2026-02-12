@@ -1,4 +1,4 @@
-import { singleton } from 'tsyringe'
+import { injectable } from 'tsyringe'
 
 import { ChainEmitter, processResults, getRandomId } from './utils'
 import { getNextStepPrompt } from './consts'
@@ -7,22 +7,19 @@ import Polywise from './Polywise'
 import type { CortexProcessArgs, WorkingMemory, Step } from './types/cortex'
 import type { Knowledge, Action, FinalQueryResult } from './types/polywise'
 
-@singleton()
+@injectable()
 export default class Cortex {
 	private p: Polywise
-
 	private working_memory: Map<string, WorkingMemory> = new Map()
 
 	init(p: Polywise) {
 		this.p = p
 	}
 
-	async process(args: CortexProcessArgs): Promise<FinalQueryResult> {
+	async process(args: CortexProcessArgs) {
 		const { cot_depth = 0 } = args
 
-		if (cot_depth <= 0) {
-			return await this.executeFastPath(args)
-		}
+		if (cot_depth <= 0) return await this.executeFastPath(args)
 
 		const emitter = new ChainEmitter()
 		const task_id = getRandomId()
@@ -58,7 +55,7 @@ export default class Cortex {
 		}
 	}
 
-	private async executeFastPath(args: CortexProcessArgs): Promise<FinalQueryResult> {
+	private async executeFastPath(args: CortexProcessArgs) {
 		const {
 			query,
 			recall_depth,
@@ -164,6 +161,7 @@ export default class Cortex {
 		const prompt = getNextStepPrompt(wm.original_goal, history)
 
 		const decision = await this.p.pipeline.decide(prompt, { max_new_tokens: 30, temperature: 0.3 })
+
 		const query = decision.trim().split('\n')[0].replace(/"/g, '')
 
 		return query.length < 3 ? 'DONE' : query
