@@ -10,16 +10,17 @@ import type { LogArgs, WriteLogArgs } from './types'
 
 @injectable()
 export default class Log {
-	private log_dir = ''
-	private enable_log = true
+	private log_dir = join(homedir(), '.polywise', 'log')
+	private enable_log = false
 	private enable_json = false
 	private today_logs: Array<string> = []
 
 	init(args: LogArgs) {
 		const { dir, log, json } = args
 
-		this.log_dir = dir ?? join(homedir(), '.polywise', 'log')
-		this.enable_log = log ?? true
+		if (dir) this.log_dir = dir
+
+		this.enable_log = log ?? false
 		this.enable_json = json ?? false
 
 		if (!existsSync(this.log_dir)) {

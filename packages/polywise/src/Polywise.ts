@@ -12,6 +12,7 @@ import Memory from './Memory'
 import Cortex from './Cortex'
 import * as sql from './sql'
 import * as sql_meta from './sql/meta'
+import Process from './Process'
 import { catchError, catchFinally } from './decorators'
 import { CURRENT_SCHEMA_VERSION, migrate, validateMigrations } from './utils/migration'
 import extractKeywords from './utils/extractKeywords'
@@ -70,8 +71,8 @@ export default class Polywise {
 
 	db: PGlite
 	idol_id: string | null = null
-	root_ids: string[] | null = null
-	metrics_ids: string[] | null = null
+	root_ids: Array<string> | null = null
+	metrics_ids: Array<string> | null = null
 
 	onTick?: () => void
 
@@ -123,6 +124,17 @@ export default class Polywise {
 		if (log) {
 			this.log.init(typeof log === 'boolean' ? {} : log)
 		}
+	}
+
+	process(query: string) {
+		const process = new Process(query)
+
+		this.query({ query, process }).catch(err => {
+			console.error('Process query error:', err)
+			process.emit('error', err)
+		})
+
+		return process
 	}
 
 	async getLongMemory(args: FiltersArgs = {}) {
@@ -226,8 +238,11 @@ export default class Polywise {
 		const result = await this.cortex.process({
 			...args,
 			idol_id: args.idol_id ?? this.idol_id ?? undefined,
-			root_ids: args.root_ids ?? this.root_ids ?? undefined
+			root_ids: args.root_ids ?? this.root_ids ?? undefined,
+			process: args.process
 		})
+
+		args.process?.emit('final_result', result)
 
 		this.log.write(args, result)
 
@@ -236,8 +251,8 @@ export default class Polywise {
 
 	async handleHabitReaction(args: {
 		query: string
-		query_embedding: number[]
-		initial_actions: Action[]
+		query_embedding: Array<number>
+		initial_actions: Array<Action>
 		habit_threshold: number
 	}) {
 		await handleHabitReaction(args, this.queryRaw.bind(this), (node_id, intensity) =>
@@ -505,7 +520,8 @@ export default class Polywise {
 			stimulate_on_recall,
 			idol_id,
 			root_ids,
-			metrics_ids
+			metrics_ids,
+			process
 		} = args
 
 		const query_embedding = (await this.pipeline.embed(query)) as number[]
@@ -550,6 +566,7 @@ export default class Polywise {
 			},
 			this.queryRaw.bind(this)
 		)
+		process?.emit('aggregated_results', { knowledges, actions })
 
 		const reranked_knowledges = await rerankKnowledges(
 			query,
@@ -558,6 +575,7 @@ export default class Polywise {
 			this.pipeline,
 			this.queryRaw.bind(this)
 		)
+		process?.emit('reranked_knowledges', reranked_knowledges)
 
 		const reranked_actions = await rerankActions(
 			query,
@@ -566,6 +584,7 @@ export default class Polywise {
 			this.pipeline,
 			this.queryRaw.bind(this)
 		)
+		process?.emit('reranked_actions', reranked_actions)
 
 		return {
 			knowledges: reranked_knowledges,
@@ -573,7 +592,7 @@ export default class Polywise {
 		}
 	}
 
-	async getHabits(query_embedding: number[]) {
+	async getHabits(query_embedding: Array<number>) {
 		return await getHabits(query_embedding, this.queryRaw.bind(this))
 	}
 
@@ -581,15 +600,15 @@ export default class Polywise {
 		return await recallNodesByKeywords(args, this.queryRaw.bind(this))
 	}
 
-	private async recallRelatedNodes(node_ids: number[], max_depth: number) {
+	private async recallRelatedNodes(node_ids: Array<number>, max_depth: number) {
 		return await recallRelatedNodes(node_ids, max_depth, this.queryRaw.bind(this))
 	}
 
-	private async getNodeContexts(node_ids: number[]) {
+	private async getNodeContexts(node_ids: Array<number>) {
 		return await getNodeContexts(node_ids, this.queryRaw.bind(this))
 	}
 
-	private async stimulateNodes(node_ids: number[], intensity: number) {
+	private async stimulateNodes(node_ids: Array<number>, intensity: number) {
 		await stimulateNodes(node_ids, intensity, this.queryRaw.bind(this))
 	}
 
@@ -613,7 +632,7 @@ export default class Polywise {
 		await this.db.exec(sql_input)
 	}
 
-	async queryRaw(sql_str: string, params?: any[]) {
+	async queryRaw(sql_str: string, params?: Array<any>) {
 		const res = params ? await this.db.query(sql_str, params) : await this.db.query(sql_str)
 
 		return JSON.parse(JSON.stringify(res.rows))

@@ -138,8 +138,8 @@ export const migrations: Migration[] = [
 
 export async function migrate(
 	current_version: number,
-	exec: (sql: string | string[]) => Promise<void>,
-	query: <T = any>(sql: string, params?: any[]) => Promise<T[]>
+	exec: (sql: string | Array<string>) => Promise<void>,
+	query: <T = any>(sql: string, params?: Array<any>) => Promise<Array<T>>
 ) {
 	return migrateFn(migrations, current_version, exec, query)
 }

@@ -11,8 +11,8 @@ export interface BrainArgs {
 
 export interface FiltersArgs {
 	idol_id?: string
-	root_ids?: string[]
-	metrics_ids?: string[]
+	root_ids?: Array<string>
+	metrics_ids?: Array<string>
 }
 
 export interface PolywiseArgs extends FiltersArgs {
@@ -40,7 +40,7 @@ export interface LocalEmbeddingConfig {
 
 export interface CustomEmbeddingConfig {
 	type: 'custom'
-	fn: (text: string) => Promise<number[]>
+	fn: (text: string) => Promise<Array<number>>
 }
 
 export type EmbeddingConfig = LocalEmbeddingConfig | CustomEmbeddingConfig
@@ -53,7 +53,7 @@ export interface LocalRerankerConfig {
 
 export interface CustomRerankerConfig {
 	type: 'custom'
-	fn: (query: string, documents: string[]) => Promise<{ index: number; score: number }[]>
+	fn: (query: string, documents: Array<string>) => Promise<Array<{ index: number; score: number }>>
 }
 
 export type RerankerConfig = LocalRerankerConfig | CustomRerankerConfig
@@ -94,7 +94,7 @@ export interface AddNodeArgs extends FiltersArgs {
 	y: number
 	threshold?: number
 	metadata?: Metadata
-	embedding?: number[]
+	embedding?: Array<number>
 	is_action?: boolean
 }
 
@@ -149,7 +149,7 @@ export interface RecallArgs extends FiltersArgs {
 	max_nodes?: number
 	max_depth?: number
 	stimulate_intensity?: number
-	query_embedding?: number[]
+	query_embedding?: Array<number>
 }
 
 export interface QueryArgs extends FiltersArgs {
@@ -160,20 +160,21 @@ export interface QueryArgs extends FiltersArgs {
 	cot_depth?: number
 	stimulate_on_recall?: boolean
 	habit_threshold?: number
+	process?: import('../Process').default
 }
 
 export interface AggregateResultsArgs {
 	recall_result: MemoryRecallResult
-	search_results: SearchResult[]
-	habits?: any[]
-	memory_results?: Knowledge[]
+	search_results: Array<SearchResult>
+	habits?: Array<any>
+	memory_results?: Array<Knowledge>
 }
 
 export interface PipelineSearchArgs {
 	query: string
 	rerank_limit?: number
-	vectorSearch: () => Promise<ArticleSearchResult[]>
-	fulltextSearch: () => Promise<ArticleSearchResult[]>
+	vectorSearch: () => Promise<Array<ArticleSearchResult>>
+	fulltextSearch: () => Promise<Array<ArticleSearchResult>>
 }
 
 export interface SingleSearchArgs extends FiltersArgs {
@@ -182,6 +183,7 @@ export interface SingleSearchArgs extends FiltersArgs {
 	search_limit: number
 	rerank_limit: number
 	stimulate_on_recall: boolean
+	process?: import('../Process').default
 }
 
 export interface ExecuteCotArgs extends FiltersArgs {
@@ -192,18 +194,18 @@ export interface ExecuteCotArgs extends FiltersArgs {
 	search_limit: number
 	rerank_limit: number
 	stimulate_on_recall: boolean
-	initial_knowledges: Knowledge[]
-	initial_actions: Action[]
+	initial_knowledges: Array<Knowledge>
+	initial_actions: Array<Action>
 	emitter: ChainEmitter
 	history_ids: Set<number>
 }
 
 export interface RecallNodesByKeywordsArgs extends FiltersArgs {
-	keywords: string[]
+	keywords: Array<string>
 	limit?: number
 }
 
 export interface StrengthenRelatedEdgesArgs {
-	matched_nodes: any[]
-	related_nodes: any[]
+	matched_nodes: Array<any>
+	related_nodes: Array<any>
 }

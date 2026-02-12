@@ -36,5 +36,5 @@ export interface ModelInfo {
 	name: string
 	size: number
 	last_modified?: string
-	tags?: string[]
+	tags?: Array<string>
 }

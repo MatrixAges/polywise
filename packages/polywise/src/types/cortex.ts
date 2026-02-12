@@ -9,10 +9,10 @@ export interface Step {
 
 export interface WorkingMemory {
 	original_goal: string
-	steps: Step[]
-	accumulated_knowledges: Knowledge[]
-	accumulated_actions: Action[]
-	context_embedding: number[]
+	steps: Array<Step>
+	accumulated_knowledges: Array<Knowledge>
+	accumulated_actions: Array<Action>
+	context_embedding: Array<number>
 	history_ids: Set<number>
 }
 
@@ -25,6 +25,7 @@ export interface CortexProcessArgs {
 	stimulate_on_recall?: boolean
 	habit_threshold?: number
 	idol_id?: string
-	root_ids?: string[]
-	metrics_ids?: string[]
+	root_ids?: Array<string>
+	metrics_ids?: Array<string>
+	process?: import('../Process').default
 }

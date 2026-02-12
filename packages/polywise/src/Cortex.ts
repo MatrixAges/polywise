@@ -17,7 +17,7 @@ export default class Cortex {
 	}
 
 	async process(args: CortexProcessArgs) {
-		const { cot_depth = 0 } = args
+		const { cot_depth = 0, process } = args
 
 		if (cot_depth <= 0) return await this.executeFastPath(args)
 
@@ -39,6 +39,8 @@ export default class Cortex {
 
 		this.updateMemory(wm, initial_data)
 		this.runPlanningLoop(task_id, args, emitter, wm)
+
+		args.process?.emit('planning_step', initial_data)
 
 		const { knowledges, actions, metadata } = await processResults(
 			args.query,
@@ -65,7 +67,8 @@ export default class Cortex {
 			habit_threshold,
 			idol_id,
 			root_ids,
-			metrics_ids
+			metrics_ids,
+			process
 		} = args
 
 		const query_embedding = ((await this.p.pipeline.embed(query)) as number[]) || []
@@ -79,7 +82,8 @@ export default class Cortex {
 			stimulate_on_recall,
 			idol_id: idol_id ?? undefined,
 			root_ids: root_ids ?? undefined,
-			metrics_ids: metrics_ids ?? undefined
+			metrics_ids: metrics_ids ?? undefined,
+			process
 		})
 
 		await this.p.handleHabitReaction({
@@ -124,6 +128,8 @@ export default class Cortex {
 				const step_data = await this.executeStep(args, next_query, wm)
 
 				this.updateMemory(wm, step_data)
+
+				args.process?.emit('planning_step', step_data)
 
 				if (step_data.knowledges.length > 0 || step_data.actions.length > 0) {
 					await this.emitProgress(emitter, step_data.knowledges, step_data.actions, next_query)
@@ -172,8 +178,16 @@ export default class Cortex {
 		query: string,
 		wm: WorkingMemory
 	): Promise<{ step: Step; knowledges: Knowledge[]; actions: Action[] }> {
-		const { recall_depth, search_limit, rerank_limit, stimulate_on_recall, idol_id, root_ids, metrics_ids } =
-			args
+		const {
+			recall_depth,
+			search_limit,
+			rerank_limit,
+			stimulate_on_recall,
+			idol_id,
+			root_ids,
+			metrics_ids,
+			process
+		} = args
 
 		const { knowledges, actions } = await this.p.executeSingleSearch({
 			query,
@@ -183,7 +197,8 @@ export default class Cortex {
 			stimulate_on_recall,
 			idol_id,
 			root_ids,
-			metrics_ids
+			metrics_ids,
+			process
 		})
 
 		const new_knowledges = knowledges.filter(k => !wm.history_ids.has(k.id))

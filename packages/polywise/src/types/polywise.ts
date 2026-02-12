@@ -12,8 +12,8 @@ export interface Triple {
 
 export interface Metadata {
 	desc?: string
-	links?: string[]
-	files?: string[]
+	links?: Array<string>
+	files?: Array<string>
 }
 
 export interface Node {
@@ -26,10 +26,10 @@ export interface Node {
 	threshold: number
 	last_fired_at?: string
 	idol_id?: string
-	root_ids?: string[]
-	metrics_ids?: string[]
+	root_ids?: Array<string>
+	metrics_ids?: Array<string>
 	metadata?: Metadata
-	embedding?: number[]
+	embedding?: Array<number>
 	is_action?: boolean
 	created_at?: string
 	updated_at?: string
@@ -44,8 +44,8 @@ export interface Edge {
 	learning_rate: number
 	decay_resistance: number
 	idol_id?: string
-	root_ids?: string[]
-	metrics_ids?: string[]
+	root_ids?: Array<string>
+	metrics_ids?: Array<string>
 	metadata?: Metadata
 	is_habit?: boolean
 	reaction_count?: number
@@ -62,8 +62,8 @@ export interface ReactResult {
 }
 
 export interface Snapshot {
-	nodes: Node[]
-	edges: Edge[]
+	nodes: Array<Node>
+	edges: Array<Edge>
 }
 
 export type BrainState = 'FRESH' | 'LEARNING' | 'TIRED' | 'SLEEPING'
@@ -72,11 +72,11 @@ export interface DatabaseConfig {
 	data_dir?: string
 }
 
-export type QueryResult<T = any> = T[]
+export type QueryResult<T = any> = Array<T>
 
 export type MigrationFn = (
-	exec: (sql: string | string[]) => Promise<void>,
-	query: <T = any>(sql: string, params?: any[]) => Promise<T[]>
+	exec: (sql: string | Array<string>) => Promise<void>,
+	query: <T = any>(sql: string, params?: Array<any>) => Promise<Array<T>>
 ) => Promise<void>
 
 export interface Migration {
@@ -98,22 +98,25 @@ export interface ArticleWithSimilarity extends ArticleEntity {
 export interface ArticleEmbedding {
 	id: number
 	article_id: number
-	embedding: number[]
+	embedding: Array<number>
 	model_name: string
 	created_at: string
 }
 
 export interface ArticleWithTriples extends ArticleEntity {
-	triples: Triple[]
+	triples: Array<Triple>
 }
 
-export type RerankerPipeline = (query: string, documents: string[]) => Promise<{ index: number; score: number }[]>
+export type RerankerPipeline = (
+	query: string,
+	documents: Array<string>
+) => Promise<Array<{ index: number; score: number }>>
 
 export interface ContextResult {
 	idol_id?: string
-	root_ids?: string[]
+	root_ids?: Array<string>
 	relevance_score: number
-	article_ids: number[]
+	article_ids: Array<number>
 }
 
 export interface Knowledge {
@@ -150,21 +153,21 @@ export interface MemoryResult {
 }
 
 export interface COTDepthResult {
-	knowledges: string[]
-	actions: string[]
+	knowledges: Array<string>
+	actions: Array<string>
 	metadata: Metadata
 }
 
 export interface FinalQueryResult {
-	knowledges: string[]
-	actions: string[]
+	knowledges: Array<string>
+	actions: Array<string>
 	metadata: Metadata
 	cot: any
 }
 
 export interface MemoryRecallResult {
-	nodes: Node[]
-	edges: Edge[]
-	stimulated_nodes: number[]
-	related_contexts: ContextResult[]
+	nodes: Array<Node>
+	edges: Array<Edge>
+	stimulated_nodes: Array<number>
+	related_contexts: Array<ContextResult>
 }

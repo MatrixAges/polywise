@@ -34,6 +34,10 @@ This document provides an overview of the packages/polywise module structure and
 				"desc": "Core database API for knowledge graph operations. Includes public instances of Brain, Article, and Pipeline. Supports hybrid retrieval with memory recall, external search, result aggregation, reranking, and the React (fast decision) system.",
 				"role": "Class"
 			},
+			"Process.ts": {
+				"desc": "Process tracking class for monitoring query execution with event emission and state accumulation",
+				"role": "Class"
+			},
 			"consts": {
 				"command.ts": { "desc": "Command string constants", "role": "Constant" },
 				"format.ts": { "desc": "String formatting utilities", "role": "Constant" },

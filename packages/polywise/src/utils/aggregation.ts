@@ -14,12 +14,12 @@ import type { Action, AggregateResultsArgs, Knowledge } from '../types'
 
 export async function aggregateResults(
 	args: AggregateResultsArgs,
-	queryRaw: (sql: string, params?: any[]) => Promise<any>
+	queryRaw: (sql: string, params?: Array<any>) => Promise<any>
 ) {
 	const { recall_result, search_results, habits = [], memory_results = [] } = args
 
-	const knowledges: Knowledge[] = []
-	const actions: Action[] = []
+	const knowledges: Array<Knowledge> = []
+	const actions: Array<Action> = []
 
 	await collectHabitActions(habits, actions, queryRaw)
 
@@ -34,23 +34,23 @@ export async function aggregateResults(
 	return { knowledges, actions }
 }
 
-function collectMemorySystemResults(memory_results: Knowledge[], knowledges: Knowledge[]) {
+function collectMemorySystemResults(memory_results: Array<Knowledge>, knowledges: Array<Knowledge>) {
 	for (const result of memory_results) {
 		knowledges.push(result)
 	}
 }
 
 async function collectHabitActions(
-	habits: any[],
-	actions: Action[],
-	queryRaw: (sql: string, params?: any[]) => Promise<any>
+	habits: Array<any>,
+	actions: Array<Action>,
+	queryRaw: (sql: string, params?: Array<any>) => Promise<any>
 ) {
 	for (const stimulus of habits) {
 		if (
 			stimulus.similarity > HABIT_REACTION_THRESHOLD &&
 			(stimulus.activation >= stimulus.threshold || stimulus.potential >= stimulus.threshold)
 		) {
-			const strong_habits = (await queryRaw(sql.sql_find_strongest_habit, [stimulus.id])) as any[]
+			const strong_habits = (await queryRaw(sql.sql_find_strongest_habit, [stimulus.id])) as Array<any>
 
 			for (const h of strong_habits) {
 				actions.push({
@@ -71,8 +71,8 @@ async function collectHabitActions(
 
 function collectMemoryKnowledges(
 	recall_result: AggregateResultsArgs['recall_result'],
-	search_results: any[],
-	knowledges: Knowledge[]
+	search_results: Array<any>,
+	knowledges: Array<Knowledge>
 ) {
 	for (const context of recall_result.related_contexts) {
 		for (const article_id of context.article_ids) {
@@ -99,8 +99,8 @@ function collectMemoryKnowledges(
 
 function collectExternalResults(
 	recall_result: AggregateResultsArgs['recall_result'],
-	search_results: any[],
-	knowledges: Knowledge[]
+	search_results: Array<any>,
+	knowledges: Array<Knowledge>
 ) {
 	const stimulated_node_ids = new Set(recall_result.stimulated_nodes)
 	const node_potential_map = new Map<number, number>()
@@ -131,8 +131,8 @@ function collectExternalResults(
 
 function collectImplicitResults(
 	recall_result: AggregateResultsArgs['recall_result'],
-	knowledges: Knowledge[],
-	actions: Action[]
+	knowledges: Array<Knowledge>,
+	actions: Array<Action>
 ) {
 	const high_potential_nodes = recall_result.nodes
 		.filter(

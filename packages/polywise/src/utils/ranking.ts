@@ -14,10 +14,10 @@ import type { Action, Knowledge } from '../types'
 
 export async function rerankKnowledges(
 	query: string,
-	candidates: Knowledge[],
+	candidates: Array<Knowledge>,
 	limit: number,
 	pipeline: Pipeline,
-	queryRaw: (sql: string, params?: any[]) => Promise<any>
+	queryRaw: (sql: string, params?: Array<any>) => Promise<any>
 ) {
 	if (candidates.length === 0) return []
 
@@ -29,7 +29,7 @@ export async function rerankKnowledges(
 
 	const rerank_scores = await pipeline.rerank(query, documents)
 
-	const results: Knowledge[] = candidates.map((candidate, index) => {
+	const results: Array<Knowledge> = candidates.map((candidate, index) => {
 		const rerankScore = rerank_scores[index]?.score ?? 0
 		const priority_weight = (PRIORITY_WEIGHTS as any)[candidate.source] ?? PRIORITY_WEIGHTS.external
 
@@ -51,10 +51,10 @@ export async function rerankKnowledges(
 
 export async function rerankActions(
 	query: string,
-	candidates: Action[],
+	candidates: Array<Action>,
 	limit: number,
 	pipeline: Pipeline,
-	queryRaw: (sql: string, params?: any[]) => Promise<any>
+	queryRaw: (sql: string, params?: Array<any>) => Promise<any>
 ) {
 	if (candidates.length === 0) {
 		return []
@@ -68,7 +68,7 @@ export async function rerankActions(
 
 	const rerank_scores = await pipeline.rerank(query, documents)
 
-	const results: Action[] = candidates.map((candidate, index) => {
+	const results: Array<Action> = candidates.map((candidate, index) => {
 		const rerankScore = rerank_scores[index]?.score ?? 0
 		const priority_weight = (PRIORITY_WEIGHTS as any)[candidate.source] ?? PRIORITY_WEIGHTS.external
 
@@ -89,8 +89,8 @@ export async function rerankActions(
 }
 
 async function stimulateByRanking(
-	results: (Knowledge | Action)[],
-	queryRaw: (sql: string, params?: any[]) => Promise<any>
+	results: Array<Knowledge | Action>,
+	queryRaw: (sql: string, params?: Array<any>) => Promise<any>
 ) {
 	if (results.length === 0) return
 
