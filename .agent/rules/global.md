@@ -585,6 +585,26 @@ async updateArticle(args: { id: number, content: string }) {}
 async createNode(params: CreateNodeArgs) {}
 ```
 
+## Arrow Function Preference
+
+Prefer using arrow functions (`const a = () => {}`) for standalone functions, utility functions, and exported helpers, instead of function declarations (`function a() {}`).
+
+**Good:**
+
+```typescript
+const executeWithCache = async <T>() => { ... }
+
+export const getTestVectors = async (text: string) => { ... }
+```
+
+**Avoid:**
+
+```typescript
+async function executeWithCache<T>() { ... }
+
+export async function getTestVectors(text: string) { ... }
+```
+
 ## Type Import Convention (CRITICAL)
 
 Always use `import type` for type-only imports. Avoid inline `import()` statements within interfaces or type definitions. Place all type imports at the top of the file.
