@@ -42,10 +42,15 @@ describe.concurrent('Log Module', () => {
 			expect(existsSync(join(homedir(), '.polywise', 'log'))).toBe(true)
 		})
 
-		it('should not write logs when not initialized', async () => {
+		it('should only write logs when initialized', async () => {
+			const unique_sub_dir = join(test_dir, `test_init_write_${Math.random().toString(36).slice(2)}`)
 			const log = new Log()
 
+			log.init({ dir: unique_sub_dir, log: true })
 			log.write({ test: 'input' }, { test: 'output' })
+
+			const date = new Date().toISOString().split('T')[0]
+			expect(existsSync(join(unique_sub_dir, `${date}.log`))).toBe(true)
 		})
 
 		it('should only write .log when json is disabled', async () => {
@@ -56,6 +61,7 @@ describe.concurrent('Log Module', () => {
 
 			log.init({
 				dir: unique_sub_dir,
+				log: true,
 				json: false
 			})
 
@@ -67,7 +73,7 @@ describe.concurrent('Log Module', () => {
 			expect(existsSync(join(unique_sub_dir, `${date}.json`))).toBe(false)
 		})
 
-		it('should only write .json when log is disabled', async () => {
+		it('should only write .json when json is enabled', async () => {
 			const unique_sub_dir = join(test_dir, `test_json_only_${Math.random().toString(36).slice(2)}`)
 			mkdirSync(unique_sub_dir, { recursive: true })
 
@@ -75,7 +81,8 @@ describe.concurrent('Log Module', () => {
 
 			log.init({
 				dir: unique_sub_dir,
-				log: false
+				log: true,
+				json: true
 			})
 
 			log.write({ test: 'input' }, { test: 'output' })
@@ -86,7 +93,7 @@ describe.concurrent('Log Module', () => {
 			expect(existsSync(join(unique_sub_dir, `${date}.json`))).toBe(true)
 		})
 
-		it('should disable all logging when both log and json are false', async () => {
+		it('should disable all logging when log master switch is false', async () => {
 			const unique_sub_dir = join(test_dir, `test_disabled_${Math.random().toString(36).slice(2)}`)
 			mkdirSync(unique_sub_dir, { recursive: true })
 
@@ -95,7 +102,7 @@ describe.concurrent('Log Module', () => {
 			log.init({
 				dir: unique_sub_dir,
 				log: false,
-				json: false
+				json: true
 			})
 
 			log.write({ test: 'input' }, { test: 'output' })
@@ -115,7 +122,8 @@ describe.concurrent('Log Module', () => {
 			const log = new Log()
 
 			log.init({
-				dir: unique_sub_dir
+				dir: unique_sub_dir,
+				log: true
 			})
 
 			const test_input = { query: '什么是人工智能', recall_depth: 5 }
@@ -147,7 +155,8 @@ describe.concurrent('Log Module', () => {
 			const log = new Log()
 
 			log.init({
-				dir: unique_sub_dir
+				dir: unique_sub_dir,
+				json: true
 			})
 
 			const test_input = { query: '机器学习基础', search_limit: 10 }
@@ -178,7 +187,8 @@ describe.concurrent('Log Module', () => {
 			const log = new Log()
 
 			log.init({
-				dir: unique_sub_dir
+				dir: unique_sub_dir,
+				log: true
 			})
 
 			log.write({ action: 'first' }, { result: 'result1' })
@@ -204,37 +214,31 @@ describe.concurrent('Log Module', () => {
 			const log = new Log()
 
 			log.init({
-				dir: unique_sub_dir
+				dir: unique_sub_dir,
+				log: true
 			})
 
 			log.write({ test: 'timestamp' }, { result: 'ok' })
 
 			const date = new Date().toISOString().split('T')[0]
 			const log_file_path = join(unique_sub_dir, `${date}.log`)
-			const json_file_path = join(unique_sub_dir, `${date}.json`)
 
 			if (existsSync(log_file_path)) {
 				const log_content = readFileSync(log_file_path, 'utf-8')
 
 				expect(log_content).toMatch(/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/)
 			}
-
-			if (existsSync(json_file_path)) {
-				const json_line = readFileSync(json_file_path, 'utf-8').trim()
-				const entry = JSON.parse(json_line)
-
-				expect(entry.timestamp).toMatch(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/)
-			}
 		})
 
-		it('should use same timestamp for input and output in same call', async () => {
+		it('should use same timestamp for entry', async () => {
 			const unique_sub_dir = join(test_dir, `test_same_ts_${Math.random().toString(36).slice(2)}`)
 			mkdirSync(unique_sub_dir, { recursive: true })
 
 			const log = new Log()
 
 			log.init({
-				dir: unique_sub_dir
+				dir: unique_sub_dir,
+				json: true
 			})
 
 			log.write({ input: 'data' }, { output: 'result' })
@@ -245,10 +249,8 @@ describe.concurrent('Log Module', () => {
 			const json_line = readFileSync(json_file_path, 'utf-8').trim()
 			const entry = JSON.parse(json_line)
 
-			const input_line = readFileSync(json_file_path, 'utf-8').split('\n')[0]
-			const input_timestamp = JSON.parse(input_line).timestamp
-
-			expect(entry.timestamp).toBe(input_timestamp)
+			expect(entry).toHaveProperty('timestamp')
+			expect(entry.input).toEqual({ input: 'data' })
 		})
 	})
 
@@ -260,7 +262,8 @@ describe.concurrent('Log Module', () => {
 			const log = new Log()
 
 			log.init({
-				dir: unique_sub_dir
+				dir: unique_sub_dir,
+				json: true
 			})
 
 			const complex_input = {
