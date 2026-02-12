@@ -1,9 +1,9 @@
 import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 
-import { getTestVectors } from '../scripts/getTestVectors'
 import Polywise from '../src/Polywise'
 import processText from '../src/utils/processText'
 import { long_text } from './datasets/longembedding'
+import { getTestDecision, getTestRerank, getTestVectors } from './utils/getCache'
 import getDataDir from './utils/getDataDir'
 
 describe.concurrent('Long Text Embedding & Fact Preservation', () => {
@@ -18,6 +18,14 @@ describe.concurrent('Long Text Embedding & Fact Preservation', () => {
 			embedding_config: {
 				type: 'custom',
 				fn: getTestVectors
+			},
+			reranker_config: {
+				type: 'custom',
+				fn: getTestRerank
+			},
+			decision_config: {
+				type: 'custom',
+				fn: getTestDecision
 			}
 		})
 	})

@@ -1,6 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 
-import { getTestRerank, getTestVectors } from '../scripts/getTestVectors'
 import Polywise from '../src/Polywise'
 import { long_context_datasets, multi_hop_datasets } from './datasets/longcontext'
 import {
@@ -9,6 +8,7 @@ import {
 	similarity_traps_datasets,
 	temporal_traps_datasets
 } from './datasets/traps'
+import { getTestRerank, getTestVectors } from './utils/getCache'
 import getDataDir from './utils/getDataDir'
 
 describe.concurrent('Long Context and Language Traps', () => {

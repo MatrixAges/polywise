@@ -1,9 +1,9 @@
 import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 
-import { getTestVectors } from '../scripts/getTestVectors'
 import Polywise from '../src/Polywise'
 import { cognitive_science_datasets } from './datasets/cognitive'
 import { software_architecture_datasets } from './datasets/software'
+import { getTestVectors } from './utils/getCache'
 import getDataDir from './utils/getDataDir'
 
 describe.concurrent('Article CRUD Operations', () => {

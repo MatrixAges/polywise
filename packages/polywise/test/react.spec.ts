@@ -1,8 +1,8 @@
 import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 
-import { getTestRerank, getTestVectors } from '../scripts/getTestVectors'
 import Polywise from '../src/Polywise'
 import { behavioral_knowledge, behavioral_qa } from './datasets/behavioral'
+import { getTestDecision, getTestRerank, getTestVectors } from './utils/getCache'
 import getDataDir from './utils/getDataDir'
 
 describe.concurrent('Polywise Unified Retrieval System', () => {
@@ -21,6 +21,10 @@ describe.concurrent('Polywise Unified Retrieval System', () => {
 			reranker_config: {
 				type: 'custom',
 				fn: getTestRerank
+			},
+			decision_config: {
+				type: 'custom',
+				fn: getTestDecision
 			}
 		})
 

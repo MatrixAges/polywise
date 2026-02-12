@@ -1,9 +1,9 @@
-import { afterAll, beforeAll, describe, expect, it, test } from '@rstest/core'
+import { afterAll, beforeAll, describe, expect, test } from '@rstest/core'
 
-import { getTestRerank, getTestVectors } from '../scripts/getTestVectors'
 import Polywise from '../src/Polywise'
 import { cognitive_science_datasets } from './datasets/cognitive'
 import { software_architecture_datasets } from './datasets/software'
+import { getTestDecision, getTestRerank, getTestVectors } from './utils/getCache'
 import getDataDir from './utils/getDataDir'
 
 describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
@@ -22,6 +22,10 @@ describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
 			reranker_config: {
 				type: 'custom',
 				fn: getTestRerank
+			},
+			decision_config: {
+				type: 'custom',
+				fn: getTestDecision
 			},
 			embedding_concurrency: 20,
 			reranker_concurrency: 20,

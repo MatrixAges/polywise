@@ -1,9 +1,9 @@
 import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 
-import { getTestVectors } from '../scripts/getTestVectors'
 import Polywise from '../src/Polywise'
 import { cognitive_science_datasets } from './datasets/cognitive'
 import { process_test_cases } from './datasets/process'
+import { getTestVectors } from './utils/getCache'
 import getDataDir from './utils/getDataDir'
 
 describe('Polywise Process', () => {

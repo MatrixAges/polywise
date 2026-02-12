@@ -2,9 +2,9 @@ import '@abraham/reflection'
 
 import { afterEach, beforeEach, describe, expect, it } from '@rstest/core'
 
-import { getTestRerank, getTestVectors } from '../scripts/getTestVectors'
 import Polywise from '../src/Polywise'
 import { behavioral_knowledge, behavioral_qa } from './datasets/behavioral'
+import { getTestRerank, getTestVectors } from './utils/getCache'
 import getDataDir from './utils/getDataDir'
 
 describe('Memory System', () => {
