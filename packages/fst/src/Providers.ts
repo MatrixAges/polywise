@@ -1,9 +1,11 @@
+import path from 'node:path'
 import { createAmazonBedrock } from '@ai-sdk/amazon-bedrock'
 import { createAnthropic } from '@ai-sdk/anthropic'
 import { createAzure } from '@ai-sdk/azure'
 import { createCerebras } from '@ai-sdk/cerebras'
 import { createCohere } from '@ai-sdk/cohere'
 import { createDeepInfra } from '@ai-sdk/deepinfra'
+import { createDeepSeek } from '@ai-sdk/deepseek'
 import { createGoogleGenerativeAI } from '@ai-sdk/google'
 import { createVertex } from '@ai-sdk/google-vertex'
 import { createGroq } from '@ai-sdk/groq'
@@ -12,24 +14,56 @@ import { createOpenAI } from '@ai-sdk/openai'
 import { createPerplexity } from '@ai-sdk/perplexity'
 import { createTogetherAI } from '@ai-sdk/togetherai'
 import { createXai } from '@ai-sdk/xai'
+import to from 'await-to-js'
+import envPaths from 'env-paths'
+import fs from 'fs-extra'
 import { injectable } from 'tsyringe'
+import { zodToJsonSchema } from 'zod-to-json-schema'
 
-export interface ModelConfig {
-	id: string
-	provider: string
-	model: string
-	api_key?: string
-	base_url?: string
-	max_cost?: number
-	price_per_token?: {
-		prompt: number
-		completion: number
-	}
-}
+import { AppConfigSchema } from './types'
+
+import type { AppConfig, ModelConfig } from './types'
 
 @injectable()
 export default class Providers {
-	private costs: Map<string, number> = new Map()
+	costs: Map<string, number> = new Map()
+	config: AppConfig | null = null
+
+	public async init() {
+		const paths = envPaths('polywise', { suffix: '' })
+		const config_dir = path.join(paths.config, 'polywise')
+		const config_path = path.join(config_dir, 'config.jsonc')
+		const schema_path = path.join(config_dir, 'schema.json')
+
+		await fs.ensureDir(config_dir)
+
+		const json_schema = zodToJsonSchema(AppConfigSchema as any, 'AppConfig')
+
+		await fs.writeJson(schema_path, json_schema, { spaces: 2 })
+
+		const [err, exists] = await to(fs.pathExists(config_path))
+
+		if (!exists) {
+			const default_config: AppConfig = {
+				$schema: 'https://polywise.io/config.json',
+				provider: {},
+				model: ''
+			}
+
+			await fs.writeFile(config_path, JSON.stringify(default_config, null, 2))
+		}
+
+		const [read_err, content] = await to(fs.readFile(config_path, 'utf-8'))
+
+		if (read_err) return
+
+		const parsed_config = JSON.parse(content)
+		const validation = AppConfigSchema.safeParse(parsed_config)
+
+		if (validation.success) {
+			this.config = validation.data
+		}
+	}
 
 	public createModel(config: ModelConfig) {
 		const provider = this.getProvider(config)
@@ -65,13 +99,15 @@ export default class Providers {
 	private getProvider(config: ModelConfig) {
 		const { provider, api_key, base_url } = config
 
-		switch (provider) {
+		switch (provider.toLowerCase()) {
 			case 'openai':
 				return createOpenAI({ apiKey: api_key, baseURL: base_url })
 			case 'anthropic':
 				return createAnthropic({ apiKey: api_key, baseURL: base_url })
 			case 'google':
 				return createGoogleGenerativeAI({ apiKey: api_key, baseURL: base_url })
+			case 'deepseek':
+				return createDeepSeek({ apiKey: api_key, baseURL: base_url })
 			case 'mistral':
 				return createMistral({ apiKey: api_key, baseURL: base_url })
 			case 'groq':

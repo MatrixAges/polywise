@@ -1,14 +1,9 @@
+import to from 'await-to-js'
 import mingo from 'mingo'
 import { injectable } from 'tsyringe'
 
 import Fs from './Fs'
-
-export interface SessionState {
-	context: Record<string, unknown>
-	history: Array<unknown>
-	undo_stack: Array<Record<string, unknown>>
-	redo_stack: Array<Record<string, unknown>>
-}
+import { type SessionState } from './types'
 
 @injectable()
 export default class Sessions {
@@ -22,9 +17,9 @@ export default class Sessions {
 	constructor(private fs: Fs) {}
 
 	public async init(conversation_id: string, session_id: string) {
-		const saved = await this.fs.loadSession(conversation_id, session_id)
+		const [err, saved] = await to(this.fs.loadSession(conversation_id, session_id))
 
-		if (saved) {
+		if (!err && saved) {
 			this.current_state = saved as SessionState
 		}
 	}
@@ -65,7 +60,7 @@ export default class Sessions {
 	}
 
 	public async save(conversation_id: string, session_id: string) {
-		await this.fs.saveSession(conversation_id, session_id, this.current_state)
+		await to(this.fs.saveSession(conversation_id, session_id, this.current_state))
 	}
 
 	public getContext() {

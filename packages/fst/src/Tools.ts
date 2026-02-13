@@ -10,15 +10,9 @@ import {
 import { tool } from 'ai'
 import { z } from 'zod'
 
-import Sessions from './Sessions'
+import { type ToolArgs } from './types'
 
 import type { Tool } from 'ai'
-
-export interface ToolArgs {
-	cwd: string
-	sessions: Sessions
-	summarize: (content: string) => Promise<string>
-}
 
 export default (args: ToolArgs): Record<string, Tool> => {
 	const { cwd, sessions, summarize } = args

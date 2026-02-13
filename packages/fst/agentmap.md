@@ -28,17 +28,24 @@ This document provides an overview of the packages/fst module structure and arch
 	"module": "packages/fst",
 	"structure": {
 		"src": {
-			"Fst.ts": { "desc": "Main orchestrator for the autonomous agent loop.", "role": "Core" },
+			"Fst.ts": {
+				"desc": "Main orchestrator using await-to-js and Polywise memory partitioned by conversation_id.",
+				"role": "Core"
+			},
 			"Providers.ts": {
-				"desc": "Multi-provider management with intelligent routing, cost control, and fallback.",
+				"desc": "Provider management with global config.jsonc (env-paths), Zod validation and OpenAI compatible routing.",
 				"role": "Core"
 			},
 			"Sessions.ts": {
-				"desc": "Session management using mingo for structured finite context state machine.",
+				"desc": "Session state management using await-to-js and mingo.",
 				"role": "Core"
 			},
-			"Fs.ts": { "desc": "File-based information exchange and persistence layer.", "role": "Core" },
+			"Fs.ts": { "desc": "File system abstraction layer using fs-extra and await-to-js.", "role": "Core" },
 			"Tools.ts": { "desc": "Bridge between pi-coding-agent tools and Vercel AI SDK.", "role": "Core" },
+			"types": {
+				"desc": "Modularized type definitions and Zod schemas.",
+				"role": "Types"
+			},
 			"index.ts": { "desc": "Package entry point.", "role": "Index" }
 		},
 		"scripts": {
@@ -47,7 +54,7 @@ This document provides an overview of the packages/fst module structure and arch
 		"test": {
 			"desc": "Functional and integration tests"
 		},
-		"package.json": { "desc": "Package configuration", "role": "Config" },
+		"package.json": { "desc": "Package configuration with fs-extra and await-to-js", "role": "Config" },
 		"rslib.config.ts": { "desc": "Rslib configuration", "role": "Config" },
 		"tsconfig.json": { "desc": "TypeScript configuration", "role": "Config" },
 		"agentmap.md": { "desc": "Module overview and architecture", "role": "Docs" },
@@ -59,7 +66,10 @@ This document provides an overview of the packages/fst module structure and arch
 
 ## 3. Operational Guidelines
 
-- **单次会话原则**: 配合 Polywise 确保信息准确有效，不产生无限叠加的上下文。
-- **结构化输出**: 强制模型通过 Mingo 友好的结构化格式输出以管理状态。
-- **成本控制**: 必须在路由层级校验 Token 使用量与成本配额。
-- **TDD**: Follow TDD principles for new features
+- **Error Handling**: 强制使用 `await-to-js` (`to()`) 替代传统的 `try-catch` 块。
+- **文件 I/O**: 统一使用 `fs-extra` 提供的增强型 API。
+- **配置隔离**: 默认配置文件存储在用户配置目录的 `polywise/config.jsonc` 中。
+- **内存分区**: 通过 `metrics_ids: [conversation_id]` 对 Polywise 记忆进行逻辑分区。
+- **DI 驱动**: 所有核心组件均标记为 `@injectable()`。
+- **视觉风格**: 同步与异步语句之间、不同逻辑段落之间需保持空行分隔。
+- **零注释**: 优先通过语义化命名表达逻辑。

@@ -1,11 +1,12 @@
-import fs from 'node:fs/promises'
 import path from 'node:path'
+import to from 'await-to-js'
+import fs from 'fs-extra'
 import { injectable } from 'tsyringe'
 
 @injectable()
 export default class Fs {
 	public async ensureDir(dir_path: string) {
-		await fs.mkdir(dir_path, { recursive: true })
+		await fs.ensureDir(dir_path)
 	}
 
 	public async writeFile(file_path: string, content: string) {
@@ -13,41 +14,33 @@ export default class Fs {
 	}
 
 	public async readFile(file_path: string) {
-		try {
-			const content = await fs.readFile(file_path, 'utf-8')
+		const [err, content] = await to(fs.readFile(file_path, 'utf-8'))
 
-			return content
-		} catch {
+		if (err) {
 			return null
 		}
+
+		return content
 	}
 
 	public async listFiles(dir_path: string) {
-		try {
-			const files = await fs.readdir(dir_path)
+		const [err, files] = await to(fs.readdir(dir_path))
 
-			return files
-		} catch {
+		if (err) {
 			return []
 		}
+
+		return files
 	}
 
 	public async exists(file_path: string) {
-		try {
-			await fs.access(file_path)
+		const [err] = await to(fs.access(file_path))
 
-			return true
-		} catch {
-			return false
-		}
+		return !err
 	}
 
 	public async deleteFile(file_path: string) {
-		try {
-			await fs.unlink(file_path)
-		} catch {
-			return
-		}
+		await to(fs.unlink(file_path))
 	}
 
 	public async saveSession(conversation_id: string, session_id: string, data: unknown) {
