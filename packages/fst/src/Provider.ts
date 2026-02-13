@@ -1,3 +1,4 @@
+import { dirname } from 'path'
 import { createAmazonBedrock } from '@ai-sdk/amazon-bedrock'
 import { createAnthropic } from '@ai-sdk/anthropic'
 import { createAzure } from '@ai-sdk/azure'
@@ -40,8 +41,6 @@ export default class Provider {
 
 	public async init() {
 		const config_path = getConfigPath('/config.jsonc')
-
-		await fs.ensureDir(config_path)
 
 		const [_, exists] = await to(fs.pathExists(config_path))
 

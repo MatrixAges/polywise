@@ -10,6 +10,8 @@ describe('Fst', () => {
 	})
 
 	it('should be able to think', async () => {
-		await fst.think('Hello, who are you?')
+		const result = await fst.think('Hello, who are you?')
+
+		console.log(result)
 	})
 })

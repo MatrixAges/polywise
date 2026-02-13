@@ -22,8 +22,6 @@ export default class Fst {
 	public async init() {
 		// const data_dir = getPath(`/${this.conversation_id}/:memory:`)
 
-		// await fs.ensureDir(data_dir)
-
 		await this.provider.init()
 		await this.session.init(this.conversation_id, this.session_id)
 
@@ -39,6 +37,7 @@ export default class Fst {
 		this.session.addHistory({ role: 'user', content: user_input })
 
 		let is_finished = false
+		let result = ''
 
 		while (!is_finished) {
 			const context = this.session.getContext()
@@ -54,7 +53,11 @@ export default class Fst {
 			// const related_memories = recall_err ? [] : memory.related_contexts.map(c => JSON.stringify(c))
 			// const system_prompt = this.buildSystemPrompt(context, related_memories)
 
-			const [gen_err, result] = await to(
+			console.log(123)
+			console.log(this.provider.getLanguageModel())
+			console.log(this.getSystemPrompt(context))
+
+			const [err, res] = await to(
 				generateText({
 					model: this.provider.getLanguageModel() as unknown as LanguageModel,
 					system: this.getSystemPrompt(context),
@@ -68,11 +71,11 @@ export default class Fst {
 				})
 			)
 
-			if (gen_err || !result) {
+			if (err || !res) {
 				break
 			}
 
-			const { text, finishReason } = result
+			const { text, finishReason } = res
 
 			this.session.addHistory({ role: 'assistant', content: text })
 
@@ -88,7 +91,11 @@ export default class Fst {
 			}
 
 			await to(this.session.save(this.conversation_id, this.session_id))
+
+			result = text
 		}
+
+		return result
 	}
 
 	private async summarize(content: string) {
