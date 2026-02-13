@@ -5,7 +5,7 @@ import { getNextStepPrompt } from './consts'
 import Polywise from './Polywise'
 
 import type { CortexProcessArgs, WorkingMemory, Step } from './types/cortex'
-import type { Knowledge, Action, FinalQueryResult } from './types/polywise'
+import type { Knowledge, Action } from './types/polywise'
 
 @injectable()
 export default class Cortex {

@@ -3,7 +3,8 @@ import { cors } from 'hono/cors'
 import { logger } from 'hono/logger'
 
 import polywise from './polywise'
-import { QueryRequest, SaveRequest, ServerOptions } from './types'
+
+import type { QueryRequest, SaveRequest, ServerOptions } from './types'
 
 export const createServer = async (options: ServerOptions) => {
 	const app = new Hono()
