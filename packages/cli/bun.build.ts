@@ -14,8 +14,6 @@ const build = async (target: Build.CompileTarget) => {
 		external: ['sharp', '@img/sharp-wasm32', '@img/sharp-libvips-dev']
 	})
 
-	console.log(result)
-
 	if (!result.success) {
 		console.error('Build failed')
 		console.error(JSON.stringify(result.logs))
@@ -23,7 +21,7 @@ const build = async (target: Build.CompileTarget) => {
 		process.exit(1)
 	}
 
-	console.log('Build successful!')
+	console.log(target, ' - Build successful!')
 }
 
 targets.map(item => build(item))
