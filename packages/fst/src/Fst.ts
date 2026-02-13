@@ -1,12 +1,13 @@
-import { homedir } from 'os'
 import { generateText } from 'ai'
 import to from 'await-to-js'
+import fs from 'fs-extra'
 import { Polywise } from 'polywise'
 import { injectable } from 'tsyringe'
 
 import Providers from './Providers'
 import Sessions from './Sessions'
 import getTools from './Tools'
+import { getPath } from './utils'
 
 import type { CoreMessage, LanguageModel } from 'ai'
 import type { FstArgs, ModelConfig } from './types'
@@ -24,12 +25,15 @@ export default class Fst {
 	public async init(args: FstArgs) {
 		this.fst_config = args
 
+		const data_dir = getPath(`/${args.conversation_id}/:memory:`)
+
+		await fs.ensureDir(data_dir)
 		await to(this.providers.init())
 		await to(this.sessions.init(args.conversation_id, args.session_id))
 
 		await to(
 			this.polywise.init({
-				data_dir: `${homedir()}/.polywise/.fst/${args.conversation_id}/memory`,
+				data_dir,
 				metrics_ids: [args.conversation_id]
 			})
 		)

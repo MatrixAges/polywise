@@ -16,12 +16,12 @@ import { createPerplexity } from '@ai-sdk/perplexity'
 import { createTogetherAI } from '@ai-sdk/togetherai'
 import { createXai } from '@ai-sdk/xai'
 import to from 'await-to-js'
-import envPaths from 'env-paths'
 import fs from 'fs-extra'
 import { injectable } from 'tsyringe'
 import { zodToJsonSchema } from 'zod-to-json-schema'
 
 import { AppConfigSchema } from './types'
+import { config_dir_path, default_config } from './utils'
 
 import type { AppConfig, ModelConfig } from './types'
 
@@ -31,12 +31,10 @@ export default class Providers {
 	config: AppConfig | null = null
 
 	public async init() {
-		const paths = envPaths('polywise', { suffix: '' })
-		const config_dir = path.join(paths.config, 'polywise')
-		const config_path = path.join(config_dir, 'config.jsonc')
-		const schema_path = path.join(config_dir, 'schema.json')
+		const config_path = path.join(config_dir_path, 'config.jsonc')
+		const schema_path = path.join(config_dir_path, 'schema.json')
 
-		await fs.ensureDir(config_dir)
+		await fs.ensureDir(config_path)
 
 		const json_schema = zodToJsonSchema(AppConfigSchema as any, 'AppConfig')
 
@@ -45,12 +43,6 @@ export default class Providers {
 		const [_, exists] = await to(fs.pathExists(config_path))
 
 		if (!exists) {
-			const default_config: AppConfig = {
-				$schema: 'https://polywise.io/config.json',
-				provider: {},
-				model: ''
-			}
-
 			await fs.writeJson(config_path, default_config, { spaces: 2 })
 		}
 

@@ -3,6 +3,8 @@ import to from 'await-to-js'
 import fs from 'fs-extra'
 import { injectable } from 'tsyringe'
 
+import { base_path, getPath } from './utils'
+
 @injectable()
 export default class Fs {
 	public async ensureDir(dir_path: string) {
@@ -44,7 +46,7 @@ export default class Fs {
 	}
 
 	public async saveSession(conversation_id: string, session_id: string, data: unknown) {
-		const dir = path.join(process.cwd(), '.fst', conversation_id)
+		const dir = getPath(conversation_id)
 
 		await this.ensureDir(dir)
 
@@ -54,7 +56,7 @@ export default class Fs {
 	}
 
 	public async loadSession(conversation_id: string, session_id: string) {
-		const file_path = path.join(process.cwd(), '.fst', conversation_id, `${session_id}.json`)
+		const file_path = getPath(`${conversation_id}/${session_id}.json`)
 		const content = await this.readFile(file_path)
 
 		if (!content) {

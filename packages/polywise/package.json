@@ -36,7 +36,7 @@
 	},
 	"devDependencies": {
 		"@rslib/core": "catalog:",
-		"@rstest/core": "^0.8.3",
+		"@rstest/core": "catalog:",
 		"@types/fs-extra": "^11.0.4",
 		"@types/node": "^20.0.0",
 		"bun": "catalog:",
