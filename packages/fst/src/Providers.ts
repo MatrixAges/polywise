@@ -34,7 +34,7 @@ export default class Providers {
 		const config_path = path.join(config_dir_path, 'config.jsonc')
 		const schema_path = path.join(config_dir_path, 'schema.json')
 
-		await fs.ensureDir(config_dir_path)
+		await fs.ensureDir(config_path)
 
 		const json_schema = zodToJsonSchema(AppConfigSchema as any, 'AppConfig')
 
@@ -54,11 +54,7 @@ export default class Providers {
 
 			if (validation.success) {
 				this.config = validation.data
-			} else {
-				console.error('Config validation failed:', validation.error)
 			}
-		} else {
-			console.error('Config read failed:', read_err)
 		}
 
 		if (this.config?.enable_cost) {
@@ -67,17 +63,9 @@ export default class Providers {
 	}
 
 	public createModel(config: ModelConfig) {
-		const provider_config = this.config?.provider[config.provider]
+		const provider = this.getProvider(config)
 
-		const merged_config = {
-			...config,
-			api_key: config.api_key || (provider_config?.options?.apiKey as string),
-			base_url: config.base_url || (provider_config?.options?.baseURL as string)
-		}
-
-		const provider = this.getProvider(merged_config)
-
-		return provider(merged_config.model)
+		return provider(config.model)
 	}
 
 	public async trackCost(

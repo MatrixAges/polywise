@@ -9,9 +9,5 @@
 			}
 		}
 	},
-	"plugin": [
-		// "@tarquinen/opencode-dcp@2.1.3",
-		"@nick-vi/opencode-type-inject",
-		"@mohak34/opencode-notifier@latest"
-	]
+	"plugin": ["@tarquinen/opencode-dcp@2.1.3", "@nick-vi/opencode-type-inject", "@mohak34/opencode-notifier@latest"]
 }
