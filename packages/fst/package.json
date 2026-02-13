@@ -42,7 +42,7 @@
 		"@ai-sdk/vercel": "2.0.32",
 		"@ai-sdk/xai": "3.0.56",
 		"@mariozechner/pi-coding-agent": "^0.52.10",
-		"ai": "catalog:",
+		"ai": "^6.0.85",
 		"await-to-js": "catalog:",
 		"env-paths": "catalog:",
 		"fs-extra": "catalog:",
@@ -60,7 +60,6 @@
 		"@types/fs-extra": "catalog:",
 		"@types/node": "^25.2.3",
 		"cross-env": "^10.1.0",
-		"deepmerge-ts": "^7.1.5",
-		"reflect-metadata": "^0.2.2"
+		"deepmerge-ts": "^7.1.5"
 	}
 }

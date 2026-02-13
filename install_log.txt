@@ -1,0 +1,3 @@
+Warning: You indicated that you do not have a Claude subscription. The Sisyphus agent relies heavily on Claude models (specifically Opus 4.5) and may not work ideally without them.
+
+Proceeding with installation...
