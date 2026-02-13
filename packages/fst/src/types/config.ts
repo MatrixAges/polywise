@@ -26,6 +26,7 @@ export const ProviderConfigSchema = z.object({
 
 export const AppConfigSchema = z.object({
 	$schema: z.string().optional(),
+	enable_cost: z.boolean().optional(),
 	provider: z.record(z.string(), ProviderConfigSchema),
 	model: z.string()
 })

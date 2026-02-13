@@ -1,3 +1,4 @@
+import os from 'node:os'
 import path from 'node:path'
 import { createAmazonBedrock } from '@ai-sdk/amazon-bedrock'
 import { createAnthropic } from '@ai-sdk/anthropic'
@@ -41,7 +42,7 @@ export default class Providers {
 
 		await fs.writeJson(schema_path, json_schema, { spaces: 2 })
 
-		const [err, exists] = await to(fs.pathExists(config_path))
+		const [_, exists] = await to(fs.pathExists(config_path))
 
 		if (!exists) {
 			const default_config: AppConfig = {
@@ -50,18 +51,22 @@ export default class Providers {
 				model: ''
 			}
 
-			await fs.writeFile(config_path, JSON.stringify(default_config, null, 2))
+			await fs.writeJson(config_path, default_config, { spaces: 2 })
 		}
 
 		const [read_err, content] = await to(fs.readFile(config_path, 'utf-8'))
 
-		if (read_err) return
+		if (!read_err) {
+			const parsed_config = JSON.parse(content)
+			const validation = AppConfigSchema.safeParse(parsed_config)
 
-		const parsed_config = JSON.parse(content)
-		const validation = AppConfigSchema.safeParse(parsed_config)
+			if (validation.success) {
+				this.config = validation.data
+			}
+		}
 
-		if (validation.success) {
-			this.config = validation.data
+		if (this.config?.enable_cost) {
+			await this.loadCosts()
 		}
 	}
 
@@ -71,12 +76,12 @@ export default class Providers {
 		return provider(config.model)
 	}
 
-	public trackCost(
+	public async trackCost(
 		model_id: string,
 		usage: { promptTokens: number; completionTokens: number },
 		config: ModelConfig
 	) {
-		if (!config.price_per_token) {
+		if (!this.config?.enable_cost || !config.price_per_token) {
 			return
 		}
 
@@ -86,6 +91,8 @@ export default class Providers {
 		const current_cost = this.costs.get(model_id) || 0
 
 		this.costs.set(model_id, current_cost + cost)
+
+		await this.saveCosts()
 	}
 
 	public isOverLimit(model_id: string, max_cost?: number) {
@@ -94,6 +101,30 @@ export default class Providers {
 		}
 
 		return (this.costs.get(model_id) || 0) >= max_cost
+	}
+
+	private async loadCosts() {
+		const cost_path = path.join(os.homedir(), '.polywise', 'cost.json')
+		const [err, exists] = await to(fs.pathExists(cost_path))
+
+		if (!exists) return
+
+		const [read_err, content] = await to(fs.readJson(cost_path))
+
+		if (!read_err && content) {
+			this.costs = new Map(Object.entries(content))
+		}
+	}
+
+	private async saveCosts() {
+		const cost_dir = path.join(os.homedir(), '.polywise')
+		const cost_path = path.join(cost_dir, 'cost.json')
+
+		await fs.ensureDir(cost_dir)
+
+		const data = Object.fromEntries(this.costs)
+
+		await fs.writeJson(cost_path, data, { spaces: 2 })
 	}
 
 	private getProvider(config: ModelConfig) {

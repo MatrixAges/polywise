@@ -3,7 +3,8 @@ import mingo from 'mingo'
 import { injectable } from 'tsyringe'
 
 import Fs from './Fs'
-import { type SessionState } from './types'
+
+import type { SessionState } from './types'
 
 @injectable()
 export default class Sessions {

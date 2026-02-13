@@ -7,9 +7,9 @@ import { injectable } from 'tsyringe'
 import Providers from './Providers'
 import Sessions from './Sessions'
 import getTools from './Tools'
-import { type FstArgs, type ModelConfig } from './types'
 
 import type { CoreMessage, LanguageModel } from 'ai'
+import type { FstArgs, ModelConfig } from './types'
 
 @injectable()
 export default class Fst {
