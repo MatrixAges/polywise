@@ -1,14 +1,17 @@
+<p align="right"><a href="README.zh.md">中文</a> | English</p>
+
 <p align="center">
-<img src="packages/app/public/icon.svg" width="120" height="120" alt="Polywise Logo">
+  <img src="packages/app/public/icon.svg" width="120" height="120" alt="Polywise Logo">
 </p>
 
 # <p align="center">Polywise</p>
 
-<p align="center"><strong>Agentic Memory Engine.</strong></p>
+<p align="center"><strong>Agentic Memory Engine</strong></p>
 
 <p align="center">
-English |
-<a href="README.zh.md">简体中文</a>
+  <a href="https://github.com/MatrixAges/polywise/stargazers"><img src="https://img.shields.io/github/stars/MatrixAges/polywise?style=rounded&color=795548" alt="Stars"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License"></a>
+  <a href="https://x.com/xiewendao"><img src="https://img.shields.io/badge/FollowX-XWD-green?logo=Twitter" alt="Twitter"></a>
 </p>
 
 ## 💡 Why Polywise?
@@ -250,4 +253,4 @@ Polywise is built on the shoulders of these amazing projects:
 
 ## 📜 License
 
-Modified Apache 2.0 - See [LICENSE](LICENSE) for details.
+MIT - See [LICENSE](LICENSE) for details.

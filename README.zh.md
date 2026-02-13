@@ -1,3 +1,5 @@
+<p align="right">中文 | <a href="README.md">English</a></p>
+
 <p align="center">
   <img src="packages/app/public/icon.svg" width="120" height="120" alt="Polywise Logo">
 </p>
@@ -7,8 +9,9 @@
 <p align="center"><strong>智能体记忆引擎</strong></p>
 
 <p align="center">
-  <a href="README.md">English</a> |
-  简体中文
+  <a href="https://github.com/MatrixAges/polywise/stargazers"><img src="https://img.shields.io/github/stars/MatrixAges/polywise?style=rounded&color=795548" alt="Stars"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License"></a>
+  <a href="https://x.com/xiewendao"><img src="https://img.shields.io/badge/FollowX-XWD-green?logo=Twitter" alt="Twitter"></a>
 </p>
 
 ## 💡 为什么需要 Polywise？
@@ -235,4 +238,4 @@ Polywise 站在这些优秀开源项目的肩膀上：
 
 ## 📜 开源协议
 
-Modified Apache 2.0 - 详情请参见 [LICENSE](LICENSE)。
+MIT - 详情请参见 [LICENSE](LICENSE)。
