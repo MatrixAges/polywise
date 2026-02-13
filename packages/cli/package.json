@@ -4,7 +4,7 @@
 	"type": "module",
 	"scripts": {
 		"dev": "bun run ./src/index.ts serve",
-		"build": "bun build ./src/index.ts --compile --outfile polywise-server",
+		"build": "bun bun.build",
 		"build:lib": "rslib build"
 	},
 	"dependencies": {
