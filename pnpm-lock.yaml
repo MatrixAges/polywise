@@ -553,6 +553,9 @@ importers:
       '@huggingface/transformers':
         specifier: ^3.3.2
         version: 3.8.1
+      '@img/sharp-wasm32':
+        specifier: ^0.34.5
+        version: 0.34.5
       await-to-js:
         specifier: ^3.0.0
         version: 3.0.0
@@ -6345,7 +6348,6 @@ snapshots:
   '@emnapi/runtime@1.7.1':
     dependencies:
       tslib: 2.8.1
-    optional: true
 
   '@emnapi/wasi-threads@1.1.0':
     dependencies:
@@ -6564,7 +6566,6 @@ snapshots:
   '@img/sharp-wasm32@0.34.5':
     dependencies:
       '@emnapi/runtime': 1.7.1
-    optional: true
 
   '@img/sharp-win32-arm64@0.34.5':
     optional: true

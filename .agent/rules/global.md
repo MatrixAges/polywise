@@ -115,34 +115,6 @@ Relevant skills are located in the `.opencode/skills` directory.
 
 Unless necessary for complex scenarios or public API clarity, do not explicitly specify function return types. Let the TypeScript compiler infer types automatically. Do not pass generic types to functions if the type system can infer them from the arguments.
 
-**Good:**
-
-```typescript
-async function fetchData() {
-  return await api.get('/data')
-}
-
-async processItem(item: Item) {
-  await this.save(item)
-}
-
-const rows = await db.query(sql, params)
-```
-
-**Avoid (unless necessary):**
-
-```typescript
-async function fetchData(): Promise<Data[]> {
-  return await api.get('/data')
-}
-
-async processItem(item: Item): Promise<void> {
-  await this.save(item)
-}
-
-const rows = await db.query<Row[]>(sql, params)
-```
-
 ## SQL Definition Convention (CRITICAL)
 
 All SQL statements MUST be defined within the `sql/` directory and exported for use. Raw SQL strings are prohibited within business logic files (models, services, etc.).
@@ -153,57 +125,12 @@ All SQL statements MUST be defined within the `sql/` directory and exported for 
 2. **Export**: Export SQL strings or functions that return SQL strings.
 3. **Import**: Import SQL using `import * as sql from './sql'`.
 
-**Good:**
-
-```typescript
-// src/sql/Brain.ts
-export const sql_get_nodes = `SELECT * FROM brain.nodes`
-
-// src/Polywise.ts
-import * as sql_brain from './sql/Brain'
-
-async getNodes() {
-    return await this.query(sql_brain.sql_get_nodes)
-}
-```
-
-**Avoid:**
-
-```typescript
-async getNodes() {
-    return await this.query(`SELECT * FROM brain.nodes`)
-}
-```
-
 ### SQL Comments (CRITICAL)
 
 All exported SQL strings or functions in `src/sql/` MUST be preceded by a JSDoc-style comment (`/** ... */`). This comment must describe:
 
 1.    **Operation**: What specific database action is being performed.
 2.    **Role**: The purpose of this operation within the larger system architecture.
-
-**Good:**
-
-```typescript
-/**
- * Decays the weight of weak edges.
- * Role: Implements the "forgetting curve" for weak memories, allowing unused connections to fade over time.
- */
-export const sql_sleep_tick_decay = `
-  UPDATE ${SCHEMA_BRAIN}.edges
-  SET weight = GREATEST(weight - 0.01, 0.001)
-  WHERE weight < 0.2;
-`
-```
-
-**Avoid:**
-
-```typescript
-// Updates edges
-export const sql_sleep_tick_decay = `...`
-
-export const sql_sleep_tick_decay = `...`
-```
 
 ## Class Function Ordering
 
@@ -216,143 +143,20 @@ When organizing class functions, follow this strict order:
 5. **Helper methods** - Private helper/auxiliary methods
 6. **off/destroy** - Cleanup methods at the end (e.g., `off`, `destroy`, `dispose`, `cleanup`)
 
-Example:
-
-```typescript
-export class MyClass {
-	constructor() {}
-
-	async init() {}
-
-	async publicMethod1() {}
-	async publicMethod2() {}
-
-	private async _privateMethod1() {}
-	private async _privateMethod2() {}
-
-	private async _helper() {}
-
-	off() {}
-}
-```
-
-### Empty Constructor Rule
-
-If the constructor body is empty, remove the constructor entirely. Only define a constructor when it has actual initialization logic.
-
-**Good:**
-
-```typescript
-export default class MyClass {
-	private value: number
-
-	init() {
-		this.value = 42
-	}
-}
-```
-
-**Avoid:**
-
-```typescript
-export default class MyClass {
-	private value: number
-
-	constructor() {}
-}
-```
-
-### No Any Rule
-
-Avoid using `any` type unless absolutely necessary. Use specific types, `unknown`, or generics instead.
-
-**Good:**
-
-```typescript
-interface User {
-	id: number
-	name: string
-}
-
-function getUser(id: number): Promise<User | null>
-```
-
-**Avoid:**
-
-```typescript
-function getUser(id: number): Promise<any>
-```
-
-### Empty Function Rule
-
-Do not keep empty functions. If a function body is empty (no implementation), remove it entirely.
-
-**Good:**
-
-```typescript
-export default class MyClass {
-	init() {
-		this.value = 42
-	}
-}
-```
-
-**Avoid:**
-
-```typescript
-export default class MyClass {
-	value: number
-
-	constructor() {}
-
-	off() {}
-}
-```
+- If the constructor body is empty, remove the constructor entirely. Only define a constructor when it has actual initialization logic.
+- Avoid using `any` type unless absolutely necessary. Use specific types, `unknown`, or generics instead.
+- Do not keep empty functions. If a function body is empty (no implementation), remove it entirely.
 
 ## Database Schema Migration (CRITICAL)
 
 When modifying database schema in the polywise package, you MUST update the migration system:
 
-### Migration Rules:
+## Migration Rules:
 
 1. **Version Increment**: Increment `CURRENT_SCHEMA_VERSION` in `migration.ts`
 2. **Add Migration**: Add a new migration object to the `migrations` array
 3. **Migration Content**: Use `up` function for schema changes (CREATE, ALTER, DROP) and data migration
 4. **Sequential Versions**: Migration versions must be sequential (1, 2, 3...)
-
-### Example Migration:
-
-```typescript
-// In migration.ts
-export const CURRENT_SCHEMA_VERSION = 2
-
-export const migrations: Migration[] = [
-	// ... existing migrations
-
-	{
-		version: 2,
-		description: 'Add metadata column to nodes',
-		up: async (exec, query) => {
-			// Schema change
-			await exec(`ALTER TABLE brain.nodes ADD COLUMN IF NOT EXISTS metadata JSONB;`)
-
-			// Data migration
-			const nodes = await query<{ id: number }>('SELECT id FROM brain.nodes')
-			for (const node of nodes) {
-				await query(`UPDATE brain.nodes SET metadata = $1 WHERE id = $2`, [JSON.stringify({}), node.id])
-			}
-		}
-	}
-]
-```
-
-### Automatic Migration on Init:
-
-The `Polywise.init()` method automatically:
-
-1. Checks current schema version from `meta.schema_version` table
-2. Applies all pending migrations
-3. Records applied versions
 
 **CRITICAL**: Always update `CURRENT_SCHEMA_VERSION` when modifying table structure!
 
@@ -380,29 +184,6 @@ When working on `packages/polywise`, you MUST follow TDD principles:
 - Main test file: `test/test.spec.ts` - Core functionality tests
 - Migration tests: `test/migration.spec.ts` - Database migration tests
 - New features: Create dedicated `test/[feature].spec.ts` files
-
-### Example TDD Workflow:
-
-```typescript
-// Step 1: Write failing test
-it('should calculate node magnitude from coordinates', async () => {
-	const node_id = await poly.addNode('Test', 3, 4, 0.5)
-	const magnitude = await poly.getNodeMagnitude(node_id)
-	expect(magnitude).toBe(5) // 3-4-5 triangle
-})
-
-// Step 2: Run test (should fail)
-// pnpm run test
-
-// Step 3: Implement minimal code
-async getNodeMagnitude(node_id: number) {
-	const node = await this.query('SELECT x, y FROM brain.nodes WHERE id = $1', [node_id])
-	return Math.sqrt(node[0].x ** 2 + node[0].y ** 2)
-}
-
-// Step 4: Run test (should pass)
-// Step 5: Refactor if needed
-```
 
 ### TDD Checklist:
 
@@ -433,39 +214,6 @@ All utility functions in `utils/` folders MUST follow this pattern:
 - Use `export default` with arrow function syntax: `export default () => {}`
 - Do NOT write function return type annotations (let TypeScript infer)
 - Use anonymous arrow functions (no function name after `default`)
-
-**Good:**
-
-```typescript
-// utils/calculateWeight.ts
-export default (learning_rate: number) => 0.5 * learning_rate
-
-// utils/generateNodePosition.ts
-export default () => ({
-	x: Math.random() * 800,
-	y: Math.random() * 600
-})
-
-// utils/index.ts
-export { default as calculateWeight } from './calculateWeight'
-```
-
-**Avoid:**
-
-```typescript
-// Don't use named exports
-export function calculateWeight(learning_rate: number): number {
-	return 0.5 * learning_rate
-}
-
-// Don't use function declaration syntax
-export default function calculateWeight(learning_rate: number) {
-	return 0.5 * learning_rate
-}
-
-// Don't specify return types
-export default (learning_rate: number): number => 0.5 * learning_rate
-```
 
 ## Types File Organization (CRITICAL)
 
@@ -509,34 +257,6 @@ Only consider explicit return types for:
 
 Each class MUST be in its own file with a default export:
 
-**Good:**
-
-```typescript
-// Article.ts
-export default class Article {
-	constructor(params: ArticleParams) {}
-}
-
-// Polywise.ts
-export default class Polywise {
-	public article: Article
-	constructor() {
-		this.article = new Article({ exec, query })
-	}
-}
-```
-
-**Avoid:**
-
-```typescript
-// Don't use named exports for classes
-export class Article {}
-
-// Don't put multiple classes in one file
-export class Article {}
-export class AnotherClass {}
-```
-
 ## Function & Class Model Parameters Convention
 
 When a function or class constructor has more than 2 parameters, use an object parameter for better flexibility. If there are only 1 or 2 parameters, use positional parameters directly. The parameters must follow these style rules:
@@ -546,109 +266,17 @@ When a function or class constructor has more than 2 parameters, use an object p
 - **Destructuring**: Always destructure the `args` object at the beginning of the function or constructor.
 - **Ordering Rule**: `Required Variables` > `Optional Variables` > `Required Functions` > `Optional Functions`
 
-**Good:**
-
-```typescript
-// More than 2 parameters: use object
-interface CreateNodeArgs {
-	label: string
-	x: number
-	y: number
-	threshold?: number
-}
-
-async createNode(args: CreateNodeArgs) {
-	const { label, x, y, threshold } = args
-	await this.query(sql.createNode, [label, x, y])
-}
-
-// 1 or 2 parameters: use positional
-async updateArticle(id: number, content: string) {
-	await this.query(sql.updateArticle, [id, content])
-}
-
-async addArticle(content: string) {
-	await this.query(sql.addArticle, [content])
-}
-```
-
-**Avoid:**
-
-```typescript
-// Avoid object for single parameter
-async addArticle(args: { content: string }) {}
-
-// Avoid object for two parameters
-async updateArticle(args: { id: number, content: string }) {}
-
-// Using 'params' instead of 'args'
-async createNode(params: CreateNodeArgs) {}
-```
-
 ## Arrow Function Preference
 
 Prefer using arrow functions (`const a = () => {}`) for standalone functions, utility functions, and exported helpers, instead of function declarations (`function a() {}`).
-
-**Good:**
-
-```typescript
-const executeWithCache = async <T>() => { ... }
-
-export const getTestVectors = async (text: string) => { ... }
-```
-
-**Avoid:**
-
-```typescript
-async function executeWithCache<T>() { ... }
-
-export async function getTestVectors(text: string) { ... }
-```
 
 ## Type Import Convention (CRITICAL)
 
 Always use `import type` for type-only imports. Avoid inline `import()` statements within interfaces or type definitions. Place all type imports at the top of the file.
 
-**Good:**
-
-```typescript
-import type Polywise from '../Polywise'
-import type { Metadata } from './polywise'
-
-export interface BrainArgs {
-	poly: Polywise
-	onTick?: () => void
-}
-```
-
-**Avoid:**
-
-```typescript
-export interface BrainArgs {
-	poly: import('../Polywise').default
-	onTick?: () => void
-}
-```
-
 ## Default Import Convention (CRITICAL)
 
 Always use direct default import syntax `import X from '...'` instead of `import { default as X } from '...'`.
-
-**Good:**
-
-```typescript
-import Polywise from '../Polywise'
-import migrateFn from './migrate'
-import validateMigrationsFn from './validateMigrations'
-```
-
-**Avoid:**
-
-```typescript
-import { default as Polywise } from '../Polywise'
-import { default as migrateFn } from './migrate'
-import { default as validateMigrationsFn } from './validateMigrations'
-```
 
 ## Final Guarantee
 
