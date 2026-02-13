@@ -21,18 +21,18 @@
 		"test": "pnpm run before_test && rstest run $TEST_FILE"
 	},
 	"dependencies": {
-		"@abraham/reflection": "^0.13.0",
+		"@abraham/reflection": "catalog:",
 		"@chonkiejs/core": "^0.0.7",
 		"@electric-sql/pglite": "^0.3.15",
 		"@huggingface/transformers": "^3.3.2",
 		"await-to-js": "^3.0.0",
 		"dayjs": "catalog:",
 		"fs-extra": "catalog:",
-		"ofetch": "^1.4.1",
+		"ofetch": "catalog:",
 		"optional": "^0.1.4",
 		"p-queue": "^8.1.0",
-		"tslib": "^2.8.1",
-		"tsyringe": "^4.10.0"
+		"tslib": "catalog:",
+		"tsyringe": "catalog:"
 	},
 	"devDependencies": {
 		"@rslib/core": "catalog:",

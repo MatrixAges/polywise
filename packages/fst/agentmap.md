@@ -28,12 +28,18 @@ This document provides an overview of the packages/fst module structure and arch
 	"module": "packages/fst",
 	"structure": {
 		"src": {
-			"Fst.ts": { "desc": "Main coordinator class", "role": "Core" },
-			"Providers.ts": { "desc": "Model provider management", "role": "Core" },
-			"Sessions.ts": { "desc": "Dialogue session management", "role": "Core" },
-			"Fs.ts": { "desc": "File-based persistence layer", "role": "Core" },
-			"Tools.ts": { "desc": "Agent tool definitions", "role": "Core" },
-			"index.ts": { "desc": "Main entry point", "role": "Index" }
+			"Fst.ts": { "desc": "Main orchestrator for the autonomous agent loop.", "role": "Core" },
+			"Providers.ts": {
+				"desc": "Multi-provider management with intelligent routing, cost control, and fallback.",
+				"role": "Core"
+			},
+			"Sessions.ts": {
+				"desc": "Session management using mingo for structured finite context state machine.",
+				"role": "Core"
+			},
+			"Fs.ts": { "desc": "File-based information exchange and persistence layer.", "role": "Core" },
+			"Tools.ts": { "desc": "Bridge between pi-coding-agent tools and Vercel AI SDK.", "role": "Core" },
+			"index.ts": { "desc": "Package entry point.", "role": "Index" }
 		},
 		"scripts": {
 			"desc": "Maintenance and utility scripts"
@@ -41,14 +47,12 @@ This document provides an overview of the packages/fst module structure and arch
 		"test": {
 			"desc": "Functional and integration tests"
 		},
-		"config": {
-			"package.json": { "desc": "Package configuration", "role": "Config" },
-			"rslib.config.ts": { "desc": "Rslib configuration", "role": "Config" },
-			"tsconfig.json": { "desc": "TypeScript configuration", "role": "Config" },
-			"agentmap.md": { "desc": "Module overview and architecture", "role": "Docs" },
-			"README.md": { "desc": "Project documentation (English)", "role": "Docs" },
-			"README.zh.md": { "desc": "Project documentation (Chinese)", "role": "Docs" }
-		}
+		"package.json": { "desc": "Package configuration", "role": "Config" },
+		"rslib.config.ts": { "desc": "Rslib configuration", "role": "Config" },
+		"tsconfig.json": { "desc": "TypeScript configuration", "role": "Config" },
+		"agentmap.md": { "desc": "Module overview and architecture", "role": "Docs" },
+		"README.md": { "desc": "Project documentation (English)", "role": "Docs" },
+		"README.zh.md": { "desc": "Project documentation (Chinese)", "role": "Docs" }
 	}
 }
 ```

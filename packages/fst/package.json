@@ -39,18 +39,20 @@
 		"@ai-sdk/vercel": "2.0.32",
 		"@ai-sdk/xai": "3.0.56",
 		"@mariozechner/pi-coding-agent": "^0.52.10",
-		"ai": "^6.0.85",
+		"ai": "catalog:",
+		"fs-extra": "catalog:",
+		"hono": "^4.11.9",
 		"mingo": "^7.2.0",
 		"polywise": "workspace:*",
-		"tslib": "^2.8.1",
-		"tsyringe": "^4.10.0",
-		"hono": "^4.11.9",
-		"fs-extra": "catalog:"
+		"tslib": "catalog:",
+		"tsyringe": "catalog:",
+		"zod": "catalog:",
+		"@abraham/reflection": "catalog:"
 	},
 	"devDependencies": {
 		"@rslib/core": "catalog:",
-		"@types/node": "^25.2.3",
 		"@types/fs-extra": "catalog:",
+		"@types/node": "^25.2.3",
 		"cross-env": "^10.1.0",
 		"deepmerge-ts": "^7.1.5",
 		"reflect-metadata": "^0.2.2"
