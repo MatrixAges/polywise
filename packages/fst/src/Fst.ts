@@ -55,7 +55,6 @@ export default class Fst {
 
 			console.log(123)
 			console.log(this.provider.getLanguageModel())
-			console.log(this.getSystemPrompt(context))
 
 			const [err, res] = await to(
 				generateText({
