@@ -53,9 +53,6 @@ export default class Fst {
 			// const related_memories = recall_err ? [] : memory.related_contexts.map(c => JSON.stringify(c))
 			// const system_prompt = this.buildSystemPrompt(context, related_memories)
 
-			console.log(123)
-			console.log(this.provider.getLanguageModel())
-
 			const [err, res] = await to(
 				generateText({
 					model: this.provider.getLanguageModel() as unknown as LanguageModel,
