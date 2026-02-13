@@ -14,6 +14,7 @@
 		"commander": "^13.1.0",
 		"hono": "^4.11.7",
 		"polywise": "workspace:*",
+		"sharp": "^0.34.5",
 		"tsyringe": "^4.10.0",
 		"zod": "catalog:"
 	},

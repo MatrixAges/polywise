@@ -1,8 +1,8 @@
+import fs from 'fs/promises'
 import os from 'os'
 import path from 'path'
 import { env, pipeline } from '@huggingface/transformers'
 import to from 'await-to-js'
-import fs from 'fs-extra'
 import PQueue from 'p-queue'
 import { injectable } from 'tsyringe'
 
@@ -281,7 +281,7 @@ export default class Pipeline {
 		const [err] = await to(load_fn())
 
 		if (err) {
-			await fs.remove(model_path)
+			await fs.rm(model_path)
 			await new Promise(resolve => setTimeout(resolve, 2000))
 			await load_fn()
 		}

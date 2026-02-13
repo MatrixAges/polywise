@@ -7,11 +7,11 @@ const build = async (target: Build.CompileTarget) => {
 		entrypoints: ['./src/index.ts'],
 		outdir: './dist',
 		target: 'bun',
+		minify: true,
 		compile: {
 			outfile: 'polywise' + target.replace('bun', ''),
 			target
-		} as CompileBuildOptions,
-		external: ['sharp', '@img/sharp-wasm32', '@img/sharp-libvips-dev']
+		} as CompileBuildOptions
 	})
 
 	if (!result.success) {
