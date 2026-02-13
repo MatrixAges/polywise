@@ -5,7 +5,7 @@ export const PriceSchema = z.object({
 	output: z.number()
 })
 
-export const ProviderConfigSchema = z.object({
+export const ProviderSchema = z.object({
 	npm: z.string().optional(),
 	options: z
 		.object({
@@ -24,11 +24,11 @@ export const ProviderConfigSchema = z.object({
 	enabled: z.boolean().optional()
 })
 
-export const AppConfigSchema = z.object({
+export const ConfigSchema = z.object({
 	$schema: z.string().optional(),
 	enable_cost: z.boolean().optional(),
-	provider: z.record(z.string(), ProviderConfigSchema),
+	provider: z.record(z.string(), ProviderSchema),
 	model: z.string()
 })
 
-export type AppConfig = z.infer<typeof AppConfigSchema>
+export type Config = z.infer<typeof ConfigSchema>

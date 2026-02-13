@@ -3,7 +3,7 @@ import to from 'await-to-js'
 import fs from 'fs-extra'
 import { injectable } from 'tsyringe'
 
-import { base_path, getPath } from './utils'
+import { getPath } from './utils'
 
 @injectable()
 export default class Fs {

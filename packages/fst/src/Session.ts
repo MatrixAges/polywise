@@ -7,7 +7,7 @@ import Fs from './Fs'
 import type { SessionState } from './types'
 
 @injectable()
-export default class Sessions {
+export default class Session {
 	private current_state: SessionState = {
 		context: {},
 		history: [],

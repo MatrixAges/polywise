@@ -9,12 +9,6 @@ catalogs:
     '@abraham/reflection':
       specifier: ^0.13.0
       version: 0.13.0
-    '@rsbuild/core':
-      specifier: 1.7.3
-      version: 1.7.3
-    '@rsbuild/plugin-react':
-      specifier: 1.4.5
-      version: 1.4.5
     '@rslib/core':
       specifier: 0.19.5
       version: 0.19.5
@@ -24,60 +18,15 @@ catalogs:
     '@types/fs-extra':
       specifier: 11.0.4
       version: 11.0.4
-    '@types/node':
-      specifier: 24.10.9
-      version: 24.10.9
-    '@types/react':
-      specifier: 19.2.10
-      version: 19.2.10
-    '@types/react-dom':
-      specifier: 19.2.3
-      version: 19.2.3
-    ahooks:
-      specifier: ^3.9.6
-      version: 3.9.6
     ai:
       specifier: ^4.3.19
       version: 4.3.19
     await-to-js:
       specifier: 3.0.0
       version: 3.0.0
-    bun:
-      specifier: ^1.3.9
-      version: 1.3.9
-    bun-types:
-      specifier: 1.3.8
-      version: 1.3.8
-    dayjs:
-      specifier: ^1.11.19
-      version: 1.11.19
-    env-paths:
-      specifier: 3.0.0
-      version: 3.0.0
-    es-toolkit:
-      specifier: 1.44.0
-      version: 1.44.0
     fs-extra:
       specifier: 11.3.0
       version: 11.3.0
-    i18next:
-      specifier: 25.8.0
-      version: 25.8.0
-    ofetch:
-      specifier: ^1.4.1
-      version: 1.5.1
-    react:
-      specifier: 19.2.4
-      version: 19.2.4
-    react-dom:
-      specifier: 19.2.4
-      version: 19.2.4
-    react-i18next:
-      specifier: 16.5.4
-      version: 16.5.4
-    shiki:
-      specifier: 3.22.0
-      version: 3.22.0
     tslib:
       specifier: ^2.8.1
       version: 2.8.1
@@ -597,9 +546,6 @@ importers:
       await-to-js:
         specifier: 'catalog:'
         version: 3.0.0
-      env-paths:
-        specifier: 'catalog:'
-        version: 3.0.0
       fs-extra:
         specifier: 'catalog:'
         version: 11.3.0
@@ -618,6 +564,9 @@ importers:
       tsyringe:
         specifier: 'catalog:'
         version: 4.10.0
+      xdg-basedir:
+        specifier: ^5.1.0
+        version: 5.1.0
       zod:
         specifier: 'catalog:'
         version: 4.3.6
@@ -4296,10 +4245,6 @@ packages:
     resolution: {integrity: sha512-+h1lkLKhZMTYjog1VEpJNG7NZJWcuc2DDk/qsqSTRRCOXiLjeQ1d1/udrUGhqMxUgAlwKNZ0cf2uqan5GLuS2A==}
     engines: {node: '>=6'}
 
-  env-paths@3.0.0:
-    resolution: {integrity: sha512-dtJUTepzMW3Lm/NPxRf3wP4642UWhjL2sQxc+ym2YMj1m/H2zDNQOlezafzkHwn6sMstjHTwG6iQQsctDW/b1A==}
-    engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
-
   err-code@2.0.3:
     resolution: {integrity: sha512-2bmlRpNKBxT/CRmPOlyISQpNj+qSeYvcym/uT0Jx2bMOlKLtSy1ZmLuVxSEKKyor/N5yhvp/ZiG1oE3DEYMSFA==}
 
@@ -6902,6 +6847,10 @@ packages:
         optional: true
       utf-8-validate:
         optional: true
+
+  xdg-basedir@5.1.0:
+    resolution: {integrity: sha512-GCPAHLvrIH13+c0SuacwvRYj2SxJXQ4kaVTT5xgL3kPrz56XxkF21IGhjSE1+W0aw7gpBWRGXLCPnPby6lSpmQ==}
+    engines: {node: '>=12'}
 
   xmlbuilder@15.1.1:
     resolution: {integrity: sha512-yMqGBqtXyeN1e3TGYvgNgDVZ3j84W4cwkOXQswghol6APgZWaff9lnbvN7MHYJOiXsvGPXtjTYJEiC9J2wv9Eg==}
@@ -11269,8 +11218,6 @@ snapshots:
 
   env-paths@2.2.1: {}
 
-  env-paths@3.0.0: {}
-
   err-code@2.0.3: {}
 
   error-ex@1.3.4:
@@ -14263,6 +14210,8 @@ snapshots:
   wrappy@1.0.2: {}
 
   ws@8.19.0: {}
+
+  xdg-basedir@5.1.0: {}
 
   xmlbuilder@15.1.1: {}
 

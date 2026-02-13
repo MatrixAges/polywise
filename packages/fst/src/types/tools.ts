@@ -1,4 +1,4 @@
-import Sessions from '../Sessions'
+import Sessions from '../Session'
 
 export interface ToolArgs {
 	cwd: string
