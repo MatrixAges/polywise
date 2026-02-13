@@ -10,6 +10,7 @@ import {
 	CONSOLIDATION_ACTIVE_THRESHOLD,
 	CONSOLIDATION_ENTRY_PREFIX,
 	CONSOLIDATION_POTENTIAL_THRESHOLD,
+	DEFAULT_DATA_DIR,
 	DEFAULT_EDGE_WEIGHT,
 	DEFAULT_NODE_THRESHOLD,
 	DEFAULT_RECALL_DEPTH,
@@ -103,7 +104,7 @@ export default class Polywise {
 
 		this.onTick = onTick
 
-		this.db = new PGlite(data_dir || ':polywise:', {
+		this.db = new PGlite(data_dir || DEFAULT_DATA_DIR, {
 			relaxedDurability: true,
 			extensions: { vector }
 		})
