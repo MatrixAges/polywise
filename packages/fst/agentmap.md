@@ -2,10 +2,23 @@
 
 This document provides an overview of the packages/fst module structure and architecture.
 
-## 1. Module Overview
+## 1. 核心架构
 
-- **Description**: Finite State Transducer package
-- **Architecture**: TypeScript
+该 package 作为 Full Self Thinking (FST) 智能体的核心实现，负责模型调度、会话持久化及结构化上下文管理。
+
+### 关键技术栈
+
+- **pi-mono**: 系统级交互底层
+- **Vercel AI SDK**: 多模型 Provider 调度与会话管理
+- **Mingo**: 结构化数据查询与有限上下文状态机
+- **Polywise**: 集成强化学习记忆引擎
+
+### 核心特性
+
+- **文件化持久化**: 无需数据库，每个对话拥有独立文件夹
+- **有限上下文管理**: 基于状态机的结构化上下文，支持 undo/redo
+- **智能分流路由**: 支持前置路由模型与成本上限控制
+- **失败回退机制**: 自动切换备选模型确保工作流持续
 
 ## 2. File Tree & Metadata
 
@@ -42,4 +55,7 @@ This document provides an overview of the packages/fst module structure and arch
 
 ## 3. Operational Guidelines
 
+- **单次会话原则**: 配合 Polywise 确保信息准确有效，不产生无限叠加的上下文。
+- **结构化输出**: 强制模型通过 Mingo 友好的结构化格式输出以管理状态。
+- **成本控制**: 必须在路由层级校验 Token 使用量与成本配额。
 - **TDD**: Follow TDD principles for new features

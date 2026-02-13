@@ -81,7 +81,7 @@
 	},
 	"devDependencies": {
 		"@rslib/core": "catalog:",
-		"@types/fs-extra": "^11.0.4",
+		"@types/fs-extra": "catalog:",
 		"@types/node": "^25.1.0",
 		"@types/react": "catalog:",
 		"@types/react-dom": "catalog:",
