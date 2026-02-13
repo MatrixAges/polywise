@@ -1,8 +1,8 @@
-import fs from 'fs/promises'
 import os from 'os'
 import path from 'path'
 import { env, pipeline } from '@huggingface/transformers'
 import to from 'await-to-js'
+import fs from 'fs-extra'
 import PQueue from 'p-queue'
 import { injectable } from 'tsyringe'
 
@@ -272,18 +272,20 @@ export default class Pipeline {
 
 	private async checkAndDownload(
 		config: EmbeddingConfig | RerankerConfig | DecisionConfig,
-		load_fn: () => Promise<any>
+		loadFn: () => Promise<any>
 	) {
 		if (config.type !== 'local' || !this.cache_dir) return
 
 		const model_path = path.join(this.cache_dir, config.model)
 
-		const [err] = await to(load_fn())
+		const [err] = await to(loadFn())
 
 		if (err) {
-			await fs.rm(model_path)
+			await fs.remove(model_path)
+
 			await new Promise(resolve => setTimeout(resolve, 2000))
-			await load_fn()
+
+			await loadFn()
 		}
 	}
 

@@ -1,0 +1,31 @@
+{
+	"name": "fst",
+	"type": "module",
+	"version": "0.0.0",
+	"main": "./dist/index.js",
+	"exports": {
+		".": {
+			"types": "./dist/src/index.d.ts",
+			"import": "./dist/index.js",
+			"default": "./dist/index.js"
+		}
+	},
+	"files": [
+		"dist"
+	],
+	"scripts": {
+		"dev": "cross-env NODE_ENV=development rslib build --watch",
+		"build": "rslib build"
+	},
+	"dependencies": {
+		"tsyringe": "^4.10.0",
+		"tslib": "^2.8.1"
+	},
+	"devDependencies": {
+		"@rslib/core": "catalog:",
+		"@types/node": "^20.0.0",
+		"cross-env": "^10.1.0",
+		"deepmerge-ts": "^7.1.5",
+		"reflect-metadata": "^0.2.2"
+	}
+}

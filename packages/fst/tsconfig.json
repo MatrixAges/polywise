@@ -3,7 +3,7 @@
 		"target": "ESNext",
 		"module": "ESNext",
 		"skipLibCheck": true,
-		"lib": ["ESNext", "DOM"],
+		"lib": ["ESNEXT", "DOM"],
 		"moduleResolution": "bundler",
 		"declaration": true,
 		"emitDeclarationOnly": true,
@@ -22,5 +22,5 @@
 		"emitDecoratorMetadata": true,
 		"experimentalDecorators": true
 	},
-	"include": ["src", "bun.build.ts"]
+	"include": ["src", "test", "scripts"]
 }

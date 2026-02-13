@@ -20,10 +20,5 @@ export default deepmerge(rslib, {
 		filename: {
 			js: '[name].js'
 		}
-	},
-	resolve: {
-		alias: {
-			sharp: './empty.js'
-		}
 	}
 } as Partial<RslibConfig>)
