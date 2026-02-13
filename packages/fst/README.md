@@ -1,76 +1,38 @@
 # FST (Full Self Thinking)
 
-A self-executing, non-stop autonomous agent with structured finite context management.
+A self-executing, autonomous agent framework designed for continuous thinking without context explosion.
 
 ## Core Philosophy
 
-FST is designed to be a truly autonomous thinking agent. It breaks away from traditional stateless chat patterns by introducing a persistent, file-based thinking environment and a structured finite context state machine.
+FST is built on the belief that agents should be truly autonomous and persistent. By utilizing a file-based information exchange mechanism and a finite context state machine, FST ensures that sessions remain manageable, accurate, and cost-effective over long periods.
 
-### 1. Finite Context State Machine
+## Key Technologies
 
-Context is not an infinite stream but a managed state. Using [mingo](https://github.com/kofrasa/mingo), FST maintains a structured "Smart Context" that can:
+- **[pi-mono](https://github.com/badlogic/pi-mono)**: Handles low-level system interaction and execution.
+- **Vercel AI SDK**: Manages multi-provider connections and standardized dialogue sessions.
+- **[mingo](https://github.com/kofrasa/mingo)**: Powers the structured "intelligent context" management through model outputs.
+- **Polywise**: Integrates a Reinforcement Learning (RL) memory engine for high-fidelity information retrieval.
 
-- **Undo/Redo**: Navigate through thinking states.
-- **Selective Loading**: Dynamically load "Key Information" via references.
-- **Summarization**: Automatically summarize referenced content to keep the active context within limits.
+## Features
 
-### 2. File-Based Persistence
+- **File-Based Persistence**: No database required. Each conversation is a dedicated folder; all sessions are persistent files.
+- **Finite Context State Machine**: Mingo-driven structured context that supports undo/redo and persists to disk.
+- **Reference-Based Loading**: Context stays lean by only loading "key information" via references (reading and summarizing on demand).
+- **Memory Augmented**: Deep integration with Polywise's memory engine for accurate, non-accumulating context retrieval.
+- **Autonomous Execution**: Designed for non-stop, self-driven task completion without context degradation.
 
-FST operates directly on the filesystem, eliminating the need for complex databases:
+## Availability Support
 
-- **Conversation Folders**: Every dialogue has its own dedicated directory.
-- **Session-as-Files**: All session data and thinking states are persisted as structured files.
-- **Information Exchange**: Uses files as the primary mechanism for state synchronization and information sharing.
+- **Intelligent Model Routing**: Dynamic dispatching using cheap models (e.g., Gemini Flash) or local models to optimize performance and cost.
+- **Economic Safety**: Per-model and global cost caps based on token calculations to protect user budgets.
+- **High Availability**: Automatic failure fallback ensures workflows continue even if a specific provider or model fails.
 
-### 3. Continuous Execution
+## Getting Started
 
-Unlike reactive bots, FST is designed for non-stop operation. It leverages the [Polywise](@packages/polywise) reinforcement learning memory engine to:
-
-- Maintain high information accuracy across long-running sessions.
-- Prevent context explosion through intelligent memory consolidation.
-- Execute self-driven tasks without constant user intervention.
+```bash
+pnpm install
+```
 
 ## Architecture
 
-FST integrates several high-performance modules to achieve its goals:
-
-- **System Interaction**: [pi-mono](https://github.com/badlogic/pi-mono) for low-level system access and control.
-- **Provider Management**: [Vercel AI SDK](https://sdk.vercel.ai/) for managing multiple LLM providers and sessions.
-- **Context Engine**: [mingo](https://github.com/kofrasa/mingo) for structured object manipulation and state management.
-- **Memory Engine**: [Polywise](@packages/polywise) for knowledge graph-based memory and RL-driven recall.
-
-## Directory Structure
-
-```
-packages/fst/
-├── src/
-│   ├── FST.ts               # Core agent logic
-│   ├── Context.ts           # Mingo-based context management
-│   ├── Persistence.ts       # File-based storage logic
-│   └── index.ts             # Entry point
-├── test/                    # Functional and integration tests
-├── agentmap.md              # Module architecture map
-└── package.json
-```
-
-## Tech Stack
-
-- **Platform**: Node.js / TypeScript
-- **Context**: mingo
-- **AI Core**: Vercel AI SDK
-- **System**: pi-mono
-- **Memory**: Polywise
-
-## Use Cases
-
-### Autonomous Research
-
-FST can be assigned a topic, create a thinking folder, and continuously research by reading files, summarizing findings, and updating its internal memory.
-
-### Self-Correcting Development
-
-By persisting thinking states as a state machine, FST can backtrack when it hits a dead end in logic and try alternative paths, much like a human developer.
-
-## License
-
-MIT
+FST manages "Intelligent Context" as a state machine. Instead of stacking infinite tokens, it selectively loads information into a finite window, ensuring the agent remains sharp and focused.

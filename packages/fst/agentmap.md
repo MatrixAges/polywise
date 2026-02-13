@@ -15,6 +15,11 @@ This document provides an overview of the packages/fst module structure and arch
 	"module": "packages/fst",
 	"structure": {
 		"src": {
+			"Fst.ts": { "desc": "Main coordinator class", "role": "Core" },
+			"Providers.ts": { "desc": "Model provider management", "role": "Core" },
+			"Sessions.ts": { "desc": "Dialogue session management", "role": "Core" },
+			"Fs.ts": { "desc": "File-based persistence layer", "role": "Core" },
+			"Tools.ts": { "desc": "Agent tool definitions", "role": "Core" },
 			"index.ts": { "desc": "Main entry point", "role": "Index" }
 		},
 		"scripts": {
