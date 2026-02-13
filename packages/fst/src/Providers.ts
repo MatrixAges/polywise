@@ -1,17 +1,17 @@
-import { createOpenAI } from '@ai-sdk/openai'
-import { createAnthropic } from '@ai-sdk/anthropic'
-import { createGoogleGenerativeAI } from '@ai-sdk/google'
-import { createMistral } from '@ai-sdk/mistral'
-import { createGroq } from '@ai-sdk/groq'
-import { createXai } from '@ai-sdk/xai'
-import { createCohere } from '@ai-sdk/cohere'
-import { createPerplexity } from '@ai-sdk/perplexity'
-import { createDeepInfra } from '@ai-sdk/deepinfra'
-import { createTogetherAI } from '@ai-sdk/togetherai'
-import { createAzure } from '@ai-sdk/azure'
 import { createAmazonBedrock } from '@ai-sdk/amazon-bedrock'
-import { createVertex } from '@ai-sdk/google-vertex'
+import { createAnthropic } from '@ai-sdk/anthropic'
+import { createAzure } from '@ai-sdk/azure'
 import { createCerebras } from '@ai-sdk/cerebras'
+import { createCohere } from '@ai-sdk/cohere'
+import { createDeepInfra } from '@ai-sdk/deepinfra'
+import { createGoogleGenerativeAI } from '@ai-sdk/google'
+import { createVertex } from '@ai-sdk/google-vertex'
+import { createGroq } from '@ai-sdk/groq'
+import { createMistral } from '@ai-sdk/mistral'
+import { createOpenAI } from '@ai-sdk/openai'
+import { createPerplexity } from '@ai-sdk/perplexity'
+import { createTogetherAI } from '@ai-sdk/togetherai'
+import { createXai } from '@ai-sdk/xai'
 import { injectable } from 'tsyringe'
 
 export interface ModelConfig {
@@ -37,12 +37,18 @@ export default class Providers {
 		return provider(config.model)
 	}
 
-	public trackCost(model_id: string, usage: { promptTokens: number, completionTokens: number }, config: ModelConfig) {
+	public trackCost(
+		model_id: string,
+		usage: { promptTokens: number; completionTokens: number },
+		config: ModelConfig
+	) {
 		if (!config.price_per_token) {
 			return
 		}
 
-		const cost = (usage.promptTokens * config.price_per_token.prompt) + (usage.completionTokens * config.price_per_token.completion)
+		const cost =
+			usage.promptTokens * config.price_per_token.prompt +
+			usage.completionTokens * config.price_per_token.completion
 		const current_cost = this.costs.get(model_id) || 0
 
 		this.costs.set(model_id, current_cost + cost)
@@ -89,7 +95,10 @@ export default class Providers {
 					region: process.env.AWS_REGION
 				})
 			case 'google-vertex':
-				return createVertex({ project: process.env.GOOGLE_VERTEX_PROJECT, location: process.env.GOOGLE_VERTEX_LOCATION })
+				return createVertex({
+					project: process.env.GOOGLE_VERTEX_PROJECT,
+					location: process.env.GOOGLE_VERTEX_LOCATION
+				})
 			case 'cerebras':
 				return createCerebras({ apiKey: api_key })
 			default:

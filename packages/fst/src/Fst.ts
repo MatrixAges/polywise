@@ -1,5 +1,5 @@
 import { homedir } from 'os'
-import { generateText, type CoreMessage, type LanguageModel } from 'ai'
+import { generateText } from 'ai'
 import { Polywise } from 'polywise'
 import { injectable } from 'tsyringe'
 
@@ -7,6 +7,7 @@ import Providers from './Providers'
 import Sessions from './Sessions'
 import getTools from './Tools'
 
+import type { CoreMessage, LanguageModel } from 'ai'
 import type { ModelConfig } from './Providers'
 
 export interface FstArgs {

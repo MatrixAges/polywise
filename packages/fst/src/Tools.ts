@@ -1,7 +1,18 @@
-import { tool, type Tool } from 'ai'
+import {
+	createBashTool,
+	createEditTool,
+	createFindTool,
+	createGrepTool,
+	createLsTool,
+	createReadTool,
+	createWriteTool
+} from '@mariozechner/pi-coding-agent'
+import { tool } from 'ai'
 import { z } from 'zod'
-import { createReadTool, createBashTool, createEditTool, createWriteTool, createGrepTool, createFindTool, createLsTool } from '@mariozechner/pi-coding-agent'
+
 import Sessions from './Sessions'
+
+import type { Tool } from 'ai'
 
 export interface ToolArgs {
 	cwd: string
@@ -28,7 +39,7 @@ export default (args: ToolArgs): Record<string, Tool> => {
 				offset: z.number().optional(),
 				limit: z.number().optional()
 			}),
-			execute: async (args) => {
+			execute: async args => {
 				const result = await read.execute('read', args)
 
 				if (result.content[0].type === 'text') {
@@ -44,7 +55,7 @@ export default (args: ToolArgs): Record<string, Tool> => {
 				command: z.string(),
 				timeout: z.number().optional()
 			}),
-			execute: async (args) => {
+			execute: async args => {
 				const result = await bash.execute('bash', args)
 
 				if (result.content[0].type === 'text') {
@@ -77,7 +88,7 @@ export default (args: ToolArgs): Record<string, Tool> => {
 				path: z.string(),
 				content: z.string()
 			}),
-			execute: async (args) => {
+			execute: async args => {
 				const result = await write.execute('write', args)
 
 				if (result.content[0].type === 'text') {
@@ -99,7 +110,15 @@ export default (args: ToolArgs): Record<string, Tool> => {
 				limit: z.number().optional()
 			}),
 			execute: async ({ pattern, path, glob, ignore_case, literal, context, limit }) => {
-				const result = await grep.execute('grep', { pattern, path, glob, ignoreCase: ignore_case, literal, context, limit })
+				const result = await grep.execute('grep', {
+					pattern,
+					path,
+					glob,
+					ignoreCase: ignore_case,
+					literal,
+					context,
+					limit
+				})
 
 				if (result.content[0].type === 'text') {
 					return result.content[0].text
@@ -115,7 +134,7 @@ export default (args: ToolArgs): Record<string, Tool> => {
 				path: z.string().optional(),
 				limit: z.number().optional()
 			}),
-			execute: async (args) => {
+			execute: async args => {
 				const result = await find.execute('find', args)
 
 				if (result.content[0].type === 'text') {
@@ -131,7 +150,7 @@ export default (args: ToolArgs): Record<string, Tool> => {
 				path: z.string().optional(),
 				limit: z.number().optional()
 			}),
-			execute: async (args) => {
+			execute: async args => {
 				const result = await ls.execute('ls', args)
 
 				if (result.content[0].type === 'text') {
@@ -190,6 +209,5 @@ export default (args: ToolArgs): Record<string, Tool> => {
 				return { success: true, summary, current_context: sessions.getContext() }
 			}
 		})
-
 	}
 }
