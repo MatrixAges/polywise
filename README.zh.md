@@ -4,7 +4,7 @@
 
 # <p align="center">Polywise</p>
 
-<p align="center"><strong>智能体记忆引擎。用 AI 造，为 AI 造</strong></p>
+<p align="center"><strong>智能体记忆引擎</strong></p>
 
 <p align="center">
   <a href="README.md">English</a> |

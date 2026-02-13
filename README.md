@@ -4,7 +4,7 @@
 
 # <p align="center">Polywise</p>
 
-<p align="center"><strong>Agentic Memory Engine. Build with AI, Build for AI</strong></p>
+<p align="center"><strong>Agentic Memory Engine.</strong></p>
 
 <p align="center">
 English |
