@@ -1,30 +1,30 @@
-import { env, pipeline } from '@huggingface/transformers'
-import fs from 'fs-extra'
-import path from 'path'
 import os from 'os'
+import path from 'path'
+import { env, pipeline } from '@huggingface/transformers'
+import to from 'await-to-js'
+import fs from 'fs-extra'
 import PQueue from 'p-queue'
 import { injectable } from 'tsyringe'
-import to from 'await-to-js'
 
 import {
+	DEFAULT_CONCURRENCY,
+	DEFAULT_DECISION_CONFIG,
 	DEFAULT_EMBEDDING_CONFIG,
 	DEFAULT_RERANKER_CONFIG,
-	DEFAULT_DECISION_CONFIG,
-	POOLING_MEAN,
-	DEFAULT_CONCURRENCY
+	POOLING_MEAN
 } from './consts'
 import { catchFinally } from './decorators'
 import processText from './utils/processText'
 
 import type {
-	EmbeddingConfig,
-	RerankerConfig,
 	DecisionConfig,
 	DecisionOptions,
+	EmbeddingConfig,
 	PipelineArgs,
-	SearchResult,
+	PipelineSearchArgs,
+	RerankerConfig,
 	SearchCandidate,
-	PipelineSearchArgs
+	SearchResult
 } from './types'
 
 @injectable()

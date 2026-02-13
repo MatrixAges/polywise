@@ -1,35 +1,11 @@
 import { PGlite } from '@electric-sql/pglite'
 import { vector } from '@electric-sql/pglite/vector'
-import { singleton, container } from 'tsyringe'
 import to from 'await-to-js'
 import dayjs from 'dayjs'
+import { container, singleton } from 'tsyringe'
 
-import * as sql from './sql'
-import * as sql_meta from './sql/meta'
 import Article from './Article'
 import Brain from './Brain'
-import Log from './Log'
-import Pipeline from './Pipeline'
-import Memory from './Memory'
-import Cortex from './Cortex'
-import Process from './Process'
-import { catchError, catchFinally } from './decorators'
-import {
-	CURRENT_SCHEMA_VERSION,
-	migrate,
-	validateMigrations,
-	aggregateResults,
-	rerankKnowledges,
-	rerankActions,
-	extractKeywords,
-	recallNodesByKeywords,
-	recallRelatedNodes,
-	getNodeContexts,
-	stimulateNodes,
-	strengthenRelatedEdges,
-	handleHabitReaction,
-	getHabits
-} from './utils'
 import {
 	CONSOLIDATION_ACTIVE_THRESHOLD,
 	CONSOLIDATION_ENTRY_PREFIX,
@@ -38,30 +14,54 @@ import {
 	DEFAULT_NODE_THRESHOLD,
 	DEFAULT_RECALL_DEPTH,
 	DEFAULT_TIMESTAMP_FORMAT,
+	getProactiveStatementPrompt,
 	HABIT_CONSOLIDATION_WEIGHT,
 	HABIT_LTM_PREFIX,
 	MAX_HABIT_CONSOLIDATION,
 	MEMORY_RECALL_INTENSITY,
 	NO_ACTIVITY_SUMMARY,
-	SNAPSHOT_WEIGHT_THRESHOLD,
-	getProactiveStatementPrompt
+	SNAPSHOT_WEIGHT_THRESHOLD
 } from './consts'
+import Cortex from './Cortex'
+import { catchError, catchFinally } from './decorators'
+import Log from './Log'
+import Memory from './Memory'
+import Pipeline from './Pipeline'
+import Process from './Process'
+import * as sql from './sql'
+import * as sql_meta from './sql/meta'
+import {
+	aggregateResults,
+	CURRENT_SCHEMA_VERSION,
+	extractKeywords,
+	getHabits,
+	getNodeContexts,
+	handleHabitReaction,
+	migrate,
+	recallNodesByKeywords,
+	recallRelatedNodes,
+	rerankActions,
+	rerankKnowledges,
+	stimulateNodes,
+	strengthenRelatedEdges,
+	validateMigrations
+} from './utils'
 
 import type {
+	Action,
 	AddNodeArgs,
 	ConnectArgs,
 	Edge,
+	FiltersArgs,
+	FinalQueryResult,
 	Node,
 	PolywiseArgs,
 	ProcessArticleArgs,
 	QueryArgs,
 	RecallArgs,
-	SingleSearchArgs,
 	RecallNodesByKeywordsArgs,
-	StrengthenRelatedEdgesArgs,
-	Action,
-	FiltersArgs,
-	FinalQueryResult
+	SingleSearchArgs,
+	StrengthenRelatedEdgesArgs
 } from './types'
 
 @singleton()

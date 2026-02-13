@@ -16,7 +16,7 @@
 		"^react$|^(react)$",
 		"<THIRD_PARTY_MODULES>",
 		"",
-		"^@(.*)$",
+		"^@/(.*)$",
 		"",
 		"^[./](?!.*\\.css$)",
 		"",
@@ -26,5 +26,7 @@
 		"<TYPES>",
 		"<TYPES>^[.]"
 	],
-	"useTailwindFormat": true
+	"importOrderParserPlugins": ["typescript", "decorators-legacy"],
+	"importOrderTypeScriptVersion": "5.0.0"
 }
+

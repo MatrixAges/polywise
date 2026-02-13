@@ -1,11 +1,10 @@
-import { injectable } from 'tsyringe'
 import to from 'await-to-js'
+import { injectable } from 'tsyringe'
 
-import { calculateFatigue, isIdle } from './utils'
-import { SHADOW_INTERVAL_MS, FATIGUE_THRESHOLD, IDLE_TIMEOUT_MS } from './consts'
+import { FATIGUE_THRESHOLD, IDLE_TIMEOUT_MS, SHADOW_INTERVAL_MS } from './consts'
 import { catchFinally } from './decorators'
-
 import Polywise from './Polywise'
+import { calculateFatigue, isIdle } from './utils'
 
 import type { BrainState } from './types'
 

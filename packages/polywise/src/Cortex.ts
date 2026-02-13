@@ -1,11 +1,11 @@
 import { injectable } from 'tsyringe'
 
-import { ChainEmitter, processResults, getRandomId } from './utils'
 import { getNextStepPrompt } from './consts'
 import Polywise from './Polywise'
+import { ChainEmitter, getRandomId, processResults } from './utils'
 
-import type { CortexProcessArgs, WorkingMemory, Step } from './types/cortex'
-import type { Knowledge, Action } from './types/polywise'
+import type { CortexProcessArgs, Step, WorkingMemory } from './types/cortex'
+import type { Action, Knowledge } from './types/polywise'
 
 @injectable()
 export default class Cortex {

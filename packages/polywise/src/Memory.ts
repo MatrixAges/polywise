@@ -1,12 +1,17 @@
-import { injectable } from 'tsyringe'
 import dayjs from 'dayjs'
+import { injectable } from 'tsyringe'
 
-import { getClassifyPrompt } from './consts'
+import {
+	getClassifyPrompt,
+	LONG_TERM_CAPACITY,
+	LTM_DECAY_LAMBDA,
+	PRIORITY_WEIGHTS,
+	TIME_DECAY_HALFLIFE_DAYS
+} from './consts'
 import { sql_memory } from './sql'
-import { LONG_TERM_CAPACITY, LTM_DECAY_LAMBDA, PRIORITY_WEIGHTS, TIME_DECAY_HALFLIFE_DAYS } from './consts'
 
 import type Polywise from './Polywise'
-import type { FiltersArgs, Knowledge, DataRows } from './types'
+import type { DataRows, FiltersArgs, Knowledge } from './types'
 
 @injectable()
 export default class Memory {
