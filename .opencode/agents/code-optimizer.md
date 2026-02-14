@@ -571,18 +571,18 @@ import { default as migrateFn } from './migrate'
 import { default as validateMigrationsFn } from './validateMigrations'
 ```
 
-## Node.js Native API Preference
+## fs-extra Preference
 
-Always prefer native Node.js APIs over third-party libraries like `fs-extra` when equivalent functionality is available in `fs/promises` or other core modules.
+Always prefer `fs-extra` over native Node.js `fs/promises` for consistent enhanced file system operations.
 
 ### Example: File Operations
 
 ```typescript
-// Good: Using native fs/promises
-import fs from 'fs/promises'
+// Good: Using fs-extra
+import fs from 'fs-extra'
 
 // Ensure directory exists (recursive)
-await fs.mkdir(dir_path, { recursive: true })
+await fs.ensureDir(dir_path)
 
 // Write file
 await fs.writeFile(file_path, content, 'utf-8')
@@ -591,13 +591,27 @@ await fs.writeFile(file_path, content, 'utf-8')
 const content = await fs.readFile(file_path, 'utf-8')
 
 // Delete file/directory
-await fs.rm(file_path, { recursive: true, force: true })
+await fs.remove(file_path)
 
 // Check if file exists
-const exists = await fs
-	.access(file_path)
-	.then(() => true)
-	.catch(() => false)
+const exists = await fs.pathExists(file_path)
+```
+
+## 2. Node.js Import Convention
+
+Do not use the `node:` prefix for core module imports.
+
+### Example: Imports
+
+```typescript
+// Good
+
+// Avoid
+import fs from 'node:fs/promises'
+import path from 'node:path'
+import os from 'os'
+import path from 'path'
+import fs from 'fs-extra'
 ```
 
 ```typescript

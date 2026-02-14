@@ -134,7 +134,7 @@ All exported SQL strings or functions in `src/sql/` MUST be preceded by a JSDoc-
 
 ## Node.js Native API and Import Convention (CRITICAL)
 
-- **Native API Preference**: ALWAYS prefer native Node.js APIs (e.g., `fs/promises`) over third-party wrappers like `fs-extra`.
+- **Library Preference**: ALWAYS prefer `fs-extra` over native Node.js `fs/promises` for consistent enhanced file system operations.
 - **Import Style**: NEVER use the `node:` prefix for core Node.js module imports. Use the standard module name directly.
 - **Reference**: Detailed code examples for these conventions are maintained in the `@code-optimizer` subagent documentation.
 

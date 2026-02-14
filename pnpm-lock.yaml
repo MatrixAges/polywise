@@ -673,6 +673,9 @@ importers:
       dayjs:
         specifier: 'catalog:'
         version: 1.11.19
+      fs-extra:
+        specifier: 'catalog:'
+        version: 11.3.0
       ofetch:
         specifier: 'catalog:'
         version: 1.5.1
@@ -701,6 +704,9 @@ importers:
       '@rstest/core':
         specifier: 'catalog:'
         version: 0.8.5
+      '@types/fs-extra':
+        specifier: 'catalog:'
+        version: 11.0.4
       '@types/node':
         specifier: ^20.0.0
         version: 20.19.33
@@ -7589,7 +7595,7 @@ snapshots:
       '@malept/cross-spawn-promise': 2.0.0
       debug: 4.4.3
       dir-compare: 4.2.0
-      fs-extra: 11.3.0
+      fs-extra: 11.3.3
       minimatch: 9.0.5
       plist: 3.1.0
     transitivePeerDependencies:

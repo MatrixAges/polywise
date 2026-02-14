@@ -1,6 +1,6 @@
-import fs from 'fs/promises'
 import path from 'path'
 import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
+import fs from 'fs-extra'
 
 import Polywise from '../src/Polywise'
 import { getTestDecision, getTestRerank, getTestVectors } from './utils/getCache'

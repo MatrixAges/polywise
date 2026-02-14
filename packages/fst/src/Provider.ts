@@ -1,4 +1,3 @@
-import fs from 'fs/promises'
 import path from 'path'
 import { createAmazonBedrock } from '@ai-sdk/amazon-bedrock'
 import { createAnthropic } from '@ai-sdk/anthropic'
@@ -16,6 +15,7 @@ import { createPerplexity } from '@ai-sdk/perplexity'
 import { createTogetherAI } from '@ai-sdk/togetherai'
 import { createXai } from '@ai-sdk/xai'
 import to from 'await-to-js'
+import fs from 'fs-extra'
 import { injectable } from 'tsyringe'
 
 import { ConfigSchema } from './types'
@@ -42,10 +42,8 @@ export default class Provider {
 	public async init() {
 		const config_path = getConfigPath('/config.jsonc')
 
-		const [err] = await to(fs.access(config_path))
-
-		if (err) {
-			await fs.mkdir(path.dirname(config_path), { recursive: true })
+		if (!(await fs.pathExists(config_path))) {
+			await fs.ensureDir(path.dirname(config_path))
 
 			await fs.writeFile(config_path, JSON.stringify(default_config, null, 6), 'utf-8')
 		}
