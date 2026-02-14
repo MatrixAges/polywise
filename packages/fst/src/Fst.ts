@@ -41,6 +41,10 @@ export default class Fst {
 				})
 			)
 
+			console.log('--------------')
+			console.log(recall_err)
+			console.log('--------------')
+
 			const memories = recall_err ? [] : memory.related_contexts.map(c => JSON.stringify(c))
 			const system_prompt = this.getSystemPrompt(context, memories)
 

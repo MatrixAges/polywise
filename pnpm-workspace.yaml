@@ -34,4 +34,3 @@ onlyBuiltDependencies:
       - electron
       - bun
       - simple-git-hooks
-      - sharp

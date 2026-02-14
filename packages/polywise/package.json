@@ -24,7 +24,7 @@
 		"@abraham/reflection": "catalog:",
 		"@chonkiejs/core": "^0.0.7",
 		"@electric-sql/pglite": "^0.3.15",
-		"@huggingface/transformers": "^3.3.2",
+		"@huggingface/transformers": "^3.8.1",
 		"await-to-js": "^3.0.0",
 		"dayjs": "catalog:",
 		"fs-extra": "catalog:",
