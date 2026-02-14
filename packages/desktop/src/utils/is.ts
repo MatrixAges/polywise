@@ -8,4 +8,4 @@ export const is_mac = process.platform === 'darwin'
 export const is_win = process.platform === 'win32'
 
 // export const show_devtool = process.env.DEVTOOL === '1'
-export const show_devtool = is_dev
+export const show_devtool = true

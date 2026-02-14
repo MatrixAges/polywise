@@ -35,3 +35,8 @@ onlyBuiltDependencies:
       - bun
       - simple-git-hooks
       - sharp
+      - onnxruntime-node
+      - core-js
+      - electron-winstaller
+      - esbuild
+      - protobufjs

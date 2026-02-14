@@ -36,6 +36,7 @@
 		"i18next": "catalog:",
 		"minimatch": "^10.1.1",
 		"ofetch": "^1.5.1",
+		"polywise": "workspace:*",
 		"watchpack": "^2.5.1",
 		"zod": "catalog:"
 	},
@@ -54,7 +55,5 @@
 		"electron-builder": "^26.7.0",
 		"tinyglobby": "^0.2.15",
 		"typescript": "^5.9.3"
-	},
-	"peerDependencies": {},
-	"optionalDependencies": {}
+	}
 }

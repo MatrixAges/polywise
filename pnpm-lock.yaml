@@ -446,6 +446,9 @@ importers:
       ofetch:
         specifier: ^1.5.1
         version: 1.5.1
+      polywise:
+        specifier: workspace:*
+        version: link:../polywise
       watchpack:
         specifier: ^2.5.1
         version: 2.5.1
@@ -7583,7 +7586,7 @@ snapshots:
       '@malept/cross-spawn-promise': 2.0.0
       debug: 4.4.3
       dir-compare: 4.2.0
-      fs-extra: 11.3.3
+      fs-extra: 11.3.0
       minimatch: 9.0.5
       plist: 3.1.0
     transitivePeerDependencies:

@@ -1,0 +1,1 @@
+pnpm run clean && pnpm run transform && pnpm run main:prod && pnpm electron-builder --mac zip --x64 --config.mac.identity=null
