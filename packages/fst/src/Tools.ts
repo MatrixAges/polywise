@@ -10,9 +10,19 @@ import {
 import { tool } from 'ai'
 import { z } from 'zod'
 
-import { type ToolArgs } from './types'
-
 import type { Tool } from 'ai'
+import type { ToolArgs } from './types'
+
+export const weatherTool = tool({
+	description: 'Get the weather in a location',
+	inputSchema: z.object({
+		location: z.string().describe('The location to get the weather for')
+	}),
+	execute: async ({ location }) => ({
+		location,
+		temperature: 72 + Math.floor(Math.random() * 21) - 10
+	})
+})
 
 export default (args: ToolArgs): Record<string, Tool> => {
 	const { cwd, sessions, summarize } = args
@@ -28,7 +38,7 @@ export default (args: ToolArgs): Record<string, Tool> => {
 	return {
 		read: tool({
 			description: 'Read a file or directory from the local filesystem.',
-			parameters: z.object({
+			inputSchema: z.object({
 				path: z.string(),
 				offset: z.number().optional(),
 				limit: z.number().optional()
@@ -40,12 +50,12 @@ export default (args: ToolArgs): Record<string, Tool> => {
 					return result.content[0].text
 				}
 
-				return JSON.stringify(result.content)
+				return result.content
 			}
 		}),
 		bash: tool({
 			description: 'Executes a given bash command in a persistent shell session.',
-			parameters: z.object({
+			inputSchema: z.object({
 				command: z.string(),
 				timeout: z.number().optional()
 			}),
@@ -56,12 +66,12 @@ export default (args: ToolArgs): Record<string, Tool> => {
 					return result.content[0].text
 				}
 
-				return JSON.stringify(result.content)
+				return result.content
 			}
 		}),
 		edit: tool({
 			description: 'Performs exact string replacements in files.',
-			parameters: z.object({
+			inputSchema: z.object({
 				path: z.string(),
 				old_text: z.string(),
 				new_text: z.string()
@@ -73,12 +83,12 @@ export default (args: ToolArgs): Record<string, Tool> => {
 					return result.content[0].text
 				}
 
-				return JSON.stringify(result.content)
+				return result.content
 			}
 		}),
 		write: tool({
 			description: 'Writes a file to the local filesystem.',
-			parameters: z.object({
+			inputSchema: z.object({
 				path: z.string(),
 				content: z.string()
 			}),
@@ -89,12 +99,12 @@ export default (args: ToolArgs): Record<string, Tool> => {
 					return result.content[0].text
 				}
 
-				return JSON.stringify(result.content)
+				return result.content
 			}
 		}),
 		grep: tool({
 			description: 'Fast content search tool that works with any codebase size.',
-			parameters: z.object({
+			inputSchema: z.object({
 				pattern: z.string(),
 				path: z.string().optional(),
 				glob: z.string().optional(),
@@ -118,12 +128,12 @@ export default (args: ToolArgs): Record<string, Tool> => {
 					return result.content[0].text
 				}
 
-				return JSON.stringify(result.content)
+				return result.content
 			}
 		}),
 		find: tool({
 			description: 'Fast file pattern matching tool that works with any codebase size.',
-			parameters: z.object({
+			inputSchema: z.object({
 				pattern: z.string(),
 				path: z.string().optional(),
 				limit: z.number().optional()
@@ -135,12 +145,12 @@ export default (args: ToolArgs): Record<string, Tool> => {
 					return result.content[0].text
 				}
 
-				return JSON.stringify(result.content)
+				return result.content
 			}
 		}),
 		ls: tool({
 			description: 'Lists files in a directory.',
-			parameters: z.object({
+			inputSchema: z.object({
 				path: z.string().optional(),
 				limit: z.number().optional()
 			}),
@@ -151,12 +161,12 @@ export default (args: ToolArgs): Record<string, Tool> => {
 					return result.content[0].text
 				}
 
-				return JSON.stringify(result.content)
+				return result.content
 			}
 		}),
 		update_context: tool({
 			description: 'Update the structured finite context of the current session.',
-			parameters: z.object({
+			inputSchema: z.object({
 				update: z.record(z.string(), z.unknown())
 			}),
 			execute: async ({ update }) => {
@@ -167,7 +177,7 @@ export default (args: ToolArgs): Record<string, Tool> => {
 		}),
 		undo: tool({
 			description: 'Undo the last context update.',
-			parameters: z.object({}),
+			inputSchema: z.object({}),
 			execute: async () => {
 				sessions.undo()
 
@@ -176,7 +186,7 @@ export default (args: ToolArgs): Record<string, Tool> => {
 		}),
 		redo: tool({
 			description: 'Redo the last undone context update.',
-			parameters: z.object({}),
+			inputSchema: z.object({}),
 			execute: async () => {
 				sessions.redo()
 
@@ -185,7 +195,7 @@ export default (args: ToolArgs): Record<string, Tool> => {
 		}),
 		load_reference: tool({
 			description: 'Load a reference file, summarize it, and add it to the context.',
-			parameters: z.object({
+			inputSchema: z.object({
 				path: z.string(),
 				key: z.string().describe('The key in the context to store the summary under.')
 			}),

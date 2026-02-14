@@ -34,6 +34,8 @@
 		"tsyringe": "catalog:"
 	},
 	"devDependencies": {
+		"@img/sharp-libvips-dev": "^1.2.4",
+		"@img/sharp-wasm32": "^0.34.5",
 		"@rslib/core": "catalog:",
 		"@rstest/core": "catalog:",
 		"@types/node": "^20.0.0",

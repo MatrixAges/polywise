@@ -683,6 +683,12 @@ importers:
         specifier: 'catalog:'
         version: 4.10.0
     devDependencies:
+      '@img/sharp-libvips-dev':
+        specifier: ^1.2.4
+        version: 1.2.4
+      '@img/sharp-wasm32':
+        specifier: ^0.34.5
+        version: 0.34.5
       '@rslib/core':
         specifier: 'catalog:'
         version: 0.19.5(typescript@5.9.3)
@@ -1602,6 +1608,9 @@ packages:
     resolution: {integrity: sha512-1IOd5xfVhlGwX+zXv2N93k0yMONvUlANylbJw1eTah8K/Jtpi15KC+WSiaX/nBmbm2HxRM1gZ0nSdjSsrZbGKg==}
     cpu: [x64]
     os: [darwin]
+
+  '@img/sharp-libvips-dev@1.2.4':
+    resolution: {integrity: sha512-7wC6L/1w29DCcE7Zdc0Sy/DKrEqL7rggPp9Gb/5vYquWgtb+QyuHsNbTb33mVOCaFj6txrwt75GUCkS/1+6COA==}
 
   '@img/sharp-libvips-linux-arm64@1.2.4':
     resolution: {integrity: sha512-excjX8DfsIcJ10x1Kzr4RcWe1edC9PquDRRPx3YVCvQv+U5p7Yin2s32ftzikXojb1PIFc/9Mt28/y+iRklkrw==}
@@ -7600,7 +7609,6 @@ snapshots:
   '@emnapi/runtime@1.8.1':
     dependencies:
       tslib: 2.8.1
-    optional: true
 
   '@emnapi/wasi-threads@1.1.0':
     dependencies:
@@ -7761,6 +7769,8 @@ snapshots:
   '@img/sharp-libvips-darwin-x64@1.2.4':
     optional: true
 
+  '@img/sharp-libvips-dev@1.2.4': {}
+
   '@img/sharp-libvips-linux-arm64@1.2.4':
     optional: true
 
@@ -7828,7 +7838,6 @@ snapshots:
   '@img/sharp-wasm32@0.34.5':
     dependencies:
       '@emnapi/runtime': 1.8.1
-    optional: true
 
   '@img/sharp-win32-arm64@0.34.5':
     optional: true
