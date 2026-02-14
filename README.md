@@ -136,21 +136,55 @@ const { current, prev, next } = await poly.getDailyMemory('2026-02-04 12:00:00')
 
 ## 🏗️ Architecture
 
-```
-polywise/
-├── packages/
-│   ├── polywise/          # Core memory engine
-│   │   ├── src/
-│   │   │   ├── Polywise.ts      # Database API
-│   │   │   ├── Brain.ts         # Lifecycle manager
-│   │   │   ├── sql/             # SQL operations
-│   │   │   ├── types/           # Type definitions
-│   │   │   └── utils/           # Utilities
-│   │   └── test/              # Tests
-│   ├── app/               # React frontend
-│   ├── desktop/           # Electron shell
-│   ├── erpc/              # IPC layer
-│   └── stk/               # Shared toolkit
+```bash
+          User Input (Input)
+                ↓
+┌──────────────────────────────────────────────┐
+│  Phase 0: Cortex Executive Gating            │
+│  - Check cot_depth parameter                 │
+│  - Initialize ChainEmitter & WorkingMemory   │
+└──────────────────────────────────────────────┘
+      ↓                      ↘
+[ cot_depth <= 0 ]        [ cot_depth > 0 ]
+(Fast Path)               (CoT Planning Loop)
+      ↓                      ↘
+      ↓                   ┌──────────────────────────────────────────┐
+      ↓                   │ Phase 0.5: Iterative Planning            │
+      ↓                   │ - Pipeline.decide: Generate Next Step Query │
+      ↓                   │ - Loop Phase 1-3 until depth exhausted   │
+      ↓                   │ - Update Working Memory                  │
+      └───────────────────┴──────────────────────────────────────────┘
+                              ↓
+┌──────────────────────────────────────────────────────────────────────────┐
+│ Phase 1: Hybrid Retrieval - executeSingleSearch                          │
+│ - Habit Reaction: getHabits & handleHabitReaction (Stimulate Nodes)      │
+│ - Graph Recall: recallFromMemory (Keywords -> Nodes -> Spreading -> Context) │
+│ - External Search: Article.searchVector & searchFts (Pipeline Embedding) │
+│ - Memory Search: Memory.search (LTM & Diary)                             │
+└──────────────────────────────────────────────────────────────────────────┐
+      ↓
+┌──────────────────────────────────────────────────────────────────────────┐
+│ Phase 2: Aggregation                                                     │
+│ - aggregateResults: Merge Recall, Search, Memory, Habits                 │
+│ - Deduplication & Normalization                                          │
+└──────────────────────────────────────────────────────────────────────────┐
+      ↓
+┌──────────────────────────────────────────────────────────────────────────┐
+│ Phase 3: Reranking                                                       │
+│ - Pipeline.rerank: Semantic scoring of Knowledge and Action candidates   │
+│ - Result Truncation (rerank_limit)                                       │
+└──────────────────────────────────────────────────────────────────────────┐
+      ↓
+   Response ───→ [ Write Log: Log.write ]
+                             ↓
+                 ┌──────────────────────────────────┐
+                 │ Phase 4: Brain Lifecycle         │
+                 │ - Brain.ts: Increase Synaptic Fatigue │
+                 │ - Idle Detection -> Trigger Sleep│
+                 │   - memory.saveDiary: Save Diary │
+                 │   - consolidateLongTermMemory    │
+                 │   - SQL: Decay/Prune/Replay      │
+                 └──────────────────────────────────┘
 ```
 
 ## 📚 Core Concepts
@@ -241,6 +275,8 @@ This project is inspired by the following research papers:
 
 Polywise is built on the shoulders of these amazing projects:
 
+### Libraries & Tools
+
 - 🐘 **[PGlite](https://github.com/electric-sql/pglite)** - Wasm-based PostgreSQL for local-first apps
 - ⚛️ **[React](https://react.dev/)** - Frontend UI library
 - 🖥️ **[Electron](https://www.electronjs.org/)** - Desktop application framework
@@ -250,6 +286,14 @@ Polywise is built on the shoulders of these amazing projects:
 - 🚀 **[Hono](https://hono.dev/)** - Ultrafast web framework
 - 🛠️ **[Rsbuild](https://rsbuild.dev/)** - Next-generation build tool based on Rspack
 - 📚 **[Rslib](https://rslib.dev/)** - Library build tool powered by Rsbuild
+- 🤗 **[Transformers.js](https://huggingface.co/docs/transformers.js/)** - State-of-the-art Machine Learning for the web
+- ⚡ **[ONNX Runtime](https://onnxruntime.ai/)** - High-performance machine learning inferencing engine
+
+### Models
+
+- 🤖 **[Qwen3-Embedding](https://huggingface.co/onnx-community/Qwen3-Embedding-0.6B-ONNX)** - **Vector Encoding**: Converts text into high-dimensional vectors for semantic search and graph recall.
+- 🎯 **[BGE Reranker v2-m3](https://huggingface.co/onnx-community/bge-reranker-v2-m3-ONNX)** - **Precision Sorting**: Reranks retrieved knowledge and actions to ensure the most relevant results are prioritized.
+- 🧠 **[Qwen3-0.6B](https://huggingface.co/onnx-community/Qwen3-0.6B-ONNX)** - **Reasoning & Planning**: Powers the Cortex's iterative planning and decision-making for complex "Slow Path" queries.
 
 ## 📜 License
 
