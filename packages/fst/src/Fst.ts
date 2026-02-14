@@ -1,7 +1,6 @@
-import { generateText } from 'ai'
+import { generateText, stepCountIs } from 'ai'
 import to from 'await-to-js'
-import fs from 'fs-extra'
-// import { Polywise } from 'polywise'
+import { Polywise } from 'polywise'
 import { container } from 'tsyringe'
 
 import Provider from './Provider'
@@ -9,28 +8,20 @@ import Session from './Session'
 import getTools from './Tools'
 import { getId, getPath } from './utils'
 
-import type { CoreMessage, LanguageModel } from 'ai'
+import type { LanguageModel, ModelMessage } from 'ai'
 
 export default class Fst {
 	private provider = container.resolve(Provider)
 	private session = container.resolve(Session)
-	// private polywise = container.resolve(Polywise)
+	private polywise = container.resolve(Polywise)
 
 	conversation_id = getId()
 	session_id = getId()
 
 	public async init() {
-		// const data_dir = getPath(`/${this.conversation_id}/:memory:`)
-
 		await this.provider.init()
 		await this.session.init(this.conversation_id, this.session_id)
-
-		// await to(
-		// 	this.polywise.init({
-		// 		data_dir,
-		// 		metrics_ids: [this.conversation_id]
-		// 	})
-		// )
+		await this.polywise.init({ data_dir: getPath(`/:memory:`) })
 	}
 
 	public async think(user_input: string) {
@@ -43,27 +34,27 @@ export default class Fst {
 			const context = this.session.getContext()
 			const history = this.session.getHistory()
 
-			// const [recall_err, memory] = await to(
-			// 	this.polywise.recallFromMemory({
-			// 		query: user_input,
-			// 		metrics_ids: [this.conversation_id]
-			// 	})
-			// )
+			const [recall_err, memory] = await to(
+				this.polywise.recallFromMemory({
+					query: user_input,
+					metrics_ids: [this.conversation_id]
+				})
+			)
 
-			// const related_memories = recall_err ? [] : memory.related_contexts.map(c => JSON.stringify(c))
-			// const system_prompt = this.buildSystemPrompt(context, related_memories)
+			const memories = recall_err ? [] : memory.related_contexts.map(c => JSON.stringify(c))
+			const system_prompt = this.getSystemPrompt(context, memories)
 
 			const [err, res] = await to(
 				generateText({
 					model: this.provider.getLanguageModel() as unknown as LanguageModel,
-					system: this.getSystemPrompt(context),
-					messages: history as Array<CoreMessage>,
+					system: system_prompt,
+					messages: history as Array<ModelMessage>,
 					tools: getTools({
 						cwd: process.cwd(),
 						sessions: this.session,
 						summarize: content => this.summarize(content)
 					}),
-					maxSteps: 10
+					stopWhen: stepCountIs(5)
 				})
 			)
 
@@ -75,12 +66,7 @@ export default class Fst {
 
 			this.session.addHistory({ role: 'assistant', content: text })
 
-			// await to(
-			// 	this.polywise.save({
-			// 		content: text,
-			// 		metrics_ids: [this.conversation_id]
-			// 	})
-			// )
+			this.polywise.save({ content: text, metrics_ids: [this.conversation_id] })
 
 			if (finishReason !== 'length') {
 				is_finished = true
