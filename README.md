@@ -267,9 +267,9 @@ Polywise is built on the belief that **truly intelligent AI needs truly intellig
 
 This project is inspired by the following research papers:
 
-- [Long-lasting potentiation of synaptic transmission (1973)](<papers/Long-lasting%20potentiation%20of%20synaptic%20transmission%20(1973).pdf>)
-- [The Organization of Behavior (1949)](<papers/The%20Organization%20of%20Behavior%20(1949).pdf>)
-- [A Spreading-Activation Theory of Semantic Processing (1975)](<papers/A%20Spreading-Activation%20Theory%20of%20Semantic%20Processing%20(1975).pdf>)
+- [Long-lasting potentiation of synaptic transmission (1973)](<.refs/papers/Long-lasting%20potentiation%20of%20synaptic%20transmission%20(1973).pdf>)
+- [The Organization of Behavior (1949)](<.refs/papers/The%20Organization%20of%20Behavior%20(1949).pdf>)
+- [A Spreading-Activation Theory of Semantic Processing (1975)](<.refs/papers/A%20Spreading-Activation%20Theory%20of%20Semantic%20Processing%20(1975).pdf>)
 
 ## 🙏 Credits
 
