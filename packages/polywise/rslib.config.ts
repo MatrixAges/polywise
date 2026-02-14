@@ -16,7 +16,8 @@ export default deepmerge(rslib, {
 	],
 	output: {
 		externals: {
-			'@chonkiejs/token': '@chonkiejs/token'
+			'@chonkiejs/token': '@chonkiejs/token',
+			'onnxruntime-node': 'onnxruntime-node'
 		},
 		filename: {
 			js: '[name].js'
