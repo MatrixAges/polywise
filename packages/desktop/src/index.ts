@@ -1,15 +1,13 @@
 import '@desktop/utils/locale'
 import '@desktop/utils/entry'
 
-import path from 'node:path'
-import { app, BrowserWindow, dialog, ipcMain, WebContentsView } from 'electron'
+import { app, BrowserWindow, ipcMain, WebContentsView } from 'electron'
 import { createIPCHandler } from 'erpc/main'
-import { Polywise } from 'polywise'
 
 import config from '../config'
 import { Main, Menu, Tray } from './app'
 import { routers } from './rpcs'
-import { conf, getThemeColor, is_mac, main_emitter, registerProtocol, serve } from './utils'
+import { conf, getThemeColor, is_mac, registerProtocol, serve, show_devtool } from './utils'
 
 import type { Tray as TrayType } from 'electron'
 
@@ -21,13 +19,11 @@ class App {
 	private window: BrowserWindow | null
 	private loading_view: WebContentsView | null
 	private tray: TrayType | null
-	private poly: Polywise | null
 
 	constructor() {
 		this.window = null
 		this.loading_view = null
 		this.tray = null
-		this.poly = null
 	}
 
 	async init() {
@@ -49,63 +45,30 @@ class App {
 			this.loading()
 			this.events()
 
-			this.window.webContents.openDevTools({ mode: 'detach' })
+			if (show_devtool) {
+				if (process.platform === 'win32') {
+					const win_devtools = new BrowserWindow()
+					this.window.webContents.setDevToolsWebContents(win_devtools.webContents)
+				}
+
+				this.window.webContents.openDevTools({ mode: 'detach' })
+			}
 
 			createIPCHandler({
 				createContext: async () => ({ win: this.window!, tray: this.tray! }),
 				router: routers,
 				windows: [this.window]
 			})
-
-			setTimeout(() => {
-				this.test()
-			}, 3000)
 		})
 
 		app.on('before-quit', async () => {
 			this.tray?.destroy()
 			this.window?.destroy()
 
-			if (this.poly) {
-				await this.poly.off()
-			}
-
 			this.off()
 		})
 
 		if (is_mac) this.macOSHandler()
-	}
-
-	async test() {
-		try {
-			const data_dir = path.join(app.getPath('userData'), 'polywise-db')
-
-			console.log('Initializing Polywise at:', data_dir)
-			main_emitter.emit('CHANGE', 'Initializing Polywise at:' + data_dir)
-
-			this.poly = new Polywise()
-
-			await this.poly.init({
-				data_dir
-			})
-
-			console.log('Polywise initialized successfully')
-			main_emitter.emit('CHANGE', 'Polywise initialized successfully')
-
-			await this.poly.article.process({
-				content: 'Polywise is running inside Electron! This is a test article.'
-			})
-
-			const results = await this.poly.article.searchByText({ query: 'Electron' })
-
-			console.log('Search results:', results)
-			main_emitter.emit('CHANGE', 'Search results:' + JSON.stringify(results))
-		} catch (error) {
-			console.error('Failed to initialize Polywise:', error)
-			main_emitter.emit('CHANGE', 'Polywise Error' + String(error))
-
-			dialog.showErrorBox('Polywise Error', String(error))
-		}
 	}
 
 	loading() {
