@@ -21,7 +21,9 @@ export default class Fst {
 	public async init() {
 		await this.provider.init()
 		await this.session.init(this.conversation_id, this.session_id)
-		await this.polywise.init({ data_dir: getPath(`/:memory:`) })
+		const [err] = await to(this.polywise.init({ data_dir: getPath(`/:memory:`) }))
+
+		console.log(err)
 	}
 
 	public async think(user_input: string) {
@@ -34,19 +36,20 @@ export default class Fst {
 			const context = this.session.getContext()
 			const history = this.session.getHistory()
 
-			const [recall_err, memory] = await to(
-				this.polywise.recallFromMemory({
-					query: user_input,
-					metrics_ids: [this.conversation_id]
-				})
-			)
+			// const [recall_err, memory] = await to(
+			// 	this.polywise.recallFromMemory({
+			// 		query: user_input,
+			// 		metrics_ids: [this.conversation_id]
+			// 	})
+			// )
 
-			console.log('--------------')
-			console.log(recall_err)
-			console.log('--------------')
+			// console.log('--------------')
+			// console.log(recall_err)
+			// console.log('--------------')
 
-			const memories = recall_err ? [] : memory.related_contexts.map(c => JSON.stringify(c))
-			const system_prompt = this.getSystemPrompt(context, memories)
+			// const memories = recall_err ? [] : memory.related_contexts.map(c => JSON.stringify(c))
+			// const system_prompt = this.getSystemPrompt(context, memories)
+			const system_prompt = this.getSystemPrompt(context, [])
 
 			const [err, res] = await to(
 				generateText({
@@ -70,7 +73,7 @@ export default class Fst {
 
 			this.session.addHistory({ role: 'assistant', content: text })
 
-			this.polywise.save({ content: text, metrics_ids: [this.conversation_id] })
+			// this.polywise.save({ content: text, metrics_ids: [this.conversation_id] })
 
 			if (finishReason !== 'length') {
 				is_finished = true

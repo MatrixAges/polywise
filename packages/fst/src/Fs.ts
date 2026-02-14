@@ -46,7 +46,7 @@ export default class Fs {
 	}
 
 	public async saveSession(conversation_id: string, session_id: string, data: unknown) {
-		const dir = getPath(conversation_id)
+		const dir = getPath(`/${conversation_id}`)
 
 		await this.ensureDir(dir)
 
@@ -56,7 +56,8 @@ export default class Fs {
 	}
 
 	public async loadSession(conversation_id: string, session_id: string) {
-		const file_path = getPath(`${conversation_id}/${session_id}.json`)
+		const file_path = getPath(`/${conversation_id}/${session_id}.json`)
+
 		const content = await this.readFile(file_path)
 
 		if (!content) {
