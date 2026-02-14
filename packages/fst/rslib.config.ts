@@ -9,8 +9,8 @@ export default deepmerge(rslib, {
 		{
 			source: { entry: { index: './src/index.ts' } },
 			format: 'esm',
-			dts: true
-			// autoExternal: false
+			dts: true,
+			autoExternal: false
 		}
 	],
 	output: {

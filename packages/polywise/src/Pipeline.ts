@@ -62,6 +62,9 @@ export default class Pipeline {
 		}
 
 		env.cacheDir = this.cache_dir
+		env.localModelPath = this.cache_dir
+		env.allowRemoteModels = false
+		env.allowLocalModels = true
 
 		if (embedding_config) {
 			this.embedding_config = embedding_config

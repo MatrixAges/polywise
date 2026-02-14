@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 
-import Polywise from '../src/Polywise'
+import { Polywise } from '../dist/index'
 import { cognitive_science_datasets } from './datasets/cognitive'
 import { software_architecture_datasets } from './datasets/software'
 import { getTestVectors } from './utils/getCache'

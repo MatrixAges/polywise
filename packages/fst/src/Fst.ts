@@ -21,7 +21,7 @@ export default class Fst {
 	public async init() {
 		await this.provider.init()
 		await this.session.init(this.conversation_id, this.session_id)
-		const [err] = await to(this.polywise.init({ data_dir: getPath(`/:memory:`) }))
+		const [err] = await to(this.polywise.init({ data_dir: getPath(`/memory`) }))
 
 		console.log(err)
 	}
