@@ -492,6 +492,9 @@ importers:
       electron-builder:
         specifier: ^26.7.0
         version: 26.7.0(electron-builder-squirrel-windows@26.7.0)
+      glob:
+        specifier: ^13.0.3
+        version: 13.0.3
       tinyglobby:
         specifier: ^0.2.15
         version: 0.2.15

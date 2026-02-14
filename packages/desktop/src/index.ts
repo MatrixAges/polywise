@@ -13,16 +13,6 @@ import { conf, getThemeColor, is_mac, main_emitter, registerProtocol, serve } fr
 
 import type { Tray as TrayType } from 'electron'
 
-process.on('uncaughtException', (error: Error) => {
-	dialog.showErrorBox('Uncaught Exception', String(error))
-	console.error('Uncaught Exception:', error)
-})
-
-process.on('unhandledRejection', (reason: any) => {
-	dialog.showErrorBox('Unhandled Rejection', String(reason))
-	console.error('Unhandled Rejection:', reason)
-})
-
 const port = await serve()
 
 conf.set('serve_port', port)
