@@ -1,5 +1,5 @@
+import fs from 'fs/promises'
 import path from 'path'
-import fs from 'fs-extra'
 import { ofetch } from 'ofetch'
 
 const DATASETS = [
@@ -81,7 +81,7 @@ async function cleanText(text: string) {
 }
 
 async function fetchAndSave() {
-	await fs.ensureDir(OUTPUT_DIR)
+	await fs.mkdir(OUTPUT_DIR, { recursive: true })
 
 	for (const dataset of DATASETS) {
 		console.log(`Fetching ${dataset.name}...`)
@@ -98,7 +98,7 @@ async function fetchAndSave() {
 
 		const cleaned = await cleanText(combined_text)
 		const filePath = path.join(OUTPUT_DIR, `${dataset.name}.txt`)
-		await fs.writeFile(filePath, cleaned)
+		await fs.writeFile(filePath, cleaned, 'utf-8')
 		console.log(`Saved ${dataset.name} to ${filePath} (${cleaned.length} chars)`)
 	}
 }

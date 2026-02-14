@@ -1,7 +1,7 @@
 import crypto from 'crypto'
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs'
 import os from 'os'
 import path from 'path'
-import fs from 'fs-extra'
 
 import Pipeline from '../../src/Pipeline'
 
@@ -44,8 +44,8 @@ const executeWithCache = async <T>(
 
 	const cache_path = path.join(dir, `${hash}.json`)
 
-	if (fs.existsSync(cache_path)) {
-		const result = fs.readJsonSync(cache_path)
+	if (existsSync(cache_path)) {
+		const result = JSON.parse(readFileSync(cache_path, 'utf-8'))
 
 		mem_cache.set(hash, result)
 
@@ -55,8 +55,11 @@ const executeWithCache = async <T>(
 	const pipeline = await getPipeline()
 	const result = await exec(pipeline)
 
-	fs.ensureDirSync(dir)
-	fs.writeJsonSync(cache_path, result)
+	if (!existsSync(dir)) {
+		mkdirSync(dir, { recursive: true })
+	}
+
+	writeFileSync(cache_path, JSON.stringify(result))
 
 	mem_cache.set(hash, result)
 

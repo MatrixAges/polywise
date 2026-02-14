@@ -1,6 +1,6 @@
-import path from 'node:path'
+import fs from 'fs/promises'
+import path from 'path'
 import to from 'await-to-js'
-import fs from 'fs-extra'
 import { injectable } from 'tsyringe'
 
 import { getPath } from './utils'
@@ -8,7 +8,7 @@ import { getPath } from './utils'
 @injectable()
 export default class Fs {
 	public async ensureDir(dir_path: string) {
-		await fs.ensureDir(dir_path)
+		await fs.mkdir(dir_path, { recursive: true })
 	}
 
 	public async writeFile(file_path: string, content: string) {
@@ -42,7 +42,7 @@ export default class Fs {
 	}
 
 	public async deleteFile(file_path: string) {
-		await to(fs.unlink(file_path))
+		await to(fs.rm(file_path, { recursive: true, force: true }))
 	}
 
 	public async saveSession(conversation_id: string, session_id: string, data: unknown) {

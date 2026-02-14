@@ -132,6 +132,12 @@ All exported SQL strings or functions in `src/sql/` MUST be preceded by a JSDoc-
 1.    **Operation**: What specific database action is being performed.
 2.    **Role**: The purpose of this operation within the larger system architecture.
 
+## Node.js Native API and Import Convention (CRITICAL)
+
+- **Native API Preference**: ALWAYS prefer native Node.js APIs (e.g., `fs/promises`) over third-party wrappers like `fs-extra`.
+- **Import Style**: NEVER use the `node:` prefix for core Node.js module imports. Use the standard module name directly.
+- **Reference**: Detailed code examples for these conventions are maintained in the `@code-optimizer` subagent documentation.
+
 ## Class Function Ordering
 
 When organizing class functions, follow this strict order:

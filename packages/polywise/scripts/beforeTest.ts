@@ -1,7 +1,7 @@
 import 'reflect-metadata'
 
+import fs from 'fs/promises'
 import path from 'path'
-import fs from 'fs-extra'
 import { container } from 'tsyringe'
 
 import Pipeline from '../src/Pipeline'

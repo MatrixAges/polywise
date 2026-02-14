@@ -27,7 +27,6 @@
 		"@huggingface/transformers": "^3.8.1",
 		"await-to-js": "^3.0.0",
 		"dayjs": "catalog:",
-		"fs-extra": "catalog:",
 		"ofetch": "catalog:",
 		"optional": "^0.1.4",
 		"p-queue": "^8.1.0",
@@ -37,7 +36,6 @@
 	"devDependencies": {
 		"@rslib/core": "catalog:",
 		"@rstest/core": "catalog:",
-		"@types/fs-extra": "^11.0.4",
 		"@types/node": "^20.0.0",
 		"bun": "catalog:",
 		"bun-types": "catalog:",

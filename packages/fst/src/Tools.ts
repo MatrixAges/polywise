@@ -40,7 +40,7 @@ export default (args: ToolArgs): Record<string, Tool> => {
 					return result.content[0].text
 				}
 
-				return result.content
+				return JSON.stringify(result.content)
 			}
 		}),
 		bash: tool({
@@ -56,7 +56,7 @@ export default (args: ToolArgs): Record<string, Tool> => {
 					return result.content[0].text
 				}
 
-				return result.content
+				return JSON.stringify(result.content)
 			}
 		}),
 		edit: tool({
@@ -73,7 +73,7 @@ export default (args: ToolArgs): Record<string, Tool> => {
 					return result.content[0].text
 				}
 
-				return result.content
+				return JSON.stringify(result.content)
 			}
 		}),
 		write: tool({
@@ -89,7 +89,7 @@ export default (args: ToolArgs): Record<string, Tool> => {
 					return result.content[0].text
 				}
 
-				return result.content
+				return JSON.stringify(result.content)
 			}
 		}),
 		grep: tool({
@@ -118,7 +118,7 @@ export default (args: ToolArgs): Record<string, Tool> => {
 					return result.content[0].text
 				}
 
-				return result.content
+				return JSON.stringify(result.content)
 			}
 		}),
 		find: tool({
@@ -135,7 +135,7 @@ export default (args: ToolArgs): Record<string, Tool> => {
 					return result.content[0].text
 				}
 
-				return result.content
+				return JSON.stringify(result.content)
 			}
 		}),
 		ls: tool({
@@ -151,7 +151,7 @@ export default (args: ToolArgs): Record<string, Tool> => {
 					return result.content[0].text
 				}
 
-				return result.content
+				return JSON.stringify(result.content)
 			}
 		}),
 		update_context: tool({

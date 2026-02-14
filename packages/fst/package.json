@@ -44,7 +44,6 @@
 		"@mariozechner/pi-coding-agent": "^0.52.10",
 		"ai": "catalog:",
 		"await-to-js": "catalog:",
-		"fs-extra": "catalog:",
 		"hono": "^4.11.9",
 		"mingo": "^7.2.0",
 		"polywise": "workspace:*",
@@ -57,7 +56,6 @@
 	"devDependencies": {
 		"@rslib/core": "catalog:",
 		"@rstest/core": "catalog:",
-		"@types/fs-extra": "catalog:",
 		"@types/node": "^25.2.3",
 		"cross-env": "^10.1.0",
 		"deepmerge-ts": "^7.1.5",

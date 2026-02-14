@@ -1,9 +1,9 @@
-import { resolve } from 'node:path'
-import fs from 'fs-extra'
+import { rmSync } from 'fs'
+import { resolve } from 'path'
 
 export default () => {
 	try {
-		fs.removeSync(resolve(`${process.cwd()}/.test_db`))
+		rmSync(resolve(`${process.cwd()}/.test_db`), { recursive: true, force: true })
 	} catch (error) {
 		console.error(`Failed to remove clean:`, error)
 	}

@@ -1,6 +1,5 @@
+import fs from 'fs/promises'
 import path from 'path'
-import fs from 'fs-extra'
-
 import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 
 import Polywise from '../src/Polywise'
