@@ -36,20 +36,15 @@ export default class Fst {
 			const context = this.session.getContext()
 			const history = this.session.getHistory()
 
-			// const [recall_err, memory] = await to(
-			// 	this.polywise.recallFromMemory({
-			// 		query: user_input,
-			// 		metrics_ids: [this.conversation_id]
-			// 	})
-			// )
+			const [recall_err, memory] = await to(
+				this.polywise.recallFromMemory({
+					query: user_input,
+					metrics_ids: [this.conversation_id]
+				})
+			)
 
-			// console.log('--------------')
-			// console.log(recall_err)
-			// console.log('--------------')
-
-			// const memories = recall_err ? [] : memory.related_contexts.map(c => JSON.stringify(c))
-			// const system_prompt = this.getSystemPrompt(context, memories)
-			const system_prompt = this.getSystemPrompt(context, [])
+			const memories = recall_err ? [] : memory.related_contexts.map(c => JSON.stringify(c))
+			const system_prompt = this.getSystemPrompt(context, memories)
 
 			const [err, res] = await to(
 				generateText({
