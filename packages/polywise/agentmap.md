@@ -73,15 +73,25 @@ This document provides an overview of the packages/polywise module structure and
 			"utils": {
 				"calculateFatigue.ts": { "desc": "Fatigue calculation utility", "role": "Utility" },
 				"calculateWeight.ts": { "desc": "Weight calculation utility", "role": "Utility" },
+				"generateHash.ts": { "desc": "SHA-256 file hashing utility", "role": "Utility" },
+				"generateModelHash.ts": {
+					"desc": "Model hash generation utility for .onnx files",
+					"role": "Utility"
+				},
 				"generateNodePosition.ts": { "desc": "Random node position generator", "role": "Utility" },
 				"index.ts": { "desc": "Utils exports", "role": "Index" },
 				"isIdle.ts": { "desc": "Idle state checker", "role": "Utility" },
+				"listRecursive.ts": { "desc": "Recursive directory listing utility", "role": "Utility" },
 				"migrate.ts": { "desc": "Migration execution utility", "role": "Utility" },
 				"processText.ts": {
 					"desc": "Text processing utility for large text slicing",
 					"role": "Utility"
 				},
 				"validateMigrations.ts": { "desc": "Migration validation utility", "role": "Utility" },
+				"verifyModel.ts": {
+					"desc": "Model integrity verification utility for .onnx files",
+					"role": "Utility"
+				},
 				"migration.ts": { "desc": "Database schema migration system", "role": "Module" }
 			}
 		},
@@ -92,6 +102,7 @@ This document provides an overview of the packages/polywise module structure and
 			"article.spec.ts": { "desc": "Article tests", "role": "Test" },
 			"cot.spec.ts": { "desc": "Chain of thought tests", "role": "Test" },
 			"learning.spec.ts": { "desc": "Pure text learning and large scale dataset tests", "role": "Test" },
+			"models.spec.ts": { "desc": "Model hash verification and integrity tests", "role": "Test" },
 			"longembedding.spec.ts": {
 				"desc": "Long text embedding and fact preservation tests",
 				"role": "Test"

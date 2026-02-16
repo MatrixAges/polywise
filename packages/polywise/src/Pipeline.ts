@@ -14,7 +14,7 @@ import {
 	POOLING_MEAN
 } from './consts'
 import { catchFinally } from './decorators'
-import processText from './utils/processText'
+import { generateModelHash, processText, verifyModel } from './utils'
 
 import type {
 	DecisionConfig,
@@ -281,6 +281,10 @@ export default class Pipeline {
 
 		const model_path = path.join(this.cache_dir, config.model)
 
+		const is_valid = await verifyModel(model_path)
+
+		if (is_valid) return
+
 		const [err] = await to(loadFn())
 
 		if (err) {
@@ -290,6 +294,8 @@ export default class Pipeline {
 
 			await loadFn()
 		}
+
+		await generateModelHash(model_path)
 	}
 
 	@catchFinally(function (this: Pipeline) {
