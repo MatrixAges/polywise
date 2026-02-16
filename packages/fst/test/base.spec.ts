@@ -11,6 +11,11 @@ describe('Fst', () => {
 
 	it('should be able to stream', async () => {
 		const result = await fst.stream('Hello, who are you?')
+
+		for await (const part of result.textStream) {
+			console.log(part)
+		}
+
 		const text = await result.text
 
 		expect(text).toBeTruthy()
@@ -19,6 +24,6 @@ describe('Fst', () => {
 	it('should be able to generate', async () => {
 		const result = await fst.generate('Hello, who are you?')
 
-		expect(result.text).toBeTruthy()
+		expect(result).toContain('Gemini')
 	})
 })
