@@ -5,7 +5,7 @@ import { injectable } from 'tsyringe'
 
 import { getPath } from './utils'
 
-import type { Message } from 'ai'
+import type { ModelMessage } from 'ai'
 import type { ShadowContext } from './types/shadow'
 
 @injectable()
@@ -53,7 +53,7 @@ export default class Fs {
 		await this.writeFile(file_path, JSON.stringify(data, null, 2))
 	}
 
-	public async loadShadowContext(conversation_id: string) {
+	public async loadShadowContext(conversation_id: string): Promise<ShadowContext | null> {
 		const file_path = getPath(`/conversations/${conversation_id}/shadow.json`)
 		const content = await this.readFile(file_path)
 
@@ -66,7 +66,12 @@ export default class Fs {
 		}
 	}
 
-	public async saveMessage(conversation_id: string, message_id: string, role: string, content: string) {
+	public async saveMessage(
+		conversation_id: string,
+		message_id: string,
+		role: string,
+		content: string
+	): Promise<ModelMessage> {
 		const dir = getPath(`/conversations/${conversation_id}/messages`)
 		await this.ensureDir(dir)
 
@@ -74,18 +79,19 @@ export default class Fs {
 		const filename = `${timestamp}_${role}_${message_id}.json`
 		const file_path = path.join(dir, filename)
 
+		// Create a message object that fits ModelMessage structure loosely for storage
+		// When loading back, we ensure it matches ModelMessage
 		const message_data = {
-			id: message_id,
 			role,
 			content
 		}
 
-		await this.writeFile(file_path, JSON.stringify(message_data, null, 2))
+		await this.writeFile(file_path, JSON.stringify({ id: message_id, ...message_data }, null, 2))
 
-		return message_data as Message
+		return message_data as unknown as ModelMessage
 	}
 
-	public async appendToList(conversation_id: string, message: Message) {
+	public async appendToList(conversation_id: string, message_data: { id: string; role: string; content: string }) {
 		const dir = getPath(`/conversations/${conversation_id}/list`)
 		await this.ensureDir(dir)
 
@@ -99,7 +105,7 @@ export default class Fs {
 			})
 
 		let current_chunk_idx = 0
-		let current_chunk: Array<Message> = []
+		let current_chunk: Array<any> = []
 
 		if (chunk_files.length > 0) {
 			const last_file = chunk_files[chunk_files.length - 1]
@@ -121,13 +127,13 @@ export default class Fs {
 			current_chunk = []
 		}
 
-		current_chunk.push(message)
+		current_chunk.push(message_data)
 
 		const new_file_path = path.join(dir, `chunk_${current_chunk_idx}.json`)
 		await this.writeFile(new_file_path, JSON.stringify(current_chunk, null, 2))
 	}
 
-	public async getLastMessages(conversation_id: string, count: number) {
+	public async getLastMessages(conversation_id: string, count: number): Promise<Array<ModelMessage>> {
 		const dir = getPath(`/conversations/${conversation_id}/list`)
 		if (!(await this.exists(dir))) return []
 
@@ -140,14 +146,19 @@ export default class Fs {
 				return idx_b - idx_a
 			})
 
-		const messages: Array<Message> = []
+		const messages: Array<ModelMessage> = []
 		for (const file of chunk_files) {
 			const content = await this.readFile(path.join(dir, file))
 			if (content) {
 				try {
-					const chunk = JSON.parse(content) as Array<Message>
+					const chunk = JSON.parse(content) as Array<any>
 					for (let i = chunk.length - 1; i >= 0; i--) {
-						messages.unshift(chunk[i])
+						// Ensure we reconstruct a valid ModelMessage
+						const msg = {
+							role: chunk[i].role,
+							content: chunk[i].content
+						} as ModelMessage
+						messages.unshift(msg)
 						if (messages.length >= count) return messages
 					}
 				} catch {

@@ -3,7 +3,7 @@ import { injectable } from 'tsyringe'
 import Fs from './Fs'
 import { ShadowContextSchema } from './types/shadow'
 
-import type { Message } from 'ai'
+import type { ModelMessage } from 'ai'
 import type { ShadowContext } from './types/shadow'
 
 @injectable()
@@ -15,6 +15,8 @@ export default class Session {
 		current_task: ''
 	}
 
+	private undo_stack: Array<ShadowContext> = []
+	private redo_stack: Array<ShadowContext> = []
 	private conversation_id: string | null = null
 
 	constructor(private fs: Fs) {}
@@ -28,11 +30,11 @@ export default class Session {
 		}
 	}
 
-	public getShadowContext() {
+	public getShadowContext(): ShadowContext {
 		return this.current_shadow_context
 	}
 
-	public async getLastMessages(count: number) {
+	public async getLastMessages(count: number): Promise<Array<ModelMessage>> {
 		if (!this.conversation_id) return []
 		return await this.fs.getLastMessages(this.conversation_id, count)
 	}
@@ -40,6 +42,7 @@ export default class Session {
 	public async updateShadowContext(update: Partial<ShadowContext>) {
 		if (!this.conversation_id) return
 
+		this.pushUndo()
 		this.current_shadow_context = { ...this.current_shadow_context, ...update }
 
 		const validation = ShadowContextSchema.safeParse(this.current_shadow_context)
@@ -47,12 +50,42 @@ export default class Session {
 			this.current_shadow_context = validation.data
 		}
 
+		this.redo_stack = []
 		await this.fs.saveShadowContext(this.conversation_id, this.current_shadow_context)
 	}
 
-	public async addMessage(message: Message) {
+	public undo() {
+		if (this.undo_stack.length === 0) return
+
+		this.redo_stack.push(JSON.parse(JSON.stringify(this.current_shadow_context)))
+		this.current_shadow_context = this.undo_stack.pop()!
+
+		if (this.conversation_id) {
+			this.fs.saveShadowContext(this.conversation_id, this.current_shadow_context)
+		}
+	}
+
+	public redo() {
+		if (this.redo_stack.length === 0) return
+
+		this.undo_stack.push(JSON.parse(JSON.stringify(this.current_shadow_context)))
+		this.current_shadow_context = this.redo_stack.pop()!
+
+		if (this.conversation_id) {
+			this.fs.saveShadowContext(this.conversation_id, this.current_shadow_context)
+		}
+	}
+
+	public async addMessage(message: { id: string; role: string; content: string }) {
 		if (!this.conversation_id) return
 		await this.fs.saveMessage(this.conversation_id, message.id, message.role, message.content)
 		await this.fs.appendToList(this.conversation_id, message)
+	}
+
+	private pushUndo() {
+		this.undo_stack.push(JSON.parse(JSON.stringify(this.current_shadow_context)))
+		if (this.undo_stack.length > 50) {
+			this.undo_stack.shift()
+		}
 	}
 }

@@ -1,13 +1,14 @@
-import { streamText } from 'ai'
+import { generateText, stepCountIs, streamText } from 'ai'
 import to from 'await-to-js'
 import { container } from 'tsyringe'
 
+import { summarize, system_prompt } from './consts'
 import Provider from './Provider'
 import Session from './Session'
 import getTools from './Tools'
 import { getId } from './utils'
 
-import type { LanguageModel } from 'ai'
+import type { LanguageModel, ModelMessage } from 'ai'
 import type { ShadowContext } from './types/shadow'
 
 export default class Fst {
@@ -16,69 +17,64 @@ export default class Fst {
 
 	conversation_id = getId()
 
-	public async init() {
-		await this.provider.init()
+	async init() {
+		this.provider.init()
 
 		const [err] = await to(this.session.init(this.conversation_id))
-		if (err) console.error('Fst init error:', err)
+
+		if (err) console.error('[FST] Init error:', err)
 	}
 
-	public async think(user_input: string) {
-		await to(
-			this.session.addMessage({
-				id: getId(),
-				role: 'user',
-				content: user_input
-			})
-		)
+	async think(user_input: string) {
+		const msg_id = getId()
+
+		await this.session.addMessage({
+			id: msg_id,
+			role: 'user',
+			content: user_input
+		})
 
 		const shadow = this.session.getShadowContext()
-		const [err, history] = await to(this.session.getLastMessages(6))
+		const history = await this.session.getLastMessages(6)
 
 		const tools = getTools({
 			cwd: process.cwd(),
-			sessions: this.session
+			sessions: this.session,
+			summarize: content => this.summarize(content)
 		})
 
+		const messages = history?.length > 0 ? history : [{ role: 'user', content: user_input }]
+
 		return streamText({
-			model: this.provider.getLanguageModel() as unknown as LanguageModel,
+			model: this.provider.getLanguageModel(),
 			system: this.getSystemPrompt(shadow),
-			messages: err ? [] : history,
+			messages: messages as Array<ModelMessage>,
 			tools,
-			maxSteps: 10,
+			stopWhen: stepCountIs(5),
 			onFinish: async ({ text }) => {
-				await to(
-					this.session.addMessage({
-						id: getId(),
-						role: 'assistant',
-						content: text
-					})
-				)
+				await this.session.addMessage({
+					id: getId(),
+					role: 'assistant',
+					content: text
+				})
 			}
 		})
 	}
 
-	private getSystemPrompt(shadow: ShadowContext) {
-		return `You are a Full Self Thinking (FST) Agent.
+	private async summarize(content: string) {
+		const [err, result] = await to(
+			generateText({
+				model: this.provider.getLanguageModel() as LanguageModel,
+				prompt: summarize(content)
+			})
+		)
 
-# Shadow Context (Global Persistent State)
-${JSON.stringify(shadow, null, 2)}
+		if (err || !result) return content.substring(0, 100) + '...'
 
-# Environment
-- Messages are saved individually as JSON files in 'conversations/${this.conversation_id}/messages/'.
-- Each file contains a single message: { id, role, content }.
-- You only see the LAST 6 messages in your immediate context.
+		return result.text
+	}
 
-# Core Instructions
-1. **State Maintenance**: You MUST call 'update_context' whenever:
-   - A new task is identified or a task's status changes.
-   - You gain significant knowledge that should be summarized.
-   - You need to track a new file in 'refs'.
-2. **Context Retrieval**: If you need to know what happened before the last 6 messages:
-   - Use 'grep' or 'find' to search within 'conversations/${this.conversation_id}/messages/'.
-   - Use 'read' to view specific message files.
-3. **Accuracy**: Ensure the 'context' field in Shadow Context is a concise but sufficient summary of the progress and key decisions.
-4. **Tool Use**: Be proactive in using tools to explore the filesystem and update your state.
-`
+	private getSystemPrompt(context: ShadowContext) {
+		return system_prompt({ shadow_context: context, conversation_id: this.conversation_id })
 	}
 }

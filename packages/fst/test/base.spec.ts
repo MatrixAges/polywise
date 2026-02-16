@@ -12,6 +12,8 @@ describe('Fst', () => {
 	it('should be able to think', async () => {
 		const result = await fst.think('Hello, who are you?')
 
+		console.log(result)
+
 		expect(result).toContain('Gemini')
 	})
 })

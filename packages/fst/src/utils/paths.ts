@@ -1,9 +1,16 @@
 import { homedir } from 'os'
-import { resolve } from 'path'
+import { join } from 'path'
 import { xdgConfig } from 'xdg-basedir'
 
-const base_path = `${homedir()}/.polywise/fst`
-const config_dir_path = `${xdgConfig}/polywise`
+const base_path = join(homedir(), '.polywise', 'fst')
+const config_dir_path = join(xdgConfig || join(homedir(), '.config'), 'polywise')
 
-export const getPath = (path: string) => resolve(`${base_path}${path}`)
-export const getConfigPath = (path: string) => resolve(`${config_dir_path}${path}`)
+export const getPath = (path: string) => {
+	const relative_path = path.startsWith('/') ? path.slice(1) : path
+	return join(base_path, relative_path)
+}
+
+export const getConfigPath = (path: string) => {
+	const relative_path = path.startsWith('/') ? path.slice(1) : path
+	return join(config_dir_path, relative_path)
+}

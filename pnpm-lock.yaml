@@ -600,6 +600,9 @@ importers:
       await-to-js:
         specifier: 'catalog:'
         version: 3.0.0
+      fs-extra:
+        specifier: 'catalog:'
+        version: 11.3.0
       hono:
         specifier: ^4.11.9
         version: 4.11.9
@@ -631,6 +634,9 @@ importers:
       '@rstest/core':
         specifier: 'catalog:'
         version: 0.8.5
+      '@types/fs-extra':
+        specifier: 'catalog:'
+        version: 11.0.4
       '@types/node':
         specifier: ^25.2.3
         version: 25.2.3
