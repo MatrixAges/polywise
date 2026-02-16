@@ -1,82 +1,58 @@
-import to from 'await-to-js'
-import mingo from 'mingo'
 import { injectable } from 'tsyringe'
 
 import Fs from './Fs'
+import { ShadowContextSchema } from './types/shadow'
 
-import type { SessionState } from './types'
+import type { Message } from 'ai'
+import type { ShadowContext } from './types/shadow'
 
 @injectable()
 export default class Session {
-	private current_state: SessionState = {
-		context: {},
-		history: [],
-		undo_stack: [],
-		redo_stack: []
+	private current_shadow_context: ShadowContext = {
+		refs: [],
+		context: '',
+		tasks: [],
+		current_task: ''
 	}
+
+	private conversation_id: string | null = null
 
 	constructor(private fs: Fs) {}
 
-	public async init(conversation_id: string, session_id: string) {
-		const [err, saved] = await to(this.fs.loadSession(conversation_id, session_id))
+	public async init(conversation_id: string) {
+		this.conversation_id = conversation_id
+		const saved = await this.fs.loadShadowContext(conversation_id)
 
-		if (!err && saved) {
-			this.current_state = saved as SessionState
+		if (saved) {
+			this.current_shadow_context = saved
 		}
 	}
 
-	public queryContext(query: Record<string, unknown>) {
-		const cursor = mingo.find([this.current_state.context], query)
-
-		return cursor.all()
+	public getShadowContext() {
+		return this.current_shadow_context
 	}
 
-	public updateContext(update: Record<string, unknown>) {
-		this.pushUndo()
-
-		this.current_state.context = { ...this.current_state.context, ...update }
-		this.current_state.redo_stack = []
+	public async getLastMessages(count: number) {
+		if (!this.conversation_id) return []
+		return await this.fs.getLastMessages(this.conversation_id, count)
 	}
 
-	public undo() {
-		if (this.current_state.undo_stack.length === 0) {
-			return
+	public async updateShadowContext(update: Partial<ShadowContext>) {
+		if (!this.conversation_id) return
+
+		this.current_shadow_context = { ...this.current_shadow_context, ...update }
+
+		const validation = ShadowContextSchema.safeParse(this.current_shadow_context)
+		if (validation.success) {
+			this.current_shadow_context = validation.data
 		}
 
-		this.current_state.redo_stack.push(JSON.parse(JSON.stringify(this.current_state.context)))
-		this.current_state.context = this.current_state.undo_stack.pop()!
+		await this.fs.saveShadowContext(this.conversation_id, this.current_shadow_context)
 	}
 
-	public redo() {
-		if (this.current_state.redo_stack.length === 0) {
-			return
-		}
-
-		this.current_state.undo_stack.push(JSON.parse(JSON.stringify(this.current_state.context)))
-		this.current_state.context = this.current_state.redo_stack.pop()!
-	}
-
-	public addHistory(message: unknown) {
-		this.current_state.history.push(message)
-	}
-
-	public async save(conversation_id: string, session_id: string) {
-		await to(this.fs.saveSession(conversation_id, session_id, this.current_state))
-	}
-
-	public getContext() {
-		return this.current_state.context
-	}
-
-	public getHistory() {
-		return this.current_state.history
-	}
-
-	private pushUndo() {
-		this.current_state.undo_stack.push(JSON.parse(JSON.stringify(this.current_state.context)))
-
-		if (this.current_state.undo_stack.length > 50) {
-			this.current_state.undo_stack.shift()
-		}
+	public async addMessage(message: Message) {
+		if (!this.conversation_id) return
+		await this.fs.saveMessage(this.conversation_id, message.id, message.role, message.content)
+		await this.fs.appendToList(this.conversation_id, message)
 	}
 }

@@ -5,6 +5,9 @@ import { injectable } from 'tsyringe'
 
 import { getPath } from './utils'
 
+import type { Message } from 'ai'
+import type { ShadowContext } from './types/shadow'
+
 @injectable()
 export default class Fs {
 	public async ensureDir(dir_path: string) {
@@ -43,25 +46,116 @@ export default class Fs {
 		await fs.remove(file_path)
 	}
 
-	public async saveSession(conversation_id: string, session_id: string, data: unknown) {
+	public async saveShadowContext(conversation_id: string, data: ShadowContext) {
 		const dir = getPath(`/conversations/${conversation_id}`)
-
 		await this.ensureDir(dir)
-
-		const file_path = path.join(dir, `${session_id}.json`)
-
+		const file_path = path.join(dir, 'shadow.json')
 		await this.writeFile(file_path, JSON.stringify(data, null, 2))
 	}
 
-	public async loadSession(conversation_id: string, session_id: string) {
-		const file_path = getPath(`/conversations/${conversation_id}/${session_id}.json`)
-
+	public async loadShadowContext(conversation_id: string) {
+		const file_path = getPath(`/conversations/${conversation_id}/shadow.json`)
 		const content = await this.readFile(file_path)
 
-		if (!content) {
+		if (!content) return null
+
+		try {
+			return JSON.parse(content) as ShadowContext
+		} catch {
 			return null
 		}
+	}
 
-		return JSON.parse(content)
+	public async saveMessage(conversation_id: string, message_id: string, role: string, content: string) {
+		const dir = getPath(`/conversations/${conversation_id}/messages`)
+		await this.ensureDir(dir)
+
+		const timestamp = Date.now()
+		const filename = `${timestamp}_${role}_${message_id}.json`
+		const file_path = path.join(dir, filename)
+
+		const message_data = {
+			id: message_id,
+			role,
+			content
+		}
+
+		await this.writeFile(file_path, JSON.stringify(message_data, null, 2))
+
+		return message_data as Message
+	}
+
+	public async appendToList(conversation_id: string, message: Message) {
+		const dir = getPath(`/conversations/${conversation_id}/list`)
+		await this.ensureDir(dir)
+
+		const files = (await this.listFiles(dir)) || []
+		const chunk_files = files
+			.filter(f => f.startsWith('chunk_') && f.endsWith('.json'))
+			.sort((a, b) => {
+				const idx_a = parseInt(a.match(/chunk_(\d+)/)?.[1] || '0')
+				const idx_b = parseInt(b.match(/chunk_(\d+)/)?.[1] || '0')
+				return idx_a - idx_b
+			})
+
+		let current_chunk_idx = 0
+		let current_chunk: Array<Message> = []
+
+		if (chunk_files.length > 0) {
+			const last_file = chunk_files[chunk_files.length - 1]
+			const match = last_file.match(/chunk_(\d+)/)
+			current_chunk_idx = match ? parseInt(match[1]) : 0
+
+			const content = await this.readFile(path.join(dir, last_file))
+			if (content) {
+				try {
+					current_chunk = JSON.parse(content)
+				} catch {
+					current_chunk = []
+				}
+			}
+		}
+
+		if (current_chunk.length >= 100) {
+			current_chunk_idx++
+			current_chunk = []
+		}
+
+		current_chunk.push(message)
+
+		const new_file_path = path.join(dir, `chunk_${current_chunk_idx}.json`)
+		await this.writeFile(new_file_path, JSON.stringify(current_chunk, null, 2))
+	}
+
+	public async getLastMessages(conversation_id: string, count: number) {
+		const dir = getPath(`/conversations/${conversation_id}/list`)
+		if (!(await this.exists(dir))) return []
+
+		const files = (await this.listFiles(dir)) || []
+		const chunk_files = files
+			.filter(f => f.startsWith('chunk_') && f.endsWith('.json'))
+			.sort((a, b) => {
+				const idx_a = parseInt(a.match(/chunk_(\d+)/)?.[1] || '0')
+				const idx_b = parseInt(b.match(/chunk_(\d+)/)?.[1] || '0')
+				return idx_b - idx_a
+			})
+
+		const messages: Array<Message> = []
+		for (const file of chunk_files) {
+			const content = await this.readFile(path.join(dir, file))
+			if (content) {
+				try {
+					const chunk = JSON.parse(content) as Array<Message>
+					for (let i = chunk.length - 1; i >= 0; i--) {
+						messages.unshift(chunk[i])
+						if (messages.length >= count) return messages
+					}
+				} catch {
+					// Ignore malformed chunks
+				}
+			}
+		}
+
+		return messages
 	}
 }
