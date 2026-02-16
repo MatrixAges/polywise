@@ -17,17 +17,7 @@ import type { Tool } from 'ai'
 import type { ToolArgs } from './types'
 
 export type Tools = Record<
-	| 'read'
-	| 'bash'
-	| 'edit'
-	| 'write'
-	| 'grep'
-	| 'find'
-	| 'ls'
-	| 'update_context'
-	| 'undo'
-	| 'redo'
-	| 'load_reference',
+	'read' | 'bash' | 'edit' | 'write' | 'grep' | 'find' | 'ls' | 'update_context' | 'load_reference',
 	Tool
 >
 
@@ -187,22 +177,6 @@ export default (args: ToolArgs): Tools => {
 			}),
 			execute: async ({ update }) => {
 				await sessions.updateShadowContext(update)
-				return { success: true, current_context: sessions.getShadowContext() }
-			}
-		}),
-		undo: tool({
-			description: 'Undo the last context update.',
-			inputSchema: z.object({}),
-			execute: async () => {
-				sessions.undo()
-				return { success: true, current_context: sessions.getShadowContext() }
-			}
-		}),
-		redo: tool({
-			description: 'Redo the last undone context update.',
-			inputSchema: z.object({}),
-			execute: async () => {
-				sessions.redo()
 				return { success: true, current_context: sessions.getShadowContext() }
 			}
 		}),

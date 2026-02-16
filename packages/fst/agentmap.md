@@ -29,14 +29,14 @@ This document provides an overview of the packages/fst module structure and arch
 	"structure": {
 		"src": {
 			"Fst.ts": {
-				"desc": "Main orchestrator using streamText and Shadow Context logic.",
+				"desc": "Main orchestrator using streamText/generateText and Shadow Context logic.",
 				"role": "Core"
 			},
-			"Providers.ts": {
+			"Provider.ts": {
 				"desc": "Provider management with global config.jsonc.",
 				"role": "Core"
 			},
-			"Sessions.ts": {
+			"Session.ts": {
 				"desc": "Session state management handling Shadow Context and sliding window.",
 				"role": "Core"
 			},

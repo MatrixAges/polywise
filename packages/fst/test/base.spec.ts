@@ -9,11 +9,16 @@ describe('Fst', () => {
 		await fst.init()
 	})
 
-	it('should be able to think', async () => {
-		const result = await fst.think('Hello, who are you?')
+	it('should be able to stream', async () => {
+		const result = await fst.stream('Hello, who are you?')
+		const text = await result.text
 
-		console.log(result)
+		expect(text).toBeTruthy()
+	})
 
-		expect(result).toContain('Gemini')
+	it('should be able to generate', async () => {
+		const result = await fst.generate('Hello, who are you?')
+
+		expect(result.text).toBeTruthy()
 	})
 })

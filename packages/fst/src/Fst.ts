@@ -1,4 +1,4 @@
-import { generateText, Output, stepCountIs, streamText } from 'ai'
+import { generateText, stepCountIs, streamText } from 'ai'
 import to from 'await-to-js'
 import { container } from 'tsyringe'
 
@@ -8,7 +8,7 @@ import Session from './Session'
 import getTools from './Tools'
 import { getId } from './utils'
 
-import type { LanguageModel, ModelMessage, StreamTextResult, Tool } from 'ai'
+import type { LanguageModel, ModelMessage, Output, StreamTextResult } from 'ai'
 import type { Tools } from './Tools'
 import type { ShadowContext } from './types'
 
@@ -26,7 +26,35 @@ export default class Fst {
 		if (err) console.error('[FST] Init error:', err)
 	}
 
-	async think(user_input: string): Promise<StreamTextResult<Tools, ReturnType<typeof Output.text>>> {
+	async generate(user_input: string) {
+		const options = await this.prepare(user_input)
+		const { text } = await generateText(options)
+
+		await this.session.addMessage({
+			id: getId(),
+			role: 'assistant',
+			content: text
+		})
+
+		return text
+	}
+
+	async stream(user_input: string): Promise<StreamTextResult<Tools, ReturnType<typeof Output.text>>> {
+		const options = await this.prepare(user_input)
+
+		return streamText({
+			...options,
+			onFinish: async ({ text }) => {
+				await this.session.addMessage({
+					id: getId(),
+					role: 'assistant',
+					content: text
+				})
+			}
+		})
+	}
+
+	private async prepare(user_input: string) {
 		const msg_id = getId()
 
 		await this.session.addMessage({
@@ -46,20 +74,13 @@ export default class Fst {
 
 		const messages = history?.length > 0 ? history : [{ role: 'user', content: user_input }]
 
-		return streamText({
+		return {
 			model: this.provider.getLanguageModel(),
 			system: this.getSystemPrompt(shadow),
 			messages: messages as Array<ModelMessage>,
 			tools,
-			stopWhen: stepCountIs(5),
-			onFinish: async ({ text }) => {
-				await this.session.addMessage({
-					id: getId(),
-					role: 'assistant',
-					content: text
-				})
-			}
-		})
+			stopWhen: stepCountIs(5)
+		}
 	}
 
 	private async summarize(content: string) {
