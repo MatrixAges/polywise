@@ -649,6 +649,9 @@ importers:
       reflect-metadata:
         specifier: ^0.2.2
         version: 0.2.2
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
 
   packages/opencode:
     devDependencies:

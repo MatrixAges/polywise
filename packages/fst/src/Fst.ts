@@ -1,4 +1,4 @@
-import { generateText, stepCountIs, streamText } from 'ai'
+import { generateText, Output, stepCountIs, streamText } from 'ai'
 import to from 'await-to-js'
 import { container } from 'tsyringe'
 
@@ -8,8 +8,9 @@ import Session from './Session'
 import getTools from './Tools'
 import { getId } from './utils'
 
-import type { LanguageModel, ModelMessage } from 'ai'
-import type { ShadowContext } from './types/shadow'
+import type { LanguageModel, ModelMessage, StreamTextResult, Tool } from 'ai'
+import type { Tools } from './Tools'
+import type { ShadowContext } from './types'
 
 export default class Fst {
 	private provider = container.resolve(Provider)
@@ -25,7 +26,7 @@ export default class Fst {
 		if (err) console.error('[FST] Init error:', err)
 	}
 
-	async think(user_input: string) {
+	async think(user_input: string): Promise<StreamTextResult<Tools, ReturnType<typeof Output.text>>> {
 		const msg_id = getId()
 
 		await this.session.addMessage({

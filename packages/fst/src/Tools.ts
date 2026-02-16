@@ -16,7 +16,22 @@ import { ShadowContextSchema } from './types/shadow'
 import type { Tool } from 'ai'
 import type { ToolArgs } from './types'
 
-export default (args: ToolArgs): Record<string, Tool> => {
+export type Tools = Record<
+	| 'read'
+	| 'bash'
+	| 'edit'
+	| 'write'
+	| 'grep'
+	| 'find'
+	| 'ls'
+	| 'update_context'
+	| 'undo'
+	| 'redo'
+	| 'load_reference',
+	Tool
+>
+
+export default (args: ToolArgs): Tools => {
 	const { cwd, sessions, summarize } = args
 
 	const read = createReadTool(cwd)

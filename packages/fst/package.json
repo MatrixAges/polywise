@@ -55,6 +55,7 @@
 		"zod-to-json-schema": "^3.25.1"
 	},
 	"devDependencies": {
+		"typescript": "^5.9.3",
 		"@rslib/core": "catalog:",
 		"@rstest/core": "catalog:",
 		"@types/fs-extra": "catalog:",
