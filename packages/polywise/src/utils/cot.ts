@@ -11,7 +11,7 @@ import { processResults } from './processResults'
 
 import type Polywise from '@/Polywise'
 import type Pipeline from '../Pipeline'
-import type { Action, COTDepthResult, ExecuteCotArgs, Knowledge } from '../types'
+import type { COTDepthResult, ExecuteCotArgs, Knowledge } from '../types'
 import type ChainEmitter from './ChainEmitter'
 
 export async function formEmergentQuery(
@@ -19,13 +19,12 @@ export async function formEmergentQuery(
 		query: string
 		current_depth: number
 		initial_knowledges: Array<Knowledge>
-		initial_actions: Array<Action>
 	},
 	stimulateNodes: (node_ids: Array<number>, intensity: number) => Promise<void>
 ) {
-	const { query, current_depth, initial_knowledges, initial_actions } = args
+	const { query, current_depth, initial_knowledges } = args
 
-	const top_results = [...initial_knowledges, ...initial_actions].slice(0, COT_MAX_RESULTS)
+	const top_results = initial_knowledges.slice(0, COT_MAX_RESULTS)
 	const insights = top_results.map(r => r.content.slice(0, 50)).join(', ')
 	const emerged_query = formatPerceiveQuery(query, insights)
 	const emerged_node_ids = top_results.map(r => r.id)
@@ -60,13 +59,11 @@ export async function performEmergentSearch(
 	} = args
 
 	const depth_recall_depth = base_recall_depth + current_depth
-	const query_embedding = (await poly.pipeline.embed(emerged_query)) as Array<number>
 
 	const emerged_recall_result = await poly.recallFromMemory({
 		query: emerged_query,
 		max_depth: depth_recall_depth,
 		stimulate_intensity: stimulate_on_recall ? MEMORY_RECALL_INTENSITY * (1 + current_depth) : 0,
-		query_embedding: query_embedding ?? undefined,
 		idol_id,
 		root_ids
 	})
@@ -80,20 +77,13 @@ export async function performEmergentSearch(
 			poly.article.searchByText({ query: emerged_query, limit: search_limit * SEARCH_LIMIT_FACTOR })
 	})
 
-	const habits = await poly.getHabits(query_embedding)
-
-	const { knowledges, actions } = await aggregateResults(
-		{
-			recall_result: emerged_recall_result,
-			search_results: emerged_search_results,
-			habits
-		},
-		poly.queryRaw.bind(poly)
-	)
+	const { knowledges } = await aggregateResults({
+		recall_result: emerged_recall_result,
+		search_results: emerged_search_results
+	})
 
 	return {
 		emerged_knowledges: knowledges.filter(k => !history_ids.has(k.id)),
-		emerged_actions: actions.filter(a => !history_ids.has(a.id)),
 		emerged_recall_result
 	}
 }
@@ -102,17 +92,11 @@ export async function emitCotResult(args: {
 	emitter: ChainEmitter
 	emerged_query: string
 	reranked_knowledges: Array<Knowledge>
-	reranked_actions: Array<Action>
 	pipeline: Pipeline
 }) {
-	const { emitter, emerged_query, reranked_knowledges, reranked_actions, pipeline } = args
+	const { emitter, emerged_query, reranked_knowledges, pipeline } = args
 
-	const { knowledges, actions, metadata } = await processResults(
-		emerged_query,
-		reranked_knowledges,
-		reranked_actions,
-		pipeline
-	)
+	const { knowledges, actions, metadata } = await processResults(emerged_query, reranked_knowledges, pipeline)
 
 	const cot_result: COTDepthResult = {
 		knowledges,

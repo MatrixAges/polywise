@@ -15,7 +15,7 @@ export const process_test_cases: Array<ProcessTestCase> = [
 	{
 		query: 'How do neurons communicate and form networks?',
 		cot_depth: 1,
-		expected_events: ['aggregated_results', 'reranked_knowledges', 'planning_step', 'final_result'],
+		expected_events: ['aggregated_results', 'reranked_knowledges', 'final_result'],
 		expected_knowledges_keywords: ['neurons', 'synapses', 'neural networks']
 	}
 ]

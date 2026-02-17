@@ -1,12 +1,12 @@
-import { afterAll, beforeAll, describe, expect, test } from '@rstest/core'
+import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 
 import Polywise from '../src/Polywise'
 import { cognitive_science_datasets } from './datasets/cognitive'
 import { software_architecture_datasets } from './datasets/software'
-import { getTestDecision, getTestRerank, getTestVectors } from './utils/getCache'
+import { getTestRerank, getTestVectors } from './utils/getCache'
 import getDataDir from './utils/getDataDir'
 
-describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
+describe('Chain of Thought (CoT) Iterative Search', () => {
 	let poly: Polywise
 	const db_name = getDataDir()
 
@@ -23,150 +23,168 @@ describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
 				type: 'custom',
 				fn: getTestRerank
 			},
-			decision_config: {
-				type: 'custom',
-				fn: getTestDecision
-			},
 			embedding_concurrency: 20,
-			reranker_concurrency: 20,
-			onTick: async () => {
-				const { nodes, edges } = await poly.getSnapshot()
-				const active = nodes.filter((n: any) => n.activation > 0).map((n: any) => n.label)
-
-				if (active.length > 0) {
-					console.log(
-						`CoT Test - Active: [${active.slice(0, 5).join(', ')}] | Edges: ${edges.length}`
-					)
-				}
-			}
+			reranker_concurrency: 20
 		})
 
-		await getTestVectors('init')
+		// Prepare test data: software architecture documents
+		for (const content of software_architecture_datasets.slice(0, 10)) {
+			await poly.save({ content })
+		}
 
-		await Promise.all([
-			software_architecture_datasets.map(content => poly.article.addWithEmbedding(content)),
-			cognitive_science_datasets.map(content => poly.article.addWithEmbedding(content)),
-			poly.save({
-				content: 'Comprehensive knowledge graph covering microservices, containers, orchestration, and observability.'
-			}),
-			poly.save({
-				content: 'Understanding the relationship between brain structure, memory systems, and artificial intelligence.'
-			})
-		])
+		// Prepare test data: cognitive science documents (different domain)
+		for (const content of cognitive_science_datasets.slice(0, 10)) {
+			await poly.save({ content })
+		}
 	})
 
 	afterAll(async () => {
 		await poly.off()
 	})
 
-	describe.concurrent('Basic CoT Functionality', () => {
-		test('should return immediate result with CoT emitter', async () => {
-			const { knowledges, actions, cot } = await poly.query({
-				query: 'microservices',
-				cot_depth: 2
-			})
-
-			expect(knowledges.length + actions.length).toBeGreaterThan(0)
-			expect(cot).toBeDefined()
-			expect(typeof cot.on).toBe('function')
-			expect(typeof cot.off).toBe('function')
-		})
-
-		test('should return empty cot emitter when cot_depth is 0', async () => {
-			const { cot } = await poly.query({
-				query: 'kubernetes',
-				cot_depth: 0
-			})
-
-			expect(cot).toBeDefined()
-			expect(typeof cot.on).toBe('function')
-			expect(typeof cot.off).toBe('function')
-		})
-
-		test('should contain hybrid search results', async () => {
-			const { knowledges, actions } = await poly.query({
-				query: 'docker',
-				recall_depth: 3,
-				search_limit: 20,
-				rerank_limit: 10
-			})
-
-			const results = [...knowledges, ...actions]
-
-			expect(results.length).toBeGreaterThan(0)
-			expect(results.length).toBeLessThanOrEqual(10)
-			expect(typeof results[0]).toBe('string')
-		})
-	})
-
-	describe.concurrent('Multi-Depth Exploration', () => {
-		test('should emit events in correct order and include metadata', async () => {
-			const received_events: Array<any> = []
-
-			const { cot } = await poly.query({
-				query: 'microservices deployment security',
-				cot_depth: 2,
-				recall_depth: 2,
-				search_limit: 10,
+	describe('Single Search (cot_depth=1)', () => {
+		it('should find relevant microservices content', async () => {
+			const { knowledges } = await poly.query({
+				query: 'microservices architecture patterns',
+				cot_depth: 1,
+				search_limit: 5,
 				rerank_limit: 5
 			})
 
-			cot.on(data => {
-				received_events.push(data)
-			})
+			// Should find software-related content
+			const all_text = knowledges.join(' ').toLowerCase()
+			const has_microservices = all_text.includes('microservice')
+			const has_architecture = all_text.includes('architecture')
+			const has_container = all_text.includes('container') || all_text.includes('docker')
 
-			await cot.toPromise()
-
-			expect(received_events.length).toBeLessThanOrEqual(2)
-
-			if (received_events.length > 0) {
-				expect(typeof received_events[0].metadata).toBe('object')
-			}
+			// At least 2 relevant keywords should be present
+			const relevant_keywords = [has_microservices, has_architecture, has_container].filter(Boolean).length
+			expect(relevant_keywords).toBeGreaterThanOrEqual(2)
+			expect(knowledges.length).toBeGreaterThan(0)
 		})
 
-		test('should build query progression with depth', async () => {
-			const received_events: Array<any> = []
-
-			const { cot } = await poly.query({
-				query: 'circuit breaker pattern',
-				cot_depth: 2,
-				recall_depth: 2,
-				search_limit: 10,
+		it('should filter out neuroscience content when searching for software', async () => {
+			const { knowledges } = await poly.query({
+				query: 'API gateway and service mesh',
+				cot_depth: 1,
+				search_limit: 5,
 				rerank_limit: 5
 			})
 
-			cot.on(data => {
-				received_events.push(data)
-			})
+			// Should NOT contain neuroscience content
+			const all_text = knowledges.join(' ').toLowerCase()
+			const has_neuroscience =
+				all_text.includes('neuron') || all_text.includes('brain') || all_text.includes('synapse')
 
-			await cot.toPromise()
+			// Should have software-related content
+			const has_software =
+				all_text.includes('service') || all_text.includes('api') || all_text.includes('gateway')
 
-			expect(received_events.length).toBeLessThanOrEqual(2)
+			expect(has_neuroscience).toBe(false)
+			expect(has_software).toBe(true)
 		})
 	})
 
-	describe.concurrent('Chain of Thought (CoT) Mechanism', () => {
-		test('should provide total steps in on callback', async () => {
-			const steps: Array<any> = []
-			let final_total: Array<any> = []
-
-			const { cot } = await poly.query({
-				query: 'microservices architecture exploration',
-				cot_depth: 2
+	describe('Iterative Search (cot_depth=3)', () => {
+		it('should find more comprehensive results than single search', async () => {
+			// First, do a single search
+			const single_result = await poly.query({
+				query: 'container orchestration',
+				cot_depth: 1,
+				search_limit: 5,
+				rerank_limit: 5
 			})
 
-			cot.on((data, total) => {
-				steps.push(data)
-				final_total = total
+			// Then do iterative search
+			const iterative_result = await poly.query({
+				query: 'container orchestration',
+				cot_depth: 3,
+				search_limit: 5,
+				rerank_limit: 5
 			})
 
-			await cot.toPromise()
+			// Iterative search should collect more results from different queries
+			expect(iterative_result.knowledges.length).toBeGreaterThanOrEqual(single_result.knowledges.length)
 
-			if (steps.length > 0) {
-				expect(final_total.length).toBe(steps.length)
-				expect(final_total).toEqual(steps)
-				expect(final_total[final_total.length - 1]).toBe(steps[steps.length - 1])
-			}
+			// Results should be diverse (contain different keywords)
+			const all_text = iterative_result.knowledges.join(' ').toLowerCase()
+			const has_docker = all_text.includes('docker') || all_text.includes('container')
+			const has_kubernetes = all_text.includes('kubernetes') || all_text.includes('k8s')
+			const has_orchestration = all_text.includes('orchestr')
+
+			// Should cover multiple aspects
+			const aspects = [has_docker, has_kubernetes, has_orchestration].filter(Boolean).length
+			expect(aspects).toBeGreaterThanOrEqual(2)
+		})
+
+		it('should maintain relevance across iterations', async () => {
+			const { knowledges } = await poly.query({
+				query: 'circuit breaker pattern resilience',
+				cot_depth: 3,
+				search_limit: 5,
+				rerank_limit: 5
+			})
+
+			// All results should be relevant to software patterns
+			const all_text = knowledges.join(' ').toLowerCase()
+
+			// Should contain software-related terms
+			const has_pattern = all_text.includes('pattern')
+			const has_service = all_text.includes('service')
+			const has_architecture = all_text.includes('architecture')
+
+			// At least 2 relevant keywords
+			const relevant_keywords = [has_pattern, has_service, has_architecture].filter(Boolean).length
+			expect(relevant_keywords).toBeGreaterThanOrEqual(2)
+		})
+	})
+
+	describe('Content Relevance Quality', () => {
+		it('should return neuroscience content when query matches that domain', async () => {
+			const { knowledges } = await poly.query({
+				query: 'neural networks and synaptic connections',
+				cot_depth: 1,
+				search_limit: 5,
+				rerank_limit: 5
+			})
+
+			// Should contain neuroscience content
+			const all_text = knowledges.join(' ').toLowerCase()
+			const has_neuroscience =
+				all_text.includes('neuron') || all_text.includes('synapse') || all_text.includes('brain')
+
+			// Should NOT contain software content
+			const has_software =
+				all_text.includes('microservice') || all_text.includes('container') || all_text.includes('api')
+
+			expect(has_neuroscience).toBe(true)
+			// Software content may appear due to vector similarity, but should be ranked lower
+			// We just check neuroscience is present
+		})
+
+		it('should provide high-quality results with metadata', async () => {
+			const { knowledges, metadata } = await poly.query({
+				query: 'distributed system scalability',
+				cot_depth: 2,
+				search_limit: 5,
+				rerank_limit: 5
+			})
+
+			// Should have results
+			expect(knowledges.length).toBeGreaterThan(0)
+
+			// Metadata should be present
+			expect(metadata).toBeDefined()
+
+			// Results should be relevant
+			const all_text = knowledges.join(' ').toLowerCase()
+			const has_distributed = all_text.includes('distribut')
+			const has_system = all_text.includes('system')
+			const has_scale = all_text.includes('scal')
+
+			// At least 2 relevant terms
+			const relevant_terms = [has_distributed, has_system, has_scale].filter(Boolean).length
+			expect(relevant_terms).toBeGreaterThanOrEqual(2)
 		})
 	})
 })

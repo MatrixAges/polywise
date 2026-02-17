@@ -1,244 +1,194 @@
 import { injectable } from 'tsyringe'
 
-import { getNextStepPrompt } from './consts'
+import { DEFAULT_SIMILARITY_THRESHOLD } from './consts'
 import Polywise from './Polywise'
-import { ChainEmitter, getRandomId, processResults } from './utils'
+import { ChainEmitter, extractKeywords, processResults } from './utils'
 
-import type { CortexProcessArgs, Step, WorkingMemory } from './types/cortex'
+import type { CortexProcessArgs } from './types/cortex'
 import type { Knowledge } from './types/polywise'
 
 @injectable()
 export default class Cortex {
 	private p: Polywise
-	private working_memory: Map<string, WorkingMemory> = new Map()
 
 	init(p: Polywise) {
 		this.p = p
 	}
 
 	async process(args: CortexProcessArgs) {
-		const { cot_depth = 0, process } = args
-
-		if (cot_depth <= 0) return await this.executeFastPath(args)
+		const { query, cot_depth = 0, process } = args
 
 		const emitter = new ChainEmitter()
-		const task_id = getRandomId()
-
-		const wm: WorkingMemory = {
-			original_goal: args.query,
-			steps: [],
-			accumulated_knowledges: [],
-			accumulated_actions: [],
-			context_embedding: [],
-			history_ids: new Set()
-		}
-
-		this.working_memory.set(task_id, wm)
 
 		if (process) {
-			emitter.on((data, steps) => {
-				process.emit(`CoT Step ${steps.length + 1}`, data)
-			})
-		}
-
-		const initial_data = await this.executeStep(args, args.query, wm)
-
-		this.updateMemory(wm, initial_data)
-		this.runPlanningLoop(task_id, args, emitter, wm)
-
-		args.process?.emit('planning_step', initial_data)
-
-		const { knowledges, actions, metadata } = await processResults(
-			args.query,
-			initial_data.knowledges,
-			this.p.pipeline
-		)
-
-		return {
-			knowledges,
-			actions,
-			metadata,
-			cot: emitter
-		}
-	}
-
-	private async executeFastPath(args: CortexProcessArgs) {
-		const {
-			query,
-			recall_depth,
-			search_limit,
-			rerank_limit,
-			stimulate_on_recall,
-			idol_id,
-			root_ids,
-			metrics_ids,
-			process
-		} = args
-
-		const emitter = new ChainEmitter()
-
-		if (args.process) {
 			emitter.on((_data, steps) => {
-				args.process?.emit('cot', steps)
+				process.emit('cot', steps)
 			})
 		}
 
-		const { knowledges: initial_knowledges } = await this.p.executeSingleSearch({
-			query,
-			recall_depth,
-			search_limit,
-			rerank_limit,
-			stimulate_on_recall,
-			idol_id: idol_id ?? undefined,
-			root_ids: root_ids ?? undefined,
-			metrics_ids: metrics_ids ?? undefined,
-			process
-		})
-
-		const {
-			knowledges: k_strings,
-			actions: a_strings,
-			metadata
-		} = await processResults(query, initial_knowledges, this.p.pipeline)
-
-		const result = {
-			knowledges: k_strings,
-			actions: a_strings,
-			metadata,
-			cot: (emitter.finish({ knowledges: k_strings, actions: a_strings, metadata }) as any) || emitter
+		// Single search mode (cot_depth <= 1)
+		if (cot_depth <= 1) {
+			return await this.executeSingleSearch(query, args, emitter)
 		}
 
-		return result
+		// Iterative search mode (cot_depth > 1)
+		return await this.executeIterativeSearch(query, args, emitter)
 	}
 
-	private async runPlanningLoop(
-		task_id: string,
-		args: CortexProcessArgs,
-		emitter: ChainEmitter,
-		wm: WorkingMemory
-	) {
-		const { cot_depth = 1 } = args
-
-		try {
-			for (let i = 0; i < cot_depth; i++) {
-				if (!emitter.isActiveStatus() || !this.p.db) break
-
-				const next_query = await this.planNextStep(wm)
-
-				if (next_query === 'DONE') break
-
-				const step_data = await this.executeStep(args, next_query, wm)
-
-				this.updateMemory(wm, step_data)
-
-				args.process?.emit('planning_step', step_data)
-
-				if (step_data.knowledges.length > 0) {
-					await this.emitProgress(emitter, step_data.knowledges, next_query)
-				}
-			}
-
-			const { knowledges, actions, metadata } = await processResults(
-				wm.original_goal,
-				wm.accumulated_knowledges,
-				this.p.pipeline
-			)
-
-			emitter.finish({ knowledges, actions, metadata })
-		} catch (error) {
-			console.error('Cortex Planning Error:', error)
-
-			if (this.p.db) {
-				const { knowledges, actions, metadata } = await processResults(
-					wm.original_goal,
-					wm.accumulated_knowledges,
-					this.p.pipeline
-				)
-				emitter.finish({ knowledges, actions, metadata })
-			} else {
-				emitter.finish({ knowledges: [], actions: [], metadata: {} as any })
-			}
-		} finally {
-			this.working_memory.delete(task_id)
-		}
-	}
-
-	private async planNextStep(wm: WorkingMemory): Promise<string> {
-		const history = wm.steps
-			.map(s => `Thought: ${s.thought}\nQuery: ${s.query}\nResult: ${s.result_summary}`)
-			.join('\n---\n')
-
-		const prompt = getNextStepPrompt(wm.original_goal, history)
-
-		const decision = await this.p.pipeline.decide(prompt, { max_new_tokens: 30, temperature: 0.3 })
-
-		const query = decision.trim().split('\n')[0].replace(/"/g, '')
-
-		return query.length < 3 ? 'DONE' : query
-	}
-
-	private async executeStep(
-		args: CortexProcessArgs,
-		query: string,
-		wm: WorkingMemory
-	): Promise<{ step: Step; knowledges: Array<Knowledge> }> {
-		const {
-			recall_depth,
-			search_limit,
-			rerank_limit,
-			stimulate_on_recall,
-			idol_id,
-			root_ids,
-			metrics_ids,
-			process
-		} = args
-
+	private async executeSingleSearch(query: string, args: CortexProcessArgs, emitter: ChainEmitter) {
 		const { knowledges } = await this.p.executeSingleSearch({
 			query,
-			recall_depth,
-			search_limit,
-			rerank_limit,
-			stimulate_on_recall,
-			idol_id,
-			root_ids,
-			metrics_ids,
-			process
+			recall_depth: args.recall_depth,
+			search_limit: args.search_limit,
+			rerank_limit: args.rerank_limit,
+			stimulate_on_recall: args.stimulate_on_recall,
+			idol_id: args.idol_id,
+			root_ids: args.root_ids,
+			metrics_ids: args.metrics_ids,
+			process: args.process
 		})
 
-		const new_knowledges = knowledges.filter(k => !wm.history_ids.has(k.id))
-
-		const top_results = new_knowledges.slice(0, 3)
-		const summary =
-			top_results.length > 0
-				? top_results.map(r => r.content.slice(0, 100)).join('... ')
-				: 'No new relevant information found.'
-
-		const step: Step = {
-			id: Date.now(),
-			thought: `Searching for: ${query}`,
-			query,
-			result_summary: summary
-		}
-
-		return { step, knowledges: new_knowledges }
-	}
-
-	private updateMemory(wm: WorkingMemory, data: { step: Step; knowledges: Array<Knowledge> }) {
-		wm.steps.push(data.step)
-		wm.accumulated_knowledges.push(...data.knowledges)
-
-		data.knowledges.forEach(k => wm.history_ids.add(k.id))
-	}
-
-	private async emitProgress(emitter: ChainEmitter, knowledges: Array<Knowledge>, query: string) {
 		const {
 			knowledges: k_strings,
 			actions: a_strings,
 			metadata
 		} = await processResults(query, knowledges, this.p.pipeline)
 
-		if (emitter.isActiveStatus()) {
-			emitter.emit({ knowledges: k_strings, actions: a_strings, metadata })
+		return {
+			knowledges: k_strings,
+			actions: a_strings,
+			metadata,
+			cot: (emitter.finish({ knowledges: k_strings, actions: a_strings, metadata }) as any) || emitter
 		}
+	}
+
+	private async executeIterativeSearch(original_query: string, args: CortexProcessArgs, emitter: ChainEmitter) {
+		const { cot_depth = 2, process } = args
+
+		// Track all collected knowledges (for deduplication)
+		const collected_knowledges = new Map<number, Knowledge>()
+		const used_queries = new Set<string>()
+
+		let current_query = original_query
+		used_queries.add(current_query)
+
+		// Iterative search rounds
+		for (let depth = 0; depth < cot_depth; depth++) {
+			process?.emit('cot_iteration', { depth: depth + 1, query: current_query })
+
+			// Execute search for current query
+			const search_results = await this.p.executeSingleSearch({
+				query: current_query,
+				recall_depth: args.recall_depth,
+				search_limit: args.search_limit,
+				rerank_limit: args.rerank_limit,
+				stimulate_on_recall: args.stimulate_on_recall,
+				idol_id: args.idol_id,
+				root_ids: args.root_ids,
+				metrics_ids: args.metrics_ids,
+				process: args.process
+			})
+
+			// Filter and collect high-quality results
+			const new_knowledges = this.filterNewKnowledges(search_results.knowledges, collected_knowledges)
+
+			if (new_knowledges.length === 0) {
+				process?.emit('cot_converged', { depth: depth + 1, reason: 'no_new_results' })
+				break
+			}
+
+			// Add new knowledges to collection
+			for (const k of new_knowledges) {
+				collected_knowledges.set(k.id, k)
+			}
+
+			process?.emit('cot_iteration_results', {
+				depth: depth + 1,
+				new_results: new_knowledges.length,
+				total_results: collected_knowledges.size
+			})
+
+			// Generate next query for next iteration (if not last round)
+			if (depth < cot_depth - 1) {
+				const next_query = this.generateNextQuery(original_query, new_knowledges, used_queries)
+
+				if (!next_query || used_queries.has(next_query)) {
+					process?.emit('cot_converged', { depth: depth + 1, reason: 'no_new_query' })
+					break
+				}
+
+				current_query = next_query
+				used_queries.add(current_query)
+			}
+		}
+
+		// Convert collected knowledges to array and process
+		const all_knowledges = Array.from(collected_knowledges.values())
+
+		// Final rerank to ensure quality
+		const filtered_knowledges = this.filterByQuality(all_knowledges, DEFAULT_SIMILARITY_THRESHOLD)
+
+		const {
+			knowledges: k_strings,
+			actions: a_strings,
+			metadata
+		} = await processResults(original_query, filtered_knowledges, this.p.pipeline)
+
+		return {
+			knowledges: k_strings,
+			actions: a_strings,
+			metadata,
+			cot: (emitter.finish({ knowledges: k_strings, actions: a_strings, metadata }) as any) || emitter
+		}
+	}
+
+	private filterNewKnowledges(
+		new_knowledges: Array<Knowledge>,
+		collected: Map<number, Knowledge>
+	): Array<Knowledge> {
+		return new_knowledges.filter(k => {
+			// Skip if already collected (by id)
+			if (collected.has(k.id)) return false
+
+			// Skip if combined score is too low
+			if (k.combinedScore < DEFAULT_SIMILARITY_THRESHOLD * 0.8) return false
+
+			return true
+		})
+	}
+
+	private filterByQuality(knowledges: Array<Knowledge>, threshold: number): Array<Knowledge> {
+		return knowledges.filter(k => k.combinedScore >= threshold)
+	}
+
+	private generateNextQuery(
+		original_query: string,
+		new_knowledges: Array<Knowledge>,
+		used_queries: Set<string>
+	): string | null {
+		// Extract keywords from new knowledges
+		const content_text = new_knowledges.map(k => k.content).join(' ')
+		const keywords = extractKeywords(content_text)
+
+		if (keywords.length === 0) return null
+
+		// Build query: original query + top keywords
+		const top_keywords = keywords.slice(0, 3)
+		const candidate_query = `${original_query} ${top_keywords.join(' ')}`
+
+		// Check if this query was already used
+		if (used_queries.has(candidate_query)) {
+			// Try alternative combination
+			const alt_keywords = keywords.slice(0, 5)
+			const alt_query = `${original_query} ${alt_keywords.join(' ')}`
+
+			if (used_queries.has(alt_query)) {
+				return null
+			}
+
+			return alt_query
+		}
+
+		return candidate_query
 	}
 }
