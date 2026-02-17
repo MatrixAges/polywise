@@ -59,7 +59,7 @@ export const getMetadata = (messages: Array<AssistantMessageItem>) => {
 		}
 	})
 
-	if (!desc_arr.length && !links_set.size && !files_set.size) return
+	if (!links_set.size && !files_set.size) return
 
 	return {
 		desc: desc_arr.join('\n'),

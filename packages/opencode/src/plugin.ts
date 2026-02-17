@@ -33,7 +33,7 @@ const Index: Plugin = async ctx => {
 
 			if (err) return console.error(err.message)
 
-			const { knowledges, actions, metadata } = res
+			const { knowledges, metadata } = res
 
 			console.log('--------------')
 			console.log('[PolywisePlugin] query: ', query)
@@ -52,14 +52,6 @@ const Index: Plugin = async ctx => {
 					...common,
 					id: `polywise-memory-${Date.now()}`,
 					text: `Related Memory: ${JSON.stringify(knowledges)}`
-				})
-			}
-
-			if (actions.length > 0) {
-				output.parts.push({
-					...common,
-					id: `polywise-actions-${Date.now()}`,
-					text: `Related Memory: ${JSON.stringify(actions)}`
 				})
 			}
 
@@ -82,7 +74,7 @@ const Index: Plugin = async ctx => {
 
 				if (error) return console.error(error)
 
-				const output = getTextPart(data[0].parts)
+				const output = getTextPart(data.at(-1).parts)
 
 				if (!output.trim()) return
 
@@ -97,11 +89,9 @@ const Index: Plugin = async ctx => {
 
 				if (metadata) others['metadata'] = metadata
 
-				try {
-					await poly.save({ metrics_ids: [project_id], content: output, ...others })
-				} catch (err) {
-					console.error(err.message)
-				}
+				const [err] = await to(poly.save({ metrics_ids: [project_id], content: output, ...others }))
+
+				if (err) console.error(err.message)
 			}
 		}
 	}
