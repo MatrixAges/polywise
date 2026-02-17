@@ -52,7 +52,7 @@ await poly.save({
 })
 
 // Retrieve relevant information with context-aware search
-const { knowledges, metadata } = await poly.query({
+const { memory, metadata } = await poly.query({
 	query: 'What are the user preferences?'
 })
 ```
@@ -63,13 +63,13 @@ Polywise implements a unified retrieval system combining graph-based memory reca
 
 ```typescript
 // Single search (fast)
-const { knowledges, metadata } = await poly.query({
+const { memory, metadata } = await poly.query({
 	query: 'What are the user preferences?',
 	cot_depth: 1
 })
 
 // Iterative search (comprehensive)
-const { knowledges, metadata } = await poly.query({
+const { memory, metadata } = await poly.query({
 	query: 'microservices architecture patterns',
 	cot_depth: 3, // Number of iterations
 	recall_depth: 2, // Graph traversal depth
@@ -77,7 +77,7 @@ const { knowledges, metadata } = await poly.query({
 	rerank_limit: 10 // Final result limit
 })
 
-// knowledges[0] -> "..." (String)
+// memory[0] -> "..." (String)
 // metadata       -> { links: ["..."], files: ["..."], desc: "..." }
 ```
 
@@ -87,7 +87,7 @@ For complex queries, Polywise can explore the knowledge network iteratively, exp
 
 ```typescript
 // Enable Chain of Thought (CoT) with cot_depth
-const { knowledges, metadata, cot } = await poly.query({
+const { memory, metadata, cot } = await poly.query({
 	query: 'How to optimize memory usage?',
 	cot_depth: 3, // Perform 3 search iterations
 	search_limit: 5, // Results per iteration
@@ -96,7 +96,7 @@ const { knowledges, metadata, cot } = await poly.query({
 
 // Subscribe to the iteration progress
 cot.on(event => {
-	console.log(`Found ${event.knowledges.length} insights`)
+	console.log(`Found ${event.memory.length} insights`)
 	console.log(`Top Description: ${event.metadata.desc}`)
 })
 ```
