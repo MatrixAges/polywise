@@ -2,7 +2,7 @@ import path from 'path'
 import to from 'await-to-js'
 import { Polywise } from 'polywise'
 
-import { getTextPart } from './utils'
+import { getLastAIMessages, getMetadata, getTextPart } from './utils'
 
 import type { Plugin } from '@opencode-ai/plugin'
 import type { TextPart } from '@opencode-ai/sdk'
@@ -72,14 +72,21 @@ const Index: Plugin = async ctx => {
 
 				const { error, data } = await ctx.client.session.messages({
 					path: { id },
-					query: { limit: 1 }
+					query: { limit: 30 }
 				})
 
 				if (error) return console.error(error)
 
 				const output = getTextPart(data[0].parts)
+				const last_messages = getLastAIMessages(data)
+				const metadata = getMetadata(last_messages)
+				const others = {}
 
-				const [err] = await to(poly.save({ content: output }))
+				console.log('Output: ', JSON.stringify(metadata))
+
+				if (metadata) others['metadata'] = metadata
+
+				const [err] = await to(poly.save({ content: output, ...others }))
 
 				if (err) return console.error(err.message)
 			}
