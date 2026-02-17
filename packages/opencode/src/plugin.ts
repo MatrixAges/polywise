@@ -33,7 +33,9 @@ const Index: Plugin = async ctx => {
 
 			const { knowledges, actions, metadata } = res
 
+			console.log('--------------')
 			console.log('[PolywisePlugin] memory find: ', JSON.stringify(res))
+			console.log('--------------')
 
 			const common = {
 				sessionID: input.sessionID,
@@ -82,13 +84,17 @@ const Index: Plugin = async ctx => {
 				const metadata = getMetadata(last_messages)
 				const others = {}
 
-				console.log('Output: ', JSON.stringify(metadata))
+				console.log('--------------')
+				console.log('Metadata: ', JSON.stringify(metadata))
+				console.log('--------------')
 
 				if (metadata) others['metadata'] = metadata
 
-				const [err] = await to(poly.save({ content: output, ...others }))
-
-				if (err) return console.error(err.message)
+				// try {
+				// 	poly.save({ content: output, ...others, metrics_ids: [project_id] })
+				// } catch (err) {
+				// 	console.error(err.message)
+				// }
 			}
 		}
 	}
