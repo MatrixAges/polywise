@@ -16,7 +16,8 @@ This document provides an overview of the packages/opencode module structure and
 	"structure": {
 		"src": {
 			"index.ts": { "desc": "Main entry point exporting plugin", "role": "Index" },
-			"plugin.ts": { "desc": "OpencodePolywisePlugin implementation", "role": "Plugin" }
+			"plugin.ts": { "desc": "OpencodePolywisePlugin implementation", "role": "Plugin" },
+			"utils.ts": { "desc": "Utility functions for message processing", "role": "Utils" }
 		},
 		"config": {
 			"package.json": { "desc": "Package configuration", "role": "Config" },

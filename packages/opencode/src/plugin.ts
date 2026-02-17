@@ -1,6 +1,7 @@
 import path from 'path'
 import to from 'await-to-js'
 import { Polywise } from 'polywise'
+import { container } from 'tsyringe'
 
 import { getLastAIMessages, getMetadata, getTextPart } from './utils'
 
@@ -9,9 +10,9 @@ import type { TextPart } from '@opencode-ai/sdk'
 
 const Index: Plugin = async ctx => {
 	const { project, directory } = ctx
-	const project_id = project.id || path.basename(directory)
+	const project_id = project.id
 
-	const poly = new Polywise()
+	const poly = container.resolve(Polywise)
 
 	await poly.init({
 		data_dir: path.join(directory, '.polywise'),
@@ -34,6 +35,7 @@ const Index: Plugin = async ctx => {
 			const { knowledges, actions, metadata } = res
 
 			console.log('--------------')
+			console.log('[PolywisePlugin] query: ', query)
 			console.log('[PolywisePlugin] memory find: ', JSON.stringify(res))
 			console.log('--------------')
 
@@ -74,7 +76,7 @@ const Index: Plugin = async ctx => {
 
 				const { error, data } = await ctx.client.session.messages({
 					path: { id },
-					query: { limit: 30 }
+					query: { limit: 10 }
 				})
 
 				if (error) return console.error(error)
@@ -90,11 +92,11 @@ const Index: Plugin = async ctx => {
 
 				if (metadata) others['metadata'] = metadata
 
-				// try {
-				// 	poly.save({ metrics_ids: [project_id], content: output, ...others })
-				// } catch (err) {
-				// 	console.error(err.message)
-				// }
+				try {
+					poly.save({ metrics_ids: [project_id], content: output, ...others })
+				} catch (err) {
+					console.error(err.message)
+				}
 			}
 		}
 	}
