@@ -654,10 +654,26 @@ importers:
         version: 5.9.3
 
   packages/opencode:
+    dependencies:
+      '@opencode-ai/plugin':
+        specifier: ^1.2.6
+        version: 1.2.6
+      await-to-js:
+        specifier: ^3.0.0
+        version: 3.0.0
+      polywise:
+        specifier: workspace:*
+        version: link:../polywise
+      tsyringe:
+        specifier: 'catalog:'
+        version: 4.10.0
     devDependencies:
       '@rslib/core':
         specifier: 'catalog:'
         version: 0.19.5(typescript@5.9.3)
+      deepmerge-ts:
+        specifier: ^7.1.5
+        version: 7.1.5
       typescript:
         specifier: ^5.7.3
         version: 5.9.3
@@ -2110,6 +2126,12 @@ packages:
   '@npmcli/run-script@10.0.3':
     resolution: {integrity: sha512-ER2N6itRkzWbbtVmZ9WKaWxVlKlOeBFF1/7xx+KA5J1xKa4JjUwBdb6tDpk0v1qA+d+VDwHI9qmLcXSWcmi+Rw==}
     engines: {node: ^20.17.0 || >=22.9.0}
+
+  '@opencode-ai/plugin@1.2.6':
+    resolution: {integrity: sha512-CJEp3k17yWsjyfivm3zQof8L42pdze3a7iTqMOyesHgJplSuLiBYAMndbBYMDuJkyAh0dHYjw8v10vVw7Kfl4Q==}
+
+  '@opencode-ai/sdk@1.2.6':
+    resolution: {integrity: sha512-dWMF8Aku4h7fh8sw5tQ2FtbqRLbIFT8FcsukpxTird49ax7oUXP+gzqxM/VdxHjfksQvzLBjLZyMdDStc5g7xA==}
 
   '@opentelemetry/api@1.9.0':
     resolution: {integrity: sha512-3giAOQvZiH5F9bMlMiv8+GSPMeqg0dbaeo58/0SlA9sxSqZhnUtxzX9/2FzyhS9sWQf5S0GJE0AKBrFqjpeYcg==}
@@ -6667,6 +6689,9 @@ packages:
   zod@3.25.76:
     resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
 
+  zod@4.1.8:
+    resolution: {integrity: sha512-5R1P+WwQqmmMIEACyzSvo4JXHY5WiAFHRMg+zBZKgKS+Q1viRa0C1hmUKtHltoIFKtIdki3pRxkmpP74jnNYHQ==}
+
   zod@4.3.6:
     resolution: {integrity: sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==}
 
@@ -8297,6 +8322,13 @@ snapshots:
       which: 6.0.1
     transitivePeerDependencies:
       - supports-color
+
+  '@opencode-ai/plugin@1.2.6':
+    dependencies:
+      '@opencode-ai/sdk': 1.2.6
+      zod: 4.1.8
+
+  '@opencode-ai/sdk@1.2.6': {}
 
   '@opentelemetry/api@1.9.0': {}
 
@@ -13539,6 +13571,8 @@ snapshots:
       zod: 4.3.6
 
   zod@3.25.76: {}
+
+  zod@4.1.8: {}
 
   zod@4.3.6: {}
 

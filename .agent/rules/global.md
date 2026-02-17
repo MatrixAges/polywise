@@ -115,6 +115,10 @@ Relevant skills are located in the `.opencode/skills` directory.
 
 Unless necessary for complex scenarios or public API clarity, do not explicitly specify function return types. Let the TypeScript compiler infer types automatically. Do not pass generic types to functions if the type system can infer them from the arguments.
 
+## No Any Type (CRITICAL)
+
+**NEVER** use the `any` type in TypeScript code. Always use specific types, interfaces, or `unknown` if the type is truly not known yet. Using `any` defeats the purpose of TypeScript and is strictly prohibited.
+
 ## SQL Definition Convention (CRITICAL)
 
 All SQL statements MUST be defined within the `sql/` directory and exported for use. Raw SQL strings are prohibited within business logic files (models, services, etc.).
