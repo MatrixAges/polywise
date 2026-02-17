@@ -22,8 +22,6 @@ const Index: Plugin = async ctx => {
 		'chat.message': async (input, output) => {
 			const query = getTextPart(output.parts)
 
-			// console.log(query)
-
 			const [err, res] = await to(
 				poly.query({
 					query,
@@ -35,7 +33,7 @@ const Index: Plugin = async ctx => {
 
 			const { knowledges, actions, metadata } = res
 
-			// console.log('res: ', JSON.stringify(res))
+			console.log('[PolywisePlugin] memory find: ', JSON.stringify(res))
 
 			const common = {
 				sessionID: input.sessionID,
@@ -84,8 +82,6 @@ const Index: Plugin = async ctx => {
 				const [err] = await to(poly.save({ content: output }))
 
 				if (err) return console.error(err.message)
-
-				// console.log(`output: ${output}`)
 			}
 		}
 	}
