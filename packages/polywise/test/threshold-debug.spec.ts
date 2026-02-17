@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 
 import Polywise from '../src/Polywise'
+import Process from '../src/Process'
 import { getTestRerank, getTestVectors } from './utils/getCache'
 import getDataDir from './utils/getDataDir'
 
@@ -56,15 +57,45 @@ FRESH → TIRED → SLEEPING → FRESH 状态循环`
 
 	describe('Step 2: Debug with full query API (idol_id, root_ids, metrics_ids)', () => {
 		it('should query with different thresholds', async () => {
-			for (const th of [1, 0.8, 0.7, 0.6, 0.5, 0.4, 0.35, 0.3, 0.2, 0.1, 0.05, 0.0]) {
-				const { knowledges } = await poly.query({
-					query: '记忆机制',
-					threshold: th,
-					search_limit: 10,
-					metrics_ids
-				})
-				console.log(`threshold=${th}: ${JSON.stringify(knowledges)}`)
-			}
+			const th = 0.35
+			const p = poly.process('记忆机制')
+
+			p.on((event, total) => {
+				if (event.key === 'vector_search_results' && Array.isArray(event.value)) {
+					console.log(
+						'  - vector sample:',
+						event.value[0]
+							? {
+									id: event.value[0].id,
+									similarity: event.value[0].similarity,
+									content: event.value[0].content?.slice(0, 50)
+								}
+							: 'none'
+					)
+				}
+
+				if (event.key === 'fulltext_search_results' && Array.isArray(event.value)) {
+					console.log(
+						'  - fulltext sample:',
+						event.value[0]
+							? {
+									id: event.value[0].id,
+									content: event.value[0].content?.slice(0, 50)
+								}
+							: 'none'
+					)
+				}
+			})
+
+			const { knowledges } = await poly.query({
+				query: '记忆机制',
+				threshold: th,
+				search_limit: 10,
+				metrics_ids,
+				process: p
+			})
+
+			console.log(`threshold=${th}: ${knowledges.length} results`)
 		})
 
 		it('should query with wrong metrics_ids (should return empty)', async () => {
@@ -75,6 +106,8 @@ FRESH → TIRED → SLEEPING → FRESH 状态循环`
 				metrics_ids: ['wrong_metrics_id']
 			})
 			console.log('Query with wrong metrics_ids:', knowledges.length)
+
+			expect(knowledges.length).eq(0)
 		})
 	})
 })

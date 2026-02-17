@@ -368,20 +368,30 @@ export default class Polywise {
 			metrics_ids
 		})
 
+		const vectorResults = await this.article.searchByVector({
+			query,
+			limit: search_limit,
+			idol_id,
+			root_ids,
+			metrics_ids,
+			threshold
+		})
+		process?.emit('vector_search_results', vectorResults)
+
+		const fulltextResults = await this.article.searchByText({
+			query,
+			limit: search_limit,
+			idol_id,
+			root_ids,
+			metrics_ids
+		})
+		process?.emit('fulltext_search_results', fulltextResults)
+
 		const search_results = await this.pipeline.search({
 			query,
 			rerank_limit: search_limit,
-			vectorSearch: () =>
-				this.article.searchByVector({
-					query,
-					limit: search_limit,
-					idol_id,
-					root_ids,
-					metrics_ids,
-					threshold
-				}),
-			fulltextSearch: () =>
-				this.article.searchByText({ query, limit: search_limit, idol_id, root_ids, metrics_ids })
+			vectorSearch: () => Promise.resolve(vectorResults),
+			fulltextSearch: () => Promise.resolve(fulltextResults)
 		})
 
 		const { knowledges } = await aggregateResults({

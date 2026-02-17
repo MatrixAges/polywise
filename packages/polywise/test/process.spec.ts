@@ -17,13 +17,6 @@ describe('Polywise Process', () => {
 			embedding_config: {
 				type: 'custom',
 				fn: getTestVectors
-			},
-			decision_config: {
-				type: 'custom',
-				fn: async (prompt: string) => {
-					if (prompt.includes('Next Step')) return 'DONE'
-					return 'YES'
-				}
 			}
 		})
 
