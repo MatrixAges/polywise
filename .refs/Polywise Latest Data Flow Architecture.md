@@ -1,4 +1,4 @@
-Polywise's data flow architecture is a **Cortex-based hybrid retrieval system**.
+Polywise's data flow architecture is a **Cortex-based hybrid retrieval system** with iterative search capabilities.
 
 The following is the actual data flow diagram based on the code logic:
 
@@ -8,29 +8,33 @@ The following is the actual data flow diagram based on the code logic:
 ┌──────────────────────────────────────────────┐
 │  Phase 0: Cortex Executive Gating            │
 │  - Check cot_depth parameter                 │
-│  - Initialize ChainEmitter & WorkingMemory   │
+│  - Initialize ChainEmitter                   │
 └──────────────────────────────────────────────┘
       ↓                      ↘
-[cot_depth <= 0]          [cot_depth > 0]
-(Fast Path)               (CoT Planning Loop)
+[cot_depth <= 1]          [cot_depth > 1]
+(Single Search)           (Iterative Search)
       ↓                      ↘
       ↓                   ┌──────────────────────────────────────────┐
-      ↓                   │ Phase 0.5: Iterative Planning            │
-      ↓                   │ - Generate Next Step Query               │
-      ↓                   │ - Loop Phase 1-3 until depth exhausted   │
-      ↓                   │ - Update Working Memory                  │
+      ↓                   │ Phase 0.5: Iterative Search Loop         │
+      ↓                   │ - Execute search with current query      │
+      ↓                   │ - Filter results by quality threshold    │
+      ↓                   │ - Collect unique results                 │
+      ↓                   │ - Generate next query (keywords)         │
+      ↓                   │ - Repeat until depth exhausted           │
+      ↓                   └──────────────────────────────────────────┘
       └───────────────────┴──────────────────────────────────────────┘
                               ↓
 ┌──────────────────────────────────────────────────────────────────────────┐
 │ Phase 1: Hybrid Retrieval - executeSingleSearch                          │
-│ - Graph Recall: recallFromMemory (Keywords -> Nodes -> Spreading -> Context) │
+│ - Graph Recall: recallFromMemory (Keywords -> Nodes -> Spreading)        │
 │ - External Search: Article.searchVector & searchFts (Pipeline Embedding) │
 └──────────────────────────────────────────────────────────────────────────┘
       ↓
 ┌──────────────────────────────────────────────────────────────────────────┐
-│ Phase 2: Aggregation                                                     │
+│ Phase 2: Aggregation & Quality Filter                                    │
 │ - aggregateResults: Merge Recall and Search results                      │
-│ - Deduplication & Normalization                                          │
+│ - Deduplication by ID                                                    │
+│ - Filter: combinedScore >= threshold                                     │
 └──────────────────────────────────────────────────────────────────────────┘
       ↓
 ┌──────────────────────────────────────────────────────────────────────────┐
@@ -49,23 +53,41 @@ The following is the actual data flow diagram based on the code logic:
                  └──────────────────────────────────┘
 ```
 
+### Iterative Search (CoT Mode)
+
+When `cot_depth > 1`, the system performs iterative search:
+
+1. **Initial Query**: Start with user's original query
+2. **Search & Filter**: Execute hybrid search, filter by `combinedScore >= 0.4`
+3. **Collect**: Add unique results to collection (deduplication by ID)
+4. **Generate Next Query**: Extract keywords from new results, combine with original query
+5. **Repeat**: Continue until `cot_depth` iterations or no new results
+6. **Final Filter**: Apply stricter threshold (`combinedScore >= 0.5`)
+
+**Stopping Conditions**:
+
+- Reached `cot_depth` limit
+- No new high-quality results found
+- Generated query already used (avoid loops)
+
 ### Implementation Details
 
 1.    **Cortex (src/Cortex.ts)**:
-      - **Core Logic**: The `process()` method decides between `executeFastPath` or `runPlanningLoop`.
-      - **Planning**: Uses WorkingMemory for Chain of Thought (CoT) iteration.
+      - **Core Logic**: Routes to `executeSingleSearch` or `executeIterativeSearch` based on `cot_depth`
+      - **Iterative Search**: Keyword-based query expansion without LLM
+      - **Quality Control**: Multi-stage filtering with rerank scores
 
 2.    **Pipeline (src/Pipeline.ts)**:
-      - **AI Capabilities**: Provides `embed` and `rerank` for vector operations.
-      - **Queue Management**: Uses `PQueue` for concurrency control.
+      - **AI Capabilities**: Provides `embed` and `rerank` for vector operations
+      - **Queue Management**: Uses `PQueue` for concurrency control
 
 3.    **Brain (src/Brain.ts)**:
-      - **State Machine**: Maintains system states and lifecycle.
-      - **Maintenance**: Maintains graph health via `runShadowTick` and `triggerSleepTick`.
+      - **State Machine**: Maintains system states and lifecycle
+      - **Maintenance**: Maintains graph health via `runShadowTick` and `triggerSleepTick`
 
 4.    **Hybrid Search (src/Polywise.ts)**:
-      - **Unified Entry**: `executeSingleSearch` aggregates all information sources.
-      - **Article**: `src/Article.ts` handles vector and full-text retrieval for raw documents.
+      - **Unified Entry**: `executeSingleSearch` aggregates all information sources
+      - **Article**: `src/Article.ts` handles vector and full-text retrieval for raw documents
 
 ---
 
@@ -77,17 +99,17 @@ This is the complete system data flow diagram integrating **LIF Neuro-dynamic pr
 ┌──────────────────────────────────────────────┐
 │  Phase 0: Cortex Executive Gating            │
 │  - Check cot_depth parameter                 │
-│  - Initialize ChainEmitter & WorkingMemory   │
+│  - Initialize ChainEmitter                   │
 └──────────────────────────────────────────────┘
       ↓                      ↘
-[cot_depth <= 0]          [cot_depth > 0]
-(Fast Path)               (CoT Planning Loop)
+[cot_depth <= 1]          [cot_depth > 1]
+(Single Search)           (Iterative Search)
       ↓                      ↘
       ↓                   ┌──────────────────────────────────────────┐
-      ↓                   │ Phase 0.5: Iterative Planning            │
-      ↓                   │ - Generate Next Step Query               │
-      ↓                   │ - Loop Phase 1-3 until depth exhausted   │
-      ↓                   │ - Update Working Memory                  │
+      ↓                   │ Phase 0.5: Iterative Search Loop         │
+      ↓                   │ - Search → Filter → Collect → Expand     │
+      ↓                   │ - Keyword extraction for query gen       │
+      ↓                   └──────────────────────────────────────────┘
       └───────────────────┴──────────────────────────────────────────┘
                               ↓
 ┌──────────────────────────────────────────────────────────────────────────────────────┐
@@ -116,9 +138,10 @@ This is the complete system data flow diagram integrating **LIF Neuro-dynamic pr
 └──────────────────────────────────────────────────────────────────────────────────────┘
       ↓
 ┌──────────────────────────────────────────────────────────────────────────┐
-│ Phase 2: Aggregation                                                     │
+│ Phase 2: Aggregation & Quality Filter                                    │
 │ - aggregateResults: Merge Recall (Activated Nodes), Search               │
 │ - Deduplication & Normalization                                          │
+│ - Quality Filter: combinedScore >= threshold                             │
 └──────────────────────────────────────────────────────────────────────────┘
       ↓
 ┌──────────────────────────────────────────────────────────────────────────┐

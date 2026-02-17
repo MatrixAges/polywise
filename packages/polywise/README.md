@@ -1,6 +1,6 @@
 # Polywise
 
-A neuroscience-inspired knowledge graph and memory system.
+A neuroscience-inspired knowledge graph and memory system with iterative retrieval capabilities.
 
 ## Core Philosophy
 
@@ -43,6 +43,7 @@ Simulates the brain's limited cognitive resources:
 packages/polywise/
 ├── src/
 │   ├── Polywise.ts          # Core database API
+│   ├── Cortex.ts            # Iterative search & query processing
 │   ├── Brain.ts             # Lifecycle manager
 │   ├── Pipeline.ts          # Model pipeline (embedding, reranking)
 │   ├── Article.ts           # Article storage and search
@@ -65,6 +66,7 @@ packages/polywise/
 | Module     | Responsibility                                                                   |
 | ---------- | -------------------------------------------------------------------------------- |
 | `Polywise` | Database API entry: node/edge CRUD, activation propagation, knowledge injection  |
+| `Cortex`   | Query processing: single/iterative search with quality filtering                 |
 | `Brain`    | Lifecycle management: state machine, background task scheduling, fatigue control |
 | `Pipeline` | Model inference: embedding generation and result reranking                       |
 | `Article`  | Document storage: vector and full-text search capabilities                       |
@@ -90,15 +92,46 @@ await poly.save({
 Retrieve relevant information based on natural language:
 
 ```typescript
-const { knowledges, metadata, cot } = await poly.query({
+// Single search (fast)
+const { knowledges, metadata } = await poly.query({
 	query: 'How do qubits work?',
-	recall_depth: 2,
 	cot_depth: 1
+})
+
+// Iterative search (comprehensive)
+const { knowledges, metadata } = await poly.query({
+	query: 'microservices architecture patterns',
+	cot_depth: 3, // Number of search iterations
+	recall_depth: 2, // Graph traversal depth
+	search_limit: 20, // Max search results per iteration
+	rerank_limit: 10 // Final result limit
 })
 
 console.log(knowledges) // Simplified knowledge strings
 console.log(metadata) // Merged and reranked metadata (links, files, etc.)
 ```
+
+### 3. Iterative Search (Chain of Thought)
+
+When `cot_depth > 1`, the system performs iterative search:
+
+1. **Search** with current query
+2. **Filter** results by quality threshold (rerank score)
+3. **Collect** unique high-quality results
+4. **Expand** query with keywords from results
+5. **Repeat** until iteration limit or convergence
+
+**Quality Control**:
+
+- Stage 1: Filter by `combinedScore >= 0.4`
+- Stage 2: Final filter by `combinedScore >= 0.5`
+- Deduplication by content ID across iterations
+
+**Stopping Conditions**:
+
+- Reached `cot_depth` iterations
+- No new high-quality results found
+- Cannot generate new unique query
 
 ## API Quick Reference
 
@@ -110,6 +143,20 @@ console.log(metadata) // Merged and reranked metadata (links, files, etc.)
 | `query(args: QueryArgs)`         | Query relevant concepts and context from memory    |
 | `init(args: PolywiseArgs)`       | Initialize the database and background brain       |
 | `off()`                          | Gracefully shut down background tasks and close DB |
+
+### Query Parameters
+
+| Parameter             | Type     | Default | Description                                |
+| --------------------- | -------- | ------- | ------------------------------------------ |
+| `query`               | string   | -       | Natural language query                     |
+| `cot_depth`           | number   | 1       | Search iterations (1=single, >1=iterative) |
+| `recall_depth`        | number   | 2       | Graph traversal depth for memory recall    |
+| `search_limit`        | number   | 20      | Max results per search iteration           |
+| `rerank_limit`        | number   | 10      | Final result limit after reranking         |
+| `stimulate_on_recall` | boolean  | false   | Stimulate memory nodes during recall       |
+| `idol_id`             | string   | -       | Filter by idol context                     |
+| `root_ids`            | string[] | -       | Filter by root context                     |
+| `metrics_ids`         | string[] | -       | Filter by metrics context                  |
 
 ## Background Mechanism
 

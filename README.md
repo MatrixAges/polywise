@@ -24,7 +24,7 @@ Polywise changes this by implementing a **neuroscience-inspired memory engine** 
 - 🔗 **Associative Graph**: Knowledge is stored as interconnected concepts, not isolated bits.
 - ⚡ **Spreading Activation**: One thought naturally triggers related ones through organic flow, enabling associative recall through connections rather than just vector similarity.
 - 🌙 **Consolidation**: Like human sleep, it reinforces important memories and prunes noise through a structured lifecycle.
-- 🔄 **Actionable Decisions**: Mimics the dual-process theory of the brain (Fast React/Slow Act) to provide adaptive behavior.
+- 🔄 **Iterative Search**: Chain of Thought (CoT) mode performs multiple search iterations with keyword expansion for comprehensive retrieval.
 
 ---
 
@@ -51,86 +51,69 @@ await poly.save({
 	content: 'User prefers TypeScript and works late at night.'
 })
 
-// Returns information, potential actions, and reranked metadata in a single pass
-// Query also respects class-level filters automatically
-const { knowledges, actions, metadata } = await poly.query({
+// Retrieve relevant information with context-aware search
+const { knowledges, metadata } = await poly.query({
 	query: 'What are the user preferences?'
 })
 ```
 
-#### 2. ⚡ **Unified Retrieval (Fast & Slow)**
+#### 2. ⚡ **Unified Hybrid Retrieval**
 
-Polywise implements a unified retrieval system that returns both **Knowledges** (information) and **Actions** (behaviors), mimicking the brain's dual-process theory.
+Polywise implements a unified retrieval system combining graph-based memory recall with vector and full-text search.
 
 ```typescript
-// Returns information, actions, and merged metadata in a single pass
-const { knowledges, actions, metadata } = await poly.query({
-	query: 'What are the user preferences?'
+// Single search (fast)
+const { knowledges, metadata } = await poly.query({
+	query: 'What are the user preferences?',
+	cot_depth: 1
+})
+
+// Iterative search (comprehensive)
+const { knowledges, metadata } = await poly.query({
+	query: 'microservices architecture patterns',
+	cot_depth: 3, // Number of iterations
+	recall_depth: 2, // Graph traversal depth
+	search_limit: 20, // Max results per iteration
+	rerank_limit: 10 // Final result limit
 })
 
 // knowledges[0] -> "..." (String)
-// actions[0]    -> "..." (String)
 // metadata       -> { links: ["..."], files: ["..."], desc: "..." }
 ```
 
-#### 2. ⚡ **Unified Retrieval (Fast & Slow)**
+#### 3. 🔭 **Chain of Thought (Iterative Search)**
 
-Polywise implements a unified retrieval system that returns both **Knowledges** (information) and **Actions** (behaviors), mimicking the brain's dual-process theory.
-
-```typescript
-// Returns information, actions, and merged metadata in a single pass
-const { knowledges, actions, metadatas } = await poly.query({
-	query: 'What are the user preferences?'
-})
-
-// knowledges[0] -> "..." (String)
-// actions[0]    -> "..." (String)
-// metadatas[0]  -> { links: ["..."], files: ["..."], desc: "..." }
-```
-
-#### 3. 🎯 **Habitual Reaction (The Fast Path)**
-
-Mimicking "muscle memory," Polywise automatically learns habits where specific stimuli trigger instant actions. The system strengthens connections between stimuli and successful actions over time.
-
-```typescript
-// No manual definition needed!
-// Habits are learned through interaction and reinforcement.
-const { actions } = await poly.query({ query: 'Error in system!' })
-// actions[0] will be 'Trigger emergency evacuation' if a strong habit has formed.
-```
-
-#### 4. 🔭 **Chain of Thought (The Slow Path)**
-
-For complex queries, Polywise can explore its memory network iteratively, spreading activation to discover hidden connections.
+For complex queries, Polywise can explore the knowledge network iteratively, expanding queries with discovered keywords.
 
 ```typescript
 // Enable Chain of Thought (CoT) with cot_depth
-const { knowledges, actions, cot } = await poly.query({
+const { knowledges, metadata, cot } = await poly.query({
 	query: 'How to optimize memory usage?',
-	cot_depth: 2
+	cot_depth: 3, // Perform 3 search iterations
+	search_limit: 5, // Results per iteration
+	rerank_limit: 10 // Final results after reranking
 })
 
-// Subscribe to the thinking process
+// Subscribe to the iteration progress
 cot.on(event => {
 	console.log(`Found ${event.knowledges.length} insights`)
 	console.log(`Top Description: ${event.metadata.desc}`)
 })
 ```
 
-#### 5. 📜 **Long-Term Memory & Diary**
+**How Iterative Search Works:**
 
-Polywise manages a high-priority Long-Term Memory (LTM) and a chronological Diary to solve the "recency bias" of neural networks. LTM stores distilled identities and rules, while the Diary provides time-based context.
+1. Search with current query
+2. Filter results by quality threshold (rerank score >= 0.4)
+3. Collect unique high-quality results
+4. Extract keywords and expand query
+5. Repeat until iteration limit or convergence
 
-- **Long-Term Memory**: Automatically distills proactive statements (identity, rules, constraints) and core concept patterns. It features a decision-based retention mechanism to maintain limited capacity while retaining high-value associations.
-- **Diary**: Automatically generates session summaries during the **SLEEPING** state. Entries are indexed by time, allowing the system to "remember" the flow of events across days.
+**Quality Control:**
 
-```typescript
-// Retrieve distilled long-term context
-const ltm_text = await poly.getLongMemory()
-
-// Query diary entries with navigation
-const { current, prev, next } = await poly.getDailyMemory('2026-02-04 12:00:00')
-```
+- Stage 1: Filter by `combinedScore >= 0.4`
+- Stage 2: Final filter by `combinedScore >= 0.5`
+- Deduplication by content ID across iterations
 
 ---
 
@@ -142,49 +125,48 @@ const { current, prev, next } = await poly.getDailyMemory('2026-02-04 12:00:00')
 ┌──────────────────────────────────────────────┐
 │  Phase 0: Cortex Executive Gating            │
 │  - Check cot_depth parameter                 │
-│  - Initialize ChainEmitter & WorkingMemory   │
+│  - Initialize ChainEmitter                   │
 └──────────────────────────────────────────────┘
       ↓                      ↘
-[ cot_depth <= 0 ]        [ cot_depth > 0 ]
-(Fast Path)               (CoT Planning Loop)
+[cot_depth <= 1]          [cot_depth > 1]
+(Single Search)           (Iterative Search)
       ↓                      ↘
       ↓                   ┌──────────────────────────────────────────┐
-      ↓                   │ Phase 0.5: Iterative Planning            │
-      ↓                   │ - Pipeline.decide: Generate Next Step Query │
-      ↓                   │ - Loop Phase 1-3 until depth exhausted   │
-      ↓                   │ - Update Working Memory                  │
+      ↓                   │ Phase 0.5: Iterative Search Loop         │
+      ↓                   │ - Execute search with current query      │
+      ↓                   │ - Filter by quality threshold            │
+      ↓                   │ - Collect unique results                 │
+      ↓                   │ - Expand query with keywords             │
+      ↓                   │ - Repeat until depth exhausted           │
       └───────────────────┴──────────────────────────────────────────┘
                               ↓
 ┌──────────────────────────────────────────────────────────────────────────┐
 │ Phase 1: Hybrid Retrieval - executeSingleSearch                          │
-│ - Habit Reaction: getHabits & handleHabitReaction (Stimulate Nodes)      │
-│ - Graph Recall: recallFromMemory (Keywords -> Nodes -> Spreading -> Context) │
+│ - Graph Recall: recallFromMemory (Keywords -> Nodes -> Spreading)        │
 │ - External Search: Article.searchVector & searchFts (Pipeline Embedding) │
-│ - Memory Search: Memory.search (LTM & Diary)                             │
-└──────────────────────────────────────────────────────────────────────────┐
+└──────────────────────────────────────────────────────────────────────────┘
       ↓
 ┌──────────────────────────────────────────────────────────────────────────┐
-│ Phase 2: Aggregation                                                     │
-│ - aggregateResults: Merge Recall, Search, Memory, Habits                 │
-│ - Deduplication & Normalization                                          │
-└──────────────────────────────────────────────────────────────────────────┐
+│ Phase 2: Aggregation & Quality Filter                                    │
+│ - aggregateResults: Merge Recall and Search results                      │
+│ - Deduplication by ID                                                    │
+│ - Filter: combinedScore >= threshold                                     │
+└──────────────────────────────────────────────────────────────────────────┘
       ↓
 ┌──────────────────────────────────────────────────────────────────────────┐
 │ Phase 3: Reranking                                                       │
-│ - Pipeline.rerank: Semantic scoring of Knowledge and Action candidates   │
+│ - Pipeline.rerank: Semantic scoring of Knowledge candidates              │
 │ - Result Truncation (rerank_limit)                                       │
-└──────────────────────────────────────────────────────────────────────────┐
+└──────────────────────────────────────────────────────────────────────────┘
       ↓
    Response ───→ [ Write Log: Log.write ]
                              ↓
-                 ┌──────────────────────────────────┐
-                 │ Phase 4: Brain Lifecycle         │
-                 │ - Brain.ts: Increase Synaptic Fatigue │
-                 │ - Idle Detection -> Trigger Sleep│
-                 │   - memory.saveDiary: Save Diary │
-                 │   - consolidateLongTermMemory    │
-                 │   - SQL: Decay/Prune/Replay      │
-                 └──────────────────────────────────┘
+                  ┌──────────────────────────────────┐
+                  │ Phase 4: Brain Lifecycle         │
+                  │ - Brain.ts: Manage state         │
+                  │ - Idle Detection -> Trigger Sleep│
+                  │   - SQL: Decay/Prune/Replay      │
+                  └──────────────────────────────────┘
 ```
 
 ## 📚 Core Concepts
@@ -202,7 +184,6 @@ const { current, prev, next } = await poly.getDailyMemory('2026-02-04 12:00:00')
 2. 📉 **Decay**: Unused connections weaken over time
 3. 🌙 **Consolidation**: Sleep phase reinforces important memories
 4. ⚡ **Stimulation**: External input activates nodes and spreads
-5. 🔄 **Habituation**: Successful "Act" decisions can be automated into "React" habits
 
 ### 🔄 State Machine
 
@@ -292,8 +273,7 @@ Polywise is built on the shoulders of these amazing projects:
 ### Models
 
 - 🤖 **[Qwen3-Embedding](https://huggingface.co/onnx-community/Qwen3-Embedding-0.6B-ONNX)** - **Vector Encoding**: Converts text into high-dimensional vectors for semantic search and graph recall.
-- 🎯 **[BGE Reranker v2-m3](https://huggingface.co/onnx-community/bge-reranker-v2-m3-ONNX)** - **Precision Sorting**: Reranks retrieved knowledge and actions to ensure the most relevant results are prioritized.
-- 🧠 **[Qwen3-0.6B](https://huggingface.co/onnx-community/Qwen3-0.6B-ONNX)** - **Reasoning & Planning**: Powers the Cortex's iterative planning and decision-making for complex "Slow Path" queries.
+- 🎯 **[BGE Reranker v2-m3](https://huggingface.co/onnx-community/bge-reranker-v2-m3-ONNX)** - **Precision Sorting**: Reranks retrieved knowledge to ensure the most relevant results are prioritized.
 
 ## 📜 License
 

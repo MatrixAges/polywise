@@ -17,7 +17,10 @@ This document provides an overview of the packages/polywise module structure and
 		"src": {
 			"Article.ts": { "desc": "Article manager class for CRUD and search operations", "role": "Class" },
 			"Brain.ts": { "desc": "Brain lifecycle manager with fatigue state machine", "role": "Class" },
-			"Cortex.ts": { "desc": "Task planning and executive function manager (PFC)", "role": "Class" },
+			"Cortex.ts": {
+				"desc": "Query processing with single/iterative search modes, quality filtering, and result aggregation",
+				"role": "Class"
+			},
 			"Log.ts": {
 				"desc": "Logging module for query and save operations with .log and .json output",
 				"role": "Class"
@@ -39,7 +42,7 @@ This document provides an overview of the packages/polywise module structure and
 				"role": "Class"
 			},
 			"consts": {
-				"command.ts": { "desc": "Command string constants", "role": "Constant" },
+				"database.ts": { "desc": "Database configuration constants", "role": "Constant" },
 				"format.ts": { "desc": "String formatting utilities", "role": "Constant" },
 				"index.ts": { "desc": "Main constants export", "role": "Index" },
 				"model.ts": { "desc": "Model-related constants", "role": "Constant" },
@@ -98,7 +101,7 @@ This document provides an overview of the packages/polywise module structure and
 		"test": {
 			"migration.spec.ts": { "desc": "Migration tests", "role": "Test" },
 			"brain.spec.ts": { "desc": "Knowledge graph dynamics and learning tests", "role": "Test" },
-			"decision.spec.ts": { "desc": "Cerebellum intelligence and decision logic tests", "role": "Test" },
+
 			"article.spec.ts": { "desc": "Article tests", "role": "Test" },
 			"cot.spec.ts": { "desc": "Chain of thought tests", "role": "Test" },
 			"learning.spec.ts": { "desc": "Pure text learning and large scale dataset tests", "role": "Test" },
@@ -111,7 +114,7 @@ This document provides an overview of the packages/polywise module structure and
 			"datasets": {
 				"behavioral.ts": { "desc": "Behavioral prompts and benchmarks", "role": "Data" },
 				"cognitive.ts": { "desc": "Cognitive and reasoning datasets", "role": "Data" },
-				"decision.ts": { "desc": "Decision logic and intelligence prompts", "role": "Data" },
+
 				"longcontext.ts": { "desc": "Long context retrieval datasets", "role": "Data" },
 				"longembedding.ts": { "desc": "Large scale embedding datasets", "role": "Data" },
 				"software.ts": { "desc": "Software architecture and development datasets", "role": "Data" },
@@ -131,7 +134,7 @@ This document provides an overview of the packages/polywise module structure and
 			}
 		},
 		".test_vectors": {
-			"desc": "Persistent cache for model embeddings, reranking, and decisions",
+			"desc": "Persistent cache for model embeddings and reranking results",
 			"role": "Data"
 		},
 		"config": {
