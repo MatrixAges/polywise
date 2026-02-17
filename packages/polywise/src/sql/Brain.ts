@@ -176,15 +176,3 @@ export const sql_get_node_by_id = `
  * Role: Key lookup for checking existence or getting ID for linking.
  */
 export const sql_get_node_by_label = `SELECT id FROM ${SCHEMA_BRAIN}.nodes WHERE label = $1`
-
-/**
- * Retrieves strong habit edges (automatic associations).
- * Role: Used by the "cerebellum" or "React" system to execute fast, automatic responses without deep reasoning.
- */
-export const sql_get_strong_habits = `
-  SELECT n.label, e.weight 
-  FROM ${SCHEMA_BRAIN}.edges e 
-  JOIN ${SCHEMA_BRAIN}.nodes n ON e.target_id = n.id 
-  WHERE e.is_habit = true AND e.weight > $1
-  ORDER BY e.weight DESC LIMIT $2
-`

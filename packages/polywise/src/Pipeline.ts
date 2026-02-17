@@ -6,19 +6,11 @@ import fs from 'fs-extra'
 import PQueue from 'p-queue'
 import { injectable } from 'tsyringe'
 
-import {
-	DEFAULT_CONCURRENCY,
-	DEFAULT_DECISION_CONFIG,
-	DEFAULT_EMBEDDING_CONFIG,
-	DEFAULT_RERANKER_CONFIG,
-	POOLING_MEAN
-} from './consts'
+import { DEFAULT_CONCURRENCY, DEFAULT_EMBEDDING_CONFIG, DEFAULT_RERANKER_CONFIG, POOLING_MEAN } from './consts'
 import { catchFinally } from './decorators'
 import { generateModelHash, processText, verifyModel } from './utils'
 
 import type {
-	DecisionConfig,
-	DecisionOptions,
 	EmbeddingConfig,
 	PipelineArgs,
 	PipelineSearchArgs,
@@ -31,31 +23,18 @@ import type {
 export default class Pipeline {
 	private embedding_config: EmbeddingConfig = DEFAULT_EMBEDDING_CONFIG
 	private reranker_config: RerankerConfig = DEFAULT_RERANKER_CONFIG
-	private decision_config: DecisionConfig = DEFAULT_DECISION_CONFIG
 	private cache_dir: string | null = `${os.homedir()}/.polywise/.models`
 	private embedding_concurrency: number = DEFAULT_CONCURRENCY
 	private reranker_concurrency: number = DEFAULT_CONCURRENCY
-	private decision_concurrency: number = DEFAULT_CONCURRENCY
 	private embedding_pipeline: any = null
 	private reranker_pipeline: any = null
-	private decision_pipeline: any = null
 	private embedding_queue = new PQueue({ concurrency: this.embedding_concurrency })
 	private reranker_queue = new PQueue({ concurrency: this.reranker_concurrency })
-	private decision_queue = new PQueue({ concurrency: this.decision_concurrency })
 	private embedding_promise: Promise<any> | null = null
 	private reranker_promise: Promise<any> | null = null
-	private decision_promise: Promise<any> | null = null
 
 	async init(args: PipelineArgs = {}) {
-		const {
-			cache_dir,
-			embedding_config,
-			reranker_config,
-			decision_config,
-			embedding_concurrency,
-			reranker_concurrency,
-			decision_concurrency
-		} = args
+		const { cache_dir, embedding_config, reranker_config, embedding_concurrency, reranker_concurrency } = args
 
 		if (cache_dir) {
 			this.cache_dir = cache_dir
@@ -76,27 +55,14 @@ export default class Pipeline {
 			this.reranker_pipeline = null
 		}
 
-		if (decision_config) {
-			this.decision_config = decision_config
-			this.decision_pipeline = null
-		}
-
 		if (embedding_concurrency !== undefined) {
 			this.embedding_concurrency = embedding_concurrency
-
 			this.embedding_queue = new PQueue({ concurrency: this.embedding_concurrency })
 		}
 
 		if (reranker_concurrency !== undefined) {
 			this.reranker_concurrency = reranker_concurrency
-
 			this.reranker_queue = new PQueue({ concurrency: this.reranker_concurrency })
-		}
-
-		if (decision_concurrency !== undefined) {
-			this.decision_concurrency = decision_concurrency
-
-			this.decision_queue = new PQueue({ concurrency: this.decision_concurrency })
 		}
 	}
 
@@ -115,15 +81,6 @@ export default class Pipeline {
 
 		if (config.type === 'local') {
 			await this.loadRerankerModel()
-		}
-	}
-
-	async setDecisionConfig(config: DecisionConfig) {
-		this.decision_config = config
-		this.decision_pipeline = null
-
-		if (config.type === 'local') {
-			await this.loadDecisionModel()
 		}
 	}
 
@@ -194,30 +151,6 @@ export default class Pipeline {
 		})
 	}
 
-	async decide(prompt: string, options: DecisionOptions = {}) {
-		return this.decision_queue.add(async () => {
-			if (this.decision_config.type === 'custom') {
-				const { fn } = this.decision_config
-
-				return await fn(prompt, options)
-			}
-
-			const decision = await this.loadDecisionModel()
-
-			const { max_new_tokens = 64, temperature = 0.6, top_k = 20, top_p = 0.9 } = options
-
-			const output = await decision(prompt, {
-				max_new_tokens,
-				temperature,
-				top_k,
-				top_p,
-				do_sample: temperature > 0
-			})
-
-			return output[0].generated_text.slice(prompt.length).trim()
-		})
-	}
-
 	async search(args: PipelineSearchArgs) {
 		const { query, rerank_limit = 20, vectorSearch, fulltextSearch } = args
 
@@ -270,18 +203,11 @@ export default class Pipeline {
 			(async () => {
 				await new Promise(resolve => setTimeout(resolve, 500))
 				await this.checkAndDownload(this.reranker_config, this.loadRerankerModel.bind(this))
-			})(),
-			(async () => {
-				await new Promise(resolve => setTimeout(resolve, 1000))
-				await this.checkAndDownload(this.decision_config, this.loadDecisionModel.bind(this))
 			})()
 		])
 	}
 
-	private async checkAndDownload(
-		config: EmbeddingConfig | RerankerConfig | DecisionConfig,
-		loadFn: () => Promise<any>
-	) {
+	private async checkAndDownload(config: EmbeddingConfig | RerankerConfig, loadFn: () => Promise<any>) {
 		if (config.type !== 'local' || !this.cache_dir) return
 
 		const model_path = path.join(this.cache_dir, config.model)
@@ -341,35 +267,12 @@ export default class Pipeline {
 		return this.reranker_pipeline
 	}
 
-	@catchFinally(function (this: Pipeline) {
-		this.decision_promise = null
-	})
-	async loadDecisionModel() {
-		if (this.decision_pipeline) return this.decision_pipeline
-		if (this.decision_promise) return this.decision_promise
-		if (this.decision_config.type !== 'local') return null
-
-		const { model, dtype } = this.decision_config
-
-		this.decision_promise = pipeline('text-generation', model, {
-			dtype: dtype as any
-		})
-
-		this.decision_pipeline = await this.decision_promise
-
-		return this.decision_pipeline
-	}
-
 	getEmbeddingConfig() {
 		return this.embedding_config
 	}
 
 	getRerankerConfig() {
 		return this.reranker_config
-	}
-
-	getDecisionConfig() {
-		return this.decision_config
 	}
 
 	getCacheDir() {
@@ -399,18 +302,8 @@ export default class Pipeline {
 		this.reranker_queue = new PQueue({ concurrency: this.reranker_concurrency })
 	}
 
-	getDecisionConcurrency() {
-		return this.decision_concurrency
-	}
-
-	setDecisionConcurrency(concurrency: number) {
-		this.decision_concurrency = concurrency
-		this.decision_queue = new PQueue({ concurrency: this.decision_concurrency })
-	}
-
 	off() {
 		this.embedding_queue.clear()
 		this.reranker_queue.clear()
-		this.decision_queue.clear()
 	}
 }

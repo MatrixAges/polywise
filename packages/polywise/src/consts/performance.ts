@@ -5,7 +5,6 @@ export const IDLE_TIMEOUT_MS = 5 * 60 * 1000
 export const DEFAULT_RECALL_DEPTH = 2
 export const DEFAULT_SEARCH_LIMIT = 20
 export const DEFAULT_RERANK_LIMIT = 10
-export const DEFAULT_HABIT_THRESHOLD = 0.5
 export const DEFAULT_STIMULATE_INTENSITY = 0.3
 export const DEFAULT_NODE_THRESHOLD = 0.5
 export const DEFAULT_HEBBIAN_REWARD = 0.5
@@ -13,8 +12,6 @@ export const DEFAULT_EDGE_WEIGHT = 0.1
 export const SNAPSHOT_WEIGHT_THRESHOLD = 0.2
 export const NODE_POTENTIAL_MIN = 0.05
 export const SNAPSHOT_EDGES_LIMIT = 500
-export const HABIT_REACTION_THRESHOLD = 0.8
-export const HABIT_SCORE_BOOST = 1.5
 export const MEMORY_RECALL_INTENSITY = 0.3
 export const MEMORY_SCORE_BOOST = 1.5
 export const COT_MAX_RESULTS = 3
@@ -37,23 +34,11 @@ export const EDGE_WEIGHT_MIN = 0.1
 export const EDGE_LEARNING_FACTOR = 0.2
 export const EDGE_DECAY_FACTOR = 0.001
 export const EDGE_DISTANCE_MIN = 0.2
-export const LONG_TERM_CAPACITY = 1000
-export const LTM_DECAY_LAMBDA = 0.05
 export const PRIORITY_WEIGHTS = {
 	rules: 1.0,
 	brain: 0.9,
-	long_term: 0.8,
-	diary: 0.7,
 	external: 0.6
 }
-export const TIME_DECAY_HALFLIFE_DAYS = 30
-export const CONSOLIDATION_ACTIVE_THRESHOLD = 0.8
-export const CONSOLIDATION_POTENTIAL_THRESHOLD = 1.2
-export const HABIT_CONSOLIDATION_WEIGHT = 2.0
-export const MAX_HABIT_CONSOLIDATION = 5
-export const CONSOLIDATION_ENTRY_PREFIX = 'Core active concepts from session: '
-export const HABIT_LTM_PREFIX = 'Reinforced behavioral pattern: '
-export const NO_ACTIVITY_SUMMARY = 'No activity today.'
 export const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD'
 export const DEFAULT_TIMESTAMP_FORMAT = 'YYYY-MM-DD HH:mm:ss'
 export const DEFAULT_SIMILARITY_THRESHOLD = 0.5

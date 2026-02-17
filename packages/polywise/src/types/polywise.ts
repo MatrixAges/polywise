@@ -30,7 +30,6 @@ export interface Node {
 	metrics_ids?: Array<string>
 	metadata?: Metadata
 	embedding?: Array<number>
-	is_action?: boolean
 	created_at?: string
 	updated_at?: string
 }
@@ -47,7 +46,6 @@ export interface Edge {
 	root_ids?: Array<string>
 	metrics_ids?: Array<string>
 	metadata?: Metadata
-	is_habit?: boolean
 	reaction_count?: number
 	created_at?: string
 	updated_at?: string
@@ -76,7 +74,7 @@ export type QueryResult<T = any> = Array<T>
 
 export type MigrationFn = (
 	exec: (sql: string | Array<string>) => Promise<void>,
-	query: <T = any>(sql: string, params?: Array<any>) => Promise<Array<T>>
+	query?: <T = any>(sql: string, params?: Array<any>) => Promise<Array<T>>
 ) => Promise<void>
 
 export interface Migration {
@@ -122,34 +120,13 @@ export interface ContextResult {
 export interface Knowledge {
 	id: number
 	content: string
-	source: 'memory' | 'external' | 'implicit' | 'long_term' | 'diary' | 'rules'
+	source: 'memory' | 'external' | 'implicit' | 'rules'
 	rerankScore: number
 	relevanceScore: number
 	combinedScore: number
 	stimulated: boolean
 	memoryStrength: number
 	metadata?: any
-}
-
-export interface Action {
-	id: number
-	content: string
-	source: 'memory' | 'external' | 'implicit' | 'long_term' | 'diary' | 'rules'
-	rerankScore: number
-	relevanceScore: number
-	combinedScore: number
-	stimulated: boolean
-	memoryStrength: number
-	metadata?: any
-}
-
-export interface MemoryResult {
-	id: number
-	content: string
-	similarity: number
-	source: 'long_term' | 'diary'
-	timestamp?: string
-	last_accessed_at?: string
 }
 
 export interface COTDepthResult {
@@ -163,11 +140,4 @@ export interface FinalQueryResult {
 	actions: Array<string>
 	metadata: Metadata
 	cot: ChainEmitter
-}
-
-export interface MemoryRecallResult {
-	nodes: Array<Node>
-	edges: Array<Edge>
-	stimulated_nodes: Array<number>
-	related_contexts: Array<ContextResult>
 }

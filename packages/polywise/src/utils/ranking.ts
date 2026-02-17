@@ -11,7 +11,7 @@ import {
 import * as sql_brain from '../sql/Brain'
 
 import type Pipeline from '../Pipeline'
-import type { Action, Knowledge } from '../types'
+import type { Knowledge } from '../types'
 
 export async function rerankKnowledges(
 	query: string,
@@ -21,60 +21,19 @@ export async function rerankKnowledges(
 	queryRaw: (sql: string, params?: Array<any>) => Promise<any>,
 	threshold: number = DEFAULT_SIMILARITY_THRESHOLD
 ) {
-	if (candidates.length === 0) return []
+	const valid_candidates = candidates.filter(c => c.content && c.content.trim().length > 0)
 
-	const documents = candidates.map(c => {
+	if (valid_candidates.length === 0) return []
+
+	const documents = valid_candidates.map(c => {
 		const source_info = formatSourceInfo(c.source, c.stimulated, c.memoryStrength)
 
-		return formatRerankDocument(source_info, 'info', c.content)
+		return formatRerankDocument(source_info, c.content)
 	})
 
 	const rerank_scores = await pipeline.rerank(query, documents)
 
-	const results: Array<Knowledge> = candidates.map((candidate, index) => {
-		const rerankScore = rerank_scores[index]?.score ?? 0
-		const priority_weight = (PRIORITY_WEIGHTS as any)[candidate.source] ?? PRIORITY_WEIGHTS.external
-
-		return {
-			...candidate,
-			rerankScore,
-			combinedScore:
-				(rerankScore * RERANK_SCORE_WEIGHT + candidate.relevanceScore * RELEVANCE_SCORE_WEIGHT) *
-				priority_weight
-		}
-	})
-
-	const sorted_results = results
-		.filter(r => r.combinedScore >= threshold)
-		.sort((a, b) => b.combinedScore - a.combinedScore)
-		.slice(0, limit)
-
-	await stimulateByRanking(sorted_results, queryRaw)
-
-	return sorted_results
-}
-
-export async function rerankActions(
-	query: string,
-	candidates: Array<Action>,
-	limit: number,
-	pipeline: Pipeline,
-	queryRaw: (sql: string, params?: Array<any>) => Promise<any>,
-	threshold: number = DEFAULT_SIMILARITY_THRESHOLD
-) {
-	if (candidates.length === 0) {
-		return []
-	}
-
-	const documents = candidates.map(c => {
-		const source_info = formatSourceInfo(c.source, c.stimulated, c.memoryStrength)
-
-		return formatRerankDocument(source_info, 'action', c.content)
-	})
-
-	const rerank_scores = await pipeline.rerank(query, documents)
-
-	const results: Array<Action> = candidates.map((candidate, index) => {
+	const results: Array<Knowledge> = valid_candidates.map((candidate, index) => {
 		const rerankScore = rerank_scores[index]?.score ?? 0
 		const priority_weight = (PRIORITY_WEIGHTS as any)[candidate.source] ?? PRIORITY_WEIGHTS.external
 
@@ -98,7 +57,7 @@ export async function rerankActions(
 }
 
 async function stimulateByRanking(
-	results: Array<Knowledge | Action>,
+	results: Array<Knowledge>,
 	queryRaw: (sql: string, params?: Array<any>) => Promise<any>
 ) {
 	if (results.length === 0) return

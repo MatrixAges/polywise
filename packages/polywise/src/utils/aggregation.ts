@@ -1,72 +1,20 @@
-import {
-	formatNodeContent,
-	HABIT_REACTION_THRESHOLD,
-	HABIT_SCORE_BOOST,
-	MAX_IMPLICIT_RESULTS,
-	MEMORY_SCORE_BOOST,
-	POTENTIAL_THRESHOLD,
-	RELEVANCE_SCORE_FACTOR
-} from '../consts'
-import * as sql from '../sql'
+import { MEMORY_SCORE_BOOST, POTENTIAL_THRESHOLD, RELEVANCE_SCORE_FACTOR } from '../consts'
 import calculateMemoryStrength from './calculateMemoryStrength'
 
-import type { Action, AggregateResultsArgs, Knowledge } from '../types'
+import type { AggregateResultsArgs, Knowledge } from '../types'
 
-export async function aggregateResults(
-	args: AggregateResultsArgs,
-	queryRaw: (sql: string, params?: Array<any>) => Promise<any>
-) {
-	const { recall_result, search_results, habits = [], memory_results = [] } = args
+export async function aggregateResults(args: AggregateResultsArgs) {
+	const { recall_result, search_results } = args
 
 	const knowledges: Array<Knowledge> = []
-	const actions: Array<Action> = []
-
-	await collectHabitActions(habits, actions, queryRaw)
 
 	collectMemoryKnowledges(recall_result, search_results, knowledges)
 
 	collectExternalResults(recall_result, search_results, knowledges)
 
-	collectImplicitResults(recall_result, knowledges, actions)
+	collectImplicitResults(recall_result, knowledges)
 
-	collectMemorySystemResults(memory_results, knowledges)
-
-	return { knowledges, actions }
-}
-
-function collectMemorySystemResults(memory_results: Array<Knowledge>, knowledges: Array<Knowledge>) {
-	for (const result of memory_results) {
-		knowledges.push(result)
-	}
-}
-
-async function collectHabitActions(
-	habits: Array<any>,
-	actions: Array<Action>,
-	queryRaw: (sql: string, params?: Array<any>) => Promise<any>
-) {
-	for (const stimulus of habits) {
-		if (
-			stimulus.similarity > HABIT_REACTION_THRESHOLD &&
-			(stimulus.activation >= stimulus.threshold || stimulus.potential >= stimulus.threshold)
-		) {
-			const strong_habits = (await queryRaw(sql.sql_find_strongest_habit, [stimulus.id])) as Array<any>
-
-			for (const h of strong_habits) {
-				actions.push({
-					id: h.target_id,
-					content: h.action,
-					rerankScore: h.weight,
-					relevanceScore: h.weight * HABIT_SCORE_BOOST,
-					memoryStrength: h.weight,
-					combinedScore: 0,
-					source: 'memory',
-					stimulated: true,
-					metadata: h.action_metadata || {}
-				})
-			}
-		}
-	}
+	return { knowledges }
 }
 
 function collectMemoryKnowledges(
@@ -129,24 +77,15 @@ function collectExternalResults(
 	}
 }
 
-function collectImplicitResults(
-	recall_result: AggregateResultsArgs['recall_result'],
-	knowledges: Array<Knowledge>,
-	actions: Array<Action>
-) {
+function collectImplicitResults(recall_result: AggregateResultsArgs['recall_result'], knowledges: Array<Knowledge>) {
 	const high_potential_nodes = recall_result.nodes
-		.filter(
-			n =>
-				n.potential > POTENTIAL_THRESHOLD &&
-				!knowledges.find(k => k.id === n.id) &&
-				!actions.find(a => a.id === n.id)
-		)
-		.slice(0, MAX_IMPLICIT_RESULTS)
+		.filter(n => n.potential > POTENTIAL_THRESHOLD && !knowledges.find(k => k.id === n.id))
+		.slice(0, 5)
 
 	for (const node of high_potential_nodes) {
-		const item = {
+		knowledges.push({
 			id: node.id,
-			content: formatNodeContent(node.label, node.metadata?.desc),
+			content: node.label,
 			rerankScore: node.potential,
 			relevanceScore: node.potential * RELEVANCE_SCORE_FACTOR,
 			memoryStrength: node.potential,
@@ -154,12 +93,6 @@ function collectImplicitResults(
 			source: 'implicit' as any,
 			stimulated: true,
 			metadata: node.metadata
-		}
-
-		if (node.is_action) {
-			actions.push(item)
-		} else {
-			knowledges.push(item)
-		}
+		})
 	}
 }

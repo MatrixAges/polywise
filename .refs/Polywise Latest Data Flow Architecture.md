@@ -1,4 +1,4 @@
-Polywise's data flow architecture is a **Cortex-based hybrid retrieval and iterative planning system**.
+Polywise's data flow architecture is a **Cortex-based hybrid retrieval system**.
 
 The following is the actual data flow diagram based on the code logic:
 
@@ -11,44 +11,40 @@ The following is the actual data flow diagram based on the code logic:
 │  - Initialize ChainEmitter & WorkingMemory   │
 └──────────────────────────────────────────────┘
       ↓                      ↘
-[ cot_depth <= 0 ]        [ cot_depth > 0 ]
+[cot_depth <= 0]          [cot_depth > 0]
 (Fast Path)               (CoT Planning Loop)
       ↓                      ↘
       ↓                   ┌──────────────────────────────────────────┐
       ↓                   │ Phase 0.5: Iterative Planning            │
-      ↓                   │ - Pipeline.decide: Generate Next Step Query │
+      ↓                   │ - Generate Next Step Query               │
       ↓                   │ - Loop Phase 1-3 until depth exhausted   │
       ↓                   │ - Update Working Memory                  │
       └───────────────────┴──────────────────────────────────────────┘
                               ↓
 ┌──────────────────────────────────────────────────────────────────────────┐
 │ Phase 1: Hybrid Retrieval - executeSingleSearch                          │
-│ - Habit Reaction: getHabits & handleHabitReaction (Stimulate Nodes)      │
 │ - Graph Recall: recallFromMemory (Keywords -> Nodes -> Spreading -> Context) │
 │ - External Search: Article.searchVector & searchFts (Pipeline Embedding) │
-│ - Memory Search: Memory.search (LTM & Diary)                             │
-└──────────────────────────────────────────────────────────────────────────┐
+└──────────────────────────────────────────────────────────────────────────┘
       ↓
 ┌──────────────────────────────────────────────────────────────────────────┐
 │ Phase 2: Aggregation                                                     │
-│ - aggregateResults: Merge Recall, Search, Memory, Habits                 │
+│ - aggregateResults: Merge Recall and Search results                      │
 │ - Deduplication & Normalization                                          │
-└──────────────────────────────────────────────────────────────────────────┐
+└──────────────────────────────────────────────────────────────────────────┘
       ↓
 ┌──────────────────────────────────────────────────────────────────────────┐
 │ Phase 3: Reranking                                                       │
-│ - Pipeline.rerank: Semantic scoring of Knowledge and Action candidates   │
+│ - Pipeline.rerank: Semantic scoring of Knowledge candidates              │
 │ - Result Truncation (rerank_limit)                                       │
-└──────────────────────────────────────────────────────────────────────────┐
+└──────────────────────────────────────────────────────────────────────────┘
       ↓
-   Response ───→ [ Write Log: Log.write ]
+   Response ───→ [Write Log: Log.write]
                              ↓
                  ┌──────────────────────────────────┐
                  │ Phase 4: Brain Lifecycle         │
-                 │ - Brain.ts: Increase Synaptic Fatigue │
+                 │ - Brain.ts: Manage state         │
                  │ - Idle Detection -> Trigger Sleep│
-                 │   - memory.saveDiary: Save Diary │
-                 │   - consolidateLongTermMemory    │
                  │   - SQL: Decay/Prune/Replay      │
                  └──────────────────────────────────┘
 ```
@@ -57,19 +53,18 @@ The following is the actual data flow diagram based on the code logic:
 
 1.    **Cortex (src/Cortex.ts)**:
       - **Core Logic**: The `process()` method decides between `executeFastPath` or `runPlanningLoop`.
-      - **Planning**: Uses `pipeline.decide` and `WorkingMemory` for Chain of Thought (CoT).
+      - **Planning**: Uses WorkingMemory for Chain of Thought (CoT) iteration.
 
 2.    **Pipeline (src/Pipeline.ts)**:
-      - **AI Capabilities**: Provides `embed`, `rerank`, and `decide` (LLM).
-      - **Queue Management**: Uses `PQueue` for concurrency.
+      - **AI Capabilities**: Provides `embed` and `rerank` for vector operations.
+      - **Queue Management**: Uses `PQueue` for concurrency control.
 
 3.    **Brain (src/Brain.ts)**:
-      - **State Machine**: Maintains `FRESH` -> `TIRED` -> `SLEEPING` states.
+      - **State Machine**: Maintains system states and lifecycle.
       - **Maintenance**: Maintains graph health via `runShadowTick` and `triggerSleepTick`.
 
 4.    **Hybrid Search (src/Polywise.ts)**:
       - **Unified Entry**: `executeSingleSearch` aggregates all information sources.
-      - **Memory**: `src/Memory.ts` handles LTM and STM storage.
       - **Article**: `src/Article.ts` handles vector and full-text retrieval for raw documents.
 
 ---
@@ -85,12 +80,12 @@ This is the complete system data flow diagram integrating **LIF Neuro-dynamic pr
 │  - Initialize ChainEmitter & WorkingMemory   │
 └──────────────────────────────────────────────┘
       ↓                      ↘
-[ cot_depth <= 0 ]        [ cot_depth > 0 ]
+[cot_depth <= 0]          [cot_depth > 0]
 (Fast Path)               (CoT Planning Loop)
       ↓                      ↘
       ↓                   ┌──────────────────────────────────────────┐
       ↓                   │ Phase 0.5: Iterative Planning            │
-      ↓                   │ - Pipeline.decide: Generate Next Step Query │
+      ↓                   │ - Generate Next Step Query               │
       ↓                   │ - Loop Phase 1-3 until depth exhausted   │
       ↓                   │ - Update Working Memory                  │
       └───────────────────┴──────────────────────────────────────────┘
@@ -98,13 +93,12 @@ This is the complete system data flow diagram integrating **LIF Neuro-dynamic pr
 ┌──────────────────────────────────────────────────────────────────────────────────────┐
 │ Phase 1: Hybrid Retrieval & Neuro-Dynamics                                           │
 │                                                                                      │
-│  [ A. Stimulus Injection ]                                                           │
-│   - Habit Reaction: handleHabitReaction -> stimulate(node_id)                        │
+│  [A. Stimulus Injection]                                                             │
 │   - Graph Recall: recallFromMemory -> stimulateNodes(node_ids)                       │
 │        ↓                                                                             │
 │        └── SQL: UPDATE nodes SET potential = potential + Intensity                   │
 │                                                                                      │
-│  [ B. LIF Cycle: Potential/Threshold/Activation ]                                    │
+│  [B. LIF Cycle: Potential/Threshold/Activation]                                      │
 │    Node (potential, threshold)                                                       │
 │        ↓                                                                             │
 │    1. Integrate: potential accumulates with stimulus                                 │
@@ -117,31 +111,28 @@ This is the complete system data flow diagram integrating **LIF Neuro-dynamic pr
 │             - Spreading: Propagate energy to neighbors                               │
 │             - Hebbian: strengthenRelatedEdges (Weight++)                             │
 │                                                                                      │
-│  [ C. Standard Retrieval ]                                                           │
+│  [C. Standard Retrieval]                                                             │
 │   - External Search: Article.searchVector & searchFts (Pipeline Embedding)           │
-│   - Memory Search: Memory.search (LTM & Diary)                                       │
 └──────────────────────────────────────────────────────────────────────────────────────┘
       ↓
 ┌──────────────────────────────────────────────────────────────────────────┐
 │ Phase 2: Aggregation                                                     │
-│ - aggregateResults: Merge Recall (Activated Nodes), Search, Memory, Habits│
+│ - aggregateResults: Merge Recall (Activated Nodes), Search               │
 │ - Deduplication & Normalization                                          │
-└──────────────────────────────────────────────────────────────────────────┐
+└──────────────────────────────────────────────────────────────────────────┘
       ↓
 ┌──────────────────────────────────────────────────────────────────────────┐
 │ Phase 3: Reranking                                                       │
-│ - Pipeline.rerank: Semantic scoring of Knowledge and Action candidates   │
+│ - Pipeline.rerank: Semantic scoring of Knowledge candidates              │
 │ - Result Truncation (rerank_limit)                                       │
-└──────────────────────────────────────────────────────────────────────────┐
+└──────────────────────────────────────────────────────────────────────────┘
       ↓
-   Response ───→ [ Write Log: Log.write ]
+   Response ───→ [Write Log: Log.write]
                              ↓
                  ┌──────────────────────────────────┐
                  │ Phase 4: Brain Lifecycle         │
-                 │ - Brain.ts: Increase Synaptic Fatigue │
+                 │ - Brain.ts: Manage state         │
                  │ - Idle Detection -> Trigger Sleep│
-                 │   - memory.saveDiary: Save Diary │
-                 │   - consolidateLongTermMemory    │
                  │   - SQL: Decay/Prune/Replay      │
                  └──────────────────────────────────┘
 ```

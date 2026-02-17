@@ -21,7 +21,8 @@ const Index: Plugin = async ctx => {
 
 	return {
 		'chat.message': async (input, output) => {
-			const query = getTextPart(output.parts)
+			const raw_query = getTextPart(output.parts)
+			const query = raw_query.slice(0, 300)
 
 			const [err, res] = await to(
 				poly.query({
@@ -81,12 +82,20 @@ const Index: Plugin = async ctx => {
 
 				if (error) return console.error(error)
 
-				const output = getTextPart(data[0].parts)
+				const parts = data[0].parts as Array<TextPart>
+				const output = parts
+					.filter(p => p.type === 'text' && !p.synthetic && !p.id?.startsWith('polywise-'))
+					.map(p => p.text)
+					.join('\n')
+
+				if (!output.trim()) return
+
 				const last_messages = getLastAIMessages(data)
 				const metadata = getMetadata(last_messages)
 				const others = {}
 
 				console.log('--------------')
+				console.log('Content: ', output)
 				console.log('Metadata: ', JSON.stringify(metadata))
 				console.log('--------------')
 

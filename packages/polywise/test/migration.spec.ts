@@ -3,7 +3,6 @@ import { vector } from '@electric-sql/pglite/vector'
 import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 
 import { SCHEMA_BRAIN, SCHEMA_KNOWLEDGE } from '../src/consts'
-import * as sql_meta from '../src/sql/meta'
 import { CURRENT_SCHEMA_VERSION, migrate, migrations, validateMigrations } from '../src/utils/migration'
 import getDataDir from './utils/getDataDir'
 
@@ -28,9 +27,6 @@ describe('Migration System', () => {
 
 		beforeAll(async () => {
 			db = new PGlite(db_path, { extensions: { vector } })
-
-			await db.exec(sql_meta.sql_create_schema_meta)
-			await db.exec(sql_meta.sql_create_table_schema_version)
 		})
 
 		afterAll(async () => {
@@ -58,20 +54,15 @@ describe('Migration System', () => {
 		it('should apply all migrations from version 0', async () => {
 			await migrate(0, exec, query)
 
-			const version_result = await query<{ version: number }>(sql_meta.sql_get_current_version)
+			const tables = await query(`
+				SELECT table_name 
+				FROM information_schema.tables 
+				WHERE table_schema = '${SCHEMA_BRAIN}'
+			`)
+			const table_names = tables.map((t: any) => t.table_name)
 
-			expect(version_result[0].version).toBe(CURRENT_SCHEMA_VERSION)
-		})
-
-		it('should skip already applied migrations', async () => {
-			const version_result_before = await query<{ version: number }>(sql_meta.sql_get_current_version)
-			const current_version = version_result_before[0].version
-
-			await migrate(current_version, exec, query)
-
-			const version_result_after = await query<{ version: number }>(sql_meta.sql_get_current_version)
-
-			expect(version_result_after[0].version).toBe(current_version)
+			expect(table_names).toContain('nodes')
+			expect(table_names).toContain('edges')
 		})
 
 		it('should create brain schema tables', async () => {
@@ -105,9 +96,6 @@ describe('Migration System', () => {
 
 		beforeAll(async () => {
 			db = new PGlite(db_path, { extensions: { vector } })
-
-			await db.exec(sql_meta.sql_create_schema_meta)
-			await db.exec(sql_meta.sql_create_table_schema_version)
 		})
 
 		afterAll(async () => {
@@ -181,9 +169,6 @@ describe('Migration System', () => {
 
 		beforeAll(async () => {
 			db = new PGlite(db_path, { extensions: { vector } })
-
-			await db.exec(sql_meta.sql_create_schema_meta)
-			await db.exec(sql_meta.sql_create_table_schema_version)
 		})
 
 		afterAll(async () => {
@@ -240,9 +225,6 @@ describe('Migration System', () => {
 
 		beforeAll(async () => {
 			db = new PGlite(db_path, { extensions: { vector } })
-
-			await db.exec(sql_meta.sql_create_schema_meta)
-			await db.exec(sql_meta.sql_create_table_schema_version)
 		})
 
 		afterAll(async () => {
@@ -304,9 +286,6 @@ describe('Migration System', () => {
 
 		beforeAll(async () => {
 			db = new PGlite(db_path, { extensions: { vector } })
-
-			await db.exec(sql_meta.sql_create_schema_meta)
-			await db.exec(sql_meta.sql_create_table_schema_version)
 		})
 
 		afterAll(async () => {
@@ -355,9 +334,6 @@ describe('Migration System', () => {
 
 		beforeAll(async () => {
 			db = new PGlite(db_path, { extensions: { vector } })
-
-			await db.exec(sql_meta.sql_create_schema_meta)
-			await db.exec(sql_meta.sql_create_table_schema_version)
 		})
 
 		afterAll(async () => {

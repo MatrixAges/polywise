@@ -31,7 +31,7 @@ This document provides an overview of the packages/polywise module structure and
 				"role": "Class"
 			},
 			"Polywise.ts": {
-				"desc": "Core database API for knowledge graph operations. Includes public instances of Brain, Article, and Pipeline. Supports hybrid retrieval with memory recall, external search, result aggregation, reranking, and the React (fast decision) system.",
+				"desc": "Core database API for knowledge graph operations. Includes public instances of Brain, Article, and Pipeline. Supports hybrid retrieval with memory recall, external search, result aggregation, and reranking.",
 				"role": "Class"
 			},
 			"Process.ts": {
@@ -49,7 +49,6 @@ This document provides an overview of the packages/polywise module structure and
 			"index.ts": { "desc": "Main exports", "role": "Index" },
 			"sql": {
 				"Brain.ts": { "desc": "Brain SQL operations", "role": "SQL" },
-				"Memory.ts": { "desc": "Memory SQL operations", "role": "SQL" },
 				"Polywise.ts": { "desc": "Polywise SQL operations (Articles/Nodes/Edges)", "role": "SQL" },
 				"index.ts": { "desc": "SQL exports", "role": "Index" },
 				"meta.ts": { "desc": "Metadata SQL operations", "role": "SQL" },
@@ -108,7 +107,6 @@ This document provides an overview of the packages/polywise module structure and
 				"desc": "Long text embedding and fact preservation tests",
 				"role": "Test"
 			},
-			"react.spec.ts": { "desc": "React system and habitual behavior tests", "role": "Test" },
 			"log.spec.ts": { "desc": "Log module tests", "role": "Test" },
 			"datasets": {
 				"behavioral.ts": { "desc": "Behavioral prompts and benchmarks", "role": "Data" },

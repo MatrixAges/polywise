@@ -1,33 +1,22 @@
 import { PGlite } from '@electric-sql/pglite'
 import { vector } from '@electric-sql/pglite/vector'
 import to from 'await-to-js'
-import dayjs from 'dayjs'
 import { container, singleton } from 'tsyringe'
 
 import Article from './Article'
 import Brain from './Brain'
 import {
-	CONSOLIDATION_ACTIVE_THRESHOLD,
-	CONSOLIDATION_ENTRY_PREFIX,
-	CONSOLIDATION_POTENTIAL_THRESHOLD,
 	DEFAULT_DATA_DIR,
 	DEFAULT_EDGE_WEIGHT,
 	DEFAULT_NODE_THRESHOLD,
 	DEFAULT_RECALL_DEPTH,
 	DEFAULT_SIMILARITY_THRESHOLD,
-	DEFAULT_TIMESTAMP_FORMAT,
-	getProactiveStatementPrompt,
-	HABIT_CONSOLIDATION_WEIGHT,
-	HABIT_LTM_PREFIX,
-	MAX_HABIT_CONSOLIDATION,
 	MEMORY_RECALL_INTENSITY,
-	NO_ACTIVITY_SUMMARY,
 	SNAPSHOT_WEIGHT_THRESHOLD
 } from './consts'
 import Cortex from './Cortex'
 import { catchError, catchFinally } from './decorators'
 import Log from './Log'
-import Memory from './Memory'
 import Pipeline from './Pipeline'
 import Process from './Process'
 import * as sql from './sql'
@@ -36,13 +25,10 @@ import {
 	aggregateResults,
 	CURRENT_SCHEMA_VERSION,
 	extractKeywords,
-	getHabits,
 	getNodeContexts,
-	handleHabitReaction,
 	migrate,
 	recallNodesByKeywords,
 	recallRelatedNodes,
-	rerankActions,
 	rerankKnowledges,
 	stimulateNodes,
 	strengthenRelatedEdges,
@@ -50,7 +36,6 @@ import {
 } from './utils'
 
 import type {
-	Action,
 	AddNodeArgs,
 	ConnectArgs,
 	Edge,
@@ -71,7 +56,6 @@ export default class Polywise {
 	pipeline = container.resolve(Pipeline)
 	article = container.resolve(Article)
 	brain = container.resolve(Brain)
-	memory = container.resolve(Memory)
 	cortex = container.resolve(Cortex)
 	log = container.resolve(Log)
 
@@ -88,10 +72,8 @@ export default class Polywise {
 			cache_dir,
 			embedding_config,
 			reranker_config,
-			decision_config,
 			embedding_concurrency,
 			reranker_concurrency,
-			decision_concurrency,
 			log,
 			idol_id,
 			root_ids,
@@ -116,15 +98,12 @@ export default class Polywise {
 			cache_dir,
 			embedding_config,
 			reranker_config,
-			decision_config,
 			embedding_concurrency,
-			reranker_concurrency,
-			decision_concurrency
+			reranker_concurrency
 		})
 
 		this.article.init(this)
 		this.brain.init(this)
-		this.memory.init(this)
 		this.cortex.init(this)
 
 		if (log) {
@@ -152,17 +131,6 @@ export default class Polywise {
 		this.log.write(args, result)
 
 		return result
-	}
-
-	async handleHabitReaction(args: {
-		query: string
-		query_embedding: Array<number>
-		initial_actions: Array<Action>
-		habit_threshold: number
-	}) {
-		await handleHabitReaction(args, this.queryRaw.bind(this), (node_id, intensity) =>
-			this.stimulate(node_id, intensity)
-		)
 	}
 
 	@catchError()
@@ -206,14 +174,6 @@ export default class Polywise {
 			} else {
 				await this.queryRaw(sql.sql_insert_article_embedding, [aid, `[${query_embedding.join(',')}]`])
 			}
-
-			if (await this.isProactiveStatement(content)) {
-				await this.memory.saveLongTerm(content, {
-					idol_id: idol_id ?? undefined,
-					root_ids: root_ids ?? undefined,
-					metrics_ids: metrics_ids ?? undefined
-				})
-			}
 		}
 
 		this.log.write({ ...args, idol_id, root_ids, metrics_ids }, { article_id: aid })
@@ -238,30 +198,6 @@ export default class Polywise {
 		return process
 	}
 
-	async getLongMemory(args: FiltersArgs = {}) {
-		return this.memory.getLongMemory({
-			idol_id: args.idol_id ?? this.idol_id ?? undefined,
-			root_ids: args.root_ids ?? this.root_ids ?? undefined,
-			metrics_ids: args.metrics_ids ?? this.metrics_ids ?? undefined
-		})
-	}
-
-	async getDailyMemory(timestamp: string, args: FiltersArgs = {}) {
-		return await this.memory.getDailyMemory(timestamp, {
-			idol_id: args.idol_id ?? this.idol_id ?? undefined,
-			root_ids: args.root_ids ?? this.root_ids ?? undefined,
-			metrics_ids: args.metrics_ids ?? this.metrics_ids ?? undefined
-		})
-	}
-
-	async setLongMemory(content: string, args: FiltersArgs = {}) {
-		await this.memory.saveLongTerm(content, {
-			idol_id: args.idol_id ?? this.idol_id ?? undefined,
-			root_ids: args.root_ids ?? this.root_ids ?? undefined,
-			metrics_ids: args.metrics_ids ?? this.metrics_ids ?? undefined
-		})
-	}
-
 	async addNode(args: AddNodeArgs) {
 		const {
 			label,
@@ -272,8 +208,7 @@ export default class Polywise {
 			root_ids = this.root_ids,
 			metrics_ids = this.metrics_ids,
 			metadata,
-			embedding,
-			is_action
+			embedding
 		} = args
 
 		const rows = (await this.queryRaw(sql.sql_add_node, [
@@ -285,8 +220,7 @@ export default class Polywise {
 			root_ids ?? null,
 			metrics_ids ?? null,
 			JSON.stringify(metadata ?? {}),
-			embedding ? `[${embedding.join(',')}]` : null,
-			is_action ?? false
+			embedding ? `[${embedding.join(',')}]` : null
 		])) as Array<{ id: number }>
 
 		return rows[0].id
@@ -300,8 +234,7 @@ export default class Polywise {
 			idol_id = this.idol_id,
 			root_ids = this.root_ids,
 			metrics_ids = this.metrics_ids,
-			metadata,
-			is_habit
+			metadata
 		} = args
 
 		await this.queryRaw(sql.sql_connect, [
@@ -311,8 +244,7 @@ export default class Polywise {
 			idol_id ?? null,
 			root_ids ?? null,
 			metrics_ids ?? null,
-			JSON.stringify(metadata ?? {}),
-			is_habit ?? false
+			JSON.stringify(metadata ?? {})
 		])
 	}
 
@@ -360,20 +292,6 @@ export default class Polywise {
 	}
 
 	async triggerSleepTick() {
-		const timestamp = dayjs().format(DEFAULT_TIMESTAMP_FORMAT)
-		const logs = this.log.getTodayLogs()
-		const summary = logs.length > 0 ? logs.join('\n\n') : NO_ACTIVITY_SUMMARY
-
-		const filters = {
-			idol_id: this.idol_id ?? undefined,
-			root_ids: this.root_ids ?? undefined,
-			metrics_ids: this.metrics_ids ?? undefined
-		}
-
-		await this.memory.saveDiary(summary, timestamp, filters)
-
-		await this.consolidateLongTermMemory(filters)
-
 		await this.exec([
 			sql.sql_sleep_tick_begin,
 			sql.sql_sleep_tick_clean_noise,
@@ -466,28 +384,11 @@ export default class Polywise {
 				this.article.searchByText({ query, limit: search_limit, idol_id, root_ids, metrics_ids })
 		})
 
-		const memory_results = await this.memory.search(
-			query,
-			{
-				idol_id: idol_id ?? undefined,
-				root_ids: root_ids ?? undefined,
-				metrics_ids: metrics_ids ?? undefined
-			},
-			search_limit
-		)
-
-		const habits = await this.getHabits(query_embedding)
-
-		const { knowledges, actions } = await aggregateResults(
-			{
-				recall_result,
-				search_results,
-				habits,
-				memory_results
-			},
-			this.queryRaw.bind(this)
-		)
-		process?.emit('aggregated_results', { knowledges, actions })
+		const { knowledges } = await aggregateResults({
+			recall_result,
+			search_results
+		})
+		process?.emit('aggregated_results', { knowledges, actions: [] })
 
 		const reranked_knowledges = await rerankKnowledges(
 			query,
@@ -499,24 +400,10 @@ export default class Polywise {
 		)
 		process?.emit('reranked_knowledges', reranked_knowledges)
 
-		const reranked_actions = await rerankActions(
-			query,
-			actions,
-			rerank_limit,
-			this.pipeline,
-			this.queryRaw.bind(this),
-			threshold
-		)
-		process?.emit('reranked_actions', reranked_actions)
-
 		return {
 			knowledges: reranked_knowledges,
-			actions: reranked_actions
+			actions: []
 		}
-	}
-
-	async getHabits(query_embedding: Array<number>) {
-		return await getHabits(query_embedding, this.queryRaw.bind(this))
 	}
 
 	async queryRaw(sql_str: string, params?: Array<any>) {
@@ -584,41 +471,6 @@ export default class Polywise {
 				sql.sql_create_index_edges_roots,
 				sql.sql_create_table_node_sources
 			])
-		}
-	}
-
-	private async isProactiveStatement(content: string) {
-		const prompt = getProactiveStatementPrompt(content)
-
-		const decision = await this.pipeline.decide(prompt, { max_new_tokens: 5 })
-
-		const normalized = decision.split('\n')[0].toUpperCase().trim()
-		return normalized === 'YES' || normalized.startsWith('YES')
-	}
-
-	private async consolidateLongTermMemory(filters: FiltersArgs) {
-		const snapshot = await this.getSnapshot(1.0)
-
-		const active_nodes = snapshot.nodes.filter(
-			n => n.activation > CONSOLIDATION_ACTIVE_THRESHOLD || n.potential > CONSOLIDATION_POTENTIAL_THRESHOLD
-		)
-
-		if (active_nodes.length > 0) {
-			const core_labels = active_nodes.map(n => n.label).join(', ')
-			const consolidation_entry = `${CONSOLIDATION_ENTRY_PREFIX}${core_labels}`
-
-			await this.memory.saveLongTerm(consolidation_entry, filters)
-		}
-
-		const habits = (await this.queryRaw(sql.sql_get_strong_habits, [
-			HABIT_CONSOLIDATION_WEIGHT,
-			MAX_HABIT_CONSOLIDATION
-		])) as Array<{ label: string; weight: number }>
-
-		for (const habit of habits) {
-			const habit_ltm = `${HABIT_LTM_PREFIX}${habit.label} (Strength: ${habit.weight.toFixed(2)})`
-
-			await this.memory.saveLongTerm(habit_ltm, filters)
 		}
 	}
 

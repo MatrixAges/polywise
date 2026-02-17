@@ -5,7 +5,7 @@ import Polywise from './Polywise'
 import { ChainEmitter, getRandomId, processResults } from './utils'
 
 import type { CortexProcessArgs, Step, WorkingMemory } from './types/cortex'
-import type { Action, Knowledge } from './types/polywise'
+import type { Knowledge } from './types/polywise'
 
 @injectable()
 export default class Cortex {
@@ -51,7 +51,6 @@ export default class Cortex {
 		const { knowledges, actions, metadata } = await processResults(
 			args.query,
 			initial_data.knowledges,
-			initial_data.actions,
 			this.p.pipeline
 		)
 
@@ -70,14 +69,12 @@ export default class Cortex {
 			search_limit,
 			rerank_limit,
 			stimulate_on_recall,
-			habit_threshold,
 			idol_id,
 			root_ids,
 			metrics_ids,
 			process
 		} = args
 
-		const query_embedding = ((await this.p.pipeline.embed(query)) as Array<number>) || []
 		const emitter = new ChainEmitter()
 
 		if (args.process) {
@@ -86,7 +83,7 @@ export default class Cortex {
 			})
 		}
 
-		const { knowledges: initial_knowledges, actions: initial_actions } = await this.p.executeSingleSearch({
+		const { knowledges: initial_knowledges } = await this.p.executeSingleSearch({
 			query,
 			recall_depth,
 			search_limit,
@@ -98,18 +95,11 @@ export default class Cortex {
 			process
 		})
 
-		await this.p.handleHabitReaction({
-			query,
-			query_embedding,
-			initial_actions,
-			habit_threshold: habit_threshold ?? 0.8
-		})
-
 		const {
 			knowledges: k_strings,
 			actions: a_strings,
 			metadata
-		} = await processResults(query, initial_knowledges, initial_actions, this.p.pipeline)
+		} = await processResults(query, initial_knowledges, this.p.pipeline)
 
 		const result = {
 			knowledges: k_strings,
@@ -143,15 +133,14 @@ export default class Cortex {
 
 				args.process?.emit('planning_step', step_data)
 
-				if (step_data.knowledges.length > 0 || step_data.actions.length > 0) {
-					await this.emitProgress(emitter, step_data.knowledges, step_data.actions, next_query)
+				if (step_data.knowledges.length > 0) {
+					await this.emitProgress(emitter, step_data.knowledges, next_query)
 				}
 			}
 
 			const { knowledges, actions, metadata } = await processResults(
 				wm.original_goal,
 				wm.accumulated_knowledges,
-				wm.accumulated_actions,
 				this.p.pipeline
 			)
 
@@ -163,7 +152,6 @@ export default class Cortex {
 				const { knowledges, actions, metadata } = await processResults(
 					wm.original_goal,
 					wm.accumulated_knowledges,
-					wm.accumulated_actions,
 					this.p.pipeline
 				)
 				emitter.finish({ knowledges, actions, metadata })
@@ -193,7 +181,7 @@ export default class Cortex {
 		args: CortexProcessArgs,
 		query: string,
 		wm: WorkingMemory
-	): Promise<{ step: Step; knowledges: Array<Knowledge>; actions: Array<Action> }> {
+	): Promise<{ step: Step; knowledges: Array<Knowledge> }> {
 		const {
 			recall_depth,
 			search_limit,
@@ -205,7 +193,7 @@ export default class Cortex {
 			process
 		} = args
 
-		const { knowledges, actions } = await this.p.executeSingleSearch({
+		const { knowledges } = await this.p.executeSingleSearch({
 			query,
 			recall_depth,
 			search_limit,
@@ -218,9 +206,8 @@ export default class Cortex {
 		})
 
 		const new_knowledges = knowledges.filter(k => !wm.history_ids.has(k.id))
-		const new_actions = actions.filter(a => !wm.history_ids.has(a.id))
 
-		const top_results = [...new_knowledges, ...new_actions].slice(0, 3)
+		const top_results = new_knowledges.slice(0, 3)
 		const summary =
 			top_results.length > 0
 				? top_results.map(r => r.content.slice(0, 100)).join('... ')
@@ -233,32 +220,22 @@ export default class Cortex {
 			result_summary: summary
 		}
 
-		return { step, knowledges: new_knowledges, actions: new_actions }
+		return { step, knowledges: new_knowledges }
 	}
 
-	private updateMemory(
-		wm: WorkingMemory,
-		data: { step: Step; knowledges: Array<Knowledge>; actions: Array<Action> }
-	) {
+	private updateMemory(wm: WorkingMemory, data: { step: Step; knowledges: Array<Knowledge> }) {
 		wm.steps.push(data.step)
 		wm.accumulated_knowledges.push(...data.knowledges)
-		wm.accumulated_actions.push(...data.actions)
 
 		data.knowledges.forEach(k => wm.history_ids.add(k.id))
-		data.actions.forEach(a => wm.history_ids.add(a.id))
 	}
 
-	private async emitProgress(
-		emitter: ChainEmitter,
-		knowledges: Array<Knowledge>,
-		actions: Array<Action>,
-		query: string
-	) {
+	private async emitProgress(emitter: ChainEmitter, knowledges: Array<Knowledge>, query: string) {
 		const {
 			knowledges: k_strings,
 			actions: a_strings,
 			metadata
-		} = await processResults(query, knowledges, actions, this.p.pipeline)
+		} = await processResults(query, knowledges, this.p.pipeline)
 
 		if (emitter.isActiveStatus()) {
 			emitter.emit({ knowledges: k_strings, actions: a_strings, metadata })

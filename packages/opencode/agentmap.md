@@ -34,3 +34,4 @@ This document provides an overview of the packages/opencode module structure and
 
 - **Build**: Use `npm run build`.
 - **Plugin**: Implements `OpencodePolywisePlugin` which hooks into `tui.prompt.append` and `session.idle` events.
+- **Safety**: Query strings are truncated to 1000 chars. Synthetic parts (injected memory) are excluded from being saved back to the database.

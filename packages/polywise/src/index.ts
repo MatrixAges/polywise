@@ -2,7 +2,6 @@ import '@abraham/reflection'
 
 export { default as Polywise } from './Polywise'
 export { default as Log } from './Log'
-export { default as Memory } from './Memory'
 export { default as Cortex } from './Cortex'
 
 export type {
@@ -10,9 +9,6 @@ export type {
 	ProcessArticleArgs,
 	QueryArgs,
 	Knowledge,
-	Action,
-	MemoryRecallResult,
-	ContextResult,
 	PolywiseArgs,
 	LogArgs,
 	EmbeddingConfig,

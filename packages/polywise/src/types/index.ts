@@ -1,6 +1,5 @@
 export * from './polywise'
 export * from './args'
 export * from './model'
-export * from './memory'
 export * from './process'
 export * from './log'

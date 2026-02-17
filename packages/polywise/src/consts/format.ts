@@ -15,6 +15,6 @@ export const formatPerceiveQuery = (query: string, insights: string) => {
 	return `${query} [Perceive: ${insights}]`
 }
 
-export const formatRerankDocument = (source_info: string, type: 'info' | 'action', content: string) => {
-	return `${source_info} [Type: ${type}]\n${content}`
+export const formatRerankDocument = (source_info: string, content: string) => {
+	return `${source_info}\n${content}`
 }

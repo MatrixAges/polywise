@@ -2,7 +2,7 @@ import type { PGlite } from '@electric-sql/pglite'
 import type Polywise from '../Polywise'
 import type { ChainEmitter } from '../utils'
 import type { LogArgs } from './log'
-import type { Action, Knowledge, MemoryRecallResult, Metadata } from './polywise'
+import type { Knowledge, Metadata } from './polywise'
 
 export interface BrainArgs {
 	poly: Polywise
@@ -20,16 +20,10 @@ export interface PolywiseArgs extends FiltersArgs {
 	cache_dir?: string
 	embedding_config?: EmbeddingConfig
 	reranker_config?: RerankerConfig
-	decision_config?: DecisionConfig
 	embedding_concurrency?: number
 	reranker_concurrency?: number
-	decision_concurrency?: number
 	log?: boolean | LogArgs
 	onTick?: () => void
-}
-
-export interface ReactArgs {
-	habit_threshold?: number
 }
 
 export interface LocalEmbeddingConfig {
@@ -58,34 +52,12 @@ export interface CustomRerankerConfig {
 
 export type RerankerConfig = LocalRerankerConfig | CustomRerankerConfig
 
-export interface DecisionOptions {
-	max_new_tokens?: number
-	temperature?: number
-	top_k?: number
-	top_p?: number
-}
-
-export interface LocalDecisionConfig {
-	type: 'local'
-	model: string
-	dtype?: string
-}
-
-export interface CustomDecisionConfig {
-	type: 'custom'
-	fn: (prompt: string, options?: DecisionOptions) => Promise<string>
-}
-
-export type DecisionConfig = LocalDecisionConfig | CustomDecisionConfig
-
 export interface PipelineArgs {
 	cache_dir?: string
 	embedding_config?: EmbeddingConfig
 	reranker_config?: RerankerConfig
-	decision_config?: DecisionConfig
 	embedding_concurrency?: number
 	reranker_concurrency?: number
-	decision_concurrency?: number
 }
 
 export interface AddNodeArgs extends FiltersArgs {
@@ -95,7 +67,6 @@ export interface AddNodeArgs extends FiltersArgs {
 	threshold?: number
 	metadata?: Metadata
 	embedding?: Array<number>
-	is_action?: boolean
 }
 
 export interface ConnectArgs extends FiltersArgs {
@@ -103,7 +74,6 @@ export interface ConnectArgs extends FiltersArgs {
 	target_id: number
 	weight?: number
 	metadata?: Metadata
-	is_habit?: boolean
 }
 
 export interface ProcessArticleArgs extends FiltersArgs {
@@ -160,16 +130,13 @@ export interface QueryArgs extends FiltersArgs {
 	rerank_limit?: number
 	cot_depth?: number
 	stimulate_on_recall?: boolean
-	habit_threshold?: number
 	process?: import('../Process').default
 	threshold?: number
 }
 
 export interface AggregateResultsArgs {
-	recall_result: MemoryRecallResult
+	recall_result: any
 	search_results: Array<SearchResult>
-	habits?: Array<any>
-	memory_results?: Array<Knowledge>
 }
 
 export interface PipelineSearchArgs {
@@ -198,7 +165,6 @@ export interface ExecuteCotArgs extends FiltersArgs {
 	rerank_limit: number
 	stimulate_on_recall: boolean
 	initial_knowledges: Array<Knowledge>
-	initial_actions: Array<Action>
 	emitter: ChainEmitter
 	history_ids: Set<number>
 }

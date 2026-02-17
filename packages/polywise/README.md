@@ -25,7 +25,7 @@ When stimulating a knowledge node, activation signals diffuse along weighted edg
 
 Analogous to memory replay and integration during human sleep:
 
-- **Shadow Tick**: Randomly唤醒 weak connections during idle time to reinforce memory
+- **Shadow Tick**: Randomly awaken weak connections during idle time to reinforce memory
 - **Sleep Tick**: Perform memory consolidation - clear noise, reinforce core memories, reset node states
 
 ### 4. Fatigue State Machine
@@ -44,15 +44,13 @@ packages/polywise/
 ├── src/
 │   ├── Polywise.ts          # Core database API
 │   ├── Brain.ts             # Lifecycle manager
-│   ├── migration.ts         # Migration system
+│   ├── Pipeline.ts          # Model pipeline (embedding, reranking)
+│   ├── Article.ts           # Article storage and search
 │   └── sql/
 │       ├── schema.ts        # Database schema definition
 │       ├── Brain.ts         # Core SQL operations
-│       ├── Polywise.ts      # API layer SQL
-│       └── meta.ts          # Metadata operations
-├── test/
-│   ├── test.spec.ts         # Functional tests
-│   └── migration.spec.ts    # Migration tests
+│       └── Polywise.ts      # API layer SQL
+├── test/                    # Test files
 └── package.json
 ```
 
@@ -64,39 +62,35 @@ packages/polywise/
 
 ### Core Modules
 
-| Module      | Responsibility                                                                   |
-| ----------- | -------------------------------------------------------------------------------- |
-| `Polywise`  | Database API entry: node/edge CRUD, activation propagation, knowledge injection  |
-| `Brain`     | Lifecycle management: state machine, background task scheduling, fatigue control |
-| `sql/`      | All SQL queries, keeping business logic separate from storage                    |
-| `migration` | Schema version management and auto-migration                                     |
+| Module     | Responsibility                                                                   |
+| ---------- | -------------------------------------------------------------------------------- |
+| `Polywise` | Database API entry: node/edge CRUD, activation propagation, knowledge injection  |
+| `Brain`    | Lifecycle management: state machine, background task scheduling, fatigue control |
+| `Pipeline` | Model inference: embedding generation and result reranking                       |
+| `Article`  | Document storage: vector and full-text search capabilities                       |
+| `sql/`     | All SQL queries, keeping business logic separate from storage                    |
 
 ## Use Cases
 
 ### 1. Save Content to Memory
 
-Inject knowledge from articles or structured data:
+Inject knowledge from articles:
 
 ```typescript
 const poly = new Polywise()
 await poly.init({ data_dir: './my-memory' })
 
 await poly.save({
-	title: 'Quantum Computing',
-	content: 'Quantum computing exploits quantum mechanical phenomena...',
-	triples: [
-		{ subject: 'Qubits', predicate: 'exploits', object: 'Superposition', learning_rate: 2.5 },
-		{ subject: 'Qubits', predicate: 'exploits', object: 'Entanglement', learning_rate: 2.4 }
-	]
+	content: 'Quantum computing exploits quantum mechanical phenomena...'
 })
 ```
 
 ### 2. Query from Memory
 
-Retrieve relevant information based on natural language or concepts:
+Retrieve relevant information based on natural language:
 
 ```typescript
-const { knowledges, actions, metadata, cot } = await poly.query({
+const { knowledges, metadata, cot } = await poly.query({
 	query: 'How do qubits work?',
 	recall_depth: 2,
 	cot_depth: 1
@@ -112,7 +106,7 @@ console.log(metadata) // Merged and reranked metadata (links, files, etc.)
 
 | Method                           | Description                                        |
 | -------------------------------- | -------------------------------------------------- |
-| `save(args: ProcessArticleArgs)` | Save content and knowledge triples to memory       |
+| `save(args: ProcessArticleArgs)` | Save content to memory                             |
 | `query(args: QueryArgs)`         | Query relevant concepts and context from memory    |
 | `init(args: PolywiseArgs)`       | Initialize the database and background brain       |
 | `off()`                          | Gracefully shut down background tasks and close DB |
