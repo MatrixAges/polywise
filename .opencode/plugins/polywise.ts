@@ -1,5 +1,3 @@
-import 'reflect-metadata'
+import { OpencodePlugin } from '../../packages/opencode'
 
-import { OpencodePolywisePlugin } from '../../packages/opencode/src/plugin'
-
-export default OpencodePolywisePlugin
+export default OpencodePlugin

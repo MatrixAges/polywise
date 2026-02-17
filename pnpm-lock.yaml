@@ -661,6 +661,9 @@ importers:
       '@opencode-ai/plugin':
         specifier: ^1.2.6
         version: 1.2.6
+      '@opencode-ai/sdk':
+        specifier: ^1.2.6
+        version: 1.2.6
       await-to-js:
         specifier: ^3.0.0
         version: 3.0.0
