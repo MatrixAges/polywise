@@ -26,6 +26,7 @@ npm-debug.log*
 polywise-server
 **/.test_db
 **/.test_vectors
+.polywise
 
 # electron
 release

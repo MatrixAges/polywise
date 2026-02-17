@@ -1,7 +1,11 @@
 {
-	"name": "opencode",
+	"name": "@polywise/opencode",
 	"version": "0.0.1",
 	"type": "module",
+	"main": "./dist/index.js",
+	"exports": {
+		".": "./dist/index.js"
+	},
 	"scripts": {
 		"build": "rslib build",
 		"dev": "rslib build --watch"
@@ -10,7 +14,9 @@
 		"polywise": "workspace:*",
 		"tsyringe": "catalog:",
 		"@opencode-ai/plugin": "^1.2.6",
-		"await-to-js": "^3.0.0"
+		"await-to-js": "^3.0.0",
+		"reflect-metadata": "^0.2.2",
+		"@abraham/reflection": "catalog:"
 	},
 	"devDependencies": {
 		"@rslib/core": "catalog:",

@@ -3,8 +3,7 @@ import to from 'await-to-js'
 import { Polywise } from 'polywise'
 
 import type { Plugin } from '@opencode-ai/plugin'
-
-const saved_messages = new Set<string>()
+import type { Part } from '@opencode-ai/sdk'
 
 interface AppendArgs {
 	text: string
@@ -22,7 +21,13 @@ export const OpencodePolywisePlugin: Plugin = async ctx => {
 	})
 
 	return {
-		'tui.prompt.append': async (input: AppendArgs, output: AppendArgs) => {
+		'chat.message': async (input, output) => {
+			console.log(input)
+
+			const textParts = output.parts.filter(
+				(p): p is Part & { type: 'text'; text: string } => p.type === 'text'
+			)
+
 			const [err, { knowledges, actions, metadata }] = await to(
 				poly.query({
 					query: input.text,
@@ -43,36 +48,23 @@ export const OpencodePolywisePlugin: Plugin = async ctx => {
 			if (metadata) {
 				output.text += `Related Metadata: ${JSON.stringify(actions)}`
 			}
-		},
 
+			console.log(output)
+		},
 		event: async ({ event }) => {
 			if (event.type === 'session.idle') {
-				const session = (event as any).session
+				const id = event.properties.sessionID
 
-				if (!session || !session.messages) return
+				console.log(`[PolywisePlugin] Session idle, fetching messages for: ${id}`)
 
-				for (const msg of session.messages) {
-					if (msg.role === 'assistant' && msg.content && (!msg.id || !saved_messages.has(msg.id))) {
-						const [err] = await to(
-							poly.save({
-								content: msg.content,
-								metrics_ids: [project_id],
-								metadata: {
-									timestamp: Date.now(),
-									role: msg.role,
-									message_id: msg.id,
-									files: msg.files || [],
-									...msg.metadata
-								}
-							})
-						)
+				const { error, data } = await ctx.client.session.messages({
+					path: { id },
+					query: { limit: 1 }
+				})
 
-						if (err)
-							return console.error('[@polywise/opencode-plugin] Save failed:', err.message)
+				if (error) return
 
-						if (msg.id) saved_messages.add(msg.id)
-					}
-				}
+				console.log(`[PolywisePlugin] Session messages: ${JSON.stringify(data)}`)
 			}
 		}
 	}

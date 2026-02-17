@@ -655,6 +655,9 @@ importers:
 
   packages/opencode:
     dependencies:
+      '@abraham/reflection':
+        specifier: 'catalog:'
+        version: 0.13.0
       '@opencode-ai/plugin':
         specifier: ^1.2.6
         version: 1.2.6
@@ -664,6 +667,9 @@ importers:
       polywise:
         specifier: workspace:*
         version: link:../polywise
+      reflect-metadata:
+        specifier: ^0.2.2
+        version: 0.2.2
       tsyringe:
         specifier: 'catalog:'
         version: 4.10.0
