@@ -388,7 +388,7 @@ export default class Polywise {
 			recall_result,
 			search_results
 		})
-		process?.emit('aggregated_results', { knowledges, actions: [] })
+		process?.emit('aggregated_results', { knowledges })
 
 		const reranked_knowledges = await rerankKnowledges(
 			query,
@@ -401,8 +401,7 @@ export default class Polywise {
 		process?.emit('reranked_knowledges', reranked_knowledges)
 
 		return {
-			knowledges: reranked_knowledges,
-			actions: []
+			knowledges: reranked_knowledges
 		}
 	}
 

@@ -131,13 +131,11 @@ export interface Knowledge {
 
 export interface COTDepthResult {
 	knowledges: Array<string>
-	actions: Array<string>
 	metadata: Metadata
 }
 
 export interface FinalQueryResult {
 	knowledges: Array<string>
-	actions: Array<string>
 	metadata: Metadata
 	cot: ChainEmitter
 }

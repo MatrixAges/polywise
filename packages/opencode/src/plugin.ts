@@ -82,11 +82,7 @@ const Index: Plugin = async ctx => {
 
 				if (error) return console.error(error)
 
-				const parts = data[0].parts as Array<TextPart>
-				const output = parts
-					.filter(p => p.type === 'text' && !p.synthetic && !p.id?.startsWith('polywise-'))
-					.map(p => p.text)
-					.join('\n')
+				const output = getTextPart(data[0].parts)
 
 				if (!output.trim()) return
 

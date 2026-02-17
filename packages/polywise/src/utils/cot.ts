@@ -96,11 +96,10 @@ export async function emitCotResult(args: {
 }) {
 	const { emitter, emerged_query, reranked_knowledges, pipeline } = args
 
-	const { knowledges, actions, metadata } = await processResults(emerged_query, reranked_knowledges, pipeline)
+	const { knowledges, metadata } = await processResults(emerged_query, reranked_knowledges, pipeline)
 
 	const cot_result: COTDepthResult = {
 		knowledges,
-		actions,
 		metadata
 	}
 

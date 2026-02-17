@@ -48,17 +48,12 @@ export default class Cortex {
 			process: args.process
 		})
 
-		const {
-			knowledges: k_strings,
-			actions: a_strings,
-			metadata
-		} = await processResults(query, knowledges, this.p.pipeline)
+		const { knowledges: k_strings, metadata } = await processResults(query, knowledges, this.p.pipeline)
 
 		return {
 			knowledges: k_strings,
-			actions: a_strings,
 			metadata,
-			cot: (emitter.finish({ knowledges: k_strings, actions: a_strings, metadata }) as any) || emitter
+			cot: (emitter.finish({ knowledges: k_strings, metadata }) as any) || emitter
 		}
 	}
 
@@ -128,17 +123,16 @@ export default class Cortex {
 		// Final rerank to ensure quality
 		const filtered_knowledges = this.filterByQuality(all_knowledges, DEFAULT_SIMILARITY_THRESHOLD)
 
-		const {
-			knowledges: k_strings,
-			actions: a_strings,
-			metadata
-		} = await processResults(original_query, filtered_knowledges, this.p.pipeline)
+		const { knowledges: k_strings, metadata } = await processResults(
+			original_query,
+			filtered_knowledges,
+			this.p.pipeline
+		)
 
 		return {
 			knowledges: k_strings,
-			actions: a_strings,
 			metadata,
-			cot: (emitter.finish({ knowledges: k_strings, actions: a_strings, metadata }) as any) || emitter
+			cot: (emitter.finish({ knowledges: k_strings, metadata }) as any) || emitter
 		}
 	}
 

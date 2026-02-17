@@ -85,7 +85,6 @@ export async function processResults(query: string, knowledges: Array<Knowledge>
 
 	return {
 		knowledges: k_strings,
-		actions: [],
 		metadata
 	}
 }
