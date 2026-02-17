@@ -2,9 +2,10 @@ import { existsSync, mkdirSync, readFileSync, rmSync } from 'fs'
 import { homedir } from 'os'
 import { dirname, join } from 'path'
 import { fileURLToPath } from 'url'
-
 import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
+import dayjs from 'dayjs'
 
+import { DEFAULT_DATE_FORMAT } from '../src/consts'
 import Log from '../src/Log'
 
 describe.concurrent('Log Module', () => {
@@ -49,7 +50,7 @@ describe.concurrent('Log Module', () => {
 			log.init({ dir: unique_sub_dir, log: true })
 			log.write({ test: 'input' }, { test: 'output' })
 
-			const date = new Date().toISOString().split('T')[0]
+			const date = dayjs().format(DEFAULT_DATE_FORMAT)
 			expect(existsSync(join(unique_sub_dir, `${date}.log`))).toBe(true)
 		})
 
@@ -67,7 +68,7 @@ describe.concurrent('Log Module', () => {
 
 			log.write({ test: 'input' }, { test: 'output' })
 
-			const date = new Date().toISOString().split('T')[0]
+			const date = dayjs().format(DEFAULT_DATE_FORMAT)
 
 			expect(existsSync(join(unique_sub_dir, `${date}.log`))).toBe(true)
 			expect(existsSync(join(unique_sub_dir, `${date}.json`))).toBe(false)
@@ -87,7 +88,7 @@ describe.concurrent('Log Module', () => {
 
 			log.write({ test: 'input' }, { test: 'output' })
 
-			const date = new Date().toISOString().split('T')[0]
+			const date = dayjs().format(DEFAULT_DATE_FORMAT)
 
 			expect(existsSync(join(unique_sub_dir, `${date}.log`))).toBe(false)
 			expect(existsSync(join(unique_sub_dir, `${date}.json`))).toBe(true)
@@ -107,7 +108,7 @@ describe.concurrent('Log Module', () => {
 
 			log.write({ test: 'input' }, { test: 'output' })
 
-			const date = new Date().toISOString().split('T')[0]
+			const date = dayjs().format(DEFAULT_DATE_FORMAT)
 
 			expect(existsSync(join(unique_sub_dir, `${date}.log`))).toBe(false)
 			expect(existsSync(join(unique_sub_dir, `${date}.json`))).toBe(false)
@@ -131,7 +132,7 @@ describe.concurrent('Log Module', () => {
 
 			log.write(test_input, test_output)
 
-			const date = new Date().toISOString().split('T')[0]
+			const date = dayjs().format(DEFAULT_DATE_FORMAT)
 			const log_file_path = join(unique_sub_dir, `${date}.log`)
 
 			expect(existsSync(log_file_path)).toBe(true)
@@ -164,7 +165,7 @@ describe.concurrent('Log Module', () => {
 
 			log.write(test_input, test_output)
 
-			const date = new Date().toISOString().split('T')[0]
+			const date = dayjs().format(DEFAULT_DATE_FORMAT)
 			const json_file_path = join(unique_sub_dir, `${date}.json`)
 
 			expect(existsSync(json_file_path)).toBe(true)
@@ -194,7 +195,7 @@ describe.concurrent('Log Module', () => {
 			log.write({ action: 'first' }, { result: 'result1' })
 			log.write({ action: 'second' }, { result: 'result2' })
 
-			const date = new Date().toISOString().split('T')[0]
+			const date = dayjs().format(DEFAULT_DATE_FORMAT)
 			const log_file_path = join(unique_sub_dir, `${date}.log`)
 
 			const content = readFileSync(log_file_path, 'utf-8')
@@ -220,7 +221,7 @@ describe.concurrent('Log Module', () => {
 
 			log.write({ test: 'timestamp' }, { result: 'ok' })
 
-			const date = new Date().toISOString().split('T')[0]
+			const date = dayjs().format(DEFAULT_DATE_FORMAT)
 			const log_file_path = join(unique_sub_dir, `${date}.log`)
 
 			if (existsSync(log_file_path)) {
@@ -243,7 +244,7 @@ describe.concurrent('Log Module', () => {
 
 			log.write({ input: 'data' }, { output: 'result' })
 
-			const date = new Date().toISOString().split('T')[0]
+			const date = dayjs().format(DEFAULT_DATE_FORMAT)
 			const json_file_path = join(unique_sub_dir, `${date}.json`)
 
 			const json_line = readFileSync(json_file_path, 'utf-8').trim()
@@ -288,7 +289,7 @@ describe.concurrent('Log Module', () => {
 
 			log.write(complex_input, complex_output)
 
-			const date = new Date().toISOString().split('T')[0]
+			const date = dayjs().format(DEFAULT_DATE_FORMAT)
 			const json_file_path = join(unique_sub_dir, `${date}.json`)
 
 			const json_line = readFileSync(json_file_path, 'utf-8').trim()

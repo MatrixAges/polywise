@@ -90,7 +90,8 @@ describe.concurrent('Long Context and Language Traps', () => {
 				query: 'Where is the key for Phase 2 stored?',
 				recall_depth: 2,
 				search_limit: 50,
-				rerank_limit: 20
+				rerank_limit: 20,
+				threshold: 0.1
 			})
 
 			const has_onyx_vault = step1.knowledges.some(content => content.includes('Onyx Vault'))
@@ -101,7 +102,8 @@ describe.concurrent('Long Context and Language Traps', () => {
 				query: 'What are the requirements for Onyx Vault?',
 				recall_depth: 2,
 				search_limit: 50,
-				rerank_limit: 20
+				rerank_limit: 20,
+				threshold: 0.1
 			})
 
 			const has_quantum_signature = step2.knowledges.some(content =>
@@ -167,7 +169,8 @@ describe.concurrent('Long Context and Language Traps', () => {
 				const { knowledges, actions } = await poly.query({
 					query: qa.query,
 					search_limit: 100,
-					rerank_limit: 20
+					rerank_limit: 20,
+					threshold: 0.1
 				})
 				const result = [...knowledges, ...actions]
 				const found = result.some(content => content.includes(qa.expected))

@@ -1,7 +1,7 @@
 import to from 'await-to-js'
 import { injectable } from 'tsyringe'
 
-import { SCHEMA_KNOWLEDGE } from './consts'
+import { DEFAULT_SIMILARITY_THRESHOLD, SCHEMA_KNOWLEDGE } from './consts'
 import * as sql from './sql'
 
 import type Polywise from './Polywise'
@@ -82,7 +82,7 @@ export default class Article {
 	}
 
 	async searchByVector(args: SearchArticlesArgs) {
-		const { query, limit, idol_id, root_ids, metrics_ids } = args
+		const { query, limit, idol_id, root_ids, metrics_ids, threshold } = args
 
 		const embedding = await this.p.pipeline.embed(query)
 
@@ -93,7 +93,8 @@ export default class Article {
 			limit ?? 10,
 			idol_id ?? null,
 			root_ids ?? null,
-			metrics_ids ?? null
+			metrics_ids ?? null,
+			threshold ?? DEFAULT_SIMILARITY_THRESHOLD
 		])
 
 		return res.rows

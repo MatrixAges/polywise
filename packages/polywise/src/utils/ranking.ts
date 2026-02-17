@@ -1,4 +1,5 @@
 import {
+	DEFAULT_SIMILARITY_THRESHOLD,
 	formatRerankDocument,
 	formatSourceInfo,
 	PRIORITY_WEIGHTS,
@@ -17,7 +18,8 @@ export async function rerankKnowledges(
 	candidates: Array<Knowledge>,
 	limit: number,
 	pipeline: Pipeline,
-	queryRaw: (sql: string, params?: Array<any>) => Promise<any>
+	queryRaw: (sql: string, params?: Array<any>) => Promise<any>,
+	threshold: number = DEFAULT_SIMILARITY_THRESHOLD
 ) {
 	if (candidates.length === 0) return []
 
@@ -42,7 +44,10 @@ export async function rerankKnowledges(
 		}
 	})
 
-	const sorted_results = results.sort((a, b) => b.combinedScore - a.combinedScore).slice(0, limit)
+	const sorted_results = results
+		.filter(r => r.combinedScore >= threshold)
+		.sort((a, b) => b.combinedScore - a.combinedScore)
+		.slice(0, limit)
 
 	await stimulateByRanking(sorted_results, queryRaw)
 
@@ -54,7 +59,8 @@ export async function rerankActions(
 	candidates: Array<Action>,
 	limit: number,
 	pipeline: Pipeline,
-	queryRaw: (sql: string, params?: Array<any>) => Promise<any>
+	queryRaw: (sql: string, params?: Array<any>) => Promise<any>,
+	threshold: number = DEFAULT_SIMILARITY_THRESHOLD
 ) {
 	if (candidates.length === 0) {
 		return []
@@ -81,7 +87,10 @@ export async function rerankActions(
 		}
 	})
 
-	const sorted_results = results.sort((a, b) => b.combinedScore - a.combinedScore).slice(0, limit)
+	const sorted_results = results
+		.filter(r => r.combinedScore >= threshold)
+		.sort((a, b) => b.combinedScore - a.combinedScore)
+		.slice(0, limit)
 
 	await stimulateByRanking(sorted_results, queryRaw)
 

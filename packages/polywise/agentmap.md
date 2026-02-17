@@ -92,6 +92,7 @@ This document provides an overview of the packages/polywise module structure and
 					"desc": "Model integrity verification utility for .onnx files",
 					"role": "Utility"
 				},
+				"ranking.ts": { "desc": "Ranking utility", "role": "Utility" },
 				"migration.ts": { "desc": "Database schema migration system", "role": "Module" }
 			}
 		},
@@ -108,6 +109,7 @@ This document provides an overview of the packages/polywise module structure and
 				"role": "Test"
 			},
 			"react.spec.ts": { "desc": "React system and habitual behavior tests", "role": "Test" },
+			"log.spec.ts": { "desc": "Log module tests", "role": "Test" },
 			"datasets": {
 				"behavioral.ts": { "desc": "Behavioral prompts and benchmarks", "role": "Data" },
 				"cognitive.ts": { "desc": "Cognitive and reasoning datasets", "role": "Data" },

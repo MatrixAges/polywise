@@ -56,3 +56,4 @@ export const HABIT_LTM_PREFIX = 'Reinforced behavioral pattern: '
 export const NO_ACTIVITY_SUMMARY = 'No activity today.'
 export const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD'
 export const DEFAULT_TIMESTAMP_FORMAT = 'YYYY-MM-DD HH:mm:ss'
+export const DEFAULT_SIMILARITY_THRESHOLD = 0.5

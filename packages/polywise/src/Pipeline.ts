@@ -171,6 +171,8 @@ export default class Pipeline {
 	}
 
 	async rerank(query: string, documents: Array<string>) {
+		if (documents.length === 0) return []
+
 		return this.reranker_queue.add(async () => {
 			if (this.reranker_config.type === 'custom') {
 				const { fn } = this.reranker_config
@@ -180,9 +182,12 @@ export default class Pipeline {
 
 			const reranker = await this.loadRerankerModel()
 
-			const output = await reranker(query, documents, {
+			const inputs = documents.map(doc => ({ text: query, text_pair: doc }))
+
+			const output = await reranker(inputs, {
 				truncation: true,
-				max_length: 2048
+				max_length: 2048,
+				padding: true
 			})
 
 			return output

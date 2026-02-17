@@ -93,7 +93,7 @@ const Index: Plugin = async ctx => {
 				if (metadata) others['metadata'] = metadata
 
 				try {
-					poly.save({ metrics_ids: [project_id], content: output, ...others })
+					await poly.save({ metrics_ids: [project_id], content: output, ...others })
 				} catch (err) {
 					console.error(err.message)
 				}

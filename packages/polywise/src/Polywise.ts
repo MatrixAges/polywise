@@ -14,6 +14,7 @@ import {
 	DEFAULT_EDGE_WEIGHT,
 	DEFAULT_NODE_THRESHOLD,
 	DEFAULT_RECALL_DEPTH,
+	DEFAULT_SIMILARITY_THRESHOLD,
 	DEFAULT_TIMESTAMP_FORMAT,
 	getProactiveStatementPrompt,
 	HABIT_CONSOLIDATION_WEIGHT,
@@ -433,7 +434,8 @@ export default class Polywise {
 			idol_id,
 			root_ids,
 			metrics_ids,
-			process
+			process,
+			threshold = DEFAULT_SIMILARITY_THRESHOLD
 		} = args
 
 		const query_embedding = (await this.pipeline.embed(query)) as Array<number>
@@ -452,7 +454,14 @@ export default class Polywise {
 			query,
 			rerank_limit: search_limit,
 			vectorSearch: () =>
-				this.article.searchByVector({ query, limit: search_limit, idol_id, root_ids, metrics_ids }),
+				this.article.searchByVector({
+					query,
+					limit: search_limit,
+					idol_id,
+					root_ids,
+					metrics_ids,
+					threshold
+				}),
 			fulltextSearch: () =>
 				this.article.searchByText({ query, limit: search_limit, idol_id, root_ids, metrics_ids })
 		})
@@ -485,7 +494,8 @@ export default class Polywise {
 			knowledges,
 			rerank_limit,
 			this.pipeline,
-			this.queryRaw.bind(this)
+			this.queryRaw.bind(this),
+			threshold
 		)
 		process?.emit('reranked_knowledges', reranked_knowledges)
 
@@ -494,7 +504,8 @@ export default class Polywise {
 			actions,
 			rerank_limit,
 			this.pipeline,
-			this.queryRaw.bind(this)
+			this.queryRaw.bind(this),
+			threshold
 		)
 		process?.emit('reranked_actions', reranked_actions)
 

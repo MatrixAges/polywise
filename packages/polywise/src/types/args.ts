@@ -119,6 +119,7 @@ export interface AddArticleArgs extends FiltersArgs {
 export interface SearchArticlesArgs extends FiltersArgs {
 	query: string
 	limit?: number
+	threshold?: number
 }
 
 export interface ArticleArgs {
@@ -161,6 +162,7 @@ export interface QueryArgs extends FiltersArgs {
 	stimulate_on_recall?: boolean
 	habit_threshold?: number
 	process?: import('../Process').default
+	threshold?: number
 }
 
 export interface AggregateResultsArgs {
@@ -184,6 +186,7 @@ export interface SingleSearchArgs extends FiltersArgs {
 	rerank_limit: number
 	stimulate_on_recall: boolean
 	process?: import('../Process').default
+	threshold?: number
 }
 
 export interface ExecuteCotArgs extends FiltersArgs {
