@@ -90,7 +90,7 @@ function collectImplicitResults(recall_result: AggregateResultsArgs['recall_resu
 			relevanceScore: node.potential * RELEVANCE_SCORE_FACTOR,
 			memoryStrength: node.potential,
 			combinedScore: 0,
-			source: 'implicit' as any,
+			source: 'implicit',
 			stimulated: true,
 			metadata: node.metadata
 		})

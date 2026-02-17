@@ -120,7 +120,7 @@ export interface ContextResult {
 export interface Memory {
 	id: number
 	content: string
-	source: 'memory' | 'external' | 'implicit' | 'rules'
+	source: 'memory' | 'external' | 'implicit'
 	rerankScore: number
 	relevanceScore: number
 	combinedScore: number

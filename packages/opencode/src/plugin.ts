@@ -33,7 +33,7 @@ const Index: Plugin = async ctx => {
 
 			if (err) return console.error(err.message)
 
-			const { knowledges, metadata } = res
+			const { memory, metadata } = res
 
 			console.log('--------------')
 			console.log('[PolywisePlugin] query: ', query)
@@ -47,11 +47,11 @@ const Index: Plugin = async ctx => {
 				synthetic: true
 			} as TextPart
 
-			if (knowledges.length > 0) {
+			if (memory.length > 0) {
 				output.parts.push({
 					...common,
 					id: `polywise-memory-${Date.now()}`,
-					text: `Related Memory: ${JSON.stringify(knowledges)}`
+					text: `Related Memory: ${JSON.stringify(memory)}`
 				})
 			}
 

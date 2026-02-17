@@ -35,8 +35,8 @@ export const EDGE_LEARNING_FACTOR = 0.2
 export const EDGE_DECAY_FACTOR = 0.001
 export const EDGE_DISTANCE_MIN = 0.2
 export const PRIORITY_WEIGHTS = {
-	rules: 1.0,
-	brain: 0.9,
+	memory: 1.0,
+	implicit: 0.9,
 	external: 0.6
 }
 export const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD'
