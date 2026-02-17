@@ -8,7 +8,7 @@ export type {
 	ArticleArgs,
 	ProcessArticleArgs,
 	QueryArgs,
-	Knowledge,
+	Memory,
 	PolywiseArgs,
 	LogArgs,
 	EmbeddingConfig,

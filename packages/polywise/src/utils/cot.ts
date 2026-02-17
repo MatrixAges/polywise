@@ -11,20 +11,20 @@ import { processResults } from './processResults'
 
 import type Polywise from '@/Polywise'
 import type Pipeline from '../Pipeline'
-import type { COTDepthResult, ExecuteCotArgs, Knowledge } from '../types'
+import type { COTDepthResult, Memory } from '../types'
 import type ChainEmitter from './ChainEmitter'
 
 export async function formEmergentQuery(
 	args: {
 		query: string
 		current_depth: number
-		initial_knowledges: Array<Knowledge>
+		initial_memory: Array<Memory>
 	},
 	stimulateNodes: (node_ids: Array<number>, intensity: number) => Promise<void>
 ) {
-	const { query, current_depth, initial_knowledges } = args
+	const { query, current_depth, initial_memory } = args
 
-	const top_results = initial_knowledges.slice(0, COT_MAX_RESULTS)
+	const top_results = initial_memory.slice(0, COT_MAX_RESULTS)
 	const insights = top_results.map(r => r.content.slice(0, 50)).join(', ')
 	const emerged_query = formatPerceiveQuery(query, insights)
 	const emerged_node_ids = top_results.map(r => r.id)
@@ -77,13 +77,13 @@ export async function performEmergentSearch(
 			poly.article.searchByText({ query: emerged_query, limit: search_limit * SEARCH_LIMIT_FACTOR })
 	})
 
-	const { knowledges } = await aggregateResults({
+	const { memory } = await aggregateResults({
 		recall_result: emerged_recall_result,
 		search_results: emerged_search_results
 	})
 
 	return {
-		emerged_knowledges: knowledges.filter(k => !history_ids.has(k.id)),
+		emerged_memory: memory.filter(k => !history_ids.has(k.id)),
 		emerged_recall_result
 	}
 }
@@ -91,15 +91,15 @@ export async function performEmergentSearch(
 export async function emitCotResult(args: {
 	emitter: ChainEmitter
 	emerged_query: string
-	reranked_knowledges: Array<Knowledge>
+	reranked_memory: Array<Memory>
 	pipeline: Pipeline
 }) {
-	const { emitter, emerged_query, reranked_knowledges, pipeline } = args
+	const { emitter, emerged_query, reranked_memory, pipeline } = args
 
-	const { knowledges, metadata } = await processResults(emerged_query, reranked_knowledges, pipeline)
+	const { memory, metadata } = await processResults(emerged_query, reranked_memory, pipeline)
 
 	const cot_result: COTDepthResult = {
-		knowledges,
+		memory,
 		metadata
 	}
 

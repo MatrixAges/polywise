@@ -44,39 +44,35 @@ describe('Chain of Thought (CoT) Iterative Search', () => {
 
 	describe('Single Search (cot_depth=1)', () => {
 		it('should find relevant microservices content', async () => {
-			const { knowledges } = await poly.query({
+			const { memory } = await poly.query({
 				query: 'microservices architecture patterns',
 				cot_depth: 1,
 				search_limit: 5,
 				rerank_limit: 5
 			})
 
-			// Should find software-related content
-			const all_text = knowledges.join(' ').toLowerCase()
+			const all_text = memory.join(' ').toLowerCase()
 			const has_microservices = all_text.includes('microservice')
 			const has_architecture = all_text.includes('architecture')
 			const has_container = all_text.includes('container') || all_text.includes('docker')
 
-			// At least 2 relevant keywords should be present
 			const relevant_keywords = [has_microservices, has_architecture, has_container].filter(Boolean).length
 			expect(relevant_keywords).toBeGreaterThanOrEqual(2)
-			expect(knowledges.length).toBeGreaterThan(0)
+			expect(memory.length).toBeGreaterThan(0)
 		})
 
 		it('should filter out neuroscience content when searching for software', async () => {
-			const { knowledges } = await poly.query({
+			const { memory } = await poly.query({
 				query: 'API gateway and service mesh',
 				cot_depth: 1,
 				search_limit: 5,
 				rerank_limit: 5
 			})
 
-			// Should NOT contain neuroscience content
-			const all_text = knowledges.join(' ').toLowerCase()
+			const all_text = memory.join(' ').toLowerCase()
 			const has_neuroscience =
 				all_text.includes('neuron') || all_text.includes('brain') || all_text.includes('synapse')
 
-			// Should have software-related content
 			const has_software =
 				all_text.includes('service') || all_text.includes('api') || all_text.includes('gateway')
 
@@ -87,7 +83,6 @@ describe('Chain of Thought (CoT) Iterative Search', () => {
 
 	describe('Iterative Search (cot_depth=3)', () => {
 		it('should find more comprehensive results than single search', async () => {
-			// First, do a single search
 			const single_result = await poly.query({
 				query: 'container orchestration',
 				cot_depth: 1,
@@ -95,7 +90,6 @@ describe('Chain of Thought (CoT) Iterative Search', () => {
 				rerank_limit: 5
 			})
 
-			// Then do iterative search
 			const iterative_result = await poly.query({
 				query: 'container orchestration',
 				cot_depth: 3,
@@ -103,37 +97,31 @@ describe('Chain of Thought (CoT) Iterative Search', () => {
 				rerank_limit: 5
 			})
 
-			// Iterative search should collect more results from different queries
-			expect(iterative_result.knowledges.length).toBeGreaterThanOrEqual(single_result.knowledges.length)
+			expect(iterative_result.memory.length).toBeGreaterThanOrEqual(single_result.memory.length)
 
-			// Results should be diverse (contain different keywords)
-			const all_text = iterative_result.knowledges.join(' ').toLowerCase()
+			const all_text = iterative_result.memory.join(' ').toLowerCase()
 			const has_docker = all_text.includes('docker') || all_text.includes('container')
 			const has_kubernetes = all_text.includes('kubernetes') || all_text.includes('k8s')
 			const has_orchestration = all_text.includes('orchestr')
 
-			// Should cover multiple aspects
 			const aspects = [has_docker, has_kubernetes, has_orchestration].filter(Boolean).length
 			expect(aspects).toBeGreaterThanOrEqual(2)
 		})
 
 		it('should maintain relevance across iterations', async () => {
-			const { knowledges } = await poly.query({
+			const { memory } = await poly.query({
 				query: 'circuit breaker pattern resilience',
 				cot_depth: 3,
 				search_limit: 5,
 				rerank_limit: 5
 			})
 
-			// All results should be relevant to software patterns
-			const all_text = knowledges.join(' ').toLowerCase()
+			const all_text = memory.join(' ').toLowerCase()
 
-			// Should contain software-related terms
 			const has_pattern = all_text.includes('pattern')
 			const has_service = all_text.includes('service')
 			const has_architecture = all_text.includes('architecture')
 
-			// At least 2 relevant keywords
 			const relevant_keywords = [has_pattern, has_service, has_architecture].filter(Boolean).length
 			expect(relevant_keywords).toBeGreaterThanOrEqual(2)
 		})
@@ -141,48 +129,40 @@ describe('Chain of Thought (CoT) Iterative Search', () => {
 
 	describe('Content Relevance Quality', () => {
 		it('should return neuroscience content when query matches that domain', async () => {
-			const { knowledges } = await poly.query({
+			const { memory } = await poly.query({
 				query: 'neural networks and synaptic connections',
 				cot_depth: 1,
 				search_limit: 5,
 				rerank_limit: 5
 			})
 
-			// Should contain neuroscience content
-			const all_text = knowledges.join(' ').toLowerCase()
+			const all_text = memory.join(' ').toLowerCase()
 			const has_neuroscience =
 				all_text.includes('neuron') || all_text.includes('synapse') || all_text.includes('brain')
 
-			// Should NOT contain software content
 			const has_software =
 				all_text.includes('microservice') || all_text.includes('container') || all_text.includes('api')
 
 			expect(has_neuroscience).toBe(true)
-			// Software content may appear due to vector similarity, but should be ranked lower
-			// We just check neuroscience is present
 		})
 
 		it('should provide high-quality results with metadata', async () => {
-			const { knowledges, metadata } = await poly.query({
+			const { memory, metadata } = await poly.query({
 				query: 'distributed system scalability',
 				cot_depth: 2,
 				search_limit: 5,
 				rerank_limit: 5
 			})
 
-			// Should have results
-			expect(knowledges.length).toBeGreaterThan(0)
+			expect(memory.length).toBeGreaterThan(0)
 
-			// Metadata should be present
 			expect(metadata).toBeDefined()
 
-			// Results should be relevant
-			const all_text = knowledges.join(' ').toLowerCase()
+			const all_text = memory.join(' ').toLowerCase()
 			const has_distributed = all_text.includes('distribut')
 			const has_system = all_text.includes('system')
 			const has_scale = all_text.includes('scal')
 
-			// At least 2 relevant terms
 			const relevant_terms = [has_distributed, has_system, has_scale].filter(Boolean).length
 			expect(relevant_terms).toBeGreaterThanOrEqual(2)
 		})

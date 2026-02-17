@@ -11,11 +11,11 @@ import {
 import * as sql_brain from '../sql/Brain'
 
 import type Pipeline from '../Pipeline'
-import type { Knowledge } from '../types'
+import type { Memory } from '../types'
 
-export async function rerankKnowledges(
+export async function rerankMemory(
 	query: string,
-	candidates: Array<Knowledge>,
+	candidates: Array<Memory>,
 	limit: number,
 	pipeline: Pipeline,
 	queryRaw: (sql: string, params?: Array<any>) => Promise<any>,
@@ -33,7 +33,7 @@ export async function rerankKnowledges(
 
 	const rerank_scores = await pipeline.rerank(query, documents)
 
-	const results: Array<Knowledge> = valid_candidates.map((candidate, index) => {
+	const results: Array<Memory> = valid_candidates.map((candidate, index) => {
 		const rerankScore = rerank_scores[index]?.score ?? 0
 		const priority_weight = (PRIORITY_WEIGHTS as any)[candidate.source] ?? PRIORITY_WEIGHTS.external
 
@@ -57,7 +57,7 @@ export async function rerankKnowledges(
 }
 
 async function stimulateByRanking(
-	results: Array<Knowledge>,
+	results: Array<Memory>,
 	queryRaw: (sql: string, params?: Array<any>) => Promise<any>
 ) {
 	if (results.length === 0) return

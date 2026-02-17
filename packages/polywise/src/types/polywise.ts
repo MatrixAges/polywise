@@ -117,7 +117,7 @@ export interface ContextResult {
 	article_ids: Array<number>
 }
 
-export interface Knowledge {
+export interface Memory {
 	id: number
 	content: string
 	source: 'memory' | 'external' | 'implicit' | 'rules'
@@ -130,12 +130,12 @@ export interface Knowledge {
 }
 
 export interface COTDepthResult {
-	knowledges: Array<string>
+	memory: Array<string>
 	metadata: Metadata
 }
 
 export interface FinalQueryResult {
-	knowledges: Array<string>
+	memory: Array<string>
 	metadata: Metadata
 	cot: ChainEmitter
 }

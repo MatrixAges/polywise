@@ -5,7 +5,7 @@ import Polywise from './Polywise'
 import { ChainEmitter, extractKeywords, processResults } from './utils'
 
 import type { CortexProcessArgs } from './types/cortex'
-import type { Knowledge } from './types/polywise'
+import type { Memory } from './types/polywise'
 
 @injectable()
 export default class Cortex {
@@ -36,7 +36,7 @@ export default class Cortex {
 	}
 
 	private async executeSingleSearch(query: string, args: CortexProcessArgs, emitter: ChainEmitter) {
-		const { knowledges } = await this.p.executeSingleSearch({
+		const { memory } = await this.p.executeSingleSearch({
 			query,
 			recall_depth: args.recall_depth,
 			search_limit: args.search_limit,
@@ -48,30 +48,27 @@ export default class Cortex {
 			process: args.process
 		})
 
-		const { knowledges: k_strings, metadata } = await processResults(query, knowledges, this.p.pipeline)
+		const { memory: k_strings, metadata } = await processResults(query, memory, this.p.pipeline)
 
 		return {
-			knowledges: k_strings,
+			memory: k_strings,
 			metadata,
-			cot: (emitter.finish({ knowledges: k_strings, metadata }) as any) || emitter
+			cot: (emitter.finish({ memory: k_strings, metadata }) as any) || emitter
 		}
 	}
 
 	private async executeIterativeSearch(original_query: string, args: CortexProcessArgs, emitter: ChainEmitter) {
 		const { cot_depth = 2, process } = args
 
-		// Track all collected knowledges (for deduplication)
-		const collected_knowledges = new Map<number, Knowledge>()
+		const collected_memory = new Map<number, Memory>()
 		const used_queries = new Set<string>()
 
 		let current_query = original_query
 		used_queries.add(current_query)
 
-		// Iterative search rounds
 		for (let depth = 0; depth < cot_depth; depth++) {
 			process?.emit('cot_iteration', { depth: depth + 1, query: current_query })
 
-			// Execute search for current query
 			const search_results = await this.p.executeSingleSearch({
 				query: current_query,
 				recall_depth: args.recall_depth,
@@ -84,28 +81,25 @@ export default class Cortex {
 				process: args.process
 			})
 
-			// Filter and collect high-quality results
-			const new_knowledges = this.filterNewKnowledges(search_results.knowledges, collected_knowledges)
+			const new_memory = this.filterNewMemory(search_results.memory, collected_memory)
 
-			if (new_knowledges.length === 0) {
+			if (new_memory.length === 0) {
 				process?.emit('cot_converged', { depth: depth + 1, reason: 'no_new_results' })
 				break
 			}
 
-			// Add new knowledges to collection
-			for (const k of new_knowledges) {
-				collected_knowledges.set(k.id, k)
+			for (const k of new_memory) {
+				collected_memory.set(k.id, k)
 			}
 
 			process?.emit('cot_iteration_results', {
 				depth: depth + 1,
-				new_results: new_knowledges.length,
-				total_results: collected_knowledges.size
+				new_results: new_memory.length,
+				total_results: collected_memory.size
 			})
 
-			// Generate next query for next iteration (if not last round)
 			if (depth < cot_depth - 1) {
-				const next_query = this.generateNextQuery(original_query, new_knowledges, used_queries)
+				const next_query = this.generateNextQuery(original_query, new_memory, used_queries)
 
 				if (!next_query || used_queries.has(next_query)) {
 					process?.emit('cot_converged', { depth: depth + 1, reason: 'no_new_query' })
@@ -117,51 +111,43 @@ export default class Cortex {
 			}
 		}
 
-		// Convert collected knowledges to array and process
-		const all_knowledges = Array.from(collected_knowledges.values())
+		const all_memory = Array.from(collected_memory.values())
 
-		// Final rerank to ensure quality
-		const filtered_knowledges = this.filterByQuality(all_knowledges, DEFAULT_SIMILARITY_THRESHOLD)
+		const filtered_memory = this.filterByQuality(all_memory, DEFAULT_SIMILARITY_THRESHOLD)
 
-		const { knowledges: k_strings, metadata } = await processResults(
+		const { memory: k_strings, metadata } = await processResults(
 			original_query,
-			filtered_knowledges,
+			filtered_memory,
 			this.p.pipeline
 		)
 
 		return {
-			knowledges: k_strings,
+			memory: k_strings,
 			metadata,
-			cot: (emitter.finish({ knowledges: k_strings, metadata }) as any) || emitter
+			cot: (emitter.finish({ memory: k_strings, metadata }) as any) || emitter
 		}
 	}
 
-	private filterNewKnowledges(
-		new_knowledges: Array<Knowledge>,
-		collected: Map<number, Knowledge>
-	): Array<Knowledge> {
-		return new_knowledges.filter(k => {
-			// Skip if already collected (by id)
+	private filterNewMemory(new_memory: Array<Memory>, collected: Map<number, Memory>): Array<Memory> {
+		return new_memory.filter(k => {
 			if (collected.has(k.id)) return false
 
-			// Skip if combined score is too low
 			if (k.combinedScore < DEFAULT_SIMILARITY_THRESHOLD * 0.8) return false
 
 			return true
 		})
 	}
 
-	private filterByQuality(knowledges: Array<Knowledge>, threshold: number): Array<Knowledge> {
-		return knowledges.filter(k => k.combinedScore >= threshold)
+	private filterByQuality(memory: Array<Memory>, threshold: number): Array<Memory> {
+		return memory.filter(k => k.combinedScore >= threshold)
 	}
 
 	private generateNextQuery(
 		original_query: string,
-		new_knowledges: Array<Knowledge>,
+		new_memory: Array<Memory>,
 		used_queries: Set<string>
 	): string | null {
-		// Extract keywords from new knowledges
-		const content_text = new_knowledges.map(k => k.content).join(' ')
+		const content_text = new_memory.map(k => k.content).join(' ')
 		const keywords = extractKeywords(content_text)
 
 		if (keywords.length === 0) return null

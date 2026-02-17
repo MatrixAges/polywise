@@ -85,14 +85,14 @@ describe('Polywise Process', () => {
 
 			const final_result = captured_total.final_result
 			expect(final_result).toBeDefined()
-			expect(final_result.knowledges.length).toBeGreaterThan(0)
+			expect(final_result.memory.length).toBeGreaterThan(0)
 
-			const all_texts = final_result.knowledges.join(' ').toLowerCase()
-			for (const keyword of test_case.expected_knowledges_keywords) {
+			const all_texts = final_result.memory.join(' ').toLowerCase()
+			for (const keyword of test_case.expected_memory_keywords) {
 				expect(all_texts).toContain(keyword.toLowerCase())
 			}
 
-			expect(captured_total.reranked_knowledges).toBeDefined()
+			expect(captured_total.reranked_memory).toBeDefined()
 		})
 	}
 

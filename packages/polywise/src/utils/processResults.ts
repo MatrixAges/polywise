@@ -1,8 +1,8 @@
 import type Pipeline from '../Pipeline'
-import type { Knowledge, Metadata } from '../types'
+import type { Memory, Metadata } from '../types'
 
-export async function processResults(query: string, knowledges: Array<Knowledge>, pipeline: Pipeline) {
-	const k_strings = knowledges.map(k => k.content)
+export async function processResults(query: string, memory: Array<Memory>, pipeline: Pipeline) {
+	const k_strings = memory.map(k => k.content)
 
 	const descs: Array<string> = []
 	const links: Array<string> = []
@@ -11,7 +11,7 @@ export async function processResults(query: string, knowledges: Array<Knowledge>
 	const seen_files = new Set<string>()
 	const metadata: Metadata = {}
 
-	for (const item of knowledges) {
+	for (const item of memory) {
 		if (item.metadata) {
 			const m = item.metadata
 
@@ -84,7 +84,7 @@ export async function processResults(query: string, knowledges: Array<Knowledge>
 	await Promise.all(promises)
 
 	return {
-		knowledges: k_strings,
+		memory: k_strings,
 		metadata
 	}
 }

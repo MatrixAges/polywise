@@ -94,7 +94,7 @@ describe.concurrent('Long Context and Language Traps', () => {
 				threshold: 0.1
 			})
 
-			const has_onyx_vault = step1.knowledges.some(content => content.includes('Onyx Vault'))
+			const has_onyx_vault = step1.memory.some(content => content.includes('Onyx Vault'))
 
 			expect(has_onyx_vault).toBe(true)
 
@@ -106,7 +106,7 @@ describe.concurrent('Long Context and Language Traps', () => {
 				threshold: 0.1
 			})
 
-			const has_quantum_signature = step2.knowledges.some(content =>
+			const has_quantum_signature = step2.memory.some(content =>
 				content.includes('quantum-resistant signature')
 			)
 
@@ -166,13 +166,13 @@ describe.concurrent('Long Context and Language Traps', () => {
 	describe.concurrent('Random Generated QA', () => {
 		it('should retrieve randomly selected articles correctly', async () => {
 			for (const qa of random_qas) {
-				const { knowledges } = await poly.query({
+				const { memory } = await poly.query({
 					query: qa.query,
 					search_limit: 100,
 					rerank_limit: 20,
 					threshold: 0.1
 				})
-				const found = knowledges.some(content => content.includes(qa.expected))
+				const found = memory.some(content => content.includes(qa.expected))
 
 				expect(found).toBe(true)
 			}

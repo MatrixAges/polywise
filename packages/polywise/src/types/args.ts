@@ -2,7 +2,7 @@ import type { PGlite } from '@electric-sql/pglite'
 import type Polywise from '../Polywise'
 import type { ChainEmitter } from '../utils'
 import type { LogArgs } from './log'
-import type { Knowledge, Metadata } from './polywise'
+import type { Memory, Metadata } from './polywise'
 
 export interface BrainArgs {
 	poly: Polywise
@@ -164,7 +164,7 @@ export interface ExecuteCotArgs extends FiltersArgs {
 	search_limit: number
 	rerank_limit: number
 	stimulate_on_recall: boolean
-	initial_knowledges: Array<Knowledge>
+	initial_memory: Array<Memory>
 	emitter: ChainEmitter
 	history_ids: Set<number>
 }

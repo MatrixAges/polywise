@@ -29,7 +29,7 @@ import {
 	migrate,
 	recallNodesByKeywords,
 	recallRelatedNodes,
-	rerankKnowledges,
+	rerankMemory,
 	stimulateNodes,
 	strengthenRelatedEdges,
 	validateMigrations
@@ -394,24 +394,24 @@ export default class Polywise {
 			fulltextSearch: () => Promise.resolve(fulltextResults)
 		})
 
-		const { knowledges } = await aggregateResults({
+		const { memory } = await aggregateResults({
 			recall_result,
 			search_results
 		})
-		process?.emit('aggregated_results', { knowledges })
+		process?.emit('aggregated_results', { memory })
 
-		const reranked_knowledges = await rerankKnowledges(
+		const reranked_memory = await rerankMemory(
 			query,
-			knowledges,
+			memory,
 			rerank_limit,
 			this.pipeline,
 			this.queryRaw.bind(this),
 			threshold
 		)
-		process?.emit('reranked_knowledges', reranked_knowledges)
+		process?.emit('reranked_memory', reranked_memory)
 
 		return {
-			knowledges: reranked_knowledges
+			memory: reranked_memory
 		}
 	}
 

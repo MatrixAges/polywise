@@ -128,7 +128,7 @@ describe.concurrent('Log Module', () => {
 			})
 
 			const test_input = { query: '什么是人工智能', recall_depth: 5 }
-			const test_output = { knowledges: [{ id: 1, content: '人工智能是模拟人类智能的技术' }] }
+			const test_output = { memory: [{ id: 1, content: '人工智能是模拟人类智能的技术' }] }
 
 			log.write(test_input, test_output)
 
@@ -279,7 +279,7 @@ describe.concurrent('Log Module', () => {
 			}
 
 			const complex_output = {
-				knowledges: [
+				memory: [
 					{ id: 1, content: '知识1', metadata: { source: 'article' } },
 					{ id: 2, content: '知识2', metadata: { source: 'external' } }
 				],

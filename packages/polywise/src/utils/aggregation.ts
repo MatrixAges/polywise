@@ -1,26 +1,26 @@
 import { MEMORY_SCORE_BOOST, POTENTIAL_THRESHOLD, RELEVANCE_SCORE_FACTOR } from '../consts'
 import calculateMemoryStrength from './calculateMemoryStrength'
 
-import type { AggregateResultsArgs, Knowledge } from '../types'
+import type { AggregateResultsArgs, Memory } from '../types'
 
 export async function aggregateResults(args: AggregateResultsArgs) {
 	const { recall_result, search_results } = args
 
-	const knowledges: Array<Knowledge> = []
+	const memory: Array<Memory> = []
 
-	collectMemoryKnowledges(recall_result, search_results, knowledges)
+	collectMemoryResults(recall_result, search_results, memory)
 
-	collectExternalResults(recall_result, search_results, knowledges)
+	collectExternalResults(recall_result, search_results, memory)
 
-	collectImplicitResults(recall_result, knowledges)
+	collectImplicitResults(recall_result, memory)
 
-	return { knowledges }
+	return { memory }
 }
 
-function collectMemoryKnowledges(
+function collectMemoryResults(
 	recall_result: AggregateResultsArgs['recall_result'],
 	search_results: Array<any>,
-	knowledges: Array<Knowledge>
+	memory: Array<Memory>
 ) {
 	for (const context of recall_result.related_contexts) {
 		for (const article_id of context.article_ids) {
@@ -29,7 +29,7 @@ function collectMemoryKnowledges(
 			if (article) {
 				const memory_strength = calculateMemoryStrength(context)
 
-				knowledges.push({
+				memory.push({
 					id: article.id,
 					content: article.content,
 					rerankScore: article.rerankScore,
@@ -48,7 +48,7 @@ function collectMemoryKnowledges(
 function collectExternalResults(
 	recall_result: AggregateResultsArgs['recall_result'],
 	search_results: Array<any>,
-	knowledges: Array<Knowledge>
+	memory: Array<Memory>
 ) {
 	const stimulated_node_ids = new Set(recall_result.stimulated_nodes)
 	const node_potential_map = new Map<number, number>()
@@ -58,11 +58,11 @@ function collectExternalResults(
 	}
 
 	for (const result of search_results) {
-		if (!knowledges.find(c => c.id === result.id)) {
+		if (!memory.find(c => c.id === result.id)) {
 			const is_stimulated = stimulated_node_ids.has(result.id)
 			const memory_strength = node_potential_map.get(result.id) ?? 0
 
-			knowledges.push({
+			memory.push({
 				id: result.id,
 				content: result.content,
 				rerankScore: result.rerankScore,
@@ -77,13 +77,13 @@ function collectExternalResults(
 	}
 }
 
-function collectImplicitResults(recall_result: AggregateResultsArgs['recall_result'], knowledges: Array<Knowledge>) {
+function collectImplicitResults(recall_result: AggregateResultsArgs['recall_result'], memory: Array<Memory>) {
 	const high_potential_nodes = recall_result.nodes
-		.filter(n => n.potential > POTENTIAL_THRESHOLD && !knowledges.find(k => k.id === n.id))
+		.filter(n => n.potential > POTENTIAL_THRESHOLD && !memory.find(k => k.id === n.id))
 		.slice(0, 5)
 
 	for (const node of high_potential_nodes) {
-		knowledges.push({
+		memory.push({
 			id: node.id,
 			content: node.label,
 			rerankScore: node.potential,

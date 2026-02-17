@@ -93,13 +93,13 @@ Retrieve relevant information based on natural language:
 
 ```typescript
 // Single search (fast)
-const { knowledges, metadata } = await poly.query({
+const { memory, metadata } = await poly.query({
 	query: 'How do qubits work?',
 	cot_depth: 1
 })
 
 // Iterative search (comprehensive)
-const { knowledges, metadata } = await poly.query({
+const { memory, metadata } = await poly.query({
 	query: 'microservices architecture patterns',
 	cot_depth: 3, // Number of search iterations
 	recall_depth: 2, // Graph traversal depth
@@ -107,7 +107,7 @@ const { knowledges, metadata } = await poly.query({
 	rerank_limit: 10 // Final result limit
 })
 
-console.log(knowledges) // Simplified knowledge strings
+console.log(memory) // Simplified knowledge strings
 console.log(metadata) // Merged and reranked metadata (links, files, etc.)
 ```
 

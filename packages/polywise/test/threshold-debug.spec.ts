@@ -87,7 +87,7 @@ FRESH → TIRED → SLEEPING → FRESH 状态循环`
 				}
 			})
 
-			const { knowledges } = await poly.query({
+			const { memory } = await poly.query({
 				query: '记忆机制',
 				threshold: th,
 				search_limit: 10,
@@ -95,19 +95,19 @@ FRESH → TIRED → SLEEPING → FRESH 状态循环`
 				process: p
 			})
 
-			console.log(`threshold=${th}: ${knowledges.length} results`)
+			console.log(`threshold=${th}: ${memory.length} results`)
 		})
 
 		it('should query with wrong metrics_ids (should return empty)', async () => {
-			const { knowledges } = await poly.query({
+			const { memory } = await poly.query({
 				query: '记忆机制',
 				threshold: 0.0,
 				search_limit: 10,
 				metrics_ids: ['wrong_metrics_id']
 			})
-			console.log('Query with wrong metrics_ids:', knowledges.length)
+			console.log('Query with wrong metrics_ids:', memory.length)
 
-			expect(knowledges.length).eq(0)
+			expect(memory.length).eq(0)
 		})
 	})
 })

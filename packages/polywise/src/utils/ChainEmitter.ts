@@ -2,11 +2,11 @@ import type { COTDepthResult, Metadata } from '../types'
 
 export default class ChainEmitter {
 	private callbacks: Set<(data: COTDepthResult, total: Array<COTDepthResult>) => void> = new Set()
-	private finish_callbacks: Set<(data: { knowledges: Array<string>; metadata: Metadata }) => void> = new Set()
+	private finish_callbacks: Set<(data: { memory: Array<string>; metadata: Metadata }) => void> = new Set()
 	private isActive = true
 	private is_finished = false
 	private steps: Array<COTDepthResult> = []
-	private last_data: { knowledges: Array<string>; metadata: Metadata } | null = null
+	private last_data: { memory: Array<string>; metadata: Metadata } | null = null
 
 	on(callback: (data: COTDepthResult, total: Array<COTDepthResult>) => void): ChainEmitter {
 		if (this.isActive) {
@@ -16,7 +16,7 @@ export default class ChainEmitter {
 		return this
 	}
 
-	onFinish(callback: (data: { knowledges: Array<string>; metadata: Metadata }) => void): ChainEmitter {
+	onFinish(callback: (data: { memory: Array<string>; metadata: Metadata }) => void): ChainEmitter {
 		if (this.is_finished && this.last_data) {
 			callback(this.last_data)
 
@@ -49,7 +49,7 @@ export default class ChainEmitter {
 		}
 	}
 
-	finish(data: { knowledges: Array<string>; metadata: Metadata }): void {
+	finish(data: { memory: Array<string>; metadata: Metadata }): void {
 		if (!this.isActive || this.is_finished) return
 
 		this.is_finished = true
@@ -67,7 +67,7 @@ export default class ChainEmitter {
 	}
 
 	async toPromise() {
-		return new Promise<{ knowledges: Array<string>; metadata: Metadata }>(resolve => {
+		return new Promise<{ memory: Array<string>; metadata: Metadata }>(resolve => {
 			this.onFinish(resolve)
 		})
 	}
