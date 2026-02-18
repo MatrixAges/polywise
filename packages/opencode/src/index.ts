@@ -92,7 +92,7 @@ export const OpencodePlugin: Plugin = async ctx => {
 								})
 							}
 
-							const { memory, metadata } = res
+							const { memory } = res
 
 							console.log('[PolywisePlugin] query: ', query)
 							console.log('[PolywisePlugin] memory find: ', JSON.stringify(res))
@@ -102,13 +102,6 @@ export const OpencodePlugin: Plugin = async ctx => {
 
 							if (memory.length > 0) {
 								targets += `Related Memory: \n${JSON.stringify(memory)}\n`
-							}
-
-							if (
-								metadata &&
-								(metadata.desc || metadata.files?.length || metadata.links?.length)
-							) {
-								targets += `Related Metadata: \n${JSON.stringify(metadata)}\n`
 							}
 
 							return JSON.stringify({ success: true, memory: targets })
