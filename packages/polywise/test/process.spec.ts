@@ -87,7 +87,10 @@ describe('Polywise Process', () => {
 			expect(final_result).toBeDefined()
 			expect(final_result.memory.length).toBeGreaterThan(0)
 
-			const all_texts = final_result.memory.join(' ').toLowerCase()
+			const all_texts = final_result.memory
+				.map((m: any) => m.text)
+				.join(' ')
+				.toLowerCase()
 			for (const keyword of test_case.expected_memory_keywords) {
 				expect(all_texts).toContain(keyword.toLowerCase())
 			}

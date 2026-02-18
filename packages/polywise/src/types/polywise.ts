@@ -127,16 +127,24 @@ export interface Memory {
 	combinedScore: number
 	stimulated: boolean
 	memoryStrength: number
-	metadata?: any
+	metadata: Metadata
 }
 
 export interface COTDepthResult {
-	memory: Array<string>
-	metadata: Metadata
+	memory: Array<{
+		memory_id: string
+		text: string
+		score: number
+		metadata: Metadata
+	}>
 }
 
 export interface FinalQueryResult {
-	memory: Array<string>
-	metadata: Metadata
+	memory: Array<{
+		memory_id: string
+		text: string
+		score: number
+		metadata: Metadata
+	}>
 	cot: ChainEmitter
 }

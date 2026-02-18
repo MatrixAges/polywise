@@ -48,12 +48,11 @@ export default class Cortex {
 			process: args.process
 		})
 
-		const { memory: k_strings, metadata } = await processResults(query, memory, this.p.pipeline)
+		const { memory: final_memory } = await processResults(query, memory, this.p.pipeline)
 
 		return {
-			memory: k_strings,
-			metadata,
-			cot: (emitter.finish({ memory: k_strings, metadata }) as any) || emitter
+			memory: final_memory,
+			cot: (emitter.finish({ memory: final_memory }) as any) || emitter
 		}
 	}
 
@@ -115,16 +114,11 @@ export default class Cortex {
 
 		const filtered_memory = this.filterByQuality(all_memory, DEFAULT_SIMILARITY_THRESHOLD)
 
-		const { memory: k_strings, metadata } = await processResults(
-			original_query,
-			filtered_memory,
-			this.p.pipeline
-		)
+		const { memory: final_memory } = await processResults(original_query, filtered_memory, this.p.pipeline)
 
 		return {
-			memory: k_strings,
-			metadata,
-			cot: (emitter.finish({ memory: k_strings, metadata }) as any) || emitter
+			memory: final_memory,
+			cot: (emitter.finish({ memory: final_memory }) as any) || emitter
 		}
 	}
 

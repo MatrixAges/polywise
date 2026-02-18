@@ -103,7 +103,7 @@ describe.concurrent('Article CRUD Operations', () => {
 		expect(article[0]?.content).toBe(newContent)
 
 		const queryResult = await poly.query({ query: 'deep learning neural networks' })
-		const updatedContentInMemory = queryResult.memory.some(m => m.includes('deep learning'))
+		const updatedContentInMemory = queryResult.memory.some(m => m.text.includes('deep learning'))
 		expect(updatedContentInMemory).toBe(true)
 	})
 
@@ -120,7 +120,7 @@ describe.concurrent('Article CRUD Operations', () => {
 		expect(article).toBeNull()
 
 		const queryResult = await poly.query({ query: 'neural networks cognitive' })
-		const contentInMemory = queryResult.memory.some(m => m.includes('Memory to be forgotten'))
+		const contentInMemory = queryResult.memory.some(m => m.text.includes('Memory to be forgotten'))
 		expect(contentInMemory).toBe(false)
 	})
 

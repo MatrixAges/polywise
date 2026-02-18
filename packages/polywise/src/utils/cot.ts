@@ -96,11 +96,10 @@ export async function emitCotResult(args: {
 }) {
 	const { emitter, emerged_query, reranked_memory, pipeline } = args
 
-	const { memory, metadata } = await processResults(emerged_query, reranked_memory, pipeline)
+	const { memory } = await processResults(emerged_query, reranked_memory, pipeline)
 
 	const cot_result: COTDepthResult = {
-		memory,
-		metadata
+		memory
 	}
 
 	if (emitter.isActiveStatus()) {

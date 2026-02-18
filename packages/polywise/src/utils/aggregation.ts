@@ -38,7 +38,7 @@ function collectMemoryResults(
 					combinedScore: 0,
 					source: 'memory',
 					stimulated: true,
-					metadata: (article as any).metadata
+					metadata: (article as any).metadata ?? {}
 				})
 			}
 		}
@@ -71,7 +71,7 @@ function collectExternalResults(
 				combinedScore: 0,
 				source: is_stimulated ? 'memory' : 'external',
 				stimulated: is_stimulated,
-				metadata: (result as any).metadata
+				metadata: (result as any).metadata ?? {}
 			})
 		}
 	}
@@ -92,7 +92,7 @@ function collectImplicitResults(recall_result: AggregateResultsArgs['recall_resu
 			combinedScore: 0,
 			source: 'implicit',
 			stimulated: true,
-			metadata: node.metadata
+			metadata: node.metadata ?? {}
 		})
 	}
 }

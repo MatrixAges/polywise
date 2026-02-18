@@ -94,7 +94,7 @@ describe.concurrent('Long Context and Language Traps', () => {
 				threshold: 0.1
 			})
 
-			const has_onyx_vault = step1.memory.some(content => content.includes('Onyx Vault'))
+			const has_onyx_vault = step1.memory.some(m => m.text.includes('Onyx Vault'))
 
 			expect(has_onyx_vault).toBe(true)
 
@@ -106,9 +106,7 @@ describe.concurrent('Long Context and Language Traps', () => {
 				threshold: 0.1
 			})
 
-			const has_quantum_signature = step2.memory.some(content =>
-				content.includes('quantum-resistant signature')
-			)
+			const has_quantum_signature = step2.memory.some(m => m.text.includes('quantum-resistant signature'))
 
 			expect(has_quantum_signature).toBe(true)
 		})
@@ -172,7 +170,7 @@ describe.concurrent('Long Context and Language Traps', () => {
 					rerank_limit: 20,
 					threshold: 0.1
 				})
-				const found = memory.some(content => content.includes(qa.expected))
+				const found = memory.some(m => m.text.includes(qa.expected))
 
 				expect(found).toBe(true)
 			}

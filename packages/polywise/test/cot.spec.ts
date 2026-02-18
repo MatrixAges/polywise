@@ -51,7 +51,10 @@ describe('Chain of Thought (CoT) Iterative Search', () => {
 				rerank_limit: 5
 			})
 
-			const all_text = memory.join(' ').toLowerCase()
+			const all_text = memory
+				.map(m => m.text)
+				.join(' ')
+				.toLowerCase()
 			const has_microservices = all_text.includes('microservice')
 			const has_architecture = all_text.includes('architecture')
 			const has_container = all_text.includes('container') || all_text.includes('docker')
@@ -69,7 +72,10 @@ describe('Chain of Thought (CoT) Iterative Search', () => {
 				rerank_limit: 5
 			})
 
-			const all_text = memory.join(' ').toLowerCase()
+			const all_text = memory
+				.map(m => m.text)
+				.join(' ')
+				.toLowerCase()
 			const has_neuroscience =
 				all_text.includes('neuron') || all_text.includes('brain') || all_text.includes('synapse')
 
@@ -99,7 +105,10 @@ describe('Chain of Thought (CoT) Iterative Search', () => {
 
 			expect(iterative_result.memory.length).toBeGreaterThanOrEqual(single_result.memory.length)
 
-			const all_text = iterative_result.memory.join(' ').toLowerCase()
+			const all_text = iterative_result.memory
+				.map(m => m.text)
+				.join(' ')
+				.toLowerCase()
 			const has_docker = all_text.includes('docker') || all_text.includes('container')
 			const has_kubernetes = all_text.includes('kubernetes') || all_text.includes('k8s')
 			const has_orchestration = all_text.includes('orchestr')
@@ -116,7 +125,10 @@ describe('Chain of Thought (CoT) Iterative Search', () => {
 				rerank_limit: 5
 			})
 
-			const all_text = memory.join(' ').toLowerCase()
+			const all_text = memory
+				.map(m => m.text)
+				.join(' ')
+				.toLowerCase()
 
 			const has_pattern = all_text.includes('pattern')
 			const has_service = all_text.includes('service')
@@ -136,7 +148,10 @@ describe('Chain of Thought (CoT) Iterative Search', () => {
 				rerank_limit: 5
 			})
 
-			const all_text = memory.join(' ').toLowerCase()
+			const all_text = memory
+				.map(m => m.text)
+				.join(' ')
+				.toLowerCase()
 			const has_neuroscience =
 				all_text.includes('neuron') || all_text.includes('synapse') || all_text.includes('brain')
 
@@ -146,8 +161,8 @@ describe('Chain of Thought (CoT) Iterative Search', () => {
 			expect(has_neuroscience).toBe(true)
 		})
 
-		it('should provide high-quality results with metadata', async () => {
-			const { memory, metadata } = await poly.query({
+		it('should provide high-quality results', async () => {
+			const { memory } = await poly.query({
 				query: 'distributed system scalability',
 				cot_depth: 2,
 				search_limit: 5,
@@ -156,9 +171,10 @@ describe('Chain of Thought (CoT) Iterative Search', () => {
 
 			expect(memory.length).toBeGreaterThan(0)
 
-			expect(metadata).toBeDefined()
-
-			const all_text = memory.join(' ').toLowerCase()
+			const all_text = memory
+				.map(m => m.text)
+				.join(' ')
+				.toLowerCase()
 			const has_distributed = all_text.includes('distribut')
 			const has_system = all_text.includes('system')
 			const has_scale = all_text.includes('scal')
