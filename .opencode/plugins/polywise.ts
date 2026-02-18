@@ -1,3 +1,3 @@
-import { OpencodePlugin } from '../../packages/opencode'
+// import { OpencodePlugin } from '../../packages/opencode'
 
-export default OpencodePlugin
+// export default OpencodePlugin

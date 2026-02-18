@@ -163,12 +163,13 @@ When modifying database schema in the polywise package, you MUST update the migr
 
 ## Migration Rules:
 
-1. **Version Increment**: Increment `CURRENT_SCHEMA_VERSION` in `migration.ts`
-2. **Add Migration**: Add a new migration object to the `migrations` array
-3. **Migration Content**: Use `up` function for schema changes (CREATE, ALTER, DROP) and data migration
-4. **Sequential Versions**: Migration versions must be sequential (1, 2, 3...)
+1. **Direct SQL Modification Preferred**: During the pre-production phase, directly modify SQL definitions in the schema files unless explicitly asked to write a migration. Keep `CURRENT_SCHEMA_VERSION` at 1.
+2. **Version Increment**: Only increment `CURRENT_SCHEMA_VERSION` in `migration.ts` when explicitly requested.
+3. **Add Migration**: Only add a new migration object to the `migrations` array when explicitly requested.
+4. **Migration Content**: Use `up` function for schema changes (CREATE, ALTER, DROP) and data migration
+5. **Sequential Versions**: Migration versions must be sequential (1, 2, 3...)
 
-**CRITICAL**: Always update `CURRENT_SCHEMA_VERSION` when modifying table structure!
+**CRITICAL**: Only update `CURRENT_SCHEMA_VERSION` when explicitly requested to write a migration!
 
 ## Test-Driven Development (TDD) for packages/polywise
 

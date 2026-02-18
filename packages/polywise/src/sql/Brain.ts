@@ -1,4 +1,4 @@
-import { SCHEMA_BRAIN, SCHEMA_KNOWLEDGE } from '../consts'
+import { SCHEMA_BRAIN, SCHEMA_MEMORY } from '../consts'
 
 /**
  * Randomly increases the potential of a small subset (1%) of nodes.
@@ -121,7 +121,7 @@ export const sql_stimulate_nodes_batch = `
  */
 export const sql_get_node_articles = `
 	SELECT DISTINCT a.id, a.content
-	FROM ${SCHEMA_KNOWLEDGE}.articles a
+	FROM ${SCHEMA_MEMORY}.articles a
 	JOIN ${SCHEMA_BRAIN}.node_sources ns ON a.id = ns.article_id
 	WHERE ns.node_id = ANY($1)
 `

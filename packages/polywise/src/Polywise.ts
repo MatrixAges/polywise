@@ -137,7 +137,7 @@ export default class Polywise {
 	@catchFinally(function (this: Polywise) {
 		this.brain.setBusy(false)
 	})
-	async save(args: ProcessArticleArgs) {
+	async save(args: ProcessArticleArgs): Promise<number> {
 		this.brain.reportUserActivity()
 		this.brain.setBusy(true)
 
@@ -177,6 +177,14 @@ export default class Polywise {
 		}
 
 		this.log.write({ ...args, idol_id, root_ids, metrics_ids }, { article_id: aid })
+
+		return aid
+	}
+
+	async forget(memory_id: number): Promise<void> {
+		await this.queryRaw(sql.sql_forget_decay_nodes, [memory_id])
+		await this.queryRaw(sql.sql_forget_decay_edges, [memory_id])
+		await this.queryRaw(sql.sql_delete_article, [memory_id])
 	}
 
 	setFilters(args: FiltersArgs) {
@@ -462,7 +470,7 @@ export default class Polywise {
 		if (parseInt(check_result[0]?.count || '0') === 0) {
 			await this.exec([
 				sql.sql_create_extension_vector,
-				sql.sql_create_schema_knowledge,
+				sql.sql_create_schema_memory,
 				sql.sql_create_table_articles,
 				sql.sql_create_table_article_embeddings,
 				sql.sql_create_index_article_embeddings_hnsw,

@@ -1,4 +1,4 @@
-import { SCHEMA_BRAIN, SCHEMA_KNOWLEDGE, SCHEMA_USER } from '../consts'
+import { SCHEMA_BRAIN, SCHEMA_MEMORY, SCHEMA_USER } from '../consts'
 
 /**
  * Enables the pgvector extension.
@@ -141,14 +141,14 @@ export const sql_create_index_edges_roots = `CREATE INDEX IF NOT EXISTS idx_edge
  * Creates the knowledge schema.
  * Role: Initializes namespace for raw knowledge/documents.
  */
-export const sql_create_schema_knowledge = `CREATE SCHEMA IF NOT EXISTS ${SCHEMA_KNOWLEDGE};`
+export const sql_create_schema_memory = `CREATE SCHEMA IF NOT EXISTS ${SCHEMA_MEMORY};`
 
 /**
  * Creates the articles table.
  * Role: Stores source documents, articles, or raw text chunks.
  */
 export const sql_create_table_articles = `
-  CREATE TABLE IF NOT EXISTS ${SCHEMA_KNOWLEDGE}.articles (
+  CREATE TABLE IF NOT EXISTS ${SCHEMA_MEMORY}.articles (
     id SERIAL PRIMARY KEY,
     content TEXT,
     idol_id TEXT,
@@ -166,7 +166,7 @@ export const sql_create_table_articles = `
 export const sql_create_table_node_sources = `
   CREATE TABLE IF NOT EXISTS ${SCHEMA_BRAIN}.node_sources (
     node_id INTEGER REFERENCES ${SCHEMA_BRAIN}.nodes(id),
-    article_id INTEGER REFERENCES ${SCHEMA_KNOWLEDGE}.articles(id),
+    article_id INTEGER REFERENCES ${SCHEMA_MEMORY}.articles(id) ON DELETE CASCADE,
     PRIMARY KEY (node_id, article_id)
   );
 `
@@ -182,9 +182,9 @@ export const sql_create_schema_user_space = `CREATE SCHEMA IF NOT EXISTS "${SCHE
  * Role: Separates large vector data from article content for better storage management.
  */
 export const sql_create_table_article_embeddings = `
-  CREATE TABLE IF NOT EXISTS ${SCHEMA_KNOWLEDGE}.article_embeddings (
+  CREATE TABLE IF NOT EXISTS ${SCHEMA_MEMORY}.article_embeddings (
     id SERIAL PRIMARY KEY,
-    article_id INTEGER REFERENCES ${SCHEMA_KNOWLEDGE}.articles(id) ON DELETE CASCADE,
+    article_id INTEGER REFERENCES ${SCHEMA_MEMORY}.articles(id) ON DELETE CASCADE,
     embedding vector(1024) NOT NULL,
     model_name TEXT DEFAULT 'onnx-community/Qwen3-Embedding-0.6B-ONNX',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -197,11 +197,11 @@ export const sql_create_table_article_embeddings = `
  */
 export const sql_create_index_article_embeddings_hnsw = `
   CREATE INDEX IF NOT EXISTS idx_article_embeddings_hnsw 
-  ON ${SCHEMA_KNOWLEDGE}.article_embeddings USING hnsw (embedding vector_cosine_ops);
+  ON ${SCHEMA_MEMORY}.article_embeddings USING hnsw (embedding vector_cosine_ops);
 `
 
 /**
  * Creates a GIN index on article content for full-text search.
  * Role: Optimizes standard keyword-based search.
  */
-export const sql_create_index_article_content_gin = `CREATE INDEX IF NOT EXISTS idx_article_content_gin ON ${SCHEMA_KNOWLEDGE}.articles USING GIN(to_tsvector('english', coalesce(content,'')));`
+export const sql_create_index_article_content_gin = `CREATE INDEX IF NOT EXISTS idx_article_content_gin ON ${SCHEMA_MEMORY}.articles USING GIN(to_tsvector('english', coalesce(content,'')));`

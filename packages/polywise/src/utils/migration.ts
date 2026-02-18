@@ -7,8 +7,7 @@ export const CURRENT_SCHEMA_VERSION = 1
 export const migrations: Array<Migration> = [
 	{
 		version: 1,
-		description:
-			'Initialize complete schema: extensions, brain schema, knowledge schema, all tables and indexes',
+		description: 'Initialize complete schema: extensions, brain schema, memory schema, all tables and indexes',
 		up: async exec => {
 			await exec([
 				sql_schema.sql_create_extension_vector,
@@ -24,7 +23,7 @@ export const migrations: Array<Migration> = [
 				sql_schema.sql_create_index_nodes_roots,
 				sql_schema.sql_create_index_edges_roots,
 				sql_schema.sql_create_index_nodes_embedding,
-				sql_schema.sql_create_schema_knowledge,
+				sql_schema.sql_create_schema_memory,
 				sql_schema.sql_create_table_articles,
 				sql_schema.sql_create_table_article_embeddings,
 				sql_schema.sql_create_index_article_embeddings_hnsw,

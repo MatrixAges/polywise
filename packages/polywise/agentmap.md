@@ -34,7 +34,7 @@ This document provides an overview of the packages/polywise module structure and
 				"role": "Class"
 			},
 			"Polywise.ts": {
-				"desc": "Core database API for knowledge graph operations. Includes public instances of Brain, Article, and Pipeline. Supports hybrid retrieval with memory recall, external search, result aggregation, and reranking.",
+				"desc": "Core database API for memory graph operations. Includes public instances of Brain, Article, and Pipeline. Supports hybrid retrieval with memory recall, external search, result aggregation, and reranking. Provides save() to store memory and return memory_id, and forget() to remove memory with node/edge downweighting.",
 				"role": "Class"
 			},
 			"Process.ts": {
@@ -47,16 +47,22 @@ This document provides an overview of the packages/polywise module structure and
 				"index.ts": { "desc": "Main constants export", "role": "Index" },
 				"model.ts": { "desc": "Model-related constants", "role": "Constant" },
 				"performance.ts": { "desc": "Performance and threshold constants", "role": "Constant" },
-				"schema.ts": { "desc": "Database schema constants", "role": "Constant" }
+				"schema.ts": {
+					"desc": "Database schema constants (SCHEMA_MEMORY='memory')",
+					"role": "Constant"
+				}
 			},
 			"index.ts": { "desc": "Main exports", "role": "Index" },
 			"sql": {
 				"Brain.ts": { "desc": "Brain SQL operations", "role": "SQL" },
-				"Polywise.ts": { "desc": "Polywise SQL operations (Articles/Nodes/Edges)", "role": "SQL" },
+				"Polywise.ts": {
+					"desc": "Polywise SQL operations (Articles/Nodes/Edges) with delete support",
+					"role": "SQL"
+				},
 				"index.ts": { "desc": "SQL exports", "role": "Index" },
 				"meta.ts": { "desc": "Metadata SQL operations", "role": "SQL" },
 				"schema.ts": {
-					"desc": "Database schema definitions (Nodes/Edges/Articles include JSONB metadata)",
+					"desc": "Database schema definitions (memory schema: Nodes/Edges/Articles with JSONB metadata and CASCADE)",
 					"role": "Schema"
 				}
 			},
@@ -95,7 +101,10 @@ This document provides an overview of the packages/polywise module structure and
 					"role": "Utility"
 				},
 				"ranking.ts": { "desc": "Ranking utility", "role": "Utility" },
-				"migration.ts": { "desc": "Database schema migration system", "role": "Module" }
+				"migration.ts": {
+					"desc": "Database schema migration system (CURRENT_SCHEMA_VERSION=1)",
+					"role": "Module"
+				}
 			}
 		},
 		"test": {

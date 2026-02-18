@@ -1,7 +1,7 @@
 import to from 'await-to-js'
 import { injectable } from 'tsyringe'
 
-import { DEFAULT_SIMILARITY_THRESHOLD, SCHEMA_KNOWLEDGE } from './consts'
+import { DEFAULT_SIMILARITY_THRESHOLD, SCHEMA_MEMORY } from './consts'
 import * as sql from './sql'
 
 import type Polywise from './Polywise'
@@ -78,7 +78,7 @@ export default class Article {
 	async delete(article_id: number) {
 		if (!this.p.db) return
 
-		await this.p.db.query(`DELETE FROM ${SCHEMA_KNOWLEDGE}.articles WHERE id = $1`, [article_id])
+		await this.p.db.query(sql.sql_delete_article, [article_id])
 	}
 
 	async searchByVector(args: SearchArticlesArgs) {

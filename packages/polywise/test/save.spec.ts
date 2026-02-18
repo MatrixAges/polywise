@@ -40,7 +40,7 @@ describe('Polywise Save Implementation', () => {
 		// Verify embedding was created
 		const article_id = articles[0].id
 		const embedding_res = await (poly as any).queryRaw(
-			`SELECT article_id FROM knowledge.article_embeddings WHERE article_id = $1`,
+			`SELECT article_id FROM memory.article_embeddings WHERE article_id = $1`,
 			[article_id]
 		)
 		expect(embedding_res.length).toBe(1)

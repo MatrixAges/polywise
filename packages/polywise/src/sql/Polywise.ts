@@ -7,7 +7,7 @@ import {
 	EDGE_WEIGHT_MIN,
 	NODE_POTENTIAL_MIN,
 	SCHEMA_BRAIN,
-	SCHEMA_KNOWLEDGE,
+	SCHEMA_MEMORY,
 	SNAPSHOT_EDGES_LIMIT,
 	TICK_DECAY_RATE,
 	TICK_POTENTIAL_MAX
@@ -116,7 +116,7 @@ export const sql_get_snapshot_edges = (weight_threshold: number) => `
  * Role: Ingests raw textual knowledge/content into the system.
  */
 export const sql_process_article = `
-  INSERT INTO ${SCHEMA_KNOWLEDGE}.articles (content, idol_id, root_ids, metrics_ids, metadata) 
+  INSERT INTO ${SCHEMA_MEMORY}.articles (content, idol_id, root_ids, metrics_ids, metadata) 
   VALUES ($1, $2, $3, $4, $5) 
   RETURNING id, content, created_at
 `
@@ -145,7 +145,7 @@ export const sql_upsert_node = `
 export const sql_search_articles_by_text = `
   SELECT id, content, created_at,
     ts_rank(to_tsvector('english', coalesce(content,'')), websearch_to_tsquery('english', $1)) AS rank
-  FROM ${SCHEMA_KNOWLEDGE}.articles
+  FROM ${SCHEMA_MEMORY}.articles
   WHERE to_tsvector('english', coalesce(content,'')) @@ websearch_to_tsquery('english', $1)
     AND ($3::text IS NULL OR idol_id = $3)
     AND ($4::text[] IS NULL OR root_ids && $4)
@@ -276,7 +276,7 @@ export const sql_get_edges_by_root = `
  * Role: Enables semantic search by mapping article content to a vector space.
  */
 export const sql_insert_article_embedding = `
-  INSERT INTO ${SCHEMA_KNOWLEDGE}.article_embeddings (article_id, embedding)
+  INSERT INTO ${SCHEMA_MEMORY}.article_embeddings (article_id, embedding)
   VALUES ($1, $2)
   RETURNING id
 `
@@ -285,7 +285,7 @@ export const sql_insert_article_embedding = `
  * Retrieves the stored embedding for an article.
  * Role: Used for re-indexing or analysis.
  */
-export const sql_get_article_embedding = `SELECT embedding FROM ${SCHEMA_KNOWLEDGE}.article_embeddings WHERE article_id = $1`
+export const sql_get_article_embedding = `SELECT embedding FROM ${SCHEMA_MEMORY}.article_embeddings WHERE article_id = $1`
 
 /**
  * Searches for articles similar to a query vector.
@@ -297,8 +297,8 @@ export const sql_search_articles_by_vector = `
     a.content,
     a.created_at,
     1 - (e.embedding <=> $1) AS similarity
-  FROM ${SCHEMA_KNOWLEDGE}.articles a
-  JOIN ${SCHEMA_KNOWLEDGE}.article_embeddings e ON a.id = e.article_id
+  FROM ${SCHEMA_MEMORY}.articles a
+  JOIN ${SCHEMA_MEMORY}.article_embeddings e ON a.id = e.article_id
   WHERE ($3::text IS NULL OR a.idol_id = $3)
     AND ($4::text[] IS NULL OR a.root_ids && $4)
     AND ($5::text[] IS NULL OR a.metrics_ids && $5)
@@ -311,19 +311,19 @@ export const sql_search_articles_by_vector = `
  * Retrieves the full content of a single article.
  * Role: Reading the actual text after a search result.
  */
-export const sql_get_article = `SELECT id, content, created_at FROM ${SCHEMA_KNOWLEDGE}.articles WHERE id = $1`
+export const sql_get_article = `SELECT id, content, created_at FROM ${SCHEMA_MEMORY}.articles WHERE id = $1`
 
 /**
  * Retrieves all articles (metadata only).
  * Role: Bulk export or maintenance listing.
  */
-export const sql_get_all_articles = `SELECT id, content, created_at FROM ${SCHEMA_KNOWLEDGE}.articles ORDER BY created_at DESC`
+export const sql_get_all_articles = `SELECT id, content, created_at FROM ${SCHEMA_MEMORY}.articles ORDER BY created_at DESC`
 
 /**
  * Updates an article's content.
  * Role: Correction or refinement of stored knowledge.
  */
-export const sql_update_article = `UPDATE ${SCHEMA_KNOWLEDGE}.articles SET content = $2 WHERE id = $1 RETURNING id, content, created_at`
+export const sql_update_article = `UPDATE ${SCHEMA_MEMORY}.articles SET content = $2 WHERE id = $1 RETURNING id, content, created_at`
 
 /**
  * Finds the node most semantically similar to a query vector.
@@ -353,10 +353,44 @@ export const sql_get_all_nodes = `SELECT id, label, x, y, activation, potential,
  * Checks if the articles table exists.
  * Role: Database integrity check during initialization.
  */
-export const sql_check_articles_table_exists = `SELECT COUNT(*) as count FROM information_schema.tables WHERE table_schema = '${SCHEMA_KNOWLEDGE}' AND table_name = 'articles'`
+export const sql_check_articles_table_exists = `SELECT COUNT(*) as count FROM information_schema.tables WHERE table_schema = '${SCHEMA_MEMORY}' AND table_name = 'articles'`
 
 /**
  * Updates an article's embedding vector.
  * Role: Re-indexing content after updates or model changes.
  */
-export const sql_update_article_embedding = `UPDATE ${SCHEMA_KNOWLEDGE}.article_embeddings SET embedding = $1 WHERE article_id = $2`
+export const sql_update_article_embedding = `UPDATE ${SCHEMA_MEMORY}.article_embeddings SET embedding = $1 WHERE article_id = $2`
+
+/**
+ * Deletes an article and its associated embedding (via CASCADE).
+ * Role: Removes a memory and all related data including node_sources references.
+ */
+export const sql_delete_article = `DELETE FROM ${SCHEMA_MEMORY}.articles WHERE id = $1`
+
+/**
+ * Decays the potential of nodes associated with a deleted article.
+ * Role: Weakens concepts that were derived from the forgotten memory.
+ */
+export const sql_forget_decay_nodes = `
+  UPDATE ${SCHEMA_BRAIN}.nodes n
+  SET potential = GREATEST(n.potential * 0.5, 0),
+      activation = GREATEST(n.activation * 0.5, 0)
+  WHERE n.id IN (
+    SELECT node_id FROM ${SCHEMA_BRAIN}.node_sources WHERE article_id = $1
+  )
+`
+
+/**
+ * Decays the weight of edges connected to nodes from a deleted article.
+ * Role: Weakens associations between concepts that were linked through the forgotten memory.
+ */
+export const sql_forget_decay_edges = `
+  UPDATE ${SCHEMA_BRAIN}.edges e
+  SET weight = GREATEST(e.weight * 0.5, 0.001)
+  WHERE e.source_id IN (
+    SELECT node_id FROM ${SCHEMA_BRAIN}.node_sources WHERE article_id = $1
+  )
+  OR e.target_id IN (
+    SELECT node_id FROM ${SCHEMA_BRAIN}.node_sources WHERE article_id = $1
+  )
+`

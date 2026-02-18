@@ -2,7 +2,7 @@ import { PGlite } from '@electric-sql/pglite'
 import { vector } from '@electric-sql/pglite/vector'
 import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 
-import { SCHEMA_BRAIN, SCHEMA_KNOWLEDGE } from '../src/consts'
+import { SCHEMA_BRAIN, SCHEMA_MEMORY } from '../src/consts'
 import { CURRENT_SCHEMA_VERSION, migrate, migrations, validateMigrations } from '../src/utils/migration'
 import getDataDir from './utils/getDataDir'
 
@@ -78,11 +78,11 @@ describe('Migration System', () => {
 			expect(table_names).toContain('node_sources')
 		})
 
-		it('should create knowledge schema tables', async () => {
+		it('should create memory schema tables', async () => {
 			const tables = await query(`
 				SELECT table_name 
 				FROM information_schema.tables 
-				WHERE table_schema = '${SCHEMA_KNOWLEDGE}'
+				WHERE table_schema = '${SCHEMA_MEMORY}'
 			`)
 			const table_names = tables.map((t: any) => t.table_name)
 
@@ -389,7 +389,7 @@ describe('Migration System', () => {
 
 		it('should create new table and migrate data from old table', async () => {
 			await exec(`
-				CREATE TABLE IF NOT EXISTS ${SCHEMA_KNOWLEDGE}.articles_v2 (
+				CREATE TABLE IF NOT EXISTS ${SCHEMA_MEMORY}.articles_v2 (
 					id SERIAL PRIMARY KEY,
 					content TEXT,
 					summary TEXT,
@@ -398,19 +398,19 @@ describe('Migration System', () => {
 			`)
 
 			const articles = await query<{ id: number; content: string }>(
-				`SELECT id, content FROM ${SCHEMA_KNOWLEDGE}.articles`
+				`SELECT id, content FROM ${SCHEMA_MEMORY}.articles`
 			)
 
 			for (const article of articles) {
 				const summary = article.content ? article.content.substring(0, 100) + '...' : 'No content'
 
-				await query(`INSERT INTO ${SCHEMA_KNOWLEDGE}.articles_v2 (content, summary) VALUES ($1, $2)`, [
+				await query(`INSERT INTO ${SCHEMA_MEMORY}.articles_v2 (content, summary) VALUES ($1, $2)`, [
 					article.content,
 					summary
 				])
 			}
 
-			const v2_articles = await query(`SELECT * FROM ${SCHEMA_KNOWLEDGE}.articles_v2`)
+			const v2_articles = await query(`SELECT * FROM ${SCHEMA_MEMORY}.articles_v2`)
 
 			expect(v2_articles.length).toBeGreaterThanOrEqual(0)
 		})

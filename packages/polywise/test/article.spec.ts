@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 
-import { Polywise } from '../dist/index'
+import Polywise from '../src/Polywise'
 import { cognitive_science_datasets } from './datasets/cognitive'
 import { software_architecture_datasets } from './datasets/software'
 import { getTestVectors } from './utils/getCache'
@@ -71,6 +71,34 @@ describe.concurrent('Article CRUD Operations', () => {
 		const fetched = await poly.article.get(created.id)
 
 		expect(fetched).toBeNull()
+	})
+
+	it('should save article and return memory_id via poly.save()', async () => {
+		const content = software_architecture_datasets[0]
+		const memory_id = await poly.save({ content })
+
+		expect(memory_id).toBeGreaterThan(0)
+
+		const article = await poly.article.get(memory_id)
+
+		expect(article).not.toBeNull()
+		expect(article[0]?.content).toBe(content)
+	})
+
+	it('should forget memory via poly.forget() and remove all related data', async () => {
+		const content = 'Memory to be forgotten about neural networks and cognitive architecture'
+		const memory_id = await poly.save({ content })
+
+		expect(memory_id).toBeGreaterThan(0)
+
+		await poly.forget(memory_id)
+
+		const article = await poly.article.get(memory_id)
+		expect(article).toBeNull()
+
+		const queryResult = await poly.query({ query: 'neural networks cognitive' })
+		const contentInMemory = queryResult.memory.some(m => m.includes('Memory to be forgotten'))
+		expect(contentInMemory).toBe(false)
 	})
 
 	it('should get all articles', async () => {

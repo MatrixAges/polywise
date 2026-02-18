@@ -17,19 +17,24 @@ export const getTextPart = (parts: Array<Part>) => {
 }
 
 export const getLastAIMessages = (messages: Array<MessageItem>) => {
+	let user_prompt = ''
 	const ai_messages: Array<AssistantMessageItem> = []
 
 	for (let i = messages.length - 1; i >= 0; i--) {
 		const current_msg = messages[i]
 
 		if (current_msg.info.role === 'user') {
+			user_prompt = getTextPart(current_msg.parts)
+
 			break
 		}
 
 		ai_messages.push(current_msg as AssistantMessageItem)
 	}
 
-	return ai_messages.reverse()
+	ai_messages.reverse()
+
+	return { user_prompt, ai_messages }
 }
 
 export const getMetadata = (messages: Array<AssistantMessageItem>) => {
@@ -66,4 +71,15 @@ export const getMetadata = (messages: Array<AssistantMessageItem>) => {
 		links: Array.from(links_set),
 		files: Array.from(files_set)
 	}
+}
+
+export const getQa = (q: string, a: string) => {
+	return `The following is a previous interaction for your reference:
+---
+User: 
+${q}
+---
+AI: 
+${a}
+---`
 }
