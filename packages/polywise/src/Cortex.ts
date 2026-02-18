@@ -18,6 +18,8 @@ export default class Cortex {
 	async process(args: CortexProcessArgs) {
 		const { query, cot_depth = 0, process } = args
 
+		const has_explicit_cot = args.cot_depth !== undefined && args.cot_depth !== null
+
 		const emitter = new ChainEmitter()
 
 		if (process) {
@@ -26,16 +28,19 @@ export default class Cortex {
 			})
 		}
 
-		// Single search mode (cot_depth <= 1)
 		if (cot_depth <= 1) {
-			return await this.executeSingleSearch(query, args, emitter)
+			return await this.executeSingleSearch(query, args, emitter, has_explicit_cot)
 		}
 
-		// Iterative search mode (cot_depth > 1)
 		return await this.executeIterativeSearch(query, args, emitter)
 	}
 
-	private async executeSingleSearch(query: string, args: CortexProcessArgs, emitter: ChainEmitter) {
+	private async executeSingleSearch(
+		query: string,
+		args: CortexProcessArgs,
+		emitter: ChainEmitter,
+		has_explicit_cot: boolean
+	) {
 		const { memory } = await this.p.executeSingleSearch({
 			query,
 			recall_depth: args.recall_depth,
@@ -50,9 +55,11 @@ export default class Cortex {
 
 		const { memory: final_memory } = await processResults(query, memory, this.p.pipeline)
 
+		emitter.finish({ memory: final_memory })
+
 		return {
 			memory: final_memory,
-			cot: (emitter.finish({ memory: final_memory }) as any) || emitter
+			cot: has_explicit_cot ? emitter : null
 		}
 	}
 
@@ -116,9 +123,11 @@ export default class Cortex {
 
 		const { memory: final_memory } = await processResults(original_query, filtered_memory, this.p.pipeline)
 
+		emitter.finish({ memory: final_memory })
+
 		return {
 			memory: final_memory,
-			cot: (emitter.finish({ memory: final_memory }) as any) || emitter
+			cot: emitter
 		}
 	}
 

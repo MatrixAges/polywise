@@ -164,7 +164,9 @@ export default class Pipeline {
 			candidates_map.set(r.id, {
 				id: r.id,
 				content: r.content,
-				source: 'vector'
+				source: 'vector',
+				metadata: r.metadata,
+				updated_at: r.updated_at
 			})
 		}
 
@@ -174,7 +176,9 @@ export default class Pipeline {
 			candidates_map.set(r.id, {
 				id: r.id,
 				content: r.content,
-				source: 'fulltext'
+				source: 'fulltext',
+				metadata: r.metadata,
+				updated_at: r.updated_at
 			})
 		}
 
@@ -188,7 +192,9 @@ export default class Pipeline {
 			id: candidate.id,
 			content: candidate.content,
 			source: candidate.source,
-			rerankScore: rerank_scores[index]?.score ?? 0
+			rerankScore: rerank_scores[index]?.score ?? 0,
+			metadata: candidate.metadata,
+			updated_at: candidate.updated_at
 		}))
 
 		return results.sort((a, b) => b.rerankScore - a.rerankScore).slice(0, rerank_limit)

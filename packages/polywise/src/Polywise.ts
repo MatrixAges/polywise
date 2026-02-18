@@ -265,12 +265,40 @@ export default class Polywise {
 		return memory_id
 	}
 
+	@catchError()
+	@catchFinally(function (this: Polywise) {
+		this.brain.setBusy(false)
+	})
 	async forget(args: ForgetArticleArgs): Promise<void> {
-		const { memory_id, idol_id, root_ids, metrics_ids } = args
+		this.brain.reportUserActivity()
+		this.brain.setBusy(true)
 
-		await this.queryRaw(sql_forget_decay_nodes, [memory_id])
-		await this.queryRaw(sql_forget_decay_edges, [memory_id])
-		await this.queryRaw(sql_delete_article, [memory_id, idol_id ?? null, root_ids ?? null, metrics_ids ?? null])
+		const { memory_id, query, idol_id, root_ids, metrics_ids } = args
+
+		const memory_ids_to_delete: Set<string> = new Set()
+
+		if (memory_id) {
+			memory_ids_to_delete.add(memory_id)
+		}
+
+		if (query) {
+			const result = await this.cortex.process({
+				query,
+				idol_id: idol_id ?? this.idol_id ?? undefined,
+				root_ids: root_ids ?? this.root_ids ?? undefined,
+				metrics_ids: metrics_ids ?? this.metrics_ids ?? undefined
+			})
+
+			for (const item of result.memory) {
+				memory_ids_to_delete.add(item.memory_id)
+			}
+		}
+
+		for (const id of memory_ids_to_delete) {
+			await this.queryRaw(sql_forget_decay_nodes, [id])
+			await this.queryRaw(sql_forget_decay_edges, [id])
+			await this.queryRaw(sql_delete_article, [id, idol_id ?? null, root_ids ?? null, metrics_ids ?? null])
+		}
 	}
 
 	setFilters(args: FiltersArgs) {

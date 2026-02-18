@@ -6,7 +6,7 @@ import to from 'await-to-js'
 import { Polywise } from 'polywise'
 import { container } from 'tsyringe'
 
-import { getLastAIMessages, getMetadata, getQa, getTextPart, tool_desc } from './utils'
+import { getLastAIMessages, getMetadata, getQa, getTextPart, hasForget, tool_desc } from './utils'
 
 import type { Plugin } from '@opencode-ai/plugin'
 
@@ -64,7 +64,8 @@ export const OpencodePlugin: Plugin = async ctx => {
 								})
 							}
 
-							console.log('[PolywisePlugin] save memory: ', JSON.stringify(res))
+							console.log('[PolywisePlugin] save memory: ', JSON.stringify(content))
+							console.log('[PolywisePlugin] save memory id: ', res)
 							console.log('--------------')
 
 							return JSON.stringify({ success: true, memory_id: res })
@@ -148,6 +149,13 @@ export const OpencodePlugin: Plugin = async ctx => {
 							if (!memory_id) {
 								return JSON.stringify({
 									success: false,
+									error: 'query parameter is required for forget action'
+								})
+							}
+
+							if (!memory_id) {
+								return JSON.stringify({
+									success: false,
 									error: 'memory_id parameter is required for forget action'
 								})
 							}
@@ -190,12 +198,19 @@ export const OpencodePlugin: Plugin = async ctx => {
 
 				if (!ai_response.trim()) return
 
-				const { user_prompt, ai_messages } = getLastAIMessages(data)
+				const last_messages = getLastAIMessages(data)
+
+				if (!last_messages) return
+
+				const { user_prompt, ai_messages } = last_messages
+
+				if (hasForget(ai_messages)) return
+
 				const metadata = getMetadata(ai_messages)
 				const others = {}
 
 				console.log('--------------')
-				console.log('AI Response: ', ai_response)
+				console.log('AI Response: ', JSON.stringify(last_messages))
 				console.log('Metadata: ', JSON.stringify(metadata))
 				console.log('--------------')
 

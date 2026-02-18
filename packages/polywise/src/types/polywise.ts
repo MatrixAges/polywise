@@ -126,6 +126,7 @@ export interface Memory {
 	stimulated: boolean
 	memoryStrength: number
 	metadata: Metadata
+	updated_at?: string
 }
 
 export interface COTDepthResult {
@@ -133,7 +134,8 @@ export interface COTDepthResult {
 		memory_id: string
 		text: string
 		score: number
-		metadata: Metadata
+		metadata: Metadata | null
+		updated_at: string
 	}>
 }
 
@@ -142,7 +144,8 @@ export interface FinalQueryResult {
 		memory_id: string
 		text: string
 		score: number
-		metadata: Metadata
+		metadata: Metadata | null
+		updated_at: string
 	}>
-	cot: ChainEmitter
+	cot: ChainEmitter | null
 }

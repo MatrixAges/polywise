@@ -10,6 +10,14 @@ interface AssistantMessageItem {
 	parts: Part[]
 }
 
+export const hasForget = (messages: Array<MessageItem>) => {
+	return messages.some(session => {
+		return session.parts.some(
+			part => part.type === 'tool' && part.tool === 'polywise' && part.state?.input?.action === 'forget'
+		)
+	})
+}
+
 export const getTextPart = (parts: Array<Part>) => {
 	const targets = parts.filter((p): p is Part & { type: 'text'; text: string } => p.type === 'text')
 
@@ -31,6 +39,8 @@ export const getLastAIMessages = (messages: Array<MessageItem>) => {
 
 		ai_messages.push(current_msg as AssistantMessageItem)
 	}
+
+	if (user_prompt === '') return
 
 	ai_messages.reverse()
 
@@ -79,6 +89,7 @@ Used to manage users' long-term persistent memories:
 - When using 'save', you must summarize the facts to be remembered in the 'content' field.
 - Use 'query' when a user asks "Who am I?", "What do you remember about me?", or mentions relevant background information.
 - When using 'query', enter search keywords in the 'query' field.
+- When using 'forget', should enter search keywords in the 'query' field.
 - 'memory_id' is only used for memory entries that already exist ('update' or 'forget').
 `
 

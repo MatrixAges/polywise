@@ -146,7 +146,9 @@ export default class Article {
 
 		return res.rows.map(r => ({
 			...r,
-			similarity: (r as any).rank || 0
+			similarity: (r as any).rank || 0,
+			metadata: (r as any).metadata ?? {},
+			updated_at: (r as any).updated_at
 		}))
 	}
 }

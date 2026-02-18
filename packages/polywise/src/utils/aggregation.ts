@@ -36,7 +36,8 @@ function collectMemoryResults(
 					memoryStrength: memory_strength,
 					source: 'memory',
 					stimulated: true,
-					metadata: (article as any).metadata ?? {}
+					metadata: (article as any).metadata ?? {},
+					updated_at: (article as any).updated_at
 				})
 			}
 		}
@@ -67,7 +68,8 @@ function collectExternalResults(
 				memoryStrength: memory_strength,
 				source: is_stimulated ? 'memory' : 'external',
 				stimulated: is_stimulated,
-				metadata: (result as any).metadata ?? {}
+				metadata: (result as any).metadata ?? {},
+				updated_at: (result as any).updated_at
 			})
 		}
 	}
@@ -86,7 +88,8 @@ function collectImplicitResults(recall_result: AggregateResultsArgs['recall_resu
 			memoryStrength: node.potential,
 			source: 'implicit',
 			stimulated: true,
-			metadata: node.metadata ?? {}
+			metadata: node.metadata ?? {},
+			updated_at: node.updated_at
 		})
 	}
 }

@@ -88,7 +88,8 @@ export interface UpdateArticleArgs extends FiltersArgs {
 }
 
 export interface ForgetArticleArgs extends FiltersArgs {
-	memory_id: string
+	memory_id?: string
+	query?: string
 }
 
 export interface AddArticleArgs extends FiltersArgs {
@@ -109,12 +110,16 @@ export interface SearchCandidate {
 	id: string
 	content: string
 	source: 'vector' | 'fulltext'
+	metadata?: Metadata
+	updated_at?: string
 }
 
 export interface ArticleSearchResult {
 	id: string
 	content: string
 	similarity?: number
+	metadata?: Metadata
+	updated_at?: string
 }
 
 export interface SearchResult {
@@ -122,6 +127,8 @@ export interface SearchResult {
 	content: string
 	source: 'vector' | 'fulltext'
 	rerankScore: number
+	metadata?: Metadata
+	updated_at?: string
 }
 
 export interface RecallArgs extends FiltersArgs {

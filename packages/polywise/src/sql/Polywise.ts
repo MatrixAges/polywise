@@ -143,7 +143,7 @@ export const sql_upsert_node = `
  * Role: Traditional keyword-based document retrieval.
  */
 export const sql_search_articles_by_text = `
-  SELECT id, content, created_at,
+  SELECT id, content, created_at, updated_at, metadata,
     ts_rank(to_tsvector('english', coalesce(content,'')), websearch_to_tsquery('english', $1)) AS rank
   FROM ${SCHEMA_MEMORY}.articles
   WHERE to_tsvector('english', coalesce(content,'')) @@ websearch_to_tsquery('english', $1)
@@ -296,6 +296,8 @@ export const sql_search_articles_by_vector = `
     a.id,
     a.content,
     a.created_at,
+    a.updated_at,
+    a.metadata,
     1 - (e.embedding <=> $1) AS similarity
   FROM ${SCHEMA_MEMORY}.articles a
   JOIN ${SCHEMA_MEMORY}.article_embeddings e ON a.id = e.article_id
