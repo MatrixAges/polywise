@@ -88,7 +88,7 @@ export interface UpdateArticleArgs extends FiltersArgs {
 }
 
 export interface ForgetArticleArgs extends FiltersArgs {
-	memory_id?: string
+	memory_id: string
 	query?: string
 }
 

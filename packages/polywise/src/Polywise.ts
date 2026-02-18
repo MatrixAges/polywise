@@ -275,11 +275,7 @@ export default class Polywise {
 
 		const { memory_id, query, idol_id, root_ids, metrics_ids } = args
 
-		const memory_ids_to_delete: Set<string> = new Set()
-
-		if (memory_id) {
-			memory_ids_to_delete.add(memory_id)
-		}
+		const memory_ids_to_delete: Set<string> = new Set([memory_id])
 
 		if (query) {
 			const result = await this.cortex.process({
