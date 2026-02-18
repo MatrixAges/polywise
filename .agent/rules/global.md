@@ -173,7 +173,7 @@ When modifying database schema in the polywise package, you MUST update the migr
 
 ## Unique String IDs (CRITICAL)
 
-**ALL IDs in the system MUST be unique strings (e.g., nanoid, UUID), NOT auto-incrementing integers.**
+**ALL IDs in the system MUST be unique strings (e.g., uuid v7), NOT auto-incrementing integers.**
 
 This applies to:
 
@@ -186,13 +186,13 @@ This applies to:
 - Better suited for distributed systems
 - No information leakage about system state
 - Easier data merging and synchronization
-- URL-safe and human-readable (when using nanoid)
+- Time-sortable with better database index performance (uuid v7)
 
 **Implementation:**
 
 - Use `TEXT PRIMARY KEY` instead of `SERIAL PRIMARY KEY` in PostgreSQL
 - Use `TEXT REFERENCES` instead of `INTEGER REFERENCES` for foreign keys
-- Generate IDs using `nanoid()` or similar library before insertion
+- Generate IDs using `uuidv7()` before insertion
 - All ID parameters in functions should be `string` type
 
 ## Test-Driven Development (TDD) for packages/polywise

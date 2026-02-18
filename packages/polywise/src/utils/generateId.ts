@@ -1,3 +1,3 @@
-import { nanoid } from 'nanoid'
+import { v7 as uuidv7 } from 'uuid'
 
-export default () => nanoid()
+export default () => uuidv7()

@@ -28,12 +28,12 @@
 		"await-to-js": "^3.0.0",
 		"dayjs": "catalog:",
 		"fs-extra": "catalog:",
-		"nanoid": "^5.1.6",
 		"ofetch": "catalog:",
 		"optional": "^0.1.4",
 		"p-queue": "^8.1.0",
 		"tslib": "catalog:",
-		"tsyringe": "catalog:"
+		"tsyringe": "catalog:",
+		"uuid": "catalog:"
 	},
 	"devDependencies": {
 		"@img/sharp-libvips-dev": "^1.2.4",
@@ -42,6 +42,7 @@
 		"@rstest/core": "catalog:",
 		"@types/fs-extra": "catalog:",
 		"@types/node": "^20.0.0",
+		"@types/uuid": "catalog:",
 		"bun": "catalog:",
 		"bun-types": "catalog:",
 		"cross-env": "^10.1.0",
