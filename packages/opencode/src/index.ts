@@ -146,7 +146,7 @@ export const OpencodePlugin: Plugin = async ctx => {
 						}
 
 						case 'forget': {
-							if (!memory_id) {
+							if (!query) {
 								return JSON.stringify({
 									success: false,
 									error: 'query parameter is required for forget action'
@@ -163,7 +163,8 @@ export const OpencodePlugin: Plugin = async ctx => {
 							const [err] = await to(
 								poly.forget({
 									metrics_ids: [project_id],
-									memory_id: memory_id
+									memory_id: memory_id,
+									query
 								})
 							)
 
@@ -174,6 +175,7 @@ export const OpencodePlugin: Plugin = async ctx => {
 								})
 							}
 
+							console.log('[PolywisePlugin] forget query: ', query)
 							console.log('[PolywisePlugin] forget memory id: ', memory_id)
 							console.log('--------------')
 
@@ -210,7 +212,7 @@ export const OpencodePlugin: Plugin = async ctx => {
 				const others = {}
 
 				console.log('--------------')
-				console.log('AI Response: ', JSON.stringify(last_messages))
+				console.log('AI Response: ', JSON.stringify(ai_response))
 				console.log('Metadata: ', JSON.stringify(metadata))
 				console.log('--------------')
 
