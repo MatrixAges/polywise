@@ -65,7 +65,7 @@ async function stimulateByRanking(
 	const max_stimulation = STIMULATION_MAX
 	const min_stimulation = STIMULATION_MIN
 	const decay_rate = (max_stimulation - min_stimulation) / Math.max(results.length - 1, 1)
-	const stimulation_map = new Map<number, number>()
+	const stimulation_map = new Map<string, number>()
 
 	for (let i = 0; i < results.length; i++) {
 		const intensity = Math.max(max_stimulation - i * decay_rate, min_stimulation)

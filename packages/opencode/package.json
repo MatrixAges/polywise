@@ -16,8 +16,7 @@
 		"@opencode-ai/plugin": "^1.2.6",
 		"@opencode-ai/sdk": "^1.2.6",
 		"await-to-js": "^3.0.0",
-		"reflect-metadata": "^0.2.2",
-		"@abraham/reflection": "catalog:"
+		"reflect-metadata": "^0.2.2"
 	},
 	"devDependencies": {
 		"@rslib/core": "catalog:",

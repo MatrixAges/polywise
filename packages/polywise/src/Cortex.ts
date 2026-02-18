@@ -60,7 +60,7 @@ export default class Cortex {
 	private async executeIterativeSearch(original_query: string, args: CortexProcessArgs, emitter: ChainEmitter) {
 		const { cot_depth = 2, process } = args
 
-		const collected_memory = new Map<number, Memory>()
+		const collected_memory = new Map<string, Memory>()
 		const used_queries = new Set<string>()
 
 		let current_query = original_query
@@ -128,7 +128,7 @@ export default class Cortex {
 		}
 	}
 
-	private filterNewMemory(new_memory: Array<Memory>, collected: Map<number, Memory>): Array<Memory> {
+	private filterNewMemory(new_memory: Array<Memory>, collected: Map<string, Memory>): Array<Memory> {
 		return new_memory.filter(k => {
 			if (collected.has(k.id)) return false
 

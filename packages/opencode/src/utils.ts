@@ -73,6 +73,15 @@ export const getMetadata = (messages: Array<AssistantMessageItem>) => {
 	}
 }
 
+export const tool_desc = `
+Used to manage users' long-term persistent memories:
+- Use 'save' when a user asks you to "remember," "save," or mentions important personal information.
+- When using 'save', you must summarize the facts to be remembered in the 'content' field.
+- Use 'query' when a user asks "Who am I?", "What do you remember about me?", or mentions relevant background information.
+- When using 'query', enter search keywords in the 'query' field.
+- 'memory_id' is only used for memory entries that already exist ('update' or 'forget').
+`
+
 export const getQa = (q: string, a: string) => {
 	return `The following is a previous interaction for your reference:
 ---

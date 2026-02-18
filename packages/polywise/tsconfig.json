@@ -13,7 +13,6 @@
 		"isolatedModules": true,
 		"esModuleInterop": true,
 		"importHelpers": true,
-		"jsx": "react-jsx",
 		"allowImportingTsExtensions": true,
 		"forceConsistentCasingInFileNames": true,
 		"paths": {

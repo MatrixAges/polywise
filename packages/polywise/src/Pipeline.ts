@@ -156,7 +156,7 @@ export default class Pipeline {
 
 		const [vector_results, fulltext_results] = await Promise.all([vectorSearch(), fulltextSearch()])
 
-		const candidates_map = new Map<number, SearchCandidate>()
+		const candidates_map = new Map<string, SearchCandidate>()
 
 		for (const r of vector_results) {
 			if (candidates_map.has(r.id)) continue
