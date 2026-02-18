@@ -54,10 +54,10 @@ export const OpencodePlugin: Plugin = async ctx => {
 
 							const [err, res] = await to(poly.save({ metrics_ids: [project_id], content }))
 
-							console.log('[PolywisePlugin] save memory: ', JSON.stringify(res))
-							console.log('--------------')
-
 							if (err) {
+								console.log('[PolywisePlugin] save memory err: ', JSON.stringify(err))
+								console.log('--------------')
+
 								return JSON.stringify({
 									success: false,
 									error: err?.message || 'Failed to save memory'
