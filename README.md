@@ -115,6 +115,23 @@ cot.on(event => {
 - Stage 2: Final filter by `combinedScore >= 0.5`
 - Deduplication by content ID across iterations
 
+#### 4. 🔄 **Update and Forget Memory**
+
+Polywise supports updating existing memories and selectively forgetting outdated information:
+
+```typescript
+// Update existing memory with new content
+await poly.update({
+	article_id: 1,
+	content: 'User now prefers TypeScript and Python, works from 9 AM to 6 PM.'
+})
+
+// Permanently delete a memory
+await poly.forget({
+	article_id: 1
+})
+```
+
 ---
 
 ## 🏗️ Architecture

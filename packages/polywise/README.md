@@ -133,16 +133,35 @@ When `cot_depth > 1`, the system performs iterative search:
 - No new high-quality results found
 - Cannot generate new unique query
 
+### 4. Update and Forget Memory
+
+Update existing memories or delete outdated information:
+
+```typescript
+// Update existing memory
+await poly.update({
+	article_id: 1,
+	content: 'Updated knowledge about quantum computing...'
+})
+
+// Forget memory (permanently delete)
+await poly.forget({
+	article_id: 1
+})
+```
+
 ## API Quick Reference
 
 ### Polywise
 
-| Method                           | Description                                        |
-| -------------------------------- | -------------------------------------------------- |
-| `save(args: ProcessArticleArgs)` | Save content to memory                             |
-| `query(args: QueryArgs)`         | Query relevant concepts and context from memory    |
-| `init(args: PolywiseArgs)`       | Initialize the database and background brain       |
-| `off()`                          | Gracefully shut down background tasks and close DB |
+| Method                            | Description                                        |
+| --------------------------------- | -------------------------------------------------- |
+| `save(args: ProcessArticleArgs)`  | Save content to memory                             |
+| `query(args: QueryArgs)`          | Query relevant concepts and context from memory    |
+| `update(args: UpdateArticleArgs)` | Update existing memory content                     |
+| `forget(args: ForgetArticleArgs)` | Permanently delete memory                          |
+| `init(args: PolywiseArgs)`        | Initialize the database and background brain       |
+| `off()`                           | Gracefully shut down background tasks and close DB |
 
 ### Query Parameters
 

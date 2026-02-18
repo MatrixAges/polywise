@@ -115,6 +115,23 @@ cot.on(event => {
 - 阶段 2：最终按 `combinedScore >= 0.5` 过滤
 - 跨迭代按内容 ID 去重
 
+#### 4. 🔄 **更新与遗忘记忆**
+
+Polywise 支持更新现有记忆，并选择性地遗忘过时信息：
+
+```typescript
+// 更新现有记忆内容
+await poly.update({
+	article_id: 1,
+	content: '用户现在偏好 TypeScript 和 Python，工作时间是上午 9 点到下午 6 点。'
+})
+
+// 永久删除记忆
+await poly.forget({
+	article_id: 1
+})
+```
+
 ---
 
 ## 🏗️ 架构
