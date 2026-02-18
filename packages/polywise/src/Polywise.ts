@@ -41,6 +41,7 @@ import type {
 	Edge,
 	FiltersArgs,
 	FinalQueryResult,
+	ForgetArticleArgs,
 	Node,
 	PolywiseArgs,
 	ProcessArticleArgs,
@@ -194,6 +195,9 @@ export default class Polywise {
 			metadata
 		} = args
 
+		await this.queryRaw(sql.sql_forget_decay_nodes, [article_id])
+		await this.queryRaw(sql.sql_forget_decay_edges, [article_id])
+
 		await this.article.update(article_id, {
 			content,
 			idol_id,
@@ -213,10 +217,17 @@ export default class Polywise {
 		return article_id
 	}
 
-	async forget(memory_id: number, filters: FiltersArgs = {}): Promise<void> {
-		await this.queryRaw(sql.sql_forget_decay_nodes, [memory_id])
-		await this.queryRaw(sql.sql_forget_decay_edges, [memory_id])
-		await this.queryRaw(sql.sql_delete_article, [memory_id])
+	async forget(args: ForgetArticleArgs): Promise<void> {
+		const { article_id, idol_id, root_ids, metrics_ids } = args
+
+		await this.queryRaw(sql.sql_forget_decay_nodes, [article_id])
+		await this.queryRaw(sql.sql_forget_decay_edges, [article_id])
+		await this.queryRaw(sql.sql_delete_article, [
+			article_id,
+			idol_id ?? null,
+			root_ids ?? null,
+			metrics_ids ?? null
+		])
 	}
 
 	setFilters(args: FiltersArgs) {

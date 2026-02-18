@@ -110,7 +110,7 @@ describe.concurrent('Article CRUD Operations', () => {
 
 		expect(memory_id).toBeGreaterThan(0)
 
-		await poly.forget(memory_id)
+		await poly.forget({ article_id: memory_id })
 
 		const article = await poly.article.get(memory_id)
 		expect(article).toBeNull()

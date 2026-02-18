@@ -320,8 +320,8 @@ export const sql_get_article = `SELECT id, content, created_at FROM ${SCHEMA_MEM
 export const sql_get_all_articles = `SELECT id, content, created_at FROM ${SCHEMA_MEMORY}.articles ORDER BY created_at DESC`
 
 /**
- * Updates an article's content and metadata.
- * Role: Correction or refinement of stored memory with full metadata support.
+ * Updates an article's content and metadata with filter validation.
+ * Role: Correction or refinement of stored memory with full metadata support and security filtering.
  */
 export const sql_update_article = `
   UPDATE ${SCHEMA_MEMORY}.articles 
@@ -332,6 +332,9 @@ export const sql_update_article = `
       metadata = COALESCE($6, metadata),
       updated_at = CURRENT_TIMESTAMP
   WHERE id = $1 
+    AND ($7::text IS NULL OR idol_id = $7)
+    AND ($8::text[] IS NULL OR root_ids && $8)
+    AND ($9::text[] IS NULL OR metrics_ids && $9)
   RETURNING id, content, idol_id, root_ids, metrics_ids, metadata, created_at, updated_at
 `
 
@@ -372,10 +375,16 @@ export const sql_check_articles_table_exists = `SELECT COUNT(*) as count FROM in
 export const sql_update_article_embedding = `UPDATE ${SCHEMA_MEMORY}.article_embeddings SET embedding = $1 WHERE article_id = $2`
 
 /**
- * Deletes an article and its associated embedding (via CASCADE).
- * Role: Removes a memory and all related data including node_sources references.
+ * Deletes an article and its associated embedding (via CASCADE) with filter validation.
+ * Role: Removes a memory and all related data including node_sources references with security filtering.
  */
-export const sql_delete_article = `DELETE FROM ${SCHEMA_MEMORY}.articles WHERE id = $1`
+export const sql_delete_article = `
+  DELETE FROM ${SCHEMA_MEMORY}.articles 
+  WHERE id = $1 
+    AND ($2::text IS NULL OR idol_id = $2)
+    AND ($3::text[] IS NULL OR root_ids && $3)
+    AND ($4::text[] IS NULL OR metrics_ids && $4)
+`
 
 /**
  * Decays the potential of nodes associated with a deleted article.

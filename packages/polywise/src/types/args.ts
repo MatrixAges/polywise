@@ -87,6 +87,10 @@ export interface UpdateArticleArgs extends FiltersArgs {
 	metadata?: Metadata
 }
 
+export interface ForgetArticleArgs extends FiltersArgs {
+	article_id: number
+}
+
 export interface AddArticleArgs extends FiltersArgs {
 	content: string
 }

@@ -78,16 +78,26 @@ export default class Article {
 			idol_id ?? null,
 			root_ids ?? null,
 			metrics_ids ?? null,
-			JSON.stringify(metadata ?? {})
+			JSON.stringify(metadata ?? {}),
+			idol_id ?? null,
+			root_ids ?? null,
+			metrics_ids ?? null
 		])
 
 		return res.rows.length > 0 ? res.rows[0] : null
 	}
 
-	async delete(article_id: number) {
+	async delete(article_id: number, filters: FiltersArgs = {}) {
 		if (!this.p.db) return
 
-		await this.p.db.query(sql.sql_delete_article, [article_id])
+		const { idol_id, root_ids, metrics_ids } = filters
+
+		await this.p.db.query(sql.sql_delete_article, [
+			article_id,
+			idol_id ?? null,
+			root_ids ?? null,
+			metrics_ids ?? null
+		])
 	}
 
 	async searchByVector(args: SearchArticlesArgs) {
