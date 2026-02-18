@@ -12,6 +12,7 @@ import {
 	sql_search_articles_by_vector,
 	sql_update_article
 } from './sql'
+import { generateId } from './utils'
 
 import type Polywise from './Polywise'
 import type { ArticleEntity, ArticleWithSimilarity, FiltersArgs, ProcessArticleArgs, SearchArticlesArgs } from './types'
@@ -33,7 +34,10 @@ export default class Article {
 	async process(args: ProcessArticleArgs) {
 		const { content, idol_id, root_ids, metrics_ids, metadata } = args
 
+		const article_id = generateId()
+
 		const res = await this.p.db.query<ArticleEntity>(sql_process_article, [
+			article_id,
 			content,
 			idol_id ?? null,
 			root_ids ?? null,
@@ -46,12 +50,13 @@ export default class Article {
 		return res.rows[0]
 	}
 
-	async addEmbedding(article_id: number, content: string) {
+	async addEmbedding(article_id: string, content: string) {
 		const embedding = await this.p.pipeline.embed(content)
 
 		if (!embedding) return
 
-		await this.p.db.query(sql_insert_article_embedding, [article_id, `[${embedding.join(',')}]`])
+		const embedding_id = generateId()
+		await this.p.db.query(sql_insert_article_embedding, [embedding_id, article_id, `[${embedding.join(',')}]`])
 	}
 
 	async addWithEmbedding(content: string, args?: FiltersArgs | string) {
@@ -66,7 +71,7 @@ export default class Article {
 		return result.id
 	}
 
-	async get(article_id: number) {
+	async get(article_id: string) {
 		const res = await this.p.db.query<ArticleEntity>(sql_get_article, [article_id])
 
 		return res.rows.length > 0 ? res.rows : null
@@ -78,7 +83,7 @@ export default class Article {
 		return res.rows
 	}
 
-	async update(id: number, args: ProcessArticleArgs) {
+	async update(id: string, args: ProcessArticleArgs) {
 		const { content, idol_id, root_ids, metrics_ids, metadata } = args
 
 		const res = await this.p.db.query<ArticleEntity>(sql_update_article, [
@@ -96,7 +101,7 @@ export default class Article {
 		return res.rows.length > 0 ? res.rows[0] : null
 	}
 
-	async delete(article_id: number, filters: FiltersArgs = {}) {
+	async delete(article_id: string, filters: FiltersArgs = {}) {
 		if (!this.p.db) return
 
 		const { idol_id, root_ids, metrics_ids } = filters

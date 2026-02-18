@@ -20,7 +20,7 @@ export async function formEmergentQuery(
 		current_depth: number
 		initial_memory: Array<Memory>
 	},
-	stimulateNodes: (node_ids: Array<number>, intensity: number) => Promise<void>
+	stimulateNodes: (node_ids: Array<string>, intensity: number) => Promise<void>
 ) {
 	const { query, current_depth, initial_memory } = args
 
@@ -41,7 +41,7 @@ export async function performEmergentSearch(
 		base_recall_depth: number
 		search_limit: number
 		stimulate_on_recall: boolean
-		history_ids: Set<number>
+		history_ids: Set<string>
 		idol_id?: string
 		root_ids?: Array<string>
 	},

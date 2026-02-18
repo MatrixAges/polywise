@@ -42,7 +42,7 @@ describe('Polywise Temporal Mechanics', () => {
 
 	it('should update updated_at when node is upserted', async () => {
 		const label = 'UpsertNode'
-		await poly.addNode({ label, x: 0, y: 0 })
+		const node_id = await poly.addNode({ label, x: 0, y: 0 })
 
 		const nodes_initial = await poly.getAllNodes()
 		const node_initial = nodes_initial.find(n => n.label === label)
@@ -52,13 +52,13 @@ describe('Polywise Temporal Mechanics', () => {
 
 		await (poly as any).queryRaw(
 			`
-			INSERT INTO brain.nodes (label, x, y, potential, updated_at)
-			VALUES ($1, 0, 0, 1.0, CURRENT_TIMESTAMP)
+			INSERT INTO brain.nodes (id, label, x, y, potential, updated_at)
+			VALUES ($2, $1, 0, 0, 1.0, CURRENT_TIMESTAMP)
 			ON CONFLICT (label) DO UPDATE SET 
 				potential = brain.nodes.potential + 0.5,
 				updated_at = CURRENT_TIMESTAMP
 		`,
-			[label]
+			[label, `temp_${node_id}`]
 		)
 
 		const nodes_final = await poly.getAllNodes()

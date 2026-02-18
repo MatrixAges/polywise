@@ -32,7 +32,8 @@ describe.concurrent('Article CRUD Operations', () => {
 		const content = software_architecture_datasets[0]
 		const article = await poly.article.process({ content })
 
-		expect(article.id).toBeGreaterThan(0)
+		expect(article.id).toBeDefined()
+		expect(typeof article.id).toBe('string')
 		expect(article.content).toBe(content)
 		expect(article.created_at).toBeDefined()
 	})
@@ -79,7 +80,8 @@ describe.concurrent('Article CRUD Operations', () => {
 		const content = software_architecture_datasets[0]
 		const memory_id = await poly.save({ content })
 
-		expect(memory_id).toBeGreaterThan(0)
+		expect(memory_id).toBeDefined()
+		expect(typeof memory_id).toBe('string')
 
 		const article = await poly.article.get(memory_id)
 
@@ -91,10 +93,11 @@ describe.concurrent('Article CRUD Operations', () => {
 		const originalContent = 'Original content about machine learning algorithms'
 		const memory_id = await poly.save({ content: originalContent })
 
-		expect(memory_id).toBeGreaterThan(0)
+		expect(memory_id).toBeDefined()
+		expect(typeof memory_id).toBe('string')
 
 		const newContent = 'Updated content about deep learning and neural networks'
-		await poly.update({ article_id: memory_id, content: newContent })
+		await poly.update({ memory_id, content: newContent })
 
 		const article = await poly.article.get(memory_id)
 		expect(article[0]?.content).toBe(newContent)
@@ -108,9 +111,10 @@ describe.concurrent('Article CRUD Operations', () => {
 		const content = 'Memory to be forgotten about neural networks and cognitive architecture'
 		const memory_id = await poly.save({ content })
 
-		expect(memory_id).toBeGreaterThan(0)
+		expect(memory_id).toBeDefined()
+		expect(typeof memory_id).toBe('string')
 
-		await poly.forget({ article_id: memory_id })
+		await poly.forget({ memory_id })
 
 		const article = await poly.article.get(memory_id)
 		expect(article).toBeNull()

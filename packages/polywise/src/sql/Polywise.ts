@@ -67,8 +67,8 @@ export const sql_tick = (threshold: number) => `
  * Role: Instantiates a new concept or entity within the brain.
  */
 export const sql_add_node = `
-  INSERT INTO ${SCHEMA_BRAIN}.nodes (label, x, y, threshold, idol_id, root_ids, metrics_ids, metadata, embedding)
-  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+  INSERT INTO ${SCHEMA_BRAIN}.nodes (id, label, x, y, threshold, idol_id, root_ids, metrics_ids, metadata, embedding)
+  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
   RETURNING id
 `
 
@@ -77,8 +77,8 @@ export const sql_add_node = `
  * Role: Establishes a relationship or association between two concepts.
  */
 export const sql_connect = `
-  INSERT INTO ${SCHEMA_BRAIN}.edges (source_id, target_id, weight, idol_id, root_ids, metrics_ids, metadata)
-  VALUES ($1, $2, $3, $4, $5, $6, $7)
+  INSERT INTO ${SCHEMA_BRAIN}.edges (id, source_id, target_id, weight, idol_id, root_ids, metrics_ids, metadata)
+  VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 `
 
 /**
@@ -116,8 +116,8 @@ export const sql_get_snapshot_edges = (weight_threshold: number) => `
  * Role: Ingests raw textual knowledge/content into the system.
  */
 export const sql_process_article = `
-  INSERT INTO ${SCHEMA_MEMORY}.articles (content, idol_id, root_ids, metrics_ids, metadata) 
-  VALUES ($1, $2, $3, $4, $5) 
+  INSERT INTO ${SCHEMA_MEMORY}.articles (id, content, idol_id, root_ids, metrics_ids, metadata) 
+  VALUES ($1, $2, $3, $4, $5, $6) 
   RETURNING id, content, created_at
 `
 
@@ -126,8 +126,8 @@ export const sql_process_article = `
  * Role: Ensures a concept exists and reinforces it (learning), triggering activation if it's already present.
  */
 export const sql_upsert_node = `
-  INSERT INTO ${SCHEMA_BRAIN}.nodes (label, x, y, potential, idol_id, root_ids, metrics_ids, metadata, embedding)
-  VALUES ($1, random() * 800, random() * 600, 1.0, $2, $3, $4, $5, $6)
+  INSERT INTO ${SCHEMA_BRAIN}.nodes (id, label, x, y, potential, idol_id, root_ids, metrics_ids, metadata, embedding)
+  VALUES ($1, $2, random() * 800, random() * 600, 1.0, $3, $4, $5, $6, $7)
   ON CONFLICT (label) DO UPDATE SET 
     potential = LEAST(${SCHEMA_BRAIN}.nodes.potential + ${DEFAULT_HEBBIAN_REWARD}, ${TICK_POTENTIAL_MAX}), 
     metadata = ${SCHEMA_BRAIN}.nodes.metadata || EXCLUDED.metadata, 
@@ -165,8 +165,8 @@ export const sql_inject_triples_begin = `BEGIN`
  * Role: Translates structured knowledge into graph connections.
  */
 export const sql_inject_triples_insert_edge = (
-	sub_id: number,
-	obj_id: number,
+	sub_id: string,
+	obj_id: string,
 	learning_rate: number,
 	decay_resistance: number,
 	predicate: string,
@@ -176,9 +176,9 @@ export const sql_inject_triples_insert_edge = (
 	metrics_ids?: string[],
 	metadata?: any
 ) => `
-  INSERT INTO ${SCHEMA_BRAIN}.edges (source_id, target_id, learning_rate, decay_resistance, type, weight, idol_id, root_ids, metrics_ids, metadata)
-  SELECT ${sub_id}, ${obj_id}, ${learning_rate}, ${decay_resistance}, '${predicate}', ${weight}, ${idol_id ? `'${idol_id}'` : 'NULL'}, ${root_ids && root_ids.length > 0 ? `ARRAY[${root_ids.map(id => `'${id}'`).join(',')}]` : 'NULL'}, ${metrics_ids && metrics_ids.length > 0 ? `ARRAY[${metrics_ids.map(id => `'${id}'`).join(',')}]` : 'NULL'}, '${JSON.stringify(metadata ?? {})}'::jsonb
-  WHERE NOT EXISTS (SELECT 1 FROM ${SCHEMA_BRAIN}.edges WHERE source_id = ${sub_id} AND target_id = ${obj_id});
+  INSERT INTO ${SCHEMA_BRAIN}.edges (id, source_id, target_id, learning_rate, decay_resistance, type, weight, idol_id, root_ids, metrics_ids, metadata)
+  SELECT '${sub_id}_${obj_id}', '${sub_id}', '${obj_id}', ${learning_rate}, ${decay_resistance}, '${predicate}', ${weight}, ${idol_id ? `'${idol_id}'` : 'NULL'}, ${root_ids && root_ids.length > 0 ? `ARRAY[${root_ids.map(id => `'${id}'`).join(',')}]` : 'NULL'}, ${metrics_ids && metrics_ids.length > 0 ? `ARRAY[${metrics_ids.map(id => `'${id}'`).join(',')}]` : 'NULL'}, '${JSON.stringify(metadata ?? {})}'::jsonb
+  WHERE NOT EXISTS (SELECT 1 FROM ${SCHEMA_BRAIN}.edges WHERE source_id = '${sub_id}' AND target_id = '${obj_id}');
 `
 
 /**
@@ -186,8 +186,8 @@ export const sql_inject_triples_insert_edge = (
  * Role: Reinforces and updates metadata/properties of existing knowledge connections.
  */
 export const sql_inject_triples_update_edge = (
-	sub_id: number,
-	obj_id: number,
+	sub_id: string,
+	obj_id: string,
 	learning_rate: number,
 	decay_resistance: number,
 	weight: number,
@@ -206,7 +206,7 @@ export const sql_inject_triples_update_edge = (
     metrics_ids = CASE WHEN ${metrics_ids && metrics_ids.length > 0} THEN (SELECT ARRAY(SELECT DISTINCT unnest(COALESCE(metrics_ids, '{}') || ARRAY[${metrics_ids?.map(id => `'${id}'`).join(',')}]))) ELSE metrics_ids END,
     metadata = metadata || '${JSON.stringify(metadata ?? {})}'::jsonb,
     updated_at = CURRENT_TIMESTAMP
-  WHERE source_id = ${sub_id} AND target_id = ${obj_id};
+  WHERE source_id = '${sub_id}' AND target_id = '${obj_id}';
 `
 
 /**
@@ -276,8 +276,8 @@ export const sql_get_edges_by_root = `
  * Role: Enables semantic search by mapping article content to a vector space.
  */
 export const sql_insert_article_embedding = `
-  INSERT INTO ${SCHEMA_MEMORY}.article_embeddings (article_id, embedding)
-  VALUES ($1, $2)
+  INSERT INTO ${SCHEMA_MEMORY}.article_embeddings (id, article_id, embedding)
+  VALUES ($1, $2, $3)
   RETURNING id
 `
 

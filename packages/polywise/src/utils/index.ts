@@ -1,6 +1,7 @@
 export { default as ChainEmitter } from './ChainEmitter'
 export { default as getPolywise } from './getPolywise'
 export { default as getRandomId } from './getRandomId'
+export { default as generateId } from './generateId'
 export { default as generateNodePosition } from './generateNodePosition'
 export { default as calculateWeight } from './calculateWeight'
 export { default as calculateFatigue } from './calculateFatigue'

@@ -24,7 +24,7 @@ export const sql_create_schema_brain = `CREATE SCHEMA IF NOT EXISTS ${SCHEMA_BRA
  */
 export const sql_create_table_nodes = `
   CREATE TABLE IF NOT EXISTS ${SCHEMA_BRAIN}.nodes (
-    id SERIAL PRIMARY KEY,
+    id TEXT PRIMARY KEY,
     label TEXT UNIQUE,
     x REAL,
     y REAL,
@@ -54,9 +54,9 @@ export const sql_create_table_nodes = `
  */
 export const sql_create_table_edges = `
   CREATE TABLE IF NOT EXISTS ${SCHEMA_BRAIN}.edges (
-    id SERIAL PRIMARY KEY,
-    source_id INTEGER REFERENCES ${SCHEMA_BRAIN}.nodes(id),
-    target_id INTEGER REFERENCES ${SCHEMA_BRAIN}.nodes(id),
+    id TEXT PRIMARY KEY,
+    source_id TEXT REFERENCES ${SCHEMA_BRAIN}.nodes(id),
+    target_id TEXT REFERENCES ${SCHEMA_BRAIN}.nodes(id),
     weight REAL DEFAULT 0.1,
     distance REAL DEFAULT 1.0,
     type TEXT,
@@ -149,7 +149,7 @@ export const sql_create_schema_memory = `CREATE SCHEMA IF NOT EXISTS ${SCHEMA_ME
  */
 export const sql_create_table_articles = `
   CREATE TABLE IF NOT EXISTS ${SCHEMA_MEMORY}.articles (
-    id SERIAL PRIMARY KEY,
+    id TEXT PRIMARY KEY,
     content TEXT,
     idol_id TEXT,
     root_ids TEXT[] DEFAULT '{}',
@@ -166,8 +166,8 @@ export const sql_create_table_articles = `
  */
 export const sql_create_table_node_sources = `
   CREATE TABLE IF NOT EXISTS ${SCHEMA_BRAIN}.node_sources (
-    node_id INTEGER REFERENCES ${SCHEMA_BRAIN}.nodes(id),
-    article_id INTEGER REFERENCES ${SCHEMA_MEMORY}.articles(id) ON DELETE CASCADE,
+    node_id TEXT REFERENCES ${SCHEMA_BRAIN}.nodes(id),
+    article_id TEXT REFERENCES ${SCHEMA_MEMORY}.articles(id) ON DELETE CASCADE,
     PRIMARY KEY (node_id, article_id)
   );
 `
@@ -184,8 +184,8 @@ export const sql_create_schema_user_space = `CREATE SCHEMA IF NOT EXISTS "${SCHE
  */
 export const sql_create_table_article_embeddings = `
   CREATE TABLE IF NOT EXISTS ${SCHEMA_MEMORY}.article_embeddings (
-    id SERIAL PRIMARY KEY,
-    article_id INTEGER REFERENCES ${SCHEMA_MEMORY}.articles(id) ON DELETE CASCADE,
+    id TEXT PRIMARY KEY,
+    article_id TEXT REFERENCES ${SCHEMA_MEMORY}.articles(id) ON DELETE CASCADE,
     embedding vector(1024) NOT NULL,
     model_name TEXT DEFAULT 'onnx-community/Qwen3-Embedding-0.6B-ONNX',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP

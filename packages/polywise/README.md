@@ -140,13 +140,13 @@ Update existing memories or delete outdated information:
 ```typescript
 // Update existing memory
 await poly.update({
-	article_id: 1,
+	memory_id: 1,
 	content: 'Updated knowledge about quantum computing...'
 })
 
 // Forget memory (permanently delete)
 await poly.forget({
-	article_id: 1
+	memory_id: 1
 })
 ```
 

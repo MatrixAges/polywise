@@ -70,6 +70,7 @@ import {
 	aggregateResults,
 	CURRENT_SCHEMA_VERSION,
 	extractKeywords,
+	generateId,
 	getNodeContexts,
 	migrate,
 	recallNodesByKeywords,
@@ -184,7 +185,7 @@ export default class Polywise {
 	@catchFinally(function (this: Polywise) {
 		this.brain.setBusy(false)
 	})
-	async save(args: ProcessArticleArgs): Promise<number> {
+	async save(args: ProcessArticleArgs): Promise<string> {
 		this.brain.reportUserActivity()
 		this.brain.setBusy(true)
 
@@ -196,29 +197,31 @@ export default class Polywise {
 			metadata
 		} = args
 
+		const article_id = generateId()
+
 		const res = (await this.queryRaw(sql_process_article, [
+			article_id,
 			content,
 			idol_id ?? null,
 			root_ids ?? null,
 			metrics_ids ?? null,
 			JSON.stringify(metadata ?? {})
-		])) as Array<{ id: number }>
+		])) as Array<{ id: string }>
 
 		const aid = res[0].id
 
 		const query_embedding = ((await this.pipeline.embed(content)) as Array<number>) || []
 
 		if (query_embedding && query_embedding.length > 0) {
-			const existing_embedding = await this.queryRaw(sql_get_article_embedding, [aid])
-
-			if (existing_embedding.length > 0) {
-				await this.queryRaw(sql_update_article_embedding, [`[${query_embedding.join(',')}]`, aid])
-			} else {
-				await this.queryRaw(sql_insert_article_embedding, [aid, `[${query_embedding.join(',')}]`])
-			}
+			const embedding_id = generateId()
+			await this.queryRaw(sql_insert_article_embedding, [
+				embedding_id,
+				aid,
+				`[${query_embedding.join(',')}]`
+			])
 		}
 
-		this.log.write({ ...args, idol_id, root_ids, metrics_ids }, { article_id: aid })
+		this.log.write({ ...args, idol_id, root_ids, metrics_ids }, { memory_id: aid })
 
 		return aid
 	}
@@ -227,12 +230,12 @@ export default class Polywise {
 	@catchFinally(function (this: Polywise) {
 		this.brain.setBusy(false)
 	})
-	async update(args: UpdateArticleArgs): Promise<number> {
+	async update(args: UpdateArticleArgs): Promise<string> {
 		this.brain.reportUserActivity()
 		this.brain.setBusy(true)
 
 		const {
-			article_id,
+			memory_id,
 			content,
 			idol_id = this.idol_id,
 			root_ids = this.root_ids,
@@ -240,10 +243,10 @@ export default class Polywise {
 			metadata
 		} = args
 
-		await this.queryRaw(sql_forget_decay_nodes, [article_id])
-		await this.queryRaw(sql_forget_decay_edges, [article_id])
+		await this.queryRaw(sql_forget_decay_nodes, [memory_id])
+		await this.queryRaw(sql_forget_decay_edges, [memory_id])
 
-		await this.article.update(article_id, {
+		await this.article.update(memory_id, {
 			content,
 			idol_id,
 			root_ids,
@@ -254,25 +257,20 @@ export default class Polywise {
 		const query_embedding = ((await this.pipeline.embed(content)) as Array<number>) || []
 
 		if (query_embedding && query_embedding.length > 0) {
-			await this.queryRaw(sql_update_article_embedding, [`[${query_embedding.join(',')}]`, article_id])
+			await this.queryRaw(sql_update_article_embedding, [`[${query_embedding.join(',')}]`, memory_id])
 		}
 
-		this.log.write({ ...args, idol_id, root_ids, metrics_ids }, { article_id })
+		this.log.write({ ...args, idol_id, root_ids, metrics_ids }, { memory_id })
 
-		return article_id
+		return memory_id
 	}
 
 	async forget(args: ForgetArticleArgs): Promise<void> {
-		const { article_id, idol_id, root_ids, metrics_ids } = args
+		const { memory_id, idol_id, root_ids, metrics_ids } = args
 
-		await this.queryRaw(sql_forget_decay_nodes, [article_id])
-		await this.queryRaw(sql_forget_decay_edges, [article_id])
-		await this.queryRaw(sql_delete_article, [
-			article_id,
-			idol_id ?? null,
-			root_ids ?? null,
-			metrics_ids ?? null
-		])
+		await this.queryRaw(sql_forget_decay_nodes, [memory_id])
+		await this.queryRaw(sql_forget_decay_edges, [memory_id])
+		await this.queryRaw(sql_delete_article, [memory_id, idol_id ?? null, root_ids ?? null, metrics_ids ?? null])
 	}
 
 	setFilters(args: FiltersArgs) {
@@ -307,7 +305,10 @@ export default class Polywise {
 			embedding
 		} = args
 
+		const node_id = generateId()
+
 		const rows = (await this.queryRaw(sql_add_node, [
+			node_id,
 			label,
 			x,
 			y,
@@ -317,7 +318,7 @@ export default class Polywise {
 			metrics_ids ?? null,
 			JSON.stringify(metadata ?? {}),
 			embedding ? `[${embedding.join(',')}]` : null
-		])) as Array<{ id: number }>
+		])) as Array<{ id: string }>
 
 		return rows[0].id
 	}
@@ -333,7 +334,10 @@ export default class Polywise {
 			metadata
 		} = args
 
+		const edge_id = generateId()
+
 		await this.queryRaw(sql_connect, [
+			edge_id,
 			source_id,
 			target_id,
 			weight ?? DEFAULT_EDGE_WEIGHT,
@@ -344,7 +348,7 @@ export default class Polywise {
 		])
 	}
 
-	async stimulate(node_id: number, intensity = 1.0) {
+	async stimulate(node_id: string, intensity = 1.0) {
 		await this.queryRaw(sql_stimulate, [intensity, node_id])
 	}
 
@@ -583,15 +587,15 @@ export default class Polywise {
 		return await recallNodesByKeywords(args, this.queryRaw.bind(this))
 	}
 
-	private async recallRelatedNodes(node_ids: Array<number>, max_depth: number) {
+	private async recallRelatedNodes(node_ids: Array<string>, max_depth: number) {
 		return await recallRelatedNodes(node_ids, max_depth, this.queryRaw.bind(this))
 	}
 
-	private async getNodeContexts(node_ids: Array<number>) {
+	private async getNodeContexts(node_ids: Array<string>) {
 		return await getNodeContexts(node_ids, this.queryRaw.bind(this))
 	}
 
-	private async stimulateNodes(node_ids: Array<number>, intensity: number) {
+	private async stimulateNodes(node_ids: Array<string>, intensity: number) {
 		await stimulateNodes(node_ids, intensity, this.queryRaw.bind(this))
 	}
 

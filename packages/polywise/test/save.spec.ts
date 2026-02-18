@@ -53,7 +53,7 @@ describe('Polywise Save Implementation', () => {
 		const new_content = 'Polywise uses local models like Qwen3-Embedding and BGE-Reranker for high performance.'
 
 		await poly.update({
-			article_id,
+			memory_id: article_id.toString(),
 			content: new_content
 		})
 

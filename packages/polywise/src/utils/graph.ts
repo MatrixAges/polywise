@@ -31,7 +31,7 @@ export async function recallNodesByKeywords(
 }
 
 export async function recallRelatedNodes(
-	node_ids: Array<number>,
+	node_ids: Array<string>,
 	max_depth: number,
 	queryRaw: (sql: string, params?: Array<any>) => Promise<any>
 ) {
@@ -43,7 +43,7 @@ export async function recallRelatedNodes(
 }
 
 export async function getNodeContexts(
-	node_ids: Array<number>,
+	node_ids: Array<string>,
 	queryRaw: (sql: string, params?: Array<any>) => Promise<any>
 ) {
 	if (node_ids.length === 0) {
@@ -59,7 +59,7 @@ export async function getNodeContexts(
 }
 
 export async function stimulateNodes(
-	node_ids: Array<number>,
+	node_ids: Array<string>,
 	intensity: number,
 	queryRaw: (sql: string, params?: Array<any>) => Promise<any>
 ) {

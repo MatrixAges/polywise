@@ -128,8 +128,11 @@ describe('Migration System', () => {
 			)
 
 			const unique_label = `TestNode_${Date.now()}`
+			const unique_id = `test_node_${Date.now()}`
 
-			await exec(`INSERT INTO ${SCHEMA_BRAIN}.nodes (label, x, y) VALUES ('${unique_label}', 0, 0)`)
+			await exec(
+				`INSERT INTO ${SCHEMA_BRAIN}.nodes (id, label, x, y) VALUES ('${unique_id}', '${unique_label}', 0, 0)`
+			)
 
 			const nodes = await query<{ label: string; description: string }>(
 				`SELECT label, description FROM ${SCHEMA_BRAIN}.nodes WHERE label = '${unique_label}'`
@@ -141,7 +144,7 @@ describe('Migration System', () => {
 		it('should add column and populate with calculated data', async () => {
 			await exec(`ALTER TABLE ${SCHEMA_BRAIN}.nodes ADD COLUMN IF NOT EXISTS magnitude REAL;`)
 
-			const nodes = await query<{ id: number; x: number; y: number }>(
+			const nodes = await query<{ id: string; x: number; y: number }>(
 				`SELECT id, x, y FROM ${SCHEMA_BRAIN}.nodes`
 			)
 
@@ -196,23 +199,27 @@ describe('Migration System', () => {
 		it('should rename column and preserve data', async () => {
 			await migrate(0, exec, query)
 
-			await exec(`INSERT INTO ${SCHEMA_BRAIN}.nodes (label, x, y) VALUES ('SourceNode', 0, 0)`)
-			await exec(`INSERT INTO ${SCHEMA_BRAIN}.nodes (label, x, y) VALUES ('TargetNode', 10, 10)`)
+			await exec(
+				`INSERT INTO ${SCHEMA_BRAIN}.nodes (id, label, x, y) VALUES ('source_node_1', 'SourceNode', 0, 0)`
+			)
+			await exec(
+				`INSERT INTO ${SCHEMA_BRAIN}.nodes (id, label, x, y) VALUES ('target_node_1', 'TargetNode', 10, 10)`
+			)
 
-			const nodes = await query<{ id: number; label: string }>(
+			const nodes = await query<{ id: string; label: string }>(
 				`SELECT id, label FROM ${SCHEMA_BRAIN}.nodes`
 			)
 			const source_id = nodes.find(n => n.label === 'SourceNode')!.id
 			const target_id = nodes.find(n => n.label === 'TargetNode')!.id
 
 			await exec(
-				`INSERT INTO ${SCHEMA_BRAIN}.edges (source_id, target_id, weight) VALUES (${source_id}, ${target_id}, 0.8)`
+				`INSERT INTO ${SCHEMA_BRAIN}.edges (id, source_id, target_id, weight) VALUES ('edge_1', '${source_id}', '${target_id}', 0.8)`
 			)
 
 			await exec(`ALTER TABLE ${SCHEMA_BRAIN}.edges RENAME COLUMN weight TO strength;`)
 
-			const edges = await query<{ source_id: number; target_id: number; strength: number }>(
-				`SELECT source_id, target_id, strength FROM ${SCHEMA_BRAIN}.edges WHERE source_id = ${source_id} AND target_id = ${target_id}`
+			const edges = await query<{ source_id: string; target_id: string; strength: number }>(
+				`SELECT source_id, target_id, strength FROM ${SCHEMA_BRAIN}.edges WHERE source_id = '${source_id}' AND target_id = '${target_id}'`
 			)
 
 			expect(edges[0].strength).toBe(0.8)
@@ -252,17 +259,21 @@ describe('Migration System', () => {
 		it('should modify column type with USING clause', async () => {
 			await migrate(0, exec, query)
 
-			await exec(`INSERT INTO ${SCHEMA_BRAIN}.nodes (label, x, y) VALUES ('SourceNode', 0, 0)`)
-			await exec(`INSERT INTO ${SCHEMA_BRAIN}.nodes (label, x, y) VALUES ('TargetNode', 10, 10)`)
+			await exec(
+				`INSERT INTO ${SCHEMA_BRAIN}.nodes (id, label, x, y) VALUES ('source_node_2', 'SourceNode', 0, 0)`
+			)
+			await exec(
+				`INSERT INTO ${SCHEMA_BRAIN}.nodes (id, label, x, y) VALUES ('target_node_2', 'TargetNode', 10, 10)`
+			)
 
-			const nodes = await query<{ id: number; label: string }>(
+			const nodes = await query<{ id: string; label: string }>(
 				`SELECT id, label FROM ${SCHEMA_BRAIN}.nodes`
 			)
 			const source_id = nodes.find(n => n.label === 'SourceNode')!.id
 			const target_id = nodes.find(n => n.label === 'TargetNode')!.id
 
 			await exec(
-				`INSERT INTO ${SCHEMA_BRAIN}.edges (source_id, target_id, weight) VALUES (${source_id}, ${target_id}, 0.8)`
+				`INSERT INTO ${SCHEMA_BRAIN}.edges (id, source_id, target_id, weight) VALUES ('edge_2', '${source_id}', '${target_id}', 0.8)`
 			)
 
 			await exec(`ALTER TABLE ${SCHEMA_BRAIN}.edges ADD COLUMN temp_weight TEXT;`)
@@ -362,9 +373,10 @@ describe('Migration System', () => {
 			await migrate(0, exec, query)
 
 			const unique_label = `MultiStepNode_${Date.now()}`
+			const unique_id = `multi_step_node_${Date.now()}`
 
 			await exec(
-				`INSERT INTO ${SCHEMA_BRAIN}.nodes (label, x, y, threshold) VALUES ('${unique_label}', 100, 200, 0.5)`
+				`INSERT INTO ${SCHEMA_BRAIN}.nodes (id, label, x, y, threshold) VALUES ('${unique_id}', '${unique_label}', 100, 200, 0.5)`
 			)
 
 			await exec(`ALTER TABLE ${SCHEMA_BRAIN}.nodes ADD COLUMN new_x REAL;`)
@@ -390,24 +402,24 @@ describe('Migration System', () => {
 		it('should create new table and migrate data from old table', async () => {
 			await exec(`
 				CREATE TABLE IF NOT EXISTS ${SCHEMA_MEMORY}.articles_v2 (
-					id SERIAL PRIMARY KEY,
+					id TEXT PRIMARY KEY,
 					content TEXT,
 					summary TEXT,
 					created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 				);
 			`)
 
-			const articles = await query<{ id: number; content: string }>(
+			const articles = await query<{ id: string; content: string }>(
 				`SELECT id, content FROM ${SCHEMA_MEMORY}.articles`
 			)
 
 			for (const article of articles) {
 				const summary = article.content ? article.content.substring(0, 100) + '...' : 'No content'
 
-				await query(`INSERT INTO ${SCHEMA_MEMORY}.articles_v2 (content, summary) VALUES ($1, $2)`, [
-					article.content,
-					summary
-				])
+				await query(
+					`INSERT INTO ${SCHEMA_MEMORY}.articles_v2 (id, content, summary) VALUES ($1, $2, $3)`,
+					[`v2_${article.id}`, article.content, summary]
+				)
 			}
 
 			const v2_articles = await query(`SELECT * FROM ${SCHEMA_MEMORY}.articles_v2`)

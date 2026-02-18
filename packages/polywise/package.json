@@ -28,6 +28,7 @@
 		"await-to-js": "^3.0.0",
 		"dayjs": "catalog:",
 		"fs-extra": "catalog:",
+		"nanoid": "^5.1.6",
 		"ofetch": "catalog:",
 		"optional": "^0.1.4",
 		"p-queue": "^8.1.0",

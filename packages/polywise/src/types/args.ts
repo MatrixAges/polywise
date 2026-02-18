@@ -70,8 +70,8 @@ export interface AddNodeArgs extends FiltersArgs {
 }
 
 export interface ConnectArgs extends FiltersArgs {
-	source_id: number
-	target_id: number
+	source_id: string
+	target_id: string
 	weight?: number
 	metadata?: Metadata
 }
@@ -82,13 +82,13 @@ export interface ProcessArticleArgs extends FiltersArgs {
 }
 
 export interface UpdateArticleArgs extends FiltersArgs {
-	article_id: number
+	memory_id: string
 	content: string
 	metadata?: Metadata
 }
 
 export interface ForgetArticleArgs extends FiltersArgs {
-	article_id: number
+	memory_id: string
 }
 
 export interface AddArticleArgs extends FiltersArgs {
@@ -106,19 +106,19 @@ export interface ArticleArgs {
 }
 
 export interface SearchCandidate {
-	id: number
+	id: string
 	content: string
 	source: 'vector' | 'fulltext'
 }
 
 export interface ArticleSearchResult {
-	id: number
+	id: string
 	content: string
 	similarity?: number
 }
 
 export interface SearchResult {
-	id: number
+	id: string
 	content: string
 	source: 'vector' | 'fulltext'
 	rerankScore: number
@@ -175,7 +175,7 @@ export interface ExecuteCotArgs extends FiltersArgs {
 	stimulate_on_recall: boolean
 	initial_memory: Array<Memory>
 	emitter: ChainEmitter
-	history_ids: Set<number>
+	history_ids: Set<string>
 }
 
 export interface RecallNodesByKeywordsArgs extends FiltersArgs {

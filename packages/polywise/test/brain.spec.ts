@@ -452,7 +452,8 @@ describe('Polywise Brain System', () => {
 			const content = 'This is a test article about artificial intelligence and machine learning.'
 			const article_id = await poly.article.add(content)
 
-			expect(article_id).toBeGreaterThan(0)
+			expect(article_id).toBeDefined()
+			expect(typeof article_id).toBe('string')
 
 			const articles = await poly.article.get(article_id)
 
@@ -464,7 +465,8 @@ describe('Polywise Brain System', () => {
 			const content = 'Deep learning is a subset of machine learning that uses neural networks.'
 			const article_id = await poly.article.addWithEmbedding(content)
 
-			expect(article_id).toBeGreaterThan(0)
+			expect(article_id).toBeDefined()
+			expect(typeof article_id).toBe('string')
 		})
 
 		it('should get all articles', async () => {

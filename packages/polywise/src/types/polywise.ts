@@ -17,7 +17,7 @@ export interface Metadata {
 }
 
 export interface Node {
-	id: number
+	id: string
 	label: string
 	x: number
 	y: number
@@ -35,8 +35,9 @@ export interface Node {
 }
 
 export interface Edge {
-	source_id: number
-	target_id: number
+	id?: string
+	source_id: string
+	target_id: string
 	weight: number
 	distance: number
 	type?: string
@@ -84,7 +85,7 @@ export interface Migration {
 }
 
 export interface ArticleEntity {
-	id: number
+	id: string
 	content: string
 	created_at: string
 }
@@ -94,8 +95,8 @@ export interface ArticleWithSimilarity extends ArticleEntity {
 }
 
 export interface ArticleEmbedding {
-	id: number
-	article_id: number
+	id: string
+	article_id: string
 	embedding: Array<number>
 	model_name: string
 	created_at: string
@@ -114,11 +115,11 @@ export interface ContextResult {
 	idol_id?: string
 	root_ids?: Array<string>
 	relevance_score: number
-	article_ids: Array<number>
+	article_ids: Array<string>
 }
 
 export interface Memory {
-	id: number
+	id: string
 	content: string
 	source: 'memory' | 'external' | 'implicit'
 	rerankScore: number

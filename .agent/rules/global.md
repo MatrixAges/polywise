@@ -171,6 +171,30 @@ When modifying database schema in the polywise package, you MUST update the migr
 
 **CRITICAL**: Only update `CURRENT_SCHEMA_VERSION` when explicitly requested to write a migration!
 
+## Unique String IDs (CRITICAL)
+
+**ALL IDs in the system MUST be unique strings (e.g., nanoid, UUID), NOT auto-incrementing integers.**
+
+This applies to:
+
+- Database primary keys (`id` fields)
+- Foreign key references (`source_id`, `target_id`, `article_id`, `node_id`, etc.)
+- All entity identifiers exposed through APIs
+
+**Rationale:**
+
+- Better suited for distributed systems
+- No information leakage about system state
+- Easier data merging and synchronization
+- URL-safe and human-readable (when using nanoid)
+
+**Implementation:**
+
+- Use `TEXT PRIMARY KEY` instead of `SERIAL PRIMARY KEY` in PostgreSQL
+- Use `TEXT REFERENCES` instead of `INTEGER REFERENCES` for foreign keys
+- Generate IDs using `nanoid()` or similar library before insertion
+- All ID parameters in functions should be `string` type
+
 ## Test-Driven Development (TDD) for packages/polywise
 
 When working on `packages/polywise`, you MUST follow TDD principles:
