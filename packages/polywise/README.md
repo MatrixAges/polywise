@@ -63,14 +63,14 @@ packages/polywise/
 
 ### Core Modules
 
-| Module     | Responsibility                                                                   |
-| ---------- | -------------------------------------------------------------------------------- |
-| `Polywise` | Database API entry: node/edge CRUD, activation propagation, knowledge injection  |
-| `Cortex`   | Query processing: single/iterative search with quality filtering                 |
-| `Brain`    | Lifecycle management: state machine, background task scheduling, fatigue control |
-| `Pipeline` | Model inference: embedding generation and result reranking                       |
-| `Article`  | Document storage: vector and full-text search capabilities                       |
-| `sql/`     | All SQL queries, keeping business logic separate from storage                    |
+| Module     | Responsibility                                                                                       |
+| ---------- | ---------------------------------------------------------------------------------------------------- |
+| `Polywise` | Database API entry: node/edge CRUD, activation propagation, knowledge injection                      |
+| `Cortex`   | Query processing: single/iterative search with quality filtering and Chain of Thought support        |
+| `Brain`    | Lifecycle management: state machine, background task scheduling, fatigue control                     |
+| `Pipeline` | Local model manager with embedding and reranking pipelines. Supports local models and API endpoints. |
+| `Article`  | Article manager class for CRUD, vector search, and full-text search operations                       |
+| `sql/`     | All SQL queries, keeping business logic separate from storage                                        |
 
 ## Use Cases
 
@@ -93,13 +93,13 @@ Retrieve relevant information based on natural language:
 
 ```typescript
 // Single search (fast)
-const { memory, metadata } = await poly.query({
+const { memory } = await poly.query({
 	query: 'How do qubits work?',
 	cot_depth: 1
 })
 
 // Iterative search (comprehensive)
-const { memory, metadata } = await poly.query({
+const { memory, cot } = await poly.query({
 	query: 'microservices architecture patterns',
 	cot_depth: 3, // Number of search iterations
 	recall_depth: 2, // Graph traversal depth
@@ -107,8 +107,8 @@ const { memory, metadata } = await poly.query({
 	rerank_limit: 10 // Final result limit
 })
 
-console.log(memory) // Simplified knowledge strings
-console.log(metadata) // Merged and reranked metadata (links, files, etc.)
+console.log(memory) // Array<{ memory_id, text, score, metadata, updated_at }>
+console.log(cot) // ChainEmitter | null
 ```
 
 ### 3. Iterative Search (Chain of Thought)
@@ -123,8 +123,8 @@ When `cot_depth > 1`, the system performs iterative search:
 
 **Quality Control**:
 
-- Stage 1: Filter by `combinedScore >= 0.4`
-- Stage 2: Final filter by `combinedScore >= 0.5`
+- Stage 1: Filter by `score >= 0.4`
+- Stage 2: Final filter by `score >= 0.5`
 - Deduplication by content ID across iterations
 
 **Stopping Conditions**:
@@ -140,15 +140,32 @@ Update existing memories or delete outdated information:
 ```typescript
 // Update existing memory
 await poly.update({
-	memory_id: 1,
+	memory_id: 'abc123',
 	content: 'Updated knowledge about quantum computing...'
 })
 
-// Forget memory (permanently delete)
+// Forget a specific memory (permanently delete)
 await poly.forget({
-	memory_id: 1
+	memory_id: 'abc123'
+})
+
+// Forget by query only (no memory_id required)
+await poly.forget({
+	query: 'outdated quantum computing concepts'
+})
+
+// Forget specific memory and all related memories found by query
+await poly.forget({
+	memory_id: 'abc123',
+	query: 'outdated quantum computing concepts'
 })
 ```
+
+**Forget Parameters:**
+
+- `memory_id` (optional): The memory ID to delete
+- `query` (optional): Natural language query to find and delete related memories
+- **Note**: At least one of `memory_id` or `query` must be provided
 
 ## API Quick Reference
 

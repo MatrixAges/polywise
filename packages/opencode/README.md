@@ -1,6 +1,6 @@
 # Opencode Polywise Plugin
 
-[English Documentation](./README.zh.md)
+[中文文档](./README.zh.md)
 
 ## Introduction
 

@@ -52,7 +52,7 @@ await poly.save({
 })
 
 // Retrieve relevant information with context-aware search
-const { memory, metadata } = await poly.query({
+const { memory } = await poly.query({
 	query: 'What are the user preferences?'
 })
 ```
@@ -63,13 +63,13 @@ Polywise implements a unified retrieval system combining graph-based memory reca
 
 ```typescript
 // Single search (fast)
-const { memory, metadata } = await poly.query({
+const { memory } = await poly.query({
 	query: 'What are the user preferences?',
 	cot_depth: 1
 })
 
 // Iterative search (comprehensive)
-const { memory, metadata } = await poly.query({
+const { memory, cot } = await poly.query({
 	query: 'microservices architecture patterns',
 	cot_depth: 3, // Number of iterations
 	recall_depth: 2, // Graph traversal depth
@@ -77,8 +77,8 @@ const { memory, metadata } = await poly.query({
 	rerank_limit: 10 // Final result limit
 })
 
-// memory[0] -> "..." (String)
-// metadata       -> { links: ["..."], files: ["..."], desc: "..." }
+// memory[0] -> { memory_id, text, score, metadata, updated_at }
+// cot       -> ChainEmitter (null if cot_depth <= 1)
 ```
 
 #### 3. 🔭 **Chain of Thought (Iterative Search)**
@@ -95,9 +95,11 @@ const { memory, metadata, cot } = await poly.query({
 })
 
 // Subscribe to the iteration progress
-cot.on(event => {
+cot?.on(event => {
 	console.log(`Found ${event.memory.length} insights`)
-	console.log(`Top Description: ${event.metadata.desc}`)
+	if (event.memory[0]?.metadata) {
+		console.log(`Top Description: ${event.memory[0].metadata.desc}`)
+	}
 })
 ```
 
@@ -111,8 +113,8 @@ cot.on(event => {
 
 **Quality Control:**
 
-- Stage 1: Filter by `combinedScore >= 0.4`
-- Stage 2: Final filter by `combinedScore >= 0.5`
+- Stage 1: Filter by `score >= 0.4`
+- Stage 2: Final filter by `score >= 0.5`
 - Deduplication by content ID across iterations
 
 #### 4. 🔄 **Update and Forget Memory**
@@ -122,15 +124,32 @@ Polywise supports updating existing memories and selectively forgetting outdated
 ```typescript
 // Update existing memory with new content
 await poly.update({
-	article_id: 1,
+	memory_id: 'abc123',
 	content: 'User now prefers TypeScript and Python, works from 9 AM to 6 PM.'
 })
 
-// Permanently delete a memory
+// Permanently delete a specific memory
 await poly.forget({
-	article_id: 1
+	memory_id: 'abc123'
+})
+
+// Delete memories by query (no memory_id required)
+await poly.forget({
+	query: 'outdated information about user preferences'
+})
+
+// Delete specific memory and all related memories found by query
+await poly.forget({
+	memory_id: 'abc123',
+	query: 'outdated information about user preferences'
 })
 ```
+
+**Forget Parameters:**
+
+- `memory_id` (optional): The memory ID to delete
+- `query` (optional): Natural language query to find and delete related memories
+- **Note**: At least one of `memory_id` or `query` must be provided
 
 ---
 
@@ -167,7 +186,7 @@ await poly.forget({
 │ Phase 2: Aggregation & Quality Filter                                    │
 │ - aggregateResults: Merge Recall and Search results                      │
 │ - Deduplication by ID                                                    │
-│ - Filter: combinedScore >= threshold                                     │
+│ - Filter: score >= threshold                                     │
 └──────────────────────────────────────────────────────────────────────────┘
       ↓
 ┌──────────────────────────────────────────────────────────────────────────┐
@@ -210,48 +229,6 @@ The Brain operates in states:
 - 🧠 **LEARNING**: Processing new information
 - 😴 **TIRED**: Needs consolidation
 - 🌙 **SLEEPING**: Memory consolidation in progress
-
----
-
-## 🛠️ Development
-
-### 1. Install Dependencies
-
-```bash
-pnpm install
-```
-
-### 2. Run Core Tests
-
-Verify the core memory engine:
-
-```bash
-pnpm --filter polywise test
-```
-
-### 3. Run
-
-Polywise runs as an Electron application. You need to start both the frontend and the desktop process:
-
-```bash
-# In one terminal, start the React frontend
-pnpm --filter app dev
-
-# In another terminal, start the Electron shell
-pnpm --filter desktop dev
-```
-
-### 4. Build
-
-To package the application for your platform:
-
-```bash
-# Build for macOS
-pnpm build:mac
-
-# Build for Windows
-pnpm build:win
-```
 
 ---
 
