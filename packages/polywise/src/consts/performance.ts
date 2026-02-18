@@ -21,9 +21,6 @@ export const COT_STIMULATE_DEPTH_FACTOR = 0.3
 export const SEARCH_LIMIT_FACTOR = 2
 export const POTENTIAL_THRESHOLD = 0.5
 export const MAX_IMPLICIT_RESULTS = 5
-export const RELEVANCE_SCORE_FACTOR = 0.8
-export const RERANK_SCORE_WEIGHT = 0.6
-export const RELEVANCE_SCORE_WEIGHT = 0.4
 export const STIMULATION_MAX = 0.5
 export const STIMULATION_MIN = 0.05
 export const STRENGTHEN_EDGE_WEIGHT = 0.1
@@ -34,11 +31,6 @@ export const EDGE_WEIGHT_MIN = 0.1
 export const EDGE_LEARNING_FACTOR = 0.2
 export const EDGE_DECAY_FACTOR = 0.001
 export const EDGE_DISTANCE_MIN = 0.2
-export const PRIORITY_WEIGHTS = {
-	memory: 1.0,
-	implicit: 0.9,
-	external: 0.6
-}
 export const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD'
 export const DEFAULT_TIMESTAMP_FORMAT = 'YYYY-MM-DD HH:mm:ss'
 export const DEFAULT_SIMILARITY_THRESHOLD = 0.5

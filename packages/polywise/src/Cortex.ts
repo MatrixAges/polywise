@@ -126,14 +126,14 @@ export default class Cortex {
 		return new_memory.filter(k => {
 			if (collected.has(k.id)) return false
 
-			if (k.combinedScore < DEFAULT_SIMILARITY_THRESHOLD * 0.8) return false
+			if (k.score < DEFAULT_SIMILARITY_THRESHOLD * 0.8) return false
 
 			return true
 		})
 	}
 
 	private filterByQuality(memory: Array<Memory>, threshold: number): Array<Memory> {
-		return memory.filter(k => k.combinedScore >= threshold)
+		return memory.filter(k => k.score >= threshold)
 	}
 
 	private generateNextQuery(

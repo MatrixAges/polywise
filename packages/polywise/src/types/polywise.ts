@@ -122,9 +122,7 @@ export interface Memory {
 	id: string
 	content: string
 	source: 'memory' | 'external' | 'implicit'
-	rerankScore: number
-	relevanceScore: number
-	combinedScore: number
+	score: number
 	stimulated: boolean
 	memoryStrength: number
 	metadata: Metadata

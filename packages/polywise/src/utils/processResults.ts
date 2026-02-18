@@ -5,7 +5,7 @@ export async function processResults(_query: string, memory: Array<Memory>, _pip
 	const final_memory = memory.map(k => ({
 		memory_id: k.id,
 		text: k.content,
-		score: k.combinedScore,
+		score: k.score,
 		metadata: k.metadata as Metadata
 	}))
 

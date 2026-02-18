@@ -2,9 +2,6 @@ import {
 	DEFAULT_SIMILARITY_THRESHOLD,
 	formatRerankDocument,
 	formatSourceInfo,
-	PRIORITY_WEIGHTS,
-	RELEVANCE_SCORE_WEIGHT,
-	RERANK_SCORE_WEIGHT,
 	STIMULATION_MAX,
 	STIMULATION_MIN
 } from '../consts'
@@ -34,21 +31,17 @@ export async function rerankMemory(
 	const rerank_scores = await pipeline.rerank(query, documents)
 
 	const results: Array<Memory> = valid_candidates.map((candidate, index) => {
-		const rerankScore = rerank_scores[index]?.score ?? 0
-		const priority_weight = (PRIORITY_WEIGHTS as any)[candidate.source] ?? PRIORITY_WEIGHTS.external
+		const score = rerank_scores[index]?.score ?? 0
 
 		return {
 			...candidate,
-			rerankScore,
-			combinedScore:
-				(rerankScore * RERANK_SCORE_WEIGHT + candidate.relevanceScore * RELEVANCE_SCORE_WEIGHT) *
-				priority_weight
+			score
 		}
 	})
 
 	const sorted_results = results
-		.filter(r => r.combinedScore >= threshold)
-		.sort((a, b) => b.combinedScore - a.combinedScore)
+		.filter(r => r.score >= threshold)
+		.sort((a, b) => b.score - a.score)
 		.slice(0, limit)
 
 	await stimulateByRanking(sorted_results, queryRaw)

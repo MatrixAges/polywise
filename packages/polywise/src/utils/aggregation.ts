@@ -1,4 +1,4 @@
-import { MEMORY_SCORE_BOOST, POTENTIAL_THRESHOLD, RELEVANCE_SCORE_FACTOR } from '../consts'
+import { MEMORY_SCORE_BOOST, POTENTIAL_THRESHOLD } from '../consts'
 import calculateMemoryStrength from './calculateMemoryStrength'
 
 import type { AggregateResultsArgs, Memory } from '../types'
@@ -32,10 +32,8 @@ function collectMemoryResults(
 				memory.push({
 					id: article.id,
 					content: article.content,
-					rerankScore: article.rerankScore,
-					relevanceScore: MEMORY_SCORE_BOOST,
+					score: MEMORY_SCORE_BOOST,
 					memoryStrength: memory_strength,
-					combinedScore: 0,
 					source: 'memory',
 					stimulated: true,
 					metadata: (article as any).metadata ?? {}
@@ -65,10 +63,8 @@ function collectExternalResults(
 			memory.push({
 				id: result.id,
 				content: result.content,
-				rerankScore: result.rerankScore,
-				relevanceScore: result.rerankScore,
+				score: result.rerankScore,
 				memoryStrength: memory_strength,
-				combinedScore: 0,
 				source: is_stimulated ? 'memory' : 'external',
 				stimulated: is_stimulated,
 				metadata: (result as any).metadata ?? {}
@@ -86,10 +82,8 @@ function collectImplicitResults(recall_result: AggregateResultsArgs['recall_resu
 		memory.push({
 			id: node.id,
 			content: node.label,
-			rerankScore: node.potential,
-			relevanceScore: node.potential * RELEVANCE_SCORE_FACTOR,
+			score: node.potential,
 			memoryStrength: node.potential,
-			combinedScore: 0,
 			source: 'implicit',
 			stimulated: true,
 			metadata: node.metadata ?? {}
