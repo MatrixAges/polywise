@@ -69,8 +69,17 @@ export default class Article {
 		return res.rows
 	}
 
-	async update(id: number, content: string) {
-		const res = await this.p.db.query<ArticleEntity>(sql.sql_update_article, [id, content])
+	async update(id: number, args: ProcessArticleArgs) {
+		const { content, idol_id, root_ids, metrics_ids, metadata } = args
+
+		const res = await this.p.db.query<ArticleEntity>(sql.sql_update_article, [
+			id,
+			content,
+			idol_id ?? null,
+			root_ids ?? null,
+			metrics_ids ?? null,
+			JSON.stringify(metadata ?? {})
+		])
 
 		return res.rows.length > 0 ? res.rows[0] : null
 	}

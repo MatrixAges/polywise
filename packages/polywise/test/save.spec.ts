@@ -47,18 +47,19 @@ describe('Polywise Save Implementation', () => {
 		expect(embedding_res[0].article_id).toBe(article_id)
 	})
 
-	it('should update existing article embedding when saved with existing article_id', async () => {
+	it('should update existing article embedding when updated with article_id', async () => {
 		const articles = await poly.article.getAll()
 		const article_id = articles[0].id
 		const new_content = 'Polywise uses local models like Qwen3-Embedding and BGE-Reranker for high performance.'
 
-		await poly.save({
-			content: new_content,
-			article_id
+		await poly.update({
+			article_id,
+			content: new_content
 		})
 
 		const updated_articles = await poly.article.getAll()
 		expect(updated_articles.length).toBe(1)
+		expect(updated_articles[0].content).toBe(new_content)
 	})
 
 	it('should handle metadata and associations during save', async () => {

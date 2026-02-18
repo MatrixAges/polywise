@@ -320,10 +320,20 @@ export const sql_get_article = `SELECT id, content, created_at FROM ${SCHEMA_MEM
 export const sql_get_all_articles = `SELECT id, content, created_at FROM ${SCHEMA_MEMORY}.articles ORDER BY created_at DESC`
 
 /**
- * Updates an article's content.
- * Role: Correction or refinement of stored knowledge.
+ * Updates an article's content and metadata.
+ * Role: Correction or refinement of stored memory with full metadata support.
  */
-export const sql_update_article = `UPDATE ${SCHEMA_MEMORY}.articles SET content = $2 WHERE id = $1 RETURNING id, content, created_at`
+export const sql_update_article = `
+  UPDATE ${SCHEMA_MEMORY}.articles 
+  SET content = $2,
+      idol_id = COALESCE($3, idol_id),
+      root_ids = COALESCE($4, root_ids),
+      metrics_ids = COALESCE($5, metrics_ids),
+      metadata = COALESCE($6, metadata),
+      updated_at = CURRENT_TIMESTAMP
+  WHERE id = $1 
+  RETURNING id, content, idol_id, root_ids, metrics_ids, metadata, created_at, updated_at
+`
 
 /**
  * Finds the node most semantically similar to a query vector.

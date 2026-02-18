@@ -54,7 +54,9 @@ describe.concurrent('Article CRUD Operations', () => {
 	it('should update real-world article content', async () => {
 		const created = await poly.article.process({ content: software_architecture_datasets[1] })
 
-		const updated = await poly.article.update(created.id, 'Updated content for containerization...')
+		const updated = await poly.article.update(created.id, {
+			content: 'Updated content for containerization...'
+		})
 
 		expect(updated.content).toBe('Updated content for containerization...')
 
@@ -83,6 +85,23 @@ describe.concurrent('Article CRUD Operations', () => {
 
 		expect(article).not.toBeNull()
 		expect(article[0]?.content).toBe(content)
+	})
+
+	it('should update memory via poly.update() and sync embedding', async () => {
+		const originalContent = 'Original content about machine learning algorithms'
+		const memory_id = await poly.save({ content: originalContent })
+
+		expect(memory_id).toBeGreaterThan(0)
+
+		const newContent = 'Updated content about deep learning and neural networks'
+		await poly.update({ article_id: memory_id, content: newContent })
+
+		const article = await poly.article.get(memory_id)
+		expect(article[0]?.content).toBe(newContent)
+
+		const queryResult = await poly.query({ query: 'deep learning neural networks' })
+		const updatedContentInMemory = queryResult.memory.some(m => m.includes('deep learning'))
+		expect(updatedContentInMemory).toBe(true)
 	})
 
 	it('should forget memory via poly.forget() and remove all related data', async () => {

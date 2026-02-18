@@ -48,7 +48,8 @@ import type {
 	RecallArgs,
 	RecallNodesByKeywordsArgs,
 	SingleSearchArgs,
-	StrengthenRelatedEdgesArgs
+	StrengthenRelatedEdgesArgs,
+	UpdateArticleArgs
 } from './types'
 
 @singleton()
@@ -143,26 +144,21 @@ export default class Polywise {
 
 		const {
 			content,
-			article_id,
 			idol_id = this.idol_id,
 			root_ids = this.root_ids,
 			metrics_ids = this.metrics_ids,
 			metadata
 		} = args
 
-		let aid = article_id
+		const res = (await this.queryRaw(sql.sql_process_article, [
+			content,
+			idol_id ?? null,
+			root_ids ?? null,
+			metrics_ids ?? null,
+			JSON.stringify(metadata ?? {})
+		])) as Array<{ id: number }>
 
-		if (!aid) {
-			const res = (await this.queryRaw(sql.sql_process_article, [
-				content,
-				idol_id ?? null,
-				root_ids ?? null,
-				metrics_ids ?? null,
-				JSON.stringify(metadata ?? {})
-			])) as Array<{ id: number }>
-
-			aid = res[0].id
-		}
+		const aid = res[0].id
 
 		const query_embedding = ((await this.pipeline.embed(content)) as Array<number>) || []
 
@@ -181,7 +177,43 @@ export default class Polywise {
 		return aid
 	}
 
-	async forget(memory_id: number): Promise<void> {
+	@catchError()
+	@catchFinally(function (this: Polywise) {
+		this.brain.setBusy(false)
+	})
+	async update(args: UpdateArticleArgs): Promise<number> {
+		this.brain.reportUserActivity()
+		this.brain.setBusy(true)
+
+		const {
+			article_id,
+			content,
+			idol_id = this.idol_id,
+			root_ids = this.root_ids,
+			metrics_ids = this.metrics_ids,
+			metadata
+		} = args
+
+		await this.article.update(article_id, {
+			content,
+			idol_id,
+			root_ids,
+			metrics_ids,
+			metadata
+		})
+
+		const query_embedding = ((await this.pipeline.embed(content)) as Array<number>) || []
+
+		if (query_embedding && query_embedding.length > 0) {
+			await this.queryRaw(sql.sql_update_article_embedding, [`[${query_embedding.join(',')}]`, article_id])
+		}
+
+		this.log.write({ ...args, idol_id, root_ids, metrics_ids }, { article_id })
+
+		return article_id
+	}
+
+	async forget(memory_id: number, filters: FiltersArgs = {}): Promise<void> {
 		await this.queryRaw(sql.sql_forget_decay_nodes, [memory_id])
 		await this.queryRaw(sql.sql_forget_decay_edges, [memory_id])
 		await this.queryRaw(sql.sql_delete_article, [memory_id])

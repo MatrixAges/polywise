@@ -78,7 +78,12 @@ export interface ConnectArgs extends FiltersArgs {
 
 export interface ProcessArticleArgs extends FiltersArgs {
 	content: string
-	article_id?: number
+	metadata?: Metadata
+}
+
+export interface UpdateArticleArgs extends FiltersArgs {
+	article_id: number
+	content: string
 	metadata?: Metadata
 }
 

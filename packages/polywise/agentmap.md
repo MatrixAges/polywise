@@ -34,7 +34,7 @@ This document provides an overview of the packages/polywise module structure and
 				"role": "Class"
 			},
 			"Polywise.ts": {
-				"desc": "Core database API for memory graph operations. Includes public instances of Brain, Article, and Pipeline. Supports hybrid retrieval with memory recall, external search, result aggregation, and reranking. Provides save() to store memory and return memory_id, and forget() to remove memory with node/edge downweighting.",
+				"desc": "Core database API for memory graph operations. Includes public instances of Brain, Article, and Pipeline. Supports hybrid retrieval with memory recall, external search, result aggregation, and reranking. Provides save() to create memory, update() to modify memory, and forget() to remove memory with node/edge downweighting.",
 				"role": "Class"
 			},
 			"Process.ts": {
