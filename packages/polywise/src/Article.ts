@@ -2,7 +2,16 @@ import to from 'await-to-js'
 import { injectable } from 'tsyringe'
 
 import { DEFAULT_SIMILARITY_THRESHOLD, SCHEMA_MEMORY } from './consts'
-import * as sql from './sql'
+import {
+	sql_delete_article,
+	sql_get_all_articles,
+	sql_get_article,
+	sql_insert_article_embedding,
+	sql_process_article,
+	sql_search_articles_by_text,
+	sql_search_articles_by_vector,
+	sql_update_article
+} from './sql'
 
 import type Polywise from './Polywise'
 import type { ArticleEntity, ArticleWithSimilarity, FiltersArgs, ProcessArticleArgs, SearchArticlesArgs } from './types'
@@ -24,7 +33,7 @@ export default class Article {
 	async process(args: ProcessArticleArgs) {
 		const { content, idol_id, root_ids, metrics_ids, metadata } = args
 
-		const res = await this.p.db.query<ArticleEntity>(sql.sql_process_article, [
+		const res = await this.p.db.query<ArticleEntity>(sql_process_article, [
 			content,
 			idol_id ?? null,
 			root_ids ?? null,
@@ -42,7 +51,7 @@ export default class Article {
 
 		if (!embedding) return
 
-		await this.p.db.query(sql.sql_insert_article_embedding, [article_id, `[${embedding.join(',')}]`])
+		await this.p.db.query(sql_insert_article_embedding, [article_id, `[${embedding.join(',')}]`])
 	}
 
 	async addWithEmbedding(content: string, args?: FiltersArgs | string) {
@@ -58,13 +67,13 @@ export default class Article {
 	}
 
 	async get(article_id: number) {
-		const res = await this.p.db.query<ArticleEntity>(sql.sql_get_article, [article_id])
+		const res = await this.p.db.query<ArticleEntity>(sql_get_article, [article_id])
 
 		return res.rows.length > 0 ? res.rows : null
 	}
 
 	async getAll() {
-		const res = await this.p.db.query<ArticleEntity>(sql.sql_get_all_articles)
+		const res = await this.p.db.query<ArticleEntity>(sql_get_all_articles)
 
 		return res.rows
 	}
@@ -72,7 +81,7 @@ export default class Article {
 	async update(id: number, args: ProcessArticleArgs) {
 		const { content, idol_id, root_ids, metrics_ids, metadata } = args
 
-		const res = await this.p.db.query<ArticleEntity>(sql.sql_update_article, [
+		const res = await this.p.db.query<ArticleEntity>(sql_update_article, [
 			id,
 			content,
 			idol_id ?? null,
@@ -92,7 +101,7 @@ export default class Article {
 
 		const { idol_id, root_ids, metrics_ids } = filters
 
-		await this.p.db.query(sql.sql_delete_article, [
+		await this.p.db.query(sql_delete_article, [
 			article_id,
 			idol_id ?? null,
 			root_ids ?? null,
@@ -107,7 +116,7 @@ export default class Article {
 
 		if (!embedding) return []
 
-		const res = await this.p.db.query<ArticleWithSimilarity>(sql.sql_search_articles_by_vector, [
+		const res = await this.p.db.query<ArticleWithSimilarity>(sql_search_articles_by_vector, [
 			`[${embedding.join(',')}]`,
 			limit ?? 10,
 			idol_id ?? null,
@@ -122,7 +131,7 @@ export default class Article {
 	async searchByText(args: SearchArticlesArgs) {
 		const { query, limit, idol_id, root_ids, metrics_ids } = args
 
-		const res = await this.p.db.query<ArticleWithSimilarity>(sql.sql_search_articles_by_text, [
+		const res = await this.p.db.query<ArticleWithSimilarity>(sql_search_articles_by_text, [
 			query,
 			limit ?? 10,
 			idol_id ?? null,

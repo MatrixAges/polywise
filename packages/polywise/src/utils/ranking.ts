@@ -8,7 +8,7 @@ import {
 	STIMULATION_MAX,
 	STIMULATION_MIN
 } from '../consts'
-import * as sql_brain from '../sql/Brain'
+import { sql_stimulate_nodes_batch } from '../sql/Brain'
 
 import type Pipeline from '../Pipeline'
 import type { Memory } from '../types'
@@ -77,6 +77,6 @@ async function stimulateByRanking(
 	const intensities = node_ids.map(id => stimulation_map.get(id)!)
 
 	for (let i = 0; i < node_ids.length; i++) {
-		await queryRaw(sql_brain.sql_stimulate_nodes_batch, [intensities[i], [node_ids[i]]])
+		await queryRaw(sql_stimulate_nodes_batch, [intensities[i], [node_ids[i]]])
 	}
 }

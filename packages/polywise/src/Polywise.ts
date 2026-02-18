@@ -19,8 +19,53 @@ import { catchError, catchFinally } from './decorators'
 import Log from './Log'
 import Pipeline from './Pipeline'
 import Process from './Process'
-import * as sql from './sql'
-import * as sql_meta from './sql/meta'
+import {
+	sql_add_node,
+	sql_check_articles_table_exists,
+	sql_connect,
+	sql_create_extension_vector,
+	sql_create_index_active_edges,
+	sql_create_index_article_content_gin,
+	sql_create_index_article_embeddings_hnsw,
+	sql_create_index_core_truth,
+	sql_create_index_edge_src,
+	sql_create_index_edge_tgt,
+	sql_create_index_edges_idol,
+	sql_create_index_edges_roots,
+	sql_create_index_nodes_idol,
+	sql_create_index_nodes_roots,
+	sql_create_schema_brain,
+	sql_create_schema_memory,
+	sql_create_table_article_embeddings,
+	sql_create_table_articles,
+	sql_create_table_edges,
+	sql_create_table_node_sources,
+	sql_create_table_nodes,
+	sql_delete_article,
+	sql_forget_decay_edges,
+	sql_forget_decay_nodes,
+	sql_get_all_nodes,
+	sql_get_article_embedding,
+	sql_get_edges_by_idol,
+	sql_get_edges_by_root,
+	sql_get_nodes_by_idol,
+	sql_get_nodes_by_root,
+	sql_get_snapshot_edges,
+	sql_get_snapshot_nodes,
+	sql_insert_article_embedding,
+	sql_process_article,
+	sql_run_shadow_tick,
+	sql_sleep_tick_begin,
+	sql_sleep_tick_clean_noise,
+	sql_sleep_tick_commit,
+	sql_sleep_tick_decay,
+	sql_sleep_tick_replay,
+	sql_sleep_tick_reset_nodes,
+	sql_stimulate,
+	sql_tick,
+	sql_update_article_embedding
+} from './sql'
+import { sql_create_schema_meta, sql_create_table_schema_version, sql_get_current_version } from './sql/meta'
 import {
 	aggregateResults,
 	CURRENT_SCHEMA_VERSION,
@@ -151,7 +196,7 @@ export default class Polywise {
 			metadata
 		} = args
 
-		const res = (await this.queryRaw(sql.sql_process_article, [
+		const res = (await this.queryRaw(sql_process_article, [
 			content,
 			idol_id ?? null,
 			root_ids ?? null,
@@ -164,12 +209,12 @@ export default class Polywise {
 		const query_embedding = ((await this.pipeline.embed(content)) as Array<number>) || []
 
 		if (query_embedding && query_embedding.length > 0) {
-			const existing_embedding = await this.queryRaw(sql.sql_get_article_embedding, [aid])
+			const existing_embedding = await this.queryRaw(sql_get_article_embedding, [aid])
 
 			if (existing_embedding.length > 0) {
-				await this.queryRaw(sql.sql_update_article_embedding, [`[${query_embedding.join(',')}]`, aid])
+				await this.queryRaw(sql_update_article_embedding, [`[${query_embedding.join(',')}]`, aid])
 			} else {
-				await this.queryRaw(sql.sql_insert_article_embedding, [aid, `[${query_embedding.join(',')}]`])
+				await this.queryRaw(sql_insert_article_embedding, [aid, `[${query_embedding.join(',')}]`])
 			}
 		}
 
@@ -195,8 +240,8 @@ export default class Polywise {
 			metadata
 		} = args
 
-		await this.queryRaw(sql.sql_forget_decay_nodes, [article_id])
-		await this.queryRaw(sql.sql_forget_decay_edges, [article_id])
+		await this.queryRaw(sql_forget_decay_nodes, [article_id])
+		await this.queryRaw(sql_forget_decay_edges, [article_id])
 
 		await this.article.update(article_id, {
 			content,
@@ -209,7 +254,7 @@ export default class Polywise {
 		const query_embedding = ((await this.pipeline.embed(content)) as Array<number>) || []
 
 		if (query_embedding && query_embedding.length > 0) {
-			await this.queryRaw(sql.sql_update_article_embedding, [`[${query_embedding.join(',')}]`, article_id])
+			await this.queryRaw(sql_update_article_embedding, [`[${query_embedding.join(',')}]`, article_id])
 		}
 
 		this.log.write({ ...args, idol_id, root_ids, metrics_ids }, { article_id })
@@ -220,9 +265,9 @@ export default class Polywise {
 	async forget(args: ForgetArticleArgs): Promise<void> {
 		const { article_id, idol_id, root_ids, metrics_ids } = args
 
-		await this.queryRaw(sql.sql_forget_decay_nodes, [article_id])
-		await this.queryRaw(sql.sql_forget_decay_edges, [article_id])
-		await this.queryRaw(sql.sql_delete_article, [
+		await this.queryRaw(sql_forget_decay_nodes, [article_id])
+		await this.queryRaw(sql_forget_decay_edges, [article_id])
+		await this.queryRaw(sql_delete_article, [
 			article_id,
 			idol_id ?? null,
 			root_ids ?? null,
@@ -262,7 +307,7 @@ export default class Polywise {
 			embedding
 		} = args
 
-		const rows = (await this.queryRaw(sql.sql_add_node, [
+		const rows = (await this.queryRaw(sql_add_node, [
 			label,
 			x,
 			y,
@@ -288,7 +333,7 @@ export default class Polywise {
 			metadata
 		} = args
 
-		await this.queryRaw(sql.sql_connect, [
+		await this.queryRaw(sql_connect, [
 			source_id,
 			target_id,
 			weight ?? DEFAULT_EDGE_WEIGHT,
@@ -300,56 +345,56 @@ export default class Polywise {
 	}
 
 	async stimulate(node_id: number, intensity = 1.0) {
-		await this.queryRaw(sql.sql_stimulate, [intensity, node_id])
+		await this.queryRaw(sql_stimulate, [intensity, node_id])
 	}
 
 	async getSnapshot(weight_threshold = SNAPSHOT_WEIGHT_THRESHOLD) {
-		const nodes = (await this.queryRaw(sql.sql_get_snapshot_nodes(weight_threshold))) as Array<Node>
-		const edges = (await this.queryRaw(sql.sql_get_snapshot_edges(weight_threshold))) as Array<Edge>
+		const nodes = (await this.queryRaw(sql_get_snapshot_nodes(weight_threshold))) as Array<Node>
+		const edges = (await this.queryRaw(sql_get_snapshot_edges(weight_threshold))) as Array<Edge>
 
 		return { nodes, edges }
 	}
 
 	async getAllNodes() {
-		return (await this.queryRaw(sql.sql_get_all_nodes)) as Array<Node>
+		return (await this.queryRaw(sql_get_all_nodes)) as Array<Node>
 	}
 
 	async getNodesByIdol(idol_id: string) {
-		return (await this.queryRaw(sql.sql_get_nodes_by_idol, [idol_id])) as Array<Node>
+		return (await this.queryRaw(sql_get_nodes_by_idol, [idol_id])) as Array<Node>
 	}
 
 	async getNodesByRoot(root_id: string) {
-		return (await this.queryRaw(sql.sql_get_nodes_by_root, [root_id])) as Array<Node>
+		return (await this.queryRaw(sql_get_nodes_by_root, [root_id])) as Array<Node>
 	}
 
 	async getEdgesByIdol(idol_id: string) {
-		return (await this.queryRaw(sql.sql_get_edges_by_idol, [idol_id])) as Array<Edge>
+		return (await this.queryRaw(sql_get_edges_by_idol, [idol_id])) as Array<Edge>
 	}
 
 	async getEdgesByRoot(root_id: string) {
-		return (await this.queryRaw(sql.sql_get_edges_by_root, [root_id])) as Array<Edge>
+		return (await this.queryRaw(sql_get_edges_by_root, [root_id])) as Array<Edge>
 	}
 
 	async tick(threshold_override?: number) {
 		const threshold = threshold_override ?? DEFAULT_NODE_THRESHOLD
 
-		await this.exec(sql.sql_tick(threshold))
+		await this.exec(sql_tick(threshold))
 	}
 
 	async runShadowTick() {
-		await this.exec(sql.sql_run_shadow_tick)
+		await this.exec(sql_run_shadow_tick)
 
 		await this.tick(0.8)
 	}
 
 	async triggerSleepTick() {
 		await this.exec([
-			sql.sql_sleep_tick_begin,
-			sql.sql_sleep_tick_clean_noise,
-			sql.sql_sleep_tick_decay,
-			sql.sql_sleep_tick_replay,
-			sql.sql_sleep_tick_reset_nodes,
-			sql.sql_sleep_tick_commit
+			sql_sleep_tick_begin,
+			sql_sleep_tick_clean_noise,
+			sql_sleep_tick_decay,
+			sql_sleep_tick_replay,
+			sql_sleep_tick_reset_nodes,
+			sql_sleep_tick_commit
 		])
 	}
 
@@ -485,10 +530,10 @@ export default class Polywise {
 
 		const [err] = await to(
 			(async () => {
-				await this.exec(sql_meta.sql_create_schema_meta)
-				await this.exec(sql_meta.sql_create_table_schema_version)
+				await this.exec(sql_create_schema_meta)
+				await this.exec(sql_create_table_schema_version)
 
-				const version_result = (await this.queryRaw(sql_meta.sql_get_current_version)) as Array<{
+				const version_result = (await this.queryRaw(sql_get_current_version)) as Array<{
 					version: number
 				}>
 
@@ -508,28 +553,28 @@ export default class Polywise {
 	}
 
 	private async initSchema() {
-		const check_result = (await this.queryRaw(sql.sql_check_articles_table_exists)) as Array<{ count: string }>
+		const check_result = (await this.queryRaw(sql_check_articles_table_exists)) as Array<{ count: string }>
 
 		if (parseInt(check_result[0]?.count || '0') === 0) {
 			await this.exec([
-				sql.sql_create_extension_vector,
-				sql.sql_create_schema_memory,
-				sql.sql_create_table_articles,
-				sql.sql_create_table_article_embeddings,
-				sql.sql_create_index_article_embeddings_hnsw,
-				sql.sql_create_index_article_content_gin,
-				sql.sql_create_schema_brain,
-				sql.sql_create_table_nodes,
-				sql.sql_create_table_edges,
-				sql.sql_create_index_edge_src,
-				sql.sql_create_index_edge_tgt,
-				sql.sql_create_index_active_edges,
-				sql.sql_create_index_core_truth,
-				sql.sql_create_index_nodes_idol,
-				sql.sql_create_index_edges_idol,
-				sql.sql_create_index_nodes_roots,
-				sql.sql_create_index_edges_roots,
-				sql.sql_create_table_node_sources
+				sql_create_extension_vector,
+				sql_create_schema_memory,
+				sql_create_table_articles,
+				sql_create_table_article_embeddings,
+				sql_create_index_article_embeddings_hnsw,
+				sql_create_index_article_content_gin,
+				sql_create_schema_brain,
+				sql_create_table_nodes,
+				sql_create_table_edges,
+				sql_create_index_edge_src,
+				sql_create_index_edge_tgt,
+				sql_create_index_active_edges,
+				sql_create_index_core_truth,
+				sql_create_index_nodes_idol,
+				sql_create_index_edges_idol,
+				sql_create_index_nodes_roots,
+				sql_create_index_edges_roots,
+				sql_create_table_node_sources
 			])
 		}
 	}

@@ -1,6 +1,6 @@
 import { STRENGTHEN_EDGE_WEIGHT } from '../consts'
-import * as sql from '../sql'
-import * as sql_brain from '../sql/Brain'
+import { sql_stimulate, sql_strengthen_edges_batch } from '../sql'
+import { sql_get_node_articles, sql_recall_nodes_by_label, sql_recall_related_nodes } from '../sql/Brain'
 
 import type { Node, RecallNodesByKeywordsArgs, StrengthenRelatedEdgesArgs } from '../types'
 
@@ -17,7 +17,7 @@ export async function recallNodesByKeywords(
 	const results: Node[] = []
 
 	for (const keyword of keywords) {
-		const nodes = (await queryRaw(sql_brain.sql_recall_nodes_by_label, [
+		const nodes = (await queryRaw(sql_recall_nodes_by_label, [
 			`%${keyword}%`,
 			limit,
 			idol_id,
@@ -39,7 +39,7 @@ export async function recallRelatedNodes(
 		return []
 	}
 
-	return (await queryRaw(sql_brain.sql_recall_related_nodes, [node_ids, max_depth, 20])) as Array<Node>
+	return (await queryRaw(sql_recall_related_nodes, [node_ids, max_depth, 20])) as Array<Node>
 }
 
 export async function getNodeContexts(
@@ -50,7 +50,7 @@ export async function getNodeContexts(
 		return []
 	}
 
-	const articles = (await queryRaw(sql_brain.sql_get_node_articles, [node_ids])) as Array<any>
+	const articles = (await queryRaw(sql_get_node_articles, [node_ids])) as Array<any>
 
 	return articles.map(article => ({
 		article_ids: [article.id],
@@ -68,7 +68,7 @@ export async function stimulateNodes(
 	}
 
 	for (const id of node_ids) {
-		await queryRaw(sql.sql_stimulate, [intensity, id])
+		await queryRaw(sql_stimulate, [intensity, id])
 	}
 }
 
@@ -83,5 +83,5 @@ export async function strengthenRelatedEdges(
 		return
 	}
 
-	await queryRaw(sql.sql_strengthen_edges_batch, [STRENGTHEN_EDGE_WEIGHT, node_ids, node_ids])
+	await queryRaw(sql_strengthen_edges_batch, [STRENGTHEN_EDGE_WEIGHT, node_ids, node_ids])
 }

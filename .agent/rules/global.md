@@ -127,7 +127,7 @@ All SQL statements MUST be defined within the `sql/` directory and exported for 
 
 1. **Location**: Place SQL files in `src/sql/`.
 2. **Export**: Export SQL strings or functions that return SQL strings.
-3. **Import**: Import SQL using `import * as sql from './sql'`.
+3. **Import**: Import SQL using named imports `import { sql_query, sql_insert } from './sql'`.
 
 ### SQL Comments (CRITICAL)
 
@@ -288,6 +288,27 @@ Always use `import type` for type-only imports. Avoid inline `import()` statemen
 ## Default Import Convention (CRITICAL)
 
 Always use direct default import syntax `import X from '...'` instead of `import { default as X } from '...'`.
+
+## Named Import Convention (CRITICAL)
+
+**NEVER** use namespace imports (`import * as name from 'module'`). Always use named imports (`import { a, b, c } from 'module'`).
+
+### Rules:
+
+1. **Explicit Named Imports**: Import only what you need using destructuring syntax.
+2. **No Namespace Aliases**: Avoid `import * as sql from './sql'` - instead import specific exports like `import { sql_query, sql_insert } from './sql'`.
+3. **Benefits**: Better tree-shaking, clearer dependencies, and easier refactoring.
+
+### Example:
+
+```typescript
+// WRONG
+import * as sql from './sql'
+// CORRECT
+import { sql_insert, sql_query, sql_update } from './sql'
+import * as utils from './utils'
+import { calculateSum, formatDate } from './utils'
+```
 
 ## Final Guarantee
 

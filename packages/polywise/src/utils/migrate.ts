@@ -1,4 +1,4 @@
-import * as sql_meta from '../sql/meta'
+import { sql_insert_version } from '../sql/meta'
 
 import type { Migration } from '../types'
 
@@ -17,6 +17,6 @@ export default async (
 	for (const migration of pending_migrations) {
 		await migration.up(exec, query)
 
-		await query(sql_meta.sql_insert_version, [migration.version])
+		await query(sql_insert_version, [migration.version])
 	}
 }

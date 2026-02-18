@@ -1,4 +1,25 @@
-import * as sql_schema from '../sql/schema'
+import {
+	sql_create_extension_vector,
+	sql_create_index_active_edges,
+	sql_create_index_article_content_gin,
+	sql_create_index_article_embeddings_hnsw,
+	sql_create_index_core_truth,
+	sql_create_index_edge_src,
+	sql_create_index_edge_tgt,
+	sql_create_index_edges_idol,
+	sql_create_index_edges_roots,
+	sql_create_index_nodes_embedding,
+	sql_create_index_nodes_idol,
+	sql_create_index_nodes_roots,
+	sql_create_schema_brain,
+	sql_create_schema_memory,
+	sql_create_schema_user_space,
+	sql_create_table_article_embeddings,
+	sql_create_table_articles,
+	sql_create_table_edges,
+	sql_create_table_node_sources,
+	sql_create_table_nodes
+} from '../sql/schema'
 
 import type { Migration } from '../types'
 
@@ -10,26 +31,26 @@ export const migrations: Array<Migration> = [
 		description: 'Initialize complete schema: extensions, brain schema, memory schema, all tables and indexes',
 		up: async exec => {
 			await exec([
-				sql_schema.sql_create_extension_vector,
-				sql_schema.sql_create_schema_brain,
-				sql_schema.sql_create_table_nodes,
-				sql_schema.sql_create_table_edges,
-				sql_schema.sql_create_index_edge_src,
-				sql_schema.sql_create_index_edge_tgt,
-				sql_schema.sql_create_index_active_edges,
-				sql_schema.sql_create_index_core_truth,
-				sql_schema.sql_create_index_nodes_idol,
-				sql_schema.sql_create_index_edges_idol,
-				sql_schema.sql_create_index_nodes_roots,
-				sql_schema.sql_create_index_edges_roots,
-				sql_schema.sql_create_index_nodes_embedding,
-				sql_schema.sql_create_schema_memory,
-				sql_schema.sql_create_table_articles,
-				sql_schema.sql_create_table_article_embeddings,
-				sql_schema.sql_create_index_article_embeddings_hnsw,
-				sql_schema.sql_create_index_article_content_gin,
-				sql_schema.sql_create_table_node_sources,
-				sql_schema.sql_create_schema_user_space
+				sql_create_extension_vector,
+				sql_create_schema_brain,
+				sql_create_table_nodes,
+				sql_create_table_edges,
+				sql_create_index_edge_src,
+				sql_create_index_edge_tgt,
+				sql_create_index_active_edges,
+				sql_create_index_core_truth,
+				sql_create_index_nodes_idol,
+				sql_create_index_edges_idol,
+				sql_create_index_nodes_roots,
+				sql_create_index_edges_roots,
+				sql_create_index_nodes_embedding,
+				sql_create_schema_memory,
+				sql_create_table_articles,
+				sql_create_table_article_embeddings,
+				sql_create_index_article_embeddings_hnsw,
+				sql_create_index_article_content_gin,
+				sql_create_table_node_sources,
+				sql_create_schema_user_space
 			])
 		}
 	}
