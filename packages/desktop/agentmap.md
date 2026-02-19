@@ -64,7 +64,7 @@ This document provides an overview of the packages/desktop module structure and 
 				},
 				"memory": {
 					"index.ts": {
-						"desc": "Polywise memory operations RPC with lightweight save path",
+						"desc": "Polywise memory operations RPC using full poly.save pipeline",
 						"role": "RPC"
 					}
 				},

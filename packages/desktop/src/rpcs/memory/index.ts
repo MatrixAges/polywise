@@ -25,13 +25,7 @@ const save = p
 		})
 	)
 	.mutation(async ({ input, ctx }) => {
-		const article = await ctx.poly.article.process(input)
-
-		if (!article?.id) {
-			throw new Error('Failed to save memory')
-		}
-
-		return article.id
+		return await ctx.poly.save(input)
 	})
 
 const update = p
