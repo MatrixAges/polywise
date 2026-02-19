@@ -18,6 +18,7 @@
 		"build": "rslib build",
 		"before_test": "bun ./scripts/beforeTest.ts",
 		"after_test": "bun ./scripts/afterTest.ts",
+		"triple": "bun ./scripts/testTriple.ts",
 		"test": "pnpm run before_test && rstest run $TEST_FILE"
 	},
 	"dependencies": {

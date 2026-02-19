@@ -143,16 +143,32 @@ export default class Pipeline {
 			const generator = await this.loadRebelModel()
 			const prompt = formatTriple(text)
 
+			// const messages = [
+			// 	{ role: 'system', content: 'Extract triples to JSON array.' },
+			// 	{ role: 'user', content: text }
+			// ]
+
+			// const prompt = generator.tokenizer.apply_chat_template(messages, {
+			// 	tokenize: false,
+			// 	add_generation_prompt: true,
+			// 	enable_thinking: false
+			// })
+
 			const output = await generator(prompt, {
-				max_new_tokens: 128,
-				emperature: 0,
+				max_new_tokens: 64,
+				temperature: 0.7,
+				top_p: 0.8,
+				repetition_penalty: 1.2,
 				do_sample: false,
-				return_full_text: false
+				return_full_text: false,
+				stop_sequences: ['<|im_end|>', ']', '\n\n', '```']
 			})
 
 			const generated_text = output[0]?.generated_text || ''
 
-			return this.parseTriples(generated_text)
+			return generated_text
+
+			// return this.parseTriples(generated_text)
 		})
 
 		return result || []

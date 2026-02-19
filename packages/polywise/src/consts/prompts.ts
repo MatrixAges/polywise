@@ -20,14 +20,18 @@ export const formatRerankDocument = (source_info: string, content: string) => {
 }
 
 export const formatTriple = (text: string) => {
-	return `<|im_start|>system
-You are a knowledge extraction assistant. Your task is to extract subject-predicate-object triples from the given text. Return ONLY a JSON array of triples in this exact format:
-[{"subject": "...", "predicate": "...", "object": "..."}]
-If no meaningful triples can be extracted, return an empty array [].
+	return `
+<|im_start|>system
+You are a JSON extractor. Extract ONE or MORE triples from the text.
+Strict JSON Format: [{"subject": "", "predicate": "", "object": ""}]
 <|im_end|>
+
 <|im_start|>user
-Extract triples from this text:
-${text}
+Text: ${text}
 <|im_end|>
-<|im_start|>assistant`
+
+<|im_start|>assistant
+<think>
+</think>
+[{"subject":`
 }
