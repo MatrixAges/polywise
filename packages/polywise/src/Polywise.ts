@@ -70,7 +70,8 @@ import {
 	sql_sleep_tick_reset_nodes,
 	sql_stimulate,
 	sql_tick,
-	sql_update_article_embedding
+	sql_update_article_embedding,
+	sql_upsert_node
 } from './sql'
 import { sql_create_schema_meta, sql_create_table_schema_version, sql_get_current_version } from './sql/meta'
 import {
@@ -561,19 +562,15 @@ export default class Polywise {
 		const { label, idol_id, root_ids, metrics_ids } = args
 		const node_id = generateId()
 
-		const rows = (await this.queryRaw(
-			`INSERT INTO brain.nodes (id, label, x, y, potential, idol_id, root_ids, metrics_ids, metadata, embedding)
-			 VALUES ($1, $2, random() * 800, random() * 600, 1.0, $3, $4, $5, $6, $7)
-			 ON CONFLICT (label) DO UPDATE SET
-			   potential = LEAST(brain.nodes.potential + 1.0, 100.0),
-			   metadata = brain.nodes.metadata || EXCLUDED.metadata,
-			   idol_id = COALESCE(EXCLUDED.idol_id, brain.nodes.idol_id),
-			   root_ids = CASE WHEN EXCLUDED.root_ids IS NOT NULL THEN (SELECT ARRAY(SELECT DISTINCT unnest(COALESCE(brain.nodes.root_ids, '{}') || EXCLUDED.root_ids))) ELSE brain.nodes.root_ids END,
-			   metrics_ids = CASE WHEN EXCLUDED.metrics_ids IS NOT NULL THEN (SELECT ARRAY(SELECT DISTINCT unnest(COALESCE(brain.nodes.metrics_ids, '{}') || EXCLUDED.metrics_ids))) ELSE brain.nodes.metrics_ids END,
-			   updated_at = CURRENT_TIMESTAMP
-			 RETURNING id`,
-			[node_id, label, idol_id ?? null, root_ids ?? null, metrics_ids ?? null, '{}', null]
-		)) as Array<{ id: string }>
+		const rows = (await this.queryRaw(sql_upsert_node, [
+			node_id,
+			label,
+			idol_id ?? null,
+			root_ids ?? null,
+			metrics_ids ?? null,
+			'{}',
+			null
+		])) as Array<{ id: string }>
 
 		return rows[0].id
 	}
@@ -758,14 +755,10 @@ export default class Polywise {
 	}
 
 	private async initDatabase() {
-		try {
-			validateMigrations()
-		} catch (error) {
-			console.error('Migration validation error:', error)
-		}
-
 		const [err] = await to(
 			(async () => {
+				validateMigrations()
+
 				await this.exec(sql_create_schema_meta)
 				await this.exec(sql_create_table_schema_version)
 
@@ -781,8 +774,12 @@ export default class Polywise {
 			})()
 		)
 
+		console.log(666)
+
 		if (err) {
-			console.error('Migration error:', err)
+			console.error('Database initialization error:', err)
+
+			throw err
 		}
 	}
 
