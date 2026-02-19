@@ -1,4 +1,5 @@
 import type { PGlite } from '@electric-sql/pglite'
+import type { DataType } from '@huggingface/transformers'
 import type Polywise from '../Polywise'
 import type Process from '../Process'
 import type { ChainEmitter } from '../utils'
@@ -32,7 +33,7 @@ export interface PolywiseArgs extends FiltersArgs {
 export interface LocalEmbeddingConfig {
 	type: 'local'
 	model: string
-	dtype?: string
+	dtype?: DataType
 }
 
 export interface CustomEmbeddingConfig {
@@ -45,7 +46,7 @@ export type EmbeddingConfig = LocalEmbeddingConfig | CustomEmbeddingConfig
 export interface LocalRerankerConfig {
 	type: 'local'
 	model: string
-	dtype?: string
+	dtype?: DataType
 }
 
 export interface CustomRerankerConfig {
@@ -58,7 +59,7 @@ export type RerankerConfig = LocalRerankerConfig | CustomRerankerConfig
 export interface LocalRebelConfig {
 	type: 'local'
 	model: string
-	dtype?: string
+	dtype?: DataType
 }
 
 export interface CustomRebelConfig {

@@ -19,20 +19,17 @@ export const formatRerankDocument = (source_info: string, content: string) => {
 	return `${source_info}\n${content}`
 }
 
-export const formatTriple = (text: string) => {
+export const formatTriple = (input: string) => {
 	return `
 <|im_start|>system
-You are a JSON extractor. Extract ONE or MORE triples from the text.
+You are a JSON extractor. Extract ONE or MORE triples from the input.
 Strict JSON Format: [{"subject": "", "predicate": "", "object": ""}]
 <|im_end|>
 
 <|im_start|>user
-Text: ${text}
+input: ${input}
 <|im_end|>
 
 <|im_start|>assistant
-<think>
-
-</think>
 [{"subject":`
 }

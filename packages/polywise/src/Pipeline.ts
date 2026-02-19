@@ -64,7 +64,6 @@ export default class Pipeline {
 
 		env.cacheDir = this.cache_dir
 		env.localModelPath = this.cache_dir
-		env.allowRemoteModels = false
 		env.allowLocalModels = true
 
 		if (embedding_config) {
@@ -310,14 +309,15 @@ export default class Pipeline {
 
 		await Promise.all([
 			this.checkAndDownload(this.embedding_config, this.loadEmbeddingModel.bind(this)),
-			(async () => {
-				await new Promise(resolve => setTimeout(resolve, 500))
-				await this.checkAndDownload(this.reranker_config, this.loadRerankerModel.bind(this))
-			})()
+			this.checkAndDownload(this.reranker_config, this.loadRerankerModel.bind(this)),
+			this.checkAndDownload(this.rebel_config, this.loadRebelModel.bind(this))
 		])
 	}
 
-	private async checkAndDownload(config: EmbeddingConfig | RerankerConfig, loadFn: () => Promise<any>) {
+	private async checkAndDownload(
+		config: EmbeddingConfig | RerankerConfig | RebelConfig,
+		loadFn: () => Promise<any>
+	) {
 		if (config.type !== 'local' || !this.cache_dir) return
 
 		const model_path = path.join(this.cache_dir, config.model)
