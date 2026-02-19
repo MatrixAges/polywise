@@ -69,7 +69,12 @@ This document provides an overview of the packages/app module structure and arch
 							"index.tsx": { "desc": "Memory query panel view", "role": "Component" }
 						},
 						"Save": { "index.tsx": { "desc": "Memory save panel view", "role": "Component" } },
-						"Task": { "index.tsx": { "desc": "Task queue panel view", "role": "Component" } },
+						"Task": {
+							"index.tsx": {
+								"desc": "Task queue panel view with pending/failed delete",
+								"role": "Component"
+							}
+						},
 						"index.ts": { "desc": "Panel components exports", "role": "Index" }
 					},
 					"index.tsx": {
@@ -158,13 +163,16 @@ This document provides an overview of the packages/app module structure and arch
 				"components": {
 					"MemoryGraph": {
 						"index.tsx": {
-							"desc": "Memory graph visualization using @xyflow/react",
+							"desc": "Brain graph visualization using @xyflow/react with node/edge attributes",
 							"role": "Component"
 						}
 					},
 					"index.ts": { "desc": "Memory page components exports", "role": "Index" }
 				},
-				"index.tsx": { "desc": "Memory page with query, list and graph views", "role": "Page" }
+				"index.tsx": {
+					"desc": "Memory page with query list and live brain graph views",
+					"role": "Page"
+				}
 			}
 		},
 		"presets": {

@@ -1,6 +1,5 @@
-import { useCallback, useState, useMemo } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Button, Input, Segmented } from 'antd'
-import { useShallow } from 'mobx-react-lite'
 
 import { MemoryList } from '@/components'
 import { useGlobal } from '@/context'
@@ -12,14 +11,67 @@ import type { MemoryItem } from '@/components/MemoryList/types'
 
 const { TextArea } = Input
 
+interface BrainNode {
+	id: string
+	label: string
+	x: number
+	y: number
+	activation: number
+	potential: number
+	idol_id?: string | null
+	root_ids?: Array<string> | null
+	metrics_ids?: Array<string> | null
+	metadata?: Record<string, unknown> | null
+	created_at: string
+	updated_at: string
+}
+
+interface BrainEdge {
+	source_id: string
+	target_id: string
+	weight: number
+	distance: number
+	type?: string | null
+	idol_id?: string | null
+	root_ids?: Array<string> | null
+	metrics_ids?: Array<string> | null
+	metadata?: Record<string, unknown> | null
+	created_at: string
+	updated_at: string
+}
+
+interface SnapshotResult {
+	nodes?: Array<BrainNode>
+	edges?: Array<BrainEdge>
+}
+
 const Index = () => {
-	const { memory, settings } = useGlobal()
+	const { memory } = useGlobal()
 	const [query, setQuery] = useState('')
-	const [results, setResults] = useState<Array<any>>([])
+	const [results, setResults] = useState<Array<MemoryItem>>([])
 	const [loading, setLoading] = useState(false)
 	const [page, setPage] = useState(1)
-	const [viewMode, setViewMode] = useState<'list' | 'graph'>('list')
-	const pageSize = 10
+	const [view_mode, set_view_mode] = useState<'list' | 'graph'>('list')
+	const [graph_loading, set_graph_loading] = useState(false)
+	const [graph_nodes, set_graph_nodes] = useState<Array<BrainNode>>([])
+	const [graph_edges, set_graph_edges] = useState<Array<BrainEdge>>([])
+	const [graph_loaded, set_graph_loaded] = useState(false)
+
+	const page_size = 10
+
+	const loadGraph = useCallback(async () => {
+		set_graph_loading(true)
+
+		try {
+			const snapshot = (await memory.snapshot({ weight_threshold: 0.2 })) as SnapshotResult
+
+			set_graph_nodes(snapshot.nodes || [])
+			set_graph_edges(snapshot.edges || [])
+			set_graph_loaded(true)
+		} finally {
+			set_graph_loading(false)
+		}
+	}, [memory])
 
 	const handleSearch = useCallback(async () => {
 		if (!query.trim()) return
@@ -29,12 +81,16 @@ const Index = () => {
 		try {
 			const res = await memory.query({ query })
 
-			setResults(res.memory || [])
+			setResults((res.memory || []) as Array<MemoryItem>)
 			setPage(1)
+
+			if (view_mode === 'graph') {
+				await loadGraph()
+			}
 		} finally {
 			setLoading(false)
 		}
-	}, [memory, query])
+	}, [loadGraph, memory, query, view_mode])
 
 	const handleForget = useCallback(
 		async (memory_id: string) => {
@@ -45,33 +101,11 @@ const Index = () => {
 		[memory, results]
 	)
 
-	const graphData = useMemo(() => {
-		if (results.length === 0) return { nodes: [], edges: [] }
+	useEffect(() => {
+		if (view_mode !== 'graph' || graph_loaded) return
 
-		const nodes = results.map((item, index) => ({
-			id: item.memory_id,
-			data: { label: item.text.slice(0, 30) + (item.text.length > 30 ? '...' : '') },
-			position: {
-				x: (index % 3) * 200 + Math.random() * 50,
-				y: Math.floor(index / 3) * 150 + Math.random() * 50
-			}
-		}))
-
-		const edges: Array<any> = []
-		for (let i = 0; i < results.length - 1; i++) {
-			if (results[i + 1]) {
-				edges.push({
-					id: `e${i}-${i + 1}`,
-					source: results[i].memory_id,
-					target: results[i + 1].memory_id,
-					type: 'smoothstep',
-					animated: true
-				})
-			}
-		}
-
-		return { nodes, edges }
-	}, [results])
+		void loadGraph()
+	}, [graph_loaded, loadGraph, view_mode])
 
 	return (
 		<div className='flex h-full w-full flex-col gap-4 p-4'>
@@ -92,32 +126,38 @@ const Index = () => {
 					<Button type='primary' onClick={handleSearch} loading={loading}>
 						Search
 					</Button>
-					{results.length > 0 && (
+					<div className='flex items-center gap-2'>
+						{view_mode === 'graph' && (
+							<Button onClick={() => void loadGraph()} loading={graph_loading}>
+								Refresh Graph
+							</Button>
+						)}
+
 						<Segmented
 							options={[
 								{ label: 'List', value: 'list' },
 								{ label: 'Graph', value: 'graph' }
 							]}
-							value={viewMode}
-							onChange={value => setViewMode(value as 'list' | 'graph')}
+							value={view_mode}
+							onChange={value => set_view_mode(value as 'list' | 'graph')}
 						/>
-					)}
+					</div>
 				</div>
 			</div>
 
 			<div className='flex flex-1 overflow-hidden'>
-				{viewMode === 'list' ? (
+				{view_mode === 'list' ? (
 					<MemoryList
-						items={results as Array<MemoryItem>}
+						items={results}
 						loading={loading}
 						onForget={handleForget}
 						page={page}
-						pageSize={pageSize}
+						pageSize={page_size}
 						total={results.length}
 						onPageChange={setPage}
 					/>
 				) : (
-					<MemoryGraph data={graphData} />
+					<MemoryGraph nodes={graph_nodes} edges={graph_edges} loading={graph_loading} />
 				)}
 			</div>
 		</div>

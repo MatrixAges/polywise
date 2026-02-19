@@ -119,8 +119,20 @@ export default class MemoryModel {
 		}
 
 		this.tasks.push(task)
+
 		this.saveTasks()
-		void this.processQueue()
+		this.processQueue()
+	}
+
+	removeTask(task_id: string) {
+		const task = this.tasks.find(item => item.id === task_id)
+
+		if (!task) return
+
+		if (task.status === 'processing') return
+
+		this.tasks = this.tasks.filter(item => item.id !== task_id)
+		this.saveTasks()
 	}
 
 	async query(args: { query: string; idol_id?: string; root_ids?: Array<string>; metrics_ids?: Array<string> }) {

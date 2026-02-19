@@ -1,5 +1,6 @@
 import { AlertCircle, Clock, Loader } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { Button } from 'antd'
 
 import { useGlobal } from '@/context'
 import { memo } from '@/utils'
@@ -7,6 +8,10 @@ import { memo } from '@/utils'
 const Index = observer(() => {
 	const { memory } = useGlobal()
 	const tasks = memory.tasks
+
+	const handleDelete = (task_id: string) => {
+		memory.removeTask(task_id)
+	}
 
 	const getStatusIcon = (status: string) => {
 		switch (status) {
@@ -73,6 +78,17 @@ const Index = observer(() => {
 							>
 								{getStatusText(task.status)}
 							</span>
+
+							{(task.status === 'pending' || task.status === 'failed') && (
+								<Button
+									type='link'
+									danger
+									size='small'
+									onClick={() => handleDelete(task.id)}
+								>
+									Delete
+								</Button>
+							)}
 						</div>
 						{task.error && <div className='mt-2 text-xs text-red-500'>{task.error}</div>}
 					</div>
