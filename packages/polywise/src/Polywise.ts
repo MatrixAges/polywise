@@ -153,11 +153,7 @@ export default class Polywise {
 			extensions: { vector }
 		})
 
-		try {
-			await this.initDatabase()
-		} catch (error) {
-			console.log(error)
-		}
+		await this.initDatabase()
 
 		await this.pipeline.init({
 			cache_dir,
@@ -755,31 +751,23 @@ export default class Polywise {
 	}
 
 	private async initDatabase() {
-		const [err] = await to(
-			(async () => {
-				validateMigrations()
+		try {
+			validateMigrations()
 
-				await this.exec(sql_create_schema_meta)
-				await this.exec(sql_create_table_schema_version)
+			await this.exec(sql_create_schema_meta)
+			await this.exec(sql_create_table_schema_version)
 
-				const version_result = (await this.queryRaw(sql_get_current_version)) as Array<{
-					version: number
-				}>
+			const version_result = (await this.queryRaw(sql_get_current_version)) as Array<{
+				version: number
+			}>
 
-				const current_version = version_result[0]?.version ?? 0
+			const current_version = version_result[0]?.version ?? 0
 
-				if (current_version < CURRENT_SCHEMA_VERSION) {
-					await migrate(current_version, this.exec.bind(this), this.queryRaw.bind(this))
-				}
-			})()
-		)
-
-		console.log(666)
-
-		if (err) {
-			console.error('Database initialization error:', err)
-
-			throw err
+			if (current_version < CURRENT_SCHEMA_VERSION) {
+				await migrate(current_version, this.exec.bind(this), this.queryRaw.bind(this))
+			}
+		} catch (error) {
+			console.error('Database initialization error:', error)
 		}
 	}
 
