@@ -89,7 +89,6 @@ export default {
 	shortcuts: {
 		title: 'Shortcuts',
 		'app.toggleSetting': 'Toggle Setting Panel',
-		'app.toggleSidebar': 'Toggle Sidebar',
 		'app.openSearch': 'Open Search Panel',
 		'app.closeSearch': 'Close Search Panel',
 		keydown: 'Key Down',

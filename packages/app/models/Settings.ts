@@ -2,22 +2,23 @@ import dayjs from 'dayjs'
 import i18next from 'i18next'
 import { makeAutoObservable } from 'mobx'
 import { initReactI18next } from 'react-i18next'
-import { injectable } from 'tsyringe'
-import { Util } from '@/models/common'
-import {
-	getLang,
-	resourcesToBackend,
-	setGlobalAnimation,
-	relaunch,
-	ipc,
-	is_electron,
-	theme_match_media,
-	getSystemTheme,
-	conf
-} from '@/utils'
 import { setStoreWhenChange } from 'stk/mobx'
 import { local } from 'stk/storage'
+import { injectable } from 'tsyringe'
 import { config, locales } from 'zod'
+
+import { Util } from '@/models/common'
+import {
+	conf,
+	getLang,
+	getSystemTheme,
+	ipc,
+	is_electron,
+	relaunch,
+	resourcesToBackend,
+	setGlobalAnimation,
+	theme_match_media
+} from '@/utils'
 
 import type { Lang, Theme } from '@/types'
 
@@ -28,7 +29,6 @@ export default class Index {
 	theme_value = 'light' as Exclude<Theme, 'system'>
 	auto_theme = false
 	open = false
-	sidebar_fold = false
 
 	constructor(public util: Util) {
 		makeAutoObservable(this, { util: false }, { autoBind: true })
@@ -152,10 +152,6 @@ export default class Index {
 
 	toggleSettings() {
 		this.open = !this.open
-	}
-
-	toggleSidebar() {
-		this.sidebar_fold = !this.sidebar_fold
 	}
 
 	on() {}

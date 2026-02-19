@@ -4,15 +4,13 @@ import { useGlobal } from '@/context'
 
 import { Sidebar } from './components'
 
-import type { IPropsSidebar } from '@/layout/types'
+import type { IPropsSidebar } from './types'
 
 const Index = () => {
 	const global = useGlobal()
 	const settings = global.settings
 
 	const props_side_bar: IPropsSidebar = {
-		fold: settings.sidebar_fold,
-		toggleSidebar: settings.toggleSidebar,
 		toggleSettings: settings.toggleSettings
 	}
 

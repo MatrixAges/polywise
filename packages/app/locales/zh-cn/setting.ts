@@ -89,7 +89,6 @@ export default {
 	shortcuts: {
 		title: '快捷键',
 		'app.toggleSetting': '切换设置面板',
-		'app.toggleSidebar': '切换侧边栏',
 		'app.openSearch': '唤起搜索面板',
 		'app.closeSearch': '关闭搜索面板',
 		keydown: '按下键',
