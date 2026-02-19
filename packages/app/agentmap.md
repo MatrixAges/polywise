@@ -131,7 +131,10 @@ This document provides an overview of the packages/app module structure and arch
 		},
 		"models": {
 			"Global.ts": { "desc": "Global application state model", "role": "Model" },
-			"Memory.ts": { "desc": "Memory task queue, persistence and query model", "role": "Model" },
+			"Memory.ts": {
+				"desc": "Memory task queue with IPC-safe serialization and query model",
+				"role": "Model"
+			},
 			"Settings.ts": {
 				"desc": "User settings state model (includes current_page navigation)",
 				"role": "Model"

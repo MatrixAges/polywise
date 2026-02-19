@@ -1,7 +1,7 @@
 import { makeAutoObservable, runInAction, toJS } from 'mobx'
 import { local } from 'stk/storage'
 import { injectable } from 'tsyringe'
-import { v4 as uuid } from 'uuid'
+import { v7 as uuid } from 'uuid'
 
 import { Util } from '@/models/common'
 import { ipc } from '@/utils'
