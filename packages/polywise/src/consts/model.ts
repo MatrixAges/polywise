@@ -2,8 +2,7 @@ import type { EmbeddingConfig, RebelConfig, RerankerConfig } from '../types'
 
 export const DEFAULT_EMBEDDING_MODEL = 'onnx-community/Qwen3-Embedding-0.6B-ONNX'
 export const DEFAULT_RERANKER_MODEL = 'onnx-community/bge-reranker-v2-m3-ONNX'
-// export const DEFAULT_REBEL_MODEL = 'onnx-community/Qwen3-0.6B-ONNX'
-export const DEFAULT_REBEL_MODEL = 'onnx-community/granite-4.0-350m-ONNX'
+export const DEFAULT_REBEL_MODEL = 'onnx-community/Qwen3-0.6B-ONNX'
 export const DEFAULT_DTYPE = 'q8'
 export const POOLING_MEAN = 'mean'
 
@@ -22,5 +21,5 @@ export const DEFAULT_RERANKER_CONFIG: RerankerConfig = {
 export const DEFAULT_REBEL_CONFIG: RebelConfig = {
 	type: 'local',
 	model: DEFAULT_REBEL_MODEL,
-	dtype: 'q4'
+	dtype: DEFAULT_DTYPE
 }

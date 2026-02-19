@@ -20,16 +20,23 @@ export const formatRerankDocument = (source_info: string, content: string) => {
 }
 
 export const formatTriple = (input: string) => {
-	return `
-<|im_start|>system
-You are a JSON extractor. Extract ONE or MORE triples from the input.
-Strict JSON Format: [{"subject": "", "predicate": "", "object": ""}]
-<|im_end|>
+	return `<|im_start|>system
+You are a triple extractor. Extract ONLY 1 most important triple from the input.
+Strict JSON Output {"subject": "...", "predicate": "...", "object": "..."}
 
+Example 1:
+Input: 苹果公司发布了最新的iPhone 15系列手机。
+Output: {"subject": "苹果公司","predicate": "发布了","object": "iPhone 15系列手机"}
+
+Example 2:
+Input: Artificial intelligence is transforming the global economy.
+Output: {"subject": "Artificial intelligence","predicate": "is transforming","object": "the global economy"}
+<|im_end|>
 <|im_start|>user
-input: ${input}
+Input: ${input}
 <|im_end|>
-
 <|im_start|>assistant
-[{"subject":`
+<think>
+</think>
+{"subject":`
 }

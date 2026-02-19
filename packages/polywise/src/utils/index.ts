@@ -14,6 +14,7 @@ export { default as listRecursive } from './listRecursive'
 export { default as verifyModel } from './verifyModel'
 export { default as generateModelHash } from './generateModelHash'
 export { default as splitSentence } from './splitSentence'
+export { default as getTriple } from './getTriple'
 
 export * from './processResults'
 export * from './aggregation'

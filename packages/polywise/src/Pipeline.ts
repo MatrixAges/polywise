@@ -15,7 +15,7 @@ import {
 	POOLING_MEAN
 } from './consts'
 import { catchFinally } from './decorators'
-import { generateModelHash, processText, verifyModel } from './utils'
+import { generateModelHash, getTriple, processText, verifyModel } from './utils'
 
 import type {
 	EmbeddingConfig,
@@ -124,7 +124,7 @@ export default class Pipeline {
 		}
 	}
 
-	async extractTriples(text: string): Promise<Array<Triple>> {
+	async extractTriple(text: string) {
 		const result = await this.rebel_queue.add(async () => {
 			if (this.rebel_config.type === 'custom') {
 				const triples = await this.rebel_config.fn(text)
@@ -143,48 +143,18 @@ export default class Pipeline {
 			const prompt = formatTriple(text)
 
 			const output = await generator(prompt, {
-				max_new_tokens: 64,
-				temperature: 0.7,
-				top_p: 0.8,
-				repetition_penalty: 1.2,
+				max_new_tokens: 30,
 				do_sample: false,
 				return_full_text: false,
-				stop_sequences: ['<|im_end|>', ']', '\n', '```']
+				stop_sequences: ['<|im_end|>', '<think>', '</think>', '\n', '\n\n']
 			})
 
-			const generated_text = output[0]?.generated_text || ''
+			const generated_text = output[0]?.generated_text ? `{"subject":${output[0].generated_text}` : ''
 
-			return generated_text
-
-			// return this.parseTriples(generated_text)
+			return getTriple(generated_text)
 		})
 
-		return result || []
-	}
-
-	private parseTriples(generated_text: string): Array<Triple> {
-		try {
-			const json_match = generated_text.match(/\[[\s\S]*\]/)
-
-			if (!json_match) return []
-
-			const triples = JSON.parse(json_match[0])
-
-			if (!Array.isArray(triples)) return []
-
-			return triples
-				.filter(t => t.subject && t.predicate && t.object)
-				.map(t => ({
-					subject: String(t.subject).trim(),
-					predicate: String(t.predicate).trim(),
-					object: String(t.object).trim(),
-					learning_rate: t.learning_rate ?? 1.0,
-					decay_resistance: t.decay_resistance ?? 1.0,
-					metadata: t.metadata || {}
-				}))
-		} catch {
-			return []
-		}
+		return result
 	}
 
 	async embed(text: string) {

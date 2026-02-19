@@ -235,11 +235,11 @@ export default class Polywise {
 			])
 		}
 
-		const triples = await this.pipeline.extractTriples(content)
+		const triple = await this.pipeline.extractTriple(content)
 
-		if (triples.length > 0) {
-			await this.injectTriples({
-				triples,
+		if (triple) {
+			await this.injectTriple({
+				triple,
 				article_id: aid,
 				idol_id,
 				root_ids,
@@ -416,74 +416,55 @@ export default class Polywise {
 		])
 	}
 
-	async injectTriples(args: {
-		triples: Array<{
+	async injectTriple(args: {
+		triple: {
 			subject: string
 			predicate: string
 			object: string
-			learning_rate?: number
-			decay_resistance?: number
-			metadata?: any
-		}>
+		}
 		article_id: string
 		idol_id?: string | null
 		root_ids?: Array<string> | null
 		metrics_ids?: Array<string> | null
 	}) {
-		const { triples, article_id, idol_id, root_ids, metrics_ids } = args
-
-		if (triples.length === 0) return
+		const { triple, article_id, idol_id, root_ids, metrics_ids } = args
 
 		await this.queryRaw(sql_inject_triples_begin)
 
-		for (const triple of triples) {
-			const sub_id = await this.upsertNode({
-				label: triple.subject,
+		const sub_id = await this.upsertNode({
+			label: triple.subject,
+			idol_id,
+			root_ids,
+			metrics_ids
+		})
+
+		const obj_id = await this.upsertNode({
+			label: triple.object,
+			idol_id,
+			root_ids,
+			metrics_ids
+		})
+
+		await this.queryRaw(
+			sql_inject_triples_insert_edge(
+				sub_id,
+				obj_id,
+				1.0,
+				1.0,
+				triple.predicate,
+				0.5,
 				idol_id,
 				root_ids,
 				metrics_ids
-			})
-
-			const obj_id = await this.upsertNode({
-				label: triple.object,
-				idol_id,
-				root_ids,
-				metrics_ids
-			})
-
-			await this.queryRaw(
-				sql_inject_triples_insert_edge(
-					sub_id,
-					obj_id,
-					triple.learning_rate ?? 1.0,
-					triple.decay_resistance ?? 1.0,
-					triple.predicate,
-					0.5,
-					idol_id,
-					root_ids,
-					metrics_ids,
-					triple.metadata
-				)
 			)
+		)
 
-			await this.queryRaw(
-				sql_inject_triples_update_edge(
-					sub_id,
-					obj_id,
-					triple.learning_rate ?? 1.0,
-					triple.decay_resistance ?? 1.0,
-					0.1,
-					idol_id,
-					root_ids,
-					metrics_ids,
-					triple.metadata
-				)
-			)
+		await this.queryRaw(
+			sql_inject_triples_update_edge(sub_id, obj_id, 1.0, 1.0, 0.1, idol_id, root_ids, metrics_ids)
+		)
 
-			await this.queryRaw(sql_node_sources, [sub_id, article_id])
-			await this.queryRaw(sql_node_sources, [obj_id, article_id])
-		}
-
+		await this.queryRaw(sql_node_sources, [sub_id, article_id])
+		await this.queryRaw(sql_node_sources, [obj_id, article_id])
 		await this.queryRaw(sql_inject_triples_commit)
 	}
 
