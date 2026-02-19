@@ -19,7 +19,7 @@ import type { ArticleEntity, ArticleWithSimilarity, FiltersArgs, ProcessArticleA
 
 @injectable()
 export default class Article {
-	private p: Polywise
+	private p!: Polywise
 
 	init(p: Polywise) {
 		this.p = p

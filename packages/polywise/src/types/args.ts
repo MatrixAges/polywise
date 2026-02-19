@@ -1,8 +1,9 @@
 import type { PGlite } from '@electric-sql/pglite'
 import type Polywise from '../Polywise'
+import type Process from '../Process'
 import type { ChainEmitter } from '../utils'
 import type { LogArgs } from './log'
-import type { Memory, Metadata } from './polywise'
+import type { Memory, Metadata, RecallResult } from './polywise'
 
 export interface BrainArgs {
 	poly: Polywise
@@ -60,9 +61,7 @@ export interface LocalRebelConfig {
 
 export interface CustomRebelConfig {
 	type: 'custom'
-	fn: (
-		text: string
-	) => Promise<
+	fn: (text: string) => Promise<
 		Array<{
 			subject: string
 			predicate: string
@@ -172,12 +171,12 @@ export interface QueryArgs extends FiltersArgs {
 	rerank_limit?: number
 	cot_depth?: number
 	stimulate_on_recall?: boolean
-	process?: import('../Process').default
+	process?: Process
 	threshold?: number
 }
 
 export interface AggregateResultsArgs {
-	recall_result: any
+	recall_result: RecallResult
 	search_results: Array<SearchResult>
 }
 
@@ -190,11 +189,11 @@ export interface PipelineSearchArgs {
 
 export interface SingleSearchArgs extends FiltersArgs {
 	query: string
-	recall_depth: number
-	search_limit: number
-	rerank_limit: number
-	stimulate_on_recall: boolean
-	process?: import('../Process').default
+	recall_depth?: number
+	search_limit?: number
+	rerank_limit?: number
+	stimulate_on_recall?: boolean
+	process?: Process
 	threshold?: number
 }
 

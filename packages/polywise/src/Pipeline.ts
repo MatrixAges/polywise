@@ -126,9 +126,18 @@ export default class Pipeline {
 	}
 
 	async extractTriples(text: string): Promise<Array<Triple>> {
-		return this.rebel_queue.add(async () => {
+		const result = await this.rebel_queue.add(async () => {
 			if (this.rebel_config.type === 'custom') {
-				return await this.rebel_config.fn(text)
+				const triples = await this.rebel_config.fn(text)
+
+				return triples.map(t => ({
+					subject: String(t.subject).trim(),
+					predicate: String(t.predicate).trim(),
+					object: String(t.object).trim(),
+					learning_rate: t.learning_rate ?? 1.0,
+					decay_resistance: t.decay_resistance ?? 1.0,
+					metadata: t.metadata || {}
+				}))
 			}
 
 			const generator = await this.loadRebelModel()
@@ -143,6 +152,8 @@ export default class Pipeline {
 
 			return this.parseTriples(generated_text)
 		})
+
+		return result || []
 	}
 
 	private parseTriples(generated_text: string): Array<Triple> {

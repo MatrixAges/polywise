@@ -196,7 +196,11 @@ export const OpencodePlugin: Plugin = async ctx => {
 
 				if (error) return console.error(error)
 
-				const ai_response = getTextPart(data.at(-1).parts)
+				const last_message = data.at(-1)
+
+				if (!last_message) return
+
+				const ai_response = getTextPart(last_message.parts)
 
 				if (!ai_response.trim()) return
 
@@ -209,7 +213,7 @@ export const OpencodePlugin: Plugin = async ctx => {
 				if (hasForget(ai_messages)) return
 
 				const metadata = getMetadata(ai_messages)
-				const others = {}
+				const others = {} as Record<string, any>
 
 				console.log('--------------')
 				console.log('AI Response: ', JSON.stringify(ai_response))

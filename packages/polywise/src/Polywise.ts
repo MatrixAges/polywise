@@ -10,6 +10,8 @@ import {
 	DEFAULT_EDGE_WEIGHT,
 	DEFAULT_NODE_THRESHOLD,
 	DEFAULT_RECALL_DEPTH,
+	DEFAULT_RERANK_LIMIT,
+	DEFAULT_SEARCH_LIMIT,
 	DEFAULT_SIMILARITY_THRESHOLD,
 	MEMORY_RECALL_INTENSITY,
 	SNAPSHOT_WEIGHT_THRESHOLD
@@ -112,12 +114,14 @@ export default class Polywise {
 	cortex = container.resolve(Cortex)
 	log = container.resolve(Log)
 
-	db: PGlite
+	db!: PGlite
 	idol_id: string | null = null
 	root_ids: Array<string> | null = null
 	metrics_ids: Array<string> | null = null
 
 	onTick?: () => void
+
+	private is_closed = false
 
 	async init(args: PolywiseArgs = {}) {
 		const {
@@ -232,9 +236,9 @@ export default class Polywise {
 			await this.injectTriples({
 				triples,
 				article_id: aid,
-				idol_id: idol_id ?? undefined,
-				root_ids: root_ids ?? undefined,
-				metrics_ids: metrics_ids ?? undefined
+				idol_id,
+				root_ids,
+				metrics_ids
 			})
 		}
 
@@ -265,9 +269,9 @@ export default class Polywise {
 
 		await this.article.update(memory_id, {
 			content,
-			idol_id,
-			root_ids,
-			metrics_ids,
+			idol_id: idol_id ?? undefined,
+			root_ids: root_ids ?? undefined,
+			metrics_ids: metrics_ids ?? undefined,
 			metadata
 		})
 
@@ -283,9 +287,9 @@ export default class Polywise {
 			await this.injectTriples({
 				triples,
 				article_id: memory_id,
-				idol_id: idol_id ?? undefined,
-				root_ids: root_ids ?? undefined,
-				metrics_ids: metrics_ids ?? undefined
+				idol_id,
+				root_ids,
+				metrics_ids
 			})
 		}
 
@@ -417,9 +421,9 @@ export default class Polywise {
 			metadata?: any
 		}>
 		article_id: string
-		idol_id?: string
-		root_ids?: Array<string>
-		metrics_ids?: Array<string>
+		idol_id?: string | null
+		root_ids?: Array<string> | null
+		metrics_ids?: Array<string> | null
 	}) {
 		const { triples, article_id, idol_id, root_ids, metrics_ids } = args
 
@@ -480,9 +484,9 @@ export default class Polywise {
 
 	private async upsertNode(args: {
 		label: string
-		idol_id?: string
-		root_ids?: Array<string>
-		metrics_ids?: Array<string>
+		idol_id?: string | null
+		root_ids?: Array<string> | null
+		metrics_ids?: Array<string> | null
 	}) {
 		const { label, idol_id, root_ids, metrics_ids } = args
 		const node_id = generateId()
@@ -571,8 +575,8 @@ export default class Polywise {
 
 		const matched_nodes = await this.recallNodesByKeywords({
 			keywords,
-			idol_id,
-			root_ids
+			idol_id: idol_id ?? undefined,
+			root_ids: root_ids ?? undefined
 		})
 
 		const related_nodes = await this.recallRelatedNodes(
@@ -601,10 +605,10 @@ export default class Polywise {
 	async executeSingleSearch(args: SingleSearchArgs) {
 		const {
 			query,
-			recall_depth,
-			search_limit,
-			rerank_limit,
-			stimulate_on_recall,
+			recall_depth = DEFAULT_RECALL_DEPTH,
+			search_limit = DEFAULT_SEARCH_LIMIT,
+			rerank_limit = DEFAULT_RERANK_LIMIT,
+			stimulate_on_recall = false,
 			idol_id,
 			root_ids,
 			metrics_ids,
@@ -671,12 +675,12 @@ export default class Polywise {
 		}
 	}
 
-	async queryRaw(sql_str: string, params?: Array<any>) {
+	async queryRaw<T = any>(sql_str: string, params?: Array<any>): Promise<Array<T>> {
 		if (!this.db) {
 			throw new Error('DB not initialized or already closed')
 		}
 
-		const res = await this.db.query(sql_str, params)
+		const res = await this.db.query<T>(sql_str, params)
 
 		return res.rows
 	}
@@ -776,11 +780,12 @@ export default class Polywise {
 	}
 
 	async off() {
+		if (this.is_closed) return
+
+		this.is_closed = true
 		this.brain.off()
 		this.pipeline.off()
 
 		await this.db.close()
-
-		this.db = null
 	}
 }

@@ -149,3 +149,10 @@ export interface FinalQueryResult {
 	}>
 	cot: ChainEmitter | null
 }
+
+export interface RecallResult {
+	nodes: Array<Node>
+	edges: Array<Edge>
+	stimulated_nodes: Array<string>
+	related_contexts: Array<ContextResult>
+}

@@ -1,3 +1,5 @@
+import type Process from '../Process'
+
 export interface CortexProcessArgs {
 	query: string
 	recall_depth?: number
@@ -8,5 +10,5 @@ export interface CortexProcessArgs {
 	idol_id?: string
 	root_ids?: Array<string>
 	metrics_ids?: Array<string>
-	process?: import('../Process').default
+	process?: Process
 }

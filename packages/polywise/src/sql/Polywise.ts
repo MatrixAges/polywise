@@ -171,9 +171,9 @@ export const sql_inject_triples_insert_edge = (
 	decay_resistance: number,
 	predicate: string,
 	weight: number,
-	idol_id?: string,
-	root_ids?: string[],
-	metrics_ids?: string[],
+	idol_id?: string | null,
+	root_ids?: string[] | null,
+	metrics_ids?: string[] | null,
 	metadata?: any
 ) => `
   INSERT INTO ${SCHEMA_BRAIN}.edges (id, source_id, target_id, learning_rate, decay_resistance, type, weight, idol_id, root_ids, metrics_ids, metadata)
@@ -191,9 +191,9 @@ export const sql_inject_triples_update_edge = (
 	learning_rate: number,
 	decay_resistance: number,
 	weight: number,
-	idol_id?: string,
-	root_ids?: string[],
-	metrics_ids?: string[],
+	idol_id?: string | null,
+	root_ids?: string[] | null,
+	metrics_ids?: string[] | null,
 	metadata?: any
 ) => `
   UPDATE ${SCHEMA_BRAIN}.edges

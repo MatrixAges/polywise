@@ -9,7 +9,7 @@ import type { Memory } from './types/polywise'
 
 @injectable()
 export default class Cortex {
-	private p: Polywise
+	private p!: Polywise
 
 	init(p: Polywise) {
 		this.p = p

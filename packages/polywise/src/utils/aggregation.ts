@@ -50,7 +50,7 @@ function collectExternalResults(
 	memory: Array<Memory>
 ) {
 	const stimulated_node_ids = new Set(recall_result.stimulated_nodes)
-	const node_potential_map = new Map<number, number>()
+	const node_potential_map = new Map<string, number>()
 
 	for (const node of recall_result.nodes) {
 		node_potential_map.set(node.id, node.potential)

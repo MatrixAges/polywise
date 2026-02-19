@@ -10,7 +10,7 @@ import type { BrainState } from './types'
 
 @injectable()
 export default class Brain {
-	private p: Polywise
+	private p!: Polywise
 
 	private state: BrainState = 'FRESH'
 	private shadow_interval?: any
