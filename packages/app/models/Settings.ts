@@ -7,6 +7,7 @@ import { local } from 'stk/storage'
 import { injectable } from 'tsyringe'
 import { config, locales } from 'zod'
 
+import { PANEL_COLLAPSE_THRESHOLD, PANEL_WIDTH_DEFAULT } from '@/appdata'
 import { Util } from '@/models/common'
 import {
 	conf,
@@ -30,12 +31,15 @@ export default class Index {
 	auto_theme = false
 	open = false
 
+	panel_collapsed = false
+	panel_width = PANEL_WIDTH_DEFAULT
+
 	constructor(public util: Util) {
 		makeAutoObservable(this, { util: false }, { autoBind: true })
 	}
 
 	async init() {
-		const off = await setStoreWhenChange(['lang', 'theme_source'], this)
+		const off = await setStoreWhenChange(['lang', 'theme_source', 'panel_collapsed', 'panel_width'], this)
 
 		this.util.acts = [off]
 
@@ -152,6 +156,38 @@ export default class Index {
 
 	toggleSettings() {
 		this.open = !this.open
+	}
+
+	togglePanelCollapsed() {
+		this.panel_collapsed = !this.panel_collapsed
+	}
+
+	handlePanelResize(sizes: Array<number>) {
+		const next_panel_width = sizes[1]
+
+		if (typeof next_panel_width !== 'number') return
+
+		if (next_panel_width < PANEL_COLLAPSE_THRESHOLD) {
+			this.panel_collapsed = true
+			this.panel_width = PANEL_WIDTH_DEFAULT
+
+			return
+		}
+
+		this.panel_width = next_panel_width
+	}
+
+	handlePanelCollapse(collapsed: Array<boolean>) {
+		const next_is_panel_collapsed = collapsed[1]
+
+		if (typeof next_is_panel_collapsed !== 'boolean') return
+
+		this.panel_collapsed = next_is_panel_collapsed
+	}
+
+	expandPanel() {
+		this.panel_width = PANEL_WIDTH_DEFAULT
+		this.panel_collapsed = false
 	}
 
 	on() {}
