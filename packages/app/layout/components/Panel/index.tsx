@@ -1,4 +1,4 @@
-import { Bot, Clipboard, PanelRightClose, Search } from 'lucide-react'
+import { Bot, Clipboard, PanelRight, Search } from 'lucide-react'
 
 import { memo } from '@/utils'
 
@@ -22,7 +22,7 @@ const Index = (props: IPropsPanel) => {
 					</div>
 				</div>
 				<div className='clickable flex h-full w-[37px] items-center justify-center' onClick={onClose}>
-					<PanelRightClose size={16} />
+					<PanelRight size={16} />
 				</div>
 			</div>
 			<div className='bg-std-100 border-std-900/8 flex flex-1 border-l'></div>
