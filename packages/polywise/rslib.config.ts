@@ -19,5 +19,6 @@ export default deepmerge(rslib, {
 		filename: {
 			js: '[name].js'
 		}
-	}
+	},
+	performance: { removeConsole: false }
 } as Partial<RslibConfig>)

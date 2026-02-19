@@ -153,7 +153,11 @@ export default class Polywise {
 			extensions: { vector }
 		})
 
-		await this.initDatabase()
+		try {
+			await this.initDatabase()
+		} catch (error) {
+			console.log(error)
+		}
 
 		await this.pipeline.init({
 			cache_dir,
