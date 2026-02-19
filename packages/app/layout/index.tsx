@@ -45,12 +45,7 @@ const Index = () => {
 		<ConfigProvider {...props_config_provider}>
 			<GlobalProvider value={global}>
 				<div className='flex h-screen'>
-					<div
-						className='
-							flex flex-1 flex-col
-							h-full
-						'
-					>
+					<div className='flex h-full flex-1 flex-col'>
 						<Tab {...props_tab}></Tab>
 						<Page {...props_page}></Page>
 					</div>

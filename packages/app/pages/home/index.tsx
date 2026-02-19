@@ -4,7 +4,7 @@ import { useGlobal } from '@/context'
 
 import { Sidebar } from './components'
 
-import type { IPropsSidebar } from './types'
+import type { IPropsSidebar } from '@/layout/types'
 
 const Index = () => {
 	const global = useGlobal()
