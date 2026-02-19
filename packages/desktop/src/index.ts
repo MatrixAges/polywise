@@ -8,7 +8,7 @@ import { Polywise } from 'polywise'
 import config from '../config'
 import { Main, Menu, Tray } from './app'
 import { routers } from './rpcs'
-import { conf, getThemeColor, is_mac, registerProtocol, serve, show_devtool } from './utils'
+import { conf, getAppDataPath, getThemeColor, is_mac, registerProtocol, serve, show_devtool } from './utils'
 
 import type { Tray as TrayType } from 'electron'
 
@@ -30,7 +30,7 @@ class App {
 	}
 
 	async init() {
-		await this.poly.init()
+		await this.poly.init({ data_dir: getAppDataPath('/memory') })
 
 		this.register()
 	}
