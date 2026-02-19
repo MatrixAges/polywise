@@ -175,6 +175,7 @@ export default class Index {
 		}
 
 		this.panel_width = next_panel_width
+		this.panel_collapsed = false
 	}
 
 	handlePanelCollapse(collapsed: Array<boolean>) {
