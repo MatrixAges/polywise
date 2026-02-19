@@ -32,6 +32,7 @@ Text: ${text}
 
 <|im_start|>assistant
 <think>
+
 </think>
 [{"subject":`
 }
