@@ -94,7 +94,7 @@ export default class Brain {
 			}
 
 			if (this.state !== 'SLEEPING' && this.state !== 'LEARNING') {
-				await to(this.runShadowTick())
+				await this.runShadowTick()
 			}
 		}, SHADOW_INTERVAL_MS)
 	}

@@ -34,12 +34,17 @@ export default class Index {
 	panel_collapsed = false
 	panel_width = PANEL_WIDTH_DEFAULT
 
+	current_page: 'home' | 'memory' | 'browser' = 'home'
+
 	constructor(public util: Util) {
 		makeAutoObservable(this, { util: false }, { autoBind: true })
 	}
 
 	async init() {
-		const off = await setStoreWhenChange(['lang', 'theme_source', 'panel_collapsed', 'panel_width'], this)
+		const off = await setStoreWhenChange(
+			['lang', 'theme_source', 'panel_collapsed', 'panel_width', 'current_page'],
+			this
+		)
 
 		this.util.acts = [off]
 
@@ -189,6 +194,10 @@ export default class Index {
 	expandPanel() {
 		this.panel_width = PANEL_WIDTH_DEFAULT
 		this.panel_collapsed = false
+	}
+
+	setCurrentPage(page: 'home' | 'memory' | 'browser') {
+		this.current_page = page
 	}
 
 	on() {}

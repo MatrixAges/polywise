@@ -99,5 +99,21 @@ export default class MemoryModel {
 		return await ipc.memory.forget.mutate(args)
 	}
 
+	async snapshot(args?: { weight_threshold?: number }) {
+		return await ipc.memory.snapshot.query(args || {})
+	}
+
+	async getNodes() {
+		return await ipc.memory.getNodes.query({})
+	}
+
+	async getNodesByIdol(idol_id: string) {
+		return await ipc.memory.getNodesByIdol.query({ idol_id })
+	}
+
+	async getEdgesByIdol(idol_id: string) {
+		return await ipc.memory.getEdgesByIdol.query({ idol_id })
+	}
+
 	off() {}
 }

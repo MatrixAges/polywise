@@ -16,6 +16,7 @@
 		"@microflash/rehype-figure": "^2.1.4",
 		"@swc/helpers": "^0.5.18",
 		"@trpc/client": "^11.9.0",
+		"@xyflow/react": "^12.10.1",
 		"ahooks": "^3.9.6",
 		"ai": "catalog:",
 		"antd": "^6.2.2",

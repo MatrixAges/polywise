@@ -1,5 +1,5 @@
 import { p, router } from '@desktop/utils'
-import { array, object, string } from 'zod'
+import { array, number, object, string } from 'zod'
 
 const query = p
 	.input(
@@ -57,9 +57,47 @@ const forget = p
 		return await ctx.poly.forget(input)
 	})
 
+const snapshot = p
+	.input(
+		object({
+			weight_threshold: number().optional()
+		})
+	)
+	.query(async ({ input, ctx }) => {
+		return await ctx.poly.getSnapshot(input.weight_threshold)
+	})
+
+const getNodes = p.query(async ({ ctx }) => {
+	return await ctx.poly.getAllNodes()
+})
+
+const getNodesByIdol = p
+	.input(
+		object({
+			idol_id: string()
+		})
+	)
+	.query(async ({ input, ctx }) => {
+		return await ctx.poly.getNodesByIdol(input.idol_id)
+	})
+
+const getEdgesByIdol = p
+	.input(
+		object({
+			idol_id: string()
+		})
+	)
+	.query(async ({ input, ctx }) => {
+		return await ctx.poly.getEdgesByIdol(input.idol_id)
+	})
+
 export default router({
 	query,
 	save,
 	update,
-	forget
+	forget,
+	snapshot,
+	getNodes,
+	getNodesByIdol,
+	getEdgesByIdol
 })

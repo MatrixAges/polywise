@@ -1,8 +1,11 @@
-import { Button, Input, List, Pagination } from 'antd'
+import { Button, Input } from 'antd'
 import { useState } from 'react'
 
+import { MemoryList } from '@/components'
 import { useGlobal } from '@/context'
 import { memo } from '@/utils'
+
+import type { MemoryItem } from '@/components/MemoryList/types'
 
 const { TextArea } = Input
 
@@ -51,49 +54,15 @@ const Index = () => {
 				</Button>
 			</div>
 
-			<List
-				className='flex-1 overflow-auto'
+			<MemoryList
+				items={paginatedData as Array<MemoryItem>}
 				loading={loading}
-				dataSource={paginatedData}
-				renderItem={(item: any) => (
-					<List.Item
-						actions={[
-							<Button
-								key='delete'
-								type='link'
-								danger
-								onClick={() => handleForget(item.memory_id)}
-							>
-								Forget
-							</Button>
-						]}
-					>
-						<List.Item.Meta
-							description={
-								<div className='flex flex-col gap-1'>
-									<div className='break-words text-slate-900'>{item.text}</div>
-									<div className='flex justify-between text-xs text-slate-500'>
-										<span>Score: {item.score.toFixed(4)}</span>
-										<span>{item.updated_at}</span>
-									</div>
-								</div>
-							}
-						/>
-					</List.Item>
-				)}
+				onForget={handleForget}
+				page={page}
+				pageSize={pageSize}
+				total={results.length}
+				onPageChange={setPage}
 			/>
-
-			{results.length > pageSize && (
-				<Pagination
-					size='small'
-					current={page}
-					total={results.length}
-					pageSize={pageSize}
-					onChange={setPage}
-					showSizeChanger={false}
-					className='mt-auto pt-2'
-				/>
-			)}
 		</div>
 	)
 }

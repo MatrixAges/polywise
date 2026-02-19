@@ -1,6 +1,7 @@
 import { Settings } from 'lucide-react'
 
 import { nav_items } from '@/appdata'
+import { useGlobal } from '@/context'
 import Logo from '@/svgs/bare.svg?react'
 import { memo } from '@/utils'
 
@@ -8,6 +9,11 @@ import type { IPropsSidebar } from '../types'
 
 const Index = (props: IPropsSidebar) => {
 	const { toggleSettings } = props
+	const { settings } = useGlobal()
+
+	const handleNavClick = (key: string) => {
+		settings.setCurrentPage(key as 'home' | 'memory' | 'browser')
+	}
 
 	return (
 		<nav className='relative flex h-full w-18 flex-col items-center justify-center'>
@@ -21,6 +27,7 @@ const Index = (props: IPropsSidebar) => {
 					<div
 						className='hover:bg-std-300/60 hover:text-std-900 clickable flex h-12 w-12 items-center justify-center rounded-full'
 						key={key}
+						onClick={() => handleNavClick(key)}
 					>
 						<Icon size={20}></Icon>
 					</div>

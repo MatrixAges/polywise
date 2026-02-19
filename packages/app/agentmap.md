@@ -42,6 +42,10 @@ This document provides an overview of the packages/app module structure and arch
 				},
 				"index.tsx": { "desc": "Main Markdown viewer component", "role": "Component" }
 			},
+			"MemoryList": {
+				"index.tsx": { "desc": "Reusable memory list component", "role": "Component" },
+				"types.ts": { "desc": "MemoryList type definitions", "role": "Type" }
+			},
 			"Modal.tsx": { "desc": "Reusable modal dialog component", "role": "Component" },
 			"index.ts": { "desc": "Components module exports", "role": "Index" }
 		},
@@ -65,10 +69,11 @@ This document provides an overview of the packages/app module structure and arch
 							"index.tsx": { "desc": "Memory query panel view", "role": "Component" }
 						},
 						"Save": { "index.tsx": { "desc": "Memory save panel view", "role": "Component" } },
+						"Task": { "index.tsx": { "desc": "Task queue panel view", "role": "Component" } },
 						"index.ts": { "desc": "Panel components exports", "role": "Index" }
 					},
 					"index.tsx": {
-						"desc": "Resizable side panel content with tabbed views (Chat, Save, Query)",
+						"desc": "Resizable side panel content with tabbed views (Chat, Save, Query, Task)",
 						"role": "Layout"
 					}
 				},
@@ -126,8 +131,11 @@ This document provides an overview of the packages/app module structure and arch
 		},
 		"models": {
 			"Global.ts": { "desc": "Global application state model", "role": "Model" },
-			"Memory.ts": { "desc": "Memory task queue and persistence model", "role": "Model" },
-			"Settings.ts": { "desc": "User settings state model", "role": "Model" },
+			"Memory.ts": { "desc": "Memory task queue, persistence and query model", "role": "Model" },
+			"Settings.ts": {
+				"desc": "User settings state model (includes current_page navigation)",
+				"role": "Model"
+			},
 			"common": {
 				"Util.ts": { "desc": "Model utility functions", "role": "Utility" },
 				"index.ts": { "desc": "Model common exports", "role": "Index" }
@@ -142,6 +150,18 @@ This document provides an overview of the packages/app module structure and arch
 				},
 				"index.tsx": { "desc": "Home page main view", "role": "Page" },
 				"types.ts": { "desc": "Home page types", "role": "Type" }
+			},
+			"memory": {
+				"components": {
+					"MemoryGraph": {
+						"index.tsx": {
+							"desc": "Memory graph visualization using @xyflow/react",
+							"role": "Component"
+						}
+					},
+					"index.ts": { "desc": "Memory page components exports", "role": "Index" }
+				},
+				"index.tsx": { "desc": "Memory page with query, list and graph views", "role": "Page" }
 			}
 		},
 		"presets": {
