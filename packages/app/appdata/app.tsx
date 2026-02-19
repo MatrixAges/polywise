@@ -3,10 +3,10 @@ import { Compass, Database, House, NotebookPen, SquareChartGantt, StickyNote } f
 export const nav_items = [
 	{ key: 'home', Icon: House },
 	{ key: 'memory', Icon: StickyNote },
-	{ key: 'broswer', Icon: Compass },
-	{ key: 'notebook', Icon: NotebookPen },
-	{ key: 'database', Icon: Database },
-	{ key: 'project', Icon: SquareChartGantt }
+	{ key: 'broswer', Icon: Compass }
+	// { key: 'notebook', Icon: NotebookPen },
+	// { key: 'database', Icon: Database },
+	// { key: 'project', Icon: SquareChartGantt }
 ] as const
 
 export const locales = ['en', 'zh-cn'] as const
