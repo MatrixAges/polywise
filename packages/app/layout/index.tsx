@@ -41,7 +41,15 @@ const Index = () => {
 		[settings.theme_value]
 	)
 
-	const props_tab: IPropsTab = {}
+	const handleExpandPanel = () => {
+		setPanelWidth(panel_width_default)
+		setIsPanelCollapsed(false)
+	}
+
+	const props_tab: IPropsTab = {
+		is_panel_collapsed,
+		onExpand: handleExpandPanel
+	}
 
 	const props_page: IPropsPage = {}
 
@@ -81,7 +89,10 @@ const Index = () => {
 			<GlobalProvider value={global}>
 				<div className='flex h-screen w-full'>
 					<Splitter
-						className='h-full w-full'
+						className='group/splitter h-full w-full'
+						classNames={{
+							dragger: '!bg-transparent !opacity-0 transition-opacity duration-150 [&_*]:!opacity-0 group-hover/splitter:!opacity-100 group-hover/splitter:[&_*]:!opacity-100 hover:!opacity-100 hover:[&_*]:!opacity-100 active:!opacity-100 active:[&_*]:!opacity-100'
+						}}
 						onCollapse={handlePanelCollapse}
 						onResize={handlePanelResize}
 					>
@@ -92,7 +103,7 @@ const Index = () => {
 							</div>
 						</Splitter.Panel>
 						<Splitter.Panel
-							collapsible={{ start: true, showCollapsibleIcon: 'auto' }}
+							collapsible={{ start: true, showCollapsibleIcon: false }}
 							defaultSize={panel_width_default}
 							min={0}
 							size={is_panel_collapsed ? 0 : panel_width}

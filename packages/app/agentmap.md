@@ -60,19 +60,24 @@ This document provides an overview of the packages/app module structure and arch
 				"Page": { "index.tsx": { "desc": "Page layout container", "role": "Layout" } },
 				"Panel": {
 					"index.tsx": {
-						"desc": "Resizable side panel content with close action",
+						"desc": "Resizable side panel content with reliable no-drag close action",
 						"role": "Layout"
 					}
 				},
 				"Sidebar.tsx": { "desc": "Sidebar layout component", "role": "Layout" },
-				"Tab": { "index.tsx": { "desc": "Tab navigation component", "role": "Layout" } },
+				"Tab": {
+					"index.tsx": {
+						"desc": "Tab bar with collapsed-panel expand trigger",
+						"role": "Layout"
+					}
+				},
 				"index.ts": { "desc": "Layout components exports", "role": "Index" }
 			},
 			"index.tsx": {
-				"desc": "Main layout with Splitter-based panel resizing and collapsing",
+				"desc": "Main layout with hidden splitter handle until hover and controlled panel collapse",
 				"role": "Layout"
 			},
-			"types.ts": { "desc": "Layout prop types including panel close callback", "role": "Type" }
+			"types.ts": { "desc": "Layout prop types for panel close and expand interactions", "role": "Type" }
 		},
 		"locales": {
 			"antd": {
