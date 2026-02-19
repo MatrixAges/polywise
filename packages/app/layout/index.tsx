@@ -53,7 +53,7 @@ const Index = () => {
 					<Splitter
 						className='group/splitter h-full w-full'
 						classNames={{
-							dragger: '!bg-transparent !opacity-0 transition-opacity duration-150 [&_*]:!opacity-0 group-hover/splitter:!opacity-100 group-hover/splitter:[&_*]:!opacity-100 hover:!opacity-100 hover:[&_*]:!opacity-100 active:!opacity-100 active:[&_*]:!opacity-100'
+							dragger: '!opacity-0 group-hover/splitter:!opacity-100'
 						}}
 						onCollapse={settings.handlePanelCollapse}
 						onResize={settings.handlePanelResize}

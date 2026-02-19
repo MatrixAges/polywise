@@ -13,3 +13,10 @@ body {
 .no_drag {
 	-webkit-app-region: no-drag;
 }
+
+.pw-splitter {
+	.pw-splitter-panel {
+		padding: 0 !important;
+		scrollbar-width: 0 !important;
+	}
+}
