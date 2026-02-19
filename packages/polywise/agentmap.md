@@ -87,19 +87,17 @@ This document provides an overview of the packages/polywise module structure and
 				"index.ts": { "desc": "Utils exports", "role": "Index" },
 				"isIdle.ts": { "desc": "Idle state checker", "role": "Utility" },
 				"listRecursive.ts": { "desc": "Recursive directory listing utility", "role": "Utility" },
-				"migrate.ts": { "desc": "Migration execution utility", "role": "Utility" },
 				"processText.ts": {
 					"desc": "Text processing utility for large text slicing",
 					"role": "Utility"
 				},
-				"validateMigrations.ts": { "desc": "Migration validation utility", "role": "Utility" },
 				"verifyModel.ts": {
 					"desc": "Model integrity verification utility for .onnx files",
 					"role": "Utility"
 				},
 				"ranking.ts": { "desc": "Ranking utility", "role": "Utility" },
 				"migration.ts": {
-					"desc": "Database schema migration system (CURRENT_SCHEMA_VERSION=1)",
+					"desc": "Database schema migration system with version tracking and validation (CURRENT_SCHEMA_VERSION=1)",
 					"role": "Module"
 				}
 			}

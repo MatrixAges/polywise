@@ -3,6 +3,7 @@ import { vector } from '@electric-sql/pglite/vector'
 import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 
 import { SCHEMA_BRAIN, SCHEMA_MEMORY } from '../src/consts'
+import { sql_create_schema_meta, sql_create_table_schema_version } from '../src/sql/meta'
 import { CURRENT_SCHEMA_VERSION, migrate, migrations, validateMigrations } from '../src/utils/migration'
 import getDataDir from './utils/getDataDir'
 
@@ -27,6 +28,9 @@ describe('Migration System', () => {
 
 		beforeAll(async () => {
 			db = new PGlite(db_path, { extensions: { vector } })
+
+			await db.exec(sql_create_schema_meta)
+			await db.exec(sql_create_table_schema_version)
 		})
 
 		afterAll(async () => {
@@ -96,6 +100,9 @@ describe('Migration System', () => {
 
 		beforeAll(async () => {
 			db = new PGlite(db_path, { extensions: { vector } })
+
+			await db.exec(sql_create_schema_meta)
+			await db.exec(sql_create_table_schema_version)
 		})
 
 		afterAll(async () => {
@@ -172,6 +179,9 @@ describe('Migration System', () => {
 
 		beforeAll(async () => {
 			db = new PGlite(db_path, { extensions: { vector } })
+
+			await db.exec(sql_create_schema_meta)
+			await db.exec(sql_create_table_schema_version)
 		})
 
 		afterAll(async () => {
@@ -232,6 +242,9 @@ describe('Migration System', () => {
 
 		beforeAll(async () => {
 			db = new PGlite(db_path, { extensions: { vector } })
+
+			await db.exec(sql_create_schema_meta)
+			await db.exec(sql_create_table_schema_version)
 		})
 
 		afterAll(async () => {
@@ -297,6 +310,9 @@ describe('Migration System', () => {
 
 		beforeAll(async () => {
 			db = new PGlite(db_path, { extensions: { vector } })
+
+			await db.exec(sql_create_schema_meta)
+			await db.exec(sql_create_table_schema_version)
 		})
 
 		afterAll(async () => {
@@ -345,6 +361,9 @@ describe('Migration System', () => {
 
 		beforeAll(async () => {
 			db = new PGlite(db_path, { extensions: { vector } })
+
+			await db.exec(sql_create_schema_meta)
+			await db.exec(sql_create_table_schema_version)
 		})
 
 		afterAll(async () => {

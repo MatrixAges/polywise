@@ -378,12 +378,6 @@ export const sql_update_node_embedding = `UPDATE ${SCHEMA_BRAIN}.nodes SET embed
 export const sql_get_all_nodes = `SELECT id, label, x, y, activation, potential, idol_id, root_ids, metrics_ids, metadata, created_at, updated_at FROM ${SCHEMA_BRAIN}.nodes`
 
 /**
- * Checks if the articles table exists.
- * Role: Database integrity check during initialization.
- */
-export const sql_check_articles_table_exists = `SELECT COUNT(*) as count FROM information_schema.tables WHERE table_schema = '${SCHEMA_MEMORY}' AND table_name = 'articles'`
-
-/**
  * Updates an article's embedding vector.
  * Role: Re-indexing content after updates or model changes.
  */

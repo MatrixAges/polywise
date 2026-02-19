@@ -1,3 +1,4 @@
+import { sql_insert_version } from '../sql/meta'
 import {
 	sql_create_extension_vector,
 	sql_create_index_active_edges,
@@ -57,12 +58,16 @@ export const migrations: Array<Migration> = [
 ]
 
 export async function migrate(
-	_current_version: number,
+	current_version: number,
 	exec: (sql: string | Array<string>) => Promise<void>,
 	query: <T = any>(sql: string, params?: Array<any>) => Promise<Array<T>>
 ) {
 	for (const migration of migrations) {
-		await migration.up(exec, query)
+		if (migration.version > current_version) {
+			await migration.up(exec, query)
+
+			await query(sql_insert_version, [migration.version])
+		}
 	}
 }
 

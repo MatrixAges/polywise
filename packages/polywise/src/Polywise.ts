@@ -23,7 +23,6 @@ import Pipeline from './Pipeline'
 import Process from './Process'
 import {
 	sql_add_node,
-	sql_check_articles_table_exists,
 	sql_connect,
 	sql_create_extension_vector,
 	sql_create_index_active_edges,
@@ -759,10 +758,10 @@ export default class Polywise {
 	}
 
 	private async initDatabase() {
-		const [val_err] = await to(Promise.resolve(validateMigrations()))
-
-		if (val_err) {
-			console.error('Migration validation error:', val_err)
+		try {
+			validateMigrations()
+		} catch (error) {
+			console.error('Migration validation error:', error)
 		}
 
 		const [err] = await to(
@@ -779,40 +778,11 @@ export default class Polywise {
 				if (current_version < CURRENT_SCHEMA_VERSION) {
 					await migrate(current_version, this.exec.bind(this), this.queryRaw.bind(this))
 				}
-
-				await this.initSchema()
 			})()
 		)
 
 		if (err) {
 			console.error('Migration error:', err)
-		}
-	}
-
-	private async initSchema() {
-		const check_result = (await this.queryRaw(sql_check_articles_table_exists)) as Array<{ count: string }>
-
-		if (parseInt(check_result[0]?.count || '0') === 0) {
-			await this.exec([
-				sql_create_extension_vector,
-				sql_create_schema_memory,
-				sql_create_table_articles,
-				sql_create_table_article_embeddings,
-				sql_create_index_article_embeddings_hnsw,
-				sql_create_index_article_content_gin,
-				sql_create_schema_brain,
-				sql_create_table_nodes,
-				sql_create_table_edges,
-				sql_create_index_edge_src,
-				sql_create_index_edge_tgt,
-				sql_create_index_active_edges,
-				sql_create_index_core_truth,
-				sql_create_index_nodes_idol,
-				sql_create_index_edges_idol,
-				sql_create_index_nodes_roots,
-				sql_create_index_edges_roots,
-				sql_create_table_node_sources
-			])
 		}
 	}
 
