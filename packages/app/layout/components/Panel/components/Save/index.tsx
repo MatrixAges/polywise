@@ -13,10 +13,14 @@ const Index = () => {
 	const handleSave = () => {
 		if (!content.trim()) return
 
-		memory.addTask('save', { content })
-		setContent('')
+		try {
+			memory.addTask('save', { content })
+			setContent('')
 
-		message.success('Task added to queue')
+			message.success('Task added to queue')
+		} catch (error) {
+			message.error(error instanceof Error ? error.message : 'Failed to create task')
+		}
 	}
 
 	return (
