@@ -1,4 +1,4 @@
-import { makeAutoObservable, runInAction } from 'mobx'
+import { makeAutoObservable, runInAction, toJS } from 'mobx'
 import { local } from 'stk/storage'
 import { injectable } from 'tsyringe'
 import { v4 as uuid } from 'uuid'
@@ -9,8 +9,23 @@ import { ipc } from '@/utils'
 export interface ITask {
 	id: string
 	type: 'save' | 'update'
-	args: any
-	status: 'pending' | 'processing' | 'completed' | 'failed'
+	args:
+		| {
+				content: string
+				idol_id?: string
+				root_ids?: Array<string>
+				metrics_ids?: Array<string>
+				metadata?: Record<string, unknown>
+		  }
+		| {
+				memory_id: string
+				content: string
+				idol_id?: string
+				root_ids?: Array<string>
+				metrics_ids?: Array<string>
+				metadata?: Record<string, unknown>
+		  }
+	status: 'pending' | 'processing' | 'failed'
 	error?: string
 	created_at: number
 }
@@ -25,9 +40,9 @@ export default class MemoryModel {
 	}
 
 	init() {
-		this.tasks = local.memory_tasks || []
+		this.tasks = this.readTasksFromStorage()
 
-		this.processQueue()
+		void this.processQueue()
 	}
 
 	async processQueue() {
@@ -44,20 +59,39 @@ export default class MemoryModel {
 		})
 
 		try {
+			const task_args = this.toSerializableTaskArgs(task.args)
+
 			if (task.type === 'save') {
-				await ipc.memory.save.mutate(task.args)
+				await ipc.memory.save.mutate(
+					task_args as {
+						content: string
+						idol_id?: string
+						root_ids?: Array<string>
+						metrics_ids?: Array<string>
+						metadata?: Record<string, unknown>
+					}
+				)
 			} else if (task.type === 'update') {
-				await ipc.memory.update.mutate(task.args)
+				await ipc.memory.update.mutate(
+					task_args as {
+						memory_id: string
+						content: string
+						idol_id?: string
+						root_ids?: Array<string>
+						metrics_ids?: Array<string>
+						metadata?: Record<string, unknown>
+					}
+				)
 			}
 
 			runInAction(() => {
-				task.status = 'completed'
+				this.tasks = this.tasks.filter(item => item.id !== task.id)
 				this.saveTasks()
 			})
-		} catch (error: any) {
+		} catch (error: unknown) {
 			runInAction(() => {
 				task.status = 'failed'
-				task.error = error.message
+				task.error = error instanceof Error ? error.message : String(error)
 				this.saveTasks()
 			})
 		} finally {
@@ -68,25 +102,29 @@ export default class MemoryModel {
 	}
 
 	saveTasks() {
-		local.memory_tasks = this.tasks.filter(t => t.status !== 'completed')
+		try {
+			local.memory_tasks = this.toSerializableTasks(this.tasks)
+		} catch {
+			local.memory_tasks = []
+		}
 	}
 
-	addTask(type: ITask['type'], args: any) {
+	addTask(type: ITask['type'], args: ITask['args']) {
 		const task: ITask = {
 			id: uuid(),
 			type,
-			args,
+			args: toJS(args),
 			status: 'pending',
 			created_at: Date.now()
 		}
 
 		this.tasks.push(task)
 		this.saveTasks()
-		this.processQueue()
+		void this.processQueue()
 	}
 
 	async query(args: { query: string; idol_id?: string; root_ids?: Array<string>; metrics_ids?: Array<string> }) {
-		return await ipc.memory.query.query(args)
+		return await ipc.memory.query.query(toJS(args))
 	}
 
 	async forget(args: {
@@ -96,15 +134,15 @@ export default class MemoryModel {
 		root_ids?: Array<string>
 		metrics_ids?: Array<string>
 	}) {
-		return await ipc.memory.forget.mutate(args)
+		return await ipc.memory.forget.mutate(toJS(args))
 	}
 
 	async snapshot(args?: { weight_threshold?: number }) {
-		return await ipc.memory.snapshot.query(args || {})
+		return await ipc.memory.snapshot.query(toJS(args || {}))
 	}
 
 	async getNodes() {
-		return await ipc.memory.getNodes.query({})
+		return await ipc.memory.getNodes.query()
 	}
 
 	async getNodesByIdol(idol_id: string) {
@@ -113,6 +151,26 @@ export default class MemoryModel {
 
 	async getEdgesByIdol(idol_id: string) {
 		return await ipc.memory.getEdgesByIdol.query({ idol_id })
+	}
+
+	private readTasksFromStorage() {
+		const source = toJS(local.memory_tasks)
+
+		if (!Array.isArray(source)) return []
+
+		return source.filter(item => item && typeof item === 'object') as Array<ITask>
+	}
+
+	private toSerializableTaskArgs(args: ITask['args']) {
+		const plain_args = toJS(args)
+
+		return JSON.parse(JSON.stringify(plain_args)) as ITask['args']
+	}
+
+	private toSerializableTasks(tasks: Array<ITask>) {
+		const plain_tasks = toJS(tasks)
+
+		return JSON.parse(JSON.stringify(plain_tasks)) as Array<ITask>
 	}
 
 	off() {}

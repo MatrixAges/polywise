@@ -1,4 +1,4 @@
-import { Clock, AlertCircle, CheckCircle, Loader } from 'lucide-react'
+import { AlertCircle, Clock, Loader } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { useGlobal } from '@/context'
@@ -14,8 +14,6 @@ const Index = observer(() => {
 				return <Clock size={14} className='text-slate-400' />
 			case 'processing':
 				return <Loader size={14} className='animate-spin text-blue-500' />
-			case 'completed':
-				return <CheckCircle size={14} className='text-green-500' />
 			case 'failed':
 				return <AlertCircle size={14} className='text-red-500' />
 			default:
@@ -29,8 +27,6 @@ const Index = observer(() => {
 				return 'Pending'
 			case 'processing':
 				return 'Processing'
-			case 'completed':
-				return 'Completed'
 			case 'failed':
 				return 'Failed'
 			default:
@@ -72,7 +68,6 @@ const Index = observer(() => {
 									'text-xs',
 									task.status === 'pending' && 'text-slate-400',
 									task.status === 'processing' && 'text-blue-500',
-									task.status === 'completed' && 'text-green-500',
 									task.status === 'failed' && 'text-red-500'
 								)}
 							>
