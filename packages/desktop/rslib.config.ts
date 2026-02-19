@@ -1,6 +1,5 @@
-import dotenv from 'dotenv'
-
 import { defineConfig } from '@rslib/core'
+import dotenv from 'dotenv'
 
 import type { RslibConfig } from '@rslib/core'
 
@@ -17,7 +16,10 @@ export default defineConfig({
 	mode: is_dev ? 'development' : 'production',
 	lib: [{ format: 'cjs' }],
 	source: {
-		entry: { index: './src/index.ts' },
+		entry: {
+			index: './src/index.ts',
+			'poly-save-worker': './src/poly-save-worker.ts'
+		},
 		define: {
 			'process.env.DEVTOOL': JSON.stringify(process.env.DEVTOOL)
 		},
@@ -27,7 +29,7 @@ export default defineConfig({
 		sourceMap: is_dev,
 		cleanDistPath: false,
 		target: 'node',
-		filename: { js: 'index.js' },
+		filename: { js: '[name].js' },
 		...prod_output
 	},
 	performance: {

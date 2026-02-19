@@ -9,6 +9,7 @@ import config from '../config'
 import { Main, Menu, Tray } from './app'
 import { routers } from './rpcs'
 import { conf, getAppDataPath, getThemeColor, is_mac, registerProtocol, serve, show_devtool } from './utils'
+import saveWithUtilityProcess from './utils/saveWithUtilityProcess'
 
 import type { Tray as TrayType } from 'electron'
 
@@ -21,16 +22,18 @@ class App {
 	private loading_view: WebContentsView | null
 	private tray: TrayType | null
 	private poly: Polywise
+	private memory_data_dir: string
 
 	constructor() {
 		this.window = null
 		this.loading_view = null
 		this.tray = null
 		this.poly = new Polywise()
+		this.memory_data_dir = getAppDataPath('/memory')
 	}
 
 	async init() {
-		await this.poly.init({ data_dir: getAppDataPath('/memory') })
+		await this.poly.init({ data_dir: this.memory_data_dir })
 
 		this.register()
 	}
@@ -48,7 +51,7 @@ class App {
 			if (win_bounds) this.window.setBounds(win_bounds)
 
 			this.loading()
-			this.events()
+			this.events(port)
 
 			if (show_devtool) {
 				if (process.platform === 'win32') {
@@ -60,7 +63,18 @@ class App {
 			}
 
 			createIPCHandler({
-				createContext: async () => ({ win: this.window!, tray: this.tray!, poly: this.poly }),
+				createContext: async () => ({
+					win: this.window!,
+					tray: this.tray!,
+					poly: this.poly,
+					saveMemory: async input => {
+						return await saveWithUtilityProcess({
+							input,
+							data_dir: this.memory_data_dir,
+							fallback: next_input => this.poly.save(next_input)
+						})
+					}
+				}),
 				router: routers,
 				windows: [this.window]
 			})
@@ -98,7 +112,7 @@ class App {
 		})
 	}
 
-	events() {
+	events(port: number) {
 		ipcMain.handle('get-env', () => {
 			return { port }
 		})

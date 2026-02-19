@@ -38,7 +38,11 @@ This document provides an overview of the packages/desktop module structure and 
 				"index.ts": { "desc": "App module exports", "role": "Index" }
 			},
 			"index.ts": {
-				"desc": "Main process entry point with increased V8 heap for heavy save workloads",
+				"desc": "Main process entry point with utility process save offloading",
+				"role": "Entry"
+			},
+			"poly-save-worker.ts": {
+				"desc": "Dedicated utility process entry for poly.save worker",
 				"role": "Entry"
 			},
 			"locales": {
@@ -93,6 +97,10 @@ This document provides an overview of the packages/desktop module structure and 
 				"protocol.ts": { "desc": "Protocol registration", "role": "Utility" },
 				"relaunch.ts": { "desc": "Relaunch helper", "role": "Utility" },
 				"request.ts": { "desc": "HTTP request helper", "role": "Utility" },
+				"saveWithUtilityProcess": {
+					"index.ts": { "desc": "UtilityProcess save bridge with fallback", "role": "Utility" },
+					"manager.ts": { "desc": "UtilityProcess worker lifecycle manager", "role": "Utility" }
+				},
 				"rstream": {
 					"index.ts": { "desc": "Stream module exports", "role": "Index" },
 					"pubsub.ts": { "desc": "Publish-Subscribe pattern", "role": "Utility" }
@@ -101,12 +109,15 @@ This document provides an overview of the packages/desktop module structure and 
 				"serve.ts": { "desc": "Internal server setup", "role": "Utility" },
 				"setWindowGlass.ts": { "desc": "Window vibrancy effect", "role": "Utility" },
 				"time.ts": { "desc": "Time manipulation", "role": "Utility" },
-				"trpc.ts": { "desc": "tRPC setup helper", "role": "Utility" }
+				"trpc.ts": { "desc": "tRPC setup helper with saveMemory context", "role": "Utility" }
+			},
+			"workers": {
+				"polySave.ts": { "desc": "Utility process worker for poly.save", "role": "Worker" }
 			}
 		},
 		"config": {
 			"package.json": { "desc": "Desktop package configuration", "role": "Config" },
-			"rslib.config.ts": { "desc": "Rslib configuration", "role": "Config" },
+			"rslib.config.ts": { "desc": "Rslib configuration with multi-entry worker build", "role": "Config" },
 			"tsconfig.json": { "desc": "TypeScript configuration", "role": "Config" },
 			"typings": {
 				"extension.d.ts": { "desc": "Extension type definitions", "role": "Type" },

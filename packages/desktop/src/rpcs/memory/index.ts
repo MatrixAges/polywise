@@ -25,7 +25,7 @@ const save = p
 		})
 	)
 	.mutation(async ({ input, ctx }) => {
-		return await ctx.poly.save(input)
+		return await ctx.saveMemory(input)
 	})
 
 const update = p
