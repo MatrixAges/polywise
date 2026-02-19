@@ -4,7 +4,7 @@
 
 ## 简介
 
-`@polywise/opencode-plugin` **Polywise** 知识引擎为opencode提供的插件，它为您的 AI 编程助手提供项目级别的记忆和上下文感知能力。
+`@polywise/opencode` **Polywise** 知识引擎为opencode提供的插件，它为您的 AI 编程助手提供项目级别的记忆和上下文感知能力。
 
 利用 Polywise 的向量数据库和知识图谱能力，该插件可以自动：
 
@@ -25,14 +25,14 @@
 要在 OpenCode 中使用此插件：
 
 1.    **安装包**：
-      确保 `@polywise/opencode-plugin` 已构建并在您的工作区中可用，或者已安装在您的项目中。
+      确保 `@polywise/opencode` 已构建并在您的工作区中可用，或者已安装在您的项目中。
 
 2.    **配置 OpenCode**：
       将插件添加到您的 `opencode.json`（项目级）或 `~/.config/opencode/opencode.json`（全局级）中。
 
       ```json
       {
-      	"plugins": ["@polywise/opencode-plugin"]
+      	"plugins": ["@polywise/opencode"]
       }
       ```
 

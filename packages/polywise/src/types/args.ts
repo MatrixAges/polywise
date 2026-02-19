@@ -52,12 +52,38 @@ export interface CustomRerankerConfig {
 
 export type RerankerConfig = LocalRerankerConfig | CustomRerankerConfig
 
+export interface LocalRebelConfig {
+	type: 'local'
+	model: string
+	dtype?: string
+}
+
+export interface CustomRebelConfig {
+	type: 'custom'
+	fn: (
+		text: string
+	) => Promise<
+		Array<{
+			subject: string
+			predicate: string
+			object: string
+			learning_rate?: number
+			decay_resistance?: number
+			metadata?: any
+		}>
+	>
+}
+
+export type RebelConfig = LocalRebelConfig | CustomRebelConfig
+
 export interface PipelineArgs {
 	cache_dir?: string
 	embedding_config?: EmbeddingConfig
 	reranker_config?: RerankerConfig
+	rebel_config?: RebelConfig
 	embedding_concurrency?: number
 	reranker_concurrency?: number
+	rebel_concurrency?: number
 }
 
 export interface AddNodeArgs extends FiltersArgs {

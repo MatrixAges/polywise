@@ -4,7 +4,7 @@
 
 ## Introduction
 
-`@polywise/opencode-plugin` The **Polywise** knowledge engine plugin for Opencode provides your AI programming assistant with project-level memory and context awareness.
+`@polywise/opencode` The **Polywise** knowledge engine plugin for Opencode provides your AI programming assistant with project-level memory and context awareness.
 
 Leveraging Polywise's vector database and knowledge graph capabilities, this plugin can automatically:
 
@@ -30,7 +30,7 @@ To use this plugin in OpenCode:
 
 1. **Installation Package:**
 
-Ensure that `@polywise/opencode-plugin` is built and available in your workspace, or installed in your project.
+Ensure that `@polywise/opencode` is built and available in your workspace, or installed in your project.
 
 2. **Configure OpenCode:**
 
@@ -38,7 +38,7 @@ Add the plugin to your `opencode.json` (project-level) or `~/.config/opencode/op
 
 ```json
 {
-	"plugins": ["@polywise/opencode-plugin"]
+	"plugins": ["@polywise/opencode"]
 }
 ```
 

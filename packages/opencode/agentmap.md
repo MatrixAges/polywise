@@ -15,15 +15,18 @@ This document provides an overview of the packages/opencode module structure and
 	"module": "packages/opencode",
 	"structure": {
 		"src": {
-			"index.ts": { "desc": "Main entry point exporting plugin", "role": "Index" },
-			"plugin.ts": { "desc": "OpencodePolywisePlugin implementation", "role": "Plugin" },
-			"utils.ts": { "desc": "Utility functions for message processing", "role": "Utils" }
+			"index.ts": {
+				"desc": "Main entry point exporting OpencodePlugin with polywise tool and session.idle event handling",
+				"role": "Plugin"
+			},
+			"utils.ts": {
+				"desc": "Utility functions for message processing and metadata extraction",
+				"role": "Utils"
+			}
 		},
-		"config": {
-			"package.json": { "desc": "Package configuration", "role": "Config" },
-			"rslib.config.ts": { "desc": "Rslib configuration", "role": "Config" },
-			"tsconfig.json": { "desc": "TypeScript configuration", "role": "Config" }
-		},
+		"package.json": { "desc": "Package configuration (@polywise/opencode)", "role": "Config" },
+		"rslib.config.ts": { "desc": "Rslib configuration", "role": "Config" },
+		"tsconfig.json": { "desc": "TypeScript configuration", "role": "Config" },
 		"README.md": { "desc": "Plugin documentation", "role": "Doc" },
 		"README_zh.md": { "desc": "Chinese Plugin documentation", "role": "Doc" }
 	}

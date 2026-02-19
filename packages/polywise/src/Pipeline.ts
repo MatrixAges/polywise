@@ -6,7 +6,14 @@ import fs from 'fs-extra'
 import PQueue from 'p-queue'
 import { injectable } from 'tsyringe'
 
-import { DEFAULT_CONCURRENCY, DEFAULT_EMBEDDING_CONFIG, DEFAULT_RERANKER_CONFIG, POOLING_MEAN } from './consts'
+import {
+	DEFAULT_CONCURRENCY,
+	DEFAULT_EMBEDDING_CONFIG,
+	DEFAULT_REBEL_CONFIG,
+	DEFAULT_RERANKER_CONFIG,
+	formatTriple,
+	POOLING_MEAN
+} from './consts'
 import { catchFinally } from './decorators'
 import { generateModelHash, processText, verifyModel } from './utils'
 
@@ -14,27 +21,42 @@ import type {
 	EmbeddingConfig,
 	PipelineArgs,
 	PipelineSearchArgs,
+	RebelConfig,
 	RerankerConfig,
 	SearchCandidate,
-	SearchResult
+	SearchResult,
+	Triple
 } from './types'
 
 @injectable()
 export default class Pipeline {
 	private embedding_config: EmbeddingConfig = DEFAULT_EMBEDDING_CONFIG
 	private reranker_config: RerankerConfig = DEFAULT_RERANKER_CONFIG
-	private cache_dir: string | null = `${os.homedir()}/.polywise/.models`
+	private rebel_config: RebelConfig = DEFAULT_REBEL_CONFIG
+	private cache_dir: string = `${os.homedir()}/.polywise/.models`
 	private embedding_concurrency: number = DEFAULT_CONCURRENCY
 	private reranker_concurrency: number = DEFAULT_CONCURRENCY
+	private rebel_concurrency: number = DEFAULT_CONCURRENCY
 	private embedding_pipeline: any = null
 	private reranker_pipeline: any = null
+	private rebel_pipeline: any = null
 	private embedding_queue = new PQueue({ concurrency: this.embedding_concurrency })
 	private reranker_queue = new PQueue({ concurrency: this.reranker_concurrency })
+	private rebel_queue = new PQueue({ concurrency: this.rebel_concurrency })
 	private embedding_promise: Promise<any> | null = null
 	private reranker_promise: Promise<any> | null = null
+	private rebel_promise: Promise<any> | null = null
 
 	async init(args: PipelineArgs = {}) {
-		const { cache_dir, embedding_config, reranker_config, embedding_concurrency, reranker_concurrency } = args
+		const {
+			cache_dir,
+			embedding_config,
+			reranker_config,
+			rebel_config,
+			embedding_concurrency,
+			reranker_concurrency,
+			rebel_concurrency
+		} = args
 
 		if (cache_dir) {
 			this.cache_dir = cache_dir
@@ -55,6 +77,11 @@ export default class Pipeline {
 			this.reranker_pipeline = null
 		}
 
+		if (rebel_config) {
+			this.rebel_config = rebel_config
+			this.rebel_pipeline = null
+		}
+
 		if (embedding_concurrency !== undefined) {
 			this.embedding_concurrency = embedding_concurrency
 			this.embedding_queue = new PQueue({ concurrency: this.embedding_concurrency })
@@ -63,6 +90,11 @@ export default class Pipeline {
 		if (reranker_concurrency !== undefined) {
 			this.reranker_concurrency = reranker_concurrency
 			this.reranker_queue = new PQueue({ concurrency: this.reranker_concurrency })
+		}
+
+		if (rebel_concurrency !== undefined) {
+			this.rebel_concurrency = rebel_concurrency
+			this.rebel_queue = new PQueue({ concurrency: this.rebel_concurrency })
 		}
 	}
 
@@ -81,6 +113,60 @@ export default class Pipeline {
 
 		if (config.type === 'local') {
 			await this.loadRerankerModel()
+		}
+	}
+
+	async setRebelConfig(config: RebelConfig) {
+		this.rebel_config = config
+		this.rebel_pipeline = null
+
+		if (config.type === 'local') {
+			await this.loadRebelModel()
+		}
+	}
+
+	async extractTriples(text: string): Promise<Array<Triple>> {
+		return this.rebel_queue.add(async () => {
+			if (this.rebel_config.type === 'custom') {
+				return await this.rebel_config.fn(text)
+			}
+
+			const generator = await this.loadRebelModel()
+			const prompt = formatTriple(text)
+
+			const output = await generator(prompt, {
+				max_new_tokens: 1024,
+				do_sample: false
+			})
+
+			const generated_text = output[0]?.generated_text || ''
+
+			return this.parseTriples(generated_text)
+		})
+	}
+
+	private parseTriples(generated_text: string): Array<Triple> {
+		try {
+			const json_match = generated_text.match(/\[[\s\S]*\]/)
+
+			if (!json_match) return []
+
+			const triples = JSON.parse(json_match[0])
+
+			if (!Array.isArray(triples)) return []
+
+			return triples
+				.filter(t => t.subject && t.predicate && t.object)
+				.map(t => ({
+					subject: String(t.subject).trim(),
+					predicate: String(t.predicate).trim(),
+					object: String(t.object).trim(),
+					learning_rate: t.learning_rate ?? 1.0,
+					decay_resistance: t.decay_resistance ?? 1.0,
+					metadata: t.metadata || {}
+				}))
+		} catch {
+			return []
 		}
 	}
 
@@ -273,6 +359,25 @@ export default class Pipeline {
 		return this.reranker_pipeline
 	}
 
+	@catchFinally(function (this: Pipeline) {
+		this.rebel_promise = null
+	})
+	async loadRebelModel() {
+		if (this.rebel_pipeline) return this.rebel_pipeline
+		if (this.rebel_promise) return this.rebel_promise
+		if (this.rebel_config.type !== 'local') return null
+
+		const { model, dtype } = this.rebel_config
+
+		this.rebel_promise = pipeline('text-generation', model, {
+			dtype: dtype as any
+		})
+
+		this.rebel_pipeline = await this.rebel_promise
+
+		return this.rebel_pipeline
+	}
+
 	getEmbeddingConfig() {
 		return this.embedding_config
 	}
@@ -308,8 +413,22 @@ export default class Pipeline {
 		this.reranker_queue = new PQueue({ concurrency: this.reranker_concurrency })
 	}
 
+	getRebelConfig() {
+		return this.rebel_config
+	}
+
+	getRebelConcurrency() {
+		return this.rebel_concurrency
+	}
+
+	setRebelConcurrency(concurrency: number) {
+		this.rebel_concurrency = concurrency
+		this.rebel_queue = new PQueue({ concurrency: this.rebel_concurrency })
+	}
+
 	off() {
 		this.embedding_queue.clear()
 		this.reranker_queue.clear()
+		this.rebel_queue.clear()
 	}
 }

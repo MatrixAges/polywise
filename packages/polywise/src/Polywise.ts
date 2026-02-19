@@ -52,7 +52,12 @@ import {
 	sql_get_nodes_by_root,
 	sql_get_snapshot_edges,
 	sql_get_snapshot_nodes,
+	sql_inject_triples_begin,
+	sql_inject_triples_commit,
+	sql_inject_triples_insert_edge,
+	sql_inject_triples_update_edge,
 	sql_insert_article_embedding,
+	sql_node_sources,
 	sql_process_article,
 	sql_run_shadow_tick,
 	sql_sleep_tick_begin,
@@ -221,6 +226,18 @@ export default class Polywise {
 			])
 		}
 
+		const triples = await this.pipeline.extractTriples(content)
+
+		if (triples.length > 0) {
+			await this.injectTriples({
+				triples,
+				article_id: aid,
+				idol_id: idol_id ?? undefined,
+				root_ids: root_ids ?? undefined,
+				metrics_ids: metrics_ids ?? undefined
+			})
+		}
+
 		this.log.write({ ...args, idol_id, root_ids, metrics_ids }, { memory_id: aid })
 
 		return aid
@@ -258,6 +275,18 @@ export default class Polywise {
 
 		if (query_embedding && query_embedding.length > 0) {
 			await this.queryRaw(sql_update_article_embedding, [`[${query_embedding.join(',')}]`, memory_id])
+		}
+
+		const triples = await this.pipeline.extractTriples(content)
+
+		if (triples.length > 0) {
+			await this.injectTriples({
+				triples,
+				article_id: memory_id,
+				idol_id: idol_id ?? undefined,
+				root_ids: root_ids ?? undefined,
+				metrics_ids: metrics_ids ?? undefined
+			})
 		}
 
 		this.log.write({ ...args, idol_id, root_ids, metrics_ids }, { memory_id })
@@ -376,6 +405,103 @@ export default class Polywise {
 			metrics_ids ?? null,
 			JSON.stringify(metadata ?? {})
 		])
+	}
+
+	async injectTriples(args: {
+		triples: Array<{
+			subject: string
+			predicate: string
+			object: string
+			learning_rate?: number
+			decay_resistance?: number
+			metadata?: any
+		}>
+		article_id: string
+		idol_id?: string
+		root_ids?: Array<string>
+		metrics_ids?: Array<string>
+	}) {
+		const { triples, article_id, idol_id, root_ids, metrics_ids } = args
+
+		if (triples.length === 0) return
+
+		await this.queryRaw(sql_inject_triples_begin)
+
+		for (const triple of triples) {
+			const sub_id = await this.upsertNode({
+				label: triple.subject,
+				idol_id,
+				root_ids,
+				metrics_ids
+			})
+
+			const obj_id = await this.upsertNode({
+				label: triple.object,
+				idol_id,
+				root_ids,
+				metrics_ids
+			})
+
+			await this.queryRaw(
+				sql_inject_triples_insert_edge(
+					sub_id,
+					obj_id,
+					triple.learning_rate ?? 1.0,
+					triple.decay_resistance ?? 1.0,
+					triple.predicate,
+					0.5,
+					idol_id,
+					root_ids,
+					metrics_ids,
+					triple.metadata
+				)
+			)
+
+			await this.queryRaw(
+				sql_inject_triples_update_edge(
+					sub_id,
+					obj_id,
+					triple.learning_rate ?? 1.0,
+					triple.decay_resistance ?? 1.0,
+					0.1,
+					idol_id,
+					root_ids,
+					metrics_ids,
+					triple.metadata
+				)
+			)
+
+			await this.queryRaw(sql_node_sources, [sub_id, article_id])
+			await this.queryRaw(sql_node_sources, [obj_id, article_id])
+		}
+
+		await this.queryRaw(sql_inject_triples_commit)
+	}
+
+	private async upsertNode(args: {
+		label: string
+		idol_id?: string
+		root_ids?: Array<string>
+		metrics_ids?: Array<string>
+	}) {
+		const { label, idol_id, root_ids, metrics_ids } = args
+		const node_id = generateId()
+
+		const rows = (await this.queryRaw(
+			`INSERT INTO brain.nodes (id, label, x, y, potential, idol_id, root_ids, metrics_ids, metadata, embedding)
+			 VALUES ($1, $2, random() * 800, random() * 600, 1.0, $3, $4, $5, $6, $7)
+			 ON CONFLICT (label) DO UPDATE SET
+			   potential = LEAST(brain.nodes.potential + 1.0, 100.0),
+			   metadata = brain.nodes.metadata || EXCLUDED.metadata,
+			   idol_id = COALESCE(EXCLUDED.idol_id, brain.nodes.idol_id),
+			   root_ids = CASE WHEN EXCLUDED.root_ids IS NOT NULL THEN (SELECT ARRAY(SELECT DISTINCT unnest(COALESCE(brain.nodes.root_ids, '{}') || EXCLUDED.root_ids))) ELSE brain.nodes.root_ids END,
+			   metrics_ids = CASE WHEN EXCLUDED.metrics_ids IS NOT NULL THEN (SELECT ARRAY(SELECT DISTINCT unnest(COALESCE(brain.nodes.metrics_ids, '{}') || EXCLUDED.metrics_ids))) ELSE brain.nodes.metrics_ids END,
+			   updated_at = CURRENT_TIMESTAMP
+			 RETURNING id`,
+			[node_id, label, idol_id ?? null, root_ids ?? null, metrics_ids ?? null, '{}', null]
+		)) as Array<{ id: string }>
+
+		return rows[0].id
 	}
 
 	async stimulate(node_id: string, intensity = 1.0) {

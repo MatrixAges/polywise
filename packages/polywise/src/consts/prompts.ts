@@ -18,3 +18,16 @@ export const formatPerceiveQuery = (query: string, insights: string) => {
 export const formatRerankDocument = (source_info: string, content: string) => {
 	return `${source_info}\n${content}`
 }
+
+export const formatTriple = (text: string) => {
+	return `<|im_start|>system
+You are a knowledge extraction assistant. Your task is to extract subject-predicate-object triples from the given text. Return ONLY a JSON array of triples in this exact format:
+[{"subject": "...", "predicate": "...", "object": "..."}]
+If no meaningful triples can be extracted, return an empty array [].
+<|im_end|>
+<|im_start|>user
+Extract triples from this text:
+${text}
+<|im_end|>
+<|im_start|>assistant`
+}
