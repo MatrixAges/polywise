@@ -1,9 +1,11 @@
 import { router } from '@desktop/utils'
 
 import app from './app'
+import memory from './memory'
 
 export const routers = router({
-	app
+	app,
+	memory
 })
 
 export type Router = typeof routers

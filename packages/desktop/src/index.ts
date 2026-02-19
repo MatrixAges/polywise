@@ -3,6 +3,7 @@ import '@desktop/utils/entry'
 
 import { app, BrowserWindow, ipcMain, WebContentsView } from 'electron'
 import { createIPCHandler } from 'erpc/main'
+import { Polywise } from 'polywise'
 
 import config from '../config'
 import { Main, Menu, Tray } from './app'
@@ -19,14 +20,18 @@ class App {
 	private window: BrowserWindow | null
 	private loading_view: WebContentsView | null
 	private tray: TrayType | null
+	private poly: Polywise
 
 	constructor() {
 		this.window = null
 		this.loading_view = null
 		this.tray = null
+		this.poly = new Polywise()
 	}
 
 	async init() {
+		await this.poly.init()
+
 		this.register()
 	}
 
@@ -55,7 +60,7 @@ class App {
 			}
 
 			createIPCHandler({
-				createContext: async () => ({ win: this.window!, tray: this.tray! }),
+				createContext: async () => ({ win: this.window!, tray: this.tray!, poly: this.poly }),
 				router: routers,
 				windows: [this.window]
 			})
@@ -64,6 +69,8 @@ class App {
 		app.on('before-quit', async () => {
 			this.tray?.destroy()
 			this.window?.destroy()
+
+			await this.poly.off()
 
 			this.off()
 		})

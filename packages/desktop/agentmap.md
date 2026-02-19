@@ -62,6 +62,9 @@ This document provides an overview of the packages/desktop module structure and 
 					"setGlass.ts": { "desc": "Window glass effect RPC", "role": "RPC" },
 					"setTheme.ts": { "desc": "Theme setting RPC", "role": "RPC" }
 				},
+				"memory": {
+					"index.ts": { "desc": "Polywise memory operations RPC", "role": "RPC" }
+				},
 				"index.ts": { "desc": "RPC routers entry point", "role": "Index" }
 			},
 			"types": {

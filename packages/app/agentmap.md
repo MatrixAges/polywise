@@ -59,8 +59,16 @@ This document provides an overview of the packages/app module structure and arch
 			"components": {
 				"Page": { "index.tsx": { "desc": "Page layout container", "role": "Layout" } },
 				"Panel": {
+					"components": {
+						"Chat": { "index.tsx": { "desc": "Chat panel view", "role": "Component" } },
+						"Query": {
+							"index.tsx": { "desc": "Memory query panel view", "role": "Component" }
+						},
+						"Save": { "index.tsx": { "desc": "Memory save panel view", "role": "Component" } },
+						"index.ts": { "desc": "Panel components exports", "role": "Index" }
+					},
 					"index.tsx": {
-						"desc": "Resizable side panel content with reliable no-drag close action",
+						"desc": "Resizable side panel content with tabbed views (Chat, Save, Query)",
 						"role": "Layout"
 					}
 				},
@@ -118,6 +126,7 @@ This document provides an overview of the packages/app module structure and arch
 		},
 		"models": {
 			"Global.ts": { "desc": "Global application state model", "role": "Model" },
+			"Memory.ts": { "desc": "Memory task queue and persistence model", "role": "Model" },
 			"Settings.ts": { "desc": "User settings state model", "role": "Model" },
 			"common": {
 				"Util.ts": { "desc": "Model utility functions", "role": "Utility" },
