@@ -51,9 +51,9 @@ const Index = () => {
 			<GlobalProvider value={global}>
 				<div className='flex h-screen w-full'>
 					<Splitter
-						className='group/splitter h-full w-full'
+						className='h-full w-full'
 						classNames={{
-							dragger: '!opacity-0 group-hover/splitter:!opacity-100'
+							dragger: 'opacity-0 hover:opacity-100'
 						}}
 						onCollapse={settings.handlePanelCollapse}
 						onResize={settings.handlePanelResize}
