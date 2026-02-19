@@ -26,11 +26,11 @@ This document provides an overview of the packages/polywise module structure and
 				"role": "Class"
 			},
 			"Pipeline.ts": {
-				"desc": "Pipeline manager with embedding, reranking, and triple extraction (ReBel) capabilities. Supports local models and API endpoints.",
+				"desc": "Pipeline manager with embedding, reranking, and triple extraction (ReBel) capabilities. Triple extraction is exposed via extractTriples() and always returns an array.",
 				"role": "Class"
 			},
 			"Polywise.ts": {
-				"desc": "Core database API for memory graph operations. Includes public instances of Brain, Article, and Pipeline. Supports hybrid retrieval with memory recall, external search, result aggregation, and reranking. Provides save() to create memory with automatic triple extraction, update() to modify memory, and forget() to remove memory with node/edge downweighting.",
+				"desc": "Core database API for memory graph operations. Includes public instances of Brain, Article, and Pipeline. Supports hybrid retrieval with memory recall, external search, result aggregation, and reranking. Provides save() and update() with batch triple extraction + injectTriples() graph injection, and forget() to remove memory with node/edge downweighting.",
 				"role": "Class"
 			},
 			"Process.ts": {
@@ -52,7 +52,7 @@ This document provides an overview of the packages/polywise module structure and
 			"sql": {
 				"Brain.ts": { "desc": "Brain SQL operations", "role": "SQL" },
 				"Polywise.ts": {
-					"desc": "Polywise SQL operations (Articles/Nodes/Edges) with delete support",
+					"desc": "Polywise SQL operations (Articles/Nodes/Edges) with transaction-safe triple injection helpers (BEGIN/COMMIT/ROLLBACK) and defensive array merge SQL for optional root_ids/metrics_ids",
 					"role": "SQL"
 				},
 				"index.ts": { "desc": "SQL exports", "role": "Index" },
@@ -117,6 +117,12 @@ This document provides an overview of the packages/polywise module structure and
 				"role": "Test"
 			},
 			"log.spec.ts": { "desc": "Log module tests", "role": "Test" },
+			"utils": {
+				"getCache.ts": {
+					"desc": "Test cache helper for embeddings/rerank/triples with legacy triple cache normalization",
+					"role": "Utility"
+				}
+			},
 			"datasets": {
 				"behavioral.ts": { "desc": "Behavioral prompts and benchmarks", "role": "Data" },
 				"cognitive.ts": { "desc": "Cognitive and reasoning datasets", "role": "Data" },
@@ -132,7 +138,10 @@ This document provides an overview of the packages/polywise module structure and
 			}
 		},
 		"scripts": {
-			"beforeTest.ts": { "desc": "Pre-test setup with precise cache pre-warming", "role": "Script" },
+			"beforeTest.ts": {
+				"desc": "Pre-test setup with precise cache pre-warming for embeddings and triple cache files via test cache helpers",
+				"role": "Script"
+			},
 			"afterTest.ts": { "desc": "Post-test cleanup", "role": "Script" },
 			"fetch_datasets.ts": {
 				"desc": "Script to fetch and clean complex datasets from external sources",

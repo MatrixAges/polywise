@@ -42,13 +42,13 @@ async function testTriple() {
 		sentences.map(async item => {
 			const startTime = Date.now()
 
-			const triple = await pipeline.extractTriple(item)
+			const triples = await pipeline.extractTriples(item)
 
 			const duration = Date.now() - startTime
 
 			console.log('-----------')
 			console.log(`Input: ${item}`)
-			console.log(`Output: ${JSON.stringify(triple)}`)
+			console.log(`Output: ${JSON.stringify(triples)}`)
 			console.log(`Duration: ${duration}`)
 		})
 	)

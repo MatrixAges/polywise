@@ -9,7 +9,7 @@ import { behavioral_knowledge, behavioral_qa } from '../test/datasets/behavioral
 import { cognitive_science_datasets } from '../test/datasets/cognitive'
 import { process_test_cases } from '../test/datasets/process'
 import { software_architecture_datasets } from '../test/datasets/software'
-import { getTestVectors } from '../test/utils/getCache'
+import { getTestTriples, getTestVectors } from '../test/utils/getCache'
 
 async function beforeTest() {
 	const pipeline = container.resolve(Pipeline)
@@ -91,8 +91,10 @@ async function beforeTest() {
 	console.log('Pre-warming triples cache...')
 	const triple_texts = [...cognitive_science_datasets.slice(0, 5), ...software_architecture_datasets.slice(0, 5)]
 	console.log(`  Extracting triples from ${triple_texts.length} documents...`)
-	for (const text of triple_texts) {
-		await pipeline.extractTriples(text)
+	const triple_chunk_size = 5
+	for (let i = 0; i < triple_texts.length; i += triple_chunk_size) {
+		const chunk = triple_texts.slice(i, i + triple_chunk_size)
+		await Promise.all(chunk.map(text => getTestTriples(text)))
 		process.stdout.write('.')
 	}
 	console.log('\nTriples cache ready.')

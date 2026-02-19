@@ -195,25 +195,38 @@ export const sql_inject_triples_update_edge = (
 	root_ids?: string[] | null,
 	metrics_ids?: string[] | null,
 	metadata?: any
-) => `
+) => {
+	const has_root_ids = Boolean(root_ids && root_ids.length > 0)
+	const has_metrics_ids = Boolean(metrics_ids && metrics_ids.length > 0)
+	const root_ids_array = has_root_ids ? `ARRAY[${root_ids!.map(id => `'${id}'`).join(',')}]` : 'NULL'
+	const metrics_ids_array = has_metrics_ids ? `ARRAY[${metrics_ids!.map(id => `'${id}'`).join(',')}]` : 'NULL'
+
+	return `
   UPDATE ${SCHEMA_BRAIN}.edges
   SET
     learning_rate = GREATEST(learning_rate, ${learning_rate}),
     decay_resistance = GREATEST(decay_resistance, ${decay_resistance}),
     weight = LEAST(weight + ${weight}, 5.0),
     idol_id = COALESCE(${idol_id ? `'${idol_id}'` : 'NULL'}, idol_id),
-    root_ids = CASE WHEN ${root_ids && root_ids.length > 0} THEN (SELECT ARRAY(SELECT DISTINCT unnest(COALESCE(root_ids, '{}') || ARRAY[${root_ids?.map(id => `'${id}'`).join(',')}]))) ELSE root_ids END,
-    metrics_ids = CASE WHEN ${metrics_ids && metrics_ids.length > 0} THEN (SELECT ARRAY(SELECT DISTINCT unnest(COALESCE(metrics_ids, '{}') || ARRAY[${metrics_ids?.map(id => `'${id}'`).join(',')}]))) ELSE metrics_ids END,
+    root_ids = CASE WHEN ${has_root_ids} THEN (SELECT ARRAY(SELECT DISTINCT unnest(COALESCE(root_ids, '{}') || ${root_ids_array}))) ELSE root_ids END,
+    metrics_ids = CASE WHEN ${has_metrics_ids} THEN (SELECT ARRAY(SELECT DISTINCT unnest(COALESCE(metrics_ids, '{}') || ${metrics_ids_array}))) ELSE metrics_ids END,
     metadata = metadata || '${JSON.stringify(metadata ?? {})}'::jsonb,
     updated_at = CURRENT_TIMESTAMP
   WHERE source_id = '${sub_id}' AND target_id = '${obj_id}';
 `
+}
 
 /**
  * Commits the triple injection transaction.
  * Role: Finalizes the bulk knowledge ingestion.
  */
 export const sql_inject_triples_commit = `COMMIT`
+
+/**
+ * Rolls back the triple injection transaction.
+ * Role: Restores database consistency when any step in batch triple ingestion fails.
+ */
+export const sql_inject_triples_rollback = `ROLLBACK`
 
 /**
  * Helper query to find a node ID by label during upsert.

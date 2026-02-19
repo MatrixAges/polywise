@@ -124,8 +124,8 @@ export default class Pipeline {
 		}
 	}
 
-	async extractTriple(text: string) {
-		const result = await this.rebel_queue.add(async () => {
+	async extractTriples(text: string): Promise<Array<Triple>> {
+		const result = await this.rebel_queue.add<Array<Triple>>(async () => {
 			if (this.rebel_config.type === 'custom') {
 				const triples = await this.rebel_config.fn(text)
 
@@ -150,11 +150,25 @@ export default class Pipeline {
 			})
 
 			const generated_text = output[0]?.generated_text ? `{"subject":${output[0].generated_text}` : ''
+			const triple = getTriple(generated_text)
 
-			return getTriple(generated_text)
+			if (!triple) {
+				return []
+			}
+
+			return [
+				{
+					subject: String(triple.subject).trim(),
+					predicate: String(triple.predicate).trim(),
+					object: String(triple.object).trim(),
+					learning_rate: 1.0,
+					decay_resistance: 1.0,
+					metadata: {}
+				}
+			]
 		})
 
-		return result
+		return result ?? []
 	}
 
 	async embed(text: string) {
