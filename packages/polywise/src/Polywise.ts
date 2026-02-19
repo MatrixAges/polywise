@@ -129,8 +129,10 @@ export default class Polywise {
 			cache_dir,
 			embedding_config,
 			reranker_config,
+			rebel_config,
 			embedding_concurrency,
 			reranker_concurrency,
+			rebel_concurrency,
 			log,
 			idol_id,
 			root_ids,
@@ -155,8 +157,10 @@ export default class Polywise {
 			cache_dir,
 			embedding_config,
 			reranker_config,
+			rebel_config,
 			embedding_concurrency,
-			reranker_concurrency
+			reranker_concurrency,
+			rebel_concurrency
 		})
 
 		this.article.init(this)
@@ -180,6 +184,7 @@ export default class Polywise {
 			...args,
 			idol_id: args.idol_id ?? this.idol_id ?? undefined,
 			root_ids: args.root_ids ?? this.root_ids ?? undefined,
+			metrics_ids: args.metrics_ids ?? this.metrics_ids ?? undefined,
 			process: args.process
 		})
 
@@ -568,7 +573,8 @@ export default class Polywise {
 			max_depth = DEFAULT_RECALL_DEPTH,
 			stimulate_intensity = MEMORY_RECALL_INTENSITY,
 			idol_id = this.idol_id,
-			root_ids = this.root_ids
+			root_ids = this.root_ids,
+			metrics_ids = this.metrics_ids
 		} = args
 
 		const keywords = extractKeywords(query)
@@ -576,7 +582,8 @@ export default class Polywise {
 		const matched_nodes = await this.recallNodesByKeywords({
 			keywords,
 			idol_id: idol_id ?? undefined,
-			root_ids: root_ids ?? undefined
+			root_ids: root_ids ?? undefined,
+			metrics_ids: metrics_ids ?? undefined
 		})
 
 		const related_nodes = await this.recallRelatedNodes(

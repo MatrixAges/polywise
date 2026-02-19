@@ -7,9 +7,11 @@ import Pipeline from '../../src/Pipeline'
 
 const CACHE_DIR = path.resolve(__dirname, '../../.test_vectors')
 const CACHE_RERANK_DIR = path.resolve(__dirname, '../../.test_vectors/rerank')
+const CACHE_TRIPLE_DIR = path.resolve(__dirname, '../../.test_vectors/triples')
 
 const memory_vector_cache = new Map<string, Array<number>>()
 const memory_rerank_cache = new Map<string, any>()
+const memory_triple_cache = new Map<string, any>()
 
 let pipeline: Pipeline | null = null
 
@@ -20,7 +22,8 @@ const getPipeline = async () => {
 		await pipeline.init({
 			cache_dir: path.join(os.homedir(), '.polywise', '.models'),
 			embedding_concurrency: 20,
-			reranker_concurrency: 20
+			reranker_concurrency: 20,
+			rebel_concurrency: 20
 		})
 	}
 
@@ -72,5 +75,11 @@ export const getTestVectors = async (text: string) => {
 export const getTestRerank = async (query: string, documents: Array<string>) => {
 	return executeWithCache(JSON.stringify({ query, documents }), CACHE_RERANK_DIR, memory_rerank_cache, async p => {
 		return await p.rerank(query, documents)
+	})
+}
+
+export const getTestTriples = async (text: string) => {
+	return executeWithCache(text, CACHE_TRIPLE_DIR, memory_triple_cache, async p => {
+		return await p.extractTriples(text)
 	})
 }

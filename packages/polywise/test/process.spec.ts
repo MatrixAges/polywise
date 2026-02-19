@@ -3,7 +3,7 @@ import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 import Polywise from '../src/Polywise'
 import { cognitive_science_datasets } from './datasets/cognitive'
 import { process_test_cases } from './datasets/process'
-import { getTestVectors } from './utils/getCache'
+import { getTestRerank, getTestTriples, getTestVectors } from './utils/getCache'
 import getDataDir from './utils/getDataDir'
 
 describe('Polywise Process', () => {
@@ -17,7 +17,18 @@ describe('Polywise Process', () => {
 			embedding_config: {
 				type: 'custom',
 				fn: getTestVectors
-			}
+			},
+			reranker_config: {
+				type: 'custom',
+				fn: getTestRerank
+			},
+			rebel_config: {
+				type: 'custom',
+				fn: getTestTriples
+			},
+			embedding_concurrency: 10,
+			reranker_concurrency: 10,
+			rebel_concurrency: 10
 		})
 
 		for (const text of cognitive_science_datasets.slice(0, 10)) {

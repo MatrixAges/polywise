@@ -8,7 +8,7 @@ export async function recallNodesByKeywords(
 	args: RecallNodesByKeywordsArgs,
 	queryRaw: (sql: string, params?: any[]) => Promise<any>
 ) {
-	const { keywords, limit = 10, idol_id, root_ids } = args
+	const { keywords, limit = 10, idol_id, root_ids, metrics_ids } = args
 
 	if (keywords.length === 0) {
 		return []
@@ -20,8 +20,9 @@ export async function recallNodesByKeywords(
 		const nodes = (await queryRaw(sql_recall_nodes_by_label, [
 			`%${keyword}%`,
 			limit,
-			idol_id,
-			root_ids
+			idol_id ?? null,
+			root_ids ?? null,
+			metrics_ids ?? null
 		])) as Array<Node>
 
 		results.push(...nodes)

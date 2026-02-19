@@ -144,8 +144,10 @@ export default class Pipeline {
 			const prompt = formatTriple(text)
 
 			const output = await generator(prompt, {
-				max_new_tokens: 1024,
-				do_sample: false
+				max_new_tokens: 128,
+				emperature: 0,
+				do_sample: false,
+				return_full_text: false
 			})
 
 			const generated_text = output[0]?.generated_text || ''

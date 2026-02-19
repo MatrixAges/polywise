@@ -3,7 +3,7 @@ import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 import Polywise from '../src/Polywise'
 import { cognitive_science_datasets } from './datasets/cognitive'
 import { software_architecture_datasets } from './datasets/software'
-import { getTestRerank, getTestVectors } from './utils/getCache'
+import { getTestRerank, getTestTriples, getTestVectors } from './utils/getCache'
 import getDataDir from './utils/getDataDir'
 
 describe('Chain of Thought (CoT) Iterative Search', () => {
@@ -23,17 +23,22 @@ describe('Chain of Thought (CoT) Iterative Search', () => {
 				type: 'custom',
 				fn: getTestRerank
 			},
+			rebel_config: {
+				type: 'custom',
+				fn: getTestTriples
+			},
 			embedding_concurrency: 20,
-			reranker_concurrency: 20
+			reranker_concurrency: 20,
+			rebel_concurrency: 20
 		})
 
 		// Prepare test data: software architecture documents
-		for (const content of software_architecture_datasets.slice(0, 10)) {
+		for (const content of software_architecture_datasets.slice(0, 5)) {
 			await poly.save({ content })
 		}
 
 		// Prepare test data: cognitive science documents (different domain)
-		for (const content of cognitive_science_datasets.slice(0, 10)) {
+		for (const content of cognitive_science_datasets.slice(0, 5)) {
 			await poly.save({ content })
 		}
 	})

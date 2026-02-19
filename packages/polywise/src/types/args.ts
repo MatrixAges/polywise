@@ -21,8 +21,10 @@ export interface PolywiseArgs extends FiltersArgs {
 	cache_dir?: string
 	embedding_config?: EmbeddingConfig
 	reranker_config?: RerankerConfig
+	rebel_config?: RebelConfig
 	embedding_concurrency?: number
 	reranker_concurrency?: number
+	rebel_concurrency?: number
 	log?: boolean | LogArgs
 	onTick?: () => void
 }

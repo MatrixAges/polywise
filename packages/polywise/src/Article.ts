@@ -1,7 +1,7 @@
 import to from 'await-to-js'
 import { injectable } from 'tsyringe'
 
-import { DEFAULT_SIMILARITY_THRESHOLD, SCHEMA_MEMORY } from './consts'
+import { DEFAULT_SIMILARITY_THRESHOLD } from './consts'
 import {
 	sql_delete_article,
 	sql_get_all_articles,

@@ -3,7 +3,7 @@ import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 import Polywise from '../src/Polywise'
 import { cognitive_science_datasets } from './datasets/cognitive'
 import { software_architecture_datasets } from './datasets/software'
-import { getTestVectors } from './utils/getCache'
+import { getTestRerank, getTestTriples, getTestVectors } from './utils/getCache'
 import getDataDir from './utils/getDataDir'
 
 describe.concurrent('Article CRUD Operations', () => {
@@ -19,8 +19,17 @@ describe.concurrent('Article CRUD Operations', () => {
 				type: 'custom',
 				fn: getTestVectors
 			},
+			reranker_config: {
+				type: 'custom',
+				fn: getTestRerank
+			},
+			rebel_config: {
+				type: 'custom',
+				fn: getTestTriples
+			},
 			embedding_concurrency: 10,
-			reranker_concurrency: 10
+			reranker_concurrency: 10,
+			rebel_concurrency: 10
 		})
 	})
 
@@ -164,8 +173,17 @@ describe.concurrent('Full-Text Search and Vector Search', () => {
 				type: 'custom',
 				fn: getTestVectors
 			},
+			reranker_config: {
+				type: 'custom',
+				fn: getTestRerank
+			},
+			rebel_config: {
+				type: 'custom',
+				fn: getTestTriples
+			},
 			embedding_concurrency: 10,
-			reranker_concurrency: 10
+			reranker_concurrency: 10,
+			rebel_concurrency: 10
 		})
 	})
 

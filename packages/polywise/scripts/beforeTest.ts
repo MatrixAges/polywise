@@ -13,6 +13,11 @@ import { getTestVectors } from '../test/utils/getCache'
 
 async function beforeTest() {
 	const pipeline = container.resolve(Pipeline)
+	await pipeline.init({
+		embedding_concurrency: 20,
+		reranker_concurrency: 20,
+		rebel_concurrency: 10
+	})
 	await pipeline.checkModels()
 	console.log('All models are ready.')
 
@@ -81,6 +86,16 @@ async function beforeTest() {
 	}
 
 	console.log('\nAll datasets are ready.')
+
+	// Pre-generate triples cache for test datasets (only first 5 from each to save time)
+	console.log('Pre-warming triples cache...')
+	const triple_texts = [...cognitive_science_datasets.slice(0, 5), ...software_architecture_datasets.slice(0, 5)]
+	console.log(`  Extracting triples from ${triple_texts.length} documents...`)
+	for (const text of triple_texts) {
+		await pipeline.extractTriples(text)
+		process.stdout.write('.')
+	}
+	console.log('\nTriples cache ready.')
 }
 
 beforeTest().catch(err => {

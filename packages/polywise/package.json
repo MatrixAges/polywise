@@ -29,6 +29,7 @@
 		"dayjs": "catalog:",
 		"fs-extra": "catalog:",
 		"ofetch": "catalog:",
+		"onnxruntime-node": "^1.24.1",
 		"optional": "^0.1.4",
 		"p-queue": "^8.1.0",
 		"tslib": "catalog:",
