@@ -37,7 +37,10 @@ This document provides an overview of the packages/desktop module structure and 
 				"Tray.ts": { "desc": "System Tray controller", "role": "Controller" },
 				"index.ts": { "desc": "App module exports", "role": "Index" }
 			},
-			"index.ts": { "desc": "Main process entry point", "role": "Entry" },
+			"index.ts": {
+				"desc": "Main process entry point with increased V8 heap for heavy save workloads",
+				"role": "Entry"
+			},
 			"locales": {
 				"en": {
 					"global.ts": { "desc": "English global strings", "role": "Locale" },

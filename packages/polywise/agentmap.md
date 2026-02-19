@@ -26,7 +26,7 @@ This document provides an overview of the packages/polywise module structure and
 				"role": "Class"
 			},
 			"Pipeline.ts": {
-				"desc": "Pipeline manager with embedding, reranking, and triple extraction (ReBel) capabilities. Triple extraction is exposed via extractTriples() and always returns an array.",
+				"desc": "Pipeline manager with embedding, reranking, and triple extraction (ReBel) capabilities. Rerank output is normalized with label-aware score parsing (LABEL_1/relevant) for stable relevance scores. Triple extraction is exposed via extractTriples() and always returns an array.",
 				"role": "Class"
 			},
 			"Polywise.ts": {

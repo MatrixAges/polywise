@@ -217,11 +217,12 @@ export default class Pipeline {
 	async rerank(query: string, documents: Array<string>) {
 		if (documents.length === 0) return []
 
-		return this.reranker_queue.add(async () => {
+		const scores = await this.reranker_queue.add<Array<{ score: number }>>(async () => {
 			if (this.reranker_config.type === 'custom') {
 				const { fn } = this.reranker_config
+				const output = await fn(query, documents)
 
-				return await fn(query, documents)
+				return this.normalizeRerankOutput(output)
 			}
 
 			const reranker = await this.loadRerankerModel()
@@ -231,11 +232,67 @@ export default class Pipeline {
 			const output = await reranker(inputs, {
 				truncation: true,
 				max_length: 2048,
-				padding: true
+				padding: true,
+				top_k: null
 			})
 
-			return output
+			return this.normalizeRerankOutput(output)
 		})
+
+		return scores || []
+	}
+
+	private normalizeRerankOutput(output: unknown) {
+		if (!Array.isArray(output)) return []
+
+		return output.map(item => ({ score: this.extractRerankScore(item) }))
+	}
+
+	private extractRerankScore(item: unknown) {
+		if (typeof item === 'number') {
+			return item
+		}
+
+		if (this.isScoreObject(item)) {
+			return item.score
+		}
+
+		if (Array.isArray(item)) {
+			const valid_items = item.filter(this.isLabelScoreObject)
+
+			if (valid_items.length === 0) return 0
+
+			const positive_label = valid_items.find(entry => {
+				const label = entry.label.toLowerCase()
+
+				return label.includes('label_1') || label.includes('relevant')
+			})
+
+			if (positive_label) {
+				return positive_label.score
+			}
+
+			return Math.max(...valid_items.map(entry => entry.score))
+		}
+
+		return 0
+	}
+
+	private isScoreObject(value: unknown): value is { score: number } {
+		if (!value || typeof value !== 'object') return false
+
+		const score = (value as { score?: unknown }).score
+
+		return typeof score === 'number'
+	}
+
+	private isLabelScoreObject(value: unknown): value is { label: string; score: number } {
+		if (!value || typeof value !== 'object') return false
+
+		const score = (value as { score?: unknown }).score
+		const label = (value as { label?: unknown }).label
+
+		return typeof score === 'number' && typeof label === 'string'
 	}
 
 	async search(args: PipelineSearchArgs) {

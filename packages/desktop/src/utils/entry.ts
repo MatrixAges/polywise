@@ -8,5 +8,5 @@ if (!app.requestSingleInstanceLock()) app.exit()
 
 conf.registerRendererListener()
 
-app.commandLine.appendSwitch('js-flags', '--max-old-space-size=4096')
+app.commandLine.appendSwitch('js-flags', '--max-old-space-size=8192')
 app.commandLine.appendSwitch('lang', 'en-US')
