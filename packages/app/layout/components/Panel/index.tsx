@@ -5,10 +5,10 @@ import { memo } from '@/utils'
 import type { IPropsPanel } from '../../types'
 
 const Index = (props: IPropsPanel) => {
-	const {} = props
+	const { onClose } = props
 
 	return (
-		<div className='flex h-full w-[320px] flex-col'>
+		<div className='flex h-full w-full flex-col'>
 			<div className='border-std-900/8 is_drag flex h-[36px] items-center justify-between border-b border-l'>
 				<div className='no_drag flex h-full'>
 					<div className='bg-std-100 border-std-900/8 clickable flex h-full w-[37px] items-center justify-center border-r shadow-[0_1px_0_0_var(--color-std-100)]'>
@@ -21,7 +21,7 @@ const Index = (props: IPropsPanel) => {
 						<Search size={16} />
 					</div>
 				</div>
-				<div className='clickable flex h-full w-[37px] items-center justify-center'>
+				<div className='clickable flex h-full w-[37px] items-center justify-center' onClick={onClose}>
 					<PanelRightClose size={16} />
 				</div>
 			</div>
