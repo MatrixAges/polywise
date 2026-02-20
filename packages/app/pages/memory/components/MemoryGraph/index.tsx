@@ -165,16 +165,16 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 
 	useEffect(() => {
 		if (fgRef.current && graphData.nodes.length > 0) {
-			// Increase distance for longer edges
-			fgRef.current.d3Force('link').distance((link: any) => (link.distance || 1) * 100)
+			// Increase distance for longer edges (reduced from 100 to 50)
+			fgRef.current.d3Force('link').distance((link: any) => (link.distance || 1) * 50)
 			fgRef.current.d3Force('charge').strength(-300)
 
-			// Enforce absolute non-overlap
+			// Enforce absolute non-overlap (using updated sizes)
 			fgRef.current.d3Force(
 				'collide',
 				forceCollide((node: any) => {
-					const baseSize = 12
-					return Math.max((node.potential || 1) * 30, baseSize) + 5 // Radius + 5px margin
+					const baseSize = 24
+					return Math.max((node.potential || 1) * 60, baseSize) + 5 // Radius + 5px margin
 				})
 			)
 
@@ -207,43 +207,65 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 					onNodeClick={node => console.log('Clicked node', node)}
 					onLinkClick={link => console.log('Clicked link', link)}
 					nodeCanvasObject={(node: any, ctx, globalScale) => {
-						const label = node.label
+						const label = node.label || ''
 						const potential = node.potential || 1
 
-						const baseSize = 12
-						const nodeR = Math.max(potential * 30, baseSize)
+						const baseSize = 24
+						const nodeR = Math.max(potential * 60, baseSize)
 
 						ctx.beginPath()
 						ctx.arc(node.x, node.y, nodeR, 0, 2 * Math.PI, false)
 
-						// Solid styling using cluster color
+						// Solid styling using cluster color, 50% opacity
+						ctx.save()
+						ctx.globalAlpha = 0.5
 						ctx.fillStyle = node.clusterColor
 						ctx.fill()
+						ctx.restore()
 
-						ctx.lineWidth = 1.5 / globalScale
-						// Apply slightly darker stroke of the same color or default
-						ctx.strokeStyle = '#ffffff99'
+						ctx.lineWidth = 2 / globalScale
+						// Border using original cluster color 100% opacity
+						ctx.strokeStyle = node.clusterColor
 						ctx.stroke()
 
-						// Note: Node text styling (0.8 * 8px visual scaling = 6.4)
-						const fontSize = 6.4 / globalScale
+						// Node text styling (naturally scaling with canvas)
+						const fontSize = 12
 						ctx.font = `300 ${fontSize}px Sans-Serif`
 						ctx.textAlign = 'center'
-						ctx.textBaseline = 'top'
+						ctx.textBaseline = 'middle'
 						ctx.fillStyle = '#334155'
 
-						ctx.fillText(label, node.x, node.y + nodeR + 4 / globalScale)
+						const maxWidth = nodeR * 2.5
+						let line = ''
+						const lines = []
+						for (let i = 0; i < label.length; i++) {
+							const testLine = line + label[i]
+							const metrics = ctx.measureText(testLine)
+							if (metrics.width > maxWidth && line.length > 0) {
+								lines.push(line)
+								line = label[i]
+							} else {
+								line = testLine
+							}
+						}
+						lines.push(line)
+
+						const lineHeight = fontSize * 1.2
+						const startY = node.y - ((lines.length - 1) * lineHeight) / 2
+						lines.forEach((l, idx) => {
+							ctx.fillText(l, node.x, startY + idx * lineHeight)
+						})
 					}}
 					nodePointerAreaPaint={(node: any, color, ctx) => {
-						const baseSize = 12
-						const nodeR = Math.max((node.potential || 1) * 30, baseSize)
+						const baseSize = 24
+						const nodeR = Math.max((node.potential || 1) * 60, baseSize)
 						ctx.fillStyle = color
 						ctx.beginPath()
 						ctx.arc(node.x, node.y, nodeR, 0, 2 * Math.PI, false)
 						ctx.fill()
 					}}
 					linkColor={() => '#cbd5e1'}
-					linkWidth={1}
+					linkWidth={1.5}
 					linkCanvasObjectMode={() => 'after'}
 					linkCanvasObject={(link: any, ctx, globalScale) => {
 						const start = link.source
@@ -269,8 +291,8 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 						const displayLabel =
 							label.length > maxChars ? label.substring(0, maxChars) + '...' : label
 
-						// 0.8 scale applied against a small baseline
-						const fontSize = 6.4 / globalScale
+						// Scale naturally with canvas
+						const fontSize = 10
 						ctx.font = `300 ${fontSize}px Sans-Serif`
 
 						ctx.save()
@@ -278,9 +300,18 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 						ctx.rotate(textAngle)
 
 						ctx.textAlign = 'center'
-						ctx.textBaseline = 'bottom'
-						ctx.fillStyle = '#94a3b8'
-						ctx.fillText(displayLabel, 0, -(2 / globalScale))
+						ctx.textBaseline = 'middle'
+
+						const textWidth = ctx.measureText(displayLabel).width
+						const textHeight = fontSize
+
+						// 0.6 standard black background
+						ctx.fillStyle = 'rgba(0, 0, 0, 0.6)'
+						ctx.fillRect(-textWidth / 2 - 4, -textHeight / 2 - 2, textWidth + 8, textHeight + 4)
+
+						// Text right on the edge line
+						ctx.fillStyle = '#f8fafc'
+						ctx.fillText(displayLabel, 0, 0)
 
 						ctx.restore()
 					}}
