@@ -203,14 +203,14 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 		}))
 
 		const sim = forceSimulation(simNodes as any)
-			.force('center', forceCenter(0, 0).strength(0.1)) // Much stronger center pull
-			.force('x', forceX(0).strength(0.1)) // Explicit suction on X
-			.force('y', forceY(0).strength(0.1)) // Explicit suction on Y
+			.force('center', forceCenter(0, 0).strength(0.05)) // Relaxed pull
+			.force('x', forceX(0).strength(0.05))
+			.force('y', forceY(0).strength(0.05))
 			.force('charge', forceManyBody().strength(-800).distanceMax(800)) // Scaled back repulsion
 			.force(
 				'collide',
 				forceCollide((node: any) => {
-					return 150 // Tighter collision box
+					return 200 // Increased collision buffer by 50 (extra 100 space between nodes)
 				}).iterations(5)
 			)
 			.force(
@@ -218,7 +218,7 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 				forceLink(simLinks as any)
 					.id((d: any) => d.id)
 					.distance((link: any) => {
-						return 300 // Slightly tighter link distance
+						return 200 // Increased link distance by 100
 					})
 					.strength(1)
 			)
