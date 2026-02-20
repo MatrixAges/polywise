@@ -8,7 +8,7 @@ import {
 	useNodesState,
 	BackgroundVariant
 } from '@xyflow/react'
-import { forceSimulation, forceLink, forceManyBody, forceCollide, forceX, forceY } from 'd3-force'
+import { forceSimulation, forceLink, forceManyBody, forceCollide, forceCenter, forceX, forceY } from 'd3-force'
 import { Spin } from 'antd'
 import '@xyflow/react/dist/style.css'
 
@@ -174,12 +174,21 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 
 		const getClusterTarget = (clusterIdx: number, totalClusters: number) => {
 			if (totalClusters <= 1) return { x: 0, y: 0 }
-			const radius = Math.max(200, totalClusters * 100)
+			// Massively reduced radius for initial focal points
+			const radius = 50 + clusterIdx * 20
 			const angle = (clusterIdx / totalClusters) * 2 * Math.PI
 			return { x: Math.cos(angle) * radius, y: Math.sin(angle) * radius }
 		}
 
 		const simNodes = graphData.nodes.map(d => {
+			const existingNode = flow_nodes.find(fn => fn.id === d.id)
+			if (existingNode) {
+				return {
+					...d,
+					x: existingNode.position.x + 130,
+					y: existingNode.position.y + 42
+				}
+			}
 			const target = getClusterTarget((d as any).clusterIdx, graphData.clusters.length)
 			return {
 				...d,
@@ -193,36 +202,23 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 			target: d.target
 		}))
 
-		const getRadius = (n: any) => {
-			return 150 // Constant simulated bounding radius for large (260x140) cards to avoid overlap
-		}
-
 		const sim = forceSimulation(simNodes as any)
-			.force('charge', forceManyBody().strength(-1500).distanceMax(1000)) // Repel locally, but ignore far clusters
+			.force('center', forceCenter(0, 0).strength(0.1)) // Much stronger center pull
+			.force('x', forceX(0).strength(0.1)) // Explicit suction on X
+			.force('y', forceY(0).strength(0.1)) // Explicit suction on Y
+			.force('charge', forceManyBody().strength(-800).distanceMax(800)) // Scaled back repulsion
 			.force(
 				'collide',
 				forceCollide((node: any) => {
-					return 160 // Buffer for 260x84 cards
+					return 150 // Tighter collision box
 				}).iterations(5)
-			)
-			.force(
-				'cluster_x',
-				forceX((node: any) => {
-					return getClusterTarget(node.clusterIdx, graphData.clusters.length).x
-				}).strength(0.2)
-			)
-			.force(
-				'cluster_y',
-				forceY((node: any) => {
-					return getClusterTarget(node.clusterIdx, graphData.clusters.length).y
-				}).strength(0.2)
 			)
 			.force(
 				'link',
 				forceLink(simLinks as any)
 					.id((d: any) => d.id)
 					.distance((link: any) => {
-						return 450 // Increased distance to prevent edge labels from clipping 260px wide node cards
+						return 300 // Slightly tighter link distance
 					})
 					.strength(1)
 			)
@@ -358,7 +354,7 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 				nodesDraggable={true}
 				attributionPosition='bottom-left'
 			>
-				<Background color='var(--color-border-light)' gap={48} variant={BackgroundVariant.Lines} />
+				<Background color='var(--color-border-light)' gap={40} variant={BackgroundVariant.Lines} />
 			</ReactFlow>
 		</div>
 	)

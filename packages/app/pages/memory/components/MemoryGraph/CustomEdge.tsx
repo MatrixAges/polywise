@@ -39,11 +39,10 @@ const CustomEdge = ({
 		displayLabel = displayLabel.substring(0, maxChars) + '...'
 	}
 
-	// Pseudo-random deterministic offset
+	// Minor deterministic offset to handle parallel lines
 	const hash = (id || '').split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
-
-	const xOffset = ((hash * 13) % 20) - 10
-	const yOffset = ((hash * 17) % 20) - 10
+	const xOffset = (hash % 6) - 3
+	const yOffset = ((hash * 7) % 6) - 3
 
 	return (
 		<>
