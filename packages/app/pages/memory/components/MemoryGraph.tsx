@@ -83,29 +83,30 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 	}
 
 	return (
-		<div className='h-full w-full overflow-hidden rounded border border-slate-200'>
-			<Spin spinning={loading} className='h-full w-full'>
-				<ReactFlow
-					nodes={flow_nodes}
-					edges={flow_edges}
-					onNodesChange={onNodesChange}
-					onEdgesChange={onEdgesChange}
-					onNodeClick={(_, node) =>
-						set_selected_info(`Node ${node.id}: ${String(node.data.label)}`)
-					}
-					onEdgeClick={(_, edge) => set_selected_info(`Edge ${edge.id}: ${edge.label || ''}`)}
-					fitView
-					attributionPosition='bottom-left'
-				>
-					<Background color='#aaa' gap={16} />
-					<Controls />
-					<MiniMap
-						nodeStrokeColor={() => '#555'}
-						nodeColor={() => '#fff'}
-						maskColor='rgba(240, 240, 240, 0.6)'
-					/>
-				</ReactFlow>
-			</Spin>
+		<div className='relative h-full w-full overflow-hidden rounded border border-slate-200'>
+			{loading && (
+				<div className='absolute inset-0 z-10 flex items-center justify-center bg-white/50'>
+					<Spin />
+				</div>
+			)}
+			<ReactFlow
+				nodes={flow_nodes}
+				edges={flow_edges}
+				onNodesChange={onNodesChange}
+				onEdgesChange={onEdgesChange}
+				onNodeClick={(_, node) => set_selected_info(`Node ${node.id}: ${String(node.data.label)}`)}
+				onEdgeClick={(_, edge) => set_selected_info(`Edge ${edge.id}: ${edge.label || ''}`)}
+				fitView
+				attributionPosition='bottom-left'
+			>
+				<Background color='#aaa' gap={16} />
+				<Controls />
+				<MiniMap
+					nodeStrokeColor={() => '#555'}
+					nodeColor={() => '#fff'}
+					maskColor='rgba(240, 240, 240, 0.6)'
+				/>
+			</ReactFlow>
 
 			{selected_info && (
 				<div className='pointer-events-none absolute bottom-3 left-3 rounded bg-white/90 px-2 py-1 text-xs text-slate-700 shadow'>
