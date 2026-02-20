@@ -1,8 +1,7 @@
+import { conf } from '@desktop/utils'
 import { nativeTheme } from 'electron'
 
-import { conf } from '@desktop/utils'
-
-import type { Theme } from '@app/types'
+import type { Theme } from '../../../app/types'
 
 export default () => {
 	const theme_source = (conf.get('theme_source') || 'system') as Theme

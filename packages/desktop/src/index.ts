@@ -57,7 +57,7 @@ class App {
 			if (win_bounds) this.window.setBounds(win_bounds)
 
 			this.loading()
-			this.events(port)
+			this.events(port as number)
 
 			if (show_devtool) {
 				if (process.platform === 'win32') {
@@ -88,7 +88,7 @@ class App {
 						snapshot: async input => {
 							return await saveWithUtilityProcess.snapshot(input, this.memory_data_dir)
 						},
-						recallFromMemory: async input => {
+						recall: async input => {
 							return await saveWithUtilityProcess.recall(input, this.memory_data_dir)
 						},
 						getNodes: async () => {

@@ -1,5 +1,6 @@
 import { p, router } from '@desktop/utils'
-import { array, number, object, string } from 'zod'
+import * as taskUtil from '@desktop/utils/task'
+import { any, array, number, object, string } from 'zod'
 
 const writeLog = (event_name: string, payload?: Record<string, unknown>) => {
 	if (payload) {
@@ -101,11 +102,11 @@ const recall = p
 	)
 	.query(async ({ input, ctx }) => {
 		// Ensure method exists before calling (runtime safety check)
-		if (typeof ctx.memory.recallFromMemory !== 'function') {
-			throw new Error('Polywise.recallFromMemory is not defined. Please restart the backend.')
+		if (typeof ctx.memory.recall !== 'function') {
+			throw new Error('Polywise.recall is not defined. Please restart the backend.')
 		}
 
-		return await ctx.memory.recallFromMemory({
+		return await ctx.memory.recall({
 			query: input.query,
 			max_depth: input.max_depth,
 			idol_id: input.idol_id,
@@ -139,6 +140,41 @@ const getEdgesByIdol = p
 		return await ctx.memory.getEdgesByIdol({ idol_id: input.idol_id })
 	})
 
+const syncTasks = p
+	.input(
+		object({
+			pending: array(any()),
+			processing: array(any())
+		})
+	)
+	.mutation(async ({ input }) => {
+		return await taskUtil.syncTasks(input.pending, input.processing)
+	})
+
+const getTasks = p.query(async () => {
+	return await taskUtil.getTasks()
+})
+
+const archiveTask = p
+	.input(
+		object({
+			task: any()
+		})
+	)
+	.mutation(async ({ input }) => {
+		return await taskUtil.archiveTask(input.task)
+	})
+
+const getArchiveTasks = p
+	.input(
+		object({
+			page: number()
+		})
+	)
+	.query(async ({ input }) => {
+		return await taskUtil.getArchiveTasks(input.page)
+	})
+
 export default router({
 	query,
 	save,
@@ -148,5 +184,9 @@ export default router({
 	recall,
 	getNodes,
 	getNodesByIdol,
-	getEdgesByIdol
+	getEdgesByIdol,
+	syncTasks,
+	getTasks,
+	archiveTask,
+	getArchiveTasks
 })

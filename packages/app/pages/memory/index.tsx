@@ -89,9 +89,9 @@ const Index = () => {
 		setLoading(true)
 
 		try {
-			const res = await memory.query({ query })
+			const res = (await memory.query({ query })) as Record<string, unknown>
 
-			setResults((res.memory || []) as Array<MemoryItem>)
+			setResults((res.memory || []) as any)
 			setPage(1)
 
 			if (view_mode === 'graph') {

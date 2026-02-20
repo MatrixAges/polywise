@@ -236,9 +236,11 @@ const startPolySaveWorker = () => {
 			return
 		}
 
-		writeLog('call_dispatch', { request_id: message.request_id, method: message.method })
+		const save_message = message as SaveRequestMessage
 
-		void handleSave(message)
+		writeLog('call_dispatch', { request_id: save_message.request_id, method: save_message.method })
+
+		void handleSave(save_message)
 	})
 }
 

@@ -21,10 +21,9 @@ export interface ITask {
 				content: string
 				idol_id?: string
 				root_ids?: Array<string>
-				metrics_ids?: Array<string>
 				metadata?: Record<string, unknown>
 		  }
-	status: 'pending' | 'processing' | 'failed'
+	status: 'pending' | 'processing' | 'failed' | 'complete'
 	error?: string
 	created_at: number
 }
@@ -39,10 +38,25 @@ export default class MemoryModel {
 		makeAutoObservable(this, { util: false }, { autoBind: true })
 	}
 
-	init() {
-		this.tasks = this.readTasksFromStorage()
+	async init() {
+		await this.loadTasks()
 
 		void this.processQueue()
+	}
+
+	async loadTasks() {
+		try {
+			const { pending, processing } = await ipc.memory.getTasks.query()
+			runInAction(() => {
+				const all_tasks = [...pending, ...processing].map(t => ({
+					...t,
+					status: t.status as 'pending' | 'processing'
+				})) as ITask[]
+				this.tasks = all_tasks
+			})
+		} catch (error) {
+			this.writeLog('load_tasks_error', { error: error instanceof Error ? error.message : String(error) })
+		}
 	}
 
 	async processQueue() {
@@ -104,6 +118,7 @@ export default class MemoryModel {
 				this.tasks = this.tasks.filter(item => item.id !== task.id)
 				this.saveTasks()
 			})
+			void ipc.memory.archiveTask.mutate({ task: { ...task, status: 'complete' } })
 		} catch (error: unknown) {
 			this.writeLog('queue_task_error', {
 				task_id: task.id,
@@ -114,8 +129,10 @@ export default class MemoryModel {
 			runInAction(() => {
 				task.status = 'failed'
 				task.error = error instanceof Error ? error.message : String(error)
+				this.tasks = this.tasks.filter(item => item.id !== task.id)
 				this.saveTasks()
 			})
+			void ipc.memory.archiveTask.mutate({ task })
 		} finally {
 			this.is_processing = false
 
@@ -124,7 +141,10 @@ export default class MemoryModel {
 	}
 
 	saveTasks() {
-		return
+		const pending = this.tasks.filter(t => t.status === 'pending')
+		const processing = this.tasks.filter(t => t.status === 'processing')
+
+		void ipc.memory.syncTasks.mutate({ pending, processing })
 	}
 
 	addTask(type: ITask['type'], args: ITask['args']) {
@@ -204,10 +224,6 @@ export default class MemoryModel {
 
 	async getEdgesByIdol(idol_id: string) {
 		return await ipc.memory.getEdgesByIdol.query({ idol_id })
-	}
-
-	private readTasksFromStorage() {
-		return []
 	}
 
 	private toSerializableTaskArgs(args: ITask['args']) {

@@ -41,10 +41,7 @@ export default class Index {
 	}
 
 	async init() {
-		const off = await setStoreWhenChange(
-			['lang', 'theme_source', 'panel_collapsed', 'panel_width', 'current_page'],
-			this
-		)
+		const off = await setStoreWhenChange(['lang', 'theme_source', 'panel_collapsed', 'panel_width'], this)
 
 		this.util.acts = [off]
 

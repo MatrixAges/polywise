@@ -1,3 +1,4 @@
+import { observer } from 'mobx-react-lite'
 import { Button, Input, message } from 'antd'
 import { useState } from 'react'
 
@@ -6,7 +7,7 @@ import { memo } from '@/utils'
 
 const { TextArea } = Input
 
-const Index = () => {
+const Index = observer(() => {
 	const { memory } = useGlobal()
 	const [content, setContent] = useState('')
 
@@ -37,6 +38,6 @@ const Index = () => {
 			</Button>
 		</div>
 	)
-}
+})
 
 export default memo(Index)

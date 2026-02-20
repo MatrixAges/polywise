@@ -24,6 +24,15 @@ type SnapshotArgs = {
 	weight_threshold?: number
 }
 
+type RecallArgs = {
+	query: string
+	max_depth?: number
+	idol_id?: string
+	root_ids?: Array<string>
+	metrics_ids?: Array<string>
+	limit?: number
+}
+
 type IdolArgs = {
 	idol_id: string
 }
@@ -34,6 +43,7 @@ type MemoryBridge = {
 	update: (input: UpdateArgs) => Promise<string>
 	forget: (input: ForgetArgs) => Promise<unknown>
 	snapshot: (input: SnapshotArgs) => Promise<unknown>
+	recall: (input: RecallArgs) => Promise<unknown>
 	getNodes: () => Promise<unknown>
 	getNodesByIdol: (input: IdolArgs) => Promise<unknown>
 	getEdgesByIdol: (input: IdolArgs) => Promise<unknown>
