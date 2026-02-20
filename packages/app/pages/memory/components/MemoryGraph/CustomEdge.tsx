@@ -39,6 +39,11 @@ const CustomEdge = ({
 		displayLabel = displayLabel.substring(0, maxChars) + '...'
 	}
 
+	// Pseudo-random deterministic offset to prevent identical route label overlaps
+	const hash = (id || '').split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
+	const xOffset = ((hash * 13) % 40) - 20
+	const yOffset = (hash % 30) - 15
+
 	return (
 		<>
 			<BaseEdge
@@ -55,7 +60,9 @@ const CustomEdge = ({
 					<div
 						style={{
 							position: 'absolute',
-							transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
+							transform: `translate(-50%, -50%) translate(${labelX + xOffset}px,${
+								labelY + yOffset
+							}px)`,
 							pointerEvents: 'all'
 						}}
 						className='nodrag nopan rounded-full border border-slate-300 bg-white px-3 py-[2px] shadow-sm'

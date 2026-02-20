@@ -210,8 +210,8 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 				sim.nodes().map((node: any) => {
 					return {
 						id: node.id,
-						// Offset by half of 260x140 card dimensions
-						position: { x: node.x - 130, y: node.y - 70 },
+						// Offset by half of 260x84 approx card dimensions (avg)
+						position: { x: node.x - 130, y: node.y - 42 },
 						data: {
 							label: node.label,
 							potential: node.potential,
@@ -223,19 +223,58 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 					}
 				})
 			)
-			setEdges(
-				simLinks.map((edge: any) => ({
-					id: `${edge.source.id}_${edge.target.id}_${edge.type || 'rel'}`,
-					source: edge.source.id,
-					target: edge.target.id,
-					type: 'customEdge',
-					animated: edge.weight > 1,
-					data: {
-						type: edge.type,
-						weight: edge.weight,
-						distance: edge.distance
+
+			const getOptimalHandles = (nodeA: any, nodeB: any) => {
+				const W = 260
+				const H = 84
+				const handlesA = [
+					{ id: 'top', x: nodeA.x, y: nodeA.y - H / 2 },
+					{ id: 'bottom', x: nodeA.x, y: nodeA.y + H / 2 },
+					{ id: 'left', x: nodeA.x - W / 2, y: nodeA.y },
+					{ id: 'right', x: nodeA.x + W / 2, y: nodeA.y }
+				]
+				const handlesB = [
+					{ id: 'top', x: nodeB.x, y: nodeB.y - H / 2 },
+					{ id: 'bottom', x: nodeB.x, y: nodeB.y + H / 2 },
+					{ id: 'left', x: nodeB.x - W / 2, y: nodeB.y },
+					{ id: 'right', x: nodeB.x + W / 2, y: nodeB.y }
+				]
+
+				let minDist = Infinity
+				let bestA = 'right'
+				let bestB = 'left'
+
+				for (const a of handlesA) {
+					for (const b of handlesB) {
+						const dist = Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2)
+						if (dist < minDist) {
+							minDist = dist
+							bestA = a.id
+							bestB = b.id
+						}
 					}
-				}))
+				}
+				return { sourceHandle: bestA + '-source', targetHandle: bestB + '-target' }
+			}
+
+			setEdges(
+				simLinks.map((edge: any) => {
+					const handles = getOptimalHandles(edge.source, edge.target)
+					return {
+						id: `${edge.source.id}_${edge.target.id}_${edge.type || 'rel'}`,
+						source: edge.source.id,
+						target: edge.target.id,
+						sourceHandle: handles.sourceHandle,
+						targetHandle: handles.targetHandle,
+						type: 'customEdge',
+						animated: edge.weight > 1,
+						data: {
+							type: edge.type,
+							weight: edge.weight,
+							distance: edge.distance
+						}
+					}
+				})
 			)
 		})
 

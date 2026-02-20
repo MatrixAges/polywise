@@ -66,26 +66,57 @@ const CustomNode = ({ data, selected }: NodeProps) => {
 				)}
 			</div>
 
-			{/* Black dots handles */}
+			{/* Top */}
 			<Handle
 				type='target'
 				position={Position.Top}
+				id='top-target'
+				className='h-[6px] w-[6px] rounded-full border border-black bg-black'
+			/>
+			<Handle
+				type='source'
+				position={Position.Top}
+				id='top-source'
+				className='pointer-events-none absolute h-0 w-0 border-0 opacity-0'
+			/>
+			{/* Bottom */}
+			<Handle
+				type='target'
+				position={Position.Bottom}
+				id='bottom-target'
 				className='h-[6px] w-[6px] rounded-full border border-black bg-black'
 			/>
 			<Handle
 				type='source'
 				position={Position.Bottom}
-				className='h-[6px] w-[6px] rounded-full border border-black bg-black'
+				id='bottom-source'
+				className='pointer-events-none absolute h-0 w-0 border-0 opacity-0'
 			/>
+			{/* Left */}
 			<Handle
 				type='target'
 				position={Position.Left}
+				id='left-target'
+				className='h-[6px] w-[6px] rounded-full border border-black bg-black'
+			/>
+			<Handle
+				type='source'
+				position={Position.Left}
+				id='left-source'
+				className='pointer-events-none absolute h-0 w-0 border-0 opacity-0'
+			/>
+			{/* Right */}
+			<Handle
+				type='target'
+				position={Position.Right}
+				id='right-target'
 				className='h-[6px] w-[6px] rounded-full border border-black bg-black'
 			/>
 			<Handle
 				type='source'
 				position={Position.Right}
-				className='h-[6px] w-[6px] rounded-full border border-black bg-black'
+				id='right-source'
+				className='pointer-events-none absolute h-0 w-0 border-0 opacity-0'
 			/>
 		</div>
 	)
