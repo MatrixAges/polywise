@@ -227,16 +227,28 @@ export default class Pipeline {
 
 			const reranker = await this.loadRerankerModel()
 
-			const inputs = documents.map(doc => ({ text: query, text_pair: doc }))
+			const texts = new Array(documents.length).fill(query)
+			const text_pairs = documents
 
-			const output = await reranker(inputs, {
-				truncation: true,
-				max_length: 2048,
+			const encoded = await reranker.tokenizer(texts, {
+				text_pair: text_pairs,
 				padding: true,
-				top_k: null
+				truncation: true,
+				max_length: 512
 			})
 
-			return this.normalizeRerankOutput(output)
+			const output = await reranker.model(encoded)
+			const logits = output.logits.data
+
+			const scores: Array<{ score: number }> = []
+
+			for (let i = 0; i < logits.length; i++) {
+				const logit = logits[i]
+				const score = 1 / (1 + Math.exp(-logit))
+				scores.push({ score })
+			}
+
+			return scores
 		})
 
 		return scores || []
