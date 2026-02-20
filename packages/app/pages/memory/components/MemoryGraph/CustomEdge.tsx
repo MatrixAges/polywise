@@ -41,8 +41,18 @@ const CustomEdge = ({
 
 	// Pseudo-random deterministic offset to prevent identical route label overlaps
 	const hash = (id || '').split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
-	const xOffset = ((hash * 13) % 40) - 20
-	const yOffset = (hash % 30) - 15
+
+	// Roughly determine if the overall path spans more horizontally or vertically
+	const isHorizontal = Math.abs(targetX - sourceX) > Math.abs(targetY - sourceY)
+
+	// Slide label significantly along the longest axis to separate overlapping midpoints
+	// Guarantees sliding away from the dead center by at least 40px, up to 90px
+	const direction = hash % 2 === 0 ? 1 : -1
+	const primaryOffset = direction * (((hash * 47) % 50) + 40)
+	const secondaryOffset = ((hash * 13) % 20) - 10
+
+	const xOffset = isHorizontal ? primaryOffset : secondaryOffset
+	const yOffset = !isHorizontal ? primaryOffset : secondaryOffset
 
 	return (
 		<>
@@ -63,7 +73,8 @@ const CustomEdge = ({
 							transform: `translate(-50%, -50%) translate(${labelX + xOffset}px,${
 								labelY + yOffset
 							}px)`,
-							pointerEvents: 'all'
+							pointerEvents: 'all',
+							zIndex: selected ? 20 : 10 + (hash % 5)
 						}}
 						className='nodrag nopan rounded-full border border-slate-300 bg-white px-3 py-[2px] shadow-sm'
 					>
