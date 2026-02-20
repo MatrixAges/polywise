@@ -42,6 +42,9 @@ export async function recallRelatedNodes(
 	queryRaw: (sql: string, params?: Array<any>) => Promise<any>,
 	limit = 20
 ) {
+	// Debug log
+	// console.log('[graph] recallRelatedNodes limit:', limit)
+
 	if (node_ids.length === 0 || max_depth <= 0) {
 		return []
 	}

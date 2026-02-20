@@ -30,6 +30,8 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 	const { nodes, edges, loading = false } = props
 	const [selected_info, set_selected_info] = useState('')
 
+	console.log(props)
+
 	const initialNodes = useMemo(
 		() =>
 			nodes.map(node => ({

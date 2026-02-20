@@ -100,6 +100,11 @@ const recall = p
 		})
 	)
 	.query(async ({ input, ctx }) => {
+		// Ensure method exists before calling (runtime safety check)
+		if (typeof ctx.memory.recallFromMemory !== 'function') {
+			throw new Error('Polywise.recallFromMemory is not defined. Please restart the backend.')
+		}
+
 		return await ctx.memory.recallFromMemory({
 			query: input.query,
 			max_depth: input.max_depth,

@@ -627,6 +627,9 @@ export default class Polywise {
 	}
 
 	async recallFromMemory(args: RecallArgs) {
+		// Log recall start for debugging
+		this.log.write({ query: args.query }, { event: 'recall_start' })
+
 		const {
 			query,
 			max_depth = DEFAULT_RECALL_DEPTH,
