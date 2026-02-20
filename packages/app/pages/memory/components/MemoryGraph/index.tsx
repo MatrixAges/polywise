@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useRef, useCallback, useEffect, useMemo, useState } from 'react'
 import { Background, ReactFlow, useEdgesState, useNodesState, BackgroundVariant } from '@xyflow/react'
 import { forceSimulation, forceLink, forceManyBody, forceCollide, forceCenter, forceX, forceY } from 'd3-force'
 import { Spin } from 'antd'
@@ -8,7 +8,7 @@ import { memo } from '@/utils'
 import CustomNode from './CustomNode'
 import CustomEdge from './CustomEdge'
 
-import type { Node, Edge } from '@xyflow/react'
+import type { Node, Edge, NodeChange } from '@xyflow/react'
 
 interface MemoryGraphProps {
 	nodes: Array<{
@@ -91,11 +91,56 @@ const colorMegaPools = [
 const MemoryGraph = (props: MemoryGraphProps) => {
 	const { nodes: initialNodes, edges: initialEdges, loading = false } = props
 
-	const [flow_nodes, setNodes, onNodesChange] = useNodesState<Node>([])
-	const [flow_edges, setEdges, onEdgesChange] = useEdgesState<Edge>([])
-	const [simulation, setSimulation] = useState<any>(null)
+	const [flow_nodes, setNodes, onOriginalNodesChange] = useNodesState<Node>([])
+	const [flow_edges, setEdges, onOriginalEdgesChange] = useEdgesState<Edge>([])
+	const simRef = useRef<any>(null)
 
-	console.log(flow_edges)
+	const onNodesChange = useCallback(
+		(changes: Array<NodeChange>) => {
+			const filtered = changes.filter(c => c.type !== 'position')
+			onOriginalNodesChange(filtered)
+		},
+		[onOriginalNodesChange]
+	)
+
+	const onEdgesChange = useCallback(
+		(changes: any) => {
+			onOriginalEdgesChange(changes)
+		},
+		[onOriginalEdgesChange]
+	)
+
+	const onNodeDragStart = useCallback((evt: any, node: Node) => {
+		if (simRef.current) {
+			const simNode = simRef.current.nodes().find((n: any) => n.id === node.id)
+			if (simNode) {
+				simNode.fx = simNode.x
+				simNode.fy = simNode.y
+			}
+			simRef.current.alphaTarget(0.3).restart()
+		}
+	}, [])
+
+	const onNodeDrag = useCallback((evt: any, node: Node) => {
+		if (simRef.current) {
+			const simNode = simRef.current.nodes().find((n: any) => n.id === node.id)
+			if (simNode) {
+				simNode.fx = node.position.x + 130
+				simNode.fy = node.position.y + 42
+			}
+		}
+	}, [])
+
+	const onNodeDragStop = useCallback((evt: any, node: Node) => {
+		if (simRef.current) {
+			const simNode = simRef.current.nodes().find((n: any) => n.id === node.id)
+			if (simNode) {
+				simNode.fx = null
+				simNode.fy = null
+			}
+			simRef.current.alphaTarget(0)
+		}
+	}, [])
 
 	const graphData = useMemo(() => {
 		const nodes = initialNodes.map(n => ({ ...n }))
@@ -313,12 +358,12 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 			)
 		})
 
-		setSimulation(sim)
+		simRef.current = sim
 
 		return () => {
 			sim.stop()
 		}
-	}, [graphData, setNodes, setEdges])
+	}, [graphData, onOriginalNodesChange, onOriginalEdgesChange])
 
 	if (!loading && initialNodes.length === 0) {
 		return <div className='flex h-full w-full items-center justify-center text-slate-500'>No graph data</div>
@@ -336,6 +381,9 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 				edges={flow_edges}
 				onNodesChange={onNodesChange}
 				onEdgesChange={onEdgesChange}
+				onNodeDragStart={onNodeDragStart}
+				onNodeDrag={onNodeDrag}
+				onNodeDragStop={onNodeDragStop}
 				nodeTypes={nodeTypes}
 				edgeTypes={edgeTypes}
 				fitView
