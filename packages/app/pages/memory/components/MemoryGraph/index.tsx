@@ -94,11 +94,13 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 	const [flow_nodes, setNodes, onOriginalNodesChange] = useNodesState<Node>([])
 	const [flow_edges, setEdges, onOriginalEdgesChange] = useEdgesState<Edge>([])
 	const simRef = useRef<any>(null)
+	const draggingNodeIdRef = useRef<string | null>(null)
+
+	console.log(flow_nodes)
 
 	const onNodesChange = useCallback(
 		(changes: Array<NodeChange>) => {
-			const filtered = changes.filter(c => c.type !== 'position')
-			onOriginalNodesChange(filtered)
+			onOriginalNodesChange(changes)
 		},
 		[onOriginalNodesChange]
 	)
@@ -111,6 +113,7 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 	)
 
 	const onNodeDragStart = useCallback((evt: any, node: Node) => {
+		draggingNodeIdRef.current = node.id
 		if (simRef.current) {
 			const simNode = simRef.current.nodes().find((n: any) => n.id === node.id)
 			if (simNode) {
@@ -125,6 +128,7 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 		if (simRef.current) {
 			const simNode = simRef.current.nodes().find((n: any) => n.id === node.id)
 			if (simNode) {
+				// Important: Sync React Flow's drag position back to D3
 				simNode.fx = node.position.x + 130
 				simNode.fy = node.position.y + 42
 			}
@@ -132,6 +136,7 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 	}, [])
 
 	const onNodeDragStop = useCallback((evt: any, node: Node) => {
+		draggingNodeIdRef.current = null
 		if (simRef.current) {
 			const simNode = simRef.current.nodes().find((n: any) => n.id === node.id)
 			if (simNode) {
@@ -258,104 +263,149 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 					.strength(1)
 			)
 
-		sim.on('tick', () => {
-			setNodes(
-				sim.nodes().map((node: any) => {
-					return {
-						id: node.id,
-						// Offset by half of 260x84 approx card dimensions (avg)
-						position: { x: node.x - 130, y: node.y - 42 },
-						data: {
-							label: node.label,
-							potential: node.potential,
-							activation: node.activation,
-							clusterColor: node.clusterColor,
-							metadata: node.metadata
-						},
-						type: 'customNode'
-					}
-				})
-			)
+		const getOptimalHandles = (edge: any) => {
+			// Get actual node objects from simulation
+			const nodeA =
+				typeof edge.source === 'string'
+					? sim.nodes().find((n: any) => n.id === edge.source)
+					: edge.source
+			const nodeB =
+				typeof edge.target === 'string'
+					? sim.nodes().find((n: any) => n.id === edge.target)
+					: edge.target
 
-			const getOptimalHandles = (edge: any) => {
-				const nodeA = edge.source
-				const nodeB = edge.target
-				const W = 260
-				const H = 84
-				const handlesA = [
-					{ id: 'top', x: nodeA.x, y: nodeA.y - H / 2 },
-					{ id: 'bottom', x: nodeA.x, y: nodeA.y + H / 2 },
-					{ id: 'left', x: nodeA.x - W / 2, y: nodeA.y },
-					{ id: 'right', x: nodeA.x + W / 2, y: nodeA.y }
-				]
-				const handlesB = [
-					{ id: 'top', x: nodeB.x, y: nodeB.y - H / 2 },
-					{ id: 'bottom', x: nodeB.x, y: nodeB.y + H / 2 },
-					{ id: 'left', x: nodeB.x - W / 2, y: nodeB.y },
-					{ id: 'right', x: nodeB.x + W / 2, y: nodeB.y }
-				]
+			if (!nodeA || !nodeB) return { sourceHandle: 'right-source', targetHandle: 'left-target' }
 
-				let minDist = Infinity
-				let bestA = 'right'
-				let bestB = 'left'
+			const W = 260
+			const H = 84
+			const handlesA = [
+				{ id: 'top', x: nodeA.x, y: nodeA.y - H / 2 },
+				{ id: 'bottom', x: nodeA.x, y: nodeA.y + H / 2 },
+				{ id: 'left', x: nodeA.x - W / 2, y: nodeA.y },
+				{ id: 'right', x: nodeA.x + W / 2, y: nodeA.y }
+			]
+			const handlesB = [
+				{ id: 'top', x: nodeB.x, y: nodeB.y - H / 2 },
+				{ id: 'bottom', x: nodeB.x, y: nodeB.y + H / 2 },
+				{ id: 'left', x: nodeB.x - W / 2, y: nodeB.y },
+				{ id: 'right', x: nodeB.x + W / 2, y: nodeB.y }
+			]
 
-				const currentA = edge._prevSourceHandleId
-				const currentB = edge._prevTargetHandleId
+			let minDist = Infinity
+			let bestA = 'right'
+			let bestB = 'left'
 
-				let currentDist = Infinity
-				if (currentA && currentB) {
-					const currHandleA = handlesA.find(h => h.id === currentA)
-					const currHandleB = handlesB.find(h => h.id === currentB)
-					if (currHandleA && currHandleB) {
-						currentDist = Math.sqrt(
-							Math.pow(currHandleA.x - currHandleB.x, 2) +
-								Math.pow(currHandleA.y - currHandleB.y, 2)
-						)
-					}
+			const currentA = edge._prevSourceHandleId
+			const currentB = edge._prevTargetHandleId
+
+			let currentDist = Infinity
+			if (currentA && currentB) {
+				const currHandleA = handlesA.find(h => h.id === currentA)
+				const currHandleB = handlesB.find(h => h.id === currentB)
+				if (currHandleA && currHandleB) {
+					currentDist = Math.sqrt(
+						Math.pow(currHandleA.x - currHandleB.x, 2) +
+							Math.pow(currHandleA.y - currHandleB.y, 2)
+					)
 				}
-
-				for (const a of handlesA) {
-					for (const b of handlesB) {
-						const dist = Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2))
-						if (dist < minDist) {
-							minDist = dist
-							bestA = a.id
-							bestB = b.id
-						}
-					}
-				}
-
-				// Hysteresis buffer: only switch handles if the new distance is at least 10px shorter
-				if (currentDist !== Infinity && minDist > currentDist - 10) {
-					bestA = currentA
-					bestB = currentB
-				} else {
-					edge._prevSourceHandleId = bestA
-					edge._prevTargetHandleId = bestB
-				}
-
-				return { sourceHandle: bestA + '-source', targetHandle: bestB + '-target' }
 			}
 
-			setEdges(
-				simLinks.map((edge: any) => {
-					const handles = getOptimalHandles(edge)
-					return {
-						id: `${edge.source.id}_${edge.target.id}_${edge.type || 'rel'}`,
-						source: edge.source.id,
-						target: edge.target.id,
-						sourceHandle: handles.sourceHandle,
-						targetHandle: handles.targetHandle,
-						type: 'customEdge',
-						animated: edge.weight > 1,
-						data: {
-							type: edge.type,
-							weight: edge.weight,
-							distance: edge.distance
-						}
+			for (const a of handlesA) {
+				for (const b of handlesB) {
+					const dist = Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2))
+					if (dist < minDist) {
+						minDist = dist
+						bestA = a.id
+						bestB = b.id
 					}
-				})
-			)
+				}
+			}
+
+			if (currentDist !== Infinity && minDist > currentDist - 10) {
+				bestA = currentA
+				bestB = currentB
+			} else {
+				edge._prevSourceHandleId = bestA
+				edge._prevTargetHandleId = bestB
+			}
+
+			return { sourceHandle: bestA + '-source', targetHandle: bestB + '-target' }
+		}
+
+		// Initial seed of nodes so the tick function has nds to map over
+		const initialFlowNodes = simNodes.map((node: any) => ({
+			id: node.id,
+			position: { x: node.x - 130, y: node.y - 42 },
+			data: {
+				label: node.label,
+				potential: node.potential,
+				activation: node.activation,
+				clusterColor: node.clusterColor,
+				metadata: node.metadata
+			},
+			type: 'customNode'
+		}))
+		setNodes(initialFlowNodes)
+
+		const initialFlowEdges = simLinks.map((edge: any) => {
+			const handles = getOptimalHandles({
+				...edge,
+				source: simNodes.find(n => n.id === edge.source),
+				target: simNodes.find(n => n.id === edge.target)
+			})
+			return {
+				id: `${edge.source}_${edge.target}_${edge.type || 'rel'}`,
+				source: edge.source,
+				target: edge.target,
+				sourceHandle: handles.sourceHandle,
+				targetHandle: handles.targetHandle,
+				type: 'customEdge',
+				animated: edge.weight > 1,
+				data: {
+					type: edge.type,
+					weight: edge.weight,
+					distance: edge.distance
+				}
+			}
+		})
+		setEdges(initialFlowEdges)
+
+		sim.on('tick', () => {
+			requestAnimationFrame(() => {
+				setNodes(nds =>
+					nds.map((node: any) => {
+						if (node.id === draggingNodeIdRef.current) return node
+
+						const simNode = sim.nodes().find((n: any) => n.id === node.id)
+						if (!simNode) return node
+
+						return {
+							...node,
+							position: { x: (simNode.x || 0) - 130, y: (simNode.y || 0) - 42 }
+						}
+					})
+				)
+
+				setEdges(
+					simLinks.map((edge: any) => {
+						const handles = getOptimalHandles(edge)
+						return {
+							id: `${typeof edge.source === 'string' ? edge.source : edge.source.id}_${typeof edge.target === 'string' ? edge.target : edge.target.id}_${edge.type || 'rel'}`,
+							source: typeof edge.source === 'string' ? edge.source : edge.source.id,
+							target: typeof edge.target === 'string' ? edge.target : edge.target.id,
+							sourceHandle: handles.sourceHandle,
+							targetHandle: handles.targetHandle,
+							type: 'customEdge',
+							animated: edge.weight > 1,
+							data: {
+								type: edge.type,
+								weight: edge.weight,
+								distance: edge.distance
+							}
+						}
+					})
+				)
+			})
 		})
 
 		simRef.current = sim
@@ -390,6 +440,9 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 				minZoom={0.1}
 				maxZoom={2}
 				nodesDraggable={true}
+				panOnDrag={true}
+				selectionOnDrag={false}
+				style={{ cursor: 'default' }}
 				attributionPosition='bottom-left'
 			>
 				<Background color='var(--color-border-light)' gap={40} variant={BackgroundVariant.Lines} />
