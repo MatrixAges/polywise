@@ -1,9 +1,14 @@
-import { useEffect, useRef, useState, useMemo } from 'react'
-import ForceGraph2D from 'react-force-graph-2d'
-import { forceCollide } from 'd3-force'
+import { useEffect, useMemo, useState } from 'react'
+import { Background, Controls, MiniMap, ReactFlow, useEdgesState, useNodesState } from '@xyflow/react'
+import { forceSimulation, forceLink, forceManyBody, forceCollide } from 'd3-force'
 import { Spin } from 'antd'
+import '@xyflow/react/dist/style.css'
 
 import { memo } from '@/utils'
+import CustomNode from './CustomNode'
+import CustomEdge from './CustomEdge'
+
+import type { Node, Edge } from '@xyflow/react'
 
 interface MemoryGraphProps {
 	nodes: Array<{
@@ -24,6 +29,14 @@ interface MemoryGraphProps {
 		metadata?: Record<string, unknown> | null
 	}>
 	loading?: boolean
+}
+
+const nodeTypes = {
+	customNode: CustomNode
+}
+
+const edgeTypes = {
+	customEdge: CustomEdge
 }
 
 const colorMegaPools = [
@@ -77,28 +90,11 @@ const colorMegaPools = [
 
 const MemoryGraph = (props: MemoryGraphProps) => {
 	const { nodes: initialNodes, edges: initialEdges, loading = false } = props
-	const fgRef = useRef<any>(null)
-	const containerRef = useRef<HTMLDivElement>(null)
-	const [dimensions, setDimensions] = useState({ width: 0, height: 0 })
 
-	useEffect(() => {
-		if (!containerRef.current) return
+	const [flow_nodes, setNodes, onNodesChange] = useNodesState<Node>([])
+	const [flow_edges, setEdges, onEdgesChange] = useEdgesState<Edge>([])
 
-		// Instant load fix
-		const rect = containerRef.current.getBoundingClientRect()
-		if (rect.width > 0 && rect.height > 0) {
-			setDimensions({ width: rect.width, height: rect.height })
-		}
-
-		const observer = new ResizeObserver(entries => {
-			if (entries[0]) {
-				const { width, height } = entries[0].contentRect
-				setDimensions({ width, height })
-			}
-		})
-		observer.observe(containerRef.current)
-		return () => observer.disconnect()
-	}, [initialNodes.length]) // Trigger layout setup on node data presence
+	const [simulation, setSimulation] = useState<any>(null)
 
 	const graphData = useMemo(() => {
 		const nodes = initialNodes.map(n => ({ ...n }))
@@ -164,159 +160,119 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 	}, [initialNodes, initialEdges])
 
 	useEffect(() => {
-		if (fgRef.current && graphData.nodes.length > 0) {
-			// Increase distance for longer edges (reduced from 100 to 50)
-			fgRef.current.d3Force('link').distance((link: any) => (link.distance || 1) * 50)
-			fgRef.current.d3Force('charge').strength(-300)
+		if (graphData.nodes.length === 0) return
 
-			// Enforce absolute non-overlap (using updated sizes)
-			fgRef.current.d3Force(
+		// Prepare D3 items and apply jitter to prevent stacking
+		const simNodes = graphData.nodes.map(d => ({
+			...d,
+			x: (Math.random() - 0.5) * 500,
+			y: (Math.random() - 0.5) * 500
+		}))
+		const simLinks = graphData.links.map(d => ({
+			...d,
+			source: d.source,
+			target: d.target
+		}))
+
+		const getRadius = (n: any) => {
+			const baseSize = 24
+			if (!n || typeof n !== 'object') return baseSize
+			return Math.max((n.potential || 0) * 60, baseSize) // ?? 0
+		}
+
+		const sim = forceSimulation(simNodes as any)
+			.force('charge', forceManyBody().strength(-300)) // Push clusters apart
+			.force(
 				'collide',
 				forceCollide((node: any) => {
-					const baseSize = 24
-					return Math.max((node.potential || 1) * 60, baseSize) + 5 // Radius + 5px margin
-				})
+					// Enforce absolute non-overlap (min distance between node surfaces = 80 => +40 radius buffer)
+					return getRadius(node) + 40
+				}).iterations(3)
+			)
+			.force(
+				'link',
+				forceLink(simLinks as any)
+					.id((d: any) => d.id)
+					.distance((link: any) => {
+						const r1 = getRadius(link.source)
+						const r2 = getRadius(link.target)
+						// Centers must be specifically separated by their physical radius + 80 gap
+						return r1 + r2 + 80
+					})
 			)
 
-			fgRef.current.zoomToFit(400, 50)
+		sim.on('tick', () => {
+			setNodes(
+				sim.nodes().map((node: any) => {
+					const R = getRadius(node)
+					return {
+						id: node.id,
+						// Offset slightly so that xyflow node's top-left origin draws the center correctly
+						position: { x: node.x - R, y: node.y - R },
+						data: {
+							label: node.label,
+							potential: node.potential,
+							clusterColor: node.clusterColor
+						},
+						type: 'customNode'
+					}
+				})
+			)
+			setEdges(
+				simLinks.map((edge: any) => ({
+					id: `${edge.source.id}_${edge.target.id}_${edge.type || 'rel'}`,
+					source: edge.source.id,
+					target: edge.target.id,
+					type: 'customEdge',
+					animated: edge.weight > 1,
+					data: {
+						type: edge.type,
+						weight: edge.weight,
+						distance: edge.distance
+					}
+				}))
+			)
+		})
+
+		setSimulation(sim)
+
+		return () => {
+			sim.stop()
 		}
-	}, [graphData])
+	}, [graphData, setNodes, setEdges])
 
 	if (!loading && initialNodes.length === 0) {
 		return <div className='flex h-full w-full items-center justify-center text-slate-500'>No graph data</div>
 	}
 
 	return (
-		<div
-			ref={containerRef}
-			className='relative h-full w-full overflow-hidden rounded border border-slate-200 bg-[#f8fafc]'
-		>
+		<div className='relative h-full w-full overflow-hidden rounded border border-slate-200'>
 			{loading && (
 				<div className='absolute inset-0 z-10 flex items-center justify-center bg-white/50'>
 					<Spin />
 				</div>
 			)}
-
-			{dimensions.width > 0 && dimensions.height > 0 && graphData.nodes.length > 0 && (
-				<ForceGraph2D
-					ref={fgRef}
-					width={dimensions.width}
-					height={dimensions.height}
-					graphData={graphData}
-					enableNodeDrag={false}
-					onNodeClick={node => console.log('Clicked node', node)}
-					onLinkClick={link => console.log('Clicked link', link)}
-					nodeCanvasObject={(node: any, ctx, globalScale) => {
-						const label = node.label || ''
-						const potential = node.potential || 1
-
-						const baseSize = 24
-						const nodeR = Math.max(potential * 60, baseSize)
-
-						ctx.beginPath()
-						ctx.arc(node.x, node.y, nodeR, 0, 2 * Math.PI, false)
-
-						// Solid styling using cluster color, 50% opacity
-						ctx.save()
-						ctx.globalAlpha = 0.5
-						ctx.fillStyle = node.clusterColor
-						ctx.fill()
-						ctx.restore()
-
-						ctx.lineWidth = 2 / globalScale
-						// Border using original cluster color 100% opacity
-						ctx.strokeStyle = node.clusterColor
-						ctx.stroke()
-
-						// Node text styling (naturally scaling with canvas)
-						const fontSize = 12
-						ctx.font = `300 ${fontSize}px Sans-Serif`
-						ctx.textAlign = 'center'
-						ctx.textBaseline = 'middle'
-						ctx.fillStyle = '#334155'
-
-						const maxWidth = nodeR * 2.5
-						let line = ''
-						const lines = []
-						for (let i = 0; i < label.length; i++) {
-							const testLine = line + label[i]
-							const metrics = ctx.measureText(testLine)
-							if (metrics.width > maxWidth && line.length > 0) {
-								lines.push(line)
-								line = label[i]
-							} else {
-								line = testLine
-							}
-						}
-						lines.push(line)
-
-						const lineHeight = fontSize * 1.2
-						const startY = node.y - ((lines.length - 1) * lineHeight) / 2
-						lines.forEach((l, idx) => {
-							ctx.fillText(l, node.x, startY + idx * lineHeight)
-						})
-					}}
-					nodePointerAreaPaint={(node: any, color, ctx) => {
-						const baseSize = 24
-						const nodeR = Math.max((node.potential || 1) * 60, baseSize)
-						ctx.fillStyle = color
-						ctx.beginPath()
-						ctx.arc(node.x, node.y, nodeR, 0, 2 * Math.PI, false)
-						ctx.fill()
-					}}
-					linkColor={() => '#cbd5e1'}
-					linkWidth={1.5}
-					linkCanvasObjectMode={() => 'after'}
-					linkCanvasObject={(link: any, ctx, globalScale) => {
-						const start = link.source
-						const end = link.target
-
-						if (typeof start !== 'object' || typeof end !== 'object') return
-
-						const textPos = {
-							x: start.x + (end.x - start.x) / 2,
-							y: start.y + (end.y - start.y) / 2
-						}
-
-						const relLink = { x: end.x - start.x, y: end.y - start.y }
-
-						let textAngle = Math.atan2(relLink.y, relLink.x)
-						if (textAngle > Math.PI / 2) textAngle = -(Math.PI - textAngle)
-						if (textAngle < -Math.PI / 2) textAngle = -(Math.PI + textAngle)
-
-						const label = link.type || ''
-						if (!label) return
-
-						const maxChars = 20
-						const displayLabel =
-							label.length > maxChars ? label.substring(0, maxChars) + '...' : label
-
-						// Scale naturally with canvas
-						const fontSize = 10
-						ctx.font = `300 ${fontSize}px Sans-Serif`
-
-						ctx.save()
-						ctx.translate(textPos.x, textPos.y)
-						ctx.rotate(textAngle)
-
-						ctx.textAlign = 'center'
-						ctx.textBaseline = 'middle'
-
-						const textWidth = ctx.measureText(displayLabel).width
-						const textHeight = fontSize
-
-						// 0.6 standard black background
-						ctx.fillStyle = 'rgba(0, 0, 0, 0.6)'
-						ctx.fillRect(-textWidth / 2 - 4, -textHeight / 2 - 2, textWidth + 8, textHeight + 4)
-
-						// Text right on the edge line
-						ctx.fillStyle = '#f8fafc'
-						ctx.fillText(displayLabel, 0, 0)
-
-						ctx.restore()
-					}}
+			<ReactFlow
+				nodes={flow_nodes}
+				edges={flow_edges}
+				onNodesChange={onNodesChange}
+				onEdgesChange={onEdgesChange}
+				nodeTypes={nodeTypes}
+				edgeTypes={edgeTypes}
+				fitView
+				minZoom={0.1}
+				maxZoom={4}
+				nodesDraggable={false}
+				attributionPosition='bottom-left'
+			>
+				<Background color='#aaa' gap={16} size={1} />
+				<Controls showInteractive={false} />
+				<MiniMap
+					nodeStrokeColor={() => '#555'}
+					nodeColor={() => '#fff'}
+					maskColor='rgba(240, 240, 240, 0.6)'
 				/>
-			)}
+			</ReactFlow>
 		</div>
 	)
 }
