@@ -17,7 +17,6 @@ const CustomEdge = ({
 	sourcePosition,
 	targetPosition,
 	style = {},
-	markerEnd,
 	data,
 	selected
 }: EdgeProps) => {

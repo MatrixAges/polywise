@@ -71,7 +71,7 @@ const CustomNode = ({ data, selected }: NodeProps) => {
 				type='target'
 				position={Position.Top}
 				id='top-target'
-				className='h-[6px] w-[6px] rounded-full border border-black bg-black'
+				className='h-[6px] w-[6px] rounded-full border border-black opacity-0'
 			/>
 			<Handle
 				type='source'
@@ -84,7 +84,7 @@ const CustomNode = ({ data, selected }: NodeProps) => {
 				type='target'
 				position={Position.Bottom}
 				id='bottom-target'
-				className='h-[6px] w-[6px] rounded-full border border-black bg-black'
+				className='h-[6px] w-[6px] rounded-full border border-black opacity-0'
 			/>
 			<Handle
 				type='source'
@@ -97,7 +97,7 @@ const CustomNode = ({ data, selected }: NodeProps) => {
 				type='target'
 				position={Position.Left}
 				id='left-target'
-				className='h-[6px] w-[6px] rounded-full border border-black bg-black'
+				className='h-[6px] w-[6px] rounded-full border border-black opacity-0'
 			/>
 			<Handle
 				type='source'
@@ -110,7 +110,7 @@ const CustomNode = ({ data, selected }: NodeProps) => {
 				type='target'
 				position={Position.Right}
 				id='right-target'
-				className='h-[6px] w-[6px] rounded-full border border-black bg-black'
+				className='h-[6px] w-[6px] rounded-full border border-black opacity-0'
 			/>
 			<Handle
 				type='source'

@@ -101,10 +101,6 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 
 	const [flow_nodes, setNodes, onNodesChange] = useNodesState<Node>([])
 	const [flow_edges, setEdges, onEdgesChange] = useEdgesState<Edge>([])
-
-	console.log(flow_nodes)
-	console.log(flow_edges)
-
 	const [simulation, setSimulation] = useState<any>(null)
 
 	const graphData = useMemo(() => {
