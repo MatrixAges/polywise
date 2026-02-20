@@ -649,20 +649,29 @@ export default class Polywise {
 			max_depth
 		)
 
+		const all_nodes = [...matched_nodes]
+		const matched_ids = new Set(matched_nodes.map(n => n.id))
+
+		for (const node of related_nodes) {
+			if (!matched_ids.has(node.id)) {
+				all_nodes.push(node)
+				matched_ids.add(node.id)
+			}
+		}
+
 		if (stimulate_intensity > 0) {
-			const all_nodes = [...matched_nodes, ...related_nodes]
 			const node_ids = all_nodes.map(n => n.id)
 
 			await this.stimulateNodes(node_ids, stimulate_intensity)
 			await this.strengthenRelatedEdges({ matched_nodes, related_nodes })
 		}
 
-		const contexts = await this.getNodeContexts([...matched_nodes, ...related_nodes].map(n => n.id))
+		const contexts = await this.getNodeContexts(all_nodes.map(n => n.id))
 
 		return {
-			nodes: [...matched_nodes, ...related_nodes],
+			nodes: all_nodes,
 			edges: [],
-			stimulated_nodes: [...matched_nodes, ...related_nodes].map(n => n.id),
+			stimulated_nodes: all_nodes.map(n => n.id),
 			related_contexts: contexts
 		}
 	}
