@@ -8,7 +8,7 @@ import {
 	useNodesState,
 	BackgroundVariant
 } from '@xyflow/react'
-import { forceSimulation, forceLink, forceManyBody, forceCollide, forceCenter } from 'd3-force'
+import { forceSimulation, forceLink, forceManyBody, forceCollide, forceX, forceY } from 'd3-force'
 import { Spin } from 'antd'
 import '@xyflow/react/dist/style.css'
 
@@ -163,9 +163,10 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 
 		nodes.forEach(n => {
 			;(n as any).clusterColor = nodeColorMap.get(n.id) || '#cbd5e1'
+			;(n as any).clusterIdx = clusters.findIndex(c => c.includes(n.id))
 		})
 
-		return { nodes, links }
+		return { nodes, links, clusters }
 	}, [initialNodes, initialEdges])
 
 	useEffect(() => {
@@ -187,20 +188,36 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 		}
 
 		const sim = forceSimulation(simNodes as any)
-			.force('center', forceCenter(0, 0).strength(0.01))
-			.force('charge', forceManyBody().strength(-1000)) // Push large cards apart strongly
+			.force('charge', forceManyBody().strength(-1000)) // Repel everything strongly
 			.force(
 				'collide',
 				forceCollide((node: any) => {
-					return 160 // Base 150 + 10 padding margin for cards
+					return 160 // Buffer for 260x84 cards
 				}).iterations(5)
+			)
+			.force(
+				'cluster_x',
+				forceX((node: any) => {
+					// Isolate clusters onto distinct focal coordinates around a circle
+					if (graphData.clusters.length <= 1) return 0
+					const angle = (node.clusterIdx / graphData.clusters.length) * 2 * Math.PI
+					return Math.cos(angle) * 700
+				}).strength(0.08)
+			)
+			.force(
+				'cluster_y',
+				forceY((node: any) => {
+					if (graphData.clusters.length <= 1) return 0
+					const angle = (node.clusterIdx / graphData.clusters.length) * 2 * Math.PI
+					return Math.sin(angle) * 700
+				}).strength(0.08)
 			)
 			.force(
 				'link',
 				forceLink(simLinks as any)
 					.id((d: any) => d.id)
 					.distance((link: any) => {
-						return 350 // High distance guarantees orthogonal smoothstep routes cleanly
+						return 350
 					})
 					.strength(1)
 			)

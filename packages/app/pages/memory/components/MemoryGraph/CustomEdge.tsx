@@ -39,20 +39,11 @@ const CustomEdge = ({
 		displayLabel = displayLabel.substring(0, maxChars) + '...'
 	}
 
-	// Pseudo-random deterministic offset to prevent identical route label overlaps
+	// Pseudo-random deterministic offset
 	const hash = (id || '').split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
 
-	// Roughly determine if the overall path spans more horizontally or vertically
-	const isHorizontal = Math.abs(targetX - sourceX) > Math.abs(targetY - sourceY)
-
-	// Slide label significantly along the longest axis to separate overlapping midpoints
-	// Guarantees sliding away from the dead center by at least 40px, up to 90px
-	const direction = hash % 2 === 0 ? 1 : -1
-	const primaryOffset = direction * (((hash * 47) % 50) + 40)
-	const secondaryOffset = ((hash * 13) % 20) - 10
-
-	const xOffset = isHorizontal ? primaryOffset : secondaryOffset
-	const yOffset = !isHorizontal ? primaryOffset : secondaryOffset
+	const xOffset = ((hash * 13) % 20) - 10
+	const yOffset = ((hash * 17) % 20) - 10
 
 	return (
 		<>
