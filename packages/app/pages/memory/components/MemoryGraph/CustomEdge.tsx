@@ -49,7 +49,7 @@ const CustomEdge = ({
 				path={edgePath}
 				style={{
 					...style,
-					strokeWidth: selected ? 1.5 : 1,
+					strokeWidth: (selected ? 2 : 1) + ((data as any)?.weight || 0) * 2,
 					stroke: selected ? '#334155' : '#1e293b'
 				}}
 				id={id}

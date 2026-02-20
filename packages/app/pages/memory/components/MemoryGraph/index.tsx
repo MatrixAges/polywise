@@ -1,13 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import {
-	Background,
-	Controls,
-	MiniMap,
-	ReactFlow,
-	useEdgesState,
-	useNodesState,
-	BackgroundVariant
-} from '@xyflow/react'
+import { Background, ReactFlow, useEdgesState, useNodesState, BackgroundVariant } from '@xyflow/react'
 import { forceSimulation, forceLink, forceManyBody, forceCollide, forceCenter, forceX, forceY } from 'd3-force'
 import { Spin } from 'antd'
 import '@xyflow/react/dist/style.css'
@@ -102,6 +94,8 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 	const [flow_nodes, setNodes, onNodesChange] = useNodesState<Node>([])
 	const [flow_edges, setEdges, onEdgesChange] = useEdgesState<Edge>([])
 	const [simulation, setSimulation] = useState<any>(null)
+
+	console.log(flow_edges)
 
 	const graphData = useMemo(() => {
 		const nodes = initialNodes.map(n => ({ ...n }))
@@ -214,7 +208,7 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 				forceLink(simLinks as any)
 					.id((d: any) => d.id)
 					.distance((link: any) => {
-						return 200 // Increased link distance by 100
+						return 150 + (link.distance || 0) * 150
 					})
 					.strength(1)
 			)
