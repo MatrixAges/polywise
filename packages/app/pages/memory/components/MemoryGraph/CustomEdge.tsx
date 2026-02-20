@@ -1,5 +1,5 @@
 import { memo } from 'react'
-import { BaseEdge, EdgeLabelRenderer, getStraightPath } from '@xyflow/react'
+import { BaseEdge, EdgeLabelRenderer, getSmoothStepPath } from '@xyflow/react'
 import type { EdgeProps } from '@xyflow/react'
 
 export type CustomEdgeData = {
@@ -23,11 +23,14 @@ const CustomEdge = ({
 }: EdgeProps) => {
 	const { type } = (data || {}) as CustomEdgeData
 
-	const [edgePath, labelX, labelY] = getStraightPath({
+	const [edgePath, labelX, labelY] = getSmoothStepPath({
 		sourceX,
 		sourceY,
+		sourcePosition,
 		targetX,
-		targetY
+		targetY,
+		targetPosition,
+		borderRadius: 16
 	})
 
 	const maxChars = 20
@@ -36,20 +39,14 @@ const CustomEdge = ({
 		displayLabel = displayLabel.substring(0, maxChars) + '...'
 	}
 
-	// Calculate angle aligning parallel with straight line between anchors
-	let textAngle = Math.atan2(targetY - sourceY, targetX - sourceX)
-	if (textAngle > Math.PI / 2) textAngle = -(Math.PI - textAngle)
-	if (textAngle < -Math.PI / 2) textAngle = -(Math.PI + textAngle)
-	const angleDeg = textAngle * (180 / Math.PI)
-
 	return (
 		<>
 			<BaseEdge
 				path={edgePath}
 				style={{
 					...style,
-					strokeWidth: selected ? 2 : 1.5,
-					stroke: selected ? '#64748b' : '#cbd5e1'
+					strokeWidth: selected ? 1.5 : 1,
+					stroke: selected ? '#334155' : '#1e293b'
 				}}
 				id={id}
 			/>
@@ -58,12 +55,12 @@ const CustomEdge = ({
 					<div
 						style={{
 							position: 'absolute',
-							transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px) rotate(${angleDeg}deg)`,
+							transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
 							pointerEvents: 'all'
 						}}
-						className='nodrag nopan rounded bg-black/60 px-1 py-[2px] shadow-sm'
+						className='nodrag nopan rounded-full border border-slate-300 bg-white px-3 py-[2px] shadow-sm'
 					>
-						<span className='text-[10px] font-light whitespace-nowrap text-slate-100'>
+						<span className='text-[11px] font-medium whitespace-nowrap text-slate-700'>
 							{displayLabel}
 						</span>
 					</div>

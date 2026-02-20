@@ -1,5 +1,13 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Background, Controls, MiniMap, ReactFlow, useEdgesState, useNodesState } from '@xyflow/react'
+import {
+	Background,
+	Controls,
+	MiniMap,
+	ReactFlow,
+	useEdgesState,
+	useNodesState,
+	BackgroundVariant
+} from '@xyflow/react'
 import { forceSimulation, forceLink, forceManyBody, forceCollide, forceCenter } from 'd3-force'
 import { Spin } from 'antd'
 import '@xyflow/react/dist/style.css'
@@ -94,6 +102,9 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 	const [flow_nodes, setNodes, onNodesChange] = useNodesState<Node>([])
 	const [flow_edges, setEdges, onEdgesChange] = useEdgesState<Edge>([])
 
+	console.log(flow_nodes)
+	console.log(flow_edges)
+
 	const [simulation, setSimulation] = useState<any>(null)
 
 	const graphData = useMemo(() => {
@@ -172,44 +183,41 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 		}))
 
 		const getRadius = (n: any) => {
-			const baseSize = 24
-			if (!n || typeof n !== 'object') return baseSize
-			return Math.max((n.potential || 0) * 60, baseSize)
+			return 150 // Constant simulated bounding radius for large (260x140) cards to avoid overlap
 		}
 
 		const sim = forceSimulation(simNodes as any)
 			.force('center', forceCenter(0, 0).strength(0.01))
-			.force('charge', forceManyBody().strength(-100)) // 1/3 of the previous pushing distance
+			.force('charge', forceManyBody().strength(-1000)) // Push large cards apart strongly
 			.force(
 				'collide',
 				forceCollide((node: any) => {
-					// Use 5px buffer, but enforce highly rigorous overlap checking through iterations
-					return getRadius(node) + 5
-				}).iterations(10)
+					return 160 // Base 150 + 10 padding margin for cards
+				}).iterations(5)
 			)
 			.force(
 				'link',
 				forceLink(simLinks as any)
 					.id((d: any) => d.id)
 					.distance((link: any) => {
-						const r1 = getRadius(link.source)
-						const r2 = getRadius(link.target)
-						return r1 + r2 + 60
+						return 350 // High distance guarantees orthogonal smoothstep routes cleanly
 					})
-					.strength(1) // rigidly enforce the distance so cluster internal structures resolve perfectly
+					.strength(1)
 			)
 
 		sim.on('tick', () => {
 			setNodes(
 				sim.nodes().map((node: any) => {
-					const R = getRadius(node)
 					return {
 						id: node.id,
-						position: { x: node.x - R, y: node.y - R },
+						// Offset by half of 260x140 card dimensions
+						position: { x: node.x - 130, y: node.y - 70 },
 						data: {
 							label: node.label,
 							potential: node.potential,
-							clusterColor: node.clusterColor
+							activation: node.activation,
+							clusterColor: node.clusterColor,
+							metadata: node.metadata
 						},
 						type: 'customNode'
 					}
@@ -258,11 +266,12 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 				edgeTypes={edgeTypes}
 				fitView
 				minZoom={0.1}
-				maxZoom={4}
-				nodesDraggable={false}
+				maxZoom={2}
+				nodesDraggable={true} // Allow dragging diagram nodes
 				attributionPosition='bottom-left'
 			>
-				<Background color='#aaa' gap={16} size={1} />
+				{/* Architecture style faint graph paper lines */}
+				<Background color='#cbd5e1' gap={32} size={1} variant={BackgroundVariant.Lines} />
 			</ReactFlow>
 		</div>
 	)
