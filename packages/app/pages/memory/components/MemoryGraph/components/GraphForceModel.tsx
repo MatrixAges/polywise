@@ -1,6 +1,6 @@
 import { useMemo, useRef } from 'react'
-import { useFrame } from '@react-three/fiber'
-import { Line, Html } from '@react-three/drei'
+import { useFrame, useThree } from '@react-three/fiber'
+import { Line, Text, Billboard, Environment } from '@react-three/drei'
 // @ts-ignore
 import * as THREE from 'three'
 // @ts-ignore
@@ -25,14 +25,19 @@ interface GraphForceModelProps {
 	onSelect?: (info: string) => void
 }
 
-const colorCold = new THREE.Color('#3b82f6')
-const colorHot = new THREE.Color('#ef4444')
-const tempColor = new THREE.Color()
+const nodeMaterial = new THREE.MeshStandardMaterial({
+	color: 'white',
+	roughness: 0.1,
+	metalness: 0.1,
+	envMapIntensity: 1
+})
 
 const GraphForceModel = ({ nodes: initialNodes, edges: initialEdges, onSelect }: GraphForceModelProps) => {
-	const nodesRef = useRef<Array<THREE.Mesh | null>>([])
+	const nodesRef = useRef<Array<THREE.Group | null>>([])
 	const linksRef = useRef<Array<any>>([])
-	const edgeLabelsRef = useRef<Array<THREE.Group | null>>([])
+	const edgeTextRefs = useRef<Array<THREE.Mesh | null>>([])
+
+	const { camera } = useThree()
 
 	const simulation = useMemo(() => {
 		// Deep copy to prevent d3 from mutating the original props
@@ -80,20 +85,44 @@ const GraphForceModel = ({ nodes: initialNodes, edges: initialEdges, onSelect }:
 					link.target?.z || 0
 				])
 			}
-			if (edgeLabelsRef.current[i]) {
-				// Calculate midpoint for the label
-				const midX = ((link.source?.x || 0) + (link.target?.x || 0)) / 2
-				const midY = ((link.source?.y || 0) + (link.target?.y || 0)) / 2
-				const midZ = ((link.source?.z || 0) + (link.target?.z || 0)) / 2
-				edgeLabelsRef.current[i]!.position.set(midX, midY, midZ)
+			if (edgeTextRefs.current[i]) {
+				const vSource = new THREE.Vector3(link.source?.x || 0, link.source?.y || 0, link.source?.z || 0)
+				const vTarget = new THREE.Vector3(link.target?.x || 0, link.target?.y || 0, link.target?.z || 0)
+
+				const mid = vSource.clone().lerp(vTarget, 0.5)
+				edgeTextRefs.current[i]!.position.copy(mid)
+
+				edgeTextRefs.current[i]!.quaternion.copy(camera.quaternion)
+
+				const p1 = vSource.clone().project(camera)
+				const p2 = vTarget.clone().project(camera)
+				// @ts-ignore
+				const aspect = camera.aspect || 1
+				const dx = p2.x - p1.x
+				const dy = (p2.y - p1.y) / aspect
+
+				if (dx === 0 && dy === 0) return
+
+				let angle = Math.atan2(dy, dx)
+				if (angle > Math.PI / 2) angle -= Math.PI
+				else if (angle < -Math.PI / 2) angle += Math.PI
+
+				edgeTextRefs.current[i]!.rotateZ(angle)
+				edgeTextRefs.current[i]!.translateZ(2)
 			}
 		})
 	})
 
 	return (
 		<group>
+			<Environment preset='city' />
 			{simulation.links.map((link: any, index: number) => {
-				const linkLabel = `${link.type || 'edge'} | w:${link.weight.toFixed(2)} d:${link.distance.toFixed(2)}`
+				const expectedDist = (link.distance || 1) * 50
+				const maxChars = Math.max(4, Math.floor((expectedDist * 0.6) / 1.5))
+				let truncatedLabel = link.type || 'edge'
+				if (truncatedLabel.length > maxChars) {
+					truncatedLabel = truncatedLabel.substring(0, maxChars) + '...'
+				}
 
 				return (
 					<group key={`link-group-${index}`}>
@@ -104,13 +133,28 @@ const GraphForceModel = ({ nodes: initialNodes, edges: initialEdges, onSelect }:
 								[0, 0, 0],
 								[0, 0, 0]
 							]}
-							color='#aaa'
-							opacity={0.4}
+							color='#94a3b8'
+							opacity={0.5}
 							transparent
 							lineWidth={Math.min(Math.max(link.weight * 2, 2), 6)}
+						/>
+						<Text
+							ref={el => {
+								edgeTextRefs.current[index] = el as any
+							}}
+							fontSize={2.5}
+							color='#64748b'
+							fontWeight={100}
+							anchorY='bottom'
+							anchorX='center'
+							outlineWidth={0.1}
+							outlineColor='#ffffff'
 							onClick={e => {
 								e.stopPropagation()
-								if (onSelect) onSelect(`Edge: ${linkLabel}`)
+								if (onSelect)
+									onSelect(
+										`Edge: ${link.type || 'edge'} | w:${link.weight.toFixed(2)} d:${link.distance.toFixed(2)}`
+									)
 							}}
 							onPointerOver={e => {
 								e.stopPropagation()
@@ -120,34 +164,20 @@ const GraphForceModel = ({ nodes: initialNodes, edges: initialEdges, onSelect }:
 								e.stopPropagation()
 								document.body.style.cursor = 'auto'
 							}}
-						/>
-						<group ref={el => (edgeLabelsRef.current[index] = el)}>
-							<Html center className='pointer-events-none'>
-								<div
-									className='pointer-events-auto cursor-pointer rounded border border-slate-200 bg-white/80 px-1.5 py-0.5 text-[10px] text-slate-500 shadow-sm backdrop-blur-sm transition-colors hover:bg-slate-100'
-									onClick={e => {
-										e.stopPropagation()
-										if (onSelect) onSelect(`Edge: ${linkLabel}`)
-									}}
-								>
-									{link.type || 'edge'}
-								</div>
-							</Html>
-						</group>
+						>
+							{truncatedLabel}
+						</Text>
 					</group>
 				)
 			})}
 
 			{simulation.nodes.map((node: any, index: number) => {
-				const nodeColor = tempColor.copy(colorCold).lerp(colorHot, node.activation)
-				// Size based on potential or fixed size. Multiply to scale appropriately in 3D
-				const nodeSize = Math.max((node.potential || 1) * 3, 2)
+				const nodeSize = Math.max((node.potential || 0) * 12 + 8, 8)
 
 				return (
-					<mesh
+					<group
 						key={node.id}
-						ref={el => (nodesRef.current[index] = el)}
-						scale={nodeSize}
+						ref={el => (nodesRef.current[index] = el as any)}
 						onClick={e => {
 							e.stopPropagation()
 							if (onSelect)
@@ -164,14 +194,23 @@ const GraphForceModel = ({ nodes: initialNodes, edges: initialEdges, onSelect }:
 							document.body.style.cursor = 'auto'
 						}}
 					>
-						<sphereGeometry args={[1, 16, 16]} />
-						<meshStandardMaterial color={nodeColor} roughness={0.2} metalness={0.1} />
-						<Html center className='pointer-events-none mt-4'>
-							<div className='rounded bg-black/60 px-2 py-1 text-xs font-medium whitespace-nowrap text-white shadow-lg backdrop-blur-md'>
+						<mesh scale={nodeSize} material={nodeMaterial}>
+							<sphereGeometry args={[1, 32, 32]} />
+						</mesh>
+						<Billboard position={[0, -nodeSize - 2, 0]}>
+							<Text
+								fontSize={4}
+								color='#334155'
+								fontWeight={100}
+								anchorY='top'
+								anchorX='center'
+								outlineWidth={0.15}
+								outlineColor='#ffffff'
+							>
 								{node.label}
-							</div>
-						</Html>
-					</mesh>
+							</Text>
+						</Billboard>
+					</group>
 				)
 			})}
 		</group>
