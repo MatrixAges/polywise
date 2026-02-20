@@ -100,7 +100,6 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 		const nodes = initialNodes.map(n => ({ ...n }))
 		const links = initialEdges.map(e => ({ ...e, source: e.source_id, target: e.target_id }))
 
-		// Cluster detection BFS
 		const adj = new Map<string, string[]>()
 		nodes.forEach(n => adj.set(n.id, []))
 		links.forEach(l => {
@@ -138,7 +137,6 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 			const poolIndex = idx % colorMegaPools.length
 			const pool = [...colorMegaPools[poolIndex]]
 
-			// Simple shuffle to add uniqueness per render
 			for (let i = pool.length - 1; i > 0; i--) {
 				const j = Math.floor(Math.random() * (i + 1))
 				const temp = pool[i]
@@ -162,7 +160,6 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 	useEffect(() => {
 		if (graphData.nodes.length === 0) return
 
-		// Prepare D3 items and apply jitter to prevent stacking
 		const simNodes = graphData.nodes.map(d => ({
 			...d,
 			x: (Math.random() - 0.5) * 500,
@@ -177,15 +174,14 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 		const getRadius = (n: any) => {
 			const baseSize = 24
 			if (!n || typeof n !== 'object') return baseSize
-			return Math.max((n.potential || 0) * 60, baseSize) // ?? 0
+			return Math.max((n.potential || 0) * 60, baseSize)
 		}
 
 		const sim = forceSimulation(simNodes as any)
-			.force('charge', forceManyBody().strength(-300)) // Push clusters apart
+			.force('charge', forceManyBody().strength(-300))
 			.force(
 				'collide',
 				forceCollide((node: any) => {
-					// Enforce absolute non-overlap (min distance between node surfaces = 80 => +40 radius buffer)
 					return getRadius(node) + 40
 				}).iterations(3)
 			)
@@ -196,7 +192,6 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 					.distance((link: any) => {
 						const r1 = getRadius(link.source)
 						const r2 = getRadius(link.target)
-						// Centers must be specifically separated by their physical radius + 80 gap
 						return r1 + r2 + 80
 					})
 			)
@@ -207,7 +202,6 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 					const R = getRadius(node)
 					return {
 						id: node.id,
-						// Offset slightly so that xyflow node's top-left origin draws the center correctly
 						position: { x: node.x - R, y: node.y - R },
 						data: {
 							label: node.label,
@@ -266,12 +260,6 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 				attributionPosition='bottom-left'
 			>
 				<Background color='#aaa' gap={16} size={1} />
-				<Controls showInteractive={false} />
-				<MiniMap
-					nodeStrokeColor={() => '#555'}
-					nodeColor={() => '#fff'}
-					maskColor='rgba(240, 240, 240, 0.6)'
-				/>
 			</ReactFlow>
 		</div>
 	)
