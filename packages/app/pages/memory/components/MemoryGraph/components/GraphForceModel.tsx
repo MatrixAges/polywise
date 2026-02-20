@@ -39,22 +39,21 @@ const GraphForceModel = ({ nodes: initialNodes, edges: initialEdges, onSelect }:
 			...d,
 			x: (Math.random() - 0.5) * 100,
 			y: (Math.random() - 0.5) * 100,
-			z: (Math.random() - 0.5) * 100
+			z: (Math.random() - 0.5) * 100,
+			vx: 0,
+			vy: 0,
+			vz: 0
 		}))
 		const links = initialEdges.map(d => ({ ...d, source: d.source_id, target: d.target_id }))
 
-		const sim = forceSimulation(nodes)
-			.numDimensions(3)
-			.force('charge', forceManyBody().strength(-100))
+		const sim = forceSimulation(nodes, 3)
+			.force('charge', forceManyBody().strength(-200))
 			.force('center', forceCenter(0, 0, 0))
-			.force('x', forceX())
-			.force('y', forceY())
-			.force('z', forceZ())
 			.force(
 				'link',
 				forceLink(links)
 					.id((d: any) => d.id)
-					.distance((link: any) => link.distance || 30)
+					.distance((link: any) => (link.distance || 1) * 50)
 			)
 
 		return { sim, nodes, links }
