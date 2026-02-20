@@ -15,7 +15,7 @@ import {
 	POOLING_MEAN
 } from './consts'
 import { catchFinally } from './decorators'
-import { generateModelHash, getTriple, processText, verifyModel } from './utils'
+import { generateModelHash, getTriple, processText, splitSentence, verifyModel } from './utils'
 
 import type {
 	EmbeddingConfig,
@@ -124,51 +124,78 @@ export default class Pipeline {
 		}
 	}
 
-	async extractTriples(text: string): Promise<Array<Triple>> {
-		const result = await this.rebel_queue.add<Array<Triple>>(async () => {
-			if (this.rebel_config.type === 'custom') {
-				const triples = await this.rebel_config.fn(text)
+	async extractTriples(text: string) {
+		if (!text.trim()) return []
 
-				return triples.map(t => ({
-					subject: String(t.subject).trim(),
-					predicate: String(t.predicate).trim(),
-					object: String(t.object).trim(),
-					learning_rate: t.learning_rate ?? 1.0,
-					decay_resistance: t.decay_resistance ?? 1.0,
-					metadata: t.metadata || {}
-				}))
-			}
+		const sentences = await splitSentence([text])
+		const all_triples: Array<Triple> = []
 
-			const generator = await this.loadRebelModel()
-			const prompt = formatTriple(text)
+		for (const sentence of sentences) {
+			if (sentence.length < 5) continue
 
-			const output = await generator(prompt, {
-				max_new_tokens: 30,
-				do_sample: false,
-				return_full_text: false,
-				stop_sequences: ['<|im_end|>', '<think>', '</think>', '\n', '\n\n']
+			const result = await this.rebel_queue.add<Array<Triple>>(async () => {
+				if (this.rebel_config.type === 'custom') {
+					const triples = await this.rebel_config.fn(sentence)
+
+					return triples.map(t => ({
+						subject: String(t.subject).trim(),
+						predicate: String(t.predicate).trim(),
+						object: String(t.object).trim(),
+						learning_rate: t.learning_rate ?? 1.0,
+						decay_resistance: t.decay_resistance ?? 1.0,
+						metadata: t.metadata || {}
+					}))
+				}
+
+				const generator = await this.loadRebelModel()
+				const prompt = formatTriple(sentence)
+
+				const output = await generator(prompt, {
+					max_new_tokens: 36,
+					do_sample: false,
+					return_full_text: false,
+					stop_sequences: ['<|im_end|>', '<think>', '</think>', '\n', '\n\n', '}']
+				})
+
+				const generated_text = output[0]?.generated_text ? `{"subject":${output[0].generated_text}` : ''
+				const triple = getTriple(generated_text)
+
+				console.log('---------')
+				console.log(triple)
+
+				if (!triple) {
+					return []
+				}
+
+				return [
+					{
+						subject: String(triple.subject).trim(),
+						predicate: String(triple.predicate).trim(),
+						object: String(triple.object).trim(),
+						learning_rate: 1.0,
+						decay_resistance: 1.0,
+						metadata: {}
+					}
+				]
 			})
 
-			const generated_text = output[0]?.generated_text ? `{"subject":${output[0].generated_text}` : ''
-			const triple = getTriple(generated_text)
-
-			if (!triple) {
-				return []
+			if (result && result.length > 0) {
+				all_triples.push(...result)
 			}
+		}
 
-			return [
-				{
-					subject: String(triple.subject).trim(),
-					predicate: String(triple.predicate).trim(),
-					object: String(triple.object).trim(),
-					learning_rate: 1.0,
-					decay_resistance: 1.0,
-					metadata: {}
-				}
-			]
-		})
+		const unique_triples: Array<Triple> = []
+		const seen = new Set<string>()
 
-		return result ?? []
+		for (const t of all_triples) {
+			const key = `${t.subject}|${t.predicate}|${t.object}`.toLowerCase()
+			if (!seen.has(key)) {
+				unique_triples.push(t)
+				seen.add(key)
+			}
+		}
+
+		return unique_triples
 	}
 
 	async embed(text: string) {
