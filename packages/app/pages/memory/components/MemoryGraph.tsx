@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import type { CSSProperties } from 'react'
 import { Background, Controls, MarkerType, MiniMap, ReactFlow, useEdgesState, useNodesState } from '@xyflow/react'
 import { Spin } from 'antd'
 import '@xyflow/react/dist/style.css'
@@ -48,8 +49,8 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 					padding: '10px',
 					fontSize: '12px',
 					maxWidth: '220px',
-					wordBreak: 'break-word'
-				}
+					overflowWrap: 'break-word'
+				} as CSSProperties
 			})),
 		[nodes]
 	)
