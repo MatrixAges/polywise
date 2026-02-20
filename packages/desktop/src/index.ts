@@ -3,7 +3,6 @@ import '@desktop/utils/entry'
 
 import { app, BrowserWindow, ipcMain, WebContentsView } from 'electron'
 import { createIPCHandler } from 'erpc/main'
-import { Polywise } from 'polywise'
 
 import config from '../config'
 import { Main, Menu, Tray } from './app'
@@ -21,26 +20,33 @@ class App {
 	private window: BrowserWindow | null
 	private loading_view: WebContentsView | null
 	private tray: TrayType | null
-	private poly: Polywise
 	private memory_data_dir: string
 
 	constructor() {
 		this.window = null
 		this.loading_view = null
 		this.tray = null
-		this.poly = new Polywise()
 		this.memory_data_dir = getAppDataPath('/memory')
 	}
 
 	async init() {
-		await this.poly.init({ data_dir: this.memory_data_dir })
-
 		this.register()
 	}
 
 	register() {
 		app.whenReady().then(async () => {
 			registerProtocol()
+
+			console.log('[memory-bootstrap] init_start')
+
+			try {
+				await saveWithUtilityProcess.init(this.memory_data_dir)
+				console.log('[memory-bootstrap] init_done')
+			} catch (error) {
+				const error_message = error instanceof Error ? error.message : String(error)
+
+				console.log('[memory-bootstrap] init_error', { error_message })
+			}
 
 			this.window = new Main()
 			this.loading_view = new WebContentsView()
@@ -66,13 +72,37 @@ class App {
 				createContext: async () => ({
 					win: this.window!,
 					tray: this.tray!,
-					poly: this.poly,
-					saveMemory: async input => {
-						return await saveWithUtilityProcess({
-							input,
-							data_dir: this.memory_data_dir,
-							fallback: next_input => this.poly.save(next_input)
-						})
+					memory: {
+						save: async input => {
+							return await saveWithUtilityProcess.save(input, this.memory_data_dir)
+						},
+						query: async input => {
+							return await saveWithUtilityProcess.query(input, this.memory_data_dir)
+						},
+						update: async input => {
+							return await saveWithUtilityProcess.update(input, this.memory_data_dir)
+						},
+						forget: async input => {
+							return await saveWithUtilityProcess.forget(input, this.memory_data_dir)
+						},
+						snapshot: async input => {
+							return await saveWithUtilityProcess.snapshot(input, this.memory_data_dir)
+						},
+						getNodes: async () => {
+							return await saveWithUtilityProcess.getNodes(this.memory_data_dir)
+						},
+						getNodesByIdol: async input => {
+							return await saveWithUtilityProcess.getNodesByIdol(
+								input,
+								this.memory_data_dir
+							)
+						},
+						getEdgesByIdol: async input => {
+							return await saveWithUtilityProcess.getEdgesByIdol(
+								input,
+								this.memory_data_dir
+							)
+						}
 					}
 				}),
 				router: routers,
@@ -83,8 +113,6 @@ class App {
 		app.on('before-quit', async () => {
 			this.tray?.destroy()
 			this.window?.destroy()
-
-			await this.poly.off()
 
 			this.off()
 		})

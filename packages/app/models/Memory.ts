@@ -1,5 +1,4 @@
 import { makeAutoObservable, runInAction, toJS } from 'mobx'
-import { local } from 'stk/storage'
 import { injectable } from 'tsyringe'
 import { v7 as uuid } from 'uuid'
 
@@ -34,6 +33,7 @@ export interface ITask {
 export default class MemoryModel {
 	tasks = [] as Array<ITask>
 	is_processing = false
+	task_timeout_ms = 600000
 
 	constructor(public util: Util) {
 		makeAutoObservable(this, { util: false }, { autoBind: true })
@@ -58,30 +58,46 @@ export default class MemoryModel {
 			task.status = 'processing'
 		})
 
+		this.writeLog('queue_task_start', { task_id: task.id, task_type: task.type })
+
 		try {
 			const task_args = this.toSerializableTaskArgs(task.args)
 
 			if (task.type === 'save') {
-				await ipc.memory.save.mutate(
-					task_args as {
-						content: string
-						idol_id?: string
-						root_ids?: Array<string>
-						metrics_ids?: Array<string>
-						metadata?: Record<string, unknown>
-					}
+				this.writeLog('queue_task_send_save', { task_id: task.id })
+
+				await this.withTaskTimeout(
+					ipc.memory.save.mutate(
+						task_args as {
+							content: string
+							idol_id?: string
+							root_ids?: Array<string>
+							metrics_ids?: Array<string>
+							metadata?: Record<string, unknown>
+						}
+					),
+					'save'
 				)
+
+				this.writeLog('queue_task_done_save', { task_id: task.id })
 			} else if (task.type === 'update') {
-				await ipc.memory.update.mutate(
-					task_args as {
-						memory_id: string
-						content: string
-						idol_id?: string
-						root_ids?: Array<string>
-						metrics_ids?: Array<string>
-						metadata?: Record<string, unknown>
-					}
+				this.writeLog('queue_task_send_update', { task_id: task.id })
+
+				await this.withTaskTimeout(
+					ipc.memory.update.mutate(
+						task_args as {
+							memory_id: string
+							content: string
+							idol_id?: string
+							root_ids?: Array<string>
+							metrics_ids?: Array<string>
+							metadata?: Record<string, unknown>
+						}
+					),
+					'update'
 				)
+
+				this.writeLog('queue_task_done_update', { task_id: task.id })
 			}
 
 			runInAction(() => {
@@ -89,6 +105,12 @@ export default class MemoryModel {
 				this.saveTasks()
 			})
 		} catch (error: unknown) {
+			this.writeLog('queue_task_error', {
+				task_id: task.id,
+				task_type: task.type,
+				error: error instanceof Error ? error.message : String(error)
+			})
+
 			runInAction(() => {
 				task.status = 'failed'
 				task.error = error instanceof Error ? error.message : String(error)
@@ -102,11 +124,7 @@ export default class MemoryModel {
 	}
 
 	saveTasks() {
-		try {
-			local.memory_tasks = this.toSerializableTasks(this.tasks)
-		} catch {
-			local.memory_tasks = []
-		}
+		return
 	}
 
 	addTask(type: ITask['type'], args: ITask['args']) {
@@ -136,7 +154,19 @@ export default class MemoryModel {
 	}
 
 	async query(args: { query: string; idol_id?: string; root_ids?: Array<string>; metrics_ids?: Array<string> }) {
-		return await ipc.memory.query.query(toJS(args))
+		this.writeLog('query_start')
+
+		try {
+			const result = await this.withTaskTimeout(ipc.memory.query.query(toJS(args)), 'query')
+
+			this.writeLog('query_done')
+
+			return result
+		} catch (error) {
+			this.writeLog('query_error', { error: error instanceof Error ? error.message : String(error) })
+
+			throw error
+		}
 	}
 
 	async forget(args: {
@@ -166,11 +196,7 @@ export default class MemoryModel {
 	}
 
 	private readTasksFromStorage() {
-		const source = toJS(local.memory_tasks)
-
-		if (!Array.isArray(source)) return []
-
-		return source.filter(item => item && typeof item === 'object') as Array<ITask>
+		return []
 	}
 
 	private toSerializableTaskArgs(args: ITask['args']) {
@@ -179,10 +205,30 @@ export default class MemoryModel {
 		return JSON.parse(JSON.stringify(plain_args)) as ITask['args']
 	}
 
-	private toSerializableTasks(tasks: Array<ITask>) {
-		const plain_tasks = toJS(tasks)
+	private async withTaskTimeout<T>(task_promise: Promise<T>, task_type: string) {
+		let timeout_id: ReturnType<typeof setTimeout> | null = null
 
-		return JSON.parse(JSON.stringify(plain_tasks)) as Array<ITask>
+		const timeout_promise = new Promise<T>((_, reject) => {
+			timeout_id = setTimeout(() => {
+				this.writeLog('task_timeout', { task_type })
+				reject(new Error(`${task_type} timeout`))
+			}, this.task_timeout_ms)
+		})
+
+		try {
+			return await Promise.race([task_promise, timeout_promise])
+		} finally {
+			if (timeout_id) clearTimeout(timeout_id)
+		}
+	}
+
+	private writeLog(event_name: string, payload?: Record<string, unknown>) {
+		if (payload) {
+			console.log('[memory-ui]', event_name, payload)
+			return
+		}
+
+		console.log('[memory-ui]', event_name)
 	}
 
 	off() {}

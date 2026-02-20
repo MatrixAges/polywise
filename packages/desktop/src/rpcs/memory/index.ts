@@ -1,6 +1,15 @@
 import { p, router } from '@desktop/utils'
 import { array, number, object, string } from 'zod'
 
+const writeLog = (event_name: string, payload?: Record<string, unknown>) => {
+	if (payload) {
+		console.log('[memory-rpc]', event_name, payload)
+		return
+	}
+
+	console.log('[memory-rpc]', event_name)
+}
+
 const query = p
 	.input(
 		object({
@@ -11,7 +20,13 @@ const query = p
 		})
 	)
 	.query(async ({ input, ctx }) => {
-		return await ctx.poly.query(input)
+		writeLog('query_start')
+
+		const result = await ctx.memory.query(input)
+
+		writeLog('query_done')
+
+		return result
 	})
 
 const save = p
@@ -25,7 +40,13 @@ const save = p
 		})
 	)
 	.mutation(async ({ input, ctx }) => {
-		return await ctx.saveMemory(input)
+		writeLog('save_start')
+
+		const result = await ctx.memory.save(input)
+
+		writeLog('save_done')
+
+		return result
 	})
 
 const update = p
@@ -40,7 +61,7 @@ const update = p
 		})
 	)
 	.mutation(async ({ input, ctx }) => {
-		return await ctx.poly.update(input)
+		return await ctx.memory.update(input)
 	})
 
 const forget = p
@@ -54,7 +75,7 @@ const forget = p
 		})
 	)
 	.mutation(async ({ input, ctx }) => {
-		return await ctx.poly.forget(input)
+		return await ctx.memory.forget(input)
 	})
 
 const snapshot = p
@@ -64,11 +85,11 @@ const snapshot = p
 		})
 	)
 	.query(async ({ input, ctx }) => {
-		return await ctx.poly.getSnapshot(input.weight_threshold)
+		return await ctx.memory.snapshot({ weight_threshold: input.weight_threshold })
 	})
 
 const getNodes = p.query(async ({ ctx }) => {
-	return await ctx.poly.getAllNodes()
+	return await ctx.memory.getNodes()
 })
 
 const getNodesByIdol = p
@@ -78,7 +99,7 @@ const getNodesByIdol = p
 		})
 	)
 	.query(async ({ input, ctx }) => {
-		return await ctx.poly.getNodesByIdol(input.idol_id)
+		return await ctx.memory.getNodesByIdol({ idol_id: input.idol_id })
 	})
 
 const getEdgesByIdol = p
@@ -88,7 +109,7 @@ const getEdgesByIdol = p
 		})
 	)
 	.query(async ({ input, ctx }) => {
-		return await ctx.poly.getEdgesByIdol(input.idol_id)
+		return await ctx.memory.getEdgesByIdol({ idol_id: input.idol_id })
 	})
 
 export default router({

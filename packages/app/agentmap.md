@@ -137,7 +137,7 @@ This document provides an overview of the packages/app module structure and arch
 		"models": {
 			"Global.ts": { "desc": "Global application state model", "role": "Model" },
 			"Memory.ts": {
-				"desc": "Memory task queue with IPC-safe serialization and query model",
+				"desc": "Memory task queue with IPC timeout guard, in-memory-only task persistence, and debug tracing",
 				"role": "Model"
 			},
 			"Settings.ts": {

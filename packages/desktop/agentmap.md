@@ -38,7 +38,7 @@ This document provides an overview of the packages/desktop module structure and 
 				"index.ts": { "desc": "App module exports", "role": "Index" }
 			},
 			"index.ts": {
-				"desc": "Main process entry point with utility process save offloading",
+				"desc": "Main process entry point with startup memory worker init and utility process memory offloading",
 				"role": "Entry"
 			},
 			"poly-save-worker.ts": {
@@ -71,7 +71,7 @@ This document provides an overview of the packages/desktop module structure and 
 				},
 				"memory": {
 					"index.ts": {
-						"desc": "Polywise memory operations RPC using full poly.save pipeline",
+						"desc": "Polywise memory operations RPC delegated to utility process memory bridge with debug tracing",
 						"role": "RPC"
 					}
 				},
@@ -98,8 +98,14 @@ This document provides an overview of the packages/desktop module structure and 
 				"relaunch.ts": { "desc": "Relaunch helper", "role": "Utility" },
 				"request.ts": { "desc": "HTTP request helper", "role": "Utility" },
 				"saveWithUtilityProcess": {
-					"index.ts": { "desc": "UtilityProcess save bridge with fallback", "role": "Utility" },
-					"manager.ts": { "desc": "UtilityProcess worker lifecycle manager", "role": "Utility" }
+					"index.ts": {
+						"desc": "UtilityProcess memory bridge facade with startup init",
+						"role": "Utility"
+					},
+					"manager.ts": {
+						"desc": "UtilityProcess memory worker lifecycle and call manager with debug tracing, heap tuning, stdio capture, and init call",
+						"role": "Utility"
+					}
 				},
 				"rstream": {
 					"index.ts": { "desc": "Stream module exports", "role": "Index" },
@@ -109,10 +115,16 @@ This document provides an overview of the packages/desktop module structure and 
 				"serve.ts": { "desc": "Internal server setup", "role": "Utility" },
 				"setWindowGlass.ts": { "desc": "Window vibrancy effect", "role": "Utility" },
 				"time.ts": { "desc": "Time manipulation", "role": "Utility" },
-				"trpc.ts": { "desc": "tRPC setup helper with saveMemory context", "role": "Utility" }
+				"trpc.ts": {
+					"desc": "tRPC setup helper with utility-process memory context",
+					"role": "Utility"
+				}
 			},
 			"workers": {
-				"polySave.ts": { "desc": "Utility process worker for poly.save", "role": "Worker" }
+				"polySave.ts": {
+					"desc": "Utility process worker for full poly memory methods including init with debug tracing and crash hooks",
+					"role": "Worker"
+				}
 			}
 		},
 		"config": {
