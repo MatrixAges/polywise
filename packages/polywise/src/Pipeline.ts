@@ -301,9 +301,11 @@ export default class Pipeline {
 		const [vector_results, fulltext_results] = await Promise.all([vectorSearch(), fulltextSearch()])
 
 		const candidates_map = new Map<string, SearchCandidate>()
+		const content_set = new Set<string>()
 
 		for (const r of vector_results) {
 			if (candidates_map.has(r.id)) continue
+			if (content_set.has(r.content)) continue
 
 			candidates_map.set(r.id, {
 				id: r.id,
@@ -312,10 +314,12 @@ export default class Pipeline {
 				metadata: r.metadata,
 				updated_at: r.updated_at
 			})
+			content_set.add(r.content)
 		}
 
 		for (const r of fulltext_results) {
 			if (candidates_map.has(r.id)) continue
+			if (content_set.has(r.content)) continue
 
 			candidates_map.set(r.id, {
 				id: r.id,
@@ -324,6 +328,7 @@ export default class Pipeline {
 				metadata: r.metadata,
 				updated_at: r.updated_at
 			})
+			content_set.add(r.content)
 		}
 
 		const candidates = Array.from(candidates_map.values())

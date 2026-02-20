@@ -96,6 +96,10 @@ This document provides an overview of the packages/polywise module structure and
 					"role": "Utility"
 				},
 				"ranking.ts": { "desc": "Ranking utility", "role": "Utility" },
+				"mmr.ts": {
+					"desc": "Maximum Marginal Relevance algorithm for semantic retrieval diversification",
+					"role": "Utility"
+				},
 				"migration.ts": {
 					"desc": "Database schema migration system with version tracking and validation (CURRENT_SCHEMA_VERSION=1)",
 					"role": "Module"
