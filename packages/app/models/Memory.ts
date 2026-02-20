@@ -179,6 +179,17 @@ export default class MemoryModel {
 		return await ipc.memory.forget.mutate(toJS(args))
 	}
 
+	async recall(args: {
+		query: string
+		max_depth?: number
+		idol_id?: string
+		root_ids?: Array<string>
+		metrics_ids?: Array<string>
+		limit?: number
+	}) {
+		return await ipc.memory.recall.query(toJS(args))
+	}
+
 	async snapshot(args?: { weight_threshold?: number }) {
 		return await ipc.memory.snapshot.query(toJS(args || {}))
 	}

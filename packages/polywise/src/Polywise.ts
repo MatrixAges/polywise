@@ -79,6 +79,7 @@ import {
 	CURRENT_SCHEMA_VERSION,
 	extractKeywords,
 	generateId,
+	getEdgesBetweenNodes,
 	getNodeContexts,
 	migrate,
 	recallNodesByKeywords,
@@ -632,7 +633,8 @@ export default class Polywise {
 			stimulate_intensity = MEMORY_RECALL_INTENSITY,
 			idol_id = this.idol_id,
 			root_ids = this.root_ids,
-			metrics_ids = this.metrics_ids
+			metrics_ids = this.metrics_ids,
+			limit = 20
 		} = args
 
 		const keywords = extractKeywords(query)
@@ -641,12 +643,14 @@ export default class Polywise {
 			keywords,
 			idol_id: idol_id ?? undefined,
 			root_ids: root_ids ?? undefined,
-			metrics_ids: metrics_ids ?? undefined
+			metrics_ids: metrics_ids ?? undefined,
+			limit
 		})
 
 		const related_nodes = await this.recallRelatedNodes(
 			matched_nodes.map(n => n.id),
-			max_depth
+			max_depth,
+			limit
 		)
 
 		const all_nodes = [...matched_nodes]
@@ -668,9 +672,11 @@ export default class Polywise {
 
 		const contexts = await this.getNodeContexts(all_nodes.map(n => n.id))
 
+		const edges = await this.getEdgesBetweenNodes(all_nodes.map(n => n.id))
+
 		return {
 			nodes: all_nodes,
-			edges: [],
+			edges,
 			stimulated_nodes: all_nodes.map(n => n.id),
 			related_contexts: contexts
 		}
@@ -784,8 +790,12 @@ export default class Polywise {
 		return await recallNodesByKeywords(args, this.queryRaw.bind(this))
 	}
 
-	private async recallRelatedNodes(node_ids: Array<string>, max_depth: number) {
-		return await recallRelatedNodes(node_ids, max_depth, this.queryRaw.bind(this))
+	private async recallRelatedNodes(node_ids: Array<string>, max_depth: number, limit: number) {
+		return await recallRelatedNodes(node_ids, max_depth, this.queryRaw.bind(this), limit)
+	}
+
+	private async getEdgesBetweenNodes(node_ids: Array<string>) {
+		return await getEdgesBetweenNodes(node_ids, this.queryRaw.bind(this))
 	}
 
 	private async getNodeContexts(node_ids: Array<string>) {

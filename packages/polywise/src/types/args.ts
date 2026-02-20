@@ -165,6 +165,7 @@ export interface RecallArgs extends FiltersArgs {
 	max_depth?: number
 	stimulate_intensity?: number
 	query_embedding?: Array<number>
+	limit?: number
 }
 
 export interface QueryArgs extends FiltersArgs {

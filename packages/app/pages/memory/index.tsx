@@ -63,15 +63,25 @@ const Index = () => {
 		set_graph_loading(true)
 
 		try {
-			const snapshot = (await memory.snapshot({ weight_threshold: 0.2 })) as SnapshotResult
+			let result: SnapshotResult
 
-			set_graph_nodes(snapshot.nodes || [])
-			set_graph_edges(snapshot.edges || [])
+			if (query.trim()) {
+				result = (await memory.recall({
+					query,
+					max_depth: 3,
+					limit: 100
+				})) as unknown as SnapshotResult
+			} else {
+				result = (await memory.snapshot({ weight_threshold: 0.2 })) as SnapshotResult
+			}
+
+			set_graph_nodes(result.nodes || [])
+			set_graph_edges(result.edges || [])
 			set_graph_loaded(true)
 		} finally {
 			set_graph_loading(false)
 		}
-	}, [memory])
+	}, [memory, query])
 
 	const handleSearch = useCallback(async () => {
 		if (!query.trim()) return

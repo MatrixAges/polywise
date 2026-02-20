@@ -177,3 +177,13 @@ export const sql_get_node_by_id = `
  * Role: Key lookup for checking existence or getting ID for linking.
  */
 export const sql_get_node_by_label = `SELECT id FROM ${SCHEMA_BRAIN}.nodes WHERE label = $1`
+
+/**
+ * Retrieves all edges connecting a set of nodes.
+ * Role: Reconstructs the local graph structure for a set of recalled concepts.
+ */
+export const sql_get_edges_between_nodes = `
+	SELECT id, source_id, target_id, weight, distance, type, learning_rate, decay_resistance, idol_id, root_ids, metrics_ids, metadata, created_at, updated_at
+	FROM ${SCHEMA_BRAIN}.edges
+	WHERE source_id = ANY($1) AND target_id = ANY($1)
+`

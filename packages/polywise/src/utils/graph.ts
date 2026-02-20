@@ -1,8 +1,13 @@
 import { STRENGTHEN_EDGE_WEIGHT } from '../consts'
 import { sql_stimulate, sql_strengthen_edges_batch } from '../sql'
-import { sql_get_node_articles, sql_recall_nodes_by_label, sql_recall_related_nodes } from '../sql/Brain'
+import {
+	sql_get_edges_between_nodes,
+	sql_get_node_articles,
+	sql_recall_nodes_by_label,
+	sql_recall_related_nodes
+} from '../sql/Brain'
 
-import type { Node, RecallNodesByKeywordsArgs, StrengthenRelatedEdgesArgs } from '../types'
+import type { Edge, Node, RecallNodesByKeywordsArgs, StrengthenRelatedEdgesArgs } from '../types'
 
 export async function recallNodesByKeywords(
 	args: RecallNodesByKeywordsArgs,
@@ -34,13 +39,25 @@ export async function recallNodesByKeywords(
 export async function recallRelatedNodes(
 	node_ids: Array<string>,
 	max_depth: number,
-	queryRaw: (sql: string, params?: Array<any>) => Promise<any>
+	queryRaw: (sql: string, params?: Array<any>) => Promise<any>,
+	limit = 20
 ) {
 	if (node_ids.length === 0 || max_depth <= 0) {
 		return []
 	}
 
-	return (await queryRaw(sql_recall_related_nodes, [node_ids, max_depth, 20])) as Array<Node>
+	return (await queryRaw(sql_recall_related_nodes, [node_ids, max_depth, limit])) as Array<Node>
+}
+
+export async function getEdgesBetweenNodes(
+	node_ids: Array<string>,
+	queryRaw: (sql: string, params?: Array<any>) => Promise<any>
+) {
+	if (node_ids.length < 2) {
+		return []
+	}
+
+	return (await queryRaw(sql_get_edges_between_nodes, [node_ids])) as Array<Edge>
 }
 
 export async function getNodeContexts(
