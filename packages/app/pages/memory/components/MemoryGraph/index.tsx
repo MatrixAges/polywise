@@ -174,7 +174,7 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 
 		const getClusterTarget = (clusterIdx: number, totalClusters: number) => {
 			if (totalClusters <= 1) return { x: 0, y: 0 }
-			const radius = Math.max(800, totalClusters * 400)
+			const radius = Math.max(200, totalClusters * 100)
 			const angle = (clusterIdx / totalClusters) * 2 * Math.PI
 			return { x: Math.cos(angle) * radius, y: Math.sin(angle) * radius }
 		}
@@ -222,7 +222,7 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 				forceLink(simLinks as any)
 					.id((d: any) => d.id)
 					.distance((link: any) => {
-						return 350
+						return 450 // Increased distance to prevent edge labels from clipping 260px wide node cards
 					})
 					.strength(1)
 			)
@@ -355,11 +355,10 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 				fitView
 				minZoom={0.1}
 				maxZoom={2}
-				nodesDraggable={true} // Allow dragging diagram nodes
+				nodesDraggable={true}
 				attributionPosition='bottom-left'
 			>
-				{/* Architecture style faint graph paper lines */}
-				<Background color='#cbd5e1' gap={32} size={1} variant={BackgroundVariant.Lines} />
+				<Background color='var(--color-border-light)' gap={48} variant={BackgroundVariant.Lines} />
 			</ReactFlow>
 		</div>
 	)
