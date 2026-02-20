@@ -262,10 +262,16 @@ export default class Pipeline {
 
 			if (valid_items.length === 0) return 0
 
+			// For single-label output (standard BGE-M3 behavior in pipeline), the score is the relevance score.
+			// Even if the label is LABEL_0, it represents the sigmoid score (0-1).
+			if (valid_items.length === 1) {
+				return valid_items[0].score
+			}
+
 			const positive_label = valid_items.find(entry => {
 				const label = entry.label.toLowerCase()
 
-				return label.includes('label_1') || label.includes('relevant')
+				return label.includes('label_1') || label.includes('relevant') || label.includes('positive')
 			})
 
 			if (positive_label) {
