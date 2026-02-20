@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useMemo } from 'react'
 import ForceGraph2D from 'react-force-graph-2d'
+import { forceCollide } from 'd3-force'
 import { Spin } from 'antd'
 
 import { memo } from '@/utils'
@@ -25,6 +26,55 @@ interface MemoryGraphProps {
 	loading?: boolean
 }
 
+const colorMegaPools = [
+	// Sunset
+	['#f43f5e', '#e11d48', '#f87171', '#ef4444', '#dc2626', '#fb923c', '#f97316', '#ea580c'],
+	// Forest
+	[
+		'#f59e0b',
+		'#d97706',
+		'#a3e635',
+		'#84cc16',
+		'#65a30d',
+		'#4ade80',
+		'#22c55e',
+		'#16a34a',
+		'#34d399',
+		'#10b981',
+		'#059669'
+	],
+	// Ocean
+	[
+		'#2dd4bf',
+		'#14b8a6',
+		'#0d9488',
+		'#22d3ee',
+		'#06b6d4',
+		'#0891b2',
+		'#38bdf8',
+		'#0ea5e9',
+		'#0284c7',
+		'#60a5fa',
+		'#3b82f6',
+		'#2563eb'
+	],
+	// Midnight
+	[
+		'#818cf8',
+		'#6366f1',
+		'#4f46e5',
+		'#a78bfa',
+		'#8b5cf6',
+		'#7c3aed',
+		'#c084fc',
+		'#a855f7',
+		'#9333ea',
+		'#e879f9',
+		'#d946ef',
+		'#c026d3'
+	]
+]
+
 const MemoryGraph = (props: MemoryGraphProps) => {
 	const { nodes: initialNodes, edges: initialEdges, loading = false } = props
 	const fgRef = useRef<any>(null)
@@ -33,6 +83,13 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 
 	useEffect(() => {
 		if (!containerRef.current) return
+
+		// Instant load fix
+		const rect = containerRef.current.getBoundingClientRect()
+		if (rect.width > 0 && rect.height > 0) {
+			setDimensions({ width: rect.width, height: rect.height })
+		}
+
 		const observer = new ResizeObserver(entries => {
 			if (entries[0]) {
 				const { width, height } = entries[0].contentRect
@@ -41,26 +98,92 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 		})
 		observer.observe(containerRef.current)
 		return () => observer.disconnect()
-	}, [])
+	}, [initialNodes.length]) // Trigger layout setup on node data presence
+
+	const graphData = useMemo(() => {
+		const nodes = initialNodes.map(n => ({ ...n }))
+		const links = initialEdges.map(e => ({ ...e, source: e.source_id, target: e.target_id }))
+
+		// Cluster detection BFS
+		const adj = new Map<string, string[]>()
+		nodes.forEach(n => adj.set(n.id, []))
+		links.forEach(l => {
+			if (adj.has(l.source as string) && adj.has(l.target as string)) {
+				adj.get(l.source as string)!.push(l.target as string)
+				adj.get(l.target as string)!.push(l.source as string)
+			}
+		})
+
+		const visited = new Set<string>()
+		const clusters: string[][] = []
+
+		nodes.forEach(n => {
+			if (!visited.has(n.id)) {
+				const cluster: string[] = []
+				const queue = [n.id]
+				visited.add(n.id)
+
+				while (queue.length > 0) {
+					const curr = queue.shift()!
+					cluster.push(curr)
+					adj.get(curr)?.forEach(neighbor => {
+						if (!visited.has(neighbor)) {
+							visited.add(neighbor)
+							queue.push(neighbor)
+						}
+					})
+				}
+				clusters.push(cluster)
+			}
+		})
+
+		const nodeColorMap = new Map<string, string>()
+		clusters.forEach((cluster, idx) => {
+			const poolIndex = idx % colorMegaPools.length
+			const pool = [...colorMegaPools[poolIndex]]
+
+			// Simple shuffle to add uniqueness per render
+			for (let i = pool.length - 1; i > 0; i--) {
+				const j = Math.floor(Math.random() * (i + 1))
+				const temp = pool[i]
+				pool[i] = pool[j]
+				pool[j] = temp
+			}
+
+			cluster.forEach((nodeId, nodeIdx) => {
+				const color = pool[nodeIdx % pool.length]
+				nodeColorMap.set(nodeId, color)
+			})
+		})
+
+		nodes.forEach(n => {
+			;(n as any).clusterColor = nodeColorMap.get(n.id) || '#cbd5e1'
+		})
+
+		return { nodes, links }
+	}, [initialNodes, initialEdges])
 
 	useEffect(() => {
-		if (fgRef.current && initialNodes.length > 0) {
-			// Compact the layout (shorter force distance)
-			fgRef.current.d3Force('link').distance((link: any) => (link.distance || 1) * 30) // distance was 150
-			fgRef.current.d3Force('charge').strength(-300) // previously -800
+		if (fgRef.current && graphData.nodes.length > 0) {
+			// Increase distance for longer edges
+			fgRef.current.d3Force('link').distance((link: any) => (link.distance || 1) * 100)
+			fgRef.current.d3Force('charge').strength(-300)
 
-			// Optional: zoom to fit on initial load
+			// Enforce absolute non-overlap
+			fgRef.current.d3Force(
+				'collide',
+				forceCollide((node: any) => {
+					const baseSize = 12
+					return Math.max((node.potential || 1) * 30, baseSize) + 5 // Radius + 5px margin
+				})
+			)
+
 			fgRef.current.zoomToFit(400, 50)
 		}
-	}, [initialNodes, initialEdges])
+	}, [graphData])
 
 	if (!loading && initialNodes.length === 0) {
 		return <div className='flex h-full w-full items-center justify-center text-slate-500'>No graph data</div>
-	}
-
-	const graphData = {
-		nodes: initialNodes.map(n => ({ ...n })),
-		links: initialEdges.map(e => ({ ...e, source: e.source_id, target: e.target_id }))
 	}
 
 	return (
@@ -74,43 +197,37 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 				</div>
 			)}
 
-			{dimensions.width > 0 && dimensions.height > 0 && initialNodes.length > 0 && (
+			{dimensions.width > 0 && dimensions.height > 0 && graphData.nodes.length > 0 && (
 				<ForceGraph2D
 					ref={fgRef}
 					width={dimensions.width}
 					height={dimensions.height}
 					graphData={graphData}
-					// Disallow dragging nodes
 					enableNodeDrag={false}
-					// Click handlers
-					onNodeClick={node => {
-						console.log('Clicked node', node)
-					}}
-					onLinkClick={link => {
-						console.log('Clicked link', link)
-					}}
+					onNodeClick={node => console.log('Clicked node', node)}
+					onLinkClick={link => console.log('Clicked link', link)}
 					nodeCanvasObject={(node: any, ctx, globalScale) => {
 						const label = node.label
 						const potential = node.potential || 1
-						const activation = node.activation || 0
 
-						// Node styling (3x larger than before)
-						const baseSize = 24 // originally 8
-						const nodeR = Math.max(potential * 60, baseSize) // originally * 20
-						const isHot = activation > 0.3
+						const baseSize = 12
+						const nodeR = Math.max(potential * 30, baseSize)
 
 						ctx.beginPath()
 						ctx.arc(node.x, node.y, nodeR, 0, 2 * Math.PI, false)
-						ctx.fillStyle = isHot ? '#fecaca' : potential > 0.8 ? '#a5f3fc' : '#e0e7ff'
+
+						// Solid styling using cluster color
+						ctx.fillStyle = node.clusterColor
 						ctx.fill()
 
-						ctx.lineWidth = 2 / globalScale
-						ctx.strokeStyle = isHot ? '#fca5a5' : potential > 0.8 ? '#67e8f9' : '#c7d2fe'
+						ctx.lineWidth = 1.5 / globalScale
+						// Apply slightly darker stroke of the same color or default
+						ctx.strokeStyle = '#ffffff99'
 						ctx.stroke()
 
-						// Node text styling (0.8x font size, no shadow)
-						const fontSize = (10 / globalScale) * 0.8
-						ctx.font = `300 ${fontSize}px Sans-Serif` // using thin (300)
+						// Note: Node text styling (0.8 * 8px visual scaling = 6.4)
+						const fontSize = 6.4 / globalScale
+						ctx.font = `300 ${fontSize}px Sans-Serif`
 						ctx.textAlign = 'center'
 						ctx.textBaseline = 'top'
 						ctx.fillStyle = '#334155'
@@ -118,8 +235,8 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 						ctx.fillText(label, node.x, node.y + nodeR + 4 / globalScale)
 					}}
 					nodePointerAreaPaint={(node: any, color, ctx) => {
-						const baseSize = 24
-						const nodeR = Math.max((node.potential || 1) * 60, baseSize)
+						const baseSize = 12
+						const nodeR = Math.max((node.potential || 1) * 30, baseSize)
 						ctx.fillStyle = color
 						ctx.beginPath()
 						ctx.arc(node.x, node.y, nodeR, 0, 2 * Math.PI, false)
@@ -132,7 +249,6 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 						const start = link.source
 						const end = link.target
 
-						// ignore unbound links
 						if (typeof start !== 'object' || typeof end !== 'object') return
 
 						const textPos = {
@@ -143,31 +259,27 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 						const relLink = { x: end.x - start.x, y: end.y - start.y }
 
 						let textAngle = Math.atan2(relLink.y, relLink.x)
-						// Maintain label upright
 						if (textAngle > Math.PI / 2) textAngle = -(Math.PI - textAngle)
 						if (textAngle < -Math.PI / 2) textAngle = -(Math.PI + textAngle)
 
 						const label = link.type || ''
-
 						if (!label) return
 
-						// Cut label length
 						const maxChars = 20
 						const displayLabel =
 							label.length > maxChars ? label.substring(0, maxChars) + '...' : label
 
-						const fontSize = (8 / globalScale) * 0.8 // 0.8x size as requested
+						// 0.8 scale applied against a small baseline
+						const fontSize = 6.4 / globalScale
 						ctx.font = `300 ${fontSize}px Sans-Serif`
 
 						ctx.save()
 						ctx.translate(textPos.x, textPos.y)
 						ctx.rotate(textAngle)
 
-						// Draw text exactly parallel to line, no shadow
 						ctx.textAlign = 'center'
 						ctx.textBaseline = 'bottom'
 						ctx.fillStyle = '#94a3b8'
-						// small offset to sit right "on" the line
 						ctx.fillText(displayLabel, 0, -(2 / globalScale))
 
 						ctx.restore()
