@@ -23,6 +23,15 @@ type SnapshotArgs = {
 	weight_threshold?: number
 }
 
+type RecallArgs = {
+	query: string
+	max_depth?: number
+	idol_id?: string
+	root_ids?: Array<string>
+	metrics_ids?: Array<string>
+	limit?: number
+}
+
 type IdolArgs = {
 	idol_id: string
 }
@@ -34,6 +43,7 @@ type MemoryMethod =
 	| 'update'
 	| 'forget'
 	| 'snapshot'
+	| 'recall'
 	| 'getNodes'
 	| 'getNodesByIdol'
 	| 'getEdgesByIdol'
@@ -146,6 +156,8 @@ const runMemoryMethod = async (method: MemoryMethod, args: unknown) => {
 
 		return await poly.getSnapshot(snapshot_args?.weight_threshold)
 	}
+
+	if (method === 'recall') return await poly.recallFromMemory(args as RecallArgs)
 
 	if (method === 'getNodes') return await poly.getAllNodes()
 

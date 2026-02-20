@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Background, Controls, MarkerType, MiniMap, ReactFlow, useEdgesState, useNodesState } from '@xyflow/react'
 import { Spin } from 'antd'
 import '@xyflow/react/dist/style.css'
@@ -70,8 +70,13 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 		[edges]
 	)
 
-	const [flow_nodes, , onNodesChange] = useNodesState(initialNodes)
-	const [flow_edges, , onEdgesChange] = useEdgesState(initialEdges)
+	const [flow_nodes, setNodes, onNodesChange] = useNodesState(initialNodes)
+	const [flow_edges, setEdges, onEdgesChange] = useEdgesState(initialEdges)
+
+	useEffect(() => {
+		setNodes(initialNodes)
+		setEdges(initialEdges)
+	}, [initialNodes, initialEdges, setNodes, setEdges])
 
 	if (!loading && flow_nodes.length === 0) {
 		return <div className='flex h-full w-full items-center justify-center text-slate-500'>No graph data</div>

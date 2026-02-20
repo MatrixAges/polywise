@@ -88,6 +88,9 @@ class App {
 						snapshot: async input => {
 							return await saveWithUtilityProcess.snapshot(input, this.memory_data_dir)
 						},
+						recallFromMemory: async input => {
+							return await saveWithUtilityProcess.recall(input, this.memory_data_dir)
+						},
 						getNodes: async () => {
 							return await saveWithUtilityProcess.getNodes(this.memory_data_dir)
 						},

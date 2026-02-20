@@ -33,6 +33,7 @@ type MemoryMethod =
 	| 'update'
 	| 'forget'
 	| 'snapshot'
+	| 'recall'
 	| 'getNodes'
 	| 'getNodesByIdol'
 	| 'getEdgesByIdol'
@@ -64,6 +65,15 @@ type ForgetArgs = {
 
 type SnapshotArgs = {
 	weight_threshold?: number
+}
+
+type RecallArgs = {
+	query: string
+	max_depth?: number
+	idol_id?: string
+	root_ids?: Array<string>
+	metrics_ids?: Array<string>
+	limit?: number
 }
 
 type IdolArgs = {
@@ -172,6 +182,10 @@ export default class PolySaveUtilityProcess {
 
 	async snapshot(input: SnapshotArgs, data_dir: string) {
 		return await this.callMemory('snapshot', input, data_dir)
+	}
+
+	async recall(input: RecallArgs, data_dir: string) {
+		return await this.callMemory('recall', input, data_dir)
 	}
 
 	async getNodes(data_dir: string) {

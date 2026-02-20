@@ -27,6 +27,15 @@ type IdolArgs = {
 	idol_id: string
 }
 
+type RecallArgs = {
+	query: string
+	max_depth?: number
+	idol_id?: string
+	root_ids?: Array<string>
+	metrics_ids?: Array<string>
+	limit?: number
+}
+
 const poly_save_utility_process = new PolySaveUtilityProcess()
 
 const saveWithUtilityProcess = {
@@ -47,6 +56,9 @@ const saveWithUtilityProcess = {
 	},
 	snapshot: async (input: SnapshotArgs, data_dir: string) => {
 		return await poly_save_utility_process.snapshot(input, data_dir)
+	},
+	recall: async (input: RecallArgs, data_dir: string) => {
+		return await poly_save_utility_process.recall(input, data_dir)
 	},
 	getNodes: async (data_dir: string) => {
 		return await poly_save_utility_process.getNodes(data_dir)
