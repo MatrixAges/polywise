@@ -118,7 +118,13 @@ export default class MemoryModel {
 				this.tasks = this.tasks.filter(item => item.id !== task.id)
 				this.saveTasks()
 			})
-			void ipc.memory.archiveTask.mutate({ task: { ...task, status: 'complete' } })
+			void ipc.memory.archiveTask.mutate({
+				task: {
+					...task,
+					args: task_args,
+					status: 'complete'
+				} as ITask
+			})
 		} catch (error: unknown) {
 			this.writeLog('queue_task_error', {
 				task_id: task.id,
@@ -132,7 +138,12 @@ export default class MemoryModel {
 				this.tasks = this.tasks.filter(item => item.id !== task.id)
 				this.saveTasks()
 			})
-			void ipc.memory.archiveTask.mutate({ task })
+			void ipc.memory.archiveTask.mutate({
+				task: {
+					...task,
+					args: task_args
+				} as ITask
+			})
 		} finally {
 			this.is_processing = false
 
@@ -144,7 +155,7 @@ export default class MemoryModel {
 		const pending = this.tasks.filter(t => t.status === 'pending')
 		const processing = this.tasks.filter(t => t.status === 'processing')
 
-		void ipc.memory.syncTasks.mutate({ pending, processing })
+		void ipc.memory.syncTasks.mutate({ pending: toJS(pending), processing: toJS(processing) })
 	}
 
 	addTask(type: ITask['type'], args: ITask['args']) {

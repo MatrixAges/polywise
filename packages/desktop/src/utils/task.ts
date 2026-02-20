@@ -66,7 +66,7 @@ export const archiveTask = async (task: Task) => {
 		const timestamp = Date.now()
 		const shardPath = join(TASK_DIR, `archive_${timestamp}.json`)
 		await fs.move(archivePath, shardPath)
-		await fs.writeJSON(archivePath, [], { spaces: 2 })
+		await fs.writeJSON(archivePath, [task], { spaces: 2 })
 	} else {
 		await fs.writeJSON(archivePath, archive, { spaces: 2 })
 	}

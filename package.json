@@ -22,5 +22,11 @@
 		"simple-git-hooks": "^2.13.1",
 		"tsx": "^4.21.0",
 		"turbo": "^2.8.1"
+	},
+	"dependencies": {
+		"@react-three/drei": "^10.7.7",
+		"@react-three/fiber": "^9.5.0",
+		"d3-force-3d": "^3.0.6",
+		"three": "^0.183.1"
 	}
 }

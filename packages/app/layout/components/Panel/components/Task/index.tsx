@@ -89,7 +89,7 @@ const Index = observer(() => {
 		}
 
 		return (
-			<div className='flex flex-col gap-2 overflow-auto'>
+			<div className='flex min-h-0 flex-1 flex-col gap-2 overflow-auto'>
 				{list.map(task => (
 					<div key={task.id} className='border-std-900/8 flex flex-col gap-1 rounded border p-3'>
 						<div className='flex items-center justify-between'>
