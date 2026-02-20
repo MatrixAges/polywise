@@ -119,11 +119,10 @@ export default class MemoryModel {
 				this.saveTasks()
 			})
 			void ipc.memory.archiveTask.mutate({
-				task: {
+				task: this.toSerializableTask({
 					...task,
-					args: task_args,
 					status: 'complete'
-				} as ITask
+				})
 			})
 		} catch (error: unknown) {
 			this.writeLog('queue_task_error', {
@@ -139,10 +138,7 @@ export default class MemoryModel {
 				this.saveTasks()
 			})
 			void ipc.memory.archiveTask.mutate({
-				task: {
-					...task,
-					args: task_args
-				} as ITask
+				task: this.toSerializableTask(task)
 			})
 		} finally {
 			this.is_processing = false
@@ -155,7 +151,10 @@ export default class MemoryModel {
 		const pending = this.tasks.filter(t => t.status === 'pending')
 		const processing = this.tasks.filter(t => t.status === 'processing')
 
-		void ipc.memory.syncTasks.mutate({ pending: toJS(pending), processing: toJS(processing) })
+		void ipc.memory.syncTasks.mutate({
+			pending: this.toSerializableObject(pending),
+			processing: this.toSerializableObject(processing)
+		})
 	}
 
 	addTask(type: ITask['type'], args: ITask['args']) {
@@ -188,7 +187,10 @@ export default class MemoryModel {
 		this.writeLog('query_start')
 
 		try {
-			const result = await this.withTaskTimeout(ipc.memory.query.query(toJS(args)), 'query')
+			const result = await this.withTaskTimeout(
+				ipc.memory.query.query(this.toSerializableObject(args)),
+				'query'
+			)
 
 			this.writeLog('query_done')
 
@@ -207,7 +209,7 @@ export default class MemoryModel {
 		root_ids?: Array<string>
 		metrics_ids?: Array<string>
 	}) {
-		return await ipc.memory.forget.mutate(toJS(args))
+		return await ipc.memory.forget.mutate(this.toSerializableObject(args))
 	}
 
 	async recall(args: {
@@ -218,11 +220,11 @@ export default class MemoryModel {
 		metrics_ids?: Array<string>
 		limit?: number
 	}) {
-		return await ipc.memory.recall.query(toJS(args))
+		return await ipc.memory.recall.query(this.toSerializableObject(args))
 	}
 
 	async snapshot(args?: { weight_threshold?: number }) {
-		return await ipc.memory.snapshot.query(toJS(args || {}))
+		return await ipc.memory.snapshot.query(this.toSerializableObject(args || {}))
 	}
 
 	async getNodes() {
@@ -237,10 +239,19 @@ export default class MemoryModel {
 		return await ipc.memory.getEdgesByIdol.query({ idol_id })
 	}
 
-	private toSerializableTaskArgs(args: ITask['args']) {
-		const plain_args = toJS(args)
+	private toSerializableTask(task: ITask) {
+		return this.toSerializableObject({
+			...task,
+			args: this.toSerializableObject(task.args)
+		}) as ITask
+	}
 
-		return JSON.parse(JSON.stringify(plain_args)) as ITask['args']
+	private toSerializableObject<T>(obj: T): T {
+		return JSON.parse(JSON.stringify(toJS(obj)))
+	}
+
+	private toSerializableTaskArgs(args: ITask['args']) {
+		return this.toSerializableObject(args)
 	}
 
 	private async withTaskTimeout<T>(task_promise: Promise<T>, task_type: string) {
