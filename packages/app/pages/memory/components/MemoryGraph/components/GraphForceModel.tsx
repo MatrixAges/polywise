@@ -1,6 +1,6 @@
 import { useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
-import { Line } from '@react-three/drei'
+import { Line, Html } from '@react-three/drei'
 // @ts-ignore
 import * as THREE from 'three'
 // @ts-ignore
@@ -32,6 +32,7 @@ const tempColor = new THREE.Color()
 const GraphForceModel = ({ nodes: initialNodes, edges: initialEdges, onSelect }: GraphForceModelProps) => {
 	const nodesRef = useRef<Array<THREE.Mesh | null>>([])
 	const linksRef = useRef<Array<any>>([])
+	const edgeLabelsRef = useRef<Array<THREE.Group | null>>([])
 
 	const simulation = useMemo(() => {
 		// Deep copy to prevent d3 from mutating the original props
@@ -79,35 +80,63 @@ const GraphForceModel = ({ nodes: initialNodes, edges: initialEdges, onSelect }:
 					link.target?.z || 0
 				])
 			}
+			if (edgeLabelsRef.current[i]) {
+				// Calculate midpoint for the label
+				const midX = ((link.source?.x || 0) + (link.target?.x || 0)) / 2
+				const midY = ((link.source?.y || 0) + (link.target?.y || 0)) / 2
+				const midZ = ((link.source?.z || 0) + (link.target?.z || 0)) / 2
+				edgeLabelsRef.current[i]!.position.set(midX, midY, midZ)
+			}
 		})
 	})
 
-	console.log(simulation)
-
 	return (
 		<group>
-			{simulation.links.map((link: any, index: number) => (
-				<Line
-					key={`link-${index}`}
-					// @ts-ignore
-					ref={(el: any) => (linksRef.current[index] = el)}
-					points={[
-						[0, 0, 0],
-						[0, 0, 0]
-					]}
-					color='#aaa'
-					opacity={0.4}
-					transparent
-					lineWidth={Math.min(Math.max(link.weight, 1), 5)}
-					onClick={e => {
-						e.stopPropagation()
-						if (onSelect)
-							onSelect(
-								`Edge: ${link.type || 'edge'} | w:${link.weight.toFixed(2)} d:${link.distance.toFixed(2)}`
-							)
-					}}
-				/>
-			))}
+			{simulation.links.map((link: any, index: number) => {
+				const linkLabel = `${link.type || 'edge'} | w:${link.weight.toFixed(2)} d:${link.distance.toFixed(2)}`
+
+				return (
+					<group key={`link-group-${index}`}>
+						<Line
+							// @ts-ignore
+							ref={(el: any) => (linksRef.current[index] = el)}
+							points={[
+								[0, 0, 0],
+								[0, 0, 0]
+							]}
+							color='#aaa'
+							opacity={0.4}
+							transparent
+							lineWidth={Math.min(Math.max(link.weight * 2, 2), 6)}
+							onClick={e => {
+								e.stopPropagation()
+								if (onSelect) onSelect(`Edge: ${linkLabel}`)
+							}}
+							onPointerOver={e => {
+								e.stopPropagation()
+								document.body.style.cursor = 'pointer'
+							}}
+							onPointerOut={e => {
+								e.stopPropagation()
+								document.body.style.cursor = 'auto'
+							}}
+						/>
+						<group ref={el => (edgeLabelsRef.current[index] = el)}>
+							<Html center className='pointer-events-none'>
+								<div
+									className='pointer-events-auto cursor-pointer rounded border border-slate-200 bg-white/80 px-1.5 py-0.5 text-[10px] text-slate-500 shadow-sm backdrop-blur-sm transition-colors hover:bg-slate-100'
+									onClick={e => {
+										e.stopPropagation()
+										if (onSelect) onSelect(`Edge: ${linkLabel}`)
+									}}
+								>
+									{link.type || 'edge'}
+								</div>
+							</Html>
+						</group>
+					</group>
+				)
+			})}
 
 			{simulation.nodes.map((node: any, index: number) => {
 				const nodeColor = tempColor.copy(colorCold).lerp(colorHot, node.activation)
@@ -126,9 +155,22 @@ const GraphForceModel = ({ nodes: initialNodes, edges: initialEdges, onSelect }:
 									`Node ${node.id}: ${node.label}\nA:${node.activation.toFixed(2)} P:${node.potential.toFixed(2)}`
 								)
 						}}
+						onPointerOver={e => {
+							e.stopPropagation()
+							document.body.style.cursor = 'pointer'
+						}}
+						onPointerOut={e => {
+							e.stopPropagation()
+							document.body.style.cursor = 'auto'
+						}}
 					>
 						<sphereGeometry args={[1, 16, 16]} />
 						<meshStandardMaterial color={nodeColor} roughness={0.2} metalness={0.1} />
+						<Html center className='pointer-events-none mt-4'>
+							<div className='rounded bg-black/60 px-2 py-1 text-xs font-medium whitespace-nowrap text-white shadow-lg backdrop-blur-md'>
+								{node.label}
+							</div>
+						</Html>
 					</mesh>
 				)
 			})}
