@@ -172,11 +172,21 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 	useEffect(() => {
 		if (graphData.nodes.length === 0) return
 
-		const simNodes = graphData.nodes.map(d => ({
-			...d,
-			x: (Math.random() - 0.5) * 500,
-			y: (Math.random() - 0.5) * 500
-		}))
+		const getClusterTarget = (clusterIdx: number, totalClusters: number) => {
+			if (totalClusters <= 1) return { x: 0, y: 0 }
+			const radius = Math.max(800, totalClusters * 400)
+			const angle = (clusterIdx / totalClusters) * 2 * Math.PI
+			return { x: Math.cos(angle) * radius, y: Math.sin(angle) * radius }
+		}
+
+		const simNodes = graphData.nodes.map(d => {
+			const target = getClusterTarget((d as any).clusterIdx, graphData.clusters.length)
+			return {
+				...d,
+				x: target.x + (Math.random() - 0.5) * 300,
+				y: target.y + (Math.random() - 0.5) * 300
+			}
+		})
 		const simLinks = graphData.links.map(d => ({
 			...d,
 			source: d.source,
@@ -188,7 +198,7 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 		}
 
 		const sim = forceSimulation(simNodes as any)
-			.force('charge', forceManyBody().strength(-1000)) // Repel everything strongly
+			.force('charge', forceManyBody().strength(-1500).distanceMax(1000)) // Repel locally, but ignore far clusters
 			.force(
 				'collide',
 				forceCollide((node: any) => {
@@ -198,19 +208,14 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 			.force(
 				'cluster_x',
 				forceX((node: any) => {
-					// Isolate clusters onto distinct focal coordinates around a circle
-					if (graphData.clusters.length <= 1) return 0
-					const angle = (node.clusterIdx / graphData.clusters.length) * 2 * Math.PI
-					return Math.cos(angle) * 700
-				}).strength(0.08)
+					return getClusterTarget(node.clusterIdx, graphData.clusters.length).x
+				}).strength(0.2)
 			)
 			.force(
 				'cluster_y',
 				forceY((node: any) => {
-					if (graphData.clusters.length <= 1) return 0
-					const angle = (node.clusterIdx / graphData.clusters.length) * 2 * Math.PI
-					return Math.sin(angle) * 700
-				}).strength(0.08)
+					return getClusterTarget(node.clusterIdx, graphData.clusters.length).y
+				}).strength(0.2)
 			)
 			.force(
 				'link',
@@ -241,7 +246,9 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 				})
 			)
 
-			const getOptimalHandles = (nodeA: any, nodeB: any) => {
+			const getOptimalHandles = (edge: any) => {
+				const nodeA = edge.source
+				const nodeB = edge.target
 				const W = 260
 				const H = 84
 				const handlesA = [
@@ -261,9 +268,24 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 				let bestA = 'right'
 				let bestB = 'left'
 
+				const currentA = edge._prevSourceHandleId
+				const currentB = edge._prevTargetHandleId
+
+				let currentDist = Infinity
+				if (currentA && currentB) {
+					const currHandleA = handlesA.find(h => h.id === currentA)
+					const currHandleB = handlesB.find(h => h.id === currentB)
+					if (currHandleA && currHandleB) {
+						currentDist = Math.sqrt(
+							Math.pow(currHandleA.x - currHandleB.x, 2) +
+								Math.pow(currHandleA.y - currHandleB.y, 2)
+						)
+					}
+				}
+
 				for (const a of handlesA) {
 					for (const b of handlesB) {
-						const dist = Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2)
+						const dist = Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2))
 						if (dist < minDist) {
 							minDist = dist
 							bestA = a.id
@@ -271,12 +293,22 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 						}
 					}
 				}
+
+				// Hysteresis buffer: only switch handles if the new distance is at least 10px shorter
+				if (currentDist !== Infinity && minDist > currentDist - 10) {
+					bestA = currentA
+					bestB = currentB
+				} else {
+					edge._prevSourceHandleId = bestA
+					edge._prevTargetHandleId = bestB
+				}
+
 				return { sourceHandle: bestA + '-source', targetHandle: bestB + '-target' }
 			}
 
 			setEdges(
 				simLinks.map((edge: any) => {
-					const handles = getOptimalHandles(edge.source, edge.target)
+					const handles = getOptimalHandles(edge)
 					return {
 						id: `${edge.source.id}_${edge.target.id}_${edge.type || 'rel'}`,
 						source: edge.source.id,
