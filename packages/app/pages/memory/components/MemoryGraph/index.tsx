@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Background, Controls, MiniMap, ReactFlow, useEdgesState, useNodesState } from '@xyflow/react'
-import { forceSimulation, forceLink, forceManyBody, forceCollide } from 'd3-force'
+import { forceSimulation, forceLink, forceManyBody, forceCollide, forceCenter } from 'd3-force'
 import { Spin } from 'antd'
 import '@xyflow/react/dist/style.css'
 
@@ -178,12 +178,14 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 		}
 
 		const sim = forceSimulation(simNodes as any)
-			.force('charge', forceManyBody().strength(-300))
+			.force('center', forceCenter(0, 0).strength(0.01))
+			.force('charge', forceManyBody().strength(-100)) // 1/3 of the previous pushing distance
 			.force(
 				'collide',
 				forceCollide((node: any) => {
-					return getRadius(node) + 40
-				}).iterations(3)
+					// Use 5px buffer, but enforce highly rigorous overlap checking through iterations
+					return getRadius(node) + 5
+				}).iterations(10)
 			)
 			.force(
 				'link',
@@ -192,8 +194,9 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 					.distance((link: any) => {
 						const r1 = getRadius(link.source)
 						const r2 = getRadius(link.target)
-						return r1 + r2 + 80
+						return r1 + r2 + 60
 					})
+					.strength(1) // rigidly enforce the distance so cluster internal structures resolve perfectly
 			)
 
 		sim.on('tick', () => {

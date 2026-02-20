@@ -1,5 +1,5 @@
 import { memo } from 'react'
-import { BaseEdge, EdgeLabelRenderer, getBezierPath } from '@xyflow/react'
+import { BaseEdge, EdgeLabelRenderer, getStraightPath } from '@xyflow/react'
 import type { EdgeProps } from '@xyflow/react'
 
 export type CustomEdgeData = {
@@ -23,13 +23,11 @@ const CustomEdge = ({
 }: EdgeProps) => {
 	const { type } = (data || {}) as CustomEdgeData
 
-	const [edgePath, labelX, labelY] = getBezierPath({
+	const [edgePath, labelX, labelY] = getStraightPath({
 		sourceX,
 		sourceY,
-		sourcePosition,
 		targetX,
-		targetY,
-		targetPosition
+		targetY
 	})
 
 	const maxChars = 20
