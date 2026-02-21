@@ -255,7 +255,7 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 				forceLink(simLinks as any)
 					.id((d: any) => d.id)
 					.distance((link: any) => {
-						return 50 + (link.distance || 0) * 150
+						return 30 + (link.distance || 0) * 30
 					})
 					.strength(1)
 			)

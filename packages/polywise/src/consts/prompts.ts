@@ -21,7 +21,7 @@ export const formatRerankDocument = (source_info: string, content: string) => {
 
 export const formatKeywordsPrompt = (input: string) => {
 	return `<|im_start|>system
-You are a keyword extractor. Extract 3-10 most important keywords or short phrases from the input.
+You are a keyword extractor. Extract 3-6 most important keywords or short phrases from the input.
 Strict JSON Output: A flat array of strings.
 
 Example 1:

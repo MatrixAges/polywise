@@ -511,7 +511,10 @@ export default class Polywise {
 		const nodes = (await this.queryRaw(sql_get_snapshot_nodes(weight_threshold, limit))) as Array<Node>
 		const edges = (await this.queryRaw(sql_get_snapshot_edges(weight_threshold))) as Array<Edge>
 
-		return { nodes, edges }
+		const node_ids = new Set(nodes.map(n => n.id))
+		const valid_edges = edges.filter(e => node_ids.has(e.source_id) && node_ids.has(e.target_id))
+
+		return { nodes, edges: valid_edges }
 	}
 
 	async getAllNodes() {
