@@ -3,7 +3,7 @@ import fs from 'fs-extra'
 
 import { getAppDataPath } from './path'
 
-const TASK_DIR = getAppDataPath('task')
+const TASK_DIR = getAppDataPath('/task')
 
 export interface Task {
 	id: string
