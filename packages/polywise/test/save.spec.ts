@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 
 import Polywise from '../src/Polywise'
-import { getTestVectors } from './utils/getCache'
+import { getTestKeywords, getTestVectors } from './utils/getCache'
 import getDataDir from './utils/getDataDir'
 
 describe('Polywise Save Implementation', () => {
@@ -18,7 +18,11 @@ describe('Polywise Save Implementation', () => {
 				fn: getTestVectors
 			},
 			embedding_concurrency: 5,
-			reranker_concurrency: 5
+			reranker_concurrency: 5,
+			rebel_config: {
+				type: 'custom',
+				fn: getTestKeywords
+			}
 		})
 	})
 

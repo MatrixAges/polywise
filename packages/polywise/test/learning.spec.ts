@@ -3,7 +3,7 @@ import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 import fs from 'fs-extra'
 
 import Polywise from '../src/Polywise'
-import { getTestDecision, getTestRerank, getTestVectors } from './utils/getCache'
+import { getTestKeywords, getTestRerank, getTestVectors } from './utils/getCache'
 import getDataDir from './utils/getDataDir'
 
 describe.concurrent('Polywise Pure Text Learning', () => {
@@ -24,9 +24,9 @@ describe.concurrent('Polywise Pure Text Learning', () => {
 				type: 'custom',
 				fn: getTestRerank
 			},
-			decision_config: {
+			rebel_config: {
 				type: 'custom',
-				fn: getTestDecision
+				fn: getTestKeywords
 			},
 			embedding_concurrency: 20,
 			reranker_concurrency: 20

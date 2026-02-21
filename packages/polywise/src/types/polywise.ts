@@ -1,15 +1,6 @@
 import type { PGlite } from '@electric-sql/pglite'
 import type ChainEmitter from '../utils/ChainEmitter'
 
-export interface Triple {
-	subject: string
-	predicate: string
-	object: string
-	learning_rate: number
-	decay_resistance: number
-	metadata?: Metadata
-}
-
 export interface Metadata {
 	desc?: string
 	links?: Array<string>
@@ -39,7 +30,6 @@ export interface Edge {
 	target_id: string
 	weight: number
 	distance: number
-	type?: string
 	learning_rate: number
 	decay_resistance: number
 	idol_id?: string
@@ -100,8 +90,8 @@ export interface ArticleEmbedding {
 	created_at: string
 }
 
-export interface ArticleWithTriples extends ArticleEntity {
-	triples: Array<Triple>
+export interface ArticleWithKeywords extends ArticleEntity {
+	keywords: Array<string>
 }
 
 export type RerankerPipeline = (

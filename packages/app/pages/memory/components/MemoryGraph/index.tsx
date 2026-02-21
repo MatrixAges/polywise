@@ -1,4 +1,4 @@
-import { useRef, useCallback, useEffect, useMemo, useState } from 'react'
+import { useRef, useCallback, useEffect, useMemo } from 'react'
 import { Background, ReactFlow, useEdgesState, useNodesState, BackgroundVariant } from '@xyflow/react'
 import { forceSimulation, forceLink, forceManyBody, forceCollide, forceCenter, forceX, forceY } from 'd3-force'
 import { Spin } from 'antd'
@@ -25,7 +25,6 @@ interface MemoryGraphProps {
 		target_id: string
 		weight: number
 		distance: number
-		type?: string | null
 		metadata?: Record<string, unknown> | null
 	}>
 	loading?: boolean
@@ -354,15 +353,13 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 				target: simNodes.find(n => n.id === edge.target)
 			})
 			return {
-				id: `${edge.source}_${edge.target}_${edge.type || 'rel'}`,
+				id: `${edge.source}_${edge.target}`,
 				source: edge.source,
 				target: edge.target,
 				sourceHandle: handles.sourceHandle,
 				targetHandle: handles.targetHandle,
-				type: 'customEdge',
 				animated: edge.weight > 1,
 				data: {
-					type: edge.type,
 					weight: edge.weight,
 					distance: edge.distance
 				}
@@ -390,15 +387,13 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 					simLinks.map((edge: any) => {
 						const handles = getOptimalHandles(edge)
 						return {
-							id: `${typeof edge.source === 'string' ? edge.source : edge.source.id}_${typeof edge.target === 'string' ? edge.target : edge.target.id}_${edge.type || 'rel'}`,
+							id: `${typeof edge.source === 'string' ? edge.source : edge.source.id}_${typeof edge.target === 'string' ? edge.target : edge.target.id}`,
 							source: typeof edge.source === 'string' ? edge.source : edge.source.id,
 							target: typeof edge.target === 'string' ? edge.target : edge.target.id,
 							sourceHandle: handles.sourceHandle,
 							targetHandle: handles.targetHandle,
-							type: 'customEdge',
 							animated: edge.weight > 1,
 							data: {
-								type: edge.type,
 								weight: edge.weight,
 								distance: edge.distance
 							}

@@ -5,15 +5,13 @@ import path from 'path'
 
 import Pipeline from '../../src/Pipeline'
 
-import type { Triple } from '../../src/types'
-
 const CACHE_DIR = path.resolve(__dirname, '../../.test_vectors')
 const CACHE_RERANK_DIR = path.resolve(__dirname, '../../.test_vectors/rerank')
-const CACHE_TRIPLE_DIR = path.resolve(__dirname, '../../.test_vectors/triples')
+const CACHE_KEYWORD_DIR = path.resolve(__dirname, '../../.test_vectors/keywords')
 
 const memory_vector_cache = new Map<string, Array<number>>()
-const memory_rerank_cache = new Map<string, Array<{ index: number; score: number }>>()
-const memory_triple_cache = new Map<string, Array<Triple>>()
+const memory_rerank_cache = new Map<string, Array<{ score: number }>>()
+const memory_keyword_cache = new Map<string, Array<string>>()
 
 let pipeline: Pipeline | null = null
 
@@ -82,65 +80,27 @@ export const getTestRerank = async (query: string, documents: Array<string>) => 
 	})
 }
 
-const normalizeTriple = (data: unknown) => {
-	if (!data || typeof data !== 'object') {
-		return null
-	}
-
-	const triple_data = data as {
-		subject?: unknown
-		predicate?: unknown
-		object?: unknown
-		learning_rate?: unknown
-		decay_resistance?: unknown
-		metadata?: unknown
-	}
-
-	const subject = String(triple_data.subject ?? '').trim()
-	const predicate = String(triple_data.predicate ?? '').trim()
-	const object = String(triple_data.object ?? '').trim()
-
-	if (!subject || !predicate || !object) {
-		return null
-	}
-
-	const learning_rate_candidate = Number(triple_data.learning_rate)
-	const decay_resistance_candidate = Number(triple_data.decay_resistance)
-
-	return {
-		subject,
-		predicate,
-		object,
-		learning_rate: Number.isFinite(learning_rate_candidate) ? learning_rate_candidate : 1.0,
-		decay_resistance: Number.isFinite(decay_resistance_candidate) ? decay_resistance_candidate : 1.0,
-		metadata: triple_data.metadata && typeof triple_data.metadata === 'object' ? triple_data.metadata : {}
-	}
-}
-
-const normalizeTriples = (data: unknown) => {
+const normalizeKeywords = (data: unknown) => {
 	if (Array.isArray(data)) {
-		return data.map(item => normalizeTriple(item)).filter((item): item is Triple => item !== null)
+		return data.map(String)
 	}
-
-	const single_triple = normalizeTriple(data)
-
-	if (!single_triple) {
-		return []
-	}
-
-	return [single_triple]
+	return []
 }
 
-export const getTestTriples = async (text: string) => {
+export const getTestKeywords = async (text: string) => {
 	return executeWithCache(
 		text,
-		CACHE_TRIPLE_DIR,
-		memory_triple_cache,
+		CACHE_KEYWORD_DIR,
+		memory_keyword_cache,
 		async p => {
-			const triples = await p.extractTriples(text)
+			const words = text
+				.toLowerCase()
+				.split(/\W+/)
+				.filter(w => w.length > 4 && isNaN(Number(w)))
 
-			return normalizeTriples(triples)
+			const uniqueWords = Array.from(new Set(words)).sort((a, b) => b.length - a.length)
+			return uniqueWords.slice(0, 40)
 		},
-		normalizeTriples
+		normalizeKeywords
 	)
 }

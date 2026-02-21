@@ -58,7 +58,6 @@ export const sql_create_table_edges = `
     target_id TEXT REFERENCES ${SCHEMA_BRAIN}.nodes(id),
     weight REAL DEFAULT 0.1,
     distance REAL DEFAULT 1.0,
-    type TEXT,
     learning_rate REAL DEFAULT 1.0,
     decay_resistance REAL DEFAULT 1.0,
     idol_id TEXT,
@@ -130,10 +129,22 @@ export const sql_create_index_edges_idol = `CREATE INDEX IF NOT EXISTS idx_edges
 export const sql_create_index_nodes_roots = `CREATE INDEX IF NOT EXISTS idx_nodes_roots ON ${SCHEMA_BRAIN}.nodes USING GIN(root_ids);`
 
 /**
+ * Creates a GIN index on node Metrics IDs array.
+ * Role: Optimizes metric-based node retrieval.
+ */
+export const sql_create_index_nodes_metrics = `CREATE INDEX IF NOT EXISTS idx_nodes_metrics ON ${SCHEMA_BRAIN}.nodes USING GIN(metrics_ids);`
+
+/**
  * Creates a GIN index on edge Root IDs array.
  * Role: Optimizes group/hierarchy-based edge retrieval.
  */
 export const sql_create_index_edges_roots = `CREATE INDEX IF NOT EXISTS idx_edges_roots ON ${SCHEMA_BRAIN}.edges USING GIN(root_ids);`
+
+/**
+ * Creates a GIN index on edge Metrics IDs array.
+ * Role: Optimizes metric-based edge retrieval.
+ */
+export const sql_create_index_edges_metrics = `CREATE INDEX IF NOT EXISTS idx_edges_metrics ON ${SCHEMA_BRAIN}.edges USING GIN(metrics_ids);`
 
 /**
  * Creates the knowledge schema.

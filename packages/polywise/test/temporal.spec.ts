@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from '@rstest/core'
 
 import Polywise from '../src/Polywise'
-import { getTestVectors } from './utils/getCache'
+import { getTestKeywords, getTestVectors } from './utils/getCache'
 import getDataDir from './utils/getDataDir'
 
 describe('Polywise Temporal Mechanics', () => {
@@ -16,6 +16,10 @@ describe('Polywise Temporal Mechanics', () => {
 			embedding_config: {
 				type: 'custom',
 				fn: getTestVectors
+			},
+			rebel_config: {
+				type: 'custom',
+				fn: getTestKeywords
 			}
 		})
 	})

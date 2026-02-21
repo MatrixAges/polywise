@@ -3,7 +3,7 @@ import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 import Polywise from '../src/Polywise'
 import { cognitive_science_datasets } from './datasets/cognitive'
 import { software_architecture_datasets } from './datasets/software'
-import { getTestRerank, getTestTriples, getTestVectors } from './utils/getCache'
+import { getTestKeywords, getTestRerank, getTestVectors } from './utils/getCache'
 import getDataDir from './utils/getDataDir'
 
 describe('Chain of Thought (CoT) Iterative Search', () => {
@@ -25,7 +25,7 @@ describe('Chain of Thought (CoT) Iterative Search', () => {
 			},
 			rebel_config: {
 				type: 'custom',
-				fn: getTestTriples
+				fn: getTestKeywords
 			},
 			embedding_concurrency: 20,
 			reranker_concurrency: 20,
@@ -124,7 +124,7 @@ describe('Chain of Thought (CoT) Iterative Search', () => {
 
 		it('should maintain relevance across iterations', async () => {
 			const { memory } = await poly.query({
-				query: 'circuit breaker pattern resilience',
+				query: 'service mesh observability and distributed systems',
 				cot_depth: 3,
 				search_limit: 5,
 				rerank_limit: 5
@@ -135,11 +135,11 @@ describe('Chain of Thought (CoT) Iterative Search', () => {
 				.join(' ')
 				.toLowerCase()
 
-			const has_pattern = all_text.includes('pattern')
+			const has_mesh = all_text.includes('mesh')
 			const has_service = all_text.includes('service')
-			const has_architecture = all_text.includes('architecture')
+			const has_observability = all_text.includes('observability')
 
-			const relevant_keywords = [has_pattern, has_service, has_architecture].filter(Boolean).length
+			const relevant_keywords = [has_mesh, has_service, has_observability].filter(Boolean).length
 			expect(relevant_keywords).toBeGreaterThanOrEqual(2)
 		})
 	})

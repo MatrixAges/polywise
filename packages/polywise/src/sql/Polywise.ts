@@ -104,7 +104,7 @@ export const sql_get_snapshot_nodes = (weight_threshold: number) => `
  * Role: Captures the active wiring of the brain for visualization or analysis.
  */
 export const sql_get_snapshot_edges = (weight_threshold: number) => `
-  SELECT source_id, target_id, weight, distance, type, idol_id, root_ids, metrics_ids, created_at, updated_at
+  SELECT source_id, target_id, weight, distance, idol_id, root_ids, metrics_ids, created_at, updated_at
   FROM ${SCHEMA_BRAIN}.edges
   WHERE weight > ${weight_threshold}
   ORDER BY weight DESC
@@ -158,25 +158,24 @@ export const sql_search_articles_by_text = `
  * Begins a transaction for batch triple injection.
  * Role: Ensures atomicity when ingesting large sets of structured knowledge (triples).
  */
-export const sql_inject_triples_begin = `BEGIN`
+export const sql_inject_edges_begin = `BEGIN`
 
 /**
  * Inserts a new edge derived from a triple (Subject-Predicate-Object) if it doesn't exist.
  * Role: Translates structured knowledge into graph connections.
  */
-export const sql_inject_triples_insert_edge = (
+export const sql_inject_edges_insert_edge = (
 	sub_id: string,
 	obj_id: string,
 	learning_rate: number,
 	decay_resistance: number,
-	predicate: string,
 	weight: number,
 	idol_id?: string | null,
 	root_ids?: string[] | null,
 	metrics_ids?: string[] | null
 ) => `
-  INSERT INTO ${SCHEMA_BRAIN}.edges (id, source_id, target_id, learning_rate, decay_resistance, type, weight, idol_id, root_ids, metrics_ids)
-  SELECT '${sub_id}_${obj_id}', '${sub_id}', '${obj_id}', ${learning_rate}, ${decay_resistance}, '${predicate}', ${weight}, ${idol_id ? `'${idol_id}'` : 'NULL'}, ${root_ids && root_ids.length > 0 ? `ARRAY[${root_ids.map(id => `'${id}'`).join(',')}]` : 'NULL'}, ${metrics_ids && metrics_ids.length > 0 ? `ARRAY[${metrics_ids.map(id => `'${id}'`).join(',')}]` : 'NULL'}
+  INSERT INTO ${SCHEMA_BRAIN}.edges (id, source_id, target_id, learning_rate, decay_resistance, weight, idol_id, root_ids, metrics_ids)
+  SELECT '${sub_id}_${obj_id}', '${sub_id}', '${obj_id}', ${learning_rate}, ${decay_resistance}, ${weight}, ${idol_id ? `'${idol_id}'` : 'NULL'}, ${root_ids && root_ids.length > 0 ? `ARRAY[${root_ids.map(id => `'${id}'`).join(',')}]` : 'NULL'}, ${metrics_ids && metrics_ids.length > 0 ? `ARRAY[${metrics_ids.map(id => `'${id}'`).join(',')}]` : 'NULL'}
   WHERE NOT EXISTS (SELECT 1 FROM ${SCHEMA_BRAIN}.edges WHERE source_id = '${sub_id}' AND target_id = '${obj_id}');
 `
 
@@ -184,7 +183,7 @@ export const sql_inject_triples_insert_edge = (
  * Updates an existing edge derived from a triple.
  * Role: Reinforces and updates metadata/properties of existing knowledge connections.
  */
-export const sql_inject_triples_update_edge = (
+export const sql_inject_edges_update_edge = (
 	sub_id: string,
 	obj_id: string,
 	learning_rate: number,
@@ -217,13 +216,13 @@ export const sql_inject_triples_update_edge = (
  * Commits the triple injection transaction.
  * Role: Finalizes the bulk knowledge ingestion.
  */
-export const sql_inject_triples_commit = `COMMIT`
+export const sql_inject_edges_commit = `COMMIT`
 
 /**
  * Rolls back the triple injection transaction.
  * Role: Restores database consistency when any step in batch triple ingestion fails.
  */
-export const sql_inject_triples_rollback = `ROLLBACK`
+export const sql_inject_edges_rollback = `ROLLBACK`
 
 /**
  * Helper query to find a node ID by label during upsert.
@@ -262,7 +261,7 @@ export const sql_get_nodes_by_root = `
  * Role: Context-scoped structure retrieval.
  */
 export const sql_get_edges_by_idol = `
-  SELECT source_id, target_id, weight, distance, type, idol_id, root_ids, metrics_ids, created_at, updated_at
+  SELECT source_id, target_id, weight, distance, idol_id, root_ids, metrics_ids, created_at, updated_at
   FROM ${SCHEMA_BRAIN}.edges
   WHERE idol_id = $1
 `
@@ -272,7 +271,7 @@ export const sql_get_edges_by_idol = `
  * Role: Group-scoped structure retrieval.
  */
 export const sql_get_edges_by_root = `
-  SELECT source_id, target_id, weight, distance, type, idol_id, root_ids, metrics_ids, created_at, updated_at
+  SELECT source_id, target_id, weight, distance, idol_id, root_ids, metrics_ids, created_at, updated_at
   FROM ${SCHEMA_BRAIN}.edges
   WHERE $1 = ANY(root_ids)
 `

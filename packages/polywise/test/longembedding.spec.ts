@@ -3,7 +3,7 @@ import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 import Polywise from '../src/Polywise'
 import processText from '../src/utils/processText'
 import { long_text } from './datasets/longembedding'
-import { getTestDecision, getTestRerank, getTestVectors } from './utils/getCache'
+import { getTestKeywords, getTestRerank, getTestVectors } from './utils/getCache'
 import getDataDir from './utils/getDataDir'
 
 describe.concurrent('Long Text Embedding & Fact Preservation', () => {
@@ -23,9 +23,9 @@ describe.concurrent('Long Text Embedding & Fact Preservation', () => {
 				type: 'custom',
 				fn: getTestRerank
 			},
-			decision_config: {
+			rebel_config: {
 				type: 'custom',
-				fn: getTestDecision
+				fn: getTestKeywords
 			}
 		})
 	})

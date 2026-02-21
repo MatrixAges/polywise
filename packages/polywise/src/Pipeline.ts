@@ -11,11 +11,11 @@ import {
 	DEFAULT_EMBEDDING_CONFIG,
 	DEFAULT_REBEL_CONFIG,
 	DEFAULT_RERANKER_CONFIG,
-	formatTriple,
+	formatKeywordsPrompt,
 	POOLING_MEAN
 } from './consts'
 import { catchFinally } from './decorators'
-import { generateModelHash, getTriple, processText, splitSentence, verifyModel } from './utils'
+import { generateModelHash, getKeywords, processText, splitSentence, verifyModel } from './utils'
 
 import type {
 	EmbeddingConfig,
@@ -24,8 +24,7 @@ import type {
 	RebelConfig,
 	RerankerConfig,
 	SearchCandidate,
-	SearchResult,
-	Triple
+	SearchResult
 } from './types'
 
 @injectable()
@@ -124,78 +123,61 @@ export default class Pipeline {
 		}
 	}
 
-	async extractTriples(text: string) {
+	async generateKeywords(text: string) {
 		if (!text.trim()) return []
 
 		const sentences = await splitSentence([text])
-		const all_triples: Array<Triple> = []
+		const all_keywords: Array<string> = []
 
 		for (const sentence of sentences) {
 			if (sentence.length < 5) continue
 
-			const result = await this.rebel_queue.add<Array<Triple>>(async () => {
+			const result = await this.rebel_queue.add<Array<string>>(async () => {
 				if (this.rebel_config.type === 'custom') {
-					const triples = await this.rebel_config.fn(sentence)
-
-					return triples.map(t => ({
-						subject: String(t.subject).trim(),
-						predicate: String(t.predicate).trim(),
-						object: String(t.object).trim(),
-						learning_rate: t.learning_rate ?? 1.0,
-						decay_resistance: t.decay_resistance ?? 1.0,
-						metadata: t.metadata || {}
-					}))
+					const keywords = await this.rebel_config.fn(sentence)
+					return keywords.map(String)
 				}
 
 				const generator = await this.loadRebelModel()
-				const prompt = formatTriple(sentence)
+				const prompt = formatKeywordsPrompt(sentence)
 
 				const output = await generator(prompt, {
-					max_new_tokens: 36,
+					max_new_tokens: 64,
 					do_sample: false,
 					return_full_text: false,
 					stop_sequences: ['<|im_end|>', '<think>', '</think>', '\n', '\n\n', '}']
 				})
 
-				const generated_text = output[0]?.generated_text ? `{"subject":${output[0].generated_text}` : ''
-				const triple = getTriple(generated_text)
+				const generated_text = output[0]?.generated_text
+					? `[${output[0].generated_text.replace('[', '')}`
+					: ''
+				const keywords = getKeywords(generated_text)
 
-				console.log('---------')
-				console.log(triple)
-
-				if (!triple) {
+				if (!keywords || keywords.length === 0) {
 					return []
 				}
 
-				return [
-					{
-						subject: String(triple.subject).trim(),
-						predicate: String(triple.predicate).trim(),
-						object: String(triple.object).trim(),
-						learning_rate: 1.0,
-						decay_resistance: 1.0,
-						metadata: {}
-					}
-				]
+				return keywords
 			})
 
 			if (result && result.length > 0) {
-				all_triples.push(...result)
+				all_keywords.push(...result)
 			}
 		}
 
-		const unique_triples: Array<Triple> = []
+		const unique_keywords: Array<string> = []
 		const seen = new Set<string>()
 
-		for (const t of all_triples) {
-			const key = `${t.subject}|${t.predicate}|${t.object}`.toLowerCase()
+		for (const kw of all_keywords) {
+			const key = kw.toLowerCase().trim()
+			if (!key) continue
 			if (!seen.has(key)) {
-				unique_triples.push(t)
+				unique_keywords.push(kw.trim())
 				seen.add(key)
 			}
 		}
 
-		return unique_triples
+		return unique_keywords
 	}
 
 	async embed(text: string) {

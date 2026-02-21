@@ -9,7 +9,7 @@ import { behavioral_knowledge, behavioral_qa } from '../test/datasets/behavioral
 import { cognitive_science_datasets } from '../test/datasets/cognitive'
 import { process_test_cases } from '../test/datasets/process'
 import { software_architecture_datasets } from '../test/datasets/software'
-import { getTestTriples, getTestVectors } from '../test/utils/getCache'
+import { getTestKeywords, getTestVectors } from '../test/utils/getCache'
 
 async function beforeTest() {
 	const pipeline = container.resolve(Pipeline)
@@ -87,17 +87,17 @@ async function beforeTest() {
 
 	console.log('\nAll datasets are ready.')
 
-	// Pre-generate triples cache for test datasets (only first 5 from each to save time)
-	console.log('Pre-warming triples cache...')
-	const triple_texts = [...cognitive_science_datasets.slice(0, 5), ...software_architecture_datasets.slice(0, 5)]
-	console.log(`  Extracting triples from ${triple_texts.length} documents...`)
-	const triple_chunk_size = 5
-	for (let i = 0; i < triple_texts.length; i += triple_chunk_size) {
-		const chunk = triple_texts.slice(i, i + triple_chunk_size)
-		await Promise.all(chunk.map(text => getTestTriples(text)))
+	// Pre-generate keywords cache for test datasets (only first 5 from each to save time)
+	console.log('Pre-warming keywords cache...')
+	const keyword_texts = [...cognitive_science_datasets.slice(0, 5), ...software_architecture_datasets.slice(0, 5)]
+	console.log(`  Generating keywords from ${keyword_texts.length} documents...`)
+	const keyword_chunk_size = 5
+	for (let i = 0; i < keyword_texts.length; i += keyword_chunk_size) {
+		const chunk = keyword_texts.slice(i, i + keyword_chunk_size)
+		await Promise.all(chunk.map(text => getTestKeywords(text)))
 		process.stdout.write('.')
 	}
-	console.log('\nTriples cache ready.')
+	console.log('\nKeywords cache ready.')
 }
 
 beforeTest().catch(err => {

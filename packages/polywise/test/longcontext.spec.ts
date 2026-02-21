@@ -8,7 +8,7 @@ import {
 	similarity_traps_datasets,
 	temporal_traps_datasets
 } from './datasets/traps'
-import { getTestRerank, getTestVectors } from './utils/getCache'
+import { getTestKeywords, getTestRerank, getTestVectors } from './utils/getCache'
 import getDataDir from './utils/getDataDir'
 
 describe.concurrent('Long Context and Language Traps', () => {
@@ -29,6 +29,10 @@ describe.concurrent('Long Context and Language Traps', () => {
 			reranker_config: {
 				type: 'custom',
 				fn: getTestRerank
+			},
+			rebel_config: {
+				type: 'custom',
+				fn: getTestKeywords
 			},
 			embedding_concurrency: 10,
 			reranker_concurrency: 10
@@ -56,7 +60,7 @@ describe.concurrent('Long Context and Language Traps', () => {
 		]
 
 		// Use 15 articles total to stay within 60s limit (9 mandatory + 6 random)
-		const shuffled_others = others.sort(() => Math.random() - 0.5).slice(0, 6)
+		const shuffled_others = others.slice(0, 6)
 
 		for (const content of shuffled_others.slice(0, 3)) {
 			const mid = Math.floor(content.length / 2)
@@ -65,7 +69,7 @@ describe.concurrent('Long Context and Language Traps', () => {
 			random_qas.push({ query, expected: content.slice(0, 50) })
 		}
 
-		const final_datasets = [...mandatory, ...shuffled_others].sort(() => Math.random() - 0.5)
+		const final_datasets = [...mandatory, ...shuffled_others]
 
 		await getTestVectors('init')
 

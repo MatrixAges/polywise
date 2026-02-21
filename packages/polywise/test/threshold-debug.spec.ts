@@ -2,7 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 
 import Polywise from '../src/Polywise'
 import Process from '../src/Process'
-import { getTestRerank, getTestTriples, getTestVectors } from './utils/getCache'
+import { getTestKeywords, getTestRerank, getTestVectors } from './utils/getCache'
 import getDataDir from './utils/getDataDir'
 
 describe('Memory Recall Debug - Issue: "记忆机制" returns empty', () => {
@@ -33,7 +33,7 @@ FRESH → TIRED → SLEEPING → FRESH 状态循环`
 			data_dir: db_name,
 			embedding_config: { type: 'custom', fn: getTestVectors },
 			reranker_config: { type: 'custom', fn: getTestRerank },
-			rebel_config: { type: 'custom', fn: getTestTriples },
+			rebel_config: { type: 'custom', fn: getTestKeywords },
 			metrics_ids
 		})
 

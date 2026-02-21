@@ -51,7 +51,7 @@ export interface LocalRerankerConfig {
 
 export interface CustomRerankerConfig {
 	type: 'custom'
-	fn: (query: string, documents: Array<string>) => Promise<Array<{ index: number; score: number }>>
+	fn: (query: string, documents: Array<string>) => Promise<Array<{ score: number }>>
 }
 
 export type RerankerConfig = LocalRerankerConfig | CustomRerankerConfig
@@ -64,16 +64,7 @@ export interface LocalRebelConfig {
 
 export interface CustomRebelConfig {
 	type: 'custom'
-	fn: (text: string) => Promise<
-		Array<{
-			subject: string
-			predicate: string
-			object: string
-			learning_rate?: number
-			decay_resistance?: number
-			metadata?: any
-		}>
-	>
+	fn: (text: string) => Promise<Array<string>>
 }
 
 export type RebelConfig = LocalRebelConfig | CustomRebelConfig

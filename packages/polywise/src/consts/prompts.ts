@@ -19,18 +19,18 @@ export const formatRerankDocument = (source_info: string, content: string) => {
 	return `${source_info}\n${content}`
 }
 
-export const formatTriple = (input: string) => {
+export const formatKeywordsPrompt = (input: string) => {
 	return `<|im_start|>system
-You are a triple extractor. Extract ONLY 1 most important triple from the input.
-Strict JSON Output {"subject": "...", "predicate": "...", "object": "..."}
+You are a keyword extractor. Extract 3-10 most important keywords or short phrases from the input.
+Strict JSON Output: A flat array of strings.
 
 Example 1:
 Input: 苹果公司发布了最新的iPhone 15系列手机。
-Output: {"subject": "苹果公司","predicate": "发布了","object": "iPhone 15系列手机"}
+Output: ["苹果公司", "发布了", "iPhone 15系列"]
 
 Example 2:
 Input: Artificial intelligence is transforming the global economy.
-Output: {"subject": "Artificial intelligence","predicate": "is transforming","object": "the global economy"}
+Output: ["Artificial intelligence", "global economy", "transforming"]
 <|im_end|>
 <|im_start|>user
 Input: ${input}
@@ -38,5 +38,5 @@ Input: ${input}
 <|im_start|>assistant
 <think>
 </think>
-{"subject":`
+[`
 }

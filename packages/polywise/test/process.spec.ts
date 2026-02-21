@@ -3,7 +3,7 @@ import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 import Polywise from '../src/Polywise'
 import { cognitive_science_datasets } from './datasets/cognitive'
 import { process_test_cases } from './datasets/process'
-import { getTestRerank, getTestTriples, getTestVectors } from './utils/getCache'
+import { getTestKeywords, getTestRerank, getTestVectors } from './utils/getCache'
 import getDataDir from './utils/getDataDir'
 
 describe('Polywise Process', () => {
@@ -24,7 +24,7 @@ describe('Polywise Process', () => {
 			},
 			rebel_config: {
 				type: 'custom',
-				fn: getTestTriples
+				fn: getTestKeywords
 			},
 			embedding_concurrency: 10,
 			reranker_concurrency: 10,

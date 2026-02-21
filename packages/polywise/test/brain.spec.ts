@@ -3,7 +3,7 @@ import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 import Polywise from '../src/Polywise'
 import { cognitive_science_datasets } from './datasets/cognitive'
 import { software_architecture_datasets } from './datasets/software'
-import { getTestDecision, getTestRerank, getTestVectors } from './utils/getCache'
+import { getTestKeywords, getTestRerank, getTestVectors } from './utils/getCache'
 import getDataDir from './utils/getDataDir'
 
 describe('Polywise Brain System', () => {
@@ -24,9 +24,9 @@ describe('Polywise Brain System', () => {
 				type: 'custom',
 				fn: getTestRerank
 			},
-			decision_config: {
+			rebel_config: {
 				type: 'custom',
-				fn: getTestDecision
+				fn: getTestKeywords
 			},
 			embedding_concurrency: 10,
 			reranker_concurrency: 10,

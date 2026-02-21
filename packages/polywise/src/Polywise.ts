@@ -53,11 +53,11 @@ import {
 	sql_get_nodes_by_root,
 	sql_get_snapshot_edges,
 	sql_get_snapshot_nodes,
-	sql_inject_triples_begin,
-	sql_inject_triples_commit,
-	sql_inject_triples_insert_edge,
-	sql_inject_triples_rollback,
-	sql_inject_triples_update_edge,
+	sql_inject_edges_begin,
+	sql_inject_edges_commit,
+	sql_inject_edges_insert_edge,
+	sql_inject_edges_rollback,
+	sql_inject_edges_update_edge,
 	sql_insert_article_embedding,
 	sql_node_sources,
 	sql_process_article,
@@ -105,7 +105,6 @@ import type {
 	RecallNodesByKeywordsArgs,
 	SingleSearchArgs,
 	StrengthenRelatedEdgesArgs,
-	Triple,
 	UpdateArticleArgs
 } from './types'
 
@@ -238,11 +237,11 @@ export default class Polywise {
 			])
 		}
 
-		const triples = await this.pipeline.extractTriples(content)
+		const keywords = await this.pipeline.generateKeywords(content)
 
-		if (triples.length > 0) {
-			await this.injectTriples({
-				triples,
+		if (keywords.length > 0) {
+			await this.injectKeywords({
+				keywords,
 				article_id: aid,
 				idol_id,
 				root_ids,
@@ -289,11 +288,11 @@ export default class Polywise {
 			await this.queryRaw(sql_update_article_embedding, [`[${query_embedding.join(',')}]`, memory_id])
 		}
 
-		const triples = await this.pipeline.extractTriples(content)
+		const keywords = await this.pipeline.generateKeywords(content)
 
-		if (triples.length > 0) {
-			await this.injectTriples({
-				triples,
+		if (keywords.length > 0) {
+			await this.injectKeywords({
+				keywords,
 				article_id: memory_id,
 				idol_id,
 				root_ids,
@@ -415,50 +414,44 @@ export default class Polywise {
 		])
 	}
 
-	async injectTriples(args: {
-		triples: Array<Triple>
+	async injectKeywords(args: {
+		keywords: Array<string>
 		article_id: string
 		idol_id?: string | null
 		root_ids?: Array<string> | null
 		metrics_ids?: Array<string> | null
 	}) {
-		const { triples, article_id, idol_id, root_ids, metrics_ids } = args
+		const { keywords, article_id, idol_id, root_ids, metrics_ids } = args
 
-		if (triples.length === 0) {
+		if (keywords.length < 2) {
 			return
 		}
 
-		await this.queryRaw(sql_inject_triples_begin)
+		await this.queryRaw(sql_inject_edges_begin)
 
 		try {
-			for (const triple of triples) {
-				const normalized_triple = this.normalizeTriple(triple)
-
-				if (!normalized_triple) {
-					continue
-				}
-
-				const sub_id = await this.upsertNode({
-					label: normalized_triple.subject,
+			const node_ids: Array<string> = []
+			for (const keyword of keywords) {
+				const id = await this.upsertNode({
+					label: keyword,
 					idol_id,
 					root_ids,
 					metrics_ids
 				})
+				node_ids.push(id)
+				await this.queryRaw(sql_node_sources, [id, article_id])
+			}
 
-				const obj_id = await this.upsertNode({
-					label: normalized_triple.object,
-					idol_id,
-					root_ids,
-					metrics_ids
-				})
+			for (let i = 0; i < node_ids.length - 1; i++) {
+				const sub_id = node_ids[i]
+				const obj_id = node_ids[i + 1]
 
 				await this.queryRaw(
-					sql_inject_triples_insert_edge(
+					sql_inject_edges_insert_edge(
 						sub_id,
 						obj_id,
-						normalized_triple.learning_rate,
-						normalized_triple.decay_resistance,
-						normalized_triple.predicate,
+						1.0,
+						1.0,
 						0.5,
 						idol_id,
 						root_ids,
@@ -467,78 +460,24 @@ export default class Polywise {
 				)
 
 				await this.queryRaw(
-					sql_inject_triples_update_edge(
+					sql_inject_edges_update_edge(
 						sub_id,
 						obj_id,
-						normalized_triple.learning_rate,
-						normalized_triple.decay_resistance,
+						1.0,
+						1.0,
 						0.1,
 						idol_id,
 						root_ids,
 						metrics_ids
 					)
 				)
-
-				await this.queryRaw(sql_node_sources, [sub_id, article_id])
-				await this.queryRaw(sql_node_sources, [obj_id, article_id])
 			}
 
-			await this.queryRaw(sql_inject_triples_commit)
+			await this.queryRaw(sql_inject_edges_commit)
 		} catch (error) {
-			await this.queryRaw(sql_inject_triples_rollback)
+			await this.queryRaw(sql_inject_edges_rollback)
 
 			throw error
-		}
-	}
-
-	async injectTriple(args: {
-		triple: Pick<Triple, 'subject' | 'predicate' | 'object'> &
-			Partial<Pick<Triple, 'learning_rate' | 'decay_resistance'>>
-		article_id: string
-		idol_id?: string | null
-		root_ids?: Array<string> | null
-		metrics_ids?: Array<string> | null
-	}) {
-		const { triple, article_id, idol_id, root_ids, metrics_ids } = args
-
-		await this.injectTriples({
-			triples: [
-				{
-					subject: triple.subject,
-					predicate: triple.predicate,
-					object: triple.object,
-					learning_rate: triple.learning_rate ?? 1.0,
-					decay_resistance: triple.decay_resistance ?? 1.0,
-					metadata: {}
-				}
-			],
-			article_id,
-			idol_id,
-			root_ids,
-			metrics_ids
-		})
-	}
-
-	private normalizeTriple(triple: Triple) {
-		const subject = String(triple.subject ?? '').trim()
-		const predicate = String(triple.predicate ?? '').trim()
-		const object = String(triple.object ?? '').trim()
-
-		if (!subject || !predicate || !object) {
-			return null
-		}
-
-		const learning_rate_candidate = Number(triple.learning_rate)
-		const decay_resistance_candidate = Number(triple.decay_resistance)
-		const learning_rate = Number.isFinite(learning_rate_candidate) ? learning_rate_candidate : 1.0
-		const decay_resistance = Number.isFinite(decay_resistance_candidate) ? decay_resistance_candidate : 1.0
-
-		return {
-			subject,
-			predicate,
-			object,
-			learning_rate,
-			decay_resistance
 		}
 	}
 
