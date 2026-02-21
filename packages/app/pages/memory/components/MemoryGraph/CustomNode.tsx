@@ -59,11 +59,6 @@ const CustomNode = ({ data, selected }: NodeProps) => {
 								</span>
 							</div>
 						))}
-				{!metadata && (
-					<div className='mt-2 leading-tight text-slate-400'>
-						General purpose semantic cluster node representation.
-					</div>
-				)}
 			</div>
 
 			{/* Top */}

@@ -359,6 +359,7 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 				sourceHandle: handles.sourceHandle,
 				targetHandle: handles.targetHandle,
 				animated: edge.weight > 1,
+				type: 'customEdge',
 				data: {
 					weight: edge.weight,
 					distance: edge.distance
@@ -393,6 +394,7 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 							sourceHandle: handles.sourceHandle,
 							targetHandle: handles.targetHandle,
 							animated: edge.weight > 1,
+							type: 'customEdge',
 							data: {
 								weight: edge.weight,
 								distance: edge.distance
