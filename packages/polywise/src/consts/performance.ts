@@ -12,6 +12,7 @@ export const DEFAULT_EDGE_WEIGHT = 0.1
 export const SNAPSHOT_WEIGHT_THRESHOLD = 0.2
 export const NODE_POTENTIAL_MIN = 0.05
 export const SNAPSHOT_EDGES_LIMIT = 500
+export const SNAPSHOT_NODES_LIMIT = 100
 export const MEMORY_RECALL_INTENSITY = 0.3
 export const MEMORY_SCORE_BOOST = 1.5
 export const COT_MAX_RESULTS = 3

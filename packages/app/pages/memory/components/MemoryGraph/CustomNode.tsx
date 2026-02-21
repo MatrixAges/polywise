@@ -8,11 +8,10 @@ export type CustomNodeData = {
 	clusterColor: string
 	potential: number
 	activation: number
-	metadata?: Record<string, unknown> | null
 }
 
 const CustomNode = ({ data, selected }: NodeProps) => {
-	const { label, clusterColor, potential, activation, metadata } = data as CustomNodeData
+	const { label, clusterColor, potential, activation } = data as CustomNodeData
 
 	const isEndpoint = label.toLowerCase().includes('api') || label.toLowerCase().includes('endpoint')
 	const isDb = label.toLowerCase().includes('database') || label.toLowerCase().includes('sql')
@@ -48,17 +47,6 @@ const CustomNode = ({ data, selected }: NodeProps) => {
 					<span>Activation:</span>
 					<span className='text-slate-700'>{activation?.toFixed(2) || '0.00'}</span>
 				</div>
-				{metadata &&
-					Object.keys(metadata)
-						.slice(0, 2)
-						.map(key => (
-							<div key={key} className='flex items-center justify-between'>
-								<span className='capitalize'>{key}:</span>
-								<span className='max-w-[120px] truncate text-slate-700'>
-									{String(metadata[key])}
-								</span>
-							</div>
-						))}
 			</div>
 
 			{/* Top */}

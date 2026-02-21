@@ -18,14 +18,12 @@ interface MemoryGraphProps {
 		y: number
 		activation: number
 		potential: number
-		metadata?: Record<string, unknown> | null
 	}>
 	edges: Array<{
 		source_id: string
 		target_id: string
 		weight: number
 		distance: number
-		metadata?: Record<string, unknown> | null
 	}>
 	loading?: boolean
 }
@@ -339,8 +337,7 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 				label: node.label,
 				potential: node.potential,
 				activation: node.activation,
-				clusterColor: node.clusterColor,
-				metadata: node.metadata
+				clusterColor: node.clusterColor
 			},
 			type: 'customNode'
 		}))

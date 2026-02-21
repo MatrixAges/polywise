@@ -14,6 +14,7 @@ import {
 	DEFAULT_SEARCH_LIMIT,
 	DEFAULT_SIMILARITY_THRESHOLD,
 	MEMORY_RECALL_INTENSITY,
+	SNAPSHOT_NODES_LIMIT,
 	SNAPSHOT_WEIGHT_THRESHOLD
 } from './consts'
 import Cortex from './Cortex'
@@ -506,8 +507,8 @@ export default class Polywise {
 		await this.queryRaw(sql_stimulate, [intensity, node_id])
 	}
 
-	async getSnapshot(weight_threshold = SNAPSHOT_WEIGHT_THRESHOLD) {
-		const nodes = (await this.queryRaw(sql_get_snapshot_nodes(weight_threshold))) as Array<Node>
+	async getSnapshot(weight_threshold = SNAPSHOT_WEIGHT_THRESHOLD, limit = SNAPSHOT_NODES_LIMIT) {
+		const nodes = (await this.queryRaw(sql_get_snapshot_nodes(weight_threshold, limit))) as Array<Node>
 		const edges = (await this.queryRaw(sql_get_snapshot_edges(weight_threshold))) as Array<Edge>
 
 		return { nodes, edges }

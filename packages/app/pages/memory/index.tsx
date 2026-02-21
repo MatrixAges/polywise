@@ -21,7 +21,6 @@ interface BrainNode {
 	idol_id?: string | null
 	root_ids?: Array<string> | null
 	metrics_ids?: Array<string> | null
-	metadata?: Record<string, unknown> | null
 	created_at: string
 	updated_at: string
 }
@@ -35,7 +34,6 @@ interface BrainEdge {
 	idol_id?: string | null
 	root_ids?: Array<string> | null
 	metrics_ids?: Array<string> | null
-	metadata?: Record<string, unknown> | null
 	created_at: string
 	updated_at: string
 }

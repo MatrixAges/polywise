@@ -91,12 +91,14 @@ export const sql_stimulate = `UPDATE ${SCHEMA_BRAIN}.nodes SET potential = poten
  * Retrieves a snapshot of active or significant nodes.
  * Role: Captures the current "state of mind" for visualization or analysis, filtering out dormant nodes.
  */
-export const sql_get_snapshot_nodes = (weight_threshold: number) => `
+export const sql_get_snapshot_nodes = (weight_threshold: number, limit: number) => `
   SELECT id, label, x, y, activation, potential, idol_id, root_ids, metrics_ids, created_at, updated_at
   FROM ${SCHEMA_BRAIN}.nodes
   WHERE potential > ${NODE_POTENTIAL_MIN}
   OR id IN (SELECT source_id FROM ${SCHEMA_BRAIN}.edges WHERE weight > ${weight_threshold})
   OR id IN (SELECT target_id FROM ${SCHEMA_BRAIN}.edges WHERE weight > ${weight_threshold})
+  ORDER BY potential DESC
+  LIMIT ${limit}
 `
 
 /**

@@ -436,7 +436,7 @@ describe('Polywise Brain System', () => {
 				metrics_ids
 			})
 
-			const { nodes } = await poly.getSnapshot(0.1)
+			const { nodes } = await poly.getSnapshot(0.1, 1000)
 
 			const snapshot_node = nodes.find((n: any) => n.label === 'Snapshot_Node')
 
