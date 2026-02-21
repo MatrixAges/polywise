@@ -67,8 +67,8 @@ export const sql_tick = (threshold: number) => `
  * Role: Instantiates a new concept or entity within the brain.
  */
 export const sql_add_node = `
-  INSERT INTO ${SCHEMA_BRAIN}.nodes (id, label, x, y, threshold, idol_id, root_ids, metrics_ids, metadata, embedding)
-  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+  INSERT INTO ${SCHEMA_BRAIN}.nodes (id, label, x, y, threshold, idol_id, root_ids, metrics_ids, embedding)
+  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
   RETURNING id
 `
 
@@ -77,8 +77,8 @@ export const sql_add_node = `
  * Role: Establishes a relationship or association between two concepts.
  */
 export const sql_connect = `
-  INSERT INTO ${SCHEMA_BRAIN}.edges (id, source_id, target_id, weight, idol_id, root_ids, metrics_ids, metadata)
-  VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+  INSERT INTO ${SCHEMA_BRAIN}.edges (id, source_id, target_id, weight, idol_id, root_ids, metrics_ids)
+  VALUES ($1, $2, $3, $4, $5, $6, $7)
 `
 
 /**
@@ -92,7 +92,7 @@ export const sql_stimulate = `UPDATE ${SCHEMA_BRAIN}.nodes SET potential = poten
  * Role: Captures the current "state of mind" for visualization or analysis, filtering out dormant nodes.
  */
 export const sql_get_snapshot_nodes = (weight_threshold: number) => `
-  SELECT id, label, x, y, activation, potential, idol_id, root_ids, metrics_ids, metadata, created_at, updated_at
+  SELECT id, label, x, y, activation, potential, idol_id, root_ids, metrics_ids, created_at, updated_at
   FROM ${SCHEMA_BRAIN}.nodes
   WHERE potential > ${NODE_POTENTIAL_MIN}
   OR id IN (SELECT source_id FROM ${SCHEMA_BRAIN}.edges WHERE weight > ${weight_threshold})
@@ -104,7 +104,7 @@ export const sql_get_snapshot_nodes = (weight_threshold: number) => `
  * Role: Captures the active wiring of the brain for visualization or analysis.
  */
 export const sql_get_snapshot_edges = (weight_threshold: number) => `
-  SELECT source_id, target_id, weight, distance, type, idol_id, root_ids, metrics_ids, metadata, created_at, updated_at
+  SELECT source_id, target_id, weight, distance, type, idol_id, root_ids, metrics_ids, created_at, updated_at
   FROM ${SCHEMA_BRAIN}.edges
   WHERE weight > ${weight_threshold}
   ORDER BY weight DESC
@@ -126,11 +126,10 @@ export const sql_process_article = `
  * Role: Ensures a concept exists and reinforces it (learning), triggering activation if it's already present.
  */
 export const sql_upsert_node = `
-  INSERT INTO ${SCHEMA_BRAIN}.nodes (id, label, x, y, potential, idol_id, root_ids, metrics_ids, metadata, embedding)
-  VALUES ($1, $2, random() * 800, random() * 600, 1.0, $3, $4, $5, $6, $7)
+  INSERT INTO ${SCHEMA_BRAIN}.nodes (id, label, x, y, potential, idol_id, root_ids, metrics_ids, embedding)
+  VALUES ($1, $2, random() * 800, random() * 600, 1.0, $3, $4, $5, $6)
   ON CONFLICT (label) DO UPDATE SET 
     potential = LEAST(${SCHEMA_BRAIN}.nodes.potential + ${DEFAULT_HEBBIAN_REWARD}, ${TICK_POTENTIAL_MAX}), 
-    metadata = ${SCHEMA_BRAIN}.nodes.metadata || EXCLUDED.metadata, 
     embedding = COALESCE(EXCLUDED.embedding, ${SCHEMA_BRAIN}.nodes.embedding), 
     idol_id = COALESCE(EXCLUDED.idol_id, ${SCHEMA_BRAIN}.nodes.idol_id),
     root_ids = CASE WHEN EXCLUDED.root_ids IS NOT NULL THEN (SELECT ARRAY(SELECT DISTINCT unnest(COALESCE(${SCHEMA_BRAIN}.nodes.root_ids, '{}') || EXCLUDED.root_ids))) ELSE ${SCHEMA_BRAIN}.nodes.root_ids END,
@@ -174,11 +173,10 @@ export const sql_inject_triples_insert_edge = (
 	weight: number,
 	idol_id?: string | null,
 	root_ids?: string[] | null,
-	metrics_ids?: string[] | null,
-	metadata?: any
+	metrics_ids?: string[] | null
 ) => `
-  INSERT INTO ${SCHEMA_BRAIN}.edges (id, source_id, target_id, learning_rate, decay_resistance, type, weight, idol_id, root_ids, metrics_ids, metadata)
-  SELECT '${sub_id}_${obj_id}', '${sub_id}', '${obj_id}', ${learning_rate}, ${decay_resistance}, '${predicate}', ${weight}, ${idol_id ? `'${idol_id}'` : 'NULL'}, ${root_ids && root_ids.length > 0 ? `ARRAY[${root_ids.map(id => `'${id}'`).join(',')}]` : 'NULL'}, ${metrics_ids && metrics_ids.length > 0 ? `ARRAY[${metrics_ids.map(id => `'${id}'`).join(',')}]` : 'NULL'}, '${JSON.stringify(metadata ?? {})}'::jsonb
+  INSERT INTO ${SCHEMA_BRAIN}.edges (id, source_id, target_id, learning_rate, decay_resistance, type, weight, idol_id, root_ids, metrics_ids)
+  SELECT '${sub_id}_${obj_id}', '${sub_id}', '${obj_id}', ${learning_rate}, ${decay_resistance}, '${predicate}', ${weight}, ${idol_id ? `'${idol_id}'` : 'NULL'}, ${root_ids && root_ids.length > 0 ? `ARRAY[${root_ids.map(id => `'${id}'`).join(',')}]` : 'NULL'}, ${metrics_ids && metrics_ids.length > 0 ? `ARRAY[${metrics_ids.map(id => `'${id}'`).join(',')}]` : 'NULL'}
   WHERE NOT EXISTS (SELECT 1 FROM ${SCHEMA_BRAIN}.edges WHERE source_id = '${sub_id}' AND target_id = '${obj_id}');
 `
 
@@ -194,8 +192,7 @@ export const sql_inject_triples_update_edge = (
 	weight: number,
 	idol_id?: string | null,
 	root_ids?: string[] | null,
-	metrics_ids?: string[] | null,
-	metadata?: any
+	metrics_ids?: string[] | null
 ) => {
 	const has_root_ids = Boolean(root_ids && root_ids.length > 0)
 	const has_metrics_ids = Boolean(metrics_ids && metrics_ids.length > 0)
@@ -211,7 +208,6 @@ export const sql_inject_triples_update_edge = (
     idol_id = COALESCE(${idol_id ? `'${idol_id}'` : 'NULL'}, idol_id),
     root_ids = CASE WHEN ${has_root_ids} THEN (SELECT ARRAY(SELECT DISTINCT unnest(COALESCE(root_ids, '{}') || ${root_ids_array}))) ELSE root_ids END,
     metrics_ids = CASE WHEN ${has_metrics_ids} THEN (SELECT ARRAY(SELECT DISTINCT unnest(COALESCE(metrics_ids, '{}') || ${metrics_ids_array}))) ELSE metrics_ids END,
-    metadata = metadata || '${JSON.stringify(metadata ?? {})}'::jsonb,
     updated_at = CURRENT_TIMESTAMP
   WHERE source_id = '${sub_id}' AND target_id = '${obj_id}';
 `
@@ -245,12 +241,8 @@ export const sql_node_sources = `INSERT INTO ${SCHEMA_BRAIN}.node_sources (node_
  * Retrieves all nodes associated with a specific Idol (namespace/context).
  * Role: Scoped retrieval for multi-tenant or multi-context operations.
  */
-/**
- * Retrieves all nodes associated with a specific Idol (namespace/context).
- * Role: Scoped retrieval for multi-tenant or multi-context operations.
- */
 export const sql_get_nodes_by_idol = `
-  SELECT id, label, x, y, activation, potential, idol_id, root_ids, metrics_ids, metadata, created_at, updated_at
+  SELECT id, label, x, y, activation, potential, idol_id, root_ids, metrics_ids, created_at, updated_at
   FROM ${SCHEMA_BRAIN}.nodes
   WHERE idol_id = $1
 `
@@ -260,7 +252,7 @@ export const sql_get_nodes_by_idol = `
  * Role: Hierarchical or group-based retrieval.
  */
 export const sql_get_nodes_by_root = `
-  SELECT id, label, x, y, activation, potential, idol_id, root_ids, metrics_ids, metadata, created_at, updated_at
+  SELECT id, label, x, y, activation, potential, idol_id, root_ids, metrics_ids, created_at, updated_at
   FROM ${SCHEMA_BRAIN}.nodes
   WHERE $1 = ANY(root_ids)
 `
@@ -270,7 +262,7 @@ export const sql_get_nodes_by_root = `
  * Role: Context-scoped structure retrieval.
  */
 export const sql_get_edges_by_idol = `
-  SELECT source_id, target_id, weight, distance, type, idol_id, root_ids, metrics_ids, metadata, created_at, updated_at
+  SELECT source_id, target_id, weight, distance, type, idol_id, root_ids, metrics_ids, created_at, updated_at
   FROM ${SCHEMA_BRAIN}.edges
   WHERE idol_id = $1
 `
@@ -280,7 +272,7 @@ export const sql_get_edges_by_idol = `
  * Role: Group-scoped structure retrieval.
  */
 export const sql_get_edges_by_root = `
-  SELECT source_id, target_id, weight, distance, type, idol_id, root_ids, metrics_ids, metadata, created_at, updated_at
+  SELECT source_id, target_id, weight, distance, type, idol_id, root_ids, metrics_ids, created_at, updated_at
   FROM ${SCHEMA_BRAIN}.edges
   WHERE $1 = ANY(root_ids)
 `
@@ -359,7 +351,7 @@ export const sql_update_article = `
  * Role: "Grounding" - mapping an abstract vector/thought to a concrete concept node in the graph.
  */
 export const sql_find_nearest_node = `
-  SELECT id, label, activation, potential, threshold, metadata, 1 - (embedding <=> $1) AS similarity
+  SELECT id, label, activation, potential, threshold, 1 - (embedding <=> $1) AS similarity
   FROM ${SCHEMA_BRAIN}.nodes
   WHERE embedding IS NOT NULL
   ORDER BY embedding <=> $1
@@ -376,7 +368,7 @@ export const sql_update_node_embedding = `UPDATE ${SCHEMA_BRAIN}.nodes SET embed
  * Retrieves all nodes.
  * Role: Full system dump/backup.
  */
-export const sql_get_all_nodes = `SELECT id, label, x, y, activation, potential, idol_id, root_ids, metrics_ids, metadata, created_at, updated_at FROM ${SCHEMA_BRAIN}.nodes`
+export const sql_get_all_nodes = `SELECT id, label, x, y, activation, potential, idol_id, root_ids, metrics_ids, created_at, updated_at FROM ${SCHEMA_BRAIN}.nodes`
 
 /**
  * Updates an article's embedding vector.

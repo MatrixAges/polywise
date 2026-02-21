@@ -95,7 +95,7 @@ function collectImplicitResults(recall_result: AggregateResultsArgs['recall_resu
 			memoryStrength: node.potential,
 			source: 'implicit',
 			stimulated: true,
-			metadata: node.metadata ?? {},
+			metadata: {},
 			updated_at: node.updated_at
 		})
 	}

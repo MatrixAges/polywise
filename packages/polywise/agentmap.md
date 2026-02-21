@@ -58,7 +58,7 @@ This document provides an overview of the packages/polywise module structure and
 				"index.ts": { "desc": "SQL exports", "role": "Index" },
 				"meta.ts": { "desc": "Metadata SQL operations", "role": "SQL" },
 				"schema.ts": {
-					"desc": "Database schema definitions (memory schema: Nodes/Edges/Articles with JSONB metadata and CASCADE)",
+					"desc": "Database schema definitions (memory schema: Nodes/Edges/Articles with JSONB metadata for Articles only and CASCADE)",
 					"role": "Schema"
 				}
 			},

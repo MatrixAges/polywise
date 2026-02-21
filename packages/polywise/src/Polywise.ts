@@ -372,7 +372,6 @@ export default class Polywise {
 			idol_id = this.idol_id,
 			root_ids = this.root_ids,
 			metrics_ids = this.metrics_ids,
-			metadata,
 			embedding
 		} = args
 
@@ -387,7 +386,6 @@ export default class Polywise {
 			idol_id ?? null,
 			root_ids ?? null,
 			metrics_ids ?? null,
-			JSON.stringify(metadata ?? {}),
 			embedding ? `[${embedding.join(',')}]` : null
 		])) as Array<{ id: string }>
 
@@ -401,8 +399,7 @@ export default class Polywise {
 			weight,
 			idol_id = this.idol_id,
 			root_ids = this.root_ids,
-			metrics_ids = this.metrics_ids,
-			metadata
+			metrics_ids = this.metrics_ids
 		} = args
 
 		const edge_id = generateId()
@@ -414,8 +411,7 @@ export default class Polywise {
 			weight ?? DEFAULT_EDGE_WEIGHT,
 			idol_id ?? null,
 			root_ids ?? null,
-			metrics_ids ?? null,
-			JSON.stringify(metadata ?? {})
+			metrics_ids ?? null
 		])
 	}
 
@@ -466,8 +462,7 @@ export default class Polywise {
 						0.5,
 						idol_id,
 						root_ids,
-						metrics_ids,
-						normalized_triple.metadata
+						metrics_ids
 					)
 				)
 
@@ -480,8 +475,7 @@ export default class Polywise {
 						0.1,
 						idol_id,
 						root_ids,
-						metrics_ids,
-						normalized_triple.metadata
+						metrics_ids
 					)
 				)
 
@@ -499,7 +493,7 @@ export default class Polywise {
 
 	async injectTriple(args: {
 		triple: Pick<Triple, 'subject' | 'predicate' | 'object'> &
-			Partial<Pick<Triple, 'learning_rate' | 'decay_resistance' | 'metadata'>>
+			Partial<Pick<Triple, 'learning_rate' | 'decay_resistance'>>
 		article_id: string
 		idol_id?: string | null
 		root_ids?: Array<string> | null
@@ -515,7 +509,7 @@ export default class Polywise {
 					object: triple.object,
 					learning_rate: triple.learning_rate ?? 1.0,
 					decay_resistance: triple.decay_resistance ?? 1.0,
-					metadata: triple.metadata
+					metadata: {}
 				}
 			],
 			article_id,
@@ -538,15 +532,13 @@ export default class Polywise {
 		const decay_resistance_candidate = Number(triple.decay_resistance)
 		const learning_rate = Number.isFinite(learning_rate_candidate) ? learning_rate_candidate : 1.0
 		const decay_resistance = Number.isFinite(decay_resistance_candidate) ? decay_resistance_candidate : 1.0
-		const metadata = triple.metadata ?? {}
 
 		return {
 			subject,
 			predicate,
 			object,
 			learning_rate,
-			decay_resistance,
-			metadata
+			decay_resistance
 		}
 	}
 
@@ -565,7 +557,6 @@ export default class Polywise {
 			idol_id ?? null,
 			root_ids ?? null,
 			metrics_ids ?? null,
-			'{}',
 			null
 		])) as Array<{ id: string }>
 

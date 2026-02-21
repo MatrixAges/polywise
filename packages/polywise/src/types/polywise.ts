@@ -28,7 +28,6 @@ export interface Node {
 	idol_id?: string
 	root_ids?: Array<string>
 	metrics_ids?: Array<string>
-	metadata?: Metadata
 	embedding?: Array<number>
 	created_at?: string
 	updated_at?: string
@@ -46,7 +45,6 @@ export interface Edge {
 	idol_id?: string
 	root_ids?: Array<string>
 	metrics_ids?: Array<string>
-	metadata?: Metadata
 	reaction_count?: number
 	created_at?: string
 	updated_at?: string

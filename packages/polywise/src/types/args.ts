@@ -93,7 +93,6 @@ export interface AddNodeArgs extends FiltersArgs {
 	x: number
 	y: number
 	threshold?: number
-	metadata?: Metadata
 	embedding?: Array<number>
 }
 
@@ -101,7 +100,6 @@ export interface ConnectArgs extends FiltersArgs {
 	source_id: string
 	target_id: string
 	weight?: number
-	metadata?: Metadata
 }
 
 export interface ProcessArticleArgs extends FiltersArgs {
