@@ -27,7 +27,7 @@ export const sql_create_table_nodes = `
     label TEXT UNIQUE,
     x REAL,
     y REAL,
-    potential REAL DEFAULT 0.1,
+    potential REAL DEFAULT 1.0,
     threshold REAL DEFAULT 0.5,
     last_fired_at TIMESTAMP,
     idol_id TEXT,

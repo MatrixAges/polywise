@@ -13,7 +13,7 @@ const CustomNode = ({ data, selected }: NodeProps) => {
 
 	return (
 		<div
-			className={`pointer-events-auto relative flex w-[150px] flex-col items-center gap-2 rounded-full bg-white p-3 shadow-sm transition-shadow ${
+			className={`pointer-events-auto relative flex h-[100px] w-[100px] flex-col items-center justify-center gap-1 rounded-full bg-white p-3 shadow-sm transition-shadow ${
 				selected ? 'shadow-md ring-2 ring-slate-400' : ''
 			}`}
 			style={{
