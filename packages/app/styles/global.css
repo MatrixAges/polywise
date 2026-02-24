@@ -20,7 +20,3 @@ body {
 		scrollbar-width: 0 !important;
 	}
 }
-
-.react-flow__edge-path {
-	fill: unset;
-}
