@@ -5,7 +5,11 @@ import {
 	EDGE_LEARNING_FACTOR,
 	EDGE_WEIGHT_MAX,
 	EDGE_WEIGHT_MIN,
+	GLOBAL_DECAY_RATE,
+	HYPERPOLARIZATION_POTENTIAL,
+	MIN_POTENTIAL,
 	NODE_POTENTIAL_MIN,
+	REFRACTORY_PERIOD_MS,
 	SCHEMA_BRAIN,
 	SCHEMA_MEMORY,
 	SCHEMA_META,
@@ -27,7 +31,7 @@ export const sql_propagate = (threshold: number) => `
     SELECT 
       e.target_id, 
       SUM(
-        n.activation * e.weight * (1.0 / (1.0 + ln(1.0 + EXTRACT(EPOCH FROM (CURRENT_TIMESTAMP - e.updated_at)) / 86400.0))) / (e.distance + 0.1)
+        n.activation * e.weight * ${GLOBAL_DECAY_RATE} / (e.distance + 0.1)
       ) as total_input
     FROM ${SCHEMA_BRAIN}.edges e
     JOIN ${SCHEMA_BRAIN}.nodes n ON e.source_id = n.id
@@ -35,14 +39,34 @@ export const sql_propagate = (threshold: number) => `
     GROUP BY e.target_id
   )
   UPDATE ${SCHEMA_BRAIN}.nodes
-  SET potential = LEAST(potential + COALESCE((SELECT total_input FROM incoming_signals WHERE incoming_signals.target_id = ${SCHEMA_BRAIN}.nodes.id), 0), ${TICK_POTENTIAL_MAX});
+  SET potential = LEAST(GREATEST(potential + COALESCE((SELECT total_input FROM incoming_signals WHERE incoming_signals.target_id = ${SCHEMA_BRAIN}.nodes.id), 0), ${MIN_POTENTIAL}), ${TICK_POTENTIAL_MAX});
 
   UPDATE ${SCHEMA_BRAIN}.nodes
   SET 
-    activation = CASE WHEN potential > ${threshold} THEN 1.0 ELSE 0.0 END,
-    potential = CASE WHEN potential > ${threshold} THEN 0.0 ELSE potential * ${TICK_DECAY_RATE} END,
-    last_fired_at = CASE WHEN potential > ${threshold} THEN CURRENT_TIMESTAMP ELSE last_fired_at END,
-    updated_at = CASE WHEN potential > ${threshold} THEN CURRENT_TIMESTAMP ELSE updated_at END;
+    activation = CASE 
+      WHEN potential > ${threshold} 
+           AND (last_fired_at IS NULL OR EXTRACT(EPOCH FROM (CURRENT_TIMESTAMP - last_fired_at)) * 1000 > ${REFRACTORY_PERIOD_MS})
+      THEN 1.0 
+      ELSE 0.0 
+    END,
+    potential = CASE 
+      WHEN potential > ${threshold} 
+           AND (last_fired_at IS NULL OR EXTRACT(EPOCH FROM (CURRENT_TIMESTAMP - last_fired_at)) * 1000 > ${REFRACTORY_PERIOD_MS})
+      THEN ${HYPERPOLARIZATION_POTENTIAL} 
+      ELSE potential * ${TICK_DECAY_RATE} 
+    END,
+    last_fired_at = CASE 
+      WHEN potential > ${threshold} 
+           AND (last_fired_at IS NULL OR EXTRACT(EPOCH FROM (CURRENT_TIMESTAMP - last_fired_at)) * 1000 > ${REFRACTORY_PERIOD_MS})
+      THEN CURRENT_TIMESTAMP 
+      ELSE last_fired_at 
+    END,
+    updated_at = CASE 
+      WHEN potential > ${threshold} 
+           AND (last_fired_at IS NULL OR EXTRACT(EPOCH FROM (CURRENT_TIMESTAMP - last_fired_at)) * 1000 > ${REFRACTORY_PERIOD_MS})
+      THEN CURRENT_TIMESTAMP 
+      ELSE updated_at 
+    END;
 
   UPDATE ${SCHEMA_BRAIN}.edges e
   SET 
@@ -103,7 +127,7 @@ export const sql_stimulate = `UPDATE ${SCHEMA_BRAIN}.nodes SET potential = poten
  * Role: Captures the current "state of mind" for visualization or analysis, filtering out dormant nodes.
  */
 export const sql_get_snapshot_nodes = (weight_threshold: number, limit: number) => `
-  SELECT id, label, x, y, activation, potential, idol_id, root_ids, metrics_ids, created_at, updated_at
+  SELECT id, label, x, y, activation, potential, idol_id, root_ids, metrics_ids, article_ids, lock, created_at, updated_at
   FROM ${SCHEMA_BRAIN}.nodes
   WHERE potential > ${NODE_POTENTIAL_MIN}
   OR id IN (SELECT source_id FROM ${SCHEMA_BRAIN}.edges WHERE weight > ${weight_threshold})
@@ -117,7 +141,7 @@ export const sql_get_snapshot_nodes = (weight_threshold: number, limit: number) 
  * Role: Captures the active wiring of the brain for visualization or analysis.
  */
 export const sql_get_snapshot_edges = (weight_threshold: number) => `
-  SELECT source_id, target_id, weight, distance, idol_id, root_ids, metrics_ids, created_at, updated_at
+  SELECT source_id, target_id, weight, distance, idol_id, root_ids, metrics_ids, lock, created_at, updated_at
   FROM ${SCHEMA_BRAIN}.edges
   WHERE weight > ${weight_threshold}
   ORDER BY weight DESC
@@ -381,7 +405,7 @@ export const sql_update_node_embedding = `UPDATE ${SCHEMA_BRAIN}.nodes SET embed
  * Retrieves all nodes.
  * Role: Full system dump/backup.
  */
-export const sql_get_all_nodes = `SELECT id, label, x, y, activation, potential, idol_id, root_ids, metrics_ids, created_at, updated_at FROM ${SCHEMA_BRAIN}.nodes`
+export const sql_get_all_nodes = `SELECT id, label, x, y, activation, potential, idol_id, root_ids, metrics_ids, article_ids, lock, created_at, updated_at FROM ${SCHEMA_BRAIN}.nodes`
 
 /**
  * Updates an article's embedding vector.

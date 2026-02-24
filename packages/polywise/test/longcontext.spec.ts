@@ -30,7 +30,7 @@ describe.concurrent('Long Context and Language Traps', () => {
 				type: 'custom',
 				fn: getTestRerank
 			},
-			rebel_config: {
+			keyword_config: {
 				type: 'custom',
 				fn: getTestKeywords
 			},

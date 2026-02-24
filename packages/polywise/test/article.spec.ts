@@ -23,13 +23,13 @@ describe.concurrent('Article CRUD Operations', () => {
 				type: 'custom',
 				fn: getTestRerank
 			},
-			rebel_config: {
+			keyword_config: {
 				type: 'custom',
 				fn: getTestKeywords
 			},
 			embedding_concurrency: 10,
 			reranker_concurrency: 10,
-			rebel_concurrency: 10
+			keyword_concurrency: 10
 		})
 	})
 
@@ -177,13 +177,13 @@ describe.concurrent('Full-Text Search and Vector Search', () => {
 				type: 'custom',
 				fn: getTestRerank
 			},
-			rebel_config: {
+			keyword_config: {
 				type: 'custom',
 				fn: getTestKeywords
 			},
 			embedding_concurrency: 10,
 			reranker_concurrency: 10,
-			rebel_concurrency: 10
+			keyword_concurrency: 10
 		})
 	})
 

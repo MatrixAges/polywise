@@ -33,7 +33,7 @@ FRESH → TIRED → SLEEPING → FRESH 状态循环`
 			data_dir: db_name,
 			embedding_config: { type: 'custom', fn: getTestVectors },
 			reranker_config: { type: 'custom', fn: getTestRerank },
-			rebel_config: { type: 'custom', fn: getTestKeywords },
+			keyword_config: { type: 'custom', fn: getTestKeywords },
 			metrics_ids
 		})
 

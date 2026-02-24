@@ -223,7 +223,7 @@ describe('Polywise Brain System', () => {
 
 			await poly.brain.triggerInputBurst(50)
 
-			const { nodes } = await poly.getSnapshot(0.1)
+			const { nodes } = await poly.getSnapshot(0.1, 1000)
 			const output_node = nodes.find((n: any) => n.label.includes('Secure_API'))
 
 			expect(output_node).toBeDefined()

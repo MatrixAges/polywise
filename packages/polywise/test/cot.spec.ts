@@ -29,7 +29,7 @@ describe('Chain of Thought (CoT) Iterative Search', () => {
 			},
 			embedding_concurrency: 20,
 			reranker_concurrency: 20,
-			rebel_concurrency: 20
+			keyword_concurrency: 20
 		})
 
 		// Prepare test data: software architecture documents

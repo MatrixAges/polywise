@@ -4,11 +4,11 @@ import { Tabs } from 'antd'
 
 import { memo } from '@/utils'
 
-import { Chat, Save, Task } from './components'
+import { Chat, Query, Save, Task } from './components'
 
 import type { IPropsPanel } from '../../types'
 
-type Tab = 'chat' | 'save' | 'task'
+type Tab = 'chat' | 'save' | 'query' | 'task'
 
 const Index = (props: IPropsPanel) => {
 	const { onClose } = props
@@ -36,6 +36,15 @@ const Index = (props: IPropsPanel) => {
 					>
 						<Clipboard size={16} />
 					</div>
+					<div
+						className={$cx(
+							'border-std-900/8 clickable flex h-full w-[37px] items-center justify-center border-r',
+							active_tab === 'query' && 'bg-std-100 shadow-[0_1px_0_0_var(--color-std-100)]'
+						)}
+						onClick={() => set_active_tab('query')}
+					>
+						<Search size={16} />
+					</div>
 
 					<div
 						className={$cx(
@@ -62,6 +71,7 @@ const Index = (props: IPropsPanel) => {
 					items={[
 						{ key: 'chat', label: 'Chat', children: <Chat /> },
 						{ key: 'save', label: 'Save', children: <Save /> },
+						{ key: 'query', label: 'Query', children: <Query /> },
 						{ key: 'task', label: 'Task', children: <Task /> }
 					]}
 				/>

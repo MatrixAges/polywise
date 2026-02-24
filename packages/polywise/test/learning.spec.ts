@@ -24,7 +24,7 @@ describe.concurrent('Polywise Pure Text Learning', () => {
 				type: 'custom',
 				fn: getTestRerank
 			},
-			rebel_config: {
+			keyword_config: {
 				type: 'custom',
 				fn: getTestKeywords
 			},

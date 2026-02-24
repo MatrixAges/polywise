@@ -23,7 +23,7 @@ const getPipeline = async () => {
 			cache_dir: path.join(os.homedir(), '.polywise', '.models'),
 			embedding_concurrency: 20,
 			reranker_concurrency: 20,
-			rebel_concurrency: 20
+			keyword_concurrency: 20
 		})
 	}
 

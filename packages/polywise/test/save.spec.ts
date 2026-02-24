@@ -19,7 +19,7 @@ describe('Polywise Save Implementation', () => {
 			},
 			embedding_concurrency: 5,
 			reranker_concurrency: 5,
-			rebel_config: {
+			keyword_config: {
 				type: 'custom',
 				fn: getTestKeywords
 			}

@@ -22,13 +22,13 @@ describe('Polywise Process', () => {
 				type: 'custom',
 				fn: getTestRerank
 			},
-			rebel_config: {
+			keyword_config: {
 				type: 'custom',
 				fn: getTestKeywords
 			},
 			embedding_concurrency: 10,
 			reranker_concurrency: 10,
-			rebel_concurrency: 10
+			keyword_concurrency: 10
 		})
 
 		for (const text of cognitive_science_datasets.slice(0, 10)) {

@@ -23,7 +23,7 @@ describe.concurrent('Long Text Embedding & Fact Preservation', () => {
 				type: 'custom',
 				fn: getTestRerank
 			},
-			rebel_config: {
+			keyword_config: {
 				type: 'custom',
 				fn: getTestKeywords
 			}
