@@ -20,10 +20,7 @@ const getPipeline = async () => {
 		pipeline = new Pipeline()
 
 		await pipeline.init({
-			cache_dir: path.join(os.homedir(), '.polywise', '.models'),
-			embedding_concurrency: 20,
-			reranker_concurrency: 20,
-			keyword_concurrency: 20
+			cache_dir: path.join(os.homedir(), '.polywise', '.models')
 		})
 	}
 

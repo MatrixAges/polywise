@@ -28,8 +28,6 @@ describe('Polywise Brain System', () => {
 				type: 'custom',
 				fn: getTestKeywords
 			},
-			embedding_concurrency: 10,
-			reranker_concurrency: 10,
 			onTick: async () => {
 				const { nodes, edges } = await poly.getSnapshot()
 				const active = nodes.filter((n: any) => n.activation > 0).map((n: any) => n.label)

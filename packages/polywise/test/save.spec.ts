@@ -17,8 +17,6 @@ describe('Polywise Save Implementation', () => {
 				type: 'custom',
 				fn: getTestVectors
 			},
-			embedding_concurrency: 5,
-			reranker_concurrency: 5,
 			keyword_config: {
 				type: 'custom',
 				fn: getTestKeywords

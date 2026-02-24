@@ -27,9 +27,7 @@ describe.concurrent('Polywise Pure Text Learning', () => {
 			keyword_config: {
 				type: 'custom',
 				fn: getTestKeywords
-			},
-			embedding_concurrency: 20,
-			reranker_concurrency: 20
+			}
 		})
 	})
 

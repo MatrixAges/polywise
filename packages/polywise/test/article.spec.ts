@@ -26,10 +26,7 @@ describe.concurrent('Article CRUD Operations', () => {
 			keyword_config: {
 				type: 'custom',
 				fn: getTestKeywords
-			},
-			embedding_concurrency: 10,
-			reranker_concurrency: 10,
-			keyword_concurrency: 10
+			}
 		})
 	})
 
@@ -147,9 +144,7 @@ describe.concurrent('Article CRUD Operations', () => {
 		const empty_poly = new Polywise()
 
 		await empty_poly.init({
-			data_dir: getDataDir(),
-			embedding_concurrency: 10,
-			reranker_concurrency: 10
+			data_dir: getDataDir()
 		})
 
 		const results = await empty_poly.article.searchByText({ query: 'test', limit: 10 })
@@ -180,10 +175,7 @@ describe.concurrent('Full-Text Search and Vector Search', () => {
 			keyword_config: {
 				type: 'custom',
 				fn: getTestKeywords
-			},
-			embedding_concurrency: 10,
-			reranker_concurrency: 10,
-			keyword_concurrency: 10
+			}
 		})
 	})
 

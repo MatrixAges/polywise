@@ -26,10 +26,7 @@ describe('Chain of Thought (CoT) Iterative Search', () => {
 			keyword_config: {
 				type: 'custom',
 				fn: getTestKeywords
-			},
-			embedding_concurrency: 20,
-			reranker_concurrency: 20,
-			keyword_concurrency: 20
+			}
 		})
 
 		// Prepare test data: software architecture documents

@@ -33,9 +33,7 @@ describe.concurrent('Long Context and Language Traps', () => {
 			keyword_config: {
 				type: 'custom',
 				fn: getTestKeywords
-			},
-			embedding_concurrency: 10,
-			reranker_concurrency: 10
+			}
 		})
 
 		const mandatory = [
