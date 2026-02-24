@@ -52,8 +52,8 @@
 		"concurrently": "^9.2.1",
 		"cross-env": "^10.1.0",
 		"delay-cli": "^3.0.0",
-		"electron": "^40.1.0",
-		"electron-builder": "^26.7.0",
+		"electron": "^40.6.0",
+		"electron-builder": "^26.8.1",
 		"glob": "^13.0.3",
 		"tinyglobby": "^0.2.15",
 		"typescript": "^5.9.3"

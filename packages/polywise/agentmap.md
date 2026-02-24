@@ -104,7 +104,7 @@ This document provides an overview of the packages/polywise module structure and
 					"role": "Utility"
 				},
 				"KeyBERT.ts": {
-					"desc": "Biological-inspired keyword extraction using Intl.Segmenter and Cosine Similarity between document and candidate n-gram embeddings.",
+					"desc": "Biological-inspired keyword extraction using @node-rs/jieba for POS-tagged segmentation, stopword filtering, and a POS boundary firewall (filtering out verbs, adverbs, etc.) for high-quality semantic node candidates.",
 					"role": "Utility"
 				},
 				"aggregation.ts": { "desc": "Memory aggregation logic", "role": "Utility" },

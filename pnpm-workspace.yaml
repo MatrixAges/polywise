@@ -33,12 +33,13 @@ catalog:
   zod: 4.3.6
 
 onlyBuiltDependencies:
-  - electron
+  - '@node-rs/jieba'
   - bun
-  - simple-git-hooks
-  - sharp
-  - onnxruntime-node
   - core-js
+  - electron
   - electron-winstaller
   - esbuild
+  - onnxruntime-node
   - protobufjs
+  - sharp
+  - simple-git-hooks
