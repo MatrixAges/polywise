@@ -13,7 +13,7 @@ const CustomNode = ({ data, selected }: NodeProps) => {
 
 	return (
 		<div
-			className={`pointer-events-auto relative flex w-[260px] flex-col gap-2 rounded-xl bg-white p-4 shadow-sm transition-shadow ${
+			className={`pointer-events-auto relative flex w-[150px] flex-col items-center gap-2 rounded-full bg-white p-3 shadow-sm transition-shadow ${
 				selected ? 'shadow-md ring-2 ring-slate-400' : ''
 			}`}
 			style={{
@@ -22,14 +22,13 @@ const CustomNode = ({ data, selected }: NodeProps) => {
 		>
 			<div className='flex items-center justify-between'>
 				<div className='flex items-center gap-2 text-slate-800'>
-					<span className='text-[15px] underline' title={label}>
+					<span className='text-[15px]' title={label}>
 						{label}
 					</span>
 				</div>
 			</div>
 
 			<div className='flex items-center justify-between text-[12px] text-slate-500'>
-				<span>Activation:</span>
 				<span className='text-slate-700'>{potential?.toFixed(2) || '0.00'}</span>
 			</div>
 
