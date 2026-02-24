@@ -99,6 +99,10 @@ This document provides an overview of the packages/polywise module structure and
 					"desc": "Text processing utility for large text slicing",
 					"role": "Utility"
 				},
+				"splitSentence.ts": {
+					"desc": "Sentence splitting utility using sentence-splitter for robust multilingual segmentation.",
+					"role": "Utility"
+				},
 				"verifyModel.ts": {
 					"desc": "Model integrity verification utility for .onnx files",
 					"role": "Utility"

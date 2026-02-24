@@ -32,6 +32,7 @@
 		"fs-extra": "catalog:",
 		"ofetch": "catalog:",
 		"optional": "^0.1.4",
+		"sentence-splitter": "^5.0.0",
 		"stopword": "^3.1.4",
 		"tslib": "catalog:",
 		"tsyringe": "catalog:",
