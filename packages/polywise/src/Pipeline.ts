@@ -3,16 +3,10 @@ import path from 'path'
 import { env, pipeline } from '@huggingface/transformers'
 import to from 'await-to-js'
 import fs from 'fs-extra'
-import PQueue from 'p-queue'
 import { injectable } from 'tsyringe'
 
-import {
-	DEFAULT_CONCURRENCY,
-	DEFAULT_EMBEDDING_CONFIG,
-	DEFAULT_KEYWORD_CONFIG,
-	DEFAULT_RERANKER_CONFIG,
-	POOLING_MEAN
-} from './consts'
+import Console from './Console'
+import { DEFAULT_EMBEDDING_CONFIG, DEFAULT_KEYWORD_CONFIG, DEFAULT_RERANKER_CONFIG, POOLING_MEAN } from './consts'
 import { catchFinally } from './decorators'
 import { generateModelHash, processText, splitSentence, verifyModel } from './utils'
 import KeyBERT from './utils/KeyBERT'
@@ -33,27 +27,13 @@ export default class Pipeline {
 	private reranker_config: RerankerConfig = DEFAULT_RERANKER_CONFIG
 	private keyword_config: KeywordConfig = DEFAULT_KEYWORD_CONFIG
 	private cache_dir: string = `${os.homedir()}/.polywise/.models`
-	private embedding_concurrency: number = DEFAULT_CONCURRENCY
-	private reranker_concurrency: number = DEFAULT_CONCURRENCY
-	private keyword_concurrency: number = DEFAULT_CONCURRENCY
 	private embedding_pipeline: any = null
 	private reranker_pipeline: any = null
-	private embedding_queue = new PQueue({ concurrency: this.embedding_concurrency })
-	private reranker_queue = new PQueue({ concurrency: this.reranker_concurrency })
-	private keyword_queue = new PQueue({ concurrency: this.keyword_concurrency })
 	private embedding_promise: Promise<any> | null = null
 	private reranker_promise: Promise<any> | null = null
 
 	async init(args: PipelineArgs = {}) {
-		const {
-			cache_dir,
-			embedding_config,
-			reranker_config,
-			keyword_config,
-			embedding_concurrency,
-			reranker_concurrency,
-			keyword_concurrency
-		} = args
+		const { cache_dir, embedding_config, reranker_config, keyword_config } = args
 
 		if (cache_dir) {
 			this.cache_dir = cache_dir
@@ -75,21 +55,6 @@ export default class Pipeline {
 
 		if (keyword_config) {
 			this.keyword_config = keyword_config
-		}
-
-		if (embedding_concurrency !== undefined) {
-			this.embedding_concurrency = embedding_concurrency
-			this.embedding_queue = new PQueue({ concurrency: this.embedding_concurrency })
-		}
-
-		if (reranker_concurrency !== undefined) {
-			this.reranker_concurrency = reranker_concurrency
-			this.reranker_queue = new PQueue({ concurrency: this.reranker_concurrency })
-		}
-
-		if (keyword_concurrency !== undefined) {
-			this.keyword_concurrency = keyword_concurrency
-			this.keyword_queue = new PQueue({ concurrency: this.keyword_concurrency })
 		}
 	}
 
@@ -124,7 +89,7 @@ export default class Pipeline {
 		for (const sentence of sentences) {
 			if (sentence.length < 5) continue
 
-			const result = await this.keyword_queue.add<Array<string>>(async () => {
+			const keywords = await (async () => {
 				if (this.keyword_config.type === 'custom') {
 					const keywords = await this.keyword_config.fn(sentence)
 					return keywords.map(String)
@@ -138,10 +103,10 @@ export default class Pipeline {
 				}
 
 				return extracted.map(k => k.word)
-			})
+			})()
 
-			if (result && result.length > 0) {
-				all_keywords.push(...result)
+			if (keywords && keywords.length > 0) {
+				all_keywords.push(...keywords)
 			}
 		}
 
@@ -164,26 +129,24 @@ export default class Pipeline {
 		const chunks = await processText(text)
 
 		const results = await Promise.all(
-			chunks.map(chunk =>
-				this.embedding_queue.add(async () => {
-					if (this.embedding_config.type === 'custom') {
-						const { fn } = this.embedding_config
+			chunks.map(async chunk => {
+				if (this.embedding_config.type === 'custom') {
+					const { fn } = this.embedding_config
 
-						return (await fn(chunk)) as Array<number>
-					}
+					return (await fn(chunk)) as Array<number>
+				}
 
-					const embedding = await this.loadEmbeddingModel()
+				const embedding = await this.loadEmbeddingModel()
 
-					const output = await embedding(chunk, {
-						pooling: POOLING_MEAN,
-						normalize: true,
-						truncation: true,
-						max_length: 2048
-					})
-
-					return Array.from((output as any).data) as Array<number>
+				const output = await embedding(chunk, {
+					pooling: POOLING_MEAN,
+					normalize: true,
+					truncation: true,
+					max_length: 2048
 				})
-			)
+
+				return Array.from((output as any).data) as Array<number>
+			})
 		)
 
 		if (results.length === 1) {
@@ -206,7 +169,9 @@ export default class Pipeline {
 	async rerank(query: string, documents: Array<string>) {
 		if (documents.length === 0) return []
 
-		const scores = await this.reranker_queue.add<Array<{ score: number }>>(async () => {
+		Console.log('PIPELINE', 'rerank starting', { query, doc_count: documents.length })
+
+		const all_scores = await (async () => {
 			if (this.reranker_config.type === 'custom') {
 				const { fn } = this.reranker_config
 				const output = await fn(query, documents)
@@ -216,31 +181,44 @@ export default class Pipeline {
 
 			const reranker = await this.loadRerankerModel()
 
-			const texts = new Array(documents.length).fill(query)
-			const text_pairs = documents
-
-			const encoded = await reranker.tokenizer(texts, {
-				text_pair: text_pairs,
-				padding: true,
-				truncation: true,
-				max_length: 512
-			})
-
-			const output = await reranker.model(encoded)
-			const logits = output.logits.data
-
+			const batch_size = 4
 			const scores: Array<{ score: number }> = []
 
-			for (let i = 0; i < logits.length; i++) {
-				const logit = logits[i]
-				const score = 1 / (1 + Math.exp(-logit))
-				scores.push({ score })
+			for (let i = 0; i < documents.length; i += batch_size) {
+				const chunk = documents.slice(i, i + batch_size)
+				const texts = new Array(chunk.length).fill(query)
+
+				Console.log(
+					'PIPELINE',
+					`rerank: batch ${Math.floor(i / batch_size) + 1}/${Math.ceil(documents.length / batch_size)}`,
+					{
+						chunk_size: chunk.length,
+						memory: (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2) + 'MB'
+					}
+				)
+
+				const encoded = await reranker.tokenizer(texts, {
+					text_pair: chunk,
+					padding: true,
+					truncation: true,
+					max_length: 512
+				})
+
+				const output = await reranker.model(encoded)
+				const logits = output.logits.data
+
+				for (let j = 0; j < logits.length; j++) {
+					const logit = logits[j]
+					const score = 1 / (1 + Math.exp(-logit))
+					scores.push({ score })
+				}
 			}
 
 			return scores
-		})
+		})()
 
-		return scores || []
+		Console.log('PIPELINE', 'rerank finished')
+		return all_scores || []
 	}
 
 	private normalizeRerankOutput(output: unknown) {
@@ -263,8 +241,6 @@ export default class Pipeline {
 
 			if (valid_items.length === 0) return 0
 
-			// For single-label output (standard BGE-M3 behavior in pipeline), the score is the relevance score.
-			// Even if the label is LABEL_0, it represents the sigmoid score (0-1).
 			if (valid_items.length === 1) {
 				return valid_items[0].score
 			}
@@ -443,40 +419,9 @@ export default class Pipeline {
 		env.cacheDir = dir
 	}
 
-	getEmbeddingConcurrency() {
-		return this.embedding_concurrency
-	}
-
-	setEmbeddingConcurrency(concurrency: number) {
-		this.embedding_concurrency = concurrency
-		this.embedding_queue = new PQueue({ concurrency: this.embedding_concurrency })
-	}
-
-	getRerankerConcurrency() {
-		return this.reranker_concurrency
-	}
-
-	setRerankerConcurrency(concurrency: number) {
-		this.reranker_concurrency = concurrency
-		this.reranker_queue = new PQueue({ concurrency: this.reranker_concurrency })
-	}
-
 	getKeywordConfig() {
 		return this.keyword_config
 	}
 
-	getRebelConcurrency() {
-		return this.keyword_concurrency
-	}
-
-	setRebelConcurrency(concurrency: number) {
-		this.keyword_concurrency = concurrency
-		this.keyword_queue = new PQueue({ concurrency: this.keyword_concurrency })
-	}
-
-	off() {
-		this.embedding_queue.clear()
-		this.reranker_queue.clear()
-		this.keyword_queue.clear()
-	}
+	off() {}
 }

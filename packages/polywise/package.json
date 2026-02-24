@@ -31,7 +31,6 @@
 		"fs-extra": "catalog:",
 		"ofetch": "catalog:",
 		"optional": "^0.1.4",
-		"p-queue": "^8.1.0",
 		"tslib": "catalog:",
 		"tsyringe": "catalog:",
 		"uuid": "catalog:"
@@ -46,6 +45,7 @@
 		"@types/uuid": "catalog:",
 		"bun": "catalog:",
 		"bun-types": "catalog:",
+		"chalk": "^5.6.2",
 		"cross-env": "^10.1.0",
 		"deepmerge-ts": "^7.1.5",
 		"glob": "^13.0.0",

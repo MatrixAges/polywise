@@ -63,7 +63,7 @@ const Index = observer(() => {
 				</Button>
 			</div>
 
-			<div className='flex flex-1 overflow-hidden'>
+			<div className='flex flex-1 overflow-auto'>
 				<MemoryList
 					items={results}
 					loading={loading}

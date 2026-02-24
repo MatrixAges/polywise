@@ -1,5 +1,6 @@
 import type { PGlite } from '@electric-sql/pglite'
 import type { DataType } from '@huggingface/transformers'
+import type { ConsoleConfig } from '../Console'
 import type Polywise from '../Polywise'
 import type Process from '../Process'
 import type { ChainEmitter } from '../utils'
@@ -17,16 +18,15 @@ export interface FiltersArgs {
 	metrics_ids?: Array<string>
 }
 
+// ...
 export interface PolywiseArgs extends FiltersArgs {
 	data_dir?: string
 	cache_dir?: string
 	embedding_config?: EmbeddingConfig
 	reranker_config?: RerankerConfig
 	keyword_config?: KeywordConfig
-	embedding_concurrency?: number
-	reranker_concurrency?: number
-	keyword_concurrency?: number
 	log?: boolean | LogArgs
+	console?: ConsoleConfig
 	onTick?: () => void
 }
 
@@ -74,9 +74,6 @@ export interface PipelineArgs {
 	embedding_config?: EmbeddingConfig
 	reranker_config?: RerankerConfig
 	keyword_config?: KeywordConfig
-	embedding_concurrency?: number
-	reranker_concurrency?: number
-	keyword_concurrency?: number
 }
 
 export interface AddNodeArgs extends FiltersArgs {

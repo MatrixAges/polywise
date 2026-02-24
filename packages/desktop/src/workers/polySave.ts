@@ -1,14 +1,9 @@
-import { Polywise } from 'polywise'
+import { Console, Polywise } from 'polywise'
 
 import type { ProcessArticleArgs, QueryArgs } from 'polywise'
 
-type UpdateArgs = {
-	memory_id: string
-	content: string
-	idol_id?: string
-	root_ids?: Array<string>
-	metrics_ids?: Array<string>
-	metadata?: Record<string, unknown>
+const writeLog = (event_name: string, payload?: Record<string, unknown>) => {
+	Console.log('SYSTEM', event_name, payload)
 }
 
 type ForgetArgs = {
@@ -62,15 +57,6 @@ type SaveReadyMessage = {
 
 type WorkerProcess = NodeJS.Process & {
 	send?: (message: unknown) => void
-}
-
-const writeLog = (event_name: string, payload?: Record<string, unknown>) => {
-	if (payload) {
-		console.log('[memory-worker]', event_name, payload)
-		return
-	}
-
-	console.log('[memory-worker]', event_name)
 }
 
 const poly = new Polywise()

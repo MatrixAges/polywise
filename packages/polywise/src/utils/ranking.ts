@@ -1,3 +1,4 @@
+import Console from '../Console'
 import {
 	DEFAULT_SIMILARITY_THRESHOLD,
 	formatRerankDocument,
@@ -20,9 +21,13 @@ export async function rerankMemory(
 	threshold: number = DEFAULT_SIMILARITY_THRESHOLD,
 	lambda: number = 0.5
 ) {
+	Console.log('RANKING', 'rerankMemory start', { candidate_count: candidates.length })
 	const valid_candidates = candidates.filter(c => c.content && c.content.trim().length > 0)
 
-	if (valid_candidates.length === 0) return []
+	if (valid_candidates.length === 0) {
+		Console.log('RANKING', 'no valid candidates')
+		return []
+	}
 
 	const documents = valid_candidates.map(c => {
 		const source_info = formatSourceInfo(c.source, c.stimulated, c.memoryStrength)
@@ -30,7 +35,9 @@ export async function rerankMemory(
 		return formatRerankDocument(source_info, c.content)
 	})
 
+	Console.log('RANKING', 'pipeline.rerank start')
 	const rerank_scores = await pipeline.rerank(query, documents)
+	Console.log('RANKING', 'pipeline.rerank done')
 
 	const results_with_scores = valid_candidates.map((candidate, index) => {
 		const score = rerank_scores[index]?.score ?? 0
@@ -41,12 +48,12 @@ export async function rerankMemory(
 		}
 	})
 
-	// Pre-filter by threshold to save on embedding lookups for low-quality results
 	const thresholded_results = results_with_scores.filter(r => r.score >= threshold)
+	Console.log('RANKING', 'thresholded results', { count: thresholded_results.length })
 
 	if (thresholded_results.length === 0) return []
 
-	// Retrieve embeddings for MMR
+	Console.log('RANKING', 'retrieving embeddings for MMR...')
 	const results_with_embeddings = await Promise.all(
 		thresholded_results.map(async candidate => {
 			let embedding: Array<number> | undefined = undefined
@@ -72,9 +79,12 @@ export async function rerankMemory(
 			}
 		})
 	)
+	Console.log('RANKING', 'embeddings retrieval done')
 
 	// Apply MMR
+	Console.log('RANKING', 'maximalMarginalRelevance start')
 	const mmr_results = maximalMarginalRelevance(results_with_embeddings, limit, lambda)
+	Console.log('RANKING', 'maximalMarginalRelevance done')
 
 	// Clean up embedding records to return Memory type correctly
 	const final_results: Array<Memory> = mmr_results.map(item => {
@@ -82,7 +92,9 @@ export async function rerankMemory(
 		return rest as Memory
 	})
 
+	Console.log('RANKING', 'stimulateByRanking start')
 	await stimulateByRanking(final_results, queryRaw)
+	Console.log('RANKING', 'stimulateByRanking done')
 
 	return final_results
 }

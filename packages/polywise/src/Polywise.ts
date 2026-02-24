@@ -6,6 +6,7 @@ import { container, singleton } from 'tsyringe'
 import Activation from './Activation'
 import Article from './Article'
 import Brain from './Brain'
+import Console from './Console'
 import {
 	DEFAULT_DATA_DIR,
 	DEFAULT_EDGE_WEIGHT,
@@ -138,15 +139,17 @@ export default class Polywise {
 			embedding_config,
 			reranker_config,
 			keyword_config,
-			embedding_concurrency,
-			reranker_concurrency,
-			keyword_concurrency,
 			log,
+			console: console_config,
 			idol_id,
 			root_ids,
 			metrics_ids,
 			onTick
 		} = args
+
+		if (console_config) {
+			Console.configure(console_config)
+		}
 
 		this.idol_id = idol_id ?? null
 		this.root_ids = root_ids ?? null
@@ -165,10 +168,7 @@ export default class Polywise {
 			cache_dir,
 			embedding_config,
 			reranker_config,
-			keyword_config,
-			embedding_concurrency,
-			reranker_concurrency,
-			keyword_concurrency
+			keyword_config
 		})
 
 		this.article.init(this)
@@ -669,8 +669,11 @@ export default class Polywise {
 			threshold = DEFAULT_SIMILARITY_THRESHOLD
 		} = args
 
+		Console.log('SEARCH', 'executeSingleSearch start', { query })
+
 		const query_embedding = (await this.pipeline.embed(query)) as Array<number>
 
+		Console.log('SEARCH', 'recallFromMemory start')
 		const recall_result = await this.recallFromMemory({
 			query,
 			max_depth: recall_depth,
@@ -681,6 +684,7 @@ export default class Polywise {
 			metrics_ids
 		})
 
+		Console.log('SEARCH', 'article.searchByVector start')
 		const vectorResults = await this.article.searchByVector({
 			query,
 			limit: search_limit,
@@ -691,6 +695,7 @@ export default class Polywise {
 		})
 		process?.emit('vector_search_results', vectorResults)
 
+		Console.log('SEARCH', 'article.searchByText start')
 		const fulltextResults = await this.article.searchByText({
 			query,
 			limit: search_limit,
@@ -700,6 +705,7 @@ export default class Polywise {
 		})
 		process?.emit('fulltext_search_results', fulltextResults)
 
+		Console.log('SEARCH', 'pipeline.search start')
 		const search_results = await this.pipeline.search({
 			query,
 			rerank_limit: search_limit,
@@ -707,12 +713,14 @@ export default class Polywise {
 			fulltextSearch: () => Promise.resolve(fulltextResults)
 		})
 
+		Console.log('SEARCH', 'aggregateResults start')
 		const { memory } = await aggregateResults({
 			recall_result,
 			search_results
 		})
 		process?.emit('aggregated_results', { memory })
 
+		Console.log('SEARCH', 'rerankMemory start')
 		const reranked_memory = await rerankMemory(
 			query,
 			memory,
@@ -732,6 +740,8 @@ export default class Polywise {
 		if (!this.db) {
 			throw new Error('DB not initialized or already closed')
 		}
+
+		Console.log('SQL', 'queryRaw', { sql: sql_str.trim(), params })
 
 		const res = await this.db.query<T>(sql_str, params)
 
