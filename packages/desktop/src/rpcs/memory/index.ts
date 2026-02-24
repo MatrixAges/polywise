@@ -120,6 +120,18 @@ const recall = p
 		})
 	})
 
+const expand = p
+	.input(
+		object({
+			node_id: string(),
+			depth: number().optional(),
+			limit: number().optional()
+		})
+	)
+	.query(async ({ input, ctx }) => {
+		return await ctx.memory.expand(input)
+	})
+
 const getNodes = p.query(async ({ ctx }) => {
 	return await ctx.memory.getNodes()
 })
@@ -186,6 +198,7 @@ export default router({
 	forget,
 	snapshot,
 	recall,
+	expand,
 	getNodes,
 	getNodesByIdol,
 	getEdgesByIdol,

@@ -26,6 +26,7 @@ interface MemoryGraphProps {
 		distance: number
 	}>
 	loading?: boolean
+	onNodeClick?: (node_id: string) => void
 }
 
 const nodeTypes = {
@@ -86,7 +87,7 @@ const colorMegaPools = [
 ]
 
 const MemoryGraph = (props: MemoryGraphProps) => {
-	const { nodes: initialNodes, edges: initialEdges, loading = false } = props
+	const { nodes: initialNodes, edges: initialEdges, loading = false, onNodeClick } = props
 
 	const [flow_nodes, setNodes, onOriginalNodesChange] = useNodesState<Node>([])
 	const [flow_edges, setEdges, onOriginalEdgesChange] = useEdgesState<Edge>([])
@@ -336,7 +337,7 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 			data: {
 				label: node.label,
 				potential: node.potential,
-				activation: node.activation,
+				activation: node.activation ?? node.potential,
 				clusterColor: node.clusterColor
 			},
 			type: 'customNode'
@@ -430,6 +431,7 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 				onNodeDragStop={onNodeDragStop}
 				nodeTypes={nodeTypes}
 				edgeTypes={edgeTypes}
+				onNodeClick={(_, node) => onNodeClick?.(node.id)}
 				fitView
 				minZoom={0.1}
 				maxZoom={2}

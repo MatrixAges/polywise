@@ -67,7 +67,7 @@ const Index = () => {
 				result = (await memory.recall({
 					query,
 					max_depth: 3,
-					limit: 60
+					limit: 30
 				})) as unknown as SnapshotResult
 			} else {
 				result = (await memory.snapshot({ weight_threshold: 0.2, limit: 60 })) as SnapshotResult
@@ -109,11 +109,47 @@ const Index = () => {
 		[memory, results]
 	)
 
+	const handleNodeClick = useCallback(
+		async (node_id: string) => {
+			set_graph_loading(true)
+
+			try {
+				const result = await memory.expand({ node_id, limit: 20 })
+				const new_nodes = result.nodes || []
+				const new_edges = result.edges || []
+
+				set_graph_nodes((prev: Array<BrainNode>) => {
+					const existing_ids = new Set(prev.map(n => n.id))
+					const filtered_new = (new_nodes as Array<BrainNode>).filter(n => !existing_ids.has(n.id))
+					return [...prev, ...filtered_new]
+				})
+
+				set_graph_edges((prev: Array<BrainEdge>) => {
+					const existing_keys = new Set(prev.map(e => `${e.source_id}_${e.target_id}`))
+					const filtered_new = (new_edges as Array<BrainEdge>).filter(
+						e => !existing_keys.has(`${e.source_id}_${e.target_id}`)
+					)
+					return [...prev, ...filtered_new]
+				})
+			} finally {
+				set_graph_loading(false)
+			}
+		},
+		[memory]
+	)
+
 	useEffect(() => {
 		if (view_mode !== 'graph' || graph_loaded) return
 
 		void loadGraph()
 	}, [graph_loaded, loadGraph, view_mode])
+
+	// Automatically reload graph data when query changes
+	useEffect(() => {
+		if (view_mode === 'graph') {
+			set_graph_loaded(false)
+		}
+	}, [query, view_mode])
 
 	return (
 		<div className='flex h-full w-full flex-col gap-4 p-4'>
@@ -165,7 +201,12 @@ const Index = () => {
 						onPageChange={setPage}
 					/>
 				) : (
-					<MemoryGraph nodes={graph_nodes} edges={graph_edges} loading={graph_loading} />
+					<MemoryGraph
+						nodes={graph_nodes}
+						edges={graph_edges}
+						loading={graph_loading}
+						onNodeClick={handleNodeClick}
+					/>
 				)}
 			</div>
 		</div>

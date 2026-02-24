@@ -105,6 +105,9 @@ class App {
 								input,
 								this.memory_data_dir
 							)
+						},
+						expand: async input => {
+							return await saveWithUtilityProcess.expand(input, this.memory_data_dir)
 						}
 					}
 				}),

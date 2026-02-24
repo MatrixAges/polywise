@@ -604,6 +604,19 @@ export default class Polywise {
 		await this.exec(sql_memory_reorganization)
 	}
 
+	async expand(args: { node_id: string; depth?: number; limit?: number }) {
+		const { node_id, depth = 1, limit = 20 } = args
+
+		const related_nodes = await this.recallRelatedNodes([node_id], depth, limit)
+		const all_node_ids = Array.from(new Set([node_id, ...related_nodes.map(n => n.id)]))
+		const edges = await this.getEdgesBetweenNodes(all_node_ids)
+
+		return {
+			nodes: related_nodes,
+			edges
+		}
+	}
+
 	async recallFromMemory(args: RecallArgs) {
 		this.log.write({ query: args.query }, { event: 'recall_start' })
 

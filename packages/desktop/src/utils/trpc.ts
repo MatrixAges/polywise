@@ -34,6 +34,12 @@ type RecallArgs = {
 	limit?: number
 }
 
+type ExpandArgs = {
+	node_id: string
+	depth?: number
+	limit?: number
+}
+
 type IdolArgs = {
 	idol_id: string
 }
@@ -45,6 +51,7 @@ type MemoryBridge = {
 	forget: (input: ForgetArgs) => Promise<unknown>
 	snapshot: (input: SnapshotArgs) => Promise<unknown>
 	recall: (input: RecallArgs) => Promise<unknown>
+	expand: (input: ExpandArgs) => Promise<unknown>
 	getNodes: () => Promise<unknown>
 	getNodesByIdol: (input: IdolArgs) => Promise<unknown>
 	getEdgesByIdol: (input: IdolArgs) => Promise<unknown>

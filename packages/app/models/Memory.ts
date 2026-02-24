@@ -223,6 +223,13 @@ export default class MemoryModel {
 		return await ipc.memory.recall.query(this.toSerializableObject(args))
 	}
 
+	async expand(args: { node_id: string; depth?: number; limit?: number }) {
+		return (await ipc.memory.expand.query(this.toSerializableObject(args))) as {
+			nodes: Array<any>
+			edges: Array<any>
+		}
+	}
+
 	async snapshot(args?: { weight_threshold?: number; limit?: number }) {
 		return await ipc.memory.snapshot.query(this.toSerializableObject(args || {}))
 	}

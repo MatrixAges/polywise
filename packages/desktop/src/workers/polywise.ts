@@ -33,6 +33,12 @@ type RecallArgs = {
 	limit?: number
 }
 
+type ExpandArgs = {
+	node_id: string
+	depth?: number
+	limit?: number
+}
+
 type IdolArgs = {
 	idol_id: string
 }
@@ -45,6 +51,7 @@ type MemoryMethod =
 	| 'forget'
 	| 'snapshot'
 	| 'recall'
+	| 'expand'
 	| 'getNodes'
 	| 'getNodesByIdol'
 	| 'getEdgesByIdol'
@@ -136,6 +143,8 @@ const initPoly = async (data_dir: string) => {
 }
 
 const runMemoryMethod = async (method: MemoryMethod, args: unknown) => {
+	writeLog('method_call', { method, args })
+
 	if (method === 'init') return true
 
 	if (method === 'save') return await poly.save(args as ProcessArticleArgs)
@@ -153,6 +162,8 @@ const runMemoryMethod = async (method: MemoryMethod, args: unknown) => {
 	}
 
 	if (method === 'recall') return await poly.recallFromMemory(args as RecallArgs)
+
+	if (method === 'expand') return await poly.expand(args as ExpandArgs)
 
 	if (method === 'getNodes') return await poly.getAllNodes()
 
