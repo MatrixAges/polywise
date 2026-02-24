@@ -538,8 +538,13 @@ export default class Polywise {
 	}
 
 	async getSnapshot(weight_threshold = SNAPSHOT_WEIGHT_THRESHOLD, limit = SNAPSHOT_NODES_LIMIT) {
+		Console.log('SYSTEM', 'getSnapshot start', { weight_threshold, limit })
+
 		const nodes = (await this.queryRaw(sql_get_snapshot_nodes(weight_threshold, limit))) as Array<Node>
+		Console.log('SYSTEM', 'getSnapshot nodes fetched', { count: nodes.length })
+
 		const edges = (await this.queryRaw(sql_get_snapshot_edges(weight_threshold))) as Array<Edge>
+		Console.log('SYSTEM', 'getSnapshot edges fetched', { count: edges.length })
 
 		const node_ids = new Set(nodes.map(n => n.id))
 		const valid_edges = edges.filter(e => node_ids.has(e.source_id) && node_ids.has(e.target_id))
@@ -787,15 +792,17 @@ export default class Polywise {
 	}
 
 	async queryRaw<T = any>(sql_str: string, params?: Array<any>): Promise<Array<T>> {
-		if (!this.db) {
+		if (!this.db || this.is_closed) {
+			Console.log('SYSTEM', 'DB not ready for query', { is_closed: this.is_closed })
+
 			throw new Error('DB not initialized or already closed')
 		}
 
-		Console.log('SQL', 'queryRaw', { sql: sql_str.trim(), params })
+		Console.log('SQL', 'queryRaw start', { sql: sql_str.substring(0, 500) })
 
-		const res = await this.db.query<T>(sql_str, params)
+		const result = await this.db.query<T>(sql_str, params)
 
-		return res.rows
+		return result.rows
 	}
 
 	private async initDatabase() {
