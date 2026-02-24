@@ -81,6 +81,8 @@ export default class Pipeline {
 	async generateKeywords(text: string) {
 		if (!text.trim()) return []
 
+		Console.log('PIPELINE', 'keyword generation start')
+
 		const sentences = await splitSentence([text])
 		const all_keywords: Array<string> = []
 
@@ -126,6 +128,8 @@ export default class Pipeline {
 	}
 
 	async embed(text: string) {
+		Console.log('PIPELINE', 'embedding start', { text_len: text.length })
+
 		const chunks = await processText(text)
 
 		const results = await Promise.all(

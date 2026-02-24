@@ -215,6 +215,8 @@ export default class Polywise {
 			metadata
 		} = args
 
+		Console.log('SYSTEM', 'save start', { content_len: content.length, metadata })
+
 		const article_id = generateId()
 
 		const res = (await this.queryRaw(sql_process_article, [
@@ -242,6 +244,7 @@ export default class Polywise {
 		const keywords = await this.pipeline.generateKeywords(content)
 
 		if (keywords.length > 0) {
+			Console.log('SYSTEM', 'keywords injected', { count: keywords.length })
 			const node_ids = await this.injectKeywords({
 				keywords,
 				article_id: aid,
@@ -255,6 +258,8 @@ export default class Polywise {
 		}
 
 		this.log.write({ ...args, idol_id, root_ids, metrics_ids }, { memory_id: aid })
+
+		Console.log('SYSTEM', 'save complete', { memory_id: aid })
 
 		return aid
 	}
@@ -275,6 +280,8 @@ export default class Polywise {
 			metrics_ids = this.metrics_ids,
 			metadata
 		} = args
+
+		Console.log('SYSTEM', 'save start', { content_len: content.length, metadata })
 
 		await this.queryRaw(sql_forget_decay_nodes, [memory_id])
 		await this.queryRaw(sql_forget_decay_edges, [memory_id])
@@ -309,6 +316,8 @@ export default class Polywise {
 		}
 
 		this.log.write({ ...args, idol_id, root_ids, metrics_ids }, { memory_id })
+
+		Console.log('SYSTEM', 'save complete', { memory_id })
 
 		return memory_id
 	}

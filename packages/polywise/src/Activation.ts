@@ -1,5 +1,6 @@
 import { injectable } from 'tsyringe'
 
+import Console from './Console'
 import { DEFAULT_NODE_THRESHOLD, STRENGTHEN_EDGE_WEIGHT } from './consts'
 import { sql_stimulate_nodes_batch, sql_strengthen_edges_batch } from './sql'
 
@@ -18,6 +19,8 @@ export default class Activation {
 			return
 		}
 
+		Console.log('SYSTEM', 'stimulating nodes', { count: node_ids.length, intensity })
+
 		await this.p.queryRaw(sql_stimulate_nodes_batch, [intensity, node_ids])
 	}
 
@@ -33,6 +36,7 @@ export default class Activation {
 	}
 
 	async spread(steps = 3, threshold = DEFAULT_NODE_THRESHOLD) {
+		Console.log('SYSTEM', 'spreading activation', { steps, threshold })
 		for (let i = 0; i < steps; i++) {
 			await this.p.tick(threshold)
 
