@@ -70,7 +70,7 @@ export const sql_propagate = (threshold: number) => `
       WHEN (SELECT potential FROM ${SCHEMA_BRAIN}.nodes WHERE id = e.source_id) > ${threshold} 
            AND (SELECT potential FROM ${SCHEMA_BRAIN}.nodes WHERE id = e.target_id) > ${threshold} 
       THEN LEAST(weight + (${EDGE_LEARNING_FACTOR} * e.learning_rate * (1 - weight / ${EDGE_WEIGHT_MAX})), ${EDGE_WEIGHT_MAX})
-      ELSE weight
+      ELSE LEAST(weight + (${QUERY_REWARD} * e.learning_rate * (1 - weight / ${EDGE_WEIGHT_MAX})), ${EDGE_WEIGHT_MAX})
     END,
     distance = GREATEST(1.0 / (weight + ${DISTANCE_EPSILON}), 0.1),
     reaction_count = reaction_count + 1,

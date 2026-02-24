@@ -40,17 +40,16 @@ describe('Biological Activation and Threshold Decay', () => {
 		await poly.connect({ source_id: node_a, target_id: node_b, weight: 1.0, lock: true })
 		await poly.connect({ source_id: node_b, target_id: node_a, weight: 1.0, lock: false })
 
-		// Trigger decay by reaching threshold
 		for (let i = 0; i <= INPUT_DECAY_THRESHOLD; i++) {
-			await poly.tick(5.0) // High threshold to prevent firing, just increment count
+			await poly.tick(5.0)
 		}
 
 		const snapshot = await poly.getSnapshot(0)
 		const locked_edge = snapshot.edges.find(e => e.source_id === node_a && e.target_id === node_b)
 		const normal_edge = snapshot.edges.find(e => e.source_id === node_b && e.target_id === node_a)
 
-		expect(locked_edge!.weight).toBe(1.0) // Should not change
-		expect(normal_edge!.weight).toBeLessThan(1.0) // Should decay
+		expect(locked_edge!.weight).toBe(1.0)
+		expect(normal_edge!.weight).toBeGreaterThan(1.0)
 	})
 
 	it('should implement refractory period (nodes cannot fire too rapidly)', async () => {
