@@ -128,6 +128,38 @@ export const sql_get_snapshot_nodes = (weight_threshold: number, limit: number) 
 `
 
 /**
+ * Retrieves top N nodes by potential for snapshot seeding.
+ * Role: Gets the highest potential nodes to use as seeds for BFS expansion.
+ */
+export const sql_get_top_nodes_by_potential = (limit: number) => `
+  SELECT id, label, x, y, potential, idol_id, root_ids, metrics_ids, article_ids, lock, created_at, updated_at
+  FROM ${SCHEMA_BRAIN}.nodes
+  ORDER BY potential DESC
+  LIMIT ${limit}
+`
+
+/**
+ * Retrieves edges connected to given nodes.
+ * Role: Gets all edges that connect to the specified nodes for graph expansion.
+ */
+export const sql_get_edges_for_nodes = (node_ids: Array<string>) => `
+  SELECT id, source_id, target_id, weight, distance, learning_rate, decay_resistance, idol_id, root_ids, metrics_ids, lock, created_at, updated_at
+  FROM ${SCHEMA_BRAIN}.edges
+  WHERE source_id = ANY($1) OR target_id = ANY($1)
+  ORDER BY weight DESC
+`
+
+/**
+ * Retrieves nodes by their IDs.
+ * Role: Gets full node details for a list of node IDs.
+ */
+export const sql_get_nodes_by_ids = (node_ids: Array<string>) => `
+  SELECT id, label, x, y, potential, idol_id, root_ids, metrics_ids, article_ids, lock, created_at, updated_at
+  FROM ${SCHEMA_BRAIN}.nodes
+  WHERE id = ANY($1)
+`
+
+/**
  * Retrieves a snapshot of significant edges.
  * Role: Captures the active wiring of the brain for visualization or analysis.
  */

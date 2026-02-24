@@ -37,12 +37,15 @@ import {
 	sql_get_all_nodes,
 	sql_get_edges_by_idol,
 	sql_get_edges_by_root,
+	sql_get_edges_for_nodes,
 	sql_get_hot_node_count,
 	sql_get_input_count,
 	sql_get_nodes_by_idol,
+	sql_get_nodes_by_ids,
 	sql_get_nodes_by_root,
 	sql_get_snapshot_edges,
 	sql_get_snapshot_nodes,
+	sql_get_top_nodes_by_potential,
 	sql_increment_input_count,
 	sql_inject_edges_begin,
 	sql_inject_edges_commit,
@@ -137,7 +140,7 @@ export default class Polywise {
 
 		this.onTick = onTick
 
-		this.db = new PGlite(data_dir || DEFAULT_DATA_DIR, {
+		this.db = await PGlite.create(data_dir || DEFAULT_DATA_DIR, {
 			relaxedDurability: true,
 			extensions: { vector }
 		})
@@ -524,25 +527,84 @@ export default class Polywise {
 	async getSnapshot(weight_threshold = SNAPSHOT_WEIGHT_THRESHOLD, limit = SNAPSHOT_NODES_LIMIT) {
 		Console.log('SYSTEM', 'getSnapshot start', { weight_threshold, limit })
 
-		try {
-			const nodes = (await this.queryRaw(sql_get_snapshot_nodes(weight_threshold, limit))) as Array<Node>
-			Console.log('SYSTEM', 'getSnapshot nodes fetched', { count: nodes.length })
+		const SEED_NODES = 3
 
-			const edges = (await this.queryRaw(sql_get_snapshot_edges(weight_threshold))) as Array<Edge>
-			Console.log('SYSTEM', 'getSnapshot edges fetched', { count: edges.length })
+		const seed_nodes = (await this.queryRaw(sql_get_top_nodes_by_potential(SEED_NODES))) as Array<Node>
 
-			const node_ids = new Set(nodes.map(n => n.id))
-			const valid_edges = edges.filter(e => node_ids.has(e.source_id) && node_ids.has(e.target_id))
+		Console.log('SYSTEM', 'getSnapshot seed nodes', { count: seed_nodes.length })
 
-			return { nodes, edges: valid_edges }
-		} catch (error) {
-			Console.log('SYSTEM', 'getSnapshot error', {
-				error: error instanceof Error ? error.message : String(error),
-				stack: error instanceof Error ? error.stack : undefined
+		if (seed_nodes.length === 0) {
+			return { nodes: [], edges: [] }
+		}
+
+		const all_nodes_map = new Map<string, Node>()
+		const all_edges_map = new Map<string, Edge>()
+
+		const initial_node_ids = seed_nodes.map(n => n.id)
+		initial_node_ids.forEach(id => all_nodes_map.set(id, seed_nodes.find(n => n.id === id)!))
+
+		let frontier_node_ids = initial_node_ids
+		const max_iterations = 10
+
+		for (let iteration = 0; iteration < max_iterations; iteration++) {
+			if (all_nodes_map.size >= limit) break
+			if (frontier_node_ids.length === 0) break
+
+			const edges = (await this.queryRaw(sql_get_edges_for_nodes(frontier_node_ids), [
+				frontier_node_ids
+			])) as Array<Edge>
+
+			Console.log('SYSTEM', 'getSnapshot iteration edges', { iteration, count: edges.length })
+
+			if (edges.length === 0) break
+
+			edges.forEach(edge => {
+				const key = `${edge.source_id}_${edge.target_id}`
+				if (!all_edges_map.has(key)) {
+					all_edges_map.set(key, edge)
+				}
 			})
 
-			throw error
+			const connected_node_idsSet = new Set<string>()
+			edges.forEach(edge => {
+				if (!all_nodes_map.has(edge.source_id)) {
+					connected_node_idsSet.add(edge.source_id)
+				}
+				if (!all_nodes_map.has(edge.target_id)) {
+					connected_node_idsSet.add(edge.target_id)
+				}
+			})
+
+			const connected_node_ids = Array.from(connected_node_idsSet)
+
+			if (connected_node_ids.length === 0) break
+
+			const new_nodes = (await this.queryRaw(sql_get_nodes_by_ids(connected_node_ids), [
+				connected_node_ids
+			])) as Array<Node>
+
+			Console.log('SYSTEM', 'getSnapshot iteration nodes', { iteration, count: new_nodes.length })
+
+			new_nodes.forEach(node => {
+				if (!all_nodes_map.has(node.id)) {
+					all_nodes_map.set(node.id, node)
+				}
+			})
+
+			if (all_nodes_map.size >= limit) break
+
+			frontier_node_ids = connected_node_ids.slice(0, limit - all_nodes_map.size)
 		}
+
+		const result_nodes = Array.from(all_nodes_map.values()).slice(0, limit)
+		const result_edges = Array.from(all_edges_map.values())
+
+		Console.log('SYSTEM', 'getSnapshot done', {
+			nodes: result_nodes.length,
+			edges: result_edges.length
+		})
+
+		return { nodes: result_nodes, edges: result_edges }
 	}
 
 	async getAllNodes() {

@@ -57,6 +57,7 @@ export async function handleIPCMessage<TRouter extends AnyTRPCRouter>({
 			type,
 			signal: abortController.signal,
 			router,
+			batchIndex: 0,
 			getRawInput: async () => input
 		})
 
