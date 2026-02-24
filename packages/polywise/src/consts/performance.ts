@@ -37,10 +37,18 @@ export const DEFAULT_SIMILARITY_THRESHOLD = 0.1
 export const INPUT_DECAY_THRESHOLD = 100
 export const REFRACTORY_PERIOD_MS = 500
 export const GLOBAL_DECAY_RATE = 0.8
-export const HYPERPOLARIZATION_POTENTIAL = -0.5
-export const MIN_POTENTIAL = -1.0
+export const MIN_POTENTIAL = 0
 export const DECAY_STRENGTH = 0.8
 export const REORGANIZATION_STRENGTH = 0.15
 export const WEAK_EDGE_THRESHOLD = 0.005
 export const QUERY_REWARD = 0.01
 export const DISTANCE_EPSILON = 0.001
+
+// Synaptic Homeostasis Model (SHY)
+export const HOT_NODE_THRESHOLD = 0.8
+export const MAX_HOT_NODES = 100
+export const NODE_DECAY_RATE = 0.5
+export const NODE_INACTIVE_DAYS = 1
+export const EDGE_DECAY_RATE = 0.1
+export const EDGE_INACTIVE_DAYS = 7
+export const WEIGHT_DEATH_THRESHOLD = 0.001

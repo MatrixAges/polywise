@@ -1,11 +1,16 @@
 import {
 	DECAY_STRENGTH,
 	DISTANCE_EPSILON,
+	EDGE_DECAY_RATE,
+	EDGE_INACTIVE_DAYS,
 	EDGE_WEIGHT_MAX,
+	NODE_DECAY_RATE,
+	NODE_INACTIVE_DAYS,
 	REORGANIZATION_STRENGTH,
 	SCHEMA_BRAIN,
 	SCHEMA_MEMORY,
-	WEAK_EDGE_THRESHOLD
+	WEAK_EDGE_THRESHOLD,
+	WEIGHT_DEATH_THRESHOLD
 } from '../consts'
 
 /**
@@ -27,20 +32,29 @@ export const sql_sleep_tick_begin = `BEGIN`
 /**
  * Removes edges with negligible weight.
  * Role: Neural pruning mechanism to remove unused or insignificant connections, optimizing graph size and traversal performance.
+ * Triggered by: Cognitive overload (hot nodes > MAX_HOT_NODES).
  */
 export const sql_sleep_tick_clean_noise = `
   DELETE FROM ${SCHEMA_BRAIN}.edges 
-  WHERE weight < 0.001; 
+  WHERE weight < ${WEIGHT_DEATH_THRESHOLD}; 
 `
 
 /**
- * Decays the weight of weak edges.
- * Role: Implements the "forgetting curve" for weak memories, allowing unused connections to fade over time.
+ * Decays the weight of weak and inactive edges.
+ * Role: Implements selective synaptic decay - only decays edges that are both low-weight and long-inactive.
+ * This mimics synaptic homeostasis where weak, unused connections are pruned during cognitive overload.
+ * Triggered by: Cognitive overload (hot nodes > MAX_HOT_NODES).
  */
-export const sql_sleep_tick_decay = `
+export const sql_sleep_tick_decay_edges = `
   UPDATE ${SCHEMA_BRAIN}.edges
-  SET weight = GREATEST(weight - 0.01, 0.001)
-  WHERE weight < 0.2;
+  SET 
+    weight = weight * (1.0 - ${EDGE_DECAY_RATE}),
+    distance = 1.0 / (weight * (1.0 - ${EDGE_DECAY_RATE}) + ${DISTANCE_EPSILON}),
+    updated_at = CURRENT_TIMESTAMP
+  WHERE 
+    lock = FALSE
+    AND weight < 0.5
+    AND updated_at < NOW() - INTERVAL '${EDGE_INACTIVE_DAYS} days';
 `
 
 /**
@@ -58,10 +72,20 @@ export const sql_sleep_tick_replay = `
 `
 
 /**
- * Resets all node potentials to zero.
- * Role: Clears the "short-term memory" or active working memory buffer to prepare for a fresh wake cycle.
+ * Decays the potential of inactive nodes.
+ * Role: Implements selective node decay - only decays nodes that are low-potential and long-inactive.
+ * This mimics synaptic homeostasis where inactive neural pathways are downregulated during cognitive overload.
+ * Triggered by: Cognitive overload (hot nodes > MAX_HOT_NODES).
  */
-export const sql_sleep_tick_reset_nodes = `UPDATE ${SCHEMA_BRAIN}.nodes SET potential = 0;`
+export const sql_sleep_tick_decay_nodes = `
+  UPDATE ${SCHEMA_BRAIN}.nodes
+  SET potential = potential * ${NODE_DECAY_RATE},
+      updated_at = CURRENT_TIMESTAMP
+  WHERE 
+    lock = FALSE
+    AND potential < 0.5
+    AND updated_at < NOW() - INTERVAL '${NODE_INACTIVE_DAYS} days';
+`
 
 /**
  * Commits the sleep cycle transaction.
@@ -222,4 +246,14 @@ export const sql_memory_reorganization = `
 	  AND (lock IS NULL OR lock = FALSE);
 
 	COMMIT;
+`
+
+/**
+ * Counts nodes with potential above the hot threshold.
+ * Role: Used to determine if cognitive overload has occurred, triggering selective decay.
+ */
+export const sql_get_hot_node_count = (threshold: number) => `
+	SELECT COUNT(*) as count
+	FROM ${SCHEMA_BRAIN}.nodes
+	WHERE potential > ${threshold}
 `

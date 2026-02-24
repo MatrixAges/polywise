@@ -15,7 +15,9 @@ import {
 	DEFAULT_RERANK_LIMIT,
 	DEFAULT_SEARCH_LIMIT,
 	DEFAULT_SIMILARITY_THRESHOLD,
+	HOT_NODE_THRESHOLD,
 	INPUT_DECAY_THRESHOLD,
+	MAX_HOT_NODES,
 	MEMORY_RECALL_INTENSITY,
 	SNAPSHOT_NODES_LIMIT,
 	SNAPSHOT_WEIGHT_THRESHOLD
@@ -35,6 +37,7 @@ import {
 	sql_get_all_nodes,
 	sql_get_edges_by_idol,
 	sql_get_edges_by_root,
+	sql_get_hot_node_count,
 	sql_get_input_count,
 	sql_get_nodes_by_idol,
 	sql_get_nodes_by_root,
@@ -56,9 +59,9 @@ import {
 	sql_sleep_tick_begin,
 	sql_sleep_tick_clean_noise,
 	sql_sleep_tick_commit,
-	sql_sleep_tick_decay,
+	sql_sleep_tick_decay_edges,
+	sql_sleep_tick_decay_nodes,
 	sql_sleep_tick_replay,
-	sql_sleep_tick_reset_nodes,
 	sql_stimulate,
 	sql_update_article_embedding,
 	sql_upsert_node
@@ -585,14 +588,39 @@ export default class Polywise {
 	}
 
 	async triggerSleepTick() {
+		Console.log('SYSTEM', 'triggerSleepTick start')
+
+		const hot_node_result = (await this.queryRaw(sql_get_hot_node_count(HOT_NODE_THRESHOLD))) as Array<{
+			count: number
+		}>
+		const hot_node_count = hot_node_result[0]?.count ?? 0
+
+		Console.log('SYSTEM', 'triggerSleepTick check', { hot_node_count, max_hot_nodes: MAX_HOT_NODES })
+
+		const is_overloaded = hot_node_count > MAX_HOT_NODES
+
+		if (!is_overloaded) {
+			Console.log('SYSTEM', 'triggerSleepTick skipped - not overloaded')
+			return
+		}
+
+		Console.log('SYSTEM', 'triggerSleepTick executing - cognitive overload detected')
+
 		await this.exec([
 			sql_sleep_tick_begin,
 			sql_sleep_tick_clean_noise,
-			sql_sleep_tick_decay,
+			sql_sleep_tick_decay_nodes,
+			sql_sleep_tick_decay_edges,
 			sql_sleep_tick_replay,
-			sql_sleep_tick_reset_nodes,
 			sql_sleep_tick_commit
 		])
+
+		Console.log('SYSTEM', 'triggerSleepTick completed')
+	}
+
+	async getHotNodeCount() {
+		const result = (await this.queryRaw(sql_get_hot_node_count(HOT_NODE_THRESHOLD))) as Array<{ count: number }>
+		return result[0]?.count ?? 0
 	}
 
 	async triggerMemoryReorganization() {

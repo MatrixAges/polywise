@@ -6,7 +6,6 @@ import {
 	EDGE_WEIGHT_MAX,
 	EDGE_WEIGHT_MIN,
 	GLOBAL_DECAY_RATE,
-	HYPERPOLARIZATION_POTENTIAL,
 	MIN_POTENTIAL,
 	NODE_POTENTIAL_MIN,
 	QUERY_REWARD,
@@ -47,7 +46,7 @@ export const sql_propagate = (threshold: number) => `
     potential = CASE 
       WHEN potential > ${threshold} 
            AND (last_fired_at IS NULL OR EXTRACT(EPOCH FROM (CURRENT_TIMESTAMP - last_fired_at)) * 1000 > ${REFRACTORY_PERIOD_MS})
-      THEN ${HYPERPOLARIZATION_POTENTIAL} 
+      THEN 0
       ELSE potential * ${TICK_DECAY_RATE} 
     END,
     last_fired_at = CASE 
