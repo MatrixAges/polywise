@@ -107,7 +107,11 @@ This document provides an overview of the packages/polywise module structure and
 					"desc": "Biological-inspired keyword extraction using Intl.Segmenter and Cosine Similarity between document and candidate n-gram embeddings.",
 					"role": "Utility"
 				},
-				"ranking.ts": { "desc": "Ranking utility", "role": "Utility" },
+				"aggregation.ts": { "desc": "Memory aggregation logic", "role": "Utility" },
+				"ranking.ts": {
+					"desc": "Ranking utility with optimization to skip redundant reranking steps",
+					"role": "Utility"
+				},
 				"mmr.ts": {
 					"desc": "Maximum Marginal Relevance algorithm for semantic retrieval diversification",
 					"role": "Utility"

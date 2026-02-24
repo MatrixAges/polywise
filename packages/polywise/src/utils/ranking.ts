@@ -29,24 +29,31 @@ export async function rerankMemory(
 		return []
 	}
 
-	const documents = valid_candidates.map(c => {
-		const source_info = formatSourceInfo(c.source, c.stimulated, c.memoryStrength)
+	let results_with_scores: Array<Memory>
 
-		return formatRerankDocument(source_info, c.content)
-	})
+	if (valid_candidates.every(c => c.score > 0)) {
+		Console.log('RANKING', 'skipping rerank, using existing scores')
+		results_with_scores = valid_candidates
+	} else {
+		const documents = valid_candidates.map(c => {
+			const source_info = formatSourceInfo(c.source, c.stimulated, c.memoryStrength)
 
-	Console.log('RANKING', 'pipeline.rerank start')
-	const rerank_scores = await pipeline.rerank(query, documents)
-	Console.log('RANKING', 'pipeline.rerank done')
+			return formatRerankDocument(source_info, c.content)
+		})
 
-	const results_with_scores = valid_candidates.map((candidate, index) => {
-		const score = rerank_scores[index]?.score ?? 0
+		Console.log('RANKING', 'pipeline.rerank start')
+		const rerank_scores = await pipeline.rerank(query, documents)
+		Console.log('RANKING', 'pipeline.rerank done')
 
-		return {
-			...candidate,
-			score
-		}
-	})
+		results_with_scores = valid_candidates.map((candidate, index) => {
+			const score = rerank_scores[index]?.score ?? 0
+
+			return {
+				...candidate,
+				score
+			}
+		})
+	}
 
 	const thresholded_results = results_with_scores.filter(r => r.score >= threshold)
 	Console.log('RANKING', 'thresholded results', { count: thresholded_results.length })

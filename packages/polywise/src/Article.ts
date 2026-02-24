@@ -6,6 +6,7 @@ import {
 	sql_delete_article,
 	sql_get_all_articles,
 	sql_get_article,
+	sql_get_articles_by_ids,
 	sql_insert_article_embedding,
 	sql_process_article,
 	sql_search_articles_by_text,
@@ -75,6 +76,12 @@ export default class Article {
 		const res = await this.p.db.query<ArticleEntity>(sql_get_article, [article_id])
 
 		return res.rows.length > 0 ? res.rows : null
+	}
+
+	async getMany(article_ids: Array<string>) {
+		if (article_ids.length === 0) return []
+		const res = await this.p.db.query<ArticleEntity>(sql_get_articles_by_ids, [article_ids])
+		return res.rows
 	}
 
 	async getAll() {

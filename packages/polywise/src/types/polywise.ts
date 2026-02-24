@@ -79,6 +79,8 @@ export interface ArticleEntity {
 	id: string
 	content: string
 	created_at: string
+	updated_at?: string
+	metadata?: Metadata
 }
 
 export interface ArticleWithSimilarity extends ArticleEntity {

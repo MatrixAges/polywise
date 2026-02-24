@@ -1,7 +1,7 @@
-import { MEMORY_SCORE_BOOST, POTENTIAL_THRESHOLD } from '../consts'
+import { POTENTIAL_THRESHOLD } from '../consts'
 import calculateMemoryStrength from './calculateMemoryStrength'
 
-import type { AggregateResultsArgs, Memory } from '../types'
+import type { AggregateResultsArgs, Memory, SearchResult } from '../types'
 
 export async function aggregateResults(args: AggregateResultsArgs) {
 	const { recall_result, search_results } = args
@@ -20,7 +20,7 @@ export async function aggregateResults(args: AggregateResultsArgs) {
 
 function collectMemoryResults(
 	recall_result: AggregateResultsArgs['recall_result'],
-	search_results: Array<any>,
+	search_results: Array<SearchResult>,
 	memory: Array<Memory>,
 	seen_ids: Set<string>
 ) {
@@ -36,7 +36,7 @@ function collectMemoryResults(
 				memory.push({
 					id: article.id,
 					content: article.content,
-					score: MEMORY_SCORE_BOOST,
+					score: article.rerankScore + 0.1,
 					memoryStrength: memory_strength,
 					source: 'memory',
 					stimulated: true,
@@ -51,7 +51,7 @@ function collectMemoryResults(
 
 function collectExternalResults(
 	recall_result: AggregateResultsArgs['recall_result'],
-	search_results: Array<any>,
+	search_results: Array<SearchResult>,
 	memory: Array<Memory>,
 	seen_ids: Set<string>
 ) {

@@ -708,6 +708,35 @@ export default class Polywise {
 		})
 		process?.emit('fulltext_search_results', fulltextResults)
 
+		// --- NEW: Recall missing articles from memory ---
+		const recalled_article_ids = new Set<string>()
+
+		for (const context of recall_result.related_contexts) {
+			for (const id of context.article_ids) {
+				recalled_article_ids.add(id)
+			}
+		}
+
+		const found_ids = new Set([...vectorResults.map(r => r.id), ...fulltextResults.map(r => r.id)])
+		const missing_ids = Array.from(recalled_article_ids).filter(id => !found_ids.has(id))
+
+		if (missing_ids.length > 0) {
+			Console.log('SEARCH', 'fetching missing memory articles', { count: missing_ids.length })
+			const missing_articles = await this.article.getMany(missing_ids)
+
+			const missing_results = missing_articles.map(a => ({
+				id: a.id,
+				content: a.content,
+				similarity: 0.5, // Give a reasonable base similarity for memory items
+				metadata: a.metadata,
+				created_at: a.created_at,
+				updated_at: a.updated_at
+			}))
+
+			vectorResults.push(...missing_results)
+		}
+		// ------------------------------------------------
+
 		Console.log('SEARCH', 'pipeline.search start')
 		const search_results = await this.pipeline.search({
 			query,

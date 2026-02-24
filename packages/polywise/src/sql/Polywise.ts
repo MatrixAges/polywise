@@ -362,6 +362,12 @@ export const sql_get_article = `SELECT id, content, created_at FROM ${SCHEMA_MEM
  * Retrieves all articles (metadata only).
  * Role: Bulk export or maintenance listing.
  */
+export const sql_get_articles_by_ids = `SELECT id, content, created_at, updated_at, metadata FROM ${SCHEMA_MEMORY}.articles WHERE id = ANY($1)`
+
+/**
+ * Retrieves all articles (metadata only).
+ * Role: Bulk export or maintenance listing.
+ */
 export const sql_get_all_articles = `SELECT id, content, created_at FROM ${SCHEMA_MEMORY}.articles ORDER BY created_at DESC`
 
 /**
