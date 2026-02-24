@@ -1,6 +1,5 @@
-import { BrowserWindow, shell } from 'electron'
-
 import { conf } from '@desktop/utils'
+import { BrowserWindow, shell } from 'electron'
 
 import config from '../../config'
 
@@ -10,6 +9,7 @@ export default class Index extends BrowserWindow {
 	constructor() {
 		super(config.window_options)
 
+		console.log('[app] Main window instance created')
 		this.window = this
 
 		this.loadURL(config.window_url)

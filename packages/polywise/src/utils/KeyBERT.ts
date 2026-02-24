@@ -1,5 +1,5 @@
 import { Jieba } from '@node-rs/jieba'
-import { dict } from '@node-rs/jieba/dict'
+import { dict } from '@node-rs/jieba/dict.js'
 import { eng, removeStopwords, zho } from 'stopword'
 
 import Console from '../Console'

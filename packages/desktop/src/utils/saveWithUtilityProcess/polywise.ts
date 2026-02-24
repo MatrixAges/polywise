@@ -140,7 +140,6 @@ export default class PolySaveUtilityProcess {
 		})
 
 		this.child = fork(worker_path, [], {
-			env: process.env,
 			execArgv: ['--max-old-space-size=8192'],
 			stdio: 'pipe'
 		})

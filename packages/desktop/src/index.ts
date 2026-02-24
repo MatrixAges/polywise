@@ -139,6 +139,7 @@ class App {
 		)
 
 		loading_view.webContents.on('dom-ready', () => {
+			console.log('[app] loading_view dom-ready, showing window')
 			window.show()
 		})
 	}
