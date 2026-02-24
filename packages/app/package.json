@@ -31,6 +31,7 @@
 		"electron-conf": "^1.3.0",
 		"erpc": "workspace:*",
 		"es-toolkit": "catalog:",
+		"geist": "^1.7.0",
 		"hotkeys-js": "^4.0.0",
 		"i18next": "catalog:",
 		"katex": "^0.16.28",

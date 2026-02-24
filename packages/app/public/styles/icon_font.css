@@ -15,58 +15,36 @@
 	src: local('STSongti-SC-Black');
 }
 
-/** IBMPlexSans */
+/** Geist */
 @font-face {
-	font-family: 'IBMPlexSans';
+	font-family: 'Geist';
 	font-style: normal;
 	src:
-		local('IBMPlexSans'),
-		url('../font/IBMPlexSans/IBMPlexSans.ttf') format('truetype');
+		local('Geist'),
+		url('../fonts/Geist/Geist.ttf') format('truetype');
 }
+
 @font-face {
-	font-family: 'IBMPlexSans';
+	font-family: 'Geist';
 	font-style: italic;
 	src:
-		local('IBMPlexSans'),
-		url('../font/IBMPlexSans/IBMPlexSans-Italic.ttf') format('truetype');
+		local('Geist'),
+		url('../fonts/Geist/Geist-Italic.ttf') format('truetype');
 }
 
-/** STIXTwoText */
+/** GeistMono */
 @font-face {
-	font-family: 'STIXTwoText';
+	font-family: 'GeistMono';
 	font-style: normal;
 	src:
-		local('STIXTwoText'),
-		url('../font/STIXTwoText/STIXTwoText.ttf') format('truetype');
-
-	descent-override: 6%;
+		local('GeistMono'),
+		url('../fonts/GeistMono/GeistMono.ttf') format('truetype');
 }
+
 @font-face {
-	font-family: 'STIXTwoText';
+	font-family: 'GeistMono';
 	font-style: italic;
 	src:
-		local('STIXTwoText'),
-		url('../font/STIXTwoText/STIXTwoText-Italic.ttf') format('truetype');
-
-	descent-override: 6%;
-}
-
-/** Tektur */
-@font-face {
-	font-family: 'Tektur';
-	font-style: normal;
-	src:
-		local('Tektur'),
-		url('../font/Tektur.ttf') format('truetype');
-
-	descent-override: 24%;
-}
-
-/** NotoEmoji */
-@font-face {
-	font-family: 'NotoEmoji';
-	font-style: normal;
-	src:
-		local('NotoEmoji'),
-		url('../font/NotoEmoji.ttf') format('truetype');
+		local('GeistMono'),
+		url('../fonts/GeistMono/GeistMono-Italic.ttf') format('truetype');
 }

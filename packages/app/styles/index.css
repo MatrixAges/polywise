@@ -40,6 +40,9 @@
 	--color-border-solid-active: oklch(from var(--color-std-900) l c h / 0.5);
 	--color-border-gray: oklch(from var(--color-std-600) l c h / 0.1);
 	--color-border-light: oklch(from var(--color-std-400) l c h / 0.1);
+
+	--font-sans: 'Geist';
+	--font-mono: 'GeistMono';
 }
 
 [data-theme='dark'] {
@@ -65,14 +68,7 @@
 
 @layer components {
 	.btn {
-		@apply 
-				flex
-				items-center justify-center
-				gap-1.5
-				text-gray
-				hover:text-dark hover:bg-bg-hover active:bg-bg-active
-				clickable
-			;
+		@apply text-gray hover:text-dark hover:bg-bg-hover active:bg-bg-active clickable flex items-center justify-center gap-1.5;
 	}
 
 	.no-scrollbar::-webkit-scrollbar {
