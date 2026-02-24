@@ -126,8 +126,8 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 			const simNode = simRef.current.nodes().find((n: any) => n.id === node.id)
 			if (simNode) {
 				// Important: Sync React Flow's drag position back to D3
-				simNode.fx = node.position.x + 30
-				simNode.fy = node.position.y + 30
+				simNode.fx = node.position.x + 130
+				simNode.fy = node.position.y + 42
 			}
 		}
 	}, [])
@@ -243,11 +243,11 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 			.force('center', forceCenter(0, 0).strength(0.05)) // Relaxed pull
 			.force('x', forceX(0).strength(0.05))
 			.force('y', forceY(0).strength(0.05))
-			.force('charge', forceManyBody().strength(-400).distanceMax(500)) // Scaled for smaller circular nodes
+			.force('charge', forceManyBody().strength(-800).distanceMax(800)) // Scaled back repulsion
 			.force(
 				'collide',
 				forceCollide((node: any) => {
-					return 100 // Tighter spacing for circular nodes
+					return 200 // Increased collision buffer by 50 (extra 100 space between nodes)
 				}).iterations(5)
 			)
 			.force(
@@ -255,9 +255,9 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 				forceLink(simLinks as any)
 					.id((d: any) => d.id)
 					.distance((link: any) => {
-						return 150 + (link.distance || 0) * 50
+						return 30 + (link.distance || 0) * 30
 					})
-					.strength(0.1)
+					.strength(1)
 			)
 
 		const getOptimalHandles = (edge: any) => {
@@ -376,7 +376,7 @@ const MemoryGraph = (props: MemoryGraphProps) => {
 
 						return {
 							...node,
-							position: { x: (simNode.x || 0) - 30, y: (simNode.y || 0) - 30 }
+							position: { x: (simNode.x || 0) - 130, y: (simNode.y || 0) - 42 }
 						}
 					})
 				)

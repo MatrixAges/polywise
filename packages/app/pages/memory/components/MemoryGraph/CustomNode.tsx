@@ -6,77 +6,98 @@ export type CustomNodeData = {
 	label: string
 	clusterColor: string
 	potential: number
+	activation: number
 }
 
 const CustomNode = ({ data, selected }: NodeProps) => {
-	const { label, clusterColor, potential } = data as CustomNodeData
+	const { label, clusterColor, potential, activation } = data as CustomNodeData
 
 	return (
 		<div
-			className={`relative flex h-[60px] w-[60px] flex-col items-center justify-center rounded-full border-2 border-white/80 text-white shadow-[0_0_15px_rgba(255,126,95,0.4)] transition-all ${
-				selected ? 'scale-110 ring-4 ring-white/50' : ''
+			className={`pointer-events-auto relative flex w-[260px] flex-col gap-2 rounded-xl bg-white p-4 shadow-sm transition-shadow ${
+				selected ? 'shadow-md ring-2 ring-slate-400' : ''
 			}`}
 			style={{
-				background: `radial-gradient(circle at 30% 30%, ${clusterColor}, #feb47b)`,
-				boxShadow: `0 0 20px ${clusterColor}66`
+				border: `1px solid ${clusterColor}`
 			}}
 		>
-			<div className='pointer-events-none flex flex-col items-center justify-center text-center leading-tight'>
-				<span className='max-w-[50px] overflow-hidden px-1 text-[10px] font-bold text-ellipsis whitespace-nowrap drop-shadow-md'>
-					{label}
-				</span>
+			<div className='flex items-center justify-between'>
+				<div className='flex items-center gap-2 text-slate-800'>
+					<span className='text-[15px] underline' title={label}>
+						{label}
+					</span>
+				</div>
+
+				{potential > 0 && (
+					<div
+						className='rounded-md border px-2 py-[2px] text-[10px] font-medium tracking-wide'
+						style={{
+							backgroundColor: `${clusterColor}15`,
+							color: clusterColor,
+							borderColor: `${clusterColor}30`
+						}}
+					>
+						POT: {potential.toFixed(1)}
+					</div>
+				)}
 			</div>
 
+			<div className='flex items-center justify-between text-[12px] text-slate-500'>
+				<span>Activation:</span>
+				<span className='text-slate-700'>{activation?.toFixed(2) || '0.00'}</span>
+			</div>
+
+			{/* Top */}
 			<Handle
 				type='target'
 				position={Position.Top}
 				id='top-target'
-				style={{ opacity: 0, border: 'none', background: 'transparent' }}
+				className='h-[6px] w-[6px] rounded-full border border-black opacity-0'
 			/>
 			<Handle
 				type='source'
 				position={Position.Top}
 				id='top-source'
-				style={{ opacity: 0, border: 'none', background: 'transparent' }}
+				className='pointer-events-none absolute h-0 w-0 border-0 opacity-0'
 			/>
-
+			{/* Bottom */}
 			<Handle
 				type='target'
 				position={Position.Bottom}
 				id='bottom-target'
-				style={{ opacity: 0, border: 'none', background: 'transparent' }}
+				className='h-[6px] w-[6px] rounded-full border border-black opacity-0'
 			/>
 			<Handle
 				type='source'
 				position={Position.Bottom}
 				id='bottom-source'
-				style={{ opacity: 0, border: 'none', background: 'transparent' }}
+				className='pointer-events-none absolute h-0 w-0 border-0 opacity-0'
 			/>
-
+			{/* Left */}
 			<Handle
 				type='target'
 				position={Position.Left}
 				id='left-target'
-				style={{ opacity: 0, border: 'none', background: 'transparent' }}
+				className='h-[6px] w-[6px] rounded-full border border-black opacity-0'
 			/>
 			<Handle
 				type='source'
 				position={Position.Left}
 				id='left-source'
-				style={{ opacity: 0, border: 'none', background: 'transparent' }}
+				className='pointer-events-none absolute h-0 w-0 border-0 opacity-0'
 			/>
-
+			{/* Right */}
 			<Handle
 				type='target'
 				position={Position.Right}
 				id='right-target'
-				style={{ opacity: 0, border: 'none', background: 'transparent' }}
+				className='h-[6px] w-[6px] rounded-full border border-black opacity-0'
 			/>
 			<Handle
 				type='source'
 				position={Position.Right}
 				id='right-source'
-				style={{ opacity: 0, border: 'none', background: 'transparent' }}
+				className='pointer-events-none absolute h-0 w-0 border-0 opacity-0'
 			/>
 		</div>
 	)

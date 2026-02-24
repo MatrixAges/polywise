@@ -6,7 +6,6 @@ import {
 	EDGE_WEIGHT_MAX,
 	EDGE_WEIGHT_MIN,
 	GLOBAL_DECAY_RATE,
-	HABIT_THRESHOLD,
 	HYPERPOLARIZATION_POTENTIAL,
 	MIN_POTENTIAL,
 	NODE_POTENTIAL_MIN,
@@ -25,9 +24,8 @@ import {
  * Role:
  * 1. Propagates activation: Nodes fire if they cross a threshold, sending signals to connected neighbors.
  * 2. Updates node states: Adjusts potential based on input, decay, and firing (reset).
- * 3. Updates edge weights: Implements Hebbian learning (LTP) - strengthens active-active connections.
+ * 3. Updates edge weights: Implements Hebbian learning (LTP) with diminishing marginal returns.
  * 4. Updates distance: Dynamically calculates distance = 1 / (weight + epsilon) to reflect synaptic efficiency.
- * 5. Updates is_habit: Marks edges as automatic/reflexive when reaction_count exceeds threshold.
  */
 export const sql_propagate = (threshold: number) => `
   WITH incoming_signals AS (
@@ -68,19 +66,14 @@ export const sql_propagate = (threshold: number) => `
   UPDATE ${SCHEMA_BRAIN}.edges e
   SET 
     weight = CASE 
+      WHEN (e.lock IS NOT NULL AND e.lock = TRUE) THEN weight
       WHEN (SELECT potential FROM ${SCHEMA_BRAIN}.nodes WHERE id = e.source_id) > ${threshold} 
            AND (SELECT potential FROM ${SCHEMA_BRAIN}.nodes WHERE id = e.target_id) > ${threshold} 
-      THEN LEAST(weight + (${EDGE_LEARNING_FACTOR} * e.learning_rate), ${EDGE_WEIGHT_MAX})
-      ELSE LEAST(weight + ${QUERY_REWARD} * e.learning_rate, ${EDGE_WEIGHT_MAX})
+      THEN LEAST(weight + (${EDGE_LEARNING_FACTOR} * e.learning_rate * (1 - weight / ${EDGE_WEIGHT_MAX})), ${EDGE_WEIGHT_MAX})
+      ELSE weight
     END,
-    distance = CASE 
-      WHEN (SELECT potential FROM ${SCHEMA_BRAIN}.nodes WHERE id = e.source_id) > ${threshold} 
-           AND (SELECT potential FROM ${SCHEMA_BRAIN}.nodes WHERE id = e.target_id) > ${threshold} 
-      THEN GREATEST(1.0 / (LEAST(weight + (${EDGE_LEARNING_FACTOR} * e.learning_rate), ${EDGE_WEIGHT_MAX}) + ${DISTANCE_EPSILON}), 0.1)
-      ELSE GREATEST(1.0 / (LEAST(weight + ${QUERY_REWARD} * e.learning_rate, ${EDGE_WEIGHT_MAX}) + ${DISTANCE_EPSILON}), 0.1)
-    END,
+    distance = GREATEST(1.0 / (weight + ${DISTANCE_EPSILON}), 0.1),
     reaction_count = reaction_count + 1,
-    is_habit = CASE WHEN reaction_count + 1 > ${HABIT_THRESHOLD} THEN TRUE ELSE is_habit END,
     updated_at = CURRENT_TIMESTAMP;
 `
 
@@ -92,8 +85,7 @@ export const sql_propagate = (threshold: number) => `
 export const sql_decay = `
   UPDATE ${SCHEMA_BRAIN}.edges
   SET weight = GREATEST(weight - (${EDGE_DECAY_FACTOR} / decay_resistance), ${EDGE_WEIGHT_MIN}),
-      distance = GREATEST(1.0 / (GREATEST(weight - (${EDGE_DECAY_FACTOR} / decay_resistance), ${EDGE_WEIGHT_MIN}) + ${DISTANCE_EPSILON}), 0.1),
-      is_habit = FALSE
+      distance = GREATEST(1.0 / (GREATEST(weight - (${EDGE_DECAY_FACTOR} / decay_resistance), ${EDGE_WEIGHT_MIN}) + ${DISTANCE_EPSILON}), 0.1)
   WHERE (lock IS NULL OR lock = FALSE);
 `
 
@@ -141,7 +133,7 @@ export const sql_get_snapshot_nodes = (weight_threshold: number, limit: number) 
  * Role: Captures the active wiring of the brain for visualization or analysis.
  */
 export const sql_get_snapshot_edges = (weight_threshold: number) => `
-  SELECT source_id, target_id, weight, distance, learning_rate, decay_resistance, is_habit, idol_id, root_ids, metrics_ids, lock, created_at, updated_at
+  SELECT source_id, target_id, weight, distance, learning_rate, decay_resistance, idol_id, root_ids, metrics_ids, lock, created_at, updated_at
   FROM ${SCHEMA_BRAIN}.edges
   WHERE weight > ${weight_threshold}
   ORDER BY weight DESC
@@ -299,7 +291,7 @@ export const sql_get_nodes_by_root = `
  * Role: Context-scoped structure retrieval.
  */
 export const sql_get_edges_by_idol = `
-  SELECT source_id, target_id, weight, distance, learning_rate, decay_resistance, is_habit, idol_id, root_ids, metrics_ids, created_at, updated_at
+  SELECT source_id, target_id, weight, distance, learning_rate, decay_resistance, idol_id, root_ids, metrics_ids, created_at, updated_at
   FROM ${SCHEMA_BRAIN}.edges
   WHERE idol_id = $1
 `
@@ -309,7 +301,7 @@ export const sql_get_edges_by_idol = `
  * Role: Group-scoped structure retrieval.
  */
 export const sql_get_edges_by_root = `
-  SELECT source_id, target_id, weight, distance, learning_rate, decay_resistance, is_habit, idol_id, root_ids, metrics_ids, created_at, updated_at
+  SELECT source_id, target_id, weight, distance, learning_rate, decay_resistance, idol_id, root_ids, metrics_ids, created_at, updated_at
   FROM ${SCHEMA_BRAIN}.edges
   WHERE $1 = ANY(root_ids)
 `

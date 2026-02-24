@@ -49,7 +49,6 @@ export const sql_create_table_nodes = `
  * - distance: Cost of traversal (inverse of weight). Dynamically calculated: distance = 1 / (weight + epsilon).
  * - learning_rate: How quickly this edge adapts (neuroplasticity).
  * - decay_resistance: How resistant this edge is to forgetting.
- * - is_habit: Whether this edge represents an automatic/reflexive pathway (reaction_count > threshold).
  */
 export const sql_create_table_edges = `
   CREATE TABLE IF NOT EXISTS ${SCHEMA_BRAIN}.edges (
@@ -60,7 +59,6 @@ export const sql_create_table_edges = `
     distance REAL DEFAULT 1.0,
     learning_rate REAL DEFAULT 1.0,
     decay_resistance REAL DEFAULT 1.0,
-    is_habit BOOLEAN DEFAULT FALSE,
     idol_id TEXT,
     root_ids TEXT[] DEFAULT '{}',
     metrics_ids TEXT[] DEFAULT '{}',

@@ -33,7 +33,6 @@ export interface Edge {
 	distance: number
 	learning_rate: number
 	decay_resistance: number
-	is_habit: boolean
 	idol_id?: string
 	root_ids?: Array<string>
 	metrics_ids?: Array<string>

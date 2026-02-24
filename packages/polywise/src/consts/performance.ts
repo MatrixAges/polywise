@@ -43,5 +43,4 @@ export const DECAY_STRENGTH = 0.8
 export const REORGANIZATION_STRENGTH = 0.15
 export const WEAK_EDGE_THRESHOLD = 0.005
 export const QUERY_REWARD = 0.01
-export const HABIT_THRESHOLD = 1000
 export const DISTANCE_EPSILON = 0.001
