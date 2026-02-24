@@ -21,6 +21,7 @@ type ForgetArgs = {
 
 type SnapshotArgs = {
 	weight_threshold?: number
+	limit?: number
 }
 
 type RecallArgs = {
@@ -148,7 +149,7 @@ const runMemoryMethod = async (method: MemoryMethod, args: unknown) => {
 	if (method === 'snapshot') {
 		const snapshot_args = args as SnapshotArgs | undefined
 
-		return await poly.getSnapshot(snapshot_args?.weight_threshold)
+		return await poly.getSnapshot(snapshot_args?.weight_threshold, snapshot_args?.limit)
 	}
 
 	if (method === 'recall') return await poly.recallFromMemory(args as RecallArgs)

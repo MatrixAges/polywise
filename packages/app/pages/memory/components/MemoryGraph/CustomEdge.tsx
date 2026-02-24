@@ -65,7 +65,7 @@ const CustomEdge = ({
 							pointerEvents: 'all',
 							zIndex: selected ? 20 : 10 + (hash % 5)
 						}}
-						className='nodrag nopan rounded-full border border-slate-300 bg-white px-3 py-[2px] shadow-sm'
+						className='nodrag nopan rounded-full border border-slate-300 bg-white px-3 py-px shadow-sm'
 					>
 						<span className='text-[11px] font-medium whitespace-nowrap text-slate-700'>
 							{displayLabel}

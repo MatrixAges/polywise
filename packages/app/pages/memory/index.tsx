@@ -67,10 +67,10 @@ const Index = () => {
 				result = (await memory.recall({
 					query,
 					max_depth: 3,
-					limit: 100
+					limit: 60
 				})) as unknown as SnapshotResult
 			} else {
-				result = (await memory.snapshot({ weight_threshold: 0.2 })) as SnapshotResult
+				result = (await memory.snapshot({ weight_threshold: 0.2, limit: 60 })) as SnapshotResult
 			}
 
 			set_graph_nodes(result.nodes || [])

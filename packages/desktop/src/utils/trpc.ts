@@ -22,6 +22,7 @@ type ForgetArgs = {
 
 type SnapshotArgs = {
 	weight_threshold?: number
+	limit?: number
 }
 
 type RecallArgs = {

@@ -223,7 +223,7 @@ export default class MemoryModel {
 		return await ipc.memory.recall.query(this.toSerializableObject(args))
 	}
 
-	async snapshot(args?: { weight_threshold?: number }) {
+	async snapshot(args?: { weight_threshold?: number; limit?: number }) {
 		return await ipc.memory.snapshot.query(this.toSerializableObject(args || {}))
 	}
 

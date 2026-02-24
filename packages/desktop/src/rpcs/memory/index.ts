@@ -82,11 +82,15 @@ const forget = p
 const snapshot = p
 	.input(
 		object({
-			weight_threshold: number().optional()
+			weight_threshold: number().optional(),
+			limit: number().optional()
 		})
 	)
 	.query(async ({ input, ctx }) => {
-		return await ctx.memory.snapshot({ weight_threshold: input.weight_threshold })
+		return await ctx.memory.snapshot({
+			weight_threshold: input.weight_threshold,
+			limit: input.limit
+		})
 	})
 
 const recall = p
