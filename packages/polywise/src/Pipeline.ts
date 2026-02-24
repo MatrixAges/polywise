@@ -1,16 +1,16 @@
 import os from 'os'
 import path from 'path'
-import { env, pipeline } from '@huggingface/transformers'
+import { env, pipeline, Tensor } from '@huggingface/transformers'
 import to from 'await-to-js'
 import fs from 'fs-extra'
 import { injectable } from 'tsyringe'
 
 import Console from './Console'
 import { DEFAULT_EMBEDDING_CONFIG, DEFAULT_KEYWORD_CONFIG, DEFAULT_RERANKER_CONFIG, POOLING_MEAN } from './consts'
-import { catchFinally } from './decorators'
 import { generateModelHash, processText, splitSentence, verifyModel } from './utils'
 import KeyBERT from './utils/KeyBERT'
 
+import type { FeatureExtractionPipeline, TextClassificationPipeline } from '@huggingface/transformers'
 import type {
 	EmbeddingConfig,
 	KeywordConfig,
@@ -27,10 +27,8 @@ export default class Pipeline {
 	private reranker_config: RerankerConfig = DEFAULT_RERANKER_CONFIG
 	private keyword_config: KeywordConfig = DEFAULT_KEYWORD_CONFIG
 	private cache_dir: string = `${os.homedir()}/.polywise/.models`
-	private embedding_pipeline: any = null
-	private reranker_pipeline: any = null
-	private embedding_promise: Promise<any> | null = null
-	private reranker_promise: Promise<any> | null = null
+	private embedding?: Promise<FeatureExtractionPipeline | null>
+	private reranker?: Promise<TextClassificationPipeline | null>
 
 	async init(args: PipelineArgs = {}) {
 		const { cache_dir, embedding_config, reranker_config, keyword_config } = args
@@ -45,12 +43,12 @@ export default class Pipeline {
 
 		if (embedding_config) {
 			this.embedding_config = embedding_config
-			this.embedding_pipeline = null
+			delete this.embedding
 		}
 
 		if (reranker_config) {
 			this.reranker_config = reranker_config
-			this.reranker_pipeline = null
+			delete this.reranker
 		}
 
 		if (keyword_config) {
@@ -60,7 +58,7 @@ export default class Pipeline {
 
 	async setEmbeddingConfig(config: EmbeddingConfig) {
 		this.embedding_config = config
-		this.embedding_pipeline = null
+		delete this.embedding
 
 		if (config.type === 'local') {
 			await this.loadEmbeddingModel()
@@ -69,7 +67,7 @@ export default class Pipeline {
 
 	async setRerankerConfig(config: RerankerConfig) {
 		this.reranker_config = config
-		this.reranker_pipeline = null
+		delete this.reranker
 
 		if (config.type === 'local') {
 			await this.loadRerankerModel()
@@ -96,6 +94,8 @@ export default class Pipeline {
 				}
 
 				const extractor = await this.loadEmbeddingModel()
+				if (!extractor) return []
+
 				const extracted = await KeyBERT.extract(sentence, extractor, 5)
 
 				if (!extracted || extracted.length === 0) {
@@ -136,16 +136,22 @@ export default class Pipeline {
 					return (await fn(chunk)) as Array<number>
 				}
 
-				const embedding = await this.loadEmbeddingModel()
+				const embedding_pipeline = await this.loadEmbeddingModel()
+				if (!embedding_pipeline) throw new Error('Failed to load embedding model')
 
-				const output = await embedding(chunk, {
+				const output = await (
+					embedding_pipeline as unknown as (
+						text: string,
+						options: Record<string, unknown>
+					) => Promise<Tensor>
+				)(chunk, {
 					pooling: POOLING_MEAN,
 					normalize: true,
 					truncation: true,
 					max_length: 2048
 				})
 
-				return Array.from((output as any).data) as Array<number>
+				return Array.from((output as Tensor).data as number[]) as Array<number>
 			})
 		)
 
@@ -179,7 +185,8 @@ export default class Pipeline {
 				return this.normalizeRerankOutput(output)
 			}
 
-			const reranker = await this.loadRerankerModel()
+			const reranker_pipeline = await this.loadRerankerModel()
+			if (!reranker_pipeline) throw new Error('Failed to load reranker model')
 
 			const batch_size = 4
 			const scores: Array<{ score: number }> = []
@@ -197,14 +204,18 @@ export default class Pipeline {
 					}
 				)
 
-				const encoded = await reranker.tokenizer(texts, {
+				const encoded = await reranker_pipeline.tokenizer(texts, {
 					text_pair: chunk,
 					padding: true,
 					truncation: true,
 					max_length: 512
 				})
 
-				const output = await reranker.model(encoded)
+				const output = await (
+					reranker_pipeline as unknown as {
+						model: (encoded: unknown) => Promise<{ logits: Tensor }>
+					}
+				).model(encoded)
 				const logits = output.logits.data
 
 				for (let j = 0; j < logits.length; j++) {
@@ -342,7 +353,7 @@ export default class Pipeline {
 		])
 	}
 
-	private async checkAndDownload(config: EmbeddingConfig | RerankerConfig, loadFn: () => Promise<any>) {
+	private async checkAndDownload(config: EmbeddingConfig | RerankerConfig, loadFn: () => Promise<unknown>) {
 		if (config.type !== 'local' || !this.cache_dir) return
 
 		const model_path = path.join(this.cache_dir, config.model)
@@ -364,42 +375,32 @@ export default class Pipeline {
 		await generateModelHash(model_path)
 	}
 
-	@catchFinally(function (this: Pipeline) {
-		this.embedding_promise = null
-	})
 	async loadEmbeddingModel() {
-		if (this.embedding_pipeline) return this.embedding_pipeline
-		if (this.embedding_promise) return this.embedding_promise
+		if (this.embedding) return this.embedding
+
 		if (this.embedding_config.type !== 'local') return null
 
 		const { model, dtype } = this.embedding_config
 
-		this.embedding_promise = pipeline('feature-extraction', model, {
-			dtype: dtype as any
-		})
+		this.embedding = pipeline('feature-extraction', model, {
+			dtype
+		}) as unknown as Promise<FeatureExtractionPipeline>
 
-		this.embedding_pipeline = await this.embedding_promise
-
-		return this.embedding_pipeline
+		return this.embedding
 	}
 
-	@catchFinally(function (this: Pipeline) {
-		this.reranker_promise = null
-	})
 	async loadRerankerModel() {
-		if (this.reranker_pipeline) return this.reranker_pipeline
-		if (this.reranker_promise) return this.reranker_promise
+		if (this.reranker) return this.reranker
+
 		if (this.reranker_config.type !== 'local') return null
 
 		const { model, dtype } = this.reranker_config
 
-		this.reranker_promise = pipeline('text-classification' as any, model, {
-			dtype: dtype as any
-		})
+		this.reranker = pipeline('text-classification', model, {
+			dtype
+		}) as unknown as Promise<TextClassificationPipeline>
 
-		this.reranker_pipeline = await this.reranker_promise
-
-		return this.reranker_pipeline
+		return this.reranker
 	}
 
 	getEmbeddingConfig() {
@@ -423,5 +424,8 @@ export default class Pipeline {
 		return this.keyword_config
 	}
 
-	off() {}
+	off() {
+		delete this.embedding
+		delete this.reranker
+	}
 }
