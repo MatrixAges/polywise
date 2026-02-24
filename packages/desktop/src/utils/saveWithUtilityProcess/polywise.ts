@@ -1,11 +1,10 @@
 import { fork } from 'child_process'
 import { randomUUID } from 'crypto'
 import path from 'path'
-import { utilityProcess } from 'electron'
+import chalk from 'chalk'
 import { pathExistsSync } from 'fs-extra'
 
 import type { ChildProcess } from 'child_process'
-import type { UtilityProcess } from 'electron'
 import type { ProcessArticleArgs, QueryArgs } from 'polywise'
 
 type PendingTask = {
@@ -80,15 +79,6 @@ type IdolArgs = {
 	idol_id: string
 }
 
-const writeLog = (event_name: string, payload?: Record<string, unknown>) => {
-	if (payload) {
-		console.log('[memory-bridge]', event_name, payload)
-		return
-	}
-
-	console.log('[memory-bridge]', event_name)
-}
-
 const getMessageType = (message: unknown) => {
 	if (!message || typeof message !== 'object') return 'unknown'
 
@@ -98,10 +88,7 @@ const getMessageType = (message: unknown) => {
 }
 
 const getWorkerPath = () => {
-	const candidate_paths = [
-		path.join(__dirname, 'poly-save-worker.js'),
-		path.join(__dirname, 'dist/poly-save-worker.js')
-	]
+	const candidate_paths = [path.join(__dirname, 'polywise.js'), path.join(__dirname, 'dist/polywise.js')]
 
 	const resolved_path = candidate_paths.find(candidate_path => pathExistsSync(candidate_path))
 
@@ -121,11 +108,32 @@ export default class PolySaveUtilityProcess {
 
 	private resolve_worker_ready: (() => void) | null = null
 
+	private log_enabled = process.env.NODE_ENV === 'development'
+
+	private writeLog(event_name: string, payload?: Record<string, unknown>) {
+		if (!this.log_enabled) return
+
+		const timestamp = chalk.gray(`[${new Date().toLocaleTimeString('en-US', { hour12: false })}]`)
+		const tag = chalk.cyan('[memory-bridge]')
+		const event = chalk.yellow(event_name)
+
+		console.log(`${timestamp} ${tag} ${event}`)
+
+		if (payload) {
+			console.log(
+				JSON.stringify(payload, null, 2)
+					.split('\n')
+					.map(line => chalk.gray('  ' + line))
+					.join('\n')
+			)
+		}
+	}
+
 	private ensureWorker() {
 		if (this.child) return
 
 		const worker_path = getWorkerPath()
-		writeLog('worker_spawn_start', { worker_path })
+		this.writeLog('worker_spawn_start', { worker_path })
 
 		this.worker_ready_promise = new Promise(resolve => {
 			this.resolve_worker_ready = resolve
@@ -133,27 +141,26 @@ export default class PolySaveUtilityProcess {
 
 		this.child = fork(worker_path, [], {
 			execArgv: ['--max-old-space-size=8192'],
-
 			stdio: 'pipe'
 		})
-		writeLog('worker_spawned', { pid: this.child.pid })
+		this.writeLog('worker_spawned', { pid: this.child.pid })
 
 		this.child.stdout?.on('data', data => {
-			writeLog('worker_stdout', { message: data.toString().trim() })
+			process.stdout.write(data)
 		})
 
 		this.child.stderr?.on('data', data => {
-			writeLog('worker_stderr', { message: data.toString().trim() })
+			this.writeLog('worker_stderr', { message: data.toString().trim() })
 		})
 
 		this.child.on('message', message => {
-			writeLog('worker_message', { message_type: getMessageType(message) })
+			this.writeLog('worker_message', { message_type: getMessageType(message) })
 			this.handleMessage(message)
 		})
 
 		this.child.on('exit', (code, signal) => {
-			writeLog('worker_exit', { code, signal, pending_count: this.pending_map.size })
-			this.rejectAll('poly save worker exited unexpectedly')
+			this.writeLog('worker_exit', { code, signal, pending_count: this.pending_map.size })
+			this.rejectAll('polywise worker exited unexpectedly')
 			this.worker_ready_promise = null
 			this.resolve_worker_ready = null
 			this.child = null
@@ -201,7 +208,7 @@ export default class PolySaveUtilityProcess {
 	}
 
 	private async callMemory(method: MemoryMethod, args: unknown, data_dir: string) {
-		writeLog('call_enqueue', { method, pending_count: this.pending_map.size })
+		this.writeLog('call_enqueue', { method, pending_count: this.pending_map.size })
 
 		const run_task = async () => {
 			return await this.executeCall(method, args, data_dir)
@@ -223,17 +230,17 @@ export default class PolySaveUtilityProcess {
 
 		return await new Promise<unknown>((resolve, reject) => {
 			if (!this.child) {
-				writeLog('call_reject_no_worker', { method })
-				reject(new Error('poly save worker is unavailable'))
+				this.writeLog('call_reject_no_worker', { method })
+				reject(new Error('polywise worker is unavailable'))
 				return
 			}
 
 			const request_id = randomUUID()
-			writeLog('call_send', { request_id, method })
+			this.writeLog('call_send', { request_id, method })
 
 			const timeout_id = setTimeout(() => {
-				writeLog('call_timeout', { request_id, method })
-				this.restartWorker('poly save worker timeout')
+				this.writeLog('call_timeout', { request_id, method })
+				this.restartWorker('polywise worker timeout')
 			}, this.request_timeout_ms)
 
 			this.pending_map.set(request_id, { resolve, reject, timeout_id })
@@ -263,7 +270,7 @@ export default class PolySaveUtilityProcess {
 
 		this.pending_map.delete(typed_message.request_id)
 		clearTimeout(task.timeout_id)
-		writeLog('call_result', {
+		this.writeLog('call_result', {
 			request_id: typed_message.request_id,
 			ok: Boolean(typed_message.ok)
 		})
@@ -273,11 +280,11 @@ export default class PolySaveUtilityProcess {
 			return
 		}
 
-		task.reject(new Error(typed_message.error_message || 'poly save worker failed'))
+		task.reject(new Error(typed_message.error_message || 'polywise worker failed'))
 	}
 
 	private rejectAll(error_message: string) {
-		writeLog('reject_all', { error_message, pending_count: this.pending_map.size })
+		this.writeLog('reject_all', { error_message, pending_count: this.pending_map.size })
 
 		for (const [request_id, task] of this.pending_map.entries()) {
 			clearTimeout(task.timeout_id)
@@ -287,7 +294,7 @@ export default class PolySaveUtilityProcess {
 	}
 
 	private restartWorker(error_message: string) {
-		writeLog('worker_restart', { error_message })
+		this.writeLog('worker_restart', { error_message })
 
 		if (this.child) {
 			this.child.removeAllListeners()
@@ -299,21 +306,21 @@ export default class PolySaveUtilityProcess {
 	}
 
 	private async waitForWorkerReady() {
-		if (!this.worker_ready_promise) throw new Error('poly save worker start failed')
+		if (!this.worker_ready_promise) throw new Error('polywise worker start failed')
 
-		writeLog('worker_ready_wait_start')
+		this.writeLog('worker_ready_wait_start')
 
 		let timeout_id: ReturnType<typeof setTimeout> | null = null
 
 		const timeout_promise = new Promise<void>((_, reject) => {
 			timeout_id = setTimeout(() => {
-				reject(new Error('poly save worker init timeout'))
+				reject(new Error('polywise worker init timeout'))
 			}, 10000)
 		})
 
 		try {
 			await Promise.race([this.worker_ready_promise, timeout_promise])
-			writeLog('worker_ready_wait_done')
+			this.writeLog('worker_ready_wait_done')
 		} finally {
 			if (timeout_id) clearTimeout(timeout_id)
 		}

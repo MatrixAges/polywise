@@ -2,8 +2,13 @@ import { Console, Polywise } from 'polywise'
 
 import type { ProcessArticleArgs, QueryArgs } from 'polywise'
 
-const writeLog = (event_name: string, payload?: Record<string, unknown>) => {
-	Console.log('SYSTEM', event_name, payload)
+type UpdateArgs = {
+	memory_id: string
+	content: string
+	idol_id?: string
+	root_ids?: Array<string>
+	metrics_ids?: Array<string>
+	metadata?: Record<string, unknown>
 }
 
 type ForgetArgs = {
@@ -59,13 +64,15 @@ type WorkerProcess = NodeJS.Process & {
 	send?: (message: unknown) => void
 }
 
+const worker_process = process as WorkerProcess
+
+const writeLog = (event_name: string, payload?: Record<string, unknown>) => {
+	Console.log('SYSTEM', event_name, payload)
+}
+
 const poly = new Polywise()
 
 let active_data_dir = ''
-
-const worker_process = process as WorkerProcess
-
-writeLog('boot', { pid: process.pid })
 
 process.on('uncaughtException', error => {
 	writeLog('uncaught_exception', { error_message: error.message })
@@ -94,7 +101,6 @@ const unwrapMessage = (message: unknown) => {
 }
 
 const isSaveRequestMessage = (message: unknown) => {
-	writeLog('type_check', { message_type: typeof message, message })
 	if (!message || typeof message !== 'object') return false
 
 	const typed_message = message as Partial<SaveRequestMessage>
@@ -108,18 +114,20 @@ const isSaveRequestMessage = (message: unknown) => {
 }
 
 const initPoly = async (data_dir: string) => {
-	writeLog('init_start', { data_dir })
-
 	if (active_data_dir === data_dir) {
 		writeLog('init_skip', { data_dir })
 		return
 	}
 
+	writeLog('init_start', { data_dir })
+
 	if (active_data_dir) {
 		await poly.off()
 	}
 
-	await poly.init({ data_dir })
+	await poly.init({
+		data_dir
+	})
 
 	active_data_dir = data_dir
 
@@ -212,7 +220,7 @@ const startPolySaveWorker = () => {
 	const ready_message: SaveReadyMessage = { type: 'save_ready' }
 
 	worker_process.send(ready_message)
-	writeLog('ready_sent')
+	writeLog('boot', { pid: process.pid })
 
 	worker_process.on('message', payload => {
 		const message = unwrapMessage(payload)
@@ -230,4 +238,4 @@ const startPolySaveWorker = () => {
 	})
 }
 
-export default startPolySaveWorker
+startPolySaveWorker()

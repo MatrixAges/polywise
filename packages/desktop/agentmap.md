@@ -41,10 +41,6 @@ This document provides an overview of the packages/desktop module structure and 
 				"desc": "Main process entry point with startup memory worker init and utility process memory offloading",
 				"role": "Entry"
 			},
-			"poly-save-worker.ts": {
-				"desc": "Dedicated utility process entry for poly.save worker",
-				"role": "Entry"
-			},
 			"locales": {
 				"en": {
 					"global.ts": { "desc": "English global strings", "role": "Locale" },
@@ -102,7 +98,7 @@ This document provides an overview of the packages/desktop module structure and 
 						"desc": "UtilityProcess memory bridge facade with startup init",
 						"role": "Utility"
 					},
-					"manager.ts": {
+					"polywise.ts": {
 						"desc": "UtilityProcess memory worker lifecycle and call manager with debug tracing, heap tuning, stdio capture, and init call",
 						"role": "Utility"
 					}
@@ -121,8 +117,8 @@ This document provides an overview of the packages/desktop module structure and 
 				}
 			},
 			"workers": {
-				"polySave.ts": {
-					"desc": "Utility process worker for full poly memory methods including init with debug tracing and crash hooks",
+				"polywise.ts": {
+					"desc": "Utility process worker for full poly memory methods including init with debug tracing and crash hooks. Acts as the entry point for the polywise-worker bundle.",
 					"role": "Worker"
 				}
 			}

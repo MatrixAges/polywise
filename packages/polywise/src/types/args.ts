@@ -26,7 +26,6 @@ export interface PolywiseArgs extends FiltersArgs {
 	reranker_config?: RerankerConfig
 	keyword_config?: KeywordConfig
 	log?: boolean | LogArgs
-	console?: ConsoleConfig
 	onTick?: () => void
 }
 

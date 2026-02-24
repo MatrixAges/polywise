@@ -140,16 +140,11 @@ export default class Polywise {
 			reranker_config,
 			keyword_config,
 			log,
-			console: console_config,
 			idol_id,
 			root_ids,
 			metrics_ids,
 			onTick
 		} = args
-
-		if (console_config) {
-			Console.configure(console_config)
-		}
 
 		this.idol_id = idol_id ?? null
 		this.root_ids = root_ids ?? null
@@ -596,7 +591,6 @@ export default class Polywise {
 	}
 
 	async recallFromMemory(args: RecallArgs) {
-		// Log recall start for debugging
 		this.log.write({ query: args.query }, { event: 'recall_start' })
 
 		const {

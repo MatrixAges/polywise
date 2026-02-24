@@ -10,9 +10,9 @@ export type ConsoleConfig = {
 
 export default class Console {
 	private static config: ConsoleConfig = {
-		enabled: process.env.NODE_ENV === 'development',
+		enabled: true,
 		stages: ['SQL', 'PIPELINE', 'RANKING', 'SEARCH', 'SYSTEM'],
-		only: []
+		only: ['PIPELINE', 'RANKING', 'SEARCH', 'SYSTEM']
 	}
 
 	static configure(config: ConsoleConfig) {

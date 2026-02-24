@@ -1,4 +1,4 @@
-import PolySaveUtilityProcess from './manager'
+import PolySaveUtilityProcess from './polywise'
 
 import type { ProcessArticleArgs, QueryArgs } from 'polywise'
 
