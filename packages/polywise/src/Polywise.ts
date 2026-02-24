@@ -28,30 +28,11 @@ import Process from './Process'
 import {
 	sql_add_node,
 	sql_connect,
-	sql_create_extension_vector,
-	sql_create_index_active_edges,
-	sql_create_index_article_content_gin,
-	sql_create_index_article_embeddings_hnsw,
-	sql_create_index_core_truth,
-	sql_create_index_edge_src,
-	sql_create_index_edge_tgt,
-	sql_create_index_edges_idol,
-	sql_create_index_edges_roots,
-	sql_create_index_nodes_idol,
-	sql_create_index_nodes_roots,
-	sql_create_schema_brain,
-	sql_create_schema_memory,
-	sql_create_table_article_embeddings,
-	sql_create_table_articles,
-	sql_create_table_edges,
-	sql_create_table_node_sources,
-	sql_create_table_nodes,
 	sql_decay,
 	sql_delete_article,
 	sql_forget_decay_edges,
 	sql_forget_decay_nodes,
 	sql_get_all_nodes,
-	sql_get_article_embedding,
 	sql_get_edges_by_idol,
 	sql_get_edges_by_root,
 	sql_get_input_count,
@@ -540,16 +521,25 @@ export default class Polywise {
 	async getSnapshot(weight_threshold = SNAPSHOT_WEIGHT_THRESHOLD, limit = SNAPSHOT_NODES_LIMIT) {
 		Console.log('SYSTEM', 'getSnapshot start', { weight_threshold, limit })
 
-		const nodes = (await this.queryRaw(sql_get_snapshot_nodes(weight_threshold, limit))) as Array<Node>
-		Console.log('SYSTEM', 'getSnapshot nodes fetched', { count: nodes.length })
+		try {
+			const nodes = (await this.queryRaw(sql_get_snapshot_nodes(weight_threshold, limit))) as Array<Node>
+			Console.log('SYSTEM', 'getSnapshot nodes fetched', { count: nodes.length })
 
-		const edges = (await this.queryRaw(sql_get_snapshot_edges(weight_threshold))) as Array<Edge>
-		Console.log('SYSTEM', 'getSnapshot edges fetched', { count: edges.length })
+			const edges = (await this.queryRaw(sql_get_snapshot_edges(weight_threshold))) as Array<Edge>
+			Console.log('SYSTEM', 'getSnapshot edges fetched', { count: edges.length })
 
-		const node_ids = new Set(nodes.map(n => n.id))
-		const valid_edges = edges.filter(e => node_ids.has(e.source_id) && node_ids.has(e.target_id))
+			const node_ids = new Set(nodes.map(n => n.id))
+			const valid_edges = edges.filter(e => node_ids.has(e.source_id) && node_ids.has(e.target_id))
 
-		return { nodes, edges: valid_edges }
+			return { nodes, edges: valid_edges }
+		} catch (error) {
+			Console.log('SYSTEM', 'getSnapshot error', {
+				error: error instanceof Error ? error.message : String(error),
+				stack: error instanceof Error ? error.stack : undefined
+			})
+
+			throw error
+		}
 	}
 
 	async getAllNodes() {
@@ -800,9 +790,21 @@ export default class Polywise {
 
 		Console.log('SQL', 'queryRaw start', { sql: sql_str.substring(0, 500) })
 
-		const result = await this.db.query<T>(sql_str, params)
+		try {
+			const result = await this.db.query<T>(sql_str, params)
 
-		return result.rows
+			Console.log('SQL', 'queryRaw done', { row_count: result.rows.length })
+
+			return result.rows
+		} catch (error) {
+			Console.log('SQL', 'queryRaw error', {
+				sql: sql_str.substring(0, 500),
+				error: error instanceof Error ? error.message : String(error),
+				stack: error instanceof Error ? error.stack : undefined
+			})
+
+			throw error
+		}
 	}
 
 	private async initDatabase() {

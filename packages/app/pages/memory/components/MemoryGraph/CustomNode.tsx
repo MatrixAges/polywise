@@ -6,11 +6,10 @@ export type CustomNodeData = {
 	label: string
 	clusterColor: string
 	potential: number
-	activation: number
 }
 
 const CustomNode = ({ data, selected }: NodeProps) => {
-	const { label, clusterColor, potential, activation } = data as CustomNodeData
+	const { label, clusterColor, potential } = data as CustomNodeData
 
 	return (
 		<div
@@ -27,27 +26,13 @@ const CustomNode = ({ data, selected }: NodeProps) => {
 						{label}
 					</span>
 				</div>
-
-				{potential > 0 && (
-					<div
-						className='rounded-md border px-2 py-[2px] text-[10px] font-medium tracking-wide'
-						style={{
-							backgroundColor: `${clusterColor}15`,
-							color: clusterColor,
-							borderColor: `${clusterColor}30`
-						}}
-					>
-						POT: {potential.toFixed(1)}
-					</div>
-				)}
 			</div>
 
 			<div className='flex items-center justify-between text-[12px] text-slate-500'>
 				<span>Activation:</span>
-				<span className='text-slate-700'>{activation?.toFixed(2) || '0.00'}</span>
+				<span className='text-slate-700'>{potential?.toFixed(2) || '0.00'}</span>
 			</div>
 
-			{/* Top */}
 			<Handle
 				type='target'
 				position={Position.Top}
