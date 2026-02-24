@@ -3,6 +3,7 @@ import { vector } from '@electric-sql/pglite/vector'
 import to from 'await-to-js'
 import { container, singleton } from 'tsyringe'
 
+import Activation from './Activation'
 import Article from './Article'
 import Brain from './Brain'
 import {
@@ -91,8 +92,6 @@ import {
 	recallNodesByKeywords,
 	recallRelatedNodes,
 	rerankMemory,
-	stimulateNodes,
-	strengthenRelatedEdges,
 	validateMigrations
 } from './utils'
 
@@ -121,6 +120,7 @@ export default class Polywise {
 	brain = container.resolve(Brain)
 	cortex = container.resolve(Cortex)
 	log = container.resolve(Log)
+	activation = container.resolve(Activation)
 
 	db!: PGlite
 	idol_id: string | null = null
@@ -174,6 +174,7 @@ export default class Polywise {
 		this.article.init(this)
 		this.brain.init(this)
 		this.cortex.init(this)
+		this.activation.init(this)
 
 		if (log) {
 			this.log.init(typeof log === 'boolean' ? {} : log)
@@ -246,13 +247,16 @@ export default class Polywise {
 		const keywords = await this.pipeline.generateKeywords(content)
 
 		if (keywords.length > 0) {
-			await this.injectKeywords({
+			const node_ids = await this.injectKeywords({
 				keywords,
 				article_id: aid,
 				idol_id,
 				root_ids,
 				metrics_ids
 			})
+
+			await this.activation.stimulate(node_ids, 1.0)
+			await this.activation.spread()
 		}
 
 		this.log.write({ ...args, idol_id, root_ids, metrics_ids }, { memory_id: aid })
@@ -297,13 +301,16 @@ export default class Polywise {
 		const keywords = await this.pipeline.generateKeywords(content)
 
 		if (keywords.length > 0) {
-			await this.injectKeywords({
+			const node_ids = await this.injectKeywords({
 				keywords,
 				article_id: memory_id,
 				idol_id,
 				root_ids,
 				metrics_ids
 			})
+
+			await this.activation.stimulate(node_ids, 1.0)
+			await this.activation.spread()
 		}
 
 		this.log.write({ ...args, idol_id, root_ids, metrics_ids }, { memory_id })
@@ -436,7 +443,7 @@ export default class Polywise {
 		const { keywords, article_id, idol_id, root_ids, metrics_ids } = args
 
 		if (keywords.length < 2) {
-			return
+			return []
 		}
 
 		await this.queryRaw(sql_inject_edges_begin)
@@ -487,6 +494,8 @@ export default class Polywise {
 			}
 
 			await this.queryRaw(sql_inject_edges_commit)
+
+			return node_ids
 		} catch (error) {
 			await this.queryRaw(sql_inject_edges_rollback)
 
@@ -629,8 +638,9 @@ export default class Polywise {
 		if (stimulate_intensity > 0) {
 			const node_ids = all_nodes.map(n => n.id)
 
-			await this.stimulateNodes(node_ids, stimulate_intensity)
-			await this.strengthenRelatedEdges({ matched_nodes, related_nodes })
+			await this.activation.stimulate(node_ids, stimulate_intensity)
+			await this.activation.strengthen({ matched_nodes, related_nodes })
+			await this.activation.spread(3)
 		}
 
 		const contexts = await this.getNodeContexts(all_nodes.map(n => n.id))
@@ -763,14 +773,6 @@ export default class Polywise {
 
 	private async getNodeContexts(node_ids: Array<string>) {
 		return await getNodeContexts(node_ids, this.queryRaw.bind(this))
-	}
-
-	private async stimulateNodes(node_ids: Array<string>, intensity: number) {
-		await stimulateNodes(node_ids, intensity, this.queryRaw.bind(this))
-	}
-
-	private async strengthenRelatedEdges(args: StrengthenRelatedEdgesArgs) {
-		await strengthenRelatedEdges(args, this.queryRaw.bind(this))
 	}
 
 	private async exec(sql_input: string | Array<string>) {

@@ -1,5 +1,3 @@
-import { STRENGTHEN_EDGE_WEIGHT } from '../consts'
-import { sql_stimulate, sql_strengthen_edges_batch } from '../sql'
 import {
 	sql_get_edges_between_nodes,
 	sql_get_node_articles,
@@ -7,7 +5,7 @@ import {
 	sql_recall_related_nodes
 } from '../sql/Brain'
 
-import type { Edge, Node, RecallNodesByKeywordsArgs, StrengthenRelatedEdgesArgs } from '../types'
+import type { Edge, Node, RecallNodesByKeywordsArgs } from '../types'
 
 export async function recallNodesByKeywords(
 	args: RecallNodesByKeywordsArgs,
@@ -77,32 +75,4 @@ export async function getNodeContexts(
 		article_ids: [article.id],
 		relevance_score: 1.0
 	}))
-}
-
-export async function stimulateNodes(
-	node_ids: Array<string>,
-	intensity: number,
-	queryRaw: (sql: string, params?: Array<any>) => Promise<any>
-) {
-	if (node_ids.length === 0 || intensity <= 0) {
-		return
-	}
-
-	for (const id of node_ids) {
-		await queryRaw(sql_stimulate, [intensity, id])
-	}
-}
-
-export async function strengthenRelatedEdges(
-	args: StrengthenRelatedEdgesArgs,
-	queryRaw: (sql: string, params?: any[]) => Promise<any>
-) {
-	const { matched_nodes, related_nodes } = args
-	const node_ids = [...matched_nodes, ...related_nodes].map(n => n.id)
-
-	if (node_ids.length < 2) {
-		return
-	}
-
-	await queryRaw(sql_strengthen_edges_batch, [STRENGTHEN_EDGE_WEIGHT, node_ids, node_ids])
 }

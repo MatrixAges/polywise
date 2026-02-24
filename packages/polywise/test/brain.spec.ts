@@ -24,7 +24,7 @@ describe('Polywise Brain System', () => {
 				type: 'custom',
 				fn: getTestRerank
 			},
-			rebel_config: {
+			keyword_config: {
 				type: 'custom',
 				fn: getTestKeywords
 			},

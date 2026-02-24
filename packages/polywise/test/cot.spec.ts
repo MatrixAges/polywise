@@ -23,7 +23,7 @@ describe('Chain of Thought (CoT) Iterative Search', () => {
 				type: 'custom',
 				fn: getTestRerank
 			},
-			rebel_config: {
+			keyword_config: {
 				type: 'custom',
 				fn: getTestKeywords
 			},
