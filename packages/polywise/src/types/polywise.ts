@@ -13,7 +13,6 @@ export interface Node {
 	x: number
 	y: number
 	potential: number
-	activation: number
 	threshold: number
 	last_fired_at?: string
 	idol_id?: string
@@ -34,6 +33,7 @@ export interface Edge {
 	distance: number
 	learning_rate: number
 	decay_resistance: number
+	is_habit: boolean
 	idol_id?: string
 	root_ids?: Array<string>
 	metrics_ids?: Array<string>

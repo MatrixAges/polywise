@@ -1,7 +1,7 @@
 import to from 'await-to-js'
 import { injectable } from 'tsyringe'
 
-import { FATIGUE_THRESHOLD, IDLE_TIMEOUT_MS, SHADOW_INTERVAL_MS } from './consts'
+import { FATIGUE_THRESHOLD, IDLE_DECAY_THRESHOLD_MS, IDLE_TIMEOUT_MS, SHADOW_INTERVAL_MS } from './consts'
 import { catchFinally } from './decorators'
 import Polywise from './Polywise'
 import { calculateFatigue, isIdle } from './utils'
@@ -84,6 +84,15 @@ export default class Brain {
 			if (this.is_busy) return
 
 			const is_idle = isIdle(this.last_user_interaction, IDLE_TIMEOUT_MS)
+			const is_deep_idle = isIdle(this.last_user_interaction, IDLE_DECAY_THRESHOLD_MS)
+
+			if (is_deep_idle && this.state !== 'SLEEPING' && this.state !== 'LEARNING') {
+				const [err] = await to(this.p.triggerMemoryReorganization())
+
+				if (err) console.error('Memory reorganization error:', err)
+
+				return
+			}
 
 			if (this.state === 'TIRED' && is_idle) {
 				const [err] = await to(this.triggerSleepTick())

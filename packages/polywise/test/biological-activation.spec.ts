@@ -62,7 +62,7 @@ describe('Biological Activation and Threshold Decay', () => {
 
 		const nodes_after_1 = await poly.getAllNodes()
 		const node_1 = nodes_after_1.find(n => n.id === node_id)
-		expect(node_1!.activation).toBe(1.0)
+		expect(node_1!.potential).toBeLessThan(0)
 
 		// 2nd tick: Stimulate again immediately
 		await poly.stimulate(node_id, 1.0)
@@ -71,7 +71,7 @@ describe('Biological Activation and Threshold Decay', () => {
 		const nodes_after_2 = await poly.getAllNodes()
 		const node_2 = nodes_after_2.find(n => n.id === node_id)
 		// Should NOT fire because of refractory period (default 500ms, ticks are fast)
-		expect(node_2!.activation).toBe(0.0)
+		expect(node_2!.potential).toBeGreaterThanOrEqual(0)
 
 		// Wait for refractory period to pass
 		await new Promise(resolve => setTimeout(resolve, REFRACTORY_PERIOD_MS + 100))
@@ -82,7 +82,7 @@ describe('Biological Activation and Threshold Decay', () => {
 
 		const nodes_after_3 = await poly.getAllNodes()
 		const node_3 = nodes_after_3.find(n => n.id === node_id)
-		expect(node_3!.activation).toBe(1.0)
+		expect(node_3!.potential).toBeLessThan(0)
 	})
 
 	it('should demonstrate energy diffusion loss (global decay rate)', async () => {

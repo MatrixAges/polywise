@@ -1,4 +1,12 @@
-import { SCHEMA_BRAIN, SCHEMA_MEMORY } from '../consts'
+import {
+	DECAY_STRENGTH,
+	DISTANCE_EPSILON,
+	EDGE_WEIGHT_MAX,
+	REORGANIZATION_STRENGTH,
+	SCHEMA_BRAIN,
+	SCHEMA_MEMORY,
+	WEAK_EDGE_THRESHOLD
+} from '../consts'
 
 /**
  * Randomly increases the potential of a small subset (1%) of nodes.
@@ -50,10 +58,10 @@ export const sql_sleep_tick_replay = `
 `
 
 /**
- * Resets all node potentials and activations to zero.
+ * Resets all node potentials to zero.
  * Role: Clears the "short-term memory" or active working memory buffer to prepare for a fresh wake cycle.
  */
-export const sql_sleep_tick_reset_nodes = `UPDATE ${SCHEMA_BRAIN}.nodes SET potential = 0, activation = 0;`
+export const sql_sleep_tick_reset_nodes = `UPDATE ${SCHEMA_BRAIN}.nodes SET potential = 0;`
 
 /**
  * Commits the sleep cycle transaction.
@@ -66,13 +74,13 @@ export const sql_sleep_tick_commit = `COMMIT`
  * Role: Keyword-based memory retrieval entry point, allowing the system to recall concepts by name.
  */
 export const sql_recall_nodes_by_label = `
-	SELECT id, label, x, y, activation, potential, idol_id, root_ids, metrics_ids, created_at, updated_at
+	SELECT id, label, x, y, potential, idol_id, root_ids, metrics_ids, created_at, updated_at
 	FROM ${SCHEMA_BRAIN}.nodes
 	WHERE (label ILIKE $1 OR $1 ILIKE '%' || label || '%')
 	  AND ($3::text IS NULL OR idol_id = $3)
 	  AND ($4::text[] IS NULL OR root_ids && $4)
 	  AND ($5::text[] IS NULL OR metrics_ids && $5)
-	ORDER BY potential DESC, activation DESC
+	ORDER BY potential DESC
 	LIMIT $2
 `
 
@@ -94,7 +102,7 @@ export const sql_recall_related_nodes = `
 		WHERE sg.depth < $2
 		AND e.weight > 0.2
 	)
-	SELECT DISTINCT n.id, n.label, n.x, n.y, n.activation, n.potential, n.idol_id, n.root_ids, n.metrics_ids, n.created_at, n.updated_at
+	SELECT DISTINCT n.id, n.label, n.x, n.y, n.potential, n.idol_id, n.root_ids, n.metrics_ids, n.created_at, n.updated_at
 	FROM ${SCHEMA_BRAIN}.nodes n
 	JOIN (
 		SELECT DISTINCT source_id as nid FROM search_graph
@@ -155,7 +163,7 @@ export const sql_strengthen_edges_batch = `
  * Role: Identifies the currently active "thoughts" or high-priority concepts in the global workspace.
  */
 export const sql_get_high_potential_nodes = `
-	SELECT id, label, x, y, activation, potential, idol_id, root_ids, metrics_ids, created_at, updated_at
+	SELECT id, label, x, y, potential, idol_id, root_ids, metrics_ids, created_at, updated_at
 	FROM ${SCHEMA_BRAIN}.nodes
 	WHERE potential > $1
 	ORDER BY potential DESC
@@ -167,7 +175,7 @@ export const sql_get_high_potential_nodes = `
  * Role: Precise lookup for node attributes.
  */
 export const sql_get_node_by_id = `
-	SELECT id, label, x, y, activation, potential, idol_id, root_ids, metrics_ids, created_at, updated_at
+	SELECT id, label, x, y, potential, idol_id, root_ids, metrics_ids, created_at, updated_at
 	FROM ${SCHEMA_BRAIN}.nodes
 	WHERE id = $1
 `
@@ -183,7 +191,36 @@ export const sql_get_node_by_label = `SELECT id FROM ${SCHEMA_BRAIN}.nodes WHERE
  * Role: Reconstructs the local graph structure for a set of recalled concepts.
  */
 export const sql_get_edges_between_nodes = `
-	SELECT id, source_id, target_id, weight, distance, learning_rate, decay_resistance, idol_id, root_ids, metrics_ids, created_at, updated_at
+	SELECT id, source_id, target_id, weight, distance, learning_rate, decay_resistance, is_habit, idol_id, root_ids, metrics_ids, created_at, updated_at
 	FROM ${SCHEMA_BRAIN}.edges
 	WHERE source_id = ANY($1) AND target_id = ANY($1)
+`
+
+/**
+ * Memory reorganization triggered by idle state.
+ * Role: Simulates brain's memory consolidation during rest - weakens unused connections, reinforces important ones.
+ * Unlike time-based decay, this is triggered by new learning events going idle.
+ * Synchronously updates distance to reflect synaptic efficiency changes.
+ */
+export const sql_memory_reorganization = `
+	BEGIN;
+
+	UPDATE ${SCHEMA_BRAIN}.edges
+	SET weight = GREATEST(weight * ${DECAY_STRENGTH}, ${WEAK_EDGE_THRESHOLD}),
+	    distance = GREATEST(1.0 / (weight * ${DECAY_STRENGTH} + ${DISTANCE_EPSILON}), 0.1),
+	    is_habit = FALSE
+	WHERE (lock IS NULL OR lock = FALSE)
+	  AND weight < 0.5;
+
+	UPDATE ${SCHEMA_BRAIN}.edges
+	SET weight = LEAST(weight + ${REORGANIZATION_STRENGTH}, ${EDGE_WEIGHT_MAX}),
+	    distance = GREATEST(1.0 / (weight + ${REORGANIZATION_STRENGTH} + ${DISTANCE_EPSILON}), 0.1)
+	WHERE (lock IS NULL OR lock = FALSE)
+	  AND weight > 0.5;
+
+	DELETE FROM ${SCHEMA_BRAIN}.edges
+	WHERE weight < ${WEAK_EDGE_THRESHOLD}
+	  AND (lock IS NULL OR lock = FALSE);
+
+	COMMIT;
 `

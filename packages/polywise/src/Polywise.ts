@@ -64,8 +64,8 @@ import {
 	sql_inject_edges_commit,
 	sql_inject_edges_insert_edge,
 	sql_inject_edges_rollback,
-	sql_inject_edges_update_edge,
 	sql_insert_article_embedding,
+	sql_memory_reorganization,
 	sql_node_sources,
 	sql_process_article,
 	sql_propagate,
@@ -597,6 +597,10 @@ export default class Polywise {
 			sql_sleep_tick_reset_nodes,
 			sql_sleep_tick_commit
 		])
+	}
+
+	async triggerMemoryReorganization() {
+		await this.exec(sql_memory_reorganization)
 	}
 
 	async recallFromMemory(args: RecallArgs) {

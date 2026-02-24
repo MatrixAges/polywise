@@ -1,14 +1,16 @@
 import {
 	DEFAULT_HEBBIAN_REWARD,
+	DISTANCE_EPSILON,
 	EDGE_DECAY_FACTOR,
-	EDGE_DISTANCE_MIN,
 	EDGE_LEARNING_FACTOR,
 	EDGE_WEIGHT_MAX,
 	EDGE_WEIGHT_MIN,
 	GLOBAL_DECAY_RATE,
+	HABIT_THRESHOLD,
 	HYPERPOLARIZATION_POTENTIAL,
 	MIN_POTENTIAL,
 	NODE_POTENTIAL_MIN,
+	QUERY_REWARD,
 	REFRACTORY_PERIOD_MS,
 	SCHEMA_BRAIN,
 	SCHEMA_MEMORY,
@@ -23,19 +25,20 @@ import {
  * Role:
  * 1. Propagates activation: Nodes fire if they cross a threshold, sending signals to connected neighbors.
  * 2. Updates node states: Adjusts potential based on input, decay, and firing (reset).
- * 3. Updates edge weights: Implements Hebbian learning (strengthens active-active connections).
- * 4. Adjusts distances: Recalculates "distance" (cost) based on weight for pathfinding.
+ * 3. Updates edge weights: Implements Hebbian learning (LTP) - strengthens active-active connections.
+ * 4. Updates distance: Dynamically calculates distance = 1 / (weight + epsilon) to reflect synaptic efficiency.
+ * 5. Updates is_habit: Marks edges as automatic/reflexive when reaction_count exceeds threshold.
  */
 export const sql_propagate = (threshold: number) => `
   WITH incoming_signals AS (
     SELECT 
       e.target_id, 
       SUM(
-        n.activation * e.weight * ${GLOBAL_DECAY_RATE} / (e.distance + 0.1)
+        CASE WHEN n.potential > ${threshold} THEN 1.0 ELSE 0.0 END * e.weight * ${GLOBAL_DECAY_RATE} / (e.distance + 0.1)
       ) as total_input
     FROM ${SCHEMA_BRAIN}.edges e
     JOIN ${SCHEMA_BRAIN}.nodes n ON e.source_id = n.id
-    WHERE n.activation > 0
+    WHERE n.potential > ${threshold}
     GROUP BY e.target_id
   )
   UPDATE ${SCHEMA_BRAIN}.nodes
@@ -43,12 +46,6 @@ export const sql_propagate = (threshold: number) => `
 
   UPDATE ${SCHEMA_BRAIN}.nodes
   SET 
-    activation = CASE 
-      WHEN potential > ${threshold} 
-           AND (last_fired_at IS NULL OR EXTRACT(EPOCH FROM (CURRENT_TIMESTAMP - last_fired_at)) * 1000 > ${REFRACTORY_PERIOD_MS})
-      THEN 1.0 
-      ELSE 0.0 
-    END,
     potential = CASE 
       WHEN potential > ${threshold} 
            AND (last_fired_at IS NULL OR EXTRACT(EPOCH FROM (CURRENT_TIMESTAMP - last_fired_at)) * 1000 > ${REFRACTORY_PERIOD_MS})
@@ -71,29 +68,32 @@ export const sql_propagate = (threshold: number) => `
   UPDATE ${SCHEMA_BRAIN}.edges e
   SET 
     weight = CASE 
-      WHEN (SELECT activation FROM ${SCHEMA_BRAIN}.nodes WHERE id = e.source_id) > 0 
-           AND (SELECT activation FROM ${SCHEMA_BRAIN}.nodes WHERE id = e.target_id) > 0 
+      WHEN (SELECT potential FROM ${SCHEMA_BRAIN}.nodes WHERE id = e.source_id) > ${threshold} 
+           AND (SELECT potential FROM ${SCHEMA_BRAIN}.nodes WHERE id = e.target_id) > ${threshold} 
       THEN LEAST(weight + (${EDGE_LEARNING_FACTOR} * e.learning_rate), ${EDGE_WEIGHT_MAX})
-      ELSE weight
+      ELSE LEAST(weight + ${QUERY_REWARD} * e.learning_rate, ${EDGE_WEIGHT_MAX})
     END,
-    updated_at = CASE 
-      WHEN (SELECT activation FROM ${SCHEMA_BRAIN}.nodes WHERE id = e.source_id) > 0 
-           AND (SELECT activation FROM ${SCHEMA_BRAIN}.nodes WHERE id = e.target_id) > 0 
-      THEN CURRENT_TIMESTAMP 
-      ELSE updated_at 
-    END;
-
-  UPDATE ${SCHEMA_BRAIN}.edges
-  SET distance = GREATEST(1.0 / (weight + 0.1), ${EDGE_DISTANCE_MIN});
+    distance = CASE 
+      WHEN (SELECT potential FROM ${SCHEMA_BRAIN}.nodes WHERE id = e.source_id) > ${threshold} 
+           AND (SELECT potential FROM ${SCHEMA_BRAIN}.nodes WHERE id = e.target_id) > ${threshold} 
+      THEN GREATEST(1.0 / (LEAST(weight + (${EDGE_LEARNING_FACTOR} * e.learning_rate), ${EDGE_WEIGHT_MAX}) + ${DISTANCE_EPSILON}), 0.1)
+      ELSE GREATEST(1.0 / (LEAST(weight + ${QUERY_REWARD} * e.learning_rate, ${EDGE_WEIGHT_MAX}) + ${DISTANCE_EPSILON}), 0.1)
+    END,
+    reaction_count = reaction_count + 1,
+    is_habit = CASE WHEN reaction_count + 1 > ${HABIT_THRESHOLD} THEN TRUE ELSE is_habit END,
+    updated_at = CURRENT_TIMESTAMP;
 `
 
 /**
- * Decays the weight of edges over time.
- * Role: Implements the "forgetting curve" for memories, allowing unused connections to fade over time, unless locked.
+ * Decays the weight of edges over time (LTD - Long-Term Depression).
+ * Role: Implements the "forgetting curve" for memories, allowing unused connections to fade.
+ * Synchronously updates distance to reflect reduced synaptic efficiency.
  */
 export const sql_decay = `
   UPDATE ${SCHEMA_BRAIN}.edges
-  SET weight = GREATEST(weight - (${EDGE_DECAY_FACTOR} / decay_resistance), ${EDGE_WEIGHT_MIN})
+  SET weight = GREATEST(weight - (${EDGE_DECAY_FACTOR} / decay_resistance), ${EDGE_WEIGHT_MIN}),
+      distance = GREATEST(1.0 / (GREATEST(weight - (${EDGE_DECAY_FACTOR} / decay_resistance), ${EDGE_WEIGHT_MIN}) + ${DISTANCE_EPSILON}), 0.1),
+      is_habit = FALSE
   WHERE (lock IS NULL OR lock = FALSE);
 `
 
@@ -127,7 +127,7 @@ export const sql_stimulate = `UPDATE ${SCHEMA_BRAIN}.nodes SET potential = poten
  * Role: Captures the current "state of mind" for visualization or analysis, filtering out dormant nodes.
  */
 export const sql_get_snapshot_nodes = (weight_threshold: number, limit: number) => `
-  SELECT id, label, x, y, activation, potential, idol_id, root_ids, metrics_ids, article_ids, lock, created_at, updated_at
+  SELECT id, label, x, y, potential, idol_id, root_ids, metrics_ids, article_ids, lock, created_at, updated_at
   FROM ${SCHEMA_BRAIN}.nodes
   WHERE potential > ${NODE_POTENTIAL_MIN}
   OR id IN (SELECT source_id FROM ${SCHEMA_BRAIN}.edges WHERE weight > ${weight_threshold})
@@ -141,7 +141,7 @@ export const sql_get_snapshot_nodes = (weight_threshold: number, limit: number) 
  * Role: Captures the active wiring of the brain for visualization or analysis.
  */
 export const sql_get_snapshot_edges = (weight_threshold: number) => `
-  SELECT source_id, target_id, weight, distance, idol_id, root_ids, metrics_ids, lock, created_at, updated_at
+  SELECT source_id, target_id, weight, distance, learning_rate, decay_resistance, is_habit, idol_id, root_ids, metrics_ids, lock, created_at, updated_at
   FROM ${SCHEMA_BRAIN}.edges
   WHERE weight > ${weight_threshold}
   ORDER BY weight DESC
@@ -279,7 +279,7 @@ export const sql_node_sources = `INSERT INTO ${SCHEMA_BRAIN}.node_sources (node_
  * Role: Scoped retrieval for multi-tenant or multi-context operations.
  */
 export const sql_get_nodes_by_idol = `
-  SELECT id, label, x, y, activation, potential, idol_id, root_ids, metrics_ids, created_at, updated_at
+  SELECT id, label, x, y, potential, idol_id, root_ids, metrics_ids, created_at, updated_at
   FROM ${SCHEMA_BRAIN}.nodes
   WHERE idol_id = $1
 `
@@ -289,7 +289,7 @@ export const sql_get_nodes_by_idol = `
  * Role: Hierarchical or group-based retrieval.
  */
 export const sql_get_nodes_by_root = `
-  SELECT id, label, x, y, activation, potential, idol_id, root_ids, metrics_ids, created_at, updated_at
+  SELECT id, label, x, y, potential, idol_id, root_ids, metrics_ids, created_at, updated_at
   FROM ${SCHEMA_BRAIN}.nodes
   WHERE $1 = ANY(root_ids)
 `
@@ -299,7 +299,7 @@ export const sql_get_nodes_by_root = `
  * Role: Context-scoped structure retrieval.
  */
 export const sql_get_edges_by_idol = `
-  SELECT source_id, target_id, weight, distance, idol_id, root_ids, metrics_ids, created_at, updated_at
+  SELECT source_id, target_id, weight, distance, learning_rate, decay_resistance, is_habit, idol_id, root_ids, metrics_ids, created_at, updated_at
   FROM ${SCHEMA_BRAIN}.edges
   WHERE idol_id = $1
 `
@@ -309,7 +309,7 @@ export const sql_get_edges_by_idol = `
  * Role: Group-scoped structure retrieval.
  */
 export const sql_get_edges_by_root = `
-  SELECT source_id, target_id, weight, distance, idol_id, root_ids, metrics_ids, created_at, updated_at
+  SELECT source_id, target_id, weight, distance, learning_rate, decay_resistance, is_habit, idol_id, root_ids, metrics_ids, created_at, updated_at
   FROM ${SCHEMA_BRAIN}.edges
   WHERE $1 = ANY(root_ids)
 `
@@ -394,7 +394,7 @@ export const sql_update_article = `
  * Role: "Grounding" - mapping an abstract vector/thought to a concrete concept node in the graph.
  */
 export const sql_find_nearest_node = `
-  SELECT id, label, activation, potential, threshold, 1 - (embedding <=> $1) AS similarity
+  SELECT id, label, potential, threshold, 1 - (embedding <=> $1) AS similarity
   FROM ${SCHEMA_BRAIN}.nodes
   WHERE embedding IS NOT NULL
   ORDER BY embedding <=> $1
@@ -411,7 +411,7 @@ export const sql_update_node_embedding = `UPDATE ${SCHEMA_BRAIN}.nodes SET embed
  * Retrieves all nodes.
  * Role: Full system dump/backup.
  */
-export const sql_get_all_nodes = `SELECT id, label, x, y, activation, potential, idol_id, root_ids, metrics_ids, article_ids, lock, created_at, updated_at FROM ${SCHEMA_BRAIN}.nodes`
+export const sql_get_all_nodes = `SELECT id, label, x, y, potential, idol_id, root_ids, metrics_ids, article_ids, lock, created_at, updated_at FROM ${SCHEMA_BRAIN}.nodes`
 
 /**
  * Updates an article's embedding vector.
@@ -437,8 +437,7 @@ export const sql_delete_article = `
  */
 export const sql_forget_decay_nodes = `
   UPDATE ${SCHEMA_BRAIN}.nodes n
-  SET potential = GREATEST(n.potential * 0.5, 0),
-      activation = GREATEST(n.activation * 0.5, 0)
+  SET potential = GREATEST(n.potential * 0.5, 0)
   WHERE n.id IN (
     SELECT node_id FROM ${SCHEMA_BRAIN}.node_sources WHERE article_id = $1
   )

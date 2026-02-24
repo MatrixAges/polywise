@@ -17,7 +17,6 @@ export const sql_create_schema_brain = `CREATE SCHEMA IF NOT EXISTS ${SCHEMA_BRA
  * Role: Stores the fundamental units of the knowledge graph (concepts, entities).
  * Columns:
  * - potential: Current excitation level.
- * - activation: Firing state (0 or 1).
  * - threshold: Activation threshold.
  * - embedding: Semantic vector representation.
  * - is_action: Whether this node represents an executable action.
@@ -28,8 +27,7 @@ export const sql_create_table_nodes = `
     label TEXT UNIQUE,
     x REAL,
     y REAL,
-    potential REAL DEFAULT 0.0,
-    activation REAL DEFAULT 0.0,
+    potential REAL DEFAULT 0.1,
     threshold REAL DEFAULT 0.5,
     last_fired_at TIMESTAMP,
     idol_id TEXT,
@@ -48,10 +46,10 @@ export const sql_create_table_nodes = `
  * Role: Stores the connections between nodes (associations, relationships).
  * Columns:
  * - weight: Strength of the connection (synaptic weight).
- * - distance: Cost of traversal (inverse of weight).
+ * - distance: Cost of traversal (inverse of weight). Dynamically calculated: distance = 1 / (weight + epsilon).
  * - learning_rate: How quickly this edge adapts (neuroplasticity).
  * - decay_resistance: How resistant this edge is to forgetting.
- * - is_habit: Whether this edge represents an automatic/reflexive pathway.
+ * - is_habit: Whether this edge represents an automatic/reflexive pathway (reaction_count > threshold).
  */
 export const sql_create_table_edges = `
   CREATE TABLE IF NOT EXISTS ${SCHEMA_BRAIN}.edges (
@@ -62,6 +60,7 @@ export const sql_create_table_edges = `
     distance REAL DEFAULT 1.0,
     learning_rate REAL DEFAULT 1.0,
     decay_resistance REAL DEFAULT 1.0,
+    is_habit BOOLEAN DEFAULT FALSE,
     idol_id TEXT,
     root_ids TEXT[] DEFAULT '{}',
     metrics_ids TEXT[] DEFAULT '{}',
