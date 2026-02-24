@@ -9,19 +9,19 @@ import { injectable } from 'tsyringe'
 import {
 	DEFAULT_CONCURRENCY,
 	DEFAULT_EMBEDDING_CONFIG,
-	DEFAULT_REBEL_CONFIG,
+	DEFAULT_KEYWORD_CONFIG,
 	DEFAULT_RERANKER_CONFIG,
-	formatKeywordsPrompt,
 	POOLING_MEAN
 } from './consts'
 import { catchFinally } from './decorators'
-import { generateModelHash, getKeywords, processText, splitSentence, verifyModel } from './utils'
+import { generateModelHash, processText, splitSentence, verifyModel } from './utils'
+import KeyBERT from './utils/KeyBERT'
 
 import type {
 	EmbeddingConfig,
+	KeywordConfig,
 	PipelineArgs,
 	PipelineSearchArgs,
-	RebelConfig,
 	RerankerConfig,
 	SearchCandidate,
 	SearchResult
@@ -31,30 +31,28 @@ import type {
 export default class Pipeline {
 	private embedding_config: EmbeddingConfig = DEFAULT_EMBEDDING_CONFIG
 	private reranker_config: RerankerConfig = DEFAULT_RERANKER_CONFIG
-	private rebel_config: RebelConfig = DEFAULT_REBEL_CONFIG
+	private keyword_config: KeywordConfig = DEFAULT_KEYWORD_CONFIG
 	private cache_dir: string = `${os.homedir()}/.polywise/.models`
 	private embedding_concurrency: number = DEFAULT_CONCURRENCY
 	private reranker_concurrency: number = DEFAULT_CONCURRENCY
-	private rebel_concurrency: number = DEFAULT_CONCURRENCY
+	private keyword_concurrency: number = DEFAULT_CONCURRENCY
 	private embedding_pipeline: any = null
 	private reranker_pipeline: any = null
-	private rebel_pipeline: any = null
 	private embedding_queue = new PQueue({ concurrency: this.embedding_concurrency })
 	private reranker_queue = new PQueue({ concurrency: this.reranker_concurrency })
-	private rebel_queue = new PQueue({ concurrency: this.rebel_concurrency })
+	private keyword_queue = new PQueue({ concurrency: this.keyword_concurrency })
 	private embedding_promise: Promise<any> | null = null
 	private reranker_promise: Promise<any> | null = null
-	private rebel_promise: Promise<any> | null = null
 
 	async init(args: PipelineArgs = {}) {
 		const {
 			cache_dir,
 			embedding_config,
 			reranker_config,
-			rebel_config,
+			keyword_config,
 			embedding_concurrency,
 			reranker_concurrency,
-			rebel_concurrency
+			keyword_concurrency
 		} = args
 
 		if (cache_dir) {
@@ -75,9 +73,8 @@ export default class Pipeline {
 			this.reranker_pipeline = null
 		}
 
-		if (rebel_config) {
-			this.rebel_config = rebel_config
-			this.rebel_pipeline = null
+		if (keyword_config) {
+			this.keyword_config = keyword_config
 		}
 
 		if (embedding_concurrency !== undefined) {
@@ -90,9 +87,9 @@ export default class Pipeline {
 			this.reranker_queue = new PQueue({ concurrency: this.reranker_concurrency })
 		}
 
-		if (rebel_concurrency !== undefined) {
-			this.rebel_concurrency = rebel_concurrency
-			this.rebel_queue = new PQueue({ concurrency: this.rebel_concurrency })
+		if (keyword_concurrency !== undefined) {
+			this.keyword_concurrency = keyword_concurrency
+			this.keyword_queue = new PQueue({ concurrency: this.keyword_concurrency })
 		}
 	}
 
@@ -114,13 +111,8 @@ export default class Pipeline {
 		}
 	}
 
-	async setRebelConfig(config: RebelConfig) {
-		this.rebel_config = config
-		this.rebel_pipeline = null
-
-		if (config.type === 'local') {
-			await this.loadRebelModel()
-		}
+	async setKeywordConfig(config: KeywordConfig) {
+		this.keyword_config = config
 	}
 
 	async generateKeywords(text: string) {
@@ -132,32 +124,20 @@ export default class Pipeline {
 		for (const sentence of sentences) {
 			if (sentence.length < 5) continue
 
-			const result = await this.rebel_queue.add<Array<string>>(async () => {
-				if (this.rebel_config.type === 'custom') {
-					const keywords = await this.rebel_config.fn(sentence)
+			const result = await this.keyword_queue.add<Array<string>>(async () => {
+				if (this.keyword_config.type === 'custom') {
+					const keywords = await this.keyword_config.fn(sentence)
 					return keywords.map(String)
 				}
 
-				const generator = await this.loadRebelModel()
-				const prompt = formatKeywordsPrompt(sentence)
+				const extractor = await this.loadEmbeddingModel()
+				const extracted = await KeyBERT.extract(sentence, extractor, 5)
 
-				const output = await generator(prompt, {
-					max_new_tokens: 64,
-					do_sample: false,
-					return_full_text: false,
-					stop_sequences: ['<|im_end|>', '<think>', '</think>', '\n', '\n\n', '}']
-				})
-
-				const generated_text = output[0]?.generated_text
-					? `[${output[0].generated_text.replace('[', '')}`
-					: ''
-				const keywords = getKeywords(generated_text)
-
-				if (!keywords || keywords.length === 0) {
+				if (!extracted || extracted.length === 0) {
 					return []
 				}
 
-				return keywords
+				return extracted.map(k => k.word)
 			})
 
 			if (result && result.length > 0) {
@@ -382,15 +362,11 @@ export default class Pipeline {
 
 		await Promise.all([
 			this.checkAndDownload(this.embedding_config, this.loadEmbeddingModel.bind(this)),
-			this.checkAndDownload(this.reranker_config, this.loadRerankerModel.bind(this)),
-			this.checkAndDownload(this.rebel_config, this.loadRebelModel.bind(this))
+			this.checkAndDownload(this.reranker_config, this.loadRerankerModel.bind(this))
 		])
 	}
 
-	private async checkAndDownload(
-		config: EmbeddingConfig | RerankerConfig | RebelConfig,
-		loadFn: () => Promise<any>
-	) {
+	private async checkAndDownload(config: EmbeddingConfig | RerankerConfig, loadFn: () => Promise<any>) {
 		if (config.type !== 'local' || !this.cache_dir) return
 
 		const model_path = path.join(this.cache_dir, config.model)
@@ -450,25 +426,6 @@ export default class Pipeline {
 		return this.reranker_pipeline
 	}
 
-	@catchFinally(function (this: Pipeline) {
-		this.rebel_promise = null
-	})
-	async loadRebelModel() {
-		if (this.rebel_pipeline) return this.rebel_pipeline
-		if (this.rebel_promise) return this.rebel_promise
-		if (this.rebel_config.type !== 'local') return null
-
-		const { model, dtype } = this.rebel_config
-
-		this.rebel_promise = pipeline('text-generation', model, {
-			dtype: dtype as any
-		})
-
-		this.rebel_pipeline = await this.rebel_promise
-
-		return this.rebel_pipeline
-	}
-
 	getEmbeddingConfig() {
 		return this.embedding_config
 	}
@@ -504,22 +461,22 @@ export default class Pipeline {
 		this.reranker_queue = new PQueue({ concurrency: this.reranker_concurrency })
 	}
 
-	getRebelConfig() {
-		return this.rebel_config
+	getKeywordConfig() {
+		return this.keyword_config
 	}
 
 	getRebelConcurrency() {
-		return this.rebel_concurrency
+		return this.keyword_concurrency
 	}
 
 	setRebelConcurrency(concurrency: number) {
-		this.rebel_concurrency = concurrency
-		this.rebel_queue = new PQueue({ concurrency: this.rebel_concurrency })
+		this.keyword_concurrency = concurrency
+		this.keyword_queue = new PQueue({ concurrency: this.keyword_concurrency })
 	}
 
 	off() {
 		this.embedding_queue.clear()
 		this.reranker_queue.clear()
-		this.rebel_queue.clear()
+		this.keyword_queue.clear()
 	}
 }

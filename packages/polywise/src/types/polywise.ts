@@ -19,9 +19,11 @@ export interface Node {
 	idol_id?: string
 	root_ids?: Array<string>
 	metrics_ids?: Array<string>
+	article_ids?: Array<string>
 	embedding?: Array<number>
 	created_at?: string
 	updated_at?: string
+	lock?: boolean
 }
 
 export interface Edge {
@@ -38,6 +40,7 @@ export interface Edge {
 	reaction_count?: number
 	created_at?: string
 	updated_at?: string
+	lock?: boolean
 }
 
 export interface ReactResult {

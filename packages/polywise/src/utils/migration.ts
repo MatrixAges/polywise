@@ -1,3 +1,4 @@
+import { SCHEMA_BRAIN, SCHEMA_META } from '../consts'
 import { sql_insert_version } from '../sql/meta'
 import {
 	sql_create_extension_vector,
@@ -19,12 +20,13 @@ import {
 	sql_create_table_articles,
 	sql_create_table_edges,
 	sql_create_table_node_sources,
-	sql_create_table_nodes
+	sql_create_table_nodes,
+	sql_create_table_stats
 } from '../sql/schema'
 
 import type { Migration } from '../types'
 
-export const CURRENT_SCHEMA_VERSION = 1
+export const CURRENT_SCHEMA_VERSION = 2
 
 export const migrations: Array<Migration> = [
 	{
@@ -52,6 +54,19 @@ export const migrations: Array<Migration> = [
 				sql_create_index_article_content_gin,
 				sql_create_table_node_sources,
 				sql_create_schema_user_space
+			])
+		}
+	},
+	{
+		version: 2,
+		description: 'Add article_ids to nodes, lock to nodes/edges, and create stats table',
+		up: async exec => {
+			await exec([
+				`ALTER TABLE ${SCHEMA_BRAIN}.nodes ADD COLUMN IF NOT EXISTS article_ids TEXT[] DEFAULT '{}'`,
+				`ALTER TABLE ${SCHEMA_BRAIN}.nodes ADD COLUMN IF NOT EXISTS lock BOOLEAN DEFAULT FALSE`,
+				`ALTER TABLE ${SCHEMA_BRAIN}.edges ADD COLUMN IF NOT EXISTS lock BOOLEAN DEFAULT FALSE`,
+				sql_create_table_stats,
+				`INSERT INTO ${SCHEMA_META}.stats (key, value) VALUES ('input_count', '0'::jsonb) ON CONFLICT DO NOTHING`
 			])
 		}
 	}

@@ -1,4 +1,4 @@
-import { SCHEMA_BRAIN, SCHEMA_MEMORY, SCHEMA_USER } from '../consts'
+import { SCHEMA_BRAIN, SCHEMA_MEMORY, SCHEMA_META, SCHEMA_USER } from '../consts'
 
 /**
  * Enables the pgvector extension.
@@ -35,9 +35,11 @@ export const sql_create_table_nodes = `
     idol_id TEXT,
     root_ids TEXT[] DEFAULT '{}',
     metrics_ids TEXT[] DEFAULT '{}',
+    article_ids TEXT[] DEFAULT '{}',
     embedding vector(1024),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    lock BOOLEAN DEFAULT FALSE
   );
 `
 
@@ -65,7 +67,8 @@ export const sql_create_table_edges = `
     metrics_ids TEXT[] DEFAULT '{}',
     reaction_count INTEGER DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    lock BOOLEAN DEFAULT FALSE
   );
 `
 
@@ -151,6 +154,14 @@ export const sql_create_index_edges_metrics = `CREATE INDEX IF NOT EXISTS idx_ed
  * Role: Initializes namespace for raw knowledge/documents.
  */
 export const sql_create_schema_memory = `CREATE SCHEMA IF NOT EXISTS ${SCHEMA_MEMORY};`
+
+export const sql_create_table_stats = `
+  CREATE TABLE IF NOT EXISTS ${SCHEMA_META}.stats (
+    key TEXT PRIMARY KEY,
+    value JSONB,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  );
+`
 
 /**
  * Creates the articles table.

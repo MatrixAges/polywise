@@ -22,10 +22,10 @@ export interface PolywiseArgs extends FiltersArgs {
 	cache_dir?: string
 	embedding_config?: EmbeddingConfig
 	reranker_config?: RerankerConfig
-	rebel_config?: RebelConfig
+	keyword_config?: KeywordConfig
 	embedding_concurrency?: number
 	reranker_concurrency?: number
-	rebel_concurrency?: number
+	keyword_concurrency?: number
 	log?: boolean | LogArgs
 	onTick?: () => void
 }
@@ -56,27 +56,27 @@ export interface CustomRerankerConfig {
 
 export type RerankerConfig = LocalRerankerConfig | CustomRerankerConfig
 
-export interface LocalRebelConfig {
+export interface LocalKeywordConfig {
 	type: 'local'
 	model: string
 	dtype?: DataType
 }
 
-export interface CustomRebelConfig {
+export interface CustomKeywordConfig {
 	type: 'custom'
 	fn: (text: string) => Promise<Array<string>>
 }
 
-export type RebelConfig = LocalRebelConfig | CustomRebelConfig
+export type KeywordConfig = LocalKeywordConfig | CustomKeywordConfig
 
 export interface PipelineArgs {
 	cache_dir?: string
 	embedding_config?: EmbeddingConfig
 	reranker_config?: RerankerConfig
-	rebel_config?: RebelConfig
+	keyword_config?: KeywordConfig
 	embedding_concurrency?: number
 	reranker_concurrency?: number
-	rebel_concurrency?: number
+	keyword_concurrency?: number
 }
 
 export interface AddNodeArgs extends FiltersArgs {
@@ -85,12 +85,15 @@ export interface AddNodeArgs extends FiltersArgs {
 	y: number
 	threshold?: number
 	embedding?: Array<number>
+	article_ids?: Array<string>
+	lock?: boolean
 }
 
 export interface ConnectArgs extends FiltersArgs {
 	source_id: string
 	target_id: string
 	weight?: number
+	lock?: boolean
 }
 
 export interface ProcessArticleArgs extends FiltersArgs {

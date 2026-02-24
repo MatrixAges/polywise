@@ -8,6 +8,7 @@ import {
 	NODE_POTENTIAL_MIN,
 	SCHEMA_BRAIN,
 	SCHEMA_MEMORY,
+	SCHEMA_META,
 	SNAPSHOT_EDGES_LIMIT,
 	TICK_DECAY_RATE,
 	TICK_POTENTIAL_MAX
@@ -18,10 +19,10 @@ import {
  * Role:
  * 1. Propagates activation: Nodes fire if they cross a threshold, sending signals to connected neighbors.
  * 2. Updates node states: Adjusts potential based on input, decay, and firing (reset).
- * 3. Updates edge weights: Implements Hebbian learning (strengthens active-active connections) and decay (weakens unused ones).
+ * 3. Updates edge weights: Implements Hebbian learning (strengthens active-active connections).
  * 4. Adjusts distances: Recalculates "distance" (cost) based on weight for pathfinding.
  */
-export const sql_tick = (threshold: number) => `
+export const sql_propagate = (threshold: number) => `
   WITH incoming_signals AS (
     SELECT 
       e.target_id, 
@@ -49,7 +50,7 @@ export const sql_tick = (threshold: number) => `
       WHEN (SELECT activation FROM ${SCHEMA_BRAIN}.nodes WHERE id = e.source_id) > 0 
            AND (SELECT activation FROM ${SCHEMA_BRAIN}.nodes WHERE id = e.target_id) > 0 
       THEN LEAST(weight + (${EDGE_LEARNING_FACTOR} * e.learning_rate), ${EDGE_WEIGHT_MAX})
-      ELSE GREATEST(weight - (${EDGE_DECAY_FACTOR} / e.decay_resistance), ${EDGE_WEIGHT_MIN})
+      ELSE weight
     END,
     updated_at = CASE 
       WHEN (SELECT activation FROM ${SCHEMA_BRAIN}.nodes WHERE id = e.source_id) > 0 
@@ -63,12 +64,22 @@ export const sql_tick = (threshold: number) => `
 `
 
 /**
+ * Decays the weight of edges over time.
+ * Role: Implements the "forgetting curve" for memories, allowing unused connections to fade over time, unless locked.
+ */
+export const sql_decay = `
+  UPDATE ${SCHEMA_BRAIN}.edges
+  SET weight = GREATEST(weight - (${EDGE_DECAY_FACTOR} / decay_resistance), ${EDGE_WEIGHT_MIN})
+  WHERE (lock IS NULL OR lock = FALSE);
+`
+
+/**
  * Creates a new node in the graph.
  * Role: Instantiates a new concept or entity within the brain.
  */
 export const sql_add_node = `
-  INSERT INTO ${SCHEMA_BRAIN}.nodes (id, label, x, y, threshold, idol_id, root_ids, metrics_ids, embedding)
-  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+  INSERT INTO ${SCHEMA_BRAIN}.nodes (id, label, x, y, threshold, idol_id, root_ids, metrics_ids, embedding, article_ids, lock)
+  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
   RETURNING id
 `
 
@@ -77,8 +88,8 @@ export const sql_add_node = `
  * Role: Establishes a relationship or association between two concepts.
  */
 export const sql_connect = `
-  INSERT INTO ${SCHEMA_BRAIN}.edges (id, source_id, target_id, weight, idol_id, root_ids, metrics_ids)
-  VALUES ($1, $2, $3, $4, $5, $6, $7)
+  INSERT INTO ${SCHEMA_BRAIN}.edges (id, source_id, target_id, weight, idol_id, root_ids, metrics_ids, lock)
+  VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 `
 
 /**
@@ -128,14 +139,15 @@ export const sql_process_article = `
  * Role: Ensures a concept exists and reinforces it (learning), triggering activation if it's already present.
  */
 export const sql_upsert_node = `
-  INSERT INTO ${SCHEMA_BRAIN}.nodes (id, label, x, y, potential, idol_id, root_ids, metrics_ids, embedding)
-  VALUES ($1, $2, random() * 800, random() * 600, 1.0, $3, $4, $5, $6)
+  INSERT INTO ${SCHEMA_BRAIN}.nodes (id, label, x, y, potential, idol_id, root_ids, metrics_ids, embedding, article_ids, lock)
+  VALUES ($1, $2, random() * 800, random() * 600, 1.0, $3, $4, $5, $6, $7, $8)
   ON CONFLICT (label) DO UPDATE SET 
     potential = LEAST(${SCHEMA_BRAIN}.nodes.potential + ${DEFAULT_HEBBIAN_REWARD}, ${TICK_POTENTIAL_MAX}), 
     embedding = COALESCE(EXCLUDED.embedding, ${SCHEMA_BRAIN}.nodes.embedding), 
     idol_id = COALESCE(EXCLUDED.idol_id, ${SCHEMA_BRAIN}.nodes.idol_id),
     root_ids = CASE WHEN EXCLUDED.root_ids IS NOT NULL THEN (SELECT ARRAY(SELECT DISTINCT unnest(COALESCE(${SCHEMA_BRAIN}.nodes.root_ids, '{}') || EXCLUDED.root_ids))) ELSE ${SCHEMA_BRAIN}.nodes.root_ids END,
     metrics_ids = CASE WHEN EXCLUDED.metrics_ids IS NOT NULL THEN (SELECT ARRAY(SELECT DISTINCT unnest(COALESCE(${SCHEMA_BRAIN}.nodes.metrics_ids, '{}') || EXCLUDED.metrics_ids))) ELSE ${SCHEMA_BRAIN}.nodes.metrics_ids END,
+    article_ids = CASE WHEN EXCLUDED.article_ids IS NOT NULL THEN (SELECT ARRAY(SELECT DISTINCT unnest(COALESCE(${SCHEMA_BRAIN}.nodes.article_ids, '{}') || EXCLUDED.article_ids))) ELSE ${SCHEMA_BRAIN}.nodes.article_ids END,
     updated_at = CURRENT_TIMESTAMP
   RETURNING id;
 `
@@ -415,4 +427,30 @@ export const sql_forget_decay_edges = `
   OR e.target_id IN (
     SELECT node_id FROM ${SCHEMA_BRAIN}.node_sources WHERE article_id = $1
   )
+`
+
+/**
+ * Increments the input count in the stats table.
+ * Role: Tracks the total number of inputs processed by the system.
+ */
+export const sql_increment_input_count = `
+  INSERT INTO ${SCHEMA_META}.stats (key, value)
+  VALUES ('input_count', '1'::jsonb)
+  ON CONFLICT (key) DO UPDATE SET value = to_jsonb(COALESCE((stats.value::text)::int, 0) + 1);
+`
+
+/**
+ * Retrieves the current input count.
+ * Role: Monitoring system activity.
+ */
+export const sql_get_input_count = `SELECT value FROM ${SCHEMA_META}.stats WHERE key = 'input_count'`
+
+/**
+ * Resets the input count to zero.
+ * Role: Resetting system statistics.
+ */
+export const sql_reset_input_count = `
+  INSERT INTO ${SCHEMA_META}.stats (key, value)
+  VALUES ('input_count', '0'::jsonb)
+  ON CONFLICT (key) DO UPDATE SET value = '0'::jsonb;
 `

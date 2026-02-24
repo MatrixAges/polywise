@@ -52,7 +52,7 @@ This document provides an overview of the packages/polywise module structure and
 			"sql": {
 				"Brain.ts": { "desc": "Brain SQL operations", "role": "SQL" },
 				"Polywise.ts": {
-					"desc": "Polywise SQL operations (Articles/Nodes/Edges) with transaction-safe keyword injection helpers (BEGIN/COMMIT/ROLLBACK) and defensive array merge SQL for optional root_ids/metrics_ids",
+					"desc": "Polywise SQL operations (Articles/Nodes/Edges) including memory propagation, decay logic, stats tracking, and transaction-safe keyword injection helpers",
 					"role": "SQL"
 				},
 				"index.ts": { "desc": "SQL exports", "role": "Index" },

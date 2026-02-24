@@ -13,6 +13,7 @@ import {
 	DEFAULT_RERANK_LIMIT,
 	DEFAULT_SEARCH_LIMIT,
 	DEFAULT_SIMILARITY_THRESHOLD,
+	INPUT_DECAY_THRESHOLD,
 	MEMORY_RECALL_INTENSITY,
 	SNAPSHOT_NODES_LIMIT,
 	SNAPSHOT_WEIGHT_THRESHOLD
@@ -43,6 +44,7 @@ import {
 	sql_create_table_edges,
 	sql_create_table_node_sources,
 	sql_create_table_nodes,
+	sql_decay,
 	sql_delete_article,
 	sql_forget_decay_edges,
 	sql_forget_decay_nodes,
@@ -50,10 +52,12 @@ import {
 	sql_get_article_embedding,
 	sql_get_edges_by_idol,
 	sql_get_edges_by_root,
+	sql_get_input_count,
 	sql_get_nodes_by_idol,
 	sql_get_nodes_by_root,
 	sql_get_snapshot_edges,
 	sql_get_snapshot_nodes,
+	sql_increment_input_count,
 	sql_inject_edges_begin,
 	sql_inject_edges_commit,
 	sql_inject_edges_insert_edge,
@@ -62,6 +66,8 @@ import {
 	sql_insert_article_embedding,
 	sql_node_sources,
 	sql_process_article,
+	sql_propagate,
+	sql_reset_input_count,
 	sql_run_shadow_tick,
 	sql_sleep_tick_begin,
 	sql_sleep_tick_clean_noise,
@@ -70,7 +76,6 @@ import {
 	sql_sleep_tick_replay,
 	sql_sleep_tick_reset_nodes,
 	sql_stimulate,
-	sql_tick,
 	sql_update_article_embedding,
 	sql_upsert_node
 } from './sql'
@@ -132,10 +137,10 @@ export default class Polywise {
 			cache_dir,
 			embedding_config,
 			reranker_config,
-			rebel_config,
+			keyword_config,
 			embedding_concurrency,
 			reranker_concurrency,
-			rebel_concurrency,
+			keyword_concurrency,
 			log,
 			idol_id,
 			root_ids,
@@ -160,10 +165,10 @@ export default class Polywise {
 			cache_dir,
 			embedding_config,
 			reranker_config,
-			rebel_config,
+			keyword_config,
 			embedding_concurrency,
 			reranker_concurrency,
-			rebel_concurrency
+			keyword_concurrency
 		})
 
 		this.article.init(this)
@@ -372,7 +377,9 @@ export default class Polywise {
 			idol_id = this.idol_id,
 			root_ids = this.root_ids,
 			metrics_ids = this.metrics_ids,
-			embedding
+			embedding,
+			article_ids,
+			lock
 		} = args
 
 		const node_id = generateId()
@@ -386,7 +393,9 @@ export default class Polywise {
 			idol_id ?? null,
 			root_ids ?? null,
 			metrics_ids ?? null,
-			embedding ? `[${embedding.join(',')}]` : null
+			embedding ? `[${embedding.join(',')}]` : null,
+			article_ids ?? null,
+			lock ?? false
 		])) as Array<{ id: string }>
 
 		return rows[0].id
@@ -399,7 +408,8 @@ export default class Polywise {
 			weight,
 			idol_id = this.idol_id,
 			root_ids = this.root_ids,
-			metrics_ids = this.metrics_ids
+			metrics_ids = this.metrics_ids,
+			lock
 		} = args
 
 		const edge_id = generateId()
@@ -411,7 +421,8 @@ export default class Polywise {
 			weight ?? DEFAULT_EDGE_WEIGHT,
 			idol_id ?? null,
 			root_ids ?? null,
-			metrics_ids ?? null
+			metrics_ids ?? null,
+			lock ?? false
 		])
 	}
 
@@ -437,7 +448,8 @@ export default class Polywise {
 					label: keyword,
 					idol_id,
 					root_ids,
-					metrics_ids
+					metrics_ids,
+					article_ids: [article_id]
 				})
 				node_ids.push(id)
 				await this.queryRaw(sql_node_sources, [id, article_id])
@@ -487,8 +499,10 @@ export default class Polywise {
 		idol_id?: string | null
 		root_ids?: Array<string> | null
 		metrics_ids?: Array<string> | null
+		article_ids?: Array<string> | null
+		lock?: boolean
 	}) {
-		const { label, idol_id, root_ids, metrics_ids } = args
+		const { label, idol_id, root_ids, metrics_ids, article_ids, lock } = args
 		const node_id = generateId()
 
 		const rows = (await this.queryRaw(sql_upsert_node, [
@@ -497,7 +511,9 @@ export default class Polywise {
 			idol_id ?? null,
 			root_ids ?? null,
 			metrics_ids ?? null,
-			null
+			null,
+			article_ids ?? null,
+			lock ?? false
 		])) as Array<{ id: string }>
 
 		return rows[0].id
@@ -540,7 +556,17 @@ export default class Polywise {
 	async tick(threshold_override?: number) {
 		const threshold = threshold_override ?? DEFAULT_NODE_THRESHOLD
 
-		await this.exec(sql_tick(threshold))
+		await this.exec(sql_propagate(threshold))
+
+		await this.queryRaw(sql_increment_input_count)
+
+		const count_res = (await this.queryRaw(sql_get_input_count)) as Array<{ value: number }>
+		const count = count_res[0]?.value ?? 0
+
+		if (count > INPUT_DECAY_THRESHOLD) {
+			await this.exec(sql_decay)
+			await this.exec(sql_reset_input_count)
+		}
 	}
 
 	async runShadowTick() {
