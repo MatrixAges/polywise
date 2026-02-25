@@ -13,8 +13,6 @@ export async function aggregateResults(args: AggregateResultsArgs) {
 
 	collectExternalResults(recall_result, search_results, memory, seen_ids)
 
-	// collectImplicitResults(recall_result, memory)
-
 	return { memory }
 }
 
@@ -79,24 +77,5 @@ function collectExternalResults(
 			updated_at: (result as any).updated_at
 		})
 		seen_ids.add(result.id)
-	}
-}
-
-function collectImplicitResults(recall_result: AggregateResultsArgs['recall_result'], memory: Array<Memory>) {
-	const high_potential_nodes = recall_result.nodes
-		.filter(n => n.potential > POTENTIAL_THRESHOLD && !memory.find(k => k.id === n.id))
-		.slice(0, 5)
-
-	for (const node of high_potential_nodes) {
-		memory.push({
-			id: node.id,
-			content: node.label,
-			score: node.potential,
-			memoryStrength: node.potential,
-			source: 'implicit',
-			stimulated: true,
-			metadata: {},
-			updated_at: node.updated_at
-		})
 	}
 }

@@ -28,6 +28,11 @@ This document provides an overview of the packages/polywise module structure and
 				"desc": "Query processing with single/iterative search modes, quality filtering, and result aggregation",
 				"role": "Class"
 			},
+			"decorators": {
+				"catchError.ts": { "desc": "Error-handling decorator", "role": "Decorator" },
+				"catchFinally.ts": { "desc": "Finally-hook decorator", "role": "Decorator" },
+				"index.ts": { "desc": "Decorators export", "role": "Index" }
+			},
 			"Console.ts": {
 				"desc": "Structured, colorized logging utility with stage-based filtering and environment detection. Provides beautiful, readable output for development.",
 				"role": "Class"
@@ -117,7 +122,10 @@ This document provides an overview of the packages/polywise module structure and
 					"desc": "Biological-inspired keyword extraction using @node-rs/jieba for POS-tagged segmentation, stopword filtering, and a POS boundary firewall (filtering out verbs, adverbs, etc.) for high-quality semantic node candidates.",
 					"role": "Utility"
 				},
-				"aggregation.ts": { "desc": "Memory aggregation logic", "role": "Utility" },
+				"aggregation.ts": {
+					"desc": "Memory aggregation logic for recall + external results",
+					"role": "Utility"
+				},
 				"ranking.ts": {
 					"desc": "Ranking utility with optimization to skip redundant reranking steps",
 					"role": "Utility"
@@ -145,6 +153,10 @@ This document provides an overview of the packages/polywise module structure and
 			"models.spec.ts": { "desc": "Model hash verification and integrity tests", "role": "Test" },
 			"longembedding.spec.ts": {
 				"desc": "Long text embedding and fact preservation tests",
+				"role": "Test"
+			},
+			"threshold-debug.spec.ts": {
+				"desc": "Recall threshold debugging tests",
 				"role": "Test"
 			},
 			"log.spec.ts": { "desc": "Log module tests", "role": "Test" },

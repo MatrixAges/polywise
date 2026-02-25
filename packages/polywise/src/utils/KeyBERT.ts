@@ -1,6 +1,6 @@
 import { Jieba } from '@node-rs/jieba'
 import { dict } from '@node-rs/jieba/dict.js'
-import { eng, removeStopwords, zho } from 'stopword'
+import { eng, zho } from 'stopword'
 
 import Console from '../Console'
 
@@ -9,11 +9,6 @@ const jieba = Jieba.withDict(dict)
 
 // Stopwords lists
 const STOPWORDS = new Set([...zho, ...eng])
-
-// POS boundary firewall tags:
-// v: verb, p: preposition, c: conjunction, u/uj: particle, r: pronoun,
-// d: adverb, m: numeral, q: quantity, t: time, f: direction, a: adjective
-const INVALID_BOUNDARY_TAGS = new Set(['v', 'p', 'c', 'u', 'uj', 'r', 'd', 'm', 'q', 't', 'f', 'a'])
 
 // POS tags that are considered "Noun-like" or "Entity-like"
 // n: noun, nr: person, ns: place, nt: org, nz: proper noun, eng: english

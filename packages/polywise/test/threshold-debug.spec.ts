@@ -1,7 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from '@rstest/core'
 
 import Polywise from '../src/Polywise'
-import Process from '../src/Process'
 import { getTestKeywords, getTestRerank, getTestVectors } from './utils/getCache'
 import getDataDir from './utils/getDataDir'
 

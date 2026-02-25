@@ -1,4 +1,3 @@
-import type { PGlite } from '@electric-sql/pglite'
 import type ChainEmitter from '../utils/ChainEmitter'
 
 export interface Metadata {

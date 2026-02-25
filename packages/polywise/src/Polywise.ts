@@ -1,6 +1,5 @@
 import { PGlite } from '@electric-sql/pglite'
 import { vector } from '@electric-sql/pglite/vector'
-import to from 'await-to-js'
 import { container, singleton } from 'tsyringe'
 
 import Activation from './Activation'
@@ -16,7 +15,6 @@ import {
 	DEFAULT_SEARCH_LIMIT,
 	DEFAULT_SIMILARITY_THRESHOLD,
 	GLOBAL_INHIBITION_MAX,
-	HOT_NODE_THRESHOLD,
 	INPUT_DECAY_THRESHOLD,
 	MAX_ACTIVE_LIMIT,
 	MAX_THRESHOLD_DECAY_STEP,
@@ -45,8 +43,6 @@ import {
 	sql_get_nodes_by_idol,
 	sql_get_nodes_by_ids,
 	sql_get_nodes_by_root,
-	sql_get_snapshot_edges,
-	sql_get_snapshot_nodes,
 	sql_get_top_nodes_by_potential,
 	sql_increment_input_count,
 	sql_inject_edges_begin,
@@ -100,7 +96,6 @@ import type {
 	RecallArgs,
 	RecallNodesByKeywordsArgs,
 	SingleSearchArgs,
-	StrengthenRelatedEdgesArgs,
 	UpdateArticleArgs
 } from './types'
 
@@ -581,9 +576,7 @@ export default class Polywise {
 			if (all_nodes_map.size >= limit) break
 			if (frontier_node_ids.length === 0) break
 
-			const edges = (await this.queryRaw(sql_get_edges_for_nodes(frontier_node_ids), [
-				frontier_node_ids
-			])) as Array<Edge>
+			const edges = (await this.queryRaw(sql_get_edges_for_nodes, [frontier_node_ids])) as Array<Edge>
 
 			Console.log('SYSTEM', 'getSnapshot iteration edges', { iteration, count: edges.length })
 
@@ -610,9 +603,7 @@ export default class Polywise {
 
 			if (connected_node_ids.length === 0) break
 
-			const new_nodes = (await this.queryRaw(sql_get_nodes_by_ids(connected_node_ids), [
-				connected_node_ids
-			])) as Array<Node>
+			const new_nodes = (await this.queryRaw(sql_get_nodes_by_ids, [connected_node_ids])) as Array<Node>
 
 			Console.log('SYSTEM', 'getSnapshot iteration nodes', { iteration, count: new_nodes.length })
 

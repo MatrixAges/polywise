@@ -6,12 +6,10 @@ import {
 	EDGE_WEIGHT_MAX,
 	EDGE_WEIGHT_MIN,
 	GLOBAL_DECAY_RATE,
-	MAX_ACTIVE_LIMIT,
 	MAX_THRESHOLD,
 	MIN_POTENTIAL,
 	MIN_THRESHOLD,
 	NODE_POTENTIAL_MIN,
-	QUERY_REWARD,
 	REFRACTORY_PERIOD_MS,
 	SCHEMA_BRAIN,
 	SCHEMA_MEMORY,
@@ -192,7 +190,7 @@ export const sql_get_top_nodes_by_potential = (limit: number) => `
  * Retrieves edges connected to given nodes.
  * Role: Gets all edges that connect to the specified nodes for graph expansion.
  */
-export const sql_get_edges_for_nodes = (node_ids: Array<string>) => `
+export const sql_get_edges_for_nodes = `
   SELECT id, source_id, target_id, weight, distance, learning_rate, decay_resistance, idol_id, root_ids, metrics_ids, lock, created_at, updated_at
   FROM ${SCHEMA_BRAIN}.edges
   WHERE source_id = ANY($1) OR target_id = ANY($1)
@@ -203,7 +201,7 @@ export const sql_get_edges_for_nodes = (node_ids: Array<string>) => `
  * Retrieves nodes by their IDs.
  * Role: Gets full node details for a list of node IDs.
  */
-export const sql_get_nodes_by_ids = (node_ids: Array<string>) => `
+export const sql_get_nodes_by_ids = `
   SELECT id, label, x, y, potential, threshold, current_threshold, transmitter, is_active, idol_id, root_ids, metrics_ids, article_ids, lock, created_at, updated_at
   FROM ${SCHEMA_BRAIN}.nodes
   WHERE id = ANY($1)

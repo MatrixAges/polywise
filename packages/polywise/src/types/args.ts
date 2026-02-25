@@ -1,6 +1,5 @@
 import type { PGlite } from '@electric-sql/pglite'
 import type { DataType } from '@huggingface/transformers'
-import type { ConsoleConfig } from '../Console'
 import type Polywise from '../Polywise'
 import type Process from '../Process'
 import type { ChainEmitter } from '../utils'
