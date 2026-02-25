@@ -83,12 +83,12 @@ const handleTask = async (method: string, args: any, data_dir: string) => {
 			case 'forget':
 				result = await poly.forget(args as ForgetArgs)
 				break
-			case 'snapshot': {
+			case 'getSnapshot': {
 				const snapshot_args = args as SnapshotArgs | undefined
 				result = await poly.getSnapshot(snapshot_args?.weight_threshold, snapshot_args?.limit)
 				break
 			}
-			case 'recall':
+			case 'recallFromMemory':
 				result = await poly.recallFromMemory(args as RecallArgs)
 				break
 			case 'getNodeRelated':

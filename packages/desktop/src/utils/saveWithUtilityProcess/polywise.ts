@@ -115,11 +115,11 @@ export default class PolySaveUtilityProcess {
 	}
 
 	async snapshot(input: SnapshotArgs, data_dir: string) {
-		return await this.callMemory('snapshot', input, data_dir)
+		return await this.callMemory('getSnapshot', input, data_dir)
 	}
 
 	async recall(input: RecallArgs, data_dir: string) {
-		return await this.callMemory('recall', input, data_dir)
+		return await this.callMemory('recallFromMemory', input, data_dir)
 	}
 
 	async getNodeRelated(input: GetNodeRelatedArgs, data_dir: string) {
