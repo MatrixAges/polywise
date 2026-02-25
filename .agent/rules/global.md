@@ -8,6 +8,7 @@ The answer should be in the same language as the input question. (CRITICAL)
 
 BEFORE executing ANY other tool or responding to the user, you MUST save the raw user input (the current prompt) verbatim to the `.prompts/[YYYY-MM-DD]/[HH-mm-ss].md` file. If the input is not in English, it MUST be translated into English before saving.
 
+- **Exception:** Context saving is not required in plan mode.
 - **Time Retrieval:** You MUST use the `bash` tool with `date "+%H-%M-%S"` to get the current timestamp for the filename. Do not rely on internal time.
 - **Strict Order:** This is the absolute first action for every new turn.
 - **Dependency:** You are prohibited from using `read`, `edit`, or any other tool for the user's task until this context file is successfully written. `bash` is only allowed initially for `date` retrieval.
