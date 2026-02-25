@@ -19,6 +19,7 @@ import {
 	MAX_ACTIVE_LIMIT,
 	MAX_THRESHOLD_DECAY_STEP,
 	MEMORY_RECALL_INTENSITY,
+	QUERY_KEYWORDS_LIMIT,
 	SNAPSHOT_NODES_LIMIT,
 	SNAPSHOT_WEIGHT_THRESHOLD
 } from './consts'
@@ -71,7 +72,6 @@ import { sql_create_schema_meta, sql_create_table_schema_version, sql_get_curren
 import {
 	aggregateResults,
 	CURRENT_SCHEMA_VERSION,
-	extractKeywords,
 	generateId,
 	getEdgesBetweenNodes,
 	getNodeContexts,
@@ -754,10 +754,11 @@ export default class Polywise {
 			arousal = 1.0
 		} = args
 
-		const keywords = extractKeywords(query)
+		const query_keywords = await this.pipeline.generateKeywords(query)
+		const recall_keywords = query_keywords.slice(0, QUERY_KEYWORDS_LIMIT)
 
 		const matched_nodes = await this.recallNodesByKeywords({
-			keywords,
+			keywords: recall_keywords,
 			idol_id: idol_id ?? undefined,
 			root_ids: root_ids ?? undefined,
 			metrics_ids: metrics_ids ?? undefined,

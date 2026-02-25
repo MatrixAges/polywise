@@ -34,6 +34,7 @@ export const EDGE_DECAY_FACTOR = 0.001
 export const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD'
 export const DEFAULT_TIMESTAMP_FORMAT = 'YYYY-MM-DD HH:mm:ss'
 export const DEFAULT_SIMILARITY_THRESHOLD = 0.1
+export const QUERY_KEYWORDS_LIMIT = 8
 export const INPUT_DECAY_THRESHOLD = 100
 export const REFRACTORY_PERIOD_MS = 500
 export const GLOBAL_DECAY_RATE = 0.8

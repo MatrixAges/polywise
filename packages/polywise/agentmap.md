@@ -160,6 +160,10 @@ This document provides an overview of the packages/polywise module structure and
 				"role": "Test"
 			},
 			"log.spec.ts": { "desc": "Log module tests", "role": "Test" },
+			"query-keywords.spec.ts": {
+				"desc": "Query keyword generation tests using pipeline keywords",
+				"role": "Test"
+			},
 			"utils": {
 				"getCache.ts": {
 					"desc": "Test cache helper for embeddings/rerank/keywords with mock keyword cache normalization",
