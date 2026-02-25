@@ -35,3 +35,6 @@ src/main/bundle.js.map
 
 # opencode
 .opencode/plans
+
+# conductor
+.conductor

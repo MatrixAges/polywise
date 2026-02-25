@@ -442,6 +442,9 @@ importers:
       watchpack:
         specifier: ^2.5.1
         version: 2.5.1
+      workerpool:
+        specifier: ^10.0.1
+        version: 10.0.1
       zod:
         specifier: 'catalog:'
         version: 4.3.6
@@ -461,6 +464,9 @@ importers:
       '@types/watchpack':
         specifier: ^2.4.5
         version: 2.4.5
+      '@types/workerpool':
+        specifier: ^9.0.0
+        version: 9.0.0
       bun:
         specifier: 'catalog:'
         version: 1.3.9
@@ -3543,6 +3549,10 @@ packages:
 
   '@types/webxr@0.5.24':
     resolution: {integrity: sha512-h8fgEd/DpoS9CBrjEQXR+dIDraopAEfu4wYVNY2tEPwk60stPWhvZMf4Foo5FakuQ7HFZoa8WceaWFervK2Ovg==}
+
+  '@types/workerpool@9.0.0':
+    resolution: {integrity: sha512-gEiZU7P4NzkhqcSwHlSx1CddtzzEjFD/uWegp2tV5DXQABOE4qlH4H8ptCm/S5DDvCViqFj7yMrN3yMBh1pkQg==}
+    deprecated: This is a stub types definition. workerpool provides its own type definitions, so you do not need this installed.
 
   '@types/yauzl@2.10.3':
     resolution: {integrity: sha512-oJoftv0LSuaDZE3Le4DbKX+KS9G36NzOeSap90UIK0yMA/NhKJhqlSGtNDORNRaIbQfzjXDrQa0ytJ6mNRGz/Q==}
@@ -7049,6 +7059,9 @@ packages:
     resolution: {integrity: sha512-c9bZp7b5YtRj2wOe6dlj32MK+Bx/M/d+9VB2SHM1OtsUHR0aV0tdP6DWh/iMt0kWi1t5g1Iudu6hQRNd1A4PVA==}
     engines: {node: '>=18'}
 
+  workerpool@10.0.1:
+    resolution: {integrity: sha512-NAnKwZJxWlj/U1cp6ZkEtPE+GQY1S6KtOS3AlCiPfPFLxV3m64giSp7g2LsNJxzYCocDT7TSl+7T0sgrDp3KoQ==}
+
   wrap-ansi@6.2.0:
     resolution: {integrity: sha512-r6lPcBGxZXlIcymEu7InxDMhdW0KDxpLgoFLcguasxCaJ/SOIZwINatK9KY/tf+ZrlywOKU0UDj3ATXUBfxJXA==}
     engines: {node: '>=8'}
@@ -10334,6 +10347,10 @@ snapshots:
       '@types/node': 25.3.0
 
   '@types/webxr@0.5.24': {}
+
+  '@types/workerpool@9.0.0':
+    dependencies:
+      workerpool: 10.0.1
 
   '@types/yauzl@2.10.3':
     dependencies:
@@ -14372,6 +14389,8 @@ snapshots:
   widest-line@5.0.0:
     dependencies:
       string-width: 7.2.0
+
+  workerpool@10.0.1: {}
 
   wrap-ansi@6.2.0:
     dependencies:

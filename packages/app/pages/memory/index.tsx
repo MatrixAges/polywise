@@ -114,7 +114,7 @@ const Index = () => {
 			set_graph_loading(true)
 
 			try {
-				const result = await memory.expand({ node_id, limit: 20 })
+				const result = await memory.getNodeRelated({ node_id, limit: 20 })
 				const new_nodes = result.nodes || []
 				const new_edges = result.edges || []
 

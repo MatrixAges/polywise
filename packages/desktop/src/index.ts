@@ -91,23 +91,11 @@ class App {
 						recall: async input => {
 							return await saveWithUtilityProcess.recall(input, this.memory_data_dir)
 						},
-						getNodes: async () => {
-							return await saveWithUtilityProcess.getNodes(this.memory_data_dir)
-						},
-						getNodesByIdol: async input => {
-							return await saveWithUtilityProcess.getNodesByIdol(
+						getNodeRelated: async input => {
+							return await saveWithUtilityProcess.getNodeRelated(
 								input,
 								this.memory_data_dir
 							)
-						},
-						getEdgesByIdol: async input => {
-							return await saveWithUtilityProcess.getEdgesByIdol(
-								input,
-								this.memory_data_dir
-							)
-						},
-						expand: async input => {
-							return await saveWithUtilityProcess.expand(input, this.memory_data_dir)
 						}
 					}
 				}),

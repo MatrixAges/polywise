@@ -213,8 +213,8 @@ export default class MemoryModel {
 		return await ipc.memory.recall.query(this.toSerializableObject(args))
 	}
 
-	async expand(args: { node_id: string; depth?: number; limit?: number }) {
-		return (await ipc.memory.expand.query(this.toSerializableObject(args))) as {
+	async getNodeRelated(args: { node_id: string; depth?: number; limit?: number }) {
+		return (await ipc.memory.getNodeRelated.query(this.toSerializableObject(args))) as {
 			nodes: Array<any>
 			edges: Array<any>
 		}
@@ -222,18 +222,6 @@ export default class MemoryModel {
 
 	async snapshot(args?: { weight_threshold?: number; limit?: number }) {
 		return await ipc.memory.snapshot.query(this.toSerializableObject(args || {}))
-	}
-
-	async getNodes() {
-		return await ipc.memory.getNodes.query()
-	}
-
-	async getNodesByIdol(idol_id: string) {
-		return await ipc.memory.getNodesByIdol.query({ idol_id })
-	}
-
-	async getEdgesByIdol(idol_id: string) {
-		return await ipc.memory.getEdgesByIdol.query({ idol_id })
 	}
 
 	private toSerializableTask(task: ITask) {

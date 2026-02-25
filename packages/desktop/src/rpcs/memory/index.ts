@@ -114,7 +114,7 @@ const recall = p
 		})
 	})
 
-const expand = p
+const getNodeRelated = p
 	.input(
 		object({
 			node_id: string(),
@@ -123,31 +123,7 @@ const expand = p
 		})
 	)
 	.query(async ({ input, ctx }) => {
-		return await ctx.memory.expand(input)
-	})
-
-const getNodes = p.query(async ({ ctx }) => {
-	return await ctx.memory.getNodes()
-})
-
-const getNodesByIdol = p
-	.input(
-		object({
-			idol_id: string()
-		})
-	)
-	.query(async ({ input, ctx }) => {
-		return await ctx.memory.getNodesByIdol({ idol_id: input.idol_id })
-	})
-
-const getEdgesByIdol = p
-	.input(
-		object({
-			idol_id: string()
-		})
-	)
-	.query(async ({ input, ctx }) => {
-		return await ctx.memory.getEdgesByIdol({ idol_id: input.idol_id })
+		return await ctx.memory.getNodeRelated(input)
 	})
 
 const syncTasks = p
@@ -192,10 +168,7 @@ export default router({
 	forget,
 	snapshot,
 	recall,
-	expand,
-	getNodes,
-	getNodesByIdol,
-	getEdgesByIdol,
+	getNodeRelated,
 	syncTasks,
 	getTasks,
 	archiveTask,

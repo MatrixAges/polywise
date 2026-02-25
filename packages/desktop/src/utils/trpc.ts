@@ -1,7 +1,7 @@
 import { initTRPC } from '@trpc/server'
 
 import type { BrowserWindow, Tray } from 'electron'
-import type { ProcessArticleArgs, QueryArgs } from 'polywise'
+import type { GetNodeRelatedArgs, ProcessArticleArgs, QueryArgs } from 'polywise'
 
 type UpdateArgs = {
 	memory_id: string
@@ -31,16 +31,6 @@ type RecallArgs = {
 	limit?: number
 }
 
-type ExpandArgs = {
-	node_id: string
-	depth?: number
-	limit?: number
-}
-
-type IdolArgs = {
-	idol_id: string
-}
-
 type MemoryBridge = {
 	save: (input: ProcessArticleArgs) => Promise<string>
 	query: (input: QueryArgs) => Promise<unknown>
@@ -48,10 +38,7 @@ type MemoryBridge = {
 	forget: (input: ForgetArgs) => Promise<unknown>
 	snapshot: (input: SnapshotArgs) => Promise<unknown>
 	recall: (input: RecallArgs) => Promise<unknown>
-	expand: (input: ExpandArgs) => Promise<unknown>
-	getNodes: () => Promise<unknown>
-	getNodesByIdol: (input: IdolArgs) => Promise<unknown>
-	getEdgesByIdol: (input: IdolArgs) => Promise<unknown>
+	getNodeRelated: (input: GetNodeRelatedArgs) => Promise<unknown>
 }
 
 const t = initTRPC

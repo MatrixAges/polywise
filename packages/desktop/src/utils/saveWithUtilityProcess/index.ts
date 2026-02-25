@@ -1,6 +1,6 @@
 import PolySaveUtilityProcess from './polywise'
 
-import type { ProcessArticleArgs, QueryArgs } from 'polywise'
+import type { GetNodeRelatedArgs, ProcessArticleArgs, QueryArgs } from 'polywise'
 
 type UpdateArgs = {
 	memory_id: string
@@ -34,12 +34,6 @@ type RecallArgs = {
 	limit?: number
 }
 
-type ExpandArgs = {
-	node_id: string
-	depth?: number
-	limit?: number
-}
-
 const poly_save_utility_process = new PolySaveUtilityProcess()
 
 const saveWithUtilityProcess = {
@@ -64,17 +58,8 @@ const saveWithUtilityProcess = {
 	recall: async (input: RecallArgs, data_dir: string) => {
 		return await poly_save_utility_process.recall(input, data_dir)
 	},
-	expand: async (input: ExpandArgs, data_dir: string) => {
-		return await poly_save_utility_process.expand(input, data_dir)
-	},
-	getNodes: async (data_dir: string) => {
-		return await poly_save_utility_process.getNodes(data_dir)
-	},
-	getNodesByIdol: async (input: IdolArgs, data_dir: string) => {
-		return await poly_save_utility_process.getNodesByIdol(input, data_dir)
-	},
-	getEdgesByIdol: async (input: IdolArgs, data_dir: string) => {
-		return await poly_save_utility_process.getEdgesByIdol(input, data_dir)
+	getNodeRelated: async (input: GetNodeRelatedArgs, data_dir: string) => {
+		return await poly_save_utility_process.getNodeRelated(input, data_dir)
 	}
 }
 
