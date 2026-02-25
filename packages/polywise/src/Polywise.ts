@@ -15,10 +15,10 @@ import {
 	DEFAULT_RERANK_LIMIT,
 	DEFAULT_SEARCH_LIMIT,
 	DEFAULT_SIMILARITY_THRESHOLD,
+	GLOBAL_INHIBITION_MAX,
 	HOT_NODE_THRESHOLD,
 	INPUT_DECAY_THRESHOLD,
 	MAX_ACTIVE_LIMIT,
-	MAX_HOT_NODES,
 	MAX_THRESHOLD_DECAY_STEP,
 	MEMORY_RECALL_INTENSITY,
 	SNAPSHOT_NODES_LIMIT,
@@ -41,7 +41,6 @@ import {
 	sql_get_edges_by_idol,
 	sql_get_edges_by_root,
 	sql_get_edges_for_nodes,
-	sql_get_hot_node_count,
 	sql_get_input_count,
 	sql_get_nodes_by_idol,
 	sql_get_nodes_by_ids,
@@ -212,9 +211,9 @@ export default class Polywise {
 		const vectorResults = await this.article.searchByVector({
 			query: content,
 			limit: 1,
-			idol_id,
-			root_ids,
-			metrics_ids,
+			idol_id: idol_id ?? undefined,
+			root_ids: root_ids ?? undefined,
+			metrics_ids: metrics_ids ?? undefined,
 			threshold: 0
 		})
 		const max_sim = vectorResults.length > 0 ? vectorResults[0].similarity : 0
@@ -290,9 +289,9 @@ export default class Polywise {
 		const vectorResults = await this.article.searchByVector({
 			query: content,
 			limit: 1,
-			idol_id,
-			root_ids,
-			metrics_ids,
+			idol_id: idol_id ?? undefined,
+			root_ids: root_ids ?? undefined,
+			metrics_ids: metrics_ids ?? undefined,
 			threshold: 0
 		})
 		const max_sim = vectorResults.length > 0 ? vectorResults[0].similarity : 0
@@ -677,8 +676,9 @@ export default class Polywise {
 		const active_count = active_res[0]?.count ?? 0
 		const heat = Math.min(1.0, active_count / MAX_ACTIVE_LIMIT)
 		const threshold_decrement = MAX_THRESHOLD_DECAY_STEP * (1.0 - heat)
+		const inhibition_factor = Math.min(GLOBAL_INHIBITION_MAX, Math.max(0, heat * GLOBAL_INHIBITION_MAX))
 
-		await this.exec(sql_propagate(threshold, threshold_decrement, is_learning, arousal))
+		await this.exec(sql_propagate(threshold, threshold_decrement, is_learning, arousal, inhibition_factor))
 
 		await this.queryRaw(sql_increment_input_count)
 

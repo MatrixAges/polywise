@@ -41,7 +41,7 @@ This document provides an overview of the packages/polywise module structure and
 				"role": "Class"
 			},
 			"Polywise.ts": {
-				"desc": "Core database API for memory graph operations. Includes public instances of Brain, Article, and Pipeline. Supports dual-process memory with separate working memory recall and LTM consolidation. Dynamic attention plasticity modifies learning rates based on arousal during saves.",
+				"desc": "Core database API for memory graph operations. Includes public instances of Brain, Article, and Pipeline. Supports dual-process memory with separate working memory recall and LTM consolidation. Dynamic attention plasticity modifies learning rates based on arousal during saves, with global inhibition applied during tick propagation.",
 				"role": "Class"
 			},
 			"Process.ts": {
@@ -53,7 +53,10 @@ This document provides an overview of the packages/polywise module structure and
 				"format.ts": { "desc": "String formatting utilities", "role": "Constant" },
 				"index.ts": { "desc": "Main constants export", "role": "Index" },
 				"model.ts": { "desc": "Model-related constants", "role": "Constant" },
-				"performance.ts": { "desc": "Performance and threshold constants", "role": "Constant" },
+				"performance.ts": {
+					"desc": "Performance, inhibition, and threshold constants",
+					"role": "Constant"
+				},
 				"schema.ts": {
 					"desc": "Database schema constants (SCHEMA_MEMORY='memory')",
 					"role": "Constant"
@@ -63,7 +66,7 @@ This document provides an overview of the packages/polywise module structure and
 			"sql": {
 				"Brain.ts": { "desc": "Brain SQL operations", "role": "SQL" },
 				"Polywise.ts": {
-					"desc": "Polywise SQL operations (Articles/Nodes/Edges) including memory propagation, decay logic, stats tracking, and transaction-safe keyword injection helpers",
+					"desc": "Polywise SQL operations (Articles/Nodes/Edges) including memory propagation with global inhibition, decay logic, stats tracking, and transaction-safe keyword injection helpers",
 					"role": "SQL"
 				},
 				"index.ts": { "desc": "SQL exports", "role": "Index" },

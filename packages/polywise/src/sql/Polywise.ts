@@ -34,7 +34,8 @@ export const sql_propagate = (
 	threshold: number,
 	threshold_decrement: number,
 	is_learning: boolean = false,
-	arousal: number = 1.0
+	arousal: number = 1.0,
+	inhibition_factor: number = 0
 ) => `
   WITH incoming_signals AS (
     SELECT 
@@ -48,7 +49,7 @@ export const sql_propagate = (
     GROUP BY e.target_id
   )
   UPDATE ${SCHEMA_BRAIN}.nodes
-  SET potential = LEAST(GREATEST(potential + COALESCE((SELECT total_input FROM incoming_signals WHERE incoming_signals.target_id = ${SCHEMA_BRAIN}.nodes.id), 0), ${MIN_POTENTIAL}), ${TICK_POTENTIAL_MAX});
+  SET potential = LEAST(GREATEST(potential + COALESCE((SELECT total_input FROM incoming_signals WHERE incoming_signals.target_id = ${SCHEMA_BRAIN}.nodes.id), 0) * (1 - ${inhibition_factor}), ${MIN_POTENTIAL}), ${TICK_POTENTIAL_MAX});
 
   UPDATE ${SCHEMA_BRAIN}.nodes
   SET 

@@ -37,6 +37,7 @@ export const DEFAULT_SIMILARITY_THRESHOLD = 0.1
 export const INPUT_DECAY_THRESHOLD = 100
 export const REFRACTORY_PERIOD_MS = 500
 export const GLOBAL_DECAY_RATE = 0.8
+export const GLOBAL_INHIBITION_MAX = 0.6
 export const MIN_POTENTIAL = 0
 export const DECAY_STRENGTH = 0.8
 export const REORGANIZATION_STRENGTH = 0.15
