@@ -52,7 +52,7 @@ export default class Brain {
 		this.addSynapticLoad(load)
 
 		for (let i = 0; i < 100; i++) {
-			await this.p.tick(0.3)
+			await this.p.tick(0.3, true, 1.0)
 
 			this.p.onTick?.()
 

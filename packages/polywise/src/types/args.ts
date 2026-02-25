@@ -154,6 +154,8 @@ export interface RecallArgs extends FiltersArgs {
 	stimulate_intensity?: number
 	query_embedding?: Array<number>
 	limit?: number
+	is_learning?: boolean
+	arousal?: number
 }
 
 export interface QueryArgs extends FiltersArgs {

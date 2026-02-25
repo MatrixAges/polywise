@@ -49,7 +49,7 @@ describe('Biological Activation and Threshold Decay', () => {
 		const normal_edge = snapshot.edges.find(e => e.source_id === node_b && e.target_id === node_a)
 
 		expect(locked_edge!.weight).toBe(1.0)
-		expect(normal_edge!.weight).toBeGreaterThan(1.0)
+		expect(normal_edge!.weight).toBeLessThan(1.0)
 	})
 
 	it('should implement refractory period (nodes cannot fire too rapidly)', async () => {

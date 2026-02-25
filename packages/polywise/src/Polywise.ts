@@ -208,6 +208,18 @@ export default class Polywise {
 
 		Console.log('SYSTEM', 'save start', { content_len: content.length, metadata })
 
+		let arousal = 1.0
+		const vectorResults = await this.article.searchByVector({
+			query: content,
+			limit: 1,
+			idol_id,
+			root_ids,
+			metrics_ids,
+			threshold: 0
+		})
+		const max_sim = vectorResults.length > 0 ? vectorResults[0].similarity : 0
+		arousal = max_sim > 0.8 ? 0.5 : max_sim < 0.3 ? 1.5 : 1.0
+
 		const article_id = generateId()
 
 		const res = (await this.queryRaw(sql_process_article, [
@@ -245,7 +257,7 @@ export default class Polywise {
 			})
 
 			await this.activation.stimulate(node_ids, 1.0)
-			await this.activation.spread()
+			await this.activation.spread(3, DEFAULT_NODE_THRESHOLD, true, arousal)
 		}
 
 		this.log.write({ ...args, idol_id, root_ids, metrics_ids }, { memory_id: aid })
@@ -273,6 +285,18 @@ export default class Polywise {
 		} = args
 
 		Console.log('SYSTEM', 'save start', { content_len: content.length, metadata })
+
+		let arousal = 1.0
+		const vectorResults = await this.article.searchByVector({
+			query: content,
+			limit: 1,
+			idol_id,
+			root_ids,
+			metrics_ids,
+			threshold: 0
+		})
+		const max_sim = vectorResults.length > 0 ? vectorResults[0].similarity : 0
+		arousal = max_sim > 0.8 ? 0.5 : max_sim < 0.3 ? 1.5 : 1.0
 
 		await this.queryRaw(sql_forget_decay_nodes, [memory_id])
 		await this.queryRaw(sql_forget_decay_edges, [memory_id])
@@ -303,7 +327,7 @@ export default class Polywise {
 			})
 
 			await this.activation.stimulate(node_ids, 1.0)
-			await this.activation.spread()
+			await this.activation.spread(3, DEFAULT_NODE_THRESHOLD, true, arousal)
 		}
 
 		this.log.write({ ...args, idol_id, root_ids, metrics_ids }, { memory_id })
@@ -645,7 +669,7 @@ export default class Polywise {
 	 * 4. Reset: Active nodes enter a refractory period (potential resets).
 	 * 5. Decay: Inactive nodes lose potential over time (Leak).
 	 */
-	async tick(threshold_override?: number) {
+	async tick(threshold_override?: number, is_learning: boolean = false, arousal: number = 1.0) {
 		const threshold = threshold_override ?? DEFAULT_NODE_THRESHOLD
 
 		// Calculate System Heat (Homeostatic Plasticity)
@@ -654,7 +678,7 @@ export default class Polywise {
 		const heat = Math.min(1.0, active_count / MAX_ACTIVE_LIMIT)
 		const threshold_decrement = MAX_THRESHOLD_DECAY_STEP * (1.0 - heat)
 
-		await this.exec(sql_propagate(threshold, threshold_decrement))
+		await this.exec(sql_propagate(threshold, threshold_decrement, is_learning, arousal))
 
 		await this.queryRaw(sql_increment_input_count)
 
@@ -670,7 +694,7 @@ export default class Polywise {
 	async runShadowTick() {
 		await this.exec(sql_run_shadow_tick)
 
-		await this.tick(0.8)
+		await this.tick(0.8, true, 0.5)
 	}
 
 	async triggerSleepTick() {
@@ -734,7 +758,9 @@ export default class Polywise {
 			idol_id = this.idol_id,
 			root_ids = this.root_ids,
 			metrics_ids = this.metrics_ids,
-			limit = 20
+			limit = 20,
+			is_learning = false,
+			arousal = 1.0
 		} = args
 
 		const keywords = extractKeywords(query)
@@ -767,8 +793,10 @@ export default class Polywise {
 			const node_ids = all_nodes.map(n => n.id)
 
 			await this.activation.stimulate(node_ids, stimulate_intensity)
-			await this.activation.strengthen({ matched_nodes, related_nodes })
-			await this.activation.spread(3)
+			if (is_learning) {
+				await this.activation.strengthen({ matched_nodes, related_nodes })
+			}
+			await this.activation.spread(3, DEFAULT_NODE_THRESHOLD, is_learning, arousal)
 		}
 
 		const contexts = await this.getNodeContexts(all_nodes.map(n => n.id))

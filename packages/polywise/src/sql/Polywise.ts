@@ -30,12 +30,17 @@ import {
  * 3. Updates edge weights: Implements Hebbian learning (LTP) with diminishing marginal returns.
  * 4. Updates distance: Dynamically calculates distance = 1 / (weight + epsilon) to reflect synaptic efficiency.
  */
-export const sql_propagate = (threshold: number, threshold_decrement: number) => `
+export const sql_propagate = (
+	threshold: number,
+	threshold_decrement: number,
+	is_learning: boolean = false,
+	arousal: number = 1.0
+) => `
   WITH incoming_signals AS (
     SELECT 
       e.target_id, 
       SUM(
-        CASE WHEN n.is_active THEN 1.0 ELSE 0.0 END * e.weight * ${GLOBAL_DECAY_RATE} / (e.distance + 0.1)
+        CASE WHEN n.is_active THEN n.transmitter ELSE 0.0 END * e.weight * ${GLOBAL_DECAY_RATE} / (e.distance + 0.1)
       ) as total_input
     FROM ${SCHEMA_BRAIN}.edges e
     JOIN ${SCHEMA_BRAIN}.nodes n ON e.source_id = n.id
@@ -58,6 +63,10 @@ export const sql_propagate = (threshold: number, threshold_decrement: number) =>
       -- 2. Otherwise, decay back towards baseline (Homeostasis) using calculated decrement
       ELSE GREATEST(current_threshold - ${threshold_decrement}, ${MIN_THRESHOLD}, threshold)
     END,
+    transmitter = CASE
+      WHEN is_active THEN GREATEST(transmitter - 0.2, 0.0)
+      ELSE LEAST(transmitter + 0.05, 1.0)
+    END,
     is_active = CASE
       WHEN is_active THEN FALSE
       WHEN potential > current_threshold 
@@ -78,18 +87,42 @@ export const sql_propagate = (threshold: number, threshold_decrement: number) =>
       ELSE updated_at 
     END;
 
+  ${
+		is_learning
+			? `
   UPDATE ${SCHEMA_BRAIN}.edges e
   SET 
     weight = CASE 
       WHEN (e.lock IS NOT NULL AND e.lock = TRUE) THEN weight
       WHEN (SELECT is_active FROM ${SCHEMA_BRAIN}.nodes WHERE id = e.source_id) IS TRUE
            AND (SELECT is_active FROM ${SCHEMA_BRAIN}.nodes WHERE id = e.target_id) IS TRUE
-      THEN LEAST(weight + (${EDGE_LEARNING_FACTOR} * e.learning_rate * (1 - weight / ${EDGE_WEIGHT_MAX})), ${EDGE_WEIGHT_MAX})
-      ELSE LEAST(weight + (${QUERY_REWARD} * e.learning_rate * (1 - weight / ${EDGE_WEIGHT_MAX})), ${EDGE_WEIGHT_MAX})
+      THEN LEAST(weight + (${EDGE_LEARNING_FACTOR} * e.learning_rate * ${arousal} * (1 - weight / ${EDGE_WEIGHT_MAX})), ${EDGE_WEIGHT_MAX})
+      WHEN (SELECT is_active FROM ${SCHEMA_BRAIN}.nodes WHERE id = e.source_id) IS TRUE
+           OR (SELECT is_active FROM ${SCHEMA_BRAIN}.nodes WHERE id = e.target_id) IS TRUE
+      THEN GREATEST(weight - (${EDGE_DECAY_FACTOR} * e.learning_rate), ${EDGE_WEIGHT_MIN})
+      ELSE weight
     END,
-    distance = GREATEST(1.0 / (weight + ${DISTANCE_EPSILON}), 0.1),
-    reaction_count = reaction_count + 1,
-    updated_at = CURRENT_TIMESTAMP;
+    distance = GREATEST(1.0 / (CASE 
+      WHEN (e.lock IS NOT NULL AND e.lock = TRUE) THEN weight
+      WHEN (SELECT is_active FROM ${SCHEMA_BRAIN}.nodes WHERE id = e.source_id) IS TRUE
+           AND (SELECT is_active FROM ${SCHEMA_BRAIN}.nodes WHERE id = e.target_id) IS TRUE
+      THEN LEAST(weight + (${EDGE_LEARNING_FACTOR} * e.learning_rate * ${arousal} * (1 - weight / ${EDGE_WEIGHT_MAX})), ${EDGE_WEIGHT_MAX})
+      WHEN (SELECT is_active FROM ${SCHEMA_BRAIN}.nodes WHERE id = e.source_id) IS TRUE
+           OR (SELECT is_active FROM ${SCHEMA_BRAIN}.nodes WHERE id = e.target_id) IS TRUE
+      THEN GREATEST(weight - (${EDGE_DECAY_FACTOR} * e.learning_rate), ${EDGE_WEIGHT_MIN})
+      ELSE weight
+    END + ${DISTANCE_EPSILON}), 0.1),
+    reaction_count = reaction_count + CASE 
+      WHEN (SELECT is_active FROM ${SCHEMA_BRAIN}.nodes WHERE id = e.source_id) IS TRUE
+           AND (SELECT is_active FROM ${SCHEMA_BRAIN}.nodes WHERE id = e.target_id) IS TRUE
+      THEN 1 ELSE 0 END,
+    updated_at = CASE 
+      WHEN (SELECT is_active FROM ${SCHEMA_BRAIN}.nodes WHERE id = e.source_id) IS TRUE
+           OR (SELECT is_active FROM ${SCHEMA_BRAIN}.nodes WHERE id = e.target_id) IS TRUE
+      THEN CURRENT_TIMESTAMP ELSE updated_at END;
+  `
+			: ''
+  }
 `
 
 /**
@@ -109,8 +142,8 @@ export const sql_decay = `
  * Role: Instantiates a new concept or entity within the brain.
  */
 export const sql_add_node = `
-  INSERT INTO ${SCHEMA_BRAIN}.nodes (id, label, x, y, threshold, current_threshold, idol_id, root_ids, metrics_ids, embedding, article_ids, lock, is_active)
-  VALUES ($1, $2, $3, $4, $5, $5, $6, $7, $8, $9, $10, $11, FALSE)
+  INSERT INTO ${SCHEMA_BRAIN}.nodes (id, label, x, y, threshold, current_threshold, transmitter, idol_id, root_ids, metrics_ids, embedding, article_ids, lock, is_active)
+  VALUES ($1, $2, $3, $4, $5, $5, 1.0, $6, $7, $8, $9, $10, $11, FALSE)
   RETURNING id
 `
 
@@ -134,7 +167,7 @@ export const sql_stimulate = `UPDATE ${SCHEMA_BRAIN}.nodes SET potential = poten
  * Role: Captures the current "state of mind" for visualization or analysis, filtering out dormant nodes.
  */
 export const sql_get_snapshot_nodes = (weight_threshold: number, limit: number) => `
-  SELECT id, label, x, y, potential, threshold, current_threshold, is_active, idol_id, root_ids, metrics_ids, article_ids, lock, created_at, updated_at
+  SELECT id, label, x, y, potential, threshold, current_threshold, transmitter, is_active, idol_id, root_ids, metrics_ids, article_ids, lock, created_at, updated_at
   FROM ${SCHEMA_BRAIN}.nodes
   WHERE potential > ${NODE_POTENTIAL_MIN}
   OR id IN (SELECT source_id FROM ${SCHEMA_BRAIN}.edges WHERE weight > ${weight_threshold})
@@ -148,7 +181,7 @@ export const sql_get_snapshot_nodes = (weight_threshold: number, limit: number) 
  * Role: Gets the highest potential nodes to use as seeds for BFS expansion.
  */
 export const sql_get_top_nodes_by_potential = (limit: number) => `
-  SELECT id, label, x, y, potential, threshold, current_threshold, is_active, idol_id, root_ids, metrics_ids, article_ids, lock, created_at, updated_at
+  SELECT id, label, x, y, potential, threshold, current_threshold, transmitter, is_active, idol_id, root_ids, metrics_ids, article_ids, lock, created_at, updated_at
   FROM ${SCHEMA_BRAIN}.nodes
   ORDER BY potential DESC
   LIMIT ${limit}
@@ -170,7 +203,7 @@ export const sql_get_edges_for_nodes = (node_ids: Array<string>) => `
  * Role: Gets full node details for a list of node IDs.
  */
 export const sql_get_nodes_by_ids = (node_ids: Array<string>) => `
-  SELECT id, label, x, y, potential, threshold, current_threshold, is_active, idol_id, root_ids, metrics_ids, article_ids, lock, created_at, updated_at
+  SELECT id, label, x, y, potential, threshold, current_threshold, transmitter, is_active, idol_id, root_ids, metrics_ids, article_ids, lock, created_at, updated_at
   FROM ${SCHEMA_BRAIN}.nodes
   WHERE id = ANY($1)
 `
@@ -202,8 +235,8 @@ export const sql_process_article = `
  * Role: Ensures a concept exists and reinforces it (learning), triggering activation if it's already present.
  */
 export const sql_upsert_node = `
-  INSERT INTO ${SCHEMA_BRAIN}.nodes (id, label, x, y, potential, threshold, current_threshold, idol_id, root_ids, metrics_ids, embedding, article_ids, lock, is_active)
-  VALUES ($1, $2, random() * 800, random() * 600, 1.0, ${MIN_THRESHOLD}, ${MIN_THRESHOLD}, $3, $4, $5, $6, $7, $8, FALSE)
+  INSERT INTO ${SCHEMA_BRAIN}.nodes (id, label, x, y, potential, threshold, current_threshold, transmitter, idol_id, root_ids, metrics_ids, embedding, article_ids, lock, is_active)
+  VALUES ($1, $2, random() * 800, random() * 600, 1.0, ${MIN_THRESHOLD}, ${MIN_THRESHOLD}, 1.0, $3, $4, $5, $6, $7, $8, FALSE)
   ON CONFLICT (label) DO UPDATE SET 
     potential = LEAST(${SCHEMA_BRAIN}.nodes.potential + ${DEFAULT_HEBBIAN_REWARD}, ${TICK_POTENTIAL_MAX}), 
     is_active = CASE WHEN (${SCHEMA_BRAIN}.nodes.potential + ${DEFAULT_HEBBIAN_REWARD}) > ${SCHEMA_BRAIN}.nodes.current_threshold THEN TRUE ELSE ${SCHEMA_BRAIN}.nodes.is_active END,
@@ -319,7 +352,7 @@ export const sql_node_sources = `INSERT INTO ${SCHEMA_BRAIN}.node_sources (node_
  * Role: Scoped retrieval for multi-tenant or multi-context operations.
  */
 export const sql_get_nodes_by_idol = `
-  SELECT id, label, x, y, potential, threshold, current_threshold, is_active, idol_id, root_ids, metrics_ids, created_at, updated_at
+  SELECT id, label, x, y, potential, threshold, current_threshold, transmitter, is_active, idol_id, root_ids, metrics_ids, created_at, updated_at
   FROM ${SCHEMA_BRAIN}.nodes
   WHERE idol_id = $1
 `
@@ -329,7 +362,7 @@ export const sql_get_nodes_by_idol = `
  * Role: Hierarchical or group-based retrieval.
  */
 export const sql_get_nodes_by_root = `
-  SELECT id, label, x, y, potential, threshold, current_threshold, is_active, idol_id, root_ids, metrics_ids, created_at, updated_at
+  SELECT id, label, x, y, potential, threshold, current_threshold, transmitter, is_active, idol_id, root_ids, metrics_ids, created_at, updated_at
   FROM ${SCHEMA_BRAIN}.nodes
   WHERE $1 = ANY(root_ids)
 `
@@ -434,7 +467,7 @@ export const sql_update_article = `
  * Role: "Grounding" - mapping an abstract vector/thought to a concrete concept node in the graph.
  */
 export const sql_find_nearest_node = `
-  SELECT id, label, potential, threshold, current_threshold, is_active, 1 - (embedding <=> $1) AS similarity
+  SELECT id, label, potential, threshold, current_threshold, transmitter, is_active, 1 - (embedding <=> $1) AS similarity
   FROM ${SCHEMA_BRAIN}.nodes
   WHERE embedding IS NOT NULL
   ORDER BY embedding <=> $1
@@ -451,7 +484,7 @@ export const sql_update_node_embedding = `UPDATE ${SCHEMA_BRAIN}.nodes SET embed
  * Retrieves all nodes.
  * Role: Full system dump/backup.
  */
-export const sql_get_all_nodes = `SELECT id, label, x, y, potential, threshold, current_threshold, is_active, idol_id, root_ids, metrics_ids, article_ids, lock, created_at, updated_at FROM ${SCHEMA_BRAIN}.nodes`
+export const sql_get_all_nodes = `SELECT id, label, x, y, potential, threshold, current_threshold, transmitter, is_active, idol_id, root_ids, metrics_ids, article_ids, lock, created_at, updated_at FROM ${SCHEMA_BRAIN}.nodes`
 
 /**
  * Updates an article's embedding vector.

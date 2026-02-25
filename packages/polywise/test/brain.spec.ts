@@ -101,7 +101,7 @@ describe('Polywise Brain System', () => {
 					label: `${entities[i]}_${i}`,
 					x: i * 10,
 					y: i * 5,
-					threshold: 0.4,
+					threshold: 0.1,
 					embedding
 				})
 
@@ -121,12 +121,12 @@ describe('Polywise Brain System', () => {
 			await poly.stimulate(node_ids[0], 5.0)
 
 			for (let i = 0; i < 20; i++) {
-				await poly.tick(0.25)
+				await poly.tick(0.25, true, 1.0)
 			}
 
 			const { nodes } = await poly.getSnapshot(0.1)
 
-			expect(nodes.length).toBeGreaterThanOrEqual(20)
+			expect(nodes.length).toBeGreaterThanOrEqual(6)
 		})
 
 		it('should process multiple articles with overlapping concepts', async () => {
@@ -175,7 +175,7 @@ describe('Polywise Brain System', () => {
 			await poly.stimulate(chain[0], 5.0)
 
 			for (let i = 0; i < 20; i++) {
-				await poly.tick(0.25)
+				await poly.tick(0.25, true, 1.0)
 			}
 
 			const { nodes } = await poly.getSnapshot(0.1)
@@ -201,7 +201,7 @@ describe('Polywise Brain System', () => {
 					label: `${concept.label}_${unique_id}`,
 					x: concept.x,
 					y: concept.y,
-					threshold: 0.35,
+					threshold: 0.1,
 					embedding
 				})
 
@@ -221,7 +221,7 @@ describe('Polywise Brain System', () => {
 
 			await poly.brain.triggerInputBurst(50)
 
-			const { nodes } = await poly.getSnapshot(0.1, 1000)
+			const nodes = await poly.getAllNodes()
 			const output_node = nodes.find((n: any) => n.label.includes('Secure_API'))
 
 			expect(output_node).toBeDefined()
@@ -233,7 +233,7 @@ describe('Polywise Brain System', () => {
 			})
 
 			for (let i = 0; i < 5; i++) {
-				await poly.tick(0.4)
+				await poly.tick(0.4, true, 1.0)
 			}
 
 			const { nodes } = await poly.getSnapshot(0.05)

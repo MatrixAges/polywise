@@ -16,11 +16,14 @@ This document provides an overview of the packages/polywise module structure and
 	"structure": {
 		"src": {
 			"Activation.ts": {
-				"desc": "Neural activation manager implementing Spreading Activation logic. Handles node stimulation and iterative activation spreading via Polywise.tick().",
+				"desc": "Neural activation manager implementing Spreading Activation logic. Handles node stimulation and iterative activation spreading via Polywise.tick() with support for learning phases and dynamic arousal modulation.",
 				"role": "Class"
 			},
 			"Article.ts": { "desc": "Article manager class for CRUD and search operations", "role": "Class" },
-			"Brain.ts": { "desc": "Brain lifecycle manager with fatigue state machine", "role": "Class" },
+			"Brain.ts": {
+				"desc": "Brain lifecycle manager with fatigue state machine and sleep/shadow tick consolidation",
+				"role": "Class"
+			},
 			"Cortex.ts": {
 				"desc": "Query processing with single/iterative search modes, quality filtering, and result aggregation",
 				"role": "Class"
@@ -38,7 +41,7 @@ This document provides an overview of the packages/polywise module structure and
 				"role": "Class"
 			},
 			"Polywise.ts": {
-				"desc": "Core database API for memory graph operations. Includes public instances of Brain, Article, and Pipeline. Supports hybrid retrieval with memory recall, external search, result aggregation, and reranking. Provides save() and update() with batch keyword extraction + injectKeywords() graph injection, and forget() to remove memory with node/edge downweighting.",
+				"desc": "Core database API for memory graph operations. Includes public instances of Brain, Article, and Pipeline. Supports dual-process memory with separate working memory recall and LTM consolidation. Dynamic attention plasticity modifies learning rates based on arousal during saves.",
 				"role": "Class"
 			},
 			"Process.ts": {
@@ -121,7 +124,7 @@ This document provides an overview of the packages/polywise module structure and
 					"role": "Utility"
 				},
 				"migration.ts": {
-					"desc": "Database schema migration system with version tracking and validation (CURRENT_SCHEMA_VERSION=3)",
+					"desc": "Database schema migration system with version tracking and validation (CURRENT_SCHEMA_VERSION=5)",
 					"role": "Module"
 				}
 			}

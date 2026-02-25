@@ -15,6 +15,7 @@ export interface Node {
 	potential: number
 	threshold: number
 	current_threshold?: number
+	transmitter?: number
 	is_active: boolean
 	last_fired_at?: string
 	idol_id?: string

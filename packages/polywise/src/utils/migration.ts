@@ -26,7 +26,7 @@ import {
 
 import type { Migration } from '../types'
 
-export const CURRENT_SCHEMA_VERSION = 4
+export const CURRENT_SCHEMA_VERSION = 5
 
 export const migrations: Array<Migration> = [
 	{
@@ -85,6 +85,15 @@ export const migrations: Array<Migration> = [
 		up: async exec => {
 			await exec([
 				`ALTER TABLE ${SCHEMA_BRAIN}.nodes ADD COLUMN IF NOT EXISTS current_threshold REAL DEFAULT 0.5`
+			])
+		}
+	},
+	{
+		version: 5,
+		description: 'Add transmitter pool for short-term depression',
+		up: async exec => {
+			await exec([
+				`ALTER TABLE ${SCHEMA_BRAIN}.nodes ADD COLUMN IF NOT EXISTS transmitter REAL DEFAULT 1.0`
 			])
 		}
 	}

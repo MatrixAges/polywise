@@ -35,10 +35,10 @@ export default class Activation {
 		await this.p.queryRaw(sql_strengthen_edges_batch, [STRENGTHEN_EDGE_WEIGHT, node_ids, node_ids])
 	}
 
-	async spread(steps = 3, threshold = DEFAULT_NODE_THRESHOLD) {
-		Console.log('SYSTEM', 'spreading activation', { steps, threshold })
+	async spread(steps = 3, threshold = DEFAULT_NODE_THRESHOLD, is_learning = false, arousal = 1.0) {
+		Console.log('SYSTEM', 'spreading activation', { steps, threshold, is_learning, arousal })
 		for (let i = 0; i < steps; i++) {
-			await this.p.tick(threshold)
+			await this.p.tick(threshold, is_learning, arousal)
 
 			if (this.p.onTick) {
 				this.p.onTick()
