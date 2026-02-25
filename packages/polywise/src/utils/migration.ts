@@ -26,7 +26,7 @@ import {
 
 import type { Migration } from '../types'
 
-export const CURRENT_SCHEMA_VERSION = 2
+export const CURRENT_SCHEMA_VERSION = 4
 
 export const migrations: Array<Migration> = [
 	{
@@ -67,6 +67,24 @@ export const migrations: Array<Migration> = [
 				`ALTER TABLE ${SCHEMA_BRAIN}.edges ADD COLUMN IF NOT EXISTS lock BOOLEAN DEFAULT FALSE`,
 				sql_create_table_stats,
 				`INSERT INTO ${SCHEMA_META}.stats (key, value) VALUES ('input_count', '0'::jsonb) ON CONFLICT DO NOTHING`
+			])
+		}
+	},
+	{
+		version: 3,
+		description: 'Add is_active column for digital activation state',
+		up: async exec => {
+			await exec([
+				`ALTER TABLE ${SCHEMA_BRAIN}.nodes ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT FALSE`
+			])
+		}
+	},
+	{
+		version: 4,
+		description: 'Add current_threshold for dynamic thresholding',
+		up: async exec => {
+			await exec([
+				`ALTER TABLE ${SCHEMA_BRAIN}.nodes ADD COLUMN IF NOT EXISTS current_threshold REAL DEFAULT 0.5`
 			])
 		}
 	}

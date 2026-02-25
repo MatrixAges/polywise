@@ -46,9 +46,14 @@ export const DISTANCE_EPSILON = 0.001
 
 // Synaptic Homeostasis Model (SHY)
 export const HOT_NODE_THRESHOLD = 0.8
-export const MAX_HOT_NODES = 100
+export const MAX_ACTIVE_LIMIT = 100
 export const NODE_DECAY_RATE = 0.5
 export const NODE_INACTIVE_DAYS = 1
 export const EDGE_DECAY_RATE = 0.1
 export const EDGE_INACTIVE_DAYS = 7
 export const WEIGHT_DEATH_THRESHOLD = 0.001
+export const THRESHOLD_DECAY_RATE = 0.8
+export const THRESHOLD_SPIKE = 2.0
+export const MAX_THRESHOLD = 5.0
+export const MIN_THRESHOLD = 0.5
+export const MAX_THRESHOLD_DECAY_STEP = 0.5

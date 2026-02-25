@@ -249,11 +249,11 @@ export const sql_memory_reorganization = `
 `
 
 /**
- * Counts nodes with potential above the hot threshold.
- * Role: Used to determine if cognitive overload has occurred, triggering selective decay.
+ * Counts the number of currently active nodes.
+ * Role: Used to calculate system heat (load) for homeostatic plasticity and overload detection.
  */
-export const sql_get_hot_node_count = (threshold: number) => `
+export const sql_get_active_node_count = `
 	SELECT COUNT(*) as count
 	FROM ${SCHEMA_BRAIN}.nodes
-	WHERE potential > ${threshold}
+	WHERE is_active = TRUE
 `

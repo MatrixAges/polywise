@@ -17,7 +17,9 @@ import {
 	DEFAULT_SIMILARITY_THRESHOLD,
 	HOT_NODE_THRESHOLD,
 	INPUT_DECAY_THRESHOLD,
+	MAX_ACTIVE_LIMIT,
 	MAX_HOT_NODES,
+	MAX_THRESHOLD_DECAY_STEP,
 	MEMORY_RECALL_INTENSITY,
 	SNAPSHOT_NODES_LIMIT,
 	SNAPSHOT_WEIGHT_THRESHOLD
@@ -34,6 +36,7 @@ import {
 	sql_delete_article,
 	sql_forget_decay_edges,
 	sql_forget_decay_nodes,
+	sql_get_active_node_count,
 	sql_get_all_nodes,
 	sql_get_edges_by_idol,
 	sql_get_edges_by_root,
@@ -520,6 +523,11 @@ export default class Polywise {
 		return rows[0].id
 	}
 
+	/**
+	 * Injects potential (energy) into a specific node.
+	 * This increases the node's `potential` (analog state).
+	 * If the potential crosses the node's threshold, it will trigger an `Activation` (digital event) in the next tick.
+	 */
 	async stimulate(node_id: string, intensity = 1.0) {
 		await this.queryRaw(sql_stimulate, [intensity, node_id])
 	}
@@ -627,10 +635,26 @@ export default class Polywise {
 		return (await this.queryRaw(sql_get_edges_by_root, [root_id])) as Array<Edge>
 	}
 
+	/**
+	 * Executes a simulation tick for the neural network.
+	 *
+	 * Biological Mechanism:
+	 * 1. Integrate: Nodes accumulate potential from incoming signals.
+	 * 2. Fire: If potential > node.threshold (Activation), the node fires (is_active=true).
+	 * 3. Propagate: Active nodes send signals to neighbors via edges.
+	 * 4. Reset: Active nodes enter a refractory period (potential resets).
+	 * 5. Decay: Inactive nodes lose potential over time (Leak).
+	 */
 	async tick(threshold_override?: number) {
 		const threshold = threshold_override ?? DEFAULT_NODE_THRESHOLD
 
-		await this.exec(sql_propagate(threshold))
+		// Calculate System Heat (Homeostatic Plasticity)
+		const active_res = (await this.queryRaw(sql_get_active_node_count)) as Array<{ count: number }>
+		const active_count = active_res[0]?.count ?? 0
+		const heat = Math.min(1.0, active_count / MAX_ACTIVE_LIMIT)
+		const threshold_decrement = MAX_THRESHOLD_DECAY_STEP * (1.0 - heat)
+
+		await this.exec(sql_propagate(threshold, threshold_decrement))
 
 		await this.queryRaw(sql_increment_input_count)
 
@@ -652,14 +676,12 @@ export default class Polywise {
 	async triggerSleepTick() {
 		Console.log('SYSTEM', 'triggerSleepTick start')
 
-		const hot_node_result = (await this.queryRaw(sql_get_hot_node_count(HOT_NODE_THRESHOLD))) as Array<{
-			count: number
-		}>
-		const hot_node_count = hot_node_result[0]?.count ?? 0
+		const active_res = (await this.queryRaw(sql_get_active_node_count)) as Array<{ count: number }>
+		const active_count = active_res[0]?.count ?? 0
 
-		Console.log('SYSTEM', 'triggerSleepTick check', { hot_node_count, max_hot_nodes: MAX_HOT_NODES })
+		Console.log('SYSTEM', 'triggerSleepTick check', { active_count, limit: MAX_ACTIVE_LIMIT })
 
-		const is_overloaded = hot_node_count > MAX_HOT_NODES
+		const is_overloaded = active_count > MAX_ACTIVE_LIMIT
 
 		if (!is_overloaded) {
 			Console.log('SYSTEM', 'triggerSleepTick skipped - not overloaded')
@@ -680,8 +702,8 @@ export default class Polywise {
 		Console.log('SYSTEM', 'triggerSleepTick completed')
 	}
 
-	async getHotNodeCount() {
-		const result = (await this.queryRaw(sql_get_hot_node_count(HOT_NODE_THRESHOLD))) as Array<{ count: number }>
+	async getActiveNodeCount() {
+		const result = (await this.queryRaw(sql_get_active_node_count)) as Array<{ count: number }>
 		return result[0]?.count ?? 0
 	}
 

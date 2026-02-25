@@ -14,6 +14,8 @@ export interface Node {
 	y: number
 	potential: number
 	threshold: number
+	current_threshold?: number
+	is_active: boolean
 	last_fired_at?: string
 	idol_id?: string
 	root_ids?: Array<string>
