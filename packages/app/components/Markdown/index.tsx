@@ -1,3 +1,4 @@
+import figure from '@microflash/rehype-figure'
 import Markdown from 'react-markdown'
 import slug from 'rehype-slug'
 import breaks from 'remark-breaks'
@@ -6,7 +7,6 @@ import images from 'remark-images'
 import math from 'remark-math'
 
 import styles from '@/styles/md.module.css'
-import figure from '@microflash/rehype-figure'
 
 import components from './components'
 

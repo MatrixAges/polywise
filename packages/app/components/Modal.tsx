@@ -80,26 +80,10 @@ const Index = (props: IProps) => {
 		if (!title) return null
 
 		return (
-			<div
-				className='
-					box-border
-					flex
-					items-center justify-between
-					w-full h-[21px]
-					mb-4
-					leading-none
-				'
-			>
+			<div className='mb-4 box-border flex h-[21px] w-full items-center justify-between leading-none'>
 				<span className='font-medium'>{title}</span>
 				<span
-					className='
-						flex
-						items-center justify-center
-						w-6 h-6
-						rounded-full
-						hover:bg-std-200/60
-						-mr-2 clickable
-					'
+					className='hover:bg-std-200/60 clickable -mr-2 flex h-6 w-6 items-center justify-center rounded-full'
 					onClick={onClose}
 				>
 					<X size={14} />
@@ -115,16 +99,7 @@ const Index = (props: IProps) => {
 			<AnimatePresence>
 				{open && (
 					<motion.div
-						className={`
-							top-0
-							left-0
-							w-full h-full
-							bg-black/48
-							backdrop-blur-sm
-							select-none
-							${on_body ? 'fixed' : 'absolute'}
-							${mask_class_name}
-						`}
+						className={`top-0 left-0 h-full w-full bg-black/48 backdrop-blur-sm select-none ${on_body ? 'fixed' : 'absolute'} ${mask_class_name} `}
 						initial={{ opacity: 0 }}
 						animate={{ opacity: 1 }}
 						exit={{ opacity: 0 }}
@@ -135,36 +110,14 @@ const Index = (props: IProps) => {
 			</AnimatePresence>
 			{exsit && (
 				<div
-					className={`
-						top-0
-						left-0
-						box-border
-						overflow-y-auto
-						flex
-						items-center
-						w-full h-full
-						select-none
-						${on_body ? 'fixed' : 'absolute'}
-						${flexiable && 'max-[720px]:p-0'}
-					`}
+					className={`top-0 left-0 box-border flex h-full w-full items-center overflow-y-auto select-none ${on_body ? 'fixed' : 'absolute'} ${flexiable && 'max-[720px]:p-0'} `}
 					ref={ref_content_wrap}
 					style={{ zIndex: z_index ? z_index + 1 : 1002 }}
 				>
 					<AnimatePresence>
 						{open && (
 							<motion.div
-								className={`
-									relative
-									overflow-hidden
-									flex flex-col
-									max-h-full
-									px-6 py-4
-									mx-auto
-									rounded-xl
-									bg-std-100
-									${flexiable && 'max-[720px]:m-0 max-[720px]:ml-[36px] max-[720px]:w-[calc(100vw-72px)]'}
-									${className}
-								`}
+								className={`bg-std-100 relative mx-auto flex max-h-full flex-col overflow-hidden rounded-xl px-6 py-4 ${flexiable && 'max-[720px]:m-0 max-[720px]:ml-[36px] max-[720px]:w-[calc(100vw-72px)]'} ${className} `}
 								ref={ref_content}
 								initial={{ transform: 'translate3d(0px, -30px, 0px)', opacity: 0 }}
 								animate={{ transform: 'translate3d(0px, 0px, 0px)', opacity: 1 }}
@@ -179,13 +132,7 @@ const Index = (props: IProps) => {
 							>
 								{Header}
 								<div
-									className={`
-										box-border
-										overflow-y-auto
-										flex
-										w-full
-										${Header ? 'h-[calc(100%-30px)]' : 'h-full'}
-									`}
+									className={`box-border flex w-full overflow-y-auto ${Header ? 'h-[calc(100%-30px)]' : 'h-full'} `}
 									ref={getRef}
 								>
 									{children}
