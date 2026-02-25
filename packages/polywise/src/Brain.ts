@@ -3,14 +3,25 @@ import { injectable } from 'tsyringe'
 
 import { FATIGUE_THRESHOLD, IDLE_DECAY_THRESHOLD_MS, IDLE_TIMEOUT_MS, SHADOW_INTERVAL_MS } from './consts'
 import { catchFinally } from './decorators'
-import Polywise from './Polywise'
 import { calculateFatigue, isIdle } from './utils'
 
 import type { BrainState } from './types'
 
+type BrainInitArgs = {
+	tick: (threshold_override?: number, is_learning?: boolean, arousal?: number) => Promise<void>
+	trigger_sleep_tick: () => Promise<void>
+	trigger_memory_reorganization: () => Promise<void>
+	run_shadow_tick: () => Promise<void>
+	on_tick?: () => void
+}
+
 @injectable()
 export default class Brain {
-	private p!: Polywise
+	private tick!: BrainInitArgs['tick']
+	private trigger_sleep_tick!: BrainInitArgs['trigger_sleep_tick']
+	private trigger_memory_reorganization!: BrainInitArgs['trigger_memory_reorganization']
+	private run_shadow_tick!: BrainInitArgs['run_shadow_tick']
+	private on_tick?: () => void
 
 	private state: BrainState = 'FRESH'
 	private shadow_interval?: any
@@ -18,8 +29,14 @@ export default class Brain {
 	private current_fatigue = 0
 	private is_busy = false
 
-	init(p: Polywise) {
-		this.p = p
+	init(args: BrainInitArgs) {
+		const { tick, trigger_sleep_tick, trigger_memory_reorganization, run_shadow_tick, on_tick } = args
+
+		this.tick = tick
+		this.trigger_sleep_tick = trigger_sleep_tick
+		this.trigger_memory_reorganization = trigger_memory_reorganization
+		this.run_shadow_tick = run_shadow_tick
+		this.on_tick = on_tick
 
 		this.startLifeCycleLoop()
 	}
@@ -52,9 +69,9 @@ export default class Brain {
 		this.addSynapticLoad(load)
 
 		for (let i = 0; i < 100; i++) {
-			await this.p.tick(0.3, true, 1.0)
+			await this.tick(0.3, true, 1.0)
 
-			this.p.onTick?.()
+			this.on_tick?.()
 
 			await new Promise(resolve => setTimeout(resolve, 50))
 		}
@@ -72,7 +89,7 @@ export default class Brain {
 	async triggerSleepTick() {
 		this.state = 'SLEEPING'
 
-		await this.p.triggerSleepTick()
+		await this.trigger_sleep_tick()
 
 		this.current_fatigue = 0
 
@@ -87,7 +104,7 @@ export default class Brain {
 			const is_deep_idle = isIdle(this.last_user_interaction, IDLE_DECAY_THRESHOLD_MS)
 
 			if (is_deep_idle && this.state !== 'SLEEPING' && this.state !== 'LEARNING') {
-				const [err] = await to(this.p.triggerMemoryReorganization())
+				const [err] = await to(this.trigger_memory_reorganization())
 
 				if (err) console.error('Memory reorganization error:', err)
 
@@ -109,9 +126,9 @@ export default class Brain {
 	}
 
 	private async runShadowTick() {
-		await this.p.runShadowTick()
+		await this.run_shadow_tick()
 
-		this.p.onTick?.()
+		this.on_tick?.()
 	}
 
 	off() {

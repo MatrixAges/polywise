@@ -1,4 +1,4 @@
-import { SCHEMA_BRAIN, SCHEMA_META } from '../consts'
+import { SCHEMA_META } from '../consts'
 import { sql_insert_version } from '../sql/meta'
 import {
 	sql_create_extension_vector,
@@ -32,7 +32,7 @@ import {
 
 import type { Migration } from '../types'
 
-export const CURRENT_SCHEMA_VERSION = 5
+export const CURRENT_SCHEMA_VERSION = 1
 
 export const migrations: Array<Migration> = [
 	{
@@ -65,47 +65,9 @@ export const migrations: Array<Migration> = [
 				sql_create_index_article_embeddings_hnsw,
 				sql_create_index_article_content_gin,
 				sql_create_table_node_sources,
-				sql_create_schema_user_space
-			])
-		}
-	},
-	{
-		version: 2,
-		description: 'Add article_ids to nodes, lock to nodes/edges, and create stats table',
-		up: async exec => {
-			await exec([
-				`ALTER TABLE ${SCHEMA_BRAIN}.nodes ADD COLUMN IF NOT EXISTS article_ids TEXT[] DEFAULT '{}'`,
-				`ALTER TABLE ${SCHEMA_BRAIN}.nodes ADD COLUMN IF NOT EXISTS lock BOOLEAN DEFAULT FALSE`,
-				`ALTER TABLE ${SCHEMA_BRAIN}.edges ADD COLUMN IF NOT EXISTS lock BOOLEAN DEFAULT FALSE`,
 				sql_create_table_stats,
-				`INSERT INTO ${SCHEMA_META}.stats (key, value) VALUES ('input_count', '0'::jsonb) ON CONFLICT DO NOTHING`
-			])
-		}
-	},
-	{
-		version: 3,
-		description: 'Add is_active column for digital activation state',
-		up: async exec => {
-			await exec([
-				`ALTER TABLE ${SCHEMA_BRAIN}.nodes ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT FALSE`
-			])
-		}
-	},
-	{
-		version: 4,
-		description: 'Add current_threshold for dynamic thresholding',
-		up: async exec => {
-			await exec([
-				`ALTER TABLE ${SCHEMA_BRAIN}.nodes ADD COLUMN IF NOT EXISTS current_threshold REAL DEFAULT 0.5`
-			])
-		}
-	},
-	{
-		version: 5,
-		description: 'Add transmitter pool for short-term depression',
-		up: async exec => {
-			await exec([
-				`ALTER TABLE ${SCHEMA_BRAIN}.nodes ADD COLUMN IF NOT EXISTS transmitter REAL DEFAULT 1.0`
+				`INSERT INTO ${SCHEMA_META}.stats (key, value) VALUES ('input_count', '0'::jsonb) ON CONFLICT DO NOTHING`,
+				sql_create_schema_user_space
 			])
 		}
 	}

@@ -19,6 +19,9 @@ import {
 	CONTEXT_SEQUENCE_BRANCH,
 	CONTEXT_SEQUENCE_DEPTH,
 	CONTEXT_SEQUENCE_HOP_DECAY,
+	CONTEXT_SEQUENCE_REPLAY_LIMIT,
+	CONTEXT_SEQUENCE_REPLAY_MIN_SCORE,
+	CONTEXT_SEQUENCE_REPLAY_STRENGTH,
 	CONTEXT_SEQUENCE_TIME_HALF_LIFE_HOURS,
 	CONTEXT_SEQUENCE_WINDOW_HOURS,
 	CONTEXT_SEQUENCE_WINDOW_PENALTY,
@@ -96,6 +99,7 @@ import {
 	sql_sleep_tick_decay_nodes,
 	sql_sleep_tick_replay,
 	sql_stimulate,
+	sql_strengthen_edges_by_context,
 	sql_update_article_embedding,
 	sql_update_article_metadata,
 	sql_update_context,
@@ -124,6 +128,7 @@ import type {
 	FiltersArgs,
 	FinalQueryResult,
 	ForgetArticleArgs,
+	GetNodeRelatedArgs,
 	Memory,
 	Metadata,
 	Node,
@@ -136,7 +141,7 @@ import type {
 	UpdateArticleArgs
 } from './types'
 
-export const calculateArousal = (similarity: number) => {
+const calculateArousal = (similarity: number) => {
 	const clamped_similarity = Math.min(1, Math.max(0, similarity))
 	const similarity_delta = clamped_similarity - AROUSAL_OPTIMAL_SIMILARITY
 	const variance = AROUSAL_WIDTH * AROUSAL_WIDTH
@@ -200,10 +205,29 @@ export default class Polywise {
 			keyword_config
 		})
 
+		const on_tick = () => {
+			if (this.onTick) {
+				this.onTick()
+			}
+		}
+
 		this.article.init(this)
-		this.brain.init(this)
-		this.cortex.init(this)
-		this.activation.init(this)
+		this.brain.init({
+			tick: this.tick.bind(this),
+			trigger_sleep_tick: this.triggerSleepTick.bind(this),
+			trigger_memory_reorganization: this.triggerMemoryReorganization.bind(this),
+			run_shadow_tick: this.runShadowTick.bind(this),
+			on_tick
+		})
+		this.cortex.init({
+			execute_single_search: this.executeSingleSearch.bind(this),
+			pipeline: this.pipeline
+		})
+		this.activation.init({
+			query_raw: this.queryRaw.bind(this),
+			tick: this.tick.bind(this),
+			on_tick
+		})
 
 		if (log) {
 			this.log.init(typeof log === 'boolean' ? {} : log)
@@ -426,7 +450,7 @@ export default class Polywise {
 		}
 	}
 
-	setFilters(args: FiltersArgs) {
+	private setFilters(args: FiltersArgs) {
 		const { idol_id, root_ids, context_id } = args
 
 		if (idol_id !== undefined) this.idol_id = idol_id
@@ -434,7 +458,7 @@ export default class Polywise {
 		if (context_id !== undefined) this.context_id = context_id
 	}
 
-	process(query: string) {
+	private process(query: string) {
 		const process = new Process(query)
 
 		this.query({ query, process }).catch(err => {
@@ -445,7 +469,7 @@ export default class Polywise {
 		return process
 	}
 
-	async addNode(args: AddNodeArgs) {
+	private async addNode(args: AddNodeArgs) {
 		const {
 			label,
 			x,
@@ -478,7 +502,7 @@ export default class Polywise {
 		return rows[0].id
 	}
 
-	async connect(args: ConnectArgs) {
+	private async connect(args: ConnectArgs) {
 		const {
 			source_id,
 			target_id,
@@ -503,7 +527,7 @@ export default class Polywise {
 		])
 	}
 
-	async injectKeywords(args: {
+	private async injectKeywords(args: {
 		keywords: Array<string>
 		article_id: string
 		idol_id?: string | null
@@ -585,7 +609,7 @@ export default class Polywise {
 	 * This increases the node's `potential` (analog state).
 	 * If the potential crosses the node's threshold, it will trigger an `Activation` (digital event) in the next tick.
 	 */
-	async stimulate(node_id: string, intensity = 1.0) {
+	private async stimulate(node_id: string, intensity = 1.0) {
 		await this.queryRaw(sql_stimulate, [intensity, node_id])
 	}
 
@@ -701,23 +725,23 @@ export default class Polywise {
 		return { nodes: result_nodes, edges: result_edges }
 	}
 
-	async getAllNodes() {
+	private async getAllNodes() {
 		return (await this.queryRaw(sql_get_all_nodes)) as Array<Node>
 	}
 
-	async getNodesByIdol(idol_id: string) {
+	private async getNodesByIdol(idol_id: string) {
 		return (await this.queryRaw(sql_get_nodes_by_idol, [idol_id])) as Array<Node>
 	}
 
-	async getNodesByRoot(root_id: string) {
+	private async getNodesByRoot(root_id: string) {
 		return (await this.queryRaw(sql_get_nodes_by_root, [root_id])) as Array<Node>
 	}
 
-	async getEdgesByIdol(idol_id: string) {
+	private async getEdgesByIdol(idol_id: string) {
 		return (await this.queryRaw(sql_get_edges_by_idol, [idol_id])) as Array<Edge>
 	}
 
-	async getEdgesByRoot(root_id: string) {
+	private async getEdgesByRoot(root_id: string) {
 		return (await this.queryRaw(sql_get_edges_by_root, [root_id])) as Array<Edge>
 	}
 
@@ -731,7 +755,7 @@ export default class Polywise {
 	 * 4. Reset: Active nodes enter a refractory period (potential resets).
 	 * 5. Decay: Inactive nodes lose potential over time (Leak).
 	 */
-	async tick(threshold_override?: number, is_learning: boolean = false, arousal: number = 1.0) {
+	private async tick(threshold_override?: number, is_learning: boolean = false, arousal: number = 1.0) {
 		const threshold = threshold_override ?? DEFAULT_NODE_THRESHOLD
 
 		// Calculate System Heat (Homeostatic Plasticity)
@@ -754,13 +778,13 @@ export default class Polywise {
 		}
 	}
 
-	async runShadowTick() {
+	private async runShadowTick() {
 		await this.exec(sql_run_shadow_tick)
 
 		await this.tick(0.8, true, 0.5)
 	}
 
-	async triggerSleepTick() {
+	private async triggerSleepTick() {
 		Console.log('SYSTEM', 'triggerSleepTick start')
 
 		const active_res = (await this.queryRaw(sql_get_active_node_count)) as Array<{ count: number }>
@@ -777,34 +801,45 @@ export default class Polywise {
 
 		Console.log('SYSTEM', 'triggerSleepTick executing - cognitive overload detected')
 
-		await this.exec([
-			sql_sleep_tick_begin,
-			sql_sleep_tick_clean_noise,
-			sql_sleep_tick_decay_nodes,
-			sql_sleep_tick_decay_edges,
-			sql_sleep_tick_replay,
-			sql_sleep_tick_commit
-		])
+		const sequence_scores = await this.getContextSequenceScores()
+		const filtered_scores = sequence_scores.filter(
+			score_item => score_item.score >= CONTEXT_SEQUENCE_REPLAY_MIN_SCORE
+		)
+		const selected_scores = filtered_scores.slice(0, CONTEXT_SEQUENCE_REPLAY_LIMIT)
+		const context_ids = selected_scores.map(score_item => score_item.context_id)
+		const context_scores = selected_scores.map(score_item => score_item.score)
+
+		await this.exec(sql_sleep_tick_begin)
+		await this.exec(sql_sleep_tick_clean_noise)
+		await this.exec(sql_sleep_tick_decay_nodes)
+		await this.exec(sql_sleep_tick_decay_edges)
+
+		await this.queryRaw(sql_sleep_tick_replay, [context_ids, context_scores])
+
+		await this.exec(sql_sleep_tick_commit)
 
 		Console.log('SYSTEM', 'triggerSleepTick completed')
 	}
 
-	async getActiveNodeCount() {
+	private async getActiveNodeCount() {
 		const result = (await this.queryRaw(sql_get_active_node_count)) as Array<{ count: number }>
 		return result[0]?.count ?? 0
 	}
 
-	async triggerMemoryReorganization() {
+	private async triggerMemoryReorganization() {
 		await this.exec(sql_memory_reorganization)
+
+		await this.applyContextSequenceReplay()
 	}
 
-	async expand(args: { node_id: string; depth?: number; limit?: number }) {
+	async getNodeRelated(args: GetNodeRelatedArgs) {
 		const { node_id, depth = 1, limit = 20 } = args
 
 		const related_nodes = await this.recallRelatedNodes({
 			node_ids: [node_id],
 			max_depth: depth,
-			limit
+			limit,
+			context_id: this.context_id ?? undefined
 		})
 		const all_node_ids = Array.from(new Set([node_id, ...related_nodes.map(n => n.id)]))
 		const edges = await this.getEdgesBetweenNodes(all_node_ids)
@@ -815,7 +850,7 @@ export default class Polywise {
 		}
 	}
 
-	async recallFromMemory(args: RecallArgs) {
+	private async recallFromMemory(args: RecallArgs) {
 		this.log.write({ query: args.query }, { event: 'recall_start' })
 
 		const {
@@ -900,7 +935,7 @@ export default class Polywise {
 		}
 	}
 
-	async executeSingleSearch(args: SingleSearchArgs) {
+	private async executeSingleSearch(args: SingleSearchArgs) {
 		const {
 			query,
 			recall_depth = DEFAULT_RECALL_DEPTH,
@@ -1024,7 +1059,7 @@ export default class Polywise {
 		}
 	}
 
-	async queryRaw<T = any>(sql_str: string, params?: Array<any>): Promise<Array<T>> {
+	private async queryRaw<T = any>(sql_str: string, params?: Array<any>): Promise<Array<T>> {
 		if (!this.db || this.is_closed) {
 			Console.log('SYSTEM', 'DB not ready for query', { is_closed: this.is_closed })
 
@@ -1147,10 +1182,11 @@ export default class Polywise {
 		return best_context.id
 	}
 
-	private async getSequentialContext() {
+	private async getContextSequenceScores() {
 		if (!this.last_context_id) {
-			return null
+			return []
 		}
+
 		const scores = new Map<string, number>()
 		const path_ids = new Set<string>()
 		path_ids.add(this.last_context_id)
@@ -1164,15 +1200,56 @@ export default class Polywise {
 			path_ids
 		})
 
-		if (scores.size === 0) {
-			return this.last_context_id
-		}
-
 		const sorted_scores = Array.from(scores.entries()).sort(
 			(left_entry, right_entry) => right_entry[1] - left_entry[1]
 		)
 
-		return sorted_scores[0]?.[0] ?? this.last_context_id
+		return sorted_scores.map(([context_id, score]) => ({ context_id, score }))
+	}
+
+	private async getSequentialContext() {
+		const sequence_scores = await this.getContextSequenceScores()
+
+		if (sequence_scores.length === 0) {
+			return this.last_context_id
+		}
+
+		return sequence_scores[0]?.context_id ?? this.last_context_id
+	}
+
+	private async applyContextSequenceReplay() {
+		const sequence_scores = await this.getContextSequenceScores()
+
+		if (sequence_scores.length === 0) {
+			return
+		}
+
+		const filtered_scores = sequence_scores.filter(
+			score_item => score_item.score >= CONTEXT_SEQUENCE_REPLAY_MIN_SCORE
+		)
+
+		if (filtered_scores.length === 0) {
+			return
+		}
+
+		const selected_scores = filtered_scores.slice(0, CONTEXT_SEQUENCE_REPLAY_LIMIT)
+		let max_score = 0
+
+		for (const score_item of selected_scores) {
+			if (score_item.score > max_score) {
+				max_score = score_item.score
+			}
+		}
+
+		if (max_score <= 0) {
+			return
+		}
+
+		for (const score_item of selected_scores) {
+			const replay_strength = CONTEXT_SEQUENCE_REPLAY_STRENGTH * (score_item.score / max_score)
+
+			await this.queryRaw(sql_strengthen_edges_by_context, [replay_strength, [score_item.context_id]])
+		}
 	}
 
 	private async collectSequenceScores(args: {

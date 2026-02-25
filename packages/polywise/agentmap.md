@@ -46,7 +46,7 @@ This document provides an overview of the packages/polywise module structure and
 				"role": "Class"
 			},
 			"Polywise.ts": {
-				"desc": "Core database API for memory graph operations with snapshot seeding fallback, multi-step temporal context prediction, and conflict-aware signals. Includes public instances of Brain, Article, and Pipeline. Supports dual-process memory with separate working memory recall and LTM consolidation. Dynamic attention plasticity modifies learning rates based on arousal during saves, with global inhibition applied during tick propagation.",
+				"desc": "Core database API for memory graph operations with snapshot seeding fallback, multi-step temporal context prediction with replay weighting, and conflict-aware signals. Includes public instances of Brain, Article, and Pipeline. Supports dual-process memory with separate working memory recall and LTM consolidation. Dynamic attention plasticity modifies learning rates based on arousal during saves, with global inhibition applied during tick propagation.",
 				"role": "Class"
 			},
 			"Process.ts": {
@@ -69,7 +69,10 @@ This document provides an overview of the packages/polywise module structure and
 			},
 			"index.ts": { "desc": "Main exports", "role": "Index" },
 			"sql": {
-				"Brain.ts": { "desc": "Brain SQL operations", "role": "SQL" },
+				"Brain.ts": {
+					"desc": "Brain SQL operations including context-weighted sleep replay",
+					"role": "SQL"
+				},
 				"Polywise.ts": {
 					"desc": "Polywise SQL operations (Articles/Nodes/Edges) including memory propagation with global inhibition, decay logic, stats tracking, context sequencing queries, and transaction-safe keyword injection helpers",
 					"role": "SQL"
@@ -136,86 +139,33 @@ This document provides an overview of the packages/polywise module structure and
 					"role": "Utility"
 				},
 				"migration.ts": {
-					"desc": "Database schema migration system with version tracking and validation (CURRENT_SCHEMA_VERSION=5)",
+					"desc": "Database schema migration system with version tracking and validation (CURRENT_SCHEMA_VERSION=1)",
 					"role": "Module"
 				}
 			}
 		},
 		"test": {
-			"migration.spec.ts": { "desc": "Migration tests", "role": "Test" },
-			"brain.spec.ts": { "desc": "Knowledge graph dynamics and learning tests", "role": "Test" },
-			"biological-activation.spec.ts": {
-				"desc": "Biological activation and threshold-based decay tests",
-				"role": "Test"
-			},
-			"article.spec.ts": { "desc": "Article tests", "role": "Test" },
-			"cot.spec.ts": { "desc": "Chain of thought tests", "role": "Test" },
-			"learning.spec.ts": { "desc": "Pure text learning and large scale dataset tests", "role": "Test" },
-			"models.spec.ts": { "desc": "Model hash verification and integrity tests", "role": "Test" },
-			"longembedding.spec.ts": {
-				"desc": "Long text embedding and fact preservation tests",
-				"role": "Test"
-			},
-			"threshold-debug.spec.ts": {
-				"desc": "Recall threshold debugging tests",
-				"role": "Test"
-			},
-			"log.spec.ts": { "desc": "Log module tests", "role": "Test" },
-			"query-keywords.spec.ts": {
-				"desc": "Query keyword generation tests using pipeline keywords",
-				"role": "Test"
-			},
-			"arousal-gating.spec.ts": {
-				"desc": "Arousal curve gating tests",
-				"role": "Test"
-			},
-			"local-competition.spec.ts": {
-				"desc": "Local competition recall gating tests",
-				"role": "Test"
-			},
-			"sleep-priority.spec.ts": {
-				"desc": "Sleep replay recency and competitive decay tests",
-				"role": "Test"
-			},
-			"ranking-stimulation.spec.ts": {
-				"desc": "Ranking stimulation confidence and conflict gating tests",
-				"role": "Test"
-			},
-			"context-sequence-prediction.spec.ts": {
-				"desc": "Temporal context multi-step prediction tests",
-				"role": "Test"
-			},
-			"context-separation.spec.ts": {
-				"desc": "Context-based separation tests",
-				"role": "Test"
-			},
-			"context-auto.spec.ts": {
-				"desc": "Automatic context resolution tests",
-				"role": "Test"
-			},
-			"context-sequence.spec.ts": {
-				"desc": "Context transition tracking tests",
-				"role": "Test"
-			},
-			"cognitive-paradigms.spec.ts": {
-				"desc": "Spacing, DRM, and interference regression tests",
-				"role": "Test"
-			},
-			"source-confidence.spec.ts": {
-				"desc": "Source confidence persistence tests",
-				"role": "Test"
-			},
-			"temporal-recency.spec.ts": {
-				"desc": "Temporal recency weighting tests",
-				"role": "Test"
-			},
-			"temporal-context.spec.ts": {
-				"desc": "Temporal context sequence weighting tests",
-				"role": "Test"
-			},
+			"memory.spec.ts": { "desc": "Save/update/forget and confidence tests", "role": "Test" },
+			"query.spec.ts": { "desc": "Query, rerank, threshold, COT, and recall tests", "role": "Test" },
+			"graph.spec.ts": { "desc": "Snapshot and related node retrieval tests", "role": "Test" },
+			"context.spec.ts": { "desc": "Context filter and temporal update tests", "role": "Test" },
+			"long.spec.ts": { "desc": "Long context and long text retrieval tests", "role": "Test" },
+			"log.spec.ts": { "desc": "Log file generation tests", "role": "Test" },
 			"utils": {
 				"getCache.ts": {
 					"desc": "Test cache helper for embeddings/rerank/keywords with mock keyword cache normalization",
+					"role": "Utility"
+				},
+				"getDataDir.ts": {
+					"desc": "Unique test database directory helper",
+					"role": "Utility"
+				},
+				"setup.ts": {
+					"desc": "Shared test setup helpers",
+					"role": "Utility"
+				},
+				"withPolywise.ts": {
+					"desc": "Polywise lifecycle helper for tests",
 					"role": "Utility"
 				}
 			},

@@ -75,16 +75,21 @@ export const sql_sleep_tick_decay_edges = `
 
 /**
  * Strengthens a prioritized subset of high-learning-rate, recent edges.
- * Role: Simulates experience-biased "memory replay" during sleep, favoring recent, high-plasticity connections.
+ * Role: Simulates experience-biased "memory replay" during sleep with context sequence weighting.
  */
 export const sql_sleep_tick_replay = `
-  UPDATE ${SCHEMA_BRAIN}.edges 
-  SET weight = LEAST(weight + 0.2, 5.0)
-  WHERE id IN (
-    SELECT id FROM ${SCHEMA_BRAIN}.edges 
-    WHERE learning_rate > ${REPLAY_LEARNING_RATE_MIN}
-      AND updated_at > NOW() - INTERVAL '${REPLAY_RECENCY_DAYS} days'
-    ORDER BY updated_at DESC, learning_rate DESC, weight DESC
+  WITH context_scores AS (
+    SELECT unnest($1::text[]) AS context_id, unnest($2::real[]) AS score
+  )
+  UPDATE ${SCHEMA_BRAIN}.edges e
+  SET weight = LEAST(e.weight + 0.2, 5.0)
+  WHERE e.id IN (
+    SELECT e2.id
+    FROM ${SCHEMA_BRAIN}.edges e2
+    LEFT JOIN context_scores cs ON e2.context_id = cs.context_id
+    WHERE e2.learning_rate > ${REPLAY_LEARNING_RATE_MIN}
+      AND e2.updated_at > NOW() - INTERVAL '${REPLAY_RECENCY_DAYS} days'
+    ORDER BY COALESCE(cs.score, 0) DESC, e2.updated_at DESC, e2.learning_rate DESC, e2.weight DESC
     LIMIT ${REPLAY_PRIORITY_LIMIT}
   );
 `
@@ -201,6 +206,19 @@ export const sql_strengthen_edges_batch = `
 	    updated_at = CURRENT_TIMESTAMP
 	WHERE (source_id = ANY($2) AND target_id = ANY($3))
 	   OR (source_id = ANY($3) AND target_id = ANY($2))
+`
+
+/**
+ * Strengthens edges for a set of context ids.
+ * Role: Reinforces replayed context trajectories during consolidation.
+ */
+export const sql_strengthen_edges_by_context = `
+	UPDATE ${SCHEMA_BRAIN}.edges
+	SET weight = LEAST(weight + $1, ${EDGE_WEIGHT_MAX}),
+	    distance = GREATEST(1.0 / (LEAST(weight + $1, ${EDGE_WEIGHT_MAX}) + ${DISTANCE_EPSILON}), 0.1),
+	    updated_at = CURRENT_TIMESTAMP
+	WHERE context_id = ANY($2)
+	  AND (lock IS NULL OR lock = FALSE)
 `
 
 /**

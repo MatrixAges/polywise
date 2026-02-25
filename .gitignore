@@ -23,8 +23,8 @@ npm-debug.log*
 **/.prompts
 
 # polywise
-polywise-server
 **/.test_db
+**/.test_logs
 **/.test_vectors
 .polywise
 

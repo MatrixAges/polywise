@@ -160,6 +160,12 @@ export interface RecallArgs extends FiltersArgs {
 	arousal?: number
 }
 
+export interface GetNodeRelatedArgs {
+	node_id: string
+	depth?: number
+	limit?: number
+}
+
 export interface QueryArgs extends FiltersArgs {
 	query: string
 	recall_depth?: number

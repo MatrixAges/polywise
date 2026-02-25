@@ -1,18 +1,30 @@
 import { injectable } from 'tsyringe'
 
 import { DEFAULT_SIMILARITY_THRESHOLD } from './consts'
-import Polywise from './Polywise'
 import { ChainEmitter, extractKeywords, processResults } from './utils'
 
+import type Pipeline from './Pipeline'
+import type { SingleSearchArgs } from './types/args'
 import type { CortexProcessArgs } from './types/cortex'
 import type { Memory } from './types/polywise'
 
+type ExecuteSingleSearch = (args: SingleSearchArgs) => Promise<{ memory: Array<Memory> }>
+
+type CortexInitArgs = {
+	execute_single_search: ExecuteSingleSearch
+	pipeline: Pipeline
+}
+
 @injectable()
 export default class Cortex {
-	private p!: Polywise
+	private execute_single_search!: ExecuteSingleSearch
+	private pipeline!: Pipeline
 
-	init(p: Polywise) {
-		this.p = p
+	init(args: CortexInitArgs) {
+		const { execute_single_search, pipeline } = args
+
+		this.execute_single_search = execute_single_search
+		this.pipeline = pipeline
 	}
 
 	async process(args: CortexProcessArgs) {
@@ -41,7 +53,7 @@ export default class Cortex {
 		emitter: ChainEmitter,
 		has_explicit_cot: boolean
 	) {
-		const { memory } = await this.p.executeSingleSearch({
+		const { memory } = await this.execute_single_search({
 			query,
 			recall_depth: args.recall_depth,
 			search_limit: args.search_limit,
@@ -53,7 +65,7 @@ export default class Cortex {
 			process: args.process
 		})
 
-		const { memory: final_memory } = await processResults(query, memory, this.p.pipeline)
+		const { memory: final_memory } = await processResults(query, memory, this.pipeline)
 
 		emitter.finish({ memory: final_memory })
 
@@ -75,7 +87,7 @@ export default class Cortex {
 		for (let depth = 0; depth < cot_depth; depth++) {
 			process?.emit('cot_iteration', { depth: depth + 1, query: current_query })
 
-			const search_results = await this.p.executeSingleSearch({
+			const search_results = await this.execute_single_search({
 				query: current_query,
 				recall_depth: args.recall_depth,
 				search_limit: args.search_limit,
@@ -121,7 +133,7 @@ export default class Cortex {
 
 		const filtered_memory = this.filterByQuality(all_memory, DEFAULT_SIMILARITY_THRESHOLD)
 
-		const { memory: final_memory } = await processResults(original_query, filtered_memory, this.p.pipeline)
+		const { memory: final_memory } = await processResults(original_query, filtered_memory, this.pipeline)
 
 		emitter.finish({ memory: final_memory })
 

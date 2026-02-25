@@ -4,14 +4,28 @@ import Console from './Console'
 import { DEFAULT_NODE_THRESHOLD, STRENGTHEN_EDGE_WEIGHT } from './consts'
 import { sql_stimulate_nodes_batch, sql_strengthen_edges_batch } from './sql'
 
-import type Polywise from './Polywise'
+import type { Node } from './types'
+
+type QueryRaw = <T>(sql: string, params?: Array<unknown>) => Promise<Array<T>>
+
+type ActivationInitArgs = {
+	query_raw: QueryRaw
+	tick: (threshold_override?: number, is_learning?: boolean, arousal?: number) => Promise<void>
+	on_tick?: () => void
+}
 
 @injectable()
 export default class Activation {
-	private p!: Polywise
+	private query_raw!: QueryRaw
+	private tick!: ActivationInitArgs['tick']
+	private on_tick?: () => void
 
-	init(p: Polywise) {
-		this.p = p
+	init(args: ActivationInitArgs) {
+		const { query_raw, tick, on_tick } = args
+
+		this.query_raw = query_raw
+		this.tick = tick
+		this.on_tick = on_tick
 	}
 
 	async stimulate(node_ids: Array<string>, intensity: number) {
@@ -21,10 +35,10 @@ export default class Activation {
 
 		Console.log('SYSTEM', 'stimulating nodes', { count: node_ids.length, intensity })
 
-		await this.p.queryRaw(sql_stimulate_nodes_batch, [intensity, node_ids])
+		await this.query_raw(sql_stimulate_nodes_batch, [intensity, node_ids])
 	}
 
-	async strengthen(args: { matched_nodes: Array<any>; related_nodes: Array<any> }) {
+	async strengthen(args: { matched_nodes: Array<Node>; related_nodes: Array<Node> }) {
 		const { matched_nodes, related_nodes } = args
 		const node_ids = [...matched_nodes, ...related_nodes].map(n => n.id)
 
@@ -32,16 +46,16 @@ export default class Activation {
 			return
 		}
 
-		await this.p.queryRaw(sql_strengthen_edges_batch, [STRENGTHEN_EDGE_WEIGHT, node_ids, node_ids])
+		await this.query_raw(sql_strengthen_edges_batch, [STRENGTHEN_EDGE_WEIGHT, node_ids, node_ids])
 	}
 
 	async spread(steps = 3, threshold = DEFAULT_NODE_THRESHOLD, is_learning = false, arousal = 1.0) {
 		Console.log('SYSTEM', 'spreading activation', { steps, threshold, is_learning, arousal })
 		for (let i = 0; i < steps; i++) {
-			await this.p.tick(threshold, is_learning, arousal)
+			await this.tick(threshold, is_learning, arousal)
 
-			if (this.p.onTick) {
-				this.p.onTick()
+			if (this.on_tick) {
+				this.on_tick()
 			}
 		}
 	}

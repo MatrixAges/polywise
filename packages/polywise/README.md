@@ -177,6 +177,8 @@ await poly.forget({
 | `query(args: QueryArgs)`          | Query relevant concepts and context from memory    |
 | `update(args: UpdateArticleArgs)` | Update existing memory content                     |
 | `forget(args: ForgetArticleArgs)` | Permanently delete memory                          |
+| `getSnapshot()`                   | Fetch a graph snapshot of nodes and edges          |
+| `getNodeRelated(args)`            | Fetch related nodes for a given node               |
 | `init(args: PolywiseArgs)`        | Initialize the database and background brain       |
 | `off()`                           | Gracefully shut down background tasks and close DB |
 
