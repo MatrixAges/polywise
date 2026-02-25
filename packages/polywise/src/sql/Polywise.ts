@@ -61,7 +61,7 @@ export const sql_propagate = (
       -- 1. If actively firing, spike threshold to prevent immediate re-fire (Refractory)
       WHEN is_active THEN LEAST(current_threshold + ${THRESHOLD_SPIKE}, ${MAX_THRESHOLD})
       -- 2. Otherwise, decay back towards baseline (Homeostasis) using calculated decrement
-      ELSE GREATEST(current_threshold - ${threshold_decrement}, ${MIN_THRESHOLD}, threshold)
+      ELSE GREATEST(current_threshold - ${threshold_decrement}, ${MIN_THRESHOLD}, ${threshold})
     END,
     transmitter = CASE
       WHEN is_active THEN GREATEST(transmitter - 0.2, 0.0)
