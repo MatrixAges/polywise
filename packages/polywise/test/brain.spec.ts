@@ -64,7 +64,7 @@ describe('Polywise Brain System', () => {
 				content: text
 			})
 
-			const { nodes, edges } = await poly.getSnapshot(0.05)
+			const { nodes } = await poly.getSnapshot(0.05)
 
 			expect(nodes.length).toBeGreaterThanOrEqual(0)
 		})

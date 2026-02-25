@@ -157,9 +157,6 @@ describe('Chain of Thought (CoT) Iterative Search', () => {
 			const has_neuroscience =
 				all_text.includes('neuron') || all_text.includes('synapse') || all_text.includes('brain')
 
-			const has_software =
-				all_text.includes('microservice') || all_text.includes('container') || all_text.includes('api')
-
 			expect(has_neuroscience).toBe(true)
 		})
 

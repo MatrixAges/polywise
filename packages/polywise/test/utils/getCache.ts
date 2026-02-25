@@ -89,7 +89,7 @@ export const getTestKeywords = async (text: string) => {
 		text,
 		CACHE_KEYWORD_DIR,
 		memory_keyword_cache,
-		async p => {
+		async () => {
 			const words = text
 				.toLowerCase()
 				.split(/\W+/)

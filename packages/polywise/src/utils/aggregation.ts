@@ -1,4 +1,3 @@
-import { POTENTIAL_THRESHOLD } from '../consts'
 import calculateMemoryStrength from './calculateMemoryStrength'
 
 import type { AggregateResultsArgs, Memory, SearchResult } from '../types'

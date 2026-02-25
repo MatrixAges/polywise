@@ -60,7 +60,7 @@ FRESH → TIRED → SLEEPING → FRESH 状态循环`
 			const th = 0.35
 			const p = poly.process('记忆机制')
 
-			p.on((event, total) => {
+			p.on(event => {
 				if (event.key === 'vector_search_results' && Array.isArray(event.value)) {
 					console.log(
 						'  - vector sample:',
