@@ -4,6 +4,10 @@ export interface Metadata {
 	desc?: string
 	links?: Array<string>
 	files?: Array<string>
+	source_confidence?: number
+	conflict_score?: number
+	conflict_count?: number
+	last_verified_at?: string
 }
 
 export interface Node {
@@ -19,7 +23,7 @@ export interface Node {
 	last_fired_at?: string
 	idol_id?: string
 	root_ids?: Array<string>
-	metrics_ids?: Array<string>
+	context_id?: string
 	article_ids?: Array<string>
 	embedding?: Array<number>
 	created_at?: string
@@ -37,7 +41,7 @@ export interface Edge {
 	decay_resistance: number
 	idol_id?: string
 	root_ids?: Array<string>
-	metrics_ids?: Array<string>
+	context_id?: string
 	reaction_count?: number
 	created_at?: string
 	updated_at?: string
@@ -82,6 +86,7 @@ export interface ArticleEntity {
 	created_at: string
 	updated_at?: string
 	metadata?: Metadata
+	context_id?: string
 }
 
 export interface ArticleWithSimilarity extends ArticleEntity {
@@ -121,6 +126,7 @@ export interface Memory {
 	memoryStrength: number
 	metadata: Metadata
 	updated_at?: string
+	context_id?: string
 }
 
 export interface COTDepthResult {

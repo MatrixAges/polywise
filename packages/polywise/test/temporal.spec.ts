@@ -56,9 +56,9 @@ describe('Polywise Temporal Mechanics', () => {
 
 		await (poly as any).queryRaw(
 			`
-			INSERT INTO brain.nodes (id, label, x, y, potential, updated_at)
-			VALUES ($2, $1, 0, 0, 1.0, CURRENT_TIMESTAMP)
-			ON CONFLICT (label) DO UPDATE SET 
+			INSERT INTO brain.nodes (id, label, context_id, x, y, potential, updated_at)
+			VALUES ($2, $1, 'global', 0, 0, 1.0, CURRENT_TIMESTAMP)
+			ON CONFLICT (label, context_id) DO UPDATE SET 
 				potential = brain.nodes.potential + 0.5,
 				updated_at = CURRENT_TIMESTAMP
 		`,

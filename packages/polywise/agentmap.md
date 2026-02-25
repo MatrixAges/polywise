@@ -46,7 +46,7 @@ This document provides an overview of the packages/polywise module structure and
 				"role": "Class"
 			},
 			"Polywise.ts": {
-				"desc": "Core database API for memory graph operations. Includes public instances of Brain, Article, and Pipeline. Supports dual-process memory with separate working memory recall and LTM consolidation. Dynamic attention plasticity modifies learning rates based on arousal during saves, with global inhibition applied during tick propagation.",
+				"desc": "Core database API for memory graph operations with snapshot seeding fallback, multi-step temporal context prediction, and conflict-aware signals. Includes public instances of Brain, Article, and Pipeline. Supports dual-process memory with separate working memory recall and LTM consolidation. Dynamic attention plasticity modifies learning rates based on arousal during saves, with global inhibition applied during tick propagation.",
 				"role": "Class"
 			},
 			"Process.ts": {
@@ -59,7 +59,7 @@ This document provides an overview of the packages/polywise module structure and
 				"index.ts": { "desc": "Main constants export", "role": "Index" },
 				"model.ts": { "desc": "Model-related constants", "role": "Constant" },
 				"performance.ts": {
-					"desc": "Performance, inhibition, and threshold constants",
+					"desc": "Performance, inhibition, threshold, conflict, and temporal sequencing constants",
 					"role": "Constant"
 				},
 				"schema.ts": {
@@ -71,7 +71,7 @@ This document provides an overview of the packages/polywise module structure and
 			"sql": {
 				"Brain.ts": { "desc": "Brain SQL operations", "role": "SQL" },
 				"Polywise.ts": {
-					"desc": "Polywise SQL operations (Articles/Nodes/Edges) including memory propagation with global inhibition, decay logic, stats tracking, and transaction-safe keyword injection helpers",
+					"desc": "Polywise SQL operations (Articles/Nodes/Edges) including memory propagation with global inhibition, decay logic, stats tracking, context sequencing queries, and transaction-safe keyword injection helpers",
 					"role": "SQL"
 				},
 				"index.ts": { "desc": "SQL exports", "role": "Index" },
@@ -96,6 +96,7 @@ This document provides an overview of the packages/polywise module structure and
 			"utils": {
 				"calculateFatigue.ts": { "desc": "Fatigue calculation utility", "role": "Utility" },
 				"calculateWeight.ts": { "desc": "Weight calculation utility", "role": "Utility" },
+				"calculateRecencyWeight.ts": { "desc": "Recency weighting utility", "role": "Utility" },
 				"generateHash.ts": { "desc": "SHA-256 file hashing utility", "role": "Utility" },
 				"generateId.ts": { "desc": "Unique string ID generator using uuid v7", "role": "Utility" },
 				"generateModelHash.ts": {
@@ -123,11 +124,11 @@ This document provides an overview of the packages/polywise module structure and
 					"role": "Utility"
 				},
 				"aggregation.ts": {
-					"desc": "Memory aggregation logic for recall + external results",
+					"desc": "Memory aggregation logic for recall + external results with sequence context weighting",
 					"role": "Utility"
 				},
 				"ranking.ts": {
-					"desc": "Ranking utility with optimization to skip redundant reranking steps",
+					"desc": "Ranking utility with rerank skipping and conflict-aware stimulation gating",
 					"role": "Utility"
 				},
 				"mmr.ts": {
@@ -164,6 +165,54 @@ This document provides an overview of the packages/polywise module structure and
 				"desc": "Query keyword generation tests using pipeline keywords",
 				"role": "Test"
 			},
+			"arousal-gating.spec.ts": {
+				"desc": "Arousal curve gating tests",
+				"role": "Test"
+			},
+			"local-competition.spec.ts": {
+				"desc": "Local competition recall gating tests",
+				"role": "Test"
+			},
+			"sleep-priority.spec.ts": {
+				"desc": "Sleep replay recency and competitive decay tests",
+				"role": "Test"
+			},
+			"ranking-stimulation.spec.ts": {
+				"desc": "Ranking stimulation confidence and conflict gating tests",
+				"role": "Test"
+			},
+			"context-sequence-prediction.spec.ts": {
+				"desc": "Temporal context multi-step prediction tests",
+				"role": "Test"
+			},
+			"context-separation.spec.ts": {
+				"desc": "Context-based separation tests",
+				"role": "Test"
+			},
+			"context-auto.spec.ts": {
+				"desc": "Automatic context resolution tests",
+				"role": "Test"
+			},
+			"context-sequence.spec.ts": {
+				"desc": "Context transition tracking tests",
+				"role": "Test"
+			},
+			"cognitive-paradigms.spec.ts": {
+				"desc": "Spacing, DRM, and interference regression tests",
+				"role": "Test"
+			},
+			"source-confidence.spec.ts": {
+				"desc": "Source confidence persistence tests",
+				"role": "Test"
+			},
+			"temporal-recency.spec.ts": {
+				"desc": "Temporal recency weighting tests",
+				"role": "Test"
+			},
+			"temporal-context.spec.ts": {
+				"desc": "Temporal context sequence weighting tests",
+				"role": "Test"
+			},
 			"utils": {
 				"getCache.ts": {
 					"desc": "Test cache helper for embeddings/rerank/keywords with mock keyword cache normalization",
@@ -173,6 +222,7 @@ This document provides an overview of the packages/polywise module structure and
 			"datasets": {
 				"behavioral.ts": { "desc": "Behavioral prompts and benchmarks", "role": "Data" },
 				"cognitive.ts": { "desc": "Cognitive and reasoning datasets", "role": "Data" },
+				"paradigms.ts": { "desc": "Spacing, DRM, and interference datasets", "role": "Data" },
 
 				"longcontext.ts": { "desc": "Long context retrieval datasets", "role": "Data" },
 				"longembedding.ts": { "desc": "Large scale embedding datasets", "role": "Data" },

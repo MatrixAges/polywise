@@ -9,6 +9,6 @@ export interface CortexProcessArgs {
 	stimulate_on_recall?: boolean
 	idol_id?: string
 	root_ids?: Array<string>
-	metrics_ids?: Array<string>
+	context_id?: string
 	process?: Process
 }

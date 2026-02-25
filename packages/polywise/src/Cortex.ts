@@ -49,7 +49,7 @@ export default class Cortex {
 			stimulate_on_recall: args.stimulate_on_recall,
 			idol_id: args.idol_id,
 			root_ids: args.root_ids,
-			metrics_ids: args.metrics_ids,
+			context_id: args.context_id,
 			process: args.process
 		})
 
@@ -83,7 +83,7 @@ export default class Cortex {
 				stimulate_on_recall: args.stimulate_on_recall,
 				idol_id: args.idol_id,
 				root_ids: args.root_ids,
-				metrics_ids: args.metrics_ids,
+				context_id: args.context_id,
 				process: args.process
 			})
 

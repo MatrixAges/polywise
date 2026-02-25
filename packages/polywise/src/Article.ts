@@ -33,7 +33,7 @@ export default class Article {
 	}
 
 	async process(args: ProcessArticleArgs) {
-		const { content, idol_id, root_ids, metrics_ids, metadata } = args
+		const { content, idol_id, root_ids, context_id, metadata } = args
 
 		const article_id = generateId()
 
@@ -42,7 +42,7 @@ export default class Article {
 			content,
 			idol_id ?? null,
 			root_ids ?? null,
-			metrics_ids ?? null,
+			context_id ?? null,
 			JSON.stringify(metadata ?? {})
 		])
 
@@ -91,18 +91,19 @@ export default class Article {
 	}
 
 	async update(id: string, args: ProcessArticleArgs) {
-		const { content, idol_id, root_ids, metrics_ids, metadata } = args
+		const { content, idol_id, root_ids, context_id, metadata } = args
+		const metadata_payload = metadata ? JSON.stringify(metadata) : null
 
 		const res = await this.p.db.query<ArticleEntity>(sql_update_article, [
 			id,
 			content,
 			idol_id ?? null,
 			root_ids ?? null,
-			metrics_ids ?? null,
-			JSON.stringify(metadata ?? {}),
+			context_id ?? null,
+			metadata_payload,
 			idol_id ?? null,
 			root_ids ?? null,
-			metrics_ids ?? null
+			context_id ?? null
 		])
 
 		return res.rows.length > 0 ? res.rows[0] : null
@@ -111,18 +112,18 @@ export default class Article {
 	async delete(article_id: string, filters: FiltersArgs = {}) {
 		if (!this.p.db) return
 
-		const { idol_id, root_ids, metrics_ids } = filters
+		const { idol_id, root_ids, context_id } = filters
 
 		await this.p.db.query(sql_delete_article, [
 			article_id,
 			idol_id ?? null,
 			root_ids ?? null,
-			metrics_ids ?? null
+			context_id ?? null
 		])
 	}
 
 	async searchByVector(args: SearchArticlesArgs) {
-		const { query, limit, idol_id, root_ids, metrics_ids, threshold } = args
+		const { query, limit, idol_id, root_ids, context_id, threshold } = args
 
 		const embedding = await this.p.pipeline.embed(query)
 
@@ -133,7 +134,7 @@ export default class Article {
 			limit ?? 10,
 			idol_id ?? null,
 			root_ids ?? null,
-			metrics_ids ?? null,
+			context_id ?? null,
 			threshold ?? DEFAULT_SIMILARITY_THRESHOLD
 		])
 
@@ -141,21 +142,22 @@ export default class Article {
 	}
 
 	async searchByText(args: SearchArticlesArgs) {
-		const { query, limit, idol_id, root_ids, metrics_ids } = args
+		const { query, limit, idol_id, root_ids, context_id } = args
 
 		const res = await this.p.db.query<ArticleWithSimilarity>(sql_search_articles_by_text, [
 			query,
 			limit ?? 10,
 			idol_id ?? null,
 			root_ids ?? null,
-			metrics_ids ?? null
+			context_id ?? null
 		])
 
 		return res.rows.map(r => ({
 			...r,
 			similarity: (r as any).rank || 0,
 			metadata: (r as any).metadata ?? {},
-			updated_at: (r as any).updated_at
+			updated_at: (r as any).updated_at,
+			context_id: (r as any).context_id
 		}))
 	}
 }

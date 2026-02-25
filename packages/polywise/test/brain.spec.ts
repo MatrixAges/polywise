@@ -262,7 +262,7 @@ describe('Polywise Brain System', () => {
 		})
 	})
 
-	describe.concurrent('Node and Edge Filtering with idol_id, root_ids, metrics_ids', () => {
+	describe.concurrent('Node and Edge Filtering with idol_id, root_ids, context_id', () => {
 		it('should create nodes with idol_id and filter by idol', async () => {
 			const idol_a = 'idol_001'
 			const idol_b = 'idol_002'
@@ -274,7 +274,7 @@ describe('Polywise Brain System', () => {
 				threshold: 0.5,
 				idol_id: idol_a,
 				root_ids: ['root_1'],
-				metrics_ids: ['metric_1']
+				context_id: 'context_1'
 			})
 			const node_b = await poly.addNode({
 				label: 'Concept_B',
@@ -283,7 +283,7 @@ describe('Polywise Brain System', () => {
 				threshold: 0.5,
 				idol_id: idol_a,
 				root_ids: ['root_2'],
-				metrics_ids: ['metric_2']
+				context_id: 'context_2'
 			})
 			const node_c = await poly.addNode({
 				label: 'Concept_C',
@@ -292,7 +292,7 @@ describe('Polywise Brain System', () => {
 				threshold: 0.5,
 				idol_id: idol_b,
 				root_ids: ['root_1'],
-				metrics_ids: ['metric_3']
+				context_id: 'context_3'
 			})
 
 			await poly.connect({
@@ -301,7 +301,7 @@ describe('Polywise Brain System', () => {
 				weight: 0.8,
 				idol_id: idol_a,
 				root_ids: ['root_1'],
-				metrics_ids: ['metric_1']
+				context_id: 'context_1'
 			})
 			await poly.connect({
 				source_id: node_b,
@@ -309,7 +309,7 @@ describe('Polywise Brain System', () => {
 				weight: 0.6,
 				idol_id: idol_b,
 				root_ids: ['root_2'],
-				metrics_ids: ['metric_2']
+				context_id: 'context_2'
 			})
 
 			const nodes_idol_a = await poly.getNodesByIdol(idol_a)
@@ -398,13 +398,13 @@ describe('Polywise Brain System', () => {
 		it('should process article with filtering metadata', async () => {
 			const idol = 'article_idol_001'
 			const root_ids = ['article_root_1', 'article_root_2']
-			const metrics_ids = ['metric_quality', 'metric_relevance']
+			const context_id = 'context_quality'
 
 			await poly.save({
 				content: 'Content about AI...',
 				idol_id: idol,
 				root_ids,
-				metrics_ids
+				context_id
 			})
 
 			const nodes = await poly.getNodesByIdol(idol)
@@ -414,7 +414,7 @@ describe('Polywise Brain System', () => {
 		it('should include new fields in snapshot', async () => {
 			const idol = 'snapshot_test'
 			const root_ids = ['root_snapshot']
-			const metrics_ids = ['metric_snapshot']
+			const context_id = 'context_snapshot'
 
 			const node = await poly.addNode({
 				label: 'Snapshot_Node',
@@ -423,7 +423,7 @@ describe('Polywise Brain System', () => {
 				threshold: 0.5,
 				idol_id: idol,
 				root_ids,
-				metrics_ids
+				context_id
 			})
 			await poly.connect({
 				source_id: node,
@@ -431,8 +431,10 @@ describe('Polywise Brain System', () => {
 				weight: 0.5,
 				idol_id: idol,
 				root_ids,
-				metrics_ids
+				context_id
 			})
+
+			await poly.stimulate(node, 2.0)
 
 			const { nodes } = await poly.getSnapshot(0.1, 1000)
 
@@ -445,7 +447,7 @@ describe('Polywise Brain System', () => {
 			expect(snapshot_node).toBeDefined()
 			expect(snapshot_node.idol_id).toBe(idol)
 			expect(snapshot_node.root_ids).toEqual(root_ids)
-			expect(snapshot_node.metrics_ids).toEqual(metrics_ids)
+			expect(snapshot_node.context_id).toBe(context_id)
 		})
 	})
 

@@ -20,14 +20,12 @@ const tool_args = {
 }
 
 export const OpencodePlugin: Plugin = async ctx => {
-	const { project, directory } = ctx
-	const project_id = project.id
+	const { directory } = ctx
 
 	const poly = container.resolve(Polywise)
 
 	await poly.init({
-		data_dir: path.join(directory, '.polywise'),
-		metrics_ids: [project_id]
+		data_dir: path.join(directory, '.polywise')
 	})
 
 	return {
@@ -52,7 +50,7 @@ export const OpencodePlugin: Plugin = async ctx => {
 								})
 							}
 
-							const [err, res] = await to(poly.save({ metrics_ids: [project_id], content }))
+							const [err, res] = await to(poly.save({ content }))
 
 							if (err) {
 								console.log('[PolywisePlugin] save memory err: ', JSON.stringify(err))
@@ -81,7 +79,6 @@ export const OpencodePlugin: Plugin = async ctx => {
 
 							const [err, res] = await to(
 								poly.query({
-									metrics_ids: [project_id],
 									query
 								})
 							)
@@ -125,7 +122,6 @@ export const OpencodePlugin: Plugin = async ctx => {
 
 							const [err, res] = await to(
 								poly.update({
-									metrics_ids: [project_id],
 									memory_id: memory_id,
 									content
 								})
@@ -162,7 +158,6 @@ export const OpencodePlugin: Plugin = async ctx => {
 
 							const [err] = await to(
 								poly.forget({
-									metrics_ids: [project_id],
 									memory_id: memory_id,
 									query
 								})
@@ -224,7 +219,6 @@ export const OpencodePlugin: Plugin = async ctx => {
 
 				const [err] = await to(
 					poly.save({
-						metrics_ids: [project_id],
 						content: getQa(user_prompt, ai_response),
 						...others
 					})

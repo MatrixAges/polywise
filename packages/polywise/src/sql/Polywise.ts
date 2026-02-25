@@ -141,8 +141,8 @@ export const sql_decay = `
  * Role: Instantiates a new concept or entity within the brain.
  */
 export const sql_add_node = `
-  INSERT INTO ${SCHEMA_BRAIN}.nodes (id, label, x, y, threshold, current_threshold, transmitter, idol_id, root_ids, metrics_ids, embedding, article_ids, lock, is_active)
-  VALUES ($1, $2, $3, $4, $5, $5, 1.0, $6, $7, $8, $9, $10, $11, FALSE)
+  INSERT INTO ${SCHEMA_BRAIN}.nodes (id, label, x, y, threshold, current_threshold, transmitter, idol_id, root_ids, context_id, embedding, article_ids, lock, is_active)
+  VALUES ($1, $2, $3, $4, $5, $5, 1.0, $6, $7, COALESCE($8, 'global'), $9, $10, $11, FALSE)
   RETURNING id
 `
 
@@ -151,8 +151,8 @@ export const sql_add_node = `
  * Role: Establishes a relationship or association between two concepts.
  */
 export const sql_connect = `
-  INSERT INTO ${SCHEMA_BRAIN}.edges (id, source_id, target_id, weight, idol_id, root_ids, metrics_ids, lock)
-  VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+  INSERT INTO ${SCHEMA_BRAIN}.edges (id, source_id, target_id, weight, idol_id, root_ids, context_id, lock)
+  VALUES ($1, $2, $3, $4, $5, $6, COALESCE($7, 'global'), $8)
 `
 
 /**
@@ -166,7 +166,7 @@ export const sql_stimulate = `UPDATE ${SCHEMA_BRAIN}.nodes SET potential = poten
  * Role: Captures the current "state of mind" for visualization or analysis, filtering out dormant nodes.
  */
 export const sql_get_snapshot_nodes = (weight_threshold: number, limit: number) => `
-  SELECT id, label, x, y, potential, threshold, current_threshold, transmitter, is_active, idol_id, root_ids, metrics_ids, article_ids, lock, created_at, updated_at
+  SELECT id, label, x, y, potential, threshold, current_threshold, transmitter, is_active, idol_id, root_ids, context_id, article_ids, lock, created_at, updated_at
   FROM ${SCHEMA_BRAIN}.nodes
   WHERE potential > ${NODE_POTENTIAL_MIN}
   OR id IN (SELECT source_id FROM ${SCHEMA_BRAIN}.edges WHERE weight > ${weight_threshold})
@@ -180,7 +180,7 @@ export const sql_get_snapshot_nodes = (weight_threshold: number, limit: number) 
  * Role: Gets the highest potential nodes to use as seeds for BFS expansion.
  */
 export const sql_get_top_nodes_by_potential = (limit: number) => `
-  SELECT id, label, x, y, potential, threshold, current_threshold, transmitter, is_active, idol_id, root_ids, metrics_ids, article_ids, lock, created_at, updated_at
+  SELECT id, label, x, y, potential, threshold, current_threshold, transmitter, is_active, idol_id, root_ids, context_id, article_ids, lock, created_at, updated_at
   FROM ${SCHEMA_BRAIN}.nodes
   ORDER BY potential DESC
   LIMIT ${limit}
@@ -191,7 +191,7 @@ export const sql_get_top_nodes_by_potential = (limit: number) => `
  * Role: Gets all edges that connect to the specified nodes for graph expansion.
  */
 export const sql_get_edges_for_nodes = `
-  SELECT id, source_id, target_id, weight, distance, learning_rate, decay_resistance, idol_id, root_ids, metrics_ids, lock, created_at, updated_at
+  SELECT id, source_id, target_id, weight, distance, learning_rate, decay_resistance, idol_id, root_ids, context_id, lock, created_at, updated_at
   FROM ${SCHEMA_BRAIN}.edges
   WHERE source_id = ANY($1) OR target_id = ANY($1)
   ORDER BY weight DESC
@@ -202,7 +202,7 @@ export const sql_get_edges_for_nodes = `
  * Role: Gets full node details for a list of node IDs.
  */
 export const sql_get_nodes_by_ids = `
-  SELECT id, label, x, y, potential, threshold, current_threshold, transmitter, is_active, idol_id, root_ids, metrics_ids, article_ids, lock, created_at, updated_at
+  SELECT id, label, x, y, potential, threshold, current_threshold, transmitter, is_active, idol_id, root_ids, context_id, article_ids, lock, created_at, updated_at
   FROM ${SCHEMA_BRAIN}.nodes
   WHERE id = ANY($1)
 `
@@ -212,7 +212,7 @@ export const sql_get_nodes_by_ids = `
  * Role: Captures the active wiring of the brain for visualization or analysis.
  */
 export const sql_get_snapshot_edges = (weight_threshold: number) => `
-  SELECT source_id, target_id, weight, distance, learning_rate, decay_resistance, idol_id, root_ids, metrics_ids, lock, created_at, updated_at
+  SELECT source_id, target_id, weight, distance, learning_rate, decay_resistance, idol_id, root_ids, context_id, lock, created_at, updated_at
   FROM ${SCHEMA_BRAIN}.edges
   WHERE weight > ${weight_threshold}
   ORDER BY weight DESC
@@ -224,8 +224,8 @@ export const sql_get_snapshot_edges = (weight_threshold: number) => `
  * Role: Ingests raw textual knowledge/content into the system.
  */
 export const sql_process_article = `
-  INSERT INTO ${SCHEMA_MEMORY}.articles (id, content, idol_id, root_ids, metrics_ids, metadata) 
-  VALUES ($1, $2, $3, $4, $5, $6) 
+  INSERT INTO ${SCHEMA_MEMORY}.articles (id, content, idol_id, root_ids, context_id, metadata) 
+  VALUES ($1, $2, $3, $4, COALESCE($5, 'global'), $6) 
   RETURNING id, content, created_at
 `
 
@@ -234,15 +234,15 @@ export const sql_process_article = `
  * Role: Ensures a concept exists and reinforces it (learning), triggering activation if it's already present.
  */
 export const sql_upsert_node = `
-  INSERT INTO ${SCHEMA_BRAIN}.nodes (id, label, x, y, potential, threshold, current_threshold, transmitter, idol_id, root_ids, metrics_ids, embedding, article_ids, lock, is_active)
-  VALUES ($1, $2, random() * 800, random() * 600, 1.0, ${MIN_THRESHOLD}, ${MIN_THRESHOLD}, 1.0, $3, $4, $5, $6, $7, $8, FALSE)
-  ON CONFLICT (label) DO UPDATE SET 
+  INSERT INTO ${SCHEMA_BRAIN}.nodes (id, label, x, y, potential, threshold, current_threshold, transmitter, idol_id, root_ids, context_id, embedding, article_ids, lock, is_active)
+  VALUES ($1, $2, random() * 800, random() * 600, 1.0, ${MIN_THRESHOLD}, ${MIN_THRESHOLD}, 1.0, $3, $4, COALESCE($5, 'global'), $6, $7, $8, FALSE)
+  ON CONFLICT (label, context_id) DO UPDATE SET 
     potential = LEAST(${SCHEMA_BRAIN}.nodes.potential + ${DEFAULT_HEBBIAN_REWARD}, ${TICK_POTENTIAL_MAX}), 
     is_active = CASE WHEN (${SCHEMA_BRAIN}.nodes.potential + ${DEFAULT_HEBBIAN_REWARD}) > ${SCHEMA_BRAIN}.nodes.current_threshold THEN TRUE ELSE ${SCHEMA_BRAIN}.nodes.is_active END,
     embedding = COALESCE(EXCLUDED.embedding, ${SCHEMA_BRAIN}.nodes.embedding), 
     idol_id = COALESCE(EXCLUDED.idol_id, ${SCHEMA_BRAIN}.nodes.idol_id),
     root_ids = CASE WHEN EXCLUDED.root_ids IS NOT NULL THEN (SELECT ARRAY(SELECT DISTINCT unnest(COALESCE(${SCHEMA_BRAIN}.nodes.root_ids, '{}') || EXCLUDED.root_ids))) ELSE ${SCHEMA_BRAIN}.nodes.root_ids END,
-    metrics_ids = CASE WHEN EXCLUDED.metrics_ids IS NOT NULL THEN (SELECT ARRAY(SELECT DISTINCT unnest(COALESCE(${SCHEMA_BRAIN}.nodes.metrics_ids, '{}') || EXCLUDED.metrics_ids))) ELSE ${SCHEMA_BRAIN}.nodes.metrics_ids END,
+    context_id = COALESCE(EXCLUDED.context_id, ${SCHEMA_BRAIN}.nodes.context_id),
     article_ids = CASE WHEN EXCLUDED.article_ids IS NOT NULL THEN (SELECT ARRAY(SELECT DISTINCT unnest(COALESCE(${SCHEMA_BRAIN}.nodes.article_ids, '{}') || EXCLUDED.article_ids))) ELSE ${SCHEMA_BRAIN}.nodes.article_ids END,
     updated_at = CURRENT_TIMESTAMP
   RETURNING id;
@@ -253,13 +253,13 @@ export const sql_upsert_node = `
  * Role: Traditional keyword-based document retrieval.
  */
 export const sql_search_articles_by_text = `
-  SELECT id, content, created_at, updated_at, metadata,
+  SELECT id, content, created_at, updated_at, metadata, context_id,
     ts_rank(to_tsvector('english', coalesce(content,'')), websearch_to_tsquery('english', $1)) AS rank
   FROM ${SCHEMA_MEMORY}.articles
   WHERE to_tsvector('english', coalesce(content,'')) @@ websearch_to_tsquery('english', $1)
     AND ($3::text IS NULL OR idol_id = $3)
     AND ($4::text[] IS NULL OR root_ids && $4)
-    AND ($5::text[] IS NULL OR metrics_ids && $5)
+    AND ($5::text IS NULL OR context_id = $5)
   ORDER BY rank DESC
   LIMIT $2
 `
@@ -282,10 +282,10 @@ export const sql_inject_edges_insert_edge = (
 	weight: number,
 	idol_id?: string | null,
 	root_ids?: string[] | null,
-	metrics_ids?: string[] | null
+	context_id?: string | null
 ) => `
-  INSERT INTO ${SCHEMA_BRAIN}.edges (id, source_id, target_id, learning_rate, decay_resistance, weight, idol_id, root_ids, metrics_ids)
-  SELECT '${sub_id}_${obj_id}', '${sub_id}', '${obj_id}', ${learning_rate}, ${decay_resistance}, ${weight}, ${idol_id ? `'${idol_id}'` : 'NULL'}, ${root_ids && root_ids.length > 0 ? `ARRAY[${root_ids.map(id => `'${id}'`).join(',')}]` : 'NULL'}, ${metrics_ids && metrics_ids.length > 0 ? `ARRAY[${metrics_ids.map(id => `'${id}'`).join(',')}]` : 'NULL'}
+  INSERT INTO ${SCHEMA_BRAIN}.edges (id, source_id, target_id, learning_rate, decay_resistance, weight, idol_id, root_ids, context_id)
+  SELECT '${sub_id}_${obj_id}', '${sub_id}', '${obj_id}', ${learning_rate}, ${decay_resistance}, ${weight}, ${idol_id ? `'${idol_id}'` : 'NULL'}, ${root_ids && root_ids.length > 0 ? `ARRAY[${root_ids.map(id => `'${id}'`).join(',')}]` : 'NULL'}, '${context_id ?? 'global'}'
   WHERE NOT EXISTS (SELECT 1 FROM ${SCHEMA_BRAIN}.edges WHERE source_id = '${sub_id}' AND target_id = '${obj_id}');
 `
 
@@ -301,12 +301,10 @@ export const sql_inject_edges_update_edge = (
 	weight: number,
 	idol_id?: string | null,
 	root_ids?: string[] | null,
-	metrics_ids?: string[] | null
+	context_id?: string | null
 ) => {
 	const has_root_ids = Boolean(root_ids && root_ids.length > 0)
-	const has_metrics_ids = Boolean(metrics_ids && metrics_ids.length > 0)
 	const root_ids_array = has_root_ids ? `ARRAY[${root_ids!.map(id => `'${id}'`).join(',')}]` : 'NULL'
-	const metrics_ids_array = has_metrics_ids ? `ARRAY[${metrics_ids!.map(id => `'${id}'`).join(',')}]` : 'NULL'
 
 	return `
   UPDATE ${SCHEMA_BRAIN}.edges
@@ -315,8 +313,8 @@ export const sql_inject_edges_update_edge = (
     decay_resistance = GREATEST(decay_resistance, ${decay_resistance}),
     weight = LEAST(weight + ${weight}, 5.0),
     idol_id = COALESCE(${idol_id ? `'${idol_id}'` : 'NULL'}, idol_id),
+    context_id = COALESCE(${context_id ? `'${context_id}'` : 'NULL'}, context_id),
     root_ids = CASE WHEN ${has_root_ids} THEN (SELECT ARRAY(SELECT DISTINCT unnest(COALESCE(root_ids, '{}') || ${root_ids_array}))) ELSE root_ids END,
-    metrics_ids = CASE WHEN ${has_metrics_ids} THEN (SELECT ARRAY(SELECT DISTINCT unnest(COALESCE(metrics_ids, '{}') || ${metrics_ids_array}))) ELSE metrics_ids END,
     updated_at = CURRENT_TIMESTAMP
   WHERE source_id = '${sub_id}' AND target_id = '${obj_id}';
 `
@@ -351,7 +349,7 @@ export const sql_node_sources = `INSERT INTO ${SCHEMA_BRAIN}.node_sources (node_
  * Role: Scoped retrieval for multi-tenant or multi-context operations.
  */
 export const sql_get_nodes_by_idol = `
-  SELECT id, label, x, y, potential, threshold, current_threshold, transmitter, is_active, idol_id, root_ids, metrics_ids, created_at, updated_at
+  SELECT id, label, x, y, potential, threshold, current_threshold, transmitter, is_active, idol_id, root_ids, context_id, created_at, updated_at
   FROM ${SCHEMA_BRAIN}.nodes
   WHERE idol_id = $1
 `
@@ -361,7 +359,7 @@ export const sql_get_nodes_by_idol = `
  * Role: Hierarchical or group-based retrieval.
  */
 export const sql_get_nodes_by_root = `
-  SELECT id, label, x, y, potential, threshold, current_threshold, transmitter, is_active, idol_id, root_ids, metrics_ids, created_at, updated_at
+  SELECT id, label, x, y, potential, threshold, current_threshold, transmitter, is_active, idol_id, root_ids, context_id, created_at, updated_at
   FROM ${SCHEMA_BRAIN}.nodes
   WHERE $1 = ANY(root_ids)
 `
@@ -371,7 +369,7 @@ export const sql_get_nodes_by_root = `
  * Role: Context-scoped structure retrieval.
  */
 export const sql_get_edges_by_idol = `
-  SELECT source_id, target_id, weight, distance, learning_rate, decay_resistance, idol_id, root_ids, metrics_ids, created_at, updated_at
+  SELECT source_id, target_id, weight, distance, learning_rate, decay_resistance, idol_id, root_ids, context_id, created_at, updated_at
   FROM ${SCHEMA_BRAIN}.edges
   WHERE idol_id = $1
 `
@@ -381,7 +379,7 @@ export const sql_get_edges_by_idol = `
  * Role: Group-scoped structure retrieval.
  */
 export const sql_get_edges_by_root = `
-  SELECT source_id, target_id, weight, distance, learning_rate, decay_resistance, idol_id, root_ids, metrics_ids, created_at, updated_at
+  SELECT source_id, target_id, weight, distance, learning_rate, decay_resistance, idol_id, root_ids, context_id, created_at, updated_at
   FROM ${SCHEMA_BRAIN}.edges
   WHERE $1 = ANY(root_ids)
 `
@@ -413,14 +411,84 @@ export const sql_search_articles_by_vector = `
     a.created_at,
     a.updated_at,
     a.metadata,
+    a.context_id,
     1 - (e.embedding <=> $1) AS similarity
   FROM ${SCHEMA_MEMORY}.articles a
   JOIN ${SCHEMA_MEMORY}.article_embeddings e ON a.id = e.article_id
   WHERE ($3::text IS NULL OR a.idol_id = $3)
     AND ($4::text[] IS NULL OR a.root_ids && $4)
-    AND ($5::text[] IS NULL OR a.metrics_ids && $5)
+    AND ($5::text IS NULL OR a.context_id = $5)
     AND (1 - (e.embedding <=> $1)) > $6
   ORDER BY e.embedding <=> $1
+  LIMIT $2
+`
+
+/**
+ * Retrieves nearest contexts by embedding similarity.
+ * Role: Resolves episodic context for save/query based on semantic proximity.
+ */
+export const sql_find_nearest_contexts = `
+  SELECT id, 1 - (embedding <=> $1) AS similarity
+  FROM ${SCHEMA_MEMORY}.contexts
+  ORDER BY embedding <=> $1
+  LIMIT $2
+`
+
+/**
+ * Inserts a new episodic context.
+ * Role: Creates a fresh context cluster for new experiences.
+ */
+export const sql_insert_context = `
+  INSERT INTO ${SCHEMA_MEMORY}.contexts (id, embedding, keywords, usage_count)
+  VALUES ($1, $2, $3, $4)
+`
+
+/**
+ * Updates an existing episodic context.
+ * Role: Refreshes context centroid and usage tracking.
+ */
+export const sql_update_context = `
+  UPDATE ${SCHEMA_MEMORY}.contexts
+  SET embedding = $2,
+      keywords = COALESCE($3, keywords),
+      usage_count = usage_count + 1,
+      updated_at = CURRENT_TIMESTAMP
+  WHERE id = $1
+`
+
+/**
+ * Inserts or updates a context transition edge.
+ * Role: Tracks sequential context transitions for temporal context prediction.
+ */
+export const sql_upsert_context_edge = `
+  INSERT INTO ${SCHEMA_MEMORY}.context_edges (source_id, target_id, weight)
+  VALUES ($1, $2, 1.0)
+  ON CONFLICT (source_id, target_id) DO UPDATE SET
+    weight = ${SCHEMA_MEMORY}.context_edges.weight + 1.0,
+    updated_at = CURRENT_TIMESTAMP
+`
+
+/**
+ * Retrieves the strongest next context for a source context.
+ * Role: Predicts temporal context transitions.
+ */
+export const sql_get_next_context = `
+  SELECT target_id, weight
+  FROM ${SCHEMA_MEMORY}.context_edges
+  WHERE source_id = $1
+  ORDER BY weight DESC, updated_at DESC
+  LIMIT 1
+`
+
+/**
+ * Retrieves ranked context transitions for a source context.
+ * Role: Provides multi-step temporal context prediction inputs.
+ */
+export const sql_get_context_edges_by_source = `
+  SELECT target_id, weight, updated_at
+  FROM ${SCHEMA_MEMORY}.context_edges
+  WHERE source_id = $1
+  ORDER BY weight DESC, updated_at DESC
   LIMIT $2
 `
 
@@ -451,14 +519,25 @@ export const sql_update_article = `
   SET content = $2,
       idol_id = COALESCE($3, idol_id),
       root_ids = COALESCE($4, root_ids),
-      metrics_ids = COALESCE($5, metrics_ids),
+      context_id = COALESCE($5, context_id),
       metadata = COALESCE($6, metadata),
       updated_at = CURRENT_TIMESTAMP
   WHERE id = $1 
     AND ($7::text IS NULL OR idol_id = $7)
     AND ($8::text[] IS NULL OR root_ids && $8)
-    AND ($9::text[] IS NULL OR metrics_ids && $9)
-  RETURNING id, content, idol_id, root_ids, metrics_ids, metadata, created_at, updated_at
+    AND ($9::text IS NULL OR context_id = $9)
+  RETURNING id, content, idol_id, root_ids, context_id, metadata, created_at, updated_at
+`
+
+/**
+ * Updates article metadata.
+ * Role: Persists source confidence and conflict monitoring signals.
+ */
+export const sql_update_article_metadata = `
+  UPDATE ${SCHEMA_MEMORY}.articles
+  SET metadata = $2,
+      updated_at = CURRENT_TIMESTAMP
+  WHERE id = $1
 `
 
 /**
@@ -483,7 +562,7 @@ export const sql_update_node_embedding = `UPDATE ${SCHEMA_BRAIN}.nodes SET embed
  * Retrieves all nodes.
  * Role: Full system dump/backup.
  */
-export const sql_get_all_nodes = `SELECT id, label, x, y, potential, threshold, current_threshold, transmitter, is_active, idol_id, root_ids, metrics_ids, article_ids, lock, created_at, updated_at FROM ${SCHEMA_BRAIN}.nodes`
+export const sql_get_all_nodes = `SELECT id, label, x, y, potential, threshold, current_threshold, transmitter, is_active, idol_id, root_ids, context_id, article_ids, lock, created_at, updated_at FROM ${SCHEMA_BRAIN}.nodes`
 
 /**
  * Updates an article's embedding vector.
@@ -500,7 +579,7 @@ export const sql_delete_article = `
   WHERE id = $1 
     AND ($2::text IS NULL OR idol_id = $2)
     AND ($3::text[] IS NULL OR root_ids && $3)
-    AND ($4::text[] IS NULL OR metrics_ids && $4)
+    AND ($4::text IS NULL OR context_id = $4)
 `
 
 /**

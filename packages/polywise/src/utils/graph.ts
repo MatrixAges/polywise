@@ -11,7 +11,7 @@ export async function recallNodesByKeywords(
 	args: RecallNodesByKeywordsArgs,
 	queryRaw: (sql: string, params?: any[]) => Promise<any>
 ) {
-	const { keywords, limit = 10, idol_id, root_ids, metrics_ids } = args
+	const { keywords, limit = 10, idol_id, root_ids, context_id } = args
 
 	if (keywords.length === 0) {
 		return []
@@ -25,7 +25,7 @@ export async function recallNodesByKeywords(
 			limit,
 			idol_id ?? null,
 			root_ids ?? null,
-			metrics_ids ?? null
+			context_id ?? null
 		])) as Array<Node>
 
 		results.push(...nodes)
@@ -34,20 +34,25 @@ export async function recallNodesByKeywords(
 	return Array.from(new Map(results.map(n => [n.id, n])).values())
 }
 
-export async function recallRelatedNodes(
-	node_ids: Array<string>,
-	max_depth: number,
-	queryRaw: (sql: string, params?: Array<any>) => Promise<any>,
-	limit = 20
-) {
-	// Debug log
-	// console.log('[graph] recallRelatedNodes limit:', limit)
+export async function recallRelatedNodes(args: {
+	node_ids: Array<string>
+	max_depth: number
+	query_raw: (sql: string, params?: Array<any>) => Promise<any>
+	limit?: number
+	context_id?: string | null
+}) {
+	const { node_ids, max_depth, query_raw, limit = 20, context_id } = args
 
 	if (node_ids.length === 0 || max_depth <= 0) {
 		return []
 	}
 
-	return (await queryRaw(sql_recall_related_nodes, [node_ids, max_depth, limit])) as Array<Node>
+	return (await query_raw(sql_recall_related_nodes, [
+		node_ids,
+		max_depth,
+		limit,
+		context_id ?? null
+	])) as Array<Node>
 }
 
 export async function getEdgesBetweenNodes(

@@ -1,10 +1,18 @@
 import Console from '../Console'
 import {
+	CONFLICT_PENALTY_THRESHOLD,
+	CONFLICT_STIMULATION_COUNT_LIMIT,
+	CONFLICT_STIMULATION_SCORE_LIMIT,
 	DEFAULT_SIMILARITY_THRESHOLD,
 	formatRerankDocument,
 	formatSourceInfo,
+	SOURCE_CONFIDENCE_MIN,
+	STIMULATION_CONFIDENCE_MIN,
+	STIMULATION_CONFIDENCE_TARGET,
 	STIMULATION_MAX,
-	STIMULATION_MIN
+	STIMULATION_MEMORY_WEIGHT,
+	STIMULATION_MIN,
+	STIMULATION_SCORE_WEIGHT
 } from '../consts'
 import { sql_get_article_embedding, sql_stimulate_nodes_batch } from '../sql'
 import { maximalMarginalRelevance } from './mmr'
@@ -115,10 +123,40 @@ async function stimulateByRanking(
 	const max_stimulation = STIMULATION_MAX
 	const min_stimulation = STIMULATION_MIN
 	const decay_rate = (max_stimulation - min_stimulation) / Math.max(results.length - 1, 1)
+	const weight_total = STIMULATION_SCORE_WEIGHT + STIMULATION_MEMORY_WEIGHT
+	const score_weight = STIMULATION_SCORE_WEIGHT / weight_total
+	const memory_weight = STIMULATION_MEMORY_WEIGHT / weight_total
 	const stimulation_map = new Map<string, number>()
 
 	for (let i = 0; i < results.length; i++) {
-		const intensity = Math.max(max_stimulation - i * decay_rate, min_stimulation)
+		const base_intensity = Math.max(max_stimulation - i * decay_rate, min_stimulation)
+		const score = results[i].score
+		const memory_strength = results[i].memoryStrength
+		const raw_source_confidence = results[i].metadata?.source_confidence
+		const source_confidence = typeof raw_source_confidence === 'number' ? raw_source_confidence : 1.0
+		const normalized_source_confidence = Math.min(1, Math.max(0, source_confidence))
+		const confidence = (score * score_weight + memory_strength * memory_weight) * normalized_source_confidence
+		const normalized_score = Math.min(1, Math.max(0, score))
+		const normalized_memory = Math.min(1, Math.max(0, memory_strength))
+		const conflict_delta = Math.max(0, normalized_memory - normalized_score)
+		const conflict_scale = Math.max(0, 1 - conflict_delta / CONFLICT_PENALTY_THRESHOLD)
+		const raw_conflict_count = results[i].metadata?.conflict_count
+		const conflict_count = typeof raw_conflict_count === 'number' ? raw_conflict_count : 0
+		const raw_conflict_score = results[i].metadata?.conflict_score
+		const conflict_score = typeof raw_conflict_score === 'number' ? raw_conflict_score : 0
+		const conflict_history_scale = Math.max(
+			0,
+			1 - conflict_score / Math.max(CONFLICT_STIMULATION_SCORE_LIMIT, 0.01)
+		)
+
+		if (normalized_source_confidence < SOURCE_CONFIDENCE_MIN) continue
+		if (confidence < STIMULATION_CONFIDENCE_MIN) continue
+		if (conflict_scale <= 0) continue
+		if (conflict_count >= CONFLICT_STIMULATION_COUNT_LIMIT) continue
+		if (conflict_history_scale <= 0) continue
+
+		const confidence_scale = Math.min(1, confidence / STIMULATION_CONFIDENCE_TARGET)
+		const intensity = base_intensity * confidence_scale * conflict_scale * conflict_history_scale
 
 		stimulation_map.set(results[i].id, intensity)
 	}

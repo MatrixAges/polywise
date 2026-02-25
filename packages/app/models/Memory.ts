@@ -13,7 +13,6 @@ export interface ITask {
 				content: string
 				idol_id?: string
 				root_ids?: Array<string>
-				metrics_ids?: Array<string>
 				metadata?: Record<string, unknown>
 		  }
 		| {
@@ -86,7 +85,6 @@ export default class MemoryModel {
 							content: string
 							idol_id?: string
 							root_ids?: Array<string>
-							metrics_ids?: Array<string>
 							metadata?: Record<string, unknown>
 						}
 					),
@@ -104,7 +102,6 @@ export default class MemoryModel {
 							content: string
 							idol_id?: string
 							root_ids?: Array<string>
-							metrics_ids?: Array<string>
 							metadata?: Record<string, unknown>
 						}
 					),
@@ -183,7 +180,7 @@ export default class MemoryModel {
 		this.saveTasks()
 	}
 
-	async query(args: { query: string; idol_id?: string; root_ids?: Array<string>; metrics_ids?: Array<string> }) {
+	async query(args: { query: string; idol_id?: string; root_ids?: Array<string> }) {
 		this.writeLog('query_start')
 
 		try {
@@ -202,13 +199,7 @@ export default class MemoryModel {
 		}
 	}
 
-	async forget(args: {
-		memory_id?: string
-		query?: string
-		idol_id?: string
-		root_ids?: Array<string>
-		metrics_ids?: Array<string>
-	}) {
+	async forget(args: { memory_id?: string; query?: string; idol_id?: string; root_ids?: Array<string> }) {
 		return await ipc.memory.forget.mutate(this.toSerializableObject(args))
 	}
 
@@ -217,7 +208,6 @@ export default class MemoryModel {
 		max_depth?: number
 		idol_id?: string
 		root_ids?: Array<string>
-		metrics_ids?: Array<string>
 		limit?: number
 	}) {
 		return await ipc.memory.recall.query(this.toSerializableObject(args))

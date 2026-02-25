@@ -7,6 +7,22 @@ import Article from './Article'
 import Brain from './Brain'
 import Console from './Console'
 import {
+	AROUSAL_MAX,
+	AROUSAL_MIN,
+	AROUSAL_OPTIMAL_SIMILARITY,
+	AROUSAL_WIDTH,
+	CONFLICT_PENALTY_STEP,
+	CONFLICT_PENALTY_THRESHOLD,
+	CONTEXT_KEYWORDS_LIMIT,
+	CONTEXT_QUERY_LIMIT,
+	CONTEXT_QUERY_THRESHOLD,
+	CONTEXT_SEQUENCE_BRANCH,
+	CONTEXT_SEQUENCE_DEPTH,
+	CONTEXT_SEQUENCE_HOP_DECAY,
+	CONTEXT_SEQUENCE_TIME_HALF_LIFE_HOURS,
+	CONTEXT_SEQUENCE_WINDOW_HOURS,
+	CONTEXT_SEQUENCE_WINDOW_PENALTY,
+	CONTEXT_SIMILARITY_THRESHOLD,
 	DEFAULT_DATA_DIR,
 	DEFAULT_EDGE_WEIGHT,
 	DEFAULT_NODE_THRESHOLD,
@@ -16,12 +32,22 @@ import {
 	DEFAULT_SIMILARITY_THRESHOLD,
 	GLOBAL_INHIBITION_MAX,
 	INPUT_DECAY_THRESHOLD,
+	LOCAL_COMPETITION_EDGE_WEIGHT_MIN,
+	LOCAL_COMPETITION_RATIO,
 	MAX_ACTIVE_LIMIT,
 	MAX_THRESHOLD_DECAY_STEP,
 	MEMORY_RECALL_INTENSITY,
 	QUERY_KEYWORDS_LIMIT,
 	SNAPSHOT_NODES_LIMIT,
-	SNAPSHOT_WEIGHT_THRESHOLD
+	SNAPSHOT_WEIGHT_THRESHOLD,
+	SOURCE_CONFIDENCE_BASE,
+	SOURCE_CONFIDENCE_FULLTEXT_BONUS,
+	SOURCE_CONFIDENCE_HISTORY_WEIGHT,
+	SOURCE_CONFIDENCE_MAX,
+	SOURCE_CONFIDENCE_MIN,
+	SOURCE_CONFIDENCE_RECALL_BONUS,
+	SOURCE_CONFIDENCE_RERANK_BONUS,
+	SOURCE_CONFIDENCE_VECTOR_BONUS
 } from './consts'
 import Cortex from './Cortex'
 import { catchError, catchFinally } from './decorators'
@@ -33,10 +59,12 @@ import {
 	sql_connect,
 	sql_decay,
 	sql_delete_article,
+	sql_find_nearest_contexts,
 	sql_forget_decay_edges,
 	sql_forget_decay_nodes,
 	sql_get_active_node_count,
 	sql_get_all_nodes,
+	sql_get_context_edges_by_source,
 	sql_get_edges_by_idol,
 	sql_get_edges_by_root,
 	sql_get_edges_for_nodes,
@@ -44,6 +72,8 @@ import {
 	sql_get_nodes_by_idol,
 	sql_get_nodes_by_ids,
 	sql_get_nodes_by_root,
+	sql_get_snapshot_edges,
+	sql_get_snapshot_nodes,
 	sql_get_top_nodes_by_potential,
 	sql_increment_input_count,
 	sql_inject_edges_begin,
@@ -52,6 +82,7 @@ import {
 	sql_inject_edges_rollback,
 	sql_inject_edges_update_edge,
 	sql_insert_article_embedding,
+	sql_insert_context,
 	sql_memory_reorganization,
 	sql_node_sources,
 	sql_process_article,
@@ -66,6 +97,9 @@ import {
 	sql_sleep_tick_replay,
 	sql_stimulate,
 	sql_update_article_embedding,
+	sql_update_article_metadata,
+	sql_update_context,
+	sql_upsert_context_edge,
 	sql_upsert_node
 } from './sql'
 import { sql_create_schema_meta, sql_create_table_schema_version, sql_get_current_version } from './sql/meta'
@@ -85,10 +119,13 @@ import {
 import type {
 	AddNodeArgs,
 	ConnectArgs,
+	ContextResult,
 	Edge,
 	FiltersArgs,
 	FinalQueryResult,
 	ForgetArticleArgs,
+	Memory,
+	Metadata,
 	Node,
 	PolywiseArgs,
 	ProcessArticleArgs,
@@ -98,6 +135,17 @@ import type {
 	SingleSearchArgs,
 	UpdateArticleArgs
 } from './types'
+
+export const calculateArousal = (similarity: number) => {
+	const clamped_similarity = Math.min(1, Math.max(0, similarity))
+	const similarity_delta = clamped_similarity - AROUSAL_OPTIMAL_SIMILARITY
+	const variance = AROUSAL_WIDTH * AROUSAL_WIDTH
+	const exponent = -(similarity_delta * similarity_delta) / (2 * variance)
+	const curve = Math.exp(exponent)
+	const arousal = AROUSAL_MIN + (AROUSAL_MAX - AROUSAL_MIN) * curve
+
+	return Math.min(AROUSAL_MAX, Math.max(AROUSAL_MIN, arousal))
+}
 
 @singleton()
 export default class Polywise {
@@ -111,11 +159,12 @@ export default class Polywise {
 	db!: PGlite
 	idol_id: string | null = null
 	root_ids: Array<string> | null = null
-	metrics_ids: Array<string> | null = null
+	context_id: string | null = null
 
 	onTick?: () => void
 
 	private is_closed = false
+	private last_context_id: string | null = null
 
 	async init(args: PolywiseArgs = {}) {
 		const {
@@ -127,13 +176,13 @@ export default class Polywise {
 			log,
 			idol_id,
 			root_ids,
-			metrics_ids,
+			context_id,
 			onTick
 		} = args
 
 		this.idol_id = idol_id ?? null
 		this.root_ids = root_ids ?? null
-		this.metrics_ids = metrics_ids ?? null
+		this.context_id = context_id ?? null
 
 		this.onTick = onTick
 
@@ -173,7 +222,7 @@ export default class Polywise {
 			...args,
 			idol_id: args.idol_id ?? this.idol_id ?? undefined,
 			root_ids: args.root_ids ?? this.root_ids ?? undefined,
-			metrics_ids: args.metrics_ids ?? this.metrics_ids ?? undefined,
+			context_id: this.context_id ?? undefined,
 			process: args.process
 		})
 
@@ -192,27 +241,30 @@ export default class Polywise {
 		this.brain.reportUserActivity()
 		this.brain.setBusy(true)
 
-		const {
-			content,
-			idol_id = this.idol_id,
-			root_ids = this.root_ids,
-			metrics_ids = this.metrics_ids,
-			metadata
-		} = args
+		const { content, idol_id = this.idol_id, root_ids = this.root_ids, metadata } = args
 
 		Console.log('SYSTEM', 'save start', { content_len: content.length, metadata })
 
-		let arousal = 1.0
 		const vectorResults = await this.article.searchByVector({
 			query: content,
 			limit: 1,
 			idol_id: idol_id ?? undefined,
 			root_ids: root_ids ?? undefined,
-			metrics_ids: metrics_ids ?? undefined,
+			context_id: this.context_id ?? undefined,
 			threshold: 0
 		})
 		const max_sim = vectorResults.length > 0 ? vectorResults[0].similarity : 0
-		arousal = max_sim > 0.8 ? 0.5 : max_sim < 0.3 ? 1.5 : 1.0
+		const arousal = calculateArousal(max_sim)
+
+		const keywords = await this.pipeline.generateKeywords(content)
+		const query_embedding = ((await this.pipeline.embed(content)) as Array<number>) || []
+		const context_keywords = keywords.slice(0, CONTEXT_KEYWORDS_LIMIT)
+		const resolved_context_id =
+			this.context_id ??
+			(await this.resolveContextIdForSave({
+				embedding: query_embedding,
+				keywords: context_keywords
+			}))
 
 		const article_id = generateId()
 
@@ -221,13 +273,11 @@ export default class Polywise {
 			content,
 			idol_id ?? null,
 			root_ids ?? null,
-			metrics_ids ?? null,
+			resolved_context_id ?? null,
 			JSON.stringify(metadata ?? {})
 		])) as Array<{ id: string }>
 
 		const aid = res[0].id
-
-		const query_embedding = ((await this.pipeline.embed(content)) as Array<number>) || []
 
 		if (query_embedding && query_embedding.length > 0) {
 			const embedding_id = generateId()
@@ -238,8 +288,6 @@ export default class Polywise {
 			])
 		}
 
-		const keywords = await this.pipeline.generateKeywords(content)
-
 		if (keywords.length > 0) {
 			Console.log('SYSTEM', 'keywords injected', { count: keywords.length })
 			const node_ids = await this.injectKeywords({
@@ -247,14 +295,16 @@ export default class Polywise {
 				article_id: aid,
 				idol_id,
 				root_ids,
-				metrics_ids
+				context_id: resolved_context_id
 			})
 
 			await this.activation.stimulate(node_ids, 1.0)
 			await this.activation.spread(3, DEFAULT_NODE_THRESHOLD, true, arousal)
 		}
 
-		this.log.write({ ...args, idol_id, root_ids, metrics_ids }, { memory_id: aid })
+		this.log.write({ ...args, idol_id, root_ids, context_id: resolved_context_id }, { memory_id: aid })
+
+		await this.updateContextTransition({ context_id: resolved_context_id })
 
 		Console.log('SYSTEM', 'save complete', { memory_id: aid })
 
@@ -269,28 +319,37 @@ export default class Polywise {
 		this.brain.reportUserActivity()
 		this.brain.setBusy(true)
 
-		const {
-			memory_id,
-			content,
-			idol_id = this.idol_id,
-			root_ids = this.root_ids,
-			metrics_ids = this.metrics_ids,
-			metadata
-		} = args
+		const { memory_id, content, idol_id = this.idol_id, root_ids = this.root_ids, metadata } = args
 
 		Console.log('SYSTEM', 'save start', { content_len: content.length, metadata })
 
-		let arousal = 1.0
 		const vectorResults = await this.article.searchByVector({
 			query: content,
 			limit: 1,
 			idol_id: idol_id ?? undefined,
 			root_ids: root_ids ?? undefined,
-			metrics_ids: metrics_ids ?? undefined,
+			context_id: this.context_id ?? undefined,
 			threshold: 0
 		})
 		const max_sim = vectorResults.length > 0 ? vectorResults[0].similarity : 0
-		arousal = max_sim > 0.8 ? 0.5 : max_sim < 0.3 ? 1.5 : 1.0
+		const arousal = calculateArousal(max_sim)
+		const keywords = await this.pipeline.generateKeywords(content)
+		const query_embedding = ((await this.pipeline.embed(content)) as Array<number>) || []
+		const context_keywords = keywords.slice(0, CONTEXT_KEYWORDS_LIMIT)
+		const resolved_context_id =
+			this.context_id ??
+			(await this.resolveContextIdForSave({
+				embedding: query_embedding,
+				keywords: context_keywords
+			}))
+		let merged_metadata = metadata
+
+		if (metadata && Object.keys(metadata).length > 0) {
+			const existing_articles = await this.article.get(memory_id)
+			const existing_metadata = (existing_articles?.[0]?.metadata ?? {}) as Metadata
+
+			merged_metadata = { ...existing_metadata, ...metadata }
+		}
 
 		await this.queryRaw(sql_forget_decay_nodes, [memory_id])
 		await this.queryRaw(sql_forget_decay_edges, [memory_id])
@@ -299,17 +358,13 @@ export default class Polywise {
 			content,
 			idol_id: idol_id ?? undefined,
 			root_ids: root_ids ?? undefined,
-			metrics_ids: metrics_ids ?? undefined,
-			metadata
+			context_id: resolved_context_id ?? undefined,
+			metadata: merged_metadata
 		})
-
-		const query_embedding = ((await this.pipeline.embed(content)) as Array<number>) || []
 
 		if (query_embedding && query_embedding.length > 0) {
 			await this.queryRaw(sql_update_article_embedding, [`[${query_embedding.join(',')}]`, memory_id])
 		}
-
-		const keywords = await this.pipeline.generateKeywords(content)
 
 		if (keywords.length > 0) {
 			const node_ids = await this.injectKeywords({
@@ -317,14 +372,16 @@ export default class Polywise {
 				article_id: memory_id,
 				idol_id,
 				root_ids,
-				metrics_ids
+				context_id: resolved_context_id
 			})
 
 			await this.activation.stimulate(node_ids, 1.0)
 			await this.activation.spread(3, DEFAULT_NODE_THRESHOLD, true, arousal)
 		}
 
-		this.log.write({ ...args, idol_id, root_ids, metrics_ids }, { memory_id })
+		this.log.write({ ...args, idol_id, root_ids, context_id: resolved_context_id }, { memory_id })
+
+		await this.updateContextTransition({ context_id: resolved_context_id })
 
 		Console.log('SYSTEM', 'save complete', { memory_id })
 
@@ -339,7 +396,7 @@ export default class Polywise {
 		this.brain.reportUserActivity()
 		this.brain.setBusy(true)
 
-		const { memory_id, query, idol_id, root_ids, metrics_ids } = args
+		const { memory_id, query, idol_id, root_ids, context_id } = args
 
 		if (!memory_id && !query) return
 
@@ -354,7 +411,7 @@ export default class Polywise {
 				query,
 				idol_id: idol_id ?? this.idol_id ?? undefined,
 				root_ids: root_ids ?? this.root_ids ?? undefined,
-				metrics_ids: metrics_ids ?? this.metrics_ids ?? undefined
+				context_id: context_id ?? this.context_id ?? undefined
 			})
 
 			for (const item of result.memory) {
@@ -365,16 +422,16 @@ export default class Polywise {
 		for (const id of memory_ids_to_delete) {
 			await this.queryRaw(sql_forget_decay_nodes, [id])
 			await this.queryRaw(sql_forget_decay_edges, [id])
-			await this.queryRaw(sql_delete_article, [id, idol_id ?? null, root_ids ?? null, metrics_ids ?? null])
+			await this.queryRaw(sql_delete_article, [id, idol_id ?? null, root_ids ?? null, context_id ?? null])
 		}
 	}
 
 	setFilters(args: FiltersArgs) {
-		const { idol_id, root_ids, metrics_ids } = args
+		const { idol_id, root_ids, context_id } = args
 
 		if (idol_id !== undefined) this.idol_id = idol_id
 		if (root_ids !== undefined) this.root_ids = root_ids
-		if (metrics_ids !== undefined) this.metrics_ids = metrics_ids
+		if (context_id !== undefined) this.context_id = context_id
 	}
 
 	process(query: string) {
@@ -396,7 +453,7 @@ export default class Polywise {
 			threshold,
 			idol_id = this.idol_id,
 			root_ids = this.root_ids,
-			metrics_ids = this.metrics_ids,
+			context_id = this.context_id,
 			embedding,
 			article_ids,
 			lock
@@ -412,7 +469,7 @@ export default class Polywise {
 			threshold ?? DEFAULT_NODE_THRESHOLD,
 			idol_id ?? null,
 			root_ids ?? null,
-			metrics_ids ?? null,
+			context_id ?? null,
 			embedding ? `[${embedding.join(',')}]` : null,
 			article_ids ?? null,
 			lock ?? false
@@ -428,7 +485,7 @@ export default class Polywise {
 			weight,
 			idol_id = this.idol_id,
 			root_ids = this.root_ids,
-			metrics_ids = this.metrics_ids,
+			context_id = this.context_id,
 			lock
 		} = args
 
@@ -441,7 +498,7 @@ export default class Polywise {
 			weight ?? DEFAULT_EDGE_WEIGHT,
 			idol_id ?? null,
 			root_ids ?? null,
-			metrics_ids ?? null,
+			context_id ?? null,
 			lock ?? false
 		])
 	}
@@ -451,9 +508,9 @@ export default class Polywise {
 		article_id: string
 		idol_id?: string | null
 		root_ids?: Array<string> | null
-		metrics_ids?: Array<string> | null
+		context_id?: string | null
 	}) {
-		const { keywords, article_id, idol_id, root_ids, metrics_ids } = args
+		const { keywords, article_id, idol_id, root_ids, context_id } = args
 
 		if (keywords.length < 2) {
 			return []
@@ -468,7 +525,7 @@ export default class Polywise {
 					label: keyword,
 					idol_id,
 					root_ids,
-					metrics_ids,
+					context_id,
 					article_ids: [article_id]
 				})
 				node_ids.push(id)
@@ -480,29 +537,11 @@ export default class Polywise {
 				const obj_id = node_ids[i + 1]
 
 				await this.queryRaw(
-					sql_inject_edges_insert_edge(
-						sub_id,
-						obj_id,
-						1.0,
-						1.0,
-						0.5,
-						idol_id,
-						root_ids,
-						metrics_ids
-					)
+					sql_inject_edges_insert_edge(sub_id, obj_id, 1.0, 1.0, 0.5, idol_id, root_ids, context_id)
 				)
 
 				await this.queryRaw(
-					sql_inject_edges_update_edge(
-						sub_id,
-						obj_id,
-						1.0,
-						1.0,
-						0.1,
-						idol_id,
-						root_ids,
-						metrics_ids
-					)
+					sql_inject_edges_update_edge(sub_id, obj_id, 1.0, 1.0, 0.1, idol_id, root_ids, context_id)
 				)
 			}
 
@@ -520,11 +559,11 @@ export default class Polywise {
 		label: string
 		idol_id?: string | null
 		root_ids?: Array<string> | null
-		metrics_ids?: Array<string> | null
+		context_id?: string | null
 		article_ids?: Array<string> | null
 		lock?: boolean
 	}) {
-		const { label, idol_id, root_ids, metrics_ids, article_ids, lock } = args
+		const { label, idol_id, root_ids, context_id, article_ids, lock } = args
 		const node_id = generateId()
 
 		const rows = (await this.queryRaw(sql_upsert_node, [
@@ -532,7 +571,7 @@ export default class Polywise {
 			label,
 			idol_id ?? null,
 			root_ids ?? null,
-			metrics_ids ?? null,
+			context_id ?? null,
 			null,
 			article_ids ?? null,
 			lock ?? false
@@ -620,6 +659,39 @@ export default class Polywise {
 
 		const result_nodes = Array.from(all_nodes_map.values()).slice(0, limit)
 		const result_edges = Array.from(all_edges_map.values())
+
+		if (result_nodes.length <= SEED_NODES) {
+			const snapshot_nodes = (await this.queryRaw(
+				sql_get_snapshot_nodes(weight_threshold, limit)
+			)) as Array<Node>
+			const snapshot_edges = (await this.queryRaw(sql_get_snapshot_edges(weight_threshold))) as Array<Edge>
+
+			for (const node of snapshot_nodes) {
+				if (!all_nodes_map.has(node.id)) {
+					all_nodes_map.set(node.id, node)
+				}
+			}
+
+			for (const edge of snapshot_edges) {
+				const key = `${edge.source_id}_${edge.target_id}`
+				if (all_edges_map.has(key)) continue
+
+				if (!all_nodes_map.has(edge.source_id)) continue
+				if (!all_nodes_map.has(edge.target_id)) continue
+
+				all_edges_map.set(key, edge)
+			}
+
+			const fallback_nodes = Array.from(all_nodes_map.values()).slice(0, limit)
+			const fallback_edges = Array.from(all_edges_map.values())
+
+			Console.log('SYSTEM', 'getSnapshot fallback', {
+				nodes: fallback_nodes.length,
+				edges: fallback_edges.length
+			})
+
+			return { nodes: fallback_nodes, edges: fallback_edges }
+		}
 
 		Console.log('SYSTEM', 'getSnapshot done', {
 			nodes: result_nodes.length,
@@ -729,7 +801,11 @@ export default class Polywise {
 	async expand(args: { node_id: string; depth?: number; limit?: number }) {
 		const { node_id, depth = 1, limit = 20 } = args
 
-		const related_nodes = await this.recallRelatedNodes([node_id], depth, limit)
+		const related_nodes = await this.recallRelatedNodes({
+			node_ids: [node_id],
+			max_depth: depth,
+			limit
+		})
 		const all_node_ids = Array.from(new Set([node_id, ...related_nodes.map(n => n.id)]))
 		const edges = await this.getEdgesBetweenNodes(all_node_ids)
 
@@ -748,11 +824,22 @@ export default class Polywise {
 			stimulate_intensity = MEMORY_RECALL_INTENSITY,
 			idol_id = this.idol_id,
 			root_ids = this.root_ids,
-			metrics_ids = this.metrics_ids,
 			limit = 20,
 			is_learning = false,
-			arousal = 1.0
+			arousal = 1.0,
+			query_embedding
 		} = args
+
+		let resolved_context_id = this.context_id
+
+		if (!resolved_context_id) {
+			const recall_embedding =
+				query_embedding && query_embedding.length > 0
+					? query_embedding
+					: ((await this.pipeline.embed(query)) as Array<number>)
+
+			resolved_context_id = await this.resolveContextIdForQuery({ embedding: recall_embedding })
+		}
 
 		const query_keywords = await this.pipeline.generateKeywords(query)
 		const recall_keywords = query_keywords.slice(0, QUERY_KEYWORDS_LIMIT)
@@ -761,15 +848,16 @@ export default class Polywise {
 			keywords: recall_keywords,
 			idol_id: idol_id ?? undefined,
 			root_ids: root_ids ?? undefined,
-			metrics_ids: metrics_ids ?? undefined,
+			context_id: resolved_context_id ?? undefined,
 			limit
 		})
 
-		const related_nodes = await this.recallRelatedNodes(
-			matched_nodes.map(n => n.id),
+		const related_nodes = await this.recallRelatedNodes({
+			node_ids: matched_nodes.map(n => n.id),
 			max_depth,
-			limit
-		)
+			limit,
+			context_id: resolved_context_id ?? undefined
+		})
 
 		const all_nodes = [...matched_nodes]
 		const matched_ids = new Set(matched_nodes.map(n => n.id))
@@ -781,24 +869,33 @@ export default class Polywise {
 			}
 		}
 
+		const all_edges = await this.getEdgesBetweenNodes(all_nodes.map(n => n.id))
+		const { selected_nodes, filtered_related_nodes } = this.applyLocalCompetition({
+			matched_nodes,
+			related_nodes,
+			edges: all_edges
+		})
+		const selected_ids = new Set(selected_nodes.map(node => node.id))
+		const selected_edges = all_edges.filter(
+			edge => selected_ids.has(edge.source_id) && selected_ids.has(edge.target_id)
+		)
+
 		if (stimulate_intensity > 0) {
-			const node_ids = all_nodes.map(n => n.id)
+			const node_ids = selected_nodes.map(node => node.id)
 
 			await this.activation.stimulate(node_ids, stimulate_intensity)
 			if (is_learning) {
-				await this.activation.strengthen({ matched_nodes, related_nodes })
+				await this.activation.strengthen({ matched_nodes, related_nodes: filtered_related_nodes })
 			}
 			await this.activation.spread(3, DEFAULT_NODE_THRESHOLD, is_learning, arousal)
 		}
 
-		const contexts = await this.getNodeContexts(all_nodes.map(n => n.id))
-
-		const edges = await this.getEdgesBetweenNodes(all_nodes.map(n => n.id))
+		const contexts = await this.getNodeContexts(selected_nodes.map(node => node.id))
 
 		return {
-			nodes: all_nodes,
-			edges,
-			stimulated_nodes: all_nodes.map(n => n.id),
+			nodes: selected_nodes,
+			edges: selected_edges,
+			stimulated_nodes: selected_nodes.map(node => node.id),
 			related_contexts: contexts
 		}
 	}
@@ -812,7 +909,6 @@ export default class Polywise {
 			stimulate_on_recall = false,
 			idol_id,
 			root_ids,
-			metrics_ids,
 			process,
 			threshold = DEFAULT_SIMILARITY_THRESHOLD
 		} = args
@@ -820,6 +916,13 @@ export default class Polywise {
 		Console.log('SEARCH', 'executeSingleSearch start', { query })
 
 		const query_embedding = (await this.pipeline.embed(query)) as Array<number>
+		const sequence_context_id = await this.getSequentialContext()
+		const resolved_context_id =
+			this.context_id ?? (await this.resolveContextIdForQuery({ embedding: query_embedding }))
+
+		if (resolved_context_id) {
+			this.last_context_id = resolved_context_id
+		}
 
 		Console.log('SEARCH', 'recallFromMemory start')
 		const recall_result = await this.recallFromMemory({
@@ -829,7 +932,7 @@ export default class Polywise {
 			query_embedding: query_embedding ?? undefined,
 			idol_id,
 			root_ids,
-			metrics_ids
+			context_id: resolved_context_id ?? undefined
 		})
 
 		Console.log('SEARCH', 'article.searchByVector start')
@@ -838,7 +941,7 @@ export default class Polywise {
 			limit: search_limit,
 			idol_id,
 			root_ids,
-			metrics_ids,
+			context_id: undefined,
 			threshold
 		})
 		process?.emit('vector_search_results', vectorResults)
@@ -849,7 +952,7 @@ export default class Polywise {
 			limit: search_limit,
 			idol_id,
 			root_ids,
-			metrics_ids
+			context_id: undefined
 		})
 		process?.emit('fulltext_search_results', fulltextResults)
 
@@ -893,7 +996,8 @@ export default class Polywise {
 		Console.log('SEARCH', 'aggregateResults start')
 		const { memory } = await aggregateResults({
 			recall_result,
-			search_results
+			search_results,
+			sequence_context_id
 		})
 		process?.emit('aggregated_results', { memory })
 
@@ -907,6 +1011,13 @@ export default class Polywise {
 			threshold
 		)
 		process?.emit('reranked_memory', reranked_memory)
+		await this.updateSourceConfidence({
+			memory: reranked_memory,
+			vector_results: vectorResults,
+			fulltext_results: fulltextResults,
+			recall_contexts: recall_result.related_contexts,
+			threshold
+		})
 
 		return {
 			memory: reranked_memory
@@ -964,8 +1075,21 @@ export default class Polywise {
 		return await recallNodesByKeywords(args, this.queryRaw.bind(this))
 	}
 
-	private async recallRelatedNodes(node_ids: Array<string>, max_depth: number, limit: number) {
-		return await recallRelatedNodes(node_ids, max_depth, this.queryRaw.bind(this), limit)
+	private async recallRelatedNodes(args: {
+		node_ids: Array<string>
+		max_depth: number
+		limit: number
+		context_id?: string | null
+	}) {
+		const { node_ids, max_depth, limit, context_id } = args
+
+		return await recallRelatedNodes({
+			node_ids,
+			max_depth,
+			query_raw: this.queryRaw.bind(this),
+			limit,
+			context_id
+		})
 	}
 
 	private async getEdgesBetweenNodes(node_ids: Array<string>) {
@@ -974,6 +1098,349 @@ export default class Polywise {
 
 	private async getNodeContexts(node_ids: Array<string>) {
 		return await getNodeContexts(node_ids, this.queryRaw.bind(this))
+	}
+
+	private async resolveContextIdForSave(args: { embedding: Array<number>; keywords: Array<string> }) {
+		const { embedding, keywords } = args
+
+		if (!embedding || embedding.length === 0) {
+			return 'global'
+		}
+
+		const context_candidates = await this.findNearestContexts({
+			embedding,
+			limit: 1
+		})
+		const best_context = context_candidates[0]
+		const trimmed_keywords = keywords.slice(0, CONTEXT_KEYWORDS_LIMIT)
+
+		if (best_context && best_context.similarity >= CONTEXT_SIMILARITY_THRESHOLD) {
+			await this.updateContext({
+				context_id: best_context.id,
+				embedding,
+				keywords: trimmed_keywords
+			})
+
+			return best_context.id
+		}
+
+		return await this.createContext({ embedding, keywords: trimmed_keywords })
+	}
+
+	private async resolveContextIdForQuery(args: { embedding: Array<number> }) {
+		const { embedding } = args
+
+		if (!embedding || embedding.length === 0) {
+			return null
+		}
+
+		const context_candidates = await this.findNearestContexts({
+			embedding,
+			limit: CONTEXT_QUERY_LIMIT
+		})
+		const best_context = context_candidates[0]
+
+		if (!best_context || best_context.similarity < CONTEXT_QUERY_THRESHOLD) {
+			return await this.getSequentialContext()
+		}
+
+		return best_context.id
+	}
+
+	private async getSequentialContext() {
+		if (!this.last_context_id) {
+			return null
+		}
+		const scores = new Map<string, number>()
+		const path_ids = new Set<string>()
+		path_ids.add(this.last_context_id)
+
+		await this.collectSequenceScores({
+			source_id: this.last_context_id,
+			depth: CONTEXT_SEQUENCE_DEPTH,
+			step: 0,
+			base_score: 1,
+			scores,
+			path_ids
+		})
+
+		if (scores.size === 0) {
+			return this.last_context_id
+		}
+
+		const sorted_scores = Array.from(scores.entries()).sort(
+			(left_entry, right_entry) => right_entry[1] - left_entry[1]
+		)
+
+		return sorted_scores[0]?.[0] ?? this.last_context_id
+	}
+
+	private async collectSequenceScores(args: {
+		source_id: string
+		depth: number
+		step: number
+		base_score: number
+		scores: Map<string, number>
+		path_ids: Set<string>
+	}) {
+		const { source_id, depth, step, base_score, scores, path_ids } = args
+
+		if (step >= depth) {
+			return
+		}
+
+		const edges = (await this.queryRaw(sql_get_context_edges_by_source, [
+			source_id,
+			CONTEXT_SEQUENCE_BRANCH
+		])) as Array<{ target_id: string; weight: number; updated_at?: string }>
+
+		if (edges.length === 0) {
+			return
+		}
+
+		const hop_decay = Math.pow(CONTEXT_SEQUENCE_HOP_DECAY, step)
+
+		await this.applySequenceEdges({
+			edges,
+			depth,
+			step,
+			base_score,
+			hop_decay,
+			scores,
+			path_ids
+		})
+	}
+
+	private async applySequenceEdges(args: {
+		edges: Array<{ target_id: string; weight: number; updated_at?: string }>
+		depth: number
+		step: number
+		base_score: number
+		hop_decay: number
+		scores: Map<string, number>
+		path_ids: Set<string>
+	}) {
+		const { edges, depth, step, base_score, hop_decay, scores, path_ids } = args
+
+		for (const edge of edges) {
+			if (!edge.target_id) continue
+
+			const edge_weight = this.calculateContextEdgeWeight(edge)
+			if (edge_weight <= 0) continue
+
+			const score = base_score * edge_weight * hop_decay
+			const previous_score = scores.get(edge.target_id) ?? 0
+			scores.set(edge.target_id, previous_score + score)
+
+			if (step + 1 >= depth) continue
+			if (path_ids.has(edge.target_id)) continue
+
+			path_ids.add(edge.target_id)
+			await this.collectSequenceScores({
+				source_id: edge.target_id,
+				depth,
+				step: step + 1,
+				base_score: base_score * edge_weight,
+				scores,
+				path_ids
+			})
+			path_ids.delete(edge.target_id)
+		}
+	}
+
+	private calculateContextEdgeWeight(edge: { weight?: number; updated_at?: string }) {
+		const base_weight = typeof edge.weight === 'number' ? edge.weight : 0
+
+		if (base_weight <= 0) {
+			return 0
+		}
+
+		const updated_at = edge.updated_at ? new Date(edge.updated_at).getTime() : Date.now()
+		const elapsed_hours = Math.max(0, (Date.now() - updated_at) / 3600000)
+		const half_life = Math.max(CONTEXT_SEQUENCE_TIME_HALF_LIFE_HOURS, 1)
+		const window_hours = Math.max(CONTEXT_SEQUENCE_WINDOW_HOURS, 1)
+		const time_decay = Math.pow(0.5, elapsed_hours / half_life)
+		const window_count = Math.floor(elapsed_hours / window_hours)
+		const window_decay = Math.pow(CONTEXT_SEQUENCE_WINDOW_PENALTY, window_count)
+
+		return base_weight * time_decay * window_decay
+	}
+
+	private async findNearestContexts(args: { embedding: Array<number>; limit: number }) {
+		const { embedding, limit } = args
+
+		const embedding_value = `[${embedding.join(',')}]`
+
+		return (await this.queryRaw(sql_find_nearest_contexts, [embedding_value, limit])) as Array<{
+			id: string
+			similarity: number
+		}>
+	}
+
+	private async createContext(args: { embedding: Array<number>; keywords: Array<string> }) {
+		const { embedding, keywords } = args
+		const context_id = generateId()
+		const embedding_value = `[${embedding.join(',')}]`
+
+		await this.queryRaw(sql_insert_context, [context_id, embedding_value, keywords, 1])
+
+		return context_id
+	}
+
+	private async updateContext(args: { context_id: string; embedding: Array<number>; keywords: Array<string> }) {
+		const { context_id, embedding, keywords } = args
+		const embedding_value = `[${embedding.join(',')}]`
+
+		await this.queryRaw(sql_update_context, [context_id, embedding_value, keywords])
+	}
+
+	private async updateContextTransition(args: { context_id: string | null }) {
+		const { context_id } = args
+
+		if (!context_id) {
+			return
+		}
+
+		if (this.last_context_id && this.last_context_id !== context_id) {
+			await this.queryRaw(sql_upsert_context_edge, [this.last_context_id, context_id])
+		}
+
+		this.last_context_id = context_id
+	}
+
+	private async updateSourceConfidence(args: {
+		memory: Array<Memory>
+		vector_results: Array<{ id: string }>
+		fulltext_results: Array<{ id: string }>
+		recall_contexts: Array<ContextResult>
+		threshold: number
+	}) {
+		const { memory, vector_results, fulltext_results, recall_contexts, threshold } = args
+		const vector_ids = new Set(vector_results.map(result => result.id))
+		const fulltext_ids = new Set(fulltext_results.map(result => result.id))
+		const recall_ids = new Set<string>()
+
+		for (const context of recall_contexts) {
+			for (const article_id of context.article_ids) {
+				recall_ids.add(article_id)
+			}
+		}
+
+		const now = new Date().toISOString()
+
+		for (const item of memory) {
+			let evidence_confidence = SOURCE_CONFIDENCE_BASE
+			const is_vector = vector_ids.has(item.id)
+			const is_fulltext = fulltext_ids.has(item.id)
+			const is_recall = recall_ids.has(item.id)
+			const is_rerank_strong = item.score >= threshold
+
+			if (is_vector) evidence_confidence += SOURCE_CONFIDENCE_VECTOR_BONUS
+			if (is_fulltext) evidence_confidence += SOURCE_CONFIDENCE_FULLTEXT_BONUS
+			if (is_recall) evidence_confidence += SOURCE_CONFIDENCE_RECALL_BONUS
+			if (is_rerank_strong) evidence_confidence += SOURCE_CONFIDENCE_RERANK_BONUS
+
+			const conflict_score = Math.max(0, item.memoryStrength - item.score)
+			const conflict_flag = conflict_score > CONFLICT_PENALTY_THRESHOLD
+
+			if (conflict_flag) {
+				evidence_confidence -= CONFLICT_PENALTY_STEP
+			}
+
+			const base_metadata = (item.metadata ?? {}) as Metadata
+			const raw_previous_confidence = base_metadata.source_confidence
+			const previous_confidence =
+				typeof raw_previous_confidence === 'number' ? raw_previous_confidence : SOURCE_CONFIDENCE_BASE
+			const normalized_previous = Math.min(
+				SOURCE_CONFIDENCE_MAX,
+				Math.max(SOURCE_CONFIDENCE_MIN, previous_confidence)
+			)
+			const normalized_evidence = Math.min(
+				SOURCE_CONFIDENCE_MAX,
+				Math.max(SOURCE_CONFIDENCE_MIN, evidence_confidence)
+			)
+			const blended_confidence =
+				normalized_previous * SOURCE_CONFIDENCE_HISTORY_WEIGHT +
+				normalized_evidence * (1 - SOURCE_CONFIDENCE_HISTORY_WEIGHT)
+			const normalized_confidence = Math.min(
+				SOURCE_CONFIDENCE_MAX,
+				Math.max(SOURCE_CONFIDENCE_MIN, blended_confidence)
+			)
+			const conflict_count =
+				typeof base_metadata.conflict_count === 'number' ? base_metadata.conflict_count : 0
+			const updated_metadata: Metadata = {
+				...base_metadata,
+				source_confidence: normalized_confidence,
+				conflict_score,
+				conflict_count: conflict_count + (conflict_flag ? 1 : 0),
+				last_verified_at: now
+			}
+
+			item.metadata = updated_metadata
+
+			await this.queryRaw(sql_update_article_metadata, [item.id, JSON.stringify(updated_metadata)])
+		}
+	}
+
+	private applyLocalCompetition(args: {
+		matched_nodes: Array<Node>
+		related_nodes: Array<Node>
+		edges: Array<Edge>
+	}) {
+		const { matched_nodes, related_nodes, edges } = args
+		const node_map = new Map<string, Node>()
+
+		for (const node of matched_nodes) {
+			node_map.set(node.id, node)
+		}
+
+		for (const node of related_nodes) {
+			node_map.set(node.id, node)
+		}
+
+		const neighbor_map = new Map<string, Array<string>>()
+
+		for (const edge of edges) {
+			if (edge.weight < LOCAL_COMPETITION_EDGE_WEIGHT_MIN) continue
+
+			const source_neighbors = neighbor_map.get(edge.source_id) ?? []
+			source_neighbors.push(edge.target_id)
+			neighbor_map.set(edge.source_id, source_neighbors)
+
+			const target_neighbors = neighbor_map.get(edge.target_id) ?? []
+			target_neighbors.push(edge.source_id)
+			neighbor_map.set(edge.target_id, target_neighbors)
+		}
+
+		const inhibited_ids = new Set<string>()
+
+		for (const node of related_nodes) {
+			const neighbors = neighbor_map.get(node.id) ?? []
+			let max_neighbor_potential = 0
+
+			for (const neighbor_id of neighbors) {
+				const neighbor = node_map.get(neighbor_id)
+				const neighbor_potential = neighbor?.potential ?? 0
+
+				if (neighbor_potential > max_neighbor_potential) {
+					max_neighbor_potential = neighbor_potential
+				}
+			}
+
+			const node_potential = node.potential ?? 0
+
+			if (max_neighbor_potential > 0 && node_potential < max_neighbor_potential * LOCAL_COMPETITION_RATIO) {
+				inhibited_ids.add(node.id)
+			}
+		}
+
+		const matched_ids = new Set(matched_nodes.map(node => node.id))
+		const selected_nodes = Array.from(node_map.values()).filter(
+			node => matched_ids.has(node.id) || !inhibited_ids.has(node.id)
+		)
+		const filtered_related_nodes = selected_nodes.filter(node => !matched_ids.has(node.id))
+
+		return { selected_nodes, filtered_related_nodes }
 	}
 
 	private async exec(sql_input: string | Array<string>) {

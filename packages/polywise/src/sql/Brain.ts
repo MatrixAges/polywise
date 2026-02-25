@@ -1,4 +1,6 @@
 import {
+	COMPETITIVE_DECAY_RATIO,
+	COMPETITIVE_INACTIVE_DAYS,
 	DECAY_STRENGTH,
 	DISTANCE_EPSILON,
 	EDGE_DECAY_RATE,
@@ -7,6 +9,9 @@ import {
 	NODE_DECAY_RATE,
 	NODE_INACTIVE_DAYS,
 	REORGANIZATION_STRENGTH,
+	REPLAY_LEARNING_RATE_MIN,
+	REPLAY_PRIORITY_LIMIT,
+	REPLAY_RECENCY_DAYS,
 	SCHEMA_BRAIN,
 	SCHEMA_MEMORY,
 	WEAK_EDGE_THRESHOLD,
@@ -40,34 +45,47 @@ export const sql_sleep_tick_clean_noise = `
 `
 
 /**
- * Decays the weight of weak and inactive edges.
- * Role: Implements selective synaptic decay - only decays edges that are both low-weight and long-inactive.
- * This mimics synaptic homeostasis where weak, unused connections are pruned during cognitive overload.
+ * Decays weak or competitively dominated edges after inactivity.
+ * Role: Implements selective synaptic decay and local competition, down-weighting edges that lose to stronger neighbors.
  * Triggered by: Cognitive overload (hot nodes > MAX_HOT_NODES).
  */
 export const sql_sleep_tick_decay_edges = `
-  UPDATE ${SCHEMA_BRAIN}.edges
+  WITH max_outgoing AS (
+    SELECT source_id, MAX(weight) as max_weight
+    FROM ${SCHEMA_BRAIN}.edges
+    GROUP BY source_id
+  )
+  UPDATE ${SCHEMA_BRAIN}.edges e
   SET 
-    weight = weight * (1.0 - ${EDGE_DECAY_RATE}),
-    distance = 1.0 / (weight * (1.0 - ${EDGE_DECAY_RATE}) + ${DISTANCE_EPSILON}),
+    weight = e.weight * (1.0 - ${EDGE_DECAY_RATE}),
+    distance = 1.0 / (e.weight * (1.0 - ${EDGE_DECAY_RATE}) + ${DISTANCE_EPSILON}),
     updated_at = CURRENT_TIMESTAMP
+  FROM max_outgoing m
   WHERE 
-    lock = FALSE
-    AND weight < 0.5
-    AND updated_at < NOW() - INTERVAL '${EDGE_INACTIVE_DAYS} days';
+    e.lock = FALSE
+    AND e.source_id = m.source_id
+    AND (
+      (e.weight < 0.5 AND e.updated_at < NOW() - INTERVAL '${EDGE_INACTIVE_DAYS} days')
+      OR (
+        e.weight < m.max_weight * ${COMPETITIVE_DECAY_RATIO}
+        AND e.updated_at < NOW() - INTERVAL '${COMPETITIVE_INACTIVE_DAYS} days'
+      )
+    );
 `
 
 /**
- * Strengthens a random subset of high-learning-rate edges.
- * Role: Simulates "memory replay" or consolidation during sleep, reinforcing important (high learning rate) connections.
+ * Strengthens a prioritized subset of high-learning-rate, recent edges.
+ * Role: Simulates experience-biased "memory replay" during sleep, favoring recent, high-plasticity connections.
  */
 export const sql_sleep_tick_replay = `
   UPDATE ${SCHEMA_BRAIN}.edges 
   SET weight = LEAST(weight + 0.2, 5.0)
   WHERE id IN (
     SELECT id FROM ${SCHEMA_BRAIN}.edges 
-    WHERE learning_rate > 1.5 
-    ORDER BY random() LIMIT 5
+    WHERE learning_rate > ${REPLAY_LEARNING_RATE_MIN}
+      AND updated_at > NOW() - INTERVAL '${REPLAY_RECENCY_DAYS} days'
+    ORDER BY updated_at DESC, learning_rate DESC, weight DESC
+    LIMIT ${REPLAY_PRIORITY_LIMIT}
   );
 `
 
@@ -98,12 +116,12 @@ export const sql_sleep_tick_commit = `COMMIT`
  * Role: Keyword-based memory retrieval entry point, allowing the system to recall concepts by name.
  */
 export const sql_recall_nodes_by_label = `
-	SELECT id, label, x, y, potential, idol_id, root_ids, metrics_ids, created_at, updated_at
+	SELECT id, label, x, y, potential, idol_id, root_ids, context_id, created_at, updated_at
 	FROM ${SCHEMA_BRAIN}.nodes
 	WHERE (label ILIKE $1 OR $1 ILIKE '%' || label || '%')
 	  AND ($3::text IS NULL OR idol_id = $3)
 	  AND ($4::text[] IS NULL OR root_ids && $4)
-	  AND ($5::text[] IS NULL OR metrics_ids && $5)
+	  AND ($5::text IS NULL OR context_id = $5)
 	ORDER BY potential DESC
 	LIMIT $2
 `
@@ -116,7 +134,8 @@ export const sql_recall_related_nodes = `
 	WITH RECURSIVE search_graph AS (
 		SELECT source_id, target_id, weight, 1 as depth
 		FROM ${SCHEMA_BRAIN}.edges
-		WHERE source_id = ANY($1) OR target_id = ANY($1)
+		WHERE (source_id = ANY($1) OR target_id = ANY($1))
+		  AND ($4::text IS NULL OR context_id = $4)
 		
 		UNION ALL
 		
@@ -125,14 +144,16 @@ export const sql_recall_related_nodes = `
 		JOIN search_graph sg ON (e.source_id = sg.target_id OR e.target_id = sg.source_id)
 		WHERE sg.depth < $2
 		AND e.weight > 0.2
+		AND ($4::text IS NULL OR e.context_id = $4)
 	)
-	SELECT DISTINCT n.id, n.label, n.x, n.y, n.potential, n.idol_id, n.root_ids, n.metrics_ids, n.created_at, n.updated_at
+	SELECT DISTINCT n.id, n.label, n.x, n.y, n.potential, n.idol_id, n.root_ids, n.context_id, n.created_at, n.updated_at
 	FROM ${SCHEMA_BRAIN}.nodes n
 	JOIN (
 		SELECT DISTINCT source_id as nid FROM search_graph
 		UNION
 		SELECT DISTINCT target_id as nid FROM search_graph
 	) connected ON n.id = connected.nid
+	WHERE ($4::text IS NULL OR n.context_id = $4)
 	ORDER BY n.potential DESC
 	LIMIT $3
 `
@@ -187,7 +208,7 @@ export const sql_strengthen_edges_batch = `
  * Role: Identifies the currently active "thoughts" or high-priority concepts in the global workspace.
  */
 export const sql_get_high_potential_nodes = `
-	SELECT id, label, x, y, potential, idol_id, root_ids, metrics_ids, created_at, updated_at
+	SELECT id, label, x, y, potential, idol_id, root_ids, context_id, created_at, updated_at
 	FROM ${SCHEMA_BRAIN}.nodes
 	WHERE potential > $1
 	ORDER BY potential DESC
@@ -199,7 +220,7 @@ export const sql_get_high_potential_nodes = `
  * Role: Precise lookup for node attributes.
  */
 export const sql_get_node_by_id = `
-	SELECT id, label, x, y, potential, idol_id, root_ids, metrics_ids, created_at, updated_at
+	SELECT id, label, x, y, potential, idol_id, root_ids, context_id, created_at, updated_at
 	FROM ${SCHEMA_BRAIN}.nodes
 	WHERE id = $1
 `
@@ -208,14 +229,14 @@ export const sql_get_node_by_id = `
  * Finds a node's ID given its label.
  * Role: Key lookup for checking existence or getting ID for linking.
  */
-export const sql_get_node_by_label = `SELECT id FROM ${SCHEMA_BRAIN}.nodes WHERE label = $1`
+export const sql_get_node_by_label = `SELECT id FROM ${SCHEMA_BRAIN}.nodes WHERE label = $1 AND ($2::text IS NULL OR context_id = $2)`
 
 /**
  * Retrieves all edges connecting a set of nodes.
  * Role: Reconstructs the local graph structure for a set of recalled concepts.
  */
 export const sql_get_edges_between_nodes = `
-	SELECT id, source_id, target_id, weight, distance, learning_rate, decay_resistance, idol_id, root_ids, metrics_ids, created_at, updated_at
+	SELECT id, source_id, target_id, weight, distance, learning_rate, decay_resistance, idol_id, root_ids, context_id, created_at, updated_at
 	FROM ${SCHEMA_BRAIN}.edges
 	WHERE source_id = ANY($1) AND target_id = ANY($1)
 `

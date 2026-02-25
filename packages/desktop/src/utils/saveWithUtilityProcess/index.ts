@@ -7,7 +7,6 @@ type UpdateArgs = {
 	content: string
 	idol_id?: string
 	root_ids?: Array<string>
-	metrics_ids?: Array<string>
 	metadata?: Record<string, unknown>
 }
 
@@ -16,7 +15,6 @@ type ForgetArgs = {
 	query?: string
 	idol_id?: string
 	root_ids?: Array<string>
-	metrics_ids?: Array<string>
 }
 
 type SnapshotArgs = {
@@ -33,7 +31,6 @@ type RecallArgs = {
 	max_depth?: number
 	idol_id?: string
 	root_ids?: Array<string>
-	metrics_ids?: Array<string>
 	limit?: number
 }
 

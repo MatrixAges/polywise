@@ -67,7 +67,7 @@ This document provides an overview of the packages/desktop module structure and 
 				},
 				"memory": {
 					"index.ts": {
-						"desc": "Polywise memory operations RPC delegated to utility process memory bridge with debug tracing",
+						"desc": "Polywise memory operations RPC delegated to utility process",
 						"role": "RPC"
 					}
 				},
@@ -112,7 +112,7 @@ This document provides an overview of the packages/desktop module structure and 
 				"setWindowGlass.ts": { "desc": "Window vibrancy effect", "role": "Utility" },
 				"time.ts": { "desc": "Time manipulation", "role": "Utility" },
 				"trpc.ts": {
-					"desc": "tRPC setup helper with utility-process memory context",
+					"desc": "tRPC setup helper with utility-process memory bridge",
 					"role": "Utility"
 				}
 			},

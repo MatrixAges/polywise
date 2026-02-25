@@ -14,7 +14,7 @@ export interface BrainArgs {
 export interface FiltersArgs {
 	idol_id?: string
 	root_ids?: Array<string>
-	metrics_ids?: Array<string>
+	context_id?: string
 }
 
 // ...
@@ -127,6 +127,7 @@ export interface SearchCandidate {
 	source: 'vector' | 'fulltext'
 	metadata?: Metadata
 	updated_at?: string
+	context_id?: string
 }
 
 export interface ArticleSearchResult {
@@ -135,6 +136,7 @@ export interface ArticleSearchResult {
 	similarity?: number
 	metadata?: Metadata
 	updated_at?: string
+	context_id?: string
 }
 
 export interface SearchResult {
@@ -144,6 +146,7 @@ export interface SearchResult {
 	rerankScore: number
 	metadata?: Metadata
 	updated_at?: string
+	context_id?: string
 }
 
 export interface RecallArgs extends FiltersArgs {
@@ -171,6 +174,7 @@ export interface QueryArgs extends FiltersArgs {
 export interface AggregateResultsArgs {
 	recall_result: RecallResult
 	search_results: Array<SearchResult>
+	sequence_context_id?: string | null
 }
 
 export interface PipelineSearchArgs {

@@ -24,7 +24,7 @@ export const sql_create_schema_brain = `CREATE SCHEMA IF NOT EXISTS ${SCHEMA_BRA
 export const sql_create_table_nodes = `
   CREATE TABLE IF NOT EXISTS ${SCHEMA_BRAIN}.nodes (
     id TEXT PRIMARY KEY,
-    label TEXT UNIQUE,
+    label TEXT,
     x REAL,
     y REAL,
     potential REAL DEFAULT 1.0,
@@ -35,12 +35,13 @@ export const sql_create_table_nodes = `
     last_fired_at TIMESTAMP,
     idol_id TEXT,
     root_ids TEXT[] DEFAULT '{}',
-    metrics_ids TEXT[] DEFAULT '{}',
+    context_id TEXT DEFAULT 'global',
     article_ids TEXT[] DEFAULT '{}',
     embedding vector(1024),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    lock BOOLEAN DEFAULT FALSE
+    lock BOOLEAN DEFAULT FALSE,
+    UNIQUE (label, context_id)
   );
 `
 
@@ -64,7 +65,7 @@ export const sql_create_table_edges = `
     decay_resistance REAL DEFAULT 1.0,
     idol_id TEXT,
     root_ids TEXT[] DEFAULT '{}',
-    metrics_ids TEXT[] DEFAULT '{}',
+    context_id TEXT DEFAULT 'global',
     reaction_count INTEGER DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -132,10 +133,10 @@ export const sql_create_index_edges_idol = `CREATE INDEX IF NOT EXISTS idx_edges
 export const sql_create_index_nodes_roots = `CREATE INDEX IF NOT EXISTS idx_nodes_roots ON ${SCHEMA_BRAIN}.nodes USING GIN(root_ids);`
 
 /**
- * Creates a GIN index on node Metrics IDs array.
- * Role: Optimizes metric-based node retrieval.
+ * Creates an index on node context_id.
+ * Role: Optimizes context-based node retrieval.
  */
-export const sql_create_index_nodes_metrics = `CREATE INDEX IF NOT EXISTS idx_nodes_metrics ON ${SCHEMA_BRAIN}.nodes USING GIN(metrics_ids);`
+export const sql_create_index_nodes_context = `CREATE INDEX IF NOT EXISTS idx_nodes_context ON ${SCHEMA_BRAIN}.nodes (context_id);`
 
 /**
  * Creates a GIN index on edge Root IDs array.
@@ -144,10 +145,10 @@ export const sql_create_index_nodes_metrics = `CREATE INDEX IF NOT EXISTS idx_no
 export const sql_create_index_edges_roots = `CREATE INDEX IF NOT EXISTS idx_edges_roots ON ${SCHEMA_BRAIN}.edges USING GIN(root_ids);`
 
 /**
- * Creates a GIN index on edge Metrics IDs array.
- * Role: Optimizes metric-based edge retrieval.
+ * Creates an index on edge context_id.
+ * Role: Optimizes context-based edge retrieval.
  */
-export const sql_create_index_edges_metrics = `CREATE INDEX IF NOT EXISTS idx_edges_metrics ON ${SCHEMA_BRAIN}.edges USING GIN(metrics_ids);`
+export const sql_create_index_edges_context = `CREATE INDEX IF NOT EXISTS idx_edges_context ON ${SCHEMA_BRAIN}.edges (context_id);`
 
 /**
  * Creates the knowledge schema.
@@ -173,10 +174,40 @@ export const sql_create_table_articles = `
     content TEXT,
     idol_id TEXT,
     root_ids TEXT[] DEFAULT '{}',
-    metrics_ids TEXT[] DEFAULT '{}',
+    context_id TEXT DEFAULT 'global',
     metadata JSONB DEFAULT '{}',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  );
+`
+
+/**
+ * Creates the contexts table.
+ * Role: Stores episodic context embeddings for context resolution and retrieval gating.
+ */
+export const sql_create_table_contexts = `
+  CREATE TABLE IF NOT EXISTS ${SCHEMA_MEMORY}.contexts (
+    id TEXT PRIMARY KEY,
+    embedding vector(1024) NOT NULL,
+    keywords TEXT[] DEFAULT '{}',
+    usage_count INTEGER DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  );
+`
+
+/**
+ * Creates the context_edges table.
+ * Role: Tracks sequential transitions between episodic contexts.
+ */
+export const sql_create_table_context_edges = `
+  CREATE TABLE IF NOT EXISTS ${SCHEMA_MEMORY}.context_edges (
+    source_id TEXT REFERENCES ${SCHEMA_MEMORY}.contexts(id),
+    target_id TEXT REFERENCES ${SCHEMA_MEMORY}.contexts(id),
+    weight REAL DEFAULT 0.0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (source_id, target_id)
   );
 `
 
@@ -210,6 +241,24 @@ export const sql_create_table_article_embeddings = `
     model_name TEXT DEFAULT 'onnx-community/Qwen3-Embedding-0.6B-ONNX',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   );
+`
+
+/**
+ * Creates an HNSW index on context embeddings.
+ * Role: Optimizes episodic context similarity search.
+ */
+export const sql_create_index_contexts_embedding = `
+  CREATE INDEX IF NOT EXISTS idx_contexts_embedding_hnsw 
+  ON ${SCHEMA_MEMORY}.contexts USING hnsw (embedding vector_cosine_ops);
+`
+
+/**
+ * Creates an index on context_edges source.
+ * Role: Optimizes context transition lookups.
+ */
+export const sql_create_index_context_edges_source = `
+  CREATE INDEX IF NOT EXISTS idx_context_edges_source
+  ON ${SCHEMA_MEMORY}.context_edges (source_id);
 `
 
 /**

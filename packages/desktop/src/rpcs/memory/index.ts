@@ -16,8 +16,7 @@ const query = p
 		object({
 			query: string(),
 			idol_id: string().optional(),
-			root_ids: array(string()).optional(),
-			metrics_ids: array(string()).optional()
+			root_ids: array(string()).optional()
 		})
 	)
 	.query(async ({ input, ctx }) => {
@@ -36,7 +35,6 @@ const save = p
 			content: string(),
 			idol_id: string().optional(),
 			root_ids: array(string()).optional(),
-			metrics_ids: array(string()).optional(),
 			metadata: object({}).passthrough().optional()
 		})
 	)
@@ -57,7 +55,6 @@ const update = p
 			content: string(),
 			idol_id: string().optional(),
 			root_ids: array(string()).optional(),
-			metrics_ids: array(string()).optional(),
 			metadata: object({}).passthrough().optional()
 		})
 	)
@@ -71,8 +68,7 @@ const forget = p
 			memory_id: string().optional(),
 			query: string().optional(),
 			idol_id: string().optional(),
-			root_ids: array(string()).optional(),
-			metrics_ids: array(string()).optional()
+			root_ids: array(string()).optional()
 		})
 	)
 	.mutation(async ({ input, ctx }) => {
@@ -100,7 +96,6 @@ const recall = p
 			max_depth: number().optional(),
 			idol_id: string().optional(),
 			root_ids: array(string()).optional(),
-			metrics_ids: array(string()).optional(),
 			limit: number().optional()
 		})
 	)
@@ -115,7 +110,6 @@ const recall = p
 			max_depth: input.max_depth,
 			idol_id: input.idol_id,
 			root_ids: input.root_ids,
-			metrics_ids: input.metrics_ids,
 			limit: input.limit
 		})
 	})

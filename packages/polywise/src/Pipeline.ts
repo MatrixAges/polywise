@@ -310,7 +310,8 @@ export default class Pipeline {
 				content: r.content,
 				source: 'vector',
 				metadata: r.metadata,
-				updated_at: r.updated_at
+				updated_at: r.updated_at,
+				context_id: r.context_id
 			})
 			content_set.add(r.content)
 		}
@@ -324,7 +325,8 @@ export default class Pipeline {
 				content: r.content,
 				source: 'fulltext',
 				metadata: r.metadata,
-				updated_at: r.updated_at
+				updated_at: r.updated_at,
+				context_id: r.context_id
 			})
 			content_set.add(r.content)
 		}
@@ -341,7 +343,8 @@ export default class Pipeline {
 			source: candidate.source,
 			rerankScore: rerank_scores[index]?.score ?? 0,
 			metadata: candidate.metadata,
-			updated_at: candidate.updated_at
+			updated_at: candidate.updated_at,
+			context_id: candidate.context_id
 		}))
 
 		return results.sort((a, b) => b.rerankScore - a.rerankScore).slice(0, rerank_limit)

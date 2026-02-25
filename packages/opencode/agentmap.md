@@ -16,7 +16,7 @@ This document provides an overview of the packages/opencode module structure and
 	"structure": {
 		"src": {
 			"index.ts": {
-				"desc": "Main entry point exporting OpencodePlugin with polywise tool and session.idle event handling",
+				"desc": "Main entry point exporting OpencodePlugin with polywise tool and session.idle handling",
 				"role": "Plugin"
 			},
 			"utils.ts": {

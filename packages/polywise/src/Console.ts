@@ -10,7 +10,7 @@ export type ConsoleConfig = {
 
 export default class Console {
 	private static config: ConsoleConfig = {
-		enabled: true,
+		enabled: false,
 		stages: ['SQL', 'PIPELINE', 'RANKING', 'SEARCH', 'SYSTEM'],
 		only: ['PIPELINE', 'RANKING', 'SEARCH', 'SYSTEM']
 	}

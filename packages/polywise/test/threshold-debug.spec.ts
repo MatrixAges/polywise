@@ -8,7 +8,7 @@ describe('Memory Recall Debug - Issue: "记忆机制" returns empty', () => {
 	let poly: Polywise
 	const db_name = getDataDir()
 
-	const metrics_ids = ['test_metrics_001']
+	const context_id = 'test_context_001'
 
 	const architecture_content = `我已经详细分析过 packages/polywise 的项目架构，以下是核心要点：
 	
@@ -33,12 +33,12 @@ FRESH → TIRED → SLEEPING → FRESH 状态循环`
 			embedding_config: { type: 'custom', fn: getTestVectors },
 			reranker_config: { type: 'custom', fn: getTestRerank },
 			keyword_config: { type: 'custom', fn: getTestKeywords },
-			metrics_ids
+			context_id
 		})
 
 		await poly.save({
 			content: architecture_content,
-			metrics_ids
+			context_id
 		})
 		console.log('✓ Content saved, id: 1')
 	}, 60000)
@@ -48,14 +48,14 @@ FRESH → TIRED → SLEEPING → FRESH 状态循环`
 	})
 
 	describe('Step 1: Verify storage', () => {
-		it('should have stored articles with metrics_id', async () => {
+		it('should have stored articles with context_id', async () => {
 			const articles = await poly.article.getAll()
 			console.log('Articles count:', articles.length)
 			expect(articles.length).toBeGreaterThan(0)
 		})
 	})
 
-	describe('Step 2: Debug with full query API (idol_id, root_ids, metrics_ids)', () => {
+	describe('Step 2: Debug with full query API (idol_id, root_ids, context_id)', () => {
 		it('should query with different thresholds', async () => {
 			const th = 0.35
 			const p = poly.process('记忆机制')
@@ -91,23 +91,23 @@ FRESH → TIRED → SLEEPING → FRESH 状态循环`
 				query: '记忆机制',
 				threshold: th,
 				search_limit: 10,
-				metrics_ids,
+				context_id,
 				process: p
 			})
 
 			console.log(`threshold=${th}: ${memory.length} results`)
 		})
 
-		it('should query with wrong metrics_ids (should return empty)', async () => {
+		it('should ignore wrong context_id when context is internal', async () => {
 			const { memory } = await poly.query({
 				query: '记忆机制',
 				threshold: 0.0,
 				search_limit: 10,
-				metrics_ids: ['wrong_metrics_id']
+				context_id: 'wrong_context_id'
 			})
-			console.log('Query with wrong metrics_ids:', memory.length)
+			console.log('Query with wrong context_id:', memory.length)
 
-			expect(memory.length).eq(0)
+			expect(memory.length).toBeGreaterThan(0)
 		})
 	})
 })
