@@ -189,7 +189,9 @@ This document provides an overview of the packages/polywise module structure and
 			"fetch_datasets.ts": {
 				"desc": "Script to fetch and clean complex datasets from external sources",
 				"role": "Script"
-			}
+			},
+			"testKeywords.ts": { "desc": "Keyword extraction smoke test", "role": "Script" },
+			"testTriple.ts": { "desc": "Keyword extraction batch test", "role": "Script" }
 		},
 		".test_vectors": {
 			"desc": "Persistent cache for model embeddings and reranking results",

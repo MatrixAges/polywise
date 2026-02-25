@@ -13,11 +13,7 @@ import { getTestKeywords, getTestVectors } from '../test/utils/getCache'
 
 async function beforeTest() {
 	const pipeline = container.resolve(Pipeline)
-	await pipeline.init({
-		embedding_concurrency: 20,
-		reranker_concurrency: 20,
-		rebel_concurrency: 10
-	})
+	await pipeline.init()
 	await pipeline.checkModels()
 	console.log('All models are ready.')
 

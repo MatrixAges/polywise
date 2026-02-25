@@ -10,6 +10,13 @@ import { generateModelHash, verifyModel } from '../src/utils'
 describe('Model Hash Verification', () => {
 	let pipeline: Pipeline
 	const temp_cache_dir = path.join(os.tmpdir(), `polywise-test-models-${Date.now()}`)
+	const getModelName = () => {
+		if (DEFAULT_EMBEDDING_CONFIG.type !== 'local') {
+			throw new Error('Expected local embedding config')
+		}
+
+		return DEFAULT_EMBEDDING_CONFIG.model
+	}
 
 	beforeAll(async () => {
 		pipeline = new Pipeline()
@@ -25,7 +32,7 @@ describe('Model Hash Verification', () => {
 	})
 
 	it('should generate hash.json for a model directory', async () => {
-		const model_name = DEFAULT_EMBEDDING_CONFIG.model
+		const model_name = getModelName()
 		const model_path = path.join(temp_cache_dir, model_name)
 
 		await fs.ensureDir(model_path)
@@ -43,7 +50,7 @@ describe('Model Hash Verification', () => {
 	})
 
 	it('should verify model integrity when files are valid', async () => {
-		const model_name = DEFAULT_EMBEDDING_CONFIG.model
+		const model_name = getModelName()
 		const model_path = path.join(temp_cache_dir, model_name)
 
 		const is_valid = await verifyModel(model_path)
@@ -51,7 +58,7 @@ describe('Model Hash Verification', () => {
 	})
 
 	it('should fail verification when an onnx file is modified', async () => {
-		const model_name = DEFAULT_EMBEDDING_CONFIG.model
+		const model_name = getModelName()
 		const model_path = path.join(temp_cache_dir, model_name)
 
 		await fs.writeFile(path.join(model_path, 'model.onnx'), 'modified content')
@@ -61,7 +68,7 @@ describe('Model Hash Verification', () => {
 	})
 
 	it('should still pass verification when a non-onnx file is modified', async () => {
-		const model_name = DEFAULT_EMBEDDING_CONFIG.model
+		const model_name = getModelName()
 		const model_path = path.join(temp_cache_dir, model_name)
 
 		// Restore model.onnx and regenerate hash
@@ -76,7 +83,7 @@ describe('Model Hash Verification', () => {
 	})
 
 	it('should fail verification when an onnx file is missing', async () => {
-		const model_name = DEFAULT_EMBEDDING_CONFIG.model
+		const model_name = getModelName()
 		const model_path = path.join(temp_cache_dir, model_name)
 
 		await fs.remove(path.join(model_path, 'model.onnx'))
@@ -86,7 +93,7 @@ describe('Model Hash Verification', () => {
 	})
 
 	it('should detect when hash.json itself is missing', async () => {
-		const model_name = DEFAULT_EMBEDDING_CONFIG.model
+		const model_name = getModelName()
 		const model_path = path.join(temp_cache_dir, model_name)
 
 		await fs.remove(path.join(model_path, 'hash.json'))

@@ -1,5 +1,8 @@
 export default (onFinally?: (...args: Array<any>) => void) =>
 	(target: any, property: string, descriptor: PropertyDescriptor) => {
+		void target
+		void property
+
 		const original_method = descriptor.value
 
 		descriptor.value = async function (...args: Array<any>) {

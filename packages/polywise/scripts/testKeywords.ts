@@ -11,11 +11,7 @@ import { software_architecture_datasets } from '../test/datasets/software'
 async function testKeywords() {
 	console.log('Initializing Pipeline...')
 	const pipeline = container.resolve(Pipeline)
-	await pipeline.init({
-		embedding_concurrency: 20,
-		reranker_concurrency: 20,
-		rebel_concurrency: 10
-	})
+	await pipeline.init()
 
 	console.log('Checking models...')
 	await pipeline.checkModels()

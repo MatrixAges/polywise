@@ -70,7 +70,7 @@ describe('Polywise Brain System', () => {
 		})
 
 		it('should handle large scale knowledge network with real entities', async () => {
-			const node_ids: Array<number> = []
+			const node_ids: Array<string> = []
 			const entities = [
 				'PostgreSQL',
 				'Redis',
@@ -151,7 +151,7 @@ describe('Polywise Brain System', () => {
 
 	describe.concurrent('Brain Dynamics and Learning', () => {
 		it('should propagate activation through network chains using real entities', async () => {
-			const chain: Array<number> = []
+			const chain: Array<string> = []
 			const entities = ['Processor', 'Instruction', 'Memory', 'Address', 'Bus', 'Cache', 'RAM', 'Storage']
 
 			for (let i = 0; i < entities.length; i++) {
@@ -192,7 +192,7 @@ describe('Polywise Brain System', () => {
 				{ label: 'Secure_API', x: 600, y: 200 }
 			]
 
-			const node_ids: Array<number> = []
+			const node_ids: Array<string> = []
 
 			for (const concept of concepts) {
 				const embedding = (await poly.pipeline.embed(concept.label)) as Array<number>
@@ -244,7 +244,7 @@ describe('Polywise Brain System', () => {
 
 	describe.concurrent('Schema and Data Integrity', () => {
 		it('should handle concurrent node operations', async () => {
-			const promises: Array<Promise<number>> = []
+			const promises: Array<Promise<string>> = []
 
 			for (let i = 0; i < 15; i++) {
 				promises.push(poly.addNode({ label: `Concurrent_${i}`, x: i * 20, y: i * 10, threshold: 0.5 }))
@@ -438,6 +438,10 @@ describe('Polywise Brain System', () => {
 
 			const snapshot_node = nodes.find((n: any) => n.label === 'Snapshot_Node')
 
+			if (!snapshot_node) {
+				throw new Error('Snapshot node not found')
+			}
+
 			expect(snapshot_node).toBeDefined()
 			expect(snapshot_node.idol_id).toBe(idol)
 			expect(snapshot_node.root_ids).toEqual(root_ids)
@@ -450,10 +454,18 @@ describe('Polywise Brain System', () => {
 			const content = 'This is a test article about artificial intelligence and machine learning.'
 			const article_id = await poly.article.add(content)
 
+			if (!article_id) {
+				throw new Error('Article not created')
+			}
+
 			expect(article_id).toBeDefined()
 			expect(typeof article_id).toBe('string')
 
 			const articles = await poly.article.get(article_id)
+
+			if (!articles || articles.length === 0) {
+				throw new Error('Article not found')
+			}
 
 			expect(articles.length).toBe(1)
 			expect(articles[0].content).toBe(content)

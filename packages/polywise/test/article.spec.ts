@@ -38,6 +38,10 @@ describe.concurrent('Article CRUD Operations', () => {
 		const content = software_architecture_datasets[0]
 		const article = await poly.article.process({ content })
 
+		if (!article) {
+			throw new Error('Article not created')
+		}
+
 		expect(article.id).toBeDefined()
 		expect(typeof article.id).toBe('string')
 		expect(article.content).toBe(content)
@@ -54,6 +58,10 @@ describe.concurrent('Article CRUD Operations', () => {
 
 		const article = await poly.article.get(articles[0].id)
 
+		if (!article || article.length === 0) {
+			throw new Error('Article not found')
+		}
+
 		expect(article.length).toBeGreaterThan(0)
 		expect(article[0]?.content).toBe(content)
 	})
@@ -61,19 +69,35 @@ describe.concurrent('Article CRUD Operations', () => {
 	it('should update real-world article content', async () => {
 		const created = await poly.article.process({ content: software_architecture_datasets[1] })
 
+		if (!created) {
+			throw new Error('Article not created')
+		}
+
 		const updated = await poly.article.update(created.id, {
 			content: 'Updated content for containerization...'
 		})
 
+		if (!updated) {
+			throw new Error('Article not updated')
+		}
+
 		expect(updated.content).toBe('Updated content for containerization...')
 
 		const fetched = await poly.article.get(created.id)
+
+		if (!fetched || fetched.length === 0) {
+			throw new Error('Updated article not found')
+		}
 
 		expect(fetched[0]?.content).toBe('Updated content for containerization...')
 	})
 
 	it('should delete article', async () => {
 		const created = await poly.article.process({ content: 'Content for deletion test.' })
+
+		if (!created) {
+			throw new Error('Article not created')
+		}
 
 		await poly.article.delete(created.id)
 
@@ -91,6 +115,10 @@ describe.concurrent('Article CRUD Operations', () => {
 
 		const article = await poly.article.get(memory_id)
 
+		if (!article || article.length === 0) {
+			throw new Error('Article not found')
+		}
+
 		expect(article).not.toBeNull()
 		expect(article[0]?.content).toBe(content)
 	})
@@ -106,6 +134,11 @@ describe.concurrent('Article CRUD Operations', () => {
 		await poly.update({ memory_id, content: newContent })
 
 		const article = await poly.article.get(memory_id)
+
+		if (!article || article.length === 0) {
+			throw new Error('Article not found')
+		}
+
 		expect(article[0]?.content).toBe(newContent)
 
 		const queryResult = await poly.query({ query: 'deep learning neural networks' })

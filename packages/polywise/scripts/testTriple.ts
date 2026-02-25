@@ -11,11 +11,7 @@ import { software_architecture_datasets } from '../test/datasets/software'
 async function testTriple() {
 	console.log('Initializing Pipeline...')
 	const pipeline = container.resolve(Pipeline)
-	await pipeline.init({
-		embedding_concurrency: 20,
-		reranker_concurrency: 20,
-		rebel_concurrency: 10
-	})
+	await pipeline.init()
 
 	console.log('Checking models...')
 	await pipeline.checkModels()
@@ -42,13 +38,13 @@ async function testTriple() {
 		sentences.map(async item => {
 			const startTime = Date.now()
 
-			const triples = await pipeline.extractTriples(item)
+			const keywords = await pipeline.generateKeywords(item)
 
 			const duration = Date.now() - startTime
 
 			console.log('-----------')
 			console.log(`Input: ${item}`)
-			console.log(`Output: ${JSON.stringify(triples)}`)
+			console.log(`Output: ${JSON.stringify(keywords)}`)
 			console.log(`Duration: ${duration}`)
 		})
 	)
