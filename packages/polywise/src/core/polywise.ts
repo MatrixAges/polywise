@@ -5,6 +5,7 @@ import { container } from 'tsyringe'
 import { app } from '../consts'
 import { getPglite, setDbScopes } from '../utils'
 import Article from './article'
+import Brain from './brain'
 import Logger from './logger'
 import Pipeline from './pipeline'
 
@@ -16,6 +17,7 @@ export default class Index {
 	logger = resolve(Logger)
 	pipeline = resolve(Pipeline)
 	article = resolve(Article)
+	brain = resolve(Brain)
 
 	config!: PolywiseConfig
 	db!: PGlite
@@ -43,8 +45,6 @@ export default class Index {
 		await this.pipeline.init(this, this.config.pipeline)
 	}
 
-	@catchFinally<Index, any>(ctx => {
-		ctx.brain.setBusy(false)
-	})
+	@catchFinally<Index>(ctx => ctx.brain.busy(false))
 	async query(args: QueryArgs) {}
 }

@@ -9,7 +9,6 @@ import * as node from './node'
 import * as simulation from './simulation'
 import * as snapshot from './snapshot'
 import * as stat from './stat'
-import * as tx from './tx'
 
 export default {
 	meta,
@@ -22,6 +21,5 @@ export default {
 	injection,
 	simulation,
 	snapshot,
-	stat,
-	tx
+	stat
 }

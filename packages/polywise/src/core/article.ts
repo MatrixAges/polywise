@@ -3,7 +3,7 @@ import { injectable } from 'tsyringe'
 import { app, system } from '@/consts'
 
 import sql from '../sql'
-import { generateId, getMetadata } from '../utils'
+import { generateId, getMetadata, querySql } from '../utils'
 
 import type { ArticleEntity, ArticleWithSimilarity, SearchArticlesArgs, upsertArticleArgs } from '../types'
 import type Polywise from './polywise'
@@ -22,17 +22,17 @@ export default class Index {
 
 		const article_id = id ?? generateId()
 
-		const res = await this.p.db.query<ArticleEntity>(sql.article.sql_upsert_article, [
+		const res = await querySql<ArticleEntity>(this.p.db, sql.article.sql_upsert_article, [
 			article_id,
 			content,
 			metadata
 		])
 
-		if (!res.rows.length) return null
+		if (!res.length) return
 
 		const embedding = await this.p.pipeline.embed(content)
 
-		await this.p.db.query(sql.article.sql_upsert_article_embedding, [
+		await querySql(this.p.db, sql.article.sql_upsert_article_embedding, [
 			generateId(),
 			article_id,
 			`[${embedding.join(',')}]`
@@ -42,17 +42,17 @@ export default class Index {
 	}
 
 	async get(id: string) {
-		const res = await this.p.db.query<ArticleEntity>(sql.article.sql_get_article, [id])
+		const res = await querySql<ArticleEntity>(this.p.db, sql.article.sql_get_article, [id])
 
-		return res.rows.length > 0 ? res.rows : null
+		return res.length > 0 ? res[0] : null
 	}
 
 	async getMany(ids: Array<string>) {
-		const res = await this.p.db.query<ArticleEntity>(sql.article.sql_get_articles_by_ids, [ids])
+		const res = await querySql<ArticleEntity>(this.p.db, sql.article.sql_get_articles_by_ids, [ids])
 
-		if (res.rows.length === 0) return null
+		if (res.length === 0) return
 
-		return res.rows.reduce(
+		return res.reduce(
 			(acc, item) => {
 				acc[item.id] = item
 
@@ -63,7 +63,7 @@ export default class Index {
 	}
 
 	async remove(id: string) {
-		await this.p.db.query(sql.article.sql_delete_article, [id])
+		await querySql(this.p.db, sql.article.sql_delete_article, [id])
 
 		return id
 	}
@@ -71,12 +71,10 @@ export default class Index {
 	async searchByText(args: SearchArticlesArgs) {
 		const { text, limit } = args
 
-		const res = await this.p.db.query<ArticleWithSimilarity>(sql.article.sql_search_articles_by_text, [
+		return querySql<ArticleWithSimilarity>(this.p.db, sql.article.sql_search_articles_by_text, [
 			text,
 			limit ?? app.article.default_search_limit
 		])
-
-		return res.rows
 	}
 
 	async searchByVector(args: SearchArticlesArgs) {
@@ -84,12 +82,10 @@ export default class Index {
 
 		const embedding = await this.p.pipeline.embed(text)
 
-		const res = await this.p.db.query<ArticleWithSimilarity>(sql.article.sql_search_articles_by_vector, [
+		return querySql<ArticleWithSimilarity>(this.p.db, sql.article.sql_search_articles_by_vector, [
 			`[${embedding.join(',')}]`,
 			limit ?? app.article.default_search_limit,
 			threshold ?? system.default_config.default_similarity_threshold
 		])
-
-		return res.rows
 	}
 }

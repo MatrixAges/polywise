@@ -7,6 +7,8 @@ export { default as getTextChunks } from './getTextChunks'
 export { default as getAvgVectors } from './getAvgVectors'
 export { default as getMetadata } from './getMetadata'
 export { default as execSql } from './execSql'
+export { default as querySql } from './querySql'
 export { default as setDbScopes } from './setDbScopes'
+export { default as getContextEdgeWeight } from './getContextEdgeWeight'
 
 export { getPglite, closePglite } from './getPglite'

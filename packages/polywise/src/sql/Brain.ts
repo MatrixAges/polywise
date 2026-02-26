@@ -1,6 +1,24 @@
 import { app, system } from '../consts'
 
 /**
+ * Begins a transaction.
+ * Role: Ensures a group of SQL operations execute atomically.
+ */
+export const sql_sleep_tick_begin = `BEGIN`
+
+/**
+ * Commits a transaction.
+ * Role: Finalizes all SQL changes in current transaction.
+ */
+export const sql_sleep_tick_commit = `COMMIT`
+
+/**
+ * Rolls back a transaction.
+ * Role: Reverts all SQL changes in current transaction.
+ */
+export const sql_sleep_tick_rollback = `ROLLBACK`
+
+/**
  * Randomly increases the potential of a small subset (1%) of nodes.
  * Role: Simulates background neural noise or "shadow" activity to prevent system stagnation and enable spontaneous activation.
  */
@@ -141,4 +159,45 @@ export const sql_get_active_node_count = `
   SELECT COUNT(*) as count
   FROM ${app.db.schema_brain}.nodes
   WHERE is_active = TRUE
+`
+
+/**
+ * Memory reorganization triggered by idle state.
+ * Role: Simulates brain's memory consolidation during rest - weakens unused connections, reinforces important ones.
+ * Unlike time-based decay, this is triggered by new learning events going idle.
+ * Synchronously updates distance to reflect synaptic efficiency changes.
+ */
+export const sql_memory_reorganization = `
+	${sql_sleep_tick_begin};
+
+	UPDATE ${app.db.schema_brain}.edges
+	SET weight = GREATEST(weight * ${system.tick.decay_strength}, ${system.node_edge.weak_edge_threshold}),
+	    distance = GREATEST(1.0 / (weight * ${system.tick.decay_strength} + ${system.tick.distance_epsilon}), 0.1)
+	WHERE (lock IS NULL OR lock = FALSE)
+	  AND weight < 0.5;
+
+	UPDATE ${app.db.schema_brain}.edges
+	SET weight = LEAST(weight + ${system.tick.reorganization_strength}, ${system.node_edge.edge_weight_max}),
+	    distance = GREATEST(1.0 / (weight + ${system.tick.reorganization_strength} + ${system.tick.distance_epsilon}), 0.1)
+	WHERE (lock IS NULL OR lock = FALSE)
+	  AND weight > 0.5;
+
+	DELETE FROM ${app.db.schema_brain}.edges
+	WHERE weight < ${system.node_edge.weak_edge_threshold}
+	  AND (lock IS NULL OR lock = FALSE);
+
+	${sql_sleep_tick_commit};
+`
+
+/**
+ * Strengthens edges for a set of context ids.
+ * Role: Reinforces replayed context trajectories during consolidation.
+ */
+export const sql_strengthen_edges_by_context = `
+	UPDATE ${app.db.schema_brain}.edges
+	SET weight = LEAST(weight + $1, ${system.node_edge.edge_weight_max}),
+	    distance = GREATEST(1.0 / (LEAST(weight + $1, ${system.node_edge.edge_weight_max}) + ${system.tick.distance_epsilon}), 0.1),
+	    updated_at = CURRENT_TIMESTAMP
+	WHERE context_id = ANY($2)
+	  AND (lock IS NULL OR lock = FALSE)
 `
