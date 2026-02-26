@@ -1,4 +1,3 @@
-import to from 'await-to-js'
 import { injectable } from 'tsyringe'
 
 import { app, system } from '@/consts'

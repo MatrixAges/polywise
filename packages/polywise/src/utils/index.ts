@@ -6,3 +6,6 @@ export { default as checkModelExsit } from './checkModelExsit'
 export { default as getTextChunks } from './getTextChunks'
 export { default as getAvgVectors } from './getAvgVectors'
 export { default as getFilters } from './getFilters'
+export { default as execSql } from './execSql'
+
+export { getPglite, closePglite } from './getPglite'

@@ -132,3 +132,16 @@ export const sql_reorg_delete_too_weak_edges = `
   WHERE weight < ${system.node_edge.weak_edge_threshold}
     AND lock IS NOT TRUE
 `
+
+/**
+ * Counts the number of currently active nodes.
+ * Role: Used to calculate system heat (load) for homeostatic plasticity and overload detection.
+ */
+export const sql_get_active_node_count = `
+  SELECT COUNT(*) as count
+  FROM ${app.db.schema_brain}.nodes
+  WHERE is_active = TRUE
+  AND ($1::text[] IS NULL OR root_ids && $2::text[])
+  AND ($2::text IS NULL OR idol_id = $3)
+  AND ($3::text IS NULL OR context_id = $4)
+`
