@@ -7,9 +7,7 @@ export default async (file_path: string) => {
 	const hash = createHash('sha256')
 	const input = createReadStream(file_path)
 
-	const [err] = await to(pipeline(input, hash))
-
-	if (err) return
+	await pipeline(input, hash)
 
 	return hash.digest('hex')
 }

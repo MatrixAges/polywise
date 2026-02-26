@@ -1,5 +1,2 @@
-export * from './prompts'
-export * from './model'
-export * from './performance'
-export * from './schema'
-export * from './database'
+export * as app from './app'
+export * as system from './system'

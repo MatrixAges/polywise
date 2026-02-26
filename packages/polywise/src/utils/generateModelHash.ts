@@ -1,23 +1,16 @@
-import path from 'path'
-import fs from 'fs-extra'
+import crypto from 'crypto'
+import fs from 'fs'
+import { pipeline as streamPipeline } from 'stream/promises'
 
-import generateHash from './generateHash'
-import listRecursive from './listRecursive'
+export default async (file_path: string) => {
+	const hash = crypto.createHash('sha256')
+	const input = fs.createReadStream(file_path)
 
-export default async (model_path: string) => {
-	const files = await listRecursive(model_path)
-	const hashes: Record<string, string> = {}
+	try {
+		await streamPipeline(input, hash)
 
-	for (const file of files) {
-		if (!file.endsWith('.onnx')) continue
-
-		const relative_path = path.relative(model_path, file)
-		const hash = await generateHash(file)
-
-		if (hash) {
-			hashes[relative_path] = hash
-		}
+		return hash.digest('hex')
+	} catch (err) {
+		return null
 	}
-
-	await fs.writeJson(path.join(model_path, 'hash.json'), { hashes }, { spaces: 2 })
 }

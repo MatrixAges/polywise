@@ -1,76 +1,54 @@
-import {
-	COMPETITIVE_DECAY_RATIO,
-	COMPETITIVE_INACTIVE_DAYS,
-	DECAY_STRENGTH,
-	DISTANCE_EPSILON,
-	EDGE_DECAY_RATE,
-	EDGE_INACTIVE_DAYS,
-	EDGE_WEIGHT_MAX,
-	NODE_DECAY_RATE,
-	NODE_INACTIVE_DAYS,
-	REORGANIZATION_STRENGTH,
-	REPLAY_LEARNING_RATE_MIN,
-	REPLAY_PRIORITY_LIMIT,
-	REPLAY_RECENCY_DAYS,
-	SCHEMA_BRAIN,
-	SCHEMA_MEMORY,
-	WEAK_EDGE_THRESHOLD,
-	WEIGHT_DEATH_THRESHOLD
-} from '../consts'
+import { app, system } from '../consts'
 
 /**
  * Randomly increases the potential of a small subset (1%) of nodes.
  * Role: Simulates background neural noise or "shadow" activity to prevent system stagnation and enable spontaneous activation.
  */
 export const sql_run_shadow_tick = `
-  UPDATE ${SCHEMA_BRAIN}.nodes 
-  SET potential = potential + 0.1 
-  WHERE id IN (SELECT id FROM ${SCHEMA_BRAIN}.nodes ORDER BY random() LIMIT (SELECT count(*)/100 + 1 FROM ${SCHEMA_BRAIN}.nodes));
+  UPDATE ${app.db.schema_brain}.nodes
+  SET potential = potential + ${system.node_edge.strengthen_edge_weight}
+  WHERE id IN (
+    SELECT id
+    FROM ${app.db.schema_brain}.nodes
+    ORDER BY random()
+    LIMIT (SELECT count(*) / 100 + 1 FROM ${app.db.schema_brain}.nodes)
+  )
 `
-
-/**
- * Begins the sleep cycle transaction.
- * Role: Ensures atomicity of the sleep maintenance operations (decay, replay, pruning).
- */
-export const sql_sleep_tick_begin = `BEGIN`
 
 /**
  * Removes edges with negligible weight.
  * Role: Neural pruning mechanism to remove unused or insignificant connections, optimizing graph size and traversal performance.
- * Triggered by: Cognitive overload (hot nodes > MAX_HOT_NODES).
  */
 export const sql_sleep_tick_clean_noise = `
-  DELETE FROM ${SCHEMA_BRAIN}.edges 
-  WHERE weight < ${WEIGHT_DEATH_THRESHOLD}; 
+  DELETE FROM ${app.db.schema_brain}.edges
+  WHERE weight < ${system.shy.weight_death_threshold}
 `
 
 /**
  * Decays weak or competitively dominated edges after inactivity.
  * Role: Implements selective synaptic decay and local competition, down-weighting edges that lose to stronger neighbors.
- * Triggered by: Cognitive overload (hot nodes > MAX_HOT_NODES).
  */
 export const sql_sleep_tick_decay_edges = `
   WITH max_outgoing AS (
-    SELECT source_id, MAX(weight) as max_weight
-    FROM ${SCHEMA_BRAIN}.edges
+    SELECT source_id, MAX(weight) AS max_weight
+    FROM ${app.db.schema_brain}.edges
     GROUP BY source_id
   )
-  UPDATE ${SCHEMA_BRAIN}.edges e
-  SET 
-    weight = e.weight * (1.0 - ${EDGE_DECAY_RATE}),
-    distance = 1.0 / (e.weight * (1.0 - ${EDGE_DECAY_RATE}) + ${DISTANCE_EPSILON}),
+  UPDATE ${app.db.schema_brain}.edges e
+  SET
+    weight = e.weight * (1.0 - ${system.shy.edge_decay_rate}),
+    distance = 1.0 / (e.weight * (1.0 - ${system.shy.edge_decay_rate}) + ${system.tick.distance_epsilon}),
     updated_at = CURRENT_TIMESTAMP
   FROM max_outgoing m
-  WHERE 
-    e.lock = FALSE
-    AND e.source_id = m.source_id
+  WHERE e.source_id = m.source_id
+    AND e.lock IS NOT TRUE
     AND (
-      (e.weight < 0.5 AND e.updated_at < NOW() - INTERVAL '${EDGE_INACTIVE_DAYS} days')
+      (e.weight < ${system.node_edge.potential_threshold} AND e.updated_at < CURRENT_TIMESTAMP - INTERVAL '${system.shy.edge_inactive_days} days')
       OR (
-        e.weight < m.max_weight * ${COMPETITIVE_DECAY_RATIO}
-        AND e.updated_at < NOW() - INTERVAL '${COMPETITIVE_INACTIVE_DAYS} days'
+        e.weight < m.max_weight * ${system.shy.competitive_decay_ratio}
+        AND e.updated_at < CURRENT_TIMESTAMP - INTERVAL '${system.shy.competitive_inactive_days} days'
       )
-    );
+    )
 `
 
 /**
@@ -81,218 +59,76 @@ export const sql_sleep_tick_replay = `
   WITH context_scores AS (
     SELECT unnest($1::text[]) AS context_id, unnest($2::real[]) AS score
   )
-  UPDATE ${SCHEMA_BRAIN}.edges e
-  SET weight = LEAST(e.weight + 0.2, 5.0)
+  UPDATE ${app.db.schema_brain}.edges e
+  SET weight = LEAST(e.weight + ${system.node_edge.edge_learning_factor}, ${system.node_edge.edge_weight_max})
   WHERE e.id IN (
     SELECT e2.id
-    FROM ${SCHEMA_BRAIN}.edges e2
+    FROM ${app.db.schema_brain}.edges e2
     LEFT JOIN context_scores cs ON e2.context_id = cs.context_id
-    WHERE e2.learning_rate > ${REPLAY_LEARNING_RATE_MIN}
-      AND e2.updated_at > NOW() - INTERVAL '${REPLAY_RECENCY_DAYS} days'
-    ORDER BY COALESCE(cs.score, 0) DESC, e2.updated_at DESC, e2.learning_rate DESC, e2.weight DESC
-    LIMIT ${REPLAY_PRIORITY_LIMIT}
-  );
+    WHERE e2.learning_rate > ${system.replay.replay_learning_rate_min}
+      AND e2.updated_at > CURRENT_TIMESTAMP - INTERVAL '${system.replay.replay_recency_days} days'
+    ORDER BY COALESCE(cs.score, ${system.tick.min_potential}) DESC, e2.updated_at DESC, e2.learning_rate DESC, e2.weight DESC
+    LIMIT ${system.replay.replay_priority_limit}
+  )
 `
 
 /**
  * Decays the potential of inactive nodes.
  * Role: Implements selective node decay - only decays nodes that are low-potential and long-inactive.
- * This mimics synaptic homeostasis where inactive neural pathways are downregulated during cognitive overload.
- * Triggered by: Cognitive overload (hot nodes > MAX_HOT_NODES).
  */
 export const sql_sleep_tick_decay_nodes = `
-  UPDATE ${SCHEMA_BRAIN}.nodes
-  SET potential = potential * ${NODE_DECAY_RATE},
+  UPDATE ${app.db.schema_brain}.nodes
+  SET potential = potential * ${system.shy.node_decay_rate},
       updated_at = CURRENT_TIMESTAMP
-  WHERE 
-    lock = FALSE
-    AND potential < 0.5
-    AND updated_at < NOW() - INTERVAL '${NODE_INACTIVE_DAYS} days';
+  WHERE lock IS NOT TRUE
+    AND potential < ${system.node_edge.potential_threshold}
+    AND updated_at < CURRENT_TIMESTAMP - INTERVAL '${system.shy.node_inactive_days} days'
 `
 
 /**
- * Commits the sleep cycle transaction.
- * Role: Finalizes the sleep maintenance operations.
+ * Decays the weight of edges over time (LTD - Long-Term Depression).
+ * Role: Implements the forgetting curve for memories, allowing unused connections to fade.
  */
-export const sql_sleep_tick_commit = `COMMIT`
-
-/**
- * Retrieves nodes matching a text label pattern.
- * Role: Keyword-based memory retrieval entry point, allowing the system to recall concepts by name.
- */
-export const sql_recall_nodes_by_label = `
-	SELECT id, label, x, y, potential, idol_id, root_ids, context_id, created_at, updated_at
-	FROM ${SCHEMA_BRAIN}.nodes
-	WHERE (label ILIKE $1 OR $1 ILIKE '%' || label || '%')
-	  AND ($3::text IS NULL OR idol_id = $3)
-	  AND ($4::text[] IS NULL OR root_ids && $4)
-	  AND ($5::text IS NULL OR context_id = $5)
-	ORDER BY potential DESC
-	LIMIT $2
+export const sql_decay_edges_ltd = `
+  UPDATE ${app.db.schema_brain}.edges
+  SET weight = GREATEST(weight - (${system.node_edge.edge_decay_factor} / decay_resistance), ${system.node_edge.weak_edge_threshold}),
+      distance = GREATEST(
+        1.0 / (GREATEST(weight - (${system.node_edge.edge_decay_factor} / decay_resistance), ${system.node_edge.weak_edge_threshold}) + ${system.tick.distance_epsilon}),
+        ${system.node_edge.edge_weight_min}
+      )
+  WHERE lock IS NOT TRUE
 `
 
 /**
- * Performs a recursive graph search to find nodes related to the starting set.
- * Role: Associative memory recall (spreading activation). Finds concepts that are strongly connected to the initial thoughts, up to a certain depth.
+ * Memory reorganization step 1.
+ * Role: Weakens low-weight edges during idle consolidation.
  */
-export const sql_recall_related_nodes = `
-	WITH RECURSIVE search_graph AS (
-		SELECT source_id, target_id, weight, 1 as depth
-		FROM ${SCHEMA_BRAIN}.edges
-		WHERE (source_id = ANY($1) OR target_id = ANY($1))
-		  AND ($4::text IS NULL OR context_id = $4)
-		
-		UNION ALL
-		
-		SELECT e.source_id, e.target_id, e.weight, sg.depth + 1
-		FROM ${SCHEMA_BRAIN}.edges e
-		JOIN search_graph sg ON (e.source_id = sg.target_id OR e.target_id = sg.source_id)
-		WHERE sg.depth < $2
-		AND e.weight > 0.2
-		AND ($4::text IS NULL OR e.context_id = $4)
-	)
-	SELECT DISTINCT n.id, n.label, n.x, n.y, n.potential, n.idol_id, n.root_ids, n.context_id, n.created_at, n.updated_at
-	FROM ${SCHEMA_BRAIN}.nodes n
-	JOIN (
-		SELECT DISTINCT source_id as nid FROM search_graph
-		UNION
-		SELECT DISTINCT target_id as nid FROM search_graph
-	) connected ON n.id = connected.nid
-	WHERE ($4::text IS NULL OR n.context_id = $4)
-	ORDER BY n.potential DESC
-	LIMIT $3
+export const sql_reorg_decay_weak_edges = `
+  UPDATE ${app.db.schema_brain}.edges
+  SET weight = GREATEST(weight * ${system.tick.decay_strength}, ${system.node_edge.weak_edge_threshold}),
+      distance = GREATEST(1.0 / (weight * ${system.tick.decay_strength} + ${system.tick.distance_epsilon}), ${system.node_edge.edge_weight_min})
+  WHERE lock IS NOT TRUE
+    AND weight < ${system.node_edge.potential_threshold}
 `
 
 /**
- * Increases the potential of a batch of nodes.
- * Role: Simulates "attention" or "stimulation" from external sources or internal processes, priming these nodes for activation.
+ * Memory reorganization step 2.
+ * Role: Reinforces high-value edges during idle consolidation.
  */
-export const sql_stimulate_nodes_batch = `
-	UPDATE ${SCHEMA_BRAIN}.nodes
-	SET potential = LEAST(potential + $1, 2.0),
-	    updated_at = CURRENT_TIMESTAMP
-	WHERE id = ANY($2)
+export const sql_reorg_strengthen_strong_edges = `
+  UPDATE ${app.db.schema_brain}.edges
+  SET weight = LEAST(weight + ${system.tick.reorganization_strength}, ${system.node_edge.edge_weight_max}),
+      distance = GREATEST(1.0 / (weight + ${system.tick.reorganization_strength} + ${system.tick.distance_epsilon}), ${system.node_edge.edge_weight_min})
+  WHERE lock IS NOT TRUE
+    AND weight > ${system.node_edge.potential_threshold}
 `
 
 /**
- * Retrieves original content articles associated with specific nodes.
- * Role: Grounds abstract node concepts back to their source knowledge/text for detailed retrieval.
+ * Memory reorganization step 3.
+ * Role: Prunes too-weak edges after consolidation updates.
  */
-export const sql_get_node_articles = `
-	SELECT DISTINCT a.id, a.content
-	FROM ${SCHEMA_MEMORY}.articles a
-	JOIN ${SCHEMA_BRAIN}.node_sources ns ON a.id = ns.article_id
-	WHERE ns.node_id = ANY($1)
-`
-
-/**
- * Increases the weight of a specific edge.
- * Role: Implements Hebbian learning ("neurons that fire together wire together"), strengthening connections between simultaneously active concepts.
- */
-export const sql_strengthen_edge = `
-	UPDATE ${SCHEMA_BRAIN}.edges
-	SET weight = LEAST(weight + $1, 5.0),
-	    updated_at = CURRENT_TIMESTAMP
-	WHERE source_id = $2 AND target_id = $3
-`
-
-/**
- * Batch update to strengthen bidirectional connections between groups of nodes.
- * Role: Efficiently reinforces associations between multiple concepts at once.
- */
-export const sql_strengthen_edges_batch = `
-	UPDATE ${SCHEMA_BRAIN}.edges
-	SET weight = LEAST(weight + $1, 5.0),
-	    updated_at = CURRENT_TIMESTAMP
-	WHERE (source_id = ANY($2) AND target_id = ANY($3))
-	   OR (source_id = ANY($3) AND target_id = ANY($2))
-`
-
-/**
- * Strengthens edges for a set of context ids.
- * Role: Reinforces replayed context trajectories during consolidation.
- */
-export const sql_strengthen_edges_by_context = `
-	UPDATE ${SCHEMA_BRAIN}.edges
-	SET weight = LEAST(weight + $1, ${EDGE_WEIGHT_MAX}),
-	    distance = GREATEST(1.0 / (LEAST(weight + $1, ${EDGE_WEIGHT_MAX}) + ${DISTANCE_EPSILON}), 0.1),
-	    updated_at = CURRENT_TIMESTAMP
-	WHERE context_id = ANY($2)
-	  AND (lock IS NULL OR lock = FALSE)
-`
-
-/**
- * Selects nodes with potential above a certain threshold.
- * Role: Identifies the currently active "thoughts" or high-priority concepts in the global workspace.
- */
-export const sql_get_high_potential_nodes = `
-	SELECT id, label, x, y, potential, idol_id, root_ids, context_id, created_at, updated_at
-	FROM ${SCHEMA_BRAIN}.nodes
-	WHERE potential > $1
-	ORDER BY potential DESC
-	LIMIT $2
-`
-
-/**
- * Retrieves a single node's details by its ID.
- * Role: Precise lookup for node attributes.
- */
-export const sql_get_node_by_id = `
-	SELECT id, label, x, y, potential, idol_id, root_ids, context_id, created_at, updated_at
-	FROM ${SCHEMA_BRAIN}.nodes
-	WHERE id = $1
-`
-
-/**
- * Finds a node's ID given its label.
- * Role: Key lookup for checking existence or getting ID for linking.
- */
-export const sql_get_node_by_label = `SELECT id FROM ${SCHEMA_BRAIN}.nodes WHERE label = $1 AND ($2::text IS NULL OR context_id = $2)`
-
-/**
- * Retrieves all edges connecting a set of nodes.
- * Role: Reconstructs the local graph structure for a set of recalled concepts.
- */
-export const sql_get_edges_between_nodes = `
-	SELECT id, source_id, target_id, weight, distance, learning_rate, decay_resistance, idol_id, root_ids, context_id, created_at, updated_at
-	FROM ${SCHEMA_BRAIN}.edges
-	WHERE source_id = ANY($1) AND target_id = ANY($1)
-`
-
-/**
- * Memory reorganization triggered by idle state.
- * Role: Simulates brain's memory consolidation during rest - weakens unused connections, reinforces important ones.
- * Unlike time-based decay, this is triggered by new learning events going idle.
- * Synchronously updates distance to reflect synaptic efficiency changes.
- */
-export const sql_memory_reorganization = `
-	BEGIN;
-
-	UPDATE ${SCHEMA_BRAIN}.edges
-	SET weight = GREATEST(weight * ${DECAY_STRENGTH}, ${WEAK_EDGE_THRESHOLD}),
-	    distance = GREATEST(1.0 / (weight * ${DECAY_STRENGTH} + ${DISTANCE_EPSILON}), 0.1)
-	WHERE (lock IS NULL OR lock = FALSE)
-	  AND weight < 0.5;
-
-	UPDATE ${SCHEMA_BRAIN}.edges
-	SET weight = LEAST(weight + ${REORGANIZATION_STRENGTH}, ${EDGE_WEIGHT_MAX}),
-	    distance = GREATEST(1.0 / (weight + ${REORGANIZATION_STRENGTH} + ${DISTANCE_EPSILON}), 0.1)
-	WHERE (lock IS NULL OR lock = FALSE)
-	  AND weight > 0.5;
-
-	DELETE FROM ${SCHEMA_BRAIN}.edges
-	WHERE weight < ${WEAK_EDGE_THRESHOLD}
-	  AND (lock IS NULL OR lock = FALSE);
-
-	COMMIT;
-`
-
-/**
- * Counts the number of currently active nodes.
- * Role: Used to calculate system heat (load) for homeostatic plasticity and overload detection.
- */
-export const sql_get_active_node_count = `
-	SELECT COUNT(*) as count
-	FROM ${SCHEMA_BRAIN}.nodes
-	WHERE is_active = TRUE
+export const sql_reorg_delete_too_weak_edges = `
+  DELETE FROM ${app.db.schema_brain}.edges
+  WHERE weight < ${system.node_edge.weak_edge_threshold}
+    AND lock IS NOT TRUE
 `
