@@ -1,33 +1,17 @@
 import { Console, Polywise } from 'polywise'
 import workerpool from 'workerpool'
 
-import type { GetNodeRelatedArgs, ProcessArticleArgs, QueryArgs } from 'polywise'
-
-type UpdateArgs = {
-	memory_id: string
-	content: string
-	idol_id?: string
-	root_ids?: Array<string>
-	metadata?: Record<string, unknown>
-}
-
-type ForgetArgs = {
-	memory_id?: string
-	query?: string
-	idol_id?: string
-	root_ids?: Array<string>
-}
+import type {
+	ForgetArticleArgs,
+	GetNodeRelatedArgs,
+	ProcessArticleArgs,
+	QueryArgs,
+	RecallArgs,
+	UpdateArticleArgs
+} from 'polywise'
 
 type SnapshotArgs = {
 	weight_threshold?: number
-	limit?: number
-}
-
-type RecallArgs = {
-	query: string
-	max_depth?: number
-	idol_id?: string
-	root_ids?: Array<string>
 	limit?: number
 }
 
@@ -78,18 +62,18 @@ const handleTask = async (method: string, args: any, data_dir: string) => {
 				result = await poly.query(args as QueryArgs)
 				break
 			case 'update':
-				result = await poly.update(args as UpdateArgs)
+				result = await poly.update(args as UpdateArticleArgs)
 				break
 			case 'forget':
-				result = await poly.forget(args as ForgetArgs)
+				result = await poly.forget(args as ForgetArticleArgs)
 				break
 			case 'getSnapshot': {
 				const snapshot_args = args as SnapshotArgs | undefined
 				result = await poly.getSnapshot(snapshot_args?.weight_threshold, snapshot_args?.limit)
 				break
 			}
-			case 'recallFromMemory':
-				result = await poly.recallFromMemory(args as RecallArgs)
+			case 'recall':
+				result = await poly.recall(args as RecallArgs)
 				break
 			case 'getNodeRelated':
 				result = await poly.getNodeRelated(args as GetNodeRelatedArgs)

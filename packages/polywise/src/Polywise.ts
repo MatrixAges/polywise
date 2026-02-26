@@ -850,7 +850,7 @@ export default class Polywise {
 		}
 	}
 
-	private async recallFromMemory(args: RecallArgs) {
+	async recall(args: RecallArgs) {
 		this.log.write({ query: args.query }, { event: 'recall_start' })
 
 		const {
@@ -959,8 +959,8 @@ export default class Polywise {
 			this.last_context_id = resolved_context_id
 		}
 
-		Console.log('SEARCH', 'recallFromMemory start')
-		const recall_result = await this.recallFromMemory({
+		Console.log('SEARCH', 'recall start')
+		const recall_result = await this.recall({
 			query,
 			max_depth: recall_depth,
 			stimulate_intensity: stimulate_on_recall ? MEMORY_RECALL_INTENSITY : 0,

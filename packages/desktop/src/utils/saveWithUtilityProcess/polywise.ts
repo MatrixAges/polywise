@@ -3,43 +3,19 @@ import chalk from 'chalk'
 import { pathExistsSync } from 'fs-extra'
 import workerpool from 'workerpool'
 
-import type { GetNodeRelatedArgs, ProcessArticleArgs, QueryArgs } from 'polywise'
+import type {
+	ForgetArticleArgs,
+	GetNodeRelatedArgs,
+	ProcessArticleArgs,
+	QueryArgs,
+	RecallArgs,
+	UpdateArticleArgs
+} from 'polywise'
 
-type MemoryMethod =
-	| 'init'
-	| 'save'
-	| 'query'
-	| 'update'
-	| 'forget'
-	| 'getSnapshot'
-	| 'recallFromMemory'
-	| 'getNodeRelated'
-
-type UpdateArgs = {
-	memory_id: string
-	content: string
-	idol_id?: string
-	root_ids?: Array<string>
-	metadata?: Record<string, unknown>
-}
-
-type ForgetArgs = {
-	memory_id?: string
-	query?: string
-	idol_id?: string
-	root_ids?: Array<string>
-}
+type MemoryMethod = 'init' | 'save' | 'query' | 'update' | 'forget' | 'getSnapshot' | 'recall' | 'getNodeRelated'
 
 type SnapshotArgs = {
 	weight_threshold?: number
-	limit?: number
-}
-
-type RecallArgs = {
-	query: string
-	max_depth?: number
-	idol_id?: string
-	root_ids?: Array<string>
 	limit?: number
 }
 
@@ -106,11 +82,11 @@ export default class PolySaveUtilityProcess {
 		return await this.callMemory('query', input, data_dir)
 	}
 
-	async update(input: UpdateArgs, data_dir: string) {
+	async update(input: UpdateArticleArgs, data_dir: string) {
 		return await this.callMemory('update', input, data_dir)
 	}
 
-	async forget(input: ForgetArgs, data_dir: string) {
+	async forget(input: ForgetArticleArgs, data_dir: string) {
 		return await this.callMemory('forget', input, data_dir)
 	}
 
@@ -119,7 +95,7 @@ export default class PolySaveUtilityProcess {
 	}
 
 	async recall(input: RecallArgs, data_dir: string) {
-		return await this.callMemory('recallFromMemory', input, data_dir)
+		return await this.callMemory('recall', input, data_dir)
 	}
 
 	async getNodeRelated(input: GetNodeRelatedArgs, data_dir: string) {

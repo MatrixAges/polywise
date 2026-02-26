@@ -60,7 +60,7 @@ export async function performEmergentSearch(
 
 	const depth_recall_depth = base_recall_depth + current_depth
 
-	const emerged_recall_result = await poly.recallFromMemory({
+	const emerged_recall_result = await poly.recall({
 		query: emerged_query,
 		max_depth: depth_recall_depth,
 		stimulate_intensity: stimulate_on_recall ? MEMORY_RECALL_INTENSITY * (1 + current_depth) : 0,

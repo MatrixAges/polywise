@@ -178,7 +178,7 @@ await poly.forget({
                               ↓
 ┌──────────────────────────────────────────────────────────────────────────┐
 │ Phase 1: Hybrid Retrieval - executeSingleSearch                          │
-│ - Graph Recall: recallFromMemory (Keywords -> Nodes -> Spreading)        │
+│ - Graph Recall: recall (Keywords -> Nodes -> Spreading)        │
 │ - External Search: Article.searchVector & searchFts (Pipeline Embedding) │
 └──────────────────────────────────────────────────────────────────────────┘
       ↓

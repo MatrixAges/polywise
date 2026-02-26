@@ -26,7 +26,7 @@ The following is the actual data flow diagram based on the code logic:
                               ↓
 ┌──────────────────────────────────────────────────────────────────────────┐
 │ Phase 1: Hybrid Retrieval - executeSingleSearch                          │
-│ - Graph Recall: recallFromMemory (Keywords -> Nodes -> Spreading)        │
+│ - Graph Recall: recall (Keywords -> Nodes -> Spreading)        │
 │ - External Search: Article.searchVector & searchFts (Pipeline Embedding) │
 └──────────────────────────────────────────────────────────────────────────┘
       ↓
@@ -116,7 +116,7 @@ This is the complete system data flow diagram integrating **LIF Neuro-dynamic pr
 │ Phase 1: Hybrid Retrieval & Neuro-Dynamics                                           │
 │                                                                                      │
 │  [A. Stimulus Injection]                                                             │
-│   - Graph Recall: recallFromMemory -> stimulateNodes(node_ids)                       │
+│   - Graph Recall: recall -> stimulateNodes(node_ids)                       │
 │        ↓                                                                             │
 │        └── SQL: UPDATE nodes SET potential = potential + Intensity                   │
 │                                                                                      │
