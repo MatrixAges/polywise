@@ -21,6 +21,8 @@ export default class Index {
 
 	init(p: Polywise) {
 		this.p = p
+
+		this.startLifeCycleLoop()
 	}
 
 	busy(v?: boolean) {
@@ -41,6 +43,33 @@ export default class Index {
 		this.current_fatigue += load
 
 		this.updateState()
+	}
+
+	private startLifeCycleLoop() {
+		this.shadow_interval = setInterval(async () => {
+			if (this.is_busy) return
+
+			const is_idle = this.isIdle()
+			const is_deep_idle = this.isIdle(true)
+
+			if (is_deep_idle && this.state !== 'SLEEPING' && this.state !== 'LEARNING') {
+				await execSql(this.p.db, sql.brain.sql_memory_reorganization)
+
+				await this.applyContextSequenceReplay()
+
+				return
+			}
+
+			if (this.state === 'TIRED' && is_idle) {
+				await this.triggerSleepTick()
+
+				return
+			}
+
+			if (this.state !== 'SLEEPING' && this.state !== 'LEARNING') {
+				await this.runShadowTick()
+			}
+		}, system.timing.shadow_interval_ms)
 	}
 
 	@catchFinally<Index>(ctx => ctx.busy(false))
@@ -145,33 +174,6 @@ export default class Index {
 			await execSql(this.p.db, sql.simulation.sql_decay)
 			await execSql(this.p.db, sql.stat.sql_reset_input_count)
 		}
-	}
-
-	private startLifeCycleLoop() {
-		this.shadow_interval = setInterval(async () => {
-			if (this.is_busy) return
-
-			const is_idle = this.isIdle()
-			const is_deep_idle = this.isIdle(true)
-
-			if (is_deep_idle && this.state !== 'SLEEPING' && this.state !== 'LEARNING') {
-				await execSql(this.p.db, sql.brain.sql_memory_reorganization)
-
-				await this.applyContextSequenceReplay()
-
-				return
-			}
-
-			if (this.state === 'TIRED' && is_idle) {
-				await this.triggerSleepTick()
-
-				return
-			}
-
-			if (this.state !== 'SLEEPING' && this.state !== 'LEARNING') {
-				await this.runShadowTick()
-			}
-		}, system.timing.shadow_interval_ms)
 	}
 
 	private async applyContextSequenceReplay() {
