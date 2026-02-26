@@ -6,7 +6,7 @@ import { edge_recall_fields, edge_select_fields } from './fragments'
  * Role: Establishes a relationship or association between two concepts.
  */
 export const sql_connect = `
-  INSERT INTO ${app.db.schema_brain}.edges (id, source_id, target_id, weight, idol_id, root_ids, context_id, lock)
+  INSERT INTO ${app.db.schema_brain}.edges (id, source_id, target_id, weight, lock)
   VALUES ($1, $2, $3, $4, $5, $6, COALESCE($7, 'global'), $8)
 `
 

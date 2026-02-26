@@ -1,10 +1,10 @@
-import type { Filters } from './common'
+import type { Scopes } from './common'
 import type { LoggerConfig } from './logger'
 import type { EmbeddingConfig, KeywordConfig, RerankerConfig } from './pipeline'
 
-export interface PolywiseConfig extends Filters {
+export interface PolywiseConfig {
 	data_dir?: string
-	filters?: Filters
+	scopes?: Scopes
 	pipeline?: {
 		models_dir?: string
 		embedding_config?: EmbeddingConfig

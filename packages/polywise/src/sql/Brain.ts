@@ -141,7 +141,4 @@ export const sql_get_active_node_count = `
   SELECT COUNT(*) as count
   FROM ${app.db.schema_brain}.nodes
   WHERE is_active = TRUE
-  AND ($1::text[] IS NULL OR root_ids && $2::text[])
-  AND ($2::text IS NULL OR idol_id = $3)
-  AND ($3::text IS NULL OR context_id = $4)
 `

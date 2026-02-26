@@ -1,4 +1,4 @@
-export interface Filters {
+export interface Scopes {
 	root_ids?: Array<string>
 	idol_id?: string
 	context_id?: string
