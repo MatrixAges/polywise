@@ -20,7 +20,7 @@ export default class Index {
 	private is_busy = false
 	private is_loop_running = false
 	private is_disposed = false
-	private shadow_interval?: NodeJS.Timeout
+	private timer?: NodeJS.Timeout
 
 	init(p: Polywise) {
 		this.p = p
@@ -48,7 +48,7 @@ export default class Index {
 	}
 
 	private startLifeCycleLoop() {
-		this.shadow_interval = setInterval(() => {
+		this.timer = setInterval(() => {
 			void this.runLifeCycleLoop()
 		}, system.shadow_interval_ms)
 	}
@@ -320,9 +320,10 @@ export default class Index {
 	off() {
 		this.is_disposed = true
 
-		if (this.shadow_interval) {
-			clearInterval(this.shadow_interval)
-			this.shadow_interval = undefined
+		if (this.timer) {
+			clearInterval(this.timer)
+
+			this.timer = undefined
 		}
 	}
 }
