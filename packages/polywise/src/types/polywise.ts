@@ -47,7 +47,7 @@ export interface Memory {
 	memoryStrength: number
 	metadata: Metadata
 	updated_at?: string
-	context_id?: string
+	context_id?: string | null
 }
 
 export interface MemoryResult {

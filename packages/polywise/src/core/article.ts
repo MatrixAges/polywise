@@ -51,8 +51,6 @@ export default class Index {
 	async getMany(ids: Array<string>) {
 		const res = await querySql<ArticleEntity>(this.p.db, sql.article.sql_get_articles_by_ids, [ids])
 
-		if (res.length === 0) return
-
 		return res.reduce(
 			(acc, item) => {
 				acc[item.id] = item
@@ -69,24 +67,24 @@ export default class Index {
 		return id
 	}
 
-	async searchByText(args: SearchArticlesArgs) {
-		const { text, limit } = args
-
-		return querySql<ArticleWithSimilarity>(this.p.db, sql.article.sql_search_articles_by_text, [
-			text,
-			limit ?? system.default_search_limit
-		])
-	}
-
 	async searchByVector(args: SearchArticlesArgs) {
-		const { text, limit, threshold } = args
+		const { query, limit, threshold } = args
 
-		const embedding = await this.p.pipeline.embed(text)
+		const embedding = await this.p.pipeline.embed(query)
 
 		return querySql<ArticleWithSimilarity>(this.p.db, sql.article.sql_search_articles_by_vector, [
 			`[${embedding.join(',')}]`,
 			limit ?? system.default_search_limit,
 			threshold ?? system.default_similarity_threshold
+		])
+	}
+
+	async searchByText(args: SearchArticlesArgs) {
+		const { query, limit } = args
+
+		return querySql<ArticleWithSimilarity>(this.p.db, sql.article.sql_search_articles_by_text, [
+			query,
+			limit ?? system.default_search_limit
 		])
 	}
 }

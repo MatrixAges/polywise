@@ -2,20 +2,13 @@ import { Jieba } from '@node-rs/jieba'
 import { dict } from '@node-rs/jieba/dict.js'
 import { eng, zho } from 'stopword'
 
+import cosineSimilarity from './cosineSimilarity'
+
 const jieba_instance = Jieba.withDict(dict)
 
 const stopword_set = new Set([...zho, ...eng])
 const valid_entity_tag_set = new Set(['n', 'nr', 'ns', 'nt', 'nz', 'eng', 'vn', 'an', 'l', 'j', 'i'])
 const blacklist_tag_set = new Set(['v', 'd', 'm', 'q', 't', 'f', 's', 'r', 'p', 'c', 'u', 'xc', 'w', 'x', 'zg'])
-
-const cosineSimilarity = (vec_a: Array<number>, vec_b: Array<number>) => {
-	const dot_product = vec_a.reduce((acc, val, index) => acc + val * vec_b[index], 0)
-	const norm_a = Math.sqrt(vec_a.reduce((acc, val) => acc + val * val, 0))
-	const norm_b = Math.sqrt(vec_b.reduce((acc, val) => acc + val * val, 0))
-
-	if (!norm_a || !norm_b) return 0
-	return dot_product / (norm_a * norm_b)
-}
 
 const isValidUnigram = (tagged_word: TaggedWord) => {
 	const word_text = tagged_word.word.trim()

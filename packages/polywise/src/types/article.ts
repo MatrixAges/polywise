@@ -3,6 +3,7 @@ import type { Metadata } from './common'
 export interface ArticleEntity {
 	id: string
 	content: string
+	context_id?: string | null
 	metadata?: Metadata
 	created_at: string
 	updated_at?: string
@@ -19,7 +20,7 @@ export interface upsertArticleArgs {
 }
 
 export interface SearchArticlesArgs {
-	text: string
+	query: string
 	limit?: number
 	threshold?: number
 }

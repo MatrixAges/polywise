@@ -2,15 +2,17 @@ import { injectable } from 'tsyringe'
 
 import { system } from '@/consts'
 import {
+	aggregation,
 	ChainEmitter,
 	getEdgesBetweenNodes,
 	getNodesByKeywords,
 	getNodesContexts,
 	getRelatedNodes,
+	getUniqueDocs,
 	getWinNodes
 } from '@/utils'
 
-import type { Memory, QueryArgs, QueryResult, RecallArgs } from '../types'
+import type { Memory, QueryArgs, QueryResult, RecallArgs, SearchResult } from '../types'
 import type Polywise from './polywise'
 
 @injectable()
@@ -60,69 +62,89 @@ export default class Index {
 		if (resolved_context_id) {
 			this.p.context.last_context_id = resolved_context_id
 		}
-	}
 
-	private async deepSearch(args: QueryArgs, emitter: ChainEmitter) {
-		const { cot_depth = 2, process } = args
+		this.p.logger.log('SEARCH', 'recall start')
 
-		const collected_memory = new Map<string, Memory>()
-		const used_queries = new Set<string>()
+		const recall_res = await this.recall({ query, context_id: resolved_context_id ?? undefined })
 
-		let current_query = original_query
-		used_queries.add(current_query)
+		this.p.logger.log('SEARCH', 'article.searchByVector start')
 
-		for (let depth = 0; depth < cot_depth; depth++) {
-			process?.emit('cot_iteration', { depth: depth + 1, query: current_query })
+		const vector_res = await this.p.article.searchByVector({
+			query
+		})
 
-			const search_results = await this.execute_single_search({
-				query: current_query,
-				recall_depth: args.recall_depth,
-				search_limit: args.search_limit,
-				rerank_limit: args.rerank_limit,
-				stimulate_on_recall: args.stimulate_on_recall,
-				idol_id: args.idol_id,
-				root_ids: args.root_ids,
-				context_id: args.context_id,
-				process: args.process
-			})
+		process?.emit('vector_search_results', vector_res)
 
-			const new_memory = this.filterNewMemory(search_results.memory, collected_memory)
+		this.p.logger.log('SEARCH', 'article.searchByText start')
 
-			if (new_memory.length === 0) {
-				process?.emit('cot_converged', { depth: depth + 1, reason: 'no_new_results' })
-				break
-			}
+		const fulltext_res = await this.p.article.searchByText({
+			query
+		})
 
-			for (const k of new_memory) {
-				collected_memory.set(k.id, k)
-			}
+		process?.emit('fulltext_search_results', fulltext_res)
 
-			process?.emit('cot_iteration_results', {
-				depth: depth + 1,
-				new_results: new_memory.length,
-				total_results: collected_memory.size
-			})
+		const recalled_article_ids = new Set<string>()
 
-			if (depth < cot_depth - 1) {
-				const next_query = this.generateNextQuery(original_query, new_memory, used_queries)
-
-				if (!next_query || used_queries.has(next_query)) {
-					process?.emit('cot_converged', { depth: depth + 1, reason: 'no_new_query' })
-					break
-				}
-
-				current_query = next_query
-				used_queries.add(current_query)
+		for (const context of recall_res.related_contexts) {
+			for (const id of context.article_ids) {
+				recalled_article_ids.add(id)
 			}
 		}
 
-		const all_memory = Array.from(collected_memory.values())
+		const found_ids = new Set([...vector_res.map(r => r.id), ...fulltext_res.map(r => r.id)])
+		const missing_ids = Array.from(recalled_article_ids).filter(id => !found_ids.has(id))
 
-		const filtered_memory = this.filterByQuality(all_memory, DEFAULT_SIMILARITY_THRESHOLD)
+		if (missing_ids.length > 0) {
+			this.p.logger.log('SEARCH', 'fetching missing memory articles', () => ({ count: missing_ids.length }))
 
-		const { memory: final_memory } = await processResults(original_query, filtered_memory, this.pipeline)
+			const missing_articles = await this.p.article.getMany(missing_ids)
 
-		emitter.finish({ memory: final_memory })
+			const missing_results = Object.values(missing_articles).map(a => ({
+				id: a.id,
+				content: a.content,
+				similarity: 0.5,
+				metadata: a.metadata,
+				created_at: a.created_at,
+				updated_at: a.updated_at
+			}))
+
+			vector_res.push(...missing_results)
+		}
+
+		const { candidates, documents } = getUniqueDocs({ vector_res, fulltext_res })
+		const rerank_scores = await this.p.pipeline.rerank(query, documents)
+
+		const results: Array<SearchResult> = candidates.map((item, index) => ({
+			id: item.id,
+			content: item.content,
+			source: item.source,
+			score: rerank_scores[index]?.score ?? 0,
+			metadata: item.metadata,
+			updated_at: item.updated_at,
+			context_id: item.context_id
+		}))
+
+		const target_results = results.sort((a, b) => b.score - a.score).slice(0, 20)
+
+		this.p.logger.log('SEARCH', 'aggregateResults start')
+
+		const { memory } = await aggregation({
+			recall_res,
+			target_results,
+			sequence_context_id
+		})
+
+		process?.emit('aggregated_results', { memory })
+
+		this.p.logger.log('SEARCH', 'rerankMemory start')
+
+		return {
+			memory: reranked_memory
+		}
+	}
+
+	private async deepSearch(args: QueryArgs, emitter: ChainEmitter) {
+		const { query: original_query, cot_depth = 2, process } = args
 
 		return {
 			memory: final_memory,
@@ -137,7 +159,6 @@ export default class Index {
 			stimulate_intensity = system.memory_recall_intensity,
 			is_learning = false,
 			arousal = 1.0,
-			query_embedding,
 			context_id
 		} = args
 
@@ -219,9 +240,9 @@ export default class Index {
 		return memory.filter(k => k.score >= threshold)
 	}
 
-	private generateNextQuery(original_query: string, new_memory: Array<Memory>, used_queries: Set<string>) {
+	private async generateNextQuery(original_query: string, new_memory: Array<Memory>, used_queries: Set<string>) {
 		const content_text = new_memory.map(k => k.content).join(' ')
-		const keywords = extractKeywords(content_text)
+		const keywords = await this.p.pipeline.getKeywords(content_text)
 
 		if (keywords.length === 0) return null
 

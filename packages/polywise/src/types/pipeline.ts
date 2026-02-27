@@ -35,5 +35,5 @@ export interface SearchCandidate {
 	source: 'vector' | 'fulltext'
 	metadata?: Metadata
 	updated_at?: string
-	context_id?: string
+	context_id?: string | null
 }
