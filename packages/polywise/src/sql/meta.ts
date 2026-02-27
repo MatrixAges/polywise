@@ -4,14 +4,14 @@ import { app } from '../consts'
  * Creates the metadata schema.
  * Role: Initializes namespace for system metadata.
  */
-export const sql_create_schema_meta = `CREATE SCHEMA IF NOT EXISTS ${app.db.schema_meta};`
+export const sql_create_schema_meta = `CREATE SCHEMA IF NOT EXISTS ${app.schema_meta};`
 
 /**
  * Creates the schema version table.
  * Role: Tracks the current database migration state to ensure compatibility.
  */
 export const sql_create_table_schema_version = `
-  CREATE TABLE IF NOT EXISTS ${app.db.schema_meta}.schema_version (
+  CREATE TABLE IF NOT EXISTS ${app.schema_meta}.schema_version (
     id SERIAL PRIMARY KEY,
     version INTEGER NOT NULL,
     applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -24,7 +24,7 @@ export const sql_create_table_schema_version = `
  */
 export const sql_get_current_version = `
   SELECT version
-  FROM ${app.db.schema_meta}.schema_version
+  FROM ${app.schema_meta}.schema_version
   ORDER BY id DESC
   LIMIT 1
 `
@@ -34,7 +34,7 @@ export const sql_get_current_version = `
  * Role: Updates the system state after a successful migration.
  */
 export const sql_insert_version = `
-  INSERT INTO ${app.db.schema_meta}.schema_version (version)
+  INSERT INTO ${app.schema_meta}.schema_version (version)
   VALUES ($1)
 `
 
@@ -43,7 +43,7 @@ export const sql_insert_version = `
  * Role: Stores system counters and runtime metadata.
  */
 export const sql_create_table_stats = `
-  CREATE TABLE IF NOT EXISTS ${app.db.schema_meta}.stats (
+  CREATE TABLE IF NOT EXISTS ${app.schema_meta}.stats (
     key TEXT PRIMARY KEY,
     value JSONB,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP

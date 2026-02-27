@@ -34,7 +34,7 @@ export default class Index {
 	}
 
 	updateState() {
-		if (this.current_fatigue > system.activation.fatigue_threshold && this.state === 'FRESH') {
+		if (this.current_fatigue > system.fatigue_threshold && this.state === 'FRESH') {
 			this.state = 'TIRED'
 		}
 	}
@@ -69,7 +69,7 @@ export default class Index {
 			if (this.state !== 'SLEEPING' && this.state !== 'LEARNING') {
 				await this.runShadowTick()
 			}
-		}, system.timing.shadow_interval_ms)
+		}, system.shadow_interval_ms)
 	}
 
 	@catchFinally<Index>(ctx => ctx.busy(false))
@@ -104,10 +104,10 @@ export default class Index {
 
 		this.p.logger.log('SYSTEM', 'triggerSleepTick check', () => ({
 			active_count,
-			limit: system.shy.max_active_limit
+			limit: system.max_active_limit
 		}))
 
-		const is_overloaded = active_count > system.shy.max_active_limit
+		const is_overloaded = active_count > system.max_active_limit
 
 		if (!is_overloaded) return this.p.logger.log('SYSTEM', 'triggerSleepTick skipped - not overloaded')
 
@@ -116,8 +116,8 @@ export default class Index {
 		const sequence_scores = await this.getContextSequenceScores()
 
 		const selected_scores = sequence_scores
-			.filter(score_item => score_item.score >= system.context.context_sequence_replay_min_score)
-			.slice(0, system.context.context_sequence_replay_limit)
+			.filter(score_item => score_item.score >= system.context_sequence_replay_min_score)
+			.slice(0, system.context_sequence_replay_limit)
 
 		const context_ids = selected_scores.map(score_item => score_item.context_id)
 		const context_scores = selected_scores.map(score_item => score_item.score)
@@ -146,17 +146,17 @@ export default class Index {
 	 * 5. Decay: Inactive nodes lose potential over time (Leak).
 	 */
 	private async tick(threshold_override?: number, is_learning: boolean = false, arousal: number = 1.0) {
-		const threshold = threshold_override ?? system.default_config.default_node_threshold
+		const threshold = threshold_override ?? system.default_node_threshold
 
 		const active_res = await querySql<{ count: number }>(this.p.db, sql.brain.sql_get_active_node_count)
 
 		const active_count = active_res[0]?.count ?? 0
-		const heat = Math.min(1.0, active_count / system.shy.max_active_limit)
-		const threshold_decrement = system.shy.max_threshold_decay_step * (1.0 - heat)
+		const heat = Math.min(1.0, active_count / system.max_active_limit)
+		const threshold_decrement = system.max_threshold_decay_step * (1.0 - heat)
 
 		const inhibition_factor = Math.min(
-			system.tick.global_inhibition_max,
-			Math.max(0, heat * system.tick.global_inhibition_max)
+			system.global_inhibition_max,
+			Math.max(0, heat * system.global_inhibition_max)
 		)
 
 		await execSql(
@@ -170,7 +170,7 @@ export default class Index {
 
 		const count = count_res[0]?.value ?? 0
 
-		if (count > system.tick.input_decay_threshold) {
+		if (count > system.input_decay_threshold) {
 			await execSql(this.p.db, sql.simulation.sql_decay)
 			await execSql(this.p.db, sql.stat.sql_reset_input_count)
 		}
@@ -182,12 +182,12 @@ export default class Index {
 		if (!sequence_scores.length) return
 
 		const filtered_scores = sequence_scores.filter(
-			score_item => score_item.score >= system.context.context_sequence_replay_min_score
+			score_item => score_item.score >= system.context_sequence_replay_min_score
 		)
 
 		if (!filtered_scores.length) return
 
-		const selected_scores = filtered_scores.slice(0, system.context.context_sequence_replay_limit)
+		const selected_scores = filtered_scores.slice(0, system.context_sequence_replay_limit)
 
 		let max_score = 0
 
@@ -200,8 +200,7 @@ export default class Index {
 		if (max_score <= 0) return
 
 		for (const score_item of selected_scores) {
-			const replay_strength =
-				system.context.context_sequence_replay_strength * (score_item.score / max_score)
+			const replay_strength = system.context_sequence_replay_strength * (score_item.score / max_score)
 
 			await querySql(this.p.db, sql.brain.sql_strengthen_edges_by_context, [
 				replay_strength,
@@ -220,7 +219,7 @@ export default class Index {
 
 		await this.collectSequenceScores({
 			source_id: this.last_context_id,
-			depth: system.context.context_sequence_depth,
+			depth: system.context_sequence_depth,
 			step: 0,
 			base_score: 1,
 			scores,
@@ -248,12 +247,12 @@ export default class Index {
 
 		const edges = await querySql<Edge>(this.p.db, sql.context.sql_get_context_edges_by_source, [
 			source_id,
-			system.context.context_sequence_branch
+			system.context_sequence_branch
 		])
 
 		if (edges.length === 0) return
 
-		const hop_decay = Math.pow(system.context.context_sequence_hop_decay, step)
+		const hop_decay = Math.pow(system.context_sequence_hop_decay, step)
 
 		await this.applySequenceEdges({
 			edges,
@@ -314,7 +313,7 @@ export default class Index {
 	private isIdle(deep?: boolean) {
 		return (
 			Date.now() - this.last_user_interaction >
-			(deep ? system.timing.idle_decay_threshold_ms : system.timing.idle_timeout_ms)
+			(deep ? system.idle_decay_threshold_ms : system.idle_timeout_ms)
 		)
 	}
 

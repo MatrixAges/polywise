@@ -7,13 +7,13 @@ import { article_select_fields } from './fragments'
  */
 export const sql_upsert_article = `
   WITH updated_row AS (
-    UPDATE ${app.db.schema_memory}.articles
+    UPDATE ${app.schema_memory}.articles
     SET content = $2, metadata = COALESCE($3, metadata), updated_at = CURRENT_TIMESTAMP
     WHERE id = $1
     RETURNING ${article_select_fields}
   ),
   inserted_row AS (
-    INSERT INTO ${app.db.schema_memory}.articles (id, content, metadata)
+    INSERT INTO ${app.schema_memory}.articles (id, content, metadata)
     SELECT $1, $2, $3
     WHERE NOT EXISTS (SELECT 1 FROM updated_row)
     RETURNING ${article_select_fields}
@@ -29,7 +29,7 @@ export const sql_upsert_article = `
  */
 export const sql_get_article = `
   SELECT ${article_select_fields}
-  FROM ${app.db.schema_memory}.articles
+  FROM ${app.schema_memory}.articles
   WHERE id = $1
 `
 
@@ -39,7 +39,7 @@ export const sql_get_article = `
  */
 export const sql_get_articles_by_ids = `
   SELECT ${article_select_fields}
-  FROM ${app.db.schema_memory}.articles
+  FROM ${app.schema_memory}.articles
   WHERE id = ANY($1::text[])
 `
 
@@ -48,7 +48,7 @@ export const sql_get_articles_by_ids = `
  * Role: Persists source confidence and conflict monitoring signals.
  */
 export const sql_update_article_metadata = `
-  UPDATE ${app.db.schema_memory}.articles
+  UPDATE ${app.schema_memory}.articles
   SET metadata = $2,
   updated_at = CURRENT_TIMESTAMP
   WHERE id = $1
@@ -59,7 +59,7 @@ export const sql_update_article_metadata = `
  * Role: Removes a memory and all related data including node_sources references.
  */
 export const sql_delete_article = `
-  DELETE FROM ${app.db.schema_memory}.articles
+  DELETE FROM ${app.schema_memory}.articles
   WHERE id = ANY($1::text[])
 `
 
@@ -69,7 +69,7 @@ export const sql_delete_article = `
  */
 export const sql_get_article_embedding = `
   SELECT embedding
-  FROM ${app.db.schema_memory}.article_embeddings
+  FROM ${app.schema_memory}.article_embeddings
   WHERE id = ANY($1::text[])
 `
 
@@ -78,7 +78,7 @@ export const sql_get_article_embedding = `
  * Role: Enables semantic search by mapping article content to a vector space.
  */
 export const sql_upsert_article_embedding = `
-  INSERT INTO ${app.db.schema_memory}.article_embeddings (
+  INSERT INTO ${app.schema_memory}.article_embeddings (
     id,
     article_id,
     embedding
@@ -97,7 +97,7 @@ export const sql_upsert_article_embedding = `
 export const sql_search_articles_by_text = `
   SELECT ${article_select_fields},
     ts_rank(to_tsvector('english', coalesce(content,'')), websearch_to_tsquery('english', $1)) AS similarity
-  FROM ${app.db.schema_memory}.articles
+  FROM ${app.schema_memory}.articles
   WHERE to_tsvector('english', coalesce(content,'')) @@ websearch_to_tsquery('english', $1)
   ORDER BY similarity DESC
   LIMIT $2
@@ -111,8 +111,8 @@ export const sql_search_articles_by_vector = `
   SELECT 
     ${article_select_fields},
     1 - (e.embedding <=> $1) AS similarity
-  FROM ${app.db.schema_memory}.articles a
-  JOIN ${app.db.schema_memory}.article_embeddings e ON a.id = e.article_id
+  FROM ${app.schema_memory}.articles a
+  JOIN ${app.schema_memory}.article_embeddings e ON a.id = e.article_id
   WHERE (1 - (e.embedding <=> $1)) > $3
   ORDER BY e.embedding <=> $1
   LIMIT $2

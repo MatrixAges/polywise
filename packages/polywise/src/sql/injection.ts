@@ -11,9 +11,9 @@ export const sql_inject_edges_insert_edge = (
 	decay_resistance: number,
 	weight: number
 ) => `
-  INSERT INTO ${app.db.schema_brain}.edges (id, source_id, target_id, learning_rate, decay_resistance, weight)
+  INSERT INTO ${app.schema_brain}.edges (id, source_id, target_id, learning_rate, decay_resistance, weight)
   SELECT '${sub_id}_${obj_id}', '${sub_id}', '${obj_id}', ${learning_rate}, ${decay_resistance}, ${weight}
-  WHERE NOT EXISTS (SELECT 1 FROM ${app.db.schema_brain}.edges WHERE source_id = '${sub_id}' AND target_id = '${obj_id}');
+  WHERE NOT EXISTS (SELECT 1 FROM ${app.schema_brain}.edges WHERE source_id = '${sub_id}' AND target_id = '${obj_id}');
 `
 
 /**
@@ -27,11 +27,11 @@ export const sql_inject_edges_update_edge = (
 	decay_resistance: number,
 	weight: number
 ) => `
-  UPDATE ${app.db.schema_brain}.edges
+  UPDATE ${app.schema_brain}.edges
   SET
     learning_rate = GREATEST(learning_rate, ${learning_rate}),
     decay_resistance = GREATEST(decay_resistance, ${decay_resistance}),
-    weight = LEAST(weight + ${weight}, ${system.node_edge.edge_weight_max}),
+    weight = LEAST(weight + ${weight}, ${system.edge_weight_max}),
     updated_at = CURRENT_TIMESTAMP
   WHERE source_id = '${sub_id}' AND target_id = '${obj_id}';
 `

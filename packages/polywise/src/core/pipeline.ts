@@ -25,7 +25,7 @@ export default class Index {
 
 		this.p = p
 		this.config = config as RequiredDeep<RequiredPipelineConfig>
-		this.config.models_dir = models_dir || app.model.default_models_dir
+		this.config.models_dir = models_dir || app.default_models_dir
 		this.config.embedding_config = embedding_config || app.default_embedding_config
 		this.config.reranker_config = reranker_config || app.default_reranker_config
 		this.config.keyword_config = keyword_config || app.default_keyword_config

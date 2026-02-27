@@ -14,11 +14,11 @@ export default (edge: Edge) => {
 	const timestamp = dayjs(updated_at).valueOf()
 	const elapsed_hours = Math.max(0, (Date.now() - timestamp) / 3600000)
 
-	const half_life = Math.max(system.context.context_sequence_time_half_life_hours, 1)
-	const window_hours = Math.max(system.context.context_sequence_window_hours, 1)
+	const half_life = Math.max(system.context_sequence_time_half_life_hours, 1)
+	const window_hours = Math.max(system.context_sequence_window_hours, 1)
 	const time_decay = Math.pow(0.5, elapsed_hours / half_life)
 	const window_count = Math.floor(elapsed_hours / window_hours)
-	const window_decay = Math.pow(system.context.context_sequence_window_penalty, window_count)
+	const window_decay = Math.pow(system.context_sequence_window_penalty, window_count)
 
 	return base_weight * time_decay * window_decay
 }

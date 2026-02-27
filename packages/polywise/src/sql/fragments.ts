@@ -25,7 +25,7 @@ export const article_select_fields = `
 
 export const sql_node_sources_join_articles = `
   SELECT DISTINCT a.id, a.content
-  FROM ${app.db.schema_memory}.articles a
-  JOIN ${app.db.schema_brain}.node_sources ns ON a.id = ns.article_id
+  FROM ${app.schema_memory}.articles a
+  JOIN ${app.schema_brain}.node_sources ns ON a.id = ns.article_id
   WHERE ns.node_id = ANY($1)
 `

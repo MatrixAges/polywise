@@ -6,7 +6,7 @@ import { edge_recall_fields, edge_select_fields } from './fragments'
  * Role: Establishes a relationship or association between two concepts.
  */
 export const sql_connect = `
-  INSERT INTO ${app.db.schema_brain}.edges (id, source_id, target_id, weight, lock)
+  INSERT INTO ${app.schema_brain}.edges (id, source_id, target_id, weight, lock)
   VALUES ($1, $2, $3, $4, $5, $6, COALESCE($7, 'global'), $8)
 `
 
@@ -16,7 +16,7 @@ export const sql_connect = `
  */
 export const sql_get_edges_for_nodes = `
   SELECT ${edge_select_fields}
-  FROM ${app.db.schema_brain}.edges
+  FROM ${app.schema_brain}.edges
   WHERE source_id = ANY($1) OR target_id = ANY($1)
   ORDER BY weight DESC
 `
@@ -27,8 +27,8 @@ export const sql_get_edges_for_nodes = `
  */
 export const sql_get_snapshot_edges = (weight_threshold: number) => `
   SELECT ${edge_recall_fields}
-  FROM ${app.db.schema_brain}.edges
+  FROM ${app.schema_brain}.edges
   WHERE weight > ${weight_threshold}
   ORDER BY weight DESC
-  LIMIT ${system.snapshot.snapshot_edges_limit}
+  LIMIT ${system.snapshot_edges_limit}
 `

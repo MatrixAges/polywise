@@ -32,7 +32,7 @@ export default class Index {
 	}
 
 	private async initPglite() {
-		this.db = await getPglite(this.config.data_dir || app.db.default_data_dir)
+		this.db = await getPglite(this.config.data_dir || app.default_data_dir)
 
 		await setDbScopes(this.db, this.config.scopes!)
 	}

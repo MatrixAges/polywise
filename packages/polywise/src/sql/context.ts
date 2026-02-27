@@ -6,7 +6,7 @@ import { app } from '../consts'
  */
 export const sql_find_nearest_contexts = `
   SELECT id, 1 - (embedding <=> $1) AS similarity
-  FROM ${app.db.schema_memory}.contexts
+  FROM ${app.schema_memory}.contexts
   ORDER BY embedding <=> $1
   LIMIT $2
 `
@@ -16,7 +16,7 @@ export const sql_find_nearest_contexts = `
  * Role: Creates a fresh semantic context container.
  */
 export const sql_insert_context = `
-  INSERT INTO ${app.db.schema_memory}.contexts (id, embedding, keywords, usage_count)
+  INSERT INTO ${app.schema_memory}.contexts (id, embedding, keywords, usage_count)
   VALUES ($1, $2, $3, $4)
 `
 
@@ -25,7 +25,7 @@ export const sql_insert_context = `
  * Role: Keeps context representation adaptive over time.
  */
 export const sql_update_context = `
-  UPDATE ${app.db.schema_memory}.contexts
+  UPDATE ${app.schema_memory}.contexts
   SET embedding = $2,
       keywords = COALESCE($3, keywords),
       usage_count = usage_count + 1,
@@ -38,10 +38,10 @@ export const sql_update_context = `
  * Role: Learns navigation pattern from one context to another.
  */
 export const sql_upsert_context_edge = `
-  INSERT INTO ${app.db.schema_memory}.context_edges (source_id, target_id, weight)
+  INSERT INTO ${app.schema_memory}.context_edges (source_id, target_id, weight)
   VALUES ($1, $2, 1.0)
   ON CONFLICT (source_id, target_id) DO UPDATE SET
-    weight = ${app.db.schema_memory}.context_edges.weight + 1.0,
+    weight = ${app.schema_memory}.context_edges.weight + 1.0,
     updated_at = CURRENT_TIMESTAMP
 `
 
@@ -51,7 +51,7 @@ export const sql_upsert_context_edge = `
  */
 export const sql_get_next_context = `
   SELECT target_id, weight
-  FROM ${app.db.schema_memory}.context_edges
+  FROM ${app.schema_memory}.context_edges
   WHERE source_id = $1
   ORDER BY weight DESC, updated_at DESC
   LIMIT 1
@@ -63,7 +63,7 @@ export const sql_get_next_context = `
  */
 export const sql_get_context_edges_by_source = `
   SELECT target_id, weight, updated_at
-  FROM ${app.db.schema_memory}.context_edges
+  FROM ${app.schema_memory}.context_edges
   WHERE source_id = $1
   ORDER BY weight DESC, updated_at DESC
   LIMIT $2

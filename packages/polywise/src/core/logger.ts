@@ -22,7 +22,7 @@ export default class Index {
 		this.config = config as RequiredDeep<LoggerConfig>
 		this.config.enable_console_log = enable_console_log || false
 		this.config.enable_file_log = enable_file_log || false
-		this.config.dir = dir || app.loggger.default_logger_dir
+		this.config.dir = dir || app.default_logger_dir
 		this.config.exclude_stages = difference(this.stages, exclude_stages || [])
 
 		this.checkDir()
@@ -43,7 +43,7 @@ export default class Index {
 
 		if (!this.stages.includes(stage)) return
 
-		const timestamp = gray(dayjs().format(app.loggger.default_timestamp_format))
+		const timestamp = gray(dayjs().format(app.default_timestamp_format))
 		const stage_text = stage_color_map[stage](stage)
 		const message_text = green(message)
 
@@ -56,7 +56,7 @@ export default class Index {
 		}
 
 		if (enable_file_log) {
-			const file_path = join(dir, `${dayjs().format(app.loggger.default_date_format)}.log`)
+			const file_path = join(dir, `${dayjs().format(app.default_date_format)}.log`)
 
 			writeFile(file_path, target, { flag: 'a' })
 		}

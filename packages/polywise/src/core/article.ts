@@ -74,7 +74,7 @@ export default class Index {
 
 		return querySql<ArticleWithSimilarity>(this.p.db, sql.article.sql_search_articles_by_text, [
 			text,
-			limit ?? app.article.default_search_limit
+			limit ?? app.default_search_limit
 		])
 	}
 
@@ -85,8 +85,8 @@ export default class Index {
 
 		return querySql<ArticleWithSimilarity>(this.p.db, sql.article.sql_search_articles_by_vector, [
 			`[${embedding.join(',')}]`,
-			limit ?? app.article.default_search_limit,
-			threshold ?? system.default_config.default_similarity_threshold
+			limit ?? app.default_search_limit,
+			threshold ?? system.default_similarity_threshold
 		])
 	}
 }
