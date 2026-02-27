@@ -1,9 +1,10 @@
+import { getId } from 'shared'
 import { injectable } from 'tsyringe'
 
 import { app, system } from '@/consts'
 
 import sql from '../sql'
-import { generateId, getMetadata, querySql } from '../utils'
+import { getMetadata, querySql } from '../utils'
 
 import type { ArticleEntity, ArticleWithSimilarity, SearchArticlesArgs, upsertArticleArgs } from '../types'
 import type Polywise from './polywise'
@@ -20,7 +21,7 @@ export default class Index {
 		const { id, content } = args
 		const { metadata } = getMetadata(args)
 
-		const article_id = id ?? generateId()
+		const article_id = id ?? getId()
 
 		const res = await querySql<ArticleEntity>(this.p.db, sql.article.sql_upsert_article, [
 			article_id,
@@ -33,7 +34,7 @@ export default class Index {
 		const embedding = await this.p.pipeline.embed(content)
 
 		await querySql(this.p.db, sql.article.sql_upsert_article_embedding, [
-			generateId(),
+			getId(),
 			article_id,
 			`[${embedding.join(',')}]`
 		])

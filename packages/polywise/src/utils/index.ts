@@ -1,5 +1,4 @@
 export { default as listFiles } from './listFiles'
-export { default as generateId } from './generateId'
 export { default as generateHash } from './generateHash'
 export { default as generateModelHash } from './generateModelHash'
 export { default as checkModelExsit } from './checkModelExsit'
