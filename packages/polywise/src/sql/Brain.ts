@@ -184,3 +184,24 @@ export const sql_strengthen_edges_by_context = `
 	WHERE context_id = ANY($2)
 	  AND (lock IS NULL OR lock = FALSE)
 `
+
+/**
+ * Strengthens edges for context ids with per-context strengths.
+ * Role: Reinforces replayed context trajectories during consolidation with weighted replay intensity.
+ * Mapping: context_ids[i] -> strengths[i].
+ */
+export const sql_strengthen_edges_by_context_batch = `
+	WITH replay_input AS (SELECT context_id, strength FROM unnest($1::text[], $2::float8[]) AS input(context_id, strength)),
+	target_rows AS (
+		SELECT e.id, LEAST(e.weight + r.strength, ${system.edge_weight_max}) AS next_weight
+		FROM ${app.schema_brain}.edges e
+		INNER JOIN replay_input r ON e.context_id = r.context_id
+		WHERE (e.lock IS NULL OR e.lock = FALSE)
+	)
+	UPDATE ${app.schema_brain}.edges e
+	SET weight = t.next_weight,
+	    distance = GREATEST(1.0 / (t.next_weight + ${system.distance_epsilon}), 0.1),
+	    updated_at = CURRENT_TIMESTAMP
+	FROM target_rows t
+	WHERE e.id = t.id
+`

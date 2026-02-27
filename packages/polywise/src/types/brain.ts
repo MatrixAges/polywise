@@ -42,3 +42,21 @@ export interface SequenceFrontierItem {
 	base_score: number
 	path_ids: Set<string>
 }
+
+export interface TickOptions {
+	threshold?: number
+	is_learning?: boolean
+	arousal?: number
+}
+
+export interface SpreadOptions {
+	steps?: number
+	threshold?: number
+	is_learning?: boolean
+	arousal?: number
+}
+
+export interface SleepReplayPayload {
+	context_ids: Array<string>
+	context_scores: Array<number>
+}

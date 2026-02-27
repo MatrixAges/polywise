@@ -172,3 +172,26 @@ export const sql_decay = `
  * Role: Provides external stimulation to a target concept node.
  */
 export const sql_stimulate = `UPDATE ${app.schema_brain}.nodes SET potential = potential + $1 WHERE id = $2`
+
+/**
+ * Increases the potential of a batch of nodes.
+ * Role: Simulates "attention" or "stimulation" from external sources or internal processes, priming these nodes for activation.
+ */
+export const sql_stimulate_nodes_batch = `
+	UPDATE ${app.schema_brain}.nodes
+	SET potential = LEAST(potential + $1, 2.0),
+	    updated_at = CURRENT_TIMESTAMP
+	WHERE id = ANY($2)
+`
+
+/**
+ * Batch update to strengthen bidirectional connections between groups of nodes.
+ * Role: Efficiently reinforces associations between multiple concepts at once.
+ */
+export const sql_strengthen_edges_batch = `
+	UPDATE ${app.schema_brain}.edges
+	SET weight = LEAST(weight + $1, 5.0),
+	    updated_at = CURRENT_TIMESTAMP
+	WHERE (source_id = ANY($2) AND target_id = ANY($3))
+	   OR (source_id = ANY($3) AND target_id = ANY($2))
+`

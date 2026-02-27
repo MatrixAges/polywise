@@ -52,6 +52,8 @@ export const stimulation_score_weight = 0.7
 export const stimulation_memory_weight = 0.3
 export const conflict_stimulation_count_limit = 3
 export const conflict_stimulation_score_limit = 0.6
+export const burst_tick_count = 100
+export const burst_tick_delay_ms = 50
 
 export const source_confidence_min = 0.3
 export const source_confidence_base = 0.4
