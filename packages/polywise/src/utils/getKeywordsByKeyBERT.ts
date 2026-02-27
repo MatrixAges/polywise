@@ -2,10 +2,6 @@ import { Jieba } from '@node-rs/jieba'
 import { dict } from '@node-rs/jieba/dict.js'
 import { eng, zho } from 'stopword'
 
-import Console from '../Console'
-
-import type { Extractor, KeywordScore, TaggedWord } from '../types'
-
 const jieba_instance = Jieba.withDict(dict)
 
 const stopword_set = new Set([...zho, ...eng])
@@ -58,17 +54,13 @@ const generateCandidates = (text: string) => {
 	return Array.from(new Set(ngram_list))
 }
 
-const extract = async (text: string, extractor: Extractor, top_k = 5) => {
+export default async (text: string, extractor: Extractor, top_k = 5) => {
 	const clean_text = text.trim()
 	if (!clean_text) return []
 
 	const candidate_list = generateCandidates(clean_text)
-	if (!candidate_list.length) return []
 
-	Console.log('PIPELINE', 'KeyBERT extract candidates', {
-		text_len: clean_text.length,
-		candidates_count: candidate_list.length
-	})
+	if (!candidate_list.length) return []
 
 	const input_list = [clean_text, ...candidate_list]
 
@@ -89,4 +81,23 @@ const extract = async (text: string, extractor: Extractor, top_k = 5) => {
 	return result_list.sort((a, b) => b.score - a.score).slice(0, top_k)
 }
 
-export default { extract }
+interface KeywordScore {
+	word: string
+	score: number
+}
+
+interface TaggedWord {
+	word: string
+	tag: string
+}
+
+interface ExtractorOptions {
+	pooling: 'mean'
+	normalize: boolean
+}
+
+interface ExtractorOutput {
+	tolist: () => Array<Array<number>>
+}
+
+type Extractor = (input_list: Array<string>, options: ExtractorOptions) => Promise<ExtractorOutput>

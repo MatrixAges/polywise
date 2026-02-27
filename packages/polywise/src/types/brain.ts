@@ -2,6 +2,7 @@ export type BrainState = 'FRESH' | 'LEARNING' | 'TIRED' | 'SLEEPING'
 
 export interface Node {
 	id: string
+	context_id: string | null
 	label: string | null
 	x: number | null
 	y: number | null
@@ -20,6 +21,7 @@ export interface Node {
 
 export interface Edge {
 	id: string
+	context_id: string | null
 	source_id: string | null
 	target_id: string | null
 	weight: number

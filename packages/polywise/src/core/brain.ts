@@ -3,23 +3,10 @@ import { injectable } from 'tsyringe'
 
 import { system } from '../consts'
 import sql from '../sql'
-import { execSql, getContextEdgeWeight, querySql } from '../utils'
+import { execSql, getMaxReplayScore, getReplayScores, querySql } from '../utils'
 
-import type {
-	BrainState,
-	Edge,
-	Node,
-	SequenceFrontierItem,
-	SequenceScore,
-	SleepReplayPayload,
-	SpreadOptions,
-	TickOptions
-} from '../types'
+import type { BrainState, Node, SleepReplayPayload, SpreadOptions, TickOptions } from '../types'
 import type Polywise from './polywise'
-
-function sortScoreEntryDesc(left_item: [string, number], right_item: [string, number]) {
-	return right_item[1] - left_item[1]
-}
 
 @injectable()
 export default class Index {
@@ -27,7 +14,6 @@ export default class Index {
 
 	private state: BrainState = 'FRESH'
 	private last_user_interaction = Date.now()
-	private last_context_id: string | null = null
 	private current_fatigue = 0
 
 	private is_loop_running = false
@@ -37,6 +23,14 @@ export default class Index {
 	init(p: Polywise) {
 		this.p = p
 		this.start()
+	}
+
+	setBusy(next_busy: boolean) {
+		this.is_busy = next_busy
+	}
+
+	report() {
+		this.last_user_interaction = Date.now()
 	}
 
 	async stimulate(node_ids: Array<string>, intensity: number) {
@@ -122,7 +116,7 @@ export default class Index {
 				return
 			}
 
-			const replay_payload = await this.getSleepReplayPayload()
+			const replay_payload = await this.p.context.getSleepReplayPayload()
 
 			await this.runSleepTickTransaction(replay_payload)
 
@@ -145,16 +139,6 @@ export default class Index {
 		}
 
 		this.timer = setTimeout(() => this.heartbeat(), system.shadow_interval_ms)
-	}
-
-	private setBusy(next_busy: boolean) {
-		this.is_busy = next_busy
-	}
-
-	private report(context_id?: string) {
-		this.last_user_interaction = Date.now()
-		if (!context_id) return
-		this.last_context_id = context_id
 	}
 
 	private updateStateByFatigue() {
@@ -263,26 +247,6 @@ export default class Index {
 		return false
 	}
 
-	private async getSleepReplayPayload() {
-		const sequence_scores = await this.getContextSequenceScores()
-		const selected_scores = this.selectReplayScores(sequence_scores)
-
-		const context_ids: Array<string> = []
-		const context_scores: Array<number> = []
-
-		for (const selected_item of selected_scores) {
-			context_ids.push(selected_item.context_id)
-			context_scores.push(selected_item.score)
-		}
-
-		const payload: SleepReplayPayload = {
-			context_ids,
-			context_scores
-		}
-
-		return payload
-	}
-
 	private async runSleepTickTransaction(replay_payload: SleepReplayPayload) {
 		await execSql(this.p.db, sql.meta.sql_begin)
 
@@ -308,13 +272,13 @@ export default class Index {
 	}
 
 	private async applyContextSequenceReplay() {
-		const sequence_scores = await this.getContextSequenceScores()
+		const sequence_scores = await this.p.context.getContextSequenceScores()
 		if (!sequence_scores.length) return
 
-		const selected_scores = this.selectReplayScores(sequence_scores)
+		const selected_scores = getReplayScores(sequence_scores)
 		if (!selected_scores.length) return
 
-		const max_score = this.getMaxReplayScore(selected_scores)
+		const max_score = getMaxReplayScore(selected_scores)
 		if (max_score <= 0) return
 
 		const context_ids: Array<string> = []
@@ -326,138 +290,6 @@ export default class Index {
 		}
 
 		await querySql(this.p.db, sql.brain.sql_strengthen_edges_by_context_batch, [context_ids, strengths])
-	}
-
-	private selectReplayScores(sequence_scores: Array<SequenceScore>) {
-		const selected_scores: Array<SequenceScore> = []
-
-		for (const score_item of sequence_scores) {
-			if (score_item.score < system.context_sequence_replay_min_score) continue
-
-			selected_scores.push(score_item)
-			if (selected_scores.length >= system.context_sequence_replay_limit) break
-		}
-
-		return selected_scores
-	}
-
-	private getMaxReplayScore(selected_scores: Array<SequenceScore>) {
-		let max_score = 0
-
-		for (const selected_item of selected_scores) {
-			if (selected_item.score > max_score) {
-				max_score = selected_item.score
-			}
-		}
-
-		return max_score
-	}
-
-	private async getContextSequenceScores() {
-		if (!this.last_context_id) return [] as Array<SequenceScore>
-
-		const scores = new Map<string, number>()
-
-		let frontier: Array<SequenceFrontierItem> = [
-			{
-				context_id: this.last_context_id,
-				base_score: 1,
-				path_ids: new Set<string>([this.last_context_id])
-			}
-		]
-
-		for (let step_index = 0; step_index < system.context_sequence_depth; step_index++) {
-			if (!frontier.length) break
-
-			const source_ids = this.collectFrontierSourceIds(frontier)
-			const edges = await this.getContextEdgesBySources(source_ids, system.context_sequence_branch)
-
-			if (!edges.length) break
-
-			const edge_map = this.buildContextEdgeMap(edges)
-			const hop_decay = Math.pow(system.context_sequence_hop_decay, step_index)
-			const next_frontier: Array<SequenceFrontierItem> = []
-
-			for (const frontier_item of frontier) {
-				const source_edges = edge_map.get(frontier_item.context_id)
-
-				if (!source_edges || !source_edges.length) continue
-
-				for (const edge_item of source_edges) {
-					if (!edge_item.target_id) continue
-
-					const edge_weight = getContextEdgeWeight(edge_item)
-
-					if (edge_weight <= 0) continue
-
-					const score = frontier_item.base_score * edge_weight * hop_decay
-					const prev_score = scores.get(edge_item.target_id) ?? 0
-
-					scores.set(edge_item.target_id, prev_score + score)
-
-					const reach_limit = step_index + 1 >= system.context_sequence_depth
-
-					if (reach_limit) continue
-					if (frontier_item.path_ids.has(edge_item.target_id)) continue
-
-					const next_path_ids = new Set<string>(frontier_item.path_ids)
-
-					next_path_ids.add(edge_item.target_id)
-
-					next_frontier.push({
-						context_id: edge_item.target_id,
-						base_score: frontier_item.base_score * edge_weight,
-						path_ids: next_path_ids
-					})
-				}
-			}
-
-			frontier = next_frontier
-		}
-
-		const score_entries = Array.from(scores.entries())
-		score_entries.sort(sortScoreEntryDesc)
-
-		const sequence_scores: Array<SequenceScore> = []
-
-		for (const entry_item of score_entries) {
-			sequence_scores.push({
-				context_id: entry_item[0],
-				score: entry_item[1]
-			})
-		}
-
-		return sequence_scores
-	}
-
-	private collectFrontierSourceIds(frontier: Array<SequenceFrontierItem>) {
-		const source_ids: Array<string> = []
-
-		for (const frontier_item of frontier) {
-			source_ids.push(frontier_item.context_id)
-		}
-
-		return source_ids
-	}
-
-	private buildContextEdgeMap(edges: Array<Edge>) {
-		const edge_map = new Map<string, Array<Edge>>()
-
-		for (const edge_item of edges) {
-			if (!edge_item.source_id) continue
-
-			const edge_list = edge_map.get(edge_item.source_id) ?? []
-
-			edge_list.push(edge_item)
-			edge_map.set(edge_item.source_id, edge_list)
-		}
-
-		return edge_map
-	}
-
-	private async getContextEdgesBySources(source_ids: Array<string>, branch_limit: number) {
-		if (!source_ids.length) return [] as Array<Edge>
-		return querySql<Edge>(this.p.db, sql.context.sql_get_context_edges_by_sources, [source_ids, branch_limit])
 	}
 
 	private async runShadowTick() {

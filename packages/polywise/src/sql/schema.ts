@@ -8,6 +8,7 @@ export const sql_create_schema_user_space = `CREATE SCHEMA IF NOT EXISTS "${app.
 export const sql_create_table_nodes = `
   CREATE TABLE IF NOT EXISTS ${app.schema_brain}.nodes (
     id TEXT PRIMARY KEY,
+    context_id TEXT,
     label TEXT,
     x REAL,
     y REAL,
@@ -29,6 +30,7 @@ export const sql_create_table_nodes = `
 export const sql_create_table_edges = `
   CREATE TABLE IF NOT EXISTS ${app.schema_brain}.edges (
     id TEXT PRIMARY KEY,
+    context_id TEXT,
     source_id TEXT REFERENCES ${app.schema_brain}.nodes(id),
     target_id TEXT REFERENCES ${app.schema_brain}.nodes(id),
     weight REAL DEFAULT 0.1,

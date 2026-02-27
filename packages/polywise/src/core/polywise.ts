@@ -6,6 +6,7 @@ import { app } from '../consts'
 import { getPglite, setDbScopes } from '../utils'
 import Article from './article'
 import Brain from './brain'
+import Context from './context'
 import Logger from './logger'
 import Pipeline from './pipeline'
 
@@ -18,6 +19,7 @@ export default class Index {
 	pipeline = resolve(Pipeline)
 	article = resolve(Article)
 	brain = resolve(Brain)
+	context = resolve(Context)
 
 	config!: PolywiseConfig
 	db!: PGlite
@@ -29,6 +31,9 @@ export default class Index {
 		await this.initPglite()
 		await this.initLogger()
 		await this.initPipeline()
+
+		this.brain.init(this)
+		this.context.init(this)
 	}
 
 	private async initPglite() {
@@ -45,6 +50,6 @@ export default class Index {
 		await this.pipeline.init(this, this.config.pipeline)
 	}
 
-	@catchFinally<Index>(ctx => ctx.brain.busy(false))
+	@catchFinally<Index>(ctx => ctx.brain.setBusy(false))
 	async query(args: QueryArgs) {}
 }

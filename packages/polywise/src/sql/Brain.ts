@@ -205,3 +205,68 @@ export const sql_strengthen_edges_by_context_batch = `
 	FROM target_rows t
 	WHERE e.id = t.id
 `
+
+/**
+ * Retrieves nodes matching a text label pattern.
+ * Role: Keyword-based memory retrieval entry point, allowing the system to recall concepts by name.
+ */
+export const sql_recall_nodes_by_label = `
+	SELECT id, label, x, y, potential, created_at, updated_at
+	FROM ${app.schema_brain}.nodes
+	WHERE (label ILIKE $1 OR $1 ILIKE '%' || label || '%')
+	ORDER BY potential DESC
+	LIMIT $2
+`
+
+/**
+ * Performs a recursive graph search to find nodes related to the starting set.
+ * Role: Associative memory recall (spreading activation). Finds concepts that are strongly connected to the initial thoughts, up to a certain depth.
+ */
+export const sql_recall_related_nodes = `
+	WITH RECURSIVE search_graph AS (
+		SELECT source_id, target_id, weight, 1 as depth
+		FROM ${app.schema_brain}.edges
+		WHERE (source_id = ANY($1) OR target_id = ANY($1))
+		  AND ($4::text IS NULL OR context_id = $4)
+		
+		UNION ALL
+		
+		SELECT e.source_id, e.target_id, e.weight, sg.depth + 1
+		FROM ${app.schema_brain}.edges e
+		JOIN search_graph sg ON (e.source_id = sg.target_id OR e.target_id = sg.source_id)
+		WHERE sg.depth < $2
+		AND e.weight > 0.2
+		AND ($4::text IS NULL OR e.context_id = $4)
+	)
+	SELECT DISTINCT n.id, n.label, n.x, n.y, n.potential, n.created_at, n.updated_at
+	FROM ${app.schema_brain}.nodes n
+	JOIN (
+		SELECT DISTINCT source_id as nid FROM search_graph
+		UNION
+		SELECT DISTINCT target_id as nid FROM search_graph
+	) connected ON n.id = connected.nid
+	WHERE ($4::text IS NULL OR n.context_id = $4)
+	ORDER BY n.potential DESC
+	LIMIT $3
+`
+
+/**
+ * Retrieves all edges connecting a set of nodes.
+ * Role: Reconstructs the local graph structure for a set of recalled concepts.
+ */
+export const sql_get_edges_between_nodes = `
+	SELECT id, source_id, target_id, weight, distance, learning_rate, decay_resistance, context_id, created_at, updated_at
+	FROM ${app.schema_brain}.edges
+	WHERE source_id = ANY($1) AND target_id = ANY($1)
+`
+
+/**
+ * Retrieves original content articles associated with specific nodes.
+ * Role: Grounds abstract node concepts back to their source knowledge/text for detailed retrieval.
+ */
+export const sql_get_node_articles = `
+	SELECT DISTINCT a.id, a.content
+	FROM ${app.schema_brain}.articles a
+	JOIN ${app.schema_brain}.node_sources ns ON a.id = ns.article_id
+	WHERE ns.node_id = ANY($1)
+`

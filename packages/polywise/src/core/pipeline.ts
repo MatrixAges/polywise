@@ -4,7 +4,14 @@ import to from 'await-to-js'
 import { remove } from 'fs-extra'
 import { injectable } from 'tsyringe'
 
-import { checkModelExsit, generateModelHash, getAvgVectors, getTextChunks } from '@/utils'
+import {
+	checkModelExsit,
+	generateModelHash,
+	getAvgVectors,
+	getKeywordsByKeyBERT,
+	getTextChunks,
+	splitSentence
+} from '@/utils'
 
 import { app } from '../consts'
 
@@ -141,62 +148,109 @@ export default class Index {
 		return scores
 	}
 
-	async search(query: PipelineSearchArgs) {
-		const { query } = args
+	async getKeywords(text: string) {
+		if (!text.trim()) return []
 
-		const [vector_results, fulltext_results] = await Promise.all([vectorSearch(), fulltextSearch()])
+		this.p.logger.log('PIPELINE', 'keyword generation start')
 
-		const candidates_map = new Map<string, SearchCandidate>()
-		const content_set = new Set<string>()
+		const sentences = await splitSentence([text])
+		const all_keywords: Array<string> = []
 
-		for (const r of vector_results) {
-			if (candidates_map.has(r.id)) continue
-			if (content_set.has(r.content)) continue
+		for (const sentence of sentences) {
+			const keywords = await this.getSentenceKeywords(sentence)
 
-			candidates_map.set(r.id, {
-				id: r.id,
-				content: r.content,
-				source: 'vector',
-				metadata: r.metadata,
-				updated_at: r.updated_at,
-				context_id: r.context_id
-			})
-			content_set.add(r.content)
+			if (keywords.length) all_keywords.push(...keywords)
 		}
 
-		for (const r of fulltext_results) {
-			if (candidates_map.has(r.id)) continue
-			if (content_set.has(r.content)) continue
+		const unique_keywords: Array<string> = []
+		const seen = new Set<string>()
 
-			candidates_map.set(r.id, {
-				id: r.id,
-				content: r.content,
-				source: 'fulltext',
-				metadata: r.metadata,
-				updated_at: r.updated_at,
-				context_id: r.context_id
-			})
-			content_set.add(r.content)
+		for (const kw of all_keywords) {
+			const key = kw.toLowerCase().trim()
+
+			if (!key) continue
+
+			if (!seen.has(key)) {
+				unique_keywords.push(kw.trim())
+				seen.add(key)
+			}
 		}
 
-		const candidates = Array.from(candidates_map.values())
-
-		const documents = candidates.map(c => c.content)
-
-		const rerank_scores = await this.rerank(query, documents)
-
-		const results: Array<SearchResult> = candidates.map((candidate, index) => ({
-			id: candidate.id,
-			content: candidate.content,
-			source: candidate.source,
-			rerankScore: rerank_scores[index]?.score ?? 0,
-			metadata: candidate.metadata,
-			updated_at: candidate.updated_at,
-			context_id: candidate.context_id
-		}))
-
-		return results.sort((a, b) => b.rerankScore - a.rerankScore).slice(0, rerank_limit)
+		return unique_keywords
 	}
+
+	private async getSentenceKeywords(sentence: string) {
+		if (this.config.keyword_config.type === 'custom') {
+			return this.config.keyword_config.fn(sentence)
+		}
+
+		if (sentence.length < 5) return []
+
+		await this.loadEmbeddingModel()
+
+		const extracted = await getKeywordsByKeyBERT(sentence, this.embedding, 5)
+
+		if (!extracted || extracted.length === 0) return []
+
+		return extracted.map(k => k.word)
+	}
+
+	// async search(query: PipelineSearchArgs) {
+	// 	const { query } = args
+
+	// 	const [vector_results, fulltext_results] = await Promise.all([vectorSearch(), fulltextSearch()])
+
+	// 	const candidates_map = new Map<string, SearchCandidate>()
+	// 	const content_set = new Set<string>()
+
+	// 	for (const r of vector_results) {
+	// 		if (candidates_map.has(r.id)) continue
+	// 		if (content_set.has(r.content)) continue
+
+	// 		candidates_map.set(r.id, {
+	// 			id: r.id,
+	// 			content: r.content,
+	// 			source: 'vector',
+	// 			metadata: r.metadata,
+	// 			updated_at: r.updated_at,
+	// 			context_id: r.context_id
+	// 		})
+	// 		content_set.add(r.content)
+	// 	}
+
+	// 	for (const r of fulltext_results) {
+	// 		if (candidates_map.has(r.id)) continue
+	// 		if (content_set.has(r.content)) continue
+
+	// 		candidates_map.set(r.id, {
+	// 			id: r.id,
+	// 			content: r.content,
+	// 			source: 'fulltext',
+	// 			metadata: r.metadata,
+	// 			updated_at: r.updated_at,
+	// 			context_id: r.context_id
+	// 		})
+	// 		content_set.add(r.content)
+	// 	}
+
+	// 	const candidates = Array.from(candidates_map.values())
+
+	// 	const documents = candidates.map(c => c.content)
+
+	// 	const rerank_scores = await this.rerank(query, documents)
+
+	// 	const results: Array<SearchResult> = candidates.map((candidate, index) => ({
+	// 		id: candidate.id,
+	// 		content: candidate.content,
+	// 		source: candidate.source,
+	// 		rerankScore: rerank_scores[index]?.score ?? 0,
+	// 		metadata: candidate.metadata,
+	// 		updated_at: candidate.updated_at,
+	// 		context_id: candidate.context_id
+	// 	}))
+
+	// 	return results.sort((a, b) => b.rerankScore - a.rerankScore).slice(0, rerank_limit)
+	// }
 
 	private async checkAndDownload(config: EmbeddingConfig | RerankerConfig, loadFn: () => Promise<unknown>) {
 		if (config.type !== 'local') return
