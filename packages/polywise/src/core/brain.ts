@@ -122,12 +122,12 @@ export default class Index {
 		const context_ids = selected_scores.map(score_item => score_item.context_id)
 		const context_scores = selected_scores.map(score_item => score_item.score)
 
-		await execSql(this.p.db, sql.brain.sql_sleep_tick_begin)
+		await execSql(this.p.db, sql.meta.sql_begin)
 		await execSql(this.p.db, sql.brain.sql_sleep_tick_clean_noise)
 		await execSql(this.p.db, sql.brain.sql_sleep_tick_decay_nodes)
 		await execSql(this.p.db, sql.brain.sql_sleep_tick_decay_edges)
 		await querySql(this.p.db, sql.brain.sql_sleep_tick_replay, [context_ids, context_scores])
-		await execSql(this.p.db, sql.brain.sql_sleep_tick_commit)
+		await execSql(this.p.db, sql.meta.sql_commit)
 
 		this.current_fatigue = 0
 		this.state = 'FRESH'

@@ -1,22 +1,5 @@
 import { app, system } from '../consts'
-
-/**
- * Begins a transaction.
- * Role: Ensures a group of SQL operations execute atomically.
- */
-export const sql_sleep_tick_begin = `BEGIN`
-
-/**
- * Commits a transaction.
- * Role: Finalizes all SQL changes in current transaction.
- */
-export const sql_sleep_tick_commit = `COMMIT`
-
-/**
- * Rolls back a transaction.
- * Role: Reverts all SQL changes in current transaction.
- */
-export const sql_sleep_tick_rollback = `ROLLBACK`
+import { sql_begin, sql_commit } from './meta'
 
 /**
  * Randomly increases the potential of a small subset (1%) of nodes.
@@ -168,7 +151,7 @@ export const sql_get_active_node_count = `
  * Synchronously updates distance to reflect synaptic efficiency changes.
  */
 export const sql_memory_reorganization = `
-	${sql_sleep_tick_begin};
+	${sql_begin};
 
 	UPDATE ${app.schema_brain}.edges
 	SET weight = GREATEST(weight * ${system.decay_strength}, ${system.weak_edge_threshold}),
@@ -186,7 +169,7 @@ export const sql_memory_reorganization = `
 	WHERE weight < ${system.weak_edge_threshold}
 	  AND (lock IS NULL OR lock = FALSE);
 
-	${sql_sleep_tick_commit};
+	${sql_commit};
 `
 
 /**

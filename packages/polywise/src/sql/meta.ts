@@ -49,3 +49,21 @@ export const sql_create_table_stats = `
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   );
 `
+
+/**
+ * Begins a transaction.
+ * Role: Ensures a group of SQL operations execute atomically.
+ */
+export const sql_begin = `BEGIN`
+
+/**
+ * Commits a transaction.
+ * Role: Finalizes all SQL changes in current transaction.
+ */
+export const sql_commit = `COMMIT`
+
+/**
+ * Rolls back a transaction.
+ * Role: Reverts all SQL changes in current transaction.
+ */
+export const sql_rollback = `ROLLBACK`
