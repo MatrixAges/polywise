@@ -1,7 +1,7 @@
 export interface Scopes {
-	root_ids?: Array<string>
+	workspace_id?: string
+	project_id?: string
 	idol_id?: string
-	context_id?: string
 }
 
 export interface Metadata {
