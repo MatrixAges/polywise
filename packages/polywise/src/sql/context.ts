@@ -68,3 +68,31 @@ export const sql_get_context_edges_by_source = `
   ORDER BY weight DESC, updated_at DESC
   LIMIT $2
 `
+
+/**
+ * Gets top outgoing context edges for multiple source contexts.
+ * Role: Batched context recommendation / graph traversal.
+ *
+ * Params:
+ * $1: Array<string> source_ids
+ * $2: number branch_limit_per_source
+ */
+export const sql_get_context_edges_by_sources = `
+  WITH ranked_edges AS (
+    SELECT
+      source_id,
+      target_id,
+      weight,
+      updated_at,
+      ROW_NUMBER() OVER (
+        PARTITION BY source_id
+        ORDER BY weight DESC, updated_at DESC
+      ) AS rank_index
+    FROM ${app.schema_memory}.context_edges
+    WHERE source_id = ANY($1)
+  )
+  SELECT source_id, target_id, weight, updated_at
+  FROM ranked_edges
+  WHERE rank_index <= $2
+  ORDER BY source_id, rank_index
+`

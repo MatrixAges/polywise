@@ -31,3 +31,14 @@ export interface Edge {
 	updated_at: string
 	lock: boolean
 }
+
+export interface SequenceScore {
+	context_id: string
+	score: number
+}
+
+export interface SequenceFrontierItem {
+	context_id: string
+	base_score: number
+	path_ids: Set<string>
+}
