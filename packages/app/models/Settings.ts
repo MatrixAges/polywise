@@ -26,7 +26,7 @@ import type { Lang, Theme } from '@/types'
 @injectable()
 export default class Index {
 	lang = 'en' as Lang
-	theme_source = 'system' as Theme
+	theme_source = 'light' as Theme
 	theme_value = 'light' as Exclude<Theme, 'system'>
 	auto_theme = false
 	open = false

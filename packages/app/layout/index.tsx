@@ -4,6 +4,7 @@ import { useLayoutEffect, useState } from 'react'
 import { observer } from 'mobx-react-lite'
 import { container } from 'tsyringe'
 
+import Dialog from '@/components/Dialog'
 import { GlobalProvider } from '@/context'
 import GlobalModel from '@/models/global'
 import Settings from '@/settings'
@@ -33,7 +34,9 @@ const Index = () => {
 
 	return (
 		<GlobalProvider value={global}>
-			<div className='flex h-screen w-full'></div>
+			<div className='flex h-screen w-full'>
+				<Dialog></Dialog>
+			</div>
 			<Settings></Settings>
 		</GlobalProvider>
 	)

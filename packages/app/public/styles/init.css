@@ -42,6 +42,10 @@ body {
 	-webkit-tap-highlight-color: transparent;
 }
 
+#root {
+	isolation: isolate;
+}
+
 body[data-scroll-locked] {
 	position: relative !important;
 	overflow: hidden !important;

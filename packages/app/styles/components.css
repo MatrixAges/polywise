@@ -1,0 +1,14 @@
+@layer components {
+	.btn {
+		@apply text-gray hover:text-dark hover:bg-bg-hover active:bg-bg-active clickable flex items-center justify-center gap-1.5;
+	}
+
+	.no-scrollbar::-webkit-scrollbar {
+		display: none;
+	}
+
+	.no-scrollbar {
+		-ms-overflow-style: none;
+		scrollbar-width: none;
+	}
+}

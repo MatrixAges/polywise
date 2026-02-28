@@ -1,6 +1,5 @@
-import { ipcLink } from 'erpc/renderer'
-
 import { createTRPCClient } from '@trpc/client'
+import { ipcLink } from 'erpc/renderer'
 
 import type { Router } from '@desktop/rpcs'
 

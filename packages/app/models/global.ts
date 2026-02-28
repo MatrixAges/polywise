@@ -13,18 +13,18 @@ export default class GlobalModel {
 	) {
 		makeAutoObservable(this, { util: false, settings: false }, { autoBind: true })
 
-		this.onMain()
+		// this.onMain()
 	}
 
-	onMain() {
-		const off = ipc.app.onMain.subscribe(undefined, {
-			onData: res => {
-				console.log(res)
-			}
-		})
+	// onMain() {
+	// 	const off = ipc.app.onMain.subscribe(undefined, {
+	// 		onData: res => {
+	// 			console.log(res)
+	// 		}
+	// 	})
 
-		this.util.acts.push(off.unsubscribe)
-	}
+	// 	this.util.acts.push(off.unsubscribe)
+	// }
 
 	init() {
 		this.settings.init()

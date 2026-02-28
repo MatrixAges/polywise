@@ -17,7 +17,6 @@ export { default as hash } from './hash'
 export { default as sleep } from './sleep'
 export { default as copy } from './copy'
 export { default as conf } from './conf'
-export { default as mermaidRender } from './mermaidRender'
 export { default as getLang } from './getLang'
 export { default as getGlobal } from './getGlobal'
 

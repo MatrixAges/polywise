@@ -1,1 +1,1 @@
-export { default as Util } from './Util'
+export { default as Util } from './util'
