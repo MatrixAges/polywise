@@ -5,7 +5,7 @@ import { observer } from 'mobx-react-lite'
 import { container } from 'tsyringe'
 
 import { GlobalProvider } from '@/context'
-import GlobalModel from '@/models/Global'
+import GlobalModel from '@/models/global'
 import Settings from '@/settings'
 
 import type { IPropsPage, IPropsPanel, IPropsTab } from './types'

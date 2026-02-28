@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react'
 
-import Model from '../models/Global'
+import Model from '../models/global'
 
 // @ts-ignore Avoid duplicate declarations
 const GlobalContext = createContext<Model>()

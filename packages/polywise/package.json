@@ -1,60 +1,62 @@
 {
-	"name": "polywise",
-	"type": "module",
-	"version": "0.0.0",
-	"main": "./dist/index.js",
-	"exports": {
-		".": {
-			"types": "./dist/src/index.d.ts",
-			"import": "./dist/index.js",
-			"default": "./dist/index.js"
-		}
-	},
-	"files": [
-		"dist"
-	],
-	"scripts": {
-		"dev": "cross-env NODE_ENV=development rslib build --watch",
-		"build": "rslib build",
-		"before_test": "bun ./scripts/beforeTest.ts",
-		"after_test": "bun ./scripts/afterTest.ts",
-		"triple": "bun ./scripts/testTriple.ts",
-		"test": "pnpm run before_test && rstest run $TEST_FILE"
-	},
-	"dependencies": {
-		"@abraham/reflection": "catalog:",
-		"@chonkiejs/core": "^0.0.7",
-		"@electric-sql/pglite": "^0.3.15",
-		"@huggingface/transformers": "^3.8.1",
-		"@node-rs/jieba": "^2.0.1",
-		"await-to-js": "catalog:",
-		"dayjs": "catalog:",
-		"es-toolkit": "catalog:",
-		"fs-extra": "catalog:",
-		"ofetch": "catalog:",
-		"sentence-splitter": "^5.0.0",
-		"stopword": "^3.1.4",
-		"tslib": "catalog:",
-		"tsyringe": "catalog:",
-		"type-fest": "catalog:",
-		"uuid": "catalog:",
-		"ansis": "catalog:",
-		"shared": "workspace:*"
-	},
-	"devDependencies": {
-		"@img/sharp-libvips-dev": "^1.2.4",
-		"@img/sharp-wasm32": "^0.34.5",
-		"@rslib/core": "catalog:",
-		"@rstest/core": "catalog:",
-		"@types/fs-extra": "catalog:",
-		"@types/node": "catalog:",
-		"@types/stopword": "^2.0.3",
-		"@types/uuid": "catalog:",
-		"bun": "catalog:",
-		"bun-types": "catalog:",
-		"cross-env": "catalog:",
-		"deepmerge-ts": "catalog:",
-		"globby": "catalog:",
-		"reflect-metadata": "catalog:"
-	}
+  "name": "polywise",
+  "type": "module",
+  "version": "0.0.0",
+  "main": "./dist/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "cross-env NODE_ENV=development rslib build --watch",
+    "build": "rslib build",
+    "before_test": "bun ./scripts/beforeTest.ts",
+    "after_test": "bun ./scripts/afterTest.ts",
+    "triple": "bun ./scripts/testTriple.ts",
+    "test": "pnpm run before_test && rstest run $TEST_FILE"
+  },
+  "dependencies": {
+    "@abraham/reflection": "catalog:",
+    "@chonkiejs/core": "^0.0.7",
+    "@electric-sql/pglite": "^0.3.15",
+    "@huggingface/transformers": "^3.8.1",
+    "@node-rs/jieba": "^2.0.1",
+    "await-to-js": "catalog:",
+    "dayjs": "catalog:",
+    "es-toolkit": "catalog:",
+    "fs-extra": "catalog:",
+    "ofetch": "catalog:",
+    "sentence-splitter": "^5.0.0",
+    "stopword": "^3.1.4",
+    "tslib": "catalog:",
+    "tsyringe": "catalog:",
+    "type-fest": "catalog:",
+    "uuid": "catalog:",
+    "ansis": "catalog:",
+    "shared": "workspace:*"
+  },
+  "devDependencies": {
+    "@img/sharp-libvips-dev": "^1.2.4",
+    "@img/sharp-wasm32": "^0.34.5",
+    "@rslib/core": "catalog:",
+    "@rstest/core": "catalog:",
+    "@types/fs-extra": "catalog:",
+    "@types/node": "catalog:",
+    "@types/stopword": "^2.0.3",
+    "@types/uuid": "catalog:",
+    "bun": "catalog:",
+    "bun-types": "catalog:",
+    "cross-env": "catalog:",
+    "deepmerge-ts": "catalog:",
+    "globby": "catalog:",
+    "reflect-metadata": "catalog:"
+  },
+  "peerDependencies": {},
+  "optionalDependencies": {}
 }
