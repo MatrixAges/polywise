@@ -210,6 +210,7 @@ This document provides an overview of the packages/app module structure and arch
 			"capitalizeFirst.ts": { "desc": "String capitalization utility", "role": "Utility" },
 			"checkParent.ts": { "desc": "DOM parent check utility", "role": "Utility" },
 			"clearStorage.ts": { "desc": "Storage clearing utility", "role": "Utility" },
+			"cn.ts": { "desc": "ClassName merge utility for shadcn/ui", "role": "Utility" },
 			"conf.ts": { "desc": "App configuration utility", "role": "Utility" },
 			"copy.ts": { "desc": "Clipboard copy utility", "role": "Utility" },
 			"execUntil.ts": { "desc": "Execution retry utility", "role": "Utility" },
@@ -234,6 +235,7 @@ This document provides an overview of the packages/app module structure and arch
 			"theme.ts": { "desc": "Theme management utility", "role": "Utility" },
 			"time.ts": { "desc": "Time formatting utilities", "role": "Utility" }
 		},
+		"components.json": { "desc": "shadcn/ui CLI configuration", "role": "Config" },
 		"package.json": { "desc": "App package configuration", "role": "Config" },
 		"postcss.config.ts": { "desc": "PostCSS configuration", "role": "Config" },
 		"rsbuild.config.ts": { "desc": "Rsbuild configuration", "role": "Config" },
