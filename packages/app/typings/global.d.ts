@@ -1,13 +1,13 @@
 import type { App } from '@/types'
 import type { PrefixMap } from '@/utils'
 import type SmoothScroll from '@/utils/SmoothScroll'
-import type { ClassName } from 'clsx'
+import type { ClassValue } from 'clsx'
 import type { GlobalERPC } from 'erpc/renderer'
 import type { TFunction } from 'i18next'
 import type Emittery from 'stk/emittery'
 import type { handle, memo } from 'stk/react'
 
-type $CX = (...args: Array<ClassName>) => string
+type $CX = (...args: Array<ClassValue>) => string
 type $Copy = <T>(input: T) => T
 
 interface $App {
