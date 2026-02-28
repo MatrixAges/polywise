@@ -55,13 +55,15 @@ const Index = () => {
 					<ResizablePanel id='layout_content' className='flex h-full flex-col'>
 						<Header {...props_Header}></Header>
 					</ResizablePanel>
-					<ResizableHandle
-						className='
-							bg-transparent
-							transition-colors duration-200
-							hover:bg-std-150 focus:bg-std-300
-						'
-					/>
+					{!s.panel_collapsed && (
+						<ResizableHandle
+							className='
+								bg-transparent
+								transition-colors duration-200
+								hover:bg-std-150 focus:bg-std-300
+							'
+						/>
+					)}
 					<ResizablePanel
 						id='layout_panel'
 						className='h-full'
