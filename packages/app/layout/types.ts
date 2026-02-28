@@ -1,10 +1,5 @@
-export interface IPropsTab {
-	is_panel_collapsed?: boolean
-	onExpand?: () => void
-}
+import type { Settings } from '@/models'
 
-export interface IPropsPage {}
+export interface IPropsHeader extends Pick<Settings, 'panel_collapsed' | 'togglePanel'> {}
 
-export interface IPropsPanel {
-	onClose?: () => void
-}
+export interface IPropsPanel extends Pick<Settings, 'togglePanel'> {}

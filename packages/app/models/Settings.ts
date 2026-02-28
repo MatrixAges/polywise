@@ -1,3 +1,4 @@
+import Big from 'big.js'
 import dayjs from 'dayjs'
 import i18next from 'i18next'
 import { makeAutoObservable } from 'mobx'
@@ -7,7 +8,6 @@ import { local } from 'stk/storage'
 import { injectable } from 'tsyringe'
 import { config, locales } from 'zod'
 
-import { PANEL_COLLAPSE_THRESHOLD, PANEL_WIDTH_DEFAULT } from '@/appdata'
 import { Util } from '@/models/common'
 import {
 	conf,
@@ -22,6 +22,7 @@ import {
 } from '@/utils'
 
 import type { Lang, Theme } from '@/types'
+import type { PanelImperativeHandle } from 'react-resizable-panels'
 
 @injectable()
 export default class Index {
@@ -29,15 +30,15 @@ export default class Index {
 	theme_source = 'light' as Theme
 	theme_value = 'light' as Exclude<Theme, 'system'>
 	auto_theme = false
-	open = false
+	settings_visible = false
 
+	panel_ref = null as unknown as PanelImperativeHandle
 	panel_collapsed = false
-	panel_width = PANEL_WIDTH_DEFAULT
 
 	current_page: 'home' | 'memory' | 'browser' = 'home'
 
 	constructor(public util: Util) {
-		makeAutoObservable(this, { util: false }, { autoBind: true })
+		makeAutoObservable(this, { util: false, panel_ref: false }, { autoBind: true })
 	}
 
 	async init() {
@@ -50,7 +51,6 @@ export default class Index {
 		this.setTheme(this.theme_source || 'system', true)
 
 		this.checkTheme()
-		this.on()
 	}
 
 	async setLocale(lang: Lang) {
@@ -156,48 +156,33 @@ export default class Index {
 		this.setTheme(hour >= 6 && hour < 18 ? 'light' : 'dark')
 	}
 
-	toggleSettings() {
-		this.open = !this.open
+	setPanelRef(v: Index['panel_ref']) {
+		this.panel_ref = v
 	}
 
-	togglePanelCollapsed() {
-		this.panel_collapsed = !this.panel_collapsed
-	}
+	togglePanel() {
+		if (this.panel_ref.isCollapsed()) {
+			const last_width = local.layout_panel_last_width as number
 
-	handlePanelResize(sizes: Array<number>) {
-		const next_panel_width = sizes[1]
-
-		if (typeof next_panel_width !== 'number') return
-
-		if (next_panel_width < PANEL_COLLAPSE_THRESHOLD) {
-			this.panel_collapsed = true
-			this.panel_width = PANEL_WIDTH_DEFAULT
-
-			return
+			if (last_width) {
+				this.panel_ref.resize(last_width.toString())
+			} else {
+				this.panel_ref.expand()
+			}
+		} else {
+			this.panel_ref.collapse()
 		}
 
-		this.panel_width = next_panel_width
-		this.panel_collapsed = false
+		this.panel_collapsed = this.panel_ref.isCollapsed()
 	}
 
-	handlePanelCollapse(collapsed: Array<boolean>) {
-		const next_is_panel_collapsed = collapsed[1]
-
-		if (typeof next_is_panel_collapsed !== 'boolean') return
-
-		this.panel_collapsed = next_is_panel_collapsed
+	updatePanelState() {
+		this.panel_collapsed = this.panel_ref.isCollapsed()
 	}
 
-	expandPanel() {
-		this.panel_width = PANEL_WIDTH_DEFAULT
-		this.panel_collapsed = false
+	toggleSettings() {
+		this.settings_visible = !this.settings_visible
 	}
-
-	setCurrentPage(page: 'home' | 'memory' | 'browser') {
-		this.current_page = page
-	}
-
-	on() {}
 
 	off() {
 		this.offThemeChange()

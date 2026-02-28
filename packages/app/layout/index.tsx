@@ -1,19 +1,27 @@
 import '@/styles/index.css'
 
 import { useLayoutEffect, useState } from 'react'
+import { useMemoizedFn } from 'ahooks'
 import { observer } from 'mobx-react-lite'
+import { useDefaultLayout } from 'react-resizable-panels'
+import { local } from 'stk/storage'
 import { container } from 'tsyringe'
 
-import Dialog from '@/components/Dialog'
-import { GlobalProvider } from '@/context'
-import GlobalModel from '@/models/global'
-import Settings from '@/settings'
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/__shadcn__/components/ui/resizable'
+import { PANEL_COLLAPSE_THRESHOLD, PANEL_WIDTH_DEFAULT } from '@/appdata'
+import { GlobalModel, GlobalProvider } from '@/context'
 
-import type { IPropsPage, IPropsPanel, IPropsTab } from './types'
+import { Header, Panel } from './components'
+
+import type { IPropsHeader, IPropsPanel } from './types'
 
 const Index = () => {
 	const [global] = useState(() => container.resolve(GlobalModel))
-	const settings = global.settings
+	const { defaultLayout, onLayoutChanged: layoutChanged } = useDefaultLayout({
+		id: 'layout'
+	})
+
+	const s = global.settings
 
 	useLayoutEffect(() => {
 		global.init()
@@ -21,23 +29,53 @@ const Index = () => {
 		return () => global.off()
 	}, [])
 
-	const props_tab: IPropsTab = {
-		is_panel_collapsed: settings.panel_collapsed,
-		onExpand: settings.togglePanelCollapsed
+	const props_Header: IPropsHeader = {
+		panel_collapsed: s.panel_collapsed,
+		togglePanel: s.togglePanel
 	}
 
-	const props_page: IPropsPage = {}
-
-	const props_right_panel: IPropsPanel = {
-		onClose: settings.togglePanelCollapsed
+	const props_panel: IPropsPanel = {
+		togglePanel: s.togglePanel
 	}
+
+	const onLayoutChanged = useMemoizedFn((v: Record<string, number>) => {
+		const { layout_panel } = v
+
+		layoutChanged(v)
+
+		if (!layout_panel) return
+
+		local.layout_panel_last_width = layout_panel
+	})
 
 	return (
 		<GlobalProvider value={global}>
-			<div className='flex h-screen w-full'>
-				<Dialog></Dialog>
+			<div className='flex h-screen w-screen'>
+				<ResizablePanelGroup defaultLayout={defaultLayout} onLayoutChanged={onLayoutChanged}>
+					<ResizablePanel id='layout_content' className='flex h-full flex-col'>
+						<Header {...props_Header}></Header>
+					</ResizablePanel>
+					<ResizableHandle
+						className='
+							bg-transparent
+							transition-colors duration-200
+							hover:bg-std-150 focus:bg-std-300
+						'
+					/>
+					<ResizablePanel
+						id='layout_panel'
+						className='h-full'
+						collapsible
+						defaultSize={PANEL_WIDTH_DEFAULT}
+						minSize={PANEL_COLLAPSE_THRESHOLD}
+						maxSize='50'
+						panelRef={s.setPanelRef}
+						onResize={s.updatePanelState}
+					>
+						<Panel {...props_panel}></Panel>
+					</ResizablePanel>
+				</ResizablePanelGroup>
 			</div>
-			<Settings></Settings>
 		</GlobalProvider>
 	)
 }

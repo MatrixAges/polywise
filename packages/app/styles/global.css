@@ -20,3 +20,22 @@ body {
 		scrollbar-width: 0 !important;
 	}
 }
+
+.icon_button {
+	@apply 
+				flex
+				items-center justify-center
+				w-7 h-7
+				rounded-full
+				text-std-400
+				hover:bg-std-100 hover:text-std-black
+				clickable
+			;
+
+	-webkit-app-region: no-drag;
+
+	svg {
+		width: 14px;
+		height: 14px;
+	}
+}
