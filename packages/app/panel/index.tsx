@@ -17,7 +17,7 @@ const Index = (props: IPropsPanel) => {
 					flex
 					items-center justify-between
 					h-[42px]
-					px-3
+					px-2.5
 					is_drag
 				'
 			>

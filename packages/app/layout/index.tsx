@@ -58,7 +58,7 @@ const Index = () => {
 					{!s.panel_collapsed && (
 						<ResizableHandle
 							className='
-								bg-transparent
+								bg-std-100/80
 								transition-colors duration-200
 								hover:bg-std-100 focus:bg-std-150
 							'
@@ -66,7 +66,7 @@ const Index = () => {
 					)}
 					<ResizablePanel
 						id='layout_panel'
-						className='h-full'
+						className={$cx('h-full', 'transition-all duration-300 ease-in-out')}
 						collapsible
 						defaultSize={PANEL_WIDTH_DEFAULT}
 						minSize={PANEL_COLLAPSE_THRESHOLD}

@@ -46,7 +46,7 @@ const Index = (props: IPropsHeader) => {
 					panel_collapsed && 'panel_collapsed',
 					is_win_electron && column_is_last && 'column_is_last'
 				)}
-				scrollContainerClassName='items-center gap-2'
+				scrollContainerClassName='items-center gap-1.5'
 				onWheel={onWheel}
 			>
 				{content_tabs.map((item, index) => {

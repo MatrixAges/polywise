@@ -34,6 +34,7 @@ export default class Index {
 
 	panel_ref = null as unknown as PanelImperativeHandle
 	panel_collapsed = false
+	panel_animating = false
 
 	current_page: 'home' | 'memory' | 'browser' = 'home'
 
@@ -161,6 +162,8 @@ export default class Index {
 	}
 
 	togglePanel() {
+		this.panel_animating = true
+
 		if (this.panel_ref.isCollapsed()) {
 			const last_width = local.layout_panel_last_width as number
 
@@ -174,6 +177,10 @@ export default class Index {
 		}
 
 		this.panel_collapsed = this.panel_ref.isCollapsed()
+
+		setTimeout(() => {
+			this.panel_animating = false
+		}, 300)
 	}
 
 	updatePanelState() {
