@@ -5,6 +5,7 @@
 @import './utility.css';
 @import './components.css';
 @import './custom.css';
+@import './react-horizontal-scrolling-menu.css';
 @import 'tw-animate-css';
 
 @custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));

@@ -1,6 +1,10 @@
 import { House, PanelRight } from 'lucide-react'
+import { ScrollMenu } from 'react-horizontal-scrolling-menu'
 
-import { is_mac_electron, memo } from '@/utils'
+import { content_tabs } from '@/__metadata__'
+import { is_mac_electron, memo, onWheel } from '@/utils'
+
+import { TabItem } from './components'
 
 import type { IPropsHeader } from '../../types'
 
@@ -19,28 +23,26 @@ const Index = (props: IPropsHeader) => {
 				is_mac_electron && 'pl-[86px]'
 			)}
 		>
-			<div className='no_drag flex h-full'>
-				<div
-					className='
-						aspect-square
-						flex
-						items-center justify-center
-						h-full
-						icon_button
-					'
-				>
+			<div
+				className='
+					flex
+					items-center
+					h-full
+					px-3
+					no_drag
+				'
+			>
+				<div className='icon_button'>
 					<House></House>
 				</div>
+				<ScrollMenu wrapperClassName='bg-amber-50' onWheel={onWheel}>
+					{content_tabs.map(item => {
+						return <TabItem {...item} key={item.type + item.title}></TabItem>
+					})}
+				</ScrollMenu>
 			</div>
 			{panel_collapsed && (
-				<div
-					className='
-						flex
-						items-center justify-center
-						icon_button
-					'
-					onClick={togglePanel}
-				>
+				<div className='icon_button mr-3' onClick={togglePanel}>
 					<PanelRight></PanelRight>
 				</div>
 			)}
