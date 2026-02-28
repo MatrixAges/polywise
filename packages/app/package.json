@@ -5,13 +5,15 @@
 	"type": "module",
 	"scripts": {
 		"dev": "rsbuild dev",
-		"build": "rsbuild build"
+		"build": "rsbuild build",
+		"shadcn": "pnpm dlx shadcn@latest add"
 	},
 	"keywords": [],
 	"dependencies": {
 		"@abraham/reflection": "catalog:",
 		"@ai-sdk/provider-utils": "catalog:",
 		"@ai-sdk/react": "^3.0.106",
+		"@base-ui/react": "^1.2.0",
 		"@formatjs/intl-localematcher": "^0.8.1",
 		"@swc/helpers": "catalog:",
 		"@trpc/client": "catalog:",
@@ -19,7 +21,8 @@
 		"ahooks": "catalog:",
 		"ai": "catalog:",
 		"await-to-js": "catalog:",
-		"classix": "catalog:",
+		"class-variance-authority": "^0.7.1",
+		"clsx": "catalog:",
 		"color": "^5.0.3",
 		"d3-force": "^3.0.0",
 		"dayjs": "catalog:",
@@ -45,6 +48,7 @@
 		"shiki": "catalog:",
 		"smooth-scroll-into-view-if-needed": "^2.0.2",
 		"stk": "workspace:*",
+		"tailwind-merge": "^3.5.0",
 		"ts-pattern": "^5.9.0",
 		"tslib": "catalog:",
 		"tsyringe": "catalog:",
@@ -52,7 +56,6 @@
 		"zod": "catalog:"
 	},
 	"devDependencies": {
-		"type-fest": "catalog:",
 		"@csstools/postcss-is-pseudo-class": "^6.0.0",
 		"@rsbuild/core": "catalog:",
 		"@rsbuild/plugin-react": "catalog:",
@@ -75,8 +78,7 @@
 		"postcss-nesting": "^14.0.0",
 		"tailwindcss": "^4.2.1",
 		"tinyglobby": "catalog:",
+		"type-fest": "catalog:",
 		"typescript": "catalog:"
-	},
-	"peerDependencies": {},
-	"optionalDependencies": {}
+	}
 }

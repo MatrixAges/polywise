@@ -1,7 +1,7 @@
 import type { App } from '@/types'
 import type { PrefixMap } from '@/utils'
 import type SmoothScroll from '@/utils/SmoothScroll'
-import type { ClassName } from 'classix'
+import type { ClassName } from 'clsx'
 import type { GlobalERPC } from 'erpc/renderer'
 import type { TFunction } from 'i18next'
 import type Emittery from 'stk/emittery'

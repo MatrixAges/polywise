@@ -1,4 +1,4 @@
-import cx from 'classix'
+import cx from 'clsx'
 import rfdc from 'rfdc'
 
 import Handle from './Handle'

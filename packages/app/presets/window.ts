@@ -1,4 +1,4 @@
-import cx from 'classix'
+import cx from 'clsx'
 import Emittery from 'stk/emittery'
 import { copy } from 'stk/mobx'
 import { handle, memo } from 'stk/react'
