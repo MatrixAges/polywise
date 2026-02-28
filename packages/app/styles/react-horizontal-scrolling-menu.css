@@ -27,3 +27,6 @@
 .react-horizontal-scrolling-menu--arrow-right {
 	display: flex;
 }
+.react-horizontal-scrolling-menu--item {
+	height: 100%;
+}

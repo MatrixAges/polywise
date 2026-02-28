@@ -22,25 +22,33 @@ const Index = (props: IPropsHeader) => {
 				flex
 				items-center justify-between
 				w-full h-[42px]
+				border-std-100/60 border-b
 				is_drag
 			`,
 				styles._local
 			)}
 		>
-			<div className='flex px-2'>
+			<div
+				className='
+					flex
+					items-center justify-center
+					h-full
+					px-2
+					border-std-100/60 border-r
+				'
+			>
 				<div className='icon_button'>
 					<House></House>
 				</div>
 			</div>
-			<div className='bg-std-100 flex h-2/5 w-px'></div>
 			<ScrollMenu
 				wrapperClassName={$cx(
-					'scroll_wrap overflow-hidden px-2',
+					'scroll_wrap overflow-hidden',
 					is_mac_electron && 'is_mac_electron',
 					panel_collapsed && 'panel_collapsed',
 					is_win_electron && column_is_last && 'column_is_last'
 				)}
-				scrollContainerClassName='items-center gap-2'
+				scrollContainerClassName='items-center'
 				onWheel={onWheel}
 			>
 				{content_tabs.map((item, index) => {

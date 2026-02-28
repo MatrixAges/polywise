@@ -16,6 +16,14 @@
 			&.column_is_last {
 				--width_win_actions: 108px;
 			}
+
+			.react-horizontal-scrolling-menu--item {
+				&:first-child {
+					.tab_item {
+						border: none;
+					}
+				}
+			}
 		}
 	}
 }

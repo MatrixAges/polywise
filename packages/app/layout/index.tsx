@@ -58,9 +58,9 @@ const Index = () => {
 					{!s.panel_collapsed && (
 						<ResizableHandle
 							className='
-								bg-transparent
+								bg-std-100/60
 								transition-colors duration-200
-								hover:bg-std-150 focus:bg-std-300
+								hover:bg-std-100 focus:bg-std-150
 							'
 						/>
 					)}

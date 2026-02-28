@@ -20,19 +20,20 @@ const Index = (props: IPropsTabItem) => {
 				overflow-hidden
 				flex
 				items-center
-				h-7
-				pl-2 pr-1
-				rounded-full
+				h-full
+				gap-1
+				px-3
 				text-sm text-std-400/80
+				border-std-100/60 border-l
 				group
 				hover:text-std-black
-				capitalize lightclick
+				tab_item capitalize lightclick
 			`,
-				active && 'text-std-black'
+				active && 'text-std-black bg-std-50'
 			)}
 			title={title}
 		>
-			<span className='mr-1 shrink-0'>
+			<span className='shrink-0'>
 				<Icon size={12} />
 			</span>
 			<span className='max-w-[150px] overflow-hidden whitespace-nowrap'>{title}</span>
@@ -50,7 +51,7 @@ const Index = (props: IPropsTabItem) => {
 					group-hover:opacity-100
 					-translate-y-1/2 pointer-events-none
 				`,
-					active && 'opacity-100'
+					active && 'from-std-50! via-std-50! opacity-100'
 				)}
 			>
 				<span
