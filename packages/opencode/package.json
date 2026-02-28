@@ -15,13 +15,13 @@
     "tsyringe": "catalog:",
     "@opencode-ai/plugin": "^1.2.15",
     "@opencode-ai/sdk": "^1.2.15",
-    "await-to-js": "^3.0.0",
-    "reflect-metadata": "^0.2.2"
+    "await-to-js": "catalog:",
+    "reflect-metadata": "catalog:"
   },
   "devDependencies": {
     "@rslib/core": "catalog:",
-    "typescript": "^5.9.3",
-    "deepmerge-ts": "^7.1.5"
+    "typescript": "catalog:",
+    "deepmerge-ts": "catalog:"
   },
   "peerDependencies": {},
   "optionalDependencies": {}

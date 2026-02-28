@@ -23,11 +23,11 @@
   },
   "devDependencies": {
     "@rslib/core": "catalog:",
-    "@trpc/client": "^11.10.0",
-    "@trpc/server": "^11.10.0",
-    "@types/node": "^25.3.2",
-    "deepmerge-ts": "^7.1.5",
-    "electron": "^40.6.1"
+    "@trpc/client": "catalog:",
+    "@trpc/server": "catalog:",
+    "@types/node": "catalog:",
+    "deepmerge-ts": "catalog:",
+    "electron": "catalog:"
   },
   "dependencies": {},
   "peerDependencies": {},

@@ -33,11 +33,11 @@
     "@ai-sdk/google-vertex": "4.0.67",
     "@ai-sdk/groq": "3.0.25",
     "@ai-sdk/mistral": "3.0.20",
-    "@ai-sdk/openai": "3.0.36",
+    "@ai-sdk/openai": "catalog:",
     "@ai-sdk/openai-compatible": "2.0.30",
     "@ai-sdk/perplexity": "3.0.19",
     "@ai-sdk/provider": "3.0.8",
-    "@ai-sdk/provider-utils": "4.0.15",
+    "@ai-sdk/provider-utils": "catalog:",
     "@ai-sdk/togetherai": "2.0.34",
     "@ai-sdk/vercel": "2.0.32",
     "@ai-sdk/xai": "3.0.59",
@@ -45,7 +45,7 @@
     "ai": "catalog:",
     "await-to-js": "catalog:",
     "fs-extra": "catalog:",
-    "hono": "^4.12.3",
+    "hono": "catalog:",
     "mingo": "^7.2.0",
     "polywise": "workspace:*",
     "tslib": "catalog:",
@@ -55,14 +55,14 @@
     "zod-to-json-schema": "^3.25.1"
   },
   "devDependencies": {
-    "typescript": "^5.9.3",
+    "typescript": "catalog:",
     "@rslib/core": "catalog:",
     "@rstest/core": "catalog:",
     "@types/fs-extra": "catalog:",
-    "@types/node": "^25.3.2",
-    "cross-env": "^10.1.0",
-    "deepmerge-ts": "^7.1.5",
-    "reflect-metadata": "^0.2.2"
+    "@types/node": "catalog:",
+    "cross-env": "catalog:",
+    "deepmerge-ts": "catalog:",
+    "reflect-metadata": "catalog:"
   },
   "peerDependencies": {},
   "optionalDependencies": {}

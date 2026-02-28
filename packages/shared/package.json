@@ -18,7 +18,7 @@
     "build": "rslib build"
   },
   "dependencies": {
-    "await-to-js": "^3.0.0",
+    "await-to-js": "catalog:",
     "dayjs": "catalog:",
     "fs-extra": "catalog:",
     "ofetch": "catalog:",
@@ -28,13 +28,13 @@
   "devDependencies": {
     "@rslib/core": "catalog:",
     "@types/fs-extra": "catalog:",
-    "@types/node": "^25.3.2",
+    "@types/node": "catalog:",
     "@types/uuid": "catalog:",
     "bun": "catalog:",
     "bun-types": "catalog:",
-    "cross-env": "^10.1.0",
-    "deepmerge-ts": "^7.1.5",
-    "globby": "^16.1.1"
+    "cross-env": "catalog:",
+    "deepmerge-ts": "catalog:",
+    "globby": "catalog:"
   },
   "peerDependencies": {},
   "optionalDependencies": {}

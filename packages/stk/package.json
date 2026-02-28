@@ -68,12 +68,12 @@
     }
   },
   "dependencies": {
-    "@swc/helpers": "^0.5.19",
+    "@swc/helpers": "catalog:",
     "ahooks": "catalog:",
-    "classix": "^2.2.8",
+    "classix": "catalog:",
     "es-toolkit": "catalog:",
     "fast-equals": "^6.0.0",
-    "mobx": "^6.15.0",
+    "mobx": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
     "rfdc": "^1.4.1",
@@ -82,16 +82,16 @@
   "devDependencies": {
     "@rslib/core": "catalog:",
     "@types/fs-extra": "catalog:",
-    "@types/node": "^25.3.2",
+    "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "@types/scheduler": "^0.26.0",
     "bun": "catalog:",
     "bun-types": "catalog:",
-    "deepmerge-ts": "^7.1.5",
+    "deepmerge-ts": "catalog:",
     "fast-glob": "^3.3.3",
     "fs-extra": "catalog:",
-    "typescript": "^5.9.3"
+    "typescript": "catalog:"
   },
   "peerDependencies": {},
   "optionalDependencies": {}
