@@ -21,7 +21,6 @@
 		"@xyflow/react": "^12.10.1",
 		"ahooks": "^3.9.6",
 		"ai": "catalog:",
-		"antd": "^6.2.2",
 		"await-to-js": "^3.0.0",
 		"classix": "^2.2.6",
 		"color": "^5.0.3",

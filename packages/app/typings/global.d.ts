@@ -1,16 +1,13 @@
 import type { App } from '@/types'
 import type { PrefixMap } from '@/utils'
 import type SmoothScroll from '@/utils/SmoothScroll'
-import type { MessageInstance } from 'antd/es/message/interface'
-import type { ModalStaticFunctions } from 'antd/es/modal/confirm'
-import type { NotificationInstance } from 'antd/es/notification/interface'
+import type { ClassName } from 'classix'
 import type { GlobalERPC } from 'erpc/renderer'
 import type { TFunction } from 'i18next'
-import type { memo } from 'react'
 import type Emittery from 'stk/emittery'
-import type { handle } from 'stk/react'
+import type { handle, memo } from 'stk/react'
 
-type $CX = (...args: Array<string | boolean | number | null | undefined>) => string
+type $CX = (...args: Array<ClassName>) => string
 type $Copy = <T>(input: T) => T
 
 interface $App {

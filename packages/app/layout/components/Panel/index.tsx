@@ -1,6 +1,5 @@
-import { Bot, Clipboard, PanelRight, Search, SquareChartGantt } from 'lucide-react'
 import { useState } from 'react'
-import { Tabs } from 'antd'
+import { Bot, Clipboard, PanelRight, Search, SquareChartGantt } from 'lucide-react'
 
 import { memo } from '@/utils'
 
@@ -63,19 +62,7 @@ const Index = (props: IPropsPanel) => {
 					<PanelRight size={16} />
 				</div>
 			</div>
-			<div className='bg-std-100 border-std-900/8 flex flex-1 overflow-hidden border-l'>
-				<Tabs
-					activeKey={active_tab}
-					renderTabBar={() => null as any}
-					className='h-full w-full [&_.ant-tabs-content]:h-full [&_.ant-tabs-tabpane]:h-full'
-					items={[
-						{ key: 'chat', label: 'Chat', children: <Chat /> },
-						{ key: 'save', label: 'Save', children: <Save /> },
-						{ key: 'query', label: 'Query', children: <Query /> },
-						{ key: 'task', label: 'Task', children: <Task /> }
-					]}
-				/>
-			</div>
+			<div className='bg-std-100 border-std-900/8 flex flex-1 overflow-hidden border-l'></div>
 		</div>
 	)
 }

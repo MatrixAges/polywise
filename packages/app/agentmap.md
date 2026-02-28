@@ -98,10 +98,6 @@ This document provides an overview of the packages/app module structure and arch
 			"types.ts": { "desc": "Layout prop types for panel close and expand interactions", "role": "Type" }
 		},
 		"locales": {
-			"antd": {
-				"en.ts": { "desc": "Ant Design English locale", "role": "Locale" },
-				"zh-cn.ts": { "desc": "Ant Design Chinese locale", "role": "Locale" }
-			},
 			"dayjs": {
 				"en.ts": { "desc": "Day.js English locale", "role": "Locale" },
 				"zh-cn.ts": { "desc": "Day.js Chinese locale", "role": "Locale" }
@@ -195,7 +191,6 @@ This document provides an overview of the packages/app module structure and arch
 		},
 		"svgs": { "bare.svg": { "desc": "Bare SVG asset", "role": "Asset" } },
 		"theme": {
-			"antd.ts": { "desc": "Ant Design theme configuration", "role": "Config" },
 			"index.ts": { "desc": "Theme module exports", "role": "Index" }
 		},
 		"types": {
@@ -212,7 +207,6 @@ This document provides an overview of the packages/app module structure and arch
 		},
 		"utils": {
 			"PrefixMap.ts": { "desc": "Prefix map utility", "role": "Utility" },
-			"antd.ts": { "desc": "Ant Design utilities", "role": "Utility" },
 			"capitalizeFirst.ts": { "desc": "String capitalization utility", "role": "Utility" },
 			"checkParent.ts": { "desc": "DOM parent check utility", "role": "Utility" },
 			"clearStorage.ts": { "desc": "Storage clearing utility", "role": "Utility" },

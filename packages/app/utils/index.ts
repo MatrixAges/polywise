@@ -23,7 +23,6 @@ export { default as getGlobal } from './getGlobal'
 
 export * from './theme'
 export * from './is'
-export * from './antd'
 export * from './shiki'
 export * from './memo'
 export * from './i18n'
