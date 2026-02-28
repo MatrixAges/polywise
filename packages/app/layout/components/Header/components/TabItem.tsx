@@ -20,16 +20,16 @@ const Index = (props: IPropsTabItem) => {
 				overflow-hidden
 				flex
 				items-center
-				h-full
+				h-7
 				gap-1
-				px-3
+				pl-2 pr-1
+				rounded-full
 				text-sm text-std-400/80
-				border-std-100/60 border-l
 				group
 				hover:text-std-black
 				tab_item capitalize lightclick
 			`,
-				active && 'text-std-black bg-std-50'
+				active && 'text-std-black bg-std-100'
 			)}
 			title={title}
 		>
@@ -44,14 +44,14 @@ const Index = (props: IPropsTabItem) => {
 					top-1/2 right-1
 					flex
 					items-center justify-end
-					w-10 h-6
+					w-10 h-full
 					bg-linear-to-l
 					from-std-white via-std-white to-transparent
 					opacity-0
 					group-hover:opacity-100
 					-translate-y-1/2 pointer-events-none
 				`,
-					active && 'from-std-50! via-std-50! opacity-100'
+					active && 'from-std-100! via-std-100! opacity-100'
 				)}
 			>
 				<span
@@ -61,7 +61,7 @@ const Index = (props: IPropsTabItem) => {
 						w-5 h-5
 						rounded-full
 						text-std-400
-						hover:bg-std-100
+						hover:bg-std-150
 						clickable pointer-events-auto
 					'
 				>
