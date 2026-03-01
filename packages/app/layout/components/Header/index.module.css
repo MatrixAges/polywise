@@ -1,0 +1,11 @@
+@reference '#tailwind';
+
+._local {
+	:global {
+		.workspace_selector {
+			svg {
+				@apply text-std-400/80;
+			}
+		}
+	}
+}

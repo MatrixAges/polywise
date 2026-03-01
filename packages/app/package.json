@@ -8,7 +8,9 @@
 		"build": "rsbuild build",
 		"shadcn": "pnpm dlx shadcn@latest add"
 	},
-	"keywords": [],
+	"imports": {
+		"#tailwind": "./styles/index.css"
+	},
 	"dependencies": {
 		"@abraham/reflection": "catalog:",
 		"@ai-sdk/provider-utils": "catalog:",
