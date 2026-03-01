@@ -1,71 +1,107 @@
-import { House, PanelRight } from 'lucide-react'
-import { ScrollMenu } from 'react-horizontal-scrolling-menu'
+import { useState } from 'react'
+import { PanelLeft, PanelRight, SlidersHorizontal } from 'lucide-react'
 
-import { content_tabs } from '@/__metadata__'
-import { is_mac_electron, is_win_electron, memo, onWheel } from '@/utils'
+import { nav_items } from '@/appdata'
+import Logo from '@/public/bare.svg?react'
 
-import { TabItem } from './components'
-
-import styles from './index.module.css'
-
-import type { IPropsHeader } from '../../types'
-
-const Index = (props: IPropsHeader) => {
-	const { panel_collapsed, togglePanel } = props
-	const column_is_last = false
-	const active_index = 2
+const Index = () => {
+	const [active_tab, set_active_tab] = useState('agent')
 
 	return (
 		<div
-			className={$cx(
-				`
+			className='
+				relative
 				flex
-				items-center justify-between
-				w-full h-[42px]
-				is_drag
-			`,
-				styles._local
-			)}
+				items-center justify-center
+				w-full h-[43px]
+				border-std-100/80 border-b
+			'
 		>
 			<div
 				className='
+					absolute
+					left-3
 					flex
-					items-center justify-center
+					items-center
 					h-full
-					px-2
 				'
 			>
-				<div className='icon_button'>
-					<House></House>
+				<div
+					className='
+						flex
+						items-center justify-center
+						w-5 h-5
+						transition-all
+						hover:fill-std-black
+						fill-std-300
+					'
+				>
+					<Logo width='100%' height='100%'></Logo>
+				</div>
+				<div
+					className='
+						w-px h-[14px]
+						ml-4 mr-3
+						bg-std-100/80
+					'
+				></div>
+				<button className='icon_button'>
+					<PanelLeft></PanelLeft>
+				</button>
+			</div>
+			<div className='flex items-center'>
+				<div
+					className='
+						flex
+						items-center
+						h-9
+						gap-1.5
+						text-xs
+					'
+				>
+					{nav_items.map(({ key, Icon }) => (
+						<div
+							className={$cx(
+								`
+								flex
+								items-center justify-center
+								h-7
+								gap-1
+								rounded-full
+								hover:bg-std-100
+								clickable
+							`,
+								active_tab === key
+									? 'text-std-black bg-std-100 px-2'
+									: 'text-std-400/80 w-7'
+							)}
+							key={key}
+							onClick={() => set_active_tab(key)}
+						>
+							<Icon size={14} />
+							{active_tab === key && <span className='capitalize'>{key}</span>}
+						</div>
+					))}
 				</div>
 			</div>
-			<ScrollMenu
-				wrapperClassName={$cx(
-					'scroll_wrap overflow-hidden pr-2',
-					is_mac_electron && 'is_mac_electron',
-					panel_collapsed && 'panel_collapsed',
-					is_win_electron && column_is_last && 'column_is_last'
-				)}
-				scrollContainerClassName='items-center gap-1.5'
-				onWheel={onWheel}
+			<div
+				className='
+					absolute
+					right-2
+					flex
+					items-center
+					gap-2
+				'
 			>
-				{content_tabs.map((item, index) => {
-					return (
-						<TabItem
-							{...item}
-							active={active_index === index}
-							key={item.type + item.title}
-						></TabItem>
-					)
-				})}
-			</ScrollMenu>
-			{panel_collapsed && (
-				<div className='icon_button mr-3' onClick={togglePanel}>
+				<button className='icon_button'>
+					<SlidersHorizontal></SlidersHorizontal>
+				</button>
+				<button className='icon_button'>
 					<PanelRight></PanelRight>
-				</div>
-			)}
+				</button>
+			</div>
 		</div>
 	)
 }
 
-export default memo(Index)
+export default $app.memo(Index)

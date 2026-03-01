@@ -51,7 +51,8 @@ const Index = () => {
 	return (
 		<GlobalProvider value={global}>
 			<div className='flex h-screen w-screen'>
-				<ResizablePanelGroup defaultLayout={defaultLayout} onLayoutChanged={onLayoutChanged}>
+				<Header></Header>
+				{/* <ResizablePanelGroup defaultLayout={defaultLayout} onLayoutChanged={onLayoutChanged}>
 					<ResizablePanel id='layout_content' className='flex h-full flex-col'>
 						<Header {...props_Header}></Header>
 					</ResizablePanel>
@@ -76,7 +77,7 @@ const Index = () => {
 					>
 						<Panel {...props_panel}></Panel>
 					</ResizablePanel>
-				</ResizablePanelGroup>
+				</ResizablePanelGroup> */}
 			</div>
 		</GlobalProvider>
 	)

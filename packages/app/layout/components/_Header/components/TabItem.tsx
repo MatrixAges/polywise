@@ -36,7 +36,7 @@ const Index = (props: IPropsTabItem) => {
 			<span className='shrink-0'>
 				<Icon size={12} />
 			</span>
-			<span className='max-w-[150px] overflow-hidden whitespace-nowrap'>{title}</span>
+			<span className='w-[120px] overflow-hidden whitespace-nowrap'>{title}</span>
 			<span
 				className={$cx(
 					`

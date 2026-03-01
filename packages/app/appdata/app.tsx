@@ -1,18 +1,13 @@
-import { Bookmark, Compass, Database, House, NotebookPen, SquareChartGantt } from 'lucide-react'
-
-export const nav_icon_map = {
-	bookmark: Bookmark,
-	browser: Compass,
-	notebook: NotebookPen
-} as Record<string, typeof Bookmark>
+import { Bookmark, Bot, Compass, Database, Folders, NotebookPen, Search } from 'lucide-react'
 
 export const nav_items = [
-	{ key: 'home', Icon: House },
-	{ key: 'bookmark', Icon: nav_icon_map['bookmark'] },
-	{ key: 'browser', Icon: nav_icon_map['browser'] },
-	{ key: 'notebook', Icon: nav_icon_map['notebook'] }
-	// { key: 'database', Icon: Database },
-	// { key: 'project', Icon: SquareChartGantt }
+	{ key: 'search', Icon: Search },
+	{ key: 'agent', Icon: Bot },
+	{ key: 'bookmark', Icon: Bookmark },
+	{ key: 'browser', Icon: Compass },
+	{ key: 'notebook', Icon: NotebookPen },
+	{ key: 'database', Icon: Database },
+	{ key: 'project', Icon: Folders }
 ] as const
 
 export const locales = ['en', 'zh-cn'] as const

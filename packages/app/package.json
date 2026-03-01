@@ -46,6 +46,8 @@
 		"react-i18next": "catalog:",
 		"react-markdown": "^10.1.0",
 		"react-resizable-panels": "^4.6.5",
+		"react-router": "^7.13.1",
+		"react-router-dom": "^7.13.1",
 		"shiki": "catalog:",
 		"smooth-scroll-into-view-if-needed": "^2.0.2",
 		"stk": "workspace:*",

@@ -3,7 +3,7 @@ body {
 }
 
 .lucide {
-	stroke-width: 1.8px;
+	stroke-width: 2.1px;
 }
 
 .is_drag {
@@ -27,7 +27,7 @@ body {
 				items-center justify-center
 				w-7 h-7
 				rounded-full
-				text-std-400
+				text-std-400/80
 				hover:bg-std-100 hover:text-std-black
 				clickable
 			;
@@ -35,7 +35,7 @@ body {
 	-webkit-app-region: no-drag;
 
 	svg {
-		width: 14px;
-		height: 14px;
+		width: 13px;
+		height: 13px;
 	}
 }

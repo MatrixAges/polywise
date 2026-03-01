@@ -38,7 +38,8 @@
 		"tsyringe": "catalog:",
 		"uuid": "catalog:",
 		"ansis": "catalog:",
-		"shared": "workspace:*"
+		"shared": "workspace:*",
+		"trpc-to-openapi": "catalog:"
 	},
 	"devDependencies": {
 		"type-fest": "catalog:",

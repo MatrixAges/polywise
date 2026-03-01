@@ -20,5 +20,5 @@
 		"hooks": "@/__shadcn__/hooks"
 	},
 	"menuColor": "default",
-	"menuAccent": "bold"
+	"menuAccent": "subtle"
 }
