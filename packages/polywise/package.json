@@ -39,7 +39,9 @@
 		"uuid": "catalog:",
 		"ansis": "catalog:",
 		"shared": "workspace:*",
-		"trpc-to-openapi": "catalog:"
+		"trpc-to-openapi": "catalog:",
+		"hono": "catalog:",
+		"@trpc/server": "catalog:"
 	},
 	"devDependencies": {
 		"type-fest": "catalog:",

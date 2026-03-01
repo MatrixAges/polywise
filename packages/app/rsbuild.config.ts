@@ -20,7 +20,7 @@ const config = {
 		printUrls: ({ port }) => [`http://localhost:${port}`]
 	},
 	html: {
-		title: 'Polywise - Your Second Brain.',
+		title: 'Polywise - Agentic Memory Engine.',
 		template: './public/index.html'
 	},
 	tools: {
