@@ -11,6 +11,13 @@
 @custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
 
 @theme {
+	--border-visible: 0;
+
+	--border-alpha: calc(var(--border-visible) * 0.8);
+	--color-border-dev: oklch(from var(--color-std-100) l c h / var(--border-alpha));
+}
+
+@theme {
 	--color-std-50: oklch(98.5% 0 0);
 	--color-std-100: oklch(96.7% 0 0);
 	--color-std-150: oklch(94.2% 0 0);

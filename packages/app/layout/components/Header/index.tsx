@@ -10,7 +10,7 @@ const Index = () => {
 				flex
 				items-center justify-center
 				w-full h-[43px]
-				border-std-100/80 border-b
+				border-border-dev border-b
 				${styles._local}
 			`}
 		>

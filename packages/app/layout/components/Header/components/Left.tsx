@@ -27,11 +27,11 @@ const Index = () => {
 				className='
 					flex
 					items-center justify-center
+					w-[18px] h-[18px]
 					transition-all
 					hover:fill-std-black
 					fill-std-300
 				'
-				style={{ width: 18, height: 18 }}
 			>
 				<Logo width='100%' height='100%'></Logo>
 			</div>
@@ -42,20 +42,14 @@ const Index = () => {
 					bg-std-100
 				'
 			></div>
-			<button className='icon_button mr-3'>
+			<button className='icon_button mr-1'>
 				<PanelLeft></PanelLeft>
 			</button>
 			<Select
 				items={workspaces.map(item => ({ label: item.name, value: item.endpoint }))}
 				defaultValue={workspaces.at(-1)!.endpoint}
 			>
-				<SelectTrigger
-					className='
-						p-0
-						bg-transparent!
-						workspace_selector
-					'
-				>
+				<SelectTrigger className='workspace_selector'>
 					<SelectValue />
 				</SelectTrigger>
 				<SelectContent className='w-[180px]' align='start'>

@@ -11,6 +11,16 @@ const Index = () => {
 				gap-2
 			'
 		>
+			<div
+				className='
+					w-auto!
+					px-2
+					icon_button
+				'
+			>
+				<span className='h-1.5 w-1.5 rounded-full bg-green-600/60'></span>
+				<span>Status</span>
+			</div>
 			<button className='icon_button'>
 				<SlidersHorizontal></SlidersHorizontal>
 			</button>
