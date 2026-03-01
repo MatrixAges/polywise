@@ -39,4 +39,8 @@ body {
 		width: 13px;
 		height: 13px;
 	}
+
+	&.active {
+		@apply bg-std-100 text-std-black;
+	}
 }

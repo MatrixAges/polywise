@@ -15,7 +15,7 @@ import Panel from '@/panel'
 
 import { Header } from './components'
 
-import type { IPropsHeader, IPropsPanel } from './types'
+import type { IPropsHeader } from './types'
 
 const Index = () => {
 	const [global] = useState(() => container.resolve(GlobalModel))
@@ -35,10 +35,6 @@ const Index = () => {
 		togglePanel: s.togglePanel
 	}
 
-	const props_panel: IPropsPanel = {
-		togglePanel: s.togglePanel
-	}
-
 	const onLayoutChanged = useMemoizedFn((v: Record<string, number>) => {
 		const { layout_panel } = v
 
@@ -51,11 +47,17 @@ const Index = () => {
 
 	return (
 		<GlobalProvider value={global}>
-			<div className='flex h-screen w-screen flex-col'>
+			<div
+				className='
+					overflow-hidden
+					flex flex-col
+					w-screen h-screen
+				'
+			>
 				<Header {...props_header}></Header>
 				<ResizablePanelGroup defaultLayout={defaultLayout} onLayoutChanged={onLayoutChanged}>
-					<ResizablePanel id='layout_content' className='flex h-full flex-col'>
-						{outlet}
+					<ResizablePanel id='layout_content' className='flex h-full flex-col overflow-y-scroll'>
+						<div className='w-full'>{outlet}</div>
 					</ResizablePanel>
 					{!s.panel_collapsed && (
 						<ResizableHandle
@@ -68,7 +70,7 @@ const Index = () => {
 					)}
 					<ResizablePanel
 						id='layout_panel'
-						className={$cx('h-full', 'transition-all duration-300 ease-in-out')}
+						className='h-full'
 						collapsible
 						defaultSize={PANEL_WIDTH_DEFAULT}
 						minSize={PANEL_COLLAPSE_THRESHOLD}
@@ -76,7 +78,7 @@ const Index = () => {
 						panelRef={s.setPanelRef}
 						onResize={s.updatePanelState}
 					>
-						<Panel {...props_panel}></Panel>
+						<Panel></Panel>
 					</ResizablePanel>
 				</ResizablePanelGroup>
 			</div>

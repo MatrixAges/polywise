@@ -1,5 +1,3 @@
 import type { Setting } from '@/models'
 
 export interface IPropsHeader extends Pick<Setting, 'togglePanel'> {}
-
-export interface IPropsPanel {}
