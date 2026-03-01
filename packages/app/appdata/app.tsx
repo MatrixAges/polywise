@@ -1,14 +1,14 @@
 import { Bookmark, Bot, Compass, Database, Folders, NotebookPen, Search } from 'lucide-react'
 
 export const nav_items = [
-	{ key: 'search', Icon: Search },
+	{ key: '', Icon: Search, title: 'search' },
 	{ key: 'agent', Icon: Bot },
 	{ key: 'bookmark', Icon: Bookmark },
-	{ key: 'browser', Icon: Compass },
 	{ key: 'notebook', Icon: NotebookPen },
 	{ key: 'database', Icon: Database },
-	{ key: 'project', Icon: Folders }
-] as const
+	{ key: 'project', Icon: Folders },
+	{ key: 'browser', Icon: Compass }
+] as Array<{ key: string; Icon: typeof Search; title?: string }>
 
 export const locales = ['en', 'zh-cn'] as const
 

@@ -1,7 +1,7 @@
 import { makeAutoObservable } from 'mobx'
 import { singleton } from 'tsyringe'
 
-import { Settings } from '@/models'
+import { Setting } from '@/models'
 import { Util } from '@/models/common'
 import { ipc } from '@/utils'
 
@@ -9,7 +9,7 @@ import { ipc } from '@/utils'
 export default class GlobalModel {
 	constructor(
 		public util: Util,
-		public settings: Settings
+		public settings: Setting
 	) {
 		makeAutoObservable(this, { util: false, settings: false }, { autoBind: true })
 

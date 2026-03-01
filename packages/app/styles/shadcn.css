@@ -110,12 +110,22 @@
 
 @layer base {
 	* {
-		@apply border-border outline-ring/50;
+		@apply border-border;
 	}
+
+	html {
+		@apply font-sans;
+	}
+
 	body {
 		@apply bg-background text-foreground font-sans;
 	}
-	html {
-		@apply font-sans;
+
+	*:focus {
+		@apply ring-0 outline-none;
+	}
+
+	*:focus-visible {
+		@apply outline-ring/50 outline-2;
 	}
 }

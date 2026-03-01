@@ -113,7 +113,7 @@ This document provides an overview of the packages/app module structure and arch
 				"index.ts": { "desc": "English locale entry", "role": "Index" },
 				"layout.ts": { "desc": "English Layout strings", "role": "Locale" },
 				"note.ts": { "desc": "English Note strings", "role": "Locale" },
-				"setting.ts": { "desc": "English Settings strings", "role": "Locale" }
+				"setting.ts": { "desc": "English Setting strings", "role": "Locale" }
 			},
 			"index.ts": { "desc": "Locales module exports", "role": "Index" },
 			"zh-cn": {
@@ -127,7 +127,7 @@ This document provides an overview of the packages/app module structure and arch
 				"index.ts": { "desc": "Chinese locale entry", "role": "Index" },
 				"layout.ts": { "desc": "Chinese Layout strings", "role": "Locale" },
 				"note.ts": { "desc": "Chinese Note strings", "role": "Locale" },
-				"setting.ts": { "desc": "Chinese Settings strings", "role": "Locale" }
+				"setting.ts": { "desc": "Chinese Setting strings", "role": "Locale" }
 			}
 		},
 		"models": {
@@ -136,7 +136,7 @@ This document provides an overview of the packages/app module structure and arch
 				"desc": "Memory task queue with IPC timeout guard and in-memory-only task persistence",
 				"role": "Model"
 			},
-			"Settings.ts": {
+			"Setting.ts": {
 				"desc": "User settings state model (includes current_page navigation)",
 				"role": "Model"
 			},
@@ -178,10 +178,10 @@ This document provides an overview of the packages/app module structure and arch
 		},
 		"settings": {
 			"components": {
-				"Item.tsx": { "desc": "Settings item component", "role": "Component" },
-				"index.ts": { "desc": "Settings components exports", "role": "Index" }
+				"Item.tsx": { "desc": "Setting item component", "role": "Component" },
+				"index.ts": { "desc": "Setting components exports", "role": "Index" }
 			},
-			"index.tsx": { "desc": "Settings page main view", "role": "Page" }
+			"index.tsx": { "desc": "Setting page main view", "role": "Page" }
 		},
 		"styles": {
 			"global.css": { "desc": "Global CSS styles", "role": "Style" },

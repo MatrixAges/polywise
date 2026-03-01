@@ -1,5 +1,5 @@
-import type { Settings } from '@/models'
+import type { Setting } from '@/models'
 
-export interface IPropsHeader extends Pick<Settings, 'panel_collapsed' | 'togglePanel'> {}
+export interface IPropsHeader extends Pick<Setting, 'panel_collapsed' | 'togglePanel'> {}
 
-export interface IPropsPanel extends Pick<Settings, 'togglePanel'> {}
+export interface IPropsPanel extends Pick<Setting, 'togglePanel'> {}

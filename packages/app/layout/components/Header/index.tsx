@@ -1,12 +1,20 @@
-import { useState } from 'react'
 import { PanelLeft, PanelRight, SlidersHorizontal } from 'lucide-react'
+import { NavLink } from 'react-router'
 
+import { workspaces } from '@/__metadata__'
+import {
+	Select,
+	SelectContent,
+	SelectGroup,
+	SelectItem,
+	SelectLabel,
+	SelectTrigger,
+	SelectValue
+} from '@/__shadcn__/components/ui/select'
 import { nav_items } from '@/appdata'
 import Logo from '@/public/bare.svg?react'
 
 const Index = () => {
-	const [active_tab, set_active_tab] = useState('agent')
-
 	return (
 		<div
 			className='
@@ -30,7 +38,7 @@ const Index = () => {
 					className='
 						flex
 						items-center justify-center
-						w-5 h-5
+						w-4.5 h-4.5
 						transition-all
 						hover:fill-std-black
 						fill-std-300
@@ -42,12 +50,30 @@ const Index = () => {
 					className='
 						w-px h-[14px]
 						ml-4 mr-3
-						bg-std-100/80
+						bg-std-100
 					'
 				></div>
-				<button className='icon_button'>
+				<button className='icon_button mr-3'>
 					<PanelLeft></PanelLeft>
 				</button>
+				<Select
+					items={workspaces.map(item => ({ label: item.name, value: item.endpoint }))}
+					defaultValue={workspaces.at(-1)!.endpoint}
+				>
+					<SelectTrigger className='bg-transparent! p-0'>
+						<SelectValue />
+					</SelectTrigger>
+					<SelectContent className='w-[180px] p-1' align='start'>
+						<SelectGroup>
+							<SelectLabel>Workspaces</SelectLabel>
+							{workspaces.map(item => (
+								<SelectItem value={item.endpoint} key={item.id}>
+									{item.name}
+								</SelectItem>
+							))}
+						</SelectGroup>
+					</SelectContent>
+				</Select>
 			</div>
 			<div className='flex items-center'>
 				<div
@@ -59,28 +85,30 @@ const Index = () => {
 						text-xs
 					'
 				>
-					{nav_items.map(({ key, Icon }) => (
-						<div
-							className={$cx(
-								`
-								flex
-								items-center justify-center
-								h-7
-								gap-1
-								rounded-full
-								hover:bg-std-100
-								clickable
-							`,
-								active_tab === key
-									? 'text-std-black bg-std-100 px-2'
-									: 'text-std-400/80 w-7'
+					{nav_items.map(({ key, Icon, title }) => (
+						<NavLink to={`/${key}`} key={key}>
+							{({ isActive }) => (
+								<div
+									className={$cx(
+										`
+										flex
+										items-center justify-center
+										h-7
+										gap-1
+										rounded-full
+										hover:bg-std-100
+										clickable
+									`,
+										isActive
+											? 'text-std-black bg-std-100 px-2'
+											: 'text-std-400/80 w-7'
+									)}
+								>
+									<Icon size={14} />
+									{isActive && <span className='capitalize'>{key || title}</span>}
+								</div>
 							)}
-							key={key}
-							onClick={() => set_active_tab(key)}
-						>
-							<Icon size={14} />
-							{active_tab === key && <span className='capitalize'>{key}</span>}
-						</div>
+						</NavLink>
 					))}
 				</div>
 			</div>
