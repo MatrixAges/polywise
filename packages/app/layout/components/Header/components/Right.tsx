@@ -1,6 +1,10 @@
 import { PanelRight, SlidersHorizontal } from 'lucide-react'
 
-const Index = () => {
+import type { IPropsRight } from '../types'
+
+const Index = (props: IPropsRight) => {
+	const { togglePanel } = props
+
 	return (
 		<div
 			className='
@@ -24,7 +28,7 @@ const Index = () => {
 			<button className='icon_button'>
 				<SlidersHorizontal></SlidersHorizontal>
 			</button>
-			<button className='icon_button'>
+			<button className='icon_button' onClick={togglePanel}>
 				<PanelRight></PanelRight>
 			</button>
 		</div>

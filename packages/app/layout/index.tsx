@@ -11,16 +11,17 @@ import { container } from 'tsyringe'
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/__shadcn__/components/ui/resizable'
 import { PANEL_COLLAPSE_THRESHOLD, PANEL_WIDTH_DEFAULT } from '@/appdata'
 import { GlobalModel, GlobalProvider } from '@/context'
+import Panel from '@/panel'
 
-import { Header, Panel } from './components'
+import { Header } from './components'
 
 import type { IPropsHeader, IPropsPanel } from './types'
 
 const Index = () => {
 	const [global] = useState(() => container.resolve(GlobalModel))
-	const { defaultLayout, onLayoutChanged: layoutChanged } = useDefaultLayout({
-		id: 'layout'
-	})
+
+	const { defaultLayout, onLayoutChanged: layoutChanged } = useDefaultLayout({ id: 'layout' })
+	const outlet = useOutlet()
 
 	const s = global.settings
 
@@ -30,8 +31,7 @@ const Index = () => {
 		return () => global.off()
 	}, [])
 
-	const props_Header: IPropsHeader = {
-		panel_collapsed: s.panel_collapsed,
+	const props_header: IPropsHeader = {
 		togglePanel: s.togglePanel
 	}
 
@@ -51,16 +51,16 @@ const Index = () => {
 
 	return (
 		<GlobalProvider value={global}>
-			<div className='flex h-screen w-screen'>
-				<Header></Header>
-				{/* <ResizablePanelGroup defaultLayout={defaultLayout} onLayoutChanged={onLayoutChanged}>
+			<div className='flex h-screen w-screen flex-col'>
+				<Header {...props_header}></Header>
+				<ResizablePanelGroup defaultLayout={defaultLayout} onLayoutChanged={onLayoutChanged}>
 					<ResizablePanel id='layout_content' className='flex h-full flex-col'>
-						<Header {...props_Header}></Header>
+						{outlet}
 					</ResizablePanel>
 					{!s.panel_collapsed && (
 						<ResizableHandle
 							className='
-								bg-std-100/80
+								bg-border-dev
 								transition-colors duration-200
 								hover:bg-std-100 focus:bg-std-150
 							'
@@ -78,7 +78,7 @@ const Index = () => {
 					>
 						<Panel {...props_panel}></Panel>
 					</ResizablePanel>
-				</ResizablePanelGroup> */}
+				</ResizablePanelGroup>
 			</div>
 		</GlobalProvider>
 	)

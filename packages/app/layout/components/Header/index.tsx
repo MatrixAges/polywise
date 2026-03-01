@@ -2,7 +2,16 @@ import { Center, Left, Right } from './components'
 
 import styles from './index.module.css'
 
-const Index = () => {
+import type { IPropsHeader } from '@/layout/types'
+import type { IPropsRight } from './types'
+
+const Index = (props: IPropsHeader) => {
+	const { togglePanel } = props
+
+	const props_right: IPropsRight = {
+		togglePanel
+	}
+
 	return (
 		<div
 			className={`
@@ -16,7 +25,7 @@ const Index = () => {
 		>
 			<Left></Left>
 			<Center></Center>
-			<Right></Right>
+			<Right {...props_right}></Right>
 		</div>
 	)
 }

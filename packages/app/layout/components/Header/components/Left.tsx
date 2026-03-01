@@ -27,11 +27,11 @@ const Index = () => {
 				className='
 					flex
 					items-center justify-center
-					w-[18px] h-[18px]
 					transition-all
 					hover:fill-std-black
 					fill-std-300
 				'
+				style={{ width: 16, height: 16 }}
 			>
 				<Logo width='100%' height='100%'></Logo>
 			</div>

@@ -34,7 +34,7 @@ const Index = (props: IProps) => {
 			className='
 				flex
 				items-center
-				h-9
+				h-7
 				gap-1.5
 				text-xs
 			'
