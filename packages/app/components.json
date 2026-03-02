@@ -1,24 +1,26 @@
 {
-	"$schema": "https://ui.shadcn.com/schema.json",
-	"style": "base-maia",
-	"rsc": false,
-	"tsx": true,
-	"tailwind": {
-		"config": "",
-		"css": "styles/index.css",
-		"baseColor": "neutral",
-		"cssVariables": true,
-		"prefix": ""
-	},
-
-	"iconLibrary": "lucide",
-	"aliases": {
-		"components": "@/__shadcn__/components",
-		"utils": "@/__shadcn__/lib/utils",
-		"ui": "@/__shadcn__/components/ui",
-		"lib": "@/__shadcn__/lib",
-		"hooks": "@/__shadcn__/hooks"
-	},
-	"menuColor": "default",
-	"menuAccent": "subtle"
+  "$schema": "https://ui.shadcn.com/schema.json",
+  "style": "base-maia",
+  "rsc": false,
+  "tsx": true,
+  "tailwind": {
+    "config": "",
+    "css": "styles/index.css",
+    "baseColor": "neutral",
+    "cssVariables": true,
+    "prefix": ""
+  },
+  "iconLibrary": "lucide",
+  "menuColor": "default",
+  "menuAccent": "subtle",
+  "aliases": {
+    "components": "@/__shadcn__/components",
+    "utils": "@/__shadcn__/lib/utils",
+    "ui": "@/__shadcn__/components/ui",
+    "lib": "@/__shadcn__/lib",
+    "hooks": "@/__shadcn__/hooks"
+  },
+  "registries": {
+    "@plate": "https://platejs.org/r/{name}.json"
+  }
 }

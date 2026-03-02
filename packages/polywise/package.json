@@ -27,24 +27,24 @@
 		"@electric-sql/pglite": "^0.3.15",
 		"@huggingface/transformers": "^3.8.1",
 		"@node-rs/jieba": "^2.0.1",
+		"@trpc/server": "catalog:",
+		"ansis": "catalog:",
 		"await-to-js": "catalog:",
 		"dayjs": "catalog:",
 		"es-toolkit": "catalog:",
+		"fastq": "^1.20.1",
 		"fs-extra": "catalog:",
+		"hono": "catalog:",
 		"ofetch": "catalog:",
 		"sentence-splitter": "^5.0.0",
+		"shared": "workspace:*",
 		"stopword": "^3.1.4",
+		"trpc-to-openapi": "catalog:",
 		"tslib": "catalog:",
 		"tsyringe": "catalog:",
-		"uuid": "catalog:",
-		"ansis": "catalog:",
-		"shared": "workspace:*",
-		"trpc-to-openapi": "catalog:",
-		"hono": "catalog:",
-		"@trpc/server": "catalog:"
+		"uuid": "catalog:"
 	},
 	"devDependencies": {
-		"type-fest": "catalog:",
 		"@img/sharp-libvips-dev": "^1.2.4",
 		"@img/sharp-wasm32": "^0.34.5",
 		"@rslib/core": "catalog:",
@@ -58,8 +58,7 @@
 		"cross-env": "catalog:",
 		"deepmerge-ts": "catalog:",
 		"globby": "catalog:",
-		"reflect-metadata": "catalog:"
-	},
-	"peerDependencies": {},
-	"optionalDependencies": {}
+		"reflect-metadata": "catalog:",
+		"type-fest": "catalog:"
+	}
 }
