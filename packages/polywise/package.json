@@ -37,7 +37,7 @@
 		"hono": "catalog:",
 		"ofetch": "catalog:",
 		"sentence-splitter": "^5.0.0",
-		"shared": "workspace:*",
+		"stk": "workspace:*",
 		"stopword": "^3.1.4",
 		"trpc-to-openapi": "catalog:",
 		"tslib": "catalog:",

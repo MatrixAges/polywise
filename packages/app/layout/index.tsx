@@ -4,7 +4,7 @@ import { useLayoutEffect, useState } from 'react'
 import { useMemoizedFn } from 'ahooks'
 import { observer } from 'mobx-react-lite'
 import { useDefaultLayout } from 'react-resizable-panels'
-import { useOutlet } from 'react-router'
+import { Outlet } from 'react-router'
 import { local } from 'stk/storage'
 import { container } from 'tsyringe'
 
@@ -21,7 +21,6 @@ const Index = () => {
 	const [global] = useState(() => container.resolve(GlobalModel))
 
 	const { defaultLayout, onLayoutChanged: layoutChanged } = useDefaultLayout({ id: 'layout' })
-	const outlet = useOutlet()
 
 	const s = global.settings
 
@@ -55,9 +54,15 @@ const Index = () => {
 				'
 			>
 				<Header {...props_header}></Header>
-				<ResizablePanelGroup defaultLayout={defaultLayout} onLayoutChanged={onLayoutChanged}>
+				<ResizablePanelGroup
+					className='h-[calc(100%-43px)]!'
+					defaultLayout={defaultLayout}
+					onLayoutChanged={onLayoutChanged}
+				>
 					<ResizablePanel id='layout_content' className='flex h-full flex-col overflow-y-scroll'>
-						<div className='w-full'>{outlet}</div>
+						<div className='w-full'>
+							<Outlet></Outlet>
+						</div>
 					</ResizablePanel>
 					{!s.panel_collapsed && (
 						<ResizableHandle
@@ -86,4 +91,4 @@ const Index = () => {
 	)
 }
 
-export default new $app.handle(Index).by(observer).by($app.memo).get()
+export default new $app.Handle(Index).by(observer).by($app.memo).get()

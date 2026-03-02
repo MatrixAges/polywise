@@ -5,14 +5,14 @@ import type { ClassValue } from 'clsx'
 import type { GlobalERPC } from 'erpc/renderer'
 import type { TFunction } from 'i18next'
 import type Emittery from 'stk/emittery'
-import type { handle, memo } from 'stk/react'
+import type { Handle, memo } from 'stk/react'
 
 type $CX = (...args: Array<ClassValue>) => string
 type $Copy = <T>(input: T) => T
 
 interface $App {
 	memo: typeof memo
-	handle: typeof handle
+	Handle: typeof Handle
 	Event: Emittery
 }
 

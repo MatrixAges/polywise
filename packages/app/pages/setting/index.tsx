@@ -16,4 +16,4 @@ const Index = () => {
 	return <div className='flex h-[1200px]'>setting</div>
 }
 
-export const Component = new $app.handle(Index).by(observer).by($app.memo).get()
+export const Component = new $app.Handle(Index).by(observer).by($app.memo).get()

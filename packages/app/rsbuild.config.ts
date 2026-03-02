@@ -12,15 +12,14 @@ const config = {
 	output: { legalComments: 'none', assetPrefix: './' },
 	plugins: [pluginReact(), pluginSvgr()],
 	performance: { removeConsole: false },
-	lazyCompilation: { entries: false, imports: true },
+	dev: { lazyCompilation: true },
 	server: {
 		open: false,
-		port: 666,
-		cors: { origin: ['http://localhost:8787'] },
-		printUrls: ({ port }) => [`http://localhost:${port}`]
+		port: 1024,
+		cors: { origin: ['http://localhost:8787'] }
 	},
 	html: {
-		title: 'Polywise - Agentic Memory Engine.',
+		title: 'Polywise - Your Memory, Agentic Now.',
 		template: './public/index.html'
 	},
 	tools: {

@@ -1,10 +1,10 @@
 import { debounce } from 'es-toolkit/compat'
 import { makeAutoObservable } from 'mobx'
 
-import { useInstanceWatch } from '@/mobx'
+import useInstanceWatch from './useInstanceWatch'
 
-import type { Watch } from '@/mobx'
 import type { IReactionDisposer, Lambda } from 'mobx'
+import type { Watch } from './types'
 
 const addEventListeners = (object: typeof window | typeof document, events: Array<string>, callback: () => any) => {
 	events.forEach(event => {

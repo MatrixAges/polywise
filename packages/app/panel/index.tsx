@@ -38,7 +38,7 @@ const Index = () => {
 				</div>
 			</div>
 			<div className='flex h-[calc(100%-42px)] overflow-y-scroll'>
-				<div className='flex w-full px-2 pb-12'>
+				<div className='flex w-full px-3 pb-12'>
 					{panel_tabs.map(({ key }) => {
 						const Component = map[key]
 
@@ -54,4 +54,4 @@ const Index = () => {
 	)
 }
 
-export default new $app.handle(Index).by(observer).by($app.memo).get()
+export default new $app.Handle(Index).by(observer).by($app.memo).get()

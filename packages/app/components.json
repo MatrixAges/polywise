@@ -21,6 +21,7 @@
     "hooks": "@/__shadcn__/hooks"
   },
   "registries": {
-    "@plate": "https://platejs.org/r/{name}.json"
+    "@plate": "https://platejs.org/r/{name}.json",
+    "@lucide-animated": "https://lucide-animated.com/r/{name}.json"
   }
 }

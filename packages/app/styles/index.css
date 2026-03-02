@@ -1,6 +1,5 @@
 @import 'tailwindcss';
 
-@plugin 'tailwind-scrollbar-hide';
 @import './vars.css';
 @import './global.css';
 @import './shadcn.css';

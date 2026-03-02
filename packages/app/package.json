@@ -6,7 +6,11 @@
 	"scripts": {
 		"dev": "rsbuild dev",
 		"build": "rsbuild build",
-		"shadcn": "pnpm dlx shadcn@latest add"
+		"shadcn": "pnpm dlx shadcn@latest add",
+		"kibo": "pnpm dlx kibo-ui add",
+		"animate": "f() { pnpm dlx shadcn@latest add @animate-ui/components-base-$1; }; f",
+		"magic": "f() { pnpm dlx shadcn@latest add @magicui/$1; }; f",
+		"lucide": "f() { pnpm dlx shadcn@latest add @lucide-animated/$1; }; f"
 	},
 	"imports": {
 		"#tailwind": "./styles/index.css"
@@ -57,7 +61,6 @@
 		"smooth-scroll-into-view-if-needed": "^2.0.2",
 		"stk": "workspace:*",
 		"tailwind-merge": "^3.5.0",
-		"tailwind-scrollbar-hide": "^4.0.0",
 		"ts-pattern": "^5.9.0",
 		"tslib": "catalog:",
 		"tsyringe": "catalog:",

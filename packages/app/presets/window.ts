@@ -1,14 +1,14 @@
 import cx from 'clsx'
 import Emittery from 'stk/emittery'
 import { copy } from 'stk/mobx'
-import { handle, memo } from 'stk/react'
+import { Handle, memo } from 'stk/react'
 
 window.$is_dev = process.env.NODE_ENV === 'development'
 window.$is_prod = process.env.NODE_ENV === 'production'
 
 window.$app = {
 	memo,
-	handle,
+	Handle,
 	Event: new Emittery()
 }
 

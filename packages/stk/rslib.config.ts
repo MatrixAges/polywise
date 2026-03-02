@@ -4,10 +4,10 @@ import { rslib } from '../../config'
 
 import type { RslibConfig } from '@rslib/core'
 
-const modules = ['common', 'dnd', 'emittery', 'mobx', 'react', 'storage', 'dom', 'graph', 'utils']
+const modules = ['emittery', 'mobx', 'react', 'storage', 'utils']
 
 export default deepmerge(rslib, {
-	lib: [{ format: 'esm', dts: true, experiments: { advancedEsm: true } }],
+	lib: [{ format: 'esm', dts: true }],
 	output: { target: 'web' },
 	source: {
 		entry: modules.reduce(

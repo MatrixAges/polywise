@@ -1,28 +1,26 @@
 {
-  "name": "@polywise/opencode",
-  "version": "0.0.1",
-  "type": "module",
-  "main": "./dist/index.js",
-  "exports": {
-    ".": "./dist/index.js"
-  },
-  "scripts": {
-    "build": "rslib build",
-    "dev": "rslib build --watch"
-  },
-  "dependencies": {
-    "polywise": "workspace:*",
-    "tsyringe": "catalog:",
-    "@opencode-ai/plugin": "^1.2.15",
-    "@opencode-ai/sdk": "^1.2.15",
-    "await-to-js": "catalog:",
-    "reflect-metadata": "catalog:"
-  },
-  "devDependencies": {
-    "@rslib/core": "catalog:",
-    "typescript": "catalog:",
-    "deepmerge-ts": "catalog:"
-  },
-  "peerDependencies": {},
-  "optionalDependencies": {}
+	"name": "@polywise/opencode",
+	"version": "0.0.1",
+	"type": "module",
+	"main": "./dist/index.js",
+	"exports": {
+		".": "./dist/index.js"
+	},
+	"scripts": {
+		"build": "rslib build",
+		"dev": "rslib build --watch"
+	},
+	"dependencies": {
+		"polywise": "workspace:*",
+		"tsyringe": "catalog:",
+		"@opencode-ai/plugin": "^1.2.15",
+		"@opencode-ai/sdk": "^1.2.15",
+		"await-to-js": "catalog:",
+		"reflect-metadata": "catalog:"
+	},
+	"devDependencies": {
+		"@rslib/core": "catalog:",
+		"typescript": "catalog:",
+		"deepmerge-ts": "catalog:"
+	}
 }
