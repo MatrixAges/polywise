@@ -4,7 +4,7 @@ import { observer } from 'mobx-react-lite'
 import { container } from 'tsyringe'
 
 import { panel_tabs } from '@/appdata'
-import { Tabs } from '@/components'
+import { Lazy, Tabs } from '@/components'
 
 import Agent from './agent'
 import Bookmark from './bookmark'
@@ -44,7 +44,8 @@ const Index = () => {
 
 						return (
 							<Activity mode={key === x.active_tab ? 'visible' : 'hidden'} key={key}>
-								<Component />
+								{/* <Component /> */}
+								<Lazy type='panel' path={key}></Lazy>
 							</Activity>
 						)
 					})}

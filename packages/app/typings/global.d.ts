@@ -4,6 +4,7 @@ import type SmoothScroll from '@/utils/SmoothScroll'
 import type { ClassValue } from 'clsx'
 import type { GlobalERPC } from 'erpc/renderer'
 import type { TFunction } from 'i18next'
+import type { EffectCallback } from 'react'
 import type Emittery from 'stk/emittery'
 import type { Handle, memo } from 'stk/react'
 
@@ -15,6 +16,8 @@ interface $App {
 	Handle: typeof Handle
 	Event: Emittery
 }
+
+type $AliveUnmountedSet = Set<ReturnType<EffectCallback>>
 
 declare global {
 	interface $Env {
@@ -41,26 +44,20 @@ declare global {
 		$is_prod: boolean
 
 		$t: TFunction<'translation', undefined>
+		$app: $App
+
 		$copy: $Copy
 		$cx: $CX
-
-		$app: $App
-		$message: MessageInstance
-		$notification: NotificationInstance
-		$modal: Omit<ModalStaticFunctions, 'warn'>
 	}
 
 	let $is_dev: boolean
 	let $is_prod: boolean
 
 	let $t: TFunction<'translation', undefined>
+	let $app: $App
+
 	let $copy: $Copy
 	let $cx: $CX
-
-	let $app: $App
-	let $message: MessageInstance
-	let $notification: NotificationInstance
-	let $modal: Omit<ModalStaticFunctions, 'warn'>
 }
 
 export {}

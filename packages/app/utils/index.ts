@@ -1,4 +1,5 @@
 export { default as PrefixMap } from './PrefixMap'
+export { default as ShadowTracker } from './ShadowTracker'
 
 export { default as flat } from './flat'
 export { default as execUntil } from './execUntil'

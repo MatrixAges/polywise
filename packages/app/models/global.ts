@@ -17,20 +17,20 @@ export default class GlobalModel {
 	}
 
 	// onMain() {
-	// 	const off = ipc.app.onMain.subscribe(undefined, {
+	// 	const deinit = ipc.app.onMain.subscribe(undefined, {
 	// 		onData: res => {
 	// 			console.log(res)
 	// 		}
 	// 	})
 
-	// 	this.util.acts.push(off.unsubscribe)
+	// 	this.util.acts.push(deinit.unsubscribe)
 	// }
 
 	init() {
 		this.settings.init()
 	}
 
-	off() {
-		this.settings.off()
+	deinit() {
+		this.settings.deinit()
 	}
 }

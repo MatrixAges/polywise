@@ -27,7 +27,7 @@ const Index = () => {
 	useLayoutEffect(() => {
 		global.init()
 
-		return () => global.off()
+		return () => global.deinit()
 	}, [])
 
 	const props_header: IPropsHeader = {

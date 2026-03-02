@@ -43,9 +43,9 @@ export default class Index {
 	}
 
 	async init() {
-		const off = await setStoreWhenChange(['lang', 'theme_source', 'panel_collapsed', 'panel_width'], this)
+		const deinit = await setStoreWhenChange(['lang', 'theme_source', 'panel_collapsed', 'panel_width'], this)
 
-		this.util.acts = [off]
+		this.util.acts = [deinit]
 
 		await this.setLocale(this.lang ?? getLang(navigator.language))
 
@@ -191,9 +191,9 @@ export default class Index {
 		this.settings_visible = !this.settings_visible
 	}
 
-	off() {
+	deinit() {
 		this.offThemeChange()
 
-		this.util.off()
+		this.util.deinit()
 	}
 }

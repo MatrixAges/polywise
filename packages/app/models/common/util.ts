@@ -10,7 +10,7 @@ export default class Index {
 		makeAutoObservable(this, { acts: false }, { autoBind: true })
 	}
 
-	off() {
+	deinit() {
 		this.acts.map(item => item())
 		this.acts = []
 	}

@@ -10,7 +10,7 @@ const Index = () => {
 	useLayoutEffect(() => {
 		x.init()
 
-		return () => x.off()
+		return () => x.deinit()
 	}, [])
 
 	return <div className='flex'></div>

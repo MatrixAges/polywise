@@ -9,5 +9,5 @@ export default class Index {
 
 	init() {}
 
-	off() {}
+	deinit() {}
 }
