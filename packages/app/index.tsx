@@ -45,7 +45,7 @@ const routes: Array<RouteObject> = [
 			},
 			{
 				path: '/setting',
-				lazy: () => import('@/pages/setting')
+				lazy: () => import('@/setting')
 			}
 		],
 		ErrorBoundary

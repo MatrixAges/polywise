@@ -6,7 +6,7 @@
 
 # <p align="center">Polywise</p>
 
-<p align="center"><strong>Agentic Memory Engine</strong></p>
+<p align="center"><strong>Your AI Digital Twins</strong></p>
 
 <p align="center">
   <a href="https://github.com/MatrixAges/polywise/stargazers"><img src="https://img.shields.io/github/stars/MatrixAges/polywise?style=rounded&color=795548" alt="Stars"></a>

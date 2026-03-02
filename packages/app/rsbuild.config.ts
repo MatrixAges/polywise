@@ -19,7 +19,7 @@ const config = {
 		cors: { origin: ['http://localhost:8787'] }
 	},
 	html: {
-		title: 'Polywise - Your Memory, Agentic Now.',
+		title: 'Polywise - Your AI Digital Twins',
 		template: './public/index.html'
 	},
 	tools: {

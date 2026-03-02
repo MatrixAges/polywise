@@ -59,10 +59,8 @@ const Index = () => {
 					defaultLayout={defaultLayout}
 					onLayoutChanged={onLayoutChanged}
 				>
-					<ResizablePanel id='layout_content' className='flex h-full flex-col overflow-y-scroll'>
-						<div className='w-full'>
-							<Outlet></Outlet>
-						</div>
+					<ResizablePanel id='layout_content' className='h-full'>
+						<Outlet></Outlet>
 					</ResizablePanel>
 					{!s.panel_collapsed && (
 						<ResizableHandle
