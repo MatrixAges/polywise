@@ -1,6 +1,6 @@
 'use client';
 
-import * as React from 'react';
+
 
 import type { VariantProps } from 'class-variance-authority';
 import type { PlateContentProps, PlateViewProps } from 'platejs/react';
