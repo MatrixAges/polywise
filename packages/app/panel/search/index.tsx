@@ -1,6 +1,5 @@
 const Index = () => {
-	console.log('search')
-	return <div className='flex'>search</div>
+	return <div className='flex'></div>
 }
 
 export default $app.memo(Index)

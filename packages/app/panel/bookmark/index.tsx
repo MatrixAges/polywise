@@ -1,11 +1,9 @@
 import { useLayoutEffect } from 'react'
 
 const Index = () => {
-	console.log('bookmark')
-
 	useLayoutEffect(() => {}, [])
 
-	return <div className='flex'>bookmark</div>
+	return <div className='flex'></div>
 }
 
 export default $app.memo(Index)

@@ -13,7 +13,7 @@ const Index = () => {
 		return () => x.off()
 	}, [])
 
-	return <div className='flex h-[1200px]'>setting</div>
+	return <div className='flex h-[1200px]'></div>
 }
 
 export const Component = new $app.Handle(Index).by(observer).by($app.memo).get()

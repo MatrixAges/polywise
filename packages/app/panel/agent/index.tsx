@@ -1,6 +1,5 @@
 const Index = () => {
-	console.log('agent')
-	return <div className='flex'>agent</div>
+	return <div className='flex'></div>
 }
 
 export default $app.memo(Index)
