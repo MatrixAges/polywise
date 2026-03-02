@@ -12,7 +12,7 @@ const config = {
 	output: { legalComments: 'none', assetPrefix: './' },
 	plugins: [pluginReact(), pluginSvgr()],
 	performance: { removeConsole: false },
-	dev: { lazyCompilation: true },
+	dev: { lazyCompilation: { imports: true } },
 	server: {
 		open: false,
 		port: 1024,

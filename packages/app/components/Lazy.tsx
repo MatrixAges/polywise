@@ -15,7 +15,7 @@ const Index = (_props: IProps) => {
 
 	const Component = useMemo(() => {
 		return match(type)
-			.with('panel', () => lazy(() => import(`@/panel/${path}`)))
+			.with('panel', () => lazy(() => import(`@/panel/${path}/index`)))
 			.exhaustive()
 	}, [type, path])
 
