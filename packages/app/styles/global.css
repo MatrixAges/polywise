@@ -21,6 +21,14 @@ body {
 	}
 }
 
+.page_wrap {
+	margin: 0 auto;
+	max-width: 640px;
+	width: 100%;
+	padding: calc(var(--spacing) * 4);
+	padding-bottom: calc(var(--spacing) * 12);
+}
+
 .icon_button {
 	@apply 
 				flex

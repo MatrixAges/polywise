@@ -56,7 +56,7 @@ const Index = () => {
 			>
 				<Header {...props_header}></Header>
 				<ResizablePanelGroup
-					className='h-[calc(100%-48px)]!'
+					className='h-[calc(100%-42px)]!'
 					defaultLayout={defaultLayout}
 					onLayoutChanged={onLayoutChanged}
 				>
