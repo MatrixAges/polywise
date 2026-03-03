@@ -1,12 +1,13 @@
-import { Bookmark, Bot, Compass, Database, Folders, NotebookPen, Search } from 'lucide-react'
+import { Bookmark, Bot, ClockCheck, Compass, Database, Folders, NotebookPen, Search } from 'lucide-react'
 
 export const nav_items = [
 	{ key: '', Icon: Search, title: 'search' },
 	{ key: 'agent', Icon: Bot },
 	{ key: 'bookmark', Icon: Bookmark },
 	{ key: 'notebook', Icon: NotebookPen },
-	{ key: 'database', Icon: Database },
-	{ key: 'project', Icon: Folders },
+	// { key: 'database', Icon: Database },
+	// { key: 'project', Icon: Folders },
+	{ key: 'task', Icon: ClockCheck },
 	{ key: 'browser', Icon: Compass }
 ] as Array<{ key: string; Icon: typeof Search; title?: string }>
 

@@ -42,6 +42,10 @@ const routes: Array<RouteObject> = [
 				lazy: () => import('@/pages/project')
 			},
 			{
+				path: '/task',
+				lazy: () => import('@/pages/task')
+			},
+			{
 				path: '/browser',
 				lazy: () => import('@/pages/browser')
 			},
