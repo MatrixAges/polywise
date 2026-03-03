@@ -12,10 +12,10 @@
 @custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
 
 @theme {
-	--border-visible: 1;
+	--dev-visible: 1;
 
-	--border-alpha: calc(var(--border-visible) * 0.8);
-	--color-border-dev: oklch(from var(--color-std-100) l c h / var(--border-alpha));
+	--dev-alpha: calc(var(--dev-visible) * 0.8);
+	--color-dev: oklch(from var(--color-std-100) l c h / var(--dev-alpha));
 }
 
 @theme {

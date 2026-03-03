@@ -12,7 +12,7 @@ const Index = (props: IPropsSidebar) => {
 			className='
 				overflow-y-scroll
 				flex
-				w-[160px] h-full
+				w-[222px] h-full
 			'
 		>
 			<div
@@ -20,7 +20,7 @@ const Index = (props: IPropsSidebar) => {
 					flex flex-col
 					w-full
 					gap-1
-					p-2
+					px-2
 					pb-12
 				'
 			>
@@ -30,12 +30,11 @@ const Index = (props: IPropsSidebar) => {
 						items-center
 						px-2.5 py-1.5
 						text-xs text-muted-foreground
-						label
 					'
 				>
 					Settings
 				</span>
-				{setting_items.map(({ key, Icon }) => (
+				{setting_items.map(({ key, title, Icon }) => (
 					<div
 						className={`
 							click_button
@@ -45,7 +44,7 @@ const Index = (props: IPropsSidebar) => {
 						onClick={() => toggleActive(key)}
 					>
 						<Icon></Icon>
-						<span className='capitalize'>{key}</span>
+						<span className='capitalize'>{title || key}</span>
 					</div>
 				))}
 			</div>

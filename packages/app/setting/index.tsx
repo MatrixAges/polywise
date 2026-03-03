@@ -43,9 +43,8 @@ const Index = () => {
 					className='
 						overflow-y-scroll
 						w-full h-full
-						p-6
 						rounded-2xl
-						bg-std-50
+						bg-dev/50
 					'
 				>
 					<div className='w-full'>
