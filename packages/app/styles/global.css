@@ -23,9 +23,9 @@ body {
 
 .page_wrap {
 	margin: 0 auto;
-	max-width: 640px;
+	max-width: 720px;
 	width: 100%;
-	padding: calc(var(--spacing) * 4);
+	padding: calc(var(--spacing) * 4) calc(var(--spacing) * 10);
 	padding-bottom: calc(var(--spacing) * 12);
 }
 
