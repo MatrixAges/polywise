@@ -3,13 +3,17 @@ import { injectable } from 'tsyringe'
 
 @injectable()
 export default class Index {
-	active = 'general'
+	current = 'general'
 
 	constructor() {
 		makeAutoObservable(this, {}, { autoBind: true })
 	}
 
 	init() {}
+
+	setCurrent(v: Index['current']) {
+		this.current = v
+	}
 
 	deinit() {}
 }

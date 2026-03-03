@@ -1,15 +1,12 @@
 import { useLayoutEffect, useState } from 'react'
-import { useMemoizedFn } from 'ahooks'
 import { observer } from 'mobx-react-lite'
 import { container } from 'tsyringe'
 
-import { Lazy } from '@/components'
+import { setting_items } from '@/appdata'
+import { Lazy, Sidebar } from '@/components'
 import { useGlobal } from '@/context'
 
 import Model from './model'
-import Sidebar from './Sidebar'
-
-import type { IPropsSidebar } from './types'
 
 const Index = () => {
 	const global = useGlobal()
@@ -23,15 +20,13 @@ const Index = () => {
 		return () => x.deinit()
 	}, [])
 
-	const props_sidebar: IPropsSidebar = {
-		sidebar_collapsed: s.sidebar_collapsed,
-		active: x.active,
-		toggleActive: useMemoizedFn((v: string) => (x.active = v))
-	}
-
 	return (
 		<div className='flex h-full w-full'>
-			<Sidebar {...props_sidebar}></Sidebar>
+			<Sidebar
+				groups={[{ label: 'Settings', items: setting_items }]}
+				current={x.current}
+				setCurrent={x.setCurrent}
+			></Sidebar>
 			<div
 				className='
 					flex flex-1
@@ -48,7 +43,7 @@ const Index = () => {
 					'
 				>
 					<div className='w-full'>
-						<Lazy type='setting' path={x.active}></Lazy>
+						<Lazy type='setting' path={x.current}></Lazy>
 					</div>
 				</div>
 			</div>

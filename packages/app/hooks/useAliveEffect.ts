@@ -11,7 +11,7 @@ interface Args {
 	deps?: DependencyList
 }
 
-const createShadowElement = (dom: HTMLElement, cleanup: () => void) => {
+const createShadowTracker = (dom: HTMLElement, cleanup: () => void) => {
 	const tracker = document.createElement('shadow-tracker') as ShadowTracker
 
 	tracker.style.display = 'none'
@@ -23,8 +23,8 @@ const createShadowElement = (dom: HTMLElement, cleanup: () => void) => {
 export default (args: Args) => {
 	const { init, deinit, deps = [] } = args
 
-	const state = useRef<{ is_mounted: boolean; dom: HTMLElement | null; deps: DependencyList }>({
-		is_mounted: false,
+	const state = useRef<{ mounted: boolean; dom: HTMLElement | null; deps: DependencyList }>({
+		mounted: false,
 		dom: null,
 		deps: []
 	})
@@ -32,7 +32,7 @@ export default (args: Args) => {
 	const cleanup = useMemoizedFn(() => {
 		deinit?.()
 
-		state.current.is_mounted = false
+		state.current.mounted = false
 		state.current.dom = null
 		state.current.deps = []
 	})
@@ -42,13 +42,13 @@ export default (args: Args) => {
 
 		state.current.dom = v
 
-		createShadowElement(v, cleanup)
+		createShadowTracker(v, cleanup)
 	})
 
 	useInsertionEffect(() => {
-		if (state.current.is_mounted && deepEqual(state.current.deps, deps)) return
+		if (state.current.mounted && deepEqual(state.current.deps, deps)) return
 
-		state.current.is_mounted = true
+		state.current.mounted = true
 		state.current.deps = deps
 
 		init(setRef)

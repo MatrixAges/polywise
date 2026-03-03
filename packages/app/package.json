@@ -23,6 +23,7 @@
 		"@formatjs/intl-localematcher": "^0.8.1",
 		"@platejs/basic-nodes": "^52.0.11",
 		"@radix-ui/react-toolbar": "^1.1.11",
+		"@radix-ui/react-tooltip": "^1.1.11",
 		"@swc/helpers": "catalog:",
 		"@trpc/client": "catalog:",
 		"@xyflow/react": "^12.10.1",
