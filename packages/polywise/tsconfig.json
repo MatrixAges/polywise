@@ -9,14 +9,14 @@
 		"emitDeclarationOnly": true,
 		"strict": true,
 		"outDir": "dist",
-		"baseUrl": ".",
+		"baseUrl": "../",
 		"isolatedModules": true,
 		"esModuleInterop": true,
 		"importHelpers": true,
 		"allowImportingTsExtensions": true,
 		"forceConsistentCasingInFileNames": true,
 		"paths": {
-			"@/*": ["./src/*"]
+			"@core/*": ["./polywise/src/*"]
 		},
 		"emitDecoratorMetadata": true,
 		"experimentalDecorators": true

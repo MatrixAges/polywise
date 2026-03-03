@@ -51,7 +51,7 @@ const Index = (props: IProps) => {
 						h-7
 						gap-1
 						rounded-full
-						hover:bg-std-100
+						hover:bg-std-100 active:bg-std-150
 						clickable
 					`,
 							getActive(key) ? 'text-std-black bg-std-100 px-2' : 'text-std-400/80 w-7'
@@ -60,7 +60,7 @@ const Index = (props: IProps) => {
 						key={key}
 					>
 						{Icon && <Icon size={14} />}
-						{getActive(key) && <span className='capitalize'>{key || title}</span>}
+						{getActive(key) && <span className='font-medium capitalize'>{key || title}</span>}
 					</div>
 				)
 			})}

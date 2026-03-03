@@ -39,6 +39,7 @@ body {
 	text-size-adjust: 100%;
 	unicode-bidi: isolate;
 
+	-webkit-font-smoothing: antialiased;
 	-webkit-tap-highlight-color: transparent;
 }
 

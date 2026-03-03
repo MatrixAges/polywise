@@ -4,7 +4,7 @@ import { match } from 'ts-pattern'
 import type { ReactNode } from 'react'
 
 interface IProps {
-	type: 'panel'
+	type: 'panel' | 'setting'
 	path: string
 	props?: any
 	placeholder?: ReactNode
@@ -16,6 +16,7 @@ const Index = (_props: IProps) => {
 	const Component = useMemo(() => {
 		return match(type)
 			.with('panel', () => lazy(() => import(`@/panel/${path}/index`)))
+			.with('setting', () => lazy(() => import(`@/setting/${path}/index`)))
 			.exhaustive()
 	}, [type, path])
 

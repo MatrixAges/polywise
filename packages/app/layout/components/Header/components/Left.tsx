@@ -12,7 +12,11 @@ import {
 } from '@/__shadcn__/components/ui/select'
 import Logo from '@/public/bare.svg?react'
 
-const Index = () => {
+import type { IPropsLeft } from '../types'
+
+const Index = (props: IPropsLeft) => {
+	const { toggleSidebar } = props
+
 	return (
 		<div
 			className='
@@ -42,7 +46,7 @@ const Index = () => {
 					bg-std-100
 				'
 			></div>
-			<button className='icon_button mr-1'>
+			<button className='icon_button mr-1' onClick={toggleSidebar}>
 				<PanelLeft></PanelLeft>
 			</button>
 			<Select

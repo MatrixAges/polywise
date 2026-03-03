@@ -29,7 +29,6 @@ const Index = () => {
 				className='
 					flex
 					items-center justify-between
-					h-[42px]
 					px-2
 				'
 			>
@@ -56,7 +55,7 @@ const Index = () => {
 					</DropdownMenuContent>
 				</DropdownMenu>
 			</div>
-			<div className='flex h-[calc(100%-42px)] overflow-y-scroll'>
+			<div className='flex flex-1 overflow-y-scroll'>
 				<div className='flex w-full px-3 pb-12'>
 					{panel_tabs.map(({ key }) => {
 						return (

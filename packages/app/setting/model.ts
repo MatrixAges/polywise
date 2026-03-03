@@ -3,6 +3,8 @@ import { injectable } from 'tsyringe'
 
 @injectable()
 export default class Index {
+	active = 'general'
+
 	constructor() {
 		makeAutoObservable(this, {}, { autoBind: true })
 	}

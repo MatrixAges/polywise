@@ -3,7 +3,7 @@ body {
 }
 
 .lucide {
-	stroke-width: 2.1px;
+	stroke-width: 1.8px;
 }
 
 .is_drag {
@@ -38,6 +38,30 @@ body {
 	svg {
 		width: 13px;
 		height: 13px;
+	}
+
+	&.active {
+		@apply bg-std-100 text-std-black;
+	}
+}
+
+.click_button {
+	@apply 
+				flex
+				items-center
+				gap-2
+				px-2.5 py-1.5
+				rounded-full
+				text-std-400 text-sm font-medium
+				hover:bg-std-100 hover:text-std-black active:bg-std-150
+				clickit
+			;
+
+	-webkit-app-region: no-drag;
+
+	svg {
+		width: 14px;
+		height: 14px;
 	}
 
 	&.active {

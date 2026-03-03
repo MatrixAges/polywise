@@ -31,6 +31,7 @@ const Index = () => {
 	}, [])
 
 	const props_header: IPropsHeader = {
+		toggleSidebar: s.toggleSidebar,
 		togglePanel: s.togglePanel
 	}
 
@@ -55,7 +56,7 @@ const Index = () => {
 			>
 				<Header {...props_header}></Header>
 				<ResizablePanelGroup
-					className='h-[calc(100%-43px)]!'
+					className='h-[calc(100%-48px)]!'
 					defaultLayout={defaultLayout}
 					onLayoutChanged={onLayoutChanged}
 				>
@@ -65,7 +66,7 @@ const Index = () => {
 					{!s.panel_collapsed && (
 						<ResizableHandle
 							className='
-								bg-border-dev
+								bg-transparent
 								transition-colors duration-200
 								hover:bg-std-100 focus:bg-std-150
 							'

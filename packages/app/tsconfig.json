@@ -15,9 +15,10 @@
 		"forceConsistentCasingInFileNames": true,
 		"paths": {
 			"@/*": ["./app/*"],
+			"@core/*": ["./polywise/src/*"],
+			"@desktop/*": ["./desktop/src/*"],
 			"@/components/*": ["./app/components/*"],
-			"@/components": ["./app/components/index.ts"],
-			"@desktop/*": ["./desktop/src/*"]
+			"@/components": ["./app/components/index.ts"]
 		},
 		"emitDecoratorMetadata": true,
 		"experimentalDecorators": true

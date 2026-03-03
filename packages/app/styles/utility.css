@@ -2,8 +2,8 @@
 	@apply cursor-pointer transition-all select-none active:scale-90;
 }
 
-@utility lightclick {
-	@apply cursor-pointer transition-all select-none active:scale-97;
+@utility clickit {
+	@apply cursor-pointer transition-all select-none active:scale-99;
 }
 
 @utility scrollbar-hide {
