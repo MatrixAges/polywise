@@ -1,6 +1,7 @@
 import '@abraham/reflection'
 import '@/presets'
 
+import { Fragment } from 'react'
 import { createRoot } from 'react-dom/client'
 import { createBrowserRouter, createHashRouter, RouterProvider } from 'react-router-dom'
 
@@ -14,6 +15,7 @@ const routes: Array<RouteObject> = [
 	{
 		path: '/',
 		element: <Layout />,
+		hydrateFallbackElement: <Fragment />,
 		children: [
 			{
 				path: '/',

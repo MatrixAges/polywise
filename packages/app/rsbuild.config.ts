@@ -15,7 +15,7 @@ const config = {
 	dev: { lazyCompilation: { imports: true } },
 	server: {
 		open: false,
-		port: 1024,
+		port: 3072,
 		cors: { origin: ['http://localhost:8787'] }
 	},
 	html: {
