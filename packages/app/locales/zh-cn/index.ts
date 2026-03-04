@@ -1,7 +1,9 @@
 import global from './global'
+import provider from './provider'
 
 export default {
 	translation: {
-		...global
+		...global,
+		provider
 	}
 } as const

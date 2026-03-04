@@ -7,8 +7,6 @@ export interface AlertArgs {
 	title: string
 	desc: string
 	icon?: string
-	onConfirm: () => void
-	onCancel?: () => void
 }
 
 const initial = { title: '', desc: '', icon: '' } as AlertArgs
