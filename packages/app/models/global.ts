@@ -11,15 +11,15 @@ export default class GlobalModel {
 		public util: Util,
 		public locale: Locale,
 		public theme: Theme,
-		public settings: Setting
+		public setting: Setting
 	) {
-		makeAutoObservable(this, { util: false, locale: false, theme: false, settings: false }, { autoBind: true })
+		makeAutoObservable(this, { util: false, locale: false, theme: false, setting: false }, { autoBind: true })
 	}
 
 	init() {
 		this.locale.init()
 		this.theme.init()
-		this.settings.init()
+		this.setting.init()
 
 		if (is_electron) this.onElectronMain()
 	}
@@ -36,6 +36,6 @@ export default class GlobalModel {
 		this.util.deinit()
 		this.locale.deinit()
 		this.theme.deinit()
-		this.settings.deinit()
+		this.setting.deinit()
 	}
 }

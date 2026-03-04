@@ -20,6 +20,8 @@ export { default as copy } from './copy'
 export { default as conf } from './conf'
 export { default as getLang } from './getLang'
 export { default as getGlobal } from './getGlobal'
+export { default as getCssVar } from './getCssVar'
+export { default as setCssVar } from './setCssVar'
 
 export * from './theme'
 export * from './is'

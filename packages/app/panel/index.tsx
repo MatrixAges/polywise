@@ -21,7 +21,7 @@ const Index = () => {
 	const global = useGlobal()
 	const [x] = useState(() => container.resolve(Model))
 
-	const s = global.settings
+	const s = global.setting
 
 	return (
 		<div className='flex h-full w-full flex-col'>

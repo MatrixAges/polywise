@@ -22,7 +22,7 @@ const Index = () => {
 
 	const { defaultLayout, onLayoutChanged: layoutChanged } = useDefaultLayout({ id: 'layout' })
 
-	const s = global.settings
+	const s = global.setting
 
 	useLayoutEffect(() => {
 		global.init()

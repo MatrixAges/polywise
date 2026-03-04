@@ -12,7 +12,7 @@ const Index = () => {
 	const global = useGlobal()
 	const [x] = useState(() => container.resolve(Model))
 
-	const s = global.settings
+	const s = global.setting
 
 	useLayoutEffect(() => {
 		x.init()

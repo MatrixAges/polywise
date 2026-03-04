@@ -19,9 +19,11 @@ const Index = () => {
 	const global = useGlobal()
 	const l = global.locale
 	const t = global.theme
+	const s = global.setting
 
 	const setLang = useMemoizedFn(v => l.setLang(v))
 	const setTheme = useMemoizedFn(v => t.setTheme(v))
+	const setDevTheme = useMemoizedFn(v => s.setDevTheme(v))
 
 	return (
 		<div className='flex w-full'>
@@ -84,7 +86,7 @@ const Index = () => {
 							Add dividers and backgrounds to the content area
 						</FieldDescription>
 					</FieldContent>
-					<Switch id='switch-share' />
+					<Switch checked={s.dev_theme} onCheckedChange={setDevTheme} />
 				</Field>
 			</FieldGroup>
 		</div>
