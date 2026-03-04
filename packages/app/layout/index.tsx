@@ -13,7 +13,7 @@ import { PANEL_COLLAPSE_THRESHOLD, PANEL_WIDTH_DEFAULT } from '@/appdata'
 import { GlobalModel, GlobalProvider } from '@/context'
 import Panel from '@/panel'
 
-import { Header } from './components'
+import { Alert, Header } from './components'
 
 import type { IPropsHeader } from './types'
 
@@ -47,6 +47,7 @@ const Index = () => {
 
 	return (
 		<GlobalProvider value={global}>
+			<Alert></Alert>
 			<div
 				className='
 					overflow-hidden

@@ -3,6 +3,7 @@ export { default as ShadowTracker } from './ShadowTracker'
 
 export { default as flat } from './flat'
 export { default as execUntil } from './execUntil'
+export { default as createUniversalObject } from './createUniversalObject'
 
 export { default as ipc } from './ipc'
 export { default as setGlobalAnimation } from './setGlobalAnimation'

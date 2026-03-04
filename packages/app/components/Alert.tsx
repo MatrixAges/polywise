@@ -1,4 +1,4 @@
-import { BluetoothIcon } from 'lucide-react'
+import { useMemo } from 'react'
 
 import {
 	AlertDialog,
@@ -12,26 +12,53 @@ import {
 	AlertDialogTitle,
 	AlertDialogTrigger
 } from '@/__shadcn__/components/ui/alert-dialog'
-import { Button } from '@/__shadcn__/components/ui/button'
+import { icon_map } from '@/appdata'
 
-const Index = () => {
+import type { ElementType } from 'react'
+
+interface IProps {
+	title: string
+	desc: string
+	open?: boolean
+	confirm_text?: string
+	cancel_text?: string
+	Trigger?: ElementType
+	icon?: string
+	onConfirm?: (...args: Array<any>) => void
+	onCancel?: () => void
+}
+
+const Index = (props: IProps) => {
+	const {
+		title,
+		desc,
+		open,
+		confirm_text = 'Confirm',
+		cancel_text = 'Cancel',
+		Trigger,
+		icon,
+		onConfirm,
+		onCancel
+	} = props
+
+	const Icon = useMemo(() => (icon ? icon_map[icon] : null), [icon])
+
 	return (
-		<AlertDialog>
-			<AlertDialogTrigger render={<Button variant='outline'>Show Dialog</Button>} />
-
+		<AlertDialog open={open}>
+			{Trigger && <AlertDialogTrigger render={<Trigger></Trigger>} />}
 			<AlertDialogContent size='sm'>
 				<AlertDialogHeader>
-					<AlertDialogMedia>
-						<BluetoothIcon />
-					</AlertDialogMedia>
-					<AlertDialogTitle>Allow accessory to connect?</AlertDialogTitle>
-					<AlertDialogDescription>
-						Do you want to allow the USB accessory to connect to this device?
-					</AlertDialogDescription>
+					{Icon && (
+						<AlertDialogMedia>
+							<Icon />
+						</AlertDialogMedia>
+					)}
+					<AlertDialogTitle>{title}</AlertDialogTitle>
+					<AlertDialogDescription>{desc}</AlertDialogDescription>
 				</AlertDialogHeader>
 				<AlertDialogFooter>
-					<AlertDialogCancel>Don&apos;t allow</AlertDialogCancel>
-					<AlertDialogAction>Allow</AlertDialogAction>
+					<AlertDialogCancel onClick={onCancel}>{cancel_text}</AlertDialogCancel>
+					<AlertDialogAction onClick={onConfirm}>{confirm_text}</AlertDialogAction>
 				</AlertDialogFooter>
 			</AlertDialogContent>
 		</AlertDialog>

@@ -9,6 +9,7 @@ import { config, locales } from 'zod'
 import { Util } from '@/models/common'
 import { conf, getLang, relaunch, resourcesToBackend } from '@/utils'
 
+import type { AlertArgs } from '@/layout/components/Alert'
 import type { Lang } from '@/types'
 
 @injectable()
@@ -57,8 +58,16 @@ export default class Index {
 		config(zod_locale)
 	}
 
-	setLang(v: Lang) {
+	async setLang(v: Lang) {
 		if (v === this.lang) return
+
+		const res = await $app.Event.emit('app/alert', {
+			icon: 'lang',
+			title: 'Change Language',
+			desc: 'Changing the application language will force a page refresh'
+		} as AlertArgs)
+
+		if (!res) return
 
 		this.lang = v
 
