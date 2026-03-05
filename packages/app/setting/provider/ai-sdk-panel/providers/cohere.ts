@@ -8,29 +8,17 @@ export default {
 		{
 			enabled: true,
 			id: 'command-a-03-2025',
-			name: 'Command A 032025',
-			features: {
-				function_calling: true,
-				structured_output: true
-			}
+			name: 'Command A 032025'
 		},
 		{
 			enabled: true,
 			id: 'command-r7b-12-2024',
-			name: 'Command R 7B',
-			features: {
-				function_calling: true,
-				structured_output: true
-			}
+			name: 'Command R 7B'
 		},
 		{
 			enabled: true,
 			id: 'command-r-plus-04-2024',
-			name: 'Command R Plus',
-			features: {
-				function_calling: true,
-				structured_output: true
-			}
+			name: 'Command R Plus'
 		}
 	]
 } as PresetProvider

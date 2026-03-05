@@ -8,11 +8,7 @@ export default {
 		{
 			enabled: true,
 			id: '',
-			name: '',
-			features: {
-				function_calling: true,
-				structured_output: true
-			}
+			name: ''
 		}
 	]
 } as PresetProvider

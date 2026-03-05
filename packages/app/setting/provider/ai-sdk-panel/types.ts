@@ -83,8 +83,6 @@ export interface IPropsFormModelForm {
 	register: UseFormRegister<IPropsForm['provider']> | UseFormRegister<Model>
 }
 
-export interface IPropsFormModelFormFeatures {}
-
 export interface IPropsCustom {
 	custom_providers: Config['custom_providers']
 	onChangeCustomProviders: M['onChangeCustomProviders']
@@ -140,20 +138,6 @@ export interface Model {
 	id: string
 	enabled: boolean
 	fid?: string
-}
-
-export interface Features {
-	vision?: boolean
-	voice?: boolean
-	function_calling?: boolean
-	structured_output?: boolean
-	reasoning?: boolean
-	reasoning_optional?: boolean
-	web_search?: boolean
-	image_input?: boolean
-	image_output?: boolean
-	embedding?: boolean
-	reranking?: boolean
 }
 
 export type DeepPartial<T> = T extends object

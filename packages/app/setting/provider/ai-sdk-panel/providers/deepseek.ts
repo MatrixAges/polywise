@@ -8,21 +8,12 @@ export default {
 		{
 			enabled: true,
 			id: 'deepseek-reasoner',
-			name: 'Deepseek R1',
-			features: {
-				function_calling: true,
-				structured_output: true,
-				reasoning: true
-			}
+			name: 'Deepseek R1'
 		},
 		{
 			enabled: true,
 			id: 'deepseek-chat',
-			name: 'Deepseek V3',
-			features: {
-				function_calling: true,
-				structured_output: true
-			}
+			name: 'Deepseek Chat'
 		}
 	]
 } as PresetProvider

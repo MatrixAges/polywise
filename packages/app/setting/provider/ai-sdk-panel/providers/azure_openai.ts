@@ -12,34 +12,17 @@ export default {
 		{
 			enabled: true,
 			id: 'gpt-4.1',
-			name: 'GPT 4.1',
-			features: {
-				function_calling: true,
-				structured_output: true,
-				web_search: true,
-				image_input: true
-			}
+			name: 'GPT 4.1'
 		},
 		{
 			enabled: true,
 			id: 'gpt-4o',
-			name: 'GPT 4o',
-			features: {
-				function_calling: true,
-				structured_output: true,
-				web_search: true,
-				image_input: true
-			}
+			name: 'GPT 4o'
 		},
 		{
 			enabled: true,
 			id: 'gpt-3.5-turbo',
-			name: 'GPT 3.5 Turbo',
-			features: {
-				function_calling: true,
-				structured_output: true,
-				web_search: true
-			}
+			name: 'GPT 3.5 Turbo'
 		}
 	]
 } as SpecialProvider

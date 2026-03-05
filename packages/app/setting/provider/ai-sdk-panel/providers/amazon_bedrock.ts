@@ -9,97 +9,47 @@ export default {
 		{
 			enabled: true,
 			id: 'amazon.nova-pro-v1:0',
-			name: 'Amazon Nova Pro',
-			features: {
-				function_calling: true,
-				structured_output: true,
-				image_input: true
-			}
+			name: 'Amazon Nova Pro'
 		},
 		{
 			enabled: true,
 			id: 'amazon.nova-lite-v1:0',
-			name: 'Amazon Nova Lite',
-			features: {
-				function_calling: true,
-				structured_output: true,
-				image_input: true
-			}
+			name: 'Amazon Nova Lite'
 		},
 		{
 			enabled: true,
 			id: 'anthropic.claude-3-opus-20240229-v1:0',
-			name: 'Claude 3 Opus',
-			features: {
-				function_calling: true,
-				structured_output: true,
-				reasoning: true,
-				reasoning_optional: true,
-				web_search: true,
-				image_input: true
-			}
+			name: 'Claude 3 Opus'
 		},
 		{
 			enabled: true,
 			id: 'anthropic.claude-3-sonnet-20240229-v1:0',
-			name: 'Claude 3 Sonnet',
-			features: {
-				function_calling: true,
-				structured_output: true,
-				reasoning: true,
-				reasoning_optional: true,
-				web_search: true,
-				image_input: true
-			}
+			name: 'Claude 3 Sonnet'
 		},
 		{
 			enabled: true,
 			id: 'anthropic.claude-3-haiku-20240307-v1:0',
-			name: 'Claude 3 Haiku',
-			features: {
-				function_calling: true,
-				structured_output: true,
-				reasoning: true,
-				reasoning_optional: true,
-				web_search: true,
-				image_input: true
-			}
+			name: 'Claude 3 Haiku'
 		},
 		{
 			enabled: true,
 			id: 'cohere.command-r-v1:0',
-			name: 'Command R',
-			features: {
-				function_calling: true,
-				structured_output: true
-			}
+			name: 'Command R'
 		},
 		{
 			enabled: true,
 			id: 'cohere.command-r-plus-v1:0',
-			name: 'Command R Plus',
-			features: {
-				function_calling: true,
-				structured_output: true
-			}
+			name: 'Command R Plus'
 		},
 		{
 			enabled: true,
 			id: 'meta.llama3-8b-instruct-v1:0',
-			name: 'Llama 3 8B Instruct',
-			features: {
-				function_calling: true,
-				structured_output: true
-			}
+			name: 'Llama 3 8B Instruct'
 		},
 		{
 			enabled: true,
 			id: 'meta.llama3-70b-instruct-v1:0',
-			name: 'Llama 3 70B Instruct',
-			features: {
-				function_calling: true,
-				structured_output: true
-			}
+			name: 'Llama 3 70B Instruct'
 		}
 	]
 } as SpecialProvider

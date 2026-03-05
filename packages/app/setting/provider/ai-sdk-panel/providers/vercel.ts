@@ -8,32 +8,17 @@ export default {
 		{
 			enabled: true,
 			id: 'v0-1.5-md',
-			name: 'V0 1.5 MD',
-			features: {
-				function_calling: true,
-				structured_output: true,
-				image_input: true
-			}
+			name: 'V0 1.5 MD'
 		},
 		{
 			enabled: true,
 			id: 'v0-1.5-lg',
-			name: 'V0 1.5 LG',
-			features: {
-				function_calling: true,
-				structured_output: true,
-				image_input: true
-			}
+			name: 'V0 1.5 LG'
 		},
 		{
 			enabled: true,
 			id: 'v0-1.0-md',
-			name: 'V0 1.0- MD',
-			features: {
-				function_calling: true,
-				structured_output: true,
-				image_input: true
-			}
+			name: 'V0 1.0- MD'
 		}
 	]
 } as PresetProvider

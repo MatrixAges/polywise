@@ -8,39 +8,22 @@ export default {
 		{
 			enabled: true,
 			id: 'meta-llama/llama-4-scout-17b-16e-instruct',
-			name: 'Llama 4',
-			features: {
-				function_calling: true,
-				structured_output: true,
-				image_input: true
-			}
+			name: 'Llama 4'
 		},
 		{
 			enabled: true,
 			id: 'llama-3.3-70b-versatile',
-			name: 'Llama 3',
-			features: {
-				function_calling: true,
-				structured_output: true
-			}
+			name: 'Llama 3'
 		},
 		{
 			enabled: true,
 			id: 'deepseek-r1-distill-qwen-32b',
-			name: 'Deepseek R1 Distill (Qwen 32B)',
-			features: {
-				function_calling: true,
-				structured_output: true
-			}
+			name: 'Deepseek R1 Distill (Qwen 32B)'
 		},
 		{
 			enabled: true,
 			id: 'deepseek-r1-distill-llama-70b',
-			name: 'Deepseek R1 Distill (Llama 70B)',
-			features: {
-				function_calling: true,
-				structured_output: true
-			}
+			name: 'Deepseek R1 Distill (Llama 70B)'
 		}
 	]
 } as PresetProvider
