@@ -23,6 +23,7 @@ export { default as getLang } from './getLang'
 export { default as getGlobal } from './getGlobal'
 export { default as getCssVar } from './getCssVar'
 export { default as setCssVar } from './setCssVar'
+export { default as alert } from './alert'
 
 export * from './theme'
 export * from './is'

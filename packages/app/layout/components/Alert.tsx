@@ -9,11 +9,9 @@ export interface AlertArgs {
 	icon?: string
 }
 
-const initial = { title: '', desc: '', icon: '' } as AlertArgs
-
 const Index = () => {
 	const [open, setOpen] = useState(false)
-	const [ctx, setCtx] = useState<AlertArgs>(initial)
+	const [ctx, setCtx] = useState<AlertArgs>({ title: '', desc: '', icon: '' })
 	const p = useRef<PromiseWithResolvers<boolean>>(Promise.withResolvers<boolean>())
 
 	const reset = useMemoizedFn(() => (p.current = Promise.withResolvers<boolean>()))

@@ -1,5 +1,3 @@
-import { memo } from '@/utils'
-
 import type { PropsWithChildren } from 'react'
 
 interface IProps extends PropsWithChildren {
@@ -61,4 +59,4 @@ const Index = (props: IProps) => {
 	)
 }
 
-export default memo(Index)
+export default $app.memo(Index)

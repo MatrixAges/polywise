@@ -7,7 +7,7 @@ import { injectable } from 'tsyringe'
 import { config, locales } from 'zod'
 
 import { Util } from '@/models/common'
-import { conf, getLang, relaunch, resourcesToBackend } from '@/utils'
+import { alert, conf, getLang, relaunch, resourcesToBackend } from '@/utils'
 
 import type { AlertArgs } from '@/layout/components/Alert'
 import type { Lang } from '@/types'
@@ -61,11 +61,11 @@ export default class Index {
 	async setLang(v: Lang) {
 		if (v === this.lang) return
 
-		const res = await $app.Event.emit('app/alert', {
+		const res = await alert({
 			icon: 'lang',
 			title: 'Change Language',
 			desc: 'Changing the application language will force a page refresh'
-		} as AlertArgs)
+		})
 
 		if (!res) return
 

@@ -1,0 +1,30 @@
+@reference '#tailwind';
+
+.label {
+	@apply text-solid text-xsm;
+}
+
+.input_wrap {
+	@apply 
+				relative
+				flex
+				items-center
+				rounded-2xl
+				bg-bg-main
+				border
+				transition-colors
+				focus-within:border-border-solid-active
+			;
+}
+
+.input {
+	@apply 
+				w-full
+				px-4
+				rounded-2xl
+				text-xsm
+				outline-none
+				transition-colors
+				placeholder:text-soft
+			;
+}

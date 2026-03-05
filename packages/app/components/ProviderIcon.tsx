@@ -23,15 +23,11 @@ import Together from '@lobehub/icons-static-svg/icons/together.svg?react'
 import V0 from '@lobehub/icons-static-svg/icons/v0.svg?react'
 import Volcengine from '@lobehub/icons-static-svg/icons/volcengine.svg?react'
 import Zhipu from '@lobehub/icons-static-svg/icons/zhipu.svg?react'
-import { BoulesIcon, EyeClosedIcon, RobotIcon } from '@phosphor-icons/react'
-import { deepmerge } from 'deepmerge-ts'
+import { Bot, EyeClosedIcon, Leaf } from 'lucide-react'
 
-import { useGlobalState } from '@/libs/Providers/context'
-import { memo } from '@/utils'
+import type { ElementType } from 'react'
 
-import type { Icon } from '@phosphor-icons/react'
-
-export const module_icon = {
+export const provider_icon_map = {
 	google_gemini: Gemini,
 	aliyun_bailian: AlibabaCloud,
 	amazon_bedrock: Bedrock,
@@ -56,9 +52,9 @@ export const module_icon = {
 	volcengine: Volcengine,
 	xai: Grok,
 	zhipu: Zhipu,
-	custom: BoulesIcon,
+	custom: Leaf,
 	disabled: EyeClosedIcon
-} as Record<string, Icon>
+} as Record<string, ElementType>
 
 interface IProps {
 	name: string
@@ -67,15 +63,9 @@ interface IProps {
 }
 
 const Index = ({ name, ...props }: IProps) => {
-	const { icons = {} } = useGlobalState()
-
-	const Icon = useMemo(() => {
-		const icon_maps = deepmerge(module_icon, icons)
-
-		return name in icon_maps ? icon_maps[name] : RobotIcon
-	}, [name, icons])
+	const Icon = useMemo(() => (name in provider_icon_map ? provider_icon_map[name] : Bot), [name])
 
 	return <Icon {...props}></Icon>
 }
 
-export default memo(Index)
+export default $app.memo(Index)

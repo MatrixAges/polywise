@@ -1,0 +1,107 @@
+import { useEffect, useMemo } from 'react'
+import { useMemoizedFn, useToggle } from 'ahooks'
+import { Plus } from 'lucide-react'
+import { useFieldArray, useForm } from 'react-hook-form'
+import { deepEqual } from 'stk/react'
+
+import { Show } from '@/components'
+
+import { useGlobalState } from '../../context'
+import Form from './Form'
+import Provider from './Provider'
+
+import styles from '../../index.module.css'
+
+import type { IPropsCustom, Provider as ProviderType } from '../../types'
+
+const Index = (props: IPropsCustom) => {
+	const { custom_providers = [], onChangeCustomProviders } = props
+	const { locales } = useGlobalState()
+	const [visible, { toggle }] = useToggle()
+
+	const { control, formState, getValues } = useForm<{
+		providers: Array<ProviderType>
+	}>({
+		values: { providers: custom_providers }
+	})
+
+	const { fields, prepend, remove, update } = useFieldArray({
+		control,
+		name: 'providers',
+		keyName: '_'
+	})
+
+	const target_fields = useMemo(() => {
+		return fields.map(item => {
+			// @ts-ignore
+			delete item['_']
+
+			return item
+		})
+	}, [fields])
+
+	const checkExist = useMemoizedFn((name: string) => {
+		const target = custom_providers.find(item => item.name === name)
+
+		return Boolean(target)
+	})
+
+	const onAddProvider = useMemoizedFn((v: ProviderType) => {
+		prepend({ ...v, enabled: true, models: [] })
+	})
+
+	const onChange = useMemoizedFn(() => {
+		const values = getValues()
+
+		if (deepEqual(values, custom_providers)) return
+
+		onChangeCustomProviders($copy(values.providers))
+	})
+
+	useEffect(() => {
+		if (formState.isDirty) onChange()
+	}, [formState.isDirty])
+
+	return (
+		<div className='flex flex-col gap-5'>
+			<div
+				className='
+					overflow-hidden
+					flex
+					items-center justify-between
+					p-3
+					rounded-2xl
+					text-xsm
+					bg-bg-main
+					border border-border-gray
+				'
+			>
+				<button className='btn rounded-2xl px-2.5 py-1.5' type='button' onClick={toggle}>
+					<Plus className='text-sm' />
+					{locales.form.custom.add_provider}
+				</button>
+				<span className='text-gray'>{locales.form.custom.openai_compatible}</span>
+			</div>
+			<Show
+				className='overflow-hidden'
+				visible={visible}
+				initial={{ opacity: 0, height: 0 }}
+				animate={{ opacity: 1, height: 'auto' }}
+			>
+				<Form {...{ toggle, checkExist, onAddProvider }} />
+			</Show>
+			{target_fields.length > 0 && (
+				<div className='flex w-full flex-col gap-2.5'>
+					<span className={styles.label}>{locales.form.custom.providers}</span>
+					<div className='flex flex-col gap-5'>
+						{target_fields.map((item, index) => (
+							<Provider {...{ index, item, update, remove }} key={item.name} />
+						))}
+					</div>
+				</div>
+			)}
+		</div>
+	)
+}
+
+export default $app.memo(Index)

@@ -2,8 +2,6 @@ import { cloneElement } from 'react'
 import { useMemoizedFn } from 'ahooks'
 import { Controller } from 'react-hook-form'
 
-import { memo } from '@/utils'
-
 import type { ReactElement } from 'react'
 import type { Control } from 'react-hook-form'
 
@@ -24,4 +22,4 @@ const Index = (props: IProps) => {
 	return <Controller name={name} control={control} render={render} />
 }
 
-export default memo(Index)
+export default $app.memo(Index)
