@@ -274,10 +274,10 @@ const Index = (props: IPropsForm) => {
 					<div
 						className='
 							overflow-hidden
-							flex
+							flex flex-wrap
 							items-center justify-between
-							h-13
-							px-3
+							min-h-13
+							px-3 py-2
 							rounded-full
 							text-xsm
 							border border-border-light
