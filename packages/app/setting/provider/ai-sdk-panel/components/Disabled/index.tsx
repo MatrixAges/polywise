@@ -12,7 +12,14 @@ const Index = (props: IPropsDisabled) => {
 	const { t } = useTranslation()
 
 	return (
-		<div className='flex flex-col gap-2.5'>
+		<div
+			className='
+				flex flex-col
+				w-full
+				gap-2.5
+				pt-4
+			'
+		>
 			<div className={styles.label}>{t('provider.form.disabled.disabled_provider')}</div>
 			{items.length > 0 ? (
 				<div
@@ -20,8 +27,7 @@ const Index = (props: IPropsDisabled) => {
 						flex flex-col
 						rounded-2xl
 						text-solid
-						bg-bg-main
-						border border-border-gray
+						border border-border-light
 					'
 				>
 					{items.map(item => (
@@ -30,7 +36,7 @@ const Index = (props: IPropsDisabled) => {
 								flex
 								items-center justify-between
 								p-4
-								border-b border-border-light
+								border-b border-border-light/60
 								last:border-none
 							'
 							key={item}
@@ -53,8 +59,7 @@ const Index = (props: IPropsDisabled) => {
 						px-4 py-5
 						rounded-2xl
 						text-xsm text-soft
-						bg-bg-main
-						border border-border-gray
+						border border-border-light
 					'
 				>
 					{t('provider.form.disabled.empty')}

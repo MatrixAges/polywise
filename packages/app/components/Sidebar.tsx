@@ -11,19 +11,21 @@ interface Item {
 interface IProps<T extends Item = Item> {
 	groups: Array<{ label: string; items: Array<T> }>
 	current: string
+	width?: number
 	setCurrent: (v: string, item: T) => void
 }
 
 const Index = (props: IProps) => {
-	const { groups, current, setCurrent } = props
+	const { groups, current, width = 222, setCurrent } = props
 
 	return (
 		<div
-			className='
+			className={`
 				overflow-y-scroll
 				flex
-				w-[222px] h-full
-			'
+				h-full
+				${`w-[${width}px]`}
+			`}
 		>
 			<div
 				className='

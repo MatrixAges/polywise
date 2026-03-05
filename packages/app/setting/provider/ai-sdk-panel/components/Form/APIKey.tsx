@@ -29,7 +29,8 @@ const Index = (props: IPropsFormAPIKey) => {
 			</span>
 			<div
 				className={`
-					border-border-solid
+					border-border-solid outline-border-gray
+					focus-within:outline-1
 					${styles.input_wrap}
 					${custom ? 'h-9' : 'h-13'}
 				`}

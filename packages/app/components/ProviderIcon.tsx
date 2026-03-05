@@ -25,7 +25,7 @@ import Together from '@lobehub/icons-static-svg/icons/together.svg?react'
 import V0 from '@lobehub/icons-static-svg/icons/v0.svg?react'
 import Volcengine from '@lobehub/icons-static-svg/icons/volcengine.svg?react'
 import Zhipu from '@lobehub/icons-static-svg/icons/zhipu.svg?react'
-import { Bot, EyeClosedIcon, Leaf } from 'lucide-react'
+import { Bot, Building2, EyeClosed, Leaf } from 'lucide-react'
 
 import type { ElementType } from 'react'
 
@@ -56,8 +56,8 @@ export const provider_icon_map = {
 	zhipu: Zhipu,
 	moonshot: Moonshot,
 	minimax: Minimax,
-	custom: Leaf,
-	disabled: EyeClosedIcon
+	custom: Building2,
+	disabled: EyeClosed
 } as Record<string, ElementType>
 
 interface IProps {
@@ -67,7 +67,7 @@ interface IProps {
 }
 
 const Index = ({ name, ...props }: IProps) => {
-	const Icon = useMemo(() => (name in provider_icon_map ? provider_icon_map[name] : Bot), [name])
+	const Icon = useMemo(() => (name in provider_icon_map ? provider_icon_map[name] : Building2), [name])
 
 	return <Icon {...props}></Icon>
 }

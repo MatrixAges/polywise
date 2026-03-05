@@ -60,8 +60,8 @@
 }
 
 [data-theme='dark'] {
-	--color-std-50: oklch(0.13 0 0);
-	--color-std-100: oklch(0.27 0 0);
+	--color-std-50: oklch(0.18 0 0);
+	--color-std-100: oklch(0.24 0 0);
 	--color-std-150: oklch(0.32 0 0);
 	--color-std-200: oklch(0.378 0 0);
 	--color-std-300: oklch(0.473 0 0);
@@ -74,4 +74,6 @@
 	--color-std-950: oklch(0.985 0 0);
 	--color-std-black: #fff;
 	--color-std-white: #000;
+
+	--color-border-light: oklch(from var(--color-std-500) l c h / 0.1);
 }

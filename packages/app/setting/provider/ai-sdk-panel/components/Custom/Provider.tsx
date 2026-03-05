@@ -31,8 +31,8 @@ const Index = (props: IPropsCustomProvider) => {
 				flex flex-col
 				gap-5
 				p-4 pt-2
-				rounded-2xl
-				border border-border-gray
+				rounded-4xl
+				border border-dashed border-border-light
 			'
 		>
 			<Form {...props_form} />

@@ -28,7 +28,7 @@ const Index = (props: IPropsFormCustomFields) => {
 					<input
 						className={`
 							h-14
-							border-border-gray
+							border-border-light
 							${styles.input_wrap} ${styles.input}
 				`}
 						placeholder={`Input field ${key}`}

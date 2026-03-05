@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useMemoizedFn } from 'ahooks'
-import { Download, EyeClosed, Plus, RotateCw, Trash, Upload } from 'lucide-react'
+import { EyeClosed, Plus, RotateCw, Trash } from 'lucide-react'
 import { useFieldArray, useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { deepEqual } from 'stk/react'
@@ -29,8 +29,6 @@ const Index = (props: IPropsForm) => {
 		custom,
 		onTest,
 		onChangeProvider,
-		download,
-		upload,
 		onChangeCurrentModel,
 		toggleAddingModel,
 		onDisableProvider,
@@ -146,9 +144,11 @@ const Index = (props: IPropsForm) => {
 				'
 			>
 				<div className='h-[36px] w-[36px] text-[36px]'>
-					<ProviderIcon name={name}></ProviderIcon>
+					<ProviderIcon name={name} size={36}></ProviderIcon>
 				</div>
-				<span className='text-xl font-medium'>{t(`provider.providers.${name}` as any)}</span>
+				<span className='text-xl font-medium capitalize'>
+					{custom ? name : t(`provider.providers.${name}` as any)}
+				</span>
 			</div>
 			<form className='flex w-full flex-col gap-6'>
 				{custom && (
@@ -158,7 +158,7 @@ const Index = (props: IPropsForm) => {
 							items-center justify-between
 							pb-2
 							text-sm
-							border-b border-border-gray
+							border-b border-border-light
 							capitalize
 						'
 					>
@@ -169,7 +169,7 @@ const Index = (props: IPropsForm) => {
 								type='button'
 								onClick={onRemoveProvider}
 							>
-								<Trash className='text-base' />
+								<Trash size={14} />
 							</button>
 							<Controller name='enabled' control={control}>
 								<Switch />
@@ -186,15 +186,13 @@ const Index = (props: IPropsForm) => {
 						{custom && (
 							<button
 								className='
-									px-1.5 py-0.5
-									rounded-2xl
-									text-xsm
-									btn
+									h-7
+									click_button
 								'
 								type='button'
 								onClick={toggleAddingModel}
 							>
-								<Plus className='text-sm' />
+								<Plus size={14} />
 								{t('provider.form.add_model')}
 							</button>
 						)}
@@ -263,7 +261,7 @@ const Index = (props: IPropsForm) => {
 							flex flex-col
 							rounded-lg
 							text-xsm
-							border border-border-light/80
+							border border-border-light
 						'
 					>
 						<ModelForm control={control_model} adding_model register={register_model} />
@@ -277,40 +275,29 @@ const Index = (props: IPropsForm) => {
 						className='
 							overflow-hidden
 							flex
-							justify-between
-							p-3
+							items-center justify-between
+							h-13
+							px-3
 							rounded-full
 							text-xsm
-							border border-border-light/80
+							border border-border-light
 						'
 					>
-						<div className='flex'>
-							<button className='click_button' type='button' onClick={toggleAddingModel}>
+						<div className='flex items-center'>
+							<button
+								className='click_button h-7'
+								type='button'
+								onClick={toggleAddingModel}
+							>
 								<Plus size={14} />
 								{t('provider.form.add_model')}
 							</button>
-							<button className='click_button' type='button' onClick={resetModels}>
+							<button className='click_button h-7' type='button' onClick={resetModels}>
 								<RotateCw size={14} />
 								{t('provider.form.reset_model')}
 							</button>
-							{/* <button
-								className='btn rounded-2xl px-2.5 py-1.5'
-								type='button'
-								onClick={download}
-							>
-								<Download className='text-sm' />
-								{t('provider.form.export_config')}
-							</button>
-							<button
-								className='btn rounded-2xl px-2.5 py-1.5'
-								type='button'
-								onClick={upload}
-							>
-								<Upload className='text-sm' />
-								{t('provider.form.import_config')}
-							</button> */}
 						</div>
-						<button className='click_button' onClick={onDisableProvider}>
+						<button className='click_button h-7' onClick={onDisableProvider}>
 							<EyeClosed size={14} />
 							{t('provider.form.disable_provider')}
 						</button>

@@ -26,6 +26,7 @@ const Index = () => {
 				<Sidebar
 					groups={[{ label: 'Settings', items: setting_items }]}
 					current={x.current}
+					width={180}
 					setCurrent={x.setCurrent}
 				></Sidebar>
 			)}

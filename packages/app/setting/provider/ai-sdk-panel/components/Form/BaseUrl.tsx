@@ -12,7 +12,8 @@ const Index = (props: IPropsFormBaseUrl) => {
 			<span className={`${styles.label}`}>{title}</span>
 			<input
 				className={`
-					border-border-gray
+					border-border-light outline-border-gray
+					focus-within:outline-1
 					${styles.input_wrap} ${styles.input}
 					${custom ? 'h-9 px-3!' : 'h-13'}
 				`}

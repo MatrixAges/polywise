@@ -38,7 +38,13 @@ const Index = (props: IPropsCustomForm) => {
 	return (
 		<form className='flex flex-col gap-2.5' onSubmit={handleSubmit(onSubmit)}>
 			<div className='flex items-center justify-between'>
-				<div className={`flex items-center gap-3${styles.label}`}>
+				<div
+					className={`
+						flex
+						items-center
+						gap-3
+						${styles.label}`}
+				>
 					{t('provider.form.custom.add_provider')}
 					<Show
 						className='
@@ -56,10 +62,10 @@ const Index = (props: IPropsCustomForm) => {
 					</Show>
 				</div>
 				<div className='text-xsm flex gap-1'>
-					<button className='btn rounded-2xl px-1.5 py-0.5' type='button' onClick={onCancel}>
+					<button className='click_button h-7' type='button' onClick={onCancel}>
 						{t('provider.form.cancel')}
 					</button>
-					<button className='btn rounded-2xl px-1.5 py-0.5' type='submit'>
+					<button className='click_button h-7' type='submit'>
 						{t('provider.form.submit')}
 					</button>
 				</div>
@@ -68,10 +74,9 @@ const Index = (props: IPropsCustomForm) => {
 				className='
 					overflow-hidden
 					flex flex-col
-					rounded-2xl
+					rounded-lg
 					text-xsm
-					bg-bg-main
-					border border-border-gray
+					border border-border-light
 				'
 			>
 				<AutoLabel label={t('provider.form.custom.provider_name')} valued>

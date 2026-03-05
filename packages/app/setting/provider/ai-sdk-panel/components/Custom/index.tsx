@@ -63,21 +63,28 @@ const Index = (props: IPropsCustom) => {
 	}, [formState.isDirty])
 
 	return (
-		<div className='flex flex-col gap-5'>
+		<div
+			className='
+				flex flex-col
+				w-full
+				gap-5
+				pt-3
+			'
+		>
 			<div
 				className='
 					overflow-hidden
 					flex
 					items-center justify-between
-					p-3
-					rounded-2xl
+					h-13
+					px-3
+					rounded-full
 					text-xsm
-					bg-bg-main
-					border border-border-gray
+					border border-border-light
 				'
 			>
-				<button className='btn rounded-2xl px-2.5 py-1.5' type='button' onClick={toggle}>
-					<Plus className='text-sm' />
+				<button className='click_button' type='button' onClick={toggle}>
+					<Plus size={14} />
 					{t('provider.form.custom.add_provider')}
 				</button>
 				<span className='text-gray'>{t('provider.form.custom.openai_compatible')}</span>

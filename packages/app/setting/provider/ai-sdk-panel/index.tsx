@@ -64,7 +64,8 @@ const Index = (props: IPropsPanel) => {
 			className='
 				flex
 				w-full h-full max-w-[720px]!
-				px-6! py-0!
+				py-0!
+				pl-6! pr-5!
 				page_wrap
 			'
 		>
@@ -75,16 +76,18 @@ const Index = (props: IPropsPanel) => {
 					flex flex-1
 					w-full h-full
 					pt-4
-					pb-10 pl-4
+					pl-4
 				'
 			>
-				{x.current_tab === props_tab.items.length - 1 ? (
-					<Disabled {...props_disabled} />
-				) : x.current_tab === props_tab.items.length - 2 ? (
-					<Custom {...props_custom} />
-				) : (
-					<Form {...props_form} />
-				)}
+				<div className='w-full pr-1'>
+					{x.current_tab === props_tab.items.length - 1 ? (
+						<Disabled {...props_disabled} />
+					) : x.current_tab === props_tab.items.length - 2 ? (
+						<Custom {...props_custom} />
+					) : (
+						<Form {...props_form} />
+					)}
+				</div>
 			</div>
 		</div>
 	)
