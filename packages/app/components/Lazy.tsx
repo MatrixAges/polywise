@@ -1,7 +1,7 @@
 import { lazy, Suspense, useMemo } from 'react'
 import { match } from 'ts-pattern'
 
-import { Spinner } from '@/__shadcn__/components/ui/spinner'
+import Fallback from './Fallback'
 
 import type { ReactNode } from 'react'
 
@@ -11,21 +11,6 @@ interface IProps {
 	props?: any
 	placeholder?: ReactNode
 }
-
-const Fallback = $app.memo(() => {
-	return (
-		<div
-			className='
-				flex
-				items-center justify-center
-				w-full h-full
-				py-6
-			'
-		>
-			<Spinner></Spinner>
-		</div>
-	)
-})
 
 const Index = (_props: IProps) => {
 	const { type, path, props, placeholder } = _props

@@ -1,11 +1,10 @@
 import '@abraham/reflection'
 import '@/presets'
 
-import { Fragment } from 'react'
 import { createRoot } from 'react-dom/client'
 import { createBrowserRouter, createHashRouter, RouterProvider } from 'react-router-dom'
 
-import { ErrorBoundary } from '@/components'
+import { ErrorBoundary, Fallback } from '@/components'
 import Layout from '@/layout'
 import { is_electron } from '@/utils'
 
@@ -15,7 +14,7 @@ const routes: Array<RouteObject> = [
 	{
 		path: '/',
 		element: <Layout />,
-		hydrateFallbackElement: <Fragment />,
+		hydrateFallbackElement: <Fallback />,
 		children: [
 			{
 				path: '/',
