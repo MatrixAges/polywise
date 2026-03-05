@@ -1,14 +1,22 @@
 import { Spinner } from '@/__shadcn__/components/ui/spinner'
 
-const Index = () => {
+interface IProps {
+	screen?: boolean
+}
+
+const Index = (props: IProps) => {
+	const { screen } = props
+
 	return (
 		<div
-			className='
+			className={$cx(
+				`
 				flex
 				items-center justify-center
-				w-full h-full
 				py-6
-			'
+			`,
+				screen ? 'h-screen w-screen' : 'h-full w-full'
+			)}
 		>
 			<Spinner></Spinner>
 		</div>

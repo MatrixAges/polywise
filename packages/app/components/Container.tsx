@@ -14,7 +14,7 @@ const Index = ({ children }: PropsWithChildren) => {
 				className='
 					overflow-y-hidden
 					w-full h-full
-					rounded-xl
+					rounded-2xl
 					bg-dev/24
 					border border-dev
 				'

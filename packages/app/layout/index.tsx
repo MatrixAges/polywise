@@ -10,6 +10,7 @@ import { container } from 'tsyringe'
 
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/__shadcn__/components/ui/resizable'
 import { PANEL_COLLAPSE_THRESHOLD, PANEL_WIDTH_DEFAULT } from '@/appdata'
+import { Fallback } from '@/components'
 import { GlobalModel, GlobalProvider } from '@/context'
 import Panel from '@/panel'
 
@@ -45,7 +46,7 @@ const Index = () => {
 		local.layout_panel_last_width = layout_panel
 	})
 
-	if (!global.ready) return null
+	if (!global.ready) return <Fallback screen></Fallback>
 
 	return (
 		<GlobalProvider value={global}>

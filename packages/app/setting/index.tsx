@@ -1,10 +1,10 @@
 import { useLayoutEffect, useState } from 'react'
 import { observer } from 'mobx-react-lite'
-import { Outlet, useNavigate } from 'react-router'
+import { Outlet, useLocation, useNavigate } from 'react-router'
 import { container } from 'tsyringe'
 
 import { setting_items } from '@/appdata'
-import { Container, Lazy, Sidebar } from '@/components'
+import { Container, Sidebar } from '@/components'
 import { useGlobal } from '@/context'
 
 import Model from './model'
@@ -13,6 +13,7 @@ const Index = () => {
 	const global = useGlobal()
 	const [x] = useState(() => container.resolve(Model))
 	const navgate = useNavigate()
+	const { pathname } = useLocation()
 
 	const s = global.setting
 
@@ -27,7 +28,7 @@ const Index = () => {
 			{s.sidebar_collapsed && (
 				<Sidebar
 					groups={[{ label: 'Settings', items: setting_items }]}
-					current={x.current}
+					current={pathname.replace('/setting/', '')}
 					width={180}
 					setCurrent={v => navgate('/setting/' + v)}
 				></Sidebar>
