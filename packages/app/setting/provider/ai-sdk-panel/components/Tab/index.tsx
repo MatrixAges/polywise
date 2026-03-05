@@ -13,8 +13,14 @@ const Index = (props: IPropsTab) => {
 	const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }))
 
 	return (
-		<div className='h-full w-full overflow-y-scroll'>
-			<div className='flex w-full flex-col'>
+		<div className='h-full w-[160px] overflow-y-scroll'>
+			<div
+				className='
+					flex flex-col
+					w-full
+					gap-1
+				'
+			>
 				<DndContext sensors={sensors} onDragEnd={onDragProvider}>
 					<SortableContext items={items} strategy={verticalListSortingStrategy}>
 						{items.map((item, index) => (

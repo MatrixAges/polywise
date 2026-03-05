@@ -1,73 +1,30 @@
-import { useLayoutEffect, useState } from 'react'
 import { useMemoizedFn } from 'ahooks'
-import { observer } from 'mobx-react-lite'
-import { deepEqual } from 'stk/react'
-import { container } from 'tsyringe'
 
-import { Custom, Disabled, Form, Tab } from './components'
-import Model from './model'
+import { sleep } from '@/utils'
 
-import type { IPropsCustom, IPropsDisabled, IPropsForm, IPropsProviders, IPropsTab } from './types'
+import Panel from './ai-sdk-panel'
+import { preset_providers } from './ai-sdk-panel/providers'
 
-const Index = (props: IPropsProviders) => {
-	const { config, onChange, onTest } = props
-	const [x] = useState(() => container.resolve(Model))
+import type { IPropsPanel } from './ai-sdk-panel/types'
 
-	const target_config = $copy(x.config)
-	const providers = $copy(x.providers)
-
-	useLayoutEffect(() => {
-		if (deepEqual(config, x.config)) return
-
-		x.init({ config, onChange, onTest })
-	}, [config, onChange, onTest])
-
-	const props_tab: IPropsTab = {
-		items: $copy(x.tabs),
-		current_tab: x.current_tab,
-		onChangeCurrentTab: x.onChangeCurrentTab,
-		onDragProvider: x.onDragProvider
-	}
-
-	const props_form: IPropsForm = {
-		provider: $copy(x.provider),
-		test: $copy(x.test),
-		current_model: x.current_model,
-		adding_model: x.adding_model,
-		onTest: x.onTestModel,
-		onChangeProvider: x.onChangeProvider,
-		download: x.download,
-		upload: x.upload,
-		onChangeCurrentModel: useMemoizedFn((v: number | null) => {
-			x.current_model = v === x.current_model ? null : v
+const Index = () => {
+	const props_panel: IPropsPanel = {
+		config: { providers: preset_providers },
+		onChange: useMemoizedFn(v => {
+			console.log(v)
 		}),
-		toggleAddingModel: useMemoizedFn(() => (x.adding_model = !x.adding_model)),
-		onDisableProvider: x.onToggleProvider
-	}
+		onTest: useMemoizedFn(async () => {
+			await sleep(500)
 
-	const props_custom: IPropsCustom = {
-		custom_providers: $copy(target_config?.custom_providers),
-		onChangeCustomProviders: x.onChangeCustomProviders
+			return true
+		})
 	}
-
-	const props_disabled: IPropsDisabled = {
-		items: providers.disabled,
-		onEnableProvider: x.onEnableProvider
-	}
-
-	if (!x.config || !target_config) return null
 
 	return (
-		<div className='flex flex-col items-center gap-8'>
-			<Tab {...props_tab} />
-			{x.current_tab === props_tab.items.length - 1 ? (
-				<Disabled {...props_disabled} />
-			) : x.current_tab === props_tab.items.length - 2 ? (
-				<Custom {...props_custom} />
-			) : (
-				<Form {...props_form} />
-			)}
+		<div className='flex h-full w-full'>
+			<Panel {...props_panel} />
 		</div>
 	)
 }
-export default new $app.Handle(Index).by(observer).by($app.memo).get()
+
+export default $app.memo(Index)

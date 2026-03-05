@@ -24,34 +24,25 @@ const Index = (props: IPropsTabItem) => {
 	return (
 		<div
 			className={`
-				flex flex-col
+				flex
 				items-center
-				gap-3
+				h-8
+				gap-2.5
+				px-2.5
 				text-light
-				group
-				hover:text-gray-600
-				data-[active=true]:text-dark!
+				click_button
 				${isDragging && disabled && 'cursor-not-allowed!'}
-				${isDragging ? 'cursor-grab' : 'clickable'}
+				${isDragging && 'cursor-grab transition-none!'}
+                        ${active && 'active'}
 			`}
 			ref={setNodeRef}
-			data-active={active}
 			style={{ transform: CSS.Translate.toString(transform), transition }}
 			onClick={onClick}
 			{...attributes}
 			{...listeners}
 		>
-			<span className='flex items-center justify-center text-xl'>
-				<ProviderIcon name={item} />
-			</span>
-			<span
-				className='
-					text-xsm text-soft
-					group-data-[active=true]:text-dark!
-				'
-			>
-				{display_name}
-			</span>
+			<ProviderIcon name={item} />
+			<span>{display_name}</span>
 		</div>
 	)
 }

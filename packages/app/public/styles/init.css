@@ -47,16 +47,8 @@ body {
 	isolation: isolate;
 }
 
-body[data-scroll-locked] {
-	position: relative !important;
-	overflow: hidden !important;
-	padding-top: 0px;
-	padding-right: 0px;
-	padding-left: 0px;
-	margin-top: 0;
-	margin-right: 0px !important;
-	margin-left: 0;
-	overscroll-behavior: contain;
+body {
+	overflow: hidden;
 }
 
 ::-webkit-scrollbar-thumb {

@@ -5,8 +5,8 @@ import tsj from 'ts-json-schema-generator'
 import type { Config } from 'ts-json-schema-generator'
 
 const cwd = process.cwd()
-const input_path = resolve(`${cwd}/setting/provider/types.ts`)
-const output_path = resolve(`${cwd}/setting/provider/schema.json`)
+const input_path = resolve(`${cwd}/setting/provider/ai-sdk-panel/types.ts`)
+const output_path = resolve(`${cwd}/setting/provider/ai-sdk-panel/schema.json`)
 
 const config = { path: input_path, type: 'Config', skipTypeCheck: true, schemaId: 'https://_.json' } as Config
 

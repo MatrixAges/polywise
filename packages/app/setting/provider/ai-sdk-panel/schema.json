@@ -81,24 +81,6 @@
                 },
                 "fid": {
                     "type": "string"
-                },
-                "desc": {
-                    "type": "string"
-                },
-                "features": {
-                    "$ref": "#/definitions/Features"
-                },
-                "fee": {
-                    "type": "object",
-                    "properties": {
-                        "output": {
-                            "type": "number"
-                        },
-                        "input": {
-                            "type": "number"
-                        }
-                    },
-                    "additionalProperties": false
                 }
             },
             "required": [
@@ -106,45 +88,6 @@
                 "id",
                 "enabled"
             ],
-            "additionalProperties": false
-        },
-        "Features": {
-            "type": "object",
-            "properties": {
-                "vision": {
-                    "type": "boolean"
-                },
-                "voice": {
-                    "type": "boolean"
-                },
-                "function_calling": {
-                    "type": "boolean"
-                },
-                "structured_output": {
-                    "type": "boolean"
-                },
-                "reasoning": {
-                    "type": "boolean"
-                },
-                "reasoning_optional": {
-                    "type": "boolean"
-                },
-                "web_search": {
-                    "type": "boolean"
-                },
-                "image_input": {
-                    "type": "boolean"
-                },
-                "image_output": {
-                    "type": "boolean"
-                },
-                "embedding": {
-                    "type": "boolean"
-                },
-                "reranking": {
-                    "type": "boolean"
-                }
-            },
             "additionalProperties": false
         },
         "SpecialProvider": {

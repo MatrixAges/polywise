@@ -9,7 +9,7 @@ import { downloadFile, uploadFile } from '@/utils'
 import schema from './schema.json'
 
 import type { DragEndEvent } from '@dnd-kit/core'
-import type { ArgsInit, Config, ConfigProvider, IPropsProviders } from './types'
+import type { ArgsInit, Config, ConfigProvider, IPropsPanel } from './types'
 
 @injectable()
 export default class Index {
@@ -22,8 +22,8 @@ export default class Index {
 	upload_error = ''
 
 	timer_test = null as NodeJS.Timeout | null
-	onChange = null as unknown as IPropsProviders['onChange']
-	onTest = null as unknown as IPropsProviders['onTest']
+	onChange = null as unknown as IPropsPanel['onChange']
+	onTest = null as unknown as IPropsPanel['onTest']
 
 	get providers() {
 		const enabled = [] as Array<ConfigProvider>

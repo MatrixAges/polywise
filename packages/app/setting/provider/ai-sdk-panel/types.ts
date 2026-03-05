@@ -2,13 +2,13 @@ import type { DragEndEvent } from '@dnd-kit/core'
 import type { Control, UseFieldArrayRemove, UseFieldArrayUpdate, UseFormRegister } from 'react-hook-form'
 import type M from './model'
 
-export interface IPropsProviders {
+export interface IPropsPanel {
 	config: Config
 	onChange: (v: Config) => void
 	onTest?: (provider: PresetProvider | SpecialProvider) => Promise<boolean>
 }
 
-export interface ArgsInit extends Pick<IPropsProviders, 'config' | 'onChange' | 'onTest'> {}
+export interface ArgsInit extends Pick<IPropsPanel, 'config' | 'onChange' | 'onTest'> {}
 
 export interface IPropsTab {
 	items: Array<string>

@@ -4,6 +4,7 @@ const Index = ({ children }: PropsWithChildren) => {
 	return (
 		<div
 			className='
+				overflow-x-hidden
 				flex flex-1
 				h-full
 				p-2 pt-0
@@ -11,14 +12,14 @@ const Index = ({ children }: PropsWithChildren) => {
 		>
 			<div
 				className='
-					overflow-y-scroll
+					overflow-y-hidden
 					w-full h-full
 					rounded-xl
 					bg-dev/24
 					border border-dev
 				'
 			>
-				<div className='w-full'>{children}</div>
+				<div className='h-full w-full'>{children}</div>
 			</div>
 		</div>
 	)
