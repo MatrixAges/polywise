@@ -34,7 +34,7 @@ const Index = (props: IPropsProviders) => {
 		test: $copy(x.test),
 		current_model: x.current_model,
 		adding_model: x.adding_model,
-		onTest: x.onTest,
+		onTest: x.onTestModel,
 		onChangeProvider: x.onChangeProvider,
 		download: x.download,
 		upload: x.upload,

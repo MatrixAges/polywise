@@ -98,13 +98,13 @@ const Index = (props: IPropsCustomForm) => {
 							outline-none
 							placeholder:text-soft
 						`}
-						placeholder={locales.form.model_form.input + locales.form.base_url}
+						placeholder={t('provider.form.model_form.input') + t('provider.form.base_url')}
 						autoComplete='off'
 						required
 						{...register('base_url')}
 					/>
 				</AutoLabel>
-				<AutoLabel label={locales.form.api_key} valued>
+				<AutoLabel label={t('provider.form.api_key')} valued>
 					<input
 						className={`
 							w-full h-full
@@ -112,12 +112,12 @@ const Index = (props: IPropsCustomForm) => {
 							outline-none
 							placeholder:text-soft
 						`}
-						placeholder={locales.form.model_form.input + locales.form.api_key}
+						placeholder={t('provider.form.model_form.input') + t('provider.form.api_key')}
 						autoComplete='off'
 						{...register('api_key')}
 					/>
 				</AutoLabel>
-				<AutoLabel className='border-b-0' label={locales.form.custom.headers} valued>
+				<AutoLabel className='border-b-0' label={t('provider.form.custom.headers')} valued>
 					<input
 						className={`
 							w-full h-full
@@ -125,7 +125,7 @@ const Index = (props: IPropsCustomForm) => {
 							outline-none
 							placeholder:text-soft
 						`}
-						placeholder={locales.form.custom.headers_placeholder}
+						placeholder={t('provider.form.custom.headers_placeholder')}
 						autoComplete='off'
 						{...register('headers')}
 					/>

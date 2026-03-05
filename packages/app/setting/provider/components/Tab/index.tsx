@@ -1,60 +1,33 @@
-import { useMemo } from 'react'
 import { DndContext, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
-import { horizontalListSortingStrategy, SortableContext } from '@dnd-kit/sortable'
-import { ScrollMenu } from 'react-horizontal-scrolling-menu'
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
+import { useTranslation } from 'react-i18next'
 
-import { useGlobalState } from '../../context'
 import Item from './Item'
 
 import type { IPropsTab } from '../../types'
 
 const Index = (props: IPropsTab) => {
-	const { tab, items, current_tab, onChangeCurrentTab, onDragProvider } = props
-
-	const { locales } = useGlobalState()
+	const { items, current_tab, onChangeCurrentTab, onDragProvider } = props
+	const { t } = useTranslation()
 
 	const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }))
 
-	const { scroller, container } = useMemo(() => {
-		const styles = { scroller: '', container: '' }
-
-		styles['scroller'] += ' max-w-full'
-
-		if (tab === 'scroll') {
-			styles['scroller'] += ' overflow-scroll no-scrollbar'
-		} else {
-			styles['container'] += ' w-full justify-between'
-		}
-
-		return styles
-	}, [tab])
-
-	const Items = (
-		<DndContext sensors={sensors} onDragEnd={onDragProvider}>
-			<SortableContext items={items} strategy={horizontalListSortingStrategy}>
-				{items.map((item, index) => (
-					<Item
-						index={index}
-						display_name={locales.providers[item]}
-						active={current_tab === index}
-						key={item}
-						{...{ item, onChangeCurrentTab }}
-					/>
-				))}
-			</SortableContext>
-		</DndContext>
-	)
-
 	return (
-		<div className={`flex w-full${scroller}`}>
-			<div className={`flex${container}`}>
-				{tab === 'scroll' ? (
-					<ScrollMenu wrapperClassName='w-full' itemClassName='flex gap-10'>
-						{Items}
-					</ScrollMenu>
-				) : (
-					Items
-				)}
+		<div className='h-full w-full overflow-y-scroll'>
+			<div className='flex w-full flex-col'>
+				<DndContext sensors={sensors} onDragEnd={onDragProvider}>
+					<SortableContext items={items} strategy={verticalListSortingStrategy}>
+						{items.map((item, index) => (
+							<Item
+								index={index}
+								display_name={t(`provider.providers.${item}` as any)}
+								active={current_tab === index}
+								key={item}
+								{...{ item, onChangeCurrentTab }}
+							/>
+						))}
+					</SortableContext>
+				</DndContext>
 			</div>
 		</div>
 	)

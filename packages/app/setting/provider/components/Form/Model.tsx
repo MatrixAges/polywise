@@ -7,38 +7,19 @@ import { Trash } from 'lucide-react'
 import { Switch } from '@/__shadcn__/components/ui/switch'
 import { Controller } from '@/components'
 
-import { useGlobalState } from '../../context'
-
 import styles from '../../index.module.css'
 
 import type { IPropsFormModel } from '../../types'
 
 const Index = (props: IPropsFormModel) => {
-	const { index, item, control, desc_keys, custom, editing, onChangeCurrentModel, remove } = props
-	const { id, name, desc } = item
-
-	const { locales } = useGlobalState()
+	const { index, item, control, custom, editing, onChangeCurrentModel, remove } = props
+	const { id, name } = item
 
 	const { attributes, listeners, transform, transition, isDragging, setNodeRef } = useSortable({
 		id
 	})
 
 	const onClick = useMemoizedFn(() => onChangeCurrentModel(index))
-
-	const target_desc = useMemo(() => {
-		if (desc) return desc
-
-		const exact_key = desc_keys.find(i => id === i)
-
-		if (exact_key) return locales.form.desc[exact_key]
-
-		const relate_key = desc_keys.find(i => id.toLowerCase().indexOf(i) !== -1)
-
-		if (relate_key) return locales.form.desc[relate_key]
-
-		return locales.form.desc.no_desc
-	}, [desc, locales.form.desc, desc_keys])
-
 	const onRemove = useMemoizedFn(() => remove(index))
 
 	return (
@@ -64,7 +45,7 @@ const Index = (props: IPropsFormModel) => {
 		>
 			<div className='flex flex-col gap-0.5'>
 				<span className={`${styles.label} ${name === '' && 'text-gray'}`}>{name || 'Unnamed'}</span>
-				<div className='text-softlight flex items-center text-xs'>{target_desc}</div>
+				<div className='text-softlight flex items-center text-xs'></div>
 			</div>
 			<div className='flex items-center gap-3'>
 				{editing && (

@@ -2,12 +2,12 @@ import { useEffect, useMemo, useState } from 'react'
 import { useMemoizedFn } from 'ahooks'
 import { Download, EyeClosed, Plus, RotateCw, Trash, Upload } from 'lucide-react'
 import { useFieldArray, useForm } from 'react-hook-form'
+import { useTranslation } from 'react-i18next'
 import { deepEqual } from 'stk/react'
 
 import { Switch } from '@/__shadcn__/components/ui/switch'
 import { Controller, Show } from '@/components'
 
-import { useGlobalState } from '../../context'
 import { all_providers } from '../../providers'
 import APIKey from './APIKey'
 import BaseUrl from './BaseUrl'
@@ -36,7 +36,7 @@ const Index = (props: IPropsForm) => {
 		onDisableProvider,
 		onRemoveProvider
 	} = props
-	const { locales } = useGlobalState()
+	const { t } = useTranslation()
 
 	const { name, api_key, base_url } = provider
 
@@ -89,19 +89,19 @@ const Index = (props: IPropsForm) => {
 		if (!values['id']) {
 			setFocus('id')
 
-			return setError(locales.form.error.id_required)
+			return setError(t('provider.form.error.id_required'))
 		}
 
 		if (target_fields.find(item => item.id === values['id'])) {
 			setFocus('id')
 
-			return setError(locales.form.error.id_exsit)
+			return setError(t('provider.form.error.id_exsit'))
 		}
 
 		if (!values['name']) {
 			setFocus('name')
 
-			return setError(locales.form.error.name_required)
+			return setError(t('provider.form.error.name_required'))
 		}
 
 		prepend({ ...values, enabled: true, features: values.features || {} })
@@ -157,12 +157,12 @@ const Index = (props: IPropsForm) => {
 						</div>
 					</div>
 				)}
-				<APIKey title={locales.form.api_key} {...{ api_key, custom, test, onTest, register }} />
-				<BaseUrl title={locales.form.base_url} {...{ base_url, custom, register }} />
+				<APIKey title={t('provider.form.api_key')} {...{ api_key, custom, test, onTest, register }} />
+				<BaseUrl title={t('provider.form.base_url')} {...{ base_url, custom, register }} />
 				<CustomFields custom_fields={(provider as SpecialProvider).custom_fields} register={register} />
 				<div className='flex flex-col gap-2.5'>
 					<div className='flex items-center justify-between'>
-						<span className={`${styles.label}`}>{locales.form.models}</span>
+						<span className={`${styles.label}`}>{t('provider.form.models')}</span>
 						{custom && (
 							<button
 								className='
@@ -175,14 +175,13 @@ const Index = (props: IPropsForm) => {
 								onClick={toggleAddingModel}
 							>
 								<Plus className='text-sm' />
-								{locales.form.add_model}
+								{t('provider.form.add_model')}
 							</button>
 						)}
 					</div>
 					<Models
 						models={target_fields}
 						{...{
-							locales,
 							current_model,
 							control,
 							custom,
@@ -203,7 +202,7 @@ const Index = (props: IPropsForm) => {
 				<form className='flex flex-col gap-2.5' onSubmit={handleSubmit(onSubmit)}>
 					<div className='flex items-center justify-between'>
 						<div className={`flex items-center gap-3${styles.label}`}>
-							{locales.form.add_model}
+							{t('provider.form.add_model')}
 							<Show
 								className='
 									overflow-hidden
@@ -225,10 +224,10 @@ const Index = (props: IPropsForm) => {
 								type='button'
 								onClick={onCancel}
 							>
-								{locales.form.cancel}
+								{t('provider.form.cancel')}
 							</button>
 							<button className='btn rounded-2xl px-1.5 py-0.5' type='submit'>
-								{locales.form.submit}
+								{t('provider.form.submit')}
 							</button>
 						</div>
 					</div>
@@ -247,7 +246,7 @@ const Index = (props: IPropsForm) => {
 			</Show>
 			{!custom && (
 				<div className='flex flex-col gap-2.5'>
-					<span className={`${styles.label}`}>{locales.form.actions}</span>
+					<span className={`${styles.label}`}>{t('provider.form.actions')}</span>
 					<div
 						className='
 							overflow-hidden
@@ -267,7 +266,7 @@ const Index = (props: IPropsForm) => {
 								onClick={toggleAddingModel}
 							>
 								<Plus className='text-sm' />
-								{locales.form.add_model}
+								{t('provider.form.add_model')}
 							</button>
 							<button
 								className='btn rounded-2xl px-2.5 py-1.5'
@@ -275,7 +274,7 @@ const Index = (props: IPropsForm) => {
 								onClick={resetModels}
 							>
 								<RotateCw className='text-sm' />
-								{locales.form.reset_model}
+								{t('provider.form.reset_model')}
 							</button>
 							<button
 								className='btn rounded-2xl px-2.5 py-1.5'
@@ -283,7 +282,7 @@ const Index = (props: IPropsForm) => {
 								onClick={download}
 							>
 								<Download className='text-sm' />
-								{locales.form.export_config}
+								{t('provider.form.export_config')}
 							</button>
 							<button
 								className='btn rounded-2xl px-2.5 py-1.5'
@@ -291,7 +290,7 @@ const Index = (props: IPropsForm) => {
 								onClick={upload}
 							>
 								<Upload className='text-sm' />
-								{locales.form.import_config}
+								{t('provider.form.import_config')}
 							</button>
 						</div>
 						<button
@@ -304,7 +303,7 @@ const Index = (props: IPropsForm) => {
 							onClick={onDisableProvider}
 						>
 							<EyeClosed className='text-sm' />
-							{locales.form.disable_provider}
+							{t('provider.form.disable_provider')}
 						</button>
 					</div>
 				</div>

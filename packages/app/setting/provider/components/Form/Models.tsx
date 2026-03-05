@@ -2,10 +2,10 @@ import { Fragment, useMemo } from 'react'
 import { DndContext, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { useMemoizedFn } from 'ahooks'
+import { useTranslation } from 'react-i18next'
 
 import { Show } from '@/components'
 
-import { useGlobalState } from '../../context'
 import Model from './Model'
 import ModelForm from './ModelForm'
 
@@ -14,11 +14,9 @@ import type { IPropsFormModels } from '../../types'
 const Index = (props: IPropsFormModels) => {
 	const { models, control, current_model, custom, register, remove, onChangeCurrentModel, onDragModel } = props
 
-	const { locales } = useGlobalState()
+	const { t } = useTranslation()
 
 	const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }))
-
-	const desc_keys = useMemo(() => Object.keys(locales.form.desc), [locales.form.desc])
 
 	const onDragStart = useMemoizedFn(() => onChangeCurrentModel(null))
 
@@ -35,7 +33,7 @@ const Index = (props: IPropsFormModels) => {
 				border border-border-gray
 			'
 			>
-				{locales.form.models_empty}
+				{t('provider.form.models_empty')}
 			</div>
 		)
 
@@ -58,7 +56,6 @@ const Index = (props: IPropsFormModels) => {
 									index,
 									item,
 									control,
-									desc_keys,
 									custom,
 									onChangeCurrentModel,
 									remove

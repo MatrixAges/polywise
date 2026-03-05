@@ -1,7 +1,7 @@
+import { useTranslation } from 'react-i18next'
+
 import { Switch } from '@/__shadcn__/components/ui/switch'
 import { ProviderIcon } from '@/components'
-
-import { useGlobalState } from '../../context'
 
 import styles from '../../index.module.css'
 
@@ -9,11 +9,11 @@ import type { IPropsDisabled } from '../../types'
 
 const Index = (props: IPropsDisabled) => {
 	const { items, onEnableProvider } = props
-	const { locales } = useGlobalState()
+	const { t } = useTranslation()
 
 	return (
 		<div className='flex flex-col gap-2.5'>
-			<div className={styles.label}>{locales.form.disabled.disabled_provider}</div>
+			<div className={styles.label}>{t('provider.form.disabled.disabled_provider')}</div>
 			{items.length > 0 ? (
 				<div
 					className='
@@ -38,7 +38,7 @@ const Index = (props: IPropsDisabled) => {
 							<div className='flex items-center gap-3 text-xl'>
 								<ProviderIcon name={item} />
 								<span className='text-sm'>
-									{locales.providers[item as keyof typeof locales.providers]}
+									{t(`provider.providers.${item}` as any)}
 								</span>
 							</div>
 							<Switch checked={false} onCheckedChange={() => onEnableProvider(item)} />
@@ -57,7 +57,7 @@ const Index = (props: IPropsDisabled) => {
 						border border-border-gray
 					'
 				>
-					{locales.form.disabled.empty}
+					{t('provider.form.disabled.empty')}
 				</div>
 			)}
 		</div>

@@ -2,11 +2,11 @@ import { useEffect, useMemo } from 'react'
 import { useMemoizedFn, useToggle } from 'ahooks'
 import { Plus } from 'lucide-react'
 import { useFieldArray, useForm } from 'react-hook-form'
+import { useTranslation } from 'react-i18next'
 import { deepEqual } from 'stk/react'
 
 import { Show } from '@/components'
 
-import { useGlobalState } from '../../context'
 import Form from './Form'
 import Provider from './Provider'
 
@@ -16,7 +16,7 @@ import type { IPropsCustom, Provider as ProviderType } from '../../types'
 
 const Index = (props: IPropsCustom) => {
 	const { custom_providers = [], onChangeCustomProviders } = props
-	const { locales } = useGlobalState()
+	const { t } = useTranslation()
 	const [visible, { toggle }] = useToggle()
 
 	const { control, formState, getValues } = useForm<{
@@ -78,9 +78,9 @@ const Index = (props: IPropsCustom) => {
 			>
 				<button className='btn rounded-2xl px-2.5 py-1.5' type='button' onClick={toggle}>
 					<Plus className='text-sm' />
-					{locales.form.custom.add_provider}
+					{t('provider.form.custom.add_provider')}
 				</button>
-				<span className='text-gray'>{locales.form.custom.openai_compatible}</span>
+				<span className='text-gray'>{t('provider.form.custom.openai_compatible')}</span>
 			</div>
 			<Show
 				className='overflow-hidden'
@@ -92,7 +92,7 @@ const Index = (props: IPropsCustom) => {
 			</Show>
 			{target_fields.length > 0 && (
 				<div className='flex w-full flex-col gap-2.5'>
-					<span className={styles.label}>{locales.form.custom.providers}</span>
+					<span className={styles.label}>{t('provider.form.custom.providers')}</span>
 					<div className='flex flex-col gap-5'>
 						{target_fields.map((item, index) => (
 							<Provider {...{ index, item, update, remove }} key={item.name} />

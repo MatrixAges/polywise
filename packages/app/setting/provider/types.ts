@@ -1,6 +1,6 @@
 import type { DragEndEvent } from '@dnd-kit/core'
 import type { Control, UseFieldArrayRemove, UseFieldArrayUpdate, UseFormRegister } from 'react-hook-form'
-import type { default as DataModel } from './model'
+import type M from './model'
 
 export interface IPropsProviders {
 	config: Config
@@ -12,9 +12,9 @@ export interface ArgsInit extends Pick<IPropsProviders, 'config' | 'onChange' | 
 
 export interface IPropsTab {
 	items: Array<string>
-	current_tab: DataModel['current_tab']
+	current_tab: M['current_tab']
 	onChangeCurrentTab: (v: number) => void
-	onDragProvider: DataModel['onDragProvider']
+	onDragProvider: M['onDragProvider']
 }
 
 export interface IPropsTabItem extends Pick<IPropsTab, 'onChangeCurrentTab'> {
@@ -26,14 +26,14 @@ export interface IPropsTabItem extends Pick<IPropsTab, 'onChangeCurrentTab'> {
 
 export interface IPropsForm {
 	provider: Config['providers'][number]
-	test?: DataModel['test']
-	current_model: DataModel['current_model']
-	adding_model: DataModel['adding_model']
+	test?: M['test']
+	current_model: M['current_model']
+	adding_model: M['adding_model']
 	custom?: boolean
-	onTest?: DataModel['onTest']
-	onChangeProvider: DataModel['onChangeProvider']
-	download?: DataModel['download']
-	upload?: DataModel['upload']
+	onTest?: M['onTestModel']
+	onChangeProvider: M['onChangeProvider']
+	download?: M['download']
+	upload?: M['upload']
 	onChangeCurrentModel: (v: number | null) => void
 	toggleAddingModel: () => void
 	onDisableProvider?: () => void
@@ -71,7 +71,6 @@ export interface IPropsFormModels extends Pick<IPropsForm, 'current_model' | 'on
 export interface IPropsFormModel extends Pick<IPropsFormModels, 'control' | 'onChangeCurrentModel' | 'remove'> {
 	index: number
 	item: Model
-	desc_keys: Array<string>
 	custom?: boolean
 	editing?: boolean
 }
@@ -80,7 +79,7 @@ export interface IPropsFormModelForm {
 	control: Control<IPropsForm['provider']> | Control<Model>
 	index?: number
 	item?: Model
-	adding_model?: DataModel['adding_model']
+	adding_model?: M['adding_model']
 	register: UseFormRegister<IPropsForm['provider']> | UseFormRegister<Model>
 }
 
@@ -88,7 +87,7 @@ export interface IPropsFormModelFormFeatures {}
 
 export interface IPropsCustom {
 	custom_providers: Config['custom_providers']
-	onChangeCustomProviders: DataModel['onChangeCustomProviders']
+	onChangeCustomProviders: M['onChangeCustomProviders']
 }
 
 export interface IPropsCustomForm {
@@ -106,7 +105,7 @@ export interface IPropsCustomProvider {
 
 export interface IPropsDisabled {
 	items: Array<string>
-	onEnableProvider: DataModel['onEnableProvider']
+	onEnableProvider: M['onEnableProvider']
 }
 
 export interface Config {
@@ -141,9 +140,6 @@ export interface Model {
 	id: string
 	enabled: boolean
 	fid?: string
-	desc?: string
-	features?: Features
-	fee?: { output?: number; input?: number }
 }
 
 export interface Features {

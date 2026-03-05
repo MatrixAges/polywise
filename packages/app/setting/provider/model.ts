@@ -100,7 +100,7 @@ export default class Index {
 		this.config!.providers[index].enabled = true
 		this.current_tab += 1
 
-		this.onChange()
+		this.onChangeConfig()
 	}
 
 	onDragProvider(args: DragEndEvent) {
@@ -136,7 +136,7 @@ export default class Index {
 		downloadFile('ai-sdk-panel.config', JSON.stringify(this.config, null, 6), 'json')
 	}
 
-	async onTestProvider() {
+	async onTestModel() {
 		if (this.timer_test) clearTimeout(this.timer_test)
 
 		this.test = { loading: true, res: null }
