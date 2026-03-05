@@ -14,7 +14,7 @@ const Index = (props: IPropsFormBaseUrl) => {
 				className={`
 					border-border-gray
 					${styles.input_wrap} ${styles.input}
-					${custom ? 'h-9 px-3!' : 'h-14'}
+					${custom ? 'h-9 px-3!' : 'h-13'}
 				`}
 				autoComplete='off'
 				{...register('base_url')}

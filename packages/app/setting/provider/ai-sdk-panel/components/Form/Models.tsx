@@ -43,7 +43,7 @@ const Index = (props: IPropsFormModels) => {
 				overflow-hidden
 				flex flex-col
 				rounded-2xl
-				border border-border-gray
+				border border-border-light/80
 			'
 		>
 			<DndContext sensors={sensors} onDragStart={onDragStart} onDragEnd={onDragModel}>

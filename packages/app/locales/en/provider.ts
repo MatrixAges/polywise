@@ -24,6 +24,8 @@ export default {
 		volcengine: 'Bytedance',
 		azure_openai: 'Azure',
 		amazon_bedrock: 'Amazon',
+		minimax: 'MiniMax',
+		moonshot: 'Moonshot',
 		custom: 'Custom',
 		disabled: 'Disabled'
 	},

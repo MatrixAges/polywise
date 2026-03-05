@@ -11,7 +11,9 @@ import fireworks from './fireworks'
 import google_gemini from './google_gemini'
 import groq from './groq'
 import lmstudio from './lmstudio'
+import minimax from './minimax'
 import mistral from './mistral'
+import moonshot from './moonshot'
 import ollama from './ollama'
 import openai from './openai'
 import openrouter from './openrouter'
@@ -24,8 +26,7 @@ import volcengine from './volcengine'
 import xai from './xai'
 import zhipu from './zhipu'
 
-// add minimax, glm, kimi
-export const preset_providers = [openai, anthropic, google_gemini, deepseek]
+export const preset_providers = [openai, anthropic, google_gemini, deepseek, zhipu, minimax, moonshot]
 
 export const all_providers = [
 	openai,
@@ -51,7 +52,9 @@ export const all_providers = [
 	tencent_hunyuan,
 	volcengine,
 	azure_openai,
-	amazon_bedrock
+	amazon_bedrock,
+	minimax,
+	moonshot
 ]
 
 export {
@@ -79,5 +82,7 @@ export {
 	volcengine,
 	azure_openai,
 	amazon_bedrock,
+	minimax,
+	moonshot,
 	custom
 }

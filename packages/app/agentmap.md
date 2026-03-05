@@ -116,7 +116,16 @@ This document provides an overview of the packages/app module structure and arch
 			"about": { "index.tsx": { "desc": "About setting view", "role": "View" } },
 			"general": { "index.tsx": { "desc": "General settings view", "role": "View" } },
 			"memory": { "index.tsx": { "desc": "Memory settings view", "role": "View" } },
-			"provider": { "index.tsx": { "desc": "AI provider settings view", "role": "View" } },
+			"provider": {
+				"ai-sdk-panel": {
+					"components": { "desc": "Provider panel components", "role": "Component" },
+					"providers": { "desc": "Preset AI providers configuration", "role": "Config" },
+					"index.tsx": { "desc": "AI SDK configuration panel", "role": "View" },
+					"model.ts": { "desc": "AI SDK panel state model", "role": "Model" },
+					"types.ts": { "desc": "AI SDK panel type definitions", "role": "Type" }
+				},
+				"index.tsx": { "desc": "AI provider settings view", "role": "View" }
+			},
 			"index.tsx": { "desc": "Main setting layout view", "role": "View" },
 			"model.ts": { "desc": "Setting layout state model", "role": "Model" },
 			"types.ts": { "desc": "Setting layout types", "role": "Type" }

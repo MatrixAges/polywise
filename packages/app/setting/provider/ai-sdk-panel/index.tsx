@@ -57,13 +57,14 @@ const Index = (props: IPropsPanel) => {
 
 	if (!x.config || !target_config) return null
 
+	console.log(config)
+
 	return (
 		<div
 			className='
 				flex
-				w-full h-full max-w-[800px]!
-				px-4!
-				pb-0!
+				w-full h-full max-w-[720px]!
+				px-6! py-0!
 				page_wrap
 			'
 		>
@@ -73,8 +74,8 @@ const Index = (props: IPropsPanel) => {
 					overflow-y-scroll
 					flex flex-1
 					w-full h-full
-					px-2
-					pl-4
+					pt-4
+					pb-10 pl-4
 				'
 			>
 				{x.current_tab === props_tab.items.length - 1 ? (

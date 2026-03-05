@@ -13,7 +13,7 @@ const Index = (props: IPropsTab) => {
 	const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }))
 
 	return (
-		<div className='h-full w-[160px] overflow-y-scroll'>
+		<div className='h-full w-[160px] overflow-y-scroll py-6'>
 			<div
 				className='
 					flex flex-col

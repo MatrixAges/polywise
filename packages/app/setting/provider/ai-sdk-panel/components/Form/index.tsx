@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { deepEqual } from 'stk/react'
 
 import { Switch } from '@/__shadcn__/components/ui/switch'
-import { Controller, Show } from '@/components'
+import { Controller, ProviderIcon, Show } from '@/components'
 
 import { all_providers } from '../../providers'
 import APIKey from './APIKey'
@@ -129,8 +129,28 @@ const Index = (props: IPropsForm) => {
 	})
 
 	return (
-		<div className='flex w-full flex-col gap-5'>
-			<form className='flex w-full flex-col gap-5'>
+		<div
+			className='
+				flex flex-col
+				items-center
+				w-full
+				gap-6
+			'
+		>
+			<div
+				className='
+					flex flex-col
+					items-center
+					gap-2
+					pt-6
+				'
+			>
+				<div className='h-[36px] w-[36px] text-[36px]'>
+					<ProviderIcon name={name}></ProviderIcon>
+				</div>
+				<span className='text-xl font-medium'>{t(`provider.providers.${name}` as any)}</span>
+			</div>
+			<form className='flex w-full flex-col gap-6'>
 				{custom && (
 					<div
 						className='
@@ -194,14 +214,20 @@ const Index = (props: IPropsForm) => {
 				</div>
 			</form>
 			<Show
-				className='overflow-hidden'
+				className='w-full overflow-hidden'
 				visible={adding_model}
 				initial={{ opacity: 0, height: 0 }}
 				animate={{ opacity: 1, height: 'auto' }}
 			>
-				<form className='flex flex-col gap-2.5' onSubmit={handleSubmit(onSubmit)}>
+				<form className='flex w-full flex-col gap-2.5' onSubmit={handleSubmit(onSubmit)}>
 					<div className='flex items-center justify-between'>
-						<div className={`flex items-center gap-3${styles.label}`}>
+						<div
+							className={`
+								flex
+								items-center
+								gap-3
+								${styles.label}`}
+						>
 							{t('provider.form.add_model')}
 							<Show
 								className='
@@ -233,11 +259,11 @@ const Index = (props: IPropsForm) => {
 					</div>
 					<div
 						className='
+							overflow-hidden
 							flex flex-col
-							rounded-2xl
+							rounded-lg
 							text-xsm
-							bg-bg-main
-							border border-b-2 border-border-gray
+							border border-border-light/80
 						'
 					>
 						<ModelForm control={control_model} adding_model register={register_model} />
@@ -245,7 +271,7 @@ const Index = (props: IPropsForm) => {
 				</form>
 			</Show>
 			{!custom && (
-				<div className='flex flex-col gap-2.5'>
+				<div className='flex w-full flex-col gap-2.5'>
 					<span className={`${styles.label}`}>{t('provider.form.actions')}</span>
 					<div
 						className='
@@ -253,30 +279,21 @@ const Index = (props: IPropsForm) => {
 							flex
 							justify-between
 							p-3
-							rounded-2xl
+							rounded-full
 							text-xsm
-							bg-bg-main
-							border border-border-gray
+							border border-border-light/80
 						'
 					>
 						<div className='flex'>
-							<button
-								className='btn rounded-2xl px-2.5 py-1.5'
-								type='button'
-								onClick={toggleAddingModel}
-							>
-								<Plus className='text-sm' />
+							<button className='click_button' type='button' onClick={toggleAddingModel}>
+								<Plus size={14} />
 								{t('provider.form.add_model')}
 							</button>
-							<button
-								className='btn rounded-2xl px-2.5 py-1.5'
-								type='button'
-								onClick={resetModels}
-							>
-								<RotateCw className='text-sm' />
+							<button className='click_button' type='button' onClick={resetModels}>
+								<RotateCw size={14} />
 								{t('provider.form.reset_model')}
 							</button>
-							<button
+							{/* <button
 								className='btn rounded-2xl px-2.5 py-1.5'
 								type='button'
 								onClick={download}
@@ -291,18 +308,10 @@ const Index = (props: IPropsForm) => {
 							>
 								<Upload className='text-sm' />
 								{t('provider.form.import_config')}
-							</button>
+							</button> */}
 						</div>
-						<button
-							className='
-								px-2.5 py-1.5
-								rounded-2xl
-								text-rose-400
-								btn
-							'
-							onClick={onDisableProvider}
-						>
-							<EyeClosed className='text-sm' />
+						<button className='click_button' onClick={onDisableProvider}>
+							<EyeClosed size={14} />
 							{t('provider.form.disable_provider')}
 						</button>
 					</div>

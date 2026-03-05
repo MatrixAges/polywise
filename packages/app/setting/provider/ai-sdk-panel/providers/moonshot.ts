@@ -1,19 +1,14 @@
 import type { PresetProvider } from '../types'
 
 export default {
-	name: 'zhipu',
+	name: 'moonshot',
 	enabled: true,
 	api_key: '',
 	models: [
 		{
 			enabled: true,
-			id: 'glm-5',
-			name: 'GLM 5'
-		},
-		{
-			enabled: true,
-			id: 'glm-5-flash',
-			name: 'GLM 5 Flash'
+			id: 'kimi-k2.5',
+			name: 'Kimi k2.5'
 		}
 	]
 } as PresetProvider

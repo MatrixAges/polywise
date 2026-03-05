@@ -16,12 +16,12 @@ const Index = (props: IProps) => {
 				relative
 				w-full h-14
 				text-xsm
-				border-b border-border-gray
+				border-b border-border-light/80
 				transition-[border]
 				group
 				focus-within:border-b-border-solid-active
 				${value && 'justify-start'} ${className}
-`}
+                  `}
 		>
 			<label
 				className={`

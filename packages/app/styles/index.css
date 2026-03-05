@@ -45,8 +45,8 @@
 	--color-softlight: oklch(from var(--color-std-900) l c h / 0.3);
 
 	--color-bg-main: oklch(from var(--color-std-white) l c h / 0.6);
-	--color-bg-main-hover: oklch(from var(--color-std-100) l c h / 0.2);
-	--color-bg-main-active: oklch(from var(--color-std-300) l c h / 0.1);
+	--color-bg-main-hover: oklch(from var(--color-std-100) l c h / 0.3);
+	--color-bg-main-active: oklch(from var(--color-std-300) l c h / 0.2);
 	--color-bg-hover: oklch(from var(--color-std-300) l c h / 0.15);
 	--color-bg-active: oklch(from var(--color-std-400) l c h / 0.15);
 

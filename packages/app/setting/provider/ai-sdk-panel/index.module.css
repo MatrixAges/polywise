@@ -9,9 +9,8 @@
 				relative
 				flex
 				items-center
-				rounded-2xl
-				bg-bg-main
-				border
+				rounded-full
+				bg-std-50
 				transition-colors
 				focus-within:border-border-solid-active
 			;
@@ -21,7 +20,7 @@
 	@apply 
 				w-full
 				px-4
-				rounded-2xl
+				rounded-full
 				text-xsm
 				outline-none
 				transition-colors

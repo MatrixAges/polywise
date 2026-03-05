@@ -15,7 +15,10 @@ const Index = (props: IPropsFormModelForm) => {
 		<div className='flex flex-col'>
 			<div className='grid grid-cols-2'>
 				<AutoLabel
-					className='border-r'
+					className={`
+						border-r
+						${adding_model && 'border-b-0!'}
+                              `}
 					label={t('provider.form.model_form.model_id')}
 					valued={id || adding_model}
 				>
@@ -39,7 +42,11 @@ const Index = (props: IPropsFormModelForm) => {
 								))}
 					/>
 				</AutoLabel>
-				<AutoLabel label={t('provider.form.model_form.model_name')} valued={name || adding_model}>
+				<AutoLabel
+					className={adding_model ? 'border-b-0!' : ''}
+					label={t('provider.form.model_form.model_name')}
+					valued={name || adding_model}
+				>
 					<input
 						className={`
 							w-full h-full

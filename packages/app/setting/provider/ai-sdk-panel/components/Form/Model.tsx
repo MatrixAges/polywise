@@ -1,4 +1,3 @@
-import { useMemo } from 'react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { useMemoizedFn } from 'ahooks'
@@ -27,10 +26,10 @@ const Index = (props: IPropsFormModel) => {
 			className={`
 				flex
 				items-center justify-between
+				h-13
 				gap-3
-				p-4
-				bg-bg-main
-				border-b border-border-light
+				px-4
+				border-border-light/50 border-b
 				transition-colors
 				hover:bg-bg-main-hover active:bg-bg-main-active
 				select-none cursor-pointer nth-last-of-type-3:border-none
@@ -43,14 +42,11 @@ const Index = (props: IPropsFormModel) => {
 			{...attributes}
 			{...listeners}
 		>
-			<div className='flex flex-col gap-0.5'>
-				<span className={`${styles.label} ${name === '' && 'text-gray'}`}>{name || 'Unnamed'}</span>
-				<div className='text-softlight flex items-center text-xs'></div>
-			</div>
+			<span className={`${styles.label} ${name === '' && 'text-gray'}`}>{name || 'Unnamed'}</span>
 			<div className='flex items-center gap-3'>
 				{editing && (
 					<button className='btn rounded-2xl p-1.5' type='button' onClick={onRemove}>
-						<Trash className='text-base' />
+						<Trash className='text-base' size={14} />
 					</button>
 				)}
 				<Controller name={`models.${index}.enabled`} control={control}>

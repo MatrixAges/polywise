@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { Check, Loader, WifiHigh, X } from 'lucide-react'
+import { Check, Loader, Wifi, X } from 'lucide-react'
 
 import styles from '../../index.module.css'
 
@@ -10,8 +10,8 @@ const Index = (props: IPropsFormAPIKey) => {
 	const { loading, res } = test || {}
 
 	const Status = useMemo(() => {
-		if (loading) return <Loader />
-		if (res == null) return <WifiHigh />
+		if (loading) return <Loader size={16} />
+		if (res == null) return <Wifi size={16} />
 
 		return res ? <Check size={16} /> : <X size={15} />
 	}, [loading, res])
@@ -20,12 +20,18 @@ const Index = (props: IPropsFormAPIKey) => {
 
 	return (
 		<div className='flex flex-col gap-2.5'>
-			<span className={`flex${styles.label}`}>{title}</span>
+			<span
+				className={`
+					flex
+					${styles.label}`}
+			>
+				{title}
+			</span>
 			<div
 				className={`
 					border-border-solid
 					${styles.input_wrap}
-					${custom ? 'h-9' : 'h-14'}
+					${custom ? 'h-9' : 'h-13'}
 				`}
 			>
 				<input
@@ -37,7 +43,7 @@ const Index = (props: IPropsFormAPIKey) => {
 						${styles.input}
 						${custom && 'px-3!'}
 					`}
-					placeholder='sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+					placeholder='sk-xxxxxx'
 					autoComplete='off'
 					{...register('api_key')}
 				/>
