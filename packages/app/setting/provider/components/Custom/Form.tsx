@@ -1,10 +1,9 @@
 import { useState } from 'react'
 import { useMemoizedFn } from 'ahooks'
 import { useForm } from 'react-hook-form'
+import { useTranslation } from 'react-i18next'
 
 import { AutoLabel, Show } from '@/components'
-
-import { useGlobalState } from '../../context'
 
 import styles from '../../index.module.css'
 
@@ -12,7 +11,7 @@ import type { IPropsCustomForm, Provider } from '../../types'
 
 const Index = (props: IPropsCustomForm) => {
 	const { toggle, checkExist, onAddProvider } = props
-	const { locales } = useGlobalState()
+	const { t } = useTranslation()
 	const [error, setError] = useState('')
 
 	const { register, handleSubmit, reset } = useForm<Provider>({})
@@ -29,7 +28,7 @@ const Index = (props: IPropsCustomForm) => {
 		if (checkExist(values.name)) {
 			setTimeout(() => setError(''), 2400)
 
-			return setError(locales.form.custom.error.replace('{{name}}', `'${values.name}'`))
+			return setError(t('provider.form.custom.error', { name: `'${values.name}'` }))
 		}
 
 		onAddProvider(values)
@@ -40,7 +39,7 @@ const Index = (props: IPropsCustomForm) => {
 		<form className='flex flex-col gap-2.5' onSubmit={handleSubmit(onSubmit)}>
 			<div className='flex items-center justify-between'>
 				<div className={`flex items-center gap-3${styles.label}`}>
-					{locales.form.custom.add_provider}
+					{t('provider.form.custom.add_provider')}
 					<Show
 						className='
 							overflow-hidden
@@ -58,10 +57,10 @@ const Index = (props: IPropsCustomForm) => {
 				</div>
 				<div className='text-xsm flex gap-1'>
 					<button className='btn rounded-2xl px-1.5 py-0.5' type='button' onClick={onCancel}>
-						{locales.form.cancel}
+						{t('provider.form.cancel')}
 					</button>
 					<button className='btn rounded-2xl px-1.5 py-0.5' type='submit'>
-						{locales.form.submit}
+						{t('provider.form.submit')}
 					</button>
 				</div>
 			</div>
@@ -75,7 +74,7 @@ const Index = (props: IPropsCustomForm) => {
 					border border-border-gray
 				'
 			>
-				<AutoLabel label={locales.form.custom.provider_name} valued>
+				<AutoLabel label={t('provider.form.custom.provider_name')} valued>
 					<input
 						className={`
 							w-full h-full
@@ -83,13 +82,15 @@ const Index = (props: IPropsCustomForm) => {
 							outline-none
 							placeholder:text-soft
 						`}
-						placeholder={locales.form.model_form.input + locales.form.custom.provider_name}
+						placeholder={
+							t('provider.form.model_form.input') + t('provider.form.custom.provider_name')
+						}
 						autoComplete='off'
 						required
 						{...register('name')}
 					/>
 				</AutoLabel>
-				<AutoLabel label={locales.form.base_url} valued>
+				<AutoLabel label={t('provider.form.base_url')} valued>
 					<input
 						className={`
 							w-full h-full

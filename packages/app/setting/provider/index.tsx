@@ -1,8 +1,8 @@
-import { useLayoutEffect, useRef } from 'react'
+import { useLayoutEffect, useState } from 'react'
 import { useMemoizedFn } from 'ahooks'
-import { deepmerge } from 'deepmerge-ts'
-
-import { Show } from '@/components'
+import { observer } from 'mobx-react-lite'
+import { deepEqual } from 'stk/react'
+import { container } from 'tsyringe'
 
 import { Custom, Disabled, Form, Tab } from './components'
 import Model from './model'
@@ -10,12 +10,11 @@ import Model from './model'
 import type { IPropsCustom, IPropsDisabled, IPropsForm, IPropsProviders, IPropsTab } from './types'
 
 const Index = (props: IPropsProviders) => {
-	const { config, tab, width, icons, onChange, onTest } = props
-	const state = useRef(proxy(new Model()))
-	const x = useProxy(state.current)
+	const { config, onChange, onTest } = props
+	const [x] = useState(() => container.resolve(Model))
 
-	const target_config = deepClone(x.config)
-	const providers = deepClone(x.providers)
+	const target_config = $copy(x.config)
+	const providers = $copy(x.providers)
 
 	useLayoutEffect(() => {
 		if (deepEqual(config, x.config)) return
@@ -24,16 +23,15 @@ const Index = (props: IPropsProviders) => {
 	}, [config, onChange, onTest])
 
 	const props_tab: IPropsTab = {
-		tab,
-		items: deepClone(x.tabs),
+		items: $copy(x.tabs),
 		current_tab: x.current_tab,
 		onChangeCurrentTab: x.onChangeCurrentTab,
 		onDragProvider: x.onDragProvider
 	}
 
 	const props_form: IPropsForm = {
-		provider: deepClone(x.provider),
-		test: deepClone(x.test),
+		provider: $copy(x.provider),
+		test: $copy(x.test),
 		current_model: x.current_model,
 		adding_model: x.adding_model,
 		onTest: x.onTest,
@@ -48,7 +46,7 @@ const Index = (props: IPropsProviders) => {
 	}
 
 	const props_custom: IPropsCustom = {
-		custom_providers: deepClone(target_config?.custom_providers),
+		custom_providers: $copy(target_config?.custom_providers),
 		onChangeCustomProviders: x.onChangeCustomProviders
 	}
 
@@ -60,7 +58,7 @@ const Index = (props: IPropsProviders) => {
 	if (!x.config || !target_config) return null
 
 	return (
-		<div style={{ width }} className='flex flex-col items-center gap-8'>
+		<div className='flex flex-col items-center gap-8'>
 			<Tab {...props_tab} />
 			{x.current_tab === props_tab.items.length - 1 ? (
 				<Disabled {...props_disabled} />
@@ -69,18 +67,7 @@ const Index = (props: IPropsProviders) => {
 			) : (
 				<Form {...props_form} />
 			)}
-			<Show
-				className='text-xsm overflow-hidden py-2 text-rose-400'
-				visible={x.upload_error !== ''}
-				initial={{ opacity: 0, width: 0 }}
-				animate={{ opacity: 1, width: 'auto' }}
-			>
-				{x.upload_error}
-			</Show>
 		</div>
 	)
 }
-
-export default $app.memo(Index)
-
-export * from './types'
+export default new $app.Handle(Index).by(observer).by($app.memo).get()

@@ -1,13 +1,9 @@
 import type { DragEndEvent } from '@dnd-kit/core'
-import type { ExoticComponent } from 'react'
 import type { Control, UseFieldArrayRemove, UseFieldArrayUpdate, UseFormRegister } from 'react-hook-form'
 import type { default as DataModel } from './model'
 
 export interface IPropsProviders {
 	config: Config
-	tab: 'between' | 'scroll'
-	width?: number | string
-	icons?: Record<string, ExoticComponent<any>>
 	onChange: (v: Config) => void
 	onTest?: (provider: PresetProvider | SpecialProvider) => Promise<boolean>
 }
@@ -15,7 +11,6 @@ export interface IPropsProviders {
 export interface ArgsInit extends Pick<IPropsProviders, 'config' | 'onChange' | 'onTest'> {}
 
 export interface IPropsTab {
-	tab: Required<IPropsProviders>['tab']
 	items: Array<string>
 	current_tab: DataModel['current_tab']
 	onChangeCurrentTab: (v: number) => void

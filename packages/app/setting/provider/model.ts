@@ -1,15 +1,17 @@
 import { arrayMove } from '@dnd-kit/sortable'
 import { deepmerge } from 'deepmerge-ts'
 import { validate } from 'jsonschema'
-import { ref } from 'valtio'
-import { deepClone } from 'valtio/utils'
+import { makeAutoObservable } from 'mobx'
+import { injectable } from 'tsyringe'
 
-import schema from '@/schema.json'
-import { autoBind, downloadFile, uploadFile } from '@/utils'
+import { downloadFile, uploadFile } from '@/utils'
+
+import schema from './schema.json'
 
 import type { DragEndEvent } from '@dnd-kit/core'
-import type { ArgsInit, Config, ConfigProvider, IPropsProviders, ProvidersLocales } from './types'
+import type { ArgsInit, Config, ConfigProvider, IPropsProviders } from './types'
 
+@injectable()
 export default class Index {
 	config = null as Config | null
 	current_tab = 0
@@ -19,12 +21,9 @@ export default class Index {
 	adding_provider = false
 	upload_error = ''
 
-	refs = ref({
-		locales_upload: {} as ProvidersLocales['upload'],
-		timer_test: null as NodeJS.Timeout | null,
-		onChange: null as unknown as IPropsProviders['onChange'],
-		onTest: null as unknown as IPropsProviders['onTest']
-	})
+	timer_test = null as NodeJS.Timeout | null
+	onChange = null as unknown as IPropsProviders['onChange']
+	onTest = null as unknown as IPropsProviders['onTest']
 
 	get providers() {
 		const enabled = [] as Array<ConfigProvider>
@@ -51,16 +50,17 @@ export default class Index {
 		return this.providers.enabled?.[this.current_tab]!
 	}
 
+	constructor() {
+		makeAutoObservable(this, {}, { autoBind: true })
+	}
+
 	init(args: ArgsInit) {
-		const { locales_upload, config, onChange, onTest } = args
+		const { config, onChange, onTest } = args
 
-		this.config = deepClone(config)
+		this.config = config
 
-		this.refs.locales_upload = locales_upload
-		this.refs.onChange = onChange
-		this.refs.onTest = onTest
-
-		autoBind(this)
+		this.onChange = onChange
+		this.onTest = onTest
 	}
 
 	setEnabledProvider(v: Partial<ConfigProvider>) {
@@ -79,7 +79,7 @@ export default class Index {
 	onChangeProvider(v: Index['provider']) {
 		this.setEnabledProvider(v)
 
-		this.onChange()
+		this.onChangeConfig()
 	}
 
 	onToggleProvider() {
@@ -91,7 +91,7 @@ export default class Index {
 			this.current_tab = this.current_tab - 1
 		}
 
-		this.onChange()
+		this.onChangeConfig()
 	}
 
 	onEnableProvider(name: string) {
@@ -119,33 +119,33 @@ export default class Index {
 
 		this.current_tab = this.tabs.findIndex(item => item === current_tab_name)
 
-		this.onChange()
+		this.onChangeConfig()
 	}
 
 	onChangeCustomProviders(v: Config['custom_providers']) {
 		this.config!.custom_providers = v
 
-		this.onChange()
+		this.onChangeConfig()
 	}
 
-	onChange() {
-		this.refs.onChange(deepClone(this.config!))
+	onChangeConfig() {
+		this.onChange($copy(this.config!))
 	}
 
 	download() {
 		downloadFile('ai-sdk-panel.config', JSON.stringify(this.config, null, 6), 'json')
 	}
 
-	async onTest() {
-		if (this.refs.timer_test) clearTimeout(this.refs.timer_test)
+	async onTestProvider() {
+		if (this.timer_test) clearTimeout(this.timer_test)
 
 		this.test = { loading: true, res: null }
 
-		const res = await this.refs.onTest!(this.provider)
+		const res = await this.onTest!(this.provider)
 
 		this.test = { loading: false, res }
 
-		this.refs.timer_test = setTimeout(() => {
+		this.timer_test = setTimeout(() => {
 			this.test.res = null
 		}, 2400)
 	}
@@ -167,26 +167,21 @@ export default class Index {
 				this.adding_model = false
 				this.config = null
 
-				this.config = deepmerge(deepClone(this.config), json)
+				this.config = deepmerge($copy(this.config), json)
 			}
 
-			if (res.errors.length)
-				this.upload_error = res.errors.reduce((total, item, index) => {
-					total += this.refs.locales_upload.validate_error.replace(
-						'{{property}}',
-						`${item.property.replace('instance.', '')}`
-					)
-
-					if (index !== res.errors.length - 1) total += ' | '
-
-					return total
-				}, this.refs.locales_upload.validate_error_prefix)
+			if (res.errors.length) {
+				// this.upload_error = res.errors.reduce((total, item, index) => {
+				// 	total += this.validate_error.replace(
+				// 		'{{property}}',
+				// 		`${item.property.replace('instance.', '')}`
+				// 	)
+				// 	if (index !== res.errors.length - 1) total += ' | '
+				// 	return total
+				// }, this.validate_error_prefix)
+			}
 		} catch (err) {
-			if ((err as Error).message) this.upload_error = this.refs.locales_upload.upload_error
+			if ((err as Error).message) this.upload_error = this.upload_error
 		}
-
-		setTimeout(() => {
-			this.upload_error = ''
-		}, 6000)
 	}
 }

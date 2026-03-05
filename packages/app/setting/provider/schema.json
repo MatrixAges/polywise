@@ -1,0 +1,222 @@
+{
+    "$id": "https://_.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/Config",
+    "definitions": {
+        "Config": {
+            "type": "object",
+            "properties": {
+                "providers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ConfigProvider"
+                    }
+                },
+                "custom_providers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Provider"
+                    }
+                }
+            },
+            "required": [
+                "providers"
+            ],
+            "additionalProperties": false
+        },
+        "ConfigProvider": {
+            "anyOf": [
+                {
+                    "$ref": "#/definitions/PresetProvider"
+                },
+                {
+                    "$ref": "#/definitions/SpecialProvider"
+                }
+            ]
+        },
+        "PresetProvider": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "api_key": {
+                    "type": "string"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "models": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Model"
+                    }
+                },
+                "headers": {
+                    "type": "string"
+                },
+                "base_url": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "api_key",
+                "enabled",
+                "models",
+                "name"
+            ],
+            "additionalProperties": false
+        },
+        "Model": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "fid": {
+                    "type": "string"
+                },
+                "desc": {
+                    "type": "string"
+                },
+                "features": {
+                    "$ref": "#/definitions/Features"
+                },
+                "fee": {
+                    "type": "object",
+                    "properties": {
+                        "output": {
+                            "type": "number"
+                        },
+                        "input": {
+                            "type": "number"
+                        }
+                    },
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "name",
+                "id",
+                "enabled"
+            ],
+            "additionalProperties": false
+        },
+        "Features": {
+            "type": "object",
+            "properties": {
+                "vision": {
+                    "type": "boolean"
+                },
+                "voice": {
+                    "type": "boolean"
+                },
+                "function_calling": {
+                    "type": "boolean"
+                },
+                "structured_output": {
+                    "type": "boolean"
+                },
+                "reasoning": {
+                    "type": "boolean"
+                },
+                "reasoning_optional": {
+                    "type": "boolean"
+                },
+                "web_search": {
+                    "type": "boolean"
+                },
+                "image_input": {
+                    "type": "boolean"
+                },
+                "image_output": {
+                    "type": "boolean"
+                },
+                "embedding": {
+                    "type": "boolean"
+                },
+                "reranking": {
+                    "type": "boolean"
+                }
+            },
+            "additionalProperties": false
+        },
+        "SpecialProvider": {
+            "type": "object",
+            "properties": {
+                "api_key": {
+                    "type": "string"
+                },
+                "base_url": {
+                    "type": "string"
+                },
+                "models": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Model"
+                    }
+                },
+                "headers": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "custom_fields": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                }
+            },
+            "required": [
+                "name",
+                "enabled"
+            ],
+            "additionalProperties": false
+        },
+        "Provider": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "api_key": {
+                    "type": "string"
+                },
+                "base_url": {
+                    "type": "string"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "models": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Model"
+                    }
+                },
+                "headers": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "name",
+                "api_key",
+                "base_url",
+                "enabled",
+                "models"
+            ],
+            "additionalProperties": false
+        }
+    }
+}
