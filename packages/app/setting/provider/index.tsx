@@ -27,4 +27,4 @@ const Index = () => {
 	)
 }
 
-export default $app.memo(Index)
+export const Component = $app.memo(Index)

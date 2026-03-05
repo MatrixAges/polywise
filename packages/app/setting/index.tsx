@@ -1,5 +1,6 @@
 import { useLayoutEffect, useState } from 'react'
 import { observer } from 'mobx-react-lite'
+import { Outlet, useNavigate } from 'react-router'
 import { container } from 'tsyringe'
 
 import { setting_items } from '@/appdata'
@@ -11,6 +12,7 @@ import Model from './model'
 const Index = () => {
 	const global = useGlobal()
 	const [x] = useState(() => container.resolve(Model))
+	const navgate = useNavigate()
 
 	const s = global.setting
 
@@ -27,11 +29,11 @@ const Index = () => {
 					groups={[{ label: 'Settings', items: setting_items }]}
 					current={x.current}
 					width={180}
-					setCurrent={x.setCurrent}
+					setCurrent={v => navgate('/setting/' + v)}
 				></Sidebar>
 			)}
 			<Container>
-				<Lazy type='setting' path={x.current}></Lazy>
+				<Outlet></Outlet>
 			</Container>
 		</div>
 	)

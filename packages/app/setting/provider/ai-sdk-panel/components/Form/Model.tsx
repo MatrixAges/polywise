@@ -29,7 +29,7 @@ const Index = (props: IPropsFormModel) => {
 				transition-colors
 				hover:bg-bg-main-hover active:bg-bg-main-active
 				select-none cursor-pointer nth-last-of-type-3:border-none
-				${isDragging && 'z-10 rounded-sm border backdrop-blur-sm'}
+				${isDragging && 'z-10 rounded-full border backdrop-blur-sm'}
 			`}
 			ref={setNodeRef}
 			style={{ transform: CSS.Translate.toString(transform), transition }}

@@ -93,4 +93,4 @@ const Index = () => {
 	)
 }
 
-export default new $app.Handle(Index).by(observer).by($app.memo).get()
+export const Component = new $app.Handle(Index).by(observer).by($app.memo).get()

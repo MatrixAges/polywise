@@ -17,7 +17,7 @@ const routes: Array<RouteObject> = [
 		hydrateFallbackElement: <Fallback />,
 		children: [
 			{
-				path: '/',
+				index: true,
 				lazy: () => import('@/pages/search')
 			},
 			{
@@ -50,7 +50,25 @@ const routes: Array<RouteObject> = [
 			},
 			{
 				path: '/setting',
-				lazy: () => import('@/setting')
+				lazy: () => import('@/setting'),
+				children: [
+					{
+						index: true,
+						lazy: () => import('@/setting/general')
+					},
+					{
+						path: 'provider',
+						lazy: () => import('@/setting/provider')
+					},
+					{
+						path: 'memory',
+						lazy: () => import('@/setting/memory')
+					},
+					{
+						path: 'about',
+						lazy: () => import('@/setting/about')
+					}
+				]
 			}
 		],
 		ErrorBoundary
