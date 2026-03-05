@@ -57,8 +57,6 @@ const Index = (props: IPropsPanel) => {
 
 	if (!x.config || !target_config) return null
 
-	console.log(config)
-
 	return (
 		<div
 			className='

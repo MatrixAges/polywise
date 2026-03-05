@@ -14,9 +14,16 @@ interface IProps {
 const Index = (props: IProps) => {
 	const { children, name, control } = props
 
-	const render = useMemoizedFn(({ field: { value, name, ref, onChange } }) =>
-		//@ts-ignore
-		cloneElement(children, { name, value, ref, onChange })
+	const render = useMemoizedFn(({ field: { name, value, ref, onChange } }) =>
+		cloneElement(children, {
+			//@ts-ignore
+			name,
+			value,
+			checked: typeof value === 'boolean' ? value : undefined,
+			onCheckedChange: onChange,
+			ref,
+			onChange
+		})
 	)
 
 	return <Controller name={name} control={control} render={render} />

@@ -24,16 +24,11 @@ const Index = (props: IPropsFormModel) => {
 	return (
 		<div
 			className={`
-				flex
-				items-center justify-between
 				h-13
-				gap-3
-				px-4
 				border-border-light/50 border-b
 				transition-colors
 				hover:bg-bg-main-hover active:bg-bg-main-active
 				select-none cursor-pointer nth-last-of-type-3:border-none
-				${custom && 'p-3!'}
 				${isDragging && 'z-10 rounded-sm border backdrop-blur-sm'}
 			`}
 			ref={setNodeRef}
@@ -42,16 +37,27 @@ const Index = (props: IPropsFormModel) => {
 			{...attributes}
 			{...listeners}
 		>
-			<span className={`${styles.label} ${name === '' && 'text-gray'}`}>{name || 'Unnamed'}</span>
-			<div className='flex items-center gap-3'>
-				{editing && (
-					<button className='btn rounded-2xl p-1.5' type='button' onClick={onRemove}>
-						<Trash className='text-base' size={14} />
-					</button>
-				)}
-				<Controller name={`models.${index}.enabled`} control={control}>
-					<Switch />
-				</Controller>
+			<div
+				className={`
+					flex
+					items-center justify-between
+					w-full h-full
+					gap-3
+					px-4
+					${custom && 'p-3!'}
+				`}
+			>
+				<span className={`${styles.label} ${name === '' && 'text-gray'}`}>{name || 'Unnamed'}</span>
+				<div className='flex items-center gap-3'>
+					{editing && (
+						<button className='btn rounded-2xl p-1.5' type='button' onClick={onRemove}>
+							<Trash className='text-base' size={14} />
+						</button>
+					)}
+					<Controller name={`models.${index}.enabled`} control={control}>
+						<Switch />
+					</Controller>
+				</div>
 			</div>
 		</div>
 	)
