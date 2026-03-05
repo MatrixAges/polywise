@@ -45,6 +45,8 @@ const Index = () => {
 		local.layout_panel_last_width = layout_panel
 	})
 
+	if (!global.ready) return null
+
 	return (
 		<GlobalProvider value={global}>
 			<Alert></Alert>

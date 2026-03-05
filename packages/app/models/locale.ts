@@ -9,7 +9,6 @@ import { config, locales } from 'zod'
 import { Util } from '@/models/common'
 import { alert, conf, getLang, relaunch, resourcesToBackend } from '@/utils'
 
-import type { AlertArgs } from '@/layout/components/Alert'
 import type { Lang } from '@/types'
 
 @injectable()
@@ -29,11 +28,11 @@ export default class Index {
 	}
 
 	async setLocale(lang: Lang) {
-		i18next
+		await i18next
 			.use(resourcesToBackend)
 			.use(initReactI18next)
 			.init({
-				lng: this.lang,
+				lng: lang,
 				fallbackLng: 'en',
 				load: 'currentOnly',
 				returnObjects: true,

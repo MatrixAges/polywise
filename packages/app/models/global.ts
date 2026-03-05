@@ -7,6 +7,8 @@ import { ipc, is_electron } from '@/utils'
 
 @singleton()
 export default class GlobalModel {
+	ready = false
+
 	constructor(
 		public util: Util,
 		public locale: Locale,
@@ -16,10 +18,12 @@ export default class GlobalModel {
 		makeAutoObservable(this, { util: false, locale: false, theme: false, setting: false }, { autoBind: true })
 	}
 
-	init() {
-		this.locale.init()
-		this.theme.init()
-		this.setting.init()
+	async init() {
+		await this.locale.init()
+		await this.theme.init()
+		await this.setting.init()
+
+		this.ready = true
 
 		if (is_electron) this.onElectronMain()
 	}
