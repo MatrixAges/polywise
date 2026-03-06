@@ -25,7 +25,7 @@ const Index = (props: IPropsFormModel) => {
 		<div
 			className={`
 				h-13
-				border-border-light/50 border-b
+				border-border-light/80 border-b
 				transition-colors
 				hover:bg-bg-main-hover active:bg-bg-main-active
 				select-none cursor-pointer nth-last-of-type-3:border-none

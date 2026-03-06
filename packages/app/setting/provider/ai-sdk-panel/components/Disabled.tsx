@@ -3,9 +3,9 @@ import { useTranslation } from 'react-i18next'
 import { Switch } from '@/__shadcn__/components/ui/switch'
 import { ProviderIcon } from '@/components'
 
-import styles from '../../index.module.css'
+import styles from '../index.module.css'
 
-import type { IPropsDisabled } from '../../types'
+import type { IPropsDisabled } from '../types'
 
 const Index = (props: IPropsDisabled) => {
 	const { items, onEnableProvider } = props

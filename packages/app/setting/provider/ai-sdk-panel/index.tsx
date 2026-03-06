@@ -4,7 +4,7 @@ import { observer } from 'mobx-react-lite'
 import { deepEqual } from 'stk/react'
 import { container } from 'tsyringe'
 
-import { Custom, Disabled, Form, Tab } from './components'
+import { CodingPlan, Custom, Disabled, Form, Tab } from './components'
 import Model from './model'
 
 import type { IPropsCustom, IPropsDisabled, IPropsForm, IPropsPanel, IPropsTab } from './types'
@@ -77,7 +77,14 @@ const Index = (props: IPropsPanel) => {
 					pl-4
 				'
 			>
-				<div className='w-full pr-1'>
+				<div
+					className='
+						flex flex-col
+						w-full
+						gap-6
+						pr-1
+					'
+				>
 					{x.current_tab === props_tab.items.length - 1 ? (
 						<Disabled {...props_disabled} />
 					) : x.current_tab === props_tab.items.length - 2 ? (
@@ -85,6 +92,7 @@ const Index = (props: IPropsPanel) => {
 					) : (
 						<Form {...props_form} />
 					)}
+					<CodingPlan></CodingPlan>
 				</div>
 			</div>
 		</div>
