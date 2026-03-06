@@ -28,7 +28,7 @@ const Index = () => {
 			{s.sidebar_collapsed && (
 				<Sidebar
 					groups={[{ label: 'Settings', items: setting_items }]}
-					current={pathname.replace('/setting/', '')}
+					current={pathname === '/setting' ? '' : pathname.replace('/setting/', '')}
 					width={180}
 					setCurrent={v => navgate('/setting/' + v)}
 				></Sidebar>
