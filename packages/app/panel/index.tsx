@@ -29,11 +29,10 @@ const Index = () => {
 				className='
 					flex
 					items-center justify-between
-					px-2
+					px-2 py-2
 				'
 			>
 				<Tabs items={panel_tabs} active={x.active_tab} onClick={x.setActiveTab}></Tabs>
-
 				<DropdownMenu>
 					<DropdownMenuTrigger>
 						<div className='icon_button'>

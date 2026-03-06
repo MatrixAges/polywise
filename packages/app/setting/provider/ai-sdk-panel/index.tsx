@@ -63,7 +63,7 @@ const Index = (props: IPropsPanel) => {
 				flex
 				w-full h-full max-w-[720px]!
 				py-0!
-				pl-6! pr-5!
+				pl-4! pr-3!
 				page_wrap
 			'
 		>

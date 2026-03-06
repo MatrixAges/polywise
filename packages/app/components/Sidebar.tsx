@@ -24,6 +24,7 @@ const Index = (props: IProps) => {
 				overflow-y-scroll
 				flex
 				h-full
+				border-dev border-r
 				${`w-[${width}px]`}
 			`}
 		>
@@ -32,7 +33,7 @@ const Index = (props: IProps) => {
 					flex flex-col
 					w-full
 					gap-1
-					px-2
+					px-2 pt-2
 					pb-12
 				'
 			>
