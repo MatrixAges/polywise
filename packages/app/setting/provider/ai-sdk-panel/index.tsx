@@ -25,8 +25,12 @@ const Index = (props: IPropsPanel) => {
 	const props_tab: IPropsTab = {
 		items: $copy(x.tabs),
 		current_tab: x.current_tab,
+		builtin_providers: $copy(x.builtin_providers),
 		onChangeCurrentTab: x.onChangeCurrentTab,
-		onDragProvider: x.onDragProvider
+		onDragProvider: x.onDragProvider,
+		onAddBuiltinProvider: x.onAddBuiltinProvider,
+		download: x.download,
+		upload: x.upload
 	}
 
 	const props_form: IPropsForm = {
@@ -36,8 +40,7 @@ const Index = (props: IPropsPanel) => {
 		adding_model: x.adding_model,
 		onTest: x.onTestModel,
 		onChangeProvider: x.onChangeProvider,
-		download: x.download,
-		upload: x.upload,
+
 		onChangeCurrentModel: useMemoizedFn((v: number | null) => {
 			x.current_model = v === x.current_model ? null : v
 		}),

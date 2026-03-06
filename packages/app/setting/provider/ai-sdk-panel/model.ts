@@ -1,11 +1,13 @@
 import { arrayMove } from '@dnd-kit/sortable'
 import { deepmerge } from 'deepmerge-ts'
+import { differenceBy } from 'es-toolkit'
 import { validate } from 'jsonschema'
 import { makeAutoObservable } from 'mobx'
 import { injectable } from 'tsyringe'
 
-import { downloadFile, uploadFile } from '@/utils'
+import { alert, downloadFile, uploadFile } from '@/utils'
 
+import { all_providers } from './providers'
 import schema from './schema.json'
 
 import type { DragEndEvent } from '@dnd-kit/core'
@@ -19,7 +21,6 @@ export default class Index {
 	test = { loading: false, res: null as boolean | null }
 	adding_model = false
 	adding_provider = false
-	upload_error = ''
 
 	timer_test = null as NodeJS.Timeout | null
 	onChange = null as unknown as IPropsPanel['onChange']
@@ -38,6 +39,10 @@ export default class Index {
 		})
 
 		return { enabled, disabled }
+	}
+
+	get builtin_providers() {
+		return differenceBy(all_providers, this.config?.providers || [], item => item.name)
 	}
 
 	get tabs() {
@@ -122,6 +127,14 @@ export default class Index {
 		this.onChangeConfig()
 	}
 
+	onAddBuiltinProvider(index: number | null) {
+		if (index === null || !this.config) return
+
+		this.config.providers.push(this.builtin_providers[index])
+
+		this.config.providers = $copy(this.config.providers)
+	}
+
 	onChangeCustomProviders(v: Config['custom_providers']) {
 		this.config!.custom_providers = v
 
@@ -157,6 +170,8 @@ export default class Index {
 
 		const file = await (files as File).text()
 
+		let upload_error = ''
+
 		try {
 			const json = JSON.parse(file)
 			const res = validate(json, schema)
@@ -171,17 +186,26 @@ export default class Index {
 			}
 
 			if (res.errors.length) {
-				// this.upload_error = res.errors.reduce((total, item, index) => {
-				// 	total += this.validate_error.replace(
-				// 		'{{property}}',
-				// 		`${item.property.replace('instance.', '')}`
-				// 	)
-				// 	if (index !== res.errors.length - 1) total += ' | '
-				// 	return total
-				// }, this.validate_error_prefix)
+				console.log(res.errors)
+				upload_error = res.errors.reduce((total, item, index) => {
+					total += item.message
+
+					if (index !== res.errors.length - 1) total += ' | '
+
+					return total
+				}, $t('provider.upload.validate_error_prefix'))
 			}
 		} catch (err) {
-			if ((err as Error).message) this.upload_error = this.upload_error
+			if ((err as Error).message) upload_error = $t('provider.upload.upload_error')
+		}
+
+		if (upload_error) {
+			alert({
+				icon: 'error',
+				info: true,
+				title: 'Import Error',
+				desc: `The fields in the imported configuration do not match. ${upload_error}`
+			})
 		}
 	}
 }

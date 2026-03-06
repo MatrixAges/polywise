@@ -13,8 +13,12 @@ export interface ArgsInit extends Pick<IPropsPanel, 'config' | 'onChange' | 'onT
 export interface IPropsTab {
 	items: Array<string>
 	current_tab: M['current_tab']
+	builtin_providers: M['builtin_providers']
 	onChangeCurrentTab: (v: number) => void
 	onDragProvider: M['onDragProvider']
+	onAddBuiltinProvider: M['onAddBuiltinProvider']
+	download?: M['download']
+	upload?: M['upload']
 }
 
 export interface IPropsTabItem extends Pick<IPropsTab, 'onChangeCurrentTab'> {
@@ -32,8 +36,6 @@ export interface IPropsForm {
 	custom?: boolean
 	onTest?: M['onTestModel']
 	onChangeProvider: M['onChangeProvider']
-	download?: M['download']
-	upload?: M['upload']
 	onChangeCurrentModel: (v: number | null) => void
 	toggleAddingModel: () => void
 	onDisableProvider?: () => void

@@ -7,6 +7,7 @@ export interface AlertArgs {
 	title: string
 	desc: string
 	icon?: string
+	info?: boolean
 }
 
 const Index = () => {
@@ -51,6 +52,7 @@ const Index = () => {
 			title={ctx.title}
 			desc={ctx.desc}
 			icon={ctx.icon}
+			info={ctx.info}
 			onConfirm={confirm}
 			onCancel={close}
 		></Alert>

@@ -31,7 +31,6 @@ export default {
 	},
 	upload: {
 		validate_error_prefix: '[Validate error]: ',
-		validate_error: '{{property}} is not correct',
 		upload_error: '[Upload error]: please check config format.'
 	},
 	form: {

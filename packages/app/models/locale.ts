@@ -28,7 +28,7 @@ export default class Index {
 	}
 
 	async setLocale(lang: Lang) {
-		await i18next
+		$t = await i18next
 			.use(resourcesToBackend)
 			.use(initReactI18next)
 			.init({

@@ -26,7 +26,7 @@ import volcengine from './volcengine'
 import xai from './xai'
 import zhipu from './zhipu'
 
-export const preset_providers = [openai, anthropic, google_gemini, deepseek, zhipu, minimax, moonshot]
+export const preset_providers = [openai, anthropic, google_gemini, zhipu, minimax, moonshot, deepseek]
 
 export const all_providers = [
 	openai,
