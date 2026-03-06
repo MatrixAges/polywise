@@ -1,21 +1,24 @@
+import { useMemo } from 'react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { useMemoizedFn } from 'ahooks'
 
 import { ProviderIcon } from '@/components'
-import { useScrollToItem } from '@/hooks'
+import { useDelayValue, useScrollToItem } from '@/hooks'
 
 import type { IPropsTabItem } from '../../types'
 
 const Index = (props: IPropsTabItem) => {
 	const { index, item, display_name, active, onChangeCurrentTab } = props
 
-	const disabled = item === 'custom' || item === 'disabled'
+	const disabled = useMemo(() => item === 'custom' || item === 'disabled', [item])
 
 	const { attributes, listeners, transform, transition, isDragging, setNodeRef } = useSortable({
 		id: item,
 		disabled
 	})
+
+	const is_dragging = useDelayValue(isDragging, 300) || isDragging
 
 	useScrollToItem(item, active, isDragging)
 
@@ -31,12 +34,12 @@ const Index = (props: IPropsTabItem) => {
 				px-2.5
 				text-light
 				click_button
-				${isDragging && disabled && 'cursor-not-allowed!'}
-				${isDragging && 'cursor-grab transition-none!'}
+				${is_dragging && disabled && 'cursor-not-allowed!'}
+				${is_dragging && 'relative z-10 cursor-grab transition-none!'}
                         ${active && 'active'}
 			`}
-			ref={setNodeRef}
 			style={{ transform: CSS.Translate.toString(transform), transition }}
+			ref={setNodeRef}
 			onClick={onClick}
 			{...attributes}
 			{...listeners}
