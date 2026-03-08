@@ -24,7 +24,6 @@ const Index = (props: IProps) => {
 				overflow-y-scroll
 				flex
 				h-full
-				border-dev border-r
 				${`w-[${width}px]`}
 			`}
 		>

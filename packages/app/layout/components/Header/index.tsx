@@ -22,8 +22,7 @@ const Index = (props: IPropsHeader) => {
 				relative
 				flex
 				items-center justify-center
-				w-full h-[43px]
-				border-dev border-b
+				w-full h-[42px]
 				${styles._local}
 			`}
 		>

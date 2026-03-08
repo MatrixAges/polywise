@@ -26,8 +26,17 @@ const Index = () => {
 	const setDevTheme = useMemoizedFn(v => s.setDevTheme(v))
 
 	return (
-		<div className='flex w-full'>
+		<div className='flex w-full flex-col'>
 			<FieldGroup className='page_wrap gap-0'>
+				<h1
+					className='
+						pt-4
+						pb-2
+						text-std-500 text-sm font-medium
+					'
+				>
+					General Settings
+				</h1>
 				<Field className='border-dev items-center! border-b py-3' orientation='horizontal'>
 					<FieldContent>
 						<FieldTitle className='text-base'>Theme</FieldTitle>

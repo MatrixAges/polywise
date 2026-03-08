@@ -24,7 +24,13 @@ const Index = () => {
 	const s = global.setting
 
 	return (
-		<div className='flex h-full w-full flex-col'>
+		<div
+			className='
+				flex flex-col
+				w-full h-full
+				border-dev border-t
+			'
+		>
 			<div
 				className='
 					flex

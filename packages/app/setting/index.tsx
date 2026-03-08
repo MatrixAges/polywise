@@ -25,7 +25,7 @@ const Index = () => {
 
 	return (
 		<div className='flex h-full w-full'>
-			{s.sidebar_collapsed && (
+			{!s.sidebar_collapsed && (
 				<Sidebar
 					groups={[{ label: 'Settings', items: setting_items }]}
 					current={pathname === '/setting' ? '' : pathname.replace('/setting/', '')}

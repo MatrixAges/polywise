@@ -60,7 +60,7 @@ const Index = () => {
 			>
 				<Header {...props_header}></Header>
 				<ResizablePanelGroup
-					className='h-[calc(100%-43px)]!'
+					className='h-[calc(100%-42px)]!'
 					defaultLayout={defaultLayout}
 					onLayoutChanged={onLayoutChanged}
 				>
@@ -70,7 +70,7 @@ const Index = () => {
 					{!s.panel_collapsed && (
 						<ResizableHandle
 							className='
-								bg-dev
+								bg-dev/80
 								transition-colors duration-200
 								hover:bg-std-100 focus:bg-std-150
 							'
