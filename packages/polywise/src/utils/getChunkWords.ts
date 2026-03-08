@@ -12,6 +12,8 @@ export default (v: string) => {
 		.filter(word => {
 			const trimmed = word.trim()
 
+			if (/^[a-zA-Z]$/.test(trimmed)) return false
+
 			return trimmed.length > 0 && /^[\u4e00-\u9fa5a-zA-Z0-9]+$/.test(trimmed)
 		})
 		.join(' ')
