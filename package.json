@@ -1,7 +1,7 @@
 {
 	"name": "monorepo",
 	"author": "1yasa",
-	"packageManager": "pnpm@10.30.3",
+	"packageManager": "pnpm@10.31.0",
 	"scripts": {
 		"deps": "ncu -i",
 		"deps:w": "ncu -u -i --workspaces",
