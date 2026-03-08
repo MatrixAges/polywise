@@ -52,13 +52,11 @@ catalog:
 
 onlyBuiltDependencies:
       - '@node-rs/jieba'
+      - '@lancedb/lancedb'
       - bun
       - core-js
       - electron
       - electron-winstaller
       - esbuild
-      - onnxruntime-node
-      - protobufjs
-      - sharp
       - simple-git-hooks
-      - koffi
+      - node-llama-cpp

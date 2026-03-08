@@ -44,7 +44,9 @@
 		"trpc-to-openapi": "^3.1.0",
 		"tslib": "catalog:",
 		"tsyringe": "catalog:",
-		"uuid": "catalog:"
+		"uuid": "catalog:",
+		"node-llama-cpp": "^3.17.1",
+		"@electric-sql/pglite": "^0.3.15"
 	},
 	"devDependencies": {
 		"@rslib/core": "catalog:",
