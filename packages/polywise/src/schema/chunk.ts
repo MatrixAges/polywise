@@ -12,11 +12,12 @@ export default MEM.table(
 		article_id: text('article_id').references(() => article.id, { onDelete: 'cascade' }),
 		content: text('content'),
 		vectors: vector('vectors', { dimensions: 1024 }),
+		keywords: text('keywords').notNull(),
 		position: integer('position'),
 		created_at: timestamp('created_at').defaultNow()
 	},
 	t => [
 		index('chunk_vectors_index').using('hnsw', t.vectors.op('vector_cosine_ops')),
-		index('chunk_content_index').using('gin', sql`to_tsvector('english', ${t.content})`)
+		index('chunk_keywords_index').using('gin', sql`to_tsvector('simple', ${t.keywords})`)
 	]
 )
