@@ -15,6 +15,11 @@ This document provides an overview of the packages/polywise module structure and
 	"module": "packages/polywise",
 	"structure": {
 		"src": {
+			"schema": {
+				"article.ts": { "desc": "Drizzle schema for articles table", "role": "Schema" },
+				"chunk.ts": { "desc": "Drizzle schema for chunks table with vector support", "role": "Schema" },
+				"index.ts": { "desc": "Schema exports", "role": "Index" }
+			},
 			"Activation.ts": {
 				"desc": "Neural activation manager implementing Spreading Activation logic. Handles node stimulation and iterative activation spreading via Polywise.tick() with support for learning phases and dynamic arousal modulation.",
 				"role": "Class"
