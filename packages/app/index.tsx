@@ -61,8 +61,8 @@ const routes: Array<RouteObject> = [
 						lazy: () => import('@/setting/provider')
 					},
 					{
-						path: 'memory',
-						lazy: () => import('@/setting/memory')
+						path: 'tool',
+						lazy: () => import('@/setting/tool')
 					},
 					{
 						path: 'about',

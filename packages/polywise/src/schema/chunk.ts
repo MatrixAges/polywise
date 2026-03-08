@@ -17,7 +17,7 @@ export default MEM.table(
 		created_at: timestamp('created_at').defaultNow()
 	},
 	t => [
-		index('chunk_vectors_index').using('hnsw', t.vectors.op('vector_cosine_ops')),
-		index('chunk_keywords_index').using('gin', sql`to_tsvector('simple', ${t.keywords})`)
+		index('chunk_vectors_idx').using('hnsw', t.vectors.op('vector_cosine_ops')),
+		index('chunk_keywords_idx').using('gin', sql`to_tsvector('simple', ${t.keywords})`)
 	]
 )
