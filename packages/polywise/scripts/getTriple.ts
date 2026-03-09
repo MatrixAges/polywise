@@ -1,5 +1,6 @@
 import { getLlama, LlamaChatSession } from 'node-llama-cpp'
 
+import text from '../datasets/triple_en_2'
 import { app, prompt } from '../src/consts'
 import { loadModel } from '../src/utils'
 
@@ -32,9 +33,6 @@ const grammar = await llama.createGrammarForJsonSchema({
 		additionalProperties: false
 	}
 })
-
-const text =
-	'史蒂夫·乔布斯（Steve Jobs）、史蒂夫·沃兹尼亚克（Steve Wozniak）和罗纳德·韦恩（Ronald Wayne）于1976年4月1日共同创立了苹果公司（Apple Inc.），其最初的目的是为了开发和销售沃兹尼亚克设计并制造的Apple I个人电脑。1977年1月，苹果公司正式注册成立，并随着Apple II的发布而迅速崛起，这款电脑成为了1970年代末最成功的个人电脑之一。1980年，苹果公司公开上市，筹集了大量资金并造就了众多百万富翁。1984年，苹果推出了具有革命性图形用户界面的麦金塔（Macintosh）电脑，并在著名的“1984”超级碗广告中大放异彩。然而，由于内部权力斗争，乔布斯于1985年离开了苹果公司，转而创立了NeXT公司。直到1997年，苹果公司收购了NeXT，乔布斯才得以回归，并带领公司推出了iMac、iPod、iPhone和iPad等一系列创新产品，使苹果成为全球市值最高的科技公司之一。'
 
 console.log('正在提取三元组...')
 
