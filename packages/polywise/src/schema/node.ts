@@ -11,7 +11,9 @@ export default MEM.table(
 		agent_id: uuid('agent_id')
 			.references(() => agent.id, { onDelete: 'cascade' })
 			.notNull(),
+		// 实体名称
 		name: text('name').notNull(),
+		// 实体名称的向量
 		vectors: vector('vectors', { dimensions: 1024 }),
 		// 当前激活电位 (用于模拟能量扩散/扩展激活)
 		active_level: real('active_level').default(0.0).notNull(),

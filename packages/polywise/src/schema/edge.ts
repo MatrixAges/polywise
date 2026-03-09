@@ -1,4 +1,4 @@
-import { boolean, index, integer, real, timestamp, uniqueIndex, uuid, varchar } from 'drizzle-orm/pg-core'
+import { boolean, index, integer, real, timestamp, uniqueIndex, uuid, varchar, vector } from 'drizzle-orm/pg-core'
 import { getId } from 'stk/utils'
 
 import agent from './agent'
@@ -11,6 +11,8 @@ export default MEM.table(
 		id: uuid('id').primaryKey().$defaultFn(getId),
 		// 记录三元组中的 "谓词/关系"
 		relation: varchar('relation', { length: 100 }).notNull(),
+		// 谓词/关系的向量
+		vectors: vector('vectors', { dimensions: 1024 }),
 		// 外键：属于哪个智能体
 		agent_id: uuid('agent_id')
 			.references(() => agent.id, { onDelete: 'cascade' })
@@ -39,6 +41,7 @@ export default MEM.table(
 		created_at: timestamp('created_at').defaultNow().notNull()
 	},
 	t => [
+		index('edge_vectors_idx').using('hnsw', t.vectors.op('vector_cosine_ops')),
 		index('edge_agent_id_idx').on(t.agent_id),
 		index('edge_source_idx').on(t.source_id),
 		index('edge_target_idx').on(t.target_id),

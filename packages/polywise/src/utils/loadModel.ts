@@ -1,6 +1,6 @@
 import path from 'path'
 import fs from 'fs-extra'
-import { createModelDownloader, readGgufFileInfo } from 'node-llama-cpp'
+import { combineModelDownloaders, createModelDownloader, readGgufFileInfo } from 'node-llama-cpp'
 
 import type { Llama } from 'node-llama-cpp'
 
@@ -42,7 +42,16 @@ export default async (config: ModelConfig) => {
 		dirPath: dir_path
 	})
 
-	const downloaded_path = await downloader.download()
+	const combile_downloader = await combineModelDownloaders([downloader], {
+		showCliProgress: true,
+		onProgress(status) {
+			const { downloadedSize, totalSize } = status
+
+			// console.log(`${downloadedSize}/${totalSize}`)
+		}
+	})
+
+	const [downloaded_path] = await combile_downloader.download()
 
 	console.log('🚀 Download complete.')
 
