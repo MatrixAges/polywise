@@ -14,6 +14,18 @@ This document provides an overview of the packages/polywise module structure and
 	"project": "Polywise",
 	"module": "packages/polywise",
 	"structure": {
+		"datasets": {
+			"triple_cn_1.ts": { "desc": "Technology and Business History test data (CN)", "role": "Data" },
+			"triple_cn_2.ts": { "desc": "History and Geography test data (CN)", "role": "Data" },
+			"triple_cn_3.ts": { "desc": "Science and Biology test data (CN)", "role": "Data" },
+			"triple_cn_4.ts": { "desc": "Literature and Culture test data (CN)", "role": "Data" },
+			"triple_cn_5.ts": { "desc": "Space and Exploration test data (CN)", "role": "Data" },
+			"triple_en_1.ts": { "desc": "Physics and Science test data (EN)", "role": "Data" },
+			"triple_en_2.ts": { "desc": "Tech Companies and Business test data (EN)", "role": "Data" },
+			"triple_en_3.ts": { "desc": "History and Global Conflict test data (EN)", "role": "Data" },
+			"triple_en_4.ts": { "desc": "Geography and Ecology test data (EN)", "role": "Data" },
+			"triple_en_5.ts": { "desc": "Entertainment and Media test data (EN)", "role": "Data" }
+		},
 		"src": {
 			"schema": {
 				"article.ts": { "desc": "Drizzle schema for articles table", "role": "Schema" },
