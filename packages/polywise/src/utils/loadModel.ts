@@ -4,7 +4,7 @@ import { createModelDownloader, readGgufFileInfo } from 'node-llama-cpp'
 
 import type { Llama } from 'node-llama-cpp'
 
-type ModelConfig = {
+interface ModelConfig {
 	llama: Llama
 	model_uri: string
 	dir_path: string
