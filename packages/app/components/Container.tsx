@@ -15,16 +15,22 @@ const Index = ({ children }: PropsWithChildren) => {
 				flex flex-1
 				h-full
 				px-2
-				border-dev border-l border-t
 			`,
-				!global.setting.sidebar_collapsed && 'rounded-tl-2xl'
+				global.setting.sidebar_collapsed && 'pl-0',
+				global.setting.panel_collapsed && 'pr-0'
 			)}
 		>
 			<div
-				className='
+				className={$cx(
+					`
 					overflow-y-hidden
 					w-full h-full
-				'
+					rounded-t-2xl
+					border-dev border-x border-t
+				`,
+					global.setting.sidebar_collapsed && 'rounded-tl-none',
+					global.setting.panel_collapsed && 'rounded-tr-none'
+				)}
 			>
 				<div className='h-full w-full'>{children}</div>
 			</div>

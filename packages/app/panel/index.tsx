@@ -28,7 +28,6 @@ const Index = () => {
 			className='
 				flex flex-col
 				w-full h-full
-				border-dev border-t
 			'
 		>
 			<div
