@@ -1,8 +1,8 @@
 import { homedir } from 'os'
 import { resolve } from 'path'
 
-export const data_dir = resolve(`${homedir()}/.polywise/.memory`)
-export const model_dir = resolve(`${homedir()}/.polywise/.models`)
+export const default_data_dir = resolve(`${homedir()}/.polywise/.memory`)
+export const default_model_dir = resolve(`${homedir()}/.polywise/.models`)
 
 export const embedding_model = {
 	uri: 'hf:Qwen/Qwen3-Embedding-0.6B-GGUF/Qwen3-Embedding-0.6B-Q8_0.gguf',

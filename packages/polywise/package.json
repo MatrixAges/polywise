@@ -16,19 +16,21 @@
 	"scripts": {
 		"dev": "cross-env NODE_ENV=development rslib build --watch",
 		"build": "rslib build",
-		"before_test": "bun ./scripts/beforeTest.ts",
-		"after_test": "bun ./scripts/afterTest.ts",
-		"triple": "bun ./scripts/testTriple.ts",
-		"test": "pnpm run before_test && rstest run $TEST_FILE"
+		"test": "rstest run $TEST_FILE",
+		"auth:sql": "pnpx auth generate --adapter drizzle",
+		"auth:migrate": "pnpx auth migrate"
 	},
 	"dependencies": {
 		"@abraham/reflection": "catalog:",
+		"@better-auth/drizzle-adapter": "^1.5.4",
 		"@chonkiejs/core": "^0.0.7",
 		"@drizzle-team/brocli": "^0.11.0",
+		"@electric-sql/pglite": "^0.3.15",
 		"@node-rs/jieba": "^2.0.1",
 		"@trpc/server": "catalog:",
 		"ansis": "catalog:",
 		"await-to-js": "catalog:",
+		"better-auth": "^1.5.4",
 		"dayjs": "catalog:",
 		"drizzle-kit": "1.0.0-beta.16-ea816b6",
 		"drizzle-orm": "1.0.0-beta.16-ea816b6",
@@ -36,6 +38,7 @@
 		"fastq": "^1.20.1",
 		"fs-extra": "catalog:",
 		"hono": "catalog:",
+		"node-llama-cpp": "^3.17.1",
 		"ofetch": "catalog:",
 		"sentence-splitter": "^5.0.0",
 		"stk": "workspace:*",
@@ -43,9 +46,7 @@
 		"trpc-to-openapi": "^3.1.0",
 		"tslib": "catalog:",
 		"tsyringe": "catalog:",
-		"uuid": "catalog:",
-		"node-llama-cpp": "^3.17.1",
-		"@electric-sql/pglite": "^0.3.15"
+		"uuid": "catalog:"
 	},
 	"devDependencies": {
 		"@rslib/core": "catalog:",
