@@ -18,6 +18,10 @@ const routes: Array<RouteObject> = [
 		children: [
 			{
 				index: true,
+				lazy: () => import('@/pages/home')
+			},
+			{
+				path: '/search',
 				lazy: () => import('@/pages/search')
 			},
 			{
@@ -39,10 +43,6 @@ const routes: Array<RouteObject> = [
 			{
 				path: '/project',
 				lazy: () => import('@/pages/project')
-			},
-			{
-				path: '/task',
-				lazy: () => import('@/pages/task')
 			},
 			{
 				path: '/browser',

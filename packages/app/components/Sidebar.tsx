@@ -20,12 +20,12 @@ const Index = (props: IProps) => {
 
 	return (
 		<div
-			className={`
+			className='
 				overflow-y-scroll
 				flex
 				h-full
-				${`w-[${width}px]`}
-			`}
+			'
+			style={{ width }}
 		>
 			<div
 				className='

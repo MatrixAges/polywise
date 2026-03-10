@@ -25,7 +25,7 @@ const Index = ({ children }: PropsWithChildren) => {
 					`
 					overflow-y-hidden
 					w-full h-full
-					rounded-t-2xl
+					rounded-t-xl
 					border-dev border-x border-t
 				`,
 					global.setting.sidebar_collapsed && 'rounded-tl-none',

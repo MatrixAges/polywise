@@ -1,15 +1,17 @@
-import { Bookmark, Bot, ClockCheck, Compass, Database, Folders, NotebookPen, Search } from 'lucide-react'
+import { Bookmark, Bot, Compass, Database, Folders, House, NotebookPen, Search } from 'lucide-react'
+
+import { is_electron } from '@/utils/is'
 
 export const nav_items = [
-	{ key: '', Icon: Search, title: 'search' },
+	{ key: '', Icon: House, title: 'home' },
+	{ key: 'search', Icon: Search },
 	{ key: 'agent', Icon: Bot },
 	{ key: 'bookmark', Icon: Bookmark },
 	{ key: 'notebook', Icon: NotebookPen },
-	// { key: 'database', Icon: Database },
-	// { key: 'project', Icon: Folders },
-	{ key: 'task', Icon: ClockCheck },
-	{ key: 'browser', Icon: Compass }
-] as Array<{ key: string; Icon: typeof Search; title?: string }>
+	{ key: 'database', Icon: Database },
+	{ key: 'project', Icon: Folders },
+	is_electron && { key: 'browser', Icon: Compass }
+].filter(Boolean) as Array<{ key: string; Icon: typeof Search; title?: string }>
 
 export const locales = ['en', 'zh-cn'] as const
 

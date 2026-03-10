@@ -5,5 +5,5 @@ interface Env {
 }
 
 export default {
-	pglite_data_dir: app.default_data_dir
+	pglite_data_dir: app.data_dir
 } as Env

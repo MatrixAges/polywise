@@ -1,6 +1,6 @@
 import { getLlama, LlamaChatSession } from 'node-llama-cpp'
 
-import text from '../datasets/triple_en_2'
+import text from '../datasets/triple_cn_1'
 import { app, prompt } from '../src/consts'
 import { loadModel } from '../src/utils'
 
