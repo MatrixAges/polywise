@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm'
-import { index, integer, text, timestamp, uuid, vector } from 'drizzle-orm/pg-core'
+import { boolean, index, integer, text, timestamp, uuid, vector } from 'drizzle-orm/pg-core'
 import { getId } from 'stk/utils'
 
 import article from './article'
@@ -17,6 +17,8 @@ export default MEM.table(
 		vectors: vector('vectors', { dimensions: 1024 }),
 		// 从切片内容中提取到的关键词，用于全文检索
 		keywords: text('keywords').notNull(),
+		// 所属文章只有一个 chunk
+		as_body: boolean('as_body').default(false),
 		// 切片在文章中位置
 		position: integer('position'),
 		created_at: timestamp('created_at').defaultNow()
