@@ -692,9 +692,6 @@ importers:
       tsyringe:
         specifier: 'catalog:'
         version: 4.10.0
-      unist-util-visit:
-        specifier: ^5.1.0
-        version: 5.1.0
       uuid:
         specifier: 'catalog:'
         version: 13.0.0
@@ -738,6 +735,9 @@ importers:
       globby:
         specifier: 'catalog:'
         version: 16.1.1
+      picocolors:
+        specifier: ^1.1.1
+        version: 1.1.1
       reflect-metadata:
         specifier: 'catalog:'
         version: 0.2.2

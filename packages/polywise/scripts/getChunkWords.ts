@@ -1,4 +1,4 @@
-import { getChunkWords } from '../src/utils'
+import { getChunkWords } from '../src/pipeline'
 
 console.log(getChunkWords('今天纽约的天气真好啊，京华大酒店的张尧经理吃了一只北京烤鸭。'))
 console.log(

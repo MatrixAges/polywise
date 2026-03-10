@@ -65,6 +65,7 @@
 		"deepmerge-ts": "catalog:",
 		"drizzle-seed": "^0.3.1",
 		"globby": "catalog:",
+		"picocolors": "^1.1.1",
 		"reflect-metadata": "catalog:",
 		"type-fest": "catalog:"
 	}

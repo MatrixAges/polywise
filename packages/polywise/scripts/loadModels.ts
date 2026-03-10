@@ -1,3 +1,3 @@
-import { getEmbeddingModel, getGenModel, getRerankModel } from '../src/utils'
+import { initModels } from '../src/env'
 
-await Promise.all([getEmbeddingModel(), getRerankModel(), getGenModel()])
+await initModels()
