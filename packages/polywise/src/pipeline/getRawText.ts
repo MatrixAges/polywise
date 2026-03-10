@@ -5,12 +5,35 @@ import type { Root, RootContent } from 'mdast'
 export default (nodes: Array<RootContent>, original_text: string) => {
 	if (nodes.length === 0) return ''
 
-	const first_node = nodes[0]
-	const last_node = nodes[nodes.length - 1]
-	const start_offset = first_node.position?.start.offset
-	const end_offset = last_node.position?.end.offset
+	let result = ''
+	let last_end_offset = -1
 
-	return start_offset !== undefined && end_offset !== undefined
-		? original_text.slice(start_offset, end_offset)
-		: nodes.map(node => processor.stringify(node as unknown as Root)).join('\n\n')
+	for (const node of nodes) {
+		const start_offset = node.position?.start.offset
+		const end_offset = node.position?.end.offset
+
+		if (start_offset !== undefined && end_offset !== undefined) {
+			if (last_end_offset !== -1) {
+				const between = original_text.slice(last_end_offset, start_offset)
+
+				if (between.trim() === '') {
+					result += between
+				} else {
+					result += '\n\n'
+				}
+			} else if (result.length > 0) {
+				result += '\n\n'
+			}
+
+			result += original_text.slice(start_offset, end_offset)
+			last_end_offset = end_offset
+		} else {
+			if (result.length > 0) result += '\n\n'
+
+			result += processor.stringify(node as unknown as Root).trimEnd()
+			last_end_offset = -1
+		}
+	}
+
+	return result
 }
