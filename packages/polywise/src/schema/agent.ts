@@ -1,4 +1,4 @@
-import { text, timestamp, uuid, varchar, vector } from 'drizzle-orm/pg-core'
+import { bytea, text, timestamp, uuid, varchar, vector } from 'drizzle-orm/pg-core'
 import { getId } from 'stk/utils'
 
 import { MEM } from './metadata'
@@ -9,6 +9,8 @@ export default MEM.table('agent', {
 	name: varchar('name', { length: 255 }).notNull(),
 	// 智能体描述
 	description: varchar('description', { length: 500 }),
+	// 智能体头像
+	avatar: bytea('avatar'),
 	// 系统提示词
 	prompt: text('prompt').notNull().default('You are a personal agent assistant.'),
 	// 智能体人格

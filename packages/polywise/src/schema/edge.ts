@@ -31,6 +31,10 @@ export default MEM.table(
 		growth: real('growth').default(1.0).notNull(),
 		// 置信度 (RL 探索 vs 利用的依据：低置信度促使网络探索新路径)
 		confidence: real('confidence').default(0.5).notNull(),
+		// 起始节点到目标节点的距离
+		distance: real('distance').default(1.0).notNull(),
+		// 边的粗细，决定信号传播速度
+		bandwidth: real('bandwidth').default(1.0).notNull(),
 		// 被访问的总次数
 		active_times: integer('active_times').default(1).notNull(),
 		// 最后一次被用于推理/漫游的时间 (用于突触修剪/长时程抑制)
