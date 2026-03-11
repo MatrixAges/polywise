@@ -2,8 +2,9 @@
 
 import getChunkWords from './getChunkWords'
 import getSimilarity from './getSimilarity'
+import getVectors from './getVectors'
 
-export default async (text: string, getVectors: (v: Array<string>) => Promise<Array<Array<number>>>) => {
+export default async (text: string) => {
 	const candidate_list = getChunkWords(text)
 
 	if (!candidate_list.length) return []

@@ -1,10 +1,9 @@
-import { pipeline } from '../consts'
-import getEmbedding from './getEmbedding'
+import { pipeline } from '@core/consts'
+import { getEmbedding, getSimilarity, getTokenCount } from '@core/pipeline'
+
 import getOverlapChunks from './getOverlapChunks'
 import getRawText from './getRawText'
-import getSimilarity from './getSimilarity'
 import processor from './processor'
-import { getTokenCount } from './token'
 
 import type { Heading, Root, RootContent } from 'mdast'
 

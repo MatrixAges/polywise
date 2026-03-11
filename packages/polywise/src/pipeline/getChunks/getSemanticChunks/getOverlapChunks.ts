@@ -1,5 +1,5 @@
-import { pipeline } from '../consts'
-import { decode, encode } from './token'
+import { pipeline } from '@core/consts'
+import { decode, encode } from '@core/pipeline'
 
 export default async (text: string) => {
 	const tokens = encode(text)

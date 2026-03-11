@@ -3,16 +3,16 @@ import pc from 'picocolors'
 
 import article from '../datasets/article_en_1.txt'
 import { initEmbeddingModel, initEnv } from '../src/env'
-import chunking from '../src/pipeline/chunking'
+import { getChunks } from '../src/pipeline'
 
 await initEnv()
 await initEmbeddingModel()
 
-const res = await chunking(article)
+const chunks = await getChunks(article)
 
-// res.map(item => {
-// 	console.log(pc.green('[***************************]'))
-// 	console.log(item)
-// })
+chunks.map(item => {
+	console.log(pc.green('[***************************]'))
+	console.log(item)
+})
 
-writeFileSync(`${process.cwd()}/datasets/__temp__.txt`, res.join('\n\n__CHUNK_BOUNDARY__\n\n'))
+writeFileSync(`${process.cwd()}/datasets/__temp__.txt`, chunks.join('\n\n__CHUNK_BOUNDARY__\n\n'))
