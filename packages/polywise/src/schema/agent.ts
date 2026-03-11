@@ -1,9 +1,9 @@
 import { bytea, text, timestamp, uuid, varchar, vector } from 'drizzle-orm/pg-core'
 import { getId } from 'stk/utils'
 
-import { MEM } from './metadata'
+import { SYS } from './base'
 
-export default MEM.table('agent', {
+export default SYS.table('agent', {
 	id: uuid('id').primaryKey().$defaultFn(getId),
 	// 智能体名称
 	name: varchar('name', { length: 255 }).notNull(),

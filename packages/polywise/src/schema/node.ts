@@ -2,7 +2,7 @@ import { boolean, index, integer, real, text, timestamp, unique, uuid, vector } 
 import { getId } from 'stk/utils'
 
 import agent from './agent'
-import { MEM } from './metadata'
+import { MEM } from './base'
 
 export default MEM.table(
 	'node',

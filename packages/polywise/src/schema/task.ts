@@ -1,7 +1,7 @@
 import { pgEnum, text, timestamp, uuid } from 'drizzle-orm/pg-core'
 import { getId } from 'stk/utils'
 
-import { SYS } from './metadata'
+import { SYS } from './base'
 
 // task log: [id].log by fs
 

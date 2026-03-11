@@ -3,7 +3,7 @@ import { boolean, index, integer, text, timestamp, uuid, vector } from 'drizzle-
 import { getId } from 'stk/utils'
 
 import article from './article'
-import { MEM } from './metadata'
+import { MEM } from './base'
 
 export default MEM.table(
 	'chunk',
