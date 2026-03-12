@@ -1,3 +1,11 @@
+CREATE SCHEMA "MEMORY";
+--> statement-breakpoint
+CREATE SCHEMA "METADATA";
+--> statement-breakpoint
+CREATE SCHEMA "SYSTEM";
+--> statement-breakpoint
+CREATE SCHEMA "USER";
+--> statement-breakpoint
 CREATE TABLE "SYSTEM"."agent" (
 	"id" uuid PRIMARY KEY,
 	"name" varchar(255) NOT NULL,

@@ -1,11 +1,27 @@
 {
   "version": "8",
   "dialect": "postgres",
-  "id": "f732e3c3-951a-4318-8f85-1e6955ffbff9",
+  "id": "ce9356de-0390-4141-84e7-1497fd4b8e88",
   "prevIds": [
     "00000000-0000-0000-0000-000000000000"
   ],
   "ddl": [
+    {
+      "name": "MEMORY",
+      "entityType": "schemas"
+    },
+    {
+      "name": "METADATA",
+      "entityType": "schemas"
+    },
+    {
+      "name": "SYSTEM",
+      "entityType": "schemas"
+    },
+    {
+      "name": "USER",
+      "entityType": "schemas"
+    },
     {
       "isRlsEnabled": false,
       "name": "agent",
