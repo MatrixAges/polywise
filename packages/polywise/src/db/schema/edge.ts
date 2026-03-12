@@ -1,28 +1,25 @@
-import { boolean, index, integer, real, timestamp, uniqueIndex, uuid, varchar, vector } from 'drizzle-orm/pg-core'
+import { index, integer, real, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core'
 import { getId } from 'stk/utils'
 
 import agent from './agent'
-import { MEM } from './base'
 import node from './node'
 
-export default MEM.table(
+export default sqliteTable(
 	'edge',
 	{
-		id: uuid('id').primaryKey().$defaultFn(getId),
+		id: text('id').primaryKey().$defaultFn(getId),
 		// 记录三元组中的 "谓词/关系"
-		relation: varchar('relation', { length: 100 }).notNull(),
-		// 谓词/关系的向量
-		vectors: vector('vectors', { dimensions: 1024 }),
+		relation: text('relation').notNull(),
 		// 外键：属于哪个智能体
-		agent_id: uuid('agent_id')
+		agent_id: text('agent_id')
 			.references(() => agent.id, { onDelete: 'cascade' })
 			.notNull(),
 		// 外键：来源哪个节点
-		source_id: uuid('source_id')
+		source_id: text('source_id')
 			.references(() => node.id, { onDelete: 'cascade' })
 			.notNull(),
 		// 外键：指向哪个节点
-		target_id: uuid('target_id')
+		target_id: text('target_id')
 			.references(() => node.id, { onDelete: 'cascade' })
 			.notNull(),
 		// 突触权重：RL 中的 Q-value (决定信号传递强度)
@@ -38,14 +35,17 @@ export default MEM.table(
 		// 被访问的总次数
 		active_times: integer('active_times').default(1).notNull(),
 		// 最后一次被用于推理/漫游的时间 (用于突触修剪/长时程抑制)
-		active_at: timestamp('active_at').defaultNow().notNull(),
+		active_at: integer('active_at', { mode: 'timestamp' })
+			.$defaultFn(() => new Date())
+			.notNull(),
 		// 冻结状态 (核心记忆节点，免受遗忘机制清理)
-		is_frozen: boolean('is_frozen').default(false).notNull(),
+		is_frozen: integer('is_frozen', { mode: 'boolean' }).default(false).notNull(),
 
-		created_at: timestamp('created_at').defaultNow().notNull()
+		created_at: integer('created_at', { mode: 'timestamp' })
+			.$defaultFn(() => new Date())
+			.notNull()
 	},
 	t => [
-		index('edge_vectors_idx').using('hnsw', t.vectors.op('vector_cosine_ops')),
 		index('edge_agent_id_idx').on(t.agent_id),
 		index('edge_source_idx').on(t.source_id),
 		index('edge_target_idx').on(t.target_id),

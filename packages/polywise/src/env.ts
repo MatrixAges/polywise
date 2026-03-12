@@ -1,9 +1,10 @@
 import Sqlite from 'better-sqlite3'
 import { getLlama } from 'node-llama-cpp'
-import sqliteVec from 'sqlite-vec'
+import { load as loadVec } from 'sqlite-vec'
 
 import { app } from './consts'
 import { getDrizzleDB, migrate } from './db'
+import initSql from './db/initSql'
 import { getEmbeddingModel, getGenModel, getRerankModel } from './utils'
 
 import type { Database } from 'better-sqlite3'
@@ -26,13 +27,15 @@ export const env = {
 	db_path: app.db_path
 } as Env
 
-export const initDB = async () => {
+export const initDB = () => {
 	env.sqlite = new Sqlite(env.db_path)
 
-	sqliteVec.load(env.sqlite)
+	env.sqlite.pragma('journal_mode = WAL')
+
+	loadVec(env.sqlite)
 }
 
-export const initDrizzle = async () => {
+export const initDrizzle = () => {
 	env.db = getDrizzleDB()
 }
 
@@ -61,8 +64,10 @@ export const initModels = async () => {
 }
 
 export const initEnv = async () => {
-	await initDB()
-	await initDrizzle()
-	await migrate()
+	initDB()
+	initSql()
+	initDrizzle()
+	migrate()
+
 	// await initModels()
 }

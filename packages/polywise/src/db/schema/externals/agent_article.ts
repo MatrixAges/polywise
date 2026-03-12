@@ -1,23 +1,22 @@
-import { index, primaryKey, timestamp, uuid } from 'drizzle-orm/pg-core'
+import { index, integer, primaryKey, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 
 import agent from '../agent'
 import article from '../article'
-import { SYS } from '../base'
 
-export default SYS.table(
+export default sqliteTable(
 	'agent_article',
 	{
 		// 关联 agent 表，设置级联删除：删除 Agent 时自动删除此关联记录
-		agent_id: uuid('agent_id')
+		agent_id: text('agent_id')
 			.notNull()
 			.references(() => agent.id, { onDelete: 'cascade' }),
 
 		// 关联 article 表，设置级联删除：删除文章时自动删除此关联记录
-		article_id: uuid('article_id')
+		article_id: text('article_id')
 			.notNull()
 			.references(() => article.id, { onDelete: 'cascade' }),
 
-		created_at: timestamp('created_at').defaultNow()
+		created_at: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date())
 	},
 	t => [
 		// 将两者的组合设置为主键，防止同一个 Agent 重复关联同一篇文章
