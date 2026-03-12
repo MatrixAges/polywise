@@ -18,7 +18,7 @@
 	},
 	"dependencies": {
 		"@ai-sdk/openai": "catalog:",
-		"@hono/node-server": "^1.19.11",
+		"@hono/node-server": "catalog:",
 		"@trpc/server": "catalog:",
 		"ai": "catalog:",
 		"atomically": "^2.1.1",

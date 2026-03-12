@@ -16,6 +16,7 @@
 	"scripts": {
 		"dev": "cross-env NODE_ENV=development rslib build --watch",
 		"build": "rslib build",
+		"server": "bun ./src/index.ts",
 		"test": "rstest run $TEST_FILE",
 		"sql": "drizzle-kit generate",
 		"auth:sql": "pnpx auth generate --adapter drizzle",
@@ -30,6 +31,8 @@
 		"@node-rs/jieba": "^2.0.1",
 		"@node-rs/xxhash": "^1.7.6",
 		"@trpc/server": "catalog:",
+		"@hono/trpc-server": "catalog:",
+		"@hono/node-server": "catalog:",
 		"ansis": "catalog:",
 		"await-to-js": "catalog:",
 		"better-auth": "^1.5.5",
@@ -51,7 +54,8 @@
 		"trpc-to-openapi": "^3.1.0",
 		"tslib": "catalog:",
 		"tsyringe": "catalog:",
-		"uuid": "catalog:"
+		"uuid": "catalog:",
+		"zod": "catalog:"
 	},
 	"devDependencies": {
 		"@rslib/core": "catalog:",
