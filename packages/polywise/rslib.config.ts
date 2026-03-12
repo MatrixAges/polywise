@@ -12,18 +12,12 @@ export default {
 			source: { entry: { index: './src/index.ts' } },
 			format: 'esm',
 			dts: true,
-			autoExternal: false,
-			shims: {
-				esm: {
-					__filename: true,
-					__dirname: true
-				}
-			}
+			autoExternal: false
 		}
 	],
 	output: {
 		target: 'node',
-		externals: ['@chonkiejs/token', 'node-llama-cpp', 'fs-extra'],
+		externals: ['fs-extra', 'better-sqlite3', 'sqlite-vec', '@chonkiejs/token', 'node-llama-cpp'],
 		filename: { js: '[name].js' },
 		copy: [{ from: './drizzle', to: 'drizzle' }]
 	},

@@ -10,6 +10,12 @@ export const server = new Hono()
 server.use('*', cors())
 server.all('/trpc/*', trpcServer({ router }))
 
+server.get('/api/test123', ctx => {
+	return ctx.json({
+		message: 'Hello from Polywise API!'
+	})
+})
+
 export const initServer = async () => {
 	const { promise, resolve } = Promise.withResolvers()
 
