@@ -28,6 +28,7 @@
 		"@drizzle-team/brocli": "^0.11.0",
 		"@electric-sql/pglite": "^0.3.16",
 		"@node-rs/jieba": "^2.0.1",
+		"@node-rs/xxhash": "^1.7.6",
 		"@trpc/server": "catalog:",
 		"ansis": "catalog:",
 		"await-to-js": "catalog:",

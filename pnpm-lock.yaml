@@ -626,6 +626,9 @@ importers:
       '@node-rs/jieba':
         specifier: ^2.0.1
         version: 2.0.1
+      '@node-rs/xxhash':
+        specifier: ^1.7.6
+        version: 1.7.6
       '@trpc/server':
         specifier: 'catalog:'
         version: 11.12.0(typescript@5.9.3)
@@ -1870,6 +1873,97 @@ packages:
     resolution: {integrity: sha512-tnfzXOMqzVQF2dSKMhPC9HrHzzWmN6KheL/zYtGenhOpq/bCKHJWVASSggEnHlkmHgXGeIJHR2N/IuPzewz1BQ==}
     engines: {node: '>= 10'}
 
+  '@node-rs/xxhash-android-arm-eabi@1.7.6':
+    resolution: {integrity: sha512-ptmfpFZ8SgTef58Us+0HsZ9BKhyX/gZYbhLkuzPt7qUoMqMSJK85NC7LEgzDgjUiG+S5GahEEQ9/tfh9BVvKhw==}
+    engines: {node: '>= 12'}
+    cpu: [arm]
+    os: [android]
+
+  '@node-rs/xxhash-android-arm64@1.7.6':
+    resolution: {integrity: sha512-n4MyZvqifuoARfBvrZ2IBqmsGzwlVI3kb2mB0gVvoHtMsPbl/q94zoDBZ7WgeP3t4Wtli+QS3zgeTCOWUbqqUQ==}
+    engines: {node: '>= 12'}
+    cpu: [arm64]
+    os: [android]
+
+  '@node-rs/xxhash-darwin-arm64@1.7.6':
+    resolution: {integrity: sha512-6xGuE07CiCIry/KT3IiwQd/kykTOmjKzO/ZnHlE5ibGMx64NFE0qDuwJbxQ4rGyUzgJ0KuN9ZdOhUDJmepnpcw==}
+    engines: {node: '>= 12'}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@node-rs/xxhash-darwin-x64@1.7.6':
+    resolution: {integrity: sha512-Z4oNnhyznDvHhxv+s0ka+5KG8mdfLVucZMZMejj9BL+CPmamClygPiHIRiifRcPAoX9uPZykaCsULngIfLeF3Q==}
+    engines: {node: '>= 12'}
+    cpu: [x64]
+    os: [darwin]
+
+  '@node-rs/xxhash-freebsd-x64@1.7.6':
+    resolution: {integrity: sha512-arCDOf3xZ5NfBL5fk5J52sNPjXL2cVWN6nXNB3nrtRFFdPBLsr6YXtshAc6wMVxnIW4VGaEv/5K6IpTA8AFyWw==}
+    engines: {node: '>= 12'}
+    cpu: [x64]
+    os: [freebsd]
+
+  '@node-rs/xxhash-linux-arm-gnueabihf@1.7.6':
+    resolution: {integrity: sha512-ndLLEW+MwLH3lFS0ahlHCcmkf2ykOv/pbP8OBBeAOlz/Xc3jKztg5IJ9HpkjKOkHk470yYxgHVaw1QMoMzU00A==}
+    engines: {node: '>= 12'}
+    cpu: [arm]
+    os: [linux]
+
+  '@node-rs/xxhash-linux-arm64-gnu@1.7.6':
+    resolution: {integrity: sha512-VX7VkTG87mAdrF2vw4aroiRpFIIN8Lj6NgtGHF+IUVbzQxPudl4kG+FPEjsNH8y04yQxRbPE7naQNgHcTKMrNw==}
+    engines: {node: '>= 12'}
+    cpu: [arm64]
+    os: [linux]
+    libc: [glibc]
+
+  '@node-rs/xxhash-linux-arm64-musl@1.7.6':
+    resolution: {integrity: sha512-AB5m6crGYSllM9F/xZNOQSPImotR5lOa9e4arW99Bv82S+gcpphI8fGMDOVTTCXY/RLRhvvhwzLDxmLB2O8VDg==}
+    engines: {node: '>= 12'}
+    cpu: [arm64]
+    os: [linux]
+    libc: [musl]
+
+  '@node-rs/xxhash-linux-x64-gnu@1.7.6':
+    resolution: {integrity: sha512-a2A6M+5tc0PVlJlE/nl0XsLEzMpKkwg7Y1lR5urFUbW9uVQnKjJYQDrUojhlXk0Uv3VnYQPa6ThmwlacZA5mvQ==}
+    engines: {node: '>= 12'}
+    cpu: [x64]
+    os: [linux]
+    libc: [glibc]
+
+  '@node-rs/xxhash-linux-x64-musl@1.7.6':
+    resolution: {integrity: sha512-WioGJSC1GoxQpmdQrG5l/uddSBAS4XCWczHNwXe895J5xadGQzyvmr0r17BNfihvbBUDH1H9jwouNYzDDeA6+A==}
+    engines: {node: '>= 12'}
+    cpu: [x64]
+    os: [linux]
+    libc: [musl]
+
+  '@node-rs/xxhash-wasm32-wasi@1.7.6':
+    resolution: {integrity: sha512-WDXXKMMFMrez+esm2DzMPHFNPFYf+wQUtaXrXwtxXeQMFEzleOLwEaqV0+bbXGJTwhPouL3zY1Qo2xmIH4kkTg==}
+    engines: {node: '>=14.0.0'}
+    cpu: [wasm32]
+
+  '@node-rs/xxhash-win32-arm64-msvc@1.7.6':
+    resolution: {integrity: sha512-qjDFUZJT/Zq0yFS+0TApkD86p0NBdPXlOoHur9yNeO9YX2/9/b1sC2P7N27PgOu13h61TUOvTUC00e/82jAZRQ==}
+    engines: {node: '>= 12'}
+    cpu: [arm64]
+    os: [win32]
+
+  '@node-rs/xxhash-win32-ia32-msvc@1.7.6':
+    resolution: {integrity: sha512-s7a+mQWOTnU4NiiypRq/vbNGot/il0HheXuy9oxJ0SW2q/e4BJ8j0pnP6UBlAjsk+005A76vOwsEj01qbQw8+A==}
+    engines: {node: '>= 12'}
+    cpu: [ia32]
+    os: [win32]
+
+  '@node-rs/xxhash-win32-x64-msvc@1.7.6':
+    resolution: {integrity: sha512-zHOHm2UaIahRhgRPJll+4Xy4Z18aAT/7KNeQW+QJupGvFz+GzOFXMGs3R/3B1Ktob/F5ui3i1MrW9GEob3CWTg==}
+    engines: {node: '>= 12'}
+    cpu: [x64]
+    os: [win32]
+
+  '@node-rs/xxhash@1.7.6':
+    resolution: {integrity: sha512-XMisO+aQHsVpxRp/85EszTtOQTOlhPbd149P/Xa9F55wafA6UM3h2UhOgOs7aAzItnHU/Aw1WQ1FVTEg7WB43Q==}
+    engines: {node: '>= 12'}
+
   '@nodelib/fs.scandir@2.1.5':
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
     engines: {node: '>= 8'}
@@ -2943,9 +3037,6 @@ packages:
 
   '@types/node@24.10.13':
     resolution: {integrity: sha512-oH72nZRfDv9lADUBSo104Aq7gPHpQZc4BTx38r9xf9pg5LfP6EzSyH2n7qFmmxRQXh7YlUXODcYsg6PuTDSxGg==}
-
-  '@types/node@25.3.2':
-    resolution: {integrity: sha512-RpV6r/ij22zRRdyBPcxDeKAzH43phWVKEjL2iksqo1Vz3CuBUrgmPpPhALKiRfU7OMCmeeO9vECBMsV0hMTG8Q==}
 
   '@types/node@25.4.0':
     resolution: {integrity: sha512-9wLpoeWuBlcbBpOY3XmzSTG3oscB6xjBEEtn+pYXTfhyXhIxC5FsBer2KTopBlvKEiW9l13po9fq+SJY/5lkhw==}
@@ -7570,7 +7661,7 @@ snapshots:
     dependencies:
       cross-dirname: 0.1.0
       debug: 4.4.3
-      fs-extra: 11.3.3
+      fs-extra: 11.3.4
       minimist: 1.2.8
       postject: 1.0.0-alpha.6
     transitivePeerDependencies:
@@ -8029,6 +8120,67 @@ snapshots:
       '@node-rs/jieba-win32-arm64-msvc': 2.0.1
       '@node-rs/jieba-win32-ia32-msvc': 2.0.1
       '@node-rs/jieba-win32-x64-msvc': 2.0.1
+
+  '@node-rs/xxhash-android-arm-eabi@1.7.6':
+    optional: true
+
+  '@node-rs/xxhash-android-arm64@1.7.6':
+    optional: true
+
+  '@node-rs/xxhash-darwin-arm64@1.7.6':
+    optional: true
+
+  '@node-rs/xxhash-darwin-x64@1.7.6':
+    optional: true
+
+  '@node-rs/xxhash-freebsd-x64@1.7.6':
+    optional: true
+
+  '@node-rs/xxhash-linux-arm-gnueabihf@1.7.6':
+    optional: true
+
+  '@node-rs/xxhash-linux-arm64-gnu@1.7.6':
+    optional: true
+
+  '@node-rs/xxhash-linux-arm64-musl@1.7.6':
+    optional: true
+
+  '@node-rs/xxhash-linux-x64-gnu@1.7.6':
+    optional: true
+
+  '@node-rs/xxhash-linux-x64-musl@1.7.6':
+    optional: true
+
+  '@node-rs/xxhash-wasm32-wasi@1.7.6':
+    dependencies:
+      '@napi-rs/wasm-runtime': 0.2.12
+    optional: true
+
+  '@node-rs/xxhash-win32-arm64-msvc@1.7.6':
+    optional: true
+
+  '@node-rs/xxhash-win32-ia32-msvc@1.7.6':
+    optional: true
+
+  '@node-rs/xxhash-win32-x64-msvc@1.7.6':
+    optional: true
+
+  '@node-rs/xxhash@1.7.6':
+    optionalDependencies:
+      '@node-rs/xxhash-android-arm-eabi': 1.7.6
+      '@node-rs/xxhash-android-arm64': 1.7.6
+      '@node-rs/xxhash-darwin-arm64': 1.7.6
+      '@node-rs/xxhash-darwin-x64': 1.7.6
+      '@node-rs/xxhash-freebsd-x64': 1.7.6
+      '@node-rs/xxhash-linux-arm-gnueabihf': 1.7.6
+      '@node-rs/xxhash-linux-arm64-gnu': 1.7.6
+      '@node-rs/xxhash-linux-arm64-musl': 1.7.6
+      '@node-rs/xxhash-linux-x64-gnu': 1.7.6
+      '@node-rs/xxhash-linux-x64-musl': 1.7.6
+      '@node-rs/xxhash-wasm32-wasi': 1.7.6
+      '@node-rs/xxhash-win32-arm64-msvc': 1.7.6
+      '@node-rs/xxhash-win32-ia32-msvc': 1.7.6
+      '@node-rs/xxhash-win32-x64-msvc': 1.7.6
 
   '@nodelib/fs.scandir@2.1.5':
     dependencies:
@@ -9002,7 +9154,7 @@ snapshots:
 
   '@types/better-sqlite3@7.6.13':
     dependencies:
-      '@types/node': 25.3.2
+      '@types/node': 25.4.0
     optional: true
 
   '@types/big.js@6.2.2': {}
@@ -9097,7 +9249,7 @@ snapshots:
 
   '@types/mssql@9.1.9(@azure/core-client@1.10.1)':
     dependencies:
-      '@types/node': 25.3.2
+      '@types/node': 25.4.0
       tarn: 3.0.2
       tedious: 19.2.1(@azure/core-client@1.10.1)
     transitivePeerDependencies:
@@ -9107,10 +9259,6 @@ snapshots:
   '@types/node@24.10.13':
     dependencies:
       undici-types: 7.16.0
-
-  '@types/node@25.3.2':
-    dependencies:
-      undici-types: 7.18.2
 
   '@types/node@25.4.0':
     dependencies:
@@ -9132,7 +9280,7 @@ snapshots:
 
   '@types/readable-stream@4.0.23':
     dependencies:
-      '@types/node': 25.3.2
+      '@types/node': 25.4.0
 
   '@types/responselike@1.0.3':
     dependencies:
@@ -13037,7 +13185,7 @@ snapshots:
       '@azure/identity': 4.13.0
       '@azure/keyvault-keys': 4.10.0(@azure/core-client@1.10.1)
       '@js-joda/core': 5.7.0
-      '@types/node': 25.3.2
+      '@types/node': 25.4.0
       bl: 6.1.6
       iconv-lite: 0.6.3
       js-md4: 0.3.2
@@ -13053,7 +13201,7 @@ snapshots:
       '@azure/identity': 4.13.0
       '@azure/keyvault-keys': 4.10.0(@azure/core-client@1.10.1)
       '@js-joda/core': 5.7.0
-      '@types/node': 25.3.2
+      '@types/node': 25.4.0
       bl: 6.1.6
       iconv-lite: 0.7.2
       js-md4: 0.3.2
