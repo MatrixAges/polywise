@@ -6,6 +6,7 @@ CREATE SCHEMA "SYSTEM";
 --> statement-breakpoint
 CREATE SCHEMA "USER";
 --> statement-breakpoint
+CREATE TYPE "task_status" AS ENUM('pending', 'processing', 'completed', 'failed');--> statement-breakpoint
 CREATE TABLE "SYSTEM"."agent" (
 	"id" uuid PRIMARY KEY,
 	"name" varchar(255) NOT NULL,
@@ -34,7 +35,7 @@ CREATE TABLE "MEMORY"."article" (
 --> statement-breakpoint
 CREATE TABLE "MEMORY"."chunk" (
 	"id" uuid PRIMARY KEY,
-	"article_id" text,
+	"article_id" uuid,
 	"content" text,
 	"vectors" vector(1024),
 	"keywords" text NOT NULL,

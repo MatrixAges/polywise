@@ -1,11 +1,8 @@
-import { pgEnum, text, timestamp, uuid } from 'drizzle-orm/pg-core'
+import { text, timestamp, uuid } from 'drizzle-orm/pg-core'
 import { getId } from 'stk/utils'
 
 import { SYS } from './base'
-
-// task log: [id].log by fs
-
-export const Status = pgEnum('task_status', ['pending', 'processing', 'completed', 'failed'])
+import { Status } from './objects'
 
 export default SYS.table('task', {
 	id: uuid('id').primaryKey().$defaultFn(getId),

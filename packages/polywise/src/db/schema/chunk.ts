@@ -10,7 +10,7 @@ export default MEM.table(
 	{
 		id: uuid('id').primaryKey().$defaultFn(getId),
 		// 外键：属于那一篇文章
-		article_id: text('article_id').references(() => article.id, { onDelete: 'cascade' }),
+		article_id: uuid('article_id').references(() => article.id, { onDelete: 'cascade' }),
 		// 切片内容
 		content: text('content'),
 		// 切片向量

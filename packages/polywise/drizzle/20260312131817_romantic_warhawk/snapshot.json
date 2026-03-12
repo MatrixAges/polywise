@@ -1,7 +1,7 @@
 {
   "version": "8",
   "dialect": "postgres",
-  "id": "ce9356de-0390-4141-84e7-1497fd4b8e88",
+  "id": "b8116458-780c-47a8-82d2-5aa6b6f9d16a",
   "prevIds": [
     "00000000-0000-0000-0000-000000000000"
   ],
@@ -21,6 +21,17 @@
     {
       "name": "USER",
       "entityType": "schemas"
+    },
+    {
+      "values": [
+        "pending",
+        "processing",
+        "completed",
+        "failed"
+      ],
+      "name": "task_status",
+      "entityType": "enums",
+      "schema": "public"
     },
     {
       "isRlsEnabled": false,
@@ -359,7 +370,7 @@
       "table": "chunk"
     },
     {
-      "type": "text",
+      "type": "uuid",
       "typeSchema": null,
       "notNull": false,
       "dimensions": 0,

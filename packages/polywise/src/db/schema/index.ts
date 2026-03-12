@@ -8,3 +8,4 @@ export { default as agent } from './agent'
 
 export * from './base/metadata'
 export * from './relations'
+export * from './objects'
