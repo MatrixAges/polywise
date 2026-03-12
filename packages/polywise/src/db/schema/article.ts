@@ -17,6 +17,8 @@ export default MEM.table(
 		title: varchar('title', { length: 100 }).notNull(),
 		// 文章数据来源（可选）
 		url: text('url'),
+		// 内容哈希值，用来做相同内容验证
+		hash: text('hash').unique(),
 		// 文章元数据（用于筛选）
 		metadata: jsonb('metadata').default({}),
 		// 长文章（content 超过 12000个字符）
@@ -26,5 +28,8 @@ export default MEM.table(
 			.defaultNow()
 			.$onUpdateFn(() => new Date())
 	},
-	t => [index('article_document_id_idx').on(t.document_id)]
+	t => [
+		index('article_document_id_idx').on(t.document_id),
+		index('article_url_idx').using('gin', t.url.op('gin_trgm_ops'))
+	]
 )
