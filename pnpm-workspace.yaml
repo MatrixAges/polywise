@@ -54,11 +54,15 @@ catalog:
 
 onlyBuiltDependencies:
       - '@node-rs/jieba'
+      - '@node-rs/xxhash'
       - '@lancedb/lancedb'
       - bun
+      - esbuild
       - core-js
       - electron
-      - electron-winstaller
-      - esbuild
       - simple-git-hooks
+      - better-sqlite3
       - node-llama-cpp
+
+ignoredBuiltDependencies:
+      - electron-winstaller

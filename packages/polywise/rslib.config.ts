@@ -12,7 +12,13 @@ export default {
 			source: { entry: { index: './src/index.ts' } },
 			format: 'esm',
 			dts: true,
-			autoExternal: false
+			autoExternal: false,
+			shims: {
+				esm: {
+					__filename: true,
+					__dirname: true
+				}
+			}
 		}
 	],
 	output: {

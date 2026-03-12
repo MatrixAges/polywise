@@ -1,4 +1,6 @@
+import { dirname } from 'path'
 import Sqlite from 'better-sqlite3'
+import fs from 'fs-extra'
 import { getLlama } from 'node-llama-cpp'
 import { load as loadVec } from 'sqlite-vec'
 
@@ -28,6 +30,8 @@ export const env = {
 } as Env
 
 export const initDB = () => {
+	fs.ensureDirSync(dirname(env.db_path))
+
 	env.sqlite = new Sqlite(env.db_path)
 
 	env.sqlite.pragma('journal_mode = WAL')
