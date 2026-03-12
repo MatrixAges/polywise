@@ -64,10 +64,7 @@ const Index = (props: IPropsPanel) => {
 		<div
 			className='
 				flex
-				w-full h-full max-w-[720px]!
-				py-0!
-				pl-4! pr-3!
-				page_wrap
+				w-full h-full
 			'
 		>
 			<Tab {...props_tab} />
@@ -76,8 +73,7 @@ const Index = (props: IPropsPanel) => {
 					overflow-y-scroll
 					flex flex-1
 					w-full h-full
-					pt-4
-					pl-4
+					page_wrap
 				'
 			>
 				<div
@@ -85,7 +81,6 @@ const Index = (props: IPropsPanel) => {
 						flex flex-col
 						w-full
 						gap-6
-						pr-1
 					'
 				>
 					{x.current_tab === props_tab.items.length - 1 ? (

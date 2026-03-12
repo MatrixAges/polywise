@@ -11,7 +11,6 @@ import {
 	SelectTrigger,
 	SelectValue
 } from '@/__shadcn__/components/ui/select'
-import { Switch } from '@/__shadcn__/components/ui/switch'
 import { locale_options, themes } from '@/appdata'
 import { useGlobal } from '@/context'
 
@@ -23,12 +22,17 @@ const Index = () => {
 
 	const setLang = useMemoizedFn(v => l.setLang(v))
 	const setTheme = useMemoizedFn(v => t.setTheme(v))
-	const setDevTheme = useMemoizedFn(v => s.setDevTheme(v))
 
 	return (
-		<div className='flex w-full flex-col'>
-			<FieldGroup className='page_wrap gap-0'>
-				<Field className='border-dev items-center! border-b py-3' orientation='horizontal'>
+		<div className='page_wrap flex w-full flex-col'>
+			<FieldGroup className='gap-0'>
+				<Field
+					className='
+						items-center!
+						py-3
+					'
+					orientation='horizontal'
+				>
 					<FieldContent>
 						<FieldTitle className='text-base'>Theme</FieldTitle>
 						<FieldDescription>
@@ -56,7 +60,7 @@ const Index = () => {
 						</SelectContent>
 					</Select>
 				</Field>
-				<Field className='border-dev items-center! border-b py-3' orientation='horizontal'>
+				<Field className='items-center! py-3' orientation='horizontal'>
 					<FieldContent>
 						<FieldTitle className='text-base'>Language</FieldTitle>
 						<FieldDescription>
@@ -78,15 +82,6 @@ const Index = () => {
 							</SelectGroup>
 						</SelectContent>
 					</Select>
-				</Field>
-				<Field className='border-dev items-center! border-b py-3' orientation='horizontal'>
-					<FieldContent>
-						<FieldTitle className='text-base'>Development Appearance</FieldTitle>
-						<FieldDescription>
-							Add dividers and backgrounds to the content area
-						</FieldDescription>
-					</FieldContent>
-					<Switch checked={s.dev_theme} onCheckedChange={setDevTheme} />
 				</Field>
 			</FieldGroup>
 		</div>

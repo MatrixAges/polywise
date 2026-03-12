@@ -34,7 +34,7 @@ const Index = () => {
 				className='
 					flex
 					items-center justify-between
-					px-2 py-2
+					px-2.5
 				'
 			>
 				<Tabs items={panel_tabs} active={x.active_tab} onClick={x.setActiveTab}></Tabs>
@@ -60,7 +60,7 @@ const Index = () => {
 				</DropdownMenu>
 			</div>
 			<div className='flex flex-1 overflow-y-scroll'>
-				<div className='flex w-full px-2 pb-12'>
+				<div className='flex w-full px-2.5 pb-12'>
 					{panel_tabs.map(({ key }) => {
 						return (
 							<Activity mode={key === x.active_tab ? 'visible' : 'hidden'} key={key}>

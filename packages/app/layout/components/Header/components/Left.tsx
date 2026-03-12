@@ -21,7 +21,7 @@ const Index = (props: IPropsLeft) => {
 		<div
 			className='
 				absolute
-				left-3
+				left-3.5
 				flex
 				items-center
 				h-full

@@ -12,13 +12,6 @@
 @custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
 
 @theme {
-	--dev-theme: 0;
-
-	--dev-alpha: calc(var(--dev-theme) * 0.8);
-	--color-dev: oklch(from var(--color-std-100) l c h / var(--dev-alpha));
-}
-
-@theme {
 	--color-std-50: oklch(98.5% 0 0);
 	--color-std-100: oklch(96.7% 0 0);
 	--color-std-150: oklch(94.2% 0 0);

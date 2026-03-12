@@ -23,6 +23,7 @@ const Index = (props: IPropsHeader) => {
 				flex
 				items-center justify-center
 				w-full h-[42px]
+				bg-over
 				${styles._local}
 			`}
 		>

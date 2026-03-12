@@ -32,8 +32,22 @@ const Index = (props: IPropsTab) => {
 	const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }))
 
 	return (
-		<div className='flex h-full w-[160px] flex-col'>
-			<div className='w-full flex-1 overflow-y-scroll py-6'>
+		<div
+			className='
+				flex flex-col
+				w-[160px] h-full
+				pr-2.5
+			'
+		>
+			<div
+				className='
+					overflow-y-scroll
+					flex-1
+					w-full
+					pt-2.5
+					pb-6
+				'
+			>
 				<div
 					className='
 						flex flex-col
@@ -56,7 +70,7 @@ const Index = (props: IPropsTab) => {
 					</DndContext>
 				</div>
 			</div>
-			<div className='flex flex-col py-2'>
+			<div className='flex flex-col py-2.5'>
 				<Select
 					items={builtin_providers.map((item, index) => ({ label: item.name, value: index }))}
 					value={-1}

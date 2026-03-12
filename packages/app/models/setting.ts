@@ -5,7 +5,6 @@ import { injectable } from 'tsyringe'
 
 import { PANEL_WIDTH_DEFAULT } from '@/appdata'
 import { Util } from '@/models/common'
-import { getCssVar, setCssVar } from '@/utils'
 
 import type { PanelImperativeHandle } from 'react-resizable-panels'
 
@@ -14,16 +13,13 @@ export default class Index {
 	panel_ref = null as unknown as PanelImperativeHandle
 	panel_collapsed = false
 	sidebar_collapsed = false
-	dev_theme = local.dev_theme || getCssVar('--dev-theme') === '1'
 
 	constructor(public util: Util) {
 		makeAutoObservable(this, { util: false, panel_ref: false }, { autoBind: true })
 	}
 
 	async init() {
-		const deinit = await setStoreWhenChange(['panel_collapsed', 'sidebar_collapsed', 'dev_theme'], this)
-
-		this.setDevTheme(this.dev_theme)
+		const deinit = await setStoreWhenChange(['panel_collapsed', 'sidebar_collapsed'], this)
 
 		this.util.acts = [deinit]
 	}
@@ -58,12 +54,6 @@ export default class Index {
 
 	toggleSidebar() {
 		this.sidebar_collapsed = !this.sidebar_collapsed
-	}
-
-	setDevTheme(v: boolean) {
-		this.dev_theme = v
-
-		setCssVar('--dev-theme', v ? '1' : '0')
 	}
 
 	deinit() {

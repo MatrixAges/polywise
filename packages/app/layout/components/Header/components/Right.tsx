@@ -10,7 +10,7 @@ const Index = (props: IPropsRight) => {
 		<div
 			className='
 				absolute
-				right-2
+				right-2.5
 				flex
 				items-center
 				gap-2
