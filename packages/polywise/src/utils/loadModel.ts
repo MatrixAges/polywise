@@ -1,4 +1,4 @@
-import path from 'path'
+import { join } from 'path'
 import fs from 'fs-extra'
 import { combineModelDownloaders, createModelDownloader, readGgufFileInfo } from 'node-llama-cpp'
 
@@ -13,7 +13,7 @@ interface ModelConfig {
 
 export default async (config: ModelConfig) => {
 	const { llama, model_uri, dir_path, file_name } = config
-	const file_path = path.join(dir_path, file_name)
+	const file_path = join(dir_path, file_name)
 
 	const exsit = await fs.pathExists(file_path)
 

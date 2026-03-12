@@ -1,11 +1,11 @@
-import { deepmerge } from 'deepmerge-ts'
-
-import { rslib } from '../../config'
-
 import type { RslibConfig } from '@rslib/core'
 
-export default deepmerge(rslib, {
-	source: { tsconfigPath: './tsconfig.build.json' },
+export default {
+	mode: 'production',
+	source: {
+		decorators: { version: 'legacy' },
+		tsconfigPath: './tsconfig.build.json'
+	},
 	lib: [
 		{
 			source: { entry: { index: './src/index.ts' } },
@@ -15,16 +15,29 @@ export default deepmerge(rslib, {
 		}
 	],
 	output: {
-		externals: ['@chonkiejs/token'],
+		target: 'node',
+		externals: ['@chonkiejs/token', 'node-llama-cpp'],
 		filename: { js: '[name].js' },
 		copy: [{ from: './drizzle', to: 'drizzle' }]
-	},
-	performance: { removeConsole: false },
-	tools: {
-		// rspack: config => {
-		// 	// resolve https://github.com/web-infra-dev/rspack/issues/13086
-		// 	config.optimization!.usedExports = false
-		// 	return config
-		// }
 	}
-} as Partial<RslibConfig>)
+	// performance: { removeConsole: false },
+	// tools: {
+	// 	rspack: config => {
+	// 		config.target = 'node'
+
+	// 		if (config.output) {
+	// 			config.output.publicPath = ''
+	// 		}
+
+	// 		// resolve https://github.com/web-infra-dev/rspack/issues/13086
+
+	// 		// config.externalsType = 'module'
+	// 		// config.optimization!.innerGraph = false
+	// 		// config.optimization!.usedExports = false
+	// 		// config.optimization!.concatenateModules = false
+	// 		// config.optimization!.splitChunks = false
+
+	// 		return config
+	// 	}
+	// }
+} as Partial<RslibConfig>

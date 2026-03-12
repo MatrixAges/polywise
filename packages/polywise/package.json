@@ -1,7 +1,7 @@
 {
 	"name": "polywise",
-	"type": "module",
 	"version": "0.0.0",
+	"type": "module",
 	"main": "./dist/index.js",
 	"exports": {
 		".": {
@@ -11,7 +11,8 @@
 		}
 	},
 	"files": [
-		"dist"
+		"dist",
+		"./package.json"
 	],
 	"scripts": {
 		"dev": "cross-env NODE_ENV=development rslib build --watch",
@@ -28,11 +29,11 @@
 		"@chonkiejs/core": "^0.0.7",
 		"@drizzle-team/brocli": "^0.11.0",
 		"@electric-sql/pglite": "^0.3.16",
+		"@hono/node-server": "catalog:",
+		"@hono/trpc-server": "catalog:",
 		"@node-rs/jieba": "^2.0.1",
 		"@node-rs/xxhash": "^1.7.6",
 		"@trpc/server": "catalog:",
-		"@hono/trpc-server": "catalog:",
-		"@hono/node-server": "catalog:",
 		"ansis": "catalog:",
 		"await-to-js": "catalog:",
 		"better-auth": "^1.5.5",
