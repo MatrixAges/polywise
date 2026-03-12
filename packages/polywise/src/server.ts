@@ -13,6 +13,8 @@ server.all('/trpc/*', trpcServer({ router }))
 export const initServer = async () => {
 	const { promise, resolve } = Promise.withResolvers()
 
+	process.title = 'polywise_server'
+
 	serve({ fetch: server.fetch, port: 3072 }, ({ port }) => {
 		console.log(`Listening on http://localhost:${port}`)
 
