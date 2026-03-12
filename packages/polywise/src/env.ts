@@ -9,12 +9,11 @@ import { app } from './consts'
 import { getDrizzleDB, migrate } from './db'
 import { getEmbeddingModel, getGenModel, getRerankModel } from './utils'
 
-import type { LiveNamespace } from '@electric-sql/pglite/live'
 import type { Llama, LlamaContext, LlamaEmbeddingContext, LlamaModel, LlamaRankingContext } from 'node-llama-cpp'
 
 interface Env {
 	pglite_data_dir: string
-	pglite: PGlite & { vector: unknown; live: LiveNamespace }
+	pglite: PGlite
 	db: ReturnType<typeof getDrizzleDB>
 	llama: Llama
 	embedding_model: LlamaModel
@@ -30,7 +29,7 @@ export const env = {
 } as Env
 
 export const initPglite = async () => {
-	env.pglite = await PGlite.create(env.pglite_data_dir, { extensions: { vector, pg_trgm, live } })
+	env.pglite = new PGlite(env.pglite_data_dir, { extensions: { vector, pg_trgm, live } })
 }
 
 export const initDrizzle = async () => {
@@ -70,6 +69,6 @@ export const initEnv = async () => {
 	await initPglite()
 	await initDrizzle()
 	await initPgExtensions()
-	await migrate()
+	// await migrate()
 	// await initModels()
 }

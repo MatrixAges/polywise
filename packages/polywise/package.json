@@ -16,7 +16,7 @@
 	],
 	"scripts": {
 		"dev": "cross-env NODE_ENV=development rslib build --watch",
-		"build": "rslib build",
+		"build": "rslib build && bun run ./scripts/postBuild.ts",
 		"server": "bun ./src/index.ts",
 		"test": "rstest run $TEST_FILE",
 		"sql": "drizzle-kit generate",

@@ -4,7 +4,8 @@ export default {
 	mode: 'production',
 	source: {
 		decorators: { version: 'legacy' },
-		tsconfigPath: './tsconfig.build.json'
+		tsconfigPath: './tsconfig.build.json',
+		define: { 'entityKind;': undefined }
 	},
 	lib: [
 		{
@@ -16,28 +17,8 @@ export default {
 	],
 	output: {
 		target: 'node',
-		externals: ['@chonkiejs/token', 'node-llama-cpp'],
+		externals: ['@chonkiejs/token', 'node-llama-cpp', 'fs-extra'],
 		filename: { js: '[name].js' },
 		copy: [{ from: './drizzle', to: 'drizzle' }]
 	}
-	// performance: { removeConsole: false },
-	// tools: {
-	// 	rspack: config => {
-	// 		config.target = 'node'
-
-	// 		if (config.output) {
-	// 			config.output.publicPath = ''
-	// 		}
-
-	// 		// resolve https://github.com/web-infra-dev/rspack/issues/13086
-
-	// 		// config.externalsType = 'module'
-	// 		// config.optimization!.innerGraph = false
-	// 		// config.optimization!.usedExports = false
-	// 		// config.optimization!.concatenateModules = false
-	// 		// config.optimization!.splitChunks = false
-
-	// 		return config
-	// 	}
-	// }
-} as Partial<RslibConfig>
+} as RslibConfig
