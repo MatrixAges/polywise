@@ -1,12 +1,17 @@
+import { PGlite } from '@electric-sql/pglite'
+import { live } from '@electric-sql/pglite/live'
+import { vector } from '@electric-sql/pglite/vector'
 import { getLlama } from 'node-llama-cpp'
 
 import { app } from './consts'
 import { getEmbeddingModel, getGenModel, getRerankModel } from './utils'
 
+import type { LiveNamespace } from '@electric-sql/pglite/live'
 import type { Llama, LlamaContext, LlamaEmbeddingContext, LlamaModel, LlamaRankingContext } from 'node-llama-cpp'
 
 interface Env {
 	pglite_data_dir: string
+	pglite: PGlite & { vector: unknown; live: LiveNamespace }
 	llama: Llama
 	embedding_model: LlamaModel
 	embedding_context: LlamaEmbeddingContext
@@ -20,7 +25,11 @@ export const env = {
 	pglite_data_dir: app.data_dir
 } as Env
 
-export const initEnv = async () => {
+export const initPglite = async () => {
+	env.pglite = await PGlite.create(env.pglite_data_dir, { extensions: { vector, live } })
+}
+
+export const initLlama = async () => {
 	env.llama = await getLlama()
 }
 
@@ -40,6 +49,11 @@ export const initGenModel = async () => {
 }
 
 export const initModels = async () => {
-	await initEnv()
+	await initLlama()
 	await Promise.all([initEmbeddingModel(), initRerankModel(), initGenModel()])
+}
+
+export const initEnv = async () => {
+	await initPglite()
+	await initModels()
 }

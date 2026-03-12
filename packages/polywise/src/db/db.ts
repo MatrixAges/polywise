@@ -1,5 +1,4 @@
+import { env } from '@core/env'
 import { drizzle } from 'drizzle-orm/pglite'
 
-import client from './pglite'
-
-export default drizzle({ client })
+export default drizzle({ client: env.pglite })
