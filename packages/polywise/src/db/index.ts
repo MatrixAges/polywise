@@ -1,2 +1,2 @@
-export { default as pglite } from './pglite'
 export { default as db } from './db'
+export { default as migrate } from './migrate'

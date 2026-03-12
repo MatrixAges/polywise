@@ -4,6 +4,7 @@ import { vector } from '@electric-sql/pglite/vector'
 import { getLlama } from 'node-llama-cpp'
 
 import { app } from './consts'
+import { migrate } from './db'
 import { getEmbeddingModel, getGenModel, getRerankModel } from './utils'
 
 import type { LiveNamespace } from '@electric-sql/pglite/live'
@@ -55,5 +56,6 @@ export const initModels = async () => {
 
 export const initEnv = async () => {
 	await initPglite()
+	await migrate()
 	await initModels()
 }

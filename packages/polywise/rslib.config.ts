@@ -16,9 +16,8 @@ export default deepmerge(rslib, {
 	],
 	output: {
 		externals: ['@chonkiejs/token'],
-		filename: {
-			js: '[name].js'
-		}
+		filename: { js: '[name].js' },
+		copy: [{ from: './drizzle', to: 'drizzle' }]
 	},
 	performance: { removeConsole: false }
 } as Partial<RslibConfig>)

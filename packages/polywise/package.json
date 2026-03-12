@@ -17,6 +17,7 @@
 		"dev": "cross-env NODE_ENV=development rslib build --watch",
 		"build": "rslib build",
 		"test": "rstest run $TEST_FILE",
+		"sql": "drizzle-kit generate",
 		"auth:sql": "pnpx auth generate --adapter drizzle",
 		"auth:migrate": "pnpx auth migrate"
 	},
