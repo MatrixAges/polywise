@@ -1,7 +1,7 @@
 import { resolve } from 'path'
 import { env } from '@core/env'
-import { migrate } from 'drizzle-orm/pglite/migrator'
+import { migrate } from 'drizzle-orm/better-sqlite3/migrator'
 
 export default async () => {
-	await migrate(env.db, { migrationsFolder: resolve(`${process.cwd()}/drizzle`) })
+	migrate(env.db, { migrationsFolder: resolve(`${process.cwd()}/drizzle`) })
 }

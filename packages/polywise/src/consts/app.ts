@@ -1,7 +1,7 @@
 import { homedir } from 'os'
 import { resolve } from 'path'
 
-export const data_dir = resolve(`${homedir()}/.polywise/.memory`)
+export const db_path = resolve(`${homedir()}/.polywise/db/app.db`)
 export const model_dir = resolve(`${homedir()}/.polywise/.models`)
 
 export const embedding_model = {

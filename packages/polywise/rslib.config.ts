@@ -20,5 +20,6 @@ export default {
 		externals: ['@chonkiejs/token', 'node-llama-cpp', 'fs-extra'],
 		filename: { js: '[name].js' },
 		copy: [{ from: './drizzle', to: 'drizzle' }]
-	}
+	},
+	performance: { removeConsole: false }
 } as RslibConfig

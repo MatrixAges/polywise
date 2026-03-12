@@ -1,19 +1,17 @@
-import { PGlite } from '@electric-sql/pglite'
-import { pg_trgm } from '@electric-sql/pglite/contrib/pg_trgm'
-import { live } from '@electric-sql/pglite/live'
-import { vector } from '@electric-sql/pglite/vector'
-import { sql } from 'drizzle-orm'
+import Sqlite from 'better-sqlite3'
 import { getLlama } from 'node-llama-cpp'
+import sqliteVec from 'sqlite-vec'
 
 import { app } from './consts'
 import { getDrizzleDB, migrate } from './db'
 import { getEmbeddingModel, getGenModel, getRerankModel } from './utils'
 
+import type { Database } from 'better-sqlite3'
 import type { Llama, LlamaContext, LlamaEmbeddingContext, LlamaModel, LlamaRankingContext } from 'node-llama-cpp'
 
 interface Env {
-	pglite_data_dir: string
-	pglite: PGlite
+	db_path: string
+	sqlite: Database
 	db: ReturnType<typeof getDrizzleDB>
 	llama: Llama
 	embedding_model: LlamaModel
@@ -25,20 +23,17 @@ interface Env {
 }
 
 export const env = {
-	pglite_data_dir: app.data_dir
+	db_path: app.db_path
 } as Env
 
-export const initPglite = async () => {
-	env.pglite = new PGlite(env.pglite_data_dir, { extensions: { vector, pg_trgm, live } })
+export const initDB = async () => {
+	env.sqlite = new Sqlite(env.db_path)
+
+	sqliteVec.load(env.sqlite)
 }
 
 export const initDrizzle = async () => {
 	env.db = getDrizzleDB()
-}
-
-export const initPgExtensions = async () => {
-	await env.db.execute(sql`CREATE EXTENSION IF NOT EXISTS vector;`)
-	await env.db.execute(sql`CREATE EXTENSION IF NOT EXISTS pg_trgm;`)
 }
 
 export const initLlama = async () => {
@@ -66,9 +61,8 @@ export const initModels = async () => {
 }
 
 export const initEnv = async () => {
-	await initPglite()
+	await initDB()
 	await initDrizzle()
-	await initPgExtensions()
-	// await migrate()
+	await migrate()
 	// await initModels()
 }
