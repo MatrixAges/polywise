@@ -1,31 +1,8 @@
-import { serve } from '@hono/node-server'
 import { trpcServer } from '@hono/trpc-server'
-import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 
 import { router } from './rpcs'
-
-export const server = new Hono()
+import { server } from './utils'
 
 server.use('*', cors())
 server.all('/trpc/*', trpcServer({ router }))
-
-server.get('/api/test123', ctx => {
-	return ctx.json({
-		message: 'Hello from Polywise API!'
-	})
-})
-
-export const initServer = async () => {
-	const { promise, resolve } = Promise.withResolvers()
-
-	process.title = 'polywise_server'
-
-	serve({ fetch: server.fetch, port: 3072 }, ({ port }) => {
-		console.log(`Listening on http://localhost:${port}`)
-
-		resolve(port)
-	})
-
-	return promise
-}

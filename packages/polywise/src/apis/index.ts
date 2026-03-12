@@ -1,4 +1,4 @@
-import { server } from '@core/server'
+import { server } from '@core/utils'
 
 server.get('/api/test', ctx => {
 	return ctx.json({

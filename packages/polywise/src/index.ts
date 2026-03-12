@@ -1,5 +1,7 @@
+import './apis'
+
 import { initEnv } from './env'
-import { initServer } from './server'
+import { initServer } from './utils'
 
 await initEnv()
 await initServer()
