@@ -11,7 +11,7 @@ export default deepmerge(rslib, {
 			source: { entry: { index: './src/index.ts' } },
 			format: 'esm',
 			dts: true,
-			autoExternal: true
+			autoExternal: false
 		}
 	],
 	output: {
@@ -19,5 +19,12 @@ export default deepmerge(rslib, {
 		filename: { js: '[name].js' },
 		copy: [{ from: './drizzle', to: 'drizzle' }]
 	},
-	performance: { removeConsole: false }
+	performance: { removeConsole: false },
+	tools: {
+		// rspack: config => {
+		// 	// resolve https://github.com/web-infra-dev/rspack/issues/13086
+		// 	config.optimization!.usedExports = false
+		// 	return config
+		// }
+	}
 } as Partial<RslibConfig>)

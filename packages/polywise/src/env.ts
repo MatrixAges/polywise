@@ -67,9 +67,9 @@ export const initModels = async () => {
 }
 
 export const initEnv = async () => {
-	// await initPglite()
-	// await initDrizzle()
-	// await initPgExtensions()
-	// await migrate()
+	await initPglite()
+	await initDrizzle()
+	await initPgExtensions()
+	await migrate()
 	// await initModels()
 }
