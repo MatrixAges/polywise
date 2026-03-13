@@ -1,7 +1,3 @@
----
-trigger: always_on
----
-
 ## Coding Standards
 
 Relevant skills are located in the `.opencode/skills` directory.

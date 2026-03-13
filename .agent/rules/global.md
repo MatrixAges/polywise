@@ -1,7 +1,3 @@
----
-trigger: always_on
----
-
 The answer should be in the same language as the input question. (CRITICAL)
 
 ## Saving Context (CRITICAL)
