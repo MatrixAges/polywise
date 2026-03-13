@@ -23,14 +23,16 @@ const Index = (props: IPropsFormModel) => {
 
 	return (
 		<div
-			className={`
+			className={$cx(
+				`
 				h-13
 				border-border-light/80 border-b
 				transition-colors
 				hover:bg-bg-main-hover active:bg-bg-main-active
 				select-none cursor-pointer nth-last-of-type-3:border-none
-				${isDragging && 'z-10 rounded-full border backdrop-blur-sm'}
-			`}
+			`,
+				isDragging && 'z-10 rounded-full border backdrop-blur-sm'
+			)}
 			ref={setNodeRef}
 			style={{ transform: CSS.Translate.toString(transform), transition }}
 			onClick={onClick}
@@ -38,16 +40,18 @@ const Index = (props: IPropsFormModel) => {
 			{...listeners}
 		>
 			<div
-				className={`
+				className={$cx(
+					`
 					flex
 					items-center justify-between
 					w-full h-full
 					gap-3
 					px-4
-					${custom && 'p-3!'}
-				`}
+				`,
+					custom && 'p-3!'
+				)}
 			>
-				<span className={`${styles.label} ${name === '' && 'text-gray'}`}>{name || 'Unnamed'}</span>
+				<span className={$cx(styles.label, name === '' && 'text-gray')}>{name || 'Unnamed'}</span>
 				<div className='flex items-center gap-3'>
 					{editing && (
 						<button className='btn rounded-2xl p-1.5' type='button' onClick={onRemove}>

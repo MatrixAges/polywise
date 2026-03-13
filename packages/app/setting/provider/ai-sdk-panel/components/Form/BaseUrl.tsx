@@ -9,14 +9,17 @@ const Index = (props: IPropsFormBaseUrl) => {
 
 	return (
 		<div className='flex flex-col gap-2.5'>
-			<span className={`${styles.label}`}>{title}</span>
+			<span className={$cx(styles.label)}>{title}</span>
 			<input
-				className={`
+				className={$cx(
+					`
 					border-border-light outline-border-gray
 					focus-within:outline-1
-					${styles.input_wrap} ${styles.input}
-					${custom ? 'h-9 px-3!' : 'h-13'}
-				`}
+				`,
+					styles.input_wrap,
+					styles.input,
+					custom ? 'h-9 px-3!' : 'h-13'
+				)}
 				autoComplete='off'
 				{...register('base_url')}
 			/>

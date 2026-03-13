@@ -15,21 +15,18 @@ const Index = (props: IPropsFormModelForm) => {
 		<div className='flex flex-col'>
 			<div className='grid grid-cols-2'>
 				<AutoLabel
-					className={`
-						border-r
-						${adding_model && 'border-b-0!'}
-                              `}
+					className={$cx(`border-r`, adding_model && 'border-b-0!')}
 					label={t('provider.form.model_form.model_id')}
 					valued={id || adding_model}
 				>
 					<input
-						className={`
+						className={$cx(`
 							w-full h-full
 							leading-none
 							outline-none
 							disabled:text-gray
 							placeholder:text-soft
-						`}
+						`)}
 						placeholder={
 							t('provider.form.model_form.input') + t('provider.form.model_form.model_id')
 						}
@@ -48,12 +45,12 @@ const Index = (props: IPropsFormModelForm) => {
 					valued={name || adding_model}
 				>
 					<input
-						className={`
+						className={$cx(`
 							w-full h-full
 							leading-none
 							outline-none
 							placeholder:text-soft
-						`}
+						`)}
 						placeholder={
 							t('provider.form.model_form.input') + t('provider.form.model_form.model_name')
 						}

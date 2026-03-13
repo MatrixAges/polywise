@@ -18,19 +18,16 @@ const Index = (props: IPropsFormCustomFields) => {
 		<Fragment>
 			{keys.map(key => (
 				<div key={key} className='flex flex-col gap-2.5'>
-					<span
-						className={`
-							capitalize
-							${styles.label}`}
-					>
-						{key.replaceAll('_', '')}
-					</span>
+					<span className={$cx(`capitalize`, styles.label)}>{key.replaceAll('_', '')}</span>
 					<input
-						className={`
+						className={$cx(
+							`
 							h-14
 							border-border-light
-							${styles.input_wrap} ${styles.input}
-				`}
+						`,
+							styles.input_wrap,
+							styles.input
+						)}
 						placeholder={`Input field ${key}`}
 						autoComplete='off'
 						{...register(`custom_fields.${key}`)}

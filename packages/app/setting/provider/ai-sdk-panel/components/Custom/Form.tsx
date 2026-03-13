@@ -39,11 +39,14 @@ const Index = (props: IPropsCustomForm) => {
 		<form className='flex flex-col gap-2.5' onSubmit={handleSubmit(onSubmit)}>
 			<div className='flex items-center justify-between'>
 				<div
-					className={`
+					className={$cx(
+						`
 						flex
 						items-center
 						gap-3
-						${styles.label}`}
+					`,
+						styles.label
+					)}
 				>
 					{t('provider.form.custom.add_provider')}
 					<Show
@@ -81,12 +84,12 @@ const Index = (props: IPropsCustomForm) => {
 			>
 				<AutoLabel label={t('provider.form.custom.provider_name')} valued>
 					<input
-						className={`
+						className={$cx(`
 							w-full h-full
 							leading-none
 							outline-none
 							placeholder:text-soft
-						`}
+						`)}
 						placeholder={
 							t('provider.form.model_form.input') + t('provider.form.custom.provider_name')
 						}
@@ -97,12 +100,12 @@ const Index = (props: IPropsCustomForm) => {
 				</AutoLabel>
 				<AutoLabel label={t('provider.form.base_url')} valued>
 					<input
-						className={`
+						className={$cx(`
 							w-full h-full
 							leading-none
 							outline-none
 							placeholder:text-soft
-						`}
+						`)}
 						placeholder={t('provider.form.model_form.input') + t('provider.form.base_url')}
 						autoComplete='off'
 						required
@@ -111,12 +114,12 @@ const Index = (props: IPropsCustomForm) => {
 				</AutoLabel>
 				<AutoLabel label={t('provider.form.api_key')} valued>
 					<input
-						className={`
+						className={$cx(`
 							w-full h-full
 							leading-none
 							outline-none
 							placeholder:text-soft
-						`}
+						`)}
 						placeholder={t('provider.form.model_form.input') + t('provider.form.api_key')}
 						autoComplete='off'
 						{...register('api_key')}
@@ -124,12 +127,12 @@ const Index = (props: IPropsCustomForm) => {
 				</AutoLabel>
 				<AutoLabel className='border-b-0' label={t('provider.form.custom.headers')} valued>
 					<input
-						className={`
+						className={$cx(`
 							w-full h-full
 							leading-none
 							outline-none
 							placeholder:text-soft
-						`}
+						`)}
 						placeholder={t('provider.form.custom.headers_placeholder')}
 						autoComplete='off'
 						{...register('headers')}

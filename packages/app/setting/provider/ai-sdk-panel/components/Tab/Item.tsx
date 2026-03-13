@@ -26,7 +26,8 @@ const Index = (props: IPropsTabItem) => {
 
 	return (
 		<div
-			className={`
+			className={$cx(
+				`
 				flex
 				items-center
 				h-8
@@ -34,10 +35,11 @@ const Index = (props: IPropsTabItem) => {
 				px-2.5
 				text-light
 				click_button
-				${is_dragging && disabled && 'cursor-not-allowed!'}
-				${is_dragging && 'relative z-10 cursor-grab transition-none!'}
-                        ${active && 'active'}
-			`}
+			`,
+				is_dragging && disabled && 'cursor-not-allowed!',
+				is_dragging && 'relative z-10 cursor-grab transition-none!',
+				active && 'active'
+			)}
 			style={{ transform: CSS.Translate.toString(transform), transition }}
 			ref={setNodeRef}
 			onClick={onClick}

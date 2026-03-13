@@ -21,45 +21,54 @@ const Index = (props: IPropsFormAPIKey) => {
 	return (
 		<div className='flex flex-col gap-2.5'>
 			<span
-				className={`
+				className={$cx(
+					`
 					flex
-					${styles.label}`}
+				`,
+					styles.label
+				)}
 			>
 				{title}
 			</span>
 			<div
-				className={`
+				className={$cx(
+					`
 					border-border-solid outline-border-gray
 					focus-within:outline-1
-					${styles.input_wrap}
-					${custom ? 'h-9' : 'h-13'}
-				`}
+				`,
+					styles.input_wrap,
+					custom ? 'h-9' : 'h-13'
+				)}
 			>
 				<input
-					className={`
+					className={$cx(
+						`
 						h-full
 						blur-xs
 						focus:blur-none
 						placeholder-shown:blur-none!
-						${styles.input}
-						${custom && 'px-3!'}
-					`}
+					`,
+						styles.input,
+						custom && 'px-3!'
+					)}
 					placeholder='sk-xxxxxx'
 					autoComplete='off'
 					{...register('api_key')}
 				/>
 				{onTest && (
 					<span
-						className={`
+						className={$cx(
+							`
 							absolute
 							right-2
 							w-8 h-8
 							rounded-full
 							text-xl
 							btn
-							${loading && 'animate-spin'}
-							${res !== null && (res ? 'text-lime-500' : 'text-rose-400')}
-						`}
+						`,
+							loading && 'animate-spin',
+							res !== null && (res ? 'text-lime-500' : 'text-rose-400')
+						)}
 						onClick={onTest}
 					>
 						{Status}

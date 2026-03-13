@@ -182,7 +182,7 @@ const Index = (props: IPropsForm) => {
 				<CustomFields custom_fields={(provider as SpecialProvider).custom_fields} register={register} />
 				<div className='flex flex-col gap-2.5'>
 					<div className='flex items-center justify-between'>
-						<span className={`${styles.label}`}>{t('provider.form.models')}</span>
+						<span className={$cx(styles.label)}>{t('provider.form.models')}</span>
 						{custom && (
 							<button
 								className='
@@ -220,11 +220,14 @@ const Index = (props: IPropsForm) => {
 				<form className='flex w-full flex-col gap-2.5' onSubmit={handleSubmit(onSubmit)}>
 					<div className='flex items-center justify-between'>
 						<div
-							className={`
+							className={$cx(
+								`
 								flex
 								items-center
 								gap-3
-								${styles.label}`}
+							`,
+								styles.label
+							)}
 						>
 							{t('provider.form.add_model')}
 							<Show
@@ -270,7 +273,7 @@ const Index = (props: IPropsForm) => {
 			</Show>
 			{!custom && (
 				<div className='flex w-full flex-col gap-2.5'>
-					<span className={`${styles.label}`}>{t('provider.form.actions')}</span>
+					<span className={$cx(styles.label)}>{t('provider.form.actions')}</span>
 					<div
 						className='
 							overflow-hidden

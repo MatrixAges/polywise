@@ -18,14 +18,16 @@ const Index = (props: IPropsHeader) => {
 
 	return (
 		<div
-			className={`
+			className={$cx(
+				`
 				relative
 				flex
 				items-center justify-center
 				w-full h-[42px]
 				bg-over
-				${styles._local}
-			`}
+			`,
+				styles._local
+			)}
 		>
 			<Left {...props_left}></Left>
 			<Center></Center>

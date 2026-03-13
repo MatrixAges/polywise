@@ -12,7 +12,8 @@ const Index = (props: IProps) => {
 
 	return (
 		<div
-			className={`
+			className={$cx(
+				`
 				relative
 				w-full h-14
 				text-xsm
@@ -20,11 +21,14 @@ const Index = (props: IProps) => {
 				transition-[border]
 				group
 				focus-within:border-b-border-solid-active
-				${value && 'justify-start'} ${className}
-                  `}
+			`,
+				value && 'justify-start',
+				className
+			)}
 		>
 			<label
-				className={`
+				className={$cx(
+					`
 					absolute
 					top-2
 					left-0
@@ -36,13 +40,15 @@ const Index = (props: IProps) => {
 					transition-[top]
 					group-focus-within:text-[10px]
 					capitalize
-					${value ? 'text-[10px]' : 'group-not-focus-within:top-5'}
-`}
+				`,
+					value ? 'text-[10px]' : 'group-not-focus-within:top-5'
+				)}
 			>
 				{label}
 			</label>
 			<div
-				className={`
+				className={$cx(
+					`
 					absolute
 					left-0
 					flex
@@ -50,8 +56,9 @@ const Index = (props: IProps) => {
 					px-3 pt-4
 					text-solid
 					transition-opacity
-					${!value && 'group-not-focus-within:opacity-0'}
-`}
+				`,
+					!value && 'group-not-focus-within:opacity-0'
+				)}
 			>
 				{children}
 			</div>
