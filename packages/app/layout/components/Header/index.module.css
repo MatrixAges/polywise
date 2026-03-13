@@ -3,7 +3,7 @@
 ._local {
 	:global {
 		.icon_button {
-			@apply text-under/80 hover:bg-under/10;
+			@apply text-under/60 hover:bg-under/10 hover:text-under/80;
 
 			&.active {
 				@apply bg-under/16 text-under;
@@ -17,7 +17,7 @@
 				pr-2
 				bg-transparent!
 				hover:bg-under/10!
-				data-popup-open:bg-under/16!
+				data-popup-open:bg-under/16! data-popup-open:text-under/80
 			;
 
 			svg {

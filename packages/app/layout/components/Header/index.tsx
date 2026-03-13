@@ -24,7 +24,7 @@ const Index = (props: IPropsHeader) => {
 				flex
 				items-center justify-center
 				w-full h-[48px]
-				text-under
+				text-under/60
 				bg-over
 			`,
 				styles._local

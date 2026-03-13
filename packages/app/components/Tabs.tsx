@@ -13,6 +13,7 @@ interface IProps {
 	items: Array<Item>
 	active?: string | ((v: string) => boolean)
 	under?: boolean
+
 	deps?: DependencyList
 	onClick?: (v: string, item: Item) => void
 }
@@ -55,9 +56,9 @@ const Index = (props: IProps) => {
 					`,
 							under
 								? `
-						text-under/80
+						text-under/60
 						hover:bg-under/10 active:bg-under/16
-						data-[active=true]:bg-under/10 data-[active=true]:text-under
+						data-[active=true]:bg-under/10 data-[active=true]:text-under/80
 					`
 								: `
 						text-std-400/80
