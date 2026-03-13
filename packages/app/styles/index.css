@@ -50,6 +50,10 @@
 
 	--font-sans: 'Geist';
 	--font-mono: 'GeistMono';
+
+	--color-under: oklch(from var(--color-std-100) l c h / 1);
+	--color-layout-under: oklch(from var(--color-std-900) l c h / 1);
+	--color-layout-over: oklch(from var(--color-std-white) l c h / 1);
 }
 
 [data-theme='dark'] {
@@ -69,4 +73,7 @@
 	--color-std-white: #000;
 
 	--color-border-light: oklch(from var(--color-std-500) l c h / 0.1);
+
+	--color-layout-under: oklch(from var(--color-std-white) l c h / 1);
+	--color-layout-over: oklch(from var(--color-std-100) l c h / 1);
 }

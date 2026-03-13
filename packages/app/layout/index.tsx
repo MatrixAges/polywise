@@ -56,39 +56,49 @@ const Index = () => {
 					overflow-hidden
 					flex flex-col
 					w-screen h-screen
+					bg-layout-under
 				'
 			>
 				<Header {...props_header}></Header>
-				<ResizablePanelGroup
-					className='h-[calc(100%-42px)]!'
-					defaultLayout={defaultLayout}
-					onLayoutChanged={onLayoutChanged}
+				<div
+					className='
+						flex
+						w-full h-[calc(100%-48px)]
+						px-2.5
+						pb-2.5
+					'
 				>
-					<ResizablePanel id='layout_content' className='h-full'>
-						<Outlet></Outlet>
-					</ResizablePanel>
-					{!s.panel_collapsed && (
-						<ResizableHandle
-							className='
-								bg-transparent
-								transition-colors duration-200
-								hover:bg-std-100 focus:bg-std-150
-							'
-						/>
-					)}
-					<ResizablePanel
-						id='layout_panel'
-						className='h-full'
-						collapsible
-						defaultSize={PANEL_WIDTH_DEFAULT}
-						minSize={PANEL_COLLAPSE_THRESHOLD}
-						maxSize='50'
-						panelRef={s.setPanelRef}
-						onResize={s.updatePanelState}
+					<ResizablePanelGroup
+						className='bg-layout-over h-full! overflow-hidden rounded-sm'
+						defaultLayout={defaultLayout}
+						onLayoutChanged={onLayoutChanged}
 					>
-						<Panel></Panel>
-					</ResizablePanel>
-				</ResizablePanelGroup>
+						<ResizablePanel id='layout_content' className='h-full'>
+							<Outlet></Outlet>
+						</ResizablePanel>
+						{!s.panel_collapsed && (
+							<ResizableHandle
+								className='
+									bg-std-100
+									transition-colors duration-200
+									hover:bg-std-100 focus:bg-std-150
+								'
+							/>
+						)}
+						<ResizablePanel
+							id='layout_panel'
+							className='h-full'
+							collapsible
+							defaultSize={PANEL_WIDTH_DEFAULT}
+							minSize={PANEL_COLLAPSE_THRESHOLD}
+							maxSize='50'
+							panelRef={s.setPanelRef}
+							onResize={s.updatePanelState}
+						>
+							<Panel></Panel>
+						</ResizablePanel>
+					</ResizablePanelGroup>
+				</div>
 			</div>
 		</GlobalProvider>
 	)

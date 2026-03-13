@@ -28,13 +28,15 @@ const Index = () => {
 			className='
 				flex flex-col
 				w-full h-full
+				bg-std-50
 			'
 		>
 			<div
 				className='
 					flex
 					items-center justify-between
-					px-2.5
+					px-2.5 py-1.5
+					border-b border-std-100
 				'
 			>
 				<Tabs items={panel_tabs} active={x.active_tab} onClick={x.setActiveTab}></Tabs>

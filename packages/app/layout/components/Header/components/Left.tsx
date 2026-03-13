@@ -43,7 +43,7 @@ const Index = (props: IPropsLeft) => {
 				className='
 					w-px h-[14px]
 					ml-4 mr-3
-					bg-std-100
+					bg-under/16
 				'
 			></div>
 			<button className='icon_button mr-1' onClick={toggleSidebar}>
@@ -53,7 +53,7 @@ const Index = (props: IPropsLeft) => {
 				items={workspaces.map(item => ({ label: item.name, value: item.endpoint }))}
 				defaultValue={workspaces.at(-1)!.endpoint}
 			>
-				<SelectTrigger className='workspace_selector'>
+				<SelectTrigger className='workspace_selector' no_active_style>
 					<SelectValue />
 				</SelectTrigger>
 				<SelectContent className='w-[180px]' align='start'>

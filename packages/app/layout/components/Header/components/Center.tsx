@@ -21,7 +21,7 @@ const Index = () => {
 				text-xs
 			'
 		>
-			<Tabs items={nav_items} active={getActive} deps={[pathname]} onClick={onClick}></Tabs>
+			<Tabs items={nav_items} active={getActive} deps={[pathname]} under onClick={onClick}></Tabs>
 		</div>
 	)
 }

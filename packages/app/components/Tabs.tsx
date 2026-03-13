@@ -12,12 +12,13 @@ interface Item {
 interface IProps {
 	items: Array<Item>
 	active?: string | ((v: string) => boolean)
+	under?: boolean
 	deps?: DependencyList
 	onClick?: (v: string, item: Item) => void
 }
 
 const Index = (props: IProps) => {
-	const { items, active, onClick } = props
+	const { items, active, under, onClick } = props
 
 	const getActive = useMemoizedFn((v: string) => {
 		if (!active) return
@@ -34,7 +35,6 @@ const Index = (props: IProps) => {
 			className='
 				flex
 				items-center
-				h-7
 				gap-1.5
 				text-xs
 			'
@@ -48,15 +48,25 @@ const Index = (props: IProps) => {
 							`
 						flex
 						items-center justify-center
-						h-7
+						w-7 h-7
 						gap-1
 						rounded-full
-						hover:bg-std-100 active:bg-std-150
-						clickable
+						clickable data-[active=true]:px-2 data-[active=true]:w-auto
 					`,
-							getActive(key) ? 'text-std-black bg-std-100 px-2' : 'text-std-400/80 w-7'
+							under
+								? `
+						text-under/80
+						hover:bg-under/10 active:bg-under/16
+						data-[active=true]:bg-under/10 data-[active=true]:text-under
+					`
+								: `
+						text-std-400/80
+						hover:bg-std-100 active:bg-std-150
+						data-[active=true]:bg-std-100 data-[active=true]:text-std-black
+					`
 						)}
 						onClick={() => onClick?.(key, item)}
+						data-active={getActive(key)}
 						key={key}
 					>
 						{Icon && <Icon size={14} />}
