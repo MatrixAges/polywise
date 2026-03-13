@@ -1,6 +1,13 @@
 @layer components {
 	.btn {
-		@apply text-gray hover:text-dark hover:bg-bg-hover active:bg-bg-active clickable flex items-center justify-center gap-1.5;
+		@apply 
+				flex
+				items-center justify-center
+				gap-1.5
+				text-gray
+				hover:text-dark hover:bg-active active:bg-click
+				clickable
+			;
 	}
 
 	.no-scrollbar::-webkit-scrollbar {

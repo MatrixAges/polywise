@@ -36,7 +36,7 @@ body {
 				gap-1.5
 				rounded-full
 				text-std-400/80 text-xs
-				hover:bg-std-100 hover:text-std-black
+				hover:bg-active hover:text-std-800 active:bg-click
 				clickable
 			;
 
@@ -48,7 +48,7 @@ body {
 	}
 
 	&.active {
-		@apply bg-std-100 text-std-black;
+		@apply bg-active text-std-800;
 	}
 }
 
@@ -60,7 +60,7 @@ body {
 				px-2.5 py-1.5
 				rounded-full
 				text-std-400 text-sm font-medium
-				hover:bg-std-100 hover:text-std-black active:bg-std-150
+				hover:bg-active hover:text-std-800 active:bg-click
 				clickit
 			;
 
@@ -72,6 +72,6 @@ body {
 	}
 
 	&.active {
-		@apply bg-std-100 text-std-black;
+		@apply bg-active text-std-800;
 	}
 }

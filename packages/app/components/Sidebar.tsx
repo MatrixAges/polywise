@@ -24,6 +24,7 @@ const Index = (props: IProps) => {
 				overflow-y-scroll
 				flex
 				w-full h-full
+				border-border-light border-r
 			'
 			style={{ width }}
 		>
@@ -36,21 +37,8 @@ const Index = (props: IProps) => {
 					pb-12
 				'
 			>
-				{groups.map(({ label, items }, index) => (
+				{groups.map(({ items }, index) => (
 					<Fragment key={index}>
-						{label && (
-							<span
-								className='
-									flex
-									items-center
-									px-2.5 py-1.5
-									text-xs text-muted-foreground
-									capitalize
-								'
-							>
-								{label}
-							</span>
-						)}
 						{items.map(item => {
 							const { key, title, Icon } = item
 

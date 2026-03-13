@@ -36,7 +36,7 @@ const Index = () => {
 					flex
 					items-center justify-between
 					px-2.5 py-1.5
-					border-b border-std-100
+					border-border-light border-b
 				'
 			>
 				<Tabs items={panel_tabs} active={x.active_tab} onClick={x.setActiveTab}></Tabs>
