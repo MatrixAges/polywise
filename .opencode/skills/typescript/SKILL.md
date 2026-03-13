@@ -1,106 +1,70 @@
 ---
 name: typescript
-description: Guides the implementation of TypeScript in the project, including naming conventions, type definitions, and code style. Triggered when writing or refactoring TypeScript code.
+description: 在项目中实现 TypeScript 的指南，包括命名规范、类型定义和代码风格。在编写或重构 TypeScript 代码时触发。
 ---
 
-# TypeScript Development Skill
+# TypeScript 开发指南
 
-This skill provides mandatory instructions for writing TypeScript in this project, ensuring consistency, type safety, and clean code.
+此技能提供了在本项目中编写 TypeScript 的强制性规范，以确保一致性、类型安全和代码整洁。
 
-## 1. Naming Conventions
+## 1. 命名规范
 
-### 1.1 Variables and Functions
+### 1.1 变量与函数
 
-- **Variables**: Use `snake_case` (e.g., `theme_value`, `is_dev`).
-- **Functions**: Use `camelCase` (e.g., `getAntdTheme`, `setGlobalAnimation`).
-- **Internal Props Objects**: Use `props_*` prefix (e.g., `props_side_bar`).
+- **变量**：使用 `snake_case`（例如：`theme_value`, `is_dev`）。
+- **函数**：使用 `camelCase`（例如：`getAntdTheme`, `setGlobalAnimation`）。
+- **内部 Props 对象**：使用 `props_*` 前缀（例如：`props_side_bar`）。
 
-### 1.2 Classes and Types
+### 1.2 类与类型
 
-- **Classes**: Use `PascalCase` (e.g., `GlobalModel`, `Settings`).
-- **Interfaces/Types**: Use `PascalCase`. Interfaces should ideally start with `I` (e.g., `IProps`, `IPropsSidebar`).
-- **Enum-like Types**: Use literal unions instead of `enum` whenever possible (e.g., `type Theme = 'light' | 'dark' | 'system'`).
+- **类**：使用 `PascalCase`（例如：`GlobalModel`, `Settings`）。
+- **接口/类型**：使用 `PascalCase`。接口最好以 `I` 开头（例如：`IProps`, `IPropsSidebar`）。
+- **类似枚举的类型**：尽可能使用字面量联合类型代替 `enum`（例如：`type Theme = 'light' | 'dark' | 'system'`）。
 
-## 2. Type Definitions
+## 2. 类型定义
 
-### 2.1 File Organization
+### 2.1 文件组织
 
-- **Global Types**: Place in `packages/app/types/` or `packages/app/typings/`.
-- **Local Types**: Use a `types.ts` file within the same directory as the component or module.
-- **Props**: Define an `IProps` interface for each component, typically in the component file or an adjacent `types.ts`.
+- **全局类型**：放置在 `packages/app/types/` 或 `packages/app/typings/` 中。
+- **局部类型**：在组件或模块所在目录使用 `types.ts` 文件。
+- **Props**：为每个组件定义一个 `IProps` 接口，通常在组件文件中或相邻的 `types.ts` 中。
 
-### 2.2 Best Practices
+### 2.2 最佳实践
 
-- **Explicit Types**: Favor explicit type annotations for function parameters and complex return types.
-- **Utility Types**: Leverage TypeScript's utility types (`Pick`, `Omit`, `Partial`, `Exclude`) to reuse existing definitions.
-- **Strict Typing**: Avoid `any`. Use `unknown` if the type is truly unknown and cast when necessary.
-- **Type Aliases vs. Interfaces**: Use `interface` for object structures (especially props) and `type` for unions, intersections, or primitives.
+- **显式类型**：优先为函数参数和复杂的返回值类型提供显式的类型注解。
+- **工具类型**：利用 TypeScript 的工具类型（`Pick`, `Omit`, `Partial`, `Exclude`）重用现有的定义。
+- **严格类型**：避免使用 `any`。如果类型确实未知，请使用 `unknown` 并在必要时进行类型转换（cast）。
+- **Type 别名 vs. Interface**：使用 `interface` 定义对象结构（特别是 props），使用 `type` 定义联合、交叉或基础类型。
 
-## 3. Code Style
+## 3. 代码风格
 
-### 3.1 Imports and Exports
+### 3.1 导入与导出
 
-- **Named Exports**: Prefer named exports for utilities and models.
-- **Default Exports**: Use default exports for the main component or the primary class in a file.
-- **Type-only Imports**: Use `import type` for importing types to maintain clean process boundaries and reduce bundle size.
-- **Path Aliases**: Use `@/` to refer to the `src` directory (e.g., `import { Settings } from '@/models'`).
+- **命名导出**：工具函数和模型优先使用命名导出。
+- **默认导出**：对于文件中的主组件或主类，使用默认导出。
+- **纯类型导入**：使用 `import type` 导入类型，以保持清晰的进程边界并减小打包体积。
+- **路径别名**：使用 `@/` 引用 `src` 目录（例如：`import { Settings } from '@/models'`）。
 
-### 3.2 Statements and Logic
+### 3.2 语句与逻辑
 
-- **Arrow Functions**: Prefer arrow functions for component definitions and small utility functions.
-- **Destructuring**: Use destructuring for props and objects to improve readability.
-- **Conditional Logic**: Use optional chaining (`?.`) and nullish coalescing (`??`) for safer property access.
+- **箭头函数**：组件定义和小型工具函数优先使用箭头函数。
+- **解构**：对 props 和对象使用解构以提高可读性。
+- **条件逻辑**：使用可选链 (`?.`) 和空值合并运算符 (`??`) 以更安全地访问属性。
 
-## 4. Implementation Examples
+### 3.3 代码间距与空行
 
-### 4.1 Interface with Pick and Exclude
+使用空行分隔具有不同执行风格或视觉外观的代码。**如果相邻的两行代码看起来风格不同，必须在它们之间添加空行。**
 
-```typescript
-import { Settings } from '@/models'
+**何时添加空行：**
 
-import type { Theme } from '@/types'
+- 数据获取和 return 语句之间
+- 变量计算和使用之间
+- 多个连续操作（不同的独立步骤）之间
+- 在 early return 之前
+- 不同的操作类型之间（同步 vs 异步，查询 vs 修改）
+- 状态变更前后
 
-export interface IPropsSidebar extends Pick<Settings, 'toggleSidebar' | 'toggleSettings'> {
-	fold: Settings['sidebar_fold']
-	current_theme: Exclude<Theme, 'system'>
-}
-```
-
-### 4.2 Utility with Strict Typing
-
-```typescript
-export const capitalizeFirst = (str: string): string => {
-	if (!str) return ''
-	return str.charAt(0).toUpperCase() + str.slice(1)
-}
-```
-
-### 4.3 Type-safe Union
-
-```typescript
-export type Theme = 'light' | 'dark' | 'system'
-export type ThemeValue = Exclude<Theme, 'system'>
-
-export interface IThemeConfig {
-	value: ThemeValue
-	is_auto: boolean
-}
-```
-
-## 3.3 Code Spacing and Line Breaks
-
-Use blank lines to separate code with different execution styles or visual appearances. **If two consecutive statements look different, add a blank line between them.**
-
-**When to add blank lines:**
-
-- Data fetching and return statements
-- Variable calculation and usage
-- Multiple sequential operations (distinct steps)
-- Before early returns
-- Different operation types (sync vs async, queries vs mutations)
-- State changes
-
-**Good:**
+**推荐：**
 
 ```typescript
 async getSnapshot(weight_threshold = 0.2) {
@@ -115,15 +79,9 @@ async tick(threshold_override?: number) {
 
 	await this.exec(sql.sql_tick(threshold))
 }
-
-async addNode(label: string, x: number, y: number, threshold = 0.5) {
-	const rows = await this.query<{ id: number }>(sql.sql_add_node, [label, x, y, threshold])
-
-	return rows[0].id
-}
 ```
 
-**Avoid:**
+**避免：**
 
 ```typescript
 async getSnapshot(weight_threshold = 0.2) {
@@ -131,20 +89,14 @@ async getSnapshot(weight_threshold = 0.2) {
 	const edges = await this.query(sql.sql_get_snapshot_edges(weight_threshold))
 	return { nodes, edges }
 }
-
-async tick(threshold_override?: number) {
-	const threshold = threshold_override ?? 0.5
-	await this.exec(sql.sql_tick(threshold))
-}
 ```
 
-## 5. Summary Checklist
+## 4. 总结检查清单
 
-- [ ] Are variable names in `snake_case`?
-- [ ] Are function names in `camelCase`?
-- [ ] Are component props using `IProps` or `IProps*`?
-- [ ] Is `import type` used for type-only imports?
-- [ ] Are local types placed in a `types.ts` file?
-- [ ] Is `any` avoided in favor of strict typing or `unknown`?
-- [ ] Are blank lines used to separate different execution styles?
-- [ ] Is there a blank line before return statements after async operations?
+- [ ] 变量名是否为 `snake_case`？
+- [ ] 函数名是否为 `camelCase`？
+- [ ] 组件 props 是否使用了 `IProps` 或 `IProps*`？
+- [ ] 纯类型导入是否使用了 `import type`？
+- [ ] 局部类型是否放在了 `types.ts` 文件中？
+- [ ] 是否避免了使用 `any`，而是采用了严格类型或 `unknown`？
+- [ ] 是否使用空行分隔了不同的执行风格代码块？

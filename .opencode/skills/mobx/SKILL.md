@@ -1,37 +1,22 @@
 ---
 name: mobx
-description: Guides the implementation of state management using MobX + tsyringe. Triggered when working on data models, state logic, or store architecture.
+description: 指导使用 MobX + tsyringe 实现状态管理。在处理数据模型、状态逻辑或 Store 架构时触发。
 ---
 
-# MobX State Management Skill
+# MobX 状态管理指南
 
-This skill provides mandatory instructions for implementing state management using MobX and tsyringe for Dependency Injection (DI) in this project.
+此技能提供了在项目中强制使用 MobX 以及 tsyringe（用于依赖注入 DI）进行状态管理的规范。
 
-## 1. Architecture Overview
+## 1. 架构概览
 
-The project uses a structured approach to state management:
+- **MobX**: 核心状态管理库 (使用 `makeAutoObservable`)。
+- **tsyringe**: 用于模型的依赖注入容器。
+- **模块化模型**: 状态被拆分为专门的模型（如 `GlobalModel`, `Settings`）。
+- **自动绑定**: 动作 (actions) 会被自动绑定到类实例上。
 
-- **MobX**: Core state management library (using `makeAutoObservable`)
-- **tsyringe**: Dependency injection container for models
-- **Modular Models**: State is divided into specialized models (e.g., `GlobalModel`, `Settings`)
-- **Automatic Binding**: Actions are automatically bound to the class instance
+## 2. 模型实现模式
 
-## 2. Directory Structure
-
-```
-packages/app/
-├── models/
-│   ├── index.ts                # Model exports
-│   ├── Global.ts               # Root singleton model
-│   ├── Settings.ts             # Specialized injectable model
-│   └── common/
-│       ├── index.ts
-│       └── Util.ts             # Common utility model (loading, disposers)
-```
-
-## 3. Model Implementation Patterns
-
-### 3.1 Basic Model Structure
+### 2.1 基础模型结构
 
 ```typescript
 import { makeAutoObservable } from 'mobx'
@@ -43,7 +28,7 @@ export default class FeatureModel {
 	loading = false
 
 	constructor() {
-		// ✅ Use autoBind: true for easier event handling
+		// ✅ 使用 autoBind: true 以方便事件处理
 		makeAutoObservable(this, {}, { autoBind: true })
 	}
 
@@ -54,7 +39,7 @@ export default class FeatureModel {
 	async fetchData() {
 		this.loading = true
 		try {
-			// API call logic
+			// API 调用逻辑
 		} finally {
 			this.loading = false
 		}
@@ -62,15 +47,16 @@ export default class FeatureModel {
 }
 ```
 
-### 3.2 Singleton Model (Root Store)
+### 2.2 单例模型 (根 Store)
 
 ```typescript
 import { singleton } from 'tsyringe'
+
 import { Settings } from '@/models'
 
 @singleton()
 export default class GlobalModel {
-	// ✅ Dependency Injection via constructor
+	// ✅ 通过构造函数进行依赖注入
 	constructor(public settings: Settings) {}
 
 	init() {
@@ -83,12 +69,12 @@ export default class GlobalModel {
 }
 ```
 
-### 3.3 Handling Complex Models (DI Composition)
+### 2.3 处理复杂模型 (DI 组合)
 
-For complex state management (exceeding 20 observable variables), split the model into smaller, specialized models and compose them using DI.
+对于复杂的状态管理（超过 20 个响应式变量），应将模型拆分为更小、更专注的子模型，并使用 DI 组合它们。
 
 ```typescript
-// ✅ Good: Split complex model into sub-models
+// ✅ 推荐：将复杂的模型拆分为多个子模型并注入
 @injectable()
 export default class ComplexFeatureModel {
 	constructor(
@@ -97,71 +83,51 @@ export default class ComplexFeatureModel {
 		public sync: SyncSubModel,
 		public util: Util
 	) {
+		// 注意：排除注入的依赖，不要将其变为 observable
 		makeAutoObservable(this, { data: false, ui: false, sync: false, util: false }, { autoBind: true })
 	}
 }
 ```
 
-## 4. Parent-Child Model Communication
+## 3. 父子模型通信
 
-### 4.1 Accessing Singleton GlobalModel
+### 3.1 访问单例 GlobalModel
 
-In sub-models, you can access the singleton `GlobalModel` by declaring a non-observable property and binding it in the constructor using the `getGlobal` utility.
+在子模型中，可以通过声明一个非 observable 的属性，并在构造函数中使用 `getGlobal` 工具函数绑定 `GlobalModel` 的单例。
 
 ```typescript
 import { injectable } from 'tsyringe'
+
 import { getGlobal } from '@/utils'
+
 import type { GlobalModel } from '@/models'
 
 @injectable()
 export default class SubModel {
-	// ✅ Declare as non-observable
+	// ✅ 声明为非响应式属性
 	global = null as unknown as GlobalModel
 
 	constructor() {
 		makeAutoObservable(this, { global: false }, { autoBind: true })
 
-		// ✅ Bind instance via utility
+		// ✅ 通过工具函数绑定实例
 		getGlobal(this.global)
 	}
 }
 ```
 
-### 4.2 Accessing Parent in Transient Models
+### 3.2 在临时 (Transient) 模型中访问父级
 
-In non-singleton (Transient) models, `container.resolve()` creates new instances. To ensure sub-models access the correct parent instance, the parent must explicitly pass its reference.
+在非单例模型中，`container.resolve()` 会创建新实例。为了确保子模型访问到正确的父级实例，父级必须显式传递其引用。
 
-```typescript
-@injectable()
-class SubModel {
-	public parent?: ParentModel
+**关键原则：**
 
-	// ✅ Method to accept parent reference
-	setParent(parent: ParentModel) {
-		this.parent = parent
-	}
-}
+1. **避免递归注入**：永远不要在依赖子模型的父级模型对应的子模型构造函数内，调用 `container.resolve(ParentModel)`。
+2. **主动赋值**：由父模型负责建立关联引用。
 
-@injectable()
-class ParentModel {
-	constructor(public sub_instance: SubModel) {
-		makeAutoObservable(this, { sub_instance: false }, { autoBind: true })
+## 4. 生命周期管理
 
-		// ✅ Establish parent reference manually
-		this.sub_instance.setParent(this)
-	}
-}
-```
-
-**Key Principles:**
-
-1. **Avoid Recursion**: Never call `container.resolve(ParentModel)` inside a sub-model's constructor if the parent depends on that sub-model.
-2. **Proactive Assignment**: The parent model is responsible for establishing the reference relationship.
-3. **Cross-Sibling Communication**: A sub-model can communicate with its siblings via the parent reference (e.g., `this.parent.other_sub_instance`).
-
-## 5. Lifecycle Management
-
-Models should implement `init()` and `off()` methods for setup and cleanup.
+所有模型都应实现 `init()` 和 `off()` 方法用于初始化设置和销毁清理。
 
 ```typescript
 @injectable()
@@ -171,173 +137,42 @@ export default class Index {
 	}
 
 	async init() {
-		// ✅ Store synchronization using stk utilities
-		const off = await setStoreWhenChange(['lang', 'theme_source'], this)
-
-		// ✅ Collect disposers in util.acts
-		this.util.acts = [off]
+		// ✅ 收集清理函数 (disposers) 到 util.acts 数组中
+		this.util.acts = [
+			/* ... */
+		]
 	}
 
 	off() {
-		// ✅ Implementation of cleanup logic
+		// ✅ 执行清理逻辑
 		this.util.off()
 	}
 }
 ```
 
-## 5. Integration with React
+## 5. 约束与最佳实践
 
-### 5.1 Provider Setup
+### 5.1 Observable 规则
 
-```typescript
-// context/global.ts
-import { createContext, useContext } from 'react'
+- **响应式状态**：将所有响应式状态定义为类属性。
+- **排除项 (Exclusions)**：使用 `makeAutoObservable` 的第二个参数，将注入的服务/工具类排除掉（设为 `false`），不让它们变成响应式。
 
-import Model from '../models/Global'
+### 5.2 依赖注入 (tsyringe)
 
-const GlobalContext = createContext<Model>()
-export const GlobalProvider = GlobalContext.Provider
-export const useGlobal = () => useContext(GlobalContext)
-```
+- **@injectable()**：用于可多次实例化或局部注入的特性模型。
+- **@singleton()**：用于只应存在一个实例的全局 Store。
+- **构造器注入**：永远优先使用构造函数注入，并且使用 `public` 关键字自动赋值属性。
 
-### 5.2 Component Usage
+### 5.3 代码风格
 
-```typescript
-import { observer } from 'mobx-react-lite'
-import { useGlobal } from '@/context'
+- **禁止注释**：不要在模型文件中写解释性注释。
+- **snake_case**：所有响应式状态变量名必须使用蛇形命名。
+- **camelCase**：所有方法必须使用驼峰命名。
+- **PascalCase**：所有类名必须使用帕斯卡命名。
+- **AutoBind**：始终在 `makeAutoObservable` 中使用 `{ autoBind: true }`。
 
-const MyComponent = observer(() => {
-	const { settings } = useGlobal()
+### 5.4 常见错误
 
-	return (
-		<div onClick={settings.toggleSidebar}>
-			{settings.sidebar_fold ? 'Folded' : 'Open'}
-		</div>
-	)
-})
-```
-
-## 6. Utilities from `stk/mobx`
-
-The project uses shared utilities for common MobX patterns.
-
-- `setStoreWhenChange`: Sync class properties with local storage/config
-- `setStorageWhenChange`: Reactively update storage when properties change
-- `useInstanceWatch`: React hook to watch MobX instance properties
-- `copy`: Deep copy utility for MobX objects
-
-## 7. Constraints & Best Practices
-
-### 7.1 Observable Rules
-
-- **Observable State**: Define all reactive state as class properties
-- **Actions**: Define all state-modifying logic as class methods
-- **Computed**: Use getters for derived state (MobX automatically treats them as `computed`)
-- **Exclusions**: Use the second argument of `makeAutoObservable` to exclude non-observable properties (like injected services/utils)
-
-### 7.2 Dependency Injection (tsyringe)
-
-- **@injectable()**: Use for feature models that can be instantiated multiple times or injected
-- **@singleton()**: Use for global stores that should have only one instance
-- **Constructor Injection**: ALWAYS prefer constructor injection over property injection
-- **Access Modifiers**: Use `public` in constructor to automatically assign properties
-
-### 7.3 Code Style
-
-- **No Comments**: DO NOT add comments to model files
-- **snake_case**: Use snake_case for observable variable names
-- **camelCase**: Use camelCase for methods
-- **PascalCase**: Use PascalCase for Class names
-- **AutoBind**: ALWAYS use `{ autoBind: true }` in `makeAutoObservable`
-- **Code Spacing**: Use blank lines to separate code with different execution styles (e.g., between data fetching and usage, variable calculation and action calls)
-
-**Example:**
-
-```typescript
-async init() {
-	const disposer = await setStoreWhenChange(['theme'], this)
-
-	this.util.acts.push(disposer)
-}
-
-async fetchData() {
-	const data = await api.get('/data')
-	const processed = this.process(data)
-
-	this.items = processed
-}
-```
-
-### 7.4 Performance
-
-- **Granular Updates**: Keep models focused to minimize unnecessary re-renders
-- **Reaction Management**: ALWAYS dispose of reactions/subscriptions in the `off()` method
-- **Loading States**: Use a dedicated `Util` model or property to track async operation status
-
-## 8. Implementation Examples
-
-### 8.1 Complex State Splitting (Few-Shot)
-
-```typescript
-// Sub-model for Data
-@injectable()
-class ChatDataModel {
-	messages = []
-	constructor() {
-		makeAutoObservable(this, {}, { autoBind: true })
-	}
-}
-
-// Sub-model for UI state
-@injectable()
-class ChatUIModel {
-	is_typing = false
-	constructor() {
-		makeAutoObservable(this, {}, { autoBind: true })
-	}
-}
-
-// Main Model composition
-@injectable()
-export default class ChatModel {
-	constructor(
-		public data: ChatDataModel,
-		public ui: ChatUIModel
-	) {
-		makeAutoObservable(this, { data: false, ui: false }, { autoBind: true })
-	}
-}
-```
-
-### 8.2 Using stk Utilities
-
-```typescript
-import { setStoreWhenChange } from 'stk/mobx'
-
-@injectable()
-export default class UserSettings {
-	theme = 'light'
-
-	async init() {
-		// Sync 'theme' property with storage automatically
-		const disposer = await setStoreWhenChange(['theme'], this)
-		this.util.acts.push(disposer)
-	}
-}
-```
-
-## 9. Common Mistakes to Avoid
-
-- **Direct State Mutation**: Never mutate state outside of an action (though MobX 6+ allows it if not in strict mode, it's bad practice)
-- **Missing @injectable**: Forgetting to decorate a class will cause DI to fail
-- **Infinite Loops**: Be careful with `reaction` or `autorun` that modifies the observed state
-- **Memory Leaks**: Forgetting to call `.off()` or clear disposers when a model is no longer needed
-- **Complex Constructors**: Keep constructors simple; move heavy initialization logic to an `init()` method
-
-## 10. Summary of Architectural Rules
-
-1. **Hierarchy**: GlobalModel (Singleton) -> FeatureModels (Injectable) -> SubModels
-2. **Communication**: Sub-models communicate via the parent model or shared services
-3. **Purity**: Models should contain logic and data, not UI or DOM manipulation
-4. **Composition**: Favor DI composition over inheritance for complex models
-5. **Consistency**: Follow the established `init()`/`off()` lifecycle pattern everywhere
+- 忘记加 `@injectable` 装饰器会导致 DI 失败。
+- 忘记在 `off()` 中清理 reaction 会导致内存泄漏。
+- 构造函数不能太重；耗时的初始化逻辑必须放入 `init()`。

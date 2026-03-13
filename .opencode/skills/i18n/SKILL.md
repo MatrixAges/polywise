@@ -1,111 +1,39 @@
 ---
 name: i18n
-description: Guides the implementation of internationalization (i18n) using i18next with TypeScript. Triggered when working on localization, translation files, or multi-language support.
+description: 指导使用 i18next 与 TypeScript 实现国际化 (i18n)。在处理本地化、翻译文件或多语言支持时触发。
 ---
 
-# i18n Skill
+# i18n 国际化指南
 
-This skill provides mandatory instructions for implementing internationalization using i18next in this project.
+此技能提供了在项目中强制使用 i18next 实现国际化的规范。
 
-## 1. Architecture Overview
+## 1. 架构概览
 
-The project uses a modular i18n structure with the following components:
+项目采用了模块化的 i18n 结构：
 
-- **i18next**: Core internationalization library
-- **TypeScript**: Full type safety for translation keys
-- **Modular Structure**: Translations organized by feature/module
-- **Dual Support**: Both app (renderer) and desktop (main process) support
+- **i18next**: 核心国际化库。
+- **TypeScript**: 对翻译键 (Translation Keys) 提供完整的类型安全保护。
+- **模块化结构**: 翻译文案按功能/模块进行组织。
+- **双端支持**: 同时支持 app（渲染进程）和 desktop（主进程）。
 
-## 2. Directory Structure
+## 2. 翻译文件结构
 
-### App (Renderer Process)
-
-```
-packages/app/locales/
-├── index.ts                    # Main locale exports
-├── en/                         # English translations
-│   ├── index.ts               # English entry point
-│   ├── global.ts              # Global/common strings
-│   ├── app.ts                 # App-specific strings
-│   ├── setting.ts             # Settings strings
-│   ├── layout.ts              # Layout strings
-│   ├── components.ts          # Component strings
-│   ├── editor.ts              # Editor strings
-│   ├── chatbox.ts             # Chatbox strings
-│   ├── ai.ts                  # AI-related strings
-│   ├── chat.ts                # Chat strings
-│   └── note.ts                # Note strings
-├── zh-cn/                     # Chinese translations (same structure as en)
-├── antd/                      # Ant Design locale files
-│   ├── en.ts
-│   └── zh-cn.ts
-└── dayjs/                     # Day.js locale files
-    ├── en.ts
-    └── zh-cn.ts
-```
-
-### Desktop (Main Process)
-
-```
-packages/desktop/src/locales/
-├── en/
-│   ├── index.ts
-│   └── global.ts
-└── zh-cn/
-    ├── index.ts
-    └── global.ts
-```
-
-## 3. Translation File Structure
-
-### 3.1 Basic Translation Module
+### 2.1 基础翻译模块
 
 ```typescript
 // packages/app/locales/en/global.ts
 export default {
-	$: '$',
-	b: ' ',
-	s: 's',
-	a: 'a',
-	an: 'an',
-	unique: 'unique',
 	notice: 'Notice',
 	edit: 'Edit',
 	add: 'Add',
 	save: 'Save',
 	remove: 'Remove',
-	recent: 'Recent',
-	icon: 'Icon',
-	emoji: 'Emoji',
-	to: 'to',
-	favorite: 'Favorite',
-	conversation: 'Conversation',
-	role: 'Role',
-	inspect: 'Inspect',
-	model: 'Model',
-	group: 'Group',
-	reset: 'Reset',
-	input: 'Input',
-	cancel: 'Cancel',
-	million: 'Million',
-	select: 'Select',
-	naming: 'Naming',
-	summary: 'Summary',
-	translate: 'Translate',
-	reload: 'Reload',
-	copied: 'Copied',
-	confirm: 'Confirm',
-	preview: 'Preview',
-	insert: 'Insert',
-	reset_confirm: 'Reset will remove all configuration changes, confirm reset?',
 	remove_confirm:
-		'Confirm removal? Deleting this item will also delete the corresponding local file. Please proceed with caution!',
-	config_remove_confirm:
-		'Deleting this item will delete the corresponding configuration data. Are you sure you want to delete it?'
+		'Confirm removal? Deleting this item will also delete the corresponding local file. Please proceed with caution!'
 }
 ```
 
-### 3.2 Namespaced Translation Module
+### 2.2 命名空间模块
 
 ```typescript
 // packages/app/locales/en/app.ts
@@ -113,384 +41,93 @@ export default {
 	module: {
 		chat: 'Chat',
 		research: 'Research',
-		agent: 'Agent',
-		flow: 'Flow',
-		linkcase: 'Linkcase',
-		memory: 'Memory',
-		note: 'Note',
-		database: 'Database',
-		artifact: 'Artifact'
+		agent: 'Agent'
 	},
 	workspace: {
 		title: 'Workspace',
-		name_placeholder: 'A unique name',
-		confirm: 'Removing the workspace will delete all files under it. Are you sure you want to delete this workspace? Click save to apply changes. Please proceed with caution!',
-		tips: 'Workspaces are used to differentiate between various working environments, such as using two separate workspaces for company projects and personal projects to create isolation. A single workspace implies an independent storage directory.'
-	},
-	ErrorBoundary: {
-		title: 'Something Error',
-		desc: 'App encountered unexpected exception'
+		name_placeholder: 'A unique name'
 	}
 }
 ```
 
-### 3.3 Locale Entry Point
+### 2.3 区域语言入口点 (Locale Entry Point)
 
 ```typescript
 // packages/app/locales/en/index.ts
 import ai from './ai'
 import app from './app'
-import chat from './chat'
-import chatbox from './chatbox'
-import components from './components'
-import editor from './editor'
 import global from './global'
-import layout from './layout'
-import note from './note'
-import setting from './setting'
 
 export default {
 	translation: {
 		...global,
 		app,
-		setting,
-		layout,
-		components,
-		editor,
-		chatbox,
-		ai,
-		chat,
-		note
+		ai
 	}
-} as const
+} as const // ✅ 必须使用 as const 以确保 TypeScript 类型推断
 ```
 
-## 4. Type Safety Configuration
+## 3. 添加新翻译的步骤
 
-### 4.1 Type Declarations
-
-```typescript
-// packages/app/typings/i18n.d.ts
-import { en } from '@/locales'
-
-declare module 'i18next' {
-	interface CustomTypeOptions {
-		returnObjects: true
-		resources: typeof en
-	}
-}
-```
-
-### 4.2 Resource Backend
+### 3.1 增加新模块翻译
 
 ```typescript
-// packages/app/utils/i18n.ts
-import type { BackendModule } from 'i18next'
-
-export const resourcesToBackend = {
-	type: 'backend',
-	read: (lang, namespace, callback) => {
-		import(`@/locales/${lang.toLowerCase()}/index`).then(data => {
-			callback(null, data.default[namespace])
-		})
-	}
-} as BackendModule
-```
-
-## 5. Ant Design Localization
-
-```typescript
-// packages/app/locales/antd/en.ts
-import Calendar from 'antd/es/calendar/locale/en_US'
-import DatePicker from 'antd/es/date-picker/locale/en_US'
-import TimePicker from 'antd/es/time-picker/locale/en_US'
-
-const typeTemplate = '${label} is not a valid ${type}'
-const localeValues = {
-	locale: 'en',
-	Pagination: {
-		// Options
-		items_per_page: '/ page',
-		jump_to: 'Go to',
-		jump_to_confirm: 'confirm',
-		page: 'Page',
-		// Pagination
-		prev_page: 'Previous Page',
-		next_page: 'Next Page',
-		prev_5: 'Previous 5 Pages',
-		next_5: 'Next 5 Pages',
-		prev_3: 'Previous 3 Pages',
-		next_3: 'Next 3 Pages',
-		page_size: 'Page Size'
-	},
-	DatePicker,
-	TimePicker,
-	Calendar,
-	global: {
-		placeholder: 'Please select'
-	}
-	// ... other Ant Design components
-}
-export default localeValues
-```
-
-## 6. Day.js Localization
-
-```typescript
-// packages/app/locales/dayjs/en.ts
-import type { DayJSLocale } from '@/types'
-
-export default {
-	name: 'en',
-	weekdays: 'Sunday_Monday_Tuesday_Wednesday_Thursday_Friday_Saturday'.split('_'),
-	weekStart: 1,
-	months: 'January_February_March_April_May_June_July_August_September_October_November_December'.split('_'),
-	relativeTime: {
-		future: 'after %s',
-		past: '%s ago',
-		s: 'a few seconds',
-		m: 'a minute',
-		mm: '%d minutes',
-		h: 'an hour',
-		hh: '%d hours',
-		d: 'a day',
-		dd: '%d days',
-		M: 'a month',
-		MM: '%d months',
-		y: 'a year',
-		yy: '%d years'
-	},
-	ordinal: n => {
-		const s = ['th', 'st', 'nd', 'rd']
-		const v = n % 100
-		return `[${n}${s[(v - 20) % 10] || s[v] || s[0]}]`
-	}
-} as DayJSLocale
-```
-
-## 7. Desktop Process Localization
-
-```typescript
-// packages/desktop/src/locales/en/global.ts
-export default {
-	app: {
-		name: 'Polywise',
-		quit: 'Quit',
-		hide: 'Hide',
-		hide_others: 'Hide Others',
-		show_all: 'Show All',
-		about: 'About',
-		preferences: 'Preferences',
-		services: 'Services',
-		close: 'Close',
-		minimize: 'Minimize',
-		zoom: 'Zoom',
-		bring_all_to_front: 'Bring All to Front'
-	},
-	tray: {
-		show: 'Show',
-		quit: 'Quit'
-	}
-}
-```
-
-## 8. Implementation Examples
-
-### 8.1 Adding New Translation Module
-
-```typescript
-// Step 2: Add to locale index
+// 第二步：添加到入口索引
 // packages/app/locales/en/index.ts
 import newFeature from './newFeature'
 
-// Step 1: Create new translation file
+// 第一步：创建新翻译文件（英文与中文必须同步创建）
 // packages/app/locales/en/newFeature.ts
 export default {
 	title: 'New Feature',
-	description: 'This is a new feature description',
-	actions: {
-		save: 'Save',
-		cancel: 'Cancel',
-		delete: 'Delete'
-	},
-	messages: {
-		success: 'Operation completed successfully',
-		error: 'An error occurred'
-	}
+	description: 'This is a new feature description'
 }
 
-// ... other imports
-
-export default {
-	translation: {
-		...global,
-		app,
-		setting,
-		layout,
-		components,
-		editor,
-		chatbox,
-		ai,
-		chat,
-		note,
-		newFeature // Add new module
-	}
-} as const
-
-// Step 3: Create corresponding Chinese translation
 // packages/app/locales/zh-cn/newFeature.ts
 export default {
 	title: '新功能',
-	description: '这是新功能描述',
-	actions: {
-		save: '保存',
-		cancel: '取消',
-		delete: '删除'
-	},
-	messages: {
-		success: '操作成功完成',
-		error: '发生错误'
-	}
+	description: '这是新功能描述'
 }
-```
-
-### 8.2 Adding New Language Support
-
-```typescript
-// Step 1: Create new language directory
-// packages/app/locales/es/ (Spanish)
-// packages/app/locales/es/index.ts
-import ai from './ai'
-import app from './app'
-
-// ... import all modules
 
 export default {
 	translation: {
-		...global,
-		app,
-		setting,
-		layout,
-		components,
-		editor,
-		chatbox,
-		ai,
-		chat,
-		note
+		// ... 其他
+		newFeature // 注册新模块
 	}
 } as const
-
-// Step 2: Create all module files in Spanish
-// packages/app/locales/es/global.ts
-export default {
-	$: '$',
-	edit: 'Editar',
-	add: 'Agregar',
-	save: 'Guardar',
-	remove: 'Eliminar'
-	// ... other translations
-}
-
-// Step 3: Add to language options
-// Update locale_options in appdata
 ```
 
-## 9. Constraints & Best Practices
+## 4. 约束与最佳实践
 
-### 9.1 Naming Conventions
+### 4.1 命名规范
 
-- **Keys**: Use snake_case for translation keys
-- **Structure**: Organize keys hierarchically by feature/component
-- **Consistency**: Maintain identical key structure across all languages
-- **Descriptive**: Use descriptive key names that indicate purpose
+- **键名 (Keys)**: 翻译键必须使用 `snake_case`。
+- **结构**: 按照功能或组件进行层次化组织键名。
+- **一致性**: 在所有语言文件中必须保持完全一致的键名结构。
 
-### 9.2 Code Style Requirements
+### 4.2 代码风格要求
 
-- **No Comments**: DO NOT add comments to translation files
-- **Export Default**: ALWAYS use `export default` for translation modules
-- **Type Safety**: ALWAYS use `as const` for locale index exports
-- **Immutability**: Translation objects MUST be immutable
+- **禁止注释**: 不要向翻译文件中添加任何注释。
+- **默认导出**: 始终使用 `export default` 导出翻译对象。
+- **类型安全**: 在区域语言的 index 导出中，**始终**使用 `as const`。
+- **扁平结构**: 翻译对象尽量保持扁平化（嵌套不要超过 3 层）。
 
-### 9.3 File Organization
-
-- **One Feature Per File**: Create separate files for different features/modules
-- **Flat Structure**: Keep translation objects relatively flat (max 3 levels deep)
-- **Group Related**: Group related translations together under logical namespaces
-- **Alphabetical**: Maintain alphabetical order within translation objects
-
-### 9.4 Quality Guidelines
-
-- **Complete Translations**: ALL keys must have translations in ALL supported languages
-- **Consistent Terminology**: Use consistent terminology across the application
-- **Context Awareness**: Provide context for ambiguous terms
-- **Pluralization**: Handle plural forms appropriately
-- **Variables**: Use `${variable}` syntax for dynamic content
-
-### 9.5 Technical Constraints
-
-- **No Dynamic Keys**: DO NOT generate translation keys dynamically at runtime
-- **Type Safety**: ALWAYS maintain TypeScript type safety
-- **Bundle Size**: Be mindful of bundle size; use code splitting for large translations
-- **Performance**: Use efficient import patterns to avoid unnecessary bundle bloat
-
-## 10. Common Patterns
-
-### 10.1 Dynamic Content
+### 4.3 动态内容与插值
 
 ```typescript
-// In translation file
+// 在翻译文件中
 export default {
 	welcome_message: 'Welcome, ${name}!',
-	item_count: 'You have ${count} items',
-	items: {
-		one: '${count} item',
-		other: '${count} items'
-	}
+	item_count: 'You have ${count} items'
 }
 
-// In component
+// 在组件中
 const { t } = useTranslation()
 t('welcome_message', { name: 'John' })
-t('item_count', { count: 5 })
-t('items', { count: 1 }) // Returns "1 item"
-t('items', { count: 5 }) // Returns "5 items"
 ```
 
-### 10.2 Nested Structures
+### 4.4 质量指南
 
-```typescript
-// In translation file
-export default {
-	buttons: {
-		save: 'Save',
-		cancel: 'Cancel',
-		delete: 'Delete'
-	},
-	messages: {
-		success: 'Operation successful',
-		error: 'An error occurred'
-	}
-}
-
-// In component
-t('buttons.save')
-t('messages.success')
-```
-
-### 10.3 Interpolation with HTML
-
-```typescript
-// In translation file
-export default {
-	terms: 'I agree to the <1>Terms of Service</1> and <2>Privacy Policy</2>'
-}
-
-// In component
-<Trans
-	i18nKey="terms"
-	components={[
-		<a href="/terms">Terms of Service</a>,
-		<a href="/privacy">Privacy Policy</a>
-	]}
-/>
-```
+- **翻译完整性**: **所有**支持的语言文件中，**所有**的键都必须有对应的翻译。
+- **上下文**: 当词汇有歧义时，必须根据上下文提供准确的翻译。
+- **避免硬编码**: 在 React 组件中，永远不要硬编码可见的中文字符或英文字符，必须抽取到 locale 文件中。

@@ -1,30 +1,45 @@
 ---
 name: agentmap-generator
-description: Guides the generation, reading, and updating of agentmap.md files. This skill ensures a consistent and up-to-date map of the codebase for AI agents.
+description: 指导 agentmap.md 文件的生成、读取和更新。此技能确保为 AI Agent 提供一致且最新的代码库地图。
 ---
 
-# Agentmap Generation and Maintenance
+# AgentMap 生成指南
 
-This skill governs the creation and lifecycle of `agentmap.md` files, which serve as the primary architectural guide for AI agents.
+此技能提供了在项目中维护 `agentmap.md` 的强制规范，以便让 AI 准确掌握代码库的最新的物理文件结构和模块职能划分。
 
-## 1. File Structure & Content
+## 1. 何时触发更新
 
-Every `agentmap.md` (at project root or `packages/{package_name}/`) MUST contain:
+- **在修改任何文件后**：只要你在一个包（package）内进行了文件的新增、重命名或删除，或者显著改变了核心模块的职责，**必须**在任务结束前更新该包根目录下的 `agentmap.md`。
 
-- **Architecture Overview**: High-level description of the project/package structure.
-- **Module Summaries**: Brief descriptions of each functional module.
-- **JSON File Tree**: A structured representation of the filesystem including:
-     - **Folder/File Function**: What it does.
-     - **Organizational Structure**: Patterns used (e.g., Layered, Hexagonal).
-     - **Naming Conventions**: e.g., kebab-case for files, PascalCase for components.
-     - **File Metadata**:
-          - `input`: External dependencies or required data.
-          - `output`: Provided exports or side effects.
-          - `role`: Role in the system (e.g., Controller, View, Utility).
-          - `description`: Brief functional summary.
+## 2. AgentMap 的结构
 
-## 2. Implementation Details
+一个标准的 `agentmap.md` 必须包含以下部分：
 
-- Use Markdown code blocks for the JSON structure.
-- Ensure descriptions are concise and accurate.
-- Follow existing patterns in the `agentmap.md` if it already exists.
+### 2.1 包的描述
+
+简短描述该 package 的核心职责（如“这是应用的前端渲染进程包，负责所有的 UI 和状态管理”）。
+
+### 2.2 Tree JSON 状态树
+
+这部分最重要，必须使用 Markdown 的代码块（` ```json `）包裹。它代表了当前包内部的最新文件夹结构和核心文件的职责。
+
+```json
+{
+	"src": {
+		"components": {
+			"Button": {
+				"index.tsx": "通用按钮组件"
+			}
+		},
+		"models": {
+			"global.ts": "全局单例状态模型"
+		}
+	}
+}
+```
+
+## 3. 维护规范
+
+- **准确性**：JSON 树必须真实反映当前磁盘上的文件结构，严禁编造不存在的文件。
+- **保护目录**：永远不要在 `agentmap.md` 中包含以 `__`（双下划线）开头的文件夹（如 `__codegrave__`）。
+- **简洁性**：文件描述应该尽量简短（一行内），只需要说明“这是干什么的”。对于嵌套层级，如果目录内部非常复杂，只需列出核心入口文件。

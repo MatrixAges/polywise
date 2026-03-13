@@ -1,66 +1,47 @@
 ---
 name: css
-description: Guides the implementation of styling using TailwindCSS + CSS Modules. Triggered when working on component styling, layout design, or CSS patterns.
+description: 指导使用 TailwindCSS + CSS Modules 实现样式。在处理组件样式、布局设计或 CSS 模式时触发。
 ---
 
-# CSS Styling Skill
+# CSS 样式指南
 
-This skill provides mandatory instructions for implementing styling using TailwindCSS + CSS Modules in this project.
+此技能提供了本项目中结合 TailwindCSS + CSS Modules 进行样式实现的强制性规范。
 
-## 1. Architecture Overview
+## 1. 架构概览
 
-The project uses a hybrid styling approach:
+本项目采用混合样式策略：
 
-- **TailwindCSS**: For simple, utility-first styles and layouts
-- **CSS Modules**: For complex state management, component-specific styles, and maintainability
-- **Rsbuild + Lightning CSS**: For modern CSS processing with PostCSS support
+- **TailwindCSS**: 用于简单的、实用优先的样式和布局。
+- **CSS Modules**: 用于复杂的状态管理、组件特定的样式和高可维护性需求。
+- **Rsbuild + Lightning CSS**: 提供带有 PostCSS 支持的现代 CSS 处理。
 
-## 2. Directory Structure
+## 2. 样式策略决策树
 
-```
-packages/app/
-├── styles/
-│   ├── global.css              # Global styles
-│   ├── index.css               # Main CSS entry
-│   ├── vars.css                # CSS variables
-│   └── md.module.css           # Markdown specific styles
-└── components/
-    ├── Modal.tsx               # Pure TailwindCSS
-    └── Markdown/
-        └── components/
-            ├── Code/
-            │   ├── index.tsx
-            │   └── index.module.css  # CSS Modules for complex styles
-            └── ...
-```
-
-## 3. Style Strategy Decision Tree
-
-### When to Use TailwindCSS
+### 何时使用 TailwindCSS
 
 ```typescript
-// ✅ Use TailwindCSS for:
-// - Simple layouts (flex, grid, positioning)
-// - Basic spacing (margin, padding)
-// - Simple colors and typography
-// - One-off styles
-// - Quick prototyping
+// ✅ 使用 TailwindCSS:
+// - 简单的布局（flex, grid, 定位）
+// - 基础间距（margin, padding）
+// - 基础颜色和排版
+// - 一次性样式
+// - 快速原型
 
 <div className='flex items-center gap-3 p-4'>
-  <span className='text-std-600'>Content</span>
+  <span className='text-std-600'>内容</span>
 </div>
 ```
 
-### When to Use CSS Modules
+### 何时使用 CSS Modules
 
 ```typescript
-// ✅ Use CSS Modules for:
-// - Complex state transitions (hover, active, focus states)
-// - Component-specific animations
-// - Nested selector patterns
-// - Repeated complex styles
-// - Dark mode switching
-// - Styles that would create overly long TailwindCSS class strings
+// ✅ 使用 CSS Modules:
+// - 复杂的状态过渡（hover, active, focus 状态组合）
+// - 组件专属的动画
+// - 嵌套选择器模式
+// - 重复的复杂样式
+// - 黑暗模式切换逻辑
+// - 会导致 TailwindCSS 类名字符串过长的样式组合
 
 import styles from './index.module.css'
 
@@ -69,12 +50,12 @@ import styles from './index.module.css'
 </div>
 ```
 
-## 4. TailwindCSS Patterns
+## 3. TailwindCSS 模式
 
-### 4.1 Multi-line Class Naming
+### 3.1 多行类名命名
 
 ```typescript
-// ✅ Preferred: Multi-line for readability
+// ✅ 推荐：多行以增加可读性
 <div
 	className='
 		flex
@@ -86,14 +67,14 @@ import styles from './index.module.css'
 	<Icon size={20}></Icon>
 </div>
 
-// ❌ Avoid: Single-line when complex
+// ❌ 避免：当样式很复杂时仍写在单行
 <div className='flex items-center justify-center w-18 h-screen is_drag'>
 ```
 
-### 4.2 Conditional Styles with Template Strings
+### 3.2 带有模板字符串的条件样式
 
 ```typescript
-// ✅ Use template strings for conditional styles
+// ✅ 使用模板字符串管理条件类名
 const Index = ({ fold }: { fold: boolean }) => {
 	return (
 		<nav
@@ -109,83 +90,44 @@ const Index = ({ fold }: { fold: boolean }) => {
 }
 ```
 
-### 4.3 Common Layout Patterns
+### 3.3 全局工具类 (Global Utilities)
 
 ```typescript
-// Flexbox Center
-<div className='flex items-center justify-center h-full'></div>
+// Electron 窗口拖拽
+<div className='is_drag'></div>        // 允许拖动
+<div className='no_drag clickable'></div> // 禁止拖动，允许点击
 
-// Flexbox Gap
-<div className='flex flex-col gap-4'></div>
+// Lucide 图标边框
+<svg className='lucide'></svg>         // 应用 1.8px 的线条宽度
 
-// Absolute Positioning
-<div className='absolute top-2 right-2'></div>
-
-// Responsive with Breakpoints
-<div className='max-[720px]:p-0 p-6'></div>
-
-// Hover States
-<div className='hover:bg-std-300/60 hover:text-std-900 clickable'></div>
-
-// Rounded Variants
-<div className='rounded-full'></div>
-<div className='rounded-xl'></div>
-<div className='rounded-md'></div>
-```
-
-### 4.4 Global Utility Classes
-
-```typescript
-// Electron Window Dragging
-<div className='is_drag'></div>        // Enable drag region
-<div className='no_drag clickable'></div> // Disable drag, enable click
-
-// Lucide Icon Stroke
-<svg className='lucide'></svg>         // Apply 1.8px stroke-width
-
-// Custom Utilities
-<div className='clickable'></div>      // Cursor pointer
+// 自定义工具类
+<div className='clickable'></div>      // 鼠标指针 cursor pointer
 <div className='border_box'></div>     // box-sizing: border-box
 <div className='w_100'></div>          // width: 100%
 ```
 
-## 5. CSS Modules Patterns
+## 4. CSS Modules 模式
 
-### 5.1 File Structure
+### 4.1 文件结构
 
 ```css
 /* index.module.css */
-@reference '../../../styles/index.css';
+@reference '../../../styles/index.css'; /* 用于引入 Tailwind 基础 */
 
 ._local {
-	/* Component-specific styles */
+	/* 组件特定的样式 */
 
 	&:hover {
-		/* Hover state */
+		/* Hover 状态 */
 	}
 
 	:global {
-		/* Global class styles */
+		/* 全局类样式（跳过哈希化） */
 	}
 }
 ```
 
-### 5.2 Component Integration
-
-```typescript
-// Component file
-import styles from './index.module.css'
-
-const Index = () => {
-	return (
-		<div className={`w_100 border_box relative${styles._local}`}>
-			<button className='btn_copy'></button>
-		</div>
-	)
-}
-```
-
-### 5.3 Nested States with :global
+### 4.2 嵌套状态与 :global
 
 ```css
 /* index.module.css */
@@ -213,17 +155,17 @@ const Index = () => {
 }
 ```
 
-### 5.4 Using @apply for TailwindCSS
+### 4.3 使用 @apply
 
 ```css
 ._local {
-	/* ✅ Use @apply for TailwindCSS utilities */
+	/* ✅ 使用 @apply 引入 TailwindCSS 工具类 */
 	@apply rounded-xl;
 
-	/* ✅ Mix custom CSS with @apply */
+	/* ✅ 将自定义 CSS 与 @apply 混合 */
 	padding: 16px 0;
 
-	/* ✅ Use @apply for colors */
+	/* ✅ 将 @apply 用于颜色 */
 	:global {
 		.lang {
 			@apply text-std-400;
@@ -232,10 +174,10 @@ const Index = () => {
 }
 ```
 
-### 5.5 CSS Variables
+### 4.4 CSS 变量
 
 ```css
-/* ✅ Define CSS variables with snake_case */
+/* ✅ 使用 snake_case 定义 CSS 变量 */
 ._local {
 	--margin_y: 1.2em;
 
@@ -245,382 +187,44 @@ const Index = () => {
 }
 ```
 
-### 5.6 Complex State Transitions
+## 5. 颜色系统
 
-```css
-/* ✅ Use CSS Modules for complex transitions */
-._local {
-	.btn {
-		opacity: 0;
-		transition-property: opacity;
-
-		&:hover {
-			@apply bg-std-300;
-		}
-	}
-
-	/* ✅ Parent-child hover effects */
-	&:hover {
-		.btn {
-			opacity: 1;
-		}
-	}
-}
-```
-
-## 6. Implementation Examples
-
-### 6.1 Simple Component (Pure TailwindCSS)
+项目使用语义化的颜色名称：
 
 ```typescript
-// settings/components/Item.tsx
-const Index = ({ Icon, title, desc }: IProps) => {
-	return (
-		<div
-			className='
-				flex
-				items-center justify-between
-				w-full
-				min-h-10
-				gap-3
-			'
-		>
-			<div className='flex items-center'>
-				<div
-					className='
-						flex shrink-0
-						items-center justify-center
-						w-[21px] h-[21px]
-						mr-4
-						text-[21px]
-					'
-				>
-					<Icon />
-				</div>
-				<div className='flex flex-col'>
-					<span className='leading-none font-medium'>{title}</span>
-					{desc && <span className='text-gray mt-1 text-xs'>{desc}</span>}
-				}
-			</div>
-		</div>
-	)
-}
+// TailwindCSS 颜色类名
+'text-std-800' // 主要文字
+'text-std-600' // 次要文字
+'text-std-400' // 柔和文字
+'text-std-white' // 白色文字
+'text-std-black' // 黑色文字
+
+'bg-std-100' // 主要背景
+'bg-std-200' // 次要背景
+'bg-std-300' // Hover 悬停背景
+'bg-std-800' // 黑暗背景
+
+'border-std-200' // 亮色边框
+'border-std-900/8' // 带透明度的暗色边框
 ```
 
-### 6.2 Component with CSS Modules
+## 6. 约束与最佳实践
 
-```typescript
-// components/Markdown/components/Code/index.tsx
-import styles from './index.module.css'
+### 6.1 命名约定
 
-const Index = ({ children, language }: IProps) => {
-	return (
-		<div className={`w_100 border_box relative${styles._local}`}>
-			<span className='lang absolute'>{language}</span>
-			<button className='absolute flex btn_copy justify_center align_center clickable'>
-				<Copy></Copy>
-			</button>
-			<div className='pre_wrap w_100 flex'></div>
-		</div>
-	)
-}
-```
+- **TailwindCSS**: 使用标准的实用类名。
+- **CSS Modules**: 类名必须使用 `snake_case`。
+- **CSS 变量**: 使用带有 `--` 前缀的 `snake_case`。
+- **组件容器**: 对于主容器类名，始终使用 `_local`。
 
-```css
-/* components/Markdown/components/Code/index.module.css */
-@reference '../../../../styles/index.css';
+### 6.2 代码风格
 
-._local {
-	padding: 16px 0;
-	font-size: 12px;
+- **TailwindCSS**: 换行格式化以增强可读性。
+- **CSS Modules**: 不加任何注释。使用 Tab 缩进。
+- **空行**: 用空行分隔不同的逻辑区域。
 
-	&:hover {
-		:global {
-			.btn_copy {
-				opacity: 1;
-			}
-		}
-	}
+### 6.3 性能与维护
 
-	@apply rounded-xl;
-
-	:global {
-		.btn_copy {
-			opacity: 0;
-			transition-property: opacity;
-
-			&:hover {
-				@apply bg-std-300;
-			}
-		}
-	}
-}
-```
-
-### 6.3 Complex Component with Conditional Styles
-
-```typescript
-// pages/home/components/Sidebar.tsx
-const Index = ({ fold, toggleSidebar }: IProps) => {
-	return (
-		<nav
-			className={`
-				relative
-				flex flex-col
-				h-full
-				${fold ? 'w-18 items-center justify-center' : 'border-std-900/8 w-60 border-r py-2'}
-			`}
-		>
-			<div
-				className={`
-					flex
-					items-center
-					px-4
-					group
-					${fold ? 'absolute top-4 justify-center' : 'border-std-900/8 justify-between border-b pb-2'}
-				`}
-			>
-				<div
-					className={`
-						flex
-						items-center justify-center
-						fill-std-800
-						${fold ? 'h-8 w-8 group-hover:opacity-0' : 'h-6 w-6'}
-					`}
-				>
-					<Logo></Logo>
-				</div>
-			</div>
-		</nav>
-	)
-}
-```
-
-## 7. CSS Variables System
-
-### 7.1 Global Variables
-
-```css
-/* styles/vars.css */
-:root {
-	--radius: 4px;
-}
-```
-
-### 7.2 Using Variables
-
-```css
-._local {
-	--margin_y: 1.2em;
-
-	p {
-		margin-block: var(--margin_y);
-	}
-}
-```
-
-## 8. Color System
-
-The project uses semantic color names:
-
-```typescript
-// TailwindCSS color classes
-'text-std-800' // Primary text
-'text-std-600' // Secondary text
-'text-std-400' // Muted text
-'text-std-white' // White text
-'text-std-black' // Black text
-
-'bg-std-100' // Primary background
-'bg-std-200' // Secondary background
-'bg-std-300' // Hover state
-'bg-std-800' // Dark background
-
-'border-std-200' // Light border
-'border-std-900/8' // Dark border with opacity
-```
-
-## 9. Constraints & Best Practices
-
-### 9.1 Naming Conventions
-
-- **TailwindCSS**: Use standard utility classes
-- **CSS Modules**: Use `snake_case` for class names
-- **CSS Variables**: Use `snake_case` with `--` prefix
-- **Component Classes**: Use `_local` for main container
-
-### 9.2 Code Style
-
-- **TailwindCSS**: Multi-line format for readability
-- **CSS Modules**: No comments
-- **Indentation**: Use tabs
-- **Empty Lines**: Use blank lines to separate logical sections
-
-### 9.3 Performance
-
-- **Avoid Over-Tailwinding**: Don't create overly long class strings (> 100 characters)
-- **Use CSS Modules**: For complex state transitions and repeated patterns
-- **Lazy Loading**: Component-specific CSS Modules are automatically code-split
-- **Minification**: Lightning CSS automatically minifies production builds
-
-### 9.4 Maintainability
-
-- **Prefer CSS Modules** for:
-     - Complex hover/active/focus states
-     - Animations and transitions
-     - Dark mode variations
-     - Repeated complex patterns
-- **Prefer TailwindCSS** for:
-     - Simple layouts
-     - One-off styles
-     - Quick iterations
-     - Design system consistency
-
-### 9.5 Technical Constraints
-
-- **No Inline Styles**: Avoid inline `style` props unless necessary
-- **No !important**: Never use `!important` in CSS Modules
-- **Class Scoping**: Always use CSS Modules for component-specific styles
-- **Global Styles**: Place global styles in `styles/global.css`
-
-## 10. Common Patterns
-
-### 10.1 Icon Button
-
-```typescript
-<div
-	className='
-		flex
-		items-center justify-center
-		w-6 h-6
-		rounded-full
-		hover:bg-std-200/60
-		clickable
-	'
-	onClick={handleClick}
->
-	<Icon size={14} />
-</div>
-```
-
-### 10.2 Card Layout
-
-```typescript
-<div
-	className='
-		relative
-		overflow-hidden
-		flex flex-col
-		max-h-full
-		px-6 py-4
-		mx-auto
-		rounded-xl
-		bg-std-100
-	'
->
-	<div className='header'></div>
-	<div className='content overflow-y-auto flex w-full h-full'></div>
-</div>
-```
-
-### 10.3 Navigation Item
-
-```typescript
-<div
-	className={`
-		flex
-		items-center
-		h-12
-		hover:bg-std-300/60 hover:text-std-900
-		clickable
-		${fold ? 'w-12 justify-center rounded-full' : 'gap-4 rounded-full px-3.5'}
-	`}
-	onClick={handleClick}
->
-	<Icon size={fold ? 20 : 18}></Icon>
-	{!fold && <span className='capitalize'>{label}</span>}
-</div>
-```
-
-### 10.4 Code Block with Copy Button
-
-```typescript
-// CSS
-._local {
-	&:hover {
-		:global {
-			.btn_copy {
-				opacity: 1;
-			}
-		}
-	}
-
-	:global {
-		.btn_copy {
-			opacity: 0;
-			transition-property: opacity;
-		}
-	}
-}
-
-// TSX
-<div className={`w_100 border_box relative${styles._local}`}>
-	<button className='absolute flex btn_copy justify_center align_center clickable'>
-		<Copy></Copy>
-	</button>
-	<div className='pre_wrap w_100 flex'></div>
-</div>
-```
-
-## 11. TailwindCSS Group Reference
-
-| Category             | Utilities / Prefixes                                         |
-| :------------------- | :----------------------------------------------------------- |
-| **Position**         | `relative`, `absolute`, `fixed`, `sticky`                    |
-| **PositionSides**    | `inset-`, `top-`, `right-`, `bottom-`                        |
-| **PositionSidesExt** | `left-`, `float-`, `clear-`, `isolate`                       |
-| **Layout**           | `container`, `block`, `inline`, `hidden`                     |
-| **LayoutDisplay**    | `visible`, `contents`, `table`, `flow-root`                  |
-| **LayoutBox**        | `box-`, `aspect-`, `columns-`, `break-`                      |
-| **LayoutOverflow**   | `overflow-`, `overscroll-`, `object-`, `z-`                  |
-| **Flexbox**          | `flex`, `flex-`, `shrink-`, `grow-`                          |
-| **FlexUtils**        | `basis-`, `order-`, `wrap-`, `flex-nowrap`                   |
-| **Grid**             | `grid`, `grid-`, `col-`, `row-`                              |
-| **GridUtils**        | `auto-`, `grid-flow-`, `place-`, `content-`                  |
-| **Alignment**        | `items-`, `justify-`, `self-`, `justify-self-`               |
-| **Sizing**           | `w-`, `h-`, `size-`, `max-w-`                                |
-| **SizingMinMax**     | `min-w-`, `min-h-`, `max-h-`, `fit-`                         |
-| **Spacing**          | `space-`, `gap-`, `divide-`                                  |
-| **Padding**          | `p-`, `px-`, `py-`, `pt-`                                    |
-| **PaddingExt**       | `pb-`, `pl-`, `pr-`                                          |
-| **Margin**           | `m-`, `mx-`, `my-`, `mt-`                                    |
-| **MarginExt**        | `mb-`, `ml-`, `mr-`                                          |
-| **Shape**            | `rounded`, `rounded-`, `circle-`, `square-`                  |
-| **Typography**       | `text-`, `font-`, `leading-`, `tracking-`                    |
-| **TypographyStyle**  | `italic`, `not-italic`, `underline`, `no-underline`          |
-| **TypographyDecor**  | `decoration-`, `underline-offset-`, `uppercase`, `lowercase` |
-| **TypographyLayout** | `truncate`, `break-`, `whitespace-`, `list-`                 |
-| **TypographyAlign**  | `align-`, `text-left`, `text-center`, `text-right`           |
-| **Background**       | `bg-`, `gradient-`, `mix-blend-`, `bg-blend-`                |
-| **Gradients**        | `from-`, `via-`, `to-`                                       |
-| **Borders**          | `border`, `border-`, `outline-`, `outline`                   |
-| **Rings**            | `ring`, `ring-`, `ring-offset-`, `divide-`                   |
-| **Shadow**           | `shadow-`, `drop-shadow-`                                    |
-| **Effects**          | `opacity-`, `filter-`, `backdrop-`, `blur-`                  |
-| **Filters**          | `brightness-`, `contrast-`, `grayscale-`, `hue-rotate-`      |
-| **FiltersExt**       | `invert-`, `saturate-`, `sepia-`                             |
-| **Transforms**       | `transform-`, `scale-`, `rotate-`, `translate-`              |
-| **TransformsExt**    | `skew-`, `origin-`, `will-change-`, `perspective-`           |
-| **Transitions**      | `transition-`, `duration-`, `ease-`, `delay-`                |
-| **Animation**        | `animate-`                                                   |
-| **State**            | `group*`, `peer*`, `has-*`, `data-*`                         |
-| **StateInteractive** | `open:`, `checked:`, `disabled:`, `visited:`                 |
-| **StateEmpty**       | `empty:`, `read-only:`, `required:`, `valid:`                |
-| **StateAria**        | `aria-*`                                                     |
-| **Action**           | `hover:`, `active:`, `focus:`, `focus-`                      |
-| **ActionExt**        | `focus-within:`, `focus-visible:`, `target:`, `selection:`   |
-| **Before**           | `before:`                                                    |
-| **After**            | `after:`                                                     |
-| **Dark**             | `dark:`                                                      |
-| **Media**            | `sm:`, `md:`, `lg:`, `xl:`                                   |
-| **MediaExt**         | `2xl:`, `min-[`, `max-[`, `print:`                           |
+- **避免冗长字符串**: 不要创建超过 100 个字符的 TailwindCSS 字符串。改用 CSS Modules。
+- **不使用内联样式**: 除非必须，避免使用内联的 `style` props。
+- **严禁 !important**: 绝对不要在 CSS Modules 中使用 `!important`。

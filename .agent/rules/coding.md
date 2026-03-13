@@ -1,238 +1,76 @@
-## Coding Standards
+## 基石原则 (Agent Constitution)
 
-Relevant skills are located in the `.opencode/skills` directory.
+这是你生成任何代码必须遵守的最高宪法：
 
-- TypeScript: typescript/SKILL.md
-- React coding best practices: See react/SKILL.md
-- MobX state management best practices: See mobx/SKILL.md
-- Tailwind CSS + CSS Modules styling best practices: See css/SKILL.md
-- i18n best practices: See i18n/SKILL.md
-- Electron main process and renderer process data interaction best practices: See erpc/SKILL.md
+- **原子化 (单一职责与物理隔离)**：
+     - 一个函数或组件只允许做**一件具体的事情**（即一个“原子”）。
+     - 强制执行“**一个原子，一个物理文件**”的原则，严禁在一个文件中堆砌多个无关联的函数或组件。
+     - 所有文件必须通过 `export default` 暴露其核心“原子”，具体的导出语法（如箭头函数还是 Class）必须严格对照当前目录所在包的 `unify.md` 文件。
 
-## Type Inference Over Explicit Types
+- **分形化 (深层目录与高内聚)**：
+     - 随着业务复杂度的增加，严禁在同一个扁平目录下不断新增文件（这会导致代码膨胀和混乱）。
+     - 当一个“原子”的内部逻辑变复杂（例如代码超过 40 行，或者需要拆分出多个子逻辑/子组件协同工作时），你必须**就地创建一个与该原子同名的深层文件夹**。
+     - 将原有的主逻辑移入该文件夹的 `index.ts/tsx` 中，并将拆分出来的新子逻辑/子组件放在该文件夹内，仅供 `index` 调度使用。
+     - 具体的组件如何拆分子组件、函数如何聚类为同名文件夹，**必须在执行代码生成前，读取并严格效仿当前项目或子模块目录下的 `unify.md` 中定义的“分形法则”**。
+     - 最终生成的代码必须呈现出树状的、高内聚的层级结构，确保极高的可读性和可维护性，杜绝“想到哪写到哪”的面条式代码。
 
-Unless necessary for complex scenarios or public API clarity, do not explicitly specify function return types. Let the TypeScript compiler infer types automatically. Do not pass generic types to functions if the type system can infer them from the arguments.
+## 代码规范 (Coding Standards)
 
-## No Any Type (CRITICAL)
+针对不同技术栈和代码模块的开发，请强制使用 `@.opencode/skills/` 下的具体技能指南：
 
-**NEVER** use the `any` type in TypeScript code. Always use specific types, interfaces, or `unknown` if the type is truly not known yet. Using `any` defeats the purpose of TypeScript and is strictly prohibited.
+- **TypeScript**: [typescript/SKILL.md](../../.opencode/skills/typescript/SKILL.md)
+- **React**: [react/SKILL.md](../../.opencode/skills/react/SKILL.md)
+- **MobX**: [mobx/SKILL.md](../../.opencode/skills/mobx/SKILL.md)
+- **Tailwind CSS**: [css/SKILL.md](../../.opencode/skills/css/SKILL.md)
+- **i18n**: [i18n/SKILL.md](../../.opencode/skills/i18n/SKILL.md)
+- **eRPC 通信**: [erpc/SKILL.md](../../.opencode/skills/erpc/SKILL.md)
 
-## SQL Definition Convention (CRITICAL)
+### 命名与格式
 
-All SQL statements MUST be defined within the `sql/` directory and exported for use. Raw SQL strings are prohibited within business logic files (models, services, etc.).
+- **命名规范**：所有普通变量必须使用 `snake_case`，所有函数和方法必须使用 `camelCase`，所有组件和页面文件必须使用 `PascalCase`。
+- **禁止下划线**：任何函数或方法（包括类内部的私有方法）的命名，绝对不能以 `_` 符号开头。
+- **类型标记**：声明数组类型时强制使用 `Array<T>` 泛型语法，严格禁止使用 `T[]` 语法。
+- **代码空行**：当相邻两行代码发生异步/同步风格切换，或执行不同的逻辑块时，强制插入一个空行进行视觉隔离。
+- **禁止注释**：生成的代码中严禁写任何中文或英文的解释性注释，强制要求通过极具描述性的变量名和函数名来体现业务意图。
 
-**Rules:**
+### 架构与设计
 
-1. **Location**: Place SQL files in `src/sql/`.
-2. **Export**: Export SQL strings or functions that return SQL strings.
-3. **Import**: Import SQL using named imports `import { sql_query, sql_insert } from './sql'`.
+- **单一职责**：`models/` 下的文件只允许写状态和数据获取逻辑，`components/` 只允许写 UI 渲染逻辑，`utils/` 只允许写无外部依赖的纯函数。
+- **原子化逻辑**：单个函数代码超过 40 行时必须将其拆分为多个独立小函数；JSX 中 `map` 循环内部的 DOM 结构必须抽离并新建为一个子组件。
+- **依赖注入**：所有类的外部依赖必须通过构造函数和 `tsyringe` 注入，严禁在业务代码中出现 `new ClassName()` 的强制实例化写法。
+- **文件拆分**：单个组件文件超过 80 行时，必须在该同级目录新建 `components/` 文件夹，将内部的区块组件拆分进去并使用无前缀的简短命名。
+- **函数顺序**：Class 内部必须严格按 `constructor` -> `init` -> `public 方法` -> `private 方法` -> `辅助函数` -> `off` 的物理顺序排列，且严禁保留没有任何内容的空函数。
 
-### SQL Comments (CRITICAL)
+### TypeScript 规范
 
-All exported SQL strings or functions in `src/sql/` MUST be preceded by a JSDoc-style comment (`/** ... */`). This comment must describe:
+- **禁止 Any**：代码中严禁出现 `any` 类型声明，对于不确定的类型，强制声明为 `unknown` 并使用 typeof/instanceof 等类型收窄机制。
+- **类型推断**：除了导出的复杂公共 API 外，禁止手动声明函数的返回值类型，全部交给 TS 编译器自动推断。
+- **类型导入**：导入 Type 或 Interface 时必须使用 `import type` 语法，且该类导入必须统一放在目标文件的最顶端区块。
+- **箭头函数**：所有业务组件、工具函数和独立函数强制声明为 `const fn = () => {}` 格式，禁止使用 `function fn() {}` 语法。
+- **函数传参**：当函数参数数量大于等于 3 个时，强制将参数合并为一个对象并命名为 `args`，且必须在函数体的第一行解构该 `args`。
+- **类型文件**：当单个 `.ts` 类型文件超过 50 行时必须按业务域拆分为多个文件；若某目录下存在多个不足 20 行的零散类型文件则必须合并为一。
 
-1.    **Operation**: What specific database action is being performed.
-2.    **Role**: The purpose of this operation within the larger system architecture.
+### 模块与导入导出
 
-## Node.js Native API and Import Convention (CRITICAL)
+- **默认导出**：每个 Class 类必须独占一个物理文件，并且在该文件的最末尾使用 `export default ClassName` 导出。
+- **Utils 导出**：`utils/` 目录下的所有工具函数，强制要求使用 `export default () => {}` 的匿名箭头函数格式导出。
+- **命名导入**：严禁使用 `import * as name` 的全量导入，强制使用精准解构语法 `import { a, b } from 'pkg'` 按需引入。
+- **默认导入**：引入 default 模块时必须直接使用 `import X from 'pkg'`，严禁写成带有别名的 `import { default as X } from 'pkg'`。
 
-- **Library Preference**: ALWAYS prefer `fs-extra` over native Node.js `fs/promises` for consistent enhanced file system operations.
-- **Import Style**: NEVER use the `node:` prefix for core Node.js module imports. Use the standard module name directly.
-- **Reference**: Detailed code examples for these conventions are maintained in the `@code-optimizer` subagent documentation.
+### 数据库与 SQL
 
-## Class Function Ordering
+- **全局唯一 ID**：所有数据库表的主键（id）和外键字段，强制使用 `uuidv7()` 生成字符串类型，严格禁止使用数据库自增 Int 类型。
+- **SQL 隔离**：所有 SQL 查询字符串强制存放在 `src/sql/` 目录的文件中，业务代码中若出现硬编码的 SQL 字符串将被视为违规。
+- **SQL 注释**：`src/sql/` 中导出的每一个 SQL 变量或函数上方，强制附带一段 JSDoc 注释，详细写明该语句操作了哪个表以及属于什么动作。
+- **数据库迁移**：日常开发直接修改 schema 定义文件即可；只有当用户明确指示“需要编写迁移脚本”时，才允许自增 `CURRENT_SCHEMA_VERSION`。
 
-When organizing class functions, follow this strict order:
+### 测试规范 (TDD)
 
-1. **constructor** - Instance initialization
-2. **init** - Initialization/setup methods (e.g., `init`, `setup`, `configure`)
-3. **Public methods** - All public API methods
-4. **Private methods** - Internal utility methods (prefixed with `_` or `private`)
-5. **Helper methods** - Private helper/auxiliary methods
-6. **off/destroy** - Cleanup methods at the end (e.g., `off`, `destroy`, `dispose`, `cleanup`)
+- **测试先行 (TDD)**：在 `packages/polywise` 中开发功能时，必须先编写测试代码并确认运行失败（Red），然后再编写业务代码使其通过（Green）。
+- **真实模型**：测试中严禁 Mock 本地大模型（如嵌入或重排模型）的响应，强制要求引入真实的推理库并利用真实数据集进行断言。
+- **测试隔离**：编写多测试用例时强制使用 `describe.concurrent` 并发运行，且每个用例在初始化时必须为其分配一个独立的数据库名或隔离目录以防止状态污染。
 
-- If the constructor body is empty, remove the constructor entirely. Only define a constructor when it has actual initialization logic.
-- Avoid using `any` type unless absolutely necessary. Use specific types, `unknown`, or generics instead.
-- Do not keep empty functions. If a function body is empty (no implementation), remove it entirely.
+### Node.js API 规范
 
-## Database Schema Migration (CRITICAL)
-
-When modifying database schema in the polywise package, you MUST update the migration system:
-
-## Migration Rules:
-
-1. **Direct SQL Modification Preferred**: During the pre-production phase, directly modify SQL definitions in the schema files unless explicitly asked to write a migration. Keep `CURRENT_SCHEMA_VERSION` at 1.
-2. **Version Increment**: Only increment `CURRENT_SCHEMA_VERSION` in `migration.ts` when explicitly requested.
-3. **Add Migration**: Only add a new migration object to the `migrations` array when explicitly requested.
-4. **Migration Content**: Use `up` function for schema changes (CREATE, ALTER, DROP) and data migration
-5. **Sequential Versions**: Migration versions must be sequential (1, 2, 3...)
-
-**CRITICAL**: Only update `CURRENT_SCHEMA_VERSION` when explicitly requested to write a migration!
-
-## Unique String IDs (CRITICAL)
-
-**ALL IDs in the system MUST be unique strings (e.g., uuid v7), NOT auto-incrementing integers.**
-
-This applies to:
-
-- Database primary keys (`id` fields)
-- Foreign key references (`source_id`, `target_id`, `article_id`, `node_id`, etc.)
-- All entity identifiers exposed through APIs
-
-**Rationale:**
-
-- Better suited for distributed systems
-- No information leakage about system state
-- Easier data merging and synchronization
-- Time-sortable with better database index performance (uuid v7)
-
-**Implementation:**
-
-- Use `TEXT PRIMARY KEY` instead of `SERIAL PRIMARY KEY` in PostgreSQL
-- Use `TEXT REFERENCES` instead of `INTEGER REFERENCES` for foreign keys
-- Generate IDs using `uuidv7()` before insertion
-- All ID parameters in functions should be `string` type
-
-## Test-Driven Development (TDD) for packages/polywise
-
-When working on `packages/polywise`, you MUST follow TDD principles:
-
-### TDD Cycle (Red-Green-Refactor):
-
-1. **Red**: Write a failing test first
-2. **Green**: Write minimal code to make the test pass
-3. **Refactor**: Clean up while keeping tests green
-
-### TDD Rules:
-
-1. **Test First**: Never write implementation code without a failing test
-2. **Atomic Tests**: Each test should verify ONE specific behavior
-3. **Descriptive Names**: Test names should describe behavior, not implementation
-4. **Independent Tests**: Tests should not depend on each other
-5. **Run Tests**: Always run tests after each change. When testing specific functionality, use `TEST_FILE=test/abc.spec.ts pnpm test` to accelerate the process and avoid full test suite execution.
-6. **Full Suite**: Run the full test suite (`pnpm test`) before final submission or major commits to ensure no regressions.
-
-### Test File Structure:
-
-- Main test file: `test/test.spec.ts` - Core functionality tests
-- Migration tests: `test/migration.spec.ts` - Database migration tests
-- New features: Create dedicated `test/[feature].spec.ts` files
-
-### TDD Checklist:
-
-- [ ] Did you write the test BEFORE the implementation?
-- [ ] Does the test name describe WHAT not HOW?
-- [ ] Is the test independent (no shared state with other tests)?
-- [ ] Did you run the test and see it fail first (Red)?
-- [ ] Did you write minimal code to make it pass (Green)?
-- [ ] Did you refactor while keeping tests passing?
-- [ ] Are all tests passing before committing?
-
-## Unit Testing Rules (CRITICAL)
-
-All unit tests in the `packages/polywise` package MUST adhere to the following rules:
-
-1.    **No Mocks for Models**: Mocking embedding functions or rerankers is STRICTLY PROHIBITED. All tests must use the actual local models (Qwen3-Embedding, BGE-Reranker) to ensure real-world reasoning performance.
-2.    **Real-world Datasets**: Tests must use complex, realistic datasets stored in the `test/datasets` directory. Hardcoded simple strings should be replaced with meaningful domain knowledge.
-3.    **Concurrency**: Use `describe.concurrent` for all test suites to maximize performance.
-4.    **Database Isolation**: Each test must use a unique database name or directory to prevent state leakage between concurrent tests.
-5.    **Timeout Handling**: Set appropriate timeouts (e.g., 60s-120s) for tests involving model inference.
-
-## Utils Export Convention (CRITICAL)
-
-All utility functions in `utils/` folders MUST follow this pattern:
-
-### Export Rule:
-
-- Use `export default` with arrow function syntax: `export default () => {}`
-- Do NOT write function return type annotations (let TypeScript infer)
-- Use anonymous arrow functions (no function name after `default`)
-
-## Types File Organization (CRITICAL)
-
-When organizing `types/` folders:
-
-### Splitting Rule:
-
-- If a types file exceeds **50 lines**, split it into separate files by category
-
-### Merging Rule:
-
-- If multiple types files are each under **20 lines**, merge them into a single file
-
-### Example Structure:
-
-```
-types/
-├── index.ts          # Re-exports all types
-├── node.ts           # Node-related types (if > 50 lines)
-├── edge.ts           # Edge-related types (if > 50 lines)
-└── common.ts         # Shared types (merged if all < 20 lines)
-```
-
-## No Return Type Annotations (CRITICAL)
-
-**NEVER** explicitly specify function return types unless absolutely necessary for complex scenarios or public API clarity. Let TypeScript infer types automatically.
-
-This applies to:
-
-- All utility functions in `utils/`
-- All private methods
-- All internal functions
-
-Only consider explicit return types for:
-
-- Public library APIs
-- Complex recursive types
-- Overload signatures
-
-## Class Export Convention
-
-Each class MUST be in its own file with a default export:
-
-## Function & Class Model Parameters Convention
-
-When a function or class constructor has more than 2 parameters, use an object parameter for better flexibility. If there are only 1 or 2 parameters, use positional parameters directly. The parameters must follow these style rules:
-
-- **Parameter Name**: Always use `args` for the object parameter (when there are more than 2 parameters).
-- **Type Name**: Always use `*Args` for the interface/type name (e.g., `CreateNodeArgs`).
-- **Destructuring**: Always destructure the `args` object at the beginning of the function or constructor.
-- **Ordering Rule**: `Required Variables` > `Optional Variables` > `Required Functions` > `Optional Functions`
-
-## Arrow Function Preference
-
-Prefer using arrow functions (`const a = () => {}`) for standalone functions, utility functions, and exported helpers, instead of function declarations (`function a() {}`).
-
-## Type Import Convention (CRITICAL)
-
-Always use `import type` for type-only imports. Avoid inline `import()` statements within interfaces or type definitions. Place all type imports at the top of the file.
-
-## Default Import Convention (CRITICAL)
-
-Always use direct default import syntax `import X from '...'` instead of `import { default as X } from '...'`.
-
-## Named Import Convention (CRITICAL)
-
-**NEVER** use namespace imports (`import * as name from 'module'`). Always use named imports (`import { a, b, c } from 'module'`).
-
-### Rules:
-
-1. **Explicit Named Imports**: Import only what you need using destructuring syntax.
-2. **No Namespace Aliases**: Avoid `import * as sql from './sql'` - instead import specific exports like `import { sql_query, sql_insert } from './sql'`.
-3. **Benefits**: Better tree-shaking, clearer dependencies, and easier refactoring.
-
-### Example:
-
-```typescript
-// WRONG
-import * as sql from './sql'
-// CORRECT
-import { sql_insert, sql_query, sql_update } from './sql'
-import * as utils from './utils'
-import { calculateSum, formatDate } from './utils'
-```
-
-## Final Guarantee
-
-- **Important:** Do not write any comments to explain the code!!! - Do not make modifications to modules that are not mentioned. If you realize that you need to modify pages or modules that are not mentioned, you must confirm with the user before performing the relevant operations.
-- Never execute any non-read-only Git commands from the command line at any time.
+- **文件系统**：所有涉及本地文件系统的操作，必须引入第三方库 `fs-extra` 进行处理，严禁使用原生的 `fs` 或 `fs/promises` 模块。
+- **无 node 前缀**：引入 Node.js 原生内置模块（如 `path`、`crypto`）时，导入路径严禁添加 `node:` 字符前缀。

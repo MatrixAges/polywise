@@ -1,39 +1,21 @@
 ---
 name: edoc-generator
-description: Specialized skill for translating documentation files and their content into English. Triggered when requested to localize, translate, or convert Chinese documentation to English.
+description: 专门用于将文档文件及其内容翻译为英文的技能。在要求进行本地化、翻译或将中文文档转换为英文时触发。
 ---
 
-# Skill: edoc-generator
+# English Doc Generator (英文文档生成器)
 
-This skill provides a structured workflow for translating project documentation from Chinese to English, ensuring consistency, technical accuracy, and professional terminology.
+此技能专门用于项目中文档的中英翻译与转换。
 
-## Workflow
+## 1. 翻译准则
 
-1.    **Preparation**:
-      - Identify the target files or directories for translation.
-      - Read the existing content to understand the context and technical terms.
+- **准确性**：必须准确传达原中文文档的技术含义。
+- **专业术语**：对于技术词汇（如 Agent, Prompt, Context, Dependency Injection 等），必须使用行业标准的英文术语。
+- **Markdown 格式**：翻译后必须严格保持原有的 Markdown 格式（包括代码块、加粗、列表、链接等）。
 
-2.    **Naming Convention**:
-      - Translate the filename into a concise, professional English name.
-      - Use `PascalCase` or `Sentence Case` for Markdown titles as per existing project style.
-      - Ensure the new filename reflects the core topic accurately.
+## 2. 执行流程
 
-3.    **Content Translation**:
-      - Translate the content accurately while preserving Markdown formatting, code blocks, and diagrams.
-      - **Terminology**: Use standard industry terms (e.g., "Prefrontal Cortex" for "前额叶皮层", "Spreading Activation" for "激活扩散").
-      - **Tone**: Maintain a professional, technical, and objective tone.
-      - **Context**: If the document refers to specific code entities (classes, methods), ensure the names match the actual code.
-
-4.    **Verification**:
-      - Verify that all internal links (if any) are updated to point to the new English filenames.
-      - Check that no information is lost during the translation process.
-
-5.    **Cleanup**:
-      - Replace the original Chinese files with the new English versions unless specifically asked to keep both.
-
-## Implementation Rules
-
-- **ALWAYS** translate the filename first to establish a reference.
-- **NEVER** use literal translations for technical terms if an established English equivalent exists.
-- **MUST** preserve all non-textual elements (Latex, Mermaid diagrams, code blocks).
-- **SHOULD** ensure the translated content adheres to the `minimalist` approach if it contains code or technical instructions.
+1. **读取原文**：读取用户指定的中文 `.md` 文档。
+2. **术语对齐**：检查文档中是否包含项目特有的缩写或代号，并决定其英文翻译策略。
+3. **逐段翻译**：将内容转换为英文，并进行适当的本地化润色。
+4. **覆写或另存**：根据用户的具体要求，将英文内容覆盖原文件或另存为新的文件（如 `README_EN.md`）。

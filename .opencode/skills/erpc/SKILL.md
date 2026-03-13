@@ -1,20 +1,20 @@
 ---
 name: erpc-communication
-description: Guides the implementation of Inter-Process Communication (IPC) using eRPC (electron-tRPC) between Electron's main and renderer processes. Triggered when working on Electron IPC, main-renderer communication, or tRPC-based Electron systems.
+description: 指导使用 eRPC (electron-tRPC) 在 Electron 主进程和渲染进程之间实现进程间通信 (IPC)。在处理 Electron IPC 或基于 tRPC 的系统时触发。
 ---
 
-# eRPC Communication Skill
+# eRPC 通信指南
 
-This skill provides mandatory instructions for implementing type-safe IPC using eRPC in this project.
+此技能提供了在本项目中使用 eRPC 实现类型安全的 IPC 的强制性说明。
 
-## 1. Main Process Implementation
+## 1. 主进程实现
 
-- **Router Definition**: You MUST define tRPC routers using the project's router utility.
-- **Handler Initialization**: You MUST use `createIPCHandler` from `erpc/main` to bind the router to Electron windows.
-- **Context Injection**: You SHOULD provide necessary instances (like `BrowserWindow` or `Tray`) via `createContext`.
+- **路由定义**: 必须使用项目提供的 router 工具定义 tRPC 路由。
+- **处理程序初始化**: 必须使用 `erpc/main` 中的 `createIPCHandler` 将路由器绑定到 Electron 窗口。
+- **上下文注入**: 应该通过 `createContext` 提供必要的实例（例如 `BrowserWindow` 或 `Tray`）。
 
 ```typescript
-// ALWAYS initialize createIPCHandler in the app ready lifecycle
+// 始终在 app ready 生命周期内初始化 createIPCHandler
 import { createIPCHandler } from 'erpc/main'
 
 import { routers } from './rpcs'
@@ -26,10 +26,10 @@ createIPCHandler({
 })
 ```
 
-## 2. Preload Script Configuration
+## 2. 预加载脚本 (Preload Script) 配置
 
-- **Expose Bridge**: You MUST call `exposeElectronTRPC()` from `erpc/main` within the preload script.
-- **Lifecycle**: It SHOULD be called within `process.once('loaded')`.
+- **暴露桥接接口**: 必须在预加载脚本中调用 `erpc/main` 提供的 `exposeElectronTRPC()`。
+- **生命周期**: 应该在 `process.once('loaded')` 内调用。
 
 ```typescript
 import { exposeElectronTRPC } from 'erpc/main'
@@ -39,97 +39,24 @@ process.once('loaded', () => {
 })
 ```
 
-## 3. Renderer Process Usage
+## 3. 渲染进程使用
 
-- **Client Creation**: Use `ipcLink` from `erpc/renderer` to create the tRPC client.
-- **Type Safety**: ALWAYS import the `Router` type from the main process to ensure full type safety.
+- **客户端创建**: 使用 `erpc/renderer` 中的 `ipcLink` 创建 tRPC 客户端。
+- **类型安全**: 始终从主进程导入 `Router` 类型以确保完整的端到端类型安全。
 
 ```typescript
+import { createTRPCClient } from '@trpc/client'
 import { ipcLink } from 'erpc/renderer'
 
-import { createTRPCClient } from '@trpc/client'
-
-import type { Router } from '@desktop/rpcs'
+import type { Router } from '@desktop/rpcs' // 导入主进程的 Router 类型
 
 export const trpc = createTRPCClient<Router>({
 	links: [ipcLink()]
 })
 ```
 
-## 4. Implementation Examples (Few-Shot)
+## 4. 路由与端点最佳实践
 
-### Example 1: Basic Query (Action without input)
-
-Used for simple actions like exiting the app or fetching static system info.
-
-```typescript
-// packages/desktop/src/rpcs/app/exit.ts
-import { app } from 'electron'
-
-import { p } from '@desktop/utils'
-
-export default p.query(async () => {
-	app.exit()
-})
-```
-
-### Example 2: Mutation with Validation (Action with input)
-
-Used for state-changing operations like setting themes or saving configuration.
-
-```typescript
-// packages/desktop/src/rpcs/app/setTheme.ts
-import { nativeTheme } from 'electron'
-import { enum as Enum, object } from 'zod'
-
-import { p } from '@desktop/utils'
-
-const input_type = object({
-	theme: Enum(['light', 'dark', 'system'])
-})
-
-export default p.input(input_type).mutation(async ({ input }) => {
-	const { theme } = input
-	nativeTheme.themeSource = theme
-})
-```
-
-### Example 3: Subscription (Event streaming)
-
-Used for streaming window events, download progress, or system status updates.
-
-```typescript
-// packages/desktop/src/rpcs/app/onApp.ts
-import { EventEmitter, on } from 'events'
-
-import { p } from '@desktop/utils'
-
-export default p.subscription(async function* (args) {
-	const { ctx, signal } = args
-	const e = new EventEmitter()
-
-	const onFocus = () => e.emit('CHANGE', { type: 'blur', value: false })
-	const onBlur = () => e.emit('CHANGE', { type: 'blur', value: true })
-
-	try {
-		ctx.win.on('focus', onFocus)
-		ctx.win.on('blur', onBlur)
-
-		for await (const [data] of on(e, 'CHANGE', { signal })) {
-			yield data
-		}
-	} finally {
-		ctx.win.off('focus', onFocus)
-		ctx.win.off('blur', onBlur)
-		e.removeAllListeners()
-	}
-})
-```
-
-## 5. Constraints & Best Practices
-
-- **Channel**: DO NOT manually handle `erpc` channel messages; let the library manage IPC flow.
-- **Window Management**: ALWAYS ensure new `BrowserWindow` instances are attached to the IPC handler if they need to communicate.
-- **Type Imports**: Only use `import type` for the Router in the renderer process to avoid bundling main process code.
-- **Validation**: ALWAYS use `zod` to define `input_type` for procedures that accept arguments.
-- **Cleanup**: In `subscription`, ALWAYS implement a `finally` block to detach listeners and prevent memory leaks.
+- **单一责任**: 每个路由应该对应主进程中的一项具体服务（例如：`window`, `file`, `dialog`）。
+- **参数验证**: 严禁在 Router 中编写复杂的业务逻辑。Router 只负责校验参数的输入与输出，必须将业务逻辑委托给 Service（例如调用 `WindowService.open()`）。
+- **类型引用**: 对于复杂的对象传参，必须将其类型定义放在 `packages/erpc` 包下并在两端共享，避免直接跨包导入实体逻辑。
