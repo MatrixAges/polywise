@@ -73,7 +73,7 @@ const Index = () => {
 						defaultLayout={defaultLayout}
 						onLayoutChanged={onLayoutChanged}
 					>
-						<ResizablePanel id='layout_content' className='h-full'>
+						<ResizablePanel id='layout_content' className='h-full' disabled={s.panel_collapsed}>
 							<Outlet></Outlet>
 						</ResizablePanel>
 						{!s.panel_collapsed && (
