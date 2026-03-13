@@ -48,7 +48,7 @@ body {
 	}
 
 	&.active {
-		@apply bg-active text-std-800;
+		@apply bg-active text-std-900;
 	}
 }
 
@@ -56,11 +56,11 @@ body {
 	@apply 
 				flex
 				items-center
-				gap-1.5
+				gap-2
 				px-2.5 py-1.5
 				rounded-full
 				text-std-400 text-sm font-medium
-				hover:bg-active hover:text-std-800 active:bg-click
+				hover:bg-active hover:text-std-900 active:bg-click
 				clickit
 			;
 
@@ -72,6 +72,6 @@ body {
 	}
 
 	&.active {
-		@apply bg-active text-std-800;
+		@apply bg-active text-std-900;
 	}
 }

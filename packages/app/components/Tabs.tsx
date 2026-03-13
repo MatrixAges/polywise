@@ -57,12 +57,12 @@ const Index = (props: IProps) => {
 								? `
 						text-under/60
 						hover:bg-under/10 active:bg-under/16
-						data-[active=true]:bg-under/10 data-[active=true]:text-under/80
+						data-[active=true]:bg-under/10 data-[active=true]:text-under
 					`
 								: `
 						text-std-400/80
 						hover:bg-active active:bg-click
-						data-[active=true]:bg-active data-[active=true]:text-std-800
+						data-[active=true]:bg-active data-[active=true]:text-std-900
 					`
 						)}
 						onClick={() => onClick?.(key, item)}
