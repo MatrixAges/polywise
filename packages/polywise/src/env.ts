@@ -7,7 +7,7 @@ import { load as loadVec } from 'sqlite-vec'
 import { app } from './consts'
 import { getDrizzleDB, migrate } from './db'
 import initSql from './db/initSql'
-import { getEmbeddingModel, getGenModel, getRerankModel } from './utils'
+import { getModelContext } from './utils'
 
 import type { Database } from 'better-sqlite3'
 import type { Llama, LlamaContext, LlamaEmbeddingContext, LlamaModel, LlamaRankingContext } from 'node-llama-cpp'
@@ -48,22 +48,18 @@ export const initLlama = async () => {
 }
 
 export const initEmbeddingModel = async () => {
-	env.embedding_model = await getEmbeddingModel(env.llama)
-	env.embedding_context = await env.embedding_model.createEmbeddingContext()
+	await getModelContext('embedding')
 }
 
 export const initRerankModel = async () => {
-	env.rerank_model = await getRerankModel(env.llama)
-	env.rerank_context = await env.rerank_model.createRankingContext()
+	await getModelContext('rerank')
 }
 
 export const initGenModel = async () => {
-	env.gen_model = await getGenModel(env.llama)
-	env.gen_context = await env.gen_model.createContext()
+	await getModelContext('gen')
 }
 
 export const initModels = async () => {
-	await initLlama()
 	await Promise.all([initEmbeddingModel(), initRerankModel(), initGenModel()])
 }
 

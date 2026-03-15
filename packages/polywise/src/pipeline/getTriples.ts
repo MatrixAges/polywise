@@ -1,9 +1,11 @@
 import { LlamaChatSession } from 'node-llama-cpp'
 
 import { prompt } from '../consts'
-import { env } from '../env'
+import { env, initGenModel } from '../env'
 
 export default async (text: string, onTextChunk?: ((text: string) => void) | undefined) => {
+	await initGenModel()
+
 	const session = new LlamaChatSession({
 		contextSequence: env.gen_context.getSequence(),
 		systemPrompt: prompt.get_triple
