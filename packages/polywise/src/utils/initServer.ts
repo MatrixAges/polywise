@@ -1,6 +1,6 @@
 import { serve } from '@hono/node-server'
 
-import server from './server'
+import { server } from '../server'
 
 export default async () => {
 	const { promise, resolve } = Promise.withResolvers()

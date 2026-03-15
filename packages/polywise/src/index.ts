@@ -1,3 +1,5 @@
+import './server'
+
 import { initEnv } from './env'
 import { initServer } from './utils'
 
