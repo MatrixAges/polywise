@@ -10,7 +10,7 @@ export default p
 	.meta({ openapi: { method: 'POST', path: '/save' } })
 	.input(input_type)
 	.output(output_type)
-	.query(async ({ input }) => {
+	.mutation(async ({ input }) => {
 		const { content } = input
 
 		await save({ type: 'article', content: content })

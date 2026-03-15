@@ -1,0 +1,402 @@
+npm warn Unknown user config "home". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> polywise@0.0.0 dev
+> concurrently -c "cyan,magenta" "npm run build:watch" "npm run start:watch"
+
+[0] npm warn Unknown env config "home". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+[0] npm warn Unknown user config "home". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+[1] npm warn Unknown env config "home". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+[1] npm warn Unknown user config "home". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+[0] 
+[0] > polywise@0.0.0 build:watch
+[0] > cross-env NODE_ENV=development rslib build --watch
+[0] 
+[1] 
+[1] > polywise@0.0.0 start:watch
+[1] > node --watch ./dist/index.js
+[1] 
+[0] Rslib v0.20.0
+[0] 
+[0] start   build started...
+[0] ready   built in 0.07 s
+[1] Listening on http://localhost:3072
+[0] info    [tsc] Starting compilation in watch mode... (esm)
+[1] Restarting './dist/index.js'
+[1] Listening on http://localhost:3072
+[0] info    [tsc] Found 0 errors. Watching for file changes. (esm)
+[0] 
+[0] File (esm)                                                     Size      
+[0] dist/drizzle/20260315062025_spicy_morgan_stark/migration.sql   5.1 kB 
+[0] dist/index.js                                                  9.4 kB 
+[0] dist/drizzle/20260315062025_spicy_morgan_stark/snapshot.json   25.0 kB
+[0] 
+[0]                                                       Total:   39.6 kB
+[0] 
+[0] success build completed, watching for changes...
+[1] 4mkPMhGQx0M
+[1] JseCfYifbaM
+[1] RLws9a13CZk
+[0] start   building src/utils/openapi_handler.ts
+[0] ready   built in 0.03 s
+[0] info    [tsc] File change detected. Starting incremental compilation... (esm)
+[1] Restarting './dist/index.js'
+[1] Listening on http://localhost:3072
+[0] info    [tsc] Found 0 errors. Watching for file changes. (esm)
+[1] Restarting './dist/index.js'
+[1] node:events:486
+[1]       throw er; // Unhandled 'error' event
+[1]       ^
+[1] 
+[1] Error: listen EADDRINUSE: address already in use :::3072
+[1]     at Server.setupListenHandle [as _listen2] (node:net:2008:16)
+[1]     at listenInCluster (node:net:2065:12)
+[1]     at Server.listen (node:net:2170:7)
+[1]     at serve (file:///Users/xiewendao/Documents/MatrixAges/polywise/node_modules/.pnpm/@hono+node-server@1.19.11_hono@4.12.7/node_modules/@hono/node-server/dist/index.mjs:581:10)
+[1]     at initServer (file:///Users/xiewendao/Documents/MatrixAges/polywise/packages/polywise/dist/index.js:90:5)
+[1]     at file:///Users/xiewendao/Documents/MatrixAges/polywise/packages/polywise/dist/index.js:240:7
+[1] Emitted 'error' event on Server instance at:
+[1]     at emitErrorNT (node:net:2044:8)
+[1]     at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+[1]   code: 'EADDRINUSE',
+[1]   errno: -48,
+[1]   syscall: 'listen',
+[1]   address: '::',
+[1]   port: 3072
+[1] }
+[1] 
+[1] Node.js v25.8.1
+[1] Failed running './dist/index.js'. Waiting for file changes before restarting...
+[1] Restarting './dist/index.js'
+[1] Listening on http://localhost:3072
+[1] Failed running './dist/index.js'. Waiting for file changes before restarting...
+[1] Restarting './dist/index.js'
+[1] node:events:486
+[1]       throw er; // Unhandled 'error' event
+[1]       ^
+[1] 
+[1] Error: listen EADDRINUSE: address already in use :::3072
+[1]     at Server.setupListenHandle [as _listen2] (node:net:2008:16)
+[1]     at listenInCluster (node:net:2065:12)
+[1]     at Server.listen (node:net:2170:7)
+[1]     at serve (file:///Users/xiewendao/Documents/MatrixAges/polywise/node_modules/.pnpm/@hono+node-server@1.19.11_hono@4.12.7/node_modules/@hono/node-server/dist/index.mjs:581:10)
+[1]     at initServer (file:///Users/xiewendao/Documents/MatrixAges/polywise/packages/polywise/dist/index.js:90:5)
+[1]     at file:///Users/xiewendao/Documents/MatrixAges/polywise/packages/polywise/dist/index.js:240:7
+[1] Emitted 'error' event on Server instance at:
+[1]     at emitErrorNT (node:net:2044:8)
+[1]     at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+[1]   code: 'EADDRINUSE',
+[1]   errno: -48,
+[1]   syscall: 'listen',
+[1]   address: '::',
+[1]   port: 3072
+[1] }
+[1] 
+[1] Node.js v25.8.1
+[1] Failed running './dist/index.js'. Waiting for file changes before restarting...
+[0] start   building src/utils/openapi_handler.ts
+[0] ready   built in 0.04 s
+[0] info    [tsc] File change detected. Starting incremental compilation... (esm)
+[1] Restarting './dist/index.js'
+[1] node:events:486
+[1]       throw er; // Unhandled 'error' event
+[1]       ^
+[1] 
+[1] Error: listen EADDRINUSE: address already in use :::3072
+[1]     at Server.setupListenHandle [as _listen2] (node:net:2008:16)
+[1]     at listenInCluster (node:net:2065:12)
+[1]     at Server.listen (node:net:2170:7)
+[1]     at serve (file:///Users/xiewendao/Documents/MatrixAges/polywise/node_modules/.pnpm/@hono+node-server@1.19.11_hono@4.12.7/node_modules/@hono/node-server/dist/index.mjs:581:10)
+[1]     at initServer (file:///Users/xiewendao/Documents/MatrixAges/polywise/packages/polywise/dist/index.js:90:5)
+[1]     at file:///Users/xiewendao/Documents/MatrixAges/polywise/packages/polywise/dist/index.js:282:7
+[1] Emitted 'error' event on Server instance at:
+[1]     at emitErrorNT (node:net:2044:8)
+[1]     at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+[1]   code: 'EADDRINUSE',
+[1]   errno: -48,
+[1]   syscall: 'listen',
+[1]   address: '::',
+[1]   port: 3072
+[1] }
+[1] 
+[1] Node.js v25.8.1
+[1] Failed running './dist/index.js'. Waiting for file changes before restarting...
+[0] info    [tsc] Found 0 errors. Watching for file changes. (esm)
+[0] start   building package.json
+[0] ready   built in 0.05 s
+[0] info    [tsc] File change detected. Starting incremental compilation... (esm)
+[0] info    [tsc] Found 0 errors. Watching for file changes. (esm)
+[0] info    [tsc] File change detected. Starting incremental compilation... (esm)
+[0] info    [tsc] Found 0 errors. Watching for file changes. (esm)
+[0] start   building package.json
+[0] ready   built in 0.04 s
+[0] info    [tsc] File change detected. Starting incremental compilation... (esm)
+[0] info    [tsc] Found 0 errors. Watching for file changes. (esm)
+[0] start   building src/utils/openapi_handler.ts
+[0] ready   built in 0.03 s
+[0] info    [tsc] File change detected. Starting incremental compilation... (esm)
+[1] Restarting './dist/index.js'
+[1] Listening on http://localhost:3072
+[0] info    [tsc] Found 0 errors. Watching for file changes. (esm)
+[0] start   building src/utils/openapi_handler.ts
+[0] ready   built in 0.03 s
+[0] info    [tsc] File change detected. Starting incremental compilation... (esm)
+[0] info    [tsc] Found 0 errors. Watching for file changes. (esm)
+[0] start   building src/utils/openapi_handler.ts
+[0] ready   built in 0.03 s
+[0] info    [tsc] File change detected. Starting incremental compilation... (esm)
+[0] info    [tsc] Found 0 errors. Watching for file changes. (esm)
+[0] start   building src/utils/openapi_handler.ts
+[0] ready   built in 0.03 s
+[1] Restarting './dist/index.js'
+[0] info    [tsc] File change detected. Starting incremental compilation... (esm)
+[1] node:events:486
+[1]       throw er; // Unhandled 'error' event
+[1]       ^
+[1] 
+[1] Error: listen EADDRINUSE: address already in use :::3072
+[1]     at Server.setupListenHandle [as _listen2] (node:net:2008:16)
+[1]     at listenInCluster (node:net:2065:12)
+[1]     at Server.listen (node:net:2170:7)
+[1]     at serve (file:///Users/xiewendao/Documents/MatrixAges/polywise/node_modules/.pnpm/@hono+node-server@1.19.11_hono@4.12.7/node_modules/@hono/node-server/dist/index.mjs:581:10)
+[1]     at initServer (file:///Users/xiewendao/Documents/MatrixAges/polywise/packages/polywise/dist/index.js:90:5)
+[1]     at file:///Users/xiewendao/Documents/MatrixAges/polywise/packages/polywise/dist/index.js:284:7
+[1] Emitted 'error' event on Server instance at:
+[1]     at emitErrorNT (node:net:2044:8)
+[1]     at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+[1]   code: 'EADDRINUSE',
+[1]   errno: -48,
+[1]   syscall: 'listen',
+[1]   address: '::',
+[1]   port: 3072
+[1] }
+[1] 
+[1] Node.js v25.8.1
+[1] Failed running './dist/index.js'. Waiting for file changes before restarting...
+[0] info    [tsc] Found 0 errors. Watching for file changes. (esm)
+[0] start   building src/utils/openapi_handler.ts
+[0] ready   built in 0.03 s
+[0] info    [tsc] File change detected. Starting incremental compilation... (esm)
+[1] Restarting './dist/index.js'
+[1] Listening on http://localhost:3072
+[0] info    [tsc] Found 0 errors. Watching for file changes. (esm)
+[0] start   building src/utils/openapi_handler.ts
+[0] ready   built in 0.03 s
+[0] info    [tsc] File change detected. Starting incremental compilation... (esm)
+[0] info    [tsc] Found 0 errors. Watching for file changes. (esm)
+[1] Restarting './dist/index.js'
+[1] node:internal/modules/cjs/loader:1478
+[1]   throw err;
+[1]   ^
+[1] 
+[1] Error: Cannot find module '/Users/xiewendao/Documents/MatrixAges/polywise/packages/polywise/dist/index.js'
+[1]     at Module._resolveFilename (node:internal/modules/cjs/loader:1475:15)
+[1]     at wrapResolveFilename (node:internal/modules/cjs/loader:1048:27)
+[1]     at defaultResolveImplForCJSLoading (node:internal/modules/cjs/loader:1072:10)
+[1]     at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1093:12)
+[1]     at Module._load (node:internal/modules/cjs/loader:1261:25)
+[1]     at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+[1]     at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+[1]     at node:internal/main/run_main_module:33:47 {
+[1]   code: 'MODULE_NOT_FOUND',
+[1]   requireStack: []
+[1] }
+[1] 
+[1] Node.js v25.8.1
+[1] Failed running './dist/index.js'. Waiting for file changes before restarting...
+[1] Restarting './dist/index.js'
+[1] file:///Users/xiewendao/Documents/MatrixAges/polywise/packages/polywise/dist/index.js:18491
+[1] entityKind;
+[1] ^
+[1] 
+[1] ReferenceError: entityKind is not defined
+[1]     at file:///Users/xiewendao/Documents/MatrixAges/polywise/packages/polywise/dist/index.js:18491:1
+[1] 
+[1] Node.js v25.8.1
+[1] Failed running './dist/index.js'. Waiting for file changes before restarting...
+[1] Restarting './dist/index.js'
+[1] node:events:486
+[1]       throw er; // Unhandled 'error' event
+[1]       ^
+[1] 
+[1] Error: listen EADDRINUSE: address already in use :::3072
+[1]     at Server.setupListenHandle [as _listen2] (node:net:2008:16)
+[1]     at listenInCluster (node:net:2065:12)
+[1]     at Server.listen (node:net:2170:7)
+[1]     at serve (file:///Users/xiewendao/Documents/MatrixAges/polywise/packages/polywise/dist/index.js:21296:12)
+[1]     at initServer (file:///Users/xiewendao/Documents/MatrixAges/polywise/packages/polywise/dist/index.js:21305:5)
+[1]     at file:///Users/xiewendao/Documents/MatrixAges/polywise/packages/polywise/dist/index.js:29883:7
+[1] Emitted 'error' event on Server instance at:
+[1]     at emitErrorNT (node:net:2044:8)
+[1]     at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+[1]   code: 'EADDRINUSE',
+[1]   errno: -48,
+[1]   syscall: 'listen',
+[1]   address: '::',
+[1]   port: 3072
+[1] }
+[1] 
+[1] Node.js v25.8.1
+[1] Failed running './dist/index.js'. Waiting for file changes before restarting...
+e_modules/.pnpm/@hono+node-server@1.19.11_hono@4.12.7/node_modules/@hono/node-server/dist/index.mjs:581:10)
+[1]     at initServer (file:///Users/xiewendao/Documents/MatrixAges/polywise/packages/polywise/dist/index.js:90:5)
+[1]     at file:///Users/xiewendao/Documents/MatrixAges/polywise/packages/polywise/dist/index.js:240:7
+[1] Emitted 'error' event on Server instance at:
+[1]     at emitErrorNT (node:net:2044:8)
+[1]     at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+[1]   code: 'EADDRINUSE',
+[1]   errno: -48,
+[1]   syscall: 'listen',
+[1]   address: '::',
+[1]   port: 3072
+[1] }
+[1] 
+[1] Node.js v25.8.1
+[1] Failed running './dist/index.js'. Waiting for file changes before restarting...
+[1] Restarting './dist/index.js'
+[1] Listening on http://localhost:3072
+[1] 4mkPMhGQx0M
+[0] start   building src/utils/openapi_handler.ts
+[0] ready   built in 0.03 s
+[0] info    [tsc] File change detected. Starting incremental compilation... (esm)
+[1] Restarting './dist/index.js'
+[1] node:events:486
+[1]       throw er; // Unhandled 'error' event
+[1]       ^
+[1] 
+[1] Error: listen EADDRINUSE: address already in use :::3072
+[1]     at Server.setupListenHandle [as _listen2] (node:net:2008:16)
+[1]     at listenInCluster (node:net:2065:12)
+[1]     at Server.listen (node:net:2170:7)
+[1]     at serve (file:///Users/xiewendao/Documents/MatrixAges/polywise/node_modules/.pnpm/@hono+node-server@1.19.11_hono@4.12.7/node_modules/@hono/node-server/dist/index.mjs:581:10)
+[1]     at initServer (file:///Users/xiewendao/Documents/MatrixAges/polywise/packages/polywise/dist/index.js:90:5)
+[1]     at file:///Users/xiewendao/Documents/MatrixAges/polywise/packages/polywise/dist/index.js:282:7
+[1] Emitted 'error' event on Server instance at:
+[1]     at emitErrorNT (node:net:2044:8)
+[1]     at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+[1]   code: 'EADDRINUSE',
+[1]   errno: -48,
+[1]   syscall: 'listen',
+[1]   address: '::',
+[1]   port: 3072
+[1] }
+[1] 
+[1] Node.js v25.8.1
+[1] Failed running './dist/index.js'. Waiting for file changes before restarting...
+[0] info    [tsc] Found 0 errors. Watching for file changes. (esm)
+[0] start   building package.json
+[0] ready   built in 0.04 s
+[0] info    [tsc] File change detected. Starting incremental compilation... (esm)
+[0] info    [tsc] Found 0 errors. Watching for file changes. (esm)
+[0] info    [tsc] File change detected. Starting incremental compilation... (esm)
+[0] info    [tsc] Found 0 errors. Watching for file changes. (esm)
+[0] start   building package.json
+[0] ready   built in 0.04 s
+[0] info    [tsc] File change detected. Starting incremental compilation... (esm)
+[0] info    [tsc] Found 0 errors. Watching for file changes. (esm)
+[0] start   building src/utils/openapi_handler.ts
+[0] ready   built in 0.04 s
+[0] info    [tsc] File change detected. Starting incremental compilation... (esm)
+[1] Restarting './dist/index.js'
+[1] node:events:486
+[1]       throw er; // Unhandled 'error' event
+[1]       ^
+[1] 
+[1] Error: listen EADDRINUSE: address already in use :::3072
+[1]     at Server.setupListenHandle [as _listen2] (node:net:2008:16)
+[1]     at listenInCluster (node:net:2065:12)
+[1]     at Server.listen (node:net:2170:7)
+[1]     at serve (file:///Users/xiewendao/Documents/MatrixAges/polywise/node_modules/.pnpm/@hono+node-server@1.19.11_hono@4.12.7/node_modules/@hono/node-server/dist/index.mjs:581:10)
+[1]     at initServer (file:///Users/xiewendao/Documents/MatrixAges/polywise/packages/polywise/dist/index.js:90:5)
+[1]     at file:///Users/xiewendao/Documents/MatrixAges/polywise/packages/polywise/dist/index.js:284:7
+[1] Emitted 'error' event on Server instance at:
+[1]     at emitErrorNT (node:net:2044:8)
+[1]     at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+[1]   code: 'EADDRINUSE',
+[1]   errno: -48,
+[1]   syscall: 'listen',
+[1]   address: '::',
+[1]   port: 3072
+[1] }
+[1] 
+[1] Node.js v25.8.1
+[1] Failed running './dist/index.js'. Waiting for file changes before restarting...
+[0] info    [tsc] Found 0 errors. Watching for file changes. (esm)
+[0] start   building src/utils/openapi_handler.ts
+[0] ready   built in 0.03 s
+[0] info    [tsc] File change detected. Starting incremental compilation... (esm)
+[0] info    [tsc] Found 0 errors. Watching for file changes. (esm)
+[0] start   building src/utils/openapi_handler.ts
+[0] ready   built in 0.03 s
+[0] info    [tsc] File change detected. Starting incremental compilation... (esm)
+[0] info    [tsc] Found 0 errors. Watching for file changes. (esm)
+[0] start   building src/utils/openapi_handler.ts
+[0] ready   built in 0.03 s
+[1] Restarting './dist/index.js'
+[0] info    [tsc] File change detected. Starting incremental compilation... (esm)
+[1] Listening on http://localhost:3072
+[0] info    [tsc] Found 0 errors. Watching for file changes. (esm)
+[0] start   building src/utils/openapi_handler.ts
+[0] ready   built in 0.03 s
+[0] info    [tsc] File change detected. Starting incremental compilation... (esm)
+[1] Restarting './dist/index.js'
+[1] node:events:486
+[1]       throw er; // Unhandled 'error' event
+[1]       ^
+[1] 
+[1] Error: listen EADDRINUSE: address already in use :::3072
+[1]     at Server.setupListenHandle [as _listen2] (node:net:2008:16)
+[1]     at listenInCluster (node:net:2065:12)
+[1]     at Server.listen (node:net:2170:7)
+[1]     at serve (file:///Users/xiewendao/Documents/MatrixAges/polywise/node_modules/.pnpm/@hono+node-server@1.19.11_hono@4.12.7/node_modules/@hono/node-server/dist/index.mjs:581:10)
+[1]     at initServer (file:///Users/xiewendao/Documents/MatrixAges/polywise/packages/polywise/dist/index.js:90:5)
+[1]     at file:///Users/xiewendao/Documents/MatrixAges/polywise/packages/polywise/dist/index.js:284:7
+[1] Emitted 'error' event on Server instance at:
+[1]     at emitErrorNT (node:net:2044:8)
+[1]     at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+[1]   code: 'EADDRINUSE',
+[1]   errno: -48,
+[1]   syscall: 'listen',
+[1]   address: '::',
+[1]   port: 3072
+[1] }
+[1] 
+[1] Node.js v25.8.1
+[1] Failed running './dist/index.js'. Waiting for file changes before restarting...
+[0] info    [tsc] Found 0 errors. Watching for file changes. (esm)
+[0] start   building src/utils/openapi_handler.ts
+[0] ready   built in 0.03 s
+[0] info    [tsc] File change detected. Starting incremental compilation... (esm)
+[0] info    [tsc] Found 0 errors. Watching for file changes. (esm)
+[1] Restarting './dist/index.js'
+[1] node:internal/modules/cjs/loader:1478
+[1]   throw err;
+[1]   ^
+[1] 
+[1] Error: Cannot find module '/Users/xiewendao/Documents/MatrixAges/polywise/packages/polywise/dist/index.js'
+[1]     at Module._resolveFilename (node:internal/modules/cjs/loader:1475:15)
+[1]     at wrapResolveFilename (node:internal/modules/cjs/loader:1048:27)
+[1]     at defaultResolveImplForCJSLoading (node:internal/modules/cjs/loader:1072:10)
+[1]     at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1093:12)
+[1]     at Module._load (node:internal/modules/cjs/loader:1261:25)
+[1]     at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+[1]     at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+[1]     at node:internal/main/run_main_module:33:47 {
+[1]   code: 'MODULE_NOT_FOUND',
+[1]   requireStack: []
+[1] }
+[1] 
+[1] Node.js v25.8.1
+[1] Failed running './dist/index.js'. Waiting for file changes before restarting...
+[1] Restarting './dist/index.js'
+[1] file:///Users/xiewendao/Documents/MatrixAges/polywise/packages/polywise/dist/index.js:18491
+[1] entityKind;
+[1] ^
+[1] 
+[1] ReferenceError: entityKind is not defined
+[1]     at file:///Users/xiewendao/Documents/MatrixAges/polywise/packages/polywise/dist/index.js:18491:1
+[1] 
+[1] Node.js v25.8.1
+[1] Failed running './dist/index.js'. Waiting for file changes before restarting...
+[1] Restarting './dist/index.js'
+[1] Listening on http://localhost:3072
+[1] Failed running './dist/index.js'. Waiting for file changes before restarting...

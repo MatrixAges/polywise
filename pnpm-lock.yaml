@@ -680,6 +680,9 @@ importers:
       mammoth:
         specifier: ^1.12.0
         version: 1.12.0
+      nice-try:
+        specifier: ^4.0.2
+        version: 4.0.2
       node-llama-cpp:
         specifier: ^3.17.1
         version: 3.17.1(typescript@5.9.3)
@@ -744,6 +747,9 @@ importers:
       '@types/mdast':
         specifier: ^4.0.4
         version: 4.0.4
+      '@types/nice-try':
+        specifier: ^2.1.2
+        version: 2.1.2
       '@types/node':
         specifier: 'catalog:'
         version: 25.4.0
@@ -3023,6 +3029,9 @@ packages:
 
   '@types/mssql@9.1.9':
     resolution: {integrity: sha512-P0nCgw6vzY23UxZMnbI4N7fnLGANt4LI4yvxze1paPj+LuN28cFv5EI+QidP8udnId/BKhkcRhm/BleNsjK65A==}
+
+  '@types/nice-try@2.1.2':
+    resolution: {integrity: sha512-DSRPibsknY1lV5xVaCri4hNtSNvn6SmxVfP6ECgYwRhLluNDMvcDUif/kTXtzYbieat9v2Wa52vnZNDHikimdA==}
 
   '@types/node@24.12.0':
     resolution: {integrity: sha512-GYDxsZi3ChgmckRT9HPU0WEhKLP08ev/Yfcq2AstjrDASOYCSXeyjDsHg4v5t4jOj7cyDX3vmprafKlWIG9MXQ==}
@@ -5400,6 +5409,9 @@ packages:
   negotiator@1.0.0:
     resolution: {integrity: sha512-8Ofs/AUQh8MaEcrlq5xOX0CQ9ypTF5dl78mjlMNfOK08fzpgTHQRQPBxcPlEtIw0yRpws+Zo/3r+5WRby7u3Gg==}
     engines: {node: '>= 0.6'}
+
+  nice-try@4.0.2:
+    resolution: {integrity: sha512-dj7jCdOjiF5cDwpXQ243GFofw+8+flZ86U7hcfAJPZ2QrHt+M0+ZTwOjLPTVDHrbM0kolX4M7GIZ7CotI1/Mvw==}
 
   no-case@3.0.4:
     resolution: {integrity: sha512-fgAN3jGAh+RoxUGZHTSOLJIqUc2wmoBwGR4tbpNAKmmovFoWq0OdRkb0VkldReO2a2iBT/OEulG9XSUc10r3zg==}
@@ -9074,6 +9086,8 @@ snapshots:
       - '@azure/core-client'
       - supports-color
 
+  '@types/nice-try@2.1.2': {}
+
   '@types/node@24.12.0':
     dependencies:
       undici-types: 7.16.0
@@ -11643,6 +11657,8 @@ snapshots:
   native-duplexpair@1.0.0: {}
 
   negotiator@1.0.0: {}
+
+  nice-try@4.0.2: {}
 
   no-case@3.0.4:
     dependencies:
