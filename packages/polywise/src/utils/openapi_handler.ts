@@ -1,5 +1,4 @@
 import { HTTPException } from 'hono/http-exception'
-import Try from 'nice-try'
 import { createOpenApiFetchHandler } from 'trpc-to-openapi'
 
 import { router } from '../rpc'
@@ -27,7 +26,7 @@ export default (async c => {
 			req = new Request(req.url, {
 				method: req.method,
 				headers,
-				body: body ?? '{}'
+				body: body ? body : '{}'
 			})
 		}
 	}
