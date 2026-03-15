@@ -18,6 +18,6 @@ const handler = async (c: HonoContext<GetValidateData<Input>>): Output => {
 }
 
 export default {
-	validator: vt('json', input_type),
+	validator: vt('query', input_type),
 	handler
 }
