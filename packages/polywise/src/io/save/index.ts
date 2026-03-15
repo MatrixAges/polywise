@@ -1,6 +1,8 @@
+import saveArticle from './saveArticle'
+
 interface ArgsSaveArticle {
 	type: 'article'
-	text: string
+	content: string
 }
 
 interface ArgsSaveDocument {
@@ -10,4 +12,8 @@ interface ArgsSaveDocument {
 
 type ArgsSave = ArgsSaveArticle | ArgsSaveDocument
 
-export default async (args: ArgsSave) => {}
+export default async (args: ArgsSave) => {
+	if (args.type === 'article') {
+		await saveArticle(args.content)
+	}
+}

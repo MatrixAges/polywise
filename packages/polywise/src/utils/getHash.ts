@@ -1,0 +1,10 @@
+import { xxh64 } from '@node-rs/xxhash'
+
+export default (v: string) => {
+	const source_buffer = Buffer.from(v)
+	const big_int = xxh64(source_buffer)
+	const hex = big_int.toString(16).padStart(16, '0')
+	const target_buffer = Buffer.from(hex, 'hex')
+
+	return target_buffer.toString('base64url')
+}

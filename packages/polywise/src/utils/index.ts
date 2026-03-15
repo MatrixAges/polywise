@@ -4,6 +4,7 @@ export { default as initServer } from './initServer'
 export { default as openapi_handler } from './openapi_handler'
 export { default as error_handler } from './error_handler'
 export { default as vt } from './vt'
+export { default as getHash } from './getHash'
 
 export * from './getModel'
 export * from './middleware'

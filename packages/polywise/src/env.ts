@@ -69,5 +69,6 @@ export const initEnv = async () => {
 	initDrizzle()
 	migrate()
 
+	await initLlama()
 	// await initModels()
 }

@@ -15,9 +15,10 @@
 		"./package.json"
 	],
 	"scripts": {
-		"dev": "cross-env NODE_ENV=development rslib build --watch",
-		"build": "rslib build && bun run ./scripts/postBuild.ts",
+		"watch": "cross-env NODE_ENV=development rslib build --watch",
+		"build": "cross-env NODE_ENV=production rslib build && bun run ./scripts/postBuild.ts",
 		"server": "node ./dist/index.js",
+		"dev": "concurrently -c \"cyan,magenta\" \"npm run watch\" \"npm run server\"",
 		"test": "rstest run $TEST_FILE",
 		"sql": "drizzle-kit generate",
 		"auth:sql": "pnpx auth generate --adapter drizzle",
@@ -74,6 +75,7 @@
 		"@types/uuid": "catalog:",
 		"bun": "catalog:",
 		"bun-types": "catalog:",
+		"concurrently": "^9.2.1",
 		"cross-env": "catalog:",
 		"deepmerge-ts": "catalog:",
 		"drizzle-seed": "^0.3.1",
