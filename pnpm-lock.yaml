@@ -632,6 +632,9 @@ importers:
       '@hono/trpc-server':
         specifier: 'catalog:'
         version: 0.4.2(@trpc/server@11.12.0(typescript@5.9.3))(hono@4.12.7)
+      '@hono/zod-validator':
+        specifier: ^0.7.6
+        version: 0.7.6(hono@4.12.7)(zod@4.3.6)
       '@node-rs/jieba':
         specifier: ^2.0.1
         version: 2.0.1
@@ -1499,6 +1502,12 @@ packages:
     peerDependencies:
       '@trpc/server': ^10.10.0 || >11.0.0-rc
       hono: '>=4.0.0'
+
+  '@hono/zod-validator@0.7.6':
+    resolution: {integrity: sha512-Io1B6d011Gj1KknV4rXYz4le5+5EubcWEU/speUjuw9XMMIaP3n78yXLhjd2A3PXaXaUwEAluOiAyLqhBEJgsw==}
+    peerDependencies:
+      hono: '>=3.9.0'
+      zod: ^3.25.0 || ^4.0.0
 
   '@huggingface/jinja@0.5.6':
     resolution: {integrity: sha512-MyMWyLnjqo+KRJYSH7oWNbsOn5onuIvfXYPcc0WOGxU0eHUV7oAYUoQTl2BMdu7ml+ea/bu11UM+EshbeHwtIA==}
@@ -7686,6 +7695,11 @@ snapshots:
     dependencies:
       '@trpc/server': 11.12.0(typescript@5.9.3)
       hono: 4.12.7
+
+  '@hono/zod-validator@0.7.6(hono@4.12.7)(zod@4.3.6)':
+    dependencies:
+      hono: 4.12.7
+      zod: 4.3.6
 
   '@huggingface/jinja@0.5.6': {}
 

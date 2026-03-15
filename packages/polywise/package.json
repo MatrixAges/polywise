@@ -17,7 +17,7 @@
 	"scripts": {
 		"dev": "cross-env NODE_ENV=development rslib build --watch",
 		"build": "rslib build && bun run ./scripts/postBuild.ts",
-		"server": "bun ./src/index.ts",
+		"server": "node ./dist/index.js",
 		"test": "rstest run $TEST_FILE",
 		"sql": "drizzle-kit generate",
 		"auth:sql": "pnpx auth generate --adapter drizzle",
@@ -30,6 +30,7 @@
 		"@drizzle-team/brocli": "^0.11.0",
 		"@hono/node-server": "catalog:",
 		"@hono/trpc-server": "catalog:",
+		"@hono/zod-validator": "^0.7.6",
 		"@node-rs/jieba": "^2.0.1",
 		"@node-rs/xxhash": "^1.7.6",
 		"@trpc/server": "catalog:",
