@@ -54,19 +54,23 @@ const routes: Array<RouteObject> = [
 				children: [
 					{
 						index: true,
-						lazy: () => import('@/setting/general')
+						lazy: () => import('@/setting/general_setting')
 					},
 					{
-						path: 'provider',
-						lazy: () => import('@/setting/provider')
+						path: 'model_provider',
+						lazy: () => import('@/setting/model_provider')
 					},
 					{
-						path: 'tool',
-						lazy: () => import('@/setting/tool')
+						path: 'local_model',
+						lazy: () => import('@/setting/local_model')
 					},
 					{
-						path: 'about',
-						lazy: () => import('@/setting/about')
+						path: 'service_provider',
+						lazy: () => import('@/setting/service_provider')
+					},
+					{
+						path: 'about_feedback',
+						lazy: () => import('@/setting/about_feedback')
 					}
 				]
 			}

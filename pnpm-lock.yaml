@@ -671,9 +671,6 @@ importers:
       fs-extra:
         specifier: 'catalog:'
         version: 11.3.4
-      graceful-fs:
-        specifier: ^4.2.11
-        version: 4.2.11
       hono:
         specifier: 'catalog:'
         version: 4.12.7
@@ -1739,6 +1736,20 @@ packages:
     os: [linux]
     libc: [glibc]
 
+  '@node-llama-cpp/linux-x64-cuda-ext@3.17.1':
+    resolution: {integrity: sha512-wlGASJIqs6yLIUd++d7KVQvrCsJrGgWKsA87wzOkkJsWEtWqtu1qCL5Pbvja5yv7OK4B4UJ/oruzccAyuBFeqQ==}
+    engines: {node: '>=20.0.0'}
+    cpu: [x64]
+    os: [linux]
+    libc: [glibc]
+
+  '@node-llama-cpp/linux-x64-cuda@3.17.1':
+    resolution: {integrity: sha512-DNTlf/x4y7eOodLrGIk2q8LL3lLrMZOG8ztUCVi802vXm3oyIO5x+ZqoRT8zbDx90wVdo3sSZhf8jvNli+JSEQ==}
+    engines: {node: '>=20.0.0'}
+    cpu: [x64]
+    os: [linux]
+    libc: [glibc]
+
   '@node-llama-cpp/linux-x64-vulkan@3.17.1':
     resolution: {integrity: sha512-M14roGcHYVHBNuPI6v3eNQkoBp2BsGYbyNoks6arAX5Tstl9XqJr8Zg5cEzRcYf0h5a54Ec99uM4T871j46wxg==}
     engines: {node: '>=20.0.0'}
@@ -1769,6 +1780,24 @@ packages:
     resolution: {integrity: sha512-AStvEtvpwQoCFr6lc0OQgOs//WOS0288AN9WTTmhb4FloRj8HvGeKqlLEdhQBtIES8CXpuDXHcbYfFu4v+BXVQ==}
     engines: {node: '>=20.0.0'}
     cpu: [arm64, x64]
+    os: [win32]
+
+  '@node-llama-cpp/win-x64-cuda-ext@3.17.1':
+    resolution: {integrity: sha512-8ypciTUj1m1AYUbQehIj408a4w9hxNb6ddaW7dMiPH0Cqq9TFCspY/Pj2uXmJOH22VcijGNIvIQe5MPoAmYoUA==}
+    engines: {node: '>=20.0.0'}
+    cpu: [x64]
+    os: [win32]
+
+  '@node-llama-cpp/win-x64-cuda@3.17.1':
+    resolution: {integrity: sha512-Gn08t64l3GHANoYwOnDzTA8Zp9BXZCQnTXHWIyc9pZ6pkDB4LAvZZIPgGuWTGSCipSk6Oi/hartehsRCin7Mhg==}
+    engines: {node: '>=20.0.0'}
+    cpu: [x64]
+    os: [win32]
+
+  '@node-llama-cpp/win-x64-vulkan@3.17.1':
+    resolution: {integrity: sha512-HleDjYiJjL761U64eGo8Xe/U43zQ+xwzNSPw6Z82JCTnHjZ7tci33dmhJZHDl9NraG8hO15UnrDwgXzHwucDdw==}
+    engines: {node: '>=20.0.0'}
+    cpu: [x64]
     os: [win32]
 
   '@node-llama-cpp/win-x64@3.17.1':
@@ -7797,6 +7826,12 @@ snapshots:
   '@node-llama-cpp/linux-armv7l@3.17.1':
     optional: true
 
+  '@node-llama-cpp/linux-x64-cuda-ext@3.17.1':
+    optional: true
+
+  '@node-llama-cpp/linux-x64-cuda@3.17.1':
+    optional: true
+
   '@node-llama-cpp/linux-x64-vulkan@3.17.1':
     optional: true
 
@@ -7810,6 +7845,15 @@ snapshots:
     optional: true
 
   '@node-llama-cpp/win-arm64@3.17.1':
+    optional: true
+
+  '@node-llama-cpp/win-x64-cuda-ext@3.17.1':
+    optional: true
+
+  '@node-llama-cpp/win-x64-cuda@3.17.1':
+    optional: true
+
+  '@node-llama-cpp/win-x64-vulkan@3.17.1':
     optional: true
 
   '@node-llama-cpp/win-x64@3.17.1':
@@ -11516,11 +11560,16 @@ snapshots:
       '@node-llama-cpp/linux-arm64': 3.17.1
       '@node-llama-cpp/linux-armv7l': 3.17.1
       '@node-llama-cpp/linux-x64': 3.17.1
+      '@node-llama-cpp/linux-x64-cuda': 3.17.1
+      '@node-llama-cpp/linux-x64-cuda-ext': 3.17.1
       '@node-llama-cpp/linux-x64-vulkan': 3.17.1
       '@node-llama-cpp/mac-arm64-metal': 3.17.1
       '@node-llama-cpp/mac-x64': 3.17.1
       '@node-llama-cpp/win-arm64': 3.17.1
       '@node-llama-cpp/win-x64': 3.17.1
+      '@node-llama-cpp/win-x64-cuda': 3.17.1
+      '@node-llama-cpp/win-x64-cuda-ext': 3.17.1
+      '@node-llama-cpp/win-x64-vulkan': 3.17.1
       typescript: 5.9.3
     transitivePeerDependencies:
       - supports-color
