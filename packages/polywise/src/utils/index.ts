@@ -1,6 +1,9 @@
 export { default as loadModel } from './loadModel'
 export { default as getModelContext } from './getModelContext'
 export { default as initServer } from './initServer'
+export { default as openapi_handler } from './openapi_handler'
+export { default as error_handler } from './error_handler'
 export { default as vt } from './vt'
 
 export * from './getModel'
+export * from './middleware'

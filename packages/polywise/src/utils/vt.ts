@@ -7,9 +7,12 @@ import type { ZodType } from 'zod'
 export default <T extends ZodType, Target extends keyof ValidationTargets>(target: Target, schema: T) => {
 	return zValidator(target, schema, result => {
 		if (!result.success) {
-			const message = result.error.issues.map(i => `[${i.path.join('.')}] ${i.message}`).join(', ')
+			const issues = result.error.issues.map(i => ({
+				path: i.path,
+				message: i.message
+			}))
 
-			throw new HTTPException(400, { message })
+			throw new HTTPException(400, { cause: { issues } })
 		}
 	})
 }
