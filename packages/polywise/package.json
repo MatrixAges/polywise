@@ -52,6 +52,7 @@
 		"remark": "^15.0.1",
 		"remark-gfm": "^4.0.1",
 		"remark-math": "^6.0.0",
+		"safer-buffer": "^2.1.2",
 		"sentence-splitter": "^5.0.0",
 		"sqlite-vec": "^0.1.7-alpha.10",
 		"stk": "workspace:*",

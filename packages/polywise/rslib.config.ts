@@ -4,8 +4,7 @@ export default {
 	mode: 'production',
 	source: {
 		decorators: { version: 'legacy' },
-		tsconfigPath: './tsconfig.build.json',
-		define: { 'entityKind;': undefined }
+		tsconfigPath: './tsconfig.build.json'
 	},
 	lib: [
 		{
@@ -17,7 +16,14 @@ export default {
 	],
 	output: {
 		target: 'node',
-		externals: ['fs-extra', 'better-sqlite3', 'sqlite-vec', '@chonkiejs/token', 'node-llama-cpp'],
+		externals: [
+			'fs-extra',
+			'better-sqlite3',
+			'sqlite-vec',
+			'@chonkiejs/token',
+			'node-llama-cpp',
+			'safer-buffer'
+		],
 		filename: { js: '[name].js' },
 		copy: [{ from: './drizzle', to: 'drizzle' }]
 	},

@@ -698,6 +698,9 @@ importers:
       remark-math:
         specifier: ^6.0.0
         version: 6.0.0
+      safer-buffer:
+        specifier: ^2.1.2
+        version: 2.1.2
       sentence-splitter:
         specifier: ^5.0.0
         version: 5.0.0
