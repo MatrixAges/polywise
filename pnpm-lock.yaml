@@ -87,6 +87,9 @@ catalogs:
     deepmerge-ts:
       specifier: ^7.1.5
       version: 7.1.5
+    delay-cli:
+      specifier: ^3.0.0
+      version: 3.0.0
     electron:
       specifier: ^41.0.0
       version: 41.0.0
@@ -542,7 +545,7 @@ importers:
         specifier: 'catalog:'
         version: 10.1.0
       delay-cli:
-        specifier: ^3.0.0
+        specifier: 'catalog:'
         version: 3.0.0
       electron:
         specifier: 'catalog:'
@@ -774,6 +777,9 @@ importers:
       deepmerge-ts:
         specifier: 'catalog:'
         version: 7.1.5
+      delay-cli:
+        specifier: 'catalog:'
+        version: 3.0.0
       drizzle-seed:
         specifier: ^0.3.1
         version: 0.3.1(drizzle-orm@1.0.0-beta.16-ea816b6(@electric-sql/pglite@0.3.16)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/mssql@9.1.9(@azure/core-client@1.10.1))(better-sqlite3@12.6.2)(bun-types@1.3.10)(mssql@11.0.1(@azure/core-client@1.10.1))(zod@4.3.6))

@@ -51,6 +51,7 @@ catalog:
       mobx: ^6.15.0
       tinyglobby: ^0.2.15
       typescript: ^5.9.3
+      delay-cli: ^3.0.0
 
 onlyBuiltDependencies:
       - '@node-rs/jieba'

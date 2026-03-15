@@ -18,45 +18,17 @@ export default (async c => {
 			content_type.includes('multipart/form-data')
 
 		if (!is_form) {
-			const text = await req.clone().text()
+			const body = await req.clone().text()
 
-			let is_json = false
+			const headers = new Headers(req.headers)
 
-			if (text) {
-				is_json = Try(() => JSON.parse(text))
-			}
+			headers.set('content-type', 'application/json')
 
-			if (!text) {
-				const headers = new Headers(req.headers)
-
-				headers.set('content-type', 'application/json')
-
-				req = new Request(req.url, {
-					method: req.method,
-					headers,
-					body: '{}'
-				})
-			} else if (!is_json) {
-				const headers = new Headers(req.headers)
-
-				headers.set('content-type', 'application/json')
-
-				req = new Request(req.url, {
-					method: req.method,
-					headers,
-					body: JSON.stringify({ content: text })
-				})
-			} else if (!req.headers.has('content-type')) {
-				const headers = new Headers(req.headers)
-
-				headers.set('content-type', 'application/json')
-
-				req = new Request(req.url, {
-					method: req.method,
-					headers,
-					body: text
-				})
-			}
+			req = new Request(req.url, {
+				method: req.method,
+				headers,
+				body: body ?? '{}'
+			})
 		}
 	}
 
