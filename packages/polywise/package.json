@@ -15,10 +15,11 @@
 		"./package.json"
 	],
 	"scripts": {
-		"watch": "cross-env NODE_ENV=development rslib build --watch",
 		"build": "cross-env NODE_ENV=production rslib build && bun run ./scripts/postBuild.ts",
-		"server": "node ./dist/index.js",
-		"dev": "concurrently -c \"cyan,magenta\" \"npm run watch\" \"npm run server\"",
+		"build:watch": "cross-env NODE_ENV=development rslib build --watch",
+		"start": "node ./dist/index.js",
+		"start:watch": "node --watch ./dist/index.js",
+		"dev": "concurrently -c \"cyan,magenta\" \"npm run build:watch\" \"npm run start:watch\"",
 		"test": "rstest run $TEST_FILE",
 		"sql": "drizzle-kit generate",
 		"auth:sql": "pnpx auth generate --adapter drizzle",

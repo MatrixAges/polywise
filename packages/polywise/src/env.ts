@@ -65,9 +65,9 @@ export const initModels = async () => {
 
 export const initEnv = async () => {
 	initDB()
-	initSql()
 	initDrizzle()
 	migrate()
+	initSql()
 
 	await initLlama()
 	// await initModels()
