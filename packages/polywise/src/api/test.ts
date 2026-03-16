@@ -14,7 +14,7 @@ type Input = Infer<typeof input_type>
 type Output = Promise<TypedResponse<Infer<typeof output_type>>>
 
 const handler = async (c: HonoContext<GetValidateData<Input>>): Output => {
-	return c.json({ timestamp: Date.now() }, 200)
+	return c.json({ timestamp: Date.now() })
 }
 
 export default {

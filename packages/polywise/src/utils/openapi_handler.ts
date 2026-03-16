@@ -31,7 +31,7 @@ export default (async c => {
 		}
 	}
 
-	const res = await createOpenApiFetchHandler({ endpoint: '/openapi', req, router })
+	const res = await createOpenApiFetchHandler({ endpoint: '/api', req, router })
 
 	if (res.status >= 400) {
 		const data = await res.json()

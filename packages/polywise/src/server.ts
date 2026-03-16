@@ -12,8 +12,8 @@ server.use('*', cors())
 server.use('/trpc/*', error_middleware)
 
 server.all('/trpc/*', trpcServer({ router }))
-server.all('/openapi/*', openapi_handler)
+server.all('/api/*', openapi_handler)
 
-server.route('/api', api)
+server.route('/sys', api)
 
 server.onError(error_handler)
