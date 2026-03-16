@@ -20,9 +20,9 @@ export const env = {} as Env
 
 export const initEnv = async () => {
 	initDB()
+	initDrizzle()
 	migrate()
 	initSql()
-	initDrizzle()
 
 	await initLlama()
 }
