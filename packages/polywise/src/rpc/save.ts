@@ -13,7 +13,7 @@ export default p
 	.mutation(async ({ input }) => {
 		const { content } = input
 
-		await save({ type: 'article', content: content })
+		const id = await save({ type: 'article', content: content })
 
-		return { ok: true }
+		return { ok: true, id }
 	})

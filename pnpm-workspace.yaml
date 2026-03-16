@@ -56,7 +56,6 @@ catalog:
 onlyBuiltDependencies:
       - '@node-rs/jieba'
       - '@node-rs/xxhash'
-      - '@lancedb/lancedb'
       - bun
       - esbuild
       - core-js

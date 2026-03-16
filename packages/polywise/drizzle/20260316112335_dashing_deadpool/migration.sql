@@ -4,7 +4,7 @@ CREATE TABLE `agent` (
 	`description` text,
 	`avatar` blob,
 	`prompt` text,
-	`soul` text DEFAULT '' NOT NULL,
+	`soul` text,
 	`memory` text DEFAULT '',
 	`created_at` integer,
 	`updated_at` integer
@@ -14,7 +14,7 @@ CREATE TABLE `article` (
 	`id` text PRIMARY KEY,
 	`document_id` text,
 	`content` text NOT NULL,
-	`title` text NOT NULL,
+	`title` text,
 	`url` text,
 	`hash` text UNIQUE,
 	`metadata` text DEFAULT '{}',

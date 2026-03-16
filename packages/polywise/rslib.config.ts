@@ -20,12 +20,13 @@ export default {
 	output: {
 		target: 'node',
 		externals: [
-			'fs-extra',
-			'better-sqlite3',
-			'sqlite-vec',
-			'@chonkiejs/token',
-			'node-llama-cpp',
-			'@node-rs/xxhash',
+			/^@chonkiejs\/core(\/.*)?$/,
+			/^@node-rs\/xxhash(\/.*)?$/,
+			/^@node-rs\/jieba(\/.*)?$/,
+			/^fs-extra(\/.*)?$/,
+			/^better-sqlite3(\/.*)?$/,
+			/^sqlite-vec(\/.*)?$/,
+			/^node-llama-cpp(\/.*)?$/,
 			{ 'safer-buffer': 'module safer-buffer' }
 		],
 		filename: { js: '[name].js' },

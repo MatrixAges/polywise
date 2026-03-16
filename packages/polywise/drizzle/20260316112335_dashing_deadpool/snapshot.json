@@ -1,7 +1,7 @@
 {
   "version": "7",
   "dialect": "sqlite",
-  "id": "0a386fae-f0d7-47d2-bc11-2bec07991272",
+  "id": "dbb466d4-afef-4c0c-91f3-b83b41573feb",
   "prevIds": [
     "00000000-0000-0000-0000-000000000000"
   ],
@@ -98,9 +98,9 @@
     },
     {
       "type": "text",
-      "notNull": true,
+      "notNull": false,
       "autoincrement": false,
-      "default": "''",
+      "default": null,
       "generated": null,
       "name": "soul",
       "entityType": "columns",
@@ -168,7 +168,7 @@
     },
     {
       "type": "text",
-      "notNull": true,
+      "notNull": false,
       "autoincrement": false,
       "default": null,
       "generated": null,

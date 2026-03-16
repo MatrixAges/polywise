@@ -1,8 +1,9 @@
+import { appendFileSync } from 'fs'
 import { join } from 'path'
 import { blueBright, cyanBright, gray, green, magentaBright, whiteBright, yellowBright } from 'ansis'
 import dayjs from 'dayjs'
 import { difference } from 'es-toolkit'
-import { appendFileSync, ensureDirSync } from 'fs-extra'
+import { ensureDirSync } from 'fs-extra/esm'
 
 import { app } from '../consts'
 

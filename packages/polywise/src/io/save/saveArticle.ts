@@ -6,15 +6,15 @@ import { and, eq } from 'drizzle-orm'
 
 import type { SqliteRow } from '@core/types'
 
-const statement_insert_node_vec = env.sqlite.prepare('INSERT INTO vec.node_vec(rowid, vectors) VALUES (?, ?)')
-const statement_insert_edge_vec = env.sqlite.prepare('INSERT INTO vec.edge_vec(rowid, vectors) VALUES (?, ?)')
-
 export default async (v: string) => {
 	const hash = getHash(v)
 
 	const [exist] = await env.db.select().from(article).where(eq(article.hash, hash)).limit(1)
 
 	if (exist) return exist.id
+
+	const insert_node_vec = env.sqlite.prepare('INSERT INTO vec.node_vec(rowid, vectors) VALUES (?, ?)')
+	const insert_edge_vec = env.sqlite.prepare('INSERT INTO vec.edge_vec(rowid, vectors) VALUES (?, ?)')
 
 	const chunks = await getChunks(v)
 
@@ -102,7 +102,7 @@ export default async (v: string) => {
 
 				log('SAVE', 'saveHeadVector')
 
-				statement_insert_node_vec.run(node_rowid, Buffer.from(new Float32Array(head_vector).buffer))
+				insert_node_vec.run(node_rowid, Buffer.from(new Float32Array(head_vector).buffer))
 			}
 
 			await env.db
@@ -138,7 +138,7 @@ export default async (v: string) => {
 
 				log('SAVE', 'saveTailVector')
 
-				statement_insert_node_vec.run(node_rowid, Buffer.from(new Float32Array(tail_vector).buffer))
+				insert_node_vec.run(node_rowid, Buffer.from(new Float32Array(tail_vector).buffer))
 			}
 
 			await env.db
@@ -179,7 +179,7 @@ export default async (v: string) => {
 
 				log('SAVE', 'saveEdgeVector')
 
-				statement_insert_edge_vec.run(edge_rowid, Buffer.from(new Float32Array(edge_vector).buffer))
+				insert_edge_vec.run(edge_rowid, Buffer.from(new Float32Array(edge_vector).buffer))
 			}
 		}
 	}
