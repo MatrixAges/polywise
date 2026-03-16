@@ -35,5 +35,7 @@ export default async (text: string, onTextChunk?: ((text: string) => void) | und
 
 	session.dispose()
 
-	return JSON.parse(res) as Triples
+	console.log(res, typeof res)
+
+	return JSON.parse(JSON.stringify(JSON.parse(res))) as Triples
 }

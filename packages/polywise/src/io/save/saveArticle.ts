@@ -59,11 +59,11 @@ export default async (v: string) => {
 
 		const statement = env.sqlite.prepare('INSERT INTO vec.chunk_vec(rowid, vectors) VALUES (?, ?)')
 
-		statement.run(rowid, Buffer.from(new Float32Array(vector).buffer))
+		statement.run(BigInt(rowid), Buffer.from(new Float32Array(vector).buffer))
 
 		log('SAVE', 'saveChunkVector')
 
-		const triples = await getTriples(item)
+		const triples = await getTriples(item, chunk => process.stdout.write(chunk))
 
 		log('SAVE', 'getTriples', () => `triples: ${JSON.stringify(triples)}`)
 
@@ -102,7 +102,7 @@ export default async (v: string) => {
 
 				log('SAVE', 'saveHeadVector')
 
-				insert_node_vec.run(node_rowid, Buffer.from(new Float32Array(head_vector).buffer))
+				insert_node_vec.run(BigInt(node_rowid), Buffer.from(new Float32Array(head_vector).buffer))
 			}
 
 			await env.db
@@ -138,7 +138,7 @@ export default async (v: string) => {
 
 				log('SAVE', 'saveTailVector')
 
-				insert_node_vec.run(node_rowid, Buffer.from(new Float32Array(tail_vector).buffer))
+				insert_node_vec.run(BigInt(node_rowid), Buffer.from(new Float32Array(tail_vector).buffer))
 			}
 
 			await env.db
@@ -179,7 +179,7 @@ export default async (v: string) => {
 
 				log('SAVE', 'saveEdgeVector')
 
-				insert_edge_vec.run(edge_rowid, Buffer.from(new Float32Array(edge_vector).buffer))
+				insert_edge_vec.run(BigInt(edge_rowid), Buffer.from(new Float32Array(edge_vector).buffer))
 			}
 		}
 	}

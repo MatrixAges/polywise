@@ -13,6 +13,8 @@ export default async () => {
 		resolve(port)
 	})
 
+	node_server.setTimeout(120000)
+
 	const deinit = () => {
 		node_server.close(() => process.exit(0))
 	}

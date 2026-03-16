@@ -1,5 +1,6 @@
 import text from '../datasets/triple_cn_1'
-import { initEnv, initGenModel } from '../src/env'
+import { initEnv } from '../src/env'
+import { initGenModel } from '../src/llama'
 import { getTriples } from '../src/pipeline'
 
 await initEnv()

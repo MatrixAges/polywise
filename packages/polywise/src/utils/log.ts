@@ -9,37 +9,36 @@ import { app } from '../consts'
 
 import type { Ansis } from 'ansis'
 
+type LogStage = 'SQL' | 'SAVE' | 'PIPELINE' | 'RANKING' | 'SEARCH' | 'SYSTEM'
+
 const stage_map: Record<string, Ansis> = {
 	SQL: blueBright,
 	PIPELINE: magentaBright,
 	RANKING: yellowBright,
 	SEARCH: cyanBright,
-	SYSTEM: whiteBright
+	SYSTEM: whiteBright,
+	SAVE: green
 }
 
 const enable_console = true
 const enable_file = true
-const allowed_stages = ['SQL', 'SAVE', 'PIPELINE', 'RANKING', 'SEARCH', 'SYSTEM'] as const
-const exclude_stages = [] as Array<string>
+const allowed_stages: Array<LogStage> = ['SQL', 'SAVE', 'PIPELINE', 'RANKING', 'SEARCH', 'SYSTEM']
+const exclude_stages: Array<string> = []
 const active_stages = difference(allowed_stages, exclude_stages)
 
-export default (stage: (typeof allowed_stages)[number], message: string, getContext?: () => unknown) => {
-	if (!enable_console && !enable_file) return
-	if (!active_stages.includes(stage)) return
+export default (stage: LogStage, message: string, getContext?: () => unknown) => {
+	const is_active = active_stages.includes(stage)
 
-	const time_stamp = gray(dayjs().format('YYYY-MM-DD HH:mm:ss'))
-	const color_fn = stage_map[stage] ?? whiteBright
-	const stage_tag = color_fn(stage)
-	const msg_content = green(message)
+	if ((!enable_console && !enable_file) || !is_active) return
 
-	let target_text = `[${time_stamp}] ${stage_tag}:${msg_content}`
-
-	if (getContext) {
-		target_text += gray(JSON.stringify(getContext()).slice(0, 100))
-	}
+	const time_now = dayjs().format('YYYY-MM-DD HH:mm:ss')
+	const extra_info = getContext ? '\n' + JSON.stringify(getContext()).slice(0, 100) : ''
 
 	if (enable_console) {
-		console.log(target_text)
+		const color_fn = stage_map[stage] ?? whiteBright
+		const console_msg = `[${gray(time_now)}] ${color_fn(stage)}:${green(message)} ${gray(extra_info)}`
+
+		console.log(console_msg)
 	}
 
 	if (!enable_file) return
@@ -47,6 +46,7 @@ export default (stage: (typeof allowed_stages)[number], message: string, getCont
 	ensureDirSync(app.logs_dir)
 
 	const log_path = join(app.logs_dir, `${dayjs().format('YYYY-MM-DD')}.log`)
+	const file_content = `[${time_now}] ${stage}:${message}${extra_info}\n`
 
-	appendFileSync(log_path, `${target_text}\n`)
+	appendFileSync(log_path, file_content)
 }
