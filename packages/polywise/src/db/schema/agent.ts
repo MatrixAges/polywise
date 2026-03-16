@@ -10,7 +10,7 @@ export default sqliteTable('agent', {
 	// 智能体头像
 	avatar: blob('avatar'),
 	// 系统提示词
-	prompt: text('prompt').notNull().default('You are a personal agent assistant.'),
+	prompt: text('prompt'),
 	// 智能体人格
 	soul: text('soul').notNull().default(''),
 	// 核心记忆

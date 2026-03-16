@@ -1,5 +1,5 @@
 import { env } from '../env'
-import { getEmbeddingModel, getGenModel, getRerankModel } from './getModel'
+import { getEmbeddingModel, getGenModel, getRerankModel } from '../llama/getModel'
 
 import type { Llama, LlamaContext, LlamaEmbeddingContext, LlamaModel, LlamaRankingContext } from 'node-llama-cpp'
 

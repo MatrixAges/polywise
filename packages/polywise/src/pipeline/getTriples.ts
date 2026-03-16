@@ -1,7 +1,8 @@
+import { initGenModel } from '@core/llama'
 import { LlamaChatSession } from 'node-llama-cpp'
 
 import { prompt } from '../consts'
-import { env, initGenModel } from '../env'
+import { env } from '../env'
 
 export default async (text: string, onTextChunk?: ((text: string) => void) | undefined) => {
 	await initGenModel()

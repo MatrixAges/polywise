@@ -1,4 +1,4 @@
-import { vt } from '@core/utils'
+import { guard } from '@core/utils'
 import { infer as Infer, number, object, string } from 'zod'
 
 import type { GetValidateData, HonoContext } from '@core/types'
@@ -18,6 +18,6 @@ const handler = async (c: HonoContext<GetValidateData<Input>>): Output => {
 }
 
 export default {
-	validator: vt('query', input_type),
+	validator: guard('query', input_type),
 	handler
 }

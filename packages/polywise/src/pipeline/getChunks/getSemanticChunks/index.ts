@@ -1,5 +1,5 @@
 import { pipeline } from '@core/consts'
-import { initEmbeddingModel } from '@core/env'
+import { initEmbeddingModel } from '@core/llama'
 import { getEmbedding, getSimilarity, getTokenCount } from '@core/pipeline'
 
 import getOverlapChunks from './getOverlapChunks'

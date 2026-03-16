@@ -7,10 +7,10 @@ export default () => {
       CREATE VIRTUAL TABLE IF NOT EXISTS chunk_fts USING fts5(keywords,tokenize='unicode61');
 
       -- 向量虚表
-      CREATE VIRTUAL TABLE IF NOT EXISTS agent_vec USING vec0(vectors float[1024]);
-      CREATE VIRTUAL TABLE IF NOT EXISTS node_vec USING vec0(vectors float[1024]);
-      CREATE VIRTUAL TABLE IF NOT EXISTS edge_vec USING vec0(vectors float[1024]);
-      CREATE VIRTUAL TABLE IF NOT EXISTS chunk_vec USING vec0(vectors float[1024]);
+      CREATE VIRTUAL TABLE IF NOT EXISTS vec.agent_vec USING vec0(vectors float[1024]);
+      CREATE VIRTUAL TABLE IF NOT EXISTS vec.node_vec USING vec0(vectors float[1024]);
+      CREATE VIRTUAL TABLE IF NOT EXISTS vec.edge_vec USING vec0(vectors float[1024]);
+      CREATE VIRTUAL TABLE IF NOT EXISTS vec.chunk_vec USING vec0(vectors float[1024]);
 
       -- article url fts 触发器
       CREATE TRIGGER IF NOT EXISTS article_url_after_insert AFTER INSERT ON article BEGIN
@@ -23,7 +23,7 @@ export default () => {
             DELETE FROM article_url_fts WHERE rowid = old.rowid;
       END;
 
-      -- chunk fts 触发器
+      -- chunk keywords fts 触发器
       CREATE TRIGGER IF NOT EXISTS chunk_after_insert AFTER INSERT ON chunk BEGIN
             INSERT INTO chunk_fts(rowid, keywords) VALUES (new.rowid, new.keywords);
       END;

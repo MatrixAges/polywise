@@ -3,7 +3,7 @@ CREATE TABLE `agent` (
 	`name` text NOT NULL,
 	`description` text,
 	`avatar` blob,
-	`prompt` text DEFAULT 'You are a personal agent assistant.' NOT NULL,
+	`prompt` text,
 	`soul` text DEFAULT '' NOT NULL,
 	`memory` text DEFAULT '',
 	`created_at` integer,

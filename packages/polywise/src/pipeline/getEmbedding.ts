@@ -1,4 +1,6 @@
-import { env, initEmbeddingModel } from '../env'
+import { initEmbeddingModel } from '@core/llama'
+
+import { env } from '../env'
 
 export default async (text: string) => {
 	await initEmbeddingModel()

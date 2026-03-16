@@ -23,7 +23,8 @@
 		"test": "rstest run $TEST_FILE",
 		"sql": "drizzle-kit generate",
 		"auth:sql": "pnpx auth generate --adapter drizzle",
-		"auth:migrate": "pnpx auth migrate"
+		"auth:migrate": "pnpx auth migrate",
+		"studio": "drizzle-kit studio"
 	},
 	"dependencies": {
 		"@abraham/reflection": "catalog:",

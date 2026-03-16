@@ -1,7 +1,7 @@
 {
   "version": "7",
   "dialect": "sqlite",
-  "id": "3c14c6f1-d941-46fd-870f-b0aa3376cbb3",
+  "id": "0a386fae-f0d7-47d2-bc11-2bec07991272",
   "prevIds": [
     "00000000-0000-0000-0000-000000000000"
   ],
@@ -88,9 +88,9 @@
     },
     {
       "type": "text",
-      "notNull": true,
+      "notNull": false,
       "autoincrement": false,
-      "default": "'You are a personal agent assistant.'",
+      "default": null,
       "generated": null,
       "name": "prompt",
       "entityType": "columns",
