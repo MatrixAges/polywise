@@ -1,4 +1,4 @@
-import { initGenModel } from '@core/llama'
+import { addTask, initGenModel, removeTask } from '@core/llama'
 import { LlamaChatSession } from 'node-llama-cpp'
 
 import { prompt } from '../consts'
@@ -8,6 +8,8 @@ import type { Triples } from '@core/types'
 
 export default async (text: string, onTextChunk?: ((text: string) => void) | undefined) => {
 	await initGenModel()
+
+	const task_id = addTask('gen')
 
 	const session = new LlamaChatSession({
 		contextSequence: env.gen_context.getSequence(),
@@ -37,5 +39,7 @@ export default async (text: string, onTextChunk?: ((text: string) => void) | und
 
 	console.log(res, typeof res)
 
-	return JSON.parse(JSON.stringify(JSON.parse(res))) as Triples
+	removeTask('gen', task_id)
+
+	return JSON.parse(res) as Triples
 }

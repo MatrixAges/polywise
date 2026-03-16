@@ -45,7 +45,7 @@ export default (stage: LogStage, message: string, getContext?: () => unknown) =>
 
 	ensureDirSync(app.logs_dir)
 
-	const log_path = join(app.logs_dir, `${dayjs().format('YYYY-MM-DD')}.log`)
+	const log_path = join(app.logs_dir, `${dayjs().format('YYYY-MM-DD HH')}.log`)
 	const file_content = `[${time_now}] ${stage}:${message}${extra_info}\n`
 
 	appendFileSync(log_path, file_content)

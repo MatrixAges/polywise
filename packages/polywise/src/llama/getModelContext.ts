@@ -1,5 +1,6 @@
 import { env } from '../env'
 import { getEmbeddingModel, getGenModel, getRerankModel } from '../llama/getModel'
+import { isTasksEmpty } from './index'
 
 import type { Llama, LlamaContext, LlamaEmbeddingContext, LlamaModel, LlamaRankingContext } from 'node-llama-cpp'
 
@@ -71,6 +72,7 @@ const resetContextTimer = (type: 'embedding' | 'rerank' | 'gen') => {
 
 	if (state.timer) {
 		clearTimeout(state.timer)
+
 		state.timer = null
 	}
 
@@ -78,6 +80,9 @@ const resetContextTimer = (type: 'embedding' | 'rerank' | 'gen') => {
 		const ctx = env[context_key] as LlamaContext
 
 		if (ctx) {
+			const is_empty = isTasksEmpty(type)
+
+			if (!is_empty) return resetContextTimer(type)
 			// @ts-ignore
 			env[context_key] = null
 

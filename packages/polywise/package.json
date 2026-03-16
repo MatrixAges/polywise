@@ -15,7 +15,7 @@
 		"./package.json"
 	],
 	"scripts": {
-		"build": "cross-env NODE_ENV=production rslib build && bun run ./scripts/postBuild.ts",
+		"build": "cross-env NODE_ENV=production rslib build",
 		"build:watch": "cross-env NODE_ENV=development rslib build --watch",
 		"start": "node ./dist/index.js",
 		"start:watch": "delay 300ms && node --watch ./dist/index.js",
