@@ -68,7 +68,9 @@ export default async (v: string) => {
 		log('SAVE', 'getTriples', () => `triples: ${JSON.stringify(triples)}`)
 
 		for (const triple of triples) {
-			if (!triple.head || !triple.relation || !triple.tail) continue
+			const { head, relation, tail } = triple
+
+			if (!head || !relation || !tail) continue
 
 			let head_id: string
 			let tail_id: string
@@ -77,7 +79,7 @@ export default async (v: string) => {
 			const [head_node] = await env.db
 				.select()
 				.from(node)
-				.where(and(eq(node.agent_id, agent_id), eq(node.name, triple.head)))
+				.where(and(eq(node.agent_id, agent_id), eq(node.name, head)))
 				.limit(1)
 
 			head_id = head_node?.id
@@ -87,7 +89,7 @@ export default async (v: string) => {
 			if (!head_id) {
 				const [head_node_item] = await env.db
 					.insert(node)
-					.values({ agent_id, name: triple.head })
+					.values({ agent_id, name: head })
 					.returning({ id: node.id })
 
 				head_id = head_node_item.id
@@ -98,7 +100,7 @@ export default async (v: string) => {
 					.prepare('SELECT rowid FROM node WHERE id = ?')
 					.get(head_id) as SqliteRow
 
-				const head_vector = await getEmbedding(triple.head)
+				const head_vector = await getEmbedding(head)
 
 				log('SAVE', 'saveHeadVector')
 
@@ -107,13 +109,13 @@ export default async (v: string) => {
 
 			await env.db
 				.insert(node_chunk)
-				.values({ node_id: head_node.id, chunk_id: chunk_item.id })
+				.values({ node_id: head_id, chunk_id: chunk_item.id })
 				.onConflictDoNothing()
 
 			const [tail_node] = await env.db
 				.select()
 				.from(node)
-				.where(and(eq(node.agent_id, agent_id), eq(node.name, triple.tail)))
+				.where(and(eq(node.agent_id, agent_id), eq(node.name, tail)))
 				.limit(1)
 
 			tail_id = tail_node?.id
@@ -123,7 +125,7 @@ export default async (v: string) => {
 			if (!tail_id) {
 				const [tail_node_item] = await env.db
 					.insert(node)
-					.values({ agent_id, name: triple.tail })
+					.values({ agent_id, name: tail })
 					.returning({ id: node.id })
 
 				tail_id = tail_node_item.id
@@ -134,7 +136,7 @@ export default async (v: string) => {
 					.prepare('SELECT rowid FROM node WHERE id = ?')
 					.get(tail_id) as SqliteRow
 
-				const tail_vector = await getEmbedding(triple.tail)
+				const tail_vector = await getEmbedding(tail)
 
 				log('SAVE', 'saveTailVector')
 
@@ -143,13 +145,13 @@ export default async (v: string) => {
 
 			await env.db
 				.insert(node_chunk)
-				.values({ node_id: tail_node.id, chunk_id: chunk_item.id })
+				.values({ node_id: tail_id, chunk_id: chunk_item.id })
 				.onConflictDoNothing()
 
 			const [relation_edge] = await env.db
 				.select()
 				.from(edge)
-				.where(and(eq(edge.source_id, head_node.id), eq(edge.target_id, tail_node.id)))
+				.where(and(eq(edge.source_id, head_id), eq(edge.target_id, tail_id)))
 				.limit(1)
 
 			edge_id = relation_edge?.id
@@ -161,9 +163,9 @@ export default async (v: string) => {
 					.insert(edge)
 					.values({
 						agent_id,
-						relation: triple.relation,
-						source_id: head_node.id,
-						target_id: tail_node.id
+						relation: relation,
+						source_id: head_id,
+						target_id: tail_id
 					})
 					.returning({ id: edge.id })
 
@@ -175,7 +177,7 @@ export default async (v: string) => {
 					.prepare('SELECT rowid FROM edge WHERE id = ?')
 					.get(edge_id) as SqliteRow
 
-				const edge_vector = await getEmbedding(triple.relation)
+				const edge_vector = await getEmbedding(relation)
 
 				log('SAVE', 'saveEdgeVector')
 
