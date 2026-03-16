@@ -2,7 +2,8 @@ import { writeFileSync } from 'fs-extra'
 import pc from 'picocolors'
 
 import article from '../datasets/article_en_1.txt'
-import { initEmbeddingModel, initEnv } from '../src/env'
+import { initEnv } from '../src/env'
+import { initEmbeddingModel } from '../src/llama'
 import { getChunks } from '../src/pipeline'
 
 await initEnv()
