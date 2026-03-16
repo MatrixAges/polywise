@@ -8,3 +8,7 @@ export type GetValidateData<T extends {}> = {
 	in: { json: T }
 	out: { json: T }
 }
+
+export interface SqliteRow {
+	rowid: number
+}

@@ -64,6 +64,7 @@ onlyBuiltDependencies:
       - simple-git-hooks
       - better-sqlite3
       - node-llama-cpp
+      - lmdb
 
 ignoredBuiltDependencies:
       - electron-winstaller

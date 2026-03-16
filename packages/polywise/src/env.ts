@@ -1,4 +1,4 @@
-import { initDB, initDrizzle, initSql, migrate } from './db'
+import { initDB, initDrizzle, initSql, initSys, migrate } from './db'
 import { initLlama } from './llama'
 
 import type { Database } from 'better-sqlite3'
@@ -23,6 +23,7 @@ export const initEnv = async () => {
 	initDrizzle()
 	migrate()
 	initSql()
+	initSys()
 
 	await initLlama()
 }

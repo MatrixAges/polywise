@@ -4,6 +4,8 @@ import { LlamaChatSession } from 'node-llama-cpp'
 import { prompt } from '../consts'
 import { env } from '../env'
 
+import type { Triples } from '@core/types'
+
 export default async (text: string, onTextChunk?: ((text: string) => void) | undefined) => {
 	await initGenModel()
 
@@ -33,5 +35,5 @@ export default async (text: string, onTextChunk?: ((text: string) => void) | und
 
 	session.dispose()
 
-	return JSON.stringify(JSON.parse(res), null, 4)
+	return JSON.parse(res) as Triples
 }

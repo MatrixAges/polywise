@@ -12,7 +12,7 @@ export default sqliteTable('agent', {
 	// 系统提示词
 	prompt: text('prompt'),
 	// 智能体人格
-	soul: text('soul').notNull().default(''),
+	soul: text('soul'),
 	// 核心记忆
 	memory: text('memory').default(''),
 	created_at: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),

@@ -6,5 +6,7 @@ export default async (text: string) => {
 		minCharactersPerChunk: 200
 	})
 
-	return chunker.chunk(text)
+	const chunks = await chunker.chunk(text)
+
+	return chunks.map(item => item.text)
 }

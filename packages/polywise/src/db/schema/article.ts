@@ -13,7 +13,7 @@ export default sqliteTable(
 		// 文章内容
 		content: text('content').notNull(),
 		// 文章标题（可选）
-		title: text('title').notNull(),
+		title: text('title'),
 		// 文章数据来源（可选）
 		url: text('url'),
 		// 内容哈希值，用来做相同内容验证

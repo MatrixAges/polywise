@@ -3,5 +3,6 @@ export { default as getTriples } from './getTriples'
 export { default as getChunks } from './getChunks'
 export { default as getChunkWords } from './getChunkWords'
 export { default as getSimilarity } from './getSimilarity'
+export { default as getKeywords } from './getKeywords'
 
 export * from './token'
