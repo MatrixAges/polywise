@@ -11,8 +11,10 @@ export default async (text: string, onTextChunk?: ((text: string) => void) | und
 
 	const task_id = addTask('gen')
 
+	const sequence = env.gen_context.getSequence()
+
 	const session = new LlamaChatSession({
-		contextSequence: env.gen_context.getSequence(),
+		contextSequence: sequence,
 		systemPrompt: prompt.get_triple
 	})
 
@@ -36,8 +38,7 @@ export default async (text: string, onTextChunk?: ((text: string) => void) | und
 	})
 
 	session.dispose()
-
-	console.log(res, typeof res)
+	sequence.dispose()
 
 	removeTask('gen', task_id)
 

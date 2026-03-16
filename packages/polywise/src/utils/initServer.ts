@@ -1,3 +1,4 @@
+import { disposeModels } from '@core/llama'
 import { serve } from '@hono/node-server'
 
 import { server } from '../server'
@@ -13,7 +14,9 @@ export default async () => {
 		resolve(port)
 	})
 
-	const deinit = () => {
+	const deinit = async () => {
+		await disposeModels()
+
 		node_server.close(() => process.exit(0))
 	}
 

@@ -2,7 +2,14 @@ import { env } from '../env'
 import { getEmbeddingModel, getGenModel, getRerankModel } from '../llama/getModel'
 import { isTasksEmpty } from './index'
 
-import type { Llama, LlamaContext, LlamaEmbeddingContext, LlamaModel, LlamaRankingContext } from 'node-llama-cpp'
+import type {
+	Llama,
+	LlamaChatSession,
+	LlamaContext,
+	LlamaEmbeddingContext,
+	LlamaModel,
+	LlamaRankingContext
+} from 'node-llama-cpp'
 
 interface ContextState {
 	model_promise: Promise<void> | null

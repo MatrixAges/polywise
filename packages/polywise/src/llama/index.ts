@@ -53,6 +53,15 @@ export const isTasksEmpty = (type: TaskType) => {
 	}
 }
 
+export const disposeModels = async () => {
+	await env.embedding_context?.dispose()
+	await env.embedding_model?.dispose()
+	await env.rerank_context?.dispose()
+	await env.rerank_model?.dispose()
+	await env.gen_context?.dispose()
+	await env.gen_model?.dispose()
+}
+
 export const initLlama = async () => {
 	env.llama = await getLlama()
 }
