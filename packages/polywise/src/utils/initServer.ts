@@ -7,14 +7,14 @@ export default async () => {
 
 	process.title = 'polywise_server'
 
-	const s = serve({ fetch: server.fetch, port: 3072 }, ({ port }) => {
+	const node_server = serve({ fetch: server.fetch, port: 3072 }, ({ port }) => {
 		console.log(`Listening on http://localhost:${port}`)
 
 		resolve(port)
 	})
 
 	const deinit = () => {
-		s.close(() => process.exit(0))
+		node_server.close(() => process.exit(0))
 	}
 
 	process.on('SIGINT', deinit)
