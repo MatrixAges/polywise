@@ -18,14 +18,30 @@ export default async (text: string) => {
 
 	const result_list = candidate_list.map((word, index) => {
 		const score = getSimilarity(doc_embedding, candidate_embedding_list[index])
+		const vector = candidate_embedding_list[index]
 
-		return { word, score }
+		return { word, score, vector }
 	})
 
 	const top_k = Math.max(6, Math.min(30, Math.round((text.length / 50) * 1.5)))
 
-	return result_list
-		.sort((a, b) => b.score - a.score)
-		.slice(0, top_k)
-		.map(item => item.word.trim())
+	const sorted_list = result_list.sort((a, b) => b.score - a.score)
+	const filtered_list: Array<{ word: string; score: number; vector: Array<number> }> = []
+
+	for (const item of sorted_list) {
+		const is_similar = filtered_list.some(selected => {
+			const is_text_similar = item.word.includes(selected.word) || selected.word.includes(item.word)
+			const is_vec_similar = getSimilarity(item.vector, selected.vector) > 0.8
+
+			return is_text_similar || is_vec_similar
+		})
+
+		if (!is_similar) {
+			filtered_list.push(item)
+
+			if (filtered_list.length >= top_k) break
+		}
+	}
+
+	return filtered_list.map(item => item.word.trim())
 }

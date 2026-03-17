@@ -30,6 +30,14 @@ export default (text: string) => {
 		if (!isValidBigram(first_word, second_word)) continue
 
 		ngram_list.push(`${first_word.word.trim()}${second_word.word.trim()}`)
+
+		if (index < tagged_word_list.length - 2) {
+			const third_word = tagged_word_list[index + 2]
+
+			if (isValidBigram(second_word, third_word)) {
+				ngram_list.push(`${first_word.word.trim()}${second_word.word.trim()}${third_word.word.trim()}`)
+			}
+		}
 	}
 
 	return Array.from(new Set(ngram_list))

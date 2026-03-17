@@ -16,6 +16,7 @@ npm-debug.log*
 .idea
 .svn
 .swc
+.test
 @mf-types
 
 # temp
@@ -23,9 +24,6 @@ npm-debug.log*
 **/.prompts
 
 # polywise
-**/.test_db
-**/.test_logs
-**/.test_vectors
 .polywise
 
 # electron
