@@ -42,7 +42,7 @@ export default async (v: string) => {
 				article_id: article_item.id,
 				content: item,
 				keywords: keywords.map(k => k.word).join(','),
-				as_body: chunks.length === 1,
+				is_body: chunks.length === 1,
 				position: i
 			})
 			.returning({ id: chunk.id })

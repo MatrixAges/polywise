@@ -14,7 +14,7 @@ export default sqliteTable(
 		// 从切片内容中提取到的关键词，用于全文检索
 		keywords: text('keywords').notNull(),
 		// 所属文章只有一个 chunk
-		as_body: integer('as_body', { mode: 'boolean' }).default(false),
+		is_body: integer('is_body', { mode: 'boolean' }).default(false).notNull(),
 		// 切片在文章中位置
 		position: integer('position'),
 		created_at: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date())

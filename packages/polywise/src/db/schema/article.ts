@@ -21,11 +21,13 @@ export default sqliteTable(
 		// 文章元数据（用于筛选）
 		metadata: text('metadata', { mode: 'json' }).default({}),
 		// 长文章（content 超过 12000个字符）
-		long: integer('long', { mode: 'boolean' }).generatedAlwaysAs(sql`length(content) > 12000`),
+		is_long: integer('is_long', { mode: 'boolean' }).generatedAlwaysAs(sql`length(content) > 12000`),
+		// 是否已生成三元组
+		is_tripled: integer('is_tripled', { mode: 'boolean' }).default(false).notNull(),
 		created_at: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
 		updated_at: integer('updated_at', { mode: 'timestamp' })
 			.$defaultFn(() => new Date())
 			.$onUpdateFn(() => new Date())
 	},
-	t => [index('article_document_id_idx').on(t.document_id)]
+	t => [index('article_document_id_idx').on(t.document_id), index('article_is_tripled_idx').on(t.is_tripled)]
 )

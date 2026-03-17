@@ -18,7 +18,8 @@ CREATE TABLE `article` (
 	`url` text,
 	`hash` text UNIQUE,
 	`metadata` text DEFAULT '{}',
-	`long` integer GENERATED ALWAYS AS (length(content) > 12000) VIRTUAL,
+	`is_long` integer GENERATED ALWAYS AS (length(content) > 12000) VIRTUAL,
+	`is_tripled` integer DEFAULT false NOT NULL,
 	`created_at` integer,
 	`updated_at` integer,
 	CONSTRAINT `fk_article_document_id_document_id_fk` FOREIGN KEY (`document_id`) REFERENCES `document`(`id`) ON DELETE CASCADE
@@ -29,7 +30,7 @@ CREATE TABLE `chunk` (
 	`article_id` text,
 	`content` text,
 	`keywords` text NOT NULL,
-	`as_body` integer DEFAULT false,
+	`is_body` integer DEFAULT false NOT NULL,
 	`position` integer,
 	`created_at` integer,
 	CONSTRAINT `fk_chunk_article_id_article_id_fk` FOREIGN KEY (`article_id`) REFERENCES `article`(`id`) ON DELETE CASCADE
@@ -39,6 +40,7 @@ CREATE TABLE `document` (
 	`id` text PRIMARY KEY,
 	`title` text NOT NULL,
 	`description` text,
+	`is_tripled` integer DEFAULT false NOT NULL,
 	`created_at` integer,
 	`updated_at` integer
 );
@@ -80,7 +82,8 @@ CREATE TABLE `node` (
 CREATE TABLE `task` (
 	`id` text PRIMARY KEY,
 	`type` text NOT NULL,
-	`progress` text NOT NULL,
+	`args` text NOT NULL,
+	`progress` text,
 	`status` text DEFAULT 'pending',
 	`created_at` integer,
 	`updated_at` integer
@@ -114,12 +117,15 @@ CREATE TABLE `node_chunk` (
 );
 --> statement-breakpoint
 CREATE INDEX `article_document_id_idx` ON `article` (`document_id`);--> statement-breakpoint
+CREATE INDEX `article_is_tripled_idx` ON `article` (`is_tripled`);--> statement-breakpoint
 CREATE INDEX `chunk_article_id_idx` ON `chunk` (`article_id`);--> statement-breakpoint
+CREATE INDEX `document_is_tripled_idx` ON `document` (`is_tripled`);--> statement-breakpoint
 CREATE INDEX `edge_agent_id_idx` ON `edge` (`agent_id`);--> statement-breakpoint
 CREATE INDEX `edge_source_idx` ON `edge` (`source_id`);--> statement-breakpoint
 CREATE INDEX `edge_target_idx` ON `edge` (`target_id`);--> statement-breakpoint
 CREATE UNIQUE INDEX `edge_source_target_idx` ON `edge` (`source_id`,`target_id`);--> statement-breakpoint
 CREATE INDEX `node_agent_id_idx` ON `node` (`agent_id`);--> statement-breakpoint
+CREATE INDEX `task_type_idx` ON `task` (`type`);--> statement-breakpoint
 CREATE INDEX `agent_article_article_id_idx` ON `agent_article` (`article_id`);--> statement-breakpoint
 CREATE INDEX `agent_document_document_id_idx` ON `agent_document` (`document_id`);--> statement-breakpoint
 CREATE INDEX `node_chunk_chunk_id_idx` ON `node_chunk` (`chunk_id`);

@@ -1,7 +1,7 @@
 {
   "version": "7",
   "dialect": "sqlite",
-  "id": "dbb466d4-afef-4c0c-91f3-b83b41573feb",
+  "id": "0bf37126-03ad-468c-b1af-625d446992cd",
   "prevIds": [
     "00000000-0000-0000-0000-000000000000"
   ],
@@ -215,7 +215,17 @@
         "as": "(length(content) > 12000)",
         "type": "virtual"
       },
-      "name": "long",
+      "name": "is_long",
+      "entityType": "columns",
+      "table": "article"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "false",
+      "generated": null,
+      "name": "is_tripled",
       "entityType": "columns",
       "table": "article"
     },
@@ -281,11 +291,11 @@
     },
     {
       "type": "integer",
-      "notNull": false,
+      "notNull": true,
       "autoincrement": false,
       "default": "false",
       "generated": null,
-      "name": "as_body",
+      "name": "is_body",
       "entityType": "columns",
       "table": "chunk"
     },
@@ -336,6 +346,16 @@
       "default": null,
       "generated": null,
       "name": "description",
+      "entityType": "columns",
+      "table": "document"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "false",
+      "generated": null,
+      "name": "is_tripled",
       "entityType": "columns",
       "table": "document"
     },
@@ -612,6 +632,16 @@
     {
       "type": "text",
       "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "args",
+      "entityType": "columns",
+      "table": "task"
+    },
+    {
+      "type": "text",
+      "notNull": false,
       "autoincrement": false,
       "default": null,
       "generated": null,
@@ -1029,6 +1059,20 @@
     {
       "columns": [
         {
+          "value": "is_tripled",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "article_is_tripled_idx",
+      "entityType": "indexes",
+      "table": "article"
+    },
+    {
+      "columns": [
+        {
           "value": "article_id",
           "isExpression": false
         }
@@ -1039,6 +1083,20 @@
       "name": "chunk_article_id_idx",
       "entityType": "indexes",
       "table": "chunk"
+    },
+    {
+      "columns": [
+        {
+          "value": "is_tripled",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "document_is_tripled_idx",
+      "entityType": "indexes",
+      "table": "document"
     },
     {
       "columns": [
@@ -1113,6 +1171,20 @@
       "name": "node_agent_id_idx",
       "entityType": "indexes",
       "table": "node"
+    },
+    {
+      "columns": [
+        {
+          "value": "type",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "task_type_idx",
+      "entityType": "indexes",
+      "table": "task"
     },
     {
       "columns": [
