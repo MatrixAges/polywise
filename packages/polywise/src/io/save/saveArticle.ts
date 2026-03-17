@@ -33,11 +33,6 @@ export default async (v: string) => {
 		const item = chunks[i]
 
 		const keywords = await getKeywords(item)
-		console.log('----------')
-		console.log(item)
-		console.log('----------')
-		console.log(keywords)
-		console.log('*********')
 
 		log('SAVE', 'getKeywords', () => `keywords: ${JSON.stringify(keywords)}`)
 
