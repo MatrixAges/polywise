@@ -24,5 +24,8 @@ export default async (text: string) => {
 
 	const top_k = Math.max(6, Math.min(30, Math.round((text.length / 50) * 1.5)))
 
-	return result_list.sort((a, b) => b.score - a.score).slice(0, top_k)
+	return result_list
+		.sort((a, b) => b.score - a.score)
+		.slice(0, top_k)
+		.map(item => item.word.trim())
 }
