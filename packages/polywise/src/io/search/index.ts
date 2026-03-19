@@ -2,8 +2,9 @@ import { getSearchTarget } from '@core/pipeline'
 import { log } from '@core/utils'
 
 import evaluate from './evaluate'
+import lookup, { ArticleWithScore } from './lookup'
 import prerank from './prerank'
-import rerank from './rerank'
+import rerank, { RerankedResult } from './rerank'
 import searchByKeywords from './searchByKeywords'
 import searchByVector from './searchByVector'
 
@@ -11,10 +12,26 @@ interface ArgsSearch {
 	query: string
 	intent?: string
 	rank_by_time?: boolean
+	return_article?: boolean
 }
 
-export default async (args: ArgsSearch) => {
-	const { query, intent, rank_by_time } = args
+type ChunkResult = RerankedResult
+type ArticleResult = ArticleWithScore
+
+interface SearchChunkOutput {
+	type: 'chunk'
+	results: Array<ChunkResult>
+}
+
+interface SearchArticleOutput {
+	type: 'article'
+	results: Array<ArticleResult>
+}
+
+type SearchOutput = SearchChunkOutput | SearchArticleOutput
+
+export default async (args: ArgsSearch): Promise<SearchOutput> => {
+	const { query, intent, rank_by_time, return_article } = args
 
 	log('SEARCH', 'start', () => `query: ${query}, intent: ${intent}`)
 
@@ -47,12 +64,28 @@ export default async (args: ArgsSearch) => {
 
 		log('SEARCH', 'done', () => `result_count: ${reranked.length}`)
 
-		return reranked
+		if (return_article) {
+			const articles = await lookup(reranked)
+
+			log('SEARCH', 'articleLookup', () => `article_count: ${articles.length}`)
+
+			return { type: 'article' as const, results: articles.slice(0, 3) }
+		}
+
+		return { type: 'chunk' as const, results: reranked.slice(0, 6) }
 	}
 
 	const reranked = await rerank(query, rrf_results)
 
 	log('SEARCH', 'done', () => `result_count: ${reranked.length}`)
 
-	return reranked
+	if (return_article) {
+		const articles = await lookup(reranked)
+
+		log('SEARCH', 'articleLookup', () => `article_count: ${articles.length}`)
+
+		return { type: 'article' as const, results: articles.slice(0, 3) }
+	}
+
+	return { type: 'chunk' as const, results: reranked.slice(0, 6) }
 }
