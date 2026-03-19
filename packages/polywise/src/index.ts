@@ -1,16 +1,14 @@
 import './server'
 
+import { initConfig } from './config'
 import { initEnv } from './env'
-import { TaskQueue } from './task'
+import { initTask } from './task'
 import { initServer } from './utils'
 
 await initEnv()
 await initServer()
+await initConfig()
 
-const task_queue = new TaskQueue()
-
-setTimeout(() => {
-	task_queue.start()
-}, 6000)
+initTask()
 
 export type { Router } from './rpc'

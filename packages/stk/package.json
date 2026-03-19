@@ -5,6 +5,7 @@
 	"author": "1yasa",
 	"license": "MIT",
 	"sideEffects": false,
+	"type": "module",
 	"keywords": [
 		"react",
 		"nodejs",

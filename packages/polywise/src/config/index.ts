@@ -13,3 +13,4 @@ export const config: Config = {}
 export const config_emitter = new EventEmitter()
 
 export { default as saveConfig } from './saveConfig'
+export { default as initConfig } from './initConfig'

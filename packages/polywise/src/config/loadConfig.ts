@@ -1,3 +1,4 @@
+import { log } from '@core/utils'
 import { to } from 'await-to-js'
 import fs from 'fs-extra'
 
@@ -14,7 +15,10 @@ export default async () => {
 		return
 	}
 
+	Object.assign(config, {})
 	Object.assign(config, data || {})
+
+	log('CONFIG', 'loadConfig', () => data)
 
 	config_emitter.emit('change', config)
 }
