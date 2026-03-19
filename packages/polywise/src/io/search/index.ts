@@ -34,18 +34,35 @@ interface ArticleSearchResult {
 export default async (args: ArgsSearch): Promise<SearchOutput> => {
 	const { query, intent, enable_rewrite = false, rank_by_time, type = 'article' } = args
 
-	log('SEARCH', 'start', () => `query: ${query}, intent: ${intent}`)
+	log('SEARCH', 'start', () => `query: ${query}, intent: ${intent}, enable_rewrite: ${enable_rewrite}`)
 
-	const search_target = await getSearchTarget(query, intent)
+	let search_keywords: string
+	let search_question: string
+	let search_answer: string
+	let rerank_query: string
 
-	log('SEARCH', 'getSearchTarget', () => search_target)
+	if (enable_rewrite) {
+		const search_target = await getSearchTarget(query, intent)
 
-	const rerank_query = enable_rewrite ? search_target.question : [query, intent].filter(Boolean).join(' ').trim()
+		log('SEARCH', 'getSearchTarget', () => search_target)
+
+		search_keywords = search_target.keywords
+		search_question = search_target.question
+		search_answer = search_target.answer
+		rerank_query = search_target.question
+	} else {
+		const combined_query = [query, intent].filter(Boolean).join(' ').trim()
+
+		search_keywords = combined_query
+		search_question = combined_query
+		search_answer = ''
+		rerank_query = combined_query
+	}
 
 	const [kw_results, q_results, ans_results] = await Promise.all([
-		searchByKeywords(search_target.keywords),
-		searchByVector(search_target.question),
-		searchByVector(search_target.answer)
+		searchByKeywords(search_keywords),
+		searchByVector(search_question),
+		search_answer ? searchByVector(search_answer) : Promise.resolve([])
 	])
 
 	log('SEARCH', 'searchDone', () => ({
