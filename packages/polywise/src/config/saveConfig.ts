@@ -1,4 +1,4 @@
-import to from 'await-to-js'
+import { to } from 'await-to-js'
 import { deepmerge } from 'deepmerge-ts'
 import fs from 'fs-extra'
 

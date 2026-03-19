@@ -1,7 +1,7 @@
 import { task } from '@core/db/schema'
 import { env } from '@core/env'
 import { log } from '@core/utils'
-import to from 'await-to-js'
+import { to } from 'await-to-js'
 import { eq } from 'drizzle-orm'
 import fastq from 'fastq'
 

@@ -1,4 +1,4 @@
-import to from 'await-to-js'
+import { to } from 'await-to-js'
 import { boolean, object } from 'zod'
 
 import { config_schema, saveConfig } from '../config'
