@@ -31,10 +31,17 @@ export interface RerankedArticleResult extends ArticleSearchResult {
 	content: string
 }
 
-const MIN_RERANK_SCORE = 0.3
+const MIN_RERANK_SCORE = 0.5
+const MIN_ARTICLE_RERANK_SCORE = 0.6
 
-const calculateFinalScore = (rerank_score: number, retrieval_score: number, rrf_rank: number) => {
-	if (rerank_score < MIN_RERANK_SCORE) return 0
+const calculateFinalScore = (
+	rerank_score: number,
+	retrieval_score: number,
+	rrf_rank: number,
+	is_article: boolean = false
+) => {
+	const min_score = is_article ? MIN_ARTICLE_RERANK_SCORE : MIN_RERANK_SCORE
+	if (rerank_score < min_score) return 0
 
 	if (rrf_rank >= 1 && rrf_rank <= 3) {
 		return 0.75 * retrieval_score + 0.25 * rerank_score
@@ -75,7 +82,7 @@ const rerankChunk = async (query: string, results: Array<SearchResult>) => {
 		const content = content_map.get(doc.chunk_id) || ''
 
 		const rerank_score = await env.rerank_context.rank(query, content)
-		const final_score = calculateFinalScore(rerank_score, doc.normalized_rrf_score, doc.rrf_rank)
+		const final_score = calculateFinalScore(rerank_score, doc.normalized_rrf_score, doc.rrf_rank, false)
 
 		if (final_score === 0) continue
 
@@ -124,7 +131,7 @@ const rerankArticle = async (query: string, results: Array<ArticleSearchResult>)
 		const content = content_map.get(doc.article_id) || ''
 
 		const rerank_score = await env.rerank_context.rank(query, content)
-		const final_score = calculateFinalScore(rerank_score, doc.normalized_rrf_score, doc.rrf_rank)
+		const final_score = calculateFinalScore(rerank_score, doc.normalized_rrf_score, doc.rrf_rank, true)
 
 		if (final_score === 0) continue
 

@@ -7,6 +7,8 @@ interface SearchResult {
 	rank: number
 }
 
+const MAX_VECTOR_DISTANCE = 0.4
+
 export default async (text: string) => {
 	const vector = await getEmbedding(text)
 
@@ -23,9 +25,11 @@ export default async (text: string) => {
 	const vector_buffer = Buffer.from(new Float32Array(vector).buffer)
 	const results = stmt.all(vector_buffer) as Array<{ chunk_id: string; distance: number }>
 
-	log('SEARCH', 'searchByVector results', () => `count: ${results.length}`)
+	const filtered = results.filter(r => r.distance < MAX_VECTOR_DISTANCE)
 
-	return results.map((item, index) => ({
+	log('SEARCH', 'searchByVector results', () => `count: ${results.length}, filtered: ${filtered.length}`)
+
+	return filtered.map((item, index) => ({
 		chunk_id: item.chunk_id,
 		rank: index + 1
 	})) as Array<SearchResult>
