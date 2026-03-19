@@ -7,38 +7,23 @@ const input_type = object({
 	query: string(),
 	intent: string().optional(),
 	rank_by_time: boolean().optional(),
-	return_article: boolean().optional()
+	type: union([literal('chunk'), literal('article')]).optional()
+})
+
+const result_shape = object({
+	id: string(),
+	content: string(),
+	score: number()
 })
 
 const chunk_output = object({
 	type: literal('chunk'),
-	results: array(
-		object({
-			chunk_id: string(),
-			content: string(),
-			rrf_score: number(),
-			normalized_rrf_score: number(),
-			rrf_rank: number(),
-			reranker_score: number(),
-			final_score: number()
-		})
-	)
+	results: array(result_shape)
 })
 
 const article_output = object({
 	type: literal('article'),
-	results: array(
-		object({
-			article_id: string(),
-			article_title: string().nullable(),
-			article_url: string().nullable(),
-			article_content: string(),
-			chunk_id: string(),
-			content: string(),
-			reranker_score: number(),
-			final_score: number()
-		})
-	)
+	results: array(result_shape)
 })
 
 const output_type = union([chunk_output, article_output])

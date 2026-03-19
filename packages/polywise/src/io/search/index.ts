@@ -12,26 +12,22 @@ interface ArgsSearch {
 	query: string
 	intent?: string
 	rank_by_time?: boolean
-	return_article?: boolean
+	type?: 'chunk' | 'article'
 }
 
-type ChunkResult = RerankedResult
-type ArticleResult = ArticleWithScore
+interface ChunkResult {
+	id: string
+	content: string
+	score: number
+}
 
-interface SearchChunkOutput {
-	type: 'chunk'
+interface SearchOutput {
+	type: 'chunk' | 'article'
 	results: Array<ChunkResult>
 }
 
-interface SearchArticleOutput {
-	type: 'article'
-	results: Array<ArticleResult>
-}
-
-type SearchOutput = SearchChunkOutput | SearchArticleOutput
-
 export default async (args: ArgsSearch): Promise<SearchOutput> => {
-	const { query, intent, rank_by_time, return_article } = args
+	const { query, intent, rank_by_time, type = 'article' } = args
 
 	log('SEARCH', 'start', () => `query: ${query}, intent: ${intent}`)
 
@@ -64,28 +60,56 @@ export default async (args: ArgsSearch): Promise<SearchOutput> => {
 
 		log('SEARCH', 'done', () => `result_count: ${reranked.length}`)
 
-		if (return_article) {
-			const articles = await lookup(reranked)
-
-			log('SEARCH', 'articleLookup', () => `article_count: ${articles.length}`)
-
-			return { type: 'article' as const, results: articles.slice(0, 3) }
+		if (type === 'chunk') {
+			return {
+				type: 'chunk',
+				results: reranked.slice(0, 6).map(item => ({
+					id: item.chunk_id,
+					content: item.content,
+					score: item.final_score
+				}))
+			}
 		}
 
-		return { type: 'chunk' as const, results: reranked.slice(0, 6) }
+		const articles = await lookup(reranked)
+
+		log('SEARCH', 'articleLookup', () => `article_count: ${articles.length}`)
+
+		return {
+			type: 'article',
+			results: articles.slice(0, 3).map(item => ({
+				id: item.article_id,
+				content: item.article_content,
+				score: item.final_score
+			}))
+		}
 	}
 
 	const reranked = await rerank(query, rrf_results)
 
 	log('SEARCH', 'done', () => `result_count: ${reranked.length}`)
 
-	if (return_article) {
-		const articles = await lookup(reranked)
-
-		log('SEARCH', 'articleLookup', () => `article_count: ${articles.length}`)
-
-		return { type: 'article' as const, results: articles.slice(0, 3) }
+	if (type === 'chunk') {
+		return {
+			type: 'chunk',
+			results: reranked.slice(0, 6).map(item => ({
+				id: item.chunk_id,
+				content: item.content,
+				score: item.final_score
+			}))
+		}
 	}
 
-	return { type: 'chunk' as const, results: reranked.slice(0, 6) }
+	const articles = await lookup(reranked)
+
+	log('SEARCH', 'articleLookup', () => `article_count: ${articles.length}`)
+
+	return {
+		type: 'article',
+		results: articles.slice(0, 3).map(item => ({
+			id: item.article_id,
+			content: item.article_content,
+			score: item.final_score
+		}))
+	}
 }
