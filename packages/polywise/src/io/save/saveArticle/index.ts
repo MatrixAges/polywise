@@ -1,12 +1,11 @@
 import { config } from '@core/config'
-import { article, chunk } from '@core/db/schema'
+import { article, chunk, task } from '@core/db/schema'
 import { env } from '@core/env'
 import { getChunks, getEmbedding, getKeywords } from '@core/pipeline'
 import { getHash, log } from '@core/utils'
 import { eq } from 'drizzle-orm'
 
 import { getGlobalAgentId } from '../../common'
-import handleTriples from './handleTriples'
 
 import type { SqliteRow } from '@core/types'
 
@@ -65,7 +64,11 @@ export default async (v: string) => {
 		log('SAVE', 'saveChunkVector')
 
 		if (enable_triple) {
-			await handleTriples({ chunk_text: item, agent_id, chunk_item_id: chunk_item.id })
+			await env.db.insert(task).values({
+				type: 'triple',
+				fn: 'handleTriples',
+				args: { chunk_text: item, agent_id, chunk_item_id: chunk_item.id }
+			})
 		}
 	}
 

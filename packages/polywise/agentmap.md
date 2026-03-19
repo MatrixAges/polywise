@@ -44,6 +44,14 @@ This document provides an overview of the packages/polywise module structure and
 				"migrate.ts": { "desc": "Migration runner", "role": "Module" },
 				"schema": { "desc": "Drizzle schema definitions for memory graph entities", "role": "Folder" }
 			},
+			"task": {
+				"TaskQueue.ts": {
+					"desc": "Background task queue with event-driven exponential backoff polling",
+					"role": "Module"
+				},
+				"types.ts": { "desc": "Task type definitions", "role": "Type" },
+				"index.ts": { "desc": "Task module exports", "role": "Index" }
+			},
 			"io": {
 				"save": { "desc": "Article and Document saving logic", "role": "Folder" },
 				"forget.ts": { "desc": "Memory forgetting logic", "role": "Module" },
