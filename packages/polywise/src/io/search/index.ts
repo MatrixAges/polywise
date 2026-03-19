@@ -61,7 +61,7 @@ export default async (args: ArgsSearch): Promise<SearchOutput> => {
 	}
 
 	if (type === 'chunk') {
-		const reranked = await rerank(query, rrf_results)
+		const reranked = await rerank(search_target.question, rrf_results)
 
 		log('SEARCH', 'done', () => `result_count: ${reranked.length}`)
 
@@ -75,7 +75,7 @@ export default async (args: ArgsSearch): Promise<SearchOutput> => {
 		}
 	}
 
-	const reranked = await rerank(query, rrf_results)
+	const reranked = await rerank(search_target.question, rrf_results)
 
 	log('SEARCH', 'done', () => `result_count: ${reranked.length}`)
 
@@ -100,7 +100,7 @@ export default async (args: ArgsSearch): Promise<SearchOutput> => {
 	}))
 
 	const reranked_articles: Array<RerankedArticleResult & { article_id: string }> = await rerankArticle(
-		query,
+		search_target.question,
 		article_search_results
 	)
 
