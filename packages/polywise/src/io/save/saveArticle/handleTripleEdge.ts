@@ -1,0 +1,58 @@
+import { edge } from '@core/db/schema'
+import { env } from '@core/env'
+import { getEmbedding } from '@core/pipeline'
+import { log } from '@core/utils'
+import { and, eq } from 'drizzle-orm'
+
+import type { SqliteRow } from '@core/types'
+
+interface Args {
+	relation: string
+	agent_id: string
+	source_id: string
+	target_id: string
+}
+
+export default async (args: Args) => {
+	const { relation, agent_id, source_id, target_id } = args
+
+	const insert_edge_vec = env.sqlite.prepare('INSERT INTO vec.edge_vec(rowid, vectors) VALUES (?, ?)')
+
+	const [exist_edge] = await env.db
+		.select()
+		.from(edge)
+		.where(and(eq(edge.source_id, source_id), eq(edge.target_id, target_id)))
+		.limit(1)
+
+	let edge_id = exist_edge?.id
+
+	log('SAVE', 'getExistEdge', () => `edge_id: ${edge_id}`)
+
+	if (!edge_id) {
+		const [new_edge] = await env.db
+			.insert(edge)
+			.values({
+				agent_id,
+				relation,
+				source_id,
+				target_id
+			})
+			.returning({ id: edge.id })
+
+		edge_id = new_edge.id
+
+		log('SAVE', 'insertNewEdge', () => `edge_id: ${edge_id}`)
+
+		const { rowid: edge_rowid } = env.sqlite
+			.prepare('SELECT rowid FROM edge WHERE id = ?')
+			.get(edge_id) as SqliteRow
+
+		const edge_vector = await getEmbedding(relation)
+
+		log('SAVE', 'saveEdgeVector')
+
+		insert_edge_vec.run(BigInt(edge_rowid), Buffer.from(new Float32Array(edge_vector).buffer))
+	}
+
+	return edge_id
+}
