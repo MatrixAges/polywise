@@ -64,6 +64,7 @@ onlyBuiltDependencies:
       - better-sqlite3
       - node-llama-cpp
       - lmdb
+      - simsimd
 
 ignoredBuiltDependencies:
       - electron-winstaller

@@ -61,6 +61,7 @@
 		"remark-math": "^6.0.0",
 		"safer-buffer": "^2.1.2",
 		"sentence-splitter": "^5.0.0",
+		"simsimd": "^6.5.5",
 		"sqlite-vec": "^0.1.7-alpha.10",
 		"stk": "workspace:*",
 		"stopword": "^3.1.4",

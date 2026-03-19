@@ -719,6 +719,9 @@ importers:
       sentence-splitter:
         specifier: ^5.0.0
         version: 5.0.0
+      simsimd:
+        specifier: ^6.5.5
+        version: 6.5.5
       sqlite-vec:
         specifier: ^0.1.7-alpha.10
         version: 0.1.7-alpha.10
@@ -3407,6 +3410,9 @@ packages:
       just-bash:
         optional: true
 
+  benchmark@2.1.4:
+    resolution: {integrity: sha512-l9MlfN4M1K/H2fbhfMy3B7vJd6AGKJVQn2h6Sg/Yx+KckoUA7ewS5Vv6TjSq18ooE1kS9hhAlQRH3AkXIh/aOQ==}
+
   better-auth@1.5.5:
     resolution: {integrity: sha512-GpVPaV1eqr3mOovKfghJXXk6QvlcVeFbS3z+n+FPDid5rK/2PchnDtiaVCzWyXA9jH2KkirOfl+JhAUvnja0Eg==}
     peerDependencies:
@@ -3786,6 +3792,9 @@ packages:
     resolution: {integrity: sha512-pJDh5/4wrEnXX/VWRZvruAGHkzKdr46z11OlTPN+VrATlWWhSKewNCJ1futCO5C7eJB3nPMFZA1LeYtcFboZ2A==}
     engines: {node: '>=0.10.0'}
 
+  complex.js@2.4.3:
+    resolution: {integrity: sha512-UrQVSUur14tNX6tiP4y8T4w4FeJAX3bi2cIv0pu/DTLFNxoq7z2Yh83Vfzztj6Px3X/lubqQ9IrPp7Bpn6p4MQ==}
+
   compressjs@1.0.3:
     resolution: {integrity: sha512-jpKJjBTretQACTGLNuvnozP1JdP2ZLrjdGdBgk/tz1VfXlUcBhhSZW6vEsuThmeot/yjvSrPQKEgfF3X2Lpi8Q==}
     hasBin: true
@@ -3942,6 +3951,9 @@ packages:
     peerDependenciesMeta:
       supports-color:
         optional: true
+
+  decimal.js@10.6.0:
+    resolution: {integrity: sha512-YpgQiITW3JXGntzdUmyUR1V812Hn8T1YVXhCu+wO3OpS4eU9l4YdD3qjyiKdV6mvV29zapkMeD390UVEf2lkUg==}
 
   decode-named-character-reference@1.3.0:
     resolution: {integrity: sha512-GtpQYB283KrPp6nRw50q3U9/VfOutZOe103qlN7BPP6Ad27xYnOIWv4lPzo8HCAL+mMZofJ9KEy30fq6MfaK6Q==}
@@ -4330,6 +4342,9 @@ packages:
     resolution: {integrity: sha512-WUj2qlxaQtO4g6Pq5c29GTcWGDyd8itL8zTlipgECz3JesAiiOKotd8JU6otB3PACgG6xkJUyVhboMS+bje/jA==}
     engines: {node: '>=6'}
 
+  escape-latex@1.2.0:
+    resolution: {integrity: sha512-nV5aVWW1K0wEiUIEdZ4erkGGH8mDxGyxSeqPzRNtWP7ataw+/olFObw7hujFWlVjNsaDFw5VZ5NzVSIqRgfTiw==}
+
   escape-string-regexp@4.0.0:
     resolution: {integrity: sha512-TtpcNJ3XAzx3Gq8sWRzJaVajRs0uVxA2YAkdb1jm2YkPz4G6egUFAyA3n5vtEIZefPk5Wa4UXbKuS5fKkJWdgA==}
     engines: {node: '>=10'}
@@ -4452,6 +4467,9 @@ packages:
   form-data@4.0.5:
     resolution: {integrity: sha512-8RipRLol37bNs2bhoV67fiTEvdTrbMUYcFTiy3+wuuOnUog2QBHCZWXDRijWQfAkhBj2Uf5UnVaiWwA5vdd82w==}
     engines: {node: '>= 6'}
+
+  fraction.js@5.3.4:
+    resolution: {integrity: sha512-1X1NTtiJphryn/uLQz3whtY6jK3fTqoE3ohKs0tT+Ujr1W59oopxmoEh7Lu5p6vBaPbgoM0bzveAW4Qi5RyWDQ==}
 
   framer-motion@12.36.0:
     resolution: {integrity: sha512-4PqYHAT7gev0ke0wos+PyrcFxI0HScjm3asgU8nSYa8YzJFuwgIvdj3/s3ZaxLq0bUSboIn19A2WS/MHwLCvfw==}
@@ -4889,6 +4907,9 @@ packages:
     engines: {node: '>=10'}
     hasBin: true
 
+  javascript-natural-sort@0.7.1:
+    resolution: {integrity: sha512-nO6jcEfZWQXDhOiBtG2KvKyEptz7RVbpGP4vTD2hLBdmNQSsCiicO2Ioinv6UI4y9ukqnBpy+XZ9H6uLNgJTlw==}
+
   jiti@2.6.1:
     resolution: {integrity: sha512-ekilCSN1jwRvIbgeg/57YFh8qQDNbwDb9xT/qu2DAHbFFZUicIl4ygVaAvzveMhMVr3LnpSKTNnwt8PoOfmKhQ==}
     hasBin: true
@@ -5232,6 +5253,11 @@ packages:
   math-intrinsics@1.1.0:
     resolution: {integrity: sha512-/IXtbwEk5HTPyEwyKX6hGkYXxM9nbj64B+ilVJnC/R6B0pH5G4V3b0pVbL7DBj4tkhBAppbQUlf6F6Xl9LHu1g==}
     engines: {node: '>= 0.4'}
+
+  mathjs@14.9.1:
+    resolution: {integrity: sha512-xhqv8Xjf+caWG3WlaPekg4v8QFOR3D5+8ycfcjMcPcnCNDgAONQLaLfyGgrggJrcHx2yUGCpACRpiD4GmXwX+Q==}
+    engines: {node: '>= 18'}
+    hasBin: true
 
   mdast-util-find-and-replace@3.0.2:
     resolution: {integrity: sha512-Tmd1Vg/m3Xz43afeNxDIhWRtFZgM2VLyaf4vSTYwudTyeuTneoL3qtWMA5jeLyz/O1vDJmmV4QuScFCA2tBPwg==}
@@ -5917,6 +5943,9 @@ packages:
       react: '>=18.0.0'
       react-dom: '>=18.0.0'
 
+  platform@1.3.6:
+    resolution: {integrity: sha512-fnWVljUchTro6RiCFvCXBbNhJc2NijN7oIQxbwsyL0buWJPG85v81ehlHI9fXrJsMNgTofEoWIQeClKpgxFLrg==}
+
   plist@3.1.0:
     resolution: {integrity: sha512-uysumyrvkUX0rX/dEVqt8gC3sTBzd4zoWfLeS29nb53imdaXVvLINYXTI2GNqzaMuvacNx4uJQ8+b3zXR0pkgQ==}
     engines: {node: '>=10.4.0'}
@@ -6404,6 +6433,9 @@ packages:
     resolution: {integrity: sha512-vfD3pmTzGpufjScBh50YHKzEu2lxBWhVEHsNGoEXmCmn2hKGfeNLYMzCJpe8cD7gqX7TJluOVpBkAequ6dgMmA==}
     engines: {node: '>=4'}
 
+  seedrandom@3.0.5:
+    resolution: {integrity: sha512-8OwmbklUNzwezjGInmZ+2clQmExQPvomqjL7LFqOYqtmuxRgQYqOD3mHaU+MvZn5FLUeVxVfQjwLZW/n/JFuqg==}
+
   semver-compare@1.0.0:
     resolution: {integrity: sha512-YM3/ITh2MJ5MtzaM429anh+x2jiLVjqILF4m4oyQB18W7Ggea7BfqdH/wGMK7dDiMghv/6WG7znWMwUDzJiXow==}
 
@@ -6498,6 +6530,10 @@ packages:
   simple-update-notifier@2.0.0:
     resolution: {integrity: sha512-a2B9Y0KlNXl9u/vsW6sTIu9vGEpfKu2wRV6l1H3XEas/0gUIzGzBoP/IouTcUQbm9JWZLH3COxyn03TYlFax6w==}
     engines: {node: '>=10'}
+
+  simsimd@6.5.5:
+    resolution: {integrity: sha512-iMZLxr/rWOOhg+L0QimMMvehntzJrPMLizvOXr3VZtQHazskaIRuBtui9QtlZf8iXuPFDBwzLwAdrm/J3U/HwA==}
+    engines: {node: ~10 >=10.20 || >=12.17}
 
   sisteransi@1.0.5:
     resolution: {integrity: sha512-bLGGlR1QxBcynn2d5YmDX4MGjlZvy2MRBDRNHLJ8VI6l6+9FUiyTFNJ0IveOSP0bcXgVDPRcfGqA0pjaqUpfVg==}
@@ -6811,6 +6847,9 @@ packages:
   tiny-async-pool@1.3.0:
     resolution: {integrity: sha512-01EAw5EDrcVrdgyCLgoSPvqznC0sVxDSVeiOz09FUpjh71G79VCqneOr+xvt7T1r76CF6ZZfPjHorN2+d+3mqA==}
 
+  tiny-emitter@2.1.0:
+    resolution: {integrity: sha512-NB6Dk1A9xgQPMoGqC5CVXn123gWyte215ONT5Pp5a0yt4nlEoO1ZWeCwpncaekPHXO60i47ihFnZPiRPjRMq4Q==}
+
   tiny-invariant@1.3.1:
     resolution: {integrity: sha512-AD5ih2NlSssTCwsMznbvwMZpJ1cbhkGd2uueNxzv2jDlEeZdU04JQfRnggJQ8DrcVBGjAsCKwFBbDlVNtEMlzw==}
 
@@ -6952,6 +6991,10 @@ packages:
     resolution: {integrity: sha512-TkRKr9sUTxEH8MdfuCSP7VizJyzRNMjj2J2do2Jr3Kym598JVdEksuzPQCnlFPW4ky9Q+iA+ma9BGm06XQBy8g==}
     engines: {node: '>= 0.6'}
 
+  typed-function@4.2.2:
+    resolution: {integrity: sha512-VwaXim9Gp1bngi/q3do8hgttYn2uC3MoT/gfuMWylnj1IeZBUAyPddHZlo1K05BDoj8DYPpMdiHqH1dDYdJf2A==}
+    engines: {node: '>= 18'}
+
   typescript@5.9.3:
     resolution: {integrity: sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==}
     engines: {node: '>=14.17'}
@@ -7068,6 +7111,10 @@ packages:
     resolution: {integrity: sha512-Pp6GSwGP/NrPIrxVFAIkOQeyw8lFenOHijQWkUTrDvrF4ALqylP2C/KCkeS9dpUM3KvYRQhna5vt7IL95+ZQ9w==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+
+  usearch@2.21.4:
+    resolution: {integrity: sha512-AzavmhAfGubKOLdR3S6Rh/6dvgXqxL+6Fzs1fsgKneQG8i7oLX2Gpqsc4EfdSyKb4sQXhavIiKIguMA2R3cRaA==}
+    engines: {node: ~10 >=10.20 || >=12.17}
 
   utf8-byte-length@1.0.5:
     resolution: {integrity: sha512-Xn0w3MtiQ6zoz2vFyUVruaCL53O/DwUvkEeOvj+uulMm0BkUGYWmBYVyElqZaSLhY6ZD0ulfU3aBra2aVT4xfA==}
@@ -9740,6 +9787,12 @@ snapshots:
     optionalDependencies:
       just-bash: 2.13.1
 
+  benchmark@2.1.4:
+    dependencies:
+      lodash: 4.17.23
+      platform: 1.3.6
+    optional: true
+
   better-auth@1.5.5(better-sqlite3@12.6.2)(drizzle-kit@1.0.0-beta.16-ea816b6)(drizzle-orm@1.0.0-beta.16-ea816b6(@electric-sql/pglite@0.3.16)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/mssql@9.1.9(@azure/core-client@1.10.1))(better-sqlite3@12.6.2)(bun-types@1.3.10)(mssql@11.0.1(@azure/core-client@1.10.1))(sql.js@1.14.1)(zod@4.3.6))(mongodb@7.1.0(@mongodb-js/zstd@7.0.0)(socks@2.8.7))(react-dom@19.2.4(react@19.2.4))(react@19.2.4):
     dependencies:
       '@better-auth/core': 1.5.5(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(better-call@1.3.2(zod@4.3.6))(jose@6.2.1)(kysely@0.28.11)(nanostores@1.1.1)
@@ -10126,6 +10179,9 @@ snapshots:
 
   compare-version@0.1.2: {}
 
+  complex.js@2.4.3:
+    optional: true
+
   compressjs@1.0.3:
     dependencies:
       amdefine: 1.0.1
@@ -10274,6 +10330,9 @@ snapshots:
   debug@4.4.3:
     dependencies:
       ms: 2.1.3
+
+  decimal.js@10.6.0:
+    optional: true
 
   decode-named-character-reference@1.3.0:
     dependencies:
@@ -10622,6 +10681,9 @@ snapshots:
 
   escalade@3.2.0: {}
 
+  escape-latex@1.2.0:
+    optional: true
+
   escape-string-regexp@4.0.0:
     optional: true
 
@@ -10737,6 +10799,9 @@ snapshots:
       es-set-tostringtag: 2.1.0
       hasown: 2.0.2
       mime-types: 2.1.35
+
+  fraction.js@5.3.4:
+    optional: true
 
   framer-motion@12.36.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4):
     dependencies:
@@ -11229,6 +11294,9 @@ snapshots:
       filelist: 1.0.6
       picocolors: 1.1.1
 
+  javascript-natural-sort@0.7.1:
+    optional: true
+
   jiti@2.6.1: {}
 
   jose@6.2.1: {}
@@ -11576,6 +11644,19 @@ snapshots:
     optional: true
 
   math-intrinsics@1.1.0: {}
+
+  mathjs@14.9.1:
+    dependencies:
+      '@babel/runtime': 7.28.6
+      complex.js: 2.4.3
+      decimal.js: 10.6.0
+      escape-latex: 1.2.0
+      fraction.js: 5.3.4
+      javascript-natural-sort: 0.7.1
+      seedrandom: 3.0.5
+      tiny-emitter: 2.1.0
+      typed-function: 4.2.2
+    optional: true
 
   mdast-util-find-and-replace@3.0.2:
     dependencies:
@@ -12172,8 +12253,7 @@ snapshots:
     dependencies:
       detect-libc: 2.1.2
 
-  node-gyp-build@4.8.4:
-    optional: true
+  node-gyp-build@4.8.4: {}
 
   node-gyp@11.5.0:
     dependencies:
@@ -12568,6 +12648,9 @@ snapshots:
       - react-native
       - scheduler
       - use-sync-external-store
+
+  platform@1.3.6:
+    optional: true
 
   plist@3.1.0:
     dependencies:
@@ -13030,6 +13113,9 @@ snapshots:
       extend-shallow: 2.0.1
       kind-of: 6.0.3
 
+  seedrandom@3.0.5:
+    optional: true
+
   semver-compare@1.0.0:
     optional: true
 
@@ -13140,6 +13226,16 @@ snapshots:
   simple-update-notifier@2.0.0:
     dependencies:
       semver: 7.7.4
+
+  simsimd@6.5.5:
+    dependencies:
+      bindings: 1.5.0
+      node-addon-api: 8.6.0
+      node-gyp-build: 4.8.4
+    optionalDependencies:
+      benchmark: 2.1.4
+      mathjs: 14.9.1
+      usearch: 2.21.4
 
   sisteransi@1.0.5: {}
 
@@ -13492,6 +13588,9 @@ snapshots:
     dependencies:
       semver: 5.7.2
 
+  tiny-emitter@2.1.0:
+    optional: true
+
   tiny-invariant@1.3.1: {}
 
   tiny-typed-emitter@2.1.0: {}
@@ -13628,6 +13727,9 @@ snapshots:
       media-typer: 0.3.0
       mime-types: 2.1.35
 
+  typed-function@4.2.2:
+    optional: true
+
   typescript@5.9.3: {}
 
   ufo@1.6.3: {}
@@ -13735,6 +13837,13 @@ snapshots:
   use-sync-external-store@1.6.0(react@19.2.4):
     dependencies:
       react: 19.2.4
+
+  usearch@2.21.4:
+    dependencies:
+      bindings: 1.5.0
+      node-addon-api: 8.6.0
+      node-gyp-build: 4.8.4
+    optional: true
 
   utf8-byte-length@1.0.5: {}
 

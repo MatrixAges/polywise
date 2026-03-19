@@ -1,9 +1,11 @@
-export default (vec_a: Array<number>, vec_b: Array<number>) => {
-	const dot_product = vec_a.reduce((acc, val, index) => acc + val * vec_b[index], 0)
-	const norm_a = Math.sqrt(vec_a.reduce((acc, val) => acc + val * val, 0))
-	const norm_b = Math.sqrt(vec_b.reduce((acc, val) => acc + val * val, 0))
+import simsimd from 'simsimd'
 
-	if (!norm_a || !norm_b) return 0
+export default (
+	vec_a: Array<number> | Float32Array | Float64Array,
+	vec_b: Array<number> | Float32Array | Float64Array
+) => {
+	const a = vec_a instanceof Float64Array ? vec_a : new Float64Array(vec_a)
+	const b = vec_b instanceof Float64Array ? vec_b : new Float64Array(vec_b)
 
-	return dot_product / (norm_a * norm_b)
+	return 1 - simsimd.cosine(a, b)
 }
