@@ -3,9 +3,10 @@ import { array, boolean, literal, number, object, string, union } from 'zod'
 
 import { p } from '../utils/trpc'
 
-const input_type = object({
+export const input_type = object({
 	query: string(),
 	intent: string().optional(),
+	enable_rewrite: boolean().optional(),
 	rank_by_time: boolean().optional(),
 	type: union([literal('chunk'), literal('article')]).optional()
 }).strict()

@@ -1,6 +1,8 @@
 import { getSearchTarget } from '@core/pipeline'
 import { log } from '@core/utils'
+import { z } from 'zod'
 
+import { input_type } from '../../rpc/search'
 import evaluate from './evaluate'
 import lookup from './lookup'
 import prerank from './prerank'
@@ -9,12 +11,7 @@ import rerank, { rerankArticle, RerankedArticleResult } from './rerank'
 import searchByKeywords from './searchByKeywords'
 import searchByVector from './searchByVector'
 
-interface ArgsSearch {
-	query: string
-	intent?: string
-	rank_by_time?: boolean
-	type?: 'chunk' | 'article'
-}
+export type ArgsSearch = z.infer<typeof input_type>
 
 interface ChunkResult {
 	id: string
@@ -27,14 +24,23 @@ interface SearchOutput {
 	results: Array<ChunkResult>
 }
 
+interface ArticleSearchResult {
+	article_id: string
+	rrf_score: number
+	normalized_rrf_score: number
+	rrf_rank: number
+}
+
 export default async (args: ArgsSearch): Promise<SearchOutput> => {
-	const { query, intent, rank_by_time, type = 'article' } = args
+	const { query, intent, enable_rewrite = false, rank_by_time, type = 'article' } = args
 
 	log('SEARCH', 'start', () => `query: ${query}, intent: ${intent}`)
 
 	const search_target = await getSearchTarget(query, intent)
 
 	log('SEARCH', 'getSearchTarget', () => search_target)
+
+	const rerank_query = enable_rewrite ? search_target.question : [query, intent].filter(Boolean).join(' ').trim()
 
 	const [kw_results, q_results, ans_results] = await Promise.all([
 		searchByKeywords(search_target.keywords),
@@ -57,11 +63,11 @@ export default async (args: ArgsSearch): Promise<SearchOutput> => {
 
 		log('SEARCH', 'preRankDone', () => `result_count: ${preranked.length}`)
 
-		return await rankByTime(search_target.question, preranked, type)
+		return await rankByTime(rerank_query, preranked, type)
 	}
 
 	if (type === 'chunk') {
-		const reranked = await rerank(search_target.question, rrf_results)
+		const reranked = await rerank(rerank_query, rrf_results)
 
 		log('SEARCH', 'done', () => `result_count: ${reranked.length}`)
 
@@ -75,7 +81,7 @@ export default async (args: ArgsSearch): Promise<SearchOutput> => {
 		}
 	}
 
-	const reranked = await rerank(search_target.question, rrf_results)
+	const reranked = await rerank(rerank_query, rrf_results)
 
 	log('SEARCH', 'done', () => `result_count: ${reranked.length}`)
 
@@ -87,12 +93,7 @@ export default async (args: ArgsSearch): Promise<SearchOutput> => {
 		return { type: 'article', results: [] }
 	}
 
-	const article_search_results: Array<{
-		article_id: string
-		rrf_score: number
-		normalized_rrf_score: number
-		rrf_rank: number
-	}> = article_scores.map(a => ({
+	const article_search_results: Array<ArticleSearchResult> = article_scores.map(a => ({
 		article_id: a.article_id,
 		rrf_score: a.rrf_score,
 		normalized_rrf_score: a.normalized_rrf_score,
@@ -100,7 +101,7 @@ export default async (args: ArgsSearch): Promise<SearchOutput> => {
 	}))
 
 	const reranked_articles: Array<RerankedArticleResult & { article_id: string }> = await rerankArticle(
-		search_target.question,
+		rerank_query,
 		article_search_results
 	)
 
