@@ -5,7 +5,7 @@ import { getChunks, getEmbedding, getKeywords } from '@core/pipeline'
 import { getHash, log } from '@core/utils'
 import { eq } from 'drizzle-orm'
 
-import { getGlobalAgentId } from '../../common'
+import { getGlobalAgentId } from '../common'
 
 import type { SqliteRow } from '@core/types'
 
@@ -66,7 +66,6 @@ export default async (v: string) => {
 		if (enable_triple) {
 			await env.db.insert(task).values({
 				type: 'triple',
-				fn: 'handleTriples',
 				args: { chunk_text: item, agent_id, chunk_item_id: chunk_item.id }
 			})
 		}

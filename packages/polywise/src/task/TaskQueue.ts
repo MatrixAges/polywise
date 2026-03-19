@@ -5,23 +5,27 @@ import to from 'await-to-js'
 import { eq } from 'drizzle-orm'
 import { catchError, catchFinally } from 'stk/utils'
 
+import handleTriple from './handleTriple'
+
 import type { Task } from './types'
 
-const DEFAULT_CONCURRENCY = 3
 const MIN_POLL_INTERVAL = 300
 const MAX_POLL_INTERVAL = 30000
 
+const concurrent = {
+	url: 3,
+	triple: 1
+}
+
+const handlers = {
+	triple: handleTriple
+}
+
 export default class TaskQueue {
-	private readonly handlers: Map<string, (args: Record<string, unknown>) => Promise<void>> = new Map()
-	private readonly config: Map<string, { concurrency: number; fn: string }> = new Map()
 	private readonly tasks: Map<string, Set<string>> = new Map()
 	private readonly poll_intervals: Map<string, NodeJS.Timeout | null> = new Map()
 	private readonly current_intervals: Map<string, number> = new Map()
 	private is_started: boolean = false
-
-	constructor() {
-		this.config.set('triple', { concurrency: 1, fn: 'handleTriples' })
-	}
 
 	async start() {
 		if (this.is_started) return
@@ -96,7 +100,7 @@ export default class TaskQueue {
 	})
 	private async startTask(type: string, task_item: Task) {
 		const config = this.config.get(type)!
-		const handler = this.handlers.get(config.fn)!
+		const handler = handlers[type]
 
 		const [err_update] = await to(
 			env.db.update(task).set({ status: 'running' }).where(eq(task.id, task_item.id))
@@ -116,9 +120,5 @@ export default class TaskQueue {
 
 			if (err) log('TASK_QUEUE', 'updateStatusError', () => `${task_item.id}: ${err}`)
 		}
-	}
-
-	registerHandler(name: string, handler: (args: Record<string, unknown>) => Promise<void>) {
-		this.handlers.set(name, handler)
 	}
 }
