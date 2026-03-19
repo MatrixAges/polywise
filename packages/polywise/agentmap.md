@@ -33,6 +33,7 @@ This document provides an overview of the packages/polywise module structure and
 			"rpcs": {
 				"index.ts": { "desc": "RPC routers aggregation and type export", "role": "Index" },
 				"save.ts": { "desc": "Save content to memory", "role": "RPC" },
+				"search.ts": { "desc": "Search with keywords/vector/rrf/rerank pipeline", "role": "RPC" },
 				"setConfig.ts": { "desc": "Update configuration settings", "role": "RPC" },
 				"setTask.ts": {
 					"desc": "Set task state (cancel/pause/resume/retry/ignore/remove)",
@@ -62,15 +63,16 @@ This document provides an overview of the packages/polywise module structure and
 			},
 			"io": {
 				"save": { "desc": "Article and Document saving logic", "role": "Folder" },
+				"search": { "desc": "Search pipeline with keywords/vector/rrf/rerank", "role": "Folder" },
 				"forget.ts": { "desc": "Memory forgetting logic", "role": "Module" },
 				"recall.ts": { "desc": "Memory recall logic", "role": "Module" },
-				"search.ts": { "desc": "Search operations", "role": "Module" },
 				"update.ts": { "desc": "Memory update logic", "role": "Module" }
 			},
 			"pipeline": {
 				"getChunks": { "desc": "Semantic and split chunking logic", "role": "Folder" },
 				"getEmbedding.ts": { "desc": "Text embedding generation", "role": "Module" },
 				"getKeywords.ts": { "desc": "Keyword extraction logic", "role": "Module" },
+				"getSearchTarget.ts": { "desc": "Gen Model query expansion for search", "role": "Module" },
 				"index.ts": { "desc": "Pipeline module exports", "role": "Index" }
 			},
 			"consts": {
