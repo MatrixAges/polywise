@@ -1,7 +1,7 @@
 {
   "version": "7",
   "dialect": "sqlite",
-  "id": "b1763868-deef-447e-b29c-353b67fa52a1",
+  "id": "17dbf2f3-a9bb-4e88-a7e9-03186e80c120",
   "prevIds": [
     "00000000-0000-0000-0000-000000000000"
   ],
@@ -643,16 +643,6 @@
       "type": "text",
       "notNull": false,
       "autoincrement": false,
-      "default": null,
-      "generated": null,
-      "name": "progress",
-      "entityType": "columns",
-      "table": "task"
-    },
-    {
-      "type": "text",
-      "notNull": false,
-      "autoincrement": false,
       "default": "'pending'",
       "generated": null,
       "name": "status",
@@ -1183,6 +1173,20 @@
       "where": null,
       "origin": "manual",
       "name": "task_type_idx",
+      "entityType": "indexes",
+      "table": "task"
+    },
+    {
+      "columns": [
+        {
+          "value": "status",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "task_status_idx",
       "entityType": "indexes",
       "table": "task"
     },

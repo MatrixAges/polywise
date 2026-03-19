@@ -83,7 +83,6 @@ CREATE TABLE `task` (
 	`id` text PRIMARY KEY,
 	`type` text NOT NULL,
 	`args` text NOT NULL,
-	`progress` text,
 	`status` text DEFAULT 'pending',
 	`created_at` integer,
 	`updated_at` integer
@@ -126,6 +125,7 @@ CREATE INDEX `edge_target_idx` ON `edge` (`target_id`);--> statement-breakpoint
 CREATE UNIQUE INDEX `edge_source_target_idx` ON `edge` (`source_id`,`target_id`);--> statement-breakpoint
 CREATE INDEX `node_agent_id_idx` ON `node` (`agent_id`);--> statement-breakpoint
 CREATE INDEX `task_type_idx` ON `task` (`type`);--> statement-breakpoint
+CREATE INDEX `task_status_idx` ON `task` (`status`);--> statement-breakpoint
 CREATE INDEX `agent_article_article_id_idx` ON `agent_article` (`article_id`);--> statement-breakpoint
 CREATE INDEX `agent_document_document_id_idx` ON `agent_document` (`document_id`);--> statement-breakpoint
 CREATE INDEX `node_chunk_chunk_id_idx` ON `node_chunk` (`chunk_id`);
