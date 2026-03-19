@@ -34,6 +34,7 @@ export default p
 	.input(input_type)
 	.output(output_type)
 	.query(async ({ input }) => {
+		console.log('input: ', input)
 		const results = await search(input)
 
 		return results
