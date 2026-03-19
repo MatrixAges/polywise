@@ -1,9 +1,9 @@
 import { getSearchTarget } from '@core/pipeline'
 import { log } from '@core/utils'
 
-import eval_rrf from './eval'
-import preRank from './preRank'
-import reRank from './reRank'
+import eval from './eval'
+import prerank from './prerank'
+import rerank from './rerank'
 import searchByKeywords from './searchByKeywords'
 import searchByVector from './searchByVector'
 
@@ -34,23 +34,23 @@ export default async (args: ArgsSearch) => {
 		ans_count: ans_results.length
 	}))
 
-	const rrf_results = eval_rrf(kw_results, q_results, ans_results)
+	const rrf_results = eval(kw_results, q_results, ans_results)
 
 	log('SEARCH', 'rrfDone', () => `result_count: ${rrf_results.length}`)
 
 	if (rank_by_time) {
-		const preranked = await preRank(rrf_results)
+		const preranked = await prerank(rrf_results)
 
 		log('SEARCH', 'preRankDone', () => `result_count: ${preranked.length}`)
 
-		const reranked = await reRank(query, preranked)
+		const reranked = await rerank(query, preranked)
 
 		log('SEARCH', 'done', () => `result_count: ${reranked.length}`)
 
 		return reranked
 	}
 
-	const reranked = await reRank(query, rrf_results)
+	const reranked = await rerank(query, rrf_results)
 
 	log('SEARCH', 'done', () => `result_count: ${reranked.length}`)
 
