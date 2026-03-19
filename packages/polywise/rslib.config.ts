@@ -24,6 +24,7 @@ export default {
 			/^@node-rs\/xxhash(\/.*)?$/,
 			/^@node-rs\/jieba(\/.*)?$/,
 			/^fs-extra(\/.*)?$/,
+			/^watchpack(\/.*)?$/,
 			/^better-sqlite3(\/.*)?$/,
 			/^sqlite-vec(\/.*)?$/,
 			/^node-llama-cpp(\/.*)?$/,

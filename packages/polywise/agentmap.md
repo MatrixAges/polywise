@@ -34,8 +34,16 @@ This document provides an overview of the packages/polywise module structure and
 				"index.ts": { "desc": "RPC routers aggregation and type export", "role": "Index" },
 				"save.ts": { "desc": "Save content to memory", "role": "RPC" },
 				"setConfig.ts": { "desc": "Update configuration settings", "role": "RPC" },
+				"setTask.ts": {
+					"desc": "Set task state (cancel/pause/resume/retry/ignore/remove)",
+					"role": "RPC"
+				},
 				"test.ts": { "desc": "Test RPC procedure", "role": "RPC" },
-				"watchConfig.ts": { "desc": "Subscribe to config changes", "role": "RPC" }
+				"watchConfig.ts": { "desc": "Subscribe to config changes", "role": "RPC" },
+				"watchTasks.ts": {
+					"desc": "Subscribe to task status changes with optional type filter",
+					"role": "RPC"
+				}
 			},
 			"db": {
 				"drizzle.ts": { "desc": "Database connection and drizzle instance", "role": "Module" },

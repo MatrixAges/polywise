@@ -1,3 +1,4 @@
+import { EventEmitter } from 'events'
 import { task } from '@core/db/schema'
 import { env } from '@core/env'
 import { log } from '@core/utils'
@@ -9,6 +10,8 @@ import handleTriple from './handleTriple'
 
 import type { queueAsPromised } from 'fastq'
 import type { Task } from './types'
+
+export const task_emitter = new EventEmitter()
 
 const MIN_POLL_INTERVAL = 300
 const MAX_POLL_INTERVAL = 30000
@@ -120,12 +123,15 @@ export default class TaskQueue {
 			return
 		}
 
+		task_emitter.emit('change')
+
 		const handler = handlers[task_item.type]
 
 		if (!handler) {
 			log('TASK_QUEUE', 'noHandler', () => `${task_item.id}: no handler for type ${task_item.type}`)
 
 			await env.db.update(task).set({ status: 'fail' }).where(eq(task.id, task_item.id))
+			task_emitter.emit('change')
 
 			return
 		}
@@ -135,24 +141,109 @@ export default class TaskQueue {
 
 			await handler(task_item.args)
 			await env.db.update(task).set({ status: 'success' }).where(eq(task.id, task_item.id))
+			task_emitter.emit('change')
 		} catch (error) {
 			log('TASK_QUEUE', 'taskError', () => `${task_item.id}: ${error}`)
 
 			const [err] = await to(env.db.update(task).set({ status: 'fail' }).where(eq(task.id, task_item.id)))
 
 			if (err) log('TASK_QUEUE', 'updateStatusError', () => `${task_item.id}: ${err}`)
+
+			task_emitter.emit('change')
 		}
 	}
 
 	private handleError(error: unknown, task_item: Task) {
 		log('TASK_QUEUE', 'queueError', () => `${task_item.id}: ${error}`)
 	}
+
+	async cancelTask(id: string) {
+		const [err] = await to(env.db.update(task).set({ status: 'fail' }).where(eq(task.id, id)))
+
+		if (err) throw new Error(`Failed to cancel task: ${err.message}`)
+
+		for (const [_, queue] of this.queues) {
+			const items = queue.getQueue()
+			const idx = items.findIndex(t => t.id === id)
+
+			if (idx !== -1) {
+				items.splice(idx, 1)
+
+				break
+			}
+		}
+
+		task_emitter.emit('change')
+	}
+
+	async pauseTaskQueue(type: string) {
+		const queue = this.queues.get(type)
+
+		if (queue) queue.pause()
+
+		task_emitter.emit('change')
+	}
+
+	async resumeTaskQueue(type: string) {
+		const queue = this.queues.get(type)
+
+		if (queue) queue.resume()
+
+		task_emitter.emit('change')
+	}
+
+	async retryTask(task_item: Task) {
+		const [err] = await to(env.db.update(task).set({ status: 'pending' }).where(eq(task.id, task_item.id)))
+
+		if (err) throw new Error(`Failed to retry task: ${err.message}`)
+
+		const queue = this.queues.get(task_item.type)
+
+		if (queue) {
+			const updated = { ...task_item, status: 'pending' as const }
+
+			queue.unshift(updated)
+		}
+
+		task_emitter.emit('change')
+	}
+
+	async ignoreTask(id: string) {
+		const [err] = await to(env.db.update(task).set({ status: 'skipped' }).where(eq(task.id, id)))
+
+		if (err) throw new Error(`Failed to ignore task: ${err.message}`)
+
+		task_emitter.emit('change')
+	}
+
+	async removeTask(id: string) {
+		for (const [_, queue] of this.queues) {
+			const items = queue.getQueue()
+			const idx = items.findIndex(t => t.id === id)
+
+			if (idx !== -1) {
+				items.splice(idx, 1)
+
+				break
+			}
+		}
+
+		const [err] = await to(env.db.delete(task).where(eq(task.id, id)))
+
+		if (err) throw new Error(`Failed to remove task: ${err.message}`)
+
+		task_emitter.emit('change')
+	}
 }
 
+let task_queue_instance: TaskQueue | null = null
+
+export const getTaskQueue = () => task_queue_instance
+
 export const initTask = () => {
-	const task_queue = new TaskQueue()
+	task_queue_instance = new TaskQueue()
 
 	setTimeout(() => {
-		task_queue.start()
+		task_queue_instance!.start()
 	}, 6000)
 }
