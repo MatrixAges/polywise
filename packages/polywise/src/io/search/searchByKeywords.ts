@@ -6,6 +6,10 @@ interface SearchResult {
 	rank: number
 }
 
+const escapeFtsQuery = (query: string): string => {
+	return query.replace(/'/g, "''").replace(/-/g, ' ').replace(/\+/g, ' ').replace(/\*/g, ' ')
+}
+
 export default async (keywords: string) => {
 	const query = keywords
 		.split(',')
@@ -14,6 +18,8 @@ export default async (keywords: string) => {
 		.join(' OR ')
 
 	log('SEARCH', 'searchByKeywords', () => `query: ${query}`)
+
+	const escaped_query = escapeFtsQuery(query)
 
 	const stmt = env.sqlite.prepare(`
 		SELECT c.id as chunk_id, rank
@@ -24,7 +30,7 @@ export default async (keywords: string) => {
 		LIMIT 20
 	`)
 
-	const results = stmt.all(query) as Array<{ chunk_id: string; rank: number }>
+	const results = stmt.all(escaped_query) as Array<{ chunk_id: string; rank: number }>
 
 	log('SEARCH', 'searchByKeywords results', () => `count: ${results.length}`)
 

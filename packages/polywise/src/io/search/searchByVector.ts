@@ -16,9 +16,8 @@ export default async (text: string) => {
 		SELECT c.id as chunk_id, distance
 		FROM vec.chunk_vec v
 		JOIN chunk c ON c.rowid = v.rowid
-		WHERE v.vectors MATCH ?
+		WHERE v.vectors MATCH vec_f32(?) AND k = 20
 		ORDER BY distance
-		LIMIT 20
 	`)
 
 	const vector_buffer = Buffer.from(new Float32Array(vector).buffer)
