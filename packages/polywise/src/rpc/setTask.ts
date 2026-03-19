@@ -2,16 +2,14 @@ import { task } from '@core/db/schema'
 import { env } from '@core/env'
 import { to } from 'await-to-js'
 import { eq } from 'drizzle-orm'
-import { boolean, object, string, enum as zenum } from 'zod'
+import { boolean, enum as Enum, object, string } from 'zod'
 
 import { getTaskQueue } from '../task'
 import { p } from '../utils/trpc'
 
-const task_action = zenum(['cancel', 'pauseQueue', 'resumeQueue', 'retry', 'ignore', 'remove'])
-
 const input_type = object({
 	id: string(),
-	action: task_action
+	action: Enum(['cancel', 'pauseQueue', 'resumeQueue', 'retry', 'ignore', 'remove'])
 })
 
 const output_type = object({ ok: boolean() })
@@ -39,11 +37,11 @@ export default p
 				await task_queue.cancelTask(id)
 
 				break
-			case 'pause':
+			case 'pauseQueue':
 				await task_queue.pauseTaskQueue(task_item.type)
 
 				break
-			case 'resume':
+			case 'resumeQueue':
 				await task_queue.resumeTaskQueue(task_item.type)
 
 				break
@@ -59,8 +57,6 @@ export default p
 				await task_queue.removeTask(id)
 
 				break
-			default:
-				throw new Error(`Unknown action: ${action}`)
 		}
 
 		return { ok: true }
