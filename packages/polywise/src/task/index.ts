@@ -2,7 +2,7 @@ import { task } from '@core/db/schema'
 import { env } from '@core/env'
 import { log } from '@core/utils'
 import { to } from 'await-to-js'
-import { eq } from 'drizzle-orm'
+import { and, eq } from 'drizzle-orm'
 import fastq from 'fastq'
 
 import handleTriple from './handleTriple'
@@ -65,7 +65,11 @@ export default class TaskQueue {
 		}
 
 		const [err, pending_tasks] = await to(
-			env.db.select().from(task).where(eq(task.type, type)).limit(available_slots)
+			env.db
+				.select()
+				.from(task)
+				.where(and(eq(task.type, type), eq(task.status, 'pending')))
+				.limit(available_slots)
 		)
 
 		if (err) {
