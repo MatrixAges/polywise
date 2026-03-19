@@ -8,7 +8,7 @@ const input_type = object({
 	intent: string().optional(),
 	rank_by_time: boolean().optional(),
 	type: union([literal('chunk'), literal('article')]).optional()
-})
+}).strict()
 
 const result_shape = object({
 	id: string(),

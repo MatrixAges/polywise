@@ -21,6 +21,9 @@ export interface ArticleWithScore {
 	content: string
 	reranker_score: number
 	final_score: number
+	rrf_score: number
+	normalized_rrf_score: number
+	rrf_rank: number
 }
 
 export default async (chunks: Array<ChunkScore>): Promise<Array<ArticleWithScore>> => {
@@ -66,7 +69,10 @@ export default async (chunks: Array<ChunkScore>): Promise<Array<ArticleWithScore
 			chunk_id: c.chunk_id,
 			content: chunk_info.content || '',
 			reranker_score: c.reranker_score,
-			final_score: c.final_score
+			final_score: c.final_score,
+			rrf_score: c.rrf_score,
+			normalized_rrf_score: c.normalized_rrf_score,
+			rrf_rank: c.rrf_rank
 		})
 	}
 

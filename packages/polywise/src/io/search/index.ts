@@ -2,9 +2,10 @@ import { getSearchTarget } from '@core/pipeline'
 import { log } from '@core/utils'
 
 import evaluate from './evaluate'
-import lookup, { ArticleWithScore } from './lookup'
+import lookup from './lookup'
 import prerank from './prerank'
-import rerank, { RerankedResult } from './rerank'
+import rankByTime from './rankByTime'
+import rerank, { rerankArticle, RerankedArticleResult } from './rerank'
 import searchByKeywords from './searchByKeywords'
 import searchByVector from './searchByVector'
 
@@ -56,30 +57,19 @@ export default async (args: ArgsSearch): Promise<SearchOutput> => {
 
 		log('SEARCH', 'preRankDone', () => `result_count: ${preranked.length}`)
 
-		const reranked = await rerank(query, preranked)
+		return await rankByTime(search_target.question, preranked, type)
+	}
+
+	if (type === 'chunk') {
+		const reranked = await rerank(query, rrf_results)
 
 		log('SEARCH', 'done', () => `result_count: ${reranked.length}`)
 
-		if (type === 'chunk') {
-			return {
-				type: 'chunk',
-				results: reranked.slice(0, 6).map(item => ({
-					id: item.chunk_id,
-					content: item.content,
-					score: item.final_score
-				}))
-			}
-		}
-
-		const articles = await lookup(reranked)
-
-		log('SEARCH', 'articleLookup', () => `article_count: ${articles.length}`)
-
 		return {
-			type: 'article',
-			results: articles.slice(0, 3).map(item => ({
-				id: item.article_id,
-				content: item.article_content,
+			type: 'chunk',
+			results: reranked.map(item => ({
+				id: item.chunk_id,
+				content: item.content,
 				score: item.final_score
 			}))
 		}
@@ -89,26 +79,38 @@ export default async (args: ArgsSearch): Promise<SearchOutput> => {
 
 	log('SEARCH', 'done', () => `result_count: ${reranked.length}`)
 
-	if (type === 'chunk') {
-		return {
-			type: 'chunk',
-			results: reranked.slice(0, 6).map(item => ({
-				id: item.chunk_id,
-				content: item.content,
-				score: item.final_score
-			}))
-		}
+	const article_scores = await lookup(reranked)
+
+	log('SEARCH', 'articleLookup', () => `article_count: ${article_scores.length}`)
+
+	if (article_scores.length === 0) {
+		return { type: 'article', results: [] }
 	}
 
-	const articles = await lookup(reranked)
+	const article_search_results: Array<{
+		article_id: string
+		rrf_score: number
+		normalized_rrf_score: number
+		rrf_rank: number
+	}> = article_scores.map(a => ({
+		article_id: a.article_id,
+		rrf_score: a.rrf_score,
+		normalized_rrf_score: a.normalized_rrf_score,
+		rrf_rank: a.rrf_rank
+	}))
 
-	log('SEARCH', 'articleLookup', () => `article_count: ${articles.length}`)
+	const reranked_articles: Array<RerankedArticleResult & { article_id: string }> = await rerankArticle(
+		query,
+		article_search_results
+	)
+
+	log('SEARCH', 'articleRerankDone', () => `result_count: ${reranked_articles.length}`)
 
 	return {
 		type: 'article',
-		results: articles.slice(0, 3).map(item => ({
+		results: reranked_articles.map(item => ({
 			id: item.article_id,
-			content: item.article_content,
+			content: item.content,
 			score: item.final_score
 		}))
 	}
