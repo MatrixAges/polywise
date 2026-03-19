@@ -1,3 +1,4 @@
+import { config } from '@core/config'
 import { article, chunk } from '@core/db/schema'
 import { env } from '@core/env'
 import { getChunks, getEmbedding, getKeywords } from '@core/pipeline'
@@ -11,6 +12,7 @@ import type { SqliteRow } from '@core/types'
 
 export default async (v: string) => {
 	const hash = getHash(v)
+	const enable_triple = Boolean(config.enable_triple)
 
 	const [exist] = await env.db.select().from(article).where(eq(article.hash, hash)).limit(1)
 
@@ -21,7 +23,10 @@ export default async (v: string) => {
 
 	log('SAVE', 'getChunks', () => `chunk_length: ${chunks.length}`)
 
-	const [article_item] = await env.db.insert(article).values({ content: v, hash }).returning({ id: article.id })
+	const [article_item] = await env.db
+		.insert(article)
+		.values({ content: v, hash, is_tripled: enable_triple })
+		.returning({ id: article.id })
 
 	log('SAVE', 'insertArticle', () => `article_id: ${article_item.id}`)
 
@@ -59,7 +64,9 @@ export default async (v: string) => {
 
 		log('SAVE', 'saveChunkVector')
 
-		await handleTriples({ chunk_text: item, agent_id, chunk_item_id: chunk_item.id })
+		if (enable_triple) {
+			await handleTriples({ chunk_text: item, agent_id, chunk_item_id: chunk_item.id })
+		}
 	}
 
 	log('SAVE', 'Done', () => `article_id: ${article_item.id}`)
