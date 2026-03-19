@@ -1,4 +1,4 @@
-import { getSearchTarget } from '@core/pipeline'
+import { getKeywords, getSearchTarget } from '@core/pipeline'
 import { log } from '@core/utils'
 import { z } from 'zod'
 
@@ -52,8 +52,9 @@ export default async (args: ArgsSearch): Promise<SearchOutput> => {
 		rerank_query = search_target.question
 	} else {
 		const combined_query = [query, intent].filter(Boolean).join(' ').trim()
+		const keywords_list = await getKeywords(combined_query)
 
-		search_keywords = combined_query
+		search_keywords = keywords_list.join(', ')
 		search_question = combined_query
 		search_answer = ''
 		rerank_query = combined_query
