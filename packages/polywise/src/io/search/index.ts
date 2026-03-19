@@ -4,6 +4,7 @@ import { z } from 'zod'
 
 import { input_type } from '../../rpc/search'
 import evaluate from './evaluate'
+import filterBySemanticSimilarity from './filterBySemanticSimilarity'
 import lookup from './lookup'
 import prerank from './prerank'
 import rankByTime from './rankByTime'
@@ -76,8 +77,12 @@ export default async (args: ArgsSearch): Promise<SearchOutput> => {
 
 	log('SEARCH', 'rrfDone', () => `result_count: ${rrf_results.length}`)
 
+	const filtered_results = await filterBySemanticSimilarity(rerank_query, rrf_results)
+
+	log('SEARCH', 'semanticFilterDone', () => `result_count: ${filtered_results.length}`)
+
 	if (rank_by_time) {
-		const preranked = await prerank(rrf_results)
+		const preranked = await prerank(filtered_results)
 
 		log('SEARCH', 'preRankDone', () => `result_count: ${preranked.length}`)
 
@@ -85,7 +90,7 @@ export default async (args: ArgsSearch): Promise<SearchOutput> => {
 	}
 
 	if (type === 'chunk') {
-		const reranked = await rerank(rerank_query, rrf_results)
+		const reranked = await rerank(rerank_query, filtered_results)
 
 		log('SEARCH', 'done', () => `result_count: ${reranked.length}`)
 
@@ -99,7 +104,7 @@ export default async (args: ArgsSearch): Promise<SearchOutput> => {
 		}
 	}
 
-	const reranked = await rerank(rerank_query, rrf_results)
+	const reranked = await rerank(rerank_query, filtered_results)
 
 	log('SEARCH', 'done', () => `result_count: ${reranked.length}`)
 
