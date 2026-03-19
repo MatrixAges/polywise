@@ -38,6 +38,8 @@ catalog:
       tsyringe: ^4.10.0
       type-fest: ^5.4.4
       uuid: 13.0.0
+      watchpack: ^2.5.1
+      '@types/watchpack': ^2.4.5
       zod: ^4.3.6
       ansis: ^4.2.0
       cross-env: ^10.1.0

@@ -1,7 +1,6 @@
 import { EventEmitter, on } from 'events'
-import { autoUpdater } from 'electron-updater'
-
 import { p, r2_url } from '@desktop/utils'
+import { autoUpdater } from 'electron-updater'
 
 import type { ProgressInfo, UpdateInfo } from 'electron-updater'
 

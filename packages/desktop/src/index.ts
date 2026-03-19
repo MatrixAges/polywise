@@ -6,7 +6,7 @@ import { createIPCHandler } from 'erpc/main'
 
 import config from '../config'
 import { Main, Menu, Tray } from './app'
-import { routers } from './rpcs'
+import { routers } from './rpc'
 import { conf, getAppDataPath, getThemeColor, is_mac, registerProtocol, serve, show_devtool } from './utils'
 import saveWithUtilityProcess from './utils/saveWithUtilityProcess'
 

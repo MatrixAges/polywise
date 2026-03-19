@@ -1,5 +1,4 @@
 import { EventEmitter, on } from 'events'
-
 import { p } from '@desktop/utils'
 
 type Res = { type: 'blur'; value: boolean } | { type: 'maximize'; value: boolean }

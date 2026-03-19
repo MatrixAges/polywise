@@ -1,6 +1,5 @@
-import { boolean, object } from 'zod'
-
 import { p, setWindowGlass } from '@desktop/utils'
+import { boolean, object } from 'zod'
 
 const input_type = object({ glass: boolean() })
 

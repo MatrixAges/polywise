@@ -1,6 +1,5 @@
-import { enum as Enum, object } from 'zod'
-
 import { p } from '@desktop/utils'
+import { enum as Enum, object } from 'zod'
 
 const input_type = object({
 	type: Enum(['minimize', 'maximize', 'close'])

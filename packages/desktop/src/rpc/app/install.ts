@@ -1,7 +1,6 @@
+import { p } from '@desktop/utils'
 import { app } from 'electron'
 import { autoUpdater } from 'electron-updater'
-
-import { p } from '@desktop/utils'
 
 export default p.query(async ({ ctx }) => {
 	setImmediate(() => {

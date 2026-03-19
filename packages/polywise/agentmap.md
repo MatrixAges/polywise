@@ -32,7 +32,10 @@ This document provides an overview of the packages/polywise module structure and
 			},
 			"rpcs": {
 				"index.ts": { "desc": "RPC routers aggregation and type export", "role": "Index" },
-				"test.ts": { "desc": "Test RPC procedure", "role": "RPC" }
+				"save.ts": { "desc": "Save content to memory", "role": "RPC" },
+				"setConfig.ts": { "desc": "Update configuration settings", "role": "RPC" },
+				"test.ts": { "desc": "Test RPC procedure", "role": "RPC" },
+				"watchConfig.ts": { "desc": "Subscribe to config changes", "role": "RPC" }
 			},
 			"db": {
 				"drizzle.ts": { "desc": "Database connection and drizzle instance", "role": "Module" },
@@ -67,6 +70,7 @@ This document provides an overview of the packages/polywise module structure and
 			},
 			"index.ts": { "desc": "Main package exports (API, RPCs, types)", "role": "Index" },
 			"auth.ts": { "desc": "Authentication configuration", "role": "Module" },
+			"config.ts": { "desc": "Real-time config mapping with watchpack", "role": "Module" },
 			"env.ts": { "desc": "Environment variable configuration", "role": "Module" }
 		},
 		"test": {

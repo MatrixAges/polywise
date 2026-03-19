@@ -46,6 +46,7 @@
 		"drizzle-kit": "1.0.0-beta.16-ea816b6",
 		"drizzle-orm": "1.0.0-beta.16-ea816b6",
 		"es-toolkit": "catalog:",
+		"evlog": "^2.8.0",
 		"fastq": "^1.20.1",
 		"fs-extra": "catalog:",
 		"hono": "catalog:",
@@ -69,6 +70,7 @@
 		"tslib": "catalog:",
 		"tsyringe": "catalog:",
 		"uuid": "catalog:",
+		"watchpack": "catalog:",
 		"zod": "catalog:"
 	},
 	"devDependencies": {
@@ -81,6 +83,7 @@
 		"@types/node": "catalog:",
 		"@types/stopword": "^2.0.3",
 		"@types/uuid": "catalog:",
+		"@types/watchpack": "catalog:",
 		"bun": "catalog:",
 		"bun-types": "catalog:",
 		"concurrently": "^9.2.1",

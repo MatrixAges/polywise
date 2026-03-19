@@ -1,7 +1,6 @@
+import { p } from '@desktop/utils'
 import { nativeTheme } from 'electron'
 import { enum as Enum, object } from 'zod'
-
-import { p } from '@desktop/utils'
 
 const input_type = object({
 	theme: Enum(['light', 'dark', 'system'])
