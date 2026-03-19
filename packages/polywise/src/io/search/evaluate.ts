@@ -20,7 +20,7 @@ export default (
 ) => {
 	const score_map = new Map<string, number>()
 
-	const apply_rrf = (list: Array<SearchResult>, weight: number) => {
+	const applyRrf = (list: Array<SearchResult>, weight: number) => {
 		list.forEach(item => {
 			const current_score = score_map.get(item.chunk_id) || 0
 			const additional_score = weight * (1 / (k + item.rank))
@@ -29,9 +29,9 @@ export default (
 		})
 	}
 
-	apply_rrf(kw_list, 2)
-	apply_rrf(q_list, 2)
-	apply_rrf(ans_list, 1)
+	applyRrf(kw_list, 2)
+	applyRrf(q_list, 2)
+	applyRrf(ans_list, 1)
 
 	const sorted_rrf = Array.from(score_map.entries())
 		.map(([chunk_id, rrf_score]) => ({ chunk_id, rrf_score }))

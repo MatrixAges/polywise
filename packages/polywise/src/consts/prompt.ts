@@ -23,3 +23,25 @@ export const get_triple = `
   {"head": "Apple Park", "relation": "位于", "tail": "加州"}
 ]
 `
+
+export const get_search_target = `
+# 搜索词扩展专家
+你是一个专业的搜索词扩展与意图分析专家。请根据提供的搜索词（query）和意图（intent），提取关键词、重写为完整的问句，并生成一个极简短的假设性回答片段。
+
+## 核心准则：语言绝对一致性（CRITICAL）
+必须严格保持与原始输入 query **完全相同的语言**进行输出，绝对禁止擅自翻译、重写成其他语言或被外语专有名词带偏！
+- 中英文隔离：如果输入是中文，你的 keywords, question, answer 必须全部是中文；如果输入是纯英文，必须全部输出英文。
+- 实体保留原貌：原文中的中英文专有名词（人名、公司名、品牌等，如 "WeWork", "Adam Neumann"），必须保持原样提取。
+
+## 生成规则
+1. keywords（关键词）：提取核心搜索词汇。
+2. question（语义短语）：结合 query 和 intent，重写为一个清晰、直接的问句（语言必须与 query 保持一致）。
+3. answer（假设性结果片段）：**极度简短的单句**。必须一针见血地回答问题，强制要求字数在 30 个字（或30个单词）以内，绝对禁止任何啰嗦的背景介绍或长篇大论。
+
+## 示例 (Few-Shot)
+输入："query: WeWork 创始人, intent: 了解现状"
+输出：{"keywords": "WeWork, 创始人, 现状", "question": "WeWork 的创始人目前现状如何？", "answer": "Adam Neumann 已于2019年离职，目前正致力于新的房地产项目。"}
+
+输入："query: Apple Vision Pro release date, intent: buying"
+输出：{"keywords": "Apple Vision Pro, release date", "question": "When was the Apple Vision Pro released?", "answer": "It was officially launched in the United States on February 2, 2024."}
+`

@@ -1,6 +1,7 @@
 import { addTask, initGenModel, removeTask } from '@core/llama'
 import { LlamaChatSession } from 'node-llama-cpp'
 
+import { prompt } from '../consts'
 import { env } from '../env'
 
 interface SearchTarget {
@@ -16,14 +17,11 @@ export default async (query: string, intent?: string) => {
 
 	const sequence = env.gen_context.getSequence()
 
-	const prompt = [`Expand this search query: ${query}`, intent && `Query intent: ${intent}`]
-		.filter(Boolean)
-		.join('\n')
+	const user_prompt = [`Query: ${query}`, intent && `Intent: ${intent}`].filter(Boolean).join('\n')
 
 	const session = new LlamaChatSession({
 		contextSequence: sequence,
-		systemPrompt:
-			'You are a search query expansion expert. Extract keywords, rephrase as a question, and generate a hypothetical answer snippet.'
+		systemPrompt: prompt.get_search_target
 	})
 
 	const grammar = await env.llama.createGrammarForJsonSchema({
@@ -37,7 +35,7 @@ export default async (query: string, intent?: string) => {
 		additionalProperties: false
 	})
 
-	const res = await session.prompt(prompt, { grammar })
+	const res = await session.prompt(user_prompt, { grammar })
 
 	session.dispose()
 	sequence.dispose()

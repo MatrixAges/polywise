@@ -15,6 +15,7 @@ interface SearchResult {
 export interface RerankedResult extends SearchResult {
 	reranker_score: number
 	final_score: number
+	content: string
 }
 
 export default async (query: string, results: Array<SearchResult>) => {
@@ -62,7 +63,8 @@ export default async (query: string, results: Array<SearchResult>) => {
 		reranked.push({
 			...doc,
 			reranker_score: rerank_score,
-			final_score
+			final_score,
+			content
 		})
 	}
 

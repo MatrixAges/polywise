@@ -13,6 +13,7 @@ const output_type = object({
 	results: array(
 		object({
 			chunk_id: string(),
+			content: string(),
 			rrf_score: number(),
 			normalized_rrf_score: number(),
 			rrf_rank: number(),
@@ -23,7 +24,7 @@ const output_type = object({
 })
 
 export default p
-	.meta({ openapi: { method: 'POST', path: '/search' } })
+	.meta({ openapi: { method: 'GET', path: '/search' } })
 	.input(input_type)
 	.output(output_type)
 	.query(async ({ input }) => {

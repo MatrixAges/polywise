@@ -1,7 +1,7 @@
 import { getSearchTarget } from '@core/pipeline'
 import { log } from '@core/utils'
 
-import eval from './eval'
+import evaluate from './evaluate'
 import prerank from './prerank'
 import rerank from './rerank'
 import searchByKeywords from './searchByKeywords'
@@ -34,7 +34,7 @@ export default async (args: ArgsSearch) => {
 		ans_count: ans_results.length
 	}))
 
-	const rrf_results = eval(kw_results, q_results, ans_results)
+	const rrf_results = evaluate(kw_results, q_results, ans_results)
 
 	log('SEARCH', 'rrfDone', () => `result_count: ${rrf_results.length}`)
 
