@@ -5,8 +5,10 @@ export default sqliteTable(
 	'task',
 	{
 		id: text('id').primaryKey().$defaultFn(getId),
-		// 任务类型
+		// 任务分类：消费任务时，每个分类是独立执行的
 		type: text('type').notNull(),
+		// 任务执行函数
+		fn: text('fn').notNull(),
 		// 传递给执行函数的参数
 		args: text('args', { mode: 'json' }).$type<Record<string, any>>().notNull(),
 		// 任务进度（可选）：用于任务断点恢复
