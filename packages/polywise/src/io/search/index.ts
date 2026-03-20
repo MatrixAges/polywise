@@ -68,8 +68,14 @@ export default async (args: ArgsSearch): Promise<SearchOutput> => {
 	}
 
 	let recall_result: { chunk_ids: string[]; article_ids: string[] } = { chunk_ids: [], article_ids: [] }
+
 	if (enable_recall) {
-		recall_result = await recall(query, intent, type)
+		const recall_text = enable_rewrite
+			? [search_keywords, search_question].filter(Boolean).join(' ')
+			: [query, intent].filter(Boolean).join(' ').trim()
+
+		recall_result = await recall(recall_text, type)
+
 		log('SEARCH', 'recallDone', () => recall_result)
 	}
 
