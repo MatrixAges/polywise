@@ -7,7 +7,7 @@ import { eq } from 'drizzle-orm'
 import { emitter } from '.'
 import handleTriple from './handleTriple'
 
-import type { Task } from './types'
+import type { Task } from '.'
 
 const handlers: Record<string, (args: any) => Promise<any>> = {
 	triple: handleTriple

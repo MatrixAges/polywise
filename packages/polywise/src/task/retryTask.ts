@@ -5,7 +5,7 @@ import { eq } from 'drizzle-orm'
 
 import { emitter, queue } from '.'
 
-import type { Task } from './types'
+import type { Task } from '.'
 
 export default async (item: Task) => {
 	const [err] = await to(env.db.update(task).set({ status: 'pending' }).where(eq(task.id, item.id)))
