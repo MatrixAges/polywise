@@ -1,4 +1,4 @@
-import { getKeywords, getSearchTarget } from '@core/pipeline'
+import { getKeywords, getRewriteQuery } from '@core/pipeline'
 import { log } from '@core/utils'
 import { z } from 'zod'
 
@@ -43,9 +43,9 @@ export default async (args: ArgsSearch): Promise<SearchOutput> => {
 	let rerank_query: string
 
 	if (enable_rewrite) {
-		const search_target = await getSearchTarget(query, intent)
+		const search_target = await getRewriteQuery(query, intent)
 
-		log('SEARCH', 'getSearchTarget', () => search_target)
+		log('SEARCH', 'getRewriteQuery', () => search_target)
 
 		search_keywords = search_target.keywords
 		search_question = search_target.question

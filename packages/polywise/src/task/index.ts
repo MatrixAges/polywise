@@ -17,6 +17,7 @@ export const emitter = new EventEmitter()
 
 export { default as pauseQueue } from './pauseQueue'
 export { default as resumeQueue } from './resumeQueue'
+export { pauseTriple, resumeTriple } from './pauseTriple'
 export { default as cancelTask } from './cancelTask'
 export { default as ignoreTask } from './ignoreTask'
 export { default as removeTask } from './removeTask'

@@ -69,6 +69,10 @@ This document provides an overview of the packages/polywise module structure and
 				},
 				"pauseTask.ts": { "desc": "Pause a task queue by type", "role": "Module" },
 				"resumeTask.ts": { "desc": "Resume a paused task queue by type", "role": "Module" },
+				"pauseTriple.ts": {
+					"desc": "Pause/resume triple queue with shared concurrency counter",
+					"role": "Module"
+				},
 				"retryTask.ts": { "desc": "Retry a failed task by resetting to pending", "role": "Module" },
 				"ignoreTask.ts": { "desc": "Ignore task by setting skipped status", "role": "Module" },
 				"removeTask.ts": { "desc": "Remove task from queue and DB", "role": "Module" },
@@ -85,7 +89,7 @@ This document provides an overview of the packages/polywise module structure and
 				"getChunks": { "desc": "Semantic and split chunking logic", "role": "Folder" },
 				"getEmbedding.ts": { "desc": "Text embedding generation", "role": "Module" },
 				"getKeywords.ts": { "desc": "Keyword extraction logic", "role": "Module" },
-				"getSearchTarget.ts": { "desc": "Gen Model query expansion for search", "role": "Module" },
+				"getRewriteQuery.ts": { "desc": "Gen Model query expansion for search", "role": "Module" },
 				"index.ts": { "desc": "Pipeline module exports", "role": "Index" }
 			},
 			"consts": {

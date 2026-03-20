@@ -1,4 +1,5 @@
 import { search } from '@core/io'
+import { pauseTriple, resumeTriple } from '@core/task'
 import { array, boolean, literal, number, object, string, union } from 'zod'
 
 import { p } from '../utils/trpc'
@@ -35,7 +36,14 @@ export default p
 	.output(output_type)
 	.query(async ({ input }) => {
 		console.log('input: ', input)
-		const results = await search(input)
 
-		return results
+		pauseTriple()
+
+		try {
+			const results = await search(input)
+
+			return results
+		} finally {
+			resumeTriple()
+		}
 	})
