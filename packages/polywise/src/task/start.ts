@@ -24,7 +24,7 @@ export default () => {
 		const q = fastq.promise({} as any, process, concurrent[type] ?? 1)
 
 		q.error((err, item) => {
-			log('TASK_QUEUE', 'queueError', () => `${item.id}: ${err}`)
+			if (err) log('TASK_QUEUE', 'queueError', () => `${item.id}: ${err}`)
 		})
 
 		queue.map.set(type, q)

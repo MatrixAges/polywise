@@ -15,20 +15,25 @@ interface ContextState {
 	model_promise: Promise<void> | null
 	timer: ReturnType<typeof setTimeout> | null
 	promise: Promise<void> | null
+	disposing: boolean
 }
 
 type EnvKey = keyof typeof env
 
 const context_state = {
-	embedding: { model_promise: null, timer: null, promise: null } as ContextState,
-	rerank: { model_promise: null, timer: null, promise: null } as ContextState,
-	gen: { model_promise: null, timer: null, promise: null } as ContextState
+	embedding: { model_promise: null, timer: null, promise: null, disposing: false } as ContextState,
+	rerank: { model_promise: null, timer: null, promise: null, disposing: false } as ContextState,
+	gen: { model_promise: null, timer: null, promise: null, disposing: false } as ContextState
 }
 
 export default async (type: 'embedding' | 'rerank' | 'gen') => {
 	const model_key = `${type}_model` as EnvKey
 	const context_key = `${type}_context` as EnvKey
 	const state = context_state[type]
+
+	while (state.disposing) {
+		await new Promise(resolve => setTimeout(resolve, 50))
+	}
 
 	if (!env[model_key] && !state.model_promise) {
 		let fetcher: (llama: Llama) => Promise<LlamaModel>
@@ -90,10 +95,13 @@ const resetContextTimer = (type: 'embedding' | 'rerank' | 'gen') => {
 			const is_empty = isTasksEmpty(type)
 
 			if (!is_empty) return resetContextTimer(type)
+
+			state.disposing = true
 			// @ts-ignore
 			env[context_key] = null
 
 			await ctx.dispose()
+			state.disposing = false
 		}
 	}, 30000)
 }

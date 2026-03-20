@@ -13,6 +13,8 @@ interface Args {
 export default async (args: Args) => {
 	const { chunk_text, agent_id, chunk_item_id } = args
 
+	log('SAVE', 'getTriples', () => `chunk: ${chunk_text}`)
+
 	const triples = await getTriples(chunk_text, chunk => process.stdout.write(chunk))
 
 	log('SAVE', 'getTriples', () => `triples: ${JSON.stringify(triples)}`)
