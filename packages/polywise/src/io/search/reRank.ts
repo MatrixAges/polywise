@@ -31,8 +31,8 @@ export interface RerankedArticleResult extends ArticleSearchResult {
 	content: string
 }
 
-const MIN_RERANK_SCORE = 0.5
-const MIN_ARTICLE_RERANK_SCORE = 0.6
+const MIN_RERANK_SCORE = 0.3
+const MIN_ARTICLE_RERANK_SCORE = 0.3
 
 const calculateFinalScore = (
 	rerank_score: number,
@@ -122,8 +122,6 @@ const rerankArticle = async (query: string, results: Array<ArticleSearchResult>)
 			content_map.set(a.id, a.content)
 		}
 	})
-
-	console.log(results)
 
 	log('SEARCH', 'reRankArticle', () => `query: ${query.slice(0, 50)}, count: ${results.length}`)
 
