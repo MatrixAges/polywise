@@ -23,7 +23,7 @@ export default async (text: string) => {
 		return { word, score, vector }
 	})
 
-	const top_k = Math.max(6, Math.min(30, Math.round((text.length / 50) * 1.5)))
+	const top_k = Math.max(8, Math.min(40, Math.round((text.length / 40) * 2)))
 
 	const sorted_list = result_list.sort((a, b) => b.score - a.score)
 	const filtered_list: Array<{ word: string; score: number; vector: Array<number> }> = []
@@ -31,7 +31,7 @@ export default async (text: string) => {
 	for (const item of sorted_list) {
 		const is_similar = filtered_list.some(selected => {
 			const is_text_similar = item.word.includes(selected.word) || selected.word.includes(item.word)
-			const is_vec_similar = getSimilarity(item.vector, selected.vector) > 0.8
+			const is_vec_similar = getSimilarity(item.vector, selected.vector) > 0.85
 
 			return is_text_similar || is_vec_similar
 		})

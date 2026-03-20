@@ -45,6 +45,14 @@ export const deleteChunkVector = (): Database.Statement => {
 	return env.sqlite.prepare('DELETE FROM vec.chunk_vec WHERE rowid = ?')
 }
 
+export const deleteChunkFts = (): Database.Statement => {
+	return env.sqlite.prepare('DELETE FROM chunk_keywords_fts WHERE rowid = ?')
+}
+
+export const insertChunkFts = (): Database.Statement => {
+	return env.sqlite.prepare('INSERT INTO chunk_keywords_fts(rowid, keywords) VALUES (?, ?)')
+}
+
 export const getEdgeRowid = (): Database.Statement => {
 	return env.sqlite.prepare('SELECT rowid FROM edge WHERE id = ?')
 }

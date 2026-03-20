@@ -1,5 +1,5 @@
 import { config } from '@core/config'
-import { deleteChunkVector, getChunkRowid, insertChunkVector } from '@core/db/prepare'
+import { deleteChunkFts, deleteChunkVector, getChunkRowid, insertChunkFts, insertChunkVector } from '@core/db/prepare'
 import { article, chunk, node_chunk, task } from '@core/db/schema'
 import { env } from '@core/env'
 import { getChunks, getEmbedding, getKeywords } from '@core/pipeline'
@@ -47,6 +47,7 @@ export default async (v: string, article_id?: string) => {
 
 				if (rowid_res) {
 					deleteChunkVector().run(BigInt(rowid_res.rowid))
+					deleteChunkFts().run(BigInt(rowid_res.rowid))
 
 					log('SAVE', 'deleteChunkVector', () => `chunk_rowid: ${rowid_res.rowid}`)
 				}
@@ -96,6 +97,10 @@ export default async (v: string, article_id?: string) => {
 		const { rowid } = getChunkRowid().get(chunk_item.id) as { rowid: number }
 
 		log('SAVE', 'getChunkRowid', () => `chunk_rowid: ${rowid}`)
+
+		insertChunkFts().run(BigInt(rowid), keywords.join(','))
+
+		log('SAVE', 'insertChunkFts', () => `chunk_rowid: ${rowid}`)
 
 		const vector = await getEmbedding(item)
 

@@ -11,5 +11,9 @@ export default (tagged_word: Word) => {
 	if (word_text.length < 2 && tagged_word.tag !== 'eng') return false
 	if (stopword_set.has(word_text.toLowerCase())) return false
 
-	return valid_entity_tag_set.has(tagged_word.tag)
+	if (valid_entity_tag_set.has(tagged_word.tag)) return true
+
+	if (/[a-zA-Z]/.test(word_text) && word_text.length >= 2) return true
+
+	return false
 }

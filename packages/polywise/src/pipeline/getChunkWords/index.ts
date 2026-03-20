@@ -13,6 +13,32 @@ export const stopword_set = new Set([...zho, ...eng])
 export const valid_entity_tag_set = new Set(['n', 'nr', 'ns', 'nt', 'nz', 'eng', 'vn', 'an', 'l', 'j', 'i'])
 export const blacklist_tag_set = new Set(['v', 'd', 'm', 'q', 't', 'f', 's', 'r', 'p', 'c', 'u', 'xc', 'w', 'x', 'zg'])
 
+const extractEnglishPhrases = (text: string): Array<string> => {
+	const phrases: Array<string> = []
+
+	const patterns = [
+		/[A-Z][a-z]+(?:\s+[A-Z][a-z]+)+/g,
+		/[A-Z]{2,}(?:\s+[A-Z][a-z]+)+/g,
+		/[A-Z][a-z]*[-_][A-Za-z0-9]+/g,
+		/[A-Z]{2,}/g,
+		/\d+[\-_.]?\w+/g
+	]
+
+	patterns.forEach(pattern => {
+		const matches = text.match(pattern)
+		if (matches) {
+			matches.forEach(match => {
+				const clean = match.trim()
+				if (clean.length >= 2 && !stopword_set.has(clean.toLowerCase())) {
+					phrases.push(clean)
+				}
+			})
+		}
+	})
+
+	return phrases
+}
+
 export default (text: string) => {
 	const tagged_word_list = jieba.tag(text) as Array<Word>
 	const ngram_list: Array<string> = []
@@ -39,6 +65,9 @@ export default (text: string) => {
 			}
 		}
 	}
+
+	const english_phrases = extractEnglishPhrases(text)
+	ngram_list.push(...english_phrases)
 
 	return Array.from(new Set(ngram_list))
 }

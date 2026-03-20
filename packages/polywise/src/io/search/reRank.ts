@@ -123,6 +123,8 @@ const rerankArticle = async (query: string, results: Array<ArticleSearchResult>)
 		}
 	})
 
+	console.log(results)
+
 	log('SEARCH', 'reRankArticle', () => `query: ${query.slice(0, 50)}, count: ${results.length}`)
 
 	const reranked: Array<RerankedArticleResult> = []
