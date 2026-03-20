@@ -21,3 +21,5 @@ export const gen_model = {
 	uri: 'hf:unsloth/Qwen3.5-4B-GGUF/Qwen3.5-4B-UD-Q8_K_XL.gguf',
 	file_name: 'hf_unsloth_Qwen3.5-4B-UD-Q8_K_XL.gguf'
 }
+
+export const global_agent_name = 'global'

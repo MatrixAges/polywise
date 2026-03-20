@@ -17,6 +17,7 @@ export default async (v: string) => {
 
 	const agent_id = await getGlobalAgentId()
 	const chunks = await getChunks(v)
+
 	log('SAVE', 'getChunks', () => `chunk_length: ${chunks.length}`)
 
 	const [article_item] = await env.db
@@ -29,6 +30,7 @@ export default async (v: string) => {
 	for (let i = 0; i < chunks.length; i++) {
 		const item = chunks[i]
 		const keywords = await getKeywords(item)
+
 		log('SAVE', 'getKeywords', () => `keywords: ${JSON.stringify(keywords)}`)
 
 		const [chunk_item] = await env.db
@@ -45,12 +47,15 @@ export default async (v: string) => {
 		log('SAVE', 'insertChunk', () => `${i} chunk_length: ${item.length}`)
 
 		const { rowid } = getChunkRowid().get(chunk_item.id) as { rowid: number }
+
 		log('SAVE', 'getChunkRowid', () => `chunk_rowid: ${rowid}`)
 
 		const vector = await getEmbedding(item)
+
 		log('SAVE', 'getChunkEmbedding')
 
 		insertChunkVector().run(BigInt(rowid), Buffer.from(new Float32Array(vector).buffer))
+
 		log('SAVE', 'saveChunkVector')
 
 		if (enable_triple) {
@@ -62,5 +67,6 @@ export default async (v: string) => {
 	}
 
 	log('SAVE', 'Done', () => `article_id: ${article_item.id}`)
+
 	return article_item.id
 }
