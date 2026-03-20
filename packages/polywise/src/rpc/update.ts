@@ -1,10 +1,10 @@
-import { update } from '@core/io'
+import { save } from '@core/io'
 import { boolean, object, string } from 'zod'
 
 import { p } from '../utils/trpc'
 
 const input_type = object({ id: string(), content: string() })
-const output_type = object({ ok: boolean() })
+const output_type = object({ ok: boolean(), id: string() })
 
 export default p
 	.meta({ openapi: { method: 'POST', path: '/update' } })
@@ -13,7 +13,7 @@ export default p
 	.mutation(async ({ input }) => {
 		const { id, content } = input
 
-		await update(id, content)
+		const updated_id = await save({ type: 'article', content: content, id })
 
-		return { ok: true }
+		return { ok: true, id: updated_id }
 	})
