@@ -26,18 +26,12 @@ export default async (item: Task) => {
 
 	const handler = handlers[item.type]
 
-	if (!handler) {
-		log('TASK_QUEUE', 'noHandler', () => `${item.id}: no handler for type ${item.type}`)
-		await env.db.update(task).set({ status: 'fail' }).where(eq(task.id, item.id))
-		emitter.emit('change')
-
-		return
-	}
-
 	try {
 		log('TASK_QUEUE', 'startTask', () => `${item.id}`)
+
 		await handler(item.args)
 		await env.db.update(task).set({ status: 'success' }).where(eq(task.id, item.id))
+
 		emitter.emit('change')
 	} catch (e) {
 		log('TASK_QUEUE', 'taskError', () => `${item.id}: ${e}`)

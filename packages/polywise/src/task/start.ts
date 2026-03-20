@@ -3,7 +3,7 @@ import fastq from 'fastq'
 
 import { queue } from '.'
 import poll from './poll'
-import processTask from './process'
+import process from './process'
 
 const concurrent: Record<string, number> = {
 	url: 3,
@@ -15,10 +15,13 @@ const handlers = ['triple']
 export default () => {
 	if (queue.on) return
 
+	queue.map = new Map()
+	queue.intervals = new Map()
+	queue.ticks = new Map()
 	queue.on = true
 
 	for (const type of handlers) {
-		const q = fastq.promise({} as any, processTask, concurrent[type] ?? 1)
+		const q = fastq.promise({} as any, process, concurrent[type] ?? 1)
 
 		q.error((err, item) => {
 			log('TASK_QUEUE', 'queueError', () => `${item.id}: ${err}`)
