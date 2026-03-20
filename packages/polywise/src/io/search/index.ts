@@ -101,7 +101,9 @@ export default async (args: ArgsSearch): Promise<SearchOutput> => {
 
 	log('SEARCH', 'rrfDone', () => `result_count: ${rrf_results.length}`)
 
-	const filtered_results = await filterBySemanticSimilarity(rerank_query, rrf_results)
+	const recall_chunk_ids = new Set(recall_result.chunk_ids)
+
+	const filtered_results = await filterBySemanticSimilarity(rerank_query, rrf_results, recall_chunk_ids)
 
 	log('SEARCH', 'semanticFilterDone', () => `result_count: ${filtered_results.length}`)
 

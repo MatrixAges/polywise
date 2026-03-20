@@ -73,7 +73,7 @@ export const getNodeChunk = (): Database.Statement => {
 		SELECT node_id, chunk_id, article_id
 		FROM node_chunk nc
 		JOIN chunk c ON c.id = nc.chunk_id
-		WHERE node_id IN (SELECT * FROM json_each(?))
+		WHERE node_id IN (SELECT value FROM json_each(?))
 	`)
 }
 

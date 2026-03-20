@@ -10,6 +10,7 @@ interface RrfScore {
 	rrf_score: number
 	normalized_rrf_score: number
 	rrf_rank: number
+	from_recall: boolean
 }
 
 export default (
@@ -20,20 +21,22 @@ export default (
 	recall_list: Array<SearchResult> = []
 ) => {
 	const score_map = new Map<string, number>()
+	const recall_chunk_ids = new Set<string>()
 
-	const applyRrf = (list: Array<SearchResult>, weight: number) => {
+	const applyRrf = (list: Array<SearchResult>, weight: number, isRecall: boolean = false) => {
 		list.forEach(item => {
 			const current_score = score_map.get(item.chunk_id) || 0
 			const additional_score = weight * (1 / (k + item.rank))
 
 			score_map.set(item.chunk_id, current_score + additional_score)
+			if (isRecall) recall_chunk_ids.add(item.chunk_id)
 		})
 	}
 
 	applyRrf(kw_list, 2)
 	applyRrf(q_list, 2)
 	applyRrf(ans_list, 1)
-	applyRrf(recall_list, 1)
+	applyRrf(recall_list, 1, true)
 
 	const sorted_rrf = Array.from(score_map.entries())
 		.map(([chunk_id, rrf_score]) => ({ chunk_id, rrf_score }))
@@ -47,6 +50,7 @@ export default (
 		chunk_id: item.chunk_id,
 		rrf_score: item.rrf_score,
 		normalized_rrf_score: item.rrf_score / max_rrf_score,
-		rrf_rank: index + 1
+		rrf_rank: index + 1,
+		from_recall: recall_chunk_ids.has(item.chunk_id)
 	})) as Array<RrfScore>
 }
