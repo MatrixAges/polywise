@@ -4,7 +4,7 @@ import { boolean, object, string } from 'zod'
 import { p } from '../utils/trpc'
 
 const input_type = object({ content: string() })
-const output_type = object({ ok: boolean() })
+const output_type = object({ ok: boolean(), id: string() })
 
 export default p
 	.meta({ openapi: { method: 'POST', path: '/save' } })

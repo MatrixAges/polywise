@@ -1,3 +1,4 @@
+import { deleteChunkVector, getChunkRowid } from '@core/db/prepare'
 import { article, chunk, node_chunk } from '@core/db/schema'
 import { env } from '@core/env'
 import { log } from '@core/utils'
@@ -15,6 +16,13 @@ export default async (article_id: string) => {
 	log('SYSTEM', 'findChunks', () => `found ${existing_chunks.length} chunks for article ${article_id}`)
 
 	for (const chunk_item of existing_chunks) {
+		const rowid_res = getChunkRowid().get(chunk_item.id) as { rowid: number } | undefined
+
+		if (rowid_res) {
+			deleteChunkVector().run(BigInt(rowid_res.rowid))
+			log('SYSTEM', 'deleteChunkVector', () => `chunk_rowid: ${rowid_res.rowid}`)
+		}
+
 		await env.db.delete(node_chunk).where(eq(node_chunk.chunk_id, chunk_item.id))
 
 		log('SYSTEM', 'deleteNodeChunk', () => `chunk_id: ${chunk_item.id}`)

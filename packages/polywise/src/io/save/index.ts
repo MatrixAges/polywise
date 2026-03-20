@@ -14,6 +14,7 @@ type ArgsSave = ArgsSaveArticle | ArgsSaveDocument
 
 export default async (args: ArgsSave) => {
 	if (args.type === 'article') {
-		await saveArticle(args.content)
+		return await saveArticle(args.content)
 	}
+	throw new Error('Unsupported save type')
 }

@@ -41,6 +41,10 @@ export const insertChunkVector = (): Database.Statement => {
 	return env.sqlite.prepare('INSERT INTO vec.chunk_vec(rowid, vectors) VALUES (?, ?)')
 }
 
+export const deleteChunkVector = (): Database.Statement => {
+	return env.sqlite.prepare('DELETE FROM vec.chunk_vec WHERE rowid = ?')
+}
+
 export const getEdgeRowid = (): Database.Statement => {
 	return env.sqlite.prepare('SELECT rowid FROM edge WHERE id = ?')
 }
