@@ -16,7 +16,8 @@ export default (
 	kw_list: Array<SearchResult>,
 	q_list: Array<SearchResult>,
 	ans_list: Array<SearchResult>,
-	k: number = 60
+	k: number = 60,
+	recall_list: Array<SearchResult> = []
 ) => {
 	const score_map = new Map<string, number>()
 
@@ -32,6 +33,7 @@ export default (
 	applyRrf(kw_list, 2)
 	applyRrf(q_list, 2)
 	applyRrf(ans_list, 1)
+	applyRrf(recall_list, 1)
 
 	const sorted_rrf = Array.from(score_map.entries())
 		.map(([chunk_id, rrf_score]) => ({ chunk_id, rrf_score }))

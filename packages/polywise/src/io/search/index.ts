@@ -8,6 +8,7 @@ import filterBySemanticSimilarity from './filterBySemanticSimilarity'
 import lookup from './lookup'
 import prerank from './prerank'
 import rankByTime from './rankByTime'
+import recall from './recall'
 import rerank, { rerankArticle, RerankedArticleResult } from './rerank'
 import searchByKeywords from './searchByKeywords'
 import searchByVector from './searchByVector'
@@ -33,9 +34,14 @@ interface ArticleSearchResult {
 }
 
 export default async (args: ArgsSearch): Promise<SearchOutput> => {
-	const { query, intent, enable_rewrite = false, rank_by_time, type = 'article' } = args
+	const { query, intent, enable_rewrite = false, enable_recall = false, rank_by_time, type = 'article' } = args
 
-	log('SEARCH', 'start', () => `query: ${query}, intent: ${intent}, enable_rewrite: ${enable_rewrite}`)
+	log(
+		'SEARCH',
+		'start',
+		() =>
+			`query: ${query}, intent: ${intent}, enable_rewrite: ${enable_rewrite}, enable_recall: ${enable_recall}`
+	)
 
 	let search_keywords: string
 	let search_question: string
@@ -61,6 +67,17 @@ export default async (args: ArgsSearch): Promise<SearchOutput> => {
 		rerank_query = combined_query
 	}
 
+	let recall_result: { chunk_ids: string[]; article_ids: string[] } = { chunk_ids: [], article_ids: [] }
+	if (enable_recall) {
+		recall_result = await recall(query, intent, type)
+		log('SEARCH', 'recallDone', () => recall_result)
+	}
+
+	const recall_list = recall_result.chunk_ids.map((chunk_id, index) => ({
+		chunk_id,
+		rank: index + 1
+	}))
+
 	const [kw_results, q_results, ans_results] = await Promise.all([
 		searchByKeywords(search_keywords),
 		searchByVector(search_question),
@@ -70,10 +87,11 @@ export default async (args: ArgsSearch): Promise<SearchOutput> => {
 	log('SEARCH', 'searchDone', () => ({
 		kw_count: kw_results.length,
 		q_count: q_results.length,
-		ans_count: ans_results.length
+		ans_count: ans_results.length,
+		recall_count: recall_list.length
 	}))
 
-	const rrf_results = evaluate(kw_results, q_results, ans_results)
+	const rrf_results = evaluate(kw_results, q_results, ans_results, 60, recall_list)
 
 	log('SEARCH', 'rrfDone', () => `result_count: ${rrf_results.length}`)
 

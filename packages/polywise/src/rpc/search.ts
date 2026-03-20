@@ -8,6 +8,7 @@ export const input_type = object({
 	query: string(),
 	intent: string().optional(),
 	enable_rewrite: boolean().optional(),
+	enable_recall: boolean().optional(),
 	rank_by_time: boolean().optional(),
 	type: union([literal('chunk'), literal('article')]).optional()
 }).strict()
