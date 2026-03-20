@@ -54,12 +54,25 @@ This document provides an overview of the packages/polywise module structure and
 				"schema": { "desc": "Drizzle schema definitions for memory graph entities", "role": "Folder" }
 			},
 			"task": {
-				"TaskQueue.ts": {
-					"desc": "Background task queue with event-driven exponential backoff polling",
+				"index.ts": { "desc": "Global queue/emitter state and re-exports", "role": "Index" },
+				"types.ts": { "desc": "Task and Queue type definitions", "role": "Type" },
+				"start.ts": { "desc": "Initialize all task queues and start polling", "role": "Module" },
+				"poll.ts": { "desc": "Poll DB for pending tasks with exponential backoff", "role": "Module" },
+				"schedulePoll.ts": { "desc": "Schedule next poll with timeout", "role": "Module" },
+				"process.ts": {
+					"desc": "Process single task: update status, run handler, handle errors",
 					"role": "Module"
 				},
-				"types.ts": { "desc": "Task type definitions", "role": "Type" },
-				"index.ts": { "desc": "Task module exports", "role": "Index" }
+				"cancelTask.ts": {
+					"desc": "Cancel task by setting fail status and removing from queue",
+					"role": "Module"
+				},
+				"pauseTask.ts": { "desc": "Pause a task queue by type", "role": "Module" },
+				"resumeTask.ts": { "desc": "Resume a paused task queue by type", "role": "Module" },
+				"retryTask.ts": { "desc": "Retry a failed task by resetting to pending", "role": "Module" },
+				"ignoreTask.ts": { "desc": "Ignore task by setting skipped status", "role": "Module" },
+				"removeTask.ts": { "desc": "Remove task from queue and DB", "role": "Module" },
+				"handleTriple": { "desc": "Triple extraction and graph insertion logic", "role": "Folder" }
 			},
 			"io": {
 				"save": { "desc": "Article and Document saving logic", "role": "Folder" },

@@ -2,13 +2,13 @@ import './server'
 
 import { initConfig } from './config'
 import { initEnv } from './env'
-import { initTask } from './task'
+import { startQueue } from './task'
 import { initServer } from './utils'
 
 await initEnv()
 await initServer()
 await initConfig()
 
-initTask()
+startQueue()
 
 export type { Router } from './rpc'

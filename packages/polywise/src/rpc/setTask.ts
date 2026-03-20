@@ -4,7 +4,7 @@ import { to } from 'await-to-js'
 import { eq } from 'drizzle-orm'
 import { boolean, enum as Enum, object, string } from 'zod'
 
-import { getTaskQueue } from '../task'
+import { cancelTask, ignoreTask, pauseQueue, removeTask, resumeQueue, retryTask } from '../task'
 import { p } from '../utils/trpc'
 
 const input_type = object({
@@ -20,9 +20,6 @@ export default p
 	.output(output_type)
 	.mutation(async ({ input }) => {
 		const { id, action } = input
-		const task_queue = getTaskQueue()
-
-		if (!task_queue) throw new Error('TaskQueue not initialized')
 
 		const [err_fetch, task_rows] = await to(env.db.select().from(task).where(eq(task.id, id)).limit(1))
 
@@ -33,28 +30,29 @@ export default p
 		if (!task_item) throw new Error(`Task not found: ${id}`)
 
 		switch (action) {
-			case 'cancel':
-				await task_queue.cancelTask(id)
-
-				break
 			case 'pauseQueue':
-				await task_queue.pauseTaskQueue(task_item.type)
+				pauseQueue(task_item.type)
 
 				break
 			case 'resumeQueue':
-				await task_queue.resumeTaskQueue(task_item.type)
+				resumeQueue(task_item.type)
 
 				break
+			case 'cancel':
+				await cancelTask(id)
+
+				break
+
 			case 'retry':
-				await task_queue.retryTask(task_item)
+				await retryTask(task_item)
 
 				break
 			case 'ignore':
-				await task_queue.ignoreTask(id)
+				await ignoreTask(id)
 
 				break
 			case 'remove':
-				await task_queue.removeTask(id)
+				await removeTask(id)
 
 				break
 		}

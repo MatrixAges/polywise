@@ -9,7 +9,7 @@ export default sqliteTable(
 		type: text('type').notNull(),
 		// 传递给执行函数的参数
 		args: text('args', { mode: 'json' }).$type<Record<string, any>>().notNull(),
-		// 任务状态：pending（排队中）、runing（执行中）、success（执行成功）、fail（执行失败）、awaiting（需要确认）、skipped（已忽略）、timeout（已超时）
+		// 任务状态：pending（排队中）、runing（执行中）、success（执行成功）、fail（执行失败）、awaiting（需要确认）、ignore（已忽略）、timeout（已超时）、cancel（已取消）
 		status: text('status').default('pending'),
 		created_at: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
 		updated_at: integer('updated_at', { mode: 'timestamp' })
