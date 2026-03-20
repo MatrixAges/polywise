@@ -1,4 +1,4 @@
-import { env } from '@core/env'
+import { searchChunkByVector } from '@core/db/prepare'
 import { getEmbedding } from '@core/pipeline'
 import { log } from '@core/utils'
 
@@ -11,22 +11,12 @@ const MAX_VECTOR_DISTANCE = 0.4
 
 export default async (text: string) => {
 	const vector = await getEmbedding(text)
-
 	log('SEARCH', 'searchByVector', () => `text: ${text.slice(0, 50)}`)
 
-	const stmt = env.sqlite.prepare(`
-		SELECT c.id as chunk_id, distance
-		FROM vec.chunk_vec v
-		JOIN chunk c ON c.rowid = v.rowid
-		WHERE v.vectors MATCH vec_f32(?) AND k = 20
-		ORDER BY distance
-	`)
-
 	const vector_buffer = Buffer.from(new Float32Array(vector).buffer)
-	const results = stmt.all(vector_buffer) as Array<{ chunk_id: string; distance: number }>
+	const results = searchChunkByVector().all(vector_buffer) as Array<{ chunk_id: string; distance: number }>
 
 	const filtered = results.filter(r => r.distance < MAX_VECTOR_DISTANCE)
-
 	log('SEARCH', 'searchByVector results', () => `count: ${results.length}, filtered: ${filtered.length}`)
 
 	return filtered.map((item, index) => ({

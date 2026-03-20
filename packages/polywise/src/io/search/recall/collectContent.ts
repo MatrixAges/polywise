@@ -1,24 +1,11 @@
 import getNodeChunk from './getNodeChunk'
 
-interface NodeResult {
-	id: string
-	name: string
-	rowid: number
-	similarity: number
-}
-
-export default (nodes: Array<NodeResult>, searchType: 'chunk' | 'article') => {
+export default (nodes: Array<{ id: string }>, type: 'chunk' | 'article') => {
 	if (nodes.length === 0) return { chunk_ids: [], article_ids: [] }
 
-	const node_ids = nodes.map(n => n.id)
-	const chunk_results = getNodeChunk(node_ids)
+	const chunks = getNodeChunk(nodes.map(n => n.id))
+	const chunk_ids = [...new Set(chunks.map(c => c.chunk_id))]
+	const article_ids = [...new Set(chunks.map(c => c.article_id))]
 
-	const chunk_ids = [...new Set(chunk_results.map(r => r.chunk_id))]
-	const article_ids = [...new Set(chunk_results.map(r => r.article_id))]
-
-	if (searchType === 'chunk') {
-		return { chunk_ids, article_ids }
-	}
-
-	return { chunk_ids: [], article_ids }
+	return type === 'chunk' ? { chunk_ids, article_ids } : { chunk_ids: [], article_ids }
 }
