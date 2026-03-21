@@ -4,13 +4,9 @@ import { log } from '@core/utils'
 import handleTripleEdge from './handleTripleEdge'
 import handleTripleNode from './handleTripleNode'
 
-interface Args {
-	chunk_text: string
-	agent_id: string
-	chunk_item_id: string
-}
+import type { TripleTaskArgs } from '../types'
 
-export default async (args: Args) => {
+export default async (args: TripleTaskArgs) => {
 	const { chunk_text, agent_id, chunk_item_id } = args
 
 	log('SAVE', 'getTriples', () => `chunk: ${chunk_text}`)

@@ -55,7 +55,7 @@ This document provides an overview of the packages/polywise module structure and
 			},
 			"task": {
 				"index.ts": { "desc": "Global queue/emitter state and re-exports", "role": "Index" },
-				"types.ts": { "desc": "Task and Queue type definitions", "role": "Type" },
+				"types.ts": { "desc": "Task args type definitions (TripleTaskArgs, etc.)", "role": "Type" },
 				"start.ts": { "desc": "Initialize all task queues and start polling", "role": "Module" },
 				"poll.ts": { "desc": "Poll DB for pending tasks with exponential backoff", "role": "Module" },
 				"schedulePoll.ts": { "desc": "Schedule next poll with timeout", "role": "Module" },
@@ -76,7 +76,8 @@ This document provides an overview of the packages/polywise module structure and
 				"retryTask.ts": { "desc": "Retry a failed task by resetting to pending", "role": "Module" },
 				"ignoreTask.ts": { "desc": "Ignore task by setting skipped status", "role": "Module" },
 				"removeTask.ts": { "desc": "Remove task from queue and DB", "role": "Module" },
-				"handleTriple": { "desc": "Triple extraction and graph insertion logic", "role": "Folder" }
+				"handleTriple": { "desc": "Triple extraction and graph insertion logic", "role": "Folder" },
+				"handleError": { "desc": "Task failure error handlers by type", "role": "Folder" }
 			},
 			"io": {
 				"save": { "desc": "Article and Document saving logic", "role": "Folder" },
