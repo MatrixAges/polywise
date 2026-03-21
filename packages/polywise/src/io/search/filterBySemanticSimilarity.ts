@@ -8,6 +8,7 @@ interface RrfResult {
 	normalized_rrf_score: number
 	rrf_rank: number
 	from_recall: boolean
+	from_keyword: boolean
 }
 
 interface ChunkRow {
@@ -19,8 +20,8 @@ type SimResult = RrfResult & {
 	similarity: number
 }
 
-const MIN_SEMANTIC_SIMILARITY = 0.55
-const RECALL_MIN_SIMILARITY = 0.15
+const MIN_SEMANTIC_SIMILARITY = 0.65
+const RECALL_MIN_SIMILARITY = 0.3
 
 export default async (query: string, results: Array<RrfResult>, recall_chunk_ids: Set<string> = new Set()) => {
 	if (results.length === 0) return []
@@ -48,6 +49,8 @@ export default async (query: string, results: Array<RrfResult>, recall_chunk_ids
 	const boost_factor = max_similarity > 0 && max_similarity < 0.85 ? 0.85 / Math.max(0.3, max_similarity) : 1.0
 
 	const filtered_results = sim_results.filter(item => {
+		if (item.from_keyword) return true
+
 		const is_recall = item.from_recall || recall_chunk_ids.has(item.chunk_id)
 		const weighted_similarity = is_recall ? item.similarity : Math.min(1.0, item.similarity * boost_factor)
 		const threshold = is_recall ? RECALL_MIN_SIMILARITY : MIN_SEMANTIC_SIMILARITY
