@@ -36,12 +36,9 @@ interface ArticleSearchResult {
 export default async (args: ArgsSearch): Promise<SearchOutput> => {
 	const { query, intent, enable_rewrite = false, enable_recall = false, rank_by_time, type = 'article' } = args
 
-	log(
-		'SEARCH',
-		'start',
-		() =>
-			`query: ${query}, intent: ${intent}, enable_rewrite: ${enable_rewrite}, enable_recall: ${enable_recall}`
-	)
+	log('SEARCH', 'start', () => {
+		return `query: ${query}, intent: ${intent}, enable_rewrite: ${enable_rewrite}, enable_recall: ${enable_recall}`
+	})
 
 	let search_keywords: string
 	let search_question: string

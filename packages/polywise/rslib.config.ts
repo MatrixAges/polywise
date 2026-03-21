@@ -19,6 +19,7 @@ export default {
 	],
 	output: {
 		target: 'node',
+		minify: true,
 		externals: [
 			/^@chonkiejs\/core(\/.*)?$/,
 			/^@node-rs\/xxhash(\/.*)?$/,

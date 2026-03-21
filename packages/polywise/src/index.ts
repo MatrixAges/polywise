@@ -1,28 +1,14 @@
-// await initServer()
-// await initConfig()
+import './server'
 
-// startQueue()
-
-// export type { Router } from './rpc'
-
-import { serve } from '@hono/node-server'
-import { Hono } from 'hono'
-
+import { initConfig } from './config'
 import { initEnv } from './env'
+import { startQueue } from './task'
+import { initServer } from './utils'
 
-// import './server'
-
-// import { initConfig } from './config'
-
-// import { startQueue } from './task'
-// import { initServer } from './utils'
-
+await initServer()
+await initConfig()
 await initEnv()
 
-const server = new Hono()
+startQueue()
 
-process.title = 'polywise_server'
-
-serve({ fetch: server.fetch, port: 3072 }, ({ port }) => {
-	console.log(`Listening on http://localhost:${port}`)
-})
+export type { Router } from './rpc'
