@@ -142,11 +142,12 @@ export default async (args: ArgsSearch): Promise<SearchOutput> => {
 		return { type: 'article', results: [] }
 	}
 
-	const article_search_results: Array<ArticleSearchResult> = article_scores.map(a => ({
+	const article_search_results: Array<ArticleSearchResult & { from_keyword?: boolean }> = article_scores.map(a => ({
 		article_id: a.article_id,
 		rrf_score: a.rrf_score,
 		normalized_rrf_score: a.normalized_rrf_score,
-		rrf_rank: a.rrf_rank
+		rrf_rank: a.rrf_rank,
+		from_keyword: a.from_keyword
 	}))
 
 	const reranked_articles: Array<RerankedArticleResult & { article_id: string }> = await rerankArticle(

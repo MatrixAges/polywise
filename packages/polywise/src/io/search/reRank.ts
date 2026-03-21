@@ -10,6 +10,7 @@ interface SearchResult {
 	normalized_rrf_score: number
 	rrf_rank: number
 	final_score?: number
+	from_keyword?: boolean
 }
 
 interface ArticleSearchResult {
@@ -17,6 +18,7 @@ interface ArticleSearchResult {
 	rrf_score: number
 	normalized_rrf_score: number
 	rrf_rank: number
+	from_keyword?: boolean
 }
 
 export interface RerankedResult extends SearchResult {
@@ -33,14 +35,18 @@ export interface RerankedArticleResult extends ArticleSearchResult {
 
 const MIN_RERANK_SCORE = 0.3
 const MIN_ARTICLE_RERANK_SCORE = 0.3
+const MIN_KEYWORD_RERANK_SCORE = 0.15
 
 const calculateFinalScore = (
 	rerank_score: number,
 	retrieval_score: number,
 	rrf_rank: number,
-	is_article: boolean = false
+	is_article: boolean = false,
+	from_keyword: boolean = false
 ) => {
-	const min_score = is_article ? MIN_ARTICLE_RERANK_SCORE : MIN_RERANK_SCORE
+	let min_score = is_article ? MIN_ARTICLE_RERANK_SCORE : MIN_RERANK_SCORE
+	if (from_keyword) min_score = MIN_KEYWORD_RERANK_SCORE
+
 	if (rerank_score < min_score) return 0
 
 	if (rrf_rank >= 1 && rrf_rank <= 3) {
@@ -82,7 +88,13 @@ const rerankChunk = async (query: string, results: Array<SearchResult>) => {
 		const content = content_map.get(doc.chunk_id) || ''
 
 		const rerank_score = await env.rerank_context.rank(query, content)
-		const final_score = calculateFinalScore(rerank_score, doc.normalized_rrf_score, doc.rrf_rank, false)
+		const final_score = calculateFinalScore(
+			rerank_score,
+			doc.normalized_rrf_score,
+			doc.rrf_rank,
+			false,
+			doc.from_keyword
+		)
 
 		if (final_score === 0) continue
 
@@ -131,7 +143,13 @@ const rerankArticle = async (query: string, results: Array<ArticleSearchResult>)
 		const content = content_map.get(doc.article_id) || ''
 
 		const rerank_score = await env.rerank_context.rank(query, content)
-		const final_score = calculateFinalScore(rerank_score, doc.normalized_rrf_score, doc.rrf_rank, true)
+		const final_score = calculateFinalScore(
+			rerank_score,
+			doc.normalized_rrf_score,
+			doc.rrf_rank,
+			true,
+			doc.from_keyword
+		)
 
 		if (final_score === 0) continue
 

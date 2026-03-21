@@ -10,6 +10,7 @@ interface ChunkScore {
 	rrf_rank: number
 	final_score: number
 	reranker_score: number
+	from_keyword?: boolean
 }
 
 export interface ArticleWithScore {
@@ -24,6 +25,7 @@ export interface ArticleWithScore {
 	rrf_score: number
 	normalized_rrf_score: number
 	rrf_rank: number
+	from_keyword?: boolean
 }
 
 export default async (chunks: Array<ChunkScore>): Promise<Array<ArticleWithScore>> => {
@@ -72,7 +74,8 @@ export default async (chunks: Array<ChunkScore>): Promise<Array<ArticleWithScore
 			final_score: c.final_score,
 			rrf_score: c.rrf_score,
 			normalized_rrf_score: c.normalized_rrf_score,
-			rrf_rank: c.rrf_rank
+			rrf_rank: c.rrf_rank,
+			from_keyword: c.from_keyword
 		})
 	}
 
