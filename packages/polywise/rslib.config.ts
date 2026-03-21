@@ -29,11 +29,13 @@ export default {
 			/^@chonkiejs\/core(\/.*)?$/,
 			/^@node-rs\/xxhash(\/.*)?$/,
 			/^@node-rs\/jieba(\/.*)?$/,
+			/^simsimd(\/.*)?$/,
 			/^fs-extra(\/.*)?$/,
 			/^watchpack(\/.*)?$/,
 			/^better-sqlite3(\/.*)?$/,
 			/^sqlite-vec(\/.*)?$/,
 			/^node-llama-cpp(\/.*)?$/,
+
 			{ 'safer-buffer': 'module safer-buffer' }
 		],
 		filename: { js: '[name].js' },

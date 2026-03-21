@@ -17,6 +17,7 @@ npm-debug.log*
 .svn
 .swc
 .test
+.clinic
 @mf-types
 
 # temp

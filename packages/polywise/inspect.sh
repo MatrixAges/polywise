@@ -1,0 +1,1 @@
+clinic doctor -- node ./dist/index.js
