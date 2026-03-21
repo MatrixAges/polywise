@@ -1,6 +1,6 @@
 import { env } from '../env'
 import { getEmbeddingModel, getGenModel, getRerankModel } from '../llama/getModel'
-import { isTasksEmpty } from './index'
+import { initLlama, isTasksEmpty } from './index'
 
 import type { Llama, LlamaContext, LlamaEmbeddingContext, LlamaModel, LlamaRankingContext } from 'node-llama-cpp'
 
@@ -30,12 +30,15 @@ export default async (type: 'embedding' | 'rerank' | 'gen') => {
 		else if (type === 'rerank') fetcher = getRerankModel
 		else fetcher = getGenModel
 
-		state.model_promise = fetcher(env.llama).then(model => {
+		state.model_promise = (async () => {
+			await initLlama()
+
+			const model = await fetcher(env.llama)
 			// @ts-ignore
 			env[model_key] = model
 
 			state.model_promise = null
-		})
+		})()
 	}
 
 	if (state.model_promise) {
@@ -51,12 +54,13 @@ export default async (type: 'embedding' | 'rerank' | 'gen') => {
 		else if (type === 'rerank') creator = () => model.createRankingContext()
 		else creator = () => model.createContext()
 
-		state.promise = creator().then(ctx => {
+		state.promise = (async () => {
+			const ctx = await creator()
 			// @ts-ignore
 			env[context_key] = ctx
 
 			state.promise = null
-		})
+		})()
 	}
 
 	if (state.promise) {

@@ -8,6 +8,9 @@ const embedding_tasks = new Set<string>()
 const rerank_tasks = new Set<string>()
 const gen_tasks = new Set<string>()
 
+let llama_promise: Promise<void> | null = null
+let llama_timer: ReturnType<typeof setTimeout> | null = null
+
 type TaskType = 'embedding' | 'rerank' | 'gen'
 
 export const addTask = (type: TaskType) => {
@@ -25,6 +28,11 @@ export const addTask = (type: TaskType) => {
 			break
 	}
 
+	if (llama_timer) {
+		clearTimeout(llama_timer)
+		llama_timer = null
+	}
+
 	return id
 }
 
@@ -40,6 +48,28 @@ export const removeTask = (type: TaskType, id: string) => {
 			gen_tasks.delete(id)
 			break
 	}
+
+	checkDisposeLlama()
+}
+
+const checkDisposeLlama = () => {
+	if (embedding_tasks.size === 0 && rerank_tasks.size === 0 && gen_tasks.size === 0) {
+		if (llama_timer) {
+			clearTimeout(llama_timer)
+		}
+
+		llama_timer = setTimeout(async () => {
+			if (embedding_tasks.size === 0 && rerank_tasks.size === 0 && gen_tasks.size === 0) {
+				await disposeModels()
+
+				if (env.llama) {
+					await env.llama.dispose()
+					// @ts-ignore
+					env.llama = null
+				}
+			}
+		}, 30000)
+	}
 }
 
 export const isTasksEmpty = (type: TaskType) => {
@@ -54,16 +84,50 @@ export const isTasksEmpty = (type: TaskType) => {
 }
 
 export const disposeModels = async () => {
-	await env.embedding_context?.dispose()
-	await env.embedding_model?.dispose()
-	await env.rerank_context?.dispose()
-	await env.rerank_model?.dispose()
-	await env.gen_context?.dispose()
-	await env.gen_model?.dispose()
+	if (env.embedding_context) {
+		await env.embedding_context.dispose()
+		// @ts-ignore
+		env.embedding_context = null
+	}
+	if (env.embedding_model) {
+		await env.embedding_model.dispose()
+		// @ts-ignore
+		env.embedding_model = null
+	}
+	if (env.rerank_context) {
+		await env.rerank_context.dispose()
+		// @ts-ignore
+		env.rerank_context = null
+	}
+	if (env.rerank_model) {
+		await env.rerank_model.dispose()
+		// @ts-ignore
+		env.rerank_model = null
+	}
+	if (env.gen_context) {
+		await env.gen_context.dispose()
+		// @ts-ignore
+		env.gen_context = null
+	}
+	if (env.gen_model) {
+		await env.gen_model.dispose()
+		// @ts-ignore
+		env.gen_model = null
+	}
 }
 
 export const initLlama = async () => {
-	env.llama = await getLlama()
+	if (env.llama) return
+
+	if (!llama_promise) {
+		llama_promise = (async () => {
+			env.llama = await getLlama()
+
+			llama_promise = null
+		})()
+	}
+
+	await llama_promise
 }
 
 export const initEmbeddingModel = async () => {
