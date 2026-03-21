@@ -2,6 +2,7 @@ import { log } from '@core/utils'
 import fastq from 'fastq'
 
 import { queue } from '.'
+import handleError from './handleError'
 import poll from './poll'
 import process from './process'
 
@@ -21,10 +22,16 @@ export default () => {
 	queue.on = true
 
 	for (const type of handlers) {
-		const q = fastq.promise({} as any, process, concurrent[type] ?? 1)
+		const q = fastq.promise(null, process, concurrent[type] ?? 1)
 
 		q.error((err, item) => {
-			if (err) log('TASK_QUEUE', 'queueError', () => `${item.id}: ${err}`)
+			if (err) {
+				log('TASK_QUEUE', 'queueError', () => `${item.id}: ${err}`)
+
+				const handler = handleError[item.type]
+
+				if (handler) handler(item.args)
+			}
 		})
 
 		queue.map.set(type, q)
