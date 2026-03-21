@@ -740,6 +740,9 @@ importers:
       stopword:
         specifier: ^3.1.4
         version: 3.1.4
+      tinypool:
+        specifier: ^2.1.0
+        version: 2.1.0
       trpc-to-openapi:
         specifier: ^3.1.0
         version: 3.1.0(@trpc/server@11.12.0(typescript@5.9.3))(zod-openapi@5.4.6(zod@4.3.6))(zod@4.3.6)

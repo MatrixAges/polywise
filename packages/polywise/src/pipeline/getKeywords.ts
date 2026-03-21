@@ -5,7 +5,7 @@ import getSimilarity from './getSimilarity'
 import getVectors from './getVectors'
 
 export default async (text: string) => {
-	const candidate_list = getChunkWords(text)
+	const candidate_list = await getChunkWords(text)
 
 	if (!candidate_list.length) return []
 

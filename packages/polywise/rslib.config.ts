@@ -11,7 +11,12 @@ export default {
 	},
 	lib: [
 		{
-			source: { entry: { index: './src/index.ts' } },
+			source: {
+				entry: {
+					index: './src/index.ts',
+					'pipeline/jieba.worker': './src/pipeline/getChunkWords/jieba.worker.ts'
+				}
+			},
 			format: 'esm',
 			dts: true,
 			autoExternal: is_dev

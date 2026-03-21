@@ -39,8 +39,8 @@ const extractEnglishPhrases = (text: string): Array<string> => {
 	return phrases
 }
 
-export default (text: string) => {
-	const tagged_word_list = jieba.tag(text) as Array<Word>
+export default async (text: string) => {
+	const tagged_word_list = (await jieba.tag(text)) as Array<Word>
 	const ngram_list: Array<string> = []
 
 	tagged_word_list.forEach(tagged_word => {

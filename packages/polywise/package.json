@@ -67,6 +67,7 @@
 		"sqlite-vec": "^0.1.7-alpha.10",
 		"stk": "workspace:*",
 		"stopword": "^3.1.4",
+		"tinypool": "^2.1.0",
 		"trpc-to-openapi": "^3.1.0",
 		"tslib": "catalog:",
 		"tsyringe": "catalog:",
