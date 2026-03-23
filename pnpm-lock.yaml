@@ -22,8 +22,8 @@ catalogs:
       specifier: ^0.4.2
       version: 0.4.2
     '@rsbuild/core':
-      specifier: 2.0.0-beta.8
-      version: 2.0.0-beta.8
+      specifier: 2.0.0-beta.9
+      version: 2.0.0-beta.9
     '@rsbuild/plugin-react':
       specifier: 1.4.6
       version: 1.4.6
@@ -64,7 +64,7 @@ catalogs:
       specifier: ^3.9.6
       version: 3.9.6
     ai:
-      specifier: 6.0.134
+      specifier: ^6.0.134
       version: 6.0.134
     ansis:
       specifier: ^4.2.0
@@ -371,13 +371,13 @@ importers:
         version: 6.0.0(postcss@8.5.8)
       '@rsbuild/core':
         specifier: 'catalog:'
-        version: 2.0.0-beta.8
+        version: 2.0.0-beta.9
       '@rsbuild/plugin-react':
         specifier: 'catalog:'
-        version: 1.4.6(@rsbuild/core@2.0.0-beta.8)
+        version: 1.4.6(@rsbuild/core@2.0.0-beta.9)
       '@rsbuild/plugin-svgr':
         specifier: ^1.3.1
-        version: 1.3.1(@rsbuild/core@2.0.0-beta.8)(typescript@5.9.3)
+        version: 1.3.1(@rsbuild/core@2.0.0-beta.9)(typescript@5.9.3)
       '@tailwindcss/postcss':
         specifier: ^4.2.2
         version: 4.2.2
@@ -9923,25 +9923,25 @@ snapshots:
     transitivePeerDependencies:
       - '@module-federation/runtime-tools'
 
-  '@rsbuild/plugin-react@1.4.6(@rsbuild/core@2.0.0-beta.8)':
+  '@rsbuild/plugin-react@1.4.6(@rsbuild/core@2.0.0-beta.9)':
     dependencies:
       '@rspack/plugin-react-refresh': 1.6.1(react-refresh@0.18.0)
       react-refresh: 0.18.0
     optionalDependencies:
-      '@rsbuild/core': 2.0.0-beta.8
+      '@rsbuild/core': 2.0.0-beta.9
     transitivePeerDependencies:
       - webpack-hot-middleware
 
-  '@rsbuild/plugin-svgr@1.3.1(@rsbuild/core@2.0.0-beta.8)(typescript@5.9.3)':
+  '@rsbuild/plugin-svgr@1.3.1(@rsbuild/core@2.0.0-beta.9)(typescript@5.9.3)':
     dependencies:
-      '@rsbuild/plugin-react': 1.4.6(@rsbuild/core@2.0.0-beta.8)
+      '@rsbuild/plugin-react': 1.4.6(@rsbuild/core@2.0.0-beta.9)
       '@svgr/core': 8.1.0(typescript@5.9.3)
       '@svgr/plugin-jsx': 8.1.0(@svgr/core@8.1.0(typescript@5.9.3))
       '@svgr/plugin-svgo': 8.1.0(@svgr/core@8.1.0(typescript@5.9.3))(typescript@5.9.3)
       deepmerge: 4.3.1
       loader-utils: 3.3.1
     optionalDependencies:
-      '@rsbuild/core': 2.0.0-beta.8
+      '@rsbuild/core': 2.0.0-beta.9
     transitivePeerDependencies:
       - supports-color
       - typescript

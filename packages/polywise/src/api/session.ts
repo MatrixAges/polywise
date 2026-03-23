@@ -6,11 +6,11 @@ import type { HonoContext } from '@core/types'
 export const post = async (c: HonoContext) => {
 	const { id, messages } = await c.req.json<{ id: string; messages: any }>()
 
-	const store_chat = SessionStore.get(id)!
-	const chat_stream = await store_chat.getStream(messages)
+	const session = SessionStore.get(id)!
+	const stream = await session.getStream(messages)
 
 	const target_stream = await SessionStreamStore.resumableStream(id, () =>
-		chat_stream.pipeThrough(new JsonToSseTransformStream())
+		stream.pipeThrough(new JsonToSseTransformStream())
 	)
 
 	if (!target_stream) return c.body(null)
