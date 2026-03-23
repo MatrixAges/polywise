@@ -3,7 +3,7 @@ import { resolve } from 'path'
 import { app } from '@core/consts'
 import { p } from '@core/utils'
 import { readFile } from 'atomically'
-import to from 'await-to-js'
+import { to } from 'await-to-js'
 import Watchpack from 'watchpack'
 import { array, string } from 'zod'
 

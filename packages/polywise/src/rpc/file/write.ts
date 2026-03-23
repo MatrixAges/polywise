@@ -2,7 +2,7 @@ import { resolve } from 'path'
 import { app } from '@core/consts'
 import { p } from '@core/utils'
 import { readFile, writeFile } from 'atomically'
-import to from 'await-to-js'
+import { to } from 'await-to-js'
 import { deepmerge } from 'deepmerge-ts'
 import ntry from 'nice-try'
 import { any, boolean, object, string } from 'zod'
@@ -15,8 +15,6 @@ const input_type = object({
 
 export default p.input(input_type).mutation(async ({ input }) => {
 	const { path, data, merge } = input
-
-	console.log(path, data)
 
 	let target_data = data
 

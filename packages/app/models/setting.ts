@@ -37,6 +37,7 @@ export default class Index {
 				if (res['config']) {
 					this.config = res['config']
 				}
+				console.log(res)
 
 				if (res['providers']) {
 					this.providers = res['providers']
