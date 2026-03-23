@@ -1,10 +1,9 @@
 import { EventEmitter, on } from 'events'
 import { resolve } from 'path'
 import { app } from '@core/consts'
-import { ensureWithValue, p } from '@core/utils'
+import { p } from '@core/utils'
 import { readFile } from 'atomically'
 import to from 'await-to-js'
-import fs from 'fs-extra'
 import Watchpack from 'watchpack'
 import { array, string } from 'zod'
 
@@ -15,10 +14,6 @@ const input_type = array(string())
 export default p.input(input_type).subscription(async function* (args) {
 	const { signal, input } = args
 	const files = input.map(item => resolve(`${app.app_path}/${item}.json`))
-
-	for await (const file of files) {
-		await ensureWithValue(file, {})
-	}
 
 	const e = new EventEmitter()
 	const watchpack = new Watchpack({ aggregateTimeout: 30, poll: false })

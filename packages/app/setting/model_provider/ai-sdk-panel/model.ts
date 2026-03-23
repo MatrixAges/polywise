@@ -5,22 +5,23 @@ import { validate } from 'jsonschema'
 import { makeAutoObservable } from 'mobx'
 import { injectable } from 'tsyringe'
 
-import { alert, downloadFile, uploadFile } from '@/utils'
+import { alert, downloadFile, rpc, uploadFile } from '@/utils'
 
-import { all_providers } from './providers'
 import schema from './schema.json'
 
+import type { ConfigProvider, ProviderConfig } from '@core/types'
 import type { DragEndEvent } from '@dnd-kit/core'
-import type { ArgsInit, Config, ConfigProvider, IPropsPanel } from './types'
+import type { ArgsInit, IPropsPanel } from './types'
 
 @injectable()
 export default class Index {
-	config = null as Config | null
+	config = null as ProviderConfig | null
 	current_tab = 0
 	current_model = null as number | null
 	test = { loading: false, res: null as boolean | null }
 	adding_model = false
 	adding_provider = false
+	all_providers = {} as Array<ConfigProvider>
 
 	timer_test = null as NodeJS.Timeout | null
 	onChange = null as unknown as IPropsPanel['onChange']
@@ -42,7 +43,7 @@ export default class Index {
 	}
 
 	get builtin_providers() {
-		return differenceBy(all_providers, this.config?.providers || [], item => item.name)
+		return differenceBy(this.all_providers, this.config?.providers || [], item => item.name)
 	}
 
 	get tabs() {
@@ -59,13 +60,19 @@ export default class Index {
 		makeAutoObservable(this, {}, { autoBind: true })
 	}
 
-	init(args: ArgsInit) {
+	async init(args: ArgsInit) {
 		const { config, onChange, onTest } = args
+
+		await this.getAll()
 
 		this.config = config
 
 		this.onChange = onChange
 		this.onTest = onTest
+	}
+
+	async getAll() {
+		this.all_providers = await rpc.provider.getAll.query()
 	}
 
 	setEnabledProvider(v: Partial<ConfigProvider>) {
@@ -135,7 +142,7 @@ export default class Index {
 		this.config.providers = $copy(this.config.providers)
 	}
 
-	onChangeCustomProviders(v: Config['custom_providers']) {
+	onChangeCustomProviders(v: ProviderConfig['custom_providers']) {
 		this.config!.custom_providers = v
 
 		this.onChangeConfig()

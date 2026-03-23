@@ -1,0 +1,24 @@
+import type { PresetProvider } from '@core/types'
+
+export default {
+	name: 'vercel',
+	enabled: true,
+	api_key: '',
+	models: [
+		{
+			enabled: true,
+			id: 'v0-1.5-md',
+			name: 'V0 1.5 MD'
+		},
+		{
+			enabled: true,
+			id: 'v0-1.5-lg',
+			name: 'V0 1.5 LG'
+		},
+		{
+			enabled: true,
+			id: 'v0-1.0-md',
+			name: 'V0 1.0- MD'
+		}
+	]
+} as PresetProvider

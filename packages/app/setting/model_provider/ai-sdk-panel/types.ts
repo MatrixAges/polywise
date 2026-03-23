@@ -1,10 +1,11 @@
+import type { Model, PresetProvider, Provider, ProviderConfig, SpecialProvider } from '@core/types'
 import type { DragEndEvent } from '@dnd-kit/core'
 import type { Control, UseFieldArrayRemove, UseFieldArrayUpdate, UseFormRegister } from 'react-hook-form'
 import type M from './model'
 
 export interface IPropsPanel {
-	config: Config
-	onChange: (v: Config) => void
+	config: ProviderConfig
+	onChange: (v: ProviderConfig) => void
 	onTest?: (provider: PresetProvider | SpecialProvider) => Promise<boolean>
 }
 
@@ -29,7 +30,7 @@ export interface IPropsTabItem extends Pick<IPropsTab, 'onChangeCurrentTab'> {
 }
 
 export interface IPropsForm {
-	provider: Config['providers'][number]
+	provider: ProviderConfig['providers'][number]
 	test?: M['test']
 	current_model: M['current_model']
 	adding_model: M['adding_model']
@@ -86,7 +87,7 @@ export interface IPropsFormModelForm {
 }
 
 export interface IPropsCustom {
-	custom_providers: Config['custom_providers']
+	custom_providers: ProviderConfig['custom_providers']
 	onChangeCustomProviders: M['onChangeCustomProviders']
 }
 
@@ -106,40 +107,6 @@ export interface IPropsCustomProvider {
 export interface IPropsDisabled {
 	items: Array<string>
 	onEnableProvider: M['onEnableProvider']
-}
-
-export interface Config {
-	providers: Array<ConfigProvider>
-	custom_providers?: Array<Provider>
-}
-
-export type ConfigProvider = PresetProvider | SpecialProvider
-
-export interface Provider {
-	name: string
-	api_key: string
-	base_url: string
-	enabled: boolean
-	models: Array<Model>
-	headers?: string
-}
-
-export interface PresetProvider extends Omit<Provider, 'base_url'> {
-	api_key: string
-	base_url?: string
-}
-
-export interface SpecialProvider extends Partial<Omit<Provider, 'name' | 'enabled'>> {
-	name: string
-	enabled: boolean
-	custom_fields?: Record<string, string>
-}
-
-export interface Model {
-	name: string
-	id: string
-	enabled: boolean
-	fid?: string
 }
 
 export type DeepPartial<T> = T extends object

@@ -5,7 +5,6 @@ import { useGlobal } from '@/context'
 import { sleep } from '@/utils'
 
 import Panel from './ai-sdk-panel'
-import { preset_providers } from './ai-sdk-panel/providers'
 
 import type { IPropsPanel } from './ai-sdk-panel/types'
 
@@ -15,7 +14,7 @@ const Index = () => {
 	const s = global.setting
 
 	const props_panel: IPropsPanel = {
-		config: s.providers || { providers: preset_providers },
+		config: $copy(s.providers),
 		onChange: useMemoizedFn(v => s.setConfig('providers', v)),
 		onTest: useMemoizedFn(async () => {
 			await sleep(500)

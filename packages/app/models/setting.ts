@@ -7,8 +7,7 @@ import { PANEL_WIDTH_DEFAULT } from '@/appdata'
 import { Util } from '@/models/common'
 import { rpc } from '@/utils'
 
-import type { Config } from '@/setting/model_provider/ai-sdk-panel/types'
-import type { AppConfig } from '@/types'
+import type { AppConfig, ProviderConfig } from '@core/types'
 import type { PanelImperativeHandle } from 'react-resizable-panels'
 
 @injectable()
@@ -18,7 +17,7 @@ export default class Index {
 	sidebar_collapsed = false
 
 	config = null as unknown as AppConfig
-	providers = null as unknown as Config
+	providers = null as unknown as ProviderConfig
 
 	constructor(public util: Util) {
 		makeAutoObservable(this, { util: false, panel_ref: false }, { autoBind: true })
@@ -42,15 +41,11 @@ export default class Index {
 				if (res['providers']) {
 					this.providers = res['providers']
 				}
-
-				this.setDefault()
 			}
 		})
 
 		this.util.acts.push(deinit.unsubscribe)
 	}
-
-	setDefault() {}
 
 	setConfig(type: 'config' | 'providers', data: any) {
 		rpc.file.write.mutate({ path: `${type}.json`, data })
