@@ -12,6 +12,6 @@ for (const filePath of paths) {
 
 		await writeFile(filePath, newContent, 'utf-8')
 
-		console.log(`✅ 已清理: ${filePath}`)
+		console.log(`✅ Cleaned: ${filePath}`)
 	}
 }

@@ -23,9 +23,9 @@ export default async (text: string, onTextChunk?: ((text: string) => void) | und
 		items: {
 			type: 'object',
 			properties: {
-				head: { type: 'string', description: '头实体（主语）' },
-				relation: { type: 'string', description: '关系（谓语）' },
-				tail: { type: 'string', description: '尾实体（宾语）' }
+				head: { type: 'string', description: 'Head entity (subject)' },
+				relation: { type: 'string', description: 'Relation (predicate)' },
+				tail: { type: 'string', description: 'Tail entity (object)' }
 			},
 			required: ['head', 'relation', 'tail'],
 			additionalProperties: false
