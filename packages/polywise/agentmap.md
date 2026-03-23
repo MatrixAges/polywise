@@ -27,8 +27,16 @@ This document provides an overview of the packages/polywise module structure and
 			"triple_en_5.ts": { "desc": "Entertainment and Media test data (EN)", "role": "Data" }
 		},
 		"src": {
-			"apis": {
-				"index.ts": { "desc": "Hono API entry with tRPC fetch handler", "role": "Index" }
+			"api": {
+				"index.ts": { "desc": "Hono API entry with tRPC and custom handlers", "role": "Index" },
+				"chat.ts": { "desc": "Chat API handler exposing fst capabilities", "role": "Endpoint" }
+			},
+			"fst": {
+				"index.ts": { "desc": "fst module exports", "role": "Index" },
+				"chat": { "desc": "Chat capabilities using AI SDK, supporting UIMessages", "role": "Folder" },
+				"tools": { "desc": "Bash sandboxing tools via bash-tool", "role": "Folder" },
+				"mcp": { "desc": "MCP client tools integration", "role": "Folder" },
+				"acp": { "desc": "ACP provider integration", "role": "Folder" }
 			},
 			"rpcs": {
 				"index.ts": { "desc": "RPC routers aggregation and type export", "role": "Index" },
@@ -51,7 +59,10 @@ This document provides an overview of the packages/polywise module structure and
 				"index.ts": { "desc": "DB module exports", "role": "Index" },
 				"initSql.ts": { "desc": "Virtual table initialization", "role": "Module" },
 				"migrate.ts": { "desc": "Migration runner", "role": "Module" },
-				"schema": { "desc": "Drizzle schema definitions for memory graph entities", "role": "Folder" }
+				"schema": {
+					"session.ts": { "desc": "Chat session storage schema", "role": "Schema" },
+					"message.ts": { "desc": "Chat message storage schema with UIMessages", "role": "Schema" }
+				}
 			},
 			"task": {
 				"index.ts": { "desc": "Global queue/emitter state and re-exports", "role": "Index" },

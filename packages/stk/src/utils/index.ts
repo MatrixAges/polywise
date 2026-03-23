@@ -9,6 +9,7 @@ export { default as uniqBy } from './uniqBy'
 export { default as findParent } from './findParent'
 export { default as getStyleValue } from './getStyleValue'
 export { default as getComputedStyleValue } from './getComputedStyleValue'
+export { default as nextTick } from './nextTick'
 
 export * from './is'
 export * from './date'

@@ -1,7 +1,8 @@
 // Rewrite from https://github.com/vercel/resumable-stream/blob/main/src/runtime.ts
 
-import nextTick from '../nextTick'
-import { getPubSub } from './pubsub'
+import { nextTick } from 'stk/utils'
+
+import getPubSub from './getPubSub'
 
 const { publisher, subscriber } = getPubSub()
 

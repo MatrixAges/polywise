@@ -65,6 +65,16 @@ CREATE TABLE `edge` (
 	CONSTRAINT `fk_edge_target_id_node_id_fk` FOREIGN KEY (`target_id`) REFERENCES `node`(`id`) ON DELETE CASCADE
 );
 --> statement-breakpoint
+CREATE TABLE `message` (
+	`id` text PRIMARY KEY,
+	`session_id` text NOT NULL,
+	`role` text NOT NULL,
+	`model_content` text NOT NULL,
+	`created_at` integer,
+	`updated_at` integer,
+	CONSTRAINT `fk_message_session_id_session_id_fk` FOREIGN KEY (`session_id`) REFERENCES `session`(`id`) ON DELETE CASCADE
+);
+--> statement-breakpoint
 CREATE TABLE `node` (
 	`id` text PRIMARY KEY,
 	`agent_id` text NOT NULL,
@@ -77,6 +87,13 @@ CREATE TABLE `node` (
 	`created_at` integer NOT NULL,
 	CONSTRAINT `fk_node_agent_id_agent_id_fk` FOREIGN KEY (`agent_id`) REFERENCES `agent`(`id`) ON DELETE CASCADE,
 	CONSTRAINT `node_agent_name_unique` UNIQUE(`agent_id`,`name`)
+);
+--> statement-breakpoint
+CREATE TABLE `session` (
+	`id` text PRIMARY KEY,
+	`title` text NOT NULL,
+	`created_at` integer,
+	`updated_at` integer
 );
 --> statement-breakpoint
 CREATE TABLE `skill` (
@@ -142,6 +159,7 @@ CREATE INDEX `edge_agent_id_idx` ON `edge` (`agent_id`);--> statement-breakpoint
 CREATE INDEX `edge_source_idx` ON `edge` (`source_id`);--> statement-breakpoint
 CREATE INDEX `edge_target_idx` ON `edge` (`target_id`);--> statement-breakpoint
 CREATE UNIQUE INDEX `edge_source_target_idx` ON `edge` (`source_id`,`target_id`);--> statement-breakpoint
+CREATE INDEX `message_session_id` ON `message` (`session_id`);--> statement-breakpoint
 CREATE INDEX `node_agent_id_idx` ON `node` (`agent_id`);--> statement-breakpoint
 CREATE INDEX `skill_type_idx` ON `skill` (`type`);--> statement-breakpoint
 CREATE INDEX `task_type_idx` ON `task` (`type`);--> statement-breakpoint

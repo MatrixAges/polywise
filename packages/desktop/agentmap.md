@@ -88,7 +88,6 @@ This document provides an overview of the packages/desktop module structure and 
 				"index.ts": { "desc": "Utils module exports", "role": "Index" },
 				"is.ts": { "desc": "Type check helpers", "role": "Utility" },
 				"locale.ts": { "desc": "Locale management", "role": "Utility" },
-				"nextTick.ts": { "desc": "Next tick helper", "role": "Utility" },
 				"path.ts": { "desc": "Path manipulation helpers", "role": "Utility" },
 				"protocol.ts": { "desc": "Protocol registration", "role": "Utility" },
 				"relaunch.ts": { "desc": "Relaunch helper", "role": "Utility" },
