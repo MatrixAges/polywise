@@ -1,47 +1,47 @@
 ---
 name: css
-description: 指导使用 TailwindCSS + CSS Modules 实现样式。在处理组件样式、布局设计或 CSS 模式时触发。
+description: Guides styling implementation using TailwindCSS + CSS Modules. Triggered when handling component styles, layout design, or CSS patterns.
 ---
 
-# CSS 样式指南
+# CSS Styling Guide
 
-此技能提供了本项目中结合 TailwindCSS + CSS Modules 进行样式实现的强制性规范。
+This skill provides mandatory specifications for combining TailwindCSS + CSS Modules for styling implementation in this project.
 
-## 1. 架构概览
+## 1. Architecture Overview
 
-本项目采用混合样式策略：
+This project adopts a hybrid styling strategy:
 
-- **TailwindCSS**: 用于简单的、实用优先的样式和布局。
-- **CSS Modules**: 用于复杂的状态管理、组件特定的样式和高可维护性需求。
-- **Rsbuild + Lightning CSS**: 提供带有 PostCSS 支持的现代 CSS 处理。
+- **TailwindCSS**: For simple, utility-first styles and layouts.
+- **CSS Modules**: For complex state management, component-specific styles, and high maintainability needs.
+- **Rsbuild + Lightning CSS**: Provides modern CSS processing with PostCSS support.
 
-## 2. 样式策略决策树
+## 2. Styling Strategy Decision Tree
 
-### 何时使用 TailwindCSS
+### When to Use TailwindCSS
 
 ```typescript
-// ✅ 使用 TailwindCSS:
-// - 简单的布局（flex, grid, 定位）
-// - 基础间距（margin, padding）
-// - 基础颜色和排版
-// - 一次性样式
-// - 快速原型
+// ✅ Use TailwindCSS:
+// - Simple layouts (flex, grid, positioning)
+// - Basic spacing (margin, padding)
+// - Basic colors and typography
+// - One-off styles
+// - Rapid prototyping
 
 <div className='flex items-center gap-3 p-4'>
-  <span className='text-std-600'>内容</span>
+  <span className='text-std-600'>Content</span>
 </div>
 ```
 
-### 何时使用 CSS Modules
+### When to Use CSS Modules
 
 ```typescript
-// ✅ 使用 CSS Modules:
-// - 复杂的状态过渡（hover, active, focus 状态组合）
-// - 组件专属的动画
-// - 嵌套选择器模式
-// - 重复的复杂样式
-// - 黑暗模式切换逻辑
-// - 会导致 TailwindCSS 类名字符串过长的样式组合
+// ✅ Use CSS Modules:
+// - Complex state transitions (hover, active, focus state combinations)
+// - Component-specific animations
+// - Nested selector patterns
+// - Repeated complex styles
+// - Dark mode switching logic
+// - Style combinations that would make TailwindCSS class strings too long
 
 import styles from './index.module.css'
 
@@ -50,12 +50,12 @@ import styles from './index.module.css'
 </div>
 ```
 
-## 3. TailwindCSS 模式
+## 3. TailwindCSS Patterns
 
-### 3.1 多行类名命名
+### 3.1 Multi-line Class Naming
 
 ```typescript
-// ✅ 推荐：多行以增加可读性
+// ✅ Recommended: multi-line for readability
 <div
 	className='
 		flex
@@ -67,14 +67,14 @@ import styles from './index.module.css'
 	<Icon size={20}></Icon>
 </div>
 
-// ❌ 避免：当样式很复杂时仍写在单行
+// ❌ Avoid: still writing on single line when styles are complex
 <div className='flex items-center justify-center w-18 h-screen is_drag'>
 ```
 
-### 3.2 带有模板字符串的条件样式
+### 3.2 Conditional Styles with Template Strings
 
 ```typescript
-// ✅ 使用模板字符串管理条件类名
+// ✅ Use template strings for conditional class names
 const Index = ({ fold }: { fold: boolean }) => {
 	return (
 		<nav
@@ -90,44 +90,44 @@ const Index = ({ fold }: { fold: boolean }) => {
 }
 ```
 
-### 3.3 全局工具类 (Global Utilities)
+### 3.3 Global Utilities
 
 ```typescript
-// Electron 窗口拖拽
-<div className='is_drag'></div>        // 允许拖动
-<div className='no_drag clickable'></div> // 禁止拖动，允许点击
+// Electron window dragging
+<div className='is_drag'></div>        // Allow dragging
+<div className='no_drag clickable'></div> // Disallow dragging, allow clicking
 
-// Lucide 图标边框
-<svg className='lucide'></svg>         // 应用 1.8px 的线条宽度
+// Lucide icon borders
+<svg className='lucide'></svg>         // Apply 1.8px line width
 
-// 自定义工具类
-<div className='clickable'></div>      // 鼠标指针 cursor pointer
+// Custom utilities
+<div className='clickable'></div>      // cursor pointer
 <div className='border_box'></div>     // box-sizing: border-box
 <div className='w_100'></div>          // width: 100%
 ```
 
-## 4. CSS Modules 模式
+## 4. CSS Modules Patterns
 
-### 4.1 文件结构
+### 4.1 File Structure
 
 ```css
 /* index.module.css */
-@reference '../../../styles/index.css'; /* 用于引入 Tailwind 基础 */
+@reference '../../../styles/index.css'; /* For importing Tailwind base */
 
 ._local {
-	/* 组件特定的样式 */
+	/* Component-specific styles */
 
 	&:hover {
-		/* Hover 状态 */
+		/* Hover state */
 	}
 
 	:global {
-		/* 全局类样式（跳过哈希化） */
+		/* Global class styles (skip hashing) */
 	}
 }
 ```
 
-### 4.2 嵌套状态与 :global
+### 4.2 Nested States and :global
 
 ```css
 /* index.module.css */
@@ -155,17 +155,17 @@ const Index = ({ fold }: { fold: boolean }) => {
 }
 ```
 
-### 4.3 使用 @apply
+### 4.3 Using @apply
 
 ```css
 ._local {
-	/* ✅ 使用 @apply 引入 TailwindCSS 工具类 */
+	/* ✅ Use @apply to include TailwindCSS utilities */
 	@apply rounded-xl;
 
-	/* ✅ 将自定义 CSS 与 @apply 混合 */
+	/* ✅ Mix custom CSS with @apply */
 	padding: 16px 0;
 
-	/* ✅ 将 @apply 用于颜色 */
+	/* ✅ Use @apply for colors */
 	:global {
 		.lang {
 			@apply text-std-400;
@@ -174,10 +174,10 @@ const Index = ({ fold }: { fold: boolean }) => {
 }
 ```
 
-### 4.4 CSS 变量
+### 4.4 CSS Variables
 
 ```css
-/* ✅ 使用 snake_case 定义 CSS 变量 */
+/* ✅ Use snake_case for CSS variables */
 ._local {
 	--margin_y: 1.2em;
 
@@ -187,44 +187,44 @@ const Index = ({ fold }: { fold: boolean }) => {
 }
 ```
 
-## 5. 颜色系统
+## 5. Color System
 
-项目使用语义化的颜色名称：
+The project uses semantic color names:
 
 ```typescript
-// TailwindCSS 颜色类名
-'text-std-800' // 主要文字
-'text-std-600' // 次要文字
-'text-std-400' // 柔和文字
-'text-std-white' // 白色文字
-'text-std-black' // 黑色文字
+// TailwindCSS color classes
+'text-std-800' // Primary text
+'text-std-600' // Secondary text
+'text-std-400' // Muted text
+'text-std-white' // White text
+'text-std-black' // Black text
 
-'bg-std-100' // 主要背景
-'bg-std-200' // 次要背景
-'bg-std-300' // Hover 悬停背景
-'bg-std-800' // 黑暗背景
+'bg-std-100' // Primary background
+'bg-std-200' // Secondary background
+'bg-std-300' // Hover background
+'bg-std-800' // Dark background
 
-'border-std-200' // 亮色边框
-'border-std-900/8' // 带透明度的暗色边框
+'border-std-200' // Light border
+'border-std-900/8' // Dark border with opacity
 ```
 
-## 6. 约束与最佳实践
+## 6. Constraints and Best Practices
 
-### 6.1 命名约定
+### 6.1 Naming Conventions
 
-- **TailwindCSS**: 使用标准的实用类名。
-- **CSS Modules**: 类名必须使用 `snake_case`。
-- **CSS 变量**: 使用带有 `--` 前缀的 `snake_case`。
-- **组件容器**: 对于主容器类名，始终使用 `_local`。
+- **TailwindCSS**: Use standard utility class names.
+- **CSS Modules**: Class names must use `snake_case`.
+- **CSS Variables**: Use `snake_case` with `--` prefix.
+- **Component Container**: Always use `_local` for the main container class name.
 
-### 6.2 代码风格
+### 6.2 Code Style
 
-- **TailwindCSS**: 换行格式化以增强可读性。
-- **CSS Modules**: 不加任何注释。使用 Tab 缩进。
-- **空行**: 用空行分隔不同的逻辑区域。
+- **TailwindCSS**: Use line breaks for better readability.
+- **CSS Modules**: No comments. Use Tab indentation.
+- **Blank Lines**: Separate different logical areas with blank lines.
 
-### 6.3 性能与维护
+### 6.3 Performance and Maintenance
 
-- **避免冗长字符串**: 不要创建超过 100 个字符的 TailwindCSS 字符串。改用 CSS Modules。
-- **不使用内联样式**: 除非必须，避免使用内联的 `style` props。
-- **严禁 !important**: 绝对不要在 CSS Modules 中使用 `!important`。
+- **Avoid Long Strings**: Don't create TailwindCSS strings exceeding 100 characters. Use CSS Modules instead.
+- **No Inline Styles**: Avoid inline `style` props unless absolutely necessary.
+- **No !important**: Absolutely never use `!important` in CSS Modules.

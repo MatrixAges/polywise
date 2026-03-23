@@ -1,75 +1,75 @@
-## 基石原则 (Agent Constitution)
+## Foundational Principles (Agent Constitution)
 
-这是你生成任何代码必须遵守的最高宪法：
+This is the highest constitution you must adhere to when generating any code:
 
-- **原子化 (单一职责与物理隔离)**：
-     - 一个函数或组件只允许做**一件具体的事情**（即一个“原子”）。
-     - 强制执行“**一个原子，一个物理文件**”的原则，严禁在一个文件中堆砌多个无关联的函数或组件。
-     - 所有文件必须通过 `export default` 暴露其核心“原子”，具体的导出语法（如箭头函数还是 Class）必须严格对照当前目录所在包的 `unify.md` 文件。
+- **Atomicity (Single Responsibility and Physical Isolation)**:
+     - A function or component is only allowed to do **one specific thing** (i.e., an "atom").
+     - Strictly enforce the "**one atom, one physical file**" principle. It is strictly prohibited to stack multiple unrelated functions or components in a single file.
+     - All files must expose their core "atom" via `export default`. The specific export syntax (e.g., arrow function or Class) must strictly follow the `unify.md` file of the current directory's package.
 
-- **分形化 (深层目录与高内聚)**：
-     - 随着业务复杂度的增加，严禁在同一个扁平目录下不断新增文件（这会导致代码膨胀和混乱）。
-     - 当一个“原子”的内部逻辑变复杂（例如代码超过 40 行，或者需要拆分出多个子逻辑/子组件协同工作时），你必须**就地创建一个与该原子同名的深层文件夹**。
-     - 将原有的主逻辑移入该文件夹的 `index.ts/tsx` 中，并将拆分出来的新子逻辑/子组件放在该文件夹内，仅供 `index` 调度使用。
-     - 具体的组件如何拆分子组件、函数如何聚类为同名文件夹，**必须在执行代码生成前，读取并严格效仿当前项目或子模块目录下的 `unify.md` 中定义的“分形法则”**。
-     - 最终生成的代码必须呈现出树状的、高内聚的层级结构，确保极高的可读性和可维护性，杜绝“想到哪写到哪”的面条式代码。
+- **Fractalization (Deep Directory and High Cohesion)**:
+     - As business complexity increases, it is strictly prohibited to continuously add new files in the same flat directory (this will lead to code bloat and confusion).
+     - When the internal logic of an "atom" becomes complex (e.g., code exceeds 40 lines, or needs to split into multiple sub-logics/sub-components working together), you must **create a deep folder with the same name as the atom in place**.
+     - Move the original main logic into the `index.ts/tsx` of that folder, and place the split-out new sub-logics/sub-components within that folder, to be dispatched only by `index`.
+     - How to split sub-components for components and how to cluster functions into same-name folders, **must be read and strictly emulated from the "fractal rules" defined in `unify.md` in the current project or sub-module directory before performing code generation**.
+     - The generated code must present a tree-like, highly cohesive hierarchical structure, ensuring extremely high readability and maintainability, and eliminating "noodle-style" code that is written wherever one thinks.
 
-## 代码规范 (Coding Standards)
+## Coding Standards
 
-针对不同技术栈和代码模块的开发，请强制使用 `@.opencode/skills/` 下的具体技能指南：
+For development targeting different tech stacks and code modules, please strictly use the specific skill guides under `@.opencode/skills/`:
 
 - **TypeScript**: [typescript/SKILL.md](../../.opencode/skills/typescript/SKILL.md)
 - **React**: [react/SKILL.md](../../.opencode/skills/react/SKILL.md)
 - **MobX**: [mobx/SKILL.md](../../.opencode/skills/mobx/SKILL.md)
 - **Tailwind CSS**: [css/SKILL.md](../../.opencode/skills/css/SKILL.md)
 - **i18n**: [i18n/SKILL.md](../../.opencode/skills/i18n/SKILL.md)
-- **eRPC 通信**: [erpc/SKILL.md](../../.opencode/skills/erpc/SKILL.md)
+- **eRPC Communication**: [erpc/SKILL.md](../../.opencode/skills/erpc/SKILL.md)
 
-### 命名与格式
+### Naming and Formatting
 
-- **命名规范**：所有普通变量必须使用 `snake_case`，所有函数和方法必须使用 `camelCase`，所有组件和页面文件必须使用 `PascalCase`。
-- **禁止下划线**：任何函数或方法（包括类内部的私有方法）的命名，绝对不能以 `_` 符号开头。
-- **类型标记**：声明数组类型时强制使用 `Array<T>` 泛型语法，严格禁止使用 `T[]` 语法。
-- **代码空行**：当相邻两行代码发生异步/同步风格切换，或执行不同的逻辑块时，强制插入一个空行进行视觉隔离。
-- **禁止注释**：生成的代码中严禁写任何中文或英文的解释性注释，强制要求通过极具描述性的变量名和函数名来体现业务意图。
+- **Naming Conventions**: All ordinary variables must use `snake_case`, all functions and methods must use `camelCase`, and all component and page files must use `PascalCase`.
+- **No Underscores**: The naming of any function or method (including private methods within a class) absolutely cannot start with the `_` symbol.
+- **Type Notation**: When declaring array types, the `Array<T>` generic syntax must be strictly enforced, and the `T[]` syntax is strictly prohibited.
+- **Code Blank Lines**: When adjacent lines of code switch between async/sync styles or execute different logical blocks, a blank line must be forcibly inserted for visual separation.
+- **No Comments**: Generated code is strictly prohibited from containing any explanatory comments in Chinese or English. Business intent must be conveyed through highly descriptive variable and function names.
 
-### 架构与设计
+### Architecture and Design
 
-- **单一职责**：`models/` 下的文件只允许写状态和数据获取逻辑，`components/` 只允许写 UI 渲染逻辑，`utils/` 只允许写无外部依赖的纯函数。
-- **原子化逻辑**：单个函数代码超过 40 行时必须将其拆分为多个独立小函数；JSX 中 `map` 循环内部的 DOM 结构必须抽离并新建为一个子组件。
-- **依赖注入**：所有类的外部依赖必须通过构造函数和 `tsyringe` 注入，严禁在业务代码中出现 `new ClassName()` 的强制实例化写法。
-- **文件拆分**：单个组件文件超过 80 行时，必须在该同级目录新建 `components/` 文件夹，将内部的区块组件拆分进去并使用无前缀的简短命名。
-- **函数顺序**：Class 内部必须严格按 `constructor` -> `init` -> `public 方法` -> `private 方法` -> `辅助函数` -> `off` 的物理顺序排列，且严禁保留没有任何内容的空函数。
+- **Single Responsibility**: Files under `models/` are only allowed to contain state and data fetching logic, `components/` only for UI rendering logic, and `utils/` only for pure functions with no external dependencies.
+- **Atomic Logic**: When a single function's code exceeds 40 lines, it must be split into multiple independent small functions; DOM structures inside `map` loops in JSX must be extracted and created as a new sub-component.
+- **Dependency Injection**: All external dependencies of classes must be injected through constructors and `tsyringe`. It is strictly prohibited to have forced instantiation patterns like `new ClassName()` in business code.
+- **File Splitting**: When a single component file exceeds 80 lines, a `components/` folder must be created in the same-level directory, and the internal block components must be split into it with short, prefix-free names.
+- **Function Order**: Inside a Class, the physical order must strictly be `constructor` -> `init` -> `public methods` -> `private methods` -> `helper functions` -> `off`, and empty functions with no content are strictly prohibited.
 
-### TypeScript 规范
+### TypeScript Specifications
 
-- **禁止 Any**：代码中严禁出现 `any` 类型声明，对于不确定的类型，强制声明为 `unknown` 并使用 typeof/instanceof 等类型收窄机制。
-- **类型推断**：除了导出的复杂公共 API 外，禁止手动声明函数的返回值类型，全部交给 TS 编译器自动推断。
-- **类型导入**：导入 Type 或 Interface 时必须使用 `import type` 语法，且该类导入必须统一放在目标文件的最顶端区块。
-- **箭头函数**：所有业务组件、工具函数和独立函数强制声明为 `const fn = () => {}` 格式，禁止使用 `function fn() {}` 语法。
-- **函数传参**：当函数参数数量大于等于 3 个时，强制将参数合并为一个对象并命名为 `args`，且必须在函数体的第一行解构该 `args`。
-- **类型文件**：当单个 `.ts` 类型文件超过 50 行时必须按业务域拆分为多个文件；若某目录下存在多个不足 20 行的零散类型文件则必须合并为一。
+- **No Any**: The `any` type declaration is strictly prohibited in code. For uncertain types, forcefully declare as `unknown` and use typeof/instanceof and other type narrowing mechanisms.
+- **Type Inference**: Except for exported complex public APIs, manually declaring function return value types is prohibited; all type inference is left to the TS compiler.
+- **Type Imports**: When importing Types or Interfaces, the `import type` syntax must be used, and such imports must be placed at the very top block of the target file.
+- **Arrow Functions**: All business components, utility functions, and independent functions must be declared in `const fn = () => {}` format, and the `function fn() {}` syntax is prohibited.
+- **Function Parameters**: When a function has 3 or more parameters, the parameters must be merged into a single object named `args`, and the `args` must be destructured on the first line of the function body.
+- **Type Files**: When a single `.ts` type file exceeds 50 lines, it must be split into multiple files by business domain; if there are multiple scattered type files under 20 lines in a directory, they must be merged into one.
 
-### 模块与导入导出
+### Modules and Import/Export
 
-- **默认导出**：每个 Class 类必须独占一个物理文件，并且在该文件的最末尾使用 `export default ClassName` 导出。
-- **Utils 导出**：`utils/` 目录下的所有工具函数，强制要求使用 `export default () => {}` 的匿名箭头函数格式导出。
-- **命名导入**：严禁使用 `import * as name` 的全量导入，强制使用精准解构语法 `import { a, b } from 'pkg'` 按需引入。
-- **默认导入**：引入 default 模块时必须直接使用 `import X from 'pkg'`，严禁写成带有别名的 `import { default as X } from 'pkg'`。
+- **Default Export**: Each Class must occupy a single physical file, and must be exported at the very end of the file using `export default ClassName`.
+- **Utils Export**: All utility functions under the `utils/` directory must use the anonymous arrow function format `export default () => {}` for exporting.
+- **Named Imports**: It is strictly prohibited to use `import * as name` for full imports. The precise destructuring syntax `import { a, b } from 'pkg'` must be used for on-demand imports.
+- **Default Imports**: When importing a default module, directly use `import X from 'pkg'`. It is strictly prohibited to write it with an alias like `import { default as X } from 'pkg'`.
 
-### 数据库与 SQL
+### Database and SQL
 
-- **全局唯一 ID**：所有数据库表的主键（id）和外键字段，强制使用 `uuidv7()` 生成字符串类型，严格禁止使用数据库自增 Int 类型。
-- **SQL 隔离**：所有 SQL 查询字符串强制存放在 `src/sql/` 目录的文件中，业务代码中若出现硬编码的 SQL 字符串将被视为违规。
-- **SQL 注释**：`src/sql/` 中导出的每一个 SQL 变量或函数上方，强制附带一段 JSDoc 注释，详细写明该语句操作了哪个表以及属于什么动作。
+- **Globally Unique IDs**: All primary keys (id) and foreign key fields in database tables must use `uuidv7()` to generate string types. It is strictly prohibited to use database auto-increment Int types.
+- **SQL Isolation**: All SQL query strings must be stored in files under the `src/sql/` directory. Hard-coded SQL strings in business code will be considered a violation.
+- **SQL Comments**: Above every SQL variable or function exported from `src/sql/`, a JSDoc comment must be attached, detailing which table the statement operates on and what action it belongs to.
 
-### 测试规范 (TDD)
+### Testing Specifications (TDD)
 
-- **测试先行 (TDD)**：在 `packages/polywise` 中开发功能时，必须先编写测试代码并确认运行失败（Red），然后再编写业务代码使其通过（Green）。
-- **真实模型**：测试中严禁 Mock 本地大模型（如嵌入或重排模型）的响应，强制要求引入真实的推理库并利用真实数据集进行断言。
-- **测试隔离**：编写多测试用例时强制使用 `describe.concurrent` 并发运行，且每个用例在初始化时必须为其分配一个独立的数据库名或隔离目录以防止状态污染。
+- **Test-Driven Development (TDD)**: When developing features in `packages/polywise`, you must first write test code and confirm it fails (Red), then write business code to make it pass (Green).
+- **Real Models**: In tests, it is strictly prohibited to Mock responses from local large models (such as embedding or reranking models). You must forcefully introduce real inference libraries and use real datasets for assertions.
+- **Test Isolation**: When writing multiple test cases, `describe.concurrent` must be used for concurrent execution, and each case must be assigned an independent database name or isolated directory during initialization to prevent state pollution.
 
-### Node.js API 规范
+### Node.js API Specifications
 
-- **文件系统**：所有涉及本地文件系统的操作，必须引入第三方库 `fs-extra` 进行处理，严禁使用原生的 `fs` 或 `fs/promises` 模块。
-- **无 node 前缀**：引入 Node.js 原生内置模块（如 `path`、`crypto`）时，导入路径严禁添加 `node:` 字符前缀。
+- **File System**: All operations involving the local file system must introduce the third-party library `fs-extra` for processing. Using the native `fs` or `fs/promises` modules is strictly prohibited.
+- **No node Prefix**: When introducing Node.js native built-in modules (such as `path`, `crypto`), the import path is strictly prohibited from adding the `node:` character prefix.

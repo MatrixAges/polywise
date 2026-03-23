@@ -1,22 +1,22 @@
 ---
 name: mobx
-description: 指导使用 MobX + tsyringe 实现状态管理。在处理数据模型、状态逻辑或 Store 架构时触发。
+description: Guides state management implementation using MobX + tsyringe. Triggered when handling data models, state logic, or Store architecture.
 ---
 
-# MobX 状态管理指南
+# MobX State Management Guide
 
-此技能提供了在项目中强制使用 MobX 以及 tsyringe（用于依赖注入 DI）进行状态管理的规范。
+This skill provides mandatory specifications for using MobX and tsyringe (for dependency injection DI) for state management in this project.
 
-## 1. 架构概览
+## 1. Architecture Overview
 
-- **MobX**: 核心状态管理库 (使用 `makeAutoObservable`)。
-- **tsyringe**: 用于模型的依赖注入容器。
-- **模块化模型**: 状态被拆分为专门的模型（如 `GlobalModel`, `Settings`）。
-- **自动绑定**: 动作 (actions) 会被自动绑定到类实例上。
+- **MobX**: Core state management library (using `makeAutoObservable`).
+- **tsyringe**: Dependency injection container for models.
+- **Modular Models**: State is split into specialized models (e.g., `GlobalModel`, `Settings`).
+- **Auto-binding**: Actions are automatically bound to class instances.
 
-## 2. 模型实现模式
+## 2. Model Implementation Patterns
 
-### 2.1 基础模型结构
+### 2.1 Basic Model Structure
 
 ```typescript
 import { makeAutoObservable } from 'mobx'
@@ -28,7 +28,7 @@ export default class FeatureModel {
 	loading = false
 
 	constructor() {
-		// ✅ 使用 autoBind: true 以方便事件处理
+		// ✅ Use autoBind: true for convenient event handling
 		makeAutoObservable(this, {}, { autoBind: true })
 	}
 
@@ -39,7 +39,7 @@ export default class FeatureModel {
 	async fetchData() {
 		this.loading = true
 		try {
-			// API 调用逻辑
+			// API call logic
 		} finally {
 			this.loading = false
 		}
@@ -47,7 +47,7 @@ export default class FeatureModel {
 }
 ```
 
-### 2.2 单例模型 (根 Store)
+### 2.2 Singleton Model (Root Store)
 
 ```typescript
 import { singleton } from 'tsyringe'
@@ -56,7 +56,7 @@ import { Settings } from '@/models'
 
 @singleton()
 export default class GlobalModel {
-	// ✅ 通过构造函数进行依赖注入
+	// ✅ Dependency injection via constructor
 	constructor(public settings: Settings) {}
 
 	init() {
@@ -69,12 +69,12 @@ export default class GlobalModel {
 }
 ```
 
-### 2.3 处理复杂模型 (DI 组合)
+### 2.3 Handling Complex Models (DI Composition)
 
-对于复杂的状态管理（超过 20 个响应式变量），应将模型拆分为更小、更专注的子模型，并使用 DI 组合它们。
+For complex state management (more than 20 reactive variables), models should be split into smaller, focused sub-models and composed using DI.
 
 ```typescript
-// ✅ 推荐：将复杂的模型拆分为多个子模型并注入
+// ✅ Recommended: split complex models into multiple sub-models and inject
 @injectable()
 export default class ComplexFeatureModel {
 	constructor(
@@ -83,17 +83,17 @@ export default class ComplexFeatureModel {
 		public sync: SyncSubModel,
 		public util: Util
 	) {
-		// 注意：排除注入的依赖，不要将其变为 observable
+		// Note: exclude injected dependencies, don't make them observable
 		makeAutoObservable(this, { data: false, ui: false, sync: false, util: false }, { autoBind: true })
 	}
 }
 ```
 
-## 3. 父子模型通信
+## 3. Parent-Child Model Communication
 
-### 3.1 访问单例 GlobalModel
+### 3.1 Accessing Singleton GlobalModel
 
-在子模型中，可以通过声明一个非 observable 的属性，并在构造函数中使用 `getGlobal` 工具函数绑定 `GlobalModel` 的单例。
+In sub-models, you can declare a non-observable property and bind the singleton `GlobalModel` instance in the constructor using the `getGlobal` utility function.
 
 ```typescript
 import { injectable } from 'tsyringe'
@@ -104,30 +104,30 @@ import type { GlobalModel } from '@/models'
 
 @injectable()
 export default class SubModel {
-	// ✅ 声明为非响应式属性
+	// ✅ Declare as non-reactive property
 	global = null as unknown as GlobalModel
 
 	constructor() {
 		makeAutoObservable(this, { global: false }, { autoBind: true })
 
-		// ✅ 通过工具函数绑定实例
+		// ✅ Bind instance via utility function
 		getGlobal(this.global)
 	}
 }
 ```
 
-### 3.2 在临时 (Transient) 模型中访问父级
+### 3.2 Accessing Parent in Transient Models
 
-在非单例模型中，`container.resolve()` 会创建新实例。为了确保子模型访问到正确的父级实例，父级必须显式传递其引用。
+In non-singleton models, `container.resolve()` creates new instances. To ensure sub-models access the correct parent instance, the parent must explicitly pass its reference.
 
-**关键原则：**
+**Key Principles:**
 
-1. **避免递归注入**：永远不要在依赖子模型的父级模型对应的子模型构造函数内，调用 `container.resolve(ParentModel)`。
-2. **主动赋值**：由父模型负责建立关联引用。
+1. **Avoid Recursive Injection**: Never call `container.resolve(ParentModel)` inside the constructor of a sub-model that the parent model depends on.
+2. **Active Assignment**: The parent model is responsible for establishing the association reference.
 
-## 4. 生命周期管理
+## 4. Lifecycle Management
 
-所有模型都应实现 `init()` 和 `off()` 方法用于初始化设置和销毁清理。
+All models should implement `init()` and `off()` methods for initialization setup and destruction cleanup.
 
 ```typescript
 @injectable()
@@ -137,42 +137,42 @@ export default class Index {
 	}
 
 	async init() {
-		// ✅ 收集清理函数 (disposers) 到 util.acts 数组中
+		// ✅ Collect cleanup functions (disposers) into util.acts array
 		this.util.acts = [
 			/* ... */
 		]
 	}
 
 	off() {
-		// ✅ 执行清理逻辑
+		// ✅ Execute cleanup logic
 		this.util.off()
 	}
 }
 ```
 
-## 5. 约束与最佳实践
+## 5. Constraints and Best Practices
 
-### 5.1 Observable 规则
+### 5.1 Observable Rules
 
-- **响应式状态**：将所有响应式状态定义为类属性。
-- **排除项 (Exclusions)**：使用 `makeAutoObservable` 的第二个参数，将注入的服务/工具类排除掉（设为 `false`），不让它们变成响应式。
+- **Reactive State**: Define all reactive state as class properties.
+- **Exclusions**: Use the second parameter of `makeAutoObservable` to exclude injected services/util classes (set to `false`), preventing them from becoming reactive.
 
-### 5.2 依赖注入 (tsyringe)
+### 5.2 Dependency Injection (tsyringe)
 
-- **@injectable()**：用于可多次实例化或局部注入的特性模型。
-- **@singleton()**：用于只应存在一个实例的全局 Store。
-- **构造器注入**：永远优先使用构造函数注入，并且使用 `public` 关键字自动赋值属性。
+- **@injectable()**: For feature models that can be instantiated multiple times or locally injected.
+- **@singleton()**: For global stores that should only have one instance.
+- **Constructor Injection**: Always prefer constructor injection, and use the `public` keyword to automatically assign properties.
 
-### 5.3 代码风格
+### 5.3 Code Style
 
-- **禁止注释**：不要在模型文件中写解释性注释。
-- **snake_case**：所有响应式状态变量名必须使用蛇形命名。
-- **camelCase**：所有方法必须使用驼峰命名。
-- **PascalCase**：所有类名必须使用帕斯卡命名。
-- **AutoBind**：始终在 `makeAutoObservable` 中使用 `{ autoBind: true }`。
+- **No Comments**: Don't write explanatory comments in model files.
+- **snake_case**: All reactive state variable names must use snake_case.
+- **camelCase**: All methods must use camelCase.
+- **PascalCase**: All class names must use PascalCase.
+- **AutoBind**: Always use `{ autoBind: true }` in `makeAutoObservable`.
 
-### 5.4 常见错误
+### 5.4 Common Errors
 
-- 忘记加 `@injectable` 装饰器会导致 DI 失败。
-- 忘记在 `off()` 中清理 reaction 会导致内存泄漏。
-- 构造函数不能太重；耗时的初始化逻辑必须放入 `init()`。
+- Forgetting the `@injectable` decorator will cause DI failure.
+- Forgetting to clean up reactions in `off()` will cause memory leaks.
+- Constructors should not be too heavy; time-consuming initialization logic must be placed in `init()`.

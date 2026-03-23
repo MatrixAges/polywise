@@ -1,30 +1,30 @@
-## 核心执行流
+## Core Execution Flow
 
-- **保存上下文**：接收到用户指令后、调用其他任何工具前，必须通过 `bash` 调用 `date` 命令获取时间，将用户原始输入翻译为英文并写入 `.prompts/YYYY-MM-DD/HH-mm-ss.md`。
-- **语言对齐**：必须检测用户输入的语种，并使用完全相同的语言输出最终回复。
-- **安全路径**：调用文件工具前，若非已知的绝对路径，必须先使用 `glob` 或 `ls` 搜索确认文件确切位置，严禁凭借记忆猜测路径。
-- **测试脚本隔离（强约束）**：任何为了验证逻辑或进行临时测试而通过 `bash` 生成的脚本文件（不仅限于 `.ts`，还包括所有的 `*.sql`, `*.sh` 等），**绝对严禁**在项目根目录或业务源码目录中直接生成。你**必须**在对应的子 Package 根目录下的 `.test/` 目录中生成和执行。如果没有明确归属的子包，也必须新建一个临时的 `.test/` 目录存放，执行完毕后应尽量清理。将测试脚本散落在根目录将被视为严重违规。
-- **完整替换**：使用 `edit` 工具时，`oldString` 必须包含足够多的上下文以唯一定位，`newString` 必须是完整的业务逻辑，严禁使用 `...` 截断代码。
-- **作用域限制**：严格将代码修改限制在用户明确提及的文件或模块内，若关联修改涉及未提及的模块，必须先输出文本向用户确认。
-- **保护目录**：绝对不允许修改任何以 `__`（双下划线）开头的文件夹（如 `__codegrave__`），也严禁为这些受保护的目录生成、修改或读取 `unify.md` 及其他代码。
-- **简洁输出**：严禁在回复中包含任何客套话或废话说明，直接输出最终解决结论或包裹在 Markdown 中的代码块。
+- **Save Context**: After receiving user instructions and before calling any other tools, you must call the `date` command via `bash` to get the time, translate the user's original input into English, and write it to `.prompts/YYYY-MM-DD/HH-mm-ss.md`.
+- **Language Alignment**: You must detect the language of the user's input and output the final reply in the exact same language.
+- **Safe Paths**: Before calling file tools, if the path is not a known absolute path, you must first use `glob` or `ls` to search and confirm the exact file location. Guessing paths based on memory is strictly prohibited.
+- **Test Script Isolation (Strong Constraint)**: Any script files generated via `bash` for verification or temporary testing (not limited to `.ts`, but including all `*.sql`, `*.sh`, etc.) are **absolutely prohibited** from being generated directly in the project root or business source code directories. You **must** generate and execute them in the `.test/` directory under the corresponding sub-package root. If there is no clearly associated sub-package, you must also create a temporary `.test/` directory to store them, and clean up after execution as much as possible. Scattering test scripts in the root directory will be considered a serious violation.
+- **Complete Replacement**: When using the `edit` tool, `oldString` must contain enough context to uniquely locate it, and `newString` must be complete business logic. Using `...` to truncate code is strictly prohibited.
+- **Scope Limitation**: Strictly limit code modifications to files or modules explicitly mentioned by the user. If related modifications involve unmentioned modules, you must first output text to confirm with the user.
+- **Protected Directories**: You are absolutely not allowed to modify any folders starting with `__` (double underscore) (such as `__codegrave__`), nor are you allowed to generate, modify, or read `unify.md` and other code for these protected directories.
+- **Concise Output**: Do not include any pleasantries or unnecessary explanations in the reply. Directly output the final solution or wrap it in a Markdown code block.
 
-## 核心规范文件协作指引
+## Core Specification File Collaboration Guide
 
-- **`agentmap.md`（架构与状态地图）**
-     - **何时使用**：在保存上下文之后、读取其他代码前必须读取；在结束任务前，只要发生了文件增删改，必须用 `edit` 更新其内部的 JSON 树。
-     - **作用**：确保你准确掌握目标包最新的物理文件结构和模块职能划分。
+- **`agentmap.md` (Architecture and Status Map)**
+     - **When to use**: After saving context and before reading other code, you must read it; before ending the task, as long as file additions, deletions, or modifications have occurred, you must update its internal JSON tree using `edit`.
+     - **Function**: Ensures you accurately grasp the latest physical file structure and module functional division of the target package.
 
-- **`unify.md`（风格路由表）**
-     - **何时使用**：在新建文件、重构现有模块或编写核心逻辑之前，必须读取该文件。
-     - **作用**：根据该文件的路由表寻址到匹配的“模板代码文件”，并在后续生成中像素级模仿其结构、命名与导入顺序，控制代码熵增。
+- **`unify.md` (Style Routing Table)**
+     - **When to use**: Before creating new files, refactoring existing modules, or writing core logic, you must read this file.
+     - **Function**: Addresses the matching "template code file" based on this file's routing table, and subsequently performs pixel-level imitation of its structure, naming, and import order during code generation to control code entropy increase.
 
-- **`coding.md`（编码规范）**
-     - **何时使用**：在任何涉及编写、审查或修改代码的步骤中，必须将其作为底层约束实时校验。
-     - **作用**：提供项目最硬性的代码语法、架构约定与强制执行规则。
+- **`coding.md` (Coding Specification)**
+     - **When to use**: In any step involving writing, reviewing, or modifying code, you must use it as the underlying constraint for real-time verification.
+     - **Function**: Provides the project's most stringent code syntax, architectural conventions, and mandatory execution rules.
 
 [CRITICAL]
 
-- 我提问用的什么语言就用什么语言回答我的问题
-- 禁止读取 `__codegrave__` 目录下的任何内容
-- 仅允许使用 `git status` 或 `git log` 等只读命令，绝对禁止执行 `git push` 或 `git commit` 等改变仓库状态的指令。
+- Answer my questions in the same language I use to ask them.
+- Reading any content from the `__codegrave__` directory is prohibited.
+- Only read-only commands like `git status` or `git log` are allowed. Absolutely prohibited are commands that change repository status like `git push` or `git commit`.

@@ -1,20 +1,20 @@
-## Unify Rules: 熵增限制与代码风格统一规范
+## Unify Rules: Entropy Limitation and Code Style Unification Specification
 
-**1. 核心原则**
-严格限制项目演进中的代码“熵增”。Agent 在生成任何新代码时，必须遵循“克隆式”编程原则，即完全复用同类型现有模块的代码结构、命名约定、状态管理模式与逻辑组织顺序，杜绝任何偏离现有规范的“创新”写法。
+**1. Core Principles**
+Strictly limit code "entropy increase" during project evolution. When generating any new code, the Agent must follow the "cloning" programming principle, which means completely reusing the code structure, naming conventions, state management patterns, and logical organization order of existing modules of the same type, and avoiding any "innovative" writing style that deviates from existing specifications.
 
-**2. 风格路由维护 (`unify.md`)**
-Agent 需负责在项目目录（或monorepo子packagege目录维护 `unify.md`，该文件以 Tree JSON 格式作为全局代码风格的路由和状态表。
+**2. Style Route Maintenance (`unify.md`)**
+The Agent is responsible for maintaining `unify.md` in the project directory (or monorepo sub-package directory), which serves as a global code style routing and status table in Tree JSON format.
 
-- **输入与输出：** 当扫描当前文件或生成新文件时，Agent 需动态提取代码特征，将文件归类（如：UI组件、数据模型服务等），并将路由和风格描述补充写入 Tree JSON。
-- **结构细节：** JSON 树的节点必须包含：模块分类名、抽象风格描述（如错误处理模式、依赖注入规范），以及属于该分类的具体参考文件路径池。
+- **Input and Output:** When scanning current files or generating new files, the Agent needs to dynamically extract code features, categorize files (e.g., UI components, data model services, etc.), and supplement the routing and style descriptions into the Tree JSON.
+- **Structure Details:** The nodes of the JSON tree must contain: module category name, abstract style description (e.g., error handling patterns, dependency injection specifications), and a pool of specific reference file paths belonging to that category.
 
-**3. Agent 标准执行流 (SOP)**
-在进行代码生成前，Agent 必须严格按序执行以下约束步骤：
+**3. Agent Standard Operating Procedure (SOP)**
+Before performing code generation, the Agent must strictly follow the sequence of the following constrained steps:
 
-- **Step 1: 路由寻址** - 读取并解析 `unify.md` 中的 Tree JSON，根据当前需求推断目标代码所属的模块类型节点。
-- **Step 2: 提取风格** - 从命中的节点中，获取该模块专属的 Unify Style 规则描述。
-- **Step 3: 获取主干样本** - 读取该分类下的 `Same Code 1`（第一参考文件），进行深度结构分析，精准捕获其导入顺序、变量命名范式及函数骨架。
-- **Step 4: 像素级模仿** - 以 `Same Code 1` 为绝对物理模板，将新的业务逻辑精准注入到这套固定的骨架中，进行代码生成。
-- **Step 5: 规范 Review** - 代码初稿完成后，Agent 需对照 Step 2 的 Unify Style 进行自我审查，确保没有引入非标准的高级语法或违背架构约束的写法。
-- **Step 6: 抗过拟合校验** - 强制读取同分类下的 `Same Code 2`（第二参考文件）。将生成的代码与两份样本进行三角比对：确保新代码学习到的是模块的“通用模式”，而不是盲目抄袭了 `Same Code 1` 中特有的业务硬编码（如特定的魔法数字或特定字段名）。若检出过拟合，需退回重构。
+- **Step 1: Route Addressing** - Read and parse the Tree JSON in `unify.md`, and infer the module type node that the target code belongs to based on the current requirements.
+- **Step 2: Extract Style** - From the matched node, obtain the Unify Style rule description specific to that module.
+- **Step 3: Obtain Main Sample** - Read the `Same Code 1` (first reference file) under that category, perform deep structural analysis, and accurately capture its import order, variable naming paradigms, and function skeletons.
+- **Step 4: Pixel-Level Imitation** - Use `Same Code 1` as an absolute physical template, accurately inject new business logic into this fixed skeleton, and perform code generation.
+- **Step 5: Specification Review** - After completing the initial draft, the Agent must self-review against the Unify Style from Step 2 to ensure no non-standard advanced syntax or architecture-violating writing styles are introduced.
+- **Step 6: Anti-Overfitting Verification** - Force reading of `Same Code 2` (second reference file) under the same category. Perform triangular comparison between the generated code and both samples: ensure the new code learns the "general pattern" of the module, rather than blindly copying business hardcoding specific to `Same Code 1` (such as specific magic numbers or specific field names). If overfitting is detected, return for refactoring.

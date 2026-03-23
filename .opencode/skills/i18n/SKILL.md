@@ -1,24 +1,24 @@
 ---
 name: i18n
-description: 指导使用 i18next 与 TypeScript 实现国际化 (i18n)。在处理本地化、翻译文件或多语言支持时触发。
+description: Guides internationalization (i18n) implementation using i18next with TypeScript. Triggered when handling localization, translation files, or multilingual support.
 ---
 
-# i18n 国际化指南
+# i18n Internationalization Guide
 
-此技能提供了在项目中强制使用 i18next 实现国际化的规范。
+This skill provides mandatory specifications for implementing internationalization using i18next in this project.
 
-## 1. 架构概览
+## 1. Architecture Overview
 
-项目采用了模块化的 i18n 结构：
+The project adopts a modular i18n structure:
 
-- **i18next**: 核心国际化库。
-- **TypeScript**: 对翻译键 (Translation Keys) 提供完整的类型安全保护。
-- **模块化结构**: 翻译文案按功能/模块进行组织。
-- **双端支持**: 同时支持 app（渲染进程）和 desktop（主进程）。
+- **i18next**: Core internationalization library.
+- **TypeScript**: Provides complete type safety protection for translation keys.
+- **Modular Structure**: Translation copy is organized by functionality/module.
+- **Dual-end Support**: Simultaneously supports app (renderer process) and desktop (main process).
 
-## 2. 翻译文件结构
+## 2. Translation File Structure
 
-### 2.1 基础翻译模块
+### 2.1 Basic Translation Module
 
 ```typescript
 // packages/app/locales/en/global.ts
@@ -33,7 +33,7 @@ export default {
 }
 ```
 
-### 2.2 命名空间模块
+### 2.2 Namespace Module
 
 ```typescript
 // packages/app/locales/en/app.ts
@@ -50,7 +50,7 @@ export default {
 }
 ```
 
-### 2.3 区域语言入口点 (Locale Entry Point)
+### 2.3 Regional Language Entry Point
 
 ```typescript
 // packages/app/locales/en/index.ts
@@ -64,19 +64,19 @@ export default {
 		app,
 		ai
 	}
-} as const // ✅ 必须使用 as const 以确保 TypeScript 类型推断
+} as const // ✅ Must use as const to ensure TypeScript type inference
 ```
 
-## 3. 添加新翻译的步骤
+## 3. Steps for Adding New Translations
 
-### 3.1 增加新模块翻译
+### 3.1 Adding New Module Translation
 
 ```typescript
-// 第二步：添加到入口索引
+// Step 2: Add to entry index
 // packages/app/locales/en/index.ts
 import newFeature from './newFeature'
 
-// 第一步：创建新翻译文件（英文与中文必须同步创建）
+// Step 1: Create new translation file (English and Chinese must be created simultaneously)
 // packages/app/locales/en/newFeature.ts
 export default {
 	title: 'New Feature',
@@ -91,43 +91,43 @@ export default {
 
 export default {
 	translation: {
-		// ... 其他
-		newFeature // 注册新模块
+		// ... others
+		newFeature // Register new module
 	}
 } as const
 ```
 
-## 4. 约束与最佳实践
+## 4. Constraints and Best Practices
 
-### 4.1 命名规范
+### 4.1 Naming Conventions
 
-- **键名 (Keys)**: 翻译键必须使用 `snake_case`。
-- **结构**: 按照功能或组件进行层次化组织键名。
-- **一致性**: 在所有语言文件中必须保持完全一致的键名结构。
+- **Keys**: Translation keys must use `snake_case`.
+- **Structure**: Organize key names hierarchically by functionality or component.
+- **Consistency**: Must maintain completely consistent key name structure across all language files.
 
-### 4.2 代码风格要求
+### 4.2 Code Style Requirements
 
-- **禁止注释**: 不要向翻译文件中添加任何注释。
-- **默认导出**: 始终使用 `export default` 导出翻译对象。
-- **类型安全**: 在区域语言的 index 导出中，**始终**使用 `as const`。
-- **扁平结构**: 翻译对象尽量保持扁平化（嵌套不要超过 3 层）。
+- **No Comments**: Do not add any comments to translation files.
+- **Default Export**: Always use `export default` to export translation objects.
+- **Type Safety**: In regional language index exports, **always** use `as const`.
+- **Flat Structure**: Keep translation objects as flat as possible (nesting should not exceed 3 levels).
 
-### 4.3 动态内容与插值
+### 4.3 Dynamic Content and Interpolation
 
 ```typescript
-// 在翻译文件中
+// In translation file
 export default {
 	welcome_message: 'Welcome, ${name}!',
 	item_count: 'You have ${count} items'
 }
 
-// 在组件中
+// In component
 const { t } = useTranslation()
 t('welcome_message', { name: 'John' })
 ```
 
-### 4.4 质量指南
+### 4.4 Quality Guidelines
 
-- **翻译完整性**: **所有**支持的语言文件中，**所有**的键都必须有对应的翻译。
-- **上下文**: 当词汇有歧义时，必须根据上下文提供准确的翻译。
-- **避免硬编码**: 在 React 组件中，永远不要硬编码可见的中文字符或英文字符，必须抽取到 locale 文件中。
+- **Translation Completeness**: In **all** supported language files, **all** keys must have corresponding translations.
+- **Context**: When words are ambiguous, accurate translations must be provided based on context.
+- **Avoid Hardcoding**: In React components, never hardcode visible Chinese or English characters; they must be extracted to locale files.

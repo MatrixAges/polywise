@@ -1,21 +1,21 @@
 ---
 name: edoc-generator
-description: 专门用于将文档文件及其内容翻译为英文的技能。在要求进行本地化、翻译或将中文文档转换为英文时触发。
+description: Specialized for translating document files and their content into English. Triggered when localization, translation, or converting Chinese documents to English is requested.
 ---
 
-# English Doc Generator (英文文档生成器)
+# English Doc Generator
 
-此技能专门用于项目中文档的中英翻译与转换。
+This skill is specialized for Chinese-English translation and conversion of documents in the project.
 
-## 1. 翻译准则
+## 1. Translation Guidelines
 
-- **准确性**：必须准确传达原中文文档的技术含义。
-- **专业术语**：对于技术词汇（如 Agent, Prompt, Context, Dependency Injection 等），必须使用行业标准的英文术语。
-- **Markdown 格式**：翻译后必须严格保持原有的 Markdown 格式（包括代码块、加粗、列表、链接等）。
+- **Accuracy**: Must accurately convey the technical meaning of the original Chinese document.
+- **Professional Terminology**: For technical terms (such as Agent, Prompt, Context, Dependency Injection, etc.), industry-standard English terms must be used.
+- **Markdown Format**: After translation, the original Markdown format must be strictly maintained (including code blocks, bold, lists, links, etc.).
 
-## 2. 执行流程
+## 2. Execution Flow
 
-1. **读取原文**：读取用户指定的中文 `.md` 文档。
-2. **术语对齐**：检查文档中是否包含项目特有的缩写或代号，并决定其英文翻译策略。
-3. **逐段翻译**：将内容转换为英文，并进行适当的本地化润色。
-4. **覆写或另存**：根据用户的具体要求，将英文内容覆盖原文件或另存为新的文件（如 `README_EN.md`）。
+1. **Read Original**: Read the user-specified Chinese `.md` document.
+2. **Terminology Alignment**: Check if the document contains project-specific abbreviations or codes, and decide their English translation strategy.
+3. **Paragraph-by-Paragraph Translation**: Convert content to English with appropriate localization polish.
+4. **Overwrite or Save As**: Based on user's specific requirements, overwrite the original file with English content or save as a new file (e.g., `README_EN.md`).
