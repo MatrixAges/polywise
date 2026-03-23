@@ -10,19 +10,19 @@ export default sqliteTable(
 		agent_id: text('agent_id')
 			.references(() => agent.id, { onDelete: 'cascade' })
 			.notNull(),
-		// 实体名称
+		// Entity name
 		name: text('name').notNull(),
-		// 当前激活电位 (用于模拟能量扩散/扩展激活)
+		// Current activation potential (for simulating energy diffusion/spreading activation)
 		active_level: real('active_level').default(0.0).notNull(),
-		// 激活敏感度 (决定被激活的难易程度)
+		// Activation sensitivity (determines ease of activation)
 		active_sens: real('active_sens').default(0.0).notNull(),
-		// 被访问的总次数
+		// Total number of times visited
 		active_times: integer('active_times').default(1).notNull(),
-		// 最后一次被用于推理/漫游的时间 (用于长时程抑制)
+		// Last time used for reasoning/wandering (for long-term depression)
 		active_at: integer('active_at', { mode: 'timestamp' })
 			.$defaultFn(() => new Date())
 			.notNull(),
-		// 冻结状态 (核心记忆节点，免受遗忘机制清理)
+		// Frozen state (core memory nodes, exempt from forgetting mechanism cleanup)
 		is_frozen: integer('is_frozen', { mode: 'boolean' }).default(false).notNull(),
 
 		created_at: integer('created_at', { mode: 'timestamp' })

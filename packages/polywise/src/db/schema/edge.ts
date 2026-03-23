@@ -8,37 +8,37 @@ export default sqliteTable(
 	'edge',
 	{
 		id: text('id').primaryKey().$defaultFn(getId),
-		// 记录三元组中的 "谓词/关系"
+		// Records "predicate/relation" in triples
 		relation: text('relation').notNull(),
-		// 外键：属于哪个智能体
+		// Foreign key: belongs to which agent
 		agent_id: text('agent_id')
 			.references(() => agent.id, { onDelete: 'cascade' })
 			.notNull(),
-		// 外键：来源哪个节点
+		// Foreign key: source node
 		source_id: text('source_id')
 			.references(() => node.id, { onDelete: 'cascade' })
 			.notNull(),
-		// 外键：指向哪个节点
+		// Foreign key: target node
 		target_id: text('target_id')
 			.references(() => node.id, { onDelete: 'cascade' })
 			.notNull(),
-		// 突触权重：RL 中的 Q-value (决定信号传递强度)
+		// Synaptic weight: Q-value in RL (determines signal transmission strength)
 		weight: real('weight').default(1.0).notNull(),
-		// 神经可塑性：学习率 (这个值越高，weight 改变越快；可用于冻结成熟记忆)
+		// Neuroplasticity: learning rate (higher value means faster weight change; can be used to freeze mature memories)
 		growth: real('growth').default(1.0).notNull(),
-		// 置信度 (RL 探索 vs 利用的依据：低置信度促使网络探索新路径)
+		// Confidence (basis for RL exploration vs exploitation: low confidence encourages network to explore new paths)
 		confidence: real('confidence').default(0.5).notNull(),
-		// 起始节点到目标节点的距离
+		// Distance from source node to target node
 		distance: real('distance').default(1.0).notNull(),
-		// 边的粗细，决定信号传播速度
+		// Edge thickness, determines signal propagation speed
 		bandwidth: real('bandwidth').default(1.0).notNull(),
-		// 被访问的总次数
+		// Total number of times visited
 		active_times: integer('active_times').default(1).notNull(),
-		// 最后一次被用于推理/漫游的时间 (用于突触修剪/长时程抑制)
+		// Last time used for reasoning/wandering (for synaptic pruning/long-term depression)
 		active_at: integer('active_at', { mode: 'timestamp' })
 			.$defaultFn(() => new Date())
 			.notNull(),
-		// 冻结状态 (核心记忆节点，免受遗忘机制清理)
+		// Frozen state (core memory nodes, exempt from forgetting mechanism cleanup)
 		is_frozen: integer('is_frozen', { mode: 'boolean' }).default(false).notNull(),
 
 		created_at: integer('created_at', { mode: 'timestamp' })

@@ -8,21 +8,21 @@ export default sqliteTable(
 	'article',
 	{
 		id: text('id').primaryKey().$defaultFn(getId),
-		// 外键：属于那一个文档（可选）
+		// Foreign key: belongs to which document (optional)
 		document_id: text('document_id').references(() => document.id, { onDelete: 'cascade' }),
-		// 文章内容
+		// Article content
 		content: text('content').notNull(),
-		// 文章标题（可选）
+		// Article title (optional)
 		title: text('title'),
-		// 文章数据来源（可选）
+		// Article data source (optional)
 		url: text('url'),
-		// 内容哈希值，用来做相同内容验证
+		// Content hash value, used for duplicate content verification
 		hash: text('hash').unique(),
-		// 文章元数据（用于筛选）
+		// Article metadata (for filtering)
 		metadata: text('metadata', { mode: 'json' }).default({}),
-		// 长文章（content 超过 12000个字符）
+		// Long article (content exceeds 12000 characters)
 		is_long: integer('is_long', { mode: 'boolean' }).generatedAlwaysAs(sql`length(content) > 12000`),
-		// 是否已生成三元组
+		// Whether triples have been generated
 		is_tripled: integer('is_tripled', { mode: 'boolean' }).default(false).notNull(),
 		created_at: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
 		updated_at: integer('updated_at', { mode: 'timestamp' })

@@ -6,12 +6,12 @@ import node from '../node'
 export default sqliteTable(
 	'node_chunk',
 	{
-		// 谁（哪个节点）
+		// Who (which node)
 		node_id: text('node_id')
 			.references(() => node.id, { onDelete: 'cascade' })
 			.notNull(),
 
-		// 在哪（哪个文本块里）
+		// Where (in which text chunk)
 		chunk_id: text('chunk_id')
 			.references(() => chunk.id, { onDelete: 'cascade' })
 			.notNull(),
@@ -21,9 +21,9 @@ export default sqliteTable(
 			.notNull()
 	},
 	t => [
-		// 复合主键：确保同一个节点在同一个 Chunk 里只会被记录一次
+		// Composite primary key: ensures same node is recorded only once in same Chunk
 		primaryKey({ columns: [t.node_id, t.chunk_id] }),
-		// 支持反向查找的索引：一个 chunk 被哪些 node 引用
+		// Index supporting reverse lookup: which nodes reference a chunk
 		index('node_chunk_chunk_id_idx').on(t.chunk_id)
 	]
 )

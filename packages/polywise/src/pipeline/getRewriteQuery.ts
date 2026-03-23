@@ -27,9 +27,9 @@ export default async (query: string, intent?: string) => {
 	const grammar = await env.llama.createGrammarForJsonSchema({
 		type: 'object',
 		properties: {
-			keywords: { type: 'string', description: '关键词' },
-			question: { type: 'string', description: '语义短语' },
-			answer: { type: 'string', description: '假设性结果片段' }
+			keywords: { type: 'string', description: 'Keywords' },
+			question: { type: 'string', description: 'Semantic phrase' },
+			answer: { type: 'string', description: 'Hypothetical result snippet' }
 		},
 		required: ['keywords', 'question', 'answer'],
 		additionalProperties: false

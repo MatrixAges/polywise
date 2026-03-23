@@ -2,11 +2,11 @@ import { env } from '@core/env'
 
 export default () => {
 	const sql = `
-      -- FTS 虚表
+      -- FTS virtual tables
       CREATE VIRTUAL TABLE IF NOT EXISTS vec.article_url_fts USING fts5(url, tokenize='unicode61');
       CREATE VIRTUAL TABLE IF NOT EXISTS vec.chunk_keywords_fts USING fts5(keywords,tokenize='unicode61');
 
-      -- 向量虚表
+      -- Vector virtual tables
       CREATE VIRTUAL TABLE IF NOT EXISTS vec.agent_vec USING vec0(vectors float[1024]);
       CREATE VIRTUAL TABLE IF NOT EXISTS vec.node_vec USING vec0(vectors float[1024]);
       CREATE VIRTUAL TABLE IF NOT EXISTS vec.edge_vec USING vec0(vectors float[1024]);

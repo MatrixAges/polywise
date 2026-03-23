@@ -1,31 +1,31 @@
-# 代码风格路由 (Unify Rules)
+# Code Style Routing (Unify Rules)
 
-本文件定义 `polywise` 核心引擎包内的代码风格和模块分形结构约束。Agent 在生成代码前，必须读取此 JSON，找到目标节点的 `fractal_rule` (分形与目录深度规则) 和 `Same Code` 样本，进行克隆式编码。
+This file defines code style and module fractal structure constraints within the `polywise` core engine package. Before generating code, the Agent must read this JSON, find the target node's `fractal_rule` (fractal and directory depth rules) and `Same Code` samples, and perform clone-style coding.
 
-## Tree JSON 路由表
+## Tree JSON Routing Table
 
 ```json
 {
-	"Pipeline Action (流水线原子函数)": {
-		"description": "处理知识库核心业务流水线（分块、向量化、检索等）的纯函数或聚合入口。",
-		"fractal_rule": "遵循自然分形生长法则：\n1. 简单的原子功能，直接定义为单文件（如 `getVectors.ts`）。\n2. 当单文件逻辑超过40行，或者内部需要多个子步骤协同（如分块功能既有语义分块又有符号分块），强制新建同名文件夹（如 `getChunks/`），主逻辑作为总调度入口存入 `index.ts`，其余拆分出的子原子函数存在同级目录（如 `getSemanticChunks.ts`、`getSplitChunks.ts`），并仅由 `index.ts` 引入调度。\n3. 所有相关联的辅助类型、配置项如果复杂，也应收敛到该同级目录下。",
-		"export_style": "必须使用匿名箭头函数作为默认导出：`export default async (args) => {}`。如果参数超过 2 个，必须封装为一个对象并在首行解构。",
-		"naming_rules": "函数与文件名一律采用 camelCase。",
+	"Pipeline Action (Pipeline Atomic Functions)": {
+		"description": "Pure functions or aggregation entries that handle knowledge base core business pipeline (chunking, vectorization, retrieval, etc.).",
+		"fractal_rule": "Follow natural fractal growth rules:\n1. Simple atomic functions are defined directly as single files (e.g., `getVectors.ts`).\n2. When single file logic exceeds 40 lines, or multiple sub-steps need to collaborate internally (e.g., chunking functionality has both semantic chunking and symbolic chunking), forcibly create a new folder with the same name (e.g., `getChunks/`), store the main logic as the overall scheduling entry in `index.ts`, and store other split-out atomic functions in the same-level directory (e.g., `getSemanticChunks.ts`, `getSplitChunks.ts`), introduced and scheduled only by `index.ts`.\n3. All related auxiliary types and configuration items, if complex, should also converge to that same-level directory.",
+		"export_style": "Must use anonymous arrow functions as default exports: `export default async (args) => {}`. If parameters exceed 2, they must be encapsulated as an object and destructured on the first line.",
+		"naming_rules": "Function and file names一律 use camelCase.",
 		"Same Code 1": "packages/polywise/src/pipeline/getChunks/index.ts",
 		"Same Code 2": "packages/polywise/src/pipeline/getVectors.ts"
 	},
-	"Database SQL (纯SQL操作)": {
-		"description": "存放原生 SQL 语句或拼装 SQL 的纯函数。业务模型不能硬编码 SQL。",
-		"fractal_rule": "按数据库表名（如 `nodes.ts`, `edges.ts`）拆分文件存放于 `src/sql/`。如果跨表复杂查询，可以根据业务域新建文件。",
-		"export_style": "必须通过按需导出 `export const sql_insert_node = ...` 暴露。严禁 default 导出。",
-		"comments_rule": "强制带 JSDoc 注释，详细说明当前 SQL 操作的表与业务作用。",
+	"Database SQL (Pure SQL Operations)": {
+		"description": "Stores native SQL statements or pure functions for assembling SQL. Business models cannot hardcode SQL.",
+		"fractal_rule": "Split files by database table name (e.g., `nodes.ts`, `edges.ts`) stored in `src/sql/`. For complex cross-table queries, new files can be created based on business domain.",
+		"export_style": "Must be exposed through on-demand exports `export const sql_insert_node = ...`. Default export is strictly prohibited.",
+		"comments_rule": "Mandatory JSDoc comments, detailing the table and business function of the current SQL operation.",
 		"Same Code 1": "packages/polywise/src/sql/nodes.ts"
 	},
-	"Database Model (数据模型)": {
-		"description": "负责调度 SQL 执行并进行数据转换的业务模型。",
-		"fractal_rule": "按业务域拆分为独立文件（如 `NodeModel.ts`）存放于 `src/models/`。如果模型职责变大，需拆分为基础模型（读写分离）等。",
-		"export_style": "默认导出 class。",
-		"dependency_injection": "无强注入，但需统一依赖 `sqlite` 执行器实例。",
+	"Database Model (Data Models)": {
+		"description": "Business models responsible for scheduling SQL execution and performing data transformation.",
+		"fractal_rule": "Split by business domain into independent files (e.g., `NodeModel.ts`) stored in `src/models/`. If model responsibilities grow, split into basic models (read-write separation), etc.",
+		"export_style": "Default export class.",
+		"dependency_injection": "No strong injection, but must uniformly depend on `sqlite` executor instance.",
 		"Same Code 1": "packages/polywise/src/models/NodeModel.ts"
 	}
 }
