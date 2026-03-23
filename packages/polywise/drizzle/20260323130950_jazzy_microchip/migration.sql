@@ -79,6 +79,16 @@ CREATE TABLE `node` (
 	CONSTRAINT `node_agent_name_unique` UNIQUE(`agent_id`,`name`)
 );
 --> statement-breakpoint
+CREATE TABLE `skill` (
+	`id` text PRIMARY KEY,
+	`name` text NOT NULL,
+	`desc` text NOT NULL,
+	`path` text NOT NULL,
+	`type` text,
+	`created_at` integer,
+	`updated_at` integer
+);
+--> statement-breakpoint
 CREATE TABLE `task` (
 	`id` text PRIMARY KEY,
 	`type` text NOT NULL,
@@ -106,6 +116,15 @@ CREATE TABLE `agent_document` (
 	CONSTRAINT `fk_agent_document_document_id_document_id_fk` FOREIGN KEY (`document_id`) REFERENCES `document`(`id`) ON DELETE CASCADE
 );
 --> statement-breakpoint
+CREATE TABLE `agent_skill` (
+	`agent_id` text NOT NULL,
+	`skill_id` text NOT NULL,
+	`created_at` integer,
+	CONSTRAINT `agent_skill_pk` PRIMARY KEY(`agent_id`, `skill_id`),
+	CONSTRAINT `fk_agent_skill_agent_id_agent_id_fk` FOREIGN KEY (`agent_id`) REFERENCES `agent`(`id`) ON DELETE CASCADE,
+	CONSTRAINT `fk_agent_skill_skill_id_skill_id_fk` FOREIGN KEY (`skill_id`) REFERENCES `skill`(`id`) ON DELETE CASCADE
+);
+--> statement-breakpoint
 CREATE TABLE `node_chunk` (
 	`node_id` text NOT NULL,
 	`chunk_id` text NOT NULL,
@@ -124,8 +143,10 @@ CREATE INDEX `edge_source_idx` ON `edge` (`source_id`);--> statement-breakpoint
 CREATE INDEX `edge_target_idx` ON `edge` (`target_id`);--> statement-breakpoint
 CREATE UNIQUE INDEX `edge_source_target_idx` ON `edge` (`source_id`,`target_id`);--> statement-breakpoint
 CREATE INDEX `node_agent_id_idx` ON `node` (`agent_id`);--> statement-breakpoint
+CREATE INDEX `skill_type_idx` ON `skill` (`type`);--> statement-breakpoint
 CREATE INDEX `task_type_idx` ON `task` (`type`);--> statement-breakpoint
 CREATE INDEX `task_status_idx` ON `task` (`status`);--> statement-breakpoint
 CREATE INDEX `agent_article_article_id_idx` ON `agent_article` (`article_id`);--> statement-breakpoint
 CREATE INDEX `agent_document_document_id_idx` ON `agent_document` (`document_id`);--> statement-breakpoint
+CREATE INDEX `agent_skill_id_idx` ON `agent_skill` (`skill_id`);--> statement-breakpoint
 CREATE INDEX `node_chunk_chunk_id_idx` ON `node_chunk` (`chunk_id`);

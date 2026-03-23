@@ -5,5 +5,6 @@ export { default as node } from './node'
 export { default as edge } from './edge'
 export { default as task } from './task'
 export { default as agent } from './agent'
+export { default as skill } from './skill'
 
 export * from './externals'

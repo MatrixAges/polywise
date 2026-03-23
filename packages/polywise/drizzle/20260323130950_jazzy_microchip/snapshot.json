@@ -1,7 +1,7 @@
 {
   "version": "7",
   "dialect": "sqlite",
-  "id": "17dbf2f3-a9bb-4e88-a7e9-03186e80c120",
+  "id": "4e3827d3-1583-4156-899b-4971ffcb6fda",
   "prevIds": [
     "00000000-0000-0000-0000-000000000000"
   ],
@@ -31,6 +31,10 @@
       "entityType": "tables"
     },
     {
+      "name": "skill",
+      "entityType": "tables"
+    },
+    {
       "name": "task",
       "entityType": "tables"
     },
@@ -40,6 +44,10 @@
     },
     {
       "name": "agent_document",
+      "entityType": "tables"
+    },
+    {
+      "name": "agent_skill",
       "entityType": "tables"
     },
     {
@@ -617,6 +625,76 @@
       "generated": null,
       "name": "id",
       "entityType": "columns",
+      "table": "skill"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "name",
+      "entityType": "columns",
+      "table": "skill"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "desc",
+      "entityType": "columns",
+      "table": "skill"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "path",
+      "entityType": "columns",
+      "table": "skill"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "type",
+      "entityType": "columns",
+      "table": "skill"
+    },
+    {
+      "type": "integer",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "table": "skill"
+    },
+    {
+      "type": "integer",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "table": "skill"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
       "table": "task"
     },
     {
@@ -728,6 +806,36 @@
       "name": "created_at",
       "entityType": "columns",
       "table": "agent_document"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "agent_id",
+      "entityType": "columns",
+      "table": "agent_skill"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "skill_id",
+      "entityType": "columns",
+      "table": "agent_skill"
+    },
+    {
+      "type": "integer",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "table": "agent_skill"
     },
     {
       "type": "text",
@@ -911,6 +1019,36 @@
     },
     {
       "columns": [
+        "agent_id"
+      ],
+      "tableTo": "agent",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "nameExplicit": false,
+      "name": "fk_agent_skill_agent_id_agent_id_fk",
+      "entityType": "fks",
+      "table": "agent_skill"
+    },
+    {
+      "columns": [
+        "skill_id"
+      ],
+      "tableTo": "skill",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "nameExplicit": false,
+      "name": "fk_agent_skill_skill_id_skill_id_fk",
+      "entityType": "fks",
+      "table": "agent_skill"
+    },
+    {
+      "columns": [
         "node_id"
       ],
       "tableTo": "node",
@@ -958,6 +1096,16 @@
       "name": "agent_document_pk",
       "entityType": "pks",
       "table": "agent_document"
+    },
+    {
+      "columns": [
+        "agent_id",
+        "skill_id"
+      ],
+      "nameExplicit": false,
+      "name": "agent_skill_pk",
+      "entityType": "pks",
+      "table": "agent_skill"
     },
     {
       "columns": [
@@ -1021,6 +1169,15 @@
       "nameExplicit": false,
       "name": "node_pk",
       "table": "node",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "skill_pk",
+      "table": "skill",
       "entityType": "pks"
     },
     {
@@ -1172,6 +1329,20 @@
       "isUnique": false,
       "where": null,
       "origin": "manual",
+      "name": "skill_type_idx",
+      "entityType": "indexes",
+      "table": "skill"
+    },
+    {
+      "columns": [
+        {
+          "value": "type",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
       "name": "task_type_idx",
       "entityType": "indexes",
       "table": "task"
@@ -1217,6 +1388,20 @@
       "name": "agent_document_document_id_idx",
       "entityType": "indexes",
       "table": "agent_document"
+    },
+    {
+      "columns": [
+        {
+          "value": "skill_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "agent_skill_id_idx",
+      "entityType": "indexes",
+      "table": "agent_skill"
     },
     {
       "columns": [
