@@ -4,6 +4,7 @@ export { default as error_handler } from './error_handler'
 export { default as guard } from './guard'
 export { default as getHash } from './getHash'
 export { default as log } from './log'
+export { default as ensureWithValue } from './ensureWithValue'
 
 export * from './middleware'
 export * from './session'

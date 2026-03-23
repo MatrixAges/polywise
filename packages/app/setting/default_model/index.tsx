@@ -18,6 +18,7 @@ const Index = () => {
 	const global = useGlobal()
 	const l = global.locale
 	const t = global.theme
+	const s = global.setting
 
 	const setLang = useMemoizedFn(v => l.setLang(v))
 	const setTheme = useMemoizedFn(v => t.setTheme(v))

@@ -285,8 +285,8 @@ importers:
         specifier: ^1.5.0
         version: 1.5.0
       lucide-react:
-        specifier: ^1.0.0
-        version: 1.0.0(react@19.2.4)
+        specifier: ^1.0.1
+        version: 1.0.1(react@19.2.4)
       mnemonist:
         specifier: ^0.40.3
         version: 0.40.3
@@ -734,6 +734,9 @@ importers:
       ansis:
         specifier: 'catalog:'
         version: 4.2.0
+      atomically:
+        specifier: ^2.1.1
+        version: 2.1.1
       await-to-js:
         specifier: 'catalog:'
         version: 3.0.0
@@ -5828,8 +5831,8 @@ packages:
     resolution: {integrity: sha512-Jo6dJ04CmSjuznwJSS3pUeWmd/H0ffTlkXXgwZi+eq1UCmqQwCh+eLsYOYCwY991i2Fah4h1BEMCx4qThGbsiA==}
     engines: {node: '>=10'}
 
-  lucide-react@1.0.0:
-    resolution: {integrity: sha512-pdRRtv5WhKSBMU+8jc4yyk0hagCpiE1P/6GgSwV5nOUoJUu8u4E9IE3cmEs/YDK9W1KpEANcJGbDuVm9B4X0Sw==}
+  lucide-react@1.0.1:
+    resolution: {integrity: sha512-lih7tKEczCYOQjVEzpFuxEuNzlwf+1yhvlMlEkGWJM3va8Pugv8bYXc/pRtcjPncaP7k84X0Pt/71ufxvqEPtQ==}
     peerDependencies:
       react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
@@ -12771,7 +12774,7 @@ snapshots:
     dependencies:
       yallist: 4.0.0
 
-  lucide-react@1.0.0(react@19.2.4):
+  lucide-react@1.0.1(react@19.2.4):
     dependencies:
       react: 19.2.4
 

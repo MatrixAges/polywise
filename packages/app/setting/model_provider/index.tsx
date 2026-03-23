@@ -1,5 +1,7 @@
 import { useMemoizedFn } from 'ahooks'
+import { observer } from 'mobx-react-lite'
 
+import { useGlobal } from '@/context'
 import { sleep } from '@/utils'
 
 import Panel from './ai-sdk-panel'
@@ -8,11 +10,13 @@ import { preset_providers } from './ai-sdk-panel/providers'
 import type { IPropsPanel } from './ai-sdk-panel/types'
 
 const Index = () => {
+	const global = useGlobal()
+
+	const s = global.setting
+
 	const props_panel: IPropsPanel = {
-		config: { providers: preset_providers },
-		onChange: useMemoizedFn(v => {
-			console.log(v)
-		}),
+		config: s.providers || { providers: preset_providers },
+		onChange: useMemoizedFn(v => s.setConfig('providers', v)),
 		onTest: useMemoizedFn(async () => {
 			await sleep(500)
 
@@ -27,4 +31,4 @@ const Index = () => {
 	)
 }
 
-export const Component = $app.memo(Index)
+export const Component = new $app.Handle(Index).by(observer).by($app.memo).get()

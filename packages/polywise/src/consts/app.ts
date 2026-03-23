@@ -1,11 +1,12 @@
 import { homedir } from 'os'
 import { resolve } from 'path'
 
-export const config_path = resolve(`${homedir()}/.polywise/config.json`)
-export const db_path = resolve(`${homedir()}/.polywise/db/app.db`)
-export const vec_path = resolve(`${homedir()}/.polywise/db/vec.db`)
-export const model_dir = resolve(`${homedir()}/.polywise/.models`)
-export const logs_dir = resolve(`${homedir()}/.polywise/.logs`)
+export const app_path = resolve(`${homedir()}/.polywise`)
+export const config_path = resolve(`${app_path}/config.json`)
+export const db_path = resolve(`${app_path}/db/app.db`)
+export const vec_path = resolve(`${app_path}/db/vec.db`)
+export const model_dir = resolve(`${app_path}/.models`)
+export const logs_dir = resolve(`${app_path}/.logs`)
 
 export const embedding_model = {
 	uri: 'hf:Qwen/Qwen3-Embedding-0.6B-GGUF/Qwen3-Embedding-0.6B-Q8_0.gguf',

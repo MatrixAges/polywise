@@ -5,7 +5,10 @@ import { injectable } from 'tsyringe'
 
 import { PANEL_WIDTH_DEFAULT } from '@/appdata'
 import { Util } from '@/models/common'
+import { rpc } from '@/utils'
 
+import type { Config } from '@/setting/model_provider/ai-sdk-panel/types'
+import type { AppConfig } from '@/types'
 import type { PanelImperativeHandle } from 'react-resizable-panels'
 
 @injectable()
@@ -13,6 +16,9 @@ export default class Index {
 	panel_ref = null as unknown as PanelImperativeHandle
 	panel_collapsed = false
 	sidebar_collapsed = false
+
+	config = null as unknown as AppConfig
+	providers = null as unknown as Config
 
 	constructor(public util: Util) {
 		makeAutoObservable(this, { util: false, panel_ref: false }, { autoBind: true })
@@ -22,6 +28,32 @@ export default class Index {
 		const deinit = await setStoreWhenChange(['panel_collapsed', 'sidebar_collapsed'], this)
 
 		this.util.acts = [deinit]
+
+		this.watchConfig()
+	}
+
+	watchConfig() {
+		const deinit = rpc.file.watch.subscribe(['config', 'providers'], {
+			onData: res => {
+				if (res['config']) {
+					this.config = res['config']
+				}
+
+				if (res['providers']) {
+					this.providers = res['providers']
+				}
+
+				this.setDefault()
+			}
+		})
+
+		this.util.acts.push(deinit.unsubscribe)
+	}
+
+	setDefault() {}
+
+	setConfig(type: 'config' | 'providers', data: any) {
+		rpc.file.write.mutate({ path: `${type}.json`, data })
 	}
 
 	setPanelRef(v: Index['panel_ref']) {
