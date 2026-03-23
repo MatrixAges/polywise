@@ -8,7 +8,6 @@ import { deepEqual } from 'stk/react'
 import { Switch } from '@/__shadcn__/components/ui/switch'
 import { Controller, ProviderIcon, Show } from '@/components'
 
-import { all_providers } from '../../providers'
 import APIKey from './APIKey'
 import BaseUrl from './BaseUrl'
 import CustomFields from './CustomFields'
@@ -17,11 +16,14 @@ import Models from './Models'
 
 import styles from '../../index.module.css'
 
+import type { Model, SpecialProvider } from '@core/types'
 import type { DragEndEvent } from '@dnd-kit/core'
-import type { IPropsForm, Model, SpecialProvider } from '../../types'
+import type { Control } from 'react-hook-form'
+import type { IPropsForm } from '../../types'
 
 const Index = (props: IPropsForm) => {
 	const {
+		all_providers,
 		provider,
 		test,
 		current_model,
@@ -171,7 +173,7 @@ const Index = (props: IPropsForm) => {
 							>
 								<Trash size={14} />
 							</button>
-							<Controller name='enabled' control={control}>
+							<Controller name='enabled' control={control as Control<any>}>
 								<Switch />
 							</Controller>
 						</div>

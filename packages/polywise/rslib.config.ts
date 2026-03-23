@@ -35,7 +35,7 @@ export default {
 			/^better-sqlite3(\/.*)?$/,
 			/^sqlite-vec(\/.*)?$/,
 			/^node-llama-cpp(\/.*)?$/,
-
+			{ jws: 'module jws' },
 			{ 'safer-buffer': 'module safer-buffer' }
 		],
 		filename: { js: '[name].js' },

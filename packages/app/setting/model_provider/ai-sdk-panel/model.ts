@@ -21,7 +21,7 @@ export default class Index {
 	test = { loading: false, res: null as boolean | null }
 	adding_model = false
 	adding_provider = false
-	all_providers = {} as Array<ConfigProvider>
+	all_providers = [] as Array<ConfigProvider>
 
 	timer_test = null as NodeJS.Timeout | null
 	onChange = null as unknown as IPropsPanel['onChange']
@@ -57,7 +57,7 @@ export default class Index {
 	}
 
 	constructor() {
-		makeAutoObservable(this, {}, { autoBind: true })
+		makeAutoObservable(this, { all_providers: false }, { autoBind: true })
 	}
 
 	async init(args: ArgsInit) {

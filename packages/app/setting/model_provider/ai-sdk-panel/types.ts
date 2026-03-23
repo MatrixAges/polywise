@@ -30,6 +30,7 @@ export interface IPropsTabItem extends Pick<IPropsTab, 'onChangeCurrentTab'> {
 }
 
 export interface IPropsForm {
+	all_providers: ProviderConfig['providers']
 	provider: ProviderConfig['providers'][number]
 	test?: M['test']
 	current_model: M['current_model']

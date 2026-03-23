@@ -79,6 +79,7 @@
 		"fs-extra": "catalog:",
 		"hono": "catalog:",
 		"just-bash": "^2.14.0",
+		"jws": "^4.0.1",
 		"lmdb": "^3.5.2",
 		"mammoth": "^1.12.0",
 		"nice-try": "^4.0.2",

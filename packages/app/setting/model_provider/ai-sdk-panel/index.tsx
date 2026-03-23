@@ -34,6 +34,7 @@ const Index = (props: IPropsPanel) => {
 	}
 
 	const props_form: IPropsForm = {
+		all_providers: x.all_providers,
 		provider: $copy(x.provider),
 		test: $copy(x.test),
 		current_model: x.current_model,

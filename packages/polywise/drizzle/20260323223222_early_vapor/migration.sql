@@ -69,7 +69,7 @@ CREATE TABLE `message` (
 	`id` text PRIMARY KEY,
 	`session_id` text NOT NULL,
 	`role` text NOT NULL,
-	`model_content` text NOT NULL,
+	`content` text NOT NULL,
 	`created_at` integer,
 	`updated_at` integer,
 	CONSTRAINT `fk_message_session_id_session_id_fk` FOREIGN KEY (`session_id`) REFERENCES `session`(`id`) ON DELETE CASCADE
@@ -92,6 +92,11 @@ CREATE TABLE `node` (
 CREATE TABLE `session` (
 	`id` text PRIMARY KEY,
 	`title` text NOT NULL,
+	`provider` text NOT NULL,
+	`model` text NOT NULL,
+	`effort` text,
+	`options` text,
+	`runing` integer DEFAULT false NOT NULL,
 	`created_at` integer,
 	`updated_at` integer
 );

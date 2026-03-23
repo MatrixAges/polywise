@@ -16,6 +16,8 @@ const input_type = object({
 export default p.input(input_type).mutation(async ({ input }) => {
 	const { path, data, merge } = input
 
+	console.log(path, data)
+
 	let target_data = data
 
 	const target_path = resolve(`${app.app_path}/${path}`)

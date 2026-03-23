@@ -776,6 +776,9 @@ importers:
       just-bash:
         specifier: ^2.14.0
         version: 2.14.0
+      jws:
+        specifier: ^4.0.1
+        version: 4.0.1
       lmdb:
         specifier: ^3.5.2
         version: 3.5.2

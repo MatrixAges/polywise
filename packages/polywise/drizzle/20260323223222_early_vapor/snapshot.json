@@ -1,7 +1,7 @@
 {
   "version": "7",
   "dialect": "sqlite",
-  "id": "cf3f70c6-284f-4770-bdb4-a15a032f42be",
+  "id": "28ba024d-0dc2-4723-a2bf-5e99bd5a9d08",
   "prevIds": [
     "00000000-0000-0000-0000-000000000000"
   ],
@@ -571,7 +571,7 @@
       "autoincrement": false,
       "default": null,
       "generated": null,
-      "name": "model_content",
+      "name": "content",
       "entityType": "columns",
       "table": "message"
     },
@@ -702,6 +702,56 @@
       "default": null,
       "generated": null,
       "name": "title",
+      "entityType": "columns",
+      "table": "session"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "provider",
+      "entityType": "columns",
+      "table": "session"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "model",
+      "entityType": "columns",
+      "table": "session"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "effort",
+      "entityType": "columns",
+      "table": "session"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "options",
+      "entityType": "columns",
+      "table": "session"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "false",
+      "generated": null,
+      "name": "runing",
       "entityType": "columns",
       "table": "session"
     },
