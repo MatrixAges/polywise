@@ -11,6 +11,10 @@ export default sqliteTable('session', {
 	model: text('model').notNull(),
 	// reasoning effort
 	effort: text('effort'),
+	// provider
+	options: text('options', { mode: 'json' }),
+	// session runing status
+	is_runing: integer('runing', { mode: 'boolean' }).default(false).notNull(),
 	created_at: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
 	updated_at: integer('updated_at', { mode: 'timestamp' })
 		.$defaultFn(() => new Date())

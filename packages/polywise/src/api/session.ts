@@ -1,4 +1,4 @@
-import { ChatStore, ChatStreamStore } from '@core/utils'
+import { SessionStore, SessionStreamStore } from '@core/utils'
 import { createUIMessageStream, JsonToSseTransformStream } from 'ai'
 
 import type { HonoContext } from '@core/types'
@@ -6,10 +6,10 @@ import type { HonoContext } from '@core/types'
 export const post = async (c: HonoContext) => {
 	const { id, messages } = await c.req.json<{ id: string; messages: any }>()
 
-	const store_chat = ChatStore.get(id)!
-	const chat_stream = store_chat.getStream(messages)
+	const store_chat = SessionStore.get(id)!
+	const chat_stream = await store_chat.getStream(messages)
 
-	const target_stream = await ChatStreamStore.resumableStream(id, () =>
+	const target_stream = await SessionStreamStore.resumableStream(id, () =>
 		chat_stream.pipeThrough(new JsonToSseTransformStream())
 	)
 
@@ -23,11 +23,11 @@ export const get = async (c: HonoContext) => {
 
 	if (!id) return c.body(null)
 
-	if (!ChatStreamStore.hasExistingStream(id)) return c.body(null)
+	if (!SessionStreamStore.hasExistingStream(id)) return c.body(null)
 
 	const empty_stream = createUIMessageStream({ execute: () => {} })
 
-	const store_stream = await ChatStreamStore.resumableStream(id, () =>
+	const store_stream = await SessionStreamStore.resumableStream(id, () =>
 		empty_stream.pipeThrough(new JsonToSseTransformStream())
 	)
 

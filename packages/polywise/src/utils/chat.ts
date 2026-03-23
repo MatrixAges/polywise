@@ -2,8 +2,8 @@ import { EventEmitter } from 'events'
 
 import { createResumableStreamContext } from './rstream'
 
-import type Chat from 'fst/chat'
+import type { Session } from '@core/fst'
 
-export const ChatStore = new Map<string, Chat>()
-export const ChatStreamStore = createResumableStreamContext()
-export const ChatEventStore = new EventEmitter()
+export const SessionStore = new Map<string, Session>()
+export const SessionStreamStore = createResumableStreamContext()
+export const SessionEventStore = new EventEmitter()

@@ -13,8 +13,8 @@ export default sqliteTable(
 			.references(() => session.id, { onDelete: 'cascade' }),
 		// message role
 		role: text('role').notNull(),
-		// raw model content
-		content: text('model_content', { mode: 'json' }).notNull(),
+		// ai sdk ui message
+		content: text('content').notNull(),
 		created_at: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
 		updated_at: integer('updated_at', { mode: 'timestamp' })
 			.$defaultFn(() => new Date())
