@@ -6,4 +6,5 @@ export { default as getHash } from './getHash'
 export { default as log } from './log'
 
 export * from './middleware'
-export * from './chat'
+export * from './session'
+export * from './trpc'

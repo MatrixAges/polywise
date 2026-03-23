@@ -25,18 +25,23 @@ export default class Index {
 		this.id = id
 		this.event = event
 
-		await this.get()
+		await this.getData()
 
 		return { type: 'init', data: { session: this.session, messages: this.messages } } as ChatEventRes
 	}
 
-	async get() {
+	async getData() {
+		await this.getSession()
+		await this.getMessages()
+	}
+
+	async getSession() {
 		const [res] = await env.db.select().from(session).where(eq(session.id, this.id)).limit(1)
 
 		this.session = res
 	}
 
-	async update(args: Partial<SessionInsert>) {
+	async updateSession(args: Partial<SessionInsert>) {
 		const [res] = await env.db.update(session).set(args).where(eq(session.id, this.id)).returning()
 
 		return res
@@ -122,7 +127,7 @@ export default class Index {
 
 		this.event.emit(`${this.id}/CHANGE`, { type: 'sync', session: this.session } as ChatEventRes)
 
-		await this.update({ is_runing: v })
+		await this.updateSession({ is_runing: v })
 	}
 
 	private async append(v: Message) {

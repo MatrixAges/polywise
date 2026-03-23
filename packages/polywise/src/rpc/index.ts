@@ -2,6 +2,7 @@ import { r } from '../utils/trpc'
 import remove from './remove'
 import save from './save'
 import search from './search'
+import session from './session'
 import setConfig from './setConfig'
 import setTask from './setTask'
 import test from './test'
@@ -18,7 +19,8 @@ export const router = r({
 	watchTasks,
 	setTask,
 	update,
-	remove
+	remove,
+	session
 })
 
 export type Router = typeof router

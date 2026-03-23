@@ -27,3 +27,8 @@ export const locale_options = [
 ]
 
 export const themes = ['light', 'dark', 'system'] as const
+
+export const server_base_url = 'http://localhost:3072'
+export const server_sys_url = server_base_url + '/sys'
+export const server_sys_session_url = server_sys_url + '/session'
+export const server_trpc_url = server_base_url + '/trpc'
