@@ -1,3 +1,5 @@
+import { config_watcher } from '@core/config'
+import { env } from '@core/env'
 import { disposeModels } from '@core/llama'
 import { serve } from '@hono/node-server'
 
@@ -17,7 +19,11 @@ export default async () => {
 	const deinit = async () => {
 		await disposeModels()
 
-		node_server.close(() => process.exit(0))
+		env.sqlite.close()
+		config_watcher.close()
+		node_server.close()
+
+		setTimeout(() => process.exit(0), 300)
 	}
 
 	process.on('SIGINT', deinit)

@@ -26,14 +26,13 @@ export default p.input(string()).subscription(async function* (args) {
 	const destroy = () => SessionStore.delete(id)
 
 	SessionEventStore.on(`${id}/STOP`, stop)
-	SessionEventStore.on(`${id}/DESTORY`, destroy)
+	SessionEventStore.on(`${id}/DESTROY`, destroy)
 
 	try {
 		for await (const [data] of on(SessionEventStore, `${id}/CHANGE`, { signal })) {
 			yield data as ChatEventRes
 		}
 	} finally {
-		SessionEventStore.off(`${id}/STOP`, stop)
-		SessionEventStore.off(`${id}/DESTORY`, () => SessionStore.delete(id))
+		SessionEventStore.removeAllListeners()
 	}
 })
