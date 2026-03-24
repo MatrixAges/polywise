@@ -107,8 +107,7 @@ const Index = () => {
 									</div>
 								) : s.model_progress[key as LocalModelType] ? (
 									<span className='text-xsm font-medium'>
-										{s.model_progress[key as LocalModelType]!.percent * 100 +
-											'%'}
+										{s.model_progress[key as LocalModelType]!.percent + '%'}
 									</span>
 								) : (
 									<button

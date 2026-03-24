@@ -59,7 +59,7 @@ export default async (config: ModelConfig, status_only?: boolean) => {
 			progress[type] = {
 				total: totalSize,
 				downloaded: downloadedSize,
-				percent: parseFloat((downloadedSize / totalSize).toFixed(2))
+				percent: parseFloat(((downloadedSize * 100) / totalSize).toFixed(2))
 			}
 
 			progress_emmiter.emit('change', progress)
