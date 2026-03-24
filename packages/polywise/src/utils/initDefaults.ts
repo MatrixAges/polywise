@@ -13,9 +13,14 @@ export default async () => {
 
 		if (name === 'config') {
 			const preset = preset_providers[0]
+			const default_model = { provider: preset.name, model: preset.models[0].id }
 
 			await ensureWithValue(path, {
-				provider: { id: preset.name, model: preset.models[0].id, effort: 'default' }
+				default_model,
+				enable_triple: false,
+				triple_model: default_model,
+				enable_rewrite: false,
+				rewrite_model: default_model
 			} as AppConfig)
 		}
 

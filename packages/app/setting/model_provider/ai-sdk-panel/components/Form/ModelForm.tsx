@@ -2,8 +2,9 @@ import { useTranslation } from 'react-i18next'
 
 import { AutoLabel } from '@/components'
 
+import type { Model } from '@core/types'
 import type { UseFormRegister } from 'react-hook-form'
-import type { IPropsForm, IPropsFormModelForm, Model } from '../../types'
+import type { IPropsForm, IPropsFormModelForm } from '../../types'
 
 const Index = (props: IPropsFormModelForm) => {
 	const { index = 0, item, adding_model, register } = props

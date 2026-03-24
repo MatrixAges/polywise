@@ -1,87 +1,77 @@
+import { useEffect, useMemo, useState } from 'react'
+import { AppConfig } from '@core/types'
 import { useMemoizedFn } from 'ahooks'
 import { observer } from 'mobx-react-lite'
 
 import { Field, FieldContent, FieldDescription, FieldGroup, FieldTitle } from '@/__shadcn__/components/ui/field'
-import {
-	Select,
-	SelectContent,
-	SelectGroup,
-	SelectItem,
-	SelectLabel,
-	SelectTrigger,
-	SelectValue
-} from '@/__shadcn__/components/ui/select'
-import { locale_options, themes } from '@/appdata'
+import { Switch } from '@/__shadcn__/components/ui/switch'
+import { ModelSelect } from '@/components'
 import { useGlobal } from '@/context'
 
 const Index = () => {
 	const global = useGlobal()
-	const l = global.locale
-	const t = global.theme
 	const s = global.setting
+	const default_model = s.config?.default_model ? s.config.default_model : null
+	const triple_model = s.config?.triple_model ? s.config.triple_model : null
+	const rewrite_model = s.config?.rewrite_model ? s.config.rewrite_model : null
 
-	const setLang = useMemoizedFn(v => l.setLang(v))
-	const setTheme = useMemoizedFn(v => t.setTheme(v))
+	const setDefaultModel = useMemoizedFn(v => {
+		s.setConfig('config', { provider: v } as Partial<AppConfig>)
+	})
+
+	const setTripleModel = useMemoizedFn(v => {
+		s.setConfig('config', { triple_model: v } as Partial<AppConfig>)
+	})
+
+	const setRewriteModel = useMemoizedFn(v => {
+		s.setConfig('config', { rewrite_model: v } as Partial<AppConfig>)
+	})
 
 	return (
 		<div className='page_wrap flex w-full flex-col'>
 			<FieldGroup className='gap-0'>
-				<Field
-					className='
-						items-center!
-						py-3
-					'
-					orientation='horizontal'
-				>
+				<Field className='items-center! py-3' orientation='horizontal'>
 					<FieldContent>
-						<FieldTitle className='text-base'>Theme</FieldTitle>
-						<FieldDescription>
-							Customize the visual interface, including color modes and system
-							synchronization
-						</FieldDescription>
+						<FieldTitle className='text-base'>Default Model</FieldTitle>
+						<FieldDescription>Select the default model for session</FieldDescription>
 					</FieldContent>
-					<Select
-						items={themes.map(item => ({ label: item, value: item }))}
-						value={t.theme_source}
-						onValueChange={setTheme}
-					>
-						<SelectTrigger className='workspace_selector'>
-							<SelectValue />
-						</SelectTrigger>
-						<SelectContent align='start'>
-							<SelectGroup>
-								<SelectLabel>Theme</SelectLabel>
-								{themes.map(item => (
-									<SelectItem value={item} key={item}>
-										{item}
-									</SelectItem>
-								))}
-							</SelectGroup>
-						</SelectContent>
-					</Select>
+					<ModelSelect value={default_model!} onChange={setDefaultModel}></ModelSelect>
+				</Field>
+			</FieldGroup>
+			<div className='bg-border-light my-2 h-px w-full'></div>
+			<FieldGroup className='gap-0'>
+				<Field className='items-center! py-3' orientation='horizontal'>
+					<FieldContent>
+						<FieldTitle className='text-base'>Generate Triples</FieldTitle>
+						<FieldDescription>Enable generate triples for article</FieldDescription>
+					</FieldContent>
+					<Switch></Switch>
 				</Field>
 				<Field className='items-center! py-3' orientation='horizontal'>
 					<FieldContent>
-						<FieldTitle className='text-base'>Language</FieldTitle>
+						<FieldTitle className='text-base'>Triple Model</FieldTitle>
 						<FieldDescription>
-							Select your preferred language for the application interface and notifications
+							Select triple model for generating triples for content
 						</FieldDescription>
 					</FieldContent>
-					<Select items={locale_options} value={l.lang} onValueChange={setLang}>
-						<SelectTrigger className='workspace_selector'>
-							<SelectValue />
-						</SelectTrigger>
-						<SelectContent align='start'>
-							<SelectGroup>
-								<SelectLabel>Language</SelectLabel>
-								{locale_options.map(item => (
-									<SelectItem value={item.value} key={item.value}>
-										{item.label}
-									</SelectItem>
-								))}
-							</SelectGroup>
-						</SelectContent>
-					</Select>
+					<ModelSelect value={triple_model!} onChange={setTripleModel}></ModelSelect>
+				</Field>
+			</FieldGroup>
+			<div className='bg-border-light my-2 h-px w-full'></div>
+			<FieldGroup className='gap-0'>
+				<Field className='items-center! py-3' orientation='horizontal'>
+					<FieldContent>
+						<FieldTitle className='text-base'>Search Rewrite</FieldTitle>
+						<FieldDescription>Enable generation model to rewirte search</FieldDescription>
+					</FieldContent>
+					<Switch></Switch>
+				</Field>
+				<Field className='items-center! py-3' orientation='horizontal'>
+					<FieldContent>
+						<FieldTitle className='text-base'>Rewrite Model</FieldTitle>
+						<FieldDescription>Select model to generate rewrited search params</FieldDescription>
+					</FieldContent>
+					<ModelSelect value={rewrite_model!} onChange={setRewriteModel}></ModelSelect>
 				</Field>
 			</FieldGroup>
 		</div>

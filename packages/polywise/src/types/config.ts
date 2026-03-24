@@ -1,9 +1,14 @@
+export interface DefaultModel {
+	provider: string
+	model: string
+}
+
 export interface AppConfig {
-	provider: {
-		id: string
-		model: string
-		effort: string
-	}
+	default_model: DefaultModel
+	enable_triple: boolean
+	triple_model: DefaultModel
+	enable_rewrite: boolean
+	rewrite_model: DefaultModel
 }
 
 export interface ProviderConfig {

@@ -8,6 +8,7 @@ import { Controller } from '@/components'
 
 import styles from '../../index.module.css'
 
+import type { Control } from 'react-hook-form'
 import type { IPropsFormModel } from '../../types'
 
 const Index = (props: IPropsFormModel) => {
@@ -58,7 +59,7 @@ const Index = (props: IPropsFormModel) => {
 							<Trash className='text-base' size={14} />
 						</button>
 					)}
-					<Controller name={`models.${index}.enabled`} control={control}>
+					<Controller name={`models.${index}.enabled`} control={control as Control<any>}>
 						<Switch />
 					</Controller>
 				</div>

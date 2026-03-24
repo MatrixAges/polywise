@@ -17,7 +17,7 @@ export default class Index {
 	sidebar_collapsed = false
 
 	config = null as unknown as AppConfig
-	providers = null as unknown as ProviderConfig
+	providers = { providers: [] } as unknown as ProviderConfig
 
 	constructor(public util: Util) {
 		makeAutoObservable(this, { util: false, panel_ref: false }, { autoBind: true })
@@ -37,7 +37,6 @@ export default class Index {
 				if (res['config']) {
 					this.config = res['config']
 				}
-				console.log(res)
 
 				if (res['providers']) {
 					this.providers = res['providers']
@@ -49,7 +48,7 @@ export default class Index {
 	}
 
 	setConfig(type: 'config' | 'providers', data: any) {
-		rpc.file.write.mutate({ path: `${type}.json`, data })
+		rpc.file.write.mutate({ path: `${type}.json`, data, merge: true })
 	}
 
 	setPanelRef(v: Index['panel_ref']) {
