@@ -19,7 +19,9 @@ interface Progress {
 	percent: number
 }
 
-export const progress: Record<LocalModelType, Progress | null> = {
+export type ModelProgress = Record<LocalModelType, Progress | null>
+
+export const progress: ModelProgress = {
 	embedding: null,
 	rerank: null,
 	gen: null
@@ -40,11 +42,6 @@ export const addTask = (type: LocalModelType) => {
 			break
 	}
 
-	if (llama_timer) {
-		clearTimeout(llama_timer)
-		llama_timer = null
-	}
-
 	return id
 }
 
@@ -59,28 +56,6 @@ export const removeTask = (type: LocalModelType, id: string) => {
 		case 'gen':
 			gen_tasks.delete(id)
 			break
-	}
-
-	checkDisposeLlama()
-}
-
-const checkDisposeLlama = () => {
-	if (embedding_tasks.size === 0 && rerank_tasks.size === 0 && gen_tasks.size === 0) {
-		if (llama_timer) {
-			clearTimeout(llama_timer)
-		}
-
-		llama_timer = setTimeout(async () => {
-			if (embedding_tasks.size === 0 && rerank_tasks.size === 0 && gen_tasks.size === 0) {
-				await disposeModels()
-
-				if (env.llama) {
-					await env.llama.dispose()
-					// @ts-ignore
-					env.llama = null
-				}
-			}
-		}, 30000)
 	}
 }
 
@@ -128,12 +103,34 @@ export const disposeModels = async () => {
 	}
 }
 
+export const disposeLlama = async () => {
+	if (embedding_tasks.size === 0 && rerank_tasks.size === 0 && gen_tasks.size === 0) {
+		await disposeModels()
+
+		if (env.llama) {
+			await env.llama.dispose()
+			// @ts-ignore
+			env.llama = null
+		}
+
+		if (llama_timer) {
+			clearInterval(llama_timer)
+
+			llama_timer = null
+		}
+	}
+}
+
 export const initLlama = async () => {
 	if (env.llama) return
 
 	if (!llama_promise) {
 		llama_promise = (async () => {
 			env.llama = await getLlama()
+
+			if (!llama_timer) {
+				llama_timer = setInterval(disposeLlama, 30000)
+			}
 
 			llama_promise = null
 		})()

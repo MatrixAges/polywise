@@ -1,5 +1,6 @@
 import { r } from '../utils/trpc'
 import file from './file'
+import llama from './llama'
 import provider from './provider'
 import remove from './remove'
 import save from './save'
@@ -14,6 +15,7 @@ export const router = r({
 	file,
 	session,
 	provider,
+	llama,
 
 	save,
 	search,

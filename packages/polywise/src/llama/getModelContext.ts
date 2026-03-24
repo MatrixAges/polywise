@@ -24,7 +24,7 @@ export default async (type: 'embedding' | 'rerank' | 'gen', model_only?: boolean
 	const state = context_state[type]
 
 	if (!env[model_key] && !state.model_promise) {
-		let fetcher: (llama: Llama) => Promise<LlamaModel>
+		let fetcher: (llama: Llama) => Promise<LlamaModel | false>
 
 		if (type === 'embedding') fetcher = getEmbeddingModel
 		else if (type === 'rerank') fetcher = getRerankModel

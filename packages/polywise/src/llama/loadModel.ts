@@ -1,4 +1,5 @@
 import { join } from 'path'
+import { progress_emmiter } from '@core/rpc/llama/progress'
 import fs from 'fs-extra'
 import { combineModelDownloaders, createModelDownloader, readGgufFileInfo } from 'node-llama-cpp'
 
@@ -15,11 +16,13 @@ interface ModelConfig {
 	file_name: string
 }
 
-export default async (config: ModelConfig) => {
+export default async (config: ModelConfig, status_only?: boolean) => {
 	const { llama, type, model_uri, dir_path, file_name } = config
 	const file_path = join(dir_path, file_name)
 
 	const exsit = await fs.pathExists(file_path)
+
+	if (status_only && !exsit) return false
 
 	if (exsit) {
 		try {
@@ -34,6 +37,8 @@ export default async (config: ModelConfig) => {
 			console.warn(`❌ Model invalid: ${(err as Error).message}. Cleaning up...`)
 
 			await fs.remove(file_path)
+
+			if (status_only) return false
 		}
 	}
 
@@ -56,6 +61,8 @@ export default async (config: ModelConfig) => {
 				downloaded: downloadedSize,
 				percent: parseFloat((downloadedSize / totalSize).toFixed(2))
 			}
+
+			progress_emmiter.emit('change', progress)
 		}
 	})
 
@@ -66,6 +73,8 @@ export default async (config: ModelConfig) => {
 		downloaded: progress[type]!.total,
 		percent: 100
 	}
+
+	progress_emmiter.emit('change', progress)
 
 	console.log('🚀 Download complete.')
 
