@@ -38,16 +38,6 @@ const Index = (props: IProps) => {
 		if (value?.model) setModel(value.model)
 	}, [value])
 
-	const setDefaultModel = useMemoizedFn((_, detail) => {
-		const index = Number(detail.event.target.dataset.index)
-		const idx = Number(detail.event.target.dataset.idx)
-		const provider = providers[index]
-		const model = provider.models![idx].id
-
-		setModel(model)
-		onChange?.({ provider: provider.name, model })
-	})
-
 	const provider_items = useMemo(() => {
 		const target = providers.map(group => ({
 			value: group.name,
@@ -63,6 +53,16 @@ const Index = (props: IProps) => {
 
 		return target
 	}, [providers])
+
+	const setDefaultModel = useMemoizedFn((_, detail) => {
+		const index = Number(detail.event.target.dataset.index)
+		const idx = Number(detail.event.target.dataset.idx)
+		const provider = provider_items[index]
+		const model = provider.items[idx]
+
+		setModel(model)
+		onChange?.({ provider: provider.value, model })
+	})
 
 	return (
 		<Combobox items={provider_items} value={model} onValueChange={setDefaultModel}>

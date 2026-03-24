@@ -2,6 +2,7 @@ import '@/styles/index.css'
 
 import { useLayoutEffect, useState } from 'react'
 import { useMemoizedFn } from 'ahooks'
+import { LucideProvider } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 import { useDefaultLayout } from 'react-resizable-panels'
 import { Outlet } from 'react-router'
@@ -49,58 +50,70 @@ const Index = () => {
 	if (!global.ready) return <Fallback screen></Fallback>
 
 	return (
-		<GlobalProvider value={global}>
-			<Alert></Alert>
-			<div
-				className='
-					overflow-hidden
-					flex flex-col
-					w-screen h-screen
-					bg-layout-under
-				'
-			>
-				<Header {...props_header}></Header>
+		<LucideProvider size={14} strokeWidth={2.4}>
+			<GlobalProvider value={global}>
+				<Alert></Alert>
 				<div
 					className='
-						flex
-						w-full h-[calc(100%-48px)]
-						px-2.5
-						pb-2.5
+						overflow-hidden
+						flex flex-col
+						w-screen h-screen
+						bg-layout-under
 					'
 				>
-					<ResizablePanelGroup
-						className='bg-layout-over h-full! overflow-hidden rounded-sm'
-						defaultLayout={defaultLayout}
-						onLayoutChanged={onLayoutChanged}
+					<Header {...props_header}></Header>
+					<div
+						className='
+							flex
+							w-full h-[calc(100%-48px)]
+							px-2.5
+							pb-2.5
+						'
 					>
-						<ResizablePanel id='layout_content' className='h-full' disabled={s.panel_collapsed}>
-							<Outlet></Outlet>
-						</ResizablePanel>
-						{!s.panel_collapsed && (
-							<ResizableHandle
-								className='
-									bg-border-light
-									transition-colors duration-200
-									hover:bg-std-100 focus:bg-std-150
-								'
-							/>
-						)}
-						<ResizablePanel
-							id='layout_panel'
-							className='h-full'
-							collapsible
-							defaultSize={PANEL_WIDTH_DEFAULT}
-							minSize={PANEL_COLLAPSE_THRESHOLD}
-							maxSize='50'
-							panelRef={s.setPanelRef}
-							onResize={s.updatePanelState}
+						<ResizablePanelGroup
+							className='
+								overflow-hidden
+								h-full!
+								rounded-sm
+								bg-layout-over
+								dark:border-border-light/60 dark:border
+							'
+							defaultLayout={defaultLayout}
+							onLayoutChanged={onLayoutChanged}
 						>
-							<Panel></Panel>
-						</ResizablePanel>
-					</ResizablePanelGroup>
+							<ResizablePanel
+								id='layout_content'
+								className='h-full'
+								disabled={s.panel_collapsed}
+							>
+								<Outlet></Outlet>
+							</ResizablePanel>
+							{!s.panel_collapsed && (
+								<ResizableHandle
+									className='
+										bg-border-light
+										transition-colors duration-200
+										hover:bg-std-100 focus:bg-std-150
+									'
+								/>
+							)}
+							<ResizablePanel
+								id='layout_panel'
+								className='h-full'
+								collapsible
+								defaultSize={PANEL_WIDTH_DEFAULT}
+								minSize={PANEL_COLLAPSE_THRESHOLD}
+								maxSize='50'
+								panelRef={s.setPanelRef}
+								onResize={s.updatePanelState}
+							>
+								<Panel></Panel>
+							</ResizablePanel>
+						</ResizablePanelGroup>
+					</div>
 				</div>
-			</div>
-		</GlobalProvider>
+			</GlobalProvider>
+		</LucideProvider>
 	)
 }
 

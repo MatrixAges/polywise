@@ -23,7 +23,7 @@ const Index = (props: IProps) => {
 			onChange
 		} as any
 
-		if (typeof children.type !== 'function') {
+		if (typeof children.type === 'function' && (children.props as any)?.items) {
 			target_props['onValueChange'] = onChange
 		}
 

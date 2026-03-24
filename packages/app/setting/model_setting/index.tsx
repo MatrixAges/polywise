@@ -1,4 +1,4 @@
-import { useInsertionEffect } from 'react'
+import { Fragment, useInsertionEffect } from 'react'
 import { LocalModelType } from '@core/llama'
 import { useMemoizedFn } from 'ahooks'
 import { ArrowDownToLine, BadgeCheck } from 'lucide-react'
@@ -10,7 +10,7 @@ import { Switch } from '@/__shadcn__/components/ui/switch'
 import { local_models } from '@/appdata'
 import { Controller, ModelSelect } from '@/components'
 import { useGlobal } from '@/context'
-import { useForm } from '@/hooks'
+import { useClickLoading, useForm } from '@/hooks'
 import { rpc } from '@/utils'
 
 import type { AppConfig } from '@core/types'
@@ -18,6 +18,8 @@ import type { AppConfig } from '@core/types'
 const Index = () => {
 	const global = useGlobal()
 	const s = global.setting
+
+	const { loading, click } = useClickLoading(2400)
 
 	useInsertionEffect(() => {
 		s.getModelStatus()
@@ -112,12 +114,20 @@ const Index = () => {
 								) : (
 									<button
 										className='click_button'
-										onClick={() =>
+										onClick={() => {
+											click()
 											rpc.llama.download.mutate(key as LocalModelType)
-										}
+										}}
+										disabled={loading}
 									>
-										<ArrowDownToLine></ArrowDownToLine>
-										<span>Download</span>
+										{loading ? (
+											<Spinner></Spinner>
+										) : (
+											<Fragment>
+												<ArrowDownToLine></ArrowDownToLine>
+												<span>Download</span>
+											</Fragment>
+										)}
 									</button>
 								)}
 							</div>

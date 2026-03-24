@@ -121,16 +121,49 @@ export const disposeLlama = async () => {
 	}
 }
 
+export const isDownloading = () => {
+	const types: LocalModelType[] = ['embedding', 'rerank', 'gen']
+
+	for (const type of types) {
+		const p = progress[type]
+
+		if (p !== null && p.percent < 100) {
+			return true
+		}
+	}
+
+	return false
+}
+
+const resetLlamaTimer = () => {
+	if (llama_timer) {
+		clearTimeout(llama_timer)
+	}
+
+	llama_timer = setTimeout(async () => {
+		if (isDownloading()) {
+			return resetLlamaTimer()
+		}
+
+		await disposeLlama()
+
+		llama_timer = null
+	}, 30000)
+}
+
 export const initLlama = async () => {
-	if (env.llama) return
+	if (env.llama && !env.llama.disposed) return resetLlamaTimer()
+
+	if (env.llama?.disposed) {
+		// @ts-ignore
+		env.llama = null
+	}
 
 	if (!llama_promise) {
 		llama_promise = (async () => {
 			env.llama = await getLlama()
 
-			if (!llama_timer) {
-				llama_timer = setInterval(disposeLlama, 30000)
-			}
+			resetLlamaTimer()
 
 			llama_promise = null
 		})()

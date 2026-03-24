@@ -22,6 +22,7 @@ const Index = () => {
 	const l = global.locale
 
 	const onChange = useMemoizedFn((_, changed) => {
+		console.log(changed)
 		if ('theme' in changed) t.setTheme(changed['theme'])
 		if ('lang' in changed) l.setLang(changed['lang'])
 	})
