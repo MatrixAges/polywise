@@ -11,9 +11,21 @@ const gen_tasks = new Set<string>()
 let llama_promise: Promise<void> | null = null
 let llama_timer: ReturnType<typeof setTimeout> | null = null
 
-type TaskType = 'embedding' | 'rerank' | 'gen'
+export type LocalModelType = 'embedding' | 'rerank' | 'gen'
 
-export const addTask = (type: TaskType) => {
+interface Progress {
+	total: number
+	downloaded: number
+	percent: number
+}
+
+export const progress: Record<LocalModelType, Progress | null> = {
+	embedding: null,
+	rerank: null,
+	gen: null
+}
+
+export const addTask = (type: LocalModelType) => {
 	const id = getId()
 
 	switch (type) {
@@ -36,7 +48,7 @@ export const addTask = (type: TaskType) => {
 	return id
 }
 
-export const removeTask = (type: TaskType, id: string) => {
+export const removeTask = (type: LocalModelType, id: string) => {
 	switch (type) {
 		case 'embedding':
 			embedding_tasks.delete(id)
@@ -72,7 +84,7 @@ const checkDisposeLlama = () => {
 	}
 }
 
-export const isTasksEmpty = (type: TaskType) => {
+export const isTasksEmpty = (type: LocalModelType) => {
 	switch (type) {
 		case 'embedding':
 			return embedding_tasks.size === 0

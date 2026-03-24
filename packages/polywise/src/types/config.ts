@@ -29,6 +29,7 @@ export interface Model {
 	name: string
 	id: string
 	enabled: boolean
+	type?: 'text' | 'embedding' | 'rerank' | 'image' | 'audio' | 'video'
 	fid?: string
 }
 

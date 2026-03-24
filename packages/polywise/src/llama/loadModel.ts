@@ -2,17 +2,21 @@ import { join } from 'path'
 import fs from 'fs-extra'
 import { combineModelDownloaders, createModelDownloader, readGgufFileInfo } from 'node-llama-cpp'
 
+import { progress } from './index'
+
 import type { Llama } from 'node-llama-cpp'
+import type { LocalModelType } from './index'
 
 interface ModelConfig {
 	llama: Llama
+	type: LocalModelType
 	model_uri: string
 	dir_path: string
 	file_name: string
 }
 
 export default async (config: ModelConfig) => {
-	const { llama, model_uri, dir_path, file_name } = config
+	const { llama, type, model_uri, dir_path, file_name } = config
 	const file_path = join(dir_path, file_name)
 
 	const exsit = await fs.pathExists(file_path)
@@ -45,13 +49,23 @@ export default async (config: ModelConfig) => {
 	const combile_downloader = await combineModelDownloaders([downloader], {
 		showCliProgress: true,
 		onProgress(status) {
-			const { downloadedSize, totalSize } = status
+			const { totalSize, downloadedSize } = status
 
-			// console.log(`${downloadedSize}/${totalSize}`)
+			progress[type] = {
+				total: totalSize,
+				downloaded: downloadedSize,
+				percent: parseFloat((downloadedSize / totalSize).toFixed(2))
+			}
 		}
 	})
 
 	const [downloaded_path] = await combile_downloader.download()
+
+	progress[type] = {
+		total: progress[type]!.total,
+		downloaded: progress[type]!.total,
+		percent: 100
+	}
 
 	console.log('🚀 Download complete.')
 

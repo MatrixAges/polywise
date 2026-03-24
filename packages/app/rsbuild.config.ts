@@ -19,7 +19,7 @@ const config = {
 		cors: { origin: ['http://localhost:8787'] }
 	},
 	html: {
-		title: 'Polywise - Your AI Digital Twins',
+		title: 'Polywise - The Way to fork Yourself ◑',
 		template: './public/index.html'
 	},
 	tools: {

@@ -18,7 +18,7 @@ const context_state = {
 	gen: { model_promise: null, timer: null, promise: null } as ContextState
 }
 
-export default async (type: 'embedding' | 'rerank' | 'gen') => {
+export default async (type: 'embedding' | 'rerank' | 'gen', model_only?: boolean) => {
 	const model_key = `${type}_model` as EnvKey
 	const context_key = `${type}_context` as EnvKey
 	const state = context_state[type]
@@ -45,26 +45,28 @@ export default async (type: 'embedding' | 'rerank' | 'gen') => {
 		await state.model_promise
 	}
 
-	if (!env[context_key] && !state.promise) {
-		const model = env[model_key] as LlamaModel
+	if (!model_only) {
+		if (!env[context_key] && !state.promise) {
+			const model = env[model_key] as LlamaModel
 
-		let creator: () => Promise<LlamaEmbeddingContext | LlamaRankingContext | LlamaContext>
+			let creator: () => Promise<LlamaEmbeddingContext | LlamaRankingContext | LlamaContext>
 
-		if (type === 'embedding') creator = () => model.createEmbeddingContext()
-		else if (type === 'rerank') creator = () => model.createRankingContext()
-		else creator = () => model.createContext()
+			if (type === 'embedding') creator = () => model.createEmbeddingContext()
+			else if (type === 'rerank') creator = () => model.createRankingContext()
+			else creator = () => model.createContext()
 
-		state.promise = (async () => {
-			const ctx = await creator()
-			// @ts-ignore
-			env[context_key] = ctx
+			state.promise = (async () => {
+				const ctx = await creator()
+				// @ts-ignore
+				env[context_key] = ctx
 
-			state.promise = null
-		})()
-	}
+				state.promise = null
+			})()
+		}
 
-	if (state.promise) {
-		await state.promise
+		if (state.promise) {
+			await state.promise
+		}
 	}
 
 	resetContextTimer(type)

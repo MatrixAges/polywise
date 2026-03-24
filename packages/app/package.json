@@ -47,7 +47,7 @@
 		"hotkeys-js": "^4.0.2",
 		"i18next": "catalog:",
 		"jsonschema": "^1.5.0",
-		"lucide-react": "^1.0.1",
+		"lucide-react": "^1.6.0",
 		"mnemonist": "^0.40.3",
 		"mobx": "catalog:",
 		"mobx-react-lite": "^4.1.1",
