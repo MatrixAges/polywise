@@ -50,7 +50,7 @@ const Index = () => {
 	if (!global.ready) return <Fallback screen></Fallback>
 
 	return (
-		<LucideProvider size={14} strokeWidth={2.4}>
+		<LucideProvider size={14} strokeWidth={2}>
 			<GlobalProvider value={global}>
 				<Alert></Alert>
 				<div
