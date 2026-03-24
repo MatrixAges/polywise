@@ -1,81 +1,134 @@
+import { useInsertionEffect } from 'react'
+import { LocalModelType } from '@core/llama'
 import { useMemoizedFn } from 'ahooks'
+import { ArrowDownToLine, BadgeCheck } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { Field, FieldContent, FieldDescription, FieldGroup, FieldTitle } from '@/__shadcn__/components/ui/field'
+import { Spinner } from '@/__shadcn__/components/ui/spinner'
 import { Switch } from '@/__shadcn__/components/ui/switch'
+import { local_models } from '@/appdata'
 import { Controller, ModelSelect } from '@/components'
 import { useGlobal } from '@/context'
 import { useForm } from '@/hooks'
+import { rpc } from '@/utils'
 
 import type { AppConfig } from '@core/types'
-import type { Control } from 'react-hook-form'
 
 const Index = () => {
 	const global = useGlobal()
 	const s = global.setting
 
-	const onChange = useMemoizedFn(values => s.setConfig('config', values))
+	useInsertionEffect(() => {
+		s.getModelStatus()
+	}, [])
 
-	const { control } = useForm<AppConfig>({ values: s.config }, onChange)
+	const onChange = useMemoizedFn(values => {
+		s.setConfig('config', values)
+	})
+
+	const { control } = useForm<AppConfig>({ values: $copy(s.config) }, onChange)
 
 	return (
-		<form className='page_wrap flex w-full flex-col'>
-			<FieldGroup className='gap-0'>
-				<Field className='items-center! py-3' orientation='horizontal'>
-					<FieldContent>
-						<FieldTitle className='text-base'>Default Model</FieldTitle>
-						<FieldDescription>Select the default model for session</FieldDescription>
-					</FieldContent>
-					<Controller name='default_model' control={control}>
-						<ModelSelect></ModelSelect>
-					</Controller>
-				</Field>
-			</FieldGroup>
+		<div className='page_wrap flex w-full flex-col'>
+			<form className='flex w-full flex-col'>
+				<FieldGroup className='gap-0'>
+					<Field className='items-center! py-3' orientation='horizontal'>
+						<FieldContent>
+							<FieldTitle className='text-base'>Default Model</FieldTitle>
+							<FieldDescription>Select the default model for session</FieldDescription>
+						</FieldContent>
+						<Controller name='default_model' control={control}>
+							<ModelSelect></ModelSelect>
+						</Controller>
+					</Field>
+				</FieldGroup>
+				<div className='bg-border-light my-2 h-px w-full'></div>
+				<FieldGroup className='gap-0'>
+					<Field className='items-center! py-3' orientation='horizontal'>
+						<FieldContent>
+							<FieldTitle className='text-base'>Generate Triples</FieldTitle>
+							<FieldDescription>Enable generate triples for article</FieldDescription>
+						</FieldContent>
+						<Controller name='enable_triple' control={control}>
+							<Switch></Switch>
+						</Controller>
+					</Field>
+					<Field className='items-center! py-3' orientation='horizontal'>
+						<FieldContent>
+							<FieldTitle className='text-base'>Triple Model</FieldTitle>
+							<FieldDescription>
+								Select triple model for generating triples for content
+							</FieldDescription>
+						</FieldContent>
+						<Controller name='triple_model' control={control}>
+							<ModelSelect show_local_model></ModelSelect>
+						</Controller>
+					</Field>
+				</FieldGroup>
+				<div className='bg-border-light my-2 h-px w-full'></div>
+				<FieldGroup className='gap-0'>
+					<Field className='items-center! py-3' orientation='horizontal'>
+						<FieldContent>
+							<FieldTitle className='text-base'>Search Rewrite</FieldTitle>
+							<FieldDescription>Enable generation model to rewirte search</FieldDescription>
+						</FieldContent>
+						<Controller name='enable_rewrite' control={control}>
+							<Switch></Switch>
+						</Controller>
+					</Field>
+					<Field className='items-center! py-3' orientation='horizontal'>
+						<FieldContent>
+							<FieldTitle className='text-base'>Rewrite Model</FieldTitle>
+							<FieldDescription>
+								Select model to generate rewrited search params
+							</FieldDescription>
+						</FieldContent>
+						<Controller name='rewrite_model' control={control}>
+							<ModelSelect show_local_model></ModelSelect>
+						</Controller>
+					</Field>
+				</FieldGroup>
+			</form>
 			<div className='bg-border-light my-2 h-px w-full'></div>
-			<FieldGroup className='gap-0'>
-				<Field className='items-center! py-3' orientation='horizontal'>
-					<FieldContent>
-						<FieldTitle className='text-base'>Generate Triples</FieldTitle>
-						<FieldDescription>Enable generate triples for article</FieldDescription>
-					</FieldContent>
-					<Controller name='enable_triple' control={control}>
-						<Switch></Switch>
-					</Controller>
-				</Field>
-				<Field className='items-center! py-3' orientation='horizontal'>
-					<FieldContent>
-						<FieldTitle className='text-base'>Triple Model</FieldTitle>
-						<FieldDescription>
-							Select triple model for generating triples for content
-						</FieldDescription>
-					</FieldContent>
-					<Controller name='triple_model' control={control}>
-						<ModelSelect show_local_model></ModelSelect>
-					</Controller>
-				</Field>
-			</FieldGroup>
-			<div className='bg-border-light my-2 h-px w-full'></div>
-			<FieldGroup className='gap-0'>
-				<Field className='items-center! py-3' orientation='horizontal'>
-					<FieldContent>
-						<FieldTitle className='text-base'>Search Rewrite</FieldTitle>
-						<FieldDescription>Enable generation model to rewirte search</FieldDescription>
-					</FieldContent>
-					<Controller name='enable_rewrite' control={control}>
-						<Switch></Switch>
-					</Controller>
-				</Field>
-				<Field className='items-center! py-3' orientation='horizontal'>
-					<FieldContent>
-						<FieldTitle className='text-base'>Rewrite Model</FieldTitle>
-						<FieldDescription>Select model to generate rewrited search params</FieldDescription>
-					</FieldContent>
-					<Controller name='rewrite_model' control={control}>
-						<ModelSelect show_local_model></ModelSelect>
-					</Controller>
-				</Field>
-			</FieldGroup>
-		</form>
+			<div className='flex flex-col'>
+				{Object.keys(local_models).map(key => (
+					<div className='flex items-center justify-between py-3' key={key}>
+						<div className='flex flex-col gap-1'>
+							<span className='font-medium'>{local_models[key].name}</span>
+							<span className='text-std-600 text-xs'>{local_models[key].model}</span>
+						</div>
+						{s.model_status[key as LocalModelType] !== undefined ? (
+							<div className='flex items-center'>
+								{s.model_status[key as LocalModelType] ? (
+									<div className='click_button'>
+										<BadgeCheck></BadgeCheck>
+										<span>Ready</span>
+									</div>
+								) : s.model_progress[key as LocalModelType] ? (
+									<span className='text-xsm font-medium'>
+										{s.model_progress[key as LocalModelType]!.percent * 100 +
+											'%'}
+									</span>
+								) : (
+									<button
+										className='click_button'
+										onClick={() =>
+											rpc.llama.download.mutate(key as LocalModelType)
+										}
+									>
+										<ArrowDownToLine></ArrowDownToLine>
+										<span>Download</span>
+									</button>
+								)}
+							</div>
+						) : (
+							<Spinner></Spinner>
+						)}
+					</div>
+				))}
+			</div>
+		</div>
 	)
 }
 

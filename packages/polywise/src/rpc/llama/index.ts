@@ -1,7 +1,11 @@
 import { r } from '@core/utils'
 
-import load from './load'
+import download from './download'
+import getStatus from './getStatus'
+import progress from './progress'
 
 export default r({
-	load
+	getStatus,
+	download,
+	progress
 })

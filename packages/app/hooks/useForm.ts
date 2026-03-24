@@ -12,16 +12,12 @@ export default <T extends FieldValues = FieldValues>(props: UseFormProps<T>, onC
 
 	const { watch, getValues } = res
 
-	const onChangeValues = useMemoizedFn((latestValues, { name }) => {
-		if (deepEqual(latestValues, props.values)) return
+	const onChangeValues = useMemoizedFn((values, { name }) => {
+		if (deepEqual(values[name], props.values?.[name])) return
 
-		if (name) {
-			const changedFieldValue = getValues(name as any)
+		const changed_value = getValues(name)
 
-			onChange(latestValues as T, { [name]: changedFieldValue } as Partial<T>)
-		} else {
-			onChange(latestValues as T)
-		}
+		onChange(values as T, { [name]: changed_value } as Partial<T>)
 	})
 
 	useEffect(() => {

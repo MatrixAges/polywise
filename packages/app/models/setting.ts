@@ -7,6 +7,8 @@ import { PANEL_WIDTH_DEFAULT } from '@/appdata'
 import { Util } from '@/models/common'
 import { rpc } from '@/utils'
 
+import type { ModelProgress } from '@core/llama'
+import type { ModelStatus } from '@core/rpc/llama/getStatus'
 import type { AppConfig, ProviderConfig } from '@core/types'
 import type { PanelImperativeHandle } from 'react-resizable-panels'
 
@@ -18,6 +20,8 @@ export default class Index {
 
 	config = null as unknown as AppConfig
 	providers = { providers: [] } as unknown as ProviderConfig
+	model_status = {} as ModelStatus
+	model_progress = {} as ModelProgress
 
 	constructor(public util: Util) {
 		makeAutoObservable(this, { util: false, panel_ref: false }, { autoBind: true })
@@ -29,6 +33,7 @@ export default class Index {
 		this.util.acts = [deinit]
 
 		this.watchConfig()
+		this.watchProgress()
 	}
 
 	watchConfig() {
@@ -41,6 +46,16 @@ export default class Index {
 				if (res['providers']) {
 					this.providers = res['providers']
 				}
+			}
+		})
+
+		this.util.acts.push(deinit.unsubscribe)
+	}
+
+	watchProgress() {
+		const deinit = rpc.llama.progress.subscribe(undefined, {
+			onData: res => {
+				this.model_progress = res
 			}
 		})
 
@@ -81,6 +96,14 @@ export default class Index {
 
 	toggleSidebar() {
 		this.sidebar_collapsed = !this.sidebar_collapsed
+	}
+
+	async getModelStatus() {
+		const values = Object.values(this.model_status)
+
+		if (values.length && values.every(item => item)) return
+
+		this.model_status = await rpc.llama.getStatus.query()
 	}
 
 	deinit() {

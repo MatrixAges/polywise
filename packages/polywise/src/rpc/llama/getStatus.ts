@@ -1,10 +1,12 @@
 import { env } from '@core/env'
-import { initLlama } from '@core/llama'
+import { disposeLlama, initLlama } from '@core/llama'
 import { getEmbeddingModel, getGenModel, getRerankModel } from '@core/llama/getModel'
 import { p } from '@core/utils'
-import { boolean, enum as Enum, record } from 'zod'
+import { boolean, enum as Enum, infer as Infer, record } from 'zod'
 
 const output_type = record(Enum(['embedding', 'rerank', 'gen']), boolean())
+
+export type ModelStatus = Infer<typeof output_type>
 
 export default p.output(output_type).query(async () => {
 	await initLlama()
