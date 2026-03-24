@@ -12,16 +12,15 @@ import Provider from './Provider'
 
 import styles from '../../index.module.css'
 
-import type { IPropsCustom, Provider as ProviderType } from '../../types'
+import type { Provider as ProviderType } from '@core/types'
+import type { IPropsCustom } from '../../types'
 
 const Index = (props: IPropsCustom) => {
 	const { custom_providers = [], onChangeCustomProviders } = props
 	const { t } = useTranslation()
 	const [visible, { toggle }] = useToggle()
 
-	const { control, formState, getValues } = useForm<{
-		providers: Array<ProviderType>
-	}>({
+	const { control, formState, getValues } = useForm<{ providers: Array<ProviderType> }>({
 		values: { providers: custom_providers }
 	})
 

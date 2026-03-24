@@ -12,15 +12,24 @@ import {
 	SelectValue
 } from '@/__shadcn__/components/ui/select'
 import { locale_options, themes } from '@/appdata'
+import { Controller } from '@/components'
 import { useGlobal } from '@/context'
+import { useForm } from '@/hooks'
 
 const Index = () => {
 	const global = useGlobal()
-	const l = global.locale
 	const t = global.theme
+	const l = global.locale
 
-	const setLang = useMemoizedFn(v => l.setLang(v))
-	const setTheme = useMemoizedFn(v => t.setTheme(v))
+	const onChange = useMemoizedFn((_, changed) => {
+		if ('theme' in changed) t.setTheme(changed['theme'])
+		if ('lang' in changed) l.setLang(changed['lang'])
+	})
+
+	const { control } = useForm<{ theme: string; lang: string }>(
+		{ values: { theme: t.theme_source, lang: l.lang } },
+		onChange
+	)
 
 	return (
 		<div className='page_wrap flex w-full flex-col'>
@@ -39,25 +48,23 @@ const Index = () => {
 							synchronization
 						</FieldDescription>
 					</FieldContent>
-					<Select
-						items={themes.map(item => ({ label: item, value: item }))}
-						value={t.theme_source}
-						onValueChange={setTheme}
-					>
-						<SelectTrigger className='workspace_selector'>
-							<SelectValue />
-						</SelectTrigger>
-						<SelectContent align='start'>
-							<SelectGroup>
-								<SelectLabel>Theme</SelectLabel>
-								{themes.map(item => (
-									<SelectItem value={item} key={item}>
-										{item}
-									</SelectItem>
-								))}
-							</SelectGroup>
-						</SelectContent>
-					</Select>
+					<Controller name='theme' control={control}>
+						<Select items={themes.map(item => ({ label: item, value: item }))}>
+							<SelectTrigger className='workspace_selector'>
+								<SelectValue />
+							</SelectTrigger>
+							<SelectContent align='start'>
+								<SelectGroup>
+									<SelectLabel>Theme</SelectLabel>
+									{themes.map(item => (
+										<SelectItem value={item} key={item}>
+											{item}
+										</SelectItem>
+									))}
+								</SelectGroup>
+							</SelectContent>
+						</Select>
+					</Controller>
 				</Field>
 				<Field className='items-center! py-3' orientation='horizontal'>
 					<FieldContent>
@@ -66,21 +73,23 @@ const Index = () => {
 							Select your preferred language for the application interface and notifications
 						</FieldDescription>
 					</FieldContent>
-					<Select items={locale_options} value={l.lang} onValueChange={setLang}>
-						<SelectTrigger className='workspace_selector'>
-							<SelectValue />
-						</SelectTrigger>
-						<SelectContent align='start'>
-							<SelectGroup>
-								<SelectLabel>Language</SelectLabel>
-								{locale_options.map(item => (
-									<SelectItem value={item.value} key={item.value}>
-										{item.label}
-									</SelectItem>
-								))}
-							</SelectGroup>
-						</SelectContent>
-					</Select>
+					<Controller name='lang' control={control}>
+						<Select items={locale_options}>
+							<SelectTrigger className='workspace_selector'>
+								<SelectValue />
+							</SelectTrigger>
+							<SelectContent align='start'>
+								<SelectGroup>
+									<SelectLabel>Language</SelectLabel>
+									{locale_options.map(item => (
+										<SelectItem value={item.value} key={item.value}>
+											{item.label}
+										</SelectItem>
+									))}
+								</SelectGroup>
+							</SelectContent>
+						</Select>
+					</Controller>
 				</Field>
 			</FieldGroup>
 		</div>

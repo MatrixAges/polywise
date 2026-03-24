@@ -19,8 +19,8 @@ import { useGlobal } from '@/context'
 import type { DefaultModel } from '@core/types'
 
 interface IProps {
-	value: DefaultModel
-	onChange: (v: DefaultModel) => void
+	value?: DefaultModel
+	onChange?: (v: DefaultModel) => void
 }
 
 const Index = (props: IProps) => {
@@ -44,7 +44,7 @@ const Index = (props: IProps) => {
 		const model = provider.models![idx].id
 
 		setModel(model)
-		onChange({ provider: provider.name, model })
+		onChange?.({ provider: provider.name, model })
 	})
 
 	const provider_items = useMemo(

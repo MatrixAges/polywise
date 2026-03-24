@@ -59,7 +59,7 @@ const Index = (props: IPropsFormModel) => {
 							<Trash className='text-base' size={14} />
 						</button>
 					)}
-					<Controller name={`models.${index}.enabled`} control={control as Control<any>}>
+					<Controller name={`models.${index}.enabled`} control={control}>
 						<Switch />
 					</Controller>
 				</div>

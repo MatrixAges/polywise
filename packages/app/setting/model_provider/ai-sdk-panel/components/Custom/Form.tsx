@@ -7,7 +7,8 @@ import { AutoLabel, Show } from '@/components'
 
 import styles from '../../index.module.css'
 
-import type { IPropsCustomForm, Provider } from '../../types'
+import type { Provider } from '@core/types'
+import type { IPropsCustomForm } from '../../types'
 
 const Index = (props: IPropsCustomForm) => {
 	const { toggle, checkExist, onAddProvider } = props

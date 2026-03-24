@@ -3,28 +3,32 @@ import { useMemoizedFn } from 'ahooks'
 import { Controller } from 'react-hook-form'
 
 import type { ReactElement } from 'react'
-import type { Control } from 'react-hook-form'
 
 interface IProps {
 	children: ReactElement
 	name: string
-	control: Control<any>
+	control: any
 }
 
 const Index = (props: IProps) => {
 	const { children, name, control } = props
 
-	const render = useMemoizedFn(({ field: { name, value, ref, onChange } }) =>
-		cloneElement(children, {
-			//@ts-ignore
+	const render = useMemoizedFn(({ field: { name, value, ref, onChange } }) => {
+		const target_props = {
 			name,
 			value,
-			checked: typeof value === 'boolean' ? value : undefined,
+			checked: typeof value === 'boolean' ? value : false,
 			onCheckedChange: onChange,
 			ref,
 			onChange
-		})
-	)
+		} as any
+
+		if (typeof children.type !== 'function') {
+			target_props['onValueChange'] = onChange
+		}
+
+		return cloneElement(children, target_props)
+	})
 
 	return <Controller name={name} control={control} render={render} />
 }
