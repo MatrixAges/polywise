@@ -55,14 +55,14 @@ export default p.input(input_type).subscription(async function* (args) {
 			return total
 		}, {} as Res)
 
-		e.emit('CHANGE', target)
+		e.emit('change', target)
 	}
 
 	try {
 		watchpack.watch({ files })
 		watchpack.on('aggregated', onChange)
 
-		for await (const [data] of on(e, 'CHANGE', { signal })) {
+		for await (const [data] of on(e, 'change', { signal })) {
 			yield data as Res
 		}
 	} finally {

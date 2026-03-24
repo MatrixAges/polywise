@@ -12,15 +12,16 @@ import watchTasks from './watchTasks'
 
 export const router = r({
 	file,
+	session,
 	provider,
+
 	save,
 	search,
 	test,
 	watchTasks,
 	setTask,
 	update,
-	remove,
-	session
+	remove
 })
 
 export type Router = typeof router

@@ -8,13 +8,11 @@ import { emitter, queue } from '../task'
 import { p } from '../utils/trpc'
 
 const input_type = object({
-	type: string().optional()
+	type: string()
 })
 
-const getPayload = async (type?: string) => {
-	const tasks = type
-		? await env.db.select().from(task).where(eq(task.type, type))
-		: await env.db.select().from(task)
+const getPayload = async (type: string) => {
+	const tasks = await env.db.select().from(task).where(eq(task.type, type)).limit(10)
 
 	const queue_item = type ? queue.map.get(type) : null
 	const paused = queue_item?.paused ?? false
@@ -27,7 +25,11 @@ export default p.input(input_type).subscription(async function* (args) {
 
 	yield await getPayload(input.type)
 
-	for await (const _ of on(emitter, 'change', { signal })) {
-		yield await getPayload(input.type)
+	try {
+		for await (const _ of on(emitter, 'change', { signal })) {
+			yield await getPayload(input.type)
+		}
+	} finally {
+		emitter.removeAllListeners()
 	}
 })

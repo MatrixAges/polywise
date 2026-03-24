@@ -25,14 +25,14 @@ export default class Index {
 		this.id = id
 		this.event = event
 
-		await this.getData()
-
-		return { type: 'init', data: { session: this.session, messages: this.messages } } as ChatEventRes
+		return this.getData()
 	}
 
 	async getData() {
 		await this.getSession()
 		await this.getMessages()
+
+		return { type: 'init', data: { session: this.session, messages: this.messages } } as ChatEventRes
 	}
 
 	async getSession() {
@@ -61,7 +61,7 @@ export default class Index {
 	async getModel() {
 		const { provider, model, options } = this.session
 
-		this.model = getModel(provider, model, options)
+		this.model = await getModel(provider, model, options)
 	}
 
 	async getStream(messages: Array<Message>) {
