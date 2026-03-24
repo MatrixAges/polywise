@@ -75,6 +75,6 @@
 	--color-border-light: oklch(from var(--color-std-500) l c h / 0.1);
 
 	--color-under: oklch(from var(--color-std-700) l c h / 1);
-	--color-layout-under: oklch(from var(--color-std-50) l c h / 1);
-	--color-layout-over: oklch(from var(--color-std-100) l c h / 0.72);
+	--color-layout-under: oklch(from var(--color-std-white) l c h / 1);
+	--color-layout-over: oklch(from var(--color-std-100) l c h / 0.8);
 }
