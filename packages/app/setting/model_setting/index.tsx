@@ -50,7 +50,7 @@ const Index = () => {
 						</FieldDescription>
 					</FieldContent>
 					<Controller name='triple_model' control={control}>
-						<ModelSelect></ModelSelect>
+						<ModelSelect show_local_model></ModelSelect>
 					</Controller>
 				</Field>
 			</FieldGroup>
@@ -71,7 +71,7 @@ const Index = () => {
 						<FieldDescription>Select model to generate rewrited search params</FieldDescription>
 					</FieldContent>
 					<Controller name='rewrite_model' control={control}>
-						<ModelSelect></ModelSelect>
+						<ModelSelect show_local_model></ModelSelect>
 					</Controller>
 				</Field>
 			</FieldGroup>

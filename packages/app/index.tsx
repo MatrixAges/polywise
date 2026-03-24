@@ -61,12 +61,8 @@ const routes: Array<RouteObject> = [
 						lazy: () => import('@/setting/model_provider')
 					},
 					{
-						path: 'default_model',
-						lazy: () => import('@/setting/default_model')
-					},
-					{
-						path: 'local_model',
-						lazy: () => import('@/setting/local_model')
+						path: 'model_setting',
+						lazy: () => import('@/setting/model_setting')
 					},
 					{
 						path: 'service_provider',

@@ -20,11 +20,12 @@ import type { DefaultModel } from '@core/types'
 
 interface IProps {
 	value?: DefaultModel
+	show_local_model?: boolean
 	onChange?: (v: DefaultModel) => void
 }
 
 const Index = (props: IProps) => {
-	const { value, onChange } = props
+	const { value, show_local_model, onChange } = props
 
 	const global = useGlobal()
 
@@ -47,14 +48,21 @@ const Index = (props: IProps) => {
 		onChange?.({ provider: provider.name, model })
 	})
 
-	const provider_items = useMemo(
-		() =>
-			providers.map(group => ({
-				value: group.name,
-				items: (group.models || []).map(item => item.id)
-			})),
-		[providers]
-	)
+	const provider_items = useMemo(() => {
+		const target = providers.map(group => ({
+			value: group.name,
+			items: (group.models || []).map(item => item.id)
+		}))
+
+		if (show_local_model) {
+			target.unshift({
+				value: 'local model',
+				items: ['qwen3.5-4b']
+			})
+		}
+
+		return target
+	}, [providers])
 
 	return (
 		<Combobox items={provider_items} value={model} onValueChange={setDefaultModel}>
