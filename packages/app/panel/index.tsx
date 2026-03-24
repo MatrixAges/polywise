@@ -29,6 +29,7 @@ const Index = () => {
 				flex flex-col
 				w-full h-full
 				bg-std-50/60
+				dark:bg-std-50/30
 			'
 		>
 			<div
