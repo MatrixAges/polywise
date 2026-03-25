@@ -1,24 +1,22 @@
-import { log } from '@core/utils'
+import { clearObject, initDefaults, log } from '@core/utils'
 import { to } from 'await-to-js'
 import fs from 'fs-extra'
 
-import { config_path } from '../consts/app'
-import { config, config_emitter } from './index'
+import { config_path, providers_path } from '../consts/app'
+import { config, providers } from './index'
 
 export default async () => {
-	const [err, data] = await to(fs.readJson(config_path, { throws: false }))
+	const [err_config, res_config] = await to(fs.readJson(config_path))
+	const [err_providers, res_providers] = await to(fs.readJson(providers_path, { throws: false }))
 
-	if (err) {
-		await fs.ensureFile(config_path)
-		await fs.writeJson(config_path, {}, { spaces: 4 })
+	if (err_config || err_providers) return initDefaults()
 
-		return
-	}
+	clearObject(config)
+	Object.assign(config, res_config || {})
 
-	Object.assign(config, {})
-	Object.assign(config, data || {})
+	clearObject(providers)
+	Object.assign(providers, res_providers || {})
 
-	log('CONFIG', 'loadConfig', () => data)
-
-	config_emitter.emit('change', config)
+	log('CONFIG', 'load Config', () => res_config)
+	log('CONFIG', 'load Providers', () => res_providers)
 }

@@ -3,8 +3,8 @@ import type { PresetProvider } from '@core/types'
 export default {
 	name: 'siliconflow',
 	enabled: true,
-	api_key: '',
-	base_url: '',
+	apiKey: '',
+	baseURL: '',
 	models: [
 		{
 			enabled: true,

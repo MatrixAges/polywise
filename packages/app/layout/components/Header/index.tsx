@@ -23,7 +23,7 @@ const Index = (props: IPropsHeader) => {
 				relative
 				flex
 				items-center justify-center
-				w-full h-[48px]
+				w-full h-[42px]
 				text-under/60
 				bg-over
 			`,

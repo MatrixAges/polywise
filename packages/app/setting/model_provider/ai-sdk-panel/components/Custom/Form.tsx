@@ -99,7 +99,7 @@ const Index = (props: IPropsCustomForm) => {
 						{...register('name')}
 					/>
 				</AutoLabel>
-				<AutoLabel label={t('provider.form.base_url')} valued>
+				<AutoLabel label={t('provider.form.baseURL')} valued>
 					<input
 						className={$cx(`
 							w-full h-full
@@ -107,13 +107,13 @@ const Index = (props: IPropsCustomForm) => {
 							outline-none
 							placeholder:text-soft
 						`)}
-						placeholder={t('provider.form.model_form.input') + t('provider.form.base_url')}
+						placeholder={t('provider.form.model_form.input') + t('provider.form.baseURL')}
 						autoComplete='off'
 						required
-						{...register('base_url')}
+						{...register('baseURL')}
 					/>
 				</AutoLabel>
-				<AutoLabel label={t('provider.form.api_key')} valued>
+				<AutoLabel label={t('provider.form.apiKey')} valued>
 					<input
 						className={$cx(`
 							w-full h-full
@@ -121,9 +121,9 @@ const Index = (props: IPropsCustomForm) => {
 							outline-none
 							placeholder:text-soft
 						`)}
-						placeholder={t('provider.form.model_form.input') + t('provider.form.api_key')}
+						placeholder={t('provider.form.model_form.input') + t('provider.form.apiKey')}
 						autoComplete='off'
-						{...register('api_key')}
+						{...register('apiKey')}
 					/>
 				</AutoLabel>
 				<AutoLabel className='border-b-0' label={t('provider.form.custom.headers')} valued>

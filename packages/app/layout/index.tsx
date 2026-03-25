@@ -67,7 +67,7 @@ const Index = () => {
 					<div
 						className='
 							flex
-							w-full h-[calc(100%-48px)]
+							w-full h-[calc(100%-42px)]
 							px-2.5
 							pb-2.5
 						'

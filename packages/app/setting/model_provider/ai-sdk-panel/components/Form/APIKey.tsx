@@ -6,7 +6,7 @@ import styles from '../../index.module.css'
 import type { IPropsFormAPIKey } from '../../types'
 
 const Index = (props: IPropsFormAPIKey) => {
-	const { title, api_key, test, custom, onTest, register } = props
+	const { title, apiKey, test, custom, onTest, register } = props
 	const { loading, res } = test || {}
 
 	const Status = useMemo(() => {
@@ -16,7 +16,7 @@ const Index = (props: IPropsFormAPIKey) => {
 		return res ? <Check size={16} /> : <X size={15} />
 	}, [loading, res])
 
-	if (api_key === undefined) return null
+	if (apiKey === undefined) return null
 
 	return (
 		<div className='flex flex-col gap-2.5'>
@@ -53,7 +53,7 @@ const Index = (props: IPropsFormAPIKey) => {
 					)}
 					placeholder='sk-xxxxxx'
 					autoComplete='off'
-					{...register('api_key')}
+					{...register('apiKey')}
 				/>
 				{onTest && (
 					<span

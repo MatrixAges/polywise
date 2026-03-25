@@ -6,6 +6,7 @@ export { default as guard } from './guard'
 export { default as getHash } from './getHash'
 export { default as log } from './log'
 export { default as ensureWithValue } from './ensureWithValue'
+export { default as clearObject } from './clearObject'
 
 export * from './middleware'
 export * from './session'

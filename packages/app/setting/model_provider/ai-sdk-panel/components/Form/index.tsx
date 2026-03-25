@@ -38,7 +38,7 @@ const Index = (props: IPropsForm) => {
 	} = props
 	const { t } = useTranslation()
 
-	const { name, api_key, base_url } = provider
+	const { name, apiKey, baseURL } = provider
 
 	const [error, setError] = useState('')
 
@@ -179,8 +179,8 @@ const Index = (props: IPropsForm) => {
 						</div>
 					</div>
 				)}
-				<APIKey title={t('provider.form.api_key')} {...{ api_key, custom, test, onTest, register }} />
-				<BaseUrl title={t('provider.form.base_url')} {...{ base_url, custom, register }} />
+				<APIKey title={t('provider.form.apiKey')} {...{ apiKey, custom, test, onTest, register }} />
+				<BaseUrl title={t('provider.form.baseURL')} {...{ baseURL, custom, register }} />
 				<CustomFields custom_fields={(provider as SpecialProvider).custom_fields} register={register} />
 				<div className='flex flex-col gap-2.5'>
 					<div className='flex items-center justify-between'>

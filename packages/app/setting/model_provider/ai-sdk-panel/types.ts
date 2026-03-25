@@ -46,14 +46,14 @@ export interface IPropsForm {
 
 export interface IPropsFormAPIKey extends Pick<IPropsForm, 'test' | 'onTest'> {
 	title: string
-	api_key: IPropsForm['provider']['api_key']
+	apiKey: IPropsForm['provider']['apiKey']
 	custom?: boolean
 	register: UseFormRegister<IPropsForm['provider']>
 }
 
 export interface IPropsFormBaseUrl {
 	title: string
-	base_url: IPropsForm['provider']['base_url']
+	baseURL: IPropsForm['provider']['baseURL']
 	custom?: boolean
 	register: UseFormRegister<IPropsForm['provider']>
 }

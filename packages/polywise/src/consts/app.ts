@@ -3,6 +3,7 @@ import { resolve } from 'path'
 
 export const app_path = resolve(`${homedir()}/.polywise`)
 export const config_path = resolve(`${app_path}/config.json`)
+export const providers_path = resolve(`${app_path}/providers.json`)
 export const db_path = resolve(`${app_path}/db/app.db`)
 export const vec_path = resolve(`${app_path}/db/vec.db`)
 export const model_dir = resolve(`${app_path}/.models`)

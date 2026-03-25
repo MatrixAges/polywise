@@ -1,165 +1,145 @@
 {
-    "$id": "https://_.json",
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/Config",
-    "definitions": {
-        "Config": {
-            "type": "object",
-            "properties": {
-                "providers": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ConfigProvider"
-                    }
-                },
-                "custom_providers": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/Provider"
-                    }
-                }
-            },
-            "required": [
-                "providers"
-            ],
-            "additionalProperties": false
-        },
-        "ConfigProvider": {
-            "anyOf": [
-                {
-                    "$ref": "#/definitions/PresetProvider"
-                },
-                {
-                    "$ref": "#/definitions/SpecialProvider"
-                }
-            ]
-        },
-        "PresetProvider": {
-            "type": "object",
-            "properties": {
-                "name": {
-                    "type": "string"
-                },
-                "api_key": {
-                    "type": "string"
-                },
-                "enabled": {
-                    "type": "boolean"
-                },
-                "models": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/Model"
-                    }
-                },
-                "headers": {
-                    "type": "string"
-                },
-                "base_url": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "api_key",
-                "enabled",
-                "models",
-                "name"
-            ],
-            "additionalProperties": false
-        },
-        "Model": {
-            "type": "object",
-            "properties": {
-                "name": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "enabled": {
-                    "type": "boolean"
-                },
-                "fid": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "name",
-                "id",
-                "enabled"
-            ],
-            "additionalProperties": false
-        },
-        "SpecialProvider": {
-            "type": "object",
-            "properties": {
-                "api_key": {
-                    "type": "string"
-                },
-                "base_url": {
-                    "type": "string"
-                },
-                "models": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/Model"
-                    }
-                },
-                "headers": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "enabled": {
-                    "type": "boolean"
-                },
-                "custom_fields": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                }
-            },
-            "required": [
-                "name",
-                "enabled"
-            ],
-            "additionalProperties": false
-        },
-        "Provider": {
-            "type": "object",
-            "properties": {
-                "name": {
-                    "type": "string"
-                },
-                "api_key": {
-                    "type": "string"
-                },
-                "base_url": {
-                    "type": "string"
-                },
-                "enabled": {
-                    "type": "boolean"
-                },
-                "models": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/Model"
-                    }
-                },
-                "headers": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "name",
-                "api_key",
-                "base_url",
-                "enabled",
-                "models"
-            ],
-            "additionalProperties": false
-        }
-    }
+	"$id": "https://_.json",
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"$ref": "#/definitions/Config",
+	"definitions": {
+		"Config": {
+			"type": "object",
+			"properties": {
+				"providers": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/ConfigProvider"
+					}
+				},
+				"custom_providers": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/Provider"
+					}
+				}
+			},
+			"required": ["providers"],
+			"additionalProperties": false
+		},
+		"ConfigProvider": {
+			"anyOf": [
+				{
+					"$ref": "#/definitions/PresetProvider"
+				},
+				{
+					"$ref": "#/definitions/SpecialProvider"
+				}
+			]
+		},
+		"PresetProvider": {
+			"type": "object",
+			"properties": {
+				"name": {
+					"type": "string"
+				},
+				"apiKey": {
+					"type": "string"
+				},
+				"enabled": {
+					"type": "boolean"
+				},
+				"models": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/Model"
+					}
+				},
+				"headers": {
+					"type": "string"
+				},
+				"baseURL": {
+					"type": "string"
+				}
+			},
+			"required": ["apiKey", "enabled", "models", "name"],
+			"additionalProperties": false
+		},
+		"Model": {
+			"type": "object",
+			"properties": {
+				"name": {
+					"type": "string"
+				},
+				"id": {
+					"type": "string"
+				},
+				"enabled": {
+					"type": "boolean"
+				},
+				"fid": {
+					"type": "string"
+				}
+			},
+			"required": ["name", "id", "enabled"],
+			"additionalProperties": false
+		},
+		"SpecialProvider": {
+			"type": "object",
+			"properties": {
+				"apiKey": {
+					"type": "string"
+				},
+				"baseURL": {
+					"type": "string"
+				},
+				"models": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/Model"
+					}
+				},
+				"headers": {
+					"type": "string"
+				},
+				"name": {
+					"type": "string"
+				},
+				"enabled": {
+					"type": "boolean"
+				},
+				"custom_fields": {
+					"type": "object",
+					"additionalProperties": {
+						"type": "string"
+					}
+				}
+			},
+			"required": ["name", "enabled"],
+			"additionalProperties": false
+		},
+		"Provider": {
+			"type": "object",
+			"properties": {
+				"name": {
+					"type": "string"
+				},
+				"apiKey": {
+					"type": "string"
+				},
+				"baseURL": {
+					"type": "string"
+				},
+				"enabled": {
+					"type": "boolean"
+				},
+				"models": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/Model"
+					}
+				},
+				"headers": {
+					"type": "string"
+				}
+			},
+			"required": ["name", "apiKey", "baseURL", "enabled", "models"],
+			"additionalProperties": false
+		}
+	}
 }

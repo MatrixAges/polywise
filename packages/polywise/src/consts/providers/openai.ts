@@ -3,7 +3,7 @@ import type { PresetProvider } from '@core/types'
 export default {
 	name: 'openai',
 	enabled: true,
-	api_key: '',
+	apiKey: '',
 	models: [
 		{
 			enabled: true,

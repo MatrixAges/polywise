@@ -3,7 +3,7 @@ import type { PresetProvider } from '@core/types'
 export default {
 	name: 'volcengine',
 	enabled: true,
-	api_key: '',
-	base_url: 'https://ark.cn-beijing.volces.com/api/v3/',
+	apiKey: '',
+	baseURL: 'https://ark.cn-beijing.volces.com/api/v3/',
 	models: []
 } as PresetProvider

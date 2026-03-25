@@ -3,9 +3,9 @@ import styles from '../../index.module.css'
 import type { IPropsFormBaseUrl } from '../../types'
 
 const Index = (props: IPropsFormBaseUrl) => {
-	const { title, base_url, custom, register } = props
+	const { title, baseURL, custom, register } = props
 
-	if (base_url === undefined) return null
+	if (baseURL === undefined) return null
 
 	return (
 		<div className='flex flex-col gap-2.5'>
@@ -21,7 +21,7 @@ const Index = (props: IPropsFormBaseUrl) => {
 					custom ? 'h-9 px-3!' : 'h-13'
 				)}
 				autoComplete='off'
-				{...register('base_url')}
+				{...register('baseURL')}
 			/>
 		</div>
 	)

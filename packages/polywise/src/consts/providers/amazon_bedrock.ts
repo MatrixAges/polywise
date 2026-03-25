@@ -3,7 +3,7 @@ import type { SpecialProvider } from '@core/types'
 export default {
 	name: 'amazon_bedrock',
 	enabled: true,
-	api_key: '',
+	apiKey: '',
 	custom_fields: { region: 'us-east-1', accessKeyId: '', secretAccessKey: '', sessionToken: '' },
 	models: [
 		{

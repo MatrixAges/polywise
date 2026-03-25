@@ -18,8 +18,8 @@ export interface ProviderConfig {
 
 export interface Provider {
 	name: string
-	api_key: string
-	base_url: string
+	apiKey: string
+	baseURL: string
 	enabled: boolean
 	models: Array<Model>
 	headers?: string
@@ -33,9 +33,9 @@ export interface Model {
 	fid?: string
 }
 
-export interface PresetProvider extends Omit<Provider, 'base_url'> {
-	api_key: string
-	base_url?: string
+export interface PresetProvider extends Omit<Provider, 'baseURL'> {
+	apiKey: string
+	baseURL?: string
 }
 
 export interface SpecialProvider extends Partial<Omit<Provider, 'name' | 'enabled'>> {

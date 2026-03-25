@@ -34,8 +34,8 @@ export default {
 		upload_error: '[Upload error]: please check config format.'
 	},
 	form: {
-		api_key: 'API Key',
-		base_url: 'Base URL',
+		apiKey: 'API Key',
+		baseURL: 'Base URL',
 		models: 'Models',
 		actions: 'Actions',
 		add_model: 'Add Model',

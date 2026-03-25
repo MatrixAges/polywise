@@ -3,7 +3,7 @@ import type { SpecialProvider } from '@core/types'
 export default {
 	name: 'azure_openai',
 	enabled: true,
-	api_key: '',
+	apiKey: '',
 	custom_fields: {
 		api_version: '2024-10-01-preview',
 		resourceName: ''

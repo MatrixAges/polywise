@@ -1,9 +1,6 @@
-import { EventEmitter } from 'events'
-
-import type { AppConfig } from '@core/types'
+import type { AppConfig, ProviderConfig } from '@core/types'
 
 export const config = {} as AppConfig
-export const config_emitter = new EventEmitter()
+export const providers = {} as ProviderConfig
 
-export { default as saveConfig } from './saveConfig'
 export { default as initConfig, config_watcher } from './initConfig'

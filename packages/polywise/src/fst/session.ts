@@ -1,4 +1,4 @@
-import { config } from '@core/config'
+import { config, providers } from '@core/config'
 import { agent, message, session, session_agent } from '@core/db/schema'
 import { env } from '@core/env'
 import { convertToModelMessages, smoothStream, streamText } from 'ai'
@@ -78,6 +78,9 @@ export default class Index {
 	async getModel() {
 		const { provider, model, options } = this.session.model
 
+		const all_providers = [...providers.providers, ...(providers.custom_providers || [])]
+		const target_provider = all_providers.find(item => item.name === provider)
+
 		this.model = await getModel(provider, model, options)
 	}
 
@@ -124,13 +127,7 @@ export default class Index {
 			abortSignal: this.abort_controller.signal,
 			experimental_transform: smoothStream(),
 			onAbort: this.onStop.bind(this),
-			onError: err => {
-				this.onStop.bind(this)
-
-				const message = (err.error as Error).message
-
-				this.event.emit(`${this.id}/change`, { type: 'error', message } as ChatEventRes)
-			}
+			onError: this.onStop.bind(this)
 		})
 
 		let reasoning_start = 0

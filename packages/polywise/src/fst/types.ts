@@ -17,5 +17,4 @@ export interface MessageMetadata {
 
 export type ChatEventRes =
 	| { type: 'init'; data: { session: Session; messages: Array<Message> } }
-	| { type: 'error'; message: string }
 	| { type: 'sync'; session: Session }
