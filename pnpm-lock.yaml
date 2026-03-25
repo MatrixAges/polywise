@@ -823,6 +823,9 @@ importers:
       watchpack:
         specifier: 'catalog:'
         version: 2.5.1
+      ws:
+        specifier: ^8.20.0
+        version: 8.20.0
       zhipu-ai-provider:
         specifier: ^0.2.2
         version: 0.2.2(zod@4.3.6)
@@ -863,6 +866,9 @@ importers:
       '@types/watchpack':
         specifier: 'catalog:'
         version: 2.4.5
+      '@types/ws':
+        specifier: ^8.18.1
+        version: 8.18.1
       bun:
         specifier: 'catalog:'
         version: 1.3.11
@@ -3621,6 +3627,9 @@ packages:
   '@types/workerpool@9.0.0':
     resolution: {integrity: sha512-gEiZU7P4NzkhqcSwHlSx1CddtzzEjFD/uWegp2tV5DXQABOE4qlH4H8ptCm/S5DDvCViqFj7yMrN3yMBh1pkQg==}
     deprecated: This is a stub types definition. workerpool provides its own type definitions, so you do not need this installed.
+
+  '@types/ws@8.18.1':
+    resolution: {integrity: sha512-ThVF6DCVhA8kUGy+aazFQ4kXQ7E1Ty7A3ypFOe0IcJV8O/M511G99AW24irKrW56Wt44yG9+ij8FaqoBGkuBXg==}
 
   '@types/yauzl@2.10.3':
     resolution: {integrity: sha512-oJoftv0LSuaDZE3Le4DbKX+KS9G36NzOeSap90UIK0yMA/NhKJhqlSGtNDORNRaIbQfzjXDrQa0ytJ6mNRGz/Q==}
@@ -7817,6 +7826,18 @@ packages:
   wrappy@1.0.2:
     resolution: {integrity: sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==}
 
+  ws@8.20.0:
+    resolution: {integrity: sha512-sAt8BhgNbzCtgGbt2OxmpuryO63ZoDk/sqaB/znQm94T4fCEsy/yV+7CdC1kJhOU9lboAEU7R3kquuycDoibVA==}
+    engines: {node: '>=10.0.0'}
+    peerDependencies:
+      bufferutil: ^4.0.1
+      utf-8-validate: '>=5.0.2'
+    peerDependenciesMeta:
+      bufferutil:
+        optional: true
+      utf-8-validate:
+        optional: true
+
   wsl-utils@0.1.0:
     resolution: {integrity: sha512-h3Fbisa2nKGPxCpm89Hk33lBLsnaGBvctQopaBSOW/uIs6FTe1ATyAnKFJrzVs9vpGdsTe73WF3V4lIsk4Gacw==}
     engines: {node: '>=18'}
@@ -10503,6 +10524,10 @@ snapshots:
   '@types/workerpool@9.0.0':
     dependencies:
       workerpool: 10.0.1
+
+  '@types/ws@8.18.1':
+    dependencies:
+      '@types/node': 25.5.0
 
   '@types/yauzl@2.10.3':
     dependencies:
@@ -15075,6 +15100,8 @@ snapshots:
       strip-ansi: 7.2.0
 
   wrappy@1.0.2: {}
+
+  ws@8.20.0: {}
 
   wsl-utils@0.1.0:
     dependencies:
