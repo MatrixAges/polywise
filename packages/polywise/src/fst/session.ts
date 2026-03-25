@@ -115,13 +115,22 @@ export default class Index {
 
 		const target = await convertToModelMessages(messages)
 
+		console.log('--------')
+		console.log(JSON.stringify(target))
+
 		const res = streamText({
 			model: this.model,
 			messages: target,
 			abortSignal: this.abort_controller.signal,
 			experimental_transform: smoothStream(),
 			onAbort: this.onStop.bind(this),
-			onError: this.onStop.bind(this)
+			onError: err => {
+				this.onStop.bind(this)
+
+				const message = (err.error as Error).message
+
+				this.event.emit(`${this.id}/change`, { type: 'error', message } as ChatEventRes)
+			}
 		})
 
 		let reasoning_start = 0
@@ -169,7 +178,7 @@ export default class Index {
 	private async setRunning(v: boolean) {
 		this.session.is_runing = v
 
-		this.event.emit(`${this.id}/CHANGE`, { type: 'sync', session: this.session } as ChatEventRes)
+		this.event.emit(`${this.id}/change`, { type: 'sync', session: this.session } as ChatEventRes)
 
 		await this.updateSession({ is_runing: v })
 	}

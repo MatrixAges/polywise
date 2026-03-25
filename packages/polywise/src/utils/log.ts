@@ -21,7 +21,7 @@ const stage_map: Record<string, Ansis> = {
 	TASK_QUEUE: cyanBright
 }
 
-const disabled = false
+const disabled = true
 const enable_console = true
 const enable_file = true
 const allowed_stages: Array<LogStage> = [

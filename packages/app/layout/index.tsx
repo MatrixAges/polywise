@@ -10,6 +10,7 @@ import { local } from 'stk/storage'
 import { container } from 'tsyringe'
 
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/__shadcn__/components/ui/resizable'
+import { Toaster } from '@/__shadcn__/components/ui/sonner'
 import { PANEL_COLLAPSE_THRESHOLD, PANEL_WIDTH_DEFAULT } from '@/appdata'
 import { Fallback } from '@/components'
 import { GlobalModel, GlobalProvider } from '@/context'
@@ -52,6 +53,7 @@ const Index = () => {
 	return (
 		<LucideProvider size={14} strokeWidth={2}>
 			<GlobalProvider value={global}>
+				<Toaster position='top-center' toastOptions={{ duration: 3000 }} closeButton></Toaster>
 				<Alert></Alert>
 				<div
 					className='

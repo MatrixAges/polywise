@@ -63,7 +63,7 @@ const Index = () => {
 				</DropdownMenu>
 			</div>
 			<div className='flex flex-1 overflow-y-scroll'>
-				<div className='flex w-full px-2.5 pb-12'>
+				<div className='flex w-full'>
 					{panel_tabs.map(({ key }) => {
 						return (
 							<Activity mode={key === x.active_tab ? 'visible' : 'hidden'} key={key}>

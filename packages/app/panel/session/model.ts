@@ -1,8 +1,8 @@
 import { DefaultChatTransport } from 'ai'
 import { makeAutoObservable } from 'mobx'
 import { toast } from 'sonner'
+import { getId } from 'stk/utils'
 import { injectable } from 'tsyringe'
-import { v4 as uuidv4 } from 'uuid'
 
 import { server_sys_session_url } from '@/appdata'
 import { Util } from '@/models/common'
@@ -52,12 +52,12 @@ export default class Index {
 				id: this.id,
 				throttle: 60,
 				transport: new DefaultChatTransport({
-					api: server_sys_session_url + '/session',
+					api: server_sys_session_url,
 					prepareReconnectToStreamRequest: () => ({
 						api: `${server_sys_session_url}?id=${this.id}`
 					})
 				}),
-				generateId: uuidv4
+				generateId: getId
 			})
 		}
 
@@ -73,11 +73,8 @@ export default class Index {
 						case 'init':
 							const { session, messages } = res.data
 
-							console.log(res)
-
 							this.session = session as Session
 							this.chat.setMessages(messages as unknown as Array<Message>)
-
 							break
 					}
 				}
@@ -117,7 +114,7 @@ export default class Index {
 		}, 30)
 
 		const off_error = this.chat['~registerErrorCallback'](() => {
-			if (this.chat.error?.message) toast.error(this.chat.error.message)
+			if (this.chat.error?.message) toast.error(this.chat.error.message, { duration: 1000000 })
 		})
 
 		this.util.acts.push(off_status, off_messages, off_error)
