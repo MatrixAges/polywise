@@ -1,13 +1,15 @@
+import to from 'await-to-js'
 import { makeAutoObservable } from 'mobx'
 import { singleton } from 'tsyringe'
 
 import { Locale, Setting, Theme } from '@/models'
 import { Util } from '@/models/common'
-import { ipc, is_electron } from '@/utils'
+import { api, ipc, is_electron } from '@/utils'
 
 @singleton()
 export default class GlobalModel {
 	ready = false
+	disconnected = false
 
 	constructor(
 		public util: Util,
@@ -26,6 +28,8 @@ export default class GlobalModel {
 		this.ready = true
 
 		if (is_electron) this.onElectronMain()
+
+		this.onHeartBeat()
 	}
 
 	onElectronMain() {
@@ -34,6 +38,18 @@ export default class GlobalModel {
 		})
 
 		this.util.acts.push(deinit.unsubscribe)
+	}
+
+	onHeartBeat() {
+		setInterval(async () => {
+			const [err, res] = await to(api.heartbeat.$get())
+
+			if (err || !res.ok) return (this.disconnected = true)
+
+			const data = await res.json()
+
+			this.disconnected = data.status !== 'ok'
+		}, 6000)
 	}
 
 	deinit() {

@@ -275,6 +275,9 @@ importers:
       es-toolkit:
         specifier: 'catalog:'
         version: 1.45.1
+      hono:
+        specifier: 'catalog:'
+        version: 4.12.9
       hotkeys-js:
         specifier: ^4.0.2
         version: 4.0.2
@@ -595,37 +598,6 @@ importers:
       electron:
         specifier: 'catalog:'
         version: 41.0.3
-
-  packages/opencode:
-    dependencies:
-      '@opencode-ai/plugin':
-        specifier: ^1.3.0
-        version: 1.3.0
-      '@opencode-ai/sdk':
-        specifier: ^1.3.0
-        version: 1.3.0
-      await-to-js:
-        specifier: 'catalog:'
-        version: 3.0.0
-      polywise:
-        specifier: workspace:*
-        version: link:../polywise
-      reflect-metadata:
-        specifier: 'catalog:'
-        version: 0.2.2
-      tsyringe:
-        specifier: 'catalog:'
-        version: 4.10.0
-    devDependencies:
-      '@rslib/core':
-        specifier: 'catalog:'
-        version: 0.20.0(typescript@5.9.3)
-      deepmerge-ts:
-        specifier: 'catalog:'
-        version: 7.1.5
-      typescript:
-        specifier: 'catalog:'
-        version: 5.9.3
 
   packages/polywise:
     dependencies:
@@ -2479,12 +2451,6 @@ packages:
   '@npmcli/run-script@10.0.4':
     resolution: {integrity: sha512-mGUWr1uMnf0le2TwfOZY4SFxZGXGfm4Jtay/nwAa2FLNAKXUoUwaGwBMNH36UHPtinWfTSJ3nqFQr0091CxVGg==}
     engines: {node: ^20.17.0 || >=22.9.0}
-
-  '@opencode-ai/plugin@1.3.0':
-    resolution: {integrity: sha512-mR1Kdcpr3Iv+KS7cL2DRFB6QAcSoR6/DojmwuxYF/pMCahMtaCLiqZGQjoSNl12+gQ6RsIJJyUh/jX3JVlOx8A==}
-
-  '@opencode-ai/sdk@1.3.0':
-    resolution: {integrity: sha512-5WyYEpcV6Zk9otXOMIrvZRbJm1yxt/c8EXSBn1p6Sw1yagz8HRljkoUTJFxzD0x2+/6vAZItr3OrXDZfE+oA2g==}
 
   '@openrouter/ai-sdk-provider@2.3.3':
     resolution: {integrity: sha512-4fVteGkVedc7fGoA9+qJs4tpYwALezMq14m2Sjub3KmyRlksCbK+WJf67NPdGem8+NZrV2tAN42A1NU3+SiV3w==}
@@ -7919,9 +7885,6 @@ packages:
   zod@3.25.76:
     resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
 
-  zod@4.1.8:
-    resolution: {integrity: sha512-5R1P+WwQqmmMIEACyzSvo4JXHY5WiAFHRMg+zBZKgKS+Q1viRa0C1hmUKtHltoIFKtIdki3pRxkmpP74jnNYHQ==}
-
   zod@4.3.6:
     resolution: {integrity: sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==}
 
@@ -9453,13 +9416,6 @@ snapshots:
       proc-log: 6.1.0
     transitivePeerDependencies:
       - supports-color
-
-  '@opencode-ai/plugin@1.3.0':
-    dependencies:
-      '@opencode-ai/sdk': 1.3.0
-      zod: 4.1.8
-
-  '@opencode-ai/sdk@1.3.0': {}
 
   '@openrouter/ai-sdk-provider@2.3.3(ai@6.0.134(zod@4.3.6))(zod@4.3.6)':
     dependencies:
@@ -15175,8 +15131,6 @@ snapshots:
       zod: 3.25.76
 
   zod@3.25.76: {}
-
-  zod@4.1.8: {}
 
   zod@4.3.6: {}
 

@@ -1,9 +1,10 @@
 import { Hono } from 'hono'
 
+import heartbeat from './heartbeat'
 import * as session from './session'
-import test from './test'
 
-export default new Hono()
-	.get('/test', test.validator, test.handler)
-	.get('/session', session.get)
-	.post('/session', session.post)
+const api = new Hono().get('/heartbeat', heartbeat).get('/session', session.get).post('/session', session.post)
+
+export type Api = typeof api
+
+export default api

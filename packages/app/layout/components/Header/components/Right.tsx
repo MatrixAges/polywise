@@ -4,7 +4,7 @@ import { NavLink } from 'react-router'
 import type { IPropsRight } from '../types'
 
 const Index = (props: IPropsRight) => {
-	const { togglePanel } = props
+	const { disconnected, togglePanel } = props
 
 	return (
 		<div
@@ -23,7 +23,12 @@ const Index = (props: IPropsRight) => {
 					icon_button
 				'
 			>
-				<span className='h-1.5 w-1.5 rounded-full bg-green-500/72'></span>
+				<span
+					className={$cx(
+						'h-1.5 w-1.5 rounded-full',
+						disconnected ? 'bg-red-400' : 'bg-green-500/72'
+					)}
+				></span>
 				<span>Status</span>
 			</div>
 			<NavLink to='/setting'>

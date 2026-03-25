@@ -34,6 +34,7 @@ const Index = () => {
 	}, [])
 
 	const props_header: IPropsHeader = {
+		disconnected: global.disconnected,
 		toggleSidebar: s.toggleSidebar,
 		togglePanel: s.togglePanel
 	}
