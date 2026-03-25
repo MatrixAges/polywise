@@ -1,14 +1,9 @@
 import type { PresetProvider } from '@core/types'
 
 export default {
-	name: '__template__',
+	name: 'openai_compatible',
 	enabled: true,
 	apiKey: '',
-	models: [
-		{
-			enabled: true,
-			id: '',
-			name: ''
-		}
-	]
+	baseURL: '',
+	models: []
 } as PresetProvider

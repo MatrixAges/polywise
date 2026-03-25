@@ -6,9 +6,9 @@ export const getModel = async (provider: string, model: string, options?: any): 
 			return (await import('a2a-ai-provider')).a2a(model)
 		case 'acp':
 			return (await import('@mcpc-tech/acp-ai-provider')).createACPProvider(options).languageModel()
-		case 'open-responses':
+		case 'open_responses':
 			return (await import('@ai-sdk/open-responses')).createOpenResponses(options)(model)
-		case 'open-compatible':
+		case 'open_compatible':
 			return (await import('@ai-sdk/openai-compatible')).createOpenAICompatible(options)(model)
 		case 'openai':
 			return (await import('@ai-sdk/openai')).createOpenAI(options)(model)
@@ -46,10 +46,12 @@ export const getModel = async (provider: string, model: string, options?: any): 
 			return (await import('@ai-sdk/cerebras')).createCerebras(options)(model)
 		case 'vercel':
 			return (await import('@ai-sdk/vercel')).createVercel(options)(model)
-		case 'alibaba':
-			return (await import('@ai-sdk/alibaba')).createAlibaba(options)(model)
-		case 'huggingface':
-			return (await import('@ai-sdk/huggingface')).createHuggingFace(options)(model)
+		case 'fireworks':
+			return (await import('@ai-sdk/fireworks')).createFireworks(options)(model)
+		case 'ollama':
+			return (await import('ai-sdk-ollama')).createOllama(options)(model)
+		case 'openrouter':
+			return (await import('@openrouter/ai-sdk-provider')).createOpenRouter(options)(model)
 		default:
 			throw new Error(`Unsupported provider: ${provider}`)
 	}

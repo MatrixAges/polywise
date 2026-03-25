@@ -21,12 +21,24 @@ catalogs:
     '@hono/trpc-server':
       specifier: ^0.4.2
       version: 0.4.2
+    '@rsbuild/core':
+      specifier: 2.0.0-beta.9
+      version: 2.0.0-beta.9
+    '@rsbuild/plugin-react':
+      specifier: 1.4.6
+      version: 1.4.6
     '@rslib/core':
       specifier: 0.20.0
       version: 0.20.0
     '@rstest/core':
       specifier: ^0.9.4
       version: 0.9.4
+    '@swc/helpers':
+      specifier: ^0.5.19
+      version: 0.5.19
+    '@trpc/client':
+      specifier: ^11.15.0
+      version: 11.15.0
     '@trpc/server':
       specifier: ^11.15.0
       version: 11.15.0
@@ -36,12 +48,21 @@ catalogs:
     '@types/node':
       specifier: 25.5.0
       version: 25.5.0
+    '@types/react':
+      specifier: 19.2.14
+      version: 19.2.14
+    '@types/react-dom':
+      specifier: 19.2.3
+      version: 19.2.3
     '@types/uuid':
       specifier: 11.0.0
       version: 11.0.0
     '@types/watchpack':
       specifier: ^2.4.5
       version: 2.4.5
+    ahooks:
+      specifier: ^3.9.6
+      version: 3.9.6
     ai:
       specifier: ^6.0.134
       version: 6.0.134
@@ -57,6 +78,9 @@ catalogs:
     bun-types:
       specifier: 1.3.11
       version: 1.3.11
+    clsx:
+      specifier: ^2.1.1
+      version: 2.1.1
     cross-env:
       specifier: ^10.1.0
       version: 10.1.0
@@ -69,6 +93,12 @@ catalogs:
     delay-cli:
       specifier: ^3.0.0
       version: 3.0.0
+    electron:
+      specifier: ^41.0.3
+      version: 41.0.3
+    electron-conf:
+      specifier: ^1.3.0
+      version: 1.3.0
     es-toolkit:
       specifier: 1.45.1
       version: 1.45.1
@@ -81,12 +111,33 @@ catalogs:
     hono:
       specifier: ^4.12.9
       version: 4.12.9
+    i18next:
+      specifier: 25.10.5
+      version: 25.10.5
+    mobx:
+      specifier: ^6.15.0
+      version: 6.15.0
     ofetch:
       specifier: 1.5.1
       version: 1.5.1
+    react:
+      specifier: 19.2.4
+      version: 19.2.4
+    react-dom:
+      specifier: 19.2.4
+      version: 19.2.4
+    react-i18next:
+      specifier: 16.6.2
+      version: 16.6.2
     reflect-metadata:
       specifier: ^0.2.2
       version: 0.2.2
+    shiki:
+      specifier: 4.0.2
+      version: 4.0.2
+    tinyglobby:
+      specifier: ^0.2.15
+      version: 0.2.15
     tslib:
       specifier: ^2.8.1
       version: 2.8.1
@@ -96,6 +147,9 @@ catalogs:
     type-fest:
       specifier: ^5.5.0
       version: 5.5.0
+    typescript:
+      specifier: ^5.9.3
+      version: 5.9.3
     uuid:
       specifier: 13.0.0
       version: 13.0.0
@@ -578,9 +632,6 @@ importers:
       '@abraham/reflection':
         specifier: 'catalog:'
         version: 0.13.0
-      '@ai-sdk/alibaba':
-        specifier: ^1.0.13
-        version: 1.0.13(zod@4.3.6)
       '@ai-sdk/amazon-bedrock':
         specifier: ^4.0.82
         version: 4.0.82(zod@4.3.6)
@@ -602,15 +653,15 @@ importers:
       '@ai-sdk/deepseek':
         specifier: ^2.0.26
         version: 2.0.26(zod@4.3.6)
+      '@ai-sdk/fireworks':
+        specifier: ^2.0.42
+        version: 2.0.42(zod@4.3.6)
       '@ai-sdk/google':
         specifier: ^3.0.52
         version: 3.0.52(zod@4.3.6)
       '@ai-sdk/groq':
         specifier: ^3.0.31
         version: 3.0.31(zod@4.3.6)
-      '@ai-sdk/huggingface':
-        specifier: ^1.0.39
-        version: 1.0.39(zod@4.3.6)
       '@ai-sdk/mcp':
         specifier: ^1.0.30
         version: 1.0.30(zod@4.3.6)
@@ -671,6 +722,9 @@ importers:
       '@node-rs/xxhash':
         specifier: ^1.7.6
         version: 1.7.6
+      '@openrouter/ai-sdk-provider':
+        specifier: ^2.3.3
+        version: 2.3.3(ai@6.0.134(zod@4.3.6))(zod@4.3.6)
       '@trpc/server':
         specifier: 'catalog:'
         version: 11.15.0(typescript@5.9.3)
@@ -680,6 +734,9 @@ importers:
       ai:
         specifier: 'catalog:'
         version: 6.0.134(zod@4.3.6)
+      ai-sdk-ollama:
+        specifier: ^3.8.2
+        version: 3.8.2(ai@6.0.134(zod@4.3.6))(zod@4.3.6)
       ansis:
         specifier: 'catalog:'
         version: 4.2.0
@@ -969,12 +1026,6 @@ packages:
     peerDependencies:
       zod: ^3.25.0 || ^4.0.0
 
-  '@ai-sdk/alibaba@1.0.13':
-    resolution: {integrity: sha512-L6TxDthd8fa0msQCAFIvV8TX7aBF8SJCSYSivo8mVf7Zl2axsFr8Ad1dfyXmCyoK64UJbsqOzLXgJqkHUQWMsA==}
-    engines: {node: '>=18'}
-    peerDependencies:
-      zod: ^3.25.76 || ^4.1.8
-
   '@ai-sdk/amazon-bedrock@4.0.82':
     resolution: {integrity: sha512-pvXyXy62xt7Auiv2f8dGuTPqSxUaRZ3Pxpe6VtyUvj+zm2T5GWToXMn1xySAwZzhK7r1kAA9fzxamNKCy7Y3/Q==}
     engines: {node: '>=18'}
@@ -1023,6 +1074,12 @@ packages:
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
+  '@ai-sdk/fireworks@2.0.42':
+    resolution: {integrity: sha512-AF8UxWqLRxpgAmlKs++v9WdjfnaPs5P+Vce2HUpDimX4eoA/t28fC6fihyFyh7AC5zb8IcxmhR9xQ7DVtmUT+A==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
+
   '@ai-sdk/gateway@3.0.77':
     resolution: {integrity: sha512-UdwIG2H2YMuntJQ5L+EmED5XiwnlvDT3HOmKfVFxR4Nq/RSLFA/HcchhwfNXHZ5UJjyuL2VO0huLbWSZ9ijemQ==}
     engines: {node: '>=18'}
@@ -1040,12 +1097,6 @@ packages:
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
-
-  '@ai-sdk/huggingface@1.0.39':
-    resolution: {integrity: sha512-QRhQfR2OEjPD7tHYAuOVVBoS6nYM/zayEF9/dP2Ow0UqsuZPCT7QcZ/cG9bBUnE0x5ol28a3h1hQIzfIUs+k3A==}
-    engines: {node: '>=18'}
-    peerDependencies:
-      zod: ^3.25.76 || ^4
 
   '@ai-sdk/mcp@1.0.30':
     resolution: {integrity: sha512-QTpRa5kmMpKGbhaOgCULxIVykBlDoAe14bynSfx7oQYxGfINapixDyrTr40TwWU71VfGLWVdEJBkfMyKeTbQtw==}
@@ -2435,6 +2486,13 @@ packages:
   '@opencode-ai/sdk@1.3.0':
     resolution: {integrity: sha512-5WyYEpcV6Zk9otXOMIrvZRbJm1yxt/c8EXSBn1p6Sw1yagz8HRljkoUTJFxzD0x2+/6vAZItr3OrXDZfE+oA2g==}
 
+  '@openrouter/ai-sdk-provider@2.3.3':
+    resolution: {integrity: sha512-4fVteGkVedc7fGoA9+qJs4tpYwALezMq14m2Sjub3KmyRlksCbK+WJf67NPdGem8+NZrV2tAN42A1NU3+SiV3w==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      ai: ^6.0.0
+      zod: ^3.25.0 || ^4.0.0
+
   '@opentelemetry/api@1.9.0':
     resolution: {integrity: sha512-3giAOQvZiH5F9bMlMiv8+GSPMeqg0dbaeo58/0SlA9sxSqZhnUtxzX9/2FzyhS9sWQf5S0GJE0AKBrFqjpeYcg==}
     engines: {node: '>=8.0.0'}
@@ -3670,6 +3728,12 @@ packages:
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+
+  ai-sdk-ollama@3.8.2:
+    resolution: {integrity: sha512-0k9tLeXLhGahsjNOOBZ07KccffeZNx4gIeutuccjRT8YxxEtnIoVF/ECdgoyaPm8be6WCLDkVnmtSJmkdWHHZA==}
+    engines: {node: '>=22'}
+    peerDependencies:
+      ai: ^6.0.137
 
   ai@6.0.134:
     resolution: {integrity: sha512-YalNEaavld/kE444gOcsMKXdVVRGEe0SK77fAFcWYcqLg+a7xKnEet8bdfrEAJTfnMjj01rhgrIL10903w1a5Q==}
@@ -5535,6 +5599,10 @@ packages:
     resolution: {integrity: sha512-POQXvpdL69+CluYsillJ7SUhKvytYjW9vG/GKpnf+xP8UWgYEM/RaMzHHofbALDiKbbP1W8UEYmgGl39WkPZsg==}
     engines: {'0': node >= 0.2.0}
 
+  jsonrepair@3.13.3:
+    resolution: {integrity: sha512-BTznj0owIt2CBAH/LTo7+1I5pMvl1e1033LRl/HUowlZmJOIhzC0zbX5bxMngLkfT4WnzPP26QnW5wMr2g9tsQ==}
+    hasBin: true
+
   jsonschema@1.5.0:
     resolution: {integrity: sha512-K+A9hhqbn0f3pJX17Q/7H6yQfD/5OXgdrR5UE12gMXCiN9D5Xq2o5mddV2QEcX/bjla99ASsAAQUyMCCRWAEhw==}
 
@@ -6324,6 +6392,9 @@ packages:
 
   ofetch@1.5.1:
     resolution: {integrity: sha512-2W4oUZlVaqAPAil6FUg/difl6YhqhUR7x2eZY4bQCko22UXg3hptq9KLQdqFClV+Wu85UX7hNtdGTngi/1BxcA==}
+
+  ollama@0.6.3:
+    resolution: {integrity: sha512-KEWEhIqE5wtfzEIZbDCLH51VFZ6Z3ZSa6sIOg/E/tBV8S51flyqBOXi+bRxlOYKDf8i327zG9eSTb8IJxvm3Zg==}
 
   on-finished@2.4.1:
     resolution: {integrity: sha512-oVlzkg3ENAhCk2zdv7IJwd/QUD4z2RxRwpkcGY8psCVcCYZNq4wYnVWALHM+brtuJjePWiYF/ClmuDr8Ch5+kg==}
@@ -7733,6 +7804,9 @@ packages:
     resolution: {integrity: sha512-VwddBukDzu71offAQR975unBIGqfKZpM+8ZX6ySk8nYhVoo5CYaZyzt3YBvYtRtO+aoGlqxPg/B87NGVZ/fu6g==}
     engines: {node: '>=12'}
 
+  whatwg-fetch@3.6.20:
+    resolution: {integrity: sha512-EqhiFU6daOA8kpjOWTL0olhVOF3i7OrFzSYiGsEMB8GcXS+RrzauAERX65xMeNWVqxA6HXH2m69Z9LaKKdisfg==}
+
   whatwg-url@14.2.0:
     resolution: {integrity: sha512-De72GdQZzNTUBBChsXueQUnPKDkg/5A5zp7pFDuQAj5UFoENpiACU0wlCvzpAGnTkj++ihpKwKyYewn/XNUbKw==}
     engines: {node: '>=18'}
@@ -7913,13 +7987,6 @@ snapshots:
     dependencies:
       zod: 3.25.76
 
-  '@ai-sdk/alibaba@1.0.13(zod@4.3.6)':
-    dependencies:
-      '@ai-sdk/openai-compatible': 2.0.37(zod@4.3.6)
-      '@ai-sdk/provider': 3.0.8
-      '@ai-sdk/provider-utils': 4.0.21(zod@4.3.6)
-      zod: 4.3.6
-
   '@ai-sdk/amazon-bedrock@4.0.82(zod@4.3.6)':
     dependencies:
       '@ai-sdk/anthropic': 3.0.63(zod@4.3.6)
@@ -7975,6 +8042,13 @@ snapshots:
       '@ai-sdk/provider-utils': 4.0.21(zod@4.3.6)
       zod: 4.3.6
 
+  '@ai-sdk/fireworks@2.0.42(zod@4.3.6)':
+    dependencies:
+      '@ai-sdk/openai-compatible': 2.0.37(zod@4.3.6)
+      '@ai-sdk/provider': 3.0.8
+      '@ai-sdk/provider-utils': 4.0.21(zod@4.3.6)
+      zod: 4.3.6
+
   '@ai-sdk/gateway@3.0.77(zod@3.25.76)':
     dependencies:
       '@ai-sdk/provider': 3.0.8
@@ -7997,13 +8071,6 @@ snapshots:
 
   '@ai-sdk/groq@3.0.31(zod@4.3.6)':
     dependencies:
-      '@ai-sdk/provider': 3.0.8
-      '@ai-sdk/provider-utils': 4.0.21(zod@4.3.6)
-      zod: 4.3.6
-
-  '@ai-sdk/huggingface@1.0.39(zod@4.3.6)':
-    dependencies:
-      '@ai-sdk/openai-compatible': 2.0.37(zod@4.3.6)
       '@ai-sdk/provider': 3.0.8
       '@ai-sdk/provider-utils': 4.0.21(zod@4.3.6)
       zod: 4.3.6
@@ -9394,6 +9461,11 @@ snapshots:
 
   '@opencode-ai/sdk@1.3.0': {}
 
+  '@openrouter/ai-sdk-provider@2.3.3(ai@6.0.134(zod@4.3.6))(zod@4.3.6)':
+    dependencies:
+      ai: 6.0.134(zod@4.3.6)
+      zod: 4.3.6
+
   '@opentelemetry/api@1.9.0': {}
 
   '@opentelemetry/semantic-conventions@1.40.0': {}
@@ -10575,6 +10647,16 @@ snapshots:
       resize-observer-polyfill: 1.5.1
       screenfull: 5.2.0
       tslib: 2.8.1
+
+  ai-sdk-ollama@3.8.2(ai@6.0.134(zod@4.3.6))(zod@4.3.6):
+    dependencies:
+      '@ai-sdk/provider': 3.0.8
+      '@ai-sdk/provider-utils': 4.0.21(zod@4.3.6)
+      ai: 6.0.134(zod@4.3.6)
+      jsonrepair: 3.13.3
+      ollama: 0.6.3
+    transitivePeerDependencies:
+      - zod
 
   ai@6.0.134(zod@3.25.76):
     dependencies:
@@ -12416,6 +12498,8 @@ snapshots:
 
   jsonparse@1.3.1: {}
 
+  jsonrepair@3.13.3: {}
+
   jsonschema@1.5.0: {}
 
   jsonwebtoken@9.0.3:
@@ -13477,6 +13561,10 @@ snapshots:
       destr: 2.0.5
       node-fetch-native: 1.6.7
       ufo: 1.6.3
+
+  ollama@0.6.3:
+    dependencies:
+      whatwg-fetch: 3.6.20
 
   on-finished@2.4.1:
     dependencies:
@@ -14983,6 +15071,8 @@ snapshots:
 
   webidl-conversions@7.0.0:
     optional: true
+
+  whatwg-fetch@3.6.20: {}
 
   whatwg-url@14.2.0:
     dependencies:

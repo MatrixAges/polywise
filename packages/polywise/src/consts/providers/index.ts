@@ -1,4 +1,3 @@
-import custom from './__custom__'
 import amazon_bedrock from './amazon_bedrock'
 import anthropic from './anthropic'
 import azure_openai from './azure_openai'
@@ -15,9 +14,9 @@ import mistral from './mistral'
 import moonshot from './moonshot'
 import ollama from './ollama'
 import openai from './openai'
+import custom from './openai_compatible'
 import openrouter from './openrouter'
 import perplexity from './perplexity'
-import siliconflow from './siliconflow'
 import together from './together'
 import vercel from './vercel'
 import xai from './xai'
@@ -41,7 +40,6 @@ export const all_providers = [
 	lmstudio,
 	mistral,
 	perplexity,
-	siliconflow,
 	together,
 	vercel,
 	zhipu,
@@ -67,7 +65,6 @@ export {
 	lmstudio,
 	mistral,
 	perplexity,
-	siliconflow,
 	together,
 	vercel,
 	zhipu,
