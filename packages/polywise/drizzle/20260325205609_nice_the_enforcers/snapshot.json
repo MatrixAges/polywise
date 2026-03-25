@@ -1,7 +1,7 @@
 {
   "version": "7",
   "dialect": "sqlite",
-  "id": "f599ff68-b007-4114-a518-c907f90af21f",
+  "id": "4f170367-7419-458c-bc26-612ec2506ba0",
   "prevIds": [
     "00000000-0000-0000-0000-000000000000"
   ],
@@ -716,16 +716,6 @@
       "default": null,
       "generated": null,
       "name": "title",
-      "entityType": "columns",
-      "table": "session"
-    },
-    {
-      "type": "text",
-      "notNull": true,
-      "autoincrement": false,
-      "default": null,
-      "generated": null,
-      "name": "model",
       "entityType": "columns",
       "table": "session"
     },

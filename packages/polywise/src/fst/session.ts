@@ -4,11 +4,13 @@ import { env } from '@core/env'
 import { convertToModelMessages, smoothStream, streamText } from 'ai'
 import dayjs from 'dayjs'
 import { desc, eq } from 'drizzle-orm'
+import { pick } from 'es-toolkit'
 import { getId } from 'stk/utils'
 
 import { getModel } from './provider'
 
 import type { Agent, MessageInsert, Session, SessionInsert } from '@core/db'
+import type { SpecialProvider } from '@core/types'
 import type { LanguageModel } from 'ai'
 import type { EventEmitter } from 'events'
 import type { ChatEventRes, InitArgs, Message, MessageMetadata } from './types'
@@ -45,8 +47,7 @@ export default class Index {
 				.insert(session)
 				.values({
 					id: this.id,
-					title: `Session ${dayjs().format('YYYY-MM-DD HH:mm:ss')}`,
-					model: config.default_model
+					title: `Session ${dayjs().format('YYYY-MM-DD HH:mm:ss')}`
 				})
 				.returning()
 
@@ -76,12 +77,21 @@ export default class Index {
 	}
 
 	async getModel() {
-		const { provider, model, options } = this.session.model
+		const { provider, model } = config.default_model
 
 		const all_providers = [...providers.providers, ...(providers.custom_providers || [])]
 		const target_provider = all_providers.find(item => item.name === provider)
 
-		this.model = await getModel(provider, model, options)
+		let target_options
+
+		if (target_provider) {
+			target_options = {
+				...pick(target_provider, ['apiKey', 'baseURL']),
+				...(target_provider as SpecialProvider)['custom_fields']
+			}
+		}
+
+		this.model = await getModel(provider, model, target_options)
 	}
 
 	async updateSession(args: Partial<SessionInsert>) {

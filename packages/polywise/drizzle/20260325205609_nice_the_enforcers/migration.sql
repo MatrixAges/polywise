@@ -93,7 +93,6 @@ CREATE TABLE `node` (
 CREATE TABLE `session` (
 	`id` text PRIMARY KEY,
 	`title` text NOT NULL,
-	`model` text NOT NULL,
 	`runing` integer DEFAULT false NOT NULL,
 	`created_at` integer,
 	`updated_at` integer
