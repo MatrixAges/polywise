@@ -12,7 +12,8 @@ const config = {
 	output: { legalComments: 'none', assetPrefix: './' },
 	plugins: [pluginReact(), pluginSvgr()],
 	performance: { removeConsole: false },
-	dev: { lazyCompilation: { imports: true } },
+	// dev: { lazyCompilation: { imports: true } },
+	dev: { lazyCompilation: false },
 	server: {
 		open: false,
 		port: 3071,

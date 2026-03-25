@@ -29,8 +29,15 @@ const Index = () => {
 			>
 				<Logo width='100%' height='100%'></Logo>
 			</div>
-			<h1 className='text-std-800 text-3xl font-bold'>Polywise</h1>
-			<h2 className='text-std-800 text-lg font-medium'>The Way to fork Yourself</h2>
+			<h1
+				className='
+					mb-1
+					text-std-800 text-3xl font-serif font-bold
+				'
+			>
+				Polywise
+			</h1>
+			<h2 className='text-std-800 font-serif text-lg font-medium'>The Way to fork Yourself</h2>
 			<div
 				className='
 					flex flex-col
@@ -67,7 +74,15 @@ const Index = () => {
 					</a>
 				</div>
 			</div>
-			<span className='text-std-400 absolute bottom-6 text-sm'>v{version}</span>
+			<span
+				className='
+					absolute
+					bottom-6
+					text-std-400 text-sm font-mono
+				'
+			>
+				v{version}
+			</span>
 		</div>
 	)
 }
