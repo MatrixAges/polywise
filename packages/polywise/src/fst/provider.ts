@@ -42,8 +42,6 @@ export const getModel = async (provider: string, model: string, options?: any): 
 			return (await import('@ai-sdk/azure')).createAzure(options)(model)
 		case 'amazon_bedrock':
 			return (await import('@ai-sdk/amazon-bedrock')).createAmazonBedrock(options)(model)
-		case 'google-vertex':
-			return (await import('@ai-sdk/google-vertex')).createVertex(options)(model)
 		case 'cerebras':
 			return (await import('@ai-sdk/cerebras')).createCerebras(options)(model)
 		case 'vercel':
