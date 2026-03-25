@@ -1,6 +1,6 @@
 import type { LanguageModel } from 'ai'
 
-export const getModel = async (provider: string, model: string, options: any): Promise<LanguageModel> => {
+export const getModel = async (provider: string, model: string, options?: any): Promise<LanguageModel> => {
 	switch (provider) {
 		case 'a2a':
 			return (await import('a2a-ai-provider')).a2a(model)

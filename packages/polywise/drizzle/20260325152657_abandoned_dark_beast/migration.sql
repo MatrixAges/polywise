@@ -6,6 +6,7 @@ CREATE TABLE `agent` (
 	`prompt` text,
 	`soul` text,
 	`memory` text DEFAULT '',
+	`model` text NOT NULL,
 	`created_at` integer,
 	`updated_at` integer
 );
@@ -92,10 +93,7 @@ CREATE TABLE `node` (
 CREATE TABLE `session` (
 	`id` text PRIMARY KEY,
 	`title` text NOT NULL,
-	`provider` text NOT NULL,
 	`model` text NOT NULL,
-	`effort` text,
-	`options` text,
 	`runing` integer DEFAULT false NOT NULL,
 	`created_at` integer,
 	`updated_at` integer
@@ -156,6 +154,15 @@ CREATE TABLE `node_chunk` (
 	CONSTRAINT `fk_node_chunk_chunk_id_chunk_id_fk` FOREIGN KEY (`chunk_id`) REFERENCES `chunk`(`id`) ON DELETE CASCADE
 );
 --> statement-breakpoint
+CREATE TABLE `session_agent` (
+	`session_id` text NOT NULL,
+	`agent_id` text NOT NULL,
+	`created_at` integer,
+	CONSTRAINT `session_agent_pk` PRIMARY KEY(`session_id`, `agent_id`),
+	CONSTRAINT `fk_session_agent_session_id_session_id_fk` FOREIGN KEY (`session_id`) REFERENCES `session`(`id`) ON DELETE CASCADE,
+	CONSTRAINT `fk_session_agent_agent_id_agent_id_fk` FOREIGN KEY (`agent_id`) REFERENCES `agent`(`id`) ON DELETE CASCADE
+);
+--> statement-breakpoint
 CREATE INDEX `article_document_id_idx` ON `article` (`document_id`);--> statement-breakpoint
 CREATE INDEX `article_is_tripled_idx` ON `article` (`is_tripled`);--> statement-breakpoint
 CREATE INDEX `chunk_article_id_idx` ON `chunk` (`article_id`);--> statement-breakpoint
@@ -172,4 +179,5 @@ CREATE INDEX `task_status_idx` ON `task` (`status`);--> statement-breakpoint
 CREATE INDEX `agent_article_article_id_idx` ON `agent_article` (`article_id`);--> statement-breakpoint
 CREATE INDEX `agent_document_document_id_idx` ON `agent_document` (`document_id`);--> statement-breakpoint
 CREATE INDEX `agent_skill_id_idx` ON `agent_skill` (`skill_id`);--> statement-breakpoint
-CREATE INDEX `node_chunk_chunk_id_idx` ON `node_chunk` (`chunk_id`);
+CREATE INDEX `node_chunk_chunk_id_idx` ON `node_chunk` (`chunk_id`);--> statement-breakpoint
+CREATE INDEX `session_agent_agent_idx` ON `session_agent` (`agent_id`);

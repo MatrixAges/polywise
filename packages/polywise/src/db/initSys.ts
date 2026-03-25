@@ -1,3 +1,4 @@
+import { config } from '@core/config'
 import { app } from '@core/consts'
 import { getAgentByName, insertAgent } from '@core/db/prepare'
 import { getId } from 'stk/utils'
@@ -8,6 +9,6 @@ export default () => {
 	if (!exist) {
 		const now = Date.now()
 
-		insertAgent().run(getId(), app.global_agent_name, '', now, now)
+		insertAgent().run(getId(), app.global_agent_name, '', JSON.stringify(config.default_model), now, now)
 	}
 }

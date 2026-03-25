@@ -1,8 +1,10 @@
-import { message, session } from './schema'
+import { agent, message, session } from './schema'
 
 import type { InferInsertModel, InferSelectModel } from 'drizzle-orm'
 
 export type Session = InferSelectModel<typeof session>
 export type SessionInsert = InferInsertModel<typeof session>
+export type Agent = InferSelectModel<typeof agent>
+export type AgentInsert = InferInsertModel<typeof agent>
 export type Message = InferSelectModel<typeof message>
 export type MessageInsert = InferInsertModel<typeof message>

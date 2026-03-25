@@ -75,8 +75,8 @@ export const getAgentByName = (): Database.Statement => {
 
 export const insertAgent = (): Database.Statement => {
 	return env.sqlite.prepare(`
-		INSERT INTO agent (id, name, soul, created_at, updated_at)
-		VALUES (?, ?, ?, ?, ?)
+		INSERT INTO agent (id, name, soul, model, created_at, updated_at)
+		VALUES (?, ?, ?, ?, ?, ?)
 	`)
 }
 

@@ -4,9 +4,9 @@ import fs from 'fs-extra'
 
 import { config_path } from '../consts/app'
 
-import type { Config } from './index'
+import type { AppConfig } from '@core/types'
 
-export default async (new_config: Partial<Config>) => {
+export default async (new_config: Partial<AppConfig>) => {
 	const [err, current] = await to(fs.readJson(config_path, { throws: false }))
 
 	if (err) {

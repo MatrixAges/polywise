@@ -1,12 +1,14 @@
-import { message, session } from '@core/db/schema'
+import { config } from '@core/config'
+import { agent, message, session, session_agent } from '@core/db/schema'
 import { env } from '@core/env'
 import { convertToModelMessages, smoothStream, streamText } from 'ai'
+import dayjs from 'dayjs'
 import { desc, eq } from 'drizzle-orm'
 import { getId } from 'stk/utils'
 
 import { getModel } from './provider'
 
-import type { MessageInsert, Session, SessionInsert } from '@core/db'
+import type { Agent, MessageInsert, Session, SessionInsert } from '@core/db'
 import type { LanguageModel } from 'ai'
 import type { EventEmitter } from 'events'
 import type { ChatEventRes, InitArgs, Message, MessageMetadata } from './types'
@@ -16,6 +18,7 @@ export default class Index {
 	event = null as unknown as EventEmitter
 	messages = [] as Array<Message>
 	session = null as unknown as Session
+	agents = [] as Array<Agent>
 	model = null as unknown as LanguageModel
 	abort_controller = new AbortController()
 
@@ -25,7 +28,24 @@ export default class Index {
 		this.id = id
 		this.event = event
 
+		await this.createSession()
+
 		return this.getData()
+	}
+
+	async createSession() {
+		const [res] = await env.db
+			.insert(session)
+			.values({
+				id: this.id,
+				title: `Session ${dayjs().format('YYYY-MM-DD HH:mm:ss')}`,
+				model: config.default_model
+			})
+			.returning()
+
+		this.session = res
+
+		await this.getModel()
 	}
 
 	async getData() {
@@ -39,6 +59,14 @@ export default class Index {
 		const [res] = await env.db.select().from(session).where(eq(session.id, this.id)).limit(1)
 
 		this.session = res
+
+		await this.getModel()
+	}
+
+	async getModel() {
+		const { provider, model, options } = this.session.model
+
+		this.model = await getModel(provider, model, options)
 	}
 
 	async updateSession(args: Partial<SessionInsert>) {
@@ -58,10 +86,14 @@ export default class Index {
 		this.messages = res.map(item => JSON.parse(item.content)).reverse()
 	}
 
-	async getModel() {
-		const { provider, model, options } = this.session
+	async getAgents() {
+		const res = await env.db
+			.select({ agent })
+			.from(session_agent)
+			.innerJoin(agent, eq(session_agent.agent_id, agent.id))
+			.where(eq(session_agent.session_id, this.id))
 
-		this.model = await getModel(provider, model, options)
+		this.agents = res.map(item => item.agent)
 	}
 
 	async getStream(messages: Array<Message>) {
