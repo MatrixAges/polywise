@@ -1,10 +1,9 @@
-import to from 'await-to-js'
 import { makeAutoObservable } from 'mobx'
 import { singleton } from 'tsyringe'
 
 import { Locale, Setting, Theme } from '@/models'
 import { Util } from '@/models/common'
-import { api, ipc, is_electron, rpc } from '@/utils'
+import { ipc, is_electron, rpc } from '@/utils'
 
 @singleton()
 export default class GlobalModel {
