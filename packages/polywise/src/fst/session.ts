@@ -91,6 +91,8 @@ export default class Index {
 			}
 		}
 
+		console.log(provider, model, target_options)
+
 		this.model = await getModel(provider, model, target_options)
 	}
 

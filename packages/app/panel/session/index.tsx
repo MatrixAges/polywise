@@ -24,7 +24,7 @@ const Index = () => {
 
 	return (
 		<div className='flex h-full w-full flex-col' ref={setRef}>
-			<div className='flex flex-1'>{JSON.stringify(x.messages)}</div>
+			<div className={$cx('flex flex-1', x.chat_signal)}>{JSON.stringify(x.messages)}</div>
 			<div className='border-border-light w-full border-t'>
 				<textarea className='w-full resize-none px-3 py-2' ref={textarea} />
 				<button className='click_button' onClick={submit}>
