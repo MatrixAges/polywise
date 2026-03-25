@@ -4,7 +4,7 @@ import { singleton } from 'tsyringe'
 
 import { Locale, Setting, Theme } from '@/models'
 import { Util } from '@/models/common'
-import { api, ipc, is_electron } from '@/utils'
+import { api, ipc, is_electron, rpc } from '@/utils'
 
 @singleton()
 export default class GlobalModel {
@@ -41,15 +41,19 @@ export default class GlobalModel {
 	}
 
 	onHeartBeat() {
-		setInterval(async () => {
-			const [err, res] = await to(api.heartbeat.$get())
+		const startTimer = () => setTimeout(() => (this.disconnected = true), 9 * 1000)
 
-			if (err || !res.ok) return (this.disconnected = true)
+		let timer = startTimer()
 
-			const data = await res.json()
+		const deinit = rpc.heartbeat.subscribe(undefined, {
+			onData: () => {
+				clearTimeout(timer)
 
-			this.disconnected = data.status !== 'ok'
-		}, 6000)
+				timer = startTimer()
+			}
+		})
+
+		this.util.acts.push(deinit.unsubscribe, () => clearTimeout(timer))
 	}
 
 	deinit() {
