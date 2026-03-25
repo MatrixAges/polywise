@@ -28,20 +28,30 @@ export default class Index {
 		this.id = id
 		this.event = event
 
-		await this.createSession()
+		await this.initSession()
 
 		return this.getData()
 	}
 
-	async createSession() {
-		const [res] = await env.db
-			.insert(session)
-			.values({
-				id: this.id,
-				title: `Session ${dayjs().format('YYYY-MM-DD HH:mm:ss')}`,
-				model: config.default_model
-			})
-			.returning()
+	async initSession() {
+		let res: Session
+
+		const [res_exsit] = await env.db.select().from(session).where(eq(session.id, this.id)).limit(1)
+
+		if (res_exsit) {
+			res = res_exsit
+		} else {
+			const [res_insert] = await env.db
+				.insert(session)
+				.values({
+					id: this.id,
+					title: `Session ${dayjs().format('YYYY-MM-DD HH:mm:ss')}`,
+					model: config.default_model
+				})
+				.returning()
+
+			res = res_insert
+		}
 
 		this.session = res
 
@@ -49,10 +59,12 @@ export default class Index {
 	}
 
 	async getData() {
-		await this.getSession()
 		await this.getMessages()
 
-		return { type: 'init', data: { session: this.session, messages: this.messages } } as ChatEventRes
+		return {
+			type: 'init',
+			data: { session: this.session, messages: this.messages }
+		} as ChatEventRes
 	}
 
 	async getSession() {

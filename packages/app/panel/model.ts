@@ -3,7 +3,7 @@ import { injectable } from 'tsyringe'
 
 @injectable()
 export default class Index {
-	active_tab = 'agent'
+	active_tab = 'session'
 
 	constructor() {
 		makeAutoObservable(this, {}, { autoBind: true })

@@ -2,22 +2,27 @@ import { on } from 'events'
 import { Session } from '@core/fst'
 import { p, SessionEventStore, SessionStore } from '@core/utils'
 import { getId } from 'stk/utils'
-import { string } from 'zod'
+import { boolean, object, string } from 'zod'
 
 import type { ChatEventRes } from '@core/fst'
 
-export default p.input(string()).subscription(async function* (args) {
+const input_type = object({
+	id: string(),
+	global: boolean().optional()
+})
+
+export default p.input(input_type).subscription(async function* (args) {
 	const { signal, input } = args
 
-	let id = input
-	let session = SessionStore.get(input) as Session
+	let id = input.id
+	let session = SessionStore.get(id) as Session
 
 	if (session) {
 		yield session.getData()
 	} else {
 		session = new Session()
 
-		id = getId()
+		if (!input.global) id = getId()
 
 		const res = await session.init({ id, event: SessionEventStore })
 
