@@ -1,5 +1,4 @@
 import custom from './__custom__'
-import aliyun_bailian from './aliyun_bailian'
 import amazon_bedrock from './amazon_bedrock'
 import anthropic from './anthropic'
 import azure_openai from './azure_openai'
@@ -19,10 +18,8 @@ import openai from './openai'
 import openrouter from './openrouter'
 import perplexity from './perplexity'
 import siliconflow from './siliconflow'
-import tencent_hunyuan from './tencent_hunyuan'
 import together from './together'
 import vercel from './vercel'
-import volcengine from './volcengine'
 import xai from './xai'
 import zhipu from './zhipu'
 
@@ -48,9 +45,6 @@ export const all_providers = [
 	together,
 	vercel,
 	zhipu,
-	aliyun_bailian,
-	tencent_hunyuan,
-	volcengine,
 	azure_openai,
 	amazon_bedrock,
 	minimax,
@@ -77,9 +71,6 @@ export {
 	together,
 	vercel,
 	zhipu,
-	aliyun_bailian,
-	tencent_hunyuan,
-	volcengine,
 	azure_openai,
 	amazon_bedrock,
 	minimax,

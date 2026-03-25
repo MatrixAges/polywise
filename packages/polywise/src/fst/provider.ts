@@ -14,11 +14,11 @@ export const getModel = async (provider: string, model: string, options?: any): 
 			return (await import('@ai-sdk/openai')).createOpenAI(options)(model)
 		case 'anthropic':
 			return (await import('@ai-sdk/anthropic')).createAnthropic(options)(model)
-		case 'google':
+		case 'google_gemini':
 			return (await import('@ai-sdk/google')).createGoogleGenerativeAI(options)(model)
 		case 'deepseek':
 			return (await import('@ai-sdk/deepseek')).createDeepSeek(options)(model)
-		case 'moonshotai':
+		case 'moonshot':
 			return (await import('@ai-sdk/moonshotai')).createMoonshotAI(options)(model)
 		case 'zhipu':
 			return (await import('zhipu-ai-provider')).createZhipu(options)(model)
@@ -36,11 +36,11 @@ export const getModel = async (provider: string, model: string, options?: any): 
 			return (await import('@ai-sdk/perplexity')).createPerplexity(options)(model)
 		case 'deepinfra':
 			return (await import('@ai-sdk/deepinfra')).createDeepInfra(options)(model)
-		case 'togetherai':
+		case 'together':
 			return (await import('@ai-sdk/togetherai')).createTogetherAI(options)(model)
-		case 'azure':
+		case 'azure_openai':
 			return (await import('@ai-sdk/azure')).createAzure(options)(model)
-		case 'amazon-bedrock':
+		case 'amazon_bedrock':
 			return (await import('@ai-sdk/amazon-bedrock')).createAmazonBedrock(options)(model)
 		case 'google-vertex':
 			return (await import('@ai-sdk/google-vertex')).createVertex(options)(model)
