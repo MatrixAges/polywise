@@ -60,6 +60,10 @@ This document provides an overview of the packages/polywise module structure and
 				"initSql.ts": { "desc": "Virtual table initialization", "role": "Module" },
 				"migrate.ts": { "desc": "Migration runner", "role": "Module" },
 				"schema": {
+					"article.ts": {
+						"desc": "Article storage schema with content, metadata, and sop flag",
+						"role": "Schema"
+					},
 					"session.ts": { "desc": "Chat session storage schema", "role": "Schema" },
 					"message.ts": { "desc": "Chat message storage schema with UIMessages", "role": "Schema" }
 				}

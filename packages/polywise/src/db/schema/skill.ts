@@ -18,5 +18,9 @@ export default sqliteTable(
 			.$defaultFn(() => new Date())
 			.$onUpdateFn(() => new Date())
 	},
-	t => [index('skill_type_idx').on(t.type)]
+	t => [
+		index('skill_type_idx').on(t.type),
+		index('skill_created_at_idx').on(t.created_at),
+		index('skill_updated_at_idx').on(t.updated_at)
+	]
 )

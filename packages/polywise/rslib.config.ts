@@ -41,5 +41,11 @@ export default {
 		filename: { js: '[name].js' },
 		copy: [{ from: './drizzle', to: 'drizzle' }]
 	},
-	performance: { removeConsole: false }
+	performance: { removeConsole: false },
+	tools: {
+		rspack: {
+			target: 'node',
+			module: { rules: [{ test: /\.(md|txt)$/i, type: 'asset/source' }] }
+		}
+	}
 } as RslibConfig

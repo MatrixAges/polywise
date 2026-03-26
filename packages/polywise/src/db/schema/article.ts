@@ -24,10 +24,18 @@ export default sqliteTable(
 		is_long: integer('is_long', { mode: 'boolean' }).generatedAlwaysAs(sql`length(content) > 12000`),
 		// Whether triples have been generated
 		is_tripled: integer('is_tripled', { mode: 'boolean' }).default(false).notNull(),
+		// Whether it is a standard operating procedure
+		sop: integer('sop', { mode: 'boolean' }),
 		created_at: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
 		updated_at: integer('updated_at', { mode: 'timestamp' })
 			.$defaultFn(() => new Date())
 			.$onUpdateFn(() => new Date())
 	},
-	t => [index('article_document_id_idx').on(t.document_id), index('article_is_tripled_idx').on(t.is_tripled)]
+	t => [
+		index('article_document_id_idx').on(t.document_id),
+		index('article_is_tripled_idx').on(t.is_tripled),
+		index('article_sop_idx').on(t.sop),
+		index('article_created_at_idx').on(t.created_at),
+		index('article_updated_at_idx').on(t.updated_at)
+	]
 )

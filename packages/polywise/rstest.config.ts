@@ -1,21 +1,10 @@
 import { resolve } from 'path'
-
 import { defineConfig } from '@rstest/core'
-
-import afterTest from './scripts/afterTest'
-
-import type { Reporter } from '@rstest/core'
-
-const hooks_reporter: Reporter = {
-	onTestRunEnd() {
-		afterTest()
-	}
-}
 
 export default defineConfig({
 	root: './test',
 	setupFiles: ['./utils/setup.ts'],
-	reporters: ['verbose', hooks_reporter],
+	reporters: ['verbose'],
 	resolve: { alias: { '@': resolve(`${process.cwd()}/src`) } },
 	source: { decorators: { version: 'legacy' } },
 	hookTimeout: 180000,

@@ -16,5 +16,10 @@ export default sqliteTable(
 			.$defaultFn(() => new Date())
 			.$onUpdateFn(() => new Date())
 	},
-	t => [index('task_type_idx').on(t.type), index('task_status_idx').on(t.status)]
+	t => [
+		index('task_type_idx').on(t.type),
+		index('task_status_idx').on(t.status),
+		index('task_created_at_idx').on(t.created_at),
+		index('task_updated_at_idx').on(t.updated_at)
+	]
 )

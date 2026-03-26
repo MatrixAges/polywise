@@ -29,5 +29,9 @@ export default sqliteTable(
 			.$defaultFn(() => new Date())
 			.notNull()
 	},
-	t => [unique('node_agent_name_unique').on(t.agent_id, t.name), index('node_agent_id_idx').on(t.agent_id)]
+	t => [
+		unique('node_agent_name_unique').on(t.agent_id, t.name),
+		index('node_agent_id_idx').on(t.agent_id),
+		index('node_created_at_idx').on(t.created_at)
+	]
 )

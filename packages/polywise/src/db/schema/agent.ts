@@ -1,27 +1,31 @@
-import { blob, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
+import { blob, index, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 import { getId } from 'stk/utils'
 
 import type { TableModel } from '@core/types'
 
-export default sqliteTable('agent', {
-	id: text('id').primaryKey().$defaultFn(getId),
-	// Agent name
-	name: text('name').notNull(),
-	// Agent description
-	description: text('description'),
-	// Agent avatar
-	avatar: blob('avatar'),
-	// System prompt
-	prompt: text('prompt'),
-	// Agent personality
-	soul: text('soul'),
-	// Core memory
-	memory: text('memory').default(''),
-	// Model provider
-	model: text('model', { mode: 'json' }).$type<TableModel>().notNull(),
+export default sqliteTable(
+	'agent',
+	{
+		id: text('id').primaryKey().$defaultFn(getId),
+		// Agent name
+		name: text('name').notNull(),
+		// Agent description
+		description: text('description'),
+		// Agent avatar
+		avatar: blob('avatar'),
+		// System prompt
+		prompt: text('prompt'),
+		// Agent personality
+		soul: text('soul'),
+		// Core memory
+		memory: text('memory').default(''),
+		// Model provider
+		model: text('model', { mode: 'json' }).$type<TableModel>().notNull(),
 
-	created_at: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
-	updated_at: integer('updated_at', { mode: 'timestamp' })
-		.$defaultFn(() => new Date())
-		.$onUpdateFn(() => new Date())
-})
+		created_at: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
+		updated_at: integer('updated_at', { mode: 'timestamp' })
+			.$defaultFn(() => new Date())
+			.$onUpdateFn(() => new Date())
+	},
+	t => [index('agent_created_at_idx').on(t.created_at), index('agent_updated_at_idx').on(t.updated_at)]
+)

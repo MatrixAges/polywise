@@ -1,4 +1,5 @@
 import { config, providers } from '@core/config'
+import fst_system_prompt from '@core/consts/prompts/fst_system_prompt.md'
 import { agent, message, session, session_agent } from '@core/db/schema'
 import { env } from '@core/env'
 import { convertToModelMessages, smoothStream, streamText } from 'ai'
@@ -138,6 +139,7 @@ export default class Index {
 
 		const res = streamText({
 			model: this.model,
+			system: fst_system_prompt,
 			messages: target,
 			abortSignal: this.abort_controller.signal,
 			experimental_transform: smoothStream(),

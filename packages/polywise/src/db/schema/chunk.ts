@@ -19,5 +19,5 @@ export default sqliteTable(
 		position: integer('position'),
 		created_at: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date())
 	},
-	t => [index('chunk_article_id_idx').on(t.article_id)]
+	t => [index('chunk_article_id_idx').on(t.article_id), index('chunk_created_at_idx').on(t.created_at)]
 )

@@ -20,5 +20,9 @@ export default sqliteTable(
 			.$defaultFn(() => new Date())
 			.$onUpdateFn(() => new Date())
 	},
-	t => [index('message_session_id').on(t.session_id)]
+	t => [
+		index('message_session_id').on(t.session_id),
+		index('message_created_at_idx').on(t.created_at),
+		index('message_updated_at_idx').on(t.updated_at)
+	]
 )

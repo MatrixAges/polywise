@@ -16,5 +16,9 @@ export default sqliteTable(
 			.$defaultFn(() => new Date())
 			.$onUpdateFn(() => new Date())
 	},
-	t => [index('document_is_tripled_idx').on(t.is_tripled)]
+	t => [
+		index('document_is_tripled_idx').on(t.is_tripled),
+		index('document_created_at_idx').on(t.created_at),
+		index('document_updated_at_idx').on(t.updated_at)
+	]
 )
