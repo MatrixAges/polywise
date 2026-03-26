@@ -24,8 +24,9 @@ body {
 	padding: calc(var(--spacing) * 2.5);
 }
 
-.icon_button {
-	@apply 
+@layer components {
+	.icon_button {
+		@apply 
 				flex
 				items-center justify-center
 				w-7 h-7
@@ -36,20 +37,33 @@ body {
 				clickable
 			;
 
-	-webkit-app-region: no-drag;
+		-webkit-app-region: no-drag;
 
-	svg {
-		width: 13px;
-		height: 13px;
+		svg {
+			width: 13px;
+			height: 13px;
+		}
+
+		&.active {
+			@apply bg-active text-std-900;
+		}
+
+		&.primary {
+			@apply 
+				text-std-100 text-xs
+				bg-std-600
+				hover:bg-std-800 hover:text-std-100 active:bg-std-black active:fill-std-white
+				fill-std-100
+			;
+
+			&.active {
+				@apply bg-active text-std-white fill-std-white;
+			}
+		}
 	}
 
-	&.active {
-		@apply bg-active text-std-900;
-	}
-}
-
-.click_button {
-	@apply 
+	.click_button {
+		@apply 
 				flex
 				items-center
 				gap-2
@@ -60,14 +74,15 @@ body {
 				clickit
 			;
 
-	-webkit-app-region: no-drag;
+		-webkit-app-region: no-drag;
 
-	svg {
-		width: 14px;
-		height: 14px;
-	}
+		svg {
+			width: 14px;
+			height: 14px;
+		}
 
-	&.active {
-		@apply bg-active text-std-900;
+		&.active {
+			@apply bg-active text-std-900;
+		}
 	}
 }

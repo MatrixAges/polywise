@@ -1,6 +1,7 @@
 import '@/styles/index.css'
 
 import { useLayoutEffect, useState } from 'react'
+import { IconContext } from '@phosphor-icons/react'
 import { useMemoizedFn } from 'ahooks'
 import { LucideProvider } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
@@ -53,69 +54,71 @@ const Index = () => {
 
 	return (
 		<LucideProvider size={14} strokeWidth={2}>
-			<GlobalProvider value={global}>
-				<Toaster position='top-center' toastOptions={{ duration: 3000 }} closeButton></Toaster>
-				<Alert></Alert>
-				<div
-					className='
-						overflow-hidden
-						flex flex-col
-						w-screen h-screen
-						bg-layout-under
-					'
-				>
-					<Header {...props_header}></Header>
+			<IconContext.Provider value={{ size: 14, strokeWidth: 2 }}>
+				<GlobalProvider value={global}>
+					<Toaster position='top-center' toastOptions={{ duration: 3000 }} closeButton></Toaster>
+					<Alert></Alert>
 					<div
 						className='
-							flex
-							w-full h-[calc(100%-42px)]
-							px-2.5
-							pb-2.5
+							overflow-hidden
+							flex flex-col
+							w-screen h-screen
+							bg-layout-under
 						'
 					>
-						<ResizablePanelGroup
+						<Header {...props_header}></Header>
+						<div
 							className='
-								overflow-hidden
-								h-full!
-								rounded-sm
-								bg-layout-over
-								dark:border-border-light/60 dark:border
+								flex
+								w-full h-[calc(100%-42px)]
+								px-2.5
+								pb-2.5
 							'
-							defaultLayout={defaultLayout}
-							onLayoutChanged={onLayoutChanged}
 						>
-							<ResizablePanel
-								id='layout_content'
-								className='h-full'
-								disabled={s.panel_collapsed}
+							<ResizablePanelGroup
+								className='
+									overflow-hidden
+									h-full!
+									rounded-sm
+									bg-layout-over
+									dark:border-border-light/60 dark:border
+								'
+								defaultLayout={defaultLayout}
+								onLayoutChanged={onLayoutChanged}
 							>
-								<Outlet></Outlet>
-							</ResizablePanel>
-							{!s.panel_collapsed && (
-								<ResizableHandle
-									className='
-										bg-border-light
-										transition-colors duration-200
-										hover:bg-std-100 focus:bg-std-150
-									'
-								/>
-							)}
-							<ResizablePanel
-								id='layout_panel'
-								className='h-full'
-								collapsible
-								defaultSize={PANEL_WIDTH_DEFAULT}
-								minSize={PANEL_COLLAPSE_THRESHOLD}
-								maxSize='50'
-								panelRef={s.setPanelRef}
-								onResize={s.updatePanelState}
-							>
-								<Panel></Panel>
-							</ResizablePanel>
-						</ResizablePanelGroup>
+								<ResizablePanel
+									id='layout_content'
+									className='h-full'
+									disabled={s.panel_collapsed}
+								>
+									<Outlet></Outlet>
+								</ResizablePanel>
+								{!s.panel_collapsed && (
+									<ResizableHandle
+										className='
+											bg-border-light
+											transition-colors duration-200
+											hover:bg-std-100 focus:bg-std-150
+										'
+									/>
+								)}
+								<ResizablePanel
+									id='layout_panel'
+									className='h-full'
+									collapsible
+									defaultSize={PANEL_WIDTH_DEFAULT}
+									minSize={PANEL_COLLAPSE_THRESHOLD}
+									maxSize='50'
+									panelRef={s.setPanelRef}
+									onResize={s.updatePanelState}
+								>
+									<Panel></Panel>
+								</ResizablePanel>
+							</ResizablePanelGroup>
+						</div>
 					</div>
-				</div>
-			</GlobalProvider>
+				</GlobalProvider>
+			</IconContext.Provider>
 		</LucideProvider>
 	)
 }

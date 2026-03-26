@@ -43,6 +43,7 @@
 	--color-soft: oklch(from var(--color-std-600) l c h / 0.4);
 	--color-softlight: oklch(from var(--color-std-900) l c h / 0.3);
 
+	--color-card: oklch(from var(--color-std-white) l c h / 1);
 	--color-active: oklch(from var(--color-std-100) l c h / 1);
 	--color-click: oklch(from var(--color-std-150) l c h / 1);
 
@@ -75,6 +76,7 @@
 	--color-std-black: #fff;
 	--color-std-white: #000;
 
+	--color-card: oklch(from var(--color-std-100) l c h / 1);
 	--color-active: oklch(from var(--color-std-150) l c h / 0.6);
 	--color-click: oklch(from var(--color-std-200) l c h / 0.6);
 
