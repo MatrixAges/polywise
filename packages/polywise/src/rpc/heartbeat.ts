@@ -2,7 +2,7 @@ import { EventEmitter, on } from 'events'
 
 import { p } from '../utils/trpc'
 
-interface Res {
+export interface Res {
 	status: string
 	timestamp: number
 	uptime: number

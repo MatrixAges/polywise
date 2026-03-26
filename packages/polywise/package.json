@@ -70,9 +70,10 @@
 		"bash-tool": "^1.3.15",
 		"better-auth": "^1.5.6",
 		"better-sqlite3": "^12.8.0",
+		"bufferutil": "^4.1.0",
 		"dayjs": "catalog:",
-		"drizzle-kit": "1.0.0-beta.16-ea816b6",
-		"drizzle-orm": "1.0.0-beta.16-ea816b6",
+		"drizzle-kit": "1.0.0-beta.19-dca1773",
+		"drizzle-orm": "1.0.0-beta.19-dca1773",
 		"es-toolkit": "catalog:",
 		"evlog": "^2.9.0",
 		"fastq": "^1.20.1",
@@ -99,13 +100,13 @@
 		"trpc-to-openapi": "^3.2.0",
 		"tslib": "catalog:",
 		"tsyringe": "catalog:",
+		"utf-8-validate": "^6.0.6",
 		"uuid": "catalog:",
 		"vercel-minimax-ai-provider": "^0.0.2",
 		"watchpack": "catalog:",
 		"ws": "^8.20.0",
 		"zhipu-ai-provider": "^0.2.2",
-		"zod": "catalog:",
-		"zx": "^8.8.5"
+		"zod": "catalog:"
 	},
 	"devDependencies": {
 		"@rslib/core": "catalog:",
