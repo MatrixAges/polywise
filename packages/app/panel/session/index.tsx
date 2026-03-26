@@ -1,15 +1,25 @@
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import { useMemoizedFn } from 'ahooks'
 import { observer } from 'mobx-react-lite'
 import { container } from 'tsyringe'
 
+import {
+	Message,
+	MessageContent,
+	MessageResponse,
+	PromptInput,
+	PromptInputSubmit,
+	PromptInputTextarea
+} from '@/__shadcn__/components/ai-elements'
 import { useAliveEffect } from '@/hooks'
 
 import Model from './model'
 
+import type { PromptInputMessage } from '@/__shadcn__/components/ai-elements/prompt-input'
+
 const Index = () => {
 	const [x] = useState(() => container.resolve(Model))
-	const textarea = useRef<HTMLTextAreaElement>(null)
+	const [input, setInput] = useState('')
 
 	const streaming = x.status === 'streaming'
 
@@ -18,8 +28,15 @@ const Index = () => {
 		deinit: () => x.deinit()
 	})
 
-	const submit = useMemoizedFn(() => {
-		x.send(textarea.current?.value!)
+	const handleSubmit = useMemoizedFn((message: PromptInputMessage) => {
+		if (message.text?.trim()) {
+			x.send(message.text)
+			setInput('')
+		}
+	})
+
+	const handleStop = useMemoizedFn(() => {
+		x.stop()
 	})
 
 	return (
@@ -28,20 +45,40 @@ const Index = () => {
 				className={$cx(
 					`
 					overflow-y-scroll
-					flex flex-1
-					wrap-anywhere
-					w-full
+					flex flex-1 flex-col
+					gap-4
+					p-4
 				`,
 					x.chat_signal
 				)}
 			>
-				{JSON.stringify(x.messages)}
+				{x.messages.map(message => (
+					<Message from={message.role} key={message.id}>
+						<MessageContent>
+							{message.parts
+								.filter(part => part.type === 'text')
+								.map((part, i) => (
+									<MessageResponse
+										isAnimating={streaming && message.role === 'assistant'}
+										key={`${message.id}-${i}`}
+									>
+										{part.text}
+									</MessageResponse>
+								))}
+						</MessageContent>
+					</Message>
+				))}
 			</div>
-			<div className='border-border-light w-full border-t'>
-				<textarea className='w-full resize-none px-3 py-2' ref={textarea} />
-				<button className='click_button' onClick={submit}>
-					submit
-				</button>
+
+			<div className='border-border-light w-full border-t p-3'>
+				<PromptInput onSubmit={handleSubmit} className='w-full'>
+					<PromptInputTextarea
+						value={input}
+						placeholder='输入消息...'
+						onChange={e => setInput(e.currentTarget.value)}
+					/>
+					<PromptInputSubmit status={streaming ? 'streaming' : 'ready'} onStop={handleStop} />
+				</PromptInput>
 			</div>
 		</div>
 	)
