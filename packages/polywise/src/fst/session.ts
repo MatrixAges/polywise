@@ -23,6 +23,7 @@ export default class Index {
 	agents = [] as Array<Agent>
 	model = null as unknown as LanguageModel
 	abort_controller = new AbortController()
+	update_at = Date.now()
 
 	async init(args: InitArgs) {
 		const { id, event } = args
@@ -55,12 +56,12 @@ export default class Index {
 		}
 
 		this.session = res
-
-		await this.getModel()
 	}
 
 	async getData() {
-		await this.getMessages()
+		this.active()
+
+		await Promise.all([this.getModel, this.getAgents, this.getMessages])
 
 		return {
 			type: 'init',
@@ -97,6 +98,8 @@ export default class Index {
 	}
 
 	async updateSession(args: Partial<SessionInsert>) {
+		this.active()
+
 		const [res] = await env.db.update(session).set(args).where(eq(session.id, this.id)).returning()
 
 		return res
@@ -150,6 +153,8 @@ export default class Index {
 			sendSources: true,
 			generateMessageId: getId,
 			messageMetadata: ({ part }) => {
+				this.active()
+
 				if (part.type === 'reasoning-start') {
 					reasoning_start = Date.now()
 				}
@@ -182,6 +187,10 @@ export default class Index {
 		await this.setRunning(false)
 
 		this.abort_controller.abort()
+	}
+
+	private active() {
+		this.update_at = Date.now()
 	}
 
 	private async setRunning(v: boolean) {
