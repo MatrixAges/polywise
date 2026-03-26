@@ -98,7 +98,11 @@ const Index = () => {
 					<div className='flex items-center justify-between py-3' key={key}>
 						<div className='flex flex-col gap-1'>
 							<span className='font-medium'>{local_models[key].name}</span>
-							<span className='text-std-600 text-xs'>{local_models[key].model}</span>
+							<div className='flex items-center text-xs'>
+								<span className='text-std-600'>{local_models[key].model}</span>
+								<span className='text-std-400 mx-2 font-bold'>·</span>
+								<span className='text-std-400'>{local_models[key].size}</span>
+							</div>
 						</div>
 						{s.model_status[key as LocalModelType] !== undefined ? (
 							<div className='flex items-center'>
