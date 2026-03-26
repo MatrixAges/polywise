@@ -61,7 +61,7 @@ export default class Index {
 	async getData() {
 		this.active()
 
-		await Promise.all([this.getModel, this.getAgents, this.getMessages])
+		await Promise.all([this.getModel(), this.getAgents(), this.getMessages()])
 
 		return {
 			type: 'init',
