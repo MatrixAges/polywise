@@ -7,6 +7,7 @@
 		"dev": "rsbuild dev",
 		"build": "rsbuild build",
 		"shadcn": "pnpm dlx shadcn@latest add",
+		"aies": "f() { pnpm dlx shadcn@latest add @ai-elements/$1; }; f",
 		"kibo": "pnpm dlx kibo-ui add",
 		"animate": "f() { pnpm dlx shadcn@latest add @animate-ui/components-base-$1; }; f",
 		"magic": "f() { pnpm dlx shadcn@latest add @magicui/$1; }; f",

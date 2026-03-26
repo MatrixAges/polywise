@@ -12,21 +12,43 @@ import {
 } from '@/__shadcn__/components/ui/tooltip'
 import { cn } from '@/__shadcn__/lib/utils'
 import { CornerDownLeftIcon, SquareIcon, XIcon } from 'lucide-react'
-import { useCallback, useState } from 'react'
+import { createContext, useCallback, useContext, useRef, useState } from 'react'
 
 import type { ChatStatus } from 'ai'
-import type { ChangeEventHandler, ComponentProps, FormEvent, KeyboardEventHandler } from 'react'
+import type {
+	ComponentProps,
+	FormEvent,
+	FormEventHandler,
+	KeyboardEventHandler,
+	PropsWithChildren,
+	RefObject
+} from 'react'
 
 export interface PromptInputMessage {
 	text: string
 }
 
-export type PromptInputProps = Omit<
-	ComponentProps<'form'>,
-	'onSubmit'
-> & {
-	onSubmit: (message: PromptInputMessage, event: FormEvent<HTMLFormElement>) => void | Promise<void>
+interface PromptInputContextValue {
+	value: string
+	setValue: (v: string) => void
+	inputRef: RefObject<HTMLTextAreaElement | null>
 }
+
+const PromptInputContext = createContext<PromptInputContextValue | null>(null)
+
+const usePromptInputContext = () => {
+	const ctx = useContext(PromptInputContext)
+	if (!ctx) {
+		throw new Error('PromptInput components must be used within <PromptInput>')
+	}
+	return ctx
+}
+
+export type PromptInputProps = PropsWithChildren<
+	Omit<ComponentProps<'form'>, 'onSubmit'> & {
+		onSubmit: (message: PromptInputMessage, event: FormEvent<HTMLFormElement>) => void | Promise<void>
+	}
+>
 
 export const PromptInput = ({
 	className,
@@ -34,40 +56,50 @@ export const PromptInput = ({
 	children,
 	...props
 }: PromptInputProps) => {
-	const handleSubmit = useCallback(
-		(event: FormEvent<HTMLFormElement>) => {
+	const [value, setValue] = useState('')
+	const inputRef = useRef<HTMLTextAreaElement>(null)
+
+	const handleSubmit: FormEventHandler<HTMLFormElement> = useCallback(
+		event => {
 			event.preventDefault()
 
-			const form = event.currentTarget
-			const formData = new FormData(form)
-			const text = (formData.get('message') as string) || ''
+			const text = value.trim()
+			if (!text) return
 
 			onSubmit({ text }, event)
-			form.reset()
+			setValue('')
 		},
-		[onSubmit]
+		[value, onSubmit]
 	)
 
 	return (
-		<form
-			className={cn('w-full', className)}
-			onSubmit={handleSubmit}
-			{...props}
-		>
-			<InputGroup className='overflow-hidden'>{children}</InputGroup>
-		</form>
+		<PromptInputContext.Provider value={{ value, setValue, inputRef }}>
+			<form
+				className={cn('w-full', className)}
+				onSubmit={handleSubmit}
+				{...props}
+			>
+				<InputGroup className='overflow-hidden'>{children}</InputGroup>
+			</form>
+		</PromptInputContext.Provider>
 	)
 }
 
-export type PromptInputTextareaProps = ComponentProps<typeof InputGroupTextarea>
+export type PromptInputTextareaProps = Omit<
+	ComponentProps<typeof InputGroupTextarea>,
+	'value' | 'onChange'
+> & {
+	value?: string
+	onChange?: (e: React.ChangeEvent<HTMLTextAreaElement>) => void
+}
 
 export const PromptInputTextarea = ({
-	onChange,
 	onKeyDown,
 	className,
 	placeholder = 'What would you like to know?',
 	...props
 }: PromptInputTextareaProps) => {
+	const ctx = useContext(PromptInputContext)
 	const [isComposing, setIsComposing] = useState(false)
 
 	const handleKeyDown: KeyboardEventHandler<HTMLTextAreaElement> = useCallback(
@@ -103,6 +135,29 @@ export const PromptInputTextarea = ({
 
 	const handleCompositionEnd = useCallback(() => setIsComposing(false), [])
 	const handleCompositionStart = useCallback(() => setIsComposing(true), [])
+
+	const handleChange = useCallback(
+		(e: React.ChangeEvent<HTMLTextAreaElement>) => {
+			ctx?.setValue(e.currentTarget.value)
+		},
+		[ctx]
+	)
+
+	if (ctx) {
+		return (
+			<InputGroupTextarea
+				className={cn('field-sizing-content max-h-48 min-h-16', className)}
+				name='message'
+				onCompositionEnd={handleCompositionEnd}
+				onCompositionStart={handleCompositionStart}
+				onKeyDown={handleKeyDown}
+				onChange={handleChange}
+				placeholder={placeholder}
+				value={ctx.value}
+				ref={ctx.inputRef}
+			/>
+		)
+	}
 
 	return (
 		<InputGroupTextarea

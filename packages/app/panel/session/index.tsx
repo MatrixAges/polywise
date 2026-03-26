@@ -19,7 +19,6 @@ import type { PromptInputMessage } from '@/__shadcn__/components/ai-elements/pro
 
 const Index = () => {
 	const [x] = useState(() => container.resolve(Model))
-	const [input, setInput] = useState('')
 
 	const streaming = x.status === 'streaming'
 
@@ -31,7 +30,6 @@ const Index = () => {
 	const handleSubmit = useMemoizedFn((message: PromptInputMessage) => {
 		if (message.text?.trim()) {
 			x.send(message.text)
-			setInput('')
 		}
 	})
 
@@ -72,11 +70,7 @@ const Index = () => {
 
 			<div className='border-border-light w-full border-t p-3'>
 				<PromptInput onSubmit={handleSubmit} className='w-full'>
-					<PromptInputTextarea
-						value={input}
-						placeholder='输入消息...'
-						onChange={e => setInput(e.currentTarget.value)}
-					/>
+					<PromptInputTextarea placeholder='输入消息...' />
 					<PromptInputSubmit status={streaming ? 'streaming' : 'ready'} onStop={handleStop} />
 				</PromptInput>
 			</div>
