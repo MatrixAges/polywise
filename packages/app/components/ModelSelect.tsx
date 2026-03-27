@@ -21,18 +21,19 @@ import type { DefaultModel } from '@core/types'
 interface IProps {
 	value?: DefaultModel
 	show_local_model?: boolean
+	ghost?: boolean
 	onChange?: (v: DefaultModel) => void
 }
 
 const Index = (props: IProps) => {
-	const { value, show_local_model, onChange } = props
+	const { value, show_local_model, ghost, onChange } = props
 
 	const global = useGlobal()
 
 	const s = global.setting
 	const providers = $copy([...s.providers.providers, ...(s.providers.custom_providers || [])])
 
-	const [model, setModel] = useState<string | null>(null)
+	const [model, setModel] = useState<string | null>(() => (s.config ? s.config.default_model?.model : null))
 
 	useEffect(() => {
 		if (value?.model) setModel(value.model)
@@ -66,8 +67,8 @@ const Index = (props: IProps) => {
 
 	return (
 		<Combobox items={provider_items} value={model} onValueChange={setDefaultModel}>
-			<ComboboxInput placeholder='Select a default model' />
-			<ComboboxContent>
+			<ComboboxInput ghost={ghost} placeholder='Select a default model' />
+			<ComboboxContent ghost={ghost}>
 				<ComboboxEmpty>No providers found.</ComboboxEmpty>
 				<ComboboxList>
 					{(group, index) => (

@@ -51,7 +51,7 @@ body {
 		&.primary {
 			@apply 
 				text-std-100 text-xs
-				bg-std-600
+				bg-std-700
 				hover:bg-std-800 hover:text-std-100 active:bg-std-black active:fill-std-white
 				fill-std-100
 			;
