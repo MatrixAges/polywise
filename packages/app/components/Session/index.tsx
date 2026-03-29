@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
+import { useMemoizedFn } from 'ahooks'
 import { observer } from 'mobx-react-lite'
 import { container } from 'tsyringe'
 
@@ -25,9 +26,11 @@ const Index = (props: IProps) => {
 		deinit: () => x.deinit()
 	})
 
+	const setConfainerRef = useMemoizedFn(v => (x.ref_container = v))
+
 	const props_input: IPropsInput = {
 		streaming,
-		submit: x.chat?.sendMessage,
+		send: x.send,
 		clear: x.clear
 	}
 
@@ -48,12 +51,19 @@ const Index = (props: IProps) => {
 					flex flex-1 flex-col
 					gap-4
 					p-4
-					pb-10
 				`,
 					x.chat_signal
 				)}
+				ref={setConfainerRef}
 			>
-				<div className='flex w-full flex-col gap-6'>
+				<div
+					className='
+						flex flex-col
+						w-full
+						gap-6
+						pb-20
+					'
+				>
 					{x.messages.map(message => (
 						<Message from={message.role} key={message.id}>
 							<MessageContent>

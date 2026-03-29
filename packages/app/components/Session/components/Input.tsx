@@ -27,7 +27,7 @@ const submit_modes = [
 ]
 
 const Index = (props: IPropsInput) => {
-	const { streaming, submit, clear } = props
+	const { streaming, send, clear } = props
 	const global = useGlobal()
 	const ref = useRef<HTMLTextAreaElement>(null)
 	const [compositing, { setLeft, setRight }] = useToggle(false)
@@ -58,7 +58,7 @@ const Index = (props: IPropsInput) => {
 	})
 
 	const submitTo = useMemoizedFn((v: string) => {
-		submit({ text: v })
+		send(v)
 
 		ref.current!.value = ''
 	})

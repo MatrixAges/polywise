@@ -1,7 +1,5 @@
-import type { Chat } from '@/utils'
 import type Model from './model'
 
-export interface IPropsInput extends Pick<Model, 'clear'> {
+export interface IPropsInput extends Pick<Model, 'clear' | 'send'> {
 	streaming: boolean
-	submit: Chat['sendMessage']
 }

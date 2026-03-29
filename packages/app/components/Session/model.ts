@@ -86,6 +86,8 @@ export default class Index {
 
 	send(v: string) {
 		this.chat.sendMessage({ text: v })
+
+		this.scrollToBottom()
 	}
 
 	stop() {
@@ -96,8 +98,19 @@ export default class Index {
 		rpc.session.stop.mutate(this.id)
 	}
 
+	scrollToBottom() {
+		if (!this.ref_container) return
+
+		this.ref_container.scrollTo({
+			top: this.ref_container.scrollHeight,
+			behavior: 'smooth'
+		})
+	}
+
 	update() {
 		this.chat_signal += 1
+
+		this.scrollToBottom()
 	}
 
 	async clear() {

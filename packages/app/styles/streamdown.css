@@ -22,4 +22,12 @@
 	h6 {
 		@apply text-xs;
 	}
+
+	ul,
+	ol {
+		input[type='checkbox'] {
+			translate: 0 2px;
+			margin-right: 1px;
+		}
+	}
 }
