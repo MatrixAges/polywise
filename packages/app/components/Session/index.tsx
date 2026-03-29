@@ -6,7 +6,7 @@ import { container } from 'tsyringe'
 import { Message, MessageContent, MessageResponse } from '@/__shadcn__/components/ai-elements'
 import { useAliveEffect } from '@/hooks'
 
-import { Input } from './components'
+import { Input, LoadingDots } from './components'
 import Model from './model'
 
 import type { IPropsInput } from './types'
@@ -68,18 +68,22 @@ const Index = (props: IProps) => {
 					{x.messages.map(message => (
 						<Message from={message.role} key={message.id}>
 							<MessageContent>
-								{message.parts
-									.filter(part => part.type === 'text')
-									.map((part, i) => (
-										<MessageResponse
-											isAnimating={
-												streaming && message.role === 'assistant'
-											}
-											key={`${message.id}-${i}`}
-										>
-											{part.text}
-										</MessageResponse>
-									))}
+								{message.parts.length ? (
+									message.parts
+										.filter(part => part.type === 'text')
+										.map((part, i) => (
+											<MessageResponse
+												isAnimating={
+													streaming && message.role === 'assistant'
+												}
+												key={`${message.id}-${i}`}
+											>
+												{part.text}
+											</MessageResponse>
+										))
+								) : (
+									<LoadingDots></LoadingDots>
+								)}
 							</MessageContent>
 						</Message>
 					))}

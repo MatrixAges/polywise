@@ -7,7 +7,7 @@ import getPubSub from './getPubSub'
 const { publisher, subscriber } = getPubSub()
 
 const DONE_MESSAGE = '\n\n\nDONE_SENTINEL_hasdfasudfyge374%$%^$EDSATRTYFtydryrte\n'
-const DONE_VALUE = 'DONE'
+export const DONE_VALUE = 'DONE'
 
 const hasExistingStream = (id: string) => {
 	const state = publisher.get(`sentinel:${id}`)

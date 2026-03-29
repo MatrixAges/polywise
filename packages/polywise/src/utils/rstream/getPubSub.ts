@@ -1,3 +1,5 @@
+import { DONE_VALUE } from '.'
+
 export interface Publisher {
 	publish: (channel: string, message: string) => void
 	set: (key: string, value: string) => void
@@ -44,7 +46,10 @@ export default () => {
 			data.delete(key)
 		},
 		incr: key => {
-			const value = Number(data.get(key) || 0)
+			const prev_value = data.get(key)
+
+			let value = prev_value === DONE_VALUE ? 0 : (prev_value as number) || 0
+
 			const new_value = value + 1
 
 			data.set(key, new_value)

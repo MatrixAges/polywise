@@ -143,9 +143,6 @@ export default class Index {
 
 		const target = await convertToModelMessages(messages)
 
-		console.log('--------')
-		console.log(JSON.stringify(target))
-
 		const res = streamText({
 			model: this.model,
 			// system: fst_system_prompt,
