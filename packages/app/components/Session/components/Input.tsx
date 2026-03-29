@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef } from 'react'
 import { PauseIcon, PlayIcon } from '@phosphor-icons/react'
 import { useMemoizedFn, useToggle } from 'ahooks'
-import { BrushCleaning, Maximize } from 'lucide-react'
+import { ArrowDownToLine, BrushCleaning, Maximize } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import {
@@ -14,7 +14,7 @@ import {
 	SelectValue
 } from '@/__shadcn__/components/ui/select'
 import { Textarea } from '@/__shadcn__/components/ui/textarea'
-import { ModelSelect } from '@/components'
+import { ModelSelect, Show } from '@/components'
 import { useGlobal } from '@/context'
 
 import type { AppConfig } from '@core/types'
@@ -27,7 +27,7 @@ const submit_modes = [
 ]
 
 const Index = (props: IPropsInput) => {
-	const { streaming, send, stop, clear } = props
+	const { streaming, send, stop, clear, scrollToBottom } = props
 	const global = useGlobal()
 	const ref = useRef<HTMLTextAreaElement>(null)
 	const [compositing, { setLeft, setRight }] = useToggle(false)
@@ -100,13 +100,26 @@ const Index = (props: IPropsInput) => {
 	const Icon = streaming ? PauseIcon : PlayIcon
 
 	return (
-		<div className={$cx('w-full px-3', full && 'absolute z-50 h-full')}>
+		<div
+			className={$cx(
+				'relative w-full px-3',
+				full &&
+					`
+				absolute
+				z-50
+				h-full
+				pt-3
+				backdrop-blur-lg
+			`
+			)}
+		>
 			<div className={$cx('flex flex-col', full && 'h-full')}>
 				<div
 					className='
 						flex flex-col flex-1
 						rounded-lg
 						bg-card
+						border-t border-border-light/36
 						shadow
 					'
 				>
@@ -182,9 +195,14 @@ const Index = (props: IPropsInput) => {
 							</SelectGroup>
 						</SelectContent>
 					</Select>
-					<button className='icon_button h-5 w-5' onClick={clear}>
-						<BrushCleaning className='stroke-std-400 h-[12px] w-[12px]'></BrushCleaning>
-					</button>
+					<div className='flex gap-1'>
+						<button className='icon_button h-5 w-5' onClick={scrollToBottom}>
+							<ArrowDownToLine className='stroke-std-400 h-[12px] w-[12px]'></ArrowDownToLine>
+						</button>
+						<button className='icon_button h-5 w-5' onClick={clear}>
+							<BrushCleaning className='stroke-std-400 h-[12px] w-[12px]'></BrushCleaning>
+						</button>
+					</div>
 				</div>
 			</div>
 		</div>

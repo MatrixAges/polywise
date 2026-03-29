@@ -9,6 +9,14 @@ declare module 'react' {
 	interface CSSProperties {
 		[key: string]: any
 	}
+
+	interface ButtonHTMLAttributes<T> {
+		onClick?: React.MouseEventHandler<T> | ((v: any) => any)
+	}
+
+	interface DivHTMLAttributes<T> {
+		onClick?: React.MouseEventHandler<T> | ((v: any) => any)
+	}
 }
 
 declare module 'react-dom' {

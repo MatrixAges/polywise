@@ -27,12 +27,14 @@ const Index = (props: IProps) => {
 	})
 
 	const setConfainerRef = useMemoizedFn(v => (x.ref_container = v))
+	const setBottomSignalRef = useMemoizedFn(v => (x.ref_bottom_signal = v))
 
 	const props_input: IPropsInput = {
 		streaming,
 		send: x.send,
 		stop: x.stop,
-		clear: x.clear
+		clear: x.clear,
+		scrollToBottom: x.scrollToBottom
 	}
 
 	return (
@@ -55,6 +57,7 @@ const Index = (props: IProps) => {
 				`,
 					x.chat_signal
 				)}
+				onWheel={x.onWheel}
 				ref={setConfainerRef}
 			>
 				<div
@@ -62,7 +65,6 @@ const Index = (props: IProps) => {
 						flex flex-col
 						w-full
 						gap-6
-						pb-20
 					'
 				>
 					{x.messages.map(message => (
@@ -87,6 +89,7 @@ const Index = (props: IProps) => {
 							</MessageContent>
 						</Message>
 					))}
+					<div className='mt-12 h-8' ref={setBottomSignalRef}></div>
 				</div>
 			</div>
 			<Input {...props_input}></Input>

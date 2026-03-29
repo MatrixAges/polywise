@@ -1,21 +1,26 @@
 import { DefaultChatTransport } from 'ai'
 import { makeAutoObservable } from 'mobx'
+import scroll from 'smooth-scroll-into-view-if-needed'
 import { toast } from 'sonner'
 import { getId } from 'stk/utils'
 import { injectable } from 'tsyringe'
 
 import { server_sys_session_url } from '@/appdata'
 import { Util } from '@/models/common'
-import { alert, Chat, rpc } from '@/utils'
+import { alert, Chat, execUntil, onViewport, rpc } from '@/utils'
 
 import type { Session } from '@core/db'
 import type { Message } from '@core/fst'
 import type { AbstractChat, UIMessage } from 'ai'
+import type { UIEvent } from 'react'
 
 @injectable()
 export default class Index {
 	id = ''
 	ref_container = null as unknown as HTMLDivElement
+	ref_bottom_signal = null as unknown as HTMLDivElement
+	wheeled = false
+	auto_scroll = true
 
 	session = null as unknown as Session
 	chat = null as unknown as Chat
@@ -30,6 +35,9 @@ export default class Index {
 				util: false,
 				id: false,
 				ref_container: false,
+				ref_bottom_signal: false,
+				wheeled: false,
+				auto_scroll: false,
 				status: false,
 				messages: false,
 				chat: false
@@ -44,6 +52,11 @@ export default class Index {
 		this.initChat()
 		this.sub()
 		this.on()
+
+		execUntil(
+			() => this.ref_bottom_signal,
+			() => this.forceToBottom()
+		)
 	}
 
 	initChat() {
@@ -87,7 +100,7 @@ export default class Index {
 	send(v: string) {
 		this.chat.sendMessage({ text: v })
 
-		this.scrollToBottom()
+		this.scrollToBottom({ force: true })
 	}
 
 	stop() {
@@ -98,19 +111,61 @@ export default class Index {
 		rpc.session.stop.mutate(this.id)
 	}
 
-	scrollToBottom() {
-		if (!this.ref_container) return
+	forceToBottom() {
+		let framer_id: number
+		let check_times = 0
 
-		this.ref_container.scrollTo({
-			top: this.ref_container.scrollHeight,
-			behavior: 'smooth'
-		})
+		const start = () => {
+			this.scrollToBottom({ instant: true })
+
+			cancelAnimationFrame(framer_id)
+
+			framer_id = requestAnimationFrame(() => check())
+		}
+
+		const check = () => {
+			check_times += 1
+
+			if (this.wheeled || check_times > 12) {
+				if (this.wheeled) {
+					cancelAnimationFrame(framer_id)
+				} else {
+					check_times = 0
+
+					start()
+				}
+			} else {
+				start()
+			}
+		}
+
+		start()
+	}
+
+	scrollToBottom(args?: { force?: boolean; update?: boolean; instant?: boolean }) {
+		const { force, update, instant } = args || {}
+
+		if (force) {
+			this.forceToBottom()
+		} else {
+			scroll(this.ref_bottom_signal, { block: 'start', behavior: instant ? 'instant' : 'smooth' })
+		}
+
+		if (!update && !this.auto_scroll) this.auto_scroll = true
+	}
+
+	onWheel() {
+		if (!this.wheeled) this.wheeled = true
+
+		if (!this.auto_scroll) return
+
+		this.auto_scroll = false
 	}
 
 	update() {
 		this.chat_signal += 1
 
-		this.scrollToBottom()
+		if (this.auto_scroll) this.scrollToBottom({ update: true, instant: true })
 	}
 
 	async clear() {

@@ -10,7 +10,7 @@ export interface IProps extends PropsWithChildren, Pick<MotionNodeAnimationOptio
 	visible: boolean | null | undefined
 	className?: string
 	id?: string
-	onClick?: MouseEventHandler<HTMLDivElement>
+	onClick?: MouseEventHandler<HTMLDivElement> | ((v: any) => any)
 }
 
 const Index = (props: IProps) => {
