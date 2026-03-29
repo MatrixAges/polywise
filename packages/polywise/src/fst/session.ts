@@ -135,6 +135,12 @@ export default class Index {
 	async getStream(messages: Array<Message>) {
 		this.messages = messages
 
+		if (!this.session.is_runing && messages.length) {
+			const user_prompt = messages.at(-1)!
+
+			await this.insert(user_prompt)
+		}
+
 		this.setRunning(true)
 
 		const target = await convertToModelMessages(messages)
@@ -211,6 +217,10 @@ export default class Index {
 	private async append(v: Message) {
 		this.messages = [...this.messages, v]
 
+		await this.insert(v)
+	}
+
+	private async insert(v: Message) {
 		await env.db
 			.insert(message)
 			.values({ id: v.id, session_id: this.id, role: v.role, content: JSON.stringify(v) } as MessageInsert)
