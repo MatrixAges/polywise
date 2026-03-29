@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { BadgeAlert } from 'lucide-react'
 
 import {
 	AlertDialog,
@@ -43,7 +44,7 @@ const Index = (props: IProps) => {
 		onCancel
 	} = props
 
-	const Icon = useMemo(() => (icon ? icon_map[icon] : null), [icon])
+	const Icon = useMemo(() => (icon ? icon_map[icon] : BadgeAlert), [icon])
 
 	return (
 		<AlertDialog open={open}>

@@ -6,7 +6,7 @@ import { injectable } from 'tsyringe'
 
 import { server_sys_session_url } from '@/appdata'
 import { Util } from '@/models/common'
-import { Chat, rpc } from '@/utils'
+import { alert, Chat, rpc } from '@/utils'
 
 import type { Session } from '@core/db'
 import type { Message } from '@core/fst'
@@ -98,6 +98,23 @@ export default class Index {
 
 	update() {
 		this.chat_signal += 1
+	}
+
+	async clear() {
+		const res = await alert({
+			title: 'Clear Messages',
+			desc: 'Confirm clearing all message history?'
+		})
+
+		if (!res) return
+
+		this.stop()
+
+		this.messages = []
+
+		this.update()
+
+		rpc.session.clear.mutate(this.id)
 	}
 
 	on() {

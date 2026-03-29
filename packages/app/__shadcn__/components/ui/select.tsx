@@ -28,6 +28,7 @@ function SelectValue({ className, ...props }: SelectPrimitive.Value.Props) {
 
 function SelectTrigger({
   className,
+  arrowClassName,
   size = "default",
   no_style,
   no_active_style,
@@ -37,6 +38,7 @@ function SelectTrigger({
   no_style?:boolean
   no_active_style?:boolean
   size?: "sm" | "default"
+  arrowClassName?:string
 }) {
   return (
     <SelectPrimitive.Trigger
@@ -53,7 +55,7 @@ function SelectTrigger({
       {children}
       {!no_style&&<SelectPrimitive.Icon
         render={
-          <ChevronDownIcon className="text-muted-foreground pointer-events-none size-4" />
+          <ChevronDownIcon className={cn("pointer-events-none size-4",arrowClassName)} />
         }
       />}
     </SelectPrimitive.Trigger>

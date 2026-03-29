@@ -11,6 +11,7 @@ export interface DefaultModel {
 export interface AppConfig {
 	workspaces: Array<Workspace>
 	current_workspace: string
+	submit_mode: 'enter' | 'ctrl+enter'
 	default_model: DefaultModel
 	enable_triple: boolean
 	triple_model: DefaultModel

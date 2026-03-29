@@ -202,6 +202,14 @@ export default class Index {
 		this.abort_controller.abort()
 	}
 
+	async clear() {
+		this.messages = []
+
+		await env.db.delete(message).where(eq(message.session_id, this.id))
+
+		this.event.emit(`${this.id}/change`, { type: 'sync', session: this.session, messages: [] } as ChatEventRes)
+	}
+
 	private active() {
 		this.update_at = Date.now()
 	}

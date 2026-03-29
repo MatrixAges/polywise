@@ -62,8 +62,8 @@ export default class Index {
 		this.util.acts.push(deinit.unsubscribe)
 	}
 
-	setConfig(type: 'config' | 'providers', data: any) {
-		rpc.file.write.mutate({ path: `${type}.json`, data })
+	setConfig(type: 'config' | 'providers', data: any, merge?: boolean) {
+		rpc.file.write.mutate({ path: `${type}.json`, data, merge })
 	}
 
 	setPanelRef(v: Index['panel_ref']) {

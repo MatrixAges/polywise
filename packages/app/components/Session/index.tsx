@@ -9,6 +9,8 @@ import { useAliveEffect } from '@/hooks'
 import { Input } from './components'
 import Model from './model'
 
+import type { IPropsInput } from './types'
+
 interface IProps {
 	id: string
 }
@@ -24,8 +26,21 @@ const Index = (props: IProps) => {
 		deinit: () => x.deinit()
 	})
 
+	const props_input: IPropsInput = {
+		streaming,
+		submit: x.chat?.sendMessage,
+		clear: x.clear
+	}
+
 	return (
-		<div className='flex h-full w-full flex-col' ref={setRef}>
+		<div
+			className='
+				relative
+				flex flex-col
+				w-full h-full
+			'
+			ref={setRef}
+		>
 			<div
 				className={$cx(
 					`
@@ -58,7 +73,7 @@ const Index = (props: IProps) => {
 					))}
 				</div>
 			</div>
-			<Input></Input>
+			<Input {...props_input}></Input>
 		</div>
 	)
 }

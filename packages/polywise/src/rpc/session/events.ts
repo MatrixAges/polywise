@@ -8,3 +8,7 @@ export const stop = p.input(string()).mutation(async ({ input }) => {
 export const destroy = p.input(string()).mutation(async ({ input }) => {
 	SessionEventStore.emit(`${input}/destroy`)
 })
+
+export const clear = p.input(string()).mutation(async ({ input }) => {
+	SessionEventStore.emit(`${input}/clear`)
+})
