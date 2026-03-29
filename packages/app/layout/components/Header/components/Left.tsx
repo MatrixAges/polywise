@@ -1,6 +1,5 @@
 import { PanelLeft } from 'lucide-react'
 
-import { workspaces } from '@/__metadata__'
 import {
 	Select,
 	SelectContent,
@@ -15,7 +14,9 @@ import Logo from '@/public/bare.svg?react'
 import type { IPropsLeft } from '../types'
 
 const Index = (props: IPropsLeft) => {
-	const { toggleSidebar } = props
+	const { workspaces, current_workspace, toggleSidebar } = props
+
+	console.log(workspaces, current_workspace)
 
 	return (
 		<div
@@ -50,8 +51,8 @@ const Index = (props: IPropsLeft) => {
 				<PanelLeft></PanelLeft>
 			</button>
 			<Select
-				items={workspaces.map(item => ({ label: item.name, value: item.endpoint }))}
-				defaultValue={workspaces.at(-1)!.endpoint}
+				items={workspaces.map(item => ({ label: item.name, value: item.name }))}
+				value={current_workspace ?? null}
 			>
 				<SelectTrigger className='workspace_selector' no_active_style>
 					<SelectValue />
@@ -60,7 +61,7 @@ const Index = (props: IPropsLeft) => {
 					<SelectGroup>
 						<SelectLabel>Workspaces</SelectLabel>
 						{workspaces.map(item => (
-							<SelectItem value={item.endpoint} key={item.id}>
+							<SelectItem value={item.name} key={item.name}>
 								{item.name}
 							</SelectItem>
 						))}

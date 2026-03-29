@@ -16,6 +16,8 @@ export default async () => {
 			const default_model = { provider: preset.name, model: preset.models[0].id }
 
 			await ensureWithValue(path, {
+				workspaces: [{ name: 'Default' }],
+				current_workspace: 'Default',
 				default_model,
 				enable_triple: false,
 				triple_model: default_model,

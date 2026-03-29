@@ -35,6 +35,8 @@ const Index = () => {
 	}, [])
 
 	const props_header: IPropsHeader = {
+		workspaces: $copy(s.config?.workspaces) || [],
+		current_workspace: s.config?.current_workspace,
 		disconnected: global.disconnected,
 		toggleSidebar: s.toggleSidebar,
 		togglePanel: s.togglePanel

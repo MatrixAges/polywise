@@ -1,9 +1,16 @@
+export interface Workspace {
+	name: string
+	endpoint?: string
+}
+
 export interface DefaultModel {
 	provider: string
 	model: string
 }
 
 export interface AppConfig {
+	workspaces: Array<Workspace>
+	current_workspace: string
 	default_model: DefaultModel
 	enable_triple: boolean
 	triple_model: DefaultModel
