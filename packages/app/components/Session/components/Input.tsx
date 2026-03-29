@@ -58,6 +58,8 @@ const Index = (props: IPropsInput) => {
 	})
 
 	const onSend = useMemoizedFn(() => {
+		if (streaming || compositing) return
+
 		const value = ref.current?.value
 
 		if (!value) return
