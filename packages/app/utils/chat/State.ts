@@ -69,6 +69,12 @@ export default class Index<UI_MESSAGE extends UIMessage> implements ChatState<UI
 		this.#callMessagesCallbacks()
 	}
 
+	clearMessages() {
+		this.#messages = []
+
+		this.#callMessagesCallbacks()
+	}
+
 	snapshot<T>(v: T) {
 		return $copy(v)
 	}

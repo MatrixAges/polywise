@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { useMemoizedFn } from 'ahooks'
 import { observer } from 'mobx-react-lite'
 import { container } from 'tsyringe'
 
@@ -36,6 +35,7 @@ const Index = (props: IProps) => {
 		<div
 			className='
 				relative
+				overflow-hidden
 				flex flex-col
 				w-full h-full
 			'
@@ -48,11 +48,12 @@ const Index = (props: IProps) => {
 					flex flex-1 flex-col
 					gap-4
 					p-4
+					pb-10
 				`,
 					x.chat_signal
 				)}
 			>
-				<div className='flex w-full flex-col'>
+				<div className='flex w-full flex-col gap-6'>
 					{x.messages.map(message => (
 						<Message from={message.role} key={message.id}>
 							<MessageContent>

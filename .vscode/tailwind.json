@@ -4,6 +4,7 @@
 		{ "name": "@plugin" },
 		{ "name": "@reference" },
 		{ "name": "@theme" },
+		{ "name": "@source" },
 		{ "name": "@apply" },
 		{ "name": "@utility" },
 		{ "name": "@variant" },

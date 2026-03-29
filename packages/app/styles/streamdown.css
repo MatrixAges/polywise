@@ -1,0 +1,25 @@
+[data-streamdown] {
+	h1 {
+		@apply text-xl;
+	}
+
+	h2 {
+		@apply text-lg;
+	}
+
+	h3 {
+		@apply text-base;
+	}
+
+	h4 {
+		@apply text-sm;
+	}
+
+	h5 {
+		@apply text-xsm;
+	}
+
+	h6 {
+		@apply text-xs;
+	}
+}

@@ -6,6 +6,7 @@
 @import './utility.css';
 @import './components.css';
 @import './custom.css';
+@import './streamdown.css';
 @import './react-horizontal-scrolling-menu.css';
 @import 'tw-animate-css';
 
@@ -33,7 +34,7 @@
 	--color-std-black: #000;
 	--color-std-white: #fff;
 
-	--text-xsm: 13px;
+	--text-xsm: 0.82rem;
 	--text-xsm--line-height: 1.25rem;
 
 	--color-dark: oklch(from var(--color-std-900) l c h / 0.9);

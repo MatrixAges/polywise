@@ -32,6 +32,10 @@ export default class Index<UI_MESSAGE extends UIMessage = UIMessage> extends Abs
 		this.#state.removeMessage(index)
 	}
 
+	clearMessages() {
+		this.#state.clearMessages()
+	}
+
 	'~registerMessagesCallback'(onChange: () => void, throttle_wait_ms?: number) {
 		return this.#state['~registerMessagesCallback'](onChange, throttle_wait_ms)
 	}

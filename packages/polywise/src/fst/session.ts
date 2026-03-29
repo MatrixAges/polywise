@@ -98,8 +98,6 @@ export default class Index {
 			}
 		}
 
-		console.log(provider, model, target_options)
-
 		this.model = await getModel(provider, model, target_options)
 	}
 
@@ -150,7 +148,7 @@ export default class Index {
 
 		const res = streamText({
 			model: this.model,
-			system: fst_system_prompt,
+			// system: fst_system_prompt,
 			messages: target,
 			abortSignal: this.abort_controller.signal,
 			experimental_transform: smoothStream(),

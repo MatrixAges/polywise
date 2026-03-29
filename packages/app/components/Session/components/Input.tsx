@@ -1,3 +1,4 @@
+import { useLayoutEffect, useRef } from 'react'
 import { PauseIcon, PlayIcon } from '@phosphor-icons/react'
 import { useMemoizedFn, useToggle } from 'ahooks'
 import { BrushCleaning, Maximize } from 'lucide-react'
@@ -28,9 +29,25 @@ const submit_modes = [
 const Index = (props: IPropsInput) => {
 	const { streaming, submit, clear } = props
 	const global = useGlobal()
+	const ref = useRef<HTMLTextAreaElement>(null)
+	const [compositing, { setLeft, setRight }] = useToggle(false)
 	const [full, { toggle: toggleFull }] = useToggle(false)
 
 	const s = global.setting
+
+	useLayoutEffect(() => {
+		const el = ref.current
+
+		if (!el) return
+
+		el.addEventListener('compositionstart', setRight)
+		el.addEventListener('compositionend', setLeft)
+
+		return () => {
+			el.removeEventListener('compositionstart', setRight)
+			el.removeEventListener('compositionend', setLeft)
+		}
+	}, [])
 
 	const onChangeDefaultMode = useMemoizedFn(v => {
 		s.setConfig('config', { default_model: v } as AppConfig, true)
@@ -40,9 +57,17 @@ const Index = (props: IPropsInput) => {
 		s.setConfig('config', { submit_mode: v } as AppConfig, true)
 	})
 
+	const submitTo = useMemoizedFn((v: string) => {
+		submit({ text: v })
+
+		ref.current!.value = ''
+	})
+
 	const onSubmit = useMemoizedFn((e: KeyboardEvent<HTMLTextAreaElement>) => {
 		const submit_mode = s.config?.submit_mode || 'enter'
 		const textarea = e.currentTarget
+
+		if (compositing) return
 
 		if (submit_mode === 'enter') {
 			if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
@@ -50,8 +75,7 @@ const Index = (props: IPropsInput) => {
 
 				if (!textarea.value) return
 
-				submit({ text: textarea.value })
-				return
+				return submitTo(textarea.value)
 			}
 
 			if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
@@ -68,9 +92,7 @@ const Index = (props: IPropsInput) => {
 
 				if (!textarea.value) return
 
-				submit({ text: textarea.value })
-
-				return
+				return submitTo(textarea.value)
 			}
 		}
 	})
@@ -78,7 +100,7 @@ const Index = (props: IPropsInput) => {
 	const Icon = streaming ? PauseIcon : PlayIcon
 
 	return (
-		<div className={$cx('w-full p-3 pb-0', full && 'absolute z-50 h-full')}>
+		<div className={$cx('w-full px-3', full && 'absolute z-50 h-full')}>
 			<div className={$cx('flex flex-col', full && 'h-full')}>
 				<div
 					className='
@@ -99,6 +121,7 @@ const Index = (props: IPropsInput) => {
 						`,
 							full && 'h-full max-h-full'
 						)}
+						ref={ref}
 						placeholder='What would you like to know?'
 						maxLength={9999}
 						onKeyDown={onSubmit}
@@ -129,7 +152,7 @@ const Index = (props: IPropsInput) => {
 						flex
 						items-center justify-between
 						w-full
-						py-2
+						py-1.5
 						text-xs
 					'
 				>
@@ -146,7 +169,7 @@ const Index = (props: IPropsInput) => {
 								bg-transparent
 							'
 						>
-							<SelectValue className='' />
+							<SelectValue />
 						</SelectTrigger>
 						<SelectContent className='w-[180px]' align='start'>
 							<SelectGroup>

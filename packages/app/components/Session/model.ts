@@ -110,6 +110,8 @@ export default class Index {
 
 		this.stop()
 
+		this.chat.clearMessages()
+
 		this.messages = []
 
 		this.update()

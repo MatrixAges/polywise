@@ -1,6 +1,6 @@
 import { SessionEventStore, SessionStore } from '@core/utils'
 
-const IDLE_TIMEOUT = 120 * 1000
+const IDLE_TIMEOUT = 720 * 1000
 const CHECK_INTERVAL = 30 * 1000
 
 export const initAutoClean = () => {
