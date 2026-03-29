@@ -65,7 +65,7 @@ const Index = (props: IPropsCustomForm) => {
 						{error}
 					</Show>
 				</div>
-				<div className='text-xsm flex gap-1'>
+				<div className='flex gap-1 text-sm'>
 					<button className='click_button h-7' type='button' onClick={onCancel}>
 						{t('provider.form.cancel')}
 					</button>
@@ -79,7 +79,7 @@ const Index = (props: IPropsCustomForm) => {
 					overflow-hidden
 					flex flex-col
 					rounded-lg
-					text-xsm
+					text-sm
 					border border-border-light
 				'
 			>

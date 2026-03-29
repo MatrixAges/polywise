@@ -28,7 +28,7 @@ const Index = (props: IPropsFormModels) => {
 				justify-center
 				px-4 py-5
 				rounded-2xl
-				text-xsm text-soft
+				text-sm text-soft
 				border border-border-light
 			'
 			>

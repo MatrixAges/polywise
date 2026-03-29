@@ -1,7 +1,7 @@
 @reference '#tailwind';
 
 .label {
-	@apply text-solid text-xsm;
+	@apply text-solid text-sm;
 }
 
 .input_wrap {
@@ -21,7 +21,7 @@
 				w-full
 				px-4
 				rounded-full
-				text-xsm
+				text-sm
 				outline-none
 				transition-colors
 				placeholder:text-soft

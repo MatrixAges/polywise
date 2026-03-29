@@ -78,7 +78,7 @@ const Index = (props: IPropsCustom) => {
 					h-13
 					px-3
 					rounded-full
-					text-xsm
+					text-sm
 					border border-border-light
 				'
 			>

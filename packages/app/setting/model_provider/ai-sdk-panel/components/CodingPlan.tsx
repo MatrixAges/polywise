@@ -48,7 +48,7 @@ const Index = () => {
 					flex flex-col
 					w-full
 					gap-3
-					text-xsm
+					text-sm
 				'
 			>
 				{plans.map(({ name, desc, link, month, comment, tier1, tier2, tier3 }) => (

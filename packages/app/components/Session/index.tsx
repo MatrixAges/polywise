@@ -31,6 +31,7 @@ const Index = (props: IProps) => {
 	const props_input: IPropsInput = {
 		streaming,
 		send: x.send,
+		stop: x.stop,
 		clear: x.clear
 	}
 

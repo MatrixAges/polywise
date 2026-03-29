@@ -247,7 +247,7 @@ const Index = (props: IPropsForm) => {
 								{error}
 							</Show>
 						</div>
-						<div className='text-xsm flex gap-1'>
+						<div className='flex gap-1 text-sm'>
 							<button
 								className='btn rounded-2xl px-1.5 py-0.5'
 								type='button'
@@ -265,7 +265,7 @@ const Index = (props: IPropsForm) => {
 							overflow-hidden
 							flex flex-col
 							rounded-lg
-							text-xsm
+							text-sm
 							border border-border-light
 						'
 					>
@@ -284,7 +284,7 @@ const Index = (props: IPropsForm) => {
 							min-h-13
 							px-3 py-2
 							rounded-full
-							text-xsm
+							text-sm
 							border border-border-light
 						'
 					>

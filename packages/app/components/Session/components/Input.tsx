@@ -27,7 +27,7 @@ const submit_modes = [
 ]
 
 const Index = (props: IPropsInput) => {
-	const { streaming, send, clear } = props
+	const { streaming, send, stop, clear } = props
 	const global = useGlobal()
 	const ref = useRef<HTMLTextAreaElement>(null)
 	const [compositing, { setLeft, setRight }] = useToggle(false)
@@ -57,8 +57,12 @@ const Index = (props: IPropsInput) => {
 		s.setConfig('config', { submit_mode: v } as AppConfig, true)
 	})
 
-	const submitTo = useMemoizedFn((v: string) => {
-		send(v)
+	const onSend = useMemoizedFn(() => {
+		const value = ref.current?.value
+
+		if (!value) return
+
+		send(value)
 
 		ref.current!.value = ''
 	})
@@ -67,15 +71,13 @@ const Index = (props: IPropsInput) => {
 		const submit_mode = s.config?.submit_mode || 'enter'
 		const textarea = e.currentTarget
 
-		if (compositing) return
+		if (streaming || compositing) return
 
 		if (submit_mode === 'enter') {
 			if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
 				e.preventDefault()
 
-				if (!textarea.value) return
-
-				return submitTo(textarea.value)
+				return onSend()
 			}
 
 			if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
@@ -90,9 +92,7 @@ const Index = (props: IPropsInput) => {
 			if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
 				e.preventDefault()
 
-				if (!textarea.value) return
-
-				return submitTo(textarea.value)
+				return onSend()
 			}
 		}
 	})
@@ -142,7 +142,7 @@ const Index = (props: IPropsInput) => {
 							</button>
 							<ModelSelect ghost onChange={onChangeDefaultMode}></ModelSelect>
 						</div>
-						<button className='icon_button primary h-6 w-6'>
+						<button className='icon_button primary h-6 w-6' onClick={streaming ? stop : onSend}>
 							<Icon className='fill-std-white h-[10px] w-[10px]' weight='fill'></Icon>
 						</button>
 					</div>
@@ -152,7 +152,7 @@ const Index = (props: IPropsInput) => {
 						flex
 						items-center justify-between
 						w-full
-						py-1.5
+						px-2 py-1.5
 						text-xs
 					'
 				>
