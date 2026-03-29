@@ -74,7 +74,7 @@ function ComboboxInput({
             variant="ghost"
             render={<ComboboxTrigger ghost={ghost} />}
             data-slot="input-group-button"
-            className="h-8! group-has-data-[slot=combobox-clear]/input-group:hidden data-pressed:bg-transparent"
+            className="h-8! group-has-data-[slot=combobox-clear]/input-group:hidden data-pressed:bg-transparent hover:bg-transparent"
             disabled={disabled}
           />
         )}

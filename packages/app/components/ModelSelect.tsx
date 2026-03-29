@@ -86,7 +86,7 @@ const Index = (props: IProps) => {
 									</ComboboxItem>
 								)}
 							</ComboboxCollection>
-							{index < provider_items.length - 1 && <ComboboxSeparator />}
+							{index < provider_items.length - 2 && <ComboboxSeparator />}
 						</ComboboxGroup>
 					)}
 				</ComboboxList>

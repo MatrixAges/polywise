@@ -16,8 +16,6 @@ import type { IPropsLeft } from '../types'
 const Index = (props: IPropsLeft) => {
 	const { workspaces, current_workspace, toggleSidebar } = props
 
-	console.log(workspaces, current_workspace)
-
 	return (
 		<div
 			className='
