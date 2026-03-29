@@ -1,4 +1,6 @@
+import { resolve } from 'path'
 import { config, providers } from '@core/config'
+import { app } from '@core/consts'
 import fst_system_prompt from '@core/consts/prompts/fst_system_prompt.md'
 import { agent, message, session, session_agent } from '@core/db/schema'
 import { env } from '@core/env'
@@ -6,6 +8,7 @@ import { convertToModelMessages, smoothStream, streamText } from 'ai'
 import dayjs from 'dayjs'
 import { desc, eq } from 'drizzle-orm'
 import { pick } from 'es-toolkit'
+import fs from 'fs-extra'
 import { getId } from 'stk/utils'
 
 import { getModel } from './provider'
@@ -44,6 +47,8 @@ export default class Index {
 
 		if (res_exsit) {
 			res = res_exsit
+
+			await fs.ensureDir(resolve(`${app.app_path}/${this.id}`))
 		} else {
 			const [res_insert] = await env.db
 				.insert(session)
