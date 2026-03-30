@@ -13,6 +13,7 @@ import fs from 'fs-extra'
 import { getId } from 'stk/utils'
 
 import { getModel, provider_options } from './provider'
+import weather_tool from './tools/weather'
 
 import type { Agent, MessageInsert, Session, SessionInsert } from '@core/db'
 import type { SpecialProvider } from '@core/types'
@@ -149,7 +150,8 @@ export default class Index {
 			// system: fst_system_prompt,
 			messages: target,
 			tools: {
-				googleSearch: google.tools.googleSearch({})
+				// googleSearch: google.tools.googleSearch({}),
+				weather_tool
 			},
 			abortSignal: this.abort_controller.signal,
 			providerOptions: provider_options,

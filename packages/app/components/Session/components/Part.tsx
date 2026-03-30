@@ -1,6 +1,10 @@
+import { isStaticToolUIPart } from 'ai'
+
 import { MessageResponse } from '@/__shadcn__/components/ai-elements'
 import { Reasoning, ReasoningContent, ReasoningTrigger } from '@/__shadcn__/components/ai-elements/reasoning'
+import { Tool, ToolContent, ToolHeader, ToolInput, ToolOutput } from '@/__shadcn__/components/ai-elements/tool'
 
+import type { DynamicToolUIPart, ToolUIPart } from 'ai'
 import type { IPropsPart } from '../types'
 
 const Index = (props: IPropsPart) => {
@@ -21,6 +25,42 @@ const Index = (props: IPropsPart) => {
 			)
 		case 'text':
 			return <MessageResponse isAnimating>{part.text}</MessageResponse>
+		case 'dynamic-tool': {
+			const tool_part = part as DynamicToolUIPart
+
+			return (
+				<Tool className='w-full'>
+					<ToolHeader
+						type={tool_part.type}
+						state={tool_part.state}
+						toolName={tool_part.toolName}
+						title={tool_part.title}
+					/>
+					<ToolContent>
+						{tool_part.input !== undefined && <ToolInput input={tool_part.input} />}
+						{(tool_part.output ?? tool_part.errorText) && (
+							<ToolOutput output={tool_part.output} errorText={tool_part.errorText} />
+						)}
+					</ToolContent>
+				</Tool>
+			)
+		}
+	}
+
+	if (isStaticToolUIPart(part)) {
+		const tool_part = part as ToolUIPart
+
+		return (
+			<Tool className='w-full'>
+				<ToolHeader type={tool_part.type} state={tool_part.state} title={tool_part.title} />
+				<ToolContent>
+					{tool_part.input !== undefined && <ToolInput input={tool_part.input} />}
+					{(tool_part.output ?? tool_part.errorText) && (
+						<ToolOutput output={tool_part.output} errorText={tool_part.errorText} />
+					)}
+				</ToolContent>
+			</Tool>
+		)
 	}
 
 	return null
