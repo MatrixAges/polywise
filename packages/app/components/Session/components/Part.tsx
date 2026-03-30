@@ -17,7 +17,7 @@ const Index = (props: IPropsPart) => {
 				<Reasoning
 					className='w-full'
 					isStreaming={streaming}
-					duration={parseInt(((metadata?.reasoning_duration || 0) / 1000).toFixed(0))}
+					duration={Math.ceil((metadata?.reasoning_duration ?? 0) / 1000)}
 				>
 					<ReasoningTrigger />
 					<ReasoningContent>{part.text}</ReasoningContent>

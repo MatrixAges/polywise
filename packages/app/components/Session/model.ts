@@ -194,12 +194,15 @@ export default class Index {
 	}
 
 	onScroll() {
-		if (this.status === 'streaming') return
 		if (!this.ref_container) return
+		if (this.status === 'streaming') return
 
 		const { scrollTop, scrollHeight, clientHeight } = this.ref_container
 		const is_at_top = scrollTop === 0
 		const is_at_bottom = scrollTop + clientHeight >= scrollHeight - 10
+
+		console.log('----------')
+		console.log({ has_newer: this.has_newer, has_older: this.has_older, is_at_top, is_at_bottom })
 
 		if (is_at_top && this.has_older) {
 			rpc.session.load.query({ id: this.id, type: 'prev' })

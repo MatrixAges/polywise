@@ -92,6 +92,14 @@ export default class Index {
 		await this.getModel()
 	}
 
+	async updateSession(args: Partial<SessionInsert>) {
+		this.active()
+
+		const [res] = await env.db.update(session).set(args).where(eq(session.id, this.id)).returning()
+
+		return res
+	}
+
 	async getModel() {
 		const { provider, model } = config.default_model
 
@@ -108,14 +116,6 @@ export default class Index {
 		}
 
 		this.model = await getModel(provider, model, target_options)
-	}
-
-	async updateSession(args: Partial<SessionInsert>) {
-		this.active()
-
-		const [res] = await env.db.update(session).set(args).where(eq(session.id, this.id)).returning()
-
-		return res
 	}
 
 	async getMessages() {
@@ -141,6 +141,7 @@ export default class Index {
 			.where(eq(message.session_id, this.id))
 
 		const total = Number(count_row?.count ?? 0)
+
 		this.ui_has_older = total > 20
 		this.ui_has_newer = false
 	}
@@ -149,8 +150,7 @@ export default class Index {
 		this.active()
 
 		if (type === 'prev') {
-			await this.loadOlderMessages()
-			return
+			return await this.loadOlderMessages()
 		}
 
 		await this.loadNewerMessages()
@@ -162,6 +162,7 @@ export default class Index {
 		}
 
 		const oldest = this.ui_messages[0]
+
 		if (!oldest?.createdAt) {
 			return
 		}
@@ -175,8 +176,8 @@ export default class Index {
 
 		if (!res.length) {
 			this.ui_has_older = false
-			this.emitSync()
-			return
+
+			return this.emitSync()
 		}
 
 		const older_messages = res
@@ -190,7 +191,7 @@ export default class Index {
 		this.ui_messages = [...older_messages, ...this.ui_messages]
 
 		if (this.ui_messages.length > 20) {
-			this.ui_messages = this.ui_messages.slice(0, 20)
+			this.ui_messages = this.ui_messages.slice(0, -10)
 			this.ui_has_newer = true
 		}
 
@@ -233,7 +234,7 @@ export default class Index {
 		this.ui_messages = [...this.ui_messages, ...newer_messages]
 
 		if (this.ui_messages.length > 20) {
-			this.ui_messages = this.ui_messages.slice(-20)
+			this.ui_messages = this.ui_messages.slice(10)
 			this.ui_has_older = true
 		}
 
@@ -269,6 +270,7 @@ export default class Index {
 			await this.insert(message)
 
 			this.model_messages.push(message)
+			this.ui_messages.push(message)
 		}
 
 		if (this.model_messages.length >= 16) {
@@ -299,6 +301,7 @@ export default class Index {
 		let reasoning_end = 0
 
 		return res.toUIMessageStream({
+			originalMessages: [message],
 			sendSources: true,
 			generateMessageId: getId,
 			messageMetadata: ({ part }) => {
@@ -374,13 +377,15 @@ export default class Index {
 	}
 
 	private async append(v: Message) {
-		this.model_messages = [...this.model_messages, v]
-		this.ui_messages = [...this.ui_messages, v]
+		this.model_messages.push(v)
+		this.ui_messages.push(v)
 
-		if (this.ui_messages.length > 20) {
-			this.ui_messages = this.ui_messages.slice(-20)
+		if (this.ui_messages.length >= 20) {
+			this.ui_messages = this.ui_messages.slice(10)
 			this.ui_has_older = true
 		}
+
+		this.emitSync()
 
 		await this.insert(v)
 	}

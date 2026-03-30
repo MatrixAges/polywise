@@ -1,7 +1,6 @@
 import { DefaultChatTransport } from 'ai'
 
-import type { UIMessage } from 'ai'
-import type { ChatRequestOptions } from 'ai'
+import type { ChatRequestOptions, UIMessage, UIMessageChunk } from 'ai'
 
 interface CustomTransportOptions {
 	api: string
@@ -26,10 +25,23 @@ export default class CustomTransport<
 			messages: UI_MESSAGE[]
 			abortSignal: AbortSignal | undefined
 		} & ChatRequestOptions
-	): Promise<ReadableStream<unknown>> {
+	): Promise<ReadableStream<UIMessageChunk<UI_MESSAGE>>> {
 		const { messages, chatId, abortSignal, body, headers, metadata } = args
 
 		const last_message = messages.at(-1)
+
+		const request_body: Record<string, unknown> = {
+			id: chatId,
+			message: last_message
+		}
+
+		if (body && typeof body === 'object') {
+			Object.assign(request_body, body)
+		}
+
+		if (metadata && typeof metadata === 'object') {
+			Object.assign(request_body, metadata)
+		}
 
 		const res = await fetch(this.#options.api, {
 			method: 'POST',
@@ -37,12 +49,7 @@ export default class CustomTransport<
 				'Content-Type': 'application/json',
 				...headers
 			},
-			body: JSON.stringify({
-				id: chatId,
-				message: last_message,
-				...body,
-				...metadata
-			}),
+			body: JSON.stringify(request_body),
 			signal: abortSignal
 		})
 
@@ -50,6 +57,8 @@ export default class CustomTransport<
 			throw new Error(`API error: ${res.status}`)
 		}
 
-		return res.body as ReadableStream<unknown>
+		return this.processResponseStream(res.body as ReadableStream<Uint8Array>) as ReadableStream<
+			UIMessageChunk<UI_MESSAGE>
+		>
 	}
 }

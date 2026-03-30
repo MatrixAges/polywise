@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import { useMemoizedFn } from 'ahooks'
 import { observer } from 'mobx-react-lite'
 import { container } from 'tsyringe'
@@ -57,6 +57,7 @@ const Index = (props: IProps) => {
 					x.chat_signal
 				)}
 				onWheel={x.onWheel}
+				onScroll={x.onScroll}
 				ref={setConfainerRef}
 			>
 				<div
@@ -66,8 +67,12 @@ const Index = (props: IProps) => {
 						gap-6
 					'
 				>
-					{x.messages.map(message => (
-						<Message streaming={streaming} message={message} key={message.id}></Message>
+					{x.messages.map((message, index) => (
+						<Message
+							streaming={index === x.messages.length - 1 && streaming}
+							message={message}
+							key={message.id}
+						></Message>
 					))}
 					<div className='mt-12 h-8' ref={setBottomSignalRef}></div>
 				</div>
