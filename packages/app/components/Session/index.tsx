@@ -37,6 +37,8 @@ const Index = (props: IProps) => {
 		scrollToBottom: x.scrollToBottom
 	}
 
+	console.log(x.messages)
+
 	return (
 		<div
 			className='

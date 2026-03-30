@@ -1,4 +1,14 @@
+import type { GoogleLanguageModelOptions } from '@ai-sdk/google'
+import type { ProviderOptions } from '@ai-sdk/provider-utils'
 import type { LanguageModel } from 'ai'
+
+export const provider_options: ProviderOptions = {
+	google: {
+		thinkingConfig: {
+			includeThoughts: true
+		}
+	} satisfies GoogleLanguageModelOptions
+}
 
 export const getModel = async (provider: string, model: string, options?: any): Promise<LanguageModel> => {
 	switch (provider) {

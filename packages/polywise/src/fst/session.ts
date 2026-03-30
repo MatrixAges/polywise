@@ -11,7 +11,7 @@ import { pick } from 'es-toolkit'
 import fs from 'fs-extra'
 import { getId } from 'stk/utils'
 
-import { getModel } from './provider'
+import { getModel, provider_options } from './provider'
 
 import type { Agent, MessageInsert, Session, SessionInsert } from '@core/db'
 import type { SpecialProvider } from '@core/types'
@@ -148,6 +148,7 @@ export default class Index {
 			// system: fst_system_prompt,
 			messages: target,
 			abortSignal: this.abort_controller.signal,
+			providerOptions: provider_options,
 			experimental_transform: smoothStream(),
 			onAbort: this.onStop.bind(this),
 			onError: this.onStop.bind(this)
