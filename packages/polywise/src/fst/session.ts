@@ -24,8 +24,10 @@ import type { ChatEventRes, InitArgs, Message, MessageMetadata } from './types'
 export default class Index {
 	id = ''
 	event = null as unknown as EventEmitter
-	messages = [] as Array<Message>
 	session = null as unknown as Session
+	model_messages = [] as Array<Message>
+	ui_messages = [] as Array<Message>
+	ui_offset = 0
 	agents = [] as Array<Agent>
 	model = null as unknown as ModelResult
 	abort_controller = new AbortController()
@@ -73,7 +75,7 @@ export default class Index {
 
 		return {
 			type: 'init',
-			data: { session: this.session, messages: this.messages }
+			data: { session: this.session, messages: this.ui_messages }
 		} as ChatEventRes
 	}
 
@@ -117,9 +119,28 @@ export default class Index {
 			.from(message)
 			.where(eq(message.session_id, this.id))
 			.orderBy(desc(message.created_at))
-			.limit(10)
+			.limit(20)
 
-		this.messages = res.map(item => JSON.parse(item.content)).reverse()
+		this.ui_messages = res.map(item => JSON.parse(item.content)).reverse()
+		this.model_messages = this.ui_messages.slice(-10)
+		this.ui_offset = 20
+	}
+
+	async getMoreMessages(offset: number) {
+		const res = await env.db
+			.select()
+			.from(message)
+			.where(eq(message.session_id, this.id))
+			.orderBy(desc(message.created_at))
+			.limit(20)
+			.offset(offset)
+
+		const older_messages = res.map(item => JSON.parse(item.content)).reverse()
+
+		this.ui_messages = [...older_messages, ...this.ui_messages]
+		this.ui_offset += 20
+
+		return { messages: older_messages, has_more: older_messages.length === 20 }
 	}
 
 	async getAgents() {
@@ -133,17 +154,21 @@ export default class Index {
 	}
 
 	async getStream(messages: Array<Message>) {
-		this.messages = messages
-
 		if (!this.session.is_runing && messages.length) {
-			const user_prompt = messages.at(-1)!
+			const user_message = messages.at(-1)!
 
-			await this.insert(user_prompt)
+			await this.insert(user_message)
+
+			this.model_messages.push(user_message)
+		}
+
+		if (this.model_messages.length >= 16) {
+			this.trimModelMessages()
 		}
 
 		this.setRunning(true)
 
-		const target = await convertToModelMessages(messages)
+		const target = await convertToModelMessages(this.model_messages)
 
 		const res = streamText({
 			model: this.model.model,
@@ -206,11 +231,16 @@ export default class Index {
 	}
 
 	async clear() {
-		this.messages = []
+		this.model_messages = []
+		this.ui_messages = []
 
 		await env.db.delete(message).where(eq(message.session_id, this.id))
 
 		this.event.emit(`${this.id}/change`, { type: 'sync', session: this.session, messages: [] } as ChatEventRes)
+	}
+
+	private trimModelMessages() {
+		this.model_messages = this.model_messages.slice(6)
 	}
 
 	private active() {
@@ -226,7 +256,7 @@ export default class Index {
 	}
 
 	private async append(v: Message) {
-		this.messages = [...this.messages, v]
+		this.model_messages = [...this.model_messages, v]
 
 		await this.insert(v)
 	}
