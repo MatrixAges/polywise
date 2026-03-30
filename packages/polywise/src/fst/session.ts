@@ -1,4 +1,5 @@
 import { resolve } from 'path'
+import { google } from '@ai-sdk/google'
 import { config, providers } from '@core/config'
 import { app } from '@core/consts'
 import fst_system_prompt from '@core/consts/prompts/fst_system_prompt.md'
@@ -147,6 +148,9 @@ export default class Index {
 			model: this.model,
 			// system: fst_system_prompt,
 			messages: target,
+			tools: {
+				googleSearch: google.tools.googleSearch({})
+			},
 			abortSignal: this.abort_controller.signal,
 			providerOptions: provider_options,
 			experimental_transform: smoothStream(),

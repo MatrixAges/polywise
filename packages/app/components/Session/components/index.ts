@@ -1,2 +1,2 @@
 export { default as Input } from './Input'
-export { default as LoadingDots } from './LoadingDots'
+export { default as Message } from './Message'
