@@ -1,5 +1,4 @@
 import { resolve } from 'path'
-import { google } from '@ai-sdk/google'
 import { config, providers } from '@core/config'
 import { app } from '@core/consts'
 import fst_system_prompt from '@core/consts/prompts/fst_system_prompt.md'

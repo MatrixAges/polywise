@@ -7,12 +7,11 @@ import { injectable } from 'tsyringe'
 
 import { server_sys_session_url } from '@/appdata'
 import { Util } from '@/models/common'
-import { alert, Chat, execUntil, onViewport, rpc } from '@/utils'
+import { alert, Chat, execUntil, rpc } from '@/utils'
 
 import type { Session } from '@core/db'
 import type { Message } from '@core/fst'
 import type { AbstractChat, UIMessage } from 'ai'
-import type { UIEvent } from 'react'
 
 @injectable()
 export default class Index {
@@ -84,6 +83,7 @@ export default class Index {
 				onData: res => {
 					switch (res.type) {
 						case 'init':
+						case 'sync':
 							const { session, messages } = res.data
 
 							this.session = session as Session
