@@ -6,7 +6,7 @@ import { agent, message, session, session_agent } from '@core/db/schema'
 import { env } from '@core/env'
 import { convertToModelMessages, smoothStream, stepCountIs, streamText } from 'ai'
 import dayjs from 'dayjs'
-import { and, desc, eq, sql } from 'drizzle-orm'
+import { and, desc, eq, gt, lt, sql } from 'drizzle-orm'
 import { pick } from 'es-toolkit'
 import fs from 'fs-extra'
 import { getId } from 'stk/utils'
@@ -146,12 +146,10 @@ export default class Index {
 		this.ui_has_newer = false
 	}
 
-	async loadMessages(type: 'next' | 'prev') {
+	async load(type: 'prev' | 'next') {
 		this.active()
 
-		if (type === 'prev') {
-			return await this.loadOlderMessages()
-		}
+		if (type === 'prev') return await this.loadOlderMessages()
 
 		await this.loadNewerMessages()
 	}
@@ -170,7 +168,7 @@ export default class Index {
 		const res = await env.db
 			.select()
 			.from(message)
-			.where(and(eq(message.session_id, this.id), sql`${message.created_at} < ${oldest.createdAt}`))
+			.where(and(eq(message.session_id, this.id), lt(message.created_at, oldest.createdAt)))
 			.orderBy(desc(message.created_at))
 			.limit(10)
 
@@ -213,7 +211,7 @@ export default class Index {
 		const res = await env.db
 			.select()
 			.from(message)
-			.where(and(eq(message.session_id, this.id), sql`${message.created_at} > ${newest.createdAt}`))
+			.where(and(eq(message.session_id, this.id), gt(message.created_at, newest.createdAt)))
 			.orderBy(desc(message.created_at))
 			.limit(10)
 
@@ -273,9 +271,12 @@ export default class Index {
 			this.ui_messages.push(message)
 		}
 
+		console.log('**********')
+		console.log(this.model_messages.length)
 		if (this.model_messages.length >= 16) {
 			this.trimModelMessages()
 		}
+		console.log(this.model_messages.length)
 
 		this.setRunning(true)
 

@@ -33,10 +33,12 @@ export default p.input(input_type).subscription(async function* (args) {
 
 	const stop = () => session.abort()
 	const clear = () => session.clear()
+	const load = (type: 'prev' | 'next') => session.load(type)
 	const destroy = () => SessionStore.delete(id)
 
 	SessionEventStore.on(`${id}/stop`, stop)
 	SessionEventStore.on(`${id}/clear`, clear)
+	SessionEventStore.on(`${id}/load`, load)
 	SessionEventStore.on(`${id}/destroy`, destroy)
 
 	try {
@@ -46,6 +48,7 @@ export default p.input(input_type).subscription(async function* (args) {
 	} finally {
 		SessionEventStore.off(`${id}/stop`, stop)
 		SessionEventStore.off(`${id}/clear`, clear)
+		SessionEventStore.off(`${id}/load`, load)
 		SessionEventStore.off(`${id}/destroy`, destroy)
 	}
 })
