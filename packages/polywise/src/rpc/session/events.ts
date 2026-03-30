@@ -13,6 +13,6 @@ export const clear = p.input(string()).mutation(async ({ input }) => {
 	SessionEventStore.emit(`${input}/clear`)
 })
 
-export const load = p.input(object({ id: string(), type: Enum(['prev', 'next']) })).mutation(async ({ input }) => {
+export const load = p.input(object({ id: string(), type: Enum(['prev', 'next']) })).query(async ({ input }) => {
 	SessionEventStore.emit(`${input.id}/load`, input.type)
 })

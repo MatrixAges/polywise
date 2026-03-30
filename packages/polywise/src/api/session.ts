@@ -2,10 +2,11 @@ import { Session } from '@core/fst'
 import { SessionEventStore, SessionStore, SessionStreamStore } from '@core/utils'
 import { createUIMessageStream, JsonToSseTransformStream } from 'ai'
 
+import type { Message } from '@core/fst'
 import type { HonoContext } from '@core/types'
 
 export const post = async (c: HonoContext) => {
-	const { id, messages } = await c.req.json<{ id: string; messages: any }>()
+	const { id, message } = await c.req.json<{ id: string; message: Message }>()
 
 	let session = SessionStore.get(id)!
 
@@ -17,7 +18,7 @@ export const post = async (c: HonoContext) => {
 		SessionStore.set(id, session)
 	}
 
-	const stream = await session.getStream(messages)
+	const stream = await session.getStream(message)
 
 	const target_stream = await SessionStreamStore.resumableStream(id, () =>
 		stream.pipeThrough(new JsonToSseTransformStream())

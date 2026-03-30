@@ -75,7 +75,12 @@ export default class Index {
 
 		return {
 			type: 'init',
-			data: { session: this.session, messages: this.ui_messages }
+			data: {
+				session: this.session,
+				messages: this.ui_messages,
+				has_older: this.ui_has_older,
+				has_newer: this.ui_has_newer
+			}
 		} as ChatEventRes
 	}
 
@@ -170,7 +175,7 @@ export default class Index {
 
 		if (!res.length) {
 			this.ui_has_older = false
-			await this.emitSync()
+			this.emitSync()
 			return
 		}
 
@@ -191,7 +196,7 @@ export default class Index {
 
 		this.ui_has_older = res.length === 10
 
-		await this.emitSync()
+		this.emitSync()
 	}
 
 	private async loadNewerMessages() {
@@ -213,7 +218,7 @@ export default class Index {
 
 		if (!res.length) {
 			this.ui_has_newer = false
-			await this.emitSync()
+			this.emitSync()
 			return
 		}
 
@@ -234,13 +239,18 @@ export default class Index {
 
 		this.ui_has_newer = res.length === 10
 
-		await this.emitSync()
+		this.emitSync()
 	}
 
-	private async emitSync() {
+	private emitSync() {
 		this.event.emit(`${this.id}/change`, {
 			type: 'sync',
-			data: { session: this.session, messages: this.ui_messages }
+			data: {
+				session: this.session,
+				messages: this.ui_messages,
+				has_older: this.ui_has_older,
+				has_newer: this.ui_has_newer
+			}
 		} as ChatEventRes)
 	}
 
@@ -254,13 +264,11 @@ export default class Index {
 		this.agents = res.map(item => item.agent)
 	}
 
-	async getStream(messages: Array<Message>) {
-		if (!this.session.is_runing && messages.length) {
-			const user_message = messages.at(-1)!
+	async getStream(message: Message) {
+		if (!this.session.is_runing) {
+			await this.insert(message)
 
-			await this.insert(user_message)
-
-			this.model_messages.push(user_message)
+			this.model_messages.push(message)
 		}
 
 		if (this.model_messages.length >= 16) {
@@ -291,7 +299,6 @@ export default class Index {
 		let reasoning_end = 0
 
 		return res.toUIMessageStream({
-			originalMessages: messages,
 			sendSources: true,
 			generateMessageId: getId,
 			messageMetadata: ({ part }) => {
@@ -353,7 +360,15 @@ export default class Index {
 	private async setRunning(v: boolean) {
 		this.session.is_runing = v
 
-		this.emitSync()
+		this.event.emit(`${this.id}/change`, {
+			type: 'sync',
+			data: {
+				session: this.session,
+				messages: this.ui_messages,
+				has_older: this.ui_has_older,
+				has_newer: this.ui_has_newer
+			}
+		} as ChatEventRes)
 
 		await this.updateSession({ is_runing: v })
 	}

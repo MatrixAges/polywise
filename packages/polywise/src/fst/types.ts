@@ -16,5 +16,5 @@ export interface MessageMetadata {
 }
 
 export type ChatEventRes =
-	| { type: 'init'; data: { session: Session; messages: Array<Message> } }
-	| { type: 'sync'; data: { session: Session; messages: Array<Message> } }
+	| { type: 'init'; data: { session: Session; messages: Array<Message>; has_older: boolean; has_newer: boolean } }
+	| { type: 'sync'; data: { session: Session; messages: Array<Message>; has_older: boolean; has_newer: boolean } }

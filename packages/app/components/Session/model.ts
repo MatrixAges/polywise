@@ -1,4 +1,3 @@
-import { DefaultChatTransport } from 'ai'
 import { makeAutoObservable } from 'mobx'
 import scroll from 'smooth-scroll-into-view-if-needed'
 import { toast } from 'sonner'
@@ -7,7 +6,7 @@ import { injectable } from 'tsyringe'
 
 import { server_sys_session_url } from '@/appdata'
 import { Util } from '@/models/common'
-import { alert, Chat, execUntil, rpc } from '@/utils'
+import { alert, Chat, CustomTransport, execUntil, rpc } from '@/utils'
 
 import type { Session } from '@core/db'
 import type { Message } from '@core/fst'
@@ -17,9 +16,13 @@ import type { AbstractChat, UIMessage } from 'ai'
 export default class Index {
 	id = ''
 	ref_container = null as unknown as HTMLDivElement
+	ref_top_signal = null as unknown as HTMLDivElement
 	ref_bottom_signal = null as unknown as HTMLDivElement
 	wheeled = false
 	auto_scroll = true
+
+	has_older = false
+	has_newer = false
 
 	session = null as unknown as Session
 	chat = null as unknown as Chat
@@ -34,6 +37,7 @@ export default class Index {
 				util: false,
 				id: false,
 				ref_container: false,
+				ref_top_signal: false,
 				ref_bottom_signal: false,
 				wheeled: false,
 				auto_scroll: false,
@@ -63,7 +67,7 @@ export default class Index {
 			this.chat = new Chat({
 				id: this.id,
 				throttle: 60,
-				transport: new DefaultChatTransport({
+				transport: new CustomTransport({
 					api: server_sys_session_url,
 					prepareReconnectToStreamRequest: () => ({
 						api: `${server_sys_session_url}?id=${this.id}`
@@ -84,9 +88,11 @@ export default class Index {
 					switch (res.type) {
 						case 'init':
 						case 'sync':
-							const { session, messages } = res.data
+							const { session, messages, has_older, has_newer } = res.data
 
 							this.session = session as Session
+							this.has_older = has_older
+							this.has_newer = has_newer
 							this.chat.setMessages(messages as unknown as Array<Message>)
 							break
 					}
@@ -185,6 +191,23 @@ export default class Index {
 		this.update()
 
 		rpc.session.clear.mutate(this.id)
+	}
+
+	onScroll() {
+		if (this.status === 'streaming') return
+		if (!this.ref_container) return
+
+		const { scrollTop, scrollHeight, clientHeight } = this.ref_container
+		const is_at_top = scrollTop === 0
+		const is_at_bottom = scrollTop + clientHeight >= scrollHeight - 10
+
+		if (is_at_top && this.has_older) {
+			rpc.session.load.query({ id: this.id, type: 'prev' })
+		}
+
+		if (is_at_bottom && this.has_newer) {
+			rpc.session.load.query({ id: this.id, type: 'next' })
+		}
 	}
 
 	on() {
