@@ -155,15 +155,11 @@ export default class Index {
 	}
 
 	private async loadOlderMessages() {
-		if (!this.ui_has_older) {
-			return
-		}
+		if (!this.ui_has_older) return
 
 		const oldest = this.ui_messages[0]
 
-		if (!oldest?.createdAt) {
-			return
-		}
+		if (!oldest?.createdAt) return
 
 		const res = await env.db
 			.select()
@@ -199,14 +195,11 @@ export default class Index {
 	}
 
 	private async loadNewerMessages() {
-		if (!this.ui_has_newer) {
-			return
-		}
+		if (!this.ui_has_newer) return
 
 		const newest = this.ui_messages.at(-1)
-		if (!newest?.createdAt) {
-			return
-		}
+
+		if (!newest?.createdAt) return
 
 		const res = await env.db
 			.select()
@@ -224,7 +217,9 @@ export default class Index {
 		const newer_messages = res
 			.map(item => {
 				const parsed = JSON.parse(item.content)
+
 				parsed.createdAt = item.created_at
+
 				return parsed
 			})
 			.reverse()
