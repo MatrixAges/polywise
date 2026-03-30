@@ -1,67 +1,126 @@
 import type { GoogleLanguageModelOptions } from '@ai-sdk/google'
 import type { ProviderOptions } from '@ai-sdk/provider-utils'
-import type { LanguageModel } from 'ai'
+import type { LanguageModel, ToolSet } from 'ai'
 
-export const provider_options: ProviderOptions = {
-	google: {
-		thinkingConfig: {
-			includeThoughts: true
-		}
-	} satisfies GoogleLanguageModelOptions
+export type ModelResult = {
+	model: LanguageModel
+	provider_options?: ProviderOptions
+	tools?: ToolSet
 }
 
-export const getModel = async (provider: string, model: string, options?: any): Promise<LanguageModel> => {
+export const getModel = async (provider: string, model: string, options?: any): Promise<ModelResult> => {
 	switch (provider) {
+		case 'google_gemini': {
+			const { createGoogleGenerativeAI, google } = await import('@ai-sdk/google')
+
+			return {
+				model: createGoogleGenerativeAI(options)(model),
+				provider_options: {
+					google: {
+						thinkingConfig: {
+							includeThoughts: true
+						}
+					} satisfies GoogleLanguageModelOptions
+				},
+				tools: { googleSearch: google.tools.googleSearch({}) }
+			}
+		}
 		case 'a2a':
-			return (await import('a2a-ai-provider')).a2a(model)
+			return {
+				model: (await import('a2a-ai-provider')).a2a(model)
+			}
 		case 'acp':
-			return (await import('@mcpc-tech/acp-ai-provider')).createACPProvider(options).languageModel()
+			return {
+				model: (await import('@mcpc-tech/acp-ai-provider')).createACPProvider(options).languageModel()
+			}
 		case 'open_responses':
-			return (await import('@ai-sdk/open-responses')).createOpenResponses(options)(model)
+			return {
+				model: (await import('@ai-sdk/open-responses')).createOpenResponses(options)(model)
+			}
 		case 'open_compatible':
-			return (await import('@ai-sdk/openai-compatible')).createOpenAICompatible(options)(model)
+			return {
+				model: (await import('@ai-sdk/openai-compatible')).createOpenAICompatible(options)(model)
+			}
 		case 'openai':
-			return (await import('@ai-sdk/openai')).createOpenAI(options)(model)
+			return {
+				model: (await import('@ai-sdk/openai')).createOpenAI(options)(model)
+			}
 		case 'anthropic':
-			return (await import('@ai-sdk/anthropic')).createAnthropic(options)(model)
-		case 'google_gemini':
-			return (await import('@ai-sdk/google')).createGoogleGenerativeAI(options)(model)
+			return {
+				model: (await import('@ai-sdk/anthropic')).createAnthropic(options)(model)
+			}
 		case 'deepseek':
-			return (await import('@ai-sdk/deepseek')).createDeepSeek(options)(model)
+			return {
+				model: (await import('@ai-sdk/deepseek')).createDeepSeek(options)(model)
+			}
 		case 'moonshot':
-			return (await import('@ai-sdk/moonshotai')).createMoonshotAI(options)(model)
+			return {
+				model: (await import('@ai-sdk/moonshotai')).createMoonshotAI(options)(model)
+			}
 		case 'zhipu':
-			return (await import('zhipu-ai-provider')).createZhipu(options)(model)
+			return {
+				model: (await import('zhipu-ai-provider')).createZhipu(options)(model)
+			}
 		case 'minimax':
-			return (await import('vercel-minimax-ai-provider')).createMinimax(options)(model)
+			return {
+				model: (await import('vercel-minimax-ai-provider')).createMinimax(options)(model)
+			}
 		case 'mistral':
-			return (await import('@ai-sdk/mistral')).createMistral(options)(model)
+			return {
+				model: (await import('@ai-sdk/mistral')).createMistral(options)(model)
+			}
 		case 'groq':
-			return (await import('@ai-sdk/groq')).createGroq(options)(model)
+			return {
+				model: (await import('@ai-sdk/groq')).createGroq(options)(model)
+			}
 		case 'xai':
-			return (await import('@ai-sdk/xai')).createXai(options)(model)
+			return {
+				model: (await import('@ai-sdk/xai')).createXai(options)(model)
+			}
 		case 'cohere':
-			return (await import('@ai-sdk/cohere')).createCohere(options)(model)
+			return {
+				model: (await import('@ai-sdk/cohere')).createCohere(options)(model)
+			}
 		case 'perplexity':
-			return (await import('@ai-sdk/perplexity')).createPerplexity(options)(model)
+			return {
+				model: (await import('@ai-sdk/perplexity')).createPerplexity(options)(model)
+			}
 		case 'deepinfra':
-			return (await import('@ai-sdk/deepinfra')).createDeepInfra(options)(model)
+			return {
+				model: (await import('@ai-sdk/deepinfra')).createDeepInfra(options)(model)
+			}
 		case 'together':
-			return (await import('@ai-sdk/togetherai')).createTogetherAI(options)(model)
+			return {
+				model: (await import('@ai-sdk/togetherai')).createTogetherAI(options)(model)
+			}
 		case 'azure_openai':
-			return (await import('@ai-sdk/azure')).createAzure(options)(model)
+			return {
+				model: (await import('@ai-sdk/azure')).createAzure(options)(model)
+			}
 		case 'amazon_bedrock':
-			return (await import('@ai-sdk/amazon-bedrock')).createAmazonBedrock(options)(model)
+			return {
+				model: (await import('@ai-sdk/amazon-bedrock')).createAmazonBedrock(options)(model)
+			}
 		case 'cerebras':
-			return (await import('@ai-sdk/cerebras')).createCerebras(options)(model)
+			return {
+				model: (await import('@ai-sdk/cerebras')).createCerebras(options)(model)
+			}
 		case 'vercel':
-			return (await import('@ai-sdk/vercel')).createVercel(options)(model)
+			return {
+				model: (await import('@ai-sdk/vercel')).createVercel(options)(model)
+			}
 		case 'fireworks':
-			return (await import('@ai-sdk/fireworks')).createFireworks(options)(model)
+			return {
+				model: (await import('@ai-sdk/fireworks')).createFireworks(options)(model)
+			}
 		case 'ollama':
-			return (await import('ai-sdk-ollama')).createOllama(options)(model)
+			return {
+				model: (await import('ai-sdk-ollama')).createOllama(options)(model)
+			}
 		case 'openrouter':
-			return (await import('@openrouter/ai-sdk-provider')).createOpenRouter(options)(model)
+			return {
+				model: (await import('@openrouter/ai-sdk-provider')).createOpenRouter(options)(model)
+			}
 		default:
 			throw new Error(`Unsupported provider: ${provider}`)
 	}

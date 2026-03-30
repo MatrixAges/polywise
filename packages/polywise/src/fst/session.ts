@@ -5,20 +5,20 @@ import { app } from '@core/consts'
 import fst_system_prompt from '@core/consts/prompts/fst_system_prompt.md'
 import { agent, message, session, session_agent } from '@core/db/schema'
 import { env } from '@core/env'
-import { convertToModelMessages, smoothStream, streamText } from 'ai'
+import { convertToModelMessages, smoothStream, stepCountIs, streamText } from 'ai'
 import dayjs from 'dayjs'
 import { desc, eq } from 'drizzle-orm'
 import { pick } from 'es-toolkit'
 import fs from 'fs-extra'
 import { getId } from 'stk/utils'
 
-import { getModel, provider_options } from './provider'
+import { getModel } from './provider'
 import weather_tool from './tools/weather'
 
 import type { Agent, MessageInsert, Session, SessionInsert } from '@core/db'
 import type { SpecialProvider } from '@core/types'
-import type { LanguageModel } from 'ai'
 import type { EventEmitter } from 'events'
+import type { ModelResult } from './provider'
 import type { ChatEventRes, InitArgs, Message, MessageMetadata } from './types'
 
 export default class Index {
@@ -27,7 +27,7 @@ export default class Index {
 	messages = [] as Array<Message>
 	session = null as unknown as Session
 	agents = [] as Array<Agent>
-	model = null as unknown as LanguageModel
+	model = null as unknown as ModelResult
 	abort_controller = new AbortController()
 	update_at = Date.now()
 
@@ -146,15 +146,16 @@ export default class Index {
 		const target = await convertToModelMessages(messages)
 
 		const res = streamText({
-			model: this.model,
+			model: this.model.model,
 			// system: fst_system_prompt,
 			messages: target,
 			tools: {
-				// googleSearch: google.tools.googleSearch({}),
+				...this.model.tools,
 				weather_tool
 			},
+			stopWhen: stepCountIs(60),
 			abortSignal: this.abort_controller.signal,
-			providerOptions: provider_options,
+			providerOptions: this.model.provider_options,
 			experimental_transform: smoothStream(),
 			onAbort: this.onStop.bind(this),
 			onError: this.onStop.bind(this)
