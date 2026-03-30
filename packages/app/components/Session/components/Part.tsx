@@ -29,7 +29,7 @@ const Index = (props: IPropsPart) => {
 			const tool_part = part as DynamicToolUIPart
 
 			return (
-				<Tool className='w-full'>
+				<Tool>
 					<ToolHeader
 						type={tool_part.type}
 						state={tool_part.state}
@@ -51,7 +51,7 @@ const Index = (props: IPropsPart) => {
 		const tool_part = part as ToolUIPart
 
 		return (
-			<Tool className='w-full'>
+			<Tool>
 				<ToolHeader type={tool_part.type} state={tool_part.state} title={tool_part.title} />
 				<ToolContent>
 					{tool_part.input !== undefined && <ToolInput input={tool_part.input} />}
