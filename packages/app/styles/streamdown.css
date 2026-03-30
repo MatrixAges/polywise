@@ -31,3 +31,7 @@
 		}
 	}
 }
+
+code[data-streamdown='inline-code'] {
+	@apply px-1 py-[0.08rem];
+}
