@@ -7,7 +7,7 @@ import { agent, message, session, session_agent } from '@core/db/schema'
 import { env } from '@core/env'
 import { convertToModelMessages, smoothStream, stepCountIs, streamText } from 'ai'
 import dayjs from 'dayjs'
-import { desc, eq } from 'drizzle-orm'
+import { and, desc, eq, sql } from 'drizzle-orm'
 import { pick } from 'es-toolkit'
 import fs from 'fs-extra'
 import { getId } from 'stk/utils'
@@ -27,7 +27,8 @@ export default class Index {
 	session = null as unknown as Session
 	model_messages = [] as Array<Message>
 	ui_messages = [] as Array<Message>
-	ui_offset = 0
+	ui_has_older = false
+	ui_has_newer = false
 	agents = [] as Array<Agent>
 	model = null as unknown as ModelResult
 	abort_controller = new AbortController()
@@ -121,26 +122,127 @@ export default class Index {
 			.orderBy(desc(message.created_at))
 			.limit(20)
 
-		this.ui_messages = res.map(item => JSON.parse(item.content)).reverse()
+		this.ui_messages = res
+			.map(item => {
+				const parsed = JSON.parse(item.content)
+				parsed.createdAt = item.created_at
+				return parsed
+			})
+			.reverse()
 		this.model_messages = this.ui_messages.slice(-10)
-		this.ui_offset = 20
+
+		const [count_row] = await env.db
+			.select({ count: sql<number>`count(*)`.as('count') })
+			.from(message)
+			.where(eq(message.session_id, this.id))
+
+		const total = Number(count_row?.count ?? 0)
+		this.ui_has_older = total > 20
+		this.ui_has_newer = false
 	}
 
-	async getMoreMessages(offset: number) {
+	async loadMessages(type: 'next' | 'prev') {
+		this.active()
+
+		if (type === 'prev') {
+			await this.loadOlderMessages()
+			return
+		}
+
+		await this.loadNewerMessages()
+	}
+
+	private async loadOlderMessages() {
+		if (!this.ui_has_older) {
+			return
+		}
+
+		const oldest = this.ui_messages[0]
+		if (!oldest?.createdAt) {
+			return
+		}
+
 		const res = await env.db
 			.select()
 			.from(message)
-			.where(eq(message.session_id, this.id))
+			.where(and(eq(message.session_id, this.id), sql`${message.created_at} < ${oldest.createdAt}`))
 			.orderBy(desc(message.created_at))
-			.limit(20)
-			.offset(offset)
+			.limit(10)
 
-		const older_messages = res.map(item => JSON.parse(item.content)).reverse()
+		if (!res.length) {
+			this.ui_has_older = false
+			await this.emitSync()
+			return
+		}
+
+		const older_messages = res
+			.map(item => {
+				const parsed = JSON.parse(item.content)
+				parsed.createdAt = item.created_at
+				return parsed
+			})
+			.reverse()
 
 		this.ui_messages = [...older_messages, ...this.ui_messages]
-		this.ui_offset += 20
 
-		return { messages: older_messages, has_more: older_messages.length === 20 }
+		if (this.ui_messages.length > 20) {
+			this.ui_messages = this.ui_messages.slice(0, 20)
+			this.ui_has_newer = true
+		}
+
+		this.ui_has_older = res.length === 10
+
+		await this.emitSync()
+	}
+
+	private async loadNewerMessages() {
+		if (!this.ui_has_newer) {
+			return
+		}
+
+		const newest = this.ui_messages.at(-1)
+		if (!newest?.createdAt) {
+			return
+		}
+
+		const res = await env.db
+			.select()
+			.from(message)
+			.where(and(eq(message.session_id, this.id), sql`${message.created_at} > ${newest.createdAt}`))
+			.orderBy(desc(message.created_at))
+			.limit(10)
+
+		if (!res.length) {
+			this.ui_has_newer = false
+			await this.emitSync()
+			return
+		}
+
+		const newer_messages = res
+			.map(item => {
+				const parsed = JSON.parse(item.content)
+				parsed.createdAt = item.created_at
+				return parsed
+			})
+			.reverse()
+
+		this.ui_messages = [...this.ui_messages, ...newer_messages]
+
+		if (this.ui_messages.length > 20) {
+			this.ui_messages = this.ui_messages.slice(-20)
+			this.ui_has_older = true
+		}
+
+		this.ui_has_newer = res.length === 10
+
+		await this.emitSync()
+	}
+
+	private async emitSync() {
+		this.event.emit(`${this.id}/change`, {
+			type: 'sync',
+			data: { session: this.session, messages: this.ui_messages }
+		} as ChatEventRes)
 	}
 
 	async getAgents() {
@@ -233,10 +335,12 @@ export default class Index {
 	async clear() {
 		this.model_messages = []
 		this.ui_messages = []
+		this.ui_has_older = false
+		this.ui_has_newer = false
 
 		await env.db.delete(message).where(eq(message.session_id, this.id))
 
-		this.event.emit(`${this.id}/change`, { type: 'sync', session: this.session, messages: [] } as ChatEventRes)
+		this.emitSync()
 	}
 
 	private trimModelMessages() {
@@ -250,13 +354,19 @@ export default class Index {
 	private async setRunning(v: boolean) {
 		this.session.is_runing = v
 
-		this.event.emit(`${this.id}/change`, { type: 'sync', session: this.session } as ChatEventRes)
+		this.emitSync()
 
 		await this.updateSession({ is_runing: v })
 	}
 
 	private async append(v: Message) {
 		this.model_messages = [...this.model_messages, v]
+		this.ui_messages = [...this.ui_messages, v]
+
+		if (this.ui_messages.length > 20) {
+			this.ui_messages = this.ui_messages.slice(-20)
+			this.ui_has_older = true
+		}
 
 		await this.insert(v)
 	}
