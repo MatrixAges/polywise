@@ -4,6 +4,17 @@ import type { EventEmitter } from 'events'
 
 export type Message = UIMessage<unknown, UIDataTypes, UITools> & { createdAt?: Date }
 
+export interface Context {
+	// 用户意图
+	intent: string
+	// 关联核心的上下文信息
+	context: string
+	// 任务列表
+	tasks: Array<{ title: string; status: 'pending' | 'runing' | 'done' }>
+	// 关联文件
+	files: Array<string>
+}
+
 export interface InitArgs {
 	id: string
 	event: EventEmitter

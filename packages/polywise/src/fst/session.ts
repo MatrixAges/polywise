@@ -5,6 +5,7 @@ import fst_system_prompt from '@core/consts/prompts/fst_system_prompt.md'
 import { agent, message, session, session_agent } from '@core/db/schema'
 import { env } from '@core/env'
 import { convertToModelMessages, smoothStream, stepCountIs, streamText } from 'ai'
+import { to } from 'await-to-js'
 import dayjs from 'dayjs'
 import { and, desc, eq, gt, lt, sql } from 'drizzle-orm'
 import { pick } from 'es-toolkit'
@@ -18,20 +19,32 @@ import type { Agent, MessageInsert, Session, SessionInsert } from '@core/db'
 import type { SpecialProvider } from '@core/types'
 import type { EventEmitter } from 'events'
 import type { ModelResult } from './provider'
-import type { ChatEventRes, InitArgs, Message, MessageMetadata } from './types'
+import type { ChatEventRes, Context, InitArgs, Message, MessageMetadata } from './types'
 
 export default class Index {
 	id = ''
 	event = null as unknown as EventEmitter
 	session = null as unknown as Session
+	model = null as unknown as ModelResult
+
+	agents = [] as Array<Agent>
 	model_messages = [] as Array<Message>
+	context = {} as Context
+
 	ui_messages = [] as Array<Message>
 	ui_has_older = false
 	ui_has_newer = false
-	agents = [] as Array<Agent>
-	model = null as unknown as ModelResult
+
 	abort_controller = new AbortController()
 	update_at = Date.now()
+
+	get session_dir() {
+		return resolve(`${app.app_path}/sessions/${this.id}`)
+	}
+
+	get context_dir() {
+		return resolve(`${this.session_dir}/context.json`)
+	}
 
 	async init(args: InitArgs) {
 		const { id, event } = args
@@ -46,6 +59,8 @@ export default class Index {
 
 	async initSession() {
 		let res: Session
+
+		await fs.ensureDir(this.session_dir)
 
 		const [res_exsit] = await env.db.select().from(session).where(eq(session.id, this.id)).limit(1)
 
@@ -224,6 +239,20 @@ export default class Index {
 			.where(eq(session_agent.session_id, this.id))
 
 		this.agents = res.map(item => item.agent)
+	}
+
+	async getContext() {
+		const [err, res] = await to(fs.readJSON(this.context_dir))
+
+		if (err) return
+
+		this.context = res
+	}
+
+	async setContext() {
+		const [err] = await to(fs.writeJSON(this.context_dir, this.context))
+
+		if (err) return
 	}
 
 	async getStream(message: Message) {
