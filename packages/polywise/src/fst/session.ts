@@ -62,6 +62,8 @@ export default class Index {
 
 		await fs.ensureDir(this.session_dir)
 
+		await this.getContext()
+
 		const [res_exsit] = await env.db.select().from(session).where(eq(session.id, this.id)).limit(1)
 
 		if (res_exsit) {
@@ -273,7 +275,7 @@ export default class Index {
 
 		const res = streamText({
 			model: this.model.model,
-			// system: fst_system_prompt,
+			system: `Current Context: \n ${this.context}`,
 			messages: target,
 			tools: {
 				...this.model.tools,
