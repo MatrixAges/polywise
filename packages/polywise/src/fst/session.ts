@@ -13,8 +13,7 @@ import fs from 'fs-extra'
 import { getId } from 'stk/utils'
 
 import { getModel } from './provider'
-import { createContextTool } from './tools/context'
-import { createMessageTool } from './tools/message'
+import { createContextTool, createMessageTool } from './tools'
 
 import type { Agent, MessageInsert, Session, SessionInsert } from '@core/db'
 import type { SpecialProvider } from '@core/types'
@@ -294,10 +293,10 @@ export default class Index {
 				message_tool: createMessageTool(this.id, this.model_messages),
 				context_tool: createContextTool(this)
 			},
-			// toolChoice:{
-			//       type:'tool',
-			//       toolName:'context_tool'
-			// },
+			toolChoice: {
+				type: 'tool',
+				toolName: 'context_tool'
+			},
 			stopWhen: stepCountIs(300),
 			abortSignal: this.abort_controller.signal,
 			providerOptions: this.model.provider_options,

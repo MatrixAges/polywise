@@ -5,18 +5,27 @@ import type { EventEmitter } from 'events'
 export type Message = UIMessage<unknown, UIDataTypes, UITools> & { createdAt?: Date }
 
 export interface Context {
-	// 用户意图
 	intent: string
-	// 关联核心的上下文信息
 	context: string
-	// 任务列表
-	tasks: Array<{ title: string; status: 'pending' | 'runing' | 'done' }>
-	// 关联文件
-	files: Array<string>
-	// 全部消息数量
+	tasks: Array<{
+		title: string
+		desc: string
+		status: 'pending' | 'runing' | 'done'
+		result?: string
+		error?: string
+	}>
+	files: Array<{
+		path: string
+		desc: string
+		status?: 'read' | 'modified' | 'created' | 'deleted'
+		summary?: string
+	}>
 	total_messages_count: number
-	// 当前消息窗口数量
 	current_messages_count: number
+	constraints?: Array<string>
+	lessons_learned?: Array<string>
+	environment?: Record<string, string>
+	blockers?: Array<string>
 }
 
 export interface InitArgs {
