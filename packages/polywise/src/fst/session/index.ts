@@ -1,22 +1,19 @@
 import { EventEmitter } from 'events'
 import { resolve } from 'path'
 import { app } from '@core/consts'
-import { session } from '@core/db/schema'
-import { env } from '@core/env'
-import dayjs from 'dayjs'
-import { eq } from 'drizzle-orm'
-import fs from 'fs-extra'
 
 import append from './append'
 import clear from './clear'
 import getAgents from './getAgents'
 import getContext from './getContext'
+import getData from './getData'
 import getMessages from './getMessages'
 import getModel from './getModel'
 import getSession from './getSession'
 import getStream from './getStream'
 import getTasks from './getTasks'
 import getTotalMessagesCount from './getTotalMessagesCount'
+import initSession from './initSession'
 import insertMessage from './insertMessage'
 import loadMessages from './loadMessages'
 import setContext from './setContext'
@@ -25,7 +22,7 @@ import updateSession from './updateSession'
 
 import type { Agent, Session, SessionInsert } from '@core/db'
 import type { ModelResult } from '../provider'
-import type { ChatEventRes, Context, InitArgs, Message } from '../types'
+import type { Context, InitArgs, Message } from '../types'
 
 export default class Index {
 	id = ''
@@ -67,51 +64,9 @@ export default class Index {
 		return this.getData()
 	}
 
-	async initSession() {
-		let res: Session
+	initSession = () => initSession(this)
 
-		await fs.ensureDir(this.session_dir)
-		await fs.ensureDir(this.files_dir)
-
-		await this.getContext()
-
-		const [res_exsit] = await env.db.select().from(session).where(eq(session.id, this.id)).limit(1)
-
-		if (res_exsit) {
-			res = res_exsit
-
-			await fs.ensureDir(resolve(`${app.app_path}/${this.id}`))
-		} else {
-			const [res_insert] = await env.db
-				.insert(session)
-				.values({
-					id: this.id,
-					title: `Session ${dayjs().format('YYYY-MM-DD HH:mm:ss')}`
-				})
-				.returning()
-
-			res = res_insert
-		}
-
-		this.session = res
-	}
-
-	async getData() {
-		this.active()
-
-		await Promise.all([this.getModel(), this.getAgents(), this.getMessages()])
-
-		return {
-			type: 'init',
-			data: {
-				session: this.session,
-				messages: this.ui_messages,
-				context: this.context,
-				has_older: this.ui_has_older,
-				has_newer: this.ui_has_newer
-			}
-		} as ChatEventRes
-	}
+	getData = () => getData(this)
 
 	getSession = () => getSession(this)
 	updateSession = (args: Partial<SessionInsert>) => updateSession(this, args)
@@ -141,7 +96,7 @@ export default class Index {
 				has_older: this.ui_has_older,
 				has_newer: this.ui_has_newer
 			}
-		} as ChatEventRes)
+		})
 	}
 
 	setRunning = async (v: boolean) => {
