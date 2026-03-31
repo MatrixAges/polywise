@@ -33,7 +33,7 @@ export default p.input(input_type).subscription(async function* (args) {
 
 	const stop = () => session.abort()
 	const clear = () => session.clear()
-	const load = (type: 'prev' | 'next') => session.load(type)
+	const load = (type: 'prev' | 'next') => session.loadMessages(type)
 	const destroy = () => SessionStore.delete(id)
 
 	SessionEventStore.on(`${id}/stop`, stop)
