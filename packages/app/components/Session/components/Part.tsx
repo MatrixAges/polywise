@@ -50,6 +50,8 @@ const Index = (props: IPropsPart) => {
 	if (isStaticToolUIPart(part)) {
 		const tool_part = part as ToolUIPart
 
+		if (tool_part.type === 'tool-context_tool') return null
+
 		return (
 			<Tool>
 				<ToolHeader type={tool_part.type} state={tool_part.state} title={tool_part.title} />

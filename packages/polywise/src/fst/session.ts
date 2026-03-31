@@ -24,8 +24,8 @@ import type { ChatEventRes, Context, InitArgs, Message, MessageMetadata } from '
 
 const ui_threshold_value = 20
 const ui_reduce_value = 10
-const model_threshold_value = 16
-const model_reduce_value = 6
+const model_threshold_value = 12
+const model_reduce_value = 4
 
 export default class Index {
 	id = ''
@@ -263,13 +263,14 @@ export default class Index {
 	}
 
 	async setContext(v: Partial<Context>) {
-		console.log(v)
 		this.context = {
 			...this.context,
 			...v,
 			total_messages_count: this.context.total_messages_count,
 			current_messages_count: this.context.current_messages_count
 		} as Context
+
+		console.log(this.context)
 
 		const [err] = await to(fs.writeJSON(this.context_dir, this.context, { spaces: 4 }))
 

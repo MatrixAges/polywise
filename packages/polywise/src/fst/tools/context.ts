@@ -4,33 +4,37 @@ import { array, enum as Enum, object, record, string } from 'zod'
 import type Session from '../session'
 
 const inputSchema = object({
-	intent: string().optional().describe('Update user intent or goal'),
-	context: string().max(3000).optional().describe('Update core contextual information'),
+	intent: string().optional().describe('User intent or goal for the current conversation'),
+	context: string().max(3000).optional().describe('Core contextual information and current progress'),
 	tasks: array(
 		object({
-			title: string(),
-			desc: string(),
-			status: Enum(['pending', 'runing', 'done']),
-			result: string().optional(),
-			error: string().optional()
+			title: string().describe('Task title'),
+			desc: string().describe('Task description'),
+			status: Enum(['pending', 'runing', 'done']).describe('Task status'),
+			result: string().optional().describe('Task result when completed'),
+			error: string().optional().describe('Error message when task fails')
 		})
 	)
 		.optional()
-		.describe('Replace entire task list'),
+		.describe('List of tasks being tracked'),
 	files: array(
 		object({
-			path: string(),
-			desc: string(),
-			status: Enum(['read', 'modified', 'created', 'deleted']).optional(),
-			summary: string().optional()
+			path: string().describe('File path'),
+			desc: string().describe('File description or purpose'),
+			status: Enum(['read', 'modified', 'created', 'deleted'])
+				.optional()
+				.describe('File modification status'),
+			summary: string().optional().describe('Brief summary of file content')
 		})
 	)
 		.optional()
-		.describe('Replace associated file list'),
-	constraints: array(string()).optional().describe('Update hard constraints'),
-	lessons_learned: array(string()).optional().describe('Update failed approaches or errors'),
-	environment: record(string(), string()).optional().describe('Update runtime environment'),
-	blockers: array(string()).optional().describe('Update current blockers')
+		.describe('Files referenced or modified in the conversation'),
+	constraints: array(string()).optional().describe('Hard rules or constraints that must be followed'),
+	lessons_learned: array(string()).optional().describe('Failed approaches or errors to avoid repeating'),
+	environment: record(string(), string())
+		.optional()
+		.describe('Runtime environment details such as versions or paths'),
+	blockers: array(string()).optional().describe('Issues blocking progress that require user input')
 })
 
 export const createContextTool = (session: Session) => {
