@@ -2,22 +2,28 @@ import { EventEmitter } from 'events'
 import { resolve } from 'path'
 import { app } from '@core/consts'
 
-import append from './append'
-import clear from './clear'
+import abortStream from './abortStream'
+import active from './active'
+import appendMessage from './appendMessage'
+import clearMessages from './clearMessages'
 import getAgents from './getAgents'
 import getContext from './getContext'
 import getData from './getData'
 import getMessages from './getMessages'
+import getMessagesCount from './getMessagesCount'
 import getModel from './getModel'
 import getSession from './getSession'
 import getStream from './getStream'
 import getTasks from './getTasks'
-import getTotalMessagesCount from './getTotalMessagesCount'
 import initSession from './initSession'
 import insertMessage from './insertMessage'
 import loadMessages from './loadMessages'
+import runing from './runing'
 import setContext from './setContext'
 import setTasks from './setTasks'
+import stop from './stop'
+import sync from './sync'
+import trimMessages from './trimMessages'
 import updateSession from './updateSession'
 
 import type { Agent, Session, SessionInsert } from '@core/db'
@@ -74,54 +80,24 @@ export default class Index {
 
 	getMessages = () => getMessages(this)
 	loadMessages = (type: 'prev' | 'next') => loadMessages(this, type)
+	trimMessages = () => trimMessages(this)
+	clearMessages = () => clearMessages(this)
+	getMessagesCount = () => getMessagesCount(this)
+
 	insertMessage = (v: Message) => insertMessage(this, v)
+	appendMessage = (v: Message) => appendMessage(this, v)
 
 	getTasks = () => getTasks(this)
 	setTasks = (v: Array<Context['tasks'][number]>) => setTasks(this, v)
 
 	getContext = () => getContext(this)
 	setContext = (v: Partial<Context>) => setContext(this, v)
-	getTotalMessagesCount = () => getTotalMessagesCount(this)
-	clear = () => clear(this)
+
 	getStream = (message: Message) => getStream(this, message)
-	append = (v: Message) => append(this, v)
+	abortStream = () => abortStream(this)
 
-	trimlMessages() {
-		this.model_messages = this.model_messages.slice(4)
-	}
-
-	active() {
-		this.update_at = Date.now()
-	}
-
-	emitSync() {
-		this.event.emit(`${this.id}/change`, {
-			type: 'sync',
-			data: {
-				session: this.session,
-				messages: this.ui_messages,
-				context: this.context,
-				has_older: this.ui_has_older,
-				has_newer: this.ui_has_newer
-			}
-		})
-	}
-
-	async setRunning(v: boolean) {
-		this.session.is_runing = v
-
-		this.emitSync()
-
-		await this.updateSession({ is_runing: v })
-	}
-
-	async stop() {
-		await this.setRunning(false)
-	}
-
-	async abort() {
-		await this.setRunning(false)
-
-		this.abort_controller.abort()
-	}
+	runing = (v: boolean) => runing(this, v)
+	active = () => active(this)
+	sync = () => sync(this)
+	stop = () => stop(this)
 }

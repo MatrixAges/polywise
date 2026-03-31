@@ -11,7 +11,7 @@ import type Index from './index'
 const model_threshold_value = 12
 
 export default async (s: Index, message: Message) => {
-	s.context.total_messages_count = await s.getTotalMessagesCount()
+	s.context.total_messages_count = await s.getMessagesCount()
 	s.context.current_messages_count = s.model_messages.length
 
 	if (!s.session.is_runing) {
@@ -22,10 +22,10 @@ export default async (s: Index, message: Message) => {
 	}
 
 	if (s.model_messages.length >= model_threshold_value) {
-		s.trimlMessages()
+		s.trimMessages()
 	}
 
-	await s.setRunning(true)
+	await s.runing(true)
 
 	const target = await convertToModelMessages(s.model_messages)
 
@@ -79,7 +79,7 @@ export default async (s: Index, message: Message) => {
 		},
 		onFinish: ({ responseMessage }) => {
 			s.stop()
-			s.append(responseMessage)
+			s.appendMessage(responseMessage)
 		}
 	})
 }

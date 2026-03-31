@@ -31,8 +31,8 @@ export default p.input(input_type).subscription(async function* (args) {
 		yield res
 	}
 
-	const stop = () => session.abort()
-	const clear = () => session.clear()
+	const stop = () => session.abortStream()
+	const clear = () => session.clearMessages()
 	const load = (type: 'prev' | 'next') => session.loadMessages(type)
 	const destroy = () => SessionStore.delete(id)
 
