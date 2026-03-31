@@ -65,68 +65,66 @@ export const get_search_target = `
 `
 
 export const getShadowContext = (context: unknown) => `
-# 上下文状态管理
+# Context State Management
 
-你拥有一个持久化的上下文状态（Context State），用于在当前对话窗口中维持任务进度和关键信息。
+You have a persistent context state to maintain task progress and key information across the conversation.
 
-## 当前上下文状态
+## Current Context State
 \`\`\`json
 ${JSON.stringify(context, null, 2)}
 \`\`\`
 
-## context_tool 使用指南
+## context_tool Usage
 
-你可以使用 context_tool 来更新上下文状态。该工具支持增量更新（PATCH 模式），你只需要传递需要修改的字段，未传递的字段会自动保留原值。
+You can use context_tool to update the context state. It supports incremental updates (PATCH mode) - only pass fields that need changing, others are preserved automatically.
 
-### 何时调用 context_tool
-- 用户意图发生变化
-- 任务状态发生变化（pending → running → done）
-- 有新的文件被引用或修改
-- 出现新的约束条件、阻塞问题或经验教训
-- 取得重大进展时
+## CRITICAL: Shadow Context Rules
 
-### 何时不调用 context_tool
-- 仅进行日常对话或简单问答
-- 上下文状态没有实质性变化
-- 连续多次回复中已经调用过
+context_tool is an internal tool completely invisible to the user. You MUST strictly follow these rules:
+- **NEVER** mention in your response that you used context_tool or updated context state
+- **NEVER** say things like "recorded", "state updated", "progress saved", or any phrasing implying tool usage
+- After calling context_tool, continue responding to the user normally without any additional explanation
+- The user cannot see context_tool invocation records; mentioning it will confuse them
 
-### 增量更新示例
+## When to Call context_tool
+- User intent changes
+- Task status changes (pending → running → done)
+- New files are referenced or modified
+- New constraints, blockers, or lessons learned emerge
+- Significant progress is made
 
-只更新任务状态：
+## When NOT to Call context_tool
+- Casual conversation or simple Q&A
+- No substantial context change
+- Already called in recent consecutive responses
+
+## Incremental Update Examples
+
+Update only task status:
 \`\`\`json
 {
   "tasks": [
-    { "title": "分析需求", "desc": "理解用户需求", "status": "done" },
-    { "title": "编写大纲", "desc": "整理内容结构", "status": "running" }
+    { "title": "Analyze requirements", "desc": "Understand user needs", "status": "done" },
+    { "title": "Draft outline", "desc": "Structure content", "status": "running" }
   ]
 }
 \`\`\`
 
-只添加阻塞问题：
+Add blockers only:
 \`\`\`json
 {
-  "blockers": ["需要用户确认技术方案"]
+  "blockers": ["Need user confirmation on technical approach"]
 }
 \`\`\`
 
-只更新意图和上下文：
+Update intent and context only:
 \`\`\`json
 {
-  "intent": "帮助用户完成技术分享大纲",
-  "context": "已完成 2PC 和 Saga 部分，正在编写事件溯源部分"
+  "intent": "Help user create a technical presentation outline",
+  "context": "Completed 2PC and Saga sections, currently writing Event Sourcing"
 }
 \`\`\`
 
-### 字段说明
-- intent: 用户当前意图或目标
-- context: 核心上下文信息，记录当前进展
-- tasks: 任务列表，包含 title、desc、status(pending/running/done)、result(可选)、error(可选)
-- files: 关联文件列表，包含 path、desc、status(read/modified/created/deleted, 可选)、summary(可选)
-- constraints: 硬性约束条件数组
-- lessons_learned: 已尝试但失败的方案或错误记录
-- environment: 运行环境信息
-- blockers: 当前阻塞问题，需要用户介入
-
-## 重要提醒
-不要每次回复都调用 context_tool。只在上下文状态发生实质性变化时才调用。
+## Reminder
+Do not call context_tool on every response. Only call when context changes substantially.
 `
