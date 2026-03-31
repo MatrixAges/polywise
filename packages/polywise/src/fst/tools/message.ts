@@ -49,7 +49,7 @@ export const createMessageTool = (session_id: string, model_messages: Array<Mess
 				return parsed
 			})
 
-			return await convertToModelMessages(selected)
+			return convertToModelMessages(selected)
 		}
 	})
 }
