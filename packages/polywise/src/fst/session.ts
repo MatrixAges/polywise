@@ -252,6 +252,7 @@ export default class Index {
 	}
 
 	async setContext(v: Partial<Context>) {
+		console.log(v)
 		this.context = {
 			...v,
 			total_messages_count: this.context.total_messages_count,
