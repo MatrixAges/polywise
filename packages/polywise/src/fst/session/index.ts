@@ -55,6 +55,10 @@ export default class Index {
 		return resolve(`${this.session_dir}/context.json`)
 	}
 
+	get context_history_dir() {
+		return resolve(`${this.session_dir}/context_history`)
+	}
+
 	get files_dir() {
 		return resolve(`${this.session_dir}/files`)
 	}
