@@ -13,6 +13,10 @@ export interface Context {
 	tasks: Array<{ title: string; status: 'pending' | 'runing' | 'done' }>
 	// 关联文件
 	files: Array<string>
+	// 全部消息数量
+	total_messages_count: number
+	// 当前消息窗口数量
+	current_messages_count: number
 }
 
 export interface InitArgs {

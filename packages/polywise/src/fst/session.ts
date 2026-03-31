@@ -13,6 +13,7 @@ import fs from 'fs-extra'
 import { getId } from 'stk/utils'
 
 import { getModel } from './provider'
+import { createContextTool } from './tools/context'
 import { createMessageTool } from './tools/message'
 
 import type { Agent, MessageInsert, Session, SessionInsert } from '@core/db'
@@ -251,13 +252,24 @@ export default class Index {
 		this.context = res
 	}
 
-	async setContext() {
+	async setContext(v: Partial<Context>) {
+		this.context = {
+			...v,
+			total_messages_count: this.context.total_messages_count,
+			current_messages_count: this.context.current_messages_count
+		} as Context
+
 		const [err] = await to(fs.writeJSON(this.context_dir, this.context))
 
 		if (err) return
+
+		return this.context
 	}
 
 	async getStream(message: Message) {
+		this.context.total_messages_count = await this.getTotalMessagesCount()
+		this.context.current_messages_count = this.model_messages.length
+
 		if (!this.session.is_runing) {
 			await this.insert(message)
 
@@ -275,11 +287,12 @@ export default class Index {
 
 		const res = streamText({
 			model: this.model.model,
-			system: `Current Context: \n ${this.context}`,
+			system: `Current Context: \n ${JSON.stringify(this.context, null, 2)}`,
 			messages: target,
 			tools: {
 				...this.model.tools,
-				message_tool: createMessageTool(this.id, this.model_messages)
+				message_tool: createMessageTool(this.id, this.model_messages),
+				context_tool: createContextTool(this)
 			},
 			// toolChoice:{
 			//       type:'tool',
@@ -350,6 +363,15 @@ export default class Index {
 
 	private trimModelMessages() {
 		this.model_messages = this.model_messages.slice(6)
+	}
+
+	private async getTotalMessagesCount() {
+		const [{ count }] = await env.db
+			.select({ count: sql<number>`count(*)` })
+			.from(message)
+			.where(eq(message.session_id, this.id))
+
+		return Number(count)
 	}
 
 	private active() {
