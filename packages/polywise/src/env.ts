@@ -1,4 +1,4 @@
-import { initDB, initDrizzle, initSql, initSys, migrate } from './db'
+import { initDB, initDrizzle, initSql, migrate } from './db'
 
 import type { Database } from 'better-sqlite3'
 import type { Llama, LlamaContext, LlamaEmbeddingContext, LlamaModel, LlamaRankingContext } from 'node-llama-cpp'
@@ -22,5 +22,4 @@ export const initEnv = async () => {
 	initDrizzle()
 	migrate()
 	initSql()
-	initSys()
 }

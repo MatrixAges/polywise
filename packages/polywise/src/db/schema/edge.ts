@@ -11,9 +11,7 @@ export default sqliteTable(
 		// Records "predicate/relation" in triples
 		relation: text('relation').notNull(),
 		// Foreign key: belongs to which agent
-		agent_id: text('agent_id')
-			.references(() => agent.id, { onDelete: 'cascade' })
-			.notNull(),
+		agent_id: text('agent_id').references(() => agent.id, { onDelete: 'cascade' }),
 		// Foreign key: source node
 		source_id: text('source_id')
 			.references(() => node.id, { onDelete: 'cascade' })

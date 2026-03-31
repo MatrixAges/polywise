@@ -7,8 +7,6 @@ import { notifyQueue } from '@core/task'
 import { getHash, log } from '@core/utils'
 import { eq } from 'drizzle-orm'
 
-import { getGlobalAgentId } from '../common'
-
 export default async (v: string, article_id?: string) => {
 	const hash = getHash(v)
 	const enable_triple = Boolean(config.enable_triple)
@@ -19,7 +17,6 @@ export default async (v: string, article_id?: string) => {
 		if (exist) return exist.id
 	}
 
-	const agent_id = await getGlobalAgentId()
 	const chunks = await getChunks(v)
 
 	log('SAVE', 'getChunks', () => `chunk_length: ${chunks.length}`)
@@ -115,7 +112,7 @@ export default async (v: string, article_id?: string) => {
 		if (enable_triple) {
 			await env.db.insert(task).values({
 				type: 'triple',
-				args: { chunk_text: item, agent_id, chunk_item_id: chunk_item.id }
+				args: { chunk_text: item, chunk_item_id: chunk_item.id }
 			})
 
 			has_new_task = true

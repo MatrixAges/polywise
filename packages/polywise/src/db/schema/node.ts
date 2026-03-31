@@ -7,9 +7,7 @@ export default sqliteTable(
 	'node',
 	{
 		id: text('id').primaryKey().$defaultFn(getId),
-		agent_id: text('agent_id')
-			.references(() => agent.id, { onDelete: 'cascade' })
-			.notNull(),
+		agent_id: text('agent_id').references(() => agent.id, { onDelete: 'cascade' }),
 		// Entity name
 		name: text('name').notNull(),
 		// Current activation potential (for simulating energy diffusion/spreading activation)
