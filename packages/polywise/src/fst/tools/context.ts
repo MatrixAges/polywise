@@ -10,7 +10,9 @@ const inputSchema = object({
 		object({
 			title: string().describe('Task title'),
 			desc: string().describe('Task description'),
-			status: Enum(['pending', 'runing', 'done']).describe('Task status'),
+			status: Enum(['draft', 'pending', 'processing', 'done', 'error', 'archive']).describe(
+				'Task status: use "archive" to detach a completed task from the current session context'
+			),
 			result: string().optional().describe('Task result when completed'),
 			error: string().optional().describe('Error message when task fails')
 		})

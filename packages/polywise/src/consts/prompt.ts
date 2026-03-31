@@ -88,7 +88,7 @@ context_tool is an internal tool completely invisible to the user. You MUST stri
 
 ## When to Call context_tool
 - User intent changes
-- Task status changes (pending → running → done)
+- Task status changes (pending → running → done → archive)
 - New files are referenced or modified
 - New constraints, blockers, or lessons learned emerge
 - Significant progress is made
@@ -106,6 +106,15 @@ Update only task status:
   "tasks": [
     { "title": "Analyze requirements", "desc": "Understand user needs", "status": "done" },
     { "title": "Draft outline", "desc": "Structure content", "status": "running" }
+  ]
+}
+\`\`\`
+
+Archive completed tasks no longer relevant to current context:
+\`\`\`json
+{
+  "tasks": [
+    { "title": "Old completed task", "desc": "No longer needed", "status": "archive" }
   ]
 }
 \`\`\`

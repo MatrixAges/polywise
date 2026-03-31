@@ -3,12 +3,12 @@ import { config, providers } from '@core/config'
 import { app } from '@core/consts'
 import { getShadowContext } from '@core/consts/prompt'
 import fst_system_prompt from '@core/consts/prompts/fst_system_prompt.md'
-import { agent, message, session, session_agent } from '@core/db/schema'
+import { agent, message, session, session_agent, session_todo, todo } from '@core/db/schema'
 import { env } from '@core/env'
 import { convertToModelMessages, smoothStream, stepCountIs, streamText } from 'ai'
 import { to } from 'await-to-js'
 import dayjs from 'dayjs'
-import { and, desc, eq, gt, lt, sql } from 'drizzle-orm'
+import { and, asc, desc, eq, gt, lt, ne, sql } from 'drizzle-orm'
 import { pick } from 'es-toolkit'
 import fs from 'fs-extra'
 import { getId } from 'stk/utils'
@@ -106,6 +106,7 @@ export default class Index {
 			data: {
 				session: this.session,
 				messages: this.ui_messages,
+				context: this.context,
 				has_older: this.ui_has_older,
 				has_newer: this.ui_has_newer
 			}
@@ -254,15 +255,96 @@ export default class Index {
 		this.agents = res.map(item => item.agent)
 	}
 
+	async getTasks() {
+		const res = await env.db
+			.select({ todo })
+			.from(session_todo)
+			.innerJoin(todo, eq(session_todo.todo_id, todo.id))
+			.where(and(eq(session_todo.session_id, this.id), ne(todo.status, 'archive')))
+			.orderBy(asc(todo.order))
+
+		this.context.tasks = res.map(item => {
+			const t = item.todo
+
+			return {
+				title: t.title,
+				desc: t.description ?? '',
+				status: t.status,
+				result: t.result ?? undefined,
+				error: t.error ?? undefined
+			} as Context['tasks'][number]
+		})
+	}
+
+	async setTasks(v: Array<Context['tasks'][number]>) {
+		const existing = await env.db
+			.select({ todo })
+			.from(session_todo)
+			.innerJoin(todo, eq(session_todo.todo_id, todo.id))
+			.where(eq(session_todo.session_id, this.id))
+
+		const existing_map = new Map(existing.map(item => [item.todo.title, item.todo]))
+
+		for (const task of v) {
+			const db_status = task.status
+
+			const found = existing_map.get(task.title)
+
+			if (found) {
+				const updates: Record<string, unknown> = {
+					status: db_status,
+					description: task.desc || undefined,
+					result: task.result ?? undefined,
+					error: task.error ?? undefined
+				}
+
+				if (db_status === 'done' && found.status !== 'done') {
+					updates.completed_at = new Date()
+				}
+
+				if (db_status !== 'done') {
+					updates.completed_at = null
+				}
+
+				await env.db.update(todo).set(updates).where(eq(todo.id, found.id))
+			} else {
+				const [inserted] = await env.db
+					.insert(todo)
+					.values({
+						title: task.title,
+						description: task.desc || undefined,
+						status: db_status,
+						order: existing.length + v.indexOf(task),
+						result: task.result ?? undefined,
+						error: task.error ?? undefined
+					})
+					.returning()
+
+				await env.db.insert(session_todo).values({
+					session_id: this.id,
+					todo_id: inserted.id
+				})
+			}
+		}
+
+		await this.getTasks()
+	}
+
 	async getContext() {
 		const [err, res] = await to(fs.readJSON(this.context_dir))
 
-		if (err) return
+		if (!err && res) {
+			this.context = res
+		}
 
-		this.context = res
+		await this.getTasks()
 	}
 
 	async setContext(v: Partial<Context>) {
+		if (v.tasks) {
+			await this.setTasks(v.tasks)
+		}
+
 		this.context = {
 			...this.context,
 			...v,
@@ -396,6 +478,7 @@ export default class Index {
 			data: {
 				session: this.session,
 				messages: this.ui_messages,
+				context: this.context,
 				has_older: this.ui_has_older,
 				has_newer: this.ui_has_newer
 			}
@@ -410,6 +493,7 @@ export default class Index {
 			data: {
 				session: this.session,
 				messages: this.ui_messages,
+				context: this.context,
 				has_older: this.ui_has_older,
 				has_newer: this.ui_has_newer
 			}

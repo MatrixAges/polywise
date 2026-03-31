@@ -10,7 +10,7 @@ export interface Context {
 	tasks: Array<{
 		title: string
 		desc: string
-		status: 'pending' | 'runing' | 'done'
+		status: 'draft' | 'pending' | 'processing' | 'done' | 'error' | 'archive'
 		result?: string
 		error?: string
 	}>
@@ -40,5 +40,23 @@ export interface MessageMetadata {
 }
 
 export type ChatEventRes =
-	| { type: 'init'; data: { session: Session; messages: Array<Message>; has_older: boolean; has_newer: boolean } }
-	| { type: 'sync'; data: { session: Session; messages: Array<Message>; has_older: boolean; has_newer: boolean } }
+	| {
+			type: 'init'
+			data: {
+				session: Session
+				messages: Array<Message>
+				context: Context
+				has_older: boolean
+				has_newer: boolean
+			}
+	  }
+	| {
+			type: 'sync'
+			data: {
+				session: Session
+				messages: Array<Message>
+				context: Context
+				has_older: boolean
+				has_newer: boolean
+			}
+	  }

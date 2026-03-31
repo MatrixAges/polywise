@@ -11,8 +11,12 @@ export default sqliteTable(
 		description: text('description'),
 		// Todo priority: urgent, high, medium, low, none
 		priority: text('priority').default('none'),
-		// Todo status: draft, pending, processing, done
+		// Todo status: draft, pending, processing, done, error, archive
 		status: text('status').default('draft').notNull(),
+		// Task result when completed
+		result: text('result'),
+		// Error message when task fails
+		error: text('error'),
 		// Sort order (float for fine-grained reordering)
 		order: real('order').notNull(),
 		// Estimated duration in minutes
