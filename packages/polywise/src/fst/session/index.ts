@@ -65,28 +65,36 @@ export default class Index {
 	}
 
 	initSession = () => initSession(this)
-
-	getData = () => getData(this)
-
 	getSession = () => getSession(this)
 	updateSession = (args: Partial<SessionInsert>) => updateSession(this, args)
+
+	getData = () => getData(this)
+	getAgents = () => getAgents(this)
 	getModel = () => getModel(this)
+
 	getMessages = () => getMessages(this)
 	loadMessages = (type: 'prev' | 'next') => loadMessages(this, type)
-	getAgents = () => getAgents(this)
+	insertMessage = (v: Message) => insertMessage(this, v)
+
 	getTasks = () => getTasks(this)
 	setTasks = (v: Array<Context['tasks'][number]>) => setTasks(this, v)
+
 	getContext = () => getContext(this)
 	setContext = (v: Partial<Context>) => setContext(this, v)
 	getTotalMessagesCount = () => getTotalMessagesCount(this)
-	insertMessage = (v: Message) => insertMessage(this, v)
 	clear = () => clear(this)
+	getStream = (message: Message) => getStream(this, message)
+	append = (v: Message) => append(this, v)
 
-	active = () => {
+	trimlMessages() {
+		this.model_messages = this.model_messages.slice(4)
+	}
+
+	active() {
 		this.update_at = Date.now()
 	}
 
-	emitSync = () => {
+	emitSync() {
 		this.event.emit(`${this.id}/change`, {
 			type: 'sync',
 			data: {
@@ -99,7 +107,7 @@ export default class Index {
 		})
 	}
 
-	setRunning = async (v: boolean) => {
+	async setRunning(v: boolean) {
 		this.session.is_runing = v
 
 		this.emitSync()
@@ -107,23 +115,13 @@ export default class Index {
 		await this.updateSession({ is_runing: v })
 	}
 
-	append = (v: Message) => append(this, v)
-
-	onStop = async () => {
+	async stop() {
 		await this.setRunning(false)
 	}
 
-	trimModelMessages = () => {
-		this.model_messages = this.model_messages.slice(4)
-	}
-
-	abort = async () => {
+	async abort() {
 		await this.setRunning(false)
 
 		this.abort_controller.abort()
-	}
-
-	getStream = (message: Message) => {
-		return getStream(this, message)
 	}
 }

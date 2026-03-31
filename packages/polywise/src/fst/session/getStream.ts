@@ -22,7 +22,7 @@ export default async (s: Index, message: Message) => {
 	}
 
 	if (s.model_messages.length >= model_threshold_value) {
-		s.trimModelMessages()
+		s.trimlMessages()
 	}
 
 	await s.setRunning(true)
@@ -42,8 +42,8 @@ export default async (s: Index, message: Message) => {
 		abortSignal: s.abort_controller.signal,
 		providerOptions: s.model.provider_options,
 		experimental_transform: smoothStream(),
-		onAbort: s.onStop.bind(s),
-		onError: s.onStop.bind(s)
+		onAbort: s.stop.bind(s),
+		onError: s.stop.bind(s)
 	})
 
 	let reasoning_start = 0
@@ -78,7 +78,7 @@ export default async (s: Index, message: Message) => {
 			}
 		},
 		onFinish: ({ responseMessage }) => {
-			s.onStop()
+			s.stop()
 			s.append(responseMessage)
 		}
 	})
