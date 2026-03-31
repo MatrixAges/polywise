@@ -107,9 +107,10 @@ const Index = (props: IPropsInput) => {
 				'relative w-full px-3',
 				full &&
 					`
-				absolute
+				absolute!
 				z-50
 				h-full
+				pt-3
 				backdrop-blur-lg
 			`
 			)}

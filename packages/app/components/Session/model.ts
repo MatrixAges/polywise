@@ -26,9 +26,10 @@ export default class Index {
 
 	session = null as unknown as Session
 	chat = null as unknown as Chat
-	chat_signal = 0
 	status = '' as AbstractChat<UIMessage>['status']
 	messages = [] as AbstractChat<UIMessage>['messages']
+
+	chat_signal = 0
 
 	constructor(public util: Util) {
 		makeAutoObservable(
@@ -41,9 +42,10 @@ export default class Index {
 				ref_bottom_signal: false,
 				wheeled: false,
 				auto_scroll: false,
+				session: false,
+				chat: false,
 				status: false,
-				messages: false,
-				chat: false
+				messages: false
 			},
 			{ autoBind: true }
 		)

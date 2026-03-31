@@ -216,18 +216,6 @@ export default class Index {
 		this.emitSync()
 	}
 
-	private emitSync() {
-		this.event.emit(`${this.id}/change`, {
-			type: 'sync',
-			data: {
-				session: this.session,
-				messages: this.ui_messages,
-				has_older: this.ui_has_older,
-				has_newer: this.ui_has_newer
-			}
-		} as ChatEventRes)
-	}
-
 	async getAgents() {
 		const res = await env.db
 			.select({ agent })
@@ -262,6 +250,10 @@ export default class Index {
 				...this.model.tools,
 				message_tool: createMessageTool(this.id, this.model_messages)
 			},
+			// toolChoice:{
+			//       type:'tool',
+			//       toolName:'context_tool'
+			// },
 			stopWhen: stepCountIs(300),
 			abortSignal: this.abort_controller.signal,
 			providerOptions: this.model.provider_options,
@@ -331,6 +323,18 @@ export default class Index {
 
 	private active() {
 		this.update_at = Date.now()
+	}
+
+	private emitSync() {
+		this.event.emit(`${this.id}/change`, {
+			type: 'sync',
+			data: {
+				session: this.session,
+				messages: this.ui_messages,
+				has_older: this.ui_has_older,
+				has_newer: this.ui_has_newer
+			}
+		} as ChatEventRes)
 	}
 
 	private async setRunning(v: boolean) {
