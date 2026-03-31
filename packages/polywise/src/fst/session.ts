@@ -22,6 +22,11 @@ import type { EventEmitter } from 'events'
 import type { ModelResult } from './provider'
 import type { ChatEventRes, Context, InitArgs, Message, MessageMetadata } from './types'
 
+const ui_threshold_value = 20
+const ui_reduce_value = 10
+const model_threshold_value = 16
+const model_reduce_value = 6
+
 export default class Index {
 	id = ''
 	event = null as unknown as EventEmitter
@@ -47,6 +52,10 @@ export default class Index {
 		return resolve(`${this.session_dir}/context.json`)
 	}
 
+	get files_dir() {
+		return resolve(`${this.session_dir}/files`)
+	}
+
 	async init(args: InitArgs) {
 		const { id, event } = args
 
@@ -62,6 +71,7 @@ export default class Index {
 		let res: Session
 
 		await fs.ensureDir(this.session_dir)
+		await fs.ensureDir(this.files_dir)
 
 		await this.getContext()
 
@@ -142,7 +152,7 @@ export default class Index {
 			.from(message)
 			.where(eq(message.session_id, this.id))
 			.orderBy(desc(message.created_at))
-			.limit(20)
+			.limit(ui_threshold_value)
 
 		this.ui_messages = res
 			.map(item => {
@@ -154,7 +164,7 @@ export default class Index {
 			})
 			.reverse()
 
-		this.model_messages = this.ui_messages.slice(-10)
+		this.model_messages = this.ui_messages.slice(-ui_reduce_value)
 
 		const [count_row] = await env.db
 			.select({ count: sql<number>`count(*)`.as('count') })
@@ -163,7 +173,7 @@ export default class Index {
 
 		const total = Number(count_row?.count ?? 0)
 
-		this.ui_has_older = total > 20
+		this.ui_has_older = total > ui_threshold_value
 		this.ui_has_newer = false
 	}
 
@@ -189,7 +199,7 @@ export default class Index {
 			.from(message)
 			.where(and(eq(message.session_id, this.id), condition))
 			.orderBy(desc(message.created_at))
-			.limit(10)
+			.limit(ui_reduce_value)
 
 		if (!res.length) {
 			if (is_older) {
@@ -212,23 +222,23 @@ export default class Index {
 		if (is_older) {
 			this.ui_messages = [...new_messages, ...this.ui_messages]
 
-			if (this.ui_messages.length > 20) {
-				this.ui_messages = this.ui_messages.slice(0, -10)
+			if (this.ui_messages.length > ui_threshold_value) {
+				this.ui_messages = this.ui_messages.slice(0, -ui_reduce_value)
 				this.ui_has_newer = true
 			}
 		} else {
 			this.ui_messages = [...this.ui_messages, ...new_messages]
 
-			if (this.ui_messages.length > 20) {
-				this.ui_messages = this.ui_messages.slice(10)
+			if (this.ui_messages.length > ui_threshold_value) {
+				this.ui_messages = this.ui_messages.slice(ui_reduce_value)
 				this.ui_has_older = true
 			}
 		}
 
 		if (is_older) {
-			this.ui_has_older = res.length === 10
+			this.ui_has_older = res.length === ui_reduce_value
 		} else {
-			this.ui_has_newer = res.length === 10
+			this.ui_has_newer = res.length === ui_reduce_value
 		}
 
 		this.emitSync()
@@ -261,7 +271,7 @@ export default class Index {
 			current_messages_count: this.context.current_messages_count
 		} as Context
 
-		const [err] = await to(fs.writeJSON(this.context_dir, this.context))
+		const [err] = await to(fs.writeJSON(this.context_dir, this.context, { spaces: 4 }))
 
 		if (err) return
 
@@ -279,7 +289,7 @@ export default class Index {
 			this.ui_messages.push(message)
 		}
 
-		if (this.model_messages.length >= 16) {
+		if (this.model_messages.length >= model_threshold_value) {
 			this.trimModelMessages()
 		}
 
@@ -363,7 +373,7 @@ export default class Index {
 	}
 
 	private trimModelMessages() {
-		this.model_messages = this.model_messages.slice(6)
+		this.model_messages = this.model_messages.slice(model_reduce_value)
 	}
 
 	private async getTotalMessagesCount() {
@@ -411,8 +421,8 @@ export default class Index {
 		this.model_messages.push(v)
 		this.ui_messages.push(v)
 
-		if (this.ui_messages.length >= 20) {
-			this.ui_messages = this.ui_messages.slice(10)
+		if (this.ui_messages.length >= ui_threshold_value) {
+			this.ui_messages = this.ui_messages.slice(ui_reduce_value)
 			this.ui_has_older = true
 		}
 

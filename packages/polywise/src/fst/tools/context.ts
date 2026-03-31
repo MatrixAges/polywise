@@ -5,7 +5,7 @@ import type Session from '../session'
 
 const inputSchema = object({
 	intent: string().optional().describe('Update user intent or goal'),
-	context: string().optional().describe('Update core contextual information'),
+	context: string().max(3000).optional().describe('Update core contextual information'),
 	tasks: array(
 		object({
 			title: string(),
