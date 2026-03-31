@@ -2,8 +2,8 @@ import { message } from '@core/db/schema'
 import { env } from '@core/env'
 
 import type { MessageInsert } from '@core/db'
-import type { Message } from '../types'
-import type Index from './index'
+import type { Message } from '../../types'
+import type Index from '../index'
 
 export default async (s: Index, v: Message) => {
 	await env.db

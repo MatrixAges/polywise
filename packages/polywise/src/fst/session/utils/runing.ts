@@ -1,4 +1,4 @@
-import type Index from './index'
+import type Index from '../index'
 
 export default async (s: Index, v: boolean) => {
 	s.session.is_runing = v

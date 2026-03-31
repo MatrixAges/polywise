@@ -2,8 +2,8 @@ import { message } from '@core/db/schema'
 import { env } from '@core/env'
 import { eq } from 'drizzle-orm'
 
-import type { Context } from '../types'
-import type Index from './index'
+import type { Context } from '../../types'
+import type Index from '../index'
 
 export default async (s: Index) => {
 	s.model_messages = []

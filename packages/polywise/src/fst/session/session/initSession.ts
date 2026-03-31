@@ -4,7 +4,7 @@ import dayjs from 'dayjs'
 import { eq } from 'drizzle-orm'
 import fs from 'fs-extra'
 
-import type Index from './index'
+import type Index from '../index'
 
 export default async (s: Index) => {
 	let res: typeof s.session

@@ -1,5 +1,5 @@
-import type { Message } from '../types'
-import type Index from './index'
+import type { Message } from '../../types'
+import type Index from '../index'
 
 export default async (s: Index, v: Message) => {
 	s.model_messages.push(v)

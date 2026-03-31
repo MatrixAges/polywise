@@ -2,7 +2,7 @@ import { message } from '@core/db/schema'
 import { env } from '@core/env'
 import { desc, eq, sql } from 'drizzle-orm'
 
-import type Index from './index'
+import type Index from '../index'
 
 const ui_threshold_value = 20
 const ui_reduce_value = 10

@@ -1,5 +1,5 @@
-import type { ChatEventRes } from '../types'
-import type Index from './index'
+import type { ChatEventRes } from '../../types'
+import type Index from '../index'
 
 export default (s: Index) => {
 	s.event.emit(`${s.id}/change`, {

@@ -1,10 +1,10 @@
 import { config, providers } from '@core/config'
 import { pick } from 'es-toolkit'
 
-import { getModel } from '../provider'
+import { getModel } from '../../provider'
 
 import type { SpecialProvider } from '@core/types'
-import type Index from './index'
+import type Index from '../index'
 
 export default async (s: Index) => {
 	const { provider, model } = config.default_model

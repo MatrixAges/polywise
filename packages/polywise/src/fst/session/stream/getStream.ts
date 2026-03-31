@@ -3,10 +3,10 @@ import fst_system_prompt from '@core/consts/prompts/fst_system_prompt.md'
 import { convertToModelMessages, smoothStream, stepCountIs, streamText } from 'ai'
 import { getId } from 'stk/utils'
 
-import { createContextTool, createMessageTool } from '../tools'
+import { createContextTool, createMessageTool } from '../../tools'
 
-import type { Message, MessageMetadata } from '../types'
-import type Index from './index'
+import type { Message, MessageMetadata } from '../../types'
+import type Index from '../index'
 
 const model_threshold_value = 12
 

@@ -2,8 +2,8 @@ import { to } from 'await-to-js'
 import dayjs from 'dayjs'
 import fs from 'fs-extra'
 
-import type { Context } from '../types'
-import type Index from './index'
+import type { Context } from '../../types'
+import type Index from '../index'
 
 const append_context_history = async (s: Index, context: Context) => {
 	const history_dir = s.context_history_dir

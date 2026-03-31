@@ -2,8 +2,8 @@ import { session_todo, todo } from '@core/db/schema'
 import { env } from '@core/env'
 import { and, asc, eq, ne } from 'drizzle-orm'
 
-import type { Context } from '../types'
-import type Index from './index'
+import type { Context } from '../../types'
+import type Index from '../index'
 
 export default async (s: Index) => {
 	const res = await env.db
