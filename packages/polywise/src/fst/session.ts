@@ -353,6 +353,9 @@ export default class Index {
 		this.ui_messages = []
 		this.ui_has_older = false
 		this.ui_has_newer = false
+		this.context = {} as Context
+
+		await this.setContext({})
 
 		await env.db.delete(message).where(eq(message.session_id, this.id))
 
