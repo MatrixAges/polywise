@@ -13,10 +13,12 @@ export default sqliteTable(
 		description: text('description'),
 		// Agent avatar
 		avatar: blob('avatar'),
-		// System prompt
+		// How you run
 		prompt: text('prompt'),
-		// Agent personality
+		// What's in your mind
 		soul: text('soul'),
+		// Who you are
+		identity: text('identity'),
 		// Core memory
 		memory: text('memory').default(''),
 		// Model provider

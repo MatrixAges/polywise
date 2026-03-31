@@ -1,3 +1,6 @@
+import { readUIMessageStream, tool, ToolLoopAgent } from 'ai'
+import { object, string } from 'zod'
+
 import type { GoogleLanguageModelOptions } from '@ai-sdk/google'
 import type { ProviderOptions } from '@ai-sdk/provider-utils'
 import type { LanguageModel, ToolSet } from 'ai'
@@ -10,21 +13,6 @@ export type ModelResult = {
 
 export const getModel = async (provider: string, model: string, options?: any): Promise<ModelResult> => {
 	switch (provider) {
-		case 'google_gemini': {
-			const { createGoogleGenerativeAI, google } = await import('@ai-sdk/google')
-
-			return {
-				model: createGoogleGenerativeAI(options)(model),
-				provider_options: {
-					google: {
-						thinkingConfig: {
-							includeThoughts: true
-						}
-					} satisfies GoogleLanguageModelOptions
-				},
-				tools: { googleSearch: google.tools.googleSearch({}) }
-			}
-		}
 		case 'a2a':
 			return {
 				model: (await import('a2a-ai-provider')).a2a(model)
@@ -41,6 +29,48 @@ export const getModel = async (provider: string, model: string, options?: any): 
 			return {
 				model: (await import('@ai-sdk/openai-compatible')).createOpenAICompatible(options)(model)
 			}
+		case 'google_gemini': {
+			const { createGoogleGenerativeAI, google } = await import('@ai-sdk/google')
+
+			const target_model = createGoogleGenerativeAI(options)(model)
+
+			const search_agent = new ToolLoopAgent({
+				model: target_model,
+				instructions: `You are a google search agent.`,
+				tools: { googleSearch: google.tools.googleSearch({}) }
+			})
+
+			const search_tool = tool({
+				description: 'Search using google search for user query if possible.',
+				inputSchema: object({
+					query: string().describe('The search content')
+				}),
+				execute: async function* ({ query }, { abortSignal }) {
+					const result = await search_agent.stream({
+						prompt: query,
+						abortSignal
+					})
+
+					for await (const message of readUIMessageStream({
+						stream: result.toUIMessageStream()
+					})) {
+						yield message
+					}
+				}
+			})
+
+			return {
+				model: target_model,
+				provider_options: {
+					google: {
+						thinkingConfig: {
+							includeThoughts: true
+						}
+					} satisfies GoogleLanguageModelOptions
+				},
+				tools: { search_tool }
+			}
+		}
 		case 'openai':
 			return {
 				model: (await import('@ai-sdk/openai')).createOpenAI(options)(model)

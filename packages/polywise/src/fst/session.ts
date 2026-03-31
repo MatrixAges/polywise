@@ -12,7 +12,7 @@ import fs from 'fs-extra'
 import { getId } from 'stk/utils'
 
 import { getModel } from './provider'
-import weather_tool from './tools/weather'
+import { createMessageTool } from './tools/message'
 
 import type { Agent, MessageInsert, Session, SessionInsert } from '@core/db'
 import type { SpecialProvider } from '@core/types'
@@ -129,10 +129,13 @@ export default class Index {
 		this.ui_messages = res
 			.map(item => {
 				const parsed = JSON.parse(item.content)
+
 				parsed.createdAt = item.created_at
+
 				return parsed
 			})
 			.reverse()
+
 		this.model_messages = this.ui_messages.slice(-10)
 
 		const [count_row] = await env.db
@@ -149,89 +152,66 @@ export default class Index {
 	async load(type: 'prev' | 'next') {
 		this.active()
 
-		if (type === 'prev') return await this.loadOlderMessages()
+		const is_older = type === 'prev'
 
-		await this.loadNewerMessages()
-	}
+		const has_more = is_older ? this.ui_has_older : this.ui_has_newer
 
-	private async loadOlderMessages() {
-		if (!this.ui_has_older) return
+		if (!has_more) return
 
-		const oldest = this.ui_messages[0]
+		const boundary = is_older ? this.ui_messages[0] : this.ui_messages.at(-1)
 
-		if (!oldest?.createdAt) return
+		if (!boundary?.createdAt) return
 
-		const res = await env.db
-			.select()
-			.from(message)
-			.where(and(eq(message.session_id, this.id), lt(message.created_at, oldest.createdAt)))
-			.orderBy(desc(message.created_at))
-			.limit(10)
-
-		if (!res.length) {
-			this.ui_has_older = false
-
-			return this.emitSync()
-		}
-
-		const older_messages = res
-			.map(item => {
-				const parsed = JSON.parse(item.content)
-				parsed.createdAt = item.created_at
-				return parsed
-			})
-			.reverse()
-
-		this.ui_messages = [...older_messages, ...this.ui_messages]
-
-		if (this.ui_messages.length > 20) {
-			this.ui_messages = this.ui_messages.slice(0, -10)
-			this.ui_has_newer = true
-		}
-
-		this.ui_has_older = res.length === 10
-
-		this.emitSync()
-	}
-
-	private async loadNewerMessages() {
-		if (!this.ui_has_newer) return
-
-		const newest = this.ui_messages.at(-1)
-
-		if (!newest?.createdAt) return
+		const condition = is_older
+			? lt(message.created_at, boundary.createdAt)
+			: gt(message.created_at, boundary.createdAt)
 
 		const res = await env.db
 			.select()
 			.from(message)
-			.where(and(eq(message.session_id, this.id), gt(message.created_at, newest.createdAt)))
+			.where(and(eq(message.session_id, this.id), condition))
 			.orderBy(desc(message.created_at))
 			.limit(10)
 
 		if (!res.length) {
-			this.ui_has_newer = false
+			if (is_older) {
+				this.ui_has_older = false
+			} else {
+				this.ui_has_newer = false
+			}
 			this.emitSync()
 			return
 		}
 
-		const newer_messages = res
+		const new_messages = res
 			.map(item => {
 				const parsed = JSON.parse(item.content)
-
 				parsed.createdAt = item.created_at
-
 				return parsed
 			})
 			.reverse()
 
-		this.ui_messages = [...this.ui_messages, ...newer_messages]
+		if (is_older) {
+			this.ui_messages = [...new_messages, ...this.ui_messages]
 
-		if (this.ui_messages.length > 20) {
-			this.ui_messages = this.ui_messages.slice(10)
-			this.ui_has_older = true
+			if (this.ui_messages.length > 20) {
+				this.ui_messages = this.ui_messages.slice(0, -10)
+				this.ui_has_newer = true
+			}
+		} else {
+			this.ui_messages = [...this.ui_messages, ...new_messages]
+
+			if (this.ui_messages.length > 20) {
+				this.ui_messages = this.ui_messages.slice(10)
+				this.ui_has_older = true
+			}
 		}
 
-		this.ui_has_newer = res.length === 10
+		if (is_older) {
+			this.ui_has_older = res.length === 10
+		} else {
+			this.ui_has_newer = res.length === 10
+		}
 
 		this.emitSync()
 	}
@@ -266,12 +246,9 @@ export default class Index {
 			this.ui_messages.push(message)
 		}
 
-		console.log('**********')
-		console.log(this.model_messages.length)
 		if (this.model_messages.length >= 16) {
 			this.trimModelMessages()
 		}
-		console.log(this.model_messages.length)
 
 		this.setRunning(true)
 
@@ -283,9 +260,9 @@ export default class Index {
 			messages: target,
 			tools: {
 				...this.model.tools,
-				weather_tool
+				message_tool: createMessageTool(this.id, this.model_messages)
 			},
-			stopWhen: stepCountIs(60),
+			stopWhen: stepCountIs(300),
 			abortSignal: this.abort_controller.signal,
 			providerOptions: this.model.provider_options,
 			experimental_transform: smoothStream(),

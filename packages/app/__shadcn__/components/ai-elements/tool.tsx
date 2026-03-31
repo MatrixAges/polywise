@@ -23,7 +23,7 @@ export type ToolProps = ComponentProps<typeof Collapsible>;
 
 export const Tool = ({ className, ...props }: ToolProps) => (
   <Collapsible
-    className={cn("group not-prose mb-2 w-full rounded-md bg-secondary", className)}
+    className={cn("group not-prose w-full rounded-md bg-secondary", className)}
     {...props}
   />
 );
@@ -83,7 +83,7 @@ export const ToolHeader = ({
   return (
     <CollapsibleTrigger
       className={cn(
-        "flex w-full items-center justify-between gap-4 p-3",
+        "flex w-full items-center justify-between gap-4 p-2 px-3",
         className
       )}
       {...props}
@@ -92,7 +92,7 @@ export const ToolHeader = ({
         <WrenchIcon className="size-3.5 text-muted-foreground" />
         <span className="font-medium text-sm">{title ?? derivedName}</span>
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1">
         {getStatusBadge(state)}
         <ChevronDownIcon className="size-4 text-muted-foreground transition-transform group-data-open:rotate-180" />
       </div>
@@ -105,7 +105,7 @@ export type ToolContentProps = ComponentProps<typeof CollapsibleContent>;
 export const ToolContent = ({ className, ...props }: ToolContentProps) => (
   <CollapsibleContent
     className={cn(
-      "space-y-4 p-4 text-popover-foreground outline-none",
+      "space-y-4 px-3 pt-2 pb-3 text-popover-foreground outline-none",
       className
     )}
     {...props}
