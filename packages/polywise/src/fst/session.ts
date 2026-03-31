@@ -1,6 +1,7 @@
 import { resolve } from 'path'
 import { config, providers } from '@core/config'
 import { app } from '@core/consts'
+import { getShadowContext } from '@core/consts/prompt'
 import fst_system_prompt from '@core/consts/prompts/fst_system_prompt.md'
 import { agent, message, session, session_agent } from '@core/db/schema'
 import { env } from '@core/env'
@@ -254,6 +255,7 @@ export default class Index {
 	async setContext(v: Partial<Context>) {
 		console.log(v)
 		this.context = {
+			...this.context,
 			...v,
 			total_messages_count: this.context.total_messages_count,
 			current_messages_count: this.context.current_messages_count
@@ -287,16 +289,12 @@ export default class Index {
 
 		const res = streamText({
 			model: this.model.model,
-			system: `Current Context: \n ${JSON.stringify(this.context, null, 2)}`,
+			system: `${fst_system_prompt}\n\n${getShadowContext(this.context)}`,
 			messages: target,
 			tools: {
 				...this.model.tools,
 				message_tool: createMessageTool(this.id, this.model_messages),
 				context_tool: createContextTool(this)
-			},
-			toolChoice: {
-				type: 'tool',
-				toolName: 'context_tool'
 			},
 			stopWhen: stepCountIs(300),
 			abortSignal: this.abort_controller.signal,

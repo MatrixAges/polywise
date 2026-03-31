@@ -63,3 +63,70 @@ export const get_search_target = `
 输入："query: SR-71 Blackbird 用途, intent: 了解功能"
 输出：{"keywords": "SR-71 Blackbird, 用途, 功能", "question": "SR-71 Blackbird 的用途是什么？", "answer": "SR-71 Blackbird 是一款高空高速侦察机，主要用于执行战略侦察任务。"}
 `
+
+export const getShadowContext = (context: unknown) => `
+# 上下文状态管理
+
+你拥有一个持久化的上下文状态（Context State），用于在当前对话窗口中维持任务进度和关键信息。
+
+## 当前上下文状态
+\`\`\`json
+${JSON.stringify(context, null, 2)}
+\`\`\`
+
+## context_tool 使用指南
+
+你可以使用 context_tool 来更新上下文状态。该工具支持增量更新（PATCH 模式），你只需要传递需要修改的字段，未传递的字段会自动保留原值。
+
+### 何时调用 context_tool
+- 用户意图发生变化
+- 任务状态发生变化（pending → running → done）
+- 有新的文件被引用或修改
+- 出现新的约束条件、阻塞问题或经验教训
+- 取得重大进展时
+
+### 何时不调用 context_tool
+- 仅进行日常对话或简单问答
+- 上下文状态没有实质性变化
+- 连续多次回复中已经调用过
+
+### 增量更新示例
+
+只更新任务状态：
+\`\`\`json
+{
+  "tasks": [
+    { "title": "分析需求", "desc": "理解用户需求", "status": "done" },
+    { "title": "编写大纲", "desc": "整理内容结构", "status": "running" }
+  ]
+}
+\`\`\`
+
+只添加阻塞问题：
+\`\`\`json
+{
+  "blockers": ["需要用户确认技术方案"]
+}
+\`\`\`
+
+只更新意图和上下文：
+\`\`\`json
+{
+  "intent": "帮助用户完成技术分享大纲",
+  "context": "已完成 2PC 和 Saga 部分，正在编写事件溯源部分"
+}
+\`\`\`
+
+### 字段说明
+- intent: 用户当前意图或目标
+- context: 核心上下文信息，记录当前进展
+- tasks: 任务列表，包含 title、desc、status(pending/running/done)、result(可选)、error(可选)
+- files: 关联文件列表，包含 path、desc、status(read/modified/created/deleted, 可选)、summary(可选)
+- constraints: 硬性约束条件数组
+- lessons_learned: 已尝试但失败的方案或错误记录
+- environment: 运行环境信息
+- blockers: 当前阻塞问题，需要用户介入
+
+## 重要提醒
+不要每次回复都调用 context_tool。只在上下文状态发生实质性变化时才调用。
+`
