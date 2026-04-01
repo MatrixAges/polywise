@@ -90,17 +90,17 @@ const Index = (props: IProps) => {
 				</div>
 			</div>
 			<Input {...props_input}></Input>
-			<Drawer container={ref} open={x.open_context_modal}>
-				<DrawerContent>
+			<Drawer direction='bottom' container={ref} open={x.open_context_modal}>
+				<DrawerContent className='absolute top-0' overlayClassName='absolute top-0'>
 					<DrawerHeader>
 						<DrawerTitle>Are you absolutely sure?</DrawerTitle>
 						<DrawerDescription>This action cannot be undone.</DrawerDescription>
 					</DrawerHeader>
 					<DrawerFooter>
 						<Button>Submit</Button>
-						<DrawerClose>
-							<Button variant='outline'>Cancel</Button>
-						</DrawerClose>
+						<Button variant='outline' onClick={toggleContextModal}>
+							Cancel
+						</Button>
 					</DrawerFooter>
 				</DrawerContent>
 			</Drawer>
