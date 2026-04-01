@@ -1,4 +1,3 @@
-import { EventEmitter } from 'events'
 import { SessionEventStore } from '@core/utils'
 import { tool } from 'ai'
 import { array, boolean, infer as Infer, object, string } from 'zod'
@@ -17,23 +16,23 @@ const inputSchema = object({
 
 export type QuestionInput = Infer<typeof inputSchema>
 
-export const createQuestionTool = (session_id: string) => {
+export const createQuestionTool = (id: string) => {
 	return tool({
 		description: 'Ask the user a question with selectable options. Use when you need user input to proceed.',
 		inputSchema,
-		execute: async (args, { abortSignal }) => {
+		execute: async (_, { abortSignal }) => {
 			const { promise, resolve } = Promise.withResolvers<string>()
 
 			const handler = (v: string) => resolve(v)
 			const abort = () => resolve('Question aborted')
 
-			SessionEventStore.on(`${session_id}/answer`, handler)
+			SessionEventStore.on(`${id}/answer`, handler)
 
 			abortSignal?.addEventListener('abort', abort)
 
 			const answer = await promise
 
-			return { question: args.question, answer }
+			return answer
 		}
 	})
 }

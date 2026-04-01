@@ -6,7 +6,7 @@ import { Input } from '@/__shadcn__/components/ui/input'
 import type { IPropsQuestion } from '../types'
 
 const Index = (props: IPropsQuestion) => {
-	const { input, answer } = props
+	const { input, output, answer } = props
 	const { question, options, multiple, custom } = input
 
 	const [selected, setSelected] = useState<Array<string>>([])
@@ -33,16 +33,13 @@ const Index = (props: IPropsQuestion) => {
 			className='
 				flex flex-col
 				gap-3
-				p-4
+				p-3
+				mb-1
 				rounded-lg
-				bg-bg-secondary
-				border border-border-light
+				bg-secondary
 			'
 		>
-			<div className='flex flex-col gap-1'>
-				<span className='text-sm font-medium'>{question}</span>
-			</div>
-
+			<span className='text-sm font-medium'>{question}</span>
 			<div className='flex flex-col gap-2'>
 				{options.map((option, index) => {
 					const is_selected = selected.includes(option.label)

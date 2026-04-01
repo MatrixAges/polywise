@@ -35,7 +35,7 @@ const inputSchema = discriminatedUnion('action', [
 	})
 ])
 
-export const createMessageTool = (session_id: string, model_messages: Array<Message>) => {
+export const createMessageTool = (id: string, model_messages: Array<Message>) => {
 	const baseline = model_messages[0]?.createdAt
 	const model_count = model_messages.length
 
@@ -43,7 +43,7 @@ export const createMessageTool = (session_id: string, model_messages: Array<Mess
 		const [{ count }] = await env.db
 			.select({ count: sql<number>`count(*)` })
 			.from(message)
-			.where(eq(message.session_id, session_id))
+			.where(eq(message.id, id))
 
 		return {
 			action: 'get_total_count' as const,
@@ -75,11 +75,11 @@ export const createMessageTool = (session_id: string, model_messages: Array<Mess
 			env.db
 				.select({ count: sql<number>`count(*)` })
 				.from(message)
-				.where(eq(message.session_id, session_id)),
+				.where(eq(message.id, id)),
 			env.db
 				.select()
 				.from(message)
-				.where(and(eq(message.session_id, session_id), lt(message.created_at, baseline)))
+				.where(and(eq(message.id, id), lt(message.created_at, baseline)))
 				.orderBy(asc(message.created_at))
 		])
 

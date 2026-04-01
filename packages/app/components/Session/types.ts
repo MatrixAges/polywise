@@ -19,4 +19,5 @@ export interface IPropsInput extends Pick<Model, 'send' | 'stop' | 'clear' | 'sc
 
 export interface IPropsQuestion extends Pick<IPropsPart, 'answer'> {
 	input: QuestionInput
+	output?: string
 }

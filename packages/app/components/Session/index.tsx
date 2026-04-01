@@ -39,8 +39,6 @@ const Index = (props: IProps) => {
 		toggleContextModal
 	}
 
-	console.log(x.status, x.messages)
-
 	return (
 		<div
 			className='
