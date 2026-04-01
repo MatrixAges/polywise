@@ -3,7 +3,7 @@ import fst_system_prompt from '@core/consts/prompts/fst_system_prompt.md'
 import { convertToModelMessages, smoothStream, stepCountIs, streamText } from 'ai'
 import { getId } from 'stk/utils'
 
-import { createContextTool, createMessageTool } from '../../tools'
+import { createContextTool, createMessageTool, createQuestionTool } from '../../tools'
 
 import type { Message, MessageMetadata } from '../../types'
 import type Index from '../index'
@@ -36,7 +36,8 @@ export default async (s: Index, message: Message) => {
 		tools: {
 			...s.model.tools,
 			message_tool: createMessageTool(s.id, s.model_messages),
-			context_tool: createContextTool(s)
+			context_tool: createContextTool(s),
+			question_tool: createQuestionTool()
 		},
 		stopWhen: stepCountIs(300),
 		abortSignal: s.abort_controller.signal,

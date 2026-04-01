@@ -74,6 +74,7 @@ const Index = (props: IProps) => {
 						<Message
 							streaming={index === x.messages.length - 1 && streaming}
 							message={message}
+							submitQuestionAnswer={x.submitQuestionAnswer}
 							key={message.id}
 						></Message>
 					))}

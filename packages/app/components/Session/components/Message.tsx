@@ -11,7 +11,7 @@ import type { FileUIPart, SourceUrlUIPart, TextUIPart } from 'ai'
 import type { IPropsMessage } from '../types'
 
 const Index = (props: IPropsMessage) => {
-	const { streaming, message } = props
+	const { streaming, message, submitQuestionAnswer } = props
 	const { parts } = message
 
 	const { source_urls, files, left_parts } = useMemo(() => {
@@ -41,6 +41,7 @@ const Index = (props: IPropsMessage) => {
 							streaming={streaming}
 							part={part}
 							metadata={message.metadata as MessageMetadata}
+							submitQuestionAnswer={submitQuestionAnswer}
 							key={`${message.id}-${index}`}
 						></Part>
 					))
