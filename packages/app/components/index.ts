@@ -1,6 +1,7 @@
 export { default as ErrorBoundary } from './ErrorBoundary'
 export { default as Alert } from './Alert'
 export { default as Dialog } from './Dialog'
+export { default as Drawer } from './Drawer'
 export { default as Tabs } from './Tabs'
 export { default as Lazy } from './Lazy'
 export { default as Sidebar } from './Sidebar'

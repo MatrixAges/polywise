@@ -1,0 +1,43 @@
+[data-theme='dark'] {
+	.mask {
+		background-color: rgba(0, 0, 0, 0.75);
+	}
+}
+
+.mask {
+	position: absolute;
+	z-index: 1001;
+	top: 0;
+	left: 0;
+	background-color: rgba(0, 0, 0, 0.3);
+	-webkit-app-region: none;
+
+	&.on_body {
+		position: fixed;
+	}
+}
+
+.content_wrap {
+	position: absolute;
+	z-index: 1002;
+	top: 0;
+	left: 0;
+	overflow-y: scroll;
+
+	&.on_body {
+		position: fixed;
+	}
+}
+
+.content {
+	height: 100%;
+
+	.header {
+		line-height: 1;
+	}
+
+	.body {
+		overflow-y: scroll;
+		flex: 1;
+	}
+}

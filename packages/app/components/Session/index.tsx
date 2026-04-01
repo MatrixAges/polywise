@@ -3,19 +3,10 @@ import { useMemoizedFn } from 'ahooks'
 import { observer } from 'mobx-react-lite'
 import { container } from 'tsyringe'
 
-import { Button } from '@/__shadcn__/components/ui/button'
-import {
-	Drawer,
-	DrawerClose,
-	DrawerContent,
-	DrawerDescription,
-	DrawerFooter,
-	DrawerHeader,
-	DrawerTitle
-} from '@/__shadcn__/components/ui/drawer'
+import { Drawer } from '@/components'
 import { useAliveEffect } from '@/hooks'
 
-import { Input, Message } from './components'
+import { Context, Input, Message } from './components'
 import Model from './model'
 
 import type { IPropsInput } from './types'
@@ -90,19 +81,19 @@ const Index = (props: IProps) => {
 				</div>
 			</div>
 			<Input {...props_input}></Input>
-			<Drawer direction='bottom' container={ref} open={x.open_context_modal}>
-				<DrawerContent className='absolute top-0' overlayClassName='absolute top-0'>
-					<DrawerHeader>
-						<DrawerTitle>Are you absolutely sure?</DrawerTitle>
-						<DrawerDescription>This action cannot be undone.</DrawerDescription>
-					</DrawerHeader>
-					<DrawerFooter>
-						<Button>Submit</Button>
-						<Button variant='outline' onClick={toggleContextModal}>
-							Cancel
-						</Button>
-					</DrawerFooter>
-				</DrawerContent>
+			<Drawer
+				class_name='p-2'
+				content_class_name='rounded-md'
+				placement='bottom'
+				getContainer={() => ref}
+				mask_closable
+				height='100%'
+				title='Session Context'
+				desc='Manage session state and env'
+				open={x.open_context_modal}
+				onClose={toggleContextModal}
+			>
+				<Context></Context>
 			</Drawer>
 		</div>
 	)
