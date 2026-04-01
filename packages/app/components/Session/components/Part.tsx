@@ -151,7 +151,6 @@ const Index = (props: IPropsPart) => {
 							<ToolHeader
 								type={tool_part.type}
 								state={tool_part.state}
-								toolName={tool_part.title}
 								title={tool_part.title}
 							/>
 							<ToolContent>
@@ -165,7 +164,6 @@ const Index = (props: IPropsPart) => {
 							<ToolHeader
 								type={tool_part.type}
 								state={tool_part.state}
-								toolName={tool_part.title}
 								title={tool_part.title}
 							/>
 							<ToolContent>

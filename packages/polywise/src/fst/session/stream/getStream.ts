@@ -14,11 +14,21 @@ export default async (s: Index, message: Message) => {
 	s.context.total_messages_count = await s.getMessagesCount()
 	s.context.current_messages_count = s.model_messages.length
 
-	if (!s.session.is_runing) {
-		await s.insertMessage(message)
+	const msg_exists = s.model_messages.some(m => m.id === message.id)
 
-		s.model_messages.push(message)
-		s.ui_messages.push(message)
+	if (!s.session.is_runing) {
+		if (!msg_exists) {
+			await s.insertMessage(message)
+
+			s.model_messages.push(message)
+			s.ui_messages.push(message)
+		} else {
+			const idx = s.model_messages.findIndex(m => m.id === message.id)
+			if (idx !== -1) s.model_messages[idx] = message
+
+			const ui_idx = s.ui_messages.findIndex(m => m.id === message.id)
+			if (ui_idx !== -1) s.ui_messages[ui_idx] = message
+		}
 	}
 
 	if (s.model_messages.length >= model_threshold_value) {

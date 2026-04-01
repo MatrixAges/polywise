@@ -274,15 +274,17 @@ export default class Index {
 	async submitQuestionAnswer(answer: string) {
 		if (!this.pending_question) return
 
+		console.log('submitQuestionAnswer called with:', answer)
+
 		await this.chat.addToolOutput({
 			tool: 'question_tool',
 			toolCallId: this.pending_question.toolCallId,
 			output: { answer }
 		})
-
-		this.pending_question = null
-
+		console.log('addToolOutput done, calling sendMessage')
 		await this.chat.sendMessage(undefined)
+		console.log('sendMessage done')
+		this.pending_question = null
 
 		this.update()
 	}
