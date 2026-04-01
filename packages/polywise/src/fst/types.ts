@@ -23,7 +23,7 @@ export interface Context {
 	total_messages_count: number
 	current_messages_count: number
 	constraints?: Array<string>
-	lessons_learned?: Array<string>
+	learned?: Array<string>
 	environment?: Record<string, string>
 	blockers?: Array<string>
 }

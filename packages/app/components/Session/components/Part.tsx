@@ -24,7 +24,7 @@ const Index = (props: IPropsPart) => {
 				</Reasoning>
 			)
 		case 'text':
-			return <MessageResponse isAnimating>{part.text}</MessageResponse>
+			return <MessageResponse isAnimating={streaming}>{part.text}</MessageResponse>
 		case 'dynamic-tool': {
 			const tool_part = part as DynamicToolUIPart
 

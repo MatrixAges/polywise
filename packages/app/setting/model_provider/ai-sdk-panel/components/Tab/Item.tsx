@@ -33,7 +33,6 @@ const Index = (props: IPropsTabItem) => {
 				h-8
 				gap-2.5
 				px-2.5
-				text-light
 				click_button
 			`,
 				is_dragging && disabled && 'cursor-not-allowed!',

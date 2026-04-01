@@ -32,7 +32,7 @@ const inputSchema = object({
 		.optional()
 		.describe('Files referenced or modified in the conversation'),
 	constraints: array(string()).optional().describe('Hard rules or constraints that must be followed'),
-	lessons_learned: array(string()).optional().describe('Failed approaches or errors to avoid repeating'),
+	learned: array(string()).optional().describe('Failed approaches or errors to avoid repeating'),
 	environment: record(string(), string())
 		.optional()
 		.describe('Runtime environment details such as versions or paths'),

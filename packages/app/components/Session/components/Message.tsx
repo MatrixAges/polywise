@@ -33,7 +33,7 @@ const Index = (props: IPropsMessage) => {
 	}, [parts])
 
 	return (
-		<Message from={message.role} key={message.id}>
+		<Message from={message.role}>
 			<MessageContent>
 				{left_parts.length ? (
 					left_parts.map((part, index) => (
