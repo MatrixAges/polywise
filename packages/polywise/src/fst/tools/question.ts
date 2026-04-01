@@ -1,9 +1,10 @@
+import { EventEmitter } from 'events'
+import { SessionEventStore } from '@core/utils'
 import { tool } from 'ai'
-import { array, boolean, object, string } from 'zod'
+import { array, boolean, infer as Infer, object, string } from 'zod'
 
 const inputSchema = object({
 	question: string().describe('The question to ask the user'),
-	header: string().describe('Short label for the question'),
 	options: array(
 		object({
 			label: string().describe('Display text for the option'),
@@ -14,9 +15,25 @@ const inputSchema = object({
 	custom: boolean().optional().describe('Allow typing a custom answer')
 })
 
-export const createQuestionTool = () => {
+export type QuestionInput = Infer<typeof inputSchema>
+
+export const createQuestionTool = (session_id: string) => {
 	return tool({
 		description: 'Ask the user a question with selectable options. Use when you need user input to proceed.',
-		inputSchema
+		inputSchema,
+		execute: async (args, { abortSignal }) => {
+			const { promise, resolve } = Promise.withResolvers<string>()
+
+			const handler = (v: string) => resolve(v)
+			const abort = () => resolve('Question aborted')
+
+			SessionEventStore.on(`${session_id}/answer`, handler)
+
+			abortSignal?.addEventListener('abort', abort)
+
+			const answer = await promise
+
+			return { question: args.question, answer }
+		}
 	})
 }

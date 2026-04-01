@@ -14,21 +14,11 @@ export default async (s: Index, message: Message) => {
 	s.context.total_messages_count = await s.getMessagesCount()
 	s.context.current_messages_count = s.model_messages.length
 
-	const msg_exists = s.model_messages.some(m => m.id === message.id)
-
 	if (!s.session.is_runing) {
-		if (!msg_exists) {
-			await s.insertMessage(message)
+		await s.insertMessage(message)
 
-			s.model_messages.push(message)
-			s.ui_messages.push(message)
-		} else {
-			const idx = s.model_messages.findIndex(m => m.id === message.id)
-			if (idx !== -1) s.model_messages[idx] = message
-
-			const ui_idx = s.ui_messages.findIndex(m => m.id === message.id)
-			if (ui_idx !== -1) s.ui_messages[ui_idx] = message
-		}
+		s.model_messages.push(message)
+		s.ui_messages.push(message)
 	}
 
 	if (s.model_messages.length >= model_threshold_value) {
@@ -47,7 +37,7 @@ export default async (s: Index, message: Message) => {
 			...s.model.tools,
 			message_tool: createMessageTool(s.id, s.model_messages),
 			context_tool: createContextTool(s),
-			question_tool: createQuestionTool()
+			question_tool: createQuestionTool(s.id)
 		},
 		stopWhen: stepCountIs(300),
 		abortSignal: s.abort_controller.signal,

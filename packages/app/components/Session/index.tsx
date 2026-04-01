@@ -19,7 +19,7 @@ const Index = (props: IProps) => {
 	const { id } = props
 	const [x] = useState(() => container.resolve(Model))
 
-	const streaming = x.status === 'streaming' || !!x.pending_question
+	const streaming = x.status === 'streaming'
 
 	const { ref, setRef } = useAliveEffect({
 		init: () => x.init(id),
@@ -39,7 +39,7 @@ const Index = (props: IProps) => {
 		toggleContextModal
 	}
 
-	console.log(x.status)
+	console.log(x.status, x.messages)
 
 	return (
 		<div
@@ -76,7 +76,7 @@ const Index = (props: IProps) => {
 						<Message
 							streaming={index === x.messages.length - 1 && streaming}
 							message={message}
-							submitQuestionAnswer={x.submitQuestionAnswer}
+							answer={x.answer}
 							key={message.id}
 						></Message>
 					))}

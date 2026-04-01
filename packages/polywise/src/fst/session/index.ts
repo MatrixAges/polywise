@@ -77,7 +77,7 @@ export default class Index {
 	appendMessage = (v: Message) => appendMessage(this, v)
 
 	getTasks = () => getTasks(this)
-	setTasks = (v: Array<Context['tasks'][number]>) => setTasks(this, v)
+	setTasks = (v: Context['tasks']) => setTasks(this, v)
 
 	getContext = () => getContext(this)
 	setContext = (v: Partial<Context>) => setContext(this, v)

@@ -1,5 +1,5 @@
 import { tool } from 'ai'
-import { array, enum as Enum, object, record, string } from 'zod'
+import { array, enum as Enum, infer as Infer, object, record, string } from 'zod'
 
 import type Session from '../session'
 
@@ -37,6 +37,8 @@ const inputSchema = object({
 		.describe('Runtime environment details such as versions or paths'),
 	blockers: array(string()).optional().describe('Issues blocking progress that require user input')
 })
+
+export type ContextInput = Infer<typeof inputSchema>
 
 export const createContextTool = (session: Session) => {
 	return tool({

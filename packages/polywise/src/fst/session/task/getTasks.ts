@@ -22,6 +22,6 @@ export default async (s: Index) => {
 			status: t.status,
 			result: t.result ?? undefined,
 			error: t.error ?? undefined
-		} as Context['tasks'][number]
+		} as Required<Context>['tasks'][number]
 	})
 }

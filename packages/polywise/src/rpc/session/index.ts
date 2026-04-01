@@ -1,6 +1,6 @@
 import { r } from '@core/utils'
 
-import { clear, destroy, load, stop } from './events'
+import { answer, clear, destroy, load, stop } from './events'
 import init from './init'
 
 export default r({
@@ -8,5 +8,6 @@ export default r({
 	stop,
 	clear,
 	load,
+	answer,
 	destroy
 })

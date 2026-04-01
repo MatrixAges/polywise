@@ -3,17 +3,12 @@ import { useState } from 'react'
 import { Button } from '@/__shadcn__/components/ui/button'
 import { Input } from '@/__shadcn__/components/ui/input'
 
-interface IProps {
-	question: string
-	header: string
-	options: Array<{ label: string; description: string }>
-	multiple?: boolean
-	custom?: boolean
-	onSelect: (answer: string) => void
-}
+import type { IPropsQuestion } from '../types'
 
-const Index = (props: IProps) => {
-	const { question, header, options, multiple, custom, onSelect } = props
+const Index = (props: IPropsQuestion) => {
+	const { input, answer } = props
+	const { question, options, multiple, custom } = input
+
 	const [selected, setSelected] = useState<Array<string>>([])
 	const [custom_value, setCustomValue] = useState('')
 
@@ -27,9 +22,9 @@ const Index = (props: IProps) => {
 
 	const handleSubmit = () => {
 		if (custom_value) {
-			onSelect(custom_value)
+			answer(custom_value)
 		} else if (selected.length > 0) {
-			onSelect(selected.join(', '))
+			answer(selected.join(', '))
 		}
 	}
 
@@ -45,7 +40,6 @@ const Index = (props: IProps) => {
 			'
 		>
 			<div className='flex flex-col gap-1'>
-				<span className='text-std-400 text-xs font-medium uppercase'>{header}</span>
 				<span className='text-sm font-medium'>{question}</span>
 			</div>
 
@@ -77,7 +71,6 @@ const Index = (props: IProps) => {
 					)
 				})}
 			</div>
-
 			{custom && (
 				<Input
 					placeholder='Type your answer...'
@@ -86,7 +79,6 @@ const Index = (props: IProps) => {
 					className='text-sm'
 				/>
 			)}
-
 			<Button
 				size='sm'
 				disabled={!custom_value && selected.length === 0}

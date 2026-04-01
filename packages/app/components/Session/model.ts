@@ -31,14 +31,14 @@ export default class Index {
 
 	chat_signal = 0
 	open_context_modal = false
-	pending_question = null as unknown as {
-		toolCallId: string
-		question: string
-		header: string
-		options: Array<{ label: string; description: string }>
-		multiple?: boolean
-		custom?: boolean
-	} | null
+	// question = null as unknown as {
+	// 	toolCallId: string
+	// 	question: string
+	// 	header: string
+	// 	options: Array<{ label: string; description: string }>
+	// 	multiple?: boolean
+	// 	custom?: boolean
+	// } | null
 
 	constructor(public util: Util) {
 		makeAutoObservable(
@@ -56,8 +56,8 @@ export default class Index {
 				session: false,
 				context: false,
 				status: false,
-				messages: false,
-				pending_question: false
+				messages: false
+				// question: false
 			},
 			{ autoBind: true }
 		)
@@ -87,31 +87,31 @@ export default class Index {
 						api: `${server_sys_session_url}?id=${this.id}`
 					})
 				}),
-				generateId: getId,
-				onToolCall: ({ toolCall }) => {
-					console.log('onToolCall fired:', toolCall.toolName, toolCall.dynamic)
+				generateId: getId
+				// onToolCall: ({ toolCall }) => {
+				// 	console.log('onToolCall fired:', toolCall.toolName, toolCall.dynamic)
 
-					if (toolCall.toolName === 'question_tool') {
-						const input = toolCall.input as unknown as {
-							question: string
-							header: string
-							options: Array<{ label: string; description: string }>
-							multiple?: boolean
-							custom?: boolean
-						}
+				// 	if (toolCall.toolName === 'question_tool') {
+				// 		const input = toolCall.input as unknown as {
+				// 			question: string
+				// 			header: string
+				// 			options: Array<{ label: string; description: string }>
+				// 			multiple?: boolean
+				// 			custom?: boolean
+				// 		}
 
-						this.pending_question = {
-							toolCallId: toolCall.toolCallId,
-							question: input.question,
-							header: input.header,
-							options: input.options,
-							multiple: input.multiple,
-							custom: input.custom
-						}
+				// 		this.question = {
+				// 			toolCallId: toolCall.toolCallId,
+				// 			question: input.question,
+				// 			header: input.header,
+				// 			options: input.options,
+				// 			multiple: input.multiple,
+				// 			custom: input.custom
+				// 		}
 
-						this.update()
-					}
-				}
+				// 		this.update()
+				// 	}
+				// }
 			})
 		}
 
@@ -209,10 +209,37 @@ export default class Index {
 		this.auto_scroll = false
 	}
 
+	onScroll() {
+		if (!this.ref_container) return
+		if (this.status === 'streaming') return
+
+		const { scrollTop, scrollHeight, clientHeight } = this.ref_container
+		const is_at_top = scrollTop <= 600
+		const is_at_bottom = scrollTop + clientHeight >= scrollHeight - 600
+
+		if (is_at_top && this.has_older) {
+			rpc.session.load.query({ id: this.id, type: 'prev' })
+		}
+
+		if (is_at_bottom && this.has_newer) {
+			rpc.session.load.query({ id: this.id, type: 'next' })
+		}
+	}
+
 	update() {
 		this.chat_signal += 1
 
 		if (this.auto_scroll) this.scrollToBottom({ update: true, instant: true })
+	}
+
+	async answer(v: string) {
+		// if (!this.question) return
+
+		rpc.session.answer.mutate({ id: this.id, answer: v })
+
+		// this.question = null
+
+		this.update()
 	}
 
 	async clear() {
@@ -234,23 +261,6 @@ export default class Index {
 		rpc.session.clear.mutate(this.id)
 	}
 
-	onScroll() {
-		if (!this.ref_container) return
-		if (this.status === 'streaming') return
-
-		const { scrollTop, scrollHeight, clientHeight } = this.ref_container
-		const is_at_top = scrollTop <= 600
-		const is_at_bottom = scrollTop + clientHeight >= scrollHeight - 600
-
-		if (is_at_top && this.has_older) {
-			rpc.session.load.query({ id: this.id, type: 'prev' })
-		}
-
-		if (is_at_bottom && this.has_newer) {
-			rpc.session.load.query({ id: this.id, type: 'next' })
-		}
-	}
-
 	on() {
 		const off_status = this.chat['~registerStatusCallback'](() => {
 			this.status = this.chat.status
@@ -269,24 +279,6 @@ export default class Index {
 		})
 
 		this.util.acts.push(off_status, off_messages, off_error)
-	}
-
-	async submitQuestionAnswer(answer: string) {
-		if (!this.pending_question) return
-
-		console.log('submitQuestionAnswer called with:', answer)
-
-		await this.chat.addToolOutput({
-			tool: 'question_tool',
-			toolCallId: this.pending_question.toolCallId,
-			output: { answer }
-		})
-		console.log('addToolOutput done, calling sendMessage')
-		await this.chat.sendMessage(undefined)
-		console.log('sendMessage done')
-		this.pending_question = null
-
-		this.update()
 	}
 
 	deinit() {

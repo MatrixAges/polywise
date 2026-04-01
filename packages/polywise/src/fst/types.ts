@@ -1,30 +1,13 @@
 import type { Session } from '@core/db'
 import type { LanguageModelUsage, UIDataTypes, UIMessage, UITools } from 'ai'
 import type { EventEmitter } from 'events'
+import type { ContextInput } from './tools'
 
 export type Message = UIMessage<unknown, UIDataTypes, UITools> & { createdAt?: Date }
 
-export interface Context {
-	intent: string
-	context: string
-	tasks: Array<{
-		title: string
-		desc: string
-		status: 'draft' | 'pending' | 'processing' | 'done' | 'error' | 'archive'
-		result?: string
-		error?: string
-	}>
-	files: Array<{
-		path: string
-		desc: string
-		status?: 'read' | 'modified' | 'created' | 'deleted'
-	}>
+export type Context = ContextInput & {
 	total_messages_count: number
 	current_messages_count: number
-	constraints?: Array<string>
-	learned?: Array<string>
-	environment?: Record<string, string>
-	blockers?: Array<string>
 }
 
 export interface InitArgs {

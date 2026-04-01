@@ -5,7 +5,7 @@ import { eq } from 'drizzle-orm'
 import type { Context } from '../../types'
 import type Index from '../index'
 
-export default async (s: Index, v: Array<Context['tasks'][number]>) => {
+export default async (s: Index, v: Context['tasks']) => {
 	const existing = await env.db
 		.select({ todo })
 		.from(session_todo)
@@ -14,7 +14,9 @@ export default async (s: Index, v: Array<Context['tasks'][number]>) => {
 
 	const existing_map = new Map(existing.map(item => [item.todo.title, item.todo]))
 
-	for (const task of v) {
+	const tasks = v || []
+
+	for (const task of tasks) {
 		const db_status = task.status
 
 		const found = existing_map.get(task.title)
@@ -43,7 +45,7 @@ export default async (s: Index, v: Array<Context['tasks'][number]>) => {
 					title: task.title,
 					description: task.desc || undefined,
 					status: db_status,
-					order: existing.length + v.indexOf(task),
+					order: existing.length + tasks.indexOf(task),
 					result: task.result ?? undefined,
 					error: task.error ?? undefined
 				})
