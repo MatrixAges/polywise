@@ -57,7 +57,13 @@ const Index = (props: IPropsPart) => {
 
 		if (tool_part.type === 'tool-question_tool' && tool_part.input) {
 			console.log(tool_part)
-			return <Question input={tool_part.input as QuestionInput} answer={answer} />
+			return (
+				<Question
+					input={tool_part.input as QuestionInput}
+					output={tool_part.output as string}
+					answer={answer}
+				/>
+			)
 		}
 
 		return (

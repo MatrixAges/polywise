@@ -10,8 +10,7 @@ const inputSchema = object({
 			description: string().describe('Description of the option')
 		})
 	).describe('Available choices'),
-	multiple: boolean().optional().describe('Allow selecting multiple options'),
-	custom: boolean().optional().describe('Allow typing a custom answer')
+	multiple: boolean().optional().describe('Allow selecting multiple options')
 })
 
 export type QuestionInput = Infer<typeof inputSchema>
