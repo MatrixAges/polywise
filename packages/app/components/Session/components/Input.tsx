@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef } from 'react'
 import { PauseIcon, PlayIcon } from '@phosphor-icons/react'
 import { useMemoizedFn, useToggle } from 'ahooks'
-import { ArrowDownToLine, BrushCleaning, Maximize } from 'lucide-react'
+import { ArrowDownToLine, BrushCleaning, Layers2, Maximize } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import {
@@ -27,7 +27,7 @@ const submit_modes = [
 ]
 
 const Index = (props: IPropsInput) => {
-	const { streaming, send, stop, clear, scrollToBottom } = props
+	const { streaming, send, stop, clear, scrollToBottom, toggleContextModal } = props
 	const global = useGlobal()
 	const ref = useRef<HTMLTextAreaElement>(null)
 	const [compositing, { setLeft, setRight }] = useToggle(false)
@@ -198,6 +198,9 @@ const Index = (props: IPropsInput) => {
 						</SelectContent>
 					</Select>
 					<div className='flex gap-1'>
+						<button className='icon_button h-5 w-5' onClick={toggleContextModal}>
+							<Layers2 className='stroke-std-400 h-[12px] w-[12px]'></Layers2>
+						</button>
 						<button className='icon_button h-5 w-5' onClick={scrollToBottom}>
 							<ArrowDownToLine className='stroke-std-400 h-[12px] w-[12px]'></ArrowDownToLine>
 						</button>

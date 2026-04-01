@@ -14,4 +14,5 @@ export interface IPropsPart {
 
 export interface IPropsInput extends Pick<Model, 'send' | 'stop' | 'clear' | 'scrollToBottom'> {
 	streaming: boolean
+	toggleContextModal: () => void
 }

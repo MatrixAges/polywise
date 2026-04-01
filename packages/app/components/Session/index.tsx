@@ -3,6 +3,16 @@ import { useMemoizedFn } from 'ahooks'
 import { observer } from 'mobx-react-lite'
 import { container } from 'tsyringe'
 
+import { Button } from '@/__shadcn__/components/ui/button'
+import {
+	Drawer,
+	DrawerClose,
+	DrawerContent,
+	DrawerDescription,
+	DrawerFooter,
+	DrawerHeader,
+	DrawerTitle
+} from '@/__shadcn__/components/ui/drawer'
 import { useAliveEffect } from '@/hooks'
 
 import { Input, Message } from './components'
@@ -20,20 +30,22 @@ const Index = (props: IProps) => {
 
 	const streaming = x.status === 'streaming'
 
-	const { setRef } = useAliveEffect({
+	const { ref, setRef } = useAliveEffect({
 		init: () => x.init(id),
 		deinit: () => x.deinit()
 	})
 
 	const setConfainerRef = useMemoizedFn(v => (x.ref_container = v))
 	const setBottomSignalRef = useMemoizedFn(v => (x.ref_bottom_signal = v))
+	const toggleContextModal = useMemoizedFn(() => (x.open_context_modal = !x.open_context_modal))
 
 	const props_input: IPropsInput = {
 		streaming,
 		send: x.send,
 		stop: x.stop,
 		clear: x.clear,
-		scrollToBottom: x.scrollToBottom
+		scrollToBottom: x.scrollToBottom,
+		toggleContextModal
 	}
 
 	return (
@@ -78,6 +90,20 @@ const Index = (props: IProps) => {
 				</div>
 			</div>
 			<Input {...props_input}></Input>
+			<Drawer container={ref} open={x.open_context_modal}>
+				<DrawerContent>
+					<DrawerHeader>
+						<DrawerTitle>Are you absolutely sure?</DrawerTitle>
+						<DrawerDescription>This action cannot be undone.</DrawerDescription>
+					</DrawerHeader>
+					<DrawerFooter>
+						<Button>Submit</Button>
+						<DrawerClose>
+							<Button variant='outline'>Cancel</Button>
+						</DrawerClose>
+					</DrawerFooter>
+				</DrawerContent>
+			</Drawer>
 		</div>
 	)
 }

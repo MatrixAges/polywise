@@ -54,5 +54,5 @@ export default (args: Args) => {
 		init(setRef)
 	}, deps)
 
-	return { setRef }
+	return { ref: state.current.dom, setRef }
 }

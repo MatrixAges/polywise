@@ -16,11 +16,10 @@ import type { AbstractChat, UIMessage } from 'ai'
 export default class Index {
 	id = ''
 	ref_container = null as unknown as HTMLDivElement
-	ref_top_signal = null as unknown as HTMLDivElement
 	ref_bottom_signal = null as unknown as HTMLDivElement
+
 	wheeled = false
 	auto_scroll = true
-
 	has_older = false
 	has_newer = false
 
@@ -30,6 +29,7 @@ export default class Index {
 	messages = [] as AbstractChat<UIMessage>['messages']
 
 	chat_signal = 0
+	open_context_modal = false
 
 	constructor(public util: Util) {
 		makeAutoObservable(
@@ -38,10 +38,11 @@ export default class Index {
 				util: false,
 				id: false,
 				ref_container: false,
-				ref_top_signal: false,
 				ref_bottom_signal: false,
 				wheeled: false,
 				auto_scroll: false,
+				has_older: false,
+				has_newer: false,
 				session: false,
 				chat: false,
 				status: false,
