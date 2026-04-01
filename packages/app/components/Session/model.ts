@@ -89,7 +89,9 @@ export default class Index {
 				}),
 				generateId: getId,
 				onToolCall: ({ toolCall }) => {
-					if (toolCall.dynamic && toolCall.toolName === 'question_tool') {
+					console.log('onToolCall fired:', toolCall.toolName, toolCall.dynamic)
+
+					if (toolCall.toolName === 'question_tool') {
 						const input = toolCall.input as unknown as {
 							question: string
 							header: string
@@ -269,16 +271,18 @@ export default class Index {
 		this.util.acts.push(off_status, off_messages, off_error)
 	}
 
-	submitQuestionAnswer(answer: string) {
+	async submitQuestionAnswer(answer: string) {
 		if (!this.pending_question) return
 
-		this.chat.addToolOutput({
+		await this.chat.addToolOutput({
 			tool: 'question_tool',
 			toolCallId: this.pending_question.toolCallId,
 			output: { answer }
 		})
 
 		this.pending_question = null
+
+		await this.chat.sendMessage(undefined)
 
 		this.update()
 	}
