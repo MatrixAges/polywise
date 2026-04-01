@@ -18,7 +18,6 @@ export interface Context {
 		path: string
 		desc: string
 		status?: 'read' | 'modified' | 'created' | 'deleted'
-		summary?: string
 	}>
 	total_messages_count: number
 	current_messages_count: number

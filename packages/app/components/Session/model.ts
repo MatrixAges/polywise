@@ -9,7 +9,7 @@ import { Util } from '@/models/common'
 import { alert, Chat, CustomTransport, execUntil, rpc } from '@/utils'
 
 import type { Session } from '@core/db'
-import type { Message } from '@core/fst'
+import type { Context, Message } from '@core/fst'
 import type { AbstractChat, UIMessage } from 'ai'
 
 @injectable()
@@ -23,8 +23,9 @@ export default class Index {
 	has_older = false
 	has_newer = false
 
-	session = null as unknown as Session
 	chat = null as unknown as Chat
+	session = null as unknown as Session
+	context = null as unknown as Context
 	status = '' as AbstractChat<UIMessage>['status']
 	messages = [] as AbstractChat<UIMessage>['messages']
 
@@ -43,8 +44,9 @@ export default class Index {
 				auto_scroll: false,
 				has_older: false,
 				has_newer: false,
-				session: false,
 				chat: false,
+				session: false,
+				context: false,
 				status: false,
 				messages: false
 			},
@@ -91,12 +93,15 @@ export default class Index {
 					switch (res.type) {
 						case 'init':
 						case 'sync':
-							const { session, messages, has_older, has_newer } = res.data
+							const { session, context, messages, has_older, has_newer } = res.data
 
 							this.session = session as Session
+							this.context = context
 							this.has_older = has_older
 							this.has_newer = has_newer
+
 							this.chat.setMessages(messages as unknown as Array<Message>)
+
 							break
 					}
 				}

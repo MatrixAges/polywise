@@ -138,7 +138,7 @@ const Index = (props: DrawerProps) => {
 							styles.mask,
 							!getContainer && styles.on_body,
 							mask_class_name,
-							'h-full w-full select-none'
+							'h-full w-full backdrop-blur-md select-none'
 						)}
 						initial={{ opacity: 0 }}
 						animate={{ opacity: 1 }}
@@ -148,7 +148,6 @@ const Index = (props: DrawerProps) => {
 					/>
 				)}
 			</AnimatePresence>
-
 			<div
 				className={$cx(
 					styles.content_wrap,

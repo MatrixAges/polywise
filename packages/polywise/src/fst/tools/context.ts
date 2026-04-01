@@ -25,8 +25,7 @@ const inputSchema = object({
 			desc: string().describe('File description or purpose'),
 			status: Enum(['read', 'modified', 'created', 'deleted'])
 				.optional()
-				.describe('File modification status'),
-			summary: string().optional().describe('Brief summary of file content')
+				.describe('File modification status')
 		})
 	)
 		.optional()

@@ -82,18 +82,18 @@ const Index = (props: IProps) => {
 			</div>
 			<Input {...props_input}></Input>
 			<Drawer
-				class_name='p-2'
-				content_class_name='rounded-md'
+				class_name='p-3'
+				content_class_name='rounded-lg'
 				placement='bottom'
 				getContainer={() => ref}
 				mask_closable
 				height='100%'
 				title='Session Context'
-				desc='Manage session state and env'
+				desc='Current session state and env'
 				open={x.open_context_modal}
 				onClose={toggleContextModal}
 			>
-				<Context></Context>
+				<Context {...x.context}></Context>
 			</Drawer>
 		</div>
 	)
