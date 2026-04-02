@@ -59,7 +59,7 @@ const Index = (props: IProps) => {
 					gap-4
 					p-4
 				`,
-					x.chat_signal
+					x.signal
 				)}
 				onWheel={x.onWheel}
 				onScroll={x.onScroll}

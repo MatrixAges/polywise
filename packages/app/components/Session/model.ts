@@ -29,16 +29,8 @@ export default class Index {
 	status = '' as AbstractChat<UIMessage>['status']
 	messages = [] as AbstractChat<UIMessage>['messages']
 
-	chat_signal = 0
+	signal = 0
 	open_context_modal = false
-	// question = null as unknown as {
-	// 	toolCallId: string
-	// 	question: string
-	// 	header: string
-	// 	options: Array<{ label: string; description: string }>
-	// 	multiple?: boolean
-	// 	custom?: boolean
-	// } | null
 
 	constructor(public util: Util) {
 		makeAutoObservable(
@@ -57,7 +49,6 @@ export default class Index {
 				context: false,
 				status: false,
 				messages: false
-				// question: false
 			},
 			{ autoBind: true }
 		)
@@ -88,30 +79,6 @@ export default class Index {
 					})
 				}),
 				generateId: getId
-				// onToolCall: ({ toolCall }) => {
-				// 	console.log('onToolCall fired:', toolCall.toolName, toolCall.dynamic)
-
-				// 	if (toolCall.toolName === 'question_tool') {
-				// 		const input = toolCall.input as unknown as {
-				// 			question: string
-				// 			header: string
-				// 			options: Array<{ label: string; description: string }>
-				// 			multiple?: boolean
-				// 			custom?: boolean
-				// 		}
-
-				// 		this.question = {
-				// 			toolCallId: toolCall.toolCallId,
-				// 			question: input.question,
-				// 			header: input.header,
-				// 			options: input.options,
-				// 			multiple: input.multiple,
-				// 			custom: input.custom
-				// 		}
-
-				// 		this.update()
-				// 	}
-				// }
 			})
 		}
 
@@ -242,7 +209,7 @@ export default class Index {
 	}
 
 	update() {
-		this.chat_signal += 1
+		this.signal += 1
 
 		if (this.auto_scroll) this.scrollToBottom({ update: true, instant: true })
 	}
