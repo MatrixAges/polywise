@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { useToggle } from 'ahooks'
 
 import { Button } from '@/__shadcn__/components/ui/button'
 import { Input } from '@/__shadcn__/components/ui/input'
@@ -6,13 +7,16 @@ import { Input } from '@/__shadcn__/components/ui/input'
 import type { IPropsQuestion } from '../types'
 
 const Index = (props: IPropsQuestion) => {
-	const { input, output, answer } = props
+	const { streaming, input, output, answer } = props
 	const { question, options, multiple } = input
 
 	const [selected, setSelected] = useState<Array<string>>([])
 	const [custom_value, setCustomValue] = useState('')
+	const [open, { toggle, set }] = useToggle(true)
 
 	const disabled = useMemo(() => output !== undefined, [output])
+
+	useEffect(() => set(streaming), [streaming])
 
 	const value = useMemo(() => {
 		if (!output) return
@@ -46,66 +50,78 @@ const Index = (props: IPropsQuestion) => {
 
 	return (
 		<div
-			className='
+			className={$cx(
+				`
 				flex flex-col
 				gap-3
 				p-3
 				mb-1
-				rounded-lg
+				rounded-md
 				bg-secondary
-			'
-		>
-			<span className='text-sm font-medium'>{question}</span>
-			<div className={$cx('flex flex-col gap-2', disabled && 'pointer-events-none')}>
-				{options.map((option, index) => {
-					const is_selected = selected.includes(option.label)
-
-					return (
-						<div
-							className={$cx(
-								`
-							flex flex-col
-							gap-0.5
-							p-3
-							rounded-md
-							text-left
-							bg-card
-							border
-							cursor-pointer
-						`,
-								is_selected
-									? 'border-dark'
-									: 'border-border-light hover:border-border-solid'
-							)}
-							onClick={() => toggleOption(option.label)}
-							key={index}
-						>
-							<span className='text-sm font-medium'>{option.label}</span>
-							{option.description && (
-								<span className='text-std-500 text-xs'>{option.description}</span>
-							)}
-						</div>
-					)
-				})}
-			</div>
-			{(!disabled || (disabled && typeof value === 'string')) && (
-				<Input
-					className='bg-card text-sm'
-					placeholder='Type your answer...'
-					disabled={disabled}
-					value={custom_value}
-					onChange={e => setCustomValue(e.target.value)}
-				/>
+			`,
+				!streaming && 'cursor-pointer'
 			)}
-			{!disabled && (
-				<Button
-					className='self-end'
-					size='sm'
-					disabled={!custom_value && selected.length === 0}
-					onClick={handleSubmit}
-				>
-					Submit
-				</Button>
+			onClick={streaming ? undefined : toggle}
+		>
+			<span className={$cx('text-sm font-medium', !streaming && !open && 'text-std-500 line-clamp-1')}>
+				{question}
+			</span>
+			{open && (
+				<div className='flex flex-col gap-3'>
+					<div className={$cx('flex flex-col gap-2', disabled && 'pointer-events-none')}>
+						{options.map((option, index) => {
+							const is_selected = selected.includes(option.label)
+
+							return (
+								<div
+									className={$cx(
+										`
+									flex flex-col
+									gap-0.5
+									p-3
+									rounded-md
+									text-left
+									bg-card
+									border
+									cursor-pointer
+								`,
+										is_selected
+											? 'border-dark'
+											: 'border-border-light hover:border-border-solid'
+									)}
+									onClick={() => toggleOption(option.label)}
+									key={index}
+								>
+									<span className='text-sm font-medium'>{option.label}</span>
+									{option.description && (
+										<span className='text-std-500 text-xs'>
+											{option.description}
+										</span>
+									)}
+								</div>
+							)
+						})}
+					</div>
+					{(!disabled || (disabled && typeof value === 'string')) && (
+						<Input
+							className='bg-card border-none text-sm focus-visible:ring-0'
+							placeholder='Type your answer...'
+							disabled={disabled}
+							value={custom_value}
+							onChange={e => setCustomValue(e.target.value)}
+						/>
+					)}
+					{streaming && !disabled && (
+						<Button
+							className='self-end'
+							size='sm'
+							disabled={!custom_value && selected.length === 0}
+							onClick={handleSubmit}
+						>
+							Submit
+						</Button>
+					)}
+				</div>
 			)}
 		</div>
 	)

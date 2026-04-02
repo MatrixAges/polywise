@@ -78,9 +78,9 @@ export default async (s: Index, message: Message) => {
 				return target
 			}
 		},
-		onFinish: ({ responseMessage }) => {
-			s.stop()
-			s.appendMessage(responseMessage)
+		onFinish: async ({ responseMessage }) => {
+			await s.appendMessage(responseMessage)
+			await s.stop()
 		}
 	})
 }

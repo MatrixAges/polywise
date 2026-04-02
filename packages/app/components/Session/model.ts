@@ -133,7 +133,22 @@ export default class Index {
 							this.has_older = has_older
 							this.has_newer = has_newer
 
-							this.chat.setMessages(messages as unknown as Array<Message>)
+							const target_messages = messages as unknown as Array<Message>
+
+							if (this.session.is_runing) {
+								const current = this.chat.messages
+								const last = current[current.length - 1]
+
+								if (
+									last &&
+									last.role === 'assistant' &&
+									!target_messages.find(v => v.id === last.id)
+								) {
+									target_messages.push(last)
+								}
+							}
+
+							this.chat.setMessages(target_messages as unknown as Array<Message>)
 
 							break
 					}

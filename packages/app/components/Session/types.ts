@@ -17,7 +17,7 @@ export interface IPropsInput extends Pick<Model, 'send' | 'stop' | 'clear' | 'sc
 	toggleContextModal: () => void
 }
 
-export interface IPropsQuestion extends Pick<IPropsPart, 'answer'> {
+export interface IPropsQuestion extends Pick<IPropsPart, 'streaming' | 'answer'> {
 	input: QuestionInput
 	output?: string
 }

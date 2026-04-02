@@ -25,7 +25,7 @@ export const createQuestionTool = (id: string) => {
 			const handler = (v: string) => resolve(v)
 			const abort = () => resolve('Question aborted')
 
-			SessionEventStore.on(`${id}/answer`, handler)
+			SessionEventStore.once(`${id}/answer`, handler)
 
 			abortSignal?.addEventListener('abort', abort)
 

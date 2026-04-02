@@ -27,8 +27,6 @@ export default async (s: Index, v: Partial<Context>) => {
 		current_messages_count: s.context.current_messages_count
 	} as Context
 
-	console.log(s.context)
-
 	const [err] = await to(fs.writeJSON(s.context_dir, s.context, { spaces: 4 }))
 
 	if (err) return
