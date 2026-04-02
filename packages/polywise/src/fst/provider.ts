@@ -62,11 +62,7 @@ export const getModel = async (provider: string, model: string, options?: any): 
 			return {
 				model: target_model,
 				provider_options: {
-					google: {
-						thinkingConfig: {
-							includeThoughts: true
-						}
-					} satisfies GoogleLanguageModelOptions
+					google: { thinkingConfig: { includeThoughts: true } } satisfies GoogleLanguageModelOptions
 				},
 				tools: { search_tool }
 			}

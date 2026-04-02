@@ -137,3 +137,30 @@ Update intent and context only:
 ## Reminder
 Do not call context_tool on every response. Only call when context changes substantially.
 `
+
+export const getAuditPrompt = (args: {
+	tool: string
+	action: string
+	path: string
+	files_dir: string
+	project_dirs: string
+	context_summary: string
+	recent_messages: string
+}): string => {
+	return `Evaluate this operation:
+
+Tool: ${args.tool}
+Action: ${args.action}
+Target: ${args.path}
+
+Known safe directories:
+- Session files: ${args.files_dir}
+- Project directories: ${args.project_dirs}
+
+${args.context_summary}
+
+Recent conversation:
+${args.recent_messages}
+
+Should this operation be automatically approved (approve: true), or does it require human review (approve: false)?`
+}
