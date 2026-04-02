@@ -8,7 +8,7 @@ import { createContextTool, createMessageTool, createQuestionTool } from '../../
 import type { Message, MessageMetadata } from '../../types'
 import type Index from '../index'
 
-const model_threshold_value = 12
+const model_threshold_value = 16
 
 export default async (s: Index, message: Message) => {
 	s.context.total_messages_count = await s.getMessagesCount()
@@ -27,21 +27,21 @@ export default async (s: Index, message: Message) => {
 
 	await s.runing(true)
 
-	const target = await convertToModelMessages(s.model_messages)
+	const messages = await convertToModelMessages(s.model_messages)
 
 	const res = streamText({
 		model: s.model.model,
 		system: `${fst_system_prompt}\n\n${getShadowContext(s.context)}`,
-		messages: target,
+		messages,
 		tools: {
 			...s.model.tools,
 			message_tool: createMessageTool(s.id, s.model_messages),
 			context_tool: createContextTool(s),
 			question_tool: createQuestionTool(s.id)
 		},
-		stopWhen: stepCountIs(300),
 		abortSignal: s.abort_controller.signal,
 		providerOptions: s.model.provider_options,
+		stopWhen: stepCountIs(300),
 		experimental_transform: smoothStream(),
 		onAbort: s.stop.bind(s),
 		onError: s.stop.bind(s)
