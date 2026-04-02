@@ -65,6 +65,7 @@ const Index = (props: IPropsQuestion) => {
 		>
 			<span className={$cx('text-sm font-medium', !streaming && !open && 'text-std-500 line-clamp-1')}>
 				{question}
+				{multiple ? ' (Multiple)' : ''}
 			</span>
 			{open && (
 				<div className='flex flex-col gap-3'>
