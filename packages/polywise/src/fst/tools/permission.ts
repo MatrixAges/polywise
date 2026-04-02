@@ -6,7 +6,7 @@ import type { Tool, ToolSet } from 'ai'
 import type Index from '../session'
 
 type ToolConfig = {
-	tool_type: 'file' | 'bash' | 'glob'
+	tool_type: 'file' | 'glob'
 	path_extractor: (input: Record<string, unknown>) => Array<{ action: string; path: string }>
 }
 
@@ -20,54 +20,13 @@ const file_tool_config: ToolConfig = {
 
 		if (path) {
 			const action = mode === 'write' || mode === 'append' ? 'write' : 'read'
-
 			paths.push({ action, path })
 		}
 
 		const files = input.files as Record<string, string> | undefined
-
 		if (files) {
 			for (const file_path of Object.keys(files)) {
 				paths.push({ action: 'write', path: file_path })
-			}
-		}
-
-		return paths
-	}
-}
-
-const bash_tool_config: ToolConfig = {
-	tool_type: 'bash',
-	path_extractor: input => {
-		const command = input.command as string | undefined
-		if (!command) return []
-
-		const paths: Array<{ action: string; path: string }> = []
-
-		const read_patterns = [
-			/cat\s+([^\s;|&]+)/g,
-			/less\s+([^\s;|&]+)/g,
-			/head\s+([^\s;|&]+)/g,
-			/tail\s+([^\s;|&]+)/g
-		]
-		const write_patterns = [
-			/echo\s+.*>\s*([^\s;|&]+)/g,
-			/tee\s+([^\s;|&]+)/g,
-			/cp\s+\S+\s+([^\s;|&]+)/g,
-			/mv\s+\S+\s+([^\s;|&]+)/g
-		]
-
-		for (const pattern of read_patterns) {
-			let match
-			while ((match = pattern.exec(command)) !== null) {
-				paths.push({ action: 'read', path: match[1] })
-			}
-		}
-
-		for (const pattern of write_patterns) {
-			let match
-			while ((match = pattern.exec(command)) !== null) {
-				paths.push({ action: 'write', path: match[1] })
 			}
 		}
 
@@ -87,7 +46,6 @@ const glob_tool_config: ToolConfig = {
 
 const tool_configs: Record<string, ToolConfig> = {
 	file: file_tool_config,
-	bash: bash_tool_config,
 	glob: glob_tool_config
 }
 

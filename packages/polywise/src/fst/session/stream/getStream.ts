@@ -3,7 +3,7 @@ import fst_system_prompt from '@core/consts/prompts/fst_system_prompt.md'
 import { convertToModelMessages, smoothStream, stepCountIs, streamText } from 'ai'
 import { getId } from 'stk/utils'
 
-import { createContextTool, createMessageTool, createQuestionTool } from '../../tools'
+import { createBashTool, createContextTool, createGlobTool, createMessageTool, createQuestionTool } from '../../tools'
 
 import type { Message, MessageMetadata } from '../../types'
 import type Index from '../index'
@@ -31,12 +31,18 @@ export default async (s: Index, message: Message) => {
 
 	if (s.prefill) messages.push({ role: 'assistant', content: s.prefill })
 
+	const bash_tool = await createBashTool(s)
+
 	const res = streamText({
 		model: s.model.model,
 		system: `${fst_system_prompt}\n\n${getShadowContext(s.context)}`,
 		messages,
 		tools: {
 			...s.model.tools,
+			bash_tool: bash_tool.bash,
+			read_file_tool: bash_tool.readFile,
+			write_file_tool: bash_tool.writeFile,
+			glob_tool: createGlobTool(),
 			message_tool: createMessageTool(s.id, s.model_messages),
 			context_tool: createContextTool(s),
 			question_tool: createQuestionTool(s.id)

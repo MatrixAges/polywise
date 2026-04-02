@@ -1,4 +1,6 @@
 export * from './message'
 export * from './context'
 export * from './question'
+export * from './bash'
+export * from './glob'
 export * from './permission'
