@@ -78,6 +78,7 @@
 		"evlog": "^2.9.0",
 		"fastq": "^1.20.1",
 		"fs-extra": "catalog:",
+		"globby": "catalog:",
 		"hono": "catalog:",
 		"just-bash": "^2.14.0",
 		"jws": "^4.0.1",
@@ -128,7 +129,6 @@
 		"deepmerge-ts": "catalog:",
 		"delay-cli": "catalog:",
 		"drizzle-seed": "^0.3.1",
-		"globby": "catalog:",
 		"picocolors": "^1.1.1",
 		"reflect-metadata": "catalog:",
 		"type-fest": "catalog:"
