@@ -42,7 +42,7 @@ export default async (s: Index, message: Message) => {
 			bash_tool: bash_tool.bash,
 			read_file_tool: bash_tool.readFile,
 			write_file_tool: bash_tool.writeFile,
-			glob_tool: createGlobTool(),
+			glob_tool: createGlobTool(s),
 			message_tool: createMessageTool(s.id, s.model_messages),
 			context_tool: createContextTool(s),
 			question_tool: createQuestionTool(s.id)

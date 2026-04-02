@@ -2,16 +2,46 @@ import { tool } from 'ai'
 import { globby } from 'globby'
 import { array, object, string } from 'zod'
 
+import { checkPermission, requestApproval } from '../session/permission'
+
+import type Index from '../session'
+
 const inputSchema = object({
 	patterns: array(string()).describe('Glob patterns to match files against'),
 	cwd: string().optional().describe('Working directory to resolve patterns from')
 })
 
-export const createGlobTool = () => {
+export const createGlobTool = (s: Index) => {
 	return tool({
 		description: 'Search for files matching glob patterns. Use to find files by name or pattern.',
 		inputSchema,
+		needsApproval: async input => {
+			const paths = extractPaths(input)
+
+			for (const path of paths) {
+				const result = checkPermission(s, 'glob', 'read', path)
+				if (result === 'needs_approval') {
+					return true
+				}
+			}
+
+			return false
+		},
 		execute: async input => {
+			const paths = extractPaths(input)
+
+			for (const path of paths) {
+				const result = checkPermission(s, 'glob', 'read', path)
+
+				if (result === 'needs_approval') {
+					const approved = await requestApproval(s, 'glob', 'read', path)
+
+					if (!approved) {
+						throw new Error(`Permission denied: glob read ${path}`)
+					}
+				}
+			}
+
 			const files = await globby(input.patterns, {
 				cwd: input.cwd,
 				absolute: true
@@ -20,4 +50,20 @@ export const createGlobTool = () => {
 			return { patterns: input.patterns, files, count: files.length }
 		}
 	})
+}
+
+const extractPaths = (input: { patterns: Array<string>; cwd?: string }): Array<string> => {
+	const paths: Array<string> = []
+
+	if (input.cwd) {
+		paths.push(input.cwd)
+	}
+
+	for (const pattern of input.patterns) {
+		if (pattern.startsWith('/')) {
+			paths.push(pattern)
+		}
+	}
+
+	return paths
 }

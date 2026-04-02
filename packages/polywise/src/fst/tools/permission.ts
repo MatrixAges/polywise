@@ -6,46 +6,27 @@ import type { Tool, ToolSet } from 'ai'
 import type Index from '../session'
 
 type ToolConfig = {
-	tool_type: 'file' | 'glob'
+	tool_type: 'glob'
 	path_extractor: (input: Record<string, unknown>) => Array<{ action: string; path: string }>
 }
 
-const file_tool_config: ToolConfig = {
-	tool_type: 'file',
+const glob_tool_config: ToolConfig = {
+	tool_type: 'glob',
 	path_extractor: input => {
+		const patterns = input.patterns as Array<string> | undefined
+		if (!patterns || patterns.length === 0) return []
+
 		const paths: Array<{ action: string; path: string }> = []
 
-		const path = input.path as string | undefined
-		const mode = input.mode as string | undefined
-
-		if (path) {
-			const action = mode === 'write' || mode === 'append' ? 'write' : 'read'
-			paths.push({ action, path })
-		}
-
-		const files = input.files as Record<string, string> | undefined
-		if (files) {
-			for (const file_path of Object.keys(files)) {
-				paths.push({ action: 'write', path: file_path })
-			}
+		for (const pattern of patterns) {
+			paths.push({ action: 'read', path: pattern })
 		}
 
 		return paths
 	}
 }
 
-const glob_tool_config: ToolConfig = {
-	tool_type: 'glob',
-	path_extractor: input => {
-		const pattern = input.pattern as string | undefined
-		if (!pattern) return []
-
-		return [{ action: 'read', path: pattern }]
-	}
-}
-
 const tool_configs: Record<string, ToolConfig> = {
-	file: file_tool_config,
 	glob: glob_tool_config
 }
 
