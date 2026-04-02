@@ -4,7 +4,7 @@ import type Index from '../index'
 export default async (s: Index) => {
 	s.active()
 
-	await Promise.all([s.getModel(), s.getAgents(), s.getMessages()])
+	await Promise.all([s.getModel(), s.getAgents(), s.getProject(), s.getMessages()])
 
 	return {
 		type: 'init',

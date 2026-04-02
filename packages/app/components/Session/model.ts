@@ -9,7 +9,7 @@ import { Util } from '@/models/common'
 import { alert, Chat, CustomTransport, execUntil, rpc } from '@/utils'
 
 import type { Session } from '@core/db'
-import type { Context, Message } from '@core/fst'
+import type { Context, Message, Permission } from '@core/fst'
 import type { AbstractChat, UIMessage } from 'ai'
 
 @injectable()
@@ -28,6 +28,7 @@ export default class Index {
 	context = null as unknown as Context
 	status = '' as AbstractChat<UIMessage>['status']
 	messages = [] as AbstractChat<UIMessage>['messages']
+	permission = null as unknown as Permission
 
 	signal = 0
 	open_context_modal = false
@@ -48,7 +49,8 @@ export default class Index {
 				session: false,
 				context: false,
 				status: false,
-				messages: false
+				messages: false,
+				permission: false
 			},
 			{ autoBind: true }
 		)
@@ -117,6 +119,12 @@ export default class Index {
 
 							this.chat.setMessages(target_messages as unknown as Array<Message>)
 
+							break
+
+						case 'permission':
+							this.permission = res.data
+
+							this.update()
 							break
 					}
 				}
@@ -215,11 +223,15 @@ export default class Index {
 	}
 
 	async answer(v: string) {
-		// if (!this.question) return
-
 		rpc.session.answer.mutate({ id: this.id, answer: v })
 
-		// this.question = null
+		this.update()
+	}
+
+	async approvePermission(approved: boolean) {
+		rpc.session.permission.mutate({ id: this.id, approved })
+
+		this.permission = null as unknown as Permission
 
 		this.update()
 	}

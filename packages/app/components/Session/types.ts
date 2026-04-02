@@ -21,3 +21,5 @@ export interface IPropsQuestion extends Pick<IPropsPart, 'streaming' | 'answer'>
 	input: QuestionInput
 	output?: string
 }
+
+export interface IPropsPermission extends Pick<Model, 'permission' | 'approvePermission'> {}

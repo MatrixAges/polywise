@@ -10,6 +10,14 @@ export type Context = ContextInput & {
 	current_messages_count: number
 }
 
+export interface Permission {
+	tool: 'file' | 'bash' | 'glob'
+	action: 'read' | 'write' | 'execute'
+	path: string
+}
+
+export type Permissions = Array<Permission>
+
 export interface InitArgs {
 	id: string
 	event: EventEmitter
@@ -41,4 +49,8 @@ export type ChatEventRes =
 				has_older: boolean
 				has_newer: boolean
 			}
+	  }
+	| {
+			type: 'permission'
+			data: Permission
 	  }

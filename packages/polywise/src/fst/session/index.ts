@@ -5,15 +5,15 @@ import { app } from '@core/consts'
 import { getContext, setContext } from './context'
 import { appendMessage, insertMessage } from './message'
 import { clearMessages, getMessages, getMessagesCount, loadMessages, trimMessages } from './messages'
-import { getAgents, getData, getModel } from './related'
+import { getAgents, getData, getModel, getProject } from './related'
 import { getSession, initSession, updateSession } from './session'
 import { abortStream, getStream } from './stream'
 import { getTasks, setTasks } from './task'
 import { active, runing, stop, sync } from './utils'
 
-import type { Agent, Session, SessionInsert } from '@core/db'
+import type { Agent, Project, Session, SessionInsert } from '@core/db'
 import type { ModelResult } from '../provider'
-import type { Context, InitArgs, Message } from '../types'
+import type { Context, InitArgs, Message, Permissions } from '../types'
 
 export default class Index {
 	id = ''
@@ -22,9 +22,11 @@ export default class Index {
 	model = null as unknown as ModelResult
 
 	agents = [] as Array<Agent>
+	projects = [] as Array<Project>
 	model_messages = [] as Array<Message>
 	context = {} as Context
 	prefill = ''
+	permissions = [] as Permissions
 
 	ui_messages = [] as Array<Message>
 	ui_has_older = false
@@ -67,6 +69,7 @@ export default class Index {
 	getData = () => getData(this)
 	getAgents = () => getAgents(this)
 	getModel = () => getModel(this)
+	getProject = () => getProject(this)
 
 	getMessages = () => getMessages(this)
 	loadMessages = (type: 'prev' | 'next') => loadMessages(this, type)

@@ -1,5 +1,5 @@
 import { p, SessionEventStore } from '@core/utils'
-import { enum as Enum, object, string } from 'zod'
+import { boolean, enum as Enum, object, string } from 'zod'
 
 export const stop = p.input(string()).mutation(async ({ input }) => {
 	SessionEventStore.emit(`${input}/stop`)
@@ -19,4 +19,8 @@ export const clear = p.input(string()).mutation(async ({ input }) => {
 
 export const answer = p.input(object({ id: string(), answer: string() })).mutation(async ({ input }) => {
 	SessionEventStore.emit(`${input.id}/answer`, input.answer)
+})
+
+export const permission = p.input(object({ id: string(), approved: boolean() })).mutation(async ({ input }) => {
+	SessionEventStore.emit(`${input.id}/permission`, input.approved)
 })

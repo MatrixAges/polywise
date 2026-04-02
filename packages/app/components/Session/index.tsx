@@ -6,7 +6,7 @@ import { container } from 'tsyringe'
 import { Drawer } from '@/components'
 import { useAliveEffect } from '@/hooks'
 
-import { Context, Input, Message } from './components'
+import { Context, Input, Message, Permission } from './components'
 import Model from './model'
 
 import type { IPropsInput } from './types'
@@ -80,8 +80,14 @@ const Index = (props: IProps) => {
 							key={message.id}
 						></Message>
 					))}
-					<div className='mt-12 h-8' ref={setBottomSignalRef}></div>
 				</div>
+				<div className='mt-12 h-8' ref={setBottomSignalRef}></div>
+				{x.permission && (
+					<Permission
+						permission={x.permission}
+						approvePermission={x.approvePermission}
+					></Permission>
+				)}
 			</div>
 			<Input {...props_input}></Input>
 			<Drawer
