@@ -24,6 +24,7 @@ export default class Index {
 	agents = [] as Array<Agent>
 	model_messages = [] as Array<Message>
 	context = {} as Context
+	prefill = ''
 
 	ui_messages = [] as Array<Message>
 	ui_has_older = false

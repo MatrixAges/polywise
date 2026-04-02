@@ -8,7 +8,7 @@ import { createContextTool, createMessageTool, createQuestionTool } from '../../
 import type { Message, MessageMetadata } from '../../types'
 import type Index from '../index'
 
-const model_threshold_value = 16
+const model_threshold_value = 12
 
 export default async (s: Index, message: Message) => {
 	s.context.total_messages_count = await s.getMessagesCount()
@@ -28,6 +28,8 @@ export default async (s: Index, message: Message) => {
 	await s.runing(true)
 
 	const messages = await convertToModelMessages(s.model_messages)
+
+	if (s.prefill) messages.push({ role: 'assistant', content: s.prefill })
 
 	const res = streamText({
 		model: s.model.model,
