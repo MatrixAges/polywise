@@ -3,7 +3,14 @@ import fst_system_prompt from '@core/consts/prompts/fst_system_prompt.md'
 import { convertToModelMessages, smoothStream, stepCountIs, streamText } from 'ai'
 import { getId } from 'stk/utils'
 
-import { createBashTool, createContextTool, createGlobTool, createMessageTool, createQuestionTool } from '../../tools'
+import {
+	createBashTool,
+	createContextTool,
+	createCwdTool,
+	createGlobTool,
+	createMessageTool,
+	createQuestionTool
+} from '../../tools'
 
 import type { Message, MessageMetadata } from '../../types'
 import type Index from '../index'
@@ -43,6 +50,7 @@ export default async (s: Index, message: Message) => {
 			read_file_tool: bash_tool.readFile,
 			write_file_tool: bash_tool.writeFile,
 			glob_tool: createGlobTool(s),
+			cwd_tool: createCwdTool(s),
 			message_tool: createMessageTool(s.id, s.model_messages),
 			context_tool: createContextTool(s),
 			question_tool: createQuestionTool(s.id)

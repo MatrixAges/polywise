@@ -11,5 +11,5 @@ export default async (s: Index) => {
 		.innerJoin(project, eq(project_session.project_id, project.id))
 		.where(eq(project_session.session_id, s.id))
 
-	s.projects = res.map(item => item.project)
+	s.project = res[0]?.project ?? null
 }

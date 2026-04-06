@@ -16,7 +16,7 @@ export default (s: Index, tool: string, action: string, path: string): string =>
 		action,
 		path,
 		files_dir: s.files_dir,
-		project_dirs: s.projects.map(p => p.dir).join(', '),
+		cwd: s.cwd,
 		context_summary,
 		recent_messages
 	})

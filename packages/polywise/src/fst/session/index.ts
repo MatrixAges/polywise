@@ -1,4 +1,5 @@
 import { EventEmitter } from 'events'
+import { existsSync } from 'fs'
 import { resolve } from 'path'
 import { app } from '@core/consts'
 
@@ -22,7 +23,8 @@ export default class Index {
 	model = null as unknown as ModelResult
 
 	agents = [] as Array<Agent>
-	projects = [] as Array<Project>
+	project = null as Project | null
+	cwd = ''
 	model_messages = [] as Array<Message>
 	context = {} as Context
 	prefill = ''
@@ -59,7 +61,27 @@ export default class Index {
 
 		await this.initSession()
 
+		this.cwd = this.project?.dir || this.files_dir
+
 		return this.getData()
+	}
+
+	getCwd = () => {
+		return {
+			cwd: this.cwd,
+			files_dir: this.files_dir,
+			project_dir: this.project?.dir
+		}
+	}
+
+	setCwd = (path: string) => {
+		if (!existsSync(path)) {
+			throw new Error(`Path does not exist: ${path}`)
+		}
+
+		this.cwd = path
+
+		return this.getCwd()
 	}
 
 	initSession = () => initSession(this)

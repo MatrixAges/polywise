@@ -8,7 +8,7 @@ import type { Sandbox } from 'bash-tool'
 import type Index from '../session'
 
 export const createBashTool = async (s: Index) => {
-	const bash = new Bash()
+	const bash = new Bash({ cwd: s.cwd })
 
 	const { tools } = await BashTool({
 		sandbox: {
@@ -53,7 +53,7 @@ export const createBashTool = async (s: Index) => {
 					}
 				}
 
-				return bash.exec(command)
+				return bash.exec(command, { cwd: s.cwd })
 			}
 		} as Sandbox
 	})

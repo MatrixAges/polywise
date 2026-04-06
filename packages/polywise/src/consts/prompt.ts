@@ -143,7 +143,7 @@ export const getAuditPrompt = (args: {
 	action: string
 	path: string
 	files_dir: string
-	project_dirs: string
+	cwd: string
 	context_summary: string
 	recent_messages: string
 }): string => {
@@ -155,7 +155,7 @@ Target: ${args.path}
 
 Known safe directories:
 - Session files: ${args.files_dir}
-- Project directories: ${args.project_dirs}
+- Working directory: ${args.cwd}
 
 ${args.context_summary}
 

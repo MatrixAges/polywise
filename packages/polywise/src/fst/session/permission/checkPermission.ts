@@ -41,10 +41,8 @@ export default (s: Index, tool: string, action: string, path: string): 'allowed'
 
 	if (is_path_in_dir(path, s.files_dir)) return 'allowed'
 
-	for (const project of s.projects) {
-		if (is_path_in_dir(path, project.dir)) {
-			return 'allowed'
-		}
+	if (s.project && is_path_in_dir(path, s.project.dir)) {
+		return 'allowed'
 	}
 
 	const has_permission = s.permissions.some(p => match_permission(p, tool, action, path))

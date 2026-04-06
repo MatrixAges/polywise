@@ -16,7 +16,7 @@ export const createGlobTool = (s: Index) => {
 		description: 'Search for files matching glob patterns. Use to find files by name or pattern.',
 		inputSchema,
 		needsApproval: async input => {
-			const paths = extractPaths(input)
+			const paths = extractPaths(input, s.cwd)
 
 			for (const path of paths) {
 				const result = checkPermission(s, 'glob', 'read', path)
@@ -28,7 +28,7 @@ export const createGlobTool = (s: Index) => {
 			return false
 		},
 		execute: async input => {
-			const paths = extractPaths(input)
+			const paths = extractPaths(input, s.cwd)
 
 			for (const path of paths) {
 				const result = checkPermission(s, 'glob', 'read', path)
@@ -43,7 +43,7 @@ export const createGlobTool = (s: Index) => {
 			}
 
 			const files = await globby(input.patterns, {
-				cwd: input.cwd,
+				cwd: input.cwd ?? s.cwd,
 				absolute: true
 			})
 
@@ -52,11 +52,12 @@ export const createGlobTool = (s: Index) => {
 	})
 }
 
-const extractPaths = (input: { patterns: Array<string>; cwd?: string }): Array<string> => {
+const extractPaths = (input: { patterns: Array<string>; cwd?: string }, sessionCwd: string): Array<string> => {
 	const paths: Array<string> = []
 
-	if (input.cwd) {
-		paths.push(input.cwd)
+	const resolvedCwd = input.cwd ?? sessionCwd
+	if (resolvedCwd) {
+		paths.push(resolvedCwd)
 	}
 
 	for (const pattern of input.patterns) {
