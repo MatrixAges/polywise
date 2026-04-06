@@ -38,17 +38,3 @@ export const detectShellInjectionRisk = (input: string): boolean => {
 export const escapeShellArg = (input: string): string => {
 	return `'${input.replace(/'/g, "'\\''")}'`
 }
-
-export const safeShellInput = async (input: string, requestApprovalFn: () => Promise<boolean>): Promise<string> => {
-	const hasRisk = detectShellInjectionRisk(input)
-
-	if (hasRisk) {
-		const approved = await requestApprovalFn()
-
-		if (!approved) {
-			throw new Error('Shell command rejected due to safety concerns')
-		}
-	}
-
-	return escapeShellArg(input)
-}

@@ -1,7 +1,7 @@
 import { tool } from 'ai'
 import { array, number, object, string } from 'zod'
 
-import { detectShellInjectionRisk, escapeShellArg } from '../../utils/safeshell'
+import { escapeShellArg } from '../../utils/safeshell'
 import { checkPermission, requestApproval } from '../session/permission'
 
 import type { Bash } from 'just-bash'
@@ -32,21 +32,6 @@ export const createSearchFileTool = (s: Index, bash: Bash) => {
 
 				if (!approved) {
 					return { keyword: input.keyword, matches: [], count: 0, error: 'Permission denied' }
-				}
-			}
-
-			const has_risk = detectShellInjectionRisk(input.keyword)
-
-			if (has_risk) {
-				const approved = await requestApproval(s, 'bash', 'execute', `search (risky): ${input.keyword}`)
-
-				if (!approved) {
-					return {
-						keyword: input.keyword,
-						matches: [],
-						count: 0,
-						error: 'Shell injection risk detected'
-					}
 				}
 			}
 

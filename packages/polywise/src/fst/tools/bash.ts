@@ -3,6 +3,7 @@ import { readFile, writeFile } from 'atomically'
 import { createBashTool as BashTool } from 'bash-tool'
 import { Bash, ReadWriteFs } from 'just-bash'
 
+import { detectShellInjectionRisk } from '../../utils/safeshell'
 import { checkPermission, requestApproval } from '../session/permission'
 
 import type { Sandbox } from 'bash-tool'
@@ -39,6 +40,19 @@ export const createBashTool = async (s: Index) => {
 					}
 				}
 
+				if (detectShellInjectionRisk(virtual_path)) {
+					const approved = await requestApproval(
+						s,
+						'bash',
+						'execute',
+						`readFile (risky path): ${virtual_path}`
+					)
+
+					if (!approved) {
+						throw new Error(`Shell injection risk detected in path: ${virtual_path}`)
+					}
+				}
+
 				return readFile(real_path, 'utf8')
 			},
 			async writeFiles(files) {
@@ -51,6 +65,21 @@ export const createBashTool = async (s: Index) => {
 
 						if (!approved) {
 							throw new Error(`Permission denied: file write ${real_path}`)
+						}
+					}
+				}
+
+				for (const file of files) {
+					if (detectShellInjectionRisk(file.path)) {
+						const approved = await requestApproval(
+							s,
+							'bash',
+							'execute',
+							`writeFile (risky path): ${file.path}`
+						)
+
+						if (!approved) {
+							throw new Error(`Shell injection risk detected in path: ${file.path}`)
 						}
 					}
 				}
@@ -75,6 +104,19 @@ export const createBashTool = async (s: Index) => {
 
 					if (!approved) {
 						return { stdout: '', stderr: 'Permission denied', exitCode: 1 }
+					}
+				}
+
+				if (detectShellInjectionRisk(cleanCommand)) {
+					const approved = await requestApproval(
+						s,
+						'bash',
+						'execute',
+						`command (risky): ${cleanCommand}`
+					)
+
+					if (!approved) {
+						return { stdout: '', stderr: 'Shell injection risk detected', exitCode: 1 }
 					}
 				}
 
