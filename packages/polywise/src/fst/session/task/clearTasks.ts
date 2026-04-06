@@ -9,7 +9,7 @@ export default async (s: Index) => {
 		.select({ todo })
 		.from(session_todo)
 		.innerJoin(todo, eq(session_todo.todo_id, todo.id))
-		.where(and(eq(session_todo.session_id, s.id), ne(todo.status, 'draft')))
+		.where(and(eq(session_todo.session_id, s.id), ne(todo.status, 'archive')))
 
 	if (todos.length > 0) {
 		const todo_ids = todos.map(item => item.todo.id)
