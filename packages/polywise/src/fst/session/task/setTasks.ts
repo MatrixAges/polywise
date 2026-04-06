@@ -21,19 +21,19 @@ export default async (s: Index, v: Context['tasks']) => {
 
 	for (const item of current_tasks) {
 		if (task_titles.has(item.todo.title)) {
-			exist_tasks.push(item)
+			exist_tasks.push(item.todo)
 		} else {
-			archive_tasks.push(item)
+			archive_tasks.push(item.todo)
 		}
 	}
 
 	if (archive_tasks.length > 0) {
-		const archive_ids = archive_tasks.map(item => item.todo.id)
+		const archive_ids = archive_tasks.map(item => item.id)
 
 		await env.db.update(todo).set({ status: 'archive' }).where(inArray(todo.id, archive_ids))
 	}
 
-	const existing_map = new Map(exist_tasks.map(item => [item.todo.title, item.todo]))
+	const existing_map = new Map(exist_tasks.map(item => [item.title, item]))
 
 	for (const task of tasks) {
 		const db_status = task.status
