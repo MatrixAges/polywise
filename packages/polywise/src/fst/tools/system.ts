@@ -1,8 +1,9 @@
+import fs from 'fs'
 import system_agent_prompt from '@core/consts/prompts/system_agent_prompt.md'
 import { readUIMessageStream, stepCountIs, tool, ToolLoopAgent } from 'ai'
 import { readFile } from 'atomically'
 import { createBashTool as BashTool } from 'bash-tool'
-import { Bash, ReadWriteFs } from 'just-bash'
+import { Bash, InMemoryFs, MountableFs, ReadWriteFs } from 'just-bash'
 import { minimatch } from 'minimatch'
 import { object, string } from 'zod'
 
@@ -12,6 +13,83 @@ import { detectShellInjectionRisk } from '../utils/safeshell'
 
 import type { Sandbox } from 'bash-tool'
 import type Index from '../session'
+
+const getMacOSRootMounts = () => {
+	try {
+		const rootDirs = fs.readdirSync('/', { withFileTypes: true })
+		const mounts: { mountPoint: string; filesystem: any }[] = []
+
+		for (const dirent of rootDirs) {
+			const name = dirent.name
+			const fullPath = `/${name}`
+
+			const systemAndVirtualDirs = [
+				'tmp',
+				'home',
+				'bin',
+				'sbin',
+				'dev',
+				'proc',
+				'net',
+				'Network',
+				'usr',
+				'etc',
+				'var',
+				'System',
+				'cores',
+				'opt'
+			]
+
+			if (systemAndVirtualDirs.includes(name)) {
+				continue
+			}
+
+			try {
+				const stat = fs.statSync(fullPath)
+
+				if (!stat.isDirectory()) {
+					continue
+				}
+
+				mounts.push({
+					mountPoint: fullPath,
+					filesystem: new ReadWriteFs({
+						root: fullPath,
+						allowSymlinks: true
+					})
+				})
+			} catch (err) {
+				if ((err as NodeJS.ErrnoException).code !== 'ENOENT') {
+					console.error(`Failed to mount ${fullPath}:`, err)
+				}
+			}
+		}
+
+		if (!mounts.some(m => m.mountPoint === '/Users')) {
+			try {
+				mounts.push({
+					mountPoint: '/Users',
+					filesystem: new ReadWriteFs({
+						root: '/Users',
+						allowSymlinks: true
+					})
+				})
+			} catch (err) {
+				console.error('Failed to mount /Users:', err)
+			}
+		}
+
+		return mounts
+	} catch (e) {
+		console.error('Failed to read macOS root directory', e)
+		return []
+	}
+}
+
+const bfs = new MountableFs({
+	base: new InMemoryFs(),
+	mounts: getMacOSRootMounts()
+})
 
 const isPathInDir = (target_path: string, dir: string): boolean => {
 	const normalized_path = target_path.replace(/\\/g, '/')
@@ -29,10 +107,14 @@ const hasReadPermission = (s: Index, path: string): boolean => {
 }
 
 const createSystemBashTool = async (s: Index) => {
+	const sandboxEnv = { ...process.env } as Record<string, string>
+
+	sandboxEnv.PATH = `/bin:/usr/bin:${sandboxEnv.PATH || ''}`
+
 	const bash = new Bash({
 		cwd: '/',
-		fs: new ReadWriteFs({ root: '/' }),
-		env: process.env as Record<string, string>
+		fs: bfs,
+		env: sandboxEnv
 	})
 
 	const { tools } = await BashTool({
