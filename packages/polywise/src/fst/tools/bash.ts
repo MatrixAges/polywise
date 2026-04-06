@@ -1,3 +1,4 @@
+import path from 'path'
 import { readFile, writeFile } from 'atomically'
 import { createBashTool as BashTool } from 'bash-tool'
 import { Bash, ReadWriteFs } from 'just-bash'
@@ -7,40 +8,51 @@ import { checkPermission, requestApproval } from '../session/permission'
 import type { Sandbox } from 'bash-tool'
 import type Index from '../session'
 
+const toRealPath = (cwd: string, virtualPath: string): string => {
+	if (path.posix.isAbsolute(virtualPath)) {
+		return path.join(cwd, virtualPath)
+	}
+
+	return path.join(cwd, virtualPath)
+}
+
 export const createBashTool = async (s: Index) => {
 	const bash = new Bash({ cwd: '/', fs: new ReadWriteFs({ root: s.cwd }) })
 
 	const { tools } = await BashTool({
 		destination: '/',
 		sandbox: {
-			async readFile(path) {
-				const result = checkPermission(s, 'file', 'read', path)
+			async readFile(virtualPath) {
+				const realPath = toRealPath(s.cwd, virtualPath)
+				const result = checkPermission(s, 'file', 'read', realPath)
 
 				if (result === 'needs_approval') {
-					const approved = await requestApproval(s, 'file', 'read', path)
+					const approved = await requestApproval(s, 'file', 'read', realPath)
 
 					if (!approved) {
-						throw new Error(`Permission denied: file read ${path}`)
+						throw new Error(`Permission denied: file read ${realPath}`)
 					}
 				}
 
-				return readFile(path, 'utf8')
+				return readFile(realPath, 'utf8')
 			},
 			async writeFiles(files) {
 				for (const file of files) {
-					const result = checkPermission(s, 'file', 'write', file.path)
+					const realPath = toRealPath(s.cwd, file.path)
+					const result = checkPermission(s, 'file', 'write', realPath)
 
 					if (result === 'needs_approval') {
-						const approved = await requestApproval(s, 'file', 'write', file.path)
+						const approved = await requestApproval(s, 'file', 'write', realPath)
 
 						if (!approved) {
-							throw new Error(`Permission denied: file write ${file.path}`)
+							throw new Error(`Permission denied: file write ${realPath}`)
 						}
 					}
 				}
 
 				for (const file of files) {
-					await writeFile(file.path, file.content)
+					const realPath = toRealPath(s.cwd, file.path)
+					await writeFile(realPath, file.content)
 				}
 			},
 			async executeCommand(command) {
