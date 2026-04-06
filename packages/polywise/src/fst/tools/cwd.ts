@@ -6,15 +6,15 @@ import type Index from '../session'
 
 const inputSchema = discriminatedUnion('action', [
 	object({
-		action: literal('getCwd').describe('Get current working directory info')
+		action: literal('get_working_dir').describe('Get current working directory info')
 	}),
 	object({
-		action: literal('setCwd').describe(
+		action: literal('set_working_dir').describe(
 			'Set cwd, can be set to files_dir or project_dir as the working directory'
 		),
 		path: string().describe('New working directory path')
 	})
-])
+]).describe('')
 
 const getResult = (s: Index) => ({
 	cwd: {
@@ -33,10 +33,10 @@ const getResult = (s: Index) => ({
 
 export const createWorkingDirTool = (s: Index) => {
 	return tool({
-		description: 'Get or set current working directory for bash_tool and glob_tool.',
+		description: 'Get or set current working directory.',
 		inputSchema,
 		execute: async input => {
-			if (input.action === 'setCwd') {
+			if (input.action === 'set_working_dir') {
 				if (!existsSync(input.path)) {
 					throw new Error(`Path does not exist: ${input.path}`)
 				}
