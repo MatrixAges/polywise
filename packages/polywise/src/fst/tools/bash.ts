@@ -43,6 +43,10 @@ export const createBashTool = async (s: Index) => {
 				}
 			},
 			async executeCommand(command) {
+				if (command === 'ls /usr/bin /usr/local/bin /bin /sbin /usr/sbin 2>/dev/null') {
+					return bash.exec(command, { cwd: s.cwd })
+				}
+
 				const result = checkPermission(s, 'bash', 'execute', command)
 
 				if (result === 'needs_approval') {

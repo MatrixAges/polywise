@@ -26,6 +26,8 @@ const Index = (props: IProps) => {
 		deinit: () => x.deinit()
 	})
 
+	console.log(x.status)
+
 	const setConfainerRef = useMemoizedFn(v => (x.ref_container = v))
 	const setBottomSignalRef = useMemoizedFn(v => (x.ref_bottom_signal = v))
 	const toggleContextModal = useMemoizedFn(() => (x.open_context_modal = !x.open_context_modal))
