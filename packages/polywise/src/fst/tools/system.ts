@@ -14,81 +14,43 @@ import { detectShellInjectionRisk } from '../utils/safeshell'
 import type { Sandbox } from 'bash-tool'
 import type Index from '../session'
 
-const getMacOSRootMounts = () => {
-	try {
-		const rootDirs = fs.readdirSync('/', { withFileTypes: true })
-		const mounts: { mountPoint: string; filesystem: any }[] = []
+const SYSTEM_MOUNT_PATHS: Record<string, string[]> = {
+	darwin: ['/Users', '/Applications', '/Volumes', '/usr/local', '/opt', '/tmp'],
+	linux: ['/home', '/var', '/opt', '/mnt', '/media', '/tmp'],
+	win32: ['C:\\Users', 'C:\\ProgramData']
+}
 
-		for (const dirent of rootDirs) {
-			const name = dirent.name
-			const fullPath = `/${name}`
+const getRootMounts = () => {
+	const platform = process.platform
+	const paths = SYSTEM_MOUNT_PATHS[platform] || SYSTEM_MOUNT_PATHS.linux
+	const mounts: { mountPoint: string; filesystem: any }[] = []
 
-			const systemAndVirtualDirs = [
-				'tmp',
-				'home',
-				'bin',
-				'sbin',
-				'dev',
-				'proc',
-				'net',
-				'Network',
-				'usr',
-				'etc',
-				'var',
-				'System',
-				'cores',
-				'opt'
-			]
+	for (const path of paths) {
+		try {
+			const stat = fs.statSync(path)
 
-			if (systemAndVirtualDirs.includes(name)) {
-				continue
-			}
+			if (!stat.isDirectory()) continue
 
-			try {
-				const stat = fs.statSync(fullPath)
-
-				if (!stat.isDirectory()) {
-					continue
-				}
-
-				mounts.push({
-					mountPoint: fullPath,
-					filesystem: new ReadWriteFs({
-						root: fullPath,
-						allowSymlinks: true
-					})
+			mounts.push({
+				mountPoint: path,
+				filesystem: new ReadWriteFs({
+					root: path,
+					allowSymlinks: true
 				})
-			} catch (err) {
-				if ((err as NodeJS.ErrnoException).code !== 'ENOENT') {
-					console.error(`Failed to mount ${fullPath}:`, err)
-				}
+			})
+		} catch (err) {
+			if ((err as NodeJS.ErrnoException).code !== 'ENOENT') {
+				console.error(`Failed to mount ${path}:`, err)
 			}
 		}
-
-		if (!mounts.some(m => m.mountPoint === '/Users')) {
-			try {
-				mounts.push({
-					mountPoint: '/Users',
-					filesystem: new ReadWriteFs({
-						root: '/Users',
-						allowSymlinks: true
-					})
-				})
-			} catch (err) {
-				console.error('Failed to mount /Users:', err)
-			}
-		}
-
-		return mounts
-	} catch (e) {
-		console.error('Failed to read macOS root directory', e)
-		return []
 	}
+
+	return mounts
 }
 
 const bfs = new MountableFs({
 	base: new InMemoryFs(),
-	mounts: getMacOSRootMounts()
+	mounts: getRootMounts()
 })
 
 const isPathInDir = (target_path: string, dir: string): boolean => {
