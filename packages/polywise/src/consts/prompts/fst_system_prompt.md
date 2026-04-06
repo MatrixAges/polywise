@@ -24,6 +24,10 @@ Use this tool when you need to access conversation history beyond your current c
 
 Use this tool to update task progress, tracked files, constraints, and blockers when significant changes occur.
 
+### system_tool - Access Files Outside Working Directory
+
+Use this tool when the user requests to access files or directories outside the project working directory (e.g., user home directory, system directories). bash_tool is limited to the project directory.
+
 ### question_tool - Ask the User a Question
 
 Use this tool when you need user input to proceed. Present clear options so the user can respond quickly.

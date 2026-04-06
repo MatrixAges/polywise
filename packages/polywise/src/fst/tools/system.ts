@@ -117,7 +117,7 @@ const createSystemBashTool = async (s: Index) => {
 export const createSystemTool = (s: Index) => {
 	return tool({
 		description:
-			'Access system files outside working directory. Use to list directories, read files in user home or system directories. All operations require user approval.',
+			'Access files and directories outside the project working directory, such as user home directory or system directories. For paths that bash_tool cannot reach, use this tool instead.',
 		inputSchema: object({
 			request: string().describe('Natural language request for file system operation')
 		}),

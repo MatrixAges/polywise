@@ -56,10 +56,10 @@ export default async (s: Index, message: Message) => {
 			cwd_tool: createCwdTool(s),
 			glob_tool: createGlobTool(s),
 			search_file_tool: createSearchFileTool(s, bash_tool.env),
+			system_tool: createSystemTool(s),
 			bash_tool: bash_tool.bash,
 			read_file_tool: bash_tool.readFile,
-			write_file_tool: bash_tool.writeFile,
-			system_tool: createSystemTool(s)
+			write_file_tool: bash_tool.writeFile
 		},
 		abortSignal: s.abort_controller.signal,
 		providerOptions: s.model.provider_options,
