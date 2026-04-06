@@ -1,8 +1,8 @@
 import { tool } from 'ai'
 import { array, number, object, string } from 'zod'
 
-import { escapeShellArg } from '../../utils/safeshell'
 import { checkPermission, requestApproval } from '../session/permission'
+import { escapeShellArg } from '../utils/safeshell'
 
 import type { Bash } from 'just-bash'
 import type Index from '../session'

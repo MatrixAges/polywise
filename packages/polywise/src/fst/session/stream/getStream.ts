@@ -10,7 +10,8 @@ import {
 	createGlobTool,
 	createMessageTool,
 	createQuestionTool,
-	createSearchFileTool
+	createSearchFileTool,
+	createSystemTool
 } from '../../tools'
 
 import type { Message, MessageMetadata } from '../../types'
@@ -57,7 +58,8 @@ export default async (s: Index, message: Message) => {
 			search_file_tool: createSearchFileTool(s, bash_tool.env),
 			bash_tool: bash_tool.bash,
 			read_file_tool: bash_tool.readFile,
-			write_file_tool: bash_tool.writeFile
+			write_file_tool: bash_tool.writeFile,
+			system_tool: createSystemTool(s)
 		},
 		abortSignal: s.abort_controller.signal,
 		providerOptions: s.model.provider_options,

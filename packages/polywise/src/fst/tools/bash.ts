@@ -3,23 +3,17 @@ import { readFile, writeFile } from 'atomically'
 import { createBashTool as BashTool } from 'bash-tool'
 import { Bash, ReadWriteFs } from 'just-bash'
 
-import { detectShellInjectionRisk } from '../../utils/safeshell'
 import { checkPermission, requestApproval } from '../session/permission'
+import getBashResponse from '../utils/getBashResponse'
+import { detectShellInjectionRisk } from '../utils/safeshell'
 
 import type { Sandbox } from 'bash-tool'
-import type { BashExecResult } from 'just-bash'
 import type Index from '../session'
 
 const getRealPath = (cwd: string, virtual_path: string): string => {
 	if (path.posix.isAbsolute(virtual_path)) return path.join(cwd, virtual_path)
 
 	return path.join(cwd, virtual_path)
-}
-
-const getBashResponse = (v: BashExecResult) => {
-	if (v.stderr) return { stdout: '', stderr: v.stderr, exitCode: v.exitCode }
-
-	return { stdout: v.stdout, stderr: '', exitCode: v.exitCode }
 }
 
 export const createBashTool = async (s: Index) => {
