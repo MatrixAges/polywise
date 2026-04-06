@@ -16,5 +16,7 @@ export default async (s: Index) => {
 
 	await env.db.delete(message).where(eq(message.session_id, s.id))
 
+	await s.clearTasks()
+
 	s.sync()
 }
