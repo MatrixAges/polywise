@@ -1,4 +1,4 @@
-import { agent, message, project, session } from './schema'
+import { agent, message, project, session, todo } from './schema'
 
 import type { InferInsertModel, InferSelectModel } from 'drizzle-orm'
 
@@ -10,3 +10,5 @@ export type Message = InferSelectModel<typeof message>
 export type MessageInsert = InferInsertModel<typeof message>
 export type Project = InferSelectModel<typeof project>
 export type ProjectInsert = InferInsertModel<typeof project>
+export type Todo = InferSelectModel<typeof todo>
+export type TodoInsert = InferInsertModel<typeof todo>
