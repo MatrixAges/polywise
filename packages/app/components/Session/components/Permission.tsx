@@ -11,7 +11,7 @@ const Index = (props: IPropsPermission) => {
 			className='
 				flex flex-col
 				gap-3
-				p-3
+				p-3 pt-2
 				rounded-md
 				bg-secondary
 			'
@@ -21,18 +21,18 @@ const Index = (props: IPropsPermission) => {
 			</div>
 			<div className='flex flex-col gap-1.5 text-xs'>
 				<div className='flex gap-2'>
-					<span className='text-std-500'>Tool</span>
+					<span className='text-std-500 w-10'>Tool</span>
 					<span className='font-mono'>{tool}</span>
 				</div>
 
 				<div className='flex gap-2'>
-					<span className='text-std-500'>Action</span>
+					<span className='text-std-500 w-10'>Action</span>
 					<span className='font-mono'>{action}</span>
 				</div>
 
 				<div className='flex gap-2'>
-					<span className='text-std-500'>Path</span>
-					<span className='font-mono break-all'>{path}</span>
+					<span className='text-std-500 w-10'>Path</span>
+					<span className='flex-1 font-mono break-all'>{path}</span>
 				</div>
 			</div>
 			<div className='flex gap-2 self-end'>
