@@ -8,7 +8,7 @@ import { clearMessages, getMessages, getMessagesCount, loadMessages, trimMessage
 import { getAgents, getData, getModel, getProject } from './related'
 import { getSession, initSession, updateSession } from './session'
 import { abortStream, getStream } from './stream'
-import { getTasks, setTasks } from './task'
+import { clearTasks, getTasks, setTasks } from './task'
 import { active, runing, stop, sync } from './utils'
 
 import type { Agent, Project, Session, SessionInsert } from '@core/db'
@@ -82,6 +82,7 @@ export default class Index {
 
 	getTasks = () => getTasks(this)
 	setTasks = (v: Context['tasks']) => setTasks(this, v)
+	clearTasks = () => clearTasks(this)
 
 	getContext = () => getContext(this)
 	setContext = (v: Partial<Context>) => setContext(this, v)

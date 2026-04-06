@@ -47,6 +47,8 @@ const task_status_icon_map = {
 const Index = (props: Context) => {
 	const { intent, context, tasks, files, constraints, learned, blockers } = props || {}
 
+	console.log(tasks)
+
 	return (
 		<div
 			className='
@@ -84,7 +86,7 @@ const Index = (props: Context) => {
 					<span className='text-std-500'>{context}</span>
 				</div>
 			)}
-			{tasks?.length > 0 && (
+			{tasks && tasks?.length > 0 && (
 				<div
 					className='
 						flex flex-col
@@ -121,7 +123,7 @@ const Index = (props: Context) => {
 					</div>
 				</div>
 			)}
-			{files?.length > 0 && (
+			{files && files?.length > 0 && (
 				<div
 					className='
 						flex flex-col
