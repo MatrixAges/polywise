@@ -6,14 +6,19 @@ import { Bash, ReadWriteFs } from 'just-bash'
 import { checkPermission, requestApproval } from '../session/permission'
 
 import type { Sandbox } from 'bash-tool'
+import type { BashExecResult } from 'just-bash'
 import type Index from '../session'
 
-const toRealPath = (cwd: string, virtualPath: string): string => {
-	if (path.posix.isAbsolute(virtualPath)) {
-		return path.join(cwd, virtualPath)
-	}
+const getRealPath = (cwd: string, virtual_path: string): string => {
+	if (path.posix.isAbsolute(virtual_path)) return path.join(cwd, virtual_path)
 
-	return path.join(cwd, virtualPath)
+	return path.join(cwd, virtual_path)
+}
+
+const getBashResponse = (v: BashExecResult) => {
+	if (v.stderr) return { stdout: '', stderr: v.stderr, exitCode: v.exitCode }
+
+	return { stdout: v.stdout, stderr: '', exitCode: v.exitCode }
 }
 
 export const createBashTool = async (s: Index) => {
@@ -22,42 +27,43 @@ export const createBashTool = async (s: Index) => {
 	const { tools } = await BashTool({
 		destination: '/',
 		sandbox: {
-			async readFile(virtualPath) {
-				const realPath = toRealPath(s.cwd, virtualPath)
-				const result = checkPermission(s, 'file', 'read', realPath)
+			async readFile(virtual_path) {
+				const real_path = getRealPath(s.cwd, virtual_path)
+				const result = checkPermission(s, 'file', 'read', real_path)
 
 				if (result === 'needs_approval') {
-					const approved = await requestApproval(s, 'file', 'read', realPath)
+					const approved = await requestApproval(s, 'file', 'read', real_path)
 
 					if (!approved) {
-						throw new Error(`Permission denied: file read ${realPath}`)
+						throw new Error(`Permission denied: file read ${real_path}`)
 					}
 				}
 
-				return readFile(realPath, 'utf8')
+				return readFile(real_path, 'utf8')
 			},
 			async writeFiles(files) {
 				for (const file of files) {
-					const realPath = toRealPath(s.cwd, file.path)
-					const result = checkPermission(s, 'file', 'write', realPath)
+					const real_path = getRealPath(s.cwd, file.path)
+					const result = checkPermission(s, 'file', 'write', real_path)
 
 					if (result === 'needs_approval') {
-						const approved = await requestApproval(s, 'file', 'write', realPath)
+						const approved = await requestApproval(s, 'file', 'write', real_path)
 
 						if (!approved) {
-							throw new Error(`Permission denied: file write ${realPath}`)
+							throw new Error(`Permission denied: file write ${real_path}`)
 						}
 					}
 				}
 
 				for (const file of files) {
-					const realPath = toRealPath(s.cwd, file.path)
-					await writeFile(realPath, file.content)
+					await writeFile(getRealPath(s.cwd, file.path), file.content)
 				}
 			},
 			async executeCommand(command) {
 				if (command === 'ls /usr/bin /usr/local/bin /bin /sbin /usr/sbin 2>/dev/null') {
-					return bash.exec(command, { cwd: '/' })
+					const res = await bash.exec(command, { cwd: '/' })
+
+					return getBashResponse(res)
 				}
 
 				const cleanCommand = command.replace(/^cd\s+"[^"]+"\s+&&\s+/, '')
@@ -72,7 +78,9 @@ export const createBashTool = async (s: Index) => {
 					}
 				}
 
-				return bash.exec(command, { cwd: '/' })
+				const res = await bash.exec(command, { cwd: '/' })
+
+				return getBashResponse(res)
 			}
 		} as Sandbox
 	})
