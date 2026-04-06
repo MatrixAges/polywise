@@ -1,5 +1,6 @@
 import system_agent_prompt from '@core/consts/prompts/system_agent_prompt.md'
 import { readUIMessageStream, stepCountIs, tool, ToolLoopAgent } from 'ai'
+import { getId } from 'stk/utils'
 import { object, string } from 'zod'
 
 import { createSystemBashTool } from './bash'
@@ -20,11 +21,11 @@ export const createSystemTool = (s: Index) => {
 				model: s.model.model,
 				instructions: system_agent_prompt,
 				tools: {
-					bash: bash_tool.bash,
-					read_file: bash_tool.readFile,
-					write_file: bash_tool.writeFile
+					bash_tool: bash_tool.bash,
+					read_file_tool: bash_tool.readFile,
+					write_file_tool: bash_tool.writeFile
 				},
-				stopWhen: stepCountIs(15)
+				stopWhen: stepCountIs(60)
 			})
 
 			const result = await agent.stream({
@@ -33,7 +34,7 @@ export const createSystemTool = (s: Index) => {
 			})
 
 			for await (const message of readUIMessageStream({
-				stream: result.toUIMessageStream()
+				stream: result.toUIMessageStream({ generateMessageId: getId })
 			})) {
 				yield message
 			}
