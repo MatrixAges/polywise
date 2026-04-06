@@ -2,7 +2,7 @@ import { message } from '@core/db/schema'
 import { env } from '@core/env'
 import { convertToModelMessages, tool } from 'ai'
 import { and, asc, eq, lt, sql } from 'drizzle-orm'
-import { discriminatedUnion, literal, number, object, optional } from 'zod'
+import { enum as Enum, number, object, optional } from 'zod'
 
 import type { Message } from '../types'
 
@@ -14,26 +14,18 @@ const parseMessage = (item: typeof message.$inferSelect) => {
 	return parsed
 }
 
-const inputSchema = discriminatedUnion('action', [
-	object({
-		action: literal('get_total_count').describe('Get total message count in this session')
-	}),
-	object({
-		action: literal('get_context_messages_count').describe('Get message count in your current context window')
-	}),
-	object({
-		action: literal('get_prev_messages').describe(
-			'Read conversation history before your current context window'
-		),
-		args: optional(
-			object({
-				count: number().int().min(1).describe('Number of messages to read'),
-				before: number().int().min(0).describe('Skip N messages before current context'),
-				offset: number().int().min(1).describe('Read from absolute position -N')
-			}).describe('Parameters for get_prev_messages action')
-		).describe('Action-specific arguments')
-	})
-])
+const inputSchema = object({
+	action: Enum(['get_total_count', 'get_context_messages_count', 'get_prev_messages']).describe(
+		'The action to perform. get_total_count: total session messages. get_context_messages_count: messages in current context. get_prev_messages: read history.'
+	),
+	args: optional(
+		object({
+			count: number().int().min(1).describe('Number of messages to read'),
+			before: number().int().min(0).describe('Skip N messages before current context'),
+			offset: number().int().min(1).describe('Read from absolute position -N')
+		}).describe('Parameters for get_prev_messages action')
+	).describe('Action-specific arguments, only used when action is get_prev_messages')
+})
 
 export const createMessageTool = (id: string, model_messages: Array<Message>) => {
 	const baseline = model_messages[0]?.createdAt

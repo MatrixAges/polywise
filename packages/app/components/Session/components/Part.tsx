@@ -40,7 +40,9 @@ const Index = (props: IPropsPart) => {
 						title={tool_part.title}
 					/>
 					<ToolContent>
-						{tool_part.input !== undefined && <ToolInput input={tool_part.input} />}
+						{(tool_part.input !== undefined || 'rawInput' in tool_part) && (
+							<ToolInput input={tool_part.input ?? (tool_part as any).rawInput} />
+						)}
 						{(tool_part.output ?? tool_part.errorText) && (
 							<ToolOutput output={tool_part.output} errorText={tool_part.errorText} />
 						)}

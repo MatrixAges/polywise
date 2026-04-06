@@ -6,10 +6,10 @@ import { getId } from 'stk/utils'
 import {
 	createBashTool,
 	createContextTool,
+	createCwdTool,
 	createGlobTool,
 	createMessageTool,
-	createQuestionTool,
-	createWorkingDirTool
+	createQuestionTool
 } from '../../tools'
 
 import type { Message, MessageMetadata } from '../../types'
@@ -48,14 +48,14 @@ export default async (s: Index, message: Message) => {
 		messages,
 		tools: {
 			...s.model.tools,
+			context_tool: createContextTool(s),
+			message_tool: createMessageTool(s.id, s.model_messages),
+			question_tool: createQuestionTool(s.id),
+			cwd_tool: createCwdTool(s),
+			glob_tool: createGlobTool(s),
 			bash_tool: bash_tool.bash,
 			read_file_tool: bash_tool.readFile,
-			write_file_tool: bash_tool.writeFile,
-			glob_tool: createGlobTool(s),
-			working_dir_tool: createWorkingDirTool(s),
-			message_tool: createMessageTool(s.id, s.model_messages),
-			context_tool: createContextTool(s),
-			question_tool: createQuestionTool(s.id)
+			write_file_tool: bash_tool.writeFile
 		},
 		abortSignal: s.abort_controller.signal,
 		providerOptions: s.model.provider_options,
