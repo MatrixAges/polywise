@@ -8,7 +8,7 @@ import type { Sandbox } from 'bash-tool'
 import type Index from '../session'
 
 export const createBashTool = async (s: Index) => {
-	const bash = new Bash({ cwd: s.cwd, fs: new ReadWriteFs({ root: '/' }) })
+	const bash = new Bash({ cwd: '/', fs: new ReadWriteFs({ root: s.cwd }) })
 
 	const { tools } = await BashTool({
 		destination: '/',
@@ -44,11 +44,11 @@ export const createBashTool = async (s: Index) => {
 				}
 			},
 			async executeCommand(command) {
-				const cleanCommand = command.replace(/^cd\s+"[^"]+"\s+&&\s+/, '')
-
-				if (cleanCommand === 'ls /usr/bin /usr/local/bin /bin /sbin /usr/sbin 2>/dev/null') {
-					return bash.exec(cleanCommand, { cwd: s.cwd })
+				if (command === 'ls /usr/bin /usr/local/bin /bin /sbin /usr/sbin 2>/dev/null') {
+					return bash.exec(command, { cwd: '/' })
 				}
+
+				const cleanCommand = command.replace(/^cd\s+"[^"]+"\s+&&\s+/, '')
 
 				const result = checkPermission(s, 'bash', 'execute', cleanCommand)
 
@@ -60,7 +60,7 @@ export const createBashTool = async (s: Index) => {
 					}
 				}
 
-				return bash.exec(cleanCommand, { cwd: s.cwd })
+				return bash.exec(command, { cwd: '/' })
 			}
 		} as Sandbox
 	})
