@@ -34,6 +34,8 @@ export default async (s: Index, message: Message) => {
 
 	await s.runing(true)
 
+	s.sync()
+
 	const messages = await convertToModelMessages(s.model_messages)
 
 	if (s.prefill) messages.push({ role: 'assistant', content: s.prefill })
