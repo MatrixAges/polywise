@@ -1,5 +1,3 @@
-import clearTasks from './clearTasks'
-import getTasks from './getTasks'
-import setTasks from './setTasks'
-
-export { clearTasks, getTasks, setTasks }
+export { default as clearTasks } from './clearTasks'
+export { default as getTasks } from './getTasks'
+export { default as setTasks } from './setTasks'
