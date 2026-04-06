@@ -5,19 +5,13 @@ import {
   CollapsibleTrigger,
 } from "@/__shadcn__/components/ui/collapsible";
 import { cn } from "@/__shadcn__/lib/utils/index";
-import type { DynamicToolUIPart, ToolUIPart } from "ai";
-import {
-  CheckCircleIcon,
-  ChevronDownIcon,
-  CircleIcon,
-  ClockIcon,
-  WrenchIcon,
-  XCircleIcon,
-} from "lucide-react";
-import type { ComponentProps, ReactNode } from "react";
+import { ChevronDownIcon,WrenchIcon } from "lucide-react";
 import { isValidElement } from "react";
-
 import { CodeBlock } from "./code-block";
+
+import type { ComponentProps, ReactNode } from "react";
+import type { DynamicToolUIPart, ToolUIPart } from "ai";
+
 
 export type ToolProps = ComponentProps<typeof Collapsible>;
 
