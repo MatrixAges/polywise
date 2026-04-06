@@ -249,6 +249,7 @@ export default class Index {
 
 		this.chat.clearMessages()
 
+		this.permission = null as unknown as Permission
 		this.messages = []
 
 		this.update()

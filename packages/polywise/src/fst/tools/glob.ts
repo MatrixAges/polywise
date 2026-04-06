@@ -15,18 +15,6 @@ export const createGlobTool = (s: Index) => {
 	return tool({
 		description: 'Search for files matching glob patterns. Use to find files by name or pattern.',
 		inputSchema,
-		needsApproval: async input => {
-			const paths = extractPaths(input, s.cwd)
-
-			for (const path of paths) {
-				const result = checkPermission(s, 'glob', 'read', path)
-				if (result === 'needs_approval') {
-					return true
-				}
-			}
-
-			return false
-		},
 		execute: async input => {
 			const paths = extractPaths(input, s.cwd)
 

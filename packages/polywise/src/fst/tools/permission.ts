@@ -42,19 +42,6 @@ export const wrapToolWithPermission = (s: Index, tool_name: string, base_tool: T
 	return tool({
 		description: base_tool.description,
 		inputSchema: base_tool.inputSchema,
-		needsApproval: async (input: unknown) => {
-			const input_obj = input as Record<string, unknown>
-			const paths = config.path_extractor(input_obj)
-
-			for (const { action, path } of paths) {
-				const result = checkPermission(s, config.tool_type, action, path)
-				if (result === 'needs_approval') {
-					return true
-				}
-			}
-
-			return false
-		},
 		execute: async (input: unknown, context: unknown) => {
 			const input_obj = input as Record<string, unknown>
 			const paths = config.path_extractor(input_obj)
