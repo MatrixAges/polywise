@@ -85,5 +85,5 @@ export const createBashTool = async (s: Index) => {
 		} as Sandbox
 	})
 
-	return tools
+	return { bash: tools.bash, readFile: tools.readFile, writeFile: tools.writeFile, env: bash }
 }

@@ -9,7 +9,8 @@ import {
 	createCwdTool,
 	createGlobTool,
 	createMessageTool,
-	createQuestionTool
+	createQuestionTool,
+	createSearchFileTool
 } from '../../tools'
 
 import type { Message, MessageMetadata } from '../../types'
@@ -53,6 +54,7 @@ export default async (s: Index, message: Message) => {
 			question_tool: createQuestionTool(s.id),
 			cwd_tool: createCwdTool(s),
 			glob_tool: createGlobTool(s),
+			search_file_tool: createSearchFileTool(s, bash_tool.env),
 			bash_tool: bash_tool.bash,
 			read_file_tool: bash_tool.readFile,
 			write_file_tool: bash_tool.writeFile
