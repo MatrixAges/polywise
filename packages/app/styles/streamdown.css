@@ -33,5 +33,5 @@
 }
 
 code[data-streamdown='inline-code'] {
-	@apply px-1 py-[0.08rem];
+	@apply box-decoration-clone px-1 py-[0.08rem] break-all;
 }
