@@ -171,23 +171,12 @@ const createSystemBashTool = async (s: Index) => {
 				}
 			},
 			async executeCommand(command) {
-				const approved = await requestApproval(s, 'bash', 'execute', command)
+				const is_risky = detectShellInjectionRisk(command)
+				const approval_path = is_risky ? `command (risky): ${command}` : command
+				const approved = await requestApproval(s, 'bash', 'execute', approval_path)
 
 				if (!approved) {
 					return { stdout: '', stderr: 'Permission denied', exitCode: 1 }
-				}
-
-				if (detectShellInjectionRisk(command)) {
-					const risky_approved = await requestApproval(
-						s,
-						'bash',
-						'execute',
-						`command (risky): ${command}`
-					)
-
-					if (!risky_approved) {
-						return { stdout: '', stderr: 'Shell injection risk detected', exitCode: 1 }
-					}
 				}
 
 				const res = await bash.exec(command, { cwd: '/' })
