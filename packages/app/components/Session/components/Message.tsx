@@ -38,7 +38,7 @@ const Index = (props: IPropsMessage) => {
 				{left_parts.length ? (
 					left_parts.map((part, index) => (
 						<Part
-							streaming={streaming}
+							streaming={index === left_parts.length - 1 && streaming}
 							part={part}
 							metadata={message.metadata as MessageMetadata}
 							answer={answer}
