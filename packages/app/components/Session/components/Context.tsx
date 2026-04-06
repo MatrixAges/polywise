@@ -105,7 +105,7 @@ const Index = (props: Context) => {
 								<div
 									className='
 									flex flex-col
-									gap-1.5
+									gap-1
 									px-3 py-2
 									rounded-lg
 									border border-border-light
@@ -139,7 +139,7 @@ const Index = (props: Context) => {
 							<div
 								className='
 									flex flex-col
-									gap-1.5
+									gap-1
 									px-3 py-2
 									rounded-lg
 									border border-border-light
@@ -169,7 +169,7 @@ const Index = (props: Context) => {
 					<div
 						className='
 							flex flex-col
-							gap-1.5
+							gap-1
 							px-3 py-2
 							pl-6
 							rounded-lg
@@ -198,7 +198,7 @@ const Index = (props: Context) => {
 					<div
 						className='
 							flex flex-col
-							gap-1.5
+							gap-1
 							px-3 py-2
 							pl-6
 							rounded-lg
@@ -227,7 +227,7 @@ const Index = (props: Context) => {
 					<div
 						className='
 							flex flex-col
-							gap-1.5
+							gap-1
 							px-3 py-2
 							pl-6
 							rounded-lg
