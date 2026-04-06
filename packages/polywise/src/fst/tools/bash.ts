@@ -1,6 +1,6 @@
 import { readFile, writeFile } from 'atomically'
 import { createBashTool as BashTool } from 'bash-tool'
-import { Bash } from 'just-bash'
+import { Bash, ReadWriteFs } from 'just-bash'
 
 import { checkPermission, requestApproval } from '../session/permission'
 
@@ -8,10 +8,10 @@ import type { Sandbox } from 'bash-tool'
 import type Index from '../session'
 
 export const createBashTool = async (s: Index) => {
-	const bash = new Bash({ cwd: s.cwd })
+	const bash = new Bash({ cwd: s.cwd, fs: new ReadWriteFs({ root: '/' }) })
 
 	const { tools } = await BashTool({
-		destination: s.cwd,
+		destination: '/',
 		sandbox: {
 			async readFile(path) {
 				const result = checkPermission(s, 'file', 'read', path)
@@ -44,21 +44,23 @@ export const createBashTool = async (s: Index) => {
 				}
 			},
 			async executeCommand(command) {
-				if (command === 'ls /usr/bin /usr/local/bin /bin /sbin /usr/sbin 2>/dev/null') {
-					return bash.exec(command, { cwd: s.cwd })
+				const cleanCommand = command.replace(/^cd\s+"[^"]+"\s+&&\s+/, '')
+
+				if (cleanCommand === 'ls /usr/bin /usr/local/bin /bin /sbin /usr/sbin 2>/dev/null') {
+					return bash.exec(cleanCommand, { cwd: s.cwd })
 				}
 
-				const result = checkPermission(s, 'bash', 'execute', command)
+				const result = checkPermission(s, 'bash', 'execute', cleanCommand)
 
 				if (result === 'needs_approval') {
-					const approved = await requestApproval(s, 'bash', 'execute', command)
+					const approved = await requestApproval(s, 'bash', 'execute', cleanCommand)
 
 					if (!approved) {
 						return { stdout: '', stderr: 'Permission denied', exitCode: 1 }
 					}
 				}
 
-				return bash.exec(command, { cwd: s.cwd })
+				return bash.exec(cleanCommand, { cwd: s.cwd })
 			}
 		} as Sandbox
 	})
