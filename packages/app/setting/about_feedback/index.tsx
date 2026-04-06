@@ -37,7 +37,7 @@ const Index = () => {
 			>
 				Polywise
 			</h1>
-			<h2 className='text-std-800 font-serif text-lg font-medium'>The Way to fork Yourself</h2>
+			<h2 className='text-std-800 font-serif text-lg font-medium'>Where agents live</h2>
 			<div
 				className='
 					flex flex-col
