@@ -13,7 +13,7 @@ import { active, runing, stop, sync } from './utils'
 
 import type { Agent, Project, Session, SessionInsert } from '@core/db'
 import type { ModelResult } from '../provider'
-import type { Context, InitArgs, Message, Permissions } from '../types'
+import type { Context, InitArgs, Message, Permission, Permissions } from '../types'
 
 export default class Index {
 	id = ''
@@ -27,6 +27,7 @@ export default class Index {
 	model_messages = [] as Array<Message>
 	context = {} as Context
 	prefill = ''
+	permission = null as Permission | null
 	permissions = [] as Permissions
 
 	ui_messages = [] as Array<Message>

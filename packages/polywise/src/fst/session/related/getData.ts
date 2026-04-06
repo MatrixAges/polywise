@@ -7,13 +7,14 @@ export default async (s: Index) => {
 	await Promise.all([s.getModel(), s.getAgents(), s.getProject(), s.getMessages()])
 
 	return {
-		type: 'init',
+		type: 'sync',
 		data: {
 			session: s.session,
 			messages: s.ui_messages,
 			context: s.context,
 			has_older: s.ui_has_older,
-			has_newer: s.ui_has_newer
+			has_newer: s.ui_has_newer,
+			permission: s.permission
 		}
 	} as ChatEventRes
 }

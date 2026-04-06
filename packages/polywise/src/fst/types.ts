@@ -29,28 +29,14 @@ export interface MessageMetadata {
 	reasoning_duration: number
 }
 
-export type ChatEventRes =
-	| {
-			type: 'init'
-			data: {
-				session: Session
-				messages: Array<Message>
-				context: Context
-				has_older: boolean
-				has_newer: boolean
-			}
-	  }
-	| {
-			type: 'sync'
-			data: {
-				session: Session
-				messages: Array<Message>
-				context: Context
-				has_older: boolean
-				has_newer: boolean
-			}
-	  }
-	| {
-			type: 'permission'
-			data: Permission
-	  }
+export type ChatEventRes = {
+	type: 'sync'
+	data: {
+		session: Session
+		messages: Array<Message>
+		context: Context
+		has_older: boolean
+		has_newer: boolean
+		permission: Permission | null
+	}
+}

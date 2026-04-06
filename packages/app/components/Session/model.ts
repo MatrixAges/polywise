@@ -93,15 +93,16 @@ export default class Index {
 			{
 				onData: res => {
 					switch (res.type) {
-						case 'init':
 						case 'sync':
-							const { session, context, messages, has_older, has_newer } = res.data
+							const { session, context, messages, has_older, has_newer, permission } =
+								res.data
 							console.log(res)
 
 							this.session = session as Session
 							this.context = context
 							this.has_older = has_older
 							this.has_newer = has_newer
+							this.permission = permission as Permission
 
 							const target_messages = messages as unknown as Array<Message>
 
@@ -120,12 +121,6 @@ export default class Index {
 
 							this.chat.setMessages(target_messages as unknown as Array<Message>)
 
-							break
-
-						case 'permission':
-							this.permission = res.data
-
-							this.update()
 							break
 					}
 				}

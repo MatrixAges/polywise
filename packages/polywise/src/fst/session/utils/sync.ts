@@ -9,7 +9,8 @@ export default (s: Index) => {
 			messages: s.ui_messages,
 			context: s.context,
 			has_older: s.ui_has_older,
-			has_newer: s.ui_has_newer
+			has_newer: s.ui_has_newer,
+			permission: s.permission
 		}
 	} as ChatEventRes)
 }

@@ -26,16 +26,23 @@ export default async (s: Index, tool: string, action: string, path: string): Pro
 		return true
 	}
 
-	s.event.emit(`${s.id}/change`, {
-		type: 'permission',
-		data: { tool, action, path }
-	})
+	s.permission = {
+		tool: tool as Permission['tool'],
+		action: action as Permission['action'],
+		path
+	}
+
+	s.sync()
 
 	const { promise, resolve } = Promise.withResolvers<boolean>()
 
 	SessionEventStore.once(`${s.id}/permission`, (v: boolean) => resolve(v))
 
 	const approved = await promise
+
+	s.permission = null
+
+	s.sync()
 
 	if (approved) {
 		const permission: Permission = {
