@@ -15,4 +15,6 @@ export default async (s: Index) => {
 	await s.setContext({})
 
 	await env.db.delete(message).where(eq(message.session_id, s.id))
+
+	s.sync()
 }
