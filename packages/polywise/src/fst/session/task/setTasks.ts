@@ -1,11 +1,28 @@
 import { session_todo, todo } from '@core/db/schema'
 import { env } from '@core/env'
-import { eq } from 'drizzle-orm'
+import { and, eq, inArray, ne } from 'drizzle-orm'
 
 import type { Context } from '../../types'
 import type Index from '../index'
 
 export default async (s: Index, v: Context['tasks']) => {
+	const tasks = v || []
+	const task_titles = new Set(tasks.map(task => task.title))
+
+	const current_tasks = await env.db
+		.select({ todo })
+		.from(session_todo)
+		.innerJoin(todo, eq(session_todo.todo_id, todo.id))
+		.where(and(eq(session_todo.session_id, s.id), ne(todo.status, 'archive')))
+
+	const archives = current_tasks.filter(item => !task_titles.has(item.todo.title))
+
+	if (archives.length > 0) {
+		const archive_ids = archives.map(item => item.todo.id)
+
+		await env.db.update(todo).set({ status: 'archive' }).where(inArray(todo.id, archive_ids))
+	}
+
 	const existing = await env.db
 		.select({ todo })
 		.from(session_todo)
@@ -13,8 +30,6 @@ export default async (s: Index, v: Context['tasks']) => {
 		.where(eq(session_todo.session_id, s.id))
 
 	const existing_map = new Map(existing.map(item => [item.todo.title, item.todo]))
-
-	const tasks = v || []
 
 	for (const task of tasks) {
 		const db_status = task.status
