@@ -1,6 +1,7 @@
 import { tool } from 'ai'
 import { array, number, object, string } from 'zod'
 
+import { detectShellInjectionRisk, escapeShellArg } from '../../utils/safeshell'
 import { checkPermission, requestApproval } from '../session/permission'
 
 import type { Bash } from 'just-bash'
@@ -34,6 +35,23 @@ export const createSearchFileTool = (s: Index, bash: Bash) => {
 				}
 			}
 
+			const has_risk = detectShellInjectionRisk(input.keyword)
+
+			if (has_risk) {
+				const approved = await requestApproval(s, 'bash', 'execute', `search (risky): ${input.keyword}`)
+
+				if (!approved) {
+					return {
+						keyword: input.keyword,
+						matches: [],
+						count: 0,
+						error: 'Shell injection risk detected'
+					}
+				}
+			}
+
+			const safeKeyword = escapeShellArg(input.keyword)
+
 			const ext_filter = (input.extensions ?? []).map(ext => `--include="*${ext}"`).join(' ')
 
 			const matches: Array<{ file: string; line: number; content: string }> = []
@@ -47,7 +65,7 @@ export const createSearchFileTool = (s: Index, bash: Bash) => {
 					'-i',
 					`--max-count=${max_results - matches.length}`,
 					ext_filter,
-					`'${input.keyword}'`,
+					safeKeyword,
 					`'${search_path}'`
 				]
 					.filter(Boolean)

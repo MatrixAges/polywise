@@ -1,4 +1,2 @@
-import checkPermission from './checkPermission'
-import requestApproval from './requestApproval'
-
-export { checkPermission, requestApproval }
+export { default as checkPermission } from './checkPermission'
+export { default as requestApproval } from './requestApproval'
