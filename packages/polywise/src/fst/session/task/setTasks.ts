@@ -35,6 +35,8 @@ export default async (s: Index, v: Context['tasks']) => {
 
 	const existing_map = new Map(exist_tasks.map(item => [item.title, item]))
 
+	const status_order_map = new Map<string, number>()
+
 	for (const task of tasks) {
 		const db_status = task.status
 		const found = existing_map.get(task.title)
@@ -57,13 +59,17 @@ export default async (s: Index, v: Context['tasks']) => {
 
 			await env.db.update(todo).set(updates).where(eq(todo.id, found.id))
 		} else {
+			const current_index = status_order_map.get(db_status) || 0
+
+			status_order_map.set(db_status, current_index + 1)
+
 			const [inserted] = await env.db
 				.insert(todo)
 				.values({
 					title: task.title,
 					description: task.desc || undefined,
 					status: db_status,
-					order: exist_tasks.length + tasks.indexOf(task),
+					order: current_index,
 					result: task.result ?? undefined,
 					error: task.error ?? undefined
 				})
