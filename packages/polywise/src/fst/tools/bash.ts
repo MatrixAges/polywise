@@ -11,6 +11,7 @@ export const createBashTool = async (s: Index) => {
 	const bash = new Bash({ cwd: s.cwd })
 
 	const { tools } = await BashTool({
+		destination: s.cwd,
 		sandbox: {
 			async readFile(path) {
 				const result = checkPermission(s, 'file', 'read', path)
