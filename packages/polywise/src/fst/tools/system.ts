@@ -29,7 +29,11 @@ const hasReadPermission = (s: Index, path: string): boolean => {
 }
 
 const createSystemBashTool = async (s: Index) => {
-	const bash = new Bash({ cwd: '/', fs: new ReadWriteFs({ root: '/' }) })
+	const bash = new Bash({
+		cwd: '/',
+		fs: new ReadWriteFs({ root: '/' }),
+		env: process.env as Record<string, string>
+	})
 
 	const { tools } = await BashTool({
 		destination: '/',
