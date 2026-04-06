@@ -31,7 +31,7 @@ const getResult = (s: Index) => ({
 	}
 })
 
-export const createCwdTool = (s: Index) => {
+export const createWorkingDirTool = (s: Index) => {
 	return tool({
 		description: 'Get or set current working directory for bash_tool and glob_tool.',
 		inputSchema,

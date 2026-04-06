@@ -77,7 +77,7 @@ export const ToolHeader = ({
       {...props}
     >
       <div className="flex items-center gap-2">
-        <WrenchIcon className="size-3.5 text-std-400" />
+        <WrenchIcon className="size-3 text-std-400" />
         <span className="group-data-open:font-medium text-sm">{title ?? derivedName}</span>
       </div>
       <div className="flex items-center gap-1">
