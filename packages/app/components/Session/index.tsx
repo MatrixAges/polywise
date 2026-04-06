@@ -81,13 +81,13 @@ const Index = (props: IProps) => {
 						></Message>
 					))}
 				</div>
-				<div className='mt-12 h-8' ref={setBottomSignalRef}></div>
 				{x.permission && (
 					<Permission
 						permission={x.permission}
 						approvePermission={x.approvePermission}
 					></Permission>
 				)}
+				<div className='mt-12 h-8' ref={setBottomSignalRef}></div>
 			</div>
 			<Input {...props_input}></Input>
 			<Drawer
