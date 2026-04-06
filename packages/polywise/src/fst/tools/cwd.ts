@@ -1,33 +1,65 @@
+import { existsSync } from 'fs'
 import { tool } from 'ai'
-import { enum as enumSchema, object, string } from 'zod'
+import { discriminatedUnion, literal, object, string } from 'zod'
 
 import type Index from '../session'
 
-const inputSchema = object({
-	action: enumSchema(['getCwd', 'setCwd']).describe(
-		'Action to perform: getCwd to get current working directory, setCwd to change it'
-	),
-	path: string().optional().describe('New working directory path (required for setCwd)')
-})
+const inputSchema = discriminatedUnion('action', [
+	object({
+		action: literal('getCwd').describe('Get current working directory info')
+	}),
+	object({
+		action: literal('setCwd').describe(
+			'Set cwd, can be set to files_dir or project_dir as the working directory'
+		),
+		path: string().describe('New working directory path')
+	})
+])
 
 export const createCwdTool = (s: Index) => {
 	return tool({
-		description: 'Get or set the current working directory for file operations and command execution.',
+		description: 'Get or set current working directory for bash_tool and glob_tool.',
 		inputSchema,
 		execute: async input => {
 			if (input.action === 'getCwd') {
-				return s.getCwd()
+				return {
+					cwd: {
+						desc: 'Current working directory for bash_tool and glob_tool',
+						data: s.cwd
+					},
+					files_dir: {
+						desc: 'Session files directory, auto-allowed for writes',
+						data: s.files_dir
+					},
+					project_dir: {
+						desc: 'Project root directory, auto-allowed for operations',
+						data: s.project?.dir ?? null
+					}
+				}
 			}
 
 			if (input.action === 'setCwd') {
-				if (!input.path) {
-					throw new Error('Path is required for setCwd action')
+				if (!existsSync(input.path)) {
+					throw new Error(`Path does not exist: ${input.path}`)
 				}
 
-				return s.setCwd(input.path)
-			}
+				s.cwd = input.path
 
-			throw new Error(`Unknown action: ${input.action}`)
+				return {
+					cwd: {
+						desc: 'Current working directory for bash_tool and glob_tool',
+						data: s.cwd
+					},
+					files_dir: {
+						desc: 'Session files directory, auto-allowed for writes',
+						data: s.files_dir
+					},
+					project_dir: {
+						desc: 'Project root directory, auto-allowed for operations',
+						data: s.project?.dir ?? null
+					}
+				}
+			}
 		}
 	})
 }

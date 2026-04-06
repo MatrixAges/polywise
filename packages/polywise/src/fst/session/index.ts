@@ -1,5 +1,4 @@
 import { EventEmitter } from 'events'
-import { existsSync } from 'fs'
 import { resolve } from 'path'
 import { app } from '@core/consts'
 
@@ -64,24 +63,6 @@ export default class Index {
 		this.cwd = this.project?.dir || this.files_dir
 
 		return this.getData()
-	}
-
-	getCwd = () => {
-		return {
-			cwd: this.cwd,
-			files_dir: this.files_dir,
-			project_dir: this.project?.dir
-		}
-	}
-
-	setCwd = (path: string) => {
-		if (!existsSync(path)) {
-			throw new Error(`Path does not exist: ${path}`)
-		}
-
-		this.cwd = path
-
-		return this.getCwd()
 	}
 
 	initSession = () => initSession(this)
