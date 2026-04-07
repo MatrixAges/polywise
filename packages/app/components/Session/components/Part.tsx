@@ -4,10 +4,9 @@ import { MessageResponse } from '@/__shadcn__/components/ai-elements'
 import { Reasoning, ReasoningContent, ReasoningTrigger } from '@/__shadcn__/components/ai-elements/reasoning'
 import { Tool, ToolContent, ToolHeader, ToolInput, ToolOutput } from '@/__shadcn__/components/ai-elements/tool'
 
-import Message from './Message'
 import Question from './Question'
+import SubAgent from './SubAgent'
 
-import type { Message as MessageType } from '@core/fst'
 import type { QuestionInput } from '@core/fst/tools'
 import type { DynamicToolUIPart, ToolUIPart } from 'ai'
 import type { IPropsPart } from '../types'
@@ -72,16 +71,7 @@ const Index = (props: IPropsPart) => {
 
 		if (tool_part.type === 'tool-system_tool' && tool_part.input && tool_part.output) {
 			console.log(tool_part)
-			return (
-				<div className='flex flex-col pl-3'>
-					<span>System Agent</span>
-					<Message
-						streaming={streaming}
-						message={tool_part.output as MessageType}
-						answer={answer}
-					></Message>
-				</div>
-			)
+			return <SubAgent streaming={streaming} part={tool_part} answer={answer}></SubAgent>
 		}
 
 		return (

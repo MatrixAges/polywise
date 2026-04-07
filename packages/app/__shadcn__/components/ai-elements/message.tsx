@@ -28,7 +28,6 @@ export const Message = ({ className, from, ...props }: MessageProps) => (
 			className
 		)}
             data-streamdown='true'
-            style={{contentVisibility:'auto',containIntrinsicSize:from === 'user'?100:300}}
 		{...props}
 	/>
 )

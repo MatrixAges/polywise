@@ -1,5 +1,6 @@
 import type { Message, MessageMetadata } from '@core/fst'
 import type { QuestionInput } from '@core/fst/tools'
+import type { ToolUIPart } from 'ai'
 import type Model from './model'
 
 export interface IPropsMessage extends Pick<Model, 'answer'> {
@@ -23,3 +24,7 @@ export interface IPropsQuestion extends Pick<IPropsPart, 'streaming' | 'answer'>
 }
 
 export interface IPropsPermission extends Pick<Model, 'permission' | 'approvePermission'> {}
+
+export interface IPropsSubAgent extends Pick<IPropsPart, 'streaming' | 'answer'> {
+	part: ToolUIPart
+}
