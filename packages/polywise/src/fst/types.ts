@@ -29,6 +29,13 @@ export interface MessageMetadata {
 	reasoning_duration: number
 }
 
+export interface SkillMeta {
+	name: string
+	description: string
+	path: string
+	dir: string
+}
+
 export type ChatEventRes = {
 	type: 'sync'
 	data: {

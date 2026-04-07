@@ -12,6 +12,7 @@ import {
 	createMessageTool,
 	createQuestionTool,
 	createSearchFileTool,
+	createSkillTool,
 	createWebFetchTool,
 	createWebSearchTool
 } from '../../tools'
@@ -62,6 +63,7 @@ export default async (s: Index, message: Message) => {
 			read_file_tool: bash_tool.readFile,
 			write_file_tool: bash_tool.writeFile,
 			edit_file_tool: createEditFileTool(s),
+			skill_tool: createSkillTool(s, bash_tool.env),
 			web_search_tool: createWebSearchTool(),
 			web_fetch_tool: createWebFetchTool()
 		},

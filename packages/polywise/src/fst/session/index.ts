@@ -2,6 +2,7 @@ import { EventEmitter } from 'events'
 import { resolve } from 'path'
 import { app } from '@core/consts'
 
+import { buildSkillMap } from '../tools/skill'
 import { getContext, setContext } from './context'
 import { appendMessage, insertMessage } from './message'
 import { clearMessages, getMessages, getMessagesCount, loadMessages, trimMessages } from './messages'
@@ -13,7 +14,7 @@ import { active, runing, stop, sync } from './utils'
 
 import type { Agent, Project, Session, SessionInsert } from '@core/db'
 import type { ModelResult } from '../provider'
-import type { Context, InitArgs, Message, Permission, Permissions } from '../types'
+import type { Context, InitArgs, Message, Permission, Permissions, SkillMeta } from '../types'
 
 export default class Index {
 	id = ''
@@ -30,6 +31,8 @@ export default class Index {
 
 	permission = null as Permission | null
 	permissions = [] as Permissions
+
+	skill_map = [] as Array<SkillMeta>
 
 	ui_messages = [] as Array<Message>
 	ui_has_older = false
@@ -54,6 +57,10 @@ export default class Index {
 		return resolve(`${this.session_dir}/files`)
 	}
 
+	get skills_dir() {
+		return resolve(this.cwd, 'skills')
+	}
+
 	async init(args: InitArgs) {
 		const { id, event } = args
 
@@ -63,6 +70,8 @@ export default class Index {
 		await this.initSession()
 
 		this.cwd = this.project?.dir || this.files_dir
+
+		await this.loadSkillMap()
 
 		return this.getData()
 	}
@@ -99,4 +108,10 @@ export default class Index {
 	active = () => active(this)
 	sync = () => sync(this)
 	stop = () => stop(this)
+
+	loadSkillMap = async () => {
+		this.skill_map = await buildSkillMap(this.cwd)
+
+		return this.skill_map
+	}
 }
