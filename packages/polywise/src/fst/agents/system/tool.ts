@@ -3,11 +3,11 @@ import { readUIMessageStream, stepCountIs, tool, ToolLoopAgent } from 'ai'
 import { getId } from 'stk/utils'
 import { object, string } from 'zod'
 
-import createSystemBashTool from './createSystemBashTool'
+import bash from './bash'
 
-import type Index from '../../session'
+import type Session from '../../session'
 
-export const createSystemTool = (s: Index) => {
+export default (s: Session) => {
 	return tool({
 		description:
 			'Access files and directories outside the project working directory, such as user home directory or system directories. For paths that bash_tool cannot reach, use this tool instead.',
@@ -15,7 +15,7 @@ export const createSystemTool = (s: Index) => {
 			request: string().describe('Natural language request for file system operation')
 		}),
 		execute: async function* ({ request }, { abortSignal }) {
-			const bash_tool = await createSystemBashTool(s)
+			const bash_tool = await bash(s)
 
 			const agent = new ToolLoopAgent({
 				model: s.model.model,

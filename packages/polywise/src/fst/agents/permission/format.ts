@@ -1,11 +1,6 @@
-import { getAuditPrompt } from '@core/consts/prompt'
-
-import { extractMessageText } from './extractMessageText'
-
 import type { Context, Permissions } from '../../types'
-import type Index from '../index'
 
-const formatPermissions = (permissions: Permissions): string => {
+export const formatPermissions = (permissions: Permissions): string => {
 	if (permissions.length === 0) {
 		return 'No previously approved permissions'
 	}
@@ -15,7 +10,7 @@ const formatPermissions = (permissions: Permissions): string => {
 	return `Previously approved permissions:\n${lines.join('\n')}`
 }
 
-const formatContext = (context: Context): string => {
+export const formatContext = (context: Context): string => {
 	const parts: Array<string> = []
 
 	if (context.intent) {
@@ -49,21 +44,4 @@ const formatContext = (context: Context): string => {
 	}
 
 	return parts.join('\n\n')
-}
-
-export default (s: Index, tool: string, action: string, path: string): string => {
-	const context_summary = formatContext(s.context)
-	const recent_messages = s.model_messages.slice(-6).map(extractMessageText).filter(Boolean).join('\n')
-	const approved_permissions = formatPermissions(s.permissions)
-
-	return getAuditPrompt({
-		tool,
-		action,
-		path,
-		files_dir: s.files_dir,
-		cwd: s.cwd,
-		context_summary,
-		recent_messages,
-		approved_permissions
-	})
 }

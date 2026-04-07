@@ -1,18 +1,16 @@
 import { SessionEventStore } from '@core/utils'
 
-import buildAuditPrompt from './buildAuditPrompt'
-import createPermissionAgent from './createPermissionAgent'
+import createPermissionAgent from './agent'
+import getPrompt from './getPrompt'
 
+import type Session from '../../session'
 import type { Permission } from '../../types'
-import type Index from '../index'
-import type { PermissionAgentOutput } from './createPermissionAgent'
+import type { PermissionAgentOutput } from './agent'
 
-export default async (s: Index, tool: string, action: string, path: string): Promise<boolean> => {
+export default async (s: Session, tool: string, action: string, path: string) => {
 	const agent = createPermissionAgent(s.model.model)
 
-	const res = await agent.generate({
-		prompt: buildAuditPrompt(s, tool, action, path)
-	})
+	const res = await agent.generate({ prompt: getPrompt(s, tool, action, path) })
 
 	if ((res.output as PermissionAgentOutput)?.approve) {
 		const permission: Permission = {

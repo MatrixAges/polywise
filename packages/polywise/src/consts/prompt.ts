@@ -147,8 +147,8 @@ export const getAuditPrompt = (args: {
 	context_summary: string
 	recent_messages: string
 	approved_permissions: string
-}): string => {
-	return `Evaluate this operation:
+}) => `
+Evaluate this operation:
 
 ## Operation Details
 - Tool: ${args.tool}
@@ -175,4 +175,3 @@ If YES → approve: true
 If NO or SUSPICIOUS → approve: false
 
 Remember: Only deny operations that are malicious, don't serve the user's intent, or are dangerous.`
-}

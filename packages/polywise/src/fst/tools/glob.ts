@@ -2,16 +2,16 @@ import { tool } from 'ai'
 import { globby } from 'globby'
 import { array, object, string } from 'zod'
 
-import { checkPermission, requestApproval } from '../session/permission'
+import { approve, check } from '../agents'
 
-import type Index from '../session'
+import type Session from '../session'
 
 const inputSchema = object({
 	patterns: array(string()).describe('Glob patterns to match files against'),
 	cwd: string().optional().describe('Working directory to resolve patterns from')
 })
 
-export const createGlobTool = (s: Index) => {
+export const createGlobTool = (s: Session) => {
 	return tool({
 		description: 'Search for files matching glob patterns. Use to find files by name or pattern.',
 		inputSchema,
@@ -19,10 +19,10 @@ export const createGlobTool = (s: Index) => {
 			const paths = extractPaths(input, s.cwd)
 
 			for (const path of paths) {
-				const result = checkPermission(s, 'glob', 'read', path)
+				const result = check(s, 'glob', 'read', path)
 
 				if (result === 'needs_approval') {
-					const approved = await requestApproval(s, 'glob', 'read', path)
+					const approved = await approve(s, 'glob', 'read', path)
 
 					if (!approved) {
 						throw new Error(`Permission denied: glob read ${path}`)

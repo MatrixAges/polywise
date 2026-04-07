@@ -1,5 +1,6 @@
 import { getShadowContext } from '@core/consts/prompt'
 import fst_system_prompt from '@core/consts/prompts/fst_system_prompt.md'
+import { createSystemTool } from '@core/fst/agents'
 import { convertToModelMessages, smoothStream, stepCountIs, streamText } from 'ai'
 import { getId } from 'stk/utils'
 
@@ -9,8 +10,7 @@ import {
 	createGlobTool,
 	createMessageTool,
 	createQuestionTool,
-	createSearchFileTool,
-	createSystemTool
+	createSearchFileTool
 } from '../../tools'
 
 import type { Message, MessageMetadata } from '../../types'

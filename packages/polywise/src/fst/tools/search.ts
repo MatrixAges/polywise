@@ -1,11 +1,11 @@
 import { tool } from 'ai'
 import { array, number, object, string } from 'zod'
 
-import { checkPermission, requestApproval } from '../session/permission'
+import { approve, check } from '../agents'
 import { escapeShellArg } from '../utils/safeshell'
 
 import type { Bash } from 'just-bash'
-import type Index from '../session'
+import type Session from '../session'
 
 const inputSchema = object({
 	keyword: string().describe('Keyword to search for in file contents'),
@@ -16,7 +16,7 @@ const inputSchema = object({
 
 const MAX_LINE_LENGTH = 80
 
-export const createSearchFileTool = (s: Index, bash: Bash) => {
+export const createSearchFileTool = (s: Session, bash: Bash) => {
 	return tool({
 		description:
 			'Search for keyword in file contents. Returns matching files with line numbers and snippets. Use for code/text content search.',
@@ -25,10 +25,10 @@ export const createSearchFileTool = (s: Index, bash: Bash) => {
 			const search_paths = input.paths ?? ['/']
 			const max_results = input.max_results ?? 30
 
-			const result = checkPermission(s, 'bash', 'execute', `search ${input.keyword}`)
+			const result = check(s, 'bash', 'execute', `search ${input.keyword}`)
 
 			if (result === 'needs_approval') {
-				const approved = await requestApproval(s, 'bash', 'execute', `search ${input.keyword}`)
+				const approved = await approve(s, 'bash', 'execute', `search ${input.keyword}`)
 
 				if (!approved) {
 					return { keyword: input.keyword, matches: [], count: 0, error: 'Permission denied' }

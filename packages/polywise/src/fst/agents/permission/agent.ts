@@ -4,9 +4,7 @@ import { boolean, infer as Infer, object } from 'zod'
 
 import type { LanguageModel } from 'ai'
 
-const schema = object({
-	approve: boolean().describe('Whether to automatically approve the operation')
-})
+const schema = object({ approve: boolean().describe('Whether to automatically approve the operation') })
 
 export type PermissionAgentOutput = Infer<typeof schema>
 

@@ -1,7 +1,7 @@
 import { readFile, writeFile } from 'atomically'
 import { createBashTool } from 'bash-tool'
 
-import { checkPermission, requestApproval } from '../session/permission'
+import { approve, check } from '../agents'
 import getBashResponse from './getBashResponse'
 import getRealPath from './getRealPath'
 import { detectShellInjectionRisk } from './safeshell'
@@ -18,17 +18,17 @@ export default async (s: Index, bash: Bash, system?: boolean) => {
 				const real_path = getRealPath(s.cwd, virtual_path)
 
 				if (!system) {
-					const result = checkPermission(s, 'file', 'read', real_path)
+					const result = check(s, 'file', 'read', real_path)
 
 					if (result === 'needs_approval') {
-						const approved = await requestApproval(s, 'file', 'read', real_path)
+						const approved = await approve(s, 'file', 'read', real_path)
 
 						if (!approved) {
 							throw new Error(`Permission denied: file read ${real_path}`)
 						}
 					}
 				} else {
-					const approved = await requestApproval(s, 'file', 'read', real_path)
+					const approved = await approve(s, 'file', 'read', real_path)
 
 					if (!approved) {
 						throw new Error(`Permission denied: file read ${real_path}`)
@@ -36,12 +36,7 @@ export default async (s: Index, bash: Bash, system?: boolean) => {
 				}
 
 				if (detectShellInjectionRisk(virtual_path)) {
-					const approved = await requestApproval(
-						s,
-						'bash',
-						'execute',
-						`readFile (RISKY!): ${virtual_path}`
-					)
+					const approved = await approve(s, 'bash', 'execute', `readFile (RISKY!): ${virtual_path}`)
 
 					if (!approved) {
 						throw new Error(`Shell injection risk detected in path: ${virtual_path}`)
@@ -55,17 +50,17 @@ export default async (s: Index, bash: Bash, system?: boolean) => {
 					const real_path = getRealPath(s.cwd, file.path)
 
 					if (!system) {
-						const result = checkPermission(s, 'file', 'write', real_path)
+						const result = check(s, 'file', 'write', real_path)
 
 						if (result === 'needs_approval') {
-							const approved = await requestApproval(s, 'file', 'write', real_path)
+							const approved = await approve(s, 'file', 'write', real_path)
 
 							if (!approved) {
 								throw new Error(`Permission denied: file write ${real_path}`)
 							}
 						}
 					} else {
-						const approved = await requestApproval(s, 'file', 'write', real_path)
+						const approved = await approve(s, 'file', 'write', real_path)
 
 						if (!approved) {
 							throw new Error(`Permission denied: file write ${real_path}`)
@@ -75,7 +70,7 @@ export default async (s: Index, bash: Bash, system?: boolean) => {
 
 				for (const file of files) {
 					if (detectShellInjectionRisk(file.path)) {
-						const approved = await requestApproval(
+						const approved = await approve(
 							s,
 							'bash',
 							'execute',
@@ -102,17 +97,17 @@ export default async (s: Index, bash: Bash, system?: boolean) => {
 				const cleanCommand = command.replace(/^cd\s+"[^"]+"\s+&&\s+/, '')
 
 				if (!system) {
-					const result = checkPermission(s, 'bash', 'execute', cleanCommand)
+					const result = check(s, 'bash', 'execute', cleanCommand)
 
 					if (result === 'needs_approval') {
-						const approved = await requestApproval(s, 'bash', 'execute', cleanCommand)
+						const approved = await approve(s, 'bash', 'execute', cleanCommand)
 
 						if (!approved) {
 							return { stdout: '', stderr: 'Permission denied', exitCode: 1 }
 						}
 					}
 				} else {
-					const approved = await requestApproval(s, 'bash', 'execute', cleanCommand)
+					const approved = await approve(s, 'bash', 'execute', cleanCommand)
 
 					if (!approved) {
 						return { stdout: '', stderr: 'Permission denied', exitCode: 1 }
@@ -120,12 +115,7 @@ export default async (s: Index, bash: Bash, system?: boolean) => {
 				}
 
 				if (detectShellInjectionRisk(cleanCommand)) {
-					const approved = await requestApproval(
-						s,
-						'bash',
-						'execute',
-						`command (RISKY!): ${cleanCommand}`
-					)
+					const approved = await approve(s, 'bash', 'execute', `command (RISKY!): ${cleanCommand}`)
 
 					if (!approved) {
 						return { stdout: '', stderr: 'Shell injection risk detected', exitCode: 1 }

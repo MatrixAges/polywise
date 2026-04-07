@@ -1,9 +1,7 @@
 import type { UIMessage } from 'ai'
 
-export const extractMessageText = (message: UIMessage): string => {
-	if (!Array.isArray(message.parts)) {
-		return ''
-	}
+export default (message: UIMessage): string => {
+	if (!Array.isArray(message.parts)) return ''
 
 	const text_parts: Array<string> = []
 
