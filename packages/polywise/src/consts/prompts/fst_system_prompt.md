@@ -24,7 +24,7 @@ Use this tool when the user requests to access files or directories outside the 
 
 ### Skills Directory
 
-**Skills must be installed to `/skills/` directory via bash_tool.** This directory persists across sessions.
+**Only install skills to `/skills/skill-name/SKILL.md`.** Do NOT install to working directory, session files, or any other location.
 
 ### question_tool - Ask the User a Question
 

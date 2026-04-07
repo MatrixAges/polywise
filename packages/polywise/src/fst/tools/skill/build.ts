@@ -1,57 +1,42 @@
 import path from 'path'
 import { readFile } from 'atomically'
 import fs from 'fs-extra'
-import { globby } from 'globby'
 
 import extractHeadings from './headings'
 import parseFrontmatter from './meta'
 
 import type { SkillMeta } from '../../types'
 
-export default async (cwd: string): Promise<Array<SkillMeta>> => {
-	const dirs = await globby('**/skills', {
-		cwd,
-		onlyDirectories: true,
-		absolute: true,
-		gitignore: false,
-		dot: true
-	})
-
+export default async (dir: string) => {
 	const map: Array<SkillMeta> = []
 
-	for (const skills_dir of dirs) {
+	const entries = await fs.readdir(dir, { withFileTypes: true })
+
+	for (const entry of entries) {
+		if (!entry.isDirectory()) continue
+
+		const skill_md_path = path.resolve(dir, entry.name, 'SKILL.md')
+
 		try {
-			const entries = await fs.readdir(skills_dir, { withFileTypes: true })
+			const content = await readFile(skill_md_path, 'utf8')
+			const meta = parseFrontmatter(content)
 
-			for (const entry of entries) {
-				if (!entry.isDirectory()) continue
+			if (meta) {
+				map.push({
+					name: meta.name,
+					description: meta.description,
+					path: skill_md_path,
+					dir: path.resolve(dir, entry.name)
+				})
+			} else {
+				const heading_text = extractHeadings(content)
 
-				const skill_md_path = path.resolve(skills_dir, entry.name, 'SKILL.md')
-
-				try {
-					const content = await readFile(skill_md_path, 'utf8')
-					const meta = parseFrontmatter(content)
-
-					if (meta) {
-						map.push({
-							name: meta.name,
-							description: meta.description,
-							path: skill_md_path,
-							dir: path.resolve(skills_dir, entry.name)
-						})
-					} else {
-						const heading_text = extractHeadings(content)
-
-						map.push({
-							name: entry.name,
-							description: heading_text,
-							path: skill_md_path,
-							dir: path.resolve(skills_dir, entry.name)
-						})
-					}
-				} catch {
-					continue
-				}
+				map.push({
+					name: entry.name,
+					description: heading_text,
+					path: skill_md_path,
+					dir: path.resolve(dir, entry.name)
+				})
 			}
 		} catch {
 			continue

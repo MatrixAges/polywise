@@ -10,11 +10,15 @@ import type { Bash } from 'just-bash'
 import type Index from '../session'
 
 export default async (s: Index, bash: Bash, system?: boolean) => {
+	const path_mappings: Record<string, string> = {
+		'/skills': s.skills_dir
+	}
+
 	const { tools } = await createBashTool({
 		destination: '/',
 		sandbox: {
 			async readFile(virtual_path) {
-				const real_path = getRealPath(s.cwd, virtual_path)
+				const real_path = getRealPath(s.cwd, virtual_path, path_mappings)
 
 				const perm_error = await checkPermission(s, 'file', 'read', real_path, virtual_path, system)
 
@@ -26,7 +30,7 @@ export default async (s: Index, bash: Bash, system?: boolean) => {
 			},
 			async writeFiles(files) {
 				for (const file of files) {
-					const real_path = getRealPath(s.cwd, file.path)
+					const real_path = getRealPath(s.cwd, file.path, path_mappings)
 
 					const perm_error = await checkPermission(s, 'file', 'write', real_path, file.path, system)
 
@@ -36,7 +40,7 @@ export default async (s: Index, bash: Bash, system?: boolean) => {
 				}
 
 				for (const file of files) {
-					await writeFile(getRealPath(s.cwd, file.path), file.content)
+					await writeFile(getRealPath(s.cwd, file.path, path_mappings), file.content)
 				}
 			},
 			async executeCommand(command) {

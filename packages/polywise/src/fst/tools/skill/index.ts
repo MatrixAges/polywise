@@ -99,7 +99,7 @@ export const createSkillTool = (s: Session) => {
 			}
 
 			if (input.action === 'build') {
-				s.skill_map = await buildSkillMap(s.cwd)
+				s.skill_map = await buildSkillMap(s.skills_dir)
 
 				return {
 					action: 'build',
