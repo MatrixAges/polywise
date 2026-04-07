@@ -1,6 +1,6 @@
 import { resolve } from 'path'
 import { readFile } from 'atomically'
-import { readdir } from 'fs-extra'
+import fs from 'fs-extra'
 import { globby } from 'globby'
 
 import extractHeadings from './headings'
@@ -21,7 +21,7 @@ export default async (cwd: string): Promise<Array<SkillMeta>> => {
 
 	for (const skills_dir of dirs) {
 		try {
-			const entries = await readdir(skills_dir, { withFileTypes: true })
+			const entries = await fs.readdir(skills_dir, { withFileTypes: true })
 
 			for (const entry of entries) {
 				if (!entry.isDirectory()) continue
