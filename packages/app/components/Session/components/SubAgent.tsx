@@ -39,23 +39,12 @@ const Index = (props: IPropsSubAgent) => {
 			{mounted && open && (
 				<div
 					className='
-						relative
 						w-full
 						p-3 pt-2.5
 						rounded-2xl
 						border border-border-solid border-dashed
 					'
 				>
-					{/* <div
-						className='
-							absolute
-							top-0
-							left-1.5
-							flex
-							w-px h-full
-							bg-border-light
-						'
-					></div> */}
 					<Message
 						streaming={streaming}
 						message={part.output as MessageType}
