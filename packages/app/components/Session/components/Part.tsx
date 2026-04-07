@@ -4,12 +4,13 @@ import { MessageResponse } from '@/__shadcn__/components/ai-elements'
 import { Reasoning, ReasoningContent, ReasoningTrigger } from '@/__shadcn__/components/ai-elements/reasoning'
 import { Tool, ToolContent, ToolHeader, ToolInput, ToolOutput } from '@/__shadcn__/components/ai-elements/tool'
 
+import Edit from './Edit'
 import Question from './Question'
 import SubAgent from './SubAgent'
 
-import type { QuestionInput } from '@core/fst/tools'
+import type { EditResult, QuestionInput } from '@core/fst/tools'
 import type { DynamicToolUIPart, ToolUIPart } from 'ai'
-import type { IPropsPart } from '../types'
+import type { EditFileInput, IPropsPart } from '../types'
 
 const Index = (props: IPropsPart) => {
 	const { streaming, metadata, part, answer } = props
@@ -71,6 +72,17 @@ const Index = (props: IPropsPart) => {
 
 		if (tool_part.type === 'tool-system_tool' && tool_part.input && tool_part.output) {
 			return <SubAgent streaming={streaming} part={tool_part} answer={answer}></SubAgent>
+		}
+
+		if (tool_part.type === 'tool-edit_file_tool' && tool_part.input) {
+			return (
+				<Edit
+					streaming={streaming}
+					input={tool_part.input as EditFileInput}
+					output={tool_part.output as EditResult | undefined}
+					answer={answer}
+				/>
+			)
 		}
 
 		return (
