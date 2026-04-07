@@ -10,6 +10,9 @@ export default async (s: Session) => {
 
 	sandboxEnv.PATH = `/bin:/usr/bin:${sandboxEnv.PATH || ''}`
 
+	console.log('------------')
+	console.log(sandboxEnv)
+
 	const bash = new Bash({ cwd: '/', fs, env: sandboxEnv })
 
 	const tools = await getBashTools(s, bash, true)

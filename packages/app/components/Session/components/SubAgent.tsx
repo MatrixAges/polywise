@@ -20,7 +20,7 @@ const Index = (props: IPropsSubAgent) => {
 	const name = useMemo(() => getToolName(part.type), [part.type])
 
 	return (
-		<div className='mb-1 flex flex-col gap-3'>
+		<div className='flex flex-col gap-3'>
 			<div
 				className='
 					flex
@@ -41,8 +41,8 @@ const Index = (props: IPropsSubAgent) => {
 					className='
 						w-full
 						p-3 pt-2.5
-						rounded-2xl
-						border border-border-solid border-dashed
+						rounded-xl
+						border border-border-gray border-dashed
 					'
 				>
 					<Message
