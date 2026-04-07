@@ -7,6 +7,7 @@ import { array, object, string } from 'zod'
 
 import { checkPermissions, getRealPath } from '../../utils'
 import apply from './apply'
+import count from './count'
 import error from './error'
 import getLang from './getLang'
 
@@ -73,13 +74,17 @@ export const createEditFileTool = (s: Session) => {
 					{ context: CONTEXT_LINES }
 				)
 
+				const { add_lines, remove_lines } = count(patch)
+
 				return {
 					status: 'success' as const,
 					file_path,
 					file_name,
 					lang: getLang(file_path),
 					patch,
-					edit_count
+					edit_count,
+					add_lines,
+					remove_lines
 				}
 			} catch (err) {
 				return error(file_path, edit_count, (err as Error).message)

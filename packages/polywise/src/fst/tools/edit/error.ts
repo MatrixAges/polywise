@@ -9,5 +9,7 @@ export default (file_path: string, edit_count: number, message: string) => ({
 	file_name: file_path ? basename(file_path) : '',
 	lang: file_path ? getLangFromExt(file_path) : 'text',
 	patch: '',
-	edit_count
+	edit_count,
+	add_lines: 0,
+	remove_lines: 0
 })

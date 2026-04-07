@@ -12,4 +12,6 @@ export interface EditResult {
 	lang: string
 	patch: string
 	edit_count: number
+	add_lines: number
+	remove_lines: number
 }
