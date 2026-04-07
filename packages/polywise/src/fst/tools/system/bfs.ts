@@ -1,9 +1,13 @@
 import fs from 'fs'
 import { InMemoryFs, MountableFs, ReadWriteFs } from 'just-bash'
 
-import { SYSTEM_MOUNT_PATHS } from './consts'
+const SYSTEM_MOUNT_PATHS: Record<string, string[]> = {
+	darwin: ['/Users', '/Applications', '/Volumes', '/usr/local', '/opt', '/tmp'],
+	linux: ['/home', '/var', '/opt', '/mnt', '/media', '/tmp'],
+	win32: ['C:\\Users', 'C:\\ProgramData']
+}
 
-export const getRootMounts = () => {
+const getRootMounts = () => {
 	const platform = process.platform
 	const paths = SYSTEM_MOUNT_PATHS[platform] || SYSTEM_MOUNT_PATHS.linux
 	const mounts: { mountPoint: string; filesystem: any }[] = []
@@ -31,7 +35,7 @@ export const getRootMounts = () => {
 	return mounts
 }
 
-export const bfs = new MountableFs({
+export default new MountableFs({
 	base: new InMemoryFs(),
 	mounts: getRootMounts()
 })

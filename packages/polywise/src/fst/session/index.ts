@@ -23,10 +23,11 @@ export default class Index {
 
 	agents = [] as Array<Agent>
 	project = null as Project | null
-	cwd = ''
 	model_messages = [] as Array<Message>
 	context = {} as Context
+	cwd = ''
 	prefill = ''
+
 	permission = null as Permission | null
 	permissions = [] as Permissions
 

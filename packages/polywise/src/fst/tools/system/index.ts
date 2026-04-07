@@ -3,7 +3,7 @@ import { readUIMessageStream, stepCountIs, tool, ToolLoopAgent } from 'ai'
 import { getId } from 'stk/utils'
 import { object, string } from 'zod'
 
-import { createSystemBashTool } from './bash'
+import createSystemBashTool from './createSystemBashTool'
 
 import type Index from '../../session'
 
@@ -41,5 +41,3 @@ export const createSystemTool = (s: Index) => {
 		}
 	})
 }
-
-export default createSystemTool

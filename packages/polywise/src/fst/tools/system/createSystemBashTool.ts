@@ -3,15 +3,14 @@ import { createBashTool as BashTool } from 'bash-tool'
 import { Bash } from 'just-bash'
 
 import { requestApproval } from '../../session/permission'
-import getBashResponse from '../../utils/getBashResponse'
-import { detectShellInjectionRisk } from '../../utils/safeshell'
-import { bfs } from './mounts'
-import { hasReadPermission } from './permissions'
+import { detectShellInjectionRisk, getBashResponse } from '../../utils'
+import bfs from './bfs'
+import hasReadPermission from './hasReadPermission'
 
 import type { Sandbox } from 'bash-tool'
 import type Index from '../../session'
 
-export const createSystemBashTool = async (s: Index) => {
+export default async (s: Index) => {
 	const sandboxEnv = { ...process.env } as Record<string, string>
 
 	sandboxEnv.PATH = `/bin:/usr/bin:${sandboxEnv.PATH || ''}`

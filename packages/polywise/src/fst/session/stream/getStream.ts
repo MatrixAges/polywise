@@ -6,7 +6,6 @@ import { getId } from 'stk/utils'
 import {
 	createBashTool,
 	createContextTool,
-	createCwdTool,
 	createGlobTool,
 	createMessageTool,
 	createQuestionTool,
@@ -53,7 +52,6 @@ export default async (s: Index, message: Message) => {
 			context_tool: createContextTool(s),
 			message_tool: createMessageTool(s.id, s.model_messages),
 			question_tool: createQuestionTool(s.id),
-			cwd_tool: createCwdTool(s),
 			glob_tool: createGlobTool(s),
 			search_file_tool: createSearchFileTool(s, bash_tool.env),
 			system_tool: createSystemTool(s),

@@ -13,11 +13,9 @@ const DANGEROUS_COMMANDS = [
 	'cp'
 ]
 
-const DANGEROUS_COMMANDS_PATTERN = DANGEROUS_COMMANDS.map(cmd => `\\b${cmd}\\b`).join('|')
-
 const SHELL_INJECTION_RISK_PATTERN = new RegExp(
 	[
-		DANGEROUS_COMMANDS_PATTERN,
+		DANGEROUS_COMMANDS.map(cmd => `\\b${cmd}\\b`).join('|'),
 		'[>]{1,2}',
 		'[<]{1,2}',
 		';',
