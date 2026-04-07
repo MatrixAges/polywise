@@ -1,5 +1,3 @@
-import path from 'path'
-import { app } from '@core/consts'
 import { Bash, MountableFs, ReadWriteFs } from 'just-bash'
 
 import { getBashTools } from '../utils'
