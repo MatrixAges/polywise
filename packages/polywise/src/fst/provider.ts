@@ -40,7 +40,7 @@ export const getModel = async (provider: string, model: string, options?: any): 
 				tools: { googleSearch: google.tools.googleSearch({}) }
 			})
 
-			const search_tool = tool({
+			const google_search_tool = tool({
 				description: 'Search using google search for user query if possible.',
 				inputSchema: object({
 					query: string().describe('The search content')
@@ -63,8 +63,8 @@ export const getModel = async (provider: string, model: string, options?: any): 
 				model: target_model,
 				provider_options: {
 					google: { thinkingConfig: { includeThoughts: true } } satisfies GoogleLanguageModelOptions
-				},
-				tools: { search_tool }
+				}
+				// tools: { google_search_tool }
 			}
 		}
 		case 'openai':

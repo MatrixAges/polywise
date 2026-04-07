@@ -62,8 +62,8 @@ export default async (s: Index, message: Message) => {
 			read_file_tool: bash_tool.readFile,
 			write_file_tool: bash_tool.writeFile,
 			edit_file_tool: createEditFileTool(s),
-			web_search_tool: createEditFileTool(s),
-			web_fetch_tool: createEditFileTool(s)
+			web_search_tool: createWebSearchTool(),
+			web_fetch_tool: createWebFetchTool()
 		},
 		abortSignal: s.abort_controller.signal,
 		providerOptions: s.model.provider_options,
