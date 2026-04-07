@@ -25,9 +25,22 @@
 
 	ul,
 	ol {
+		@apply pl-1;
+
+		li {
+			ul,
+			ol {
+				@apply pl-5;
+			}
+		}
+
 		input[type='checkbox'] {
 			translate: 0 2px;
 			margin-right: 1px;
+		}
+
+		::marker {
+			@apply text-std-300;
 		}
 	}
 
