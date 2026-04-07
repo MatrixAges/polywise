@@ -27,6 +27,7 @@
 		"@formatjs/intl-localematcher": "^0.8.2",
 		"@lobehub/icons-static-svg": "^1.82.0",
 		"@phosphor-icons/react": "^2.1.10",
+		"@pierre/diffs": "^1.1.12",
 		"@platejs/basic-nodes": "^52.0.11",
 		"@radix-ui/react-toolbar": "^1.1.11",
 		"@radix-ui/react-tooltip": "^1.2.8",
