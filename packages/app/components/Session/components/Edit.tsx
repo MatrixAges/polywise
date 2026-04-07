@@ -10,7 +10,7 @@ import type { IPropsEdit } from '../types'
 
 const Index = (props: IPropsEdit) => {
 	const { streaming, output } = props
-	const { status, file_name, file_path, patch, message } = output
+	const { status, file_name, file_path, patch, message, add_lines, remove_lines } = output
 
 	const global = useGlobal()
 	const [open, { toggle, set }] = useToggle(false)
@@ -51,17 +51,19 @@ const Index = (props: IPropsEdit) => {
 					<PencilLine className='text-std-400 size-3'></PencilLine>
 					<span className='group-data-[open=true]:font-medium'>edit_file_tool</span>
 				</div>
-				<div className='flex items-center gap-2'>
-					<span className='text-std-400 text-xs'>{file_name}</span>
-					{open && (
-						<ChevronDown
-							className='
-								size-4
-								text-std-400
-								transition-transform
-							'
-						/>
-					)}
+				<div
+					className='
+						flex
+						items-center
+						gap-2
+						text-std-400 text-xs
+					'
+				>
+					<span>{file_name}</span>
+					<span>
+						+{add_lines}/-{remove_lines}
+					</span>
+					{open && <ChevronDown className='size-4' />}
 				</div>
 			</div>
 			{open && (

@@ -74,15 +74,8 @@ const Index = (props: IPropsPart) => {
 			return <SubAgent streaming={streaming} part={tool_part} answer={answer}></SubAgent>
 		}
 
-		if (tool_part.type === 'tool-edit_file_tool' && tool_part.input) {
-			return (
-				<Edit
-					streaming={streaming}
-					input={tool_part.input as EditFileInput}
-					output={tool_part.output as EditResult | undefined}
-					answer={answer}
-				/>
-			)
+		if (tool_part.type === 'tool-edit_file_tool' && tool_part.output) {
+			return <Edit streaming={streaming} output={tool_part.output as EditResult} />
 		}
 
 		return (

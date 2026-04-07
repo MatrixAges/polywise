@@ -37,7 +37,6 @@ export interface EditFileInput {
 	}>
 }
 
-export interface IPropsEdit extends Pick<IPropsPart, 'streaming' | 'answer'> {
-	input: EditFileInput
+export interface IPropsEdit extends Pick<IPropsPart, 'streaming'> {
 	output: EditResult
 }
