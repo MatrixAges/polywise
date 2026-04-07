@@ -1,14 +1,13 @@
-import { app } from '@core/consts'
 import { Bash, MountableFs, ReadWriteFs } from 'just-bash'
 
 import { getBashTools } from '../utils'
 
-import type Index from '../session'
+import type Session from '../session'
 
-export const createBashTool = async (s: Index) => {
+export const createBashTool = async (s: Session) => {
 	const fs = new MountableFs({
 		base: new ReadWriteFs({ root: s.cwd }),
-		mounts: [{ mountPoint: app.app_path, filesystem: new ReadWriteFs({ root: app.app_path }) }]
+		mounts: [{ mountPoint: '/skills', filesystem: new ReadWriteFs({ root: s.skills_dir }) }]
 	})
 
 	const bash = new Bash({
