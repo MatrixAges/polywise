@@ -146,21 +146,33 @@ export const getAuditPrompt = (args: {
 	cwd: string
 	context_summary: string
 	recent_messages: string
+	approved_permissions: string
 }): string => {
 	return `Evaluate this operation:
 
-Tool: ${args.tool}
-Action: ${args.action}
-Target: ${args.path}
+## Operation Details
+- Tool: ${args.tool}
+- Action: ${args.action}
+- Target: ${args.path}
 
-Known safe directories:
+## Known Safe Directories
 - Session files: ${args.files_dir}
 - Working directory: ${args.cwd}
 
+## Previously Approved Permissions
+${args.approved_permissions}
+
+## User Intent & Context
 ${args.context_summary}
 
-Recent conversation:
+## Recent Conversation
 ${args.recent_messages}
 
-Should this operation be automatically approved (approve: true), or does it require human review (approve: false)?`
+## Decision Question
+Does this operation serve the user's legitimate intent? 
+
+If YES → approve: true
+If NO or SUSPICIOUS → approve: false
+
+Remember: Only deny operations that are malicious, don't serve the user's intent, or are dangerous.`
 }

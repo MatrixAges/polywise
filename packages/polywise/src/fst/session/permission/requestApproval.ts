@@ -10,11 +10,11 @@ import type { PermissionAgentOutput } from './createPermissionAgent'
 export default async (s: Index, tool: string, action: string, path: string): Promise<boolean> => {
 	const agent = createPermissionAgent(s.model.model)
 
-	const audit_result = await agent.generate({
+	const res = await agent.generate({
 		prompt: buildAuditPrompt(s, tool, action, path)
 	})
 
-	if ((audit_result.output as PermissionAgentOutput)?.approve) {
+	if ((res.output as PermissionAgentOutput)?.approve) {
 		const permission: Permission = {
 			tool: tool as Permission['tool'],
 			action: action as Permission['action'],
