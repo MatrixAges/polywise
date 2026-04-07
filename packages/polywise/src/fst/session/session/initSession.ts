@@ -18,8 +18,6 @@ export default async (s: Index) => {
 
 	if (res_exsit) {
 		res = res_exsit
-
-		await fs.ensureDir(`${process.cwd()}/${s.id}`)
 	} else {
 		const [res_insert] = await env.db
 			.insert(session)
