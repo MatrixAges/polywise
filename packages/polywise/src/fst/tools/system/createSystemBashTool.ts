@@ -75,6 +75,12 @@ export default async (s: Index) => {
 				}
 			},
 			async executeCommand(command) {
+				if (command === 'ls /usr/bin /usr/local/bin /bin /sbin /usr/sbin 2>/dev/null') {
+					const res = await bash.exec(command, { cwd: '/' })
+
+					return getBashResponse(res)
+				}
+
 				const is_risky = detectShellInjectionRisk(command)
 				const approval_path = is_risky ? `command (risky): ${command}` : command
 				const approved = await requestApproval(s, 'bash', 'execute', approval_path)
