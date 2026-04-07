@@ -34,7 +34,12 @@ This document provides an overview of the packages/polywise module structure and
 			"fst": {
 				"index.ts": { "desc": "fst module exports", "role": "Index" },
 				"chat": { "desc": "Chat capabilities using AI SDK, supporting UIMessages", "role": "Folder" },
-				"tools": { "desc": "Bash sandboxing tools via bash-tool", "role": "Folder" },
+				"tools": {
+					"desc": "Bash sandboxing tools via bash-tool",
+					"role": "Folder",
+					"webfetch.ts": "Fetch URL content as Markdown (Jina primary, fetch+turndown fallback)",
+					"websearch.ts": "Web search via DuckDuckGo HTML → turndown Markdown"
+				},
 				"mcp": { "desc": "MCP client tools integration", "role": "Folder" },
 				"acp": { "desc": "ACP provider integration", "role": "Folder" }
 			},

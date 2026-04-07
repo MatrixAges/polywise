@@ -11,7 +11,9 @@ import {
 	createGlobTool,
 	createMessageTool,
 	createQuestionTool,
-	createSearchFileTool
+	createSearchFileTool,
+	createWebFetchTool,
+	createWebSearchTool
 } from '../../tools'
 
 import type { Message, MessageMetadata } from '../../types'
@@ -59,7 +61,9 @@ export default async (s: Index, message: Message) => {
 			bash_tool: bash_tool.bash,
 			read_file_tool: bash_tool.readFile,
 			write_file_tool: bash_tool.writeFile,
-			edit_file_tool: createEditFileTool(s)
+			edit_file_tool: createEditFileTool(s),
+			web_search_tool: createEditFileTool(s),
+			web_fetch_tool: createEditFileTool(s)
 		},
 		abortSignal: s.abort_controller.signal,
 		providerOptions: s.model.provider_options,
