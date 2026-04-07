@@ -1,35 +1,53 @@
-import { useEffect, useMemo, useState } from 'react'
-import { MultiFileDiff } from '@pierre/diffs/react'
+import { useEffect, useState } from 'react'
+import { PatchDiff } from '@pierre/diffs/react'
 import { useToggle } from 'ahooks'
 import { CheckCircle, ChevronDown, ChevronRight, FileEdit, XCircle } from 'lucide-react'
 
 import { Badge } from '@/__shadcn__/components/ui/badge'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/__shadcn__/components/ui/collapsible'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/__shadcn__/components/ui/tabs'
+import { Tabs, TabsList, TabsTrigger } from '@/__shadcn__/components/ui/tabs'
 
 import type { IPropsEdit } from '../types'
 
 const Index = (props: IPropsEdit) => {
-	const { streaming, input, output } = props
+	const { streaming, output } = props
 	const [open, { toggle, set }] = useToggle(false)
 	const [view_mode, setViewMode] = useState<'unified' | 'split'>('unified')
+	const [theme, setTheme] = useState<'light' | 'dark'>('light')
 
 	useEffect(() => set(streaming), [streaming])
 
-	const is_error = useMemo(() => output?.status === 'error', [output?.status])
-	const edits = useMemo(() => output?.edits ?? [], [output?.edits])
+	useEffect(() => {
+		const detectTheme = () => {
+			const dataTheme = document.documentElement.getAttribute('data-theme')
+			setTheme(dataTheme === 'dark' ? 'dark' : 'light')
+		}
+
+		detectTheme()
+
+		const observer = new MutationObserver(detectTheme)
+		observer.observe(document.documentElement, {
+			attributes: true,
+			attributeFilter: ['data-theme']
+		})
+
+		return () => observer.disconnect()
+	}, [])
+
+	const is_error = output?.status === 'error'
+	const has_patch = output?.patch && output.patch.length > 0
 
 	return (
 		<Collapsible open={open} onOpenChange={toggle}>
 			<div
 				className={$cx(
-					'
+					`
 					flex flex-col
 					gap-2
 					mb-1
 					rounded-md
 					bg-secondary
-				',
+				`,
 					!streaming && 'cursor-pointer'
 				)}
 			>
@@ -45,9 +63,14 @@ const Index = (props: IPropsEdit) => {
 					<div className='flex flex-1 items-center gap-2'>
 						<FileEdit className='text-std-400 size-4' />
 						<span className='font-medium'>edit_file_tool</span>
-						{edits.length > 0 && (
+						{output?.file_path && (
+							<span className='text-muted-foreground font-mono text-xs'>
+								{output.file_path}
+							</span>
+						)}
+						{output && output.edit_count > 1 && (
 							<Badge variant='secondary' className='text-xs'>
-								{edits.length} {edits.length === 1 ? 'edit' : 'edits'}
+								{output.edit_count} edits
 							</Badge>
 						)}
 						{output && (
@@ -98,9 +121,9 @@ const Index = (props: IPropsEdit) => {
 							</div>
 						)}
 
-						{!is_error && edits.length > 0 && (
+						{!is_error && has_patch && (
 							<div className='flex flex-col gap-4'>
-								{edits.length > 1 && (
+								<div className='flex justify-end'>
 									<Tabs
 										value={view_mode}
 										onValueChange={v => setViewMode(v as 'unified' | 'split')}
@@ -120,91 +143,33 @@ const Index = (props: IPropsEdit) => {
 											</TabsTrigger>
 										</TabsList>
 									</Tabs>
-								)}
+								</div>
 
-								{edits.length === 1 && (
-									<div className='flex justify-end'>
-										<Tabs
-											value={view_mode}
-											onValueChange={v =>
-												setViewMode(v as 'unified' | 'split')
-											}
-										>
-											<TabsList className='h-8'>
-												<TabsTrigger
-													value='unified'
-													className='px-3 py-1 text-xs'
-												>
-													Unified
-												</TabsTrigger>
-												<TabsTrigger
-													value='split'
-													className='px-3 py-1 text-xs'
-												>
-													Split
-												</TabsTrigger>
-											</TabsList>
-										</Tabs>
-									</div>
-								)}
-
-								{edits.map((edit, index) => (
-									<div key={index} className='flex flex-col gap-2'>
-										{edits.length > 1 && (
-											<div
-												className='
-													flex
-													items-center
-													gap-2
-													text-xs text-muted-foreground
-												'
-											>
-												<span className='font-medium'>
-													Edit {index + 1}
-												</span>
-												<span className='text-std-400'>•</span>
-												<span className='font-mono'>
-													{edit.file_path}
-												</span>
-											</div>
-										)}
-
-										<div className='border-border overflow-hidden rounded-md border'>
-											<MultiFileDiff
-												oldFile={{
-													name: edit.file_name,
-													contents: edit.old_content,
-													lang: edit.lang
-												}}
-												newFile={{
-													name: edit.file_name,
-													contents: edit.new_content,
-													lang: edit.lang
-												}}
-												options={{
-													diffStyle: view_mode,
-													theme: {
-														dark: 'github-dark',
-														light: 'github-light'
-													},
-													themeType: 'system',
-													diffIndicators: 'bars',
-													lineDiffType: 'word-alt',
-													disableLineNumbers: false,
-													overflow: 'scroll',
-													hunkSeparators: 'line-info',
-													expandUnchanged: true,
-													collapsedContextThreshold: 3
-												}}
-											/>
-										</div>
-									</div>
-								))}
+								<div className='border-border overflow-hidden rounded-md border'>
+									<PatchDiff
+										patch={output!.patch}
+										options={{
+											diffStyle: view_mode,
+											theme: {
+												dark: 'github-dark',
+												light: 'github-light'
+											},
+											themeType: theme,
+											diffIndicators: 'bars',
+											lineDiffType: 'word-alt',
+											disableLineNumbers: false,
+											overflow: 'scroll',
+											hunkSeparators: 'line-info',
+											expandUnchanged: true,
+											collapsedContextThreshold: 3
+										}}
+									/>
+								</div>
 							</div>
 						)}
 
-						{!is_error && edits.length === 0 && !streaming && (
-							<div className='text-muted-foreground text-sm'>No edits performed</div>
+						{!is_error && !has_patch && !streaming && (
+							<div className='text-muted-foreground text-sm'>No changes</div>
 						)}
 					</div>
 				</CollapsibleContent>

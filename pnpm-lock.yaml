@@ -724,6 +724,9 @@ importers:
       '@trpc/server':
         specifier: 'catalog:'
         version: 11.15.0(typescript@5.9.3)
+      '@types/diff':
+        specifier: ^8.0.0
+        version: 8.0.0
       a2a-ai-provider:
         specifier: 0.4.0-alpha.2
         version: 0.4.0-alpha.2(ai@6.0.143(zod@4.3.6))(express@5.2.1)
@@ -757,6 +760,9 @@ importers:
       dayjs:
         specifier: 'catalog:'
         version: 1.11.20
+      diff:
+        specifier: ^8.0.4
+        version: 8.0.4
       drizzle-kit:
         specifier: 1.0.0-beta.19-dca1773
         version: 1.0.0-beta.19-dca1773
@@ -3799,6 +3805,10 @@ packages:
   '@types/deep-eql@4.0.2':
     resolution: {integrity: sha512-c9h9dVVMigMPc4bwTvC5dxqtqJZwQPePsWjPlpSOnojbor6pGqdk541lfA7AqFQr5pB1BRdq0juY9db81BwyFw==}
 
+  '@types/diff@8.0.0':
+    resolution: {integrity: sha512-o7jqJM04gfaYrdCecCVMbZhNdG6T1MHg/oQoRFdERLV+4d+V7FijhiEAbFu0Usww84Yijk9yH58U4Jk4HbtzZw==}
+    deprecated: This is a stub types definition. diff provides its own type definitions, so you do not need this installed.
+
   '@types/dom-view-transitions@1.0.6':
     resolution: {integrity: sha512-Q5IoDouTOcZKEs4nDpmUti2MXP48MQDBkS2nUQKFrsDeTFIaArVmhWUon28vlDfNkbbaK4EROu4Fv0iKObWjSg==}
 
@@ -4939,6 +4949,10 @@ packages:
 
   diff@8.0.3:
     resolution: {integrity: sha512-qejHi7bcSD4hQAZE0tNAawRK1ZtafHDmMTMkrrIGgSLl7hTnQHmKCeB45xAcbfTqK2zowkM3j3bHt/4b/ARbYQ==}
+    engines: {node: '>=0.3.1'}
+
+  diff@8.0.4:
+    resolution: {integrity: sha512-DPi0FmjiSU5EvQV0++GFDOJ9ASQUVFh5kD+OzOnYdi7n3Wpm9hWWGfB/O2blfHcMVTL5WkQXSnRiK9makhrcnw==}
     engines: {node: '>=0.3.1'}
 
   dingbat-to-unicode@1.0.1:
@@ -11350,6 +11364,10 @@ snapshots:
 
   '@types/deep-eql@4.0.2': {}
 
+  '@types/diff@8.0.0':
+    dependencies:
+      diff: 8.0.4
+
   '@types/dom-view-transitions@1.0.6': {}
 
   '@types/estree-jsx@1.0.5':
@@ -12582,6 +12600,8 @@ snapshots:
 
   diff@8.0.3: {}
 
+  diff@8.0.4: {}
+
   dingbat-to-unicode@1.0.1: {}
 
   dir-compare@4.2.0:
@@ -13748,7 +13768,7 @@ snapshots:
   just-bash@2.14.0:
     dependencies:
       compressjs: 1.0.3
-      diff: 8.0.3
+      diff: 8.0.4
       fast-xml-parser: 5.5.5
       file-type: 21.3.2
       ini: 6.0.0

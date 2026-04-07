@@ -1,6 +1,7 @@
 import { basename, dirname, extname } from 'path'
 import { tool } from 'ai'
 import { readFile, writeFile } from 'atomically'
+import { createTwoFilesPatch } from 'diff'
 import { ensureDir } from 'fs-extra'
 import { array, object, string } from 'zod'
 
@@ -25,16 +26,15 @@ const inputSchema = object({
 export interface EditResult {
 	status: 'success' | 'error'
 	message?: string
-	edits: Array<{
-		file_path: string
-		file_name: string
-		lang: string
-		old_string: string
-		new_string: string
-		old_content: string
-		new_content: string
-	}>
+	file_path: string
+	file_name: string
+	lang: string
+	patch: string
+	edit_count: number
 }
+
+const CONTEXT_LINES = 4
+const NEW_FILE_MAX_LINES = 10
 
 const getLangFromExt = (file_path: string): string => {
 	const ext = extname(file_path).toLowerCase()
@@ -75,98 +75,145 @@ export const createEditFileTool = (s: Session) => {
 			'Edit files by replacing old_string with new_string. Supports multiple edits in one call. Creates files if they do not exist.',
 		inputSchema,
 		execute: async input => {
-			const result: EditResult = {
-				status: 'success',
-				edits: []
+			if (input.edits.length === 0) {
+				return {
+					status: 'error' as const,
+					message: 'No edits provided',
+					file_path: '',
+					file_name: '',
+					lang: 'text',
+					patch: '',
+					edit_count: 0
+				}
 			}
 
-			for (const edit of input.edits) {
-				const real_path = getRealPath(s.cwd, edit.file_path)
+			const file_path = input.edits[0].file_path
+			const real_path = getRealPath(s.cwd, file_path)
 
-				if (detectShellInjectionRisk(edit.file_path)) {
-					const approved = await approve(
-						s,
-						'bash',
-						'execute',
-						`edit_file (RISKY!): ${edit.file_path}`
-					)
+			if (detectShellInjectionRisk(file_path)) {
+				const approved = await approve(s, 'bash', 'execute', `edit_file (RISKY!): ${file_path}`)
 
-					if (!approved) {
-						result.status = 'error'
-						result.message = 'Shell injection risk detected in path'
-						return result
+				if (!approved) {
+					return {
+						status: 'error' as const,
+						message: 'Shell injection risk detected in path',
+						file_path,
+						file_name: basename(file_path),
+						lang: getLangFromExt(file_path),
+						patch: '',
+						edit_count: input.edits.length
 					}
 				}
+			}
 
-				const read_result = check(s, 'edit', 'read', real_path)
+			const read_result = check(s, 'edit', 'read', real_path)
 
-				if (read_result === 'needs_approval') {
-					const approved = await approve(s, 'edit', 'read', real_path)
+			if (read_result === 'needs_approval') {
+				const approved = await approve(s, 'edit', 'read', real_path)
 
-					if (!approved) {
-						result.status = 'error'
-						result.message = 'Permission denied for reading file'
-						return result
+				if (!approved) {
+					return {
+						status: 'error' as const,
+						message: 'Permission denied for reading file',
+						file_path,
+						file_name: basename(file_path),
+						lang: getLangFromExt(file_path),
+						patch: '',
+						edit_count: input.edits.length
 					}
 				}
+			}
 
-				const write_result = check(s, 'edit', 'write', real_path)
+			const write_result = check(s, 'edit', 'write', real_path)
 
-				if (write_result === 'needs_approval') {
-					const approved = await approve(s, 'edit', 'write', real_path)
+			if (write_result === 'needs_approval') {
+				const approved = await approve(s, 'edit', 'write', real_path)
 
-					if (!approved) {
-						result.status = 'error'
-						result.message = 'Permission denied for writing file'
-						return result
+				if (!approved) {
+					return {
+						status: 'error' as const,
+						message: 'Permission denied for writing file',
+						file_path,
+						file_name: basename(file_path),
+						lang: getLangFromExt(file_path),
+						patch: '',
+						edit_count: input.edits.length
 					}
 				}
+			}
+
+			try {
+				await ensureDir(dirname(real_path))
+
+				let original_content: string
 
 				try {
-					await ensureDir(dirname(real_path))
+					original_content = await readFile(real_path, 'utf8')
+				} catch (error: any) {
+					if (error.code === 'ENOENT') {
+						original_content = ''
+					} else {
+						throw error
+					}
+				}
 
-					let content: string
+				const is_new_file = original_content === ''
+				let final_content = original_content
 
-					try {
-						content = await readFile(real_path, 'utf8')
-					} catch (error: any) {
-						if (error.code === 'ENOENT') {
-							content = ''
-						} else {
-							throw error
+				for (const edit of input.edits) {
+					if (edit.old_string && !final_content.includes(edit.old_string)) {
+						return {
+							status: 'error' as const,
+							message: 'old_string not found in file. Ensure exact match including whitespace and newlines',
+							file_path,
+							file_name: basename(file_path),
+							lang: getLangFromExt(file_path),
+							patch: '',
+							edit_count: input.edits.length
 						}
 					}
 
-					if (edit.old_string && !content.includes(edit.old_string)) {
-						result.status = 'error'
-						result.message =
-							'old_string not found in file. Ensure exact match including whitespace and newlines'
-						return result
-					}
-
-					const new_content = edit.old_string
-						? content.replace(edit.old_string, edit.new_string)
+					final_content = edit.old_string
+						? final_content.replace(edit.old_string, edit.new_string)
 						: edit.new_string
+				}
 
-					await writeFile(real_path, new_content, 'utf8')
+				await writeFile(real_path, final_content, 'utf8')
 
-					result.edits.push({
-						file_path: edit.file_path,
-						file_name: basename(edit.file_path),
-						lang: getLangFromExt(edit.file_path),
-						old_string: edit.old_string,
-						new_string: edit.new_string,
-						old_content: content,
-						new_content
-					})
-				} catch (error) {
-					result.status = 'error'
-					result.message = (error as Error).message
-					return result
+				const file_name = basename(file_path)
+				const patch_content = is_new_file
+					? final_content.split('\n').slice(0, NEW_FILE_MAX_LINES).join('\n')
+					: final_content
+
+				const patch = createTwoFilesPatch(
+					file_name,
+					file_name,
+					original_content,
+					patch_content,
+					undefined,
+					undefined,
+					{ context: CONTEXT_LINES }
+				)
+
+				return {
+					status: 'success' as const,
+					file_path,
+					file_name,
+					lang: getLangFromExt(file_path),
+					patch,
+					edit_count: input.edits.length
+				}
+			} catch (error) {
+				return {
+					status: 'error' as const,
+					message: (error as Error).message,
+					file_path,
+					file_name: basename(file_path),
+					lang: getLangFromExt(file_path),
+					patch: '',
+					edit_count: input.edits.length
 				}
 			}
-
-			return result
 		}
 	})
 }
