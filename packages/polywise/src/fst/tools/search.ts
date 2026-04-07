@@ -1,7 +1,7 @@
 import { tool } from 'ai'
 import { array, number, object, string } from 'zod'
 
-import { approve, check } from '../agents'
+import { checkPermission } from '../utils'
 import { escapeShellArg } from '../utils/safeshell'
 
 import type { Bash } from 'just-bash'
@@ -25,14 +25,10 @@ export const createSearchFileTool = (s: Session, bash: Bash) => {
 			const search_paths = input.paths ?? ['/']
 			const max_results = input.max_results ?? 30
 
-			const result = check(s, 'bash', 'execute', `search ${input.keyword}`)
+			const perm_error = await checkPermission(s, 'bash', 'execute', `search ${input.keyword}`)
 
-			if (result === 'needs_approval') {
-				const approved = await approve(s, 'bash', 'execute', `search ${input.keyword}`)
-
-				if (!approved) {
-					return { keyword: input.keyword, matches: [], count: 0, error: 'Permission denied' }
-				}
+			if (perm_error) {
+				return { keyword: input.keyword, matches: [], count: 0, error: perm_error }
 			}
 
 			const safeKeyword = escapeShellArg(input.keyword)

@@ -2,7 +2,7 @@ import { tool } from 'ai'
 import { globby } from 'globby'
 import { array, object, string } from 'zod'
 
-import { approve, check } from '../agents'
+import { checkPermission } from '../utils'
 
 import type Session from '../session'
 
@@ -19,14 +19,10 @@ export const createGlobTool = (s: Session) => {
 			const paths = extractPaths(input, s.cwd)
 
 			for (const path of paths) {
-				const result = check(s, 'glob', 'read', path)
+				const perm_error = await checkPermission(s, 'glob', 'read', path)
 
-				if (result === 'needs_approval') {
-					const approved = await approve(s, 'glob', 'read', path)
-
-					if (!approved) {
-						throw new Error(`Permission denied: glob read ${path}`)
-					}
+				if (perm_error) {
+					throw new Error(perm_error)
 				}
 			}
 

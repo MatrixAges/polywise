@@ -1,29 +1,15 @@
-import { approve, check } from '../agents'
-import { detectShellInjectionRisk } from './safeshell'
+import checkPermission from './checkPermission'
 
 import type Session from '../session'
 
 export default async (s: Session, file_path: string, real_path: string) => {
-	if (detectShellInjectionRisk(file_path)) {
-		const is_approved = await approve(s, 'bash', 'execute', `edit_file (RISKY!): ${file_path}`)
+	const read_error = await checkPermission(s, 'edit', 'read', real_path, file_path)
 
-		if (!is_approved) return 'Shell injection risk detected in path'
-	}
+	if (read_error) return read_error
 
-	const read_result = check(s, 'edit', 'read', real_path)
+	const write_error = await checkPermission(s, 'edit', 'write', real_path)
 
-	if (read_result === 'needs_approval') {
-		const is_approved = await approve(s, 'edit', 'read', real_path)
-
-		if (!is_approved) return 'Permission denied for reading file'
-	}
-
-	const write_result = check(s, 'edit', 'write', real_path)
-
-	if (write_result === 'needs_approval') {
-		const is_approved = await approve(s, 'edit', 'write', real_path)
-		if (!is_approved) return 'Permission denied for writing file'
-	}
+	if (write_error) return write_error
 
 	return null
 }
