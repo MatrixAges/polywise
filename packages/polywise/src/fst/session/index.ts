@@ -1,13 +1,13 @@
-import { EventEmitter } from 'events'
-import { resolve } from 'path'
+import events from 'events'
+import path from 'path'
 import { app } from '@core/consts'
 
-import { buildSkillMap } from '../tools/skill'
 import { getContext, setContext } from './context'
 import { appendMessage, insertMessage } from './message'
 import { clearMessages, getMessages, getMessagesCount, loadMessages, trimMessages } from './messages'
 import { getAgents, getData, getModel, getProject } from './related'
 import { getSession, initSession, updateSession } from './session'
+import { loadSkillMap } from './skill'
 import { abortStream, getStream } from './stream'
 import { clearTasks, getTasks, setTasks } from './task'
 import { active, runing, stop, sync } from './utils'
@@ -18,7 +18,7 @@ import type { Context, InitArgs, Message, Permission, Permissions, SkillMeta } f
 
 export default class Index {
 	id = ''
-	event = null as unknown as EventEmitter
+	event = null as unknown as events.EventEmitter
 	session = null as unknown as Session
 	model = null as unknown as ModelResult
 
@@ -42,23 +42,23 @@ export default class Index {
 	update_at = Date.now()
 
 	get session_dir() {
-		return resolve(`${app.app_path}/sessions/${this.id}`)
+		return path.resolve(`${app.app_path}/sessions/${this.id}`)
 	}
 
 	get context_dir() {
-		return resolve(`${this.session_dir}/context.json`)
+		return path.resolve(`${this.session_dir}/context.json`)
 	}
 
 	get context_history_dir() {
-		return resolve(`${this.session_dir}/context_history`)
+		return path.resolve(`${this.session_dir}/context_history`)
 	}
 
 	get files_dir() {
-		return resolve(`${this.session_dir}/files`)
+		return path.resolve(`${this.session_dir}/files`)
 	}
 
 	get skills_dir() {
-		return resolve(this.cwd, 'skills')
+		return path.resolve(this.cwd, 'skills')
 	}
 
 	async init(args: InitArgs) {
@@ -101,6 +101,8 @@ export default class Index {
 	getContext = () => getContext(this)
 	setContext = (v: Partial<Context>) => setContext(this, v)
 
+	loadSkillMap = () => loadSkillMap(this)
+
 	getStream = (message: Message) => getStream(this, message)
 	abortStream = () => abortStream(this)
 
@@ -108,10 +110,4 @@ export default class Index {
 	active = () => active(this)
 	sync = () => sync(this)
 	stop = () => stop(this)
-
-	loadSkillMap = async () => {
-		this.skill_map = await buildSkillMap(this.cwd)
-
-		return this.skill_map
-	}
 }

@@ -1,4 +1,4 @@
-import { dirname } from 'path'
+import path from 'path'
 import { app } from '@core/consts'
 import { env } from '@core/env'
 import Sqlite from 'better-sqlite3'
@@ -6,7 +6,7 @@ import fs from 'fs-extra'
 import { load } from 'sqlite-vec'
 
 export default () => {
-	fs.ensureDirSync(dirname(app.db_path))
+	fs.ensureDirSync(path.dirname(app.db_path))
 
 	env.sqlite = new Sqlite(app.db_path)
 	env.sqlite.pragma('journal_mode = WAL')

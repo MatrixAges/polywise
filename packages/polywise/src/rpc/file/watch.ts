@@ -1,5 +1,5 @@
-import { EventEmitter, on } from 'events'
-import { resolve } from 'path'
+import events from 'events'
+import path from 'path'
 import { app } from '@core/consts'
 import { p } from '@core/utils'
 import { readFile } from 'atomically'
@@ -13,9 +13,9 @@ const input_type = array(string())
 
 export default p.input(input_type).subscription(async function* (args) {
 	const { signal, input } = args
-	const files = input.map(item => resolve(`${app.app_path}/${item}.json`))
+	const files = input.map(item => path.resolve(`${app.app_path}/${item}.json`))
 
-	const e = new EventEmitter()
+	const e = new events.EventEmitter()
 	const watchpack = new Watchpack({ aggregateTimeout: 30, poll: false })
 
 	const getFiles = async (paths: Array<string>) => {
@@ -62,7 +62,7 @@ export default p.input(input_type).subscription(async function* (args) {
 		watchpack.watch({ files })
 		watchpack.on('aggregated', onChange)
 
-		for await (const [data] of on(e, 'change', { signal })) {
+		for await (const [data] of events.on(e, 'change', { signal })) {
 			yield data as Res
 		}
 	} finally {

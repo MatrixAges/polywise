@@ -1,4 +1,4 @@
-import { resolve } from 'path'
+import path from 'path'
 import { readFile } from 'atomically'
 import fs from 'fs-extra'
 import { globby } from 'globby'
@@ -26,7 +26,7 @@ export default async (cwd: string): Promise<Array<SkillMeta>> => {
 			for (const entry of entries) {
 				if (!entry.isDirectory()) continue
 
-				const skill_md_path = resolve(skills_dir, entry.name, 'SKILL.md')
+				const skill_md_path = path.resolve(skills_dir, entry.name, 'SKILL.md')
 
 				try {
 					const content = await readFile(skill_md_path, 'utf8')
@@ -37,7 +37,7 @@ export default async (cwd: string): Promise<Array<SkillMeta>> => {
 							name: meta.name,
 							description: meta.description,
 							path: skill_md_path,
-							dir: resolve(skills_dir, entry.name)
+							dir: path.resolve(skills_dir, entry.name)
 						})
 					} else {
 						const heading_text = extractHeadings(content)
@@ -46,7 +46,7 @@ export default async (cwd: string): Promise<Array<SkillMeta>> => {
 							name: entry.name,
 							description: heading_text,
 							path: skill_md_path,
-							dir: resolve(skills_dir, entry.name)
+							dir: path.resolve(skills_dir, entry.name)
 						})
 					}
 				} catch {

@@ -1,4 +1,4 @@
-import { resolve } from 'path'
+import path from 'path'
 import { app } from '@core/consts'
 import { preset_providers } from '@core/consts/providers'
 import { ensureWithValue } from '@core/utils'
@@ -9,13 +9,13 @@ const configs = ['config', 'providers']
 
 export default async () => {
 	for await (const name of configs) {
-		const path = resolve(`${app.app_path}/${name}.json`)
+		const config_path = path.resolve(`${app.app_path}/${name}.json`)
 
 		if (name === 'config') {
 			const preset = preset_providers[0]
 			const default_model = { provider: preset.name, model: preset.models[0].id }
 
-			await ensureWithValue(path, {
+			await ensureWithValue(config_path, {
 				workspaces: [{ name: 'Default' }],
 				current_workspace: 'Default',
 				default_model,
@@ -27,7 +27,7 @@ export default async () => {
 		}
 
 		if (name === 'providers') {
-			await ensureWithValue(path, { providers: preset_providers } as ProviderConfig)
+			await ensureWithValue(config_path, { providers: preset_providers } as ProviderConfig)
 		}
 	}
 }

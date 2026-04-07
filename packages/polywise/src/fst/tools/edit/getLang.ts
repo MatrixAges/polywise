@@ -1,7 +1,7 @@
-import { extname } from 'path'
+import path from 'path'
 
 export default (file_path: string) => {
-	const ext = extname(file_path).toLowerCase()
+	const ext = path.extname(file_path).toLowerCase()
 
 	const map: Record<string, string> = {
 		'.ts': 'typescript',

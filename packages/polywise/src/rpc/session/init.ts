@@ -1,4 +1,4 @@
-import { on } from 'events'
+import events from 'events'
 import { Session } from '@core/fst'
 import { p, SessionEventStore, SessionStore } from '@core/utils'
 import { getId } from 'stk/utils'
@@ -47,7 +47,7 @@ export default p.input(input_type).subscription(async function* (args) {
 	SessionEventStore.on(`${id}/destroy`, destroy)
 
 	try {
-		for await (const [data] of on(SessionEventStore, `${id}/change`, { signal })) {
+		for await (const [data] of events.on(SessionEventStore, `${id}/change`, { signal })) {
 			yield data as ChatEventRes
 		}
 	} finally {

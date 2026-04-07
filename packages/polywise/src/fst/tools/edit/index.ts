@@ -1,8 +1,8 @@
-import { basename, dirname } from 'path'
+import path from 'path'
 import { tool } from 'ai'
 import { readFile, writeFile } from 'atomically'
 import { createTwoFilesPatch } from 'diff'
-import { ensureDir } from 'fs-extra'
+import fs from 'fs-extra'
 import { array, object, string } from 'zod'
 
 import { checkPermissions, getRealPath } from '../../utils'
@@ -41,7 +41,7 @@ export const createEditFileTool = (s: Session) => {
 			const edits = input.edits
 			const file_path = edits[0].file_path
 			const real_path = getRealPath(s.cwd, file_path)
-			const file_name = basename(file_path)
+			const file_name = path.basename(file_path)
 			const edit_count = edits.length
 
 			const perm_error = await checkPermissions(s, file_path, real_path)
@@ -51,7 +51,7 @@ export const createEditFileTool = (s: Session) => {
 			}
 
 			try {
-				await ensureDir(dirname(real_path))
+				await fs.ensureDir(path.dirname(real_path))
 
 				const original_content = await readFile(real_path, 'utf8')
 

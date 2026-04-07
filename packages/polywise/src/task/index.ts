@@ -1,4 +1,4 @@
-import { EventEmitter } from 'events'
+import events from 'events'
 import { task } from '@core/db/schema'
 
 import type { queueAsPromised } from 'fastq'
@@ -13,7 +13,7 @@ export interface Queue {
 }
 
 export const queue = {} as Queue
-export const emitter = new EventEmitter()
+export const emitter = new events.EventEmitter()
 
 export { pauseTriple, resumeTriple } from './pauseTriple'
 export { default as errorHandlers } from './handleError'

@@ -1,4 +1,4 @@
-import { on } from 'events'
+import events from 'events'
 import { task } from '@core/db/schema'
 import { env } from '@core/env'
 import { eq } from 'drizzle-orm'
@@ -26,7 +26,7 @@ export default p.input(input_type).subscription(async function* (args) {
 	yield await getPayload(input.type)
 
 	try {
-		for await (const _ of on(emitter, 'change', { signal })) {
+		for await (const _ of events.on(emitter, 'change', { signal })) {
 			yield await getPayload(input.type)
 		}
 	} finally {

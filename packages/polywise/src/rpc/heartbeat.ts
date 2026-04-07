@@ -1,4 +1,4 @@
-import { EventEmitter, on } from 'events'
+import events from 'events'
 
 import { p } from '../utils/trpc'
 
@@ -17,7 +17,7 @@ const getStatus = () => ({
 export default p.subscription(async function* (args) {
 	const { signal } = args
 
-	const emitter = new EventEmitter()
+	const emitter = new events.EventEmitter()
 
 	yield getStatus()
 
@@ -26,7 +26,7 @@ export default p.subscription(async function* (args) {
 	}, 6000)
 
 	try {
-		for await (const _ of on(emitter, 'change', { signal })) {
+		for await (const _ of events.on(emitter, 'change', { signal })) {
 			yield getStatus() as Res
 		}
 	} finally {

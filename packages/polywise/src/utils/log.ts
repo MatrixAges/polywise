@@ -1,9 +1,9 @@
-import { appendFileSync } from 'fs'
-import { join } from 'path'
+import fs from 'fs'
+import path from 'path'
 import { blueBright, cyanBright, gray, green, magentaBright, whiteBright, yellowBright } from 'ansis'
 import dayjs from 'dayjs'
 import { difference } from 'es-toolkit'
-import { ensureDirSync } from 'fs-extra/esm'
+import fse from 'fs-extra/esm'
 
 import { app } from '../consts'
 
@@ -55,10 +55,10 @@ export default (stage: LogStage, message: string, getContext?: () => unknown) =>
 
 	if (!enable_file) return
 
-	ensureDirSync(app.logs_dir)
+	fse.ensureDirSync(app.logs_dir)
 
-	const log_path = join(app.logs_dir, `${dayjs().format('YYYY-MM-DD HH')}.log`)
+	const log_path = path.join(app.logs_dir, `${dayjs().format('YYYY-MM-DD HH')}.log`)
 	const file_content = `[${time_now}] ${stage}:${message}${extra_info}\n------\n`
 
-	appendFileSync(log_path, file_content)
+	fs.appendFileSync(log_path, file_content)
 }

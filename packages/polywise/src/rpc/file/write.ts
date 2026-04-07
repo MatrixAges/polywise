@@ -1,4 +1,4 @@
-import { resolve } from 'path'
+import path from 'path'
 import { app } from '@core/consts'
 import { p } from '@core/utils'
 import { readFile, writeFile } from 'atomically'
@@ -14,11 +14,11 @@ const input_type = object({
 })
 
 export default p.input(input_type).mutation(async ({ input }) => {
-	const { path, data, merge } = input
+	const { path: file_path, data, merge } = input
 
 	let target_data = data
 
-	const target_path = resolve(`${app.app_path}/${path}`)
+	const target_path = path.resolve(`${app.app_path}/${file_path}`)
 
 	if (merge) {
 		const [err, res] = await to(readFile(target_path))
