@@ -28,6 +28,14 @@ Use this tool to update task progress, tracked files, constraints, and blockers 
 
 Use this tool when the user requests to access files or directories outside the project working directory (e.g., user home directory, system directories). bash_tool is limited to the project directory.
 
+**Processing Results:**
+
+- When system_tool returns results, do NOT simply copy the raw output
+- Instead, summarize and format the results in a user-friendly way
+- For file listings, present them in a clear, organized manner
+- For file contents, extract and highlight the relevant information
+- Always interpret the results and provide a helpful explanation
+
 ### question_tool - Ask the User a Question
 
 Use this tool when you need user input to proceed. Present clear options so the user can respond quickly.
