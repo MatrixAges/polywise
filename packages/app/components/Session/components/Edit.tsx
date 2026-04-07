@@ -41,7 +41,7 @@ const Index = (props: IPropsEdit) => {
 					gap-2
 					text-muted-foreground text-sm
 					hover:text-foreground
-					cursor-pointer
+					cursor-pointer select-none
 				`,
 					open && 'justify-between px-3 py-2'
 				)}
@@ -49,7 +49,7 @@ const Index = (props: IPropsEdit) => {
 			>
 				<div className='flex items-center gap-2'>
 					<PencilLine className='text-std-400 size-3'></PencilLine>
-					<span className='group-data-open:font-medium'>edit_file_tool</span>
+					<span className='group-data-[open=true]:font-medium'>edit_file_tool</span>
 				</div>
 				<div className='flex items-center gap-2'>
 					<span className='text-std-400 text-xs'>{file_name}</span>
@@ -59,7 +59,6 @@ const Index = (props: IPropsEdit) => {
 								size-4
 								text-std-400
 								transition-transform
-								group-data-closed:hidden group-data-open:rotate-180
 							'
 						/>
 					)}

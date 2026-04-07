@@ -28,7 +28,7 @@ const Index = (props: IPropsSubAgent) => {
 					gap-2
 					text-muted-foreground text-sm
 					hover:text-foreground
-					cursor-pointer
+					cursor-pointer select-none
 				'
 				onClick={toggle}
 			>
