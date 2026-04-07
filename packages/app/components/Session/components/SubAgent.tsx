@@ -26,15 +26,15 @@ const Index = (props: IPropsSubAgent) => {
 					flex
 					items-center
 					gap-2
-					text-muted-foreground text-xs
+					text-muted-foreground text-sm
 					hover:text-foreground
 					cursor-pointer
 				'
 				onClick={toggle}
 			>
 				<BotMessageSquare className='text-std-400 size-3'></BotMessageSquare>
-				<span className='text-sm'>sub_agent</span>
-				<span className='text-xs capitalize'>{name}</span>
+				<span>sub_agent</span>
+				<span className='text-std-400 text-xs capitalize'>{name}</span>
 			</div>
 			{mounted && open && (
 				<div

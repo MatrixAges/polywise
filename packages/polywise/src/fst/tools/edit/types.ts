@@ -4,7 +4,7 @@ export interface Operation {
 	new_string: string
 }
 
-export interface Result {
+export interface EditResult {
 	status: 'success' | 'error'
 	message?: string
 	file_path: string

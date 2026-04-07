@@ -46,7 +46,7 @@ const statusLabels: Record<ToolPart["state"], string> = {
   "output-error": "Error",
 };
 export const getStatusBadge = (status: ToolPart["state"]) => (
-  <Badge className="gap-1.5 rounded-full font-normal text-xs px-1 bg-transparent text-muted-foreground" variant="secondary">
+  <Badge className="gap-1.5 rounded-full font-normal text-xs px-1 bg-transparent text-std-400" variant="secondary">
     {statusLabels[status]}
   </Badge>
 );
