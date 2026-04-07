@@ -11,7 +11,7 @@ export type Context = ContextInput & {
 }
 
 export interface Permission {
-	tool: 'file' | 'bash' | 'glob'
+	tool: 'file' | 'bash' | 'glob' | 'edit'
 	action: 'read' | 'write' | 'execute'
 	path: string
 }
