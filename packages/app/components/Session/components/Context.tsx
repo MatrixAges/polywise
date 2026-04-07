@@ -47,8 +47,6 @@ const task_status_icon_map = {
 const Index = (props: Context) => {
 	const { intent, context, tasks, files, constraints, learned, blockers } = props || {}
 
-	console.log(tasks)
-
 	return (
 		<div
 			className='

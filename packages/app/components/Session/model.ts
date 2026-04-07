@@ -96,7 +96,6 @@ export default class Index {
 						case 'sync':
 							const { session, context, messages, has_older, has_newer, permission } =
 								res.data
-							console.log(res)
 
 							this.session = session as Session
 							this.context = context

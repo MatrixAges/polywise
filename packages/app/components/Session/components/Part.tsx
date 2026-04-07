@@ -70,7 +70,6 @@ const Index = (props: IPropsPart) => {
 		}
 
 		if (tool_part.type === 'tool-system_tool' && tool_part.input && tool_part.output) {
-			console.log(tool_part)
 			return <SubAgent streaming={streaming} part={tool_part} answer={answer}></SubAgent>
 		}
 
