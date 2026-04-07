@@ -2,6 +2,7 @@ import path from 'path'
 import { app } from '@core/consts'
 import { preset_providers } from '@core/consts/providers'
 import { ensureWithValue } from '@core/utils'
+import fs from 'fs-extra'
 
 import type { AppConfig, ProviderConfig } from '@core/types'
 
@@ -30,4 +31,8 @@ export default async () => {
 			await ensureWithValue(config_path, { providers: preset_providers } as ProviderConfig)
 		}
 	}
+
+	const skills_dir = path.resolve(app.app_path, 'skills')
+
+	await fs.ensureDir(skills_dir)
 }

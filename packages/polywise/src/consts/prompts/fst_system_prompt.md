@@ -26,7 +26,7 @@ Use this tool to update task progress, tracked files, constraints, and blockers 
 
 ### system_tool - Access Files Outside Working Directory
 
-Use this tool when the user requests to access files or directories outside the project working directory (e.g., user home directory, system directories). bash_tool is limited to the project directory.
+Use this tool when the user requests to access files or directories outside the project working directory (e.g., user home directory, system directories). bash_tool is limited to the project directory and the application data directory.
 
 **Processing Results:**
 

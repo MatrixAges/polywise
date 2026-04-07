@@ -58,7 +58,11 @@ export default class Index {
 	}
 
 	get skills_dir() {
-		return path.resolve(this.cwd, 'skills')
+		if (this.project?.dir) {
+			return path.resolve(this.project.dir, 'skills')
+		}
+
+		return path.resolve(app.app_path, 'skills')
 	}
 
 	async init(args: InitArgs) {
