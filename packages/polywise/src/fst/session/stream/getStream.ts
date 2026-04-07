@@ -63,7 +63,7 @@ export default async (s: Index, message: Message) => {
 			read_file_tool: bash_tool.readFile,
 			write_file_tool: bash_tool.writeFile,
 			edit_file_tool: createEditFileTool(s),
-			skill_tool: createSkillTool(s, bash_tool.env),
+			skill_tool: createSkillTool(s),
 			web_search_tool: createWebSearchTool(),
 			web_fetch_tool: createWebFetchTool()
 		},
