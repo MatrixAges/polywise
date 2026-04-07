@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { PatchDiff } from '@pierre/diffs/react'
 import { useToggle } from 'ahooks'
-import { Columns2, FileEdit, SquareMenu } from 'lucide-react'
+import { ChevronDown, Columns2, PencilLine, SquareMenu } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { useGlobal } from '@/context'
@@ -23,29 +23,56 @@ const Index = (props: IPropsEdit) => {
 
 	return (
 		<div
-			className='
+			className={$cx(
+				`
 				flex flex-col
-				gap-2
 				mb-1
-			'
+				group
+			`,
+				open && 'bg-secondary rounded-md'
+			)}
+			data-open={open}
 		>
 			<div
-				className='
+				className={$cx(
+					`
 					flex
 					items-center
 					gap-2
 					text-muted-foreground text-sm
 					hover:text-foreground
 					cursor-pointer
-				'
+				`,
+					open && 'justify-between px-3 py-2'
+				)}
 				onClick={toggle}
 			>
-				<FileEdit className='text-std-400 size-3'></FileEdit>
-				<span>edit_file_tool</span>
-				<span className='text-std-400 text-xs'>{file_name}</span>
+				<div className='flex items-center gap-2'>
+					<PencilLine className='text-std-400 size-3'></PencilLine>
+					<span className='group-data-open:font-medium'>edit_file_tool</span>
+				</div>
+				<div className='flex items-center gap-2'>
+					<span className='text-std-400 text-xs'>{file_name}</span>
+					{open && (
+						<ChevronDown
+							className='
+								size-4
+								text-std-400
+								transition-transform
+								group-data-closed:hidden group-data-open:rotate-180
+							'
+						/>
+					)}
+				</div>
 			</div>
 			{open && (
-				<div className='flex flex-col gap-2'>
+				<div
+					className='
+						flex flex-col
+						gap-2
+						p-3 pt-0
+					'
+				>
 					{is_error && message && (
 						<div
 							className='
@@ -79,14 +106,10 @@ const Index = (props: IPropsEdit) => {
 											dark: 'github-dark',
 											light: 'github-light'
 										},
-										themeType: global.theme.theme_value,
-										diffIndicators: 'bars',
-										lineDiffType: 'word-alt',
-										overflow: 'scroll',
-										hunkSeparators: 'line-info',
-										expandUnchanged: true,
-										disableLineNumbers: false,
-										collapsedContextThreshold: 3
+										themeType: global.theme.theme_value
+									}}
+									style={{
+										'--diffs-font-size': '11.4px'
 									}}
 								/>
 							</div>

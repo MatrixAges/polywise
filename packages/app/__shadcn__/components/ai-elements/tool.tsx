@@ -46,9 +46,9 @@ const statusLabels: Record<ToolPart["state"], string> = {
   "output-error": "Error",
 };
 export const getStatusBadge = (status: ToolPart["state"]) => (
-  <Badge className="gap-1.5 rounded-full font-normal text-xs px-1 bg-transparent text-std-400" variant="secondary">
+  <span className="text-xs bg-transparent text-std-400" >
     {statusLabels[status]}
-  </Badge>
+  </span>
 );
 
 export const ToolHeader = ({
@@ -65,7 +65,7 @@ export const ToolHeader = ({
   return (
     <CollapsibleTrigger
       className={cn(
-        "flex w-full items-center gap-1 text-muted-foreground hover:text-foreground group-data-open:justify-between group-data-open:p-2 group-data-open:px-3",
+        "flex w-full items-center gap-2 text-muted-foreground hover:text-foreground group-data-open:justify-between group-data-open:p-2 group-data-open:px-3",
         className
       )}
       {...props}
@@ -74,7 +74,7 @@ export const ToolHeader = ({
         <WrenchIcon className="size-3 text-std-400" />
         <span className="group-data-open:font-medium text-sm">{title ?? derivedName}</span>
       </div>
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-2">
         {getStatusBadge(state)}
         <ChevronDownIcon className="size-4 text-std-400 transition-transform group-data-closed:hidden group-data-open:rotate-180" />
       </div>
