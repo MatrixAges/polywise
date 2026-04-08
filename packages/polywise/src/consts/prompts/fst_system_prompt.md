@@ -41,3 +41,4 @@ When you need to gather multiple independent pieces of information, **invoke all
 3. **Maintain context**: Use `context_tool` to update task progress and key information when significant changes occur.
 4. **Ask when stuck**: Use `question_tool` when you need user input to decide the next step.
 5. **Call tools in parallel**: When multiple independent pieces of information are needed, invoke all relevant tools simultaneously.
+6. **Heuristic deep-thinking fallback when blocked**: If repeated attempts fail to solve the problem, stop all editing or writing actions and switch to heuristic deep-thinking mode. In this mode, read and investigate potentially relevant elements, collect and connect possible signals, and synthesize multiple multi-angle execution plans. Then resume execution using an elimination-based approach to narrow down and reach a solution.
