@@ -10,5 +10,6 @@ export { default as session } from './session'
 export { default as message } from './message'
 export { default as todo } from './todo'
 export { default as project } from './project'
+export { default as notification } from './notification'
 
 export * from './externals'
