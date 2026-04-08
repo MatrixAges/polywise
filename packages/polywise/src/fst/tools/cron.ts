@@ -8,8 +8,6 @@ import { Cron } from 'croner'
 import fs from 'fs-extra'
 import { boolean, enum as Enum, object, string } from 'zod'
 
-import { checkPermission } from '../utils'
-
 import type Session from '../session'
 
 const inputSchema = object({
@@ -26,7 +24,7 @@ const inputSchema = object({
 	enabled: boolean().optional().describe('[Optional for update] Whether this job should be scheduled')
 })
 
-const validateCron = (cron: string) => {
+const createJob = (cron: string) => {
 	const job = new Cron(cron, { paused: true })
 
 	job.stop()
@@ -39,23 +37,13 @@ export const createCronTool = (s: Session) => {
 		inputSchema,
 		execute: async input => {
 			if (input.action === 'create') {
-				if (!input.name) {
-					return { action: 'create', error: 'name is required for create action' }
-				}
-
-				if (!input.cron) {
-					return { action: 'create', error: 'cron is required for create action' }
-				}
-
-				if (!input.content) {
-					return { action: 'create', error: 'content is required for create action' }
-				}
+				if (!input.name) return { action: 'create', error: 'name is required for create action' }
+				if (!input.cron) return { action: 'create', error: 'cron is required for create action' }
+				if (!input.content) return { action: 'create', error: 'content is required for create action' }
 
 				const exists = env.cron.store.jobs.some(job => job.name === input.name)
 
-				if (exists) {
-					return { action: 'create', error: `Job "${input.name}" already exists` }
-				}
+				if (exists) return { action: 'create', error: `Job "${input.name}" already exists` }
 
 				let job_file = ''
 
@@ -68,7 +56,7 @@ export const createCronTool = (s: Session) => {
 				}
 
 				try {
-					validateCron(input.cron)
+					createJob(input.cron)
 				} catch (err) {
 					const message = err instanceof Error ? err.message : 'Invalid cron expression'
 
@@ -103,12 +91,6 @@ export const createCronTool = (s: Session) => {
 			}
 
 			if (input.action === 'list') {
-				const perm_error = await checkPermission(s, 'file', 'read', app.cron_path)
-
-				if (perm_error) {
-					return { action: 'list', jobs: [], count: 0, error: perm_error }
-				}
-
 				const jobs = await Promise.all(
 					env.cron.store.jobs.map(async job => {
 						const job_md_path = path.resolve(app.cron_dir, job.name, 'JOB.md')
@@ -131,9 +113,7 @@ export const createCronTool = (s: Session) => {
 			}
 
 			if (input.action === 'read') {
-				if (!input.name) {
-					return { action: 'read', error: 'name is required for read action' }
-				}
+				if (!input.name) return { action: 'read', error: 'name is required for read action' }
 
 				let job_file = ''
 
@@ -167,15 +147,11 @@ export const createCronTool = (s: Session) => {
 			}
 
 			if (input.action === 'update') {
-				if (!input.name) {
-					return { action: 'update', error: 'name is required for update action' }
-				}
+				if (!input.name) return { action: 'update', error: 'name is required for update action' }
 
 				const job = env.cron.store.jobs.find(item => item.name === input.name)
 
-				if (!job) {
-					return { action: 'update', error: `Job "${input.name}" not found` }
-				}
+				if (!job) return { action: 'update', error: `Job "${input.name}" not found` }
 
 				let job_file = ''
 
@@ -187,21 +163,9 @@ export const createCronTool = (s: Session) => {
 					return { action: 'update', error: message }
 				}
 
-				const write_perm_error = await checkPermission(s, 'file', 'write', job_file)
-
-				if (write_perm_error) {
-					return { action: 'update', error: write_perm_error }
-				}
-
-				const store_perm_error = await checkPermission(s, 'file', 'write', app.cron_path)
-
-				if (store_perm_error) {
-					return { action: 'update', error: store_perm_error }
-				}
-
 				if (input.cron) {
 					try {
-						validateCron(input.cron)
+						createJob(input.cron)
 					} catch (err) {
 						const message = err instanceof Error ? err.message : 'Invalid cron expression'
 
