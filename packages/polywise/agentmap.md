@@ -34,6 +34,10 @@ This document provides an overview of the packages/polywise module structure and
 			"fst": {
 				"index.ts": { "desc": "fst module exports", "role": "Index" },
 				"chat": { "desc": "Chat capabilities using AI SDK, supporting UIMessages", "role": "Folder" },
+				"agents": {
+					"desc": "Internal decision agents for permission, audit, and system operations",
+					"role": "Folder"
+				},
 				"tools": {
 					"desc": "Bash sandboxing tools via bash-tool",
 					"role": "Folder",

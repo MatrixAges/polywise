@@ -2,6 +2,7 @@ import path from 'path'
 import { app } from '@core/consts'
 import { getJobPath, reloadJob, saveStore } from '@core/cron'
 import { env } from '@core/env'
+import { audit } from '@core/fst/agents'
 import { tool } from 'ai'
 import { readFile } from 'atomically'
 import { Cron } from 'croner'
@@ -40,6 +41,12 @@ export const createCronTool = (s: Session) => {
 				if (!input.name) return { action: 'create', error: 'name is required for create action' }
 				if (!input.cron) return { action: 'create', error: 'cron is required for create action' }
 				if (!input.content) return { action: 'create', error: 'content is required for create action' }
+
+				if (input.content) {
+					const approved = await audit(s, input.content)
+
+					if (!approved) return { error: 'content is not allowed' }
+				}
 
 				const exists = env.cron.store.jobs.some(job => job.name === input.name)
 
@@ -148,6 +155,7 @@ export const createCronTool = (s: Session) => {
 
 			if (input.action === 'update') {
 				if (!input.name) return { action: 'update', error: 'name is required for update action' }
+				if (!input.content) return { action: 'update', error: 'content is required for update action' }
 
 				const job = env.cron.store.jobs.find(item => item.name === input.name)
 
@@ -175,10 +183,8 @@ export const createCronTool = (s: Session) => {
 					job.cron = input.cron
 				}
 
-				if (input.content !== undefined) {
-					await fs.ensureDir(path.dirname(job_file))
-					await fs.writeFile(job_file, input.content, 'utf8')
-				}
+				await fs.ensureDir(path.dirname(job_file))
+				await fs.writeFile(job_file, input.content, 'utf8')
 
 				if (input.enabled !== undefined) {
 					job.enabled = input.enabled
