@@ -41,9 +41,13 @@ This document provides an overview of the packages/polywise module structure and
 				"tools": {
 					"desc": "Bash sandboxing tools via bash-tool",
 					"role": "Folder",
-					"cron.ts": "Create/list/read/update cron tasks backed by app.app_path/cron.json with incremental runtime reload",
+					"cron.ts": "Create/list/read/update/remove cron jobs backed by app.app_path/cron.json with incremental runtime reload and physical directory removal",
 					"webfetch.ts": "Fetch URL content as Markdown (Jina primary, fetch+turndown fallback)",
 					"websearch.ts": "Web search via DuckDuckGo HTML → turndown Markdown"
+				},
+				"cron": {
+					"desc": "Cron runtime and store utilities including shared cron validation",
+					"role": "Folder"
 				},
 				"cron": {
 					"desc": "Cron metadata store/runtime/logging backed by cron.json and Croner jobs",

@@ -1,35 +1,28 @@
 import path from 'path'
 import { app } from '@core/consts'
-import { getJobPath, reloadJob, saveStore } from '@core/cron'
+import { getJobPath, reloadJob, saveStore, stopJob, validateCron } from '@core/cron'
 import { env } from '@core/env'
 import { audit } from '@core/fst/agents'
 import { tool } from 'ai'
 import { readFile } from 'atomically'
-import { Cron } from 'croner'
 import fs from 'fs-extra'
 import { boolean, enum as Enum, object, string } from 'zod'
 
 import type Session from '../session'
 
 const inputSchema = object({
-	action: Enum(['create', 'list', 'read', 'update']).describe(
-		'The action to perform. create: create cron job and JOB.md. list: list cron jobs. read: read JOB.md by name. update: update cron/content/enabled for existing job.'
+	action: Enum(['create', 'list', 'read', 'update', 'remove']).describe(
+		'The action to perform. create: create cron job and JOB.md. list: list cron jobs. read: read JOB.md by name. update: update cron/content/enabled for existing job. remove: remove existing job and its directory.'
 	),
 	name: string()
 		.optional()
-		.describe('[Required for create/read/update] Job name used as folder name under app.app_path/cron'),
+		.describe('[Required for create/read/update/remove] Job name used as folder name under app.app_path/cron'),
 	cron: string()
 		.optional()
 		.describe('[Required for create, optional for update] Cron expression used to validate job schedule'),
 	content: string().optional().describe('[Required for create, optional for update] JOB.md content to write'),
 	enabled: boolean().optional().describe('[Optional for update] Whether this job should be scheduled')
 })
-
-const createJob = (cron: string) => {
-	const job = new Cron(cron, { paused: true })
-
-	job.stop()
-}
 
 export const createCronTool = (s: Session) => {
 	return tool({
@@ -63,7 +56,7 @@ export const createCronTool = (s: Session) => {
 				}
 
 				try {
-					createJob(input.cron)
+					validateCron(input.cron)
 				} catch (err) {
 					const message = err instanceof Error ? err.message : 'Invalid cron expression'
 
@@ -173,7 +166,7 @@ export const createCronTool = (s: Session) => {
 
 				if (input.cron) {
 					try {
-						createJob(input.cron)
+						validateCron(input.cron)
 					} catch (err) {
 						const message = err instanceof Error ? err.message : 'Invalid cron expression'
 
@@ -202,6 +195,33 @@ export const createCronTool = (s: Session) => {
 					enabled: job.enabled,
 					path: job_file
 				}
+			}
+
+			if (input.action === 'remove') {
+				if (!input.name) return { action: 'remove', error: 'name is required for remove action' }
+
+				const index = env.cron.store.jobs.findIndex(item => item.name === input.name)
+
+				if (index === -1) return { action: 'remove', error: `Job "${input.name}" not found` }
+
+				let job_file = ''
+
+				try {
+					job_file = getJobPath(input.name)
+				} catch (err) {
+					const message = err instanceof Error ? err.message : 'Invalid name'
+
+					return { action: 'remove', error: message }
+				}
+
+				stopJob(env.cron, input.name)
+
+				env.cron.store.jobs.splice(index, 1)
+
+				await saveStore(env.cron.store)
+				await fs.remove(path.dirname(job_file))
+
+				return { action: 'remove', name: input.name, removed: true, path: path.dirname(job_file) }
 			}
 
 			return { error: 'Unknown action' }

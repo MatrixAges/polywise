@@ -1,6 +1,7 @@
 export { default as appendCronLog } from './log'
 export { default as initCron } from './initCron'
 export { default as createJob } from './createJob'
+export { default as validateCron } from './validateCron'
 export { default as reloadJob } from './reloadJob'
 export { default as stopJob } from './stopJob'
 export { default as stopAllJobs } from './stopAllJobs'
