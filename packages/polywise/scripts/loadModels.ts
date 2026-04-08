@@ -1,3 +1,3 @@
-import { initModels } from '../src/env'
+import { initModels } from '../src/llama'
 
 await initModels()
