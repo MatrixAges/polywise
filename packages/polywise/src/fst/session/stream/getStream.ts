@@ -107,7 +107,10 @@ export default async (s: Index, message: Message) => {
 			}
 		},
 		onFinish: async ({ responseMessage }) => {
-			await s.appendMessage(responseMessage)
+			if (responseMessage.parts.length) {
+				await s.appendMessage(responseMessage)
+			}
+
 			await s.stop()
 		}
 	})
