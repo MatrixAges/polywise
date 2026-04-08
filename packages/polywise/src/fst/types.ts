@@ -22,6 +22,7 @@ export interface InitArgs {
 	id: string
 	event: EventEmitter
 	is_cron?: boolean
+	title?: string
 }
 
 export interface MessageMetadata {
