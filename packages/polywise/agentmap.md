@@ -29,7 +29,11 @@ This document provides an overview of the packages/polywise module structure and
 		"src": {
 			"api": {
 				"index.ts": { "desc": "Hono API entry with tRPC and custom handlers", "role": "Index" },
-				"chat.ts": { "desc": "Chat API handler exposing fst capabilities", "role": "Endpoint" }
+				"chat.ts": { "desc": "Chat API handler exposing fst capabilities", "role": "Endpoint" },
+				"session/connectSession.ts": {
+					"desc": "Shared session connect helper for API/session consumers",
+					"role": "Utility"
+				}
 			},
 			"fst": {
 				"index.ts": { "desc": "fst module exports", "role": "Index" },

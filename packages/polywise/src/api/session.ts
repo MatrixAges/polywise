@@ -1,6 +1,7 @@
-import { Session } from '@core/fst'
-import { SessionEventStore, SessionStore, SessionStreamStore } from '@core/utils'
+import { SessionStreamStore } from '@core/utils'
 import { createUIMessageStream, JsonToSseTransformStream } from 'ai'
+
+import { connectSession } from '../utils'
 
 import type { Message } from '@core/fst'
 import type { HonoContext } from '@core/types'
@@ -8,15 +9,7 @@ import type { HonoContext } from '@core/types'
 export const post = async (c: HonoContext) => {
 	const { id, message } = await c.req.json<{ id: string; message: Message }>()
 
-	let session = SessionStore.get(id)!
-
-	if (!session) {
-		session = new Session()
-
-		await session.init({ id, event: SessionEventStore })
-
-		SessionStore.set(id, session)
-	}
+	const session = await connectSession({ id })
 
 	const stream = await session.getStream(message)
 

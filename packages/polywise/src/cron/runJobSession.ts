@@ -1,5 +1,4 @@
-import { Session } from '@core/fst'
-import { SessionEventStore, SessionStore } from '@core/utils'
+import { connectSession } from '@core/utils'
 import fs from 'fs-extra'
 import { getId } from 'stk/utils'
 
@@ -21,12 +20,8 @@ const getJobPrompt = (job: CronJob, content: string) => {
 
 export default async (job: CronJob) => {
 	const id = getId()
-	const session = new Session()
 	const job_path = getJobPath(job.name)
-
-	await session.init({ id, event: SessionEventStore, is_cron: true })
-
-	SessionStore.set(id, session)
+	const session = await connectSession({ id, is_cron: true })
 
 	const exists = await fs.pathExists(job_path)
 
