@@ -265,7 +265,11 @@ export default class Index {
 		}, 30)
 
 		const off_error = this.chat['~registerErrorCallback'](() => {
-			if (this.chat.error?.message) toast.error(this.chat.error.message, { duration: 1000000 })
+			if (this.chat.error?.message) {
+				this.stop()
+
+				toast.error(this.chat.error.message, { duration: 1000000 })
+			}
 		})
 
 		this.util.acts.push(off_status, off_messages, off_error)

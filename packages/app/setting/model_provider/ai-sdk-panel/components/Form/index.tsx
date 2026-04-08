@@ -104,7 +104,7 @@ const Index = (props: IPropsForm) => {
 			return setError(t('provider.form.error.name_required'))
 		}
 
-		prepend({ ...values, enabled: true, features: values.features || {} })
+		prepend({ ...values, enabled: true })
 
 		onCancel()
 	})

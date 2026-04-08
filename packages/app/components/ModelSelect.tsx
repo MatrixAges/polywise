@@ -40,10 +40,16 @@ const Index = (props: IProps) => {
 	}, [value])
 
 	const provider_items = useMemo(() => {
-		const target = providers.map(group => ({
-			value: group.name,
-			items: (group.models || []).map(item => item.id)
-		}))
+		const target = []
+
+		providers.map(group => {
+			if (group.enabled) {
+				target.push({
+					value: group.name,
+					items: (group.models || []).filter(item => item.enabled).map(item => item.id)
+				})
+			}
+		})
 
 		if (show_local_model) {
 			target.unshift({
@@ -61,9 +67,13 @@ const Index = (props: IProps) => {
 		const provider = provider_items[index]
 		const model = provider.items[idx]
 
+		console.log(index, idx, provider, model)
+
 		setModel(model)
 		onChange?.({ provider: provider.value, model })
 	})
+
+	console.log(model)
 
 	return (
 		<Combobox items={provider_items} value={model} onValueChange={setDefaultModel}>
