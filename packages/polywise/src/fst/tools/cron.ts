@@ -14,7 +14,7 @@ import type Session from '../session'
 
 const inputSchema = object({
 	action: Enum(['create', 'list', 'read', 'update']).describe(
-		'The action to perform. create: create cron job and TASK.md. list: list cron jobs. read: read TASK.md by name. update: update cron/content/enabled for existing job.'
+		'The action to perform. create: create cron job and JOB.md. list: list cron jobs. read: read JOB.md by name. update: update cron/content/enabled for existing job.'
 	),
 	name: string()
 		.optional()
@@ -22,7 +22,7 @@ const inputSchema = object({
 	cron: string()
 		.optional()
 		.describe('[Required for create, optional for update] Cron expression used to validate job schedule'),
-	content: string().optional().describe('[Required for create, optional for update] TASK.md content to write'),
+	content: string().optional().describe('[Required for create, optional for update] JOB.md content to write'),
 	enabled: boolean().optional().describe('[Optional for update] Whether this job should be scheduled')
 })
 
@@ -35,7 +35,7 @@ const validateCron = (cron: string) => {
 export const createCronTool = (s: Session) => {
 	return tool({
 		description:
-			'Create, update, and inspect cron job definitions. Metadata is stored in app.app_path/cron.json. Job docs are stored in app.app_path/cron/[name]/TASK.md.',
+			'Create, update, and inspect cron job definitions. Metadata is stored in app.app_path/cron.json. Job docs are stored in app.app_path/cron/[name]/JOB.md.',
 		inputSchema,
 		execute: async input => {
 			if (input.action === 'create') {
@@ -65,18 +65,6 @@ export const createCronTool = (s: Session) => {
 					const message = err instanceof Error ? err.message : 'Invalid name'
 
 					return { action: 'create', error: message }
-				}
-
-				const perm_error = await checkPermission(s, 'file', 'write', job_file)
-
-				if (perm_error) {
-					return { action: 'create', error: perm_error }
-				}
-
-				const store_perm_error = await checkPermission(s, 'file', 'write', app.cron_path)
-
-				if (store_perm_error) {
-					return { action: 'create', error: store_perm_error }
 				}
 
 				try {
@@ -123,7 +111,7 @@ export const createCronTool = (s: Session) => {
 
 				const jobs = await Promise.all(
 					env.cron.store.jobs.map(async job => {
-						const job_md_path = path.resolve(app.cron_dir, job.name, 'TASK.md')
+						const job_md_path = path.resolve(app.cron_dir, job.name, 'JOB.md')
 						const has_job_md = await fs.pathExists(job_md_path)
 
 						return {
@@ -157,12 +145,6 @@ export const createCronTool = (s: Session) => {
 					return { action: 'read', error: message }
 				}
 
-				const perm_error = await checkPermission(s, 'file', 'read', job_file)
-
-				if (perm_error) {
-					return { action: 'read', name: input.name, content: '', error: perm_error }
-				}
-
 				const exists = await fs.pathExists(job_file)
 
 				if (!exists) {
@@ -170,7 +152,7 @@ export const createCronTool = (s: Session) => {
 						action: 'read',
 						name: input.name,
 						content: '',
-						error: `TASK.md not found for job "${input.name}"`
+						error: `JOB.md not found for job "${input.name}"`
 					}
 				}
 
