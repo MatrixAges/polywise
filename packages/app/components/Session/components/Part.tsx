@@ -3,6 +3,7 @@ import { isStaticToolUIPart } from 'ai'
 import { MessageResponse } from '@/__shadcn__/components/ai-elements'
 import { Reasoning, ReasoningContent, ReasoningTrigger } from '@/__shadcn__/components/ai-elements/reasoning'
 import { Tool, ToolContent, ToolHeader, ToolInput, ToolOutput } from '@/__shadcn__/components/ai-elements/tool'
+import { getToolDesc } from '@/utils'
 
 import Edit from './Edit'
 import Question from './Question'
@@ -10,7 +11,7 @@ import SubAgent from './SubAgent'
 
 import type { EditResult, QuestionInput } from '@core/fst/tools'
 import type { DynamicToolUIPart, ToolUIPart } from 'ai'
-import type { EditFileInput, IPropsPart } from '../types'
+import type { IPropsPart } from '../types'
 
 const Index = (props: IPropsPart) => {
 	const { streaming, metadata, part, answer } = props
@@ -80,7 +81,12 @@ const Index = (props: IPropsPart) => {
 
 		return (
 			<Tool>
-				<ToolHeader type={tool_part.type} state={tool_part.state} title={tool_part.title} />
+				<ToolHeader
+					type={tool_part.type}
+					state={tool_part.state}
+					title={tool_part.title}
+					desc={getToolDesc(tool_part)}
+				/>
 				<ToolContent>
 					{tool_part.input !== undefined && <ToolInput input={tool_part.input} />}
 					{(tool_part.output ?? tool_part.errorText) && (

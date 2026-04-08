@@ -12,7 +12,6 @@ import type { IPropsSubAgent } from '../types'
 
 const Index = (props: IPropsSubAgent) => {
 	const { streaming, part, answer } = props
-	const mounted = useMounted()
 	const [open, { toggle, set }] = useToggle(false)
 
 	useEffect(() => set(streaming), [streaming])
@@ -26,17 +25,16 @@ const Index = (props: IPropsSubAgent) => {
 					flex
 					items-center
 					gap-2
-					text-muted-foreground text-sm
+					text-muted-foreground
 					hover:text-foreground
 					cursor-pointer select-none
 				'
 				onClick={toggle}
 			>
 				<BotMessageSquare className='text-std-400 size-3'></BotMessageSquare>
-				<span>sub_agent</span>
-				<span className='text-std-400 text-xs capitalize'>{name}</span>
+				<span className='capitalize'>{name} Agent</span>
 			</div>
-			{mounted && open && (
+			{open && (
 				<div
 					className='
 						w-full

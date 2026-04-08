@@ -28,6 +28,7 @@ export { default as setCssVar } from './setCssVar'
 export { default as alert } from './alert'
 export { default as onViewport } from './onViewport'
 export { default as getToolName } from './getToolName'
+export { default as getToolDesc } from './getToolDesc'
 
 export * from './theme'
 export * from './is'
