@@ -6,7 +6,7 @@ import fs from 'fs-extra'
 
 import type Index from '../index'
 
-export default async (s: Index) => {
+export default async (s: Index, is_cron?: boolean) => {
 	let res: typeof s.session
 
 	await fs.ensureDir(s.session_dir)
@@ -23,7 +23,8 @@ export default async (s: Index) => {
 			.insert(session)
 			.values({
 				id: s.id,
-				title: `Session ${dayjs().format('YYYY-MM-DD HH:mm:ss')}`
+				title: `Session ${dayjs().format('YYYY-MM-DD HH:mm:ss')}`,
+				is_cron: is_cron || undefined
 			})
 			.returning()
 

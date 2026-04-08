@@ -34,6 +34,10 @@ This document provides an overview of the packages/polywise module structure and
 			"fst": {
 				"index.ts": { "desc": "fst module exports", "role": "Index" },
 				"chat": { "desc": "Chat capabilities using AI SDK, supporting UIMessages", "role": "Folder" },
+				"session": {
+					"desc": "Session lifecycle and stream orchestration for chat and cron-triggered runs",
+					"role": "Folder"
+				},
 				"agents": {
 					"desc": "Internal decision agents for permission, audit, and system operations",
 					"role": "Folder"
@@ -46,11 +50,7 @@ This document provides an overview of the packages/polywise module structure and
 					"websearch.ts": "Web search via DuckDuckGo HTML → turndown Markdown"
 				},
 				"cron": {
-					"desc": "Cron runtime and store utilities including shared cron validation",
-					"role": "Folder"
-				},
-				"cron": {
-					"desc": "Cron metadata store/runtime/logging backed by cron.json and Croner jobs",
+					"desc": "Cron metadata store/runtime/logging backed by cron.json and Croner jobs, including session execution bridge",
 					"role": "Folder"
 				},
 				"mcp": { "desc": "MCP client tools integration", "role": "Folder" },
@@ -83,7 +83,7 @@ This document provides an overview of the packages/polywise module structure and
 						"role": "Schema"
 					},
 					"session.ts": {
-						"desc": "Chat session storage schema with nullable key, optional im flag, and related indexes",
+						"desc": "Chat session storage schema with nullable key, optional im/cron flags, and related indexes",
 						"role": "Schema"
 					},
 					"message.ts": { "desc": "Chat message storage schema with UIMessages", "role": "Schema" }

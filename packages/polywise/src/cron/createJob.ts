@@ -2,6 +2,7 @@ import { Cron } from 'croner'
 
 import getJob from './getJob'
 import log from './log'
+import runJobSession from './runJobSession'
 import saveStore from './saveStore'
 
 import type { CronJob, CronRuntime } from './types'
@@ -22,6 +23,8 @@ export default (runtime: CronRuntime, job: CronJob) => {
 
 				return
 			}
+
+			await runJobSession(job)
 
 			target.last_run_at = new Date().toISOString()
 			target.last_status = 'success'

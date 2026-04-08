@@ -21,6 +21,7 @@ export type Permissions = Array<Permission>
 export interface InitArgs {
 	id: string
 	event: EventEmitter
+	is_cron?: boolean
 }
 
 export interface MessageMetadata {

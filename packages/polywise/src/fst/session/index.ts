@@ -66,12 +66,12 @@ export default class Index {
 	}
 
 	async init(args: InitArgs) {
-		const { id, event } = args
+		const { id, event, is_cron } = args
 
 		this.id = id
 		this.event = event
 
-		await this.initSession()
+		await this.initSession(is_cron)
 
 		this.cwd = this.project?.dir || this.files_dir
 
@@ -80,7 +80,7 @@ export default class Index {
 		return this.getData()
 	}
 
-	initSession = () => initSession(this)
+	initSession = (is_cron?: boolean) => initSession(this, is_cron)
 	getSession = () => getSession(this)
 	updateSession = (args: Partial<SessionInsert>) => updateSession(this, args)
 

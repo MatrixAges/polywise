@@ -13,6 +13,8 @@ export default sqliteTable(
 		key: text('key'),
 		// is im chat session
 		is_im: integer('im', { mode: 'boolean' }),
+		// is cron execution session
+		is_cron: integer('cron', { mode: 'boolean' }),
 		created_at: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
 		updated_at: integer('updated_at', { mode: 'timestamp' })
 			.$defaultFn(() => new Date())
@@ -20,6 +22,7 @@ export default sqliteTable(
 	},
 	t => [
 		index('session_is_im_idx').on(t.is_im),
+		index('session_is_cron_idx').on(t.is_cron),
 		index('session_created_at_idx').on(t.created_at),
 		index('session_updated_at_idx').on(t.updated_at),
 		uniqueIndex('session_key_idx').on(t.key)
