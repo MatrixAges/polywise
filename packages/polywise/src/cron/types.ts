@@ -1,6 +1,6 @@
 import type { Cron } from 'croner'
 
-export interface CronTask {
+export interface CronJob {
 	name: string
 	cron: string
 	enabled: boolean
@@ -13,7 +13,7 @@ export interface CronTask {
 
 export interface CronStore {
 	version: number
-	tasks: Array<CronTask>
+	jobs: Array<CronJob>
 }
 
 export interface CronRuntime {

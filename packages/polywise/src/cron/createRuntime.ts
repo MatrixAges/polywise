@@ -9,23 +9,23 @@ export default async (store: CronStore) => {
 		jobs: new Map()
 	} as CronRuntime
 
-	for (const task of store.tasks) {
-		if (!task.enabled) {
+	for (const job of store.jobs) {
+		if (!job.enabled) {
 			continue
 		}
 
 		try {
-			const job = createJob(runtime, task)
+			const cron_job = createJob(runtime, job)
 
-			if (!job) {
+			if (!cron_job) {
 				continue
 			}
 
-			runtime.jobs.set(task.name, job)
+			runtime.jobs.set(job.name, cron_job)
 		} catch (err) {
 			const message = err instanceof Error ? err.message : 'unknown error'
 
-			await log(task.name, 'error', `load failed: ${message}`)
+			await log(job.name, 'error', `load failed: ${message}`)
 		}
 	}
 

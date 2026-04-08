@@ -4,21 +4,21 @@ import getJob from './getJob'
 import log from './log'
 import saveStore from './saveStore'
 
-import type { CronRuntime, CronTask } from './types'
+import type { CronJob, CronRuntime } from './types'
 
-export default (runtime: CronRuntime, task: CronTask) => {
-	if (!task.enabled) return null
+export default (runtime: CronRuntime, job: CronJob) => {
+	if (!job.enabled) return null
 
-	const job = new Cron(task.cron, async () => {
+	const cron_job = new Cron(job.cron, async () => {
 		const start_time = Date.now()
 
-		await log(task.name, 'trigger', 'run started')
+		await log(job.name, 'trigger', 'run started')
 
 		try {
-			const target = getJob(runtime.store, task.name)
+			const target = getJob(runtime.store, job.name)
 
 			if (!target) {
-				await log(task.name, 'error', 'task missing in memory store')
+				await log(job.name, 'error', 'job missing in memory store')
 
 				return
 			}
@@ -32,10 +32,10 @@ export default (runtime: CronRuntime, task: CronTask) => {
 
 			const cost_ms = Date.now() - start_time
 
-			await log(task.name, 'success', `run finished (cost_ms=${cost_ms})`)
+			await log(job.name, 'success', `run finished (cost_ms=${cost_ms})`)
 		} catch (err) {
 			const message = err instanceof Error ? err.message : 'unknown error'
-			const target = getJob(runtime.store, task.name)
+			const target = getJob(runtime.store, job.name)
 
 			if (target) {
 				target.last_run_at = new Date().toISOString()
@@ -46,9 +46,9 @@ export default (runtime: CronRuntime, task: CronTask) => {
 				await saveStore(runtime.store)
 			}
 
-			await log(task.name, 'error', `run failed: ${message}`)
+			await log(job.name, 'error', `run failed: ${message}`)
 		}
 	})
 
-	return job
+	return cron_job
 }

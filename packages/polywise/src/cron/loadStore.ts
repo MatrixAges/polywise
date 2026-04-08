@@ -3,11 +3,11 @@ import { cron_path } from '@core/consts/app'
 import { writeFile } from 'atomically'
 import fs from 'fs-extra'
 
-import type { CronStore, CronTask } from './types'
+import type { CronJob, CronStore } from './types'
 
 const default_store: CronStore = {
 	version: 1,
-	tasks: []
+	jobs: []
 }
 
 export default async () => {
@@ -26,19 +26,19 @@ export default async () => {
 	if (!raw || typeof raw !== 'object') return default_store
 
 	const version = Number(raw.version) || 1
-	const raw_tasks = Array.isArray(raw.tasks) ? (raw.tasks as Array<CronTask>) : []
+	const raw_jobs = Array.isArray(raw.jobs) ? (raw.jobs as Array<CronJob>) : []
 
-	const tasks = raw_tasks
+	const jobs = raw_jobs
 		.filter(
-			(item): item is CronTask & { name: string; cron: string } =>
+			(item): item is CronJob & { name: string; cron: string } =>
 				Boolean(item) &&
 				typeof item === 'object' &&
 				typeof item.name === 'string' &&
 				typeof item.cron === 'string'
 		)
-		.map((item): CronTask => {
+		.map((item): CronJob => {
 			const now = new Date().toISOString()
-			const last_status: CronTask['last_status'] =
+			const last_status: CronJob['last_status'] =
 				item.last_status === 'success' || item.last_status === 'error' || item.last_status === 'idle'
 					? item.last_status
 					: 'idle'
@@ -55,5 +55,5 @@ export default async () => {
 			}
 		})
 
-	return { version, tasks }
+	return { version, jobs }
 }

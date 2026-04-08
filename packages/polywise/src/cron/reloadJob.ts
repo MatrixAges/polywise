@@ -9,36 +9,36 @@ import type { CronRuntime } from './types'
 export default async (runtime: CronRuntime, name: string) => {
 	stopJob(runtime, name)
 
-	const task = getJob(runtime.store, name)
+	const job = getJob(runtime.store, name)
 
-	if (!task) {
-		await log(name, 'system', 'task removed from runtime')
+	if (!job) {
+		await log(name, 'system', 'job removed from runtime')
 
 		return
 	}
 
-	if (!task.enabled) {
-		await log(name, 'system', 'task disabled')
+	if (!job.enabled) {
+		await log(name, 'system', 'job disabled')
 
 		return
 	}
 
 	try {
-		const job = createJob(runtime, task)
+		const cron_job = createJob(runtime, job)
 
-		if (!job) {
+		if (!cron_job) {
 			return
 		}
 
-		runtime.jobs.set(name, job)
+		runtime.jobs.set(name, cron_job)
 
-		await log(name, 'system', 'task reloaded')
+		await log(name, 'system', 'job reloaded')
 	} catch (err) {
 		const message = err instanceof Error ? err.message : 'unknown error'
 
-		task.last_status = 'error'
-		task.last_error = message
-		task.updated_at = new Date().toISOString()
+		job.last_status = 'error'
+		job.last_error = message
+		job.updated_at = new Date().toISOString()
 
 		await saveCronStore(runtime.store)
 		await log(name, 'error', `reload failed: ${message}`)

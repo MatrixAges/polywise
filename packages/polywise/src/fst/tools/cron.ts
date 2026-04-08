@@ -1,7 +1,6 @@
 import path from 'path'
 import { app } from '@core/consts'
-import { cron_path } from '@core/consts/app'
-import { reloadJob, saveStore } from '@core/cron'
+import { getJobPath, reloadJob, saveStore } from '@core/cron'
 import { env } from '@core/env'
 import { tool } from 'ai'
 import { readFile } from 'atomically'
@@ -15,33 +14,17 @@ import type Session from '../session'
 
 const inputSchema = object({
 	action: Enum(['create', 'list', 'read', 'update']).describe(
-		'The action to perform. create: create cron task and TASK.md. list: list cron tasks. read: read TASK.md by name. update: update cron/content/enabled for existing task.'
+		'The action to perform. create: create cron job and TASK.md. list: list cron jobs. read: read TASK.md by name. update: update cron/content/enabled for existing job.'
 	),
 	name: string()
 		.optional()
-		.describe('[Required for create/read/update] Task name used as folder name under app.app_path/cron'),
+		.describe('[Required for create/read/update] Job name used as folder name under app.app_path/cron'),
 	cron: string()
 		.optional()
-		.describe('[Required for create, optional for update] Cron expression used to validate task schedule'),
+		.describe('[Required for create, optional for update] Cron expression used to validate job schedule'),
 	content: string().optional().describe('[Required for create, optional for update] TASK.md content to write'),
-	enabled: boolean().optional().describe('[Optional for update] Whether this task should be scheduled')
+	enabled: boolean().optional().describe('[Optional for update] Whether this job should be scheduled')
 })
-
-const cron_dir = path.resolve(app.app_path, 'cron')
-
-const getTaskDir = (name: string) => {
-	if (name.includes('..') || name.includes('/') || name.includes('\\')) {
-		throw new Error('Invalid name: path traversal or separators are not allowed')
-	}
-
-	if (!name.trim()) {
-		throw new Error('Invalid name: cannot be empty')
-	}
-
-	return path.resolve(cron_dir, name)
-}
-
-const getTaskFile = (name: string) => path.resolve(getTaskDir(name), 'TASK.md')
 
 const validateCron = (cron: string) => {
 	const job = new Cron(cron, { paused: true })
@@ -52,7 +35,7 @@ const validateCron = (cron: string) => {
 export const createCronTool = (s: Session) => {
 	return tool({
 		description:
-			'Create, update, and inspect cron task definitions. Metadata is stored in app.app_path/cron.json. Task docs are stored in app.app_path/cron/[name]/TASK.md.',
+			'Create, update, and inspect cron job definitions. Metadata is stored in app.app_path/cron.json. Job docs are stored in app.app_path/cron/[name]/TASK.md.',
 		inputSchema,
 		execute: async input => {
 			if (input.action === 'create') {
@@ -68,29 +51,29 @@ export const createCronTool = (s: Session) => {
 					return { action: 'create', error: 'content is required for create action' }
 				}
 
-				const exists = env.cron.store.tasks.some(task => task.name === input.name)
+				const exists = env.cron.store.jobs.some(job => job.name === input.name)
 
 				if (exists) {
-					return { action: 'create', error: `Task "${input.name}" already exists` }
+					return { action: 'create', error: `Job "${input.name}" already exists` }
 				}
 
-				let task_file = ''
+				let job_file = ''
 
 				try {
-					task_file = getTaskFile(input.name)
+					job_file = getJobPath(input.name)
 				} catch (err) {
 					const message = err instanceof Error ? err.message : 'Invalid name'
 
 					return { action: 'create', error: message }
 				}
 
-				const perm_error = await checkPermission(s, 'file', 'write', task_file)
+				const perm_error = await checkPermission(s, 'file', 'write', job_file)
 
 				if (perm_error) {
 					return { action: 'create', error: perm_error }
 				}
 
-				const store_perm_error = await checkPermission(s, 'file', 'write', cron_path)
+				const store_perm_error = await checkPermission(s, 'file', 'write', app.cron_path)
 
 				if (store_perm_error) {
 					return { action: 'create', error: store_perm_error }
@@ -104,12 +87,12 @@ export const createCronTool = (s: Session) => {
 					return { action: 'create', error: message }
 				}
 
-				await fs.ensureDir(path.dirname(task_file))
-				await fs.writeFile(task_file, input.content, 'utf8')
+				await fs.ensureDir(path.dirname(job_file))
+				await fs.writeFile(job_file, input.content, 'utf8')
 
 				const now = new Date().toISOString()
 
-				env.cron.store.tasks.push({
+				env.cron.store.jobs.push({
 					name: input.name,
 					cron: input.cron,
 					enabled: true,
@@ -127,36 +110,36 @@ export const createCronTool = (s: Session) => {
 					action: 'create',
 					name: input.name,
 					cron: input.cron,
-					path: task_file
+					path: job_file
 				}
 			}
 
 			if (input.action === 'list') {
-				const perm_error = await checkPermission(s, 'file', 'read', cron_path)
+				const perm_error = await checkPermission(s, 'file', 'read', app.cron_path)
 
 				if (perm_error) {
-					return { action: 'list', tasks: [], count: 0, error: perm_error }
+					return { action: 'list', jobs: [], count: 0, error: perm_error }
 				}
 
-				const tasks = await Promise.all(
-					env.cron.store.tasks.map(async task => {
-						const task_md_path = path.resolve(cron_dir, task.name, 'TASK.md')
-						const has_task_md = await fs.pathExists(task_md_path)
+				const jobs = await Promise.all(
+					env.cron.store.jobs.map(async job => {
+						const job_md_path = path.resolve(app.cron_dir, job.name, 'TASK.md')
+						const has_job_md = await fs.pathExists(job_md_path)
 
 						return {
-							name: task.name,
-							cron: task.cron,
-							enabled: task.enabled,
-							last_run_at: task.last_run_at,
-							last_status: task.last_status,
-							last_error: task.last_error,
-							has_task_md,
-							path: task_md_path
+							name: job.name,
+							cron: job.cron,
+							enabled: job.enabled,
+							last_run_at: job.last_run_at,
+							last_status: job.last_status,
+							last_error: job.last_error,
+							has_job_md,
+							path: job_md_path
 						}
 					})
 				)
 
-				return { action: 'list', tasks, count: tasks.length }
+				return { action: 'list', jobs, count: jobs.length }
 			}
 
 			if (input.action === 'read') {
@@ -164,39 +147,39 @@ export const createCronTool = (s: Session) => {
 					return { action: 'read', error: 'name is required for read action' }
 				}
 
-				let task_file = ''
+				let job_file = ''
 
 				try {
-					task_file = getTaskFile(input.name)
+					job_file = getJobPath(input.name)
 				} catch (err) {
 					const message = err instanceof Error ? err.message : 'Invalid name'
 
 					return { action: 'read', error: message }
 				}
 
-				const perm_error = await checkPermission(s, 'file', 'read', task_file)
+				const perm_error = await checkPermission(s, 'file', 'read', job_file)
 
 				if (perm_error) {
 					return { action: 'read', name: input.name, content: '', error: perm_error }
 				}
 
-				const exists = await fs.pathExists(task_file)
+				const exists = await fs.pathExists(job_file)
 
 				if (!exists) {
 					return {
 						action: 'read',
 						name: input.name,
 						content: '',
-						error: `TASK.md not found for task "${input.name}"`
+						error: `TASK.md not found for job "${input.name}"`
 					}
 				}
 
-				const content = await readFile(task_file, 'utf8')
+				const content = await readFile(job_file, 'utf8')
 
 				return {
 					action: 'read',
 					name: input.name,
-					path: task_file,
+					path: job_file,
 					content
 				}
 			}
@@ -206,29 +189,29 @@ export const createCronTool = (s: Session) => {
 					return { action: 'update', error: 'name is required for update action' }
 				}
 
-				const task = env.cron.store.tasks.find(item => item.name === input.name)
+				const job = env.cron.store.jobs.find(item => item.name === input.name)
 
-				if (!task) {
-					return { action: 'update', error: `Task "${input.name}" not found` }
+				if (!job) {
+					return { action: 'update', error: `Job "${input.name}" not found` }
 				}
 
-				let task_file = ''
+				let job_file = ''
 
 				try {
-					task_file = getTaskFile(input.name)
+					job_file = getJobPath(input.name)
 				} catch (err) {
 					const message = err instanceof Error ? err.message : 'Invalid name'
 
 					return { action: 'update', error: message }
 				}
 
-				const write_perm_error = await checkPermission(s, 'file', 'write', task_file)
+				const write_perm_error = await checkPermission(s, 'file', 'write', job_file)
 
 				if (write_perm_error) {
 					return { action: 'update', error: write_perm_error }
 				}
 
-				const store_perm_error = await checkPermission(s, 'file', 'write', cron_path)
+				const store_perm_error = await checkPermission(s, 'file', 'write', app.cron_path)
 
 				if (store_perm_error) {
 					return { action: 'update', error: store_perm_error }
@@ -243,29 +226,29 @@ export const createCronTool = (s: Session) => {
 						return { action: 'update', error: message }
 					}
 
-					task.cron = input.cron
+					job.cron = input.cron
 				}
 
 				if (input.content !== undefined) {
-					await fs.ensureDir(path.dirname(task_file))
-					await fs.writeFile(task_file, input.content, 'utf8')
+					await fs.ensureDir(path.dirname(job_file))
+					await fs.writeFile(job_file, input.content, 'utf8')
 				}
 
 				if (input.enabled !== undefined) {
-					task.enabled = input.enabled
+					job.enabled = input.enabled
 				}
 
-				task.updated_at = new Date().toISOString()
+				job.updated_at = new Date().toISOString()
 
 				await saveStore(env.cron.store)
 				await reloadJob(env.cron, input.name)
 
 				return {
 					action: 'update',
-					name: task.name,
-					cron: task.cron,
-					enabled: task.enabled,
-					path: task_file
+					name: job.name,
+					cron: job.cron,
+					enabled: job.enabled,
+					path: job_file
 				}
 			}
 

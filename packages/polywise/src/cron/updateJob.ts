@@ -1,13 +1,13 @@
-import type { CronStore, CronTask } from './types'
+import type { CronJob, CronStore } from './types'
 
-export default (store: CronStore, task: CronTask) => {
-	const index = store.tasks.findIndex(item => item.name === task.name)
+export default (store: CronStore, job: CronJob) => {
+	const index = store.jobs.findIndex(item => item.name === job.name)
 
 	if (index === -1) {
-		store.tasks.push(task)
+		store.jobs.push(job)
 
 		return
 	}
 
-	store.tasks[index] = task
+	store.jobs[index] = job
 }

@@ -5,5 +5,6 @@ export { default as reloadJob } from './reloadJob'
 export { default as stopJob } from './stopJob'
 export { default as stopAllJobs } from './stopAllJobs'
 export { default as saveStore } from './saveStore'
+export { default as getJobPath } from './getJobPath'
 
-export type { CronRuntime, CronStore, CronTask } from './types'
+export type { CronRuntime, CronStore, CronJob } from './types'
