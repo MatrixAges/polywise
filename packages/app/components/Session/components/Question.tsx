@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useToggle } from 'ahooks'
+import { MessageCircleQuestionMark } from 'lucide-react'
 
 import { Button } from '@/__shadcn__/components/ui/button'
 import { Input } from '@/__shadcn__/components/ui/input'
@@ -50,25 +51,43 @@ const Index = (props: IPropsQuestion) => {
 
 	return (
 		<div
-			className={$cx(
-				`
+			className='
 				flex flex-col
 				gap-3
-				p-3
-				mb-1
-				rounded-md
-				bg-secondary
-			`,
-				!streaming && 'cursor-pointer'
-			)}
-			onClick={streaming ? undefined : toggle}
+				group
+				data-[open=true]:rounded-md data-[open=true]:bg-secondary
+			'
+			data-open={open}
 		>
-			<span className={$cx('text-sm font-medium', !streaming && !open && 'text-std-500 line-clamp-1')}>
-				{question}
-				{multiple ? ' (Multiple)' : ''}
-			</span>
+			<div
+				className='
+					text-std-400 text-sm
+					group-data-[open=false]:line-clamp-1 group-data-[open=true]:px-3 group-data-[open=true]:pt-2 group/header
+					cursor-pointer select-none
+				'
+				onClick={toggle}
+			>
+				<MessageCircleQuestionMark className='text-std-400 mr-2 inline-block size-3'></MessageCircleQuestionMark>
+				<span className='text-muted-foreground group-hover/header:text-foreground mr-2'>question</span>
+				<span
+					className='
+						wrap-break-word
+						text-std-400 text-xs
+						capitalize
+					'
+				>
+					{question}
+					{multiple ? ' (Multiple)' : ''}
+				</span>
+			</div>
 			{open && (
-				<div className='flex flex-col gap-3'>
+				<div
+					className='
+						flex flex-col
+						gap-3
+						p-3 pt-0
+					'
+				>
 					<div className={$cx('flex flex-col gap-2', disabled && 'pointer-events-none')}>
 						{options.map((option, index) => {
 							const is_selected = selected.includes(option.label)
