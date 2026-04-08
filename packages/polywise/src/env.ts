@@ -1,7 +1,9 @@
+import { initCron } from './cron'
 import { initDB, initDrizzle, initSql, migrate } from './db'
 
 import type { Database } from 'better-sqlite3'
 import type { Llama, LlamaContext, LlamaEmbeddingContext, LlamaModel, LlamaRankingContext } from 'node-llama-cpp'
+import type { CronRuntime } from './cron'
 
 interface Env {
 	sqlite: Database
@@ -13,6 +15,7 @@ interface Env {
 	rerank_context: LlamaRankingContext
 	gen_model: LlamaModel
 	gen_context: LlamaContext
+	cron: CronRuntime
 }
 
 export const env = {} as Env
@@ -22,4 +25,6 @@ export const initEnv = async () => {
 	initDrizzle()
 	migrate()
 	initSql()
+
+	await initCron()
 }

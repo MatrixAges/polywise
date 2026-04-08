@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm'
-import { index, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
+import { index, integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core'
 import { getId } from 'stk/utils'
 
 import document from './document'
@@ -17,7 +17,7 @@ export default sqliteTable(
 		// Article data source (optional)
 		url: text('url'),
 		// Content hash value, used for duplicate content verification
-		hash: text('hash').unique(),
+		hash: text('hash'),
 		// Article metadata (for filtering)
 		metadata: text('metadata', { mode: 'json' }).default({}),
 		// Long article (content exceeds 12000 characters)
@@ -36,6 +36,7 @@ export default sqliteTable(
 		index('article_is_tripled_idx').on(t.is_tripled),
 		index('article_sop_idx').on(t.sop),
 		index('article_created_at_idx').on(t.created_at),
-		index('article_updated_at_idx').on(t.updated_at)
+		index('article_updated_at_idx').on(t.updated_at),
+		uniqueIndex('article_hash_idx').on(t.hash)
 	]
 )

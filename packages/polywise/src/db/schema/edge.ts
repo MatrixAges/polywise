@@ -47,7 +47,7 @@ export default sqliteTable(
 		index('edge_agent_id_idx').on(t.agent_id),
 		index('edge_source_idx').on(t.source_id),
 		index('edge_target_idx').on(t.target_id),
-		uniqueIndex('edge_source_target_idx').on(t.source_id, t.target_id),
-		index('edge_created_at_idx').on(t.created_at)
+		index('edge_created_at_idx').on(t.created_at),
+		uniqueIndex('edge_source_target_idx').on(t.source_id, t.target_id)
 	]
 )

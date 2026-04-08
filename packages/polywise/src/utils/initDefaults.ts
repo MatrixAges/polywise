@@ -4,6 +4,8 @@ import { preset_providers } from '@core/consts/providers'
 import { ensureWithValue } from '@core/utils'
 import fs from 'fs-extra'
 
+import { cron_path } from '../consts/app'
+
 import type { AppConfig, ProviderConfig } from '@core/types'
 
 const configs = ['config', 'providers']
@@ -33,6 +35,13 @@ export default async () => {
 	}
 
 	const skills_dir = path.resolve(app.app_path, 'skills')
+	const cron_logs_dir = path.resolve(app.app_path, '.logs/cron')
 
 	await fs.ensureDir(skills_dir)
+	await fs.ensureDir(cron_logs_dir)
+
+	await ensureWithValue(cron_path, {
+		version: 1,
+		tasks: []
+	})
 }

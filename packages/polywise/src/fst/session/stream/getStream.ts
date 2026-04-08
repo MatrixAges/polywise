@@ -7,6 +7,7 @@ import { getId } from 'stk/utils'
 import {
 	createBashTool,
 	createContextTool,
+	createCronTool,
 	createEditFileTool,
 	createGlobTool,
 	createMessageTool,
@@ -65,7 +66,8 @@ export default async (s: Index, message: Message) => {
 			edit_file_tool: createEditFileTool(s),
 			skill_tool: createSkillTool(s),
 			web_search_tool: createWebSearchTool(),
-			web_fetch_tool: createWebFetchTool()
+			web_fetch_tool: createWebFetchTool(),
+			cron_tool: createCronTool(s)
 		},
 		abortSignal: s.abort_controller.signal,
 		providerOptions: s.model.provider_options,

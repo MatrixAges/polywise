@@ -37,8 +37,13 @@ This document provides an overview of the packages/polywise module structure and
 				"tools": {
 					"desc": "Bash sandboxing tools via bash-tool",
 					"role": "Folder",
+					"cron.ts": "Create/list/read/update cron tasks backed by app.app_path/cron.json with incremental runtime reload",
 					"webfetch.ts": "Fetch URL content as Markdown (Jina primary, fetch+turndown fallback)",
 					"websearch.ts": "Web search via DuckDuckGo HTML → turndown Markdown"
+				},
+				"cron": {
+					"desc": "Cron metadata store/runtime/logging backed by cron.json and Croner jobs",
+					"role": "Folder"
 				},
 				"mcp": { "desc": "MCP client tools integration", "role": "Folder" },
 				"acp": { "desc": "ACP provider integration", "role": "Folder" }
@@ -69,7 +74,10 @@ This document provides an overview of the packages/polywise module structure and
 						"desc": "Article storage schema with content, metadata, and sop flag",
 						"role": "Schema"
 					},
-					"session.ts": { "desc": "Chat session storage schema", "role": "Schema" },
+					"session.ts": {
+						"desc": "Chat session storage schema with nullable key, optional im flag, and related indexes",
+						"role": "Schema"
+					},
 					"message.ts": { "desc": "Chat message storage schema with UIMessages", "role": "Schema" }
 				}
 			},
