@@ -129,3 +129,9 @@
 		@apply outline-ring/50 outline-2;
 	}
 }
+
+[data-slot='collapsible-content'] {
+	& > :first-child {
+		@apply space-y-2;
+	}
+}
