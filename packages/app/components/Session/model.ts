@@ -268,6 +268,14 @@ export default class Index {
 			if (this.chat.error?.message) {
 				this.stop()
 
+				const last_message = this.messages.at(-1)!
+
+				if (last_message.role === 'assistant' && !last_message.parts.length) {
+					this.messages.pop()
+
+					this.update()
+				}
+
 				toast.error(this.chat.error.message, { duration: 1000000 })
 			}
 		})

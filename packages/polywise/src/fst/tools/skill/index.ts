@@ -1,6 +1,6 @@
 import { tool } from 'ai'
 import { readFile } from 'atomically'
-import { literal, number, object, string, union } from 'zod'
+import { enum as Enum, number, object, string } from 'zod'
 
 import { checkPermission } from '../../utils'
 import buildSkillMap from './build'
@@ -10,22 +10,16 @@ import type Session from '../../session'
 
 export { default as buildSkillMap } from './build'
 
-export const search_schema = object({
-	action: literal('search').describe('Action: search to find skills by keyword'),
-	keyword: string().describe('Keywords to search for in skill names and descriptions'),
-	max_results: number().optional().describe('Maximum results to return (default 5)')
+export const inputSchema = object({
+	action: Enum(['search', 'read', 'build']).describe(
+		'The action to perform. search: find skills by keyword. read: get full skill content. build: rebuild the skill_map index.'
+	),
+	keyword: string()
+		.optional()
+		.describe('[Required for search] Keywords to search for in skill names and descriptions'),
+	skill_name: string().optional().describe('[Required for read] The exact skill name to read'),
+	max_results: number().optional().describe('[Only for search] Maximum results to return (default 5)')
 })
-
-export const read_schema = object({
-	action: literal('read').describe('Action: read to get full skill content'),
-	skill_name: string().describe('The exact skill name to read')
-})
-
-export const build_schema = object({
-	action: literal('build').describe('Action: rebuild the skill_map index')
-})
-
-export const inputSchema = union([search_schema, read_schema, build_schema])
 
 export const createSkillTool = (s: Session) => {
 	return tool({
@@ -44,6 +38,10 @@ export const createSkillTool = (s: Session) => {
 			const { skill_map } = s
 
 			if (input.action === 'search') {
+				if (!input.keyword) {
+					return { action: 'search', error: 'keyword is required for search action' }
+				}
+
 				const max_results = input.max_results ?? 5
 				const results = search(skill_map, input.keyword, max_results)
 
@@ -71,6 +69,10 @@ export const createSkillTool = (s: Session) => {
 			}
 
 			if (input.action === 'read') {
+				if (!input.skill_name) {
+					return { action: 'read', error: 'skill_name is required for read action' }
+				}
+
 				const target = skill_map.find(s => s.name === input.skill_name)
 
 				if (!target) {
