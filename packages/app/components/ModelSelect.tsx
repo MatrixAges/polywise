@@ -67,13 +67,9 @@ const Index = (props: IProps) => {
 		const provider = provider_items[index]
 		const model = provider.items[idx]
 
-		console.log(index, idx, provider, model)
-
 		setModel(model)
 		onChange?.({ provider: provider.value, model })
 	})
-
-	console.log(model)
 
 	return (
 		<Combobox items={provider_items} value={model} onValueChange={setDefaultModel}>

@@ -36,8 +36,6 @@ export default p
 	.input(input_type)
 	.output(output_type)
 	.query(async ({ input }) => {
-		console.log('input: ', input)
-
 		pauseTriple()
 
 		try {

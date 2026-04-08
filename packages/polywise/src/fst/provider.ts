@@ -23,7 +23,10 @@ export const getModel = async (provider: string, model: string, options?: any): 
 			}
 		case 'open_responses':
 			return {
-				model: (await import('@ai-sdk/open-responses')).createOpenResponses(options)(model)
+				model: (await import('@ai-sdk/open-responses')).createOpenResponses({
+					...options,
+					url: options.baseURL
+				})(model)
 			}
 		case 'open_compatible':
 			return {
@@ -63,8 +66,8 @@ export const getModel = async (provider: string, model: string, options?: any): 
 				model: target_model,
 				provider_options: {
 					google: { thinkingConfig: { includeThoughts: true } } satisfies GoogleLanguageModelOptions
-				}
-				// tools: { google_search_tool }
+				},
+				tools: { google_search_tool }
 			}
 		}
 		case 'openai':

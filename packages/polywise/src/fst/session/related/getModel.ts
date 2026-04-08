@@ -8,8 +8,9 @@ import type Index from '../index'
 
 export default async (s: Index) => {
 	const { provider, model } = config.default_model
+	const custom_providers = providers.custom_providers || []
 
-	const all_providers = [...providers.providers, ...(providers.custom_providers || [])]
+	const all_providers = [...providers.providers, ...custom_providers]
 	const target_provider = all_providers.find(item => item.name === provider)
 
 	let target_options
@@ -21,5 +22,11 @@ export default async (s: Index) => {
 		}
 	}
 
-	s.model = await getModel(provider, model, target_options)
+	let target_provider_name = provider
+
+	if (custom_providers.find(item => item.name === provider)) {
+		target_provider_name = 'open_responses'
+	}
+
+	s.model = await getModel(target_provider_name, model, target_options)
 }
