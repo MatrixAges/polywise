@@ -108,6 +108,7 @@ CREATE TABLE `session` (
 	`runing` integer DEFAULT false NOT NULL,
 	`key` text,
 	`im` integer,
+	`cron` integer,
 	`created_at` integer,
 	`updated_at` integer
 );
@@ -271,6 +272,7 @@ CREATE INDEX `project_name_idx` ON `project` (`name`);--> statement-breakpoint
 CREATE INDEX `project_created_at_idx` ON `project` (`created_at`);--> statement-breakpoint
 CREATE INDEX `project_updated_at_idx` ON `project` (`updated_at`);--> statement-breakpoint
 CREATE INDEX `session_is_im_idx` ON `session` (`im`);--> statement-breakpoint
+CREATE INDEX `session_is_cron_idx` ON `session` (`cron`);--> statement-breakpoint
 CREATE INDEX `session_created_at_idx` ON `session` (`created_at`);--> statement-breakpoint
 CREATE INDEX `session_updated_at_idx` ON `session` (`updated_at`);--> statement-breakpoint
 CREATE UNIQUE INDEX `session_key_idx` ON `session` (`key`);--> statement-breakpoint
