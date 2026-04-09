@@ -21,28 +21,28 @@ const routes: Array<RouteObject> = [
 				lazy: () => import('@/pages/home')
 			},
 			{
-				path: '/search',
-				lazy: () => import('@/pages/search')
+				path: '/session',
+				lazy: () => import('@/pages/session')
+			},
+			{
+				path: '/todo',
+				lazy: () => import('@/pages/agent')
+			},
+			{
+				path: '/project',
+				lazy: () => import('@/pages/project')
 			},
 			{
 				path: '/agent',
 				lazy: () => import('@/pages/agent')
 			},
 			{
-				path: '/bookmark',
-				lazy: () => import('@/pages/bookmark')
-			},
-			{
-				path: '/notebook',
-				lazy: () => import('@/pages/notebook')
+				path: '/library',
+				lazy: () => import('@/pages/library')
 			},
 			{
 				path: '/database',
 				lazy: () => import('@/pages/database')
-			},
-			{
-				path: '/project',
-				lazy: () => import('@/pages/project')
 			},
 			{
 				path: '/browser',
