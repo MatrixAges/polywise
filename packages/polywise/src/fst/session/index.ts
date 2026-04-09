@@ -5,7 +5,15 @@ import { app } from '@core/consts'
 import { loadSkillMap } from '../tools/skill'
 import { getContext, setContext } from './context'
 import { appendMessage, insertMessage } from './message'
-import { archiveMessages, clearMessages, getMessages, getMessagesCount, loadMessages, trimMessages } from './messages'
+import {
+	archiveMessages,
+	clearMessages,
+	getMessages,
+	getMessagesCount,
+	loadMessages,
+	trimMessages,
+	unarchiveMessages
+} from './messages'
 import { getAgents, getData, getModel, getProject } from './related'
 import { getSession, initSession, updateSession } from './session'
 import { getState, setState } from './state'
@@ -100,6 +108,7 @@ export default class Index {
 	trimMessages = () => trimMessages(this)
 	clearMessages = () => clearMessages(this)
 	archiveMessages = () => archiveMessages(this)
+	unarchiveMessages = () => unarchiveMessages(this)
 	getMessagesCount = () => getMessagesCount(this)
 
 	insertMessage = (v: Message) => insertMessage(this, v)

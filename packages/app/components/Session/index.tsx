@@ -32,10 +32,12 @@ const Index = (props: IProps) => {
 
 	const props_input: IPropsInput = {
 		streaming,
+		archived: x.archived_at !== null,
 		send: x.send,
 		stop: x.stop,
 		clear: x.clear,
 		archive: x.archive,
+		unarchive: x.unarchive,
 		scrollToBottom: x.scrollToBottom,
 		toggleContextModal
 	}

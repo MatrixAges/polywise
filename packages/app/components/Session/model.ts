@@ -29,6 +29,7 @@ export default class Index {
 	status = '' as AbstractChat<UIMessage>['status']
 	messages = [] as AbstractChat<UIMessage>['messages']
 	permission = null as unknown as Permission
+	archived_at = null as null | number
 
 	signal = 0
 	open_context_modal = false
@@ -94,11 +95,19 @@ export default class Index {
 				onData: res => {
 					switch (res.type) {
 						case 'sync':
-							const { session, context, messages, has_older, has_newer, permission } =
-								res.data
+							const {
+								session,
+								context,
+								messages,
+								archived_at,
+								has_older,
+								has_newer,
+								permission
+							} = res.data
 
 							this.session = session as Session
 							this.context = context
+							this.archived_at = archived_at
 							this.has_older = has_older
 							this.has_newer = has_newer
 							this.permission = permission as Permission
@@ -266,6 +275,12 @@ export default class Index {
 		this.reset()
 
 		rpc.session.archive.mutate(this.id)
+	}
+
+	unarchive() {
+		this.stop()
+
+		rpc.session.unarchive.mutate(this.id)
 	}
 
 	on() {

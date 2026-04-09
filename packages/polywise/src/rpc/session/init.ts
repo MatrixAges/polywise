@@ -34,6 +34,7 @@ export default p.input(input_type).subscription(async function* (args) {
 	const stop = () => session.abortStream()
 	const clear = () => session.clearMessages()
 	const archive = () => session.archiveMessages()
+	const unarchive = () => session.unarchiveMessages()
 	const load = (type: 'prev' | 'next') => session.loadMessages(type)
 
 	const destroy = () => {
@@ -45,6 +46,7 @@ export default p.input(input_type).subscription(async function* (args) {
 	SessionEventStore.on(`${id}/stop`, stop)
 	SessionEventStore.on(`${id}/clear`, clear)
 	SessionEventStore.on(`${id}/archive`, archive)
+	SessionEventStore.on(`${id}/unarchive`, unarchive)
 	SessionEventStore.on(`${id}/load`, load)
 	SessionEventStore.on(`${id}/destroy`, destroy)
 
@@ -56,6 +58,7 @@ export default p.input(input_type).subscription(async function* (args) {
 		SessionEventStore.off(`${id}/stop`, stop)
 		SessionEventStore.off(`${id}/clear`, clear)
 		SessionEventStore.off(`${id}/archive`, archive)
+		SessionEventStore.off(`${id}/unarchive`, unarchive)
 		SessionEventStore.off(`${id}/load`, load)
 		SessionEventStore.off(`${id}/destroy`, destroy)
 	}

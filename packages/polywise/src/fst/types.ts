@@ -46,6 +46,7 @@ export type ChatEventRes = {
 		session: Session
 		messages: Array<Message>
 		context: Context
+		archived_at: null | number
 		has_older: boolean
 		has_newer: boolean
 		permission: Permission | null

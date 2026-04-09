@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef } from 'react'
 import { PauseIcon, PlayIcon } from '@phosphor-icons/react'
 import { useMemoizedFn, useToggle } from 'ahooks'
-import { Archive, ArrowDownToLine, BrushCleaning, Layers2, Maximize } from 'lucide-react'
+import { Archive, ArrowDownToLine, BrushCleaning, Layers2, Maximize, PackageOpen } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import {
@@ -27,7 +27,7 @@ const submit_modes = [
 ]
 
 const Index = (props: IPropsInput) => {
-	const { streaming, send, stop, clear, archive, scrollToBottom, toggleContextModal } = props
+	const { streaming, archived, send, stop, clear, archive, unarchive, scrollToBottom, toggleContextModal } = props
 	const global = useGlobal()
 	const ref = useRef<HTMLTextAreaElement>(null)
 	const [compositing, { setLeft, setRight }] = useToggle(false)
@@ -171,32 +171,37 @@ const Index = (props: IPropsInput) => {
 						text-xs
 					'
 				>
-					<Select
-						items={submit_modes}
-						value={s.config?.submit_mode ?? 'enter'}
-						onValueChange={onChangeSubmitMode}
-					>
-						<SelectTrigger
-							className='
-								h-auto!
-								p-0
-								text-xs text-std-400
-								bg-transparent
-							'
+					<div className='flex gap-1'>
+						<Select
+							items={submit_modes}
+							value={s.config?.submit_mode ?? 'enter'}
+							onValueChange={onChangeSubmitMode}
 						>
-							<SelectValue />
-						</SelectTrigger>
-						<SelectContent className='w-[180px]' align='start'>
-							<SelectGroup>
-								<SelectLabel>Submit Mode</SelectLabel>
-								{submit_modes.map(item => (
-									<SelectItem value={item.value} key={item.value}>
-										{item.label}
-									</SelectItem>
-								))}
-							</SelectGroup>
-						</SelectContent>
-					</Select>
+							<SelectTrigger
+								className='
+									h-auto!
+									p-0
+									text-xs text-std-400
+									bg-transparent
+								'
+							>
+								<SelectValue />
+							</SelectTrigger>
+							<SelectContent className='w-[180px]' align='start'>
+								<SelectGroup>
+									<SelectLabel>Submit Mode</SelectLabel>
+									{submit_modes.map(item => (
+										<SelectItem value={item.value} key={item.value}>
+											{item.label}
+										</SelectItem>
+									))}
+								</SelectGroup>
+							</SelectContent>
+						</Select>
+						<button className='icon_button h-5 w-5' onClick={clear}>
+							<BrushCleaning className='stroke-std-400 h-[12px] w-[12px]'></BrushCleaning>
+						</button>
+					</div>
 					<div className='flex gap-1'>
 						<button className='icon_button h-5 w-5' onClick={toggleContextModal}>
 							<Layers2 className='stroke-std-400 h-[12px] w-[12px]'></Layers2>
@@ -204,12 +209,17 @@ const Index = (props: IPropsInput) => {
 						<button className='icon_button h-5 w-5' onClick={scrollToBottom}>
 							<ArrowDownToLine className='stroke-std-400 h-[12px] w-[12px]'></ArrowDownToLine>
 						</button>
-						<button className='icon_button h-5 w-5' onClick={clear}>
-							<BrushCleaning className='stroke-std-400 h-[12px] w-[12px]'></BrushCleaning>
-						</button>
-						<button className='icon_button h-5 w-5' onClick={archive}>
-							<Archive className='stroke-std-400 h-[12px] w-[12px]'></Archive>
-						</button>
+
+						<Show visible={archived}>
+							<button className='icon_button h-5 w-5' onClick={unarchive}>
+								<PackageOpen className='stroke-std-400 h-[12px] w-[12px]'></PackageOpen>
+							</button>
+						</Show>
+						<Show visible={!archived}>
+							<button className='icon_button h-5 w-5' onClick={archive}>
+								<Archive className='stroke-std-400 h-[12px] w-[12px]'></Archive>
+							</button>
+						</Show>
 					</div>
 				</div>
 			</div>
