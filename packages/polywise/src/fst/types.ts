@@ -8,6 +8,8 @@ export type Message = UIMessage<unknown, UIDataTypes, UITools> & { createdAt?: D
 export type Context = ContextInput & {
 	total_messages_count: number
 	current_messages_count: number
+	session_auto_title?: string
+	session_title_source?: 'ai' | 'human'
 }
 
 export interface Permission {

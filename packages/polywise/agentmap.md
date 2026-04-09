@@ -39,17 +39,18 @@ This document provides an overview of the packages/polywise module structure and
 				"index.ts": { "desc": "fst module exports", "role": "Index" },
 				"chat": { "desc": "Chat capabilities using AI SDK, supporting UIMessages", "role": "Folder" },
 				"session": {
-					"desc": "Session lifecycle and stream orchestration for chat and cron-triggered runs, consuming skill_map loading from fst/tools/skill",
+					"desc": "Session lifecycle and stream orchestration for chat and cron-triggered runs, consuming skill_map loading from fst/tools/skill and title_tool-based session renaming",
 					"role": "Folder"
 				},
 				"agents": {
-					"desc": "Internal decision agents for permission, audit, and system operations",
+					"desc": "Internal decision agents for permission, audit, system operations, and AI-generated session titles",
 					"role": "Folder"
 				},
 				"tools": {
 					"desc": "Bash sandboxing tools via bash-tool and local skill search/read/rebuild tooling backed by persisted skill_map.json under skills_dir",
 					"role": "Folder",
 					"cron.ts": "Create/list/read/update/remove cron jobs backed by app.app_path/cron.json with incremental runtime reload and physical directory removal",
+					"title.ts": "Internal tool that generates and updates session titles while protecting manually edited titles",
 					"webfetch.ts": "Fetch URL content as Markdown (Jina primary, fetch+turndown fallback)",
 					"websearch.ts": "Web search via DuckDuckGo HTML → turndown Markdown"
 				},

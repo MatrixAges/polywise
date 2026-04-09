@@ -14,14 +14,28 @@ import {
 	createQuestionTool,
 	createSearchFileTool,
 	createSkillTool,
+	createTitleTool,
 	createWebFetchTool,
-	createWebSearchTool
+	createWebSearchTool,
+	updateTitle
 } from '../../tools'
 
 import type { Message, MessageMetadata } from '../../types'
 import type Index from '../index'
 
 const model_threshold_value = 12
+
+const getTextParts = (message: Message) => {
+	const text_parts = [] as Array<string>
+
+	for (const part of message.parts) {
+		if (part.type === 'text' && 'text' in part && typeof part.text === 'string') {
+			text_parts.push(part.text)
+		}
+	}
+
+	return text_parts.join('\n').trim()
+}
 
 export default async (s: Index, message: Message) => {
 	s.context.total_messages_count = await s.getMessagesCount()
@@ -38,6 +52,14 @@ export default async (s: Index, message: Message) => {
 		s.trimMessages()
 	}
 
+	if (message.role === 'user' && !s.session.is_cron && s.context.total_messages_count === 0) {
+		const focus = getTextParts(message)
+
+		if (focus) {
+			await updateTitle(s, focus)
+		}
+	}
+
 	await s.runing(true)
 
 	s.sync()
@@ -50,7 +72,7 @@ export default async (s: Index, message: Message) => {
 
 	const res = streamText({
 		model: s.model.model,
-		system: `${fst_system_prompt}\n\n${getShadowContext(s.context)}`,
+		system: `${fst_system_prompt}\n\nCurrent Session Title: ${s.session.title}\n\n${getShadowContext(s.context)}`,
 		messages,
 		tools: {
 			...s.model.tools,
@@ -59,6 +81,7 @@ export default async (s: Index, message: Message) => {
 			question_tool: createQuestionTool(s.id),
 			glob_tool: createGlobTool(s),
 			search_file_tool: createSearchFileTool(s, bash_tool.env),
+			title_tool: createTitleTool(s),
 			system_tool: createSystemTool(s),
 			bash_tool: bash_tool.bash,
 			read_file_tool: bash_tool.readFile,

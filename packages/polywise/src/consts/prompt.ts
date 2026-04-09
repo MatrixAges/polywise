@@ -69,6 +69,8 @@ export const getShadowContext = (context: unknown) => `
 
 You have a persistent context state to maintain task progress and key information across the conversation.
 
+The context may include session title metadata such as the latest AI-generated title and its source. Use that information to avoid unnecessary title changes.
+
 ## Current Context State
 \`\`\`json
 ${JSON.stringify(context, null, 2)}
