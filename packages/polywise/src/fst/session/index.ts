@@ -8,6 +8,7 @@ import { appendMessage, insertMessage } from './message'
 import { archiveMessages, clearMessages, getMessages, getMessagesCount, loadMessages, trimMessages } from './messages'
 import { getAgents, getData, getModel, getProject } from './related'
 import { getSession, initSession, updateSession } from './session'
+import { getState, setState } from './state'
 import { abortStream, getStream } from './stream'
 import { clearTasks, getTasks, setTasks } from './task'
 import { active, runing, stop, sync } from './utils'
@@ -37,10 +38,10 @@ export default class Index {
 	ui_messages = [] as Array<Message>
 	ui_has_older = false
 	ui_has_newer = false
-	ui_older_locked_by_archive = false
 
 	abort_controller = new AbortController()
 	update_at = Date.now()
+	archived_at = null as null | number
 
 	get session_dir() {
 		return path.resolve(`${app.app_path}/sessions/${this.id}`)
@@ -48,6 +49,10 @@ export default class Index {
 
 	get context_dir() {
 		return path.resolve(`${this.session_dir}/context.json`)
+	}
+
+	get state_dir() {
+		return path.resolve(`${this.session_dir}/state.json`)
 	}
 
 	get context_history_dir() {
@@ -106,6 +111,8 @@ export default class Index {
 
 	getContext = () => getContext(this)
 	setContext = (v: Partial<Context>) => setContext(this, v)
+	getState = () => getState(this)
+	setState = () => setState(this)
 
 	loadSkillMap = () => loadSkillMap(this)
 

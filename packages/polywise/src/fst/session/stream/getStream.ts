@@ -49,7 +49,7 @@ export default async (s: Index, message: Message) => {
 	}
 
 	if (s.model_messages.length >= model_threshold_value) {
-		s.trimMessages()
+		await s.trimMessages()
 	}
 
 	if (message.role === 'user' && !s.session.is_cron && s.context.total_messages_count === 0) {

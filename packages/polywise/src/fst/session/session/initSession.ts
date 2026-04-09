@@ -13,6 +13,7 @@ export default async (s: Index, is_cron?: boolean, title?: string) => {
 	await fs.ensureDir(s.files_dir)
 
 	await s.getContext()
+	await s.getState()
 
 	const [res_exsit] = await env.db.select().from(session).where(eq(session.id, s.id)).limit(1)
 

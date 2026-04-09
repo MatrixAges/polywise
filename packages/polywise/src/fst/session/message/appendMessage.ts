@@ -7,10 +7,7 @@ export default async (s: Index, v: Message) => {
 
 	if (s.ui_messages.length >= 20) {
 		s.ui_messages = s.ui_messages.slice(10)
-
-		if (!s.ui_older_locked_by_archive) {
-			s.ui_has_older = true
-		}
+		s.ui_has_older = true
 	}
 
 	await s.insertMessage(v)

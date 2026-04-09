@@ -11,11 +11,12 @@ export default async (s: Index) => {
 	s.ui_messages = []
 	s.ui_has_older = false
 	s.ui_has_newer = false
-	s.ui_older_locked_by_archive = false
+	s.archived_at = null
 	s.context = {} as Context
 
 	await s.runing(false)
 	await s.setContext({})
+	await s.setState()
 
 	await env.db.delete(message).where(eq(message.session_id, s.id))
 

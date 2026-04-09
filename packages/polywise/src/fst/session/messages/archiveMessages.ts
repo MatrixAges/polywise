@@ -7,10 +7,11 @@ export default async (s: Index) => {
 	s.ui_has_older = false
 	s.ui_has_newer = false
 	s.context = {} as Context
-	s.ui_older_locked_by_archive = true
+	s.archived_at = Date.now()
 
 	await s.runing(false)
 	await s.setContext({})
+	await s.setState()
 	await s.clearTasks()
 
 	s.sync()

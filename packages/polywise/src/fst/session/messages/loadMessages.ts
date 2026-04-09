@@ -22,10 +22,17 @@ export default async (s: Index, type: 'prev' | 'next') => {
 		? lt(message.created_at, boundary.createdAt)
 		: gt(message.created_at, boundary.createdAt)
 
+	const archived_condition =
+		typeof s.archived_at === 'number' ? gt(message.created_at, new Date(s.archived_at)) : undefined
+
+	const where_condition = archived_condition
+		? and(eq(message.session_id, s.id), condition, archived_condition)
+		: and(eq(message.session_id, s.id), condition)
+
 	const res = await env.db
 		.select()
 		.from(message)
-		.where(and(eq(message.session_id, s.id), condition))
+		.where(where_condition)
 		.orderBy(desc(message.created_at))
 		.limit(ui_reduce_value)
 
