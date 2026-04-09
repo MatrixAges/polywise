@@ -1,4 +1,4 @@
-import { getAuditPrompt } from '@core/consts/prompt'
+import getAuditPrompt from '@core/consts/prompts/getAuditPrompt'
 
 import extract from '../permission/extract'
 import { formatContext, formatPermissions } from '../permission/format'

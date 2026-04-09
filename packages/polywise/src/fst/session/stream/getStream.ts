@@ -1,5 +1,5 @@
-import { getShadowContext } from '@core/consts/prompt'
 import fst_system_prompt from '@core/consts/prompts/fst_system_prompt.md'
+import getContextPrompt from '@core/consts/prompts/getContextPrompt'
 import { createSystemTool } from '@core/fst/agents'
 import { convertToModelMessages, smoothStream, stepCountIs, streamText } from 'ai'
 import { getId } from 'stk/utils'
@@ -72,7 +72,7 @@ export default async (s: Index, message: Message) => {
 
 	const res = streamText({
 		model: s.model.model,
-		system: `${fst_system_prompt}\n\nCurrent Session Title: ${s.session.title}\n\n${getShadowContext(s.context)}`,
+		system: `${fst_system_prompt}\n\nCurrent Session Title: ${s.session.title}\n\n${getContextPrompt(s.context)}`,
 		messages,
 		tools: {
 			...s.model.tools,
