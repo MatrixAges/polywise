@@ -35,6 +35,7 @@ const Index = (props: IProps) => {
 		send: x.send,
 		stop: x.stop,
 		clear: x.clear,
+		archive: x.archive,
 		scrollToBottom: x.scrollToBottom,
 		toggleContextModal
 	}

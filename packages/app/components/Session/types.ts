@@ -13,7 +13,7 @@ export interface IPropsPart extends Pick<IPropsMessage, 'streaming' | 'answer'> 
 	part: Message['parts'][number]
 }
 
-export interface IPropsInput extends Pick<Model, 'send' | 'stop' | 'clear' | 'scrollToBottom'> {
+export interface IPropsInput extends Pick<Model, 'send' | 'stop' | 'clear' | 'archive' | 'scrollToBottom'> {
 	streaming: boolean
 	toggleContextModal: () => void
 }

@@ -251,6 +251,26 @@ export default class Index {
 		rpc.session.clear.mutate(this.id)
 	}
 
+	async archive() {
+		const res = await alert({
+			title: 'Archive Session Messages',
+			desc: 'Confirm archiving current context and loaded messages?'
+		})
+
+		if (!res) return
+
+		this.stop()
+
+		this.chat.clearMessages()
+
+		this.permission = null as unknown as Permission
+		this.messages = []
+
+		this.update()
+
+		rpc.session.archive.mutate(this.id)
+	}
+
 	on() {
 		const off_status = this.chat['~registerStatusCallback'](() => {
 			this.status = this.chat.status

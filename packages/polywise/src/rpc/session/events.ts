@@ -17,6 +17,10 @@ export const clear = p.input(string()).mutation(async ({ input }) => {
 	SessionEventStore.emit(`${input}/clear`)
 })
 
+export const archive = p.input(string()).mutation(async ({ input }) => {
+	SessionEventStore.emit(`${input}/archive`)
+})
+
 export const answer = p.input(object({ id: string(), answer: string() })).mutation(async ({ input }) => {
 	SessionEventStore.emit(`${input.id}/answer`, input.answer)
 })

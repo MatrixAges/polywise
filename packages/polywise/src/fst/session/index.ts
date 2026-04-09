@@ -5,7 +5,7 @@ import { app } from '@core/consts'
 import { loadSkillMap } from '../tools/skill'
 import { getContext, setContext } from './context'
 import { appendMessage, insertMessage } from './message'
-import { clearMessages, getMessages, getMessagesCount, loadMessages, trimMessages } from './messages'
+import { archiveMessages, clearMessages, getMessages, getMessagesCount, loadMessages, trimMessages } from './messages'
 import { getAgents, getData, getModel, getProject } from './related'
 import { getSession, initSession, updateSession } from './session'
 import { abortStream, getStream } from './stream'
@@ -37,6 +37,7 @@ export default class Index {
 	ui_messages = [] as Array<Message>
 	ui_has_older = false
 	ui_has_newer = false
+	ui_older_locked_by_archive = false
 
 	abort_controller = new AbortController()
 	update_at = Date.now()
@@ -93,6 +94,7 @@ export default class Index {
 	loadMessages = (type: 'prev' | 'next') => loadMessages(this, type)
 	trimMessages = () => trimMessages(this)
 	clearMessages = () => clearMessages(this)
+	archiveMessages = () => archiveMessages(this)
 	getMessagesCount = () => getMessagesCount(this)
 
 	insertMessage = (v: Message) => insertMessage(this, v)

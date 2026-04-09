@@ -35,7 +35,11 @@ This document provides an overview of the packages/app module structure and arch
 			"Show.tsx": { "desc": "Conditional rendering component", "role": "Component" },
 			"Sidebar.tsx": { "desc": "Side navigation component", "role": "Component" },
 			"Tabs.tsx": { "desc": "Tab navigation component", "role": "Component" },
-			"index.ts": { "desc": "Components module exports", "role": "Index" }
+			"index.ts": { "desc": "Components module exports", "role": "Index" },
+			"Session": {
+				"desc": "Session chat container with context drawer, message timeline, and input actions including clear/archive operations",
+				"role": "Folder"
+			}
 		},
 		"context": {
 			"global.ts": { "desc": "Global application context", "role": "Context" },
