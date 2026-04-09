@@ -217,6 +217,17 @@ export default class Index {
 		if (this.auto_scroll) this.scrollToBottom({ update: true, instant: true })
 	}
 
+	reset() {
+		this.stop()
+
+		this.chat.clearMessages()
+
+		this.permission = null as unknown as Permission
+		this.messages = []
+
+		this.update()
+	}
+
 	async answer(v: string) {
 		rpc.session.answer.mutate({ id: this.id, answer: v })
 
@@ -239,14 +250,7 @@ export default class Index {
 
 		if (!res) return
 
-		this.stop()
-
-		this.chat.clearMessages()
-
-		this.permission = null as unknown as Permission
-		this.messages = []
-
-		this.update()
+		this.reset()
 
 		rpc.session.clear.mutate(this.id)
 	}
@@ -259,14 +263,7 @@ export default class Index {
 
 		if (!res) return
 
-		this.stop()
-
-		this.chat.clearMessages()
-
-		this.permission = null as unknown as Permission
-		this.messages = []
-
-		this.update()
+		this.reset()
 
 		rpc.session.archive.mutate(this.id)
 	}
