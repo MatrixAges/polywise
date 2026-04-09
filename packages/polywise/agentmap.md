@@ -83,7 +83,7 @@ This document provides an overview of the packages/polywise module structure and
 				"migrate.ts": { "desc": "Migration runner", "role": "Module" },
 				"schema": {
 					"article.ts": {
-						"desc": "Article storage schema with content, metadata, and sop flag",
+						"desc": "Article storage schema with content, source classifier(for: linkcase|wiki|memory|user), metadata, and sop flag",
 						"role": "Schema"
 					},
 					"session.ts": {

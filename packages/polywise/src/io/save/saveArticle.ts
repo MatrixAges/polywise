@@ -7,8 +7,17 @@ import { notifyQueue } from '@core/task'
 import { getHash, log } from '@core/utils'
 import { eq } from 'drizzle-orm'
 
-export default async (v: string, article_id?: string) => {
-	const hash = getHash(v)
+import type { Article } from '@core/db/types'
+
+interface ArgsSaveArticle {
+	content: string
+	for: NonNullable<Article['for']>
+	article_id?: string
+}
+
+export default async (args: ArgsSaveArticle) => {
+	const { content, article_id } = args
+	const hash = getHash(content)
 	const enable_triple = Boolean(config.enable_triple)
 
 	if (!article_id) {
@@ -17,7 +26,7 @@ export default async (v: string, article_id?: string) => {
 		if (exist) return exist.id
 	}
 
-	const chunks = await getChunks(v)
+	const chunks = await getChunks(content)
 
 	log('SAVE', 'getChunks', () => `chunk_length: ${chunks.length}`)
 
@@ -59,14 +68,14 @@ export default async (v: string, article_id?: string) => {
 
 		await env.db
 			.update(article)
-			.set({ content: v, hash, is_tripled: enable_triple, updated_at: new Date() })
+			.set({ content: content, for: args.for, hash, is_tripled: enable_triple, updated_at: new Date() })
 			.where(eq(article.id, current_article_id))
 
 		log('SAVE', 'updateArticle', () => `article_id: ${current_article_id}`)
 	} else {
 		const [article_item] = await env.db
 			.insert(article)
-			.values({ content: v, hash, is_tripled: enable_triple })
+			.values({ content: content, for: args.for, hash, is_tripled: enable_triple })
 			.returning({ id: article.id })
 
 		current_article_id = article_item.id

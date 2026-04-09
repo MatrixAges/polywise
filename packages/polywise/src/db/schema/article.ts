@@ -16,6 +16,7 @@ export default sqliteTable(
 		title: text('title'),
 		// Article data source (optional)
 		url: text('url'),
+		for: text('for', { enum: ['linkcase', 'wiki', 'memory', 'user'] }).notNull(),
 		// Content hash value, used for duplicate content verification
 		hash: text('hash'),
 		// Article metadata (for filtering)
@@ -33,6 +34,7 @@ export default sqliteTable(
 	},
 	t => [
 		index('article_document_id_idx').on(t.document_id),
+		index('article_for_idx').on(t.for),
 		index('article_is_tripled_idx').on(t.is_tripled),
 		index('article_sop_idx').on(t.sop),
 		index('article_created_at_idx').on(t.created_at),
