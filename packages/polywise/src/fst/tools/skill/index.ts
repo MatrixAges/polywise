@@ -3,12 +3,16 @@ import { readFile } from 'atomically'
 import { enum as Enum, number, object, string } from 'zod'
 
 import { checkPermission } from '../../utils'
-import buildSkillMap from './build'
+import readSkillMap from './read'
+import rebuildSkillMap from './rebuild'
 import search from './search'
 
 import type Session from '../../session'
 
-export { default as buildSkillMap } from './build'
+export { default as loadSkillMap } from './load'
+export { default as readSkillMap } from './read'
+export { default as rebuildSkillMap } from './rebuild'
+export { default as scanSkillMap } from './scan'
 
 export const inputSchema = object({
 	action: Enum(['search', 'read', 'build']).describe(
@@ -35,14 +39,13 @@ export const createSkillTool = (s: Session) => {
 		].join('\n'),
 		inputSchema,
 		execute: async input => {
-			const { skill_map } = s
-
 			if (input.action === 'search') {
 				if (!input.keyword) {
 					return { action: 'search', error: 'keyword is required for search action' }
 				}
 
 				const max_results = input.max_results ?? 5
+				const skill_map = await readSkillMap(s)
 				const results = search(skill_map, input.keyword, max_results)
 
 				if (results.length === 0) {
@@ -73,6 +76,7 @@ export const createSkillTool = (s: Session) => {
 					return { action: 'read', error: 'skill_name is required for read action' }
 				}
 
+				const skill_map = await readSkillMap(s)
 				const target = skill_map.find(s => s.name === input.skill_name)
 
 				if (!target) {
@@ -101,12 +105,12 @@ export const createSkillTool = (s: Session) => {
 			}
 
 			if (input.action === 'build') {
-				s.skill_map = await buildSkillMap(s.skills_dir)
+				const skill_map = await rebuildSkillMap(s)
 
 				return {
 					action: 'build',
-					count: s.skill_map.length,
-					skills: s.skill_map.map(m => m.name)
+					count: skill_map.length,
+					skills: skill_map.map(m => m.name)
 				}
 			}
 

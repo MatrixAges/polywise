@@ -39,7 +39,7 @@ This document provides an overview of the packages/polywise module structure and
 				"index.ts": { "desc": "fst module exports", "role": "Index" },
 				"chat": { "desc": "Chat capabilities using AI SDK, supporting UIMessages", "role": "Folder" },
 				"session": {
-					"desc": "Session lifecycle and stream orchestration for chat and cron-triggered runs",
+					"desc": "Session lifecycle and stream orchestration for chat and cron-triggered runs, consuming skill_map loading from fst/tools/skill",
 					"role": "Folder"
 				},
 				"agents": {
@@ -47,7 +47,7 @@ This document provides an overview of the packages/polywise module structure and
 					"role": "Folder"
 				},
 				"tools": {
-					"desc": "Bash sandboxing tools via bash-tool",
+					"desc": "Bash sandboxing tools via bash-tool and local skill search/read/rebuild tooling backed by persisted skill_map.json under skills_dir",
 					"role": "Folder",
 					"cron.ts": "Create/list/read/update/remove cron jobs backed by app.app_path/cron.json with incremental runtime reload and physical directory removal",
 					"webfetch.ts": "Fetch URL content as Markdown (Jina primary, fetch+turndown fallback)",
