@@ -1,4 +1,4 @@
-import get_rewrite_prompt from '@core/consts/prompts/get_rewrite_prompt.md'
+import rewrite_prompt from '@core/consts/prompts/rewrite_prompt.md'
 import { addTask, initGenModel, removeTask } from '@core/llama'
 import { LlamaChatSession } from 'node-llama-cpp'
 
@@ -21,7 +21,7 @@ export default async (query: string, intent?: string) => {
 
 	const session = new LlamaChatSession({
 		contextSequence: sequence,
-		systemPrompt: get_rewrite_prompt
+		systemPrompt: rewrite_prompt
 	})
 
 	const grammar = await env.llama.createGrammarForJsonSchema({
