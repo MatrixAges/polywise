@@ -29,6 +29,7 @@ export default {
 			/^@chonkiejs\/core(\/.*)?$/,
 			/^@node-rs\/xxhash(\/.*)?$/,
 			/^@node-rs\/jieba(\/.*)?$/,
+			/^@mongodb-js\/zstd(\/.*)?$/,
 			/^simsimd(\/.*)?$/,
 			/^fs-extra(\/.*)?$/,
 			/^watchpack(\/.*)?$/,

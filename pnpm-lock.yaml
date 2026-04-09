@@ -693,7 +693,7 @@ importers:
         version: 3.0.73(zod@4.3.6)
       '@better-auth/drizzle-adapter':
         specifier: ^1.5.6
-        version: 1.5.6(@better-auth/core@1.5.6(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(@opentelemetry/api@1.9.0)(better-call@1.3.2(zod@4.3.6))(jose@6.2.1)(kysely@0.28.14)(nanostores@1.1.1))(@better-auth/utils@0.3.1)(drizzle-orm@1.0.0-beta.19-dca1773(@electric-sql/pglite@0.3.16)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/mssql@9.1.9(@azure/core-client@1.10.1))(better-sqlite3@12.8.0)(bun-types@1.3.11)(mssql@11.0.1(@azure/core-client@1.10.1))(sql.js@1.14.1)(zod@4.3.6))
+        version: 1.5.6(@better-auth/core@1.5.6(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(@opentelemetry/api@1.9.0)(better-call@1.3.2(zod@4.3.6))(jose@6.2.1)(kysely@0.28.14)(nanostores@1.1.1))(@better-auth/utils@0.3.1)(drizzle-orm@1.0.0-beta.21-b0c345d(@electric-sql/pglite@0.3.16)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/mssql@9.1.9(@azure/core-client@1.10.1))(better-sqlite3@12.8.0)(bun-types@1.3.11)(mssql@11.0.1(@azure/core-client@1.10.1))(sql.js@1.14.1)(zod@4.3.6))
       '@chonkiejs/core':
         specifier: ^0.0.8
         version: 0.0.8
@@ -750,7 +750,7 @@ importers:
         version: 1.3.15(ai@6.0.143(zod@4.3.6))(just-bash@2.14.0)
       better-auth:
         specifier: ^1.5.6
-        version: 1.5.6(@opentelemetry/api@1.9.0)(better-sqlite3@12.8.0)(drizzle-kit@1.0.0-beta.19-dca1773)(drizzle-orm@1.0.0-beta.19-dca1773(@electric-sql/pglite@0.3.16)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/mssql@9.1.9(@azure/core-client@1.10.1))(better-sqlite3@12.8.0)(bun-types@1.3.11)(mssql@11.0.1(@azure/core-client@1.10.1))(sql.js@1.14.1)(zod@4.3.6))(mongodb@7.1.0(@mongodb-js/zstd@7.0.0)(socks@2.8.7))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+        version: 1.5.6(@opentelemetry/api@1.9.0)(better-sqlite3@12.8.0)(drizzle-kit@1.0.0-beta.21-b0c345d)(drizzle-orm@1.0.0-beta.21-b0c345d(@electric-sql/pglite@0.3.16)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/mssql@9.1.9(@azure/core-client@1.10.1))(better-sqlite3@12.8.0)(bun-types@1.3.11)(mssql@11.0.1(@azure/core-client@1.10.1))(sql.js@1.14.1)(zod@4.3.6))(mongodb@7.1.0(@mongodb-js/zstd@7.0.0)(socks@2.8.7))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       better-sqlite3:
         specifier: ^12.8.0
         version: 12.8.0
@@ -767,11 +767,11 @@ importers:
         specifier: ^8.0.4
         version: 8.0.4
       drizzle-kit:
-        specifier: 1.0.0-beta.19-dca1773
-        version: 1.0.0-beta.19-dca1773
+        specifier: 1.0.0-beta.21-b0c345d
+        version: 1.0.0-beta.21-b0c345d
       drizzle-orm:
-        specifier: 1.0.0-beta.19-dca1773
-        version: 1.0.0-beta.19-dca1773(@electric-sql/pglite@0.3.16)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/mssql@9.1.9(@azure/core-client@1.10.1))(better-sqlite3@12.8.0)(bun-types@1.3.11)(mssql@11.0.1(@azure/core-client@1.10.1))(sql.js@1.14.1)(zod@4.3.6)
+        specifier: 1.0.0-beta.21-b0c345d
+        version: 1.0.0-beta.21-b0c345d(@electric-sql/pglite@0.3.16)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/mssql@9.1.9(@azure/core-client@1.10.1))(better-sqlite3@12.8.0)(bun-types@1.3.11)(mssql@11.0.1(@azure/core-client@1.10.1))(sql.js@1.14.1)(zod@4.3.6)
       es-toolkit:
         specifier: 'catalog:'
         version: 1.45.1
@@ -937,7 +937,7 @@ importers:
         version: 3.0.0
       drizzle-seed:
         specifier: ^0.3.1
-        version: 0.3.1(drizzle-orm@1.0.0-beta.19-dca1773(@electric-sql/pglite@0.3.16)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/mssql@9.1.9(@azure/core-client@1.10.1))(better-sqlite3@12.8.0)(bun-types@1.3.11)(mssql@11.0.1(@azure/core-client@1.10.1))(sql.js@1.14.1)(zod@4.3.6))
+        version: 0.3.1(drizzle-orm@1.0.0-beta.21-b0c345d(@electric-sql/pglite@0.3.16)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/mssql@9.1.9(@azure/core-client@1.10.1))(better-sqlite3@12.8.0)(bun-types@1.3.11)(mssql@11.0.1(@azure/core-client@1.10.1))(sql.js@1.14.1)(zod@4.3.6))
       picocolors:
         specifier: ^1.1.1
         version: 1.1.1
@@ -5021,12 +5021,12 @@ packages:
     resolution: {integrity: sha512-IO8C/dzEb6O3F9/twg6ZLXz164a2fhTnEWb95H23Dm4OuN+92NmEAlTrupP9VW6Jm3sO26tQlqyvyi4CsnY9GA==}
     engines: {node: '>=12'}
 
-  drizzle-kit@1.0.0-beta.19-dca1773:
-    resolution: {integrity: sha512-KM9vXqKcmse0V0AAZLr3UOM6AWvV1KkQexwWU60N3Mo7f3SO36y+2n28d9R1/0Bc8wovpN2s9XsSx0P25oSjNw==}
+  drizzle-kit@1.0.0-beta.21-b0c345d:
+    resolution: {integrity: sha512-RX/EfVMW+Ki8JOBkJDezw6ZbHTwBvU7RDnwNWRkUxNfaNOv8i6nHKW7cA+0M2M7+//U3gj8zsIvbACgY7AWTAw==}
     hasBin: true
 
-  drizzle-orm@1.0.0-beta.19-dca1773:
-    resolution: {integrity: sha512-RyMy7P5lCyIYk2Xdu/vHq0Vobu1DTuPccDeF/TDEq8a/1k9yZeBH95F6YcMLw54/qjkjck4am5rgfuW+2rUVjg==}
+  drizzle-orm@1.0.0-beta.21-b0c345d:
+    resolution: {integrity: sha512-8N78trqeq0NGDygFnJdlTGAaM9bjwOuLdAhALsrtzWe4Wb7yBmKE1GQRW4nShVYCpJnd0Q1EYOC51Gt2qsMk/g==}
     peerDependencies:
       '@aws-sdk/client-rds-data': '>=3'
       '@cloudflare/workers-types': '>=4'
@@ -9228,12 +9228,12 @@ snapshots:
       nanostores: 1.1.1
       zod: 4.3.6
 
-  '@better-auth/drizzle-adapter@1.5.6(@better-auth/core@1.5.6(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(@opentelemetry/api@1.9.0)(better-call@1.3.2(zod@4.3.6))(jose@6.2.1)(kysely@0.28.14)(nanostores@1.1.1))(@better-auth/utils@0.3.1)(drizzle-orm@1.0.0-beta.19-dca1773(@electric-sql/pglite@0.3.16)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/mssql@9.1.9(@azure/core-client@1.10.1))(better-sqlite3@12.8.0)(bun-types@1.3.11)(mssql@11.0.1(@azure/core-client@1.10.1))(sql.js@1.14.1)(zod@4.3.6))':
+  '@better-auth/drizzle-adapter@1.5.6(@better-auth/core@1.5.6(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(@opentelemetry/api@1.9.0)(better-call@1.3.2(zod@4.3.6))(jose@6.2.1)(kysely@0.28.14)(nanostores@1.1.1))(@better-auth/utils@0.3.1)(drizzle-orm@1.0.0-beta.21-b0c345d(@electric-sql/pglite@0.3.16)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/mssql@9.1.9(@azure/core-client@1.10.1))(better-sqlite3@12.8.0)(bun-types@1.3.11)(mssql@11.0.1(@azure/core-client@1.10.1))(sql.js@1.14.1)(zod@4.3.6))':
     dependencies:
       '@better-auth/core': 1.5.6(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(@opentelemetry/api@1.9.0)(better-call@1.3.2(zod@4.3.6))(jose@6.2.1)(kysely@0.28.14)(nanostores@1.1.1)
       '@better-auth/utils': 0.3.1
     optionalDependencies:
-      drizzle-orm: 1.0.0-beta.19-dca1773(@electric-sql/pglite@0.3.16)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/mssql@9.1.9(@azure/core-client@1.10.1))(better-sqlite3@12.8.0)(bun-types@1.3.11)(mssql@11.0.1(@azure/core-client@1.10.1))(sql.js@1.14.1)(zod@4.3.6)
+      drizzle-orm: 1.0.0-beta.21-b0c345d(@electric-sql/pglite@0.3.16)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/mssql@9.1.9(@azure/core-client@1.10.1))(better-sqlite3@12.8.0)(bun-types@1.3.11)(mssql@11.0.1(@azure/core-client@1.10.1))(sql.js@1.14.1)(zod@4.3.6)
 
   '@better-auth/kysely-adapter@1.5.6(@better-auth/core@1.5.6(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(@opentelemetry/api@1.9.0)(better-call@1.3.2(zod@4.3.6))(jose@6.2.1)(kysely@0.28.14)(nanostores@1.1.1))(@better-auth/utils@0.3.1)(kysely@0.28.14)':
     dependencies:
@@ -11807,10 +11807,10 @@ snapshots:
       platform: 1.3.6
     optional: true
 
-  better-auth@1.5.6(@opentelemetry/api@1.9.0)(better-sqlite3@12.8.0)(drizzle-kit@1.0.0-beta.19-dca1773)(drizzle-orm@1.0.0-beta.19-dca1773(@electric-sql/pglite@0.3.16)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/mssql@9.1.9(@azure/core-client@1.10.1))(better-sqlite3@12.8.0)(bun-types@1.3.11)(mssql@11.0.1(@azure/core-client@1.10.1))(sql.js@1.14.1)(zod@4.3.6))(mongodb@7.1.0(@mongodb-js/zstd@7.0.0)(socks@2.8.7))(react-dom@19.2.4(react@19.2.4))(react@19.2.4):
+  better-auth@1.5.6(@opentelemetry/api@1.9.0)(better-sqlite3@12.8.0)(drizzle-kit@1.0.0-beta.21-b0c345d)(drizzle-orm@1.0.0-beta.21-b0c345d(@electric-sql/pglite@0.3.16)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/mssql@9.1.9(@azure/core-client@1.10.1))(better-sqlite3@12.8.0)(bun-types@1.3.11)(mssql@11.0.1(@azure/core-client@1.10.1))(sql.js@1.14.1)(zod@4.3.6))(mongodb@7.1.0(@mongodb-js/zstd@7.0.0)(socks@2.8.7))(react-dom@19.2.4(react@19.2.4))(react@19.2.4):
     dependencies:
       '@better-auth/core': 1.5.6(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(@opentelemetry/api@1.9.0)(better-call@1.3.2(zod@4.3.6))(jose@6.2.1)(kysely@0.28.14)(nanostores@1.1.1)
-      '@better-auth/drizzle-adapter': 1.5.6(@better-auth/core@1.5.6(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(@opentelemetry/api@1.9.0)(better-call@1.3.2(zod@4.3.6))(jose@6.2.1)(kysely@0.28.14)(nanostores@1.1.1))(@better-auth/utils@0.3.1)(drizzle-orm@1.0.0-beta.19-dca1773(@electric-sql/pglite@0.3.16)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/mssql@9.1.9(@azure/core-client@1.10.1))(better-sqlite3@12.8.0)(bun-types@1.3.11)(mssql@11.0.1(@azure/core-client@1.10.1))(sql.js@1.14.1)(zod@4.3.6))
+      '@better-auth/drizzle-adapter': 1.5.6(@better-auth/core@1.5.6(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(@opentelemetry/api@1.9.0)(better-call@1.3.2(zod@4.3.6))(jose@6.2.1)(kysely@0.28.14)(nanostores@1.1.1))(@better-auth/utils@0.3.1)(drizzle-orm@1.0.0-beta.21-b0c345d(@electric-sql/pglite@0.3.16)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/mssql@9.1.9(@azure/core-client@1.10.1))(better-sqlite3@12.8.0)(bun-types@1.3.11)(mssql@11.0.1(@azure/core-client@1.10.1))(sql.js@1.14.1)(zod@4.3.6))
       '@better-auth/kysely-adapter': 1.5.6(@better-auth/core@1.5.6(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(@opentelemetry/api@1.9.0)(better-call@1.3.2(zod@4.3.6))(jose@6.2.1)(kysely@0.28.14)(nanostores@1.1.1))(@better-auth/utils@0.3.1)(kysely@0.28.14)
       '@better-auth/memory-adapter': 1.5.6(@better-auth/core@1.5.6(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(@opentelemetry/api@1.9.0)(better-call@1.3.2(zod@4.3.6))(jose@6.2.1)(kysely@0.28.14)(nanostores@1.1.1))(@better-auth/utils@0.3.1)
       '@better-auth/mongo-adapter': 1.5.6(@better-auth/core@1.5.6(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(@opentelemetry/api@1.9.0)(better-call@1.3.2(zod@4.3.6))(jose@6.2.1)(kysely@0.28.14)(nanostores@1.1.1))(@better-auth/utils@0.3.1)(mongodb@7.1.0(@mongodb-js/zstd@7.0.0)(socks@2.8.7))
@@ -11828,8 +11828,8 @@ snapshots:
       zod: 4.3.6
     optionalDependencies:
       better-sqlite3: 12.8.0
-      drizzle-kit: 1.0.0-beta.19-dca1773
-      drizzle-orm: 1.0.0-beta.19-dca1773(@electric-sql/pglite@0.3.16)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/mssql@9.1.9(@azure/core-client@1.10.1))(better-sqlite3@12.8.0)(bun-types@1.3.11)(mssql@11.0.1(@azure/core-client@1.10.1))(sql.js@1.14.1)(zod@4.3.6)
+      drizzle-kit: 1.0.0-beta.21-b0c345d
+      drizzle-orm: 1.0.0-beta.21-b0c345d(@electric-sql/pglite@0.3.16)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/mssql@9.1.9(@azure/core-client@1.10.1))(better-sqlite3@12.8.0)(bun-types@1.3.11)(mssql@11.0.1(@azure/core-client@1.10.1))(sql.js@1.14.1)(zod@4.3.6)
       mongodb: 7.1.0(@mongodb-js/zstd@7.0.0)(socks@2.8.7)
       react: 19.2.4
       react-dom: 19.2.4(react@19.2.4)
@@ -12691,7 +12691,7 @@ snapshots:
 
   dotenv@17.3.1: {}
 
-  drizzle-kit@1.0.0-beta.19-dca1773:
+  drizzle-kit@1.0.0-beta.21-b0c345d:
     dependencies:
       '@drizzle-team/brocli': 0.11.0
       '@js-temporal/polyfill': 0.5.1
@@ -12699,7 +12699,7 @@ snapshots:
       get-tsconfig: 4.13.7
       jiti: 2.6.1
 
-  drizzle-orm@1.0.0-beta.19-dca1773(@electric-sql/pglite@0.3.16)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/mssql@9.1.9(@azure/core-client@1.10.1))(better-sqlite3@12.8.0)(bun-types@1.3.11)(mssql@11.0.1(@azure/core-client@1.10.1))(sql.js@1.14.1)(zod@4.3.6):
+  drizzle-orm@1.0.0-beta.21-b0c345d(@electric-sql/pglite@0.3.16)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/mssql@9.1.9(@azure/core-client@1.10.1))(better-sqlite3@12.8.0)(bun-types@1.3.11)(mssql@11.0.1(@azure/core-client@1.10.1))(sql.js@1.14.1)(zod@4.3.6):
     dependencies:
       '@types/mssql': 9.1.9(@azure/core-client@1.10.1)
       mssql: 11.0.1(@azure/core-client@1.10.1)
@@ -12712,11 +12712,11 @@ snapshots:
       sql.js: 1.14.1
       zod: 4.3.6
 
-  drizzle-seed@0.3.1(drizzle-orm@1.0.0-beta.19-dca1773(@electric-sql/pglite@0.3.16)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/mssql@9.1.9(@azure/core-client@1.10.1))(better-sqlite3@12.8.0)(bun-types@1.3.11)(mssql@11.0.1(@azure/core-client@1.10.1))(sql.js@1.14.1)(zod@4.3.6)):
+  drizzle-seed@0.3.1(drizzle-orm@1.0.0-beta.21-b0c345d(@electric-sql/pglite@0.3.16)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/mssql@9.1.9(@azure/core-client@1.10.1))(better-sqlite3@12.8.0)(bun-types@1.3.11)(mssql@11.0.1(@azure/core-client@1.10.1))(sql.js@1.14.1)(zod@4.3.6)):
     dependencies:
       pure-rand: 6.1.0
     optionalDependencies:
-      drizzle-orm: 1.0.0-beta.19-dca1773(@electric-sql/pglite@0.3.16)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/mssql@9.1.9(@azure/core-client@1.10.1))(better-sqlite3@12.8.0)(bun-types@1.3.11)(mssql@11.0.1(@azure/core-client@1.10.1))(sql.js@1.14.1)(zod@4.3.6)
+      drizzle-orm: 1.0.0-beta.21-b0c345d(@electric-sql/pglite@0.3.16)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/mssql@9.1.9(@azure/core-client@1.10.1))(better-sqlite3@12.8.0)(bun-types@1.3.11)(mssql@11.0.1(@azure/core-client@1.10.1))(sql.js@1.14.1)(zod@4.3.6)
 
   duck@0.1.12:
     dependencies:
