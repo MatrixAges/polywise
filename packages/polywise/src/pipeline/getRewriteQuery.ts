@@ -1,7 +1,7 @@
+import get_rewrite_prompt from '@core/consts/prompts/get_rewrite_prompt.md'
 import { addTask, initGenModel, removeTask } from '@core/llama'
 import { LlamaChatSession } from 'node-llama-cpp'
 
-import { prompt } from '../consts'
 import { env } from '../env'
 
 interface SearchTarget {
@@ -21,7 +21,7 @@ export default async (query: string, intent?: string) => {
 
 	const session = new LlamaChatSession({
 		contextSequence: sequence,
-		systemPrompt: prompt.get_search_target
+		systemPrompt: get_rewrite_prompt
 	})
 
 	const grammar = await env.llama.createGrammarForJsonSchema({

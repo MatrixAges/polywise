@@ -1,7 +1,7 @@
+import get_triple_prompt from '@core/consts/prompts/get_triple_prompt.md'
 import { addTask, initGenModel, removeTask } from '@core/llama'
 import { LlamaChatSession } from 'node-llama-cpp'
 
-import { prompt } from '../consts'
 import { env } from '../env'
 
 import type { Triples } from '@core/types'
@@ -15,7 +15,7 @@ export default async (text: string, onTextChunk?: ((text: string) => void) | und
 
 	const session = new LlamaChatSession({
 		contextSequence: sequence,
-		systemPrompt: prompt.get_triple
+		systemPrompt: get_triple_prompt
 	})
 
 	const grammar = await env.llama.createGrammarForJsonSchema({
