@@ -56,6 +56,7 @@ For development targeting different tech stacks and code modules, please strictl
 - **Utils Export**: All utility functions under the `utils/` directory must use the anonymous arrow function format `export default () => {}` for exporting.
 - **Named Imports**: It is strictly prohibited to use `import * as name` for full imports. The precise destructuring syntax `import { a, b } from 'pkg'` must be used for on-demand imports.
 - **Default Imports**: When importing a default module, directly use `import X from 'pkg'`. It is strictly prohibited to write it with an alias like `import { default as X } from 'pkg'`.
+- **Barrel Exports**: All single-file functions in a directory `index.ts` barrel file must be exported using the direct syntax `export { default as fnName } from './fnName'`, instead of importing first and then exporting.
 
 ### Database and SQL
 
