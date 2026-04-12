@@ -48,6 +48,21 @@
 		@apply bg-secondary gap-1 border-none pt-1;
 	}
 
+	div[data-streamdown='table-wrapper'] {
+		@apply bg-secondary border-none;
+
+		& > :first-child {
+			button {
+				@apply text-std-400;
+			}
+
+			svg {
+				width: 12px;
+				height: 12px;
+			}
+		}
+	}
+
 	div[data-streamdown='code-block-header'] {
 		@apply h-6;
 
