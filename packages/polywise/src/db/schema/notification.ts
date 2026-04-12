@@ -14,5 +14,10 @@ export default sqliteTable(
 			.$defaultFn(() => new Date())
 			.$onUpdateFn(() => new Date())
 	},
-	t => [index('notification_is_read_idx').on(t.is_read), index('notification_is_pushed_idx').on(t.is_pushed)]
+	t => [
+		index('notification_is_read_idx').on(t.is_read),
+		index('notification_is_pushed_idx').on(t.is_pushed),
+		index('notification_created_at_idx').on(t.created_at),
+		index('notification_updated_at_idx').on(t.updated_at)
+	]
 )
