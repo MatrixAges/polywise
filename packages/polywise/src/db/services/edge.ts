@@ -4,12 +4,19 @@ import { SQL } from 'drizzle-orm'
 
 import type { EdgeInsert } from '@core/db'
 
-export async function addEdge(values: EdgeInsert) {
-	const [res] = await env.db.insert(edge).values(values).returning()
-	return res
+export const addEdge = async (values: EdgeInsert) => {
+	return env.db
+		.insert(edge)
+		.values(values)
+		.returning()
+		.then(res => res[0])
 }
 
-export async function getEdge(where?: SQL) {
-	const [res] = await env.db.select().from(edge).where(where).limit(1)
-	return res
+export const getEdge = async (where?: SQL) => {
+	return env.db
+		.select()
+		.from(edge)
+		.where(where)
+		.limit(1)
+		.then(res => res[0])
 }

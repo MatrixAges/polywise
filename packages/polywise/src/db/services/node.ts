@@ -4,12 +4,19 @@ import { SQL } from 'drizzle-orm'
 
 import type { NodeInsert } from '@core/db'
 
-export async function addNode(values: NodeInsert) {
-	const [res] = await env.db.insert(node).values(values).returning()
-	return res
+export const addNode = async (values: NodeInsert) => {
+	return env.db
+		.insert(node)
+		.values(values)
+		.returning()
+		.then(res => res[0])
 }
 
-export async function getNode(where?: SQL) {
-	const [res] = await env.db.select().from(node).where(where).limit(1)
-	return res
+export const getNode = async (where?: SQL) => {
+	return env.db
+		.select()
+		.from(node)
+		.where(where)
+		.limit(1)
+		.then(res => res[0])
 }

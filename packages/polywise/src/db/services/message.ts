@@ -4,41 +4,46 @@ import { SQL, sql } from 'drizzle-orm'
 
 import type { MessageInsert } from '@core/db'
 
-export async function addMessage(values: MessageInsert) {
-	const [res] = await env.db.insert(message).values(values).returning()
-	return res
-}
-
-interface GetMessagesOptions {
+interface ArgsGetMessages {
 	where?: SQL
 	orderBy?: SQL | Array<SQL>
 	limit?: number
 }
 
-export async function getMessages(options: GetMessagesOptions = {}) {
-	const { where, orderBy, limit } = options
+export const addMessage = async (values: MessageInsert) => {
+	return env.db
+		.insert(message)
+		.values(values)
+		.returning()
+		.then(res => res[0])
+}
+
+export const getMessages = async (args: ArgsGetMessages = {}) => {
+	const { where, orderBy, limit } = args
+
 	let query = env.db.select().from(message).$dynamic()
 
 	if (where) query = query.where(where)
+
 	if (orderBy) {
 		const orderArgs = Array.isArray(orderBy) ? orderBy : [orderBy]
+
 		query = query.orderBy(...orderArgs)
 	}
+
 	if (limit) query = query.limit(limit)
 
-	const res = await query
-	return res
+	return query
 }
 
-export async function getMessagesCount(where?: SQL) {
-	const [{ count }] = await env.db
+export const getMessagesCount = async (where?: SQL) => {
+	return env.db
 		.select({ count: sql<number>`count(*)` })
 		.from(message)
 		.where(where)
-
-	return Number(count)
+		.then(res => Number(res[0].count))
 }
 
-export async function removeMessages(where?: SQL) {
-	await env.db.delete(message).where(where)
+export const removeMessages = async (where?: SQL) => {
+	return env.db.delete(message).where(where).returning()
 }

@@ -2,12 +2,13 @@ import { project, project_session } from '@core/db/schema'
 import { env } from '@core/env'
 import { eq, SQL } from 'drizzle-orm'
 
-interface GetSessionProjectOptions {
+interface ArgsGetSessionProject {
 	where?: SQL
 }
 
-export async function getSessionProject(options: GetSessionProjectOptions = {}) {
-	const { where } = options
+export const getSessionProject = async (args: ArgsGetSessionProject = {}) => {
+	const { where } = args
+
 	let query = env.db
 		.select({ project })
 		.from(project_session)
@@ -16,6 +17,5 @@ export async function getSessionProject(options: GetSessionProjectOptions = {}) 
 
 	if (where) query = query.where(where)
 
-	const res = await query
-	return res
+	return query
 }

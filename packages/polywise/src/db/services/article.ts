@@ -4,42 +4,51 @@ import { SQL } from 'drizzle-orm'
 
 import type { ArticleInsert } from '@core/db'
 
-export async function addArticle(values: ArticleInsert) {
-	const [res] = await env.db.insert(article).values(values).returning()
-	return res
-}
-
-export async function getArticle(where: SQL) {
-	const [res] = await env.db.select().from(article).where(where).limit(1)
-	return res
-}
-
-interface GetArticlesOptions {
+interface ArgsGetArticles {
 	where?: SQL
 	orderBy?: SQL | Array<SQL>
 	limit?: number
 }
 
-export async function getArticles(options: GetArticlesOptions = {}) {
-	const { where, orderBy, limit } = options
+export const addArticle = async (values: ArticleInsert) => {
+	return env.db
+		.insert(article)
+		.values(values)
+		.returning()
+		.then(res => res[0])
+}
+
+export const getArticle = async (where: SQL) => {
+	return env.db
+		.select()
+		.from(article)
+		.where(where)
+		.limit(1)
+		.then(res => res[0])
+}
+
+export const getArticles = async (args: ArgsGetArticles = {}) => {
+	const { where, orderBy, limit } = args
+
 	let query = env.db.select().from(article).$dynamic()
 
 	if (where) query = query.where(where)
+
 	if (orderBy) {
 		const orderArgs = Array.isArray(orderBy) ? orderBy : [orderBy]
+
 		query = query.orderBy(...orderArgs)
 	}
+
 	if (limit) query = query.limit(limit)
 
-	const res = await query
-	return res
+	return query
 }
 
-export async function removeArticle(where: SQL) {
-	await env.db.delete(article).where(where)
+export const removeArticle = async (where: SQL) => {
+	return env.db.delete(article).where(where).returning()
 }
 
-export async function setArticle(where: SQL, values: Partial<ArticleInsert>) {
-	const res = await env.db.update(article).set(values).where(where).returning()
-	return res
+export const setArticle = async (where: SQL, values: Partial<ArticleInsert>) => {
+	return env.db.update(article).set(values).where(where).returning()
 }

@@ -4,32 +4,38 @@ import { SQL } from 'drizzle-orm'
 
 import type { ChunkInsert } from '@core/db'
 
-export async function addChunk(values: ChunkInsert) {
-	const [res] = await env.db.insert(chunk).values(values).returning()
-	return res
-}
-
-interface GetChunksOptions {
+interface ArgsGetChunks {
 	where?: SQL
 	orderBy?: SQL | Array<SQL>
 	limit?: number
 }
 
-export async function getChunks(options: GetChunksOptions = {}) {
-	const { where, orderBy, limit } = options
+export const addChunk = async (values: ChunkInsert) => {
+	return env.db
+		.insert(chunk)
+		.values(values)
+		.returning()
+		.then(res => res[0])
+}
+
+export const getChunks = async (args: ArgsGetChunks = {}) => {
+	const { where, orderBy, limit } = args
+
 	let query = env.db.select().from(chunk).$dynamic()
 
 	if (where) query = query.where(where)
+
 	if (orderBy) {
 		const orderArgs = Array.isArray(orderBy) ? orderBy : [orderBy]
+
 		query = query.orderBy(...orderArgs)
 	}
+
 	if (limit) query = query.limit(limit)
 
-	const res = await query
-	return res
+	return query
 }
 
-export async function removeChunks(where: SQL) {
-	await env.db.delete(chunk).where(where)
+export const removeChunks = async (where: SQL) => {
+	return env.db.delete(chunk).where(where).returning()
 }

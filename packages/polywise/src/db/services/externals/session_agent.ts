@@ -2,12 +2,13 @@ import { agent, session_agent } from '@core/db/schema'
 import { env } from '@core/env'
 import { eq, SQL } from 'drizzle-orm'
 
-interface GetSessionAgentsOptions {
+interface ArgsGetSessionAgents {
 	where?: SQL
 }
 
-export async function getSessionAgents(options: GetSessionAgentsOptions = {}) {
-	const { where } = options
+export const getSessionAgents = async (args: ArgsGetSessionAgents = {}) => {
+	const { where } = args
+
 	let query = env.db
 		.select({ agent })
 		.from(session_agent)
@@ -16,6 +17,5 @@ export async function getSessionAgents(options: GetSessionAgentsOptions = {}) {
 
 	if (where) query = query.where(where)
 
-	const res = await query
-	return res
+	return query
 }

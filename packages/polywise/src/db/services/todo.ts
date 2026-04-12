@@ -4,12 +4,14 @@ import { SQL } from 'drizzle-orm'
 
 import type { TodoInsert } from '@core/db'
 
-export async function addTodo(values: TodoInsert) {
-	const [res] = await env.db.insert(todo).values(values).returning()
-	return res
+export const addTodo = async (values: TodoInsert) => {
+	return env.db
+		.insert(todo)
+		.values(values)
+		.returning()
+		.then(res => res[0])
 }
 
-export async function setTodo(where: SQL, values: Partial<TodoInsert>) {
-	const res = await env.db.update(todo).set(values).where(where).returning()
-	return res
+export const setTodo = async (where: SQL, values: Partial<TodoInsert>) => {
+	return env.db.update(todo).set(values).where(where).returning()
 }
