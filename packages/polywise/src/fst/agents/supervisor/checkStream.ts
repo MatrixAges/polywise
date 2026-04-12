@@ -1,3 +1,5 @@
+import { SessionStreamStore } from '@core/utils'
+import { JsonToSseTransformStream } from 'ai'
 import { getId } from 'stk/utils'
 
 import checkChaos from './checkChaos'
@@ -14,40 +16,50 @@ export default async () => {
 	const now = Date.now()
 
 	for (const [session_id, info] of streams.entries()) {
-		if (info.chaos_detected) {
-			streams.delete(session_id)
-
-			continue
-		}
-
 		const elapsed = now - info.start_time
 		const time_since_last_check = now - info.last_check_time
 
-		if (elapsed >= CHAOS_CHECK_DELAY && time_since_last_check >= CHAOS_CHECK_INTERVAL) {
+		if (
+			info.chaos_detected ||
+			(elapsed >= CHAOS_CHECK_DELAY && time_since_last_check >= CHAOS_CHECK_INTERVAL)
+		) {
 			info.last_check_time = now
 
 			try {
-				const is_chaos = await checkChaos(info.recent_parts, info.session.model.model)
+				const is_chaos =
+					info.chaos_detected || (await checkChaos(info.recent_parts, info.session.model.model))
 
-				console.log(is_chaos)
+				console.log('[chaos] detected:', is_chaos, 'source:', info.chaos_detected ? 'rule' : 'ai')
 
 				if (is_chaos) {
+					const original_message = info.message
+
 					await info.session.abortStream()
+
+					info.session.resetAbort()
 
 					const correction_message: Message = {
 						id: getId(),
-						role: 'user',
+						role: 'user' as const,
 						parts: [
 							{
-								type: 'text',
-								text: `[System Auto-Correction] Detected that the previous conversation was stuck in a chaotic loop. Please reorganize your thoughts and start answering from scratch based on the user's original question. The user's question is: ${JSON.stringify(info.message)}`
+								type: 'text' as const,
+								text: `[System Auto-Correction] Detected that the previous conversation was stuck in a chaotic loop. Please reorganize your thoughts and start answering from scratch based on the user's original question. The user's question is: ${JSON.stringify(original_message)}`
 							}
 						]
 					}
 
-					await info.session.getStream(correction_message)
+					const stream = await info.session.getStream(correction_message)
+
+					await SessionStreamStore.resumableStream(session_id, () =>
+						stream.pipeThrough(new JsonToSseTransformStream())
+					)
+
+					info.session.sync()
 
 					streams.delete(session_id)
+				} else {
+					info.chaos_detected = false
 				}
 			} catch {
 				streams.delete(session_id)

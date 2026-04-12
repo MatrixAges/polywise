@@ -128,8 +128,12 @@ export default class Index {
 	getStream = (message: Message) => getStream(this, message)
 	abortStream = () => abortStream(this)
 
-	runing = (v: boolean) => runing(this, v)
 	active = () => active(this)
+	runing = (v: boolean) => runing(this, v)
 	sync = () => sync(this)
 	stop = () => stop(this)
+
+	resetAbort = () => {
+		this.abort_controller = new AbortController()
+	}
 }

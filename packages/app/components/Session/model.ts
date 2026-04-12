@@ -129,6 +129,10 @@ export default class Index {
 
 							this.chat.setMessages(target_messages as unknown as Array<Message>)
 
+							if (this.session.is_runing && this.status !== 'streaming') {
+								this.chat.resumeStream()
+							}
+
 							break
 					}
 				}
