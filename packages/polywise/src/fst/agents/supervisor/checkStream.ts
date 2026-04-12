@@ -1,10 +1,14 @@
+import { getId } from 'stk/utils'
+
 import checkChaos from './checkChaos'
 import { streams } from './streams'
 
 import type { Message } from '../../types'
 
-const CHAOS_CHECK_DELAY = 60000
-const CHAOS_CHECK_INTERVAL = 30000
+// const CHAOS_CHECK_DELAY = 60000
+// const CHAOS_CHECK_INTERVAL = 30000
+const CHAOS_CHECK_DELAY = 15000
+const CHAOS_CHECK_INTERVAL = 10000
 
 export default async () => {
 	const now = Date.now()
@@ -25,11 +29,13 @@ export default async () => {
 			try {
 				const is_chaos = await checkChaos(info.recent_parts, info.session.model.model)
 
+				console.log(is_chaos)
+
 				if (is_chaos) {
 					await info.session.abortStream()
 
 					const correction_message: Message = {
-						id: `correction_${Date.now()}`,
+						id: getId(),
 						role: 'user',
 						parts: [
 							{
@@ -40,6 +46,7 @@ export default async () => {
 					}
 
 					await info.session.getStream(correction_message)
+
 					streams.delete(session_id)
 				}
 			} catch {
