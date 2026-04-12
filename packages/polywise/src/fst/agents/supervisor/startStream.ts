@@ -2,8 +2,8 @@ import checkStream from './checkStream'
 import { streams } from './streams'
 import { startTimer } from './timer'
 
+import type Index from '../../session'
 import type { Message } from '../../types'
-import type Index from '../index'
 
 export default (session: Index, message: Message) => {
 	startTimer(checkStream)

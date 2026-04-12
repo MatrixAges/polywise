@@ -1,9 +1,9 @@
 import fst_system_prompt from '@core/consts/prompts/fst_system_prompt.md'
 import getContextPrompt from '@core/consts/prompts/getContextPrompt'
-import { notification } from '@core/db/schema'
-import notification_session from '@core/db/schema/externals/notification_session'
+import { notification, notification_session } from '@core/db/schema'
 import { env } from '@core/env'
 import { createSystemTool } from '@core/fst/agents'
+import { pushPart, startStream, stopStream } from '@core/fst/agents/supervisor'
 import { convertToModelMessages, smoothStream, stepCountIs, streamText } from 'ai'
 import { getId } from 'stk/utils'
 
@@ -22,7 +22,6 @@ import {
 	createWebSearchTool,
 	updateTitle
 } from '../../tools'
-import { pushPart, startStream, stopStream } from '../supervisor'
 
 import type { Message, MessageMetadata } from '../../types'
 import type Index from '../index'
