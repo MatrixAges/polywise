@@ -1,5 +1,5 @@
 import { chunk } from '@core/db/schema'
-import { env } from '@core/env'
+import { getChunks } from '@core/db/services'
 import { log } from '@core/utils'
 import { inArray } from 'drizzle-orm'
 
@@ -20,16 +20,15 @@ export default async (rrf_results: Array<RrfScore>) => {
 
 	const chunk_ids = rrf_results.map(item => item.chunk_id)
 
-	const chunks = await env.db
-		.select({ id: chunk.id, updated_at: chunk.created_at })
-		.from(chunk)
-		.where(inArray(chunk.id, chunk_ids))
+	const chunks = await getChunks({
+		where: inArray(chunk.id, chunk_ids)
+	})
 
 	const time_map = new Map<string, number>()
 
 	chunks.forEach(c => {
-		if (c.updated_at) {
-			time_map.set(c.id, c.updated_at.getTime())
+		if (c.created_at) {
+			time_map.set(c.id, c.created_at.getTime())
 		}
 	})
 

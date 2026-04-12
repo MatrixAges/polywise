@@ -1,8 +1,17 @@
 import { config } from '@core/config'
 import { deleteChunkFts, deleteChunkVector, getChunkRowid, insertChunkFts, insertChunkVector } from '@core/db/prepare'
-import { article, chunk, node_chunk, task } from '@core/db/schema'
-import { env } from '@core/env'
-import { getChunks, getEmbedding, getKeywords } from '@core/pipeline'
+import { article, chunk, node_chunk } from '@core/db/schema'
+import {
+	addArticle,
+	addChunk,
+	addTask,
+	getArticle,
+	getChunks,
+	removeChunks,
+	removeNodeChunk,
+	setArticle
+} from '@core/db/services'
+import { getEmbedding, getKeywords, getChunks as getPipelineChunks } from '@core/pipeline'
 import { notifyQueue } from '@core/task'
 import { getHash, log } from '@core/utils'
 import { eq } from 'drizzle-orm'
@@ -21,12 +30,12 @@ export default async (args: ArgsSaveArticle) => {
 	const enable_triple = Boolean(config.enable_triple)
 
 	if (!article_id) {
-		const [exist] = await env.db.select().from(article).where(eq(article.hash, hash)).limit(1)
+		const exist = await getArticle(eq(article.hash, hash))
 
 		if (exist) return exist.id
 	}
 
-	const chunks = await getChunks(content)
+	const chunks = await getPipelineChunks(content)
 
 	log('SAVE', 'getChunks', () => `chunk_length: ${chunks.length}`)
 
@@ -34,20 +43,15 @@ export default async (args: ArgsSaveArticle) => {
 	let has_new_task = false
 
 	if (current_article_id) {
-		const [existing_article] = await env.db
-			.select()
-			.from(article)
-			.where(eq(article.id, current_article_id))
-			.limit(1)
+		const existing_article = await getArticle(eq(article.id, current_article_id))
 
 		if (!existing_article) {
 			throw new Error(`Article not found: ${current_article_id}`)
 		}
 
-		const existing_chunks = await env.db
-			.select({ id: chunk.id })
-			.from(chunk)
-			.where(eq(chunk.article_id, current_article_id))
+		const existing_chunks = await getChunks({
+			where: eq(chunk.article_id, current_article_id)
+		})
 
 		if (existing_chunks.length > 0) {
 			for (const chunk_item of existing_chunks) {
@@ -60,23 +64,28 @@ export default async (args: ArgsSaveArticle) => {
 					log('SAVE', 'deleteChunkVector', () => `chunk_rowid: ${rowid_res.rowid}`)
 				}
 
-				await env.db.delete(node_chunk).where(eq(node_chunk.chunk_id, chunk_item.id))
+				await removeNodeChunk(eq(node_chunk.chunk_id, chunk_item.id))
 			}
 
-			await env.db.delete(chunk).where(eq(chunk.article_id, current_article_id))
+			await removeChunks(eq(chunk.article_id, current_article_id))
 		}
 
-		await env.db
-			.update(article)
-			.set({ content: content, for: args.for, hash, is_tripled: enable_triple, updated_at: new Date() })
-			.where(eq(article.id, current_article_id))
+		await setArticle(eq(article.id, current_article_id), {
+			content: content,
+			for: args.for,
+			hash,
+			is_tripled: enable_triple,
+			updated_at: new Date()
+		})
 
 		log('SAVE', 'updateArticle', () => `article_id: ${current_article_id}`)
 	} else {
-		const [article_item] = await env.db
-			.insert(article)
-			.values({ content: content, for: args.for, hash, is_tripled: enable_triple })
-			.returning({ id: article.id })
+		const article_item = await addArticle({
+			content: content,
+			for: args.for,
+			hash,
+			is_tripled: enable_triple
+		})
 
 		current_article_id = article_item.id
 
@@ -89,16 +98,13 @@ export default async (args: ArgsSaveArticle) => {
 
 		log('SAVE', 'getKeywords', () => `keywords: ${JSON.stringify(keywords)}`)
 
-		const [chunk_item] = await env.db
-			.insert(chunk)
-			.values({
-				article_id: current_article_id,
-				content: item,
-				keywords: keywords.join(','),
-				is_body: chunks.length === 1,
-				position: i
-			})
-			.returning({ id: chunk.id })
+		const chunk_item = await addChunk({
+			article_id: current_article_id,
+			content: item,
+			keywords: keywords.join(','),
+			is_body: chunks.length === 1,
+			position: i
+		})
 
 		log('SAVE', 'insertChunk', () => `${i} chunk_length: ${item.length}`)
 
@@ -119,7 +125,7 @@ export default async (args: ArgsSaveArticle) => {
 		log('SAVE', 'saveChunkVector')
 
 		if (enable_triple) {
-			await env.db.insert(task).values({
+			await addTask({
 				type: 'triple',
 				args: { chunk_text: item, chunk_item_id: chunk_item.id }
 			})

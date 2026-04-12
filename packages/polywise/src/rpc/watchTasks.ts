@@ -1,6 +1,6 @@
 import events from 'events'
 import { task } from '@core/db/schema'
-import { env } from '@core/env'
+import { getTasks } from '@core/db/services'
 import { eq } from 'drizzle-orm'
 import { object, string } from 'zod'
 
@@ -12,7 +12,10 @@ const input_type = object({
 })
 
 const getPayload = async (type: string) => {
-	const tasks = await env.db.select().from(task).where(eq(task.type, type)).limit(10)
+	const tasks = await getTasks({
+		where: eq(task.type, type),
+		limit: 10
+	})
 
 	const queue_item = type ? queue.map.get(type) : null
 	const paused = queue_item?.paused ?? false

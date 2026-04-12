@@ -1,12 +1,12 @@
 import { task } from '@core/db/schema'
-import { env } from '@core/env'
+import { setTask } from '@core/db/services'
 import { to } from 'await-to-js'
 import { eq } from 'drizzle-orm'
 
 import { emitter } from '.'
 
 export default async (id: string) => {
-	const [err] = await to(env.db.update(task).set({ status: 'ignore' }).where(eq(task.id, id)))
+	const [err] = await to(setTask(eq(task.id, id), { status: 'ignore' }))
 
 	if (err) throw new Error(`Failed to ignore task: ${err.message}`)
 

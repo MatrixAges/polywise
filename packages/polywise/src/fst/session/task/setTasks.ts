@@ -1,5 +1,5 @@
 import { session_todo, todo } from '@core/db/schema'
-import { env } from '@core/env'
+import { addSessionTodo, addTodo, getSessionTodos, setTodo } from '@core/db/services'
 import { and, eq, inArray, ne } from 'drizzle-orm'
 
 import type { Todo } from '@core/db'
@@ -10,11 +10,9 @@ export default async (s: Index, v: Context['tasks']) => {
 	const tasks = v || []
 	const task_titles = new Set(tasks.map(task => task.title))
 
-	const current_tasks = await env.db
-		.select({ todo })
-		.from(session_todo)
-		.innerJoin(todo, eq(session_todo.todo_id, todo.id))
-		.where(and(eq(session_todo.session_id, s.id), ne(todo.status, 'archive')))
+	const current_tasks = await getSessionTodos({
+		where: and(eq(session_todo.session_id, s.id), ne(todo.status, 'archive'))
+	})
 
 	const exist_tasks: Array<Todo> = []
 	const archive_tasks: Array<Todo> = []
@@ -30,7 +28,7 @@ export default async (s: Index, v: Context['tasks']) => {
 	if (archive_tasks.length > 0) {
 		const archive_ids = archive_tasks.map(item => item.id)
 
-		await env.db.update(todo).set({ status: 'archive' }).where(inArray(todo.id, archive_ids))
+		await setTodo(inArray(todo.id, archive_ids), { status: 'archive' })
 	}
 
 	const existing_map = new Map(exist_tasks.map(item => [item.title, item]))
@@ -57,28 +55,22 @@ export default async (s: Index, v: Context['tasks']) => {
 				updates.completed_at = null
 			}
 
-			await env.db.update(todo).set(updates).where(eq(todo.id, found.id))
+			await setTodo(eq(todo.id, found.id), updates)
 		} else {
 			const current_index = status_order_map.get(db_status) || 0
 
 			status_order_map.set(db_status, current_index + 1)
 
-			const [inserted] = await env.db
-				.insert(todo)
-				.values({
-					title: task.title,
-					description: task.desc || undefined,
-					status: db_status,
-					order: current_index,
-					result: task.result ?? undefined,
-					error: task.error ?? undefined
-				})
-				.returning()
-
-			await env.db.insert(session_todo).values({
-				session_id: s.id,
-				todo_id: inserted.id
+			const inserted = await addTodo({
+				title: task.title,
+				description: task.desc || undefined,
+				status: db_status,
+				order: current_index,
+				result: task.result ?? undefined,
+				error: task.error ?? undefined
 			})
+
+			await addSessionTodo(s.id, inserted.id)
 		}
 	}
 

@@ -1,4 +1,5 @@
 import { article, chunk } from '@core/db/schema'
+import { getArticles, getChunks } from '@core/db/services'
 import { env } from '@core/env'
 import { addTask, initRerankModel, removeTask } from '@core/llama'
 import { log } from '@core/utils'
@@ -67,10 +68,9 @@ const rerankChunk = async (query: string, results: Array<SearchResult>) => {
 
 	const chunk_ids = results.map(item => item.chunk_id)
 
-	const chunks = await env.db
-		.select({ id: chunk.id, content: chunk.content })
-		.from(chunk)
-		.where(inArray(chunk.id, chunk_ids))
+	const chunks = await getChunks({
+		where: inArray(chunk.id, chunk_ids)
+	})
 
 	const content_map = new Map<string, string>()
 
@@ -122,10 +122,9 @@ const rerankArticle = async (query: string, results: Array<ArticleSearchResult>)
 
 	const article_ids = results.map(item => item.article_id)
 
-	const articles = await env.db
-		.select({ id: article.id, content: article.content })
-		.from(article)
-		.where(inArray(article.id, article_ids))
+	const articles = await getArticles({
+		where: inArray(article.id, article_ids)
+	})
 
 	const content_map = new Map<string, string>()
 

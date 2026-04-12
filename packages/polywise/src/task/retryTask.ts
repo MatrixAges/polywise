@@ -1,5 +1,5 @@
 import { task } from '@core/db/schema'
-import { env } from '@core/env'
+import { setTask } from '@core/db/services'
 import { to } from 'await-to-js'
 import { eq } from 'drizzle-orm'
 
@@ -8,7 +8,7 @@ import { emitter, queue } from '.'
 import type { Task } from '.'
 
 export default async (item: Task) => {
-	const [err] = await to(env.db.update(task).set({ status: 'pending' }).where(eq(task.id, item.id)))
+	const [err] = await to(setTask(eq(task.id, item.id), { status: 'pending' }))
 
 	if (err) throw new Error(`Failed to retry task: ${err.message}`)
 

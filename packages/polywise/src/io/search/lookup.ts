@@ -1,5 +1,5 @@
 import { article, chunk } from '@core/db/schema'
-import { env } from '@core/env'
+import { getArticles, getChunks } from '@core/db/services'
 import { log } from '@core/utils'
 import { inArray } from 'drizzle-orm'
 
@@ -33,19 +33,17 @@ export default async (chunks: Array<ChunkScore>): Promise<Array<ArticleWithScore
 
 	const chunk_ids = chunks.map(c => c.chunk_id)
 
-	const chunk_results = await env.db
-		.select({ id: chunk.id, article_id: chunk.article_id, content: chunk.content })
-		.from(chunk)
-		.where(inArray(chunk.id, chunk_ids))
+	const chunk_results = await getChunks({
+		where: inArray(chunk.id, chunk_ids)
+	})
 
 	const article_ids = [...new Set(chunk_results.map(c => c.article_id).filter(Boolean))] as Array<string>
 
 	if (article_ids.length === 0) return []
 
-	const article_results = await env.db
-		.select({ id: article.id, title: article.title, url: article.url, content: article.content })
-		.from(article)
-		.where(inArray(article.id, article_ids))
+	const article_results = await getArticles({
+		where: inArray(article.id, article_ids)
+	})
 
 	const article_map = new Map(article_results.map(a => [a.id, a]))
 	const chunk_to_article = new Map(chunk_results.map(c => [c.id, c]))

@@ -1,6 +1,6 @@
 import { message } from '@core/db/schema'
-import { env } from '@core/env'
-import { and, desc, eq, gt, sql } from 'drizzle-orm'
+import { getMessages, getMessagesCount } from '@core/db/services'
+import { and, desc, eq, gt } from 'drizzle-orm'
 
 import type Index from '../index'
 
@@ -15,12 +15,11 @@ export default async (s: Index) => {
 		? and(eq(message.session_id, s.id), archived_condition)
 		: eq(message.session_id, s.id)
 
-	const res = await env.db
-		.select()
-		.from(message)
-		.where(where_condition)
-		.orderBy(desc(message.created_at))
-		.limit(ui_threshold_value)
+	const res = await getMessages({
+		where: where_condition,
+		orderBy: desc(message.created_at),
+		limit: ui_threshold_value
+	})
 
 	s.ui_messages = res
 		.map(item => {
@@ -34,12 +33,7 @@ export default async (s: Index) => {
 
 	s.model_messages = s.ui_messages.slice(-ui_reduce_value)
 
-	const [count_row] = await env.db
-		.select({ count: sql<number>`count(*)`.as('count') })
-		.from(message)
-		.where(where_condition)
-
-	const total = Number(count_row?.count ?? 0)
+	const total = await getMessagesCount(where_condition)
 
 	s.ui_has_older = total > ui_threshold_value
 	s.ui_has_newer = false

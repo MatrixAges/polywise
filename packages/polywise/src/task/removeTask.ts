@@ -1,5 +1,5 @@
 import { task } from '@core/db/schema'
-import { env } from '@core/env'
+import { removeTask } from '@core/db/services'
 import { to } from 'await-to-js'
 import { eq } from 'drizzle-orm'
 
@@ -17,7 +17,7 @@ export default async (id: string) => {
 		}
 	}
 
-	const [err] = await to(env.db.delete(task).where(eq(task.id, id)))
+	const [err] = await to(removeTask(eq(task.id, id)))
 
 	if (err) throw new Error(`Failed to remove task: ${err.message}`)
 

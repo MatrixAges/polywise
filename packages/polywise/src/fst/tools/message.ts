@@ -1,7 +1,7 @@
 import { message } from '@core/db/schema'
-import { env } from '@core/env'
+import { getMessages, getMessagesCount } from '@core/db/services'
 import { convertToModelMessages, tool } from 'ai'
-import { and, asc, eq, lt, sql } from 'drizzle-orm'
+import { and, asc, eq, lt } from 'drizzle-orm'
 import { enum as Enum, number, object, optional } from 'zod'
 
 import type { Message } from '../types'
@@ -32,10 +32,7 @@ export const createMessageTool = (id: string, model_messages: Array<Message>) =>
 	const model_count = model_messages.length
 
 	const getTotalCount = async () => {
-		const [{ count }] = await env.db
-			.select({ count: sql<number>`count(*)` })
-			.from(message)
-			.where(eq(message.id, id))
+		const count = await getMessagesCount(eq(message.session_id, id))
 
 		return {
 			action: 'get_total_count' as const,
@@ -63,16 +60,12 @@ export const createMessageTool = (id: string, model_messages: Array<Message>) =>
 		const before = args?.before ?? 0
 		const offset = args?.offset
 
-		const [[{ count: total }], history] = await Promise.all([
-			env.db
-				.select({ count: sql<number>`count(*)` })
-				.from(message)
-				.where(eq(message.id, id)),
-			env.db
-				.select()
-				.from(message)
-				.where(and(eq(message.id, id), lt(message.created_at, baseline)))
-				.orderBy(asc(message.created_at))
+		const [total, history] = await Promise.all([
+			getMessagesCount(eq(message.session_id, id)),
+			getMessages({
+				where: and(eq(message.session_id, id), lt(message.created_at, baseline)),
+				orderBy: asc(message.created_at)
+			})
 		])
 
 		const available = history.length

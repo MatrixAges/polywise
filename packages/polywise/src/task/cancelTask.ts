@@ -1,12 +1,12 @@
 import { task } from '@core/db/schema'
-import { env } from '@core/env'
+import { setTask } from '@core/db/services'
 import { to } from 'await-to-js'
 import { eq } from 'drizzle-orm'
 
 import { emitter, queue } from '.'
 
 export default async (id: string) => {
-	const [err] = await to(env.db.update(task).set({ status: 'cancel' }).where(eq(task.id, id)))
+	const [err] = await to(setTask(eq(task.id, id), { status: 'cancel' }))
 
 	if (err) throw new Error(`Failed to cancel task: ${err.message}`)
 

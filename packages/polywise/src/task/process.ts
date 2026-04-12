@@ -1,5 +1,5 @@
 import { task } from '@core/db/schema'
-import { env } from '@core/env'
+import { setTask } from '@core/db/services'
 import { log } from '@core/utils'
 import { to } from 'await-to-js'
 import { eq } from 'drizzle-orm'
@@ -14,7 +14,7 @@ const handlers: Record<string, (args: any) => Promise<any>> = {
 }
 
 export default async (item: Task) => {
-	const [err] = await to(env.db.update(task).set({ status: 'running' }).where(eq(task.id, item.id)))
+	const [err] = await to(setTask(eq(task.id, item.id), { status: 'running' }))
 
 	if (err) {
 		log('TASK_QUEUE', 'updateStatusError', () => `${item.id}: ${err}`)
@@ -30,13 +30,13 @@ export default async (item: Task) => {
 		log('TASK_QUEUE', 'startTask', () => `${item.id}`)
 
 		await handler(item.args)
-		await env.db.update(task).set({ status: 'success' }).where(eq(task.id, item.id))
+		await setTask(eq(task.id, item.id), { status: 'success' })
 
 		emitter.emit('change')
 	} catch (e) {
 		log('TASK_QUEUE', 'taskError', () => `${item.id}: ${e}`)
 
-		const [err2] = await to(env.db.update(task).set({ status: 'fail' }).where(eq(task.id, item.id)))
+		const [err2] = await to(setTask(eq(task.id, item.id), { status: 'fail' }))
 
 		if (err2) log('TASK_QUEUE', 'updateStatusError', () => `${item.id}: ${err2}`)
 

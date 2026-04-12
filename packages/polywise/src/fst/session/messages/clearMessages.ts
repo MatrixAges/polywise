@@ -1,5 +1,5 @@
 import { message } from '@core/db/schema'
-import { env } from '@core/env'
+import { removeMessages } from '@core/db/services'
 import { eq } from 'drizzle-orm'
 
 import type { Context } from '../../types'
@@ -18,7 +18,7 @@ export default async (s: Index) => {
 	await s.setContext({})
 	await s.setState()
 
-	await env.db.delete(message).where(eq(message.session_id, s.id))
+	await removeMessages(eq(message.session_id, s.id))
 
 	await s.clearTasks()
 

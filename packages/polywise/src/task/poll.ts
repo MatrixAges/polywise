@@ -1,5 +1,5 @@
 import { task } from '@core/db/schema'
-import { env } from '@core/env'
+import { getTasks } from '@core/db/services'
 import { log } from '@core/utils'
 import { to } from 'await-to-js'
 import { and, eq } from 'drizzle-orm'
@@ -31,11 +31,10 @@ export default async (type: string) => {
 	}
 
 	const [err, pending] = await to(
-		env.db
-			.select()
-			.from(task)
-			.where(and(eq(task.type, type), eq(task.status, 'pending')))
-			.limit(slots)
+		getTasks({
+			where: and(eq(task.type, type), eq(task.status, 'pending')),
+			limit: slots
+		})
 	)
 
 	if (err) {

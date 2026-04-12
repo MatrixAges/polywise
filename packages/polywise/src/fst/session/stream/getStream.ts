@@ -1,6 +1,6 @@
 import fst_system_prompt from '@core/consts/prompts/fst_system_prompt.md'
 import getContextPrompt from '@core/consts/prompts/getContextPrompt'
-import { notification, notification_session } from '@core/db/schema'
+import { addNotification, addNotificationSession } from '@core/db/services'
 import { env } from '@core/env'
 import { createSystemTool } from '@core/fst/agents'
 import { pushPart, startStream, stopStream } from '@core/fst/agents/supervisor'
@@ -109,7 +109,7 @@ export default async (s: Index, message: Message) => {
 				const notification_id = getId()
 				const error_message = event.error instanceof Error ? event.error.message : String(event.error)
 
-				await env.db.insert(notification).values({
+				await addNotification({
 					id: notification_id,
 					title: 'Stream Error',
 					description: error_message,
@@ -117,10 +117,7 @@ export default async (s: Index, message: Message) => {
 					is_pushed: false
 				})
 
-				await env.db.insert(notification_session).values({
-					notification_id,
-					session_id: s.id
-				})
+				await addNotificationSession(notification_id, s.id)
 			}
 
 			await s.stop()

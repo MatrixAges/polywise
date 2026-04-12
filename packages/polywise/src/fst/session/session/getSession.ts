@@ -1,11 +1,11 @@
 import { session } from '@core/db/schema'
-import { env } from '@core/env'
+import { getSession } from '@core/db/services'
 import { eq } from 'drizzle-orm'
 
 import type Index from '../index'
 
 export default async (s: Index) => {
-	const [res] = await env.db.select().from(session).where(eq(session.id, s.id)).limit(1)
+	const res = await getSession(eq(session.id, s.id))
 
 	s.session = res
 

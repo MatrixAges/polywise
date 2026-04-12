@@ -1,15 +1,13 @@
-import { project, project_session } from '@core/db/schema'
-import { env } from '@core/env'
+import { project_session } from '@core/db/schema'
+import { getSessionProject } from '@core/db/services'
 import { eq } from 'drizzle-orm'
 
 import type Index from '../index'
 
 export default async (s: Index) => {
-	const res = await env.db
-		.select({ project })
-		.from(project_session)
-		.innerJoin(project, eq(project_session.project_id, project.id))
-		.where(eq(project_session.session_id, s.id))
+	const res = await getSessionProject({
+		where: eq(project_session.session_id, s.id)
+	})
 
 	s.project = res[0]?.project ?? null
 }

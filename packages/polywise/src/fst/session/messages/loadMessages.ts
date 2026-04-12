@@ -1,5 +1,5 @@
 import { message } from '@core/db/schema'
-import { env } from '@core/env'
+import { getMessages } from '@core/db/services'
 import { and, desc, eq, gt, lt } from 'drizzle-orm'
 
 import type Index from '../index'
@@ -29,12 +29,11 @@ export default async (s: Index, type: 'prev' | 'next') => {
 		? and(eq(message.session_id, s.id), condition, archived_condition)
 		: and(eq(message.session_id, s.id), condition)
 
-	const res = await env.db
-		.select()
-		.from(message)
-		.where(where_condition)
-		.orderBy(desc(message.created_at))
-		.limit(ui_reduce_value)
+	const res = await getMessages({
+		where: where_condition,
+		orderBy: desc(message.created_at),
+		limit: ui_reduce_value
+	})
 
 	if (!res.length) {
 		if (is_older) {

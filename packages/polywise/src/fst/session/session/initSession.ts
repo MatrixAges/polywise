@@ -1,5 +1,5 @@
 import { session } from '@core/db/schema'
-import { env } from '@core/env'
+import { addSession, getSession } from '@core/db/services'
 import dayjs from 'dayjs'
 import { eq } from 'drizzle-orm'
 import fs from 'fs-extra'
@@ -15,19 +15,16 @@ export default async (s: Index, is_cron?: boolean, title?: string) => {
 	await s.getContext()
 	await s.getState()
 
-	const [res_exsit] = await env.db.select().from(session).where(eq(session.id, s.id)).limit(1)
+	const res_exsit = await getSession(eq(session.id, s.id))
 
 	if (res_exsit) {
 		res = res_exsit
 	} else {
-		const [res_insert] = await env.db
-			.insert(session)
-			.values({
-				id: s.id,
-				title: title || `Session ${dayjs().format('YYYY-MM-DD HH:mm:ss')}`,
-				is_cron: is_cron || undefined
-			})
-			.returning()
+		const res_insert = await addSession({
+			id: s.id,
+			title: title || `Session ${dayjs().format('YYYY-MM-DD HH:mm:ss')}`,
+			is_cron: is_cron || undefined
+		})
 
 		res = res_insert
 	}

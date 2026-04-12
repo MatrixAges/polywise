@@ -1,6 +1,6 @@
 import { getEdgeRowid, insertEdgeVector } from '@core/db/prepare'
 import { edge } from '@core/db/schema'
-import { env } from '@core/env'
+import { addEdge, getEdge } from '@core/db/services'
 import { getEmbedding } from '@core/pipeline'
 import { log } from '@core/utils'
 import { and, eq } from 'drizzle-orm'
@@ -14,21 +14,14 @@ interface Args {
 export default async (args: Args) => {
 	const { relation, source_id, target_id } = args
 
-	const [exist_edge] = await env.db
-		.select()
-		.from(edge)
-		.where(and(eq(edge.source_id, source_id), eq(edge.target_id, target_id)))
-		.limit(1)
+	const exist_edge = await getEdge(and(eq(edge.source_id, source_id), eq(edge.target_id, target_id)))
 
 	let edge_id = exist_edge?.id
 
 	log('SAVE', 'getExistEdge', () => `edge_id: ${edge_id}`)
 
 	if (!edge_id) {
-		const [new_edge] = await env.db
-			.insert(edge)
-			.values({ relation, source_id, target_id })
-			.returning({ id: edge.id })
+		const new_edge = await addEdge({ relation, source_id, target_id })
 
 		edge_id = new_edge.id
 
