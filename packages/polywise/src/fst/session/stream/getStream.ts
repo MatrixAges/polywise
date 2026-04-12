@@ -75,7 +75,7 @@ export default async (s: Index, message: Message) => {
 	if (s.prefill) messages.push({ role: 'assistant', content: s.prefill })
 
 	const bash_tool = await createBashTool(s)
-	const system_tools_prompt = getSystemTools()
+	const system_tools_prompt = await getSystemTools()
 
 	const res = streamText({
 		model: s.model.model,

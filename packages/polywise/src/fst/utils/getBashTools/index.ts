@@ -1,13 +1,13 @@
 import { readFile, writeFile } from 'atomically'
 import { createBashTool } from 'bash-tool'
 
-import checkPermission from './checkPermission'
-import getBashResponse from './getBashResponse'
-import getRealPath from './getRealPath'
+import checkPermission from '../checkPermission'
+import getRealPath from '../getRealPath'
+import executeCommand from './executeCommand'
 
 import type { Sandbox } from 'bash-tool'
 import type { Bash } from 'just-bash'
-import type Index from '../session'
+import type Index from '../../session'
 
 export default async (s: Index, bash: Bash, system?: boolean) => {
 	const path_mappings: Record<string, string> = {
@@ -44,30 +44,7 @@ export default async (s: Index, bash: Bash, system?: boolean) => {
 				}
 			},
 			async executeCommand(command) {
-				if (command === 'ls /usr/bin /usr/local/bin /bin /sbin /usr/sbin 2>/dev/null') {
-					const res = await bash.exec(command, { cwd: '/' })
-
-					return getBashResponse(res)
-				}
-
-				const cleanCommand = command.replace(/^cd\s+"[^"]+"\s+&&\s+/, '')
-
-				const perm_error = await checkPermission(
-					s,
-					'bash',
-					'execute',
-					cleanCommand,
-					cleanCommand,
-					system
-				)
-
-				if (perm_error) {
-					return { stdout: '', stderr: perm_error, exitCode: 1 }
-				}
-
-				const res = await bash.exec(command, { cwd: '/' })
-
-				return getBashResponse(res)
+				return executeCommand({ s, bash, command, system })
 			}
 		} as Sandbox
 	})

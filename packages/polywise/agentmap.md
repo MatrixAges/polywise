@@ -46,6 +46,11 @@ This document provides an overview of the packages/polywise module structure and
 					"desc": "Internal decision agents for permission, audit, system operations, and AI-generated session titles",
 					"role": "Folder"
 				},
+				"utils": {
+					"desc": "fst execution helpers for permission checks, bash sandbox orchestration, response shaping, and shell safety",
+					"role": "Folder",
+					"getBashTools": "Sandbox-backed bash tool builder with command risk matching, audit review, and child_process proxy execution for flagged commands"
+				},
 				"tools": {
 					"desc": "Bash sandboxing tools via bash-tool and local skill search/read/rebuild tooling backed by persisted skill_map.json under skills_dir",
 					"role": "Folder",
@@ -143,8 +148,12 @@ This document provides an overview of the packages/polywise module structure and
 				"trpc.ts": { "desc": "tRPC initialization and procedure/router exports", "role": "Utility" },
 				"getModel.ts": { "desc": "Model path retrieval utility", "role": "Utility" },
 				"getSystemTools.ts": {
-					"desc": "Runtime OS and CLI capability prompt generator",
+					"desc": "Runtime OS and CLI capability prompt generator backed by in-memory command metadata",
 					"role": "Utility"
+				},
+				"system": {
+					"desc": "System command inventory, risk rule generation, and prompt formatting helpers",
+					"role": "Folder"
 				},
 				"loadModel.ts": { "desc": "Model loading utility", "role": "Utility" },
 				"index.ts": { "desc": "Utils exports", "role": "Index" }
