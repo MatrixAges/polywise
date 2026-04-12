@@ -19,7 +19,7 @@ import { getSession, initSession, updateSession } from './session'
 import { getState, setState } from './state'
 import { abortStream, getStream } from './stream'
 import { clearTasks, getTasks, setTasks } from './task'
-import { active, runing, stop, sync } from './utils'
+import { active, resetAbort, runing, stop, sync } from './utils'
 
 import type { Agent, Project, Session, SessionInsert } from '@core/db'
 import type { ModelResult } from '../provider'
@@ -132,8 +132,5 @@ export default class Index {
 	runing = (v: boolean) => runing(this, v)
 	sync = () => sync(this)
 	stop = () => stop(this)
-
-	resetAbort = () => {
-		this.abort_controller = new AbortController()
-	}
+	resetAbort = () => resetAbort(this)
 }
