@@ -1,12 +1,15 @@
 import calculateSimilarity from './calculateSimilarity'
+import checkStream from './checkStream'
 import { streams } from './streams'
 
 const MAX_PARTS = 20
 
-export default (session_id: string, text: string): boolean => {
+export default (session_id: string, text: string) => {
 	const info = streams.get(session_id)
 
 	if (!info) return false
+
+	if (info.chaos_detected) return true
 
 	info.recent_parts.push(text)
 
@@ -21,10 +24,9 @@ export default (session_id: string, text: string): boolean => {
 	for (let i = 0; i < recent.length - 1; i++) {
 		for (let j = i + 1; j < recent.length; j++) {
 			if (calculateSimilarity(recent[i], recent[j]) > 0.8) {
-				console.log(
-					`[chaos] similarity detected: ${calculateSimilarity(recent[i], recent[j]).toFixed(2)}`
-				)
 				info.chaos_detected = true
+
+				setTimeout(checkStream, 0)
 
 				return true
 			}

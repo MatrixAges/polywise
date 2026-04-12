@@ -1,5 +1,5 @@
 import { SessionStreamStore } from '@core/utils'
-import { JsonToSseTransformStream } from 'ai'
+import { convertToModelMessages, JsonToSseTransformStream } from 'ai'
 import { getId } from 'stk/utils'
 
 import checkChaos from './checkChaos'
@@ -7,10 +7,8 @@ import { streams } from './streams'
 
 import type { Message } from '../../types'
 
-// const CHAOS_CHECK_DELAY = 60000
-// const CHAOS_CHECK_INTERVAL = 30000
-const CHAOS_CHECK_DELAY = 15000
-const CHAOS_CHECK_INTERVAL = 10000
+const CHAOS_CHECK_DELAY = 60000
+const CHAOS_CHECK_INTERVAL = 30000
 
 export default async () => {
 	const now = Date.now()
@@ -26,13 +24,10 @@ export default async () => {
 			info.last_check_time = now
 
 			try {
-				const is_chaos =
-					info.chaos_detected || (await checkChaos(info.recent_parts, info.session.model.model))
-
-				console.log('[chaos] detected:', is_chaos, 'source:', info.chaos_detected ? 'rule' : 'ai')
+				const is_chaos = await checkChaos(info.recent_parts, info.session.model.model)
 
 				if (is_chaos) {
-					const original_message = info.message
+					const original_message = (await convertToModelMessages([info.message as Message]))[0]
 
 					await info.session.abortStream()
 
@@ -44,7 +39,7 @@ export default async () => {
 						parts: [
 							{
 								type: 'text' as const,
-								text: `[System Auto-Correction] Detected that the previous conversation was stuck in a chaotic loop. Please reorganize your thoughts and start answering from scratch based on the user's original question. The user's question is: ${JSON.stringify(original_message)}`
+								text: `[System Auto-Correction] Detected that the previous conversation was stuck in a chaotic loop. Please reorganize your thoughts and start answering from scratch based on the user's original question. The user's question is: ${original_message.content}`
 							}
 						]
 					}
