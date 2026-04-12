@@ -1,5 +1,8 @@
 import fst_system_prompt from '@core/consts/prompts/fst_system_prompt.md'
 import getContextPrompt from '@core/consts/prompts/getContextPrompt'
+import { notification } from '@core/db/schema'
+import notification_session from '@core/db/schema/externals/notification_session'
+import { env } from '@core/env'
 import { createSystemTool } from '@core/fst/agents'
 import { convertToModelMessages, smoothStream, stepCountIs, streamText } from 'ai'
 import { getId } from 'stk/utils'
@@ -19,6 +22,7 @@ import {
 	createWebSearchTool,
 	updateTitle
 } from '../../tools'
+import { streamStart, streamStop } from '../supervisor'
 
 import type { Message, MessageMetadata } from '../../types'
 import type Index from '../index'
@@ -62,6 +66,8 @@ export default async (s: Index, message: Message) => {
 
 	await s.runing(true)
 
+	streamStart(s, message)
+
 	s.sync()
 
 	const messages = await convertToModelMessages(s.model_messages)
@@ -97,7 +103,29 @@ export default async (s: Index, message: Message) => {
 		stopWhen: stepCountIs(300),
 		experimental_transform: smoothStream(),
 		onAbort: s.stop.bind(s),
-		onError: s.stop.bind(s)
+		onError: async (event: { error: unknown }) => {
+			streamStop(s.id)
+
+			if (!env.active) {
+				const notification_id = getId()
+				const error_message = event.error instanceof Error ? event.error.message : String(event.error)
+
+				await env.db.insert(notification).values({
+					id: notification_id,
+					title: 'Stream Error',
+					description: error_message,
+					is_read: false,
+					is_pushed: false
+				})
+
+				await env.db.insert(notification_session).values({
+					notification_id,
+					session_id: s.id
+				})
+			}
+
+			await s.stop()
+		}
 	})
 
 	let reasoning_start = 0
@@ -136,6 +164,7 @@ export default async (s: Index, message: Message) => {
 				await s.appendMessage(responseMessage)
 			}
 
+			streamStop(s.id)
 			await s.stop()
 		}
 	})
