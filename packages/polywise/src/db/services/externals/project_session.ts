@@ -6,7 +6,7 @@ interface GetSessionProjectOptions {
 	where?: SQL
 }
 
-export default async (options: GetSessionProjectOptions = {}) => {
+export async function getSessionProject(options: GetSessionProjectOptions = {}) {
 	const { where } = options
 	let query = env.db
 		.select({ project })
@@ -17,6 +17,5 @@ export default async (options: GetSessionProjectOptions = {}) => {
 	if (where) query = query.where(where)
 
 	const res = await query
-
 	return res
 }

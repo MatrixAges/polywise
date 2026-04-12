@@ -6,7 +6,7 @@ interface GetSessionAgentsOptions {
 	where?: SQL
 }
 
-export default async (options: GetSessionAgentsOptions = {}) => {
+export async function getSessionAgents(options: GetSessionAgentsOptions = {}) {
 	const { where } = options
 	let query = env.db
 		.select({ agent })
@@ -17,6 +17,5 @@ export default async (options: GetSessionAgentsOptions = {}) => {
 	if (where) query = query.where(where)
 
 	const res = await query
-
 	return res
 }

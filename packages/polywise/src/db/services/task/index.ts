@@ -1,5 +1,0 @@
-export { default as addTask } from './addTask'
-export { default as getTask } from './getTask'
-export { default as getTasks } from './getTasks'
-export { default as removeTask } from './removeTask'
-export { default as setTask } from './setTask'

@@ -3,7 +3,9 @@
     "allow": [
       "Bash(mkdir *)",
       "Bash(cp *)",
-      "Bash(rm *)"
+      "Bash(rm *)",
+      "Bash(mv *)",
+      "Bash(git checkout *)"
     ]
   },
   "$version": 3
