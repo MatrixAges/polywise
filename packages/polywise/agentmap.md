@@ -142,6 +142,10 @@ This document provides an overview of the packages/polywise module structure and
 			"utils": {
 				"trpc.ts": { "desc": "tRPC initialization and procedure/router exports", "role": "Utility" },
 				"getModel.ts": { "desc": "Model path retrieval utility", "role": "Utility" },
+				"getSystemTools.ts": {
+					"desc": "Runtime OS and CLI capability prompt generator",
+					"role": "Utility"
+				},
 				"loadModel.ts": { "desc": "Model loading utility", "role": "Utility" },
 				"index.ts": { "desc": "Utils exports", "role": "Index" }
 			},

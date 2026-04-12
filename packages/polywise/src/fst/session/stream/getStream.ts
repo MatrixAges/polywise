@@ -4,6 +4,7 @@ import { addNotification, addNotificationSession } from '@core/db/services'
 import { env } from '@core/env'
 import { createSystemTool } from '@core/fst/agents'
 import { pushPart, startStream, stopStream } from '@core/fst/agents/supervisor'
+import { getSystemTools } from '@core/utils'
 import { convertToModelMessages, smoothStream, stepCountIs, streamText } from 'ai'
 import { getId } from 'stk/utils'
 
@@ -74,10 +75,11 @@ export default async (s: Index, message: Message) => {
 	if (s.prefill) messages.push({ role: 'assistant', content: s.prefill })
 
 	const bash_tool = await createBashTool(s)
+	const system_tools_prompt = getSystemTools()
 
 	const res = streamText({
 		model: s.model.model,
-		system: `${fst_system_prompt}\n\nCurrent Session Title: ${s.session.title}\n\n${getContextPrompt(s.context)}`,
+		system: `${fst_system_prompt}\n\n${system_tools_prompt}\n\nCurrent Session Title: ${s.session.title}\n\n${getContextPrompt(s.context)}`,
 		messages,
 		tools: {
 			...s.model.tools,
