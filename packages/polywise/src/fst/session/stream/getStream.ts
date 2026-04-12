@@ -22,7 +22,7 @@ import {
 	createWebSearchTool,
 	updateTitle
 } from '../../tools'
-import { streamStart, streamStop } from '../supervisor'
+import { pushPart, startStream, stopStream } from '../supervisor'
 
 import type { Message, MessageMetadata } from '../../types'
 import type Index from '../index'
@@ -66,7 +66,7 @@ export default async (s: Index, message: Message) => {
 
 	await s.runing(true)
 
-	streamStart(s, message)
+	startStream(s, message)
 
 	s.sync()
 
@@ -104,7 +104,7 @@ export default async (s: Index, message: Message) => {
 		experimental_transform: smoothStream(),
 		onAbort: s.stop.bind(s),
 		onError: async (event: { error: unknown }) => {
-			streamStop(s.id)
+			stopStream(s.id)
 
 			if (!env.active) {
 				const notification_id = getId()
@@ -138,6 +138,10 @@ export default async (s: Index, message: Message) => {
 		messageMetadata: ({ part }) => {
 			s.active()
 
+			if (part.type === 'text-delta') {
+				pushPart(s.id, part.text)
+			}
+
 			if (part.type === 'reasoning-start') {
 				reasoning_start = Date.now()
 			}
@@ -164,7 +168,7 @@ export default async (s: Index, message: Message) => {
 				await s.appendMessage(responseMessage)
 			}
 
-			streamStop(s.id)
+			stopStream(s.id)
 			await s.stop()
 		}
 	})

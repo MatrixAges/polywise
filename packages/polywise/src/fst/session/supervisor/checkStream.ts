@@ -10,6 +10,12 @@ export default async () => {
 	const now = Date.now()
 
 	for (const [session_id, info] of streams.entries()) {
+		if (info.chaos_detected) {
+			streams.delete(session_id)
+
+			continue
+		}
+
 		const elapsed = now - info.start_time
 		const time_since_last_check = now - info.last_check_time
 
@@ -17,7 +23,7 @@ export default async () => {
 			info.last_check_time = now
 
 			try {
-				const is_chaos = await checkChaos(info.session)
+				const is_chaos = await checkChaos(info.recent_parts, info.session.model.model)
 
 				if (is_chaos) {
 					await info.session.abortStream()
@@ -28,7 +34,7 @@ export default async () => {
 						parts: [
 							{
 								type: 'text',
-								text: `[System Auto-Correction] Detected that the previous conversation陷入混乱. Please reorganize your thoughts and start answering from scratch based on the user's original question. The user's question is: ${JSON.stringify(info.message)}`
+								text: `[System Auto-Correction] Detected that the previous conversation was stuck in a chaotic loop. Please reorganize your thoughts and start answering from scratch based on the user's original question. The user's question is: ${JSON.stringify(info.message)}`
 							}
 						]
 					}
