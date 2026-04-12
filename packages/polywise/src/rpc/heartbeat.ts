@@ -1,17 +1,20 @@
 import events from 'events'
 
+import { env } from '../env'
 import { p } from '../utils/trpc'
 
 export interface Res {
 	status: string
 	timestamp: number
 	uptime: number
+	active: boolean
 }
 
 const getStatus = () => ({
 	status: 'ok',
 	timestamp: Date.now(),
-	uptime: process.uptime()
+	uptime: process.uptime(),
+	active: env.active
 })
 
 export default p.subscription(async function* (args) {

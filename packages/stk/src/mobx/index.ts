@@ -1,5 +1,4 @@
 export { default as DirTree } from './DirTree'
-export { default as Idle } from './Idle'
 
 export { default as setStorageWhenChange } from './setStorageWhenChange'
 export { default as setStoreWhenChange } from './setStoreWhenChange'

@@ -7,6 +7,7 @@ import remove from './remove'
 import save from './save'
 import search from './search'
 import session from './session'
+import setActive from './setActive'
 import setTask from './setTask'
 import test from './test'
 import update from './update'
@@ -21,6 +22,7 @@ export const router = r({
 	heartbeat,
 	save,
 	search,
+	setActive,
 	test,
 	watchTasks,
 	setTask,

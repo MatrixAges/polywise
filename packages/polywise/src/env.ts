@@ -16,9 +16,10 @@ interface Env {
 	gen_model: LlamaModel
 	gen_context: LlamaContext
 	cron: CronRuntime
+	active: boolean
 }
 
-export const env = {} as Env
+export const env = { active: true } as Env
 
 export const initEnv = async () => {
 	initDB()
@@ -27,4 +28,8 @@ export const initEnv = async () => {
 	initSql()
 
 	await initCron()
+}
+
+export const setActive = (active: boolean) => {
+	env.active = active
 }

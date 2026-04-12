@@ -1,4 +1,5 @@
 export { default as StickyTableHeader } from './StickyTableHeader'
+export { default as Idle } from './Idle'
 export { default as catchError } from './catchError'
 export { default as catchFinally } from './catchFinally'
 export { default as moveObject } from './moveObject'

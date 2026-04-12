@@ -1,4 +1,5 @@
 import { makeAutoObservable } from 'mobx'
+import { Idle } from 'stk/utils'
 import { singleton } from 'tsyringe'
 
 import { Locale, Setting, Theme } from '@/models'
@@ -9,6 +10,7 @@ import { ipc, is_electron, rpc } from '@/utils'
 export default class GlobalModel {
 	ready = false
 	disconnected = false
+	idle = new Idle()
 
 	constructor(
 		public util: Util,
@@ -16,7 +18,11 @@ export default class GlobalModel {
 		public theme: Theme,
 		public setting: Setting
 	) {
-		makeAutoObservable(this, { util: false, locale: false, theme: false, setting: false }, { autoBind: true })
+		makeAutoObservable(
+			this,
+			{ util: false, locale: false, theme: false, setting: false, idle: false },
+			{ autoBind: true }
+		)
 	}
 
 	async init() {
@@ -29,6 +35,7 @@ export default class GlobalModel {
 		if (is_electron) this.onElectronMain()
 
 		this.onHeartBeat()
+		this.onUserIdle()
 	}
 
 	onElectronMain() {
@@ -53,6 +60,19 @@ export default class GlobalModel {
 		})
 
 		this.util.acts.push(deinit.unsubscribe, () => clearTimeout(timer))
+	}
+
+	onUserIdle() {
+		this.idle.init(90000, {
+			onIdle: () => {
+				rpc.setActive.mutate({ active: false })
+			},
+			onActive: () => {
+				rpc.setActive.mutate({ active: true })
+			}
+		})
+
+		this.util.acts.push(() => this.idle.off())
 	}
 
 	deinit() {
