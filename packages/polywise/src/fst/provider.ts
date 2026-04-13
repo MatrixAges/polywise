@@ -170,7 +170,13 @@ export const getModel = async (args: GetModelArgs): Promise<ModelResult> => {
 			}
 		case 'openrouter':
 			return {
-				model: (await import('@openrouter/ai-sdk-provider')).createOpenRouter(options)(model)
+				model: (await import('@openrouter/ai-sdk-provider')).createOpenRouter({
+					...options,
+					headers: {
+						'HTTP-Referer': 'https://polywise.io',
+						'X-Title': 'Polywise'
+					}
+				})(model)
 			}
 		default:
 			throw new Error(`Unsupported provider: ${provider}`)
