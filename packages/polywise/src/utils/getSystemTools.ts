@@ -1,4 +1,4 @@
-import { createSystemSpec, getSystemToolsPrompt } from './system'
+import { createSystemSpec, getSystemToolsPrompt } from '../fst/utils/system'
 
 export default async () => {
 	const system_spec = createSystemSpec()

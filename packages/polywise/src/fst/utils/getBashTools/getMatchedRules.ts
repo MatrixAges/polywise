@@ -1,6 +1,6 @@
 import getCommandName from './getCommandName'
 
-import type { SystemSpec } from '@core/utils/system/types'
+import type { SystemSpec } from '../system/types'
 
 export default (command: string, system_spec: SystemSpec) => {
 	const command_name = getCommandName(command)

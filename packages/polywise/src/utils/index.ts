@@ -12,5 +12,7 @@ export { default as getSystemTools } from './getSystemTools'
 
 export * from './middleware'
 export * from './session'
-export * from './system'
+// system 模块已移至 fst/utils/system
+export { createSystemSpec, getCommandRules, getSystemToolsPrompt } from '../fst/utils/system'
+export type { SystemCommandSpec, SystemSpec } from '../fst/utils/system/types'
 export * from './trpc'

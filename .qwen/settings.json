@@ -5,7 +5,8 @@
       "Bash(cp *)",
       "Bash(rm *)",
       "Bash(mv *)",
-      "Bash(git checkout *)"
+      "Bash(git checkout *)",
+      "Bash(npx *)"
     ]
   },
   "$version": 3

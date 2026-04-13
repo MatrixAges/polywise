@@ -8,3 +8,6 @@ export { default as checkPermission } from './checkPermission'
 export { default as checkPermissions } from './checkPermissions'
 
 export * from './safeshell'
+
+export { createSystemSpec, getCommandRules, getSystemToolsPrompt } from './system'
+export type { SystemCommandSpec, SystemSpec } from './system/types'

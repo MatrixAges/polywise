@@ -1,8 +1,7 @@
-import { createSystemSpec } from '@core/utils/system'
-
 import { audit } from '../../agents'
 import checkPermission from '../checkPermission'
 import getBashResponse from '../getBashResponse'
+import { createSystemSpec } from '../system'
 import { detect_command } from './constants'
 import executeRiskyCommand from './executeRiskyCommand'
 import getCleanCommand from './getCleanCommand'
