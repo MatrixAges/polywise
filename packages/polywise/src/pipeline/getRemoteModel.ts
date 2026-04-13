@@ -4,6 +4,12 @@ import { pick } from 'es-toolkit'
 
 import type { SpecialProvider } from '@core/types'
 
+const local_providers = new Set(['ollama', 'lmstudio'])
+
+export const isRemoteProvider = (provider: string) => {
+	return !local_providers.has(provider)
+}
+
 export default async (type: 'triple' | 'rewrite') => {
 	const target_config = (type === 'triple' ? config.triple_model : config.rewrite_model) ?? config.default_model
 	const { provider, model } = target_config
