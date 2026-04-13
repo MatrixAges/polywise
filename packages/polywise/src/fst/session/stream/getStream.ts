@@ -135,7 +135,6 @@ export default async (s: Index, message: Message) => {
 
 	let reasoning_start = 0
 	let reasoning_end = 0
-	let append_count = 0
 
 	return res.toUIMessageStream({
 		originalMessages: [message],
@@ -172,11 +171,11 @@ export default async (s: Index, message: Message) => {
 		onFinish: async ({ responseMessage }) => {
 			if (responseMessage.parts.length) {
 				await s.appendMessage(responseMessage)
-				append_count++
+				s.superego_append_count++
 			}
 
-			if (append_count >= 3) {
-				append_count = 0
+			if (s.superego_append_count >= 3) {
+				s.superego_append_count = 0
 				processSuperego(s).catch(() => {})
 			}
 

@@ -7,6 +7,8 @@ import getPrompt from './getPrompt'
 import type Session from '../../session'
 import type { ScopeInfo } from './types'
 
+const slog = (msg: string) => console.log(`[SUPEREGO] ${msg}`)
+
 const getScope = (s: Session): ScopeInfo => {
 	if (s.project) {
 		return { scope_type: 'project', scope_id: s.project.id }
@@ -25,7 +27,10 @@ export default async (s: Session) => {
 
 	const recent_messages = s.model_messages.slice(-6)
 
-	if (recent_messages.length === 0) return
+	if (recent_messages.length === 0) {
+		slog('skip: no messages')
+		return
+	}
 
 	const model_messages = await convertToModelMessages(recent_messages)
 
@@ -37,25 +42,23 @@ export default async (s: Session) => {
 		})
 		.join('\n\n')
 
-	log(
-		'SUPEREGO',
-		'start',
-		() => `session: ${s.id}, scope: ${scope.scope_type}, messages: ${recent_messages.length}`
-	)
+	slog(`start | session: ${s.id} | scope: ${scope.scope_type} | messages: ${recent_messages.length}`)
 
 	try {
 		const agent = createSuperegoAgent(s.model.model, s, scope, prompt)
 
-		await agent.generate({
+		const result = await agent.generate({
 			prompt: `Analyze the following conversation fragment and extract memories, knowledge, and skills as appropriate.\n\n---\n\n${conversation}`
 		})
 
-		log('SUPEREGO', 'done', () => `session: ${s.id}`)
+		slog(`done | session: ${s.id} | tool_calls: ${result.toolCalls?.length ?? 0}`)
+
+		if (result.toolCalls?.length) {
+			for (const tc of result.toolCalls) {
+				slog(`tool_call | ${tc.toolName} | ${JSON.stringify(tc.input).slice(0, 200)}`)
+			}
+		}
 	} catch (error) {
-		log(
-			'SUPEREGO',
-			'error',
-			() => `session: ${s.id}, error: ${error instanceof Error ? error.message : String(error)}`
-		)
+		slog(`error | session: ${s.id} | ${error instanceof Error ? error.message : String(error)}`)
 	}
 }

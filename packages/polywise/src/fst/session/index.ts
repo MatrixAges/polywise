@@ -50,6 +50,7 @@ export default class Index {
 	abort_controller = new AbortController()
 	update_at = Date.now()
 	archived_at = null as null | number
+	superego_append_count = 0
 
 	get session_dir() {
 		return path.resolve(`${app.app_path}/sessions/${this.id}`)

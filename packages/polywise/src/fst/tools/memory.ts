@@ -30,11 +30,15 @@ export const createMemoryTool = (s: Session) => {
 		].join('\n'),
 		inputSchema,
 		execute: async input => {
+			console.log(`[memory_tool] search | query: ${input.query}`)
+
 			const results = await ioSearch({
 				query: input.query,
 				intent: 'memory search',
 				type: 'article'
 			})
+
+			console.log(`[memory_tool] search done | results: ${results.results.length}`)
 
 			const max_results = input.max_results ?? 5
 

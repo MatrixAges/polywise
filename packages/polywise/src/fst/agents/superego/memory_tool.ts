@@ -1,11 +1,13 @@
 import { article } from '@core/db/schema'
 import { getArticle, setArticle } from '@core/db/services'
-import { remove as ioRemove, search as ioSearch, save } from '@core/io'
+import { save, search } from '@core/io'
 import { tool } from 'ai'
 import { eq } from 'drizzle-orm'
 import { enum as Enum, object, string } from 'zod'
 
 import type { ScopeInfo } from './types'
+
+const slog = (msg: string) => console.log(`[SUPEREGO:memory] ${msg}`)
 
 const inputSchema = object({
 	action: Enum(['add', 'search', 'update']).describe(
@@ -32,6 +34,8 @@ export const createMemoryTool = (scope: ScopeInfo) => {
 					return { action: 'add', error: 'content is required for add action' }
 				}
 
+				slog(`add | content: ${input.content.slice(0, 100)}`)
+
 				const id = await save({
 					type: 'article',
 					content: input.content,
@@ -41,6 +45,8 @@ export const createMemoryTool = (scope: ScopeInfo) => {
 					source: 'superego'
 				})
 
+				slog(`add done | id: ${id}`)
+
 				return { action: 'add', id, status: 'saved' }
 			}
 
@@ -49,11 +55,15 @@ export const createMemoryTool = (scope: ScopeInfo) => {
 					return { action: 'search', error: 'query is required for search action' }
 				}
 
-				const results = await ioSearch({
+				slog(`search | query: ${input.query}`)
+
+				const results = await search({
 					query: input.query,
 					intent: 'memory search',
 					type: 'article'
 				})
+
+				slog(`search done | results: ${results.results.length}`)
 
 				return {
 					action: 'search',

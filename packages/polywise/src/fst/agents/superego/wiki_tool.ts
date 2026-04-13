@@ -1,11 +1,13 @@
 import { article } from '@core/db/schema'
 import { getArticle, setArticle } from '@core/db/services'
-import { remove as ioRemove, search as ioSearch, save } from '@core/io'
+import { remove, save, search } from '@core/io'
 import { tool } from 'ai'
 import { eq } from 'drizzle-orm'
 import { enum as Enum, object, string } from 'zod'
 
 import type { ScopeInfo } from './types'
+
+const slog = (msg: string) => console.log(`[SUPEREGO:wiki] ${msg}`)
 
 const inputSchema = object({
 	action: Enum(['add', 'search', 'update', 'remove']).describe(
@@ -33,6 +35,8 @@ export const createWikiTool = (scope: ScopeInfo) => {
 					return { action: 'add', error: 'content is required for add action' }
 				}
 
+				slog(`add | content: ${input.content.slice(0, 100)}`)
+
 				const id = await save({
 					type: 'article',
 					content: input.content,
@@ -42,6 +46,8 @@ export const createWikiTool = (scope: ScopeInfo) => {
 					source: 'superego'
 				})
 
+				slog(`add done | id: ${id}`)
+
 				return { action: 'add', id, status: 'saved' }
 			}
 
@@ -50,11 +56,15 @@ export const createWikiTool = (scope: ScopeInfo) => {
 					return { action: 'search', error: 'query is required for search action' }
 				}
 
-				const results = await ioSearch({
+				slog(`search | query: ${input.query}`)
+
+				const results = await search({
 					query: input.query,
 					intent: 'knowledge search',
 					type: 'article'
 				})
+
+				slog(`search done | results: ${results.results.length}`)
 
 				return {
 					action: 'search',
@@ -96,7 +106,7 @@ export const createWikiTool = (scope: ScopeInfo) => {
 					return { action: 'remove', error: 'article_id is required for remove action' }
 				}
 
-				await ioRemove(input.article_id)
+				await remove(input.article_id)
 
 				return { action: 'remove', id: input.article_id, status: 'removed' }
 			}

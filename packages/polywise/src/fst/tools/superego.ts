@@ -26,12 +26,17 @@ export const createSuperegoTool = (s: Session) => {
 		].join('\n'),
 		inputSchema,
 		execute: async input => {
-			await processSuperego(s)
+			console.log(
+				`[superego_tool] triggered | target: ${input.target} | content: ${input.content.slice(0, 100)}`
+			)
+			processSuperego(s).catch(e =>
+				console.log(`[superego_tool] error: ${e instanceof Error ? e.message : String(e)}`)
+			)
 
 			return {
 				status: 'triggered',
 				target: input.target,
-				message: `Superego extraction triggered for ${input.target}. The content will be processed asynchronously.`
+				message: `Superego extraction triggered for ${input.target}. Processing in background.`
 			}
 		}
 	})
