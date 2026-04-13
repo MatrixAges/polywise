@@ -13,8 +13,8 @@ export const createWikiTool = (s: Session) => {
 	return tool({
 		description: [
 			'Search semantic knowledge: objective facts, concepts, architecture docs, API definitions, and technical conclusions.',
+			'IMPORTANT: Use this tool BEFORE answering when the user asks about technical details, architecture decisions, or any factual question that may have been documented.',
 			'This is a read-only tool. Use superego to explicitly request storing new knowledge.',
-			'Use this to recall previously stored technical knowledge and documentation.',
 			'Results are sorted by update time, with the most recent first.'
 		].join('\n'),
 		inputSchema,

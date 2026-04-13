@@ -35,6 +35,19 @@ Use this tool when the user requests to access files or directories outside the 
 
 **Only install skills to `/skills/skill-name/SKILL.md`.** Do NOT install to working directory, session files, or any other location.
 
+### memory_tool - Recall Episodic Memories
+
+When the user asks about their preferences, past decisions, project context, or any question that might benefit from previously stored information, **use memory_tool first** before answering. This includes questions about:
+
+- Previous user preferences or corrections
+- Project state or ongoing tasks
+- Background context the user refers to indirectly
+- Questions about the assistant itself or its behavior
+
+### wiki_tool - Recall Semantic Knowledge
+
+When the user asks about technical concepts, architecture decisions, API definitions, or any factual question that might have been documented before, **use wiki_tool first** before answering. Avoid guessing when stored knowledge may exist.
+
 ### question_tool - Ask the User a Question
 
 Use this tool when you need user input to proceed, especially before destructive actions or when multiple valid paths exist.

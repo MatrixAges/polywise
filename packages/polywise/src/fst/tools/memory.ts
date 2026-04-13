@@ -13,8 +13,8 @@ export const createMemoryTool = (s: Session) => {
 	return tool({
 		description: [
 			'Search episodic memories about user preferences, project state, and context.',
+			'IMPORTANT: Use this tool BEFORE answering when the user asks about their preferences, past decisions, project background, or previously discussed topics.',
 			'This is a read-only tool. Use superego to explicitly request storing new memories.',
-			'Use this to recall previously stored information about the user or project.',
 			'Results are sorted by update time, with the most recent first.'
 		].join('\n'),
 		inputSchema,

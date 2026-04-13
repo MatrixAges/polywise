@@ -20,7 +20,7 @@ const getScope = (s: Session): ScopeInfo => {
 
 export default async (s: Session) => {
 	const scope = getScope(s)
-	const prompt = getPrompt(scope)
+	const prompt = getPrompt()
 
 	const recent_messages = s.model_messages.slice(-6)
 
