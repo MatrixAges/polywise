@@ -10,9 +10,9 @@ import { isRemoteProvider } from './getRemoteModel'
 import type { SearchTarget } from './genRewriteQuery'
 
 export default async (query: string, intent?: string): Promise<SearchTarget> => {
-	const { provider } = config.rewrite_model
+	const target = config.rewrite_model ?? config.default_model
 
-	if (isRemoteProvider(provider)) {
+	if (isRemoteProvider(target.provider)) {
 		return genRewriteQuery(query, intent)
 	}
 

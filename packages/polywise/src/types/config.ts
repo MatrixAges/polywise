@@ -14,9 +14,9 @@ export interface AppConfig {
 	submit_mode: 'enter' | 'ctrl+enter'
 	default_model: DefaultModel
 	enable_triple: boolean
-	triple_model: DefaultModel
+	triple_model?: DefaultModel
 	enable_rewrite: boolean
-	rewrite_model: DefaultModel
+	rewrite_model?: DefaultModel
 }
 
 export interface ProviderConfig {

@@ -10,9 +10,9 @@ import { isRemoteProvider } from './getRemoteModel'
 import type { Triples } from '@core/types'
 
 export default async (text: string, onTextChunk?: ((text: string) => void) | undefined) => {
-	const { provider } = config.triple_model
+	const target = config.triple_model ?? config.default_model
 
-	if (isRemoteProvider(provider)) {
+	if (isRemoteProvider(target.provider)) {
 		return genTriples(text)
 	}
 
