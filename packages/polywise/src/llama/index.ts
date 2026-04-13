@@ -161,7 +161,7 @@ export const initLlama = async () => {
 
 	if (!llama_promise) {
 		llama_promise = (async () => {
-			env.llama = await getLlama({ logLevel: LlamaLogLevel.warn })
+			env.llama = await getLlama({ logLevel: LlamaLogLevel.error })
 
 			resetLlamaTimer()
 
