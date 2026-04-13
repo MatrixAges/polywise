@@ -1,7 +1,7 @@
 import { tool } from 'ai'
 import { enum as Enum, object, string } from 'zod'
 
-import { processSuperego } from '../agents/superego'
+import { extract } from '../agents/superego'
 
 import type Session from '../session'
 
@@ -25,19 +25,10 @@ export const createSuperegoTool = (s: Session) => {
 			'The superego agent will analyze the provided content and decide the best extraction strategy.'
 		].join('\n'),
 		inputSchema,
-		execute: async input => {
-			console.log(
-				`[superego_tool] triggered | target: ${input.target} | content: ${input.content.slice(0, 100)}`
-			)
-			processSuperego(s).catch(e =>
-				console.log(`[superego_tool] error: ${e instanceof Error ? e.message : String(e)}`)
-			)
+		execute: async () => {
+			extract(s)
 
-			return {
-				status: 'triggered',
-				target: input.target,
-				message: `Superego extraction triggered for ${input.target}. Processing in background.`
-			}
+			return 'Processing in background'
 		}
 	})
 }

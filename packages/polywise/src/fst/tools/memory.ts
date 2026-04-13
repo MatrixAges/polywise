@@ -30,26 +30,20 @@ export const createMemoryTool = (s: Session) => {
 		].join('\n'),
 		inputSchema,
 		execute: async input => {
-			console.log(`[memory_tool] search | query: ${input.query}`)
-
 			const results = await ioSearch({
 				query: input.query,
 				intent: 'memory search',
 				type: 'article'
 			})
 
-			console.log(`[memory_tool] search done | results: ${results.results.length}`)
-
-			const max_results = input.max_results ?? 5
+			const max_results = input.max_results ?? 6
 
 			return {
-				query: input.query,
 				results: results.results.slice(0, max_results).map(r => ({
 					id: r.id,
 					content: r.content.slice(0, 500),
 					score: r.score
-				})),
-				count: results.results.length
+				}))
 			}
 		}
 	})

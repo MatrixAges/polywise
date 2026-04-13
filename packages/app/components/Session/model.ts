@@ -26,7 +26,7 @@ export default class Index {
 	chat = null as unknown as Chat
 	session = null as unknown as Session
 	context = null as unknown as Context
-	status = '' as AbstractChat<UIMessage>['status']
+	status = 'ready' as AbstractChat<UIMessage>['status']
 	messages = [] as AbstractChat<UIMessage>['messages']
 	permission = null as unknown as Permission
 	archived_at = null as null | number
@@ -129,7 +129,11 @@ export default class Index {
 
 							this.chat.setMessages(target_messages as unknown as Array<Message>)
 
-							if (this.session.is_runing && this.status !== 'streaming') {
+							if (
+								this.session.is_runing &&
+								this.status !== 'streaming' &&
+								this.status !== 'submitted'
+							) {
 								this.chat.resumeStream()
 							}
 

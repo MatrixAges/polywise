@@ -19,7 +19,7 @@ const Index = (props: IProps) => {
 	const { id } = props
 	const [x] = useState(() => container.resolve(Model))
 
-	const streaming = x.status === 'streaming'
+	const streaming = x.status === 'streaming' || x.status === 'submitted'
 
 	const { ref, setRef } = useAliveEffect({
 		init: () => x.init(id),
