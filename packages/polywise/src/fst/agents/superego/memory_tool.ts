@@ -7,8 +7,6 @@ import { enum as Enum, object, string } from 'zod'
 
 import type { ScopeInfo } from './types'
 
-const slog = (msg: string) => console.log(`[SUPEREGO:memory] ${msg}`)
-
 const inputSchema = object({
 	action: Enum(['add', 'search', 'update']).describe(
 		'The action to perform. add: store new episodic memory. search: check for existing memories. update: modify an existing memory by id.'
@@ -34,8 +32,6 @@ export const createMemoryTool = (scope: ScopeInfo) => {
 					return 'Memory add failed: content is required'
 				}
 
-				slog(`add | content: ${input.content.slice(0, 100)}`)
-
 				save({
 					type: 'article',
 					content: input.content,
@@ -43,9 +39,7 @@ export const createMemoryTool = (scope: ScopeInfo) => {
 					scope_type: scope.scope_type,
 					scope_id: scope.scope_id,
 					source: 'superego'
-				})
-					.then(id => slog(`add done | id: ${id}`))
-					.catch(e => slog(`add error: ${e instanceof Error ? e.message : String(e)}`))
+				}).catch(() => {})
 
 				return 'Memory add queued.'
 			}
@@ -55,15 +49,11 @@ export const createMemoryTool = (scope: ScopeInfo) => {
 					return 'Memory search failed: query is required'
 				}
 
-				slog(`search | query: ${input.query}`)
-
 				const results = await search({
 					query: input.query,
 					intent: 'memory search',
 					type: 'article'
 				})
-
-				slog(`search done | results: ${results.results.length}`)
 
 				const top = results.results.slice(0, 3)
 
@@ -85,14 +75,10 @@ export const createMemoryTool = (scope: ScopeInfo) => {
 					return 'Memory update failed: content is required'
 				}
 
-				slog(`update | id: ${input.article_id}`)
-
 				setArticle(eq(article.id, input.article_id), {
 					content: input.content,
 					updated_at: new Date()
-				})
-					.then(() => slog(`update done | id: ${input.article_id}`))
-					.catch(e => slog(`update error: ${e instanceof Error ? e.message : String(e)}`))
+				}).catch(() => {})
 
 				return `Memory update queued for id: ${input.article_id}`
 			}

@@ -7,8 +7,6 @@ import { enum as Enum, object, string } from 'zod'
 
 import type { ScopeInfo } from './types'
 
-const slog = (msg: string) => console.log(`[SUPEREGO:wiki] ${msg}`)
-
 const inputSchema = object({
 	action: Enum(['add', 'search', 'update', 'remove']).describe(
 		'The action to perform. add: store new semantic knowledge. search: verify if knowledge exists. update: correct outdated knowledge. remove: eliminate falsified facts.'
@@ -35,8 +33,6 @@ export const createWikiTool = (scope: ScopeInfo) => {
 					return 'Wiki add failed: content is required'
 				}
 
-				slog(`add | content: ${input.content.slice(0, 100)}`)
-
 				save({
 					type: 'article',
 					content: input.content,
@@ -44,9 +40,7 @@ export const createWikiTool = (scope: ScopeInfo) => {
 					scope_type: scope.scope_type,
 					scope_id: scope.scope_id,
 					source: 'superego'
-				})
-					.then(id => slog(`add done | id: ${id}`))
-					.catch(e => slog(`add error: ${e instanceof Error ? e.message : String(e)}`))
+				}).catch(() => {})
 
 				return 'Wiki add queued.'
 			}
@@ -56,15 +50,11 @@ export const createWikiTool = (scope: ScopeInfo) => {
 					return 'Wiki search failed: query is required'
 				}
 
-				slog(`search | query: ${input.query}`)
-
 				const results = await search({
 					query: input.query,
 					intent: 'knowledge search',
 					type: 'article'
 				})
-
-				slog(`search done | results: ${results.results.length}`)
 
 				const top = results.results.slice(0, 3)
 
@@ -86,14 +76,10 @@ export const createWikiTool = (scope: ScopeInfo) => {
 					return 'Wiki update failed: content is required'
 				}
 
-				slog(`update | id: ${input.article_id}`)
-
 				setArticle(eq(article.id, input.article_id), {
 					content: input.content,
 					updated_at: new Date()
-				})
-					.then(() => slog(`update done | id: ${input.article_id}`))
-					.catch(e => slog(`update error: ${e instanceof Error ? e.message : String(e)}`))
+				}).catch(() => {})
 
 				return `Wiki update queued for id: ${input.article_id}`
 			}
@@ -103,11 +89,7 @@ export const createWikiTool = (scope: ScopeInfo) => {
 					return 'Wiki remove failed: article_id is required'
 				}
 
-				slog(`remove | id: ${input.article_id}`)
-
-				remove(input.article_id)
-					.then(() => slog(`remove done | id: ${input.article_id}`))
-					.catch(e => slog(`remove error: ${e instanceof Error ? e.message : String(e)}`))
+				remove(input.article_id).catch(() => {})
 
 				return `Wiki remove queued for id: ${input.article_id}`
 			}
