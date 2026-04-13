@@ -3,7 +3,7 @@ import getContextPrompt from '@core/consts/prompts/getContextPrompt'
 import { addNotification, addNotificationSession } from '@core/db/services'
 import { env } from '@core/env'
 import { createSystemTool } from '@core/fst/agents'
-import { processSuperego } from '@core/fst/agents/superego'
+import { extract } from '@core/fst/agents/superego'
 import { pushPart, startStream, stopStream } from '@core/fst/agents/supervisor'
 import { getSystemTools } from '@core/utils'
 import { convertToModelMessages, smoothStream, stepCountIs, streamText } from 'ai'
@@ -20,7 +20,6 @@ import {
 	createQuestionTool,
 	createSearchFileTool,
 	createSkillTool,
-	createSuperegoTool,
 	createTitleTool,
 	createWebFetchTool,
 	createWebSearchTool,
@@ -101,7 +100,6 @@ export default async (s: Index, message: Message) => {
 			skill_tool: createSkillTool(s),
 			memory_tool: createMemoryTool(s),
 			wiki_tool: createWikiTool(s),
-			superego_tool: createSuperegoTool(s),
 			web_search_tool: createWebSearchTool(),
 			web_fetch_tool: createWebFetchTool(),
 			cron_tool: createCronTool(s)
@@ -177,7 +175,7 @@ export default async (s: Index, message: Message) => {
 			if (s.superego_append_count >= 3) {
 				s.superego_append_count = 0
 
-				processSuperego(s)
+				extract(s)
 			}
 
 			stopStream(s.id)

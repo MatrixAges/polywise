@@ -1,48 +1,40 @@
-import { search as ioSearch } from '@core/io'
+import { search } from '@core/io'
 import { tool } from 'ai'
 import { number, object, string } from 'zod'
 
 import type Session from '../session'
 
-const getScope = (s: Session) => {
-	if (s.project) {
-		return { scope_type: 'project' as const, scope_id: s.project.id }
-	}
-
-	if (s.agents.length > 0) {
-		return { scope_type: 'agent' as const, scope_id: s.agents[0].id }
-	}
-
-	return { scope_type: 'global' as const, scope_id: null }
-}
-
 const inputSchema = object({
 	query: string().describe('Search query to find existing memories'),
-	max_results: number().optional().describe('Maximum results to return (default 5)')
+	max_results: number().optional().describe('Maximum results to return (default 6)')
 })
 
 export const createMemoryTool = (s: Session) => {
 	return tool({
 		description: [
 			'Search episodic memories about user preferences, project state, and context.',
-			'This is a read-only tool. Use superego_tool to explicitly request storing new memories.',
-			'Use this to recall previously stored information about the user or project.'
+			'This is a read-only tool. Use superego to explicitly request storing new memories.',
+			'Use this to recall previously stored information about the user or project.',
+			'Results are sorted by update time, with the most recent first.'
 		].join('\n'),
 		inputSchema,
 		execute: async input => {
-			const results = await ioSearch({
+			const results = await search({
 				query: input.query,
 				intent: 'memory search',
-				type: 'article'
+				type: 'article',
+				scope_type: s.scope.type,
+				scope_id: s.scope.id || undefined
 			})
 
-			const max_results = input.max_results ?? 6
+			const max_results = input.max_results ?? 5
 
 			return {
 				results: results.results.slice(0, max_results).map(r => ({
 					id: r.id,
 					content: r.content.slice(0, 500),
-					score: r.score
+					score: Math.round(r.score * 100) / 100,
+					updated_at: r.updated_at
 				}))
 			}
 		}

@@ -1,4 +1,4 @@
-import { search as ioSearch } from '@core/io'
+import { search } from '@core/io'
 import { tool } from 'ai'
 import { number, object, string } from 'zod'
 
@@ -13,27 +13,29 @@ export const createWikiTool = (s: Session) => {
 	return tool({
 		description: [
 			'Search semantic knowledge: objective facts, concepts, architecture docs, API definitions, and technical conclusions.',
-			'This is a read-only tool. Use superego_tool to explicitly request storing new knowledge.',
-			'Use this to recall previously stored technical knowledge and documentation.'
+			'This is a read-only tool. Use superego to explicitly request storing new knowledge.',
+			'Use this to recall previously stored technical knowledge and documentation.',
+			'Results are sorted by update time, with the most recent first.'
 		].join('\n'),
 		inputSchema,
 		execute: async input => {
-			const results = await ioSearch({
+			const results = await search({
 				query: input.query,
 				intent: 'knowledge search',
-				type: 'article'
+				type: 'article',
+				scope_type: s.scope.type,
+				scope_id: s.scope.id || undefined
 			})
 
 			const max_results = input.max_results ?? 5
 
 			return {
-				query: input.query,
 				results: results.results.slice(0, max_results).map(r => ({
 					id: r.id,
 					content: r.content.slice(0, 500),
-					score: r.score
-				})),
-				count: results.results.length
+					score: Math.round(r.score * 100) / 100,
+					updated_at: r.updated_at
+				}))
 			}
 		}
 	})

@@ -19,22 +19,34 @@ interface ChunkResult {
 	id: string
 	content: string
 	score: number
+	updated_at: string | null
+	scope_type: 'global' | 'project' | 'agent' | null
+	scope_id: string | null
 }
 
-interface SearchOutput {
-	type: 'chunk' | 'article'
-	results: Array<ChunkResult>
-}
+type SearchOutput = { type: 'chunk'; results: Array<ChunkResult> } | { type: 'article'; results: Array<ChunkResult> }
 
 interface ArticleSearchResult {
 	article_id: string
 	rrf_score: number
 	normalized_rrf_score: number
 	rrf_rank: number
+	updated_at: Date | null
+	scope_type: string | null
+	scope_id: string | null
 }
 
 export default async (args: ArgsSearch): Promise<SearchOutput> => {
-	const { query, intent, enable_rewrite = false, enable_recall = false, rank_by_time, type = 'article' } = args
+	const {
+		query,
+		intent,
+		enable_rewrite = false,
+		enable_recall = false,
+		rank_by_time,
+		type = 'article',
+		scope_type,
+		scope_id
+	} = args
 
 	log('SEARCH', 'start', () => {
 		return `query: ${query}, intent: ${intent}, enable_rewrite: ${enable_rewrite}, enable_recall: ${enable_recall}`
@@ -117,13 +129,28 @@ export default async (args: ArgsSearch): Promise<SearchOutput> => {
 
 		log('SEARCH', 'done', () => `result_count: ${reranked.length}`)
 
+		const chunk_results: Array<ChunkResult> = reranked.map(item => ({
+			id: item.chunk_id,
+			content: item.content,
+			score: item.final_score,
+			updated_at: null,
+			scope_type: null,
+			scope_id: null
+		}))
+
+		let filtered_chunk_results = chunk_results
+
+		if (scope_type) {
+			filtered_chunk_results = chunk_results.filter(item => {
+				if (item.scope_type === 'global') return true
+				if (item.scope_type === scope_type && item.scope_id === scope_id) return true
+				return false
+			})
+		}
+
 		return {
 			type: 'chunk',
-			results: reranked.map(item => ({
-				id: item.chunk_id,
-				content: item.content,
-				score: item.final_score
-			}))
+			results: filtered_chunk_results
 		}
 	}
 
@@ -144,7 +171,10 @@ export default async (args: ArgsSearch): Promise<SearchOutput> => {
 		rrf_score: a.rrf_score,
 		normalized_rrf_score: a.normalized_rrf_score,
 		rrf_rank: a.rrf_rank,
-		from_keyword: a.from_keyword
+		from_keyword: a.from_keyword,
+		updated_at: a.updated_at,
+		scope_type: a.scope_type,
+		scope_id: a.scope_id
 	}))
 
 	const reranked_articles: Array<RerankedArticleResult & { article_id: string }> = await rerankArticle(
@@ -154,12 +184,37 @@ export default async (args: ArgsSearch): Promise<SearchOutput> => {
 
 	log('SEARCH', 'articleRerankDone', () => `result_count: ${reranked_articles.length}`)
 
-	return {
-		type: 'article',
-		results: reranked_articles.map(item => ({
+	const final_results: Array<ChunkResult> = reranked_articles.map(item => {
+		const valid_scope_type = ['global', 'project', 'agent'].includes(item.scope_type || '')
+			? (item.scope_type as 'global' | 'project' | 'agent')
+			: null
+
+		return {
 			id: item.article_id,
 			content: item.content,
-			score: item.final_score
-		}))
+			score: item.final_score,
+			updated_at: item.updated_at?.toISOString() || null,
+			scope_type: valid_scope_type,
+			scope_id: item.scope_id
+		}
+	})
+
+	const scoped_results = scope_type
+		? final_results.filter(item => {
+				if (item.scope_type === 'global') return true
+				if (item.scope_type === scope_type && item.scope_id === scope_id) return true
+				return false
+			})
+		: final_results
+
+	const sorted_results = [...scoped_results].sort((a, b) => {
+		const a_time = a.updated_at ? new Date(a.updated_at).getTime() : 0
+		const b_time = b.updated_at ? new Date(b.updated_at).getTime() : 0
+		return b_time - a_time
+	})
+
+	return {
+		type: 'article',
+		results: sorted_results
 	}
 }

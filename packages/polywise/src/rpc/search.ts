@@ -10,13 +10,18 @@ export const input_type = object({
 	enable_rewrite: boolean().optional(),
 	enable_recall: boolean().optional(),
 	rank_by_time: boolean().optional(),
-	type: union([literal('chunk'), literal('article')]).optional()
+	type: union([literal('chunk'), literal('article')]).optional(),
+	scope_type: union([literal('global'), literal('project'), literal('agent')]).optional(),
+	scope_id: string().optional()
 }).strict()
 
 const result_shape = object({
 	id: string(),
 	content: string(),
-	score: number()
+	score: number(),
+	updated_at: string().datetime().nullable(),
+	scope_type: union([literal('global'), literal('project'), literal('agent')]).nullable(),
+	scope_id: string().nullable()
 })
 
 const chunk_output = object({

@@ -20,6 +20,9 @@ interface ArticleSearchResult {
 	normalized_rrf_score: number
 	rrf_rank: number
 	from_keyword?: boolean
+	updated_at: Date | null
+	scope_type: string | null
+	scope_id: string | null
 }
 
 export interface RerankedResult extends SearchResult {

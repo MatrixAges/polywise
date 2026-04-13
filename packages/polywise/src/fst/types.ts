@@ -40,6 +40,11 @@ export interface SkillMeta {
 	dir: string
 }
 
+export interface SessionScope {
+	type: 'global' | 'project' | 'agent'
+	id: string | null
+}
+
 export type ChatEventRes = {
 	type: 'sync'
 	data: {

@@ -23,7 +23,7 @@ import { active, resetAbort, runing, stop, sync } from './utils'
 
 import type { Agent, Project, Session, SessionInsert } from '@core/db'
 import type { ModelResult } from '../provider'
-import type { Context, InitArgs, Message, Permission, Permissions, SkillMeta } from '../types'
+import type { Context, InitArgs, Message, Permission, Permissions, SessionScope, SkillMeta } from '../types'
 
 export default class Index {
 	id = ''
@@ -51,6 +51,18 @@ export default class Index {
 	update_at = Date.now()
 	archived_at = null as null | number
 	superego_append_count = 0
+
+	get scope(): SessionScope {
+		if (this.project) {
+			return { type: 'project', id: this.project.id }
+		}
+
+		if (this.agents.length > 0) {
+			return { type: 'agent', id: this.agents[0].id }
+		}
+
+		return { type: 'global', id: null }
+	}
 
 	get session_dir() {
 		return path.resolve(`${app.app_path}/sessions/${this.id}`)

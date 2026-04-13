@@ -26,6 +26,9 @@ export interface ArticleWithScore {
 	normalized_rrf_score: number
 	rrf_rank: number
 	from_keyword?: boolean
+	updated_at: Date | null
+	scope_type: string | null
+	scope_id: string | null
 }
 
 export default async (chunks: Array<ChunkScore>): Promise<Array<ArticleWithScore>> => {
@@ -73,7 +76,10 @@ export default async (chunks: Array<ChunkScore>): Promise<Array<ArticleWithScore
 			rrf_score: c.rrf_score,
 			normalized_rrf_score: c.normalized_rrf_score,
 			rrf_rank: c.rrf_rank,
-			from_keyword: c.from_keyword
+			from_keyword: c.from_keyword,
+			updated_at: article_info.updated_at,
+			scope_type: article_info.scope_type,
+			scope_id: article_info.scope_id
 		})
 	}
 
