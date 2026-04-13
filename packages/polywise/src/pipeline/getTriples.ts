@@ -1,12 +1,21 @@
+import { config } from '@core/config'
 import triple_prompt from '@core/consts/prompts/triple_prompt.md'
 import { addTask, initGenModel, removeTask } from '@core/llama'
 import { LlamaChatSession } from 'node-llama-cpp'
 
 import { env } from '../env'
+import genTriples from './genTriples'
+import { isRemoteProvider } from './getRemoteModel'
 
 import type { Triples } from '@core/types'
 
 export default async (text: string, onTextChunk?: ((text: string) => void) | undefined) => {
+	const { provider } = config.triple_model
+
+	if (isRemoteProvider(provider)) {
+		return genTriples(text)
+	}
+
 	await initGenModel()
 
 	const task_id = addTask('gen')

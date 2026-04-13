@@ -11,7 +11,16 @@ export type ModelResult = {
 	tools?: ToolSet
 }
 
-export const getModel = async (provider: string, model: string, options?: any): Promise<ModelResult> => {
+interface GetModelArgs {
+	provider: string
+	model: string
+	options?: any
+	model_tool?: boolean
+}
+
+export const getModel = async (args: GetModelArgs): Promise<ModelResult> => {
+	const { provider, model, options, model_tool = true } = args
+
 	switch (provider) {
 		case 'a2a':
 			return {
@@ -36,6 +45,19 @@ export const getModel = async (provider: string, model: string, options?: any): 
 			const { createGoogleGenerativeAI, google } = await import('@ai-sdk/google')
 
 			const target_model = createGoogleGenerativeAI(options)(model)
+
+			if (!model_tool) {
+				const result: ModelResult = {
+					model: target_model,
+					provider_options: {
+						google: {
+							thinkingConfig: { includeThoughts: true }
+						} satisfies GoogleLanguageModelOptions
+					}
+				}
+
+				return result
+			}
 
 			const search_agent = new ToolLoopAgent({
 				model: target_model,

@@ -5,5 +5,8 @@ export { default as getChunkWords } from './getChunkWords'
 export { default as getSimilarity } from './getSimilarity'
 export { default as getKeywords } from './getKeywords'
 export { default as getRewriteQuery } from './getRewriteQuery'
+export { default as getRemoteModel } from './getRemoteModel'
+export { default as genTriples } from './genTriples'
+export { default as genRewriteQuery } from './genRewriteQuery'
 
 export * from './token'

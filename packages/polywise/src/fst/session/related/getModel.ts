@@ -28,5 +28,5 @@ export default async (s: Index) => {
 		target_provider_name = 'open_responses'
 	}
 
-	s.model = await getModel(target_provider_name, model, target_options)
+	s.model = await getModel({ provider: target_provider_name, model, options: target_options })
 }

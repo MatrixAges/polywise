@@ -1,23 +1,26 @@
+import { config } from '@core/config'
 import rewrite_prompt from '@core/consts/prompts/rewrite_prompt.md'
 import { addTask, initGenModel, removeTask } from '@core/llama'
 import { LlamaChatSession } from 'node-llama-cpp'
 
 import { env } from '../env'
+import genRewriteQuery from './genRewriteQuery'
+import { isRemoteProvider } from './getRemoteModel'
 
-interface SearchTarget {
-	keywords: string
-	question: string
-	answer: string
-}
+import type { SearchTarget } from './genRewriteQuery'
 
-export default async (query: string, intent?: string) => {
+export default async (query: string, intent?: string): Promise<SearchTarget> => {
+	const { provider } = config.rewrite_model
+
+	if (isRemoteProvider(provider)) {
+		return genRewriteQuery(query, intent)
+	}
+
 	await initGenModel()
 
 	const task_id = addTask('gen')
 
 	const sequence = env.gen_context.getSequence()
-
-	const user_prompt = [`Query: ${query}`, intent && `Intent: ${intent}`].filter(Boolean).join('\n')
 
 	const session = new LlamaChatSession({
 		contextSequence: sequence,
@@ -34,6 +37,8 @@ export default async (query: string, intent?: string) => {
 		required: ['keywords', 'question', 'answer'],
 		additionalProperties: false
 	})
+
+	const user_prompt = [`Query: ${query}`, intent && `Intent: ${intent}`].filter(Boolean).join('\n')
 
 	const res = await session.prompt(user_prompt, { grammar })
 
