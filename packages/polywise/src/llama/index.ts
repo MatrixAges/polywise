@@ -1,5 +1,5 @@
 import { env } from '@core/env'
-import { getLlama } from 'node-llama-cpp'
+import { getLlama, LlamaLogLevel } from 'node-llama-cpp'
 import { getId } from 'stk/utils'
 
 import getModelContext from './getModelContext'
@@ -161,7 +161,7 @@ export const initLlama = async () => {
 
 	if (!llama_promise) {
 		llama_promise = (async () => {
-			env.llama = await getLlama()
+			env.llama = await getLlama({ logLevel: LlamaLogLevel.warn })
 
 			resetLlamaTimer()
 

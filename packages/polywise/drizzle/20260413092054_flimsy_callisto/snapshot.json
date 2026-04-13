@@ -1,9 +1,9 @@
 {
   "version": "7",
   "dialect": "sqlite",
-  "id": "fe0565c9-11ab-438e-82f3-b306afbbb73b",
+  "id": "93eae93e-451b-4619-ae76-a6f31ef4b208",
   "prevIds": [
-    "4b0f8c43-334b-4cdb-bfb7-2d1b37283d6c"
+    "00000000-0000-0000-0000-000000000000"
   ],
   "ddl": [
     {
@@ -71,10 +71,6 @@
       "entityType": "tables"
     },
     {
-      "name": "agent_sop",
-      "entityType": "tables"
-    },
-    {
       "name": "agent_todo",
       "entityType": "tables"
     },
@@ -92,10 +88,6 @@
     },
     {
       "name": "session_agent",
-      "entityType": "tables"
-    },
-    {
-      "name": "session_sop",
       "entityType": "tables"
     },
     {
@@ -280,6 +272,36 @@
       "type": "text",
       "notNull": false,
       "autoincrement": false,
+      "default": "'global'",
+      "generated": null,
+      "name": "scope_type",
+      "entityType": "columns",
+      "table": "article"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "scope_id",
+      "entityType": "columns",
+      "table": "article"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": "'agent'",
+      "generated": null,
+      "name": "source",
+      "entityType": "columns",
+      "table": "article"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
       "default": null,
       "generated": null,
       "name": "hash",
@@ -316,16 +338,6 @@
       "default": "false",
       "generated": null,
       "name": "is_tripled",
-      "entityType": "columns",
-      "table": "article"
-    },
-    {
-      "type": "integer",
-      "notNull": false,
-      "autoincrement": false,
-      "default": null,
-      "generated": null,
-      "name": "sop",
       "entityType": "columns",
       "table": "article"
     },
@@ -1347,36 +1359,6 @@
       "generated": null,
       "name": "agent_id",
       "entityType": "columns",
-      "table": "agent_sop"
-    },
-    {
-      "type": "text",
-      "notNull": true,
-      "autoincrement": false,
-      "default": null,
-      "generated": null,
-      "name": "article_id",
-      "entityType": "columns",
-      "table": "agent_sop"
-    },
-    {
-      "type": "integer",
-      "notNull": false,
-      "autoincrement": false,
-      "default": null,
-      "generated": null,
-      "name": "created_at",
-      "entityType": "columns",
-      "table": "agent_sop"
-    },
-    {
-      "type": "text",
-      "notNull": true,
-      "autoincrement": false,
-      "default": null,
-      "generated": null,
-      "name": "agent_id",
-      "entityType": "columns",
       "table": "agent_todo"
     },
     {
@@ -1528,36 +1510,6 @@
       "name": "created_at",
       "entityType": "columns",
       "table": "session_agent"
-    },
-    {
-      "type": "text",
-      "notNull": true,
-      "autoincrement": false,
-      "default": null,
-      "generated": null,
-      "name": "session_id",
-      "entityType": "columns",
-      "table": "session_sop"
-    },
-    {
-      "type": "text",
-      "notNull": true,
-      "autoincrement": false,
-      "default": null,
-      "generated": null,
-      "name": "article_id",
-      "entityType": "columns",
-      "table": "session_sop"
-    },
-    {
-      "type": "integer",
-      "notNull": false,
-      "autoincrement": false,
-      "default": null,
-      "generated": null,
-      "name": "created_at",
-      "entityType": "columns",
-      "table": "session_sop"
     },
     {
       "type": "text",
@@ -1815,36 +1767,6 @@
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "nameExplicit": false,
-      "name": "fk_agent_sop_agent_id_agent_id_fk",
-      "entityType": "fks",
-      "table": "agent_sop"
-    },
-    {
-      "columns": [
-        "article_id"
-      ],
-      "tableTo": "article",
-      "columnsTo": [
-        "id"
-      ],
-      "onUpdate": "NO ACTION",
-      "onDelete": "CASCADE",
-      "nameExplicit": false,
-      "name": "fk_agent_sop_article_id_article_id_fk",
-      "entityType": "fks",
-      "table": "agent_sop"
-    },
-    {
-      "columns": [
-        "agent_id"
-      ],
-      "tableTo": "agent",
-      "columnsTo": [
-        "id"
-      ],
-      "onUpdate": "NO ACTION",
-      "onDelete": "CASCADE",
-      "nameExplicit": false,
       "name": "fk_agent_todo_agent_id_agent_id_fk",
       "entityType": "fks",
       "table": "agent_todo"
@@ -1995,36 +1917,6 @@
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "nameExplicit": false,
-      "name": "fk_session_sop_session_id_session_id_fk",
-      "entityType": "fks",
-      "table": "session_sop"
-    },
-    {
-      "columns": [
-        "article_id"
-      ],
-      "tableTo": "article",
-      "columnsTo": [
-        "id"
-      ],
-      "onUpdate": "NO ACTION",
-      "onDelete": "CASCADE",
-      "nameExplicit": false,
-      "name": "fk_session_sop_article_id_article_id_fk",
-      "entityType": "fks",
-      "table": "session_sop"
-    },
-    {
-      "columns": [
-        "session_id"
-      ],
-      "tableTo": "session",
-      "columnsTo": [
-        "id"
-      ],
-      "onUpdate": "NO ACTION",
-      "onDelete": "CASCADE",
-      "nameExplicit": false,
       "name": "fk_session_todo_session_id_session_id_fk",
       "entityType": "fks",
       "table": "session_todo"
@@ -2092,16 +1984,6 @@
     {
       "columns": [
         "agent_id",
-        "article_id"
-      ],
-      "nameExplicit": false,
-      "name": "agent_sop_pk",
-      "entityType": "pks",
-      "table": "agent_sop"
-    },
-    {
-      "columns": [
-        "agent_id",
         "todo_id"
       ],
       "nameExplicit": false,
@@ -2138,16 +2020,6 @@
       "name": "session_agent_pk",
       "entityType": "pks",
       "table": "session_agent"
-    },
-    {
-      "columns": [
-        "session_id",
-        "article_id"
-      ],
-      "nameExplicit": false,
-      "name": "session_sop_pk",
-      "entityType": "pks",
-      "table": "session_sop"
     },
     {
       "columns": [
@@ -2354,6 +2226,38 @@
     {
       "columns": [
         {
+          "value": "scope_type",
+          "isExpression": false
+        },
+        {
+          "value": "scope_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "article_scope_idx",
+      "entityType": "indexes",
+      "table": "article"
+    },
+    {
+      "columns": [
+        {
+          "value": "source",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "article_source_idx",
+      "entityType": "indexes",
+      "table": "article"
+    },
+    {
+      "columns": [
+        {
           "value": "is_tripled",
           "isExpression": false
         }
@@ -2362,20 +2266,6 @@
       "where": null,
       "origin": "manual",
       "name": "article_is_tripled_idx",
-      "entityType": "indexes",
-      "table": "article"
-    },
-    {
-      "columns": [
-        {
-          "value": "sop",
-          "isExpression": false
-        }
-      ],
-      "isUnique": false,
-      "where": null,
-      "origin": "manual",
-      "name": "article_sop_idx",
       "entityType": "indexes",
       "table": "article"
     },
@@ -3016,20 +2906,6 @@
     {
       "columns": [
         {
-          "value": "article_id",
-          "isExpression": false
-        }
-      ],
-      "isUnique": false,
-      "where": null,
-      "origin": "manual",
-      "name": "agent_sop_article_id_idx",
-      "entityType": "indexes",
-      "table": "agent_sop"
-    },
-    {
-      "columns": [
-        {
           "value": "todo_id",
           "isExpression": false
         }
@@ -3110,20 +2986,6 @@
       "name": "session_agent_agent_idx",
       "entityType": "indexes",
       "table": "session_agent"
-    },
-    {
-      "columns": [
-        {
-          "value": "article_id",
-          "isExpression": false
-        }
-      ],
-      "isUnique": false,
-      "where": null,
-      "origin": "manual",
-      "name": "session_sop_article_id_idx",
-      "entityType": "indexes",
-      "table": "session_sop"
     },
     {
       "columns": [
