@@ -1,5 +1,6 @@
 export * from './audit'
 export * from './permission'
+export * from './superego'
 export * from './supervisor'
 export * from './system'
 export * from './title'

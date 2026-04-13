@@ -9,7 +9,7 @@ import { app } from '../consts'
 
 import type { Ansis } from 'ansis'
 
-type LogStage = 'SQL' | 'SAVE' | 'PIPELINE' | 'RANKING' | 'SEARCH' | 'SYSTEM' | 'TASK_QUEUE' | 'CONFIG'
+type LogStage = 'SQL' | 'SAVE' | 'PIPELINE' | 'RANKING' | 'SEARCH' | 'SYSTEM' | 'TASK_QUEUE' | 'CONFIG' | 'SUPEREGO'
 
 const stage_map: Record<string, Ansis> = {
 	SQL: blueBright,
@@ -18,7 +18,8 @@ const stage_map: Record<string, Ansis> = {
 	SEARCH: cyanBright,
 	SYSTEM: whiteBright,
 	SAVE: green,
-	TASK_QUEUE: cyanBright
+	TASK_QUEUE: cyanBright,
+	SUPEREGO: magentaBright
 }
 
 const disabled = true
@@ -32,7 +33,8 @@ const allowed_stages: Array<LogStage> = [
 	'SEARCH',
 	'SYSTEM',
 	'TASK_QUEUE',
-	'CONFIG'
+	'CONFIG',
+	'SUPEREGO'
 ]
 const exclude_stages: Array<string> = []
 const active_stages = difference(allowed_stages, exclude_stages)

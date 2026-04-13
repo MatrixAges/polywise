@@ -17,6 +17,12 @@ export default sqliteTable(
 		// Article data source (optional)
 		url: text('url'),
 		for: text('for', { enum: ['linkcase', 'wiki', 'memory', 'user'] }).notNull(),
+		// Scope ownership: global / project / agent
+		scope_type: text('scope_type', { enum: ['global', 'project', 'agent'] }).default('global'),
+		// Scope owner id (project.id or agent.id), null for global
+		scope_id: text('scope_id'),
+		// Data origin: agent (main agent) / superego (superego agent)
+		source: text('source', { enum: ['agent', 'superego'] }).default('agent'),
 		// Content hash value, used for duplicate content verification
 		hash: text('hash'),
 		// Article metadata (for filtering)
@@ -33,6 +39,8 @@ export default sqliteTable(
 	t => [
 		index('article_document_id_idx').on(t.document_id),
 		index('article_for_idx').on(t.for),
+		index('article_scope_idx').on(t.scope_type, t.scope_id),
+		index('article_source_idx').on(t.source),
 		index('article_is_tripled_idx').on(t.is_tripled),
 		index('article_created_at_idx').on(t.created_at),
 		index('article_updated_at_idx').on(t.updated_at),

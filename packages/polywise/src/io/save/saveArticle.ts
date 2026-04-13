@@ -22,10 +22,13 @@ interface ArgsSaveArticle {
 	content: string
 	for: NonNullable<Article['for']>
 	article_id?: string
+	scope_type?: 'global' | 'project' | 'agent'
+	scope_id?: string | null
+	source?: 'agent' | 'superego'
 }
 
 export default async (args: ArgsSaveArticle) => {
-	const { content, article_id } = args
+	const { content, article_id, scope_type = 'global', scope_id = null, source = 'agent' } = args
 	const hash = getHash(content)
 	const enable_triple = Boolean(config.enable_triple)
 
@@ -73,6 +76,9 @@ export default async (args: ArgsSaveArticle) => {
 		await setArticle(eq(article.id, current_article_id), {
 			content: content,
 			for: args.for,
+			scope_type,
+			scope_id,
+			source,
 			hash,
 			is_tripled: enable_triple,
 			updated_at: new Date()
@@ -83,6 +89,9 @@ export default async (args: ArgsSaveArticle) => {
 		const article_item = await addArticle({
 			content: content,
 			for: args.for,
+			scope_type,
+			scope_id,
+			source,
 			hash,
 			is_tripled: enable_triple
 		})

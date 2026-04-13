@@ -43,8 +43,12 @@ This document provides an overview of the packages/polywise module structure and
 					"role": "Folder"
 				},
 				"agents": {
-					"desc": "Internal decision agents for permission, audit, system operations, and AI-generated session titles",
-					"role": "Folder"
+					"desc": "Internal decision agents for permission, audit, system operations, AI-generated session titles, and superego cognitive consolidation",
+					"role": "Folder",
+					"superego": {
+						"desc": "Background cognitive observer (Superego Agent) that asynchronously extracts episodic memories, semantic knowledge, and procedural skills from conversation turns; triggered after 3 append messages or via superego_tool; has full CRUD access to memory_tool and wiki_tool with scope-aware article storage (scope_type: global|project|agent)",
+						"role": "Folder"
+					}
 				},
 				"utils": {
 					"desc": "fst execution helpers for permission checks, bash sandbox orchestration, response shaping, and shell safety",
@@ -52,10 +56,13 @@ This document provides an overview of the packages/polywise module structure and
 					"getBashTools": "Sandbox-backed bash tool builder with command risk matching, audit review, and child_process proxy execution for flagged commands"
 				},
 				"tools": {
-					"desc": "Bash sandboxing tools via bash-tool and local skill search/read/rebuild tooling backed by persisted skill_map.json under skills_dir",
+					"desc": "Bash sandboxing tools via bash-tool, local skill search/read/rebuild tooling, and read-only memory/wiki search tools with superego trigger",
 					"role": "Folder",
 					"cron.ts": "Create/list/read/update/remove cron jobs backed by app.app_path/cron.json with incremental runtime reload and physical directory removal",
 					"title.ts": "Internal tool that generates and updates session titles while protecting manually edited titles",
+					"memory.ts": "Read-only memory search tool for main agent; search episodic memories by query with scope filtering",
+					"wiki.ts": "Read-only wiki knowledge search tool for main agent; search semantic knowledge by query",
+					"superego.ts": "Trigger tool that invokes superego agent to extract and persist information from conversation; only way for main agent to write to memory/wiki",
 					"webfetch.ts": "Fetch URL content as Markdown (Jina primary, fetch+turndown fallback)",
 					"websearch.ts": "Web search via DuckDuckGo HTML → turndown Markdown"
 				},
@@ -89,7 +96,7 @@ This document provides an overview of the packages/polywise module structure and
 				"migrate.ts": { "desc": "Migration runner", "role": "Module" },
 				"schema": {
 					"article.ts": {
-						"desc": "Article storage schema with content, source classifier(for: linkcase|wiki|memory|user), metadata, and sop flag",
+						"desc": "Article storage schema with content, source classifier(for: linkcase|wiki|memory|user), scope ownership(scope_type: global|project|agent + scope_id), data origin(source: agent|superego), metadata, and sop flag",
 						"role": "Schema"
 					},
 					"session.ts": {

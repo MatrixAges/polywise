@@ -3,6 +3,7 @@ import getContextPrompt from '@core/consts/prompts/getContextPrompt'
 import { addNotification, addNotificationSession } from '@core/db/services'
 import { env } from '@core/env'
 import { createSystemTool } from '@core/fst/agents'
+import { processSuperego } from '@core/fst/agents/superego'
 import { pushPart, startStream, stopStream } from '@core/fst/agents/supervisor'
 import { getSystemTools } from '@core/utils'
 import { convertToModelMessages, smoothStream, stepCountIs, streamText } from 'ai'
@@ -14,13 +15,16 @@ import {
 	createCronTool,
 	createEditFileTool,
 	createGlobTool,
+	createMemoryTool,
 	createMessageTool,
 	createQuestionTool,
 	createSearchFileTool,
 	createSkillTool,
+	createSuperegoTool,
 	createTitleTool,
 	createWebFetchTool,
 	createWebSearchTool,
+	createWikiTool,
 	updateTitle
 } from '../../tools'
 
@@ -95,6 +99,9 @@ export default async (s: Index, message: Message) => {
 			write_file_tool: bash_tool.writeFile,
 			edit_file_tool: createEditFileTool(s),
 			skill_tool: createSkillTool(s),
+			memory_tool: createMemoryTool(s),
+			wiki_tool: createWikiTool(s),
+			superego_tool: createSuperegoTool(s),
 			web_search_tool: createWebSearchTool(),
 			web_fetch_tool: createWebFetchTool(),
 			cron_tool: createCronTool(s)
@@ -128,6 +135,7 @@ export default async (s: Index, message: Message) => {
 
 	let reasoning_start = 0
 	let reasoning_end = 0
+	let append_count = 0
 
 	return res.toUIMessageStream({
 		originalMessages: [message],
@@ -164,6 +172,12 @@ export default async (s: Index, message: Message) => {
 		onFinish: async ({ responseMessage }) => {
 			if (responseMessage.parts.length) {
 				await s.appendMessage(responseMessage)
+				append_count++
+			}
+
+			if (append_count >= 3) {
+				append_count = 0
+				processSuperego(s).catch(() => {})
 			}
 
 			stopStream(s.id)
