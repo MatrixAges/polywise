@@ -39,7 +39,7 @@ export const createMemoryTool = (scope: ScopeInfo) => {
 					scope_type: scope.scope_type,
 					scope_id: scope.scope_id,
 					source: 'superego'
-				}).catch(() => {})
+				})
 
 				return 'Memory add queued.'
 			}
@@ -78,7 +78,7 @@ export const createMemoryTool = (scope: ScopeInfo) => {
 				setArticle(eq(article.id, input.article_id), {
 					content: input.content,
 					updated_at: new Date()
-				}).catch(() => {})
+				})
 
 				return `Memory update queued for id: ${input.article_id}`
 			}

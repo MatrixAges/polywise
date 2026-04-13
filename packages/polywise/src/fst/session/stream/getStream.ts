@@ -176,7 +176,8 @@ export default async (s: Index, message: Message) => {
 
 			if (s.superego_append_count >= 3) {
 				s.superego_append_count = 0
-				processSuperego(s).catch(() => {})
+
+				processSuperego(s)
 			}
 
 			stopStream(s.id)

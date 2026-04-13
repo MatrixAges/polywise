@@ -40,7 +40,7 @@ export const createWikiTool = (scope: ScopeInfo) => {
 					scope_type: scope.scope_type,
 					scope_id: scope.scope_id,
 					source: 'superego'
-				}).catch(() => {})
+				})
 
 				return 'Wiki add queued.'
 			}
@@ -79,7 +79,7 @@ export const createWikiTool = (scope: ScopeInfo) => {
 				setArticle(eq(article.id, input.article_id), {
 					content: input.content,
 					updated_at: new Date()
-				}).catch(() => {})
+				})
 
 				return `Wiki update queued for id: ${input.article_id}`
 			}
@@ -89,7 +89,7 @@ export const createWikiTool = (scope: ScopeInfo) => {
 					return 'Wiki remove failed: article_id is required'
 				}
 
-				remove(input.article_id).catch(() => {})
+				remove(input.article_id)
 
 				return `Wiki remove queued for id: ${input.article_id}`
 			}
