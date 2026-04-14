@@ -1,14 +1,24 @@
 import { useTranslation } from 'react-i18next'
 
-import { AutoLabel } from '@/components'
+import {
+	Select,
+	SelectContent,
+	SelectGroup,
+	SelectItem,
+	SelectTrigger,
+	SelectValue
+} from '@/__shadcn__/components/ui/select'
+import { AutoLabel, Controller } from '@/components'
 
 import type { Model } from '@core/types'
 import type { UseFormRegister } from 'react-hook-form'
 import type { IPropsForm, IPropsFormModelForm } from '../../types'
 
+const MODEL_TYPES = ['text', 'embedding', 'rerank', 'image', 'audio', 'video']
+
 const Index = (props: IPropsFormModelForm) => {
-	const { index = 0, item, adding_model, register } = props
-	const { name, id } = item || {}
+	const { index = 0, item, adding_model, control, register } = props
+	const { name, id, type } = item || {}
 
 	const { t } = useTranslation()
 
@@ -62,6 +72,41 @@ const Index = (props: IPropsFormModelForm) => {
 									`models.${index}.name`
 								))}
 					/>
+				</AutoLabel>
+			</div>
+			<div className='grid grid-cols-1 border-t'>
+				<AutoLabel
+					className={adding_model ? 'border-b-0!' : ''}
+					label={t('provider.form.model_form.model_type')}
+					valued={type || adding_model}
+				>
+					<Controller name={adding_model ? 'type' : `models.${index}.type`} control={control}>
+						<Select
+							items={MODEL_TYPES.map(t => ({ label: t, value: t }))}
+							value={type || 'text'}
+						>
+							<SelectTrigger
+								className='
+									h-full
+									px-0
+									border-0 outline-none
+									shadow-none
+									focus:ring-0
+								'
+							>
+								<SelectValue placeholder='Select type' />
+							</SelectTrigger>
+							<SelectContent>
+								<SelectGroup>
+									{MODEL_TYPES.map(item => (
+										<SelectItem value={item} key={item}>
+											{item}
+										</SelectItem>
+									))}
+								</SelectGroup>
+							</SelectContent>
+						</Select>
+					</Controller>
 				</AutoLabel>
 			</div>
 		</div>

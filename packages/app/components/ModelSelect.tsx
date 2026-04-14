@@ -21,12 +21,13 @@ import type { DefaultModel } from '@core/types'
 interface IProps {
 	value?: DefaultModel
 	show_local_model?: boolean
+	filter_type?: string
 	ghost?: boolean
 	onChange?: (v: DefaultModel) => void
 }
 
 const Index = (props: IProps) => {
-	const { value, show_local_model, ghost, onChange } = props
+	const { value, show_local_model, filter_type, ghost, onChange } = props
 
 	const global = useGlobal()
 
@@ -40,18 +41,25 @@ const Index = (props: IProps) => {
 	}, [value])
 
 	const provider_items = useMemo(() => {
-		const target = []
+		const target: Array<{ value: string; items: string[] }> = []
 
 		providers.map(group => {
 			if (group.enabled) {
-				target.push({
-					value: group.name,
-					items: (group.models || []).filter(item => item.enabled).map(item => item.id)
+				const filtered_models = (group.models || []).filter(item => {
+					if (!item.enabled) return false
+					if (filter_type) return (item.type || 'text') === filter_type
+					return true
 				})
+				if (filtered_models.length > 0) {
+					target.push({
+						value: group.name,
+						items: filtered_models.map(item => item.id)
+					})
+				}
 			}
 		})
 
-		if (show_local_model) {
+		if (show_local_model && (!filter_type || filter_type === 'text')) {
 			target.unshift({
 				value: 'local model',
 				items: ['qwen3.5-4b']
@@ -59,7 +67,7 @@ const Index = (props: IProps) => {
 		}
 
 		return target
-	}, [providers])
+	}, [providers, show_local_model, filter_type])
 
 	const setDefaultModel = useMemoizedFn((_, detail) => {
 		const index = Number(detail.event.target.dataset.index)

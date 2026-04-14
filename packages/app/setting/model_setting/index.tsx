@@ -44,6 +44,28 @@ const Index = () => {
 							<ModelSelect></ModelSelect>
 						</Controller>
 					</Field>
+					<Field className='items-center! py-3' orientation='horizontal'>
+						<FieldContent>
+							<FieldTitle className='text-base'>Embedding Model</FieldTitle>
+							<FieldDescription>
+								Select the embedding model for document embedding
+							</FieldDescription>
+						</FieldContent>
+						<Controller name='embedding_model' control={control}>
+							<ModelSelect filter_type='embedding'></ModelSelect>
+						</Controller>
+					</Field>
+					<Field className='items-center! py-3' orientation='horizontal'>
+						<FieldContent>
+							<FieldTitle className='text-base'>Rerank Model</FieldTitle>
+							<FieldDescription>
+								Select the rerank model for document retrieval
+							</FieldDescription>
+						</FieldContent>
+						<Controller name='rerank_model' control={control}>
+							<ModelSelect filter_type='rerank'></ModelSelect>
+						</Controller>
+					</Field>
 				</FieldGroup>
 				<div className='bg-border-light my-2 h-px w-full'></div>
 				<FieldGroup className='gap-0'>

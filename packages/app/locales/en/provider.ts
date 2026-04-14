@@ -55,6 +55,7 @@ export default {
 			input: 'Input ',
 			model_id: 'model ID',
 			model_name: 'model name',
+			model_type: 'model type',
 			output_fee: 'output fee',
 			input_fee: 'input fee',
 			per_million: ' (per million)',

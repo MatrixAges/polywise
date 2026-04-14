@@ -1,10 +1,10 @@
 {
-  "id": "fb1a06f0-c924-426b-8391-ac9df10d9a9f",
-  "prevIds": [
-    "93eae93e-451b-4619-ae76-a6f31ef4b208"
-  ],
   "version": "7",
   "dialect": "sqlite",
+  "id": "a4b98674-4b60-4aa1-b7d1-fbe14c627eaf",
+  "prevIds": [
+    "00000000-0000-0000-0000-000000000000"
+  ],
   "ddl": [
     {
       "name": "agent",
@@ -24,6 +24,10 @@
     },
     {
       "name": "edge",
+      "entityType": "tables"
+    },
+    {
+      "name": "link",
       "entityType": "tables"
     },
     {
@@ -51,10 +55,6 @@
       "entityType": "tables"
     },
     {
-      "name": "task",
-      "entityType": "tables"
-    },
-    {
       "name": "todo",
       "entityType": "tables"
     },
@@ -72,6 +72,10 @@
     },
     {
       "name": "agent_todo",
+      "entityType": "tables"
+    },
+    {
+      "name": "link_article",
       "entityType": "tables"
     },
     {
@@ -245,16 +249,6 @@
       "default": null,
       "generated": null,
       "name": "title",
-      "entityType": "columns",
-      "table": "article"
-    },
-    {
-      "type": "text",
-      "notNull": false,
-      "autoincrement": false,
-      "default": null,
-      "generated": null,
-      "name": "url",
       "entityType": "columns",
       "table": "article"
     },
@@ -630,6 +624,56 @@
       "name": "created_at",
       "entityType": "columns",
       "table": "edge"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "link"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "url",
+      "entityType": "columns",
+      "table": "link"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "'none'",
+      "generated": null,
+      "name": "status",
+      "entityType": "columns",
+      "table": "link"
+    },
+    {
+      "type": "integer",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "table": "link"
+    },
+    {
+      "type": "integer",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "table": "link"
     },
     {
       "type": "text",
@@ -1079,66 +1123,6 @@
       "generated": null,
       "name": "id",
       "entityType": "columns",
-      "table": "task"
-    },
-    {
-      "type": "text",
-      "notNull": true,
-      "autoincrement": false,
-      "default": null,
-      "generated": null,
-      "name": "type",
-      "entityType": "columns",
-      "table": "task"
-    },
-    {
-      "type": "text",
-      "notNull": true,
-      "autoincrement": false,
-      "default": null,
-      "generated": null,
-      "name": "args",
-      "entityType": "columns",
-      "table": "task"
-    },
-    {
-      "type": "text",
-      "notNull": false,
-      "autoincrement": false,
-      "default": "'pending'",
-      "generated": null,
-      "name": "status",
-      "entityType": "columns",
-      "table": "task"
-    },
-    {
-      "type": "integer",
-      "notNull": false,
-      "autoincrement": false,
-      "default": null,
-      "generated": null,
-      "name": "created_at",
-      "entityType": "columns",
-      "table": "task"
-    },
-    {
-      "type": "integer",
-      "notNull": false,
-      "autoincrement": false,
-      "default": null,
-      "generated": null,
-      "name": "updated_at",
-      "entityType": "columns",
-      "table": "task"
-    },
-    {
-      "type": "text",
-      "notNull": false,
-      "autoincrement": false,
-      "default": null,
-      "generated": null,
-      "name": "id",
-      "entityType": "columns",
       "table": "todo"
     },
     {
@@ -1380,6 +1364,36 @@
       "name": "created_at",
       "entityType": "columns",
       "table": "agent_todo"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "link_id",
+      "entityType": "columns",
+      "table": "link_article"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "article_id",
+      "entityType": "columns",
+      "table": "link_article"
+    },
+    {
+      "type": "integer",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "table": "link_article"
     },
     {
       "type": "text",
@@ -1788,6 +1802,36 @@
     },
     {
       "columns": [
+        "link_id"
+      ],
+      "tableTo": "link",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "nameExplicit": false,
+      "name": "fk_link_article_link_id_link_id_fk",
+      "entityType": "fks",
+      "table": "link_article"
+    },
+    {
+      "columns": [
+        "article_id"
+      ],
+      "tableTo": "article",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "nameExplicit": false,
+      "name": "fk_link_article_article_id_article_id_fk",
+      "entityType": "fks",
+      "table": "link_article"
+    },
+    {
+      "columns": [
         "node_id"
       ],
       "tableTo": "node",
@@ -1993,6 +2037,16 @@
     },
     {
       "columns": [
+        "link_id",
+        "article_id"
+      ],
+      "nameExplicit": false,
+      "name": "link_article_pk",
+      "entityType": "pks",
+      "table": "link_article"
+    },
+    {
+      "columns": [
         "node_id",
         "chunk_id"
       ],
@@ -2091,6 +2145,15 @@
         "id"
       ],
       "nameExplicit": false,
+      "name": "link_pk",
+      "table": "link",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
       "name": "message_pk",
       "table": "message",
       "entityType": "pks"
@@ -2138,15 +2201,6 @@
       "nameExplicit": false,
       "name": "skill_pk",
       "table": "skill",
-      "entityType": "pks"
-    },
-    {
-      "columns": [
-        "id"
-      ],
-      "nameExplicit": false,
-      "name": "task_pk",
-      "table": "task",
       "entityType": "pks"
     },
     {
@@ -2458,6 +2512,48 @@
     {
       "columns": [
         {
+          "value": "status",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "link_status_idx",
+      "entityType": "indexes",
+      "table": "link"
+    },
+    {
+      "columns": [
+        {
+          "value": "created_at",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "link_created_at_idx",
+      "entityType": "indexes",
+      "table": "link"
+    },
+    {
+      "columns": [
+        {
+          "value": "updated_at",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "link_updated_at_idx",
+      "entityType": "indexes",
+      "table": "link"
+    },
+    {
+      "columns": [
+        {
           "value": "session_id",
           "isExpression": false
         }
@@ -2738,62 +2834,6 @@
     {
       "columns": [
         {
-          "value": "type",
-          "isExpression": false
-        }
-      ],
-      "isUnique": false,
-      "where": null,
-      "origin": "manual",
-      "name": "task_type_idx",
-      "entityType": "indexes",
-      "table": "task"
-    },
-    {
-      "columns": [
-        {
-          "value": "status",
-          "isExpression": false
-        }
-      ],
-      "isUnique": false,
-      "where": null,
-      "origin": "manual",
-      "name": "task_status_idx",
-      "entityType": "indexes",
-      "table": "task"
-    },
-    {
-      "columns": [
-        {
-          "value": "created_at",
-          "isExpression": false
-        }
-      ],
-      "isUnique": false,
-      "where": null,
-      "origin": "manual",
-      "name": "task_created_at_idx",
-      "entityType": "indexes",
-      "table": "task"
-    },
-    {
-      "columns": [
-        {
-          "value": "updated_at",
-          "isExpression": false
-        }
-      ],
-      "isUnique": false,
-      "where": null,
-      "origin": "manual",
-      "name": "task_updated_at_idx",
-      "entityType": "indexes",
-      "table": "task"
-    },
-    {
-      "columns": [
-        {
           "value": "status",
           "isExpression": false
         }
@@ -2916,6 +2956,20 @@
       "name": "agent_todo_todo_id_idx",
       "entityType": "indexes",
       "table": "agent_todo"
+    },
+    {
+      "columns": [
+        {
+          "value": "article_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "link_article_article_id_idx",
+      "entityType": "indexes",
+      "table": "link_article"
     },
     {
       "columns": [

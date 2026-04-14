@@ -13,6 +13,8 @@ export interface AppConfig {
 	current_workspace: string
 	submit_mode: 'enter' | 'ctrl+enter'
 	default_model: DefaultModel
+	embedding_model?: DefaultModel
+	rerank_model?: DefaultModel
 	enable_triple: boolean
 	triple_model?: DefaultModel
 	enable_rewrite: boolean
