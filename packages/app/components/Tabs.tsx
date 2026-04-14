@@ -65,8 +65,9 @@ const Index = (props: IProps) => {
 						data-[active=true]:bg-active data-[active=true]:text-std-900
 					`
 						)}
-						onClick={() => onClick?.(key, item)}
+						title={key || title}
 						data-active={getActive(key)}
+						onClick={() => onClick?.(key, item)}
 						key={key}
 					>
 						{Icon && <Icon size={14} />}

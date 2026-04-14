@@ -33,6 +33,10 @@ const routes: Array<RouteObject> = [
 				lazy: () => import('@/pages/project')
 			},
 			{
+				path: '/workflow',
+				lazy: () => import('@/pages/workflow')
+			},
+			{
 				path: '/agent',
 				lazy: () => import('@/pages/agent')
 			},
