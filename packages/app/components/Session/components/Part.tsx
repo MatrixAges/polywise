@@ -40,7 +40,8 @@ const Index = (props: IPropsPart) => {
 					isAnimating={streaming}
 					mermaid={{
 						config: {
-							theme: theme === 'dark' ? 'dark' : 'default',
+							theme: theme === 'dark' ? 'dark' : 'forest',
+							look: 'handDrawn',
 							themeVariables: { fontSize: '12px' }
 						}
 					}}

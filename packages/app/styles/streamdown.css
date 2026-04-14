@@ -106,6 +106,14 @@
 				ry: 12px;
 			}
 		}
+
+		.rough-node {
+			.label-container {
+				& > :first-child {
+					opacity: 0.36;
+				}
+			}
+		}
 	}
 
 	div[data-streamdown='code-block-actions'],
