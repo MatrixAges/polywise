@@ -11,7 +11,7 @@ import { code } from '@streamdown/code'
 import { math } from '@streamdown/math'
 import { mermaid } from '@streamdown/mermaid'
 import { memo } from 'react'
-import { Streamdown } from 'streamdown'
+import { Streamdown ,useIsCodeFenceIncomplete} from 'streamdown'
 
 import type { UIMessage } from 'ai'
 import type { ComponentProps, HTMLAttributes } from 'react'

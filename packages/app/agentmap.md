@@ -137,7 +137,10 @@ This document provides an overview of the packages/app module structure and arch
 		"styles": {
 			"global.css": { "desc": "Global CSS styles", "role": "Style" },
 			"index.css": { "desc": "Main CSS entry", "role": "Style" },
-			"streamdown.css": { "desc": "Streamdown Markdown rendering styles", "role": "Style" },
+			"streamdown.css": {
+				"desc": "Streamdown Markdown rendering styles with mermaid flicker prevention",
+				"role": "Style"
+			},
 			"vars.css": { "desc": "CSS variables definition", "role": "Style" },
 			"shadcn.css": { "desc": "shadcn/ui base styles", "role": "Style" },
 			"utility.css": { "desc": "Utility CSS classes", "role": "Style" }

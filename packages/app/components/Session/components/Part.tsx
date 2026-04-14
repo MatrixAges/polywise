@@ -30,7 +30,27 @@ const Index = (props: IPropsPart) => {
 				</Reasoning>
 			)
 		case 'text':
-			return <MessageResponse isAnimating={streaming}>{part.text}</MessageResponse>
+			return (
+				<MessageResponse
+					isAnimating={streaming}
+					// components={{
+					// 	code: ({ className,node, ...rest }) => {
+					//             if(!className) return node
+					// 		const match = /language-(\w+)/.exec(className || '')
+					// 		const isMermaid = match && match[1] === 'mermaid'
+
+					// 		// If it's a block-level mermaid code fence, use your custom component
+					// 		if (!inline && isMermaid) {
+					// 			return 'mermaid'
+					// 		}
+					// 		console.log(className, rest)
+					// 		return className
+					// 	}
+					// }}
+				>
+					{part.text}
+				</MessageResponse>
+			)
 		case 'dynamic-tool': {
 			const tool_part = part as DynamicToolUIPart
 
