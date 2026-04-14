@@ -1,12 +1,13 @@
-import { readUIMessageStream, tool, ToolLoopAgent } from 'ai'
+import { embed, readUIMessageStream, tool, ToolLoopAgent } from 'ai'
 import { object, string } from 'zod'
 
-import type { GoogleLanguageModelOptions } from '@ai-sdk/google'
+import type { GoogleEmbeddingModelOptions, GoogleLanguageModelOptions } from '@ai-sdk/google'
 import type { ProviderOptions } from '@ai-sdk/provider-utils'
 import type { LanguageModel, ToolSet } from 'ai'
+import type { Model } from '../types/config'
 
 export type ModelResult = {
-	model: LanguageModel
+	model: LanguageModel | any
 	provider_options?: ProviderOptions
 	tools?: ToolSet
 }
@@ -14,12 +15,13 @@ export type ModelResult = {
 interface GetModelArgs {
 	provider: string
 	model: string
+	type?: Model['type']
 	options?: any
 	model_tool?: boolean
 }
 
 export const getModel = async (args: GetModelArgs): Promise<ModelResult> => {
-	const { provider, model, options, model_tool = true } = args
+	const { provider, model, type = 'text', options, model_tool = true } = args
 
 	switch (provider) {
 		case 'a2a':
@@ -44,7 +46,30 @@ export const getModel = async (args: GetModelArgs): Promise<ModelResult> => {
 		case 'google_gemini': {
 			const { createGoogleGenerativeAI, google } = await import('@ai-sdk/google')
 
-			const target_model = createGoogleGenerativeAI(options)(model)
+			const target_google = createGoogleGenerativeAI(options)
+
+			if (type === 'embedding') {
+				const embedding_model = google.embedding(model)
+
+				const run = async () => {
+					const { embedding } = await embed({
+						model: embedding_model,
+						value: 'sunny day at the beach',
+						providerOptions: {
+							google: {
+								outputDimensionality: 1024,
+								taskType: 'SEMANTIC_SIMILARITY'
+							} satisfies GoogleEmbeddingModelOptions
+						}
+					})
+
+					return embedding as Array<number>
+				}
+
+				return { run }
+			}
+
+			const target_model = target_google(model)
 
 			if (!model_tool) {
 				const result: ModelResult = {
