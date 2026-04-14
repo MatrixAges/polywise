@@ -56,11 +56,12 @@ This document provides an overview of the packages/polywise module structure and
 					"getBashTools": "Sandbox-backed bash tool builder with command risk matching, audit review, and child_process proxy execution for flagged commands"
 				},
 				"tools": {
-					"desc": "Bash sandboxing tools via bash-tool, local skill search/read/rebuild tooling, and read-only memory/wiki search tools with superego trigger",
+					"desc": "Bash sandboxing tools via bash-tool, local skill search/read/rebuild tooling, session-scoped plan management, and read-only memory/wiki search tools with superego trigger",
 					"role": "Folder",
 					"cron.ts": "Create/list/read/update/remove cron jobs backed by app.app_path/cron.json with incremental runtime reload and physical directory removal",
 					"title.ts": "Internal tool that generates and updates session titles while protecting manually edited titles",
 					"memory.ts": "Read-only memory search tool for main agent; search episodic memories by query with scope filtering",
+					"plan.ts": "Manage session_dir/plan.md with save/get/clear actions; stores concise plan metadata, task breakdowns, mermaid execution flow, and delivery criteria",
 					"wiki.ts": "Read-only wiki knowledge search tool for main agent; search semantic knowledge by query",
 					"superego.ts": "Trigger tool that invokes superego agent to extract and persist information from conversation; only way for main agent to write to memory/wiki",
 					"webfetch.ts": "Fetch URL content as Markdown (Jina primary, fetch+turndown fallback)",
