@@ -84,7 +84,6 @@
 	div[data-streamdown='mermaid-block'] {
 		contain: layout;
 		will-change: contents;
-		min-height: 200px;
 		overflow: hidden;
 
 		& > :first-child {
@@ -97,7 +96,7 @@
 		}
 
 		& > :nth-child(2) {
-			@apply -mt-7 h-6;
+			@apply top-0.5 -mt-7 h-6;
 		}
 	}
 
