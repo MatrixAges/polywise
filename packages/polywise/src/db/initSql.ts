@@ -3,7 +3,7 @@ import { env } from '@core/env'
 export default () => {
 	const sql = `
       -- FTS virtual tables
-      CREATE VIRTUAL TABLE IF NOT EXISTS vec.article_url_fts USING fts5(url, tokenize='unicode61');
+      CREATE VIRTUAL TABLE IF NOT EXISTS vec.link_url_fts USING fts5(url, tokenize='unicode61');
       CREATE VIRTUAL TABLE IF NOT EXISTS vec.chunk_keywords_fts USING fts5(keywords,tokenize='unicode61');
 
       -- Vector virtual tables

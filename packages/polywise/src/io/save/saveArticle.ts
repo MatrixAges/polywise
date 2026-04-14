@@ -4,7 +4,6 @@ import { article, chunk, node_chunk } from '@core/db/schema'
 import {
 	addArticle,
 	addChunk,
-	addTask,
 	getArticle,
 	getChunks,
 	removeChunks,
@@ -12,7 +11,6 @@ import {
 	setArticle
 } from '@core/db/services'
 import { getEmbedding, getKeywords, getChunks as getPipelineChunks } from '@core/pipeline'
-import { notifyQueue } from '@core/task'
 import { getHash, log } from '@core/utils'
 import { eq } from 'drizzle-orm'
 
@@ -43,7 +41,6 @@ export default async (args: ArgsSaveArticle) => {
 	log('SAVE', 'getChunks', () => `chunk_length: ${chunks.length}`)
 
 	let current_article_id = article_id
-	let has_new_task = false
 
 	if (current_article_id) {
 		const existing_article = await getArticle(eq(article.id, current_article_id))
@@ -134,16 +131,9 @@ export default async (args: ArgsSaveArticle) => {
 		log('SAVE', 'saveChunkVector')
 
 		if (enable_triple) {
-			await addTask({
-				type: 'triple',
-				args: { chunk_text: item, chunk_item_id: chunk_item.id }
-			})
-
-			has_new_task = true
+			// Triple parsing now handled synchronously or via other means
 		}
 	}
-
-	if (has_new_task) notifyQueue('triple')
 
 	log('SAVE', 'Done', () => `article_id: ${current_article_id}`)
 

@@ -16,7 +16,6 @@ interface ChunkScore {
 export interface ArticleWithScore {
 	article_id: string
 	article_title: string | null
-	article_url: string | null
 	article_content: string
 	chunk_id: string
 	content: string
@@ -67,7 +66,6 @@ export default async (chunks: Array<ChunkScore>): Promise<Array<ArticleWithScore
 		scored_articles.push({
 			article_id: article_info.id,
 			article_title: article_info.title,
-			article_url: article_info.url,
 			article_content: article_info.content,
 			chunk_id: c.chunk_id,
 			content: chunk_info.content || '',
