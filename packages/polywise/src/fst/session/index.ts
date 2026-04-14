@@ -19,7 +19,7 @@ import { getSession, initSession, updateSession } from './session'
 import { getState, setState } from './state'
 import { abortStream, getStream } from './stream'
 import { clearTasks, getTasks, setTasks } from './task'
-import { active, resetAbort, runing, stop, sync } from './utils'
+import { active, clearPlan, resetAbort, runing, stop, sync } from './utils'
 
 import type { Agent, Project, Session, SessionInsert } from '@core/db'
 import type { ModelResult } from '../provider'
@@ -130,6 +130,7 @@ export default class Index {
 	getTasks = () => getTasks(this)
 	setTasks = (v: Context['tasks']) => setTasks(this, v)
 	clearTasks = () => clearTasks(this)
+	clearPlan = () => clearPlan(this)
 
 	getContext = () => getContext(this)
 	setContext = (v: Partial<Context>) => setContext(this, v)

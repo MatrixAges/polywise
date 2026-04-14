@@ -21,6 +21,7 @@ export default async (s: Index) => {
 	await removeMessages(eq(message.session_id, s.id))
 
 	await s.clearTasks()
+	await s.clearPlan()
 
 	s.sync()
 }

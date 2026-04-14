@@ -1,4 +1,5 @@
 export { default as active } from './active'
+export { default as clearPlan } from './clearPlan'
 export { default as resetAbort } from './resetAbort'
 export { default as runing } from './runing'
 export { default as stop } from './stop'

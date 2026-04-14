@@ -13,6 +13,7 @@ export default async (s: Index) => {
 	await s.setContext({})
 	await s.setState()
 	await s.clearTasks()
+	await s.clearPlan()
 
 	s.sync()
 }
