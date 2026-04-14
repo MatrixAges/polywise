@@ -32,7 +32,14 @@ const Index = () => {
 	const { control } = useForm<AppConfig>({ values: $copy(s.config) }, onChange)
 
 	return (
-		<div className='page_wrap flex w-full flex-col'>
+		<div
+			className='
+				overflow-y-scroll
+				flex flex-col
+				w-full h-full
+				page_wrap
+			'
+		>
 			<form className='flex w-full flex-col'>
 				<FieldGroup className='gap-0'>
 					<Field className='items-center! py-3' orientation='horizontal'>

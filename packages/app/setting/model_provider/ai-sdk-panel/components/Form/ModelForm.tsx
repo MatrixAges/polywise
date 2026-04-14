@@ -74,7 +74,7 @@ const Index = (props: IPropsFormModelForm) => {
 					/>
 				</AutoLabel>
 			</div>
-			<div className='grid grid-cols-1 border-t'>
+			<div className='grid grid-cols-1'>
 				<AutoLabel
 					className={adding_model ? 'border-b-0!' : ''}
 					label={t('provider.form.model_form.model_type')}
@@ -87,8 +87,9 @@ const Index = (props: IPropsFormModelForm) => {
 						>
 							<SelectTrigger
 								className='
-									h-full
-									px-0
+									h-full!
+									p-0
+									bg-transparent
 									border-0 outline-none
 									shadow-none
 									focus:ring-0
