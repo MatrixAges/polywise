@@ -1,3 +1,4 @@
+import prompt from '@core/consts/prompts/superego_prompt.md'
 import { stepCountIs, ToolLoopAgent } from 'ai'
 
 import { createSkillTool } from '../../tools'
@@ -8,10 +9,10 @@ import type { LanguageModel } from 'ai'
 import type Session from '../../session'
 import type { ScopeInfo } from './types'
 
-export default (model: LanguageModel, session: Session, scope: ScopeInfo, system: string) => {
+export default (model: LanguageModel, session: Session, scope: ScopeInfo) => {
 	return new ToolLoopAgent({
 		model,
-		instructions: system,
+		instructions: prompt,
 		tools: {
 			memory_tool: createMemoryTool(scope),
 			wiki_tool: createWikiTool(scope),

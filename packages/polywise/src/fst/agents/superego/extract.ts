@@ -1,7 +1,6 @@
 import { convertToModelMessages } from 'ai'
 
 import createSuperegoAgent from './agent'
-import getPrompt from './getPrompt'
 
 import type Session from '../../session'
 import type { ScopeInfo } from './types'
@@ -20,7 +19,6 @@ const getScope = (s: Session): ScopeInfo => {
 
 export default async (s: Session) => {
 	const scope = getScope(s)
-	const prompt = getPrompt()
 
 	const recent_messages = s.model_messages.slice(-6)
 
@@ -38,7 +36,7 @@ export default async (s: Session) => {
 		})
 		.join('\n\n')
 
-	const agent = createSuperegoAgent(s.model.model, s, scope, prompt)
+	const agent = createSuperegoAgent(s.model.model, s, scope)
 
 	await agent.generate({
 		prompt: `Analyze the following conversation fragment and extract memories, knowledge, and skills as appropriate.\n\n---\n\n${conversation}`

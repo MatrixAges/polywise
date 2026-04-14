@@ -14,6 +14,7 @@ import {
 	createContextTool,
 	createCronTool,
 	createEditFileTool,
+	createErrorCollectTool,
 	createGlobTool,
 	createMemoryTool,
 	createMessageTool,
@@ -102,7 +103,8 @@ export default async (s: Index, message: Message) => {
 			wiki_tool: createWikiTool(s),
 			web_search_tool: createWebSearchTool(),
 			web_fetch_tool: createWebFetchTool(),
-			cron_tool: createCronTool(s)
+			cron_tool: createCronTool(s),
+			error_collect_tool: createErrorCollectTool()
 		},
 		abortSignal: s.abort_controller.signal,
 		providerOptions: s.model.provider_options,
