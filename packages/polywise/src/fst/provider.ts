@@ -6,21 +6,27 @@ import type { ProviderOptions } from '@ai-sdk/provider-utils'
 import type { LanguageModel, ToolSet } from 'ai'
 import type { Model } from '../types/config'
 
-export type ModelResult = {
-	model: LanguageModel | any
+export interface EmbeddingResult {
+	run: (value: string) => Promise<Array<number>>
+}
+
+export interface ModelResult {
+	model: LanguageModel
 	provider_options?: ProviderOptions
 	tools?: ToolSet
 }
 
-interface GetModelArgs {
+export type GetModelResult<T extends Model['type'] = 'text'> = T extends 'embedding' ? EmbeddingResult : ModelResult
+
+export interface GetModelArgs<T extends Model['type'] = 'text'> {
 	provider: string
 	model: string
-	type?: Model['type']
+	type?: T
 	options?: any
 	model_tool?: boolean
 }
 
-export const getModel = async (args: GetModelArgs): Promise<ModelResult> => {
+export const getModel = async <T extends Model['type'] = 'text'>(args: GetModelArgs): Promise<GetModelResult<T>> => {
 	const { provider, model, type = 'text', options, model_tool = true } = args
 
 	switch (provider) {
@@ -39,22 +45,23 @@ export const getModel = async (args: GetModelArgs): Promise<ModelResult> => {
 					url: options.baseURL
 				})(model)
 			}
-		case 'open_compatible':
+		case 'open_compatible': {
 			return {
 				model: (await import('@ai-sdk/openai-compatible')).createOpenAICompatible(options)(model)
 			}
+		}
 		case 'google_gemini': {
 			const { createGoogleGenerativeAI, google } = await import('@ai-sdk/google')
 
 			const target_google = createGoogleGenerativeAI(options)
 
-			if (type === 'embedding') {
+			if (type === 'embedding' || type === 'rerank') {
 				const embedding_model = google.embedding(model)
 
-				const run = async () => {
+				const run = async (value: string) => {
 					const { embedding } = await embed({
 						model: embedding_model,
-						value: 'sunny day at the beach',
+						value,
 						providerOptions: {
 							google: {
 								outputDimensionality: 1024,
@@ -117,10 +124,11 @@ export const getModel = async (args: GetModelArgs): Promise<ModelResult> => {
 				tools: { google_search_tool }
 			}
 		}
-		case 'openai':
+		case 'openai': {
 			return {
 				model: (await import('@ai-sdk/openai')).createOpenAI(options)(model)
 			}
+		}
 		case 'anthropic':
 			return {
 				model: (await import('@ai-sdk/anthropic')).createAnthropic(options)(model)
@@ -141,10 +149,11 @@ export const getModel = async (args: GetModelArgs): Promise<ModelResult> => {
 			return {
 				model: (await import('vercel-minimax-ai-provider')).createMinimax(options)(model)
 			}
-		case 'mistral':
+		case 'mistral': {
 			return {
 				model: (await import('@ai-sdk/mistral')).createMistral(options)(model)
 			}
+		}
 		case 'groq':
 			return {
 				model: (await import('@ai-sdk/groq')).createGroq(options)(model)
@@ -169,14 +178,16 @@ export const getModel = async (args: GetModelArgs): Promise<ModelResult> => {
 			return {
 				model: (await import('@ai-sdk/togetherai')).createTogetherAI(options)(model)
 			}
-		case 'azure_openai':
+		case 'azure_openai': {
 			return {
 				model: (await import('@ai-sdk/azure')).createAzure(options)(model)
 			}
-		case 'amazon_bedrock':
+		}
+		case 'amazon_bedrock': {
 			return {
 				model: (await import('@ai-sdk/amazon-bedrock')).createAmazonBedrock(options)(model)
 			}
+		}
 		case 'cerebras':
 			return {
 				model: (await import('@ai-sdk/cerebras')).createCerebras(options)(model)
