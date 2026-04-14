@@ -37,6 +37,10 @@ const routes: Array<RouteObject> = [
 				lazy: () => import('@/pages/agent')
 			},
 			{
+				path: '/linkcase',
+				lazy: () => import('@/pages/linkcase')
+			},
+			{
 				path: '/library',
 				lazy: () => import('@/pages/library')
 			},

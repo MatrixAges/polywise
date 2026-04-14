@@ -1,11 +1,12 @@
 import {
+	Album,
 	AppWindowMac,
 	Bot,
 	CircleCheckBig,
 	Database,
 	Folders,
 	House,
-	LibraryBig,
+	Library,
 	MessageSquareText
 } from 'lucide-react'
 
@@ -19,7 +20,8 @@ export const nav_items = [
 	{ key: 'todo', Icon: CircleCheckBig },
 	{ key: 'project', Icon: Folders },
 	{ key: 'agent', Icon: Bot },
-	{ key: 'library', Icon: LibraryBig },
+	{ key: 'linkcase', Icon: Album },
+	{ key: 'library', Icon: Library },
 	{ key: 'database', Icon: Database },
 	is_electron && { key: 'browser', Icon: AppWindowMac }
 ].filter(Boolean) as Array<{ key: string; Icon: LucideIcon; title?: string }>
