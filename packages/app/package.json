@@ -57,6 +57,7 @@
 		"i18next": "catalog:",
 		"jsonschema": "^1.5.0",
 		"lucide-react": "^1.8.0",
+		"mermaid": "^11.14.0",
 		"mnemonist": "^0.40.3",
 		"mobx": "catalog:",
 		"mobx-react-lite": "^4.1.1",

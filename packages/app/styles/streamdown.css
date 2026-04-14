@@ -82,8 +82,7 @@
 	}
 
 	div[data-streamdown='mermaid-block'] {
-		contain: layout;
-		will-change: contents;
+		contain: layout style;
 		overflow: hidden;
 
 		& > :first-child {
@@ -97,6 +96,15 @@
 
 		& > :nth-child(2) {
 			@apply top-0.5 -mt-7 h-6;
+		}
+	}
+
+	div[data-streamdown='mermaid'] {
+		.node {
+			rect {
+				rx: 12px;
+				ry: 12px;
+			}
 		}
 	}
 
@@ -117,4 +125,13 @@
 
 code[data-streamdown='inline-code'] {
 	@apply box-decoration-clone px-1 py-[0.08rem] break-all;
+}
+
+[id^='dmermaid-'] {
+	position: absolute !important;
+	left: -9999px !important;
+	top: -9999px !important;
+	visibility: hidden !important;
+	opacity: 0 !important;
+	z-index: -1 !important;
 }

@@ -1,8 +1,10 @@
 import { isStaticToolUIPart } from 'ai'
+import { observer } from 'mobx-react-lite'
 
 import { MessageResponse } from '@/__shadcn__/components/ai-elements'
 import { Reasoning, ReasoningContent, ReasoningTrigger } from '@/__shadcn__/components/ai-elements/reasoning'
 import { Tool, ToolContent, ToolHeader, ToolInput, ToolOutput } from '@/__shadcn__/components/ai-elements/tool'
+import { useGlobal } from '@/context'
 import { getToolDesc } from '@/utils'
 
 import Edit from './Edit'
@@ -17,6 +19,9 @@ const Index = (props: IPropsPart) => {
 	const { streaming, metadata, part, answer } = props
 	const { type } = part
 
+	const global = useGlobal()
+	const theme = global.theme.theme_value
+
 	switch (type) {
 		case 'reasoning':
 			return (
@@ -30,7 +35,19 @@ const Index = (props: IPropsPart) => {
 				</Reasoning>
 			)
 		case 'text':
-			return <MessageResponse isAnimating={streaming}>{part.text}</MessageResponse>
+			return (
+				<MessageResponse
+					isAnimating={streaming}
+					mermaid={{
+						config: {
+							theme: theme === 'dark' ? 'dark' : 'default',
+							themeVariables: { fontSize: '12px' }
+						}
+					}}
+				>
+					{part.text}
+				</MessageResponse>
+			)
 		case 'dynamic-tool': {
 			const tool_part = part as DynamicToolUIPart
 
@@ -100,4 +117,4 @@ const Index = (props: IPropsPart) => {
 	return null
 }
 
-export default $app.memo(Index)
+export default new $app.Handle(Index).by(observer).by($app.memo).get()

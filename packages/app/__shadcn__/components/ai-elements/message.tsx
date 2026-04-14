@@ -11,7 +11,7 @@ import { code } from '@streamdown/code'
 import { math } from '@streamdown/math'
 import { mermaid } from '@streamdown/mermaid'
 import { memo } from 'react'
-import { Streamdown ,useIsCodeFenceIncomplete} from 'streamdown'
+import { Streamdown } from 'streamdown'
 
 import type { UIMessage } from 'ai'
 import type { ComponentProps, HTMLAttributes } from 'react'
@@ -97,7 +97,8 @@ export type MessageResponseProps = ComponentProps<typeof Streamdown>
 const streamdown_plugins = { cjk, code, math, mermaid }
 
 export const MessageResponse = memo(
-	({ className, ...props }: MessageResponseProps) => (
+	({ className, ...props }: MessageResponseProps) => {
+            return (
 		<Streamdown
 			className={cn(
 				'size-full [&>*:first-child]:mt-0 [&>*:last-child]:mb-0',
@@ -106,7 +107,8 @@ export const MessageResponse = memo(
 			plugins={streamdown_plugins}
 			{...props}
 		/>
-	),
+	      )
+      },
 	(prevProps, nextProps) =>
 		prevProps.children === nextProps.children &&
 		nextProps.isAnimating === prevProps.isAnimating
