@@ -22,11 +22,7 @@ export const createErrorCollectTool = () => {
 	const getToolcallFile = (tool_name: string) => {
 		const safe_name = tool_name.replace(/[^a-zA-Z0-9_-]/g, '_')
 
-		return path.resolve(app.app_path, 'toolcall', `${safe_name}.json`)
-	}
-
-	const isError = (output: unknown) => {
-		return typeof output === 'object' && output !== null && 'error' in output
+		return path.resolve(app.app_path, 'tool_call_errors', `${safe_name}.jsonl`)
 	}
 
 	const collectRecord = async (tool_name: string, tool_input: unknown, tool_output: unknown) => {
@@ -38,8 +34,7 @@ export const createErrorCollectTool = () => {
 
 		return {
 			action: 'collect',
-			tool_name,
-			status: isError(tool_output) ? 'error' : 'success'
+			tool_name
 		}
 	}
 
@@ -68,29 +63,28 @@ export const createErrorCollectTool = () => {
 						matched.push(record)
 					}
 				}
-			} catch {
-				// skip invalid lines
-			}
+			} catch {}
 		}
 
 		return {
 			action: 'search',
 			tool_name,
-			records: matched.length > 0 ? matched : [],
-			count: total_errors,
-			message: matched.length === 0 ? 'No matching records found' : undefined
+			records: matched.length > 0 ? matched : []
 		}
 	}
 
 	return tool({
-		description: 'Collect and search tool call error records for debugging when you meet error.',
+		description:
+			'Collect after tool call errors and success, search tool call error for debugging when you meet error.',
 		inputSchema,
 		execute: async args => {
 			const { action, tool_name, input, output, keywords } = args
 
 			if (action === 'collect') {
-				if (input === undefined || output === undefined)
+				if (input === undefined || output === undefined) {
 					return { error: 'input/output required for collect' }
+				}
+
 				return collectRecord(tool_name, input, output)
 			}
 
