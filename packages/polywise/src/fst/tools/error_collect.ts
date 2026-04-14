@@ -2,17 +2,12 @@ import path from 'path'
 import { app } from '@core/consts'
 import { tool } from 'ai'
 import fs from 'fs-extra'
+import LineByLine from 'n-readlines'
 import { array, enum as Enum, object, string, unknown } from 'zod'
 
 type RecordEntry = {
 	input: unknown
 	output: unknown
-}
-
-type ToolData = {
-	tool_name: string
-	errors: Array<RecordEntry>
-	success: RecordEntry | null
 }
 
 const inputSchema = object({
@@ -39,28 +34,12 @@ export const createErrorCollectTool = () => {
 
 		await fs.ensureDir(path.dirname(file_path))
 
-		let data: ToolData = { tool_name, errors: [], success: null }
-
-		if (await fs.pathExists(file_path)) {
-			data = await fs.readJson(file_path).catch(() => data)
-		}
-
-		if (!isError(tool_output)) {
-			data.success = { input: tool_input, output: tool_output }
-		} else {
-			const input_str = JSON.stringify(tool_input)
-			const is_dup = data.errors.some(e => JSON.stringify(e.input) === input_str)
-
-			if (!is_dup) data.errors.push({ input: tool_input, output: tool_output })
-		}
-
-		await fs.writeJson(file_path, data, { spaces: 2 })
+		await fs.appendFile(file_path, JSON.stringify({ input: tool_input, output: tool_output }) + '\n')
 
 		return {
 			action: 'collect',
 			tool_name,
-			status: isError(tool_output) ? 'error' : 'success',
-			error_count: data.errors.length
+			status: isError(tool_output) ? 'error' : 'success'
 		}
 	}
 
@@ -69,21 +48,37 @@ export const createErrorCollectTool = () => {
 
 		if (!(await fs.pathExists(file_path))) return { action: 'search', tool_name, records: [], count: 0 }
 
-		const data: ToolData = await fs.readJson(file_path).catch(() => ({ tool_name, errors: [], success: null }))
+		const liner = new LineByLine(file_path)
+		const matched: Array<RecordEntry> = []
+		let line: Buffer | null
+		let total_errors = 0
 
-		const matched = data.errors
-			.filter(err => {
-				const content = JSON.stringify(err).toLowerCase()
-				return keywords.some(k => content.includes(k.toLowerCase()))
-			})
-			.slice(0, 3)
+		while ((line = liner.next())) {
+			const line_str = line.toString()
+
+			try {
+				const record = JSON.parse(line_str) as RecordEntry
+				total_errors++
+
+				if (matched.length < 3) {
+					const content = JSON.stringify(record).toLowerCase()
+					const is_match = keywords.some(k => content.includes(k.toLowerCase()))
+
+					if (is_match) {
+						matched.push(record)
+					}
+				}
+			} catch {
+				// skip invalid lines
+			}
+		}
 
 		return {
 			action: 'search',
 			tool_name,
-			records: matched.length > 0 ? matched : data.errors.slice(0, 3),
-			count: data.errors.length,
-			message: matched.length > 0 ? undefined : 'No keyword matches, returning latest errors'
+			records: matched.length > 0 ? matched : [],
+			count: total_errors,
+			message: matched.length === 0 ? 'No matching records found' : undefined
 		}
 	}
 
