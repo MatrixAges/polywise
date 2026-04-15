@@ -9,6 +9,9 @@ export default async () => {
 	if (!config.embedding_model) return null
 
 	const { provider, model } = config.embedding_model
+
+	console.log('embedding_model', config.embedding_model)
+
 	const result = await getModel({
 		provider,
 		model,

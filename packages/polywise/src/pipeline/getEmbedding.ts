@@ -6,7 +6,11 @@ import genEmbedding from './genEmbedding'
 export default async (text: string) => {
 	const run = await genEmbedding()
 
-	if (run) return run(text)
+	if (run) {
+		const res = await run(text)
+		console.log(res)
+		return res
+	}
 
 	await initEmbeddingModel()
 

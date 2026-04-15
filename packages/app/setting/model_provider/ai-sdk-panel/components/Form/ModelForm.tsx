@@ -81,10 +81,7 @@ const Index = (props: IPropsFormModelForm) => {
 					valued={type || adding_model}
 				>
 					<Controller name={adding_model ? 'type' : `models.${index}.type`} control={control}>
-						<Select
-							items={MODEL_TYPES.map(t => ({ label: t, value: t }))}
-							value={type || 'text'}
-						>
+						<Select items={MODEL_TYPES.map(t => ({ label: t, value: t }))}>
 							<SelectTrigger
 								className='
 									h-full!
