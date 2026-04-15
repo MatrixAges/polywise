@@ -14,7 +14,7 @@ import {
 	SelectValue
 } from '@/__shadcn__/components/ui/select'
 import { Textarea } from '@/__shadcn__/components/ui/textarea'
-import { ModelSelect, Show } from '@/components'
+import { ModelSelect, Show, Tooltip } from '@/components'
 import { useGlobal } from '@/context'
 
 import type { AppConfig } from '@core/types'
@@ -100,6 +100,7 @@ const Index = (props: IPropsInput) => {
 	})
 
 	const Icon = streaming ? PauseIcon : PlayIcon
+	const RightArchiveIcon = archived ? PackageOpen : Archive
 
 	return (
 		<div
@@ -198,28 +199,36 @@ const Index = (props: IPropsInput) => {
 								</SelectGroup>
 							</SelectContent>
 						</Select>
-						<button className='icon_button h-5 w-5' onClick={clear}>
-							<BrushCleaning className='stroke-std-400 h-[12px] w-[12px]'></BrushCleaning>
-						</button>
-					</div>
-					<div className='flex gap-1'>
-						<button className='icon_button h-5 w-5' onClick={toggleContextModal}>
-							<Layers2 className='stroke-std-400 h-[12px] w-[12px]'></Layers2>
-						</button>
-						<button className='icon_button h-5 w-5' onClick={scrollToBottom}>
-							<ArrowDownToLine className='stroke-std-400 h-[12px] w-[12px]'></ArrowDownToLine>
-						</button>
+						<Tooltip title='Clear'>
+							<div className='icon_button h-5 w-5' onClick={clear}>
+								<BrushCleaning className='stroke-std-400 h-[12px] w-[12px]'></BrushCleaning>
+							</div>
+						</Tooltip>
 
 						<Show visible={archived}>
-							<button className='icon_button h-5 w-5' onClick={unarchive}>
-								<PackageOpen className='stroke-std-400 h-[12px] w-[12px]'></PackageOpen>
-							</button>
+							<Tooltip title='Archive'>
+								<div className='icon_button h-5 w-5' onClick={archive}>
+									<Archive className='stroke-std-400 h-[12px] w-[12px]'></Archive>
+								</div>
+							</Tooltip>
 						</Show>
-						<Show visible={!archived}>
-							<button className='icon_button h-5 w-5' onClick={archive}>
-								<Archive className='stroke-std-400 h-[12px] w-[12px]'></Archive>
-							</button>
-						</Show>
+					</div>
+					<div className='flex gap-1'>
+						<Tooltip title='Context'>
+							<div className='icon_button h-5 w-5' onClick={toggleContextModal}>
+								<Layers2 className='stroke-std-400 h-[12px] w-[12px]'></Layers2>
+							</div>
+						</Tooltip>
+						<Tooltip title='Scroll to bottom'>
+							<div className='icon_button h-5 w-5' onClick={scrollToBottom}>
+								<ArrowDownToLine className='stroke-std-400 h-[12px] w-[12px]'></ArrowDownToLine>
+							</div>
+						</Tooltip>
+						<Tooltip title={archived ? 'Unarhive' : 'Archive'}>
+							<div className='icon_button h-5 w-5' onClick={archived ? unarchive : archive}>
+								<RightArchiveIcon className='stroke-std-400 h-[12px] w-[12px]'></RightArchiveIcon>
+							</div>
+						</Tooltip>
 					</div>
 				</div>
 			</div>

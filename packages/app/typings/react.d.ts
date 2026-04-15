@@ -14,7 +14,7 @@ declare module 'react' {
 		onClick?: React.MouseEventHandler<T> | ((v: any) => any)
 	}
 
-	interface DivHTMLAttributes<T> {
+	interface HTMLAttributes<T> {
 		onClick?: React.MouseEventHandler<T> | ((v: any) => any)
 	}
 }
