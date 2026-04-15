@@ -3,23 +3,9 @@ import { convertToModelMessages } from 'ai'
 import createSuperegoAgent from './agent'
 
 import type Session from '../../session'
-import type { ScopeInfo } from './types'
-
-const getScope = (s: Session): ScopeInfo => {
-	if (s.project) {
-		return { scope_type: 'project', scope_id: s.project.id }
-	}
-
-	if (s.agents.length > 0) {
-		return { scope_type: 'agent', scope_id: s.agents[0].id }
-	}
-
-	return { scope_type: 'global', scope_id: null }
-}
 
 export default async (s: Session) => {
-	const scope = getScope(s)
-
+	const scope = s.scope
 	const recent_messages = s.model_messages.slice(-6)
 
 	if (recent_messages.length === 0) {

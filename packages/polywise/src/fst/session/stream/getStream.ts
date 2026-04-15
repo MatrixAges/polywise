@@ -3,10 +3,10 @@ import getContextPrompt from '@core/consts/prompts/getContextPrompt'
 import { addNotification, addNotificationSession } from '@core/db/services'
 import { env } from '@core/env'
 import { createSystemTool } from '@core/fst/agents'
-import { extract } from '@core/fst/agents/superego'
+import { extract, extractToStream } from '@core/fst/agents/superego'
 import { pushPart, startStream, stopStream } from '@core/fst/agents/supervisor'
 import { getSystemTools } from '@core/utils'
-import { convertToModelMessages, smoothStream, stepCountIs, streamText } from 'ai'
+import { convertToModelMessages, createUIMessageStream, smoothStream, stepCountIs, streamText } from 'ai'
 import { getId } from 'stk/utils'
 
 import {
@@ -135,40 +135,53 @@ export default async (s: Index, message: Message) => {
 		}
 	})
 
-	let reasoning_start = 0
-	let reasoning_end = 0
-
-	return res.toUIMessageStream({
+	return createUIMessageStream({
 		originalMessages: [message],
-		sendSources: true,
-		generateMessageId: getId,
-		messageMetadata: ({ part }) => {
-			s.active()
+		generateId: getId,
+		execute: async ({ writer }) => {
+			extractToStream(s, writer).catch(console.error)
 
-			if (part.type === 'text-delta') {
-				pushPart(s.id, part.text)
-			}
+			let reasoning_start = 0
+			let reasoning_end = 0
 
-			if (part.type === 'reasoning-start') {
-				reasoning_start = Date.now()
-			}
+			writer.merge(
+				res.toUIMessageStream({
+					originalMessages: [message],
+					sendSources: true,
+					generateMessageId: getId,
+					messageMetadata: ({ part }) => {
+						s.active()
 
-			if (part.type === 'reasoning-end') {
-				reasoning_end = Date.now()
-			}
+						if (part.type === 'text-delta') {
+							pushPart(s.id, part.text)
+						}
 
-			if (part.type === 'finish') {
-				const target = { usage: part.totalUsage, timestamp: Date.now() } as MessageMetadata
+						if (part.type === 'reasoning-start') {
+							reasoning_start = Date.now()
+						}
 
-				if (reasoning_end) {
-					target['reasoning_duration'] = reasoning_end - reasoning_start
-				}
+						if (part.type === 'reasoning-end') {
+							reasoning_end = Date.now()
+						}
 
-				reasoning_start = 0
-				reasoning_end = 0
+						if (part.type === 'finish') {
+							const target = {
+								usage: part.totalUsage,
+								timestamp: Date.now()
+							} as MessageMetadata
 
-				return target
-			}
+							if (reasoning_end) {
+								target['reasoning_duration'] = reasoning_end - reasoning_start
+							}
+
+							reasoning_start = 0
+							reasoning_end = 0
+
+							return target
+						}
+					}
+				})
+			)
 		},
 		onFinish: async ({ responseMessage }) => {
 			if (responseMessage.parts.length) {
@@ -184,6 +197,7 @@ export default async (s: Index, message: Message) => {
 
 			stopStream(s.id)
 			await s.stop()
-		}
+		},
+		onError: error => `Stream error: ${error instanceof Error ? error.message : String(error)}`
 	})
 }

@@ -4,7 +4,7 @@ import { tool } from 'ai'
 import fs from 'fs-extra'
 import { array, enum as Enum, object, string, unknown } from 'zod'
 
-import { grep } from '../../utils/grep'
+import { grep } from '../../utils'
 
 type RecordEntry = {
 	input: unknown

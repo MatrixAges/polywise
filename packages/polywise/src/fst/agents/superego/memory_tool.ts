@@ -5,7 +5,7 @@ import { tool } from 'ai'
 import { eq } from 'drizzle-orm'
 import { enum as Enum, object, string } from 'zod'
 
-import type { ScopeInfo } from './types'
+import type { SessionScope } from '../../types'
 
 const inputSchema = object({
 	action: Enum(['add', 'search', 'update']).describe(
@@ -16,7 +16,7 @@ const inputSchema = object({
 	article_id: string().optional().describe('[Required for update] The article id of the memory to update')
 })
 
-export const createMemoryTool = (scope: ScopeInfo) => {
+export const createMemoryTool = (scope: SessionScope) => {
 	return tool({
 		description: [
 			'Manage episodic memories about user preferences, project state, and context.',
@@ -36,8 +36,8 @@ export const createMemoryTool = (scope: ScopeInfo) => {
 					type: 'article',
 					content: input.content,
 					for: 'memory',
-					scope_type: scope.scope_type,
-					scope_id: scope.scope_id,
+					scope_type: scope.type,
+					scope_id: scope.id,
 					source: 'superego'
 				})
 

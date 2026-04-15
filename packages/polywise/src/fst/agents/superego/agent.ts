@@ -7,9 +7,9 @@ import { createWikiTool } from './wiki_tool'
 
 import type { LanguageModel } from 'ai'
 import type Session from '../../session'
-import type { ScopeInfo } from './types'
+import type { SessionScope } from '../../types'
 
-export default (model: LanguageModel, session: Session, scope: ScopeInfo) => {
+export default (model: LanguageModel, session: Session, scope: SessionScope) => {
 	return new ToolLoopAgent({
 		model,
 		instructions: prompt,

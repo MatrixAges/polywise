@@ -5,7 +5,7 @@ import { tool } from 'ai'
 import { eq } from 'drizzle-orm'
 import { enum as Enum, object, string } from 'zod'
 
-import type { ScopeInfo } from './types'
+import type { SessionScope } from '../../types'
 
 const inputSchema = object({
 	action: Enum(['add', 'search', 'update', 'remove']).describe(
@@ -16,7 +16,7 @@ const inputSchema = object({
 	article_id: string().optional().describe('[Required for update/remove] The article id to modify or delete')
 })
 
-export const createWikiTool = (scope: ScopeInfo) => {
+export const createWikiTool = (scope: SessionScope) => {
 	return tool({
 		description: [
 			'Manage semantic knowledge: objective facts, concepts, architecture docs, API definitions, and technical conclusions.',
@@ -37,8 +37,8 @@ export const createWikiTool = (scope: ScopeInfo) => {
 					type: 'article',
 					content: input.content,
 					for: 'wiki',
-					scope_type: scope.scope_type,
-					scope_id: scope.scope_id,
+					scope_type: scope.type,
+					scope_id: scope.id,
 					source: 'superego'
 				})
 
