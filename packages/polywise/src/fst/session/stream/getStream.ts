@@ -51,7 +51,7 @@ export default async (s: Index, message: Message) => {
 	s.context.current_messages_count = s.model_messages.length
 
 	if (!s.session.is_runing) {
-		await s.insertMessage(message)
+		s.insertMessage(message)
 
 		s.model_messages.push(message)
 		s.ui_messages.push(message)
@@ -101,8 +101,8 @@ export default async (s: Index, message: Message) => {
 			write_file_tool: bash_tool.writeFile,
 			edit_file_tool: createEditFileTool(s),
 			skill_tool: createSkillTool(s),
-			memory_tool: createMemoryTool(s),
-			wiki_tool: createWikiTool(s),
+			// memory_tool: createMemoryTool(s),
+			// wiki_tool: createWikiTool(s),
 			web_search_tool: createWebSearchTool(),
 			web_fetch_tool: createWebFetchTool(),
 			cron_tool: createCronTool(s),
@@ -139,7 +139,7 @@ export default async (s: Index, message: Message) => {
 		originalMessages: [message],
 		generateId: getId,
 		execute: async ({ writer }) => {
-			extractToStream(s, writer).catch(console.error)
+			extractToStream(s, writer)
 
 			let reasoning_start = 0
 			let reasoning_end = 0
@@ -186,16 +186,19 @@ export default async (s: Index, message: Message) => {
 		onFinish: async ({ responseMessage }) => {
 			if (responseMessage.parts.length) {
 				await s.appendMessage(responseMessage)
+
 				s.superego_append_count++
 			}
 
 			if (s.superego_append_count >= 3) {
 				s.superego_append_count = 0
 
+				console.log('---------extract')
 				extract(s)
 			}
 
 			stopStream(s.id)
+
 			await s.stop()
 		},
 		onError: error => `Stream error: ${error instanceof Error ? error.message : String(error)}`
