@@ -3,7 +3,7 @@ import getContextPrompt from '@core/consts/prompts/getContextPrompt'
 import { addNotification, addNotificationSession } from '@core/db/services'
 import { env } from '@core/env'
 import { createSystemTool } from '@core/fst/agents'
-import { extract, extractToStream } from '@core/fst/agents/superego'
+import { extract } from '@core/fst/agents/superego'
 import { pushPart, startStream, stopStream } from '@core/fst/agents/supervisor'
 import { getSystemTools } from '@core/utils'
 import { convertToModelMessages, createUIMessageStream, smoothStream, stepCountIs, streamText } from 'ai'
@@ -139,8 +139,6 @@ export default async (s: Index, message: Message) => {
 		originalMessages: [message],
 		generateId: getId,
 		execute: async ({ writer }) => {
-			extractToStream(s, writer)
-
 			let reasoning_start = 0
 			let reasoning_end = 0
 
@@ -171,7 +169,7 @@ export default async (s: Index, message: Message) => {
 							} as MessageMetadata
 
 							if (reasoning_end) {
-								target['reasoning_duration'] = reasoning_end - reasoning_start
+								target['reasoning_duration'] = reasoning_end - reasoning_start + 60
 							}
 
 							reasoning_start = 0
@@ -182,19 +180,14 @@ export default async (s: Index, message: Message) => {
 					}
 				})
 			)
+
+			extract(s, writer)
 		},
 		onFinish: async ({ responseMessage }) => {
 			if (responseMessage.parts.length) {
 				await s.appendMessage(responseMessage)
 
 				s.superego_append_count++
-			}
-
-			if (s.superego_append_count >= 3) {
-				s.superego_append_count = 0
-
-				console.log('---------extract')
-				extract(s)
 			}
 
 			stopStream(s.id)
