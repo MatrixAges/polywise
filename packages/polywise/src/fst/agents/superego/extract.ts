@@ -7,7 +7,7 @@ import type Session from '../../session'
 import type { SuperegoEvent } from './types'
 
 export default async (s: Session, writer: UIMessageStreamWriter) => {
-	if (s.superego_append_count < 2) return
+	if (s.superego_append_count < 1) return
 
 	console.log('-------------')
 	console.log('extract')

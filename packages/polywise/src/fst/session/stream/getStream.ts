@@ -181,7 +181,7 @@ export default async (s: Index, message: Message) => {
 				})
 			)
 
-			extract(s, writer)
+			await extract(s, writer)
 		},
 		onFinish: async ({ responseMessage }) => {
 			if (responseMessage.parts.length) {
