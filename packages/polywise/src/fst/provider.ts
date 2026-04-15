@@ -53,8 +53,7 @@ export const getModel = async <T extends ModelType = 'text'>(args: GetModelArgs<
 				}
 			case 'google_gemini': {
 				const { createGoogleGenerativeAI, google } = await import('@ai-sdk/google')
-				console.log('--------options----------')
-				console.log(options)
+
 				const target_google = createGoogleGenerativeAI(options)
 
 				if (type === 'embedding') {
