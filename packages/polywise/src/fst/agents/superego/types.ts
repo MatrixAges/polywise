@@ -8,7 +8,6 @@ export interface SuperegoAction {
 }
 
 export interface SuperegoEvent {
-	type: 'extracted' | 'skipped' | 'error'
-	actions: Array<{ tool: string; action: string; summary: string }>
+	result: string
 	timestamp: number
 }

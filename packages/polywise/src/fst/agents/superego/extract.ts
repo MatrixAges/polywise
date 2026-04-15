@@ -2,20 +2,15 @@ import { convertToModelMessages } from 'ai'
 
 import createSuperegoAgent from './agent'
 
-import type { UIMessageStreamWriter } from 'ai'
 import type Session from '../../session'
 import type { SuperegoEvent } from './types'
 
-export default async (s: Session, writer: UIMessageStreamWriter) => {
-	if (s.superego_append_count < 1) return
-
-	console.log('-------------')
-	console.log('extract')
+export default async (s: Session) => {
+	if (s.superego_append_count < 3) return
 
 	s.superego_append_count = 0
 
 	const scope = s.scope
-
 	const model_messages = await convertToModelMessages(s.model_messages)
 
 	const conversation = model_messages
@@ -33,26 +28,25 @@ export default async (s: Session, writer: UIMessageStreamWriter) => {
 			prompt: `Analyze the following conversation fragment and extract memories, knowledge, and skills as appropriate.\n\n---\n\n${conversation}`
 		})
 
-		console.log(result)
+		let parsed: { summary: string; actions: Array<{ tool: string; action: string; target: string }> }
 
-		if (result.toolCalls.length === 0) {
-			return
+		try {
+			parsed = JSON.parse(result.text)
+		} catch {
+			parsed = { summary: result.text || 'completed', actions: [] }
 		}
 
-		const actions = result.toolResults.map(tr => ({
-			tool: tr.toolName,
-			action: ((tr.input as Record<string, unknown>)?.action as string) || 'unknown',
-			summary: typeof tr.output === 'string' ? tr.output.slice(0, 200) : JSON.stringify(tr.output)
-		}))
-
-		writer.write({
-			type: 'data-superego_event',
-			data: { type: 'extracted', actions, timestamp: Date.now() } as SuperegoEvent
+		s.event.emit(`${s.id}/change`, {
+			type: 'superego',
+			data: { result: JSON.stringify(parsed), timestamp: Date.now() } as SuperegoEvent
 		})
 	} catch {
-		writer.write({
-			type: 'data-superego_event',
-			data: { type: 'error', actions: [], timestamp: Date.now() } as SuperegoEvent
+		s.event.emit(`${s.id}/change`, {
+			type: 'superego',
+			data: {
+				result: JSON.stringify({ summary: 'error', actions: [] }),
+				timestamp: Date.now()
+			} as SuperegoEvent
 		})
 	}
 }

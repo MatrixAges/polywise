@@ -1,6 +1,7 @@
 import type { Session } from '@core/db'
 import type { LanguageModelUsage, UIDataTypes, UIMessage, UITools } from 'ai'
 import type { EventEmitter } from 'events'
+import type { SuperegoEvent } from './agents/superego/types'
 import type { ContextInput } from './tools'
 
 export type Message = UIMessage<unknown, UIDataTypes, UITools> & { createdAt?: Date }
@@ -45,15 +46,20 @@ export interface SessionScope {
 	id: string | null
 }
 
-export type ChatEventRes = {
-	type: 'sync'
-	data: {
-		session: Session
-		messages: Array<Message>
-		context: Context
-		archived_at: null | number
-		has_older: boolean
-		has_newer: boolean
-		permission: Permission | null
-	}
-}
+export type ChatEventRes =
+	| {
+			type: 'sync'
+			data: {
+				session: Session
+				messages: Array<Message>
+				context: Context
+				archived_at: null | number
+				has_older: boolean
+				has_newer: boolean
+				permission: Permission | null
+			}
+	  }
+	| {
+			type: 'superego'
+			data: SuperegoEvent
+	  }
