@@ -9,10 +9,8 @@ export { default as ensureWithValue } from './ensureWithValue'
 export { default as clearObject } from './clearObject'
 export { default as connectSession } from './connectSession'
 export { default as getSystemTools } from './getSystemTools'
+export { default as grep } from './grep'
 
 export * from './middleware'
 export * from './session'
-// system 模块已移至 fst/utils/system
-export { createSystemSpec, getCommandRules, getSystemToolsPrompt } from '../fst/utils/system'
-export type { SystemCommandSpec, SystemSpec } from '../fst/utils/system/types'
 export * from './trpc'

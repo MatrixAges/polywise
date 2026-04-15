@@ -2,8 +2,9 @@ import path from 'path'
 import { app } from '@core/consts'
 import { tool } from 'ai'
 import fs from 'fs-extra'
-import LineByLine from 'n-readlines'
 import { array, enum as Enum, object, string, unknown } from 'zod'
+
+import { grep } from '../../utils/grep'
 
 type RecordEntry = {
 	input: unknown
@@ -43,26 +44,13 @@ export const createErrorCollectTool = () => {
 
 		if (!(await fs.pathExists(file_path))) return { action: 'search', tool_name, records: [], count: 0 }
 
-		const liner = new LineByLine(file_path)
+		const lines = await grep(file_path, keywords, { max_count: 3 })
 		const matched: Array<RecordEntry> = []
-		let line: Buffer | null
-		let total_errors = 0
 
-		while ((line = liner.next())) {
-			const line_str = line.toString()
-
+		for (const line_str of lines) {
 			try {
 				const record = JSON.parse(line_str) as RecordEntry
-				total_errors++
-
-				if (matched.length < 3) {
-					const content = JSON.stringify(record).toLowerCase()
-					const is_match = keywords.some(k => content.includes(k.toLowerCase()))
-
-					if (is_match) {
-						matched.push(record)
-					}
-				}
+				matched.push(record)
 			} catch {}
 		}
 

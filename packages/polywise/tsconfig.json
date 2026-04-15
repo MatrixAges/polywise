@@ -8,7 +8,6 @@
 		"declaration": true,
 		"emitDeclarationOnly": true,
 		"strict": true,
-		"rootDir": "./src",
 		"outDir": "dist",
 		"isolatedModules": true,
 		"esModuleInterop": true,
