@@ -8,8 +8,8 @@
 		"declaration": true,
 		"emitDeclarationOnly": true,
 		"strict": false,
+		"rootDir": "./src",
 		"outDir": "dist",
-		"baseUrl": ".",
 		"isolatedModules": true,
 		"esModuleInterop": true,
 		"importHelpers": true,
@@ -19,6 +19,7 @@
 		"paths": {
 			"@/*": ["./src/*"]
 		},
+		"types": ["node"],
 		"emitDecoratorMetadata": true,
 		"experimentalDecorators": true
 	},

@@ -6,13 +6,13 @@
 		"lib": ["ESNEXT"],
 		"moduleResolution": "Bundler",
 		"strict": true,
-		"baseUrl": "../",
+		"rootDir": "./src",
 		"esModuleInterop": true,
 		"isolatedModules": true,
 		"forceConsistentCasingInFileNames": true,
 		"paths": {
-			"@desktop/*": ["./desktop/src/*"],
-			"@app/*": ["./app/*"]
+			"@desktop/*": ["../desktop/src/*"],
+			"@app/*": ["../app/*"]
 		},
 		"emitDecoratorMetadata": true,
 		"experimentalDecorators": true
