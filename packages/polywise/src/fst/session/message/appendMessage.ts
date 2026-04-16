@@ -11,4 +11,10 @@ export default async (s: Index, v: Message) => {
 	}
 
 	await s.insertMessage(v)
+
+	if (s.archived_at !== null) {
+		s.archived_at = null
+
+		await s.setState()
+	}
 }

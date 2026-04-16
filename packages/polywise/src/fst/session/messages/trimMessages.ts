@@ -9,10 +9,4 @@ export default async (s: Index) => {
 	await trim(s, trimmed_messages, remaining_messages)
 
 	s.model_messages = remaining_messages
-
-	if (s.archived_at !== null) {
-		s.archived_at = null
-
-		await s.setState()
-	}
 }
