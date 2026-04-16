@@ -43,10 +43,14 @@ This document provides an overview of the packages/polywise module structure and
 					"role": "Folder"
 				},
 				"agents": {
-					"desc": "Internal decision agents for permission, audit, system operations, AI-generated session titles, and superego cognitive consolidation",
+					"desc": "Internal decision agents for permission, audit, system operations, AI-generated session titles, superego cognitive consolidation, and context-preserving message trimming",
 					"role": "Folder",
 					"superego": {
 						"desc": "Background cognitive observer (Superego Agent) that asynchronously extracts episodic memories, semantic knowledge, and procedural skills from conversation turns; triggered after 3 append messages or via superego_tool; has full CRUD access to memory_tool and wiki_tool with scope-aware article storage (scope_type: global|project|agent)",
+						"role": "Folder"
+					},
+					"trim": {
+						"desc": "Context-preserving trim agent that analyzes trimmed messages vs remaining messages and current context to determine if crucial information would be lost; outputs updated context fields if needed",
 						"role": "Folder"
 					}
 				},

@@ -3,7 +3,7 @@ import { array, enum as Enum, infer as Infer, object, record, string } from 'zod
 
 import type Session from '../session'
 
-const inputSchema = object({
+export const inputSchema = object({
 	intent: string().optional().describe('User intent or goal for the current conversation'),
 	context: string().max(3000).optional().describe('Core contextual information and current progress'),
 	tasks: array(

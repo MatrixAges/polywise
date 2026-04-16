@@ -1,5 +1,4 @@
 export * from './message'
-export * from './context'
 export * from './question'
 export * from './bash'
 export * from './glob'
@@ -14,3 +13,6 @@ export * from './memory'
 export * from './error_collect'
 export * from './wiki'
 export * from './plan'
+
+export { createContextTool } from './context'
+export type { ContextInput } from './context'
