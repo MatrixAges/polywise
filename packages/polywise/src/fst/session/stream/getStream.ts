@@ -13,11 +13,13 @@ import {
 	createBashTool,
 	createContextTool,
 	createCronTool,
+	createCustomToolSet,
 	createEditFileTool,
 	createErrorCollectTool,
 	createGlobTool,
 	createMemoryTool,
 	createMessageTool,
+	createMetaTool,
 	createPlanTool,
 	createQuestionTool,
 	createSearchFileTool,
@@ -26,6 +28,7 @@ import {
 	createWebFetchTool,
 	createWebSearchTool,
 	createWikiTool,
+	getCustomToolsPrompt,
 	updateTitle
 } from '../../tools'
 
@@ -81,13 +84,16 @@ export default async (s: Index, message: Message) => {
 
 	const bash_tool = await createBashTool(s)
 	const system_tools_prompt = await getSystemTools()
+	const custom_tools_prompt = getCustomToolsPrompt(s.custom_tools_map)
+	const custom_tools = createCustomToolSet(s)
 
 	const res = streamText({
 		model: s.model.model,
-		system: `${fst_system_prompt}\n\n${system_tools_prompt}\n\nCurrent Session Title: ${s.session.title}\n\n${getContextPrompt(s.context)}`,
+		system: `${fst_system_prompt}\n\n${system_tools_prompt}\n\n${custom_tools_prompt}\n\nCurrent Session Title: ${s.session.title}\n\n${getContextPrompt(s.context)}`,
 		messages,
 		tools: {
 			...s.model.tools,
+			...custom_tools,
 			context_tool: createContextTool(s),
 			message_tool: createMessageTool(s),
 			plan_tool: createPlanTool(s),
@@ -106,7 +112,8 @@ export default async (s: Index, message: Message) => {
 			web_search_tool: createWebSearchTool(),
 			web_fetch_tool: createWebFetchTool(),
 			cron_tool: createCronTool(s),
-			error_collect_tool: createErrorCollectTool()
+			error_collect_tool: createErrorCollectTool(),
+			meta_tool: createMetaTool(s)
 		},
 		abortSignal: s.abort_controller.signal,
 		providerOptions: s.model.provider_options,

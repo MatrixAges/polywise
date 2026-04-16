@@ -2,6 +2,7 @@ import events from 'events'
 import path from 'path'
 import { app } from '@core/consts'
 
+import { loadCustomToolsMap } from '../tools/meta'
 import { loadSkillMap } from '../tools/skill'
 import { getContext, setContext } from './context'
 import { appendMessage, insertMessage } from './message'
@@ -23,7 +24,16 @@ import { active, clearPlan, resetAbort, runing, stop, sync } from './utils'
 
 import type { Agent, Project, Session, SessionInsert } from '@core/db'
 import type { ModelResult } from '../provider'
-import type { Context, InitArgs, Message, Permission, Permissions, SessionScope, SkillMeta } from '../types'
+import type {
+	Context,
+	CustomToolMeta,
+	InitArgs,
+	Message,
+	Permission,
+	Permissions,
+	SessionScope,
+	SkillMeta
+} from '../types'
 
 export default class Index {
 	id = ''
@@ -42,6 +52,7 @@ export default class Index {
 	permissions = [] as Permissions
 
 	skill_map = [] as Array<SkillMeta>
+	custom_tools_map = [] as Array<CustomToolMeta>
 
 	ui_messages = [] as Array<Message>
 	ui_has_older = false
@@ -92,6 +103,10 @@ export default class Index {
 		return path.resolve(app.app_path, 'skills')
 	}
 
+	get tools_dir() {
+		return path.resolve(app.app_path, 'tools')
+	}
+
 	async init(args: InitArgs) {
 		const { id, event, is_cron, title } = args
 
@@ -103,6 +118,7 @@ export default class Index {
 		this.cwd = this.project?.dir || this.files_dir
 
 		await this.loadSkillMap()
+		await this.loadCustomToolsMap()
 
 		return this.getData()
 	}
@@ -138,6 +154,7 @@ export default class Index {
 	setState = () => setState(this)
 
 	loadSkillMap = () => loadSkillMap(this)
+	loadCustomToolsMap = () => loadCustomToolsMap(this)
 
 	getStream = (message: Message) => getStream(this, message)
 	abortStream = () => abortStream(this)

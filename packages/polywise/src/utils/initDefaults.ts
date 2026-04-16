@@ -35,9 +35,11 @@ export default async () => {
 	}
 
 	const skills_dir = path.resolve(app.app_path, 'skills')
+	const tools_dir = path.resolve(app.app_path, 'tools')
 	const cron_logs_dir = path.resolve(app.app_path, '.logs/cron')
 
 	await fs.ensureDir(skills_dir)
+	await fs.ensureDir(tools_dir)
 	await fs.ensureDir(cron_logs_dir)
 
 	await ensureWithValue(cron_path, {

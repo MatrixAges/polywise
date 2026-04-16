@@ -41,6 +41,14 @@ export interface SkillMeta {
 	dir: string
 }
 
+export interface CustomToolMeta {
+	name: string
+	description: string
+	path: string
+	dir: string
+	readme_path: string
+}
+
 export interface SessionScope {
 	type: 'global' | 'project' | 'agent'
 	id: string | null
