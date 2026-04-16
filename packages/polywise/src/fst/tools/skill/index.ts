@@ -10,6 +10,7 @@ import search from './search'
 import type Session from '../../session'
 
 export { default as loadSkillMap } from './load'
+export { default as getSkillPrompt } from './getPrompt'
 export { default as readSkillMap } from './read'
 export { default as rebuildSkillMap } from './rebuild'
 export { default as scanSkillMap } from './scan'

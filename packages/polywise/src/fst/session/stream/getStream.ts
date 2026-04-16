@@ -29,6 +29,7 @@ import {
 	createWebSearchTool,
 	createWikiTool,
 	getCustomToolsPrompt,
+	getSkillPrompt,
 	updateTitle
 } from '../../tools'
 
@@ -85,11 +86,12 @@ export default async (s: Index, message: Message) => {
 	const bash_tool = await createBashTool(s)
 	const system_tools_prompt = await getSystemTools()
 	const custom_tools_prompt = getCustomToolsPrompt(s.custom_tools_map)
+	const skill_prompt = getSkillPrompt(s.skill_map)
 	const custom_tools = createCustomToolSet(s)
 
 	const res = streamText({
 		model: s.model.model,
-		system: `${fst_system_prompt}\n\n${system_tools_prompt}\n\n${custom_tools_prompt}\n\nCurrent Session Title: ${s.session.title}\n\n${getContextPrompt(s.context)}`,
+		system: `${fst_system_prompt}\n\n${system_tools_prompt}\n\n${custom_tools_prompt}\n\n${skill_prompt}\n\nCurrent Session Title: ${s.session.title}\n\n${getContextPrompt(s.context)}`,
 		messages,
 		tools: {
 			...s.model.tools,

@@ -60,7 +60,7 @@ This document provides an overview of the packages/polywise module structure and
 					"getBashTools": "Sandbox-backed bash tool builder with command risk matching, audit review, and child_process proxy execution for flagged commands"
 				},
 				"tools": {
-					"desc": "Bash sandboxing tools via bash-tool, local skill search/read/rebuild tooling, global custom tool routing and lazy-loading via meta_tool, session-scoped plan management, session jsonl message search, and read-only memory/wiki search tools with superego trigger",
+					"desc": "Bash sandboxing tools via bash-tool, local skill search/read/rebuild tooling plus Available Skills system-prompt summary injection, global custom tool routing and lazy-loading via meta_tool, session-scoped plan management, session jsonl message search, and read-only memory/wiki search tools with superego trigger",
 					"role": "Folder",
 					"cron.ts": "Create/list/read/update/remove cron jobs backed by app.app_path/cron.json with incremental runtime reload and physical directory removal",
 					"meta": "Manage global app.app_path/tools custom tools, rebuild custom_tools_map metadata, expose fuzzy search/read/execute/create/remove actions, and lazily wrap per-tool index.mjs modules as directly callable AI tools",
