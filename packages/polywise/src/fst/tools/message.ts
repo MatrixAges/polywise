@@ -1,9 +1,14 @@
+import path from 'path'
 import { message } from '@core/db/schema'
 import { getMessages, getMessagesCount } from '@core/db/services'
+import { grep } from '@core/utils'
 import { convertToModelMessages, tool } from 'ai'
+import dayjs from 'dayjs'
 import { and, asc, eq, lt } from 'drizzle-orm'
-import { enum as Enum, number, object, optional } from 'zod'
+import fs from 'fs-extra'
+import { enum as Enum, number, object, optional, string, tuple } from 'zod'
 
+import type Session from '../session'
 import type { Message } from '../types'
 
 const parseMessage = (item: typeof message.$inferSelect) => {
@@ -15,19 +20,58 @@ const parseMessage = (item: typeof message.$inferSelect) => {
 }
 
 const inputSchema = object({
-	action: Enum(['get_total_count', 'get_context_messages_count', 'get_prev_messages']).describe(
-		'The action to perform. get_total_count: total session messages. get_context_messages_count: messages in current context. get_prev_messages: read history.'
+	action: Enum(['get_total_count', 'get_context_messages_count', 'get_prev_messages', 'search']).describe(
+		'The action to perform. get_total_count: total session messages. get_context_messages_count: messages in current context. get_prev_messages: read history. search: search session jsonl logs.'
 	),
 	args: optional(
 		object({
-			count: number().int().min(1).describe('Number of messages to read'),
-			before: number().int().min(0).describe('Skip N messages before current context'),
-			offset: number().int().min(1).describe('Read from absolute position -N')
-		}).describe('Parameters for get_prev_messages action')
-	).describe('Action-specific arguments, only used when action is get_prev_messages')
+			count: number()
+				.int()
+				.min(1)
+				.optional()
+				.describe('[required for get_prev_messages] Number of messages to read'),
+			before: number()
+				.int()
+				.min(0)
+				.optional()
+				.describe('[required for get_prev_messages] Skip N messages before current context'),
+			offset: number()
+				.int()
+				.min(1)
+				.optional()
+				.describe('[required for get_prev_messages] Read from absolute position -N'),
+			keywords: string().min(1).optional().describe('[required for search] Keywords used by search action'),
+			range: tuple([string(), string()])
+				.optional()
+				.describe(
+					'[required for search][optional] Date range for search action, format: [YYYY-MM-DD, YYYY-MM-DD]'
+				)
+		}).describe('[required for get_prev_messages, search] Action-specific arguments')
+	).describe('[required for get_prev_messages, search] Action-specific arguments')
 })
 
-export const createMessageTool = (id: string, model_messages: Array<Message>) => {
+const getSearchFiles = (session: Session, range?: [string, string]) => {
+	const messages_dir = path.resolve(session.session_dir, 'messages')
+
+	if (!range) {
+		return [path.resolve(messages_dir, `${dayjs().format('YYYY-MM-DD')}.jsonl`)]
+	}
+
+	const [start_date, end_date] = range
+	const result = [] as Array<string>
+	let current_day = dayjs(start_date)
+	const last_day = dayjs(end_date)
+
+	while (current_day.isBefore(last_day) || current_day.isSame(last_day, 'day')) {
+		result.push(path.resolve(messages_dir, `${current_day.format('YYYY-MM-DD')}.jsonl`))
+		current_day = current_day.add(1, 'day')
+	}
+
+	return result
+}
+
+export const createMessageTool = (session: Session) => {
+	const { id, model_messages } = session
 	const baseline = model_messages[0]?.createdAt
 	const model_count = model_messages.length
 
@@ -113,9 +157,47 @@ export const createMessageTool = (id: string, model_messages: Array<Message>) =>
 		}
 	}
 
+	const searchMessages = async (args?: { keywords?: string; range?: [string, string] }) => {
+		const keywords = args?.keywords
+
+		if (!keywords) {
+			return {
+				action: 'search' as const,
+				error: 'keywords is required for search action',
+				data: []
+			}
+		}
+
+		const target_files = getSearchFiles(session, args?.range)
+		const existing_files = [] as Array<string>
+
+		for (const file_path of target_files) {
+			if (await fs.pathExists(file_path)) {
+				existing_files.push(file_path)
+			}
+		}
+
+		if (!existing_files.length) {
+			return {
+				action: 'search' as const,
+				data: []
+			}
+		}
+
+		const matched_lines = await grep(existing_files, keywords, {
+			with_filename: true,
+			with_line_number: true
+		})
+
+		return {
+			action: 'search' as const,
+			data: matched_lines
+		}
+	}
+
 	return tool({
 		description:
-			'Read conversation history. Use get_total_count to check total messages, get_current_messages_count to check your context window size, get_prev_messages to read history.',
+			'Read conversation history. Use get_total_count to check total messages, get_current_messages_count to check your context window size, get_prev_messages to read history, and search to query session jsonl logs.',
 		inputSchema,
 		execute: async input => {
 			const { action } = input
@@ -127,6 +209,8 @@ export const createMessageTool = (id: string, model_messages: Array<Message>) =>
 					return getContextMessagesCount()
 				case 'get_prev_messages':
 					return getPrevMessages(input.args)
+				case 'search':
+					return searchMessages(input.args)
 			}
 		}
 	})

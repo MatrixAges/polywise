@@ -89,7 +89,7 @@ export default async (s: Index, message: Message) => {
 		tools: {
 			...s.model.tools,
 			context_tool: createContextTool(s),
-			message_tool: createMessageTool(s.id, s.model_messages),
+			message_tool: createMessageTool(s),
 			plan_tool: createPlanTool(s),
 			question_tool: createQuestionTool(s.id),
 			glob_tool: createGlobTool(s),
