@@ -6,7 +6,7 @@ import { convertToModelMessages, tool } from 'ai'
 import dayjs from 'dayjs'
 import { and, asc, eq, lt } from 'drizzle-orm'
 import fs from 'fs-extra'
-import { enum as Enum, number, object, optional, string, tuple } from 'zod'
+import { enum as Enum, number, object, optional, string } from 'zod'
 
 import type Session from '../session'
 import type { Message } from '../types'
@@ -41,23 +41,24 @@ const inputSchema = object({
 				.optional()
 				.describe('[required for get_prev_messages] Read from absolute position -N'),
 			keywords: string().min(1).optional().describe('[required for search] Keywords used by search action'),
-			range: tuple([string(), string()])
+			range: object({
+				start_date: string().describe('Start date in YYYY-MM-DD format'),
+				end_date: string().describe('End date in YYYY-MM-DD format')
+			})
 				.optional()
-				.describe(
-					'[required for search][optional] Date range for search action, format: [YYYY-MM-DD, YYYY-MM-DD]'
-				)
+				.describe('[required for search][optional] Date range for search action')
 		}).describe('[required for get_prev_messages, search] Action-specific arguments')
 	).describe('[required for get_prev_messages, search] Action-specific arguments')
 })
 
-const getSearchFiles = (session: Session, range?: [string, string]) => {
+const getSearchFiles = (session: Session, range?: { start_date: string; end_date: string }) => {
 	const messages_dir = path.resolve(session.session_dir, 'messages')
 
 	if (!range) {
 		return [path.resolve(messages_dir, `${dayjs().format('YYYY-MM-DD')}.jsonl`)]
 	}
 
-	const [start_date, end_date] = range
+	const { start_date, end_date } = range
 	const result = [] as Array<string>
 	let current_day = dayjs(start_date)
 	const last_day = dayjs(end_date)
@@ -157,7 +158,7 @@ export const createMessageTool = (session: Session) => {
 		}
 	}
 
-	const searchMessages = async (args?: { keywords?: string; range?: [string, string] }) => {
+	const searchMessages = async (args?: { keywords?: string; range?: { start_date: string; end_date: string } }) => {
 		const keywords = args?.keywords
 
 		if (!keywords) {

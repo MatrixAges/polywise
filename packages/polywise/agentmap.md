@@ -66,6 +66,7 @@ This document provides an overview of the packages/polywise module structure and
 					"meta": "Manage global custom tool routing, rebuild custom_tools_map metadata, expose fuzzy search/read/execute/create/remove actions, and lazily execute per-tool index.mjs modules only through meta_tool bridge",
 					"title.ts": "Internal tool that generates and updates session titles while protecting manually edited titles",
 					"memory.ts": "Read-only memory search tool for main agent; search episodic memories by query with scope filtering",
+					"message.ts": "Conversation history tool supporting total count, context count, previous message reads, and jsonl search with object-based date range schema for Gemini-compatible tool calling",
 					"plan.ts": "Manage session_dir/plan.md with save/get/clear actions; stores concise plan metadata, task breakdowns, mermaid execution flow, and delivery criteria",
 					"wiki.ts": "Read-only wiki knowledge search tool for main agent; search semantic knowledge by query",
 					"superego.ts": "Trigger tool that invokes superego agent to extract and persist information from conversation; only way for main agent to write to memory/wiki",
