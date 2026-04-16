@@ -29,8 +29,8 @@ This file defines code style and module fractal structure constraints within the
 		"Same Code 1": "packages/polywise/src/models/NodeModel.ts"
 	},
 	"FST Agent (Internal Decision Agents)": {
-		"description": "Internal agents used by the FST system for decision-making, observation, and consolidation. Each agent is a ToolLoopAgent with its own tools and system prompt.",
-		"fractal_rule": "Each agent lives in its own directory under `fst/agents/<name>/`. Structure: agent.ts (ToolLoopAgent creation), getPrompt.ts (system prompt builder), index.ts (barrel export). Complex agents may include additional files for tool creation (e.g., memory_tool.ts, wiki_tool.ts) and orchestration (e.g., process.ts).",
+		"description": "Internal agents used by the FST system for decision-making, observation, and consolidation. Each agent is a ToolLoopAgent with its own tools and system prompt. Prompt builders (getXPrompt) are centralized in consts/prompts/ as pure functions; agent dirs retain Session-aware data preprocessing logic at call sites.",
+		"fractal_rule": "Each agent lives in its own directory under `fst/agents/<name>/`. Structure: agent.ts (ToolLoopAgent creation), index.ts (barrel export). Complex agents may include additional files for tool creation (e.g., memory_tool.ts, wiki_tool.ts) and orchestration (e.g., process.ts). getPrompt.ts files have been migrated to consts/prompts/ as getXPrompt.ts (pure functions); call sites inline the Session data extraction.",
 		"export_style": "agent.ts must default export a factory function: `export default (model, session, ...args) => ToolLoopAgent`. index.ts re-exports with named exports.",
 		"naming_rules": "Agent directories use snake_case. Tool files use snake_case suffix (e.g., memory_tool.ts). Internal functions use camelCase.",
 		"Same Code 1": "packages/polywise/src/fst/agents/superego/agent.ts",

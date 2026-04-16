@@ -13,7 +13,7 @@ import search from './search'
 import type Session from '../../session'
 
 export { default as createCustomToolSet } from './createCustomToolSet'
-export { default as getCustomToolsPrompt } from './getPrompt'
+export { default as getCustomToolsPrompt } from '@core/consts/prompts/getCustomToolsPrompt'
 export { default as loadCustomToolsMap } from './load'
 export { default as readCustomToolsMap } from './read'
 export { default as rebuildCustomToolsMap } from './rebuild'

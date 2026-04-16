@@ -1,4 +1,4 @@
-import type { SkillMeta } from '../../types'
+import type { SkillMeta } from '@core/fst/types'
 
 export default (skill_map: Array<SkillMeta>) => {
 	if (skill_map.length === 0) {

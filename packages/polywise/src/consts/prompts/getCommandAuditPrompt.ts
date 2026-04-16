@@ -1,4 +1,4 @@
-import type { SystemCommandSpec } from '../system/types'
+import type { SystemCommandSpec } from '@core/fst/utils/system/types'
 
 interface Args {
 	command: string

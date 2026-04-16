@@ -1,4 +1,4 @@
-import type { CustomToolMeta } from '../../types'
+import type { CustomToolMeta } from '@core/fst/types'
 
 export default (custom_tools_map: Array<CustomToolMeta>) => {
 	if (custom_tools_map.length === 0) {

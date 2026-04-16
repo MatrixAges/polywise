@@ -155,7 +155,22 @@ This document provides an overview of the packages/polywise module structure and
 			"consts": {
 				"app.ts": { "desc": "Application constants", "role": "Constant" },
 				"mem.ts": { "desc": "Memory system constants", "role": "Constant" },
-				"pipeline.ts": { "desc": "Pipeline constants", "role": "Constant" }
+				"pipeline.ts": { "desc": "Pipeline constants", "role": "Constant" },
+				"prompts": {
+					"desc": "Centralized prompt builders for FST agents, tools, and system. All getXPrompt functions are pure functions receiving preprocessed plain data (no Session dependency).",
+					"role": "Folder",
+					"getAuditPrompt.ts": "Core audit/permission evaluation prompt template (tool, action, path, context)",
+					"getChaosPrompt.ts": "Chaos detection prompt from recent assistant outputs",
+					"getContextPrompt.ts": "Context state management system prompt with usage rules",
+					"getSkillPrompt.ts": "Available Skills system prompt summary from SkillMeta array",
+					"getCustomToolsPrompt.ts": "Available Custom Tools system prompt summary from CustomToolMeta array",
+					"getTrimPrompt.ts": "Context-preserving trim analysis prompt from trimmed/remaining messages",
+					"getTitlePrompt.ts": "Session title generation prompt from recent messages and focus",
+					"getPermissionPrompt.ts": "Permission evaluation prompt wrapper around getAuditPrompt",
+					"getAuditSessionPrompt.ts": "Cron content audit prompt wrapper around getAuditPrompt",
+					"getCommandAuditPrompt.ts": "Command security review prompt from SystemCommandSpec",
+					"getSystemToolsPrompt.ts": "System capabilities prompt from SystemSpec"
+				}
 			},
 			"utils": {
 				"trpc.ts": { "desc": "tRPC initialization and procedure/router exports", "role": "Utility" },

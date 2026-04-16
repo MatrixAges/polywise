@@ -1,4 +1,4 @@
-import type { SystemSpec } from './types'
+import type { SystemSpec } from '@core/fst/utils/system/types'
 
 export default (system_spec: SystemSpec) => {
 	const command_lines = system_spec.commands.length
