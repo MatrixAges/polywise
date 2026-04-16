@@ -60,10 +60,10 @@ This document provides an overview of the packages/polywise module structure and
 					"getBashTools": "Sandbox-backed bash tool builder with command risk matching, audit review, and child_process proxy execution for flagged commands"
 				},
 				"tools": {
-					"desc": "Bash sandboxing tools via bash-tool, local skill search/read/rebuild tooling plus Available Skills system-prompt summary injection, global custom tool routing and lazy-loading via meta_tool, session-scoped plan management, session jsonl message search, and read-only memory/wiki search tools with superego trigger",
+					"desc": "Bash sandboxing tools via bash-tool, local skill search/read/rebuild tooling plus Available Skills system-prompt summary injection, global custom tool routing and lazy-loading via meta_tool as the only bridge for custom tool execution, session-scoped plan management, session jsonl message search, and read-only memory/wiki search tools with superego trigger",
 					"role": "Folder",
 					"cron.ts": "Create/list/read/update/remove cron jobs backed by app.app_path/cron.json with incremental runtime reload and physical directory removal",
-					"meta": "Manage global app.app_path/tools custom tools, rebuild custom_tools_map metadata, expose fuzzy search/read/execute/create/remove actions, and lazily wrap per-tool index.mjs modules as directly callable AI tools",
+					"meta": "Manage global custom tool routing, rebuild custom_tools_map metadata, expose fuzzy search/read/execute/create/remove actions, and lazily execute per-tool index.mjs modules only through meta_tool bridge",
 					"title.ts": "Internal tool that generates and updates session titles while protecting manually edited titles",
 					"memory.ts": "Read-only memory search tool for main agent; search episodic memories by query with scope filtering",
 					"plan.ts": "Manage session_dir/plan.md with save/get/clear actions; stores concise plan metadata, task breakdowns, mermaid execution flow, and delivery criteria",

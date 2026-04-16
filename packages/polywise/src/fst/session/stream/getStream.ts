@@ -13,7 +13,6 @@ import {
 	createBashTool,
 	createContextTool,
 	createCronTool,
-	createCustomToolSet,
 	createEditFileTool,
 	createErrorCollectTool,
 	createGlobTool,
@@ -87,7 +86,6 @@ export default async (s: Index, message: Message) => {
 	const system_tools_prompt = await getSystemTools()
 	const custom_tools_prompt = getCustomToolsPrompt(s.custom_tools_map)
 	const skill_prompt = getSkillPrompt(s.skill_map)
-	const custom_tools = createCustomToolSet(s)
 
 	const res = streamText({
 		model: s.model.model,
@@ -95,7 +93,6 @@ export default async (s: Index, message: Message) => {
 		messages,
 		tools: {
 			...s.model.tools,
-			...custom_tools,
 			context_tool: createContextTool(s),
 			message_tool: createMessageTool(s),
 			plan_tool: createPlanTool(s),

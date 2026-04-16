@@ -82,11 +82,11 @@ const getDefaultEntry = () => {
 export const createMetaTool = (s: Session) => {
 	return tool({
 		description: [
-			'Manage custom tools stored in app.app_path/tools.',
+			'Custom tools are not exposed as direct callable tools in the main tool registry.',
 			'Use search to fuzzy-match available custom tools by keyword.',
-			'Use read to inspect a custom tool readme and metadata before deciding whether to call it directly.',
-			'Use execute to route through meta_tool and run a specific custom tool by name when direct invocation is not appropriate.',
-			'Use create/remove/build to maintain the custom_tools_map routing layer for lazily loaded custom tools.'
+			'Use read to inspect a custom tool readme and metadata before execution.',
+			'Use execute to route through meta_tool and run a specific custom tool by name.',
+			'Use create, remove, and build to maintain the custom_tools_map routing layer for lazily loaded custom tools.'
 		].join('\n'),
 		inputSchema,
 		execute: async input => {
