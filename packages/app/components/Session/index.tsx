@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useMemoizedFn } from 'ahooks'
 import { observer } from 'mobx-react-lite'
 import { container } from 'tsyringe'
@@ -6,7 +6,7 @@ import { container } from 'tsyringe'
 import { Drawer } from '@/components'
 import { useAliveEffect } from '@/hooks'
 
-import { Context, Input, Message, Permission } from './components'
+import { Context, Input, LoadingDots, Message, Permission } from './components'
 import Model from './model'
 
 import type { IPropsInput } from './types'
@@ -20,6 +20,7 @@ const Index = (props: IProps) => {
 	const [x] = useState(() => container.resolve(Model))
 
 	const streaming = x.status === 'streaming' || x.status === 'submitted'
+	const last_message = x.messages.at(-1)
 
 	const { ref, setRef } = useAliveEffect({
 		init: () => x.init(id),
@@ -42,7 +43,7 @@ const Index = (props: IProps) => {
 		toggleContextModal
 	}
 
-	console.log(x.messages)
+	const show_loading = useMemo(() => streaming && last_message?.role === 'user', [streaming, last_message])
 
 	return (
 		<div
@@ -83,6 +84,7 @@ const Index = (props: IProps) => {
 							key={message.id}
 						></Message>
 					))}
+					{show_loading && <LoadingDots></LoadingDots>}
 				</div>
 				{x.permission && (
 					<Permission
