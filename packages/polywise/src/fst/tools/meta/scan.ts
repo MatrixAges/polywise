@@ -32,10 +32,7 @@ export default async (dir: string) => {
 			if (meta) {
 				map.push({
 					name: meta.name,
-					description: meta.description,
-					path: tool_path,
-					dir: target_dir,
-					readme_path
+					description: meta.description
 				})
 
 				continue
@@ -43,10 +40,7 @@ export default async (dir: string) => {
 
 			map.push({
 				name: entry.name,
-				description: extractHeadings(content),
-				path: tool_path,
-				dir: target_dir,
-				readme_path
+				description: extractHeadings(content)
 			})
 		} catch {
 			continue

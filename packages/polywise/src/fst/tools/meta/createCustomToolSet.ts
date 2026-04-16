@@ -1,3 +1,4 @@
+import path from 'path'
 import { tool } from 'ai'
 import { z } from 'zod'
 
@@ -27,7 +28,7 @@ export default (s: Session) => {
 			tool({
 				description: custom_tool.description,
 				inputSchema: z.record(z.string(), z.unknown()),
-				execute: createExecute(s, custom_tool.path)
+				execute: createExecute(s, path.resolve(s.tools_dir, custom_tool.name, 'index.mjs'))
 			})
 		])
 	)

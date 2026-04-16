@@ -63,7 +63,7 @@ This document provides an overview of the packages/polywise module structure and
 					"desc": "Bash sandboxing tools via bash-tool, local skill search/read/rebuild tooling plus Available Skills system-prompt summary injection, global custom tool routing and lazy-loading via meta_tool as the only bridge for custom tool execution, session-scoped plan management, session jsonl message search, and read-only memory/wiki search tools with superego trigger",
 					"role": "Folder",
 					"cron.ts": "Create/list/read/update/remove cron jobs backed by app.app_path/cron.json with incremental runtime reload and physical directory removal",
-					"meta": "Manage global custom tool routing, rebuild custom_tools_map metadata, expose fuzzy search/read/execute/create/remove actions, and lazily execute per-tool index.mjs modules only through meta_tool bridge",
+					"meta": "Manage global custom tool routing, rebuild minimal custom_tools_map metadata (name + description only), resolve per-tool readme.md and index.mjs paths from tools_dir + name at runtime, expose fuzzy search/read/execute/create/remove actions, and lazily execute per-tool index.mjs modules only through meta_tool bridge",
 					"title.ts": "Internal tool that generates and updates session titles while protecting manually edited titles",
 					"memory.ts": "Read-only memory search tool for main agent; search episodic memories by query with scope filtering",
 					"message.ts": "Conversation history tool supporting total count, context count, previous message reads, and jsonl search with object-based date range schema for Gemini-compatible tool calling",

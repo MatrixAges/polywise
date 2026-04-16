@@ -44,9 +44,6 @@ export interface SkillMeta {
 export interface CustomToolMeta {
 	name: string
 	description: string
-	path: string
-	dir: string
-	readme_path: string
 }
 
 export interface SessionScope {

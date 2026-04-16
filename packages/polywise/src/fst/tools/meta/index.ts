@@ -79,6 +79,14 @@ const getDefaultEntry = () => {
 	].join('\n')
 }
 
+const getToolPath = (tools_dir: string, tool_name: string) => {
+	return path.resolve(getToolDir(tools_dir, tool_name), 'index.mjs')
+}
+
+const getToolReadmePath = (tools_dir: string, tool_name: string) => {
+	return path.resolve(getToolDir(tools_dir, tool_name), 'readme.md')
+}
+
 export const createMetaTool = (s: Session) => {
 	return tool({
 		description: [
@@ -126,8 +134,6 @@ export const createMetaTool = (s: Session) => {
 				return {
 					action: 'create',
 					tool_name: input.tool_name,
-					path: tool_path,
-					readme_path,
 					count: custom_tools_map.length
 				}
 			}
@@ -171,9 +177,7 @@ export const createMetaTool = (s: Session) => {
 					count: custom_tools_map.length,
 					tools: custom_tools_map.map(custom_tool => ({
 						name: custom_tool.name,
-						description: custom_tool.description,
-						path: custom_tool.path,
-						readme_path: custom_tool.readme_path
+						description: custom_tool.description
 					}))
 				}
 			}
@@ -192,14 +196,13 @@ export const createMetaTool = (s: Session) => {
 					}
 				}
 
-				const readme = await readFile(target.readme_path, 'utf8')
+				const readme_path = getToolReadmePath(s.tools_dir, target.name)
+				const readme = await readFile(readme_path, 'utf8')
 
 				return {
 					action: 'read',
 					tool_name: target.name,
 					description: target.description,
-					path: target.path,
-					readme_path: target.readme_path,
 					readme
 				}
 			}
@@ -220,8 +223,6 @@ export const createMetaTool = (s: Session) => {
 					results: results.map(custom_tool => ({
 						name: custom_tool.name,
 						description: custom_tool.description,
-						path: custom_tool.path,
-						readme_path: custom_tool.readme_path,
 						score: custom_tool.score
 					}))
 				}
@@ -244,13 +245,13 @@ export const createMetaTool = (s: Session) => {
 
 				try {
 					const execute_input = parseExecuteInput(input.execute_input)
-					const result = await executeCustomTool(target.path, execute_input, s)
+					const tool_path = getToolPath(s.tools_dir, target.name)
+					const result = await executeCustomTool(tool_path, execute_input, s)
 
 					return {
 						action: 'execute',
 						tool_name: target.name,
 						description: target.description,
-						path: target.path,
 						input: execute_input,
 						result
 					}
