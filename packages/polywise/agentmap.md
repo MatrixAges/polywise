@@ -88,6 +88,34 @@ This document provides an overview of the packages/polywise module structure and
 				"mcp": { "desc": "MCP client tools integration", "role": "Folder" },
 				"acp": { "desc": "ACP provider integration", "role": "Folder" }
 			},
+			"rpc": {
+				"desc": "tRPC router tree for API/state mutations and subscriptions, including session lifecycle, file persistence, provider/model runtime, and content operations; session router now includes dedicated single-file endpoints for create/remove/rename/pin and session-group management with pin.json + session_group.json persistence under app.app_path",
+				"role": "Folder",
+				"index.ts": { "desc": "RPC routers aggregation and type export", "role": "Index" },
+				"save.ts": { "desc": "Save content to memory", "role": "RPC" },
+				"search.ts": { "desc": "Search with keywords/vector/rrf/rerank pipeline", "role": "RPC" },
+				"setActive.ts": { "desc": "Set active workspace/session state", "role": "RPC" },
+				"remove.ts": { "desc": "Remove content by id", "role": "RPC" },
+				"update.ts": { "desc": "Update content by id", "role": "RPC" },
+				"heartbeat.ts": { "desc": "Heartbeat subscription endpoint", "role": "RPC" },
+				"test.ts": { "desc": "Test RPC procedure", "role": "RPC" },
+				"file": {
+					"desc": "File JSON write/watch RPC endpoints backed by app.app_path",
+					"role": "Folder"
+				},
+				"provider": {
+					"desc": "Provider-related RPC endpoints",
+					"role": "Folder"
+				},
+				"llama": {
+					"desc": "Model download/progress/status RPC endpoints",
+					"role": "Folder"
+				},
+				"session": {
+					"desc": "Session subscriptions and management RPCs. Existing event bridge endpoints remain in events.ts; create/remove/rename/pin and group CRUD/sort/move are split into dedicated single-file procedures. A session/utils subtree now holds single-file storage helpers, normalization helpers, path constants, and shared SessionGroupItem typing for pin.json and session_group.json persistence under app.app_path; rename persists human title intent into context.json so title_tool no longer overrides manually renamed sessions.",
+					"role": "Folder"
+				}
+			},
 			"rpcs": {
 				"index.ts": { "desc": "RPC routers aggregation and type export", "role": "Index" },
 				"save.ts": { "desc": "Save content to memory", "role": "RPC" },
@@ -187,6 +215,14 @@ This document provides an overview of the packages/polywise module structure and
 			},
 			"utils": {
 				"trpc.ts": { "desc": "tRPC initialization and procedure/router exports", "role": "Utility" },
+				"arrayMove.ts": {
+					"desc": "Generic array reorder utility returning a moved-copy list",
+					"role": "Utility"
+				},
+				"ensureArray.ts": {
+					"desc": "Generic unknown-to-array normalization helper",
+					"role": "Utility"
+				},
 				"getModel.ts": { "desc": "Model path retrieval utility", "role": "Utility" },
 				"getSystemTools.ts": {
 					"desc": "Runtime OS and CLI capability prompt generator backed by in-memory command metadata",

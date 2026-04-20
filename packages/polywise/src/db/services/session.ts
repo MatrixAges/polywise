@@ -21,10 +21,42 @@ export const getSession = async (where: SQL) => {
 		.then(res => res[0])
 }
 
+interface ArgsGetSessions {
+	where?: SQL
+	orderBy?: SQL | Array<SQL>
+	limit?: number
+}
+
+export const getSessions = async (args: ArgsGetSessions = {}) => {
+	const { where, orderBy, limit } = args
+
+	let query = env.db.select().from(session).$dynamic()
+
+	if (where) query = query.where(where)
+
+	if (orderBy) {
+		const order_args = Array.isArray(orderBy) ? orderBy : [orderBy]
+
+		query = query.orderBy(...order_args)
+	}
+
+	if (limit) query = query.limit(limit)
+
+	return query
+}
+
 export const setSession = async (where: SQL, values: Partial<SessionInsert>) => {
 	return env.db
 		.update(session)
 		.set(values)
+		.where(where)
+		.returning()
+		.then(res => res[0])
+}
+
+export const removeSession = async (where: SQL) => {
+	return env.db
+		.delete(session)
 		.where(where)
 		.returning()
 		.then(res => res[0])
