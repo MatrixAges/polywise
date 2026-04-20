@@ -40,6 +40,11 @@ For development targeting different tech stacks and code modules, please strictl
 - **Dependency Injection**: All external dependencies of classes must be injected through constructors and `tsyringe`. It is strictly prohibited to have forced instantiation patterns like `new ClassName()` in business code.
 - **File Splitting**: When a single component file exceeds 80 lines, a `components/` folder must be created in the same-level directory, and the internal block components must be split into it with short, prefix-free names.
 - **Function Order**: Inside a Class, the physical order must strictly be `constructor` -> `init` -> `public methods` -> `private methods` -> `helper functions` -> `off`, and empty functions with no content are strictly prohibited.
+- **Frontend Sample Learning**: Before writing or refactoring frontend pages/components, you must first read and learn a nearby mature sample in the same package and follow its import order, hooks placement, props organization, render segmentation, and export wrapping style. For session-related frontend code in `packages/app`, default sample is `packages/app/components/Session/index.tsx`.
+- **Frontend State Ownership**: Page-level data loading, pagination, scroll handling, selection switching, and other data-affecting event functions must be defined in the page `model`, not scattered across presentational components.
+- **Frontend Props Assembly**: When passing multiple props to a component, especially when functions are included, you must first assemble them into a typed object such as `const props_menu: IPropsMenu = { ... }`, then render with `<Menu {...props_menu} />`.
+- **Frontend Split Restraint**: Component splitting must stay minimal and cohesive. If a composite UI only contains a small number of stable sections, prefer one entry component plus a few section components in the same folder. Do not split simple list items or buttons into separate files unless they have independent state, reuse value, or clearly complex structure.
+- **Function Naming Priority**: All functions, methods, and event handlers must use `camelCase`. Snake case is allowed for ordinary variables, but never for function names such as `on_scroll` or `set_selected_session`.
 
 ### TypeScript Specifications
 

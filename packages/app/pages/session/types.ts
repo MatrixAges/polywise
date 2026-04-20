@@ -1,4 +1,5 @@
 import type { Session } from '@core/db'
+import type { UIEvent } from 'react'
 
 export interface ISessionMenuGroup {
 	group: string
@@ -12,29 +13,17 @@ export interface ISessionMenuData {
 	sessions: Array<Session>
 }
 
-export interface IPropsGroupItem {
-	item: Session
-	selected_session_id: string
-	setSelectedSession: (id: string) => void
-}
-
-export interface IPropsGroupList {
+export interface IPropsGroups {
 	groups: Array<ISessionMenuGroup>
 	selected_session_id: string
 	setSelectedSession: (id: string) => void
 }
 
-export interface IPropsSessionItem {
-	item: Session
-	selected_session_id: string
-	setSelectedSession: (id: string) => void
-}
-
-export interface IPropsSessionList {
+export interface IPropsSessions {
 	sessions: Array<Session>
 	selected_session_id: string
 	setSelectedSession: (id: string) => void
-	loadMore: () => Promise<void>
+	onScroll: (event: UIEvent<HTMLDivElement>) => void
 }
 
 export interface IPropsMenu {
@@ -42,5 +31,5 @@ export interface IPropsMenu {
 	sessions: Array<Session>
 	selected_session_id: string
 	setSelectedSession: (id: string) => void
-	loadMore: () => Promise<void>
+	onScroll: (event: UIEvent<HTMLDivElement>) => void
 }

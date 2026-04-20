@@ -4,6 +4,7 @@ import { injectable } from 'tsyringe'
 import { rpc } from '@/utils'
 
 import type { Session } from '@core/db'
+import type { UIEvent } from 'react'
 import type { ISessionMenuData, ISessionMenuGroup } from './types'
 
 @injectable()
@@ -23,23 +24,30 @@ export default class Index {
 	async init() {
 		this.loading = true
 
-		const res = (await rpc.session.getList.query()) as ISessionMenuData
+		try {
+			const res = (await rpc.session.getList.query()) as ISessionMenuData
 
-		console.log(res)
-
-		this.groups = res.groups
-		this.sessions = res.sessions
-		this.has_more = res.sessions.length >= 10
-
-		const first_group_session = res.groups[0]?.items[0]
-		const first_session = res.sessions[0]
-
-		this.selected_session_id = first_group_session?.id || first_session?.id || ''
-		this.loading = false
+			this.groups = res.groups
+			this.sessions = res.sessions
+			this.selected_session_id = ''
+			this.page = 1
+			this.has_more = res.sessions.length >= 10
+		} finally {
+			this.loading = false
+		}
 	}
 
 	setSelectedSession(id: string) {
 		this.selected_session_id = id
+	}
+
+	onScroll(event: UIEvent<HTMLDivElement>) {
+		const target = event.currentTarget
+		const is_near_bottom = target.scrollTop + target.clientHeight >= target.scrollHeight - 24
+
+		if (is_near_bottom) {
+			this.loadMore()
+		}
 	}
 
 	async loadMore() {

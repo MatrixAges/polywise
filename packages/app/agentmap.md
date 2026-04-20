@@ -102,7 +102,7 @@ This document provides an overview of the packages/app module structure and arch
 			"project": { "index.tsx": { "desc": "Project page view", "role": "Page" } },
 			"session": {
 				"index.tsx": {
-					"desc": "Session page view with left-side grouped and ungrouped session menu plus right-side Session content using getList/getMoreList RPC data",
+					"desc": "Session page view with two-column layout, left-side grouped and ungrouped session menu, and right-side Session content using getList/getMoreList RPC data; selection defaults to empty and menu scroll pagination is delegated to the page model. The page now uses a cohesive Menu/ directory with Groups and Sessions section components patterned after components/Session/index.tsx style.",
 					"role": "Page"
 				}
 			},
