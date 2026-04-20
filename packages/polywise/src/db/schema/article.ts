@@ -14,6 +14,7 @@ export default sqliteTable(
 		content: text('content').notNull(),
 		// Article title (optional)
 		title: text('title'),
+		path: text('path'),
 		for: text('for', { enum: ['linkcase', 'wiki', 'memory', 'user'] }).notNull(),
 		// Scope ownership: global / project / agent
 		scope_type: text('scope_type', { enum: ['global', 'project', 'agent'] }).default('global'),

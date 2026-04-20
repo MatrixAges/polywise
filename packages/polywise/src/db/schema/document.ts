@@ -9,6 +9,7 @@ export default sqliteTable(
 		title: text('title').notNull(),
 		// Document description (optional)
 		description: text('description'),
+		path: text('path'),
 		// Whether triples have been generated
 		is_tripled: integer('is_tripled', { mode: 'boolean' }).default(false).notNull(),
 		created_at: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),

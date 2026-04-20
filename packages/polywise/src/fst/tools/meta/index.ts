@@ -7,10 +7,15 @@ import { enum as Enum, number, object, string } from 'zod'
 import { executeCustomTool } from './createCustomToolSet'
 import getToolDir from './getToolDir'
 import readCustomToolsMap from './read'
+import readInputSchema from './readInputSchema'
 import rebuildCustomToolsMap from './rebuild'
 import search from './search'
 
 import type Session from '../../session'
+
+const inputSchemaField = string()
+	.optional()
+	.describe('[Optional for create] JSON Schema string exported as input_schema for the custom tool')
 
 export { default as createCustomToolSet } from './createCustomToolSet'
 export { default as getCustomToolsPrompt } from '@core/consts/prompts/getCustomToolsPrompt'
@@ -28,6 +33,7 @@ const inputSchema = object({
 	description: string()
 		.optional()
 		.describe('[Required for create] Short tool description stored in readme.md metadata'),
+	input_schema: inputSchemaField,
 	execute_input: string()
 		.optional()
 		.describe('[Optional for execute] JSON string passed to the target custom tool as input'),
@@ -54,6 +60,26 @@ const parseExecuteInput = (value?: string) => {
 	}
 }
 
+const parseInputSchema = (value?: string) => {
+	if (!value?.trim()) {
+		return undefined
+	}
+
+	try {
+		const json_schema = JSON.parse(value) as unknown
+
+		if (!json_schema || typeof json_schema !== 'object' || Array.isArray(json_schema)) {
+			throw new Error('input_schema must be a JSON object')
+		}
+
+		return json_schema
+	} catch (err) {
+		const message = err instanceof Error ? err.message : 'Invalid JSON'
+
+		throw new Error(`input_schema must be valid JSON Schema: ${message}`)
+	}
+}
+
 const getDefaultReadme = (tool_name: string, description: string) => {
 	return [
 		'---',
@@ -67,8 +93,16 @@ const getDefaultReadme = (tool_name: string, description: string) => {
 	].join('\n')
 }
 
-const getDefaultEntry = () => {
+const getDefaultEntry = (input_schema?: unknown) => {
+	const schema_content = JSON.stringify(
+		input_schema ?? { type: 'object', properties: {}, additionalProperties: true },
+		null,
+		4
+	)
+
 	return [
+		`export const input_schema = ${schema_content}`,
+		'',
 		'export default async (input, s) => {',
 		'\treturn {',
 		"\t\tmessage: 'Custom tool template executed',",
@@ -104,9 +138,12 @@ export const createMetaTool = (s: Session) => {
 				if (!input.description)
 					return { action: 'create', error: 'description is required for create action' }
 
+				let input_schema = undefined as unknown
+
 				let target_dir = ''
 
 				try {
+					input_schema = parseInputSchema(input.input_schema)
 					target_dir = getToolDir(s.tools_dir, input.tool_name)
 				} catch (err) {
 					const message = err instanceof Error ? err.message : 'Invalid name'
@@ -123,7 +160,7 @@ export const createMetaTool = (s: Session) => {
 				const readme_path = path.resolve(target_dir, 'readme.md')
 				const tool_path = path.resolve(target_dir, 'index.mjs')
 				const readme_content = input.readme ?? getDefaultReadme(input.tool_name, input.description)
-				const entry_content = input.entry ?? getDefaultEntry()
+				const entry_content = input.entry ?? getDefaultEntry(input_schema)
 
 				await fs.ensureDir(target_dir)
 				await writeFile(readme_path, readme_content, 'utf8')
@@ -197,12 +234,15 @@ export const createMetaTool = (s: Session) => {
 				}
 
 				const readme_path = getToolReadmePath(s.tools_dir, target.name)
+				const tool_path = getToolPath(s.tools_dir, target.name)
 				const readme = await readFile(readme_path, 'utf8')
+				const input_schema = await readInputSchema(tool_path)
 
 				return {
 					action: 'read',
 					tool_name: target.name,
 					description: target.description,
+					input_schema,
 					readme
 				}
 			}
@@ -215,16 +255,20 @@ export const createMetaTool = (s: Session) => {
 				const max_results = input.max_results ?? 5
 				const custom_tools_map = await readCustomToolsMap(s)
 				const results = search(custom_tools_map, input.keyword, max_results)
+				const results_with_schema = await Promise.all(
+					results.map(async custom_tool => ({
+						name: custom_tool.name,
+						description: custom_tool.description,
+						input_schema: await readInputSchema(getToolPath(s.tools_dir, custom_tool.name)),
+						score: custom_tool.score
+					}))
+				)
 
 				return {
 					action: 'search',
 					keyword: input.keyword,
-					count: results.length,
-					results: results.map(custom_tool => ({
-						name: custom_tool.name,
-						description: custom_tool.description,
-						score: custom_tool.score
-					}))
+					count: results_with_schema.length,
+					results: results_with_schema
 				}
 			}
 

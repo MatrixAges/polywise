@@ -67,7 +67,7 @@ This document provides an overview of the packages/polywise module structure and
 					"desc": "Bash sandboxing tools via bash-tool, local skill search/read/create/update/rebuild tooling plus Available Skills system-prompt summary injection, with skill_map persisted as name + description only and skill_tool resolving directory and SKILL.md paths from skill name at runtime; global custom tool routing and lazy-loading via meta_tool as the only bridge for custom tool execution, session-scoped plan management, session database message search by content and created_at range, and read-only memory/wiki search tools with superego trigger; initDefaults now also ensures app_path/patch exists and seeds a built-in skills/skill-creator/SKILL.md meta-skill, while error_collect_tool records raw tool_call_errors and links failure-like outputs into telemetry patch aggregation",
 					"role": "Folder",
 					"cron.ts": "Create/list/read/update/remove cron jobs backed by app.app_path/cron.json with incremental runtime reload and physical directory removal",
-					"meta": "Manage global custom tool routing, rebuild minimal custom_tools_map metadata (name + description only), resolve per-tool readme.md and index.mjs paths from tools_dir + name at runtime, expose fuzzy search/read/execute/create/remove actions, and lazily execute per-tool index.mjs modules only through meta_tool bridge",
+					"meta": "Manage global custom tool routing, rebuild minimal custom_tools_map metadata with name and description only, resolve per-tool readme.md and index.mjs paths from tools_dir + name at runtime, expose fuzzy search/read/execute/create/remove actions, return input_schema only from read/search by dynamically loading each tool module, and lazily execute per-tool index.mjs modules only through meta_tool bridge with z.fromJSONSchema-based input validation",
 					"title.ts": "Internal tool that generates and updates session titles while protecting manually edited titles",
 					"memory.ts": "Read-only memory search tool for main agent; search episodic memories by query with scope filtering",
 					"message.ts": "Conversation history tool supporting total count, context count, previous message reads, and database content search with required object-based inclusive date range schema for Gemini-compatible tool calling",
@@ -111,7 +111,11 @@ This document provides an overview of the packages/polywise module structure and
 				"migrate.ts": { "desc": "Migration runner", "role": "Module" },
 				"schema": {
 					"article.ts": {
-						"desc": "Article storage schema with content, source classifier(for: linkcase|wiki|memory|user), scope ownership(scope_type: global|project|agent + scope_id), data origin(source: agent|superego), metadata, and sop flag",
+						"desc": "Article storage schema with optional document_id, title, path, content, source classifier(for: linkcase|wiki|memory|user), scope ownership(scope_type: global|project|agent + scope_id), data origin(source: agent|superego), metadata, and sop flag",
+						"role": "Schema"
+					},
+					"document.ts": {
+						"desc": "Document storage schema with title, optional description/path, triple generation state, and timestamps",
 						"role": "Schema"
 					},
 					"session.ts": {
