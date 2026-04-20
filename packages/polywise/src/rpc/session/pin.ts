@@ -9,11 +9,11 @@ export default p.input(input_type).mutation(async ({ input }) => {
 	const pin_list = await readPinList()
 	const next_pin_list = input.value
 		? [
-				...pin_list.filter(item => item.id !== input.id),
 				{
 					id: input.id,
 					pin_at: Date.now()
-				}
+				},
+				...pin_list.filter(item => item.id !== input.id)
 			]
 		: pin_list.filter(item => item.id !== input.id)
 
