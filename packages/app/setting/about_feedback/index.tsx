@@ -38,9 +38,7 @@ const Index = () => {
 				>
 					Polywise
 				</h1>
-				<h2 className='text-std-800 text-2xl font-medium tracking-wide'>
-					AI-Powered System for Content and Decision
-				</h2>
+				<h2 className='text-std-800 text-2xl font-medium tracking-wide'>To be agentic</h2>
 			</div>
 			<div
 				className='

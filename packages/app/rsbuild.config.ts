@@ -19,7 +19,7 @@ const config = {
 		cors: { origin: ['http://localhost:8787'] }
 	},
 	html: {
-		title: 'Polywise - AI-Powered System for Content and Decision ◑',
+		title: 'Polywise - To be agentic. ◑',
 		template: './public/index.html'
 	},
 	tools: {
