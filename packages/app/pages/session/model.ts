@@ -21,6 +21,7 @@ export default class Index {
 	groups = [] as Array<ISessionMenuGroup>
 	sessions = [] as Array<Session>
 	pin_map = {} as Record<string, number>
+	deinit_watch_session_title = (() => {}) as () => void
 	selected_session_id = ''
 	rename_group_index = -1
 	rename_session_id = ''
@@ -36,6 +37,7 @@ export default class Index {
 
 	async init() {
 		await this.refresh({ reset_selected_session: true })
+		this.watchSessionTitle()
 	}
 
 	async refresh(args?: { reset_selected_session?: boolean }) {
@@ -257,5 +259,38 @@ export default class Index {
 		await this.refresh()
 	}
 
-	deinit() {}
+	watchSessionTitle() {
+		this.deinit_watch_session_title()
+
+		const deinit = rpc.session.watchSessionTitle.subscribe(undefined, {
+			onData: res => {
+				const { id, title } = res
+
+				this.groups = this.groups.map(group_item => ({
+					...group_item,
+					items: group_item.items.map(session_item => {
+						if (session_item.id === id) {
+							return { ...session_item, title }
+						}
+
+						return session_item
+					})
+				}))
+
+				this.sessions = this.sessions.map(session_item => {
+					if (session_item.id === id) {
+						return { ...session_item, title }
+					}
+
+					return session_item
+				})
+			}
+		})
+
+		this.deinit_watch_session_title = deinit.unsubscribe
+	}
+
+	deinit() {
+		this.deinit_watch_session_title()
+	}
 }

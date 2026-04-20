@@ -15,6 +15,7 @@ import rename from './rename'
 import renameGroup from './renameGroup'
 import sortGroup from './sortGroup'
 import sortGroupSession from './sortGroupSession'
+import watchSessionTitle from './watchSessionTitle'
 
 export default r({
 	init,
@@ -38,5 +39,6 @@ export default r({
 	load,
 	answer,
 	permission,
-	destroy
+	destroy,
+	watchSessionTitle
 })

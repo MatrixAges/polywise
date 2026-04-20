@@ -1,4 +1,5 @@
 import { title } from '@core/fst/agents'
+import { session_title_emitter } from '@core/rpc/session/watchSessionTitle'
 import { tool } from 'ai'
 import { object, string } from 'zod'
 
@@ -51,6 +52,7 @@ export const updateTitle = async (s: Session, focus: string) => {
 
 	await s.updateSession({ title: next_title })
 	await s.setContext({ session_auto_title: next_title, session_title_source: 'ai' })
+	session_title_emitter.emit('change', { id: s.id, title: next_title })
 
 	s.sync()
 
