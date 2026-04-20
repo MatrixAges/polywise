@@ -120,6 +120,8 @@ export default async (s: Index, message: Message) => {
 		onError: async (event: { error: unknown }) => {
 			stopStream(s.id)
 
+			await s.stop()
+
 			if (!env.active) {
 				const notification_id = getId()
 				const error_message = event.error instanceof Error ? event.error.message : String(event.error)
@@ -134,8 +136,6 @@ export default async (s: Index, message: Message) => {
 
 				await addNotificationSession(notification_id, s.id)
 			}
-
-			await s.stop()
 		}
 	})
 
@@ -186,7 +186,7 @@ export default async (s: Index, message: Message) => {
 			)
 
 			if (title_focus) {
-				void updateTitle(s, title_focus).catch(() => {})
+				updateTitle(s, title_focus)
 			}
 		},
 		onFinish: async ({ responseMessage }) => {
@@ -206,8 +206,12 @@ export default async (s: Index, message: Message) => {
 				await s.trimMessages()
 			}
 
-			await extract(s, complexity_signal)
+			extract(s, complexity_signal)
 		},
-		onError: error => `Stream error: ${error instanceof Error ? error.message : String(error)}`
+		onError: error => {
+			s.stop()
+
+			return `Stream error: ${error instanceof Error ? error.message : String(error)}`
+		}
 	})
 }
