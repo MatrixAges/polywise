@@ -25,10 +25,11 @@ interface ArgsGetSessions {
 	where?: SQL
 	orderBy?: SQL | Array<SQL>
 	limit?: number
+	offset?: number
 }
 
 export const getSessions = async (args: ArgsGetSessions = {}) => {
-	const { where, orderBy, limit } = args
+	const { where, orderBy, limit, offset } = args
 
 	let query = env.db.select().from(session).$dynamic()
 
@@ -41,6 +42,8 @@ export const getSessions = async (args: ArgsGetSessions = {}) => {
 	}
 
 	if (limit) query = query.limit(limit)
+
+	if (offset) query = query.offset(offset)
 
 	return query
 }

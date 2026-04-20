@@ -112,7 +112,7 @@ This document provides an overview of the packages/polywise module structure and
 					"role": "Folder"
 				},
 				"session": {
-					"desc": "Session subscriptions and management RPCs. Existing event bridge endpoints remain in events.ts; create/remove/rename/pin and group CRUD/sort/move, including moveOutGroup for removing a session id from a specific group by index, are split into dedicated single-file procedures. A session/utils subtree now holds single-file storage helpers, normalization helpers, and shared SessionGroupItem typing, while pin.json and session_group.json path constants are centralized in consts/app.ts; rename persists human title intent into context.json so title_tool no longer overrides manually renamed sessions.",
+					"desc": "Session subscriptions and management RPCs. Existing event bridge endpoints remain in events.ts; create/remove/rename/pin and group CRUD/sort/move, including moveOutGroup for removing a session id from a specific group by index, are split into dedicated single-file procedures. getList now returns grouped sessions by batch-loading group item ids and a separate first-page ungrouped session list, while getMoreList paginates additional ungrouped sessions in pages of 10 using the same group exclusion rule. A session/utils subtree now holds single-file storage helpers, normalization helpers, and shared SessionGroupItem typing, while pin.json and session_group.json path constants are centralized in consts/app.ts; rename persists human title intent into context.json so title_tool no longer overrides manually renamed sessions.",
 					"role": "Folder"
 				}
 			},
