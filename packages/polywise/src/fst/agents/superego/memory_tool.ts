@@ -11,7 +11,7 @@ const inputSchema = object({
 	action: Enum(['add', 'search', 'update']).describe(
 		'The action to perform. add: store new episodic memory. search: check for existing memories. update: modify an existing memory by id.'
 	),
-	content: string().describe('[Required for add/update] The memory content to store or update'),
+	content: string().optional().describe('[Required for add/update] The memory content to store or update'),
 	query: string().optional().describe('[Required for search] Search query to find existing memories'),
 	article_id: string().optional().describe('[Required for update] The article id of the memory to update')
 })

@@ -3,7 +3,48 @@ import { convertToModelMessages } from 'ai'
 import createSuperegoAgent from './agent'
 
 import type Session from '../../session'
-import type { SuperegoEvent } from './types'
+import type { SuperegoAgentOutput } from './agent'
+import type { SuperegoEvent, SuperegoResult } from './types'
+
+const getConversationFragment = async (s: Session) => {
+	const model_messages = await convertToModelMessages(s.model_messages)
+
+	return model_messages
+		.map(message => {
+			const content =
+				typeof message.content === 'string' ? message.content : JSON.stringify(message.content)
+
+			return `[${message.role}]: ${content}`
+		})
+		.join('\n\n')
+}
+
+const getSuperegoPrompt = (conversation: string) => {
+	return [
+		'Analyze the conversation fragment below.',
+		'Apply the learning loop defined in your system instructions.',
+		'Only store durable value.',
+		'For skills, prefer search -> read -> create or update when a reusable workflow exists.',
+		'',
+		'---',
+		'',
+		conversation
+	].join('\n')
+}
+
+const getSuperegoResult = (output: SuperegoAgentOutput | undefined, text: string): SuperegoResult => {
+	if (output) {
+		return {
+			summary: output.summary || 'completed',
+			actions: Array.isArray(output.actions) ? output.actions : []
+		}
+	}
+
+	return {
+		summary: text || 'completed',
+		actions: []
+	}
+}
 
 export default async (s: Session) => {
 	if (s.superego_append_count < 3) return
@@ -11,30 +52,13 @@ export default async (s: Session) => {
 	s.superego_append_count = 0
 
 	const scope = s.scope
-	const model_messages = await convertToModelMessages(s.model_messages)
-
-	const conversation = model_messages
-		.map(m => {
-			const content = typeof m.content === 'string' ? m.content : JSON.stringify(m.content)
-
-			return `[${m.role}]: ${content}`
-		})
-		.join('\n\n')
+	const conversation = await getConversationFragment(s)
 
 	const agent = createSuperegoAgent(s.model.model, s, scope)
 
 	try {
-		const result = await agent.generate({
-			prompt: `Analyze the following conversation fragment and extract memories, knowledge, and skills as appropriate.\n\n---\n\n${conversation}`
-		})
-
-		let parsed: { summary: string; actions: Array<{ tool: string; action: string; target: string }> }
-
-		try {
-			parsed = JSON.parse(result.text)
-		} catch {
-			parsed = { summary: result.text || 'completed', actions: [] }
-		}
+		const result = await agent.generate({ prompt: getSuperegoPrompt(conversation) })
+		const parsed = getSuperegoResult(result.output as SuperegoAgentOutput | undefined, result.text)
 
 		s.event.emit(`${s.id}/change`, {
 			type: 'superego',

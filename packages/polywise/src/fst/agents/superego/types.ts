@@ -1,10 +1,18 @@
 export type ScopeType = 'global' | 'project' | 'agent'
 
+export type SuperegoToolName = 'memory_tool' | 'wiki_tool' | 'skill_tool'
+
+export type SuperegoToolAction = 'add' | 'search' | 'update' | 'remove' | 'read' | 'create' | 'build'
+
 export interface SuperegoAction {
-	type: 'memory' | 'wiki' | 'skill'
-	action: 'add' | 'search' | 'update' | 'remove'
-	payload: string
-	id?: string
+	tool: SuperegoToolName
+	action: SuperegoToolAction
+	target: string
+}
+
+export interface SuperegoResult {
+	summary: string
+	actions: Array<SuperegoAction>
 }
 
 export interface SuperegoEvent {

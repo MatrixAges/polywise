@@ -46,7 +46,7 @@ This document provides an overview of the packages/polywise module structure and
 					"desc": "Internal decision agents for permission, audit, system operations, AI-generated session titles, superego cognitive consolidation, and context-preserving message trimming",
 					"role": "Folder",
 					"superego": {
-						"desc": "Background cognitive observer (Superego Agent) that asynchronously extracts episodic memories, semantic knowledge, and procedural skills from conversation turns; triggered after 3 append messages or via superego_tool; has full CRUD access to memory_tool and wiki_tool with scope-aware article storage (scope_type: global|project|agent)",
+						"desc": "Background cognitive observer (Superego Agent) that asynchronously extracts episodic memories, semantic knowledge, and procedural skills from conversation turns; triggered after 3 append messages or via superego_tool; now follows a Hermes-style learning loop with structured output, progressive disclosure rules, skill search/read before reuse, and local skill create/update support that writes /skills/<skill-name>/SKILL.md then rebuilds skill_map",
 						"role": "Folder"
 					},
 					"trim": {
@@ -60,7 +60,7 @@ This document provides an overview of the packages/polywise module structure and
 					"getBashTools": "Sandbox-backed bash tool builder with command risk matching, audit review, and child_process proxy execution for flagged commands"
 				},
 				"tools": {
-					"desc": "Bash sandboxing tools via bash-tool, local skill search/read/rebuild tooling plus Available Skills system-prompt summary injection, global custom tool routing and lazy-loading via meta_tool as the only bridge for custom tool execution, session-scoped plan management, session database message search by content and created_at range, and read-only memory/wiki search tools with superego trigger",
+					"desc": "Bash sandboxing tools via bash-tool, local skill search/read/create/update/rebuild tooling plus Available Skills system-prompt summary injection, global custom tool routing and lazy-loading via meta_tool as the only bridge for custom tool execution, session-scoped plan management, session database message search by content and created_at range, and read-only memory/wiki search tools with superego trigger",
 					"role": "Folder",
 					"cron.ts": "Create/list/read/update/remove cron jobs backed by app.app_path/cron.json with incremental runtime reload and physical directory removal",
 					"meta": "Manage global custom tool routing, rebuild minimal custom_tools_map metadata (name + description only), resolve per-tool readme.md and index.mjs paths from tools_dir + name at runtime, expose fuzzy search/read/execute/create/remove actions, and lazily execute per-tool index.mjs modules only through meta_tool bridge",
