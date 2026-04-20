@@ -14,6 +14,7 @@ import removeGroup from './removeGroup'
 import rename from './rename'
 import renameGroup from './renameGroup'
 import sortGroup from './sortGroup'
+import sortGroupSession from './sortGroupSession'
 
 export default r({
 	init,
@@ -28,6 +29,7 @@ export default r({
 	moveOutGroup,
 	removeGroup,
 	sortGroup,
+	sortGroupSession,
 	renameGroup,
 	stop,
 	clear,

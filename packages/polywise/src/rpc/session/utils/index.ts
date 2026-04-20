@@ -6,3 +6,4 @@ export { default as readGroupList } from './readGroupList'
 export { default as writeGroupList } from './writeGroupList'
 
 export type { SessionGroupItem } from './types'
+export type { SessionPinItem } from './types'

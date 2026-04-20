@@ -1,6 +1,14 @@
 import { app } from '@core/consts'
 import fs from 'fs-extra'
 
-export default async (pin_list: Array<string>) => {
-	await fs.writeJson(app.pin_path, Array.from(new Set(pin_list)), { spaces: 4 })
+import type { SessionPinItem } from './types'
+
+export default async (pin_list: Array<SessionPinItem>) => {
+	const pin_map = new Map<string, SessionPinItem>()
+
+	pin_list.forEach(item => {
+		pin_map.set(item.id, item)
+	})
+
+	await fs.writeJson(app.pin_path, Array.from(pin_map.values()), { spaces: 4 })
 }

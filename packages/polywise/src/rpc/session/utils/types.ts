@@ -4,3 +4,8 @@ export interface SessionGroupItem {
 	updated_at: number
 	items: Array<string>
 }
+
+export interface SessionPinItem {
+	id: string
+	pin_at: number
+}

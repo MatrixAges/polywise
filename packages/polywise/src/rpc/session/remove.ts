@@ -24,7 +24,7 @@ export default p.input(input_type).mutation(async ({ input }) => {
 
 	const pin_list = await readPinList()
 	const group_list = await readGroupList()
-	const next_pin_list = pin_list.filter(item => item !== input.id)
+	const next_pin_list = pin_list.filter(item => item.id !== input.id)
 	const next_group_list = group_list.map(item => ({
 		...item,
 		items: item.items.filter(session_id => session_id !== input.id)
