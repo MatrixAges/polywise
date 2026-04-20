@@ -64,6 +64,7 @@ const Index = () => {
 							position='top-center'
 							toastOptions={{ duration: 3000 }}
 							closeButton
+							theme={global.theme.theme_value}
 						></Toaster>
 						<Alert></Alert>
 						<div

@@ -143,7 +143,7 @@ export default class Index {
 							const parsed = JSON.parse(res.data.result)
 
 							if (parsed.summary && parsed.summary !== 'skipped') {
-								toast.info('Superego Executed', {
+								toast.success('Superego extraction successful', {
 									description: parsed.summary,
 									duration: 2000,
 									closeButton: false
