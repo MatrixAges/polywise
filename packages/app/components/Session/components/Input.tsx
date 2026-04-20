@@ -204,10 +204,9 @@ const Index = (props: IPropsInput) => {
 								<BrushCleaning className='stroke-std-400 h-[12px] w-[12px]'></BrushCleaning>
 							</div>
 						</Tooltip>
-
 						<Show visible={archived}>
-							<Tooltip title='Archive'>
-								<div className='icon_button h-5 w-5' onClick={archive}>
+							<Tooltip title='Unarchive'>
+								<div className='icon_button h-5 w-5' onClick={unarchive}>
 									<Archive className='stroke-std-400 h-[12px] w-[12px]'></Archive>
 								</div>
 							</Tooltip>
@@ -224,8 +223,8 @@ const Index = (props: IPropsInput) => {
 								<ArrowDownToLine className='stroke-std-400 h-[12px] w-[12px]'></ArrowDownToLine>
 							</div>
 						</Tooltip>
-						<Tooltip title={archived ? 'Unarhive' : 'Archive'}>
-							<div className='icon_button h-5 w-5' onClick={archived ? unarchive : archive}>
+						<Tooltip title='Archive'>
+							<div className='icon_button h-5 w-5' onClick={archive}>
 								<RightArchiveIcon className='stroke-std-400 h-[12px] w-[12px]'></RightArchiveIcon>
 							</div>
 						</Tooltip>
