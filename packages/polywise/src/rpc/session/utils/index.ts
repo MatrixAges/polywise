@@ -1,4 +1,3 @@
-export { pin_path, session_group_path } from './paths'
 export { default as normalizePinList } from './normalizePinList'
 export { default as normalizeGroupList } from './normalizeGroupList'
 export { default as readPinList } from './readPinList'

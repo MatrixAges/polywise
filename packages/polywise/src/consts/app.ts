@@ -10,6 +10,8 @@ export const model_dir = path.resolve(`${app_path}/.models`)
 export const logs_dir = path.resolve(`${app_path}/.logs`)
 export const cron_dir = path.resolve(`${app_path}/cron`)
 export const cron_path = path.resolve(`${app_path}/cron.json`)
+export const pin_path = path.resolve(`${app_path}/pin.json`)
+export const session_group_path = path.resolve(`${app_path}/session_group.json`)
 
 export const embedding_model = {
 	uri: 'hf:Qwen/Qwen3-Embedding-0.6B-GGUF/Qwen3-Embedding-0.6B-Q8_0.gguf',
