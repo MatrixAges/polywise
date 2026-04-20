@@ -10,16 +10,43 @@ import type Session from '../../session'
 import type { SuperegoAgentOutput } from './agent'
 import type { ComplexitySignal, SuperegoEvent, SuperegoResult } from './types'
 
+const noise_patterns = [
+	/Called the [A-Za-z]+ tool with the following input:/i,
+	/<system-reminder>[\s\S]*?<\/system-reminder>/gi,
+	/<content>[\s\S]*?<\/content>/gi,
+	/<path>[\s\S]*?<\/path>/gi,
+	/<type>[\s\S]*?<\/type>/gi,
+	/Plan Mode/gi,
+	/STRICTLY FORBIDDEN/gi,
+	/\(End of file - total \d+ lines\)/gi
+] as Array<RegExp>
+
+const stripNoise = (value: string) => {
+	return noise_patterns.reduce((target, pattern) => target.replace(pattern, ' '), value).trim()
+}
+
+const normalizeConversationContent = (value: string) => {
+	const normalized_value = stripNoise(value)
+
+	return normalized_value.replace(/\s+/g, ' ').trim()
+}
+
 const getConversationFragment = async (s: Session) => {
 	const model_messages = await convertToModelMessages(s.model_messages)
 
 	return model_messages
 		.map(message => {
-			const content =
+			const raw_content =
 				typeof message.content === 'string' ? message.content : JSON.stringify(message.content)
+			const content = normalizeConversationContent(raw_content)
+
+			if (!content) {
+				return ''
+			}
 
 			return `[${message.role}]: ${content}`
 		})
+		.filter(Boolean)
 		.join('\n\n')
 }
 
@@ -39,7 +66,6 @@ const getSuperegoPrompt = (conversation: string) => {
 
 const getSuperegoResult = (
 	output: SuperegoAgentOutput | undefined,
-	text: string,
 	args?: {
 		complexity_signal?: ComplexitySignal
 		failure_telemetry?: PatchRecord | null
@@ -59,7 +85,7 @@ const getSuperegoResult = (
 	}
 
 	return {
-		summary: text || 'completed',
+		summary: 'skipped',
 		actions: [],
 		complexity_signal: target.complexity_signal,
 		failure_telemetry: target.failure_telemetry ?? null,
@@ -116,7 +142,7 @@ export default async (s: Session, complexity_signal?: ComplexitySignal) => {
 
 	try {
 		const result = await agent.generate({ prompt: getSuperegoPrompt(conversation) })
-		const base_result = getSuperegoResult(result.output as SuperegoAgentOutput | undefined, result.text, {
+		const base_result = getSuperegoResult(result.output as SuperegoAgentOutput | undefined, {
 			complexity_signal
 		})
 		let failure_telemetry = null as PatchRecord | null
@@ -222,7 +248,7 @@ export default async (s: Session, complexity_signal?: ComplexitySignal) => {
 			}
 		}
 
-		const parsed = getSuperegoResult(result.output as SuperegoAgentOutput | undefined, result.text, {
+		const parsed = getSuperegoResult(result.output as SuperegoAgentOutput | undefined, {
 			complexity_signal,
 			failure_telemetry,
 			skill_draft
