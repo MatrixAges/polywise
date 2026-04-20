@@ -1,7 +1,7 @@
 import path from 'path'
 import { app } from '@core/consts'
 import { session } from '@core/db/schema'
-import { p, SessionEventStore, SessionStore } from '@core/utils'
+import { p, SessionEventStore, SessionStore, SessionStreamStore } from '@core/utils'
 import { eq } from 'drizzle-orm'
 import fs from 'fs-extra'
 import { object, string } from 'zod'
@@ -18,8 +18,25 @@ export default p.input(input_type).mutation(async ({ input }) => {
 		return null
 	}
 
-	if (SessionStore.get(input.id)) {
+	await SessionStreamStore.unsubscribe(input.id)
+
+	const target_live_session = SessionStore.get(input.id)
+
+	if (target_live_session) {
+		await target_live_session.abortStream()
+
 		SessionEventStore.emit(`${input.id}/destroy`)
+
+		SessionEventStore.removeAllListeners(`${input.id}/change`)
+		SessionEventStore.removeAllListeners(`${input.id}/stop`)
+		SessionEventStore.removeAllListeners(`${input.id}/clear`)
+		SessionEventStore.removeAllListeners(`${input.id}/archive`)
+		SessionEventStore.removeAllListeners(`${input.id}/unarchive`)
+		SessionEventStore.removeAllListeners(`${input.id}/load`)
+		SessionEventStore.removeAllListeners(`${input.id}/destroy`)
+		SessionEventStore.removeAllListeners(`${input.id}/answer`)
+
+		SessionStore.delete(input.id)
 	}
 
 	const pin_list = await readPinList()
