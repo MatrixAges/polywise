@@ -39,7 +39,7 @@ This document provides an overview of the packages/polywise module structure and
 				"index.ts": { "desc": "fst module exports", "role": "Index" },
 				"chat": { "desc": "Chat capabilities using AI SDK, supporting UIMessages", "role": "Folder" },
 				"session": {
-					"desc": "Session lifecycle and stream orchestration for chat and cron-triggered runs, consuming skill_map loading from fst/tools/skill and title_tool-based session renaming; supports archive/unarchive flow with archived_at state persisted in session_dir/state.json and message queries scoped by archived boundary; appendMessage persists messages to database only; clears session_dir/plan.md on message clear or archive",
+					"desc": "Session lifecycle and stream orchestration for chat and cron-triggered runs, consuming skill_map loading from fst/tools/skill and title_tool-based session renaming; supports archive/unarchive flow with archived_at state persisted in session_dir/state.json and message queries scoped by archived boundary; appendMessage persists messages to database only, and trim/title/superego extraction are deferred after stream finish; clears session_dir/plan.md on message clear or archive",
 					"role": "Folder"
 				},
 				"agents": {

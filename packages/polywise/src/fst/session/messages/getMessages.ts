@@ -35,6 +35,8 @@ export default async (s: Index) => {
 
 	const total = await getMessagesCount(where_condition)
 
+	s.context.total_messages_count = total
+	s.context.current_messages_count = s.model_messages.length
 	s.ui_has_older = total > ui_threshold_value
 	s.ui_has_newer = false
 }

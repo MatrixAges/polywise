@@ -50,29 +50,23 @@ const getTextParts = (message: Message) => {
 }
 
 export default async (s: Index, message: Message) => {
-	s.context.total_messages_count = await s.getMessagesCount()
-	s.context.current_messages_count = s.model_messages.length
+	const total_messages_count = s.context.total_messages_count ?? 0
+	const is_first_message = total_messages_count === 0
+	const should_insert_message = !s.session.is_runing
 
-	if (!s.session.is_runing) {
-		s.insertMessage(message)
+	if (should_insert_message) {
+		s.context.total_messages_count = total_messages_count + 1
+
+		await s.insertMessage(message)
 
 		s.model_messages.push(message)
 		s.ui_messages.push(message)
 	}
 
-	if (s.model_messages.length >= model_threshold_value) {
-		await s.trimMessages()
-	}
+	s.context.current_messages_count = s.model_messages.length
 
-	if (message.role === 'user' && !s.session.is_cron && s.context.total_messages_count === 0) {
-		const focus = getTextParts(message)
-
-		if (focus) {
-			await updateTitle(s, focus)
-		}
-	}
-
-	await s.runing(true)
+	s.session.is_runing = true
+	void s.updateSession({ is_runing: true }).catch(() => {})
 
 	startStream(s, message)
 
@@ -86,6 +80,10 @@ export default async (s: Index, message: Message) => {
 	const system_tools_prompt = await getSystemTools()
 	const custom_tools_prompt = getCustomToolsPrompt(s.custom_tools_map)
 	const skill_prompt = getSkillPrompt(s.skill_map)
+	const title_focus =
+		should_insert_message && message.role === 'user' && !s.session.is_cron && is_first_message
+			? getTextParts(message)
+			: ''
 
 	const res = streamText({
 		model: s.model.model,
@@ -187,18 +185,22 @@ export default async (s: Index, message: Message) => {
 				})
 			)
 
-			await extract(s)
+			if (title_focus) {
+				void updateTitle(s, title_focus).catch(() => {})
+			}
 		},
 		onFinish: async ({ responseMessage }) => {
-			if (responseMessage.parts.length) {
-				await s.appendMessage(responseMessage)
-
-				s.superego_append_count++
-			}
-
 			stopStream(s.id)
 
-			await s.stop()
+			await s.appendMessage(responseMessage)
+
+			s.superego_append_count++
+
+			if (s.model_messages.length >= model_threshold_value) {
+				await s.trimMessages()
+			}
+
+			await extract(s)
 		},
 		onError: error => `Stream error: ${error instanceof Error ? error.message : String(error)}`
 	})
