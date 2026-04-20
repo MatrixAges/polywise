@@ -1,3 +1,5 @@
+import type { PatchRecord } from '../../telemetry'
+
 export type ScopeType = 'global' | 'project' | 'agent'
 
 export type SuperegoToolName = 'memory_tool' | 'wiki_tool' | 'skill_tool'
@@ -19,23 +21,6 @@ export interface ComplexitySignal {
 	is_complex: boolean
 }
 
-export interface FailureTelemetryRecord {
-	id: string
-	date: string
-	session_id: string
-	tool_name: string
-	target: string
-	error_signature: string
-	keywords: Array<string>
-	seen_count: number
-	first_seen_at: string
-	last_seen_at: string
-	related_examples: Array<string>
-	suggested_skill_name: string
-	suggested_action: 'observe' | 'create' | 'update'
-	status: 'open' | 'patched'
-}
-
 export interface SkillCreatorDraft {
 	action: 'create' | 'update' | 'skip'
 	reason: string
@@ -43,6 +28,9 @@ export interface SkillCreatorDraft {
 	description: string
 	keywords: Array<string>
 	content: string
+	decision_basis?: string
+	matched_skill_name?: string
+	matched_skill_score?: number
 }
 
 export interface SuperegoAction {
@@ -55,7 +43,7 @@ export interface SuperegoResult {
 	summary: string
 	actions: Array<SuperegoAction>
 	complexity_signal?: ComplexitySignal
-	failure_telemetry?: FailureTelemetryRecord | null
+	failure_telemetry?: PatchRecord | null
 	skill_draft?: SkillCreatorDraft | null
 }
 

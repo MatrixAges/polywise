@@ -46,11 +46,11 @@ This document provides an overview of the packages/polywise module structure and
 					"desc": "Internal decision agents for permission, audit, system operations, AI-generated session titles, superego cognitive consolidation, Hermes-style skill creator meta-drafting, and context-preserving message trimming",
 					"role": "Folder",
 					"superego": {
-						"desc": "Background cognitive observer (Superego Agent) that asynchronously extracts episodic memories, semantic knowledge, and procedural skills from conversation turns; triggered after 3 append messages or via superego_tool; now consumes stream-level complexity signals, searches cross-session failure telemetry under app_path/patch, invokes a dedicated skill_creator meta-agent to draft skills, and then uses local skill create/update support to write /skills/<skill-name>/SKILL.md and rebuild skill_map",
+						"desc": "Background cognitive observer (Superego Agent) that asynchronously extracts episodic memories, semantic knowledge, and procedural skills from conversation turns; triggered after 3 append messages or via superego_tool; now consumes stream-level complexity signals, queries the shared fst/telemetry domain for patch suggestions and related failures, invokes a dedicated skill_creator meta-agent with strict existing-skill patch priority, and then uses local skill create/update support to write /skills/<skill-name>/SKILL.md and rebuild skill_map",
 						"role": "Folder"
 					},
 					"skill_creator": {
-						"desc": "Hermes-style meta-skill drafting agent that converts complex workflows, repeated failures, and missing recovery paths into generalized local skill drafts with progressive-disclosure descriptions and structured markdown sections",
+						"desc": "Hermes-style meta-skill drafting agent that converts complex workflows, repeated failures, and missing recovery paths into generalized local skill drafts with progressive-disclosure descriptions and structured markdown sections; now receives existing-skill match info and patch suggestion level so update is forced ahead of create when a relevant skill already exists",
 						"role": "Folder"
 					},
 					"trim": {
@@ -64,7 +64,7 @@ This document provides an overview of the packages/polywise module structure and
 					"getBashTools": "Sandbox-backed bash tool builder with command risk matching, audit review, and child_process proxy execution for flagged commands"
 				},
 				"tools": {
-					"desc": "Bash sandboxing tools via bash-tool, local skill search/read/create/update/rebuild tooling plus Available Skills system-prompt summary injection, global custom tool routing and lazy-loading via meta_tool as the only bridge for custom tool execution, session-scoped plan management, session database message search by content and created_at range, and read-only memory/wiki search tools with superego trigger; initDefaults now also ensures app_path/patch exists and seeds a built-in skills/skill-creator/SKILL.md meta-skill",
+					"desc": "Bash sandboxing tools via bash-tool, local skill search/read/create/update/rebuild tooling plus Available Skills system-prompt summary injection, global custom tool routing and lazy-loading via meta_tool as the only bridge for custom tool execution, session-scoped plan management, session database message search by content and created_at range, and read-only memory/wiki search tools with superego trigger; initDefaults now also ensures app_path/patch exists and seeds a built-in skills/skill-creator/SKILL.md meta-skill, while error_collect_tool records raw tool_call_errors and links failure-like outputs into telemetry patch aggregation",
 					"role": "Folder",
 					"cron.ts": "Create/list/read/update/remove cron jobs backed by app.app_path/cron.json with incremental runtime reload and physical directory removal",
 					"meta": "Manage global custom tool routing, rebuild minimal custom_tools_map metadata (name + description only), resolve per-tool readme.md and index.mjs paths from tools_dir + name at runtime, expose fuzzy search/read/execute/create/remove actions, and lazily execute per-tool index.mjs modules only through meta_tool bridge",
@@ -76,6 +76,10 @@ This document provides an overview of the packages/polywise module structure and
 					"superego.ts": "Trigger tool that invokes superego agent to extract and persist information from conversation; only way for main agent to write to memory/wiki",
 					"webfetch.ts": "Fetch URL content as Markdown (Jina primary, fetch+turndown fallback)",
 					"websearch.ts": "Web search via DuckDuckGo HTML → turndown Markdown"
+				},
+				"telemetry": {
+					"desc": "Shared FST telemetry domain for raw tool failure linkage, related-case grep search across tool_call_errors and patch daily files, patch suggestion leveling (observe|patch|escalate), and daily patch record upsert/write under app_path/patch",
+					"role": "Folder"
 				},
 				"cron": {
 					"desc": "Cron metadata store/runtime/logging backed by cron.json and Croner jobs, including session execution bridge",

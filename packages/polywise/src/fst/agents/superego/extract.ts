@@ -1,15 +1,14 @@
 import { app } from '@core/consts'
 import { convertToModelMessages } from 'ai'
 
+import { collectFailureEvent, PatchRecord, searchFailureCases } from '../../telemetry'
 import executeSkillTool from '../../tools/skill/execute'
 import createSkillDraft from '../skill_creator/createDraft'
 import createSuperegoAgent from './agent'
-import recordFailureTelemetry from './recordFailureTelemetry'
-import searchFailureTelemetry from './searchFailureTelemetry'
 
 import type Session from '../../session'
 import type { SuperegoAgentOutput } from './agent'
-import type { ComplexitySignal, FailureTelemetryRecord, SuperegoEvent, SuperegoResult } from './types'
+import type { ComplexitySignal, SuperegoEvent, SuperegoResult } from './types'
 
 const getConversationFragment = async (s: Session) => {
 	const model_messages = await convertToModelMessages(s.model_messages)
@@ -43,7 +42,7 @@ const getSuperegoResult = (
 	text: string,
 	args?: {
 		complexity_signal?: ComplexitySignal
-		failure_telemetry?: FailureTelemetryRecord | null
+		failure_telemetry?: PatchRecord | null
 		skill_draft?: SuperegoResult['skill_draft']
 	}
 ): SuperegoResult => {
@@ -120,31 +119,12 @@ export default async (s: Session, complexity_signal?: ComplexitySignal) => {
 		const base_result = getSuperegoResult(result.output as SuperegoAgentOutput | undefined, result.text, {
 			complexity_signal
 		})
-		let failure_telemetry = null as FailureTelemetryRecord | null
+		let failure_telemetry = null as PatchRecord | null
 		let skill_draft = null as SuperegoResult['skill_draft']
 
 		if (complexity_signal?.is_complex) {
 			const failure_target = getFailureTarget(conversation, complexity_signal)
 			const failure_keywords = getFailureKeywords(conversation, complexity_signal)
-
-			if (complexity_signal.has_error_pattern || complexity_signal.has_retry_pattern) {
-				failure_telemetry = await recordFailureTelemetry({
-					app_path: app.app_path,
-					session_id: s.id,
-					tool_name: 'superego',
-					error_text: base_result.summary,
-					target: failure_target,
-					keywords: failure_keywords
-				})
-			}
-
-			const related_failures = await searchFailureTelemetry({
-				app_path: app.app_path,
-				tool_name: 'superego',
-				keywords: failure_keywords,
-				max_count: 5
-			})
-
 			const similar_skills = await executeSkillTool(s, {
 				action: 'search',
 				keyword: failure_keywords.join(' '),
@@ -153,6 +133,7 @@ export default async (s: Session, complexity_signal?: ComplexitySignal) => {
 
 			let related_skill = ''
 			let related_skill_name = ''
+			let related_skill_score = 0
 
 			if (
 				similar_skills &&
@@ -162,6 +143,7 @@ export default async (s: Session, complexity_signal?: ComplexitySignal) => {
 				similar_skills.results.length > 0
 			) {
 				related_skill_name = String(similar_skills.results[0]?.name || '')
+				related_skill_score = Number(similar_skills.results[0]?.score || 0)
 
 				const read_result = await executeSkillTool(s, {
 					action: 'read',
@@ -173,13 +155,36 @@ export default async (s: Session, complexity_signal?: ComplexitySignal) => {
 				}
 			}
 
+			if (complexity_signal.has_error_pattern || complexity_signal.has_retry_pattern) {
+				failure_telemetry = await collectFailureEvent({
+					app_path: app.app_path,
+					session_id: s.id,
+					tool_name: 'superego',
+					target: failure_target,
+					error_text: base_result.summary,
+					keywords: failure_keywords,
+					has_existing_skill: Boolean(related_skill_name)
+				})
+			}
+
+			const related_failures = await searchFailureCases({
+				app_path: app.app_path,
+				tool_name: 'superego',
+				keywords: failure_keywords,
+				max_count: 5
+			})
+
 			skill_draft = await createSkillDraft({
 				session: s,
 				conversation,
 				complexity_signal,
 				failure_telemetry,
 				related_failures,
-				related_skill
+				related_skill_name,
+				related_skill_score,
+				related_skill,
+				patch_priority: failure_telemetry?.suggestion.level || 'observe',
+				existing_skill_preferred_action: failure_telemetry?.suggestion.suggested_action || 'observe'
 			})
 
 			if (skill_draft.action === 'create' && skill_draft.name && skill_draft.content) {

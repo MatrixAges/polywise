@@ -1,5 +1,4 @@
 export { default as extract } from './extract'
 export { default as getComplexitySignal } from './getComplexitySignal'
 export { createMemoryTool } from './memory_tool'
-export { default as recordFailureTelemetry } from './recordFailureTelemetry'
 export { createWikiTool } from './wiki_tool'

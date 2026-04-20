@@ -24,10 +24,11 @@ Decide whether the result should:
 ## Rules
 
 1. Prefer skip when the workflow is too trivial, too session-specific, or too noisy.
-2. Prefer update when an existing skill already covers the same workflow but is missing steps, pitfalls, or validation logic.
-3. Prefer create when the workflow is reusable and no existing skill covers it well.
+2. If a relevant existing skill is provided and the patch suggestion level is `patch` or `escalate`, you must prefer `update` unless the existing skill clearly does not cover the target workflow.
+3. Only choose `create` when there is no relevant existing skill or the existing skill is clearly outside the target workflow domain.
 4. Abstract concrete values into reusable parameters.
 5. Keep the description highly specific and persuasive so it works under progressive disclosure.
+6. When patch priority is high, treat create as disallowed unless the prompt explicitly proves the existing skill is a bad fit.
 
 ## Required Skill Format
 
@@ -75,5 +76,8 @@ Return a structured object with:
 - `description`: short progressive-disclosure description or empty string for skip
 - `keywords`: short search keywords for finding similar skills
 - `content`: full skill markdown or empty string for skip
+- `decision_basis`: short explanation of why patching or creating was chosen
+- `matched_skill_name`: best matching existing skill name if available
+- `matched_skill_score`: numeric relevance score if available
 
 Never return natural language outside the structured object.

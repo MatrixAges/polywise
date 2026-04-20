@@ -1,16 +1,15 @@
 import path from 'path'
 import fs from 'fs-extra'
 
-import grep from '../../../utils/grep'
+import grep from '../../utils/grep'
+import getToolErrorFile from './getToolErrorFile'
 
-const getSafeToolName = (tool_name: string) => {
-	return tool_name.replace(/[^a-zA-Z0-9_-]/g, '_')
-}
+import type { TelemetrySearchArgs } from './types'
 
-export default async (args: { app_path: string; tool_name: string; keywords: Array<string>; max_count?: number }) => {
+export default async (args: TelemetrySearchArgs) => {
 	const { app_path, tool_name, keywords, max_count = 5 } = args
 	const patch_dir = path.resolve(app_path, 'patch')
-	const tool_error_path = path.resolve(app_path, 'tool_call_errors', `${getSafeToolName(tool_name)}.jsonl`)
+	const tool_error_path = getToolErrorFile({ app_path, tool_name })
 	const targets = [] as Array<string>
 
 	if (await fs.pathExists(patch_dir)) {
