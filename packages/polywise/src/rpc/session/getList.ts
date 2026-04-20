@@ -35,9 +35,12 @@ const getSessionList = async (group_session_id_list: Array<string>) => {
 
 export default p.query(async () => {
 	const group_list = await readGroupList()
+
 	const group_session_id_list = getGroupSessionIdList(group_list)
+
 	const group_session_map = await getGroupSessionMap(group_session_id_list)
 	const sessions = await getSessionList(group_session_id_list)
+
 	const groups = group_list.map(item => ({
 		group: item.name,
 		created_at: item.created_at,

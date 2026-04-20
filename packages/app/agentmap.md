@@ -100,6 +100,12 @@ This document provides an overview of the packages/app module structure and arch
 			"database": { "index.tsx": { "desc": "Database page view", "role": "Page" } },
 			"notebook": { "index.tsx": { "desc": "Notebook page view", "role": "Page" } },
 			"project": { "index.tsx": { "desc": "Project page view", "role": "Page" } },
+			"session": {
+				"index.tsx": {
+					"desc": "Session page view with left-side grouped and ungrouped session menu plus right-side Session content using getList/getMoreList RPC data",
+					"role": "Page"
+				}
+			},
 			"search": { "index.tsx": { "desc": "Search page view", "role": "Page" } },
 			"setting": { "index.tsx": { "desc": "Setting page entry point", "role": "Page" } },
 			"task": { "index.tsx": { "desc": "Task page view", "role": "Page" } }
