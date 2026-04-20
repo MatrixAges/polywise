@@ -1,15 +1,11 @@
-import path from 'path'
 import { message } from '@core/db/schema'
 import { getMessages, getMessagesCount } from '@core/db/services'
-import { grep } from '@core/utils'
 import { convertToModelMessages, tool } from 'ai'
 import dayjs from 'dayjs'
-import { and, asc, eq, lt } from 'drizzle-orm'
-import fs from 'fs-extra'
+import { and, asc, between, eq, like, lt } from 'drizzle-orm'
 import { enum as Enum, number, object, optional, string } from 'zod'
 
 import type Session from '../session'
-import type { Message } from '../types'
 
 const parseMessage = (item: typeof message.$inferSelect) => {
 	const parsed = JSON.parse(item.content)
@@ -21,7 +17,7 @@ const parseMessage = (item: typeof message.$inferSelect) => {
 
 const inputSchema = object({
 	action: Enum(['get_total_count', 'get_context_messages_count', 'get_prev_messages', 'search']).describe(
-		'The action to perform. get_total_count: total session messages. get_context_messages_count: messages in current context. get_prev_messages: read history. search: search session jsonl logs.'
+		'The action to perform. get_total_count: total session messages. get_context_messages_count: messages in current context. get_prev_messages: read history. search: search database messages by content within a required created_at range.'
 	),
 	args: optional(
 		object({
@@ -44,32 +40,10 @@ const inputSchema = object({
 			range: object({
 				start_date: string().describe('Start date in YYYY-MM-DD format'),
 				end_date: string().describe('End date in YYYY-MM-DD format')
-			})
-				.optional()
-				.describe('[required for search][optional] Date range for search action')
+			}).describe('[required for search] Inclusive date range for search action')
 		}).describe('[required for get_prev_messages, search] Action-specific arguments')
 	).describe('[required for get_prev_messages, search] Action-specific arguments')
 })
-
-const getSearchFiles = (session: Session, range?: { start_date: string; end_date: string }) => {
-	const messages_dir = path.resolve(session.session_dir, 'messages')
-
-	if (!range) {
-		return [path.resolve(messages_dir, `${dayjs().format('YYYY-MM-DD')}.jsonl`)]
-	}
-
-	const { start_date, end_date } = range
-	const result = [] as Array<string>
-	let current_day = dayjs(start_date)
-	const last_day = dayjs(end_date)
-
-	while (current_day.isBefore(last_day) || current_day.isSame(last_day, 'day')) {
-		result.push(path.resolve(messages_dir, `${current_day.format('YYYY-MM-DD')}.jsonl`))
-		current_day = current_day.add(1, 'day')
-	}
-
-	return result
-}
 
 export const createMessageTool = (session: Session) => {
 	const { id, model_messages } = session
@@ -160,6 +134,7 @@ export const createMessageTool = (session: Session) => {
 
 	const searchMessages = async (args?: { keywords?: string; range?: { start_date: string; end_date: string } }) => {
 		const keywords = args?.keywords
+		const range = args?.range
 
 		if (!keywords) {
 			return {
@@ -169,36 +144,34 @@ export const createMessageTool = (session: Session) => {
 			}
 		}
 
-		const target_files = getSearchFiles(session, args?.range)
-		const existing_files = [] as Array<string>
-
-		for (const file_path of target_files) {
-			if (await fs.pathExists(file_path)) {
-				existing_files.push(file_path)
-			}
-		}
-
-		if (!existing_files.length) {
+		if (!range) {
 			return {
 				action: 'search' as const,
+				error: 'range is required for search action',
 				data: []
 			}
 		}
 
-		const matched_lines = await grep(existing_files, keywords, {
-			with_filename: true,
-			with_line_number: true
+		const start_at = dayjs(range.start_date).startOf('day').toDate()
+		const end_at = dayjs(range.end_date).endOf('day').toDate()
+		const where_list = [eq(message.session_id, id), like(message.content, `%${keywords}%`)]
+
+		where_list.push(between(message.created_at, start_at, end_at))
+
+		const matched_messages = await getMessages({
+			where: and(...where_list),
+			orderBy: asc(message.created_at)
 		})
 
 		return {
 			action: 'search' as const,
-			data: matched_lines
+			data: await convertToModelMessages(matched_messages.map(parseMessage))
 		}
 	}
 
 	return tool({
 		description:
-			'Read conversation history. Use get_total_count to check total messages, get_current_messages_count to check your context window size, get_prev_messages to read history, and search to query session jsonl logs.',
+			'Read conversation history. Use get_total_count to check total messages, get_current_messages_count to check your context window size, get_prev_messages to read history, and search to query database messages by content within a required created_at range.',
 		inputSchema,
 		execute: async input => {
 			const { action } = input

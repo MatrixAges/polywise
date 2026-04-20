@@ -39,7 +39,7 @@ This document provides an overview of the packages/polywise module structure and
 				"index.ts": { "desc": "fst module exports", "role": "Index" },
 				"chat": { "desc": "Chat capabilities using AI SDK, supporting UIMessages", "role": "Folder" },
 				"session": {
-					"desc": "Session lifecycle and stream orchestration for chat and cron-triggered runs, consuming skill_map loading from fst/tools/skill and title_tool-based session renaming; supports archive/unarchive flow with archived_at state persisted in session_dir/state.json and message queries scoped by archived boundary; appendMessage also mirrors messages into session_dir/messages/YYYY-MM-DD.jsonl for grep-based daily search; clears session_dir/plan.md on message clear or archive",
+					"desc": "Session lifecycle and stream orchestration for chat and cron-triggered runs, consuming skill_map loading from fst/tools/skill and title_tool-based session renaming; supports archive/unarchive flow with archived_at state persisted in session_dir/state.json and message queries scoped by archived boundary; appendMessage persists messages to database only; clears session_dir/plan.md on message clear or archive",
 					"role": "Folder"
 				},
 				"agents": {
@@ -60,13 +60,13 @@ This document provides an overview of the packages/polywise module structure and
 					"getBashTools": "Sandbox-backed bash tool builder with command risk matching, audit review, and child_process proxy execution for flagged commands"
 				},
 				"tools": {
-					"desc": "Bash sandboxing tools via bash-tool, local skill search/read/rebuild tooling plus Available Skills system-prompt summary injection, global custom tool routing and lazy-loading via meta_tool as the only bridge for custom tool execution, session-scoped plan management, session jsonl message search, and read-only memory/wiki search tools with superego trigger",
+					"desc": "Bash sandboxing tools via bash-tool, local skill search/read/rebuild tooling plus Available Skills system-prompt summary injection, global custom tool routing and lazy-loading via meta_tool as the only bridge for custom tool execution, session-scoped plan management, session database message search by content and created_at range, and read-only memory/wiki search tools with superego trigger",
 					"role": "Folder",
 					"cron.ts": "Create/list/read/update/remove cron jobs backed by app.app_path/cron.json with incremental runtime reload and physical directory removal",
 					"meta": "Manage global custom tool routing, rebuild minimal custom_tools_map metadata (name + description only), resolve per-tool readme.md and index.mjs paths from tools_dir + name at runtime, expose fuzzy search/read/execute/create/remove actions, and lazily execute per-tool index.mjs modules only through meta_tool bridge",
 					"title.ts": "Internal tool that generates and updates session titles while protecting manually edited titles",
 					"memory.ts": "Read-only memory search tool for main agent; search episodic memories by query with scope filtering",
-					"message.ts": "Conversation history tool supporting total count, context count, previous message reads, and jsonl search with object-based date range schema for Gemini-compatible tool calling",
+					"message.ts": "Conversation history tool supporting total count, context count, previous message reads, and database content search with required object-based inclusive date range schema for Gemini-compatible tool calling",
 					"plan.ts": "Manage session_dir/plan.md with save/get/clear actions; stores concise plan metadata, task breakdowns, mermaid execution flow, and delivery criteria",
 					"wiki.ts": "Read-only wiki knowledge search tool for main agent; search semantic knowledge by query",
 					"superego.ts": "Trigger tool that invokes superego agent to extract and persist information from conversation; only way for main agent to write to memory/wiki",
