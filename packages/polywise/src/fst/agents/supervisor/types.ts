@@ -5,6 +5,7 @@ export interface StreamInfo {
 	start_time: number
 	last_check_time: number
 	message: any
+	pending_text: string
 	recent_parts: Array<string>
 	chaos_detected: boolean
 }

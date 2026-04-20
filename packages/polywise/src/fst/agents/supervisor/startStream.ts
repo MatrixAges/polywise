@@ -13,6 +13,7 @@ export default (session: Index, message: Message) => {
 		start_time: Date.now(),
 		last_check_time: Date.now(),
 		message,
+		pending_text: '',
 		recent_parts: [],
 		chaos_detected: false
 	})

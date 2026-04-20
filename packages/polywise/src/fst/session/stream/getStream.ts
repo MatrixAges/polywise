@@ -192,7 +192,9 @@ export default async (s: Index, message: Message) => {
 		onFinish: async ({ responseMessage }) => {
 			stopStream(s.id)
 
+			await s.stop()
 			await s.appendMessage(responseMessage)
+
 			const complexity_signal = getComplexitySignal({
 				response_message: responseMessage,
 				recent_message_count: s.model_messages.length

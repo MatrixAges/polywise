@@ -39,14 +39,14 @@ This document provides an overview of the packages/polywise module structure and
 				"index.ts": { "desc": "fst module exports", "role": "Index" },
 				"chat": { "desc": "Chat capabilities using AI SDK, supporting UIMessages", "role": "Folder" },
 				"session": {
-					"desc": "Session lifecycle and stream orchestration for chat and cron-triggered runs, consuming skill_map loading from fst/tools/skill and title_tool-based session renaming; supports archive/unarchive flow with archived_at state persisted in session_dir/state.json and message queries scoped by archived boundary; appendMessage persists messages to database only, and trim/title/superego extraction are deferred after stream finish; clears session_dir/plan.md on message clear or archive",
+					"desc": "Session lifecycle and stream orchestration for chat and cron-triggered runs, consuming skill_map loading from fst/tools/skill and title_tool-based session renaming; supports archive/unarchive flow with archived_at state persisted in session_dir/state.json and message queries scoped by archived boundary; appendMessage persists messages to database only, and trim/title/superego extraction are deferred after stream finish; successful stream completion now also resets is_runing through stop() so follow-up user messages are inserted normally; clears session_dir/plan.md on message clear or archive",
 					"role": "Folder"
 				},
 				"agents": {
 					"desc": "Internal decision agents for permission, audit, system operations, AI-generated session titles, superego cognitive consolidation, Hermes-style skill creator meta-drafting, and context-preserving message trimming",
 					"role": "Folder",
 					"superego": {
-						"desc": "Background cognitive observer (Superego Agent) that asynchronously extracts episodic memories, semantic knowledge, and procedural skills from conversation turns; triggered after 3 append messages or via superego_tool; now consumes stream-level complexity signals, queries the shared fst/telemetry domain for patch suggestions and related failures, invokes a dedicated skill_creator meta-agent with strict existing-skill patch priority, and then uses local skill create/update support to write /skills/<skill-name>/SKILL.md and rebuild skill_map",
+						"desc": "Background cognitive observer (Superego Agent) that asynchronously extracts episodic memories, semantic knowledge, and procedural skills from conversation turns; triggered after 3 append messages or via superego_tool; now consumes stream-level complexity signals, queries the shared fst/telemetry domain for patch suggestions and related failures, invokes a dedicated skill_creator meta-agent with strict existing-skill patch priority, and then uses local skill create/update support to write /skills/<skill-name>/SKILL.md and rebuild skill_map; supervisor chaos detection now buffers stream deltas into larger text blocks and only runs after the configured time window instead of immediately on short repeated deltas",
 						"role": "Folder"
 					},
 					"skill_creator": {

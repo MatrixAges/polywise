@@ -16,15 +16,24 @@ export default async () => {
 	for (const [session_id, info] of streams.entries()) {
 		const elapsed = now - info.start_time
 		const time_since_last_check = now - info.last_check_time
+		const should_check_time_window =
+			elapsed >= CHAOS_CHECK_DELAY && time_since_last_check >= CHAOS_CHECK_INTERVAL
 
-		if (
-			info.chaos_detected ||
-			(elapsed >= CHAOS_CHECK_DELAY && time_since_last_check >= CHAOS_CHECK_INTERVAL)
-		) {
+		if (should_check_time_window) {
 			info.last_check_time = now
 
 			try {
-				const is_chaos = await checkChaos(info.recent_parts, info.session.model.model)
+				const recent_parts = info.pending_text.trim()
+					? [...info.recent_parts, info.pending_text.trim()].slice(-6)
+					: info.recent_parts
+
+				if (recent_parts.length < 3 || !info.chaos_detected) {
+					info.chaos_detected = false
+
+					continue
+				}
+
+				const is_chaos = await checkChaos(recent_parts, info.session.model.model)
 
 				if (is_chaos) {
 					const original_message = (await convertToModelMessages([info.message as Message]))[0]
@@ -39,7 +48,7 @@ export default async () => {
 						parts: [
 							{
 								type: 'text' as const,
-								text: `[System Auto-Correction] Detected that the previous conversation was stuck in a chaotic loop. Please reorganize your thoughts and start answering from scratch based on the user's original question. The user's question is: ${original_message.content}`
+								text: `[System Auto-Correction] Detected that the previous conversation was stuck in a chaotic loop. Please reorganize your thoughts and start answering from scratch based on the user's original question. The user's question is: ${JSON.stringify(original_message.content)}`
 							}
 						]
 					}
