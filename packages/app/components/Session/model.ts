@@ -140,14 +140,14 @@ export default class Index {
 							break
 
 						case 'superego':
-							try {
-								const parsed = JSON.parse(res.data.result)
+							const parsed = JSON.parse(res.data.result)
 
-								if (parsed.summary && parsed.summary !== 'skipped') {
-									toast.info(`Superego: ${parsed.summary}`)
-								}
-							} catch {
-								toast.info('Superego: processing completed')
+							if (parsed.summary && parsed.summary !== 'skipped') {
+								toast.info('Superego Executed', {
+									description: parsed.summary,
+									duration: 2000,
+									closeButton: false
+								})
 							}
 
 							break

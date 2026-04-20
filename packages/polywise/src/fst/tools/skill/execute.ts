@@ -26,6 +26,14 @@ const getSkillDirName = (name: string) => {
 		.replace(/^-+|-+$/g, '')
 }
 
+const getSkillDir = (s: Session, skill_name: string) => {
+	return path.resolve(s.skills_dir, getSkillDirName(skill_name))
+}
+
+const getSkillFilePath = (s: Session, skill_name: string) => {
+	return path.resolve(getSkillDir(s, skill_name), 'SKILL.md')
+}
+
 const getSkillTarget = async (s: Session, skill_name: string) => {
 	const skill_map = await readSkillMap(s)
 	const current = skill_map.find(item => item.name === skill_name)
@@ -34,18 +42,16 @@ const getSkillTarget = async (s: Session, skill_name: string) => {
 		return {
 			skill_map,
 			current,
-			skill_file_path: current.path,
-			skill_dir: current.dir
+			skill_file_path: getSkillFilePath(s, current.name),
+			skill_dir: getSkillDir(s, current.name)
 		}
 	}
-
-	const skill_dir_name = getSkillDirName(skill_name)
 
 	return {
 		skill_map,
 		current: null,
-		skill_file_path: path.resolve(s.skills_dir, skill_dir_name, 'SKILL.md'),
-		skill_dir: path.resolve(s.skills_dir, skill_dir_name)
+		skill_file_path: getSkillFilePath(s, skill_name),
+		skill_dir: getSkillDir(s, skill_name)
 	}
 }
 
@@ -83,10 +89,9 @@ const writeSkillFile = async (args: {
 	await fs.writeFile(skill_file_path, content, 'utf8')
 
 	const skill_map = await rebuildSkillMap(session)
-	const current = skill_map.find(item => item.path === skill_file_path || item.name === skill_name)
+	const current = skill_map.find(item => item.name === skill_name)
 
 	return {
-		path: skill_file_path,
 		skill: current ?? null,
 		count: skill_map.length
 	}
@@ -118,7 +123,6 @@ export default async (s: Session, input: SkillToolInput) => {
 			results: results.map(r => ({
 				name: r.name,
 				description: r.description,
-				path: r.path,
 				score: r.score
 			})),
 			count: results.length
@@ -142,19 +146,21 @@ export default async (s: Session, input: SkillToolInput) => {
 			}
 		}
 
-		const perm_error = await checkPermission(s, 'file', 'read', target.path)
+		const skill_file_path = getSkillFilePath(s, target.name)
+
+		const perm_error = await checkPermission(s, 'file', 'read', skill_file_path)
 
 		if (perm_error) {
 			return { action: 'read', skill_name: input.skill_name, content: '', error: perm_error }
 		}
 
-		const content = await readFile(target.path, 'utf8')
+		const content = await readFile(skill_file_path, 'utf8')
 
 		return {
 			action: 'read',
 			skill_name: input.skill_name,
 			content,
-			path: target.path
+			skill: target
 		}
 	}
 
@@ -186,7 +192,6 @@ export default async (s: Session, input: SkillToolInput) => {
 			action: 'create',
 			skill_name: input.build_name,
 			description: input.build_description,
-			path: result.path,
 			skill: result.skill,
 			count: result.count
 		}
@@ -220,7 +225,6 @@ export default async (s: Session, input: SkillToolInput) => {
 			action: 'update',
 			skill_name: input.skill_name,
 			description: input.build_description,
-			path: result.path,
 			skill: result.skill,
 			count: result.count
 		}

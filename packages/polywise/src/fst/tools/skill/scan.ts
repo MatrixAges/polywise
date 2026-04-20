@@ -24,18 +24,14 @@ export default async (dir: string) => {
 			if (meta) {
 				map.push({
 					name: meta.name,
-					description: meta.description,
-					path: skill_md_path,
-					dir: path.resolve(dir, entry.name)
+					description: meta.description
 				})
 			} else {
 				const heading_text = extractHeadings(content)
 
 				map.push({
 					name: entry.name,
-					description: heading_text,
-					path: skill_md_path,
-					dir: path.resolve(dir, entry.name)
+					description: heading_text
 				})
 			}
 		} catch {

@@ -22,7 +22,16 @@ export default async (s: Session) => {
 		return rebuildSkillMap(s)
 	}
 
-	s.skill_map = skill_map
+	if (skill_map.some(item => typeof item?.path === 'string' || typeof item?.dir === 'string')) {
+		return rebuildSkillMap(s)
+	}
 
-	return skill_map
+	s.skill_map = skill_map
+		.map(item => ({
+			name: typeof item?.name === 'string' ? item.name : '',
+			description: typeof item?.description === 'string' ? item.description : ''
+		}))
+		.filter(item => item.name && item.description)
+
+	return s.skill_map
 }

@@ -37,8 +37,6 @@ export interface MessageMetadata {
 export interface SkillMeta {
 	name: string
 	description: string
-	path: string
-	dir: string
 }
 
 export interface CustomToolMeta {
