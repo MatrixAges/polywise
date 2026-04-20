@@ -3,7 +3,7 @@ import getContextPrompt from '@core/consts/prompts/getContextPrompt'
 import { addNotification, addNotificationSession } from '@core/db/services'
 import { env } from '@core/env'
 import { createSystemTool } from '@core/fst/agents'
-import { extract } from '@core/fst/agents/superego'
+import { extract, getComplexitySignal } from '@core/fst/agents/superego'
 import { pushPart, startStream, stopStream } from '@core/fst/agents/supervisor'
 import { getSystemTools } from '@core/utils'
 import { convertToModelMessages, createUIMessageStream, smoothStream, stepCountIs, streamText } from 'ai'
@@ -193,6 +193,10 @@ export default async (s: Index, message: Message) => {
 			stopStream(s.id)
 
 			await s.appendMessage(responseMessage)
+			const complexity_signal = getComplexitySignal({
+				response_message: responseMessage,
+				recent_message_count: s.model_messages.length
+			})
 
 			s.superego_append_count++
 
@@ -200,7 +204,7 @@ export default async (s: Index, message: Message) => {
 				await s.trimMessages()
 			}
 
-			await extract(s)
+			await extract(s, complexity_signal)
 		},
 		onError: error => `Stream error: ${error instanceof Error ? error.message : String(error)}`
 	})
