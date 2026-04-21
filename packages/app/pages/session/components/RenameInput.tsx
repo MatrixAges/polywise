@@ -13,6 +13,7 @@ interface IProps {
 const Index = (props: IProps) => {
 	const { active, value, setRenameValue, submitRename, cancelRename } = props
 	const ref_input = useRef<HTMLInputElement>(null)
+	const ref_is_composing = useRef(false)
 
 	useEffect(() => {
 		if (active) {
@@ -21,17 +22,29 @@ const Index = (props: IProps) => {
 		}
 	}, [active])
 
-	if (!active) {
-		return null
-	}
+	if (!active) return null
 
 	return (
 		<Input
 			className='h-8 rounded-lg px-2'
 			value={value}
 			onChange={event => setRenameValue(event.target.value)}
-			onBlur={submitRename}
+			onCompositionStart={() => {
+				ref_is_composing.current = true
+			}}
+			onCompositionEnd={() => {
+				ref_is_composing.current = false
+			}}
+			onBlur={() => {
+				if (ref_is_composing.current) return
+
+				submitRename()
+			}}
 			onKeyDown={event => {
+				if (event.nativeEvent.isComposing || ref_is_composing.current || event.keyCode === 229) {
+					return
+				}
+
 				if (event.key === 'Enter') {
 					event.preventDefault()
 					submitRename()
