@@ -130,7 +130,7 @@ const Index = (props: IPropsMenu) => {
 				overflow-hidden
 				flex flex-none flex-col
 				w-[240px] h-full
-				border-r
+				border-border-light border-r
 			'
 		>
 			<Groups {...props_groups}></Groups>
