@@ -1,4 +1,10 @@
 [data-streamdown] {
+	line-height: 1.62;
+
+	* {
+		line-height: 1.62;
+	}
+
 	h1 {
 		@apply text-xl;
 	}

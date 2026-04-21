@@ -160,6 +160,7 @@ export default class Index {
 	}
 
 	async createSession(input?: string) {
+		const input_text = typeof input === 'string' ? input : ''
 		const next_session = await rpc.session.create.mutate({})
 
 		if (!next_session) return
@@ -168,8 +169,8 @@ export default class Index {
 
 		this.selected_session_id = next_session.id
 
-		if (input) {
-			this.temp_input = input
+		if (input_text) {
+			this.temp_input = input_text
 
 			setTimeout(() => {
 				this.temp_input = ''
