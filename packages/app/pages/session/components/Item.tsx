@@ -1,6 +1,7 @@
 import { Pin } from 'lucide-react'
 
 import { ContextMenu, ContextMenuTrigger } from '@/__shadcn__/components/ui/context-menu'
+import { Grip } from '@/components/animate'
 
 import { useMenuContext } from '../context'
 import RenameInput from './RenameInput'
@@ -47,7 +48,13 @@ const Index = (props: IProps) => {
 							title
 						)}
 					</div>
-					{pin_map[item.id] && <Pin className='text-std-300! size-3' />}
+					{!item.is_runing ? (
+						<Grip className='text-std-300! size-3'></Grip>
+					) : pin_map[item.id] ? (
+						<Pin className='text-std-300! size-3' />
+					) : (
+						''
+					)}
 				</div>
 			</ContextMenuTrigger>
 			{menu}
