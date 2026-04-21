@@ -78,19 +78,17 @@ export default class Index {
 	}
 
 	initChat() {
-		if (!this.chat) {
-			this.chat = new Chat({
-				id: this.id,
-				throttle: 60,
-				transport: new CustomTransport({
-					api: server_sys_session_url,
-					prepareReconnectToStreamRequest: () => ({
-						api: `${server_sys_session_url}?id=${this.id}`
-					})
-				}),
-				generateId: getId
-			})
-		}
+		this.chat = new Chat({
+			id: this.id,
+			throttle: 60,
+			transport: new CustomTransport({
+				api: server_sys_session_url,
+				prepareReconnectToStreamRequest: () => ({
+					api: `${server_sys_session_url}?id=${this.id}`
+				})
+			}),
+			generateId: getId
+		})
 
 		this.chat.resumeStream()
 	}

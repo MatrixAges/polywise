@@ -30,6 +30,7 @@ const Index = () => {
 				>
 					<Logo width='100%' height='100%'></Logo>
 				</div>
+
 				<h1
 					className='
 						mb-2
@@ -38,7 +39,14 @@ const Index = () => {
 				>
 					Polywise
 				</h1>
-				<h2 className='text-std-800 text-2xl font-medium tracking-wide'>To be agentic</h2>
+				<h2
+					className='
+						text-std-800 text-2xl font-medium tracking-[8px]
+						uppercase
+					'
+				>
+					Tobeagentic
+				</h2>
 			</div>
 			<div
 				className='

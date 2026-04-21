@@ -14,7 +14,7 @@ import type { IPropsInput } from './types'
 export interface IProps {
 	id: string
 	input?: string
-	create: (input: string) => void
+	create?: (input: string) => void
 }
 
 const Index = (props: IProps) => {

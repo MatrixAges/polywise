@@ -59,7 +59,7 @@ const Index = () => {
 					<Session
 						id={x.selected_session_id}
 						input={x.temp_input}
-						create={x.createSession}
+						create={!x.selected_session_id ? x.createSession : undefined}
 					></Session>
 				</div>
 			</div>
