@@ -1,3 +1,4 @@
+import { blocked_session_id } from '@core/consts'
 import { session } from '@core/db/schema'
 import { getSessions } from '@core/db/services'
 import { desc, notInArray } from 'drizzle-orm'
@@ -15,7 +16,7 @@ export default p.input(input_type).query(async ({ input }) => {
 	const pin_list = await readPinList()
 	const group_session_id_list = group_list.flatMap(item => item.items)
 	const pin_session_id_list = pin_list.map(item => item.id)
-	const exclude_session_id_list = [...group_session_id_list, ...pin_session_id_list]
+	const exclude_session_id_list = [...group_session_id_list, ...pin_session_id_list, blocked_session_id]
 
 	return getSessions({
 		where: exclude_session_id_list.length ? notInArray(session.id, exclude_session_id_list) : undefined,

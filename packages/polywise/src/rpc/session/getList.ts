@@ -1,3 +1,4 @@
+import { blocked_session_id } from '@core/consts'
 import { session } from '@core/db/schema'
 import { getSessions } from '@core/db/services'
 import { desc, inArray, notInArray } from 'drizzle-orm'
@@ -9,7 +10,6 @@ import type { Session } from '@core/db'
 import type { SessionPinItem } from './utils'
 
 const session_page_size = 10
-const blocked_session_id = 'global_panel_session'
 
 const getGroupSessionIdList = (group_list: Array<{ items: Array<string> }>) => {
 	return group_list.flatMap(item => item.items).filter(session_id => session_id !== blocked_session_id)
