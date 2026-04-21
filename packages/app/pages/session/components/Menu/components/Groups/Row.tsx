@@ -44,9 +44,8 @@ const Index = (props: IPropsGroupSessionRow) => {
 						`
 						flex
 						items-center
-						gap-2
-						text-sm
 						group
+						click_button
 					`,
 						selected_session_id === item.id && 'bg-muted'
 					)}
@@ -54,20 +53,6 @@ const Index = (props: IPropsGroupSessionRow) => {
 					onClick={() => actions.setSelectedSession(item.id)}
 					ref={setNodeRef}
 				>
-					<button
-						className='
-							text-muted-foreground
-							opacity-0
-							transition-opacity
-							group-hover:opacity-100
-							cursor-grab
-						'
-						type='button'
-						{...attributes}
-						{...listeners}
-					>
-						⋮⋮
-					</button>
 					{pin_map[item.id] && <Pin size={12} className='text-amber-500' />}
 					<div className='min-w-0 flex-1'>
 						{active_rename ? (
@@ -79,7 +64,9 @@ const Index = (props: IPropsGroupSessionRow) => {
 								cancelRename={actions.cancelRename}
 							></RenameInput>
 						) : (
-							<span className='truncate'>{item.title}</span>
+							<span className='cursor-grab truncate' {...attributes} {...listeners}>
+								{item.title}
+							</span>
 						)}
 					</div>
 				</div>

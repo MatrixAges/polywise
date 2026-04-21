@@ -75,8 +75,16 @@ const Index = (props: IPropsGroupCard) => {
 		>
 			<ContextMenu>
 				<ContextMenuTrigger>
-					<div className='group relative flex items-center'>
-						<div className='flex flex-1 items-center'>
+					<div
+						className='
+							relative
+							flex
+							items-center
+							mb-1
+							group
+						'
+					>
+						<div className='flex flex-1 items-center px-2.5'>
 							{active_rename ? (
 								<RenameInput
 									active={active_rename}
@@ -86,7 +94,7 @@ const Index = (props: IPropsGroupCard) => {
 									cancelRename={actions.cancelRename}
 								></RenameInput>
 							) : (
-								<div className='text-std-400 truncate text-sm font-medium'>
+								<div className='text-std-400 text-xsm truncate font-medium'>
 									{group_name}
 								</div>
 							)}
@@ -112,7 +120,7 @@ const Index = (props: IPropsGroupCard) => {
 			</ContextMenu>
 			<DndContext sensors={sensors} onDragEnd={dragSessionEnd}>
 				<SortableContext items={items.map(item => item.id)} strategy={verticalListSortingStrategy}>
-					<div className='flex flex-col gap-1'>
+					<div className='flex flex-col'>
 						{items.map((item, session_index) => (
 							<Row
 								session_index={session_index}

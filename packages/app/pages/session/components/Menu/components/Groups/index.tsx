@@ -45,13 +45,8 @@ const Index = (props: IPropsGroups) => {
 	return (
 		<ContextMenu>
 			<ContextMenuTrigger>
-				<div
-					className='
-						flex flex-col
-						px-3
-					'
-				>
-					<div className='flex flex-col py-3'>
+				<div className='flex flex-col px-1.5'>
+					<div className='flex flex-col gap-3 py-3'>
 						<DndContext sensors={sensors} onDragEnd={dragGroupEnd}>
 							<SortableContext
 								items={groups.map((_, index) => `group-${index}`)}

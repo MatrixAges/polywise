@@ -18,18 +18,7 @@ const Index = (props: IPropsSessionItem) => {
 		<ContextMenu>
 			<ContextMenuTrigger>
 				<div
-					className={$cx(
-						`
-						flex
-						items-center
-						gap-2
-						px-3 py-2
-						rounded-md
-						text-sm
-						text-left
-					`,
-						selected_session_id === item.id && 'bg-muted'
-					)}
+					className={$cx('click_button', selected_session_id === item.id && 'bg-muted')}
 					onClick={() => actions.setSelectedSession(item.id)}
 				>
 					{pin_map[item.id] && <Pin size={12} className='text-amber-500' />}
