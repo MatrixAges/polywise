@@ -12,22 +12,25 @@ import Model from './model'
 import type { IPropsInput } from './types'
 
 export interface IProps {
+	type: 'page' | 'global'
 	id: string
 	input?: string
 	create?: (input: string) => void
 }
 
 const Index = (props: IProps) => {
-	const { id, input, create } = props
+	const { type, id, input, create } = props
 	const [x] = useState(() => container.resolve(Model))
 
 	const streaming = x.status === 'streaming' || x.status === 'submitted'
 	const last_message = x.messages.at(-1)
+	const is_page = type === 'page'
 
 	const { ref, setRef } = useAliveEffect({
 		init: () => x.init({ id, input }),
 		deinit: () => x.deinit(),
-		deps: [id]
+		deps: [id],
+		normal: is_page
 	})
 
 	const setConfainerRef = useMemoizedFn(v => (x.ref_container = v))
@@ -35,6 +38,7 @@ const Index = (props: IProps) => {
 	const toggleContextModal = useMemoizedFn(() => (x.open_context_modal = !x.open_context_modal))
 
 	const props_input: IPropsInput = {
+		is_page,
 		streaming,
 		archived: x.archived_at !== null,
 		send: useMemoizedFn((v: string) => {
@@ -79,11 +83,14 @@ const Index = (props: IProps) => {
 				ref={setConfainerRef}
 			>
 				<div
-					className='
+					className={$cx(
+						`
 						flex flex-col
 						w-full
 						gap-6
-					'
+					`,
+						is_page && 'page_wrap py-0'
+					)}
 				>
 					{x.messages.map((message, index) => (
 						<Message

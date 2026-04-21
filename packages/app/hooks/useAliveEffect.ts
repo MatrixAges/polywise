@@ -1,4 +1,4 @@
-import { useInsertionEffect, useRef } from 'react'
+import { useInsertionEffect, useLayoutEffect, useRef } from 'react'
 import { useMemoizedFn } from 'ahooks'
 import { deepEqual } from 'stk/react'
 
@@ -9,6 +9,7 @@ interface Args {
 	init: (setRef: (v: HTMLDivElement) => void) => void
 	deinit?: () => void
 	deps?: DependencyList
+	normal?: boolean
 }
 
 const createShadowTracker = (dom: HTMLElement, cleanup: () => void) => {
@@ -21,7 +22,7 @@ const createShadowTracker = (dom: HTMLElement, cleanup: () => void) => {
 }
 
 export default (args: Args) => {
-	const { init, deinit, deps = [] } = args
+	const { init, deinit, deps = [], normal } = args
 
 	const state = useRef<{ mounted: boolean; dom: HTMLElement | null; deps: DependencyList }>({
 		mounted: false,
@@ -45,13 +46,19 @@ export default (args: Args) => {
 		createShadowTracker(v, cleanup)
 	})
 
-	useInsertionEffect(() => {
+	const useEffect = normal ? useLayoutEffect : useInsertionEffect
+
+	useEffect(() => {
 		if (state.current.mounted && deepEqual(state.current.deps, deps)) return
 
 		state.current.mounted = true
 		state.current.deps = deps
 
 		init(setRef)
+
+		if (normal) {
+			return () => deinit?.()
+		}
 	}, deps)
 
 	return { ref: state.current.dom, setRef }

@@ -47,21 +47,13 @@ const Index = () => {
 	return (
 		<div className='flex h-full overflow-hidden'>
 			<Menu {...props_menu}></Menu>
-			<div
-				className='
-					flex
-					w-[calc(100%-240px)] h-full
-					py-0
-					page_wrap
-				'
-			>
-				<div className='h-full w-full'>
-					<Session
-						id={x.selected_session_id}
-						input={x.temp_input}
-						create={!x.selected_session_id ? x.createSession : undefined}
-					></Session>
-				</div>
+			<div className='h-full w-[calc(100%-240px)]'>
+				<Session
+					type='page'
+					id={x.selected_session_id}
+					input={x.temp_input}
+					create={!x.selected_session_id ? x.createSession : undefined}
+				></Session>
 			</div>
 		</div>
 	)

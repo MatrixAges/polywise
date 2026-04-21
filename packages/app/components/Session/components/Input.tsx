@@ -27,7 +27,18 @@ const submit_modes = [
 ]
 
 const Index = (props: IPropsInput) => {
-	const { streaming, archived, send, stop, clear, archive, unarchive, scrollToBottom, toggleContextModal } = props
+	const {
+		is_page,
+		streaming,
+		archived,
+		send,
+		stop,
+		clear,
+		archive,
+		unarchive,
+		scrollToBottom,
+		toggleContextModal
+	} = props
 	const global = useGlobal()
 	const ref = useRef<HTMLTextAreaElement>(null)
 	const [compositing, { setLeft, setRight }] = useToggle(false)
@@ -113,7 +124,8 @@ const Index = (props: IPropsInput) => {
 				h-full
 				pt-3
 				backdrop-blur-lg
-			`
+			`,
+				is_page && 'page_wrap py-0'
 			)}
 		>
 			<div className={$cx('flex flex-col', full && 'h-full')}>

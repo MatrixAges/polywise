@@ -17,6 +17,7 @@ export interface IPropsInput extends Pick<
 	Model,
 	'send' | 'stop' | 'clear' | 'archive' | 'unarchive' | 'scrollToBottom'
 > {
+	is_page: boolean
 	streaming: boolean
 	archived: boolean
 	toggleContextModal: () => void
