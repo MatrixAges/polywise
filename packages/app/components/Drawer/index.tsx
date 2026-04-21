@@ -89,8 +89,8 @@ const Index = (props: DrawerProps) => {
 			right: { align: 'justify-end', style: { width }, transform: 'translate3d(100%, 0px, 0px)' },
 			top: { style: { width: '100%', height }, transform: 'translate3d(0px, -100%, 0px)' },
 			bottom: {
-				align: 'items-end',
-				style: { width: '100%', height },
+				align: 'items-end justify-center',
+				style: { width: '100%', maxWidth: width ?? '100%', height },
 				transform: 'translate3d(0px, 100%, 0px)'
 			}
 		}

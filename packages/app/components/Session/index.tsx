@@ -119,6 +119,7 @@ const Index = (props: IProps) => {
 				getContainer={() => ref}
 				mask_closable
 				height='100%'
+				width={is_page ? 480 : '100%'}
 				title='Session Context'
 				desc='Current session state and env'
 				open={x.open_context_modal}
