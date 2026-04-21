@@ -32,9 +32,14 @@ const Index = (props: IProps) => {
 	const global = useGlobal()
 
 	const s = global.setting
+	const config = $copy(s.config)
 	const providers = $copy([...s.providers.providers, ...(s.providers.custom_providers || [])])
 
-	const [model, setModel] = useState<string | null>(() => (s.config ? s.config.default_model?.model : null))
+	const [model, setModel] = useState<string | null>(() => (config ? config?.default_model?.model : null))
+
+	useEffect(() => {
+		if (config?.default_model?.model) setModel(config?.default_model?.model)
+	}, [config?.default_model])
 
 	useEffect(() => {
 		if (value?.model) setModel(value.model)
@@ -78,8 +83,6 @@ const Index = (props: IProps) => {
 		setModel(model)
 		onChange?.({ provider: provider.value, model })
 	})
-
-	console.log(model)
 
 	return (
 		<Combobox items={provider_items} value={model} onValueChange={setDefaultModel}>
