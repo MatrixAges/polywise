@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 
@@ -20,7 +21,9 @@ const Index = (props: IPropsGroupSessionRow) => {
 		rename_value
 	} = props
 
-	const { attributes, listeners, transform, transition, setNodeRef } = useSortable({ id: item.id })
+	const { attributes, listeners, transform, transition, isDragging, isOver, setNodeRef } = useSortable({
+		id: item.id
+	})
 
 	const props_row_menu: IPropsGroupSessionRowMenu = {
 		group_index,
@@ -31,6 +34,20 @@ const Index = (props: IPropsGroupSessionRow) => {
 		pin_map
 	}
 
+	const Title = useMemo(
+		() => (
+			<span
+				className='cursor-grab truncate transition-none'
+				ref={setNodeRef}
+				{...attributes}
+				{...listeners}
+			>
+				{item.title}
+			</span>
+		),
+		[item.title]
+	)
+
 	return (
 		<BaseItem
 			item={item}
@@ -38,14 +55,13 @@ const Index = (props: IPropsGroupSessionRow) => {
 			selected={selected_session_id === item.id}
 			renaming={renaming}
 			rename_value={rename_value}
-			title={
-				<span className='cursor-grab truncate' {...attributes} {...listeners}>
-					{item.title}
-				</span>
-			}
+			title={Title}
 			menu={<RowMenu {...props_row_menu}></RowMenu>}
-			style={{ transform: CSS.Translate.toString(transform), transition }}
-			node_ref={setNodeRef}
+			className={isDragging ? 'dragging z-10 backdrop-blur-lg' : ''}
+			style={{
+				transform: CSS.Translate.toString(transform),
+				transition: ''
+			}}
 		></BaseItem>
 	)
 }

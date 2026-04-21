@@ -16,12 +16,12 @@ interface IProps {
 	rename_value: string
 	title: ReactNode
 	menu: ReactNode
+	className?: string
 	style?: CSSProperties
-	node_ref?: (element: HTMLDivElement | null) => void
 }
 
 const Index = (props: IProps) => {
-	const { item, pin_map, selected, renaming, rename_value, title, menu, style, node_ref } = props
+	const { item, pin_map, selected, renaming, rename_value, title, menu, className, style } = props
 	const actions = useMenuContext()
 
 	console.log(item)
@@ -30,10 +30,9 @@ const Index = (props: IProps) => {
 		<ContextMenu>
 			<ContextMenuTrigger>
 				<div
-					className={$cx('click_button group', selected && 'active')}
+					className={$cx('click_button group', className, selected && 'active')}
 					style={style}
 					onClick={() => actions.setSelectedSession(item.id)}
-					ref={node_ref}
 				>
 					<div className='min-w-0 flex-1'>
 						{renaming ? (

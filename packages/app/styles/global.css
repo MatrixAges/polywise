@@ -81,6 +81,10 @@ body {
 			height: 14px;
 		}
 
+		&.dragging {
+			@apply transition-none;
+		}
+
 		&.active {
 			@apply bg-active text-std-900;
 		}

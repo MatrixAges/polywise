@@ -54,7 +54,7 @@ const Index = (props: IPropsGroupCard) => {
 		group_name
 	}
 
-	const props_row: Omit<IPropsGroupSessionRow, 'session_index' | 'item'> = {
+	const props_row: Omit<IPropsGroupSessionRow, 'session_index' | 'item' | 'renaming' | 'rename_value'> = {
 		group_index,
 		group_items_count: items.length,
 		groups: groups.map(group_item => ({
@@ -62,8 +62,7 @@ const Index = (props: IPropsGroupCard) => {
 			items: group_item.items
 		})),
 		pin_map,
-		selected_session_id,
-		rename_value: ''
+		selected_session_id
 	}
 
 	return (
@@ -122,11 +121,11 @@ const Index = (props: IPropsGroupCard) => {
 					<div className='flex flex-col'>
 						{items.map((item, session_index) => (
 							<Row
+								{...props_row}
 								session_index={session_index}
 								item={item}
 								renaming={rename_session_id === item.id}
 								rename_value={rename_session_id === item.id ? rename_value : ''}
-								{...props_row}
 								key={item.id}
 							></Row>
 						))}
