@@ -11,19 +11,21 @@ import Model from './model'
 
 import type { IPropsInput } from './types'
 
-interface IProps {
+export interface IProps {
 	id: string
+	input?: string
+	create: (input: string) => void
 }
 
 const Index = (props: IProps) => {
-	const { id } = props
+	const { id, input, create } = props
 	const [x] = useState(() => container.resolve(Model))
 
 	const streaming = x.status === 'streaming' || x.status === 'submitted'
 	const last_message = x.messages.at(-1)
 
 	const { ref, setRef } = useAliveEffect({
-		init: () => x.init(id),
+		init: () => x.init({ id, input }),
 		deinit: () => x.deinit(),
 		deps: [id]
 	})
@@ -35,7 +37,13 @@ const Index = (props: IProps) => {
 	const props_input: IPropsInput = {
 		streaming,
 		archived: x.archived_at !== null,
-		send: x.send,
+		send: useMemoizedFn((v: string) => {
+			if (create) {
+				create(v)
+			} else {
+				x.send(v)
+			}
+		}),
 		stop: x.stop,
 		clear: x.clear,
 		archive: x.archive,

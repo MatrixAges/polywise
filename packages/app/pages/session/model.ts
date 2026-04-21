@@ -2,6 +2,7 @@ import { arrayMove } from '@dnd-kit/sortable'
 import { makeAutoObservable } from 'mobx'
 import { injectable } from 'tsyringe'
 
+import { Util } from '@/models/common'
 import { rpc } from '@/utils'
 
 import type { Session } from '@core/db'
@@ -21,7 +22,6 @@ export default class Index {
 	groups = [] as Array<ISessionMenuGroup>
 	sessions = [] as Array<Session>
 	pin_map = {} as Record<string, number>
-	deinit_watch_session_title = (() => {}) as () => void
 	selected_session_id = ''
 	rename_group_index = -1
 	rename_session_id = ''
@@ -30,13 +30,15 @@ export default class Index {
 	loading = false
 	loading_more = false
 	has_more = true
+	temp_input = ''
 
-	constructor() {
+	constructor(public util: Util) {
 		makeAutoObservable(this, {}, { autoBind: true })
 	}
 
 	async init() {
 		await this.refresh({ reset_selected_session: true })
+
 		this.watchSessionTitle()
 	}
 
@@ -151,15 +153,22 @@ export default class Index {
 		}
 	}
 
-	async createSession() {
+	async createSession(input?: string) {
 		const next_session = await rpc.session.create.mutate({})
 
-		if (!next_session) {
-			return
-		}
+		if (!next_session) return
 
 		await this.refresh()
+
 		this.selected_session_id = next_session.id
+
+		if (input) {
+			this.temp_input = input
+
+			setTimeout(() => {
+				this.temp_input = ''
+			}, 1200)
+		}
 	}
 
 	async removeSession(id: string) {
@@ -260,8 +269,6 @@ export default class Index {
 	}
 
 	watchSessionTitle() {
-		this.deinit_watch_session_title()
-
 		const deinit = rpc.session.watchSessionTitle.subscribe(undefined, {
 			onData: res => {
 				const { id, title } = res
@@ -287,10 +294,10 @@ export default class Index {
 			}
 		})
 
-		this.deinit_watch_session_title = deinit.unsubscribe
+		this.util.acts.push(deinit.unsubscribe)
 	}
 
 	deinit() {
-		this.deinit_watch_session_title()
+		this.util.deinit()
 	}
 }

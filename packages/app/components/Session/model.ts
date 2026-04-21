@@ -11,6 +11,7 @@ import { alert, Chat, CustomTransport, execUntil, rpc } from '@/utils'
 import type { Session } from '@core/db'
 import type { Context, Message, Permission } from '@core/fst'
 import type { AbstractChat, UIMessage } from 'ai'
+import type { IProps } from './index'
 
 @injectable()
 export default class Index {
@@ -57,12 +58,18 @@ export default class Index {
 		)
 	}
 
-	init(id: string) {
+	init(args: Pick<IProps, 'id' | 'input'>) {
+		const { id, input } = args
+
+		if (!id) return
+
 		this.id = id
 
 		this.initChat()
 		this.sub()
 		this.on()
+
+		if (input) this.send(input)
 
 		execUntil(
 			() => this.ref_bottom_signal,
