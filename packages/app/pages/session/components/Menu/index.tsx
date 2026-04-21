@@ -37,7 +37,7 @@ const Index = (props: IPropsMenu) => {
 			className='
 				overflow-hidden
 				flex flex-none flex-col
-				w-[240px] h-full
+				w-[210px] h-full
 				border-border-light border-r
 			'
 		>

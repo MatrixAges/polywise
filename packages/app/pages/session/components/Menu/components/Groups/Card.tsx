@@ -94,7 +94,7 @@ const Index = (props: IPropsGroupCard) => {
 									cancelRename={actions.cancelRename}
 								></RenameInput>
 							) : (
-								<div className='text-std-400 text-xsm truncate font-medium'>
+								<div className='text-std-300 text-xsm truncate font-medium'>
 									{group_name}
 								</div>
 							)}

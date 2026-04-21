@@ -8,6 +8,7 @@ import { Menu } from './components'
 import { MenuContext } from './context'
 import Model from './model'
 
+import type { IMenuContext } from './context'
 import type { IPropsMenu } from './types'
 
 const Index = () => {
@@ -23,27 +24,24 @@ const Index = () => {
 		rename_value: x.rename_value
 	}
 
-	const actions = useMemo(
-		() => ({
-			setSelectedSession: x.setSelectedSession,
-			startRenameGroup: x.startRenameGroup,
-			startRenameSession: x.startRenameSession,
-			setRenameValue: x.setRenameValue,
-			submitRename: x.submitRename,
-			cancelRename: x.cancelRename,
-			createSession: x.createSession,
-			createGroup: x.createGroup,
-			removeSession: x.removeSession,
-			removeGroup: x.removeGroup,
-			togglePinSession: x.togglePinSession,
-			sortGroup: x.sortGroup,
-			sortGroupSession: x.sortGroupSession,
-			moveSessionToGroup: x.moveSessionToGroup,
-			moveSessionOutGroup: x.moveSessionOutGroup,
-			onScroll: x.onScroll
-		}),
-		[x]
-	)
+	const menu_context: IMenuContext = {
+		setSelectedSession: x.setSelectedSession,
+		startRenameGroup: x.startRenameGroup,
+		startRenameSession: x.startRenameSession,
+		setRenameValue: x.setRenameValue,
+		submitRename: x.submitRename,
+		cancelRename: x.cancelRename,
+		createSession: x.createSession,
+		createGroup: x.createGroup,
+		removeSession: x.removeSession,
+		removeGroup: x.removeGroup,
+		togglePinSession: x.togglePinSession,
+		sortGroup: x.sortGroup,
+		sortGroupSession: x.sortGroupSession,
+		moveSessionToGroup: x.moveSessionToGroup,
+		moveSessionOutGroup: x.moveSessionOutGroup,
+		onScroll: x.onScroll
+	}
 
 	useLayoutEffect(() => {
 		x.init()
@@ -53,10 +51,10 @@ const Index = () => {
 
 	return (
 		<div className='flex h-full overflow-hidden'>
-			<MenuContext value={actions}>
+			<MenuContext value={menu_context}>
 				<Menu {...props_menu}></Menu>
 			</MenuContext>
-			<div className='h-full w-[calc(100%-240px)]'>
+			<div className='h-full w-[calc(100%-210px)]'>
 				<Session
 					type='page'
 					id={x.selected_session_id}
