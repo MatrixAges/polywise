@@ -129,7 +129,7 @@ const Index = (props: IPropsMenu) => {
 			className='
 				overflow-hidden
 				flex flex-none flex-col
-				w-80 h-full
+				w-[240px] h-full
 				border-r
 			'
 		>

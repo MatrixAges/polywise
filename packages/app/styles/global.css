@@ -17,14 +17,14 @@ body {
 	}
 }
 
-.page_wrap {
-	margin: 0 auto;
-	max-width: 600px;
-	width: 100%;
-	padding: calc(var(--spacing) * 2.5);
-}
-
 @layer components {
+	.page_wrap {
+		margin: 0 auto;
+		max-width: 600px;
+		width: 100%;
+		padding: calc(var(--spacing) * 2.5);
+	}
+
 	.icon_button {
 		@apply 
 				flex

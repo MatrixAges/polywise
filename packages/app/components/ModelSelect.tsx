@@ -79,6 +79,8 @@ const Index = (props: IProps) => {
 		onChange?.({ provider: provider.value, model })
 	})
 
+	console.log(model)
+
 	return (
 		<Combobox items={provider_items} value={model} onValueChange={setDefaultModel}>
 			<ComboboxInput ghost={ghost} placeholder='Select a default model' />
