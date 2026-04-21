@@ -1,7 +1,8 @@
+import { useMemo } from 'react'
 import { Pin } from 'lucide-react'
 
 import { ContextMenu, ContextMenuTrigger } from '@/__shadcn__/components/ui/context-menu'
-import { Grip } from '@/components/animate'
+import { ArrowLeft, Grip } from '@/components/animate'
 
 import { useMenuContext } from '../context'
 import RenameInput from './RenameInput'
@@ -11,7 +12,7 @@ import type { CSSProperties, ReactNode } from 'react'
 
 interface IProps {
 	item: Session
-	pin_map: Record<string, number>
+	pin: boolean
 	selected: boolean
 	renaming: boolean
 	rename_value: string
@@ -22,10 +23,17 @@ interface IProps {
 }
 
 const Index = (props: IProps) => {
-	const { item, pin_map, selected, renaming, rename_value, title, menu, className, style } = props
+	const { item, pin, selected, renaming, rename_value, title, menu, className, style } = props
+	const { is_runing, unread } = item
 	const actions = useMenuContext()
 
-	console.log(item)
+	const Status = useMemo(() => {
+		if (item.is_runing) return <Grip className='text-std-400! size-3' />
+		if (unread) return <ArrowLeft className='text-std-300! size-3' />
+		if (pin) return <Pin className='text-std-300! size-3' />
+
+		return null
+	}, [pin, is_runing, unread])
 
 	return (
 		<ContextMenu>
@@ -48,13 +56,7 @@ const Index = (props: IProps) => {
 							title
 						)}
 					</div>
-					{!item.is_runing ? (
-						<Grip className='text-std-300! size-3'></Grip>
-					) : pin_map[item.id] ? (
-						<Pin className='text-std-300! size-3' />
-					) : (
-						''
-					)}
+					{Status}
 				</div>
 			</ContextMenuTrigger>
 			{menu}

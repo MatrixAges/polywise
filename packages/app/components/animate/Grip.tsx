@@ -35,7 +35,10 @@ const VARIANTS: Variants = {
 		transition: {
 			delay: index * 0.07,
 			duration: 1.1,
-			times: [0, 0.2, 0.8, 1]
+			times: [0, 0.2, 0.8, 1],
+			repeat: Infinity,
+			repeatType: 'loop',
+			repeatDelay: 0.1
 		}
 	})
 }
@@ -46,15 +49,19 @@ const Index = ({ onMouseEnter, onMouseLeave, className, size = 28, ...props }: G
 
 	const startAnimation = useCallback(async () => {
 		if (isAnimatingRef.current) return
+
 		isAnimatingRef.current = true
+
 		await controls.start('animate')
-		await controls.start('normal')
-		isAnimatingRef.current = false
 	}, [controls])
 
 	const stopAnimation = useCallback(async () => {
 		if (!isAnimatingRef.current) return
+
+		controls.stop()
+
 		await controls.start('normal')
+
 		isAnimatingRef.current = false
 	}, [controls])
 

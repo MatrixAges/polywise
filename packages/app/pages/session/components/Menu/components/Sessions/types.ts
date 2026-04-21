@@ -4,13 +4,13 @@ import type { IPropsSessions } from '../../../../types'
 export interface IPropsSessionItemMenu {
 	item: Session
 	groups: IPropsSessions['groups']
-	pin_map: Record<string, number>
+	pin: boolean
 }
 
 export interface IPropsSessionItem {
 	item: Session
 	groups: IPropsSessions['groups']
-	pin_map: Record<string, number>
+	pin: boolean
 	selected: boolean
 	renaming: boolean
 	rename_value: string

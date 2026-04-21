@@ -13,7 +13,7 @@ import { useMenuContext } from '@/pages/session/context'
 import type { IPropsGroupSessionRowMenu } from './types'
 
 const Index = (props: IPropsGroupSessionRowMenu) => {
-	const { group_index, session_index, group_items_count, item, groups, pin_map } = props
+	const { group_index, session_index, group_items_count, item, groups, pin } = props
 	const actions = useMenuContext()
 
 	const moveUp = useMemoizedFn(() => {
@@ -33,7 +33,7 @@ const Index = (props: IPropsGroupSessionRowMenu) => {
 				Rename
 			</ContextMenuItem>
 			<ContextMenuItem onClick={() => actions.togglePinSession(item.id)}>
-				{pin_map[item.id] ? 'Unpin' : 'Pin'}
+				{pin ? 'Unpin' : 'Pin'}
 			</ContextMenuItem>
 			<ContextMenuSub>
 				<ContextMenuSubTrigger>Move To Group</ContextMenuSubTrigger>

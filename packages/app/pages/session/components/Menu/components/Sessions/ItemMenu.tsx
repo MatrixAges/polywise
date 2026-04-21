@@ -11,7 +11,7 @@ import { useMenuContext } from '@/pages/session/context'
 import type { IPropsSessionItemMenu } from './types'
 
 const Index = (props: IPropsSessionItemMenu) => {
-	const { item, groups, pin_map } = props
+	const { item, groups, pin } = props
 	const actions = useMenuContext()
 
 	return (
@@ -23,7 +23,7 @@ const Index = (props: IPropsSessionItemMenu) => {
 				Rename
 			</ContextMenuItem>
 			<ContextMenuItem onClick={() => actions.togglePinSession(item.id)}>
-				{pin_map[item.id] ? 'Unpin' : 'Pin'}
+				{pin ? 'Unpin' : 'Pin'}
 			</ContextMenuItem>
 			<ContextMenuSub>
 				<ContextMenuSubTrigger>Move To Group</ContextMenuSubTrigger>

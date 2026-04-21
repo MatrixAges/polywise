@@ -9,19 +9,10 @@ import RowMenu from './RowMenu'
 import type { IPropsGroupSessionRow, IPropsGroupSessionRowMenu } from './types'
 
 const Index = (props: IPropsGroupSessionRow) => {
-	const {
-		group_index,
-		session_index,
-		item,
-		group_items_count,
-		groups,
-		pin_map,
-		selected_session_id,
-		renaming,
-		rename_value
-	} = props
+	const { group_index, session_index, item, group_items_count, groups, pin, selected, renaming, rename_value } =
+		props
 
-	const { attributes, listeners, transform, transition, isDragging, isOver, setNodeRef } = useSortable({
+	const { attributes, listeners, transform, isDragging, setNodeRef } = useSortable({
 		id: item.id
 	})
 
@@ -31,7 +22,7 @@ const Index = (props: IPropsGroupSessionRow) => {
 		group_items_count,
 		item,
 		groups,
-		pin_map
+		pin
 	}
 
 	const Title = useMemo(
@@ -51,8 +42,8 @@ const Index = (props: IPropsGroupSessionRow) => {
 	return (
 		<BaseItem
 			item={item}
-			pin_map={pin_map}
-			selected={selected_session_id === item.id}
+			pin={pin}
+			selected={selected}
 			renaming={renaming}
 			rename_value={rename_value}
 			title={Title}

@@ -8,7 +8,7 @@ export interface IPropsGroupSessionRowMenu {
 	group_items_count: number
 	item: Session
 	groups: Array<{ group: string; items: Array<Session> }>
-	pin_map: Record<string, number>
+	pin: boolean
 }
 
 export interface IPropsGroupSessionRow {
@@ -17,8 +17,8 @@ export interface IPropsGroupSessionRow {
 	item: Session
 	group_items_count: number
 	groups: Array<{ group: string; items: Array<Session> }>
-	pin_map: Record<string, number>
-	selected_session_id: string
+	pin: boolean
+	selected: boolean
 	renaming: boolean
 	rename_value: string
 }
