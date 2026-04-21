@@ -53,7 +53,10 @@ export const createWikiTool = (scope: SessionScope) => {
 				const results = await search({
 					query: input.query,
 					intent: 'knowledge search',
-					type: 'article'
+					type: 'article',
+					for_types: ['wiki'],
+					scope_type: scope.type,
+					scope_id: scope.id ?? undefined
 				})
 
 				const top = results.results.slice(0, 3)

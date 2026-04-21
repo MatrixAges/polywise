@@ -44,6 +44,7 @@ export default async (args: ArgsSearch): Promise<SearchOutput> => {
 		enable_recall = false,
 		rank_by_time,
 		type = 'article',
+		for_types,
 		scope_type,
 		scope_id
 	} = args
@@ -121,7 +122,7 @@ export default async (args: ArgsSearch): Promise<SearchOutput> => {
 
 		log('SEARCH', 'preRankDone', () => `result_count: ${preranked.length}`)
 
-		return await rankByTime(rerank_query, preranked, type)
+		return await rankByTime(rerank_query, preranked, type, for_types)
 	}
 
 	if (type === 'chunk') {
@@ -158,7 +159,7 @@ export default async (args: ArgsSearch): Promise<SearchOutput> => {
 
 	log('SEARCH', 'done', () => `result_count: ${reranked.length}`)
 
-	const article_scores = await lookup(reranked)
+	const article_scores = await lookup(reranked, for_types)
 
 	log('SEARCH', 'articleLookup', () => `article_count: ${article_scores.length}`)
 
@@ -179,7 +180,8 @@ export default async (args: ArgsSearch): Promise<SearchOutput> => {
 
 	const reranked_articles: Array<RerankedArticleResult & { article_id: string }> = await rerankArticle(
 		rerank_query,
-		article_search_results
+		article_search_results,
+		for_types
 	)
 
 	log('SEARCH', 'articleRerankDone', () => `result_count: ${reranked_articles.length}`)

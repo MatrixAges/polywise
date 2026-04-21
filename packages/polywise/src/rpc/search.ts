@@ -10,6 +10,7 @@ export const input_type = object({
 	enable_recall: boolean().optional(),
 	rank_by_time: boolean().optional(),
 	type: union([literal('chunk'), literal('article')]).optional(),
+	for_types: array(union([literal('linkcase'), literal('wiki'), literal('memory'), literal('user')])).optional(),
 	scope_type: union([literal('global'), literal('project'), literal('agent')]).optional(),
 	scope_id: string().optional()
 }).strict()

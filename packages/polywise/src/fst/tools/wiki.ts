@@ -23,6 +23,7 @@ export const createWikiTool = (s: Session) => {
 				query: input.query,
 				intent: 'knowledge search',
 				type: 'article',
+				for_types: ['wiki'],
 				scope_type: s.scope.type,
 				scope_id: s.scope.id || undefined
 			})

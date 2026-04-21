@@ -23,6 +23,7 @@ export const createMemoryTool = (s: Session) => {
 				query: input.query,
 				intent: 'memory search',
 				type: 'article',
+				for_types: ['memory'],
 				scope_type: s.scope.type,
 				scope_id: s.scope.id || undefined
 			})

@@ -52,7 +52,10 @@ export const createMemoryTool = (scope: SessionScope) => {
 				const results = await search({
 					query: input.query,
 					intent: 'memory search',
-					type: 'article'
+					type: 'article',
+					for_types: ['memory'],
+					scope_type: scope.type,
+					scope_id: scope.id ?? undefined
 				})
 
 				const top = results.results.slice(0, 3)

@@ -1,7 +1,7 @@
 import { article, chunk } from '@core/db/schema'
 import { getArticles, getChunks } from '@core/db/services'
 import { log } from '@core/utils'
-import { inArray } from 'drizzle-orm'
+import { and, inArray } from 'drizzle-orm'
 
 interface ChunkScore {
 	chunk_id: string
@@ -30,7 +30,10 @@ export interface ArticleWithScore {
 	scope_id: string | null
 }
 
-export default async (chunks: Array<ChunkScore>): Promise<Array<ArticleWithScore>> => {
+export default async (
+	chunks: Array<ChunkScore>,
+	for_types?: Array<'linkcase' | 'wiki' | 'memory' | 'user'>
+): Promise<Array<ArticleWithScore>> => {
 	if (chunks.length === 0) return []
 
 	const chunk_ids = chunks.map(c => c.chunk_id)
@@ -43,8 +46,13 @@ export default async (chunks: Array<ChunkScore>): Promise<Array<ArticleWithScore
 
 	if (article_ids.length === 0) return []
 
+	const article_where =
+		for_types && for_types.length > 0
+			? and(inArray(article.id, article_ids), inArray(article.for, for_types))
+			: inArray(article.id, article_ids)
+
 	const article_results = await getArticles({
-		where: inArray(article.id, article_ids)
+		where: article_where
 	})
 
 	const article_map = new Map(article_results.map(a => [a.id, a]))

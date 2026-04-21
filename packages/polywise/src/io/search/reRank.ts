@@ -3,7 +3,7 @@ import { getArticles, getChunks } from '@core/db/services'
 import { env } from '@core/env'
 import { addTask, initRerankModel, removeTask } from '@core/llama'
 import { log } from '@core/utils'
-import { inArray } from 'drizzle-orm'
+import { and, inArray } from 'drizzle-orm'
 
 interface SearchResult {
 	chunk_id: string
@@ -116,7 +116,11 @@ const rerankChunk = async (query: string, results: Array<SearchResult>) => {
 	return reranked.sort((a, b) => b.final_score - a.final_score)
 }
 
-const rerankArticle = async (query: string, results: Array<ArticleSearchResult>) => {
+const rerankArticle = async (
+	query: string,
+	results: Array<ArticleSearchResult>,
+	for_types?: Array<'linkcase' | 'wiki' | 'memory' | 'user'>
+) => {
 	if (results.length === 0) return []
 
 	await initRerankModel()
@@ -125,8 +129,13 @@ const rerankArticle = async (query: string, results: Array<ArticleSearchResult>)
 
 	const article_ids = results.map(item => item.article_id)
 
+	const article_where =
+		for_types && for_types.length > 0
+			? and(inArray(article.id, article_ids), inArray(article.for, for_types))
+			: inArray(article.id, article_ids)
+
 	const articles = await getArticles({
-		where: inArray(article.id, article_ids)
+		where: article_where
 	})
 
 	const content_map = new Map<string, string>()

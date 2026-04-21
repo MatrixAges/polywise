@@ -36,7 +36,12 @@ const mapRerankedToOutput = (
 	}))
 })
 
-export default async (query: string, preranked: Array<RrfScore>, type: 'chunk' | 'article'): Promise<SearchOutput> => {
+export default async (
+	query: string,
+	preranked: Array<RrfScore>,
+	type: 'chunk' | 'article',
+	for_types?: Array<'linkcase' | 'wiki' | 'memory' | 'user'>
+): Promise<SearchOutput> => {
 	const reranked = await rerank(query, preranked)
 
 	log('SEARCH', 'done', () => `result_count: ${reranked.length}`)
@@ -45,7 +50,7 @@ export default async (query: string, preranked: Array<RrfScore>, type: 'chunk' |
 		return mapRerankedToOutput(reranked, 'chunk')
 	}
 
-	const article_scores = await lookup(reranked)
+	const article_scores = await lookup(reranked, for_types)
 
 	log('SEARCH', 'articleLookup', () => `article_count: ${article_scores.length}`)
 
@@ -65,7 +70,8 @@ export default async (query: string, preranked: Array<RrfScore>, type: 'chunk' |
 
 	const reranked_articles: Array<RerankedArticleResult & { article_id: string }> = await rerankArticle(
 		query,
-		article_search_results
+		article_search_results,
+		for_types
 	)
 
 	log('SEARCH', 'articleRerankDone', () => `result_count: ${reranked_articles.length}`)

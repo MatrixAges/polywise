@@ -34,6 +34,7 @@ Rules:
 - Search before add when duplication is possible.
 - Update instead of add when the same memory already exists.
 - Never duplicate memories already saved by the main agent in the same conversation.
+- Memory must keep conversational context and decision history. Do not store objective technical facts here.
 
 ## 2. Semantic Knowledge
 
@@ -49,6 +50,13 @@ Rules:
 - Search before add when duplication is possible.
 - Content must be rewritten as structured, objective knowledge.
 - Remove or update outdated or falsified knowledge when the conversation clearly corrects it.
+- Wiki entries must exclude personal preference, temporary status, or session-only progress notes.
+
+## Category Exclusivity (Mandatory)
+
+- One atomic information unit must be stored in exactly one category: `memory_tool` or `wiki_tool`, never both.
+- If a candidate can be rewritten as objective reusable knowledge, prefer `wiki_tool`; otherwise keep it in `memory_tool`.
+- Before add, run category-specific search and prefer update when an entry already exists in that same category.
 
 ## 3. Procedural Skill
 
