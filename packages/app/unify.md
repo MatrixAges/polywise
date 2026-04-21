@@ -1,31 +1,41 @@
-# 代码风格路由 (Unify Rules)
+# Code Style Routing (packages/app)
 
-本文件定义 `app` 前端包的代码风格和组件分形结构约束。Agent 在修改或创建前端页面与逻辑时，必须以此表作为绝对准则。
+This file constrains code generation and refactoring behavior for `packages/app`. Before any write operation, the agent must match a node from the Tree JSON below and complete two-sample comparison.
 
-## Tree JSON 路由表
+## Tree JSON Routing Table
 
 ```json
 {
-	"React Component (视图组件)": {
-		"description": "负责 UI 渲染的无状态或受控 React 组件，不能直接处理复杂的异步业务逻辑。",
-		"fractal_rule": "遵循就近原则和组件分形法则：\n1. 轻量级单体组件直接使用单文件（如 `Alert.tsx`）。\n2. 如果组件逻辑超过 80 行，或者内部存在 `map` 列表循环渲染的区块，必须在该目录下新建以组件名命名的文件夹（如 `TaskDetail/`）。\n3. 将主逻辑存入 `TaskDetail/index.tsx`，拆分出的子区块组件放在同级目录（如 `TaskDetail/ListItem.tsx`），保证逻辑收敛，防止扁平目录膨胀。",
-		"export_style": "一律使用箭头函数进行默认导出：`export default (props: Props) => {}`。泛型使用 `Array<T>`，禁止 `any`。",
-		"naming_rules": "组件文件与函数名强制使用 PascalCase。内部辅助纯函数使用 camelCase。",
-		"Same Code 1": "packages/app/components/Alert.tsx",
-		"Same Code 2": "packages/app/pages/Setting/index.tsx"
+	"React Pages and Composite Components": {
+		"description": "Handles page-level and complex composite UI rendering. Child composition is allowed, but business state ownership stays in page models.",
+		"fractal_rule": "A single file can host the entry. When stable sections appear, use same-name folder + index.tsx + components/ layering to avoid flat directory sprawl.",
+		"import_order": "1) react/mobx/tsyringe and third-party libs; 2) @/ internal aliases; 3) relative modules; 4) type-only imports at the end of each group.",
+		"naming_rules": "Component files use PascalCase. Functions/events use camelCase. Ordinary variables use snake_case.",
+		"Same Code 1": "packages/app/components/Session/index.tsx",
+		"Same Code 2": "packages/app/pages/session/index.tsx",
+		"sample_pool": [
+			"packages/app/components/Dialog.tsx",
+			"packages/app/pages/project/index.tsx",
+			"packages/app/pages/session/components/Menu/index.tsx"
+		]
 	},
-	"MobX Model (状态管理模型)": {
-		"description": "负责处理复杂业务逻辑、API 请求调度和跨组件状态共享。",
-		"fractal_rule": "放置于对应模块（或全局的）`models/` 目录下。按业务域拆分为独立文件（如 `global.ts`, `theme.ts`）。如果某个页面独有的状态复杂，该页面的文件夹下必须有自己的 `models/` 文件夹。",
-		"export_style": "默认导出类：`export default class ModelName`。",
-		"dependency_injection": "强制使用 tsyringe，必须使用 `@singleton()` 或 `@injectable()` 装饰类。所有外部依赖（包含其他 Model）必须通过 `constructor(public dep1: Dep1)` 注入。所有副作用监听放入 `init()`，清理逻辑放入 `off()`。",
-		"Same Code 1": "packages/app/models/global.ts"
+	"MobX Models": {
+		"description": "Owns state organization, async orchestration, subscriptions, and lifecycle. Must not contain JSX.",
+		"fractal_rule": "Prefer single-file models. When one model becomes heavy, create a same-level folder and split by capability with index as the aggregator.",
+		"import_order": "1) mobx/tsyringe; 2) @/models and @/utils; 3) relative paths; 4) type-only imports.",
+		"naming_rules": "Class names use PascalCase with Model suffix. Methods use camelCase. Fields use snake_case.",
+		"Same Code 1": "packages/app/models/global.ts",
+		"Same Code 2": "packages/app/models/setting.ts",
+		"sample_pool": ["packages/app/models/theme.ts", "packages/app/models/locale.ts"]
 	},
-	"Utility Function (纯净工具)": {
-		"description": "无副作用纯函数，一律用于计算、数据格式化。",
-		"fractal_rule": "按纯粹功能域拆分为文件。例如专门处理时间、处理 DOM、处理 URL。",
-		"export_style": "默认导出匿名箭头函数：`export default (args) => {}`。",
-		"Same Code 1": "packages/app/utils/format.ts"
+	"Frontend Utility Functions": {
+		"description": "Provides lightweight non-UI reusable capabilities and must avoid page-state side effects.",
+		"fractal_rule": "Place by capability in utils/. If a capability has multiple sub-implementations, create a same-name folder with index.ts entry.",
+		"import_order": "1) third-party libs; 2) @/ aliases; 3) relative paths; 4) type-only imports.",
+		"naming_rules": "Functions use camelCase, ordinary variables use snake_case, and file names follow current repo style (mostly camelCase).",
+		"Same Code 1": "packages/app/utils/time.ts",
+		"Same Code 2": "packages/app/utils/i18n.ts",
+		"sample_pool": ["packages/app/utils/ipc.ts", "packages/app/utils/theme.ts"]
 	}
 }
 ```

@@ -1,31 +1,48 @@
-## Core Execution Flow
+## 核心执行流程
 
-- **Save Context**: After receiving user instructions and before calling any other tools, you must call the `date` command via `bash` to get the time, translate the user's original input into English, and write it to `.prompts/YYYY-MM-DD/HH-mm-ss.md`.
-- **Language Alignment**: You must detect the language of the user's input and output the final reply in the exact same language.
-- **Safe Paths**: Before calling file tools, if the path is not a known absolute path, you must first use `glob` or `ls` to search and confirm the exact file location. Guessing paths based on memory is strictly prohibited.
-- **Test Script Isolation (Strong Constraint)**: Any script files generated via `bash` for verification or temporary testing (not limited to `.ts`, but including all `*.sql`, `*.sh`, etc.) are **absolutely prohibited** from being generated directly in the project root or business source code directories. You **must** generate and execute them in the `.test/` directory under the corresponding sub-package root. If there is no clearly associated sub-package, you must also create a temporary `.test/` directory to store them, and clean up after execution as much as possible. Scattering test scripts in the root directory will be considered a serious violation.
-- **Complete Replacement**: When using the `edit` tool, `oldString` must contain enough context to uniquely locate it, and `newString` must be complete business logic. Using `...` to truncate code is strictly prohibited.
-- **Scope Limitation**: Strictly limit code modifications to files or modules explicitly mentioned by the user. If related modifications involve unmentioned modules, you must first output text to confirm with the user.
-- **Draft Proposal Requirement**: Before executing any file modifications (including `edit`, `write`, or `bash` commands that create/modify files), you MUST first output a complete draft proposal showing all intended changes. Wait for explicit user approval before proceeding with actual implementation. This applies to all code changes, refactoring, and file creations.
-- **Protected Directories**: You are absolutely not allowed to modify any folders starting with `__` (double underscore) (such as `__codegrave__`), nor are you allowed to generate, modify, or read `unify.md` and other code for these protected directories.
-- **Concise Output**: Do not include any pleasantries or unnecessary explanations in the reply. Directly output the final solution or wrap it in a Markdown code block.
+- **上下文落盘（强制）**：接收用户指令后、调用其他工具前，必须先通过 `bash` 执行 `date` 获取时间，把用户原始输入翻译成英文后写入 `.prompts/YYYY-MM-DD/HH-mm-ss.md`。
+- **语言一致**：必须使用与用户输入完全一致的语言回复。
+- **路径安全**：调用文件工具前，如果不是明确的绝对路径，必须先用 `glob` 或 `ls` 确认真实位置，禁止凭记忆猜路径。
+- **测试脚本隔离（强约束）**：通过 `bash` 生成的任意临时验证脚本（不限于 `.ts/.sql/.sh`）严禁放在仓库根目录或业务源码目录，必须放到对应子包 `.test/` 下；若无明确子包，也必须创建临时 `.test/` 并尽量清理。
+- **完整替换**：使用编辑工具时，替换片段必须提供足够上下文并写入完整业务逻辑，严禁使用 `...` 省略代码。
+- **范围限制**：改动严格限定在用户明确提及的文件或模块；若涉及未提及模块，必须先与用户确认。
+- **方案先行**：任何会产生写入的动作（编辑、创建文件、会修改文件的命令）前，必须先给出完整草案并等待用户明确同意。
+- **受保护目录**：严禁读取、修改任何 `__` 开头目录（如 `__codegrave__`）。
+- **输出简洁**：禁止客套话和无关说明，直接给结果。
 
-## Core Specification File Collaboration Guide
+## Unify Hard Gate (New)
 
-- **`agentmap.md` (Architecture and Status Map)**
-     - **When to use**: After saving context and before reading other code, you must read it; before ending the task, as long as file additions, deletions, or modifications have occurred, you must update its internal JSON tree using `edit`.
-     - **Function**: Ensures you accurately grasp the latest physical file structure and module functional division of the target package.
+- **No Unify, No Write**: If any step below is missing, stop all write operations immediately:
 
-- **`unify.md` (Style Routing Table)**
-     - **When to use**: Before creating new files, refactoring existing modules, or writing core logic, you must read this file.
-     - **Function**: Addresses the matching "template code file" based on this file's routing table, and subsequently performs pixel-level imitation of its structure, naming, and import order during code generation to control code entropy increase.
+1. Read target package `unify.md` and match a node.
+2. Verify `Same Code 1` and `Same Code 2` paths are reachable.
+3. Read `Same Code 1` and extract the structural skeleton.
+4. Read `Same Code 2` and complete anti-overfitting comparison.
+5. Output `UNIFY_EXECUTION_CONTEXT` evidence before editing.
 
-- **`coding.md` (Coding Specification)**
-     - **When to use**: In any step involving writing, reviewing, or modifying code, you must use it as the underlying constraint for real-time verification.
-     - **Function**: Provides the project's most stringent code syntax, architectural conventions, and mandatory execution rules.
+- **Fix Route First When Samples Break**: If any `Same Code` path is invalid, update the corresponding `unify.md` first. Skipping samples and directly editing business code is prohibited.
+- **Mandatory Post-Implementation Review**: After changes, output `UNIFY_COMPLIANCE_REPORT` with reuse points, differences, and business justification.
+- **No Silent Downgrade**: Without explicit user authorization, do not downgrade Unify from hard-blocking to warning-only.
+
+## 核心规范文件协作指南
+
+- **`agentmap.md`（架构与状态地图）**
+
+1. **何时使用**：保存上下文后、读取其他代码前必须先读；任务结束前，只要有文件增删改，必须同步更新其 JSON 树。
+2. **作用**：保证对目标包当前物理结构和模块职责有一致认知。
+
+- **`unify.md`（风格路由表）**
+
+1. **何时使用**：创建新文件、重构模块、编写核心逻辑前必须读取。
+2. **作用**：通过路由匹配模板样例，执行像素级仿写，控制代码熵增。
+
+- **`coding.md`（编码规范）**
+
+1. **何时使用**：凡涉及写码、改码、评审，必须作为实时约束。
+2. **作用**：提供项目语法、架构与强制执行规范。
 
 [CRITICAL]
 
-- Answer my questions in the same language I use to ask them.
-- Reading any content from the `__codegrave__` directory is prohibited.
-- Only read-only commands like `git status` or `git log` are allowed. Absolutely prohibited are commands that change repository status like `git push` or `git commit`.
+- 始终使用与用户问题一致的语言。
+- 严禁读取 `__codegrave__` 目录任何内容。
+- 只允许 `git status`、`git log` 等只读 git 命令；严禁执行 `git push`、`git commit` 等会修改仓库状态的命令。

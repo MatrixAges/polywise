@@ -1,48 +1,97 @@
-# Code Style Routing (Unify Rules)
+# Code Style Routing (packages/polywise)
 
-This file defines code style and module fractal structure constraints within the `polywise` core engine package. Before generating code, the Agent must read this JSON, find the target node's `fractal_rule` (fractal and directory depth rules) and `Same Code` samples, and perform clone-style coding.
+This file is the style routing table for `packages/polywise`. Before any implementation or refactor, route to a node, read both Same Code samples, then apply clone-first coding.
 
 ## Tree JSON Routing Table
 
 ```json
 {
-	"Pipeline Action (Pipeline Atomic Functions)": {
-		"description": "Pure functions or aggregation entries that handle knowledge base core business pipeline (chunking, vectorization, retrieval, etc.).",
-		"fractal_rule": "Follow natural fractal growth rules:\n1. Simple atomic functions are defined directly as single files (e.g., `getVectors.ts`).\n2. When single file logic exceeds 40 lines, or multiple sub-steps need to collaborate internally (e.g., chunking functionality has both semantic chunking and symbolic chunking), forcibly create a new folder with the same name (e.g., `getChunks/`), store the main logic as the overall scheduling entry in `index.ts`, and store other split-out atomic functions in the same-level directory (e.g., `getSemanticChunks.ts`, `getSplitChunks.ts`), introduced and scheduled only by `index.ts`.\n3. All related auxiliary types and configuration items, if complex, should also converge to that same-level directory.",
-		"export_style": "Must use anonymous arrow functions as default exports: `export default async (args) => {}`. If parameters exceed 2, they must be encapsulated as an object and destructured on the first line.",
-		"naming_rules": "Function and file names一律 use camelCase.",
+	"Pipeline Atomic Functions": {
+		"description": "Implements retrieval/extraction pipeline atoms and small orchestrators.",
+		"fractal_rule": "Keep simple atoms in single files under src/pipeline/. When one atom grows into multiple internal steps, split into same-name folder with index.ts as scheduler.",
+		"import_order": "1) @core aliases; 2) third-party libs; 3) relative modules; 4) type-only imports.",
+		"naming_rules": "Function and file names use camelCase. Ordinary variables use snake_case.",
 		"Same Code 1": "packages/polywise/src/pipeline/getChunks/index.ts",
-		"Same Code 2": "packages/polywise/src/pipeline/getVectors.ts"
+		"Same Code 2": "packages/polywise/src/pipeline/getVectors.ts",
+		"sample_pool": [
+			"packages/polywise/src/pipeline/getKeywords.ts",
+			"packages/polywise/src/pipeline/getRewriteQuery.ts"
+		]
 	},
-	"Database SQL (Pure SQL Operations)": {
-		"description": "Stores native SQL statements or pure functions for assembling SQL. Business models cannot hardcode SQL.",
-		"fractal_rule": "Split files by database table name (e.g., `nodes.ts`, `edges.ts`) stored in `src/sql/`. For complex cross-table queries, new files can be created based on business domain.",
-		"export_style": "Must be exposed through on-demand exports `export const sql_insert_node = ...`. Default export is strictly prohibited.",
-		"comments_rule": "Mandatory JSDoc comments, detailing the table and business function of the current SQL operation.",
-		"Same Code 1": "packages/polywise/src/sql/nodes.ts"
+	"IO Search and Save Flows": {
+		"description": "Owns business-domain save/search workflows built from lower-level pipeline and db services.",
+		"fractal_rule": "Use domain folders under src/io/. Keep index.ts as orchestration entry and split sub-steps into adjacent files or subfolders.",
+		"import_order": "1) @core aliases; 2) third-party libs; 3) relative modules; 4) type-only imports.",
+		"naming_rules": "Functions use camelCase. Input/output aliases use PascalCase. Variables use snake_case.",
+		"Same Code 1": "packages/polywise/src/io/search/index.ts",
+		"Same Code 2": "packages/polywise/src/io/save/index.ts",
+		"sample_pool": ["packages/polywise/src/io/search/lookup.ts", "packages/polywise/src/io/save/saveArticle.ts"]
 	},
-	"Database Model (Data Models)": {
-		"description": "Business models responsible for scheduling SQL execution and performing data transformation.",
-		"fractal_rule": "Split by business domain into independent files (e.g., `NodeModel.ts`) stored in `src/models/`. If model responsibilities grow, split into basic models (read-write separation), etc.",
-		"export_style": "Default export class.",
-		"dependency_injection": "No strong injection, but must uniformly depend on `sqlite` executor instance.",
-		"Same Code 1": "packages/polywise/src/models/NodeModel.ts"
+	"RPC Procedures": {
+		"description": "Defines tRPC procedures and routers exposed by polywise runtime.",
+		"fractal_rule": "Keep rpc/* files atomic by endpoint intent. Group related session/file/provider endpoints in subdirectories.",
+		"import_order": "1) @core aliases and zod/drizzle libs; 2) shared trpc helper imports; 3) relative rpc-local modules; 4) type-only imports.",
+		"naming_rules": "Procedure files use camelCase. Zod schemas use snake_case constants when already established. Export default per procedure file.",
+		"Same Code 1": "packages/polywise/src/rpc/search.ts",
+		"Same Code 2": "packages/polywise/src/rpc/session/getList.ts",
+		"sample_pool": ["packages/polywise/src/rpc/file/write.ts", "packages/polywise/src/rpc/provider/getAll.ts"]
 	},
-	"FST Agent (Internal Decision Agents)": {
-		"description": "Internal agents used by the FST system for decision-making, observation, and consolidation. Each agent is a ToolLoopAgent with its own tools and system prompt. Prompt builders (getXPrompt) are centralized in consts/prompts/ as pure functions; agent dirs retain Session-aware data preprocessing logic at call sites.",
-		"fractal_rule": "Each agent lives in its own directory under `fst/agents/<name>/`. Structure: agent.ts (ToolLoopAgent creation), index.ts (barrel export). Complex agents may include additional files for tool creation (e.g., memory_tool.ts, wiki_tool.ts) and orchestration (e.g., process.ts). getPrompt.ts files have been migrated to consts/prompts/ as getXPrompt.ts (pure functions); call sites inline the Session data extraction.",
-		"export_style": "agent.ts must default export a factory function: `export default (model, session, ...args) => ToolLoopAgent`. index.ts re-exports with named exports.",
-		"naming_rules": "Agent directories use snake_case. Tool files use snake_case suffix (e.g., memory_tool.ts). Internal functions use camelCase.",
-		"Same Code 1": "packages/polywise/src/fst/agents/superego/agent.ts",
-		"Same Code 2": "packages/polywise/src/fst/agents/title/agent.ts"
+	"Database Schemas": {
+		"description": "Defines drizzle table schemas and index declarations.",
+		"fractal_rule": "One table per schema file under src/db/schema/. Keep relationship imports shallow and local.",
+		"import_order": "1) drizzle imports; 2) utility/id imports; 3) relative schema references; 4) type-only imports.",
+		"naming_rules": "Schema variables use camelCase. Column fields use snake_case to match DB contract.",
+		"Same Code 1": "packages/polywise/src/db/schema/article.ts",
+		"Same Code 2": "packages/polywise/src/db/schema/node.ts",
+		"sample_pool": ["packages/polywise/src/db/schema/edge.ts", "packages/polywise/src/db/schema/session.ts"]
 	},
-	"FST Tool (Session-Level Tools)": {
-		"description": "Tools exposed to the main agent during stream execution. Each tool wraps a specific capability (search, edit, memory, wiki, etc.).",
-		"fractal_rule": "Each tool is a single file in `fst/tools/` exporting a named `createXxxTool(session)` factory function. Tools with complex logic can split into sub-files but maintain a single entry point.",
-		"export_style": "Named export: `export const createXxxTool = (session) => tool({...})`. Uses `tool()` from 'ai' SDK. Input schema defined via Zod.",
-		"naming_rules": "File names use camelCase (e.g., memory.ts, wiki.ts). Factory function name: create + PascalCase + Tool.",
+	"Database Service Functions": {
+		"description": "Wraps DB operations into reusable service-level atoms.",
+		"fractal_rule": "One service file per domain aggregate under src/db/services/. Keep each export function focused and composable.",
+		"import_order": "1) @core/db schema and env; 2) drizzle helpers; 3) type-only imports.",
+		"naming_rules": "Service functions use camelCase with verb prefixes (get/add/update/remove).",
+		"Same Code 1": "packages/polywise/src/db/services/node.ts",
+		"Same Code 2": "packages/polywise/src/db/services/article.ts",
+		"sample_pool": [
+			"packages/polywise/src/db/services/message.ts",
+			"packages/polywise/src/db/services/session.ts"
+		]
+	},
+	"FST Agents": {
+		"description": "Defines internal ToolLoopAgent builders and agent-specific orchestration boundaries.",
+		"fractal_rule": "Each agent owns its own folder under src/fst/agents/<name>/. Keep agent.ts as primary entry and split helper logic only when needed.",
+		"import_order": "1) ai/zod and model-related libs; 2) @core aliases; 3) local agent helpers; 4) type-only imports.",
+		"naming_rules": "Agent folders use snake_case. Agent factory exports use default anonymous arrow functions where already adopted.",
+		"Same Code 1": "packages/polywise/src/fst/agents/title/agent.ts",
+		"Same Code 2": "packages/polywise/src/fst/agents/superego/agent.ts",
+		"sample_pool": [
+			"packages/polywise/src/fst/agents/trim/agent.ts",
+			"packages/polywise/src/fst/agents/permission/agent.ts"
+		]
+	},
+	"FST Tool Factories": {
+		"description": "Defines tool factories and schema contracts used by FST session runtime.",
+		"fractal_rule": "Keep one tool capability per file in src/fst/tools/. For complex domains, use subdirectories with index.ts as the public entry.",
+		"import_order": "1) ai/zod and @core aliases; 2) local tool helpers; 3) type-only imports.",
+		"naming_rules": "Factory names use createXxxTool. Files use camelCase or existing established naming in the folder.",
 		"Same Code 1": "packages/polywise/src/fst/tools/memory.ts",
-		"Same Code 2": "packages/polywise/src/fst/tools/context.ts"
+		"Same Code 2": "packages/polywise/src/fst/tools/context.ts",
+		"sample_pool": [
+			"packages/polywise/src/fst/tools/skill/index.ts",
+			"packages/polywise/src/fst/tools/meta/index.ts"
+		]
+	},
+	"Prompt Builders": {
+		"description": "Defines pure prompt-building functions under consts/prompts.",
+		"fractal_rule": "One prompt builder per file. Keep them pure and free of session/runtime side effects.",
+		"import_order": "1) type-only imports; 2) local constant/function usage.",
+		"naming_rules": "Files use getXxxPrompt.ts. Export default single builder function.",
+		"Same Code 1": "packages/polywise/src/consts/prompts/getSkillPrompt.ts",
+		"Same Code 2": "packages/polywise/src/consts/prompts/getTitlePrompt.ts",
+		"sample_pool": [
+			"packages/polywise/src/consts/prompts/getContextPrompt.ts",
+			"packages/polywise/src/consts/prompts/getTrimPrompt.ts"
+		]
 	}
 }
 ```

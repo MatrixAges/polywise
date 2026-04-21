@@ -1,24 +1,37 @@
-# 代码风格路由 (Unify Rules)
+# Code Style Routing (packages/desktop)
 
-本文件定义 `desktop` (Electron 主进程) 的代码规范。
+This file defines style and layering constraints for `packages/desktop` (Electron main process). Any write must follow matched node routing plus dual-sample reading.
 
-## Tree JSON 路由表
+## Tree JSON Routing Table
 
 ```json
 {
-	"Electron Service (系统服务)": {
-		"description": "负责调用 Electron 原生 API（如窗口控制、文件系统对话框等）的服务层。",
-		"fractal_rule": "单个类负责单一操作系统级别能力（如 `WindowService`, `FileService`）。如果底层封装繁杂，则必须新建同名文件夹收拢特定能力的模块实现，提供 `index.ts` 暴露服务实例。",
-		"export_style": "默认导出 class。",
-		"dependency_injection": "使用 tsyringe，通过 `constructor` 注入依赖。需要确保 `init` 生命周期内完成对 Electron 事件总线的绑定，并在 `off` 内销毁监听。",
-		"api_rules": "禁止使用原生的 `fs/promises`，强制导入使用 `fs-extra`。禁止导入 Node 原生模块时使用 `node:` 前缀（如直接用 `import path from 'path'`）。",
-		"Same Code 1": "packages/desktop/src/services/WindowService.ts"
+	"Main Process Window and App Controllers": {
+		"description": "Owns BrowserWindow, menu, tray, and other Electron main-process app control logic.",
+		"fractal_rule": "Use single-capability files under app/. When one controller grows heavy, upgrade to same-name directory with index.ts as export entry.",
+		"import_order": "1) electron and third-party libs; 2) @desktop/* aliases; 3) relative paths; 4) type-only imports.",
+		"naming_rules": "Class names use PascalCase. Methods use camelCase. Ordinary variables use snake_case.",
+		"Same Code 1": "packages/desktop/src/app/Main.ts",
+		"Same Code 2": "packages/desktop/src/app/Menu.ts",
+		"sample_pool": ["packages/desktop/src/app/Tray.ts", "packages/desktop/src/app/index.ts"]
 	},
-	"eRPC Handler (IPC 通信)": {
-		"description": "接收并处理来自渲染进程（app）的 eRPC 请求。",
-		"fractal_rule": "按业务分类放置在 `src/erpc/` 下。",
-		"export_style": "通过 tRPC 的路由定义语法暴露函数，不要把大量业务逻辑硬塞入 Router，必须调用 Service 处理。",
-		"Same Code 1": "packages/desktop/src/erpc/app.ts"
+	"RPC Routers and Procedures": {
+		"description": "Defines main-process-facing tRPC router composition and atomic procedures.",
+		"fractal_rule": "Split directories by domain (for example rpc/app and rpc/memory). Keep procedure files atomic.",
+		"import_order": "1) @desktop/utils; 2) local relative dependencies; 3) type-only imports.",
+		"naming_rules": "Use camelCase file names and export default procedures or router composition objects.",
+		"Same Code 1": "packages/desktop/src/rpc/app/index.ts",
+		"Same Code 2": "packages/desktop/src/rpc/app/actions.ts",
+		"sample_pool": ["packages/desktop/src/rpc/app/checkUpdate.ts", "packages/desktop/src/rpc/index.ts"]
+	},
+	"Main Process Utility Modules": {
+		"description": "Provides shared main-process utilities (file, path, service bootstrap, trpc context, etc.).",
+		"fractal_rule": "Split by capability under utils/. Use subdirectories for grouped upstream/downstream capabilities (for example saveWithUtilityProcess/).",
+		"import_order": "1) Node/third-party libs; 2) @desktop/* aliases; 3) relative paths; 4) type-only imports.",
+		"naming_rules": "Functions use camelCase. Types use PascalCase. Ordinary variables use snake_case.",
+		"Same Code 1": "packages/desktop/src/utils/trpc.ts",
+		"Same Code 2": "packages/desktop/src/utils/fs.ts",
+		"sample_pool": ["packages/desktop/src/utils/serve.ts", "packages/desktop/src/utils/path.ts"]
 	}
 }
 ```

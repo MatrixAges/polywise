@@ -1,57 +1,57 @@
-## Unify 规则：熵增约束与风格统一执行规范
+## Unify Rules: Entropy Control and Style Unification
 
-### 1. 核心目标
+### 1. Core Goal
 
-在项目演进过程中，严格限制代码熵增。任何新增或重构代码都必须遵循“克隆式编程”原则：优先复用同类型成熟模块的结构、命名、状态组织、导入顺序与逻辑分层，不得随意引入偏离现有体系的新写法。
+Code entropy must be tightly controlled during project evolution. Any new implementation or refactor must follow a clone-first pattern: reuse mature structures from the same module type (imports, naming, state layout, layering, and function flow) before introducing any new style.
 
-### 2. `unify.md` 的职责
+### 2. Responsibility of `unify.md`
 
-`unify.md` 是包级风格路由表，必须使用 Tree JSON 结构维护。
+`unify.md` is the package-level style routing table and must be maintained in Tree JSON format.
 
-每个节点至少包含以下字段：
+Each routing node must contain at least:
 
-1. `description`：该类模块的职责边界。
-2. `fractal_rule`：文件分形与目录深度规则。
-3. `import_order`：导入顺序约束。
-4. `naming_rules`：命名规范。
-5. `Same Code 1`：主模板（必须存在）。
-6. `Same Code 2`：副模板（必须存在）。
-7. `sample_pool`：可选样例池（建议 2 个及以上）。
+1. `description`: responsibility boundary of the module type.
+2. `fractal_rule`: folder depth and split strategy.
+3. `import_order`: import ordering contract.
+4. `naming_rules`: naming contract.
+5. `Same Code 1`: primary template (required).
+6. `Same Code 2`: secondary template (required).
+7. `sample_pool`: optional additional examples (2+ recommended).
 
-### 3. 强制 SOP（不可跳过）
+### 3. Mandatory SOP (No Skips)
 
-在任何代码生成、修改、重构前，必须严格执行以下步骤：
+Before any code generation or modification, the following sequence is mandatory:
 
-1. 路由定位：读取目标包 `unify.md`，定位目标模块节点。
-2. 规则抽取：抽取节点中的结构、导入、命名、分层规则。
-3. 主样例学习：读取 `Same Code 1`，提取函数骨架和组织顺序。
-4. 像素级仿写：以 `Same Code 1` 为骨架注入业务改动。
-5. 规范复核：对照节点规则检查是否有越界写法。
-6. 反过拟合验证：读取 `Same Code 2`，三角比对生成代码与双样例，确保复用“通用模式”而非复制业务常量。
+1. Route targeting: read the target package `unify.md` and match a node.
+2. Rule extraction: extract structure/import/naming/layering rules from that node.
+3. Primary sample learning: read `Same Code 1` and derive the implementation skeleton.
+4. Pixel-level imitation: inject business changes into the `Same Code 1` skeleton.
+5. Rule review: verify the generated code against node rules.
+6. Anti-overfitting check: read `Same Code 2` and triangulate against both samples to ensure pattern reuse instead of business constant copy.
 
-### 4. 执行门禁（硬阻断）
+### 4. Hard Gate (Blocking Conditions)
 
-任一条件不满足，必须停止写入并先修复：
+Stop all write operations immediately if any of the following is true:
 
-1. 目标包缺失 `unify.md`。
-2. 节点缺失 `Same Code 1` 或 `Same Code 2`。
-3. `Same Code` 路径不可达。
-4. 已生成代码无法说明与双样例的结构对应关系。
+1. Target package has no `unify.md`.
+2. Matched node misses `Same Code 1` or `Same Code 2`.
+3. Any `Same Code` path is unreachable.
+4. Generated code cannot explain structural correspondence to both samples.
 
-### 5. 证据输出格式（必须）
+### 5. Mandatory Evidence Output
 
-在开始改代码前，必须在对话中输出 `UNIFY_EXECUTION_CONTEXT`，至少包含：
+Before editing code, output `UNIFY_EXECUTION_CONTEXT` with at least:
 
-1. 目标包与命中节点。
-2. `Same Code 1/2` 的真实路径。
-3. 从样例抽取的 3 条结构规则。
+1. Target package and matched node.
+2. Real paths of `Same Code 1/2`.
+3. Three structural rules extracted from samples.
 
-完成改动后，必须输出 `UNIFY_COMPLIANCE_REPORT`，至少包含：
+After implementation, output `UNIFY_COMPLIANCE_REPORT` with at least:
 
-1. 复用点（导入顺序、命名、结构分层）。
-2. 与样例的差异点。
-3. 差异理由（业务必要性）。
+1. Reuse points (import order, naming, structural layering).
+2. Differences from samples.
+3. Business reason for each difference.
 
-### 6. 路由维护责任
+### 6. Routing Maintenance Duty
 
-当代码结构变化导致样例失效或风格路由缺项时，必须同步更新对应包的 `unify.md`，保证路由长期可执行、可验证、可复用。
+If code evolution makes sample paths invalid or routing nodes incomplete, update the corresponding package `unify.md` first. Routing must stay executable, verifiable, and reusable over time.
