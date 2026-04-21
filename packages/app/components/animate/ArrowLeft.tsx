@@ -14,10 +14,7 @@ const PATH_VARIANTS: Variants = {
 		d: 'm12 19-7-7 7-7',
 		translateX: [0, 3, 0],
 		transition: {
-			duration: 0.4,
-			repeat: Infinity,
-			repeatType: 'loop',
-			repeatDelay: 0.1
+			duration: 0.8
 		}
 	}
 }
@@ -27,10 +24,7 @@ const SECOND_PATH_VARIANTS: Variants = {
 	animate: {
 		d: ['M19 12H5', 'M19 12H10', 'M19 12H5'],
 		transition: {
-			duration: 0.4,
-			repeat: Infinity,
-			repeatType: 'loop',
-			repeatDelay: 0.1
+			duration: 0.8
 		}
 	}
 }
@@ -44,7 +38,13 @@ const Index = ({ onMouseEnter, onMouseLeave, className, size = 28, ...props }: A
 
 		is_animating_ref.current = true
 
-		await controls.start('animate')
+		while (is_animating_ref.current) {
+			try {
+				await controls.start('animate')
+			} catch {
+				break
+			}
+		}
 	}, [controls])
 
 	const stopAnimation = useCallback(async () => {
@@ -78,8 +78,8 @@ const Index = ({ onMouseEnter, onMouseLeave, className, size = 28, ...props }: A
 				width={size}
 				xmlns='http://www.w3.org/2000/svg'
 			>
-				<motion.path animate={controls} d='m12 19-7-7 7-7' variants={PATH_VARIANTS} />
-				<motion.path animate={controls} d='M19 12H5' variants={SECOND_PATH_VARIANTS} />
+				<motion.path animate={controls} d='m12 19-7-7 7-7' initial='normal' variants={PATH_VARIANTS} />
+				<motion.path animate={controls} d='M19 12H5' initial='normal' variants={SECOND_PATH_VARIANTS} />
 			</svg>
 		</div>
 	)
