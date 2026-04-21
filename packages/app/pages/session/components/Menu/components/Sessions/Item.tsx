@@ -18,10 +18,9 @@ const Index = (props: IPropsSessionItem) => {
 		<ContextMenu>
 			<ContextMenuTrigger>
 				<div
-					className={$cx('click_button', selected_session_id === item.id && 'bg-muted')}
+					className={$cx('click_button', selected_session_id === item.id && 'active')}
 					onClick={() => actions.setSelectedSession(item.id)}
 				>
-					{pin_map[item.id] && <Pin size={12} className='text-amber-500' />}
 					<div className='min-w-0 flex-1'>
 						{active_rename ? (
 							<RenameInput
@@ -35,6 +34,7 @@ const Index = (props: IPropsSessionItem) => {
 							<span className='truncate'>{item.title}</span>
 						)}
 					</div>
+					{pin_map[item.id] && <Pin className='text-std-300! size-3' />}
 				</div>
 			</ContextMenuTrigger>
 			<ItemMenu item={item} groups={groups} pin_map={pin_map}></ItemMenu>

@@ -47,14 +47,13 @@ const Index = (props: IPropsGroupSessionRow) => {
 						group
 						click_button
 					`,
-						selected_session_id === item.id && 'bg-muted'
+						selected_session_id === item.id && 'active'
 					)}
 					style={{ transform: CSS.Translate.toString(transform), transition }}
 					onClick={() => actions.setSelectedSession(item.id)}
 					ref={setNodeRef}
 				>
-					{pin_map[item.id] && <Pin size={12} className='text-amber-500' />}
-					<div className='min-w-0 flex-1'>
+					<div className='flex-1'>
 						{active_rename ? (
 							<RenameInput
 								active={active_rename}
@@ -69,6 +68,7 @@ const Index = (props: IPropsGroupSessionRow) => {
 							</span>
 						)}
 					</div>
+					{pin_map[item.id] && <Pin className='text-std-300! size-3' />}
 				</div>
 			</ContextMenuTrigger>
 			<RowMenu {...props_row_menu}></RowMenu>
