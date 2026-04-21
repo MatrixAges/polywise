@@ -2,12 +2,7 @@ import { DndContext, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { useMemoizedFn } from 'ahooks'
 
-import {
-	ContextMenu,
-	ContextMenuContent,
-	ContextMenuItem,
-	ContextMenuTrigger
-} from '@/__shadcn__/components/ui/context-menu'
+import { ContextMenu, ContextMenuTrigger } from '@/__shadcn__/components/ui/context-menu'
 import { useMenuContext } from '@/pages/session/context'
 
 import Card from './Card'
@@ -53,33 +48,30 @@ const Index = (props: IPropsGroups) => {
 				<div
 					className='
 						flex flex-col
-						gap-2
-						p-3
-						border-b
+						px-3
 					'
 				>
-					<DndContext sensors={sensors} onDragEnd={dragGroupEnd}>
-						<SortableContext
-							items={groups.map((_, index) => `group-${index}`)}
-							strategy={verticalListSortingStrategy}
-						>
-							{groups.map((group_item, group_index) => (
-								<Card
-									group_index={group_index}
-									group_name={group_item.group}
-									items={group_item.items}
-									{...props_card}
-									key={`${group_item.group}-${group_index}`}
-								></Card>
-							))}
-						</SortableContext>
-					</DndContext>
+					<div className='flex flex-col py-3'>
+						<DndContext sensors={sensors} onDragEnd={dragGroupEnd}>
+							<SortableContext
+								items={groups.map((_, index) => `group-${index}`)}
+								strategy={verticalListSortingStrategy}
+							>
+								{groups.map((group_item, group_index) => (
+									<Card
+										group_index={group_index}
+										group_name={group_item.group}
+										items={group_item.items}
+										{...props_card}
+										key={`${group_item.group}-${group_index}`}
+									></Card>
+								))}
+							</SortableContext>
+						</DndContext>
+					</div>
+					<div className='border-border-light border-b'></div>
 				</div>
 			</ContextMenuTrigger>
-			<ContextMenuContent>
-				<ContextMenuItem onClick={actions.createSession}>New Session</ContextMenuItem>
-				<ContextMenuItem onClick={actions.createGroup}>New Group</ContextMenuItem>
-			</ContextMenuContent>
 		</ContextMenu>
 	)
 }

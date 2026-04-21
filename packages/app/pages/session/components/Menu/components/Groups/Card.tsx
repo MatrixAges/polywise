@@ -1,6 +1,7 @@
 import { DndContext, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
 import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import { DotsSixVerticalIcon } from '@phosphor-icons/react'
 import { useMemoizedFn } from 'ahooks'
 
 import { ContextMenu, ContextMenuTrigger } from '@/__shadcn__/components/ui/context-menu'
@@ -68,34 +69,14 @@ const Index = (props: IPropsGroupCard) => {
 
 	return (
 		<div
-			className='
-				flex flex-col
-				gap-2
-				p-2
-				rounded-lg
-				border border-border-light/60
-			'
+			className='flex w-full flex-col'
 			style={{ transform: CSS.Translate.toString(transform), transition }}
 			ref={setNodeRef}
 		>
 			<ContextMenu>
 				<ContextMenuTrigger>
-					<div className='group flex items-center gap-2'>
-						<button
-							className='
-								text-muted-foreground
-								opacity-0
-								transition-opacity
-								group-hover:opacity-100
-								cursor-grab
-							'
-							type='button'
-							{...attributes}
-							{...listeners}
-						>
-							⋮⋮
-						</button>
-						<div className='min-w-0 flex-1'>
+					<div className='group relative flex items-center'>
+						<div className='flex flex-1 items-center'>
 							{active_rename ? (
 								<RenameInput
 									active={active_rename}
@@ -105,14 +86,30 @@ const Index = (props: IPropsGroupCard) => {
 									cancelRename={actions.cancelRename}
 								></RenameInput>
 							) : (
-								<div className='truncate text-sm font-medium'>{group_name}</div>
+								<div className='text-std-400 truncate text-sm font-medium'>
+									{group_name}
+								</div>
 							)}
 						</div>
+						<button
+							className='
+								absolute
+								right-0
+								opacity-0
+								transition-opacity
+								group-hover:opacity-100
+								cursor-grab icon_btn
+							'
+							type='button'
+							{...attributes}
+							{...listeners}
+						>
+							<DotsSixVerticalIcon weight='bold'></DotsSixVerticalIcon>
+						</button>
 					</div>
 				</ContextMenuTrigger>
 				<CardMenu {...props_card_menu}></CardMenu>
 			</ContextMenu>
-
 			<DndContext sensors={sensors} onDragEnd={dragSessionEnd}>
 				<SortableContext items={items.map(item => item.id)} strategy={verticalListSortingStrategy}>
 					<div className='flex flex-col gap-1'>

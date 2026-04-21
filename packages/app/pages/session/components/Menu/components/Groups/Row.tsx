@@ -45,10 +45,7 @@ const Index = (props: IPropsGroupSessionRow) => {
 						flex
 						items-center
 						gap-2
-						px-3 py-2
-						rounded-md
 						text-sm
-						text-left
 						group
 					`,
 						selected_session_id === item.id && 'bg-muted'

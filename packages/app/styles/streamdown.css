@@ -129,6 +129,10 @@
 			height: 12px;
 		}
 	}
+
+	blockquote[data-streamdown='blockquote'] {
+		@apply border-muted-foreground/16 border-l-2 pl-3;
+	}
 }
 
 code[data-streamdown='inline-code'] {
