@@ -42,6 +42,9 @@ const Index = (props: IPropsMenu) => {
 			'
 		>
 			<Groups {...props_groups}></Groups>
+			<div className='px-1.5'>
+				<div className='border-border-light border-b'></div>
+			</div>
 			<Sessions {...props_sessions}></Sessions>
 		</div>
 	)

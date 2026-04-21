@@ -43,31 +43,33 @@ const Index = (props: IPropsGroups) => {
 	}
 
 	return (
-		<ContextMenu>
-			<ContextMenuTrigger>
-				<div className='flex flex-col px-1.5'>
-					<div className='flex flex-col gap-3 py-3'>
-						<DndContext sensors={sensors} onDragEnd={dragGroupEnd}>
-							<SortableContext
-								items={groups.map((_, index) => `group-${index}`)}
-								strategy={verticalListSortingStrategy}
-							>
-								{groups.map((group_item, group_index) => (
-									<Card
-										group_index={group_index}
-										group_name={group_item.group}
-										items={group_item.items}
-										{...props_card}
-										key={`${group_item.group}-${group_index}`}
-									></Card>
-								))}
-							</SortableContext>
-						</DndContext>
-					</div>
-					<div className='border-border-light border-b'></div>
-				</div>
-			</ContextMenuTrigger>
-		</ContextMenu>
+		<div
+			className='
+				overflow-y-scroll
+				flex flex-col
+				max-h-2/5
+				px-1.5
+			'
+		>
+			<div className='flex flex-col gap-3 py-3'>
+				<DndContext sensors={sensors} onDragEnd={dragGroupEnd}>
+					<SortableContext
+						items={groups.map((_, index) => `group-${index}`)}
+						strategy={verticalListSortingStrategy}
+					>
+						{groups.map((group_item, group_index) => (
+							<Card
+								group_index={group_index}
+								group_name={group_item.group}
+								items={group_item.items}
+								{...props_card}
+								key={`${group_item.group}-${group_index}`}
+							></Card>
+						))}
+					</SortableContext>
+				</DndContext>
+			</div>
+		</div>
 	)
 }
 
