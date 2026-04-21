@@ -9,9 +9,10 @@ import type { Session } from '@core/db'
 import type { SessionPinItem } from './utils'
 
 const session_page_size = 10
+const blocked_session_id = 'global_panel_session'
 
 const getGroupSessionIdList = (group_list: Array<{ items: Array<string> }>) => {
-	return group_list.flatMap(item => item.items)
+	return group_list.flatMap(item => item.items).filter(session_id => session_id !== blocked_session_id)
 }
 
 const getPinMap = (pin_list: Array<SessionPinItem>) => {
@@ -65,6 +66,7 @@ const getPinSessionList = async (pin_list: Array<SessionPinItem>, group_session_
 	const pin_session_id_list = pin_list
 		.map(item => item.id)
 		.filter(session_id => !group_session_id_set.has(session_id))
+		.filter(session_id => session_id !== blocked_session_id)
 
 	if (!pin_session_id_list.length) {
 		return []
@@ -78,10 +80,10 @@ const getUnpinSessionList = async (args: {
 	pin_session_id_list: Array<string>
 }) => {
 	const { group_session_id_list, pin_session_id_list } = args
-	const exclude_session_id_list = [...group_session_id_list, ...pin_session_id_list]
+	const exclude_session_id_list = [...group_session_id_list, ...pin_session_id_list, blocked_session_id]
 
 	return getSessions({
-		where: exclude_session_id_list.length ? notInArray(session.id, exclude_session_id_list) : undefined,
+		where: notInArray(session.id, exclude_session_id_list),
 		orderBy: desc(session.created_at),
 		limit: session_page_size
 	})
@@ -89,7 +91,7 @@ const getUnpinSessionList = async (args: {
 
 export default p.query(async () => {
 	const group_list = await readGroupList()
-	const pin_list = await readPinList()
+	const pin_list = (await readPinList()).filter(item => item.id !== blocked_session_id)
 
 	const pin_map = getPinMap(pin_list)
 
