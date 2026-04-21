@@ -33,7 +33,7 @@ const Index = (props: IProps) => {
 					flex flex-col
 					w-full
 					gap-1
-					px-2.5 pt-2.5
+					px-1.5 pt-2.5
 					pb-12
 				'
 			>
