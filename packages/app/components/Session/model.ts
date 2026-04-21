@@ -19,6 +19,7 @@ export default class Index {
 	ref_container = null as unknown as HTMLDivElement
 	ref_bottom_signal = null as unknown as HTMLDivElement
 
+	inited = false
 	wheeled = false
 	auto_scroll = true
 	has_older = false
@@ -320,7 +321,9 @@ export default class Index {
 			this.messages = $copy(this.chat.messages)
 
 			this.update()
-		}, 30)
+
+			if (!this.inited) this.inited = true
+		})
 
 		const off_error = this.chat['~registerErrorCallback'](() => {
 			if (this.chat.error?.message) {
@@ -342,6 +345,23 @@ export default class Index {
 	}
 
 	deinit() {
+		this.inited = false
+		this.wheeled = false
+		this.auto_scroll = true
+		this.has_older = false
+		this.has_newer = false
+
+		this.chat = null as unknown as Chat
+		this.session = null as unknown as Session
+		this.context = null as unknown as Context
+		this.status = 'ready' as AbstractChat<UIMessage>['status']
+		this.messages = [] as AbstractChat<UIMessage>['messages']
+		this.permission = null as unknown as Permission
+		this.archived_at = null as null | number
+
+		this.signal = 0
+		this.open_context_modal = false
+
 		this.util.deinit()
 	}
 }

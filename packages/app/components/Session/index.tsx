@@ -76,6 +76,7 @@ const Index = (props: IProps) => {
 					gap-4
 					p-4
 				`,
+					!x.inited && 'justify-end',
 					x.signal
 				)}
 				onWheel={x.onWheel}
