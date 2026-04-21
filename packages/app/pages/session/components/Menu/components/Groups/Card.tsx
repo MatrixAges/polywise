@@ -63,8 +63,7 @@ const Index = (props: IPropsGroupCard) => {
 		})),
 		pin_map,
 		selected_session_id,
-		rename_session_id,
-		rename_value
+		rename_value: ''
 	}
 
 	return (
@@ -125,6 +124,8 @@ const Index = (props: IPropsGroupCard) => {
 							<Row
 								session_index={session_index}
 								item={item}
+								renaming={rename_session_id === item.id}
+								rename_value={rename_session_id === item.id ? rename_value : ''}
 								{...props_row}
 								key={item.id}
 							></Row>

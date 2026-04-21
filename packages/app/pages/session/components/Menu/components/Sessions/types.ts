@@ -11,7 +11,7 @@ export interface IPropsSessionItem {
 	item: Session
 	groups: IPropsSessions['groups']
 	pin_map: Record<string, number>
-	selected_session_id: string
-	rename_session_id: string
+	selected: boolean
+	renaming: boolean
 	rename_value: string
 }

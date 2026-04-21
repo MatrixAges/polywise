@@ -19,7 +19,7 @@ export interface IPropsGroupSessionRow {
 	groups: Array<{ group: string; items: Array<Session> }>
 	pin_map: Record<string, number>
 	selected_session_id: string
-	rename_session_id: string
+	renaming: boolean
 	rename_value: string
 }
 

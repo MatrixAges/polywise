@@ -24,24 +24,27 @@ const Index = () => {
 		rename_value: x.rename_value
 	}
 
-	const menu_context: IMenuContext = {
-		setSelectedSession: x.setSelectedSession,
-		startRenameGroup: x.startRenameGroup,
-		startRenameSession: x.startRenameSession,
-		setRenameValue: x.setRenameValue,
-		submitRename: x.submitRename,
-		cancelRename: x.cancelRename,
-		createSession: x.createSession,
-		createGroup: x.createGroup,
-		removeSession: x.removeSession,
-		removeGroup: x.removeGroup,
-		togglePinSession: x.togglePinSession,
-		sortGroup: x.sortGroup,
-		sortGroupSession: x.sortGroupSession,
-		moveSessionToGroup: x.moveSessionToGroup,
-		moveSessionOutGroup: x.moveSessionOutGroup,
-		onScroll: x.onScroll
-	}
+	const menu_context = useMemo<IMenuContext>(
+		() => ({
+			setSelectedSession: x.setSelectedSession,
+			startRenameGroup: x.startRenameGroup,
+			startRenameSession: x.startRenameSession,
+			setRenameValue: x.setRenameValue,
+			submitRename: x.submitRename,
+			cancelRename: x.cancelRename,
+			createSession: x.createSession,
+			createGroup: x.createGroup,
+			removeSession: x.removeSession,
+			removeGroup: x.removeGroup,
+			togglePinSession: x.togglePinSession,
+			sortGroup: x.sortGroup,
+			sortGroupSession: x.sortGroupSession,
+			moveSessionToGroup: x.moveSessionToGroup,
+			moveSessionOutGroup: x.moveSessionOutGroup,
+			onScroll: x.onScroll
+		}),
+		[x]
+	)
 
 	useLayoutEffect(() => {
 		x.init()

@@ -10,8 +10,8 @@ const Index = (props: IPropsMenu) => {
 
 	const props_groups: IPropsGroups = useMemo(
 		() => ({
-			groups: $copy(groups),
-			pin_map: $copy(pin_map),
+			groups,
+			pin_map,
 			selected_session_id,
 			rename_group_index,
 			rename_session_id,
@@ -22,9 +22,9 @@ const Index = (props: IPropsMenu) => {
 
 	const props_sessions: IPropsSessions = useMemo(
 		() => ({
-			groups: $copy(groups),
-			sessions: $copy(sessions),
-			pin_map: $copy(pin_map),
+			groups,
+			sessions,
+			pin_map,
 			selected_session_id,
 			rename_session_id,
 			rename_value

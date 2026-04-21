@@ -11,8 +11,8 @@ import type { CSSProperties, ReactNode } from 'react'
 interface IProps {
 	item: Session
 	pin_map: Record<string, number>
-	selected_session_id: string
-	rename_session_id: string
+	selected: boolean
+	renaming: boolean
 	rename_value: string
 	title: ReactNode
 	menu: ReactNode
@@ -21,11 +21,8 @@ interface IProps {
 }
 
 const Index = (props: IProps) => {
-	const { item, pin_map, selected_session_id, rename_session_id, rename_value, title, menu, style, node_ref } =
-		props
+	const { item, pin_map, selected, renaming, rename_value, title, menu, style, node_ref } = props
 	const actions = useMenuContext()
-
-	const active_rename = rename_session_id === item.id
 
 	console.log(item)
 
@@ -33,15 +30,15 @@ const Index = (props: IProps) => {
 		<ContextMenu>
 			<ContextMenuTrigger>
 				<div
-					className={$cx('click_button group', selected_session_id === item.id && 'active')}
+					className={$cx('click_button group', selected && 'active')}
 					style={style}
 					onClick={() => actions.setSelectedSession(item.id)}
 					ref={node_ref}
 				>
 					<div className='min-w-0 flex-1'>
-						{active_rename ? (
+						{renaming ? (
 							<RenameInput
-								active={active_rename}
+								active={renaming}
 								value={rename_value}
 								setRenameValue={actions.setRenameValue}
 								submitRename={actions.submitRename}

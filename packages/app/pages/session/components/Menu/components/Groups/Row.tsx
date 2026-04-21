@@ -16,7 +16,7 @@ const Index = (props: IPropsGroupSessionRow) => {
 		groups,
 		pin_map,
 		selected_session_id,
-		rename_session_id,
+		renaming,
 		rename_value
 	} = props
 
@@ -35,8 +35,8 @@ const Index = (props: IPropsGroupSessionRow) => {
 		<BaseItem
 			item={item}
 			pin_map={pin_map}
-			selected_session_id={selected_session_id}
-			rename_session_id={rename_session_id}
+			selected={selected_session_id === item.id}
+			renaming={renaming}
 			rename_value={rename_value}
 			title={
 				<span className='cursor-grab truncate' {...attributes} {...listeners}>
