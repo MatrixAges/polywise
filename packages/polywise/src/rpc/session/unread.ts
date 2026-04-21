@@ -1,0 +1,38 @@
+import { session } from '@core/db/schema'
+import { getSession, setSession } from '@core/db/services'
+import { p, SessionStore } from '@core/utils'
+import { eq } from 'drizzle-orm'
+import { object, string } from 'zod'
+
+import { session_status_emitter } from './watchSessionStatus'
+
+const input_type = object({ id: string() })
+
+export default p.input(input_type).mutation(async ({ input }) => {
+	const target_live_session = SessionStore.get(input.id)
+	let next_session: null | Awaited<ReturnType<typeof setSession>> = null
+
+	if (target_live_session) {
+		next_session = await target_live_session.updateSession({ unread: false })
+	} else {
+		const target_session = await getSession(eq(session.id, input.id))
+
+		if (!target_session) {
+			return null
+		}
+
+		next_session = await setSession(eq(session.id, input.id), { unread: false })
+	}
+
+	if (next_session) {
+		session_status_emitter.emit('change', {
+			[input.id]: {
+				title: next_session.title,
+				running: next_session.is_runing,
+				unread: next_session.unread ?? false
+			}
+		})
+	}
+
+	return next_session
+})

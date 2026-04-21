@@ -39,7 +39,7 @@ export default class Index {
 	async init() {
 		await this.refresh({ reset_selected_session: true })
 
-		this.watchSessionTitle()
+		this.watchSessionStatus()
 	}
 
 	async refresh(args?: { reset_selected_session?: boolean }) {
@@ -75,6 +75,12 @@ export default class Index {
 
 	setSelectedSession(id: string) {
 		this.selected_session_id = id
+
+		if (!id) {
+			return
+		}
+
+		void rpc.session.unread.mutate({ id })
 	}
 
 	setRenameValue(value: string) {
@@ -268,16 +274,27 @@ export default class Index {
 		await this.refresh()
 	}
 
-	watchSessionTitle() {
-		const deinit = rpc.session.watchSessionTitle.subscribe(undefined, {
+	watchSessionStatus() {
+		const deinit = rpc.session.watchSessionStatus.subscribe(undefined, {
 			onData: res => {
-				const { id, title } = res
+				const entries = Object.entries(res)
+
+				if (!entries.length) {
+					return
+				}
 
 				this.groups = this.groups.map(group_item => ({
 					...group_item,
 					items: group_item.items.map(session_item => {
-						if (session_item.id === id) {
-							return { ...session_item, title }
+						const status = res[session_item.id]
+
+						if (status) {
+							return {
+								...session_item,
+								title: status.title,
+								is_runing: status.running,
+								unread: status.unread
+							}
 						}
 
 						return session_item
@@ -285,8 +302,15 @@ export default class Index {
 				}))
 
 				this.sessions = this.sessions.map(session_item => {
-					if (session_item.id === id) {
-						return { ...session_item, title }
+					const status = res[session_item.id]
+
+					if (status) {
+						return {
+							...session_item,
+							title: status.title,
+							is_runing: status.running,
+							unread: status.unread
+						}
 					}
 
 					return session_item

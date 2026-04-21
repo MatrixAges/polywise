@@ -5,7 +5,8 @@ import { env } from '@core/env'
 import { createSystemTool } from '@core/fst/agents'
 import { extract, getComplexitySignal } from '@core/fst/agents/superego'
 import { pushPart, startStream, stopStream } from '@core/fst/agents/supervisor'
-import { getSystemTools } from '@core/utils'
+import { session_status_emitter } from '@core/rpc/session/watchSessionStatus'
+import { getSystemTools, SessionEventStore } from '@core/utils'
 import { convertToModelMessages, createUIMessageStream, smoothStream, stepCountIs, streamText } from 'ai'
 import { getId } from 'stk/utils'
 
@@ -65,8 +66,7 @@ export default async (s: Index, message: Message) => {
 
 	s.context.current_messages_count = s.model_messages.length
 
-	s.session.is_runing = true
-	void s.updateSession({ is_runing: true }).catch(() => {})
+	void s.runing(true).catch(() => {})
 
 	startStream(s, message)
 
@@ -194,6 +194,20 @@ export default async (s: Index, message: Message) => {
 
 			await s.stop()
 			await s.appendMessage(responseMessage)
+
+			if (!SessionEventStore.listenerCount(`${s.id}/change`)) {
+				const next_session = await s.updateSession({ unread: true })
+
+				if (next_session) {
+					session_status_emitter.emit('change', {
+						[s.id]: {
+							title: next_session.title,
+							running: next_session.is_runing,
+							unread: next_session.unread ?? false
+						}
+					})
+				}
+			}
 
 			const complexity_signal = getComplexitySignal({
 				response_message: responseMessage,
