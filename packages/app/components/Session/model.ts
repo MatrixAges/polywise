@@ -323,7 +323,7 @@ export default class Index {
 			this.update()
 
 			if (!this.inited) this.inited = true
-		})
+		}, 30)
 
 		const off_error = this.chat['~registerErrorCallback'](() => {
 			if (this.chat.error?.message) {
