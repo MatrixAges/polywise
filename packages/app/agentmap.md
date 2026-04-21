@@ -101,6 +101,12 @@ This document provides an overview of the packages/app module structure and arch
 			"notebook": { "index.tsx": { "desc": "Notebook page view", "role": "Page" } },
 			"project": { "index.tsx": { "desc": "Project page view", "role": "Page" } },
 			"session": {
+				"components": {
+					"RenameInput.tsx": {
+						"desc": "Shared rename input atom reused by session menu group and session item rows",
+						"role": "Component"
+					}
+				},
 				"index.tsx": {
 					"desc": "Session page view with two-column layout, left-side grouped and ungrouped session menu, and right-side Session content using getList/getMoreList RPC data; selection defaults to empty and menu scroll pagination is delegated to the page model. The page now uses a cohesive Menu/ directory with Groups and Sessions section components patterned after components/Session/index.tsx style. page model subscribes to rpc.session.watchSessionTitle and updates menu title fields in-place for realtime sync.",
 					"role": "Page"
