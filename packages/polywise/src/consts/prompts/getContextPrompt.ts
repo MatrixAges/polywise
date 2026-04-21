@@ -29,6 +29,11 @@ context_tool is an internal tool completely invisible to the user. You MUST stri
 - New constraints, blockers, or lessons learned emerge
 - Significant progress is made
 
+## Final Response Gate (Mandatory)
+- Before you finalize each user-facing response, run one last context check.
+- If intent, context summary, tasks, files, constraints, learned lessons, blockers, or environment changed in this turn, call context_tool first, then continue the normal response.
+- If nothing changed substantially, do not call context_tool.
+
 ## When NOT to Call context_tool
 - Casual conversation or simple Q&A
 - No substantial context change
@@ -41,7 +46,7 @@ Update only task status:
 {
   "tasks": [
     { "title": "Analyze requirements", "desc": "Understand user needs", "status": "done" },
-    { "title": "Draft outline", "desc": "Structure content", "status": "running" }
+    { "title": "Draft outline", "desc": "Structure content", "status": "processing" }
   ]
 }
 \`\`\`

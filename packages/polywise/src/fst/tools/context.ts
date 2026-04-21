@@ -42,8 +42,11 @@ export type ContextInput = Infer<typeof inputSchema>
 
 export const createContextTool = (session: Session) => {
 	return tool({
-		description:
+		description: [
 			'Update persistent context state when context changes significantly. Use this tool to maintain window context.',
+			'Before finalizing each user-facing response, do a final context check: if intent/context/tasks/files/constraints/learned/environment/blockers changed, call context_tool first, then answer.',
+			'Do not call context_tool when there is no substantial context change.'
+		].join('\n'),
 		inputSchema,
 		execute: async input => {
 			return session.setContext(input)
