@@ -29,7 +29,7 @@ const Index = () => {
 				<Sidebar
 					groups={[{ label: 'Settings', items: setting_items }]}
 					current={pathname === '/setting' ? '' : pathname.replace('/setting/', '')}
-					width={200}
+					width={180}
 					setCurrent={v => navgate('/setting/' + v)}
 				></Sidebar>
 			)}
