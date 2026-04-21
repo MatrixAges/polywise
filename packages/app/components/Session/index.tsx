@@ -24,7 +24,8 @@ const Index = (props: IProps) => {
 
 	const { ref, setRef } = useAliveEffect({
 		init: () => x.init(id),
-		deinit: () => x.deinit()
+		deinit: () => x.deinit(),
+		deps: [id]
 	})
 
 	const setConfainerRef = useMemoizedFn(v => (x.ref_container = v))
