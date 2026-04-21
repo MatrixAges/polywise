@@ -102,6 +102,10 @@ This document provides an overview of the packages/app module structure and arch
 			"project": { "index.tsx": { "desc": "Project page view", "role": "Page" } },
 			"session": {
 				"components": {
+					"Item.tsx": {
+						"desc": "Shared session row atom reused by grouped rows and plain session rows; it centralizes selection, rename input, and pin icon rendering while callers inject per-context title node and context menu",
+						"role": "Component"
+					},
 					"RenameInput.tsx": {
 						"desc": "Shared rename input atom reused by session menu group and session item rows",
 						"role": "Component"

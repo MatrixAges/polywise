@@ -1,8 +1,4 @@
-import { Pin } from 'lucide-react'
-
-import { ContextMenu, ContextMenuTrigger } from '@/__shadcn__/components/ui/context-menu'
-import RenameInput from '@/pages/session/components/RenameInput'
-import { useMenuContext } from '@/pages/session/context'
+import BaseItem from '@/pages/session/components/Item'
 
 import ItemMenu from './ItemMenu'
 
@@ -10,35 +6,17 @@ import type { IPropsSessionItem } from './types'
 
 const Index = (props: IPropsSessionItem) => {
 	const { item, groups, pin_map, selected_session_id, rename_session_id, rename_value } = props
-	const actions = useMenuContext()
-
-	const active_rename = rename_session_id === item.id
 
 	return (
-		<ContextMenu>
-			<ContextMenuTrigger>
-				<div
-					className={$cx('click_button', selected_session_id === item.id && 'active')}
-					onClick={() => actions.setSelectedSession(item.id)}
-				>
-					<div className='min-w-0 flex-1'>
-						{active_rename ? (
-							<RenameInput
-								active={active_rename}
-								value={rename_value}
-								setRenameValue={actions.setRenameValue}
-								submitRename={actions.submitRename}
-								cancelRename={actions.cancelRename}
-							></RenameInput>
-						) : (
-							<span className='truncate'>{item.title}</span>
-						)}
-					</div>
-					{pin_map[item.id] && <Pin className='text-std-300! size-3' />}
-				</div>
-			</ContextMenuTrigger>
-			<ItemMenu item={item} groups={groups} pin_map={pin_map}></ItemMenu>
-		</ContextMenu>
+		<BaseItem
+			item={item}
+			pin_map={pin_map}
+			selected_session_id={selected_session_id}
+			rename_session_id={rename_session_id}
+			rename_value={rename_value}
+			title={<span className='truncate'>{item.title}</span>}
+			menu={<ItemMenu item={item} groups={groups} pin_map={pin_map}></ItemMenu>}
+		></BaseItem>
 	)
 }
 

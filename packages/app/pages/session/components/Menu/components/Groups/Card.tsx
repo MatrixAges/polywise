@@ -102,7 +102,7 @@ const Index = (props: IPropsGroupCard) => {
 						<button
 							className='
 								absolute
-								right-0
+								right-2
 								opacity-0
 								transition-opacity
 								group-hover:opacity-100
