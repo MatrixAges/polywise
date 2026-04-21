@@ -1,20 +1,57 @@
-## Unify Rules: Entropy Limitation and Code Style Unification Specification
+## Unify 规则：熵增约束与风格统一执行规范
 
-**1. Core Principles**
-Strictly limit code "entropy increase" during project evolution. When generating any new code, the Agent must follow the "cloning" programming principle, which means completely reusing the code structure, naming conventions, state management patterns, and logical organization order of existing modules of the same type, and avoiding any "innovative" writing style that deviates from existing specifications.
+### 1. 核心目标
 
-**2. Style Route Maintenance (`unify.md`)**
-The Agent is responsible for maintaining `unify.md` in the project directory (or monorepo sub-package directory), which serves as a global code style routing and status table in Tree JSON format.
+在项目演进过程中，严格限制代码熵增。任何新增或重构代码都必须遵循“克隆式编程”原则：优先复用同类型成熟模块的结构、命名、状态组织、导入顺序与逻辑分层，不得随意引入偏离现有体系的新写法。
 
-- **Input and Output:** When scanning current files or generating new files, the Agent needs to dynamically extract code features, categorize files (e.g., UI components, data model services, etc.), and supplement the routing and style descriptions into the Tree JSON.
-- **Structure Details:** The nodes of the JSON tree must contain: module category name, abstract style description (e.g., error handling patterns, dependency injection specifications), and a pool of specific reference file paths belonging to that category.
+### 2. `unify.md` 的职责
 
-**3. Agent Standard Operating Procedure (SOP)**
-Before performing code generation, the Agent must strictly follow the sequence of the following constrained steps:
+`unify.md` 是包级风格路由表，必须使用 Tree JSON 结构维护。
 
-- **Step 1: Route Addressing** - Read and parse the Tree JSON in `unify.md`, and infer the module type node that the target code belongs to based on the current requirements.
-- **Step 2: Extract Style** - From the matched node, obtain the Unify Style rule description specific to that module.
-- **Step 3: Obtain Main Sample** - Read the `Same Code 1` (first reference file) under that category, perform deep structural analysis, and accurately capture its import order, variable naming paradigms, and function skeletons.
-- **Step 4: Pixel-Level Imitation** - Use `Same Code 1` as an absolute physical template, accurately inject new business logic into this fixed skeleton, and perform code generation.
-- **Step 5: Specification Review** - After completing the initial draft, the Agent must self-review against the Unify Style from Step 2 to ensure no non-standard advanced syntax or architecture-violating writing styles are introduced.
-- **Step 6: Anti-Overfitting Verification** - Force reading of `Same Code 2` (second reference file) under the same category. Perform triangular comparison between the generated code and both samples: ensure the new code learns the "general pattern" of the module, rather than blindly copying business hardcoding specific to `Same Code 1` (such as specific magic numbers or specific field names). If overfitting is detected, return for refactoring.
+每个节点至少包含以下字段：
+
+1. `description`：该类模块的职责边界。
+2. `fractal_rule`：文件分形与目录深度规则。
+3. `import_order`：导入顺序约束。
+4. `naming_rules`：命名规范。
+5. `Same Code 1`：主模板（必须存在）。
+6. `Same Code 2`：副模板（必须存在）。
+7. `sample_pool`：可选样例池（建议 2 个及以上）。
+
+### 3. 强制 SOP（不可跳过）
+
+在任何代码生成、修改、重构前，必须严格执行以下步骤：
+
+1. 路由定位：读取目标包 `unify.md`，定位目标模块节点。
+2. 规则抽取：抽取节点中的结构、导入、命名、分层规则。
+3. 主样例学习：读取 `Same Code 1`，提取函数骨架和组织顺序。
+4. 像素级仿写：以 `Same Code 1` 为骨架注入业务改动。
+5. 规范复核：对照节点规则检查是否有越界写法。
+6. 反过拟合验证：读取 `Same Code 2`，三角比对生成代码与双样例，确保复用“通用模式”而非复制业务常量。
+
+### 4. 执行门禁（硬阻断）
+
+任一条件不满足，必须停止写入并先修复：
+
+1. 目标包缺失 `unify.md`。
+2. 节点缺失 `Same Code 1` 或 `Same Code 2`。
+3. `Same Code` 路径不可达。
+4. 已生成代码无法说明与双样例的结构对应关系。
+
+### 5. 证据输出格式（必须）
+
+在开始改代码前，必须在对话中输出 `UNIFY_EXECUTION_CONTEXT`，至少包含：
+
+1. 目标包与命中节点。
+2. `Same Code 1/2` 的真实路径。
+3. 从样例抽取的 3 条结构规则。
+
+完成改动后，必须输出 `UNIFY_COMPLIANCE_REPORT`，至少包含：
+
+1. 复用点（导入顺序、命名、结构分层）。
+2. 与样例的差异点。
+3. 差异理由（业务必要性）。
+
+### 6. 路由维护责任
+
+当代码结构变化导致样例失效或风格路由缺项时，必须同步更新对应包的 `unify.md`，保证路由长期可执行、可验证、可复用。
