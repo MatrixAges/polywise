@@ -1,38 +1,12 @@
 import { useMemo } from 'react'
-import { useMemoizedFn } from 'ahooks'
 
 import { Groups, Sessions } from './components'
 
 import type { IPropsGroups, IPropsMenu, IPropsSessions } from '../../types'
 
 const Index = (props: IPropsMenu) => {
-	const {
-		groups,
-		sessions,
-		pin_map,
-		selected_session_id,
-		rename_group_index,
-		rename_session_id,
-		rename_value,
-		setSelectedSession,
-		startRenameGroup,
-		startRenameSession,
-		setRenameValue,
-		submitRename,
-		cancelRename,
-		createSession,
-		createGroup,
-		removeSession,
-		removeGroup,
-		togglePinSession,
-		sortGroup,
-		sortGroupSession,
-		moveSessionToGroup,
-		moveSessionOutGroup,
-		onScroll
-	} = props
-
-	const handleSelectSession = useMemoizedFn((id: string) => setSelectedSession(id))
+	const { groups, sessions, pin_map, selected_session_id, rename_group_index, rename_session_id, rename_value } =
+		props
 
 	const props_groups: IPropsGroups = useMemo(
 		() => ({
@@ -41,46 +15,9 @@ const Index = (props: IPropsMenu) => {
 			selected_session_id,
 			rename_group_index,
 			rename_session_id,
-			rename_value,
-			setSelectedSession: handleSelectSession,
-			startRenameGroup,
-			startRenameSession,
-			setRenameValue,
-			submitRename,
-			cancelRename,
-			createSession,
-			createGroup,
-			removeSession,
-			removeGroup,
-			togglePinSession,
-			sortGroup,
-			sortGroupSession,
-			moveSessionToGroup,
-			moveSessionOutGroup
+			rename_value
 		}),
-		[
-			groups,
-			pin_map,
-			selected_session_id,
-			rename_group_index,
-			rename_session_id,
-			rename_value,
-			handleSelectSession,
-			startRenameGroup,
-			startRenameSession,
-			setRenameValue,
-			submitRename,
-			cancelRename,
-			createSession,
-			createGroup,
-			removeSession,
-			removeGroup,
-			togglePinSession,
-			sortGroup,
-			sortGroupSession,
-			moveSessionToGroup,
-			moveSessionOutGroup
-		]
+		[groups, pin_map, selected_session_id, rename_group_index, rename_session_id, rename_value]
 	)
 
 	const props_sessions: IPropsSessions = useMemo(
@@ -90,38 +27,9 @@ const Index = (props: IPropsMenu) => {
 			pin_map: $copy(pin_map),
 			selected_session_id,
 			rename_session_id,
-			rename_value,
-			setSelectedSession: handleSelectSession,
-			startRenameSession,
-			setRenameValue,
-			submitRename,
-			cancelRename,
-			createSession,
-			createGroup,
-			removeSession,
-			togglePinSession,
-			moveSessionToGroup,
-			onScroll
+			rename_value
 		}),
-		[
-			groups,
-			sessions,
-			pin_map,
-			selected_session_id,
-			rename_session_id,
-			rename_value,
-			handleSelectSession,
-			startRenameSession,
-			setRenameValue,
-			submitRename,
-			cancelRename,
-			createSession,
-			createGroup,
-			removeSession,
-			togglePinSession,
-			moveSessionToGroup,
-			onScroll
-		]
+		[groups, sessions, pin_map, selected_session_id, rename_session_id, rename_value]
 	)
 
 	return (

@@ -5,11 +5,12 @@ import { useMemoizedFn } from 'ahooks'
 
 import { ContextMenu, ContextMenuTrigger } from '@/__shadcn__/components/ui/context-menu'
 import RenameInput from '@/pages/session/components/RenameInput'
+import { useMenuContext } from '@/pages/session/context'
 
 import CardMenu from './CardMenu'
 import Row from './Row'
 
-import type { IPropsGroupCard, TDragEndEvent } from './types'
+import type { IPropsGroupCard, IPropsGroupCardMenu, IPropsGroupSessionRow, TDragEndEvent } from './types'
 
 const Index = (props: IPropsGroupCard) => {
 	const {
@@ -21,23 +22,9 @@ const Index = (props: IPropsGroupCard) => {
 		selected_session_id,
 		rename_group_index,
 		rename_session_id,
-		rename_value,
-		setSelectedSession,
-		startRenameGroup,
-		startRenameSession,
-		setRenameValue,
-		submitRename,
-		cancelRename,
-		createSession,
-		createGroup,
-		removeSession,
-		removeGroup,
-		togglePinSession,
-		sortGroup,
-		sortGroupSession,
-		moveSessionToGroup,
-		moveSessionOutGroup
+		rename_value
 	} = props
+	const actions = useMenuContext()
 
 	const { attributes, listeners, transform, transition, setNodeRef } = useSortable({ id: `group-${group_index}` })
 	const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }))
@@ -57,8 +44,27 @@ const Index = (props: IPropsGroupCard) => {
 			return
 		}
 
-		sortGroupSession({ group_index, from, to })
+		actions.sortGroupSession({ group_index, from, to })
 	})
+
+	const props_card_menu: IPropsGroupCardMenu = {
+		group_index,
+		groups_count: groups.length,
+		group_name
+	}
+
+	const props_row: Omit<IPropsGroupSessionRow, 'session_index' | 'item'> = {
+		group_index,
+		group_items_count: items.length,
+		groups: groups.map(group_item => ({
+			group: group_item.group,
+			items: group_item.items
+		})),
+		pin_map,
+		selected_session_id,
+		rename_session_id,
+		rename_value
+	}
 
 	return (
 		<div
@@ -94,9 +100,9 @@ const Index = (props: IPropsGroupCard) => {
 								<RenameInput
 									active={active_rename}
 									value={rename_value}
-									setRenameValue={setRenameValue}
-									submitRename={submitRename}
-									cancelRename={cancelRename}
+									setRenameValue={actions.setRenameValue}
+									submitRename={actions.submitRename}
+									cancelRename={actions.cancelRename}
 								></RenameInput>
 							) : (
 								<div className='truncate text-sm font-medium'>{group_name}</div>
@@ -104,16 +110,7 @@ const Index = (props: IPropsGroupCard) => {
 						</div>
 					</div>
 				</ContextMenuTrigger>
-				<CardMenu
-					group_index={group_index}
-					groups_count={groups.length}
-					group_name={group_name}
-					startRenameGroup={startRenameGroup}
-					createSession={createSession}
-					createGroup={createGroup}
-					removeGroup={removeGroup}
-					sortGroup={sortGroup}
-				></CardMenu>
+				<CardMenu {...props_card_menu}></CardMenu>
 			</ContextMenu>
 
 			<DndContext sensors={sensors} onDragEnd={dragSessionEnd}>
@@ -121,30 +118,9 @@ const Index = (props: IPropsGroupCard) => {
 					<div className='flex flex-col gap-1'>
 						{items.map((item, session_index) => (
 							<Row
-								group_index={group_index}
 								session_index={session_index}
 								item={item}
-								group_items_count={items.length}
-								groups={groups.map(group_item => ({
-									group: group_item.group,
-									items: group_item.items
-								}))}
-								pin_map={pin_map}
-								selected_session_id={selected_session_id}
-								rename_session_id={rename_session_id}
-								rename_value={rename_value}
-								setSelectedSession={setSelectedSession}
-								startRenameSession={startRenameSession}
-								setRenameValue={setRenameValue}
-								submitRename={submitRename}
-								cancelRename={cancelRename}
-								createSession={createSession}
-								createGroup={createGroup}
-								removeSession={removeSession}
-								togglePinSession={togglePinSession}
-								sortGroupSession={sortGroupSession}
-								moveSessionToGroup={moveSessionToGroup}
-								moveSessionOutGroup={moveSessionOutGroup}
+								{...props_row}
 								key={item.id}
 							></Row>
 						))}

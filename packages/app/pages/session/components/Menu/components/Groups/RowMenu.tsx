@@ -8,44 +8,31 @@ import {
 	ContextMenuSubContent,
 	ContextMenuSubTrigger
 } from '@/__shadcn__/components/ui/context-menu'
+import { useMenuContext } from '@/pages/session/context'
 
 import type { IPropsGroupSessionRowMenu } from './types'
 
 const Index = (props: IPropsGroupSessionRowMenu) => {
-	const {
-		group_index,
-		session_index,
-		group_items_count,
-		item,
-		groups,
-		pin_map,
-		startRenameSession,
-		createSession,
-		createGroup,
-		removeSession,
-		togglePinSession,
-		sortGroupSession,
-		moveSessionToGroup,
-		moveSessionOutGroup
-	} = props
+	const { group_index, session_index, group_items_count, item, groups, pin_map } = props
+	const actions = useMenuContext()
 
 	const moveUp = useMemoizedFn(() => {
-		sortGroupSession({ group_index, from: session_index, to: session_index - 1 })
+		actions.sortGroupSession({ group_index, from: session_index, to: session_index - 1 })
 	})
 
 	const moveDown = useMemoizedFn(() => {
-		sortGroupSession({ group_index, from: session_index, to: session_index + 1 })
+		actions.sortGroupSession({ group_index, from: session_index, to: session_index + 1 })
 	})
 
 	return (
 		<ContextMenuContent>
-			<ContextMenuItem onClick={createSession}>New Session</ContextMenuItem>
-			<ContextMenuItem onClick={createGroup}>New Group</ContextMenuItem>
+			<ContextMenuItem onClick={actions.createSession}>New Session</ContextMenuItem>
+			<ContextMenuItem onClick={actions.createGroup}>New Group</ContextMenuItem>
 			<ContextMenuSeparator />
-			<ContextMenuItem onClick={() => startRenameSession({ id: item.id, value: item.title })}>
+			<ContextMenuItem onClick={() => actions.startRenameSession({ id: item.id, value: item.title })}>
 				Rename
 			</ContextMenuItem>
-			<ContextMenuItem onClick={() => togglePinSession(item.id)}>
+			<ContextMenuItem onClick={() => actions.togglePinSession(item.id)}>
 				{pin_map[item.id] ? 'Unpin' : 'Pin'}
 			</ContextMenuItem>
 			<ContextMenuSub>
@@ -58,7 +45,9 @@ const Index = (props: IPropsGroupSessionRowMenu) => {
 
 						return (
 							<ContextMenuItem
-								onClick={() => moveSessionToGroup({ id: item.id, group_index: index })}
+								onClick={() =>
+									actions.moveSessionToGroup({ id: item.id, group_index: index })
+								}
 								key={`${target_group.group}-${index}`}
 							>
 								{target_group.group}
@@ -67,7 +56,7 @@ const Index = (props: IPropsGroupSessionRowMenu) => {
 					})}
 				</ContextMenuSubContent>
 			</ContextMenuSub>
-			<ContextMenuItem onClick={() => moveSessionOutGroup({ id: item.id, group_index })}>
+			<ContextMenuItem onClick={() => actions.moveSessionOutGroup({ id: item.id, group_index })}>
 				Move Out Group
 			</ContextMenuItem>
 			<ContextMenuSeparator />
@@ -78,7 +67,7 @@ const Index = (props: IPropsGroupSessionRowMenu) => {
 				Move Down
 			</ContextMenuItem>
 			<ContextMenuSeparator />
-			<ContextMenuItem variant='destructive' onClick={() => removeSession(item.id)}>
+			<ContextMenuItem variant='destructive' onClick={() => actions.removeSession(item.id)}>
 				Delete
 			</ContextMenuItem>
 		</ContextMenuContent>

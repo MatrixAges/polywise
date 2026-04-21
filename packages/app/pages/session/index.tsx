@@ -5,6 +5,7 @@ import { container } from 'tsyringe'
 import { Session } from '@/components'
 
 import { Menu } from './components'
+import { MenuContext } from './context'
 import Model from './model'
 
 import type { IPropsMenu } from './types'
@@ -19,24 +20,30 @@ const Index = () => {
 		selected_session_id: x.selected_session_id,
 		rename_group_index: x.rename_group_index,
 		rename_session_id: x.rename_session_id,
-		rename_value: x.rename_value,
-		setSelectedSession: x.setSelectedSession,
-		startRenameGroup: x.startRenameGroup,
-		startRenameSession: x.startRenameSession,
-		setRenameValue: x.setRenameValue,
-		submitRename: x.submitRename,
-		cancelRename: x.cancelRename,
-		createSession: x.createSession,
-		createGroup: x.createGroup,
-		removeSession: x.removeSession,
-		removeGroup: x.removeGroup,
-		togglePinSession: x.togglePinSession,
-		sortGroup: x.sortGroup,
-		sortGroupSession: x.sortGroupSession,
-		moveSessionToGroup: x.moveSessionToGroup,
-		moveSessionOutGroup: x.moveSessionOutGroup,
-		onScroll: x.onScroll
+		rename_value: x.rename_value
 	}
+
+	const actions = useMemo(
+		() => ({
+			setSelectedSession: x.setSelectedSession,
+			startRenameGroup: x.startRenameGroup,
+			startRenameSession: x.startRenameSession,
+			setRenameValue: x.setRenameValue,
+			submitRename: x.submitRename,
+			cancelRename: x.cancelRename,
+			createSession: x.createSession,
+			createGroup: x.createGroup,
+			removeSession: x.removeSession,
+			removeGroup: x.removeGroup,
+			togglePinSession: x.togglePinSession,
+			sortGroup: x.sortGroup,
+			sortGroupSession: x.sortGroupSession,
+			moveSessionToGroup: x.moveSessionToGroup,
+			moveSessionOutGroup: x.moveSessionOutGroup,
+			onScroll: x.onScroll
+		}),
+		[x]
+	)
 
 	useLayoutEffect(() => {
 		x.init()
@@ -46,7 +53,9 @@ const Index = () => {
 
 	return (
 		<div className='flex h-full overflow-hidden'>
-			<Menu {...props_menu}></Menu>
+			<MenuContext value={actions}>
+				<Menu {...props_menu}></Menu>
+			</MenuContext>
 			<div className='h-full w-[calc(100%-240px)]'>
 				<Session
 					type='page'

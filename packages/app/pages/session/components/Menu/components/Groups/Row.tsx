@@ -4,10 +4,11 @@ import { Pin } from 'lucide-react'
 
 import { ContextMenu, ContextMenuTrigger } from '@/__shadcn__/components/ui/context-menu'
 import RenameInput from '@/pages/session/components/RenameInput'
+import { useMenuContext } from '@/pages/session/context'
 
 import RowMenu from './RowMenu'
 
-import type { IPropsGroupSessionRow } from './types'
+import type { IPropsGroupSessionRow, IPropsGroupSessionRowMenu } from './types'
 
 const Index = (props: IPropsGroupSessionRow) => {
 	const {
@@ -19,23 +20,21 @@ const Index = (props: IPropsGroupSessionRow) => {
 		pin_map,
 		selected_session_id,
 		rename_session_id,
-		rename_value,
-		setSelectedSession,
-		startRenameSession,
-		setRenameValue,
-		submitRename,
-		cancelRename,
-		createSession,
-		createGroup,
-		removeSession,
-		togglePinSession,
-		sortGroupSession,
-		moveSessionToGroup,
-		moveSessionOutGroup
+		rename_value
 	} = props
+	const actions = useMenuContext()
 
 	const { attributes, listeners, transform, transition, setNodeRef } = useSortable({ id: item.id })
 	const active_rename = rename_session_id === item.id
+
+	const props_row_menu: IPropsGroupSessionRowMenu = {
+		group_index,
+		session_index,
+		group_items_count,
+		item,
+		groups,
+		pin_map
+	}
 
 	return (
 		<ContextMenu>
@@ -55,7 +54,7 @@ const Index = (props: IPropsGroupSessionRow) => {
 						selected_session_id === item.id && 'bg-muted'
 					)}
 					style={{ transform: CSS.Translate.toString(transform), transition }}
-					onClick={() => setSelectedSession(item.id)}
+					onClick={() => actions.setSelectedSession(item.id)}
 					ref={setNodeRef}
 				>
 					<button
@@ -78,9 +77,9 @@ const Index = (props: IPropsGroupSessionRow) => {
 							<RenameInput
 								active={active_rename}
 								value={rename_value}
-								setRenameValue={setRenameValue}
-								submitRename={submitRename}
-								cancelRename={cancelRename}
+								setRenameValue={actions.setRenameValue}
+								submitRename={actions.submitRename}
+								cancelRename={actions.cancelRename}
 							></RenameInput>
 						) : (
 							<span className='truncate'>{item.title}</span>
@@ -88,22 +87,7 @@ const Index = (props: IPropsGroupSessionRow) => {
 					</div>
 				</div>
 			</ContextMenuTrigger>
-			<RowMenu
-				group_index={group_index}
-				session_index={session_index}
-				group_items_count={group_items_count}
-				item={item}
-				groups={groups}
-				pin_map={pin_map}
-				startRenameSession={startRenameSession}
-				createSession={createSession}
-				createGroup={createGroup}
-				removeSession={removeSession}
-				togglePinSession={togglePinSession}
-				sortGroupSession={sortGroupSession}
-				moveSessionToGroup={moveSessionToGroup}
-				moveSessionOutGroup={moveSessionOutGroup}
-			></RowMenu>
+			<RowMenu {...props_row_menu}></RowMenu>
 		</ContextMenu>
 	)
 }

@@ -107,8 +107,12 @@ This document provides an overview of the packages/app module structure and arch
 						"role": "Component"
 					}
 				},
+				"context.ts": {
+					"desc": "Session page action context provider and hook to inject menu action functions at top-level and consume them in nested components",
+					"role": "Context"
+				},
 				"index.tsx": {
-					"desc": "Session page view with two-column layout, left-side grouped and ungrouped session menu, and right-side Session content using getList/getMoreList RPC data; selection defaults to empty and menu scroll pagination is delegated to the page model. The page now uses a cohesive Menu/ directory with Groups and Sessions section components patterned after components/Session/index.tsx style. page model subscribes to rpc.session.watchSessionTitle and updates menu title fields in-place for realtime sync.",
+					"desc": "Session page view with two-column layout, left-side grouped and ungrouped session menu, and right-side Session content using getList/getMoreList RPC data; selection defaults to empty and menu scroll pagination is delegated to the page model. The page now uses a cohesive Menu/ directory with Groups and Sessions section components patterned after components/Session/index.tsx style. page model subscribes to rpc.session.watchSessionTitle and updates menu title fields in-place for realtime sync. menu actions are injected by SessionMenuActionsProvider at page top and consumed by nested menu components via hook to avoid prop drilling.",
 					"role": "Page"
 				}
 			},

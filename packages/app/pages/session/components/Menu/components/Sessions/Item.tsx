@@ -2,30 +2,15 @@ import { Pin } from 'lucide-react'
 
 import { ContextMenu, ContextMenuTrigger } from '@/__shadcn__/components/ui/context-menu'
 import RenameInput from '@/pages/session/components/RenameInput'
+import { useMenuContext } from '@/pages/session/context'
 
 import ItemMenu from './ItemMenu'
 
 import type { IPropsSessionItem } from './types'
 
 const Index = (props: IPropsSessionItem) => {
-	const {
-		item,
-		groups,
-		pin_map,
-		selected_session_id,
-		rename_session_id,
-		rename_value,
-		setSelectedSession,
-		startRenameSession,
-		setRenameValue,
-		submitRename,
-		cancelRename,
-		createSession,
-		createGroup,
-		removeSession,
-		togglePinSession,
-		moveSessionToGroup
-	} = props
+	const { item, groups, pin_map, selected_session_id, rename_session_id, rename_value } = props
+	const actions = useMenuContext()
 
 	const active_rename = rename_session_id === item.id
 
@@ -45,7 +30,7 @@ const Index = (props: IPropsSessionItem) => {
 					`,
 						selected_session_id === item.id && 'bg-muted'
 					)}
-					onClick={() => setSelectedSession(item.id)}
+					onClick={() => actions.setSelectedSession(item.id)}
 				>
 					{pin_map[item.id] && <Pin size={12} className='text-amber-500' />}
 					<div className='min-w-0 flex-1'>
@@ -53,9 +38,9 @@ const Index = (props: IPropsSessionItem) => {
 							<RenameInput
 								active={active_rename}
 								value={rename_value}
-								setRenameValue={setRenameValue}
-								submitRename={submitRename}
-								cancelRename={cancelRename}
+								setRenameValue={actions.setRenameValue}
+								submitRename={actions.submitRename}
+								cancelRename={actions.cancelRename}
 							></RenameInput>
 						) : (
 							<span className='truncate'>{item.title}</span>
@@ -63,17 +48,7 @@ const Index = (props: IPropsSessionItem) => {
 					</div>
 				</div>
 			</ContextMenuTrigger>
-			<ItemMenu
-				item={item}
-				groups={groups}
-				pin_map={pin_map}
-				startRenameSession={startRenameSession}
-				createSession={createSession}
-				createGroup={createGroup}
-				removeSession={removeSession}
-				togglePinSession={togglePinSession}
-				moveSessionToGroup={moveSessionToGroup}
-			></ItemMenu>
+			<ItemMenu item={item} groups={groups} pin_map={pin_map}></ItemMenu>
 		</ContextMenu>
 	)
 }

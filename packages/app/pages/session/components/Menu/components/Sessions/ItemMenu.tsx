@@ -6,31 +6,23 @@ import {
 	ContextMenuSubContent,
 	ContextMenuSubTrigger
 } from '@/__shadcn__/components/ui/context-menu'
+import { useMenuContext } from '@/pages/session/context'
 
 import type { IPropsSessionItemMenu } from './types'
 
 const Index = (props: IPropsSessionItemMenu) => {
-	const {
-		item,
-		groups,
-		pin_map,
-		startRenameSession,
-		createSession,
-		createGroup,
-		removeSession,
-		togglePinSession,
-		moveSessionToGroup
-	} = props
+	const { item, groups, pin_map } = props
+	const actions = useMenuContext()
 
 	return (
 		<ContextMenuContent>
-			<ContextMenuItem onClick={createSession}>New Session</ContextMenuItem>
-			<ContextMenuItem onClick={createGroup}>New Group</ContextMenuItem>
+			<ContextMenuItem onClick={actions.createSession}>New Session</ContextMenuItem>
+			<ContextMenuItem onClick={actions.createGroup}>New Group</ContextMenuItem>
 			<ContextMenuSeparator />
-			<ContextMenuItem onClick={() => startRenameSession({ id: item.id, value: item.title })}>
+			<ContextMenuItem onClick={() => actions.startRenameSession({ id: item.id, value: item.title })}>
 				Rename
 			</ContextMenuItem>
-			<ContextMenuItem onClick={() => togglePinSession(item.id)}>
+			<ContextMenuItem onClick={() => actions.togglePinSession(item.id)}>
 				{pin_map[item.id] ? 'Unpin' : 'Pin'}
 			</ContextMenuItem>
 			<ContextMenuSub>
@@ -38,7 +30,7 @@ const Index = (props: IPropsSessionItemMenu) => {
 				<ContextMenuSubContent>
 					{groups.map((group_item, group_index) => (
 						<ContextMenuItem
-							onClick={() => moveSessionToGroup({ id: item.id, group_index })}
+							onClick={() => actions.moveSessionToGroup({ id: item.id, group_index })}
 							key={`${group_item.group}-${group_index}`}
 						>
 							{group_item.group}
@@ -47,7 +39,7 @@ const Index = (props: IPropsSessionItemMenu) => {
 				</ContextMenuSubContent>
 			</ContextMenuSub>
 			<ContextMenuSeparator />
-			<ContextMenuItem variant='destructive' onClick={() => removeSession(item.id)}>
+			<ContextMenuItem variant='destructive' onClick={() => actions.removeSession(item.id)}>
 				Delete
 			</ContextMenuItem>
 		</ContextMenuContent>
