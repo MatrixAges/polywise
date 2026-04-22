@@ -1,4 +1,6 @@
-import { PanelLeft } from 'lucide-react'
+import { useMemoizedFn } from 'ahooks'
+import { PanelLeft, Plus } from 'lucide-react'
+import { useNavigate } from 'react-router'
 
 import {
 	Select,
@@ -15,6 +17,11 @@ import type { IPropsLeft } from '../types'
 
 const Index = (props: IPropsLeft) => {
 	const { workspaces, current_workspace, toggleSidebar } = props
+	const navigate = useNavigate()
+
+	const onClickCreateSession = useMemoizedFn(() => {
+		navigate('/session', { state: { create: true } })
+	})
 
 	return (
 		<div
@@ -66,6 +73,9 @@ const Index = (props: IPropsLeft) => {
 					</SelectGroup>
 				</SelectContent>
 			</Select>
+			<button className='icon_button ml-1' onClick={onClickCreateSession}>
+				<Plus></Plus>
+			</button>
 		</div>
 	)
 }

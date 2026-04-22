@@ -150,6 +150,7 @@ const Index = (props: IPropsInput) => {
 							full && 'h-full max-h-full'
 						)}
 						ref={ref}
+						autoFocus
 						placeholder='What would you like to know?'
 						maxLength={9999}
 						onKeyDown={onSubmit}

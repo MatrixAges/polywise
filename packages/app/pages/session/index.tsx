@@ -1,5 +1,7 @@
-import { useLayoutEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useState } from 'react'
+import { useMemoizedFn } from 'ahooks'
 import { observer } from 'mobx-react-lite'
+import { useLocation, useNavigate } from 'react-router'
 import { container } from 'tsyringe'
 
 import { Session } from '@/components'
@@ -16,6 +18,20 @@ import type { IPropsMenu } from './types'
 const Index = () => {
 	const [x] = useState(() => container.resolve(Model))
 	const global = useGlobal()
+	const { state, pathname } = useLocation()
+	const navigate = useNavigate()
+
+	useLayoutEffect(() => {
+		if (state?.create) {
+			x.createSession()
+
+			navigate(pathname, { replace: true, state: null })
+		}
+
+		x.init()
+
+		return () => x.deinit()
+	}, [])
 
 	const props_menu: IPropsMenu = {
 		current_tab: x.current_tab,
@@ -47,12 +63,6 @@ const Index = () => {
 		moveSessionOutGroup: x.moveSessionOutGroup,
 		onScroll: x.onScroll
 	})
-
-	useLayoutEffect(() => {
-		x.init()
-
-		return () => x.deinit()
-	}, [])
 
 	return (
 		<div className='flex h-full overflow-hidden'>
