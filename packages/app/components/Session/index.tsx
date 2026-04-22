@@ -66,6 +66,7 @@ const Index = (props: IProps) => {
 				relative
 				overflow-hidden
 				flex flex-col
+				items-center
 				w-full h-full
 			'
 			ref={setRef}
