@@ -47,17 +47,16 @@ export default p.input(input_type).mutation(async ({ input }) => {
 		return null
 	}
 
-	const context_path = path.resolve(app.app_path, 'sessions', input.id, 'context.json')
+	const session_dir = path.resolve(app.app_path, 'sessions', input.id)
+	const context_path = path.resolve(session_dir, 'context.json')
+
+	await fs.ensureDir(session_dir)
+
 	let current_context = null as unknown
+	const has_context = await fs.pathExists(context_path)
 
-	try {
-		current_context = await fs.readJson(context_path, { throws: false })
-	} catch (error) {
-		const parsed_error = error as NodeJS.ErrnoException
-
-		if (parsed_error.code !== 'ENOENT') {
-			throw error
-		}
+	if (has_context) {
+		current_context = await fs.readJson(context_path)
 	}
 
 	const next_context = {
@@ -65,7 +64,6 @@ export default p.input(input_type).mutation(async ({ input }) => {
 		...title_context
 	}
 
-	await fs.ensureDir(path.dirname(context_path))
 	await fs.writeJson(context_path, next_context, { spaces: 4 })
 
 	session_status_emitter.emit('change', {
