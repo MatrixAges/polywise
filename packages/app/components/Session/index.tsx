@@ -71,11 +71,25 @@ const Index = (props: IProps) => {
 			'
 			ref={setRef}
 		>
+			{is_page && (
+				<div
+					className='
+						flex
+						items-center justify-between
+						w-full h-8
+						px-3
+						text-xsm
+					'
+				>
+					<span className='text-std-400 font-medium'>{x.session.title}</span>
+				</div>
+			)}
 			<div
 				className={$cx(
 					`
 					overflow-y-scroll
 					flex flex-1 flex-col
+					w-full
 					gap-4
 					p-4
 				`,

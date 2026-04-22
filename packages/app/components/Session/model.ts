@@ -26,7 +26,7 @@ export default class Index {
 	has_newer = false
 
 	chat = null as unknown as Chat
-	session = null as unknown as Session
+	session = {} as unknown as Session
 	context = null as unknown as Context
 	status = 'ready' as AbstractChat<UIMessage>['status']
 	messages = [] as AbstractChat<UIMessage>['messages']
@@ -343,7 +343,7 @@ export default class Index {
 		this.has_newer = false
 
 		this.chat = null as unknown as Chat
-		this.session = null as unknown as Session
+		this.session = {} as unknown as Session
 		this.context = null as unknown as Context
 		this.status = 'ready' as AbstractChat<UIMessage>['status']
 		this.messages = [] as AbstractChat<UIMessage>['messages']

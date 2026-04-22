@@ -35,19 +35,17 @@ const Index = (props: IPropsMessage) => {
 	return (
 		<Message from={message.role}>
 			<MessageContent>
-				{left_parts.length ? (
-					left_parts.map((part, index) => (
-						<Part
-							streaming={index === left_parts.length - 1 && streaming}
-							part={part}
-							metadata={message.metadata as MessageMetadata}
-							answer={answer}
-							key={`${message.id}-${index}`}
-						></Part>
-					))
-				) : (
-					<LoadingDots></LoadingDots>
-				)}
+				{left_parts.length
+					? left_parts.map((part, index) => (
+							<Part
+								streaming={index === left_parts.length - 1 && streaming}
+								part={part}
+								metadata={message.metadata as MessageMetadata}
+								answer={answer}
+								key={`${message.id}-${index}`}
+							></Part>
+						))
+					: streaming && <LoadingDots></LoadingDots>}
 				{source_urls.length > 0 && <SourceUrls items={source_urls}></SourceUrls>}
 			</MessageContent>
 		</Message>

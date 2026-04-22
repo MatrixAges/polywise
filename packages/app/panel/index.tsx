@@ -64,13 +64,13 @@ const Index = () => {
 			</div>
 			<div className='flex flex-1 overflow-y-scroll'>
 				<div className='flex w-full'>
-					{panel_tabs.map(({ key }) => {
+					{/* {panel_tabs.map(({ key }) => {
 						return (
 							<Activity mode={key === x.active_tab ? 'visible' : 'hidden'} key={key}>
 								<Lazy type='panel' path={key}></Lazy>
 							</Activity>
 						)
-					})}
+					})} */}
 				</div>
 			</div>
 		</div>
