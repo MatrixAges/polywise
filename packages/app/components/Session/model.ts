@@ -146,19 +146,6 @@ export default class Index {
 							}
 
 							break
-
-						case 'superego':
-							const parsed = JSON.parse(res.data.result)
-
-							if (parsed.summary && parsed.summary !== 'skipped') {
-								toast.success('Superego extraction successful', {
-									description: parsed.summary,
-									duration: 2000,
-									closeButton: false
-								})
-							}
-
-							break
 					}
 				}
 			}

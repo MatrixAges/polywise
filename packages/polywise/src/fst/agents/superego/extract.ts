@@ -1,5 +1,8 @@
+import path from 'path'
 import { app } from '@core/consts'
 import { convertToModelMessages } from 'ai'
+import dayjs from 'dayjs'
+import fs from 'fs-extra'
 
 import { collectFailureEvent, PatchRecord, searchFailureCases } from '../../telemetry'
 import executeSkillTool from '../../tools/skill/execute'
@@ -8,7 +11,28 @@ import createSuperegoAgent from './agent'
 
 import type Session from '../../session'
 import type { SuperegoAgentOutput } from './agent'
-import type { ComplexitySignal, SuperegoEvent, SuperegoResult } from './types'
+import type { ComplexitySignal, SuperegoResult } from './types'
+
+const superego_dir = path.resolve(app.app_path, 'superego')
+
+const appendSuperegoLog = async (args: { session_id: string; result: SuperegoResult }) => {
+	const { session_id, result } = args
+
+	await fs.ensureDir(superego_dir)
+
+	const file_name = `${dayjs().format('YYYY-MM-DD')}.jsonl`
+	const file_path = path.resolve(superego_dir, file_name)
+
+	await fs.appendFile(
+		file_path,
+		JSON.stringify({
+			session_id,
+			timestamp: Date.now(),
+			result
+		}) + '\n',
+		'utf8'
+	)
+}
 
 const noise_patterns = [
 	/Called the [A-Za-z]+ tool with the following input:/i,
@@ -256,17 +280,11 @@ export default async (s: Session, complexity_signal?: ComplexitySignal) => {
 		parsed.actions = base_result.actions
 		parsed.summary = base_result.summary
 
-		s.event.emit(`${s.id}/change`, {
-			type: 'superego',
-			data: { result: JSON.stringify(parsed), timestamp: Date.now() } as SuperegoEvent
-		})
+		await appendSuperegoLog({ session_id: s.id, result: parsed })
 	} catch {
-		s.event.emit(`${s.id}/change`, {
-			type: 'superego',
-			data: {
-				result: JSON.stringify({ summary: 'error', actions: [] }),
-				timestamp: Date.now()
-			} as SuperegoEvent
+		await appendSuperegoLog({
+			session_id: s.id,
+			result: { summary: 'error', actions: [], complexity_signal }
 		})
 	}
 }

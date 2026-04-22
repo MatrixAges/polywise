@@ -46,8 +46,3 @@ export interface SuperegoResult {
 	failure_telemetry?: PatchRecord | null
 	skill_draft?: SkillCreatorDraft | null
 }
-
-export interface SuperegoEvent {
-	result: string
-	timestamp: number
-}
