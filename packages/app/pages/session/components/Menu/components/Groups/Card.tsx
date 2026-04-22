@@ -25,7 +25,7 @@ const Index = (props: IPropsGroupCard) => {
 		rename_session_id,
 		rename_value
 	} = props
-	const actions = useMenuContext()
+	const { sortGroupSession, setRenameValue, submitRename, cancelRename } = useMenuContext()
 
 	const { attributes, listeners, transform, transition, setNodeRef } = useSortable({ id: `group-${group_index}` })
 	const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }))
@@ -45,7 +45,7 @@ const Index = (props: IPropsGroupCard) => {
 			return
 		}
 
-		actions.sortGroupSession({ group_index, from, to })
+		sortGroupSession({ group_index, from, to })
 	})
 
 	const props_card_menu: IPropsGroupCardMenu = {
@@ -76,9 +76,9 @@ const Index = (props: IPropsGroupCard) => {
 								<RenameInput
 									active={active_rename}
 									value={rename_value}
-									setRenameValue={actions.setRenameValue}
-									submitRename={actions.submitRename}
-									cancelRename={actions.cancelRename}
+									setRenameValue={setRenameValue}
+									submitRename={submitRename}
+									cancelRename={cancelRename}
 								></RenameInput>
 							) : (
 								<div className='text-std-300 text-xsm truncate font-medium'>

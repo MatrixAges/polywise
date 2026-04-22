@@ -12,7 +12,7 @@ import type { IPropsGroupCard, TDragEndEvent } from './types'
 
 const Index = (props: IPropsGroups) => {
 	const { groups, pin_map, selected_session_id, rename_group_index, rename_session_id, rename_value } = props
-	const actions = useMenuContext()
+	const { sortGroup } = useMenuContext()
 
 	const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }))
 
@@ -30,7 +30,7 @@ const Index = (props: IPropsGroups) => {
 			return
 		}
 
-		actions.sortGroup(from, to)
+		sortGroup(from, to)
 	})
 
 	const props_card: Omit<IPropsGroupCard, 'group_index' | 'group_name' | 'items'> = {

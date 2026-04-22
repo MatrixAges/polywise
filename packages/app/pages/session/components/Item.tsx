@@ -25,7 +25,7 @@ interface IProps {
 const Index = (props: IProps) => {
 	const { item, pin, selected, renaming, rename_value, title, menu, className, style } = props
 	const { is_runing, unread } = item
-	const actions = useMenuContext()
+	const { setSelectedSession, setRenameValue, submitRename, cancelRename } = useMenuContext()
 
 	const Status = useMemo(() => {
 		if (item.is_runing) return <Grip className='text-std-400! size-3' />
@@ -41,16 +41,16 @@ const Index = (props: IProps) => {
 				<div
 					className={$cx('click_button group', className, selected && 'active')}
 					style={style}
-					onClick={() => actions.setSelectedSession(item.id)}
+					onClick={() => setSelectedSession(item.id)}
 				>
 					<div className='min-w-0 flex-1'>
 						{renaming ? (
 							<RenameInput
 								active={renaming}
 								value={rename_value}
-								setRenameValue={actions.setRenameValue}
-								submitRename={actions.submitRename}
-								cancelRename={actions.cancelRename}
+								setRenameValue={setRenameValue}
+								submitRename={submitRename}
+								cancelRename={cancelRename}
 							></RenameInput>
 						) : (
 							title
