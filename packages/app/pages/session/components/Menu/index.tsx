@@ -16,7 +16,7 @@ const Index = (props: IPropsMenu) => {
 		pin_map,
 		selected_session_id,
 		rename_group_index,
-		rename_session_id,
+		rename_session_index,
 		rename_value
 	} = props
 	const { setCurrentTab, createSession, createGroup } = useMenuContext()
@@ -26,7 +26,7 @@ const Index = (props: IPropsMenu) => {
 		pin_map,
 		selected_session_id,
 		rename_group_index,
-		rename_session_id,
+		rename_session_index,
 		rename_value
 	}
 
@@ -35,7 +35,8 @@ const Index = (props: IPropsMenu) => {
 		sessions,
 		pin_map,
 		selected_session_id,
-		rename_session_id,
+		rename_group_index,
+		rename_session_index,
 		rename_value
 	}
 

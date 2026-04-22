@@ -37,7 +37,8 @@ export interface IArgsStartRenameGroup {
 }
 
 export interface IArgsStartRenameSession {
-	id: string
+	rename_group_index: number | undefined
+	rename_session_index: number
 	value: string
 }
 
@@ -45,8 +46,8 @@ export interface IPropsGroups {
 	groups: Array<ISessionMenuGroup>
 	pin_map: Record<string, number>
 	selected_session_id: string
-	rename_group_index: number
-	rename_session_id: string
+	rename_group_index: number | undefined
+	rename_session_index: number
 	rename_value: string
 }
 
@@ -55,7 +56,8 @@ export interface IPropsSessions {
 	sessions: Array<Session>
 	pin_map: Record<string, number>
 	selected_session_id: string
-	rename_session_id: string
+	rename_group_index: number | undefined
+	rename_session_index: number
 	rename_value: string
 }
 
@@ -64,7 +66,7 @@ export interface IPropsMenu extends Pick<Model, 'current_tab'> {
 	sessions: Array<Session>
 	pin_map: Record<string, number>
 	selected_session_id: string
-	rename_group_index: number
-	rename_session_id: string
+	rename_group_index: number | undefined
+	rename_session_index: number
 	rename_value: string
 }

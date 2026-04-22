@@ -5,7 +5,7 @@ import ItemMenu from './ItemMenu'
 import type { IPropsSessionItem } from './types'
 
 const Index = (props: IPropsSessionItem) => {
-	const { item, groups, pin, selected, renaming, rename_value } = props
+	const { item, groups, pin, selected, renaming, rename_value, session_index } = props
 
 	return (
 		<BaseItem
@@ -15,7 +15,7 @@ const Index = (props: IPropsSessionItem) => {
 			renaming={renaming}
 			rename_value={rename_value}
 			title={<span className='truncate'>{item.title}</span>}
-			menu={<ItemMenu item={item} groups={groups} pin={pin}></ItemMenu>}
+			menu={<ItemMenu item={item} groups={groups} pin={pin} session_index={session_index}></ItemMenu>}
 		></BaseItem>
 	)
 }

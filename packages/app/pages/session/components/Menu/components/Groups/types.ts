@@ -36,8 +36,8 @@ export interface IPropsGroupCard {
 	items: Array<Session>
 	pin_map: Record<string, number>
 	selected_session_id: string
-	rename_group_index: number
-	rename_session_id: string
+	rename_group_index: number | undefined
+	rename_session_index: number
 	rename_value: string
 }
 
@@ -45,8 +45,8 @@ export interface IPropsGroupsRoot {
 	groups: IPropsGroups['groups']
 	pin_map: Record<string, number>
 	selected_session_id: string
-	rename_group_index: number
-	rename_session_id: string
+	rename_group_index: number | undefined
+	rename_session_index: number
 	rename_value: string
 }
 

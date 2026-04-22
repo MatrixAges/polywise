@@ -24,7 +24,7 @@ const Index = () => {
 		pin_map: $copy(x.pin_map),
 		selected_session_id: x.selected_session_id,
 		rename_group_index: x.rename_group_index,
-		rename_session_id: x.rename_session_id,
+		rename_session_index: x.rename_session_index,
 		rename_value: x.rename_value
 	}
 

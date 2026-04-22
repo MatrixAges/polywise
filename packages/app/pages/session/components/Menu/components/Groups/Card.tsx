@@ -22,7 +22,7 @@ const Index = (props: IPropsGroupCard) => {
 		pin_map,
 		selected_session_id,
 		rename_group_index,
-		rename_session_id,
+		rename_session_index,
 		rename_value
 	} = props
 	const { sortGroupSession, setRenameValue, submitRename, cancelRename } = useMenuContext()
@@ -117,8 +117,16 @@ const Index = (props: IPropsGroupCard) => {
 								selected={selected_session_id === item.id}
 								group_index={group_index}
 								session_index={session_index}
-								renaming={rename_session_id === item.id}
-								rename_value={rename_session_id === item.id ? rename_value : ''}
+								renaming={
+									rename_group_index === group_index &&
+									rename_session_index === session_index
+								}
+								rename_value={
+									rename_group_index === group_index &&
+									rename_session_index === session_index
+										? rename_value
+										: ''
+								}
 								key={item.id}
 							></Row>
 						))}

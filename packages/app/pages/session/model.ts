@@ -1,5 +1,4 @@
 import { arrayMove } from '@dnd-kit/sortable'
-import { to } from 'await-to-js'
 import { makeAutoObservable } from 'mobx'
 import { setStoreWhenChange } from 'stk/mobx'
 import { injectable } from 'tsyringe'
@@ -26,8 +25,8 @@ export default class Index {
 	sessions = [] as Array<Session>
 	pin_map = {} as Record<string, number>
 	selected_session_id = ''
-	rename_group_index = -1
-	rename_session_id = ''
+	rename_group_index = undefined as number | undefined
+	rename_session_index = -1
 	rename_value = ''
 	page = 1
 	loading = false
@@ -89,21 +88,21 @@ export default class Index {
 		const { group_index, value } = args
 
 		this.rename_group_index = group_index
-		this.rename_session_id = ''
+		this.rename_session_index = -1
 		this.rename_value = value
 	}
 
 	startRenameSession(args: IArgsStartRenameSession) {
-		const { id, value } = args
+		const { rename_group_index, rename_session_index, value } = args
 
-		this.rename_group_index = -1
-		this.rename_session_id = id
+		this.rename_group_index = rename_group_index
+		this.rename_session_index = rename_session_index
 		this.rename_value = value
 	}
 
 	cancelRename() {
-		this.rename_group_index = -1
-		this.rename_session_id = ''
+		this.rename_group_index = undefined
+		this.rename_session_index = -1
 		this.rename_value = ''
 	}
 
@@ -116,47 +115,68 @@ export default class Index {
 			return
 		}
 
-		if (this.rename_session_id) {
-			const session_id = this.rename_session_id
-			let prev_title = ''
+		if (this.rename_session_index >= 0) {
+			const rename_group_index = this.rename_group_index
+			const rename_session_index = this.rename_session_index
 
-			this.groups = this.groups.map(group_item => ({
-				...group_item,
-				items: group_item.items.map(session_item => {
-					if (session_item.id !== session_id) {
-						return session_item
-					}
+			if (rename_group_index !== undefined) {
+				const target_group = this.groups[rename_group_index]
+				const target_session = target_group?.items[rename_session_index]
 
-					prev_title = session_item.title
+				if (target_session) {
+					const session_id = target_session.id
+					const next_groups = [...this.groups]
+					const next_items = [...target_group.items]
 
-					return {
-						...session_item,
+					next_items[rename_session_index] = {
+						...target_session,
 						title: rename_value
 					}
-				})
-			}))
 
-			this.sessions = this.sessions.map(session_item => {
-				if (session_item.id !== session_id) {
-					return session_item
+					next_groups[rename_group_index] = {
+						...target_group,
+						items: next_items
+					}
+
+					this.groups = next_groups
+
+					await rpc.session.rename.mutate({ id: session_id, title: rename_value })
 				}
+			} else {
+				const target_session = this.sessions[rename_session_index]
 
-				if (!prev_title) {
-					prev_title = session_item.title
+				if (target_session) {
+					const session_id = target_session.id
+					const next_sessions = [...this.sessions]
+					next_sessions[rename_session_index] = {
+						...target_session,
+						title: rename_value
+					}
+
+					this.sessions = next_sessions
+
+					await rpc.session.rename.mutate({ id: session_id, title: rename_value })
 				}
-
-				return {
-					...session_item,
-					title: rename_value
-				}
-			})
-
-			await rpc.session.rename.mutate({ id: session_id, title: rename_value })
+			}
 		}
 
-		if (this.rename_group_index >= 0) {
+		if (this.rename_session_index < 0 && this.rename_group_index !== undefined) {
+			const group_index = this.rename_group_index
+			const target_group = this.groups[group_index]
+
+			if (target_group) {
+				const next_groups = [...this.groups]
+
+				next_groups[group_index] = {
+					...target_group,
+					group: rename_value
+				}
+
+				this.groups = next_groups
+			}
+
 			await rpc.session.renameGroup.mutate({
-				group_index: this.rename_group_index,
+				group_index,
 				name: rename_value
 			})
 		}
@@ -213,13 +233,24 @@ export default class Index {
 	}
 
 	async removeSession(id: string) {
+		let renaming_session_id = ''
+
+		if (this.rename_session_index >= 0) {
+			if (this.rename_group_index !== undefined) {
+				renaming_session_id =
+					this.groups[this.rename_group_index]?.items[this.rename_session_index]?.id || ''
+			} else {
+				renaming_session_id = this.sessions[this.rename_session_index]?.id || ''
+			}
+		}
+
 		await rpc.session.remove.mutate({ id })
 
 		if (this.selected_session_id === id) {
 			this.selected_session_id = ''
 		}
 
-		if (this.rename_session_id === id) {
+		if (renaming_session_id && renaming_session_id === id) {
 			this.cancelRename()
 		}
 
