@@ -29,7 +29,7 @@ const Index = (props: IPropsGroupCard) => {
 
 	const { attributes, listeners, transform, transition, setNodeRef } = useSortable({ id: `group-${group_index}` })
 	const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }))
-	const active_rename = rename_group_index === group_index
+	const active_rename = rename_group_index === group_index && rename_session_index < 0
 
 	const dragSessionEnd = useMemoizedFn((args: TDragEndEvent) => {
 		const { active, over } = args
