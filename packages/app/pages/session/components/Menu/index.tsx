@@ -220,8 +220,8 @@ const Index = (props: IPropsMenu) => {
 				</div>
 			</div>
 			<ContextMenu>
-				<ContextMenuTrigger>
-					<div className='flex min-h-0 flex-1' onContextMenuCapture={onMenuContextCapture}>
+				<ContextMenuTrigger className='flex min-h-0 flex-1'>
+					<div className='flex h-full' onContextMenuCapture={onMenuContextCapture}>
 						{current_tab === 'session' ? (
 							<Sessions {...props_sessions}></Sessions>
 						) : (
