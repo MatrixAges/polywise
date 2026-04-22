@@ -213,6 +213,8 @@ export default class Index {
 	}
 
 	scrollToBottom(args?: { force?: boolean; update?: boolean; instant?: boolean }) {
+		if (!this.ref_bottom_signal) return
+
 		const { force, update, instant } = args || {}
 
 		if (force) {
