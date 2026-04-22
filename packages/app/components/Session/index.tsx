@@ -1,10 +1,11 @@
-import { useMemo, useState } from 'react'
+import { Fragment, useMemo, useState } from 'react'
 import { useMemoizedFn } from 'ahooks'
 import { observer } from 'mobx-react-lite'
 import { container } from 'tsyringe'
 
 import { Drawer } from '@/components'
 import { useAliveEffect } from '@/hooks'
+import Logo from '@/public/bare.svg?react'
 
 import { Context, Input, LoadingDots, Message, Permission } from './components'
 import Model from './model'
@@ -57,6 +58,7 @@ const Index = (props: IProps) => {
 	}
 
 	const show_loading = useMemo(() => streaming && last_message?.role === 'user', [streaming, last_message])
+	const empty = x.messages.length === 0
 
 	return (
 		<div
@@ -77,39 +79,67 @@ const Index = (props: IProps) => {
 					p-4
 				`,
 					!x.inited && 'justify-end',
-					x.signal
+					x.signal,
+					empty && 'items-center justify-center!'
 				)}
 				onWheel={x.onWheel}
 				onScroll={x.onScroll}
 				ref={setConfainerRef}
 			>
-				<div
-					className={$cx(
-						`
-						flex flex-col
-						w-full
-						gap-6
-					`,
-						is_page && 'page_wrap py-0'
-					)}
-				>
-					{x.messages.map((message, index) => (
-						<Message
-							streaming={index === x.messages.length - 1 && streaming}
-							message={message}
-							answer={x.answer}
-							key={message.id}
-						></Message>
-					))}
-					{show_loading && <LoadingDots></LoadingDots>}
-				</div>
-				{x.permission && (
-					<Permission
-						permission={x.permission}
-						approvePermission={x.approvePermission}
-					></Permission>
+				{empty ? (
+					<div
+						className='
+							flex flex-col
+							items-center justify-center
+							gap-3
+							text-std-200 text-sm
+							fill-std-200 -mb-12
+						'
+					>
+						<div
+							className='
+								flex
+								p-1.5
+								rounded-lg
+								border border-border-light
+							'
+							style={{ width: 48, height: 48 }}
+						>
+							<Logo width='100%' height='100%'></Logo>
+						</div>
+						<span className='font-medium'>New Beginning</span>
+					</div>
+				) : (
+					<Fragment>
+						<div
+							className={$cx(
+								`
+								flex flex-col
+								w-full
+								gap-6
+							`,
+								is_page && 'page_wrap py-0'
+							)}
+						>
+							{x.messages.map((message, index) => (
+								<Message
+									streaming={index === x.messages.length - 1 && streaming}
+									message={message}
+									answer={x.answer}
+									key={message.id}
+								></Message>
+							))}
+							{show_loading && <LoadingDots></LoadingDots>}
+						</div>
+						{x.permission && (
+							<Permission
+								permission={x.permission}
+								approvePermission={x.approvePermission}
+							></Permission>
+						)}
+						<div className='mt-12 h-8' ref={setBottomSignalRef}></div>
+					</Fragment>
 				)}
-				<div className='mt-12 h-8' ref={setBottomSignalRef}></div>
 			</div>
 			<Input {...props_input}></Input>
 			<Drawer
