@@ -1,5 +1,6 @@
 import { arrayMove } from '@dnd-kit/sortable'
 import { makeAutoObservable } from 'mobx'
+import { setStoreWhenChange } from 'stk/mobx'
 import { injectable } from 'tsyringe'
 
 import { Util } from '@/models/common'
@@ -37,14 +38,16 @@ export default class Index {
 	}
 
 	async init() {
-		await this.refresh({ reset_selected_session: true })
+		const deinit = await setStoreWhenChange(['selected_session_id'], this)
+
+		this.util.acts = [deinit]
+
+		await this.refresh()
 
 		this.watchSessionStatus()
 	}
 
-	async refresh(args?: { reset_selected_session?: boolean }) {
-		const { reset_selected_session } = args || {}
-
+	async refresh() {
 		this.loading = true
 
 		try {
@@ -55,11 +58,6 @@ export default class Index {
 			this.pin_map = res.pin_map
 			this.page = 1
 			this.has_more = res.has_more
-
-			if (reset_selected_session) {
-				this.selected_session_id = ''
-				return
-			}
 
 			const session_id_list = this.groups
 				.flatMap(item => item.items.map(session_item => session_item.id))
@@ -75,10 +73,6 @@ export default class Index {
 
 	setSelectedSession(id: string) {
 		this.selected_session_id = id
-
-		if (!id) {
-			return
-		}
 	}
 
 	setRenameValue(value: string) {
