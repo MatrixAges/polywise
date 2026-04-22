@@ -39,7 +39,7 @@ export default class Index {
 	}
 
 	async init() {
-		const deinit = await setStoreWhenChange(['selected_session_id'], this)
+		const deinit = await setStoreWhenChange(['current_tab', 'selected_session_id'], this)
 
 		this.util.acts = [deinit]
 
@@ -111,6 +111,7 @@ export default class Index {
 
 		if (!rename_value) {
 			this.cancelRename()
+
 			return
 		}
 

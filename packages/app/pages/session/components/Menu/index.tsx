@@ -1,3 +1,6 @@
+import { FolderPlus, Plus } from 'lucide-react'
+
+import { Tooltip } from '@/components'
 import { useDelegate } from '@/hooks'
 
 import { useMenuContext } from '../../context'
@@ -16,7 +19,7 @@ const Index = (props: IPropsMenu) => {
 		rename_session_id,
 		rename_value
 	} = props
-	const { setCurrentTab } = useMenuContext()
+	const { setCurrentTab, createSession, createGroup } = useMenuContext()
 
 	const props_groups: IPropsGroups = {
 		groups,
@@ -36,7 +39,17 @@ const Index = (props: IPropsMenu) => {
 		rename_value
 	}
 
-	const ref = useDelegate(v => setCurrentTab(v), { item_type: 'span' })
+	const ref_tab = useDelegate(v => setCurrentTab(v), { item_type: 'span' })
+
+	const ref_action = useDelegate(v => {
+		setCurrentTab(v)
+
+		if (v === 'group') {
+			createGroup()
+		} else {
+			createSession()
+		}
+	})
 
 	return (
 		<div
@@ -50,9 +63,8 @@ const Index = (props: IPropsMenu) => {
 			<div
 				className='
 					flex
-					items-center
-					px-3 pt-2
-					pb-1
+					items-center justify-between
+					px-3 py-1.5
 				'
 			>
 				<div
@@ -61,7 +73,7 @@ const Index = (props: IPropsMenu) => {
 						items-center
 						text-xsm text-std-400 font-medium
 					'
-					ref={ref}
+					ref={ref_tab}
 				>
 					<span
 						className={$cx(
@@ -89,6 +101,18 @@ const Index = (props: IPropsMenu) => {
 					>
 						Session
 					</span>
+				</div>
+				<div className='flex gap-1' ref={ref_action}>
+					<Tooltip title='New Group'>
+						<div className='icon_button small' data-key='group'>
+							<FolderPlus></FolderPlus>
+						</div>
+					</Tooltip>
+					<Tooltip title='New Session'>
+						<div className='icon_button small' data-key='session'>
+							<Plus></Plus>
+						</div>
+					</Tooltip>
 				</div>
 			</div>
 			{current_tab === 'session' ? (

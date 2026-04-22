@@ -29,7 +29,7 @@ const Index = (props: IProps) => {
 			className='
 				h-auto
 				p-0
-				rounded-full
+				rounded-none
 				bg-transparent
 				border-none outline-none
 				ring-0!

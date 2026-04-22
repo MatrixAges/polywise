@@ -44,6 +44,10 @@ body {
 			height: 13px;
 		}
 
+		&.small {
+			@apply h-6 w-6;
+		}
+
 		&.active {
 			@apply bg-active text-std-900;
 		}
@@ -79,6 +83,10 @@ body {
 		svg {
 			width: 14px;
 			height: 14px;
+		}
+
+		&.no_transition {
+			@apply active:bg-active active:scale-100;
 		}
 
 		&.dragging {

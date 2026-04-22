@@ -39,9 +39,14 @@ const Index = (props: IProps) => {
 		<ContextMenu>
 			<ContextMenuTrigger>
 				<div
-					className={$cx('click_button group', className, selected && 'active')}
+					className={$cx(
+						'click_button group',
+						className,
+						renaming && 'no_transition',
+						selected && 'active'
+					)}
 					style={style}
-					onClick={() => setSelectedSession(item.id)}
+					onClick={renaming ? undefined : () => setSelectedSession(item.id)}
 				>
 					<div className='min-w-0 flex-1'>
 						{renaming ? (
