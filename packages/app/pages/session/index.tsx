@@ -3,6 +3,7 @@ import { observer } from 'mobx-react-lite'
 import { container } from 'tsyringe'
 
 import { Session } from '@/components'
+import { useGlobal } from '@/context'
 
 import { Menu } from './components'
 import { MenuContext } from './context'
@@ -13,6 +14,7 @@ import type { IPropsMenu } from './types'
 
 const Index = () => {
 	const [x] = useState(() => container.resolve(Model))
+	const global = useGlobal()
 
 	const props_menu: IPropsMenu = {
 		groups: $copy(x.groups),
@@ -54,10 +56,12 @@ const Index = () => {
 
 	return (
 		<div className='flex h-full overflow-hidden'>
-			<MenuContext value={menu_context}>
-				<Menu {...props_menu}></Menu>
-			</MenuContext>
-			<div className='h-full w-[calc(100%-210px)]'>
+			{!global.setting.sidebar_collapsed && (
+				<MenuContext value={menu_context}>
+					<Menu {...props_menu}></Menu>
+				</MenuContext>
+			)}
+			<div className='h-full w-[calc(100%-210px)] flex-1'>
 				<Session
 					type='page'
 					id={x.selected_session_id}
