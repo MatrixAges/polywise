@@ -95,19 +95,17 @@ const Index = (props: IPropsMenu) => {
 		return null
 	})
 
-	const onMenuContextCapture = useMemoizedFn(() => {
-		;(event: MouseEvent<HTMLDivElement>) => {
-			const next_target = findMenuTarget(event.target)
+	const onMenuContextCapture = useMemoizedFn((event: MouseEvent<HTMLDivElement>) => {
+		const next_target = findMenuTarget(event.target)
 
-			if (!next_target) {
-				setMenuTarget(null)
-				event.preventDefault()
+		if (!next_target) {
+			setMenuTarget(null)
+			event.preventDefault()
 
-				return
-			}
-
-			setMenuTarget(next_target)
+			return
 		}
+
+		setMenuTarget(next_target)
 	})
 
 	const menu_content = useMemo(() => {
