@@ -5,8 +5,18 @@ import Item from './Item'
 import type { IPropsSessions } from '../../../../types'
 
 const Index = (props: IPropsSessions) => {
-	const { sessions, pin_map, selected_session_id, rename_group_index, rename_session_index, rename_value } = props
-	const { onScroll } = useMenuContext()
+	const {
+		sessions,
+		pin_map,
+		selected_session_id,
+		rename_group_index,
+		rename_session_index,
+		rename_value,
+		has_more,
+		loading,
+		loading_more
+	} = props
+	const { onScroll, loadMore } = useMenuContext()
 
 	return (
 		<div
@@ -41,6 +51,23 @@ const Index = (props: IPropsSessions) => {
 						></Item>
 					)
 				})}
+				{has_more && (
+					<button
+						type='button'
+						className='
+							px-2.5 py-1
+							text-xsm text-std-400
+							text-left
+							disabled:cursor-not-allowed disabled:opacity-50
+							hover:text-std-800
+							clickit
+						'
+						onClick={() => loadMore()}
+						disabled={loading || loading_more}
+					>
+						{loading || loading_more ? 'Loading...' : 'Show more'}
+					</button>
+				)}
 			</div>
 		</div>
 	)

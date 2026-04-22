@@ -21,6 +21,7 @@ export interface IMenuContext extends Pick<
 	| 'moveSessionToGroup'
 	| 'moveSessionOutGroup'
 	| 'onScroll'
+	| 'loadMore'
 > {}
 
 const menu_context = createContext<IMenuContext | null>(null)

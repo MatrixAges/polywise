@@ -30,7 +30,10 @@ const Index = (props: IPropsMenu) => {
 		selected_session_id,
 		rename_group_index,
 		rename_session_index,
-		rename_value
+		rename_value,
+		has_more,
+		loading,
+		loading_more
 	} = props
 	const { setCurrentTab, createSession, createGroup } = useMenuContext()
 	const [menu_target, setMenuTarget] = useState<IMenuTarget | null>(null)
@@ -51,7 +54,10 @@ const Index = (props: IPropsMenu) => {
 		selected_session_id,
 		rename_group_index,
 		rename_session_index,
-		rename_value
+		rename_value,
+		has_more,
+		loading,
+		loading_more
 	}
 
 	const ref_tab = useDelegate(v => setCurrentTab(v), { item_type: 'span' })

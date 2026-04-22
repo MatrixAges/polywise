@@ -41,7 +41,10 @@ const Index = () => {
 		selected_session_id: x.selected_session_id,
 		rename_group_index: x.rename_group_index,
 		rename_session_index: x.rename_session_index,
-		rename_value: x.rename_value
+		rename_value: x.rename_value,
+		has_more: x.has_more,
+		loading: x.loading,
+		loading_more: x.loading_more
 	}
 
 	const menu_context = useModelContext<Model, IMenuContext>(x, {
@@ -61,7 +64,8 @@ const Index = () => {
 		sortGroupSession: x.sortGroupSession,
 		moveSessionToGroup: x.moveSessionToGroup,
 		moveSessionOutGroup: x.moveSessionOutGroup,
-		onScroll: x.onScroll
+		onScroll: x.onScroll,
+		loadMore: x.loadMore
 	})
 
 	return (

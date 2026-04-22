@@ -59,6 +59,9 @@ export interface IPropsSessions {
 	rename_group_index: number | undefined
 	rename_session_index: number
 	rename_value: string
+	has_more: boolean
+	loading: boolean
+	loading_more: boolean
 }
 
 export interface IPropsMenu extends Pick<Model, 'current_tab'> {
@@ -69,4 +72,7 @@ export interface IPropsMenu extends Pick<Model, 'current_tab'> {
 	rename_group_index: number | undefined
 	rename_session_index: number
 	rename_value: string
+	has_more: boolean
+	loading: boolean
+	loading_more: boolean
 }
