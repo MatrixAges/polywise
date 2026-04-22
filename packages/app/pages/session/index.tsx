@@ -4,6 +4,7 @@ import { container } from 'tsyringe'
 
 import { Session } from '@/components'
 import { useGlobal } from '@/context'
+import { useModelContext } from '@/hooks'
 
 import { Menu } from './components'
 import { MenuContext } from './context'
@@ -26,27 +27,24 @@ const Index = () => {
 		rename_value: x.rename_value
 	}
 
-	const menu_context = useMemo<IMenuContext>(
-		() => ({
-			setSelectedSession: x.setSelectedSession,
-			startRenameGroup: x.startRenameGroup,
-			startRenameSession: x.startRenameSession,
-			setRenameValue: x.setRenameValue,
-			submitRename: x.submitRename,
-			cancelRename: x.cancelRename,
-			createSession: x.createSession,
-			createGroup: x.createGroup,
-			removeSession: x.removeSession,
-			removeGroup: x.removeGroup,
-			togglePinSession: x.togglePinSession,
-			sortGroup: x.sortGroup,
-			sortGroupSession: x.sortGroupSession,
-			moveSessionToGroup: x.moveSessionToGroup,
-			moveSessionOutGroup: x.moveSessionOutGroup,
-			onScroll: x.onScroll
-		}),
-		[x]
-	)
+	const menu_context = useModelContext<Model, IMenuContext>(x, {
+		setSelectedSession: x.setSelectedSession,
+		startRenameGroup: x.startRenameGroup,
+		startRenameSession: x.startRenameSession,
+		setRenameValue: x.setRenameValue,
+		submitRename: x.submitRename,
+		cancelRename: x.cancelRename,
+		createSession: x.createSession,
+		createGroup: x.createGroup,
+		removeSession: x.removeSession,
+		removeGroup: x.removeGroup,
+		togglePinSession: x.togglePinSession,
+		sortGroup: x.sortGroup,
+		sortGroupSession: x.sortGroupSession,
+		moveSessionToGroup: x.moveSessionToGroup,
+		moveSessionOutGroup: x.moveSessionOutGroup,
+		onScroll: x.onScroll
+	})
 
 	useLayoutEffect(() => {
 		x.init()

@@ -26,7 +26,14 @@ const Index = (props: IProps) => {
 
 	return (
 		<Input
-			className='h-8 rounded-lg px-2'
+			className='
+				h-auto
+				p-0
+				rounded-full
+				bg-transparent
+				border-none outline-none
+				ring-0!
+			'
 			value={value}
 			onChange={event => setRenameValue(event.target.value)}
 			onCompositionStart={() => {
