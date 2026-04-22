@@ -1,4 +1,5 @@
 import { arrayMove } from '@dnd-kit/sortable'
+import { to } from 'await-to-js'
 import { makeAutoObservable } from 'mobx'
 import { setStoreWhenChange } from 'stk/mobx'
 import { injectable } from 'tsyringe'
@@ -116,7 +117,41 @@ export default class Index {
 		}
 
 		if (this.rename_session_id) {
-			await rpc.session.rename.mutate({ id: this.rename_session_id, title: rename_value })
+			const session_id = this.rename_session_id
+			let prev_title = ''
+
+			this.groups = this.groups.map(group_item => ({
+				...group_item,
+				items: group_item.items.map(session_item => {
+					if (session_item.id !== session_id) {
+						return session_item
+					}
+
+					prev_title = session_item.title
+
+					return {
+						...session_item,
+						title: rename_value
+					}
+				})
+			}))
+
+			this.sessions = this.sessions.map(session_item => {
+				if (session_item.id !== session_id) {
+					return session_item
+				}
+
+				if (!prev_title) {
+					prev_title = session_item.title
+				}
+
+				return {
+					...session_item,
+					title: rename_value
+				}
+			})
+
+			await rpc.session.rename.mutate({ id: session_id, title: rename_value })
 		}
 
 		if (this.rename_group_index >= 0) {
@@ -127,6 +162,7 @@ export default class Index {
 		}
 
 		this.cancelRename()
+
 		await this.refresh()
 	}
 
