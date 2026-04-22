@@ -20,6 +20,7 @@ import type {
 
 @injectable()
 export default class Index {
+	current_tab = 'session' as 'session' | 'group'
 	groups = [] as Array<ISessionMenuGroup>
 	sessions = [] as Array<Session>
 	pin_map = {} as Record<string, number>
@@ -69,6 +70,10 @@ export default class Index {
 		} finally {
 			this.loading = false
 		}
+	}
+
+	setCurrentTab(v: Index['current_tab']) {
+		this.current_tab = v
 	}
 
 	setSelectedSession(id: string) {

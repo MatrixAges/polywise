@@ -1,5 +1,5 @@
 import type { Session } from '@core/db'
-import type { UIEvent } from 'react'
+import type Model from './model'
 
 export interface ISessionMenuGroup {
 	group: string
@@ -59,7 +59,7 @@ export interface IPropsSessions {
 	rename_value: string
 }
 
-export interface IPropsMenu {
+export interface IPropsMenu extends Pick<Model, 'current_tab'> {
 	groups: Array<ISessionMenuGroup>
 	sessions: Array<Session>
 	pin_map: Record<string, number>

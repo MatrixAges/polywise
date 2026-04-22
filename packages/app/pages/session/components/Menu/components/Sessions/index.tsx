@@ -9,8 +9,21 @@ const Index = (props: IPropsSessions) => {
 	const { onScroll } = useMenuContext()
 
 	return (
-		<div className='flex-1 overflow-y-auto px-1.5 py-3' onScroll={onScroll}>
-			<div className='flex flex-col gap-1'>
+		<div
+			className='
+				overflow-y-auto
+				flex-1
+				px-1.5
+			'
+			onScroll={onScroll}
+		>
+			<div
+				className='
+					flex flex-col
+					gap-1
+					pb-3
+				'
+			>
 				{sessions.map(item => {
 					const selected = selected_session_id === item.id
 					const renaming = rename_session_id === item.id

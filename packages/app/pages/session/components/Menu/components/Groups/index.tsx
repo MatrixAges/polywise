@@ -51,7 +51,14 @@ const Index = (props: IPropsGroups) => {
 				px-1.5
 			'
 		>
-			<div className='flex flex-col gap-3 py-3'>
+			<div
+				className='
+					flex flex-col
+					gap-3
+					pt-1.5
+					pb-3
+				'
+			>
 				<DndContext sensors={sensors} onDragEnd={dragGroupEnd}>
 					<SortableContext
 						items={groups.map((_, index) => `group-${index}`)}

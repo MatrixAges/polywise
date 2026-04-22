@@ -4,6 +4,7 @@ import type Model from './model'
 
 export interface IMenuContext extends Pick<
 	Model,
+	| 'setCurrentTab'
 	| 'setSelectedSession'
 	| 'startRenameGroup'
 	| 'startRenameSession'

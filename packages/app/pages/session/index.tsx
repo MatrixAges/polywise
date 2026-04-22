@@ -1,4 +1,4 @@
-import { useLayoutEffect, useMemo, useState } from 'react'
+import { useLayoutEffect, useState } from 'react'
 import { observer } from 'mobx-react-lite'
 import { container } from 'tsyringe'
 
@@ -18,6 +18,7 @@ const Index = () => {
 	const global = useGlobal()
 
 	const props_menu: IPropsMenu = {
+		current_tab: x.current_tab,
 		groups: $copy(x.groups),
 		sessions: $copy(x.sessions),
 		pin_map: $copy(x.pin_map),
@@ -28,6 +29,7 @@ const Index = () => {
 	}
 
 	const menu_context = useModelContext<Model, IMenuContext>(x, {
+		setCurrentTab: x.setCurrentTab,
 		setSelectedSession: x.setSelectedSession,
 		startRenameGroup: x.startRenameGroup,
 		startRenameSession: x.startRenameSession,
