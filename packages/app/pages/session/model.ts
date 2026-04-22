@@ -79,8 +79,6 @@ export default class Index {
 		if (!id) {
 			return
 		}
-
-		void rpc.session.unread.mutate({ id })
 	}
 
 	setRenameValue(value: string) {

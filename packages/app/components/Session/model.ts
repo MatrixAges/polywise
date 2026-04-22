@@ -120,6 +120,8 @@ export default class Index {
 
 							const target_messages = messages as unknown as Array<Message>
 
+							if (this.session.unread) rpc.session.unread.mutate(this.id)
+
 							if (this.session.is_runing) {
 								const current = this.chat.messages
 								const last = current[current.length - 1]

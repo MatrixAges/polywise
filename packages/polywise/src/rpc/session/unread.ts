@@ -6,27 +6,27 @@ import { object, string } from 'zod'
 
 import { session_status_emitter } from './watchSessionStatus'
 
-const input_type = object({ id: string() })
+const input_type = string()
 
 export default p.input(input_type).mutation(async ({ input }) => {
-	const target_live_session = SessionStore.get(input.id)
+	const target_live_session = SessionStore.get(input)
 	let next_session: null | Awaited<ReturnType<typeof setSession>> = null
 
 	if (target_live_session) {
 		next_session = await target_live_session.updateSession({ unread: false })
 	} else {
-		const target_session = await getSession(eq(session.id, input.id))
+		const target_session = await getSession(eq(session.id, input))
 
 		if (!target_session) {
 			return null
 		}
 
-		next_session = await setSession(eq(session.id, input.id), { unread: false })
+		next_session = await setSession(eq(session.id, input), { unread: false })
 	}
 
 	if (next_session) {
 		session_status_emitter.emit('change', {
-			[input.id]: {
+			[input]: {
 				title: next_session.title,
 				running: next_session.is_runing,
 				unread: next_session.unread ?? false
