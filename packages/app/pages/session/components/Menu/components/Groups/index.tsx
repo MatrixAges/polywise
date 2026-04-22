@@ -2,7 +2,6 @@ import { DndContext, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { useMemoizedFn } from 'ahooks'
 
-import { ContextMenu, ContextMenuTrigger } from '@/__shadcn__/components/ui/context-menu'
 import { useMenuContext } from '@/pages/session/context'
 
 import Card from './Card'

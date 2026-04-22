@@ -10,7 +10,6 @@ export interface IPropsSessionItemMenu {
 
 export interface IPropsSessionItem {
 	item: Session
-	groups: IPropsSessions['groups']
 	pin: boolean
 	session_index: number
 	selected: boolean

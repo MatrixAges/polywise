@@ -4,14 +4,12 @@ import { CSS } from '@dnd-kit/utilities'
 import { DotsSixVerticalIcon } from '@phosphor-icons/react'
 import { useMemoizedFn } from 'ahooks'
 
-import { ContextMenu, ContextMenuTrigger } from '@/__shadcn__/components/ui/context-menu'
 import RenameInput from '@/pages/session/components/RenameInput'
 import { useMenuContext } from '@/pages/session/context'
 
-import CardMenu from './CardMenu'
 import Row from './Row'
 
-import type { IPropsGroupCard, IPropsGroupCardMenu, IPropsGroupSessionRow, TDragEndEvent } from './types'
+import type { IPropsGroupCard, TDragEndEvent } from './types'
 
 const Index = (props: IPropsGroupCard) => {
 	const {
@@ -48,63 +46,53 @@ const Index = (props: IPropsGroupCard) => {
 		sortGroupSession({ group_index, from, to })
 	})
 
-	const props_card_menu: IPropsGroupCardMenu = {
-		group_index,
-		groups_count: groups.length,
-		group_name
-	}
-
 	return (
 		<div
 			className='flex w-full flex-col'
 			style={{ transform: CSS.Translate.toString(transform), transition }}
 			ref={setNodeRef}
 		>
-			<ContextMenu>
-				<ContextMenuTrigger>
-					<div
-						className='
-							relative
-							flex
-							items-center
-							mb-1
-							group
-						'
-					>
-						<div className='flex flex-1 items-center px-2.5'>
-							{active_rename ? (
-								<RenameInput
-									active={active_rename}
-									value={rename_value}
-									setRenameValue={setRenameValue}
-									submitRename={submitRename}
-									cancelRename={cancelRename}
-								></RenameInput>
-							) : (
-								<div className='text-std-300 text-xsm truncate font-medium'>
-									{group_name}
-								</div>
-							)}
-						</div>
-						<button
-							className='
-								absolute
-								right-2
-								opacity-0
-								transition-opacity
-								group-hover:opacity-100
-								cursor-grab icon_btn
-							'
-							type='button'
-							{...attributes}
-							{...listeners}
-						>
-							<DotsSixVerticalIcon weight='bold'></DotsSixVerticalIcon>
-						</button>
-					</div>
-				</ContextMenuTrigger>
-				<CardMenu {...props_card_menu}></CardMenu>
-			</ContextMenu>
+			<div
+				className='
+					relative
+					flex
+					items-center
+					mb-1
+					group
+				'
+				data-group-index={group_index}
+				data-session-index={-1}
+				data-id=''
+			>
+				<div className='flex flex-1 items-center px-2.5'>
+					{active_rename ? (
+						<RenameInput
+							active={active_rename}
+							value={rename_value}
+							setRenameValue={setRenameValue}
+							submitRename={submitRename}
+							cancelRename={cancelRename}
+						></RenameInput>
+					) : (
+						<div className='text-std-300 text-xsm truncate font-medium'>{group_name}</div>
+					)}
+				</div>
+				<button
+					className='
+						absolute
+						right-2
+						opacity-0
+						transition-opacity
+						group-hover:opacity-100
+						cursor-grab icon_btn
+					'
+					type='button'
+					{...attributes}
+					{...listeners}
+				>
+					<DotsSixVerticalIcon weight='bold'></DotsSixVerticalIcon>
+				</button>
+			</div>
 			<DndContext sensors={sensors} onDragEnd={dragSessionEnd}>
 				<SortableContext items={items.map(item => item.id)} strategy={verticalListSortingStrategy}>
 					<div className='flex flex-col'>

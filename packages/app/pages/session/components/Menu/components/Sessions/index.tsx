@@ -5,8 +5,7 @@ import Item from './Item'
 import type { IPropsSessions } from '../../../../types'
 
 const Index = (props: IPropsSessions) => {
-	const { groups, sessions, pin_map, selected_session_id, rename_group_index, rename_session_index, rename_value } =
-		props
+	const { sessions, pin_map, selected_session_id, rename_group_index, rename_session_index, rename_value } = props
 	const { onScroll } = useMenuContext()
 
 	return (
@@ -32,7 +31,6 @@ const Index = (props: IPropsSessions) => {
 
 					return (
 						<Item
-							groups={groups}
 							item={item}
 							pin={item.id in pin_map}
 							session_index={session_index}

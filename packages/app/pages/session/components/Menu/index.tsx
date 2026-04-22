@@ -1,12 +1,24 @@
+import { useState } from 'react'
 import { FolderPlus, Plus } from 'lucide-react'
 
+import { ContextMenu, ContextMenuTrigger } from '@/__shadcn__/components/ui/context-menu'
 import { Tooltip } from '@/components'
 import { useDelegate } from '@/hooks'
 
 import { useMenuContext } from '../../context'
 import { Groups, Sessions } from './components'
+import CardMenu from './components/Groups/CardMenu'
+import RowMenu from './components/Groups/RowMenu'
+import ItemMenu from './components/Sessions/ItemMenu'
 
+import type { MouseEvent } from 'react'
 import type { IPropsGroups, IPropsMenu, IPropsSessions } from '../../types'
+
+interface IMenuTarget {
+	group_index: number
+	session_index: number
+	id: string
+}
 
 const Index = (props: IPropsMenu) => {
 	const {
@@ -20,6 +32,7 @@ const Index = (props: IPropsMenu) => {
 		rename_value
 	} = props
 	const { setCurrentTab, createSession, createGroup } = useMenuContext()
+	const [menu_target, setMenuTarget] = useState<IMenuTarget | null>(null)
 
 	const props_groups: IPropsGroups = {
 		groups,
@@ -51,6 +64,95 @@ const Index = (props: IPropsMenu) => {
 			createSession()
 		}
 	})
+
+	const findMenuTarget = (target: EventTarget | null) => {
+		let current_node = target instanceof HTMLElement ? target : null
+
+		while (current_node) {
+			const group_index = current_node.getAttribute('data-group-index')
+			const session_index = current_node.getAttribute('data-session-index')
+			const id = current_node.getAttribute('data-id')
+
+			if (group_index !== null && session_index !== null && id !== null) {
+				const next_group_index = Number(group_index)
+				const next_session_index = Number(session_index)
+
+				if (Number.isNaN(next_group_index) || Number.isNaN(next_session_index)) {
+					return null
+				}
+
+				return {
+					group_index: next_group_index,
+					session_index: next_session_index,
+					id
+				}
+			}
+
+			current_node = current_node.parentElement
+		}
+
+		return null
+	}
+
+	const onMenuContextCapture = (event: MouseEvent<HTMLDivElement>) => {
+		const next_target = findMenuTarget(event.target)
+
+		if (!next_target) {
+			setMenuTarget(null)
+			event.preventDefault()
+
+			return
+		}
+
+		setMenuTarget(next_target)
+	}
+
+	let menu_content = null
+
+	if (menu_target) {
+		if (menu_target.group_index >= 0 && menu_target.session_index < 0) {
+			const target_group = groups[menu_target.group_index]
+
+			if (target_group) {
+				menu_content = (
+					<CardMenu
+						group_index={menu_target.group_index}
+						groups_count={groups.length}
+						group_name={target_group.group}
+					></CardMenu>
+				)
+			}
+		} else if (menu_target.group_index >= 0 && menu_target.session_index >= 0) {
+			const target_group = groups[menu_target.group_index]
+			const target_session = target_group?.items[menu_target.session_index]
+
+			if (target_session && target_session.id === menu_target.id) {
+				menu_content = (
+					<RowMenu
+						group_index={menu_target.group_index}
+						session_index={menu_target.session_index}
+						group_items_count={target_group.items.length}
+						item={target_session}
+						groups={groups}
+						pin={target_session.id in pin_map}
+					></RowMenu>
+				)
+			}
+		} else if (menu_target.group_index < 0 && menu_target.session_index >= 0) {
+			const target_session = sessions[menu_target.session_index]
+
+			if (target_session && target_session.id === menu_target.id) {
+				menu_content = (
+					<ItemMenu
+						item={target_session}
+						groups={groups}
+						pin={target_session.id in pin_map}
+						session_index={menu_target.session_index}
+					></ItemMenu>
+				)
+			}
+		}
+	}
 
 	return (
 		<div
@@ -116,11 +218,18 @@ const Index = (props: IPropsMenu) => {
 					</Tooltip>
 				</div>
 			</div>
-			{current_tab === 'session' ? (
-				<Sessions {...props_sessions}></Sessions>
-			) : (
-				<Groups {...props_groups}></Groups>
-			)}
+			<ContextMenu>
+				<ContextMenuTrigger>
+					<div className='flex min-h-0 flex-1' onContextMenuCapture={onMenuContextCapture}>
+						{current_tab === 'session' ? (
+							<Sessions {...props_sessions}></Sessions>
+						) : (
+							<Groups {...props_groups}></Groups>
+						)}
+					</div>
+				</ContextMenuTrigger>
+				{menu_content}
+			</ContextMenu>
 		</div>
 	)
 }

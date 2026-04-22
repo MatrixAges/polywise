@@ -1,7 +1,6 @@
 import { useMemo } from 'react'
 import { Pin } from 'lucide-react'
 
-import { ContextMenu, ContextMenuTrigger } from '@/__shadcn__/components/ui/context-menu'
 import { ArrowLeft, Grip } from '@/components/animate'
 
 import { useMenuContext } from '../context'
@@ -17,13 +16,14 @@ interface IProps {
 	renaming: boolean
 	rename_value: string
 	title: ReactNode
-	menu: ReactNode
+	group_index: number
+	session_index: number
 	className?: string
 	style?: CSSProperties
 }
 
 const Index = (props: IProps) => {
-	const { item, pin, selected, renaming, rename_value, title, menu, className, style } = props
+	const { item, pin, selected, renaming, rename_value, title, group_index, session_index, className, style } = props
 	const { is_runing, unread } = item
 	const { setSelectedSession, setRenameValue, submitRename, cancelRename } = useMenuContext()
 
@@ -36,36 +36,29 @@ const Index = (props: IProps) => {
 	}, [pin, is_runing, unread])
 
 	return (
-		<ContextMenu>
-			<ContextMenuTrigger>
-				<div
-					className={$cx(
-						'click_button group',
-						className,
-						renaming && 'no_transition',
-						selected && 'active'
-					)}
-					style={style}
-					onClick={renaming ? undefined : () => setSelectedSession(item.id)}
-				>
-					<div className='min-w-0 flex-1'>
-						{renaming ? (
-							<RenameInput
-								active={renaming}
-								value={rename_value}
-								setRenameValue={setRenameValue}
-								submitRename={submitRename}
-								cancelRename={cancelRename}
-							></RenameInput>
-						) : (
-							title
-						)}
-					</div>
-					{Status}
-				</div>
-			</ContextMenuTrigger>
-			{menu}
-		</ContextMenu>
+		<div
+			className={$cx('click_button group', className, renaming && 'no_transition', selected && 'active')}
+			style={style}
+			onClick={renaming ? undefined : () => setSelectedSession(item.id)}
+			data-group-index={group_index}
+			data-session-index={session_index}
+			data-id={item.id}
+		>
+			<div className='min-w-0 flex-1'>
+				{renaming ? (
+					<RenameInput
+						active={renaming}
+						value={rename_value}
+						setRenameValue={setRenameValue}
+						submitRename={submitRename}
+						cancelRename={cancelRename}
+					></RenameInput>
+				) : (
+					title
+				)}
+			</div>
+			{Status}
+		</div>
 	)
 }
 
