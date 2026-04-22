@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
+import { useMemoizedFn } from 'ahooks'
 import { FolderPlus, Plus } from 'lucide-react'
 
 import { ContextMenu, ContextMenuTrigger } from '@/__shadcn__/components/ui/context-menu'
@@ -65,7 +66,7 @@ const Index = (props: IPropsMenu) => {
 		}
 	})
 
-	const findMenuTarget = (target: EventTarget | null) => {
+	const findMenuTarget = useMemoizedFn((target: EventTarget | null) => {
 		let current_node = target instanceof HTMLElement ? target : null
 
 		while (current_node) {
@@ -92,29 +93,31 @@ const Index = (props: IPropsMenu) => {
 		}
 
 		return null
-	}
+	})
 
-	const onMenuContextCapture = (event: MouseEvent<HTMLDivElement>) => {
-		const next_target = findMenuTarget(event.target)
+	const onMenuContextCapture = useMemoizedFn(() => {
+		;(event: MouseEvent<HTMLDivElement>) => {
+			const next_target = findMenuTarget(event.target)
 
-		if (!next_target) {
-			setMenuTarget(null)
-			event.preventDefault()
+			if (!next_target) {
+				setMenuTarget(null)
+				event.preventDefault()
 
-			return
+				return
+			}
+
+			setMenuTarget(next_target)
 		}
+	})
 
-		setMenuTarget(next_target)
-	}
+	const menu_content = useMemo(() => {
+		if (!menu_target) return
 
-	let menu_content = null
-
-	if (menu_target) {
 		if (menu_target.group_index >= 0 && menu_target.session_index < 0) {
 			const target_group = groups[menu_target.group_index]
 
 			if (target_group) {
-				menu_content = (
+				return (
 					<CardMenu
 						group_index={menu_target.group_index}
 						groups_count={groups.length}
@@ -127,7 +130,7 @@ const Index = (props: IPropsMenu) => {
 			const target_session = target_group?.items[menu_target.session_index]
 
 			if (target_session && target_session.id === menu_target.id) {
-				menu_content = (
+				return (
 					<RowMenu
 						group_index={menu_target.group_index}
 						session_index={menu_target.session_index}
@@ -142,7 +145,7 @@ const Index = (props: IPropsMenu) => {
 			const target_session = sessions[menu_target.session_index]
 
 			if (target_session && target_session.id === menu_target.id) {
-				menu_content = (
+				return (
 					<ItemMenu
 						item={target_session}
 						groups={groups}
@@ -152,7 +155,7 @@ const Index = (props: IPropsMenu) => {
 				)
 			}
 		}
-	}
+	}, [menu_target])
 
 	return (
 		<div
