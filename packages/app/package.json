@@ -28,6 +28,7 @@
 		"@lobehub/icons-static-svg": "^1.86.0",
 		"@phosphor-icons/react": "^2.1.10",
 		"@pierre/diffs": "^1.1.15",
+		"@pierre/trees": "1.0.0-beta.3",
 		"@platejs/basic-nodes": "^52.3.10",
 		"@radix-ui/react-toolbar": "^1.1.11",
 		"@radix-ui/react-tooltip": "^1.2.8",

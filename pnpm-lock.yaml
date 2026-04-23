@@ -21,12 +21,24 @@ catalogs:
     '@hono/trpc-server':
       specifier: ^0.4.2
       version: 0.4.2
+    '@rsbuild/core':
+      specifier: 2.0.0-rc.3
+      version: 2.0.0-rc.3
+    '@rsbuild/plugin-react':
+      specifier: 1.4.6
+      version: 1.4.6
     '@rslib/core':
       specifier: 0.21.1
       version: 0.21.1
     '@rstest/core':
       specifier: ^0.9.7
       version: 0.9.7
+    '@swc/helpers':
+      specifier: ^0.5.21
+      version: 0.5.21
+    '@trpc/client':
+      specifier: ^11.16.0
+      version: 11.16.0
     '@trpc/server':
       specifier: ^11.16.0
       version: 11.16.0
@@ -36,12 +48,21 @@ catalogs:
     '@types/node':
       specifier: 25.6.0
       version: 25.6.0
+    '@types/react':
+      specifier: 19.2.14
+      version: 19.2.14
+    '@types/react-dom':
+      specifier: 19.2.3
+      version: 19.2.3
     '@types/uuid':
       specifier: 11.0.0
       version: 11.0.0
     '@types/watchpack':
       specifier: ^2.4.5
       version: 2.4.5
+    ahooks:
+      specifier: ^3.9.7
+      version: 3.9.7
     ai:
       specifier: ^6.0.161
       version: 6.0.161
@@ -57,6 +78,9 @@ catalogs:
     bun-types:
       specifier: 1.3.12
       version: 1.3.12
+    clsx:
+      specifier: ^2.1.1
+      version: 2.1.1
     cross-env:
       specifier: ^10.1.0
       version: 10.1.0
@@ -69,6 +93,12 @@ catalogs:
     delay-cli:
       specifier: ^3.0.0
       version: 3.0.0
+    electron:
+      specifier: ^41.2.0
+      version: 41.2.0
+    electron-conf:
+      specifier: ^1.3.0
+      version: 1.3.0
     es-toolkit:
       specifier: 1.45.1
       version: 1.45.1
@@ -81,12 +111,33 @@ catalogs:
     hono:
       specifier: ^4.12.14
       version: 4.12.14
+    i18next:
+      specifier: 26.0.4
+      version: 26.0.4
+    mobx:
+      specifier: ^6.15.0
+      version: 6.15.0
     ofetch:
       specifier: 1.5.1
       version: 1.5.1
+    react:
+      specifier: 19.2.5
+      version: 19.2.5
+    react-dom:
+      specifier: 19.2.5
+      version: 19.2.5
+    react-i18next:
+      specifier: 17.0.3
+      version: 17.0.3
     reflect-metadata:
       specifier: ^0.2.2
       version: 0.2.2
+    shiki:
+      specifier: 4.0.2
+      version: 4.0.2
+    tinyglobby:
+      specifier: ^0.2.16
+      version: 0.2.16
     tslib:
       specifier: ^2.8.1
       version: 2.8.1
@@ -96,6 +147,9 @@ catalogs:
     type-fest:
       specifier: ^5.5.0
       version: 5.5.0
+    typescript:
+      specifier: ^6.0.2
+      version: 6.0.2
     uuid:
       specifier: 13.0.0
       version: 13.0.0
@@ -170,6 +224,9 @@ importers:
       '@pierre/diffs':
         specifier: ^1.1.15
         version: 1.1.15(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
+      '@pierre/trees':
+        specifier: 1.0.0-beta.3
+        version: 1.0.0-beta.3(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
       '@platejs/basic-nodes':
         specifier: ^52.3.10
         version: 52.3.10(platejs@52.3.21(@types/react@19.2.14)(immer@10.2.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(scheduler@0.27.0)(use-sync-external-store@1.6.0(react@19.2.5)))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
@@ -2593,6 +2650,12 @@ packages:
   '@pierre/theme@0.0.28':
     resolution: {integrity: sha512-1j/H/fECBuc9dEvntdWI+l435HZapw+RCJTlqCA6BboQ5TjlnE005j/ROWutXIs8aq5OAc82JI2Kwk4A1WWBgw==}
     engines: {vscode: ^1.0.0}
+
+  '@pierre/trees@1.0.0-beta.3':
+    resolution: {integrity: sha512-gfV7V1AoceIwTSFwiiWl/89gNtJROyo2dFeYYuAkT4F3AbE+ajCIGZEICBw1ygmVxVetF9Kq1Xpjz8BhXXZwTQ==}
+    peerDependencies:
+      react: ^18.3.1 || ^19.0.0
+      react-dom: ^18.3.1 || ^19.0.0
 
   '@pkgjs/parseargs@0.11.0':
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
@@ -7087,6 +7150,14 @@ packages:
     engines: {node: '>=14.0.0'}
     hasBin: true
 
+  preact-render-to-string@6.6.5:
+    resolution: {integrity: sha512-O6MHzYNIKYaiSX3bOw0gGZfEbOmlIDtDfWwN1JJdc/T3ihzRT6tGGSEWE088dWrEDGa1u7101q+6fzQnO9XCPA==}
+    peerDependencies:
+      preact: '>=10 || >= 11.0.0-0'
+
+  preact@11.0.0-beta.0:
+    resolution: {integrity: sha512-IcODoASASYwJ9kxz7+MJeiJhvLriwSb4y4mHIyxdgaRZp6kPUud7xytrk/6GZw8U3y6EFJaRb5wi9SrEK+8+lg==}
+
   prebuild-install@7.1.3:
     resolution: {integrity: sha512-8Mf2cbV7x1cXPUILADGI3wuhfqWvtiLA1iclTDbFRZkgRQS0NqsPZphna9V+HyTEadheuPmjaJMsbzKQFOzLug==}
     engines: {node: '>=10'}
@@ -8042,10 +8113,6 @@ packages:
   tinyexec@1.0.4:
     resolution: {integrity: sha512-u9r3uZC0bdpGOXtlxUIdwf9pkmvhqJdrVCH9fapQtgy/OeTTMZ1nqH7agtvEfmGui6e1XxjcdrlxvxJvc3sMqw==}
     engines: {node: '>=18'}
-
-  tinyglobby@0.2.15:
-    resolution: {integrity: sha512-j2Zq4NyQYG5XMST4cbs02Ak8iJUdxRM0XI5QyxXuZOzKOINmWurp3smXu3y5wDcJrptwpSjgXHzIQxR0omXljQ==}
-    engines: {node: '>=12.0.0'}
 
   tinyglobby@0.2.16:
     resolution: {integrity: sha512-pn99VhoACYR8nFHhxqix+uvsbXineAasWm5ojXoN8xEwK5Kd3/TrhNn1wByuD52UxWRLy8pu+kRMniEi6Eq9Zg==}
@@ -10185,6 +10252,13 @@ snapshots:
       shiki: 3.23.0
 
   '@pierre/theme@0.0.28': {}
+
+  '@pierre/trees@1.0.0-beta.3(react-dom@19.2.5(react@19.2.5))(react@19.2.5)':
+    dependencies:
+      preact: 11.0.0-beta.0
+      preact-render-to-string: 6.6.5(preact@11.0.0-beta.0)
+      react: 19.2.5
+      react-dom: 19.2.5(react@19.2.5)
 
   '@pkgjs/parseargs@0.11.0':
     optional: true
@@ -12979,10 +13053,6 @@ snapshots:
     dependencies:
       pend: 1.2.0
 
-  fdir@6.5.0(picomatch@4.0.3):
-    optionalDependencies:
-      picomatch: 4.0.3
-
   fdir@6.5.0(picomatch@4.0.4):
     optionalDependencies:
       picomatch: 4.0.4
@@ -14709,7 +14779,7 @@ snapshots:
       proc-log: 6.1.0
       semver: 7.7.4
       tar: 7.5.11
-      tinyglobby: 0.2.15
+      tinyglobby: 0.2.16
       which: 6.0.1
     transitivePeerDependencies:
       - supports-color
@@ -15149,6 +15219,12 @@ snapshots:
     dependencies:
       commander: 9.5.0
     optional: true
+
+  preact-render-to-string@6.6.5(preact@11.0.0-beta.0):
+    dependencies:
+      preact: 11.0.0-beta.0
+
+  preact@11.0.0-beta.0: {}
 
   prebuild-install@7.1.3:
     dependencies:
@@ -16200,11 +16276,6 @@ snapshots:
   tinyexec@0.3.2: {}
 
   tinyexec@1.0.4: {}
-
-  tinyglobby@0.2.15:
-    dependencies:
-      fdir: 6.5.0(picomatch@4.0.3)
-      picomatch: 4.0.3
 
   tinyglobby@0.2.16:
     dependencies:
