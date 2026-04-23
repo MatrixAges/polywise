@@ -10,6 +10,7 @@ export default sqliteTable(
 		name: text('name').notNull(),
 		desc: text('desc'),
 		dir: text('dir').notNull(),
+		order: integer('order').notNull(),
 		model: text('model', { mode: 'json' }).$type<TableModel>(),
 		created_at: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
 		updated_at: integer('updated_at', { mode: 'timestamp' })

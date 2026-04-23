@@ -52,6 +52,45 @@ This routing table is scoped to folder-level matching. The matcher must use `pat
 			"packages/app/pages/session/components/RenameInput.tsx"
 		]
 	},
+	"pages/project/components/Todos": {
+		"path_scope": "packages/app/pages/project/components/Todos",
+		"description": "Project todo block rendered inside the project page.",
+		"fractal_rule": "Keep the entry component in `index.tsx` and split stable row atoms into adjacent files only if the list grows.",
+		"import_order": "1) react and ui libs; 2) @/ aliases; 3) relative page-local modules; 4) type-only imports.",
+		"naming_rules": "Component files use PascalCase and handler names use camelCase.",
+		"Same Code 1": "packages/app/pages/session/components/Menu/components/Sessions/index.tsx",
+		"Same Code 2": "packages/app/pages/session/components/Menu/components/Groups/index.tsx",
+		"sample_pool": [
+			"packages/app/pages/session/components/Item.tsx",
+			"packages/app/pages/session/components/RenameInput.tsx"
+		]
+	},
+	"pages/project/components/ProjectList": {
+		"path_scope": "packages/app/pages/project/components/ProjectList",
+		"description": "Project list block with create, rename, delete, and drag sorting interactions.",
+		"fractal_rule": "Keep list orchestration in `index.tsx`, row atoms in `Item.tsx`, and inline create/rename inputs in adjacent files within the same folder.",
+		"import_order": "1) react, dnd-kit, and ahooks; 2) @/ aliases; 3) relative page-local modules; 4) type-only imports.",
+		"naming_rules": "Component files use PascalCase. Handler names use camelCase. Props objects use `props_*` naming.",
+		"Same Code 1": "packages/app/pages/session/components/Menu/components/Sessions/index.tsx",
+		"Same Code 2": "packages/app/pages/session/components/Item.tsx",
+		"sample_pool": [
+			"packages/app/pages/session/components/RenameInput.tsx",
+			"packages/app/pages/session/components/Menu/components/Groups/index.tsx"
+		]
+	},
+	"pages/project": {
+		"path_scope": "packages/app/pages/project",
+		"description": "Project page composition with project sidebar, session viewer, todo management, and file tree/detail panes.",
+		"fractal_rule": "Use `index.tsx` as page shell, `model.ts` for data/event ownership, and `components/` for sidebar, todo, and file sections.",
+		"import_order": "1) react/mobx/tsyringe; 2) @/ aliases and package components; 3) relative page-local modules; 4) type-only imports.",
+		"naming_rules": "Page entry is `index.tsx`. Local subcomponents use PascalCase file names.",
+		"Same Code 1": "packages/app/pages/session/index.tsx",
+		"Same Code 2": "packages/app/pages/session/model.ts",
+		"sample_pool": [
+			"packages/app/pages/session/components/Menu/index.tsx",
+			"packages/app/components/Session/index.tsx"
+		]
+	},
 	"pages/*": {
 		"path_scope": "packages/app/pages",
 		"description": "General page entries outside the dedicated session folder pattern.",

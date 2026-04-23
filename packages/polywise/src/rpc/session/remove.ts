@@ -1,12 +1,13 @@
 import path from 'path'
 import { app } from '@core/consts'
-import { session } from '@core/db/schema'
+import { project_session, session } from '@core/db/schema'
 import { p, SessionEventStore, SessionStore, SessionStreamStore } from '@core/utils'
 import { eq } from 'drizzle-orm'
 import fs from 'fs-extra'
 import { object, string } from 'zod'
 
 import { getSession, removeSession } from '../../db/services'
+import { removeProjectSession } from '../../db/services/externals/project_session'
 import { readGroupList, readPinList, writeGroupList, writePinList } from './utils'
 
 const input_type = object({ id: string() })
@@ -46,6 +47,8 @@ export default p.input(input_type).mutation(async ({ input }) => {
 		...item,
 		items: item.items.filter(session_id => session_id !== input.id)
 	}))
+
+	await removeProjectSession(eq(project_session.session_id, input.id))
 
 	await writePinList(next_pin_list)
 	await writeGroupList(next_group_list)

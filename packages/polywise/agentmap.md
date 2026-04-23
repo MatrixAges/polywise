@@ -117,6 +117,10 @@ This document provides an overview of the packages/polywise module structure and
 				"session": {
 					"desc": "Session subscriptions and management RPCs. Existing event bridge endpoints remain in events.ts; create/remove/rename/pin and group CRUD/sort/move, including moveOutGroup for removing a session id from a specific group by index, are split into dedicated single-file procedures. getList now returns grouped sessions by batch-loading group item ids and a separate first-page ungrouped session list, while getMoreList paginates additional ungrouped sessions in pages of 10 using the same group exclusion rule; getList also excludes the reserved id global_panel_session from all query paths. A session/utils subtree now holds single-file storage helpers, normalization helpers, and shared SessionGroupItem typing, while pin.json and session_group.json path constants are centralized in consts/app.ts; rename persists human title intent into context.json so title_tool no longer overrides manually renamed sessions. Replaced title-only watch with watchSessionStatus subscription payload `{ [session_id]: { title, running, unread } }`, added unread mutation endpoint to clear unread on enter, and stream finish now marks unread=true when SessionEventStore has no `${id}/change` listeners. Session remove now enforces stream and event cleanup by aborting active session stream, unsubscribing SessionStreamStore, and clearing session-scoped SessionEventStore listeners before final store/file removal.",
 					"role": "Folder"
+				},
+				"project": {
+					"desc": "Project domain RPC procedures for project list, project ordering, project-todo binding, and project file detail lookup. Session CRUD for project usage is shared through the session router.",
+					"role": "Folder"
 				}
 			},
 			"rpcs": {
@@ -151,6 +155,10 @@ This document provides an overview of the packages/polywise module structure and
 					},
 					"session.ts": {
 						"desc": "Chat session storage schema with nullable key, optional im/cron flags, and related indexes",
+						"role": "Schema"
+					},
+					"project.ts": {
+						"desc": "Project storage schema with name, description, directory, order, model metadata, and timestamps",
 						"role": "Schema"
 					},
 					"message.ts": { "desc": "Chat message storage schema with UIMessages", "role": "Schema" }

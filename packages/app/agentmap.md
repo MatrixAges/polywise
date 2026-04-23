@@ -103,7 +103,33 @@ This document provides an overview of the packages/app module structure and arch
 			"browser": { "index.tsx": { "desc": "Browser page view", "role": "Page" } },
 			"database": { "index.tsx": { "desc": "Database page view", "role": "Page" } },
 			"notebook": { "index.tsx": { "desc": "Notebook page view", "role": "Page" } },
-			"project": { "index.tsx": { "desc": "Project page view", "role": "Page" } },
+			"project": {
+				"components": {
+					"ProjectList": {
+						"Item.tsx": {
+							"desc": "Project row atom with inline rename, delete confirmation, and drag handle behavior",
+							"role": "Component"
+						},
+						"index.tsx": {
+							"desc": "Project list block with create, rename, delete, and drag sorting interactions",
+							"role": "Component"
+						}
+					},
+					"Todos": { "desc": "Project todo block", "role": "Component" }
+				},
+				"index.tsx": {
+					"desc": "Project page view with left project list, center session view, and right file tree/diff pane; left list now supports project create, delete, rename, and drag sorting",
+					"role": "Page"
+				},
+				"model.ts": {
+					"desc": "Project page state model using project and session RPC for selection, CRUD, sorting, and file state",
+					"role": "Model"
+				},
+				"types.ts": {
+					"desc": "Project page type definitions re-exporting shared RPC payload types",
+					"role": "Type"
+				}
+			},
 			"session": {
 				"components": {
 					"Item.tsx": {

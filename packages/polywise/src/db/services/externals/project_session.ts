@@ -19,3 +19,19 @@ export const getSessionProject = async (args: ArgsGetSessionProject = {}) => {
 
 	return query
 }
+
+export const addProjectSession = async (project_id: string, session_id: string) => {
+	return env.db
+		.insert(project_session)
+		.values({ project_id, session_id })
+		.returning()
+		.then(res => res[0])
+}
+
+export const removeProjectSession = async (where: SQL) => {
+	return env.db
+		.delete(project_session)
+		.where(where)
+		.returning()
+		.then(res => res[0])
+}

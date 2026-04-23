@@ -88,6 +88,19 @@ This routing table is scoped to folder-level matching. The matcher must use `pat
 			"packages/polywise/src/db/schema/externals/index.ts"
 		]
 	},
+	"src/db/schema/externals/project_todo": {
+		"path_scope": "packages/polywise/src/db/schema/externals/project_todo",
+		"description": "Project and todo relation schema.",
+		"fractal_rule": "Keep the relation table atomic and mirror existing external relation schema layout.",
+		"import_order": "1) drizzle libs; 2) local schema references; 3) type-only imports.",
+		"naming_rules": "File and schema names follow snake_case relation semantics.",
+		"Same Code 1": "packages/polywise/src/db/schema/externals/session_todo.ts",
+		"Same Code 2": "packages/polywise/src/db/schema/externals/project_session.ts",
+		"sample_pool": [
+			"packages/polywise/src/db/schema/externals/agent_todo.ts",
+			"packages/polywise/src/db/schema/externals/todo_tag.ts"
+		]
+	},
 	"src/db/schema": {
 		"path_scope": "packages/polywise/src/db/schema",
 		"description": "Primary drizzle table schemas.",
@@ -97,6 +110,19 @@ This routing table is scoped to folder-level matching. The matcher must use `pat
 		"Same Code 1": "packages/polywise/src/db/schema/article.ts",
 		"Same Code 2": "packages/polywise/src/db/schema/node.ts",
 		"sample_pool": ["packages/polywise/src/db/schema/session.ts", "packages/polywise/src/db/schema/index.ts"]
+	},
+	"src/db/schema/project": {
+		"path_scope": "packages/polywise/src/db/schema/project",
+		"description": "Project table schema.",
+		"fractal_rule": "Keep the project table atomic and store only project metadata and ordering state.",
+		"import_order": "1) drizzle libs; 2) utility helpers; 3) type-only imports.",
+		"naming_rules": "Schema variables use camelCase; DB columns use snake_case.",
+		"Same Code 1": "packages/polywise/src/db/schema/session.ts",
+		"Same Code 2": "packages/polywise/src/db/schema/article.ts",
+		"sample_pool": [
+			"packages/polywise/src/db/schema/externals/project_session.ts",
+			"packages/polywise/src/db/schema/externals/project_todo.ts"
+		]
 	},
 	"src/db/services/externals": {
 		"path_scope": "packages/polywise/src/db/services/externals",
@@ -108,6 +134,19 @@ This routing table is scoped to folder-level matching. The matcher must use `pat
 		"Same Code 2": "packages/polywise/src/db/services/externals/project_session.ts",
 		"sample_pool": [
 			"packages/polywise/src/db/services/externals/notification_session.ts",
+			"packages/polywise/src/db/services/externals/index.ts"
+		]
+	},
+	"src/db/services/project": {
+		"path_scope": "packages/polywise/src/db/services/project",
+		"description": "Project domain db helpers for list/create/update/remove and ordering.",
+		"fractal_rule": "Keep one project service per file and aggregate via folder `index.ts`.",
+		"import_order": "1) @core/db schema/env; 2) drizzle helpers; 3) local service helpers; 4) type-only imports.",
+		"naming_rules": "Service functions use action-first camelCase names.",
+		"Same Code 1": "packages/polywise/src/db/services/session.ts",
+		"Same Code 2": "packages/polywise/src/db/services/todo.ts",
+		"sample_pool": [
+			"packages/polywise/src/db/services/externals/project_session.ts",
 			"packages/polywise/src/db/services/externals/index.ts"
 		]
 	},
@@ -123,6 +162,16 @@ This routing table is scoped to folder-level matching. The matcher must use `pat
 			"packages/polywise/src/db/services/message.ts",
 			"packages/polywise/src/db/services/index.ts"
 		]
+	},
+	"src/rpc/project": {
+		"path_scope": "packages/polywise/src/rpc/project",
+		"description": "Project domain RPC procedures for project list, ordering, todo binding, and file detail lookup.",
+		"fractal_rule": "Keep each project operation as a single file and aggregate with `project/index.ts`; shared filesystem helpers stay under `project/utils`.",
+		"import_order": "1) @core/db and shared libs; 2) trpc helper import; 3) project-local helpers; 4) type-only imports.",
+		"naming_rules": "Procedure files use action camelCase (create/remove/rename/sort/list/file/detail).",
+		"Same Code 1": "packages/polywise/src/rpc/session/getList.ts",
+		"Same Code 2": "packages/polywise/src/rpc/session/rename.ts",
+		"sample_pool": ["packages/polywise/src/rpc/session/index.ts", "packages/polywise/src/rpc/file/index.ts"]
 	},
 	"src/db root": {
 		"path_scope": "packages/polywise/src/db",
