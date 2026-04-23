@@ -38,7 +38,7 @@
 		"ofetch": "catalog:",
 		"polywise": "workspace:*",
 		"watchpack": "^2.5.1",
-		"workerpool": "^10.0.1",
+		"workerpool": "^10.0.2",
 		"zod": "catalog:"
 	},
 	"devDependencies": {
