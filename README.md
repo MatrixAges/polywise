@@ -44,6 +44,7 @@ Polywise stands on the shoulders of these excellent open-source projects:
 - 🚀 **[Hono](https://hono.dev/)** - Ultra-fast Web framework
 - 🛠️ **[Rsbuild](https://rsbuild.dev/)** - Next-generation build tool powered by Rspack
 - 📚 **[Rslib](https://rslib.dev/)** - Library build tool powered by Rsbuild
+- 🤖 **[AI SDK](https://ai-sdk.dev/)** - Unified toolkit for building AI-powered applications
 - 🤗 **[node-llama-cpp](https://github.com/withcatai/node-llama-cpp)** – Node.js bindings for llama-cpp, designed for interfacing with local models.
 
 ## 📜 License
