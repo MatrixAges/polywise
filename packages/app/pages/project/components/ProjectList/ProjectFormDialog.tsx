@@ -1,14 +1,6 @@
-import { Button } from '@/__shadcn__/components/ui/button'
-import {
-	Dialog,
-	DialogClose,
-	DialogContent,
-	DialogDescription,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle
-} from '@/__shadcn__/components/ui/dialog'
 import { Input } from '@/__shadcn__/components/ui/input'
+
+import ProjectDialogShell from './ProjectDialogShell'
 
 import type { ChangeEvent, KeyboardEvent } from 'react'
 
@@ -42,18 +34,32 @@ const Index = (props: IProps) => {
 	} = props
 
 	return (
-		<Dialog open={open} onOpenChange={next_open => !next_open && onClose()}>
-			<DialogContent>
-				<DialogHeader>
-					<DialogTitle>{title}</DialogTitle>
-					<DialogDescription>{desc}</DialogDescription>
-				</DialogHeader>
-				<div className='flex flex-col gap-3'>
+		<ProjectDialogShell
+			open={open}
+			title={title}
+			desc={desc}
+			confirm_text={submit_text}
+			onConfirm={onSubmit}
+			onClose={onClose}
+		>
+			<div className='flex flex-col gap-3'>
+				<Input
+					placeholder='Project name'
+					value={name_value}
+					onChange={(event: ChangeEvent<HTMLInputElement>) => onChangeName(event.target.value)}
+					onKeyDown={(event: KeyboardEvent<HTMLInputElement>) => {
+						if (event.key === 'Enter') {
+							event.preventDefault()
+							onSubmit()
+						}
+					}}
+				></Input>
+				{show_dir && (
 					<Input
-						placeholder='Project name'
-						value={name_value}
+						placeholder='Project directory'
+						value={dir_value || ''}
 						onChange={(event: ChangeEvent<HTMLInputElement>) =>
-							onChangeName(event.target.value)
+							onChangeDir?.(event.target.value)
 						}
 						onKeyDown={(event: KeyboardEvent<HTMLInputElement>) => {
 							if (event.key === 'Enter') {
@@ -62,28 +68,9 @@ const Index = (props: IProps) => {
 							}
 						}}
 					></Input>
-					{show_dir && (
-						<Input
-							placeholder='Project directory'
-							value={dir_value || ''}
-							onChange={(event: ChangeEvent<HTMLInputElement>) =>
-								onChangeDir?.(event.target.value)
-							}
-							onKeyDown={(event: KeyboardEvent<HTMLInputElement>) => {
-								if (event.key === 'Enter') {
-									event.preventDefault()
-									onSubmit()
-								}
-							}}
-						></Input>
-					)}
-				</div>
-				<DialogFooter>
-					<DialogClose render={<Button variant='outline'>Cancel</Button>} />
-					<Button onClick={onSubmit}>{submit_text}</Button>
-				</DialogFooter>
-			</DialogContent>
-		</Dialog>
+				)}
+			</div>
+		</ProjectDialogShell>
 	)
 }
 
