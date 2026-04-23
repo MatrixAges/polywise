@@ -448,6 +448,19 @@ This routing table is scoped to folder-level matching. The matcher must use `pat
 		"Same Code 2": "packages/polywise/src/fst/tools/context.ts",
 		"sample_pool": ["packages/polywise/src/fst/tools/message.ts", "packages/polywise/src/fst/tools/index.ts"]
 	},
+	"src/fst/mcp": {
+		"path_scope": "packages/polywise/src/fst/mcp",
+		"description": "MCP server configuration loading, session disabling, and tool bridging.",
+		"fractal_rule": "Keep configuration parsing, server filtering, and tool adaptation split into dedicated files with `index.ts` as the facade.",
+		"import_order": "1) ai/mcp and third-party libs; 2) @core aliases; 3) local mcp helpers; 4) type-only imports.",
+		"naming_rules": "MCP helpers use explicit camelCase verbs and config-oriented names.",
+		"Same Code 1": "packages/polywise/src/fst/mcp/index.ts",
+		"Same Code 2": "packages/polywise/src/fst/mcp/loadMcpTools.ts",
+		"sample_pool": [
+			"packages/polywise/src/fst/mcp/loadConfig.ts",
+			"packages/polywise/src/fst/mcp/getEnabledMcps.ts"
+		]
+	},
 	"src/fst/session/context": {
 		"path_scope": "packages/polywise/src/fst/session/context",
 		"description": "Session context read/write helpers.",

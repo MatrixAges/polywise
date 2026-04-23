@@ -14,6 +14,10 @@ export default async () => {
 	clearObject(config)
 	Object.assign(config, res_config || {})
 
+	if (!config.mcp) {
+		config.mcp = { enabled: true }
+	}
+
 	clearObject(providers)
 	Object.assign(providers, res_providers || {})
 

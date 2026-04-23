@@ -8,11 +8,45 @@ export interface DefaultModel {
 	model: string
 }
 
+export interface McpOAuthConfig {
+	clientId?: string
+	clientSecret?: string
+	scope?: string
+	redirectUri?: string
+}
+
+export interface McpLocalConfig {
+	type: 'local'
+	command: Array<string>
+	environment?: Record<string, string>
+	enabled?: boolean
+	timeout?: number
+}
+
+export interface McpRemoteConfig {
+	type: 'remote'
+	url: string
+	enabled?: boolean
+	headers?: Record<string, string>
+	oauth?: McpOAuthConfig | false
+	timeout?: number
+}
+
+export interface McpEnabledConfig {
+	enabled: boolean
+}
+
+export interface McpConfig {
+	enabled?: boolean
+	[name: string]: McpLocalConfig | McpRemoteConfig | boolean | undefined
+}
+
 export interface AppConfig {
 	workspaces: Array<Workspace>
 	current_workspace: string
 	submit_mode: 'enter' | 'ctrl+enter'
 	default_model: DefaultModel
+	mcp?: McpConfig
 	embedding_model?: DefaultModel
 	rerank_model?: DefaultModel
 	enable_triple: boolean

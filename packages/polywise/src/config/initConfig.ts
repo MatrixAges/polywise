@@ -15,8 +15,8 @@ export default async () => {
 	})
 
 	config_watcher.on('remove', async () => {
-		fs.writeFile(config_path, JSON.stringify(config, null, 4))
-		fs.writeFile(providers_path, JSON.stringify(providers, null, 4))
+		await fs.writeFile(config_path, JSON.stringify(config, null, 4))
+		await fs.writeFile(providers_path, JSON.stringify(providers, null, 4))
 	})
 
 	await loadConfig()

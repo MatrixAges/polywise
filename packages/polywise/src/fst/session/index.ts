@@ -2,8 +2,10 @@ import events from 'events'
 import path from 'path'
 import { app } from '@core/consts'
 
+import { loadMcpTools } from '../mcp'
 import { loadCustomToolsMap } from '../tools/meta'
 import { loadSkillMap } from '../tools/skill'
+import { getConfig } from './config'
 import { getContext, setContext } from './context'
 import { appendMessage, insertMessage } from './message'
 import {
@@ -53,6 +55,7 @@ export default class Index {
 
 	skill_map = [] as Array<SkillMeta>
 	custom_tools_map = [] as Array<CustomToolMeta>
+	mcp_tools = {} as Record<string, unknown>
 
 	ui_messages = [] as Array<Message>
 	ui_has_older = false
@@ -81,6 +84,10 @@ export default class Index {
 
 	get context_dir() {
 		return path.resolve(`${this.session_dir}/context.json`)
+	}
+
+	get config_dir() {
+		return path.resolve(`${this.session_dir}/config.json`)
 	}
 
 	get state_dir() {
@@ -149,12 +156,14 @@ export default class Index {
 	clearPlan = () => clearPlan(this)
 
 	getContext = () => getContext(this)
+	getConfig = () => getConfig(this)
 	setContext = (v: Partial<Context>) => setContext(this, v)
 	getState = () => getState(this)
 	setState = () => setState(this)
 
 	loadSkillMap = () => loadSkillMap(this)
 	loadCustomToolsMap = () => loadCustomToolsMap(this)
+	loadMcps = () => loadMcpTools(this)
 
 	getStream = (message: Message) => getStream(this, message)
 	abortStream = () => abortStream(this)

@@ -23,6 +23,7 @@ export default async () => {
 				workspaces: [{ name: 'Default' }],
 				current_workspace: 'Default',
 				default_model,
+				mcp: { enabled: true },
 				enable_triple: false,
 				triple_model: default_model,
 				enable_rewrite: false,

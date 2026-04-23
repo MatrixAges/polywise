@@ -10,6 +10,7 @@ import { getSystemTools, SessionEventStore } from '@core/utils'
 import { convertToModelMessages, createUIMessageStream, smoothStream, stepCountIs, streamText } from 'ai'
 import { getId } from 'stk/utils'
 
+import { loadMcpTools } from '../../mcp'
 import {
 	createBashTool,
 	createContextTool,
@@ -77,6 +78,7 @@ export default async (s: Index, message: Message) => {
 	if (s.prefill) messages.push({ role: 'assistant', content: s.prefill })
 
 	const bash_tool = await createBashTool(s)
+	const mcp_tools = await loadMcpTools(s)
 	const system_tools_prompt = await getSystemTools()
 	const custom_tools_prompt = getCustomToolsPrompt(s.custom_tools_map)
 	const skill_prompt = getSkillPrompt(s.skill_map)
@@ -91,6 +93,7 @@ export default async (s: Index, message: Message) => {
 		messages,
 		tools: {
 			...s.model.tools,
+			...mcp_tools,
 			context_tool: createContextTool(s),
 			message_tool: createMessageTool(s),
 			plan_tool: createPlanTool(s),

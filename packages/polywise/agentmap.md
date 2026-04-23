@@ -39,7 +39,7 @@ This document provides an overview of the packages/polywise module structure and
 				"index.ts": { "desc": "fst module exports", "role": "Index" },
 				"chat": { "desc": "Chat capabilities using AI SDK, supporting UIMessages", "role": "Folder" },
 				"session": {
-					"desc": "Session lifecycle and stream orchestration for chat and cron-triggered runs, consuming skill_map loading from fst/tools/skill and title_tool-based session renaming; skill_map is normalized to name + description only, with skill file paths derived from skill name at runtime; supports archive/unarchive flow with archived_at state persisted in session_dir/state.json and message queries scoped by archived boundary; appendMessage persists messages to database only, and trim/title/superego extraction are deferred after stream finish; successful stream completion now also resets is_runing through stop() so follow-up user messages are inserted normally; clears session_dir/plan.md on message clear or archive",
+					"desc": "Session lifecycle and stream orchestration for chat and cron-triggered runs, consuming skill_map loading from fst/tools/skill and title_tool-based session renaming; skill_map is normalized to name + description only, with skill file paths derived from skill name at runtime; supports archive/unarchive flow with archived_at state persisted in session_dir/state.json and message queries scoped by archived boundary; appendMessage persists messages to database only, and trim/title/superego extraction are deferred after stream finish; successful stream completion now also resets is_runing through stop() so follow-up user messages are inserted normally; session_dir/config.json now stores disable_map to disable named MCP servers, while global config.json stores MCP server definitions under mcp; clears session_dir/plan.md on message clear or archive",
 					"role": "Folder"
 				},
 				"agents": {
@@ -85,7 +85,10 @@ This document provides an overview of the packages/polywise module structure and
 					"desc": "Cron metadata store/runtime/logging backed by cron.json and Croner jobs, including session execution bridge",
 					"role": "Folder"
 				},
-				"mcp": { "desc": "MCP client tools integration", "role": "Folder" },
+				"mcp": {
+					"desc": "MCP client tools integration, including config loading, server filtering, startup prewarming, and tool bridging into session streams",
+					"role": "Folder"
+				},
 				"acp": { "desc": "ACP provider integration", "role": "Folder" }
 			},
 			"rpc": {

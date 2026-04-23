@@ -11,6 +11,13 @@ export default async (s: Index, is_cron?: boolean, title?: string) => {
 
 	await fs.ensureDir(s.session_dir)
 	await fs.ensureDir(s.files_dir)
+	await fs.ensureFile(s.config_dir)
+
+	const session_config_exists = await fs.pathExists(s.config_dir)
+
+	if (!session_config_exists) {
+		await fs.writeJSON(s.config_dir, { disable_map: [] }, { spaces: 4 })
+	}
 
 	await s.getContext()
 	await s.getState()
