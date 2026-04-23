@@ -22,7 +22,7 @@ import type { DefaultModel, Model } from '@core/types'
 interface IProps {
 	value?: DefaultModel
 	show_local_model?: boolean
-	filter_type?: string
+	filter_type?: Model['type']
 	ghost?: boolean
 	onChange?: (v: DefaultModel) => void
 }
