@@ -16,7 +16,7 @@ const Index = (props: IProps) => {
 	const render = useMemoizedFn(({ field: { name, value, ref, onChange } }) => {
 		const target_props = {
 			name,
-			value: value ?? null,
+			value: value ?? '',
 			checked: typeof value === 'boolean' ? value : false,
 			onCheckedChange: onChange,
 			ref,

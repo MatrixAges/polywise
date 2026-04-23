@@ -31,6 +31,8 @@ const Index = () => {
 
 	const { control } = useForm<AppConfig>({ values: $copy(s.config) }, onChange)
 
+	console.log($copy(s.config))
+
 	return (
 		<div
 			className='

@@ -28,10 +28,7 @@ This document provides an overview of the packages/app module structure and arch
 			"AutoLabel.tsx": { "desc": "Auto-sizing label component", "role": "Component" },
 			"Container.tsx": { "desc": "Layout container component", "role": "Component" },
 			"Controller.tsx": { "desc": "App control logic component", "role": "Component" },
-			"ModelSelect.tsx": {
-				"desc": "Provider-scoped model picker that resolves duplicate ids through composite keys and displays model names",
-				"role": "Component"
-			},
+			"ModelSelect.tsx": { "desc": "Default model picker for app settings", "role": "Component" },
 			"Dialog.tsx": { "desc": "Modal dialog component", "role": "Component" },
 			"ErrorBoundary.tsx": { "desc": "React error boundary", "role": "Component" },
 			"Lazy.tsx": { "desc": "Lazy loading wrapper for dynamic imports", "role": "Component" },

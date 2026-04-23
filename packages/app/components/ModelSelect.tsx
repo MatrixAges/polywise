@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { useMemoizedFn } from 'ahooks'
 import { observer } from 'mobx-react-lite'
 
@@ -34,11 +34,6 @@ interface IModelItem {
 	label: string
 }
 
-interface ISelectedItem {
-	value: string
-	label: string
-}
-
 interface IProviderGroup {
 	value: string
 	items: Array<IModelItem>
@@ -61,19 +56,6 @@ const Index = (props: IProps) => {
 	const s = global.setting
 	const config = $copy(s.config)
 	const providers = $copy([...s.providers.providers, ...(s.providers.custom_providers || [])])
-
-	const [selected_value, setSelectedValue] = useState<string | null>(() =>
-		config?.default_model ? getModelValue(config.default_model.provider, config.default_model.model) : null
-	)
-
-	useEffect(() => {
-		if (config?.default_model)
-			setSelectedValue(getModelValue(config.default_model.provider, config.default_model.model))
-	}, [config?.default_model])
-
-	useEffect(() => {
-		if (value) setSelectedValue(getModelValue(value.provider, value.model))
-	}, [value])
 
 	const provider_items = useMemo(() => {
 		const target: Array<IProviderGroup> = []
@@ -120,35 +102,31 @@ const Index = (props: IProps) => {
 		}, {})
 	}, [all_items])
 
+	const selected_value = useMemo(() => {
+		if (!value || typeof value !== 'object') return null
+
+		return getModelValue(value.provider, value.model)
+	}, [value])
+
 	const selected_item = useMemo(
 		() => all_items.find(item => item.value === selected_value) || null,
 		[all_items, selected_value]
 	)
 
-	const selected_display_item = useMemo<ISelectedItem>(() => {
-		if (!selected_item) return { value: '', label: '' }
-
-		return {
-			value: selected_item.value,
-			label: selected_item.label
-		}
-	}, [selected_item])
-
-	const setDefaultModel = useMemoizedFn((next_value: ISelectedItem | null, _event_details: unknown) => {
+	const setDefaultModel = useMemoizedFn((next_value: IModelItem | null) => {
 		if (!next_value) return
 
 		const target = item_lookup[next_value.value]
 
 		if (!target) return
 
-		setSelectedValue(target.value)
 		onChange?.({ provider: target.provider, model: target.model.id })
 	})
 
 	return (
 		<Combobox
 			items={provider_items}
-			value={selected_display_item}
+			value={selected_item}
 			onValueChange={setDefaultModel}
 			isItemEqualToValue={(item_value, value) => item_value.value === value.value}
 		>
