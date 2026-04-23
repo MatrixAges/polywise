@@ -30,6 +30,9 @@ const config = {
 		rspack: {
 			experiments: {
 				nativeWatcher: true
+			},
+			optimization: {
+				moduleIds: 'hashed'
 			}
 		}
 	}

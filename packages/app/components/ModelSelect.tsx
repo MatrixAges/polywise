@@ -14,6 +14,7 @@ import {
 	ComboboxList,
 	ComboboxSeparator
 } from '@/__shadcn__/components/ui/combobox'
+import { local_models } from '@/appdata'
 import { useGlobal } from '@/context'
 
 import type { DefaultModel, Model } from '@core/types'
@@ -33,6 +34,11 @@ interface IModelItem {
 	label: string
 }
 
+interface ISelectedItem {
+	value: string
+	label: string
+}
+
 interface IProviderGroup {
 	value: string
 	items: Array<IModelItem>
@@ -42,9 +48,9 @@ const getModelValue = (provider: string, model: string) => `${provider}::${model
 
 const getLocalModelItem = (): IModelItem => ({
 	provider: 'local model',
-	model: { id: 'qwen3.5-4b', name: 'qwen3.5-4b', enabled: true, type: 'text' },
-	value: getModelValue('local model', 'qwen3.5-4b'),
-	label: 'qwen3.5-4b'
+	model: { id: local_models.gen.model, name: local_models.gen.name, enabled: true, type: 'text' },
+	value: getModelValue('local model', local_models.gen.model),
+	label: local_models.gen.name
 })
 
 const Index = (props: IProps) => {
@@ -56,17 +62,17 @@ const Index = (props: IProps) => {
 	const config = $copy(s.config)
 	const providers = $copy([...s.providers.providers, ...(s.providers.custom_providers || [])])
 
-	const [model, setModel] = useState<string | null>(() =>
+	const [selected_value, setSelectedValue] = useState<string | null>(() =>
 		config?.default_model ? getModelValue(config.default_model.provider, config.default_model.model) : null
 	)
 
 	useEffect(() => {
 		if (config?.default_model)
-			setModel(getModelValue(config.default_model.provider, config.default_model.model))
+			setSelectedValue(getModelValue(config.default_model.provider, config.default_model.model))
 	}, [config?.default_model])
 
 	useEffect(() => {
-		if (value) setModel(getModelValue(value.provider, value.model))
+		if (value) setSelectedValue(getModelValue(value.provider, value.model))
 	}, [value])
 
 	const provider_items = useMemo(() => {
@@ -96,7 +102,7 @@ const Index = (props: IProps) => {
 
 		if (show_local_model && (!filter_type || filter_type === 'text')) {
 			target.unshift({
-				value: 'local model',
+				value: 'Local Models',
 				items: [getLocalModelItem()]
 			})
 		}
@@ -104,17 +110,48 @@ const Index = (props: IProps) => {
 		return target
 	}, [providers, show_local_model, filter_type])
 
-	const setDefaultModel = useMemoizedFn((next_value: string) => {
-		const target = provider_items.flatMap(group => group.items).find(item => item.value === next_value)
+	const all_items = useMemo(() => provider_items.flatMap(group => group.items), [provider_items])
+
+	const item_lookup = useMemo(() => {
+		return all_items.reduce<Record<string, IModelItem>>((target, item) => {
+			target[item.value] = item
+
+			return target
+		}, {})
+	}, [all_items])
+
+	const selected_item = useMemo(
+		() => all_items.find(item => item.value === selected_value) || null,
+		[all_items, selected_value]
+	)
+
+	const selected_display_item = useMemo<ISelectedItem>(() => {
+		if (!selected_item) return { value: '', label: '' }
+
+		return {
+			value: selected_item.value,
+			label: selected_item.label
+		}
+	}, [selected_item])
+
+	const setDefaultModel = useMemoizedFn((next_value: ISelectedItem | null, _event_details: unknown) => {
+		if (!next_value) return
+
+		const target = item_lookup[next_value.value]
 
 		if (!target) return
 
-		setModel(target.value)
+		setSelectedValue(target.value)
 		onChange?.({ provider: target.provider, model: target.model.id })
 	})
 
 	return (
-		<Combobox items={provider_items} value={model} onValueChange={setDefaultModel}>
+		<Combobox
+			items={provider_items}
+			value={selected_display_item}
+			onValueChange={setDefaultModel}
+			isItemEqualToValue={(item_value, value) => item_value.value === value.value}
+		>
 			<ComboboxInput ghost={ghost} placeholder='Select a default model' />
 			<ComboboxContent ghost={ghost}>
 				<ComboboxEmpty>No providers found.</ComboboxEmpty>
@@ -124,7 +161,7 @@ const Index = (props: IProps) => {
 							<ComboboxLabel>{group.value}</ComboboxLabel>
 							<ComboboxCollection>
 								{item => (
-									<ComboboxItem value={item.value} key={item.value}>
+									<ComboboxItem value={item} key={item.value}>
 										{item.label}
 									</ComboboxItem>
 								)}

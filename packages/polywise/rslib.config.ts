@@ -47,7 +47,8 @@ export default {
 	tools: {
 		rspack: {
 			target: 'node',
-			module: { rules: [{ test: /\.(md|txt)$/i, type: 'asset/source' }] }
+			module: { rules: [{ test: /\.(md|txt)$/i, type: 'asset/source' }] },
+			optimization: { moduleIds: 'hashed' }
 		}
 	}
 } as RslibConfig

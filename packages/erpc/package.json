@@ -2,6 +2,7 @@
 	"name": "erpc",
 	"description": "Trpc support for electron",
 	"version": "0.0.0",
+	"type": "module",
 	"exports": {
 		"./main": {
 			"types": "./dist/main/index.d.ts",
