@@ -106,6 +106,10 @@ This document provides an overview of the packages/app module structure and arch
 			"project": {
 				"components": {
 					"ProjectList": {
+						"ProjectFormDialog.tsx": {
+							"desc": "Unified project create and rename dialog",
+							"role": "Component"
+						},
 						"Item.tsx": {
 							"desc": "Project row atom with inline rename, delete confirmation, and drag handle behavior",
 							"role": "Component"
