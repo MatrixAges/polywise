@@ -31,8 +31,6 @@ const Index = () => {
 
 	const { control } = useForm<AppConfig>({ values: $copy(s.config) }, onChange)
 
-	console.log($copy(s.config))
-
 	return (
 		<div
 			className='
@@ -61,7 +59,7 @@ const Index = () => {
 							</FieldDescription>
 						</FieldContent>
 						<Controller name='embedding_model' control={control}>
-							<ModelSelect filter_type='embedding'></ModelSelect>
+							<ModelSelect filter_type='embedding' show_local_model></ModelSelect>
 						</Controller>
 					</Field>
 					<Field className='items-center! py-3' orientation='horizontal'>
@@ -72,7 +70,7 @@ const Index = () => {
 							</FieldDescription>
 						</FieldContent>
 						<Controller name='rerank_model' control={control}>
-							<ModelSelect filter_type='rerank'></ModelSelect>
+							<ModelSelect filter_type='rerank' show_local_model></ModelSelect>
 						</Controller>
 					</Field>
 				</FieldGroup>

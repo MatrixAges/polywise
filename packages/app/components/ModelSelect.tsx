@@ -48,17 +48,53 @@ const getLocalModelItem = (): IModelItem => ({
 	label: local_models.gen.name
 })
 
+const getLocalModelItemByType = (filter_type?: string): IModelItem | null => {
+	if (filter_type === 'embedding') {
+		return {
+			provider: 'local model',
+			model: {
+				id: local_models.embedding.model,
+				name: local_models.embedding.name,
+				enabled: true,
+				type: 'embedding'
+			},
+			value: getModelValue('local model', local_models.embedding.model),
+			label: local_models.embedding.model
+		}
+	}
+
+	if (filter_type === 'rerank') {
+		return {
+			provider: 'local model',
+			model: {
+				id: local_models.rerank.model,
+				name: local_models.rerank.name,
+				enabled: true,
+				type: 'rerank'
+			},
+			value: getModelValue('local model', local_models.rerank.model),
+			label: local_models.rerank.model
+		}
+	}
+
+	if (!filter_type || filter_type === 'text') {
+		return getLocalModelItem()
+	}
+
+	return null
+}
+
 const Index = (props: IProps) => {
 	const { value, show_local_model, filter_type, ghost, onChange } = props
 
 	const global = useGlobal()
 
 	const s = global.setting
-	const config = $copy(s.config)
 	const providers = $copy([...s.providers.providers, ...(s.providers.custom_providers || [])])
 
 	const provider_items = useMemo(() => {
 		const target: Array<IProviderGroup> = []
+		const should_show_local_model = show_local_model || filter_type === 'embedding' || filter_type === 'rerank'
 
 		providers.forEach(group => {
 			if (!group.enabled) return
@@ -82,10 +118,12 @@ const Index = (props: IProps) => {
 			})
 		})
 
-		if (show_local_model && (!filter_type || filter_type === 'text')) {
+		const local_model_item = should_show_local_model ? getLocalModelItemByType(filter_type) : null
+
+		if (local_model_item) {
 			target.unshift({
 				value: 'Local Models',
-				items: [getLocalModelItem()]
+				items: [local_model_item]
 			})
 		}
 
