@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { FileTree, useFileTree } from '@pierre/trees/react'
 import { useMemoizedFn } from 'ahooks'
 
@@ -29,6 +29,7 @@ const Index = (props: IProps) => {
 	const { active, value, onChange } = props
 	const [tree_paths, setTreePaths] = useState<Array<string>>([])
 	const [loaded_path_map, setLoadedPathMap] = useState<Record<string, boolean>>({})
+	const skip_next_replace_ref = useRef(false)
 	const file_tree = useFileTree({
 		paths: [],
 		initialExpansion: 'open',
@@ -39,6 +40,7 @@ const Index = (props: IProps) => {
 
 			const next_path = getInputPath(selected_path)
 
+			skip_next_replace_ref.current = true
 			onChange(next_path)
 			void loadDirectory(next_path, 'append')
 		}
@@ -110,6 +112,11 @@ const Index = (props: IProps) => {
 
 	useEffect(() => {
 		if (!active) return
+		if (skip_next_replace_ref.current) {
+			skip_next_replace_ref.current = false
+
+			return
+		}
 
 		const timer_id = setTimeout(() => {
 			void loadDirectory(value, 'replace')
