@@ -14,6 +14,7 @@ interface IProps {
 	initial_selected_paths?: Array<string>
 	selection_mode?: 'all' | 'directory'
 	sync_mode?: 'direct' | 'preserve_expansion'
+	only_dir?: boolean
 	className?: string
 	onSelectPath?: (path: string) => void
 }
@@ -24,6 +25,7 @@ const Index = (props: IProps) => {
 		initial_selected_paths,
 		selection_mode = 'all',
 		sync_mode = 'direct',
+		only_dir = false,
 		className,
 		onSelectPath
 	} = props
@@ -50,8 +52,9 @@ const Index = (props: IProps) => {
 	})
 
 	const syncTreePaths = useMemoizedFn((next_paths: Array<string>) => {
+		const filtered_paths = x.filterPaths({ paths: next_paths, only_dir })
 		const reset_state = x.buildResetState({
-			next_paths,
+			next_paths: filtered_paths,
 			current_paths: synced_paths_ref.current,
 			getItem: path => file_tree.model.getItem(path),
 			sync_mode

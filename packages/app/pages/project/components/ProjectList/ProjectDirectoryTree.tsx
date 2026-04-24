@@ -18,7 +18,7 @@ const Index = (props: IProps) => {
 	const [x] = useState(() => container.resolve(Model))
 
 	const loadDirectory = useMemoizedFn((target_path: string, mode: 'append' | 'replace') => {
-		return x.loadProjectDirectory({ target_path, mode })
+		return x.loadProjectDirectory({ target_path, mode, only_dir: true })
 	})
 
 	const onSelectDirectory = useMemoizedFn((selected_path: string) => {
@@ -32,7 +32,7 @@ const Index = (props: IProps) => {
 	useEffect(() => {
 		if (!active) return
 
-		x.ensureProjectDirectoryReady(value).then(next_path => {
+		x.ensureProjectDirectoryReady({ value, only_dir: true }).then(next_path => {
 			if (!value.trim()) {
 				onChange(next_path)
 			}
@@ -58,6 +58,7 @@ const Index = (props: IProps) => {
 			paths={$copy(x.project_directory_tree_paths)}
 			selection_mode='directory'
 			sync_mode='preserve_expansion'
+			only_dir
 			onSelectPath={onSelectDirectory}
 		></FileTree>
 	)

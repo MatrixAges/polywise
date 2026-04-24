@@ -3,6 +3,11 @@ import type { FileTreeDirectoryHandle, FileTreeItemHandle } from '@pierre/trees'
 type ISyncMode = 'direct' | 'preserve_expansion'
 type ISelectionMode = 'all' | 'directory'
 
+interface IArgsFilterPaths {
+	paths: Array<string>
+	only_dir: boolean
+}
+
 interface IArgsGetExpandedDirectoryPaths {
 	current_paths: Array<string>
 	getItem: (path: string) => FileTreeItemHandle | null
@@ -21,6 +26,14 @@ interface IArgsGetSelectedPath {
 }
 
 export default class Index {
+	filterPaths(args: IArgsFilterPaths) {
+		const { paths, only_dir } = args
+
+		if (!only_dir) return paths
+
+		return paths.filter(path => path.endsWith('/'))
+	}
+
 	normalizePaths(paths: Array<string>) {
 		return Array.from(new Set(paths))
 	}

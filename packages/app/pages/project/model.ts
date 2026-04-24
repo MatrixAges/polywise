@@ -127,17 +127,18 @@ export default class Index {
 		return this.project_home_dir
 	}
 
-	async ensureProjectDirectoryReady(value: string) {
+	async ensureProjectDirectoryReady(args: { value: string; only_dir?: boolean }) {
+		const { value, only_dir = false } = args
 		const value_text = value.trim()
 		const target_path = value_text || (await this.getProjectHomeDir())
 
-		await this.loadProjectDirectory({ target_path, mode: 'replace' })
+		await this.loadProjectDirectory({ target_path, mode: 'replace', only_dir })
 
 		return target_path
 	}
 
-	async loadProjectDirectory(args: { target_path: string; mode: IProjectDirectoryLoadMode }) {
-		const { target_path, mode } = args
+	async loadProjectDirectory(args: { target_path: string; mode: IProjectDirectoryLoadMode; only_dir?: boolean }) {
+		const { target_path, mode, only_dir = false } = args
 		const next_path = target_path.trim()
 
 		if (!next_path) {
@@ -151,7 +152,7 @@ export default class Index {
 
 		if (mode === 'append' && this.project_directory_loaded_path_map[next_path]) return
 
-		const list = (await rpc.file.list.query({ path: next_path })) as Array<IFileListItem>
+		const list = (await rpc.file.list.query({ path: next_path, only_dir })) as Array<IFileListItem>
 		const next_paths = list.map(item => item.dir)
 		const current_paths = mode === 'replace' ? [] : this.project_directory_tree_paths
 		const current_loaded_path_map = mode === 'replace' ? {} : this.project_directory_loaded_path_map
