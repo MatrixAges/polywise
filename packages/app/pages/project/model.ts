@@ -530,9 +530,15 @@ export default class Index {
 	}
 
 	async createSession(args: { project_id: string; title?: string }) {
-		await rpc.session.create.mutate(args)
+		const session_item = await rpc.session.create.mutate(args)
 
 		await this.refresh()
+
+		if (session_item?.id) {
+			this.selected_project_id = args.project_id
+			this.expanded_project_map[args.project_id] = true
+			this.selected_session_id = session_item.id
+		}
 	}
 
 	async removeSession(args: { project_id: string; session_id: string }) {

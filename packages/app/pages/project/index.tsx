@@ -23,7 +23,12 @@ const Index = () => {
 
 	const props_project_list = {
 		projects: $copy(x.projects),
+		sessions: $copy(x.sessions),
 		selected_project_id: x.selected_project_id,
+		selected_session_id: x.selected_session_id,
+		expanded_project_map: $copy(x.expanded_project_map),
+		has_more_map: $copy(x.has_more_map),
+		loading_project_id: x.loading_project_id,
 		project_directory_tree_paths: $copy(x.project_directory_tree_paths),
 		create_open: x.create_open,
 		rename_open: x.rename_open,
@@ -47,7 +52,11 @@ const Index = () => {
 		submitRenameProject: x.submitRenameProject,
 		confirmRemoveProject: x.confirmRemoveProject,
 		onProjectDragEnd: x.onProjectDragEnd,
-		setSelectedProject: x.setSelectedProject
+		setSelectedProject: x.setSelectedProject,
+		toggleProject: x.toggleProject,
+		setSelectedSession: x.setSelectedSession,
+		createSession: x.createSession,
+		loadMoreSessions: x.loadMoreSessions
 	})
 
 	const props_todos = {

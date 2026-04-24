@@ -53,12 +53,22 @@ export interface IPropsFormDialog {
 export interface IPropsListItem {
 	project_item: IProjectSerializedProjectItem
 	project_index: number
+	sessions: Array<IProjectSerializedSessionItem>
 	selected: boolean
+	selected_session_id: string
+	expanded: boolean
+	has_more: boolean
+	loading: boolean
 }
 
 export interface IPropsList {
 	projects: Array<IProjectSerializedProjectItem>
+	sessions: Record<string, Array<IProjectSerializedSessionItem>>
 	selected_project_id: string
+	selected_session_id: string
+	expanded_project_map: Record<string, boolean>
+	has_more_map: Record<string, boolean>
+	loading_project_id: string
 	project_directory_tree_paths: Array<string>
 	create_open: boolean
 	rename_open: boolean

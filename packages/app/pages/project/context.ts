@@ -18,6 +18,10 @@ export interface IProjectContext extends Pick<
 	| 'confirmRemoveProject'
 	| 'onProjectDragEnd'
 	| 'setSelectedProject'
+	| 'toggleProject'
+	| 'setSelectedSession'
+	| 'createSession'
+	| 'loadMoreSessions'
 > {}
 
 const project_context = createContext<IProjectContext | null>(null)

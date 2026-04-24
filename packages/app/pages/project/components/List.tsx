@@ -13,7 +13,12 @@ import type { IPropsList } from '../types'
 const Index = (props: IPropsList) => {
 	const {
 		projects,
+		sessions,
 		selected_project_id,
+		selected_session_id,
+		expanded_project_map,
+		has_more_map,
+		loading_project_id,
 		project_directory_tree_paths,
 		create_open,
 		rename_open,
@@ -42,7 +47,12 @@ const Index = (props: IPropsList) => {
 							<ListItem
 								project_item={project_item}
 								project_index={project_index}
+								sessions={sessions[project_item.id] || []}
 								selected={selected_project_id === project_item.id}
+								selected_session_id={selected_session_id}
+								expanded={expanded_project_map[project_item.id] || false}
+								has_more={has_more_map[project_item.id] || false}
+								loading={loading_project_id === project_item.id}
 								key={project_item.id}
 							></ListItem>
 						))}

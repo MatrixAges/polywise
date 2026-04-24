@@ -136,11 +136,11 @@ This document provides an overview of the packages/app module structure and arch
 						"role": "Component"
 					},
 					"List.tsx": {
-						"desc": "Project list block with drag sorting and dialog rendering; all interactions are injected as props",
+						"desc": "Project list block with drag sorting, dialog rendering, selected project/session props, expansion state, and session pagination data injected from the page model",
 						"role": "Component"
 					},
 					"ListItem.tsx": {
-						"desc": "Project row atom with drag handle and rename/delete triggers",
+						"desc": "Folder-style project row atom with select/expand behavior, create-session trigger, drag handle, rename/delete dropdown, and nested session list rendering",
 						"role": "Component"
 					}
 				},
