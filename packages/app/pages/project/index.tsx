@@ -128,28 +128,13 @@ const Index = () => {
 						px-2 py-2
 					'
 				>
-					<div
-						className='
-							overflow-y-auto
-							flex-1
-							min-h-0
-							rounded-md
-							border border-border-light
-						'
-					>
+					<div className='flex-1'>
 						<FileTree
 							paths={$copy(x.selected_project_tree_paths)}
 							initial_selected_paths={
 								x.selected_file_path ? [x.selected_file_path] : undefined
 							}
 							sync_mode='preserve_expansion'
-							className='
-								overflow-y-auto
-								flex-1
-								min-h-0
-								rounded-md
-								border border-border-light
-							'
 							onSelectPath={x.setSelectedFilePath}
 						></FileTree>
 					</div>
