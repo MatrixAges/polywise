@@ -16,7 +16,7 @@ interface IArgsBuildResetState {
 }
 
 interface IArgsGetSelectedPath {
-	selected_paths: Array<string>
+	selected_paths: ReadonlyArray<string>
 	selection_mode: ISelectionMode
 }
 

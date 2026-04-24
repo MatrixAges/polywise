@@ -71,8 +71,7 @@ const Index = (props: IProps) => {
 				className ||
 				`
 				overflow-y-auto
-				h-full
-				min-h-0
+				h-[380px]
 				rounded-md
 				border border-border-light
 			`

@@ -121,6 +121,13 @@ const Index = () => {
 							initial_selected_paths={
 								x.selected_file_path ? [x.selected_file_path] : undefined
 							}
+							className='
+								overflow-y-auto
+								flex-1
+								min-h-0
+								rounded-md
+								border border-border-light
+							'
 							onSelectPath={x.setSelectedFilePath}
 						></FileTree>
 					</div>
