@@ -1,30 +1,36 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useMemoizedFn } from 'ahooks'
 import { observer } from 'mobx-react-lite'
-import { container } from 'tsyringe'
 
 import { FileTree } from '@/components'
 
-import Model from '../../model'
+import { useProjectContext } from '../../context'
 
 interface IProps {
 	active: boolean
 	value: string
+	paths: Array<string>
 	onChange: (value: string) => void
 }
 
 const Index = (props: IProps) => {
-	const { active, value, onChange } = props
-	const [x] = useState(() => container.resolve(Model))
+	const { active, value, paths, onChange } = props
+	const {
+		setProjectDirectorySkipNextReplace,
+		consumeProjectDirectorySkipNextReplace,
+		getProjectDirectoryInputPath,
+		ensureProjectDirectoryReady,
+		loadProjectDirectory: loadProjectDirectoryAction
+	} = useProjectContext()
 
 	const loadDirectory = useMemoizedFn((target_path: string, mode: 'append' | 'replace') => {
-		return x.loadProjectDirectory({ target_path, mode, only_dir: true })
+		return loadProjectDirectoryAction({ target_path, mode, only_dir: true })
 	})
 
 	const onSelectDirectory = useMemoizedFn((selected_path: string) => {
-		const next_path = x.getProjectDirectoryInputPath(selected_path)
+		const next_path = getProjectDirectoryInputPath(selected_path)
 
-		x.setProjectDirectorySkipNextReplace(true)
+		setProjectDirectorySkipNextReplace(true)
 		onChange(next_path)
 		loadDirectory(next_path, 'append')
 	})
@@ -32,7 +38,7 @@ const Index = (props: IProps) => {
 	useEffect(() => {
 		if (!active) return
 
-		x.ensureProjectDirectoryReady({ value, only_dir: true }).then(next_path => {
+		ensureProjectDirectoryReady({ value, only_dir: true }).then(next_path => {
 			if (!value.trim()) {
 				onChange(next_path)
 			}
@@ -42,7 +48,7 @@ const Index = (props: IProps) => {
 	useEffect(() => {
 		if (!active) return
 
-		if (x.consumeProjectDirectorySkipNextReplace()) {
+		if (consumeProjectDirectorySkipNextReplace()) {
 			return
 		}
 
@@ -55,7 +61,7 @@ const Index = (props: IProps) => {
 
 	return (
 		<FileTree
-			paths={$copy(x.project_directory_tree_paths)}
+			paths={paths}
 			selection_mode='directory'
 			sync_mode='preserve_expansion'
 			only_dir

@@ -130,11 +130,20 @@ export default class Index {
 	async ensureProjectDirectoryReady(args: { value: string; only_dir?: boolean }) {
 		const { value, only_dir = false } = args
 		const value_text = value.trim()
-		const target_path = value_text || (await this.getProjectHomeDir())
 
-		await this.loadProjectDirectory({ target_path, mode: 'replace', only_dir })
+		if (!value_text) {
+			const home_dir = await this.getProjectHomeDir()
+			const list = (await rpc.file.list.query({ path: home_dir, only_dir })) as Array<IFileListItem>
 
-		return target_path
+			this.project_directory_tree_paths = list.map(item => item.dir)
+			this.project_directory_loaded_path_map = { [home_dir]: true }
+
+			return home_dir
+		}
+
+		await this.loadProjectDirectory({ target_path: value_text, mode: 'replace', only_dir })
+
+		return value_text
 	}
 
 	async loadProjectDirectory(args: { target_path: string; mode: IProjectDirectoryLoadMode; only_dir?: boolean }) {

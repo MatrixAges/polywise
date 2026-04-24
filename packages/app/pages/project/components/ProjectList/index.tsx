@@ -15,6 +15,7 @@ import type { IProjectSerializedProjectItem } from '../../types'
 interface IProps {
 	projects: Array<IProjectSerializedProjectItem>
 	selected_project_id: string
+	project_directory_tree_paths: Array<string>
 	createProject: (args: { name: string; dir: string }) => Promise<void>
 	renameProject: (args: { id: string; name: string }) => Promise<void>
 	removeProject: (id: string) => Promise<void>
@@ -33,6 +34,7 @@ const Index = (props: IProps) => {
 	const {
 		projects,
 		selected_project_id,
+		project_directory_tree_paths,
 		createProject,
 		renameProject,
 		removeProject,
@@ -149,6 +151,7 @@ const Index = (props: IProps) => {
 				desc='Create a new project with a name and directory.'
 				name_value={project_name}
 				dir_value={project_dir}
+				directory_tree_paths={project_directory_tree_paths}
 				show_dir
 				submit_text='Create'
 				onChangeName={setProjectName}

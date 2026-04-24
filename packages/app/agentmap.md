@@ -117,7 +117,7 @@ This document provides an overview of the packages/app module structure and arch
 				"components": {
 					"ProjectList": {
 						"ProjectDirectoryTree.tsx": {
-							"desc": "Create-project directory picker tree that now delegates reusable tree state sync/selection behavior to components/FileTree and keeps only project-specific input/event wiring",
+							"desc": "Create-project directory picker tree that receives directory paths by props and consumes project directory actions from project context",
 							"role": "Component"
 						},
 						"ProjectFormDialog.tsx": {
@@ -135,12 +135,16 @@ This document provides an overview of the packages/app module structure and arch
 					},
 					"Todos": { "desc": "Project todo block", "role": "Component" }
 				},
+				"context.ts": {
+					"desc": "Project page action context provider and hook for injecting directory tree action functions into nested project components while keeping tree data passed by props",
+					"role": "Context"
+				},
 				"index.tsx": {
-					"desc": "Project page view with left project list, center session view, and right file tree/diff pane; left list now supports project create, delete, rename, and drag sorting",
+					"desc": "Project page view with left project list, center session view, and right file tree/diff pane; it owns the project model lifecycle, injects project directory actions through context, and passes directory tree data down by props",
 					"role": "Page"
 				},
 				"model.ts": {
-					"desc": "Project page state model using project/session/file RPC for selection, CRUD, sorting, file detail state, and create-dialog directory tree loading cache",
+					"desc": "Project page state model using project/session/file RPC for selection, CRUD, sorting, file detail state, and create-dialog directory tree loading from homedir children",
 					"role": "Model"
 				},
 				"types.ts": {

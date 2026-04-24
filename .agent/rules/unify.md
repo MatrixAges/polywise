@@ -71,32 +71,6 @@ When updating any package `unify.md`, follow this protocol in order:
 7. Keep parent fallback nodes after child nodes are complete.
 8. Re-run path reachability checks for all `Same Code` and `sample_pool` files.
 
-No partial update is allowed.
-
-### 7. Mandatory Evidence Output
-
-Before editing code, output `UNIFY_EXECUTION_CONTEXT` with at least:
-
-1. Target package and selected node.
-2. Target file path and winning `path_scope`.
-3. Top 3 candidate nodes by prefix length (with winner marked).
-4. Real paths of `Same Code 1/2`.
-5. Three structural rules extracted from samples.
-
-After implementation, output `UNIFY_COMPLIANCE_REPORT` with at least:
-
-1. Reuse points (import order, naming, structural layering).
-2. Differences from samples.
-3. Business reason for each difference.
-
-When `unify.md` itself is updated, also output `UNIFY_ROUTING_CHANGE_REPORT`:
-
-1. Added nodes (with `path_scope`).
-2. Removed nodes.
-3. Fixed sample paths.
-4. Coverage summary for second-level/third-level folders.
-5. Uncovered folders (if any) and reason.
-
 ### 8. Quality Bar for `unify.md` Updates
 
 A `unify.md` update is valid only when all are true:
@@ -104,8 +78,6 @@ A `unify.md` update is valid only when all are true:
 1. Folder-level routing is complete for second-level/third-level business directories.
 2. All nodes have required fields.
 3. All `Same Code 1/2` and `sample_pool` files are reachable.
-4. Longest-prefix matching is deterministic.
-5. Reports are provided (`UNIFY_EXECUTION_CONTEXT`, `UNIFY_ROUTING_CHANGE_REPORT`).
 
 ### 9. Routing Maintenance Duty
 

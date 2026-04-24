@@ -4,10 +4,14 @@ import { observer } from 'mobx-react-lite'
 import { container } from 'tsyringe'
 
 import { FileTree, Session } from '@/components'
+import { useModelContext } from '@/hooks'
 
 import ProjectList from './components/ProjectList'
 import Todos from './components/Todos'
+import { ProjectContext } from './context'
 import Model from './model'
+
+import type { IProjectContext } from './context'
 
 const buildPatchFromContent = (file_path: string, content: string) => {
 	const lines = content.split('\n')
@@ -40,6 +44,14 @@ const Index = () => {
 		return buildPatchFromContent(x.selected_file_path, x.selected_file_content)
 	}, [x.selected_file_content, x.selected_file_path])
 
+	const project_context = useModelContext<Model, IProjectContext>(x, {
+		setProjectDirectorySkipNextReplace: x.setProjectDirectorySkipNextReplace,
+		consumeProjectDirectorySkipNextReplace: x.consumeProjectDirectorySkipNextReplace,
+		getProjectDirectoryInputPath: x.getProjectDirectoryInputPath,
+		ensureProjectDirectoryReady: x.ensureProjectDirectoryReady,
+		loadProjectDirectory: x.loadProjectDirectory
+	})
+
 	return (
 		<div className='flex h-full overflow-hidden'>
 			<div
@@ -50,15 +62,18 @@ const Index = () => {
 				'
 			>
 				<div className='flex-1 overflow-y-auto px-2 py-2'>
-					<ProjectList
-						projects={$copy(x.projects)}
-						selected_project_id={x.selected_project_id}
-						createProject={x.createProject}
-						renameProject={x.renameProject}
-						removeProject={x.removeProject}
-						sortProject={x.sortProject}
-						setSelectedProject={x.setSelectedProject}
-					></ProjectList>
+					<ProjectContext value={project_context}>
+						<ProjectList
+							projects={$copy(x.projects)}
+							selected_project_id={x.selected_project_id}
+							project_directory_tree_paths={$copy(x.project_directory_tree_paths)}
+							createProject={x.createProject}
+							renameProject={x.renameProject}
+							removeProject={x.removeProject}
+							sortProject={x.sortProject}
+							setSelectedProject={x.setSelectedProject}
+						></ProjectList>
+					</ProjectContext>
 					<div className='border-border-light mt-3 border-t pt-3'>
 						<Todos
 							project_id={x.selected_project_id}

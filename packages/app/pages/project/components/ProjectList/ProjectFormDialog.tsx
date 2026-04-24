@@ -13,6 +13,7 @@ interface IProps {
 	desc: string
 	name_value: string
 	dir_value?: string
+	directory_tree_paths?: Array<string>
 	show_dir: boolean
 	submit_text: string
 	onChangeName: (value: string) => void
@@ -28,6 +29,7 @@ const Index = (props: IProps) => {
 		desc,
 		name_value,
 		dir_value,
+		directory_tree_paths,
 		show_dir,
 		submit_text,
 		onChangeName,
@@ -68,6 +70,7 @@ const Index = (props: IProps) => {
 						<ProjectDirectoryTree
 							active={open}
 							value={dir_value || ''}
+							paths={directory_tree_paths || []}
 							onChange={onChangeDirValue}
 						></ProjectDirectoryTree>
 					</div>

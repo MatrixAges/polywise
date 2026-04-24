@@ -18,10 +18,8 @@
 2. Verify `Same Code 1` and `Same Code 2` paths are reachable.
 3. Read `Same Code 1` and extract the structural skeleton.
 4. Read `Same Code 2` and complete anti-overfitting comparison.
-5. Output `UNIFY_EXECUTION_CONTEXT` evidence before editing.
 
 - **Fix Route First When Samples Break**: If any `Same Code` path is invalid, update the corresponding `unify.md` first. Skipping samples and directly editing business code is prohibited.
-- **Mandatory Post-Implementation Review**: After changes, output `UNIFY_COMPLIANCE_REPORT` with reuse points, differences, and business justification.
 - **No Silent Downgrade**: Without explicit user authorization, do not downgrade Unify from hard-blocking to warning-only.
 
 ## 核心规范文件协作指南
