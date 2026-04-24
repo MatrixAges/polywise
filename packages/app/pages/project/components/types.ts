@@ -1,6 +1,7 @@
-import type { DragEndEvent } from '@dnd-kit/core'
 import type { ReactNode } from 'react'
 import type { IProjectSerializedProjectItem } from '../types'
+
+export type IProjectFormDialogType = 'create' | 'rename'
 
 export interface IPropsDialogShell {
 	open: boolean
@@ -15,10 +16,10 @@ export interface IPropsDialogShell {
 
 export interface IPropsDirectoryTree {
 	paths: Array<string>
-	onSelectPath: (selected_path: string) => void
 }
 
 export interface IPropsFormDialog {
+	type: IProjectFormDialogType
 	open: boolean
 	title: string
 	desc: string
@@ -27,20 +28,12 @@ export interface IPropsFormDialog {
 	directory_tree_paths?: Array<string>
 	show_dir: boolean
 	submit_text: string
-	onChangeName: (value: string) => void
-	onChangeDir?: (value: string) => void
-	onSelectDirectoryPath: (selected_path: string) => void
-	onSubmit: () => void
-	onClose: () => void
 }
 
 export interface IPropsListItem {
 	project_item: IProjectSerializedProjectItem
 	project_index: number
 	selected: boolean
-	onRenameProject: (project_item: IProjectSerializedProjectItem) => void
-	onRemoveProject: (project_item: IProjectSerializedProjectItem) => void
-	setSelectedProject: (id: string) => void
 }
 
 export interface IPropsList {
@@ -53,18 +46,4 @@ export interface IPropsList {
 	project_name: string
 	project_dir: string
 	target_project_name: string
-	onOpenCreateProject: () => void
-	onOpenRenameProject: (project_item: IProjectSerializedProjectItem) => void
-	onOpenRemoveProject: (project_item: IProjectSerializedProjectItem) => void
-	onCloseCreateDialog: () => void
-	onCloseRenameDialog: () => void
-	onCloseDeleteDialog: () => void
-	onChangeProjectName: (value: string) => void
-	onChangeProjectDir: (value: string) => void
-	onSelectDirectoryPath: (selected_path: string) => void
-	onSubmitCreateProject: () => void
-	onSubmitRenameProject: () => void
-	onConfirmRemoveProject: () => void
-	onProjectDragEnd: (args: DragEndEvent) => void
-	setSelectedProject: (id: string) => void
 }

@@ -1,5 +1,6 @@
 import { Input } from '@/__shadcn__/components/ui/input'
 
+import { useProjectContext } from '../context'
 import DialogShell from './DialogShell'
 import DirectoryTree from './DirectoryTree'
 
@@ -7,21 +8,17 @@ import type { ChangeEvent, KeyboardEvent } from 'react'
 import type { IPropsFormDialog } from './types'
 
 const Index = (props: IPropsFormDialog) => {
+	const { type, open, title, desc, name_value, dir_value, directory_tree_paths, show_dir, submit_text } = props
 	const {
-		open,
-		title,
-		desc,
-		name_value,
-		dir_value,
-		directory_tree_paths,
-		show_dir,
-		submit_text,
-		onChangeName,
-		onChangeDir,
-		onSelectDirectoryPath,
-		onSubmit,
-		onClose
-	} = props
+		setProjectName,
+		setProjectDir,
+		submitCreateProject,
+		submitRenameProject,
+		closeCreateDialog,
+		closeRenameDialog
+	} = useProjectContext()
+	const onSubmit = type === 'create' ? submitCreateProject : submitRenameProject
+	const onClose = type === 'create' ? closeCreateDialog : closeRenameDialog
 
 	return (
 		<DialogShell
@@ -40,7 +37,7 @@ const Index = (props: IPropsFormDialog) => {
 							placeholder='Project directory'
 							value={dir_value || ''}
 							onChange={(event: ChangeEvent<HTMLInputElement>) =>
-								onChangeDir?.(event.target.value)
+								setProjectDir(event.target.value)
 							}
 							onKeyDown={(event: KeyboardEvent<HTMLInputElement>) => {
 								if (event.key === 'Enter') {
@@ -49,17 +46,14 @@ const Index = (props: IPropsFormDialog) => {
 								}
 							}}
 						></Input>
-						<DirectoryTree
-							paths={directory_tree_paths || []}
-							onSelectPath={onSelectDirectoryPath}
-						></DirectoryTree>
+						<DirectoryTree paths={directory_tree_paths || []}></DirectoryTree>
 					</div>
 				) : (
 					<Input
 						placeholder='Project name'
 						value={name_value}
 						onChange={(event: ChangeEvent<HTMLInputElement>) =>
-							onChangeName(event.target.value)
+							setProjectName(event.target.value)
 						}
 						onKeyDown={(event: KeyboardEvent<HTMLInputElement>) => {
 							if (event.key === 'Enter') {

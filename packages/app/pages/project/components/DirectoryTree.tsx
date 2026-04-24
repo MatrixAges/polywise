@@ -1,9 +1,12 @@
 import { FileTree } from '@/components'
 
+import { useProjectContext } from '../context'
+
 import type { IPropsDirectoryTree } from './types'
 
 const Index = (props: IPropsDirectoryTree) => {
-	const { paths, onSelectPath } = props
+	const { paths } = props
+	const { onSelectProjectDirectoryPath } = useProjectContext()
 
 	return (
 		<FileTree
@@ -11,7 +14,7 @@ const Index = (props: IPropsDirectoryTree) => {
 			selection_mode='directory'
 			sync_mode='preserve_expansion'
 			only_dir
-			onSelectPath={onSelectPath}
+			onSelectPath={onSelectProjectDirectoryPath}
 		></FileTree>
 	)
 }

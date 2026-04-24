@@ -2,11 +2,14 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { GripVertical, PencilLine, Trash2 } from 'lucide-react'
 
+import { useProjectContext } from '../context'
+
 import type { MouseEvent } from 'react'
 import type { IPropsListItem } from './types'
 
 const Index = (props: IPropsListItem) => {
-	const { project_item, project_index, selected, onRenameProject, onRemoveProject, setSelectedProject } = props
+	const { project_item, project_index, selected } = props
+	const { setSelectedProject, openRenameProjectDialog, openDeleteProjectDialog } = useProjectContext()
 	const { attributes, listeners, transform, transition, setNodeRef, isDragging } = useSortable({
 		id: project_item.id
 	})
@@ -55,7 +58,7 @@ const Index = (props: IPropsListItem) => {
 				className='icon_button small'
 				onClick={(event: MouseEvent<HTMLButtonElement>) => {
 					event.stopPropagation()
-					onRenameProject(project_item)
+					openRenameProjectDialog(project_item)
 				}}
 			>
 				<PencilLine></PencilLine>
@@ -65,7 +68,7 @@ const Index = (props: IPropsListItem) => {
 				className='icon_button small'
 				onClick={(event: MouseEvent<HTMLButtonElement>) => {
 					event.stopPropagation()
-					onRemoveProject(project_item)
+					openDeleteProjectDialog(project_item)
 				}}
 			>
 				<Trash2></Trash2>

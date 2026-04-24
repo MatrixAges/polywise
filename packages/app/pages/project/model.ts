@@ -382,13 +382,22 @@ export default class Index {
 		return this.project_home_dir
 	}
 
+	filterProjectDirectoryList(args: { list: Array<IFileListItem>; only_dir: boolean }) {
+		const { list, only_dir } = args
+
+		if (!only_dir) return list
+
+		return list.filter(item => item.file_type === 'directory')
+	}
+
 	async ensureProjectDirectoryReady(args: { value: string; only_dir?: boolean }) {
 		const { value, only_dir = false } = args
 		const value_text = value.trim()
 
 		if (!value_text) {
 			const home_dir = await this.getProjectHomeDir()
-			const list = (await rpc.file.list.query({ path: home_dir, only_dir })) as Array<IFileListItem>
+			const all_list = (await rpc.file.list.query({ path: home_dir })) as Array<IFileListItem>
+			const list = this.filterProjectDirectoryList({ list: all_list, only_dir })
 
 			this.project_directory_tree_paths = list.map(item => item.dir)
 			this.project_directory_loaded_path_map = { [home_dir]: true }
@@ -416,7 +425,8 @@ export default class Index {
 
 		if (mode === 'append' && this.project_directory_loaded_path_map[next_path]) return
 
-		const list = (await rpc.file.list.query({ path: next_path, only_dir })) as Array<IFileListItem>
+		const all_list = (await rpc.file.list.query({ path: next_path })) as Array<IFileListItem>
+		const list = this.filterProjectDirectoryList({ list: all_list, only_dir })
 		const next_paths = list.map(item => item.dir)
 		const current_paths = mode === 'replace' ? [] : this.project_directory_tree_paths
 		const current_loaded_path_map = mode === 'replace' ? {} : this.project_directory_loaded_path_map

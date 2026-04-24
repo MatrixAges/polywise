@@ -4,6 +4,7 @@ import { Plus } from 'lucide-react'
 
 import { Alert, Tooltip } from '@/components'
 
+import { useProjectContext } from '../context'
 import FormDialog from './FormDialog'
 import ListItem from './ListItem'
 
@@ -19,22 +20,9 @@ const Index = (props: IPropsList) => {
 		delete_open,
 		project_name,
 		project_dir,
-		target_project_name,
-		onOpenCreateProject,
-		onOpenRenameProject,
-		onOpenRemoveProject,
-		onCloseCreateDialog,
-		onCloseRenameDialog,
-		onCloseDeleteDialog,
-		onChangeProjectName,
-		onChangeProjectDir,
-		onSelectDirectoryPath,
-		onSubmitCreateProject,
-		onSubmitRenameProject,
-		onConfirmRemoveProject,
-		onProjectDragEnd,
-		setSelectedProject
+		target_project_name
 	} = props
+	const { openCreateProjectDialog, closeDeleteDialog, confirmRemoveProject, onProjectDragEnd } = useProjectContext()
 	const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }))
 
 	return (
@@ -42,7 +30,7 @@ const Index = (props: IPropsList) => {
 			<div className='flex items-center justify-between'>
 				<div className='text-std-400 text-xs font-medium'>Projects</div>
 				<Tooltip title='New Project'>
-					<div className='icon_button small' onClick={onOpenCreateProject}>
+					<div className='icon_button small' onClick={openCreateProjectDialog}>
 						<Plus></Plus>
 					</div>
 				</Tooltip>
@@ -55,9 +43,6 @@ const Index = (props: IPropsList) => {
 								project_item={project_item}
 								project_index={project_index}
 								selected={selected_project_id === project_item.id}
-								onRenameProject={onOpenRenameProject}
-								onRemoveProject={onOpenRemoveProject}
-								setSelectedProject={setSelectedProject}
 								key={project_item.id}
 							></ListItem>
 						))}
@@ -65,6 +50,7 @@ const Index = (props: IPropsList) => {
 				</SortableContext>
 			</DndContext>
 			<FormDialog
+				type='create'
 				open={create_open}
 				title='New Project'
 				desc='Create a new project with a name and directory.'
@@ -73,13 +59,9 @@ const Index = (props: IPropsList) => {
 				directory_tree_paths={project_directory_tree_paths}
 				show_dir
 				submit_text='Create'
-				onChangeName={onChangeProjectName}
-				onChangeDir={onChangeProjectDir}
-				onSelectDirectoryPath={onSelectDirectoryPath}
-				onSubmit={onSubmitCreateProject}
-				onClose={onCloseCreateDialog}
 			></FormDialog>
 			<FormDialog
+				type='rename'
 				open={rename_open}
 				title='Rename Project'
 				desc='Update the project name.'
@@ -88,11 +70,6 @@ const Index = (props: IPropsList) => {
 				directory_tree_paths={project_directory_tree_paths}
 				show_dir={false}
 				submit_text='Save'
-				onChangeName={onChangeProjectName}
-				onChangeDir={onChangeProjectDir}
-				onSelectDirectoryPath={onSelectDirectoryPath}
-				onSubmit={onSubmitRenameProject}
-				onClose={onCloseRenameDialog}
 			></FormDialog>
 			<Alert
 				open={delete_open}
@@ -100,8 +77,8 @@ const Index = (props: IPropsList) => {
 				desc={`Delete project "${target_project_name}"? This cannot be undone.`}
 				confirm_text='Delete'
 				cancel_text='Cancel'
-				onConfirm={onConfirmRemoveProject}
-				onCancel={onCloseDeleteDialog}
+				onConfirm={confirmRemoveProject}
+				onCancel={closeDeleteDialog}
 			></Alert>
 		</div>
 	)

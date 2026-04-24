@@ -118,6 +118,10 @@ This document provides an overview of the packages/app module structure and arch
 			"database": { "index.tsx": { "desc": "Database page view", "role": "Page" } },
 			"notebook": { "index.tsx": { "desc": "Notebook page view", "role": "Page" } },
 			"project": {
+				"context.ts": {
+					"desc": "Project page action context provider and hook for nested project components to consume model methods without prop drilling",
+					"role": "Context"
+				},
 				"components": {
 					"DialogShell.tsx": {
 						"desc": "Dialog shell wrapper used by project create and rename forms",
