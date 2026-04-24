@@ -1,5 +1,3 @@
-import { useMemoizedFn } from 'ahooks'
-
 import { Input } from '@/__shadcn__/components/ui/input'
 
 import ProjectDialogShell from './ProjectDialogShell'
@@ -18,6 +16,7 @@ interface IProps {
 	submit_text: string
 	onChangeName: (value: string) => void
 	onChangeDir?: (value: string) => void
+	onSelectDirectoryPath: (selected_path: string) => void
 	onSubmit: () => void
 	onClose: () => void
 }
@@ -34,12 +33,10 @@ const Index = (props: IProps) => {
 		submit_text,
 		onChangeName,
 		onChangeDir,
+		onSelectDirectoryPath,
 		onSubmit,
 		onClose
 	} = props
-
-	const onChangeDirValue = useMemoizedFn((value: string) => onChangeDir?.(value))
-	const onChangeNameValue = useMemoizedFn((value: string) => onChangeName(value))
 
 	return (
 		<ProjectDialogShell
@@ -58,7 +55,7 @@ const Index = (props: IProps) => {
 							placeholder='Project directory'
 							value={dir_value || ''}
 							onChange={(event: ChangeEvent<HTMLInputElement>) =>
-								onChangeDirValue(event.target.value)
+								onChangeDir?.(event.target.value)
 							}
 							onKeyDown={(event: KeyboardEvent<HTMLInputElement>) => {
 								if (event.key === 'Enter') {
@@ -68,10 +65,8 @@ const Index = (props: IProps) => {
 							}}
 						></Input>
 						<ProjectDirectoryTree
-							active={open}
-							value={dir_value || ''}
 							paths={directory_tree_paths || []}
-							onChange={onChangeDirValue}
+							onSelectPath={onSelectDirectoryPath}
 						></ProjectDirectoryTree>
 					</div>
 				) : (
@@ -79,7 +74,7 @@ const Index = (props: IProps) => {
 						placeholder='Project name'
 						value={name_value}
 						onChange={(event: ChangeEvent<HTMLInputElement>) =>
-							onChangeNameValue(event.target.value)
+							onChangeName(event.target.value)
 						}
 						onKeyDown={(event: KeyboardEvent<HTMLInputElement>) => {
 							if (event.key === 'Enter') {

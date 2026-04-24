@@ -3,7 +3,7 @@ import { CSS } from '@dnd-kit/utilities'
 import { GripVertical, PencilLine, Trash2 } from 'lucide-react'
 
 import type { MouseEvent } from 'react'
-import type { IProjectSerializedProjectItem } from '../../types'
+import type { IProjectSerializedProjectItem } from '../types'
 
 interface IProps {
 	project_item: IProjectSerializedProjectItem

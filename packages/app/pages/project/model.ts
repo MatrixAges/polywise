@@ -3,6 +3,7 @@ import { injectable } from 'tsyringe'
 
 import { rpc } from '@/utils'
 
+import type { DragEndEvent } from '@dnd-kit/core'
 import type {
 	IFileListItem,
 	IHomeDir,
@@ -29,6 +30,17 @@ export default class Index {
 	project_directory_loaded_path_map = {} as Record<string, boolean>
 	project_home_dir = '' as IHomeDir
 	project_directory_skip_next_replace = false
+	project_directory_replace_timer = 0 as ReturnType<typeof setTimeout> | 0
+	create_open = false
+	rename_open = false
+	delete_open = false
+	project_name = ''
+	project_dir = ''
+	target_project_id = ''
+	target_project_name = ''
+	todo_input_value = ''
+	todo_editing_id = ''
+	todo_editing_value = ''
 	loading_project_id = ''
 	has_more_map = {} as Record<string, boolean>
 	expanded_project_map = {} as Record<string, boolean>
@@ -39,6 +51,33 @@ export default class Index {
 
 	async init() {
 		await this.refresh()
+	}
+
+	get selected_project_todos() {
+		return this.todos[this.selected_project_id] || []
+	}
+
+	get selected_project_tree_paths() {
+		const selected_project_items = this.file_trees[this.selected_project_id] || []
+
+		return selected_project_items.map(item => item.dir)
+	}
+
+	get selected_file_patch() {
+		if (!this.selected_file_path || !this.selected_file_content) {
+			return ''
+		}
+
+		const file_path = this.selected_file_path
+		const content = this.selected_file_content
+		const lines = content.split('\n')
+
+		return [
+			`--- a/${file_path}`,
+			`+++ b/${file_path}`,
+			`@@ -0,0 +1,${lines.length} @@`,
+			...lines.map(line => `+${line}`)
+		].join('\n')
 	}
 
 	async refresh() {
@@ -75,6 +114,12 @@ export default class Index {
 		this.selected_file_content = this.file_contents[this.selected_file_path] || ''
 		this.has_more_map = data.has_more_map
 		this.expanded_project_map = Object.fromEntries(this.projects.map(item => [item.id, true]))
+
+		const selected_todo_list = this.todos[next_selected_project_id] || []
+
+		if (this.todo_editing_id && !selected_todo_list.some(item => item.id === this.todo_editing_id)) {
+			this.cancelRenameTodo()
+		}
 	}
 
 	setSelectedProject(id: string) {
@@ -86,6 +131,216 @@ export default class Index {
 
 		const next_file_item = this.file_trees[id]?.find(item => item.file_type === 'file')
 		this.setSelectedFilePath(next_file_item?.dir || '')
+		this.cancelRenameTodo()
+	}
+
+	setProjectName(value: string) {
+		this.project_name = value
+	}
+
+	setProjectDir(value: string) {
+		this.project_dir = value
+		this.scheduleReplaceProjectDirectoryByInput()
+	}
+
+	async ensureCreateProjectDirectoryReady() {
+		if (!this.create_open) return
+
+		const next_path = await this.ensureProjectDirectoryReady({
+			value: this.project_dir,
+			only_dir: true
+		})
+
+		if (!this.project_dir.trim()) {
+			this.project_dir = next_path
+		}
+	}
+
+	async replaceProjectDirectoryByInput() {
+		if (!this.create_open) return
+
+		if (this.consumeProjectDirectorySkipNextReplace()) {
+			return
+		}
+
+		await this.loadProjectDirectory({
+			target_path: this.project_dir,
+			mode: 'replace',
+			only_dir: true
+		})
+	}
+
+	onSelectProjectDirectoryPath(selected_path: string) {
+		const next_path = this.getProjectDirectoryInputPath(selected_path)
+
+		this.setProjectDirectorySkipNextReplace(true)
+		this.project_dir = next_path
+		this.loadProjectDirectory({ target_path: next_path, mode: 'append', only_dir: true })
+	}
+
+	scheduleReplaceProjectDirectoryByInput() {
+		if (!this.create_open) return
+
+		this.clearProjectDirectoryReplaceTimer()
+
+		this.project_directory_replace_timer = setTimeout(() => {
+			this.replaceProjectDirectoryByInput()
+		}, 300)
+	}
+
+	clearProjectDirectoryReplaceTimer() {
+		if (!this.project_directory_replace_timer) return
+
+		clearTimeout(this.project_directory_replace_timer)
+		this.project_directory_replace_timer = 0
+	}
+
+	openCreateProjectDialog() {
+		this.target_project_id = ''
+		this.target_project_name = ''
+		this.project_name = ''
+		this.create_open = true
+		this.project_dir = ''
+
+		this.ensureCreateProjectDirectoryReady()
+	}
+
+	openRenameProjectDialog(project_item: IProjectSerializedProjectItem) {
+		this.target_project_id = project_item.id
+		this.target_project_name = project_item.name
+		this.project_name = project_item.name
+		this.project_dir = project_item.dir
+		this.rename_open = true
+	}
+
+	openDeleteProjectDialog(project_item: IProjectSerializedProjectItem) {
+		this.target_project_id = project_item.id
+		this.target_project_name = project_item.name
+		this.delete_open = true
+	}
+
+	closeCreateDialog() {
+		this.create_open = false
+		this.clearProjectDirectoryReplaceTimer()
+	}
+
+	closeRenameDialog() {
+		this.rename_open = false
+	}
+
+	closeDeleteDialog() {
+		this.delete_open = false
+	}
+
+	getProjectNameFromDir(dir: string) {
+		const dir_text = dir.trim()
+		const segments = dir_text.split(/[\\/]/).filter(Boolean)
+
+		return segments[segments.length - 1] || dir_text || 'Project'
+	}
+
+	async submitCreateProject() {
+		const next_dir = this.project_dir.trim()
+		const next_name = this.getProjectNameFromDir(next_dir)
+
+		if (!next_name || !next_dir) return
+
+		await this.createProject({ name: next_name, dir: next_dir })
+
+		this.create_open = false
+		this.clearProjectDirectoryReplaceTimer()
+	}
+
+	async submitRenameProject() {
+		const project_id = this.target_project_id
+		const next_name = this.project_name.trim()
+
+		if (!project_id || !next_name) return
+
+		await this.renameProject({ id: project_id, name: next_name })
+
+		this.rename_open = false
+	}
+
+	async confirmRemoveProject() {
+		const project_id = this.target_project_id
+
+		if (!project_id) return
+
+		await this.removeProject(project_id)
+
+		this.delete_open = false
+	}
+
+	async onProjectDragEnd(args: DragEndEvent) {
+		const { active, over } = args
+
+		if (!over?.id || active.id === over.id) {
+			return
+		}
+
+		const from = this.projects.findIndex(item => item.id === active.id)
+		const to = this.projects.findIndex(item => item.id === over.id)
+
+		if (from < 0 || to < 0) {
+			return
+		}
+
+		await this.sortProject({ from, to })
+	}
+
+	setTodoInputValue(value: string) {
+		this.todo_input_value = value
+	}
+
+	startRenameTodo(args: { todo_id: string; title: string }) {
+		const { todo_id, title } = args
+
+		this.todo_editing_id = todo_id
+		this.todo_editing_value = title
+	}
+
+	setTodoEditingValue(value: string) {
+		this.todo_editing_value = value
+	}
+
+	cancelRenameTodo() {
+		this.todo_editing_id = ''
+		this.todo_editing_value = ''
+	}
+
+	async createTodoFromInput() {
+		const project_id = this.selected_project_id
+		const title = this.todo_input_value.trim()
+
+		if (!project_id || !title) return
+
+		await this.createTodo({ project_id, title })
+
+		this.todo_input_value = ''
+	}
+
+	async submitRenameTodo(todo_id: string) {
+		const project_id = this.selected_project_id
+		const title = this.todo_editing_value.trim()
+
+		if (!project_id || !title) return
+
+		await this.renameTodo({ project_id, todo_id, title })
+
+		this.cancelRenameTodo()
+	}
+
+	async removeTodoById(todo_id: string) {
+		const project_id = this.selected_project_id
+
+		if (!project_id) return
+
+		await this.removeTodo({ project_id, todo_id })
+
+		if (this.todo_editing_id === todo_id) {
+			this.cancelRenameTodo()
+		}
 	}
 
 	toggleProject(id: string) {
@@ -265,5 +520,7 @@ export default class Index {
 		this.selected_file_content = res.content
 	}
 
-	deinit() {}
+	deinit() {
+		this.clearProjectDirectoryReplaceTimer()
+	}
 }

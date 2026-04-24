@@ -1,31 +1,21 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { PatchDiff } from '@pierre/diffs/react'
 import { observer } from 'mobx-react-lite'
 import { container } from 'tsyringe'
 
-import { FileTree, Session } from '@/components'
-import { useModelContext } from '@/hooks'
+import { FileTree, Session, Todos } from '@/components'
 
 import ProjectList from './components/ProjectList'
-import Todos from './components/Todos'
-import { ProjectContext } from './context'
 import Model from './model'
 
-import type { IProjectContext } from './context'
-
-const buildPatchFromContent = (file_path: string, content: string) => {
-	const lines = content.split('\n')
-
-	return [
-		`--- a/${file_path}`,
-		`+++ b/${file_path}`,
-		`@@ -0,0 +1,${lines.length} @@`,
-		...lines.map(line => `+${line}`)
-	].join('\n')
-}
-
 const Index = () => {
-	const [x] = useState(() => container.resolve(Model))
+	const ref_model = useRef<Model>(null as unknown as Model)
+
+	if (!ref_model.current) {
+		ref_model.current = container.resolve(Model)
+	}
+
+	const x = ref_model.current
 
 	useEffect(() => {
 		x.init()
@@ -33,24 +23,45 @@ const Index = () => {
 		return () => x.deinit()
 	}, [])
 
-	const selected_project_items = x.file_trees[x.selected_project_id] || []
-	const tree_paths = useMemo(() => selected_project_items.map(item => item.dir), [selected_project_items])
+	const props_project_list = {
+		projects: $copy(x.projects),
+		selected_project_id: x.selected_project_id,
+		project_directory_tree_paths: $copy(x.project_directory_tree_paths),
+		create_open: x.create_open,
+		rename_open: x.rename_open,
+		delete_open: x.delete_open,
+		project_name: x.project_name,
+		project_dir: x.project_dir,
+		target_project_name: x.target_project_name,
+		onOpenCreateProject: x.openCreateProjectDialog,
+		onOpenRenameProject: x.openRenameProjectDialog,
+		onOpenRemoveProject: x.openDeleteProjectDialog,
+		onCloseCreateDialog: x.closeCreateDialog,
+		onCloseRenameDialog: x.closeRenameDialog,
+		onCloseDeleteDialog: x.closeDeleteDialog,
+		onChangeProjectName: x.setProjectName,
+		onChangeProjectDir: x.setProjectDir,
+		onSelectDirectoryPath: x.onSelectProjectDirectoryPath,
+		onSubmitCreateProject: x.submitCreateProject,
+		onSubmitRenameProject: x.submitRenameProject,
+		onConfirmRemoveProject: x.confirmRemoveProject,
+		onProjectDragEnd: x.onProjectDragEnd,
+		setSelectedProject: x.setSelectedProject
+	}
 
-	const patch = useMemo(() => {
-		if (!x.selected_file_path || !x.selected_file_content) {
-			return ''
-		}
-
-		return buildPatchFromContent(x.selected_file_path, x.selected_file_content)
-	}, [x.selected_file_content, x.selected_file_path])
-
-	const project_context = useModelContext<Model, IProjectContext>(x, {
-		setProjectDirectorySkipNextReplace: x.setProjectDirectorySkipNextReplace,
-		consumeProjectDirectorySkipNextReplace: x.consumeProjectDirectorySkipNextReplace,
-		getProjectDirectoryInputPath: x.getProjectDirectoryInputPath,
-		ensureProjectDirectoryReady: x.ensureProjectDirectoryReady,
-		loadProjectDirectory: x.loadProjectDirectory
-	})
+	const props_todos = {
+		todos: $copy(x.selected_project_todos),
+		todo_input_value: x.todo_input_value,
+		todo_editing_id: x.todo_editing_id,
+		todo_editing_value: x.todo_editing_value,
+		onChangeTodoInput: x.setTodoInputValue,
+		onClickCreateTodo: x.createTodoFromInput,
+		onStartRenameTodo: (todo_id: string, title: string) => x.startRenameTodo({ todo_id, title }),
+		onChangeEditingTodoValue: x.setTodoEditingValue,
+		onSubmitRenameTodo: x.submitRenameTodo,
+		onCancelRenameTodo: x.cancelRenameTodo,
+		onClickRemoveTodo: x.removeTodoById
+	}
 
 	return (
 		<div className='flex h-full overflow-hidden'>
@@ -62,26 +73,9 @@ const Index = () => {
 				'
 			>
 				<div className='flex-1 overflow-y-auto px-2 py-2'>
-					<ProjectContext value={project_context}>
-						<ProjectList
-							projects={$copy(x.projects)}
-							selected_project_id={x.selected_project_id}
-							project_directory_tree_paths={$copy(x.project_directory_tree_paths)}
-							createProject={x.createProject}
-							renameProject={x.renameProject}
-							removeProject={x.removeProject}
-							sortProject={x.sortProject}
-							setSelectedProject={x.setSelectedProject}
-						></ProjectList>
-					</ProjectContext>
+					<ProjectList {...props_project_list}></ProjectList>
 					<div className='border-border-light mt-3 border-t pt-3'>
-						<Todos
-							project_id={x.selected_project_id}
-							todos={x.todos[x.selected_project_id] || []}
-							createTodo={x.createTodo}
-							removeTodo={x.removeTodo}
-							renameTodo={x.renameTodo}
-						></Todos>
+						<Todos {...props_todos}></Todos>
 					</div>
 				</div>
 			</div>
@@ -132,7 +126,7 @@ const Index = () => {
 						'
 					>
 						<FileTree
-							paths={tree_paths}
+							paths={$copy(x.selected_project_tree_paths)}
 							initial_selected_paths={
 								x.selected_file_path ? [x.selected_file_path] : undefined
 							}
@@ -156,9 +150,9 @@ const Index = () => {
 							border border-border-light
 						'
 					>
-						{patch ? (
+						{x.selected_file_patch ? (
 							<PatchDiff
-								patch={patch}
+								patch={x.selected_file_patch}
 								options={{
 									diffStyle: 'unified',
 									theme: { dark: 'github-dark', light: 'github-light' },

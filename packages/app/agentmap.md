@@ -28,6 +28,10 @@ This document provides an overview of the packages/app module structure and arch
 			"AutoLabel.tsx": { "desc": "Auto-sizing label component", "role": "Component" },
 			"Container.tsx": { "desc": "Layout container component", "role": "Component" },
 			"Controller.tsx": { "desc": "App control logic component", "role": "Component" },
+			"Todos.tsx": {
+				"desc": "Shared project todo list presentation component; all create/rename/delete state and handlers are passed from project page model",
+				"role": "Component"
+			},
 			"FileTree": {
 				"index.tsx": {
 					"desc": "Shared file tree wrapper based on @pierre/trees with configurable selection mode and path sync strategy, reused by project create-directory picker and project files pane",
@@ -115,36 +119,33 @@ This document provides an overview of the packages/app module structure and arch
 			"notebook": { "index.tsx": { "desc": "Notebook page view", "role": "Page" } },
 			"project": {
 				"components": {
-					"ProjectList": {
-						"ProjectDirectoryTree.tsx": {
-							"desc": "Create-project directory picker tree that receives directory paths by props and consumes project directory actions from project context",
-							"role": "Component"
-						},
-						"ProjectFormDialog.tsx": {
-							"desc": "Unified project create and rename dialog; create mode renders one directory input plus a directory tree selector",
-							"role": "Component"
-						},
-						"Item.tsx": {
-							"desc": "Project row atom with inline rename, delete confirmation, and drag handle behavior",
-							"role": "Component"
-						},
-						"index.tsx": {
-							"desc": "Project list block with create, rename, delete, drag sorting, and create-dialog directory selection interactions",
-							"role": "Component"
-						}
+					"ProjectDialogShell.tsx": {
+						"desc": "Dialog shell wrapper used by project create and rename forms",
+						"role": "Component"
 					},
-					"Todos": { "desc": "Project todo block", "role": "Component" }
-				},
-				"context.ts": {
-					"desc": "Project page action context provider and hook for injecting directory tree action functions into nested project components while keeping tree data passed by props",
-					"role": "Context"
+					"ProjectDirectoryTree.tsx": {
+						"desc": "Project directory tree selector view atom with path data and selection callback from model",
+						"role": "Component"
+					},
+					"ProjectFormDialog.tsx": {
+						"desc": "Project form dialog that renders create and rename inputs and forwards events",
+						"role": "Component"
+					},
+					"ProjectList.tsx": {
+						"desc": "Project list block with drag sorting and dialog rendering; all interactions are injected as props",
+						"role": "Component"
+					},
+					"ProjectListItem.tsx": {
+						"desc": "Project row atom with drag handle and rename/delete triggers",
+						"role": "Component"
+					}
 				},
 				"index.tsx": {
-					"desc": "Project page view with left project list, center session view, and right file tree/diff pane; it owns the project model lifecycle, injects project directory actions through context, and passes directory tree data down by props",
+					"desc": "Project page view with left project list, center session view, and right file tree/diff pane; it owns model lifecycle and only passes render props to presentational components",
 					"role": "Page"
 				},
 				"model.ts": {
-					"desc": "Project page state model using project/session/file RPC for selection, CRUD, sorting, file detail state, and create-dialog directory tree loading from homedir children",
+					"desc": "Project page state model using project/session/file RPC for selection, CRUD, sorting, file detail, project dialog states, todo inline editing state, and directory tree loading",
 					"role": "Model"
 				},
 				"types.ts": {
