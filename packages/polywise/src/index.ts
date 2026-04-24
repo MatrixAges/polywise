@@ -14,3 +14,4 @@ await initEnv()
 initAutoClean()
 
 export type { Router } from './rpc'
+export type { RouterInputs, RouterOutputs } from './rpc'

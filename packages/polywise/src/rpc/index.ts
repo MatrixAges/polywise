@@ -12,6 +12,8 @@ import setActive from './setActive'
 import test from './test'
 import update from './update'
 
+import type { inferRouterInputs, inferRouterOutputs } from '@trpc/server'
+
 export const router = r({
 	file,
 	project,
@@ -29,3 +31,5 @@ export const router = r({
 })
 
 export type Router = typeof router
+export type RouterInputs = inferRouterInputs<Router>
+export type RouterOutputs = inferRouterOutputs<Router>

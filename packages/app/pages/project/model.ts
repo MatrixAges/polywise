@@ -3,7 +3,9 @@ import { injectable } from 'tsyringe'
 
 import { rpc } from '@/utils'
 
+import type { FileTree, FileTreeDirectoryHandle, FileTreeItemHandle } from '@pierre/trees'
 import type {
+	IFileListItem,
 	IProjectSerializedProjectItem,
 	IProjectSerializedSessionItem,
 	IProjectSerializedTodoItem,
@@ -12,11 +14,17 @@ import type {
 
 @injectable()
 export default class Index {
+	home_dir = ''
 	projects = [] as Array<IProjectSerializedProjectItem>
 	sessions = {} as Record<string, Array<IProjectSerializedSessionItem>>
 	todos = {} as Record<string, Array<IProjectSerializedTodoItem>>
 	file_trees = {} as Record<string, Array<IProjectTreeItem>>
 	file_contents = {} as Record<string, string>
+	directory_cache = {} as Record<string, Array<IFileListItem>>
+	directory_loading_map = {} as Record<string, boolean>
+	directory_loaded_map = {} as Record<string, boolean>
+	file_tree_model = null as null | FileTree
+	file_tree_syncing = false
 	selected_project_id = ''
 	selected_session_id = ''
 	selected_file_path = ''
@@ -26,11 +34,15 @@ export default class Index {
 	expanded_project_map = {} as Record<string, boolean>
 
 	constructor() {
-		makeAutoObservable(this, {}, { autoBind: true })
+		makeAutoObservable(this, { file_tree_model: false, file_tree_syncing: false }, { autoBind: true })
 	}
 
 	async init() {
 		await this.refresh()
+
+		this.home_dir = await rpc.file.homedir.query()
+
+		await this.ensureHomeDirTree()
 	}
 
 	async refresh() {
@@ -69,6 +81,67 @@ export default class Index {
 		this.expanded_project_map = Object.fromEntries(this.projects.map(item => [item.id, true]))
 	}
 
+	async ensureHomeDirTree() {
+		if (!this.home_dir) return
+
+		await this.loadDirectory(this.home_dir)
+	}
+
+	setFileTreeModel(model: FileTree | null) {
+		this.file_tree_model = model
+
+		this.syncFileTreeModel()
+	}
+
+	getDirectoryPath(path: string) {
+		if (!path) return ''
+
+		return path.endsWith('/') ? path : `${path}/`
+	}
+
+	getTreePaths() {
+		const path_set = new Set<string>()
+
+		if (this.home_dir) {
+			path_set.add(this.getDirectoryPath(this.home_dir))
+		}
+
+		for (const list of Object.values(this.directory_cache)) {
+			for (const item of list) {
+				path_set.add(item.dir)
+			}
+		}
+
+		return [...path_set]
+	}
+
+	getExpandedDirectoryPaths() {
+		if (!this.file_tree_model) return [] as Array<string>
+
+		return this.getTreePaths().filter(path => {
+			const tree_item = this.file_tree_model?.getItem(path) as FileTreeItemHandle | null
+
+			if (!tree_item || !tree_item.isDirectory()) return false
+
+			return (tree_item as FileTreeDirectoryHandle).isExpanded()
+		})
+	}
+
+	syncFileTreeModel() {
+		if (this.file_tree_syncing) return
+		if (!this.file_tree_model) return
+
+		this.file_tree_syncing = true
+
+		try {
+			this.file_tree_model.resetPaths(this.getTreePaths(), {
+				initialExpandedPaths: this.getExpandedDirectoryPaths()
+			})
+		} finally {
+			this.file_tree_syncing = false
+		}
+	}
+
 	setSelectedProject(id: string) {
 		this.selected_project_id = id
 		this.expanded_project_map[id] = true
@@ -91,6 +164,42 @@ export default class Index {
 	setSelectedFilePath(path: string) {
 		this.selected_file_path = path
 		this.selected_file_content = this.file_contents[path] || ''
+	}
+
+	handleTreeSelection(selected_path: string) {
+		if (!selected_path) return
+
+		const tree_item = this.file_tree_model?.getItem(selected_path)
+
+		if (tree_item && tree_item.isDirectory()) {
+			void this.loadDirectory(selected_path)
+			this.selected_file_path = ''
+			this.selected_file_content = ''
+
+			return
+		}
+
+		this.setSelectedFilePath(selected_path)
+	}
+
+	async loadDirectory(target_path: string) {
+		if (!target_path) return
+		if (this.directory_loaded_map[target_path]) return
+		if (this.directory_loading_map[target_path]) return
+
+		this.directory_loading_map[target_path] = true
+
+		try {
+			const list = await rpc.file.list.query({ path: target_path })
+
+			this.directory_cache[target_path] = list
+			this.directory_loaded_map[target_path] = true
+			this.syncFileTreeModel()
+
+			return list
+		} finally {
+			this.directory_loading_map[target_path] = false
+		}
 	}
 
 	async createProject(args: { name: string; dir: string }) {

@@ -15,6 +15,7 @@ import type { IProjectSerializedProjectItem } from '../../types'
 interface IProps {
 	projects: Array<IProjectSerializedProjectItem>
 	selected_project_id: string
+	home_dir: string
 	createProject: (args: { name: string; dir: string }) => Promise<void>
 	renameProject: (args: { id: string; name: string }) => Promise<void>
 	removeProject: (id: string) => Promise<void>
@@ -26,6 +27,7 @@ const Index = (props: IProps) => {
 	const {
 		projects,
 		selected_project_id,
+		home_dir,
 		createProject,
 		renameProject,
 		removeProject,
@@ -43,7 +45,7 @@ const Index = (props: IProps) => {
 	const onCreateProject = useMemoizedFn(async () => {
 		setTargetProject(null)
 		setProjectName('')
-		setProjectDir('')
+		setProjectDir(home_dir)
 		setCreateOpen(true)
 	})
 
@@ -114,9 +116,9 @@ const Index = (props: IProps) => {
 			<div className='flex items-center justify-between'>
 				<div className='text-std-400 text-xs font-medium'>Projects</div>
 				<Tooltip title='New Project'>
-					<button type='button' className='icon_button small' onClick={onCreateProject}>
+					<div className='icon_button small' onClick={onCreateProject}>
 						<Plus></Plus>
-					</button>
+					</div>
 				</Tooltip>
 			</div>
 			<DndContext collisionDetection={closestCenter} onDragEnd={onDragEnd} sensors={sensors}>

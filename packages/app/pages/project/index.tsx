@@ -30,17 +30,24 @@ const Index = () => {
 		return () => x.deinit()
 	}, [])
 
-	const selected_project_items = x.file_trees[x.selected_project_id] || []
-	const tree_paths = useMemo(() => selected_project_items.map(item => item.dir), [selected_project_items])
+	const tree_paths = x.home_dir ? [x.home_dir] : []
 	const file_tree = useFileTree({
 		paths: tree_paths,
-		initialSelectedPaths: x.selected_file_path ? [x.selected_file_path] : undefined,
+		initialExpansion: 'open',
 		onSelectionChange: selected_paths => {
-			if (selected_paths[0]) {
-				x.setSelectedFilePath(selected_paths[0])
+			const selected_path = selected_paths[0]
+
+			if (selected_path) {
+				x.handleTreeSelection(selected_path)
 			}
 		}
 	})
+
+	useEffect(() => {
+		x.setFileTreeModel(file_tree.model)
+
+		return () => x.setFileTreeModel(null)
+	}, [file_tree.model, x])
 
 	const patch = useMemo(() => {
 		if (!x.selected_file_path || !x.selected_file_content) {
@@ -63,6 +70,7 @@ const Index = () => {
 					<ProjectList
 						projects={$copy(x.projects)}
 						selected_project_id={x.selected_project_id}
+						home_dir={x.home_dir}
 						createProject={x.createProject}
 						renameProject={x.renameProject}
 						removeProject={x.removeProject}

@@ -1,5 +1,5 @@
+import type { RouterOutputs } from '@core/index'
 import type {
-	IProjectListData,
 	IProjectSerializedProjectItem as IRpcProjectSerializedProjectItem,
 	IProjectSerializedSessionItem as IRpcProjectSerializedSessionItem,
 	IProjectSerializedTodoItem as IRpcProjectSerializedTodoItem,
@@ -17,4 +17,6 @@ export interface IProjectTreeItem extends IRpcProjectTreeItem {
 	content?: string
 }
 
-export type IProjectData = IProjectListData
+export type IFileListItem = RouterOutputs['file']['list'][number]
+
+export type IHomeDir = RouterOutputs['file']['homedir']
