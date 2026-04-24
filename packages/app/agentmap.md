@@ -28,6 +28,16 @@ This document provides an overview of the packages/app module structure and arch
 			"AutoLabel.tsx": { "desc": "Auto-sizing label component", "role": "Component" },
 			"Container.tsx": { "desc": "Layout container component", "role": "Component" },
 			"Controller.tsx": { "desc": "App control logic component", "role": "Component" },
+			"FileTree": {
+				"index.tsx": {
+					"desc": "Shared file tree wrapper based on @pierre/trees with configurable selection mode and path sync strategy, reused by project create-directory picker and project files pane",
+					"role": "Component"
+				},
+				"model.ts": {
+					"desc": "Shared file tree data helper model for path normalization, selection filtering, and expanded-directory preservation",
+					"role": "Model"
+				}
+			},
 			"ModelSelect.tsx": { "desc": "Default model picker for app settings", "role": "Component" },
 			"Dialog.tsx": { "desc": "Modal dialog component", "role": "Component" },
 			"ErrorBoundary.tsx": { "desc": "React error boundary", "role": "Component" },
@@ -107,7 +117,7 @@ This document provides an overview of the packages/app module structure and arch
 				"components": {
 					"ProjectList": {
 						"ProjectDirectoryTree.tsx": {
-							"desc": "Create-project directory picker tree backed by file homedir/list RPC; selected directories sync into the project directory input while typed paths reload the current-level tree",
+							"desc": "Create-project directory picker tree that now delegates reusable tree state sync/selection behavior to components/FileTree and keeps only project-specific input/event wiring",
 							"role": "Component"
 						},
 						"ProjectFormDialog.tsx": {
@@ -130,7 +140,7 @@ This document provides an overview of the packages/app module structure and arch
 					"role": "Page"
 				},
 				"model.ts": {
-					"desc": "Project page state model using project and session RPC for selection, CRUD, sorting, and file state",
+					"desc": "Project page state model using project/session/file RPC for selection, CRUD, sorting, file detail state, and create-dialog directory tree loading cache",
 					"role": "Model"
 				},
 				"types.ts": {

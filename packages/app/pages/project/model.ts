@@ -4,11 +4,15 @@ import { injectable } from 'tsyringe'
 import { rpc } from '@/utils'
 
 import type {
+	IFileListItem,
+	IHomeDir,
 	IProjectSerializedProjectItem,
 	IProjectSerializedSessionItem,
 	IProjectSerializedTodoItem,
 	IProjectTreeItem
 } from './types'
+
+type IProjectDirectoryLoadMode = 'append' | 'replace'
 
 @injectable()
 export default class Index {
@@ -21,6 +25,10 @@ export default class Index {
 	selected_session_id = ''
 	selected_file_path = ''
 	selected_file_content = ''
+	project_directory_tree_paths = [] as Array<string>
+	project_directory_loaded_path_map = {} as Record<string, boolean>
+	project_home_dir = '' as IHomeDir
+	project_directory_skip_next_replace = false
 	loading_project_id = ''
 	has_more_map = {} as Record<string, boolean>
 	expanded_project_map = {} as Record<string, boolean>
@@ -91,6 +99,65 @@ export default class Index {
 	setSelectedFilePath(path: string) {
 		this.selected_file_path = path
 		this.selected_file_content = this.file_contents[path] || ''
+	}
+
+	setProjectDirectorySkipNextReplace(value: boolean) {
+		this.project_directory_skip_next_replace = value
+	}
+
+	consumeProjectDirectorySkipNextReplace() {
+		if (!this.project_directory_skip_next_replace) return false
+
+		this.project_directory_skip_next_replace = false
+
+		return true
+	}
+
+	getProjectDirectoryInputPath(target_path: string) {
+		if (target_path === '/') return target_path
+
+		return target_path.endsWith('/') ? target_path.slice(0, -1) : target_path
+	}
+
+	async getProjectHomeDir() {
+		if (this.project_home_dir) return this.project_home_dir
+
+		this.project_home_dir = await rpc.file.homedir.query()
+
+		return this.project_home_dir
+	}
+
+	async ensureProjectDirectoryReady(value: string) {
+		const value_text = value.trim()
+		const target_path = value_text || (await this.getProjectHomeDir())
+
+		await this.loadProjectDirectory({ target_path, mode: 'replace' })
+
+		return target_path
+	}
+
+	async loadProjectDirectory(args: { target_path: string; mode: IProjectDirectoryLoadMode }) {
+		const { target_path, mode } = args
+		const next_path = target_path.trim()
+
+		if (!next_path) {
+			if (mode === 'replace') {
+				this.project_directory_tree_paths = []
+				this.project_directory_loaded_path_map = {}
+			}
+
+			return
+		}
+
+		if (mode === 'append' && this.project_directory_loaded_path_map[next_path]) return
+
+		const list = (await rpc.file.list.query({ path: next_path })) as Array<IFileListItem>
+		const next_paths = list.map(item => item.dir)
+		const current_paths = mode === 'replace' ? [] : this.project_directory_tree_paths
+		const current_loaded_path_map = mode === 'replace' ? {} : this.project_directory_loaded_path_map
+
+		this.project_directory_tree_paths = Array.from(new Set([...current_paths, ...next_paths]))
+		this.project_directory_loaded_path_map = { ...current_loaded_path_map, [next_path]: true }
 	}
 
 	async createProject(args: { name: string; dir: string }) {
