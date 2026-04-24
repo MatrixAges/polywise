@@ -40,12 +40,13 @@ const Index = (props: IProps) => {
 			title={title}
 			desc={desc}
 			confirm_text={submit_text}
+			content_class='w-[540px] max-w-none!'
 			onConfirm={onSubmit}
 			onClose={onClose}
 		>
 			<div className='flex flex-col gap-3'>
 				{show_dir ? (
-					<div className='flex flex-col gap-2'>
+					<div className='flex flex-col gap-3'>
 						<Input
 							placeholder='Project directory'
 							value={dir_value || ''}

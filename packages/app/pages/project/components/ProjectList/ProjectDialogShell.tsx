@@ -17,16 +17,17 @@ interface IProps {
 	desc: string
 	confirm_text: string
 	children: ReactNode
+	content_class?: string
 	onConfirm: () => void
 	onClose: () => void
 }
 
 const Index = (props: IProps) => {
-	const { open, title, desc, confirm_text, children, onConfirm, onClose } = props
+	const { open, title, desc, confirm_text, children, content_class, onConfirm, onClose } = props
 
 	return (
 		<Dialog open={open} onOpenChange={next_open => !next_open && onClose()}>
-			<DialogContent>
+			<DialogContent className={content_class}>
 				<DialogHeader>
 					<DialogTitle>{title}</DialogTitle>
 					<DialogDescription>{desc}</DialogDescription>

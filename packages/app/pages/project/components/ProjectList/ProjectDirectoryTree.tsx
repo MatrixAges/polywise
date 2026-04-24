@@ -137,18 +137,14 @@ const Index = (props: IProps) => {
 		<div
 			className='
 				overflow-y-auto
-				h-[240px]
+				h-[380px]
 				rounded-md
 				border border-border-light
 			'
 		>
 			<FileTree
 				model={file_tree.model}
-				style={themeToTreeStyles({
-					type: global.theme.theme_value,
-					bg: global.theme.theme_value === 'dark' ? '#0d1117' : '#ffffff',
-					fg: global.theme.theme_value === 'dark' ? '#f0f6fc' : '#24292f'
-				})}
+				style={themeToTreeStyles({ type: global.theme.theme_value })}
 			></FileTree>
 		</div>
 	)
