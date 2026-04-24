@@ -36,12 +36,17 @@ const Index = (props: IProps) => {
 
 	const file_tree = useFileTree({
 		paths,
-		icons: {
-			set: 'complete',
-			colored: true
-		},
+		search: true,
+		icons: { set: 'complete', colored: true },
+		flattenEmptyDirectories: true,
 		initialExpansion: 'closed',
 		initialSelectedPaths: initial_selected_paths,
+		unsafeCSS: `
+            button[data-type='item'] > div[data-item-section='content'] {
+                  height:100%;
+                  display:flex;
+            }
+            `,
 		onSelectionChange: selected_paths => {
 			const selected_path = x.getSelectedPath({ selected_paths, selection_mode })
 
@@ -74,15 +79,19 @@ const Index = (props: IProps) => {
 				className ||
 				`
 				overflow-y-auto
-				h-[380px]
-				rounded-md
-				border border-border-light
+				h-[400px]
+				py-4
+				rounded-xl
+				bg-secondary
 			`
 			}
 		>
 			<PierreFileTree
 				model={file_tree.model}
-				style={themeToTreeStyles({ type: global.theme.theme_value })}
+				style={themeToTreeStyles({
+					type: global.theme.theme_value,
+					bg: 'transparent'
+				})}
 			></PierreFileTree>
 		</div>
 	)

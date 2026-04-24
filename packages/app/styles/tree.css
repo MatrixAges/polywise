@@ -1,0 +1,13 @@
+file-tree-container {
+	--trees-border-color-override: #d8d8d8;
+	--trees-focus-ring-color-override: #555;
+	--trees-selected-focused-border-color-override: #555;
+}
+
+[data-theme='dark'] {
+	file-tree-container {
+		--trees-border-color-override: #3a3a3a;
+		--trees-focus-ring-color-override: #aaa;
+		--trees-selected-focused-border-color-override: #aaa;
+	}
+}
