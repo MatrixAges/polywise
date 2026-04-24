@@ -53,7 +53,7 @@ const Index = (props: IPropsList) => {
 				type='create'
 				open={create_open}
 				title='New Project'
-				desc='Create a new project with a directory.'
+				desc='Create a new project with a directory'
 				name_value={project_name}
 				dir_value={project_dir}
 				directory_tree_paths={project_directory_tree_paths}
@@ -64,7 +64,7 @@ const Index = (props: IPropsList) => {
 				type='rename'
 				open={rename_open}
 				title='Rename Project'
-				desc='Update the project name.'
+				desc='Update the project name'
 				name_value={project_name}
 				dir_value={project_dir}
 				directory_tree_paths={project_directory_tree_paths}
@@ -74,7 +74,7 @@ const Index = (props: IPropsList) => {
 			<Alert
 				open={delete_open}
 				title='Delete Project'
-				desc={`Delete project "${target_project_name}"? This cannot be undone.`}
+				desc={`Delete project "${target_project_name}"? This cannot be undone`}
 				confirm_text='Delete'
 				cancel_text='Cancel'
 				onConfirm={confirmRemoveProject}
