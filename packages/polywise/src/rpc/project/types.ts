@@ -5,6 +5,7 @@ export interface IProjectTreeItem {
 	name: string
 	dir: string
 	file_type: 'directory' | 'file'
+	has_children: boolean
 }
 
 export interface IProjectSerializedProjectItem extends Omit<Project, 'created_at' | 'updated_at'> {

@@ -8,8 +8,6 @@ const Index = (props: IPropsDirectoryTree) => {
 	const { paths } = props
 	const { onSelectProjectDirectoryPath } = useProjectContext()
 
-	console.log(paths)
-
 	return (
 		<FileTree
 			paths={paths}

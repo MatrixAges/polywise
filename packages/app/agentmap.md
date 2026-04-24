@@ -149,7 +149,7 @@ This document provides an overview of the packages/app module structure and arch
 					"role": "Page"
 				},
 				"model.ts": {
-					"desc": "Project page state model using project/session/file RPC for selection, CRUD, sorting, file detail, project dialog states, todo inline editing state, and directory tree loading",
+					"desc": "Project page state model using project/session/file RPC for selection, CRUD, sorting, click-loaded project file trees through rpc.file.list, lazy file detail loading, project dialog states, todo inline editing state, and directory tree loading",
 					"role": "Model"
 				},
 				"types.ts": {

@@ -133,6 +133,7 @@ const Index = () => {
 							initial_selected_paths={
 								x.selected_file_path ? [x.selected_file_path] : undefined
 							}
+							sync_mode='preserve_expansion'
 							className='
 								overflow-y-auto
 								flex-1

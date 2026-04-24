@@ -2,8 +2,7 @@ import type { RouterOutputs } from '@core/index'
 import type {
 	IProjectSerializedProjectItem as IRpcProjectSerializedProjectItem,
 	IProjectSerializedSessionItem as IRpcProjectSerializedSessionItem,
-	IProjectSerializedTodoItem as IRpcProjectSerializedTodoItem,
-	IProjectTreeItem as IRpcProjectTreeItem
+	IProjectSerializedTodoItem as IRpcProjectSerializedTodoItem
 } from '@core/rpc/project/types'
 import type { ReactNode } from 'react'
 
@@ -13,7 +12,7 @@ export type IProjectSerializedSessionItem = IRpcProjectSerializedSessionItem
 
 export type IProjectSerializedTodoItem = IRpcProjectSerializedTodoItem
 
-export interface IProjectTreeItem extends IRpcProjectTreeItem {
+export interface IProjectTreeItem extends IFileListItem {
 	children?: Array<IProjectTreeItem>
 	content?: string
 }

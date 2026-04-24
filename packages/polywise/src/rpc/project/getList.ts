@@ -4,8 +4,6 @@ import { desc, eq } from 'drizzle-orm'
 
 import { getProjects } from '../../db/services'
 import { p } from '../../utils/trpc'
-import readProjectFile from './utils/readProjectFile'
-import readProjectTree from './utils/readProjectTree'
 
 import type { IProjectListData, IProjectSerializedProjectItem } from './types'
 
@@ -76,32 +74,15 @@ export default p.query(async () => {
 		})
 	)
 
-	const file_trees = await Promise.all(
-		projects.map(async project_item => {
-			return [project_item.id, await readProjectTree(project_item.dir)] as const
-		})
-	)
-
-	const file_contents = {} as Record<string, string>
-
-	for (const project_item of projects) {
-		const tree_items = file_trees.find(item => item[0] === project_item.id)?.[1] || []
-		const file_item = tree_items.find(item => item.file_type === 'file')
-
-		if (file_item) {
-			file_contents[file_item.dir] = await readProjectFile(project_item.dir, file_item.dir)
-		}
-	}
-
 	return {
 		projects: serialized_projects,
 		sessions: Object.fromEntries(sessions),
 		todos: Object.fromEntries(todos),
-		file_trees: Object.fromEntries(file_trees),
-		file_contents,
+		file_trees: {},
+		file_contents: {},
 		selected_project_id: projects[0]?.id || '',
 		selected_session_id: sessions[0]?.[1][0]?.id || '',
-		selected_file_path: Object.keys(file_contents)[0] || '',
+		selected_file_path: '',
 		has_more_map: Object.fromEntries(
 			sessions.map(([project_id, session_list]) => [project_id, session_list.length >= 10])
 		)

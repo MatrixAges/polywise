@@ -100,6 +100,10 @@ export default class Index {
 
 		this.selected_project_id = next_selected_project_id
 
+		if (next_selected_project_id) {
+			await this.loadProjectRootDirectory(next_selected_project_id)
+		}
+
 		const selected_sessions = this.sessions[next_selected_project_id] || []
 		const selected_session_exists = selected_sessions.some(item => item.id === previous_selected_session_id)
 
@@ -107,7 +111,9 @@ export default class Index {
 			? previous_selected_session_id
 			: selected_sessions[0]?.id || ''
 
-		const selected_files = this.file_trees[next_selected_project_id] || []
+		const selected_files = (this.file_trees[next_selected_project_id] || []).filter(
+			item => item.file_type === 'file'
+		)
 		const selected_file_exists = selected_files.some(item => item.dir === previous_selected_file_path)
 
 		this.selected_file_path = selected_file_exists ? previous_selected_file_path : selected_files[0]?.dir || ''
@@ -129,8 +135,8 @@ export default class Index {
 		const next_session_item = this.sessions[id]?.[0]
 		this.selected_session_id = next_session_item?.id || ''
 
-		const next_file_item = this.file_trees[id]?.find(item => item.file_type === 'file')
-		this.setSelectedFilePath(next_file_item?.dir || '')
+		this.setSelectedFilePath('')
+		this.loadProjectRootDirectory(id)
 		this.cancelRenameTodo()
 	}
 
@@ -351,9 +357,62 @@ export default class Index {
 		this.selected_session_id = id
 	}
 
-	setSelectedFilePath(path: string) {
-		this.selected_file_path = path
-		this.selected_file_content = this.file_contents[path] || ''
+	async setSelectedFilePath(path: string) {
+		if (!path) {
+			this.selected_file_path = ''
+			this.selected_file_content = ''
+
+			return
+		}
+
+		const project_id = this.selected_project_id
+		const file_item = this.file_trees[project_id]?.find(item => item.dir === path)
+
+		if (file_item?.file_type === 'directory') {
+			await this.loadProjectFileDirectory({ project_id, target_path: path })
+
+			return
+		}
+
+		if (file_item?.file_type !== 'file') return
+
+		await this.loadFile(project_id, path)
+	}
+
+	getProjectById(project_id: string) {
+		return this.projects.find(item => item.id === project_id)
+	}
+
+	mergeProjectTreeItems(args: { project_id: string; items: Array<IFileListItem> }) {
+		const { project_id, items } = args
+		const current_items = this.file_trees[project_id] || []
+		const item_map = new Map(current_items.map(item => [item.dir, item]))
+
+		for (const item of items) {
+			item_map.set(item.dir, item)
+		}
+
+		this.file_trees[project_id] = Array.from(item_map.values())
+	}
+
+	async loadProjectRootDirectory(project_id: string) {
+		if (this.file_trees[project_id]?.length) return
+
+		const project_item = this.getProjectById(project_id)
+
+		if (!project_item) return
+
+		await this.loadProjectFileDirectory({ project_id, target_path: project_item.dir })
+	}
+
+	async loadProjectFileDirectory(args: { project_id: string; target_path: string }) {
+		const { project_id, target_path } = args
+
+		if (!project_id || !target_path) return
+
+		const all_list = (await rpc.file.list.query({ path: target_path })) as Array<IFileListItem>
+
+		this.mergeProjectTreeItems({ project_id, items: all_list })
 	}
 
 	setProjectDirectorySkipNextReplace(value: boolean) {
