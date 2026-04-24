@@ -106,8 +106,12 @@ This document provides an overview of the packages/app module structure and arch
 			"project": {
 				"components": {
 					"ProjectList": {
+						"ProjectDirectoryTree.tsx": {
+							"desc": "Create-project directory picker tree backed by file homedir/list RPC; selected directories sync into the project directory input while typed paths reload the current-level tree",
+							"role": "Component"
+						},
 						"ProjectFormDialog.tsx": {
-							"desc": "Unified project create and rename dialog",
+							"desc": "Unified project create and rename dialog; create mode renders one directory input plus a directory tree selector",
 							"role": "Component"
 						},
 						"Item.tsx": {
@@ -115,7 +119,7 @@ This document provides an overview of the packages/app module structure and arch
 							"role": "Component"
 						},
 						"index.tsx": {
-							"desc": "Project list block with create, rename, delete, and drag sorting interactions",
+							"desc": "Project list block with create, rename, delete, drag sorting, and create-dialog directory selection interactions",
 							"role": "Component"
 						}
 					},

@@ -1,6 +1,7 @@
 import { Input } from '@/__shadcn__/components/ui/input'
 
 import ProjectDialogShell from './ProjectDialogShell'
+import ProjectDirectoryTree from './ProjectDirectoryTree'
 
 import type { ChangeEvent, KeyboardEvent } from 'react'
 
@@ -43,23 +44,33 @@ const Index = (props: IProps) => {
 			onClose={onClose}
 		>
 			<div className='flex flex-col gap-3'>
-				<Input
-					placeholder='Project name'
-					value={name_value}
-					onChange={(event: ChangeEvent<HTMLInputElement>) => onChangeName(event.target.value)}
-					onKeyDown={(event: KeyboardEvent<HTMLInputElement>) => {
-						if (event.key === 'Enter') {
-							event.preventDefault()
-							onSubmit()
-						}
-					}}
-				></Input>
-				{show_dir && (
+				{show_dir ? (
+					<div className='flex flex-col gap-2'>
+						<Input
+							placeholder='Project directory'
+							value={dir_value || ''}
+							onChange={(event: ChangeEvent<HTMLInputElement>) =>
+								onChangeDir?.(event.target.value)
+							}
+							onKeyDown={(event: KeyboardEvent<HTMLInputElement>) => {
+								if (event.key === 'Enter') {
+									event.preventDefault()
+									onSubmit()
+								}
+							}}
+						></Input>
+						<ProjectDirectoryTree
+							active={open}
+							value={dir_value || ''}
+							onChange={value => onChangeDir?.(value)}
+						></ProjectDirectoryTree>
+					</div>
+				) : (
 					<Input
-						placeholder='Project directory'
-						value={dir_value || ''}
+						placeholder='Project name'
+						value={name_value}
 						onChange={(event: ChangeEvent<HTMLInputElement>) =>
-							onChangeDir?.(event.target.value)
+							onChangeName(event.target.value)
 						}
 						onKeyDown={(event: KeyboardEvent<HTMLInputElement>) => {
 							if (event.key === 'Enter') {

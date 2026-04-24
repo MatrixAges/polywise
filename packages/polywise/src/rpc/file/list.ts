@@ -39,7 +39,23 @@ export default p.input(input_type).query(async ({ input }) => {
 		return [] as Array<IFileListItem>
 	}
 
-	const entries = await fs.readdir(target_path, { withFileTypes: true })
+	try {
+		const target_stat = await fs.stat(target_path)
+
+		if (!target_stat.isDirectory()) {
+			return [] as Array<IFileListItem>
+		}
+	} catch {
+		return [] as Array<IFileListItem>
+	}
+
+	let entries = [] as Array<Dirent>
+
+	try {
+		entries = await fs.readdir(target_path, { withFileTypes: true })
+	} catch {
+		return [] as Array<IFileListItem>
+	}
 
 	return entries.map(entry => toListItem({ base_path: target_path, entry }))
 })

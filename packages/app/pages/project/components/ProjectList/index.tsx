@@ -15,7 +15,6 @@ import type { IProjectSerializedProjectItem } from '../../types'
 interface IProps {
 	projects: Array<IProjectSerializedProjectItem>
 	selected_project_id: string
-	home_dir: string
 	createProject: (args: { name: string; dir: string }) => Promise<void>
 	renameProject: (args: { id: string; name: string }) => Promise<void>
 	removeProject: (id: string) => Promise<void>
@@ -23,11 +22,17 @@ interface IProps {
 	setSelectedProject: (id: string) => void
 }
 
+const getProjectNameFromDir = (dir: string) => {
+	const dir_text = dir.trim()
+	const segments = dir_text.split(/[\\/]/).filter(Boolean)
+
+	return segments[segments.length - 1] || dir_text || 'Project'
+}
+
 const Index = (props: IProps) => {
 	const {
 		projects,
 		selected_project_id,
-		home_dir,
 		createProject,
 		renameProject,
 		removeProject,
@@ -45,7 +50,7 @@ const Index = (props: IProps) => {
 	const onCreateProject = useMemoizedFn(async () => {
 		setTargetProject(null)
 		setProjectName('')
-		setProjectDir(home_dir)
+		setProjectDir('')
 		setCreateOpen(true)
 	})
 
@@ -66,8 +71,8 @@ const Index = (props: IProps) => {
 	const closeDeleteDialog = useMemoizedFn(() => setDeleteOpen(false))
 
 	const submitCreateProject = useMemoizedFn(async () => {
-		const next_name = project_name.trim()
 		const next_dir = project_dir.trim()
+		const next_name = getProjectNameFromDir(next_dir)
 
 		if (!next_name || !next_dir) return
 
