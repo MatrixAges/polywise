@@ -53,7 +53,7 @@ const Index = (props: IPropsList) => {
 				type='create'
 				open={create_open}
 				title='New Project'
-				desc='Create a new project with a name and directory.'
+				desc='Create a new project with a directory.'
 				name_value={project_name}
 				dir_value={project_dir}
 				directory_tree_paths={project_directory_tree_paths}
