@@ -8,7 +8,7 @@ import { useProjectContext } from '../context'
 import FormDialog from './FormDialog'
 import ListItem from './ListItem'
 
-import type { IPropsList } from './types'
+import type { IPropsList } from '../types'
 
 const Index = (props: IPropsList) => {
 	const {

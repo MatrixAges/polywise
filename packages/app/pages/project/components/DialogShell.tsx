@@ -9,7 +9,7 @@ import {
 	DialogTitle
 } from '@/__shadcn__/components/ui/dialog'
 
-import type { IPropsDialogShell } from './types'
+import type { IPropsDialogShell } from '../types'
 
 const Index = (props: IPropsDialogShell) => {
 	const { open, title, desc, confirm_text, children, content_class, onConfirm, onClose } = props

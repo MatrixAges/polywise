@@ -5,7 +5,7 @@ import { GripVertical, PencilLine, Trash2 } from 'lucide-react'
 import { useProjectContext } from '../context'
 
 import type { MouseEvent } from 'react'
-import type { IPropsListItem } from './types'
+import type { IPropsListItem } from '../types'
 
 const Index = (props: IPropsListItem) => {
 	const { project_item, project_index, selected } = props

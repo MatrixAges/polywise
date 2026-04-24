@@ -142,10 +142,6 @@ This document provides an overview of the packages/app module structure and arch
 					"ListItem.tsx": {
 						"desc": "Project row atom with drag handle and rename/delete triggers",
 						"role": "Component"
-					},
-					"types.ts": {
-						"desc": "Project component props type definitions using IPropsX naming",
-						"role": "Type"
 					}
 				},
 				"index.tsx": {
@@ -157,7 +153,7 @@ This document provides an overview of the packages/app module structure and arch
 					"role": "Model"
 				},
 				"types.ts": {
-					"desc": "Project page type definitions re-exporting shared RPC payload types",
+					"desc": "Project page type definitions re-exporting shared RPC payload types and project component props",
 					"role": "Type"
 				}
 			},

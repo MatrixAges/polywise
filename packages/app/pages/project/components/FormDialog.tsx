@@ -5,7 +5,7 @@ import DialogShell from './DialogShell'
 import DirectoryTree from './DirectoryTree'
 
 import type { ChangeEvent, KeyboardEvent } from 'react'
-import type { IPropsFormDialog } from './types'
+import type { IPropsFormDialog } from '../types'
 
 const Index = (props: IPropsFormDialog) => {
 	const { type, open, title, desc, name_value, dir_value, directory_tree_paths, show_dir, submit_text } = props
