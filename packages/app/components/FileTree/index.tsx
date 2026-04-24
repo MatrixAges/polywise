@@ -35,7 +35,7 @@ const Index = (props: IProps) => {
 	const x = model_ref.current
 
 	const file_tree = useFileTree({
-		paths: [],
+		paths,
 		icons: {
 			set: 'complete',
 			colored: true

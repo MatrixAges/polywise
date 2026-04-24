@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { PatchDiff } from '@pierre/diffs/react'
 import { observer } from 'mobx-react-lite'
 import { container } from 'tsyringe'
@@ -13,13 +13,7 @@ import Model from './model'
 import type { IProjectContext } from './context'
 
 const Index = () => {
-	const ref_model = useRef<Model>(null as unknown as Model)
-
-	if (!ref_model.current) {
-		ref_model.current = container.resolve(Model)
-	}
-
-	const x = ref_model.current
+	const [x] = useState(() => container.resolve(Model))
 
 	useEffect(() => {
 		x.init()
