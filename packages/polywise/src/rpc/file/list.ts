@@ -1,6 +1,6 @@
 import path from 'path'
 import fs from 'fs-extra'
-import { object, string } from 'zod'
+import { boolean, object, string } from 'zod'
 
 import { p } from '../../utils/trpc'
 
@@ -15,7 +15,8 @@ export interface IFileListItem {
 }
 
 const input_type = object({
-	path: string()
+	path: string(),
+	show_hidden: boolean().optional()
 })
 
 const toListItem = (args: { base_path: string; entry: Dirent }) => {
@@ -34,6 +35,7 @@ const toListItem = (args: { base_path: string; entry: Dirent }) => {
 
 export default p.input(input_type).query(async ({ input }) => {
 	const target_path = path.resolve(input.path)
+	const show_hidden = input.show_hidden ?? false
 
 	if (!(await fs.pathExists(target_path))) {
 		return [] as Array<IFileListItem>
@@ -57,5 +59,7 @@ export default p.input(input_type).query(async ({ input }) => {
 		return [] as Array<IFileListItem>
 	}
 
-	return entries.map(entry => toListItem({ base_path: target_path, entry }))
+	return entries
+		.filter(entry => show_hidden || !entry.name.startsWith('.'))
+		.map(entry => toListItem({ base_path: target_path, entry }))
 })

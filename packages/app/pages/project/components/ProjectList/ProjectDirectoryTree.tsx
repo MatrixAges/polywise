@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
+import { themeToTreeStyles } from '@pierre/trees'
 import { FileTree, useFileTree } from '@pierre/trees/react'
 import { useMemoizedFn } from 'ahooks'
+import { observer } from 'mobx-react-lite'
 
+import { useGlobal } from '@/context'
 import { rpc } from '@/utils'
 
 import type { FileTreeDirectoryHandle, FileTreeItemHandle } from '@pierre/trees'
@@ -27,11 +30,16 @@ const getDirectoryTreePath = (target_path: string) => {
 
 const Index = (props: IProps) => {
 	const { active, value, onChange } = props
+	const global = useGlobal()
 	const [tree_paths, setTreePaths] = useState<Array<string>>([])
 	const [loaded_path_map, setLoadedPathMap] = useState<Record<string, boolean>>({})
 	const skip_next_replace_ref = useRef(false)
 	const file_tree = useFileTree({
 		paths: [],
+		icons: {
+			set: 'complete',
+			colored: true
+		},
 		initialExpansion: 'open',
 		onSelectionChange: selected_paths => {
 			const selected_path = selected_paths[0]
@@ -134,9 +142,16 @@ const Index = (props: IProps) => {
 				border border-border-light
 			'
 		>
-			<FileTree model={file_tree.model}></FileTree>
+			<FileTree
+				model={file_tree.model}
+				style={themeToTreeStyles({
+					type: global.theme.theme_value,
+					bg: global.theme.theme_value === 'dark' ? '#0d1117' : '#ffffff',
+					fg: global.theme.theme_value === 'dark' ? '#f0f6fc' : '#24292f'
+				})}
+			></FileTree>
 		</div>
 	)
 }
 
-export default $app.memo(Index)
+export default new $app.Handle(Index).by(observer).by($app.memo).get()
