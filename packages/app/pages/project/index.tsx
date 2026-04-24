@@ -5,7 +5,7 @@ import { container } from 'tsyringe'
 
 import { FileTree, Session, Todos } from '@/components'
 
-import ProjectList from './components/ProjectList'
+import List from './components/List'
 import Model from './model'
 
 const Index = () => {
@@ -73,7 +73,7 @@ const Index = () => {
 				'
 			>
 				<div className='flex-1 overflow-y-auto px-2 py-2'>
-					<ProjectList {...props_project_list}></ProjectList>
+					<List {...props_project_list}></List>
 					<div className='border-border-light mt-3 border-t pt-3'>
 						<Todos {...props_todos}></Todos>
 					</div>

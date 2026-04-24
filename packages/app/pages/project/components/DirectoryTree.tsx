@@ -1,11 +1,8 @@
 import { FileTree } from '@/components'
 
-interface IProps {
-	paths: Array<string>
-	onSelectPath: (selected_path: string) => void
-}
+import type { IPropsDirectoryTree } from './types'
 
-const Index = (props: IProps) => {
+const Index = (props: IPropsDirectoryTree) => {
 	const { paths, onSelectPath } = props
 
 	return (

@@ -1,27 +1,12 @@
 import { Input } from '@/__shadcn__/components/ui/input'
 
-import ProjectDialogShell from './ProjectDialogShell'
-import ProjectDirectoryTree from './ProjectDirectoryTree'
+import DialogShell from './DialogShell'
+import DirectoryTree from './DirectoryTree'
 
 import type { ChangeEvent, KeyboardEvent } from 'react'
+import type { IPropsFormDialog } from './types'
 
-interface IProps {
-	open: boolean
-	title: string
-	desc: string
-	name_value: string
-	dir_value?: string
-	directory_tree_paths?: Array<string>
-	show_dir: boolean
-	submit_text: string
-	onChangeName: (value: string) => void
-	onChangeDir?: (value: string) => void
-	onSelectDirectoryPath: (selected_path: string) => void
-	onSubmit: () => void
-	onClose: () => void
-}
-
-const Index = (props: IProps) => {
+const Index = (props: IPropsFormDialog) => {
 	const {
 		open,
 		title,
@@ -39,7 +24,7 @@ const Index = (props: IProps) => {
 	} = props
 
 	return (
-		<ProjectDialogShell
+		<DialogShell
 			open={open}
 			title={title}
 			desc={desc}
@@ -64,10 +49,10 @@ const Index = (props: IProps) => {
 								}
 							}}
 						></Input>
-						<ProjectDirectoryTree
+						<DirectoryTree
 							paths={directory_tree_paths || []}
 							onSelectPath={onSelectDirectoryPath}
-						></ProjectDirectoryTree>
+						></DirectoryTree>
 					</div>
 				) : (
 					<Input
@@ -85,7 +70,7 @@ const Index = (props: IProps) => {
 					></Input>
 				)}
 			</div>
-		</ProjectDialogShell>
+		</DialogShell>
 	)
 }
 

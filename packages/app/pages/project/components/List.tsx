@@ -4,39 +4,12 @@ import { Plus } from 'lucide-react'
 
 import { Alert, Tooltip } from '@/components'
 
-import ProjectFormDialog from './ProjectFormDialog'
-import ProjectListItem from './ProjectListItem'
+import FormDialog from './FormDialog'
+import ListItem from './ListItem'
 
-import type { DragEndEvent } from '@dnd-kit/core'
-import type { IProjectSerializedProjectItem } from '../types'
+import type { IPropsList } from './types'
 
-export interface IProps {
-	projects: Array<IProjectSerializedProjectItem>
-	selected_project_id: string
-	project_directory_tree_paths: Array<string>
-	create_open: boolean
-	rename_open: boolean
-	delete_open: boolean
-	project_name: string
-	project_dir: string
-	target_project_name: string
-	onOpenCreateProject: () => void
-	onOpenRenameProject: (project_item: IProjectSerializedProjectItem) => void
-	onOpenRemoveProject: (project_item: IProjectSerializedProjectItem) => void
-	onCloseCreateDialog: () => void
-	onCloseRenameDialog: () => void
-	onCloseDeleteDialog: () => void
-	onChangeProjectName: (value: string) => void
-	onChangeProjectDir: (value: string) => void
-	onSelectDirectoryPath: (selected_path: string) => void
-	onSubmitCreateProject: () => void
-	onSubmitRenameProject: () => void
-	onConfirmRemoveProject: () => void
-	onProjectDragEnd: (args: DragEndEvent) => void
-	setSelectedProject: (id: string) => void
-}
-
-const Index = (props: IProps) => {
+const Index = (props: IPropsList) => {
 	const {
 		projects,
 		selected_project_id,
@@ -78,7 +51,7 @@ const Index = (props: IProps) => {
 				<SortableContext items={projects.map(item => item.id)} strategy={verticalListSortingStrategy}>
 					<div className='flex flex-col gap-1'>
 						{projects.map((project_item, project_index) => (
-							<ProjectListItem
+							<ListItem
 								project_item={project_item}
 								project_index={project_index}
 								selected={selected_project_id === project_item.id}
@@ -86,12 +59,12 @@ const Index = (props: IProps) => {
 								onRemoveProject={onOpenRemoveProject}
 								setSelectedProject={setSelectedProject}
 								key={project_item.id}
-							></ProjectListItem>
+							></ListItem>
 						))}
 					</div>
 				</SortableContext>
 			</DndContext>
-			<ProjectFormDialog
+			<FormDialog
 				open={create_open}
 				title='New Project'
 				desc='Create a new project with a name and directory.'
@@ -105,8 +78,8 @@ const Index = (props: IProps) => {
 				onSelectDirectoryPath={onSelectDirectoryPath}
 				onSubmit={onSubmitCreateProject}
 				onClose={onCloseCreateDialog}
-			></ProjectFormDialog>
-			<ProjectFormDialog
+			></FormDialog>
+			<FormDialog
 				open={rename_open}
 				title='Rename Project'
 				desc='Update the project name.'
@@ -120,7 +93,7 @@ const Index = (props: IProps) => {
 				onSelectDirectoryPath={onSelectDirectoryPath}
 				onSubmit={onSubmitRenameProject}
 				onClose={onCloseRenameDialog}
-			></ProjectFormDialog>
+			></FormDialog>
 			<Alert
 				open={delete_open}
 				title='Delete Project'

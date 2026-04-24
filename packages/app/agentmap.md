@@ -119,25 +119,29 @@ This document provides an overview of the packages/app module structure and arch
 			"notebook": { "index.tsx": { "desc": "Notebook page view", "role": "Page" } },
 			"project": {
 				"components": {
-					"ProjectDialogShell.tsx": {
+					"DialogShell.tsx": {
 						"desc": "Dialog shell wrapper used by project create and rename forms",
 						"role": "Component"
 					},
-					"ProjectDirectoryTree.tsx": {
+					"DirectoryTree.tsx": {
 						"desc": "Project directory tree selector view atom with path data and selection callback from model",
 						"role": "Component"
 					},
-					"ProjectFormDialog.tsx": {
+					"FormDialog.tsx": {
 						"desc": "Project form dialog that renders create and rename inputs and forwards events",
 						"role": "Component"
 					},
-					"ProjectList.tsx": {
+					"List.tsx": {
 						"desc": "Project list block with drag sorting and dialog rendering; all interactions are injected as props",
 						"role": "Component"
 					},
-					"ProjectListItem.tsx": {
+					"ListItem.tsx": {
 						"desc": "Project row atom with drag handle and rename/delete triggers",
 						"role": "Component"
+					},
+					"types.ts": {
+						"desc": "Project component props type definitions using IPropsX naming",
+						"role": "Type"
 					}
 				},
 				"index.tsx": {

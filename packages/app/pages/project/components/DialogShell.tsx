@@ -9,20 +9,9 @@ import {
 	DialogTitle
 } from '@/__shadcn__/components/ui/dialog'
 
-import type { ReactNode } from 'react'
+import type { IPropsDialogShell } from './types'
 
-interface IProps {
-	open: boolean
-	title: string
-	desc: string
-	confirm_text: string
-	children: ReactNode
-	content_class?: string
-	onConfirm: () => void
-	onClose: () => void
-}
-
-const Index = (props: IProps) => {
+const Index = (props: IPropsDialogShell) => {
 	const { open, title, desc, confirm_text, children, content_class, onConfirm, onClose } = props
 
 	return (

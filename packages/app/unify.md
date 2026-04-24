@@ -55,14 +55,14 @@ This routing table is scoped to folder-level matching. The matcher must use `pat
 	"pages/project/components": {
 		"path_scope": "packages/app/pages/project/components",
 		"description": "Project page local presentational components for list rows and dialogs; state and event ownership stays in project model.",
-		"fractal_rule": "Keep one file per visual block (`ProjectList`, `ProjectListItem`, `ProjectFormDialog`, `ProjectDirectoryTree`, `ProjectDialogShell`) and move data/event orchestration into `pages/project/model.ts`.",
+		"fractal_rule": "Keep one file per visual block (`List`, `ListItem`, `FormDialog`, `DirectoryTree`, `DialogShell`) and move data/event orchestration into `pages/project/model.ts`.",
 		"import_order": "1) react/dnd/ui libs; 2) @/ aliases; 3) relative page-local modules; 4) type-only imports.",
 		"naming_rules": "Component files use PascalCase. Handler names use camelCase. Props objects use `props_*` naming.",
-		"Same Code 1": "packages/app/pages/project/components/ProjectList.tsx",
-		"Same Code 2": "packages/app/pages/project/components/ProjectFormDialog.tsx",
+		"Same Code 1": "packages/app/pages/project/components/List.tsx",
+		"Same Code 2": "packages/app/pages/project/components/FormDialog.tsx",
 		"sample_pool": [
-			"packages/app/pages/project/components/ProjectListItem.tsx",
-			"packages/app/pages/project/components/ProjectDirectoryTree.tsx"
+			"packages/app/pages/project/components/ListItem.tsx",
+			"packages/app/pages/project/components/DirectoryTree.tsx"
 		]
 	},
 	"pages/project": {

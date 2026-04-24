@@ -3,18 +3,9 @@ import { CSS } from '@dnd-kit/utilities'
 import { GripVertical, PencilLine, Trash2 } from 'lucide-react'
 
 import type { MouseEvent } from 'react'
-import type { IProjectSerializedProjectItem } from '../types'
+import type { IPropsListItem } from './types'
 
-interface IProps {
-	project_item: IProjectSerializedProjectItem
-	project_index: number
-	selected: boolean
-	onRenameProject: (project_item: IProjectSerializedProjectItem) => void
-	onRemoveProject: (project_item: IProjectSerializedProjectItem) => void
-	setSelectedProject: (id: string) => void
-}
-
-const Index = (props: IProps) => {
+const Index = (props: IPropsListItem) => {
 	const { project_item, project_index, selected, onRenameProject, onRemoveProject, setSelectedProject } = props
 	const { attributes, listeners, transform, transition, setNodeRef, isDragging } = useSortable({
 		id: project_item.id
