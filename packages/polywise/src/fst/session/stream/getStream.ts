@@ -67,7 +67,7 @@ export default async (s: Index, message: Message) => {
 
 	s.context.current_messages_count = s.model_messages.length
 
-	void s.runing(true).catch(() => {})
+	s.runing(true)
 
 	startStream(s, message)
 

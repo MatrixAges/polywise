@@ -40,7 +40,7 @@ const Index = (props: IProps) => {
 			set: 'complete',
 			colored: true
 		},
-		initialExpansion: 'open',
+		initialExpansion: 'closed',
 		onSelectionChange: selected_paths => {
 			const selected_path = selected_paths[0]
 
@@ -50,7 +50,7 @@ const Index = (props: IProps) => {
 
 			skip_next_replace_ref.current = true
 			onChange(next_path)
-			void loadDirectory(next_path, 'append')
+			loadDirectory(next_path, 'append')
 		}
 	})
 
@@ -107,14 +107,14 @@ const Index = (props: IProps) => {
 		if (!active) return
 
 		if (value) {
-			void loadDirectory(value, 'replace')
+			loadDirectory(value, 'replace')
 
 			return
 		}
 
 		rpc.file.homedir.query().then(home_dir => {
 			onChange(home_dir)
-			void loadDirectory(home_dir, 'replace')
+			loadDirectory(home_dir, 'replace')
 		})
 	}, [active])
 
@@ -127,7 +127,7 @@ const Index = (props: IProps) => {
 		}
 
 		const timer_id = setTimeout(() => {
-			void loadDirectory(value, 'replace')
+			loadDirectory(value, 'replace')
 		}, 300)
 
 		return () => clearTimeout(timer_id)
