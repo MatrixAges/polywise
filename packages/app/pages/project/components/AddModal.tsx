@@ -10,12 +10,14 @@ import {
 	DialogHeader,
 	DialogTitle
 } from '@/__shadcn__/components/ui/dialog'
+import { Input } from '@/__shadcn__/components/ui/input'
 import { FileTree } from '@/components'
 
 import { useModel } from '../context'
 
 const Index = () => {
-	const { add_modal_open, add_modal_paths, onToggleAddModal, onSelectAddModalPath } = useModel()
+	const { add_modal_open, add_modal_paths, add_modal_select_path, onToggleAddModal, onSelectAddModalPath } =
+		useModel()
 
 	return (
 		<Dialog open={add_modal_open}>
@@ -24,7 +26,13 @@ const Index = () => {
 					<DialogTitle>New Project</DialogTitle>
 					<DialogDescription>Create a new project with a directory</DialogDescription>
 				</DialogHeader>
-				<FileTree paths={add_modal_paths} onSelectPath={onSelectAddModalPath}></FileTree>
+				<div className='flex flex-col gap-3'>
+					<div className='flex gap-3'>
+						<Input value={add_modal_select_path}></Input>
+						<Button>Fetch</Button>
+					</div>
+					<FileTree paths={add_modal_paths} onSelectPath={onSelectAddModalPath}></FileTree>
+				</div>
 				<DialogFooter>
 					<DialogClose
 						render={

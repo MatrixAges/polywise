@@ -15,7 +15,8 @@ export default class Index {
 	rename_value = ''
 	projects = [] as Array<{ project: Project; sessions: Array<Session>; has_more: boolean }>
 	add_modal_open = false
-	add_modal_paths = []
+	add_modal_paths = [] as Array<string>
+	add_modal_select_path = ''
 
 	constructor(public util: Util) {
 		makeAutoObservable(this, {}, { autoBind: true })
@@ -67,11 +68,17 @@ export default class Index {
 
 	async getHomedirPaths() {
 		const path = await rpc.file.homedir.query()
-		const paths = await rpc.file.list.query({ path: path })
-		console.log(paths)
+		const paths = await rpc.file.list.query({ path: path, dir_only: true })
+
+		this.add_modal_select_path = path
+		this.add_modal_paths = paths.map(item => item.dir.replace(path + '/', ''))
 	}
 
-	async onSelectAddModalPath(v: { directory: boolean; path: string }) {}
+	async onSelectAddModalPath(v: { directory: boolean; path: string }) {
+		const paths = await rpc.file.list.query({ path: this.add_modal_select_path + '/' + v.path, dir_only: true })
+
+		console.log(v, paths)
+	}
 
 	async createProject() {}
 
