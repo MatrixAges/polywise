@@ -52,13 +52,22 @@ export default class Index {
 	}
 
 	onCancelRename() {
+		this.rename_project_id = ''
 		this.rename_session_id = ''
 		this.rename_value = ''
 	}
 
 	async createProject() {}
 
-	async renameProject(project_item: Project) {}
+	async renameProject(project_item: Project) {
+		if (!this.rename_value) return this.onCancelRename()
+
+		await rpc.project.rename.mutate({ id: project_item.id, name: this.rename_value })
+
+		this.onCancelRename()
+
+		await this.getProjectList()
+	}
 
 	async removeProject(project_item: Project) {}
 
@@ -72,6 +81,10 @@ export default class Index {
 		if (!this.rename_value) return this.onCancelRename()
 
 		await rpc.session.rename.mutate({ id: this.rename_session_id, title: this.rename_value })
+
+		this.onCancelRename()
+
+		await this.getProjectList()
 	}
 
 	async removeSession(session_id: string) {
