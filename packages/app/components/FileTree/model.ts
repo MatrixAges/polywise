@@ -7,7 +7,7 @@ import type { IProps } from '.'
 @injectable()
 export default class Index {
 	container = null as unknown as HTMLDivElement
-	tree = null as FileTree | null
+	tree = null as unknown as FileTree
 	paths = [] as Array<string>
 
 	constructor() {
@@ -53,6 +53,7 @@ export default class Index {
 		const current_path_set = new Set(this.paths)
 		const current_root_paths = this.paths.filter(item => !item.includes('/'))
 		const next_root_paths = next_paths.filter(item => !item.includes('/'))
+
 		const should_reset =
 			current_root_paths.length !== next_root_paths.length ||
 			current_root_paths.some(item => !next_root_paths.includes(item))
@@ -64,11 +65,17 @@ export default class Index {
 			return
 		}
 
+		let new_path = ''
+
 		for (const path of next_paths) {
 			if (current_path_set.has(path)) continue
 
+			if (!new_path) new_path = path
+
 			this.tree.add(path)
 		}
+
+		if (new_path) this.tree.focusNearestPath(new_path)
 
 		this.paths = next_paths
 	}

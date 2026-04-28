@@ -41,7 +41,7 @@ const Index = () => {
 					</div>
 					<FileTree
 						key={add_modal_tree_version}
-						paths={add_modal_paths}
+						paths={$copy(add_modal_paths)}
 						onSelectPath={onSelectAddModalPath}
 					></FileTree>
 				</div>
