@@ -24,7 +24,8 @@ const Index = () => {
 		onToggleAddModal,
 		onSelectAddModalPath,
 		onChangeAddModalPath,
-		onFetchAddModalPath
+		onFetchAddModalPath,
+		createProject
 	} = useModel()
 
 	return (
@@ -53,7 +54,7 @@ const Index = () => {
 							</Button>
 						}
 					/>
-					<Button>Confirm</Button>
+					<Button onClick={createProject}>Confirm</Button>
 				</DialogFooter>
 			</DialogContent>
 		</Dialog>

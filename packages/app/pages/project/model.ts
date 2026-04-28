@@ -140,7 +140,15 @@ export default class Index {
 		return `${this.add_modal_root_path}/${target_path}`
 	}
 
-	async createProject() {}
+	async createProject() {
+		if (!this.add_modal_input_path) return
+
+		this.add_modal_open = false
+
+		await rpc.project.create.mutate({ dir: this.add_modal_input_path })
+
+		await this.getProjectList()
+	}
 
 	async renameProject(project_item: Project) {
 		if (!this.rename_value) return this.onCancelRename()
