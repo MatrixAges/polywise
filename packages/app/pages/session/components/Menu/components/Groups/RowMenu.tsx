@@ -8,7 +8,7 @@ import {
 	ContextMenuSubContent,
 	ContextMenuSubTrigger
 } from '@/__shadcn__/components/ui/context-menu'
-import { useMenuContext } from '@/pages/session/context'
+import { useModel } from '@/pages/session/context'
 
 import type { IPropsGroupSessionRowMenu } from './types'
 
@@ -23,7 +23,7 @@ const Index = (props: IPropsGroupSessionRowMenu) => {
 		moveSessionToGroup,
 		moveSessionOutGroup,
 		removeSession
-	} = useMenuContext()
+	} = useModel()
 
 	const moveUp = useMemoizedFn(() => {
 		sortGroupSession({ group_index, from: session_index, to: session_index - 1 })

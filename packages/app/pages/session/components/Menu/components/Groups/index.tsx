@@ -2,7 +2,7 @@ import { DndContext, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { useMemoizedFn } from 'ahooks'
 
-import { useMenuContext } from '@/pages/session/context'
+import { useModel } from '@/pages/session/context'
 
 import Card from './Card'
 
@@ -11,7 +11,7 @@ import type { IPropsGroupCard, TDragEndEvent } from './types'
 
 const Index = (props: IPropsGroups) => {
 	const { groups, pin_map, selected_session_id, rename_group_index, rename_session_index, rename_value } = props
-	const { sortGroup } = useMenuContext()
+	const { sortGroup } = useModel()
 
 	const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }))
 

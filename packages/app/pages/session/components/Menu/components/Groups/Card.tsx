@@ -5,7 +5,7 @@ import { DotsSixVerticalIcon } from '@phosphor-icons/react'
 import { useMemoizedFn } from 'ahooks'
 
 import RenameInput from '@/pages/session/components/RenameInput'
-import { useMenuContext } from '@/pages/session/context'
+import { useModel } from '@/pages/session/context'
 
 import Row from './Row'
 
@@ -23,7 +23,7 @@ const Index = (props: IPropsGroupCard) => {
 		rename_session_index,
 		rename_value
 	} = props
-	const { sortGroupSession, setRenameValue, submitRename, cancelRename } = useMenuContext()
+	const { sortGroupSession, setRenameValue, submitRename, cancelRename } = useModel()
 
 	const { attributes, listeners, transform, transition, setNodeRef } = useSortable({ id: `group-${group_index}` })
 	const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }))

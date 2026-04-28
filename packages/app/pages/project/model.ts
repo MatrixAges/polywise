@@ -4,9 +4,12 @@ import { injectable } from 'tsyringe'
 import { Util } from '@/models/common'
 import { rpc } from '@/utils'
 
+import type { Project, Session } from '@core/db'
+
 @injectable()
 export default class Index {
 	session_id = ''
+	projects = [] as Array<{ project: Project; sessions: Array<Session>; has_more: boolean }>
 
 	constructor(public util: Util) {
 		makeAutoObservable(this, {}, { autoBind: true })
@@ -17,9 +20,9 @@ export default class Index {
 	}
 
 	async getProjectList() {
-		const data = await rpc.project.getList.query()
+		const data = (await rpc.project.getList.query()) as unknown as Index['projects']
 
-		console.log(data)
+		this.projects = data
 	}
 
 	deinit() {

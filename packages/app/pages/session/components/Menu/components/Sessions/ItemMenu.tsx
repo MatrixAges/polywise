@@ -6,14 +6,14 @@ import {
 	ContextMenuSubContent,
 	ContextMenuSubTrigger
 } from '@/__shadcn__/components/ui/context-menu'
-import { useMenuContext } from '@/pages/session/context'
+import { useModel } from '@/pages/session/context'
 
 import type { IPropsSessionItemMenu } from './types'
 
 const Index = (props: IPropsSessionItemMenu) => {
 	const { item, groups, pin, session_index } = props
 	const { createSession, createGroup, startRenameSession, togglePinSession, moveSessionToGroup, removeSession } =
-		useMenuContext()
+		useModel()
 
 	return (
 		<ContextMenuContent>

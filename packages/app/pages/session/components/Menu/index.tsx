@@ -6,7 +6,7 @@ import { ContextMenu, ContextMenuTrigger } from '@/__shadcn__/components/ui/cont
 import { Tooltip } from '@/components'
 import { useDelegate } from '@/hooks'
 
-import { useMenuContext } from '../../context'
+import { useModel } from '../../context'
 import { Groups, Sessions } from './components'
 import CardMenu from './components/Groups/CardMenu'
 import RowMenu from './components/Groups/RowMenu'
@@ -35,7 +35,7 @@ const Index = (props: IPropsMenu) => {
 		loading,
 		loading_more
 	} = props
-	const { setCurrentTab, createSession, createGroup } = useMenuContext()
+	const { setCurrentTab, createSession, createGroup } = useModel()
 	const [menu_target, setMenuTarget] = useState<IMenuTarget | null>(null)
 
 	const props_groups: IPropsGroups = {

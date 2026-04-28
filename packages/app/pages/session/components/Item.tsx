@@ -3,7 +3,7 @@ import { Pin } from 'lucide-react'
 
 import { ArrowLeft, Grip } from '@/components/animate'
 
-import { useMenuContext } from '../context'
+import { useModel } from '../context'
 import RenameInput from './RenameInput'
 
 import type { Session } from '@core/db'
@@ -25,7 +25,7 @@ interface IProps {
 const Index = (props: IProps) => {
 	const { item, pin, selected, renaming, rename_value, title, group_index, session_index, className, style } = props
 	const { is_runing, unread } = item
-	const { setSelectedSession, setRenameValue, submitRename, cancelRename } = useMenuContext()
+	const { setSelectedSession, setRenameValue, submitRename, cancelRename } = useModel()
 
 	const Status = useMemo(() => {
 		if (item.is_runing) return <Grip className='text-std-400! size-3' />

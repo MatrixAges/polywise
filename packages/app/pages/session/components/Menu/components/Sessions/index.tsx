@@ -1,4 +1,4 @@
-import { useMenuContext } from '@/pages/session/context'
+import { useModel } from '@/pages/session/context'
 
 import Item from './Item'
 
@@ -16,7 +16,7 @@ const Index = (props: IPropsSessions) => {
 		loading,
 		loading_more
 	} = props
-	const { onScroll, loadMore } = useMenuContext()
+	const { onScroll, loadMore } = useModel()
 
 	return (
 		<div

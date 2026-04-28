@@ -2,32 +2,10 @@ import { createContext, useContext } from 'react'
 
 import type Model from './model'
 
-export interface IMenuContext extends Pick<
-	Model,
-	| 'setCurrentTab'
-	| 'setSelectedSession'
-	| 'startRenameGroup'
-	| 'startRenameSession'
-	| 'setRenameValue'
-	| 'submitRename'
-	| 'cancelRename'
-	| 'createSession'
-	| 'createGroup'
-	| 'removeSession'
-	| 'removeGroup'
-	| 'togglePinSession'
-	| 'sortGroup'
-	| 'sortGroupSession'
-	| 'moveSessionToGroup'
-	| 'moveSessionOutGroup'
-	| 'onScroll'
-	| 'loadMore'
-> {}
+const context = createContext<Model | null>(null)
 
-const menu_context = createContext<IMenuContext | null>(null)
+export const Context = context.Provider
 
-export const MenuContext = menu_context.Provider
-
-export const useMenuContext = () => {
-	return useContext(menu_context)!
+export const useModel = () => {
+	return useContext(context)!
 }

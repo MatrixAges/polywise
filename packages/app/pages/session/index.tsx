@@ -1,18 +1,15 @@
-import { useEffect, useLayoutEffect, useState } from 'react'
-import { useMemoizedFn } from 'ahooks'
+import { useLayoutEffect, useState } from 'react'
 import { observer } from 'mobx-react-lite'
 import { useLocation, useNavigate } from 'react-router'
 import { container } from 'tsyringe'
 
 import { Session } from '@/components'
 import { useGlobal } from '@/context'
-import { useModelContext } from '@/hooks'
 
 import { Menu } from './components'
-import { MenuContext } from './context'
+import { Context } from './context'
 import Model from './model'
 
-import type { IMenuContext } from './context'
 import type { IPropsMenu } from './types'
 
 const Index = () => {
@@ -47,33 +44,12 @@ const Index = () => {
 		loading_more: x.loading_more
 	}
 
-	const menu_context = useModelContext<Model, IMenuContext>(x, {
-		setCurrentTab: x.setCurrentTab,
-		setSelectedSession: x.setSelectedSession,
-		startRenameGroup: x.startRenameGroup,
-		startRenameSession: x.startRenameSession,
-		setRenameValue: x.setRenameValue,
-		submitRename: x.submitRename,
-		cancelRename: x.cancelRename,
-		createSession: x.createSession,
-		createGroup: x.createGroup,
-		removeSession: x.removeSession,
-		removeGroup: x.removeGroup,
-		togglePinSession: x.togglePinSession,
-		sortGroup: x.sortGroup,
-		sortGroupSession: x.sortGroupSession,
-		moveSessionToGroup: x.moveSessionToGroup,
-		moveSessionOutGroup: x.moveSessionOutGroup,
-		onScroll: x.onScroll,
-		loadMore: x.loadMore
-	})
-
 	return (
 		<div className='flex h-full overflow-hidden'>
 			{!global.setting.sidebar_collapsed && (
-				<MenuContext value={menu_context}>
+				<Context value={x}>
 					<Menu {...props_menu}></Menu>
-				</MenuContext>
+				</Context>
 			)}
 			<div className='h-full w-[calc(100%-210px)] flex-1'>
 				<Session

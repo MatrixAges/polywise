@@ -1,11 +1,11 @@
 import { ContextMenuContent, ContextMenuItem, ContextMenuSeparator } from '@/__shadcn__/components/ui/context-menu'
-import { useMenuContext } from '@/pages/session/context'
+import { useModel } from '@/pages/session/context'
 
 import type { IPropsGroupCardMenu } from './types'
 
 const Index = (props: IPropsGroupCardMenu) => {
 	const { group_index, groups_count, group_name } = props
-	const { createSession, createGroup, startRenameGroup, sortGroup, removeGroup } = useMenuContext()
+	const { createSession, createGroup, startRenameGroup, sortGroup, removeGroup } = useModel()
 
 	return (
 		<ContextMenuContent>

@@ -2,7 +2,13 @@ import { Plus } from 'lucide-react'
 
 import { Tooltip } from '@/components'
 
-const Index = () => {
+import MenuItem from './MenuItem'
+
+import type { IPropsMenu } from '../types'
+
+const Index = (props: IPropsMenu) => {
+	const { projects } = props
+
 	return (
 		<div
 			className='
@@ -36,7 +42,11 @@ const Index = () => {
 				</div>
 			</div>
 			<div className='flex min-h-0 flex-1 overflow-y-scroll'>
-				<div className='flex flex-col'></div>
+				<div className='flex w-full flex-col px-1.5'>
+					{projects.map((item, index) => (
+						<MenuItem item={item} index={index} key={item.project.id}></MenuItem>
+					))}
+				</div>
 			</div>
 		</div>
 	)
