@@ -1,6 +1,7 @@
 export { default as normalizePinList } from './normalizePinList'
 export { default as normalizeGroupList } from './normalizeGroupList'
 export { default as readPinList } from './readPinList'
+export { default as removeSessionById } from './removeSessionById'
 export { default as writePinList } from './writePinList'
 export { default as readGroupList } from './readGroupList'
 export { default as writeGroupList } from './writeGroupList'
