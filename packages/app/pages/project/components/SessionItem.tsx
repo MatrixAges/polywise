@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { Pin } from 'lucide-react'
+import { observer } from 'mobx-react-lite'
 
 import { ArrowLeft, Grip } from '@/components/animate'
 import RenameInput from '@/pages/session/components/RenameInput'
@@ -9,26 +9,23 @@ import { useModel } from '../context'
 import type { IPropsSessionItem } from '../types'
 
 const Index = (props: IPropsSessionItem) => {
-	const {
-		item,
-		project_id,
-		project_index,
-		session_index,
-		selected,
-		renaming = false,
-		rename_value = '',
-		pin = false
-	} = props
+	const { item, project_id, project_index, session_index, selected, renaming } = props
 	const { title, unread } = item
-	const { setSelectedProject, setSelectedSession } = useModel()
+	const {
+		rename_value,
+		setSelectedProject,
+		setSelectedSession,
+		onChangeRenameValue,
+		onCancelRename,
+		renameSession
+	} = useModel()
 
 	const status = useMemo(() => {
 		if (item.is_runing) return <Grip className='text-std-400! size-3' />
 		if (unread) return <ArrowLeft className='text-std-300! size-3' />
-		if (pin) return <Pin className='text-std-300! size-3' />
 
 		return null
-	}, [item.is_runing, pin, unread])
+	}, [item.is_runing, unread])
 
 	const onClick = () => {
 		if (renaming) return
@@ -50,9 +47,9 @@ const Index = (props: IPropsSessionItem) => {
 					<RenameInput
 						active={renaming}
 						value={rename_value}
-						setRenameValue={() => {}}
-						submitRename={() => {}}
-						cancelRename={() => {}}
+						setRenameValue={onChangeRenameValue}
+						submitRename={renameSession}
+						cancelRename={onCancelRename}
 					></RenameInput>
 				) : (
 					<span className='truncate'>{title}</span>
@@ -63,4 +60,4 @@ const Index = (props: IPropsSessionItem) => {
 	)
 }
 
-export default $app.memo(Index)
+export default new $app.Handle(Index).by(observer).by($app.memo).get()

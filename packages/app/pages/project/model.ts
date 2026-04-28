@@ -10,6 +10,9 @@ import type { Project, Session } from '@core/db'
 export default class Index {
 	selected_project_id = ''
 	selected_session_id = ''
+	rename_project_id = ''
+	rename_session_id = ''
+	rename_value = ''
 	projects = [] as Array<{ project: Project; sessions: Array<Session>; has_more: boolean }>
 
 	constructor(public util: Util) {
@@ -34,6 +37,20 @@ export default class Index {
 		this.selected_session_id = session_id
 	}
 
+	onRenameSession(session_id: string, title: string) {
+		this.rename_session_id = session_id
+		this.rename_value = title
+	}
+
+	onChangeRenameValue(v: string) {
+		this.rename_value = v
+	}
+
+	onCancelRename() {
+		this.rename_session_id = ''
+		this.rename_value = ''
+	}
+
 	async createProject() {}
 
 	async renameProject(project_item: Project) {}
@@ -46,9 +63,13 @@ export default class Index {
 		await this.getProjectList()
 	}
 
-	async renameSession(args: { project_id: string; session_id: string; title: string }) {}
+	async renameSession() {
+		if (!this.rename_value) return this.onCancelRename()
 
-	async removeSession(args: { project_id: string; session_id: string }) {}
+		await rpc.session.rename.mutate({ id: this.rename_session_id, title: this.rename_value })
+	}
+
+	async removeSession(session_id: string) {}
 
 	deinit() {
 		this.util.deinit()

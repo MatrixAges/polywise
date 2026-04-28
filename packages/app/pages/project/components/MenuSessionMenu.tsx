@@ -10,22 +10,15 @@ interface IProps {
 
 const Index = (props: IProps) => {
 	const { project_id, session_item } = props
-	const { renameSession, removeSession } = useModel()
+	const { onRenameSession, removeSession } = useModel()
 
 	return (
 		<ContextMenuContent>
-			<ContextMenuItem
-				onClick={() =>
-					renameSession({ project_id, session_id: session_item.id, title: session_item.title })
-				}
-			>
+			<ContextMenuItem onClick={() => onRenameSession(session_item.id, session_item.title)}>
 				Rename
 			</ContextMenuItem>
 			<ContextMenuSeparator />
-			<ContextMenuItem
-				variant='destructive'
-				onClick={() => removeSession({ project_id, session_id: session_item.id })}
-			>
+			<ContextMenuItem variant='destructive' onClick={() => removeSession(session_item.id)}>
 				Delete
 			</ContextMenuItem>
 		</ContextMenuContent>

@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useMemoizedFn } from 'ahooks'
 import { Plus } from 'lucide-react'
+import { observer } from 'mobx-react-lite'
 
 import { ContextMenu, ContextMenuTrigger } from '@/__shadcn__/components/ui/context-menu'
 import { Tooltip } from '@/components'
@@ -11,7 +12,6 @@ import MenuProjectMenu from './MenuProjectMenu'
 import MenuSessionMenu from './MenuSessionMenu'
 
 import type { MouseEvent } from 'react'
-import type { IPropsMenu } from '../types'
 
 interface IMenuTarget {
 	project_index: number
@@ -19,9 +19,8 @@ interface IMenuTarget {
 	id: string
 }
 
-const Index = (props: IPropsMenu) => {
-	const { projects } = props
-	const { createProject } = useModel()
+const Index = () => {
+	const { projects, createProject } = useModel()
 	const [menu_target, setMenuTarget] = useState<IMenuTarget | null>(null)
 
 	const findMenuTarget = useMemoizedFn((target: EventTarget | null) => {
@@ -156,4 +155,4 @@ const Index = (props: IPropsMenu) => {
 	)
 }
 
-export default $app.memo(Index)
+export default new $app.Handle(Index).by(observer).by($app.memo).get()

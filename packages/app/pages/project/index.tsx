@@ -6,8 +6,6 @@ import { Menu } from './components'
 import { Context } from './context'
 import Model from './model'
 
-import type { IPropsMenu } from './types'
-
 const Index = () => {
 	const [x] = useState(() => container.resolve(Model))
 
@@ -17,14 +15,10 @@ const Index = () => {
 		return () => x.deinit()
 	}, [])
 
-	const props_menu: IPropsMenu = {
-		projects: $copy(x.projects)
-	}
-
 	return (
 		<Context value={x}>
 			<div className='flex h-full overflow-hidden'>
-				<Menu {...props_menu}></Menu>
+				<Menu></Menu>
 			</div>
 		</Context>
 	)

@@ -1,5 +1,6 @@
 import { useMemoizedFn } from 'ahooks'
 import { FolderIcon, MessageSquarePlus } from 'lucide-react'
+import { observer } from 'mobx-react-lite'
 
 import { useModel } from '../context'
 import SessionItem from './SessionItem'
@@ -10,7 +11,7 @@ import type { IPropsMenuItem } from '../types'
 const Index = (props: IPropsMenuItem) => {
 	const { item, index } = props
 	const { project, sessions } = item
-	const { createSession, selected_session_id, setSelectedProject } = useModel()
+	const { selected_session_id, rename_session_id, createSession, setSelectedProject } = useModel()
 
 	const onClickProject = useMemoizedFn(() => {
 		setSelectedProject(project.id)
@@ -50,6 +51,7 @@ const Index = (props: IPropsMenuItem) => {
 						project_id={project.id}
 						project_index={index}
 						session_index={idx}
+						renaming={rename_session_id === it.id}
 						selected={selected_session_id === it.id}
 						key={it.id}
 					></SessionItem>
@@ -59,4 +61,4 @@ const Index = (props: IPropsMenuItem) => {
 	)
 }
 
-export default $app.memo(Index)
+export default new $app.Handle(Index).by(observer).by($app.memo).get()
