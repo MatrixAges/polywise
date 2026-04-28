@@ -48,6 +48,7 @@ const Index = (props: IPropsMenuItem) => {
 				className='
 					justify-between
 					py-1
+					pr-1
 					click_button select-none
 				'
 				data-project-index={index}
