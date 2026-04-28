@@ -128,11 +128,11 @@ This document provides an overview of the packages/app module structure and arch
 						"role": "Component"
 					},
 					"Menu.tsx": {
-						"desc": "Project sidebar menu with a single outer context menu root that resolves right-click targets from project and session rows",
+						"desc": "Project sidebar menu with a single outer context menu root that resolves right-click targets from project and session rows and now wraps the project list in a dnd-kit sortable context for persistent drag sorting",
 						"role": "Component"
 					},
 					"MenuItem.tsx": {
-						"desc": "Project sidebar project/session list atom that renders right-click target metadata, uses SessionItem for nested session rows, and forwards click interactions to the page model",
+						"desc": "Project sidebar project/session list atom that renders right-click target metadata, exposes a draggable project header via dnd-kit sortable bindings, uses SessionItem for nested session rows, and forwards click interactions to the page model",
 						"role": "Component"
 					},
 					"SessionItem.tsx": {
@@ -177,7 +177,7 @@ This document provides an overview of the packages/app module structure and arch
 					"role": "Page"
 				},
 				"model.ts": {
-					"desc": "Project page state model loads project/session lists, subscribes to rpc.session.watchSessionStatus to sync nested session title/running/unread state in realtime, and powers the add-project directory picker by tracking a root home directory, append-only loaded directory map, deduplicated relative tree paths for lazy tree expansion, and a tree version token that forces full reset when fetch replaces the directory root",
+					"desc": "Project page state model loads project/session lists, persists project drag sorting through rpc.project.sort, subscribes to rpc.session.watchSessionStatus to sync nested session title/running/unread state in realtime, and powers the add-project directory picker by tracking a root home directory, append-only loaded directory map, deduplicated relative tree paths for lazy tree expansion, and a tree version token that forces full reset when fetch replaces the directory root",
 					"role": "Model"
 				},
 				"types.ts": {

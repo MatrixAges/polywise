@@ -3,20 +3,19 @@ import { eq } from 'drizzle-orm'
 import { number, object } from 'zod'
 
 import { getProjects, setProject } from '../../db/services'
+import arrayMove from '../../utils/arrayMove'
 import { p } from '../../utils/trpc'
 
 const input_type = object({ from: number().int(), to: number().int() })
 
 export default p.input(input_type).mutation(async ({ input }) => {
-	const projects = await getProjects()
-	const next_projects = [...projects]
-	const [target_project] = next_projects.splice(input.from, 1)
+	const projects = await getProjects({ orderBy: 'asc' })
 
-	if (!target_project) {
+	if (!projects[input.from] || input.to > projects.length - 1) {
 		return projects
 	}
 
-	next_projects.splice(input.to, 0, target_project)
+	const next_projects = arrayMove({ list: projects, from: input.from, to: input.to })
 
 	await Promise.all(next_projects.map((item, index) => setProject(eq(project.id, item.id), { order: index })))
 

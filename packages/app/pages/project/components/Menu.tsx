@@ -1,4 +1,6 @@
 import { useMemo, useState } from 'react'
+import { DndContext, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { useMemoizedFn } from 'ahooks'
 import { Plus } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
@@ -11,6 +13,7 @@ import MenuItem from './MenuItem'
 import MenuProjectMenu from './MenuProjectMenu'
 import MenuSessionMenu from './MenuSessionMenu'
 
+import type { DragEndEvent } from '@dnd-kit/core'
 import type { MouseEvent } from 'react'
 
 interface IMenuTarget {
@@ -20,8 +23,10 @@ interface IMenuTarget {
 }
 
 const Index = () => {
-	const { projects, selected_project_id, rename_project_id, expand_project_ids, onToggleAddModal } = useModel()
+	const { projects, selected_project_id, rename_project_id, expand_project_ids, onToggleAddModal, sortProject } =
+		useModel()
 	const [menu_target, setMenuTarget] = useState<IMenuTarget | null>(null)
+	const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }))
 
 	const findMenuTarget = useMemoizedFn((target: EventTarget | null) => {
 		let current_node = target instanceof HTMLElement ? target : null
@@ -63,6 +68,21 @@ const Index = () => {
 		}
 
 		setMenuTarget(next_target)
+	})
+
+	const onDragProjectEnd = useMemoizedFn((args: DragEndEvent) => {
+		const { active, over } = args
+
+		if (!over?.id || active.id === over.id) {
+			return
+		}
+
+		const from = projects.findIndex(item => item.project.id === active.id)
+		const to = projects.findIndex(item => item.project.id === over.id)
+
+		if (from < 0 || to < 0) return
+
+		sortProject(from, to)
 	})
 
 	const menu_content = useMemo(() => {
@@ -144,16 +164,23 @@ const Index = () => {
 								pb-3
 							'
 						>
-							{projects.map((item, index) => (
-								<MenuItem
-									item={item}
-									index={index}
-									renaming={rename_project_id === item.project.id}
-									selected={selected_project_id === item.project.id}
-									expand={expand_project_ids.includes(item.project.id)}
-									key={item.project.id}
-								></MenuItem>
-							))}
+							<DndContext sensors={sensors} onDragEnd={onDragProjectEnd}>
+								<SortableContext
+									items={projects.map(item => item.project.id)}
+									strategy={verticalListSortingStrategy}
+								>
+									{projects.map((item, index) => (
+										<MenuItem
+											item={item}
+											index={index}
+											renaming={rename_project_id === item.project.id}
+											selected={selected_project_id === item.project.id}
+											expand={expand_project_ids.includes(item.project.id)}
+											key={item.project.id}
+										></MenuItem>
+									))}
+								</SortableContext>
+							</DndContext>
 						</div>
 					</div>
 				</ContextMenuTrigger>

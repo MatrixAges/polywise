@@ -1,3 +1,6 @@
+import { useSortable } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
+import { DotsSixVerticalIcon } from '@phosphor-icons/react'
 import { useMemoizedFn } from 'ahooks'
 import { ChevronDown, ChevronRight, MessageCirclePlus } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
@@ -13,6 +16,7 @@ import type { IPropsMenuItem } from '../types'
 const Index = (props: IPropsMenuItem) => {
 	const { item, index, renaming, selected, expand } = props
 	const { project, sessions } = item
+	const { attributes, listeners, transform, transition, isDragging, setNodeRef } = useSortable({ id: project.id })
 	const {
 		selected_session_id,
 		rename_session_id,
@@ -41,6 +45,7 @@ const Index = (props: IPropsMenuItem) => {
 	})
 
 	const LeftIcon = expand ? ChevronDown : ChevronRight
+	const props_drag = renaming ? {} : { ...attributes, ...listeners }
 
 	return (
 		<div
@@ -48,6 +53,8 @@ const Index = (props: IPropsMenuItem) => {
 				flex flex-col
 				w-full
 			'
+			ref={setNodeRef}
+			style={{ transform: CSS.Translate.toString(transform), transition }}
 		>
 			<div
 				className={$cx(
@@ -56,18 +63,26 @@ const Index = (props: IPropsMenuItem) => {
 					py-1
 					pl-[5px] pr-1
 					bg-transparent
+					group
 					click_button select-none
 				`,
-					selected && 'active'
+					selected && 'active',
+					isDragging && 'dragging z-10 backdrop-blur-lg'
 				)}
 				data-project-index={index}
 				data-session-index={-1}
 				data-id={project.id}
 				onClick={onClickProject}
 			>
-				<div className='flex items-center gap-1'>
+				<div
+					className='
+						flex
+						items-center
+						gap-1
+					'
+				>
 					<LeftIcon size={12}></LeftIcon>
-					<div className='min-w-0 flex-1'>
+					<div className='min-w-0 flex-1 truncate'>
 						{renaming ? (
 							<RenameInput
 								active={renaming}
@@ -77,13 +92,26 @@ const Index = (props: IPropsMenuItem) => {
 								cancelRename={onCancelRename}
 							></RenameInput>
 						) : (
-							<span className='truncate capitalize'>{project.name}</span>
+							<span className='capitalize'>{project.name}</span>
 						)}
 					</div>
 				</div>
-				<button type='button' className='icon_button small' onClick={onCreateSession}>
-					<MessageCirclePlus></MessageCirclePlus>
-				</button>
+				<div className='flex'>
+					<button
+						className='
+							opacity-0
+							group-hover:opacity-100
+							icon_button small cursor-grab
+						'
+						type='button'
+						{...props_drag}
+					>
+						<DotsSixVerticalIcon weight='bold'></DotsSixVerticalIcon>
+					</button>
+					<button className='icon_button small' type='button' onClick={onCreateSession}>
+						<MessageCirclePlus></MessageCirclePlus>
+					</button>
+				</div>
 			</div>
 			{expand && (
 				<div className='flex flex-col'>

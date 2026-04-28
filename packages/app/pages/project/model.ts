@@ -1,4 +1,5 @@
-import { makeAutoObservable, observable } from 'mobx'
+import { arrayMove } from '@dnd-kit/sortable'
+import { makeAutoObservable } from 'mobx'
 import { setStorageWhenChange } from 'stk/mobx'
 import { injectable } from 'tsyringe'
 
@@ -43,12 +44,6 @@ export default class Index {
 		await this.getProjectList()
 
 		this.watchSessionStatus()
-	}
-
-	async getProjectList() {
-		const data = (await rpc.project.getList.query()) as Index['projects']
-
-		this.projects = data
 	}
 
 	setSelectedProject(project_id: string, click_by_session?: boolean) {
@@ -119,6 +114,33 @@ export default class Index {
 		if (!target_path) return this.add_modal_root_path
 
 		return `${this.add_modal_root_path}/${target_path}`
+	}
+
+	async getProjectList() {
+		const data = (await rpc.project.getList.query()) as Index['projects']
+
+		this.projects = data
+	}
+
+	async sortProject(from: number, to: number) {
+		if (from === to) return
+
+		console.log(from, to)
+		const from_index = this.expand_project_ids.findIndex(item => this.projects[from].project.id)
+
+		this.expand_project_ids.splice(from_index, 1)
+
+		const to_index = this.expand_project_ids.findIndex(item => this.projects[to].project.id)
+
+		this.expand_project_ids.splice(to_index, 1)
+
+		if (to < 0 || to > this.projects.length - 1) return
+
+		this.projects = arrayMove(this.projects, from, to)
+
+		await rpc.project.sort.mutate({ from, to })
+
+		await this.getProjectList()
 	}
 
 	async getHomedirPaths() {
