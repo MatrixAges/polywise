@@ -73,7 +73,6 @@ export default class Index {
 	onChangeAddModalPath(e: ChangeEvent<HTMLInputElement>) {
 		const v = e.target.value
 
-		this.add_modal_root_path = v
 		this.add_modal_input_path = v
 	}
 
@@ -97,8 +96,9 @@ export default class Index {
 	}
 
 	async onFetchAddModalPath() {
+		this.add_modal_paths = []
+		this.add_modal_loaded_path_map = {}
 		this.add_modal_tree_version += 1
-
 		this.add_modal_root_path = this.add_modal_input_path
 
 		await this.loadAddModalDirectory({ target_path: this.add_modal_input_path, mode: 'replace' })

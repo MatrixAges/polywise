@@ -51,7 +51,7 @@ const Index = (props: IProps) => {
 				h-[400px]
 				py-4
 				rounded-xl
-				bg-secondary/60!
+				border border-border-gray!
 			`
 			}
 			style={style}
