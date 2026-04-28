@@ -103,9 +103,7 @@ export default class Index {
 	}
 
 	get skills_dir() {
-		if (this.project?.dir) {
-			return path.resolve(this.project.dir, 'skills')
-		}
+		if (this.project?.dir) return ''
 
 		return path.resolve(app.app_path, 'skills')
 	}

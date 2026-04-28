@@ -67,10 +67,9 @@ export default async (s: Index, message: Message) => {
 
 	s.context.current_messages_count = s.model_messages.length
 
-	s.runing(true)
-
 	startStream(s, message)
 
+	s.runing(true)
 	s.sync()
 
 	const messages = await convertToModelMessages(s.model_messages)
@@ -80,6 +79,7 @@ export default async (s: Index, message: Message) => {
 	const bash_tool = await createBashTool(s)
 	const mcp_tools = await loadMcpTools(s)
 	const system_tools_prompt = await getSystemTools()
+
 	const custom_tools_prompt = getCustomToolsPrompt(s.custom_tools_map)
 	const skill_prompt = getSkillPrompt(s.skill_map)
 	const title_focus =
