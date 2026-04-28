@@ -123,6 +123,10 @@ This document provides an overview of the packages/app module structure and arch
 					"role": "Context"
 				},
 				"components": {
+					"AddModal.tsx": {
+						"desc": "Project creation dialog that binds the directory input, fetch action, and file tree key reset so re-fetching clears all existing tree expansion state before rendering the latest directory list",
+						"role": "Component"
+					},
 					"Menu.tsx": {
 						"desc": "Project sidebar menu with a single outer context menu root that resolves right-click targets from project and session rows",
 						"role": "Component"
@@ -173,7 +177,7 @@ This document provides an overview of the packages/app module structure and arch
 					"role": "Page"
 				},
 				"model.ts": {
-					"desc": "Project page state model loads project/session lists and now powers the add-project directory picker by tracking a root home directory, append-only loaded directory map, and deduplicated relative tree paths for lazy tree expansion",
+					"desc": "Project page state model loads project/session lists and powers the add-project directory picker by tracking a root home directory, append-only loaded directory map, deduplicated relative tree paths for lazy tree expansion, and a tree version token that forces full reset when fetch replaces the directory root",
 					"role": "Model"
 				},
 				"types.ts": {

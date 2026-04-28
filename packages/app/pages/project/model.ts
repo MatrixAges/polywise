@@ -5,6 +5,7 @@ import { Util } from '@/models/common'
 import { rpc } from '@/utils'
 
 import type { Project, Session } from '@core/db'
+import type { ChangeEvent } from 'react'
 
 @injectable()
 export default class Index {
@@ -17,6 +18,7 @@ export default class Index {
 	add_modal_open = false
 	add_modal_paths = [] as Array<string>
 	add_modal_select_path = ''
+	add_modal_tree_version = 0
 	add_modal_loaded_path_map = {} as Record<string, boolean>
 
 	constructor(public util: Util) {
@@ -67,10 +69,15 @@ export default class Index {
 		if (this.add_modal_open) this.getHomedirPaths()
 	}
 
+	onChangeAddModalPath(e: ChangeEvent<HTMLInputElement>) {
+		this.add_modal_select_path = e.target.value
+	}
+
 	async getHomedirPaths() {
 		const home_dir = await rpc.file.homedir.query()
 
 		this.add_modal_select_path = home_dir
+		this.add_modal_tree_version += 1
 
 		await this.loadAddModalDirectory({ target_path: home_dir, mode: 'replace' })
 	}
@@ -84,6 +91,8 @@ export default class Index {
 	}
 
 	async onFetchAddModalPath() {
+		this.add_modal_tree_version += 1
+
 		await this.loadAddModalDirectory({ target_path: this.add_modal_select_path, mode: 'replace' })
 	}
 
@@ -96,8 +105,8 @@ export default class Index {
 		if (mode === 'append' && this.add_modal_loaded_path_map[next_path]) return
 
 		const list = await rpc.file.list.query({ path: next_path, dir_only: true })
+
 		const next_paths = list.map(item => this.getAddModalRelativePath(item.dir))
-		console.log(next_path, next_paths)
 		const current_paths = mode === 'replace' ? [] : this.add_modal_paths
 		const current_loaded_path_map = mode === 'replace' ? {} : this.add_modal_loaded_path_map
 
