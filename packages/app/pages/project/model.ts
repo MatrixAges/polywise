@@ -99,7 +99,8 @@ export default class Index {
 	async onFetchAddModalPath() {
 		this.add_modal_tree_version += 1
 
-		console.log(this.add_modal_input_path)
+		this.add_modal_root_path = this.add_modal_input_path
+
 		await this.loadAddModalDirectory({ target_path: this.add_modal_input_path, mode: 'replace' })
 	}
 
