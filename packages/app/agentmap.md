@@ -177,7 +177,7 @@ This document provides an overview of the packages/app module structure and arch
 					"role": "Page"
 				},
 				"model.ts": {
-					"desc": "Project page state model loads project/session lists and powers the add-project directory picker by tracking a root home directory, append-only loaded directory map, deduplicated relative tree paths for lazy tree expansion, and a tree version token that forces full reset when fetch replaces the directory root",
+					"desc": "Project page state model loads project/session lists, subscribes to rpc.session.watchSessionStatus to sync nested session title/running/unread state in realtime, and powers the add-project directory picker by tracking a root home directory, append-only loaded directory map, deduplicated relative tree paths for lazy tree expansion, and a tree version token that forces full reset when fetch replaces the directory root",
 					"role": "Model"
 				},
 				"types.ts": {

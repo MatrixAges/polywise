@@ -28,7 +28,7 @@ export default class Index {
 		makeAutoObservable(this, { add_modal_loaded_path_map: false }, { autoBind: true })
 	}
 
-	init() {
+	async init() {
 		const deinit = setStorageWhenChange(
 			['selected_project_id', 'selected_session_id', 'expand_project_ids'],
 			this
@@ -36,7 +36,9 @@ export default class Index {
 
 		this.util.acts = [deinit]
 
-		this.getProjectList()
+		await this.getProjectList()
+
+		this.watchSessionStatus()
 	}
 
 	async getProjectList() {
@@ -225,6 +227,38 @@ export default class Index {
 		await rpc.session.remove.mutate({ id: session_id })
 
 		await this.getProjectList()
+	}
+
+	watchSessionStatus() {
+		const deinit = rpc.session.watchSessionStatus.subscribe(undefined, {
+			onData: res => {
+				const entries = Object.entries(res)
+
+				if (!entries.length) {
+					return
+				}
+
+				this.projects = this.projects.map(project_item => ({
+					...project_item,
+					sessions: project_item.sessions.map(session_item => {
+						const status = res[session_item.id]
+
+						if (status) {
+							return {
+								...session_item,
+								title: status.title,
+								is_runing: status.running,
+								unread: status.unread
+							}
+						}
+
+						return session_item
+					})
+				}))
+			}
+		})
+
+		this.util.acts.push(deinit.unsubscribe)
 	}
 
 	deinit() {
