@@ -22,7 +22,7 @@ const Index = (props: IPropsSessions) => {
 		<div
 			className='
 				overflow-y-auto
-				h-full
+				w-full h-full
 				px-1.5
 			'
 			onScroll={onScroll}

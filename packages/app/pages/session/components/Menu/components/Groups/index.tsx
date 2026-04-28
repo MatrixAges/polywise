@@ -46,7 +46,7 @@ const Index = (props: IPropsGroups) => {
 			className='
 				overflow-y-scroll
 				flex flex-col
-				h-full
+				w-full h-full
 				px-1.5
 			'
 		>
