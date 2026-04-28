@@ -1,5 +1,5 @@
 import { useMemoizedFn } from 'ahooks'
-import { FolderIcon, MessageSquarePlus } from 'lucide-react'
+import { ChevronDown, ChevronRight, MessageCirclePlus } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import RenameInput from '@/pages/session/components/RenameInput'
@@ -43,12 +43,17 @@ const Index = (props: IPropsMenuItem) => {
 	})
 
 	return (
-		<div className='flex flex-col'>
+		<div
+			className='
+				flex flex-col
+				w-full
+			'
+		>
 			<div
 				className='
 					justify-between
 					py-1
-					pr-1
+					pl-1.5 pr-1
 					click_button select-none
 				'
 				data-project-index={index}
@@ -57,7 +62,7 @@ const Index = (props: IPropsMenuItem) => {
 				onClick={onClickProject}
 			>
 				<div className='flex items-center gap-1.5'>
-					<FolderIcon size={12}></FolderIcon>
+					<ChevronRight size={12}></ChevronRight>
 					<div className='min-w-0 flex-1'>
 						{renaming ? (
 							<RenameInput
@@ -73,7 +78,7 @@ const Index = (props: IPropsMenuItem) => {
 					</div>
 				</div>
 				<button type='button' className='icon_button small' onClick={onCreateSession}>
-					<MessageSquarePlus></MessageSquarePlus>
+					<MessageCirclePlus></MessageCirclePlus>
 				</button>
 			</div>
 			<div className='flex flex-col'>

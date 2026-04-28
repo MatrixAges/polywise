@@ -139,6 +139,7 @@ const Index = () => {
 							className='
 								flex flex-col
 								w-full
+								gap-3
 								px-1.5 pt-1.5
 								pb-3
 							'
