@@ -169,7 +169,11 @@ const Index = (props: IPropsInput) => {
 							<button className='icon_button' onClick={toggleFull}>
 								<Maximize></Maximize>
 							</button>
-							<ModelSelect ghost onChange={onChangeDefaultMode}></ModelSelect>
+							<ModelSelect
+								ghost
+								value={s.config?.default_model}
+								onChange={onChangeDefaultMode}
+							></ModelSelect>
 						</div>
 						<button className='icon_button primary h-6 w-6' onClick={streaming ? stop : onSend}>
 							<Icon className='fill-std-white h-[10px] w-[10px]' weight='fill'></Icon>

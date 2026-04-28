@@ -52,7 +52,7 @@ This document provides an overview of the packages/app module structure and arch
 			"Tabs.tsx": { "desc": "Tab navigation component", "role": "Component" },
 			"index.ts": { "desc": "Components module exports", "role": "Index" },
 			"Session": {
-				"desc": "Session chat container with context drawer, message timeline, and input actions including clear/archive operations",
+				"desc": "Session chat container with context drawer, message timeline, and input actions including clear/archive operations; input model selector is now controlled by setting.config.default_model so the selected provider/model stays visible after config updates",
 				"role": "Folder"
 			}
 		},
