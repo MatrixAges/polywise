@@ -37,6 +37,11 @@ export default class Index {
 		this.selected_session_id = session_id
 	}
 
+	onRenameProject(project_id: string, title: string) {
+		this.rename_project_id = project_id
+		this.rename_value = title
+	}
+
 	onRenameSession(session_id: string, title: string) {
 		this.rename_session_id = session_id
 		this.rename_value = title
