@@ -17,9 +17,10 @@ export default class Index {
 	add_modal_open = false
 	add_modal_paths = [] as Array<string>
 	add_modal_select_path = ''
+	add_modal_loaded_path_map = {} as Record<string, boolean>
 
 	constructor(public util: Util) {
-		makeAutoObservable(this, {}, { autoBind: true })
+		makeAutoObservable(this, { add_modal_loaded_path_map: false }, { autoBind: true })
 	}
 
 	init() {
@@ -67,17 +68,52 @@ export default class Index {
 	}
 
 	async getHomedirPaths() {
-		const path = await rpc.file.homedir.query()
-		const paths = await rpc.file.list.query({ path: path, dir_only: true })
+		const home_dir = await rpc.file.homedir.query()
 
-		this.add_modal_select_path = path
-		this.add_modal_paths = paths.map(item => item.dir.replace(path + '/', ''))
+		this.add_modal_select_path = home_dir
+
+		await this.loadAddModalDirectory({ target_path: home_dir, mode: 'replace' })
 	}
 
 	async onSelectAddModalPath(v: { directory: boolean; path: string }) {
-		const paths = await rpc.file.list.query({ path: this.add_modal_select_path + '/' + v.path, dir_only: true })
+		if (!v.directory) return
 
-		console.log(v, paths)
+		const target_path = this.getAddModalAbsolutePath(v.path)
+
+		await this.loadAddModalDirectory({ target_path, mode: 'append' })
+	}
+
+	async loadAddModalDirectory(args: { target_path: string; mode: 'replace' | 'append' }) {
+		const { target_path, mode } = args
+		const next_path = target_path.trim()
+
+		if (!next_path || !this.add_modal_select_path) return
+
+		if (mode === 'append' && this.add_modal_loaded_path_map[next_path]) return
+
+		const list = await rpc.file.list.query({ path: next_path, dir_only: true })
+		const next_paths = list.map(item => this.getAddModalRelativePath(item.dir))
+		const current_paths = mode === 'replace' ? [] : this.add_modal_paths
+		const current_loaded_path_map = mode === 'replace' ? {} : this.add_modal_loaded_path_map
+
+		this.add_modal_paths = Array.from(new Set([...current_paths, ...next_paths]))
+		this.add_modal_loaded_path_map = { ...current_loaded_path_map, [next_path]: true }
+	}
+
+	getAddModalRelativePath(target_path: string) {
+		if (!this.add_modal_select_path) return target_path
+
+		const base_prefix = `${this.add_modal_select_path}/`
+
+		if (target_path === this.add_modal_select_path) return ''
+
+		return target_path.startsWith(base_prefix) ? target_path.replace(base_prefix, '') : target_path
+	}
+
+	getAddModalAbsolutePath(target_path: string) {
+		if (!target_path) return this.add_modal_select_path
+
+		return `${this.add_modal_select_path}/${target_path}`
 	}
 
 	async createProject() {}

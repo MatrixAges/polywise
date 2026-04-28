@@ -20,9 +20,15 @@ const Index = (props: IProps) => {
 	const global = useGlobal()
 
 	useLayoutEffect(() => {
-		if (!paths.length) return
+		if (!paths.length || !x.container) return
 
 		x.init({ paths, onSelectPath })
+	}, [x.container])
+
+	useLayoutEffect(() => {
+		if (!paths.length) return
+
+		x.syncPaths(paths)
 	}, [paths])
 
 	const setContainer = useMemoizedFn(v => (x.container = v))

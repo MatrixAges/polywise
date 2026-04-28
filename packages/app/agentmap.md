@@ -34,11 +34,11 @@ This document provides an overview of the packages/app module structure and arch
 			},
 			"FileTree": {
 				"index.tsx": {
-					"desc": "Shared file tree wrapper based on @pierre/trees with configurable selection mode and path sync strategy, reused by project create-directory picker and project files pane",
+					"desc": "Shared file tree wrapper based on @pierre/trees that initializes one persistent tree instance per mount, applies theme host styles, and syncs later path changes through model methods instead of remounting the tree",
 					"role": "Component"
 				},
 				"model.ts": {
-					"desc": "Shared file tree data helper model for path normalization, selection filtering, and expanded-directory preservation",
+					"desc": "Shared file tree model that keeps the imperative @pierre/trees instance alive, incrementally appends unseen paths with tree.add, and falls back to resetPaths when the root set changes",
 					"role": "Model"
 				}
 			},
@@ -173,7 +173,7 @@ This document provides an overview of the packages/app module structure and arch
 					"role": "Page"
 				},
 				"model.ts": {
-					"desc": "Project page state model currently loading the project list via rpc.project.getList and supporting minimal project-menu session creation via rpc.session.create followed by list refresh; selection, rename, remove, and other project workspace behaviors remain stubbed in the lightweight page version",
+					"desc": "Project page state model loads project/session lists and now powers the add-project directory picker by tracking a root home directory, append-only loaded directory map, and deduplicated relative tree paths for lazy tree expansion",
 					"role": "Model"
 				},
 				"types.ts": {

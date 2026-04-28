@@ -7,7 +7,8 @@ import type { IProps } from '.'
 @injectable()
 export default class Index {
 	container = null as unknown as HTMLDivElement
-	tree = null as unknown as FileTree
+	tree = null as FileTree | null
+	paths = [] as Array<string>
 
 	constructor() {
 		makeAutoObservable(this, { container: false, tree: false }, { autoBind: true })
@@ -15,6 +16,8 @@ export default class Index {
 
 	init(args: Pick<IProps, 'paths' | 'onSelectPath'>) {
 		const { paths, onSelectPath } = args
+
+		if (this.tree) return this.syncPaths(paths)
 
 		const tree = new FileTree({
 			preparedInput: prepareFileTreeInput(paths, { flattenEmptyDirectories: true }),
@@ -39,6 +42,34 @@ export default class Index {
 			}
 		})
 
+		this.tree = tree
+		this.paths = [...paths]
+
 		tree.render({ fileTreeContainer: this.container })
+	}
+
+	syncPaths(paths: Array<string>) {
+		const next_paths = Array.from(new Set(paths))
+		const current_path_set = new Set(this.paths)
+		const current_root_paths = this.paths.filter(item => !item.includes('/'))
+		const next_root_paths = next_paths.filter(item => !item.includes('/'))
+		const should_reset =
+			current_root_paths.length !== next_root_paths.length ||
+			current_root_paths.some(item => !next_root_paths.includes(item))
+
+		if (should_reset) {
+			this.tree.resetPaths(next_paths)
+			this.paths = next_paths
+
+			return
+		}
+
+		for (const path of next_paths) {
+			if (current_path_set.has(path)) continue
+
+			this.tree.add(path)
+		}
+
+		this.paths = next_paths
 	}
 }
