@@ -31,8 +31,8 @@ This routing table is scoped to folder-level matching. The matcher must use `pat
 	"pages/project/components": {
 		"path_scope": "packages/app/pages/project/components",
 		"sample_pool": [
-			"packages/app/pages/project/components/ListItem.tsx",
-			"packages/app/pages/project/components/DirectoryTree.tsx"
+			"packages/app/pages/project/components/Menu.tsx",
+			"packages/app/pages/project/components/MenuItem.tsx"
 		]
 	},
 	"pages/project": {

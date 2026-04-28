@@ -123,6 +123,22 @@ This document provides an overview of the packages/app module structure and arch
 					"role": "Context"
 				},
 				"components": {
+					"Menu.tsx": {
+						"desc": "Project sidebar menu with a single outer context menu root that resolves right-click targets from project and session rows",
+						"role": "Component"
+					},
+					"MenuItem.tsx": {
+						"desc": "Project sidebar project/session list atom that renders right-click target metadata and forwards click interactions to the page model",
+						"role": "Component"
+					},
+					"MenuProjectMenu.tsx": {
+						"desc": "Project row context menu content for new session, rename, and delete interactions",
+						"role": "Component"
+					},
+					"MenuSessionMenu.tsx": {
+						"desc": "Project session row context menu content for placeholder rename and delete interactions",
+						"role": "Component"
+					},
 					"DialogShell.tsx": {
 						"desc": "Dialog shell wrapper used by project create and rename forms",
 						"role": "Component"

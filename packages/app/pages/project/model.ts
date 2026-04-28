@@ -25,6 +25,20 @@ export default class Index {
 		this.projects = data
 	}
 
+	setSelectedProject(project_id: string) {}
+
+	setSelectedSession(session_id: string) {}
+
+	renameProject(project_item: Project) {}
+
+	removeProject(project_item: Project) {}
+
+	async createSession(args: { project_id: string; title?: string }) {}
+
+	async renameSession(args: { project_id: string; session_id: string; title: string }) {}
+
+	async removeSession(args: { project_id: string; session_id: string }) {}
+
 	deinit() {
 		this.util.deinit()
 	}
