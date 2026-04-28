@@ -145,13 +145,13 @@ const Index = (props: IProps) => {
 								></Message>
 							))}
 							{show_loading && <LoadingDots></LoadingDots>}
+							{x.permission && (
+								<Permission
+									permission={x.permission}
+									approvePermission={x.approvePermission}
+								></Permission>
+							)}
 						</div>
-						{x.permission && (
-							<Permission
-								permission={x.permission}
-								approvePermission={x.approvePermission}
-							></Permission>
-						)}
 						<div className='mt-12 h-8' ref={setBottomSignalRef}></div>
 					</Fragment>
 				)}

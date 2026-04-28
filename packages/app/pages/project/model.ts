@@ -125,7 +125,6 @@ export default class Index {
 	async sortProject(from: number, to: number) {
 		if (from === to) return
 
-		console.log(from, to)
 		const from_index = this.expand_project_ids.findIndex(item => this.projects[from].project.id)
 
 		this.expand_project_ids.splice(from_index, 1)
