@@ -16,7 +16,8 @@ export interface IFileListItem {
 
 const input_type = object({
 	path: string(),
-	show_hidden: boolean().optional()
+	show_hidden: boolean().optional(),
+	dir_only: boolean().optional()
 })
 
 const toListItem = (args: { base_path: string; entry: Dirent }) => {
@@ -36,6 +37,7 @@ const toListItem = (args: { base_path: string; entry: Dirent }) => {
 export default p.input(input_type).query(async ({ input }) => {
 	const target_path = path.resolve(input.path)
 	const show_hidden = input.show_hidden ?? false
+	const dir_only = input.dir_only ?? false
 
 	if (!(await fs.pathExists(target_path))) {
 		return [] as Array<IFileListItem>
@@ -61,5 +63,6 @@ export default p.input(input_type).query(async ({ input }) => {
 
 	return entries
 		.filter(entry => show_hidden || !entry.name.startsWith('.'))
+		.filter(entry => !dir_only || entry.isDirectory())
 		.map(entry => toListItem({ base_path: target_path, entry }))
 })

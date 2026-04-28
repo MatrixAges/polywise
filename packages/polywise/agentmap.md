@@ -103,7 +103,7 @@ This document provides an overview of the packages/polywise module structure and
 				"heartbeat.ts": { "desc": "Heartbeat subscription endpoint", "role": "RPC" },
 				"test.ts": { "desc": "Test RPC procedure", "role": "RPC" },
 				"file": {
-					"desc": "File JSON write/watch RPC endpoints backed by app.app_path plus filesystem homedir and current-level directory listing endpoints for UI directory pickers",
+					"desc": "File JSON write/watch RPC endpoints backed by app.app_path plus filesystem homedir and current-level directory listing endpoints for UI directory pickers; file/list also supports optional hidden-entry filtering and directory-only results for directory selection flows",
 					"role": "Folder"
 				},
 				"provider": {
