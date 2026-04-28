@@ -83,6 +83,10 @@ export default class Index {
 		await this.loadAddModalDirectory({ target_path, mode: 'append' })
 	}
 
+	async onFetchAddModalPath() {
+		await this.loadAddModalDirectory({ target_path: this.add_modal_select_path, mode: 'replace' })
+	}
+
 	async loadAddModalDirectory(args: { target_path: string; mode: 'replace' | 'append' }) {
 		const { target_path, mode } = args
 		const next_path = target_path.trim()
@@ -93,6 +97,7 @@ export default class Index {
 
 		const list = await rpc.file.list.query({ path: next_path, dir_only: true })
 		const next_paths = list.map(item => this.getAddModalRelativePath(item.dir))
+		console.log(next_path, next_paths)
 		const current_paths = mode === 'replace' ? [] : this.add_modal_paths
 		const current_loaded_path_map = mode === 'replace' ? {} : this.add_modal_loaded_path_map
 
