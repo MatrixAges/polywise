@@ -20,12 +20,12 @@ export const nav_items = [
 	{ key: 'session', Icon: MessageSquareText },
 	{ key: 'todo', Icon: CircleCheckBig },
 	{ key: 'project', Icon: Folders },
-	{ key: 'workflow', Icon: Route },
-	{ key: 'linkcase', Icon: Album },
-	{ key: 'library', Icon: Library },
-	{ key: 'database', Icon: Database },
-	is_electron && { key: 'browser', Icon: AppWindowMac },
-	{ key: 'agent', Icon: Bot }
+	// { key: 'workflow', Icon: Route },
+	{ key: 'linkcase', Icon: Album }
+	// { key: 'library', Icon: Library },
+	// { key: 'database', Icon: Database },
+	// is_electron && { key: 'browser', Icon: AppWindowMac },
+	// { key: 'agent', Icon: Bot }
 ].filter(Boolean) as Array<{ key: string; Icon: LucideIcon; title?: string }>
 
 export const locales = ['en', 'zh-cn'] as const

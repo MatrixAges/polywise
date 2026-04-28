@@ -20,7 +20,7 @@ interface IMenuTarget {
 }
 
 const Index = () => {
-	const { projects, createProject } = useModel()
+	const { projects, onToggleAddModal } = useModel()
 	const [menu_target, setMenuTarget] = useState<IMenuTarget | null>(null)
 
 	const findMenuTarget = useMemoizedFn((target: EventTarget | null) => {
@@ -123,7 +123,7 @@ const Index = () => {
 				</span>
 				<div className='flex gap-1'>
 					<Tooltip title='New Project'>
-						<div className='icon_button small' onClick={createProject}>
+						<div className='icon_button small' onClick={onToggleAddModal}>
 							<Plus></Plus>
 						</div>
 					</Tooltip>
