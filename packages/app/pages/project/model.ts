@@ -125,7 +125,9 @@ export default class Index {
 	getAddModalRelativePath(target_path: string) {
 		if (!this.add_modal_root_path) return target_path
 
-		const base_prefix = `${this.add_modal_root_path}/`
+		const base_prefix = this.add_modal_root_path.endsWith('/')
+			? this.add_modal_root_path
+			: `${this.add_modal_root_path}/`
 
 		if (target_path === this.add_modal_root_path) return ''
 

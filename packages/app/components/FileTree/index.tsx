@@ -25,6 +25,8 @@ const Index = (props: IProps) => {
 		x.init({ paths, onSelectPath })
 	}, [x.container])
 
+	console.log(paths)
+
 	useLayoutEffect(() => {
 		if (!paths.length) return
 
