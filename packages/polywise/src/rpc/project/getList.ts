@@ -11,10 +11,7 @@ export default p.query(async () => {
 				limit: 10
 			})
 
-			return {
-				project,
-				sessions
-			}
+			return { project, sessions }
 		})
 	)
 })
