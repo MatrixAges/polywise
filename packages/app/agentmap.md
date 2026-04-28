@@ -128,7 +128,11 @@ This document provides an overview of the packages/app module structure and arch
 						"role": "Component"
 					},
 					"MenuItem.tsx": {
-						"desc": "Project sidebar project/session list atom that renders right-click target metadata and forwards click interactions to the page model",
+						"desc": "Project sidebar project/session list atom that renders right-click target metadata, uses SessionItem for nested session rows, and forwards click interactions to the page model",
+						"role": "Component"
+					},
+					"SessionItem.tsx": {
+						"desc": "Project session row atom aligned to the shared session BaseItem structure with selected, rename shell, and running or unread status rendering",
 						"role": "Component"
 					},
 					"MenuProjectMenu.tsx": {
@@ -158,6 +162,10 @@ This document provides an overview of the packages/app module structure and arch
 					"ListItem.tsx": {
 						"desc": "Folder-style project row atom with select/expand behavior, create-session trigger, drag handle, rename/delete dropdown, and nested session list rendering",
 						"role": "Component"
+					},
+					"types.ts": {
+						"desc": "Local project component prop types for shared session row rendering",
+						"role": "Type"
 					}
 				},
 				"index.tsx": {
