@@ -17,8 +17,8 @@ import type { LucideIcon } from 'lucide-react'
 
 export const nav_items = [
 	{ key: '', Icon: House, title: 'home' },
-	{ key: 'session', Icon: MessageSquareText },
 	{ key: 'todo', Icon: CircleCheckBig },
+	{ key: 'session', Icon: MessageSquareText },
 	{ key: 'project', Icon: Folders },
 	// { key: 'workflow', Icon: Route },
 	{ key: 'linkcase', Icon: Album }
