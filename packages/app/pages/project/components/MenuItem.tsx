@@ -4,6 +4,7 @@ import type { IPropsMenuItem } from '../types'
 
 const Index = (props: IPropsMenuItem) => {
 	const { item, index } = props
+	const { project, sessions, has_more } = item
 
 	return (
 		<div
@@ -30,6 +31,13 @@ const Index = (props: IPropsMenuItem) => {
 				<button type='button' className='icon_button small'>
 					<Ellipsis></Ellipsis>
 				</button>
+			</div>
+			<div className='flex flex-col'>
+				{sessions.map((it, index) => (
+					<div className='flex' data-project-index={index} data-session-index={index} key={it.id}>
+						{it.title}
+					</div>
+				))}
 			</div>
 		</div>
 	)
