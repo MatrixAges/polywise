@@ -1,11 +1,11 @@
-import { project_session, project_todo, session, todo } from '@core/db/schema'
+import { project_session, session } from '@core/db/schema'
 import { env } from '@core/env'
 import { desc, eq } from 'drizzle-orm'
 
 import { getProjects } from '../../db/services'
 import { p } from '../../utils/trpc'
 
-import type { IProjectListData, IProjectSerializedProjectItem } from './types'
+import type { IProjectSerializedProjectItem } from './types'
 
 const serializeSessionItem = (args: { session_item: typeof session.$inferSelect; project_id: string }) => {
 	const { session_item, project_id } = args
@@ -14,19 +14,6 @@ const serializeSessionItem = (args: { session_item: typeof session.$inferSelect;
 		...session_item,
 		created_at: session_item.created_at ? session_item.created_at.toISOString() : null,
 		updated_at: session_item.updated_at ? session_item.updated_at.toISOString() : null,
-		project_id
-	}
-}
-
-const serializeTodoItem = (args: { todo_item: typeof todo.$inferSelect; project_id: string }) => {
-	const { todo_item, project_id } = args
-
-	return {
-		...todo_item,
-		created_at: todo_item.created_at ? todo_item.created_at.toISOString() : null,
-		updated_at: todo_item.updated_at ? todo_item.updated_at.toISOString() : null,
-		completed_at: todo_item.completed_at ? todo_item.completed_at.toISOString() : null,
-		due_at: todo_item.due_at ? todo_item.due_at.toISOString() : null,
 		project_id
 	}
 }
@@ -58,33 +45,8 @@ export default p.query(async () => {
 		})
 	)
 
-	const todos = await Promise.all(
-		projects.map(async project_item => {
-			const todo_rows = await env.db
-				.select({ todo })
-				.from(project_todo)
-				.innerJoin(todo, eq(project_todo.todo_id, todo.id))
-				.where(eq(project_todo.project_id, project_item.id))
-				.orderBy(desc(project_todo.created_at))
-
-			return [
-				project_item.id,
-				todo_rows.map(item => serializeTodoItem({ todo_item: item.todo, project_id: project_item.id }))
-			] as const
-		})
-	)
-
 	return {
 		projects: serialized_projects,
-		sessions: Object.fromEntries(sessions),
-		todos: Object.fromEntries(todos),
-		file_trees: {},
-		file_contents: {},
-		selected_project_id: projects[0]?.id || '',
-		selected_session_id: sessions[0]?.[1][0]?.id || '',
-		selected_file_path: '',
-		has_more_map: Object.fromEntries(
-			sessions.map(([project_id, session_list]) => [project_id, session_list.length >= 10])
-		)
-	} satisfies IProjectListData
+		sessions: Object.fromEntries(sessions)
+	}
 })

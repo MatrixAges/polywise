@@ -29,19 +29,6 @@ export interface IProjectSerializedTodoItem extends Omit<
 	due_at: string | null
 	project_id: string
 }
-
-export interface IProjectListData {
-	projects: Array<IProjectSerializedProjectItem>
-	sessions: Record<string, Array<IProjectSerializedSessionItem>>
-	todos: Record<string, Array<IProjectSerializedTodoItem>>
-	file_trees: Record<string, Array<IProjectTreeItem>>
-	file_contents: Record<string, string>
-	selected_project_id: string
-	selected_session_id: string
-	selected_file_path: string
-	has_more_map: Record<string, boolean>
-}
-
 export interface IProjectMoreSessionsData {
 	sessions: Array<IProjectSerializedSessionItem>
 	has_more: boolean

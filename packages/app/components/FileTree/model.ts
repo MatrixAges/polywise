@@ -1,78 +1,44 @@
-import type { FileTreeDirectoryHandle, FileTreeItemHandle } from '@pierre/trees'
+import { FileTree, prepareFileTreeInput } from '@pierre/trees'
+import { makeAutoObservable } from 'mobx'
+import { injectable } from 'tsyringe'
 
-type ISyncMode = 'direct' | 'preserve_expansion'
-type ISelectionMode = 'all' | 'directory'
+import type { IProps } from '.'
 
-interface IArgsFilterPaths {
-	paths: Array<string>
-	only_dir: boolean
-}
-
-interface IArgsGetExpandedDirectoryPaths {
-	current_paths: Array<string>
-	getItem: (path: string) => FileTreeItemHandle | null
-}
-
-interface IArgsBuildResetState {
-	next_paths: Array<string>
-	current_paths: Array<string>
-	getItem: (path: string) => FileTreeItemHandle | null
-	sync_mode: ISyncMode
-}
-
-interface IArgsGetSelectedPath {
-	selected_paths: ReadonlyArray<string>
-	selection_mode: ISelectionMode
-}
-
+@injectable()
 export default class Index {
-	filterPaths(args: IArgsFilterPaths) {
-		const { paths, only_dir } = args
+	container = null as unknown as HTMLDivElement
+	tree = null as unknown as FileTree
 
-		if (!only_dir) return paths
-
-		return paths.filter(path => path.endsWith('/'))
+	constructor() {
+		makeAutoObservable(this, { container: false, tree: false }, { autoBind: true })
 	}
 
-	normalizePaths(paths: Array<string>) {
-		return Array.from(new Set(paths))
-	}
+	init(args: Pick<IProps, 'paths' | 'onSelectPath'>) {
+		const { paths, onSelectPath } = args
 
-	getExpandedDirectoryPaths(args: IArgsGetExpandedDirectoryPaths) {
-		const { current_paths, getItem } = args
+		const tree = new FileTree({
+			preparedInput: prepareFileTreeInput(paths, { flattenEmptyDirectories: true }),
+			search: true,
+			icons: 'standard',
+			flattenEmptyDirectories: true,
+			initialExpansion: 'closed',
+			unsafeCSS: `
+			button[data-type='item'] > div[data-item-section='content'] {
+			      height:100%;
+			      display:flex;
+			}
+			`,
+			onSelectionChange(v: readonly string[]) {
+				const path = v[0]
 
-		return current_paths.filter(path => {
-			const tree_item = getItem(path)
+				if (!path) return
 
-			if (!tree_item || !tree_item.isDirectory()) return false
+				const item = tree.getItem(path)!
 
-			return (tree_item as FileTreeDirectoryHandle).isExpanded()
+				onSelectPath({ directory: item.isDirectory(), path })
+			}
 		})
-	}
 
-	buildResetState(args: IArgsBuildResetState) {
-		const { next_paths, current_paths, getItem, sync_mode } = args
-		const normalized_next_paths = this.normalizePaths(next_paths)
-
-		if (sync_mode !== 'preserve_expansion') {
-			return { paths: normalized_next_paths, options: {} }
-		}
-
-		const initialExpandedPaths = this.getExpandedDirectoryPaths({ current_paths, getItem })
-
-		return {
-			paths: normalized_next_paths,
-			options: { initialExpandedPaths }
-		}
-	}
-
-	getSelectedPath(args: IArgsGetSelectedPath) {
-		const { selected_paths, selection_mode } = args
-		const selected_path = selected_paths[0]
-
-		if (!selected_path) return ''
-		if (selection_mode === 'directory' && !selected_path.endsWith('/')) return ''
-
-		return selected_path
+		tree.render({ fileTreeContainer: this.container })
 	}
 }

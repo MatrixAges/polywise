@@ -165,7 +165,7 @@ const Index = (props: IPropsMenu) => {
 		<div
 			className='
 				overflow-hidden
-				flex flex-none flex-col
+				flex flex-col
 				w-[210px] h-full
 				border-border-light border-r
 			'
@@ -186,25 +186,14 @@ const Index = (props: IPropsMenu) => {
 					ref={ref_tab}
 				>
 					<span
-						className={$cx(
-							`
-							px-1 py-0.5
-							border-b border-transparent
-							clickable
-						`,
-							current_tab === 'group' && 'text-std-800'
-						)}
+						className={$cx('clickable px-1 py-0.5', current_tab === 'group' && 'text-std-800')}
 						data-key='group'
 					>
 						Group
 					</span>
 					<span
 						className={$cx(
-							`
-							px-1 py-0.5
-							border-b border-transparent
-							clickable
-						`,
+							'clickable px-1 py-0.5',
 							current_tab === 'session' && 'text-std-800'
 						)}
 						data-key='session'
