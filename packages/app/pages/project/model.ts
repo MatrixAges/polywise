@@ -148,6 +148,12 @@ export default class Index {
 		await rpc.project.create.mutate({ dir: this.add_modal_input_path })
 
 		await this.getProjectList()
+
+		this.add_modal_paths = [] as Array<string>
+		this.add_modal_root_path = ''
+		this.add_modal_input_path = ''
+		this.add_modal_tree_version = 0
+		this.add_modal_loaded_path_map = {}
 	}
 
 	async renameProject(project_item: Project) {
