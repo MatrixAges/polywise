@@ -21,7 +21,7 @@ interface IMenuTarget {
 
 const Index = (props: IPropsMenu) => {
 	const { projects } = props
-	const { createSession } = useModel()
+	const { createProject } = useModel()
 	const [menu_target, setMenuTarget] = useState<IMenuTarget | null>(null)
 
 	const findMenuTarget = useMemoizedFn((target: EventTarget | null) => {
@@ -123,10 +123,7 @@ const Index = (props: IPropsMenu) => {
 				</span>
 				<div className='flex gap-1'>
 					<Tooltip title='New Session'>
-						<div
-							className='icon_button small'
-							onClick={() => createSession({ project_id: '' })}
-						>
+						<div className='icon_button small' onClick={createProject}>
 							<Plus></Plus>
 						</div>
 					</Tooltip>

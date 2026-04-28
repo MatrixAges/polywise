@@ -29,11 +29,13 @@ export default class Index {
 
 	setSelectedSession(session_id: string) {}
 
-	renameProject(project_item: Project) {}
+	async createProject() {}
 
-	removeProject(project_item: Project) {}
+	async renameProject(project_item: Project) {}
 
-	async createSession(args: { project_id: string; title?: string }) {}
+	async removeProject(project_item: Project) {}
+
+	async createSession(project_id: string) {}
 
 	async renameSession(args: { project_id: string; session_id: string; title: string }) {}
 
