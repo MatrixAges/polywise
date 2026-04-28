@@ -54,7 +54,7 @@ const Index = (props: IPropsMenuItem) => {
 					`
 					justify-between
 					py-1
-					pl-1.5 pr-1
+					pl-[5px] pr-1
 					bg-transparent
 					click_button select-none
 				`,
@@ -65,7 +65,7 @@ const Index = (props: IPropsMenuItem) => {
 				data-id={project.id}
 				onClick={onClickProject}
 			>
-				<div className='flex items-center gap-1.5'>
+				<div className='flex items-center gap-1'>
 					<LeftIcon size={12}></LeftIcon>
 					<div className='min-w-0 flex-1'>
 						{renaming ? (

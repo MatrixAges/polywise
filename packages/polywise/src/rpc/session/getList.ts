@@ -1,6 +1,7 @@
 import { blocked_session_id } from '@core/consts'
 import { session } from '@core/db/schema'
 import { getSessions } from '@core/db/services'
+import { getProjectSessionIdList } from '@core/db/services/externals'
 import { desc, inArray, notInArray } from 'drizzle-orm'
 
 import { p } from '../../utils/trpc'
@@ -13,6 +14,10 @@ const session_page_size = 10
 
 const getGroupSessionIdList = (group_list: Array<{ items: Array<string> }>) => {
 	return group_list.flatMap(item => item.items).filter(session_id => session_id !== blocked_session_id)
+}
+
+const filterProjectSessionIdList = (session_id_list: Array<string>, project_session_id_set: Set<string>) => {
+	return session_id_list.filter(session_id => !project_session_id_set.has(session_id))
 }
 
 const getPinMap = (pin_list: Array<SessionPinItem>) => {
@@ -61,11 +66,17 @@ const getGroupSessionMap = async (group_session_id_list: Array<string>) => {
 	return new Map(group_session_list.map(item => [item.id, item]))
 }
 
-const getPinSessionList = async (pin_list: Array<SessionPinItem>, group_session_id_list: Array<string>) => {
+const getPinSessionList = async (args: {
+	pin_list: Array<SessionPinItem>
+	group_session_id_list: Array<string>
+	project_session_id_set: Set<string>
+}) => {
+	const { pin_list, group_session_id_list, project_session_id_set } = args
 	const group_session_id_set = new Set(group_session_id_list)
 	const pin_session_id_list = pin_list
 		.map(item => item.id)
 		.filter(session_id => !group_session_id_set.has(session_id))
+		.filter(session_id => !project_session_id_set.has(session_id))
 		.filter(session_id => session_id !== blocked_session_id)
 
 	if (!pin_session_id_list.length) {
@@ -78,9 +89,15 @@ const getPinSessionList = async (pin_list: Array<SessionPinItem>, group_session_
 const getUnpinSessionList = async (args: {
 	group_session_id_list: Array<string>
 	pin_session_id_list: Array<string>
+	project_session_id_list: Array<string>
 }) => {
-	const { group_session_id_list, pin_session_id_list } = args
-	const exclude_session_id_list = [...group_session_id_list, ...pin_session_id_list, blocked_session_id]
+	const { group_session_id_list, pin_session_id_list, project_session_id_list } = args
+	const exclude_session_id_list = [
+		...group_session_id_list,
+		...pin_session_id_list,
+		...project_session_id_list,
+		blocked_session_id
+	]
 
 	return getSessions({
 		where: notInArray(session.id, exclude_session_id_list),
@@ -92,16 +109,26 @@ const getUnpinSessionList = async (args: {
 export default p.query(async () => {
 	const group_list = await readGroupList()
 	const pin_list = (await readPinList()).filter(item => item.id !== blocked_session_id)
+	const project_session_id_list = await getProjectSessionIdList()
+	const project_session_id_set = new Set(project_session_id_list)
 
 	const pin_map = getPinMap(pin_list)
 
-	const group_session_id_list = getGroupSessionIdList(group_list)
+	const group_session_id_list = filterProjectSessionIdList(
+		getGroupSessionIdList(group_list),
+		project_session_id_set
+	)
 
 	const group_session_map = await getGroupSessionMap(group_session_id_list)
-	const pin_session_list = await getPinSessionList(pin_list, group_session_id_list)
+	const pin_session_list = await getPinSessionList({
+		pin_list,
+		group_session_id_list,
+		project_session_id_set
+	})
 	const unpin_session_list = await getUnpinSessionList({
 		group_session_id_list,
-		pin_session_id_list: pin_session_list.map(item => item.id)
+		pin_session_id_list: pin_session_list.map(item => item.id),
+		project_session_id_list
 	})
 	const pin_session_map = new Map(pin_session_list.map(item => [item.id, item]))
 	const sorted_pin_session_list = pin_list
@@ -115,7 +142,7 @@ export default p.query(async () => {
 		created_at: item.created_at,
 		updated_at: item.updated_at,
 		items: sortByPinAt({
-			list: item.items
+			list: filterProjectSessionIdList(item.items, project_session_id_set)
 				.map(session_id => group_session_map.get(session_id))
 				.filter((target_session): target_session is Session => Boolean(target_session)),
 			pin_map

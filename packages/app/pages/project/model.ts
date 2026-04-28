@@ -30,7 +30,11 @@ export default class Index {
 
 	async init() {
 		const deinit = setStorageWhenChange(
-			['selected_project_id', 'selected_session_id', 'expand_project_ids'],
+			[
+				{ project_selected_project_id: 'selected_project_id' },
+				{ project_selected_session_id: 'selected_session_id' },
+				'expand_project_ids'
+			],
 			this
 		)
 

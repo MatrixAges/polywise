@@ -20,7 +20,7 @@ const Index = (props: IPropsSessionItem) => {
 		renameSession
 	} = useModel()
 
-	const status = useMemo(() => {
+	const Status = useMemo(() => {
 		if (item.is_runing) return <Grip className='text-std-400! size-3' />
 		if (unread) return <ArrowLeft className='text-std-300! size-3' />
 
@@ -46,7 +46,7 @@ const Index = (props: IPropsSessionItem) => {
 				className='
 					flex flex-1
 					min-w-0
-					gap-1
+					gap-2
 					truncate
 				'
 			>
@@ -60,10 +60,10 @@ const Index = (props: IPropsSessionItem) => {
 						cancelRename={onCancelRename}
 					></RenameInput>
 				) : (
-					<span className='truncate'>{title}</span>
+					title
 				)}
 			</div>
-			{status}
+			{Status}
 		</div>
 	)
 }

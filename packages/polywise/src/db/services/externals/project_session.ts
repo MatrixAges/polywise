@@ -43,6 +43,12 @@ export const getProjectSessions = async (args: ArgsGetProjectSessions) => {
 	return query
 }
 
+export const getProjectSessionIdList = async () => {
+	const list = await env.db.select({ session_id: project_session.session_id }).from(project_session)
+
+	return list.map(item => item.session_id)
+}
+
 export const addProjectSession = async (project_id: string, session_id: string) => {
 	return env.db
 		.insert(project_session)
