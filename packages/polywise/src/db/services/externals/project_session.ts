@@ -1,6 +1,6 @@
-import { project, project_session } from '@core/db/schema'
+import { project, project_session, session } from '@core/db/schema'
 import { env } from '@core/env'
-import { eq, SQL } from 'drizzle-orm'
+import { desc, eq, SQL } from 'drizzle-orm'
 
 interface ArgsGetSessionProject {
 	where?: SQL
@@ -16,6 +16,30 @@ export const getSessionProject = async (args: ArgsGetSessionProject = {}) => {
 		.$dynamic()
 
 	if (where) query = query.where(where)
+
+	return query
+}
+
+interface ArgsGetProjectSessions {
+	project_id: string
+	limit?: number
+	offset?: number
+}
+
+export const getProjectSessions = async (args: ArgsGetProjectSessions) => {
+	const { project_id, limit, offset } = args
+
+	let query = env.db
+		.select({ session })
+		.from(project_session)
+		.innerJoin(session, eq(project_session.session_id, session.id))
+		.where(eq(project_session.project_id, project_id))
+		.orderBy(desc(project_session.created_at))
+		.$dynamic()
+
+	if (limit) query = query.limit(limit)
+
+	if (offset) query = query.offset(offset)
 
 	return query
 }
