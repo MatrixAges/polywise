@@ -111,6 +111,7 @@ const Index = (props: IPropsMenu) => {
 					flex
 					items-center justify-between
 					px-3 py-1.5
+					border-b border-border-light
 				'
 			>
 				<span
@@ -135,7 +136,14 @@ const Index = (props: IPropsMenu) => {
 						className='flex min-h-0 flex-1 overflow-y-scroll'
 						onContextMenuCapture={onMenuContextCapture}
 					>
-						<div className='flex w-full flex-col px-1.5'>
+						<div
+							className='
+								flex flex-col
+								w-full
+								px-1.5 pt-1.5
+								pb-3
+							'
+						>
 							{projects.map((item, index) => (
 								<MenuItem item={item} index={index} key={item.project.id}></MenuItem>
 							))}

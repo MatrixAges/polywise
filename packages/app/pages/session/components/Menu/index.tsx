@@ -175,12 +175,14 @@ const Index = (props: IPropsMenu) => {
 					flex
 					items-center justify-between
 					px-3 py-1.5
+					border-b border-border-light
 				'
 			>
 				<div
 					className='
 						flex
 						items-center
+						gap-0.5
 						text-xsm text-std-400 font-medium
 					'
 					ref={ref_tab}

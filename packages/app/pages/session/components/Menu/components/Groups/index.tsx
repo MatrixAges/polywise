@@ -47,7 +47,7 @@ const Index = (props: IPropsGroups) => {
 				overflow-y-scroll
 				flex flex-col
 				w-full h-full
-				px-1.5
+				px-1.5 pt-1.5
 			'
 		>
 			<div
