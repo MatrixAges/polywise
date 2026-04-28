@@ -14,10 +14,6 @@ export default p.input(input_type).mutation(async ({ input }) => {
 	const title = input.title || `Session ${dayjs().format('YYYY-MM-DD HH:mm:ss')}`
 	const session = await addSession({ title })
 
-	if (!session) {
-		return null
-	}
-
 	if (input.project_id) {
 		await addProjectSession(input.project_id, session.id)
 	}

@@ -99,6 +99,24 @@ export default class Index {
 		this.add_modal_input_path = v
 	}
 
+	getAddModalRelativePath(target_path: string) {
+		if (!this.add_modal_root_path) return target_path
+
+		const base_prefix = this.add_modal_root_path.endsWith('/')
+			? this.add_modal_root_path
+			: `${this.add_modal_root_path}/`
+
+		if (target_path === this.add_modal_root_path) return ''
+
+		return target_path.startsWith(base_prefix) ? target_path.replace(base_prefix, '') : target_path
+	}
+
+	getAddModalAbsolutePath(target_path: string) {
+		if (!target_path) return this.add_modal_root_path
+
+		return `${this.add_modal_root_path}/${target_path}`
+	}
+
 	async getHomedirPaths() {
 		const home_dir = await rpc.file.homedir.query()
 
@@ -143,24 +161,6 @@ export default class Index {
 
 		this.add_modal_paths = Array.from(new Set([...current_paths, ...next_paths]))
 		this.add_modal_loaded_path_map = { ...current_loaded_path_map, [next_path]: true }
-	}
-
-	getAddModalRelativePath(target_path: string) {
-		if (!this.add_modal_root_path) return target_path
-
-		const base_prefix = this.add_modal_root_path.endsWith('/')
-			? this.add_modal_root_path
-			: `${this.add_modal_root_path}/`
-
-		if (target_path === this.add_modal_root_path) return ''
-
-		return target_path.startsWith(base_prefix) ? target_path.replace(base_prefix, '') : target_path
-	}
-
-	getAddModalAbsolutePath(target_path: string) {
-		if (!target_path) return this.add_modal_root_path
-
-		return `${this.add_modal_root_path}/${target_path}`
 	}
 
 	async createProject() {
@@ -208,9 +208,11 @@ export default class Index {
 	}
 
 	async createSession(project_id: string) {
-		await rpc.session.create.mutate({ project_id })
+		const res = await rpc.session.create.mutate({ project_id })
 
 		await this.getProjectList()
+
+		this.selected_session_id = res!.id
 	}
 
 	async renameSession() {
