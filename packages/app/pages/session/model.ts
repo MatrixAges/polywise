@@ -1,6 +1,6 @@
 import { arrayMove } from '@dnd-kit/sortable'
 import { makeAutoObservable } from 'mobx'
-import { setStoreWhenChange } from 'stk/mobx'
+import { setStorageWhenChange } from 'stk/mobx'
 import { injectable } from 'tsyringe'
 
 import { Util } from '@/models/common'
@@ -39,7 +39,7 @@ export default class Index {
 	}
 
 	async init() {
-		const deinit = await setStoreWhenChange(['current_tab', 'selected_session_id'], this)
+		const deinit = setStorageWhenChange(['current_tab', 'selected_session_id'], this)
 
 		this.util.acts = [deinit]
 

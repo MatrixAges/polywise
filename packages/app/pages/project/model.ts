@@ -1,8 +1,9 @@
-import { makeAutoObservable } from 'mobx'
+import { makeAutoObservable, observable } from 'mobx'
+import { setStorageWhenChange } from 'stk/mobx'
 import { injectable } from 'tsyringe'
 
 import { Util } from '@/models/common'
-import { rpc } from '@/utils'
+import { alert, rpc } from '@/utils'
 
 import type { Project, Session } from '@core/db'
 import type { ChangeEvent } from 'react'
@@ -21,12 +22,20 @@ export default class Index {
 	add_modal_input_path = ''
 	add_modal_tree_version = 0
 	add_modal_loaded_path_map = {} as Record<string, boolean>
+	expand_project_ids = [] as Array<string>
 
 	constructor(public util: Util) {
 		makeAutoObservable(this, { add_modal_loaded_path_map: false }, { autoBind: true })
 	}
 
 	init() {
+		const deinit = setStorageWhenChange(
+			['selected_project_id', 'selected_session_id', 'expand_project_ids'],
+			this
+		)
+
+		this.util.acts = [deinit]
+
 		this.getProjectList()
 	}
 
@@ -36,8 +45,20 @@ export default class Index {
 		this.projects = data
 	}
 
-	setSelectedProject(project_id: string) {
+	setSelectedProject(project_id: string, click_by_session?: boolean) {
 		this.selected_project_id = project_id
+
+		if (click_by_session) return
+
+		const index = this.expand_project_ids.findIndex(item => item === project_id)
+
+		if (index !== -1) {
+			this.expand_project_ids.splice(index, 1)
+		} else {
+			this.expand_project_ids.push(project_id)
+		}
+
+		this.expand_project_ids = $copy(this.expand_project_ids)
 	}
 
 	setSelectedSession(session_id: string) {
@@ -166,7 +187,23 @@ export default class Index {
 		await this.getProjectList()
 	}
 
-	async removeProject(project_item: Project) {}
+	async removeProject(project_item: Project) {
+		const res = await alert({
+			title: 'Remove Project',
+			desc: 'Confirm remove project and all related sessions?'
+		})
+
+		if (!res) return
+
+		if (this.selected_project_id === project_item.id) {
+			this.selected_project_id = ''
+			this.selected_session_id = ''
+		}
+
+		await rpc.project.remove.mutate({ id: project_item.id })
+
+		await this.getProjectList()
+	}
 
 	async createSession(project_id: string) {
 		await rpc.session.create.mutate({ project_id })

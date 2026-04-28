@@ -6,6 +6,7 @@ export interface IPropsMenuItem {
 	index: number
 	renaming: boolean
 	selected: boolean
+	expand: boolean
 }
 
 export interface IPropsSessionItem {

@@ -20,7 +20,7 @@ interface IMenuTarget {
 }
 
 const Index = () => {
-	const { projects, selected_project_id, rename_project_id, onToggleAddModal } = useModel()
+	const { projects, selected_project_id, rename_project_id, expand_project_ids, onToggleAddModal } = useModel()
 	const [menu_target, setMenuTarget] = useState<IMenuTarget | null>(null)
 
 	const findMenuTarget = useMemoizedFn((target: EventTarget | null) => {
@@ -150,6 +150,7 @@ const Index = () => {
 									index={index}
 									renaming={rename_project_id === item.project.id}
 									selected={selected_project_id === item.project.id}
+									expand={expand_project_ids.includes(item.project.id)}
 									key={item.project.id}
 								></MenuItem>
 							))}

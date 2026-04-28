@@ -11,7 +11,7 @@ import type { MouseEvent } from 'react'
 import type { IPropsMenuItem } from '../types'
 
 const Index = (props: IPropsMenuItem) => {
-	const { item, index, renaming, selected } = props
+	const { item, index, renaming, selected, expand } = props
 	const { project, sessions } = item
 	const {
 		selected_session_id,
@@ -40,6 +40,8 @@ const Index = (props: IPropsMenuItem) => {
 		createSession(project.id)
 	})
 
+	const LeftIcon = expand ? ChevronDown : ChevronRight
+
 	return (
 		<div
 			className='
@@ -64,7 +66,7 @@ const Index = (props: IPropsMenuItem) => {
 				onClick={onClickProject}
 			>
 				<div className='flex items-center gap-1.5'>
-					<ChevronRight size={12}></ChevronRight>
+					<LeftIcon size={12}></LeftIcon>
 					<div className='min-w-0 flex-1'>
 						{renaming ? (
 							<RenameInput
@@ -83,19 +85,21 @@ const Index = (props: IPropsMenuItem) => {
 					<MessageCirclePlus></MessageCirclePlus>
 				</button>
 			</div>
-			<div className='flex flex-col'>
-				{sessions.map((it, idx) => (
-					<SessionItem
-						item={it}
-						project_id={project.id}
-						project_index={index}
-						session_index={idx}
-						renaming={rename_session_id === it.id}
-						selected={selected_session_id === it.id}
-						key={it.id}
-					></SessionItem>
-				))}
-			</div>
+			{expand && (
+				<div className='flex flex-col'>
+					{sessions.map((it, idx) => (
+						<SessionItem
+							item={it}
+							project_id={project.id}
+							project_index={index}
+							session_index={idx}
+							renaming={rename_session_id === it.id}
+							selected={selected_session_id === it.id}
+							key={it.id}
+						></SessionItem>
+					))}
+				</div>
+			)}
 		</div>
 	)
 }
