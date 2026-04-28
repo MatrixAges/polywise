@@ -17,7 +17,8 @@ export default class Index {
 	projects = [] as Array<{ project: Project; sessions: Array<Session>; has_more: boolean }>
 	add_modal_open = false
 	add_modal_paths = [] as Array<string>
-	add_modal_select_path = ''
+	add_modal_root_path = ''
+	add_modal_input_path = ''
 	add_modal_tree_version = 0
 	add_modal_loaded_path_map = {} as Record<string, boolean>
 
@@ -70,14 +71,17 @@ export default class Index {
 	}
 
 	onChangeAddModalPath(e: ChangeEvent<HTMLInputElement>) {
-		this.add_modal_select_path = e.target.value
+		const v = e.target.value
+
+		this.add_modal_root_path = v
+		this.add_modal_input_path = v
 	}
 
 	async getHomedirPaths() {
 		const home_dir = await rpc.file.homedir.query()
 
-		this.add_modal_select_path = home_dir
-		this.add_modal_tree_version += 1
+		this.add_modal_root_path = home_dir
+		this.add_modal_input_path = home_dir
 
 		await this.loadAddModalDirectory({ target_path: home_dir, mode: 'replace' })
 	}
@@ -88,19 +92,22 @@ export default class Index {
 		const target_path = this.getAddModalAbsolutePath(v.path)
 
 		await this.loadAddModalDirectory({ target_path, mode: 'append' })
+
+		this.add_modal_input_path = target_path
 	}
 
 	async onFetchAddModalPath() {
 		this.add_modal_tree_version += 1
 
-		await this.loadAddModalDirectory({ target_path: this.add_modal_select_path, mode: 'replace' })
+		console.log(this.add_modal_input_path)
+		await this.loadAddModalDirectory({ target_path: this.add_modal_input_path, mode: 'replace' })
 	}
 
 	async loadAddModalDirectory(args: { target_path: string; mode: 'replace' | 'append' }) {
 		const { target_path, mode } = args
 		const next_path = target_path.trim()
 
-		if (!next_path || !this.add_modal_select_path) return
+		if (!next_path || !this.add_modal_root_path) return
 
 		if (mode === 'append' && this.add_modal_loaded_path_map[next_path]) return
 
@@ -115,19 +122,19 @@ export default class Index {
 	}
 
 	getAddModalRelativePath(target_path: string) {
-		if (!this.add_modal_select_path) return target_path
+		if (!this.add_modal_root_path) return target_path
 
-		const base_prefix = `${this.add_modal_select_path}/`
+		const base_prefix = `${this.add_modal_root_path}/`
 
-		if (target_path === this.add_modal_select_path) return ''
+		if (target_path === this.add_modal_root_path) return ''
 
 		return target_path.startsWith(base_prefix) ? target_path.replace(base_prefix, '') : target_path
 	}
 
 	getAddModalAbsolutePath(target_path: string) {
-		if (!target_path) return this.add_modal_select_path
+		if (!target_path) return this.add_modal_root_path
 
-		return `${this.add_modal_select_path}/${target_path}`
+		return `${this.add_modal_root_path}/${target_path}`
 	}
 
 	async createProject() {}

@@ -19,7 +19,7 @@ const Index = () => {
 	const {
 		add_modal_open,
 		add_modal_paths,
-		add_modal_select_path,
+		add_modal_input_path,
 		add_modal_tree_version,
 		onToggleAddModal,
 		onSelectAddModalPath,
@@ -36,7 +36,7 @@ const Index = () => {
 				</DialogHeader>
 				<div className='flex flex-col gap-3'>
 					<div className='flex gap-3'>
-						<Input value={add_modal_select_path} onChange={onChangeAddModalPath}></Input>
+						<Input value={add_modal_input_path} onChange={onChangeAddModalPath}></Input>
 						<Button onClick={onFetchAddModalPath}>Fetch</Button>
 					</div>
 					<FileTree
