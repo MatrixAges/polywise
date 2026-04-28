@@ -12,13 +12,5 @@ export default p.input(input_type).query(async ({ input }) => {
 	const projects = await getProjects({ where: eq(project.id, input.project_id) })
 	const project_item = projects[0]
 
-	if (!project_item) {
-		return { content: '' }
-	}
-
-	const content = await readProjectFile(project_item.dir, input.file_path)
-
-	return {
-		content
-	}
+	return readProjectFile(project_item.dir, input.file_path)
 })
