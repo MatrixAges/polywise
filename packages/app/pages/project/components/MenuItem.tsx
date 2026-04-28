@@ -11,11 +11,10 @@ import type { MouseEvent } from 'react'
 import type { IPropsMenuItem } from '../types'
 
 const Index = (props: IPropsMenuItem) => {
-	const { item, index } = props
+	const { item, index, renaming, selected } = props
 	const { project, sessions } = item
 	const {
 		selected_session_id,
-		rename_project_id,
 		rename_session_id,
 		rename_value,
 		createSession,
@@ -24,7 +23,6 @@ const Index = (props: IPropsMenuItem) => {
 		onCancelRename,
 		renameProject
 	} = useModel()
-	const renaming = rename_project_id === project.id
 
 	const onClickProject = useMemoizedFn(() => {
 		if (renaming) return
@@ -50,12 +48,16 @@ const Index = (props: IPropsMenuItem) => {
 			'
 		>
 			<div
-				className='
+				className={$cx(
+					`
 					justify-between
 					py-1
 					pl-1.5 pr-1
+					bg-transparent
 					click_button select-none
-				'
+				`,
+					selected && 'active'
+				)}
 				data-project-index={index}
 				data-session-index={-1}
 				data-id={project.id}

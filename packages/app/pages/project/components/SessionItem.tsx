@@ -42,7 +42,15 @@ const Index = (props: IPropsSessionItem) => {
 			data-session-index={session_index}
 			data-id={item.id}
 		>
-			<div className='min-w-0 flex-1'>
+			<div
+				className='
+					flex flex-1
+					min-w-0
+					gap-1
+					truncate
+				'
+			>
+				<span>-</span>
 				{renaming ? (
 					<RenameInput
 						active={renaming}

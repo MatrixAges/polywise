@@ -4,6 +4,8 @@ import type Model from './model'
 export interface IPropsMenuItem {
 	item: Model['projects'][number]
 	index: number
+	renaming: boolean
+	selected: boolean
 }
 
 export interface IPropsSessionItem {
