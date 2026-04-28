@@ -165,7 +165,7 @@ This document provides an overview of the packages/app module structure and arch
 					"role": "Page"
 				},
 				"model.ts": {
-					"desc": "Project page state model using project/session/file RPC for selection, CRUD, sorting, click-loaded project file trees through rpc.file.list, lazy file detail loading, project dialog states, todo inline editing state, and directory tree loading",
+					"desc": "Project page state model currently loading the project list via rpc.project.getList and supporting minimal project-menu session creation via rpc.session.create followed by list refresh; selection, rename, remove, and other project workspace behaviors remain stubbed in the lightweight page version",
 					"role": "Model"
 				},
 				"types.ts": {

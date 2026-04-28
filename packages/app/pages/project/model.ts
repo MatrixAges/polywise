@@ -8,7 +8,8 @@ import type { Project, Session } from '@core/db'
 
 @injectable()
 export default class Index {
-	session_id = ''
+	selected_project_id = ''
+	selected_session_id = ''
 	projects = [] as Array<{ project: Project; sessions: Array<Session>; has_more: boolean }>
 
 	constructor(public util: Util) {
@@ -25,9 +26,13 @@ export default class Index {
 		this.projects = data
 	}
 
-	setSelectedProject(project_id: string) {}
+	setSelectedProject(project_id: string) {
+		this.selected_project_id = project_id
+	}
 
-	setSelectedSession(session_id: string) {}
+	setSelectedSession(session_id: string) {
+		this.selected_session_id = session_id
+	}
 
 	async createProject() {}
 
@@ -35,7 +40,11 @@ export default class Index {
 
 	async removeProject(project_item: Project) {}
 
-	async createSession(project_id: string) {}
+	async createSession(project_id: string) {
+		await rpc.session.create.mutate({ project_id })
+
+		await this.getProjectList()
+	}
 
 	async renameSession(args: { project_id: string; session_id: string; title: string }) {}
 

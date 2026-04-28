@@ -11,14 +11,16 @@ const Index = (props: IPropsMenuItem) => {
 	const { project, sessions } = item
 	const { createSession, setSelectedProject, setSelectedSession } = useModel()
 
+	console.log(sessions)
+
 	const onClickProject = useMemoizedFn(() => {
 		setSelectedProject(project.id)
 	})
 
-	const onClickCreateSession = useMemoizedFn((event: MouseEvent<HTMLButtonElement>) => {
+	const onCreateSession = useMemoizedFn((event: MouseEvent<HTMLButtonElement>) => {
 		event.stopPropagation()
 
-		void createSession({ project_id: project.id })
+		createSession(project.id)
 	})
 
 	const onClickSession = useMemoizedFn((session_id: string) => {
@@ -55,7 +57,7 @@ const Index = (props: IPropsMenuItem) => {
 					<span className='capitalize'>{project.name}</span>
 				</div>
 				<div className='flex gap-1'>
-					<button type='button' className='icon_button small' onClick={onClickCreateSession}>
+					<button type='button' className='icon_button small' onClick={onCreateSession}>
 						<MessageSquarePlus></MessageSquarePlus>
 					</button>
 					<button type='button' className='icon_button small' onClick={stopPropagation}>
@@ -64,7 +66,7 @@ const Index = (props: IPropsMenuItem) => {
 				</div>
 			</div>
 			<div className='flex flex-col'>
-				{sessions.map((it, index) => (
+				{sessions.map((it, idx) => (
 					<div
 						className='
 							flex
@@ -74,8 +76,8 @@ const Index = (props: IPropsMenuItem) => {
 							hover:text-std-900
 							select-none
 						'
-						data-project-index={props.index}
-						data-session-index={index}
+						data-project-index={index}
+						data-session-index={idx}
 						data-id={it.id}
 						onClick={() => onClickSession(it.id)}
 						key={it.id}

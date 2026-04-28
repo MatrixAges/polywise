@@ -13,9 +13,7 @@ const Index = (props: IProps) => {
 
 	return (
 		<ContextMenuContent>
-			<ContextMenuItem onClick={() => createSession({ project_id: project_item.id })}>
-				New Session
-			</ContextMenuItem>
+			<ContextMenuItem onClick={() => createSession(project_item.id)}>New Session</ContextMenuItem>
 			<ContextMenuSeparator />
 			<ContextMenuItem onClick={() => renameProject(project_item)}>Rename</ContextMenuItem>
 			<ContextMenuItem variant='destructive' onClick={() => removeProject(project_item)}>
