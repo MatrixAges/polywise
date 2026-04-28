@@ -20,11 +20,6 @@ const serializeSessionItem = (args: { session_item: typeof session.$inferSelect;
 
 export default p.query(async () => {
 	const projects = await getProjects({ orderBy: 'asc' })
-	const serialized_projects = projects.map(project_item => ({
-		...project_item,
-		created_at: project_item.created_at ? project_item.created_at.toISOString() : null,
-		updated_at: project_item.updated_at ? project_item.updated_at.toISOString() : null
-	})) satisfies Array<IProjectSerializedProjectItem>
 
 	const sessions = await Promise.all(
 		projects.map(async project_item => {
@@ -46,7 +41,7 @@ export default p.query(async () => {
 	)
 
 	return {
-		projects: serialized_projects,
+		projects,
 		sessions: Object.fromEntries(sessions)
 	}
 })
