@@ -69,7 +69,11 @@ export default class Index {
 		await rpc.session.rename.mutate({ id: this.rename_session_id, title: this.rename_value })
 	}
 
-	async removeSession(session_id: string) {}
+	async removeSession(session_id: string) {
+		await rpc.session.remove.mutate({ id: session_id })
+
+		await this.getProjectList()
+	}
 
 	deinit() {
 		this.util.deinit()
