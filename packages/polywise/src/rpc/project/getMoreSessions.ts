@@ -18,7 +18,7 @@ export default p.input(input_type).query(async ({ input }) => {
 	const sessions = has_more ? session_rows.slice(0, page_size) : session_rows
 
 	return {
-		sessions,
+		sessions: sessions.map(item => item.session),
 		has_more
 	}
 })

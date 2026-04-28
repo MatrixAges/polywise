@@ -56,14 +56,9 @@ const Index = (props: IPropsMenuItem) => {
 					<FolderIcon size={12}></FolderIcon>
 					<span className='capitalize'>{project.name}</span>
 				</div>
-				<div className='flex gap-1'>
-					<button type='button' className='icon_button small' onClick={onCreateSession}>
-						<MessageSquarePlus></MessageSquarePlus>
-					</button>
-					<button type='button' className='icon_button small' onClick={stopPropagation}>
-						<Ellipsis></Ellipsis>
-					</button>
-				</div>
+				<button type='button' className='icon_button small' onClick={onCreateSession}>
+					<MessageSquarePlus></MessageSquarePlus>
+				</button>
 			</div>
 			<div className='flex flex-col'>
 				{sessions.map((it, idx) => (

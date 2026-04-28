@@ -16,7 +16,7 @@ export default p.query(async () => {
 			const has_more = session_rows.length > page_size
 			const sessions = has_more ? session_rows.slice(0, page_size) : session_rows
 
-			return { project, sessions, has_more }
+			return { project, sessions: sessions.map(item => item.session), has_more }
 		})
 	)
 })

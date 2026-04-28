@@ -21,7 +21,7 @@ export default class Index {
 	}
 
 	async getProjectList() {
-		const data = (await rpc.project.getList.query()) as unknown as Index['projects']
+		const data = (await rpc.project.getList.query()) as Index['projects']
 
 		this.projects = data
 	}

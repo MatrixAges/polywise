@@ -101,7 +101,7 @@ const Index = (props: IPropsMenu) => {
 		<div
 			className='
 				overflow-y-hidden
-				flex-col
+				flex flex-col
 				w-[210px] h-full
 				border-border-light border-r
 			'
@@ -122,7 +122,7 @@ const Index = (props: IPropsMenu) => {
 					Projects
 				</span>
 				<div className='flex gap-1'>
-					<Tooltip title='New Session'>
+					<Tooltip title='New Project'>
 						<div className='icon_button small' onClick={createProject}>
 							<Plus></Plus>
 						</div>

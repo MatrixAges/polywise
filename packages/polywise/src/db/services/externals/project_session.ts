@@ -38,7 +38,6 @@ export const getProjectSessions = async (args: ArgsGetProjectSessions) => {
 		.$dynamic()
 
 	if (limit) query = query.limit(limit)
-
 	if (offset) query = query.offset(offset)
 
 	return query
