@@ -25,7 +25,9 @@ import Together from '@lobehub/icons-static-svg/icons/together.svg?react'
 import V0 from '@lobehub/icons-static-svg/icons/v0.svg?react'
 import Volcengine from '@lobehub/icons-static-svg/icons/volcengine.svg?react'
 import Zhipu from '@lobehub/icons-static-svg/icons/zhipu.svg?react'
-import { Bot, Building2, EyeClosed, Leaf } from 'lucide-react'
+import { Building2, EyeClosed } from 'lucide-react'
+
+import XiaomiMiMo from '@/public/icons/mimo.svg?react'
 
 import type { ElementType } from 'react'
 
@@ -56,6 +58,7 @@ export const provider_icon_map = {
 	zhipu: Zhipu,
 	moonshot: Moonshot,
 	minimax: Minimax,
+	xiaomi_mimo: XiaomiMiMo,
 	custom: Building2,
 	disabled: EyeClosed
 } as Record<string, ElementType>

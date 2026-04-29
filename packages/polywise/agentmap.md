@@ -27,6 +27,10 @@ This document provides an overview of the packages/polywise module structure and
 			"triple_en_5.ts": { "desc": "Entertainment and Media test data (EN)", "role": "Data" }
 		},
 		"src": {
+			"config": {
+				"desc": "Runtime config loading and watch lifecycle. loadConfig hydrates in-memory config/providers from ~/.polywise, backfills missing fields on existing preset provider entries from preset defaults, and still auto-appends any missing preset providers into providers.json; initConfig wires Watchpack change/remove recovery around config.json and providers.json.",
+				"role": "Folder"
+			},
 			"api": {
 				"index.ts": { "desc": "Hono API entry with tRPC and custom handlers", "role": "Index" },
 				"chat.ts": { "desc": "Chat API handler exposing fst capabilities", "role": "Endpoint" },

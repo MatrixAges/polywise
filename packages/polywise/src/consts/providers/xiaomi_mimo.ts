@@ -4,6 +4,7 @@ export default {
 	name: 'xiaomi_mimo',
 	enabled: true,
 	apiKey: '',
+	baseURL: 'https://api.xiaomimimo.com/v1',
 	models: [
 		{
 			enabled: true,

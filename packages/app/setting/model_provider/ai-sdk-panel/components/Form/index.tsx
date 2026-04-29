@@ -145,7 +145,14 @@ const Index = (props: IPropsForm) => {
 					pt-10
 				'
 			>
-				<div className='h-[36px] w-[36px] text-[36px]'>
+				<div
+					className='
+						flex
+						items-center justify-center
+						w-[72px] h-[36px]
+						text-[36px]
+					'
+				>
 					<ProviderIcon name={name} size={36}></ProviderIcon>
 				</div>
 				<span className='text-xl font-medium capitalize'>
