@@ -24,9 +24,10 @@ export default class Index {
 	add_modal_tree_version = 0
 	add_modal_loaded_path_map = {} as Record<string, boolean>
 	expand_project_ids = [] as Array<string>
+	page_map = new Map<string, number>()
 
 	constructor(public util: Util) {
-		makeAutoObservable(this, { add_modal_loaded_path_map: false }, { autoBind: true })
+		makeAutoObservable(this, { add_modal_loaded_path_map: false, page_map: false }, { autoBind: true })
 	}
 
 	async init() {
@@ -120,6 +121,21 @@ export default class Index {
 		const data = (await rpc.project.getList.query()) as Index['projects']
 
 		this.projects = data
+	}
+
+	async getMoreSessions(project_index: number) {
+		const project_id = this.projects[project_index].project.id
+
+		const page = this.page_map.has(project_id) ? this.page_map.get(project_id)! + 1 : 2
+
+		const res = await rpc.project.getMoreSessions.query({ project_id, page })
+
+		this.page_map.set(project_id, page)
+
+		this.projects[project_index].has_more = res.has_more
+		this.projects[project_index].sessions.push(...(res.sessions as Array<Session>))
+
+		console.log(res)
 	}
 
 	async sortProject(from: number, to: number) {

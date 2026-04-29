@@ -25,7 +25,8 @@ const Index = (props: IPropsMenuItem) => {
 		setSelectedProject,
 		onChangeRenameValue,
 		onCancelRename,
-		renameProject
+		renameProject,
+		getMoreSessions
 	} = useModel()
 
 	const onClickProject = useMemoizedFn(() => {
@@ -126,7 +127,11 @@ const Index = (props: IPropsMenuItem) => {
 							key={it.id}
 						></SessionItem>
 					))}
-					{has_more && <div className='click_button pl-6'>Loadmore</div>}
+					{has_more && (
+						<div className='click_button pl-6' onClick={() => getMoreSessions(index)}>
+							Loadmore
+						</div>
+					)}
 				</div>
 			)}
 		</div>
