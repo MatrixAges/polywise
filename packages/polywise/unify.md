@@ -163,6 +163,14 @@ This routing table is scoped to folder-level matching. The matcher must use `pat
 		"path_scope": "packages/polywise/src/rpc",
 		"sample_pool": ["packages/polywise/src/rpc/save.ts", "packages/polywise/src/rpc/setActive.ts"]
 	},
+	"package root config": {
+		"path_scope": "packages/polywise",
+		"sample_pool": ["packages/polywise/package.json", "packages/polywise/rslib.config.ts"]
+	},
+	".test": {
+		"path_scope": "packages/polywise/.test",
+		"sample_pool": ["packages/polywise/scripts/getChunks.ts", "packages/polywise/scripts/getTriple.ts"]
+	},
 	"src/fst/agents/title": {
 		"path_scope": "packages/polywise/src/fst/agents/title",
 		"sample_pool": [

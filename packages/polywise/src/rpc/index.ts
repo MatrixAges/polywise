@@ -1,6 +1,7 @@
 import { r } from '../utils/trpc'
 import file from './file'
 import heartbeat from './heartbeat'
+import inspect from './inspect'
 import llama from './llama'
 import project from './project'
 import provider from './provider'
@@ -20,8 +21,8 @@ export const router = r({
 	session,
 	provider,
 	llama,
-
 	heartbeat,
+	inspect,
 	save,
 	search,
 	setActive,

@@ -14,6 +14,52 @@ This document provides an overview of the packages/polywise module structure and
 	"project": "Polywise",
 	"module": "packages/polywise",
 	"structure": {
+		".test": {
+			"check-search-consts.mjs": {
+				"desc": "Verifies search thresholds and weights are centralized in src/consts/search.ts and imported by search modules",
+				"role": "Test Script"
+			},
+			"check-semantic-filter.mjs": {
+				"desc": "Validates light semantic boost correction and relative-threshold filtering behavior",
+				"role": "Test Script"
+			},
+			"check-answer-weight.mjs": {
+				"desc": "Confirms search_answer vector branch remains enabled with lower RRF weight than primary retrieval branches",
+				"role": "Test Script"
+			},
+			"check-article-time-weight.mjs": {
+				"desc": "Checks article ranking uses relevance plus time decay instead of pure updated_at sorting",
+				"role": "Test Script"
+			},
+			"loadDatasetText.mjs": {
+				"desc": "Loads dataset fixtures from packages/polywise/datasets for functional Node-based tests",
+				"role": "Test Utility"
+			},
+			"createRuntime.mjs": {
+				"desc": "Starts an isolated Node-driven polywise runtime and exposes save/search/update helpers for functional tests",
+				"role": "Test Utility"
+			},
+			"functional-basic-search.mjs": {
+				"desc": "Runs end-to-end save and article search assertions against stable Atoms and React dataset queries",
+				"role": "Test Script"
+			},
+			"functional-time-weight-search.mjs": {
+				"desc": "Runs end-to-end article ranking checks for near-equal documents to verify time weighting behavior",
+				"role": "Test Script"
+			},
+			"functional-update-reindex-search.mjs": {
+				"desc": "Runs end-to-end update and reindex checks to verify replaced article content changes search outcomes",
+				"role": "Test Script"
+			},
+			"functional-keyword-no-bypass.mjs": {
+				"desc": "Uses inspector branch overrides to verify keyword hits still pass semantic filtering and keyword-only mismatches do not bypass into final results",
+				"role": "Test Script"
+			},
+			"functional-answer-branch-lower-weight.mjs": {
+				"desc": "Uses inspector branch overrides to verify answer retrieval participates while remaining below the primary question branch in final ranking",
+				"role": "Test Script"
+			}
+		},
 		"datasets": {
 			"triple_cn_1.ts": { "desc": "Technology and Business History test data (CN)", "role": "Data" },
 			"triple_cn_2.ts": { "desc": "History and Geography test data (CN)", "role": "Data" },
@@ -102,6 +148,10 @@ This document provides an overview of the packages/polywise module structure and
 				"save.ts": { "desc": "Save content to memory", "role": "RPC" },
 				"search.ts": {
 					"desc": "Search RPC exposing keyword/vector/recall/rerank pipeline inputs without separate time-ranking mode",
+					"role": "RPC"
+				},
+				"inspectSearch.ts": {
+					"desc": "Test-only search inspection RPC exposing branch inputs, stage outputs, and deterministic branch overrides for functional validation",
 					"role": "RPC"
 				},
 				"setActive.ts": { "desc": "Set active workspace/session state", "role": "RPC" },
@@ -204,7 +254,7 @@ This document provides an overview of the packages/polywise module structure and
 			"io": {
 				"save": { "desc": "Article and Document saving logic", "role": "Folder" },
 				"search": {
-					"desc": "Search pipeline with keyword/vector recall, semantic filtering, light boost correction, and rerank/time-weighted article scoring",
+					"desc": "Search pipeline with keyword/vector recall, semantic filtering, light boost correction, and rerank/time-weighted article scoring, with inspect as the single implementation entry for deterministic functional testing",
 					"role": "Folder"
 				},
 				"forget.ts": { "desc": "Memory forgetting logic", "role": "Module" },

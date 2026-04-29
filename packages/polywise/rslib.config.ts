@@ -32,6 +32,7 @@ export default {
 			/^@mongodb-js\/zstd(\/.*)?$/,
 			/^simsimd(\/.*)?$/,
 			/^fs-extra(\/.*)?$/,
+			/^tinypool(\/.*)?$/,
 			/^watchpack(\/.*)?$/,
 			/^better-sqlite3(\/.*)?$/,
 			/^sqlite-vec(\/.*)?$/,
