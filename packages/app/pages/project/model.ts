@@ -19,6 +19,7 @@ export default class Index {
 	projects = [] as Array<{ project: Project; sessions: Array<Session>; has_more: boolean }>
 	add_modal_open = false
 	side_panel_open = false
+	side_panel_tab = 'files' as 'files' | 'todos'
 	expand_project_ids = [] as Array<string>
 	page_map = new Map<string, number>()
 
@@ -70,6 +71,10 @@ export default class Index {
 
 	setSelectedSession(session_id: string) {
 		this.selected_session_id = session_id
+	}
+
+	setSidePanelTab(v: Index['side_panel_tab']) {
+		this.side_panel_tab = v
 	}
 
 	onRenameProject(project_id: string, title: string) {

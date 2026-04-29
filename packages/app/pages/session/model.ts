@@ -20,7 +20,7 @@ import type {
 
 @injectable()
 export default class Index {
-	current_tab = 'session' as 'session' | 'group'
+	current_tab = 'sessions' as 'sessions' | 'groups'
 	groups = [] as Array<ISessionMenuGroup>
 	sessions = [] as Array<Session>
 	pin_map = {} as Record<string, number>

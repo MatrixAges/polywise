@@ -74,7 +74,6 @@ const Index = (props: IPropsMenuItem) => {
 				data-project-index={index}
 				data-session-index={-1}
 				data-id={project.id}
-				onClick={onClickProject}
 			>
 				<div
 					className='
@@ -82,6 +81,7 @@ const Index = (props: IPropsMenuItem) => {
 						items-center
 						gap-1
 					'
+					onClick={onClickProject}
 				>
 					<LeftIcon size={12}></LeftIcon>
 					<div className='min-w-0 flex-1 truncate'>

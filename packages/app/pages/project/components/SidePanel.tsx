@@ -1,0 +1,45 @@
+import { observer } from 'mobx-react-lite'
+
+import { FileTree, TextTabs } from '@/components'
+
+import { useModel } from '../context'
+
+const Index = () => {
+	const { side_panel_tab, project_files, setSidePanelTab } = useModel()
+
+	return (
+		<div
+			className='
+				overflow-y-hidden
+				flex flex-col
+				w-[300px] h-full
+				border-border-light border-l
+			'
+		>
+			<div
+				className='
+					flex
+					items-center justify-between
+					h-8
+					px-3
+					border-b border-border-light
+				'
+			>
+				<TextTabs
+					items={['files', 'todos']}
+					active={side_panel_tab}
+					setActive={setSidePanelTab}
+				></TextTabs>
+			</div>
+			<div className='flex-1'>
+				<FileTree
+					paths={$copy(project_files.paths)}
+					onSelectPath={project_files.selectPath}
+					key={project_files.tree_version}
+				></FileTree>
+			</div>
+		</div>
+	)
+}
+
+export default new $app.Handle(Index).by(observer).by($app.memo).get()

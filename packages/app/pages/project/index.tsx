@@ -4,7 +4,7 @@ import { container } from 'tsyringe'
 
 import { Session } from '@/components'
 
-import { AddModal, Menu } from './components'
+import { AddModal, Menu, SidePanel } from './components'
 import { Context } from './context'
 import Model from './model'
 
@@ -22,10 +22,11 @@ const Index = () => {
 			<div className='flex h-full overflow-hidden'>
 				<Menu></Menu>
 				{x.selected_session_id && (
-					<div className='h-full w-[calc(100%-210px)] flex-1'>
+					<div className={$cx('h-full min-w-0 flex-1')}>
 						<Session type='page' id={x.selected_session_id}></Session>
 					</div>
 				)}
+				{x.side_panel_open && <SidePanel></SidePanel>}
 			</div>
 			<AddModal></AddModal>
 		</Context>

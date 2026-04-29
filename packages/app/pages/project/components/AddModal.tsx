@@ -34,9 +34,9 @@ const Index = () => {
 						<Button onClick={modal_files.fetchPath}>Fetch</Button>
 					</div>
 					<FileTree
-						key={modal_files.tree_version}
 						paths={$copy(modal_files.paths)}
 						onSelectPath={modal_files.selectPath}
+						key={modal_files.tree_version}
 					></FileTree>
 				</div>
 				<DialogFooter>

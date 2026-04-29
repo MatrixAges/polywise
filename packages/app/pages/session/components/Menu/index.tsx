@@ -3,7 +3,7 @@ import { useMemoizedFn } from 'ahooks'
 import { FolderPlus, Plus } from 'lucide-react'
 
 import { ContextMenu, ContextMenuTrigger } from '@/__shadcn__/components/ui/context-menu'
-import { Tooltip } from '@/components'
+import { TextTabs, Tooltip } from '@/components'
 import { useDelegate } from '@/hooks'
 
 import { useModel } from '../../context'
@@ -59,8 +59,6 @@ const Index = (props: IPropsMenu) => {
 		loading,
 		loading_more
 	}
-
-	const ref_tab = useDelegate(v => setCurrentTab(v), { item_type: 'span' })
 
 	const ref_action = useDelegate(v => {
 		setCurrentTab(v)
@@ -179,31 +177,11 @@ const Index = (props: IPropsMenu) => {
 					border-b border-border-light
 				'
 			>
-				<div
-					className='
-						flex
-						items-center
-						gap-0.5
-						text-xsm text-std-400 font-medium
-					'
-					ref={ref_tab}
-				>
-					<span
-						className={$cx('clickable px-1 py-0.5', current_tab === 'group' && 'text-std-800')}
-						data-key='group'
-					>
-						Group
-					</span>
-					<span
-						className={$cx(
-							'clickable px-1 py-0.5',
-							current_tab === 'session' && 'text-std-800'
-						)}
-						data-key='session'
-					>
-						Session
-					</span>
-				</div>
+				<TextTabs
+					items={['groups', 'sessions']}
+					active={current_tab}
+					setActive={setCurrentTab}
+				></TextTabs>
 				<div className='flex gap-1' ref={ref_action}>
 					<Tooltip title='New Group'>
 						<div className='icon_button small' data-key='group'>
@@ -220,7 +198,7 @@ const Index = (props: IPropsMenu) => {
 			<ContextMenu>
 				<ContextMenuTrigger className='flex min-h-0 w-full flex-1'>
 					<div className='flex h-full w-full' onContextMenuCapture={onMenuContextCapture}>
-						{current_tab === 'session' ? (
+						{current_tab === 'sessions' ? (
 							<Sessions {...props_sessions}></Sessions>
 						) : (
 							<Groups {...props_groups}></Groups>
