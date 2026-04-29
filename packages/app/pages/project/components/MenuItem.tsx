@@ -15,7 +15,7 @@ import type { IPropsMenuItem } from '../types'
 
 const Index = (props: IPropsMenuItem) => {
 	const { item, index, renaming, selected, expand } = props
-	const { project, sessions } = item
+	const { project, sessions, has_more } = item
 	const { attributes, listeners, transform, transition, isDragging, setNodeRef } = useSortable({ id: project.id })
 	const {
 		selected_session_id,
@@ -126,6 +126,7 @@ const Index = (props: IPropsMenuItem) => {
 							key={it.id}
 						></SessionItem>
 					))}
+					{has_more && <div className='click_button pl-6'>Loadmore</div>}
 				</div>
 			)}
 		</div>
