@@ -141,7 +141,7 @@ const Index = () => {
 				>
 					Projects
 				</span>
-				<div className='flex gap-1'>
+				<div className='mr-[-2px] flex gap-1'>
 					<Tooltip title='New Project'>
 						<div className='icon_button small' onClick={onToggleAddModal}>
 							<Plus></Plus>

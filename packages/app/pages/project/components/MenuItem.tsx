@@ -106,15 +106,15 @@ const Index = (props: IPropsMenuItem) => {
 						type='button'
 						{...props_drag}
 					>
-						<DotsSixVerticalIcon weight='bold'></DotsSixVerticalIcon>
+						<DotsSixVerticalIcon className='size-3.5' weight='bold'></DotsSixVerticalIcon>
 					</button>
 					<button className='icon_button small' type='button' onClick={onCreateSession}>
-						<MessageCirclePlus></MessageCirclePlus>
+						<MessageCirclePlus className='size-3'></MessageCirclePlus>
 					</button>
 				</div>
 			</div>
 			{expand && (
-				<div className='flex flex-col'>
+				<div className='flex flex-col gap-1'>
 					{sessions.map((it, idx) => (
 						<SessionItem
 							item={it}
