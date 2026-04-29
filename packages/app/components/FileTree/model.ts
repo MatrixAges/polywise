@@ -30,6 +30,10 @@ export default class Index {
 			      height:100%;
 			      display:flex;
 			}
+
+                  button[data-item-focused='true'] {
+			      background-color:var(--color-std-50);
+			}
 			`,
 			onSelectionChange(v: readonly string[]) {
 				const path = v[0]

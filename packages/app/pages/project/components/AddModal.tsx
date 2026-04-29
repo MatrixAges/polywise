@@ -16,10 +16,10 @@ import { FileTree } from '@/components'
 import { useModel } from '../context'
 
 const Index = () => {
-	const { add_modal_open, files, onToggleAddModal, createProject } = useModel()
+	const { add_modal_open, modal_files, onToggleAddModal, createProject } = useModel()
 
 	return (
-		<Dialog open={add_modal_open}>
+		<Dialog open={add_modal_open} onOpenChange={onToggleAddModal}>
 			<DialogContent className='w-[540px] max-w-none!'>
 				<DialogHeader>
 					<DialogTitle>New Project</DialogTitle>
@@ -28,25 +28,19 @@ const Index = () => {
 				<div className='flex flex-col gap-3'>
 					<div className='flex gap-3'>
 						<Input
-							value={files.input_path}
-							onChange={event => files.setInputPath(event.target.value)}
+							value={modal_files.input_path}
+							onChange={event => modal_files.setInputPath(event.target.value)}
 						></Input>
-						<Button onClick={files.fetchPath}>Fetch</Button>
+						<Button onClick={modal_files.fetchPath}>Fetch</Button>
 					</div>
 					<FileTree
-						key={files.tree_version}
-						paths={$copy(files.paths)}
-						onSelectPath={files.selectPath}
+						key={modal_files.tree_version}
+						paths={$copy(modal_files.paths)}
+						onSelectPath={modal_files.selectPath}
 					></FileTree>
 				</div>
 				<DialogFooter>
-					<DialogClose
-						render={
-							<Button variant='outline' onClick={onToggleAddModal}>
-								Cancel
-							</Button>
-						}
-					/>
+					<DialogClose render={<Button variant='outline'>Cancel</Button>} />
 					<Button onClick={createProject}>Confirm</Button>
 				</DialogFooter>
 			</DialogContent>

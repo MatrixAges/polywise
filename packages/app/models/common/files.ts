@@ -45,13 +45,11 @@ export default class Index {
 		return `${this.root_path}/${target_path}`
 	}
 
-	async initWithHomedir() {
-		const home_dir = await rpc.file.homedir.query()
+	async init(dir: string) {
+		this.root_path = dir
+		this.input_path = dir
 
-		this.root_path = home_dir
-		this.input_path = home_dir
-
-		await this.loadDirectory({ target_path: home_dir, mode: 'replace' })
+		await this.loadDirectory({ target_path: dir, mode: 'replace' })
 	}
 
 	async selectPath(args: IArgsSelectPath) {

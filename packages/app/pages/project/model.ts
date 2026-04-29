@@ -23,9 +23,14 @@ export default class Index {
 
 	constructor(
 		public util: Util,
-		public modal_files: Files
+		public modal_files: Files,
+		public project_files: Files
 	) {
-		makeAutoObservable(this, { util: false, modal_files: false, page_map: false }, { autoBind: true })
+		makeAutoObservable(
+			this,
+			{ util: false, modal_files: false, project_files: false, page_map: false },
+			{ autoBind: true }
+		)
 	}
 
 	async init() {
@@ -90,10 +95,12 @@ export default class Index {
 		this.rename_value = ''
 	}
 
-	onToggleAddModal() {
+	async onToggleAddModal() {
 		this.add_modal_open = !this.add_modal_open
 
-		if (this.add_modal_open) this.modal_files.initWithHomedir()
+		const home_dir = await rpc.file.homedir.query()
+
+		if (this.add_modal_open) this.modal_files.init(home_dir)
 	}
 
 	async getProjectList() {
@@ -113,8 +120,6 @@ export default class Index {
 
 		this.projects[project_index].has_more = res.has_more
 		this.projects[project_index].sessions.push(...(res.sessions as Array<Session>))
-
-		console.log(res)
 	}
 
 	async sortProject(from: number, to: number) {
