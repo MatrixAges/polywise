@@ -102,6 +102,10 @@ This document provides an overview of the packages/app module structure and arch
 		},
 		"models": {
 			"common": {
+				"files.ts": {
+					"desc": "Reusable directory tree state model that resolves home directory roots, lazily appends child directories, normalizes input paths, and resets tree state for consumers such as the project add dialog",
+					"role": "Model"
+				},
 				"util.ts": { "desc": "Model utility functions", "role": "Utility" },
 				"index.ts": { "desc": "Model common exports", "role": "Index" }
 			},
@@ -177,7 +181,7 @@ This document provides an overview of the packages/app module structure and arch
 					"role": "Page"
 				},
 				"model.ts": {
-					"desc": "Project page state model loads project/session lists, persists project drag sorting through rpc.project.sort, subscribes to rpc.session.watchSessionStatus to sync nested session title/running/unread state in realtime, and powers the add-project directory picker by tracking a root home directory, append-only loaded directory map, deduplicated relative tree paths for lazy tree expansion, and a tree version token that forces full reset when fetch replaces the directory root",
+					"desc": "Project page state model loads project/session lists, persists project drag sorting through rpc.project.sort, subscribes to rpc.session.watchSessionStatus to sync nested session title/running/unread state in realtime, and now injects the shared models/common/files directory tree model to drive the add-project dialog without duplicating lazy directory loading state",
 					"role": "Model"
 				},
 				"types.ts": {

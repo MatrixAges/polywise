@@ -1,0 +1,108 @@
+import { makeAutoObservable } from 'mobx'
+import { injectable } from 'tsyringe'
+
+import { rpc } from '@/utils'
+
+interface IArgsLoadDirectory {
+	target_path: string
+	mode: 'replace' | 'append'
+}
+
+interface IArgsSelectPath {
+	directory: boolean
+	path: string
+}
+
+@injectable()
+export default class Index {
+	paths = [] as Array<string>
+	root_path = ''
+	input_path = ''
+	tree_version = 0
+	loaded_path_map = {} as Record<string, boolean>
+
+	constructor() {
+		makeAutoObservable(this, { loaded_path_map: false }, { autoBind: true })
+	}
+
+	setInputPath(value: string) {
+		this.input_path = value
+	}
+
+	getRelativePath(target_path: string) {
+		if (!this.root_path) return target_path
+
+		const base_prefix = this.root_path.endsWith('/') ? this.root_path : `${this.root_path}/`
+
+		if (target_path === this.root_path) return ''
+
+		return target_path.startsWith(base_prefix) ? target_path.replace(base_prefix, '') : target_path
+	}
+
+	getAbsolutePath(target_path: string) {
+		if (!target_path) return this.root_path
+
+		return `${this.root_path}/${target_path}`
+	}
+
+	async initWithHomedir() {
+		const home_dir = await rpc.file.homedir.query()
+
+		this.root_path = home_dir
+		this.input_path = home_dir
+
+		await this.loadDirectory({ target_path: home_dir, mode: 'replace' })
+	}
+
+	async selectPath(args: IArgsSelectPath) {
+		const { directory, path } = args
+
+		if (!directory) return
+
+		const target_path = this.getAbsolutePath(path)
+
+		await this.loadDirectory({ target_path, mode: 'append' })
+
+		this.input_path = target_path
+	}
+
+	async fetchPath() {
+		const input_path = this.input_path.trim()
+
+		if (!input_path) return
+
+		this.paths = []
+		this.loaded_path_map = {}
+		this.tree_version += 1
+		this.root_path = input_path
+		this.input_path = input_path
+
+		await this.loadDirectory({ target_path: input_path, mode: 'replace' })
+	}
+
+	async loadDirectory(args: IArgsLoadDirectory) {
+		const { target_path, mode } = args
+		const next_path = target_path.trim()
+
+		if (!next_path || !this.root_path) return
+
+		if (mode === 'append' && this.loaded_path_map[next_path]) return
+
+		const list = await rpc.file.list.query({ path: next_path, dir_only: true })
+
+		const next_paths = list.map(item => this.getRelativePath(item.dir))
+		const current_paths = mode === 'replace' ? [] : this.paths
+		const current_loaded_path_map = mode === 'replace' ? {} : this.loaded_path_map
+
+		this.paths = Array.from(new Set([...current_paths, ...next_paths]))
+		this.loaded_path_map = { ...current_loaded_path_map, [next_path]: true }
+	}
+
+	reset() {
+		this.paths = []
+		this.root_path = ''
+		this.input_path = ''
+		this.tree_version = 0
+		this.loaded_path_map = {}
+	}
+}

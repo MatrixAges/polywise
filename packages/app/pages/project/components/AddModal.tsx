@@ -16,17 +16,7 @@ import { FileTree } from '@/components'
 import { useModel } from '../context'
 
 const Index = () => {
-	const {
-		add_modal_open,
-		add_modal_paths,
-		add_modal_input_path,
-		add_modal_tree_version,
-		onToggleAddModal,
-		onSelectAddModalPath,
-		onChangeAddModalPath,
-		onFetchAddModalPath,
-		createProject
-	} = useModel()
+	const { add_modal_open, files, onToggleAddModal, createProject } = useModel()
 
 	return (
 		<Dialog open={add_modal_open}>
@@ -37,13 +27,16 @@ const Index = () => {
 				</DialogHeader>
 				<div className='flex flex-col gap-3'>
 					<div className='flex gap-3'>
-						<Input value={add_modal_input_path} onChange={onChangeAddModalPath}></Input>
-						<Button onClick={onFetchAddModalPath}>Fetch</Button>
+						<Input
+							value={files.input_path}
+							onChange={event => files.setInputPath(event.target.value)}
+						></Input>
+						<Button onClick={files.fetchPath}>Fetch</Button>
 					</div>
 					<FileTree
-						key={add_modal_tree_version}
-						paths={$copy(add_modal_paths)}
-						onSelectPath={onSelectAddModalPath}
+						key={files.tree_version}
+						paths={$copy(files.paths)}
+						onSelectPath={files.selectPath}
 					></FileTree>
 				</div>
 				<DialogFooter>
