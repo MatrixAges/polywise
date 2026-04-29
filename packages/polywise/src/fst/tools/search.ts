@@ -1,6 +1,6 @@
 import path from 'path'
 import { tool } from 'ai'
-import { array, number, object, string } from 'zod'
+import { array, boolean, number, object, string } from 'zod'
 
 import grep from '../../utils/grep'
 import { checkPermission } from '../utils'
@@ -11,7 +11,6 @@ import type Session from '../session'
 
 interface SearchMatch {
 	file: string
-	absolute_path: string
 	line: number
 	content: string
 }
@@ -27,7 +26,10 @@ const inputSchema = object({
 	keyword: string().describe('Keyword to search for in file contents'),
 	paths: array(string()).optional().describe('Virtual paths to search in (defaults to /)'),
 	extensions: array(string()).optional().describe('File extensions to filter, e.g. [".ts", ".md"]'),
-	max_results: number().optional().describe('Maximum number of results to return (default 50)')
+	max_results: number().optional().describe('Maximum number of results to return (default 50)'),
+	disable_gitignore: boolean()
+		.optional()
+		.describe('Disable filtering by .gitignore and ignore rules (default false)')
 })
 
 const MAX_LINE_LENGTH = 80
@@ -86,7 +88,6 @@ const parseMatchLine = (args: { line: string; cwd: string; path_mappings: Record
 
 	return {
 		file: toVirtualPath({ real_path: absolute_path, cwd, path_mappings }),
-		absolute_path,
 		line: line_num,
 		content: truncated.trim()
 	} satisfies SearchMatch
@@ -140,6 +141,7 @@ export const createSearchFileTool = (s: Session, bash: Bash) => {
 				{
 					max_count: max_results,
 					glob: (input.extensions ?? []).map(extension => `*${extension}`),
+					disable_gitignore: input.disable_gitignore,
 					with_filename: true,
 					with_line_number: true
 				}

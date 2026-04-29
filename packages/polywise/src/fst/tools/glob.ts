@@ -1,6 +1,6 @@
 import { tool } from 'ai'
 import { globby } from 'globby'
-import { array, object, string } from 'zod'
+import { array, boolean, object, string } from 'zod'
 
 import { checkPermission } from '../utils'
 
@@ -8,7 +8,10 @@ import type Session from '../session'
 
 const inputSchema = object({
 	patterns: array(string()).describe('Glob patterns to match files against'),
-	cwd: string().optional().describe('Working directory to resolve patterns from')
+	cwd: string().optional().describe('Working directory to resolve patterns from'),
+	disable_gitignore: boolean()
+		.optional()
+		.describe('Disable filtering by .gitignore and ignore rules (default false)')
 })
 
 export const createGlobTool = (s: Session) => {
@@ -28,7 +31,8 @@ export const createGlobTool = (s: Session) => {
 
 			const files = await globby(input.patterns, {
 				cwd: input.cwd ?? s.cwd,
-				absolute: true
+				absolute: true,
+				gitignore: input.disable_gitignore !== true
 			})
 
 			return { patterns: input.patterns, files, count: files.length }

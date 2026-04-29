@@ -5,6 +5,8 @@ export interface GrepOptions {
 	max_count?: number
 	/** Glob patterns to filter search targets */
 	glob?: Array<string>
+	/** Disable gitignore and ignore-file filtering */
+	disable_gitignore?: boolean
 	/** Whether the search is case-sensitive (default: false) */
 	case_sensitive?: boolean
 	/** Whether the keywords are regular expressions (default: false, treats as literal strings) */
@@ -26,6 +28,7 @@ export default async (targets: string | Array<string>, keywords: string | Array<
 	const {
 		max_count = 100,
 		glob = [],
+		disable_gitignore = false,
 		case_sensitive = false,
 		is_regexp = false,
 		with_filename = false,
@@ -36,6 +39,7 @@ export default async (targets: string | Array<string>, keywords: string | Array<
 
 	if (!case_sensitive) args.push('-i')
 	if (!is_regexp) args.push('-F')
+	if (disable_gitignore) args.push('--no-ignore')
 	if (max_count) args.push('--max-count', max_count.toString())
 	if (!with_filename) args.push('--no-filename')
 	else args.push('--with-filename')
