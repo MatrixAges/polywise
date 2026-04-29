@@ -32,6 +32,11 @@ export const getModel = async <T extends ModelType = 'text'>(args: GetModelArgs<
 
 	const getResponse = async (): Promise<EmbeddingResult | ModelResult> => {
 		switch (provider) {
+			case 'xiaomi_mimo':
+			case 'open_compatible':
+				return {
+					model: (await import('@ai-sdk/openai-compatible')).createOpenAICompatible(options)(model)
+				}
 			case 'a2a':
 				return { model: (await import('a2a-ai-provider')).a2a(model) }
 			case 'acp':
@@ -46,10 +51,6 @@ export const getModel = async <T extends ModelType = 'text'>(args: GetModelArgs<
 						...options,
 						url: options.baseURL as string
 					})(model)
-				}
-			case 'open_compatible':
-				return {
-					model: (await import('@ai-sdk/openai-compatible')).createOpenAICompatible(options)(model)
 				}
 			case 'google_gemini': {
 				const { createGoogleGenerativeAI, google } = await import('@ai-sdk/google')

@@ -26,6 +26,7 @@ export default {
 		amazon_bedrock: 'Amazon',
 		minimax: 'MiniMax',
 		moonshot: 'Moonshot',
+		xiaomi_mimo: 'Xiaomi',
 		custom: 'Custom',
 		disabled: 'Disabled'
 	},

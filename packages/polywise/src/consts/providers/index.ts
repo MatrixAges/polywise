@@ -20,9 +20,10 @@ import perplexity from './perplexity'
 import together from './together'
 import vercel from './vercel'
 import xai from './xai'
+import xiaomi_mimo from './xiaomi_mimo'
 import zhipu from './zhipu'
 
-export const preset_providers = [openai, anthropic, google_gemini, zhipu, minimax, moonshot, deepseek]
+export const preset_providers = [openai, anthropic, google_gemini, zhipu, minimax, moonshot, deepseek, xiaomi_mimo]
 
 export const all_providers = [
 	openai,
@@ -46,7 +47,8 @@ export const all_providers = [
 	azure_openai,
 	amazon_bedrock,
 	minimax,
-	moonshot
+	moonshot,
+	xiaomi_mimo
 ]
 
 export {
@@ -72,5 +74,6 @@ export {
 	amazon_bedrock,
 	minimax,
 	moonshot,
+	xiaomi_mimo,
 	custom
 }
