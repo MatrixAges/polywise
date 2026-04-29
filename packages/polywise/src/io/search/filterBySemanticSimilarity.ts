@@ -1,3 +1,12 @@
+import {
+	max_boost_factor,
+	min_keyword_semantic_similarity,
+	min_semantic_similarity,
+	recall_min_semantic_similarity,
+	relative_similarity_gap,
+	semantic_boost_min_anchor_similarity,
+	semantic_boost_target
+} from '@core/consts/search'
 import { getChunkById } from '@core/db/prepare'
 import { getEmbedding } from '@core/pipeline'
 import getSimilarity from '@core/pipeline/getSimilarity'
@@ -19,9 +28,6 @@ interface ChunkRow {
 type SimResult = RrfResult & {
 	similarity: number
 }
-
-const MIN_SEMANTIC_SIMILARITY = 0.65
-const RECALL_MIN_SIMILARITY = 0.3
 
 export default async (query: string, results: Array<RrfResult>, recall_chunk_ids: Set<string> = new Set()) => {
 	if (results.length === 0) return []
@@ -46,16 +52,24 @@ export default async (query: string, results: Array<RrfResult>, recall_chunk_ids
 		.filter(item => !item.from_recall && !recall_chunk_ids.has(item.chunk_id))
 		.reduce((max, item) => Math.max(max, item.similarity), 0)
 
-	const boost_factor = max_similarity > 0 && max_similarity < 0.85 ? 0.85 / Math.max(0.3, max_similarity) : 1.0
+	const boost_factor =
+		max_similarity >= semantic_boost_min_anchor_similarity && max_similarity < semantic_boost_target
+			? Math.min(max_boost_factor, semantic_boost_target / max_similarity)
+			: 1.0
+
+	const relative_threshold = max_similarity > 0 ? Math.max(0, max_similarity - relative_similarity_gap) : 0
 
 	const filtered_results = sim_results.filter(item => {
-		if (item.from_keyword) return true
-
 		const is_recall = item.from_recall || recall_chunk_ids.has(item.chunk_id)
 		const weighted_similarity = is_recall ? item.similarity : Math.min(1.0, item.similarity * boost_factor)
-		const threshold = is_recall ? RECALL_MIN_SIMILARITY : MIN_SEMANTIC_SIMILARITY
+		const threshold = is_recall
+			? recall_min_semantic_similarity
+			: item.from_keyword
+				? min_keyword_semantic_similarity
+				: min_semantic_similarity
+		const pass_relative_threshold = is_recall || item.similarity >= relative_threshold
 
-		return weighted_similarity >= threshold
+		return weighted_similarity >= threshold && pass_relative_threshold
 	})
 
 	return filtered_results.map((item, index) => ({

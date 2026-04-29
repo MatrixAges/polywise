@@ -6,8 +6,6 @@ import { input_type } from '../../rpc/search'
 import evaluate from './evaluate'
 import filterBySemanticSimilarity from './filterBySemanticSimilarity'
 import lookup from './lookup'
-import prerank from './prerank'
-import rankByTime from './rankByTime'
 import recall from './recall'
 import rerank, { rerankArticle, RerankedArticleResult } from './rerank'
 import searchByKeywords from './searchByKeywords'
@@ -42,7 +40,6 @@ export default async (args: ArgsSearch): Promise<SearchOutput> => {
 		intent,
 		enable_rewrite = false,
 		enable_recall = false,
-		rank_by_time,
 		type = 'article',
 		for_types,
 		scope_type,
@@ -107,7 +104,7 @@ export default async (args: ArgsSearch): Promise<SearchOutput> => {
 		recall_count: recall_list.length
 	}))
 
-	const rrf_results = evaluate(kw_results, q_results, ans_results, 60, recall_list)
+	const rrf_results = evaluate(kw_results, q_results, ans_results, recall_list)
 
 	log('SEARCH', 'rrfDone', () => `result_count: ${rrf_results.length}`)
 
@@ -116,14 +113,6 @@ export default async (args: ArgsSearch): Promise<SearchOutput> => {
 	const filtered_results = await filterBySemanticSimilarity(rerank_query, rrf_results, recall_chunk_ids)
 
 	log('SEARCH', 'semanticFilterDone', () => `result_count: ${filtered_results.length}`)
-
-	if (rank_by_time) {
-		const preranked = await prerank(filtered_results)
-
-		log('SEARCH', 'preRankDone', () => `result_count: ${preranked.length}`)
-
-		return await rankByTime(rerank_query, preranked, type, for_types)
-	}
 
 	if (type === 'chunk') {
 		const reranked = await rerank(rerank_query, filtered_results)
@@ -209,11 +198,7 @@ export default async (args: ArgsSearch): Promise<SearchOutput> => {
 			})
 		: final_results
 
-	const sorted_results = [...scoped_results].sort((a, b) => {
-		const a_time = a.updated_at ? new Date(a.updated_at).getTime() : 0
-		const b_time = b.updated_at ? new Date(b.updated_at).getTime() : 0
-		return b_time - a_time
-	})
+	const sorted_results = [...scoped_results].sort((a, b) => b.score - a.score)
 
 	return {
 		type: 'article',

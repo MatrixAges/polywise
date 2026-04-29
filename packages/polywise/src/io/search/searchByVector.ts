@@ -1,3 +1,4 @@
+import { max_vector_distance } from '@core/consts/search'
 import { searchChunkByVector } from '@core/db/prepare'
 import { getEmbedding } from '@core/pipeline'
 import { log } from '@core/utils'
@@ -7,8 +8,6 @@ interface SearchResult {
 	rank: number
 }
 
-const MAX_VECTOR_DISTANCE = 0.4
-
 export default async (text: string) => {
 	const vector = await getEmbedding(text)
 	log('SEARCH', 'searchByVector', () => `text: ${text.slice(0, 50)}`)
@@ -16,7 +15,7 @@ export default async (text: string) => {
 	const vector_buffer = Buffer.from(new Float32Array(vector).buffer)
 	const results = searchChunkByVector().all(vector_buffer) as Array<{ chunk_id: string; distance: number }>
 
-	const filtered = results.filter(r => r.distance < MAX_VECTOR_DISTANCE)
+	const filtered = results.filter(r => r.distance < max_vector_distance)
 	log('SEARCH', 'searchByVector results', () => `count: ${results.length}, filtered: ${filtered.length}`)
 
 	return filtered.map((item, index) => ({

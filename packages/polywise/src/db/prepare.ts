@@ -1,3 +1,4 @@
+import { chunk_vector_top_k, keyword_search_limit, node_vector_top_k } from '@core/consts/search'
 import { env } from '@core/env'
 
 import type Database from 'better-sqlite3'
@@ -17,7 +18,7 @@ export const searchChunkByVector = (): Database.Statement => {
 		SELECT c.id as chunk_id, distance
 		FROM vec.chunk_vec v
 		JOIN chunk c ON c.rowid = v.rowid
-		WHERE v.vectors MATCH vec_f32(?) AND k = 20
+		WHERE v.vectors MATCH vec_f32(?) AND k = ${chunk_vector_top_k}
 		ORDER BY distance
 	`)
 }
@@ -29,7 +30,7 @@ export const searchChunkByKeywords = (): Database.Statement => {
 		JOIN chunk c ON c.rowid = fts.rowid
 		WHERE chunk_keywords_fts MATCH ?
 		ORDER BY rank
-		LIMIT 20
+		LIMIT ${keyword_search_limit}
 	`)
 }
 
@@ -102,7 +103,7 @@ export const getNodeByVector = (): Database.Statement => {
 	return env.sqlite.prepare(`
 		SELECT n.id, n.name, n.rowid, distance
 		FROM vec.node_vec v JOIN node n ON n.rowid = v.rowid
-		WHERE v.vectors MATCH vec_f32(?) AND k = 50
+		WHERE v.vectors MATCH vec_f32(?) AND k = ${node_vector_top_k}
 		ORDER BY distance
 	`)
 }

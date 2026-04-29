@@ -1,3 +1,10 @@
+import {
+	answer_vector_rrf_weight,
+	keyword_rrf_weight,
+	question_vector_rrf_weight,
+	recall_rrf_weight,
+	rrf_k
+} from '@core/consts/search'
 import { log } from '@core/utils'
 
 interface SearchResult {
@@ -18,7 +25,6 @@ export default (
 	kw_list: Array<SearchResult>,
 	q_list: Array<SearchResult>,
 	ans_list: Array<SearchResult>,
-	k: number = 60,
 	recall_list: Array<SearchResult> = []
 ) => {
 	const score_map = new Map<string, number>()
@@ -33,7 +39,7 @@ export default (
 	) => {
 		list.forEach(item => {
 			const current_score = score_map.get(item.chunk_id) || 0
-			const additional_score = weight * (1 / (k + item.rank))
+			const additional_score = weight * (1 / (rrf_k + item.rank))
 
 			score_map.set(item.chunk_id, current_score + additional_score)
 			if (isRecall) recall_chunk_ids.add(item.chunk_id)
@@ -41,10 +47,10 @@ export default (
 		})
 	}
 
-	applyRrf(kw_list, 2, false, true)
-	applyRrf(q_list, 2)
-	applyRrf(ans_list, 1)
-	applyRrf(recall_list, 1, true)
+	applyRrf(kw_list, keyword_rrf_weight, false, true)
+	applyRrf(q_list, question_vector_rrf_weight)
+	applyRrf(ans_list, answer_vector_rrf_weight)
+	applyRrf(recall_list, recall_rrf_weight, true)
 
 	const sorted_rrf = Array.from(score_map.entries())
 		.map(([chunk_id, rrf_score]) => ({ chunk_id, rrf_score }))

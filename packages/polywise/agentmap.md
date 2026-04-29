@@ -68,7 +68,7 @@ This document provides an overview of the packages/polywise module structure and
 					"getBashTools": "Sandbox-backed bash tool builder with command risk matching, audit review, and child_process proxy execution for flagged commands"
 				},
 				"tools": {
-					"desc": "Bash sandboxing tools via bash-tool, local skill search/read/create/update/rebuild tooling plus Available Skills system-prompt summary injection, with skill_map persisted as name + description only and skill_tool resolving directory and SKILL.md paths from skill name at runtime; global custom tool routing and lazy-loading via meta_tool as the only bridge for custom tool execution, session-scoped plan management, session database message search by content and created_at range, and read-only memory/wiki search tools with superego trigger; initDefaults now also ensures app_path/patch exists and seeds a built-in skills/skill-creator/SKILL.md meta-skill, while error_collect_tool records raw tool_call_errors and links failure-like outputs into telemetry patch aggregation",
+					"desc": "Bash sandboxing tools via bash-tool, local skill search/read/create/update/rebuild tooling plus Available Skills system-prompt summary injection, with skill_map persisted as name + description only and skill_tool resolving directory and SKILL.md paths from skill name at runtime; global custom tool routing and lazy-loading via meta_tool as the only bridge for custom tool execution, session-scoped plan management, session database message search by content and created_at range, read-only memory/wiki search tools with superego trigger, and search_file_tool now using rg-based content search with per-call timeout fallback instead of recursive grep; initDefaults now also ensures app_path/patch exists and seeds a built-in skills/skill-creator/SKILL.md meta-skill, while error_collect_tool records raw tool_call_errors and links failure-like outputs into telemetry patch aggregation",
 					"role": "Folder",
 					"cron.ts": "Create/list/read/update/remove cron jobs backed by app.app_path/cron.json with incremental runtime reload and physical directory removal",
 					"meta": "Manage global custom tool routing, rebuild minimal custom_tools_map metadata with name and description only, resolve per-tool readme.md and index.mjs paths from tools_dir + name at runtime, expose fuzzy search/read/execute/create/remove actions, return input_schema only from read/search by dynamically loading each tool module, and lazily execute per-tool index.mjs modules only through meta_tool bridge with z.fromJSONSchema-based input validation",
@@ -100,7 +100,10 @@ This document provides an overview of the packages/polywise module structure and
 				"role": "Folder",
 				"index.ts": { "desc": "RPC routers aggregation and type export", "role": "Index" },
 				"save.ts": { "desc": "Save content to memory", "role": "RPC" },
-				"search.ts": { "desc": "Search with keywords/vector/rrf/rerank pipeline", "role": "RPC" },
+				"search.ts": {
+					"desc": "Search RPC exposing keyword/vector/recall/rerank pipeline inputs without separate time-ranking mode",
+					"role": "RPC"
+				},
 				"setActive.ts": { "desc": "Set active workspace/session state", "role": "RPC" },
 				"remove.ts": { "desc": "Remove content by id", "role": "RPC" },
 				"update.ts": { "desc": "Update content by id", "role": "RPC" },
@@ -148,6 +151,10 @@ This document provides an overview of the packages/polywise module structure and
 				"index.ts": { "desc": "DB module exports", "role": "Index" },
 				"initSql.ts": { "desc": "Virtual table initialization", "role": "Module" },
 				"migrate.ts": { "desc": "Migration runner", "role": "Module" },
+				"prepare.ts": {
+					"desc": "Prepared sqlite/sqlite-vec search statements with centralized search constant limits",
+					"role": "Module"
+				},
 				"schema": {
 					"article.ts": {
 						"desc": "Article storage schema with optional document_id, title, path, content, source classifier(for: linkcase|wiki|memory|user), scope ownership(scope_type: global|project|agent + scope_id), data origin(source: agent|superego), metadata, and sop flag",
@@ -196,7 +203,10 @@ This document provides an overview of the packages/polywise module structure and
 			},
 			"io": {
 				"save": { "desc": "Article and Document saving logic", "role": "Folder" },
-				"search": { "desc": "Search pipeline with keywords/vector/rrf/rerank", "role": "Folder" },
+				"search": {
+					"desc": "Search pipeline with keyword/vector recall, semantic filtering, light boost correction, and rerank/time-weighted article scoring",
+					"role": "Folder"
+				},
 				"forget.ts": { "desc": "Memory forgetting logic", "role": "Module" },
 				"recall.ts": { "desc": "Memory recall logic", "role": "Module" },
 				"update.ts": { "desc": "Memory update logic", "role": "Module" }
@@ -212,6 +222,10 @@ This document provides an overview of the packages/polywise module structure and
 				"app.ts": { "desc": "Application constants", "role": "Constant" },
 				"mem.ts": { "desc": "Memory system constants", "role": "Constant" },
 				"pipeline.ts": { "desc": "Pipeline constants", "role": "Constant" },
+				"search.ts": {
+					"desc": "Centralized search thresholds, weights, and sqlite-vec limits",
+					"role": "Constant"
+				},
 				"prompts": {
 					"desc": "Centralized prompt builders for FST agents, tools, and system. All getXPrompt functions are pure functions receiving preprocessed plain data (no Session dependency).",
 					"role": "Folder",

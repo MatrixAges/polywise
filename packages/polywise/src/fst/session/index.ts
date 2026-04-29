@@ -47,7 +47,6 @@ export default class Index {
 	project = null as Project | null
 	model_messages = [] as Array<Message>
 	context = {} as Context
-	cwd = ''
 	prefill = ''
 
 	permission = null as Permission | null
@@ -65,6 +64,10 @@ export default class Index {
 	update_at = Date.now()
 	archived_at = null as null | number
 	superego_append_count = 0
+
+	get cwd() {
+		return this.project?.dir || this.files_dir
+	}
 
 	get scope(): SessionScope {
 		if (this.project) {
@@ -119,9 +122,6 @@ export default class Index {
 		this.event = event
 
 		await this.initSession(is_cron, title)
-
-		this.cwd = this.project?.dir || this.files_dir
-
 		await this.loadSkillMap()
 		await this.loadCustomToolsMap()
 

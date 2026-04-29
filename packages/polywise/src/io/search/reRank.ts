@@ -1,3 +1,12 @@
+import {
+	article_relevance_score_weight,
+	article_time_decay_per_day,
+	article_time_fallback,
+	article_time_score_weight,
+	min_article_rerank_score,
+	min_keyword_rerank_score,
+	min_rerank_score
+} from '@core/consts/search'
 import { article, chunk } from '@core/db/schema'
 import { getArticles, getChunks } from '@core/db/services'
 import { env } from '@core/env'
@@ -37,10 +46,6 @@ export interface RerankedArticleResult extends ArticleSearchResult {
 	content: string
 }
 
-const MIN_RERANK_SCORE = 0.3
-const MIN_ARTICLE_RERANK_SCORE = 0.3
-const MIN_KEYWORD_RERANK_SCORE = 0.15
-
 const calculateFinalScore = (
 	rerank_score: number,
 	retrieval_score: number,
@@ -48,8 +53,8 @@ const calculateFinalScore = (
 	is_article: boolean = false,
 	from_keyword: boolean = false
 ) => {
-	let min_score = is_article ? MIN_ARTICLE_RERANK_SCORE : MIN_RERANK_SCORE
-	if (from_keyword) min_score = MIN_KEYWORD_RERANK_SCORE
+	let min_score = is_article ? min_article_rerank_score : min_rerank_score
+	if (from_keyword) min_score = min_keyword_rerank_score
 
 	if (rerank_score < min_score) return 0
 
@@ -60,6 +65,15 @@ const calculateFinalScore = (
 	} else {
 		return 0.4 * retrieval_score + 0.6 * rerank_score
 	}
+}
+
+const getTimeWeight = (updated_at: Date | null) => {
+	if (!updated_at) return article_time_fallback
+
+	const day_ms = 24 * 60 * 60 * 1000
+	const days_ago = Math.max(0, (Date.now() - updated_at.getTime()) / day_ms)
+
+	return 1 / (1 + days_ago * article_time_decay_per_day)
 }
 
 const rerankChunk = async (query: string, results: Array<SearchResult>) => {
@@ -154,7 +168,7 @@ const rerankArticle = async (
 		const content = content_map.get(doc.article_id) || ''
 
 		const rerank_score = await env.rerank_context.rank(query, content)
-		const final_score = calculateFinalScore(
+		const relevance_score = calculateFinalScore(
 			rerank_score,
 			doc.normalized_rrf_score,
 			doc.rrf_rank,
@@ -162,7 +176,11 @@ const rerankArticle = async (
 			doc.from_keyword
 		)
 
-		if (final_score === 0) continue
+		if (relevance_score === 0) continue
+
+		const time_weight = getTimeWeight(doc.updated_at)
+		const final_score =
+			relevance_score * article_relevance_score_weight + time_weight * article_time_score_weight
 
 		reranked.push({
 			...doc,
