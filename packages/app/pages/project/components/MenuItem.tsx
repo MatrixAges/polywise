@@ -2,7 +2,7 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { DotsSixVerticalIcon } from '@phosphor-icons/react'
 import { useMemoizedFn } from 'ahooks'
-import { ChevronDown, ChevronRight, MessageCirclePlus } from 'lucide-react'
+import { ChevronDown, ChevronRight, Folders, MessageCirclePlus } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import RenameInput from '@/pages/session/components/RenameInput'
@@ -26,7 +26,8 @@ const Index = (props: IPropsMenuItem) => {
 		onChangeRenameValue,
 		onCancelRename,
 		renameProject,
-		getMoreSessions
+		getMoreSessions,
+		setFilesProjectId
 	} = useModel()
 
 	const onClickProject = useMemoizedFn(() => {
@@ -108,6 +109,13 @@ const Index = (props: IPropsMenuItem) => {
 						{...props_drag}
 					>
 						<DotsSixVerticalIcon className='size-3.5' weight='bold'></DotsSixVerticalIcon>
+					</button>
+					<button
+						className='icon_button small'
+						type='button'
+						onClick={() => setFilesProjectId(project.id)}
+					>
+						<Folders className='size-3'></Folders>
 					</button>
 					<button className='icon_button small' type='button' onClick={onCreateSession}>
 						<MessageCirclePlus className='size-3'></MessageCirclePlus>

@@ -13,6 +13,7 @@ import type { ChangeEvent } from 'react'
 export default class Index {
 	selected_project_id = ''
 	selected_session_id = ''
+	files_project_id = ''
 	rename_project_id = ''
 	rename_session_id = ''
 	rename_value = ''
@@ -35,6 +36,7 @@ export default class Index {
 			[
 				{ project_selected_project_id: 'selected_project_id' },
 				{ project_selected_session_id: 'selected_session_id' },
+				'files_project_id',
 				'expand_project_ids'
 			],
 			this
@@ -65,6 +67,10 @@ export default class Index {
 
 	setSelectedSession(session_id: string) {
 		this.selected_session_id = session_id
+	}
+
+	setFilesProjectId(v: string) {
+		this.files_project_id = v
 	}
 
 	onRenameProject(project_id: string, title: string) {
