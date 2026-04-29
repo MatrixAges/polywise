@@ -11,18 +11,21 @@ import Model from './model'
 export interface IProps {
 	paths: Array<string>
 	className?: string
+	flex?: boolean
+	search?: boolean
+	colored_icons?: boolean
 	onSelectPath: (v: { directory: boolean; path: string }) => void
 }
 
 const Index = (props: IProps) => {
-	const { paths, className, onSelectPath } = props
+	const { paths, className, flex, search, colored_icons, onSelectPath } = props
 	const [x] = useState(() => container.resolve(Model))
 	const global = useGlobal()
 
 	useLayoutEffect(() => {
 		if (!paths.length || !x.container) return
 
-		x.init({ paths, onSelectPath })
+		x.init({ paths, search, colored_icons, onSelectPath })
 	}, [x.container])
 
 	useLayoutEffect(() => {
@@ -44,16 +47,20 @@ const Index = (props: IProps) => {
 
 	return (
 		<div
-			className={
-				className ||
+			className={$cx(
 				`
 				overflow-y-auto
+			`,
+				className,
+				flex
+					? 'flex-tree h-full min-h-0'
+					: `
 				h-[400px]
-				py-4
+				py-2.5
 				rounded-xl
 				border border-border-gray!
 			`
-			}
+			)}
 			style={style}
 			ref={setContainer}
 		></div>

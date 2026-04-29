@@ -40,6 +40,7 @@ export default class Index {
 			[
 				{ project_selected_project_id: 'selected_project_id' },
 				{ project_selected_session_id: 'selected_session_id' },
+				{ project_side_panel_open: 'side_panel_open' },
 				'files_project_id',
 				'expand_project_ids'
 			],
@@ -51,6 +52,10 @@ export default class Index {
 		await this.getProjectList()
 
 		this.watchSessionStatus()
+
+		if (this.files_project_id && this.side_panel_open) {
+			this.setFilesProjectId()
+		}
 	}
 
 	setSelectedProject(project_id: string, click_by_session?: boolean) {
@@ -105,11 +110,15 @@ export default class Index {
 		if (this.add_modal_open) await this.modal_files.init(home_dir)
 	}
 
-	async setFilesProjectId(v: string) {
-		this.files_project_id = v
+	async setFilesProjectId(index?: number) {
+		const project = index
+			? this.projects[index].project
+			: this.projects.find(item => item.project.id === this.files_project_id)!.project
+
+		this.files_project_id = project.id
 		this.side_panel_open = true
 
-		await this.project_files.init(v)
+		await this.project_files.init(project.dir, { dir_only: false, show_hidden: true })
 	}
 
 	async getProjectList() {

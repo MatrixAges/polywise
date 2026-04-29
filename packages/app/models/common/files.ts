@@ -15,6 +15,8 @@ interface IArgsSelectPath {
 
 @injectable()
 export default class Index {
+	dir_only = true
+	show_hidden = false
 	paths = [] as Array<string>
 	root_path = ''
 	input_path = ''
@@ -22,7 +24,11 @@ export default class Index {
 	loaded_path_map = {} as Record<string, boolean>
 
 	constructor() {
-		makeAutoObservable(this, { loaded_path_map: false }, { autoBind: true })
+		makeAutoObservable(
+			this,
+			{ dir_only: false, show_hidden: false, loaded_path_map: false },
+			{ autoBind: true }
+		)
 	}
 
 	setInputPath(value: string) {
@@ -45,7 +51,10 @@ export default class Index {
 		return `${this.root_path}/${target_path}`
 	}
 
-	async init(dir: string) {
+	async init(dir: string, options?: Pick<Index, 'dir_only' | 'show_hidden'>) {
+		if (options?.dir_only !== undefined) this.dir_only = options.dir_only
+		if (options?.show_hidden !== undefined) this.show_hidden = options.show_hidden
+
 		this.root_path = dir
 		this.input_path = dir
 
@@ -86,7 +95,11 @@ export default class Index {
 
 		if (mode === 'append' && this.loaded_path_map[next_path]) return
 
-		const list = await rpc.file.list.query({ path: next_path, dir_only: true })
+		const list = await rpc.file.list.query({
+			path: next_path,
+			dir_only: this.dir_only,
+			show_hidden: this.show_hidden
+		})
 
 		const next_paths = list.map(item => this.getRelativePath(item.dir))
 		const current_paths = mode === 'replace' ? [] : this.paths
@@ -97,6 +110,8 @@ export default class Index {
 	}
 
 	reset() {
+		this.dir_only = true
+		this.show_hidden = false
 		this.paths = []
 		this.root_path = ''
 		this.input_path = ''

@@ -14,18 +14,30 @@ export default class Index {
 		makeAutoObservable(this, { container: false, tree: false }, { autoBind: true })
 	}
 
-	init(args: Pick<IProps, 'paths' | 'onSelectPath'>) {
-		const { paths, onSelectPath } = args
+	init(args: Pick<IProps, 'paths' | 'search' | 'colored_icons' | 'onSelectPath'>) {
+		const { paths, search = true, colored_icons, onSelectPath } = args
 
 		if (this.tree) return this.syncPaths(paths)
 
 		const tree = new FileTree({
 			preparedInput: prepareFileTreeInput(paths, { flattenEmptyDirectories: true }),
-			search: true,
-			icons: 'standard',
+			search,
+			icons: colored_icons ? { set: 'complete', colored: true } : 'standard',
 			flattenEmptyDirectories: true,
 			initialExpansion: 'closed',
 			unsafeCSS: `
+                  [data-file-tree-virtualized-scroll='true']{
+                        scrollbar-width:none;
+                  }
+
+                  [data-file-tree-virtualized-scroll='true']:-webkit-scrollbar {
+                        display: none;
+                  }
+
+                  button[data-type='item']{
+                        margin:0;
+                  }
+                  
 			button[data-type='item'] > div[data-item-section='content'] {
 			      height:100%;
 			      display:flex;

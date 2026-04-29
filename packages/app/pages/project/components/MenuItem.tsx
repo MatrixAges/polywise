@@ -113,7 +113,7 @@ const Index = (props: IPropsMenuItem) => {
 					<button
 						className='icon_button small'
 						type='button'
-						onClick={() => setFilesProjectId(project.id)}
+						onClick={() => setFilesProjectId(index)}
 					>
 						<Folders className='size-3'></Folders>
 					</button>
