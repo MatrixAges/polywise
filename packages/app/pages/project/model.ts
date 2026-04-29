@@ -18,6 +18,7 @@ export default class Index {
 	rename_value = ''
 	projects = [] as Array<{ project: Project; sessions: Array<Session>; has_more: boolean }>
 	add_modal_open = false
+	side_panel_open = false
 	expand_project_ids = [] as Array<string>
 	page_map = new Map<string, number>()
 
@@ -71,10 +72,6 @@ export default class Index {
 		this.selected_session_id = session_id
 	}
 
-	setFilesProjectId(v: string) {
-		this.files_project_id = v
-	}
-
 	onRenameProject(project_id: string, title: string) {
 		this.rename_project_id = project_id
 		this.rename_value = title
@@ -100,7 +97,14 @@ export default class Index {
 
 		const home_dir = await rpc.file.homedir.query()
 
-		if (this.add_modal_open) this.modal_files.init(home_dir)
+		if (this.add_modal_open) await this.modal_files.init(home_dir)
+	}
+
+	async setFilesProjectId(v: string) {
+		this.files_project_id = v
+		this.side_panel_open = true
+
+		await this.project_files.init(v)
 	}
 
 	async getProjectList() {
