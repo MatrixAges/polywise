@@ -174,7 +174,8 @@ const Index = (props: IPropsMenu) => {
 				className='
 					flex
 					items-center justify-between
-					px-3 py-1.5
+					h-8
+					px-3
 					border-b border-border-light
 				'
 			>
