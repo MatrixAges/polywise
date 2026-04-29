@@ -3,7 +3,7 @@ import { number, object, string } from 'zod'
 import { getProjectSessions } from '../../db/services'
 import { p } from '../../utils/trpc'
 
-const page_size = 10
+const page_size = 6
 
 const input_type = object({ project_id: string(), page: number().int().min(1) })
 

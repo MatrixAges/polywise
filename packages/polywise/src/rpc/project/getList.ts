@@ -1,7 +1,7 @@
 import { getProjects, getProjectSessions } from '../../db/services'
 import { p } from '../../utils/trpc'
 
-const page_size = 10
+const page_size = 6
 
 export default p.query(async () => {
 	const projects = await getProjects({ orderBy: 'asc' })

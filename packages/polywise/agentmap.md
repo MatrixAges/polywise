@@ -176,7 +176,7 @@ This document provides an overview of the packages/polywise module structure and
 					"role": "Folder"
 				},
 				"project": {
-					"desc": "Project domain RPC procedures for project list, project ordering, project-todo binding, and project file detail lookup. getList returns project/session/todo metadata without scanning project directories; file trees are loaded on demand through rpc/file/list and file content through getFileDetail. Project sort now reorders against the ascending project list and reuses the shared arrayMove helper before persisting sequential order values. Project remove now cascades through project-linked sessions by reusing the shared session removal helper before deleting the project itself. Session CRUD for project usage is shared through the session router.",
+					"desc": "Project domain RPC procedures for project list, project ordering, project-todo binding, and project file detail lookup. getList returns project/session/todo metadata without scanning project directories, and both getList/getMoreSessions paginate project-owned sessions in pages of 6; file trees are loaded on demand through rpc/file/list and file content through getFileDetail. Project sort now reorders against the ascending project list and reuses the shared arrayMove helper before persisting sequential order values. Project remove now cascades through project-linked sessions by reusing the shared session removal helper before deleting the project itself. Session CRUD for project usage is shared through the session router.",
 					"role": "Folder"
 				}
 			},
