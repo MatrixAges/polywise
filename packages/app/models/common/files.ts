@@ -22,6 +22,7 @@ export default class Index {
 	input_path = ''
 	tree_version = 0
 	loaded_path_map = {} as Record<string, boolean>
+	select_file_path = ''
 
 	constructor() {
 		makeAutoObservable(
@@ -64,9 +65,9 @@ export default class Index {
 	async selectPath(args: IArgsSelectPath) {
 		const { directory, path } = args
 
-		if (!directory) return
-
 		const target_path = this.getAbsolutePath(path)
+
+		if (!directory) return (this.select_file_path = target_path)
 
 		await this.loadDirectory({ target_path, mode: 'append' })
 
