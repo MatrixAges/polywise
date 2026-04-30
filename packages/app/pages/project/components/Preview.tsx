@@ -12,13 +12,7 @@ const Index = () => {
 	const file = $copy(project_files.select_file)!
 
 	return (
-		<div
-			className='
-				flex flex-1
-				w-full h-full
-				min-w-0 min-h-0
-			'
-		>
+		<div className='flex h-full w-full'>
 			<Virtualizer
 				className='
 					overflow-y-scroll
@@ -48,7 +42,7 @@ const Index = () => {
                               `
 					}}
 					style={{
-						'--diffs-font-size': '13px',
+						'--diffs-font-size': '12px',
 						'--diffs-font-family': 'var(--font_family)',
 						'--diffs-line-height': 1.62
 					}}
