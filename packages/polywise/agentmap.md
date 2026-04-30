@@ -203,6 +203,10 @@ This document provides an overview of the packages/polywise module structure and
 			"db": {
 				"drizzle.ts": { "desc": "Database connection and drizzle instance", "role": "Module" },
 				"index.ts": { "desc": "DB module exports", "role": "Index" },
+				"schemas.ts": {
+					"desc": "Reusable drizzle-zod input schemas derived from Drizzle tables; currently exports todo insert/create/update schemas for RPC reuse.",
+					"role": "Schema"
+				},
 				"initSql.ts": { "desc": "Virtual table initialization", "role": "Module" },
 				"migrate.ts": { "desc": "Migration runner", "role": "Module" },
 				"prepare.ts": {

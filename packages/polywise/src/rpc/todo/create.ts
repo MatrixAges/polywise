@@ -1,21 +1,11 @@
+import { todo_create_input_schema } from '@core/db/schemas'
 import { addProjectTodo, addTodo, getProjectTodo } from '@core/db/services'
 import { p } from '@core/utils'
 import { eq } from 'drizzle-orm'
-import { number, object, string, enum as zod_enum } from 'zod'
 
 import { project_todo } from '../../db/schema'
 
-const input_type = object({
-	title: string(),
-	description: string().optional(),
-	priority: zod_enum(['urgent', 'high', 'medium', 'low', 'none']).optional(),
-	status: zod_enum(['draft', 'pending', 'processing', 'done', 'error', 'archive']).optional(),
-	result: string().optional(),
-	error: string().optional(),
-	estimate: number().int().optional(),
-	due_at: number().int().optional(),
-	project_id: string().optional()
-})
+const input_type = todo_create_input_schema
 
 const getNextProjectTodoOrder = async (project_id: string) => {
 	const rows = await getProjectTodo({ where: eq(project_todo.project_id, project_id) })

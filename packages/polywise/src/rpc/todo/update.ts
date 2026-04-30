@@ -1,21 +1,11 @@
+import { todo_update_input_schema } from '@core/db/schemas'
 import { getTodo, setTodo } from '@core/db/services'
 import { p } from '@core/utils'
 import { eq } from 'drizzle-orm'
-import { number, object, string, enum as zod_enum } from 'zod'
 
 import { todo } from '../../db/schema'
 
-const input_type = object({
-	id: string(),
-	title: string().optional(),
-	description: string().nullable().optional(),
-	priority: zod_enum(['urgent', 'high', 'medium', 'low', 'none']).optional(),
-	status: zod_enum(['draft', 'pending', 'processing', 'done', 'error', 'archive']).optional(),
-	result: string().nullable().optional(),
-	error: string().nullable().optional(),
-	estimate: number().int().nullable().optional(),
-	due_at: number().int().nullable().optional()
-})
+const input_type = todo_update_input_schema
 
 export default p.input(input_type).mutation(async ({ input }) => {
 	const current_todo = await getTodo(eq(todo.id, input.id))
