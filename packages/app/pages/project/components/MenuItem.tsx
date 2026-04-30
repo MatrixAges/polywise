@@ -44,6 +44,8 @@ const Index = (props: IPropsMenuItem) => {
 		event.stopPropagation()
 
 		createSession(project.id)
+		setSelectedProject(project.id)
+		setFilesProjectId(index)
 	})
 
 	const LeftIcon = expand ? ChevronDown : ChevronRight
@@ -77,7 +79,7 @@ const Index = (props: IPropsMenuItem) => {
 			>
 				<div
 					className='
-						flex
+						flex flex-1
 						items-center
 						gap-1
 					'

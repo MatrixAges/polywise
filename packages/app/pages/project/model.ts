@@ -58,10 +58,10 @@ export default class Index {
 		}
 	}
 
-	setSelectedProject(project_id: string, click_by_session?: boolean) {
+	setSelectedProject(project_id: string, click_by_session?: boolean, project_index?: number) {
 		this.selected_project_id = project_id
 
-		if (click_by_session) return
+		if (click_by_session) return this.setFilesProjectId(project_index)
 
 		const index = this.expand_project_ids.findIndex(item => item === project_id)
 
@@ -120,7 +120,7 @@ export default class Index {
 	async setFilesProjectId(index?: number) {
 		let project!: Project
 
-		if (index) {
+		if (index !== undefined) {
 			project = this.projects[index].project
 		} else if (this.files_project_id) {
 			project = this.projects.find(item => item.project.id === this.files_project_id)!.project

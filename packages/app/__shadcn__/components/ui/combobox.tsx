@@ -64,7 +64,7 @@ function ComboboxInput({
   return (
     <InputGroup className={cn("w-auto h-8 border-none",ghost&&'bg-transparent!', className)} >
       <ComboboxPrimitive.Input
-        render={<InputGroupInput className={cn("h-8",ghost&&'px-0! field-sizing-content text-std-400 focus:bg-transparent')} disabled={disabled} />}
+        render={<InputGroupInput className={cn("h-8",ghost&&'px-0! text-xsm! field-sizing-content text-std-400 focus:bg-transparent')} disabled={disabled} />}
         {...props}
       />
       <InputGroupAddon className="py-0!" align="inline-end">

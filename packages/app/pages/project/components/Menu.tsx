@@ -161,7 +161,7 @@ const Index = () => {
 								flex flex-col
 								w-full
 								gap-1
-								px-1.5 pt-1.5
+								px-1.5
 								pb-3
 							'
 						>

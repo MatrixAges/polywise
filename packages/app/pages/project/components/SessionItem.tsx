@@ -30,7 +30,7 @@ const Index = (props: IPropsSessionItem) => {
 	const onClick = () => {
 		if (renaming) return
 
-		setSelectedProject(project_id, true)
+		setSelectedProject(project_id, true, project_index)
 		setSelectedSession(item.id)
 	}
 
