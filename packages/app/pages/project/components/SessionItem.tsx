@@ -17,7 +17,8 @@ const Index = (props: IPropsSessionItem) => {
 		setSelectedSession,
 		onChangeRenameValue,
 		onCancelRename,
-		renameSession
+		renameSession,
+		setContentTab
 	} = useModel()
 
 	const Status = useMemo(() => {
@@ -32,6 +33,7 @@ const Index = (props: IPropsSessionItem) => {
 
 		setSelectedProject(project_id, true, project_index)
 		setSelectedSession(item.id)
+		setContentTab('session')
 	}
 
 	return (

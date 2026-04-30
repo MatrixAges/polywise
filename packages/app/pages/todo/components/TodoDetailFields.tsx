@@ -86,7 +86,6 @@ const Index = (props: IPropsTodoDetailFields) => {
 					<option value='urgent'>Urgent</option>
 				</select>
 			</div>
-
 			<div className='flex items-center gap-3'>
 				<div className='flex w-24 items-center gap-2'>
 					<Clock size={14} className='text-std-400' />
