@@ -17,7 +17,7 @@ const Index = () => {
 
 	return (
 		<Context value={x}>
-			<div className='flex h-full overflow-hidden'>
+			<div className='bg-background flex h-full overflow-hidden'>
 				<Menu></Menu>
 				<TodoList></TodoList>
 				{x.detail_panel_open && <TodoDetail></TodoDetail>}

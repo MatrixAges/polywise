@@ -3,12 +3,31 @@ import { useMemoizedFn } from 'ahooks'
 import { Plus } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
+import { Badge } from '@/__shadcn__/components/ui/badge'
+import { Button } from '@/__shadcn__/components/ui/button'
+import { Input } from '@/__shadcn__/components/ui/input'
+
 import { useModel } from '../context'
 import StatusGroup from './StatusGroup'
 
+import type { KeyboardEvent } from 'react'
+
 const Index = () => {
-	const { current_title, current_todos, grouped_todos, status_configs, expanded_statuses, createTodo } = useModel()
+	const {
+		current_title,
+		current_todos,
+		grouped_todos,
+		status_configs,
+		expanded_statuses,
+		createTodo,
+		selected_filter
+	} = useModel()
 	const [input_value, setInputValue] = useState('')
+	const section_label = selected_filter === 'all' ? 'Inbox' : 'Project'
+	const section_desc =
+		selected_filter === 'all'
+			? 'Capture personal execution work before it turns into noise.'
+			: 'Track project execution in clear, status-driven groups.'
 
 	const onCreateTodo = useMemoizedFn(async () => {
 		if (!input_value.trim()) return
@@ -17,7 +36,7 @@ const Index = () => {
 		setInputValue('')
 	})
 
-	const onKeyDown = useMemoizedFn((event: React.KeyboardEvent) => {
+	const onKeyDown = useMemoizedFn((event: KeyboardEvent<HTMLInputElement>) => {
 		if (event.key === 'Enter') {
 			event.preventDefault()
 			onCreateTodo()
@@ -25,64 +44,138 @@ const Index = () => {
 	})
 
 	return (
-		<div className='flex min-w-0 flex-1 flex-col'>
+		<div
+			className='
+				flex flex-1 flex-col
+				min-w-0
+				bg-background
+			'
+		>
 			<div
 				className='
-					flex
-					items-center justify-between
-					h-8
-					px-3
-					border-b border-border-light
+					border-b border-border/60
 				'
 			>
-				<span
+				<div
 					className='
-						px-1 py-0.5
-						text-xsm text-std-500 font-medium
+						flex
+						items-start justify-between
+						gap-4
+						px-6 py-5
 					'
 				>
-					{current_title}
-				</span>
-				<span className='text-xsm text-std-400'>{current_todos.length} tasks</span>
-			</div>
-			<div className='flex-1 overflow-y-auto p-2'>
-				<div className='mb-2 flex gap-2'>
-					<input
-						className='
-							flex-1
-							px-2 py-1
-							rounded
-							text-sm
-							bg-transparent
-							border border-border-light
-						'
-						placeholder='New task'
-						value={input_value}
-						onChange={event => setInputValue(event.target.value)}
-						onKeyDown={onKeyDown}
-					/>
-					<button type='button' className='icon_button small' onClick={onCreateTodo}>
-						<Plus size={14}></Plus>
-					</button>
+					<div className='flex min-w-0 flex-col gap-1'>
+						<span
+							className='
+								text-[11px] text-muted-foreground font-medium tracking-[0.16em]
+								uppercase
+							'
+						>
+							{section_label}
+						</span>
+						<span
+							className='
+								text-2xl text-foreground font-semibold tracking-tight
+								truncate
+							'
+						>
+							{current_title}
+						</span>
+						<p className='text-muted-foreground text-sm'>{section_desc}</p>
+					</div>
+					<Badge variant='outline' className='rounded-full px-3 py-1 text-xs'>
+						{current_todos.length} tasks
+					</Badge>
 				</div>
-				<div className='flex flex-col'>
-					{status_configs.map(config => {
-						const todos = grouped_todos.get(config.key) || []
+			</div>
+			<div className='flex-1 overflow-y-auto'>
+				<div
+					className='
+						flex flex-col
+						w-full max-w-4xl
+						gap-5
+						px-6 py-6
+						mx-auto
+					'
+				>
+					<div
+						className='
+							p-3
+							rounded-3xl
+							bg-secondary/20
+							border border-border/60
+						'
+					>
+						<div className='flex items-center gap-3'>
+							<Input
+								className='bg-background/90 h-10 rounded-2xl'
+								placeholder='Create a task...'
+								value={input_value}
+								onChange={event => setInputValue(event.target.value)}
+								onKeyDown={onKeyDown}
+							></Input>
+							<Button
+								size='sm'
+								className='rounded-2xl px-4'
+								onClick={onCreateTodo}
+								disabled={!input_value.trim()}
+							>
+								<Plus size={14}></Plus>
+								New
+							</Button>
+						</div>
+					</div>
+					<div className='flex flex-col gap-3'>
+						{status_configs.map(config => {
+							const todos = grouped_todos.get(config.key) || []
 
-						if (todos.length === 0) return null
+							if (todos.length === 0) return null
 
-						return (
-							<StatusGroup
-								key={config.key}
-								status={config.key}
-								label={config.label}
-								icon={config.icon}
-								color={config.color}
-								todos={todos}
-								expanded={expanded_statuses.has(config.key)}
-							/>
-						)
-					})}
+							return (
+								<StatusGroup
+									key={config.key}
+									status={config.key}
+									label={config.label}
+									icon={config.icon}
+									color={config.color}
+									todos={todos}
+									expanded={expanded_statuses.has(config.key)}
+								/>
+							)
+						})}
+						{current_todos.length === 0 && (
+							<div
+								className='
+									px-6 py-12
+									rounded-3xl
+									text-center
+									bg-secondary/10
+									border border-dashed border-border/60
+								'
+							>
+								<div
+									className='
+										flex
+										items-center justify-center
+										size-11
+										mx-auto
+										mb-3
+										rounded-full
+										text-muted-foreground
+										bg-background
+									'
+								>
+									<Plus size={16}></Plus>
+								</div>
+								<div className='text-foreground text-base font-medium'>
+									No tasks in this view.
+								</div>
+								<div className='text-muted-foreground mt-1 text-sm'>
+									Start with a concise title and refine it from the inspector.
+								</div>
+							</div>
+						)}
+					</div>
 				</div>
 			</div>
 		</div>

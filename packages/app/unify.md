@@ -42,6 +42,13 @@ This routing table is scoped to folder-level matching. The matcher must use `pat
 			"packages/app/components/Session/index.tsx"
 		]
 	},
+	"pages/todo": {
+		"path_scope": "packages/app/pages/todo",
+		"sample_pool": [
+			"packages/app/pages/project/components/AddModal.tsx",
+			"packages/app/pages/session/components/RenameInput.tsx"
+		]
+	},
 	"pages/*": {
 		"path_scope": "packages/app/pages",
 		"sample_pool": ["packages/app/pages/workflow/index.tsx", "packages/app/pages/database/index.tsx"]

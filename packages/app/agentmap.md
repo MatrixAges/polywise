@@ -121,6 +121,74 @@ This document provides an overview of the packages/app module structure and arch
 			"browser": { "index.tsx": { "desc": "Browser page view", "role": "Page" } },
 			"database": { "index.tsx": { "desc": "Database page view", "role": "Page" } },
 			"notebook": { "index.tsx": { "desc": "Notebook page view", "role": "Page" } },
+			"todo": {
+				"context.ts": {
+					"desc": "Todo page model context provider and hook for the Linear-style task workspace",
+					"role": "Context"
+				},
+				"components": {
+					"Menu.tsx": {
+						"desc": "Todo sidebar navigation with Inbox and project scopes, count badges, and Linear-style section hierarchy",
+						"role": "Component"
+					},
+					"MenuItem.tsx": {
+						"desc": "Sidebar navigation row atom for Inbox and project filters with count badge and selected state",
+						"role": "Component"
+					},
+					"StatusGroup.tsx": {
+						"desc": "Collapsible status card group for task rows with count summary and expand state",
+						"role": "Component"
+					},
+					"TodoDetail.tsx": {
+						"desc": "Closable right-side inspector panel that appears after selecting a todo and hosts metadata plus notes editors",
+						"role": "Component"
+					},
+					"TodoDetailDescription.tsx": {
+						"desc": "Inspector notes editor card that syncs local textarea state with the selected todo before saving on blur",
+						"role": "Component"
+					},
+					"TodoDetailField.tsx": {
+						"desc": "Inspector metadata field row wrapper that standardizes icon, label, and control alignment",
+						"role": "Component"
+					},
+					"TodoDetailFields.tsx": {
+						"desc": "Inspector properties card using shadcn select and input controls for status, priority, estimate, and due date",
+						"role": "Component"
+					},
+					"TodoItem.tsx": {
+						"desc": "Task row atom with completion toggle, status and priority badges, metadata pills, and hover actions",
+						"role": "Component"
+					},
+					"TodoList.tsx": {
+						"desc": "Todo main column with workspace header, quick-create input, empty state, and status-grouped task cards",
+						"role": "Component"
+					},
+					"TodoPriorityBadge.tsx": {
+						"desc": "Priority badge atom that resolves semantic tone from the page model configuration",
+						"role": "Component"
+					},
+					"TodoStatusBadge.tsx": {
+						"desc": "Status badge atom that renders icon plus tone from the shared todo status config",
+						"role": "Component"
+					},
+					"index.ts": {
+						"desc": "Todo component exports",
+						"role": "Index"
+					}
+				},
+				"index.tsx": {
+					"desc": "Todo page view with Linear-style sidebar, grouped task list, and a closable right-side inspector shown on selection",
+					"role": "Page"
+				},
+				"model.ts": {
+					"desc": "Todo page state model for standalone and project task loading, filter selection, grouped status views, and inspector badge formatting helpers",
+					"role": "Model"
+				},
+				"types.ts": {
+					"desc": "Todo page local prop and display configuration types for sidebar rows, grouped tasks, and inspector atoms",
+					"role": "Type"
+				}
+			},
 			"project": {
 				"context.ts": {
 					"desc": "Project page action context provider and hook for nested project components to consume model methods without prop drilling",

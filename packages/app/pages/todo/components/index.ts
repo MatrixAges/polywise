@@ -1,3 +1,8 @@
 export { default as Menu } from './Menu'
 export { default as TodoDetail } from './TodoDetail'
+export { default as TodoDetailField } from './TodoDetailField'
+export { default as TodoDetailFields } from './TodoDetailFields'
+export { default as TodoDetailDescription } from './TodoDetailDescription'
 export { default as TodoList } from './TodoList'
+export { default as TodoPriorityBadge } from './TodoPriorityBadge'
+export { default as TodoStatusBadge } from './TodoStatusBadge'

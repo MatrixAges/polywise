@@ -1,131 +1,122 @@
 import { useMemoizedFn } from 'ahooks'
 import { BadgeAlert, Calendar, Clock, Flag } from 'lucide-react'
 
-import { useModel } from '../context'
+import { FieldGroup } from '@/__shadcn__/components/ui/field'
+import { Input } from '@/__shadcn__/components/ui/input'
+import {
+	Select,
+	SelectContent,
+	SelectGroup,
+	SelectItem,
+	SelectTrigger,
+	SelectValue
+} from '@/__shadcn__/components/ui/select'
 
+import { useModel } from '../context'
+import TodoDetailField from './TodoDetailField'
+
+import type { ChangeEvent } from 'react'
 import type { IPropsTodoDetailFields } from '../types'
 
 const Index = (props: IPropsTodoDetailFields) => {
 	const { todo } = props
-	const { updateTodoField, status_configs } = useModel()
+	const { updateTodoField, status_configs, priority_configs } = useModel()
 
-	const onStatusChange = useMemoizedFn((e: React.ChangeEvent<HTMLSelectElement>) => {
-		updateTodoField(todo.id, 'status', e.target.value)
+	const onStatusChange = useMemoizedFn((value: string) => {
+		updateTodoField(todo.id, 'status', value)
 	})
 
-	const onPriorityChange = useMemoizedFn((e: React.ChangeEvent<HTMLSelectElement>) => {
-		updateTodoField(todo.id, 'priority', e.target.value)
+	const onPriorityChange = useMemoizedFn((value: string) => {
+		updateTodoField(todo.id, 'priority', value === 'none' ? null : value)
 	})
 
-	const onEstimateChange = useMemoizedFn((e: React.ChangeEvent<HTMLInputElement>) => {
-		const value = e.target.value ? parseInt(e.target.value) : null
+	const onEstimateChange = useMemoizedFn((event: ChangeEvent<HTMLInputElement>) => {
+		const value = event.target.value ? Number(event.target.value) : null
 
 		updateTodoField(todo.id, 'estimate', value)
 	})
 
-	const onDueAtChange = useMemoizedFn((e: React.ChangeEvent<HTMLInputElement>) => {
-		const value = e.target.value ? new Date(e.target.value) : null
+	const onDueAtChange = useMemoizedFn((event: ChangeEvent<HTMLInputElement>) => {
+		const value = event.target.value ? new Date(event.target.value) : null
 
 		updateTodoField(todo.id, 'due_at', value)
 	})
 
-	const format_date = (date: Date | null | undefined) => {
+	const formatDate = (date: Date | null | undefined) => {
 		if (!date) return ''
 
 		return new Date(date).toISOString().split('T')[0]
 	}
 
 	return (
-		<div className='flex flex-col gap-3'>
-			<div className='flex items-center gap-3'>
-				<div className='flex w-24 items-center gap-2'>
-					<BadgeAlert size={14} className='text-std-400' />
-					<span className='text-xsm text-std-500'>Status</span>
-				</div>
-				<select
-					className='
-						flex-1
-						px-2 py-1
-						rounded
-						text-sm
-						bg-transparent
-						border border-border-light
-					'
-					value={todo.status}
-					onChange={onStatusChange}
-				>
-					{status_configs.map(config => (
-						<option key={config.key} value={config.key}>
-							{config.label}
-						</option>
-					))}
-				</select>
+		<div
+			className='
+				p-4
+				rounded-3xl
+				bg-background/70
+				border border-border/60
+			'
+		>
+			<div
+				className='
+					mb-4
+					text-sm text-foreground font-semibold tracking-tight
+				'
+			>
+				Properties
 			</div>
-
-			<div className='flex items-center gap-3'>
-				<div className='flex w-24 items-center gap-2'>
-					<Flag size={14} className='text-std-400' />
-					<span className='text-xsm text-std-500'>Priority</span>
-				</div>
-				<select
-					className='
-						flex-1
-						px-2 py-1
-						rounded
-						text-sm
-						bg-transparent
-						border border-border-light
-					'
-					value={todo.priority || 'none'}
-					onChange={onPriorityChange}
-				>
-					<option value='none'>None</option>
-					<option value='low'>Low</option>
-					<option value='medium'>Medium</option>
-					<option value='high'>High</option>
-					<option value='urgent'>Urgent</option>
-				</select>
-			</div>
-			<div className='flex items-center gap-3'>
-				<div className='flex w-24 items-center gap-2'>
-					<Clock size={14} className='text-std-400' />
-					<span className='text-xsm text-std-500'>Estimate</span>
-				</div>
-				<input
-					className='
-						flex-1
-						px-2 py-1
-						rounded
-						text-sm
-						bg-transparent
-						border border-border-light
-					'
-					type='number'
-					placeholder='Minutes'
-					value={todo.estimate || ''}
-					onChange={onEstimateChange}
-				/>
-			</div>
-
-			<div className='flex items-center gap-3'>
-				<div className='flex w-24 items-center gap-2'>
-					<Calendar size={14} className='text-std-400' />
-					<span className='text-xsm text-std-500'>Due Date</span>
-				</div>
-				<input
-					className='
-						flex-1
-						px-2 py-1
-						rounded
-						text-sm
-						bg-transparent
-						border border-border-light
-					'
-					type='date'
-					value={format_date(todo.due_at)}
-					onChange={onDueAtChange}
-				/>
-			</div>
+			<FieldGroup className='gap-4'>
+				<TodoDetailField icon={BadgeAlert} label='Status'>
+					<Select value={todo.status} onValueChange={onStatusChange}>
+						<SelectTrigger className='bg-background w-full rounded-2xl'>
+							<SelectValue></SelectValue>
+						</SelectTrigger>
+						<SelectContent align='start'>
+							<SelectGroup>
+								{status_configs.map(config => (
+									<SelectItem key={config.key} value={config.key}>
+										{config.label}
+									</SelectItem>
+								))}
+							</SelectGroup>
+						</SelectContent>
+					</Select>
+				</TodoDetailField>
+				<TodoDetailField icon={Flag} label='Priority'>
+					<Select value={todo.priority || 'none'} onValueChange={onPriorityChange}>
+						<SelectTrigger className='bg-background w-full rounded-2xl'>
+							<SelectValue></SelectValue>
+						</SelectTrigger>
+						<SelectContent align='start'>
+							<SelectGroup>
+								<SelectItem value='none'>None</SelectItem>
+								{priority_configs.map(config => (
+									<SelectItem key={config.key} value={config.key}>
+										{config.label}
+									</SelectItem>
+								))}
+							</SelectGroup>
+						</SelectContent>
+					</Select>
+				</TodoDetailField>
+				<TodoDetailField icon={Clock} label='Estimate'>
+					<Input
+						className='bg-background rounded-2xl'
+						type='number'
+						placeholder='Minutes'
+						value={todo.estimate ?? ''}
+						onChange={onEstimateChange}
+					></Input>
+				</TodoDetailField>
+				<TodoDetailField icon={Calendar} label='Due Date'>
+					<Input
+						className='bg-background rounded-2xl'
+						type='date'
+						value={formatDate(todo.due_at)}
+						onChange={onDueAtChange}
+					></Input>
+				</TodoDetailField>
+			</FieldGroup>
 		</div>
 	)
 }
