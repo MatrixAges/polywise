@@ -19,6 +19,7 @@ export default p.input(input_type).query(async ({ input }) => {
 
 	return {
 		name: path.basename(target_path),
-		contents
+		contents,
+		path: target_path
 	}
 })

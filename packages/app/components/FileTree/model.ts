@@ -31,7 +31,7 @@ export default class Index {
                         scrollbar-width:none;
                   }
 
-                  [data-file-tree-virtualized-scroll='true']:-webkit-scrollbar {
+                  [data-file-tree-virtualized-scroll='true']::-webkit-scrollbar {
                         display: none;
                   }
 

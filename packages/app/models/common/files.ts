@@ -23,6 +23,7 @@ export default class Index {
 	tree_version = 0
 	loaded_path_map = {} as Record<string, boolean>
 	select_file_path = ''
+	select_file = null as { name: string; contents: string; path: string } | null
 
 	constructor() {
 		makeAutoObservable(
@@ -67,7 +68,11 @@ export default class Index {
 
 		const target_path = this.getAbsolutePath(path)
 
-		if (!directory) return (this.select_file_path = target_path)
+		if (!directory) {
+			this.select_file_path = target_path
+
+			return this.loadFile()
+		}
 
 		await this.loadDirectory({ target_path, mode: 'append' })
 
@@ -110,6 +115,12 @@ export default class Index {
 		this.loaded_path_map = { ...current_loaded_path_map, [next_path]: true }
 	}
 
+	async loadFile() {
+		const res = await rpc.file.read.query({ path: this.select_file_path })
+
+		this.select_file = res
+	}
+
 	reset() {
 		this.dir_only = true
 		this.show_hidden = false
@@ -118,5 +129,7 @@ export default class Index {
 		this.input_path = ''
 		this.tree_version = 0
 		this.loaded_path_map = {}
+		this.select_file_path = ''
+		this.select_file = null
 	}
 }

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { Activity, useEffect, useState } from 'react'
 import { Folders } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 import { container } from 'tsyringe'
@@ -6,7 +6,7 @@ import { container } from 'tsyringe'
 import { Session } from '@/components'
 import { useGlobal } from '@/context'
 
-import { AddModal, Menu, SidePanel } from './components'
+import { AddModal, Menu, Preview, SidePanel } from './components'
 import { Context } from './context'
 import Model from './model'
 
@@ -32,11 +32,16 @@ const Index = () => {
 		<Context value={x}>
 			<div className='flex h-full overflow-hidden'>
 				{!global.setting.sidebar_collapsed && <Menu></Menu>}
-				{x.selected_session_id && (
-					<div className={$cx('h-full min-w-0 flex-1')}>
-						<Session type='page' id={x.selected_session_id} actions={Actions}></Session>
-					</div>
-				)}
+				<Activity mode={x.content_tab === 'session' ? 'visible' : 'hidden'}>
+					{x.selected_session_id && (
+						<div className={$cx('h-full min-w-0 flex-1')}>
+							<Session type='page' id={x.selected_session_id} actions={Actions}></Session>
+						</div>
+					)}
+				</Activity>
+				<Activity mode={x.content_tab === 'file' ? 'visible' : 'hidden'}>
+					{x.project_files.select_file && <Preview></Preview>}
+				</Activity>
 				{x.side_panel_open && <SidePanel></SidePanel>}
 			</div>
 			<AddModal></AddModal>

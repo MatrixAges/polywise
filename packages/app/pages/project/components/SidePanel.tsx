@@ -1,3 +1,4 @@
+import { useMemoizedFn } from 'ahooks'
 import { File, MessageSquareText, X } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
@@ -8,6 +9,12 @@ import { useModel } from '../context'
 const Index = () => {
 	const { side_panel_tab, content_tab, project_files, setSidePanelTab, toggleFilesProjectId, setContentTab } =
 		useModel()
+
+	const onSelectPath = useMemoizedFn(args => {
+		project_files.selectPath(args)
+
+		setContentTab('file')
+	})
 
 	return (
 		<div
@@ -59,7 +66,7 @@ const Index = () => {
 					paths={$copy(project_files.paths)}
 					flex
 					colored_icons
-					onSelectPath={project_files.selectPath}
+					onSelectPath={onSelectPath}
 					key={project_files.tree_version}
 				></FileTree>
 			</div>
