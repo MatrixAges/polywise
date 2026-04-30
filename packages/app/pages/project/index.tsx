@@ -33,20 +33,17 @@ const Index = () => {
 			<div className='flex h-full overflow-hidden'>
 				{!global.setting.sidebar_collapsed && <Menu></Menu>}
 				<div className='flex flex-1'>
-					<Activity mode={x.content_tab === 'session' ? 'visible' : 'hidden'}>
-						{x.selected_session_id && (
-							<div className={$cx('h-full min-w-0 flex-1')}>
-								<Session
-									type='page'
-									id={x.selected_session_id}
-									actions={Actions}
-								></Session>
-							</div>
-						)}
-					</Activity>
-					<Activity mode={x.content_tab === 'file' ? 'visible' : 'hidden'}>
-						{x.project_files.select_file && <Preview></Preview>}
-					</Activity>
+					{x.content_tab === 'session'
+						? x.selected_session_id && (
+								<div className={$cx('h-full min-w-0 flex-1')}>
+									<Session
+										type='page'
+										id={x.selected_session_id}
+										actions={Actions}
+									></Session>
+								</div>
+							)
+						: x.project_files.select_file && <Preview></Preview>}
 				</div>
 				{x.side_panel_open && <SidePanel></SidePanel>}
 			</div>
