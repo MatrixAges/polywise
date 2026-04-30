@@ -1,12 +1,13 @@
-import { X } from 'lucide-react'
+import { File, MessageSquareText, X } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
-import { FileTree, TextTabs } from '@/components'
+import { FileTree, Tabs, TextTabs } from '@/components'
 
 import { useModel } from '../context'
 
 const Index = () => {
-	const { side_panel_tab, project_files, setSidePanelTab, toggleFilesProjectId } = useModel()
+	const { side_panel_tab, content_tab, project_files, setSidePanelTab, toggleFilesProjectId, setContentTab } =
+		useModel()
 
 	return (
 		<div
@@ -31,8 +32,26 @@ const Index = () => {
 					active={side_panel_tab}
 					setActive={setSidePanelTab}
 				></TextTabs>
-				<div className='icon_button small mr-[-3px]' onClick={toggleFilesProjectId}>
-					<X></X>
+				<div className='flex items-center'>
+					<Tabs
+						items={[
+							{ key: 'session', Icon: MessageSquareText },
+							{ key: 'file', Icon: File }
+						]}
+						active={content_tab}
+						simple
+						onClick={setContentTab}
+					></Tabs>
+					<div
+						className='
+							w-px h-[14px]
+							mx-2
+							bg-border-light
+						'
+					></div>
+					<div className='icon_button small mr-[-3px]' onClick={toggleFilesProjectId}>
+						<X></X>
+					</div>
 				</div>
 			</div>
 			<div className='flex-1'>

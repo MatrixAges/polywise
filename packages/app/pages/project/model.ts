@@ -20,6 +20,7 @@ export default class Index {
 	add_modal_open = false
 	side_panel_open = false
 	side_panel_tab = 'files' as 'files' | 'todos'
+	content_tab = 'session' as 'session' | 'file'
 	expand_project_ids = [] as Array<string>
 	page_map = new Map<string, number>()
 
@@ -107,6 +108,10 @@ export default class Index {
 
 		this.files_project_id = ''
 		this.side_panel_open = false
+	}
+
+	setContentTab(v: string) {
+		this.content_tab = v as Index['content_tab']
 	}
 
 	async onToggleAddModal() {

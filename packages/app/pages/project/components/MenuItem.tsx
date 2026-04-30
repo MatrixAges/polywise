@@ -113,7 +113,11 @@ const Index = (props: IPropsMenuItem) => {
 						<DotsSixVerticalIcon className='size-3.5' weight='bold'></DotsSixVerticalIcon>
 					</button>
 					<button
-						className='icon_button small'
+						className='
+							opacity-0
+							group-hover:opacity-100
+							icon_button small
+						'
 						type='button'
 						onClick={() => setFilesProjectId(index)}
 					>
