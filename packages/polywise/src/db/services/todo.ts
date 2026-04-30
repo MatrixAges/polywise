@@ -1,8 +1,17 @@
-import { todo } from '@core/db/schema'
+import { project_todo, session_todo, todo } from '@core/db/schema'
 import { env } from '@core/env'
-import { SQL } from 'drizzle-orm'
+import { and, asc, isNull, SQL, sql } from 'drizzle-orm'
 
 import type { TodoInsert } from '@core/db'
+
+const status_order = sql`CASE ${todo.status} WHEN 'draft' THEN 0 WHEN 'pending' THEN 1 WHEN 'processing' THEN 2 WHEN 'done' THEN 3 WHEN 'error' THEN 4 WHEN 'archive' THEN 5 END`
+
+interface ArgsGetTodos {
+	where?: SQL
+	orderBy?: SQL | Array<SQL>
+	limit?: number
+	offset?: number
+}
 
 export const addTodo = async (values: TodoInsert) => {
 	return env.db
@@ -10,6 +19,45 @@ export const addTodo = async (values: TodoInsert) => {
 		.values(values)
 		.returning()
 		.then(res => res[0])
+}
+
+export const getTodo = async (where: SQL) => {
+	return env.db
+		.select()
+		.from(todo)
+		.where(where)
+		.limit(1)
+		.then(res => res[0])
+}
+
+export const getTodos = async (args: ArgsGetTodos = {}) => {
+	const { where, orderBy, limit, offset } = args
+
+	let query = env.db.select().from(todo).$dynamic()
+
+	if (where) query = query.where(where)
+
+	if (orderBy) {
+		const order_args = Array.isArray(orderBy) ? orderBy : [orderBy]
+
+		query = query.orderBy(...order_args)
+	}
+
+	if (limit) query = query.limit(limit)
+
+	if (offset) query = query.offset(offset)
+
+	return query
+}
+
+export const getStandaloneTodos = async () => {
+	return env.db
+		.select({ todo })
+		.from(todo)
+		.leftJoin(session_todo, sql`${todo.id} = ${session_todo.todo_id}`)
+		.leftJoin(project_todo, sql`${todo.id} = ${project_todo.todo_id}`)
+		.where(and(isNull(session_todo.todo_id), isNull(project_todo.todo_id)))
+		.orderBy(status_order, asc(todo.order), asc(todo.created_at))
 }
 
 export const setTodo = async (where: SQL, values: Partial<TodoInsert>) => {

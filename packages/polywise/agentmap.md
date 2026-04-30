@@ -142,7 +142,7 @@ This document provides an overview of the packages/polywise module structure and
 				"acp": { "desc": "ACP provider integration", "role": "Folder" }
 			},
 			"rpc": {
-				"desc": "tRPC router tree for API/state mutations and subscriptions, including session lifecycle, file persistence, provider/model runtime, and content operations; session router now includes dedicated single-file endpoints for create/remove/rename/pin and session-group management with pin.json + session_group.json persistence under app.app_path",
+				"desc": "tRPC router tree for API/state mutations and subscriptions, including session lifecycle, file persistence, provider/model runtime, and content operations; session router now includes dedicated single-file endpoints for create/remove/rename/pin and session-group management with pin.json + session_group.json persistence under app.app_path, while todo router now provides create/remove/sort/update plus query modes for standalone todos, project-scoped todos, and project-grouped todo lists",
 				"role": "Folder",
 				"index.ts": { "desc": "RPC routers aggregation and type export", "role": "Index" },
 				"save.ts": { "desc": "Save content to memory", "role": "RPC" },
@@ -177,6 +177,10 @@ This document provides an overview of the packages/polywise module structure and
 				},
 				"project": {
 					"desc": "Project domain RPC procedures for project list, project ordering, project-todo binding, and project file detail lookup. getList returns project/session/todo metadata without scanning project directories, and both getList/getMoreSessions paginate project-owned sessions in pages of 6; file trees are loaded on demand through rpc/file/list and file content through getFileDetail. Project sort now reorders against the ascending project list and reuses the shared arrayMove helper before persisting sequential order values. Project remove now cascades through project-linked sessions by reusing the shared session removal helper before deleting the project itself. Session CRUD for project usage is shared through the session router.",
+					"role": "Folder"
+				},
+				"todo": {
+					"desc": "Todo domain RPC procedures for standalone todos and project-bound todos, including creation, deletion, status/content updates, manual sorting, direct project query, and project-grouped query views ordered by project.sort/order.",
 					"role": "Folder"
 				}
 			},
@@ -223,6 +227,10 @@ This document provides an overview of the packages/polywise module structure and
 						"role": "Schema"
 					},
 					"message.ts": { "desc": "Chat message storage schema with UIMessages", "role": "Schema" }
+				},
+				"services": {
+					"desc": "Database write/read helpers for core entities and relation-backed projections; todo service now supports single-item lookup, generic list query, and standalone todo filtering that excludes session_todo and project_todo bindings.",
+					"role": "Folder"
 				}
 			},
 			"task": {

@@ -4,10 +4,11 @@ import { eq, SQL } from 'drizzle-orm'
 
 interface ArgsGetProjectTodo {
 	where?: SQL
+	orderBy?: SQL | Array<SQL>
 }
 
 export const getProjectTodo = async (args: ArgsGetProjectTodo = {}) => {
-	const { where } = args
+	const { where, orderBy } = args
 
 	let query = env.db
 		.select({ project, todo })
@@ -17,6 +18,12 @@ export const getProjectTodo = async (args: ArgsGetProjectTodo = {}) => {
 		.$dynamic()
 
 	if (where) query = query.where(where)
+
+	if (orderBy) {
+		const order_args = Array.isArray(orderBy) ? orderBy : [orderBy]
+
+		query = query.orderBy(...order_args)
+	}
 
 	return query
 }

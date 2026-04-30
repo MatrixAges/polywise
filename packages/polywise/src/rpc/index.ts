@@ -11,6 +11,7 @@ import search from './search'
 import session from './session'
 import setActive from './setActive'
 import test from './test'
+import todo from './todo'
 import update from './update'
 
 import type { inferRouterInputs, inferRouterOutputs } from '@trpc/server'
@@ -18,6 +19,7 @@ import type { inferRouterInputs, inferRouterOutputs } from '@trpc/server'
 export const router = r({
 	file,
 	project,
+	todo,
 	session,
 	provider,
 	llama,
