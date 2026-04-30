@@ -7,7 +7,7 @@ import type { IPropsTodoItem } from '../types'
 
 const Index = (props: IPropsTodoItem) => {
 	const { item, selected } = props
-	const { updateTodo, removeTodo } = useModel()
+	const { updateTodo, removeTodo, selectTodo } = useModel()
 
 	const onToggleStatus = useMemoizedFn(() => {
 		const new_status = item.status === 'done' ? 'pending' : 'done'
@@ -17,6 +17,10 @@ const Index = (props: IPropsTodoItem) => {
 
 	const onRemove = useMemoizedFn(() => {
 		removeTodo(item.id)
+	})
+
+	const onSelect = useMemoizedFn(() => {
+		selectTodo(item.id)
 	})
 
 	return (
@@ -30,6 +34,7 @@ const Index = (props: IPropsTodoItem) => {
 			`,
 				selected && 'active'
 			)}
+			onClick={onSelect}
 		>
 			<div className='flex cursor-pointer items-center justify-center' onClick={onToggleStatus}>
 				{item.status === 'done' ? (

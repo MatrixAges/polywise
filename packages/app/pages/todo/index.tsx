@@ -2,7 +2,7 @@ import { useLayoutEffect, useState } from 'react'
 import { observer } from 'mobx-react-lite'
 import { container } from 'tsyringe'
 
-import { Menu, TodoList } from './components'
+import { Menu, TodoDetail, TodoList } from './components'
 import { Context } from './context'
 import Model from './model'
 
@@ -20,6 +20,7 @@ const Index = () => {
 			<div className='flex h-full overflow-hidden'>
 				<Menu></Menu>
 				<TodoList></TodoList>
+				{x.detail_panel_open && <TodoDetail></TodoDetail>}
 			</div>
 		</Context>
 	)

@@ -4,10 +4,10 @@ import { Plus } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { useModel } from '../context'
-import TodoItem from './TodoItem'
+import StatusGroup from './StatusGroup'
 
 const Index = () => {
-	const { current_todos, current_title, createTodo } = useModel()
+	const { current_title, current_todos, grouped_todos, status_configs, expanded_statuses, createTodo } = useModel()
 	const [input_value, setInputValue] = useState('')
 
 	const onCreateTodo = useMemoizedFn(async () => {
@@ -43,7 +43,7 @@ const Index = () => {
 				>
 					{current_title}
 				</span>
-				<span className='text-xsm text-std-400'>{current_todos.length} todos</span>
+				<span className='text-xsm text-std-400'>{current_todos.length} tasks</span>
 			</div>
 			<div className='flex-1 overflow-y-auto p-2'>
 				<div className='mb-2 flex gap-2'>
@@ -56,7 +56,7 @@ const Index = () => {
 							bg-transparent
 							border border-border-light
 						'
-						placeholder='New todo'
+						placeholder='New task'
 						value={input_value}
 						onChange={event => setInputValue(event.target.value)}
 						onKeyDown={onKeyDown}
@@ -65,10 +65,24 @@ const Index = () => {
 						<Plus size={14}></Plus>
 					</button>
 				</div>
-				<div className='flex flex-col gap-1'>
-					{current_todos.map(todo => (
-						<TodoItem key={todo.id} item={todo} selected={false}></TodoItem>
-					))}
+				<div className='flex flex-col'>
+					{status_configs.map(config => {
+						const todos = grouped_todos.get(config.key) || []
+
+						if (todos.length === 0) return null
+
+						return (
+							<StatusGroup
+								key={config.key}
+								status={config.key}
+								label={config.label}
+								icon={config.icon}
+								color={config.color}
+								todos={todos}
+								expanded={expanded_statuses.has(config.key)}
+							/>
+						)
+					})}
 				</div>
 			</div>
 		</div>

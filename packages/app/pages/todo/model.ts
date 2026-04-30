@@ -1,10 +1,11 @@
+import { Archive, CheckCircle, Circle, Clock, FileText, XCircle } from 'lucide-react'
 import { makeAutoObservable, runInAction } from 'mobx'
 import { injectable } from 'tsyringe'
 
 import { rpc } from '@/utils'
 
 import type { Project, Todo } from '@core/db'
-import type { IFilterType } from './types'
+import type { IFilterType, IStatusConfig } from './types'
 
 @injectable()
 export default class Index {
@@ -14,6 +15,9 @@ export default class Index {
 	project_todos_map = new Map<string, Array<Todo>>()
 	projects: Array<Project> = []
 	initialized = false
+	selected_todo_id: string | null = null
+	expanded_statuses = new Set<string>(['draft', 'pending', 'processing', 'done', 'error', 'archive'])
+	detail_panel_open = false
 
 	constructor() {
 		makeAutoObservable(this, {}, { autoBind: true })
@@ -89,6 +93,67 @@ export default class Index {
 		return project?.name || 'Project'
 	}
 
+	get status_configs(): Array<IStatusConfig> {
+		return [
+			{ key: 'draft', label: 'Draft', icon: FileText, color: 'text-std-400' },
+			{ key: 'pending', label: 'Todo', icon: Circle, color: 'text-blue-500' },
+			{ key: 'processing', label: 'In Progress', icon: Clock, color: 'text-yellow-500' },
+			{ key: 'done', label: 'Done', icon: CheckCircle, color: 'text-green-500' },
+			{ key: 'error', label: 'Cancelled', icon: XCircle, color: 'text-red-500' },
+			{ key: 'archive', label: 'Archive', icon: Archive, color: 'text-std-300' }
+		]
+	}
+
+	get grouped_todos(): Map<string, Array<Todo>> {
+		const grouped = new Map<string, Array<Todo>>()
+
+		for (const config of this.status_configs) {
+			grouped.set(config.key, [])
+		}
+
+		for (const todo of this.current_todos) {
+			const group = grouped.get(todo.status)
+
+			if (group) {
+				group.push(todo)
+			}
+		}
+
+		return grouped
+	}
+
+	get selected_todo(): Todo | null {
+		if (!this.selected_todo_id) return null
+
+		return this.current_todos.find(t => t.id === this.selected_todo_id) || null
+	}
+
+	selectTodo(id: string) {
+		this.selected_todo_id = id
+		this.detail_panel_open = true
+	}
+
+	toggleStatusGroup(status: string) {
+		if (this.expanded_statuses.has(status)) {
+			this.expanded_statuses.delete(status)
+		} else {
+			this.expanded_statuses.add(status)
+		}
+	}
+
+	toggleDetailPanel() {
+		this.detail_panel_open = !this.detail_panel_open
+
+		if (!this.detail_panel_open) {
+			this.selected_todo_id = null
+		}
+	}
+
+	closeDetailPanel() {
+		this.detail_panel_open = false
+		this.selected_todo_id = null
+	}
+
 	async createTodo(title: string) {
 		if (!title.trim()) return
 
@@ -103,9 +168,17 @@ export default class Index {
 		await this.loadData()
 	}
 
+	async updateTodoField(id: string, field: string, value: unknown) {
+		await this.updateTodo(id, { [field]: value })
+	}
+
 	async removeTodo(id: string) {
 		await rpc.todo.remove.mutate({ id })
 		await this.loadData()
+
+		if (this.selected_todo_id === id) {
+			this.closeDetailPanel()
+		}
 	}
 
 	deinit() {}
