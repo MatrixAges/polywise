@@ -23,6 +23,7 @@ export default class Index {
 			preparedInput: prepareFileTreeInput(paths, { flattenEmptyDirectories: true }),
 			search,
 			icons: colored_icons ? { set: 'complete', colored: true } : 'standard',
+			itemHeight: 26,
 			flattenEmptyDirectories: true,
 			initialExpansion: 'closed',
 			unsafeCSS: `
