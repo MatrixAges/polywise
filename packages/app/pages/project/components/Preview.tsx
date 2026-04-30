@@ -39,12 +39,22 @@ const Index = () => {
                                           width:12px;
                                           height:12px;
                                     }
+
+                                    [data-line-number-content]{
+                                          font-family:var(--font-mono);
+                                    }
+
+                                    pre{
+                                          padding:6px 0;
+                                    }
                               `
 					}}
 					style={{
 						'--diffs-font-size': '12px',
 						'--diffs-font-family': 'var(--font_family)',
-						'--diffs-line-height': 1.62
+						'--diffs-line-height': 1.62,
+						'--diffs-tab-size': 10,
+						'--diffs-fg-number': 'var(--color-std-300)'
 					}}
 				></File>
 			</Virtualizer>

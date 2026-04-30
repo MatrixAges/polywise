@@ -108,6 +108,7 @@ export default class Index {
 
 		this.files_project_id = ''
 		this.side_panel_open = false
+		this.content_tab = 'session'
 	}
 
 	setContentTab(v: string) {
