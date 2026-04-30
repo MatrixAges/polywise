@@ -19,13 +19,17 @@ const Index = () => {
 	const navigate = useNavigate()
 
 	useLayoutEffect(() => {
-		if (state?.create) {
+		const is_create = state?.create
+
+		if (is_create) {
 			x.createSession()
 
 			navigate(pathname, { replace: true, state: null })
 		}
 
 		x.init()
+
+		if (is_create) x.current_tab = 'sessions'
 
 		return () => x.deinit()
 	}, [])

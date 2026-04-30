@@ -39,7 +39,7 @@ export default class Index {
 	}
 
 	async init() {
-		const deinit = setStorageWhenChange(['current_tab', 'selected_session_id'], this)
+		const deinit = setStorageWhenChange([{ session_current_tab: 'current_tab' }, 'selected_session_id'], this)
 
 		this.util.acts = [deinit]
 
