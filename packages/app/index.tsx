@@ -26,7 +26,7 @@ const routes: Array<RouteObject> = [
 			},
 			{
 				path: '/todo',
-				lazy: () => import('@/pages/agent')
+				lazy: () => import('@/pages/todo')
 			},
 			{
 				path: '/project',
