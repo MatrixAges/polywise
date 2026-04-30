@@ -1,16 +1,10 @@
 :root {
 	--trees-border-color-override: var(--color-border-light);
-	--trees-border-radius-override: 999px;
-	--trees-padding-inline-override: calc(var(--spacing) * 3);
-	--trees-focus-ring-color-override: var(--color-border-gray);
-	--trees-selected-focused-border-color-override: var(--color-border-gray);
-}
-
-.flex-tree {
 	--trees-border-radius-override: 0;
 	--trees-padding-inline-override: 0;
 	--trees-focus-ring-color-override: transparent;
 	--trees-selected-focused-border-color-override: transparent;
 	--trees-item-padding-x-override: 12px;
 	--trees-font-size-override: 12px;
+	--trees-icon-width-override: 14px;
 }

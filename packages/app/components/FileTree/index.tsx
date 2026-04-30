@@ -53,10 +53,10 @@ const Index = (props: IProps) => {
 			`,
 				className,
 				flex
-					? 'flex-tree h-full min-h-0'
+					? 'h-full min-h-0'
 					: `
 				h-[400px]
-				py-2.5
+				py-1.5
 				rounded-xl
 				border border-border-gray!
 			`

@@ -62,6 +62,7 @@ export default p.input(input_type).query(async ({ input }) => {
 	}
 
 	return entries
+		.filter(entry => entry.name !== '.DS_Store')
 		.filter(entry => show_hidden || !entry.name.startsWith('.'))
 		.filter(entry => !dir_only || entry.isDirectory())
 		.map(entry => toListItem({ base_path: target_path, entry }))

@@ -36,7 +36,6 @@ const Index = () => {
 					paths={$copy(project_files.paths)}
 					flex
 					colored_icons
-					search={false}
 					onSelectPath={project_files.selectPath}
 					key={project_files.tree_version}
 				></FileTree>

@@ -15,7 +15,7 @@ export default class Index {
 	}
 
 	init(args: Pick<IProps, 'paths' | 'search' | 'colored_icons' | 'onSelectPath'>) {
-		const { paths, search = true, colored_icons, onSelectPath } = args
+		const { paths, search, colored_icons, onSelectPath } = args
 
 		if (this.tree) return this.syncPaths(paths)
 
@@ -23,7 +23,7 @@ export default class Index {
 			preparedInput: prepareFileTreeInput(paths, { flattenEmptyDirectories: true }),
 			search,
 			icons: colored_icons ? { set: 'complete', colored: true } : 'standard',
-			itemHeight: 26,
+			itemHeight: 27,
 			flattenEmptyDirectories: true,
 			initialExpansion: 'closed',
 			unsafeCSS: `
