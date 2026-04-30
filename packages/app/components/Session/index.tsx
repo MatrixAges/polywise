@@ -10,17 +10,19 @@ import Logo from '@/public/bare.svg?react'
 import { Context, Input, LoadingDots, Message, Permission } from './components'
 import Model from './model'
 
+import type { ReactNode } from 'react'
 import type { IPropsInput } from './types'
 
 export interface IProps {
 	type: 'page' | 'global'
 	id: string
 	input?: string
+	actions?: ReactNode
 	create?: (input: string) => void
 }
 
 const Index = (props: IProps) => {
-	const { type, id, input, create } = props
+	const { type, id, input, actions, create } = props
 	const [x] = useState(() => container.resolve(Model))
 
 	const streaming = x.status === 'streaming' || x.status === 'submitted'
@@ -82,6 +84,7 @@ const Index = (props: IProps) => {
 					'
 				>
 					<span className='text-std-400 font-medium'>{x.session.title}</span>
+					{actions}
 				</div>
 			)}
 			<div

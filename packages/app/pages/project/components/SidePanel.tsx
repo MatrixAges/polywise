@@ -1,3 +1,4 @@
+import { X } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { FileTree, TextTabs } from '@/components'
@@ -5,7 +6,7 @@ import { FileTree, TextTabs } from '@/components'
 import { useModel } from '../context'
 
 const Index = () => {
-	const { side_panel_tab, project_files, setSidePanelTab } = useModel()
+	const { side_panel_tab, project_files, setSidePanelTab, toggleFilesProjectId } = useModel()
 
 	return (
 		<div
@@ -30,6 +31,9 @@ const Index = () => {
 					active={side_panel_tab}
 					setActive={setSidePanelTab}
 				></TextTabs>
+				<div className='icon_button small mr-[-3px]' onClick={toggleFilesProjectId}>
+					<X></X>
+				</div>
 			</div>
 			<div className='flex-1'>
 				<FileTree

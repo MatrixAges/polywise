@@ -102,6 +102,13 @@ export default class Index {
 		this.rename_value = ''
 	}
 
+	toggleFilesProjectId() {
+		if (!this.files_project_id) return this.setFilesProjectId()
+
+		this.files_project_id = ''
+		this.side_panel_open = false
+	}
+
 	async onToggleAddModal() {
 		this.add_modal_open = !this.add_modal_open
 
@@ -111,9 +118,15 @@ export default class Index {
 	}
 
 	async setFilesProjectId(index?: number) {
-		const project = index
-			? this.projects[index].project
-			: this.projects.find(item => item.project.id === this.files_project_id)!.project
+		let project!: Project
+
+		if (index) {
+			project = this.projects[index].project
+		} else if (this.files_project_id) {
+			project = this.projects.find(item => item.project.id === this.files_project_id)!.project
+		} else if (this.selected_project_id) {
+			project = this.projects.find(item => item.project.id === this.selected_project_id)!.project
+		}
 
 		this.files_project_id = project.id
 		this.side_panel_open = true
