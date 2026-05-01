@@ -13,7 +13,7 @@ const Index = () => {
 	const onSelectPath = useMemoizedFn(args => {
 		project_files.selectPath(args)
 
-		setContentTab('file')
+		if (!args.directory) setContentTab('file')
 	})
 
 	return (
