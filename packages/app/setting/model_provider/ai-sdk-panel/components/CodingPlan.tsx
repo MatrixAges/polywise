@@ -12,12 +12,17 @@ const plans = [
 		tier1: true
 	},
 	{
+		name: 'Xiaomi Mimo Coding Plan',
+		month: '$50',
+		link: 'https://platform.xiaomimimo.com/token-plan',
+		tier2: true
+	},
+	{
 		name: 'MiniMax Coding Plan',
 		month: '$20',
 		link: 'https://platform.minimax.io/subscribe/coding-plan',
 		tier2: true
 	},
-	{ name: 'Zhipu GLM Coding Plan', month: '$10', link: 'https://z.ai/subscribe', tier2: true },
 	{
 		name: 'Bytedance Ark Coding Plan',
 		link: 'https://www.volcengine.com/activity/codingplan',
