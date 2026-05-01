@@ -203,6 +203,8 @@ export default async (s: Index, message: Message) => {
 			}
 		},
 		onFinish: async ({ responseMessage }) => {
+			const was_running = s.session.is_runing
+
 			if (config.chaos_detect) stopStream(s.id)
 
 			await s.stop()
@@ -235,7 +237,7 @@ export default async (s: Index, message: Message) => {
 
 			extract(s, complexity_signal)
 
-			if (mode === 'plan-exec' && s.plan_stage === 'plan') {
+			if (was_running && mode === 'plan-exec' && s.plan_stage === 'plan') {
 				s.plan_stage = 'exec'
 
 				await submit({ id: s.id, is_cron: true, title: s.session.title }, 'Execute the plan.')
