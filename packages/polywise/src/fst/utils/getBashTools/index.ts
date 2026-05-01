@@ -51,9 +51,11 @@ export default async (s: Index, bash: Bash, system?: boolean) => {
 			},
 			async executeCommand(command) {
 				if (is_plan_mode) {
-					throw new Error(
-						'Current in plan mode, bash operations are not allowed, use exsit tools instead'
-					)
+					return {
+						stdout: '',
+						stderr: 'Current in plan mode, bash operations are not allowed, use exsit tools instead',
+						exitCode: 1
+					}
 				}
 
 				return executeCommand({ s, bash, command, system })

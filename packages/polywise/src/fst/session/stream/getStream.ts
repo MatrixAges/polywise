@@ -69,8 +69,6 @@ export default async (s: Index, message: Message) => {
 
 	if (s.prefill) messages.push({ role: 'assistant', content: s.prefill })
 
-	const mode = s.mode
-
 	const bash_tool = await createBashTool(s)
 	const mcp_tools = await loadMcpTools(s)
 	const system_tools_prompt = await getSystemTools()
@@ -79,7 +77,7 @@ export default async (s: Index, message: Message) => {
 	const skill_prompt = getSkillPrompt(s.skill_map)
 	const title_focus = getTitleFocus({ s, message, is_first_message })
 
-	const mode_prompt = match({ mode, plan_stage: s.plan_stage })
+	const mode_prompt = match({ mode: s.mode, plan_stage: s.plan_stage })
 		.with({ mode: 'plan' }, () => plan_mode_prompt)
 		.with({ mode: 'plan-exec', plan_stage: 'plan' }, () => planexec_plan_prompt)
 		.with({ mode: 'plan-exec', plan_stage: 'exec' }, () => planexec_exec_prompt)
@@ -243,10 +241,12 @@ export default async (s: Index, message: Message) => {
 
 			extract(s, complexity_signal)
 
-			if (was_running && mode === 'plan-exec' && s.plan_stage === 'plan') {
+			if (was_running && s.mode === 'plan-exec' && s.plan_stage === 'plan') {
 				s.plan_stage = 'exec'
 
-				submit({ id: s.id }, 'Execute the plan.')
+				setTimeout(() => {
+					submit({ id: s.id }, 'Execute the plan.')
+				}, 1200)
 			}
 		},
 		onError: error => {
