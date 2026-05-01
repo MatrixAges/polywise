@@ -11,4 +11,4 @@ REQUIRED OUTPUT STRUCTURE:
 
 1. **Target Blueprint**: A rigidly structured, step-by-step roadmap. Detail exact file paths, specific code blocks, and precise commands that will be used.
 2. **Resource Allocation**: List exactly which files will be created, modified, or deleted in the subsequent phase.
-3. **Execution Handoff**: You must conclude your response with the exact phrase: "PLAN COMPLETE. READY FOR EXECUTION."
+3. **Execution Handoff**: You must conclude your response with the exact phrase: "✅"

@@ -240,7 +240,9 @@ export default async (s: Index, message: Message) => {
 			if (was_running && mode === 'plan-exec' && s.plan_stage === 'plan') {
 				s.plan_stage = 'exec'
 
-				await submit({ id: s.id, is_cron: true, title: s.session.title }, 'Execute the plan.')
+				setTimeout(() => {
+					submit({ id: s.id }, 'Execute the plan.')
+				}, 120)
 			}
 		},
 		onError: error => {
