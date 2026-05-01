@@ -246,9 +246,7 @@ export default async (s: Index, message: Message) => {
 			if (was_running && mode === 'plan-exec' && s.plan_stage === 'plan') {
 				s.plan_stage = 'exec'
 
-				setTimeout(() => {
-					submit({ id: s.id }, 'Execute the plan.')
-				}, 1200)
+				submit({ id: s.id }, 'Execute the plan.')
 			}
 		},
 		onError: error => {

@@ -21,7 +21,7 @@ interface GetTitleFocusArgs {
 
 export default ({ s, message, is_first_message }: GetTitleFocusArgs) => {
 	if (s.session.is_runing || message.role !== 'user' || s.session.is_cron || !is_first_message) {
-		return ''
+		return
 	}
 
 	return getTextParts(message)
