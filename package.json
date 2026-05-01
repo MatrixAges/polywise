@@ -21,6 +21,9 @@
 		"prettier-plugin-tailwindcss-pro": "^0.2.0",
 		"pretty-quick": "^4.2.2",
 		"simple-git-hooks": "^2.13.1",
-		"turbo": "^2.9.6"
+		"turbo": "^2.9.6",
+		"@types/node": "catalog:",
+		"bun": "catalog:",
+		"bun-types": "catalog:"
 	}
 }
