@@ -53,6 +53,7 @@ export interface AppConfig {
 	triple_model?: DefaultModel
 	enable_rewrite: boolean
 	rewrite_model?: DefaultModel
+	chaos_detect?: boolean
 }
 
 export interface ProviderConfig {

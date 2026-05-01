@@ -1,3 +1,4 @@
+import { config } from '@core/config'
 import fst_system_prompt from '@core/consts/prompts/fst_system_prompt.md'
 import getContextPrompt from '@core/consts/prompts/getContextPrompt'
 import { addNotification, addNotificationSession } from '@core/db/services'
@@ -67,7 +68,7 @@ export default async (s: Index, message: Message) => {
 
 	s.context.current_messages_count = s.model_messages.length
 
-	startStream(s, message)
+	if (config.chaos_detect) startStream(s, message)
 
 	s.runing(true)
 	s.sync()
@@ -121,7 +122,7 @@ export default async (s: Index, message: Message) => {
 		experimental_transform: smoothStream(),
 		onAbort: s.stop.bind(s),
 		onError: async (event: { error: unknown }) => {
-			stopStream(s.id)
+			if (config.chaos_detect) stopStream(s.id)
 
 			await s.stop()
 
@@ -158,7 +159,7 @@ export default async (s: Index, message: Message) => {
 						s.active()
 
 						if (part.type === 'text-delta') {
-							pushPart(s.id, part.text)
+							if (config.chaos_detect) pushPart(s.id, part.text)
 						}
 
 						if (part.type === 'reasoning-start') {
@@ -193,7 +194,7 @@ export default async (s: Index, message: Message) => {
 			}
 		},
 		onFinish: async ({ responseMessage }) => {
-			stopStream(s.id)
+			if (config.chaos_detect) stopStream(s.id)
 
 			await s.stop()
 			await s.appendMessage(responseMessage)
