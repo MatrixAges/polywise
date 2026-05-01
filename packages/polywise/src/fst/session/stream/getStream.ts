@@ -248,7 +248,7 @@ export default async (s: Index, message: Message) => {
 
 				setTimeout(() => {
 					submit({ id: s.id }, 'Execute the plan.')
-				}, 120)
+				}, 1200)
 			}
 		},
 		onError: error => {

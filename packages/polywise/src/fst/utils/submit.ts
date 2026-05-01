@@ -9,7 +9,6 @@ export default async (args: ConnectSessionArgs, text: string) => {
 	await session.getStream({
 		id: getId(),
 		role: 'user',
-		parts: [{ type: 'text', text }],
-		createdAt: new Date()
+		parts: [{ type: 'text', text }]
 	})
 }
