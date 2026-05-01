@@ -106,6 +106,7 @@
 		"stopword": "^3.1.5",
 		"tinypool": "^2.1.0",
 		"trpc-to-openapi": "^3.2.0",
+		"ts-pattern": "^5.9.0",
 		"tslib": "catalog:",
 		"tsyringe": "catalog:",
 		"turndown": "^7.2.4",

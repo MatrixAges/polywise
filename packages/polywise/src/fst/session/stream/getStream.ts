@@ -1,6 +1,7 @@
 import { config } from '@core/config'
 import fst_system_prompt from '@core/consts/prompts/fst_system_prompt.md'
 import getContextPrompt from '@core/consts/prompts/getContextPrompt'
+import plan_exec_exec_prompt from '@core/consts/prompts/plan_exec_exec_prompt.md'
 import plan_exec_mode_prompt from '@core/consts/prompts/plan_exec_mode_prompt.md'
 import plan_mode_prompt from '@core/consts/prompts/plan_mode_prompt.md'
 import { addNotification, addNotificationSession } from '@core/db/services'
@@ -12,6 +13,7 @@ import { session_status_emitter } from '@core/rpc/session/watchSessionStatus'
 import { getSystemTools, SessionEventStore } from '@core/utils'
 import { convertToModelMessages, createUIMessageStream, smoothStream, stepCountIs, streamText } from 'ai'
 import { getId } from 'stk/utils'
+import { match, P } from 'ts-pattern'
 
 import { loadMcpTools } from '../../mcp'
 import {
@@ -93,18 +95,11 @@ export default async (s: Index, message: Message) => {
 			? getTextParts(message)
 			: ''
 
-	const mode_prompt =
-		mode === 'plan'
-			? plan_mode_prompt
-			: mode === 'plan-exec' && s.plan_stage === 'plan'
-				? plan_exec_mode_prompt
-				: mode === 'plan-exec' && s.plan_stage === 'exec'
-					? `<system-reminder>
-Your operational mode has changed from plan to build.
-You are no longer in read-only mode.
-You are permitted to make file changes, run shell commands, and utilize your arsenal of tools as needed.
-</system-reminder>`
-					: ''
+	const mode_prompt = match({ mode, plan_stage: s.plan_stage })
+		.with({ mode: 'plan' }, () => plan_mode_prompt)
+		.with({ mode: 'plan-exec', plan_stage: 'plan' }, () => plan_exec_mode_prompt)
+		.with({ mode: 'plan-exec' }, () => plan_exec_exec_prompt)
+		.otherwise(() => '')
 
 	const system_prompt = [
 		fst_system_prompt,
