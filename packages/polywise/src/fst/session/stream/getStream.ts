@@ -79,8 +79,7 @@ export default async (s: Index, message: Message) => {
 
 	if (s.prefill) messages.push({ role: 'assistant', content: s.prefill })
 
-	const session_config = await s.getConfig()
-	const mode = session_config.mode ?? 'normal'
+	const mode = s.mode
 	const is_plan_mode = mode === 'plan' || mode === 'plan-exec'
 
 	const bash_tool = await createBashTool(s)

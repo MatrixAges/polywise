@@ -19,6 +19,9 @@ export default async (s: Index, is_cron?: boolean, title?: string) => {
 		await fs.writeJSON(s.config_dir, { disable_map: [], mode: 'normal' }, { spaces: 4 })
 	}
 
+	const session_config = await s.getConfig()
+	s.mode = session_config.mode ?? 'normal'
+
 	await s.getContext()
 	await s.getState()
 

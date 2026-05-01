@@ -11,7 +11,8 @@ export default (s: Index) => {
 			archived_at: s.archived_at,
 			has_older: s.ui_has_older,
 			has_newer: s.ui_has_newer,
-			permission: s.permission
+			permission: s.permission,
+			mode: s.mode
 		}
 	} as ChatEventRes)
 }

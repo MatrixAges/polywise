@@ -44,7 +44,7 @@ const Index = (props: IPropsMenuItem) => {
 		event.stopPropagation()
 
 		createSession(project.id)
-		setSelectedProject(project.id)
+		setSelectedProject(project.id, true)
 		setFilesProjectId(index)
 	})
 

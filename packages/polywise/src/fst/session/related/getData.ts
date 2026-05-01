@@ -6,8 +6,6 @@ export default async (s: Index) => {
 
 	await Promise.all([s.getModel(), s.getAgents(), s.getProject(), s.getMessages()])
 
-	const session_config = await s.getConfig()
-
 	return {
 		type: 'sync',
 		data: {
@@ -18,7 +16,7 @@ export default async (s: Index) => {
 			has_older: s.ui_has_older,
 			has_newer: s.ui_has_newer,
 			permission: s.permission,
-			mode: session_config.mode ?? 'normal'
+			mode: s.mode
 		}
 	} as ChatEventRes
 }

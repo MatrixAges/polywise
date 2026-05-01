@@ -33,6 +33,7 @@ import type {
 	Message,
 	Permission,
 	Permissions,
+	SessionMode,
 	SessionScope,
 	SkillMeta
 } from '../types'
@@ -64,6 +65,7 @@ export default class Index {
 	update_at = Date.now()
 	archived_at = null as null | number
 	superego_append_count = 0
+	mode = 'normal' as SessionMode
 
 	get cwd() {
 		return this.project?.dir || this.files_dir
