@@ -8,7 +8,8 @@
 		"build:deps": "turbo run deps",
 		"build:mac": "turbo run desktop#pack:mac",
 		"build:win": "turbo run desktop#pack:win",
-		"pcu": "pcu update -i --no-ai --no-backup"
+		"pcu": "pcu update -i --no-ai --no-backup",
+		"release": "bun scripts/release.ts"
 	},
 	"simple-git-hooks": {
 		"pre-commit": "pnpm pretty-quick --pattern \"**/*.*(md|css|js|jsx|ts|tsx)\" --staged"

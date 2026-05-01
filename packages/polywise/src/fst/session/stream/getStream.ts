@@ -1,9 +1,9 @@
 import { config } from '@core/config'
 import fst_system_prompt from '@core/consts/prompts/fst_system_prompt.md'
 import getContextPrompt from '@core/consts/prompts/getContextPrompt'
-import plan_exec_exec_prompt from '@core/consts/prompts/plan_exec_exec_prompt.md'
-import plan_exec_mode_prompt from '@core/consts/prompts/plan_exec_mode_prompt.md'
 import plan_mode_prompt from '@core/consts/prompts/plan_mode_prompt.md'
+import planexec_exec_prompt from '@core/consts/prompts/planexec_exec_prompt.md'
+import planexec_plan_prompt from '@core/consts/prompts/planexec_plan_prompt.md'
 import { addNotification, addNotificationSession } from '@core/db/services'
 import { env } from '@core/env'
 import { createSystemTool } from '@core/fst/agents'
@@ -81,8 +81,8 @@ export default async (s: Index, message: Message) => {
 
 	const mode_prompt = match({ mode, plan_stage: s.plan_stage })
 		.with({ mode: 'plan' }, () => plan_mode_prompt)
-		.with({ mode: 'plan-exec', plan_stage: 'plan' }, () => plan_exec_mode_prompt)
-		.with({ mode: 'plan-exec' }, () => plan_exec_exec_prompt)
+		.with({ mode: 'plan-exec', plan_stage: 'plan' }, () => planexec_plan_prompt)
+		.with({ mode: 'plan-exec', plan_stage: 'exec' }, () => planexec_exec_prompt)
 		.otherwise(() => '')
 
 	const system_prompt = [

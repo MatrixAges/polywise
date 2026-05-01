@@ -10,6 +10,8 @@ import type { Bash } from 'just-bash'
 import type Index from '../../session'
 
 export default async (s: Index, bash: Bash, system?: boolean) => {
+	const is_plan_mode = s.mode === 'plan' || (s.mode === 'plan-exec' && s.plan_stage === 'plan')
+
 	const path_mappings: Record<string, string> = {
 		'/skills': s.skills_dir
 	}
@@ -29,7 +31,7 @@ export default async (s: Index, bash: Bash, system?: boolean) => {
 				return readFile(real_path, 'utf8')
 			},
 			async writeFiles(files) {
-				if (s.mode === 'plan' || (s.mode === 'plan-exec' && s.plan_stage === 'plan')) {
+				if (is_plan_mode) {
 					throw new Error('Current in plan mode, write operations are not allowed')
 				}
 
@@ -48,6 +50,12 @@ export default async (s: Index, bash: Bash, system?: boolean) => {
 				}
 			},
 			async executeCommand(command) {
+				if (is_plan_mode) {
+					throw new Error(
+						'Current in plan mode, bash operations are not allowed, use exsit tools instead'
+					)
+				}
+
 				return executeCommand({ s, bash, command, system })
 			}
 		} as Sandbox
