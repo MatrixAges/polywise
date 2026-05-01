@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { DndContext, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { useMemoizedFn } from 'ahooks'
-import { Plus } from 'lucide-react'
+import { FolderPlus } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { ContextMenu, ContextMenuTrigger } from '@/__shadcn__/components/ui/context-menu'
@@ -145,7 +145,7 @@ const Index = () => {
 				<div className='mr-[-2px] flex gap-1'>
 					<Tooltip title='New Project'>
 						<div className='icon_button small' onClick={onToggleAddModal}>
-							<Plus></Plus>
+							<FolderPlus></FolderPlus>
 						</div>
 					</Tooltip>
 				</div>

@@ -2,7 +2,7 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { DotsSixVerticalIcon } from '@phosphor-icons/react'
 import { useMemoizedFn } from 'ahooks'
-import { ChevronDown, ChevronRight, Folders, MessageCirclePlus } from 'lucide-react'
+import { ChevronDown, ChevronRight, Folders, Plus } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import RenameInput from '@/pages/session/components/RenameInput'
@@ -124,7 +124,7 @@ const Index = (props: IPropsMenuItem) => {
 						<Folders className='size-3'></Folders>
 					</button>
 					<button className='icon_button small' type='button' onClick={onCreateSession}>
-						<MessageCirclePlus className='size-3'></MessageCirclePlus>
+						<Plus className='size-3'></Plus>
 					</button>
 				</div>
 			</div>
