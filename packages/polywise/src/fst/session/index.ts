@@ -5,7 +5,7 @@ import { app } from '@core/consts'
 import { loadMcpTools } from '../mcp'
 import { loadCustomToolsMap } from '../tools/meta'
 import { loadSkillMap } from '../tools/skill'
-import { getConfig } from './config'
+import { getConfig, setConfig } from './config'
 import { getContext, setContext } from './context'
 import { appendMessage, insertMessage } from './message'
 import {
@@ -155,6 +155,7 @@ export default class Index {
 
 	getContext = () => getContext(this)
 	getConfig = () => getConfig(this)
+	setConfig = (patch: Parameters<typeof setConfig>[1]) => setConfig(this, patch)
 	setContext = (v: Partial<Context>) => setContext(this, v)
 	getState = () => getState(this)
 	setState = () => setState(this)

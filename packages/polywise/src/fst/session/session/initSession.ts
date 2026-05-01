@@ -16,7 +16,7 @@ export default async (s: Index, is_cron?: boolean, title?: string) => {
 	const session_config_exists = await fs.pathExists(s.config_dir)
 
 	if (!session_config_exists) {
-		await fs.writeJSON(s.config_dir, { disable_map: [] }, { spaces: 4 })
+		await fs.writeJSON(s.config_dir, { disable_map: [], mode: 'normal' }, { spaces: 4 })
 	}
 
 	await s.getContext()

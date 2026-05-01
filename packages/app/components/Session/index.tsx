@@ -44,6 +44,7 @@ const Index = (props: IProps) => {
 		is_page,
 		streaming,
 		archived: x.archived_at !== null,
+		mode: x.mode,
 		send: useMemoizedFn((v: string) => {
 			if (create) {
 				create(v)
@@ -56,6 +57,7 @@ const Index = (props: IProps) => {
 		archive: x.archive,
 		unarchive: x.unarchive,
 		scrollToBottom: x.scrollToBottom,
+		setMode: x.setMode,
 		toggleContextModal
 	}
 

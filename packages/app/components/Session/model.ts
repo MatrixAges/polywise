@@ -32,6 +32,7 @@ export default class Index {
 	messages = [] as AbstractChat<UIMessage>['messages']
 	permission = null as unknown as Permission
 	archived_at = null as null | number
+	mode = 'normal' as 'normal' | 'plan' | 'plan-exec'
 
 	signal = 0
 	open_context_modal = false
@@ -53,7 +54,8 @@ export default class Index {
 				context: false,
 				status: false,
 				messages: false,
-				permission: false
+				permission: false,
+				mode: true
 			},
 			{ autoBind: true }
 		)
@@ -108,7 +110,8 @@ export default class Index {
 								archived_at,
 								has_older,
 								has_newer,
-								permission
+								permission,
+								mode
 							} = res.data
 
 							this.session = session as Session
@@ -117,6 +120,7 @@ export default class Index {
 							this.has_older = has_older
 							this.has_newer = has_newer
 							this.permission = permission as Permission
+							this.mode = mode ?? 'normal'
 
 							const target_messages = messages as unknown as Array<Message>
 
@@ -301,6 +305,14 @@ export default class Index {
 		rpc.session.unarchive.mutate(this.id)
 	}
 
+	setMode(mode: 'normal' | 'plan' | 'plan-exec' | null) {
+		if (!mode) return
+
+		this.mode = mode
+
+		rpc.session.setConfig.mutate({ id: this.id, mode })
+	}
+
 	on() {
 		const off_status = this.chat['~registerStatusCallback'](() => {
 			this.status = this.chat.status
@@ -349,6 +361,7 @@ export default class Index {
 		this.messages = [] as AbstractChat<UIMessage>['messages']
 		this.permission = null as unknown as Permission
 		this.archived_at = null as null | number
+		this.mode = 'normal'
 
 		this.signal = 0
 		this.open_context_modal = false

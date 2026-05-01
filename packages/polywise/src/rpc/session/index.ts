@@ -2,7 +2,7 @@ import { r } from '@core/utils'
 
 import create from './create'
 import createGroup from './createGroup'
-import { answer, archive, clear, destroy, load, permission, stop, unarchive } from './events'
+import { answer, archive, clear, destroy, load, permission, setConfig, stop, unarchive } from './events'
 import getList from './getList'
 import getMoreList from './getMoreList'
 import init from './init'
@@ -40,6 +40,7 @@ export default r({
 	load,
 	answer,
 	permission,
+	setConfig,
 	destroy,
 	unread,
 	watchSessionStatus

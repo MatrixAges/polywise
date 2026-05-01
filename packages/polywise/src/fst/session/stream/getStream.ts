@@ -1,6 +1,8 @@
 import { config } from '@core/config'
 import fst_system_prompt from '@core/consts/prompts/fst_system_prompt.md'
 import getContextPrompt from '@core/consts/prompts/getContextPrompt'
+import plan_exec_mode_prompt from '@core/consts/prompts/plan_exec_mode_prompt.md'
+import plan_mode_prompt from '@core/consts/prompts/plan_mode_prompt.md'
 import { addNotification, addNotificationSession } from '@core/db/services'
 import { env } from '@core/env'
 import { createSystemTool } from '@core/fst/agents'
@@ -77,6 +79,10 @@ export default async (s: Index, message: Message) => {
 
 	if (s.prefill) messages.push({ role: 'assistant', content: s.prefill })
 
+	const session_config = await s.getConfig()
+	const mode = session_config.mode ?? 'normal'
+	const is_plan_mode = mode === 'plan' || mode === 'plan-exec'
+
 	const bash_tool = await createBashTool(s)
 	const mcp_tools = await loadMcpTools(s)
 	const system_tools_prompt = await getSystemTools()
@@ -88,9 +94,23 @@ export default async (s: Index, message: Message) => {
 			? getTextParts(message)
 			: ''
 
+	const mode_prompt = mode === 'plan' ? plan_mode_prompt : mode === 'plan-exec' ? plan_exec_mode_prompt : ''
+
+	const system_prompt = [
+		fst_system_prompt,
+		system_tools_prompt,
+		custom_tools_prompt,
+		skill_prompt,
+		`Current Session Title: ${s.session.title}`,
+		getContextPrompt(s.context),
+		mode_prompt
+	]
+		.filter(Boolean)
+		.join('\n\n')
+
 	const res = streamText({
 		model: s.model.model,
-		system: `${fst_system_prompt}\n\n${system_tools_prompt}\n\n${custom_tools_prompt}\n\n${skill_prompt}\n\nCurrent Session Title: ${s.session.title}\n\n${getContextPrompt(s.context)}`,
+		system: system_prompt,
 		messages,
 		tools: {
 			...s.model.tools,
@@ -105,8 +125,12 @@ export default async (s: Index, message: Message) => {
 			system_tool: createSystemTool(s),
 			bash_tool: bash_tool.bash,
 			read_file_tool: bash_tool.readFile,
-			write_file_tool: bash_tool.writeFile,
-			edit_file_tool: createEditFileTool(s),
+			...(is_plan_mode
+				? {}
+				: {
+						write_file_tool: bash_tool.writeFile,
+						edit_file_tool: createEditFileTool(s)
+					}),
 			skill_tool: createSkillTool(s),
 			memory_tool: createMemoryTool(s),
 			wiki_tool: createWikiTool(s),
@@ -225,6 +249,26 @@ export default async (s: Index, message: Message) => {
 			}
 
 			extract(s, complexity_signal)
+
+			if (mode === 'plan-exec') {
+				const response_text = responseMessage.parts
+					.filter(p => p.type === 'text')
+					.map(p => (p as { text: string }).text)
+					.join('')
+
+				if (response_text.includes('PLAN COMPLETE. READY FOR EXECUTION.')) {
+					await s.setConfig({ mode: 'normal' })
+
+					const exec_message = {
+						id: getId(),
+						role: 'user' as const,
+						parts: [{ type: 'text' as const, text: 'Execute the plan.' }],
+						createdAt: new Date()
+					}
+
+					s.getStream(exec_message)
+				}
+			}
 		},
 		onError: error => {
 			s.stop()

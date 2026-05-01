@@ -48,6 +48,8 @@ export interface SessionScope {
 	id: string | null
 }
 
+export type SessionMode = 'normal' | 'plan' | 'plan-exec'
+
 export type ChatEventRes = {
 	type: 'sync'
 	data: {
@@ -58,5 +60,6 @@ export type ChatEventRes = {
 		has_older: boolean
 		has_newer: boolean
 		permission: Permission | null
+		mode: SessionMode
 	}
 }

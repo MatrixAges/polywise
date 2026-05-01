@@ -26,18 +26,26 @@ const submit_modes = [
 	{ label: 'Ctrl+Enter Mode', value: 'ctrl+enter' }
 ]
 
+const session_modes = [
+	{ label: 'Normal', value: 'normal' },
+	{ label: 'Plan', value: 'plan' },
+	{ label: 'Plan-Exec', value: 'plan-exec' }
+]
+
 const Index = (props: IPropsInput) => {
 	const {
 		is_page,
 		streaming,
 		archived,
+		mode,
 		send,
 		stop,
 		clear,
 		archive,
 		unarchive,
 		scrollToBottom,
-		toggleContextModal
+		toggleContextModal,
+		setMode
 	} = props
 	const global = useGlobal()
 	const ref = useRef<HTMLTextAreaElement>(null)
@@ -175,9 +183,41 @@ const Index = (props: IPropsInput) => {
 								onChange={onChangeDefaultMode}
 							></ModelSelect>
 						</div>
-						<button className='icon_button primary h-6 w-6' onClick={streaming ? stop : onSend}>
-							<Icon className='fill-std-white h-[10px] w-[10px]' weight='fill'></Icon>
-						</button>
+						<div className='flex items-center gap-3'>
+							<Select items={session_modes} value={mode} onValueChange={setMode}>
+								<SelectTrigger
+									className='
+										h-auto!
+										p-0
+										text-xsm! text-std-400
+										bg-transparent
+									'
+									no_active_style
+								>
+									<SelectValue />
+								</SelectTrigger>
+								<SelectContent
+									className='w-[120px]'
+									alignItemWithTrigger={false}
+									side='top'
+								>
+									<SelectGroup>
+										<SelectLabel>Mode</SelectLabel>
+										{session_modes.map(item => (
+											<SelectItem value={item.value} key={item.value}>
+												{item.label}
+											</SelectItem>
+										))}
+									</SelectGroup>
+								</SelectContent>
+							</Select>
+							<button
+								className='icon_button primary h-6 w-6'
+								onClick={streaming ? stop : onSend}
+							>
+								<Icon className='fill-std-white h-[10px] w-[10px]' weight='fill'></Icon>
+							</button>
+						</div>
 					</div>
 				</div>
 				<div

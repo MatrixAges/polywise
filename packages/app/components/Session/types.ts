@@ -15,11 +15,12 @@ export interface IPropsPart extends Pick<IPropsMessage, 'streaming' | 'answer'> 
 
 export interface IPropsInput extends Pick<
 	Model,
-	'send' | 'stop' | 'clear' | 'archive' | 'unarchive' | 'scrollToBottom'
+	'send' | 'stop' | 'clear' | 'archive' | 'unarchive' | 'scrollToBottom' | 'setMode'
 > {
 	is_page: boolean
 	streaming: boolean
 	archived: boolean
+	mode: 'normal' | 'plan' | 'plan-exec'
 	toggleContextModal: () => void
 }
 

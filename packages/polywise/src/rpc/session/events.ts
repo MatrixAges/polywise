@@ -32,3 +32,7 @@ export const answer = p.input(object({ id: string(), answer: string() })).mutati
 export const permission = p.input(object({ id: string(), approved: boolean() })).mutation(async ({ input }) => {
 	SessionEventStore.emit(`${input.id}/permission`, input.approved)
 })
+
+export const setConfig = p.input(object({ id: string(), mode: string() })).mutation(async ({ input }) => {
+	SessionEventStore.emit(`${input.id}/setConfig`, { mode: input.mode })
+})
