@@ -38,31 +38,18 @@ import {
 	getSkillPrompt,
 	updateTitle
 } from '../../tools'
-import { submit } from '../../utils'
+import { getTitleFocus, submit } from '../../utils'
 
 import type { Message, MessageMetadata } from '../../types'
 import type Index from '../index'
 
 const model_threshold_value = 12
 
-const getTextParts = (message: Message) => {
-	const text_parts = [] as Array<string>
-
-	for (const part of message.parts) {
-		if (part.type === 'text' && 'text' in part && typeof part.text === 'string') {
-			text_parts.push(part.text)
-		}
-	}
-
-	return text_parts.join('\n').trim()
-}
-
 export default async (s: Index, message: Message) => {
 	const total_messages_count = s.context.total_messages_count ?? 0
 	const is_first_message = total_messages_count === 0
-	const should_insert_message = !s.session.is_runing
 
-	if (should_insert_message) {
+	if (!s.session.is_runing) {
 		s.context.total_messages_count = total_messages_count + 1
 
 		await s.insertMessage(message)
@@ -90,10 +77,7 @@ export default async (s: Index, message: Message) => {
 
 	const custom_tools_prompt = getCustomToolsPrompt(s.custom_tools_map)
 	const skill_prompt = getSkillPrompt(s.skill_map)
-	const title_focus =
-		should_insert_message && message.role === 'user' && !s.session.is_cron && is_first_message
-			? getTextParts(message)
-			: ''
+	const title_focus = getTitleFocus({ s, message, is_first_message })
 
 	const mode_prompt = match({ mode, plan_stage: s.plan_stage })
 		.with({ mode: 'plan' }, () => plan_mode_prompt)
