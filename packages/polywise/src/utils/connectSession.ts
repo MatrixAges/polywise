@@ -3,7 +3,7 @@ import dayjs from 'dayjs'
 
 import { SessionEventStore, SessionStore } from './session'
 
-interface ConnectSessionArgs {
+export interface ConnectSessionArgs {
 	id: string
 	is_cron?: boolean
 	title?: string

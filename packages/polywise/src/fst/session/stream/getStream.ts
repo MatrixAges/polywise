@@ -36,6 +36,7 @@ import {
 	getSkillPrompt,
 	updateTitle
 } from '../../tools'
+import { submit } from '../../utils'
 
 import type { Message, MessageMetadata } from '../../types'
 import type Index from '../index'
@@ -80,7 +81,6 @@ export default async (s: Index, message: Message) => {
 	if (s.prefill) messages.push({ role: 'assistant', content: s.prefill })
 
 	const mode = s.mode
-	const is_plan_mode = mode === 'plan' || mode === 'plan-exec'
 
 	const bash_tool = await createBashTool(s)
 	const mcp_tools = await loadMcpTools(s)
@@ -93,7 +93,18 @@ export default async (s: Index, message: Message) => {
 			? getTextParts(message)
 			: ''
 
-	const mode_prompt = mode === 'plan' ? plan_mode_prompt : mode === 'plan-exec' ? plan_exec_mode_prompt : ''
+	const mode_prompt =
+		mode === 'plan'
+			? plan_mode_prompt
+			: mode === 'plan-exec' && s.plan_stage === 'plan'
+				? plan_exec_mode_prompt
+				: mode === 'plan-exec' && s.plan_stage === 'exec'
+					? `<system-reminder>
+Your operational mode has changed from plan to build.
+You are no longer in read-only mode.
+You are permitted to make file changes, run shell commands, and utilize your arsenal of tools as needed.
+</system-reminder>`
+					: ''
 
 	const system_prompt = [
 		fst_system_prompt,
@@ -124,12 +135,8 @@ export default async (s: Index, message: Message) => {
 			system_tool: createSystemTool(s),
 			bash_tool: bash_tool.bash,
 			read_file_tool: bash_tool.readFile,
-			...(is_plan_mode
-				? {}
-				: {
-						write_file_tool: bash_tool.writeFile,
-						edit_file_tool: createEditFileTool(s)
-					}),
+			write_file_tool: bash_tool.writeFile,
+			edit_file_tool: createEditFileTool(s),
 			skill_tool: createSkillTool(s),
 			memory_tool: createMemoryTool(s),
 			wiki_tool: createWikiTool(s),
@@ -249,24 +256,10 @@ export default async (s: Index, message: Message) => {
 
 			extract(s, complexity_signal)
 
-			if (mode === 'plan-exec') {
-				const response_text = responseMessage.parts
-					.filter(p => p.type === 'text')
-					.map(p => (p as { text: string }).text)
-					.join('')
+			if (mode === 'plan-exec' && s.plan_stage === 'plan') {
+				s.plan_stage = 'exec'
 
-				if (response_text.includes('PLAN COMPLETE. READY FOR EXECUTION.')) {
-					await s.setConfig({ mode: 'normal' })
-
-					const exec_message = {
-						id: getId(),
-						role: 'user' as const,
-						parts: [{ type: 'text' as const, text: 'Execute the plan.' }],
-						createdAt: new Date()
-					}
-
-					s.getStream(exec_message)
-				}
+				await submit({ id: s.id, is_cron: true, title: s.session.title }, 'Execute the plan.')
 			}
 		},
 		onError: error => {

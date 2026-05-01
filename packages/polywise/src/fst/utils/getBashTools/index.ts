@@ -29,6 +29,10 @@ export default async (s: Index, bash: Bash, system?: boolean) => {
 				return readFile(real_path, 'utf8')
 			},
 			async writeFiles(files) {
+				if (s.mode === 'plan-exec' && s.plan_stage === 'plan') {
+					throw new Error('Current in plan mode, write operations are not allowed')
+				}
+
 				for (const file of files) {
 					const real_path = getRealPath(s.cwd, file.path, path_mappings)
 

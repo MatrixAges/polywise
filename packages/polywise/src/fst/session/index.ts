@@ -66,6 +66,7 @@ export default class Index {
 	archived_at = null as null | number
 	superego_append_count = 0
 	mode = 'normal' as SessionMode
+	plan_stage = 'plan' as 'plan' | 'exec'
 
 	get cwd() {
 		return this.project?.dir || this.files_dir
