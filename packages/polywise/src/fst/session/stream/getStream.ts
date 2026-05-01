@@ -149,6 +149,14 @@ export default async (s: Index, message: Message) => {
 
 				await addNotificationSession(notification_id, s.id)
 			}
+
+			session_status_emitter.emit('change', {
+				[s.id]: {
+					title: s.session.title,
+					running: s.session.is_runing,
+					unread: s.session.unread ?? false
+				}
+			})
 		}
 	})
 
@@ -211,17 +219,15 @@ export default async (s: Index, message: Message) => {
 			await s.appendMessage(responseMessage)
 
 			if (!SessionEventStore.listenerCount(`${s.id}/change`)) {
-				const next_session = await s.updateSession({ unread: true })
+				const session = await s.updateSession({ unread: true })
 
-				if (next_session) {
-					session_status_emitter.emit('change', {
-						[s.id]: {
-							title: next_session.title,
-							running: next_session.is_runing,
-							unread: next_session.unread ?? false
-						}
-					})
-				}
+				session_status_emitter.emit('change', {
+					[s.id]: {
+						title: session.title,
+						running: session.is_runing,
+						unread: session.unread ?? false
+					}
+				})
 			}
 
 			const complexity_signal = getComplexitySignal({

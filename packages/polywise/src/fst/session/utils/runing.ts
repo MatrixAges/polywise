@@ -5,15 +5,13 @@ import type Index from '../index'
 export default async (s: Index, v: boolean) => {
 	s.session.is_runing = v
 
-	const next_session = await s.updateSession({ is_runing: v })
+	const session = await s.updateSession({ is_runing: v })
 
-	if (next_session) {
-		session_status_emitter.emit('change', {
-			[s.id]: {
-				title: next_session.title,
-				running: next_session.is_runing,
-				unread: next_session.unread ?? false
-			}
-		})
-	}
+	session_status_emitter.emit('change', {
+		[s.id]: {
+			title: session.title,
+			running: session.is_runing,
+			unread: session.unread ?? false
+		}
+	})
 }
