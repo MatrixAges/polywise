@@ -53,7 +53,7 @@ export default async (s: Index, bash: Bash, system?: boolean) => {
 				if (is_plan_mode) {
 					return {
 						stdout: '',
-						stderr: 'Current in plan mode, bash operations are not allowed, use exsit tools instead',
+						stderr: 'Current in plan mode, bash operations are not allowed, use other tools instead',
 						exitCode: 1
 					}
 				}
