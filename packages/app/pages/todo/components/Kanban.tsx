@@ -3,23 +3,27 @@ import { observer } from 'mobx-react-lite'
 import { useModel } from '../context'
 import Col from './Col'
 
-import type { TodoStatus } from '../types'
+import type { Todo } from '@core/db'
 
 const Index = () => {
-	const { kanban_data } = useModel()
+	const { mode, kanban_data } = useModel()
 
 	return (
 		<div
-			className='
+			className={$cx(
+				'flex flex-1',
+				mode === 'kanban'
+					? `
 				overflow-x-scroll overflow-y-hidden
-				flex flex-1
 				min-w-0
 				gap-5
 				px-5 py-1
-			'
+			`
+					: `min-h-0 flex-col overflow-y-scroll`
+			)}
 		>
-			{Object.keys(kanban_data).map(key => (
-				<Col status={key as TodoStatus} todos={kanban_data[key as TodoStatus]} key={key}></Col>
+			{Object.keys(kanban_data).map((key: string) => (
+				<Col status={key} todos={kanban_data[key] as Array<Todo>} key={key}></Col>
 			))}
 		</div>
 	)

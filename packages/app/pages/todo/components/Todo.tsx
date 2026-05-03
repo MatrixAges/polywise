@@ -16,7 +16,7 @@ interface IProps {
 const Index = (props: IProps) => {
 	const { item, index, selected } = props
 	const { title, created_at } = item
-	const { setSelectTodo } = useModel()
+	const { mode, setSelectTodo } = useModel()
 
 	const onClick = useMemoizedFn(() => setSelectTodo(item.status, index))
 
@@ -24,26 +24,28 @@ const Index = (props: IProps) => {
 		<div
 			className={$cx(
 				`
-				flex flex-col
+				flex
 				w-full
 				gap-1
-				px-3 py-2
-				rounded-lg
-				border border-border-light
+				px-3
+				border-border-light
 				transition-colors
 				cursor-pointer
 			`,
-				selected && 'bg-secondary/60 border-primary/40'
+				mode === 'kanban' ? 'flex-col rounded-lg border py-2' : 'h-10 items-center border-b',
+				selected && 'border-primary/40'
 			)}
 			onClick={onClick}
 		>
 			<span
-				className='
-					w-full
+				className={$cx(
+					`
 					font-medium leading-5.5!
 					text-left
 					outline-none
-				'
+				`,
+					mode === 'kanban' ? 'w-full' : 'flex-1'
+				)}
 			>
 				{title}
 			</span>

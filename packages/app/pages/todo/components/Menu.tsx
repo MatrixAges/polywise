@@ -1,4 +1,4 @@
-import { CirclePlus, FolderKanban, Inbox } from 'lucide-react'
+import { CirclePlus, FolderKanban, Inbox, Rows3, SquareKanban } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { Tooltip } from '@/components'
@@ -7,10 +7,11 @@ import { useDelegate } from '@/hooks'
 import { useModel } from '../context'
 
 const Index = () => {
-	const { type, menu_data, setType } = useModel()
+	const { type, mode, menu_data, setType, toggleMode } = useModel()
 	const { inbox, projects = [] } = menu_data
 
 	const ref = useDelegate(v => setType(v))
+	const ModeIcon = mode === 'kanban' ? SquareKanban : Rows3
 
 	return (
 		<div
@@ -39,6 +40,11 @@ const Index = () => {
 					Todos
 				</span>
 				<div className='mr-[-2px] flex gap-1'>
+					<Tooltip title='Toggle Mode'>
+						<div className='icon_button small' onClick={toggleMode}>
+							<ModeIcon></ModeIcon>
+						</div>
+					</Tooltip>
 					<Tooltip title='New Todo'>
 						<div className='icon_button small'>
 							<CirclePlus></CirclePlus>

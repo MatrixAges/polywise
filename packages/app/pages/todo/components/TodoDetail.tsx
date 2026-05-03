@@ -59,7 +59,7 @@ const Index = () => {
 		<div
 			className='
 				flex flex-col shrink-0
-				w-[300px] h-full
+				w-[320px] h-full
 				bg-background
 				border-l border-border-light
 			'
@@ -68,12 +68,11 @@ const Index = () => {
 				className='
 					flex shrink-0
 					items-center justify-between
-					h-8
-					px-3
-					border-b border-border-light
+					px-4 pt-2.5
+					pb-2
 				'
 			>
-				<span className='text-std-4s00 text-sm font-semibold'>Todo Detail</span>
+				<span className='text-std-400 text-sm font-medium'>Todo Detail</span>
 				<button className='icon_button small mr-[-2px]' onClick={closeTodoDetail}>
 					<X></X>
 				</button>
@@ -83,7 +82,7 @@ const Index = () => {
 					overflow-y-scroll
 					flex-1
 					min-h-0
-					px-4 py-3
+					px-4
 				'
 			>
 				<form className='flex flex-col'>

@@ -3,34 +3,33 @@ import { observer } from 'mobx-react-lite'
 
 import { todo_status_icon_map } from '@/appdata'
 
+import { useModel } from '../context'
 import Todo from './Todo'
 
-import type { TodoItem, TodoStatus } from '../types'
+import type { Todo as TodoType } from '@core/db'
 
 interface IProps {
-	status: TodoStatus
-	todos: Array<TodoItem>
+	status: string
+	todos: Array<TodoType>
 }
 
 const Index = (props: IProps) => {
 	const { status, todos } = props
-
+	const { mode, selected_todo_id } = useModel()
 	const { Icon } = useMemo(() => todo_status_icon_map[status], [status])
 
 	return (
-		<div
-			className='
-				flex flex-col shrink-0
-				w-80 h-full
-			'
-		>
+		<div className={$cx('flex flex-col', mode === 'kanban' ? 'h-full w-80 shrink-0' : 'w-full')}>
 			<div
-				className='
+				className={$cx(
+					`
 					flex
 					items-center justify-between
 					h-10
 					px-3
-				'
+				`,
+					mode === 'kanban' ? '' : 'bg-secondary/40'
+				)}
 			>
 				<div className='flex items-center gap-2'>
 					<Icon className='stroke-std-500 size-3.5'></Icon>
@@ -51,7 +50,12 @@ const Index = (props: IProps) => {
 			<div className='min-h-0 w-full flex-1 overflow-y-scroll'>
 				<div className='flex w-full flex-col gap-3'>
 					{todos.map((item, index) => (
-						<Todo item={item} index={index} key={item.id}></Todo>
+						<Todo
+							item={item}
+							index={index}
+							selected={selected_todo_id === item.id}
+							key={item.id}
+						></Todo>
 					))}
 				</div>
 			</div>

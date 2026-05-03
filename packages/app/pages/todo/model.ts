@@ -11,6 +11,7 @@ import type { Todo } from '@core/db'
 @injectable()
 export default class Index {
 	type = 'inbox'
+	mode = 'kanban' as 'kanban' | 'list'
 	menu_data = {} as RPCOutput['todo']['getMenuData']
 	kanban_data = {} as RPCOutput['todo']['query']
 	selected_todo_id = ''
@@ -35,6 +36,10 @@ export default class Index {
 		this.detail_todo = null as unknown as Todo
 
 		this.getTodos()
+	}
+
+	toggleMode() {
+		this.mode = this.mode === 'kanban' ? 'list' : 'kanban'
 	}
 
 	setSelectTodo(status: string, index: number) {
