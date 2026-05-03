@@ -41,9 +41,8 @@ const Index = (props: IProps) => {
 				className={$cx(
 					`
 					text-std-600 text-sb font-medium leading-5.5!
-					truncate
 				`,
-					mode === 'kanban' ? 'w-full' : 'flex-1'
+					mode === 'kanban' ? 'w-full' : 'flex-1 truncate'
 				)}
 			>
 				{title}
