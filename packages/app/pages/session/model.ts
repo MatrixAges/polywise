@@ -35,7 +35,7 @@ export default class Index {
 	temp_input = ''
 
 	constructor(public util: Util) {
-		makeAutoObservable(this, {}, { autoBind: true })
+		makeAutoObservable(this, { util: false }, { autoBind: true })
 	}
 
 	async init() {
