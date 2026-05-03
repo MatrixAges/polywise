@@ -22,7 +22,7 @@ export default class Index {
 	}
 
 	init() {
-		const deinit = setStorageWhenChange([], this)
+		const deinit = setStorageWhenChange([{ todo_mode: 'mode' }], this)
 
 		this.util.acts = [deinit]
 
@@ -63,8 +63,13 @@ export default class Index {
 	}
 
 	async updateTodo(v: RPCInput['todo']['update']) {
-		console.log(v)
 		await rpc.todo.update.mutate({ ...v, id: this.selected_todo_id })
+	}
+
+	async createTodo(v: string) {
+		await rpc.todo.create.mutate({ title: v, project_id: this.type === 'inbox' ? undefined : this.type })
+
+		await this.getTodos()
 	}
 
 	deinit() {

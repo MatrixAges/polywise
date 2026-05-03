@@ -36,6 +36,7 @@
 	--color-std-white: #fff;
 
 	--text-xsm: 0.82rem;
+	--text-sb: 0.93rem;
 	--text-xsm--line-height: 1.25rem;
 
 	--color-dark: oklch(from var(--color-std-900) l c h / 0.9);

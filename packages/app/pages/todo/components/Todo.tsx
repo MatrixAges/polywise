@@ -32,7 +32,7 @@ const Index = (props: IProps) => {
 				transition-colors
 				cursor-pointer
 			`,
-				mode === 'kanban' ? 'flex-col rounded-lg border py-2' : 'h-10 items-center border-b',
+				mode === 'kanban' ? 'flex-col rounded-lg border py-2' : 'h-11 items-center border-b',
 				selected && 'border-primary/40'
 			)}
 			onClick={onClick}
@@ -40,9 +40,8 @@ const Index = (props: IProps) => {
 			<span
 				className={$cx(
 					`
-					font-medium leading-5.5!
-					text-left
-					outline-none
+					text-std-600 text-sb font-medium leading-5.5!
+					truncate
 				`,
 					mode === 'kanban' ? 'w-full' : 'flex-1'
 				)}

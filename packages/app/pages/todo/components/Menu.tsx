@@ -1,17 +1,33 @@
-import { CirclePlus, FolderKanban, Inbox, Rows3, SquareKanban } from 'lucide-react'
+import { useRef } from 'react'
+import { useMemoizedFn } from 'ahooks'
+import { FolderKanban, Inbox, Rows3, SquareKanban } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
+import { Button } from '@/__shadcn__/components/ui/button'
+import { Textarea } from '@/__shadcn__/components/ui/textarea'
 import { Tooltip } from '@/components'
 import { useDelegate } from '@/hooks'
 
 import { useModel } from '../context'
 
 const Index = () => {
-	const { type, mode, menu_data, setType, toggleMode } = useModel()
+	const { type, mode, menu_data, setType, toggleMode, createTodo } = useModel()
 	const { inbox, projects = [] } = menu_data
+	const ref_create = useRef<HTMLTextAreaElement>(null)
 
 	const ref = useDelegate(v => setType(v))
-	const ModeIcon = mode === 'kanban' ? SquareKanban : Rows3
+	const ModeIcon = mode === 'kanban' ? Rows3 : SquareKanban
+
+	const create = useMemoizedFn(() => {
+		const el = ref_create.current!
+		const value = el.value
+
+		if (!value) return
+
+		createTodo(value)
+
+		el.value = ''
+	})
 
 	return (
 		<div
@@ -45,14 +61,15 @@ const Index = () => {
 							<ModeIcon></ModeIcon>
 						</div>
 					</Tooltip>
-					<Tooltip title='New Todo'>
-						<div className='icon_button small'>
-							<CirclePlus></CirclePlus>
-						</div>
-					</Tooltip>
 				</div>
 			</div>
-			<div className='flex min-h-0 flex-col overflow-y-scroll'>
+			<div
+				className='
+					overflow-y-scroll
+					flex flex-1 flex-col
+					min-h-0
+				'
+			>
 				<div
 					className='
 						flex flex-col
@@ -110,6 +127,14 @@ const Index = () => {
 						</div>
 					))}
 				</div>
+			</div>
+			<div className='flex flex-col gap-3 p-3'>
+				<Textarea
+					className='h-24 rounded-lg border-none focus-within:ring-0!'
+					placeholder='What needs to be done?'
+					ref={ref_create}
+				></Textarea>
+				<Button onClick={create}>Create Todo</Button>
 			</div>
 		</div>
 	)

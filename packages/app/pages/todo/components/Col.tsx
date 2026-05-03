@@ -33,7 +33,15 @@ const Index = (props: IProps) => {
 			>
 				<div className='flex items-center gap-2'>
 					<Icon className='stroke-std-500 size-3.5'></Icon>
-					<span className='mb-[-1.5px] text-sm font-medium uppercase'>{status}</span>
+					<span
+						className='
+							mb-[-1.5px]
+							text-sm text-std-500 font-medium
+							uppercase
+						'
+					>
+						{status}
+					</span>
 				</div>
 				<span
 					className='
@@ -47,8 +55,8 @@ const Index = (props: IProps) => {
 					{todos.length}
 				</span>
 			</div>
-			<div className='min-h-0 w-full flex-1 overflow-y-scroll'>
-				<div className='flex w-full flex-col gap-3'>
+			<div className={$cx('w-full flex-1', mode === 'kanban' && 'min-h-0 overflow-y-scroll')}>
+				<div className={$cx('flex w-full flex-col', mode === 'kanban' && 'gap-3')}>
 					{todos.map((item, index) => (
 						<Todo
 							item={item}

@@ -23,6 +23,7 @@ const getNextProjectTodoOrder = async (project_id: string) => {
 
 export default p.input(input_type).mutation(async ({ input }) => {
 	const order = input.project_id ? await getNextProjectTodoOrder(input.project_id) : Date.now()
+
 	const inserted = await addTodo({
 		title: input.title,
 		description: input.description,
@@ -32,8 +33,7 @@ export default p.input(input_type).mutation(async ({ input }) => {
 		error: input.error,
 		order,
 		estimate: input.estimate,
-		due_at: input.due_at ? new Date(input.due_at) : undefined,
-		completed_at: input.status === 'done' ? new Date() : undefined
+		due_at: input.due_at ? new Date(input.due_at) : undefined
 	})
 
 	if (input.project_id) {
