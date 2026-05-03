@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { useMemoizedFn } from 'ahooks'
+import { debounce } from 'es-toolkit'
 import { CircleDot, Flag, X } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 import { Controller } from 'react-hook-form'
@@ -18,9 +19,10 @@ import { useForm } from '@/hooks'
 
 import { useModel } from '../context'
 
-import type { ITodoDetailForm, TodoPriority, TodoStatus } from '../types'
+import type { RPCInput } from '@/types'
+import type { Todo } from '@core/db'
 
-const todo_status_options: Array<{ label: string; value: TodoStatus }> = [
+const todo_status_options: Array<{ label: string; value: string }> = [
 	{ label: 'Draft', value: 'draft' },
 	{ label: 'Pending', value: 'pending' },
 	{ label: 'Processing', value: 'processing' },
@@ -30,7 +32,7 @@ const todo_status_options: Array<{ label: string; value: TodoStatus }> = [
 	{ label: 'Archive', value: 'archive' }
 ]
 
-const todo_priority_options: Array<{ label: string; value: TodoPriority }> = [
+const todo_priority_options: Array<{ label: string; value: string }> = [
 	{ label: 'None', value: 'none' },
 	{ label: 'Low', value: 'low' },
 	{ label: 'Medium', value: 'medium' },
@@ -39,24 +41,19 @@ const todo_priority_options: Array<{ label: string; value: TodoPriority }> = [
 ]
 
 const Index = () => {
-	const { selected_todo, detail_form, detail_form_version, closeTodoDetail, setDetailForm, submitDetailForm } =
-		useModel()
+	const { detail_todo, updateTodo, closeTodoDetail } = useModel()
 
-	const { control, register, handleSubmit, reset } = useForm<ITodoDetailForm>({ values: detail_form }, values =>
-		setDetailForm(values)
-	)
+	const { control, register, reset } = useForm<Todo>({ values: $copy(detail_todo) }, (_, v) => {
+		updateTodo(v as RPCInput['todo']['update'])
+	})
 	const ref_is_composing = useRef(false)
 
 	useEffect(() => {
-		reset(detail_form)
-	}, [detail_form, detail_form_version, reset])
+		reset(detail_todo)
+	}, [detail_todo])
 
-	const onSubmit = useMemoizedFn((values: ITodoDetailForm) => submitDetailForm(values))
-	const submitForm = useMemoizedFn(() => handleSubmit(onSubmit)())
 	const register_title = register('title')
 	const register_description = register('description')
-
-	if (!selected_todo) return null
 
 	return (
 		<div
@@ -103,21 +100,12 @@ const Index = () => {
 							focus-within:ring-0!
 						'
 						{...register_title}
-						onChange={event => {
-							register_title.onChange(event)
-						}}
+						onChange={debounce(register_title.onChange, 450)}
 						onCompositionStart={() => {
 							ref_is_composing.current = true
 						}}
 						onCompositionEnd={() => {
 							ref_is_composing.current = false
-						}}
-						onBlur={event => {
-							register_title.onBlur(event)
-
-							if (ref_is_composing.current) return
-
-							submitForm()
 						}}
 					></Textarea>
 					<div className='flex flex-col gap-1'>
@@ -134,10 +122,7 @@ const Index = () => {
 										items={todo_status_options}
 										name={field.name}
 										value={field.value}
-										onValueChange={value => {
-											field.onChange(value)
-											submitForm()
-										}}
+										onValueChange={field.onChange}
 									>
 										<SelectTrigger
 											className='text-std-500 bg-transparent font-semibold'
@@ -175,10 +160,7 @@ const Index = () => {
 										items={todo_priority_options}
 										name={field.name}
 										value={field.value}
-										onValueChange={value => {
-											field.onChange(value)
-											submitForm()
-										}}
+										onValueChange={field.onChange}
 									>
 										<SelectTrigger
 											className='text-std-500 bg-transparent font-semibold'
@@ -213,21 +195,12 @@ const Index = () => {
 								focus-within:ring-0!
 							'
 							{...register_description}
-							onChange={event => {
-								register_description.onChange(event)
-							}}
+							onChange={debounce(register_title.onChange, 450)}
 							onCompositionStart={() => {
 								ref_is_composing.current = true
 							}}
 							onCompositionEnd={() => {
 								ref_is_composing.current = false
-							}}
-							onBlur={event => {
-								register_description.onBlur(event)
-
-								if (ref_is_composing.current) return
-
-								submitForm()
 							}}
 							placeholder='Add description'
 						></Textarea>

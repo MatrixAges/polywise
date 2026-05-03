@@ -144,7 +144,7 @@ This document provides an overview of the packages/app module structure and arch
 						"role": "Component"
 					},
 					"TodoDetail.tsx": {
-						"desc": "Closable right-side detail form that autosaves title and description on blur and persists status and priority immediately on selection change",
+						"desc": "Closable right-side detail form that persists title immediately through form watch, debounces description textarea saves during typing, and persists status and priority immediately on selection change",
 						"role": "Component"
 					},
 					"index.ts": {

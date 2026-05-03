@@ -20,7 +20,7 @@ const Index = () => {
 			<div className='bg-background flex h-full overflow-hidden'>
 				<Menu></Menu>
 				<Kanban></Kanban>
-				<TodoDetail></TodoDetail>
+				{x.detail_todo && <TodoDetail></TodoDetail>}
 			</div>
 		</Context>
 	)

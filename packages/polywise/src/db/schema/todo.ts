@@ -23,8 +23,6 @@ export default sqliteTable(
 		estimate: integer('estimate'),
 		// Due date
 		due_at: integer('due_at', { mode: 'timestamp' }),
-		// Completion timestamp
-		completed_at: integer('completed_at', { mode: 'timestamp' }),
 		created_at: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
 		updated_at: integer('updated_at', { mode: 'timestamp' })
 			.$defaultFn(() => new Date())
