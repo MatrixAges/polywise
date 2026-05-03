@@ -1,7 +1,7 @@
 import { useRef } from 'react'
 import { observer } from 'mobx-react-lite'
 
-import { Input } from '@/__shadcn__/components/ui/input'
+import { Textarea } from '@/__shadcn__/components/ui/textarea'
 import { fromNow } from '@/utils'
 
 import { useModel } from '../context'
@@ -50,13 +50,19 @@ const Index = (props: IProps) => {
 			}}
 		>
 			{is_editing ? (
-				<Input
-					className='bg-background h-8 rounded-md px-2'
+				<Textarea
+					className='
+						h-auto!
+						min-h-0!
+						p-0
+						rounded-none
+						text-base! font-medium leading-6!
+						bg-transparent
+						border-none
+						focus-within:ring-0!
+					'
 					value={title_editing_value}
 					autoFocus
-					onClick={event => {
-						event.stopPropagation()
-					}}
 					onChange={event => setTitleEditingValue(event.target.value)}
 					onBlur={async () => {
 						if (ref_is_submitting.current) return
@@ -84,13 +90,17 @@ const Index = (props: IProps) => {
 							cancelEditTitle()
 						}
 					}}
-				></Input>
+				></Textarea>
 			) : (
 				<button
 					type='button'
-					className='w-full text-left font-medium outline-none'
-					onClick={event => {
-						event.stopPropagation()
+					className='
+						w-full
+						font-medium leading-6!
+						text-left
+						outline-none
+					'
+					onClick={() => {
 						selectTodo(item.id)
 					}}
 					onDoubleClick={event => {
@@ -101,7 +111,7 @@ const Index = (props: IProps) => {
 					{title}
 				</button>
 			)}
-			<span className='text-std-400 text-sm'>{fromNow(created_at)}</span>
+			<span className='text-std-400 mt-0.5 text-sm'>{fromNow(created_at)}</span>
 		</div>
 	)
 }
