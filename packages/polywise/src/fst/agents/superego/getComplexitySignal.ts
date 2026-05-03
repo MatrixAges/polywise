@@ -1,4 +1,5 @@
 import { getToolName, isToolUIPart } from 'ai'
+import { sum } from 'es-toolkit'
 
 import type { Message, MessageMetadata } from '../../types'
 import type { ComplexitySignal } from './types'
@@ -36,16 +37,16 @@ export default (args: { response_message: Message; recent_message_count: number 
 	const distinct_tool_count = new Set(tool_names).size
 	const has_retry_pattern = new Set(tool_names).size < tool_names.length
 	const retry_count = has_retry_pattern ? tool_names.length - new Set(tool_names).size : 0
-	const reasoning_duration = metadata?.reasoning_duration ?? 0
+	const reasoning_duration = metadata?.reasoning_duration ? sum(Object.values(metadata?.reasoning_duration)) : 0
 	const input_tokens = getUsageValue(metadata, ['inputTokens', 'promptTokens'])
 	const output_tokens = getUsageValue(metadata, ['outputTokens', 'completionTokens'])
 	const total_tokens = getUsageValue(metadata, ['totalTokens']) || input_tokens + output_tokens
 	const has_error_pattern = error_count > 0
 	const is_complex =
-		tool_names.length >= 5 ||
-		distinct_tool_count >= 3 ||
-		reasoning_duration >= 2000 ||
-		total_tokens >= 1200 ||
+		tool_names.length >= 15 ||
+		distinct_tool_count >= 12 ||
+		reasoning_duration >= 30000 ||
+		total_tokens >= 12000 ||
 		has_error_pattern ||
 		has_retry_pattern
 

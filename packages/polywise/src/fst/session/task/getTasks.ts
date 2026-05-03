@@ -9,7 +9,7 @@ export default async (s: Index) => {
 	const res = await getSessionTodos({
 		where: and(eq(session_todo.session_id, s.id), ne(todo.status, 'archive')),
 		orderBy: [
-			sql`CASE ${todo.status} WHEN 'draft' THEN 0 WHEN 'pending' THEN 1 WHEN 'processing' THEN 2 WHEN 'done' THEN 3 WHEN 'error' THEN 4 END`,
+			sql`CASE ${todo.status} WHEN 'draft' THEN 0 WHEN 'pending' THEN 1 WHEN 'processing' THEN 2 WHEN 'unreview' THEN 3 WHEN 'done' THEN 4 WHEN 'error' THEN 5 END`,
 			asc(todo.order)
 		]
 	})

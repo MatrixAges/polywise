@@ -5,11 +5,13 @@ import { injectable } from 'tsyringe'
 import { Util } from '@/models/common'
 import { rpc } from '@/utils'
 
-import type { Project } from '@core/db'
+import type { RPCOutput } from '@/types'
 
 @injectable()
 export default class Index {
-	projects = [] as Array<Project>
+	type = 'inbox'
+	menu_data = {} as RPCOutput['todo']['getMenuData']
+	todos = {} as RPCOutput['todo']['query']
 
 	constructor(public util: Util) {
 		makeAutoObservable(this, { util: false }, { autoBind: true })
@@ -21,10 +23,23 @@ export default class Index {
 		this.util.acts = [deinit]
 
 		this.getProjects()
+		this.getTodos()
+	}
+
+	setType(v: string) {
+		this.type = v
+
+		this.getTodos()
 	}
 
 	async getProjects() {
-		this.projects = (await rpc.project.list.query()) as Array<Project>
+		this.menu_data = await rpc.todo.getMenuData.query()
+	}
+
+	async getTodos() {
+		this.todos = await rpc.todo.query.query({ type: this.type })
+
+		console.log($copy(this.todos))
 	}
 
 	deinit() {

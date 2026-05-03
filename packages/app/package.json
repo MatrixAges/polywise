@@ -39,6 +39,7 @@
 		"@streamdown/mermaid": "^1.0.2",
 		"@swc/helpers": "catalog:",
 		"@trpc/client": "catalog:",
+		"@trpc/server": "catalog:",
 		"@xyflow/react": "^12.10.2",
 		"ahooks": "catalog:",
 		"ai": "catalog:",

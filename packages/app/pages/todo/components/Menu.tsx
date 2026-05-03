@@ -1,12 +1,16 @@
-import { FolderKanban, Inbox, ListPlus } from 'lucide-react'
+import { CirclePlus, FolderKanban, Inbox } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { Tooltip } from '@/components'
+import { useDelegate } from '@/hooks'
 
 import { useModel } from '../context'
 
 const Index = () => {
-	const { projects } = useModel()
+	const { type, menu_data, setType } = useModel()
+	const { inbox, projects = [] } = menu_data
+
+	const ref = useDelegate(v => setType(v))
 
 	return (
 		<div
@@ -37,7 +41,7 @@ const Index = () => {
 				<div className='mr-[-2px] flex gap-1'>
 					<Tooltip title='New Todo'>
 						<div className='icon_button small'>
-							<ListPlus></ListPlus>
+							<CirclePlus></CirclePlus>
 						</div>
 					</Tooltip>
 				</div>
@@ -51,8 +55,12 @@ const Index = () => {
 						p-1.5
 						pb-3
 					'
+					ref={ref}
 				>
-					<div className='click_button justify-between'>
+					<div
+						className={$cx('click_button justify-between', type === 'inbox' && 'active')}
+						data-key='inbox'
+					>
 						<div className='flex items-center gap-2'>
 							<Inbox></Inbox>
 							<span>Inbox</span>
@@ -66,14 +74,21 @@ const Index = () => {
 								border border-border-light
 							'
 						>
-							6
+							{inbox}
 						</span>
 					</div>
 					{projects.map(item => (
-						<div className='click_button justify-between'>
+						<div
+							className={$cx(
+								'click_button justify-between',
+								type === item.project.id && 'active'
+							)}
+							data-key={item.project.id}
+							key={item.project.id}
+						>
 							<div className='flex items-center gap-2'>
 								<FolderKanban></FolderKanban>
-								<span className='capitalize'>{item.name}</span>
+								<span className='capitalize'>{item.project.name}</span>
 							</div>
 							<span
 								className='
@@ -84,7 +99,7 @@ const Index = () => {
 									border border-border-light
 								'
 							>
-								6
+								{item.count}
 							</span>
 						</div>
 					))}

@@ -180,7 +180,7 @@ This document provides an overview of the packages/polywise module structure and
 					"role": "Folder"
 				},
 				"todo": {
-					"desc": "Todo domain RPC procedures for standalone todos and project-bound todos, including creation, deletion, status/content updates, manual sorting, direct project query, and project-grouped query views ordered by project.sort/order.",
+					"desc": "Todo domain RPC procedures for standalone todos and project-bound todos, including creation, deletion, status/content updates, manual sorting, direct project query, inbox/project menu count aggregation, and query views that return Record<status, Array<Todo>> grouped in schema status order.",
 					"role": "Folder"
 				}
 			},

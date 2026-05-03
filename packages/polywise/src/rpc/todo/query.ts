@@ -5,51 +5,47 @@ import { boolean, object, string } from 'zod'
 
 import { project_todo, todo } from '../../db/schema'
 
-const input_type = object({
-	project_id: string().optional(),
-	is_project: boolean().optional()
-}).optional()
+type TodoItem = Awaited<ReturnType<typeof getStandaloneTodos>>[number]['todo']
+type TodoStatus = TodoItem['status']
+type TodoGroup = Record<TodoStatus, Array<TodoItem>>
 
-const status_order = sql`CASE ${todo.status} WHEN 'draft' THEN 0 WHEN 'pending' THEN 1 WHEN 'processing' THEN 2 WHEN 'done' THEN 3 WHEN 'error' THEN 4 WHEN 'archive' THEN 5 END`
+const input_type = object({
+	type: string()
+})
+
+const status_order = sql`CASE ${todo.status} WHEN 'draft' THEN 0 WHEN 'pending' THEN 1 WHEN 'processing' THEN 2 WHEN 'unreview' THEN 3 WHEN 'done' THEN 4 WHEN 'error' THEN 5 WHEN 'archive' THEN 6 END`
+
+const createTodoGroup = (): TodoGroup => ({
+	draft: [],
+	pending: [],
+	processing: [],
+	unreview: [],
+	done: [],
+	error: [],
+	archive: []
+})
+
+const groupTodosByStatus = (todos: Array<TodoItem>) => {
+	const grouped_todos = createTodoGroup()
+
+	for (const todo_item of todos) {
+		grouped_todos[todo_item.status].push(todo_item)
+	}
+
+	return grouped_todos
+}
 
 export default p.input(input_type).query(async ({ input }) => {
-	if (input?.project_id) {
+	if (input.type !== 'inbox') {
 		const rows = await getProjectTodo({
-			where: eq(project_todo.project_id, input.project_id),
+			where: eq(project_todo.project_id, input.type),
 			orderBy: [status_order, asc(todo.order), asc(todo.created_at)]
 		})
 
-		return rows.map(item => item.todo)
-	}
-
-	if (input?.is_project) {
-		const rows = await getProjectTodo({
-			orderBy: [asc(project_todo.project_id), status_order, asc(todo.order), asc(todo.created_at)]
-		})
-		const project_map = new Map<
-			string,
-			{ project: (typeof rows)[number]['project']; todos: Array<(typeof rows)[number]['todo']> }
-		>()
-
-		for (const item of rows) {
-			const current_group = project_map.get(item.project.id)
-
-			if (current_group) {
-				current_group.todos.push(item.todo)
-
-				continue
-			}
-
-			project_map.set(item.project.id, {
-				project: item.project,
-				todos: [item.todo]
-			})
-		}
-
-		return [...project_map.values()].sort((prev, next) => prev.project.order - next.project.order)
+		return groupTodosByStatus(rows.map(item => item.todo))
 	}
 
 	const rows = await getStandaloneTodos()
 
-	return rows.map(item => item.todo)
+	return groupTodosByStatus(rows.map(item => item.todo))
 })

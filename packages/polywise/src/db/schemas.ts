@@ -4,7 +4,7 @@ import { z } from 'zod'
 import { todo } from './schema'
 
 const todo_priority_schema = z.enum(['urgent', 'high', 'medium', 'low', 'none'])
-const todo_status_schema = z.enum(['draft', 'pending', 'processing', 'done', 'error', 'archive'])
+const todo_status_schema = z.enum(['draft', 'pending', 'processing', 'unreview', 'done', 'error', 'archive'])
 const todo_timestamp_schema = z.number().int()
 
 export const todo_insert_schema = createInsertSchema(todo, {
