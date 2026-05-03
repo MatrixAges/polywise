@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react'
 
-import type Model from './model'
+import type Model from './_model'
 
 const context = createContext<Model | null>(null)
 
