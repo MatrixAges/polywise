@@ -102,7 +102,7 @@ const Index = () => {
 							p-0
 							mb-3
 							rounded-none
-							text-base! font-medium leading-6!
+							text-base! font-medium leading-5.5!
 							bg-transparent
 							border-none
 							focus-within:ring-0!

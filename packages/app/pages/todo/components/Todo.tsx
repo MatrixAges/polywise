@@ -56,7 +56,7 @@ const Index = (props: IProps) => {
 						min-h-0!
 						p-0
 						rounded-none
-						text-base! font-medium leading-6!
+						text-base! font-medium leading-5.5!
 						bg-transparent
 						border-none
 						focus-within:ring-0!
@@ -96,7 +96,7 @@ const Index = (props: IProps) => {
 					type='button'
 					className='
 						w-full
-						font-medium leading-6!
+						font-medium leading-5.5!
 						text-left
 						outline-none
 					'
