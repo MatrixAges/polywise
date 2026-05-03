@@ -117,7 +117,10 @@ const Index = () => {
 							</div>
 							<Controller name='status' control={control}>
 								<Select items={todo_status_options}>
-									<SelectTrigger className='bg-transparent' no_active_style>
+									<SelectTrigger
+										className='text-std-500 bg-transparent font-semibold'
+										no_active_style
+									>
 										<SelectValue />
 									</SelectTrigger>
 									<SelectContent align='start'>
@@ -140,7 +143,10 @@ const Index = () => {
 							</div>
 							<Controller name='priority' control={control}>
 								<Select items={todo_priority_options}>
-									<SelectTrigger className='bg-transparent' no_active_style>
+									<SelectTrigger
+										className='text-std-500 bg-transparent font-semibold'
+										no_active_style
+									>
 										<SelectValue />
 									</SelectTrigger>
 									<SelectContent align='start'>
