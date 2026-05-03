@@ -40,7 +40,14 @@ const Index = (props: IPropsMessage) => {
 							<Part
 								streaming={index === left_parts.length - 1 && streaming}
 								part={part}
-								metadata={message.metadata as MessageMetadata}
+								reasoning_duration={
+									message.metadata
+										? Object.values(
+												(message.metadata as MessageMetadata)
+													?.reasoning_duration
+											)[index]
+										: undefined
+								}
 								answer={answer}
 								key={`${message.id}-${index}`}
 							></Part>

@@ -162,8 +162,9 @@ export default async (s: Index, message: Message) => {
 		originalMessages: [message],
 		generateId: getId,
 		execute: async ({ writer }) => {
+			const reasoning_duration = {} as Record<string, number>
+
 			let reasoning_start = 0
-			let reasoning_end = 0
 
 			writer.merge(
 				res.toUIMessageStream({
@@ -182,7 +183,9 @@ export default async (s: Index, message: Message) => {
 						}
 
 						if (part.type === 'reasoning-end') {
-							reasoning_end = Date.now()
+							reasoning_duration[part.id] = Date.now() - reasoning_start + 60
+
+							reasoning_start = 0
 						}
 
 						if (part.type === 'finish') {
@@ -191,12 +194,7 @@ export default async (s: Index, message: Message) => {
 								timestamp: Date.now()
 							} as MessageMetadata
 
-							if (reasoning_end) {
-								target['reasoning_duration'] = reasoning_end - reasoning_start + 60
-							}
-
-							reasoning_start = 0
-							reasoning_end = 0
+							target['reasoning_duration'] = reasoning_duration
 
 							return target
 						}

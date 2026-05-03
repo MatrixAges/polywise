@@ -1,4 +1,4 @@
-import type { Message, MessageMetadata } from '@core/fst'
+import type { Message } from '@core/fst'
 import type { EditResult, QuestionInput } from '@core/fst/tools'
 import type { ToolUIPart } from 'ai'
 import type Model from './model'
@@ -9,7 +9,7 @@ export interface IPropsMessage extends Pick<Model, 'answer'> {
 }
 
 export interface IPropsPart extends Pick<IPropsMessage, 'streaming' | 'answer'> {
-	metadata: MessageMetadata
+	reasoning_duration?: number
 	part: Message['parts'][number]
 }
 
