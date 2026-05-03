@@ -1,48 +1,8 @@
-import {
-	Archive,
-	BookMarked,
-	CalendarClock,
-	CircleCheck,
-	CircleCheckBig,
-	CircleDashed,
-	CircleDot,
-	CircleQuestionMark,
-	CircleX,
-	Files,
-	Loader,
-	Rss,
-	ShieldBan
-} from 'lucide-react'
+import { BookMarked, CalendarClock, CircleCheckBig, CircleQuestionMark, Files, Rss, ShieldBan } from 'lucide-react'
+
+import { todo_status_icon_map } from '@/appdata'
 
 import type { Context } from '@core/fst'
-import type { LucideIcon } from 'lucide-react'
-
-const task_status_icon_map = {
-	draft: {
-		Icon: CircleDashed,
-		color: 'text-std-300'
-	},
-	pending: {
-		Icon: CircleDot,
-		color: 'text-std-600'
-	},
-	processing: {
-		Icon: Loader,
-		color: 'text-std-black'
-	},
-	done: {
-		Icon: CircleCheck,
-		color: 'text-green-500'
-	},
-	error: {
-		Icon: CircleX,
-		color: 'text-red-500'
-	},
-	archive: {
-		Icon: Archive,
-		color: 'text-teal-500'
-	}
-} as Record<string, { Icon: LucideIcon; color: string }>
 
 const Index = (props: Context) => {
 	const { intent, context, tasks, files, constraints, learned, blockers } = props || {}
@@ -97,7 +57,7 @@ const Index = (props: Context) => {
 					</div>
 					<div className='flex flex-col gap-2'>
 						{tasks.map((item, index) => {
-							const { Icon, color } = task_status_icon_map[item.status]
+							const { Icon, color } = todo_status_icon_map[item.status]
 
 							return (
 								<div

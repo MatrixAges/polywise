@@ -11,7 +11,7 @@ import type { RPCOutput } from '@/types'
 export default class Index {
 	type = 'inbox'
 	menu_data = {} as RPCOutput['todo']['getMenuData']
-	todos = {} as RPCOutput['todo']['query']
+	kanban_data = {} as RPCOutput['todo']['query']
 
 	constructor(public util: Util) {
 		makeAutoObservable(this, { util: false }, { autoBind: true })
@@ -37,9 +37,9 @@ export default class Index {
 	}
 
 	async getTodos() {
-		this.todos = await rpc.todo.query.query({ type: this.type })
+		this.kanban_data = await rpc.todo.query.query({ type: this.type })
 
-		console.log($copy(this.todos))
+		console.log($copy(this.kanban_data))
 	}
 
 	deinit() {
