@@ -19,7 +19,7 @@ export default sqliteTable(
 		error: text('error'),
 		// Sort order (float for fine-grained reordering)
 		order: real('order').notNull(),
-		// Estimated duration in minutes
+		// Estimated duration time: done_time - create_at
 		estimate: integer('estimate'),
 		// Due date
 		due_at: integer('due_at', { mode: 'timestamp' }),

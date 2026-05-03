@@ -2,7 +2,7 @@ import { useLayoutEffect, useState } from 'react'
 import { observer } from 'mobx-react-lite'
 import { container } from 'tsyringe'
 
-import { Kanban, Menu } from './components'
+import { Kanban, Menu, TodoDetail } from './components'
 import { Context } from './context'
 import Model from './model'
 
@@ -20,6 +20,7 @@ const Index = () => {
 			<div className='bg-background flex h-full overflow-hidden'>
 				<Menu></Menu>
 				<Kanban></Kanban>
+				<TodoDetail></TodoDetail>
 			</div>
 		</Context>
 	)

@@ -3,7 +3,7 @@ import { observer } from 'mobx-react-lite'
 import { useModel } from '../context'
 import Col from './Col'
 
-import type { Todo } from '@core/db'
+import type { TodoStatus } from '../types'
 
 const Index = () => {
 	const { kanban_data } = useModel()
@@ -19,7 +19,7 @@ const Index = () => {
 			'
 		>
 			{Object.keys(kanban_data).map(key => (
-				<Col status={key} todos={kanban_data[key] as Array<Todo>} key={key}></Col>
+				<Col status={key as TodoStatus} todos={kanban_data[key as TodoStatus]} key={key}></Col>
 			))}
 		</div>
 	)

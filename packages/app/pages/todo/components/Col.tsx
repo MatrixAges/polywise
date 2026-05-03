@@ -3,19 +3,17 @@ import { observer } from 'mobx-react-lite'
 
 import { todo_status_icon_map } from '@/appdata'
 
-import { useModel } from '../context'
 import Todo from './Todo'
 
-import type { Todo as TodoType } from '@core/db'
+import type { TodoItem, TodoStatus } from '../types'
 
 interface IProps {
-	status: string
-	todos: Array<TodoType>
+	status: TodoStatus
+	todos: Array<TodoItem>
 }
 
 const Index = (props: IProps) => {
 	const { status, todos } = props
-	const {} = useModel()
 
 	const { Icon } = useMemo(() => todo_status_icon_map[status], [status])
 
