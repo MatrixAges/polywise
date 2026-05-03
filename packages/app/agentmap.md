@@ -144,7 +144,7 @@ This document provides an overview of the packages/app module structure and arch
 						"role": "Component"
 					},
 					"TodoDetail.tsx": {
-						"desc": "Closable right-side detail form that edits title, description, status, priority, estimate, and due date with shadcn fields plus Controller bindings",
+						"desc": "Closable right-side detail form that autosaves title and description on blur and persists status and priority immediately on selection change",
 						"role": "Component"
 					},
 					"index.ts": {

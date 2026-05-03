@@ -1,10 +1,9 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useMemoizedFn } from 'ahooks'
-import { CalendarDays, CircleDot, Flag, X } from 'lucide-react'
+import { CircleDot, Flag, X } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { Controller } from 'react-hook-form'
 
-import { Button } from '@/__shadcn__/components/ui/button'
-import { Field, FieldContent, FieldGroup, FieldTitle } from '@/__shadcn__/components/ui/field'
 import {
 	Select,
 	SelectContent,
@@ -15,7 +14,6 @@ import {
 	SelectValue
 } from '@/__shadcn__/components/ui/select'
 import { Textarea } from '@/__shadcn__/components/ui/textarea'
-import { Controller } from '@/components'
 import { useForm } from '@/hooks'
 
 import { useModel } from '../context'
@@ -41,25 +39,22 @@ const todo_priority_options: Array<{ label: string; value: TodoPriority }> = [
 ]
 
 const Index = () => {
-	const {
-		selected_todo,
-		detail_form,
-		detail_form_version,
-		closeTodoDetail,
-		setDetailForm,
-		submitDetailForm,
-		is_saving_detail
-	} = useModel()
+	const { selected_todo, detail_form, detail_form_version, closeTodoDetail, setDetailForm, submitDetailForm } =
+		useModel()
 
 	const { control, register, handleSubmit, reset } = useForm<ITodoDetailForm>({ values: detail_form }, values =>
 		setDetailForm(values)
 	)
+	const ref_is_composing = useRef(false)
 
 	useEffect(() => {
 		reset(detail_form)
 	}, [detail_form, detail_form_version, reset])
 
 	const onSubmit = useMemoizedFn((values: ITodoDetailForm) => submitDetailForm(values))
+	const submitForm = useMemoizedFn(() => handleSubmit(onSubmit)())
+	const register_title = register('title')
+	const register_description = register('description')
 
 	if (!selected_todo) return null
 
@@ -94,7 +89,7 @@ const Index = () => {
 					px-4 py-3
 				'
 			>
-				<form className='flex flex-col' onSubmit={handleSubmit(onSubmit)}>
+				<form className='flex flex-col'>
 					<Textarea
 						className='
 							h-auto!
@@ -107,7 +102,23 @@ const Index = () => {
 							border-none
 							focus-within:ring-0!
 						'
-						{...register('title')}
+						{...register_title}
+						onChange={event => {
+							register_title.onChange(event)
+						}}
+						onCompositionStart={() => {
+							ref_is_composing.current = true
+						}}
+						onCompositionEnd={() => {
+							ref_is_composing.current = false
+						}}
+						onBlur={event => {
+							register_title.onBlur(event)
+
+							if (ref_is_composing.current) return
+
+							submitForm()
+						}}
 					></Textarea>
 					<div className='flex flex-col gap-1'>
 						<div className='flex items-center justify-between'>
@@ -115,52 +126,82 @@ const Index = () => {
 								<CircleDot className='size-3'></CircleDot>
 								<span className='text-sm font-medium'>Status</span>
 							</div>
-							<Controller name='status' control={control}>
-								<Select items={todo_status_options}>
-									<SelectTrigger
-										className='text-std-500 bg-transparent font-semibold'
-										no_active_style
+							<Controller
+								name='status'
+								control={control}
+								render={({ field }) => (
+									<Select
+										items={todo_status_options}
+										name={field.name}
+										value={field.value}
+										onValueChange={value => {
+											field.onChange(value)
+											submitForm()
+										}}
 									>
-										<SelectValue />
-									</SelectTrigger>
-									<SelectContent align='start'>
-										<SelectGroup>
-											<SelectLabel>Status</SelectLabel>
-											{todo_status_options.map(item => (
-												<SelectItem value={item.value} key={item.value}>
-													{item.label}
-												</SelectItem>
-											))}
-										</SelectGroup>
-									</SelectContent>
-								</Select>
-							</Controller>
+										<SelectTrigger
+											className='text-std-500 bg-transparent font-semibold'
+											no_active_style
+										>
+											<SelectValue />
+										</SelectTrigger>
+										<SelectContent align='start'>
+											<SelectGroup>
+												<SelectLabel>Status</SelectLabel>
+												{todo_status_options.map(item => (
+													<SelectItem
+														value={item.value}
+														key={item.value}
+													>
+														{item.label}
+													</SelectItem>
+												))}
+											</SelectGroup>
+										</SelectContent>
+									</Select>
+								)}
+							/>
 						</div>
 						<div className='flex items-center justify-between'>
 							<div className='text-std-400 flex items-center gap-2'>
 								<Flag className='size-3'></Flag>
 								<span className='text-sm font-medium'>Priority</span>
 							</div>
-							<Controller name='priority' control={control}>
-								<Select items={todo_priority_options}>
-									<SelectTrigger
-										className='text-std-500 bg-transparent font-semibold'
-										no_active_style
+							<Controller
+								name='priority'
+								control={control}
+								render={({ field }) => (
+									<Select
+										items={todo_priority_options}
+										name={field.name}
+										value={field.value}
+										onValueChange={value => {
+											field.onChange(value)
+											submitForm()
+										}}
 									>
-										<SelectValue />
-									</SelectTrigger>
-									<SelectContent align='start'>
-										<SelectGroup>
-											<SelectLabel>Priority</SelectLabel>
-											{todo_priority_options.map(item => (
-												<SelectItem value={item.value} key={item.value}>
-													{item.label}
-												</SelectItem>
-											))}
-										</SelectGroup>
-									</SelectContent>
-								</Select>
-							</Controller>
+										<SelectTrigger
+											className='text-std-500 bg-transparent font-semibold'
+											no_active_style
+										>
+											<SelectValue />
+										</SelectTrigger>
+										<SelectContent align='start'>
+											<SelectGroup>
+												<SelectLabel>Priority</SelectLabel>
+												{todo_priority_options.map(item => (
+													<SelectItem
+														value={item.value}
+														key={item.value}
+													>
+														{item.label}
+													</SelectItem>
+												))}
+											</SelectGroup>
+										</SelectContent>
+									</Select>
+								)}
+							/>
 						</div>
 						<div className='border-border-light mt-2 w-full border-b'></div>
 						<Textarea
@@ -171,26 +212,27 @@ const Index = () => {
 								border-none
 								focus-within:ring-0!
 							'
-							{...register('description')}
+							{...register_description}
+							onChange={event => {
+								register_description.onChange(event)
+							}}
+							onCompositionStart={() => {
+								ref_is_composing.current = true
+							}}
+							onCompositionEnd={() => {
+								ref_is_composing.current = false
+							}}
+							onBlur={event => {
+								register_description.onBlur(event)
+
+								if (ref_is_composing.current) return
+
+								submitForm()
+							}}
 							placeholder='Add description'
 						></Textarea>
 					</div>
 				</form>
-			</div>
-			<div
-				className='
-					flex
-					justify-end
-					gap-2
-					p-3
-				'
-			>
-				<Button type='button' variant='outline' onClick={() => reset(detail_form)}>
-					Reset
-				</Button>
-				<Button type='submit' disabled={is_saving_detail}>
-					{is_saving_detail ? 'Saving...' : 'Save'}
-				</Button>
 			</div>
 		</div>
 	)
