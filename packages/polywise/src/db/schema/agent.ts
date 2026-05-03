@@ -11,8 +11,10 @@ export default sqliteTable(
 		name: text('name').notNull(),
 		// Agent description
 		description: text('description'),
-		// Agent avatar
-		avatar: blob('avatar'),
+		// Agent photo: image file, photo take over avatar
+		photo: blob('photo'),
+		// Agent avatar: generate by program
+		avatar: text('avatar', { mode: 'json' }).$type<any>(),
 		// How you run
 		prompt: text('prompt'),
 		// What's in your mind
