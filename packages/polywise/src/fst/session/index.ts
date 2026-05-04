@@ -62,6 +62,7 @@ export default class Index {
 	ui_has_newer = false
 
 	abort_controller = new AbortController()
+	manual_abort = false
 	update_at = Date.now()
 	archived_at = null as null | number
 	running_since = null as Date | null

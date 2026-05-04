@@ -4,7 +4,7 @@ import getContextPrompt from '@core/consts/prompts/getContextPrompt'
 import plan_mode_prompt from '@core/consts/prompts/plan_mode_prompt.md'
 import planexec_exec_prompt from '@core/consts/prompts/planexec_exec_prompt.md'
 import planexec_plan_prompt from '@core/consts/prompts/planexec_plan_prompt.md'
-import { addNotification, addNotificationSession } from '@core/db/services'
+import { addNotification, addNotificationSession, syncTodoSessionStatusBySessionId } from '@core/db/services'
 import { env } from '@core/env'
 import { createSystemTool } from '@core/fst/agents'
 import { extract, getComplexitySignal } from '@core/fst/agents/superego'
@@ -46,6 +46,10 @@ import type Index from '../index'
 
 const model_threshold_value = 12
 
+const isAbortError = (error: unknown) => {
+	return error instanceof Error && error.name === 'AbortError'
+}
+
 export default async (s: Index, message: Message) => {
 	const total_messages_count = s.context.total_messages_count ?? 0
 	const is_first_message = total_messages_count === 0
@@ -63,6 +67,7 @@ export default async (s: Index, message: Message) => {
 
 	if (config.chaos_detect) startStream(s, message)
 
+	s.manual_abort = false
 	s.runing(true)
 	s.sync()
 
@@ -132,9 +137,34 @@ export default async (s: Index, message: Message) => {
 		experimental_transform: smoothStream(),
 		onAbort: s.stop.bind(s),
 		onError: async (event: { error: unknown }) => {
+			const is_manual_abort = s.manual_abort || isAbortError(event.error)
+
 			if (config.chaos_detect) stopStream(s.id)
 
 			await s.stop()
+
+			if (is_manual_abort) {
+				s.manual_abort = false
+
+				session_status_emitter.emit('change', {
+					[s.id]: {
+						title: s.session.title,
+						report: s.session.report,
+						running: s.session.is_runing,
+						unread: s.session.unread ?? false,
+						running_since: s.running_since?.getTime() ?? null,
+						running_done: s.session.running_done?.getTime() ?? null
+					}
+				})
+
+				return
+			}
+
+			await syncTodoSessionStatusBySessionId({
+				session_id: s.id,
+				from_status_list: ['processing'],
+				to_status: 'error'
+			})
 
 			if (!env.active) {
 				const notification_id = getId()
@@ -150,6 +180,8 @@ export default async (s: Index, message: Message) => {
 
 				await addNotificationSession(notification_id, s.id)
 			}
+
+			s.manual_abort = false
 
 			session_status_emitter.emit('change', {
 				[s.id]: {
@@ -219,6 +251,13 @@ export default async (s: Index, message: Message) => {
 
 			await s.stop()
 			await s.appendMessage(responseMessage)
+			await syncTodoSessionStatusBySessionId({
+				session_id: s.id,
+				from_status_list: ['processing'],
+				to_status: 'unreview'
+			})
+
+			s.manual_abort = false
 
 			if (!SessionEventStore.listenerCount(`${s.id}/change`)) {
 				const session = await s.updateSession({ unread: true })
@@ -257,7 +296,11 @@ export default async (s: Index, message: Message) => {
 			}
 		},
 		onError: error => {
-			s.stop()
+			if (s.manual_abort || isAbortError(error)) {
+				s.manual_abort = false
+
+				return ''
+			}
 
 			return `Stream error: ${error instanceof Error ? error.message : String(error)}`
 		}

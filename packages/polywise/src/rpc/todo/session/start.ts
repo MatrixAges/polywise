@@ -1,5 +1,13 @@
 import { todo, todo_session } from '@core/db/schema'
-import { addSession, addTodoSession, getSession, getTodo, getTodoSession, removeTodoSession } from '@core/db/services'
+import {
+	addSession,
+	addTodoSession,
+	getSession,
+	getTodo,
+	getTodoSession,
+	removeTodoSession,
+	syncTodoSessionStatusByTodoId
+} from '@core/db/services'
 import { addProjectSession } from '@core/db/services/externals/project_session'
 import { submit } from '@core/fst/utils'
 import { p } from '@core/utils'
@@ -10,6 +18,8 @@ const input_type = object({
 	todo_id: string(),
 	project_id: string().optional()
 })
+
+const start_status_list = ['draft', 'pending', 'unreview', 'done', 'canceled', 'error'] as const
 
 const getLinkedSession = async (todo_id: string) => {
 	const session_link = await getTodoSession(eq(todo_session.todo_id, todo_id))
@@ -47,7 +57,23 @@ export default p.input(input_type).mutation(async ({ input }) => {
 		}
 	}
 
-	await submit({ id: session_item.id }, todo_item.title)
+	await syncTodoSessionStatusByTodoId({
+		todo_id: input.todo_id,
+		from_status_list: [...start_status_list],
+		to_status: 'processing'
+	})
+
+	try {
+		await submit({ id: session_item.id }, todo_item.title)
+	} catch (error) {
+		await syncTodoSessionStatusByTodoId({
+			todo_id: input.todo_id,
+			from_status_list: ['processing'],
+			to_status: 'error'
+		})
+
+		throw error
+	}
 
 	return session_item
 })

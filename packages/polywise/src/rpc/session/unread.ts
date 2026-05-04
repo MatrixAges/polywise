@@ -1,8 +1,8 @@
 import { session } from '@core/db/schema'
-import { getSession, setSession } from '@core/db/services'
+import { getSession, setSession, syncTodoSessionStatusBySessionId } from '@core/db/services'
 import { p, SessionStore } from '@core/utils'
 import { eq } from 'drizzle-orm'
-import { object, string } from 'zod'
+import { string } from 'zod'
 
 import { session_status_emitter } from './watchSessionStatus'
 
@@ -25,6 +25,12 @@ export default p.input(input_type).mutation(async ({ input }) => {
 	}
 
 	if (next_session) {
+		await syncTodoSessionStatusBySessionId({
+			session_id: input,
+			from_status_list: ['unreview'],
+			to_status: 'done'
+		})
+
 		const running_since = target_live_session?.running_since ?? next_session.running_since ?? null
 		const running_done = target_live_session?.session.running_done ?? next_session.running_done ?? null
 
