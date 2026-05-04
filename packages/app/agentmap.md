@@ -128,11 +128,11 @@ This document provides an overview of the packages/app module structure and arch
 				},
 				"components": {
 					"Col.tsx": {
-						"desc": "Status column renderer that shows the status icon, task count, and todo cards for a single group",
+						"desc": "Status column renderer that shows the status icon, task count, and todo cards for a single group, and now registers each status body as a droppable sortable container so todos can be reordered within or moved across columns",
 						"role": "Component"
 					},
 					"Kanban.tsx": {
-						"desc": "Scrollable middle board that renders all grouped todo status columns from the page model",
+						"desc": "Scrollable middle board that renders all grouped todo status columns from the page model and now owns the shared dnd-kit drag context for todo reordering across both kanban and list modes; drag start clears the current selection",
 						"role": "Component"
 					},
 					"Menu.tsx": {
@@ -140,7 +140,7 @@ This document provides an overview of the packages/app module structure and arch
 						"role": "Component"
 					},
 					"Todo.tsx": {
-						"desc": "Todo card atom that supports selection plus inline title editing that saves on blur through the page model",
+						"desc": "Todo card atom that supports selection and now exposes dnd-kit sortable bindings so each todo can be dragged within or across status columns while preserving the existing card layout in kanban and list modes",
 						"role": "Component"
 					},
 					"TodoDetail.tsx": {
@@ -157,7 +157,7 @@ This document provides an overview of the packages/app module structure and arch
 					"role": "Page"
 				},
 				"model.ts": {
-					"desc": "Todo page state model for loading grouped tasks, tracking selection and inline title edits, and persisting detail-form updates through rpc.todo.update",
+					"desc": "Todo page state model for loading grouped tasks, tracking selection and inline title edits, clearing selection on drag start, applying optimistic same-column or cross-column todo moves in grouped data, and persisting drag reorder updates through rpc.todo.sort plus detail-form updates through rpc.todo.update",
 					"role": "Model"
 				},
 				"types.ts": {

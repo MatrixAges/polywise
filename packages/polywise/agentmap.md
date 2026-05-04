@@ -180,7 +180,7 @@ This document provides an overview of the packages/polywise module structure and
 					"role": "Folder"
 				},
 				"todo": {
-					"desc": "Todo domain RPC procedures for standalone todos and project-bound todos, including creation, deletion, status/content updates, manual sorting, direct project query, inbox/project menu count aggregation, and query views that return Record<status, Array<Todo>> grouped in schema status order.",
+					"desc": "Todo domain RPC procedures for standalone todos and project-bound todos, including creation, deletion, status/content updates, drag sorting within a status column or across status columns, direct project query, inbox/project menu count aggregation, and query views that return Record<status, Array<Todo>> grouped in schema status order.",
 					"role": "Folder"
 				}
 			},
@@ -233,7 +233,7 @@ This document provides an overview of the packages/polywise module structure and
 					"message.ts": { "desc": "Chat message storage schema with UIMessages", "role": "Schema" }
 				},
 				"services": {
-					"desc": "Database write/read helpers for core entities and relation-backed projections; todo service now supports single-item lookup, generic list query, and standalone todo filtering that excludes session_todo and project_todo bindings.",
+					"desc": "Database write/read helpers for core entities and relation-backed projections; todo service now supports single-item lookup, generic list query, standalone todo filtering that excludes session_todo and project_todo bindings, and the todo RPC layer now reuses those projections to persist cross-status drag reordering by rewriting status plus sequential order.",
 					"role": "Folder"
 				}
 			},

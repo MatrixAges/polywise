@@ -1,4 +1,6 @@
 import { useMemo } from 'react'
+import { useDroppable } from '@dnd-kit/core'
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { observer } from 'mobx-react-lite'
 
 import { todo_status_icon_map } from '@/appdata'
@@ -17,6 +19,13 @@ const Index = (props: IProps) => {
 	const { status, todos } = props
 	const { mode, selected_todo_id } = useModel()
 	const { Icon } = useMemo(() => todo_status_icon_map[status], [status])
+	const { setNodeRef } = useDroppable({
+		id: `col:${status}`,
+		data: {
+			type: 'col',
+			status
+		}
+	})
 
 	return (
 		<div className={$cx('flex flex-col', mode === 'kanban' ? 'h-full w-80 shrink-0' : 'w-full')}>
@@ -56,16 +65,25 @@ const Index = (props: IProps) => {
 				</span>
 			</div>
 			<div className={$cx('w-full flex-1', mode === 'kanban' && 'min-h-0 overflow-y-scroll')}>
-				<div className={$cx('flex w-full flex-col', mode === 'kanban' && 'gap-3')}>
-					{todos.map((item, index) => (
-						<Todo
-							item={item}
-							index={index}
-							selected={selected_todo_id === item.id}
-							key={item.id}
-						></Todo>
-					))}
-				</div>
+				<SortableContext items={todos.map(item => item.id)} strategy={verticalListSortingStrategy}>
+					<div
+						className={$cx(
+							'flex w-full flex-col',
+							mode === 'kanban' && 'gap-3',
+							todos.length === 0 && 'min-h-24'
+						)}
+						ref={setNodeRef}
+					>
+						{todos.map((item, index) => (
+							<Todo
+								item={item}
+								index={index}
+								selected={selected_todo_id === item.id}
+								key={item.id}
+							></Todo>
+						))}
+					</div>
+				</SortableContext>
 			</div>
 		</div>
 	)

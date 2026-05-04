@@ -1,3 +1,5 @@
+import { useSortable } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import { useMemoizedFn } from 'ahooks'
 import { observer } from 'mobx-react-lite'
 
@@ -17,6 +19,14 @@ const Index = (props: IProps) => {
 	const { item, index, selected } = props
 	const { title, created_at } = item
 	const { mode, setSelectTodo } = useModel()
+	const { attributes, listeners, transform, transition, isDragging, setNodeRef } = useSortable({
+		id: item.id,
+		data: {
+			type: 'todo',
+			status: item.status,
+			todo_id: item.id
+		}
+	})
 
 	const onClick = useMemoizedFn(() => setSelectTodo(item.status, index))
 
@@ -33,9 +43,14 @@ const Index = (props: IProps) => {
 				cursor-pointer
 			`,
 				mode === 'kanban' ? 'flex-col rounded-lg border py-2' : 'h-11 items-center border-b',
-				selected && 'border-primary/40'
+				selected && 'border-primary/40',
+				isDragging && 'z-10 opacity-70'
 			)}
 			onClick={onClick}
+			ref={setNodeRef}
+			style={{ transform: CSS.Translate.toString(transform), transition }}
+			{...attributes}
+			{...listeners}
 		>
 			<span
 				className={$cx(
