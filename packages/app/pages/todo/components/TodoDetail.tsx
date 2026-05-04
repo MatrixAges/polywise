@@ -53,7 +53,7 @@ const Index = () => {
 	const ref_is_composing = useRef(false)
 	const running_time = useRuningTime(is_runing!, running_since, running_done)
 
-	const { loading, click } = useClickLoading()
+	const { loading, click } = useClickLoading(1000)
 
 	useEffect(() => {
 		reset(detail_todo)

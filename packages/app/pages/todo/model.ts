@@ -23,7 +23,6 @@ export default class Index {
 	kanban_data = {} as KanbanData
 	selected_todo_id = ''
 	detail_todo = null as unknown as Todo
-	detail_session = null as Session | null
 	drag_todo = null as KanbanTodo | null
 	archive_open = false
 	archive_page = 1
@@ -34,6 +33,22 @@ export default class Index {
 		if (this.type === 'inbox') return
 
 		return this.type
+	}
+
+	get detail_session() {
+		if (!this.selected_todo_id) return null
+
+		for (const items of Object.values(this.kanban_data)) {
+			const target_item = items.find(item => item.todo.id === this.selected_todo_id)
+
+			if (!target_item) {
+				continue
+			}
+
+			return target_item.session as Session | null
+		}
+
+		return null
 	}
 
 	constructor(public util: Util) {
@@ -54,7 +69,6 @@ export default class Index {
 		this.type = v
 		this.selected_todo_id = ''
 		this.detail_todo = null as unknown as Todo
-		this.detail_session = null
 
 		this.getTodos()
 	}
@@ -84,7 +98,6 @@ export default class Index {
 
 		this.selected_todo_id = item.todo.id
 		this.detail_todo = item.todo
-		this.detail_session = item.session
 
 		this.archive_open = false
 		this.archive_page = 1
@@ -93,7 +106,6 @@ export default class Index {
 	closeTodoDetail() {
 		this.selected_todo_id = ''
 		this.detail_todo = null as unknown as Todo
-		this.detail_session = null
 	}
 
 	onDragStart(args: DragStartEvent) {
@@ -104,7 +116,6 @@ export default class Index {
 
 		this.selected_todo_id = ''
 		this.detail_todo = null as unknown as Todo
-		this.detail_session = null
 		this.drag_todo = this.kanban_data[active_status][active_index]
 	}
 
@@ -131,11 +142,10 @@ export default class Index {
 			return
 		}
 
-		const session_item = await rpc.todo.session.start.mutate({ todo_id: this.selected_todo_id })
-
-		if (session_item) {
-			this.detail_session = session_item as Session
-		}
+		await rpc.todo.session.start.mutate({
+			todo_id: this.selected_todo_id,
+			project_id: this.project_id
+		})
 
 		await this.getTodos()
 	}
@@ -156,7 +166,6 @@ export default class Index {
 
 		this.selected_todo_id = ''
 		this.detail_todo = null as unknown as Todo
-		this.detail_session = null
 
 		await rpc.todo.remove.mutate({ id })
 
@@ -242,22 +251,6 @@ export default class Index {
 						return [status, items.map(item => this.patchSessionStatus(item, res))]
 					})
 				) as KanbanData
-
-				if (this.detail_session) {
-					const status = res[this.detail_session.id]
-
-					if (status) {
-						this.detail_session = {
-							...this.detail_session,
-							title: status.title,
-							report: status.report,
-							is_runing: status.running,
-							running_since: status.running_since ? new Date(status.running_since) : null,
-							running_done: status.running_done ? new Date(status.running_done) : null,
-							unread: status.unread
-						}
-					}
-				}
 			}
 		})
 
@@ -296,7 +289,6 @@ export default class Index {
 			}
 
 			this.detail_todo = target_item.todo
-			this.detail_session = target_item.session as Session
 
 			return
 		}
