@@ -16,6 +16,20 @@ export const fromNow = (date?: string | number | Date | dayjs.Dayjs | Date | nul
 	return dayjs(date).fromNow()
 }
 
-export const getDurationTime = (v: number) => {
-	return dayjs.duration(v).humanize()
+export const getDurationTime = (v: number): string => {
+	const duration = dayjs.duration(v)
+
+	const hours = Math.floor(duration.asHours())
+	const mins = duration.minutes()
+	const secs = duration.seconds()
+
+	if (hours > 0) {
+		return `${hours}h${mins}m${secs}s`
+	}
+
+	if (mins > 0) {
+		return `${mins}m${secs}s`
+	}
+
+	return `${secs}s`
 }

@@ -56,6 +56,8 @@ const Index = (props: IProps) => {
 		return () => clearInterval(timer)
 	}, [running_since])
 
+	console.log(running_since, running_time)
+
 	return (
 		<div
 			className={$cx(
@@ -125,7 +127,7 @@ const Index = (props: IProps) => {
 				>
 					<span className='truncate'>{item.session.title}</span>
 					{Status}
-					{running_time && <span>{getDurationTime(running_time)}</span>}
+					{running_time > 0 && <span className='text-nowrap'>{getDurationTime(running_time)}</span>}
 				</div>
 			)}
 		</div>

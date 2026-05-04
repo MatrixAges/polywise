@@ -4,7 +4,7 @@ import type Index from '../index'
 
 export default async (s: Index, v: boolean) => {
 	s.session.is_runing = v
-	s.running_since = v ? (s.running_since ?? new Date()) : null
+	s.running_since = v ? new Date() : null
 
 	const session = await s.updateSession({
 		is_runing: v,
