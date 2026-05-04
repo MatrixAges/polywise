@@ -1,7 +1,6 @@
 import { useEffect, useRef } from 'react'
-import { useMemoizedFn } from 'ahooks'
 import { debounce } from 'es-toolkit'
-import { CircleDot, Flag, X } from 'lucide-react'
+import { CircleDot, Flag, Trash, X } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 import { Controller } from 'react-hook-form'
 
@@ -41,7 +40,7 @@ const todo_priority_options: Array<{ label: string; value: string }> = [
 ]
 
 const Index = () => {
-	const { detail_todo, updateTodo, closeTodoDetail } = useModel()
+	const { detail_todo, updateTodo, closeTodoDetail, removeTodo } = useModel()
 
 	const { control, register, reset } = useForm<Todo>({ values: $copy(detail_todo) }, (_, v) => {
 		updateTodo(v as RPCInput['todo']['update'])
@@ -66,16 +65,29 @@ const Index = () => {
 		>
 			<div
 				className='
-					flex shrink-0
+					flex
 					items-center justify-between
-					px-4 pt-2.5
-					pb-2
+					h-8
+					px-3
+					border-b border-border-light
 				'
 			>
-				<span className='text-std-400 text-sm font-medium'>Todo Detail</span>
-				<button className='icon_button small mr-[-2px]' onClick={closeTodoDetail}>
-					<X></X>
-				</button>
+				<span
+					className='
+						px-1 py-0.5
+						text-xsm text-std-500 font-medium
+					'
+				>
+					Detail
+				</span>
+				<div className='mr-[-2px] flex gap-1'>
+					<div className='icon_button small' onClick={() => removeTodo(detail_todo.id)}>
+						<Trash></Trash>
+					</div>
+					<div className='icon_button small' onClick={closeTodoDetail}>
+						<X></X>
+					</div>
+				</div>
 			</div>
 			<div
 				className='
@@ -91,7 +103,7 @@ const Index = () => {
 							h-auto!
 							min-h-0!
 							p-0
-							mb-3
+							my-3
 							rounded-none
 							text-base! font-medium leading-5.5!
 							bg-transparent

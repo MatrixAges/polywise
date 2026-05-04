@@ -4,7 +4,7 @@ import { setStorageWhenChange } from 'stk/mobx'
 import { injectable } from 'tsyringe'
 
 import { Util } from '@/models/common'
-import { rpc } from '@/utils'
+import { alert, rpc } from '@/utils'
 
 import type { RPCInput, RPCOutput } from '@/types'
 import type { Todo } from '@core/db'
@@ -90,6 +90,22 @@ export default class Index {
 
 	async createTodo(v: string) {
 		await rpc.todo.create.mutate({ title: v, project_id: this.type === 'inbox' ? undefined : this.type })
+
+		await this.getTodos()
+	}
+
+	async removeTodo(id: string) {
+		const res = await alert({
+			title: 'Remove Todo',
+			desc: 'Confirm remove this todo and relate session?'
+		})
+
+		if (!res) return
+
+		this.selected_todo_id = ''
+		this.detail_todo = null as unknown as Todo
+
+		await rpc.todo.remove.mutate({ id })
 
 		await this.getTodos()
 	}
