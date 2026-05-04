@@ -4,6 +4,7 @@ import { CircleDot, Flag, Trash, X } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 import { Controller } from 'react-hook-form'
 
+import { Button } from '@/__shadcn__/components/ui/button'
 import {
 	Select,
 	SelectContent,
@@ -219,6 +220,10 @@ const Index = () => {
 						></Textarea>
 					</div>
 				</form>
+			</div>
+			<div className='flex gap-2 p-3'>
+				<Button className='flex-1'>Start</Button>
+				<Button variant='secondary'>Stop</Button>
 			</div>
 		</div>
 	)
