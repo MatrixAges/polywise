@@ -39,7 +39,7 @@ export const todo_status_icon_map = {
 
 export const todo_priority_icon_map = {
 	low: 'text-std-700 bg-std-100',
-	medium: 'text-emerald-500 bg-emerald-50',
-	high: 'text-purple-700 bg-purple-50',
-	urgent: 'text-rose-700 bg-rose-50'
+	medium: 'text-emerald-500 bg-emerald-500/10',
+	high: 'text-purple-700 bg-purple-500/16',
+	urgent: 'text-rose-700 bg-rose-500/16'
 } as Record<string, string>

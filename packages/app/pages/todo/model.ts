@@ -189,8 +189,6 @@ export default class Index {
 		} else {
 			this.kanban_data[active_status].splice(active_index, 1)
 
-			console.log(active_todo, over_todo, over)
-
 			await rpc.todo.drag.mutate({
 				active_id: active_todo.id,
 				over_id: over_todo?.id,
