@@ -6,9 +6,10 @@ import { injectable } from 'tsyringe'
 import { Util } from '@/models/common'
 import { alert, rpc } from '@/utils'
 
+import { groupTodosByStatus, patchSessionStatus } from './utils'
+
 import type { RPCInput, RPCOutput } from '@/types'
 import type { Session, Todo } from '@core/db'
-import type { SessionStatusPayload } from '@core/rpc/session/watchSessionStatus'
 import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core'
 
 type KanbanData = RPCOutput['todo']['query']
@@ -246,42 +247,17 @@ export default class Index {
 					return
 				}
 
-				this.kanban_data = Object.fromEntries(
-					Object.entries(this.kanban_data).map(([status, items]) => {
-						return [status, items.map(item => this.patchSessionStatus(item, res))]
-					})
-				) as KanbanData
+				const patched_items = Object.values(this.kanban_data)
+					.flat()
+					.map(item => patchSessionStatus(item, res))
+
+				this.kanban_data = groupTodosByStatus(patched_items)
 
 				this.syncDetail()
 			}
 		})
 
 		this.util.acts.push(deinit.unsubscribe)
-	}
-
-	patchSessionStatus(item: KanbanTodo, status_map: SessionStatusPayload) {
-		if (!item.session) return item
-
-		const status = status_map[item.session.id]
-
-		if (!status) return item
-
-		return {
-			...item,
-			todo: {
-				...item.todo,
-				status: status.status ?? item.todo.status
-			} as Todo,
-			session: {
-				...item.session,
-				title: status.title,
-				report: status.report,
-				is_runing: status.running,
-				running_since: status.running_since ? new Date(status.running_since) : null,
-				running_done: status.running_done ? new Date(status.running_done) : null,
-				unread: status.unread
-			} as Session
-		}
 	}
 
 	syncDetail() {
