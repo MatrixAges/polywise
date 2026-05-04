@@ -14,8 +14,6 @@ import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core'
 type KanbanData = RPCOutput['todo']['query']
 type KanbanStatus = keyof KanbanData
 type KanbanTodo = KanbanData[KanbanStatus][number]
-type TodoSession = Session & { running_since?: Date | null }
-type SessionAction = 'idle' | 'starting' | 'stopping'
 
 @injectable()
 export default class Index {
@@ -25,7 +23,7 @@ export default class Index {
 	kanban_data = {} as KanbanData
 	selected_todo_id = ''
 	detail_todo = null as unknown as Todo
-	detail_session = null as TodoSession | null
+	detail_session = null as Session | null
 	drag_todo = null as KanbanTodo | null
 	archive_open = false
 	archive_page = 1
@@ -128,7 +126,7 @@ export default class Index {
 		await this.getTodos()
 	}
 
-	async startTodoSession() {
+	async startSession() {
 		if (!this.selected_todo_id || this.detail_session?.is_runing) {
 			return
 		}
@@ -136,13 +134,13 @@ export default class Index {
 		const session_item = await rpc.todo.session.start.mutate({ todo_id: this.selected_todo_id })
 
 		if (session_item) {
-			this.detail_session = session_item as TodoSession
+			this.detail_session = session_item as Session
 		}
 
 		await this.getTodos()
 	}
 
-	async stopTodoSession() {
+	async stopSession() {
 		await rpc.todo.session.stop.mutate({ todo_id: this.selected_todo_id })
 
 		await this.getTodos()
@@ -247,7 +245,7 @@ export default class Index {
 
 				this.kanban_data = Object.fromEntries(
 					Object.entries(this.kanban_data).map(([status, items]) => {
-						return [status, items.map(item => this.patchTodoSessionStatus(item, res))]
+						return [status, items.map(item => this.patchSessionStatus(item, res))]
 					})
 				) as KanbanData
 
@@ -270,7 +268,7 @@ export default class Index {
 		this.util.acts.push(deinit.unsubscribe)
 	}
 
-	patchTodoSessionStatus(item: KanbanTodo, status_map: SessionStatusPayload) {
+	patchSessionStatus(item: KanbanTodo, status_map: SessionStatusPayload) {
 		if (!item.session) return item
 
 		const status = status_map[item.session.id]
@@ -285,7 +283,7 @@ export default class Index {
 				is_runing: status.running,
 				running_since: status.running_since ? new Date(status.running_since) : null,
 				unread: status.unread
-			} as TodoSession
+			} as Session
 		}
 	}
 
@@ -300,7 +298,7 @@ export default class Index {
 			}
 
 			this.detail_todo = target_item.todo
-			this.detail_session = target_item.session as TodoSession
+			this.detail_session = target_item.session as Session
 
 			return
 		}
