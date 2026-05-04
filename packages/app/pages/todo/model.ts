@@ -1,3 +1,4 @@
+import { arrayMove } from '@dnd-kit/sortable'
 import { makeAutoObservable } from 'mobx'
 import { setStorageWhenChange } from 'stk/mobx'
 import { injectable } from 'tsyringe'
@@ -60,7 +61,7 @@ export default class Index {
 		this.detail_todo = null as unknown as Todo
 	}
 
-	onDragStartTodo(args: DragStartEvent) {
+	onDragStart(args: DragStartEvent) {
 		const { active } = args
 
 		const active_status = active.data.current?.status
@@ -71,7 +72,7 @@ export default class Index {
 		this.drag_todo = this.kanban_data[active_status][active_index]
 	}
 
-	onDragCancelTodo() {
+	onDragCancel() {
 		this.drag_todo = null
 	}
 
@@ -93,7 +94,7 @@ export default class Index {
 		await this.getTodos()
 	}
 
-	async onDragTodo(args: DragEndEvent) {
+	async onDragEnd(args: DragEndEvent) {
 		const { active, over } = args
 
 		this.drag_todo = null
@@ -104,6 +105,32 @@ export default class Index {
 		const over_index = over?.data.current?.index
 
 		if (!over_status || over_index === undefined || active.id === over?.id) return
+
+		const active_todo = this.kanban_data[active_status][active_index]
+		const over_todo = this.kanban_data[over_status][over_index]
+		const project_id = this.type === 'inbox' ? undefined : this.type
+
+		if (active_status === over_status) {
+			this.kanban_data[active_status] = arrayMove(this.kanban_data[active_status], active_index, over_index)
+
+			await rpc.todo.sort.mutate({
+				from: active_index,
+				to: over_index,
+				project_id
+			})
+		} else {
+			this.kanban_data[active_status].splice(active_index, 1)
+
+			await rpc.todo.drag.mutate({
+				active_id: active_todo.id,
+				over_id: over_todo.id,
+				active_status,
+				over_status,
+				project_id
+			})
+		}
+
+		await this.getTodos()
 	}
 
 	deinit() {

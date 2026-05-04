@@ -18,18 +18,17 @@ interface IProps {
 
 const Index = (props: IProps) => {
 	const { item, index, selected, overlay = false } = props
-	const { title, created_at } = item
+	const { title, status, created_at } = item
+
 	const { mode, setSelectTodo } = useModel()
+
 	const { attributes, listeners, transform, transition, isDragging, setNodeRef } = useSortable({
 		id: item.id,
-		data: {
-			type: 'todo',
-			status: item.status,
-			todo_id: item.id
-		}
+		data: { status, index }
 	})
 
 	const onClick = useMemoizedFn(() => setSelectTodo(item.status, index))
+
 	const style = overlay ? undefined : { transform: CSS.Translate.toString(transform), transition }
 	const props_drag = overlay ? {} : { ...attributes, ...listeners }
 

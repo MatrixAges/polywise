@@ -1,0 +1,75 @@
+import { getProjectTodo, getStandaloneTodos, setTodo } from '@core/db/services'
+import { p } from '@core/utils'
+import { asc, eq, sql } from 'drizzle-orm'
+import { object, string } from 'zod'
+
+import { project_todo, todo } from '../../db/schema'
+
+const status_list = ['draft', 'pending', 'processing', 'unreview', 'done', 'error', 'archive'] as const
+
+type TodoStatus = (typeof status_list)[number]
+
+const input_type = object({
+	active_id: string(),
+	over_id: string(),
+	active_status: string(),
+	over_status: string(),
+	project_id: string().optional()
+})
+
+const status_order = sql`CASE ${todo.status} WHEN 'draft' THEN 0 WHEN 'pending' THEN 1 WHEN 'processing' THEN 2 WHEN 'unreview' THEN 3 WHEN 'done' THEN 4 WHEN 'error' THEN 5 WHEN 'archive' THEN 6 END`
+
+const getTodoList = async (project_id?: string) => {
+	if (!project_id) {
+		const rows = await getStandaloneTodos()
+		return rows.map(item => item.todo)
+	}
+
+	const rows = await getProjectTodo({
+		where: eq(project_todo.project_id, project_id),
+		orderBy: [status_order, asc(todo.order), asc(todo.created_at)]
+	})
+
+	return rows.map(item => item.todo)
+}
+
+const isValidStatus = (value: string): value is TodoStatus => {
+	return (status_list as ReadonlyArray<string>).includes(value)
+}
+
+export default p.input(input_type).mutation(async ({ input }) => {
+	const todos = await getTodoList(input.project_id)
+	const active_todo = todos.find(item => item.id === input.active_id)
+	const over_todo = todos.find(item => item.id === input.over_id)
+
+	if (!active_todo || !over_todo) {
+		return todos
+	}
+
+	const active_status = isValidStatus(input.active_status) ? input.active_status : active_todo.status
+	const over_status = isValidStatus(input.over_status) ? input.over_status : over_todo.status
+
+	if (!isValidStatus(active_status) || !isValidStatus(over_status)) {
+		return todos
+	}
+
+	const remaining_todos = todos.filter(item => item.id !== input.active_id)
+	active_todo.status = over_status
+
+	const over_index = remaining_todos.findIndex(item => item.id === input.over_id)
+	const target_index = over_index < 0 ? remaining_todos.length : over_index
+	remaining_todos.splice(target_index, 0, active_todo)
+
+	const next_todos = status_list.flatMap(status => remaining_todos.filter(item => item.status === status))
+
+	await Promise.all(
+		next_todos.map((item, index) =>
+			setTodo(eq(todo.id, item.id), {
+				order: index,
+				status: item.status
+			})
+		)
+	)
+
+	return next_todos
+})
