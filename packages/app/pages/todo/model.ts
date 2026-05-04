@@ -26,7 +26,6 @@ export default class Index {
 	selected_todo_id = ''
 	detail_todo = null as unknown as Todo
 	detail_session = null as TodoSession | null
-	session_action = 'idle' as SessionAction
 	drag_todo = null as KanbanTodo | null
 	archive_open = false
 	archive_page = 1
@@ -57,7 +56,6 @@ export default class Index {
 		this.selected_todo_id = ''
 		this.detail_todo = null as unknown as Todo
 		this.detail_session = null
-		this.session_action = 'idle'
 
 		this.getTodos()
 	}
@@ -84,7 +82,6 @@ export default class Index {
 		this.selected_todo_id = item.todo.id
 		this.detail_todo = item.todo
 		this.detail_session = item.session
-		this.session_action = 'idle'
 
 		this.archive_open = false
 		this.archive_page = 1
@@ -94,7 +91,6 @@ export default class Index {
 		this.selected_todo_id = ''
 		this.detail_todo = null as unknown as Todo
 		this.detail_session = null
-		this.session_action = 'idle'
 	}
 
 	onDragStart(args: DragStartEvent) {
@@ -106,7 +102,6 @@ export default class Index {
 		this.selected_todo_id = ''
 		this.detail_todo = null as unknown as Todo
 		this.detail_session = null
-		this.session_action = 'idle'
 		this.drag_todo = this.kanban_data[active_status][active_index]
 	}
 
@@ -126,45 +121,26 @@ export default class Index {
 		await rpc.todo.update.mutate({ ...v, id: this.selected_todo_id })
 
 		await this.getTodos()
-		this.syncDetailBySelectedTodo()
 	}
 
 	async startTodoSession() {
-		if (!this.selected_todo_id || this.session_action !== 'idle' || this.detail_session?.is_runing) {
+		if (!this.selected_todo_id || this.detail_session?.is_runing) {
 			return
 		}
 
-		this.session_action = 'starting'
+		const session_item = await rpc.todo.session.start.mutate({ todo_id: this.selected_todo_id })
 
-		try {
-			const session_item = await rpc.todo.session.start.mutate({ todo_id: this.selected_todo_id })
-
-			if (session_item) {
-				this.detail_session = session_item as TodoSession
-			}
-
-			await this.getTodos()
-			this.syncDetailBySelectedTodo()
-		} finally {
-			this.session_action = 'idle'
+		if (session_item) {
+			this.detail_session = session_item as TodoSession
 		}
+
+		await this.getTodos()
 	}
 
 	async stopTodoSession() {
-		if (!this.selected_todo_id || this.session_action !== 'idle' || !this.detail_session?.is_runing) {
-			return
-		}
+		await rpc.todo.session.stop.mutate({ todo_id: this.selected_todo_id })
 
-		this.session_action = 'stopping'
-
-		try {
-			await rpc.todo.session.stop.mutate({ todo_id: this.selected_todo_id })
-
-			await this.getTodos()
-			this.syncDetailBySelectedTodo()
-		} finally {
-			this.session_action = 'idle'
-		}
+		await this.getTodos()
 	}
 
 	async createTodo(v: string) {
@@ -184,7 +160,6 @@ export default class Index {
 		this.selected_todo_id = ''
 		this.detail_todo = null as unknown as Todo
 		this.detail_session = null
-		this.session_action = 'idle'
 
 		await rpc.todo.remove.mutate({ id })
 
@@ -284,10 +259,6 @@ export default class Index {
 						}
 					}
 				}
-
-				if (this.drag_todo) {
-					this.drag_todo = this.patchTodoSessionStatus(this.drag_todo, res)
-				}
 			}
 		})
 
@@ -295,15 +266,11 @@ export default class Index {
 	}
 
 	patchTodoSessionStatus(item: KanbanTodo, status_map: SessionStatusPayload) {
-		if (!item.session) {
-			return item
-		}
+		if (!item.session) return item
 
 		const status = status_map[item.session.id]
 
-		if (!status) {
-			return item
-		}
+		if (!status) return item
 
 		return {
 			...item,

@@ -21,13 +21,6 @@ interface IProps {
 const Index = (props: IProps) => {
 	const { item, index, selected, overlay = false } = props
 	const { title, status, created_at, priority } = item.todo
-	const [, set_signal] = useState(0)
-	const session_running = !!item.session?.is_runing
-	const session_started_at = item.session?.running_since ? new Date(item.session.running_since) : null
-	const session_elapsed =
-		session_running && session_started_at
-			? Math.max(Math.floor((Date.now() - session_started_at.getTime()) / 1000), 0)
-			: 0
 
 	const { mode, setSelectTodo } = useModel()
 
@@ -37,18 +30,6 @@ const Index = (props: IProps) => {
 	})
 
 	const onClick = useMemoizedFn(() => setSelectTodo(item.todo.status, index))
-
-	useEffect(() => {
-		if (!session_running) {
-			return
-		}
-
-		const timer = window.setInterval(() => {
-			set_signal(value => value + 1)
-		}, 1000)
-
-		return () => window.clearInterval(timer)
-	}, [item.session?.id, session_running, item.session?.running_since])
 
 	const style = overlay ? undefined : { transform: CSS.Translate.toString(transform), transition }
 	const props_drag = overlay ? {} : { ...attributes, ...listeners }
@@ -81,33 +62,14 @@ const Index = (props: IProps) => {
 						{status.substring(0, 3)}-{index + 1}
 					</span>
 				)}
-				<div className={$cx('flex min-w-0 flex-1 flex-col', mode === 'kanban' ? 'gap-1' : 'gap-0.5')}>
-					<span
-						className={$cx(
-							'text-std-600 text-sb leading-5.5! font-medium',
-							mode === 'kanban' ? 'w-full' : 'truncate'
-						)}
-					>
-						{title}
-					</span>
-
-					{item.session && (
-						<div
-							className='
-								flex
-								items-center
-								min-w-0
-								gap-2
-								text-std-400 text-xs
-							'
-						>
-							<span className='truncate'>{item.session.title}</span>
-							<span className={$cx(session_running ? 'text-primary' : 'text-std-300')}>
-								{session_running ? `Running ${session_elapsed}s` : 'Idle'}
-							</span>
-						</div>
+				<span
+					className={$cx(
+						'text-std-600 text-sb leading-5.5! font-medium',
+						mode === 'kanban' ? 'w-full' : 'truncate'
 					)}
-				</div>
+				>
+					{title}
+				</span>
 				{priority && priority !== 'none' && (
 					<span
 						className={$cx(
@@ -126,6 +88,22 @@ const Index = (props: IProps) => {
 				)}
 			</div>
 			<span className='text-std-400 mt-0.5 text-sm'>{fromNow(created_at)}</span>
+			{item.session && (
+				<div
+					className='
+						flex
+						items-center
+						gap-2
+						px-2 py-1
+						my-1
+						rounded-full
+						text-std-400 text-xs
+						bg-secondary/60
+					'
+				>
+					<span className='truncate'>{item.session.title}</span>
+				</div>
+			)}
 		</div>
 	)
 }

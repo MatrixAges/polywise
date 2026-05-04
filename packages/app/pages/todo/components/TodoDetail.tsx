@@ -41,33 +41,10 @@ const todo_priority_options: Array<{ label: string; value: string }> = [
 	{ label: 'Urgent', value: 'urgent' }
 ]
 
-const getElapsedText = (started_at?: Date | null) => {
-	if (!started_at) {
-		return 'Running'
-	}
-
-	const elapsed_ms = Math.max(Date.now() - started_at.getTime(), 0)
-	const total_seconds = Math.floor(elapsed_ms / 1000)
-	const hours = Math.floor(total_seconds / 3600)
-	const minutes = Math.floor((total_seconds % 3600) / 60)
-	const seconds = total_seconds % 60
-
-	if (hours > 0) {
-		return `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
-	}
-
-	return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
-}
-
-const getRunningSince = (detail_session?: { running_since?: Date | null } | null) => {
-	return detail_session?.running_since ?? null
-}
-
 const Index = () => {
 	const {
 		detail_todo,
 		detail_session,
-		session_action,
 		updateTodo,
 		startTodoSession,
 		stopTodoSession,
@@ -79,33 +56,13 @@ const Index = () => {
 		updateTodo(v as RPCInput['todo']['update'])
 	})
 	const ref_is_composing = useRef(false)
-	const [, set_signal] = useState(0)
 
 	useEffect(() => {
 		reset(detail_todo)
 	}, [detail_todo])
 
-	useEffect(() => {
-		if (!detail_session?.is_runing) {
-			return
-		}
-
-		const timer = window.setInterval(() => {
-			set_signal(value => value + 1)
-		}, 1000)
-
-		return () => window.clearInterval(timer)
-	}, [detail_session?.id, detail_session?.is_runing, detail_session?.updated_at])
-
 	const register_title = register('title')
 	const register_description = register('description')
-	const session_running = !!detail_session?.is_runing
-	const started_at = getRunningSince(detail_session)
-	const start_disabled = session_action !== 'idle' || session_running
-	const stop_disabled = session_action !== 'idle' || !session_running
-	const start_label = session_action === 'starting' ? 'Starting...' : 'Start Session'
-	const stop_label = session_action === 'stopping' ? 'Stopping...' : 'Stop'
-	const session_status = session_running ? 'Running' : detail_session ? 'Idle' : 'Not started'
 
 	return (
 		<div
@@ -175,34 +132,6 @@ const Index = () => {
 						}}
 					></Textarea>
 					<div className='flex flex-col'>
-						<div
-							className='
-								flex flex-col
-								gap-1
-								py-3
-								border-border-light border-b
-							'
-						>
-							<span className='text-std-400 text-sm font-medium'>Session</span>
-							<span className='text-std-700 text-sm font-semibold'>
-								{detail_session?.title || 'No session'}
-							</span>
-							<div
-								className='
-									flex
-									items-center justify-between
-									text-std-400 text-xs
-								'
-							>
-								<span>{session_status}</span>
-								{session_running && <span>{getElapsedText(started_at)}</span>}
-							</div>
-							{detail_session?.updated_at && (
-								<span className='text-std-300 text-xs'>
-									Updated {formatTime(detail_session.updated_at)}
-								</span>
-							)}
-						</div>
 						<div className='flex items-center justify-between'>
 							<div className='text-std-400 flex items-center gap-1.5'>
 								<CircleDot className='size-3'></CircleDot>
@@ -301,12 +230,19 @@ const Index = () => {
 					</div>
 				</form>
 			</div>
-			<div className='flex gap-2 p-3'>
-				<Button type='button' className='flex-1' disabled={start_disabled} onClick={startTodoSession}>
-					{start_label}
+			<div
+				className='
+					flex
+					gap-2
+					p-3
+					border-t border-border-light
+				'
+			>
+				<Button type='button' className='flex-1' onClick={startTodoSession}>
+					Start Session
 				</Button>
-				<Button type='button' variant='secondary' disabled={stop_disabled} onClick={stopTodoSession}>
-					{stop_label}
+				<Button type='button' variant='secondary' onClick={stopTodoSession}>
+					Stop
 				</Button>
 			</div>
 		</div>
