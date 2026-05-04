@@ -13,10 +13,11 @@ interface IProps {
 	item: Todo
 	index: number
 	selected: boolean
+	overlay?: boolean
 }
 
 const Index = (props: IProps) => {
-	const { item, index, selected } = props
+	const { item, index, selected, overlay = false } = props
 	const { title, created_at } = item
 	const { mode, setSelectTodo } = useModel()
 	const { attributes, listeners, transform, transition, isDragging, setNodeRef } = useSortable({
@@ -29,6 +30,8 @@ const Index = (props: IProps) => {
 	})
 
 	const onClick = useMemoizedFn(() => setSelectTodo(item.status, index))
+	const style = overlay ? undefined : { transform: CSS.Translate.toString(transform), transition }
+	const props_drag = overlay ? {} : { ...attributes, ...listeners }
 
 	return (
 		<div
@@ -44,13 +47,12 @@ const Index = (props: IProps) => {
 			`,
 				mode === 'kanban' ? 'flex-col rounded-lg border py-2' : 'h-11 items-center border-b',
 				selected && 'border-primary/40',
-				isDragging && 'z-10 opacity-70'
+				(isDragging || overlay) && 'z-10 opacity-70 shadow-lg'
 			)}
-			onClick={onClick}
-			ref={setNodeRef}
-			style={{ transform: CSS.Translate.toString(transform), transition }}
-			{...attributes}
-			{...listeners}
+			onClick={overlay ? undefined : onClick}
+			ref={overlay ? undefined : setNodeRef}
+			style={style}
+			{...props_drag}
 		>
 			<span
 				className={$cx(

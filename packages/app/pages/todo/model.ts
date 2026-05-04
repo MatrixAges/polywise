@@ -7,7 +7,7 @@ import { rpc } from '@/utils'
 
 import type { RPCInput, RPCOutput } from '@/types'
 import type { Todo } from '@core/db'
-import type { DragEndEvent } from '@dnd-kit/core'
+import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core'
 
 interface IArgsMoveTodoLocal {
 	active_id: string
@@ -28,6 +28,7 @@ export default class Index {
 	kanban_data = {} as KanbanData
 	selected_todo_id = ''
 	detail_todo = null as unknown as Todo
+	drag_todo = null as KanbanTodo | null
 
 	constructor(public util: Util) {
 		makeAutoObservable(this, { util: false }, { autoBind: true })
@@ -66,9 +67,16 @@ export default class Index {
 		this.detail_todo = null as unknown as Todo
 	}
 
-	onDragStartTodo() {
+	onDragStartTodo(args: DragStartEvent) {
+		const todo_id = String(args.active.id)
+
 		this.selected_todo_id = ''
 		this.detail_todo = null as unknown as Todo
+		this.drag_todo = this.getTodoById(todo_id)
+	}
+
+	onDragCancelTodo() {
+		this.drag_todo = null
 	}
 
 	async getProjects() {
@@ -91,6 +99,8 @@ export default class Index {
 
 	async onDragTodo(args: DragEndEvent) {
 		const { active, over } = args
+
+		this.drag_todo = null
 
 		if (!over?.id || active.id === over.id) {
 			return
@@ -154,6 +164,18 @@ export default class Index {
 		}
 
 		return ''
+	}
+
+	getTodoById(todo_id: string) {
+		for (const status of Object.keys(this.kanban_data)) {
+			const todo = this.kanban_data[status].find(item => item.id === todo_id)
+
+			if (todo) {
+				return todo
+			}
+		}
+
+		return null
 	}
 
 	moveTodoLocal(args: IArgsMoveTodoLocal) {
