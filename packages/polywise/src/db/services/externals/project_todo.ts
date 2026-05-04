@@ -1,6 +1,6 @@
 import { project, project_todo, todo } from '@core/db/schema'
 import { env } from '@core/env'
-import { eq, SQL } from 'drizzle-orm'
+import { eq, SQL, sql } from 'drizzle-orm'
 
 interface ArgsGetProjectTodo {
 	where?: SQL
@@ -32,6 +32,16 @@ export const getProjectTodo = async (args: ArgsGetProjectTodo = {}) => {
 	if (offset) query = query.offset(offset)
 
 	return query
+}
+
+export const getProjectTodoCount = async (where?: SQL) => {
+	return env.db
+		.select({ count: sql<number>`count(*)` })
+		.from(project_todo)
+		.innerJoin(project, eq(project_todo.project_id, project.id))
+		.innerJoin(todo, eq(project_todo.todo_id, todo.id))
+		.where(where)
+		.then(res => Number(res[0].count))
 }
 
 export const addProjectTodo = async (project_id: string, todo_id: string) => {

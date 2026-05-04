@@ -76,6 +76,18 @@ export const getStandaloneTodos = async (args: ArgsGetTodos = {}) => {
 	return query
 }
 
+export const getStandaloneTodosCount = async (where?: SQL) => {
+	const base_where = and(isNull(session_todo.todo_id), isNull(project_todo.todo_id), where)
+
+	return env.db
+		.select({ count: sql<number>`count(*)` })
+		.from(todo)
+		.leftJoin(session_todo, sql`${todo.id} = ${session_todo.todo_id}`)
+		.leftJoin(project_todo, sql`${todo.id} = ${project_todo.todo_id}`)
+		.where(base_where)
+		.then(res => Number(res[0].count))
+}
+
 export const setTodo = async (where: SQL, values: Partial<TodoInsert>) => {
 	return env.db
 		.update(todo)

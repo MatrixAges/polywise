@@ -24,6 +24,12 @@ export default class Index {
 	detail_todo = null as unknown as Todo
 	drag_todo = null as KanbanTodo | null
 
+	get project_id() {
+		if (this.type === 'inbox' || this.type === 'archive') return
+
+		return this.type
+	}
+
 	constructor(public util: Util) {
 		makeAutoObservable(this, { util: false }, { autoBind: true })
 	}
@@ -42,7 +48,10 @@ export default class Index {
 		this.selected_todo_id = ''
 		this.detail_todo = null as unknown as Todo
 
-		this.getTodos()
+		if (v === 'archive') {
+		} else {
+			this.getTodos()
+		}
 	}
 
 	toggleMode() {
@@ -91,7 +100,7 @@ export default class Index {
 	}
 
 	async createTodo(v: string) {
-		await rpc.todo.create.mutate({ title: v, project_id: this.type === 'inbox' ? undefined : this.type })
+		await rpc.todo.create.mutate({ title: v, project_id: this.project_id })
 
 		await this.getTodos()
 	}
@@ -112,6 +121,10 @@ export default class Index {
 		await this.getTodos()
 	}
 
+	async getArchives() {
+		// await rpc.todo.getArchives.query()
+	}
+
 	async onDragEnd(args: DragEndEvent) {
 		const { active, over } = args
 
@@ -126,7 +139,6 @@ export default class Index {
 
 		const active_todo = this.kanban_data[active_status][active_index]
 		const over_todo = this.kanban_data[over_status][over_index]
-		const project_id = this.type === 'inbox' ? undefined : this.type
 
 		if (active_status === over_status) {
 			if (!over_status || over_index === undefined) return
@@ -136,7 +148,7 @@ export default class Index {
 			await rpc.todo.sort.mutate({
 				from: active_index,
 				to: over_index,
-				project_id
+				project_id: this.project_id
 			})
 		} else {
 			this.kanban_data[active_status].splice(active_index, 1)
@@ -148,7 +160,7 @@ export default class Index {
 				over_id: over_todo?.id,
 				active_status,
 				over_status,
-				project_id
+				project_id: this.project_id
 			})
 		}
 

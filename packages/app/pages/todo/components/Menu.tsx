@@ -1,6 +1,6 @@
 import { useRef } from 'react'
 import { useMemoizedFn } from 'ahooks'
-import { FolderKanban, Inbox, Rows3, SquareKanban } from 'lucide-react'
+import { Archive, FolderKanban, Inbox, Rows3, SquareKanban } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { Button } from '@/__shadcn__/components/ui/button'
@@ -12,7 +12,7 @@ import { useModel } from '../context'
 
 const Index = () => {
 	const { type, mode, menu_data, setType, toggleMode, createTodo } = useModel()
-	const { inbox, projects = [] } = menu_data
+	const { inbox, archive, projects = [] } = menu_data
 	const ref_create = useRef<HTMLTextAreaElement>(null)
 
 	const ref = useDelegate(v => setType(v))
@@ -98,6 +98,26 @@ const Index = () => {
 							'
 						>
 							{inbox}
+						</span>
+					</div>
+					<div
+						className={$cx('click_button justify-between', type === 'archive' && 'active')}
+						data-key='archive'
+					>
+						<div className='flex items-center gap-2'>
+							<Archive></Archive>
+							<span>Archive</span>
+						</div>
+						<span
+							className='
+								px-1 py-0.5
+								rounded-full
+								text-xs leading-none
+								bg-secondary
+								border border-border-light
+							'
+						>
+							{archive}
 						</span>
 					</div>
 					{projects.map(item => (
