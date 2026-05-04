@@ -7,7 +7,6 @@ import LoadingDots from './LoadingDots'
 import Part from './Part'
 import SourceUrls from './SourceUrls'
 
-import type { MessageMetadata } from '@core/fst'
 import type { FileUIPart, SourceUrlUIPart, TextUIPart } from 'ai'
 import type { IPropsMessage } from '../types'
 
@@ -41,7 +40,13 @@ const Index = (props: IPropsMessage) => {
 							<Part
 								streaming={index === left_parts.length - 1 && streaming}
 								part={part}
-								reasoning_duration={getReasoningDuration(message, index)}
+								reasoning_duration={getReasoningDuration(
+									{
+										...message,
+										parts: left_parts
+									},
+									index
+								)}
 								answer={answer}
 								key={`${message.id}-${index}`}
 							></Part>
