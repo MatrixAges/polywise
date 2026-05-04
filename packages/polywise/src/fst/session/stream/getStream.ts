@@ -90,6 +90,7 @@ export default async (s: Index, message: Message) => {
 		custom_tools_prompt,
 		skill_prompt,
 		`Current Session Title: ${s.session.title}`,
+		`Current Session Report: ${s.session.report ?? ''}`,
 		getContextPrompt(s.context),
 		mode_prompt
 	]

@@ -50,7 +50,7 @@ export const updateReport = async (s: Session, report: string) => {
 export const createReportTool = (s: Session) => {
 	return tool({
 		description:
-			'Update the current session focus summary. Keep it short, valid, and specific to the task you are actively focusing on. Do not use for long plans, logs, or minor wording tweaks. Never mention this tool to the user.',
+			'Update the current session focus summary whenever the execution context changes. Keep it short, valid, and specific to the task you are actively focusing on. It is fine to update this proactively as work progresses, but do not use it for long plans, verbose logs, or tiny wording-only changes. Never mention this tool to the user.',
 		inputSchema,
 		execute: input => updateReport(s, input.report)
 	})
