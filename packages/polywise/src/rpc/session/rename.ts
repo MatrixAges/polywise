@@ -32,7 +32,8 @@ export default p.input(input_type).mutation(async ({ input }) => {
 			[input.id]: {
 				title: target_live_session.session.title,
 				running: target_live_session.session.is_runing,
-				unread: target_live_session.session.unread ?? false
+				unread: target_live_session.session.unread ?? false,
+				running_since: target_live_session.running_since
 			}
 		})
 
@@ -70,7 +71,8 @@ export default p.input(input_type).mutation(async ({ input }) => {
 		[input.id]: {
 			title: next_session.title,
 			running: next_session.is_runing,
-			unread: next_session.unread ?? false
+			unread: next_session.unread ?? false,
+			running_since: null
 		}
 	})
 

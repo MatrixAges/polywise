@@ -144,11 +144,11 @@ This document provides an overview of the packages/app module structure and arch
 						"role": "Component"
 					},
 					"Todo.tsx": {
-						"desc": "Todo card atom that supports selection, consumes a `{ todo, session }` board item, and exposes dnd-kit sortable bindings so each todo can be dragged within or across status columns while preserving the existing card layout in kanban and list modes",
+						"desc": "Todo card atom that supports selection, consumes a `{ todo, session }` board item, exposes dnd-kit sortable bindings so each todo can be dragged within or across status columns, and now renders linked session title plus running or idle status on the board",
 						"role": "Component"
 					},
 					"TodoDetail.tsx": {
-						"desc": "Closable right-side detail form that persists title immediately through form watch, debounces description textarea saves during typing, and persists status and priority immediately on selection change",
+						"desc": "Closable right-side detail form that persists title immediately through form watch, debounces title and description edits during typing, persists status and priority immediately on selection change, and controls linked todo session start or stop actions with realtime title, running state, elapsed time, and button disabled states",
 						"role": "Component"
 					},
 					"index.ts": {
@@ -161,7 +161,7 @@ This document provides an overview of the packages/app module structure and arch
 					"role": "Page"
 				},
 				"model.ts": {
-					"desc": "Todo page state model for loading grouped `{ todo, session }` board data, tracking selected todo plus linked session, clearing selection on drag start, applying optimistic same-column or cross-column todo moves, persisting drag reorder updates through rpc.todo.sort plus detail-form updates through rpc.todo.update, and subscribing to rpc.session.watchSessionStatus so linked session title/running/unread state stays in sync on the todo board",
+					"desc": "Todo page state model for loading grouped `{ todo, session }` board data, tracking selected todo plus linked session, starting or stopping linked todo sessions, clearing selection on drag start, applying optimistic same-column or cross-column todo moves, persisting drag reorder updates through rpc.todo.sort plus detail-form updates through rpc.todo.update, and subscribing to rpc.session.watchSessionStatus so linked session title, running state, elapsed-time anchor, and unread state stay in sync on the todo board and detail pane",
 					"role": "Model"
 				},
 				"types.ts": {

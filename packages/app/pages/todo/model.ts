@@ -14,6 +14,8 @@ import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core'
 type KanbanData = RPCOutput['todo']['query']
 type KanbanStatus = keyof KanbanData
 type KanbanTodo = KanbanData[KanbanStatus][number]
+type TodoSession = Session & { running_since?: Date | null }
+type SessionAction = 'idle' | 'starting' | 'stopping'
 
 @injectable()
 export default class Index {
@@ -23,7 +25,8 @@ export default class Index {
 	kanban_data = {} as KanbanData
 	selected_todo_id = ''
 	detail_todo = null as unknown as Todo
-	detail_session = null as Session | null
+	detail_session = null as TodoSession | null
+	session_action = 'idle' as SessionAction
 	drag_todo = null as KanbanTodo | null
 	archive_open = false
 	archive_page = 1
@@ -54,6 +57,7 @@ export default class Index {
 		this.selected_todo_id = ''
 		this.detail_todo = null as unknown as Todo
 		this.detail_session = null
+		this.session_action = 'idle'
 
 		this.getTodos()
 	}
@@ -80,6 +84,7 @@ export default class Index {
 		this.selected_todo_id = item.todo.id
 		this.detail_todo = item.todo
 		this.detail_session = item.session
+		this.session_action = 'idle'
 
 		this.archive_open = false
 		this.archive_page = 1
@@ -89,6 +94,7 @@ export default class Index {
 		this.selected_todo_id = ''
 		this.detail_todo = null as unknown as Todo
 		this.detail_session = null
+		this.session_action = 'idle'
 	}
 
 	onDragStart(args: DragStartEvent) {
@@ -100,6 +106,7 @@ export default class Index {
 		this.selected_todo_id = ''
 		this.detail_todo = null as unknown as Todo
 		this.detail_session = null
+		this.session_action = 'idle'
 		this.drag_todo = this.kanban_data[active_status][active_index]
 	}
 
@@ -119,6 +126,45 @@ export default class Index {
 		await rpc.todo.update.mutate({ ...v, id: this.selected_todo_id })
 
 		await this.getTodos()
+		this.syncDetailBySelectedTodo()
+	}
+
+	async startTodoSession() {
+		if (!this.selected_todo_id || this.session_action !== 'idle' || this.detail_session?.is_runing) {
+			return
+		}
+
+		this.session_action = 'starting'
+
+		try {
+			const session_item = await rpc.todo.session.start.mutate({ todo_id: this.selected_todo_id })
+
+			if (session_item) {
+				this.detail_session = session_item as TodoSession
+			}
+
+			await this.getTodos()
+			this.syncDetailBySelectedTodo()
+		} finally {
+			this.session_action = 'idle'
+		}
+	}
+
+	async stopTodoSession() {
+		if (!this.selected_todo_id || this.session_action !== 'idle' || !this.detail_session?.is_runing) {
+			return
+		}
+
+		this.session_action = 'stopping'
+
+		try {
+			await rpc.todo.session.stop.mutate({ todo_id: this.selected_todo_id })
+
+			await this.getTodos()
+			this.syncDetailBySelectedTodo()
+		} finally {
+			this.session_action = 'idle'
+		}
 	}
 
 	async createTodo(v: string) {
@@ -138,6 +184,7 @@ export default class Index {
 		this.selected_todo_id = ''
 		this.detail_todo = null as unknown as Todo
 		this.detail_session = null
+		this.session_action = 'idle'
 
 		await rpc.todo.remove.mutate({ id })
 
@@ -232,6 +279,7 @@ export default class Index {
 							...this.detail_session,
 							title: status.title,
 							is_runing: status.running,
+							running_since: status.running_since ? new Date(status.running_since) : null,
 							unread: status.unread
 						}
 					}
@@ -263,8 +311,28 @@ export default class Index {
 				...item.session,
 				title: status.title,
 				is_runing: status.running,
+				running_since: status.running_since ? new Date(status.running_since) : null,
 				unread: status.unread
+			} as TodoSession
+		}
+	}
+
+	syncDetailBySelectedTodo() {
+		if (!this.selected_todo_id) {
+			return
+		}
+
+		for (const items of Object.values(this.kanban_data)) {
+			const target_item = items.find(item => item.todo.id === this.selected_todo_id)
+
+			if (!target_item) {
+				continue
 			}
+
+			this.detail_todo = target_item.todo
+			this.detail_session = target_item.session as TodoSession
+
+			return
 		}
 	}
 

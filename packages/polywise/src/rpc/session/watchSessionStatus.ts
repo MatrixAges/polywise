@@ -6,6 +6,7 @@ export interface SessionStatusPayload {
 		title: string
 		running: boolean
 		unread: boolean
+		running_since: number | null
 	}
 }
 

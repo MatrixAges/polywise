@@ -29,7 +29,8 @@ export default p.input(input_type).mutation(async ({ input }) => {
 			[input]: {
 				title: next_session.title,
 				running: next_session.is_runing,
-				unread: next_session.unread ?? false
+				unread: next_session.unread ?? false,
+				running_since: target_live_session?.running_since ?? null
 			}
 		})
 	}

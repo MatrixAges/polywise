@@ -152,7 +152,8 @@ export default async (s: Index, message: Message) => {
 				[s.id]: {
 					title: s.session.title,
 					running: s.session.is_runing,
-					unread: s.session.unread ?? false
+					unread: s.session.unread ?? false,
+					running_since: s.running_since
 				}
 			})
 		}
@@ -221,7 +222,8 @@ export default async (s: Index, message: Message) => {
 					[s.id]: {
 						title: session.title,
 						running: session.is_runing,
-						unread: session.unread ?? false
+						unread: session.unread ?? false,
+						running_since: s.running_since
 					}
 				})
 			}

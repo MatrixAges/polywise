@@ -64,6 +64,7 @@ export default class Index {
 	abort_controller = new AbortController()
 	update_at = Date.now()
 	archived_at = null as null | number
+	running_since = null as null | number
 	superego_append_count = 0
 	mode = 'normal' as SessionMode
 	plan_stage = 'plan' as 'plan' | 'exec'

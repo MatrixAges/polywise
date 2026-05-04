@@ -6,7 +6,8 @@ export default async (s: Index) => {
 	await fs.writeJSON(
 		s.state_dir,
 		{
-			archived_at: s.archived_at
+			archived_at: s.archived_at,
+			running_since: s.running_since
 		},
 		{ spaces: 4 }
 	)
