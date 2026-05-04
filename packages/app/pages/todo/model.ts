@@ -30,6 +30,7 @@ export default class Index {
 	archive_open = false
 	archive_page = 1
 	archives = {} as RPCOutput['todo']['getArchives']
+	session_open = false
 
 	get project_id() {
 		if (this.type === 'inbox') return
@@ -74,6 +75,10 @@ export default class Index {
 		} else {
 			this.archive_page = 1
 		}
+	}
+
+	toggleSessionOpen(v?: boolean) {
+		this.session_open = v ?? !this.session_open
 	}
 
 	setSelectTodo(status: string, index: number) {

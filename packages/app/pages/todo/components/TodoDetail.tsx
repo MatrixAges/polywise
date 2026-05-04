@@ -49,7 +49,8 @@ const Index = () => {
 		startTodoSession,
 		stopTodoSession,
 		closeTodoDetail,
-		removeTodo
+		removeTodo,
+		toggleSessionOpen
 	} = useModel()
 
 	const { control, register, reset } = useForm<Todo>({ values: $copy(detail_todo) }, (_, v) => {
@@ -238,12 +239,18 @@ const Index = () => {
 					border-t border-border-light
 				'
 			>
-				<Button type='button' className='flex-1' onClick={startTodoSession}>
-					Start Session
+				<Button
+					type='button'
+					className='flex-1'
+					onClick={detail_session ? toggleSessionOpen : startTodoSession}
+				>
+					{detail_session ? 'Open Session' : 'Start Session'}
 				</Button>
-				<Button type='button' variant='secondary' onClick={stopTodoSession}>
-					Stop
-				</Button>
+				{detail_session?.is_runing && (
+					<Button type='button' variant='secondary' onClick={stopTodoSession}>
+						Stop
+					</Button>
+				)}
 			</div>
 		</div>
 	)

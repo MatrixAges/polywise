@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useMemo } from 'react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { useMemoizedFn } from 'ahooks'
 import { observer } from 'mobx-react-lite'
 
 import { todo_priority_icon_map } from '@/appdata'
+import { ArrowLeft, Grip } from '@/components/animate'
 import { fromNow } from '@/utils'
 
 import { useModel } from '../context'
@@ -21,6 +22,7 @@ interface IProps {
 const Index = (props: IProps) => {
 	const { item, index, selected, overlay = false } = props
 	const { title, status, created_at, priority } = item.todo
+	const { is_runing, unread } = item.session || {}
 
 	const { mode, setSelectTodo } = useModel()
 
@@ -33,6 +35,13 @@ const Index = (props: IProps) => {
 
 	const style = overlay ? undefined : { transform: CSS.Translate.toString(transform), transition }
 	const props_drag = overlay ? {} : { ...attributes, ...listeners }
+
+	const Status = useMemo(() => {
+		if (is_runing) return <Grip className='text-std-400! size-3' />
+		if (unread) return <ArrowLeft className='text-std-300! size-3' />
+
+		return null
+	}, [is_runing, unread])
 
 	return (
 		<div
@@ -102,6 +111,7 @@ const Index = (props: IProps) => {
 					'
 				>
 					<span className='truncate'>{item.session.title}</span>
+					{Status}
 				</div>
 			)}
 		</div>

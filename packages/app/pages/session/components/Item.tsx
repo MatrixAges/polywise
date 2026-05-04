@@ -28,7 +28,7 @@ const Index = (props: IProps) => {
 	const { setSelectedSession, setRenameValue, submitRename, cancelRename } = useModel()
 
 	const Status = useMemo(() => {
-		if (item.is_runing) return <Grip className='text-std-400! size-3' />
+		if (is_runing) return <Grip className='text-std-400! size-3' />
 		if (unread) return <ArrowLeft className='text-std-300! size-3' />
 		if (pin) return <Pin className='text-std-300! size-3' />
 

@@ -25,6 +25,8 @@ const Index = (props: IProps) => {
 		data: { type: 'col', status }
 	})
 
+	const items = useMemo(() => todos.map(item => item.todo.id), [todos])
+
 	return (
 		<div className={$cx('flex flex-col', mode === 'kanban' ? 'h-full w-80 shrink-0' : 'w-full')}>
 			<div
@@ -63,7 +65,7 @@ const Index = (props: IProps) => {
 				</span>
 			</div>
 			<div className={$cx('w-full flex-1', mode === 'kanban' && 'min-h-0 overflow-y-scroll')}>
-				<SortableContext items={todos.map(item => item.todo.id)} strategy={verticalListSortingStrategy}>
+				<SortableContext items={items} strategy={verticalListSortingStrategy}>
 					<div
 						className={$cx(
 							'flex w-full flex-col',
