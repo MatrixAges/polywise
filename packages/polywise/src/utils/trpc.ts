@@ -1,9 +1,11 @@
 import { initTRPC } from '@trpc/server'
+import superjson from 'superjson'
 
 import type { OpenApiMeta } from 'trpc-to-openapi'
 
 const t = initTRPC.meta<OpenApiMeta>().create({
-	isServer: true
+	isServer: true,
+	transformer: superjson
 })
 
 export const p = t.procedure

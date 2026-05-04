@@ -83,6 +83,7 @@
 		"sonner": "^2.0.7",
 		"stk": "workspace:*",
 		"streamdown": "^2.5.0",
+		"superjson": "^2.2.6",
 		"tailwind-merge": "^3.5.0",
 		"ts-pattern": "^5.9.0",
 		"tslib": "catalog:",

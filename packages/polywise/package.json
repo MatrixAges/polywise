@@ -104,6 +104,7 @@
 		"sqlite-vec": "^0.1.9",
 		"stk": "workspace:*",
 		"stopword": "^3.1.5",
+		"superjson": "^2.2.6",
 		"tinypool": "^2.1.0",
 		"trpc-to-openapi": "^3.2.0",
 		"ts-pattern": "^5.9.0",

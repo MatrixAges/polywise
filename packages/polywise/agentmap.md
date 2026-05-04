@@ -142,7 +142,7 @@ This document provides an overview of the packages/polywise module structure and
 				"acp": { "desc": "ACP provider integration", "role": "Folder" }
 			},
 			"rpc": {
-				"desc": "tRPC router tree for API/state mutations and subscriptions, including session lifecycle, file persistence, provider/model runtime, and content operations; session router now includes dedicated single-file endpoints for create/remove/rename/pin and session-group management with pin.json + session_group.json persistence under app.app_path, while todo router now provides create/remove/sort/update plus query modes for standalone todos, project-scoped todos, project-grouped todo lists, and a nested session sub-router that starts or stops a todo-linked session by todo_id while reusing one existing binding per todo",
+				"desc": "tRPC router tree for API/state mutations and subscriptions, including session lifecycle, file persistence, provider/model runtime, and content operations; session router now includes dedicated single-file endpoints for create/remove/rename/pin and session-group management with pin.json + session_group.json persistence under app.app_path, while todo router now provides create/remove/sort/update plus query modes for standalone todos, project-scoped todos, project-grouped todo lists, and a nested session sub-router that starts or stops a todo-linked session by todo_id while reusing one existing binding per todo. The shared tRPC init now uses superjson so Date fields round-trip correctly through HTTP and WS clients.",
 				"role": "Folder",
 				"index.ts": { "desc": "RPC routers aggregation and type export", "role": "Index" },
 				"save.ts": { "desc": "Save content to memory", "role": "RPC" },

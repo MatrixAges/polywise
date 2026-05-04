@@ -1,4 +1,5 @@
 import { createTRPCClient, createWSClient, httpBatchLink, splitLink, wsLink } from '@trpc/client'
+import superjson from 'superjson'
 
 import { server_trpc_url, server_ws_url } from '@/appdata'
 
@@ -10,8 +11,8 @@ export default createTRPCClient<Router>({
 	links: [
 		splitLink({
 			condition: op => op.type === 'subscription',
-			true: wsLink({ client: ws_client }),
-			false: httpBatchLink({ url: server_trpc_url })
+			true: wsLink({ client: ws_client, transformer: superjson }),
+			false: httpBatchLink({ url: server_trpc_url, transformer: superjson })
 		})
 	]
 })

@@ -23,6 +23,10 @@ This document provides an overview of the packages/app module structure and arch
 			"panel.tsx": { "desc": "Panel configuration data", "role": "Config" },
 			"setting.tsx": { "desc": "Settings configuration data", "role": "Config" }
 		},
+		"utils": {
+			"desc": "Frontend utility layer for app-wide helpers, including the network tRPC client that now uses superjson on HTTP and WS links so RPC Date fields stay aligned with inferred output types while the Electron IPC client remains transformer-free.",
+			"role": "Folder"
+		},
 		"components": {
 			"Alert.tsx": { "desc": "Reusable alert component", "role": "Component" },
 			"AutoLabel.tsx": { "desc": "Auto-sizing label component", "role": "Component" },
