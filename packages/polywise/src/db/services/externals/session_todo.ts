@@ -34,3 +34,20 @@ export const getSessionTodos = async (args: ArgsGetSessionTodos = {}) => {
 
 	return query
 }
+
+export const getSessionTodo = async (where: SQL) => {
+	return env.db
+		.select()
+		.from(session_todo)
+		.where(where)
+		.limit(1)
+		.then(res => res[0])
+}
+
+export const removeSessionTodo = async (where: SQL) => {
+	return env.db
+		.delete(session_todo)
+		.where(where)
+		.returning()
+		.then(res => res[0])
+}

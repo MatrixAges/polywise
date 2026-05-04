@@ -6,6 +6,7 @@ import getArchives from './getArchives'
 import getMenuData from './getMenuData'
 import query from './query'
 import remove from './remove'
+import session from './session'
 import sort from './sort'
 import unarchive from './unarchive'
 import update from './update'
@@ -17,6 +18,7 @@ export default r({
 	getMenuData,
 	query,
 	remove,
+	session,
 	sort,
 	unarchive,
 	update
