@@ -184,12 +184,12 @@ const Index = (props: IPropsMenu) => {
 				></TextTabs>
 				<div className='flex gap-1' ref={ref_action}>
 					<Tooltip title='New Group'>
-						<div className='icon_button small' data-key='group'>
+						<div className='icon_button small' data-key='groups'>
 							<FolderPlus></FolderPlus>
 						</div>
 					</Tooltip>
 					<Tooltip title='New Session'>
-						<div className='icon_button small' data-key='session'>
+						<div className='icon_button small' data-key='sessions'>
 							<Plus></Plus>
 						</div>
 					</Tooltip>

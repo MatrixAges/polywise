@@ -36,6 +36,8 @@ const Index = (props: IProps) => {
 		normal: is_page
 	})
 
+	console.log($copy(x.messages))
+
 	const setConfainerRef = useMemoizedFn(v => (x.ref_container = v))
 	const setBottomSignalRef = useMemoizedFn(v => (x.ref_bottom_signal = v))
 	const toggleContextModal = useMemoizedFn(() => (x.open_context_modal = !x.open_context_modal))

@@ -37,7 +37,7 @@ export default (args: { response_message: Message; recent_message_count: number 
 	const distinct_tool_count = new Set(tool_names).size
 	const has_retry_pattern = new Set(tool_names).size < tool_names.length
 	const retry_count = has_retry_pattern ? tool_names.length - new Set(tool_names).size : 0
-	const reasoning_duration = metadata?.reasoning_duration ? sum(Object.values(metadata?.reasoning_duration)) : 0
+	const reasoning_duration = metadata?.reasoning_duration ? sum(metadata.reasoning_duration) : 0
 	const input_tokens = getUsageValue(metadata, ['inputTokens', 'promptTokens'])
 	const output_tokens = getUsageValue(metadata, ['outputTokens', 'completionTokens'])
 	const total_tokens = getUsageValue(metadata, ['totalTokens']) || input_tokens + output_tokens

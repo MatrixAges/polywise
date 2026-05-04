@@ -189,7 +189,7 @@ export default async (s: Index, message: Message) => {
 		originalMessages: [message],
 		generateId: getId,
 		execute: async ({ writer }) => {
-			const reasoning_duration = {} as Record<string, number>
+			const reasoning_duration = [] as Array<number>
 
 			let reasoning_start = 0
 
@@ -210,7 +210,7 @@ export default async (s: Index, message: Message) => {
 						}
 
 						if (part.type === 'reasoning-end') {
-							reasoning_duration[part.id] = Date.now() - reasoning_start + 60
+							reasoning_duration.push(Date.now() - reasoning_start + 60)
 
 							reasoning_start = 0
 						}

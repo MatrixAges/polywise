@@ -30,7 +30,7 @@ export interface InitArgs {
 export interface MessageMetadata {
 	usage: LanguageModelUsage
 	timestamp: number
-	reasoning_duration: Record<string, number>
+	reasoning_duration: Array<number>
 }
 
 export interface SkillMeta {

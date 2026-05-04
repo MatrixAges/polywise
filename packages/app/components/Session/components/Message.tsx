@@ -2,51 +2,57 @@ import { useMemo } from 'react'
 
 import { Message, MessageContent } from '@/__shadcn__/components/ai-elements'
 
-import { getReasoningDuration } from '../utils'
 import LoadingDots from './LoadingDots'
 import Part from './Part'
 import SourceUrls from './SourceUrls'
 
-import type { FileUIPart, SourceUrlUIPart, TextUIPart } from 'ai'
+import type { MessageMetadata } from '@core/fst'
+import type { FileUIPart, ReasoningUIPart, SourceUrlUIPart, TextUIPart } from 'ai'
 import type { IPropsMessage } from '../types'
 
 const Index = (props: IPropsMessage) => {
 	const { streaming, message, answer } = props
 	const { parts } = message
+	const reasoning_duration = (message.metadata as MessageMetadata)?.reasoning_duration || []
 
 	const { source_urls, files, left_parts } = useMemo(() => {
 		const source_urls = [] as Array<SourceUrlUIPart>
 		const files = [] as Array<FileUIPart>
-		const left_parts = [] as Array<TextUIPart>
+		const left_parts = [] as Array<{
+			part: TextUIPart | ReasoningUIPart
+			reasoning_duration?: number
+		}>
+		let reasoning_index = 0
 
 		parts.forEach(part => {
 			if (part.type === 'source-url') {
 				source_urls.push(part)
 			} else if (part.type === 'file') {
 				files.push(part)
+			} else if (part.type === 'reasoning') {
+				left_parts.push({
+					part,
+					reasoning_duration: reasoning_duration[reasoning_index]
+				})
+
+				reasoning_index++
 			} else {
-				left_parts.push(part as TextUIPart)
+				left_parts.push({ part: part as TextUIPart | ReasoningUIPart })
 			}
 		})
 
 		return { source_urls, files, left_parts }
-	}, [parts])
+	}, [parts, reasoning_duration])
 
 	return (
 		<Message from={message.role}>
 			<MessageContent>
 				{left_parts.length
-					? left_parts.map((part, index) => (
+					? left_parts.map(({ part, reasoning_duration }, index) => (
 							<Part
 								streaming={index === left_parts.length - 1 && streaming}
 								part={part}
-								reasoning_duration={getReasoningDuration(
-									{
-										...message,
-										parts: left_parts
-									},
-									index
-								)}
+								reasoning_duration={reasoning_duration}
 								answer={answer}
 								key={`${message.id}-${index}`}
 							></Part>
