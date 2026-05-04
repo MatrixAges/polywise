@@ -33,31 +33,34 @@ const getTodoList = async (project_id?: string) => {
 	return rows.map(item => item.todo)
 }
 
-const isValidStatus = (value: string): value is TodoStatus => {
-	return (status_list as ReadonlyArray<string>).includes(value)
+const getStatusInsertIndex = (args: { todos: Array<typeof todo.$inferSelect>; status: TodoStatus }) => {
+	const { todos, status } = args
+
+	return todos.reduce((target_index, item, index) => {
+		if (item.status !== status) {
+			return target_index
+		}
+
+		return index + 1
+	}, 0)
 }
 
 export default p.input(input_type).mutation(async ({ input }) => {
 	const todos = await getTodoList(input.project_id)
-	const active_todo = todos.find(item => item.id === input.active_id)
-	const over_todo = todos.find(item => item.id === input.over_id)
-
-	if (!active_todo || !over_todo) {
-		return todos
-	}
-
-	const active_status = isValidStatus(input.active_status) ? input.active_status : active_todo.status
-	const over_status = isValidStatus(input.over_status) ? input.over_status : over_todo.status
-
-	if (!isValidStatus(active_status) || !isValidStatus(over_status)) {
-		return todos
-	}
+	const active_todo = todos.find(item => item.id === input.active_id)!
+	const over_todo = todos.find(item => item.id === input.over_id)!
+	const active_status = input.active_status ?? active_todo.status
+	const over_status = input.over_status ?? over_todo?.status
 
 	const remaining_todos = todos.filter(item => item.id !== input.active_id)
 	active_todo.status = over_status
 
 	const over_index = remaining_todos.findIndex(item => item.id === input.over_id)
-	const target_index = over_index < 0 ? remaining_todos.length : over_index
+
+	const target_index =
+		over_index < 0
+			? getStatusInsertIndex({ todos: remaining_todos, status: over_status as TodoStatus })
+			: over_index
 	remaining_todos.splice(target_index, 0, active_todo)
 
 	const next_todos = status_list.flatMap(status => remaining_todos.filter(item => item.status === status))

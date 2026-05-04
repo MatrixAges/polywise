@@ -127,7 +127,7 @@ export default class Index {
 
 			await rpc.todo.drag.mutate({
 				active_id: active_todo.id,
-				over_id: over_todo.id,
+				over_id: over_todo?.id,
 				active_status,
 				over_status,
 				project_id
