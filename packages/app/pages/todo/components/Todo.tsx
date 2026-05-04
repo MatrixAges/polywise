@@ -23,11 +23,11 @@ interface IProps {
 const Index = (props: IProps) => {
 	const { item, index, selected, overlay = false } = props
 	const { title, status, created_at, priority } = item.todo
-	const { is_runing, unread, running_since } = item.session || {}
+	const { is_runing, unread, running_since, running_done } = item.session || {}
 
 	const { mode, setSelectTodo } = useModel()
 
-	const running_time = useRuningTime(running_since)
+	const running_time = useRuningTime(is_runing!, running_since, running_done)
 
 	const { attributes, listeners, transform, transition, isDragging, setNodeRef } = useSortable({
 		id: item.todo.id,
@@ -113,7 +113,7 @@ const Index = (props: IProps) => {
 						bg-secondary/60
 					'
 				>
-					<span className='truncate'>{item.session.title}</span>
+					<span className='flex-1 truncate'>{item.session.title}</span>
 					{Status}
 					{running_time && <span className='text-nowrap'>{running_time}</span>}
 				</div>

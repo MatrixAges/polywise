@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { debounce } from 'es-toolkit'
 import { CircleDot, Flag, Trash, X } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
@@ -15,6 +15,7 @@ import {
 	SelectValue
 } from '@/__shadcn__/components/ui/select'
 import { Textarea } from '@/__shadcn__/components/ui/textarea'
+import { ArrowLeft, Grip } from '@/components/animate'
 import { useForm } from '@/hooks'
 
 import { useModel } from '../context'
@@ -44,12 +45,13 @@ const todo_priority_options: Array<{ label: string; value: string }> = [
 const Index = () => {
 	const { detail_todo, detail_session, updateTodo, startSession, closeTodoDetail, removeTodo, toggleSessionOpen } =
 		useModel()
+	const { is_runing, running_since, running_done, unread } = detail_session || {}
 
 	const { control, register, reset } = useForm<Todo>({ values: $copy(detail_todo) }, (_, v) => {
 		updateTodo(v as RPCInput['todo']['update'])
 	})
 	const ref_is_composing = useRef(false)
-	const running_time = useRuningTime(detail_session?.running_since)
+	const running_time = useRuningTime(is_runing!, running_since, running_done)
 
 	useEffect(() => {
 		reset(detail_todo)
@@ -57,6 +59,13 @@ const Index = () => {
 
 	const register_title = register('title')
 	const register_description = register('description')
+
+	const Status = useMemo(() => {
+		if (is_runing) return <Grip className='text-std-400! size-3' />
+		if (unread) return <ArrowLeft className='text-std-300! size-3' />
+
+		return null
+	}, [is_runing, unread])
 
 	return (
 		<div
@@ -238,7 +247,7 @@ const Index = () => {
 					</Button>
 				) : (
 					<Button type='button' className='flex-1' onClick={toggleSessionOpen}>
-						Open Session{running_time ? ` (${running_time})` : ''}
+						Open Session{running_time ? ` (${running_time})` : ''} {Status}
 					</Button>
 				)}
 			</div>
