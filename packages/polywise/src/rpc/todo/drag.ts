@@ -11,7 +11,7 @@ type TodoStatus = (typeof status_list)[number]
 
 const input_type = object({
 	active_id: string(),
-	over_id: string(),
+	over_id: string().optional(),
 	active_status: string(),
 	over_status: string(),
 	project_id: string().optional()

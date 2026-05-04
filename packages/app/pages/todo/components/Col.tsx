@@ -19,12 +19,10 @@ const Index = (props: IProps) => {
 	const { status, todos } = props
 	const { mode, selected_todo_id } = useModel()
 	const { Icon } = useMemo(() => todo_status_icon_map[status], [status])
+
 	const { setNodeRef } = useDroppable({
-		id: `col:${status}`,
-		data: {
-			type: 'col',
-			status
-		}
+		id: status,
+		data: { type: 'col', status }
 	})
 
 	return (

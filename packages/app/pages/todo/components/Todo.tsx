@@ -24,7 +24,7 @@ const Index = (props: IProps) => {
 
 	const { attributes, listeners, transform, transition, isDragging, setNodeRef } = useSortable({
 		id: item.id,
-		data: { status, index }
+		data: { type: 'todo', status, index }
 	})
 
 	const onClick = useMemoizedFn(() => setSelectTodo(item.status, index))

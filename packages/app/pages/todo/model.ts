@@ -104,13 +104,15 @@ export default class Index {
 		const over_status = over?.data.current?.status
 		const over_index = over?.data.current?.index
 
-		if (!over_status || over_index === undefined || active.id === over?.id) return
+		if (active.id === over?.id) return
 
 		const active_todo = this.kanban_data[active_status][active_index]
 		const over_todo = this.kanban_data[over_status][over_index]
 		const project_id = this.type === 'inbox' ? undefined : this.type
 
 		if (active_status === over_status) {
+			if (!over_status || over_index === undefined) return
+
 			this.kanban_data[active_status] = arrayMove(this.kanban_data[active_status], active_index, over_index)
 
 			await rpc.todo.sort.mutate({
@@ -120,6 +122,8 @@ export default class Index {
 			})
 		} else {
 			this.kanban_data[active_status].splice(active_index, 1)
+
+			console.log(active_todo, over_todo, over)
 
 			await rpc.todo.drag.mutate({
 				active_id: active_todo.id,
