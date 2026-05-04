@@ -128,11 +128,11 @@ This document provides an overview of the packages/app module structure and arch
 				},
 				"components": {
 					"Col.tsx": {
-						"desc": "Status column renderer that shows the status icon, task count, and todo cards for a single group, and now registers each status body as a droppable sortable container so todos can be reordered within or moved across columns",
+						"desc": "Status column renderer that shows the status icon, task count, and todo cards for a single group, now consuming `{ todo, session }` board items while keeping each status body registered as a droppable sortable container for within-column and cross-column moves",
 						"role": "Component"
 					},
 					"Kanban.tsx": {
-						"desc": "Scrollable middle board that renders all grouped todo status columns from the page model and now owns the shared dnd-kit drag context for todo reordering across both kanban and list modes; drag start clears the current selection",
+						"desc": "Scrollable middle board that renders all grouped todo status columns from the page model using `{ todo, session }` items and owns the shared dnd-kit drag context for todo reordering across both kanban and list modes; drag start clears the current selection",
 						"role": "Component"
 					},
 					"Menu.tsx": {
@@ -140,7 +140,7 @@ This document provides an overview of the packages/app module structure and arch
 						"role": "Component"
 					},
 					"Todo.tsx": {
-						"desc": "Todo card atom that supports selection and now exposes dnd-kit sortable bindings so each todo can be dragged within or across status columns while preserving the existing card layout in kanban and list modes",
+						"desc": "Todo card atom that supports selection, consumes a `{ todo, session }` board item, and exposes dnd-kit sortable bindings so each todo can be dragged within or across status columns while preserving the existing card layout in kanban and list modes",
 						"role": "Component"
 					},
 					"TodoDetail.tsx": {
@@ -157,7 +157,7 @@ This document provides an overview of the packages/app module structure and arch
 					"role": "Page"
 				},
 				"model.ts": {
-					"desc": "Todo page state model for loading grouped tasks, tracking selection and inline title edits, clearing selection on drag start, applying optimistic same-column or cross-column todo moves in grouped data, and persisting drag reorder updates through rpc.todo.sort plus detail-form updates through rpc.todo.update",
+					"desc": "Todo page state model for loading grouped `{ todo, session }` board data, tracking selected todo plus linked session, clearing selection on drag start, applying optimistic same-column or cross-column todo moves, persisting drag reorder updates through rpc.todo.sort plus detail-form updates through rpc.todo.update, and subscribing to rpc.session.watchSessionStatus so linked session title/running/unread state stays in sync on the todo board",
 					"role": "Model"
 				},
 				"types.ts": {

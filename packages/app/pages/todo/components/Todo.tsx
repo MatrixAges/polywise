@@ -8,10 +8,10 @@ import { fromNow } from '@/utils'
 
 import { useModel } from '../context'
 
-import type { Todo } from '@core/db'
+import type { RPCOutput } from '@/types'
 
 interface IProps {
-	item: Todo
+	item: RPCOutput['todo']['query'][keyof RPCOutput['todo']['query']][number]
 	index: number
 	selected: boolean
 	overlay?: boolean
@@ -19,16 +19,16 @@ interface IProps {
 
 const Index = (props: IProps) => {
 	const { item, index, selected, overlay = false } = props
-	const { title, status, created_at, priority } = item
+	const { title, status, created_at, priority } = item.todo
 
 	const { mode, setSelectTodo } = useModel()
 
 	const { attributes, listeners, transform, transition, isDragging, setNodeRef } = useSortable({
-		id: item.id,
+		id: item.todo.id,
 		data: { type: 'todo', status, index }
 	})
 
-	const onClick = useMemoizedFn(() => setSelectTodo(item.status, index))
+	const onClick = useMemoizedFn(() => setSelectTodo(item.todo.status, index))
 
 	const style = overlay ? undefined : { transform: CSS.Translate.toString(transform), transition }
 	const props_drag = overlay ? {} : { ...attributes, ...listeners }

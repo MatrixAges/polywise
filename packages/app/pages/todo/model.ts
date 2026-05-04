@@ -7,7 +7,8 @@ import { Util } from '@/models/common'
 import { alert, rpc } from '@/utils'
 
 import type { RPCInput, RPCOutput } from '@/types'
-import type { Todo } from '@core/db'
+import type { Session, Todo } from '@core/db'
+import type { SessionStatusPayload } from '@core/rpc/session/watchSessionStatus'
 import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core'
 
 type KanbanData = RPCOutput['todo']['query']
@@ -22,6 +23,7 @@ export default class Index {
 	kanban_data = {} as KanbanData
 	selected_todo_id = ''
 	detail_todo = null as unknown as Todo
+	detail_session = null as Session | null
 	drag_todo = null as KanbanTodo | null
 	archive_open = false
 	archive_page = 1
@@ -42,6 +44,7 @@ export default class Index {
 
 		this.util.acts = [deinit]
 
+		this.watchSessionStatus()
 		this.getProjects()
 		this.getTodos()
 	}
@@ -50,6 +53,7 @@ export default class Index {
 		this.type = v
 		this.selected_todo_id = ''
 		this.detail_todo = null as unknown as Todo
+		this.detail_session = null
 
 		this.getTodos()
 	}
@@ -71,10 +75,11 @@ export default class Index {
 	}
 
 	setSelectTodo(status: string, index: number) {
-		const todo = this.kanban_data[status][index]! as Todo
+		const item = this.kanban_data[status][index]!
 
-		this.selected_todo_id = todo.id
-		this.detail_todo = todo
+		this.selected_todo_id = item.todo.id
+		this.detail_todo = item.todo
+		this.detail_session = item.session
 
 		this.archive_open = false
 		this.archive_page = 1
@@ -83,6 +88,7 @@ export default class Index {
 	closeTodoDetail() {
 		this.selected_todo_id = ''
 		this.detail_todo = null as unknown as Todo
+		this.detail_session = null
 	}
 
 	onDragStart(args: DragStartEvent) {
@@ -93,6 +99,7 @@ export default class Index {
 
 		this.selected_todo_id = ''
 		this.detail_todo = null as unknown as Todo
+		this.detail_session = null
 		this.drag_todo = this.kanban_data[active_status][active_index]
 	}
 
@@ -130,6 +137,7 @@ export default class Index {
 
 		this.selected_todo_id = ''
 		this.detail_todo = null as unknown as Todo
+		this.detail_session = null
 
 		await rpc.todo.remove.mutate({ id })
 
@@ -190,8 +198,8 @@ export default class Index {
 			this.kanban_data[active_status].splice(active_index, 1)
 
 			await rpc.todo.drag.mutate({
-				active_id: active_todo.id,
-				over_id: over_todo?.id,
+				active_id: active_todo.todo.id,
+				over_id: over_todo?.todo.id,
 				active_status,
 				over_status,
 				project_id: this.project_id
@@ -199,6 +207,65 @@ export default class Index {
 		}
 
 		await this.getTodos()
+	}
+
+	watchSessionStatus() {
+		const deinit = rpc.session.watchSessionStatus.subscribe(undefined, {
+			onData: res => {
+				const entries = Object.entries(res)
+
+				if (!entries.length) {
+					return
+				}
+
+				this.kanban_data = Object.fromEntries(
+					Object.entries(this.kanban_data).map(([status, items]) => {
+						return [status, items.map(item => this.patchTodoSessionStatus(item, res))]
+					})
+				) as KanbanData
+
+				if (this.detail_session) {
+					const status = res[this.detail_session.id]
+
+					if (status) {
+						this.detail_session = {
+							...this.detail_session,
+							title: status.title,
+							is_runing: status.running,
+							unread: status.unread
+						}
+					}
+				}
+
+				if (this.drag_todo) {
+					this.drag_todo = this.patchTodoSessionStatus(this.drag_todo, res)
+				}
+			}
+		})
+
+		this.util.acts.push(deinit.unsubscribe)
+	}
+
+	patchTodoSessionStatus(item: KanbanTodo, status_map: SessionStatusPayload) {
+		if (!item.session) {
+			return item
+		}
+
+		const status = status_map[item.session.id]
+
+		if (!status) {
+			return item
+		}
+
+		return {
+			...item,
+			session: {
+				...item.session,
+				title: status.title,
+				is_runing: status.running,
+				unread: status.unread
+			}
+		}
 	}
 
 	deinit() {

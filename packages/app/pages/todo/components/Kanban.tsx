@@ -5,8 +5,6 @@ import { useModel } from '../context'
 import Col from './Col'
 import TodoCard from './Todo'
 
-import type { Todo } from '@core/db'
-
 const Index = () => {
 	const { mode, kanban_data, drag_todo, onDragStart, onDragEnd, onDragCancel } = useModel()
 	const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }))
@@ -27,13 +25,13 @@ const Index = () => {
 				)}
 			>
 				{Object.keys(kanban_data).map((key: string) => (
-					<Col status={key} todos={kanban_data[key] as Array<Todo>} key={key}></Col>
+					<Col status={key} todos={kanban_data[key]} key={key}></Col>
 				))}
 			</div>
 			<DragOverlay dropAnimation={null}>
 				{drag_todo && (
 					<div className='w-80'>
-						<TodoCard item={drag_todo as Todo} index={-1} selected={false} overlay></TodoCard>
+						<TodoCard item={drag_todo} index={-1} selected={false} overlay></TodoCard>
 					</div>
 				)}
 			</DragOverlay>

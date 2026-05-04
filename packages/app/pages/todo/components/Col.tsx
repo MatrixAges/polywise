@@ -8,11 +8,11 @@ import { todo_status_icon_map } from '@/appdata'
 import { useModel } from '../context'
 import Todo from './Todo'
 
-import type { Todo as TodoType } from '@core/db'
+import type { RPCOutput } from '@/types'
 
 interface IProps {
 	status: string
-	todos: Array<TodoType>
+	todos: RPCOutput['todo']['query'][keyof RPCOutput['todo']['query']]
 }
 
 const Index = (props: IProps) => {
@@ -63,7 +63,7 @@ const Index = (props: IProps) => {
 				</span>
 			</div>
 			<div className={$cx('w-full flex-1', mode === 'kanban' && 'min-h-0 overflow-y-scroll')}>
-				<SortableContext items={todos.map(item => item.id)} strategy={verticalListSortingStrategy}>
+				<SortableContext items={todos.map(item => item.todo.id)} strategy={verticalListSortingStrategy}>
 					<div
 						className={$cx(
 							'flex w-full flex-col',
@@ -76,8 +76,8 @@ const Index = (props: IProps) => {
 							<Todo
 								item={item}
 								index={index}
-								selected={selected_todo_id === item.id}
-								key={item.id}
+								selected={selected_todo_id === item.todo.id}
+								key={item.todo.id}
 							></Todo>
 						))}
 						{mode === 'kanban' && <span className='h-6'></span>}
