@@ -6,7 +6,7 @@ import { fromNow } from '@/utils'
 import { useModel } from '../context'
 
 const Index = () => {
-	const { archives, toggleArchive, getMoreArchives } = useModel()
+	const { archives, toggleArchive, getMoreArchives, unarchive } = useModel()
 	const { items = [], has_more } = archives
 
 	return (
@@ -47,7 +47,7 @@ const Index = () => {
 					overflow-y-scroll
 					flex-1
 					min-h-0
-					px-4
+					px-3
 				'
 			>
 				<div className='flex flex-col gap-3 py-3'>
@@ -69,9 +69,14 @@ const Index = () => {
 							<span className={$cx('text-std-600 text-sb leading-5.5! font-medium')}>
 								{item.title}
 							</span>
-							<span className='text-std-400 mt-0.5 text-sm'>
-								{fromNow(item.created_at)}
-							</span>
+							<div className='flex items-center justify-between'>
+								<span className='text-std-400 mt-0.5 text-sm'>
+									{fromNow(item.created_at)}
+								</span>
+								<button className='click_button' onClick={() => unarchive(item.id)}>
+									UnArchive
+								</button>
+							</div>
 						</div>
 					))}
 					{has_more && (

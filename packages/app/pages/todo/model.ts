@@ -154,6 +154,13 @@ export default class Index {
 		this.getArchives()
 	}
 
+	async unarchive(id: string) {
+		await rpc.todo.unarchive.mutate({ id })
+
+		this.getArchives()
+		this.getTodos()
+	}
+
 	async onDragEnd(args: DragEndEvent) {
 		const { active, over } = args
 
