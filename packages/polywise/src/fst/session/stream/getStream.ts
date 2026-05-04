@@ -153,7 +153,8 @@ export default async (s: Index, message: Message) => {
 					title: s.session.title,
 					running: s.session.is_runing,
 					unread: s.session.unread ?? false,
-					running_since: s.running_since?.getTime() ?? null
+					running_since: s.running_since?.getTime() ?? null,
+					running_done: s.session.running_done?.getTime() ?? null
 				}
 			})
 		}
@@ -223,7 +224,8 @@ export default async (s: Index, message: Message) => {
 						title: session.title,
 						running: session.is_runing,
 						unread: session.unread ?? false,
-						running_since: s.running_since?.getTime() ?? null
+						running_since: s.running_since?.getTime() ?? null,
+						running_done: session.running_done?.getTime() ?? null
 					}
 				})
 			}

@@ -252,6 +252,7 @@ export default class Index {
 							title: status.title,
 							is_runing: status.running,
 							running_since: status.running_since ? new Date(status.running_since) : null,
+							running_done: status.running_done ? new Date(status.running_done) : null,
 							unread: status.unread
 						}
 					}
@@ -276,6 +277,7 @@ export default class Index {
 				title: status.title,
 				is_runing: status.running,
 				running_since: status.running_since ? new Date(status.running_since) : null,
+				running_done: status.running_done ? new Date(status.running_done) : null,
 				unread: status.unread
 			} as Session
 		}

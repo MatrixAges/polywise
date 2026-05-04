@@ -13,6 +13,8 @@ export default async (s: Index, v: boolean) => {
 		s.running_since = new Date()
 
 		data['running_since'] = s.running_since
+	} else {
+		data['running_done'] = new Date()
 	}
 
 	const session = await s.updateSession(data)
@@ -24,7 +26,8 @@ export default async (s: Index, v: boolean) => {
 			title: session.title,
 			running: session.is_runing,
 			unread: session.unread ?? false,
-			running_since: s.running_since?.getTime()
+			running_since: s.running_since?.getTime() ?? null,
+			running_done: session.running_done?.getTime() ?? null
 		}
 	})
 }

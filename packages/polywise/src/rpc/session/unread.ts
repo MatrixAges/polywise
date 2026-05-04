@@ -26,13 +26,15 @@ export default p.input(input_type).mutation(async ({ input }) => {
 
 	if (next_session) {
 		const running_since = target_live_session?.running_since ?? next_session.running_since ?? null
+		const running_done = target_live_session?.session.running_done ?? next_session.running_done ?? null
 
 		session_status_emitter.emit('change', {
 			[input]: {
 				title: next_session.title,
 				running: next_session.is_runing,
 				unread: next_session.unread ?? false,
-				running_since: running_since?.getTime() ?? null
+				running_since: running_since?.getTime() ?? null,
+				running_done: running_done?.getTime() ?? null
 			}
 		})
 	}

@@ -18,6 +18,7 @@ import { Textarea } from '@/__shadcn__/components/ui/textarea'
 import { useForm } from '@/hooks'
 
 import { useModel } from '../context'
+import { useRuningTime } from '../hooks'
 
 import type { RPCInput } from '@/types'
 import type { Todo } from '@core/db'
@@ -48,6 +49,7 @@ const Index = () => {
 		updateTodo(v as RPCInput['todo']['update'])
 	})
 	const ref_is_composing = useRef(false)
+	const running_time = useRuningTime(detail_session?.running_since)
 
 	useEffect(() => {
 		reset(detail_todo)
@@ -236,7 +238,7 @@ const Index = () => {
 					</Button>
 				) : (
 					<Button type='button' className='flex-1' onClick={toggleSessionOpen}>
-						Open Session
+						Open Session{running_time ? ` (${running_time})` : ''}
 					</Button>
 				)}
 			</div>

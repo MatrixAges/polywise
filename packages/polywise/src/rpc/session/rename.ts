@@ -33,7 +33,8 @@ export default p.input(input_type).mutation(async ({ input }) => {
 				title: target_live_session.session.title,
 				running: target_live_session.session.is_runing,
 				unread: target_live_session.session.unread ?? false,
-				running_since: target_live_session.running_since?.getTime() ?? null
+				running_since: target_live_session.running_since?.getTime() ?? null,
+				running_done: target_live_session.session.running_done?.getTime() ?? null
 			}
 		})
 
@@ -72,7 +73,8 @@ export default p.input(input_type).mutation(async ({ input }) => {
 			title: next_session.title,
 			running: next_session.is_runing,
 			unread: next_session.unread ?? false,
-			running_since: next_session.running_since?.getTime() ?? null
+			running_since: next_session.running_since?.getTime() ?? null,
+			running_done: next_session.running_done?.getTime() ?? null
 		}
 	})
 

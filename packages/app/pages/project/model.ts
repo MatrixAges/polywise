@@ -264,6 +264,9 @@ export default class Index {
 								...session_item,
 								title: status.title,
 								is_runing: status.running,
+								running_done: status.running_done
+									? new Date(status.running_done)
+									: null,
 								unread: status.unread
 							}
 						}

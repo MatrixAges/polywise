@@ -7,6 +7,7 @@ export interface SessionStatusPayload {
 		running: boolean
 		unread: boolean
 		running_since: number | null
+		running_done: number | null
 	}
 }
 

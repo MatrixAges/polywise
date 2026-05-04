@@ -10,6 +10,7 @@ export default sqliteTable(
 		// session runing status
 		is_runing: integer('runing', { mode: 'boolean' }).default(false).notNull(),
 		running_since: integer('running_since', { mode: 'timestamp' }),
+		running_done: integer('running_done', { mode: 'timestamp' }),
 		unread: integer('unread', { mode: 'boolean' }),
 		// binding session for im
 		key: text('key'),
