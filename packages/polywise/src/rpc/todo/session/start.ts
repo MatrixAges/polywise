@@ -1,11 +1,15 @@
 import { todo, todo_session } from '@core/db/schema'
 import { addSession, addTodoSession, getSession, getTodo, getTodoSession, removeTodoSession } from '@core/db/services'
+import { addProjectSession } from '@core/db/services/externals/project_session'
 import { submit } from '@core/fst/utils'
 import { p } from '@core/utils'
 import { eq } from 'drizzle-orm'
 import { object, string } from 'zod'
 
-const input_type = object({ todo_id: string() })
+const input_type = object({
+	todo_id: string(),
+	project_id: string().optional()
+})
 
 const getLinkedSession = async (todo_id: string) => {
 	const session_link = await getTodoSession(eq(todo_session.todo_id, todo_id))
@@ -37,6 +41,10 @@ export default p.input(input_type).mutation(async ({ input }) => {
 
 	if (!linked_session) {
 		await addTodoSession(input.todo_id, session_item.id)
+
+		if (input.project_id) {
+			await addProjectSession(input.project_id, session_item.id)
+		}
 	}
 
 	await submit({ id: session_item.id }, todo_item.title)

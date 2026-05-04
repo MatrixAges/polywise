@@ -44,7 +44,7 @@ export const updateReport = async (s: Session, report: string) => {
 
 	s.sync()
 
-	return { updated: true, report: session.report }
+	return { updated: true }
 }
 
 export const createReportTool = (s: Session) => {

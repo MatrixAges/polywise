@@ -11,7 +11,7 @@ const Index = () => {
 
 	return (
 		<Dialog
-			className='w-[640px] max-w-none! gap-2'
+			className='w-[640px] max-w-none! gap-4'
 			max_height='max-h-[80vh]'
 			open={session_open}
 			title='Session'

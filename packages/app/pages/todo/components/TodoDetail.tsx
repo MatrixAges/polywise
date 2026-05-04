@@ -16,7 +16,7 @@ import {
 } from '@/__shadcn__/components/ui/select'
 import { Textarea } from '@/__shadcn__/components/ui/textarea'
 import { ArrowLeft, Grip } from '@/components/animate'
-import { useForm } from '@/hooks'
+import { useClickLoading, useForm } from '@/hooks'
 
 import { useModel } from '../context'
 import { useRuningTime } from '../hooks'
@@ -52,6 +52,8 @@ const Index = () => {
 	})
 	const ref_is_composing = useRef(false)
 	const running_time = useRuningTime(is_runing!, running_since, running_done)
+
+	const { loading, click } = useClickLoading()
 
 	useEffect(() => {
 		reset(detail_todo)
@@ -242,7 +244,15 @@ const Index = () => {
 				'
 			>
 				{!detail_session ? (
-					<Button type='button' className='flex-1' onClick={startSession}>
+					<Button
+						type='button'
+						className='flex-1'
+						disabled={loading}
+						onClick={() => {
+							click()
+							startSession()
+						}}
+					>
 						Start Session
 					</Button>
 				) : (
