@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 
 import { Message, MessageContent } from '@/__shadcn__/components/ai-elements'
 
+import { getReasoningDuration } from '../utils'
 import LoadingDots from './LoadingDots'
 import Part from './Part'
 import SourceUrls from './SourceUrls'
@@ -40,14 +41,7 @@ const Index = (props: IPropsMessage) => {
 							<Part
 								streaming={index === left_parts.length - 1 && streaming}
 								part={part}
-								reasoning_duration={
-									message.metadata
-										? Object.values(
-												(message.metadata as MessageMetadata)
-													?.reasoning_duration
-											)[index]
-										: undefined
-								}
+								reasoning_duration={getReasoningDuration(message, index)}
 								answer={answer}
 								key={`${message.id}-${index}`}
 							></Part>
