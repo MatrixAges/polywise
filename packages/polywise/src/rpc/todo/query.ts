@@ -1,7 +1,7 @@
-import { getTodoStatusOrder, todo_status_list } from '@core/consts/db'
+import { getTodoStatusOrder, todo_visible_status_list } from '@core/consts/db'
 import { getProjectTodo, getStandaloneTodos } from '@core/db/services'
 import { p } from '@core/utils'
-import { asc, eq } from 'drizzle-orm'
+import { and, asc, eq, ne } from 'drizzle-orm'
 import { object, string } from 'zod'
 
 import { project_todo, todo } from '../../db/schema'
@@ -17,7 +17,7 @@ const input_type = object({
 const status_order = getTodoStatusOrder(todo.status)
 
 const createTodoGroup = () => {
-	const grouped_todos = Object.fromEntries(todo_status_list.map(status => [status, []]))
+	const grouped_todos = Object.fromEntries(todo_visible_status_list.map(status => [status, []]))
 
 	return grouped_todos as TodoGroup
 }
@@ -35,14 +35,14 @@ const groupTodosByStatus = (todos: Array<TodoItem>) => {
 export default p.input(input_type).query(async ({ input }) => {
 	if (input.type !== 'inbox') {
 		const rows = await getProjectTodo({
-			where: eq(project_todo.project_id, input.type),
+			where: and(eq(project_todo.project_id, input.type), ne(todo.status, 'archive')),
 			orderBy: [status_order, asc(todo.order), asc(todo.created_at)]
 		})
 
 		return groupTodosByStatus(rows.map(item => item.todo))
 	}
 
-	const rows = await getStandaloneTodos()
+	const rows = await getStandaloneTodos({ where: ne(todo.status, 'archive') })
 
 	return groupTodosByStatus(rows.map(item => item.todo))
 })

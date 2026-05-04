@@ -51,14 +51,29 @@ export const getTodos = async (args: ArgsGetTodos = {}) => {
 	return query
 }
 
-export const getStandaloneTodos = async () => {
-	return env.db
+export const getStandaloneTodos = async (args: ArgsGetTodos = {}) => {
+	const { where, orderBy, limit, offset } = args
+	const base_where = and(isNull(session_todo.todo_id), isNull(project_todo.todo_id), where)
+	const order_args = orderBy
+		? Array.isArray(orderBy)
+			? orderBy
+			: [orderBy]
+		: [status_order, asc(todo.order), asc(todo.created_at)]
+
+	let query = env.db
 		.select({ todo })
 		.from(todo)
 		.leftJoin(session_todo, sql`${todo.id} = ${session_todo.todo_id}`)
 		.leftJoin(project_todo, sql`${todo.id} = ${project_todo.todo_id}`)
-		.where(and(isNull(session_todo.todo_id), isNull(project_todo.todo_id)))
-		.orderBy(status_order, asc(todo.order), asc(todo.created_at))
+		.where(base_where)
+		.orderBy(...order_args)
+		.$dynamic()
+
+	if (limit) query = query.limit(limit)
+
+	if (offset) query = query.offset(offset)
+
+	return query
 }
 
 export const setTodo = async (where: SQL, values: Partial<TodoInsert>) => {

@@ -5,10 +5,12 @@ import { eq, SQL } from 'drizzle-orm'
 interface ArgsGetProjectTodo {
 	where?: SQL
 	orderBy?: SQL | Array<SQL>
+	limit?: number
+	offset?: number
 }
 
 export const getProjectTodo = async (args: ArgsGetProjectTodo = {}) => {
-	const { where, orderBy } = args
+	const { where, orderBy, limit, offset } = args
 
 	let query = env.db
 		.select({ project, todo })
@@ -24,6 +26,10 @@ export const getProjectTodo = async (args: ArgsGetProjectTodo = {}) => {
 
 		query = query.orderBy(...order_args)
 	}
+
+	if (limit) query = query.limit(limit)
+
+	if (offset) query = query.offset(offset)
 
 	return query
 }
