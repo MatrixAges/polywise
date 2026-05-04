@@ -3,7 +3,7 @@ import { p } from '@core/utils'
 import { and, asc, desc, eq, isNull, sql } from 'drizzle-orm'
 import { number, object } from 'zod'
 
-import { session_todo, todo } from '../../db/schema'
+import { todo, todo_session } from '../../db/schema'
 
 const page_size = 10
 
@@ -15,8 +15,8 @@ export default p.input(input_type).query(async ({ input }) => {
 	const rows = await env.db
 		.select()
 		.from(todo)
-		.leftJoin(session_todo, sql`${todo.id} = ${session_todo.todo_id}`)
-		.where(and(eq(todo.status, 'archive'), isNull(session_todo.todo_id)))
+		.leftJoin(todo_session, sql`${todo.id} = ${todo_session.todo_id}`)
+		.where(and(eq(todo.status, 'archive'), isNull(todo_session.todo_id)))
 		.orderBy(desc(todo.updated_at), asc(todo.order))
 		.limit(page_size + 1)
 		.offset(offset)

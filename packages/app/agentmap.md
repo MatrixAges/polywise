@@ -161,7 +161,7 @@ This document provides an overview of the packages/app module structure and arch
 					"role": "Page"
 				},
 				"model.ts": {
-					"desc": "Todo page state model for loading grouped `{ todo, session }` board data, tracking selected todo plus linked session, starting or stopping linked todo sessions, clearing selection on drag start, applying optimistic same-column or cross-column todo moves, persisting drag reorder updates through rpc.todo.sort plus detail-form updates through rpc.todo.update, and subscribing to rpc.session.watchSessionStatus so linked session title, running state, elapsed-time anchor, and unread state stay in sync on the todo board and detail pane",
+					"desc": "Todo page state model for loading grouped `{ todo, session }` board data where the linked session is resolved only from todo-started execution sessions, tracking selected todo plus linked session, starting or stopping linked todo sessions, clearing selection on drag start, applying optimistic same-column or cross-column todo moves, persisting drag reorder updates through rpc.todo.sort plus detail-form updates through rpc.todo.update, and subscribing to rpc.session.watchSessionStatus so linked session title, running state, elapsed-time anchor, and unread state stay in sync on the todo board and detail pane",
 					"role": "Model"
 				},
 				"types.ts": {

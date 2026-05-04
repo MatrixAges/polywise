@@ -321,6 +321,8 @@ export default class Index {
 		})
 
 		const off_messages = this.chat['~registerMessagesCallback'](() => {
+			if (!this.chat) return
+
 			this.messages = $copy(this.chat.messages)
 
 			this.update()

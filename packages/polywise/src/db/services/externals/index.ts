@@ -1,5 +1,6 @@
 export * from './session_agent'
 export * from './session_todo'
+export * from './todo_session'
 export * from './project_session'
 export * from './notification_session'
 export * from './node_chunk'
