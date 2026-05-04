@@ -140,12 +140,6 @@ export default class Index {
 		await this.getTodos()
 	}
 
-	async stopSession() {
-		await rpc.todo.session.stop.mutate({ todo_id: this.selected_todo_id })
-
-		await this.getTodos()
-	}
-
 	async createTodo(v: string) {
 		await rpc.todo.create.mutate({ title: v, project_id: this.project_id })
 

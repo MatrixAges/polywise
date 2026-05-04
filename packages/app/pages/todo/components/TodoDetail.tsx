@@ -16,7 +16,6 @@ import {
 } from '@/__shadcn__/components/ui/select'
 import { Textarea } from '@/__shadcn__/components/ui/textarea'
 import { useForm } from '@/hooks'
-import { formatTime } from '@/utils'
 
 import { useModel } from '../context'
 
@@ -42,15 +41,8 @@ const todo_priority_options: Array<{ label: string; value: string }> = [
 ]
 
 const Index = () => {
-	const {
-		detail_todo,
-		detail_session,
-		updateTodo,
-		startTodoSession,
-		closeTodoDetail,
-		removeTodo,
-		toggleSessionOpen
-	} = useModel()
+	const { detail_todo, detail_session, updateTodo, startSession, closeTodoDetail, removeTodo, toggleSessionOpen } =
+		useModel()
 
 	const { control, register, reset } = useForm<Todo>({ values: $copy(detail_todo) }, (_, v) => {
 		updateTodo(v as RPCInput['todo']['update'])
@@ -239,7 +231,7 @@ const Index = () => {
 				'
 			>
 				{!detail_session ? (
-					<Button type='button' className='flex-1' onClick={startTodoSession}>
+					<Button type='button' className='flex-1' onClick={startSession}>
 						Start Session
 					</Button>
 				) : (

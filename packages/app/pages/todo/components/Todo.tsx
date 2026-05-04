@@ -56,8 +56,6 @@ const Index = (props: IProps) => {
 		return () => clearInterval(timer)
 	}, [running_since])
 
-	console.log(running_since, running_time)
-
 	return (
 		<div
 			className={$cx(
