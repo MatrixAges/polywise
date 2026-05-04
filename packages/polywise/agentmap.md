@@ -89,7 +89,7 @@ This document provides an overview of the packages/polywise module structure and
 				"index.ts": { "desc": "fst module exports", "role": "Index" },
 				"chat": { "desc": "Chat capabilities using AI SDK, supporting UIMessages", "role": "Folder" },
 				"session": {
-					"desc": "Session lifecycle and stream orchestration for chat and cron-triggered runs, consuming skill_map loading from fst/tools/skill and title_tool-based session renaming; skill_map is normalized to name + description only, with skill file paths derived from skill name at runtime; supports archive/unarchive flow with archived_at state persisted in session_dir/state.json and message queries scoped by archived boundary; appendMessage persists messages to database only, and trim/title/superego extraction are deferred after stream finish; successful stream completion now also resets is_runing through stop() so follow-up user messages are inserted normally; session_dir/config.json stores disable_map and mode (normal|plan|plan-exec); plan mode disables write_file/edit_file tools and injects plan prompt; plan-exec mode auto-sends execution message after plan completes and resets mode to normal; clears session_dir/plan.md on message clear or archive",
+					"desc": "Session lifecycle and stream orchestration for chat and cron-triggered runs, consuming skill_map loading from fst/tools/skill and title_tool-based session renaming; skill_map is normalized to name + description only, with skill file paths derived from skill name at runtime; supports archive/unarchive flow with archived_at state persisted in session_dir/state.json while running_since is persisted on the session table, and message queries scoped by archived boundary; appendMessage persists messages to database only, and trim/title/superego extraction are deferred after stream finish; successful stream completion now also resets is_runing through stop() so follow-up user messages are inserted normally; session_dir/config.json stores disable_map and mode (normal|plan|plan-exec); plan mode disables write_file/edit_file tools and injects plan prompt; plan-exec mode auto-sends execution message after plan completes and resets mode to normal; clears session_dir/plan.md on message clear or archive",
 					"role": "Folder"
 				},
 				"agents": {
@@ -223,7 +223,7 @@ This document provides an overview of the packages/polywise module structure and
 						"role": "Schema"
 					},
 					"session.ts": {
-						"desc": "Chat session storage schema with nullable key, optional im/cron flags, and related indexes",
+						"desc": "Chat session storage schema with nullable key, optional im/cron flags, running_since timestamp, and related indexes",
 						"role": "Schema"
 					},
 					"project.ts": {

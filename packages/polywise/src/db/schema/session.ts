@@ -9,6 +9,7 @@ export default sqliteTable(
 		title: text('title').notNull(),
 		// session runing status
 		is_runing: integer('runing', { mode: 'boolean' }).default(false).notNull(),
+		running_since: integer('running_since', { mode: 'timestamp' }),
 		unread: integer('unread', { mode: 'boolean' }),
 		// binding session for im
 		key: text('key'),

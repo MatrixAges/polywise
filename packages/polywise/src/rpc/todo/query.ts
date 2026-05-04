@@ -9,7 +9,7 @@ import { project, project_todo, session, todo, todo_session } from '../../db/sch
 import type { Session } from '@core/db'
 
 type TodoItem = typeof todo.$inferSelect
-type SessionItem = (Session & { running_since?: Date }) | null
+type SessionItem = Session | null
 type TodoSessionItem = {
 	todo: TodoItem
 	session: SessionItem

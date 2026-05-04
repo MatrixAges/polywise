@@ -40,4 +40,5 @@ export default async (s: Index, is_cron?: boolean, title?: string) => {
 	}
 
 	s.session = res
+	s.running_since = res.running_since
 }

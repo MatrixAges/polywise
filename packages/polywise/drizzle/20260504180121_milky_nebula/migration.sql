@@ -1,0 +1,1 @@
+ALTER TABLE `session` ADD `running_since` integer;

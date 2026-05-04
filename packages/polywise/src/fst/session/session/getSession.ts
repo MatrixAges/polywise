@@ -8,6 +8,7 @@ export default async (s: Index) => {
 	const res = await getSession(eq(session.id, s.id))
 
 	s.session = res
+	s.running_since = res?.running_since ?? null
 
 	await s.getModel()
 }

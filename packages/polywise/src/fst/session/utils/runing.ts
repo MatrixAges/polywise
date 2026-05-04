@@ -4,9 +4,12 @@ import type Index from '../index'
 
 export default async (s: Index, v: boolean) => {
 	s.session.is_runing = v
-	s.running_since = v ? (s.running_since ?? Date.now()) : null
+	s.running_since = v ? (s.running_since ?? new Date()) : null
 
-	const session = await s.updateSession({ is_runing: v })
+	const session = await s.updateSession({
+		is_runing: v,
+		running_since: s.running_since
+	})
 
 	await s.setState()
 
@@ -15,7 +18,7 @@ export default async (s: Index, v: boolean) => {
 			title: session.title,
 			running: session.is_runing,
 			unread: session.unread ?? false,
-			running_since: s.running_since
+			running_since: s.running_since?.getTime() ?? null
 		}
 	})
 }
