@@ -99,7 +99,6 @@ const Index = (props: IProps) => {
 					</span>
 				)}
 			</div>
-			<span className='text-std-400 mt-0.5 text-sm'>{fromNow(created_at)}</span>
 			{item.session && (
 				<div
 					className='
@@ -118,6 +117,7 @@ const Index = (props: IProps) => {
 					{running_time && <span className='text-nowrap'>{running_time}</span>}
 				</div>
 			)}
+			<span className='text-std-400 mt-0.5 text-xs'>{fromNow(created_at)}</span>
 		</div>
 	)
 }

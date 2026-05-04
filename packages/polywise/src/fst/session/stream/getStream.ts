@@ -9,6 +9,7 @@ import { env } from '@core/env'
 import { createSystemTool } from '@core/fst/agents'
 import { extract, getComplexitySignal } from '@core/fst/agents/superego'
 import { pushPart, startStream, stopStream } from '@core/fst/agents/supervisor'
+import getSessionStatusPayload from '@core/rpc/session/getSessionStatusPayload'
 import { session_status_emitter } from '@core/rpc/session/watchSessionStatus'
 import { getSystemTools, SessionEventStore } from '@core/utils'
 import { convertToModelMessages, createUIMessageStream, smoothStream, stepCountIs, streamText } from 'ai'
@@ -145,16 +146,10 @@ export default async (s: Index, message: Message) => {
 
 			if (is_manual_abort) {
 				s.manual_abort = false
+				const status_payload = await getSessionStatusPayload({ session: s })
 
 				session_status_emitter.emit('change', {
-					[s.id]: {
-						title: s.session.title,
-						report: s.session.report,
-						running: s.session.is_runing,
-						unread: s.session.unread ?? false,
-						running_since: s.running_since?.getTime() ?? null,
-						running_done: s.session.running_done?.getTime() ?? null
-					}
+					[s.id]: status_payload
 				})
 
 				return
@@ -182,16 +177,10 @@ export default async (s: Index, message: Message) => {
 			}
 
 			s.manual_abort = false
+			const status_payload = await getSessionStatusPayload({ session: s })
 
 			session_status_emitter.emit('change', {
-				[s.id]: {
-					title: s.session.title,
-					report: s.session.report,
-					running: s.session.is_runing,
-					unread: s.session.unread ?? false,
-					running_since: s.running_since?.getTime() ?? null,
-					running_done: s.session.running_done?.getTime() ?? null
-				}
+				[s.id]: status_payload
 			})
 		}
 	})
@@ -249,28 +238,26 @@ export default async (s: Index, message: Message) => {
 
 			if (config.chaos_detect) stopStream(s.id)
 
-			await s.stop()
-			await s.appendMessage(responseMessage)
 			await syncTodoSessionStatusBySessionId({
 				session_id: s.id,
 				from_status_list: ['processing'],
 				to_status: 'unreview'
 			})
+			await s.stop()
+
+			await s.appendMessage(responseMessage)
 
 			s.manual_abort = false
 
 			if (!SessionEventStore.listenerCount(`${s.id}/change`)) {
 				const session = await s.updateSession({ unread: true })
+				const status_payload = await getSessionStatusPayload({
+					session,
+					running_since: s.running_since
+				})
 
 				session_status_emitter.emit('change', {
-					[s.id]: {
-						title: session.title,
-						report: session.report,
-						running: session.is_runing,
-						unread: session.unread ?? false,
-						running_since: s.running_since?.getTime() ?? null,
-						running_done: session.running_done?.getTime() ?? null
-					}
+					[s.id]: status_payload
 				})
 			}
 

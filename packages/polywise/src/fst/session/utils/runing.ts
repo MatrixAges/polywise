@@ -1,5 +1,7 @@
 import { session_status_emitter } from '@core/rpc/session/watchSessionStatus'
 
+import getSessionStatusPayload from '../../../rpc/session/getSessionStatusPayload'
+
 import type { SessionInsert } from '@core/db'
 import type Index from '../index'
 
@@ -20,15 +22,9 @@ export default async (s: Index, v: boolean) => {
 	const session = await s.updateSession(data)
 
 	await s.setState()
+	const status_payload = await getSessionStatusPayload({ session, running_since: s.running_since })
 
 	session_status_emitter.emit('change', {
-		[s.id]: {
-			title: session.title,
-			report: session.report,
-			running: session.is_runing,
-			unread: session.unread ?? false,
-			running_since: s.running_since?.getTime() ?? null,
-			running_done: session.running_done?.getTime() ?? null
-		}
+		[s.id]: status_payload
 	})
 }

@@ -4,6 +4,7 @@ import { p, SessionStore } from '@core/utils'
 import { eq } from 'drizzle-orm'
 import { string } from 'zod'
 
+import getSessionStatusPayload from './getSessionStatusPayload'
 import { session_status_emitter } from './watchSessionStatus'
 
 const input_type = string()
@@ -32,17 +33,10 @@ export default p.input(input_type).mutation(async ({ input }) => {
 		})
 
 		const running_since = target_live_session?.running_since ?? next_session.running_since ?? null
-		const running_done = target_live_session?.session.running_done ?? next_session.running_done ?? null
+		const status_payload = await getSessionStatusPayload({ session: next_session, running_since })
 
 		session_status_emitter.emit('change', {
-			[input]: {
-				title: next_session.title,
-				report: next_session.report,
-				running: next_session.is_runing,
-				unread: next_session.unread ?? false,
-				running_since: running_since?.getTime() ?? null,
-				running_done: running_done?.getTime() ?? null
-			}
+			[input]: status_payload
 		})
 	}
 

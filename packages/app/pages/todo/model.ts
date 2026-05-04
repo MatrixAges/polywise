@@ -251,6 +251,8 @@ export default class Index {
 						return [status, items.map(item => this.patchSessionStatus(item, res))]
 					})
 				) as KanbanData
+
+				this.syncDetail()
 			}
 		})
 
@@ -266,6 +268,10 @@ export default class Index {
 
 		return {
 			...item,
+			todo: {
+				...item.todo,
+				status: status.status ?? item.todo.status
+			} as Todo,
 			session: {
 				...item.session,
 				title: status.title,

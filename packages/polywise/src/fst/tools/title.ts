@@ -3,6 +3,8 @@ import { session_status_emitter } from '@core/rpc/session/watchSessionStatus'
 import { tool } from 'ai'
 import { object, string } from 'zod'
 
+import getSessionStatusPayload from '../../rpc/session/getSessionStatusPayload'
+
 import type Session from '../session'
 
 const inputSchema = object({
@@ -52,15 +54,10 @@ export const updateTitle = async (s: Session, focus: string) => {
 
 	await s.updateSession({ title: next_title })
 	await s.setContext({ session_auto_title: next_title, session_title_source: 'ai' })
+	const status_payload = await getSessionStatusPayload({ session: s })
+
 	session_status_emitter.emit('change', {
-		[s.id]: {
-			title: next_title,
-			report: s.session.report,
-			running: s.session.is_runing,
-			unread: s.session.unread ?? false,
-			running_since: s.running_since?.getTime() ?? null,
-			running_done: s.session.running_done?.getTime() ?? null
-		}
+		[s.id]: status_payload
 	})
 
 	s.sync()

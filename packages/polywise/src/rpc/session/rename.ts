@@ -7,6 +7,7 @@ import { object, string } from 'zod'
 
 import { app } from '../../consts'
 import { setSession } from '../../db/services'
+import getSessionStatusPayload from './getSessionStatusPayload'
 import { session_status_emitter } from './watchSessionStatus'
 
 const input_type = object({ id: string(), title: string() })
@@ -27,16 +28,10 @@ export default p.input(input_type).mutation(async ({ input }) => {
 		}
 
 		await target_live_session.setContext(title_context)
+		const status_payload = await getSessionStatusPayload({ session: target_live_session })
 
 		session_status_emitter.emit('change', {
-			[input.id]: {
-				title: target_live_session.session.title,
-				report: target_live_session.session.report,
-				running: target_live_session.session.is_runing,
-				unread: target_live_session.session.unread ?? false,
-				running_since: target_live_session.running_since?.getTime() ?? null,
-				running_done: target_live_session.session.running_done?.getTime() ?? null
-			}
+			[input.id]: status_payload
 		})
 
 		target_live_session.sync()
@@ -68,16 +63,13 @@ export default p.input(input_type).mutation(async ({ input }) => {
 	}
 
 	await fs.writeJson(context_path, next_context, { spaces: 4 })
+	const status_payload = await getSessionStatusPayload({
+		session: next_session,
+		running_since: next_session.running_since ?? null
+	})
 
 	session_status_emitter.emit('change', {
-		[input.id]: {
-			title: next_session.title,
-			report: next_session.report,
-			running: next_session.is_runing,
-			unread: next_session.unread ?? false,
-			running_since: next_session.running_since?.getTime() ?? null,
-			running_done: next_session.running_done?.getTime() ?? null
-		}
+		[input.id]: status_payload
 	})
 
 	return next_session
