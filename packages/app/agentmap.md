@@ -156,6 +156,10 @@ This document provides an overview of the packages/app module structure and arch
 						"role": "Index"
 					}
 				},
+				"hooks.ts": {
+					"desc": "Todo page hooks including the running-time formatter for linked sessions and the selected-card auto-focus hook that smooth-scrolls the active todo into view after detail status changes",
+					"role": "Hook"
+				},
 				"index.tsx": {
 					"desc": "Todo page view that composes the sidebar, kanban board, and a closable right-side detail editor shown for the selected task",
 					"role": "Page"

@@ -9,7 +9,7 @@ import { ArrowLeft, Grip } from '@/components/animate'
 import { fromNow } from '@/utils'
 
 import { useModel } from '../context'
-import { useRuningTime } from '../hooks'
+import { useAutoFocus, useRuningTime } from '../hooks'
 
 import type { RPCOutput } from '@/types'
 
@@ -25,9 +25,10 @@ const Index = (props: IProps) => {
 	const { title, status, created_at, priority } = item.todo
 	const { is_runing, unread, running_since, running_done, report } = item.session || {}
 
-	const { mode, setSelectTodo } = useModel()
+	const { mode, setSelectTodo, detail_todo } = useModel()
 
 	const running_time = useRuningTime(is_runing!, running_since, running_done)
+	const ref_todo = useAutoFocus({ selected, status: detail_todo?.status, overlay })
 
 	const { attributes, listeners, transform, transition, isDragging, setNodeRef } = useSortable({
 		id: item.todo.id,
@@ -35,6 +36,11 @@ const Index = (props: IProps) => {
 	})
 
 	const onClick = useMemoizedFn(() => setSelectTodo(item.todo.status, index))
+
+	const set_ref = useMemoizedFn((node: HTMLDivElement | null) => {
+		ref_todo.current = node
+		setNodeRef(node)
+	})
 
 	const style = overlay ? undefined : { transform: CSS.Translate.toString(transform), transition }
 	const props_drag = overlay ? {} : { ...attributes, ...listeners }
@@ -64,7 +70,7 @@ const Index = (props: IProps) => {
 				(isDragging || overlay) && 'border-primary/40 z-10 backdrop-blur-lg'
 			)}
 			onClick={overlay ? undefined : onClick}
-			ref={overlay ? undefined : setNodeRef}
+			ref={overlay ? undefined : set_ref}
 			style={style}
 			{...props_drag}
 		>
