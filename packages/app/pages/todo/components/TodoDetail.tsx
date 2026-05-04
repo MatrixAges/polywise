@@ -59,8 +59,9 @@ const Index = () => {
 			className='
 				flex flex-col shrink-0
 				w-[320px] h-full
-				bg-background
+				bg-std-50/60
 				border-l border-border-light
+				dark:bg-std-50
 			'
 		>
 			<div
@@ -103,7 +104,8 @@ const Index = () => {
 							h-auto!
 							min-h-0!
 							p-0
-							my-3
+							mt-4
+							mb-3
 							rounded-none
 							text-base! font-medium leading-5.5!
 							bg-transparent
@@ -119,9 +121,9 @@ const Index = () => {
 							ref_is_composing.current = false
 						}}
 					></Textarea>
-					<div className='flex flex-col gap-1'>
+					<div className='flex flex-col'>
 						<div className='flex items-center justify-between'>
-							<div className='text-std-400 flex items-center gap-2'>
+							<div className='text-std-400 flex items-center gap-1.5'>
 								<CircleDot className='size-3'></CircleDot>
 								<span className='text-sm font-medium'>Status</span>
 							</div>
@@ -159,7 +161,7 @@ const Index = () => {
 							/>
 						</div>
 						<div className='flex items-center justify-between'>
-							<div className='text-std-400 flex items-center gap-2'>
+							<div className='text-std-400 flex items-center gap-1.5'>
 								<Flag className='size-3'></Flag>
 								<span className='text-sm font-medium'>Priority</span>
 							</div>
@@ -196,7 +198,7 @@ const Index = () => {
 								)}
 							/>
 						</div>
-						<div className='border-border-light mt-2 w-full border-b'></div>
+						<div className='border-border-light mt-1 w-full border-b'></div>
 						<Textarea
 							className='
 								min-h-32

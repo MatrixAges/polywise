@@ -36,3 +36,10 @@ export const todo_status_icon_map = {
 		color: 'text-teal-500'
 	}
 } as Record<string, { Icon: LucideIcon; color: string }>
+
+export const todo_priority_icon_map = {
+	low: 'text-std-700 bg-std-100',
+	medium: 'text-emerald-500 bg-emerald-50',
+	high: 'text-purple-700 bg-purple-50',
+	urgent: 'text-rose-700 bg-rose-50'
+} as Record<string, string>

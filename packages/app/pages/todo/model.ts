@@ -86,6 +86,8 @@ export default class Index {
 
 	async updateTodo(v: RPCInput['todo']['update']) {
 		await rpc.todo.update.mutate({ ...v, id: this.selected_todo_id })
+
+		await this.getTodos()
 	}
 
 	async createTodo(v: string) {

@@ -3,6 +3,7 @@ import { CSS } from '@dnd-kit/utilities'
 import { useMemoizedFn } from 'ahooks'
 import { observer } from 'mobx-react-lite'
 
+import { todo_priority_icon_map } from '@/appdata'
 import { fromNow } from '@/utils'
 
 import { useModel } from '../context'
@@ -18,7 +19,7 @@ interface IProps {
 
 const Index = (props: IProps) => {
 	const { item, index, selected, overlay = false } = props
-	const { title, status, created_at } = item
+	const { id, title, status, created_at, priority } = item
 
 	const { mode, setSelectTodo } = useModel()
 
@@ -54,16 +55,37 @@ const Index = (props: IProps) => {
 			style={style}
 			{...props_drag}
 		>
-			<span
-				className={$cx(
-					`
-					text-std-600 text-sb font-medium leading-5.5!
-				`,
-					mode === 'kanban' ? 'w-full' : 'flex-1 truncate'
+			<div className={$cx('flex flex-1 gap-2', mode === 'kanban' ? 'items-start' : 'items-center')}>
+				{mode === 'list' && (
+					<span className='text-xsm text-std-400 w-12 uppercase'>
+						{status.substring(0, 3)}-{index + 1}
+					</span>
 				)}
-			>
-				{title}
-			</span>
+				<span
+					className={$cx(
+						'text-std-600 text-sb leading-5.5! font-medium',
+						mode === 'kanban' ? 'w-full' : 'flex-1 truncate'
+					)}
+				>
+					{title}
+				</span>
+				{priority && priority !== 'none' && (
+					<span
+						className={$cx(
+							`
+							px-2 py-1
+							rounded-full
+							text-[10px] font-semibold leading-none
+							uppercase
+						`,
+							mode === 'kanban' ? 'mr-[-2]' : 'mr-2',
+							todo_priority_icon_map[priority]
+						)}
+					>
+						{priority}
+					</span>
+				)}
+			</div>
 			<span className='text-std-400 mt-0.5 text-sm'>{fromNow(created_at)}</span>
 		</div>
 	)
