@@ -1,6 +1,7 @@
+import { getTodoStatusOrder } from '@core/consts/db'
 import { getProjectTodo, getStandaloneTodos, setTodo } from '@core/db/services'
 import { p } from '@core/utils'
-import { asc, eq, sql } from 'drizzle-orm'
+import { asc, eq } from 'drizzle-orm'
 import { number, object, string } from 'zod'
 
 import { project_todo, todo } from '../../db/schema'
@@ -12,7 +13,7 @@ const input_type = object({
 	project_id: string().optional()
 })
 
-const status_order = sql`CASE ${todo.status} WHEN 'draft' THEN 0 WHEN 'pending' THEN 1 WHEN 'processing' THEN 2 WHEN 'unreview' THEN 3 WHEN 'done' THEN 4 WHEN 'error' THEN 5 WHEN 'archive' THEN 6 END`
+const status_order = getTodoStatusOrder(todo.status)
 
 const getTodoList = async (project_id?: string) => {
 	if (project_id) {

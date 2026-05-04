@@ -1,6 +1,7 @@
+import { getTodoStatusOrder } from '@core/consts/db'
 import { session_todo, todo } from '@core/db/schema'
 import { getSessionTodos } from '@core/db/services'
-import { and, asc, eq, ne, sql } from 'drizzle-orm'
+import { and, asc, eq, ne } from 'drizzle-orm'
 
 import type { Context } from '../../types'
 import type Index from '../index'
@@ -8,10 +9,7 @@ import type Index from '../index'
 export default async (s: Index) => {
 	const res = await getSessionTodos({
 		where: and(eq(session_todo.session_id, s.id), ne(todo.status, 'archive')),
-		orderBy: [
-			sql`CASE ${todo.status} WHEN 'draft' THEN 0 WHEN 'pending' THEN 1 WHEN 'processing' THEN 2 WHEN 'unreview' THEN 3 WHEN 'done' THEN 4 WHEN 'error' THEN 5 END`,
-			asc(todo.order)
-		]
+		orderBy: [getTodoStatusOrder(todo.status), asc(todo.order)]
 	})
 
 	s.context.tasks = res.map(item => {

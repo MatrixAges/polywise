@@ -1,10 +1,11 @@
+import { getTodoStatusOrder } from '@core/consts/db'
 import { project_todo, session_todo, todo } from '@core/db/schema'
 import { env } from '@core/env'
 import { and, asc, isNull, SQL, sql } from 'drizzle-orm'
 
 import type { TodoInsert } from '@core/db'
 
-const status_order = sql`CASE ${todo.status} WHEN 'draft' THEN 0 WHEN 'pending' THEN 1 WHEN 'processing' THEN 2 WHEN 'unreview' THEN 3 WHEN 'done' THEN 4 WHEN 'error' THEN 5 WHEN 'archive' THEN 6 END`
+const status_order = getTodoStatusOrder(todo.status)
 
 interface ArgsGetTodos {
 	where?: SQL

@@ -282,6 +282,10 @@ This document provides an overview of the packages/polywise module structure and
 			},
 			"consts": {
 				"app.ts": { "desc": "Application constants", "role": "Constant" },
+				"db.ts": {
+					"desc": "Centralized todo priority/status zod schemas, status list, and shared todo status ordering helper",
+					"role": "Constant"
+				},
 				"mem.ts": { "desc": "Memory system constants", "role": "Constant" },
 				"pipeline.ts": { "desc": "Pipeline constants", "role": "Constant" },
 				"search.ts": {

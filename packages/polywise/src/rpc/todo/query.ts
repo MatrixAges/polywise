@@ -1,7 +1,8 @@
+import { getTodoStatusOrder, todo_status_list } from '@core/consts/db'
 import { getProjectTodo, getStandaloneTodos } from '@core/db/services'
 import { p } from '@core/utils'
-import { asc, eq, sql } from 'drizzle-orm'
-import { boolean, object, string } from 'zod'
+import { asc, eq } from 'drizzle-orm'
+import { object, string } from 'zod'
 
 import { project_todo, todo } from '../../db/schema'
 
@@ -13,17 +14,13 @@ const input_type = object({
 	type: string()
 })
 
-const status_order = sql`CASE ${todo.status} WHEN 'draft' THEN 0 WHEN 'pending' THEN 1 WHEN 'processing' THEN 2 WHEN 'unreview' THEN 3 WHEN 'done' THEN 4 WHEN 'error' THEN 5 WHEN 'archive' THEN 6 END`
+const status_order = getTodoStatusOrder(todo.status)
 
-const createTodoGroup = (): TodoGroup => ({
-	draft: [],
-	pending: [],
-	processing: [],
-	unreview: [],
-	done: [],
-	error: [],
-	archive: []
-})
+const createTodoGroup = () => {
+	const grouped_todos = Object.fromEntries(todo_status_list.map(status => [status, []]))
+
+	return grouped_todos as TodoGroup
+}
 
 const groupTodosByStatus = (todos: Array<TodoItem>) => {
 	const grouped_todos = createTodoGroup()
