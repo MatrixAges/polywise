@@ -1,4 +1,4 @@
-import { getProjects, getProjectTodoCount, getStandaloneTodosCount } from '@core/db/services'
+import { getProjects, getProjectTodoCount, getStandaloneTodosCount, getTodosCount } from '@core/db/services'
 import { p } from '@core/utils'
 import { and, eq, ne } from 'drizzle-orm'
 
@@ -6,7 +6,7 @@ import { project_todo, todo } from '../../db/schema'
 
 export default p.query(async () => {
 	const inbox = await getStandaloneTodosCount(ne(todo.status, 'archive'))
-	const archive = await getStandaloneTodosCount(eq(todo.status, 'archive'))
+	const archive = await getTodosCount(eq(todo.status, 'archive'))
 	const projects = await getProjects({ orderBy: 'asc' })
 
 	const project_menu_data = await Promise.all(

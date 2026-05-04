@@ -25,7 +25,7 @@ export default class Index {
 	drag_todo = null as KanbanTodo | null
 
 	get project_id() {
-		if (this.type === 'inbox' || this.type === 'archive') return
+		if (this.type === 'inbox') return
 
 		return this.type
 	}
@@ -48,10 +48,7 @@ export default class Index {
 		this.selected_todo_id = ''
 		this.detail_todo = null as unknown as Todo
 
-		if (v === 'archive') {
-		} else {
-			this.getTodos()
-		}
+		this.getTodos()
 	}
 
 	toggleMode() {

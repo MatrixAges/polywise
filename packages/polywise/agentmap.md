@@ -180,7 +180,7 @@ This document provides an overview of the packages/polywise module structure and
 					"role": "Folder"
 				},
 				"todo": {
-					"desc": "Todo domain RPC procedures for standalone todos and project-bound todos, including creation, deletion, status/content updates, drag sorting within a status column or across status columns, direct project query, inbox/project menu count aggregation, visible-only grouped query views that exclude archive status, and archive list pagination through getArchives/getMoreArchives with 10-item pages and has_more metadata. New todo creation now assigns an order before the current minimum so fresh items appear at the top in inbox and project views. Cross-column drag now also accepts missing over_id when dropping into an empty kanban column and inserts by target status.",
+					"desc": "Todo domain RPC procedures for standalone todos and project-bound todos, including creation, deletion, status/content updates, drag sorting within a status column or across status columns, direct project query, inbox/project menu count aggregation, visible-only grouped query views that exclude archive status, and global archive list pagination through getArchives/getMoreArchives with 10-item pages and has_more metadata across all archive-status todos. New todo creation now assigns an order before the current minimum so fresh items appear at the top in inbox and project views. Cross-column drag now also accepts missing over_id when dropping into an empty kanban column and inserts by target status.",
 					"role": "Folder"
 				}
 			},
@@ -233,7 +233,7 @@ This document provides an overview of the packages/polywise module structure and
 					"message.ts": { "desc": "Chat message storage schema with UIMessages", "role": "Schema" }
 				},
 				"services": {
-					"desc": "Database write/read helpers for core entities and relation-backed projections; todo service now supports single-item lookup, generic list query, standalone todo filtering that excludes session_todo and project_todo bindings, standalone count queries for menu aggregation, and the todo RPC layer now reuses those projections to persist cross-status drag reordering by rewriting status plus sequential order. Project todo external service also exposes count queries for menu aggregation without loading full row sets.",
+					"desc": "Database write/read helpers for core entities and relation-backed projections; todo service now supports single-item lookup, generic list query, global count queries across all todos, standalone todo filtering that excludes session_todo and project_todo bindings, standalone count queries for menu aggregation, and the todo RPC layer now reuses those projections to persist cross-status drag reordering by rewriting status plus sequential order. Project todo external service also exposes count queries for menu aggregation without loading full row sets.",
 					"role": "Folder"
 				}
 			},

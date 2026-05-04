@@ -51,6 +51,14 @@ export const getTodos = async (args: ArgsGetTodos = {}) => {
 	return query
 }
 
+export const getTodosCount = async (where?: SQL) => {
+	return env.db
+		.select({ count: sql<number>`count(*)` })
+		.from(todo)
+		.where(where)
+		.then(res => Number(res[0].count))
+}
+
 export const getStandaloneTodos = async (args: ArgsGetTodos = {}) => {
 	const { where, orderBy, limit, offset } = args
 	const base_where = and(isNull(session_todo.todo_id), isNull(project_todo.todo_id), where)

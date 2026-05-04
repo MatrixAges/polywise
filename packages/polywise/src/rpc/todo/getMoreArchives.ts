@@ -1,35 +1,18 @@
-import { getProjectTodo, getStandaloneTodos } from '@core/db/services'
+import { getTodos } from '@core/db/services'
 import { p } from '@core/utils'
-import { and, asc, desc, eq } from 'drizzle-orm'
-import { number, object, string } from 'zod'
+import { asc, desc, eq } from 'drizzle-orm'
+import { number, object } from 'zod'
 
-import { project_todo, todo } from '../../db/schema'
+import { todo } from '../../db/schema'
 
 const page_size = 10
 
-const input_type = object({ type: string(), page: number().int().min(0) })
+const input_type = object({ page: number().int().min(0) })
 
 export default p.input(input_type).query(async ({ input }) => {
 	const offset = input.page * page_size
 
-	if (input.type !== 'inbox') {
-		const rows = await getProjectTodo({
-			where: and(eq(project_todo.project_id, input.type), eq(todo.status, 'archive')),
-			orderBy: [desc(todo.created_at), asc(todo.order)],
-			limit: page_size + 1,
-			offset
-		})
-
-		const has_more = rows.length > page_size
-		const items = has_more ? rows.slice(0, page_size) : rows
-
-		return {
-			items: items.map(item => item.todo),
-			has_more
-		}
-	}
-
-	const rows = await getStandaloneTodos({
+	const rows = await getTodos({
 		where: eq(todo.status, 'archive'),
 		orderBy: [desc(todo.created_at), asc(todo.order)],
 		limit: page_size + 1,
@@ -40,7 +23,7 @@ export default p.input(input_type).query(async ({ input }) => {
 	const items = has_more ? rows.slice(0, page_size) : rows
 
 	return {
-		items: items.map(item => item.todo),
+		items,
 		has_more
 	}
 })
