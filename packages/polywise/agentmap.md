@@ -233,7 +233,7 @@ This document provides an overview of the packages/polywise module structure and
 					"message.ts": { "desc": "Chat message storage schema with UIMessages", "role": "Schema" }
 				},
 				"services": {
-					"desc": "Database write/read helpers for core entities and relation-backed projections; todo service now supports single-item lookup, generic list query, global count queries across all todos, standalone todo filtering that excludes session_todo and project_todo bindings, standalone count queries for menu aggregation, and the todo RPC layer now reuses those projections to persist cross-status drag reordering by rewriting status plus sequential order. Project todo external service also exposes count queries for menu aggregation without loading full row sets.",
+					"desc": "Database write/read helpers for core entities and relation-backed projections; todo service now supports single-item lookup, generic list query, standalone todo filtering that excludes session_todo and project_todo bindings, standalone count queries for menu aggregation, and the todo RPC layer now reuses those projections to persist cross-status drag reordering by rewriting status plus sequential order. Project todo external service also exposes count queries for menu aggregation without loading full row sets.",
 					"role": "Folder"
 				}
 			},
