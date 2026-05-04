@@ -19,7 +19,7 @@ interface IProps {
 
 const Index = (props: IProps) => {
 	const { item, index, selected, overlay = false } = props
-	const { id, title, status, created_at, priority } = item
+	const { title, status, created_at, priority } = item
 
 	const { mode, setSelectTodo } = useModel()
 

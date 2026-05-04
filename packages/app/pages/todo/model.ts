@@ -59,6 +59,8 @@ export default class Index {
 	}
 
 	toggleArchive() {
+		this.closeTodoDetail()
+
 		this.archive_open = !this.archive_open
 
 		if (this.archive_open) {
@@ -73,6 +75,9 @@ export default class Index {
 
 		this.selected_todo_id = todo.id
 		this.detail_todo = todo
+
+		this.archive_open = false
+		this.archive_page = 1
 	}
 
 	closeTodoDetail() {
@@ -132,7 +137,15 @@ export default class Index {
 	}
 
 	async getArchives() {
-		await rpc.todo.getArchives.query({ page: this.archive_page })
+		const archives = await rpc.todo.getArchives.query({ page: this.archive_page })
+
+		if (this.archive_page === 1) {
+			this.archives = archives
+		} else {
+			this.archives.items.push(...archives.items)
+
+			this.archives.has_more = archives.has_more
+		}
 	}
 
 	async getMoreArchives() {

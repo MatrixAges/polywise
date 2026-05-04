@@ -2,7 +2,7 @@ import { useLayoutEffect, useState } from 'react'
 import { observer } from 'mobx-react-lite'
 import { container } from 'tsyringe'
 
-import { Kanban, Menu, TodoDetail } from './components'
+import { Archives, Kanban, Menu, TodoDetail } from './components'
 import { Context } from './context'
 import Model from './model'
 
@@ -21,6 +21,7 @@ const Index = () => {
 				<Menu></Menu>
 				<Kanban></Kanban>
 				{x.detail_todo && <TodoDetail></TodoDetail>}
+				{x.archive_open && <Archives></Archives>}
 			</div>
 		</Context>
 	)
