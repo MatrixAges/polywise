@@ -263,6 +263,7 @@ export default class Index {
 							return {
 								...session_item,
 								title: status.title,
+								report: status.report,
 								is_runing: status.running,
 								running_done: status.running_done
 									? new Date(status.running_done)

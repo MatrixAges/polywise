@@ -250,6 +250,7 @@ export default class Index {
 						this.detail_session = {
 							...this.detail_session,
 							title: status.title,
+							report: status.report,
 							is_runing: status.running,
 							running_since: status.running_since ? new Date(status.running_since) : null,
 							running_done: status.running_done ? new Date(status.running_done) : null,
@@ -275,6 +276,7 @@ export default class Index {
 			session: {
 				...item.session,
 				title: status.title,
+				report: status.report,
 				is_runing: status.running,
 				running_since: status.running_since ? new Date(status.running_since) : null,
 				running_done: status.running_done ? new Date(status.running_done) : null,

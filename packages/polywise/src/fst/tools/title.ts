@@ -55,6 +55,7 @@ export const updateTitle = async (s: Session, focus: string) => {
 	session_status_emitter.emit('change', {
 		[s.id]: {
 			title: next_title,
+			report: s.session.report,
 			running: s.session.is_runing,
 			unread: s.session.unread ?? false,
 			running_since: s.running_since?.getTime() ?? null,

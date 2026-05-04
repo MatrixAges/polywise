@@ -31,6 +31,7 @@ export default p.input(input_type).mutation(async ({ input }) => {
 		session_status_emitter.emit('change', {
 			[input.id]: {
 				title: target_live_session.session.title,
+				report: target_live_session.session.report,
 				running: target_live_session.session.is_runing,
 				unread: target_live_session.session.unread ?? false,
 				running_since: target_live_session.running_since?.getTime() ?? null,
@@ -71,6 +72,7 @@ export default p.input(input_type).mutation(async ({ input }) => {
 	session_status_emitter.emit('change', {
 		[input.id]: {
 			title: next_session.title,
+			report: next_session.report,
 			running: next_session.is_runing,
 			unread: next_session.unread ?? false,
 			running_since: next_session.running_since?.getTime() ?? null,

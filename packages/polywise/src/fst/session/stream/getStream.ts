@@ -28,6 +28,7 @@ import {
 	createMetaTool,
 	createPlanTool,
 	createQuestionTool,
+	createReportTool,
 	createSearchFileTool,
 	createSkillTool,
 	createTitleTool,
@@ -106,6 +107,7 @@ export default async (s: Index, message: Message) => {
 			message_tool: createMessageTool(s),
 			plan_tool: createPlanTool(s),
 			question_tool: createQuestionTool(s.id),
+			report_tool: createReportTool(s),
 			glob_tool: createGlobTool(s),
 			search_file_tool: createSearchFileTool(s, bash_tool.env),
 			title_tool: createTitleTool(s),
@@ -151,6 +153,7 @@ export default async (s: Index, message: Message) => {
 			session_status_emitter.emit('change', {
 				[s.id]: {
 					title: s.session.title,
+					report: s.session.report,
 					running: s.session.is_runing,
 					unread: s.session.unread ?? false,
 					running_since: s.running_since?.getTime() ?? null,
@@ -222,6 +225,7 @@ export default async (s: Index, message: Message) => {
 				session_status_emitter.emit('change', {
 					[s.id]: {
 						title: session.title,
+						report: session.report,
 						running: session.is_runing,
 						unread: session.unread ?? false,
 						running_since: s.running_since?.getTime() ?? null,

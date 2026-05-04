@@ -24,6 +24,7 @@ export default async (s: Index, v: boolean) => {
 	session_status_emitter.emit('change', {
 		[s.id]: {
 			title: session.title,
+			report: session.report,
 			running: session.is_runing,
 			unread: session.unread ?? false,
 			running_since: s.running_since?.getTime() ?? null,

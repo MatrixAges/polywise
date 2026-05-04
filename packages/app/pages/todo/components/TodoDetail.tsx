@@ -45,7 +45,7 @@ const todo_priority_options: Array<{ label: string; value: string }> = [
 const Index = () => {
 	const { detail_todo, detail_session, updateTodo, startSession, closeTodoDetail, removeTodo, toggleSessionOpen } =
 		useModel()
-	const { is_runing, running_since, running_done, unread } = detail_session || {}
+	const { title, is_runing, running_since, running_done, unread, report } = detail_session || {}
 
 	const { control, register, reset } = useForm<Todo>({ values: $copy(detail_todo) }, (_, v) => {
 		updateTodo(v as RPCInput['todo']['update'])
@@ -235,7 +235,7 @@ const Index = () => {
 			</div>
 			<div
 				className='
-					flex
+					flex shrink-0
 					gap-2
 					p-3
 					border-t border-border-light
@@ -246,9 +246,22 @@ const Index = () => {
 						Start Session
 					</Button>
 				) : (
-					<Button type='button' className='flex-1' onClick={toggleSessionOpen}>
-						Open Session{running_time ? ` (${running_time})` : ''} {Status}
-					</Button>
+					<div className='flex w-full flex-col gap-2'>
+						<div
+							className='
+								flex
+								items-center
+								gap-2
+								text-std-400 text-xsm
+							'
+						>
+							<span className='flex-1 truncate'>{report || title}</span>
+							{running_time && <span className='text-nowrap'>{running_time}</span>}
+						</div>
+						<Button type='button' onClick={toggleSessionOpen}>
+							Open Session {Status}
+						</Button>
+					</div>
 				)}
 			</div>
 		</div>

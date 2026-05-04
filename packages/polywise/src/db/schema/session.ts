@@ -7,6 +7,7 @@ export default sqliteTable(
 		id: text('id').primaryKey().$defaultFn(getId),
 		// session title
 		title: text('title').notNull(),
+		report: text('report'),
 		// session runing status
 		is_runing: integer('runing', { mode: 'boolean' }).default(false).notNull(),
 		running_since: integer('running_since', { mode: 'timestamp' }),

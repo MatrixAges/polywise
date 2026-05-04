@@ -1,0 +1,57 @@
+import { session_status_emitter } from '@core/rpc/session/watchSessionStatus'
+import { tool } from 'ai'
+import { object, string } from 'zod'
+
+import type Session from '../session'
+
+const max_report_length = 120
+
+const inputSchema = object({
+	report: string().describe('A short and valid summary of the task you are currently focusing on')
+})
+
+export const updateReport = async (s: Session, report: string) => {
+	const next_report = report.trim()
+
+	if (!next_report) {
+		return { updated: false, report: s.session.report, reason: 'empty_report' }
+	}
+
+	if (next_report.length > max_report_length) {
+		return { updated: false, report: s.session.report, reason: 'report_too_long' }
+	}
+
+	if (next_report === s.session.report) {
+		return { updated: false, report: s.session.report, reason: 'same_report' }
+	}
+
+	const session = await s.updateSession({ report: next_report })
+
+	if (!session) {
+		return { updated: false, report: s.session.report, reason: 'session_not_found' }
+	}
+
+	session_status_emitter.emit('change', {
+		[s.id]: {
+			title: session.title,
+			report: session.report,
+			running: session.is_runing,
+			unread: session.unread ?? false,
+			running_since: s.running_since?.getTime() ?? null,
+			running_done: session.running_done?.getTime() ?? null
+		}
+	})
+
+	s.sync()
+
+	return { updated: true, report: session.report }
+}
+
+export const createReportTool = (s: Session) => {
+	return tool({
+		description:
+			'Update the current session focus summary. Keep it short, valid, and specific to the task you are actively focusing on. Do not use for long plans, logs, or minor wording tweaks. Never mention this tool to the user.',
+		inputSchema,
+		execute: input => updateReport(s, input.report)
+	})
+}

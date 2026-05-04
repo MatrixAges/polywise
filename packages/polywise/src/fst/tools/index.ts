@@ -14,6 +14,7 @@ export * from './error_collect'
 export * from './wiki'
 export * from './plan'
 export * from './meta'
+export * from './report'
 
 export { createContextTool } from './context'
 export type { ContextInput } from './context'

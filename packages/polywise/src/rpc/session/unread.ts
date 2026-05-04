@@ -31,6 +31,7 @@ export default p.input(input_type).mutation(async ({ input }) => {
 		session_status_emitter.emit('change', {
 			[input]: {
 				title: next_session.title,
+				report: next_session.report,
 				running: next_session.is_runing,
 				unread: next_session.unread ?? false,
 				running_since: running_since?.getTime() ?? null,

@@ -4,6 +4,7 @@ import { p } from '@core/utils'
 export interface SessionStatusPayload {
 	[id: string]: {
 		title: string
+		report: string | null
 		running: boolean
 		unread: boolean
 		running_since: number | null
