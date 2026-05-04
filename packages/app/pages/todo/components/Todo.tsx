@@ -1,12 +1,13 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { useMemoizedFn } from 'ahooks'
+import dayjs from 'dayjs'
 import { observer } from 'mobx-react-lite'
 
 import { todo_priority_icon_map } from '@/appdata'
 import { ArrowLeft, Grip } from '@/components/animate'
-import { fromNow } from '@/utils'
+import { fromNow, getDurationTime } from '@/utils'
 
 import { useModel } from '../context'
 
@@ -22,7 +23,9 @@ interface IProps {
 const Index = (props: IProps) => {
 	const { item, index, selected, overlay = false } = props
 	const { title, status, created_at, priority } = item.todo
-	const { is_runing, unread } = item.session || {}
+	const { is_runing, unread, running_since } = item.session || {}
+
+	const [running_time, setRuningTime] = useState<number>(0)
 
 	const { mode, setSelectTodo } = useModel()
 
@@ -42,6 +45,16 @@ const Index = (props: IProps) => {
 
 		return null
 	}, [is_runing, unread])
+
+	useEffect(() => {
+		if (!running_since) return
+
+		const timer = setInterval(() => {
+			setRuningTime(Date.now() - dayjs(running_since).valueOf())
+		}, 1000)
+
+		return () => clearInterval(timer)
+	}, [running_since])
 
 	return (
 		<div
@@ -112,6 +125,7 @@ const Index = (props: IProps) => {
 				>
 					<span className='truncate'>{item.session.title}</span>
 					{Status}
+					{running_time && <span>{getDurationTime(running_time)}</span>}
 				</div>
 			)}
 		</div>

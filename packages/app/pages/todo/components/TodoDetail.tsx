@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { debounce } from 'es-toolkit'
 import { CircleDot, Flag, Trash, X } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
@@ -47,7 +47,6 @@ const Index = () => {
 		detail_session,
 		updateTodo,
 		startTodoSession,
-		stopTodoSession,
 		closeTodoDetail,
 		removeTodo,
 		toggleSessionOpen
@@ -239,16 +238,13 @@ const Index = () => {
 					border-t border-border-light
 				'
 			>
-				<Button
-					type='button'
-					className='flex-1'
-					onClick={detail_session ? toggleSessionOpen : startTodoSession}
-				>
-					{detail_session ? 'Open Session' : 'Start Session'}
-				</Button>
-				{detail_session?.is_runing && (
-					<Button type='button' variant='secondary' onClick={stopTodoSession}>
-						Stop
+				{!detail_session ? (
+					<Button type='button' className='flex-1' onClick={startTodoSession}>
+						Start Session
+					</Button>
+				) : (
+					<Button type='button' className='flex-1' onClick={toggleSessionOpen}>
+						Open Session
 					</Button>
 				)}
 			</div>

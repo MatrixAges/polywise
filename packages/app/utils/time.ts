@@ -15,3 +15,7 @@ export const formatTime = (date?: string | number | Date | dayjs.Dayjs, format =
 export const fromNow = (date?: string | number | Date | dayjs.Dayjs | Date | null) => {
 	return dayjs(date).fromNow()
 }
+
+export const getDurationTime = (v: number) => {
+	return dayjs.duration(v).humanize()
+}

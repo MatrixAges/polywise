@@ -289,10 +289,8 @@ export default class Index {
 		}
 	}
 
-	syncDetailBySelectedTodo() {
-		if (!this.selected_todo_id) {
-			return
-		}
+	syncDetail() {
+		if (!this.selected_todo_id) return
 
 		for (const items of Object.values(this.kanban_data)) {
 			const target_item = items.find(item => item.todo.id === this.selected_todo_id)
