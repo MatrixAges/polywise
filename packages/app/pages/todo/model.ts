@@ -23,6 +23,9 @@ export default class Index {
 	selected_todo_id = ''
 	detail_todo = null as unknown as Todo
 	drag_todo = null as KanbanTodo | null
+	archive_open = false
+	archive_page = 1
+	archives = {} as RPCOutput['todo']['getArchives']
 
 	get project_id() {
 		if (this.type === 'inbox') return
@@ -53,6 +56,16 @@ export default class Index {
 
 	toggleMode() {
 		this.mode = this.mode === 'kanban' ? 'list' : 'kanban'
+	}
+
+	toggleArchive() {
+		this.archive_open = !this.archive_open
+
+		if (this.archive_open) {
+			this.getArchives()
+		} else {
+			this.archive_page = 1
+		}
 	}
 
 	setSelectTodo(status: string, index: number) {
@@ -119,7 +132,13 @@ export default class Index {
 	}
 
 	async getArchives() {
-		// await rpc.todo.getArchives.query()
+		await rpc.todo.getArchives.query({ page: this.archive_page })
+	}
+
+	async getMoreArchives() {
+		this.archive_page += 1
+
+		this.getArchives()
 	}
 
 	async onDragEnd(args: DragEndEvent) {

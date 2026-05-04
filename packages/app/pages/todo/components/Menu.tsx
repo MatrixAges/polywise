@@ -11,8 +11,8 @@ import { useDelegate } from '@/hooks'
 import { useModel } from '../context'
 
 const Index = () => {
-	const { type, mode, menu_data, setType, toggleMode, createTodo } = useModel()
-	const { inbox, archive, projects = [] } = menu_data
+	const { type, mode, menu_data, setType, toggleMode, toggleArchive, createTodo } = useModel()
+	const { inbox, projects = [] } = menu_data
 	const ref_create = useRef<HTMLTextAreaElement>(null)
 
 	const ref = useDelegate(v => setType(v))
@@ -56,6 +56,11 @@ const Index = () => {
 					Todos
 				</span>
 				<div className='mr-[-2px] flex gap-1'>
+					<Tooltip title='Toggle Archive'>
+						<div className='icon_button small' onClick={toggleArchive}>
+							<Archive></Archive>
+						</div>
+					</Tooltip>
 					<Tooltip title='Toggle Mode'>
 						<div className='icon_button small' onClick={toggleMode}>
 							<ModeIcon></ModeIcon>
@@ -98,26 +103,6 @@ const Index = () => {
 							'
 						>
 							{inbox}
-						</span>
-					</div>
-					<div
-						className={$cx('click_button justify-between', type === 'archive' && 'active')}
-						data-key='archive'
-					>
-						<div className='flex items-center gap-2'>
-							<Archive></Archive>
-							<span>Archive</span>
-						</div>
-						<span
-							className='
-								px-1 py-0.5
-								rounded-full
-								text-xs leading-none
-								bg-secondary
-								border border-border-light
-							'
-						>
-							{archive}
 						</span>
 					</div>
 					{projects.map(item => (

@@ -4,7 +4,6 @@ import create from './create'
 import drag from './drag'
 import getArchives from './getArchives'
 import getMenuData from './getMenuData'
-import getMoreArchives from './getMoreArchives'
 import query from './query'
 import remove from './remove'
 import sort from './sort'
@@ -15,7 +14,6 @@ export default r({
 	drag,
 	getArchives,
 	getMenuData,
-	getMoreArchives,
 	query,
 	remove,
 	sort,
