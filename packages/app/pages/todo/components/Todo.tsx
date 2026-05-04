@@ -25,7 +25,7 @@ const Index = (props: IProps) => {
 	const { title, status, created_at, priority } = item.todo
 	const { is_runing, unread, running_since, running_done, report } = item.session || {}
 
-	const { mode, setSelectTodo, detail_todo } = useModel()
+	const { mode, detail_todo, setSelectTodo } = useModel()
 
 	const running_time = useRuningTime(is_runing!, running_since, running_done)
 	const ref_todo = useAutoFocus({ selected, status: detail_todo?.status, overlay })
@@ -107,7 +107,8 @@ const Index = (props: IProps) => {
 			</div>
 			{item.session && (
 				<div
-					className='
+					className={$cx(
+						`
 						flex
 						items-center
 						gap-2
@@ -115,15 +116,18 @@ const Index = (props: IProps) => {
 						my-1
 						rounded-full
 						text-std-400 text-xs
+						truncate
 						bg-secondary/60
-					'
+					`,
+						mode === 'list' && 'max-w-[210px]'
+					)}
 				>
 					<span className='flex-1 truncate'>{report || item.session.title}</span>
 					{Status}
 					{running_time && <span className='text-nowrap'>{running_time}</span>}
 				</div>
 			)}
-			<span className='text-std-400 mt-0.5 text-xs'>{fromNow(created_at)}</span>
+			<span className='text-std-400 mt-0.5 text-xs text-nowrap'>{fromNow(created_at)}</span>
 		</div>
 	)
 }
