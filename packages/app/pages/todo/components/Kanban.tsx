@@ -21,7 +21,7 @@ const Index = () => {
 					overflow-x-scroll overflow-y-hidden
 					min-w-0
 					gap-5
-					px-5 py-1
+					px-5 pt-1
 				`
 						: `min-h-0 flex-col overflow-y-scroll`
 				)}

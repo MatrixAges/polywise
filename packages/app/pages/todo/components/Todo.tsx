@@ -46,7 +46,8 @@ const Index = (props: IProps) => {
 			`,
 				mode === 'kanban' ? 'flex-col rounded-lg border py-2' : 'h-11 items-center border-b',
 				selected && 'border-primary/40',
-				(isDragging || overlay) && 'z-10 opacity-70 shadow-lg'
+				isDragging && 'opacity-0',
+				(isDragging || overlay) && 'border-primary/40 z-10 backdrop-blur-lg'
 			)}
 			onClick={overlay ? undefined : onClick}
 			ref={overlay ? undefined : setNodeRef}

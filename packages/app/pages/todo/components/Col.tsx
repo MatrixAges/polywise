@@ -68,7 +68,7 @@ const Index = (props: IProps) => {
 						className={$cx(
 							'flex w-full flex-col',
 							mode === 'kanban' && 'gap-3',
-							todos.length === 0 && 'min-h-24'
+							todos.length === 0 && 'min-h-20'
 						)}
 						ref={setNodeRef}
 					>
@@ -80,6 +80,7 @@ const Index = (props: IProps) => {
 								key={item.id}
 							></Todo>
 						))}
+						{mode === 'kanban' && <span className='h-6'></span>}
 					</div>
 				</SortableContext>
 			</div>

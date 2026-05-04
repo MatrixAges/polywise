@@ -180,7 +180,7 @@ This document provides an overview of the packages/polywise module structure and
 					"role": "Folder"
 				},
 				"todo": {
-					"desc": "Todo domain RPC procedures for standalone todos and project-bound todos, including creation, deletion, status/content updates, drag sorting within a status column or across status columns, direct project query, inbox/project menu count aggregation, and query views that return Record<status, Array<Todo>> grouped in schema status order. Cross-column drag now also accepts missing over_id when dropping into an empty kanban column and inserts by target status.",
+					"desc": "Todo domain RPC procedures for standalone todos and project-bound todos, including creation, deletion, status/content updates, drag sorting within a status column or across status columns, direct project query, inbox/project menu count aggregation, and query views that return Record<status, Array<Todo>> grouped in schema status order. New todo creation now assigns an order before the current minimum so fresh items appear at the top in inbox and project views. Cross-column drag now also accepts missing over_id when dropping into an empty kanban column and inserts by target status.",
 					"role": "Folder"
 				}
 			},

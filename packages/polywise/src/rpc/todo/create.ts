@@ -1,5 +1,5 @@
 import { todo_create_input_schema } from '@core/db/schemas'
-import { addProjectTodo, addTodo, getProjectTodo } from '@core/db/services'
+import { addProjectTodo, addTodo, getProjectTodo, getStandaloneTodos } from '@core/db/services'
 import { p } from '@core/utils'
 import { eq } from 'drizzle-orm'
 
@@ -7,22 +7,24 @@ import { project_todo } from '../../db/schema'
 
 const input_type = todo_create_input_schema
 
-const getNextProjectTodoOrder = async (project_id: string) => {
-	const rows = await getProjectTodo({ where: eq(project_todo.project_id, project_id) })
+const getNextTodoOrder = async (project_id?: string) => {
+	const rows = project_id
+		? await getProjectTodo({ where: eq(project_todo.project_id, project_id) })
+		: await getStandaloneTodos()
 
 	if (rows.length === 0) {
 		return 0
 	}
 
-	const max_order = rows.reduce((current_max, item) => {
-		return Math.max(current_max, item.todo.order)
+	const min_order = rows.reduce((current_min, item) => {
+		return Math.min(current_min, item.todo.order)
 	}, rows[0].todo.order)
 
-	return max_order + 1
+	return min_order - 1
 }
 
 export default p.input(input_type).mutation(async ({ input }) => {
-	const order = input.project_id ? await getNextProjectTodoOrder(input.project_id) : Date.now()
+	const order = await getNextTodoOrder(input.project_id)
 
 	const inserted = await addTodo({
 		title: input.title,
