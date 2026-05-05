@@ -84,11 +84,11 @@ This document provides an overview of the packages/app module structure and arch
 					"components": {
 						"SessionsStatus": {
 							"index.tsx": {
-								"desc": "Header status trigger that loads running, unread, and todo-error counts through rpc.session.getSessionStatus and opens the status dialog",
+								"desc": "Header status trigger that subscribes to pushed running, unread, and todo-error counts through rpc.session.getSessionStatus and opens the status dialog",
 								"role": "Component"
 							},
 							"model.ts": {
-								"desc": "Local header sessions-status model that keeps dialog open state, active status tab, selected session id, active-status session list, and aggregated counts synchronized through rpc.session.getSessionStatus, rpc.session.getStatusList({ status }), and watchSessionStatus refreshes",
+								"desc": "Local header sessions-status model that keeps dialog open state, active status tab, selected session id, active-status session list, and aggregated counts synchronized through a dedicated rpc.session.getSessionStatus subscription plus watchSessionStatus-driven list refreshes",
 								"role": "Model"
 							},
 							"SessionDialog.tsx": {

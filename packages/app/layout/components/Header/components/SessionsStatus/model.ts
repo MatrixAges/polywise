@@ -7,7 +7,7 @@ import { rpc } from '@/utils'
 import type { RPCOutput } from '@/types'
 import type { SessionStatusType } from '@core/rpc/session/types'
 
-type SessionStatusCount = RPCOutput['session']['getSessionStatus']
+type SessionStatusCount = { unread: number; running: number; error: number }
 type SessionStatusList = RPCOutput['session']['getStatusList']
 
 @injectable()
@@ -23,8 +23,7 @@ export default class Index {
 	}
 
 	async init() {
-		this.getSessionStatus()
-		this.getStatusList()
+		this.watchSessionCount()
 		this.watchSessionStatus()
 	}
 
@@ -42,22 +41,26 @@ export default class Index {
 		this.selected_session_id = id
 	}
 
-	async getSessionStatus() {
-		this.count = await rpc.session.getSessionStatus.query()
-	}
-
 	async getStatusList() {
 		const next_list = await rpc.session.getStatusList.query({ status: this.current_status })
 
 		this.list = next_list
 	}
 
+	watchSessionCount() {
+		const deinit = rpc.session.getSessionStatus.subscribe(undefined, {
+			onData: res => {
+				console.log(res)
+				this.count = res
+			}
+		})
+
+		this.util.acts.push(deinit.unsubscribe)
+	}
+
 	watchSessionStatus() {
 		const deinit = rpc.session.watchSessionStatus.subscribe(undefined, {
-			onData: async res => {
-				this.getSessionStatus()
-				console.log(res)
-
+			onData: async () => {
 				if (this.open) this.getStatusList()
 			}
 		})

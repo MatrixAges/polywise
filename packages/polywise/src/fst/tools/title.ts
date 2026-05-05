@@ -1,9 +1,8 @@
 import { title } from '@core/fst/agents'
-import { session_status_emitter } from '@core/rpc/session/watchSessionStatus'
 import { tool } from 'ai'
 import { object, string } from 'zod'
 
-import getSessionStatusPayload from '../../rpc/session/getSessionStatusPayload'
+import { emitChange } from '../utils'
 
 import type Session from '../session'
 
@@ -54,10 +53,10 @@ export const updateTitle = async (s: Session, focus: string) => {
 
 	await s.updateSession({ title: next_title })
 	await s.setContext({ session_auto_title: next_title, session_title_source: 'ai' })
-	const status_payload = await getSessionStatusPayload({ session: s })
-
-	session_status_emitter.emit('change', {
-		[s.id]: status_payload
+	await emitChange({
+		session: s.session,
+		running_since: s.running_since,
+		running_done: s.session.running_done ?? null
 	})
 
 	s.sync()

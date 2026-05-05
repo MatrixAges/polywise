@@ -1,3 +1,4 @@
+import events from 'events'
 import { blocked_session_id } from '@core/consts'
 import { session, todo, todo_session } from '@core/db/schema'
 import { and, countDistinct, eq } from 'drizzle-orm'
@@ -45,7 +46,7 @@ const countErrorSession = async () => {
 	return data.total - (blocked_data?.total ?? 0)
 }
 
-export default p.query(async () => {
+const getSessionStatusCount = async () => {
 	const [unread, running, error] = await Promise.all([
 		countUnreadSession(),
 		countRunningSession(),
@@ -56,5 +57,17 @@ export default p.query(async () => {
 		unread,
 		running,
 		error
+	}
+}
+
+export const session_count_emitter = new events.EventEmitter()
+
+export default p.subscription(async function* (args) {
+	const { signal } = args
+
+	yield await getSessionStatusCount()
+
+	for await (const _ of events.on(session_count_emitter, 'change', { signal })) {
+		yield await getSessionStatusCount()
 	}
 })

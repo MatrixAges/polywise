@@ -10,12 +10,10 @@ import { env } from '@core/env'
 import { createSystemTool } from '@core/fst/agents'
 import { extract, getComplexitySignal } from '@core/fst/agents/superego'
 import { pushPart, startStream, stopStream } from '@core/fst/agents/supervisor'
-import getSessionStatusPayload from '@core/rpc/session/getSessionStatusPayload'
-import { session_status_emitter } from '@core/rpc/session/watchSessionStatus'
 import { getSystemTools, SessionEventStore } from '@core/utils'
 import { convertToModelMessages, createUIMessageStream, smoothStream, stepCountIs, streamText } from 'ai'
 import { getId } from 'stk/utils'
-import { match, P } from 'ts-pattern'
+import { match } from 'ts-pattern'
 
 import { loadMcpTools } from '../../mcp'
 import {
@@ -41,7 +39,7 @@ import {
 	getSkillPrompt,
 	updateTitle
 } from '../../tools'
-import { getTitleFocus, submit } from '../../utils'
+import { emitChange, getTitleFocus, submit } from '../../utils'
 
 import type { ToolSet } from 'ai'
 import type { Message, MessageMetadata } from '../../types'
@@ -155,10 +153,10 @@ export default async (s: Index, message: Message) => {
 
 			if (is_manual_abort) {
 				s.manual_abort = false
-				const status_payload = await getSessionStatusPayload({ session: s })
-
-				session_status_emitter.emit('change', {
-					[s.id]: status_payload
+				await emitChange({
+					session: s.session,
+					running_since: s.running_since,
+					running_done: s.session.running_done ?? null
 				})
 
 				return
@@ -186,10 +184,10 @@ export default async (s: Index, message: Message) => {
 			}
 
 			s.manual_abort = false
-			const status_payload = await getSessionStatusPayload({ session: s })
-
-			session_status_emitter.emit('change', {
-				[s.id]: status_payload
+			await emitChange({
+				session: s.session,
+				running_since: s.running_since,
+				running_done: s.session.running_done ?? null
 			})
 		}
 	})
@@ -260,13 +258,10 @@ export default async (s: Index, message: Message) => {
 
 			if (!SessionEventStore.listenerCount(`${s.id}/change`)) {
 				const session = await s.updateSession({ unread: true })
-				const status_payload = await getSessionStatusPayload({
+				await emitChange({
 					session,
-					running_since: s.running_since
-				})
-
-				session_status_emitter.emit('change', {
-					[s.id]: status_payload
+					running_since: s.running_since,
+					running_done: session.running_done ?? null
 				})
 			}
 

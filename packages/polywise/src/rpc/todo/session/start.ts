@@ -9,7 +9,7 @@ import {
 	syncTodoSessionStatusByTodoId
 } from '@core/db/services'
 import { addProjectSession } from '@core/db/services/externals/project_session'
-import { submit } from '@core/fst/utils'
+import { emitChange, submit } from '@core/fst/utils'
 import { p } from '@core/utils'
 import { eq } from 'drizzle-orm'
 import { object, string } from 'zod'
@@ -70,6 +70,12 @@ export default p.input(input_type).mutation(async ({ input }) => {
 			todo_id: input.todo_id,
 			from_status_list: ['processing'],
 			to_status: 'error'
+		})
+
+		await emitChange({
+			session: session_item,
+			running_since: session_item.running_since ?? null,
+			running_done: session_item.running_done ?? null
 		})
 
 		throw error

@@ -109,8 +109,9 @@ This document provides an overview of the packages/polywise module structure and
 					}
 				},
 				"utils": {
-					"desc": "fst execution helpers for permission checks, bash sandbox orchestration, response shaping, and shell safety",
+					"desc": "fst execution helpers for permission checks, bash sandbox orchestration, response shaping, shell safety, and unified session change fanout via emitChange so single-session status pushes and header count pushes stay in sync",
 					"role": "Folder",
+					"emitChange.ts": "Shared session change helper that emits watchSessionStatus payloads and session count refresh signals together",
 					"getBashTools": "Sandbox-backed bash tool builder with command risk matching, audit review, and child_process proxy execution for flagged commands"
 				},
 				"tools": {
@@ -118,7 +119,7 @@ This document provides an overview of the packages/polywise module structure and
 					"role": "Folder",
 					"cron.ts": "Create/list/read/update/remove cron jobs backed by app.app_path/cron.json with incremental runtime reload and physical directory removal",
 					"meta": "Manage global custom tool routing, rebuild minimal custom_tools_map metadata with name and description only, resolve per-tool readme.md and index.mjs paths from tools_dir + name at runtime, expose fuzzy search/read/execute/create/remove actions, return input_schema only from read/search by dynamically loading each tool module, and lazily execute per-tool index.mjs modules only through meta_tool bridge with z.fromJSONSchema-based input validation",
-					"title.ts": "Internal tool that generates and updates session titles while protecting manually edited titles; title/running/unread status changes emit through rpc/session/watchSessionStatus for realtime menu sync",
+					"title.ts": "Internal tool that generates and updates session titles while protecting manually edited titles; title changes now flow through fst/utils/emitChange so realtime menu sync and header status counts update together",
 					"memory.ts": "Read-only memory search tool for main agent; search episodic memories by query with scope filtering",
 					"message.ts": "Conversation history tool supporting total count, context count, previous message reads, and database content search with required object-based inclusive date range schema for Gemini-compatible tool calling",
 					"plan.ts": "Manage session_dir/plan.md with save/get/clear actions; stores concise plan metadata, task breakdowns, mermaid execution flow, and delivery criteria",

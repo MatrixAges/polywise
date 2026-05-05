@@ -1,8 +1,7 @@
-import { session_status_emitter } from '@core/rpc/session/watchSessionStatus'
 import { tool } from 'ai'
 import { object, string } from 'zod'
 
-import getSessionStatusPayload from '../../rpc/session/getSessionStatusPayload'
+import { emitChange } from '../utils'
 
 import type Session from '../session'
 
@@ -33,10 +32,10 @@ export const updateReport = async (s: Session, report: string) => {
 		return { updated: false, report: s.session.report, reason: 'session_not_found' }
 	}
 
-	const status_payload = await getSessionStatusPayload({ session, running_since: s.running_since })
-
-	session_status_emitter.emit('change', {
-		[s.id]: status_payload
+	await emitChange({
+		session,
+		running_since: s.running_since,
+		running_done: session.running_done ?? null
 	})
 
 	s.sync()
