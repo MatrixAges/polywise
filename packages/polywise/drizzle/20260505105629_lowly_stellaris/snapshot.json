@@ -1,9 +1,9 @@
 {
   "version": "7",
   "dialect": "sqlite",
-  "id": "6b78ba90-48ee-4d27-befc-6c967879e1e4",
+  "id": "7da90d94-e6ae-4277-931b-04ba0fe7e0fa",
   "prevIds": [
-    "e5336810-2971-445c-9d99-029f131ec7e3"
+    "00000000-0000-0000-0000-000000000000"
   ],
   "ddl": [
     {
@@ -699,6 +699,16 @@
       "autoincrement": false,
       "default": null,
       "generated": null,
+      "name": "generate_at",
+      "entityType": "columns",
+      "table": "link"
+    },
+    {
+      "type": "integer",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
       "name": "created_at",
       "entityType": "columns",
       "table": "link"
@@ -1034,6 +1044,16 @@
       "table": "session"
     },
     {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "report",
+      "entityType": "columns",
+      "table": "session"
+    },
+    {
       "type": "integer",
       "notNull": true,
       "autoincrement": false,
@@ -1050,6 +1070,16 @@
       "default": null,
       "generated": null,
       "name": "running_since",
+      "entityType": "columns",
+      "table": "session"
+    },
+    {
+      "type": "integer",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "running_done",
       "entityType": "columns",
       "table": "session"
     },
@@ -2727,6 +2757,20 @@
       "where": null,
       "origin": "manual",
       "name": "link_status_idx",
+      "entityType": "indexes",
+      "table": "link"
+    },
+    {
+      "columns": [
+        {
+          "value": "generate_at",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "link_generate_at_idx",
       "entityType": "indexes",
       "table": "link"
     },

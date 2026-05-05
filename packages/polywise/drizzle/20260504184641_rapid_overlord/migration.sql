@@ -1,1 +1,0 @@
-ALTER TABLE `session` ADD `running_done` integer;
