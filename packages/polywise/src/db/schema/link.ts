@@ -1,4 +1,4 @@
-import { index, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
+import { blob, index, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 import { getId } from 'stk/utils'
 
 export default sqliteTable(
@@ -6,6 +6,8 @@ export default sqliteTable(
 	{
 		id: text('id').primaryKey().$defaultFn(getId),
 		url: text('url').notNull(),
+		title: text('title').notNull(),
+		favicon: blob('favicon'),
 		status: text('status', { enum: ['none', 'pending', 'success', 'fail', 'timeout', 'ignore'] })
 			.default('none')
 			.notNull(),

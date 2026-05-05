@@ -76,6 +76,8 @@ CREATE TABLE `edge` (
 CREATE TABLE `link` (
 	`id` text PRIMARY KEY,
 	`url` text NOT NULL,
+	`title` text NOT NULL,
+	`favicon` blob,
 	`status` text DEFAULT 'none' NOT NULL,
 	`generate_at` integer,
 	`created_at` integer,

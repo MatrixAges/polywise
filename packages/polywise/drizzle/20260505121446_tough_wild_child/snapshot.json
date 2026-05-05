@@ -1,7 +1,7 @@
 {
   "version": "7",
   "dialect": "sqlite",
-  "id": "7da90d94-e6ae-4277-931b-04ba0fe7e0fa",
+  "id": "4fb5f4d0-d3db-40dc-9b4c-8b81581f1b78",
   "prevIds": [
     "00000000-0000-0000-0000-000000000000"
   ],
@@ -680,6 +680,26 @@
       "default": null,
       "generated": null,
       "name": "url",
+      "entityType": "columns",
+      "table": "link"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "title",
+      "entityType": "columns",
+      "table": "link"
+    },
+    {
+      "type": "blob",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "favicon",
       "entityType": "columns",
       "table": "link"
     },
