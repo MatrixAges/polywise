@@ -1,6 +1,9 @@
 import events from 'events'
 import path from 'path'
 import { app } from '@core/consts'
+import { todo_session } from '@core/db/schema'
+import { getTodoSession } from '@core/db/services'
+import { eq } from 'drizzle-orm'
 
 import { loadMcpTools } from '../mcp'
 import { loadCustomToolsMap } from '../tools/meta'
@@ -118,6 +121,10 @@ export default class Index {
 
 	get tools_dir() {
 		return path.resolve(app.app_path, 'tools')
+	}
+
+	get has_todo_session_link() {
+		return getTodoSession(eq(todo_session.session_id, this.id)).then(Boolean)
 	}
 
 	async init(args: InitArgs) {

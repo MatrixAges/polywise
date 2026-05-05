@@ -42,6 +42,7 @@ import {
 } from '../../tools'
 import { getTitleFocus, submit } from '../../utils'
 
+import type { ToolSet } from 'ai'
 import type { Message, MessageMetadata } from '../../types'
 import type Index from '../index'
 
@@ -79,6 +80,7 @@ export default async (s: Index, message: Message) => {
 	const bash_tool = await createBashTool(s)
 	const mcp_tools = await loadMcpTools(s)
 	const system_tools_prompt = await getSystemTools()
+	const has_todo_session_link = await s.has_todo_session_link
 
 	const custom_tools_prompt = getCustomToolsPrompt(s.custom_tools_map)
 	const skill_prompt = getSkillPrompt(s.skill_map)
@@ -96,42 +98,47 @@ export default async (s: Index, message: Message) => {
 		custom_tools_prompt,
 		skill_prompt,
 		`Current Session Title: ${s.session.title}`,
-		`Current Session Report: ${s.session.report ?? ''}`,
+		has_todo_session_link ? `Current Session Report: ${s.session.report ?? ''}` : '',
 		getContextPrompt(s.context),
 		mode_prompt
 	]
 		.filter(Boolean)
 		.join('\n\n')
 
+	const tools = {
+		...s.model.tools,
+		...mcp_tools,
+		context_tool: createContextTool(s),
+		message_tool: createMessageTool(s),
+		plan_tool: createPlanTool(s),
+		question_tool: createQuestionTool(s.id),
+		glob_tool: createGlobTool(s),
+		search_file_tool: createSearchFileTool(s, bash_tool.env),
+		title_tool: createTitleTool(s),
+		system_tool: createSystemTool(s),
+		bash_tool: bash_tool.bash,
+		read_file_tool: bash_tool.readFile,
+		write_file_tool: bash_tool.writeFile,
+		edit_file_tool: createEditFileTool(s),
+		skill_tool: createSkillTool(s),
+		memory_tool: createMemoryTool(s),
+		wiki_tool: createWikiTool(s),
+		web_search_tool: createWebSearchTool(),
+		web_fetch_tool: createWebFetchTool(),
+		cron_tool: createCronTool(s),
+		error_collect_tool: createErrorCollectTool(),
+		meta_tool: createMetaTool(s)
+	} as ToolSet
+
+	if (has_todo_session_link) {
+		tools.report_tool = createReportTool(s)
+	}
+
 	const res = streamText({
 		model: s.model.model,
 		system: system_prompt,
 		messages,
-		tools: {
-			...s.model.tools,
-			...mcp_tools,
-			context_tool: createContextTool(s),
-			message_tool: createMessageTool(s),
-			plan_tool: createPlanTool(s),
-			question_tool: createQuestionTool(s.id),
-			report_tool: createReportTool(s),
-			glob_tool: createGlobTool(s),
-			search_file_tool: createSearchFileTool(s, bash_tool.env),
-			title_tool: createTitleTool(s),
-			system_tool: createSystemTool(s),
-			bash_tool: bash_tool.bash,
-			read_file_tool: bash_tool.readFile,
-			write_file_tool: bash_tool.writeFile,
-			edit_file_tool: createEditFileTool(s),
-			skill_tool: createSkillTool(s),
-			memory_tool: createMemoryTool(s),
-			wiki_tool: createWikiTool(s),
-			web_search_tool: createWebSearchTool(),
-			web_fetch_tool: createWebFetchTool(),
-			cron_tool: createCronTool(s),
-			error_collect_tool: createErrorCollectTool(),
-			meta_tool: createMetaTool(s)
-		},
+		tools,
 		abortSignal: s.abort_controller.signal,
 		providerOptions: s.model.provider_options,
 		stopWhen: stepCountIs(300),
