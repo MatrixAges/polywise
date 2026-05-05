@@ -1,4 +1,5 @@
 import { config } from '@core/config'
+import fst_report_tool_prompt from '@core/consts/prompts/fst_report_tool_prompt.md'
 import fst_system_prompt from '@core/consts/prompts/fst_system_prompt.md'
 import getContextPrompt from '@core/consts/prompts/getContextPrompt'
 import plan_mode_prompt from '@core/consts/prompts/plan_mode_prompt.md'
@@ -94,6 +95,7 @@ export default async (s: Index, message: Message) => {
 
 	const system_prompt = [
 		fst_system_prompt,
+		has_todo_session_link ? fst_report_tool_prompt : '',
 		system_tools_prompt,
 		custom_tools_prompt,
 		skill_prompt,

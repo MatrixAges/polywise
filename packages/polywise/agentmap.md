@@ -293,7 +293,7 @@ This document provides an overview of the packages/polywise module structure and
 					"role": "Constant"
 				},
 				"prompts": {
-					"desc": "Centralized prompt builders for FST agents, tools, and system. All getXPrompt functions are pure functions receiving preprocessed plain data (no Session dependency).",
+					"desc": "Centralized prompt builders for FST agents, tools, and system. All getXPrompt functions are pure functions receiving preprocessed plain data (no Session dependency). report_tool instructions are split out of the base FST system prompt into a dedicated conditional prompt fragment so only todo_session-linked sessions advertise that tool.",
 					"role": "Folder",
 					"getAuditPrompt.ts": "Core audit/permission evaluation prompt template (tool, action, path, context)",
 					"getChaosPrompt.ts": "Chaos detection prompt from recent assistant outputs",
