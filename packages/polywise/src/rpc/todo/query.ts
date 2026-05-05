@@ -4,7 +4,7 @@ import { p } from '@core/utils'
 import { and, asc, eq, isNull, ne, sql } from 'drizzle-orm'
 import { object, string } from 'zod'
 
-import { project, project_todo, session, todo, todo_session } from '../../db/schema'
+import { project, project_todo, session, session_todo, todo, todo_session } from '../../db/schema'
 
 import type { Session } from '@core/db'
 
@@ -55,10 +55,11 @@ const getInboxTodoWithSession = async () => {
 	return env.db
 		.select({ todo, session })
 		.from(todo)
+		.leftJoin(session_todo, sql`${todo.id} = ${session_todo.todo_id}`)
 		.leftJoin(project_todo, sql`${todo.id} = ${project_todo.todo_id}`)
 		.leftJoin(todo_session, sql`${todo.id} = ${todo_session.todo_id}`)
 		.leftJoin(session, eq(todo_session.session_id, session.id))
-		.where(and(isNull(project_todo.todo_id), ne(todo.status, 'archive')))
+		.where(and(isNull(session_todo.todo_id), isNull(project_todo.todo_id), ne(todo.status, 'archive')))
 		.orderBy(getTodoStatusOrder(todo.status), asc(todo.order), asc(todo.created_at))
 }
 
