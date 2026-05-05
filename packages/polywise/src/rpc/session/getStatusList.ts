@@ -2,11 +2,13 @@ import { blocked_session_id } from '@core/consts'
 import { session, todo, todo_session } from '@core/db/schema'
 import { getSessions } from '@core/db/services'
 import { and, desc, eq, inArray } from 'drizzle-orm'
+import { enum as Enum, object } from 'zod'
 
 import { env } from '../../env'
 import { p } from '../../utils/trpc'
 
 import type { Session } from '@core/db'
+import type { SessionStatusType } from './types'
 
 export interface SessionStatusItem extends Session {
 	status: string | null
@@ -50,26 +52,44 @@ const sortSessionList = (session_list: Array<SessionStatusItem>) => {
 	return [...session_list].sort((a, b) => (b.updated_at?.getTime() ?? 0) - (a.updated_at?.getTime() ?? 0))
 }
 
-export default p.query(async () => {
+const input_type = object({ status: Enum(['running', 'unread', 'error']) })
+
+const getRunningList = async () => {
 	const running_list = await getSessions({
 		where: and(eq(session.is_runing, true), eq(session.is_im, false)),
-		orderBy: desc(session.updated_at)
-	})
-	const unread_list = await getSessions({
-		where: and(eq(session.unread, true), eq(session.is_im, false)),
 		orderBy: desc(session.updated_at)
 	})
 	const running_map = await getSessionMap(
 		running_list.map(item => item.id).filter(session_id => session_id !== blocked_session_id)
 	)
+
+	return sortSessionList(Array.from(running_map.values()))
+}
+
+const getUnreadList = async () => {
+	const unread_list = await getSessions({
+		where: and(eq(session.unread, true), eq(session.is_im, false)),
+		orderBy: desc(session.updated_at)
+	})
 	const unread_map = await getSessionMap(
 		unread_list.map(item => item.id).filter(session_id => session_id !== blocked_session_id)
 	)
-	const error_map = await getErrorSessionMap()
 
-	return {
-		running: sortSessionList(Array.from(running_map.values())),
-		unread: sortSessionList(Array.from(unread_map.values())),
-		error: sortSessionList(Array.from(error_map.values()))
+	return sortSessionList(Array.from(unread_map.values()))
+}
+
+const getStatusList = async (status: SessionStatusType) => {
+	if (status === 'running') {
+		return getRunningList()
 	}
+
+	if (status === 'unread') {
+		return getUnreadList()
+	}
+
+	return sortSessionList(Array.from((await getErrorSessionMap()).values()))
+}
+
+export default p.input(input_type).query(async ({ input }) => {
+	return getStatusList(input.status)
 })

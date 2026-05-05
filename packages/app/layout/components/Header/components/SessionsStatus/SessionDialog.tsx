@@ -1,10 +1,8 @@
-import { useEffect } from 'react'
 import { useMemoizedFn } from 'ahooks'
 import { ArrowLeft, CircleAlert, Grip } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { Dialog, Session, Tabs } from '@/components'
-import { rpc } from '@/utils'
 
 import type Model from './model'
 
@@ -20,20 +18,10 @@ const tab_items = [
 
 const Index = (props: IProps) => {
 	const { x } = props
-	const current_list = x.data[x.active_status]
+	const current_list = x.list
 
 	const setOpen = useMemoizedFn((open: boolean) => x.setOpen(open))
-	const onClickTab = useMemoizedFn((key: string) => x.setActiveStatus(key as keyof Model['data']))
-
-	useEffect(() => {
-		const deinit = rpc.session.watchSessionStatus.subscribe(undefined, {
-			onData: async res => x.updateByStatus(res)
-		})
-
-		return () => {
-			deinit.unsubscribe()
-		}
-	}, [x])
+	const onClickTab = useMemoizedFn((key: string) => void x.setActiveStatus(key as Model['active_status']))
 
 	return (
 		<Dialog

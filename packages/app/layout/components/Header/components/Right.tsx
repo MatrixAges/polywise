@@ -18,7 +18,16 @@ const Index = (props: IPropsRight) => {
 				gap-2
 			'
 		>
-			<SessionsStatus disconnected={disconnected}></SessionsStatus>
+			<SessionsStatus></SessionsStatus>
+			<div className='icon_button w-auto! px-2'>
+				<span
+					className={$cx(
+						'h-1.5 w-1.5 rounded-full',
+						disconnected ? 'bg-red-400' : 'bg-green-500/72'
+					)}
+				></span>
+				<span>Status</span>
+			</div>
 			<NavLink to='/setting'>
 				{({ isActive }) => (
 					<button className={$cx(`icon_button`, isActive && 'active')}>

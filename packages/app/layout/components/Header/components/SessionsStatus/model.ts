@@ -1,86 +1,71 @@
 import { makeAutoObservable } from 'mobx'
 import { injectable } from 'tsyringe'
 
+import { Util } from '@/models/common'
 import { rpc } from '@/utils'
 
 import type { RPCOutput } from '@/types'
-import type { SessionStatusPayload } from '@core/rpc/session/watchSessionStatus'
+import type { SessionStatusType } from '@core/rpc/session/types'
 
-type StatusType = keyof RPCOutput['session']['getStatusList']
-type SessionStatusData = RPCOutput['session']['getStatusList']
+type SessionStatusCount = RPCOutput['session']['getSessionStatus']
+type SessionStatusList = RPCOutput['session']['getStatusList']
 
 @injectable()
 export default class Index {
+	count = {} as SessionStatusCount
 	open = false
-	active_status = 'running' as StatusType
+	current_status = 'running' as SessionStatusType
+	list = [] as SessionStatusList
 	selected_session_id = ''
-	data = {
-		running: [],
-		unread: [],
-		error: []
-	} as SessionStatusData
 
-	constructor() {
-		makeAutoObservable(this, {}, { autoBind: true })
+	constructor(public util: Util) {
+		makeAutoObservable(this, { util: false }, { autoBind: true })
 	}
 
 	async init() {
-		await this.refresh()
-
-		this.syncSelectedSession()
+		this.getSessionStatus()
+		this.getStatusList()
+		this.watchSessionStatus()
 	}
 
-	async refresh() {
-		this.data = await rpc.session.getStatusList.query()
+	toggleOpen(v?: boolean) {
+		this.open = v ?? !this.open
 
-		this.syncSelectedSession()
+		if (this.open) this.getStatusList()
 	}
 
-	setOpen(open: boolean) {
-		this.open = open
-	}
-
-	setActiveStatus(active_status: StatusType) {
-		this.active_status = active_status
-
-		this.syncSelectedSession()
+	setCurrentStatus(v: Index['current_status']) {
+		this.current_status = v
 	}
 
 	setSelectedSession(id: string) {
 		this.selected_session_id = id
 	}
 
-	async updateByStatus(status_map: SessionStatusPayload) {
-		void status_map
-
-		await this.refresh()
+	async getSessionStatus() {
+		this.count = await rpc.session.getSessionStatus.query()
 	}
 
-	private syncSelectedSession() {
-		const current_list = this.data[this.active_status]
+	async getStatusList() {
+		const next_list = await rpc.session.getStatusList.query({ status: this.current_status })
 
-		if (current_list.find(item => item.id === this.selected_session_id)) {
-			return
-		}
+		this.list = next_list
+	}
 
-		const fallback_session = this.data.running[0] ?? this.data.unread[0] ?? this.data.error[0] ?? null
+	watchSessionStatus() {
+		const deinit = rpc.session.watchSessionStatus.subscribe(undefined, {
+			onData: async res => {
+				this.getSessionStatus()
+				console.log(res)
 
-		if (current_list[0]) {
-			this.selected_session_id = current_list[0].id
-
-			return
-		}
-
-		this.selected_session_id = fallback_session?.id ?? ''
-
-		if (!current_list.length) {
-			if (this.data.running.length) {
-				this.active_status = 'running'
-			} else if (this.data.unread.length) {
-				this.active_status = 'unread'
-			} else if (this.data.error.length) {
-				this.active_status = 'error'
+				if (this.open) this.getStatusList()
 			}
-		}
+		})
+
+		this.util.acts.push(deinit.unsubscribe)
+	}
+
+	deinit() {
+		this.util.deinit()
 	}
 }

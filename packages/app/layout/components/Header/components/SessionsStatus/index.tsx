@@ -1,56 +1,80 @@
-import { useEffect, useState } from 'react'
-import { useMemoizedFn } from 'ahooks'
-import { CircleAlert } from 'lucide-react'
+import { Fragment, useLayoutEffect, useState } from 'react'
+import { CircleAlert, Loader, MessageSquareDot } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 import { container } from 'tsyringe'
 
 import Model from './model'
 import SessionDialog from './SessionDialog'
 
-interface IProps {
-	disconnected: boolean
-}
-
-const Index = (props: IProps) => {
-	const { disconnected } = props
+const Index = () => {
 	const [x] = useState(() => container.resolve(Model))
+	const { unread = 0, running = 0, error = 0 } = x.count
 
-	const onOpen = useMemoizedFn(() => x.setOpen(true))
-
-	useEffect(() => {
+	useLayoutEffect(() => {
 		x.init()
+
+		return () => x.deinit()
 	}, [x])
 
+	if (!unread && !running && !error) return null
+
 	return (
-		<>
-			<div className='icon_button w-auto! px-2' onClick={onOpen}>
-				<span
-					className={$cx(
-						'h-1.5 w-1.5 rounded-full',
-						disconnected ? 'bg-red-400' : 'bg-green-500/72'
-					)}
-				></span>
-				<span>Status</span>
-				<div
-					className='
-						flex
-						items-center
-						gap-1.5
-						text-xs text-std-400
-					'
-				>
-					{!!x.data.running.length && <span>{x.data.running.length}</span>}
-					{!!x.data.unread.length && <span>{x.data.unread.length}</span>}
-					{!!x.data.error.length && (
-						<span className='flex items-center gap-1 text-red-400'>
-							<CircleAlert className='size-3' />
-							{x.data.error.length}
-						</span>
-					)}
-				</div>
+		<Fragment>
+			<div
+				className='
+					flex
+					items-center
+					gap-1.5
+					text-xs text-std-400 font-mono leading-0
+				'
+				onClick={x.toggleOpen}
+			>
+				{unread > 0 && (
+					<div
+						className='
+							flex
+							items-center
+							gap-1
+							px-1 py-0.5
+							rounded-full
+							bg-mauve-400/20
+						'
+					>
+						<MessageSquareDot className='size-3'></MessageSquareDot>
+						<span>{unread}</span>
+					</div>
+				)}
+				{running > 0 && (
+					<div
+						className='
+							flex
+							items-center
+							gap-1
+							px-1 py-0.5
+							rounded-full
+						'
+					>
+						<Loader className='size-3'></Loader>
+						<span>{running}</span>
+					</div>
+				)}
+				{error > 0 && (
+					<div
+						className='
+							flex
+							items-center
+							gap-1
+							px-1 py-0.5
+							rounded-full
+						'
+					>
+						<CircleAlert className='size-3'></CircleAlert>
+						<span>{error}</span>
+					</div>
+				)}
 			</div>
 			<SessionDialog x={x}></SessionDialog>
-		</>
+		</Fragment>
 	)
 }
 
