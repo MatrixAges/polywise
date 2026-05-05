@@ -63,7 +63,7 @@ const Index = (props: IPropsMenu) => {
 	const ref_action = useDelegate(v => {
 		setCurrentTab(v)
 
-		if (v === 'group') {
+		if (v === 'groups') {
 			createGroup()
 		} else {
 			createSession()
