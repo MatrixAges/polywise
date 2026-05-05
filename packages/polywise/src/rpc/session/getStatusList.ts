@@ -1,7 +1,7 @@
 import { blocked_session_id } from '@core/consts'
 import { session, todo, todo_session } from '@core/db/schema'
 import { getSessions } from '@core/db/services'
-import { and, desc, eq, inArray } from 'drizzle-orm'
+import { and, desc, eq, inArray, isNull, or } from 'drizzle-orm'
 import { enum as Enum, object } from 'zod'
 
 import { env } from '../../env'
@@ -9,6 +9,9 @@ import { p } from '../../utils/trpc'
 
 import type { Session } from '@core/db'
 import type { SessionStatusType } from './types'
+
+const is_non_cron_session = or(isNull(session.is_cron), eq(session.is_cron, false))
+const is_non_im_session = or(isNull(session.is_im), eq(session.is_im, false))
 
 export interface SessionStatusItem extends Session {
 	status: string | null
@@ -32,7 +35,6 @@ const getErrorSessionMap = async () => {
 		.from(todo_session)
 		.innerJoin(todo, and(eq(todo.id, todo_session.todo_id), eq(todo.status, 'error')))
 		.innerJoin(session, eq(session.id, todo_session.session_id))
-		.where(eq(session.is_runing, false))
 		.orderBy(desc(session.updated_at))
 
 	return new Map(
@@ -56,7 +58,7 @@ const input_type = object({ status: Enum(['running', 'unread', 'error']) })
 
 const getRunningList = async () => {
 	const running_list = await getSessions({
-		where: and(eq(session.is_runing, true), eq(session.is_im, false)),
+		where: and(eq(session.is_runing, true), is_non_cron_session),
 		orderBy: desc(session.updated_at)
 	})
 	const running_map = await getSessionMap(
@@ -68,7 +70,7 @@ const getRunningList = async () => {
 
 const getUnreadList = async () => {
 	const unread_list = await getSessions({
-		where: and(eq(session.unread, true), eq(session.is_im, false)),
+		where: and(eq(session.unread, true), is_non_cron_session, is_non_im_session),
 		orderBy: desc(session.updated_at)
 	})
 	const unread_map = await getSessionMap(

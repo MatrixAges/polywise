@@ -50,7 +50,6 @@ export default class Index {
 	watchSessionCount() {
 		const deinit = rpc.session.getSessionStatus.subscribe(undefined, {
 			onData: res => {
-				console.log(res)
 				this.count = res
 			}
 		})
