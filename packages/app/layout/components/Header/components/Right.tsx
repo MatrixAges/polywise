@@ -1,6 +1,8 @@
 import { PanelRight, SlidersHorizontal } from 'lucide-react'
 import { NavLink } from 'react-router'
 
+import SessionsStatus from './SessionsStatus'
+
 import type { IPropsRight } from '../types'
 
 const Index = (props: IPropsRight) => {
@@ -16,21 +18,7 @@ const Index = (props: IPropsRight) => {
 				gap-2
 			'
 		>
-			<div
-				className='
-					w-auto!
-					px-2
-					icon_button
-				'
-			>
-				<span
-					className={$cx(
-						'h-1.5 w-1.5 rounded-full',
-						disconnected ? 'bg-red-400' : 'bg-green-500/72'
-					)}
-				></span>
-				<span>Status</span>
-			</div>
+			<SessionsStatus disconnected={disconnected}></SessionsStatus>
 			<NavLink to='/setting'>
 				{({ isActive }) => (
 					<button className={$cx(`icon_button`, isActive && 'active')}>

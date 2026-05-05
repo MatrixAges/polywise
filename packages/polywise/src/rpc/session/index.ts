@@ -5,6 +5,7 @@ import createGroup from './createGroup'
 import { answer, archive, clear, destroy, load, permission, setConfig, stop, unarchive } from './events'
 import getList from './getList'
 import getMoreList from './getMoreList'
+import getStatusList from './getStatusList'
 import init from './init'
 import moveOutGroup from './moveOutGroup'
 import moveToGroup from './moveToGroup'
@@ -23,6 +24,7 @@ export default r({
 	create,
 	getList,
 	getMoreList,
+	getStatusList,
 	remove,
 	rename,
 	pin,

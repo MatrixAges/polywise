@@ -80,6 +80,22 @@ This document provides an overview of the packages/app module structure and arch
 					"index.tsx": {
 						"desc": "Application header layout with navigation; left area includes workspace selector and a quick-create session trigger that navigates to /session with query intent",
 						"role": "Layout"
+					},
+					"components": {
+						"SessionsStatus": {
+							"index.tsx": {
+								"desc": "Header status trigger that loads aggregated running, unread, and todo-error sessions and opens the status dialog",
+								"role": "Component"
+							},
+							"model.ts": {
+								"desc": "Local header sessions-status model that keeps only dialog open state, active status tab, selected session id, and aggregated session lists synchronized with rpc.session.getStatusList plus watchSessionStatus",
+								"role": "Model"
+							},
+							"SessionDialog.tsx": {
+								"desc": "Sessions status dialog with left status-tab session list and right shared Session page view for the selected session",
+								"role": "Component"
+							}
+						}
 					}
 				},
 				"index.ts": { "desc": "Layout components exports", "role": "Index" }
