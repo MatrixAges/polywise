@@ -1,4 +1,4 @@
-import { agent, article, chunk, edge, link, message, node, notification, project, session, todo } from './schema'
+import { agent, article, chunk, edge, link, message, node, notification, project, session, skill, todo } from './schema'
 
 import type { InferInsertModel, InferSelectModel } from 'drizzle-orm'
 
@@ -6,6 +6,8 @@ export type Session = InferSelectModel<typeof session>
 export type SessionInsert = InferInsertModel<typeof session>
 export type Agent = InferSelectModel<typeof agent>
 export type AgentInsert = InferInsertModel<typeof agent>
+export type Skill = InferSelectModel<typeof skill>
+export type SkillInsert = InferInsertModel<typeof skill>
 export type Article = InferSelectModel<typeof article>
 export type ArticleInsert = InferInsertModel<typeof article>
 export type Chunk = InferSelectModel<typeof chunk>

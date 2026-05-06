@@ -10,21 +10,32 @@ import { rpc } from '@/utils'
 import type { RPCInput } from '@/types'
 import type { DefaultModel } from '@core/types'
 import type {
+	AgentArticleItem,
 	AgentAvatarConfig,
 	AgentItem,
 	AgentSessionItem,
+	AgentSkillItem,
 	AgentTab,
+	ArticleForType,
 	AvatarMode,
 	IEditableFieldArgs,
+	ISkillOption,
 	IUpdateAgentArgs
 } from './types'
 
 @injectable()
 export default class Index {
 	agents = [] as Array<AgentItem>
+	skill_items = [] as Array<AgentSkillItem>
+	skill_options = [] as Array<ISkillOption>
 	selected_agent_id = ''
 	current_tab = 'sessions' as AgentTab
 	edit_field_key = '' as '' | 'name' | 'description' | AgentTab
+	article_items = [] as Array<AgentArticleItem>
+	article_for = 'memory' as ArticleForType
+	selected_article_id = ''
+	article_draft = ''
+	article_saving = false
 	session_items = [] as Array<AgentSessionItem>
 	selected_session_id = ''
 	session_page = 1
@@ -39,6 +50,14 @@ export default class Index {
 
 	get selected_agent() {
 		return this.agents.find(item => item.id === this.selected_agent_id) || null
+	}
+
+	get selected_skill_ids() {
+		return this.skill_items.map(item => item.id)
+	}
+
+	get selected_article() {
+		return this.article_items.find(item => item.id === this.selected_article_id) || null
 	}
 
 	constructor(public util: Util) {
@@ -65,11 +84,22 @@ export default class Index {
 
 	async refresh() {
 		const agent_items = await rpc.agent.query.query()
+		const skill_items = await rpc.skill.query.query()
 
 		this.agents = agent_items as Array<AgentItem>
+		this.skill_options = (skill_items as Array<AgentSkillItem>).map(item => ({
+			value: item.id,
+			label: item.name,
+			description: item.desc,
+			path: item.path
+		}))
 
 		if (!this.agents.length) {
 			this.selected_agent_id = ''
+			this.skill_items = []
+			this.article_items = []
+			this.selected_article_id = ''
+			this.article_draft = ''
 			this.session_items = []
 			this.selected_session_id = ''
 			this.session_page = 1
@@ -84,7 +114,38 @@ export default class Index {
 			this.selected_agent_id = this.agents[0].id
 		}
 
+		await this.refreshAgentRelated()
 		await this.refreshSessions()
+	}
+
+	async refreshAgentRelated() {
+		if (!this.selected_agent_id) {
+			this.skill_items = []
+			this.article_items = []
+			this.selected_article_id = ''
+			this.article_draft = ''
+
+			return
+		}
+
+		const [skill_items, article_items] = await Promise.all([
+			rpc.agent.getSkills.query({ agent_id: this.selected_agent_id }),
+			rpc.agent.getArticles.query({
+				agent_id: this.selected_agent_id,
+				for_type: this.article_for
+			})
+		])
+
+		this.skill_items = skill_items as Array<AgentSkillItem>
+		this.article_items = article_items as Array<AgentArticleItem>
+
+		const has_selected_article = this.article_items.some(item => item.id === this.selected_article_id)
+
+		if (!has_selected_article) {
+			this.selected_article_id = this.article_items[0]?.id || ''
+		}
+
+		this.article_draft = this.selected_article?.content || ''
 	}
 
 	async refreshSessions() {
@@ -143,12 +204,25 @@ export default class Index {
 
 		this.selected_agent_id = agent_id
 		this.edit_field_key = ''
+		void this.refreshAgentRelated()
 		void this.refreshSessions()
 	}
 
 	setCurrentTab(tab: AgentTab) {
 		this.current_tab = tab
 		this.edit_field_key = ''
+	}
+
+	setArticleFor(for_type: ArticleForType) {
+		if (this.article_for === for_type) {
+			return
+		}
+
+		this.article_for = for_type
+		this.selected_article_id = ''
+		this.article_draft = ''
+
+		void this.refreshAgentRelated()
 	}
 
 	startEditField(key: '' | 'name' | 'description' | AgentTab) {
@@ -161,6 +235,15 @@ export default class Index {
 
 	setSelectedSession(session_id: string) {
 		this.selected_session_id = session_id
+	}
+
+	setSelectedArticle(article_id: string) {
+		this.selected_article_id = article_id
+		this.article_draft = this.article_items.find(item => item.id === article_id)?.content || ''
+	}
+
+	setArticleDraft(value: string) {
+		this.article_draft = value
 	}
 
 	async createAgent() {
@@ -240,6 +323,61 @@ export default class Index {
 		if (!this.selected_agent_id) return
 
 		await this.updateAgent({ id: this.selected_agent_id, model })
+	}
+
+	async setSkills(skill_ids: Array<string>) {
+		if (!this.selected_agent_id) return
+
+		await rpc.agent.setSkills.mutate({
+			agent_id: this.selected_agent_id,
+			skill_ids
+		})
+
+		const next_skill_items = await rpc.agent.getSkills.query({ agent_id: this.selected_agent_id })
+
+		this.skill_items = next_skill_items as Array<AgentSkillItem>
+	}
+
+	async createArticle() {
+		if (!this.selected_agent_id) return
+
+		const article_id = await rpc.agent.createArticle.mutate({
+			agent_id: this.selected_agent_id,
+			for: this.article_for,
+			content: 'New article'
+		})
+
+		await this.refreshAgentRelated()
+
+		if (article_id) {
+			this.selected_article_id = article_id
+			this.article_draft = this.article_items.find(item => item.id === article_id)?.content || 'New article'
+		}
+	}
+
+	async saveArticle() {
+		if (!this.selected_article_id) return
+
+		this.article_saving = true
+
+		try {
+			await rpc.agent.updateArticle.mutate({
+				article_id: this.selected_article_id,
+				for: this.article_for,
+				content: this.article_draft.trim() || 'New article'
+			})
+
+			await this.refreshAgentRelated()
+		} finally {
+			this.article_saving = false
+		}
+	}
+
+	async removeArticle(article_id: string) {
+		if (!this.selected_agent_id) return
+
+		await rpc.agent.removeArticle.mutate({ agent_id: this.selected_agent_id, article_id })
+		await this.refreshAgentRelated()
 	}
 
 	openAvatarDialog() {

@@ -11,6 +11,7 @@ import save from './save'
 import search from './search'
 import session from './session'
 import setActive from './setActive'
+import skill from './skill'
 import test from './test'
 import todo from './todo'
 import update from './update'
@@ -21,6 +22,7 @@ export const router = r({
 	agent,
 	file,
 	project,
+	skill,
 	todo,
 	session,
 	provider,

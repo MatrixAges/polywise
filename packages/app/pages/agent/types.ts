@@ -6,8 +6,19 @@ import type { AvatarConfig as NotionAvatarConfig } from 'react-notion-avatar'
 export type AgentItem = RPCOutput['agent']['query'][number]
 export type AgentSessionResponse = RPCOutput['agent']['getSessions']
 export type AgentSessionItem = AgentSessionResponse['sessions'][number]
-export type AgentTab = 'sessions' | 'prompt' | 'soul' | 'identity' | 'memory'
+export type AgentSkillItem = RPCOutput['agent']['getSkills'][number]
+export type AgentArticleItem = RPCOutput['agent']['getArticles'][number]
+export type SkillItem = RPCOutput['skill']['query'][number]
+export type AgentTab = 'sessions' | 'prompt' | 'soul' | 'identity' | 'memory' | 'article'
+export type ArticleForType = 'linkcase' | 'wiki' | 'memory' | 'user'
 export type AvatarMode = 'upload' | 'nice' | 'notion'
+
+export interface ISkillOption {
+	value: string
+	label: string
+	description: string
+	path: string
+}
 
 export interface IAgentAvatarNice {
 	type: 'nice'

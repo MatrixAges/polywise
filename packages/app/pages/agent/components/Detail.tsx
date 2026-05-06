@@ -4,11 +4,13 @@ import { ModelSelect, TextTabs } from '@/components'
 
 import { useModel } from '../context'
 import AgentAvatar from './AgentAvatar'
+import ArticlesPanel from './ArticlesPanel'
 import AvatarDialog from './AvatarDialog'
 import EditableField from './EditableField'
 import SessionsPanel from './SessionsPanel'
+import SkillSelect from './SkillSelect'
 
-const tabs = ['sessions', 'prompt', 'soul', 'identity', 'memory'] as const
+const tabs = ['sessions', 'prompt', 'soul', 'identity', 'memory', 'article'] as const
 
 const Index = () => {
 	const {
@@ -106,6 +108,7 @@ const Index = () => {
 							<ModelSelect value={selected_agent.model} onChange={setModel}></ModelSelect>
 						</div>
 					</div>
+					<SkillSelect></SkillSelect>
 					<div className='border-border-light flex h-8 border-b'>
 						<TextTabs
 							items={[...tabs]}
@@ -116,6 +119,8 @@ const Index = () => {
 					<div className='min-h-[360px]'>
 						{current_tab === 'sessions' ? (
 							<SessionsPanel></SessionsPanel>
+						) : current_tab === 'article' ? (
+							<ArticlesPanel></ArticlesPanel>
 						) : edit_field_key === current_tab ? (
 							<EditableField
 								active
@@ -134,14 +139,14 @@ const Index = () => {
 						) : (
 							<div
 								className='
-										min-h-[240px]
-										p-3
-										rounded-xl
-										text-sm
-										whitespace-pre-wrap
-										border border-border-light
-										clickable
-									'
+											min-h-[240px]
+											p-3
+											rounded-xl
+											text-sm
+											whitespace-pre-wrap
+											border border-border-light
+											clickable
+										'
 								onClick={() => startEditField(current_tab)}
 							>
 								{tab_value || `Add ${current_tab}`}

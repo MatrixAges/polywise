@@ -143,7 +143,7 @@ This document provides an overview of the packages/app module structure and arch
 				},
 				"components": {
 					"index.ts": {
-						"desc": "Agent page local component exports",
+						"desc": "Agent page local component exports including detail subpanels for skills and agent-scoped articles",
 						"role": "Index"
 					},
 					"Menu.tsx": {
@@ -155,7 +155,15 @@ This document provides an overview of the packages/app module structure and arch
 						"role": "Component"
 					},
 					"Detail.tsx": {
-						"desc": "Right agent detail panel with profile editor, model selector, content tabs, and avatar dialog mount",
+						"desc": "Right agent detail panel with profile editor, model selector, multi-skill combobox, article tab, and avatar dialog mount",
+						"role": "Component"
+					},
+					"SkillSelect.tsx": {
+						"desc": "Agent skill multi-select combobox that shows selected skills as removable chips and persists the full linked skill id set",
+						"role": "Component"
+					},
+					"ArticlesPanel.tsx": {
+						"desc": "Agent article tab split view with left for-filtered article menu and right article editor backed by unified article save pipeline",
 						"role": "Component"
 					},
 					"AgentAvatar.tsx": {
@@ -180,11 +188,11 @@ This document provides an overview of the packages/app module structure and arch
 					"role": "Page"
 				},
 				"model.ts": {
-					"desc": "Agent page state model that loads agent lists, persists create/update/remove/sort actions, manages avatar dialog state, and loads linked sessions for the selected agent",
+					"desc": "Agent page state model that loads agent lists, available skills, selected-agent skill links, and for-filtered agent articles; persists create/update/remove/sort actions, article saves through rpc.agent.createArticle/updateArticle/removeArticle plus the unified save pipeline, manages avatar dialog state, and loads linked sessions for the selected agent",
 					"role": "Model"
 				},
 				"types.ts": {
-					"desc": "Agent page local types for RPC-derived agent/session payloads and avatar config unions",
+					"desc": "Agent page local types for RPC-derived agent/session/skill/article payloads, article for filters, skill option items, and avatar config unions",
 					"role": "Type"
 				}
 			},

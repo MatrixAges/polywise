@@ -27,10 +27,10 @@ interface ArgsSaveArticle {
 
 export default async (args: ArgsSaveArticle) => {
 	const { content, article_id, scope_type = 'global', scope_id = null, source = 'agent' } = args
-	const hash = getHash(content)
+	const hash = scope_type === 'global' ? getHash(`${args.for}\n${content}`) : null
 	const enable_triple = Boolean(config.enable_triple)
 
-	if (!article_id) {
+	if (!article_id && hash) {
 		const exist = await getArticle(eq(article.hash, hash))
 
 		if (exist) return exist.id
