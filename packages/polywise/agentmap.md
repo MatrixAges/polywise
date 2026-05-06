@@ -186,7 +186,7 @@ This document provides an overview of the packages/polywise module structure and
 					"role": "Folder"
 				},
 				"skill": {
-					"desc": "Skill domain RPC procedures for creating, querying, updating, deleting, and drag-sorting local skills, plus guarded text-file saving within the selected skill directory so the app skill page can edit both SKILL.md and sibling files through the shared file tree.",
+					"desc": "Skill domain RPC procedures for creating, querying, updating, deleting, and drag-sorting local skills, plus guarded sibling file and folder create, remove, move, and text-file save operations scoped to the selected skill directory so the app skill page can manage a skill tree while protecting SKILL.md from destructive moves.",
 					"role": "Folder"
 				},
 				"todo": {

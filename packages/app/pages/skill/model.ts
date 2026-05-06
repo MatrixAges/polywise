@@ -5,7 +5,14 @@ import { injectable } from 'tsyringe'
 import { Files, Util } from '@/models/common'
 import { rpc } from '@/utils'
 
-import type { DetailMode, SkillItem } from './types'
+import type { FileTreeContextMenuItem, FileTreeContextMenuOpenContext, FileTree as TreeInstance } from '@pierre/trees'
+import type {
+	DetailMode,
+	SkillItem,
+	SkillTreeComposition,
+	SkillTreeMutationEvent,
+	SkillTreeRenamingItem
+} from './types'
 
 @injectable()
 export default class Index {
@@ -16,6 +23,7 @@ export default class Index {
 	edit_desc = ''
 	edit_content = ''
 	file_preview_open = true
+	file_tree = null as TreeInstance | null
 
 	get selected_skill() {
 		return this.skill_items.find(item => item.id === this.selected_skill_id) || null
@@ -29,7 +37,7 @@ export default class Index {
 		public util: Util,
 		public skill_files: Files
 	) {
-		makeAutoObservable(this, { util: false, skill_files: false }, { autoBind: true })
+		makeAutoObservable(this, { util: false, skill_files: false, file_tree: false }, { autoBind: true })
 	}
 
 	async init() {
@@ -40,6 +48,10 @@ export default class Index {
 
 	deinit() {
 		this.util.deinit()
+	}
+
+	setFileTree(tree: TreeInstance | null) {
+		this.file_tree = tree
 	}
 
 	getRelativeSkillFilePath(target_path: string, skill_path: string) {
@@ -74,6 +86,116 @@ export default class Index {
 		}
 
 		return `${this.selected_skill.path}/${file_path}`
+	}
+
+	isProtectedSkillFile(target_path: string) {
+		return target_path.split('/').filter(Boolean).at(-1) === 'SKILL.md'
+	}
+
+	getAbsoluteTreePath(target_path: string) {
+		return this.skill_files.getAbsolutePath(target_path)
+	}
+
+	getTreeParentPath(args: { item_path: string; directory: boolean }) {
+		const { item_path, directory } = args
+
+		if (directory) {
+			return this.getAbsoluteTreePath(item_path)
+		}
+
+		return this.getAbsoluteTreePath(item_path).split('/').slice(0, -1).join('/')
+	}
+
+	canRenameTreeItem(item: SkillTreeRenamingItem) {
+		return !this.isProtectedSkillFile(this.getAbsoluteTreePath(item.path))
+	}
+
+	getTreeComposition() {
+		return {
+			contextMenu: {
+				enabled: true,
+				triggerMode: 'right-click',
+				render: (item, context) => this.renderTreeContextMenu({ item, context })
+			}
+		} satisfies SkillTreeComposition
+	}
+
+	getTreeDragAndDrop() {
+		return {
+			canDrag: (paths: readonly string[]) => {
+				return paths.every(item => !this.isProtectedSkillFile(this.getAbsoluteTreePath(item)))
+			}
+		}
+	}
+
+	renderTreeContextMenu(args: { item: FileTreeContextMenuItem; context: FileTreeContextMenuOpenContext }) {
+		const { item, context } = args
+		const mount_node = document.createElement('div')
+		const root = document.createElement('div')
+
+		mount_node.append(root)
+
+		const item_button_class =
+			'flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm cursor-default select-none hover:bg-accent'
+		const disabled_item_button_class = 'pointer-events-none opacity-50'
+
+		const close_menu = () => {
+			mount_node.remove()
+			context.close()
+		}
+
+		const create_item = (label: string, disabled: boolean, onClick: () => void) => {
+			const button = document.createElement('button')
+			button.className = $cx(item_button_class, disabled && disabled_item_button_class)
+			button.textContent = label
+			button.type = 'button'
+
+			if (!disabled) {
+				button.onclick = () => {
+					onClick()
+					close_menu()
+				}
+			}
+
+			return button
+		}
+
+		root.className =
+			'z-50 min-w-36 rounded-2xl bg-popover p-1 text-popover-foreground shadow-2xl ring-1 ring-foreground/5'
+		root.setAttribute('data-file-tree-context-menu-root', 'true')
+		root.style.position = 'fixed'
+		root.style.left = `${context.anchorRect.x}px`
+		root.style.top = `${context.anchorRect.y}px`
+
+		root.append(
+			create_item('New File', false, () => {
+				void this.createTreeEntry({
+					item_path: item.path,
+					directory: item.kind === 'directory',
+					type: 'file'
+				})
+			}),
+			create_item('New Folder', false, () => {
+				void this.createTreeEntry({
+					item_path: item.path,
+					directory: item.kind === 'directory',
+					type: 'folder'
+				})
+			}),
+			create_item(
+				'Rename',
+				!this.canRenameTreeItem({ isFolder: item.kind === 'directory', path: item.path }),
+				() => {
+					context.close({ restoreFocus: false })
+					this.startRenameTreeEntry(item.path)
+				}
+			),
+			create_item('Remove', item.name === 'SKILL.md', () => {
+				void this.removeTreeEntry(item.path)
+			})
+		)
+
+		return mount_node
 	}
 
 	async refresh(selected_file_relative_path = 'SKILL.md') {
@@ -172,6 +294,96 @@ export default class Index {
 			this.edit_content = this.skill_files.select_file.contents
 			this.detail_mode = 'preview'
 		}
+	}
+
+	async createTreeEntry(args: { item_path: string; directory: boolean; type: 'file' | 'folder' }) {
+		if (!this.selected_skill) {
+			return
+		}
+
+		const { item_path, directory, type } = args
+		const parent_path = this.getTreeParentPath({ item_path, directory })
+		const name = type === 'folder' ? 'new-folder' : 'new-file.txt'
+
+		await rpc.skill.createEntry.mutate({
+			skill_id: this.selected_skill.id,
+			parent_path,
+			name,
+			type
+		})
+
+		await this.refresh(this.getRelativeSkillFilePath(this.selected_file?.path || '', this.selected_skill.path))
+	}
+
+	async removeTreeEntry(item_path: string) {
+		if (!this.selected_skill) {
+			return
+		}
+
+		const target_path = this.getAbsoluteTreePath(item_path)
+
+		if (this.isProtectedSkillFile(target_path)) {
+			return
+		}
+
+		await rpc.skill.removeEntry.mutate({
+			skill_id: this.selected_skill.id,
+			path: target_path
+		})
+
+		const next_selected_file_path =
+			this.selected_file?.path === target_path ? '' : this.selected_file?.path || ''
+
+		await this.refresh(this.getRelativeSkillFilePath(next_selected_file_path, this.selected_skill.path))
+	}
+
+	startRenameTreeEntry(item_path: string) {
+		this.file_tree?.startRenaming(item_path)
+	}
+
+	async onTreeMutation(event: SkillTreeMutationEvent) {
+		if (!this.selected_skill) {
+			return
+		}
+
+		if (event.operation !== 'move' && event.operation !== 'batch') {
+			return
+		}
+
+		const operations =
+			event.operation === 'move' ? [event] : event.events.filter(item => item.operation === 'move')
+
+		if (!operations.length) {
+			return
+		}
+
+		const move_operations = operations.map(item => ({
+			from: this.getAbsoluteTreePath(item.from),
+			to: this.getAbsoluteTreePath(item.to)
+		}))
+
+		if (move_operations.some(item => this.isProtectedSkillFile(item.from))) {
+			await this.refresh(
+				this.getRelativeSkillFilePath(this.selected_file?.path || '', this.selected_skill.path)
+			)
+
+			return
+		}
+
+		await rpc.skill.moveEntries.mutate({
+			skill_id: this.selected_skill.id,
+			operations: move_operations
+		})
+
+		let next_selected_file_path = this.selected_file?.path || ''
+
+		for (const item of move_operations) {
+			if (next_selected_file_path === item.from) {
+				next_selected_file_path = item.to
+			}
+		}
+
+		await this.refresh(this.getRelativeSkillFilePath(next_selected_file_path, this.selected_skill.path))
 	}
 
 	async createSkill() {

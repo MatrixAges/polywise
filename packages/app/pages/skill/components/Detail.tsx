@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { File, Virtualizer } from '@pierre/diffs/react'
 import { useMemoizedFn } from 'ahooks'
 import { FileText, PencilLine } from 'lucide-react'
@@ -26,6 +27,11 @@ const Index = () => {
 		setEditContent,
 		setDetailMode,
 		toggleFilePreviewOpen,
+		setFileTree,
+		getTreeComposition,
+		getTreeDragAndDrop,
+		canRenameTreeItem,
+		onTreeMutation,
 		selectPath,
 		saveSkill
 	} = useModel()
@@ -40,6 +46,10 @@ const Index = () => {
 			toggleFilePreviewOpen()
 		}
 	})
+
+	useEffect(() => {
+		return () => setFileTree(null)
+	}, [])
 
 	if (!selected_skill) {
 		return (
@@ -199,6 +209,13 @@ const Index = () => {
 							paths={$copy(skill_files.paths)}
 							flex
 							colored_icons
+							drag_and_drop={getTreeDragAndDrop()}
+							renaming={{
+								canRename: canRenameTreeItem
+							}}
+							composition={getTreeComposition()}
+							onMutation={event => void onTreeMutation(event)}
+							onReady={setFileTree}
 							onSelectPath={onSelectPath}
 							key={skill_files.tree_version}
 						></FileTree>

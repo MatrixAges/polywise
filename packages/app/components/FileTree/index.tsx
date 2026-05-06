@@ -8,24 +8,59 @@ import { useGlobal } from '@/context'
 
 import Model from './model'
 
+import type {
+	FileTreeCompositionOptions,
+	FileTreeDragAndDropConfig,
+	FileTreeMutationEvent,
+	FileTreeRenamingConfig,
+	FileTree as TreeInstance
+} from '@pierre/trees'
+
 export interface IProps {
 	paths: Array<string>
 	className?: string
 	flex?: boolean
 	search?: boolean
 	colored_icons?: boolean
+	drag_and_drop?: boolean | FileTreeDragAndDropConfig
+	renaming?: boolean | FileTreeRenamingConfig
+	composition?: FileTreeCompositionOptions
+	onMutation?: (event: FileTreeMutationEvent) => void
+	onReady?: (tree: TreeInstance) => void
 	onSelectPath: (v: { directory: boolean; path: string }) => void
 }
 
 const Index = (props: IProps) => {
-	const { paths, className, flex, search, colored_icons, onSelectPath } = props
+	const {
+		paths,
+		className,
+		flex,
+		search,
+		colored_icons,
+		drag_and_drop,
+		renaming,
+		composition,
+		onMutation,
+		onReady,
+		onSelectPath
+	} = props
 	const [x] = useState(() => container.resolve(Model))
 	const global = useGlobal()
 
 	useLayoutEffect(() => {
 		if (!paths.length || !x.container) return
 
-		x.init({ paths, search, colored_icons, onSelectPath })
+		x.init({
+			paths,
+			search,
+			colored_icons,
+			drag_and_drop,
+			renaming,
+			composition,
+			onMutation,
+			onReady,
+			onSelectPath
+		})
 	}, [x.container])
 
 	useLayoutEffect(() => {

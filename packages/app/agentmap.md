@@ -344,7 +344,7 @@ This document provides an overview of the packages/app module structure and arch
 					"role": "Page"
 				},
 				"model.ts": {
-					"desc": "Skill page state model that loads skill lists, persists create update remove and drag sorting through rpc.skill procedures, drives the shared file tree model for the selected skill directory, and switches the selected file between preview and simple textarea edit mode",
+					"desc": "Skill page state model that loads skill lists, persists create update remove and drag sorting through rpc.skill procedures, drives the shared file tree model for the selected skill directory, exposes tree-native context-menu actions for new file, new folder, rename, and remove, blocks SKILL.md rename and drag moves, and switches the selected file between preview and simple textarea edit mode",
 					"role": "Model"
 				},
 				"types.ts": {

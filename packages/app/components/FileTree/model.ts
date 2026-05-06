@@ -2,6 +2,9 @@ import { FileTree, prepareFileTreeInput } from '@pierre/trees'
 import { makeAutoObservable } from 'mobx'
 import { injectable } from 'tsyringe'
 
+import { Util } from '@/models/common'
+
+import type { FileTreeMutationEvent } from '@pierre/trees'
 import type { IProps } from '.'
 
 @injectable()
@@ -9,19 +12,50 @@ export default class Index {
 	container = null as unknown as HTMLDivElement
 	tree = null as unknown as FileTree
 	paths = [] as Array<string>
+	off_mutation = null as null | (() => void)
 
-	constructor() {
-		makeAutoObservable(this, { container: false, tree: false }, { autoBind: true })
+	constructor(public util: Util) {
+		makeAutoObservable(
+			this,
+			{ util: false, container: false, tree: false, off_mutation: false },
+			{ autoBind: true }
+		)
 	}
 
-	init(args: Pick<IProps, 'paths' | 'search' | 'colored_icons' | 'onSelectPath'>) {
-		const { paths, search, colored_icons, onSelectPath } = args
+	init(
+		args: Pick<
+			IProps,
+			| 'paths'
+			| 'search'
+			| 'colored_icons'
+			| 'drag_and_drop'
+			| 'renaming'
+			| 'composition'
+			| 'onMutation'
+			| 'onReady'
+			| 'onSelectPath'
+		>
+	) {
+		const {
+			paths,
+			search,
+			colored_icons,
+			drag_and_drop,
+			renaming,
+			composition,
+			onMutation,
+			onReady,
+			onSelectPath
+		} = args
 
 		if (this.tree) return this.syncPaths(paths)
 
 		const tree = new FileTree({
 			preparedInput: prepareFileTreeInput(paths, { flattenEmptyDirectories: true }),
 			search,
+			dragAndDrop: drag_and_drop,
+			renaming,
+			composition,
 			icons: colored_icons ? { set: 'complete', colored: true } : 'standard',
 			itemHeight: 27,
 			flattenEmptyDirectories: true,
@@ -62,7 +96,14 @@ export default class Index {
 		this.tree = tree
 		this.paths = [...paths]
 
+		if (onMutation) {
+			const deinit = this.tree.onMutation('*', event => onMutation(event))
+
+			this.util.acts.push(deinit)
+		}
+
 		tree.render({ fileTreeContainer: this.container })
+		onReady?.(tree)
 	}
 
 	syncPaths(paths: Array<string>) {
