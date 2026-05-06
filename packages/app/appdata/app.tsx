@@ -17,6 +17,7 @@ import type { LucideIcon } from 'lucide-react'
 
 export const nav_items = [
 	{ key: '', Icon: House, title: 'home' },
+	{ key: 'agent', Icon: Bot },
 	{ key: 'todo', Icon: CircleCheckBig },
 	{ key: 'session', Icon: MessageSquareText },
 	{ key: 'project', Icon: Folders },
@@ -25,7 +26,6 @@ export const nav_items = [
 	// { key: 'library', Icon: Library },
 	// { key: 'database', Icon: Database },
 	// is_electron && { key: 'browser', Icon: AppWindowMac },
-	// { key: 'agent', Icon: Bot }
 ].filter(Boolean) as Array<{ key: string; Icon: LucideIcon; title?: string }>
 
 export const locales = ['en', 'zh-cn'] as const
