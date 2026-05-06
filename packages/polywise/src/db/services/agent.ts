@@ -1,6 +1,6 @@
 import { agent } from '@core/db/schema'
 import { env } from '@core/env'
-import { desc, SQL } from 'drizzle-orm'
+import { asc, SQL } from 'drizzle-orm'
 
 import type { AgentInsert } from '@core/db'
 
@@ -28,7 +28,7 @@ export const getAgent = async (where: SQL) => {
 }
 
 export const getAgents = async (args: ArgsGetAgents = {}) => {
-	const { where, orderBy = [desc(agent.updated_at), desc(agent.created_at)], limit } = args
+	const { where, orderBy = [asc(agent.order), asc(agent.created_at)], limit } = args
 
 	let query = env.db.select().from(agent).$dynamic()
 

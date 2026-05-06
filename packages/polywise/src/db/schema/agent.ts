@@ -1,4 +1,4 @@
-import { blob, index, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
+import { blob, index, integer, real, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 import { getId } from 'stk/utils'
 
 import type { TableModel } from '@core/types'
@@ -23,6 +23,8 @@ export default sqliteTable(
 		identity: text('identity'),
 		// Core memory
 		memory: text('memory').default(''),
+		// Sort order for drag reordering
+		order: real('order').notNull(),
 		// Model provider
 		model: text('model', { mode: 'json' }).$type<TableModel>().notNull(),
 
@@ -31,5 +33,9 @@ export default sqliteTable(
 			.$defaultFn(() => new Date())
 			.$onUpdateFn(() => new Date())
 	},
-	t => [index('agent_created_at_idx').on(t.created_at), index('agent_updated_at_idx').on(t.updated_at)]
+	t => [
+		index('agent_order_idx').on(t.order),
+		index('agent_created_at_idx').on(t.created_at),
+		index('agent_updated_at_idx').on(t.updated_at)
+	]
 )

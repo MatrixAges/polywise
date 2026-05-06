@@ -52,6 +52,7 @@ export const agent_insert_schema = createInsertSchema(agent, {
 
 export const agent_create_input_schema = agent_insert_schema.omit({
 	id: true,
+	order: true,
 	created_at: true,
 	updated_at: true
 })
