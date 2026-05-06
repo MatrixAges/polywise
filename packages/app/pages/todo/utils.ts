@@ -9,7 +9,6 @@ type KanbanTodo = KanbanData[KanbanStatus][number]
 export const createKanbanData = () => {
 	return {
 		draft: [],
-		pending: [],
 		processing: [],
 		unreview: [],
 		done: [],

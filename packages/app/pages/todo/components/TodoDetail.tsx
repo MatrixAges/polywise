@@ -26,7 +26,6 @@ import type { Todo } from '@core/db'
 
 const todo_status_options: Array<{ label: string; value: string }> = [
 	{ label: 'Draft', value: 'draft' },
-	{ label: 'Pending', value: 'pending' },
 	{ label: 'Processing', value: 'processing' },
 	{ label: 'Unreview', value: 'unreview' },
 	{ label: 'Done', value: 'done' },

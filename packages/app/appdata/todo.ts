@@ -1,4 +1,4 @@
-import { Archive, CircleCheck, CircleDashed, CircleDot, CircleSlash, CircleX, Loader, View } from 'lucide-react'
+import { Archive, CircleCheck, CircleDashed, CircleSlash, CircleX, Loader, View } from 'lucide-react'
 
 import type { LucideIcon } from 'lucide-react'
 
@@ -6,10 +6,6 @@ export const todo_status_icon_map = {
 	draft: {
 		Icon: CircleDashed,
 		color: 'text-std-300'
-	},
-	pending: {
-		Icon: CircleDot,
-		color: 'text-std-600'
 	},
 	processing: {
 		Icon: Loader,

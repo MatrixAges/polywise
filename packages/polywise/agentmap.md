@@ -285,7 +285,7 @@ This document provides an overview of the packages/polywise module structure and
 			"consts": {
 				"app.ts": { "desc": "Application constants", "role": "Constant" },
 				"db.ts": {
-					"desc": "Centralized todo priority/status zod schemas, status list, and shared todo status ordering helper",
+					"desc": "Centralized todo priority/status zod schemas, visible status list, and shared todo status ordering helper after dropping pending from the todo lifecycle",
 					"role": "Constant"
 				},
 				"mem.ts": { "desc": "Memory system constants", "role": "Constant" },

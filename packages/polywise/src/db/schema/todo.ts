@@ -11,7 +11,7 @@ export default sqliteTable(
 		description: text('description'),
 		// Todo priority: urgent, high, medium, low, none
 		priority: text('priority').default('none'),
-		// Todo status: draft, pending, processing, unreview, done, canceled, error, archive
+		// Todo status: draft, processing, unreview, done, canceled, error, archive
 		status: text('status').default('draft').notNull(),
 		// Task result when completed
 		result: text('result'),

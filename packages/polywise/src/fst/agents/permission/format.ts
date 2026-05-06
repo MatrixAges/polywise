@@ -26,7 +26,7 @@ export const formatContext = (context: Context): string => {
 	}
 
 	if (context.tasks && context.tasks.length > 0) {
-		const active_tasks = context.tasks.filter(t => t.status === 'processing' || t.status === 'pending')
+		const active_tasks = context.tasks.filter(t => t.status === 'draft' || t.status === 'processing')
 
 		if (active_tasks.length > 0) {
 			parts.push(`Active Tasks:\n${active_tasks.map(t => `- ${t.title}: ${t.desc}`).join('\n')}`)

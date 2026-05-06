@@ -19,7 +19,7 @@ const input_type = object({
 	project_id: string().optional()
 })
 
-const start_status_list = ['draft', 'pending', 'unreview', 'done', 'canceled', 'error'] as const
+const start_status_list = ['draft', 'unreview', 'done', 'canceled', 'error'] as const
 
 const getLinkedSession = async (todo_id: string) => {
 	const session_link = await getTodoSession(eq(todo_session.todo_id, todo_id))
