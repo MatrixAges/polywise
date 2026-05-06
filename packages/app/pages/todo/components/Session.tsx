@@ -11,13 +11,13 @@ const Index = () => {
 
 	return (
 		<Dialog
-			className='w-[640px] max-w-none! gap-4'
+			className='w-[640px] max-w-none! gap-2 pb-3'
 			max_height='max-h-[80vh]'
 			open={session_open}
-			title='Session'
+			title={detail_session.title}
 			setOpen={toggleSessionOpen}
 		>
-			<Session type='page' id={detail_session!.id}></Session>
+			<Session type='dialog' id={detail_session!.id}></Session>
 		</Dialog>
 	)
 }

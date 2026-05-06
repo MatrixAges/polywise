@@ -14,7 +14,7 @@ import type { ReactNode } from 'react'
 import type { IPropsInput } from './types'
 
 export interface IProps {
-	type: 'page' | 'global'
+	type: 'dialog' | 'page' | 'global'
 	id: string
 	input?: string
 	actions?: ReactNode
@@ -27,7 +27,7 @@ const Index = (props: IProps) => {
 
 	const streaming = x.status === 'streaming' || x.status === 'submitted'
 	const last_message = x.messages.at(-1)
-	const is_page = type === 'page'
+	const is_page = type === 'page' || type === 'dialog'
 
 	const { ref, setRef } = useAliveEffect({
 		init: () => x.init({ id, input }),
@@ -41,7 +41,7 @@ const Index = (props: IProps) => {
 	const toggleContextModal = useMemoizedFn(() => (x.open_context_modal = !x.open_context_modal))
 
 	const props_input: IPropsInput = {
-		is_page,
+		type,
 		streaming,
 		archived: x.archived_at !== null,
 		mode: x.mode,
@@ -75,7 +75,7 @@ const Index = (props: IProps) => {
 			'
 			ref={setRef}
 		>
-			{is_page && (
+			{type === 'page' && (
 				<div
 					className='
 						flex
@@ -100,7 +100,8 @@ const Index = (props: IProps) => {
 				`,
 					!x.inited && 'justify-end',
 					x.signal,
-					empty && 'items-center justify-center!'
+					empty && 'items-center justify-center!',
+					type === 'dialog' && 'px-0'
 				)}
 				onWheel={x.onWheel}
 				onScroll={x.onScroll}

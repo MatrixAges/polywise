@@ -1,6 +1,7 @@
 import type { Message } from '@core/fst'
 import type { EditResult, QuestionInput } from '@core/fst/tools'
 import type { ToolUIPart } from 'ai'
+import type { IProps } from '.'
 import type Model from './model'
 
 export interface IPropsMessage extends Pick<Model, 'answer'> {
@@ -17,7 +18,7 @@ export interface IPropsInput extends Pick<
 	Model,
 	'send' | 'stop' | 'clear' | 'archive' | 'unarchive' | 'scrollToBottom' | 'setMode'
 > {
-	is_page: boolean
+	type: IProps['type']
 	streaming: boolean
 	archived: boolean
 	mode: 'normal' | 'plan' | 'plan-exec'

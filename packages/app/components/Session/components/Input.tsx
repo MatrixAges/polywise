@@ -34,7 +34,7 @@ const session_modes = [
 
 const Index = (props: IPropsInput) => {
 	const {
-		is_page,
+		type,
 		streaming,
 		archived,
 		mode,
@@ -53,6 +53,7 @@ const Index = (props: IPropsInput) => {
 	const [full, { toggle: toggleFull }] = useToggle(false)
 
 	const s = global.setting
+	const is_page = type === 'page' || type === 'dialog'
 
 	useLayoutEffect(() => {
 		const el = ref.current
@@ -133,7 +134,8 @@ const Index = (props: IPropsInput) => {
 				pt-3
 				backdrop-blur-lg
 			`,
-				is_page && 'page_wrap py-0'
+				is_page && 'page_wrap py-0',
+				type === 'dialog' && 'px-px!'
 			)}
 		>
 			<div className={$cx('flex flex-col', full && 'h-full')}>
