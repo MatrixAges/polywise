@@ -70,8 +70,7 @@ const Index = (props: IProps) => {
 				mode === 'kanban'
 					? `
 				flex-col
-				pt-2.5
-				pb-3
+				py-2
 				rounded-lg
 				border
 			`
@@ -141,6 +140,7 @@ const Index = (props: IProps) => {
 						items-center
 						gap-1
 						p-px
+						mb-1
 						rounded-full
 						text-std-600 text-xs
 						truncate

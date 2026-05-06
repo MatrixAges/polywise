@@ -138,6 +138,24 @@ export default class Index {
 		await this.getTodos()
 	}
 
+	async assignTodoProject(project_id?: string) {
+		const todo_id = this.selected_todo_id
+		const should_close_detail = this.project_id !== project_id
+
+		if (!todo_id) {
+			return
+		}
+
+		await rpc.todo.assignProject.mutate({ id: todo_id, project_id })
+
+		if (should_close_detail) {
+			this.closeTodoDetail()
+		}
+
+		await this.getProjects()
+		await this.getTodos()
+	}
+
 	async startSession() {
 		if (!this.selected_todo_id || this.detail_session?.is_runing) {
 			return

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef } from 'react'
 import { debounce } from 'es-toolkit'
-import { CircleDot, Flag, Trash, X } from 'lucide-react'
+import { CircleDot, Flag, FolderKanban, Trash, X } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 import { Controller } from 'react-hook-form'
 
@@ -42,9 +42,20 @@ const todo_priority_options: Array<{ label: string; value: string }> = [
 ]
 
 const Index = () => {
-	const { detail_todo, detail_session, updateTodo, startSession, closeTodoDetail, removeTodo, toggleSessionOpen } =
-		useModel()
+	const {
+		detail_todo,
+		detail_session,
+		menu_data,
+		project_id,
+		updateTodo,
+		assignTodoProject,
+		startSession,
+		closeTodoDetail,
+		removeTodo,
+		toggleSessionOpen
+	} = useModel()
 	const { title, is_runing, running_since, running_done, unread, report } = detail_session || {}
+	const { projects = [] } = menu_data
 
 	const { control, register, reset } = useForm<Todo>({ values: $copy(detail_todo) }, (_, v) => {
 		updateTodo(v as RPCInput['todo']['update'])
@@ -211,6 +222,45 @@ const Index = () => {
 									</Select>
 								)}
 							/>
+						</div>
+						<div className='flex items-center justify-between'>
+							<div className='text-std-400 flex items-center gap-1.5'>
+								<FolderKanban className='size-3'></FolderKanban>
+								<span className='text-sm font-medium'>Project</span>
+							</div>
+							<Select
+								value={project_id || 'none'}
+								onValueChange={value => {
+									if (!value || value === 'none') {
+										assignTodoProject()
+
+										return
+									}
+
+									assignTodoProject(value)
+								}}
+							>
+								<SelectTrigger
+									className='text-std-500 bg-transparent font-semibold capitalize'
+									no_active_style
+								>
+									<SelectValue />
+								</SelectTrigger>
+								<SelectContent align='start'>
+									<SelectGroup>
+										<SelectLabel>Project</SelectLabel>
+										<SelectItem value='none'>None</SelectItem>
+										{projects.map(item => (
+											<SelectItem
+												value={item.project.id}
+												key={item.project.id}
+											>
+												{item.project.name}
+											</SelectItem>
+										))}
+									</SelectGroup>
+								</SelectContent>
+							</Select>
 						</div>
 						<div className='border-border-light mt-1 w-full border-b'></div>
 						<Textarea

@@ -182,8 +182,12 @@ This document provides an overview of the packages/polywise module structure and
 					"role": "Folder"
 				},
 				"todo": {
-					"desc": "Todo domain RPC procedures for standalone todos and project-bound todos, including creation, deletion, status/content updates, archive recovery through unarchive back to draft while reassigning order to the top of inbox or the linked project list, drag sorting within a status column or across status columns, direct project query, inbox/project menu count aggregation, visible-only grouped query views that exclude archive status, global archive list pagination through getArchives with 10-item pages, 1-based page input, has_more metadata, and inbox query filtering that excludes both project_todo and session_todo-linked records so session context tasks never leak into the todo page. A nested session router for start/stop by todo_id reuses or recreates a single linked execution session through the dedicated todo_session relation before submit, promotes rerun-capable linked todos into processing before submit, and now optionally binds newly created todo-started sessions to project_session via project_id. Grouped query payloads remain shaped as `{ todo, session }` so inbox/project boards can keep todo-started session status separate from session-owned task bindings.",
-					"role": "Folder"
+					"desc": "Todo domain RPC procedures for standalone todos and project-bound todos, including creation, deletion, status/content updates, archive recovery through unarchive back to draft while reassigning order to the top of inbox or the linked project list, drag sorting within a status column or across status columns, direct project query, inbox/project menu count aggregation, visible-only grouped query views that exclude archive status, global archive list pagination through getArchives with 10-item pages, 1-based page input, has_more metadata, inbox query filtering that excludes both project_todo and session_todo-linked records so session context tasks never leak into the todo page, and assignProject for moving a todo between Inbox and project scopes while rewriting its order to the top of the destination list. A nested session router for start/stop by todo_id reuses or recreates a single linked execution session through the dedicated todo_session relation before submit, promotes rerun-capable linked todos into processing before submit, and now optionally binds newly created todo-started sessions to project_session via project_id. Grouped query payloads remain shaped as `{ todo, session }` so inbox/project boards can keep todo-started session status separate from session-owned task bindings.",
+					"role": "Folder",
+					"assignProject.ts": {
+						"desc": "Todo RPC mutation that reassigns a todo between Inbox and project scopes by updating project_todo linkage and moving the todo to the top of the destination list",
+						"role": "RPC"
+					}
 				}
 			},
 			"rpcs": {

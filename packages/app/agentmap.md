@@ -164,7 +164,7 @@ This document provides an overview of the packages/app module structure and arch
 						"role": "Component"
 					},
 					"TodoDetail.tsx": {
-						"desc": "Closable right-side detail form that persists title immediately through form watch, debounces title and description edits during typing, persists status and priority immediately on selection change with the pending status removed from the selector, and controls linked todo session start or stop actions with realtime title, running state, elapsed time, and button disabled states",
+						"desc": "Closable right-side detail form that persists title immediately through form watch, debounces title and description edits during typing, persists status and priority immediately on selection change with the pending status removed from the selector, adds a project selector with a None option for Inbox assignment, and controls linked todo session start or stop actions with realtime title, running state, elapsed time, and button disabled states",
 						"role": "Component"
 					},
 					"index.ts": {
@@ -181,7 +181,7 @@ This document provides an overview of the packages/app module structure and arch
 					"role": "Page"
 				},
 				"model.ts": {
-					"desc": "Todo page state model for loading grouped `{ todo, session }` board data where the linked session is resolved only from todo-started execution sessions, tracking the selected todo while deriving its detail session from current board data, starting or stopping linked todo sessions, clearing selection on drag start, applying optimistic same-column or cross-column todo moves, persisting drag reorder updates through rpc.todo.sort plus detail-form updates through rpc.todo.update, and subscribing to rpc.session.watchSessionStatus so linked session title, report, running state, elapsed-time anchor, running_done, unread state, and pushed todo status stay in sync on the todo board and detail pane, with board regrouping handled locally through pages/todo/utils.ts helpers after the pending column removal",
+					"desc": "Todo page state model for loading grouped `{ todo, session }` board data where the linked session is resolved only from todo-started execution sessions, tracking the selected todo while deriving its detail session from current board data, starting or stopping linked todo sessions, clearing selection on drag start, applying optimistic same-column or cross-column todo moves, persisting drag reorder updates through rpc.todo.sort plus detail-form updates through rpc.todo.update and project reassignment through rpc.todo.assignProject, and subscribing to rpc.session.watchSessionStatus so linked session title, report, running state, elapsed-time anchor, running_done, unread state, and pushed todo status stay in sync on the todo board and detail pane, with board regrouping handled locally through pages/todo/utils.ts helpers after the pending column removal",
 					"role": "Model"
 				},
 				"types.ts": {

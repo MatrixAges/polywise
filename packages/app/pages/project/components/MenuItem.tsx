@@ -82,6 +82,7 @@ const Index = (props: IPropsMenuItem) => {
 						flex flex-1
 						items-center
 						gap-1
+						truncate
 					'
 					onClick={onClickProject}
 				>
