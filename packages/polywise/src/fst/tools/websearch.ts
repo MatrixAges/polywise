@@ -15,7 +15,7 @@ turndown.remove(['script', 'style', 'meta', 'link', 'noscript'])
 const MAX_CHARS = 30000
 
 const inputSchema = object({
-	query: string().describe('The search query'),
+	query: string().describe('Keywords used to search the web for a list of relevant links'),
 	max_chars: number().optional().describe('Max characters to return (default 30000)')
 })
 

@@ -102,7 +102,12 @@ const Index = (props: IProps) => {
 				</span>
 				{mode === 'kanban' && Time}
 			</div>
-			<div className={$cx('flex flex-1 gap-2', mode === 'kanban' ? 'items-start' : 'items-center')}>
+			<div
+				className={$cx(
+					'flex flex-1 gap-2 truncate',
+					mode === 'kanban' ? 'items-start' : 'items-center'
+				)}
+			>
 				<span
 					className={$cx(
 						'text-std-600 text-sb leading-5.5! font-medium',
