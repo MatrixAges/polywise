@@ -24,20 +24,28 @@ export default p.input(input_type).mutation(async ({ input }) => {
 		throw new Error(`Skill not found: ${input.id}`)
 	}
 
+	const next_dir_path = getSkillDirPath(input.name)
 	const file_path = getSkillFilePath(input.name)
-	const prev_dir_path = current_skill.path
+	const prev_dir_path = current_skill.path.endsWith('SKILL.md')
+		? path.dirname(current_skill.path)
+		: current_skill.path
+	const same_dir = prev_dir_path === next_dir_path
+
+	if (!same_dir && (await fs.pathExists(next_dir_path))) {
+		throw new Error(`Skill already exists: ${input.name}`)
+	}
+
+	if (!same_dir && (await fs.pathExists(prev_dir_path))) {
+		await fs.move(prev_dir_path, next_dir_path)
+	}
 
 	await fs.ensureDir(path.dirname(file_path))
 	await writeFile(file_path, input.content, 'utf8')
 
-	if (prev_dir_path && prev_dir_path !== getSkillDirPath(input.name)) {
-		await fs.remove(prev_dir_path.endsWith('SKILL.md') ? path.dirname(prev_dir_path) : prev_dir_path)
-	}
-
 	const next_skill = await setSkill(eq(skill.id, input.id), {
 		name: input.name,
 		desc: input.desc,
-		path: getSkillDirPath(input.name),
+		path: next_dir_path,
 		type: input.type,
 		updated_at: new Date()
 	})

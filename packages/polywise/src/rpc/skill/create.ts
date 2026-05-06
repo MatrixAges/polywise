@@ -1,5 +1,5 @@
 import path from 'path'
-import { addSkill } from '@core/db/services'
+import { addSkill, getSkillOrderMax } from '@core/db/services'
 import { writeFile } from 'atomically'
 import fs from 'fs-extra'
 import { object, string } from 'zod'
@@ -33,10 +33,13 @@ export default p.input(input_type).mutation(async ({ input }) => {
 	await fs.ensureDir(path.dirname(file_path))
 	await writeFile(file_path, input.content, 'utf8')
 
+	const order = (await getSkillOrderMax()) + 1
+
 	const skill_item = await addSkill({
 		name: input.name,
 		desc: input.desc,
 		path: getSkillDirPath(input.name),
+		order,
 		type: input.type
 	})
 

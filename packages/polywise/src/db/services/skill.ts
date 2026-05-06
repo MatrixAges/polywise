@@ -1,6 +1,6 @@
 import { skill } from '@core/db/schema'
 import { env } from '@core/env'
-import { asc, SQL } from 'drizzle-orm'
+import { asc, max, SQL } from 'drizzle-orm'
 
 import type { SkillInsert } from '@core/db'
 
@@ -28,7 +28,7 @@ export const getSkill = async (where: SQL) => {
 }
 
 export const getSkills = async (args: ArgsGetSkills = {}) => {
-	const { where, orderBy = [asc(skill.name), asc(skill.created_at)], limit } = args
+	const { where, orderBy = [asc(skill.order), asc(skill.created_at)], limit } = args
 
 	let query = env.db.select().from(skill).$dynamic()
 
@@ -43,6 +43,13 @@ export const getSkills = async (args: ArgsGetSkills = {}) => {
 	if (limit) query = query.limit(limit)
 
 	return query
+}
+
+export const getSkillOrderMax = async () => {
+	return env.db
+		.select({ value: max(skill.order) })
+		.from(skill)
+		.then(res => res[0]?.value ?? -1)
 }
 
 export const setSkill = async (where: SQL, values: Partial<SkillInsert>) => {

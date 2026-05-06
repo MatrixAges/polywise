@@ -316,6 +316,42 @@ This document provides an overview of the packages/app module structure and arch
 					"role": "Type"
 				}
 			},
+			"skill": {
+				"context.ts": {
+					"desc": "Skill page model context provider and hook for the left skill menu and right detail panel",
+					"role": "Context"
+				},
+				"components": {
+					"index.ts": {
+						"desc": "Skill page local component exports for the skill list menu and detail panel",
+						"role": "Index"
+					},
+					"Menu.tsx": {
+						"desc": "Left skill list menu with create trigger and dnd-kit drag sorting",
+						"role": "Component"
+					},
+					"MenuItem.tsx": {
+						"desc": "Sortable skill row atom with selection, title, description, and remove action",
+						"role": "Component"
+					},
+					"Detail.tsx": {
+						"desc": "Right skill detail panel with name and description fields plus a skill file tree and preview or textarea edit mode for the selected file",
+						"role": "Component"
+					}
+				},
+				"index.tsx": {
+					"desc": "Skill page view with left skill menu and right skill detail editor",
+					"role": "Page"
+				},
+				"model.ts": {
+					"desc": "Skill page state model that loads skill lists, persists create update remove and drag sorting through rpc.skill procedures, drives the shared file tree model for the selected skill directory, and switches the selected file between preview and simple textarea edit mode",
+					"role": "Model"
+				},
+				"types.ts": {
+					"desc": "Skill page local RPC-derived types for skill items, selected files, and detail mode state",
+					"role": "Type"
+				}
+			},
 			"session": {
 				"components": {
 					"Item.tsx": {

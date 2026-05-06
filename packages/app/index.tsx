@@ -41,6 +41,10 @@ const routes: Array<RouteObject> = [
 				lazy: () => import('@/pages/agent')
 			},
 			{
+				path: '/skill',
+				lazy: () => import('@/pages/skill')
+			},
+			{
 				path: '/linkcase',
 				lazy: () => import('@/pages/linkcase')
 			},
