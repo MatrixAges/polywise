@@ -60,17 +60,29 @@ const Index = () => {
 	const { control, register, reset } = useForm<Todo>({ values: $copy(detail_todo) }, (_, v) => {
 		updateTodo(v as RPCInput['todo']['update'])
 	})
-	const ref_is_composing = useRef(false)
-	const running_time = useRuningTime(is_runing!, running_since, running_done)
 
-	const { loading, click } = useClickLoading(1000)
+	const register_title = register('title')
+	const register_description = register('description')
 
 	useEffect(() => {
 		reset(detail_todo)
 	}, [detail_todo])
 
-	const register_title = register('title')
-	const register_description = register('description')
+	const ref_is_composing = useRef(false)
+	const running_time = useRuningTime(is_runing!, running_since, running_done)
+
+	const { loading, click } = useClickLoading(1000)
+
+	const project_options = useMemo(
+		() => [
+			{ label: 'None', value: 'none' },
+			...projects.map(item => ({
+				label: item.project.name,
+				value: item.project.id
+			}))
+		],
+		[projects]
+	)
 
 	const Status = useMemo(() => {
 		if (is_runing) return <Grip className='text-std-400! size-3' />
@@ -229,6 +241,7 @@ const Index = () => {
 								<span className='text-sm font-medium'>Project</span>
 							</div>
 							<Select
+								items={project_options}
 								value={project_id || 'none'}
 								onValueChange={value => {
 									if (!value || value === 'none') {
