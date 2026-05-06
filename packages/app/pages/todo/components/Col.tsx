@@ -40,12 +40,12 @@ const Index = (props: IProps) => {
 					mode === 'kanban' ? '' : 'bg-secondary/40'
 				)}
 			>
-				<div className='flex items-center gap-2'>
-					<Icon className='stroke-std-500 size-3.5'></Icon>
+				<div className='text-std-400 flex items-center gap-2'>
+					<Icon className='size-3.5'></Icon>
 					<span
 						className='
 							mb-[-1.5px]
-							text-sm text-std-500 font-medium
+							text-sm font-medium
 							uppercase
 						'
 					>
@@ -56,7 +56,7 @@ const Index = (props: IProps) => {
 					className='
 						px-1 py-0.5
 						rounded-full
-						text-xs leading-none
+						text-xs text-std-500 leading-none
 						bg-secondary
 						border border-border-light
 					'
@@ -70,7 +70,7 @@ const Index = (props: IProps) => {
 						className={$cx(
 							'flex w-full flex-col',
 							mode === 'kanban' && 'gap-3',
-							todos.length === 0 && 'min-h-20'
+							todos.length === 0 && 'min-h-px'
 						)}
 						ref={setNodeRef}
 					>

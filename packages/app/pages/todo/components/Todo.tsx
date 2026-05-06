@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { useMemoizedFn } from 'ahooks'
+import { MessageSquareText } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { todo_priority_icon_map } from '@/appdata'
@@ -52,19 +53,29 @@ const Index = (props: IProps) => {
 		return null
 	}, [is_runing, unread])
 
+	const Time = <span className='text-std-400 text-xs text-nowrap'>{fromNow(created_at)}</span>
+
 	return (
 		<div
 			className={$cx(
 				`
 				flex
 				w-full
-				gap-1
+				gap-2
 				px-3
 				border-border-light
 				transition-colors
 				cursor-pointer
 			`,
-				mode === 'kanban' ? 'flex-col rounded-lg border py-2' : 'h-11 items-center border-b',
+				mode === 'kanban'
+					? `
+				flex-col
+				pt-2.5
+				pb-3
+				rounded-lg
+				border
+			`
+					: 'h-11 items-center border-b',
 				selected && 'border-primary/40',
 				isDragging && 'opacity-0',
 				(isDragging || overlay) && 'border-primary/40 z-10 backdrop-blur-lg'
@@ -74,12 +85,24 @@ const Index = (props: IProps) => {
 			style={style}
 			{...props_drag}
 		>
+			<div
+				className='
+					flex
+					items-center justify-between
+				'
+			>
+				<span
+					className='
+						w-12
+						text-xsm text-std-400 font-medium
+						uppercase
+					'
+				>
+					{status.substring(0, 3)}-{index + 1}
+				</span>
+				{mode === 'kanban' && Time}
+			</div>
 			<div className={$cx('flex flex-1 gap-2', mode === 'kanban' ? 'items-start' : 'items-center')}>
-				{mode === 'list' && (
-					<span className='text-xsm text-std-400 w-12 uppercase'>
-						{status.substring(0, 3)}-{index + 1}
-					</span>
-				)}
 				<span
 					className={$cx(
 						'text-std-600 text-sb leading-5.5! font-medium',
@@ -111,23 +134,22 @@ const Index = (props: IProps) => {
 						`
 						flex
 						items-center
-						gap-2
-						px-2 py-1
-						my-1
+						gap-1
+						p-px
 						rounded-full
-						text-std-400 text-xs
+						text-std-600 text-xs
 						truncate
-						bg-secondary/60
 					`,
 						mode === 'list' && 'max-w-[210px]'
 					)}
 				>
+					<MessageSquareText className='size-3'></MessageSquareText>
 					<span className='flex-1 truncate'>{report || item.session.title}</span>
 					{Status}
 					{running_time && <span className='text-nowrap'>{running_time}</span>}
 				</div>
 			)}
-			<span className='text-std-400 mt-0.5 text-xs text-nowrap'>{fromNow(created_at)}</span>
+			{mode === 'list' && Time}
 		</div>
 	)
 }

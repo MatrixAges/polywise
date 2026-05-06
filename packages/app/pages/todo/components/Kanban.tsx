@@ -3,7 +3,7 @@ import { observer } from 'mobx-react-lite'
 
 import { useModel } from '../context'
 import Col from './Col'
-import TodoCard from './Todo'
+import Todo from './Todo'
 
 const Index = () => {
 	const { mode, kanban_data, drag_todo, onDragStart, onDragEnd, onDragCancel } = useModel()
@@ -31,7 +31,7 @@ const Index = () => {
 			<DragOverlay dropAnimation={null}>
 				{drag_todo && (
 					<div className='w-80'>
-						<TodoCard item={drag_todo} index={-1} selected={false} overlay></TodoCard>
+						<Todo item={drag_todo} index={-1} selected={false} overlay></Todo>
 					</div>
 				)}
 			</DragOverlay>

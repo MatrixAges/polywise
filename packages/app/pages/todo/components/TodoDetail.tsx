@@ -98,7 +98,7 @@ const Index = () => {
 				</span>
 				<div className='mr-[-2px] flex gap-1'>
 					<div className='icon_button small' onClick={() => removeTodo(detail_todo.id)}>
-						<Trash></Trash>
+						<Trash className='size-3'></Trash>
 					</div>
 					<div className='icon_button small' onClick={closeTodoDetail}>
 						<X></X>
@@ -240,6 +240,7 @@ const Index = () => {
 					flex shrink-0
 					gap-2
 					p-3
+					bg-layout-over
 					border-t border-border-light
 				'
 			>
@@ -265,11 +266,15 @@ const Index = () => {
 								text-std-400 text-xsm
 							'
 						>
-							<span className='flex-1 truncate'>{report || title}</span>
-							{running_time && <span className='text-nowrap'>{running_time}</span>}
+							<span className='flex-1'>{report || title}</span>
 						</div>
 						<Button type='button' onClick={toggleSessionOpen}>
 							Open Session {Status}
+							{running_time && (
+								<span className='text-std-400 text-xsm text-nowrap'>
+									({running_time})
+								</span>
+							)}
 						</Button>
 					</div>
 				)}
