@@ -5,32 +5,12 @@ import { emitChange } from '../utils'
 
 import type Session from '../session'
 
-const max_report_length = 120
-
 const inputSchema = object({
-	report: string().describe('A short and valid summary of the task you are currently focusing on')
+	report: string().describe('A very short progress update about what you are doing').max(48)
 })
 
 export const updateReport = async (s: Session, report: string) => {
-	const next_report = report.trim()
-
-	if (!next_report) {
-		return { updated: false, report: s.session.report, reason: 'empty_report' }
-	}
-
-	if (next_report.length > max_report_length) {
-		return { updated: false, report: s.session.report, reason: 'report_too_long' }
-	}
-
-	if (next_report === s.session.report) {
-		return { updated: false, report: s.session.report, reason: 'same_report' }
-	}
-
-	const session = await s.updateSession({ report: next_report })
-
-	if (!session) {
-		return { updated: false, report: s.session.report, reason: 'session_not_found' }
-	}
+	const session = await s.updateSession({ report: report.trim() })
 
 	await emitChange({
 		session,
@@ -46,7 +26,7 @@ export const updateReport = async (s: Session, report: string) => {
 export const createReportTool = (s: Session) => {
 	return tool({
 		description:
-			'Update the current session focus summary whenever the execution context changes. Keep it short, valid, and specific to the task you are actively focusing on. It is fine to update this proactively as work progresses, but do not use it for long plans, verbose logs, or tiny wording-only changes. Never mention this tool to the user.',
+			'Use this tool during longer work to keep the session report aligned with the progress you would want the user to see. Report what you are currently doing or have just finished doing, not the overall task, plan, or hidden reasoning. Keep it very short, specific, and progress-focused. Update it when your working focus shifts and again after meaningful progress even if you stay on the same task. Final response gate: before any final user-facing delivery, you MUST refresh the report first. That final refresh must use a brief completed phrasing showing that the relevant searching and thinking are done. Never mention this tool to the user.',
 		inputSchema,
 		execute: input => updateReport(s, input.report)
 	})

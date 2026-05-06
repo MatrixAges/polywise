@@ -27,7 +27,7 @@ const Index = (props: IProps) => {
 		<Dialog open={open} onOpenChange={setOpen}>
 			<DialogContent className={className}>
 				<DialogHeader>
-					<DialogTitle>{title}</DialogTitle>
+					<DialogTitle className='-mt-1 leading-6'>{title}</DialogTitle>
 					{desc && <DialogDescription>{desc}</DialogDescription>}
 				</DialogHeader>
 				<div
