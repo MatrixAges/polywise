@@ -17,4 +17,6 @@ Right before any final user-facing delivery, call `report_tool` one more time.
 
 - The final refresh must use a brief completed phrasing.
 - It should indicate that the relevant searching and thinking have been completed.
+- If you need that final refresh, do it before producing any final user-facing answer text.
+- Once the final user-facing answer has started, do not call `report_tool` again in that turn.
 - Do not send the final answer first and update the report later.
