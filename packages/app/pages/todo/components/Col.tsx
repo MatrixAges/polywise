@@ -34,10 +34,9 @@ const Index = (props: IProps) => {
 					`
 					flex
 					items-center justify-between
-					h-10
 					px-3
 				`,
-					mode === 'kanban' ? '' : 'bg-secondary/40'
+					mode === 'kanban' ? 'h-10' : 'bg-secondary/40 h-9'
 				)}
 			>
 				<div className='text-std-400 flex items-center gap-2'>

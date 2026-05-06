@@ -22,7 +22,7 @@ const inputSchema = object({
 export const createWebSearchTool = () => {
 	return tool({
 		description:
-			'Search the web using DuckDuckGo. Returns search results as Markdown with titles, URLs, and snippets for the AI to read.',
+			'Search the web using DuckDuckGo and return a link-discovery result. This tool is for finding candidate URLs only, not for final factual answers. After reviewing the returned links and snippets, call web_fetch_tool on the most relevant target URL to read the webpage body.',
 		inputSchema,
 		execute: async input => {
 			const max_chars = input.max_chars ?? MAX_CHARS
@@ -43,13 +43,24 @@ export const createWebSearchTool = () => {
 
 				return {
 					query: input.query,
+					result_type: 'link_list_only',
+					next_action: 'call_web_fetch_tool',
+					warning: 'Do not treat search result snippets as final evidence. Fetch the target page body with web_fetch_tool before answering.',
 					content: markdown.slice(0, max_chars),
 					truncated: markdown.length > max_chars
 				}
 			} catch (e: unknown) {
 				const message = e instanceof Error ? e.message : 'Unknown error'
 
-				return { query: input.query, content: '', truncated: false, error: message }
+				return {
+					query: input.query,
+					result_type: 'link_list_only',
+					next_action: 'retry_or_refine_search',
+					warning: 'Search failed before any target page could be fetched.',
+					content: '',
+					truncated: false,
+					error: message
+				}
 			}
 		}
 	})

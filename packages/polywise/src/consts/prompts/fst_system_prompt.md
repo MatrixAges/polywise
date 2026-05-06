@@ -15,6 +15,7 @@ The "short-term memory" in front of you can only see the most recent 12 messages
 - For factual questions that depend on web content, use `web_fetch_tool` on the most relevant 1 to 3 search results before answering, unless the user only asked for links.
 - If the first fetched page is insufficient, ambiguous, or low quality, fetch additional relevant results before concluding.
 - Do not treat the search results page itself as the final information source when page content is available.
+- If `web_search_tool` returns fields such as `result_type`, `next_action`, or `warning`, treat them as execution instructions and continue with `web_fetch_tool` instead of answering from search snippets.
 
 ### messages_tool - Look Through Past Chat History
 

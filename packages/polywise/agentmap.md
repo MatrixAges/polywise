@@ -127,7 +127,7 @@ This document provides an overview of the packages/polywise module structure and
 					"wiki.ts": "Read-only wiki knowledge search tool for main agent; search semantic knowledge by query",
 					"superego.ts": "Trigger tool that invokes superego agent to extract and persist information from conversation; only way for main agent to write to memory/wiki",
 					"webfetch.ts": "Fetch URL content as Markdown (Jina primary, fetch+turndown fallback)",
-					"websearch.ts": "Web search via DuckDuckGo keyword query for link lists, returned as turndown Markdown"
+					"websearch.ts": "Web search via DuckDuckGo keyword query for link discovery, returning Markdown plus follow-up fetch guidance fields"
 				},
 				"telemetry": {
 					"desc": "Shared FST telemetry domain for raw tool failure linkage, related-case grep search across tool_call_errors and patch daily files, patch suggestion leveling (observe|patch|escalate), and daily patch record upsert/write under app_path/patch",
