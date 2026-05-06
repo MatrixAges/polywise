@@ -151,6 +151,7 @@ CREATE TABLE `skill` (
 	`desc` text NOT NULL,
 	`path` text NOT NULL,
 	`type` text,
+	`order` real NOT NULL,
 	`created_at` integer,
 	`updated_at` integer
 );

@@ -1,4 +1,4 @@
-import { index, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
+import { index, integer, real, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 import { getId } from 'stk/utils'
 
 export default sqliteTable(
@@ -13,6 +13,8 @@ export default sqliteTable(
 		path: text('path').notNull(),
 		// skill type
 		type: text('type'),
+		// Sort order for drag reordering
+		order: real('order').notNull(),
 		created_at: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
 		updated_at: integer('updated_at', { mode: 'timestamp' })
 			.$defaultFn(() => new Date())

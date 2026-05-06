@@ -1,7 +1,7 @@
 {
   "version": "7",
   "dialect": "sqlite",
-  "id": "1ca55358-063a-446b-8949-ca60fecdd254",
+  "id": "500c8c61-7e84-459a-b488-96a3f90a5347",
   "prevIds": [
     "00000000-0000-0000-0000-000000000000"
   ],
@@ -1224,6 +1224,16 @@
       "default": null,
       "generated": null,
       "name": "type",
+      "entityType": "columns",
+      "table": "skill"
+    },
+    {
+      "type": "real",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "order",
       "entityType": "columns",
       "table": "skill"
     },
