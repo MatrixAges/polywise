@@ -1,5 +1,6 @@
 import { article } from '@core/db/schema'
 import { setArticle } from '@core/db/services'
+import { addAgentArticle } from '@core/db/services/externals'
 import { remove, save, search } from '@core/io'
 import { tool } from 'ai'
 import { eq } from 'drizzle-orm'
@@ -33,7 +34,7 @@ export const createWikiTool = (scope: SessionScope) => {
 					return 'Wiki add failed: content is required'
 				}
 
-				save({
+				const article_id = await save({
 					type: 'article',
 					content: input.content,
 					for: 'wiki',
@@ -41,6 +42,10 @@ export const createWikiTool = (scope: SessionScope) => {
 					scope_id: scope.id,
 					source: 'superego'
 				})
+
+				if (scope.type === 'agent' && scope.id) {
+					await addAgentArticle(scope.id, article_id)
+				}
 
 				return 'Wiki add queued.'
 			}

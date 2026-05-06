@@ -20,7 +20,7 @@ import {
 	trimMessages,
 	unarchiveMessages
 } from './messages'
-import { getAgents, getData, getModel, getProject } from './related'
+import { getAgents, getData, getModel, getOwnerAgent, getProject } from './related'
 import { getSession, initSession, updateSession } from './session'
 import { getState, setState } from './state'
 import { abortStream, getStream } from './stream'
@@ -48,6 +48,7 @@ export default class Index {
 	model = null as unknown as ModelResult
 
 	agents = [] as Array<Agent>
+	owner_agent = null as Agent | null
 	project = null as Project | null
 	model_messages = [] as Array<Message>
 	context = {} as Context
@@ -82,8 +83,8 @@ export default class Index {
 			return { type: 'project', id: this.project.id }
 		}
 
-		if (this.agents.length > 0) {
-			return { type: 'agent', id: this.agents[0].id }
+		if (this.owner_agent) {
+			return { type: 'agent', id: this.owner_agent.id }
 		}
 
 		return { type: 'global', id: null }
@@ -146,6 +147,7 @@ export default class Index {
 
 	getData = () => getData(this)
 	getAgents = () => getAgents(this)
+	getOwnerAgent = () => getOwnerAgent(this)
 	getModel = () => getModel(this)
 	getProject = () => getProject(this)
 
