@@ -1,5 +1,4 @@
-import { useMemoizedFn } from 'ahooks'
-import { ArrowLeft, CircleAlert, Grip } from 'lucide-react'
+import { ArrowLeft, CircleAlert, Grip, Loader, MessageSquareDot } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { Dialog, Session, Tabs } from '@/components'
@@ -11,50 +10,44 @@ interface IProps {
 }
 
 const tab_items = [
-	{ key: 'running', title: 'running' },
-	{ key: 'unread', title: 'unread' },
-	{ key: 'error', title: 'error' }
+	{ key: 'unread', Icon: MessageSquareDot },
+	{ key: 'running', Icon: Loader },
+	{ key: 'error', Icon: CircleAlert }
 ]
 
 const Index = (props: IProps) => {
 	const { x } = props
 	const current_list = x.list
 
-	const setOpen = useMemoizedFn((open: boolean) => x.setOpen(open))
-	const onClickTab = useMemoizedFn((key: string) => void x.setActiveStatus(key as Model['active_status']))
-
 	return (
 		<Dialog
 			open={x.open}
-			title='Sessions Status'
-			className='w-[1120px] max-w-[min(1120px,calc(100vw-40px))]'
-			max_height='max-h-[72vh]'
-			setOpen={setOpen}
+			title='Active Sessions'
+			desc='A panel for quickly viewing dynamic session changes'
+			className='w-[800px] max-w-none! gap-4'
+			max_height='h-[80vh]'
+			setOpen={x.toggleOpen}
 		>
 			<div
 				className='
 					overflow-hidden
 					flex
-					w-full h-[72vh]
-					min-h-[560px]
+					w-full h-full
 				'
 			>
 				<div
 					className='
 						flex flex-col
-						w-[280px]
-						border-r border-border-light
+						w-[210px] h-full
 					'
 				>
-					<div className='border-border-light border-b px-3 py-2'>
-						<Tabs items={tab_items} active={x.active_status} onClick={onClickTab}></Tabs>
-					</div>
+					<Tabs items={tab_items} active={x.current_status} onClick={x.setCurrentStatus}></Tabs>
 					<div
 						className='
 							overflow-y-auto
 							flex flex-1 flex-col
 							min-h-0
-							p-2
+							py-2
 						'
 					>
 						{current_list.length ? (
@@ -73,6 +66,7 @@ const Index = (props: IProps) => {
 											`
 										items-center
 										gap-2
+										rounded-sm
 										click_button
 									`,
 											x.selected_session_id === item.id && 'active'
@@ -108,7 +102,7 @@ const Index = (props: IProps) => {
 				</div>
 				<div className='flex min-w-0 flex-1'>
 					{x.selected_session_id ? (
-						<Session type='page' id={x.selected_session_id}></Session>
+						<Session type='dialog' id={x.selected_session_id}></Session>
 					) : (
 						<div
 							className='

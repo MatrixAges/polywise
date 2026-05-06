@@ -151,7 +151,7 @@ const Index = (props: IProps) => {
 					<MessageSquareText className='size-3'></MessageSquareText>
 					<span className='flex-1 truncate'>{report || item.session.title}</span>
 					{Status}
-					{running_time && <span className='text-nowrap'>{running_time}</span>}
+					{running_time && <span className='text-std-400 text-nowrap'>{running_time}</span>}
 				</div>
 			)}
 			{mode === 'list' && Time}

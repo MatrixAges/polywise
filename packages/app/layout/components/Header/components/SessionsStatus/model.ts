@@ -14,7 +14,7 @@ type SessionStatusList = RPCOutput['session']['getStatusList']
 export default class Index {
 	count = {} as SessionStatusCount
 	open = false
-	current_status = 'running' as SessionStatusType
+	current_status = 'unread' as SessionStatusType
 	list = [] as SessionStatusList
 	selected_session_id = ''
 
@@ -33,8 +33,10 @@ export default class Index {
 		if (this.open) this.getStatusList()
 	}
 
-	setCurrentStatus(v: Index['current_status']) {
-		this.current_status = v
+	setCurrentStatus(v: string) {
+		this.current_status = v as SessionStatusType
+
+		this.getStatusList()
 	}
 
 	setSelectedSession(id: string) {
@@ -42,9 +44,7 @@ export default class Index {
 	}
 
 	async getStatusList() {
-		const next_list = await rpc.session.getStatusList.query({ status: this.current_status })
-
-		this.list = next_list
+		this.list = await rpc.session.getStatusList.query({ status: this.current_status })
 	}
 
 	watchSessionCount() {
@@ -60,7 +60,10 @@ export default class Index {
 	watchSessionStatus() {
 		const deinit = rpc.session.watchSessionStatus.subscribe(undefined, {
 			onData: async () => {
-				if (this.open) this.getStatusList()
+				if (!this.open) return
+				if (this.current_status === 'unread') return
+
+				this.getStatusList()
 			}
 		})
 
