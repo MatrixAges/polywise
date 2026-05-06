@@ -88,7 +88,7 @@ This document provides an overview of the packages/app module structure and arch
 								"role": "Component"
 							},
 							"model.ts": {
-								"desc": "Local header sessions-status model that keeps dialog open state, active status tab, selected session id, active-status session list, and aggregated counts synchronized through a dedicated rpc.session.getSessionStatus subscription plus watchSessionStatus-driven list refreshes",
+								"desc": "Local header sessions-status model that keeps dialog open state, active status tab, selected session id, active-status session list, and aggregated counts synchronized through a dedicated rpc.session.getSessionStatus subscription plus watchSessionStatus-driven in-place list patching so status transitions do not immediately drop the current selection",
 								"role": "Model"
 							},
 							"SessionDialog.tsx": {

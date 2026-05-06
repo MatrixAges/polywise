@@ -1,7 +1,5 @@
-import { useLayoutEffect, useState } from 'react'
 import { CircleAlert, Loader, MessageSquareDot } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
-import { container } from 'tsyringe'
 
 import { useDelegate } from '@/hooks'
 
@@ -14,12 +12,6 @@ interface IProps {
 const Index = (props: IProps) => {
 	const { x } = props
 	const { unread = 0, running = 0, error = 0 } = x.count
-
-	useLayoutEffect(() => {
-		x.init()
-
-		return () => x.deinit()
-	}, [x])
 
 	const state = unread || running || error
 

@@ -6,7 +6,9 @@ import { emitChange } from '../utils'
 import type Session from '../session'
 
 const inputSchema = object({
-	report: string().describe('A very short progress update about what you are doing').max(48)
+	report: string()
+		.describe('A very short progress update about what you are doing, max length 48 characters')
+		.max(48)
 })
 
 export const updateReport = async (s: Session, report: string) => {

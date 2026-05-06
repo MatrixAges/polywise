@@ -6,6 +6,7 @@ import { rpc } from '@/utils'
 
 import type { RPCOutput } from '@/types'
 import type { SessionStatusType } from '@core/rpc/session/types'
+import type { SessionStatusPayload } from '@core/rpc/session/watchSessionStatus'
 
 type SessionStatusCount = { unread: number; running: number; error: number }
 type SessionStatusList = RPCOutput['session']['getStatusList']
@@ -43,6 +44,14 @@ export default class Index {
 		this.selected_session_id = id
 	}
 
+	patchSessionStatus(item: SessionStatusList[number], status_map: SessionStatusPayload) {
+		const status = status_map[item.id]
+
+		if (!status) return item
+
+		return { ...item, ...status } as SessionStatusList[number]
+	}
+
 	async getStatusList() {
 		this.list = await rpc.session.getStatusList.query({ status: this.current_status })
 	}
@@ -59,11 +68,10 @@ export default class Index {
 
 	watchSessionStatus() {
 		const deinit = rpc.session.watchSessionStatus.subscribe(undefined, {
-			onData: async () => {
+			onData: res => {
 				if (!this.open) return
-				if (this.current_status === 'unread') return
 
-				this.getStatusList()
+				this.list = this.list.map(item => this.patchSessionStatus(item, res))
 			}
 		})
 
