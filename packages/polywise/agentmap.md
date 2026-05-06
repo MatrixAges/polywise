@@ -144,8 +144,12 @@ This document provides an overview of the packages/polywise module structure and
 				"acp": { "desc": "ACP provider integration", "role": "Folder" }
 			},
 			"rpc": {
-				"desc": "tRPC router tree for API/state mutations and subscriptions, including session lifecycle, file persistence, provider/model runtime, and content operations; session router now includes dedicated single-file endpoints for create/remove/rename/pin and session-group management with pin.json + session_group.json persistence under app.app_path, while todo router now provides create/remove/sort/update plus query modes for standalone todos, project-scoped todos, project-grouped todo lists, and a nested session sub-router that starts or stops a todo-linked execution session by todo_id while resolving that link through the dedicated todo_session relation instead of session-owned task bindings. The shared tRPC init now uses superjson so Date fields round-trip correctly through HTTP and WS clients.",
+				"desc": "tRPC router tree for API/state mutations and subscriptions, including session lifecycle, file persistence, provider/model runtime, content operations, and agent CRUD; session router now includes dedicated single-file endpoints for create/remove/rename/pin and session-group management with pin.json + session_group.json persistence under app.app_path, while todo router now provides create/remove/sort/update plus query modes for standalone todos, project-scoped todos, project-grouped todo lists, and a nested session sub-router that starts or stops a todo-linked execution session by todo_id while resolving that link through the dedicated todo_session relation instead of session-owned task bindings. The shared tRPC init now uses superjson so Date fields round-trip correctly through HTTP and WS clients.",
 				"role": "Folder",
+				"agent": {
+					"desc": "Agent domain RPC procedures for create, remove, query, and update against the agent table",
+					"role": "Folder"
+				},
 				"index.ts": { "desc": "RPC routers aggregation and type export", "role": "Index" },
 				"save.ts": { "desc": "Save content to memory", "role": "RPC" },
 				"search.ts": {
@@ -210,7 +214,7 @@ This document provides an overview of the packages/polywise module structure and
 				"drizzle.ts": { "desc": "Database connection and drizzle instance", "role": "Module" },
 				"index.ts": { "desc": "DB module exports", "role": "Index" },
 				"schemas.ts": {
-					"desc": "Reusable drizzle-zod input schemas derived from Drizzle tables; currently exports todo insert/create/update schemas for RPC reuse.",
+					"desc": "Reusable drizzle-zod input schemas derived from Drizzle tables; currently exports todo and agent insert/create/update schemas for RPC reuse.",
 					"role": "Schema"
 				},
 				"initSql.ts": { "desc": "Virtual table initialization", "role": "Module" },
@@ -239,7 +243,7 @@ This document provides an overview of the packages/polywise module structure and
 					"message.ts": { "desc": "Chat message storage schema with UIMessages", "role": "Schema" }
 				},
 				"services": {
-					"desc": "Database write/read helpers for core entities and relation-backed projections; todo service now supports single-item lookup, generic list query, standalone todo filtering that excludes session_todo and project_todo bindings, standalone count queries for menu aggregation, and the todo RPC layer now reuses those projections to persist cross-status drag reordering by rewriting status plus sequential order. External relation helpers now provide separate link access for session_todo session-owned task bindings and todo_session todo-started execution session bindings, plus guarded todo status synchronization by todo_id or session_id for the processing/unreview/done/canceled/error lifecycle while moving todos to the top of the target kanban column by rewriting order within inbox or project scope. Project todo external service also exposes count queries for menu aggregation without loading full row sets.",
+					"desc": "Database write/read helpers for core entities and relation-backed projections; includes agent CRUD helpers plus todo service support for single-item lookup, generic list query, standalone todo filtering that excludes session_todo and project_todo bindings, standalone count queries for menu aggregation, and the todo RPC layer now reuses those projections to persist cross-status drag reordering by rewriting status plus sequential order. External relation helpers now provide separate link access for session_todo session-owned task bindings and todo_session todo-started execution session bindings, plus guarded todo status synchronization by todo_id or session_id for the processing/unreview/done/canceled/error lifecycle while moving todos to the top of the target kanban column by rewriting order within inbox or project scope. Project todo external service also exposes count queries for menu aggregation without loading full row sets.",
 					"role": "Folder"
 				}
 			},

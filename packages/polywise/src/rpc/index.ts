@@ -1,4 +1,5 @@
 import { r } from '../utils/trpc'
+import agent from './agent'
 import file from './file'
 import heartbeat from './heartbeat'
 import inspect from './inspect'
@@ -17,6 +18,7 @@ import update from './update'
 import type { inferRouterInputs, inferRouterOutputs } from '@trpc/server'
 
 export const router = r({
+	agent,
 	file,
 	project,
 	todo,

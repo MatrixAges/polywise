@@ -1,3 +1,4 @@
+export * from './agent'
 export * from './article'
 export * from './chunk'
 export * from './edge'
