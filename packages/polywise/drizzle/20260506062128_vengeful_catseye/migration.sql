@@ -8,6 +8,7 @@ CREATE TABLE `agent` (
 	`soul` text,
 	`identity` text,
 	`memory` text DEFAULT '',
+	`order` real NOT NULL,
 	`model` text NOT NULL,
 	`created_at` integer,
 	`updated_at` integer
@@ -187,6 +188,15 @@ CREATE TABLE `agent_document` (
 	CONSTRAINT `fk_agent_document_document_id_document_id_fk` FOREIGN KEY (`document_id`) REFERENCES `document`(`id`) ON DELETE CASCADE
 );
 --> statement-breakpoint
+CREATE TABLE `agent_session` (
+	`id` text PRIMARY KEY,
+	`agent_id` text NOT NULL,
+	`session_id` text NOT NULL,
+	`created_at` integer,
+	CONSTRAINT `fk_agent_session_agent_id_agent_id_fk` FOREIGN KEY (`agent_id`) REFERENCES `agent`(`id`) ON DELETE CASCADE,
+	CONSTRAINT `fk_agent_session_session_id_session_id_fk` FOREIGN KEY (`session_id`) REFERENCES `session`(`id`) ON DELETE CASCADE
+);
+--> statement-breakpoint
 CREATE TABLE `agent_skill` (
 	`agent_id` text NOT NULL,
 	`skill_id` text NOT NULL,
@@ -284,6 +294,7 @@ CREATE TABLE `todo_tag` (
 	CONSTRAINT `fk_todo_tag_todo_id_todo_id_fk` FOREIGN KEY (`todo_id`) REFERENCES `todo`(`id`) ON DELETE CASCADE
 );
 --> statement-breakpoint
+CREATE INDEX `agent_order_idx` ON `agent` (`order`);--> statement-breakpoint
 CREATE INDEX `agent_created_at_idx` ON `agent` (`created_at`);--> statement-breakpoint
 CREATE INDEX `agent_updated_at_idx` ON `agent` (`updated_at`);--> statement-breakpoint
 CREATE INDEX `article_document_id_idx` ON `article` (`document_id`);--> statement-breakpoint
@@ -335,6 +346,9 @@ CREATE INDEX `todo_created_at_idx` ON `todo` (`created_at`);--> statement-breakp
 CREATE INDEX `todo_updated_at_idx` ON `todo` (`updated_at`);--> statement-breakpoint
 CREATE INDEX `agent_article_article_id_idx` ON `agent_article` (`article_id`);--> statement-breakpoint
 CREATE INDEX `agent_document_document_id_idx` ON `agent_document` (`document_id`);--> statement-breakpoint
+CREATE INDEX `agent_session_agent_id_idx` ON `agent_session` (`agent_id`);--> statement-breakpoint
+CREATE INDEX `agent_session_session_id_idx` ON `agent_session` (`session_id`);--> statement-breakpoint
+CREATE UNIQUE INDEX `agent_session_agent_session_idx` ON `agent_session` (`agent_id`,`session_id`);--> statement-breakpoint
 CREATE INDEX `agent_skill_id_idx` ON `agent_skill` (`skill_id`);--> statement-breakpoint
 CREATE INDEX `agent_todo_todo_id_idx` ON `agent_todo` (`todo_id`);--> statement-breakpoint
 CREATE INDEX `link_article_article_id_idx` ON `link_article` (`article_id`);--> statement-breakpoint

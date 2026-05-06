@@ -5,6 +5,7 @@ import getContextPrompt from '@core/consts/prompts/getContextPrompt'
 import plan_mode_prompt from '@core/consts/prompts/plan_mode_prompt.md'
 import planexec_exec_prompt from '@core/consts/prompts/planexec_exec_prompt.md'
 import planexec_plan_prompt from '@core/consts/prompts/planexec_plan_prompt.md'
+import { agent, agent_session } from '@core/db/schema'
 import { addNotification, addNotificationSession, syncTodoSessionStatusBySessionId } from '@core/db/services'
 import { env } from '@core/env'
 import { createSystemTool } from '@core/fst/agents'
@@ -12,6 +13,7 @@ import { extract, getComplexitySignal } from '@core/fst/agents/superego'
 import { pushPart, startStream, stopStream } from '@core/fst/agents/supervisor'
 import { getSystemTools, SessionEventStore } from '@core/utils'
 import { convertToModelMessages, createUIMessageStream, smoothStream, stepCountIs, streamText } from 'ai'
+import { eq } from 'drizzle-orm'
 import { getId } from 'stk/utils'
 import { match } from 'ts-pattern'
 
@@ -51,6 +53,33 @@ const isAbortError = (error: unknown) => {
 	return error instanceof Error && error.name === 'AbortError'
 }
 
+const getAgentSystemPrompt = async (session_id: string) => {
+	const agent_row = await env.db
+		.select({ agent })
+		.from(agent_session)
+		.innerJoin(agent, eq(agent_session.agent_id, agent.id))
+		.where(eq(agent_session.session_id, session_id))
+		.limit(1)
+		.then(res => res[0])
+
+	if (!agent_row) {
+		return ''
+	}
+
+	const profile_prompt = [
+		'Agent Session Profile',
+		`Name: ${agent_row.agent.name}`,
+		agent_row.agent.identity ? `Identity: ${agent_row.agent.identity}` : '',
+		agent_row.agent.soul ? `Soul: ${agent_row.agent.soul}` : '',
+		agent_row.agent.memory ? `Memory: ${agent_row.agent.memory}` : '',
+		agent_row.agent.prompt ? `Prompt: ${agent_row.agent.prompt}` : ''
+	]
+		.filter(Boolean)
+		.join('\n')
+
+	return `${profile_prompt}\nFollow this agent session profile as a hard system-level role constraint.`
+}
+
 export default async (s: Index, message: Message) => {
 	const total_messages_count = s.context.total_messages_count ?? 0
 	const is_first_message = total_messages_count === 0
@@ -80,6 +109,7 @@ export default async (s: Index, message: Message) => {
 	const mcp_tools = await loadMcpTools(s)
 	const system_tools_prompt = await getSystemTools()
 	const has_todo_session_link = await s.has_todo_session_link
+	const agent_system_prompt = await getAgentSystemPrompt(s.id)
 
 	const custom_tools_prompt = getCustomToolsPrompt(s.custom_tools_map)
 	const skill_prompt = getSkillPrompt(s.skill_map)
@@ -93,6 +123,7 @@ export default async (s: Index, message: Message) => {
 
 	const system_prompt = [
 		fst_system_prompt,
+		agent_system_prompt,
 		has_todo_session_link ? fst_report_tool_prompt : '',
 		system_tools_prompt,
 		custom_tools_prompt,

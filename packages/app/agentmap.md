@@ -136,7 +136,58 @@ This document provides an overview of the packages/app module structure and arch
 			"index.ts": { "desc": "Models module exports", "role": "Index" }
 		},
 		"pages": {
-			"agent": { "index.tsx": { "desc": "Agent page view", "role": "Page" } },
+			"agent": {
+				"context.ts": {
+					"desc": "Agent page model context provider and hook for the left menu and right detail panel",
+					"role": "Context"
+				},
+				"components": {
+					"index.ts": {
+						"desc": "Agent page local component exports",
+						"role": "Index"
+					},
+					"Menu.tsx": {
+						"desc": "Left agent list menu with create trigger and dnd-kit drag sorting",
+						"role": "Component"
+					},
+					"MenuItem.tsx": {
+						"desc": "Sortable agent row atom with avatar, title, description, selection, and remove action",
+						"role": "Component"
+					},
+					"Detail.tsx": {
+						"desc": "Right agent detail panel with profile editor, model selector, content tabs, and avatar dialog mount",
+						"role": "Component"
+					},
+					"AgentAvatar.tsx": {
+						"desc": "Agent avatar renderer that prefers uploaded photo and falls back to nice/notion avatar configs or initials",
+						"role": "Component"
+					},
+					"EditableField.tsx": {
+						"desc": "Minimal inline input or textarea editor used by agent detail fields",
+						"role": "Component"
+					},
+					"AvatarDialog.tsx": {
+						"desc": "Avatar dialog supporting manual photo upload and random nice/notion avatar config generation",
+						"role": "Component"
+					},
+					"SessionsPanel.tsx": {
+						"desc": "Sessions tab content with left session menu, new-session action, and right shared Session renderer",
+						"role": "Component"
+					}
+				},
+				"index.tsx": {
+					"desc": "Agent page view with left agent menu and right editable detail panel",
+					"role": "Page"
+				},
+				"model.ts": {
+					"desc": "Agent page state model that loads agent lists, persists create/update/remove/sort actions, manages avatar dialog state, and loads linked sessions for the selected agent",
+					"role": "Model"
+				},
+				"types.ts": {
+					"desc": "Agent page local types for RPC-derived agent/session payloads and avatar config unions",
+					"role": "Type"
+				}
+			},
 			"bookmark": { "index.tsx": { "desc": "Bookmark page view", "role": "Page" } },
 			"browser": { "index.tsx": { "desc": "Browser page view", "role": "Page" } },
 			"database": { "index.tsx": { "desc": "Database page view", "role": "Page" } },
