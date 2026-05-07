@@ -180,7 +180,7 @@ const Index = (props: IPropsForm) => {
 							>
 								<Trash size={14} />
 							</button>
-							<Controller name='enabled' control={control}>
+							<Controller type='switch' name='enabled' control={control}>
 								<Switch />
 							</Controller>
 						</div>

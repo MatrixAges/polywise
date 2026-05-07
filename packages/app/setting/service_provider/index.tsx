@@ -46,13 +46,8 @@ const Index = () => {
 							Used by web_search_tool and web_fetch_tool through s.jina.ai and r.jina.ai
 						</FieldDescription>
 					</FieldContent>
-					<Controller name='jina_api_key' control={control}>
-						<Input
-							className='workspace_selector'
-							type='password'
-							placeholder='jina_...'
-							autoComplete='off'
-						/>
+					<Controller type='input' name='jina_api_key' control={control}>
+						<Input type='text' placeholder='jina_...' autoComplete='off' />
 					</Controller>
 				</Field>
 			</FieldGroup>

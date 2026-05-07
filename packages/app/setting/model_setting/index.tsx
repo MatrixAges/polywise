@@ -81,7 +81,7 @@ const Index = () => {
 							<FieldTitle className='text-base'>Generate Triples</FieldTitle>
 							<FieldDescription>Enable generate triples for article</FieldDescription>
 						</FieldContent>
-						<Controller name='enable_triple' control={control}>
+						<Controller type='switch' name='enable_triple' control={control}>
 							<Switch></Switch>
 						</Controller>
 					</Field>
@@ -104,7 +104,7 @@ const Index = () => {
 							<FieldTitle className='text-base'>Search Rewrite</FieldTitle>
 							<FieldDescription>Enable generation model to rewirte search</FieldDescription>
 						</FieldContent>
-						<Controller name='enable_rewrite' control={control}>
+						<Controller type='switch' name='enable_rewrite' control={control}>
 							<Switch></Switch>
 						</Controller>
 					</Field>

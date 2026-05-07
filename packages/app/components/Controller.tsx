@@ -5,23 +5,27 @@ import { Controller } from 'react-hook-form'
 import type { ReactElement } from 'react'
 
 interface IProps {
+	type?: 'input' | 'radio' | 'checkbox' | 'switch'
 	children: ReactElement
 	name: string
 	control: any
 }
 
 const Index = (props: IProps) => {
-	const { children, name, control } = props
+	const { type, children, name, control } = props
 
 	const render = useMemoizedFn(({ field: { name, value, ref, onChange } }) => {
 		const target_props = {
 			name,
 			value: value ?? '',
 			checked: typeof value === 'boolean' ? value : false,
-			onCheckedChange: onChange,
 			ref,
 			onChange
 		} as any
+
+		if (type === 'switch') {
+			target_props['onCheckedChange'] = onChange
+		}
 
 		if (typeof children.type === 'function' && (children.props as any)?.items) {
 			target_props['onValueChange'] = onChange
