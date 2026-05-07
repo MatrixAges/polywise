@@ -30,12 +30,12 @@ const Index = (props: IProps) => {
 				pb-2.5
 				rounded-sm
 				group
-				clickable
+				clickit
 			`,
 				selected && 'bg-active',
 				isDragging && 'dragging z-10 backdrop-blur-lg'
 			)}
-			onClick={() => void setSelectedSkill(item.id)}
+			onClick={() => setSelectedSkill(item.id)}
 			ref={setNodeRef}
 			style={{ transform: CSS.Translate.toString(transform), transition }}
 		>

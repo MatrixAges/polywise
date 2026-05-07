@@ -127,7 +127,7 @@ const Index = () => {
 						border-t border-border-light
 					'
 				>
-					<div className='text-std-400 text-sm'>
+					<div className='text-std-400 truncate text-sm'>
 						{selected_file?.path || `${selected_skill.path}/SKILL.md`}
 					</div>
 					<div className='flex items-center gap-2'>
