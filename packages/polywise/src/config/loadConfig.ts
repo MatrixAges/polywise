@@ -66,15 +66,26 @@ export default async () => {
 
 	clearObject(config)
 	Object.assign(config, res_config || {})
+	let has_changed_config = false
 
 	if (!config.mcp) {
 		config.mcp = { enabled: true }
+		has_changed_config = true
+	}
+
+	if (config.jina_api_key === undefined) {
+		config.jina_api_key = ''
+		has_changed_config = true
 	}
 
 	const { provider_config, has_changed_provider } = mergePresetProviders(res_providers)
 
 	clearObject(providers)
 	Object.assign(providers, provider_config)
+
+	if (has_changed_config) {
+		await fs.writeJson(config_path, config, { spaces: 4 })
+	}
 
 	if (has_changed_provider) {
 		await fs.writeJson(providers_path, provider_config, { spaces: 4 })

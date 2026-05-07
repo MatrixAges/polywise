@@ -4,7 +4,7 @@ export const setting_items = [
 	{ key: '', title: 'General Setting', Icon: Settings2 },
 	{ key: 'model_provider', title: 'Model Provider', Icon: Layers2 },
 	{ key: 'model_setting', title: 'Model Setting', Icon: Sparkles },
-	// { key: 'service_provider', title: 'Service Provider', Icon: Unplug },
+	{ key: 'service_provider', title: 'Service Provider', Icon: Unplug },
 	{ key: 'about_feedback', title: 'About & Feedback', Icon: Info }
 ]
 

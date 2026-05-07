@@ -47,6 +47,7 @@ export interface AppConfig {
 	current_workspace: string
 	submit_mode: 'enter' | 'ctrl+enter'
 	default_model: DefaultModel
+	jina_api_key?: string
 	mcp?: McpConfig
 	embedding_model?: DefaultModel
 	rerank_model?: DefaultModel

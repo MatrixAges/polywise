@@ -23,6 +23,7 @@ export default async () => {
 				workspaces: [{ name: 'Default' }],
 				current_workspace: 'Default',
 				default_model,
+				jina_api_key: '',
 				mcp: { enabled: true },
 				enable_triple: false,
 				triple_model: default_model,
