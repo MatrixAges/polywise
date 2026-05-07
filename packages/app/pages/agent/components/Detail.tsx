@@ -1,16 +1,34 @@
-import { PencilLine, Sparkles } from 'lucide-react'
+import { PencilLine } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
+import {
+	Select,
+	SelectContent,
+	SelectGroup,
+	SelectItem,
+	SelectLabel,
+	SelectTrigger,
+	SelectValue
+} from '@/__shadcn__/components/ui/select'
 import { ModelSelect, TextTabs } from '@/components'
 
 import { useModel } from '../context'
 import AgentAvatar from './AgentAvatar'
 import ArticlesPanel from './ArticlesPanel'
-import AvatarDialog from './AvatarDialog'
 import EditableField from './EditableField'
 import SkillSelect from './SkillSelect'
 
 const tabs = ['prompt', 'soul', 'identity', 'memory', 'article'] as const
+const effort_modes = [
+	{ label: 'Default', value: 'default' },
+	{ label: 'None', value: 'none' },
+	{ label: 'Minimal', value: 'minimal' },
+	{ label: 'Low', value: 'low' },
+	{ label: 'Medium', value: 'medium' },
+	{ label: 'High', value: 'high' },
+	{ label: 'XHigh', value: 'xhigh' },
+	{ label: 'Max', value: 'max' }
+]
 
 const Index = () => {
 	const {
@@ -21,8 +39,8 @@ const Index = () => {
 		startEditField,
 		cancelEditField,
 		submitEditableField,
-		skill_items,
 		setModel,
+		setModelEffort,
 		openAvatarDialog
 	} = useModel()
 
@@ -43,12 +61,6 @@ const Index = () => {
 	const active_tab = current_tab === 'sessions' ? 'prompt' : current_tab
 	const field_value =
 		active_tab === 'article' ? '' : (selected_agent[active_tab] as string | null | undefined) || ''
-
-	const meta_items = [
-		{ label: 'Sessions', value: 'Open conversations live' },
-		{ label: 'Skills', value: `${skill_items.length} connected` },
-		{ label: 'Voice', value: active_tab === 'article' ? 'Knowledge editor' : 'Prompt workspace' }
-	]
 
 	return (
 		<div
@@ -109,31 +121,41 @@ const Index = () => {
 										sm:flex-row sm:items-start
 									'
 								>
-									<button
-										className='clickable relative w-fit rounded-[24px]'
-										type='button'
-										onClick={openAvatarDialog}
-									>
-										<AgentAvatar
-											item={selected_agent}
-											size='large'
-										></AgentAvatar>
-										<span
-											className='
-												absolute
-												right-[-6px] bottom-[-6px]
-												flex
-												items-center justify-center
-												w-8 h-8
-												rounded-full
-												bg-card
-												border border-border-light
-												shadow-sm
-											'
+									<div className='flex flex-col items-start gap-3'>
+										<button
+											className='clickable relative w-fit rounded-[24px]'
+											type='button'
+											onClick={openAvatarDialog}
+										>
+											<AgentAvatar
+												item={selected_agent}
+												size='large'
+											></AgentAvatar>
+											<span
+												className='
+													absolute
+													right-[-6px] bottom-[-6px]
+													flex
+													items-center justify-center
+													w-8 h-8
+													rounded-full
+													bg-card
+													border border-border-light
+													shadow-sm
+												'
+											>
+												<PencilLine className='size-3.5'></PencilLine>
+											</span>
+										</button>
+										<button
+											className='click_button text-xs'
+											type='button'
+											onClick={openAvatarDialog}
 										>
 											<PencilLine className='size-3.5'></PencilLine>
-										</span>
-									</button>
+											Edit avatar
+										</button>
+									</div>
 									<div
 										className='
 											flex flex-1 flex-col
@@ -141,19 +163,6 @@ const Index = () => {
 											gap-3
 										'
 									>
-										<div
-											className='
-												flex
-												items-center
-												gap-2
-												text-std-400 text-xs font-medium
-												tracking-[0.18em]
-												uppercase
-											'
-										>
-											<Sparkles className='size-3.5'></Sparkles>
-											Agent Detail
-										</div>
 										<div className='flex flex-col gap-2'>
 											{edit_field_key === 'name' ? (
 												<EditableField
@@ -206,32 +215,6 @@ const Index = () => {
 												</div>
 											)}
 										</div>
-										<div className='grid gap-2 sm:grid-cols-3'>
-											{meta_items.map(item => (
-												<div
-													className='
-														px-3 py-2.5
-														rounded-2xl
-														bg-secondary/20
-														border border-border-light
-													'
-													key={item.label}
-												>
-													<div
-														className='
-															text-std-400 text-[11px]
-															font-medium tracking-[0.16em]
-															uppercase
-														'
-													>
-														{item.label}
-													</div>
-													<div className='mt-1 text-sm font-medium'>
-														{item.value}
-													</div>
-												</div>
-											))}
-										</div>
 									</div>
 								</div>
 								<div
@@ -256,6 +239,44 @@ const Index = () => {
 											value={selected_agent.model}
 											onChange={setModel}
 										></ModelSelect>
+									</div>
+									<div className='flex flex-col gap-2'>
+										<span
+											className='
+												text-std-400 text-xs font-medium
+												tracking-[0.16em]
+												uppercase
+											'
+										>
+											Effort
+										</span>
+										<Select
+											items={effort_modes}
+											value={selected_agent.model?.effort ?? 'default'}
+											onValueChange={value => {
+												if (!value) return
+												void setModelEffort(value)
+											}}
+										>
+											<SelectTrigger className='w-full justify-between'>
+												<SelectValue />
+											</SelectTrigger>
+											<SelectContent>
+												<SelectGroup>
+													<SelectLabel>
+														Reasoning Effort
+													</SelectLabel>
+													{effort_modes.map(item => (
+														<SelectItem
+															value={item.value}
+															key={item.value}
+														>
+															{item.label}
+														</SelectItem>
+													))}
+												</SelectGroup>
+											</SelectContent>
+										</Select>
 									</div>
 									<div
 										className='
@@ -333,7 +354,6 @@ const Index = () => {
 					</div>
 				</div>
 			</div>
-			<AvatarDialog></AvatarDialog>
 		</div>
 	)
 }

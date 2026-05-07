@@ -371,6 +371,22 @@ export default class Index {
 		await this.updateAgent({ id: this.selected_agent_id, model })
 	}
 
+	async setModelEffort(effort: string) {
+		if (!this.selected_agent_id) return
+
+		const agent_item = this.selected_agent
+
+		if (!agent_item) return
+
+		await this.updateAgent({
+			id: this.selected_agent_id,
+			model: {
+				...agent_item.model,
+				effort
+			}
+		})
+	}
+
 	async setSkills(skill_ids: Array<string>) {
 		if (!this.selected_agent_id) return
 
