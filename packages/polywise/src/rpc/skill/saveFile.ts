@@ -7,6 +7,7 @@ import fs from 'fs-extra'
 import { object, string } from 'zod'
 
 import { p } from '../../utils/trpc'
+import { assertSkillEntryPath, getSkillItemDirPath } from './utils'
 
 const input_type = object({
 	skill_id: string(),
@@ -21,20 +22,23 @@ export default p.input(input_type).mutation(async ({ input }) => {
 		throw new Error(`Skill not found: ${input.skill_id}`)
 	}
 
-	const skill_dir = current_skill.path.endsWith('SKILL.md') ? path.dirname(current_skill.path) : current_skill.path
-	const target_path = path.resolve(input.path)
-	const relative_path = path.relative(skill_dir, target_path)
+	const skill_dir = getSkillItemDirPath(current_skill)
+	const { entry_path } = assertSkillEntryPath({
+		skill_dir,
+		target_path: input.path,
+		error_message: 'Invalid skill file path'
+	})
 
-	if (relative_path.startsWith('..') || path.isAbsolute(relative_path) || relative_path.includes(`..${path.sep}`)) {
-		throw new Error('Invalid skill file path')
+	if (path.basename(entry_path) === 'SKILL.md') {
+		throw new Error('SKILL.md must be updated through skill.update')
 	}
 
-	await fs.ensureDir(path.dirname(target_path))
-	await writeFile(target_path, input.content, 'utf8')
+	await fs.ensureDir(path.dirname(entry_path))
+	await writeFile(entry_path, input.content, 'utf8')
 
 	return {
-		path: target_path,
-		name: path.basename(target_path),
+		path: entry_path,
+		name: path.basename(entry_path),
 		contents: input.content
 	}
 })

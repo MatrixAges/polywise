@@ -115,7 +115,7 @@ This document provides an overview of the packages/polywise module structure and
 					"getBashTools": "Sandbox-backed bash tool builder with command risk matching, audit review, and child_process proxy execution for flagged commands"
 				},
 				"tools": {
-					"desc": "Bash sandboxing tools via bash-tool, local skill search/read/create/update/rebuild tooling plus Available Skills system-prompt summary injection, with skill_map persisted as name + description only and skill_tool resolving directory and SKILL.md paths from skill name at runtime; global custom tool routing and lazy-loading via meta_tool as the only bridge for custom tool execution, session-scoped plan management, session database message search by content and created_at range, read-only memory/wiki search tools with superego trigger, and search_file_tool now reusing the shared utils/grep ripgrep wrapper while still honoring virtual workspace path mapping and permission checks, normalizing absolute match filenames back into virtual paths and returning absolute_path-rich results without shell command assembly or fallback grep branches; initDefaults now also ensures app_path/patch exists and seeds a built-in skills/skill-creator/SKILL.md meta-skill, while error_collect_tool records raw tool_call_errors and links failure-like outputs into telemetry patch aggregation",
+					"desc": "Bash sandboxing tools via bash-tool, local skill search/read/create/update/rebuild tooling plus Available Skills system-prompt summary injection, with skill_map persisted as name + description only and skill_tool create/update now reusing the same file + database + skill_map sync path as rpc/skill while runtime lookup still derives SKILL.md paths from skill name; global custom tool routing and lazy-loading via meta_tool as the only bridge for custom tool execution, session-scoped plan management, session database message search by content and created_at range, read-only memory/wiki search tools with superego trigger, and search_file_tool now reusing the shared utils/grep ripgrep wrapper while still honoring virtual workspace path mapping and permission checks, normalizing absolute match filenames back into virtual paths and returning absolute_path-rich results without shell command assembly or fallback grep branches; initDefaults now also ensures app_path/patch exists and seeds a built-in skills/skill-creator/SKILL.md meta-skill, while error_collect_tool records raw tool_call_errors and links failure-like outputs into telemetry patch aggregation",
 					"role": "Folder",
 					"cron.ts": "Create/list/read/update/remove cron jobs backed by app.app_path/cron.json with incremental runtime reload and physical directory removal",
 					"meta": "Manage global custom tool routing, rebuild minimal custom_tools_map metadata with name and description only, resolve per-tool readme.md and index.mjs paths from tools_dir + name at runtime, expose fuzzy search/read/execute/create/remove actions, return input_schema only from read/search by dynamically loading each tool module, and lazily execute per-tool index.mjs modules only through meta_tool bridge with z.fromJSONSchema-based input validation",
@@ -186,7 +186,7 @@ This document provides an overview of the packages/polywise module structure and
 					"role": "Folder"
 				},
 				"skill": {
-					"desc": "Skill domain RPC procedures for creating, querying, updating, deleting, and drag-sorting local skills, plus guarded sibling file and folder create, remove, move, and text-file save operations scoped to the selected skill directory so the app skill page can manage a skill tree while protecting SKILL.md from destructive moves.",
+					"desc": "Skill domain RPC procedures for creating, querying, updating, deleting, and drag-sorting local skills, now centered on shared helpers that keep SKILL.md files, the skill database table, and skill_map.json in sync; startup default sync now only inserts the built-in skill-creator skill when missing after DB init, while create/remove/save/move entry operations guard both SKILL.md and the skill root directory from destructive or bypassing mutations.",
 					"role": "Folder"
 				},
 				"todo": {
@@ -352,7 +352,10 @@ This document provides an overview of the packages/polywise module structure and
 				},
 				"index.ts": { "desc": "Utils exports", "role": "Index" }
 			},
-			"index.ts": { "desc": "Main package exports (API, RPCs, types)", "role": "Index" },
+			"index.ts": {
+				"desc": "Main package exports (API, RPCs, types) and now runs missing-only skill default synchronization after DB initialization",
+				"role": "Index"
+			},
 			"auth.ts": { "desc": "Authentication configuration", "role": "Module" },
 			"config.ts": { "desc": "Real-time config mapping with watchpack", "role": "Module" },
 			"env.ts": { "desc": "Environment variable configuration", "role": "Module" }

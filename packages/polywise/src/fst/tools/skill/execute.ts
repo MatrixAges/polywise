@@ -1,7 +1,10 @@
 import path from 'path'
+import { getSkill } from '@core/db/services'
 import { readFile } from 'atomically'
-import fs from 'fs-extra'
+import { eq } from 'drizzle-orm'
 
+import { skill } from '../../../db/schema'
+import { createSkill, updateSkill } from '../../../rpc/skill/utils'
 import { checkPermission } from '../../utils'
 import readSkillMap from './read'
 import rebuildSkillMap from './rebuild'
@@ -58,10 +61,11 @@ const getSkillTarget = async (s: Session, skill_name: string) => {
 const writeSkillFile = async (args: {
 	session: Session
 	skill_name: string
+	description: string
 	content: string
 	require_existing: boolean
 }) => {
-	const { session, skill_name, content, require_existing } = args
+	const { session, skill_name, description, content, require_existing } = args
 	const target = await getSkillTarget(session, skill_name)
 	const skill_dir_name = getSkillDirName(skill_name)
 	const skill_dir = target.skill_dir
@@ -85,8 +89,30 @@ const writeSkillFile = async (args: {
 		return { error: `Skill "${skill_name}" already exists. Use action "update" instead.` }
 	}
 
-	await fs.ensureDir(skill_dir)
-	await fs.writeFile(skill_file_path, content, 'utf8')
+	try {
+		if (require_existing) {
+			const current_skill = await getSkill(eq(skill.name, skill_name))
+
+			if (!current_skill) {
+				return { error: `Skill "${skill_name}" does not exist. Use action "create" first.` }
+			}
+
+			await updateSkill({
+				id: current_skill.id,
+				name: skill_name,
+				desc: description,
+				content
+			})
+		} else {
+			await createSkill({
+				name: skill_name,
+				desc: description,
+				content
+			})
+		}
+	} catch (error) {
+		return { error: error instanceof Error ? error.message : 'Failed to write skill' }
+	}
 
 	const skill_map = await rebuildSkillMap(session)
 	const current = skill_map.find(item => item.name === skill_name)
@@ -180,6 +206,7 @@ export default async (s: Session, input: SkillToolInput) => {
 		const result = await writeSkillFile({
 			session: s,
 			skill_name: input.build_name,
+			description: input.build_description,
 			content: input.build_content,
 			require_existing: false
 		})
@@ -213,6 +240,7 @@ export default async (s: Session, input: SkillToolInput) => {
 		const result = await writeSkillFile({
 			session: s,
 			skill_name: input.skill_name,
+			description: input.build_description,
 			content: input.build_content,
 			require_existing: true
 		})

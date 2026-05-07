@@ -6,6 +6,7 @@ import fs from 'fs-extra'
 import { array, object, string } from 'zod'
 
 import { p } from '../../utils/trpc'
+import { assertSkillEntryPath, getSkillItemDirPath } from './utils'
 
 const input_type = object({
 	skill_id: string(),
@@ -24,25 +25,30 @@ export default p.input(input_type).mutation(async ({ input }) => {
 		throw new Error(`Skill not found: ${input.skill_id}`)
 	}
 
-	const skill_dir = current_skill.path.endsWith('SKILL.md') ? path.dirname(current_skill.path) : current_skill.path
+	const skill_dir = getSkillItemDirPath(current_skill)
 
 	for (const item of input.operations) {
-		const from_path = path.resolve(item.from)
-		const to_path = path.resolve(item.to)
-		const relative_from_path = path.relative(skill_dir, from_path)
-		const relative_to_path = path.relative(skill_dir, to_path)
-
-		if (
-			relative_from_path.startsWith('..') ||
-			path.isAbsolute(relative_from_path) ||
-			relative_to_path.startsWith('..') ||
-			path.isAbsolute(relative_to_path)
-		) {
-			throw new Error('Invalid skill move path')
-		}
+		const { entry_path: from_path } = assertSkillEntryPath({
+			skill_dir,
+			target_path: item.from,
+			error_message: 'Invalid skill move path'
+		})
+		const { entry_path: to_path } = assertSkillEntryPath({
+			skill_dir,
+			target_path: item.to,
+			error_message: 'Invalid skill move path'
+		})
 
 		if (path.basename(from_path) === 'SKILL.md') {
 			throw new Error('SKILL.md cannot be moved')
+		}
+
+		if (from_path === skill_dir) {
+			throw new Error('Skill root cannot be moved')
+		}
+
+		if (to_path === skill_dir) {
+			throw new Error('Skill root cannot be replaced')
 		}
 	}
 

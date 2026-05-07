@@ -6,6 +6,7 @@ import fs from 'fs-extra'
 import { object, string } from 'zod'
 
 import { p } from '../../utils/trpc'
+import { assertSkillEntryPath, getSkillItemDirPath } from './utils'
 
 const input_type = object({
 	skill_id: string(),
@@ -19,19 +20,18 @@ export default p.input(input_type).mutation(async ({ input }) => {
 		throw new Error(`Skill not found: ${input.skill_id}`)
 	}
 
-	const skill_dir = current_skill.path.endsWith('SKILL.md') ? path.dirname(current_skill.path) : current_skill.path
-	const target_path = path.resolve(input.path)
-	const relative_path = path.relative(skill_dir, target_path)
+	const skill_dir = getSkillItemDirPath(current_skill)
+	const { entry_path } = assertSkillEntryPath({
+		skill_dir,
+		target_path: input.path,
+		error_message: 'Invalid skill entry path'
+	})
 
-	if (relative_path.startsWith('..') || path.isAbsolute(relative_path)) {
-		throw new Error('Invalid skill entry path')
-	}
-
-	if (path.basename(target_path) === 'SKILL.md') {
+	if (path.basename(entry_path) === 'SKILL.md') {
 		throw new Error('SKILL.md cannot be removed')
 	}
 
-	await fs.remove(target_path)
+	await fs.remove(entry_path)
 
-	return { path: target_path }
+	return { path: entry_path }
 })

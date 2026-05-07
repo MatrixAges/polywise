@@ -5,7 +5,7 @@ import { injectable } from 'tsyringe'
 import { Files, Util } from '@/models/common'
 import { rpc } from '@/utils'
 
-import type { FileTreeContextMenuItem, FileTreeContextMenuOpenContext, FileTree as TreeInstance } from '@pierre/trees'
+import type { ContextMenuItem, ContextMenuOpenContext, FileTree as TreeInstance } from '@pierre/trees'
 import type {
 	DetailMode,
 	SkillItem,
@@ -23,7 +23,6 @@ export default class Index {
 	edit_name = ''
 	edit_desc = ''
 	edit_content = ''
-	file_preview_open = true
 	file_tree = null as TreeInstance | null
 
 	get selected_skill() {
@@ -129,7 +128,7 @@ export default class Index {
 		}
 	}
 
-	renderTreeContextMenu(args: { item: FileTreeContextMenuItem; context: FileTreeContextMenuOpenContext }) {
+	renderTreeContextMenu(args: { item: ContextMenuItem; context: ContextMenuOpenContext }) {
 		const { item, context } = args
 		const mount_node = document.createElement('div')
 		const root = document.createElement('div')
@@ -309,10 +308,6 @@ export default class Index {
 			...this.skill_files.select_file,
 			contents: value
 		}
-	}
-
-	toggleFilePreviewOpen() {
-		this.file_preview_open = !this.file_preview_open
 	}
 
 	async selectPath(args: { directory: boolean; path: string }) {

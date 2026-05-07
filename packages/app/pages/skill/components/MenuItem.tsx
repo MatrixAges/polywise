@@ -28,7 +28,7 @@ const Index = (props: IProps) => {
 				items-center
 				gap-2
 				px-2 py-2
-				rounded-lg
+				rounded-sm
 				group
 				clickable
 			`,
@@ -39,23 +39,24 @@ const Index = (props: IProps) => {
 			ref={setNodeRef}
 			style={{ transform: CSS.Translate.toString(transform), transition }}
 		>
-			<button className='icon_button small cursor-grab' type='button' {...attributes} {...listeners}>
-				<DotsSixVerticalIcon className='size-3.5' weight='bold'></DotsSixVerticalIcon>
-			</button>
-			<div className='min-w-0 flex-1'>
+			<div className='min-w-0 flex-1 truncate'>
 				<div className='truncate text-sm font-medium'>{item.name}</div>
 				<div className='text-std-400 truncate text-xs'>{item.desc || 'No description'}</div>
 			</div>
-			<button
-				className='icon_button small opacity-0 group-hover:opacity-100'
-				type='button'
-				onClick={event => {
-					event.stopPropagation()
-					openEditDialog(item.id)
-				}}
-			>
-				<Pencil className='size-3.5'></Pencil>
-			</button>
+			<div className='flex items-center opacity-0 group-hover:opacity-100'>
+				<button className='icon_button small cursor-grab' type='button' {...attributes} {...listeners}>
+					<DotsSixVerticalIcon className='size-3.5' weight='bold'></DotsSixVerticalIcon>
+				</button>
+				<button
+					className='icon_button small'
+					type='button'
+					onClick={() => {
+						openEditDialog(item.id)
+					}}
+				>
+					<Pencil className='size-3'></Pencil>
+				</button>
+			</div>
 		</div>
 	)
 }
