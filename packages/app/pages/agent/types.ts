@@ -9,6 +9,7 @@ export type AgentSessionItem = AgentSessionResponse['sessions'][number]
 export type AgentSkillItem = RPCOutput['agent']['getSkills'][number]
 export type AgentArticleItem = RPCOutput['agent']['getArticles'][number]
 export type SkillItem = RPCOutput['skill']['query'][number]
+export type AgentPageMode = 'sessions' | 'detail'
 export type AgentTab = 'sessions' | 'prompt' | 'soul' | 'identity' | 'memory' | 'article'
 export type ArticleForType = 'linkcase' | 'wiki' | 'memory' | 'user'
 export type AvatarMode = 'upload' | 'nice' | 'notion'

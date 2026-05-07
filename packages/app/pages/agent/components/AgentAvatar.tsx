@@ -30,7 +30,7 @@ const Index = (props: IProps) => {
 			return
 		}
 
-		const next_url = URL.createObjectURL(new Blob([photo]))
+		const next_url = URL.createObjectURL(new Blob([new Uint8Array(photo)]))
 
 		setPhotoUrl(next_url)
 

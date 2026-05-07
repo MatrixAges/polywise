@@ -2,7 +2,7 @@ import { useLayoutEffect, useState } from 'react'
 import { observer } from 'mobx-react-lite'
 import { container } from 'tsyringe'
 
-import { Detail, Menu } from './components'
+import { Detail, Menu, SessionsPanel } from './components'
 import { Context } from './context'
 import Model from './model'
 
@@ -19,7 +19,7 @@ const Index = () => {
 		<Context value={x}>
 			<div className='flex h-full overflow-hidden'>
 				<Menu></Menu>
-				<Detail></Detail>
+				{x.page_mode === 'sessions' ? <SessionsPanel></SessionsPanel> : <Detail></Detail>}
 			</div>
 		</Context>
 	)

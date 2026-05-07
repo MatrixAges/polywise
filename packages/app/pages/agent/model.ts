@@ -13,6 +13,7 @@ import type {
 	AgentArticleItem,
 	AgentAvatarConfig,
 	AgentItem,
+	AgentPageMode,
 	AgentSessionItem,
 	AgentSkillItem,
 	AgentTab,
@@ -29,7 +30,8 @@ export default class Index {
 	skill_items = [] as Array<AgentSkillItem>
 	skill_options = [] as Array<ISkillOption>
 	selected_agent_id = ''
-	current_tab = 'sessions' as AgentTab
+	page_mode = 'sessions' as AgentPageMode
+	current_tab = 'prompt' as AgentTab
 	edit_field_key = '' as '' | 'name' | 'description' | AgentTab
 	article_items = [] as Array<AgentArticleItem>
 	article_for = 'memory' as ArticleForType
@@ -78,6 +80,10 @@ export default class Index {
 				}
 			}
 		]
+
+		if (this.current_tab === 'sessions') {
+			this.current_tab = 'prompt'
+		}
 
 		await this.refresh()
 	}
@@ -198,19 +204,56 @@ export default class Index {
 	}
 
 	setSelectedAgent(agent_id: string) {
-		if (this.selected_agent_id === agent_id) {
+		this.openAgentSessions(agent_id)
+	}
+
+	openAgentSessions(agent_id: string) {
+		this.selectAgent(agent_id, 'sessions')
+	}
+
+	openAgentDetail(agent_id: string) {
+		this.selectAgent(agent_id, 'detail')
+	}
+
+	selectAgent(agent_id: string, page_mode: AgentPageMode) {
+		const same_agent = this.selected_agent_id === agent_id
+		const same_mode = this.page_mode === page_mode
+
+		if (same_agent && same_mode) {
 			return
 		}
 
 		this.selected_agent_id = agent_id
+		this.page_mode = page_mode
 		this.edit_field_key = ''
-		void this.refreshAgentRelated()
-		void this.refreshSessions()
+
+		if (this.current_tab === 'sessions') {
+			this.current_tab = 'prompt'
+		}
+
+		if (!same_agent) {
+			void this.refreshAgentRelated()
+			void this.refreshSessions()
+		}
 	}
 
 	setCurrentTab(tab: AgentTab) {
+		if (tab === 'sessions') {
+			this.page_mode = 'sessions'
+			tab = 'prompt'
+		}
+
 		this.current_tab = tab
 		this.edit_field_key = ''
+	}
+
+	setPageMode(mode: AgentPageMode) {
+		this.page_mode = mode
+		this.edit_field_key = ''
+
+		if (mode === 'detail' && this.current_tab === 'sessions') {
+			this.current_tab = 'prompt'
+		}
 	}
 
 	setArticleFor(for_type: ArticleForType) {
@@ -266,6 +309,9 @@ export default class Index {
 
 		if (next_agent?.id) {
 			this.selected_agent_id = next_agent.id
+			this.page_mode = 'detail'
+			this.current_tab = 'prompt'
+			await this.refreshAgentRelated()
 			await this.refreshSessions()
 		}
 	}
@@ -396,7 +442,7 @@ export default class Index {
 		this.resetAvatarPreview()
 
 		if (agent_item.photo) {
-			const blob = new Blob([agent_item.photo as Uint8Array])
+			const blob = new Blob([new Uint8Array(agent_item.photo as Uint8Array)])
 			this.avatar_preview_url = URL.createObjectURL(blob)
 		}
 	}

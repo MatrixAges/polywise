@@ -1,12 +1,13 @@
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { DotsSixVerticalIcon } from '@phosphor-icons/react'
-import { Trash2 } from 'lucide-react'
+import { Pencil, Trash2 } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { useModel } from '../context'
 import AgentAvatar from './AgentAvatar'
 
+import type { MouseEvent } from 'react'
 import type { AgentItem } from '../types'
 
 interface IProps {
@@ -16,46 +17,77 @@ interface IProps {
 
 const Index = (props: IProps) => {
 	const { item, selected } = props
-	const { setSelectedAgent, removeAgent } = useModel()
+	const { openAgentDetail, openAgentSessions, removeAgent } = useModel()
 	const { attributes, listeners, transform, transition, isDragging, setNodeRef } = useSortable({ id: item.id })
+	const stopPropagation = (event: MouseEvent<HTMLButtonElement>) => event.stopPropagation()
 
 	return (
 		<div
 			className={$cx(
 				`
-				flex
-				items-center
-				gap-2
-				px-2 py-2
-				rounded-lg
+				flex flex-col
+				gap-1
+				p-2.5
+				rounded-xl
 				group
 				clickable
 			`,
 				selected && 'bg-active',
 				isDragging && 'dragging z-10 backdrop-blur-lg'
 			)}
-			onClick={() => setSelectedAgent(item.id)}
+			onClick={() => openAgentSessions(item.id)}
 			ref={setNodeRef}
 			style={{ transform: CSS.Translate.toString(transform), transition }}
 		>
-			<button className='icon_button small cursor-grab' type='button' {...attributes} {...listeners}>
-				<DotsSixVerticalIcon className='size-3.5' weight='bold'></DotsSixVerticalIcon>
-			</button>
-			<AgentAvatar item={item} size='small'></AgentAvatar>
-			<div className='min-w-0 flex-1'>
-				<div className='truncate text-sm font-medium'>{item.name}</div>
-				<div className='text-std-400 truncate text-xs'>{item.description || 'No description'}</div>
+			<div className='flex items-start gap-2.5'>
+				<AgentAvatar item={item} size='small'></AgentAvatar>
+				<div className='min-w-0 flex-1'>
+					<div className='truncate text-sm font-medium'>{item.name}</div>
+					<div className='text-std-400 line-clamp-2 text-xs'>
+						{item.description || 'No description'}
+					</div>
+				</div>
+				<div
+					className='
+						flex
+						items-center
+						opacity-0
+						transition-opacity
+						group-hover:opacity-100
+						-mr-1
+					'
+				>
+					<button
+						className='icon_button small cursor-grab'
+						type='button'
+						onClick={stopPropagation}
+						{...attributes}
+						{...listeners}
+					>
+						<DotsSixVerticalIcon className='size-3.5' weight='bold'></DotsSixVerticalIcon>
+					</button>
+					<button
+						className='icon_button small'
+						type='button'
+						onClick={(event: MouseEvent<HTMLButtonElement>) => {
+							event.stopPropagation()
+							openAgentDetail(item.id)
+						}}
+					>
+						<Pencil className='size-3'></Pencil>
+					</button>
+					<button
+						className='icon_button small'
+						type='button'
+						onClick={(event: MouseEvent<HTMLButtonElement>) => {
+							event.stopPropagation()
+							removeAgent(item.id)
+						}}
+					>
+						<Trash2 className='size-3.5'></Trash2>
+					</button>
+				</div>
 			</div>
-			<button
-				className='icon_button small opacity-0 group-hover:opacity-100'
-				type='button'
-				onClick={event => {
-					event.stopPropagation()
-					removeAgent(item.id)
-				}}
-			>
-				<Trash2 className='size-3.5'></Trash2>
-			</button>
 		</div>
 	)
 }
