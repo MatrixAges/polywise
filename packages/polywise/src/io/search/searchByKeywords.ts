@@ -1,5 +1,9 @@
+import { keyword_search_limit } from '@core/consts/search'
 import { searchChunkByKeywords } from '@core/db/prepare'
+import { chunk } from '@core/db/schema'
+import { getChunks } from '@core/db/services'
 import { log } from '@core/utils'
+import { desc, like, or } from 'drizzle-orm'
 
 interface SearchResult {
 	chunk_id: string
@@ -11,11 +15,11 @@ const escapeFtsQuery = (query: string): string => {
 }
 
 export default async (keywords: string) => {
-	const query = keywords
+	const keyword_list = keywords
 		.split(',')
 		.map(k => k.trim())
 		.filter(Boolean)
-		.join(' OR ')
+	const query = keyword_list.join(' OR ')
 	log('SEARCH', 'searchByKeywords', () => `query: ${query}`)
 
 	const escaped_query = escapeFtsQuery(query)
@@ -23,8 +27,28 @@ export default async (keywords: string) => {
 
 	log('SEARCH', 'searchByKeywords results', () => `count: ${results.length}`)
 
-	return results.map((item, index) => ({
-		chunk_id: item.chunk_id,
+	if (results.length > 0) {
+		return results.map((item, index) => ({
+			chunk_id: item.chunk_id,
+			rank: index + 1
+		})) as Array<SearchResult>
+	}
+
+	const content_fallback_terms = keyword_list.filter(term => term.length >= 2).slice(0, 8)
+
+	if (content_fallback_terms.length === 0) {
+		return []
+	}
+
+	const where = or(...content_fallback_terms.map(term => like(chunk.content, `%${term}%`)))
+	const fallback_chunks = await getChunks({
+		where,
+		orderBy: desc(chunk.created_at),
+		limit: keyword_search_limit
+	})
+
+	return fallback_chunks.map((item, index) => ({
+		chunk_id: item.id,
 		rank: index + 1
 	})) as Array<SearchResult>
 }

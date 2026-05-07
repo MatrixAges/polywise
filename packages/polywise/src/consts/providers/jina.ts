@@ -13,8 +13,8 @@ export default {
 		},
 		{
 			enabled: true,
-			id: 'jina-rerank-v3',
-			name: 'Jina Rerank V3',
+			id: 'jina-reranker-v3',
+			name: 'Jina Reranker V3',
 			type: 'rerank'
 		}
 	]

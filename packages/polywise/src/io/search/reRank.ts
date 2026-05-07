@@ -47,6 +47,17 @@ export interface RerankedArticleResult extends ArticleSearchResult {
 	content: string
 }
 
+const normalizeText = (text: string) => text.trim().toLowerCase().replace(/\s+/g, '')
+
+const hasDirectTextMatch = (query: string, content: string) => {
+	const normalized_query = normalizeText(query)
+	const normalized_content = normalizeText(content)
+
+	if (!normalized_query || !normalized_content) return false
+
+	return normalized_content.includes(normalized_query)
+}
+
 const calculateFinalScore = (
 	rerank_score: number,
 	retrieval_score: number,
@@ -143,6 +154,22 @@ const rerankChunk = async (query: string, results: Array<SearchResult>) => {
 
 		log('SEARCH', 'reRank done', () => `result_count: ${reranked.length}`)
 
+		if (reranked.length === 0) {
+			const fallback_results = results
+				.map((doc, index) => ({
+					...doc,
+					reranker_score: scores[index] ?? 0,
+					final_score: doc.normalized_rrf_score,
+					content: contents[index],
+					direct_text_match: hasDirectTextMatch(query, contents[index] || '')
+				}))
+				.filter(item => item.direct_text_match || item.from_keyword)
+				.map(({ direct_text_match: _direct_text_match, ...item }) => item)
+				.sort((a, b) => b.final_score - a.final_score)
+
+			if (fallback_results.length > 0) return fallback_results
+		}
+
 		return reranked.sort((a, b) => b.final_score - a.final_score)
 	} finally {
 		removeTask('rerank', task_id)
@@ -209,6 +236,30 @@ const rerankArticle = async (
 		})
 
 		log('SEARCH', 'reRankArticle done', () => `result_count: ${reranked.length}`)
+
+		if (reranked.length === 0) {
+			const fallback_results = results
+				.map((doc, index) => {
+					const time_weight = getTimeWeight(doc.updated_at)
+					const relevance_score = doc.normalized_rrf_score
+					const final_score =
+						relevance_score * article_relevance_score_weight +
+						time_weight * article_time_score_weight
+
+					return {
+						...doc,
+						reranker_score: scores[index] ?? 0,
+						final_score,
+						content: contents[index],
+						direct_text_match: hasDirectTextMatch(query, contents[index] || '')
+					}
+				})
+				.filter(item => item.direct_text_match || item.from_keyword)
+				.map(({ direct_text_match: _direct_text_match, ...item }) => item)
+				.sort((a, b) => b.final_score - a.final_score)
+
+			if (fallback_results.length > 0) return fallback_results
+		}
 
 		return reranked.sort((a, b) => b.final_score - a.final_score)
 	} finally {

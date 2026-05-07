@@ -13,6 +13,7 @@ import { extract, getComplexitySignal } from '@core/fst/agents/superego'
 import { pushPart, startStream, stopStream } from '@core/fst/agents/supervisor'
 import { getSystemTools, SessionEventStore } from '@core/utils'
 import { convertToModelMessages, createUIMessageStream, smoothStream, stepCountIs, streamText } from 'ai'
+import dayjs from 'dayjs'
 import { eq } from 'drizzle-orm'
 import { getId } from 'stk/utils'
 import { match } from 'ts-pattern'
@@ -133,7 +134,8 @@ export default async (s: Index, message: Message) => {
 		`Current Session Title: ${s.session.title}`,
 		has_todo_session_link ? `Current Session Report: ${s.session.report ?? ''}` : '',
 		getContextPrompt(s.context),
-		mode_prompt
+		mode_prompt,
+		`Real World Date: ${dayjs().format('YYYY-MM-DD')}`
 	]
 		.filter(Boolean)
 		.join('\n\n')

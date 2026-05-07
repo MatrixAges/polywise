@@ -90,6 +90,14 @@ const getThinkingBudget = (effort: string | null) => {
 	}
 }
 
+const normalizeJinaModel = (model: string, type: ModelType) => {
+	if (type === 'rerank' && model === 'jina-rerank-v3') {
+		return 'jina-reranker-v3'
+	}
+
+	return model
+}
+
 const mergeProviderOptions = (...values: Array<ProviderOptions | undefined>) => {
 	const merged = values.reduce<Record<string, unknown>>((target, current) => {
 		if (!current) return target
@@ -255,7 +263,8 @@ const getEffortProviderOptions = (
 }
 
 export const getModel = async <T extends ModelType = 'text'>(args: GetModelArgs<T>): Promise<GetModelResult<T>> => {
-	const { provider, model, type = 'text' as T, effort, options, model_tool = true } = args
+	const { provider, type = 'text' as T, effort, options, model_tool = true } = args
+	const model = provider === 'jina' ? normalizeJinaModel(args.model, type) : args.model
 	const reasoning_effort = getReasoningEffort(effort)
 	const effort_provider_options = getEffortProviderOptions(provider, model, reasoning_effort)
 
@@ -291,8 +300,6 @@ export const getModel = async <T extends ModelType = 'text'>(args: GetModelArgs<
 
 				if (type === 'embedding') {
 					const embedding_model = target_google.embedding(model)
-
-					// target_google.rerankingModel!('')
 
 					return {
 						run: async (value: string) => {
@@ -358,11 +365,8 @@ export const getModel = async <T extends ModelType = 'text'>(args: GetModelArgs<
 
 					return {
 						run: async (value: string) => {
-							console.log('--------embedding----------')
-							console.log(value)
-							const { embedding } = await embed({
-								model: embedding_model,
-								value,
+							const { embeddings } = await embedding_model.doEmbed({
+								values: [value],
 								providerOptions: {
 									jina: {
 										inputType: 'text-matching'
@@ -370,7 +374,7 @@ export const getModel = async <T extends ModelType = 'text'>(args: GetModelArgs<
 								}
 							})
 
-							return embedding
+							return embeddings[0]
 						}
 					}
 				}
@@ -385,8 +389,6 @@ export const getModel = async <T extends ModelType = 'text'>(args: GetModelArgs<
 
 					return {
 						run: async (query: string, values: Array<string>) => {
-							console.log('--------embedding----------')
-							console.log(query, values)
 							if (values.length === 0) return []
 
 							const response = await fetch(`${baseURL}/rerank`, {

@@ -68,7 +68,7 @@ export const createMemoryTool = (s: Session) => {
 				action: 'search' as const,
 				results: results.results.slice(0, max_results).map(r => ({
 					id: r.id,
-					content: r.content.slice(0, 500),
+					content: r.content.slice(0, 50000),
 					score: Math.round(r.score * 100) / 100,
 					updated_at: r.updated_at
 				}))

@@ -314,7 +314,7 @@ const Index = (props: IPropsInput) => {
 						<Show visible={archived}>
 							<Tooltip title='Unarchive'>
 								<div className='icon_button h-5 w-5' onClick={unarchive}>
-									<Archive className='stroke-std-400 h-[12px] w-[12px]'></Archive>
+									<RightArchiveIcon className='stroke-std-400 h-[12px] w-[12px]'></RightArchiveIcon>
 								</div>
 							</Tooltip>
 						</Show>
@@ -332,7 +332,7 @@ const Index = (props: IPropsInput) => {
 						</Tooltip>
 						<Tooltip title='Archive'>
 							<div className='icon_button h-5 w-5' onClick={archive}>
-								<RightArchiveIcon className='stroke-std-400 h-[12px] w-[12px]'></RightArchiveIcon>
+								<Archive className='stroke-std-400 h-[12px] w-[12px]'></Archive>
 							</div>
 						</Tooltip>
 					</div>

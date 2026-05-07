@@ -130,6 +130,17 @@ export interface InspectSearchResult {
 	output: SearchOutput
 }
 
+const generic_intent_set = new Set(['knowledge search', 'memory search'])
+
+const normalizeIntentForSearch = (intent?: string) => {
+	const normalized = intent?.trim()
+
+	if (!normalized) return ''
+	if (generic_intent_set.has(normalized.toLowerCase())) return ''
+
+	return normalized
+}
+
 const inspect = async (args: ArgsRunPipeline): Promise<InspectSearchResult> => {
 	const {
 		query,
@@ -169,7 +180,8 @@ const inspect = async (args: ArgsRunPipeline): Promise<InspectSearchResult> => {
 		search_answer = search_target.answer
 		rerank_query = search_target.question
 	} else {
-		const combined_query = [query, intent].filter(Boolean).join(' ').trim()
+		const normalized_intent = normalizeIntentForSearch(intent)
+		const combined_query = [query, normalized_intent].filter(Boolean).join(' ').trim()
 		const keywords_list = await getKeywords(combined_query)
 
 		search_keywords = keywords_list.join(', ')
