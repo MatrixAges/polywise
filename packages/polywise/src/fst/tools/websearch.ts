@@ -23,7 +23,7 @@ const inputSchema = object({
 export const createWebSearchTool = () => {
 	return tool({
 		description:
-			'Search the web using DuckDuckGo and return a link-discovery result. This tool is for finding candidate URLs only, not for final factual answers. After reviewing the returned links and snippets, call web_fetch_tool on the most relevant target URL to read the webpage body.',
+			'Search the web and return link list. This tool is for finding candidate URLs only, not for final factual answers. After reviewing the returned links and snippets, call web_fetch_tool on the most relevant target URL to read the webpage body.',
 		inputSchema,
 		execute: async input => {
 			const max_chars = input.max_chars ?? MAX_CHARS
@@ -36,8 +36,8 @@ export const createWebSearchTool = () => {
 					const resp = await fetch(url, {
 						signal: AbortSignal.timeout(15000),
 						headers: {
-							Accept: 'text/plain',
-							Authorization: `Bearer ${jina_api_key}`
+							Authorization: `Bearer ${jina_api_key}`,
+							'X-Respond-With': 'no-content'
 						}
 					})
 

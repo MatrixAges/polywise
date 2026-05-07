@@ -62,7 +62,6 @@ const Index = (props: IProps) => {
 				flex
 				w-full
 				gap-2
-				px-3
 				border-border-light
 				transition-colors
 				cursor-pointer
@@ -70,11 +69,11 @@ const Index = (props: IProps) => {
 				mode === 'kanban'
 					? `
 				flex-col
-				py-2
+				px-3 py-2
 				rounded-lg
 				border
 			`
-					: 'h-11 items-center border-b',
+					: 'h-11 items-center border-b px-1',
 				selected && 'border-primary/40',
 				isDragging && 'opacity-0',
 				(isDragging || overlay) && 'border-primary/40 z-10 backdrop-blur-lg'
@@ -140,12 +139,11 @@ const Index = (props: IProps) => {
 						items-center
 						gap-1
 						p-px
-						mb-1
 						rounded-full
 						text-std-600 text-xs
 						truncate
 					`,
-						mode === 'list' && 'max-w-[210px]'
+						mode === 'kanban' ? 'mb-1' : 'max-w-[210px]'
 					)}
 				>
 					<MessageSquareText className='size-3'></MessageSquareText>

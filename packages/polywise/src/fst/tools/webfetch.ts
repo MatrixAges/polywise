@@ -34,7 +34,6 @@ export const createWebFetchTool = () => {
 				const resp = await fetch(`https://r.jina.ai/${input.url}`, {
 					signal: AbortSignal.timeout(15000),
 					headers: {
-						Accept: 'text/plain',
 						...(jina_api_key ? { Authorization: `Bearer ${jina_api_key}` } : {})
 					}
 				})

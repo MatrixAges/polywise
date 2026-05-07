@@ -21,7 +21,12 @@ const Index = () => {
 					gap-5
 					px-5 pt-1
 				`
-						: `min-h-0 flex-col overflow-y-scroll`
+						: `
+					overflow-y-scroll
+					flex-col
+					min-h-0
+					px-6 py-3
+				`
 				)}
 			>
 				{Object.keys(kanban_data).map((key: string) => (
