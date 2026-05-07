@@ -126,6 +126,8 @@ export default class Index {
 	async setFilesProjectId(index?: number) {
 		let project!: Project
 
+		if (!this.projects.length) return
+
 		if (index !== undefined) {
 			project = this.projects[index].project
 		} else if (this.files_project_id) {
