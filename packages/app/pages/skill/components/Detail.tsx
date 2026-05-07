@@ -1,13 +1,11 @@
 import { useEffect } from 'react'
-import { File, Virtualizer } from '@pierre/diffs/react'
 import { useMemoizedFn } from 'ahooks'
-import { FileText, PencilLine, X } from 'lucide-react'
+import { FileText, PencilLine } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { Button } from '@/__shadcn__/components/ui/button'
 import { Textarea } from '@/__shadcn__/components/ui/textarea'
-import { FileTree, Tabs } from '@/components'
-import { useGlobal } from '@/context'
+import { FileContent, FileTree, Tabs } from '@/components'
 
 import { useModel } from '../context'
 
@@ -28,7 +26,6 @@ const Index = () => {
 		selectPath,
 		saveSkill
 	} = useModel()
-	const global = useGlobal()
 
 	const onSelectPath = useMemoizedFn(args => {
 		void selectPath(args)
@@ -107,53 +104,7 @@ const Index = () => {
 							onChange={event => setEditContent(event.target.value)}
 						></Textarea>
 					) : selected_file ? (
-						<div className='flex h-full w-full'>
-							<Virtualizer
-								className='
-										overflow-y-scroll
-										w-full h-full
-										min-h-0 max-h-full
-									'
-								key={selected_file.path}
-							>
-								<File
-									className='flex h-full w-full flex-col'
-									file={$copy(selected_file)}
-									options={{
-										theme: `github-${global.theme.theme_value}`,
-										overflow: 'wrap',
-										unsafeCSS: `
-											[data-diffs-header='default']{
-												position:sticky;
-												min-height:2.16rem;
-												border-bottom:1px solid var(--color-border-light);
-												font-size:12px;
-											}
-
-											[data-diffs-header='default'] svg{
-												width:12px;
-												height:12px;
-											}
-
-											[data-line-number-content]{
-												font-family:var(--font-mono);
-											}
-
-											pre{
-												padding:6px 0;
-											}
-										`
-									}}
-									style={{
-										'--diffs-font-size': '12px',
-										'--diffs-font-family': 'var(--font_family)',
-										'--diffs-line-height': 1.62,
-										'--diffs-tab-size': 10,
-										'--diffs-fg-number': 'var(--color-std-300)'
-									}}
-								></File>
-							</Virtualizer>
-						</div>
+						<FileContent file={selected_file}></FileContent>
 					) : (
 						<div
 							className='
