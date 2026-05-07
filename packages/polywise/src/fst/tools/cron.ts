@@ -85,8 +85,7 @@ export const createCronTool = (s: Session) => {
 				return {
 					action: 'create',
 					name: input.name,
-					cron: input.cron,
-					path: job_file
+					cron: input.cron
 				}
 			}
 
@@ -103,8 +102,7 @@ export const createCronTool = (s: Session) => {
 							last_run_at: job.last_run_at,
 							last_status: job.last_status,
 							last_error: job.last_error,
-							has_job_md,
-							path: job_md_path
+							has_job_md
 						}
 					})
 				)
@@ -131,7 +129,6 @@ export const createCronTool = (s: Session) => {
 					return {
 						action: 'read',
 						name: input.name,
-						content: '',
 						error: `JOB.md not found for job "${input.name}"`
 					}
 				}
@@ -141,7 +138,6 @@ export const createCronTool = (s: Session) => {
 				return {
 					action: 'read',
 					name: input.name,
-					path: job_file,
 					content
 				}
 			}
@@ -192,8 +188,7 @@ export const createCronTool = (s: Session) => {
 					action: 'update',
 					name: job.name,
 					cron: job.cron,
-					enabled: job.enabled,
-					path: job_file
+					enabled: job.enabled
 				}
 			}
 
@@ -221,7 +216,7 @@ export const createCronTool = (s: Session) => {
 				await saveStore(env.cron.store)
 				await fs.remove(path.dirname(job_file))
 
-				return { action: 'remove', name: input.name, removed: true, path: path.dirname(job_file) }
+				return { action: 'remove', name: input.name, removed: true }
 			}
 
 			return { error: 'Unknown action' }

@@ -5,11 +5,11 @@ import { createTwoFilesPatch } from 'diff'
 import fs from 'fs-extra'
 import { array, object, string } from 'zod'
 
-import { checkPermissions, getRealPath } from '../../utils'
+import { checkPermissions, getRealPath, toDisplayPath } from '../../utils'
 import apply from './apply'
 import count from './count'
 import error from './error'
-import getLang from './getLang'
+import getPathMappings from './getPathMappings'
 
 import type Session from '../../session'
 
@@ -35,19 +35,23 @@ export const createEditFileTool = (s: Session) => {
 		inputSchema,
 		execute: async input => {
 			if (input.edits.length === 0) {
-				return error('', 0, 'No edits provided')
+				return error('', 'No edits provided')
 			}
 
 			const edits = input.edits
 			const file_path = edits[0].file_path
 			const real_path = getRealPath(s.cwd, file_path)
 			const file_name = path.basename(file_path)
-			const edit_count = edits.length
+			const display_path = toDisplayPath({
+				real_path,
+				cwd: s.cwd,
+				path_mappings: getPathMappings(s)
+			})
 
 			const perm_error = await checkPermissions(s, file_path, real_path)
 
 			if (perm_error) {
-				return error(file_path, edit_count, perm_error)
+				return error(display_path, perm_error)
 			}
 
 			try {
@@ -78,16 +82,13 @@ export const createEditFileTool = (s: Session) => {
 
 				return {
 					status: 'success' as const,
-					file_path,
-					file_name,
-					lang: getLang(file_path),
+					file_path: display_path,
 					patch,
-					edit_count,
 					add_lines,
 					remove_lines
 				}
 			} catch (err) {
-				return error(file_path, edit_count, (err as Error).message)
+				return error(display_path, (err as Error).message)
 			}
 		}
 	})

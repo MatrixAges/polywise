@@ -84,6 +84,7 @@
 		"fs-extra": "catalog:",
 		"globby": "catalog:",
 		"hono": "catalog:",
+		"jina-ai-provider": "^1.0.0",
 		"just-bash": "^2.14.2",
 		"jws": "^4.0.1",
 		"lmdb": "^3.5.4",

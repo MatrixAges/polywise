@@ -49,7 +49,9 @@ export const createContextTool = (session: Session) => {
 		].join('\n'),
 		inputSchema,
 		execute: async input => {
-			return session.setContext(input)
+			await session.setContext(input)
+
+			return { updated: true }
 		}
 	})
 }

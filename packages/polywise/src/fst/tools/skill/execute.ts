@@ -136,7 +136,6 @@ export default async (s: Session, input: SkillToolInput) => {
 		if (results.length === 0) {
 			return {
 				action: 'search',
-				keyword: input.keyword,
 				results: [],
 				count: 0,
 				hint: 'No local skills matched. Consider browsing https://skills.sh/ with web_fetch_tool to find community skills.'
@@ -145,7 +144,6 @@ export default async (s: Session, input: SkillToolInput) => {
 
 		return {
 			action: 'search',
-			keyword: input.keyword,
 			results: results.map(r => ({
 				name: r.name,
 				description: r.description,
@@ -167,7 +165,6 @@ export default async (s: Session, input: SkillToolInput) => {
 			return {
 				action: 'read',
 				skill_name: input.skill_name,
-				content: '',
 				error: `Skill "${input.skill_name}" not found in skill_map. Use action "search" to find available skills.`
 			}
 		}
@@ -177,7 +174,7 @@ export default async (s: Session, input: SkillToolInput) => {
 		const perm_error = await checkPermission(s, 'file', 'read', skill_file_path)
 
 		if (perm_error) {
-			return { action: 'read', skill_name: input.skill_name, content: '', error: perm_error }
+			return { action: 'read', skill_name: input.skill_name, error: perm_error }
 		}
 
 		const content = await readFile(skill_file_path, 'utf8')
@@ -218,7 +215,6 @@ export default async (s: Session, input: SkillToolInput) => {
 		return {
 			action: 'create',
 			skill_name: input.build_name,
-			description: input.build_description,
 			skill: result.skill,
 			count: result.count
 		}
@@ -252,7 +248,6 @@ export default async (s: Session, input: SkillToolInput) => {
 		return {
 			action: 'update',
 			skill_name: input.skill_name,
-			description: input.build_description,
 			skill: result.skill,
 			count: result.count
 		}

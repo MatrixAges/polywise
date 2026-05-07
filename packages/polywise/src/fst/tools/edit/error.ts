@@ -1,15 +1,5 @@
-import path from 'path'
-
-import getLangFromExt from './getLang'
-
-export default (file_path: string, edit_count: number, message: string) => ({
+export default (file_path: string, message: string) => ({
 	status: 'error' as const,
 	message,
-	file_path,
-	file_name: file_path ? path.basename(file_path) : '',
-	lang: file_path ? getLangFromExt(file_path) : 'text',
-	patch: '',
-	edit_count,
-	add_lines: 0,
-	remove_lines: 0
+	file_path
 })

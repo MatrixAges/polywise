@@ -2,7 +2,7 @@ import { tool } from 'ai'
 import { globby } from 'globby'
 import { array, boolean, object, string } from 'zod'
 
-import { checkPermission } from '../utils'
+import { checkPermission, toDisplayPath } from '../utils'
 
 import type Session from '../session'
 
@@ -20,6 +20,11 @@ export const createGlobTool = (s: Session) => {
 		inputSchema,
 		execute: async input => {
 			const paths = extractPaths(input, s.cwd)
+			const path_mappings: Record<string, string> = {}
+
+			if (s.skills_dir) {
+				path_mappings['/skills'] = s.skills_dir
+			}
 
 			for (const path of paths) {
 				const perm_error = await checkPermission(s, 'glob', 'read', path)
@@ -35,7 +40,12 @@ export const createGlobTool = (s: Session) => {
 				gitignore: input.disable_gitignore !== true
 			})
 
-			return { patterns: input.patterns, files, count: files.length }
+			return {
+				files: files.map(file =>
+					toDisplayPath({ real_path: file, cwd: input.cwd ?? s.cwd, path_mappings })
+				),
+				count: files.length
+			}
 		}
 	})
 }

@@ -8,10 +8,7 @@ export interface EditResult {
 	status: 'success' | 'error'
 	message?: string
 	file_path: string
-	file_name: string
-	lang: string
-	patch: string
-	edit_count: number
-	add_lines: number
-	remove_lines: number
+	patch?: string
+	add_lines?: number
+	remove_lines?: number
 }

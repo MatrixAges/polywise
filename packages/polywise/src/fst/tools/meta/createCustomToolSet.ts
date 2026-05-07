@@ -13,7 +13,7 @@ export const executeCustomTool = async (tool_path: string, input: unknown, s: Se
 	const execute = target_module.default
 
 	if (typeof execute !== 'function') {
-		return { error: `Custom tool at ${tool_path} must default export a function` }
+		return { error: 'Custom tool must default export a function' }
 	}
 
 	return execute(input, s)

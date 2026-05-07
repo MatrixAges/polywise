@@ -3,7 +3,7 @@ import { tool } from 'ai'
 import { array, boolean, number, object, string } from 'zod'
 
 import grep from '../../utils/grep'
-import { checkPermission } from '../utils'
+import { checkPermission, toDisplayPath } from '../utils'
 import getRealPath from '../utils/getRealPath'
 
 import type { Bash } from 'just-bash'
@@ -13,13 +13,6 @@ interface SearchMatch {
 	file: string
 	line: number
 	content: string
-}
-
-interface SearchResult {
-	keyword: string
-	matches: Array<SearchMatch>
-	count: number
-	error?: string
 }
 
 const inputSchema = object({
@@ -43,33 +36,6 @@ const normalizeVirtualPath = (virtual_path: string) => {
 	return normalized_path === '.' ? '/' : normalized_path
 }
 
-const toVirtualPath = (args: { real_path: string; cwd: string; path_mappings: Record<string, string> }) => {
-	const { real_path, cwd, path_mappings } = args
-	const normalized_real_path = path.resolve(real_path)
-	const mapping_list = Object.entries(path_mappings)
-		.map(([prefix, mapped_dir]) => ({
-			prefix,
-			mapped_dir: path.resolve(mapped_dir)
-		}))
-		.sort((left, right) => right.mapped_dir.length - left.mapped_dir.length)
-
-	for (const { prefix, mapped_dir } of mapping_list) {
-		if (normalized_real_path === mapped_dir) return normalizeVirtualPath(prefix)
-
-		const mapped_prefix = `${mapped_dir}${path.sep}`
-
-		if (!normalized_real_path.startsWith(mapped_prefix)) continue
-
-		const relative_path = path.relative(mapped_dir, normalized_real_path).split(path.sep).join('/')
-
-		return normalizeVirtualPath(path.posix.join(prefix, relative_path))
-	}
-
-	const relative_path = path.relative(path.resolve(cwd), normalized_real_path).split(path.sep).join('/')
-
-	return normalizeVirtualPath(relative_path)
-}
-
 const parseMatchLine = (args: { line: string; cwd: string; path_mappings: Record<string, string> }) => {
 	const { line, cwd, path_mappings } = args
 	const colon_1 = line.indexOf(':')
@@ -87,7 +53,7 @@ const parseMatchLine = (args: { line: string; cwd: string; path_mappings: Record
 	const truncated = content.length > MAX_LINE_LENGTH ? content.slice(0, MAX_LINE_LENGTH) + '...' : content
 
 	return {
-		file: toVirtualPath({ real_path: absolute_path, cwd, path_mappings }),
+		file: toDisplayPath({ real_path: absolute_path, cwd, path_mappings }),
 		line: line_num,
 		content: truncated.trim()
 	} satisfies SearchMatch
@@ -132,7 +98,7 @@ export const createSearchFileTool = (s: Session, bash: Bash) => {
 			const perm_error = await checkPermission(s, 'bash', 'execute', `search ${input.keyword}`)
 
 			if (perm_error) {
-				return { keyword: input.keyword, matches: [], count: 0, error: perm_error }
+				return { matches: [], count: 0, error: perm_error }
 			}
 
 			const lines = await grep(
@@ -163,7 +129,6 @@ export const createSearchFileTool = (s: Session, bash: Bash) => {
 					: undefined
 
 			return {
-				keyword: input.keyword,
 				matches,
 				count: matches.length,
 				error

@@ -69,12 +69,6 @@ For development targeting different tech stacks and code modules, please strictl
 - **SQL Isolation**: All SQL query strings must be stored in files under the `src/sql/` directory. Hard-coded SQL strings in business code will be considered a violation.
 - **SQL Comments**: Above every SQL variable or function exported from `src/sql/`, a JSDoc comment must be attached, detailing which table the statement operates on and what action it belongs to.
 
-### Testing Specifications (TDD)
-
-- **Test-Driven Development (TDD)**: When developing features in `packages/polywise`, you must first write test code and confirm it fails (Red), then write business code to make it pass (Green).
-- **Real Models**: In tests, it is strictly prohibited to Mock responses from local large models (such as embedding or reranking models). You must forcefully introduce real inference libraries and use real datasets for assertions.
-- **Test Isolation**: When writing multiple test cases, `describe.concurrent` must be used for concurrent execution, and each case must be assigned an independent database name or isolated directory during initialization to prevent state pollution.
-
 ### Node.js API Specifications
 
 - **File System**: All operations involving the local file system must introduce the third-party library `fs-extra` for processing. Using the native `fs` or `fs/promises` modules is strictly prohibited.

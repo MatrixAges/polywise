@@ -55,23 +55,22 @@ export const createMessageTool = (session: Session) => {
 
 		return {
 			action: 'get_total_count' as const,
-			data: { desc: 'Total messages in this session', data: Number(count) }
+			count: Number(count)
 		}
 	}
 
 	const getContextMessagesCount = () => ({
-		action: 'get_current_messages_count' as const,
-		data: { desc: 'Messages in your current context window', data: model_count }
+		action: 'get_context_messages_count' as const,
+		count: model_count
 	})
 
 	const getPrevMessages = async (args?: { count?: number; before?: number; offset?: number }) => {
 		if (!baseline) {
 			return {
 				action: 'get_prev_messages' as const,
-				data: {
-					range: { desc: 'No baseline message found', data: [] },
-					messages: { desc: 'No messages available', data: [] }
-				}
+				range: [],
+				messages: [],
+				error: 'No baseline message found'
 			}
 		}
 
@@ -79,13 +78,10 @@ export const createMessageTool = (session: Session) => {
 		const before = args?.before ?? 0
 		const offset = args?.offset
 
-		const [total, history] = await Promise.all([
-			getMessagesCount(eq(message.session_id, id)),
-			getMessages({
-				where: and(eq(message.session_id, id), lt(message.created_at, baseline)),
-				orderBy: asc(message.created_at)
-			})
-		])
+		const history = await getMessages({
+			where: and(eq(message.session_id, id), lt(message.created_at, baseline)),
+			orderBy: asc(message.created_at)
+		})
 
 		const available = history.length
 		const history_start_pos = -(model_count + available)
@@ -103,13 +99,8 @@ export const createMessageTool = (session: Session) => {
 		if (skip >= available) {
 			return {
 				action: 'get_prev_messages' as const,
-				data: {
-					range: { desc: 'No messages available', data: [] },
-					messages: {
-						desc: `No messages found. Total: ${total}, available before context: ${available}`,
-						data: []
-					}
-				}
+				range: [],
+				messages: []
 			}
 		}
 
@@ -119,16 +110,8 @@ export const createMessageTool = (session: Session) => {
 
 		return {
 			action: 'get_prev_messages' as const,
-			data: {
-				range: {
-					desc: `Relative position range: ${start} to ${end} (-1 = latest)`,
-					data: [start, end]
-				},
-				messages: {
-					desc: `Returned ${sliced.length} history messages`,
-					data: await convertToModelMessages(sliced.map(parseMessage))
-				}
-			}
+			range: [start, end],
+			messages: await convertToModelMessages(sliced.map(parseMessage))
 		}
 	}
 
@@ -140,7 +123,7 @@ export const createMessageTool = (session: Session) => {
 			return {
 				action: 'search' as const,
 				error: 'keywords is required for search action',
-				data: []
+				messages: []
 			}
 		}
 
@@ -148,7 +131,7 @@ export const createMessageTool = (session: Session) => {
 			return {
 				action: 'search' as const,
 				error: 'range is required for search action',
-				data: []
+				messages: []
 			}
 		}
 
@@ -165,7 +148,7 @@ export const createMessageTool = (session: Session) => {
 
 		return {
 			action: 'search' as const,
-			data: await convertToModelMessages(matched_messages.map(parseMessage))
+			messages: await convertToModelMessages(matched_messages.map(parseMessage))
 		}
 	}
 

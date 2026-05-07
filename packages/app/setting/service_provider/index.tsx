@@ -1,5 +1,5 @@
 import { useMemoizedFn } from 'ahooks'
-import { SquareArrowOutUpLeft } from 'lucide-react'
+import { SquareArrowOutUpRight } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { Field, FieldContent, FieldDescription, FieldGroup, FieldTitle } from '@/__shadcn__/components/ui/field'
@@ -39,11 +39,11 @@ const Index = () => {
 								target='_blank'
 								href='https://jina.ai/api-dashboard/reader'
 							>
-								<SquareArrowOutUpLeft></SquareArrowOutUpLeft>
+								<SquareArrowOutUpRight></SquareArrowOutUpRight>
 							</a>
 						</FieldTitle>
 						<FieldDescription>
-							Used by web_search_tool and web_fetch_tool through r.jina.ai and s.jina.ai.
+							Used by web_search_tool and web_fetch_tool through s.jina.ai and r.jina.ai
 						</FieldDescription>
 					</FieldContent>
 					<Controller name='jina_api_key' control={control}>

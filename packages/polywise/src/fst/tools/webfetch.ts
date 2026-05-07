@@ -28,12 +28,7 @@ export const createWebFetchTool = () => {
 		execute: async input => {
 			const max_chars = input.max_chars ?? MAX_CHARS
 			const jina_api_key = config.jina_api_key?.trim()
-			const diagnostics: {
-				jina_status?: number
-				jina_error?: string
-				direct_status?: number
-				direct_error?: string
-			} = {}
+			let jina_error = undefined as string | undefined
 
 			try {
 				const resp = await fetch(`https://r.jina.ai/${input.url}`, {
@@ -44,8 +39,6 @@ export const createWebFetchTool = () => {
 					}
 				})
 
-				diagnostics.jina_status = resp.status
-
 				if (!resp.ok) throw new Error(`Jina returned HTTP ${resp.status}`)
 
 				const markdown = await resp.text()
@@ -53,14 +46,13 @@ export const createWebFetchTool = () => {
 				if (!markdown.trim()) throw new Error('Jina returned empty content')
 
 				return {
-					url: input.url,
 					source: 'jina' as const,
+					way: { name: 'jina' as const },
 					content: markdown.slice(0, max_chars),
-					truncated: markdown.length > max_chars,
-					...diagnostics
+					truncated: markdown.length > max_chars
 				}
 			} catch (e: unknown) {
-				diagnostics.jina_error = e instanceof Error ? e.message : 'Unknown error'
+				jina_error = e instanceof Error ? e.message : 'Unknown error'
 
 				try {
 					const resp = await fetch(input.url, {
@@ -72,30 +64,26 @@ export const createWebFetchTool = () => {
 						}
 					})
 
-					diagnostics.direct_status = resp.status
-
 					if (!resp.ok) throw new Error(`HTTP ${resp.status}`)
 
 					const html = await resp.text()
 					const markdown = turndown.turndown(html)
 
 					return {
-						url: input.url,
 						source: 'direct' as const,
+						way: jina_error
+							? { name: 'direct' as const, error: jina_error }
+							: { name: 'direct' as const },
 						content: markdown.slice(0, max_chars),
-						truncated: markdown.length > max_chars,
-						...diagnostics
+						truncated: markdown.length > max_chars
 					}
 				} catch (e: unknown) {
-					diagnostics.direct_error = e instanceof Error ? e.message : 'Unknown error'
+					const direct_error = e instanceof Error ? e.message : 'Unknown error'
 
 					return {
-						url: input.url,
 						source: 'failed' as const,
-						content: '',
-						truncated: false,
-						error: diagnostics.direct_error,
-						...diagnostics
+						way: { name: 'direct' as const, error: direct_error },
+						error: direct_error
 					}
 				}
 			}

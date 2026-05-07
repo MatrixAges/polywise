@@ -105,9 +105,7 @@ const getDefaultEntry = (input_schema?: unknown) => {
 		'',
 		'export default async (input, s) => {',
 		'\treturn {',
-		"\t\tmessage: 'Custom tool template executed',",
-		'\t\tinput,',
-		'\t\tsession_id: s.id',
+		"\t\tmessage: 'Custom tool template executed'",
 		'\t}',
 		'}'
 	].join('\n')
@@ -266,7 +264,6 @@ export const createMetaTool = (s: Session) => {
 
 				return {
 					action: 'search',
-					keyword: input.keyword,
 					count: results_with_schema.length,
 					results: results_with_schema
 				}
@@ -295,8 +292,6 @@ export const createMetaTool = (s: Session) => {
 					return {
 						action: 'execute',
 						tool_name: target.name,
-						description: target.description,
-						input: execute_input,
 						result
 					}
 				} catch (err) {

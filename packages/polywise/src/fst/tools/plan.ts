@@ -153,8 +153,7 @@ export const createPlanTool = (session: Session) => {
 
 				return {
 					action: 'save',
-					path: plan_path,
-					updated_at,
+					saved: true,
 					metadata: {
 						version: '1',
 						updated_at
@@ -166,7 +165,7 @@ export const createPlanTool = (session: Session) => {
 				const exists = await fs.pathExists(plan_path)
 
 				if (!exists) {
-					return { action: 'get', path: plan_path, error: 'plan.md not found' }
+					return { action: 'get', error: 'plan.md not found' }
 				}
 
 				const content = await fs.readFile(plan_path, 'utf8')
@@ -174,7 +173,6 @@ export const createPlanTool = (session: Session) => {
 
 				return {
 					action: 'get',
-					path: plan_path,
 					metadata: parsed.metadata,
 					content: parsed.content,
 					error: parsed.error
@@ -190,7 +188,6 @@ export const createPlanTool = (session: Session) => {
 
 				return {
 					action: 'clear',
-					path: plan_path,
 					cleared: true
 				}
 			}
