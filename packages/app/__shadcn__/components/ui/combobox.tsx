@@ -67,14 +67,14 @@ function ComboboxInput({
         render={<InputGroupInput className={cn("h-8",ghost&&'px-0! text-xsm! field-sizing-content text-std-400 focus:bg-transparent')} disabled={disabled} />}
         {...props}
       />
-      <InputGroupAddon className="py-0!" align="inline-end">
+      <InputGroupAddon className="py-0! pr-0!" align="inline-end">
         {showTrigger && (
           <InputGroupButton
             size="icon-xs"
             variant="ghost"
             render={<ComboboxTrigger ghost={ghost} />}
             data-slot="input-group-button"
-            className="h-8! group-has-data-[slot=combobox-clear]/input-group:hidden data-pressed:bg-transparent hover:bg-transparent"
+            className="h-8! group-has-data-[slot=combobox-clear]/input-group:hidden data-pressed:bg-transparent hover:bg-transparent w-auto! ml-0.5"
             disabled={disabled}
           />
         )}

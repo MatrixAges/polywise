@@ -191,7 +191,7 @@ const Index = (props: IPropsInput) => {
 							bg-card
 						'
 					>
-						<div className='flex items-center gap-2'>
+						<div className='flex items-center gap-1.5'>
 							<button className='icon_button' onClick={toggleFull}>
 								<Maximize></Maximize>
 							</button>
@@ -209,6 +209,7 @@ const Index = (props: IPropsInput) => {
 									className='
 										h-auto!
 										p-0
+										ml-1
 										text-xsm! text-std-400
 										bg-transparent
 									'
