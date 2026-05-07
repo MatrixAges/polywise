@@ -1,3 +1,4 @@
+import { config } from '@core/config'
 import { tool } from 'ai'
 import TurndownService from 'turndown'
 import { number, object, string } from 'zod'
@@ -26,6 +27,47 @@ export const createWebSearchTool = () => {
 		inputSchema,
 		execute: async input => {
 			const max_chars = input.max_chars ?? MAX_CHARS
+			const jina_api_key = config.jina_api_key?.trim()
+			const diagnostics: {
+				jina_status?: number
+				jina_error?: string
+				direct_status?: number
+				direct_error?: string
+			} = {}
+
+			if (jina_api_key) {
+				try {
+					const url = `https://s.jina.ai/?q=${encodeURIComponent(input.query)}`
+					const resp = await fetch(url, {
+						signal: AbortSignal.timeout(15000),
+						headers: {
+							Accept: 'text/plain',
+							Authorization: `Bearer ${jina_api_key}`
+						}
+					})
+
+					diagnostics.jina_status = resp.status
+
+					if (!resp.ok) throw new Error(`Jina returned HTTP ${resp.status}`)
+
+					const markdown = await resp.text()
+
+					if (!markdown.trim()) throw new Error('Jina returned empty content')
+
+					return {
+						query: input.query,
+						source: 'jina' as const,
+						result_type: 'link_list_only',
+						next_action: 'call_web_fetch_tool',
+						warning: 'Do not treat search result snippets as final evidence. Fetch the target page body with web_fetch_tool before answering.',
+						content: markdown.slice(0, max_chars),
+						truncated: markdown.length > max_chars,
+						...diagnostics
+					}
+				} catch (e: unknown) {
+					diagnostics.jina_error = e instanceof Error ? e.message : 'Unknown error'
+				}
+			}
 
 			try {
 				const url = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(input.query)}`
@@ -36,6 +78,8 @@ export const createWebSearchTool = () => {
 					}
 				})
 
+				diagnostics.direct_status = resp.status
+
 				if (!resp.ok) throw new Error(`DuckDuckGo returned HTTP ${resp.status}`)
 
 				const html = await resp.text()
@@ -43,23 +87,27 @@ export const createWebSearchTool = () => {
 
 				return {
 					query: input.query,
+					source: 'direct' as const,
 					result_type: 'link_list_only',
 					next_action: 'call_web_fetch_tool',
 					warning: 'Do not treat search result snippets as final evidence. Fetch the target page body with web_fetch_tool before answering.',
 					content: markdown.slice(0, max_chars),
-					truncated: markdown.length > max_chars
+					truncated: markdown.length > max_chars,
+					...diagnostics
 				}
 			} catch (e: unknown) {
-				const message = e instanceof Error ? e.message : 'Unknown error'
+				diagnostics.direct_error = e instanceof Error ? e.message : 'Unknown error'
 
 				return {
 					query: input.query,
+					source: 'failed' as const,
 					result_type: 'link_list_only',
 					next_action: 'retry_or_refine_search',
 					warning: 'Search failed before any target page could be fetched.',
 					content: '',
 					truncated: false,
-					error: message
+					error: diagnostics.direct_error,
+					...diagnostics
 				}
 			}
 		}

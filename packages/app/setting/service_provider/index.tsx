@@ -1,15 +1,8 @@
 import { useMemoizedFn } from 'ahooks'
+import { SquareArrowOutUpLeft } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
-import {
-	Field,
-	FieldContent,
-	FieldDescription,
-	FieldGroup,
-	FieldLabel,
-	FieldSet,
-	FieldTitle
-} from '@/__shadcn__/components/ui/field'
+import { Field, FieldContent, FieldDescription, FieldGroup, FieldTitle } from '@/__shadcn__/components/ui/field'
 import { Input } from '@/__shadcn__/components/ui/input'
 import { Controller } from '@/components'
 import { useGlobal } from '@/context'
@@ -39,9 +32,18 @@ const Index = () => {
 			<FieldGroup className='gap-0'>
 				<Field className='items-center! py-3' orientation='vertical'>
 					<FieldContent>
-						<FieldTitle className='text-base'>Jina API Key</FieldTitle>
+						<FieldTitle className='flex items-center text-base'>
+							<span>Jina API Key</span>
+							<a
+								className='icon_button small'
+								target='_blank'
+								href='https://jina.ai/api-dashboard/reader'
+							>
+								<SquareArrowOutUpLeft></SquareArrowOutUpLeft>
+							</a>
+						</FieldTitle>
 						<FieldDescription>
-							Used when fetching web pages through r.jina.ai and s.jina.ai.
+							Used by web_search_tool and web_fetch_tool through r.jina.ai and s.jina.ai.
 						</FieldDescription>
 					</FieldContent>
 					<Controller name='jina_api_key' control={control}>
