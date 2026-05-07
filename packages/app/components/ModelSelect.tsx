@@ -158,7 +158,7 @@ const Index = (props: IProps) => {
 
 		if (!target) return
 
-		onChange?.({ provider: target.provider, model: target.model.id })
+		onChange?.({ provider: target.provider, model: target.model.id, effort: value?.effort })
 	})
 
 	return (

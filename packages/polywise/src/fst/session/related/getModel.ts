@@ -7,7 +7,7 @@ import type { SpecialProvider } from '@core/types'
 import type Index from '../index'
 
 export default async (s: Index) => {
-	const { provider, model } = config.default_model
+	const { provider, model, effort } = config.default_model
 	const custom_providers = providers.custom_providers || []
 
 	const all_providers = [...providers.providers, ...custom_providers]
@@ -28,5 +28,5 @@ export default async (s: Index) => {
 		target_provider_name = 'open_responses'
 	}
 
-	s.model = await getModel({ provider: target_provider_name, model, options: target_options })
+	s.model = await getModel({ provider: target_provider_name, model, effort, options: target_options })
 }

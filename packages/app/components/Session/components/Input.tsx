@@ -32,6 +32,14 @@ const session_modes = [
 	{ label: 'Plan-Exec', value: 'plan-exec' }
 ]
 
+const effort_modes = [
+	{ label: 'Default', value: 'default' },
+	{ label: 'Low', value: 'low' },
+	{ label: 'Medium', value: 'medium' },
+	{ label: 'High', value: 'high' },
+	{ label: 'XHigh', value: 'xhigh' }
+]
+
 const Index = (props: IPropsInput) => {
 	const {
 		type,
@@ -71,6 +79,14 @@ const Index = (props: IPropsInput) => {
 
 	const onChangeDefaultMode = useMemoizedFn(v => {
 		s.setConfig('config', { default_model: v } as AppConfig, true)
+	})
+
+	const onChangeDefaultEffort = useMemoizedFn(v => {
+		const default_model = s.config?.default_model
+
+		if (!default_model) return
+
+		s.setConfig('config', { default_model: { ...default_model, effort: v } } as AppConfig, true)
 	})
 
 	const onChangeSubmitMode = useMemoizedFn(v => {
@@ -184,6 +200,37 @@ const Index = (props: IPropsInput) => {
 								value={s.config?.default_model}
 								onChange={onChangeDefaultMode}
 							></ModelSelect>
+							<Select
+								items={effort_modes}
+								value={s.config?.default_model?.effort ?? 'default'}
+								onValueChange={onChangeDefaultEffort}
+							>
+								<SelectTrigger
+									className='
+										h-auto!
+										p-0
+										text-xsm! text-std-400
+										bg-transparent
+									'
+									no_active_style
+								>
+									<SelectValue />
+								</SelectTrigger>
+								<SelectContent
+									className='w-[120px]'
+									alignItemWithTrigger={false}
+									side='top'
+								>
+									<SelectGroup>
+										<SelectLabel>Effort</SelectLabel>
+										{effort_modes.map(item => (
+											<SelectItem value={item.value} key={item.value}>
+												{item.label}
+											</SelectItem>
+										))}
+									</SelectGroup>
+								</SelectContent>
+							</Select>
 						</div>
 						<div className='flex items-center gap-3'>
 							<Select items={session_modes} value={mode} onValueChange={setMode}>

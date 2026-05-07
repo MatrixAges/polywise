@@ -23,12 +23,38 @@ export interface GetModelArgs<T extends ModelType = 'text'> {
 	provider: string
 	model: string
 	type?: T
+	effort?: string
 	options?: any
 	model_tool?: boolean
 }
 
+const valid_reasoning_efforts = ['none', 'minimal', 'low', 'medium', 'high', 'xhigh'] as const
+
+const getReasoningEffort = (effort?: string) => {
+	if (!effort || effort === 'default') return null
+
+	return valid_reasoning_efforts.includes(effort as (typeof valid_reasoning_efforts)[number]) ? effort : null
+}
+
 export const getModel = async <T extends ModelType = 'text'>(args: GetModelArgs<T>): Promise<GetModelResult<T>> => {
-	const { provider, model, type = 'text' as T, options, model_tool = true } = args
+	const { provider, model, type = 'text' as T, effort, options, model_tool = true } = args
+	const reasoning_effort = getReasoningEffort(effort)
+
+	const withProviderOptions = (
+		provider_name: string,
+		provider_options?: ProviderOptions
+	): ProviderOptions | undefined => {
+		if (!reasoning_effort) return provider_options
+
+		return {
+			...(provider_options || {}),
+			[provider_name]: {
+				...((provider_options?.[provider_name as keyof ProviderOptions] as Record<string, unknown>) ||
+					{}),
+				reasoningEffort: reasoning_effort
+			}
+		} as ProviderOptions
+	}
 
 	const getResponse = async (): Promise<EmbeddingResult | ModelResult> => {
 		switch (provider) {
@@ -49,8 +75,10 @@ export const getModel = async <T extends ModelType = 'text'>(args: GetModelArgs<
 				return {
 					model: (await import('@ai-sdk/open-responses')).createOpenResponses({
 						...options,
+						name: 'open_responses',
 						url: options.baseURL as string
-					})(model)
+					})(model),
+					provider_options: withProviderOptions('open_responses')
 				}
 			case 'google_gemini': {
 				const { createGoogleGenerativeAI, google } = await import('@ai-sdk/google')
@@ -115,7 +143,10 @@ export const getModel = async <T extends ModelType = 'text'>(args: GetModelArgs<
 				}
 			}
 			case 'openai':
-				return { model: (await import('@ai-sdk/openai')).createOpenAI(options)(model) }
+				return {
+					model: (await import('@ai-sdk/openai')).createOpenAI(options)(model),
+					provider_options: withProviderOptions('openai')
+				}
 			case 'anthropic':
 				return { model: (await import('@ai-sdk/anthropic')).createAnthropic(options)(model) }
 			case 'deepseek':

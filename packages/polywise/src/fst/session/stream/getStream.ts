@@ -81,6 +81,8 @@ const getAgentSystemPrompt = async (session_id: string) => {
 }
 
 export default async (s: Index, message: Message) => {
+	await s.getModel()
+
 	const total_messages_count = s.context.total_messages_count ?? 0
 	const is_first_message = total_messages_count === 0
 

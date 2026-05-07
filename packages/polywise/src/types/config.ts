@@ -6,6 +6,7 @@ export interface Workspace {
 export interface DefaultModel {
 	provider: string
 	model: string
+	effort?: string
 }
 
 export interface McpOAuthConfig {
