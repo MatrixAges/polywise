@@ -11,13 +11,21 @@ export interface EmbeddingResult {
 	run: (value: string) => Promise<Array<number>>
 }
 
+export interface RerankResult {
+	run: (query: string, values: Array<string>) => Promise<Array<number>>
+}
+
 export interface ModelResult {
 	model: LanguageModel
 	provider_options?: ProviderOptions
 	tools?: ToolSet
 }
 
-export type GetModelResult<T extends ModelType> = T extends 'embedding' | 'rerank' ? EmbeddingResult : ModelResult
+export type GetModelResult<T extends ModelType> = T extends 'embedding'
+	? EmbeddingResult
+	: T extends 'rerank'
+		? RerankResult
+		: ModelResult
 
 export interface GetModelArgs<T extends ModelType = 'text'> {
 	provider: string
@@ -251,7 +259,7 @@ export const getModel = async <T extends ModelType = 'text'>(args: GetModelArgs<
 	const reasoning_effort = getReasoningEffort(effort)
 	const effort_provider_options = getEffortProviderOptions(provider, model, reasoning_effort)
 
-	const getResponse = async (): Promise<EmbeddingResult | ModelResult> => {
+	const getResponse = async (): Promise<EmbeddingResult | RerankResult | ModelResult> => {
 		switch (provider) {
 			case 'xiaomi_mimo':
 			case 'open_compatible':
@@ -342,6 +350,88 @@ export const getModel = async <T extends ModelType = 'text'>(args: GetModelArgs<
 					provider_options: common_provider_options,
 					tools: { google_search_tool }
 				}
+			}
+			case 'jina': {
+				if (type === 'embedding') {
+					const target_jina = (await import('jina-ai-provider')).createJina(options)
+					const embedding_model = target_jina.textEmbeddingModel(model)
+
+					return {
+						run: async (value: string) => {
+							console.log('--------embedding----------')
+							console.log(value)
+							const { embedding } = await embed({
+								model: embedding_model,
+								value,
+								providerOptions: {
+									jina: {
+										inputType: 'text-matching'
+									}
+								}
+							})
+
+							return embedding
+						}
+					}
+				}
+
+				if (type === 'rerank') {
+					const baseURL = (options?.baseURL || 'https://api.jina.ai/v1').replace(/\/$/, '')
+					const apiKey = options?.apiKey || process.env.JINA_API_KEY
+
+					if (!apiKey) {
+						throw new Error('Jina API key is required for rerank models.')
+					}
+
+					return {
+						run: async (query: string, values: Array<string>) => {
+							console.log('--------embedding----------')
+							console.log(query, values)
+							if (values.length === 0) return []
+
+							const response = await fetch(`${baseURL}/rerank`, {
+								method: 'POST',
+								headers: {
+									Authorization: `Bearer ${apiKey}`,
+									'Content-Type': 'application/json'
+								},
+								body: JSON.stringify({
+									model,
+									query,
+									documents: values,
+									top_n: values.length,
+									return_documents: false
+								})
+							})
+
+							if (!response.ok) {
+								throw new Error(
+									`Jina rerank request failed (${response.status}): ${await response.text()}`
+								)
+							}
+
+							const data = (await response.json()) as {
+								results?: Array<{ index?: number; relevance_score?: number }>
+							}
+							const scores = values.map(() => 0)
+
+							data.results?.forEach(item => {
+								if (
+									typeof item.index === 'number' &&
+									item.index >= 0 &&
+									item.index < scores.length &&
+									typeof item.relevance_score === 'number'
+								) {
+									scores[item.index] = item.relevance_score
+								}
+							})
+
+							return scores
+						}
+					}
+				}
+
+				throw new Error('Jina provider only supports embedding and rerank models.')
 			}
 			case 'openai':
 				return {

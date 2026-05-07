@@ -11,6 +11,7 @@ import { article, chunk } from '@core/db/schema'
 import { getArticles, getChunks } from '@core/db/services'
 import { env } from '@core/env'
 import { addTask, initRerankModel, removeTask } from '@core/llama'
+import genRerank from '@core/pipeline/genRerank'
 import { log } from '@core/utils'
 import { and, inArray } from 'drizzle-orm'
 
@@ -76,58 +77,76 @@ const getTimeWeight = (updated_at: Date | null) => {
 	return 1 / (1 + days_ago * article_time_decay_per_day)
 }
 
-const rerankChunk = async (query: string, results: Array<SearchResult>) => {
-	if (results.length === 0) return []
+const getRerankScores = async (query: string, contents: Array<string>) => {
+	const remote_run = await genRerank()
+
+	if (remote_run) {
+		return remote_run(query, contents)
+	}
 
 	await initRerankModel()
 
-	const task_id = addTask('rerank')
+	const scores: Array<number> = []
 
-	const chunk_ids = results.map(item => item.chunk_id)
-
-	const chunks = await getChunks({
-		where: inArray(chunk.id, chunk_ids)
-	})
-
-	const content_map = new Map<string, string>()
-
-	chunks.forEach(c => {
-		if (c.content) {
-			content_map.set(c.id, c.content)
-		}
-	})
-
-	log('SEARCH', 'reRank', () => `query: ${query.slice(0, 50)}, count: ${results.length}`)
-
-	const reranked: Array<RerankedResult> = []
-
-	for (const doc of results) {
-		const content = content_map.get(doc.chunk_id) || ''
-
-		const rerank_score = await env.rerank_context.rank(query, content)
-		const final_score = calculateFinalScore(
-			rerank_score,
-			doc.normalized_rrf_score,
-			doc.rrf_rank,
-			false,
-			doc.from_keyword
-		)
-
-		if (final_score === 0) continue
-
-		reranked.push({
-			...doc,
-			reranker_score: rerank_score,
-			final_score,
-			content
-		})
+	for (const content of contents) {
+		scores.push(await env.rerank_context.rank(query, content))
 	}
 
-	removeTask('rerank', task_id)
+	return scores
+}
 
-	log('SEARCH', 'reRank done', () => `result_count: ${reranked.length}`)
+const rerankChunk = async (query: string, results: Array<SearchResult>) => {
+	if (results.length === 0) return []
 
-	return reranked.sort((a, b) => b.final_score - a.final_score)
+	const task_id = addTask('rerank')
+
+	try {
+		const chunk_ids = results.map(item => item.chunk_id)
+
+		const chunks = await getChunks({
+			where: inArray(chunk.id, chunk_ids)
+		})
+
+		const content_map = new Map<string, string>()
+
+		chunks.forEach(c => {
+			if (c.content) {
+				content_map.set(c.id, c.content)
+			}
+		})
+
+		log('SEARCH', 'reRank', () => `query: ${query.slice(0, 50)}, count: ${results.length}`)
+
+		const contents = results.map(doc => content_map.get(doc.chunk_id) || '')
+		const scores = await getRerankScores(query, contents)
+		const reranked: Array<RerankedResult> = []
+
+		results.forEach((doc, index) => {
+			const rerank_score = scores[index] ?? 0
+			const final_score = calculateFinalScore(
+				rerank_score,
+				doc.normalized_rrf_score,
+				doc.rrf_rank,
+				false,
+				doc.from_keyword
+			)
+
+			if (final_score === 0) return
+
+			reranked.push({
+				...doc,
+				reranker_score: rerank_score,
+				final_score,
+				content: contents[index]
+			})
+		})
+
+		log('SEARCH', 'reRank done', () => `result_count: ${reranked.length}`)
+
+		return reranked.sort((a, b) => b.final_score - a.final_score)
+	} finally {
+		removeTask('rerank', task_id)
+	}
 }
 
 const rerankArticle = async (
@@ -137,64 +156,64 @@ const rerankArticle = async (
 ) => {
 	if (results.length === 0) return []
 
-	await initRerankModel()
-
 	const task_id = addTask('rerank')
 
-	const article_ids = results.map(item => item.article_id)
+	try {
+		const article_ids = results.map(item => item.article_id)
 
-	const article_where =
-		for_types && for_types.length > 0
-			? and(inArray(article.id, article_ids), inArray(article.for, for_types))
-			: inArray(article.id, article_ids)
+		const article_where =
+			for_types && for_types.length > 0
+				? and(inArray(article.id, article_ids), inArray(article.for, for_types))
+				: inArray(article.id, article_ids)
 
-	const articles = await getArticles({
-		where: article_where
-	})
-
-	const content_map = new Map<string, string>()
-
-	articles.forEach(a => {
-		if (a.content) {
-			content_map.set(a.id, a.content)
-		}
-	})
-
-	log('SEARCH', 'reRankArticle', () => `query: ${query.slice(0, 50)}, count: ${results.length}`)
-
-	const reranked: Array<RerankedArticleResult> = []
-
-	for (const doc of results) {
-		const content = content_map.get(doc.article_id) || ''
-
-		const rerank_score = await env.rerank_context.rank(query, content)
-		const relevance_score = calculateFinalScore(
-			rerank_score,
-			doc.normalized_rrf_score,
-			doc.rrf_rank,
-			true,
-			doc.from_keyword
-		)
-
-		if (relevance_score === 0) continue
-
-		const time_weight = getTimeWeight(doc.updated_at)
-		const final_score =
-			relevance_score * article_relevance_score_weight + time_weight * article_time_score_weight
-
-		reranked.push({
-			...doc,
-			reranker_score: rerank_score,
-			final_score,
-			content
+		const articles = await getArticles({
+			where: article_where
 		})
+
+		const content_map = new Map<string, string>()
+
+		articles.forEach(a => {
+			if (a.content) {
+				content_map.set(a.id, a.content)
+			}
+		})
+
+		log('SEARCH', 'reRankArticle', () => `query: ${query.slice(0, 50)}, count: ${results.length}`)
+
+		const contents = results.map(doc => content_map.get(doc.article_id) || '')
+		const scores = await getRerankScores(query, contents)
+		const reranked: Array<RerankedArticleResult> = []
+
+		results.forEach((doc, index) => {
+			const rerank_score = scores[index] ?? 0
+			const relevance_score = calculateFinalScore(
+				rerank_score,
+				doc.normalized_rrf_score,
+				doc.rrf_rank,
+				true,
+				doc.from_keyword
+			)
+
+			if (relevance_score === 0) return
+
+			const time_weight = getTimeWeight(doc.updated_at)
+			const final_score =
+				relevance_score * article_relevance_score_weight + time_weight * article_time_score_weight
+
+			reranked.push({
+				...doc,
+				reranker_score: rerank_score,
+				final_score,
+				content: contents[index]
+			})
+		})
+
+		log('SEARCH', 'reRankArticle done', () => `result_count: ${reranked.length}`)
+
+		return reranked.sort((a, b) => b.final_score - a.final_score)
+	} finally {
+		removeTask('rerank', task_id)
 	}
-
-	removeTask('rerank', task_id)
-
-	log('SEARCH', 'reRankArticle done', () => `result_count: ${reranked.length}`)
-
-	return reranked.sort((a, b) => b.final_score - a.final_score)
 }
 
 export default rerankChunk

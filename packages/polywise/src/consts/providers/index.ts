@@ -8,6 +8,7 @@ import deepseek from './deepseek'
 import fireworks from './fireworks'
 import google_gemini from './google_gemini'
 import groq from './groq'
+import jina from './jina'
 import lmstudio from './lmstudio'
 import minimax from './minimax'
 import mistral from './mistral'
@@ -23,7 +24,17 @@ import xai from './xai'
 import xiaomi_mimo from './xiaomi_mimo'
 import zhipu from './zhipu'
 
-export const preset_providers = [openai, anthropic, google_gemini, zhipu, minimax, moonshot, deepseek, xiaomi_mimo]
+export const preset_providers = [
+	openai,
+	anthropic,
+	google_gemini,
+	zhipu,
+	minimax,
+	moonshot,
+	deepseek,
+	xiaomi_mimo,
+	jina
+]
 
 export const all_providers = [
 	openai,
@@ -48,7 +59,8 @@ export const all_providers = [
 	amazon_bedrock,
 	minimax,
 	moonshot,
-	xiaomi_mimo
+	xiaomi_mimo,
+	jina
 ]
 
 export {
@@ -75,5 +87,6 @@ export {
 	minimax,
 	moonshot,
 	xiaomi_mimo,
+	jina,
 	custom
 }

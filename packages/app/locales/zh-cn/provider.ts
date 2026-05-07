@@ -27,6 +27,7 @@ export default {
 		minimax: 'MiniMax',
 		moonshot: 'Moonshot',
 		xiaomi_mimo: 'Xiaomi',
+		jina: 'Jina',
 		custom: 'Custom',
 		disabled: 'Disabled'
 	},

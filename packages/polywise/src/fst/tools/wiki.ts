@@ -1,24 +1,58 @@
-import { search } from '@core/io'
+import { addAgentArticle } from '@core/db/services/externals'
+import { save, search } from '@core/io'
 import { tool } from 'ai'
-import { number, object, string } from 'zod'
+import { enum as Enum, number, object, string } from 'zod'
 
 import type Session from '../session'
 
 const inputSchema = object({
-	query: string().describe('Search query to find existing knowledge'),
-	max_results: number().optional().describe('Maximum results to return (default 5)')
+	action: Enum(['save', 'search']).describe(
+		'The action to perform. save: store new semantic knowledge. search: find existing knowledge.'
+	),
+	content: string().optional().describe('[Required for save] The knowledge content to store'),
+	query: string().optional().describe('[Required for search] Search query to find existing knowledge'),
+	max_results: number().optional().describe('[Optional for search] Maximum results to return (default 5)')
 })
 
 export const createWikiTool = (s: Session) => {
 	return tool({
 		description: [
-			'Search semantic knowledge: objective facts, concepts, architecture docs, API definitions, and technical conclusions.',
-			'IMPORTANT: Use this tool BEFORE answering when the user asks about technical details, architecture decisions, or any factual question that may have been documented.',
-			'This is a read-only tool. Use superego to explicitly request storing new knowledge.',
+			'Manage semantic knowledge: objective facts, concepts, architecture docs, API definitions, and technical conclusions.',
+			'Use action "save" to store new reusable knowledge in the current session scope.',
+			'Use action "search" BEFORE answering when the user asks about technical details, architecture decisions, or any factual question that may have been documented.',
 			'Results are sorted by update time, with the most recent first.'
 		].join('\n'),
 		inputSchema,
 		execute: async input => {
+			if (input.action === 'save') {
+				if (!input.content) {
+					return { action: 'save' as const, error: 'content is required for save action' }
+				}
+
+				const article_id = await save({
+					type: 'article',
+					content: input.content,
+					for: 'wiki',
+					scope_type: s.scope.type,
+					scope_id: s.scope.id,
+					source: 'agent'
+				})
+
+				if (s.scope.type === 'agent' && s.scope.id) {
+					await addAgentArticle(s.scope.id, article_id)
+				}
+
+				return {
+					action: 'save' as const,
+					saved: true,
+					article_id
+				}
+			}
+
+			if (!input.query) {
+				return { action: 'search' as const, error: 'query is required for search action', results: [] }
+			}
+
 			const results = await search({
 				query: input.query,
 				intent: 'knowledge search',
@@ -31,6 +65,7 @@ export const createWikiTool = (s: Session) => {
 			const max_results = input.max_results ?? 5
 
 			return {
+				action: 'search' as const,
 				results: results.results.slice(0, max_results).map(r => ({
 					id: r.id,
 					content: r.content.slice(0, 500),

@@ -12,6 +12,7 @@ import Gemini from '@lobehub/icons-static-svg/icons/gemini.svg?react'
 import Grok from '@lobehub/icons-static-svg/icons/grok.svg?react'
 import Groq from '@lobehub/icons-static-svg/icons/groq.svg?react'
 import Hunyuan from '@lobehub/icons-static-svg/icons/hunyuan.svg?react'
+import Jina from '@lobehub/icons-static-svg/icons/jina.svg?react'
 import LmStudio from '@lobehub/icons-static-svg/icons/lmstudio.svg?react'
 import Minimax from '@lobehub/icons-static-svg/icons/minimax.svg?react'
 import Mistral from '@lobehub/icons-static-svg/icons/mistral.svg?react'
@@ -59,6 +60,7 @@ export const provider_icon_map = {
 	moonshot: Moonshot,
 	minimax: Minimax,
 	xiaomi_mimo: XiaomiMiMo,
+	jina: Jina,
 	custom: Building2,
 	disabled: EyeClosed
 } as Record<string, ElementType>
