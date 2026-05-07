@@ -32,7 +32,7 @@ export const createWebFetchTool = () => {
 
 			try {
 				const resp = await fetch(`https://r.jina.ai/${input.url}`, {
-					signal: AbortSignal.timeout(15000),
+					signal: AbortSignal.timeout(30000),
 					headers: {
 						...(jina_api_key ? { Authorization: `Bearer ${jina_api_key}` } : {})
 					}
@@ -46,7 +46,6 @@ export const createWebFetchTool = () => {
 
 				return {
 					source: 'jina' as const,
-					way: { name: 'jina' as const },
 					content: markdown.slice(0, max_chars),
 					truncated: markdown.length > max_chars
 				}
@@ -70,9 +69,7 @@ export const createWebFetchTool = () => {
 
 					return {
 						source: 'direct' as const,
-						way: jina_error
-							? { name: 'direct' as const, error: jina_error }
-							: { name: 'direct' as const },
+						jina_error,
 						content: markdown.slice(0, max_chars),
 						truncated: markdown.length > max_chars
 					}
@@ -80,9 +77,8 @@ export const createWebFetchTool = () => {
 					const direct_error = e instanceof Error ? e.message : 'Unknown error'
 
 					return {
-						source: 'failed' as const,
-						way: { name: 'direct' as const, error: direct_error },
-						error: direct_error
+						source: 'direct' as const,
+						direct_error
 					}
 				}
 			}

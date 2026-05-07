@@ -49,7 +49,6 @@ export const createWebSearchTool = () => {
 
 					return {
 						source: 'jina' as const,
-						way: { name: 'jina' as const },
 						content: markdown.slice(0, max_chars),
 						truncated: markdown.length > max_chars,
 						must_fetch: true
@@ -75,9 +74,7 @@ export const createWebSearchTool = () => {
 
 				return {
 					source: 'direct' as const,
-					way: jina_error
-						? { name: 'direct' as const, error: jina_error }
-						: { name: 'direct' as const },
+					jina_error,
 					content: markdown.slice(0, max_chars),
 					truncated: markdown.length > max_chars,
 					must_fetch: true
@@ -86,9 +83,8 @@ export const createWebSearchTool = () => {
 				const direct_error = e instanceof Error ? e.message : 'Unknown error'
 
 				return {
-					source: 'failed' as const,
-					way: { name: 'direct' as const, error: direct_error },
-					error: direct_error,
+					source: 'direct' as const,
+					direct_error,
 					must_fetch: false
 				}
 			}
