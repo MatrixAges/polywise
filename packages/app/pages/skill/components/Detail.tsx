@@ -91,40 +91,6 @@ const Index = () => {
 				</div>
 			</div>
 			<div className='flex min-w-0 flex-1 flex-col'>
-				<div
-					className='
-						flex flex-col
-						gap-3
-						p-4
-						border-b border-border-light
-					'
-				>
-					<div className='flex flex-col gap-1'>
-						<div className='text-base font-semibold'>{selected_skill.name}</div>
-						<div className='text-std-400 text-sm'>
-							{selected_skill.desc || 'No description'}
-						</div>
-					</div>
-					<div className='flex items-center justify-between gap-3'>
-						<div className='text-std-400 text-sm'>
-							{selected_file?.path || `${selected_skill.path}/SKILL.md`}
-						</div>
-						<div className='flex items-center gap-2'>
-							<Tabs
-								items={[
-									{ key: 'preview', Icon: FileText },
-									{ key: 'edit', Icon: PencilLine }
-								]}
-								active={detail_mode}
-								simple
-								onClick={value => setDetailMode(value as 'preview' | 'edit')}
-							></Tabs>
-							<Button size='xs' onClick={() => void saveSkill()}>
-								Save
-							</Button>
-						</div>
-					</div>
-				</div>
 				<div className='flex min-h-0 flex-1'>
 					{detail_mode === 'edit' ? (
 						<Textarea
@@ -133,7 +99,9 @@ const Index = () => {
 								h-full
 								min-h-0
 								rounded-none
+								bg-transparent
 								border-0
+								focus-within:ring-0!
 							'
 							value={edit_content}
 							onChange={event => setEditContent(event.target.value)}
@@ -197,6 +165,34 @@ const Index = () => {
 							Select a file
 						</div>
 					)}
+				</div>
+				<div
+					className='
+						flex
+						items-center justify-between
+						h-10
+						gap-3
+						px-4
+						border-t border-border-light
+					'
+				>
+					<div className='text-std-400 text-sm'>
+						{selected_file?.path || `${selected_skill.path}/SKILL.md`}
+					</div>
+					<div className='flex items-center gap-2'>
+						<Tabs
+							items={[
+								{ key: 'preview', Icon: FileText },
+								{ key: 'edit', Icon: PencilLine }
+							]}
+							active={detail_mode}
+							simple
+							onClick={value => setDetailMode(value as 'preview' | 'edit')}
+						></Tabs>
+						<Button size='xs' onClick={() => void saveSkill()}>
+							Save
+						</Button>
+					</div>
 				</div>
 			</div>
 		</div>

@@ -47,7 +47,7 @@ const Index = () => {
 					border-b border-border-light
 				'
 			>
-				<div
+				<span
 					className='
 						flex
 						items-center
@@ -55,9 +55,8 @@ const Index = () => {
 						text-xsm text-std-500 font-medium
 					'
 				>
-					<BookText className='size-3.5'></BookText>
-					<span>Skills</span>
-				</div>
+					Skills
+				</span>
 				<button className='icon_button small' type='button' onClick={() => void createSkill()}>
 					<Plus className='size-3.5'></Plus>
 				</button>
