@@ -1,4 +1,5 @@
 import { RefreshCw, Upload } from 'lucide-react'
+import { observer } from 'mobx-react-lite'
 import NiceAvatar, { genConfig } from 'react-nice-avatar'
 import NotionAvatar, { getRandomConfig } from 'react-notion-avatar'
 
@@ -262,4 +263,4 @@ const Index = () => {
 	)
 }
 
-export default $app.memo(Index)
+export default new $app.Handle(Index).by(observer).by($app.memo).get()
