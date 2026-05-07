@@ -34,7 +34,7 @@ const Index = () => {
 			className='
 				overflow-hidden
 				flex flex-col
-				w-[260px] h-full
+				w-[210px] h-full
 				border-border-light border-r
 			'
 		>

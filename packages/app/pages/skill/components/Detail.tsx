@@ -67,6 +67,47 @@ const Index = () => {
 
 	return (
 		<div className='flex min-w-0 flex-1'>
+			{file_preview_open && (
+				<div
+					className='
+						overflow-y-hidden
+						flex flex-col
+						w-[210px] h-full
+						border-border-light border-r
+					'
+				>
+					<div
+						className='
+							flex
+							items-center justify-between
+							h-8
+							px-3
+							border-b border-border-light
+						'
+					>
+						<div className='text-xsm text-std-500 font-medium'>Files</div>
+						<Button size='xs' variant='ghost' onClick={toggleFilePreviewOpen}>
+							Hide
+						</Button>
+					</div>
+					<div className='flex-1'>
+						<FileTree
+							paths={$copy(skill_files.paths)}
+							flex
+							colored_icons
+							drag_and_drop={getTreeDragAndDrop()}
+							renaming={{
+								canRename: canRenameTreeItem
+							}}
+							composition={getTreeComposition()}
+							onMutation={event => void onTreeMutation(event)}
+							onReady={setFileTree}
+							onSelectPath={onSelectPath}
+							key={skill_files.tree_version}
+						></FileTree>
+					</div>
+				</div>
+			)}
 			<div className='flex min-w-0 flex-1 flex-col'>
 				<div
 					className='
@@ -181,47 +222,6 @@ const Index = () => {
 					)}
 				</div>
 			</div>
-			{file_preview_open && (
-				<div
-					className='
-						overflow-y-hidden
-						flex flex-col
-						w-[300px] h-full
-						border-border-light border-l
-					'
-				>
-					<div
-						className='
-							flex
-							items-center justify-between
-							h-8
-							px-3
-							border-b border-border-light
-						'
-					>
-						<div className='text-xsm text-std-500 font-medium'>Files</div>
-						<Button size='xs' variant='ghost' onClick={toggleFilePreviewOpen}>
-							Hide
-						</Button>
-					</div>
-					<div className='flex-1'>
-						<FileTree
-							paths={$copy(skill_files.paths)}
-							flex
-							colored_icons
-							drag_and_drop={getTreeDragAndDrop()}
-							renaming={{
-								canRename: canRenameTreeItem
-							}}
-							composition={getTreeComposition()}
-							onMutation={event => void onTreeMutation(event)}
-							onReady={setFileTree}
-							onSelectPath={onSelectPath}
-							key={skill_files.tree_version}
-						></FileTree>
-					</div>
-				</div>
-			)}
 		</div>
 	)
 }
