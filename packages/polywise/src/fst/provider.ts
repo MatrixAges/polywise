@@ -28,40 +28,236 @@ export interface GetModelArgs<T extends ModelType = 'text'> {
 	model_tool?: boolean
 }
 
-const valid_reasoning_efforts = ['none', 'minimal', 'low', 'medium', 'high', 'xhigh'] as const
+const effort_ranks = ['none', 'minimal', 'low', 'medium', 'high', 'xhigh', 'max'] as const
+
+type EffortValue = (typeof effort_ranks)[number]
+
+const getEffortRank = (value: string) => effort_ranks.indexOf(value as EffortValue)
 
 const getReasoningEffort = (effort?: string) => {
 	if (!effort || effort === 'default') return null
 
-	return valid_reasoning_efforts.includes(effort as (typeof valid_reasoning_efforts)[number]) ? effort : null
+	return getEffortRank(effort) >= 0 ? effort : null
+}
+
+const getSupportedEffort = (effort: string | null, supported: Array<string>) => {
+	if (!effort) return null
+	if (supported.includes(effort)) return effort
+
+	const target_rank = getEffortRank(effort)
+
+	if (target_rank < 0) return null
+
+	const candidates = supported
+		.map(value => ({ value, rank: getEffortRank(value) }))
+		.filter(item => item.rank >= 0)
+		.sort((a, b) => {
+			const distance_diff = Math.abs(a.rank - target_rank) - Math.abs(b.rank - target_rank)
+
+			if (distance_diff !== 0) return distance_diff
+
+			return b.rank - a.rank
+		})
+
+	return candidates[0]?.value ?? null
+}
+
+const getThinkingBudget = (effort: string | null) => {
+	switch (effort) {
+		case 'none':
+			return 0
+		case 'minimal':
+		case 'low':
+			return 1024
+		case 'medium':
+			return 4096
+		case 'high':
+			return 8192
+		case 'xhigh':
+			return 16384
+		case 'max':
+			return 32768
+		default:
+			return null
+	}
+}
+
+const mergeProviderOptions = (...values: Array<ProviderOptions | undefined>) => {
+	const merged = values.reduce<Record<string, unknown>>((target, current) => {
+		if (!current) return target
+
+		Object.entries(current).forEach(([key, value]) => {
+			const prev = target[key]
+
+			target[key] =
+				prev && value && typeof prev === 'object' && typeof value === 'object'
+					? { ...(prev as Record<string, unknown>), ...(value as Record<string, unknown>) }
+					: value
+		})
+
+		return target
+	}, {})
+
+	return Object.keys(merged).length ? (merged as ProviderOptions) : undefined
+}
+
+const getEffortProviderOptions = (
+	provider: string,
+	model: string,
+	effort: string | null
+): ProviderOptions | undefined => {
+	if (!effort) return undefined
+
+	switch (provider) {
+		case 'openai': {
+			const reasoningEffort = getSupportedEffort(effort, [
+				'none',
+				'minimal',
+				'low',
+				'medium',
+				'high',
+				'xhigh'
+			])
+
+			return reasoningEffort ? ({ openai: { reasoningEffort } } as ProviderOptions) : undefined
+		}
+		case 'azure_openai': {
+			const reasoningEffort = getSupportedEffort(effort, [
+				'none',
+				'minimal',
+				'low',
+				'medium',
+				'high',
+				'xhigh'
+			])
+
+			return reasoningEffort ? ({ azure: { reasoningEffort } } as ProviderOptions) : undefined
+		}
+		case 'open_responses': {
+			const reasoningEffort = getSupportedEffort(effort, ['none', 'low', 'medium', 'high', 'xhigh'])
+
+			return reasoningEffort ? ({ open_responses: { reasoningEffort } } as ProviderOptions) : undefined
+		}
+		case 'xiaomi_mimo':
+		case 'open_compatible':
+			return { 'openai-compatible': { reasoningEffort: effort } } as ProviderOptions
+		case 'google_gemini': {
+			const thinkingLevel = getSupportedEffort(effort, ['minimal', 'low', 'medium', 'high'])
+			const thinkingBudget = getThinkingBudget(effort)
+			const thinkingConfig = {
+				includeThoughts: true,
+				...(model.startsWith('gemini-3') && thinkingLevel
+					? {
+							thinkingLevel: thinkingLevel as NonNullable<
+								GoogleLanguageModelOptions['thinkingConfig']
+							>['thinkingLevel']
+						}
+					: {}),
+				...(model.startsWith('gemini-2.5') && thinkingBudget !== null ? { thinkingBudget } : {})
+			} satisfies GoogleLanguageModelOptions['thinkingConfig']
+
+			return { google: { thinkingConfig } } as ProviderOptions
+		}
+		case 'anthropic': {
+			const anthropicEffort = getSupportedEffort(effort, ['low', 'medium', 'high', 'xhigh', 'max'])
+
+			return anthropicEffort ? ({ anthropic: { effort: anthropicEffort } } as ProviderOptions) : undefined
+		}
+		case 'deepseek':
+			return {
+				deepseek: {
+					thinking: { type: effort === 'none' ? 'disabled' : 'enabled' }
+				}
+			} as ProviderOptions
+		case 'moonshot': {
+			const thinkingBudget = getThinkingBudget(effort)
+
+			return {
+				moonshotai: {
+					thinking: {
+						type: effort === 'none' ? 'disabled' : 'enabled',
+						...(thinkingBudget && thinkingBudget > 0 ? { budgetTokens: thinkingBudget } : {})
+					}
+				}
+			} as ProviderOptions
+		}
+		case 'mistral': {
+			const reasoningEffort = getSupportedEffort(effort, ['none', 'high'])
+
+			return reasoningEffort ? ({ mistral: { reasoningEffort } } as ProviderOptions) : undefined
+		}
+		case 'groq': {
+			const reasoningEffort = getSupportedEffort(effort, ['none', 'default', 'low', 'medium', 'high'])
+
+			return reasoningEffort ? ({ groq: { reasoningEffort } } as ProviderOptions) : undefined
+		}
+		case 'xai': {
+			const reasoningEffort = getSupportedEffort(effort, ['low', 'high'])
+
+			return reasoningEffort ? ({ xai: { reasoningEffort } } as ProviderOptions) : undefined
+		}
+		case 'cohere': {
+			const thinkingBudget = getThinkingBudget(effort)
+
+			return {
+				cohere: {
+					thinking: {
+						type: effort === 'none' ? 'disabled' : 'enabled',
+						...(thinkingBudget && thinkingBudget > 0 ? { tokenBudget: thinkingBudget } : {})
+					}
+				}
+			} as ProviderOptions
+		}
+		case 'amazon_bedrock': {
+			const maxReasoningEffort = getSupportedEffort(effort, ['low', 'medium', 'high', 'xhigh', 'max'])
+
+			return maxReasoningEffort
+				? ({ bedrock: { reasoningConfig: { maxReasoningEffort } } } as ProviderOptions)
+				: undefined
+		}
+		case 'fireworks': {
+			const thinkingBudget = getThinkingBudget(effort)
+
+			return {
+				fireworks: {
+					thinking: {
+						type: effort === 'none' ? 'disabled' : 'enabled',
+						...(thinkingBudget && thinkingBudget > 0 ? { budgetTokens: thinkingBudget } : {})
+					}
+				}
+			} as ProviderOptions
+		}
+		case 'openrouter': {
+			const openrouterEffort = getSupportedEffort(effort, [
+				'none',
+				'minimal',
+				'low',
+				'medium',
+				'high',
+				'xhigh'
+			])
+
+			return openrouterEffort
+				? ({ openrouter: { reasoning: { effort: openrouterEffort } } } as ProviderOptions)
+				: undefined
+		}
+		default:
+			return undefined
+	}
 }
 
 export const getModel = async <T extends ModelType = 'text'>(args: GetModelArgs<T>): Promise<GetModelResult<T>> => {
 	const { provider, model, type = 'text' as T, effort, options, model_tool = true } = args
 	const reasoning_effort = getReasoningEffort(effort)
-
-	const withProviderOptions = (
-		provider_name: string,
-		provider_options?: ProviderOptions
-	): ProviderOptions | undefined => {
-		if (!reasoning_effort) return provider_options
-
-		return {
-			...(provider_options || {}),
-			[provider_name]: {
-				...((provider_options?.[provider_name as keyof ProviderOptions] as Record<string, unknown>) ||
-					{}),
-				reasoningEffort: reasoning_effort
-			}
-		} as ProviderOptions
-	}
+	const effort_provider_options = getEffortProviderOptions(provider, model, reasoning_effort)
 
 	const getResponse = async (): Promise<EmbeddingResult | ModelResult> => {
 		switch (provider) {
 			case 'xiaomi_mimo':
 			case 'open_compatible':
 				return {
-					model: (await import('@ai-sdk/openai-compatible')).createOpenAICompatible(options)(model)
+					model: (await import('@ai-sdk/openai-compatible')).createOpenAICompatible(options)(model),
+					provider_options: effort_provider_options
 				}
 			case 'a2a':
 				return { model: (await import('a2a-ai-provider')).a2a(model) }
@@ -78,7 +274,7 @@ export const getModel = async <T extends ModelType = 'text'>(args: GetModelArgs<
 						name: 'open_responses',
 						url: options.baseURL as string
 					})(model),
-					provider_options: withProviderOptions('open_responses')
+					provider_options: effort_provider_options
 				}
 			case 'google_gemini': {
 				const { createGoogleGenerativeAI, google } = await import('@ai-sdk/google')
@@ -109,9 +305,14 @@ export const getModel = async <T extends ModelType = 'text'>(args: GetModelArgs<
 
 				const target_model = target_google(model)
 
-				const common_provider_options = {
-					google: { thinkingConfig: { includeThoughts: true } } satisfies GoogleLanguageModelOptions
-				}
+				const common_provider_options = mergeProviderOptions(
+					{
+						google: {
+							thinkingConfig: { includeThoughts: true }
+						} satisfies GoogleLanguageModelOptions
+					},
+					effort_provider_options
+				)
 
 				if (!model_tool) {
 					return { model: target_model, provider_options: common_provider_options }
@@ -145,26 +346,47 @@ export const getModel = async <T extends ModelType = 'text'>(args: GetModelArgs<
 			case 'openai':
 				return {
 					model: (await import('@ai-sdk/openai')).createOpenAI(options)(model),
-					provider_options: withProviderOptions('openai')
+					provider_options: effort_provider_options
 				}
 			case 'anthropic':
-				return { model: (await import('@ai-sdk/anthropic')).createAnthropic(options)(model) }
+				return {
+					model: (await import('@ai-sdk/anthropic')).createAnthropic(options)(model),
+					provider_options: effort_provider_options
+				}
 			case 'deepseek':
-				return { model: (await import('@ai-sdk/deepseek')).createDeepSeek(options)(model) }
+				return {
+					model: (await import('@ai-sdk/deepseek')).createDeepSeek(options)(model),
+					provider_options: effort_provider_options
+				}
 			case 'moonshot':
-				return { model: (await import('@ai-sdk/moonshotai')).createMoonshotAI(options)(model) }
+				return {
+					model: (await import('@ai-sdk/moonshotai')).createMoonshotAI(options)(model),
+					provider_options: effort_provider_options
+				}
 			case 'zhipu':
 				return { model: (await import('zhipu-ai-provider')).createZhipu(options)(model) }
 			case 'minimax':
 				return { model: (await import('vercel-minimax-ai-provider')).createMinimax(options)(model) }
 			case 'mistral':
-				return { model: (await import('@ai-sdk/mistral')).createMistral(options)(model) }
+				return {
+					model: (await import('@ai-sdk/mistral')).createMistral(options)(model),
+					provider_options: effort_provider_options
+				}
 			case 'groq':
-				return { model: (await import('@ai-sdk/groq')).createGroq(options)(model) }
+				return {
+					model: (await import('@ai-sdk/groq')).createGroq(options)(model),
+					provider_options: effort_provider_options
+				}
 			case 'xai':
-				return { model: (await import('@ai-sdk/xai')).createXai(options)(model) }
+				return {
+					model: (await import('@ai-sdk/xai')).createXai(options)(model),
+					provider_options: effort_provider_options
+				}
 			case 'cohere':
-				return { model: (await import('@ai-sdk/cohere')).createCohere(options)(model) }
+				return {
+					model: (await import('@ai-sdk/cohere')).createCohere(options)(model),
+					provider_options: effort_provider_options
+				}
 			case 'perplexity':
 				return { model: (await import('@ai-sdk/perplexity')).createPerplexity(options)(model) }
 			case 'deepinfra':
@@ -172,15 +394,24 @@ export const getModel = async <T extends ModelType = 'text'>(args: GetModelArgs<
 			case 'together':
 				return { model: (await import('@ai-sdk/togetherai')).createTogetherAI(options)(model) }
 			case 'azure_openai':
-				return { model: (await import('@ai-sdk/azure')).createAzure(options)(model) }
+				return {
+					model: (await import('@ai-sdk/azure')).createAzure(options)(model),
+					provider_options: effort_provider_options
+				}
 			case 'amazon_bedrock':
-				return { model: (await import('@ai-sdk/amazon-bedrock')).createAmazonBedrock(options)(model) }
+				return {
+					model: (await import('@ai-sdk/amazon-bedrock')).createAmazonBedrock(options)(model),
+					provider_options: effort_provider_options
+				}
 			case 'cerebras':
 				return { model: (await import('@ai-sdk/cerebras')).createCerebras(options)(model) }
 			case 'vercel':
 				return { model: (await import('@ai-sdk/vercel')).createVercel(options)(model) }
 			case 'fireworks':
-				return { model: (await import('@ai-sdk/fireworks')).createFireworks(options)(model) }
+				return {
+					model: (await import('@ai-sdk/fireworks')).createFireworks(options)(model),
+					provider_options: effort_provider_options
+				}
 			case 'ollama':
 				return { model: (await import('ai-sdk-ollama')).createOllama(options)(model) }
 			case 'openrouter':
@@ -188,7 +419,8 @@ export const getModel = async <T extends ModelType = 'text'>(args: GetModelArgs<
 					model: (await import('@openrouter/ai-sdk-provider')).createOpenRouter({
 						...options,
 						headers: { 'HTTP-Referer': 'https://polywise.io', 'X-Title': 'Polywise' }
-					})(model)
+					})(model),
+					provider_options: effort_provider_options
 				}
 			default:
 				throw new Error(`Unsupported provider: ${provider}`)

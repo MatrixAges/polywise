@@ -1,7 +1,7 @@
 import {
 	Album,
 	AppWindowMac,
-	BookText,
+	BookOpenText,
 	Bot,
 	CircleCheckBig,
 	Database,
@@ -23,7 +23,7 @@ export const nav_items = [
 	{ key: 'session', Icon: MessageSquareText },
 	{ key: 'project', Icon: Folders },
 	// { key: 'workflow', Icon: Route },
-	{ key: 'skill', Icon: BookText },
+	{ key: 'skill', Icon: BookOpenText },
 	{ key: 'linkcase', Icon: Album }
 	// { key: 'library', Icon: Library },
 	// { key: 'database', Icon: Database },
