@@ -1,7 +1,7 @@
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { DotsSixVerticalIcon } from '@phosphor-icons/react'
-import { Trash2 } from 'lucide-react'
+import { Pencil } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { useModel } from '../context'
@@ -15,7 +15,7 @@ interface IProps {
 
 const Index = (props: IProps) => {
 	const { item, selected } = props
-	const { setSelectedSkill, removeSkill } = useModel()
+	const { setSelectedSkill, openEditDialog } = useModel()
 	const { attributes, listeners, transform, transition, isDragging, setNodeRef } = useSortable({
 		id: item.id
 	})
@@ -51,10 +51,10 @@ const Index = (props: IProps) => {
 				type='button'
 				onClick={event => {
 					event.stopPropagation()
-					void removeSkill(item.id)
+					openEditDialog(item.id)
 				}}
 			>
-				<Trash2 className='size-3.5'></Trash2>
+				<Pencil className='size-3.5'></Pencil>
 			</button>
 		</div>
 	)

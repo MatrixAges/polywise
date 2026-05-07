@@ -19,6 +19,7 @@ export default class Index {
 	skill_items = [] as Array<SkillItem>
 	selected_skill_id = ''
 	detail_mode = 'preview' as DetailMode
+	edit_dialog_open = false
 	edit_name = ''
 	edit_desc = ''
 	edit_content = ''
@@ -262,6 +263,33 @@ export default class Index {
 		this.detail_mode = mode
 	}
 
+	async openEditDialog(skill_id: string) {
+		if (this.selected_skill_id !== skill_id) {
+			this.selected_skill_id = skill_id
+
+			await this.loadSelectedSkill('SKILL.md')
+		}
+
+		if (!this.selected_skill) {
+			return
+		}
+
+		this.edit_name = this.selected_skill.name
+		this.edit_desc = this.selected_skill.desc
+		this.edit_dialog_open = true
+	}
+
+	closeEditDialog() {
+		this.edit_dialog_open = false
+
+		if (!this.selected_skill) {
+			return
+		}
+
+		this.edit_name = this.selected_skill.name
+		this.edit_desc = this.selected_skill.desc
+	}
+
 	setEditName(value: string) {
 		this.edit_name = value
 	}
@@ -450,6 +478,33 @@ export default class Index {
 		await this.refresh(selected_file_relative_path)
 	}
 
+	async saveSkillInfo() {
+		if (!this.selected_skill) {
+			return
+		}
+
+		const next_name = this.edit_name.trim()
+		const next_desc = this.edit_desc.trim()
+
+		if (!next_name) {
+			return
+		}
+
+		const skill_file = await rpc.file.read.query({ path: `${this.selected_skill.path}/SKILL.md` })
+
+		await rpc.skill.update.mutate({
+			id: this.selected_skill.id,
+			name: next_name,
+			desc: next_desc,
+			content: skill_file?.contents || this.edit_content,
+			type: this.selected_skill.type || undefined
+		})
+
+		this.edit_dialog_open = false
+
+		await this.refresh(this.getRelativeSkillFilePath(this.selected_file?.path || '', this.selected_skill.path))
+	}
+
 	async removeSkill(skill_id: string) {
 		if (!skill_id) {
 			return
@@ -460,6 +515,7 @@ export default class Index {
 		}
 
 		await rpc.skill.remove.mutate({ id: skill_id })
+		this.edit_dialog_open = false
 
 		await this.refresh()
 	}

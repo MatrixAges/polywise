@@ -5,7 +5,6 @@ import { FileText, PencilLine } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { Button } from '@/__shadcn__/components/ui/button'
-import { Input } from '@/__shadcn__/components/ui/input'
 import { Textarea } from '@/__shadcn__/components/ui/textarea'
 import { FileTree, Tabs } from '@/components'
 import { useGlobal } from '@/context'
@@ -18,12 +17,8 @@ const Index = () => {
 		skill_files,
 		selected_file,
 		detail_mode,
-		edit_name,
-		edit_desc,
 		edit_content,
 		file_preview_open,
-		setEditName,
-		setEditDesc,
 		setEditContent,
 		setDetailMode,
 		toggleFilePreviewOpen,
@@ -117,12 +112,12 @@ const Index = () => {
 						border-b border-border-light
 					'
 				>
-					<Input value={edit_name} onChange={event => setEditName(event.target.value)}></Input>
-					<Textarea
-						className='min-h-20'
-						value={edit_desc}
-						onChange={event => setEditDesc(event.target.value)}
-					></Textarea>
+					<div className='flex flex-col gap-1'>
+						<div className='text-base font-semibold'>{selected_skill.name}</div>
+						<div className='text-std-400 text-sm'>
+							{selected_skill.desc || 'No description'}
+						</div>
+					</div>
 					<div className='flex items-center justify-between gap-3'>
 						<div className='text-std-400 text-sm'>
 							{selected_file?.path || `${selected_skill.path}/SKILL.md`}

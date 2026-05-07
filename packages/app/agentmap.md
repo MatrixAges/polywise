@@ -323,7 +323,7 @@ This document provides an overview of the packages/app module structure and arch
 				},
 				"components": {
 					"index.ts": {
-						"desc": "Skill page local component exports for the skill list menu and detail panel",
+						"desc": "Skill page local component exports for the skill list menu, detail panel, and metadata edit dialog",
 						"role": "Index"
 					},
 					"Menu.tsx": {
@@ -331,11 +331,15 @@ This document provides an overview of the packages/app module structure and arch
 						"role": "Component"
 					},
 					"MenuItem.tsx": {
-						"desc": "Sortable skill row atom with selection, title, description, and remove action",
+						"desc": "Sortable skill row atom with selection, title, description, and right-side edit trigger",
+						"role": "Component"
+					},
+					"EditDialog.tsx": {
+						"desc": "Skill metadata dialog that edits name and description and hosts the remove action for the selected skill",
 						"role": "Component"
 					},
 					"Detail.tsx": {
-						"desc": "Right skill detail panel with name and description fields plus a skill file tree and preview or textarea edit mode for the selected file",
+						"desc": "Right skill detail panel that shows selected skill metadata plus a skill file tree and preview or textarea edit mode for the selected file",
 						"role": "Component"
 					}
 				},
@@ -344,7 +348,7 @@ This document provides an overview of the packages/app module structure and arch
 					"role": "Page"
 				},
 				"model.ts": {
-					"desc": "Skill page state model that loads skill lists, persists create update remove and drag sorting through rpc.skill procedures, drives the shared file tree model for the selected skill directory, exposes tree-native context-menu actions for new file, new folder, rename, and remove, blocks SKILL.md rename and drag moves, and switches the selected file between preview and simple textarea edit mode",
+					"desc": "Skill page state model that loads skill lists, persists create update remove and drag sorting through rpc.skill procedures, drives the shared file tree model for the selected skill directory, exposes tree-native context-menu actions for new file, new folder, rename, and remove, blocks SKILL.md rename and drag moves, switches the selected file between preview and simple textarea edit mode, and now owns the metadata edit dialog state for name and description updates",
 					"role": "Model"
 				},
 				"types.ts": {

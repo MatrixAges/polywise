@@ -2,7 +2,7 @@ import { useLayoutEffect, useState } from 'react'
 import { observer } from 'mobx-react-lite'
 import { container } from 'tsyringe'
 
-import { Detail, Menu } from './components'
+import { Detail, EditDialog, Menu } from './components'
 import { Context } from './context'
 import Model from './model'
 
@@ -21,6 +21,7 @@ const Index = () => {
 				<Menu></Menu>
 				<Detail></Detail>
 			</div>
+			<EditDialog></EditDialog>
 		</Context>
 	)
 }
