@@ -24,6 +24,9 @@ interface IProps {
 	showLocalModel?: boolean
 	filterType?: Model['type']
 	ghost?: boolean
+	inputGroupClassName?: string
+	inputClassName?: string
+	showTrigger?: boolean
 	onChange?: (v: DefaultModel) => void
 }
 
@@ -85,7 +88,8 @@ const getLocalModelItemByType = (filterType?: string): IModelItem | null => {
 }
 
 const Index = (props: IProps) => {
-	const { value, showLocalModel, filterType, ghost, onChange } = props
+	const { value, showLocalModel, filterType, ghost, inputGroupClassName, inputClassName, showTrigger, onChange } =
+		props
 
 	const global = useGlobal()
 
@@ -168,7 +172,13 @@ const Index = (props: IProps) => {
 			onValueChange={setDefaultModel}
 			isItemEqualToValue={(item_value, value) => item_value.value === value.value}
 		>
-			<ComboboxInput ghost={ghost} placeholder='Select a default model' />
+			<ComboboxInput
+				inputGroupClassName={inputGroupClassName}
+				className={inputClassName}
+				ghost={ghost}
+				showTrigger={showTrigger}
+				placeholder='Select a default model'
+			/>
 			<ComboboxContent ghost={ghost}>
 				<ComboboxEmpty>No providers found.</ComboboxEmpty>
 				<ComboboxList>

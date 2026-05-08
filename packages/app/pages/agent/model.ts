@@ -351,10 +351,21 @@ export default class Index {
 
 	async updateAgent(args: IUpdateAgentArgs) {
 		const { id, ...rest } = args
+		const prev_agent = this.agents.find(item => item.id === id) || null
 
-		await rpc.agent.update.mutate({ id, ...rest } as RPCInput['agent']['update'])
+		if (prev_agent) {
+			this.patchAgent(id, item => ({ ...item, ...rest }))
+		}
 
-		this.patchAgent(id, item => ({ ...item, ...rest }))
+		try {
+			await rpc.agent.update.mutate({ id, ...rest } as RPCInput['agent']['update'])
+		} catch (error) {
+			if (prev_agent) {
+				this.patchAgent(id, () => prev_agent)
+			}
+
+			throw error
+		}
 	}
 
 	async submitEditableField(args: IEditableFieldArgs) {
