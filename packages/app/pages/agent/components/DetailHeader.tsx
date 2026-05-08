@@ -46,191 +46,155 @@ const Index = ({ agent }: IProps) => {
 	} = useModel()
 
 	return (
-		<div
-			className='
-				relative
-				overflow-hidden
-				p-6
-				bg-card
-				border border-border-light
-			'
-		>
+		<div className='flex'>
 			<div
 				className='
-					absolute
-					inset-x-0 top-0
-					h-24
-					bg-linear-to-r
-					from-secondary/40 via-secondary/10 to-transparent
+					flex flex-1 flex-col
+					gap-5
+					sm:flex-row sm:items-start
 				'
-			></div>
-			<div className='relative flex flex-col gap-6'>
+			>
+				<div className='flex flex-col items-start gap-3'>
+					<button className='clickable relative w-fit' type='button' onClick={openAvatarDialog}>
+						<AgentAvatar item={agent} size='large'></AgentAvatar>
+						<span
+							className='
+								absolute
+								right-[-6px] bottom-[-6px]
+								flex
+								items-center justify-center
+								w-8 h-8
+								rounded-full
+								bg-card
+								border border-border-light
+								shadow-sm
+							'
+						>
+							<PencilLine className='size-3.5'></PencilLine>
+						</span>
+					</button>
+					<button className='click_button text-xs' type='button' onClick={openAvatarDialog}>
+						<PencilLine className='size-3.5'></PencilLine>
+						Edit avatar
+					</button>
+				</div>
 				<div
 					className='
-						flex flex-col
-						gap-5
-						xl:flex-row xl:items-start xl:justify-between
+						flex flex-1 flex-col
+						min-w-0
+						gap-3
 					'
 				>
-					<div
-						className='
-							flex flex-1 flex-col
-							gap-5
-							sm:flex-row sm:items-start
-						'
-					>
-						<div className='flex flex-col items-start gap-3'>
-							<button
-								className='clickable relative w-fit'
-								type='button'
-								onClick={openAvatarDialog}
+					<div className='flex flex-col gap-2'>
+						{edit_field_key === 'name' ? (
+							<EditableField
+								active
+								value={agent.name}
+								onSubmit={value =>
+									submitEditableField({
+										id: agent.id,
+										key: 'name',
+										value
+									})
+								}
+								onCancel={cancelEditField}
+							></EditableField>
+						) : (
+							<div
+								className='clickable text-2xl font-semibold tracking-tight'
+								onClick={() => startEditField('name')}
 							>
-								<AgentAvatar item={agent} size='large'></AgentAvatar>
-								<span
-									className='
-										absolute
-										right-[-6px] bottom-[-6px]
-										flex
-										items-center justify-center
-										w-8 h-8
-										rounded-full
-										bg-card
-										border border-border-light
-										shadow-sm
-									'
-								>
-									<PencilLine className='size-3.5'></PencilLine>
-								</span>
-							</button>
-							<button
-								className='click_button text-xs'
-								type='button'
-								onClick={openAvatarDialog}
-							>
-								<PencilLine className='size-3.5'></PencilLine>
-								Edit avatar
-							</button>
-						</div>
-						<div
-							className='
-								flex flex-1 flex-col
-								min-w-0
-								gap-3
-							'
-						>
-							<div className='flex flex-col gap-2'>
-								{edit_field_key === 'name' ? (
-									<EditableField
-										active
-										value={agent.name}
-										onSubmit={value =>
-											submitEditableField({
-												id: agent.id,
-												key: 'name',
-												value
-											})
-										}
-										onCancel={cancelEditField}
-									></EditableField>
-								) : (
-									<div
-										className='clickable text-2xl font-semibold tracking-tight'
-										onClick={() => startEditField('name')}
-									>
-										{agent.name}
-									</div>
-								)}
-								{edit_field_key === 'description' ? (
-									<EditableField
-										active
-										value={agent.description || ''}
-										placeholder='Description'
-										onSubmit={value =>
-											submitEditableField({
-												id: agent.id,
-												key: 'description',
-												value
-											})
-										}
-										onCancel={cancelEditField}
-									></EditableField>
-								) : (
-									<div
-										className='
-											max-w-2xl
-											text-std-400 text-sm leading-6
-											clickable
-										'
-										onClick={() => startEditField('description')}
-									>
-										{agent.description ||
-											'Add a short description for this agent'}
-									</div>
-								)}
+								{agent.name}
 							</div>
-						</div>
+						)}
+						{edit_field_key === 'description' ? (
+							<EditableField
+								active
+								value={agent.description || ''}
+								placeholder='Description'
+								onSubmit={value =>
+									submitEditableField({
+										id: agent.id,
+										key: 'description',
+										value
+									})
+								}
+								onCancel={cancelEditField}
+							></EditableField>
+						) : (
+							<div
+								className='
+									max-w-2xl
+									text-std-400 text-sm leading-6
+									clickable
+								'
+								onClick={() => startEditField('description')}
+							>
+								{agent.description || 'Add a short description for this agent'}
+							</div>
+						)}
 					</div>
-					<div
+				</div>
+			</div>
+			<div
+				className='
+					flex flex-col
+					w-full max-w-md
+					gap-4
+					xl:pl-4
+				'
+			>
+				<div className='flex flex-col gap-2'>
+					<span
 						className='
-							flex flex-col
-							w-full max-w-md
-							gap-4
-							xl:pl-4
+							text-std-400 text-xs font-medium tracking-[0.16em]
+							uppercase
 						'
 					>
-						<div className='flex flex-col gap-2'>
-							<span
-								className='
-									text-std-400 text-xs font-medium tracking-[0.16em]
-									uppercase
-								'
-							>
-								Model
-							</span>
-							<ModelSelect value={agent.model} onChange={setModel}></ModelSelect>
-						</div>
-						<div className='flex flex-col gap-2'>
-							<span
-								className='
-									text-std-400 text-xs font-medium tracking-[0.16em]
-									uppercase
-								'
-							>
-								Effort
-							</span>
-							<Select
-								items={effort_modes}
-								value={agent.model?.effort ?? 'default'}
-								onValueChange={value => {
-									if (!value) return
-									void setModelEffort(value)
-								}}
-							>
-								<SelectTrigger className='w-full justify-between'>
-									<SelectValue />
-								</SelectTrigger>
-								<SelectContent>
-									<SelectGroup>
-										<SelectLabel>Reasoning Effort</SelectLabel>
-										{effort_modes.map(item => (
-											<SelectItem value={item.value} key={item.value}>
-												{item.label}
-											</SelectItem>
-										))}
-									</SelectGroup>
-								</SelectContent>
-							</Select>
-						</div>
-						<div
-							className='
-								p-3
-								bg-secondary/20
-								border border-border-light
-							'
-						>
-							<SkillSelect></SkillSelect>
-						</div>
-					</div>
+						Model
+					</span>
+					<ModelSelect value={agent.model} onChange={setModel}></ModelSelect>
+				</div>
+				<div className='flex flex-col gap-2'>
+					<span
+						className='
+							text-std-400 text-xs font-medium tracking-[0.16em]
+							uppercase
+						'
+					>
+						Effort
+					</span>
+					<Select
+						items={effort_modes}
+						value={agent.model?.effort ?? 'default'}
+						onValueChange={value => {
+							if (!value) return
+							void setModelEffort(value)
+						}}
+					>
+						<SelectTrigger className='w-full justify-between'>
+							<SelectValue />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectGroup>
+								<SelectLabel>Reasoning Effort</SelectLabel>
+								{effort_modes.map(item => (
+									<SelectItem value={item.value} key={item.value}>
+										{item.label}
+									</SelectItem>
+								))}
+							</SelectGroup>
+						</SelectContent>
+					</Select>
+				</div>
+				<div
+					className='
+						p-3
+						bg-secondary/20
+						border border-border-light
+					'
+				>
+					<SkillSelect></SkillSelect>
 				</div>
 			</div>
 		</div>

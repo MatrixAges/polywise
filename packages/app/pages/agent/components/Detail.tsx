@@ -42,9 +42,7 @@ const Index = () => {
 				<div
 					className='
 						flex flex-col
-						w-full max-w-5xl
-						gap-5
-						mx-auto
+						w-full
 					'
 				>
 					<DetailHeader agent={selected_agent}></DetailHeader>

@@ -20,13 +20,7 @@ const Index = ({ agent, active_tab, field_value }: IProps) => {
 	const { edit_field_key, setCurrentTab, startEditField, cancelEditField, submitEditableField } = useModel()
 
 	return (
-		<div
-			className='
-				overflow-hidden
-				bg-card
-				border border-border-light
-			'
-		>
+		<div className='flex flex-col'>
 			<div
 				className='
 					flex
