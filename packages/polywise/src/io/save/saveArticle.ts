@@ -30,16 +30,13 @@ export default async (args: ArgsSaveArticle) => {
 	const { title, content, article_id, scope_type = 'global', scope_id = null, source = 'agent' } = args
 	const hash = scope_type === 'global' ? getHash(`${args.for}\n${content}`) : null
 	const enable_triple = Boolean(config.enable_triple)
+	const has_content = content.trim().length > 0
 
 	if (!article_id && hash) {
 		const exist = await getArticle(eq(article.hash, hash))
 
 		if (exist) return exist.id
 	}
-
-	const chunks = await getPipelineChunks(content)
-
-	log('SAVE', 'getChunks', () => `chunk_length: ${chunks.length}`)
 
 	let current_article_id = article_id
 
@@ -100,6 +97,16 @@ export default async (args: ArgsSaveArticle) => {
 
 		log('SAVE', 'insertArticle', () => `article_id: ${current_article_id}`)
 	}
+
+	if (!has_content) {
+		log('SAVE', 'skipChunking', () => `article_id: ${current_article_id}`)
+
+		return current_article_id
+	}
+
+	const chunks = await getPipelineChunks(content)
+
+	log('SAVE', 'getChunks', () => `chunk_length: ${chunks.length}`)
 
 	for (let i = 0; i < chunks.length; i++) {
 		const item = chunks[i]

@@ -67,7 +67,7 @@ const Index = () => {
 						overflow-y-auto
 						flex flex-1 flex-col
 						min-h-0
-						gap-2
+						gap-1
 					'
 				>
 					{article_items.map(item => (

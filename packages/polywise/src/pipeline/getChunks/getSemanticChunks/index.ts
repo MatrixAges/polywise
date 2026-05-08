@@ -1,5 +1,4 @@
 import { pipeline } from '@core/consts'
-import { initEmbeddingModel } from '@core/llama'
 import { getEmbedding, getSimilarity, getTokenCount } from '@core/pipeline'
 
 import getOverlapChunks from './getOverlapChunks'
@@ -9,7 +8,7 @@ import processor from './processor'
 import type { Heading, Root, RootContent } from 'mdast'
 
 export default async (text: string) => {
-	await initEmbeddingModel()
+	if (!text.trim()) return []
 
 	const tree = processor.parse(text) as Root
 	const final_chunks: Array<string> = []
