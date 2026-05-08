@@ -24,8 +24,8 @@ const Index = (props: IPropsPanel) => {
 
 	const props_tab: IPropsTab = {
 		items: $copy(x.tabs),
-		current_tab: x.current_tab,
-		builtin_providers: $copy(x.builtin_providers),
+		currentTab: x.current_tab,
+		builtinProviders: $copy(x.builtin_providers),
 		onChangeCurrentTab: x.onChangeCurrentTab,
 		onDragProvider: x.onDragProvider,
 		onAddBuiltinProvider: x.onAddBuiltinProvider,
@@ -34,11 +34,11 @@ const Index = (props: IPropsPanel) => {
 	}
 
 	const props_form: IPropsForm = {
-		all_providers: x.all_providers,
+		allProviders: x.all_providers,
 		provider: $copy(x.provider),
 		test: $copy(x.test),
-		current_model: x.current_model,
-		adding_model: x.adding_model,
+		currentModel: x.current_model,
+		addingModel: x.adding_model,
 		onTest: x.onTestModel,
 		onChangeProvider: x.onChangeProvider,
 
@@ -50,7 +50,7 @@ const Index = (props: IPropsPanel) => {
 	}
 
 	const props_custom: IPropsCustom = {
-		custom_providers: $copy(target_config?.custom_providers),
+		customProviders: $copy(target_config?.custom_providers),
 		onChangeCustomProviders: x.onChangeCustomProviders
 	}
 

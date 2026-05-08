@@ -13,8 +13,8 @@ export interface ArgsInit extends Pick<IPropsPanel, 'config' | 'onChange' | 'onT
 
 export interface IPropsTab {
 	items: Array<string>
-	current_tab: M['current_tab']
-	builtin_providers: M['builtin_providers']
+	currentTab: M['current_tab']
+	builtinProviders: M['builtin_providers']
 	onChangeCurrentTab: (v: number) => void
 	onDragProvider: M['onDragProvider']
 	onAddBuiltinProvider: M['onAddBuiltinProvider']
@@ -25,16 +25,16 @@ export interface IPropsTab {
 export interface IPropsTabItem extends Pick<IPropsTab, 'onChangeCurrentTab'> {
 	index: number
 	item: IPropsTab['items'][number]
-	display_name: string
+	displayName: string
 	active: boolean
 }
 
 export interface IPropsForm {
-	all_providers: ProviderConfig['providers']
+	allProviders: ProviderConfig['providers']
 	provider: ProviderConfig['providers'][number]
 	test?: M['test']
-	current_model: M['current_model']
-	adding_model: M['adding_model']
+	currentModel: M['current_model']
+	addingModel: M['adding_model']
 	custom?: boolean
 	onTest?: M['onTestModel']
 	onChangeProvider: M['onChangeProvider']
@@ -59,11 +59,11 @@ export interface IPropsFormBaseUrl {
 }
 
 export interface IPropsFormCustomFields {
-	custom_fields: SpecialProvider['custom_fields']
+	customFields: SpecialProvider['custom_fields']
 	register: UseFormRegister<IPropsForm['provider']>
 }
 
-export interface IPropsFormModels extends Pick<IPropsForm, 'current_model' | 'onChangeCurrentModel'> {
+export interface IPropsFormModels extends Pick<IPropsForm, 'currentModel' | 'onChangeCurrentModel'> {
 	models: SpecialProvider['models']
 	control: Control<IPropsForm['provider']>
 	custom?: boolean
@@ -83,12 +83,12 @@ export interface IPropsFormModelForm {
 	control: Control<IPropsForm['provider']> | Control<Model>
 	index?: number
 	item?: Model
-	adding_model?: M['adding_model']
+	addingModel?: M['adding_model']
 	register: UseFormRegister<IPropsForm['provider']> | UseFormRegister<Model>
 }
 
 export interface IPropsCustom {
-	custom_providers: ProviderConfig['custom_providers']
+	customProviders: ProviderConfig['custom_providers']
 	onChangeCustomProviders: M['onChangeCustomProviders']
 }
 

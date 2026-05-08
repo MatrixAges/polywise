@@ -17,7 +17,7 @@ import type { IPropsForm, IPropsFormModelForm } from '../../types'
 const MODEL_TYPES = ['text', 'embedding', 'rerank', 'image', 'audio', 'video']
 
 const Index = (props: IPropsFormModelForm) => {
-	const { index = 0, item, adding_model, control, register } = props
+	const { index = 0, item, addingModel, control, register } = props
 	const { name, id, type } = item || {}
 
 	const { t } = useTranslation()
@@ -26,9 +26,9 @@ const Index = (props: IPropsFormModelForm) => {
 		<div className='flex flex-col'>
 			<div className='grid grid-cols-2'>
 				<AutoLabel
-					className={$cx(`border-r`, adding_model && 'border-b-0!')}
+					className={$cx(`border-r`, addingModel && 'border-b-0!')}
 					label={t('provider.form.model_form.model_id')}
-					valued={id || adding_model}
+					valued={id || addingModel}
 				>
 					<input
 						className={$cx(`
@@ -42,8 +42,8 @@ const Index = (props: IPropsFormModelForm) => {
 							t('provider.form.model_form.input') + t('provider.form.model_form.model_id')
 						}
 						autoComplete='off'
-						disabled={!adding_model}
-						{...(adding_model
+						disabled={!addingModel}
+						{...(addingModel
 							? (register as UseFormRegister<Model>)('id')
 							: (register as UseFormRegister<IPropsForm['provider']>)(
 									`models.${index}.id`
@@ -51,9 +51,9 @@ const Index = (props: IPropsFormModelForm) => {
 					/>
 				</AutoLabel>
 				<AutoLabel
-					className={adding_model ? 'border-b-0!' : ''}
+					className={addingModel ? 'border-b-0!' : ''}
 					label={t('provider.form.model_form.model_name')}
-					valued={name || adding_model}
+					valued={name || addingModel}
 				>
 					<input
 						className={$cx(`
@@ -66,7 +66,7 @@ const Index = (props: IPropsFormModelForm) => {
 							t('provider.form.model_form.input') + t('provider.form.model_form.model_name')
 						}
 						autoComplete='off'
-						{...(adding_model
+						{...(addingModel
 							? (register as UseFormRegister<Model>)('name')
 							: (register as UseFormRegister<IPropsForm['provider']>)(
 									`models.${index}.name`
@@ -76,11 +76,11 @@ const Index = (props: IPropsFormModelForm) => {
 			</div>
 			<div className='grid grid-cols-1'>
 				<AutoLabel
-					className={adding_model ? 'border-b-0!' : ''}
+					className={addingModel ? 'border-b-0!' : ''}
 					label={t('provider.form.model_form.model_type')}
-					valued={type || adding_model}
+					valued={type || addingModel}
 				>
-					<Controller name={adding_model ? 'type' : `models.${index}.type`} control={control}>
+					<Controller name={addingModel ? 'type' : `models.${index}.type`} control={control}>
 						<Select items={MODEL_TYPES.map(t => ({ label: t, value: t }))}>
 							<SelectTrigger
 								className='

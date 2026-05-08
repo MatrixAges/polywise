@@ -4,21 +4,21 @@ import { useModel } from '@/pages/project/context'
 import type { Project } from '@core/db'
 
 interface IProps {
-	project_item: Project
+	projectItem: Project
 }
 
 const Index = (props: IProps) => {
-	const { project_item } = props
+	const { projectItem } = props
 	const { createSession, onRenameProject, removeProject } = useModel()
 
 	return (
 		<ContextMenuContent>
-			<ContextMenuItem onClick={() => createSession(project_item.id)}>New Session</ContextMenuItem>
+			<ContextMenuItem onClick={() => createSession(projectItem.id)}>New Session</ContextMenuItem>
 			<ContextMenuSeparator />
-			<ContextMenuItem onClick={() => onRenameProject(project_item.id, project_item.name)}>
+			<ContextMenuItem onClick={() => onRenameProject(projectItem.id, projectItem.name)}>
 				Rename
 			</ContextMenuItem>
-			<ContextMenuItem variant='destructive' onClick={() => removeProject(project_item)}>
+			<ContextMenuItem variant='destructive' onClick={() => removeProject(projectItem)}>
 				Delete
 			</ContextMenuItem>
 		</ContextMenuContent>

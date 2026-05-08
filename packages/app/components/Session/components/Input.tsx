@@ -213,7 +213,7 @@ const Index = (props: IPropsInput) => {
 										text-xsm! text-std-400
 										bg-transparent
 									'
-									no_active_style
+									noActiveStyle
 								>
 									<SelectValue />
 								</SelectTrigger>
@@ -242,7 +242,7 @@ const Index = (props: IPropsInput) => {
 										text-xsm! text-std-400
 										bg-transparent
 									'
-									no_active_style
+									noActiveStyle
 								>
 									<SelectValue />
 								</SelectTrigger>

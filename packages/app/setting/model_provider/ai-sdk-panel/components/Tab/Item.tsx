@@ -9,7 +9,7 @@ import { useDelayValue, useScrollToItem } from '@/hooks'
 import type { IPropsTabItem } from '../../types'
 
 const Index = (props: IPropsTabItem) => {
-	const { index, item, display_name, active, onChangeCurrentTab } = props
+	const { index, item, displayName, active, onChangeCurrentTab } = props
 
 	const disabled = useMemo(() => item === 'custom' || item === 'disabled', [item])
 
@@ -46,7 +46,7 @@ const Index = (props: IPropsTabItem) => {
 			{...listeners}
 		>
 			<ProviderIcon name={item} />
-			<span>{display_name}</span>
+			<span>{displayName}</span>
 		</div>
 	)
 }

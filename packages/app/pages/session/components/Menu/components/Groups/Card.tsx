@@ -13,21 +13,21 @@ import type { IPropsGroupCard, TDragEndEvent } from './types'
 
 const Index = (props: IPropsGroupCard) => {
 	const {
-		group_index,
+		groupIndex,
 		groups,
-		group_name,
+		groupName,
 		items,
-		pin_map,
-		selected_session_id,
-		rename_group_index,
-		rename_session_index,
-		rename_value
+		pinMap,
+		selectedSessionId,
+		renameGroupIndex,
+		renameSessionIndex,
+		renameValue
 	} = props
 	const { sortGroupSession, setRenameValue, submitRename, cancelRename } = useModel()
 
-	const { attributes, listeners, transform, transition, setNodeRef } = useSortable({ id: `group-${group_index}` })
+	const { attributes, listeners, transform, transition, setNodeRef } = useSortable({ id: `group-${groupIndex}` })
 	const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }))
-	const active_rename = rename_group_index === group_index && rename_session_index < 0
+	const active_rename = renameGroupIndex === groupIndex && renameSessionIndex < 0
 
 	const dragSessionEnd = useMemoizedFn((args: TDragEndEvent) => {
 		const { active, over } = args
@@ -43,7 +43,7 @@ const Index = (props: IPropsGroupCard) => {
 			return
 		}
 
-		sortGroupSession({ group_index, from, to })
+		sortGroupSession({ group_index: groupIndex, from, to })
 	})
 
 	return (
@@ -60,7 +60,7 @@ const Index = (props: IPropsGroupCard) => {
 					mb-1
 					group
 				'
-				data-group-index={group_index}
+				data-group-index={groupIndex}
 				data-session-index={-1}
 				data-id=''
 			>
@@ -68,13 +68,13 @@ const Index = (props: IPropsGroupCard) => {
 					{active_rename ? (
 						<RenameInput
 							active={active_rename}
-							value={rename_value}
+							value={renameValue}
 							setRenameValue={setRenameValue}
 							submitRename={submitRename}
 							cancelRename={cancelRename}
 						></RenameInput>
 					) : (
-						<div className='text-std-300 text-xsm truncate font-medium'>{group_name}</div>
+						<div className='text-std-300 text-xsm truncate font-medium'>{groupName}</div>
 					)}
 				</div>
 				<button
@@ -100,19 +100,19 @@ const Index = (props: IPropsGroupCard) => {
 							<Row
 								item={item}
 								groups={groups}
-								group_items_count={items.length}
-								pin={item.id in pin_map}
-								selected={selected_session_id === item.id}
-								group_index={group_index}
-								session_index={session_index}
+								groupItemsCount={items.length}
+								pin={item.id in pinMap}
+								selected={selectedSessionId === item.id}
+								groupIndex={groupIndex}
+								sessionIndex={session_index}
 								renaming={
-									rename_group_index === group_index &&
-									rename_session_index === session_index
+									renameGroupIndex === groupIndex &&
+									renameSessionIndex === session_index
 								}
-								rename_value={
-									rename_group_index === group_index &&
-									rename_session_index === session_index
-										? rename_value
+								renameValue={
+									renameGroupIndex === groupIndex &&
+									renameSessionIndex === session_index
+										? renameValue
 										: ''
 								}
 								key={item.id}

@@ -10,7 +10,7 @@ export interface IPropsMessage extends Pick<Model, 'answer'> {
 }
 
 export interface IPropsPart extends Pick<IPropsMessage, 'streaming' | 'answer'> {
-	reasoning_duration?: number
+	reasoningDuration?: number
 	part: Message['parts'][number]
 }
 

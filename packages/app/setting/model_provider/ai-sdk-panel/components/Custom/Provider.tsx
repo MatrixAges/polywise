@@ -7,21 +7,21 @@ import type { IPropsCustomProvider, IPropsForm, Provider } from '../../types'
 
 const Index = (props: IPropsCustomProvider) => {
 	const { index, item, update, remove } = props
-	const [current_model, setCurrentModel] = useState<number | null>(null)
-	const [adding_model, setAddingModel] = useState(false)
+	const [currentModel, setCurrentModel] = useState<number | null>(null)
+	const [addingModel, setAddingModel] = useState(false)
 
 	const onChangeProvider = useMemoizedFn((v: Provider) => update(index, v))
 
 	const props_form: IPropsForm = {
 		provider: item,
-		current_model,
-		adding_model,
+		currentModel,
+		addingModel,
 		custom: true,
 		onChangeProvider,
 		onChangeCurrentModel: useMemoizedFn((v: number | null) => {
-			setCurrentModel(v === current_model ? null : v)
+			setCurrentModel(v === currentModel ? null : v)
 		}),
-		toggleAddingModel: useMemoizedFn(() => setAddingModel(!adding_model)),
+		toggleAddingModel: useMemoizedFn(() => setAddingModel(!addingModel)),
 		onRemoveProvider: useMemoizedFn(() => remove(index))
 	}
 

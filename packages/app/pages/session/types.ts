@@ -44,35 +44,36 @@ export interface IArgsStartRenameSession {
 
 export interface IPropsGroups {
 	groups: Array<ISessionMenuGroup>
-	pin_map: Record<string, number>
-	selected_session_id: string
-	rename_group_index: number | undefined
-	rename_session_index: number
-	rename_value: string
+	pinMap: Record<string, number>
+	selectedSessionId: string
+	renameGroupIndex: number | undefined
+	renameSessionIndex: number
+	renameValue: string
 }
 
 export interface IPropsSessions {
 	groups: Array<ISessionMenuGroup>
 	sessions: Array<Session>
-	pin_map: Record<string, number>
-	selected_session_id: string
-	rename_group_index: number | undefined
-	rename_session_index: number
-	rename_value: string
-	has_more: boolean
+	pinMap: Record<string, number>
+	selectedSessionId: string
+	renameGroupIndex: number | undefined
+	renameSessionIndex: number
+	renameValue: string
+	hasMore: boolean
 	loading: boolean
-	loading_more: boolean
+	loadingMore: boolean
 }
 
-export interface IPropsMenu extends Pick<Model, 'current_tab'> {
+export interface IPropsMenu {
+	currentTab: Model['current_tab']
 	groups: Array<ISessionMenuGroup>
 	sessions: Array<Session>
-	pin_map: Record<string, number>
-	selected_session_id: string
-	rename_group_index: number | undefined
-	rename_session_index: number
-	rename_value: string
-	has_more: boolean
+	pinMap: Record<string, number>
+	selectedSessionId: string
+	renameGroupIndex: number | undefined
+	renameSessionIndex: number
+	renameValue: string
+	hasMore: boolean
 	loading: boolean
-	loading_more: boolean
+	loadingMore: boolean
 }

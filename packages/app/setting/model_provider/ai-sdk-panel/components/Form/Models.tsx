@@ -12,7 +12,7 @@ import ModelForm from './ModelForm'
 import type { IPropsFormModels } from '../../types'
 
 const Index = (props: IPropsFormModels) => {
-	const { models, control, current_model, custom, register, remove, onChangeCurrentModel, onDragModel } = props
+	const { models, control, currentModel, custom, register, remove, onChangeCurrentModel, onDragModel } = props
 
 	const { t } = useTranslation()
 
@@ -50,7 +50,7 @@ const Index = (props: IPropsFormModels) => {
 					{models.map((item, index) => (
 						<Fragment key={item.id}>
 							<Model
-								editing={current_model === index}
+								editing={currentModel === index}
 								{...{
 									index,
 									item,
@@ -62,7 +62,7 @@ const Index = (props: IPropsFormModels) => {
 							/>
 							<Show
 								className='overflow-hidden'
-								visible={current_model !== null && current_model === index}
+								visible={currentModel !== null && currentModel === index}
 								initial={{ opacity: 0, height: 0 }}
 								animate={{ opacity: 1, height: 'auto' }}
 							>

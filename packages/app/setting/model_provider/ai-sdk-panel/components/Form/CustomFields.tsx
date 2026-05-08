@@ -6,10 +6,10 @@ import styles from '../../index.module.css'
 import type { IPropsFormCustomFields } from '../../types'
 
 const Index = (props: IPropsFormCustomFields) => {
-	const { custom_fields, register } = props
+	const { customFields, register } = props
 	const { t } = useTranslation()
 
-	const fields = custom_fields || {}
+	const fields = customFields || {}
 	const keys = Object.keys(fields)
 
 	if (!keys.length) return null

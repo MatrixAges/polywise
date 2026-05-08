@@ -27,8 +27,8 @@ export default class Index {
 			IProps,
 			| 'paths'
 			| 'search'
-			| 'colored_icons'
-			| 'drag_and_drop'
+			| 'coloredIcons'
+			| 'dragAndDrop'
 			| 'renaming'
 			| 'composition'
 			| 'onMutation'
@@ -39,8 +39,8 @@ export default class Index {
 		const {
 			paths,
 			search,
-			colored_icons,
-			drag_and_drop,
+			coloredIcons,
+			dragAndDrop,
 			renaming,
 			composition,
 			onMutation,
@@ -53,10 +53,10 @@ export default class Index {
 		const tree = new FileTree({
 			preparedInput: prepareFileTreeInput(paths, { flattenEmptyDirectories: true }),
 			search,
-			dragAndDrop: drag_and_drop,
+			dragAndDrop,
 			renaming,
 			composition,
-			icons: colored_icons ? { set: 'complete', colored: true } : 'standard',
+			icons: coloredIcons ? { set: 'complete', colored: true } : 'standard',
 			itemHeight: 27,
 			flattenEmptyDirectories: true,
 			initialExpansion: 'closed',

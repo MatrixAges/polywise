@@ -4,7 +4,7 @@ import { useModel } from '@/pages/session/context'
 import type { IPropsGroupCardMenu } from './types'
 
 const Index = (props: IPropsGroupCardMenu) => {
-	const { group_index, groups_count, group_name } = props
+	const { groupIndex, groupsCount, groupName } = props
 	const { createSession, createGroup, startRenameGroup, sortGroup, removeGroup } = useModel()
 
 	return (
@@ -12,20 +12,20 @@ const Index = (props: IPropsGroupCardMenu) => {
 			<ContextMenuItem onClick={createSession}>New Session</ContextMenuItem>
 			<ContextMenuItem onClick={createGroup}>New Group</ContextMenuItem>
 			<ContextMenuSeparator />
-			<ContextMenuItem onClick={() => startRenameGroup({ group_index, value: group_name })}>
+			<ContextMenuItem onClick={() => startRenameGroup({ group_index: groupIndex, value: groupName })}>
 				Rename Group
 			</ContextMenuItem>
-			<ContextMenuItem disabled={group_index === 0} onClick={() => sortGroup(group_index, group_index - 1)}>
+			<ContextMenuItem disabled={groupIndex === 0} onClick={() => sortGroup(groupIndex, groupIndex - 1)}>
 				Move Up
 			</ContextMenuItem>
 			<ContextMenuItem
-				disabled={group_index >= groups_count - 1}
-				onClick={() => sortGroup(group_index, group_index + 1)}
+				disabled={groupIndex >= groupsCount - 1}
+				onClick={() => sortGroup(groupIndex, groupIndex + 1)}
 			>
 				Move Down
 			</ContextMenuItem>
 			<ContextMenuSeparator />
-			<ContextMenuItem variant='destructive' onClick={() => removeGroup(group_index)}>
+			<ContextMenuItem variant='destructive' onClick={() => removeGroup(groupIndex)}>
 				Delete Group
 			</ContextMenuItem>
 		</ContextMenuContent>

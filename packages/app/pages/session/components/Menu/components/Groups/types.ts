@@ -3,51 +3,51 @@ import type { DragEndEvent } from '@dnd-kit/core'
 import type { IPropsGroups } from '../../../../types'
 
 export interface IPropsGroupSessionRowMenu {
-	group_index: number
-	session_index: number
-	group_items_count: number
+	groupIndex: number
+	sessionIndex: number
+	groupItemsCount: number
 	item: Session
 	groups: Array<{ group: string; items: Array<Session> }>
 	pin: boolean
 }
 
 export interface IPropsGroupSessionRow {
-	group_index: number
-	session_index: number
+	groupIndex: number
+	sessionIndex: number
 	item: Session
-	group_items_count: number
+	groupItemsCount: number
 	groups: Array<{ group: string; items: Array<Session> }>
 	pin: boolean
 	selected: boolean
 	renaming: boolean
-	rename_value: string
+	renameValue: string
 }
 
 export interface IPropsGroupCardMenu {
-	group_index: number
-	groups_count: number
-	group_name: string
+	groupIndex: number
+	groupsCount: number
+	groupName: string
 }
 
 export interface IPropsGroupCard {
-	group_index: number
+	groupIndex: number
 	groups: IPropsGroups['groups']
-	group_name: string
+	groupName: string
 	items: Array<Session>
-	pin_map: Record<string, number>
-	selected_session_id: string
-	rename_group_index: number | undefined
-	rename_session_index: number
-	rename_value: string
+	pinMap: Record<string, number>
+	selectedSessionId: string
+	renameGroupIndex: number | undefined
+	renameSessionIndex: number
+	renameValue: string
 }
 
 export interface IPropsGroupsRoot {
 	groups: IPropsGroups['groups']
-	pin_map: Record<string, number>
-	selected_session_id: string
-	rename_group_index: number | undefined
-	rename_session_index: number
-	rename_value: string
+	pinMap: Record<string, number>
+	selectedSessionId: string
+	renameGroupIndex: number | undefined
+	renameSessionIndex: number
+	renameValue: string
 }
 
 export type TDragEndEvent = DragEndEvent

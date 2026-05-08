@@ -74,8 +74,8 @@ const Index = () => {
 					<FileTree
 						paths={$copy(skill_files.paths)}
 						flex
-						colored_icons
-						drag_and_drop={getTreeDragAndDrop()}
+						coloredIcons
+						dragAndDrop={getTreeDragAndDrop()}
 						renaming={{
 							canRename: canRenameTreeItem
 						}}

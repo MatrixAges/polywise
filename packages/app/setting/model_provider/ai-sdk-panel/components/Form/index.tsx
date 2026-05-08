@@ -23,11 +23,11 @@ import type { IPropsForm } from '../../types'
 
 const Index = (props: IPropsForm) => {
 	const {
-		all_providers,
+		allProviders,
 		provider,
 		test,
-		current_model,
-		adding_model,
+		currentModel,
+		addingModel,
 		custom,
 		onTest,
 		onChangeProvider,
@@ -110,7 +110,7 @@ const Index = (props: IPropsForm) => {
 	})
 
 	const resetModels = useMemoizedFn(() => {
-		const target_provider = all_providers.find(item => item.name === name)
+		const target_provider = allProviders.find(item => item.name === name)
 
 		if (!target_provider) return
 
@@ -188,7 +188,7 @@ const Index = (props: IPropsForm) => {
 				)}
 				<APIKey title={t('provider.form.apiKey')} {...{ apiKey, custom, test, onTest, register }} />
 				<BaseUrl title={t('provider.form.baseURL')} {...{ baseURL, custom, register }} />
-				<CustomFields custom_fields={(provider as SpecialProvider).custom_fields} register={register} />
+				<CustomFields customFields={(provider as SpecialProvider).custom_fields} register={register} />
 				<div className='flex flex-col gap-2.5'>
 					<div className='flex items-center justify-between'>
 						<span className={$cx(styles.label)}>{t('provider.form.models')}</span>
@@ -209,7 +209,7 @@ const Index = (props: IPropsForm) => {
 					<Models
 						models={target_fields}
 						{...{
-							current_model,
+							currentModel,
 							control,
 							custom,
 							register,
@@ -222,7 +222,7 @@ const Index = (props: IPropsForm) => {
 			</form>
 			<Show
 				className='w-full overflow-hidden'
-				visible={adding_model}
+				visible={addingModel}
 				initial={{ opacity: 0, height: 0 }}
 				animate={{ opacity: 1, height: 'auto' }}
 			>
@@ -276,7 +276,7 @@ const Index = (props: IPropsForm) => {
 							border border-border-light
 						'
 					>
-						<ModelForm control={control_model} adding_model register={register_model} />
+						<ModelForm control={control_model} addingModel register={register_model} />
 					</div>
 				</form>
 			</Show>

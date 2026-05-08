@@ -99,7 +99,7 @@ const Index = () => {
 				return null
 			}
 
-			return <MenuProjectMenu project_item={target_project.project}></MenuProjectMenu>
+			return <MenuProjectMenu projectItem={target_project.project}></MenuProjectMenu>
 		}
 
 		const target_session = target_project.sessions[menu_target.session_index]
@@ -109,10 +109,7 @@ const Index = () => {
 		}
 
 		return (
-			<MenuSessionMenu
-				project_id={target_project.project.id}
-				session_item={target_session}
-			></MenuSessionMenu>
+			<MenuSessionMenu projectId={target_project.project.id} sessionItem={target_session}></MenuSessionMenu>
 		)
 	}, [menu_target, projects])
 

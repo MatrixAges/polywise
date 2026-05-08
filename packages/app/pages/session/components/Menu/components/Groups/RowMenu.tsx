@@ -13,7 +13,7 @@ import { useModel } from '@/pages/session/context'
 import type { IPropsGroupSessionRowMenu } from './types'
 
 const Index = (props: IPropsGroupSessionRowMenu) => {
-	const { group_index, session_index, group_items_count, item, groups, pin } = props
+	const { groupIndex, sessionIndex, groupItemsCount, item, groups, pin } = props
 	const {
 		sortGroupSession,
 		createSession,
@@ -26,11 +26,11 @@ const Index = (props: IPropsGroupSessionRowMenu) => {
 	} = useModel()
 
 	const moveUp = useMemoizedFn(() => {
-		sortGroupSession({ group_index, from: session_index, to: session_index - 1 })
+		sortGroupSession({ group_index: groupIndex, from: sessionIndex, to: sessionIndex - 1 })
 	})
 
 	const moveDown = useMemoizedFn(() => {
-		sortGroupSession({ group_index, from: session_index, to: session_index + 1 })
+		sortGroupSession({ group_index: groupIndex, from: sessionIndex, to: sessionIndex + 1 })
 	})
 
 	return (
@@ -41,8 +41,8 @@ const Index = (props: IPropsGroupSessionRowMenu) => {
 			<ContextMenuItem
 				onClick={() =>
 					startRenameSession({
-						rename_group_index: group_index,
-						rename_session_index: session_index,
+						rename_group_index: groupIndex,
+						rename_session_index: sessionIndex,
 						value: item.title
 					})
 				}
@@ -54,7 +54,7 @@ const Index = (props: IPropsGroupSessionRowMenu) => {
 				<ContextMenuSubTrigger>Move To Group</ContextMenuSubTrigger>
 				<ContextMenuSubContent>
 					{groups.map((target_group, index) => {
-						if (index === group_index) {
+						if (index === groupIndex) {
 							return null
 						}
 
@@ -69,14 +69,14 @@ const Index = (props: IPropsGroupSessionRowMenu) => {
 					})}
 				</ContextMenuSubContent>
 			</ContextMenuSub>
-			<ContextMenuItem onClick={() => moveSessionOutGroup({ id: item.id, group_index })}>
+			<ContextMenuItem onClick={() => moveSessionOutGroup({ id: item.id, group_index: groupIndex })}>
 				Move Out Group
 			</ContextMenuItem>
 			<ContextMenuSeparator />
-			<ContextMenuItem disabled={session_index === 0} onClick={moveUp}>
+			<ContextMenuItem disabled={sessionIndex === 0} onClick={moveUp}>
 				Move Up
 			</ContextMenuItem>
-			<ContextMenuItem disabled={session_index >= group_items_count - 1} onClick={moveDown}>
+			<ContextMenuItem disabled={sessionIndex >= groupItemsCount - 1} onClick={moveDown}>
 				Move Down
 			</ContextMenuItem>
 			<ContextMenuSeparator />

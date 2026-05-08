@@ -164,11 +164,11 @@ const Index = (props: IProps) => {
 			</div>
 			<Input {...props_input}></Input>
 			<Drawer
-				class_name='p-3'
-				content_class_name='rounded-lg'
+				className='p-3'
+				contentClassName='rounded-lg'
 				placement='bottom'
 				getContainer={() => ref}
-				mask_closable
+				maskClosable
 				height='100%'
 				width={is_page ? 480 : '100%'}
 				title='Session Context'

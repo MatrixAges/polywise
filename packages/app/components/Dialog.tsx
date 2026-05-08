@@ -16,12 +16,12 @@ interface IProps extends PropsWithChildren {
 	title: string
 	desc?: string
 	className?: string
-	max_height?: string | number
+	maxHeight?: string | number
 	setOpen: (v: boolean) => void
 }
 
 const Index = (props: IProps) => {
-	const { children, open, title, desc, className, max_height, setOpen } = props
+	const { children, open, title, desc, className, maxHeight, setOpen } = props
 
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
@@ -36,7 +36,7 @@ const Index = (props: IProps) => {
 						overflow-y-auto
 						w-full
 					`,
-						max_height ?? 'max-h-[60vh]'
+						maxHeight ?? 'max-h-[60vh]'
 					)}
 				>
 					{children}

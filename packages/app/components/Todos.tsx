@@ -1,10 +1,13 @@
-import type { IProjectSerializedTodoItem } from '@core/rpc/project/types'
+type TodoItem = {
+	id: string
+	title: string
+}
 
 interface IProps {
-	todos: Array<IProjectSerializedTodoItem>
-	todo_input_value: string
-	todo_editing_id: string
-	todo_editing_value: string
+	todos: Array<TodoItem>
+	todoInputValue: string
+	todoEditingId: string
+	todoEditingValue: string
 	onChangeTodoInput: (value: string) => void
 	onClickCreateTodo: () => Promise<void>
 	onStartRenameTodo: (todo_id: string, title: string) => void
@@ -17,9 +20,9 @@ interface IProps {
 const Index = (props: IProps) => {
 	const {
 		todos,
-		todo_input_value,
-		todo_editing_id,
-		todo_editing_value,
+		todoInputValue,
+		todoEditingId,
+		todoEditingValue,
 		onChangeTodoInput,
 		onClickCreateTodo,
 		onStartRenameTodo,
@@ -43,7 +46,7 @@ const Index = (props: IProps) => {
 						border border-border-light
 					'
 					placeholder='New todo'
-					value={todo_input_value}
+					value={todoInputValue}
 					onChange={event => onChangeTodoInput(event.target.value)}
 					onKeyDown={event => {
 						if (event.key === 'Enter') {
@@ -75,7 +78,7 @@ const Index = (props: IProps) => {
 							border border-border-light
 						'
 					>
-						{todo_editing_id === item.id ? (
+						{todoEditingId === item.id ? (
 							<input
 								className='
 									w-full
@@ -85,7 +88,7 @@ const Index = (props: IProps) => {
 									bg-transparent
 									border border-border-light
 								'
-								value={todo_editing_value}
+								value={todoEditingValue}
 								onChange={event => onChangeEditingTodoValue(event.target.value)}
 								onKeyDown={event => {
 									if (event.key === 'Enter') {
@@ -110,7 +113,7 @@ const Index = (props: IProps) => {
 							>
 								Rename
 							</button>
-							{todo_editing_id === item.id && (
+							{todoEditingId === item.id && (
 								<button
 									type='button'
 									className='text-std-400 text-xs'

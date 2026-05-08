@@ -25,7 +25,7 @@ const Index = (props: IProps) => {
 			title='Active Sessions'
 			desc='A panel for quickly viewing dynamic session changes'
 			className='w-[800px] max-w-none! gap-4'
-			max_height='h-[80vh]'
+			maxHeight='h-[80vh]'
 			setOpen={x.toggleOpen}
 		>
 			<div

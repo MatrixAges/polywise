@@ -7,14 +7,14 @@ import type { IPropsSessions } from '../../../../types'
 const Index = (props: IPropsSessions) => {
 	const {
 		sessions,
-		pin_map,
-		selected_session_id,
-		rename_group_index,
-		rename_session_index,
-		rename_value,
-		has_more,
+		pinMap,
+		selectedSessionId,
+		renameGroupIndex,
+		renameSessionIndex,
+		renameValue,
+		hasMore,
 		loading,
-		loading_more
+		loadingMore
 	} = props
 	const { onScroll, loadMore } = useModel()
 
@@ -35,23 +35,22 @@ const Index = (props: IPropsSessions) => {
 				'
 			>
 				{sessions.map((item, session_index) => {
-					const selected = selected_session_id === item.id
-					const renaming =
-						rename_group_index === undefined && rename_session_index === session_index
+					const selected = selectedSessionId === item.id
+					const renaming = renameGroupIndex === undefined && renameSessionIndex === session_index
 
 					return (
 						<Item
 							item={item}
-							pin={item.id in pin_map}
-							session_index={session_index}
+							pin={item.id in pinMap}
+							sessionIndex={session_index}
 							selected={selected}
 							renaming={renaming}
-							rename_value={renaming ? rename_value : ''}
+							renameValue={renaming ? renameValue : ''}
 							key={item.id}
 						></Item>
 					)
 				})}
-				{has_more && (
+				{hasMore && (
 					<button
 						type='button'
 						className='
@@ -63,9 +62,9 @@ const Index = (props: IPropsSessions) => {
 							clickit
 						'
 						onClick={() => loadMore()}
-						disabled={loading || loading_more}
+						disabled={loading || loadingMore}
 					>
-						{loading || loading_more ? 'Loading...' : 'Show more'}
+						{loading || loadingMore ? 'Loading...' : 'Show more'}
 					</button>
 				)}
 			</div>

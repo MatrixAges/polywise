@@ -13,14 +13,14 @@ import type { IPropsMessage } from '../types'
 const Index = (props: IPropsMessage) => {
 	const { streaming, message, answer } = props
 	const { parts } = message
-	const reasoning_duration = (message.metadata as MessageMetadata)?.reasoning_duration || []
+	const reasoningDuration = (message.metadata as MessageMetadata)?.reasoning_duration || []
 
 	const { source_urls, files, left_parts } = useMemo(() => {
 		const source_urls = [] as Array<SourceUrlUIPart>
 		const files = [] as Array<FileUIPart>
 		const left_parts = [] as Array<{
 			part: TextUIPart | ReasoningUIPart
-			reasoning_duration?: number
+			reasoningDuration?: number
 		}>
 		let reasoning_index = 0
 
@@ -32,7 +32,7 @@ const Index = (props: IPropsMessage) => {
 			} else if (part.type === 'reasoning') {
 				left_parts.push({
 					part,
-					reasoning_duration: reasoning_duration[reasoning_index]
+					reasoningDuration: reasoningDuration[reasoning_index]
 				})
 
 				reasoning_index++
@@ -42,17 +42,17 @@ const Index = (props: IPropsMessage) => {
 		})
 
 		return { source_urls, files, left_parts }
-	}, [parts, reasoning_duration])
+	}, [parts, reasoningDuration])
 
 	return (
 		<Message from={message.role}>
 			<MessageContent>
 				{left_parts.length
-					? left_parts.map(({ part, reasoning_duration }, index) => (
+					? left_parts.map(({ part, reasoningDuration }, index) => (
 							<Part
 								streaming={index === left_parts.length - 1 && streaming}
 								part={part}
-								reasoning_duration={reasoning_duration}
+								reasoningDuration={reasoningDuration}
 								answer={answer}
 								key={`${message.id}-${index}`}
 							></Part>

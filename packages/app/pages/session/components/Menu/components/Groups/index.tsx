@@ -10,7 +10,7 @@ import type { IPropsGroups } from '../../../../types'
 import type { IPropsGroupCard, TDragEndEvent } from './types'
 
 const Index = (props: IPropsGroups) => {
-	const { groups, pin_map, selected_session_id, rename_group_index, rename_session_index, rename_value } = props
+	const { groups, pinMap, selectedSessionId, renameGroupIndex, renameSessionIndex, renameValue } = props
 	const { sortGroup } = useModel()
 
 	const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }))
@@ -32,13 +32,13 @@ const Index = (props: IPropsGroups) => {
 		sortGroup(from, to)
 	})
 
-	const props_card: Omit<IPropsGroupCard, 'group_index' | 'group_name' | 'items'> = {
+	const props_card: Omit<IPropsGroupCard, 'groupIndex' | 'groupName' | 'items'> = {
 		groups,
-		pin_map,
-		selected_session_id,
-		rename_group_index,
-		rename_session_index,
-		rename_value
+		pinMap,
+		selectedSessionId,
+		renameGroupIndex,
+		renameSessionIndex,
+		renameValue
 	}
 
 	return (
@@ -65,8 +65,8 @@ const Index = (props: IPropsGroups) => {
 					>
 						{groups.map((group_item, group_index) => (
 							<Card
-								group_index={group_index}
-								group_name={group_item.group}
+								groupIndex={group_index}
+								groupName={group_item.group}
 								items={group_item.items}
 								{...props_card}
 								key={`${group_item.group}-${group_index}`}

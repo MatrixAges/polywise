@@ -16,48 +16,48 @@ import type { MouseEvent } from 'react'
 import type { IPropsGroups, IPropsMenu, IPropsSessions } from '../../types'
 
 interface IMenuTarget {
-	group_index: number
-	session_index: number
+	groupIndex: number
+	sessionIndex: number
 	id: string
 }
 
 const Index = (props: IPropsMenu) => {
 	const {
-		current_tab,
+		currentTab,
 		groups,
 		sessions,
-		pin_map,
-		selected_session_id,
-		rename_group_index,
-		rename_session_index,
-		rename_value,
-		has_more,
+		pinMap,
+		selectedSessionId,
+		renameGroupIndex,
+		renameSessionIndex,
+		renameValue,
+		hasMore,
 		loading,
-		loading_more
+		loadingMore
 	} = props
 	const { setCurrentTab, createSession, createGroup } = useModel()
 	const [menu_target, setMenuTarget] = useState<IMenuTarget | null>(null)
 
 	const props_groups: IPropsGroups = {
 		groups,
-		pin_map,
-		selected_session_id,
-		rename_group_index,
-		rename_session_index,
-		rename_value
+		pinMap,
+		selectedSessionId,
+		renameGroupIndex,
+		renameSessionIndex,
+		renameValue
 	}
 
 	const props_sessions: IPropsSessions = {
 		groups,
 		sessions,
-		pin_map,
-		selected_session_id,
-		rename_group_index,
-		rename_session_index,
-		rename_value,
-		has_more,
+		pinMap,
+		selectedSessionId,
+		renameGroupIndex,
+		renameSessionIndex,
+		renameValue,
+		hasMore,
 		loading,
-		loading_more
+		loadingMore
 	}
 
 	const ref_action = useDelegate(v => {
@@ -87,8 +87,8 @@ const Index = (props: IPropsMenu) => {
 				}
 
 				return {
-					group_index: next_group_index,
-					session_index: next_session_index,
+					groupIndex: next_group_index,
+					sessionIndex: next_session_index,
 					id
 				}
 			}
@@ -115,44 +115,44 @@ const Index = (props: IPropsMenu) => {
 	const menu_content = useMemo(() => {
 		if (!menu_target) return
 
-		if (menu_target.group_index >= 0 && menu_target.session_index < 0) {
-			const target_group = groups[menu_target.group_index]
+		if (menu_target.groupIndex >= 0 && menu_target.sessionIndex < 0) {
+			const target_group = groups[menu_target.groupIndex]
 
 			if (target_group) {
 				return (
 					<CardMenu
-						group_index={menu_target.group_index}
-						groups_count={groups.length}
-						group_name={target_group.group}
+						groupIndex={menu_target.groupIndex}
+						groupsCount={groups.length}
+						groupName={target_group.group}
 					></CardMenu>
 				)
 			}
-		} else if (menu_target.group_index >= 0 && menu_target.session_index >= 0) {
-			const target_group = groups[menu_target.group_index]
-			const target_session = target_group?.items[menu_target.session_index]
+		} else if (menu_target.groupIndex >= 0 && menu_target.sessionIndex >= 0) {
+			const target_group = groups[menu_target.groupIndex]
+			const target_session = target_group?.items[menu_target.sessionIndex]
 
 			if (target_session && target_session.id === menu_target.id) {
 				return (
 					<RowMenu
-						group_index={menu_target.group_index}
-						session_index={menu_target.session_index}
-						group_items_count={target_group.items.length}
+						groupIndex={menu_target.groupIndex}
+						sessionIndex={menu_target.sessionIndex}
+						groupItemsCount={target_group.items.length}
 						item={target_session}
 						groups={groups}
-						pin={target_session.id in pin_map}
+						pin={target_session.id in pinMap}
 					></RowMenu>
 				)
 			}
-		} else if (menu_target.group_index < 0 && menu_target.session_index >= 0) {
-			const target_session = sessions[menu_target.session_index]
+		} else if (menu_target.groupIndex < 0 && menu_target.sessionIndex >= 0) {
+			const target_session = sessions[menu_target.sessionIndex]
 
 			if (target_session && target_session.id === menu_target.id) {
 				return (
 					<ItemMenu
 						item={target_session}
 						groups={groups}
-						pin={target_session.id in pin_map}
-						session_index={menu_target.session_index}
+						pin={target_session.id in pinMap}
+						sessionIndex={menu_target.sessionIndex}
 					></ItemMenu>
 				)
 			}
@@ -179,7 +179,7 @@ const Index = (props: IPropsMenu) => {
 			>
 				<TextTabs
 					items={['groups', 'sessions']}
-					active={current_tab}
+					active={currentTab}
 					setActive={setCurrentTab}
 				></TextTabs>
 				<div className='flex gap-1' ref={ref_action}>
@@ -198,7 +198,7 @@ const Index = (props: IPropsMenu) => {
 			<ContextMenu>
 				<ContextMenuTrigger className='flex min-h-0 w-full flex-1'>
 					<div className='flex h-full w-full' onContextMenuCapture={onMenuContextCapture}>
-						{current_tab === 'sessions' ? (
+						{currentTab === 'sessions' ? (
 							<Sessions {...props_sessions}></Sessions>
 						) : (
 							<Groups {...props_groups}></Groups>

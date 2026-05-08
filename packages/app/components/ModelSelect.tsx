@@ -21,8 +21,8 @@ import type { DefaultModel, Model } from '@core/types'
 
 interface IProps {
 	value?: DefaultModel
-	show_local_model?: boolean
-	filter_type?: Model['type']
+	showLocalModel?: boolean
+	filterType?: Model['type']
 	ghost?: boolean
 	onChange?: (v: DefaultModel) => void
 }
@@ -48,8 +48,8 @@ const getLocalModelItem = (): IModelItem => ({
 	label: local_models.gen.name
 })
 
-const getLocalModelItemByType = (filter_type?: string): IModelItem | null => {
-	if (filter_type === 'embedding') {
+const getLocalModelItemByType = (filterType?: string): IModelItem | null => {
+	if (filterType === 'embedding') {
 		return {
 			provider: 'local model',
 			model: {
@@ -63,7 +63,7 @@ const getLocalModelItemByType = (filter_type?: string): IModelItem | null => {
 		}
 	}
 
-	if (filter_type === 'rerank') {
+	if (filterType === 'rerank') {
 		return {
 			provider: 'local model',
 			model: {
@@ -77,7 +77,7 @@ const getLocalModelItemByType = (filter_type?: string): IModelItem | null => {
 		}
 	}
 
-	if (!filter_type || filter_type === 'text') {
+	if (!filterType || filterType === 'text') {
 		return getLocalModelItem()
 	}
 
@@ -85,7 +85,7 @@ const getLocalModelItemByType = (filter_type?: string): IModelItem | null => {
 }
 
 const Index = (props: IProps) => {
-	const { value, show_local_model, filter_type, ghost, onChange } = props
+	const { value, showLocalModel, filterType, ghost, onChange } = props
 
 	const global = useGlobal()
 
@@ -94,14 +94,14 @@ const Index = (props: IProps) => {
 
 	const provider_items = useMemo(() => {
 		const target: Array<IProviderGroup> = []
-		const should_show_local_model = show_local_model || filter_type === 'embedding' || filter_type === 'rerank'
+		const shouldShowLocalModel = showLocalModel || filterType === 'embedding' || filterType === 'rerank'
 
 		providers.forEach(group => {
 			if (!group.enabled) return
 
 			const filtered_models = (group.models || []).filter(item => {
 				if (!item.enabled) return false
-				if (filter_type) return (item.type || 'text') === filter_type
+				if (filterType) return (item.type || 'text') === filterType
 				return true
 			})
 
@@ -118,17 +118,17 @@ const Index = (props: IProps) => {
 			})
 		})
 
-		const local_model_item = should_show_local_model ? getLocalModelItemByType(filter_type) : null
+		const localModelItem = shouldShowLocalModel ? getLocalModelItemByType(filterType) : null
 
-		if (local_model_item) {
+		if (localModelItem) {
 			target.unshift({
 				value: 'Local Models',
-				items: [local_model_item]
+				items: [localModelItem]
 			})
 		}
 
 		return target
-	}, [providers, show_local_model, filter_type])
+	}, [providers, showLocalModel, filterType])
 
 	const all_items = useMemo(() => provider_items.flatMap(group => group.items), [provider_items])
 

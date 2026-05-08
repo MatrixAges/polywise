@@ -12,15 +12,15 @@ export interface DrawerProps {
 	children: ReactNode
 	open: boolean
 	placement?: 'left' | 'right' | 'top' | 'bottom'
-	class_name?: string
-	mask_class_name?: string
-	content_class_name?: string
+	className?: string
+	maskClassName?: string
+	contentClassName?: string
 	title?: string
 	desc?: string
 	width?: string | number
 	height?: string | number
-	mask_closable?: boolean
-	z_index?: number
+	maskClosable?: boolean
+	zIndex?: number
 	header?: (onClose: DrawerProps['onClose']) => ReactNode
 	onClose?: (e?: MouseEvent<HTMLElement>) => void
 	getRef?: (v: HTMLElement | null) => void
@@ -38,15 +38,15 @@ const Index = (props: DrawerProps) => {
 		children,
 		open,
 		placement = 'left',
-		class_name,
-		mask_class_name,
-		content_class_name,
+		className,
+		maskClassName,
+		contentClassName,
 		title,
 		desc,
 		width,
 		height = 300,
-		mask_closable,
-		z_index = 1001,
+		maskClosable,
+		zIndex = 1001,
 		header,
 		onClose,
 		getRef,
@@ -78,7 +78,7 @@ const Index = (props: DrawerProps) => {
 	}, [open])
 
 	useClickAway(e => {
-		if (!mask_closable || e.target !== ref_content_wrap.current) return
+		if (!maskClosable || e.target !== ref_content_wrap.current) return
 
 		onClose?.(e as unknown as MouseEvent<HTMLDivElement>)
 	}, ref_content)
@@ -137,14 +137,14 @@ const Index = (props: DrawerProps) => {
 						className={$cx(
 							styles.mask,
 							!getContainer && styles.on_body,
-							mask_class_name,
+							maskClassName,
 							'h-full w-full backdrop-blur-md select-none'
 						)}
 						initial={{ opacity: 0 }}
 						animate={{ opacity: 1 }}
 						exit={{ opacity: 0 }}
 						transition={{ duration: 0.18, ease: 'easeInOut' }}
-						style={{ zIndex: z_index }}
+						style={{ zIndex }}
 					/>
 				)}
 			</AnimatePresence>
@@ -153,7 +153,7 @@ const Index = (props: DrawerProps) => {
 					styles.content_wrap,
 					!getContainer && styles.on_body,
 					align,
-					class_name,
+					className,
 					`
 					box-border
 					flex
@@ -162,14 +162,14 @@ const Index = (props: DrawerProps) => {
 				`
 				)}
 				ref={ref_content_wrap}
-				style={{ zIndex: z_index + 1 }}
+				style={{ zIndex: zIndex + 1 }}
 			>
 				<AnimatePresence>
 					{open && (
 						<motion.div
 							className={$cx(
 								styles.content,
-								content_class_name,
+								contentClassName,
 								`
 								box-border
 								flex flex-col

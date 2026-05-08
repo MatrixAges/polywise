@@ -21,8 +21,8 @@ export interface IProps {
 	className?: string
 	flex?: boolean
 	search?: boolean
-	colored_icons?: boolean
-	drag_and_drop?: boolean | FileTreeDragAndDropConfig
+	coloredIcons?: boolean
+	dragAndDrop?: boolean | FileTreeDragAndDropConfig
 	renaming?: boolean | FileTreeRenamingConfig
 	composition?: FileTreeCompositionOptions
 	onMutation?: (event: FileTreeMutationEvent) => void
@@ -36,8 +36,8 @@ const Index = (props: IProps) => {
 		className,
 		flex,
 		search,
-		colored_icons,
-		drag_and_drop,
+		coloredIcons,
+		dragAndDrop,
 		renaming,
 		composition,
 		onMutation,
@@ -53,8 +53,8 @@ const Index = (props: IProps) => {
 		x.init({
 			paths,
 			search,
-			colored_icons,
-			drag_and_drop,
+			coloredIcons,
+			dragAndDrop,
 			renaming,
 			composition,
 			onMutation,

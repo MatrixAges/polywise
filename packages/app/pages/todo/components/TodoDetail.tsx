@@ -176,7 +176,7 @@ const Index = () => {
 									>
 										<SelectTrigger
 											className='text-std-500 bg-transparent font-semibold'
-											no_active_style
+											noActiveStyle
 										>
 											<SelectValue />
 										</SelectTrigger>
@@ -214,7 +214,7 @@ const Index = () => {
 									>
 										<SelectTrigger
 											className='text-std-500 bg-transparent font-semibold'
-											no_active_style
+											noActiveStyle
 										>
 											<SelectValue />
 										</SelectTrigger>
@@ -255,7 +255,7 @@ const Index = () => {
 							>
 								<SelectTrigger
 									className='text-std-500 bg-transparent font-semibold capitalize'
-									no_active_style
+									noActiveStyle
 								>
 									<SelectValue />
 								</SelectTrigger>

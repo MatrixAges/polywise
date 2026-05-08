@@ -134,9 +134,9 @@ const Index = (props: IPropsMenuItem) => {
 					{sessions.map((it, idx) => (
 						<SessionItem
 							item={it}
-							project_id={project.id}
-							project_index={index}
-							session_index={idx}
+							projectId={project.id}
+							projectIndex={index}
+							sessionIndex={idx}
 							renaming={rename_session_id === it.id}
 							selected={selected_session_id === it.id}
 							key={it.id}

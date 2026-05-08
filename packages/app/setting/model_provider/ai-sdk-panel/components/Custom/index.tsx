@@ -16,12 +16,12 @@ import type { Provider as ProviderType } from '@core/types'
 import type { IPropsCustom } from '../../types'
 
 const Index = (props: IPropsCustom) => {
-	const { custom_providers = [], onChangeCustomProviders } = props
+	const { customProviders = [], onChangeCustomProviders } = props
 	const { t } = useTranslation()
 	const [visible, { toggle }] = useToggle()
 
 	const { control, formState, getValues } = useForm<{ providers: Array<ProviderType> }>({
-		values: { providers: custom_providers }
+		values: { providers: customProviders }
 	})
 
 	const { fields, prepend, remove, update } = useFieldArray({
@@ -40,7 +40,7 @@ const Index = (props: IPropsCustom) => {
 	}, [fields])
 
 	const checkExist = useMemoizedFn((name: string) => {
-		const target = custom_providers.find(item => item.name === name)
+		const target = customProviders.find(item => item.name === name)
 
 		return Boolean(target)
 	})
@@ -52,7 +52,7 @@ const Index = (props: IPropsCustom) => {
 	const onChange = useMemoizedFn(() => {
 		const values = getValues()
 
-		if (deepEqual(values, custom_providers)) return
+		if (deepEqual(values, customProviders)) return
 
 		onChangeCustomProviders($copy(values.providers))
 	})

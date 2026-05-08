@@ -19,8 +19,8 @@ import type { IPropsTab } from '../../types'
 const Index = (props: IPropsTab) => {
 	const {
 		items,
-		current_tab,
-		builtin_providers,
+		currentTab,
+		builtinProviders,
 		onChangeCurrentTab,
 		onDragProvider,
 		onAddBuiltinProvider,
@@ -60,8 +60,8 @@ const Index = (props: IPropsTab) => {
 							{items.map((item, index) => (
 								<Item
 									index={index}
-									display_name={t(`provider.providers.${item}` as any)}
-									active={current_tab === index}
+									displayName={t(`provider.providers.${item}` as any)}
+									active={currentTab === index}
 									key={item}
 									{...{ item, onChangeCurrentTab }}
 								/>
@@ -72,11 +72,11 @@ const Index = (props: IPropsTab) => {
 			</div>
 			<div className='flex flex-col py-2.5'>
 				<Select
-					items={builtin_providers.map((item, index) => ({ label: item.name, value: index }))}
+					items={builtinProviders.map((item, index) => ({ label: item.name, value: index }))}
 					value={-1}
 					onValueChange={onAddBuiltinProvider}
 				>
-					<SelectTrigger no_style>
+					<SelectTrigger noStyle>
 						<div className='click_button'>
 							<Plus></Plus>
 							<span>Add Provider</span>
@@ -85,7 +85,7 @@ const Index = (props: IPropsTab) => {
 					<SelectContent className='max-h-60 w-[180px]' align='start'>
 						<SelectGroup>
 							<SelectLabel>Builtin Providers</SelectLabel>
-							{builtin_providers.map((item, index) => (
+							{builtinProviders.map((item, index) => (
 								<SelectItem value={index} key={item.name}>
 									{t(`provider.providers.${item.name}` as any)}
 								</SelectItem>

@@ -65,7 +65,7 @@ const Index = () => {
 				<FileTree
 					paths={$copy(project_files.paths)}
 					flex
-					colored_icons
+					coloredIcons
 					onSelectPath={onSelectPath}
 					key={project_files.tree_version}
 				></FileTree>

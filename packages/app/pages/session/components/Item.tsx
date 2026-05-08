@@ -14,16 +14,16 @@ interface IProps {
 	pin: boolean
 	selected: boolean
 	renaming: boolean
-	rename_value: string
+	renameValue: string
 	title: ReactNode
-	group_index: number
-	session_index: number
+	groupIndex: number
+	sessionIndex: number
 	className?: string
 	style?: CSSProperties
 }
 
 const Index = (props: IProps) => {
-	const { item, pin, selected, renaming, rename_value, title, group_index, session_index, className, style } = props
+	const { item, pin, selected, renaming, renameValue, title, groupIndex, sessionIndex, className, style } = props
 	const { is_runing, unread } = item
 	const { setSelectedSession, setRenameValue, submitRename, cancelRename } = useModel()
 
@@ -40,15 +40,15 @@ const Index = (props: IProps) => {
 			className={$cx('click_button group', className, renaming && 'no_transition', selected && 'active')}
 			style={style}
 			onClick={renaming ? undefined : () => setSelectedSession(item.id)}
-			data-group-index={group_index}
-			data-session-index={session_index}
+			data-group-index={groupIndex}
+			data-session-index={sessionIndex}
 			data-id={item.id}
 		>
 			<div className='min-w-0 flex-1 truncate'>
 				{renaming ? (
 					<RenameInput
 						active={renaming}
-						value={rename_value}
+						value={renameValue}
 						setRenameValue={setRenameValue}
 						submitRename={submitRename}
 						cancelRename={cancelRename}

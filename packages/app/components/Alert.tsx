@@ -21,8 +21,8 @@ interface IProps {
 	title: string
 	desc: string
 	open?: boolean
-	confirm_text?: string
-	cancel_text?: string
+	confirmText?: string
+	cancelText?: string
 	Trigger?: ElementType
 	icon?: string
 	info?: boolean
@@ -35,8 +35,8 @@ const Index = (props: IProps) => {
 		title,
 		desc,
 		open,
-		confirm_text = 'Confirm',
-		cancel_text = 'Cancel',
+		confirmText = 'Confirm',
+		cancelText = 'Cancel',
 		Trigger,
 		icon,
 		info,
@@ -60,8 +60,8 @@ const Index = (props: IProps) => {
 					<AlertDialogDescription>{desc}</AlertDialogDescription>
 				</AlertDialogHeader>
 				<AlertDialogFooter className={$cx(info && 'grid-cols-1!')}>
-					<AlertDialogCancel onClick={onCancel}>{info ? 'Get' : cancel_text}</AlertDialogCancel>
-					{!info && <AlertDialogAction onClick={onConfirm}>{confirm_text}</AlertDialogAction>}
+					<AlertDialogCancel onClick={onCancel}>{info ? 'Get' : cancelText}</AlertDialogCancel>
+					{!info && <AlertDialogAction onClick={onConfirm}>{confirmText}</AlertDialogAction>}
 				</AlertDialogFooter>
 			</AlertDialogContent>
 		</AlertDialog>

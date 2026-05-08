@@ -59,7 +59,7 @@ const Index = () => {
 							</FieldDescription>
 						</FieldContent>
 						<Controller name='embedding_model' control={control}>
-							<ModelSelect filter_type='embedding' show_local_model></ModelSelect>
+							<ModelSelect filterType='embedding' showLocalModel></ModelSelect>
 						</Controller>
 					</Field>
 					<Field className='items-center! py-3' orientation='horizontal'>
@@ -70,7 +70,7 @@ const Index = () => {
 							</FieldDescription>
 						</FieldContent>
 						<Controller name='rerank_model' control={control}>
-							<ModelSelect filter_type='rerank' show_local_model></ModelSelect>
+							<ModelSelect filterType='rerank' showLocalModel></ModelSelect>
 						</Controller>
 					</Field>
 				</FieldGroup>
@@ -93,7 +93,7 @@ const Index = () => {
 							</FieldDescription>
 						</FieldContent>
 						<Controller name='triple_model' control={control}>
-							<ModelSelect show_local_model></ModelSelect>
+							<ModelSelect showLocalModel></ModelSelect>
 						</Controller>
 					</Field>
 				</FieldGroup>
@@ -116,7 +116,7 @@ const Index = () => {
 							</FieldDescription>
 						</FieldContent>
 						<Controller name='rewrite_model' control={control}>
-							<ModelSelect show_local_model></ModelSelect>
+							<ModelSelect showLocalModel></ModelSelect>
 						</Controller>
 					</Field>
 				</FieldGroup>

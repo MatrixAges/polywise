@@ -9,7 +9,7 @@ import { useModel } from '../context'
 import type { IPropsSessionItem } from '../types'
 
 const Index = (props: IPropsSessionItem) => {
-	const { item, project_id, project_index, session_index, selected, renaming } = props
+	const { item, projectId, projectIndex, sessionIndex, selected, renaming } = props
 	const { title, unread } = item
 	const {
 		rename_value,
@@ -31,7 +31,7 @@ const Index = (props: IPropsSessionItem) => {
 	const onClick = () => {
 		if (renaming) return
 
-		setSelectedProject(project_id, true, project_index)
+		setSelectedProject(projectId, true, projectIndex)
 		setSelectedSession(item.id)
 		setContentTab('session')
 	}
@@ -40,8 +40,8 @@ const Index = (props: IPropsSessionItem) => {
 		<div
 			className={$cx('click_button group', renaming && 'no_transition', selected && 'active')}
 			onClick={onClick}
-			data-project-index={project_index}
-			data-session-index={session_index}
+			data-project-index={projectIndex}
+			data-session-index={sessionIndex}
 			data-id={item.id}
 		>
 			<div

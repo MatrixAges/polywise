@@ -35,17 +35,17 @@ const Index = () => {
 	}, [])
 
 	const props_menu: IPropsMenu = {
-		current_tab: x.current_tab,
+		currentTab: x.current_tab,
 		groups: $copy(x.groups),
 		sessions: $copy(x.sessions),
-		pin_map: $copy(x.pin_map),
-		selected_session_id: x.selected_session_id,
-		rename_group_index: x.rename_group_index,
-		rename_session_index: x.rename_session_index,
-		rename_value: x.rename_value,
-		has_more: x.has_more,
+		pinMap: $copy(x.pin_map),
+		selectedSessionId: x.selected_session_id,
+		renameGroupIndex: x.rename_group_index,
+		renameSessionIndex: x.rename_session_index,
+		renameValue: x.rename_value,
+		hasMore: x.has_more,
 		loading: x.loading,
-		loading_more: x.loading_more
+		loadingMore: x.loading_more
 	}
 
 	return (

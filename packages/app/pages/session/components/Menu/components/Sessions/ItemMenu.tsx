@@ -11,7 +11,7 @@ import { useModel } from '@/pages/session/context'
 import type { IPropsSessionItemMenu } from './types'
 
 const Index = (props: IPropsSessionItemMenu) => {
-	const { item, groups, pin, session_index } = props
+	const { item, groups, pin, sessionIndex } = props
 	const { createSession, createGroup, startRenameSession, togglePinSession, moveSessionToGroup, removeSession } =
 		useModel()
 
@@ -24,7 +24,7 @@ const Index = (props: IPropsSessionItemMenu) => {
 				onClick={() =>
 					startRenameSession({
 						rename_group_index: undefined,
-						rename_session_index: session_index,
+						rename_session_index: sessionIndex,
 						value: item.title
 					})
 				}

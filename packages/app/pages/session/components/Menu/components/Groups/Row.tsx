@@ -7,7 +7,7 @@ import BaseItem from '@/pages/session/components/Item'
 import type { IPropsGroupSessionRow } from './types'
 
 const Index = (props: IPropsGroupSessionRow) => {
-	const { group_index, session_index, item, pin, selected, renaming, rename_value } = props
+	const { groupIndex, sessionIndex, item, pin, selected, renaming, renameValue } = props
 
 	const { attributes, listeners, transform, isDragging, setNodeRef } = useSortable({
 		id: item.id
@@ -33,10 +33,10 @@ const Index = (props: IPropsGroupSessionRow) => {
 			pin={pin}
 			selected={selected}
 			renaming={renaming}
-			rename_value={rename_value}
+			renameValue={renameValue}
 			title={Title}
-			group_index={group_index}
-			session_index={session_index}
+			groupIndex={groupIndex}
+			sessionIndex={sessionIndex}
 			className={isDragging ? 'dragging z-10 backdrop-blur-lg' : ''}
 			style={{
 				transform: CSS.Translate.toString(transform),

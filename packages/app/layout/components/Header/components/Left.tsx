@@ -59,7 +59,7 @@ const Index = (props: IPropsLeft) => {
 				items={workspaces.map(item => ({ label: item.name, value: item.name }))}
 				value={current_workspace ?? null}
 			>
-				<SelectTrigger className='workspace_selector' no_active_style>
+				<SelectTrigger className='workspace_selector' noActiveStyle>
 					<SelectValue />
 				</SelectTrigger>
 				<SelectContent className='w-[180px]' align='start'>

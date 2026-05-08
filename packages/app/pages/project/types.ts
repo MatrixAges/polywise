@@ -11,9 +11,9 @@ export interface IPropsMenuItem {
 
 export interface IPropsSessionItem {
 	item: Session
-	project_id: string
-	project_index: number
-	session_index: number
+	projectId: string
+	projectIndex: number
+	sessionIndex: number
 	renaming: boolean
 	selected: boolean
 }
