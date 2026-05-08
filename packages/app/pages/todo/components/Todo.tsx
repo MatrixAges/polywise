@@ -53,7 +53,16 @@ const Index = (props: IProps) => {
 		return null
 	}, [is_runing, unread])
 
-	const Time = <span className='text-std-400 text-xs text-nowrap'>{fromNow(created_at)}</span>
+	const Time = (
+		<span
+			className='
+				text-std-400 text-xs text-nowrap
+				group-data-[mode=list]:w-[80px] group-data-[mode=list]:truncate
+			'
+		>
+			{fromNow(created_at)}
+		</span>
+	)
 
 	return (
 		<div
@@ -64,6 +73,7 @@ const Index = (props: IProps) => {
 				gap-2
 				border-border-light
 				transition-colors
+				group
 				cursor-pointer
 			`,
 				mode === 'kanban'
@@ -73,7 +83,7 @@ const Index = (props: IProps) => {
 				rounded-lg
 				border
 			`
-					: 'h-11 items-center border-b px-1',
+					: 'h-11 items-center border-b px-3',
 				selected && 'border-primary/40',
 				isDragging && 'opacity-0',
 				(isDragging || overlay) && 'border-primary/40 z-10 backdrop-blur-lg'
@@ -81,6 +91,7 @@ const Index = (props: IProps) => {
 			onClick={overlay ? undefined : onClick}
 			ref={overlay ? undefined : set_ref}
 			style={style}
+			data-mode={mode}
 			{...props_drag}
 		>
 			<div
@@ -137,19 +148,32 @@ const Index = (props: IProps) => {
 						`
 						flex
 						items-center
-						gap-1
 						p-px
 						rounded-full
 						text-std-600 text-xs
 						truncate
 					`,
-						mode === 'kanban' ? 'mb-1' : 'max-w-[210px]'
+						mode === 'kanban' ? 'mb-1 gap-1' : 'gap-3'
 					)}
 				>
-					<MessageSquareText className='size-3'></MessageSquareText>
-					<span className='flex-1 truncate'>{report || item.session.title}</span>
+					<div
+						className='
+							flex
+							items-center
+							gap-1
+						'
+					>
+						<MessageSquareText className='size-3'></MessageSquareText>
+						<span className='flex-1 truncate group-data-[mode=list]:w-[180px]'>
+							{report || item.session.title}
+						</span>
+					</div>
 					{Status}
-					{running_time && <span className='text-std-400 text-nowrap'>{running_time}</span>}
+					{running_time && (
+						<span className='text-std-400 text-nowrap group-data-[mode=list]:w-[36px]'>
+							{running_time}
+						</span>
+					)}
 				</div>
 			)}
 			{mode === 'list' && Time}

@@ -18,7 +18,7 @@ interface IProps {
 const Index = (props: IProps) => {
 	const { status, todos } = props
 	const { mode, selected_todo_id } = useModel()
-	const { Icon } = useMemo(() => todo_status_icon_map[status], [status])
+	const { Icon, color } = useMemo(() => todo_status_icon_map[status], [status])
 
 	const { setNodeRef } = useDroppable({
 		id: status,
@@ -28,7 +28,12 @@ const Index = (props: IProps) => {
 	const items = useMemo(() => todos.map(item => item.todo.id), [todos])
 
 	return (
-		<div className={$cx('flex flex-col', mode === 'kanban' ? 'h-full w-80 shrink-0' : 'w-full')}>
+		<div
+			className={$cx(
+				'flex flex-col',
+				mode === 'kanban' ? 'h-full w-80 shrink-0' : 'border-border-light w-full rounded-lg border'
+			)}
+		>
 			<div
 				className={$cx(
 					`
@@ -39,7 +44,7 @@ const Index = (props: IProps) => {
 						? 'h-10 px-3'
 						: `
 					h-10
-					px-1
+					px-3
 					rounded-xs
 					border-border-light border-b
 				`
@@ -73,7 +78,7 @@ const Index = (props: IProps) => {
 				<SortableContext items={items} strategy={verticalListSortingStrategy}>
 					<div
 						className={$cx(
-							'flex w-full flex-col',
+							'flex w-full flex-col [&>*:last-child]:border-b-0',
 							mode === 'kanban' && 'gap-3',
 							todos.length === 0 && 'min-h-px'
 						)}

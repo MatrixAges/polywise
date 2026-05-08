@@ -1,4 +1,4 @@
-import { Archive, CircleCheck, CircleDashed, CircleSlash, CircleX, Loader, View } from 'lucide-react'
+import { CircleCheck, CircleDashed, CircleSlash, CircleX, Loader, View } from 'lucide-react'
 
 import type { LucideIcon } from 'lucide-react'
 
@@ -13,7 +13,7 @@ export const todo_status_icon_map = {
 	},
 	unreview: {
 		Icon: View,
-		color: 'text-indigo-500'
+		color: 'text-teal-500'
 	},
 	done: {
 		Icon: CircleCheck,
@@ -26,10 +26,6 @@ export const todo_status_icon_map = {
 	error: {
 		Icon: CircleX,
 		color: 'text-red-500'
-	},
-	archive: {
-		Icon: Archive,
-		color: 'text-teal-500'
 	}
 } as Record<string, { Icon: LucideIcon; color: string }>
 

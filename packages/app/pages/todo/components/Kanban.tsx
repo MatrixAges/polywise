@@ -25,6 +25,7 @@ const Index = () => {
 					overflow-y-scroll
 					flex-col
 					min-h-0
+					gap-4
 					px-6 py-3
 				`
 				)}
