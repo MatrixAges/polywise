@@ -2,7 +2,6 @@ import { isStaticToolUIPart } from 'ai'
 import { observer } from 'mobx-react-lite'
 
 import { MessageResponse } from '@/__shadcn__/components/ai-elements'
-import { Reasoning, ReasoningContent, ReasoningTrigger } from '@/__shadcn__/components/ai-elements/reasoning'
 import { Tool, ToolContent, ToolHeader, ToolInput, ToolOutput } from '@/__shadcn__/components/ai-elements/tool'
 import { useGlobal } from '@/context'
 import { getToolDesc } from '@/utils'
@@ -25,14 +24,19 @@ const Index = (props: IPropsPart) => {
 	switch (type) {
 		case 'reasoning':
 			return (
-				<Reasoning
-					className='w-full'
-					isStreaming={streaming}
-					duration={Math.ceil((duration ?? 0) / 1000)}
+				<MessageResponse
+					className='text-std-400'
+					isAnimating={streaming}
+					mermaid={{
+						config: {
+							theme: theme === 'dark' ? 'dark' : 'forest',
+							look: 'handDrawn',
+							themeVariables: { fontSize: '12px' }
+						}
+					}}
 				>
-					<ReasoningTrigger />
-					<ReasoningContent>{part.text}</ReasoningContent>
-				</Reasoning>
+					{part.text}
+				</MessageResponse>
 			)
 		case 'text':
 			return (
