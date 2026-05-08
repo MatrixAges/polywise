@@ -2,7 +2,7 @@ import inspect from '@core/io/search/inspect'
 import { array, boolean, literal, number, object, string, union } from 'zod'
 
 import { p } from '../utils/trpc'
-import { input_type as search_input_type } from './search'
+import { input_type as search_input_type } from './SemanticSearch'
 
 const scope_type = union([literal('global'), literal('project'), literal('agent')])
 

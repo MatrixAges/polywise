@@ -2,7 +2,7 @@ import { getKeywords, getRewriteQuery } from '@core/pipeline'
 import { log } from '@core/utils'
 import { z } from 'zod'
 
-import { input_type } from '../../rpc/search'
+import { input_type } from '../../rpc/SemanticSearch'
 import evaluate from './evaluate'
 import filterBySemanticSimilarity from './filterBySemanticSimilarity'
 import lookup from './lookup'

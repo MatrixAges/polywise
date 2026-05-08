@@ -33,10 +33,10 @@ const article_output = object({
 	results: array(result_shape)
 })
 
-const output_type = union([chunk_output, article_output])
+export const output_type = union([chunk_output, article_output])
 
 export default p
-	.meta({ openapi: { method: 'GET', path: '/search' } })
+	.meta({ openapi: { method: 'GET', path: '/SemanticSearch' } })
 	.input(input_type)
 	.output(output_type)
 	.query(async ({ input }) => {

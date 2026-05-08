@@ -5,7 +5,7 @@ import { log } from '@core/utils'
 import { and, desc, inArray, like, or } from 'drizzle-orm'
 import { z } from 'zod'
 
-import { input_type } from '../rpc/search'
+import { input_type } from '../rpc/SemanticSearch'
 import searchByKeywords from './search/searchByKeywords'
 
 type ArgsSearch = z.infer<typeof input_type>
