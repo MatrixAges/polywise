@@ -1,6 +1,8 @@
+import { Album, BookOpenText, Brain, Trash2, UserRound } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { Button } from '@/__shadcn__/components/ui/button'
+import { Input } from '@/__shadcn__/components/ui/input'
 import { Textarea } from '@/__shadcn__/components/ui/textarea'
 import { Tabs } from '@/components'
 
@@ -9,10 +11,10 @@ import { useModel } from '../context'
 import type { ArticleForType } from '../types'
 
 const article_tab_items = [
-	{ key: 'memory', title: 'memory' },
-	{ key: 'wiki', title: 'wiki' },
-	{ key: 'user', title: 'user' },
-	{ key: 'linkcase', title: 'linkcase' }
+	{ key: 'memory', Icon: Brain },
+	{ key: 'wiki', Icon: BookOpenText },
+	{ key: 'user', Icon: UserRound },
+	{ key: 'linkcase', Icon: Album }
 ]
 
 const Index = () => {
@@ -20,10 +22,12 @@ const Index = () => {
 		article_items,
 		article_for,
 		selected_article_id,
+		article_title_draft,
 		article_draft,
 		article_saving,
 		setArticleFor,
 		setSelectedArticle,
+		setArticleTitleDraft,
 		setArticleDraft,
 		createArticle,
 		saveArticle,
@@ -31,15 +35,20 @@ const Index = () => {
 	} = useModel()
 
 	return (
-		<div className='flex min-h-[360px] gap-4'>
+		<div
+			className='
+				flex flex-1
+				h-full
+				px-6
+			'
+		>
 			<div
 				className='
 					flex flex-col shrink-0
-					w-72
+					w-48
 					gap-3
-					p-3
-					rounded-xl
-					border border-border-light
+					py-3
+					pr-3
 				'
 			>
 				<div className='flex items-center justify-between gap-2'>
@@ -63,35 +72,19 @@ const Index = () => {
 				>
 					{article_items.map(item => (
 						<div
-							className={$cx(
-								`
-								flex flex-col
-								gap-2
-								p-3
-								rounded-xl
-								border border-border-light
-								cursor-pointer
-							`,
-								selected_article_id === item.id && 'bg-active border-transparent'
-							)}
+							className={$cx('click_button', selected_article_id === item.id && 'active')}
 							onClick={() => setSelectedArticle(item.id)}
 							key={item.id}
 						>
-							<div className='flex items-center justify-between gap-2'>
-								<span className='text-xs font-medium uppercase'>{item.for}</span>
-								<Button
-									variant='ghost'
-									size='xs'
-									onClick={event => {
-										event.stopPropagation()
-										void removeArticle(item.id)
-									}}
-								>
-									Delete
-								</Button>
-							</div>
-							<div className='text-sm break-words whitespace-pre-wrap'>
-								{item.content || 'Empty article'}
+							<div
+								className='
+									flex-1
+									min-w-0
+									text-sm font-medium
+									truncate
+								'
+							>
+								{item.title || 'Untitled article'}
 							</div>
 						</div>
 					))}
@@ -113,23 +106,43 @@ const Index = () => {
 					flex flex-1 flex-col
 					min-w-0
 					gap-3
-					p-3
-					rounded-xl
-					border border-border-light
+					py-3
+					pl-3
 				'
 			>
 				<div className='flex items-center justify-between gap-2'>
 					<div className='text-sm font-medium capitalize'>{article_for}</div>
-					<Button size='xs' disabled={!selected_article_id || article_saving} onClick={saveArticle}>
-						Save
-					</Button>
+					<div className='flex items-center gap-2'>
+						<Button
+							variant='ghost'
+							size='xs'
+							disabled={!selected_article_id || article_saving}
+							onClick={() => selected_article_id && removeArticle(selected_article_id)}
+						>
+							<Trash2 size={12}></Trash2>
+						</Button>
+						<Button
+							size='xs'
+							disabled={!selected_article_id || article_saving}
+							onClick={saveArticle}
+						>
+							Save
+						</Button>
+					</div>
 				</div>
 				{selected_article_id ? (
-					<Textarea
-						className='min-h-[320px] flex-1'
-						value={article_draft}
-						onChange={event => setArticleDraft(event.target.value)}
-					></Textarea>
+					<>
+						<Input
+							value={article_title_draft}
+							placeholder='Article title'
+							onChange={event => setArticleTitleDraft(event.target.value)}
+						></Input>
+						<Textarea
+							className='bg-secondary/60 flex-1 border-none focus-within:ring-0!'
+							value={article_draft}
+							onChange={event => setArticleDraft(event.target.value)}
+						></Textarea>
+					</>
 				) : (
 					<div
 						className='

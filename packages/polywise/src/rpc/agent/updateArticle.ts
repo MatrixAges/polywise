@@ -8,6 +8,7 @@ import { p } from '../../utils/trpc'
 
 const input_type = object({
 	article_id: string(),
+	title: string(),
 	content: string(),
 	for: zod_enum(['linkcase', 'wiki', 'memory', 'user'])
 })
@@ -22,6 +23,7 @@ export default p.input(input_type).mutation(async ({ input }) => {
 	return save({
 		type: 'article',
 		id: input.article_id,
+		title: input.title,
 		content: input.content,
 		for: input.for,
 		scope_type: (current_article.scope_type as 'global' | 'project' | 'agent' | null) || 'agent',

@@ -17,6 +17,7 @@ import { eq } from 'drizzle-orm'
 import type { Article } from '@core/db/types'
 
 interface ArgsSaveArticle {
+	title?: string | null
 	content: string
 	for: NonNullable<Article['for']>
 	article_id?: string
@@ -26,7 +27,7 @@ interface ArgsSaveArticle {
 }
 
 export default async (args: ArgsSaveArticle) => {
-	const { content, article_id, scope_type = 'global', scope_id = null, source = 'agent' } = args
+	const { title, content, article_id, scope_type = 'global', scope_id = null, source = 'agent' } = args
 	const hash = scope_type === 'global' ? getHash(`${args.for}\n${content}`) : null
 	const enable_triple = Boolean(config.enable_triple)
 
@@ -71,6 +72,7 @@ export default async (args: ArgsSaveArticle) => {
 		}
 
 		await setArticle(eq(article.id, current_article_id), {
+			title: title || null,
 			content: content,
 			for: args.for,
 			scope_type,
@@ -84,6 +86,7 @@ export default async (args: ArgsSaveArticle) => {
 		log('SAVE', 'updateArticle', () => `article_id: ${current_article_id}`)
 	} else {
 		const article_item = await addArticle({
+			title: title || null,
 			content: content,
 			for: args.for,
 			scope_type,

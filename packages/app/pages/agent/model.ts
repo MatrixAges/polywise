@@ -36,6 +36,7 @@ export default class Index {
 	article_items = [] as Array<AgentArticleItem>
 	article_for = 'memory' as ArticleForType
 	selected_article_id = ''
+	article_title_draft = ''
 	article_draft = ''
 	article_saving = false
 	session_items = [] as Array<AgentSessionItem>
@@ -105,6 +106,7 @@ export default class Index {
 			this.skill_items = []
 			this.article_items = []
 			this.selected_article_id = ''
+			this.article_title_draft = ''
 			this.article_draft = ''
 			this.session_items = []
 			this.selected_session_id = ''
@@ -129,6 +131,7 @@ export default class Index {
 			this.skill_items = []
 			this.article_items = []
 			this.selected_article_id = ''
+			this.article_title_draft = ''
 			this.article_draft = ''
 
 			return
@@ -151,6 +154,7 @@ export default class Index {
 			this.selected_article_id = this.article_items[0]?.id || ''
 		}
 
+		this.article_title_draft = this.selected_article?.title || ''
 		this.article_draft = this.selected_article?.content || ''
 	}
 
@@ -263,6 +267,7 @@ export default class Index {
 
 		this.article_for = for_type
 		this.selected_article_id = ''
+		this.article_title_draft = ''
 		this.article_draft = ''
 
 		void this.refreshAgentRelated()
@@ -282,7 +287,12 @@ export default class Index {
 
 	setSelectedArticle(article_id: string) {
 		this.selected_article_id = article_id
+		this.article_title_draft = this.article_items.find(item => item.id === article_id)?.title || ''
 		this.article_draft = this.article_items.find(item => item.id === article_id)?.content || ''
+	}
+
+	setArticleTitleDraft(value: string) {
+		this.article_title_draft = value
 	}
 
 	setArticleDraft(value: string) {
@@ -417,14 +427,17 @@ export default class Index {
 		const article_id = await rpc.agent.createArticle.mutate({
 			agent_id: this.selected_agent_id,
 			for: this.article_for,
-			content: 'New article'
+			title: 'New article',
+			content: ''
 		})
 
 		await this.refreshAgentRelated()
 
 		if (article_id) {
 			this.selected_article_id = article_id
-			this.article_draft = this.article_items.find(item => item.id === article_id)?.content || 'New article'
+			this.article_title_draft =
+				this.article_items.find(item => item.id === article_id)?.title || 'New article'
+			this.article_draft = this.article_items.find(item => item.id === article_id)?.content || ''
 		}
 	}
 
@@ -437,7 +450,8 @@ export default class Index {
 			await rpc.agent.updateArticle.mutate({
 				article_id: this.selected_article_id,
 				for: this.article_for,
-				content: this.article_draft.trim() || 'New article'
+				title: this.article_title_draft.trim() || 'New article',
+				content: this.article_draft
 			})
 
 			await this.refreshAgentRelated()

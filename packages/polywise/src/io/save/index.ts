@@ -6,6 +6,7 @@ type ArticleFor = NonNullable<(typeof article.$inferInsert)['for']>
 
 interface ArgsSaveArticle {
 	type: 'article'
+	title?: string | null
 	content: string
 	for: ArticleFor
 	id?: string
@@ -25,6 +26,7 @@ type ArgsSave = ArgsSaveArticle | ArgsSaveDocument
 export default async (args: ArgsSave) => {
 	if (args.type === 'article') {
 		return await saveArticle({
+			title: args.title,
 			content: args.content,
 			for: args.for,
 			article_id: args.id,
