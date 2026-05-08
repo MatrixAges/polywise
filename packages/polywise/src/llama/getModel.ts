@@ -1,5 +1,7 @@
+import path from 'path'
+
 import { app } from '../consts'
-import loadModel from './loadModel'
+import loadModel, { verifyLocalModelFile } from './loadModel'
 
 import type { Llama } from 'node-llama-cpp'
 
@@ -40,4 +42,16 @@ export const getGenModel = async (llama: Llama, status_only?: boolean) => {
 		},
 		status_only
 	)
+}
+
+export const hasEmbeddingModel = async () => {
+	return verifyLocalModelFile(path.join(app.model_dir, app.embedding_model.file_name))
+}
+
+export const hasRerankModel = async () => {
+	return verifyLocalModelFile(path.join(app.model_dir, app.rerank_model.file_name))
+}
+
+export const hasGenModel = async () => {
+	return verifyLocalModelFile(path.join(app.model_dir, app.gen_model.file_name))
 }

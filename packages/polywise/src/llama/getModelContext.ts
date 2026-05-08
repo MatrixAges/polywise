@@ -24,7 +24,7 @@ export default async (type: 'embedding' | 'rerank' | 'gen') => {
 	const state = context_state[type]
 
 	if (!env[model_key] && !state.model_promise) {
-		let fetcher: (llama: Llama) => Promise<LlamaModel | false>
+		let fetcher: (llama: Llama) => Promise<LlamaModel | boolean>
 
 		if (type === 'embedding') fetcher = getEmbeddingModel
 		else if (type === 'rerank') fetcher = getRerankModel
@@ -34,6 +34,9 @@ export default async (type: 'embedding' | 'rerank' | 'gen') => {
 			await initLlama()
 
 			const model = await fetcher(env.llama)
+			if (!model || typeof model === 'boolean') {
+				throw new Error(`Failed to load ${type} model`)
+			}
 			// @ts-ignore
 			env[model_key] = model
 

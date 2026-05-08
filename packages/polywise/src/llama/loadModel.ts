@@ -16,30 +16,37 @@ interface ModelConfig {
 	file_name: string
 }
 
+export const verifyLocalModelFile = async (file_path: string) => {
+	const exists = await fs.pathExists(file_path)
+
+	if (!exists) return false
+
+	try {
+		await readGgufFileInfo(file_path)
+
+		return true
+	} catch (err) {
+		console.warn(`❌ Model invalid: ${(err as Error).message}. Cleaning up...`)
+
+		await fs.remove(file_path)
+
+		return false
+	}
+}
+
 export default async (config: ModelConfig, status_only?: boolean) => {
 	const { llama, type, model_uri, dir_path, file_name } = config
 	const file_path = path.join(dir_path, file_name)
 
-	const exsit = await fs.pathExists(file_path)
+	const exists = await verifyLocalModelFile(file_path)
 
-	if (status_only && !exsit) return false
+	if (status_only) return exists
 
-	if (exsit) {
-		try {
-			console.log('Checking local model...')
+	if (exists) {
+		console.log('Checking local model...')
+		console.log('✅ Verification passed.')
 
-			await readGgufFileInfo(file_path)
-
-			console.log('✅ Verification passed.')
-
-			return llama.loadModel({ modelPath: file_path })
-		} catch (err) {
-			console.warn(`❌ Model invalid: ${(err as Error).message}. Cleaning up...`)
-
-			await fs.remove(file_path)
-
-			if (status_only) return false
-		}
+		return llama.loadModel({ modelPath: file_path })
 	}
 
 	console.log('⚠️ Model missing or broken, starting download...')
