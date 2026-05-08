@@ -3,7 +3,37 @@ import type { LanguageModelUsage, UIDataTypes, UIMessage, UITools } from 'ai'
 import type { EventEmitter } from 'events'
 import type { ContextInput } from './tools'
 
-export type Message = UIMessage<unknown, UIDataTypes, UITools> & { createdAt?: Date }
+export type MessagePartDurationTargetType =
+	| 'text'
+	| 'reasoning'
+	| 'dynamic-tool'
+	| `tool-${string}`
+	| 'source-url'
+	| 'source-document'
+	| 'file'
+
+export interface MessagePartDurationData {
+	targetId: string
+	targetType: MessagePartDurationTargetType
+	duration: number
+}
+
+export interface MessageDataParts extends UIDataTypes {
+	'part-duration': MessagePartDurationData
+}
+
+export interface MessageMetadata {
+	usage: LanguageModelUsage
+	timestamp: number
+}
+
+export type Message = UIMessage<MessageMetadata, MessageDataParts, UITools> & { createdAt?: Date }
+
+export interface MessagePartDurationUIPart {
+	type: 'data-part-duration'
+	id?: string
+	data: MessagePartDurationData
+}
 
 export type Context = ContextInput & {
 	total_messages_count: number
@@ -25,12 +55,6 @@ export interface InitArgs {
 	event: EventEmitter
 	is_cron?: boolean
 	title?: string
-}
-
-export interface MessageMetadata {
-	usage: LanguageModelUsage
-	timestamp: number
-	reasoning_duration: Array<number>
 }
 
 export interface SkillMeta {

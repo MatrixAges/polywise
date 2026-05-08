@@ -7,8 +7,8 @@ import type Session from '../session'
 
 const inputSchema = object({
 	report: string()
-		.describe('A very short progress update about what you are doing, max length 48 characters')
-		.max(48)
+		.describe('A very short progress update about what you are doing, max length 64 characters')
+		.max(64)
 })
 
 export const updateReport = async (s: Session, report: string) => {

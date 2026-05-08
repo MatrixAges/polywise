@@ -11,6 +11,7 @@ import { env } from '@core/env'
 import { createSystemTool } from '@core/fst/agents'
 import { extract, getComplexitySignal } from '@core/fst/agents/superego'
 import { pushPart, startStream, stopStream } from '@core/fst/agents/supervisor'
+import { createPartDurationTracker, getPartDurationChunk } from '@core/fst/duration'
 import { getSystemTools, SessionEventStore } from '@core/utils'
 import { convertToModelMessages, createUIMessageStream, smoothStream, stepCountIs, streamText } from 'ai'
 import dayjs from 'dayjs'
@@ -44,8 +45,8 @@ import {
 } from '../../tools'
 import { emitChange, getTitleFocus, submit } from '../../utils'
 
-import type { ToolSet } from 'ai'
-import type { Message, MessageMetadata } from '../../types'
+import type { ToolSet, UIMessageChunk } from 'ai'
+import type { Message, MessageDataParts, MessageMetadata } from '../../types'
 import type Index from '../index'
 
 const model_threshold_value = 12
@@ -231,45 +232,43 @@ export default async (s: Index, message: Message) => {
 		originalMessages: [message],
 		generateId: getId,
 		execute: async ({ writer }) => {
-			const reasoning_duration = [] as Array<number>
+			const tracker = createPartDurationTracker()
+			const stream = res.toUIMessageStream({
+				originalMessages: [message],
+				sendSources: true,
+				generateMessageId: getId,
+				messageMetadata: ({ part }) => {
+					if (part.type !== 'finish') return
 
-			let reasoning_start = 0
+					return {
+						usage: part.totalUsage,
+						timestamp: Date.now()
+					} satisfies MessageMetadata
+				}
+			})
+			const reader = stream.getReader()
 
-			writer.merge(
-				res.toUIMessageStream({
-					originalMessages: [message],
-					sendSources: true,
-					generateMessageId: getId,
-					messageMetadata: ({ part }) => {
-						s.active()
+			while (true) {
+				const { done, value } = await reader.read()
 
-						if (part.type === 'text-delta') {
-							if (config.chaos_detect) pushPart(s.id, part.text)
-						}
+				if (done) break
 
-						if (part.type === 'reasoning-start') {
-							reasoning_start = Date.now()
-						}
+				s.active()
 
-						if (part.type === 'reasoning-end') {
-							reasoning_duration.push(Date.now() - reasoning_start + 60)
+				const chunk = value as UIMessageChunk<MessageMetadata, MessageDataParts>
 
-							reasoning_start = 0
-						}
+				if (chunk.type === 'text-delta' && config.chaos_detect) {
+					pushPart(s.id, chunk.delta)
+				}
 
-						if (part.type === 'finish') {
-							const target = {
-								usage: part.totalUsage,
-								timestamp: Date.now()
-							} as MessageMetadata
+				writer.write(chunk)
 
-							target['reasoning_duration'] = reasoning_duration
+				const duration_chunk = getPartDurationChunk(chunk, tracker)
 
-							return target
-						}
-					}
-				})
-			)
+				if (duration_chunk) {
+					writer.write(duration_chunk)
+				}
+			}
 
 			if (title_focus) {
 				updateTitle(s, title_focus)

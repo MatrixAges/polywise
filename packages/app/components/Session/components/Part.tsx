@@ -16,7 +16,7 @@ import type { DynamicToolUIPart, ToolUIPart } from 'ai'
 import type { IPropsPart } from '../types'
 
 const Index = (props: IPropsPart) => {
-	const { streaming, reasoningDuration, part, answer } = props
+	const { streaming, duration, part, answer } = props
 	const { type } = part
 
 	const global = useGlobal()
@@ -28,7 +28,7 @@ const Index = (props: IPropsPart) => {
 				<Reasoning
 					className='w-full'
 					isStreaming={streaming}
-					duration={Math.ceil((reasoningDuration ?? 0) / 1000)}
+					duration={Math.ceil((duration ?? 0) / 1000)}
 				>
 					<ReasoningTrigger />
 					<ReasoningContent>{part.text}</ReasoningContent>

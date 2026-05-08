@@ -1,8 +1,10 @@
-import type { Message } from '@core/fst'
+import type { Message, MessagePartDurationUIPart } from '@core/fst'
 import type { EditResult, QuestionInput } from '@core/fst/tools'
 import type { ToolUIPart } from 'ai'
 import type { IProps } from '.'
 import type Model from './model'
+
+type VisibleMessagePart = Exclude<Message['parts'][number], MessagePartDurationUIPart>
 
 export interface IPropsMessage extends Pick<Model, 'answer'> {
 	streaming: boolean
@@ -10,8 +12,8 @@ export interface IPropsMessage extends Pick<Model, 'answer'> {
 }
 
 export interface IPropsPart extends Pick<IPropsMessage, 'streaming' | 'answer'> {
-	reasoningDuration?: number
-	part: Message['parts'][number]
+	duration?: number
+	part: VisibleMessagePart
 }
 
 export interface IPropsInput extends Pick<

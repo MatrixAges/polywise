@@ -10,7 +10,7 @@ import { alert, Chat, CustomTransport, execUntil, rpc } from '@/utils'
 
 import type { Session } from '@core/db'
 import type { Context, Message, Permission } from '@core/fst'
-import type { AbstractChat, UIMessage } from 'ai'
+import type { AbstractChat } from 'ai'
 import type { IProps } from './index'
 
 @injectable()
@@ -25,11 +25,11 @@ export default class Index {
 	has_older = false
 	has_newer = false
 
-	chat = null as unknown as Chat
+	chat = null as unknown as Chat<Message>
 	session = {} as unknown as Session
 	context = null as unknown as Context
-	status = 'ready' as AbstractChat<UIMessage>['status']
-	messages = [] as AbstractChat<UIMessage>['messages']
+	status = 'ready' as AbstractChat<Message>['status']
+	messages = [] as AbstractChat<Message>['messages']
 	permission = null as unknown as Permission
 	archived_at = null as null | number
 	mode = 'normal' as 'normal' | 'plan' | 'plan-exec'
@@ -81,10 +81,10 @@ export default class Index {
 	}
 
 	initChat() {
-		this.chat = new Chat({
+		this.chat = new Chat<Message>({
 			id: this.id,
 			throttle: 60,
-			transport: new CustomTransport({
+			transport: new CustomTransport<Message>({
 				api: server_sys_session_url,
 				prepareReconnectToStreamRequest: () => ({
 					api: `${server_sys_session_url}?id=${this.id}`
@@ -359,8 +359,8 @@ export default class Index {
 		this.chat = null as unknown as Chat
 		this.session = {} as unknown as Session
 		this.context = null as unknown as Context
-		this.status = 'ready' as AbstractChat<UIMessage>['status']
-		this.messages = [] as AbstractChat<UIMessage>['messages']
+		this.status = 'ready' as AbstractChat<Message>['status']
+		this.messages = [] as AbstractChat<Message>['messages']
 		this.permission = null as unknown as Permission
 		this.archived_at = null as null | number
 		this.mode = 'normal'
