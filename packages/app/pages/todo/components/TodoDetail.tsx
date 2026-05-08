@@ -95,7 +95,7 @@ const Index = () => {
 		<div
 			className='
 				flex flex-col shrink-0
-				w-[320px] h-full
+				w-[300px] h-full
 				bg-std-50/60
 				border-l border-border-light
 				dark:bg-std-50

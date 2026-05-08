@@ -83,7 +83,7 @@ const Index = (props: IProps) => {
 				rounded-lg
 				border
 			`
-					: 'h-11 items-center border-b px-3',
+					: 'h-11 items-center border-b px-1',
 				selected && 'border-primary/40',
 				isDragging && 'opacity-0',
 				(isDragging || overlay) && 'border-primary/40 z-10 backdrop-blur-lg'
@@ -158,13 +158,13 @@ const Index = (props: IProps) => {
 				>
 					<div
 						className='
-							flex
+							flex flex-1
 							items-center
 							gap-1
 						'
 					>
 						<MessageSquareText className='size-3'></MessageSquareText>
-						<span className='flex-1 truncate group-data-[mode=list]:w-[180px]'>
+						<span className='flex-1 truncate group-data-[mode=list]:w-[160px]'>
 							{report || item.session.title}
 						</span>
 					</div>

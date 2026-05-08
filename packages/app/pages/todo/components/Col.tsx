@@ -31,7 +31,7 @@ const Index = (props: IProps) => {
 		<div
 			className={$cx(
 				'flex flex-col',
-				mode === 'kanban' ? 'h-full w-80 shrink-0' : 'border-border-light w-full rounded-lg border'
+				mode === 'kanban' ? 'h-full w-80 shrink-0' : 'border-border-light w-full'
 			)}
 		>
 			<div
@@ -44,13 +44,19 @@ const Index = (props: IProps) => {
 						? 'h-10 px-3'
 						: `
 					h-10
-					px-3
-					rounded-xs
-					border-border-light border-b
+					px-1
+					rounded-t-lg
+					border-b border-border-light
 				`
 				)}
 			>
-				<div className='text-std-400 flex items-center gap-2'>
+				<div
+					className='
+						flex
+						items-center
+						gap-2
+					'
+				>
 					<Icon className='size-3.5'></Icon>
 					<span
 						className='
@@ -78,7 +84,7 @@ const Index = (props: IProps) => {
 				<SortableContext items={items} strategy={verticalListSortingStrategy}>
 					<div
 						className={$cx(
-							'flex w-full flex-col [&>*:last-child]:border-b-0',
+							'flex w-full flex-col',
 							mode === 'kanban' && 'gap-3',
 							todos.length === 0 && 'min-h-px'
 						)}
