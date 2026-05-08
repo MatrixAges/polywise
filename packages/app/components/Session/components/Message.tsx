@@ -1,9 +1,8 @@
 import { useMemo } from 'react'
-import { ChevronDownIcon } from 'lucide-react'
+import { ChevronRightIcon } from 'lucide-react'
 
 import { Message, MessageContent } from '@/__shadcn__/components/ai-elements'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/__shadcn__/components/ui/collapsible'
-import { cn } from '@/__shadcn__/lib/utils'
 
 import LoadingDots from './LoadingDots'
 import Part from './Part'
@@ -150,6 +149,33 @@ const getRenderBlocks = (items: Array<PartWithDuration>, streaming: boolean) => 
 	return blocks
 }
 
+const getBlockDuration = (block: RenderBlock) => {
+	if (block.type === 'part') return block.item.duration ?? 0
+
+	return block.items.reduce((total, item) => total + (item.duration ?? 0), 0)
+}
+
+const formatDuration = (duration: number) => {
+	const total_seconds = Math.max(0, Math.round(duration / 1000))
+
+	if (total_seconds < 60) return `${total_seconds}s`
+
+	const minutes = Math.floor(total_seconds / 60)
+	const seconds = total_seconds % 60
+
+	if (minutes < 60) {
+		return seconds > 0 ? `${minutes}m ${seconds}s` : `${minutes}m`
+	}
+
+	const hours = Math.floor(minutes / 60)
+	const rest_minutes = minutes % 60
+
+	if (rest_minutes === 0 && seconds === 0) return `${hours}h`
+	if (seconds === 0) return `${hours}h ${rest_minutes}m`
+
+	return `${hours}h ${rest_minutes}m ${seconds}s`
+}
+
 const ToolSummaryBlock = (props: {
 	defaultOpen: boolean
 	items: Array<PartWithDuration>
@@ -168,25 +194,25 @@ const ToolSummaryBlock = (props: {
 					items-center
 					w-full
 					gap-1.5
-					text-std-300 text-sm
+					text-std-400 text-sm
 					text-left
 					transition-colors
-					hover:text-std-400
+					hover:text-std-700
 				'
 			>
 				<span>{summary}</span>
-				<ChevronDownIcon
+				<ChevronRightIcon
 					className='
 						size-4
 						transition-transform
-						group-data-open/process:rotate-180
+						group-data-open/process:rotate-90
 					'
-				></ChevronDownIcon>
+				></ChevronRightIcon>
 			</CollapsibleTrigger>
 			<CollapsibleContent
 				className='
 					pt-2
-					mt-1
+					mt-1.5
 					border-border-light border-t
 					data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:slide-out-to-top-1 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:slide-in-from-top-1
 				'
@@ -207,13 +233,52 @@ const ToolSummaryBlock = (props: {
 	)
 }
 
+const ProcessSummaryBlock = (props: { children: React.ReactNode; duration: number }) => {
+	const { children, duration } = props
+
+	return (
+		<Collapsible className='group/process-summary w-full'>
+			<CollapsibleTrigger
+				className='
+					flex
+					items-center
+					w-full
+					gap-1.5
+					text-std-400 text-sm
+					text-left
+					transition-colors
+					hover:text-std-700
+				'
+			>
+				<span>{`worked for ${formatDuration(duration)}`}</span>
+				<ChevronRightIcon
+					className='
+						size-4
+						transition-transform
+						group-data-open/process-summary:rotate-90
+					'
+				></ChevronRightIcon>
+			</CollapsibleTrigger>
+			<CollapsibleContent
+				className='
+					pt-2
+					mt-1.5
+					border-border-light border-t
+					data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:slide-out-to-top-1 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:slide-in-from-top-1
+				'
+			>
+				<div className='flex flex-col gap-3'>{children}</div>
+			</CollapsibleContent>
+		</Collapsible>
+	)
+}
+
 const Index = (props: IPropsMessage) => {
 	const { streaming, message, answer } = props
 	const { parts } = message
 
-	const { source_urls, files, render_blocks } = useMemo(() => {
+	const { source_urls, render_blocks } = useMemo(() => {
 		const source_urls = [] as Array<SourceUrlUIPart>
-		const files = [] as Array<FileUIPart>
 		const left_parts = [] as Array<PartWithDuration>
 		const pending_part_indexes = new Map<string, Array<number>>()
 
@@ -231,8 +296,6 @@ const Index = (props: IPropsMessage) => {
 
 			if (part.type === 'source-url') {
 				source_urls.push(part)
-			} else if (part.type === 'file') {
-				files.push(part)
 			} else {
 				const target_type = getTargetTypeFromPart(part as DurationAwarePart)
 				const queue = pending_part_indexes.get(target_type) ?? []
@@ -248,37 +311,63 @@ const Index = (props: IPropsMessage) => {
 
 		return {
 			source_urls,
-			files,
 			render_blocks: getRenderBlocks(left_parts, streaming)
 		}
 	}, [parts, streaming])
 
+	const renderBlock = (block: RenderBlock, index: number, total_blocks: number) => {
+		return block.type === 'tools' ? (
+			<ToolSummaryBlock
+				defaultOpen={block.defaultOpen}
+				items={block.items}
+				summary={block.summary}
+				messageId={`${message.id}-${index}-${block.defaultOpen ? 'open' : 'closed'}`}
+				streaming={streaming}
+				answer={answer}
+				key={`${message.id}-process-${index}-${block.defaultOpen ? 'open' : 'closed'}`}
+			></ToolSummaryBlock>
+		) : (
+			<Part
+				streaming={streaming && index === total_blocks - 1}
+				part={block.item.part}
+				duration={block.item.duration}
+				answer={answer}
+				key={`${message.id}-part-${index}`}
+			></Part>
+		)
+	}
+
+	const first_text_block_index = render_blocks.findIndex(
+		block => block.type === 'part' && block.item.part.type === 'text'
+	)
+	const has_final_output = first_text_block_index > 0
+	const process_blocks = has_final_output ? render_blocks.slice(0, first_text_block_index) : []
+	const content_blocks = has_final_output ? render_blocks.slice(first_text_block_index) : render_blocks
+	const process_duration = process_blocks.reduce((total, block) => total + getBlockDuration(block), 0)
+
 	return (
 		<Message from={message.role}>
 			<MessageContent>
-				{render_blocks.length
-					? render_blocks.map((block, index) =>
-							block.type === 'tools' ? (
-								<ToolSummaryBlock
-									defaultOpen={block.defaultOpen}
-									items={block.items}
-									summary={block.summary}
-									messageId={`${message.id}-${index}-${block.defaultOpen ? 'open' : 'closed'}`}
-									streaming={streaming}
-									answer={answer}
-									key={`${message.id}-process-${index}-${block.defaultOpen ? 'open' : 'closed'}`}
-								></ToolSummaryBlock>
-							) : (
-								<Part
-									streaming={streaming && index === render_blocks.length - 1}
-									part={block.item.part}
-									duration={block.item.duration}
-									answer={answer}
-									key={`${message.id}-part-${index}`}
-								></Part>
+				{render_blocks.length ? (
+					<>
+						{has_final_output && process_blocks.length > 0 && (
+							<ProcessSummaryBlock duration={process_duration}>
+								{process_blocks.map((block, index) =>
+									renderBlock(block, index, process_blocks.length)
+								)}
+							</ProcessSummaryBlock>
+						)}
+						{content_blocks.map((block, index) =>
+							renderBlock(
+								block,
+								index + (has_final_output ? first_text_block_index : 0),
+								content_blocks.length
 							)
-						)
-					: streaming && <LoadingDots></LoadingDots>}
+						)}
+					</>
+				) : (
+					streaming && <LoadingDots></LoadingDots>
+				)}
 				{source_urls.length > 0 && <SourceUrls items={source_urls}></SourceUrls>}
 			</MessageContent>
 		</Message>
