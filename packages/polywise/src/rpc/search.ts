@@ -1,4 +1,4 @@
-import { search } from '@core/io'
+import { SemanticSearch } from '@core/io'
 import { array, boolean, literal, number, object, string, union } from 'zod'
 
 import { p } from '../utils/trpc'
@@ -40,7 +40,7 @@ export default p
 	.input(input_type)
 	.output(output_type)
 	.query(async ({ input }) => {
-		const results = await search(input)
+		const results = await SemanticSearch(input)
 
 		return results
 	})

@@ -1,7 +1,7 @@
 import { article } from '@core/db/schema'
 import { setArticle } from '@core/db/services'
 import { addAgentArticle } from '@core/db/services/externals'
-import { save, search } from '@core/io'
+import { save, SemanticSearch } from '@core/io'
 import { tool } from 'ai'
 import { eq } from 'drizzle-orm'
 import { enum as Enum, object, string } from 'zod'
@@ -54,7 +54,7 @@ export const createMemoryTool = (scope: SessionScope) => {
 					return 'Memory search failed: query is required'
 				}
 
-				const results = await search({
+				const results = await SemanticSearch({
 					query: input.query,
 					intent: 'memory search',
 					type: 'article',

@@ -1,17 +1,21 @@
 import { addAgentArticle } from '@core/db/services/externals'
-import { save, search } from '@core/io'
+import { fullTextSearch, save, SemanticSearch } from '@core/io'
 import { tool } from 'ai'
 import { enum as Enum, number, object, string } from 'zod'
 
 import type Session from '../session'
 
 const inputSchema = object({
-	action: Enum(['save', 'search']).describe(
-		'The action to perform. save: store new semantic knowledge. search: find existing knowledge.'
+	action: Enum(['save', 'fullTextSearch', 'SemanticSearch']).describe(
+		'The action to perform. save: store new semantic knowledge. fullTextSearch: find knowledge by direct text matching only. SemanticSearch: find knowledge with semantic retrieval.'
 	),
 	content: string().optional().describe('[Required for save] The knowledge content to store'),
-	query: string().optional().describe('[Required for search] Search query to find existing knowledge'),
-	max_results: number().optional().describe('[Optional for search] Maximum results to return (default 5)')
+	query: string()
+		.optional()
+		.describe('[Required for fullTextSearch/SemanticSearch] Search query to find existing knowledge'),
+	max_results: number()
+		.optional()
+		.describe('[Optional for fullTextSearch/SemanticSearch] Maximum results to return (default 5)')
 })
 
 export const createWikiTool = (s: Session) => {
@@ -19,7 +23,8 @@ export const createWikiTool = (s: Session) => {
 		description: [
 			'Manage semantic knowledge: objective facts, concepts, architecture docs, API definitions, and technical conclusions.',
 			'Use action "save" to store new reusable knowledge in the current session scope.',
-			'Use action "search" BEFORE answering when the user asks about technical details, architecture decisions, or any factual question that may have been documented.',
+			'Use action "fullTextSearch" for direct keyword or phrase matching without semantic retrieval.',
+			'Use action "SemanticSearch" BEFORE answering when the user asks about technical details, architecture decisions, or any factual question that may have been documented.',
 			'Results are sorted by update time, with the most recent first.'
 		].join('\n'),
 		inputSchema,
@@ -50,10 +55,15 @@ export const createWikiTool = (s: Session) => {
 			}
 
 			if (!input.query) {
-				return { action: 'search' as const, error: 'query is required for search action', results: [] }
+				return {
+					action: input.action,
+					error: `query is required for ${input.action} action`,
+					results: []
+				}
 			}
 
-			const results = await search({
+			const runSearch = input.action === 'fullTextSearch' ? fullTextSearch : SemanticSearch
+			const results = await runSearch({
 				query: input.query,
 				intent: 'knowledge search',
 				type: 'article',
@@ -66,7 +76,7 @@ export const createWikiTool = (s: Session) => {
 			const sliced_results = results.results.slice(0, max_results)
 
 			return {
-				action: 'search' as const,
+				action: input.action,
 				results: sliced_results.map(r => ({
 					id: r.id,
 					content: r.content.slice(0, 50000),
