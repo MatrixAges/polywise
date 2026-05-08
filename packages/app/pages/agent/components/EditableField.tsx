@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import { Input } from '@/__shadcn__/components/ui/input'
 import { Textarea } from '@/__shadcn__/components/ui/textarea'
@@ -11,14 +11,16 @@ interface IProps {
 	multiline?: boolean
 	placeholder?: string
 	className?: string
+	maxLength?: number
 	onSubmit: (value: string) => void
 	onCancel: () => void
 }
 
 const Index = (props: IProps) => {
-	const { active, value, multiline, placeholder, className, onSubmit, onCancel } = props
+	const { active, value, multiline, placeholder, className, maxLength, onSubmit, onCancel } = props
 	const ref_input = useRef<HTMLInputElement | HTMLTextAreaElement>(null)
 	const ref_is_composing = useRef(false)
+	const [draft_value, setDraftValue] = useState(value)
 
 	useEffect(() => {
 		if (active) {
@@ -27,14 +29,24 @@ const Index = (props: IProps) => {
 		}
 	}, [active])
 
+	useEffect(() => {
+		if (active) {
+			setDraftValue(value)
+		}
+	}, [active, value])
+
 	if (!active) return null
 
 	if (multiline) {
 		return (
 			<Textarea
 				className={$cx(className)}
-				defaultValue={value}
+				value={draft_value}
 				placeholder={placeholder}
+				maxLength={maxLength}
+				onChange={event => {
+					setDraftValue(event.target.value)
+				}}
 				onCompositionStart={() => {
 					ref_is_composing.current = true
 				}}
@@ -70,8 +82,12 @@ const Index = (props: IProps) => {
 			`,
 				className
 			)}
-			defaultValue={value}
+			value={draft_value}
 			placeholder={placeholder}
+			maxLength={maxLength}
+			onChange={event => {
+				setDraftValue(event.target.value)
+			}}
 			onCompositionStart={() => {
 				ref_is_composing.current = true
 			}}

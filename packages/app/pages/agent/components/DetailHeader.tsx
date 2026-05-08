@@ -54,6 +54,7 @@ const Index = ({ agent }: IProps) => {
 								className='text-base! font-semibold'
 								active
 								value={agent.name}
+								maxLength={24}
 								onSubmit={value =>
 									submitEditableField({
 										id: agent.id,
@@ -77,6 +78,7 @@ const Index = ({ agent }: IProps) => {
 								active
 								value={agent.description || ''}
 								placeholder='Add a short description for this agent'
+								maxLength={60}
 								onSubmit={value =>
 									submitEditableField({
 										id: agent.id,

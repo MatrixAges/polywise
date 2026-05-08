@@ -25,9 +25,11 @@ const Index = (props: IProps) => {
 		<div
 			className={$cx(
 				`
+				relative
 				flex
-				gap-1
+				gap-2
 				p-2.5
+				rounded-sm
 				group
 			`,
 				selected && 'bg-active',
@@ -38,18 +40,25 @@ const Index = (props: IProps) => {
 			style={{ transform: CSS.Translate.toString(transform), transition }}
 		>
 			<AgentAvatar item={item} size='small'></AgentAvatar>
-			<div className='min-w-0 flex-1'>
+			<div
+				className='
+					flex flex-1 flex-col
+					min-w-0
+					gap-0.5
+				'
+			>
 				<div className='truncate text-sm font-medium'>{item.name}</div>
-				<div className='text-std-400 line-clamp-2 text-xs'>{item.description || 'No description'}</div>
+				<div className='text-std-400 truncate text-xs'>{item.description || 'No description'}</div>
 			</div>
 			<div
 				className='
+					absolute
+					top-0.5 right-0.5
 					flex
 					items-center
 					opacity-0
 					transition-opacity
 					group-hover:opacity-100
-					-mr-1
 				'
 			>
 				<button

@@ -53,25 +53,11 @@ const Index = (props: IProps) => {
 		}
 
 		if (avatar_config?.type === 'nice') {
-			return (
-				<NiceAvatar
-					className='rounded-lg'
-					style={wrapper_style}
-					shape='rounded'
-					{...avatar_config.data}
-				/>
-			)
+			return <NiceAvatar style={wrapper_style} shape='circle' {...avatar_config.data} />
 		}
 
 		if (avatar_config?.type === 'notion') {
-			return (
-				<NotionAvatar
-					className='rounded-lg'
-					style={wrapper_style}
-					shape='rounded'
-					config={avatar_config.data}
-				/>
-			)
+			return <NotionAvatar style={wrapper_style} shape='circle' config={avatar_config.data} />
 		}
 
 		return item.name.slice(0, 2)
