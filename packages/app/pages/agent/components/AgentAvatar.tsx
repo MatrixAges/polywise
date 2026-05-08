@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { observer } from 'mobx-react-lite'
 import NiceAvatar from 'react-nice-avatar'
 import NotionAvatar from 'react-notion-avatar'
@@ -43,26 +43,6 @@ const Index = (props: IProps) => {
 		return () => URL.revokeObjectURL(next_url)
 	}, [photo])
 
-	const Avatar = useMemo(() => {
-		if (photo_url) {
-			return (
-				<div className='bg-secondary/40 overflow-hidden rounded-lg' style={wrapper_style}>
-					<img className='h-full w-full object-cover' src={photo_url} alt={item.name} />
-				</div>
-			)
-		}
-
-		if (avatar_config?.type === 'nice') {
-			return <NiceAvatar style={wrapper_style} shape='circle' {...avatar_config.data} />
-		}
-
-		if (avatar_config?.type === 'notion') {
-			return <NotionAvatar style={wrapper_style} shape='circle' config={avatar_config.data} />
-		}
-
-		return item.name.slice(0, 2)
-	}, [photo_url, avatar_config?.type])
-
 	return (
 		<div
 			className='
@@ -76,7 +56,17 @@ const Index = (props: IProps) => {
 			style={wrapper_style}
 			onClick={openAvatarDialog}
 		>
-			{Avatar}
+			{photo_url ? (
+				<div className='bg-secondary/40 overflow-hidden rounded-lg' style={wrapper_style}>
+					<img className='h-full w-full object-cover' src={photo_url} alt={item.name} />
+				</div>
+			) : avatar_config?.type === 'nice' ? (
+				<NiceAvatar style={wrapper_style} shape='circle' {...avatar_config.data} />
+			) : avatar_config?.type === 'notion' ? (
+				<NotionAvatar style={wrapper_style} shape='circle' config={avatar_config.data} />
+			) : (
+				item.name.slice(0, 2)
+			)}
 		</div>
 	)
 }
