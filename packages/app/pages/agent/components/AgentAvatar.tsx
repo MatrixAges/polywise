@@ -52,6 +52,8 @@ const Index = (props: IProps) => {
 				text-sm font-medium
 				uppercase
 				bg-secondary/50
+				outline-offset-2
+				hover:outline-1
 			'
 			style={wrapper_style}
 			onClick={openAvatarDialog}
