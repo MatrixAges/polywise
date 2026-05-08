@@ -29,14 +29,12 @@ const Index = () => {
 			onValueChange={value => setSkills(value.map(item => item.value))}
 			isItemEqualToValue={(item_value, value) => item_value.value === value.value}
 		>
-			<ComboboxChips ref={ref_anchor}>
+			<ComboboxChips className='border-none bg-transparent p-0! focus-within:ring-0' ref={ref_anchor}>
 				{selected_items.map(item => (
 					<ComboboxChip key={item.value}>{item.label}</ComboboxChip>
 				))}
-
-				<ComboboxChipsInput placeholder='Search and select skills' />
+				<ComboboxChipsInput placeholder='Search and select skills for agent' />
 			</ComboboxChips>
-
 			<ComboboxContent anchor={ref_anchor}>
 				<ComboboxEmpty>No skills found.</ComboboxEmpty>
 				<ComboboxList>
