@@ -48,6 +48,9 @@ const isHiddenToolPart = (part: DurationAwarePart) => hidden_tool_types.has(part
 
 const isToolPart = (part: DurationAwarePart) => part.type === 'dynamic-tool' || part.type.startsWith('tool-')
 
+const isRenderablePart = (part: DurationAwarePart) =>
+	part.type === 'text' || part.type === 'reasoning' || isToolPart(part)
+
 const pluralize = (count: number, singular: string, plural = `${singular}s`) =>
 	`${count} ${count === 1 ? singular : plural}`
 
@@ -96,9 +99,9 @@ const getToolsSummary = (items: Array<PartWithDuration>) => {
 		counts.fetch ? pluralize(counts.fetch, 'fetch', 'fetches') : ''
 	].filter(Boolean)
 	const actions = [
-		counts.command ? `ran ${pluralize(counts.command, 'command')}` : '',
-		counts.edit ? `made ${pluralize(counts.edit, 'edit')}` : '',
-		counts.tool ? `used ${pluralize(counts.tool, 'tool')}` : ''
+		counts.command ? `Ran ${pluralize(counts.command, 'command')}` : '',
+		counts.edit ? `Made ${pluralize(counts.edit, 'edit')}` : '',
+		counts.tool ? `Used ${pluralize(counts.tool, 'tool')}` : ''
 	].filter(Boolean)
 
 	if (explored.length > 0 && actions.length > 0) {
@@ -187,7 +190,7 @@ const ToolSummaryBlock = (props: {
 	const { defaultOpen, items, messageId, streaming, summary, answer } = props
 
 	return (
-		<Collapsible className='group/process w-full' defaultOpen={defaultOpen}>
+		<Collapsible className='group/process mb-0! w-full' defaultOpen={defaultOpen}>
 			<CollapsibleTrigger
 				className='
 					flex
@@ -213,7 +216,6 @@ const ToolSummaryBlock = (props: {
 				className='
 					pt-2
 					mt-1.5
-					border-border-light border-t
 					data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:slide-out-to-top-1 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:slide-in-from-top-1
 				'
 			>
@@ -237,7 +239,7 @@ const ProcessSummaryBlock = (props: { children: React.ReactNode; duration: numbe
 	const { children, duration } = props
 
 	return (
-		<Collapsible className='group/process-summary w-full'>
+		<Collapsible className='group/process-summary mb-0! w-full'>
 			<CollapsibleTrigger
 				className='
 					flex
@@ -250,7 +252,7 @@ const ProcessSummaryBlock = (props: { children: React.ReactNode; duration: numbe
 					hover:text-std-700
 				'
 			>
-				<span>{`worked for ${formatDuration(duration)}`}</span>
+				<span>Worked for {formatDuration(duration)}</span>
 				<ChevronRightIcon
 					className='
 						size-4
@@ -261,7 +263,7 @@ const ProcessSummaryBlock = (props: { children: React.ReactNode; duration: numbe
 			</CollapsibleTrigger>
 			<CollapsibleContent
 				className='
-					pt-2
+					pt-2.5
 					mt-1.5
 					border-border-light border-t
 					data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:slide-out-to-top-1 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:slide-in-from-top-1
@@ -297,6 +299,8 @@ const Index = (props: IPropsMessage) => {
 			if (part.type === 'source-url') {
 				source_urls.push(part)
 			} else {
+				if (!isRenderablePart(part as DurationAwarePart)) return
+
 				const target_type = getTargetTypeFromPart(part as DurationAwarePart)
 				const queue = pending_part_indexes.get(target_type) ?? []
 
