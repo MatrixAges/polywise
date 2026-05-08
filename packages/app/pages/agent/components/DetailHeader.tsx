@@ -4,7 +4,6 @@ import { useModel } from '../context'
 import AgentAvatar from './AgentAvatar'
 import AgentModel from './AgentModel'
 import EditableField from './EditableField'
-import SkillSelect from './SkillSelect'
 
 import type { AgentItem } from '../types'
 
@@ -18,74 +17,72 @@ const Index = ({ agent }: IProps) => {
 	return (
 		<div
 			className='
-				flex flex-col
-				gap-2
+				flex
+				items-center
+				gap-3
 				p-6
-				pb-0
+				pb-3
 			'
 		>
-			<div className='flex items-center gap-3'>
-				<AgentAvatar item={agent} size='large'></AgentAvatar>
-				<div
-					className='
-						flex flex-1 flex-col
-						min-w-0
-						gap-3
-					'
-				>
-					<div className='flex flex-col'>
-						{edit_field_key === 'name' ? (
-							<EditableField
-								className='text-base! font-semibold'
-								active
-								value={agent.name}
-								maxLength={24}
-								onSubmit={value =>
-									submitEditableField({
-										id: agent.id,
-										key: 'name',
-										value
-									})
-								}
-								onCancel={cancelEditField}
-							></EditableField>
-						) : (
-							<div
-								className='text-base leading-5.5 font-semibold'
-								onClick={() => startEditField('name')}
-							>
-								{agent.name}
-							</div>
-						)}
-						{edit_field_key === 'description' ? (
-							<EditableField
-								className='text-std-400 text-sm! leading-5.5'
-								active
-								value={agent.description || ''}
-								placeholder='Add a short description for this agent'
-								maxLength={60}
-								onSubmit={value =>
-									submitEditableField({
-										id: agent.id,
-										key: 'description',
-										value
-									})
-								}
-								onCancel={cancelEditField}
-							></EditableField>
-						) : (
-							<div
-								className='text-std-400 text-sm leading-5.5'
-								onClick={() => startEditField('description')}
-							>
-								{agent.description || 'Add a short description for this agent'}
-							</div>
-						)}
-					</div>
+			<AgentAvatar item={agent} size='large'></AgentAvatar>
+			<div
+				className='
+					flex flex-1 flex-col
+					min-w-0
+					gap-3
+				'
+			>
+				<div className='flex flex-col'>
+					{edit_field_key === 'name' ? (
+						<EditableField
+							className='text-base! font-semibold'
+							active
+							value={agent.name}
+							maxLength={24}
+							onSubmit={value =>
+								submitEditableField({
+									id: agent.id,
+									key: 'name',
+									value
+								})
+							}
+							onCancel={cancelEditField}
+						></EditableField>
+					) : (
+						<div
+							className='text-base leading-5.5 font-semibold'
+							onClick={() => startEditField('name')}
+						>
+							{agent.name}
+						</div>
+					)}
+					{edit_field_key === 'description' ? (
+						<EditableField
+							className='text-std-400 text-sm! leading-5.5'
+							active
+							value={agent.description || ''}
+							placeholder='Add a short description for this agent'
+							maxLength={60}
+							onSubmit={value =>
+								submitEditableField({
+									id: agent.id,
+									key: 'description',
+									value
+								})
+							}
+							onCancel={cancelEditField}
+						></EditableField>
+					) : (
+						<div
+							className='text-std-400 text-sm leading-5.5'
+							onClick={() => startEditField('description')}
+						>
+							{agent.description || 'Add a short description for this agent'}
+						</div>
+					)}
 				</div>
-				<AgentModel agent={agent}></AgentModel>
 			</div>
-			<SkillSelect></SkillSelect>
+			<AgentModel agent={agent}></AgentModel>
 		</div>
 	)
 }

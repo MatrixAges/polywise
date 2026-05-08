@@ -6,10 +6,18 @@ import { TextTabs } from '@/components'
 
 import { useModel } from '../context'
 import ArticlesPanel from './ArticlesPanel'
+import SkillSelect from './SkillSelect'
 
 import type { AgentItem, AgentTab } from '../types'
 
-const tabs = ['prompt', 'soul', 'identity', 'memory', 'article'] as const
+const tabs = [
+	{ key: 'prompt', title: 'prompt' },
+	{ key: 'soul', title: 'soul' },
+	{ key: 'identity', title: 'identity' },
+	{ key: 'memory', title: 'memory' },
+	{ key: 'skills', title: 'skills' },
+	{ key: 'article', title: 'Brain' }
+] as const
 
 interface IProps {
 	agent: AgentItem
@@ -36,8 +44,8 @@ const Index = ({ agent, active_tab, field_value }: IProps) => {
 				'
 			>
 				<TextTabs
-					className='gap-2'
-					itemClassName='px-1.5'
+					className='gap-4!'
+					itemClassName='px-0!'
 					items={[...tabs]}
 					active={active_tab}
 					setActive={setCurrentTab}
@@ -45,20 +53,24 @@ const Index = ({ agent, active_tab, field_value }: IProps) => {
 			</div>
 			{active_tab === 'article' ? (
 				<ArticlesPanel></ArticlesPanel>
+			) : active_tab === 'skills' ? (
+				<div className='px-6 py-3'>
+					<SkillSelect></SkillSelect>
+				</div>
 			) : (
 				<Textarea
 					className='
-						overflow-y-auto
-						flex-1
-						h-full
-						min-h-0
-						p-4 px-6
-						rounded-none
-						text-sm
-						bg-secondary/10
-						border-none
-						focus-within:ring-0!
-					'
+							overflow-y-auto
+							flex-1
+							h-full
+							min-h-0
+							p-4 px-6
+							rounded-none
+							text-sm
+							bg-secondary/10
+							border-none
+							focus-within:ring-0!
+						'
 					value={draft_value}
 					placeholder={`Add ${active_tab}`}
 					onChange={event => {

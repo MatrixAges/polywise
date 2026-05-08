@@ -1,7 +1,9 @@
 import { useDelegate } from '@/hooks'
 
+type TabItem = string | { key: string; title: string }
+
 interface IProps {
-	items: Array<string>
+	items: Array<TabItem>
 	active: string
 	className?: string
 	itemClassName?: string
@@ -28,10 +30,14 @@ const Index = (props: IProps) => {
 			)}
 			ref={ref_tab}
 		>
-			{items.map(item => (
-				<span
-					className={$cx(
-						`
+			{items.map(item => {
+				const key = typeof item === 'string' ? item : item.key
+				const title = typeof item === 'string' ? item : item.title
+
+				return (
+					<span
+						className={$cx(
+							`
 						flex
 						items-center
 						h-full
@@ -39,15 +45,16 @@ const Index = (props: IProps) => {
 						border-b border-transparent
 						clickable capitalize
 					`,
-						active === item && 'text-std-800 border-std-black!',
-						itemClassName
-					)}
-					data-key={item}
-					key={item}
-				>
-					{item}
-				</span>
-			))}
+							active === key && 'text-std-800 border-std-black!',
+							itemClassName
+						)}
+						data-key={key}
+						key={key}
+					>
+						{title}
+					</span>
+				)
+			})}
 		</div>
 	)
 }
