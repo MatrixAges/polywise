@@ -47,20 +47,12 @@ const Index = () => {
 					border-b border-border-light
 				'
 			>
-				<div
-					className='
-						flex
-						items-center
-						gap-2
-						text-xsm text-std-500 font-medium
-					'
-				>
-					<Bot className='size-3.5'></Bot>
-					<span>Agents</span>
+				<span className='text-xsm text-std-500 gap-2 font-medium'>Agents</span>
+				<div className='mr-[-2px] flex'>
+					<button className='icon_button small' type='button' onClick={createAgent}>
+						<Plus className='size-3.5'></Plus>
+					</button>
 				</div>
-				<button className='icon_button small' type='button' onClick={createAgent}>
-					<Plus className='size-3.5'></Plus>
-				</button>
 			</div>
 			<div className='flex min-h-0 flex-1 overflow-y-scroll'>
 				<div

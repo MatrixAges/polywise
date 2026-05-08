@@ -82,7 +82,7 @@ const Index = (props: IProps) => {
 			className='
 				flex
 				items-center justify-center
-				rounded-lg
+				rounded-full
 				text-sm font-medium
 				uppercase
 				bg-secondary/50

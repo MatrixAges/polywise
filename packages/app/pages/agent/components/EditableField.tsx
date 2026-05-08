@@ -10,12 +10,13 @@ interface IProps {
 	value: string
 	multiline?: boolean
 	placeholder?: string
+	className?: string
 	onSubmit: (value: string) => void
 	onCancel: () => void
 }
 
 const Index = (props: IProps) => {
-	const { active, value, multiline, placeholder, onSubmit, onCancel } = props
+	const { active, value, multiline, placeholder, className, onSubmit, onCancel } = props
 	const ref_input = useRef<HTMLInputElement | HTMLTextAreaElement>(null)
 	const ref_is_composing = useRef(false)
 
@@ -31,7 +32,7 @@ const Index = (props: IProps) => {
 	if (multiline) {
 		return (
 			<Textarea
-				className='min-h-24 rounded-lg'
+				className={$cx(className)}
 				defaultValue={value}
 				placeholder={placeholder}
 				onCompositionStart={() => {
@@ -58,7 +59,17 @@ const Index = (props: IProps) => {
 
 	return (
 		<Input
-			className='bg-secondary/40 rounded-lg'
+			className={$cx(
+				`
+				h-auto
+				min-h-auto
+				p-0
+				rounded-none
+				leading-5.5
+				bg-transparent!
+			`,
+				className
+			)}
 			defaultValue={value}
 			placeholder={placeholder}
 			onCompositionStart={() => {

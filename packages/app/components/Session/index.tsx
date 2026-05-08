@@ -64,8 +64,6 @@ const Index = (props: IProps) => {
 	const show_loading = useMemo(() => streaming && last_message?.role === 'user', [streaming, last_message])
 	const empty = x.messages.length === 0
 
-	console.log(x.messages)
-
 	return (
 		<div
 			className='
