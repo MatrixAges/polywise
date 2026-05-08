@@ -33,7 +33,7 @@ const config = {
 		cors: { origin: ['http://localhost:8787'] }
 	},
 	html: {
-		title: 'Polywise - To be agentic. ◑',
+		title: 'Polywise - agentic content system ◑',
 		template: './public/index.html'
 	},
 	tools: {

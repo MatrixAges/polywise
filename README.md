@@ -6,7 +6,7 @@
 
 # <p align="center">Polywise</p>
 
-<p align="center"><strong>To be agentic.</strong></p>
+<p align="center"><strong>agentic content system</strong></p>
 
 <p align="center">
 <a href="https://github.com/MatrixAges/polywise/stargazers"><img src="https://img.shields.io/github/stars/MatrixAges/polywise?style=rounded&color=795548" alt="Stars"></a>

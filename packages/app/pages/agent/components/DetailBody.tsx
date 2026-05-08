@@ -1,10 +1,11 @@
+import { useEffect, useState } from 'react'
 import { observer } from 'mobx-react-lite'
 
+import { Textarea } from '@/__shadcn__/components/ui/textarea'
 import { TextTabs } from '@/components'
 
 import { useModel } from '../context'
 import ArticlesPanel from './ArticlesPanel'
-import EditableField from './EditableField'
 
 import type { AgentItem, AgentTab } from '../types'
 
@@ -17,7 +18,12 @@ interface IProps {
 }
 
 const Index = ({ agent, active_tab, field_value }: IProps) => {
-	const { edit_field_key, setCurrentTab, startEditField, cancelEditField, submitEditableField } = useModel()
+	const { setCurrentTab, submitEditableField } = useModel()
+	const [draft_value, setDraftValue] = useState(field_value)
+
+	useEffect(() => {
+		setDraftValue(field_value)
+	}, [active_tab, field_value])
 
 	return (
 		<div className='flex flex-col pt-2'>
@@ -34,36 +40,28 @@ const Index = ({ agent, active_tab, field_value }: IProps) => {
 			<div className='min-h-[420px] p-5'>
 				{active_tab === 'article' ? (
 					<ArticlesPanel></ArticlesPanel>
-				) : edit_field_key === active_tab ? (
-					<EditableField
-						active
-						multiline
-						value={field_value}
-						placeholder={`Edit ${active_tab}`}
-						onSubmit={value =>
-							submitEditableField({
+				) : (
+					<Textarea
+						className='
+							min-h-[320px]
+							p-4
+							text-sm leading-6
+							bg-secondary/10
+							border-border-light
+						'
+						value={draft_value}
+						placeholder={`Add ${active_tab}`}
+						onChange={event => {
+							setDraftValue(event.target.value)
+						}}
+						onBlur={event => {
+							void submitEditableField({
 								id: agent.id,
 								key: active_tab,
-								value
+								value: event.target.value
 							})
-						}
-						onCancel={cancelEditField}
-					></EditableField>
-				) : (
-					<div
-						className='
-								min-h-[320px]
-								p-4
-								text-sm leading-6
-								whitespace-pre-wrap
-								bg-secondary/10
-								border border-border-light
-								clickable
-							'
-						onClick={() => startEditField(active_tab)}
-					>
-						{field_value || `Add ${active_tab}`}
-					</div>
+						}}
+					></Textarea>
 				)}
 			</div>
 		</div>

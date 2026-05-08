@@ -46,7 +46,7 @@ const Index = () => {
 						uppercase
 					'
 				>
-					Tobeagentic
+					agentic content system
 				</h2>
 			</div>
 			<div
