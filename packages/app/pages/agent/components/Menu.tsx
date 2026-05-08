@@ -34,7 +34,7 @@ const Index = () => {
 			className='
 				overflow-hidden
 				flex flex-col
-				w-[240px] h-full
+				w-[210px] h-full
 				border-border-light border-r
 			'
 		>
@@ -68,7 +68,6 @@ const Index = () => {
 						flex flex-col
 						w-full
 						gap-1
-						px-1.5 py-2
 					'
 				>
 					<DndContext sensors={sensors} onDragEnd={onDragEnd}>

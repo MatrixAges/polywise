@@ -25,10 +25,9 @@ const Index = (props: IProps) => {
 		<div
 			className={$cx(
 				`
-				flex flex-col
+				flex
 				gap-1
 				p-2.5
-				rounded-xl
 				group
 				clickable
 			`,
@@ -39,54 +38,40 @@ const Index = (props: IProps) => {
 			ref={setNodeRef}
 			style={{ transform: CSS.Translate.toString(transform), transition }}
 		>
-			<div className='flex items-start gap-2.5'>
-				<AgentAvatar item={item} size='small'></AgentAvatar>
-				<div className='min-w-0 flex-1'>
-					<div className='truncate text-sm font-medium'>{item.name}</div>
-					<div className='text-std-400 line-clamp-2 text-xs'>
-						{item.description || 'No description'}
-					</div>
-				</div>
-				<div
-					className='
-						flex
-						items-center
-						opacity-0
-						transition-opacity
-						group-hover:opacity-100
-						-mr-1
-					'
+			<AgentAvatar item={item} size='small'></AgentAvatar>
+			<div className='min-w-0 flex-1'>
+				<div className='truncate text-sm font-medium'>{item.name}</div>
+				<div className='text-std-400 line-clamp-2 text-xs'>{item.description || 'No description'}</div>
+			</div>
+			<div
+				className='
+					flex
+					items-center
+					opacity-0
+					transition-opacity
+					group-hover:opacity-100
+					-mr-1
+				'
+			>
+				<button
+					className='icon_button small cursor-grab'
+					type='button'
+					onClick={stopPropagation}
+					{...attributes}
+					{...listeners}
 				>
-					<button
-						className='icon_button small cursor-grab'
-						type='button'
-						onClick={stopPropagation}
-						{...attributes}
-						{...listeners}
-					>
-						<DotsSixVerticalIcon className='size-3.5' weight='bold'></DotsSixVerticalIcon>
-					</button>
-					<button
-						className='icon_button small'
-						type='button'
-						onClick={(event: MouseEvent<HTMLButtonElement>) => {
-							event.stopPropagation()
-							openAgentDetail(item.id)
-						}}
-					>
-						<Pencil className='size-3'></Pencil>
-					</button>
-					<button
-						className='icon_button small'
-						type='button'
-						onClick={(event: MouseEvent<HTMLButtonElement>) => {
-							event.stopPropagation()
-							removeAgent(item.id)
-						}}
-					>
-						<Trash2 className='size-3.5'></Trash2>
-					</button>
-				</div>
+					<DotsSixVerticalIcon className='size-3.5' weight='bold'></DotsSixVerticalIcon>
+				</button>
+				<button
+					className='icon_button small'
+					type='button'
+					onClick={(event: MouseEvent<HTMLButtonElement>) => {
+						event.stopPropagation()
+						openAgentDetail(item.id)
+					}}
+				>
+					<Pencil className='size-3'></Pencil>
+				</button>
 			</div>
 		</div>
 	)

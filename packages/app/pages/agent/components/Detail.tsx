@@ -67,8 +67,6 @@ const Index = () => {
 			className='
 				overflow-hidden
 				flex flex-1 flex-col
-				min-w-0
-				bg-background
 			'
 		>
 			<div
@@ -76,7 +74,6 @@ const Index = () => {
 					overflow-y-scroll
 					flex flex-1 flex-col
 					min-h-0
-					p-5
 				'
 			>
 				<div
@@ -92,7 +89,6 @@ const Index = () => {
 							relative
 							overflow-hidden
 							p-6
-							rounded-[28px]
 							bg-card
 							border border-border-light
 						'
@@ -123,7 +119,7 @@ const Index = () => {
 								>
 									<div className='flex flex-col items-start gap-3'>
 										<button
-											className='clickable relative w-fit rounded-[24px]'
+											className='clickable relative w-fit'
 											type='button'
 											onClick={openAvatarDialog}
 										>
@@ -281,7 +277,6 @@ const Index = () => {
 									<div
 										className='
 											p-3
-											rounded-2xl
 											bg-secondary/20
 											border border-border-light
 										'
@@ -296,7 +291,6 @@ const Index = () => {
 					<div
 						className='
 							overflow-hidden
-							rounded-[28px]
 							bg-card
 							border border-border-light
 						'
@@ -338,7 +332,6 @@ const Index = () => {
 									className='
 											min-h-[320px]
 											p-4
-											rounded-[22px]
 											text-sm leading-6
 											whitespace-pre-wrap
 											bg-secondary/10
