@@ -1,6 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { observer } from 'mobx-react-lite'
 import NiceAvatar from 'react-nice-avatar'
 import NotionAvatar from 'react-notion-avatar'
+
+import { useModel } from '../context'
 
 import type { CSSProperties } from 'react'
 import type { AgentAvatarConfig, AgentItem } from '../types'
@@ -12,11 +15,14 @@ interface IProps {
 
 const size_map = {
 	small: 32,
-	large: 88
+	large: 48
 } as const
 
 const Index = (props: IProps) => {
 	const { item, size = 'large' } = props
+
+	const { openAvatarDialog } = useModel()
+
 	const box_size = size_map[size]
 	const avatar_config = item.avatar as AgentAvatarConfig | null
 	const photo = item.photo as Uint8Array | null
@@ -37,28 +43,39 @@ const Index = (props: IProps) => {
 		return () => URL.revokeObjectURL(next_url)
 	}, [photo])
 
-	if (photo_url) {
-		return (
-			<div className='bg-secondary/40 overflow-hidden rounded-lg' style={wrapper_style}>
-				<img className='h-full w-full object-cover' src={photo_url} alt={item.name} />
-			</div>
-		)
-	}
+	const Avatar = useMemo(() => {
+		if (photo_url) {
+			return (
+				<div className='bg-secondary/40 overflow-hidden rounded-lg' style={wrapper_style}>
+					<img className='h-full w-full object-cover' src={photo_url} alt={item.name} />
+				</div>
+			)
+		}
 
-	if (avatar_config?.type === 'nice') {
-		return <NiceAvatar className='rounded-lg' style={wrapper_style} shape='rounded' {...avatar_config.data} />
-	}
+		if (avatar_config?.type === 'nice') {
+			return (
+				<NiceAvatar
+					className='rounded-lg'
+					style={wrapper_style}
+					shape='rounded'
+					{...avatar_config.data}
+				/>
+			)
+		}
 
-	if (avatar_config?.type === 'notion') {
-		return (
-			<NotionAvatar
-				className='rounded-lg'
-				style={wrapper_style}
-				shape='rounded'
-				config={avatar_config.data}
-			/>
-		)
-	}
+		if (avatar_config?.type === 'notion') {
+			return (
+				<NotionAvatar
+					className='rounded-lg'
+					style={wrapper_style}
+					shape='rounded'
+					config={avatar_config.data}
+				/>
+			)
+		}
+
+		return item.name.slice(0, 2)
+	}, [photo_url, avatar_config?.type])
 
 	return (
 		<div
@@ -71,10 +88,11 @@ const Index = (props: IProps) => {
 				bg-secondary/50
 			'
 			style={wrapper_style}
+			onClick={openAvatarDialog}
 		>
-			{item.name.slice(0, 1) || 'A'}
+			{Avatar}
 		</div>
 	)
 }
 
-export default $app.memo(Index)
+export default new $app.Handle(Index).by(observer).by($app.memo).get()

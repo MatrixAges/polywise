@@ -67,7 +67,7 @@ const Index = () => {
 					className='
 						flex flex-col
 						w-full
-						gap-1
+						gap-0.5
 					'
 				>
 					<DndContext sensors={sensors} onDragEnd={onDragEnd}>

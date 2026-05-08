@@ -29,7 +29,6 @@ const Index = (props: IProps) => {
 				gap-1
 				p-2.5
 				group
-				clickable
 			`,
 				selected && 'bg-active',
 				isDragging && 'dragging z-10 backdrop-blur-lg'

@@ -46,11 +46,11 @@ const Index = () => {
 					'
 				>
 					<DetailHeader agent={selected_agent}></DetailHeader>
-					<DetailBody
+					{/* <DetailBody
 						agent={selected_agent}
 						active_tab={active_tab}
 						field_value={field_value}
-					></DetailBody>
+					></DetailBody> */}
 				</div>
 			</div>
 		</div>

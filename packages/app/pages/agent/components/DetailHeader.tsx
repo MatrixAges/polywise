@@ -1,4 +1,3 @@
-import { PencilLine } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import {
@@ -35,49 +34,13 @@ interface IProps {
 }
 
 const Index = ({ agent }: IProps) => {
-	const {
-		edit_field_key,
-		startEditField,
-		cancelEditField,
-		submitEditableField,
-		setModel,
-		setModelEffort,
-		openAvatarDialog
-	} = useModel()
+	const { edit_field_key, startEditField, cancelEditField, submitEditableField, setModel, setModelEffort } =
+		useModel()
 
 	return (
-		<div className='flex'>
-			<div
-				className='
-					flex flex-1 flex-col
-					gap-5
-					sm:flex-row sm:items-start
-				'
-			>
-				<div className='flex flex-col items-start gap-3'>
-					<button className='clickable relative w-fit' type='button' onClick={openAvatarDialog}>
-						<AgentAvatar item={agent} size='large'></AgentAvatar>
-						<span
-							className='
-								absolute
-								right-[-6px] bottom-[-6px]
-								flex
-								items-center justify-center
-								w-8 h-8
-								rounded-full
-								bg-card
-								border border-border-light
-								shadow-sm
-							'
-						>
-							<PencilLine className='size-3.5'></PencilLine>
-						</span>
-					</button>
-					<button className='click_button text-xs' type='button' onClick={openAvatarDialog}>
-						<PencilLine className='size-3.5'></PencilLine>
-						Edit avatar
-					</button>
-				</div>
+		<div className='flex flex-col p-4'>
+			<div className='flex items-center gap-3'>
+				<AgentAvatar item={agent} size='large'></AgentAvatar>
 				<div
 					className='
 						flex flex-1 flex-col
@@ -85,7 +48,7 @@ const Index = ({ agent }: IProps) => {
 						gap-3
 					'
 				>
-					<div className='flex flex-col gap-2'>
+					<div className='flex flex-col'>
 						{edit_field_key === 'name' ? (
 							<EditableField
 								active
@@ -101,7 +64,7 @@ const Index = ({ agent }: IProps) => {
 							></EditableField>
 						) : (
 							<div
-								className='clickable text-2xl font-semibold tracking-tight'
+								className='font-semibold tracking-tight'
 								onClick={() => startEditField('name')}
 							>
 								{agent.name}
@@ -124,9 +87,7 @@ const Index = ({ agent }: IProps) => {
 						) : (
 							<div
 								className='
-									max-w-2xl
 									text-std-400 text-sm leading-6
-									clickable
 								'
 								onClick={() => startEditField('description')}
 							>
@@ -136,7 +97,7 @@ const Index = ({ agent }: IProps) => {
 					</div>
 				</div>
 			</div>
-			<div
+			{/* <div
 				className='
 					flex flex-col
 					w-full max-w-md
@@ -196,7 +157,7 @@ const Index = ({ agent }: IProps) => {
 				>
 					<SkillSelect></SkillSelect>
 				</div>
-			</div>
+			</div> */}
 		</div>
 	)
 }
