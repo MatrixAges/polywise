@@ -30,16 +30,23 @@ const Index = () => {
 			className='
 				overflow-hidden
 				flex flex-1 flex-col
+				min-h-0
 			'
 		>
 			<div
 				className='
-					overflow-y-scroll
+					overflow-hidden
 					flex flex-1 flex-col
 					min-h-0
 				'
 			>
-				<div className='flex w-full flex-col'>
+				<div
+					className='
+						flex flex-1 flex-col
+						w-full
+						min-h-0
+					'
+				>
 					<DetailHeader agent={selected_agent}></DetailHeader>
 					<DetailBody
 						agent={selected_agent}

@@ -19,7 +19,7 @@ const Index = ({ agent }: IProps) => {
 		<div
 			className='
 				flex flex-col
-				gap-3
+				gap-2
 				p-6
 				pb-0
 			'

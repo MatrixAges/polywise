@@ -26,44 +26,53 @@ const Index = ({ agent, active_tab, field_value }: IProps) => {
 	}, [active_tab, field_value])
 
 	return (
-		<div className='flex flex-col pt-2'>
+		<div className='flex min-h-0 flex-1 flex-col'>
 			<div
 				className='
-					flex
+					flex shrink-0
 					h-8
 					px-6
 					border-border-light border-b
 				'
 			>
-				<TextTabs items={[...tabs]} active={active_tab} setActive={setCurrentTab}></TextTabs>
+				<TextTabs
+					className='gap-2'
+					itemClassName='px-1.5'
+					items={[...tabs]}
+					active={active_tab}
+					setActive={setCurrentTab}
+				></TextTabs>
 			</div>
-			<div className='min-h-[420px] p-5'>
-				{active_tab === 'article' ? (
-					<ArticlesPanel></ArticlesPanel>
-				) : (
-					<Textarea
-						className='
-							min-h-[320px]
-							p-4
-							text-sm leading-6
-							bg-secondary/10
-							border-border-light
-						'
-						value={draft_value}
-						placeholder={`Add ${active_tab}`}
-						onChange={event => {
-							setDraftValue(event.target.value)
-						}}
-						onBlur={event => {
-							void submitEditableField({
-								id: agent.id,
-								key: active_tab,
-								value: event.target.value
-							})
-						}}
-					></Textarea>
-				)}
-			</div>
+			{active_tab === 'article' ? (
+				<ArticlesPanel></ArticlesPanel>
+			) : (
+				<Textarea
+					className='
+						overflow-y-auto
+						flex-1
+						h-full
+						min-h-0
+						p-4 px-6
+						rounded-none
+						text-sm
+						bg-secondary/10
+						border-none
+						focus-within:ring-0!
+					'
+					value={draft_value}
+					placeholder={`Add ${active_tab}`}
+					onChange={event => {
+						setDraftValue(event.target.value)
+					}}
+					onBlur={event => {
+						void submitEditableField({
+							id: agent.id,
+							key: active_tab,
+							value: event.target.value
+						})
+					}}
+				></Textarea>
+			)}
 		</div>
 	)
 }
