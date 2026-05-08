@@ -35,7 +35,7 @@ const Index = ({ agent }: IProps) => {
 
 	return (
 		<div className='-mb-1 flex flex-col'>
-			<span className='text-std-400 text-xs'>Agent Model</span>
+			<span className='text-std-400 text-xs'>Model</span>
 			<div className='flex items-center gap-2'>
 				<ModelSelect
 					ghost

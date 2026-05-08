@@ -29,8 +29,9 @@ const Index = (props: IProps) => {
 				flex
 				gap-2
 				p-2.5
-				rounded-sm
+				rounded-r-sm rounded-l-3xl
 				group
+				cursor-pointer
 			`,
 				selected && 'bg-active',
 				isDragging && 'dragging z-10 backdrop-blur-lg'

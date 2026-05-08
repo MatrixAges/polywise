@@ -1,4 +1,4 @@
-import { Album, BookOpenText, Brain, Trash2, UserRound } from 'lucide-react'
+import { Album, BookOpenText, Brain, Plus, Save, Trash2, UserRound } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { Button } from '@/__shadcn__/components/ui/button'
@@ -58,9 +58,9 @@ const Index = () => {
 						simple
 						onClick={value => setArticleFor(value as ArticleForType)}
 					></Tabs>
-					<Button size='xs' onClick={createArticle}>
-						New
-					</Button>
+					<button className='icon_button small' type='button' title='New' onClick={createArticle}>
+						<Plus className='size-3.5'></Plus>
+					</button>
 				</div>
 				<div
 					className='
@@ -113,21 +113,23 @@ const Index = () => {
 				<div className='flex items-center justify-between gap-2'>
 					<div className='text-sm font-medium capitalize'>{article_for}</div>
 					<div className='flex items-center gap-2'>
-						<Button
-							variant='ghost'
-							size='xs'
+						<button
+							className='icon_button small'
+							type='button'
 							disabled={!selected_article_id || article_saving}
 							onClick={() => selected_article_id && removeArticle(selected_article_id)}
 						>
-							<Trash2 size={12}></Trash2>
-						</Button>
-						<Button
-							size='xs'
+							<Trash2></Trash2>
+						</button>
+						<button
+							className='icon_button small'
+							type='button'
+							title='Save'
 							disabled={!selected_article_id || article_saving}
 							onClick={saveArticle}
 						>
-							Save
-						</Button>
+							<Save className='size-3.5'></Save>
+						</button>
 					</div>
 				</div>
 				{selected_article_id ? (
