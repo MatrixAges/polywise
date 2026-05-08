@@ -5,7 +5,7 @@ import { Textarea } from '@/__shadcn__/components/ui/textarea'
 import { TextTabs } from '@/components'
 
 import { useModel } from '../context'
-import ArticlesPanel from './ArticlesPanel'
+import BrainPanel from './BrainPanel'
 import SkillSelect from './SkillSelect'
 
 import type { AgentItem, AgentTab } from '../types'
@@ -65,7 +65,7 @@ const Index = ({ agent, active_tab, field_value }: IProps) => {
 			</div>
 			<div className='page_wrap flex-1 p-0'>
 				{active_tab === 'article' ? (
-					<ArticlesPanel></ArticlesPanel>
+					<BrainPanel></BrainPanel>
 				) : active_tab === 'skills' ? (
 					<div className='px-6 py-3'>
 						<SkillSelect></SkillSelect>

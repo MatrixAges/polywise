@@ -34,7 +34,7 @@ const Index = ({ agent }: IProps) => {
 	const { setModel, setModelEffort } = useModel()
 
 	return (
-		<div className='flex flex-col'>
+		<div className='-mb-1 flex flex-col'>
 			<span className='text-std-400 text-xs'>Agent Model</span>
 			<div className='flex items-center gap-2'>
 				<ModelSelect

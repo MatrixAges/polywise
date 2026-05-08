@@ -162,7 +162,7 @@ This document provides an overview of the packages/app module structure and arch
 						"desc": "Agent skill multi-select combobox that shows selected skills as removable chips and persists the full linked skill id set",
 						"role": "Component"
 					},
-					"ArticlesPanel.tsx": {
+					"BrainPanel.tsx": {
 						"desc": "Agent article tab split view with left for-filtered article menu and right article editor backed by unified article save pipeline",
 						"role": "Component"
 					},
