@@ -10,6 +10,9 @@ export default sqliteTable(
 		// Document description (optional)
 		description: text('description'),
 		path: text('path'),
+		// Hit stats for rerank weighting
+		hit_count: integer('hit_count'),
+		hit_at: integer('hit_at', { mode: 'timestamp' }),
 		// Whether triples have been generated
 		is_tripled: integer('is_tripled', { mode: 'boolean' }).default(false).notNull(),
 		created_at: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),

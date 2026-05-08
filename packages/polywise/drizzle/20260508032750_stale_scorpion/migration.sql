@@ -26,6 +26,8 @@ CREATE TABLE `article` (
 	`source` text DEFAULT 'agent',
 	`hash` text,
 	`metadata` text DEFAULT '{}',
+	`hit_count` integer,
+	`hit_at` integer,
 	`is_long` integer GENERATED ALWAYS AS (length(content) > 12000) VIRTUAL,
 	`is_tripled` integer DEFAULT false NOT NULL,
 	`created_at` integer,
@@ -49,6 +51,8 @@ CREATE TABLE `document` (
 	`title` text NOT NULL,
 	`description` text,
 	`path` text,
+	`hit_count` integer,
+	`hit_at` integer,
 	`is_tripled` integer DEFAULT false NOT NULL,
 	`created_at` integer,
 	`updated_at` integer

@@ -1,7 +1,7 @@
 {
   "version": "7",
   "dialect": "sqlite",
-  "id": "500c8c61-7e84-459a-b488-96a3f90a5347",
+  "id": "beb09375-e6d3-4631-890e-39346f679185",
   "prevIds": [
     "00000000-0000-0000-0000-000000000000"
   ],
@@ -359,6 +359,26 @@
       "notNull": false,
       "autoincrement": false,
       "default": null,
+      "generated": null,
+      "name": "hit_count",
+      "entityType": "columns",
+      "table": "article"
+    },
+    {
+      "type": "integer",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "hit_at",
+      "entityType": "columns",
+      "table": "article"
+    },
+    {
+      "type": "integer",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
       "generated": {
         "as": "(length(content) > 12000)",
         "type": "virtual"
@@ -504,6 +524,26 @@
       "default": null,
       "generated": null,
       "name": "path",
+      "entityType": "columns",
+      "table": "document"
+    },
+    {
+      "type": "integer",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "hit_count",
+      "entityType": "columns",
+      "table": "document"
+    },
+    {
+      "type": "integer",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "hit_at",
       "entityType": "columns",
       "table": "document"
     },

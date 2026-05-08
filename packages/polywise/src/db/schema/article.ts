@@ -26,6 +26,9 @@ export default sqliteTable(
 		hash: text('hash'),
 		// Article metadata (for filtering)
 		metadata: text('metadata', { mode: 'json' }).default({}),
+		// Hit stats for rerank weighting
+		hit_count: integer('hit_count'),
+		hit_at: integer('hit_at', { mode: 'timestamp' }),
 		// Long article (content exceeds 12000 characters)
 		is_long: integer('is_long', { mode: 'boolean' }).generatedAlwaysAs(sql`length(content) > 12000`),
 		// Whether triples have been generated
