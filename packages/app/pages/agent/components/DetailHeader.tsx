@@ -22,6 +22,7 @@ const Index = ({ agent }: IProps) => {
 				gap-3
 				p-6
 				pb-3
+				page_wrap
 			'
 		>
 			<AgentAvatar item={agent} size='large'></AgentAvatar>
