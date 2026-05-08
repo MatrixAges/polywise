@@ -2,7 +2,7 @@ import { agent } from '@core/db/schema'
 import { env } from '@core/env'
 import { asc, SQL } from 'drizzle-orm'
 
-import type { AgentInsert } from '@core/db'
+import type { Agent, AgentInsert } from '@core/db'
 
 interface ArgsGetAgents {
 	where?: SQL
@@ -10,12 +10,38 @@ interface ArgsGetAgents {
 	limit?: number
 }
 
+const normalizeAgent = (row: Agent | undefined) => {
+	if (!row) {
+		return row
+	}
+
+	const photo = row.photo
+
+	if (!photo) {
+		return row
+	}
+
+	if (photo instanceof Uint8Array && photo.constructor === Uint8Array) {
+		return row
+	}
+
+	if (photo instanceof Uint8Array) {
+		return { ...row, photo: new Uint8Array(photo) }
+	}
+
+	if (photo instanceof ArrayBuffer) {
+		return { ...row, photo: new Uint8Array(photo) }
+	}
+
+	return row
+}
+
 export const addAgent = async (values: AgentInsert) => {
 	return env.db
 		.insert(agent)
 		.values(values)
 		.returning()
-		.then(res => res[0])
+		.then(res => normalizeAgent(res[0]))
 }
 
 export const getAgent = async (where: SQL) => {
@@ -24,7 +50,7 @@ export const getAgent = async (where: SQL) => {
 		.from(agent)
 		.where(where)
 		.limit(1)
-		.then(res => res[0])
+		.then(res => normalizeAgent(res[0]))
 }
 
 export const getAgents = async (args: ArgsGetAgents = {}) => {
@@ -42,7 +68,7 @@ export const getAgents = async (args: ArgsGetAgents = {}) => {
 
 	if (limit) query = query.limit(limit)
 
-	return query
+	return query.then(res => res.map(item => normalizeAgent(item) as Agent))
 }
 
 export const setAgent = async (where: SQL, values: Partial<AgentInsert>) => {
@@ -51,7 +77,7 @@ export const setAgent = async (where: SQL, values: Partial<AgentInsert>) => {
 		.set(values)
 		.where(where)
 		.returning()
-		.then(res => res[0])
+		.then(res => normalizeAgent(res[0]))
 }
 
 export const removeAgent = async (where: SQL) => {
@@ -59,5 +85,5 @@ export const removeAgent = async (where: SQL) => {
 		.delete(agent)
 		.where(where)
 		.returning()
-		.then(res => res[0])
+		.then(res => normalizeAgent(res[0]))
 }

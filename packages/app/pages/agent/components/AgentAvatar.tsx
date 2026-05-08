@@ -57,7 +57,7 @@ const Index = (props: IProps) => {
 			onClick={openAvatarDialog}
 		>
 			{photo_url ? (
-				<div className='bg-secondary/40 overflow-hidden rounded-lg' style={wrapper_style}>
+				<div className='bg-secondary/40 overflow-hidden rounded-full' style={wrapper_style}>
 					<img className='h-full w-full object-cover' src={photo_url} alt={item.name} />
 				</div>
 			) : avatar_config?.type === 'nice' ? (
