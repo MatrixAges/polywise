@@ -8,24 +8,15 @@ import { rpc } from '@/utils'
 
 import type { Session } from '@core/db'
 import type { UIEvent } from 'react'
-import type {
-	IArgsMoveSessionOutGroup,
-	IArgsMoveSessionToGroup,
-	IArgsSortGroupSession,
-	IArgsStartRenameGroup,
-	IArgsStartRenameSession,
-	ISessionMenuData,
-	ISessionMenuGroup
-} from './types'
+import type { IArgsStartRenameSession, ISessionMenuData } from './types'
 
 @injectable()
 export default class Index {
-	current_tab = 'sessions' as 'sessions' | 'groups'
-	groups = [] as Array<ISessionMenuGroup>
+	pins = [] as Array<Session>
 	sessions = [] as Array<Session>
 	pin_map = {} as Record<string, number>
 	selected_session_id = ''
-	rename_group_index = undefined as number | undefined
+	rename_pin = false
 	rename_session_index = -1
 	rename_value = ''
 	page = 1
@@ -39,7 +30,7 @@ export default class Index {
 	}
 
 	async init() {
-		const deinit = setStorageWhenChange([{ session_current_tab: 'current_tab' }, 'selected_session_id'], this)
+		const deinit = setStorageWhenChange(['selected_session_id'], this)
 
 		this.util.acts = [deinit]
 
@@ -54,15 +45,13 @@ export default class Index {
 		try {
 			const res = (await rpc.session.getList.query()) as ISessionMenuData
 
-			this.groups = res.groups
+			this.pins = res.pins
 			this.sessions = res.sessions
 			this.pin_map = res.pin_map
 			this.page = 1
 			this.has_more = res.has_more
 
-			const session_id_list = this.groups
-				.flatMap(item => item.items.map(session_item => session_item.id))
-				.concat(this.sessions.map(item => item.id))
+			const session_id_list = this.pins.map(item => item.id).concat(this.sessions.map(item => item.id))
 
 			if (this.selected_session_id && !session_id_list.includes(this.selected_session_id)) {
 				this.selected_session_id = ''
@@ -70,10 +59,6 @@ export default class Index {
 		} finally {
 			this.loading = false
 		}
-	}
-
-	setCurrentTab(v: Index['current_tab']) {
-		this.current_tab = v
 	}
 
 	setSelectedSession(id: string) {
@@ -84,24 +69,16 @@ export default class Index {
 		this.rename_value = value
 	}
 
-	startRenameGroup(args: IArgsStartRenameGroup) {
-		const { group_index, value } = args
-
-		this.rename_group_index = group_index
-		this.rename_session_index = -1
-		this.rename_value = value
-	}
-
 	startRenameSession(args: IArgsStartRenameSession) {
-		const { rename_group_index, rename_session_index, value } = args
+		const { pin, session_index, value } = args
 
-		this.rename_group_index = rename_group_index
-		this.rename_session_index = rename_session_index
+		this.rename_pin = pin
+		this.rename_session_index = session_index
 		this.rename_value = value
 	}
 
 	cancelRename() {
-		this.rename_group_index = undefined
+		this.rename_pin = false
 		this.rename_session_index = -1
 		this.rename_value = ''
 	}
@@ -116,69 +93,26 @@ export default class Index {
 		}
 
 		if (this.rename_session_index >= 0) {
-			const rename_group_index = this.rename_group_index
-			const rename_session_index = this.rename_session_index
+			const target_list = this.rename_pin ? this.pins : this.sessions
+			const target_session = target_list[this.rename_session_index]
 
-			if (rename_group_index !== undefined) {
-				const target_group = this.groups[rename_group_index]
-				const target_session = target_group?.items[rename_session_index]
+			if (target_session) {
+				const session_id = target_session.id
+				const next_sessions = [...target_list]
 
-				if (target_session) {
-					const session_id = target_session.id
-					const next_groups = [...this.groups]
-					const next_items = [...target_group.items]
-
-					next_items[rename_session_index] = {
-						...target_session,
-						title: rename_value
-					}
-
-					next_groups[rename_group_index] = {
-						...target_group,
-						items: next_items
-					}
-
-					this.groups = next_groups
-
-					await rpc.session.rename.mutate({ id: session_id, title: rename_value })
+				next_sessions[this.rename_session_index] = {
+					...target_session,
+					title: rename_value
 				}
-			} else {
-				const target_session = this.sessions[rename_session_index]
 
-				if (target_session) {
-					const session_id = target_session.id
-					const next_sessions = [...this.sessions]
-					next_sessions[rename_session_index] = {
-						...target_session,
-						title: rename_value
-					}
-
+				if (this.rename_pin) {
+					this.pins = next_sessions
+				} else {
 					this.sessions = next_sessions
-
-					await rpc.session.rename.mutate({ id: session_id, title: rename_value })
-				}
-			}
-		}
-
-		if (this.rename_session_index < 0 && this.rename_group_index !== undefined) {
-			const group_index = this.rename_group_index
-			const target_group = this.groups[group_index]
-
-			if (target_group) {
-				const next_groups = [...this.groups]
-
-				next_groups[group_index] = {
-					...target_group,
-					group: rename_value
 				}
 
-				this.groups = next_groups
+				await rpc.session.rename.mutate({ id: session_id, title: rename_value })
 			}
-
-			await rpc.session.renameGroup.mutate({
-				group_index,
-				name: rename_value
-			})
 		}
 
 		this.cancelRename()
@@ -236,9 +170,8 @@ export default class Index {
 		let renaming_session_id = ''
 
 		if (this.rename_session_index >= 0) {
-			if (this.rename_group_index !== undefined) {
-				renaming_session_id =
-					this.groups[this.rename_group_index]?.items[this.rename_session_index]?.id || ''
+			if (this.rename_pin) {
+				renaming_session_id = this.pins[this.rename_session_index]?.id || ''
 			} else {
 				renaming_session_id = this.sessions[this.rename_session_index]?.id || ''
 			}
@@ -263,115 +196,46 @@ export default class Index {
 		await this.refresh()
 	}
 
-	async createGroup() {
-		await rpc.session.createGroup.mutate({})
-
-		await this.refresh()
-	}
-
-	async removeGroup(group_index: number) {
-		await rpc.session.removeGroup.mutate({ group_index })
-
-		if (this.rename_group_index === group_index) {
-			this.cancelRename()
-		}
-
-		await this.refresh()
-	}
-
-	async sortGroup(from: number, to: number) {
+	async sortPin(from: number, to: number) {
 		if (from === to) {
 			return
 		}
 
-		if (to < 0 || to > this.groups.length - 1) {
+		if (to < 0 || to > this.pins.length - 1) {
 			return
 		}
 
-		this.groups = arrayMove(this.groups, from, to)
+		this.pins = arrayMove(this.pins, from, to)
 
-		await rpc.session.sortGroup.mutate({ from, to })
-		await this.refresh()
-	}
-
-	async sortGroupSession(args: IArgsSortGroupSession) {
-		const { group_index, from, to } = args
-
-		if (from === to) {
-			return
-		}
-
-		const target_group = this.groups[group_index]
-
-		if (!target_group) {
-			return
-		}
-
-		if (to < 0 || to > target_group.items.length - 1) {
-			return
-		}
-
-		this.groups = this.groups.map((item, index) => {
-			if (index !== group_index) {
-				return item
-			}
-
-			return {
-				...item,
-				items: arrayMove(item.items, from, to)
-			}
-		})
-
-		await rpc.session.sortGroupSession.mutate({ group_index, from, to })
-		await this.refresh()
-	}
-
-	async moveSessionToGroup(args: IArgsMoveSessionToGroup) {
-		const { id, group_index } = args
-
-		await rpc.session.moveToGroup.mutate({ id, group_index })
-		await this.refresh()
-	}
-
-	async moveSessionOutGroup(args: IArgsMoveSessionOutGroup) {
-		const { id, group_index } = args
-
-		await rpc.session.moveOutGroup.mutate({ id, group_index })
+		await rpc.session.sortPin.mutate({ from, to })
 		await this.refresh()
 	}
 
 	watchSessionStatus() {
 		const deinit = rpc.session.watchSessionStatus.subscribe(undefined, {
 			onData: res => {
-				const entries = Object.entries(res)
-
-				if (!entries.length) {
+				if (!Object.keys(res).length) {
 					return
 				}
 
-				this.groups = this.groups.map(group_item => ({
-					...group_item,
-					items: group_item.items.map(session_item => {
-						const status = res[session_item.id]
-
-						if (status) {
-							return {
-								...session_item,
-								title: status.title,
-								report: status.report,
-								is_runing: status.running,
-								running_done: status.running_done
-									? new Date(status.running_done)
-									: null,
-								unread: status.unread
-							}
-						}
-
-						return session_item
-					})
-				}))
-
 				this.sessions = this.sessions.map(session_item => {
+					const status = res[session_item.id]
+
+					if (status) {
+						return {
+							...session_item,
+							title: status.title,
+							report: status.report,
+							is_runing: status.running,
+							running_done: status.running_done ? new Date(status.running_done) : null,
+							unread: status.unread
+						}
+					}
+
+					return session_item
+				})
+
+				this.pins = this.pins.map(session_item => {
 					const status = res[session_item.id]
 
 					if (status) {

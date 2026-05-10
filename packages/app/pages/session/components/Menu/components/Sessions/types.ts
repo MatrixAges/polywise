@@ -1,9 +1,8 @@
 import type { Session } from '@core/db'
-import type { IPropsSessions } from '../../../../types'
+import type { CSSProperties } from 'react'
 
 export interface IPropsSessionItemMenu {
 	item: Session
-	groups: IPropsSessions['groups']
 	pin: boolean
 	sessionIndex: number
 }
@@ -15,4 +14,6 @@ export interface IPropsSessionItem {
 	selected: boolean
 	renaming: boolean
 	renameValue: string
+	className?: string
+	style?: CSSProperties
 }

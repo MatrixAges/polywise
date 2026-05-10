@@ -1,58 +1,43 @@
 import { useMemo, useState } from 'react'
 import { useMemoizedFn } from 'ahooks'
-import { FolderPlus, Plus } from 'lucide-react'
+import { Plus } from 'lucide-react'
 
 import { ContextMenu, ContextMenuTrigger } from '@/__shadcn__/components/ui/context-menu'
-import { TextTabs, Tooltip } from '@/components'
-import { useDelegate } from '@/hooks'
+import { Tooltip } from '@/components'
 
 import { useModel } from '../../context'
-import { Groups, Sessions } from './components'
-import CardMenu from './components/Groups/CardMenu'
-import RowMenu from './components/Groups/RowMenu'
+import { Sessions } from './components'
 import ItemMenu from './components/Sessions/ItemMenu'
 
 import type { MouseEvent } from 'react'
-import type { IPropsGroups, IPropsMenu, IPropsSessions } from '../../types'
+import type { IPropsMenu, IPropsSessions } from '../../types'
 
 interface IMenuTarget {
-	groupIndex: number
+	pin: boolean
 	sessionIndex: number
 	id: string
 }
 
 const Index = (props: IPropsMenu) => {
 	const {
-		currentTab,
-		groups,
+		pins,
 		sessions,
-		pinMap,
 		selectedSessionId,
-		renameGroupIndex,
+		renamePin,
 		renameSessionIndex,
 		renameValue,
 		hasMore,
 		loading,
 		loadingMore
 	} = props
-	const { setCurrentTab, createSession, createGroup } = useModel()
+	const { createSession } = useModel()
 	const [menu_target, setMenuTarget] = useState<IMenuTarget | null>(null)
 
-	const props_groups: IPropsGroups = {
-		groups,
-		pinMap,
-		selectedSessionId,
-		renameGroupIndex,
-		renameSessionIndex,
-		renameValue
-	}
-
 	const props_sessions: IPropsSessions = {
-		groups,
+		pins,
 		sessions,
-		pinMap,
 		selectedSessionId,
-		renameGroupIndex,
+		renamePin,
 		renameSessionIndex,
 		renameValue,
 		hasMore,
@@ -60,34 +45,23 @@ const Index = (props: IPropsMenu) => {
 		loadingMore
 	}
 
-	const ref_action = useDelegate(v => {
-		setCurrentTab(v)
-
-		if (v === 'groups') {
-			createGroup()
-		} else {
-			createSession()
-		}
-	})
-
 	const findMenuTarget = useMemoizedFn((target: EventTarget | null) => {
 		let current_node = target instanceof HTMLElement ? target : null
 
 		while (current_node) {
-			const group_index = current_node.getAttribute('data-group-index')
+			const pin = current_node.getAttribute('data-pin')
 			const session_index = current_node.getAttribute('data-session-index')
 			const id = current_node.getAttribute('data-id')
 
-			if (group_index !== null && session_index !== null && id !== null) {
-				const next_group_index = Number(group_index)
+			if (pin !== null && session_index !== null && id !== null) {
 				const next_session_index = Number(session_index)
 
-				if (Number.isNaN(next_group_index) || Number.isNaN(next_session_index)) {
+				if (Number.isNaN(next_session_index)) {
 					return null
 				}
 
 				return {
-					groupIndex: next_group_index,
+					pin: pin === 'true',
 					sessionIndex: next_session_index,
 					id
 				}
@@ -115,49 +89,18 @@ const Index = (props: IPropsMenu) => {
 	const menu_content = useMemo(() => {
 		if (!menu_target) return
 
-		if (menu_target.groupIndex >= 0 && menu_target.sessionIndex < 0) {
-			const target_group = groups[menu_target.groupIndex]
+		const target_session = menu_target.pin ? pins[menu_target.sessionIndex] : sessions[menu_target.sessionIndex]
 
-			if (target_group) {
-				return (
-					<CardMenu
-						groupIndex={menu_target.groupIndex}
-						groupsCount={groups.length}
-						groupName={target_group.group}
-					></CardMenu>
-				)
-			}
-		} else if (menu_target.groupIndex >= 0 && menu_target.sessionIndex >= 0) {
-			const target_group = groups[menu_target.groupIndex]
-			const target_session = target_group?.items[menu_target.sessionIndex]
-
-			if (target_session && target_session.id === menu_target.id) {
-				return (
-					<RowMenu
-						groupIndex={menu_target.groupIndex}
-						sessionIndex={menu_target.sessionIndex}
-						groupItemsCount={target_group.items.length}
-						item={target_session}
-						groups={groups}
-						pin={target_session.id in pinMap}
-					></RowMenu>
-				)
-			}
-		} else if (menu_target.groupIndex < 0 && menu_target.sessionIndex >= 0) {
-			const target_session = sessions[menu_target.sessionIndex]
-
-			if (target_session && target_session.id === menu_target.id) {
-				return (
-					<ItemMenu
-						item={target_session}
-						groups={groups}
-						pin={target_session.id in pinMap}
-						sessionIndex={menu_target.sessionIndex}
-					></ItemMenu>
-				)
-			}
+		if (target_session && target_session.id === menu_target.id) {
+			return (
+				<ItemMenu
+					item={target_session}
+					pin={menu_target.pin}
+					sessionIndex={menu_target.sessionIndex}
+				></ItemMenu>
+			)
 		}
-	}, [menu_target])
+	}, [menu_target, pins, sessions])
 
 	return (
 		<div
@@ -177,32 +120,17 @@ const Index = (props: IPropsMenu) => {
 					border-b border-border-light
 				'
 			>
-				<TextTabs
-					items={['groups', 'sessions']}
-					active={currentTab}
-					setActive={setCurrentTab}
-				></TextTabs>
-				<div className='flex gap-1' ref={ref_action}>
-					<Tooltip title='New Group'>
-						<div className='icon_button small' data-key='groups'>
-							<FolderPlus></FolderPlus>
-						</div>
-					</Tooltip>
-					<Tooltip title='New Session'>
-						<div className='icon_button small' data-key='sessions'>
-							<Plus></Plus>
-						</div>
-					</Tooltip>
-				</div>
+				<span className='text-xsm text-std-500 font-medium'>Sessions</span>
+				<Tooltip title='New Session'>
+					<div className='icon_button small -mr-1' onClick={() => createSession()}>
+						<Plus></Plus>
+					</div>
+				</Tooltip>
 			</div>
 			<ContextMenu>
 				<ContextMenuTrigger className='flex min-h-0 w-full flex-1'>
 					<div className='flex h-full w-full' onContextMenuCapture={onMenuContextCapture}>
-						{currentTab === 'sessions' ? (
-							<Sessions {...props_sessions}></Sessions>
-						) : (
-							<Groups {...props_groups}></Groups>
-						)}
+						<Sessions {...props_sessions}></Sessions>
 					</div>
 				</ContextMenuTrigger>
 				{menu_content}

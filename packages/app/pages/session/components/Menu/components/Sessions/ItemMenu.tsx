@@ -1,30 +1,21 @@
-import {
-	ContextMenuContent,
-	ContextMenuItem,
-	ContextMenuSeparator,
-	ContextMenuSub,
-	ContextMenuSubContent,
-	ContextMenuSubTrigger
-} from '@/__shadcn__/components/ui/context-menu'
+import { ContextMenuContent, ContextMenuItem, ContextMenuSeparator } from '@/__shadcn__/components/ui/context-menu'
 import { useModel } from '@/pages/session/context'
 
 import type { IPropsSessionItemMenu } from './types'
 
 const Index = (props: IPropsSessionItemMenu) => {
-	const { item, groups, pin, sessionIndex } = props
-	const { createSession, createGroup, startRenameSession, togglePinSession, moveSessionToGroup, removeSession } =
-		useModel()
+	const { item, pin, sessionIndex } = props
+	const { createSession, startRenameSession, togglePinSession, removeSession } = useModel()
 
 	return (
 		<ContextMenuContent>
 			<ContextMenuItem onClick={createSession}>New Session</ContextMenuItem>
-			<ContextMenuItem onClick={createGroup}>New Group</ContextMenuItem>
 			<ContextMenuSeparator />
 			<ContextMenuItem
 				onClick={() =>
 					startRenameSession({
-						rename_group_index: undefined,
-						rename_session_index: sessionIndex,
+						pin,
+						session_index: sessionIndex,
 						value: item.title
 					})
 				}
@@ -32,19 +23,6 @@ const Index = (props: IPropsSessionItemMenu) => {
 				Rename
 			</ContextMenuItem>
 			<ContextMenuItem onClick={() => togglePinSession(item.id)}>{pin ? 'Unpin' : 'Pin'}</ContextMenuItem>
-			<ContextMenuSub>
-				<ContextMenuSubTrigger>Move To Group</ContextMenuSubTrigger>
-				<ContextMenuSubContent>
-					{groups.map((group_item, group_index) => (
-						<ContextMenuItem
-							onClick={() => moveSessionToGroup({ id: item.id, group_index })}
-							key={`${group_item.group}-${group_index}`}
-						>
-							{group_item.group}
-						</ContextMenuItem>
-					))}
-				</ContextMenuSubContent>
-			</ContextMenuSub>
 			<ContextMenuSeparator />
 			<ContextMenuItem variant='destructive' onClick={() => removeSession(item.id)}>
 				Delete

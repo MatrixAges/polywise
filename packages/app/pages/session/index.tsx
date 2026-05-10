@@ -29,18 +29,14 @@ const Index = () => {
 
 		x.init()
 
-		if (is_create) x.current_tab = 'sessions'
-
 		return () => x.deinit()
 	}, [])
 
 	const props_menu: IPropsMenu = {
-		currentTab: x.current_tab,
-		groups: $copy(x.groups),
+		pins: $copy(x.pins),
 		sessions: $copy(x.sessions),
-		pinMap: $copy(x.pin_map),
 		selectedSessionId: x.selected_session_id,
-		renameGroupIndex: x.rename_group_index,
+		renamePin: x.rename_pin,
 		renameSessionIndex: x.rename_session_index,
 		renameValue: x.rename_value,
 		hasMore: x.has_more,

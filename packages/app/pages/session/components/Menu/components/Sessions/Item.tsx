@@ -3,7 +3,7 @@ import BaseItem from '@/pages/session/components/Item'
 import type { IPropsSessionItem } from './types'
 
 const Index = (props: IPropsSessionItem) => {
-	const { item, pin, selected, renaming, renameValue, sessionIndex } = props
+	const { item, pin, selected, renaming, renameValue, sessionIndex, className, style } = props
 
 	return (
 		<BaseItem
@@ -13,8 +13,9 @@ const Index = (props: IPropsSessionItem) => {
 			renaming={renaming}
 			renameValue={renameValue}
 			title={<span className='truncate'>{item.title}</span>}
-			groupIndex={-1}
 			sessionIndex={sessionIndex}
+			className={className}
+			style={style}
 		></BaseItem>
 	)
 }
