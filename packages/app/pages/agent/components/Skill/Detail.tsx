@@ -7,7 +7,7 @@ import { Button } from '@/__shadcn__/components/ui/button'
 import { Textarea } from '@/__shadcn__/components/ui/textarea'
 import { FileContent, FileTree, Tabs } from '@/components'
 
-import { useModel } from '../context'
+import { useModel } from './context'
 
 const Index = () => {
 	const {
@@ -33,7 +33,7 @@ const Index = () => {
 
 	useEffect(() => {
 		return () => setFileTree(null)
-	}, [])
+	}, [setFileTree])
 
 	if (!selected_skill) {
 		return (
@@ -55,7 +55,7 @@ const Index = () => {
 				className='
 					overflow-y-hidden
 					flex flex-col
-					w-[210px] h-full
+					w-[220px] h-full
 					border-border-light border-r
 				'
 			>
@@ -63,7 +63,7 @@ const Index = () => {
 					className='
 						flex
 						items-center justify-between
-						h-8
+						h-10
 						px-3
 						border-b border-border-light
 					'

@@ -13,7 +13,7 @@ import {
 import { Input } from '@/__shadcn__/components/ui/input'
 import { Textarea } from '@/__shadcn__/components/ui/textarea'
 
-import { useModel } from '../context'
+import { useModel } from './context'
 
 const Index = () => {
 	const {

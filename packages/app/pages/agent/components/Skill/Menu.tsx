@@ -1,9 +1,9 @@
 import { DndContext, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
-import { BookText, Plus } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
-import { useModel } from '../context'
+import { useModel } from './context'
 import MenuItem from './MenuItem'
 
 import type { DragEndEvent } from '@dnd-kit/core'
@@ -34,7 +34,8 @@ const Index = () => {
 			className='
 				overflow-hidden
 				flex flex-col
-				w-[210px] h-full
+				w-[220px] h-full
+				bg-background
 				border-border-light border-r
 			'
 		>
@@ -42,21 +43,12 @@ const Index = () => {
 				className='
 					flex
 					items-center justify-between
-					h-8
+					h-10
 					px-3
 					border-b border-border-light
 				'
 			>
-				<span
-					className='
-						flex
-						items-center
-						gap-2
-						text-xsm text-std-500 font-medium
-					'
-				>
-					Skills
-				</span>
+				<span className='text-xsm text-std-500 font-medium'>Skills</span>
 				<button className='icon_button small' type='button' onClick={() => void createSkill()}>
 					<Plus className='size-3.5'></Plus>
 				</button>

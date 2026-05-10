@@ -4,9 +4,9 @@ import { DotsSixVerticalIcon } from '@phosphor-icons/react'
 import { Pencil } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
-import { useModel } from '../context'
+import { useModel } from './context'
 
-import type { SkillItem } from '../types'
+import type { SkillItem } from './types'
 
 interface IProps {
 	item: SkillItem
@@ -60,7 +60,7 @@ const Index = (props: IProps) => {
 						className='icon_button small'
 						type='button'
 						onClick={() => {
-							openEditDialog(item.id)
+							void openEditDialog(item.id)
 						}}
 					>
 						<Pencil className='size-3'></Pencil>
