@@ -10,6 +10,7 @@ import { Util } from '@/models/common'
 import { rpc } from '@/utils'
 
 import type { RPCInput } from '@/types'
+import type { SessionStatusPayload } from '@core/rpc/session/watchSessionStatus'
 import type { DefaultModel } from '@core/types'
 import type {
 	AgentArticleItem,
@@ -44,11 +45,17 @@ export default class Index {
 	article_title_draft = ''
 	article_draft = ''
 	article_saving = false
+	pins = [] as Array<AgentSessionItem>
 	session_items = [] as Array<AgentSessionItem>
+	pin_map = {} as Record<string, number>
 	selected_session_id = ''
+	rename_session_id = ''
+	rename_value = ''
 	session_page = 1
 	session_has_more = false
 	session_request_key = 0
+	session_loading = false
+	session_loading_more = false
 	create_agent_loading = false
 	avatar_dialog_open = false
 	avatar_mode = 'upload' as AvatarMode
@@ -117,6 +124,7 @@ export default class Index {
 		}
 
 		await this.refresh()
+		this.watchSessionStatus()
 	}
 
 	async refresh() {
@@ -146,10 +154,16 @@ export default class Index {
 			this.selected_article_id = ''
 			this.article_title_draft = ''
 			this.article_draft = ''
+			this.pins = []
 			this.session_items = []
+			this.pin_map = {}
 			this.selected_session_id = ''
+			this.rename_session_id = ''
+			this.rename_value = ''
 			this.session_page = 1
 			this.session_has_more = false
+			this.session_loading = false
+			this.session_loading_more = false
 
 			return
 		}
@@ -198,8 +212,12 @@ export default class Index {
 
 	async refreshSessions() {
 		if (!this.selected_agent_id) {
+			this.pins = []
 			this.session_items = []
+			this.pin_map = {}
 			this.selected_session_id = ''
+			this.rename_session_id = ''
+			this.rename_value = ''
 			this.session_page = 1
 			this.session_has_more = false
 
@@ -210,39 +228,61 @@ export default class Index {
 		const request_key = this.session_request_key + 1
 
 		this.session_request_key = request_key
+		this.session_loading = true
 
-		const response = await rpc.agent.getSessions.query({ agent_id, page: 1 })
+		try {
+			const response = await rpc.agent.getSessions.query({ agent_id, page: 1 })
 
-		if (this.session_request_key !== request_key || this.selected_agent_id !== agent_id) {
-			return
-		}
+			if (this.session_request_key !== request_key || this.selected_agent_id !== agent_id) {
+				return
+			}
 
-		this.session_items = response.sessions as Array<AgentSessionItem>
-		this.session_page = 1
-		this.session_has_more = response.has_more
+			this.pins = response.pins as Array<AgentSessionItem>
+			this.session_items = response.sessions as Array<AgentSessionItem>
+			this.pin_map = response.pin_map
+			this.session_page = 1
+			this.session_has_more = response.has_more
 
-		const has_selected_session = this.session_items.some(item => item.id === this.selected_session_id)
+			const session_id_list = this.pins.map(item => item.id).concat(this.session_items.map(item => item.id))
+			const has_selected_session = session_id_list.includes(this.selected_session_id)
 
-		if (!has_selected_session) {
-			this.selected_session_id = this.session_items[0]?.id || ''
+			if (this.rename_session_id && !session_id_list.includes(this.rename_session_id)) {
+				this.onCancelRename()
+			}
+
+			if (!has_selected_session) {
+				this.selected_session_id = this.pins[0]?.id || this.session_items[0]?.id || ''
+			}
+		} finally {
+			if (this.session_request_key === request_key) {
+				this.session_loading = false
+			}
 		}
 	}
 
 	async loadMoreSessions() {
 		if (!this.selected_agent_id) return
+		if (this.session_loading) return
+		if (this.session_loading_more) return
 		if (!this.session_has_more) return
 
 		const agent_id = this.selected_agent_id
 		const next_page = this.session_page + 1
-		const response = await rpc.agent.getSessions.query({ agent_id, page: next_page })
+		this.session_loading_more = true
 
-		if (this.selected_agent_id !== agent_id) {
-			return
+		try {
+			const response = await rpc.agent.getSessions.query({ agent_id, page: next_page })
+
+			if (this.selected_agent_id !== agent_id) {
+				return
+			}
+
+			this.session_items = [...this.session_items, ...(response.sessions as Array<AgentSessionItem>)]
+			this.session_page = next_page
+			this.session_has_more = response.has_more
+		} finally {
+			this.session_loading_more = false
 		}
-
-		this.session_items = [...this.session_items, ...(response.sessions as Array<AgentSessionItem>)]
-		this.session_page = next_page
-		this.session_has_more = response.has_more
 	}
 
 	setSelectedAgent(agent_id: string) {
@@ -321,6 +361,20 @@ export default class Index {
 
 	setSelectedSession(session_id: string) {
 		this.selected_session_id = session_id
+	}
+
+	onRenameSession(session_id: string, title: string) {
+		this.rename_session_id = session_id
+		this.rename_value = title
+	}
+
+	setRenameValue(value: string) {
+		this.rename_value = value
+	}
+
+	onCancelRename() {
+		this.rename_session_id = ''
+		this.rename_value = ''
 	}
 
 	setSelectedArticle(article_id: string) {
@@ -613,6 +667,95 @@ export default class Index {
 		if (next_session?.id) {
 			this.selected_session_id = next_session.id
 		}
+	}
+
+	async renameSession() {
+		const rename_value = this.rename_value.trim()
+
+		if (!rename_value) {
+			this.onCancelRename()
+
+			return
+		}
+
+		if (!this.rename_session_id) return
+
+		await rpc.session.rename.mutate({ id: this.rename_session_id, title: rename_value })
+
+		this.onCancelRename()
+
+		await this.refreshSessions()
+	}
+
+	async removeSession(session_id: string) {
+		await rpc.session.remove.mutate({ id: session_id })
+
+		if (this.selected_session_id === session_id) {
+			this.selected_session_id = ''
+		}
+
+		if (this.rename_session_id === session_id) {
+			this.onCancelRename()
+		}
+
+		await this.refreshSessions()
+	}
+
+	async togglePinSession(session_id: string) {
+		if (!this.selected_agent_id) return
+
+		await rpc.agent.pin.mutate({
+			agent_id: this.selected_agent_id,
+			id: session_id,
+			value: !this.pin_map[session_id]
+		})
+
+		await this.refreshSessions()
+	}
+
+	async sortPin(from: number, to: number) {
+		if (!this.selected_agent_id) return
+		if (from === to) return
+		if (to < 0 || to > this.pins.length - 1) return
+
+		this.pins = arrayMove(this.pins, from, to)
+
+		await rpc.agent.sortPin.mutate({ agent_id: this.selected_agent_id, from, to })
+		await this.refreshSessions()
+	}
+
+	patchSessionList(session_list: Array<AgentSessionItem>, payload: SessionStatusPayload): Array<AgentSessionItem> {
+		return session_list.map(session_item => {
+			const status = payload[session_item.id]
+
+			if (!status) {
+				return session_item
+			}
+
+			return {
+				...session_item,
+				title: status.title,
+				report: status.report,
+				is_runing: status.running,
+				running_done: status.running_done ? new Date(status.running_done) : null,
+				unread: status.unread
+			}
+		})
+	}
+
+	watchSessionStatus() {
+		const deinit = rpc.session.watchSessionStatus.subscribe(undefined, {
+			onData: res => {
+				if (!Object.keys(res).length) {
+					return
+				}
+
+				this.pins = this.patchSessionList(this.pins, res)
+				this.session_items = this.patchSessionList(this.session_items, res)
+			}
+		})
+
+		this.util.acts.push(deinit.unsubscribe)
 	}
 
 	deinit() {

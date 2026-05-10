@@ -4,6 +4,8 @@ import { getDefaultToolModel, runToolAgent } from '@core/fst/agents'
 import { p } from '@core/utils'
 import { infer as Infer, object, string } from 'zod'
 
+import { readPinList } from './utils'
+
 const input_type = agent_create_input_schema
 type AgentCreateInput = Infer<typeof input_type>
 
@@ -91,7 +93,7 @@ export default p.input(input_type).mutation(async ({ input }) => {
 	const memory =
 		normalizeBlock(input.memory) || normalizeBlock(generated_profile?.memory) || fallback_profile.memory
 
-	return addAgent({
+	const next_agent = await addAgent({
 		...input,
 		name,
 		description,
@@ -102,4 +104,10 @@ export default p.input(input_type).mutation(async ({ input }) => {
 		model: normalizeAgentModel(input.model),
 		order: Date.now()
 	})
+
+	if (next_agent?.id) {
+		await readPinList(next_agent.id)
+	}
+
+	return next_agent
 })

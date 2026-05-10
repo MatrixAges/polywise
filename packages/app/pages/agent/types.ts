@@ -1,5 +1,6 @@
 import type { RPCOutput } from '@/types'
 import type { DefaultModel } from '@core/types'
+import type { ReactNode } from 'react'
 import type { AvatarConfig as NiceAvatarConfig } from 'react-nice-avatar'
 import type { AvatarConfig as NotionAvatarConfig } from 'react-notion-avatar'
 
@@ -36,6 +37,27 @@ export interface IToolOption {
 	value: string
 	label: string
 	description: string
+}
+
+export interface IAgentSessionMenuItemProps {
+	item: AgentSessionItem
+	pin: boolean
+	session_index: number
+	selected: boolean
+	renaming: boolean
+	rename_value: string
+}
+
+export interface IAgentMenuSessionItemProps {
+	item: AgentSessionItem
+	session_index: number
+	selected: boolean
+	renaming: boolean
+	rename_value: string
+	title?: ReactNode
+	pin?: boolean
+	class_name?: string
+	onClick?: () => void
 }
 
 export interface IAgentAvatarNice {

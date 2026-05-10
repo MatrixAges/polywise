@@ -1,21 +1,32 @@
 import { agent_session, session } from '@core/db/schema'
 import { env } from '@core/env'
-import { desc, eq, SQL } from 'drizzle-orm'
+import { and, desc, eq, inArray, notInArray, SQL } from 'drizzle-orm'
 
 interface ArgsGetAgentSessions {
 	agent_id: string
+	session_ids?: Array<string>
+	exclude_session_ids?: Array<string>
 	limit?: number
 	offset?: number
 }
 
 export const getAgentSessions = async (args: ArgsGetAgentSessions) => {
-	const { agent_id, limit, offset } = args
+	const { agent_id, session_ids, exclude_session_ids, limit, offset } = args
+	const where_list = [eq(agent_session.agent_id, agent_id)]
+
+	if (session_ids?.length) {
+		where_list.push(inArray(agent_session.session_id, session_ids))
+	}
+
+	if (exclude_session_ids?.length) {
+		where_list.push(notInArray(agent_session.session_id, exclude_session_ids))
+	}
 
 	let query = env.db
 		.select({ session })
 		.from(agent_session)
 		.innerJoin(session, eq(agent_session.session_id, session.id))
-		.where(eq(agent_session.agent_id, agent_id))
+		.where(and(...where_list))
 		.orderBy(desc(agent_session.created_at))
 		.$dynamic()
 
