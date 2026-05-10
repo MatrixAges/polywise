@@ -34,7 +34,7 @@ const Index = () => {
 
 	const avatar_mode_items = [
 		{ key: 'upload', title: 'Upload', Icon: Upload },
-		{ key: 'nice', title: 'Nice', Icon: Sparkles },
+		{ key: 'nice', title: 'Colorful', Icon: Sparkles },
 		{ key: 'notion', title: 'Notion', Icon: Layers2 }
 	] as const
 
@@ -88,45 +88,46 @@ const Index = () => {
 						setActive={setAvatarMode}
 					></TextTabs>
 				</div>
-				<AgentAvatar
-					item={selected_agent}
-					size={112}
-					shape='rounded'
-					clickable={false}
-					photo_url={avatar_preview_url}
-					avatar={pending_avatar}
-				></AgentAvatar>
-				{avatar_mode === 'upload' ? (
-					<div className='flex flex-wrap items-center gap-2'>
-						<Button variant='outline' onClick={onUpload}>
-							Choose File
-						</Button>
-						<Button variant='outline' onClick={clearAvatarPhoto}>
-							Clear Photo
-						</Button>
-						<span className='text-std-400 text-xs'>
-							{avatar_file_name || 'jpg, svg, png, webp'}
-						</span>
+				<div className='flex items-center justify-center pt-3'>
+					<AgentAvatar
+						item={selected_agent}
+						size={112}
+						shape='circle'
+						clickable={false}
+						photo_url={avatar_preview_url}
+						avatar={pending_avatar}
+					></AgentAvatar>
+				</div>
+				{avatar_mode === 'upload' && (
+					<div className='flex flex-col items-center gap-3'>
+						<div className='flex gap-2'>
+							<Button variant='outline' onClick={onUpload}>
+								Choose File
+							</Button>
+							<Button variant='outline' onClick={clearAvatarPhoto}>
+								Clear Photo
+							</Button>
+						</div>
 					</div>
-				) : null}
-				{avatar_mode === 'nice' ? (
+				)}
+				{avatar_mode === 'nice' && (
 					<div className='flex items-center gap-2'>
 						<Button variant='outline' onClick={onGenerateNice}>
 							<RefreshCw className='size-3.5'></RefreshCw>
 							Random Nice Config
 						</Button>
 					</div>
-				) : null}
-				{avatar_mode === 'notion' ? (
+				)}
+				{avatar_mode === 'notion' && (
 					<div className='flex items-center gap-2'>
 						<Button variant='outline' onClick={onGenerateNotion}>
 							<RefreshCw className='size-3.5'></RefreshCw>
 							Random Notion Config
 						</Button>
 					</div>
-				) : null}
+				)}
 			</div>
-			<DialogFooter className='mt-4'>
+			<DialogFooter className='mt-6'>
 				<Button variant='outline' onClick={closeAvatarDialog}>
 					Cancel
 				</Button>
