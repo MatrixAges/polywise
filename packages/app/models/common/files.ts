@@ -57,6 +57,9 @@ export default class Index {
 		if (options?.dir_only !== undefined) this.dir_only = options.dir_only
 		if (options?.show_hidden !== undefined) this.show_hidden = options.show_hidden
 
+		this.paths = []
+		this.loaded_path_map = {}
+		this.tree_version += 1
 		this.root_path = dir
 		this.input_path = dir
 		this.resetSelection()
