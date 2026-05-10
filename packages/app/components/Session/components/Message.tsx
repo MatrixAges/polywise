@@ -208,7 +208,7 @@ const ToolSummaryBlock = (props: {
 			<CollapsibleTrigger
 				className='
 					flex
-					items-center justify-between
+					items-center
 					w-full
 					gap-1.5
 					text-std-400 text-sm
@@ -220,14 +220,16 @@ const ToolSummaryBlock = (props: {
 				<div className='flex min-w-0 items-center gap-1.5'>
 					{SummaryIcon && <SummaryIcon className='text-std-400 size-3.5 shrink-0' />}
 					<span>{summary}</span>
+					<ChevronRightIcon
+						className='
+							shrink-0
+							size-4
+							opacity-0
+							transition-[transform,opacity]
+							group-hover/process:opacity-100 group-data-open/process:rotate-90 group-data-open/process:opacity-100
+						'
+					></ChevronRightIcon>
 				</div>
-				<ChevronRightIcon
-					className='
-						size-4
-						transition-transform
-						group-data-open/process:rotate-90
-					'
-				></ChevronRightIcon>
 			</CollapsibleTrigger>
 			<CollapsibleContent
 				className='
