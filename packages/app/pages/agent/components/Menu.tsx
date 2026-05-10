@@ -38,8 +38,10 @@ const Index = () => {
 				className='
 					overflow-hidden
 					flex flex-col
-					w-[240px] h-full
+					w-[210px] h-full
+					bg-std-50/60
 					border-border-light border-r
+					dark:bg-transparent
 				'
 			>
 				<div
@@ -47,18 +49,17 @@ const Index = () => {
 						flex
 						items-center justify-between
 						h-8
-						px-3
-						border-b border-border-light
+						px-2.5
 					'
 				>
 					<span className='text-xsm text-std-500 gap-2 font-medium'>Agents</span>
-					<div className='mr-[-2px] flex'>
+					<div className='flex gap-1'>
 						<button
 							className='icon_button small'
 							type='button'
 							onClick={() => setSkillDialogOpen(true)}
 						>
-							<BookOpenText className='size-3.5'></BookOpenText>
+							<BookOpenText className='size-3'></BookOpenText>
 						</button>
 						<button className='icon_button small' type='button' onClick={createAgent}>
 							<Plus className='size-3.5'></Plus>
@@ -71,7 +72,7 @@ const Index = () => {
 							flex flex-col
 							w-full
 							gap-0.5
-							p-1.5
+							p-1.5 pt-0
 						'
 					>
 						<DndContext sensors={sensors} onDragEnd={onDragEnd}>

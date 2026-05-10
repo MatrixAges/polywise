@@ -29,7 +29,7 @@ const Index = (props: IProps) => {
 				flex
 				gap-2
 				p-2.5
-				rounded-r-sm rounded-l-3xl
+				rounded-sm
 				group
 				cursor-pointer
 			`,

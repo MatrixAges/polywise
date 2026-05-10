@@ -1,5 +1,4 @@
 import { useMemo } from 'react'
-import { Pin } from 'lucide-react'
 
 import { ArrowLeft, Grip } from '@/components/animate'
 import RenameInput from '@/pages/session/components/RenameInput'
@@ -18,7 +17,6 @@ const Index = (props: IPropsMenuSessionItem) => {
 	const Status = useMemo(() => {
 		if (is_runing) return <Grip className='text-std-400! size-3' />
 		if (unread) return <ArrowLeft className='size-3 text-indigo-500!' />
-		if (pin) return <Pin className='text-std-300! size-3' />
 
 		return null
 	}, [pin, is_runing, unread])

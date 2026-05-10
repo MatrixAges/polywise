@@ -28,7 +28,7 @@ const Index = (props: IProps) => {
 				gap-0.5
 				p-3 pt-2
 				pb-2.5
-				rounded-sm
+				border-b border-border-light
 				group
 				clickit
 			`,
@@ -67,7 +67,7 @@ const Index = (props: IProps) => {
 					</button>
 				</div>
 			</div>
-			<div className='text-std-400 line-clamp-3 text-xs'>{item.desc || 'No description'}</div>
+			<div className='text-std-400 line-clamp-2 text-xs'>{item.desc || 'No description'}</div>
 		</div>
 	)
 }

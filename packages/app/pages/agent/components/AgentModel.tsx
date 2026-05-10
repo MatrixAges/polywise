@@ -48,10 +48,11 @@ const Index = ({ agent }: IProps) => {
 				></ModelSelect>
 				<Select
 					items={effort_modes}
-					value={agent.model?.effort ?? 'default'}
+					value={agent.model?.effort || 'Default'}
 					onValueChange={value => {
 						if (!value) return
-						void setModelEffort(value)
+
+						setModelEffort(value)
 					}}
 				>
 					<SelectTrigger

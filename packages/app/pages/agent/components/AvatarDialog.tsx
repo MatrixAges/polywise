@@ -4,14 +4,7 @@ import NiceAvatar, { genConfig } from 'react-nice-avatar'
 import NotionAvatar, { getRandomConfig } from 'react-notion-avatar'
 
 import { Button } from '@/__shadcn__/components/ui/button'
-import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle
-} from '@/__shadcn__/components/ui/dialog'
+import { Dialog, DialogFooter } from '@/components'
 import { uploadFile } from '@/utils'
 
 import { useModel } from '../context'
@@ -113,152 +106,150 @@ const Index = () => {
 	}
 
 	return (
-		<Dialog open={avatar_dialog_open} onOpenChange={open => (!open ? closeAvatarDialog() : undefined)}>
-			<DialogContent className='max-w-3xl'>
-				<DialogHeader>
-					<DialogTitle>Agent Avatar</DialogTitle>
-					<DialogDescription>
-						Edit the current avatar, upload a photo, or generate a new look.
-					</DialogDescription>
-				</DialogHeader>
-				<div className='flex flex-col gap-5'>
-					<div className='grid gap-4 md:grid-cols-[0.92fr_1.08fr]'>
+		<Dialog
+			open={avatar_dialog_open}
+			title='Agent Avatar'
+			desc='Edit the current avatar, upload a photo, or generate a new look.'
+			className='max-w-3xl sm:max-w-3xl'
+			setOpen={open => (!open ? closeAvatarDialog() : undefined)}
+		>
+			<div className='flex flex-col gap-5'>
+				<div className='grid gap-4 md:grid-cols-[0.92fr_1.08fr]'>
+					<div
+						className='
+							p-4
+							rounded-[28px]
+							bg-card
+							border border-border-light
+						'
+					>
 						<div
 							className='
-								p-4
-								rounded-[28px]
-								bg-card
-								border border-border-light
+								text-std-400 text-xs font-medium tracking-[0.16em]
+								uppercase
 							'
 						>
-							<div
-								className='
-									text-std-400 text-xs font-medium tracking-[0.16em]
-									uppercase
-								'
-							>
-								Current avatar
-							</div>
-							<div
-								className='
-									flex flex-col
-									items-center justify-center
-									min-h-56
-									gap-3
-									mt-4
-									rounded-[24px]
-									bg-secondary/15
-									border border-dashed border-border-light
-								'
-							>
-								<AgentAvatar item={selected_agent} size='large'></AgentAvatar>
-								<div className='text-center'>
-									<div className='text-sm font-medium'>{selected_agent.name}</div>
-									<div className='text-std-400 text-xs'>Saved on this agent</div>
-								</div>
-							</div>
+							Current avatar
 						</div>
 						<div
 							className='
-								p-4
-								rounded-[28px]
-								bg-card
+								flex flex-col
+								items-center justify-center
+								min-h-56
+								gap-3
+								mt-4
+								rounded-[24px]
+								bg-secondary/15
+								border border-dashed border-border-light
+							'
+						>
+							<AgentAvatar item={selected_agent} size='large'></AgentAvatar>
+							<div className='text-center'>
+								<div className='text-sm font-medium'>{selected_agent.name}</div>
+								<div className='text-std-400 text-xs'>Saved on this agent</div>
+							</div>
+						</div>
+					</div>
+					<div
+						className='
+							p-4
+							rounded-[28px]
+							bg-card
+							border border-border-light
+						'
+					>
+						<div
+							className='
+								text-std-400 text-xs font-medium tracking-[0.16em]
+								uppercase
+							'
+						>
+							New avatar
+						</div>
+						<div
+							className='
+								flex
+								items-center justify-center
+								min-h-56
+								mt-4
+								rounded-[24px]
+								bg-secondary/15
 								border border-border-light
 							'
 						>
-							<div
-								className='
-									text-std-400 text-xs font-medium tracking-[0.16em]
-									uppercase
-								'
-							>
-								New avatar
-							</div>
-							<div
-								className='
-									flex
-									items-center justify-center
-									min-h-56
-									mt-4
-									rounded-[24px]
-									bg-secondary/15
-									border border-border-light
-								'
-							>
-								<AvatarPreview
-									name={selected_agent.name}
-									photo_url={avatar_preview_url}
-									avatar={pending_avatar}
-								></AvatarPreview>
-							</div>
-							<div className='text-std-400 mt-3 text-xs'>
-								{avatar_mode === 'upload'
-									? avatar_file_name ||
-										'Upload a new image to replace the current avatar.'
-									: avatar_mode === 'nice'
-										? 'Generate another rounded nice avatar until it feels right.'
-										: 'Generate another notion avatar and save when ready.'}
-							</div>
+							<AvatarPreview
+								name={selected_agent.name}
+								photo_url={avatar_preview_url}
+								avatar={pending_avatar}
+							></AvatarPreview>
+						</div>
+						<div className='text-std-400 mt-3 text-xs'>
+							{avatar_mode === 'upload'
+								? avatar_file_name ||
+									'Upload a new image to replace the current avatar.'
+								: avatar_mode === 'nice'
+									? 'Generate another rounded nice avatar until it feels right.'
+									: 'Generate another notion avatar and save when ready.'}
 						</div>
 					</div>
-					<div className='flex flex-wrap gap-2'>
-						<Button
-							variant={avatar_mode === 'upload' ? 'default' : 'outline'}
-							onClick={() => setAvatarMode('upload')}
-						>
-							<Upload className='size-3.5'></Upload>
-							Upload Photo
-						</Button>
-						<Button
-							variant={avatar_mode === 'nice' ? 'default' : 'outline'}
-							onClick={() => setAvatarMode('nice')}
-						>
-							Nice Avatar
-						</Button>
-						<Button
-							variant={avatar_mode === 'notion' ? 'default' : 'outline'}
-							onClick={() => setAvatarMode('notion')}
-						>
-							Notion Avatar
-						</Button>
-					</div>
-					{avatar_mode === 'upload' ? (
-						<div className='flex flex-wrap items-center gap-2'>
-							<Button variant='outline' onClick={onUpload}>
-								Choose File
-							</Button>
-							<Button variant='outline' onClick={clearAvatarPhoto}>
-								Clear Photo
-							</Button>
-							<span className='text-std-400 text-xs'>
-								{avatar_file_name || 'jpg, svg, png, webp'}
-							</span>
-						</div>
-					) : null}
-					{avatar_mode === 'nice' ? (
-						<div className='flex items-center gap-2'>
-							<Button variant='outline' onClick={onGenerateNice}>
-								<RefreshCw className='size-3.5'></RefreshCw>
-								Random Nice Config
-							</Button>
-						</div>
-					) : null}
-					{avatar_mode === 'notion' ? (
-						<div className='flex items-center gap-2'>
-							<Button variant='outline' onClick={onGenerateNotion}>
-								<RefreshCw className='size-3.5'></RefreshCw>
-								Random Notion Config
-							</Button>
-						</div>
-					) : null}
 				</div>
-				<DialogFooter>
-					<Button variant='outline' onClick={closeAvatarDialog}>
-						Cancel
+				<div className='flex flex-wrap gap-2'>
+					<Button
+						variant={avatar_mode === 'upload' ? 'default' : 'outline'}
+						onClick={() => setAvatarMode('upload')}
+					>
+						<Upload className='size-3.5'></Upload>
+						Upload Photo
 					</Button>
-					<Button onClick={submitAvatar}>Save</Button>
-				</DialogFooter>
-			</DialogContent>
+					<Button
+						variant={avatar_mode === 'nice' ? 'default' : 'outline'}
+						onClick={() => setAvatarMode('nice')}
+					>
+						Nice Avatar
+					</Button>
+					<Button
+						variant={avatar_mode === 'notion' ? 'default' : 'outline'}
+						onClick={() => setAvatarMode('notion')}
+					>
+						Notion Avatar
+					</Button>
+				</div>
+				{avatar_mode === 'upload' ? (
+					<div className='flex flex-wrap items-center gap-2'>
+						<Button variant='outline' onClick={onUpload}>
+							Choose File
+						</Button>
+						<Button variant='outline' onClick={clearAvatarPhoto}>
+							Clear Photo
+						</Button>
+						<span className='text-std-400 text-xs'>
+							{avatar_file_name || 'jpg, svg, png, webp'}
+						</span>
+					</div>
+				) : null}
+				{avatar_mode === 'nice' ? (
+					<div className='flex items-center gap-2'>
+						<Button variant='outline' onClick={onGenerateNice}>
+							<RefreshCw className='size-3.5'></RefreshCw>
+							Random Nice Config
+						</Button>
+					</div>
+				) : null}
+				{avatar_mode === 'notion' ? (
+					<div className='flex items-center gap-2'>
+						<Button variant='outline' onClick={onGenerateNotion}>
+							<RefreshCw className='size-3.5'></RefreshCw>
+							Random Notion Config
+						</Button>
+					</div>
+				) : null}
+			</div>
+			<DialogFooter>
+				<Button variant='outline' onClick={closeAvatarDialog}>
+					Cancel
+				</Button>
+				<Button onClick={submitAvatar}>Save</Button>
+			</DialogFooter>
 		</Dialog>
 	)
 }

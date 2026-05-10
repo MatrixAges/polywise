@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { observer } from 'mobx-react-lite'
 import { container } from 'tsyringe'
 
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/__shadcn__/components/ui/dialog'
+import { Dialog } from '@/components'
 
 import { Context } from './context'
 import Detail from './Detail'
@@ -32,22 +32,27 @@ const Index = (props: IProps) => {
 	}, [open, x])
 
 	return (
-		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent className='max-w-[min(1200px,96vw)] gap-0 overflow-hidden p-0'>
-				<DialogHeader className='border-border-light border-b px-6 py-4'>
-					<DialogTitle>Skills</DialogTitle>
-					<DialogDescription>
-						Manage skill files and metadata without leaving agents.
-					</DialogDescription>
-				</DialogHeader>
-				<Context value={x}>
-					<div className='flex h-[min(78vh,760px)] overflow-hidden'>
-						<Menu></Menu>
-						<Detail></Detail>
-					</div>
-					<EditDialog></EditDialog>
-				</Context>
-			</DialogContent>
+		<Dialog
+			open={open}
+			title='Skills'
+			desc='Manage skill files and metadata without leaving agents.'
+			className='
+				overflow-hidden
+				w-[840px] max-w-[96vw]!
+				gap-0
+				p-0
+			'
+			headerClassName='p-6 py-5 border-b border-border-light'
+			maxHeight='max-h-[80vh]'
+			setOpen={onOpenChange}
+		>
+			<Context value={x}>
+				<div className='flex h-[min(78vh,760px)] overflow-hidden'>
+					<Menu></Menu>
+					<Detail></Detail>
+				</div>
+				<EditDialog></EditDialog>
+			</Context>
 		</Dialog>
 	)
 }

@@ -1,7 +1,5 @@
-import { Button } from '@/__shadcn__/components/ui/button'
 import {
-	Dialog,
-	DialogClose,
+	Dialog as BaseDialog,
 	DialogContent,
 	DialogDescription,
 	DialogFooter,
@@ -16,17 +14,18 @@ interface IProps extends PropsWithChildren {
 	title: string
 	desc?: string
 	className?: string
+	headerClassName?: string
 	maxHeight?: string | number
 	setOpen: (v: boolean) => void
 }
 
 const Index = (props: IProps) => {
-	const { children, open, title, desc, className, maxHeight, setOpen } = props
+	const { children, open, title, desc, className, headerClassName, maxHeight, setOpen } = props
 
 	return (
-		<Dialog open={open} onOpenChange={setOpen}>
+		<BaseDialog open={open} onOpenChange={setOpen}>
 			<DialogContent className={className}>
-				<DialogHeader className='gap-0'>
+				<DialogHeader className={$cx('gap-0', headerClassName)}>
 					<DialogTitle className='-mt-1 leading-6'>{title}</DialogTitle>
 					{desc && <DialogDescription>{desc}</DialogDescription>}
 				</DialogHeader>
@@ -42,8 +41,10 @@ const Index = (props: IProps) => {
 					{children}
 				</div>
 			</DialogContent>
-		</Dialog>
+		</BaseDialog>
 	)
 }
+
+export { DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle }
 
 export default $app.memo(Index)

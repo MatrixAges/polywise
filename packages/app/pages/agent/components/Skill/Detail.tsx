@@ -63,8 +63,8 @@ const Index = () => {
 					className='
 						flex
 						items-center justify-between
-						h-10
-						px-3
+						h-9
+						px-2.5
 						border-b border-border-light
 					'
 				>
@@ -121,7 +121,7 @@ const Index = () => {
 					className='
 						flex
 						items-center justify-between
-						h-10
+						h-9
 						gap-3
 						px-4
 						border-t border-border-light

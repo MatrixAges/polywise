@@ -21,7 +21,7 @@ const Index = ({ agent }: IProps) => {
 				items-center
 				gap-3
 				p-6
-				pb-3
+				pb-4
 				page_wrap
 			'
 		>

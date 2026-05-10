@@ -43,8 +43,8 @@ const Index = () => {
 				className='
 					flex
 					items-center justify-between
-					h-10
-					px-3
+					h-9
+					px-2.5
 					border-b border-border-light
 				'
 			>
@@ -58,8 +58,6 @@ const Index = () => {
 					className='
 						flex flex-col
 						w-full
-						gap-1
-						px-1.5 py-2
 					'
 				>
 					<DndContext sensors={sensors} onDragEnd={onDragEnd}>
