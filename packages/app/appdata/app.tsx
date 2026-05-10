@@ -18,11 +18,11 @@ import type { LucideIcon } from 'lucide-react'
 
 export const nav_items = [
 	{ key: '', Icon: House, title: 'home' },
-	{ key: 'agent', Icon: Bot },
-	{ key: 'todo', Icon: CircleCheckBig },
+	// { key: 'todo', Icon: CircleCheckBig },
 	{ key: 'session', Icon: MessageSquareText },
 	{ key: 'project', Icon: Folders },
 	// { key: 'workflow', Icon: Route },
+	{ key: 'agent', Icon: Bot },
 	{ key: 'skill', Icon: BookOpenText },
 	{ key: 'linkcase', Icon: Album }
 	// { key: 'library', Icon: Library },

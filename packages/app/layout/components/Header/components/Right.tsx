@@ -1,7 +1,7 @@
 import { PanelRight, SlidersHorizontal } from 'lucide-react'
 import { NavLink } from 'react-router'
 
-import SessionsStatus from './SessionsStatus'
+// import SessionsStatus from './SessionsStatus'
 
 import type { IPropsRight } from '../types'
 
@@ -18,7 +18,7 @@ const Index = (props: IPropsRight) => {
 				gap-2
 			'
 		>
-			<SessionsStatus></SessionsStatus>
+			{/* <SessionsStatus></SessionsStatus> */}
 			<div className='icon_button w-auto! px-2'>
 				<span
 					className={$cx(
