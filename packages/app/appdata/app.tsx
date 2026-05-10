@@ -17,10 +17,10 @@ import type { LucideIcon } from 'lucide-react'
 export const nav_items = [
 	{ key: '', Icon: House, title: 'home' },
 	// { key: 'todo', Icon: CircleCheckBig },
-	{ key: 'linkcase', Icon: Album },
 	{ key: 'session', Icon: MessageCircleCheck },
 	// { key: 'workflow', Icon: Route },
-	{ key: 'agent', Icon: Bot }
+	{ key: 'agent', Icon: Bot },
+	{ key: 'linkcase', Icon: Album }
 	// { key: 'library', Icon: Library },
 	// { key: 'database', Icon: Database },
 	// is_electron && { key: 'browser', Icon: AppWindowMac },

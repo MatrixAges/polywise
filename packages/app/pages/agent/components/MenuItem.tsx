@@ -4,6 +4,8 @@ import { DotsSixVerticalIcon } from '@phosphor-icons/react'
 import { Pencil, Trash2 } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
+import { alert } from '@/utils'
+
 import { useModel } from '../context'
 import AgentAvatar from './AgentAvatar'
 
@@ -20,6 +22,18 @@ const Index = (props: IProps) => {
 	const { openAgentDetail, openAgentSessions, removeAgent } = useModel()
 	const { attributes, listeners, transform, transition, isDragging, setNodeRef } = useSortable({ id: item.id })
 	const stopPropagation = (event: MouseEvent<HTMLButtonElement>) => event.stopPropagation()
+	const onRemove = async (event: MouseEvent<HTMLButtonElement>) => {
+		event.stopPropagation()
+
+		const res = await alert({
+			title: 'Remove Agent',
+			desc: 'Confirm remove this agent?'
+		})
+
+		if (!res) return
+
+		await removeAgent(item.id)
+	}
 
 	return (
 		<div
@@ -62,14 +76,7 @@ const Index = (props: IProps) => {
 					group-hover:opacity-100
 				'
 			>
-				<button
-					className='icon_button small'
-					type='button'
-					onClick={(event: MouseEvent<HTMLButtonElement>) => {
-						event.stopPropagation()
-						void removeAgent(item.id)
-					}}
-				>
+				<button className='icon_button small' type='button' onClick={event => void onRemove(event)}>
 					<Trash2 className='size-3'></Trash2>
 				</button>
 				<button
