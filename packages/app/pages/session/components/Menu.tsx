@@ -2,16 +2,17 @@ import { useMemo, useState } from 'react'
 import { DndContext, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { useMemoizedFn } from 'ahooks'
-import { FolderPlus } from 'lucide-react'
+import { FolderPlus, Folders, MessageSquareText } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { ContextMenu, ContextMenuTrigger } from '@/__shadcn__/components/ui/context-menu'
-import { Tooltip } from '@/components'
+import { Tabs, Tooltip } from '@/components'
 
 import { useModel } from '../context'
 import MenuItem from './MenuItem'
 import MenuProjectMenu from './MenuProjectMenu'
 import MenuSessionMenu from './MenuSessionMenu'
+import SessionMenu from './SessionMenu'
 
 import type { DragEndEvent } from '@dnd-kit/core'
 import type { MouseEvent } from 'react'
@@ -22,7 +23,7 @@ interface IMenuTarget {
 	id: string
 }
 
-const Index = () => {
+const ProjectsMenu = observer(() => {
 	const { projects, selected_project_id, rename_project_id, expand_project_ids, onToggleAddModal, sortProject } =
 		useModel()
 	const [menu_target, setMenuTarget] = useState<IMenuTarget | null>(null)
@@ -108,9 +109,7 @@ const Index = () => {
 			return null
 		}
 
-		return (
-			<MenuSessionMenu projectId={target_project.project.id} sessionItem={target_session}></MenuSessionMenu>
-		)
+		return <MenuSessionMenu sessionItem={target_session}></MenuSessionMenu>
 	}, [menu_target, projects])
 
 	return (
@@ -184,6 +183,36 @@ const Index = () => {
 				</ContextMenuTrigger>
 				{menu_content}
 			</ContextMenu>
+		</div>
+	)
+})
+
+const Index = () => {
+	const { menu_tab, setMenuTab } = useModel()
+
+	return (
+		<div className='flex h-full flex-col'>
+			<div
+				className='
+					flex
+					items-center
+					h-10
+					px-3
+					border-b border-border-light
+				'
+			>
+				<Tabs
+					items={[
+						{ key: 'projects', Icon: Folders },
+						{ key: 'sessions', Icon: MessageSquareText }
+					]}
+					active={menu_tab}
+					onClick={v => setMenuTab(v as 'projects' | 'sessions')}
+				></Tabs>
+			</div>
+			<div className='min-h-0 flex-1'>
+				{menu_tab === 'projects' ? <ProjectsMenu></ProjectsMenu> : <SessionMenu></SessionMenu>}
+			</div>
 		</div>
 	)
 }

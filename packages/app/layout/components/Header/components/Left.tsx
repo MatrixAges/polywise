@@ -20,7 +20,7 @@ const Index = (props: IPropsLeft) => {
 	const navigate = useNavigate()
 
 	const onClickCreateSession = useMemoizedFn(() => {
-		navigate('/session', { state: { create: true } })
+		navigate('/session', { state: { create: true, menu_tab: 'sessions' } })
 	})
 
 	return (

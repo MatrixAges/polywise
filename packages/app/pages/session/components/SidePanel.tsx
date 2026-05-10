@@ -7,8 +7,7 @@ import { FileTree, Tabs, TextTabs } from '@/components'
 import { useModel } from '../context'
 
 const Index = () => {
-	const { side_panel_tab, content_tab, project_files, setSidePanelTab, toggleFilesProjectId, setContentTab } =
-		useModel()
+	const { side_panel_tab, content_tab, project_files, setSidePanelTab, closeFiles, setContentTab } = useModel()
 
 	const onSelectPath = useMemoizedFn(args => {
 		project_files.selectPath(args)
@@ -22,7 +21,9 @@ const Index = () => {
 				overflow-y-hidden
 				flex flex-col
 				w-[300px] h-full
+				bg-std-50/60
 				border-border-light border-l
+				dark:bg-std-50
 			'
 		>
 			<div
@@ -34,11 +35,7 @@ const Index = () => {
 					border-b border-border-light
 				'
 			>
-				<TextTabs
-					items={['files', 'todos']}
-					active={side_panel_tab}
-					setActive={setSidePanelTab}
-				></TextTabs>
+				<TextTabs items={['files']} active={side_panel_tab} setActive={setSidePanelTab}></TextTabs>
 				<div className='flex items-center'>
 					<Tabs
 						items={[
@@ -56,7 +53,7 @@ const Index = () => {
 							bg-border-light
 						'
 					></div>
-					<div className='icon_button small mr-[-3px]' onClick={toggleFilesProjectId}>
+					<div className='icon_button small mr-[-3px]' onClick={closeFiles}>
 						<X></X>
 					</div>
 				</div>

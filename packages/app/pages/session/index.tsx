@@ -1,4 +1,5 @@
-import { useLayoutEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
+import { Folders } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 import { useLocation, useNavigate } from 'react-router'
 import { container } from 'tsyringe'
@@ -6,60 +7,67 @@ import { container } from 'tsyringe'
 import { Session } from '@/components'
 import { useGlobal } from '@/context'
 
-import { Menu } from './components'
+import { AddModal, Menu, Preview, SidePanel } from './components'
 import { Context } from './context'
 import Model from './model'
-
-import type { IPropsMenu } from './types'
 
 const Index = () => {
 	const [x] = useState(() => container.resolve(Model))
 	const global = useGlobal()
-	const { state, pathname } = useLocation()
+	const { pathname, state } = useLocation()
 	const navigate = useNavigate()
 
-	useLayoutEffect(() => {
-		const is_create = state?.create
+	useEffect(() => {
+		const run = async () => {
+			await x.init()
 
-		if (is_create) {
-			x.createSession()
+			if (state?.menu_tab === 'projects' || state?.menu_tab === 'sessions') {
+				x.setMenuTab(state.menu_tab)
+			}
 
-			navigate(pathname, { replace: true, state: null })
+			if (state?.create) {
+				await x.createSession()
+			}
+
+			if (state?.create || state?.menu_tab) {
+				navigate(pathname, { replace: true, state: null })
+			}
 		}
 
-		x.init()
+		void run()
 
 		return () => x.deinit()
 	}, [])
 
-	const props_menu: IPropsMenu = {
-		pins: $copy(x.pins),
-		sessions: $copy(x.sessions),
-		selectedSessionId: x.selected_session_id,
-		renamePin: x.rename_pin,
-		renameSessionIndex: x.rename_session_index,
-		renameValue: x.rename_value,
-		hasMore: x.has_more,
-		loading: x.loading,
-		loadingMore: x.loading_more
-	}
+	const Actions = (
+		<div className='flex items-center'>
+			<span className='icon_button small' onClick={x.toggleFiles}>
+				<Folders></Folders>
+			</span>
+		</div>
+	)
 
 	return (
-		<div className='flex h-full overflow-hidden'>
-			{!global.setting.sidebar_collapsed && (
-				<Context value={x}>
-					<Menu {...props_menu}></Menu>
-				</Context>
-			)}
-			<div className='h-full w-[calc(100%-210px)] flex-1'>
-				<Session
-					type='page'
-					id={x.selected_session_id}
-					input={x.temp_input}
-					create={!x.selected_session_id ? x.createSession : undefined}
-				></Session>
+		<Context value={x}>
+			<div className='flex h-full overflow-hidden'>
+				{!global.setting.sidebar_collapsed && <Menu></Menu>}
+				<div className='flex flex-1'>
+					{x.content_tab === 'session'
+						? x.selected_session_id && (
+								<div className={$cx('h-full min-w-0 flex-1')}>
+									<Session
+										type='page'
+										id={x.selected_session_id}
+										actions={Actions}
+									></Session>
+								</div>
+							)
+						: x.project_files.select_file && <Preview></Preview>}
+				</div>
+				{x.side_panel_open && <SidePanel></SidePanel>}
 			</div>
-		</div>
+			<AddModal></AddModal>
+		</Context>
 	)
 }
 

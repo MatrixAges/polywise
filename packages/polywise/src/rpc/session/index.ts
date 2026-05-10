@@ -2,6 +2,7 @@ import { r } from '@core/utils'
 
 import create from './create'
 import { answer, archive, clear, destroy, load, permission, setConfig, stop, unarchive } from './events'
+import getFilesDir from './getFilesDir'
 import getList from './getList'
 import getMoreList from './getMoreList'
 import getSessionStatus from './getSessionStatus'
@@ -17,6 +18,7 @@ import watchSessionStatus from './watchSessionStatus'
 export default r({
 	init,
 	create,
+	getFilesDir,
 	getList,
 	getMoreList,
 	getSessionStatus,

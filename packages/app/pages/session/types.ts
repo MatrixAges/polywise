@@ -1,4 +1,6 @@
 import type { Session } from '@core/db'
+import type { ReactNode } from 'react'
+import type Model from './model'
 
 export interface ISessionMenuData {
 	pins: Array<Session>
@@ -7,32 +9,41 @@ export interface ISessionMenuData {
 	has_more: boolean
 }
 
-export interface IArgsStartRenameSession {
+export interface IPropsMenuItem {
+	item: Model['projects'][number]
+	index: number
+	renaming: boolean
+	selected: boolean
+	expand: boolean
+}
+
+export interface IPropsProjectMenuItem {
+	item: Session
+	projectId: string
+	projectIndex: number
+	sessionIndex: number
+	renaming: boolean
+	selected: boolean
+}
+
+export interface IPropsSessionMenuItem {
+	item: Session
 	pin: boolean
-	session_index: number
-	value: string
+	sessionIndex: number
+	selected: boolean
+	renaming: boolean
+	renameValue: string
 }
 
-export interface IPropsSessions {
-	pins: Array<Session>
-	sessions: Array<Session>
-	selectedSessionId: string
-	renamePin: boolean
-	renameSessionIndex: number
+export interface IPropsMenuSessionItem {
+	item: Session
+	sessionIndex: number
+	selected: boolean
+	renaming: boolean
 	renameValue: string
-	hasMore: boolean
-	loading: boolean
-	loadingMore: boolean
-}
-
-export interface IPropsMenu {
-	pins: Array<Session>
-	sessions: Array<Session>
-	selectedSessionId: string
-	renamePin: boolean
-	renameSessionIndex: number
-	renameValue: string
-	hasMore: boolean
-	loading: boolean
-	loadingMore: boolean
+	title?: ReactNode
+	pin?: boolean
+	projectIndex?: number
+	className?: string
+	onClick?: () => void
 }

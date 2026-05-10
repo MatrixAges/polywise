@@ -2,7 +2,7 @@ import '@abraham/reflection'
 import '@/presets'
 
 import { createRoot } from 'react-dom/client'
-import { createBrowserRouter, createHashRouter, RouterProvider } from 'react-router-dom'
+import { createBrowserRouter, createHashRouter, Navigate, RouterProvider } from 'react-router-dom'
 
 import { ErrorBoundary, Fallback } from '@/components'
 import Layout from '@/layout'
@@ -30,7 +30,7 @@ const routes: Array<RouteObject> = [
 			},
 			{
 				path: '/project',
-				lazy: () => import('@/pages/project')
+				element: <Navigate to='/session' replace />
 			},
 			{
 				path: '/workflow',

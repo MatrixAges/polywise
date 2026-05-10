@@ -8,7 +8,7 @@ import { observer } from 'mobx-react-lite'
 import RenameInput from '@/pages/session/components/RenameInput'
 
 import { useModel } from '../context'
-import SessionItem from './SessionItem'
+import ProjectMenuItem from './ProjectMenuItem'
 
 import type { MouseEvent } from 'react'
 import type { IPropsMenuItem } from '../types'
@@ -43,9 +43,7 @@ const Index = (props: IPropsMenuItem) => {
 	const onCreateSession = useMemoizedFn((event: MouseEvent<HTMLButtonElement>) => {
 		event.stopPropagation()
 
-		createSession(project.id)
-		setSelectedProject(project.id, true)
-		setFilesProjectId(index)
+		void createSession(project.id)
 	})
 
 	const LeftIcon = expand ? ChevronDown : ChevronRight
@@ -132,7 +130,7 @@ const Index = (props: IPropsMenuItem) => {
 			{expand && (
 				<div className='flex flex-col gap-1'>
 					{sessions.map((it, idx) => (
-						<SessionItem
+						<ProjectMenuItem
 							item={it}
 							projectId={project.id}
 							projectIndex={index}
@@ -140,7 +138,7 @@ const Index = (props: IPropsMenuItem) => {
 							renaming={rename_session_id === it.id}
 							selected={selected_session_id === it.id}
 							key={it.id}
-						></SessionItem>
+						></ProjectMenuItem>
 					))}
 					{has_more && (
 						<div className='click_button pl-6' onClick={() => getMoreSessions(index)}>

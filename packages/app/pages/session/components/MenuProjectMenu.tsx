@@ -1,5 +1,5 @@
 import { ContextMenuContent, ContextMenuItem, ContextMenuSeparator } from '@/__shadcn__/components/ui/context-menu'
-import { useModel } from '@/pages/project/context'
+import { useModel } from '@/pages/session/context'
 
 import type { Project } from '@core/db'
 

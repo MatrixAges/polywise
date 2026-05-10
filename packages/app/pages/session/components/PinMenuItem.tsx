@@ -1,11 +1,11 @@
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 
-import Item from './Item'
+import SessionMenuItem from './SessionMenuItem'
 
-import type { IPropsSessionItem } from './types'
+import type { IPropsSessionMenuItem } from '../types'
 
-const Index = (props: IPropsSessionItem) => {
+const Index = (props: IPropsSessionMenuItem) => {
 	const { item } = props
 	const { attributes, listeners, transform, transition, isDragging, setNodeRef } = useSortable({
 		id: item.id
@@ -15,14 +15,11 @@ const Index = (props: IPropsSessionItem) => {
 		<div
 			ref={setNodeRef}
 			style={{ transform: CSS.Translate.toString(transform), transition }}
-			className={$cx(isDragging && 'z-10')}
+			className={$cx('cursor-grab active:cursor-grabbing', isDragging && 'dragging z-10 backdrop-blur-lg')}
 			{...attributes}
 			{...listeners}
 		>
-			<Item
-				{...props}
-				className={$cx('cursor-grab active:cursor-grabbing', isDragging && 'dragging backdrop-blur-lg')}
-			></Item>
+			<SessionMenuItem {...props}></SessionMenuItem>
 		</div>
 	)
 }

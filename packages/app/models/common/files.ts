@@ -59,6 +59,7 @@ export default class Index {
 
 		this.root_path = dir
 		this.input_path = dir
+		this.resetSelection()
 
 		await this.loadDirectory({ target_path: dir, mode: 'replace' })
 	}
@@ -89,6 +90,7 @@ export default class Index {
 		this.tree_version += 1
 		this.root_path = input_path
 		this.input_path = input_path
+		this.resetSelection()
 
 		await this.loadDirectory({ target_path: input_path, mode: 'replace' })
 	}
@@ -129,6 +131,11 @@ export default class Index {
 		this.input_path = ''
 		this.tree_version = 0
 		this.loaded_path_map = {}
+		this.select_file_path = ''
+		this.select_file = null
+	}
+
+	resetSelection() {
 		this.select_file_path = ''
 		this.select_file = null
 	}
