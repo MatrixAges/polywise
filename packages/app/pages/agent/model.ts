@@ -45,6 +45,7 @@ export default class Index {
 	session_page = 1
 	session_has_more = false
 	session_request_key = 0
+	create_agent_loading = false
 	avatar_dialog_open = false
 	avatar_mode = 'upload' as AvatarMode
 	avatar_preview_url = ''
@@ -321,21 +322,29 @@ export default class Index {
 	}
 
 	async createAgent() {
-		const next_agent = await rpc.agent.create.mutate({
-			prompt: '',
-			soul: '',
-			identity: '',
-			memory: ''
-		})
+		if (this.create_agent_loading) return
 
-		await this.refresh()
+		this.create_agent_loading = true
 
-		if (next_agent?.id) {
-			this.selected_agent_id = next_agent.id
-			this.page_mode = 'detail'
-			this.current_tab = 'prompt'
-			await this.refreshAgentRelated()
-			await this.refreshSessions()
+		try {
+			const next_agent = await rpc.agent.create.mutate({
+				prompt: '',
+				soul: '',
+				identity: '',
+				memory: ''
+			})
+
+			await this.refresh()
+
+			if (next_agent?.id) {
+				this.selected_agent_id = next_agent.id
+				this.page_mode = 'detail'
+				this.current_tab = 'prompt'
+				await this.refreshAgentRelated()
+				await this.refreshSessions()
+			}
+		} finally {
+			this.create_agent_loading = false
 		}
 	}
 

@@ -64,6 +64,10 @@ body {
 				@apply bg-active text-std-white fill-std-white;
 			}
 		}
+
+		&:disabled {
+			pointer-events: none;
+		}
 	}
 
 	.click_button {
@@ -95,6 +99,10 @@ body {
 
 		&.active {
 			@apply bg-active text-std-900;
+		}
+
+		&:disabled {
+			pointer-events: none;
 		}
 	}
 }

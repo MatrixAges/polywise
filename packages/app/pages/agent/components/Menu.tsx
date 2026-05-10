@@ -4,6 +4,8 @@ import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { Plus, Sparkles } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
+import { Spinner } from '@/__shadcn__/components/ui/spinner'
+
 import { useModel } from '../context'
 import MenuItem from './MenuItem'
 import { SkillDialog } from './Skill'
@@ -11,7 +13,7 @@ import { SkillDialog } from './Skill'
 import type { DragEndEvent } from '@dnd-kit/core'
 
 const Index = () => {
-	const { agents, selected_agent_id, createAgent, sortAgent } = useModel()
+	const { agents, selected_agent_id, createAgent, create_agent_loading, sortAgent } = useModel()
 	const [skill_dialog_open, setSkillDialogOpen] = useState(false)
 	const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }))
 
@@ -61,8 +63,17 @@ const Index = () => {
 						>
 							<Sparkles className='size-3'></Sparkles>
 						</button>
-						<button className='icon_button small' type='button' onClick={createAgent}>
-							<Plus className='size-3.5'></Plus>
+						<button
+							className='icon_button small'
+							type='button'
+							onClick={createAgent}
+							disabled={create_agent_loading}
+						>
+							{create_agent_loading ? (
+								<Spinner className='size-3.5'></Spinner>
+							) : (
+								<Plus className='size-3.5'></Plus>
+							)}
 						</button>
 					</div>
 				</div>
