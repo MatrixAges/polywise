@@ -5,8 +5,9 @@ import {
   CollapsibleTrigger,
 } from "@/__shadcn__/components/ui/collapsible";
 import { cn } from "@/__shadcn__/lib/utils/index";
-import { ChevronDownIcon,WrenchIcon } from "lucide-react";
+import { ChevronDownIcon } from "lucide-react";
 import { isValidElement } from "react";
+import getToolIcon from "@/utils/getToolIcon";
 import { CodeBlock } from "./code-block";
 
 import type { ComponentProps, ReactNode } from "react";
@@ -63,6 +64,10 @@ export const ToolHeader = ({
 }: ToolHeaderProps) => {
   const derivedName =
     type === "dynamic-tool" ? toolName : type.split("-").slice(1).join("-");
+  const ToolIcon = getToolIcon({
+    type,
+    toolName,
+  });
 
   return (
     <CollapsibleTrigger
@@ -73,7 +78,7 @@ export const ToolHeader = ({
       {...props}
     >
       <div className="flex items-center gap-2">
-        <WrenchIcon className="size-3 text-std-400" />
+        <ToolIcon className="size-3 text-std-400" />
         <span className="group-data-open:font-medium text-sm">{title ?? derivedName}</span>
       </div>
       <div className="flex items-center gap-2">

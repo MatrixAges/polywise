@@ -1,5 +1,7 @@
 import { useMemoizedFn } from 'ahooks'
 
+import Show from './Show'
+
 import type { LucideIcon } from 'lucide-react'
 import type { DependencyList } from 'react'
 
@@ -48,15 +50,15 @@ const Index = (props: IProps) => {
 					<div
 						className={$cx(
 							`
+						overflow-hidden
 						flex
 						items-center justify-center
 						rounded-full
+						transition-[padding,background-color,color] duration-180 ease-in-out
 						clickable
 					`,
 							`
-						${simple || small ? 'h-6 w-6' : 'h-7 w-7'}
-						gap-1
-						data-[active=true]:w-auto
+						${simple || small ? 'h-6 min-w-6' : 'h-7 min-w-7'}
 						${small ? 'data-[active=true]:px-2' : 'data-[active=true]:px-2.5'}
 					`,
 							under
@@ -72,16 +74,23 @@ const Index = (props: IProps) => {
 					`,
 							simple && 'w-6! px-0!'
 						)}
-						title={key || title}
+						title={title || key}
 						data-active={getActive(key)}
 						onClick={() => onClick?.(key, item)}
 						key={key}
 					>
 						{Icon && <Icon size={small || simple ? 12 : 14} />}
-						{!simple && getActive(key) && (
-							<span className={$cx('font-medium capitalize', small && 'text-xs')}>
-								{key || title}
-							</span>
+						{!simple && (
+							<Show
+								className='ml-1 overflow-hidden whitespace-nowrap'
+								visible={!!getActive(key)}
+								initial={{ opacity: 0, width: 0 }}
+								animate={{ opacity: 1, width: 'auto' }}
+							>
+								<span className={$cx('font-medium capitalize', small && 'text-xs')}>
+									{title || key}
+								</span>
+							</Show>
 						)}
 					</div>
 				)

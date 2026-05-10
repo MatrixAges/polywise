@@ -3,6 +3,7 @@ import { ChevronRightIcon } from 'lucide-react'
 
 import { Message, MessageContent } from '@/__shadcn__/components/ai-elements'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/__shadcn__/components/ui/collapsible'
+import getToolIcon from '@/utils/getToolIcon'
 
 import LoadingDots from './LoadingDots'
 import Part from './Part'
@@ -199,13 +200,15 @@ const ToolSummaryBlock = (props: {
 	answer: IPropsMessage['answer']
 }) => {
 	const { items, messageId, streaming, summary, answer } = props
+	const last_tool_part = items[items.length - 1]?.part
+	const SummaryIcon = last_tool_part ? getToolIcon(last_tool_part) : null
 
 	return (
 		<Collapsible className='group/process mb-0! w-full'>
 			<CollapsibleTrigger
 				className='
 					flex
-					items-center
+					items-center justify-between
 					w-full
 					gap-1.5
 					text-std-400 text-sm
@@ -214,7 +217,10 @@ const ToolSummaryBlock = (props: {
 					hover:text-std-700
 				'
 			>
-				<span>{summary}</span>
+				<div className='flex min-w-0 items-center gap-1.5'>
+					{SummaryIcon && <SummaryIcon className='text-std-400 size-3.5 shrink-0' />}
+					<span>{summary}</span>
+				</div>
 				<ChevronRightIcon
 					className='
 						size-4
