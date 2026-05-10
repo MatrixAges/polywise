@@ -4,6 +4,7 @@ import { setStorageWhenChange } from 'stk/mobx'
 import { injectable } from 'tsyringe'
 
 import { local_models } from '@/appdata'
+import { Setting } from '@/models'
 import { Util } from '@/models/common'
 import { rpc } from '@/utils'
 
@@ -63,8 +64,24 @@ export default class Index {
 		return this.article_items.find(item => item.id === this.selected_article_id) || null
 	}
 
-	constructor(public util: Util) {
-		makeAutoObservable(this, { util: false }, { autoBind: true })
+	constructor(
+		public util: Util,
+		public setting: Setting
+	) {
+		makeAutoObservable(this, { util: false, setting: false }, { autoBind: true })
+	}
+
+	get default_model(): DefaultModel {
+		const model = this.setting.config?.default_model
+
+		if (model?.provider && model?.model) {
+			return model
+		}
+
+		return {
+			provider: 'local model',
+			model: local_models.gen.model
+		}
 	}
 
 	async init() {
@@ -81,6 +98,10 @@ export default class Index {
 				}
 			}
 		]
+
+		if ((this.current_tab as AgentTab | 'article') === 'article') {
+			this.current_tab = 'content'
+		}
 
 		if (this.current_tab === 'sessions') {
 			this.current_tab = 'prompt'
@@ -300,11 +321,6 @@ export default class Index {
 	}
 
 	async createAgent() {
-		const default_model: DefaultModel = {
-			provider: 'local model',
-			model: local_models.gen.model
-		}
-
 		const next_agent = await rpc.agent.create.mutate({
 			name: `Agent ${this.agents.length + 1}`,
 			description: '',
@@ -312,7 +328,7 @@ export default class Index {
 			soul: '',
 			identity: '',
 			memory: '',
-			model: default_model
+			model: this.default_model
 		})
 
 		await this.refresh()

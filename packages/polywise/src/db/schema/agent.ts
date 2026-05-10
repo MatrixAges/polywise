@@ -15,11 +15,11 @@ export default sqliteTable(
 		photo: blob('photo'),
 		// Agent avatar: generate by program
 		avatar: text('avatar', { mode: 'json' }).$type<any>(),
-		// How you run
+		// How agent run
 		prompt: text('prompt'),
-		// What's in your mind
+		// What's in agent's mind
 		soul: text('soul'),
-		// Who you are
+		// Who agent is
 		identity: text('identity'),
 		// Core memory
 		memory: text('memory').default(''),

@@ -23,7 +23,7 @@ const Index = () => {
 
 	const active_tab = current_tab === 'sessions' ? 'prompt' : current_tab
 	const field_value =
-		active_tab === 'article' || active_tab === 'skills'
+		active_tab === 'content' || active_tab === 'graph' || active_tab === 'skills'
 			? ''
 			: (selected_agent[active_tab] as string | null | undefined) || ''
 

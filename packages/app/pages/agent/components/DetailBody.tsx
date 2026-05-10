@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { BookOpenText, Brain, Database, GitBranch, MessageSquareText, Sparkles, UserRound } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { Textarea } from '@/__shadcn__/components/ui/textarea'
@@ -6,23 +7,25 @@ import { TextTabs } from '@/components'
 
 import { useModel } from '../context'
 import BrainPanel from './BrainPanel'
+import GraphPanel from './GraphPanel'
 import SkillSelect from './SkillSelect'
 
 import type { AgentItem, AgentTab } from '../types'
 
 const tabs = [
-	{ key: 'prompt', title: 'prompt' },
-	{ key: 'soul', title: 'soul' },
-	{ key: 'identity', title: 'identity' },
-	{ key: 'memory', title: 'memory' },
-	{ key: 'skills', title: 'skills' },
-	{ key: 'article', title: 'Brain' }
+	{ key: 'prompt', title: 'prompt', Icon: MessageSquareText },
+	{ key: 'soul', title: 'soul', Icon: Brain },
+	{ key: 'identity', title: 'identity', Icon: UserRound },
+	{ key: 'memory', title: 'memory', Icon: Database },
+	{ key: 'skills', title: 'skills', Icon: Sparkles },
+	{ key: 'content', title: 'content', Icon: BookOpenText },
+	{ key: 'graph', title: 'graph', Icon: GitBranch }
 ] as const
 
 const placeholder_map = {
-	prompt: 'How you run',
-	soul: "What\'s in your mind",
-	identity: 'Who you are',
+	prompt: 'How agent run',
+	soul: "What's in agent's mind",
+	identity: 'Who agent is',
 	memory: 'Core memory'
 } as const
 
@@ -55,8 +58,7 @@ const Index = ({ agent, active_tab, field_value }: IProps) => {
 			>
 				<div className='page_wrap h-8 px-6 py-0'>
 					<TextTabs
-						className='gap-4!'
-						itemClassName='px-0!'
+						className='justify-between'
 						items={[...tabs]}
 						active={active_tab}
 						setActive={setCurrentTab}
@@ -64,8 +66,10 @@ const Index = ({ agent, active_tab, field_value }: IProps) => {
 				</div>
 			</div>
 			<div className='page_wrap flex-1 p-0'>
-				{active_tab === 'article' ? (
+				{active_tab === 'content' ? (
 					<BrainPanel></BrainPanel>
+				) : active_tab === 'graph' ? (
+					<GraphPanel agent={agent}></GraphPanel>
 				) : active_tab === 'skills' ? (
 					<div className='px-6 py-3'>
 						<SkillSelect></SkillSelect>
@@ -73,17 +77,17 @@ const Index = ({ agent, active_tab, field_value }: IProps) => {
 				) : (
 					<Textarea
 						className='
-								overflow-y-auto
-								flex-1
-								h-full
-								min-h-0
-								p-4 px-6
-								rounded-none
-								text-sm!
-								bg-secondary/10
-								border-none
-								focus-within:ring-0!
-							'
+									overflow-y-auto
+									flex-1
+									h-full
+									min-h-0
+									p-4 px-6
+									rounded-none
+									text-sm!
+									bg-secondary/10
+									border-none
+									focus-within:ring-0!
+								'
 						value={draft_value}
 						placeholder={placeholder_map[active_tab]}
 						onChange={event => {

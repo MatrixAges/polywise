@@ -1,6 +1,8 @@
 import { useDelegate } from '@/hooks'
 
-type TabItem = string | { key: string; title: string }
+import type { LucideIcon } from 'lucide-react'
+
+type TabItem = string | { key: string; title: string; Icon?: LucideIcon }
 
 interface IProps {
 	items: Array<TabItem>
@@ -33,6 +35,7 @@ const Index = (props: IProps) => {
 			{items.map(item => {
 				const key = typeof item === 'string' ? item : item.key
 				const title = typeof item === 'string' ? item : item.title
+				const Icon = typeof item === 'string' ? null : item.Icon
 
 				return (
 					<span
@@ -41,16 +44,18 @@ const Index = (props: IProps) => {
 						flex
 						items-center
 						h-full
+						gap-1.5
 						px-1
 						border-b border-transparent
 						clickable capitalize
 					`,
-							active === key && 'text-std-800 border-std-black!',
+							active === key && 'text-std-800 border-std-black! font-semibold',
 							itemClassName
 						)}
 						data-key={key}
 						key={key}
 					>
+						{Icon && <Icon className='size-3.5 shrink-0' />}
 						{title}
 					</span>
 				)

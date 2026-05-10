@@ -63,6 +63,16 @@ const Index = (props: IProps) => {
 				'
 			>
 				<button
+					className='icon_button small'
+					type='button'
+					onClick={(event: MouseEvent<HTMLButtonElement>) => {
+						event.stopPropagation()
+						void removeAgent(item.id)
+					}}
+				>
+					<Trash2 className='size-3'></Trash2>
+				</button>
+				<button
 					className='icon_button small cursor-grab'
 					type='button'
 					onClick={stopPropagation}

@@ -84,7 +84,7 @@ const Index = () => {
 									truncate
 								'
 							>
-								{item.title || 'Untitled article'}
+								{item.title || 'Untitled content'}
 							</div>
 						</div>
 					))}
@@ -96,7 +96,7 @@ const Index = () => {
 								text-std-400 text-sm
 							'
 						>
-							No articles
+							No content
 						</div>
 					)}
 				</div>
@@ -136,7 +136,7 @@ const Index = () => {
 					<>
 						<Input
 							value={article_title_draft}
-							placeholder='Article title'
+							placeholder='Content title'
 							onChange={event => setArticleTitleDraft(event.target.value)}
 						></Input>
 						<Textarea
@@ -153,7 +153,7 @@ const Index = () => {
 							text-std-400 text-sm
 						'
 					>
-						Select an article
+						Select content
 					</div>
 				)}
 			</div>

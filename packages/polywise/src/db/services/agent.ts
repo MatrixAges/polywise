@@ -1,8 +1,11 @@
+import { config } from '@core/config'
+import { preset_providers } from '@core/consts/providers'
 import { agent } from '@core/db/schema'
 import { env } from '@core/env'
 import { asc, SQL } from 'drizzle-orm'
 
 import type { Agent, AgentInsert } from '@core/db'
+import type { TableModel } from '@core/types'
 
 interface ArgsGetAgents {
 	where?: SQL
@@ -10,36 +13,85 @@ interface ArgsGetAgents {
 	limit?: number
 }
 
+const isValidAgentModel = (value: unknown): value is TableModel => {
+	if (!value || typeof value !== 'object') {
+		return false
+	}
+
+	const { provider, model } = value as Partial<TableModel>
+
+	return typeof provider === 'string' && provider.trim() !== '' && typeof model === 'string' && model.trim() !== ''
+}
+
+export const getDefaultAgentModel = (): TableModel => {
+	if (isValidAgentModel(config.default_model)) {
+		return { ...config.default_model }
+	}
+
+	const preset = preset_providers[0]
+
+	return {
+		provider: preset.name,
+		model: preset.models[0].id
+	}
+}
+
+export const normalizeAgentModel = (value: unknown): TableModel => {
+	if (!isValidAgentModel(value)) {
+		return getDefaultAgentModel()
+	}
+
+	const next_value = value as TableModel
+
+	return {
+		...next_value,
+		provider: next_value.provider.trim(),
+		model: next_value.model.trim()
+	}
+}
+
+const normalizeAgentValues = <T extends Partial<AgentInsert>>(values: T): T => {
+	if (!('model' in values)) {
+		return values
+	}
+
+	return {
+		...values,
+		model: normalizeAgentModel(values.model)
+	} as T
+}
+
 const normalizeAgent = (row: Agent | undefined) => {
 	if (!row) {
 		return row
 	}
 
+	const next_row = { ...row, model: normalizeAgentModel(row.model) }
 	const photo = row.photo
 
 	if (!photo) {
-		return row
+		return next_row
 	}
 
 	if (photo instanceof Uint8Array && photo.constructor === Uint8Array) {
-		return row
+		return next_row
 	}
 
 	if (photo instanceof Uint8Array) {
-		return { ...row, photo: new Uint8Array(photo) }
+		return { ...next_row, photo: new Uint8Array(photo) }
 	}
 
 	if (photo instanceof ArrayBuffer) {
-		return { ...row, photo: new Uint8Array(photo) }
+		return { ...next_row, photo: new Uint8Array(photo) }
 	}
 
-	return row
+	return next_row
 }
 
 export const addAgent = async (values: AgentInsert) => {
 	return env.db
 		.insert(agent)
-		.values(values)
+		.values(normalizeAgentValues(values))
 		.returning()
 		.then(res => normalizeAgent(res[0]))
 }
@@ -74,7 +126,7 @@ export const getAgents = async (args: ArgsGetAgents = {}) => {
 export const setAgent = async (where: SQL, values: Partial<AgentInsert>) => {
 	return env.db
 		.update(agent)
-		.set(values)
+		.set(normalizeAgentValues(values))
 		.where(where)
 		.returning()
 		.then(res => normalizeAgent(res[0]))

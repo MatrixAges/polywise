@@ -50,12 +50,16 @@ export const agent_insert_schema = createInsertSchema(agent, {
 	updated_at: todo_timestamp_schema.optional()
 })
 
-export const agent_create_input_schema = agent_insert_schema.omit({
-	id: true,
-	order: true,
-	created_at: true,
-	updated_at: true
-})
+export const agent_create_input_schema = agent_insert_schema
+	.omit({
+		id: true,
+		order: true,
+		created_at: true,
+		updated_at: true
+	})
+	.extend({
+		model: agent_model_schema.optional()
+	})
 
 export const agent_update_input_schema = agent_insert_schema
 	.omit({
