@@ -51,7 +51,7 @@ const Index = () => {
 		<Context value={x}>
 			<div className='flex h-full overflow-hidden'>
 				{!global.setting.sidebar_collapsed && <Menu></Menu>}
-				<div className='flex flex-1'>
+				<div className='flex min-w-0 flex-1'>
 					{x.content_tab === 'session'
 						? x.selected_session_id && (
 								<div className={$cx('h-full min-w-0 flex-1')}>

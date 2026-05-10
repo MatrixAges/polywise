@@ -14,7 +14,7 @@ const Index = () => {
 		<div
 			className='
 				overflow-y-hidden
-				flex flex-col
+				flex flex-col shrink-0
 				w-[210px] h-full
 				bg-std-50/60
 				border-r border-border-light

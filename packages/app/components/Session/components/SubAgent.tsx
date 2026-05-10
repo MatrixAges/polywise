@@ -19,11 +19,20 @@ const Index = (props: IPropsSubAgent) => {
 	const name = useMemo(() => getToolName(part.type), [part.type])
 
 	return (
-		<div className='flex flex-col gap-3'>
+		<div
+			className='
+				flex flex-col
+				max-w-full
+				min-w-0
+				gap-3
+			'
+		>
 			<div
 				className='
 					flex
 					items-center
+					max-w-full
+					min-w-0
 					gap-2
 					text-muted-foreground
 					hover:text-foreground
@@ -37,7 +46,9 @@ const Index = (props: IPropsSubAgent) => {
 			{open && (
 				<div
 					className='
-						w-full
+						overflow-hidden
+						w-full max-w-full
+						min-w-0
 						p-3 pt-2.5
 						rounded-xl
 						border border-border-gray border-dashed
