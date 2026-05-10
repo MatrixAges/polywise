@@ -11,14 +11,12 @@ import type { UIEvent } from 'react'
 import type { ISessionMenuData } from './types'
 
 type MenuTab = 'projects' | 'sessions'
-type SelectedSessionSource = '' | 'project' | 'session'
 
 @injectable()
 export default class Index {
 	selected_project_id = ''
 	project_selected_session_id = ''
 	normal_selected_session_id = ''
-	selected_session_source = '' as SelectedSessionSource
 	files_project_id = ''
 	files_session_id = ''
 	rename_project_id = ''
@@ -54,11 +52,11 @@ export default class Index {
 	}
 
 	get selected_session_id() {
-		if (this.selected_session_source === 'project') {
+		if (this.menu_tab === 'projects') {
 			return this.project_selected_session_id
 		}
 
-		if (this.selected_session_source === 'session') {
+		if (this.menu_tab === 'sessions') {
 			return this.normal_selected_session_id
 		}
 
@@ -71,7 +69,6 @@ export default class Index {
 				'selected_project_id',
 				'project_selected_session_id',
 				'normal_selected_session_id',
-				'selected_session_source',
 				'menu_tab',
 				{ project_side_panel_open: 'side_panel_open' },
 				'files_project_id',
@@ -82,15 +79,6 @@ export default class Index {
 		)
 
 		this.util.acts = [deinit]
-
-		if (
-			this.selected_session_source === 'session' &&
-			!this.normal_selected_session_id &&
-			this.project_selected_session_id
-		) {
-			this.normal_selected_session_id = this.project_selected_session_id
-			this.project_selected_session_id = ''
-		}
 
 		await Promise.all([this.getProjectList(), this.refreshSessions()])
 
@@ -107,6 +95,23 @@ export default class Index {
 
 	setMenuTab(v: MenuTab) {
 		this.menu_tab = v
+		this.content_tab = 'session'
+
+		if (v === 'projects') {
+			if (!this.project_selected_session_id) return
+
+			if (this.side_panel_open) {
+				void this.setFilesProjectId()
+			}
+
+			return
+		}
+
+		if (!this.normal_selected_session_id) return
+
+		if (this.side_panel_open) {
+			void this.setFilesSessionId(this.normal_selected_session_id)
+		}
 	}
 
 	setSelectedProject(project_id: string) {
@@ -130,7 +135,6 @@ export default class Index {
 		this.menu_tab = 'projects'
 		this.selected_project_id = project_id
 		this.project_selected_session_id = session_id
-		this.selected_session_source = 'project'
 		this.content_tab = 'session'
 
 		if (!this.expand_project_ids.includes(project_id)) {
@@ -144,7 +148,6 @@ export default class Index {
 	selectGlobalSession(session_id: string) {
 		this.menu_tab = 'sessions'
 		this.normal_selected_session_id = session_id
-		this.selected_session_source = 'session'
 		this.content_tab = 'session'
 
 		if (this.side_panel_open) {
@@ -192,8 +195,8 @@ export default class Index {
 			return this.closeFiles()
 		}
 
-		if (this.selected_session_source === 'session' && this.selected_session_id) {
-			return void this.setFilesSessionId(this.selected_session_id)
+		if (this.menu_tab === 'sessions' && this.normal_selected_session_id) {
+			return void this.setFilesSessionId(this.normal_selected_session_id)
 		}
 
 		return void this.setFilesProjectId()
@@ -234,7 +237,7 @@ export default class Index {
 		await this.project_files.init(project.dir, { dir_only: false, show_hidden: true })
 	}
 
-	async setFilesSessionId(session_id = this.selected_session_id) {
+	async setFilesSessionId(session_id = this.normal_selected_session_id) {
 		if (!session_id) return
 
 		const dir = await rpc.session.getFilesDir.query({ id: session_id })
@@ -264,10 +267,6 @@ export default class Index {
 			if (this.normal_selected_session_id) {
 				if (!session_id_list.includes(this.normal_selected_session_id)) {
 					this.normal_selected_session_id = ''
-
-					if (this.selected_session_source === 'session') {
-						this.selected_session_source = ''
-					}
 				}
 			}
 		} finally {
@@ -313,10 +312,6 @@ export default class Index {
 			if (!exists) {
 				this.selected_project_id = ''
 				this.project_selected_session_id = ''
-
-				if (this.selected_session_source === 'project') {
-					this.selected_session_source = ''
-				}
 			}
 		}
 	}
@@ -403,10 +398,6 @@ export default class Index {
 		if (this.selected_project_id === project_item.id) {
 			this.selected_project_id = ''
 			this.project_selected_session_id = ''
-
-			if (this.selected_session_source === 'project') {
-				this.selected_session_source = ''
-			}
 		}
 
 		if (this.files_project_id === project_item.id) {
@@ -431,7 +422,6 @@ export default class Index {
 			this.menu_tab = 'projects'
 			this.selected_project_id = project_id
 			this.project_selected_session_id = res.id
-			this.selected_session_source = 'project'
 
 			if (!this.expand_project_ids.includes(project_id)) {
 				this.expand_project_ids.push(project_id)
@@ -448,7 +438,6 @@ export default class Index {
 		} else {
 			this.menu_tab = 'sessions'
 			this.normal_selected_session_id = res.id
-			this.selected_session_source = 'session'
 
 			await this.refreshSessions()
 
@@ -489,18 +478,10 @@ export default class Index {
 
 		if (this.project_selected_session_id === session_id) {
 			this.project_selected_session_id = ''
-
-			if (this.selected_session_source === 'project') {
-				this.selected_session_source = ''
-			}
 		}
 
 		if (this.normal_selected_session_id === session_id) {
 			this.normal_selected_session_id = ''
-
-			if (this.selected_session_source === 'session') {
-				this.selected_session_source = ''
-			}
 		}
 
 		if (this.rename_session_id === session_id) {
