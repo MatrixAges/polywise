@@ -33,10 +33,10 @@ const Index = ({ agent }: IProps) => {
 					gap-3
 				'
 			>
-				<div className='flex flex-col'>
+				<div className='flex flex-col gap-0.5'>
 					{edit_field_key === 'name' ? (
 						<EditableField
-							class_name='text-base! font-semibold'
+							class_name='text-lg! font-semibold'
 							active
 							value={agent.name}
 							max_length={24}
@@ -51,7 +51,7 @@ const Index = ({ agent }: IProps) => {
 						></EditableField>
 					) : (
 						<div
-							className='text-base leading-5.5 font-semibold'
+							className='text-lg leading-5.5 font-semibold'
 							onClick={() => startEditField('name')}
 						>
 							{agent.name}

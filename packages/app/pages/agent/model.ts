@@ -327,8 +327,7 @@ export default class Index {
 			prompt: '',
 			soul: '',
 			identity: '',
-			memory: '',
-			model: this.default_model
+			memory: ''
 		})
 
 		await this.refresh()

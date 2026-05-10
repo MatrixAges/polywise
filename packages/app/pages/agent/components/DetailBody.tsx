@@ -59,6 +59,7 @@ const Index = ({ agent, active_tab, field_value }: IProps) => {
 				<div className='page_wrap h-8 px-6 py-0'>
 					<TextTabs
 						className='justify-between'
+						itemClassName='text-sm'
 						items={[...tabs]}
 						active={active_tab}
 						setActive={setCurrentTab}

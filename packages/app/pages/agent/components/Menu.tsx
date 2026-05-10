@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { DndContext, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
-import { BookOpenText, Plus } from 'lucide-react'
+import { Plus, Sparkles } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { useModel } from '../context'
@@ -59,7 +59,7 @@ const Index = () => {
 							type='button'
 							onClick={() => setSkillDialogOpen(true)}
 						>
-							<BookOpenText className='size-3'></BookOpenText>
+							<Sparkles className='size-3'></Sparkles>
 						</button>
 						<button className='icon_button small' type='button' onClick={createAgent}>
 							<Plus className='size-3.5'></Plus>

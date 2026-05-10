@@ -15,7 +15,7 @@ interface IProps {
 
 const size_map = {
 	small: 32,
-	large: 48
+	large: 60
 } as const
 
 const Index = (props: IProps) => {
@@ -51,7 +51,7 @@ const Index = (props: IProps) => {
 				rounded-full
 				text-sm font-medium
 				uppercase
-				bg-secondary/50
+				bg-secondary
 				outline-offset-2
 				hover:outline-1
 			'
@@ -67,7 +67,7 @@ const Index = (props: IProps) => {
 			) : avatar_config?.type === 'notion' ? (
 				<NotionAvatar style={wrapper_style} shape='circle' config={avatar_config.data} />
 			) : (
-				item.name.slice(0, 2)
+				item.name.slice(0, 1)
 			)}
 		</div>
 	)
