@@ -10,8 +10,14 @@ import type { AgentAvatarConfig, AgentItem } from '../types'
 
 interface IProps {
 	item: Pick<AgentItem, 'name' | 'photo' | 'avatar'>
-	size?: 'small' | 'large'
+	size?: 'small' | 'large' | number
+	shape?: 'circle' | 'rounded'
+	clickable?: boolean
+	photo_url?: string
+	avatar?: AgentAvatarConfig | null
 }
+
+const default_avatar_url = '/images/bird.jpg'
 
 const size_map = {
 	small: 32,
@@ -19,19 +25,26 @@ const size_map = {
 } as const
 
 const Index = (props: IProps) => {
-	const { item, size = 'large' } = props
+	const { item, size = 'large', shape = 'circle', clickable = true, photo_url = '', avatar } = props
 
 	const { openAvatarDialog } = useModel()
 
-	const box_size = size_map[size]
-	const avatar_config = item.avatar as AgentAvatarConfig | null
+	const box_size = typeof size === 'number' ? size : size_map[size]
+	const avatar_config = avatar ?? (item.avatar as AgentAvatarConfig | null)
 	const photo = item.photo as Uint8Array | null
 	const wrapper_style = { width: box_size, height: box_size } as CSSProperties
-	const [photo_url, setPhotoUrl] = useState('')
+	const is_rounded = shape === 'rounded'
+	const [resolved_photo_url, setPhotoUrl] = useState(photo_url)
 
 	useEffect(() => {
+		if (photo_url) {
+			setPhotoUrl(photo_url)
+
+			return
+		}
+
 		if (!photo) {
-			setPhotoUrl('')
+			setPhotoUrl(avatar_config ? '' : default_avatar_url)
 
 			return
 		}
@@ -41,31 +54,39 @@ const Index = (props: IProps) => {
 		setPhotoUrl(next_url)
 
 		return () => URL.revokeObjectURL(next_url)
-	}, [photo])
+	}, [avatar_config, photo, photo_url])
 
 	return (
 		<div
-			className='
+			className={$cx(
+				`
 				flex
 				items-center justify-center
-				rounded-full
 				text-sm font-medium
 				uppercase
 				bg-secondary
 				outline-offset-2
-				hover:outline-1
-			'
+			`,
+				is_rounded ? 'rounded-[24px]' : 'rounded-full',
+				clickable && 'clickable hover:outline-1'
+			)}
 			style={wrapper_style}
-			onClick={openAvatarDialog}
+			onClick={clickable ? openAvatarDialog : undefined}
 		>
-			{photo_url ? (
-				<div className='bg-secondary/40 overflow-hidden rounded-full' style={wrapper_style}>
-					<img className='h-full w-full object-cover' src={photo_url} alt={item.name} />
+			{resolved_photo_url ? (
+				<div
+					className={$cx(
+						'bg-secondary/40 overflow-hidden',
+						is_rounded ? 'rounded-[24px]' : 'rounded-full'
+					)}
+					style={wrapper_style}
+				>
+					<img className='h-full w-full object-cover' src={resolved_photo_url} alt={item.name} />
 				</div>
 			) : avatar_config?.type === 'nice' ? (
-				<NiceAvatar style={wrapper_style} shape='circle' {...avatar_config.data} />
+				<NiceAvatar style={wrapper_style} shape={shape} {...avatar_config.data} />
 			) : avatar_config?.type === 'notion' ? (
-				<NotionAvatar style={wrapper_style} shape='circle' config={avatar_config.data} />
+				<NotionAvatar style={wrapper_style} shape={shape} config={avatar_config.data} />
 			) : (
 				item.name.slice(0, 1)
 			)}

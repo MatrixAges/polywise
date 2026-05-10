@@ -322,8 +322,6 @@ export default class Index {
 
 	async createAgent() {
 		const next_agent = await rpc.agent.create.mutate({
-			name: `Agent ${this.agents.length + 1}`,
-			description: '',
 			prompt: '',
 			soul: '',
 			identity: '',

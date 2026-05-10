@@ -46,6 +46,7 @@ const Index = (props: IProps) => {
 						h-full
 						gap-1.5
 						px-1
+						mb-[-2px]
 						border-b border-transparent
 						clickable capitalize
 					`,
