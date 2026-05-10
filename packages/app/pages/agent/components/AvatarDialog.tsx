@@ -8,7 +8,6 @@ import { Dialog, DialogFooter } from '@/components'
 import { uploadFile } from '@/utils'
 
 import { useModel } from '../context'
-import AgentAvatar from './AgentAvatar'
 
 import type { AgentAvatarConfig } from '../types'
 
@@ -48,8 +47,8 @@ const AvatarPreview = (props: { name: string; photo_url: string; avatar: AgentAv
 			className='
 				flex
 				items-center justify-center
-				w-28 h-28
-				rounded-[24px]
+				w-24 h-24
+				rounded-full
 				text-xl font-medium
 				uppercase
 				bg-secondary/50
@@ -108,91 +107,18 @@ const Index = () => {
 	return (
 		<Dialog
 			open={avatar_dialog_open}
+			maxHeight='max-h-[80vh]'
 			title='Agent Avatar'
-			desc='Edit the current avatar, upload a photo, or generate a new look.'
-			className='max-w-3xl sm:max-w-3xl'
+			desc='Edit avatar, upload a photo, or generate a new look.'
+			className='w-[360px]'
 			setOpen={open => (!open ? closeAvatarDialog() : undefined)}
 		>
-			<div className='flex flex-col gap-5'>
-				<div className='grid gap-4 md:grid-cols-[0.92fr_1.08fr]'>
-					<div
-						className='
-							p-4
-							rounded-[28px]
-							bg-card
-							border border-border-light
-						'
-					>
-						<div
-							className='
-								text-std-400 text-xs font-medium tracking-[0.16em]
-								uppercase
-							'
-						>
-							Current avatar
-						</div>
-						<div
-							className='
-								flex flex-col
-								items-center justify-center
-								min-h-56
-								gap-3
-								mt-4
-								rounded-[24px]
-								bg-secondary/15
-								border border-dashed border-border-light
-							'
-						>
-							<AgentAvatar item={selected_agent} size='large'></AgentAvatar>
-							<div className='text-center'>
-								<div className='text-sm font-medium'>{selected_agent.name}</div>
-								<div className='text-std-400 text-xs'>Saved on this agent</div>
-							</div>
-						</div>
-					</div>
-					<div
-						className='
-							p-4
-							rounded-[28px]
-							bg-card
-							border border-border-light
-						'
-					>
-						<div
-							className='
-								text-std-400 text-xs font-medium tracking-[0.16em]
-								uppercase
-							'
-						>
-							New avatar
-						</div>
-						<div
-							className='
-								flex
-								items-center justify-center
-								min-h-56
-								mt-4
-								rounded-[24px]
-								bg-secondary/15
-								border border-border-light
-							'
-						>
-							<AvatarPreview
-								name={selected_agent.name}
-								photo_url={avatar_preview_url}
-								avatar={pending_avatar}
-							></AvatarPreview>
-						</div>
-						<div className='text-std-400 mt-3 text-xs'>
-							{avatar_mode === 'upload'
-								? avatar_file_name ||
-									'Upload a new image to replace the current avatar.'
-								: avatar_mode === 'nice'
-									? 'Generate another rounded nice avatar until it feels right.'
-									: 'Generate another notion avatar and save when ready.'}
-						</div>
-					</div>
-				</div>
+			<div className='flex flex-col items-center gap-5'>
+				<AvatarPreview
+					name={selected_agent.name}
+					photo_url={avatar_preview_url}
+					avatar={pending_avatar}
+				></AvatarPreview>
 				<div className='flex flex-wrap gap-2'>
 					<Button
 						variant={avatar_mode === 'upload' ? 'default' : 'outline'}
@@ -244,7 +170,7 @@ const Index = () => {
 					</div>
 				) : null}
 			</div>
-			<DialogFooter>
+			<DialogFooter className='mt-4'>
 				<Button variant='outline' onClick={closeAvatarDialog}>
 					Cancel
 				</Button>
