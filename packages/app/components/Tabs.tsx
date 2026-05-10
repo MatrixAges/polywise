@@ -15,11 +15,13 @@ interface IProps {
 	under?: boolean
 	deps?: DependencyList
 	simple?: boolean
+	itemClassName?: string
+	iconSize?: number
 	onClick?: (v: string, item: Item) => void
 }
 
 const Index = (props: IProps) => {
-	const { items, active, under, simple, onClick } = props
+	const { items, active, under, simple, itemClassName, iconSize, onClick } = props
 
 	const getActive = useMemoizedFn((v: string) => {
 		if (!active) return
@@ -69,14 +71,15 @@ const Index = (props: IProps) => {
 						text-std-400/80
 						hover:bg-active active:bg-click
 						data-[active=true]:bg-active data-[active=true]:text-std-900
-					`
+					`,
+							itemClassName
 						)}
 						title={key || title}
 						data-active={getActive(key)}
 						onClick={() => onClick?.(key, item)}
 						key={key}
 					>
-						{Icon && <Icon size={simple ? 11 : 14} />}
+						{Icon && <Icon size={iconSize ?? (simple ? 11 : 14)} />}
 						{!simple && getActive(key) && (
 							<span className='font-medium capitalize'>{key || title}</span>
 						)}

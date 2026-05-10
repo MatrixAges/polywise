@@ -2,11 +2,9 @@ import { useMemo, useState } from 'react'
 import { DndContext, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { useMemoizedFn } from 'ahooks'
-import { Plus } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { ContextMenu, ContextMenuTrigger } from '@/__shadcn__/components/ui/context-menu'
-import { Tooltip } from '@/components'
 
 import { useModel } from '../context'
 import PinMenuItem from './PinMenuItem'
@@ -34,8 +32,7 @@ const Index = () => {
 		has_more,
 		onScroll,
 		loadMore,
-		sortPin,
-		createSession
+		sortPin
 	} = useModel()
 	const [menu_target, setMenuTarget] = useState<IMenuTarget | null>(null)
 	const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }))
@@ -113,28 +110,10 @@ const Index = () => {
 	return (
 		<div
 			className='
-				overflow-hidden
 				flex flex-col
-				w-[210px] h-full
-				border-border-light border-r
+				w-full
 			'
 		>
-			<div
-				className='
-					flex
-					items-center justify-between
-					h-8
-					px-3
-					border-b border-border-light
-				'
-			>
-				<span className='text-xsm text-std-500 font-medium'>Sessions</span>
-				<Tooltip title='New Session'>
-					<div className='icon_button small -mr-1' onClick={() => createSession()}>
-						<Plus></Plus>
-					</div>
-				</Tooltip>
-			</div>
 			<ContextMenu>
 				<ContextMenuTrigger className='flex min-h-0 w-full flex-1'>
 					<div className='flex h-full w-full' onContextMenuCapture={onMenuContextCapture}>

@@ -5,7 +5,6 @@ import {
 	Bot,
 	CircleCheckBig,
 	Database,
-	Folders,
 	House,
 	Library,
 	MessageSquareText,
@@ -21,7 +20,6 @@ export const nav_items = [
 	// { key: 'todo', Icon: CircleCheckBig },
 	{ key: 'linkcase', Icon: Album },
 	{ key: 'session', Icon: MessageSquareText },
-	{ key: 'project', Icon: Folders },
 	// { key: 'workflow', Icon: Route },
 	{ key: 'agent', Icon: Bot },
 	{ key: 'skill', Icon: BookOpenText }

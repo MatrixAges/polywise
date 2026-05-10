@@ -2,7 +2,7 @@ import '@abraham/reflection'
 import '@/presets'
 
 import { createRoot } from 'react-dom/client'
-import { createBrowserRouter, createHashRouter, Navigate, RouterProvider } from 'react-router-dom'
+import { createBrowserRouter, createHashRouter, RouterProvider } from 'react-router-dom'
 
 import { ErrorBoundary, Fallback } from '@/components'
 import Layout from '@/layout'
@@ -21,44 +21,16 @@ const routes: Array<RouteObject> = [
 				lazy: () => import('@/pages/home')
 			},
 			{
-				path: '/session',
-				lazy: () => import('@/pages/session')
-			},
-			{
-				path: '/todo',
-				lazy: () => import('@/pages/todo')
-			},
-			{
-				path: '/project',
-				element: <Navigate to='/session' replace />
-			},
-			{
-				path: '/workflow',
-				lazy: () => import('@/pages/workflow')
-			},
-			{
-				path: '/agent',
-				lazy: () => import('@/pages/agent')
-			},
-			{
-				path: '/skill',
-				lazy: () => import('@/pages/skill')
-			},
-			{
 				path: '/linkcase',
 				lazy: () => import('@/pages/linkcase')
 			},
 			{
-				path: '/library',
-				lazy: () => import('@/pages/library')
+				path: '/session',
+				lazy: () => import('@/pages/session')
 			},
 			{
-				path: '/database',
-				lazy: () => import('@/pages/database')
-			},
-			{
-				path: '/browser',
-				lazy: () => import('@/pages/browser')
+				path: '/agent',
+				lazy: () => import('@/pages/agent')
 			},
 			{
 				path: '/setting',
