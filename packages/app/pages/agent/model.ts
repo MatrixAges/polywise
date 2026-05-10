@@ -1,5 +1,6 @@
 import { arrayMove } from '@dnd-kit/sortable'
 import { makeAutoObservable } from 'mobx'
+import { genConfig } from 'react-nice-avatar'
 import { setStorageWhenChange } from 'stk/mobx'
 import { injectable } from 'tsyringe'
 
@@ -32,7 +33,7 @@ export default class Index {
 	skill_options = [] as Array<ISkillOption>
 	selected_agent_id = ''
 	page_mode = 'sessions' as AgentPageMode
-	current_tab = 'prompt' as AgentTab
+	current_tab = 'info' as AgentTab
 	edit_field_key = '' as '' | 'name' | 'description' | AgentTab
 	article_items = [] as Array<AgentArticleItem>
 	article_for = 'memory' as ArticleForType
@@ -105,7 +106,7 @@ export default class Index {
 		}
 
 		if (this.current_tab === 'sessions') {
-			this.current_tab = 'prompt'
+			this.current_tab = 'info'
 		}
 
 		await this.refresh()
@@ -254,7 +255,7 @@ export default class Index {
 		this.edit_field_key = ''
 
 		if (this.current_tab === 'sessions') {
-			this.current_tab = 'prompt'
+			this.current_tab = 'info'
 		}
 
 		if (!same_agent) {
@@ -266,7 +267,7 @@ export default class Index {
 	setCurrentTab(tab: AgentTab) {
 		if (tab === 'sessions') {
 			this.page_mode = 'sessions'
-			tab = 'prompt'
+			tab = 'info'
 		}
 
 		this.current_tab = tab
@@ -278,7 +279,7 @@ export default class Index {
 		this.edit_field_key = ''
 
 		if (mode === 'detail' && this.current_tab === 'sessions') {
-			this.current_tab = 'prompt'
+			this.current_tab = 'info'
 		}
 	}
 
@@ -328,6 +329,10 @@ export default class Index {
 
 		try {
 			const next_agent = await rpc.agent.create.mutate({
+				avatar: {
+					type: 'nice',
+					data: genConfig()
+				},
 				prompt: '',
 				soul: '',
 				identity: '',
@@ -339,7 +344,7 @@ export default class Index {
 			if (next_agent?.id) {
 				this.selected_agent_id = next_agent.id
 				this.page_mode = 'detail'
-				this.current_tab = 'prompt'
+				this.current_tab = 'info'
 				await this.refreshAgentRelated()
 				await this.refreshSessions()
 			}
