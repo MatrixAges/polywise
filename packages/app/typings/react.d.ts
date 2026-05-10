@@ -1,5 +1,10 @@
 import 'react'
 
+type AnyOnClickHandler<T> = {
+	(event: React.MouseEvent<T>): any
+	(...args: any[]): any
+}
+
 declare module 'react' {
 	interface DragEvent {
 		offsetX: number
@@ -11,16 +16,12 @@ declare module 'react' {
 	}
 
 	interface ButtonHTMLAttributes<T> {
-		onClick?: React.MouseEventHandler<T> | ((v: any) => any)
+		onClick?: AnyOnClickHandler<T>
 	}
 
 	interface HTMLAttributes<T> {
-		onClick?: React.MouseEventHandler<T> | ((v: any) => any)
+		onClick?: AnyOnClickHandler<T>
 	}
-}
-
-declare module 'react-dom' {
-	var prefetchDNS: (v: string) => void
 }
 
 declare global {
