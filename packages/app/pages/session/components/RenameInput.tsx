@@ -5,13 +5,13 @@ import { Input } from '@/__shadcn__/components/ui/input'
 interface IProps {
 	active: boolean
 	value: string
-	setRenameValue: (value: string) => void
-	submitRename: () => void
-	cancelRename: () => void
+	set_rename_value: (value: string) => void
+	submit_rename: () => void
+	cancel_rename: () => void
 }
 
 const Index = (props: IProps) => {
-	const { active, value, setRenameValue, submitRename, cancelRename } = props
+	const { active, value, set_rename_value, submit_rename, cancel_rename } = props
 	const ref_input = useRef<HTMLInputElement>(null)
 	const ref_is_composing = useRef(false)
 
@@ -35,7 +35,7 @@ const Index = (props: IProps) => {
 				ring-0!
 			'
 			value={value}
-			onChange={event => setRenameValue(event.target.value)}
+			onChange={event => set_rename_value(event.target.value)}
 			onCompositionStart={() => {
 				ref_is_composing.current = true
 			}}
@@ -45,7 +45,7 @@ const Index = (props: IProps) => {
 			onBlur={() => {
 				if (ref_is_composing.current) return
 
-				submitRename()
+				submit_rename()
 			}}
 			onKeyDown={event => {
 				if (event.nativeEvent.isComposing || ref_is_composing.current || event.keyCode === 229) {
@@ -54,12 +54,12 @@ const Index = (props: IProps) => {
 
 				if (event.key === 'Enter') {
 					event.preventDefault()
-					submitRename()
+					submit_rename()
 				}
 
 				if (event.key === 'Escape') {
 					event.preventDefault()
-					cancelRename()
+					cancel_rename()
 				}
 			}}
 			ref={ref_input}

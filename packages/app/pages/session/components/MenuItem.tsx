@@ -90,9 +90,9 @@ const Index = (props: IPropsMenuItem) => {
 							<RenameInput
 								active={renaming}
 								value={rename_value}
-								setRenameValue={onChangeRenameValue}
-								submitRename={onSubmitRenameProject}
-								cancelRename={onCancelRename}
+								set_rename_value={onChangeRenameValue}
+								submit_rename={onSubmitRenameProject}
+								cancel_rename={onCancelRename}
 							></RenameInput>
 						) : (
 							<span className='capitalize'>{project.name}</span>
@@ -132,9 +132,9 @@ const Index = (props: IPropsMenuItem) => {
 					{sessions.map((it, idx) => (
 						<ProjectMenuItem
 							item={it}
-							projectId={project.id}
-							projectIndex={index}
-							sessionIndex={idx}
+							project_id={project.id}
+							project_index={index}
+							session_index={idx}
 							renaming={rename_session_id === it.id}
 							selected={selected_session_id === it.id}
 							key={it.id}

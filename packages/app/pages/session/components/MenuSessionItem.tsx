@@ -9,7 +9,7 @@ import { useModel } from '../context'
 import type { IPropsMenuSessionItem } from '../types'
 
 const Index = (props: IPropsMenuSessionItem) => {
-	const { item, sessionIndex, selected, renaming, renameValue, title, pin, projectIndex, className, onClick } =
+	const { item, session_index, selected, renaming, rename_value, title, pin, project_index, class_name, on_click } =
 		props
 	const { is_runing, unread } = item
 	const { setRenameValue, renameSession, onCancelRename } = useModel()
@@ -24,21 +24,21 @@ const Index = (props: IPropsMenuSessionItem) => {
 
 	return (
 		<div
-			className={$cx('click_button group', className, renaming && 'no_transition', selected && 'active')}
-			onClick={renaming ? undefined : onClick}
+			className={$cx('click_button group', class_name, renaming && 'no_transition', selected && 'active')}
+			onClick={renaming ? undefined : on_click}
 			data-pin={pin ? 'true' : 'false'}
-			data-project-index={projectIndex}
-			data-session-index={sessionIndex}
+			data-project-index={project_index}
+			data-session-index={session_index}
 			data-id={item.id}
 		>
 			<div className='min-w-0 flex-1 truncate'>
 				{renaming ? (
 					<RenameInput
 						active={renaming}
-						value={renameValue}
-						setRenameValue={setRenameValue}
-						submitRename={renameSession}
-						cancelRename={onCancelRename}
+						value={rename_value}
+						set_rename_value={setRenameValue}
+						submit_rename={renameSession}
+						cancel_rename={onCancelRename}
 					></RenameInput>
 				) : (
 					title || <span className='truncate'>{item.title}</span>

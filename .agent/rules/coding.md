@@ -27,7 +27,7 @@ For development targeting different tech stacks and code modules, please strictl
 
 ### Naming and Formatting
 
-- **Naming Conventions**: All ordinary variables must use `snake_case`, all functions and methods must use `camelCase`, all frontend component props parameters and prop field names must use lower camelCase starting with a lowercase letter, and all component and page files must use `PascalCase`.
+- **Naming Conventions**: All ordinary variables must use `snake_case`, all functions and methods must use `camelCase`, frontend component props parameters and prop field names must use lower camelCase starting with a lowercase letter by default, but all component props parameters and prop field names under `packages/app/pages` must use `snake_case`, and all component and page files must use `PascalCase`.
 - **No Underscores**: The naming of any function or method (including private methods within a class) absolutely cannot start with the `_` symbol.
 - **Type Notation**: When declaring array types, the `Array<T>` generic syntax must be strictly enforced, and the `T[]` syntax is strictly prohibited.
 - **Code Blank Lines**: When adjacent lines of code switch between async/sync styles or execute different logical blocks, a blank line must be forcibly inserted for visual separation.

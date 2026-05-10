@@ -36,18 +36,18 @@ const Index = ({ agent }: IProps) => {
 				<div className='flex flex-col'>
 					{edit_field_key === 'name' ? (
 						<EditableField
-							className='text-base! font-semibold'
+							class_name='text-base! font-semibold'
 							active
 							value={agent.name}
-							maxLength={24}
-							onSubmit={value =>
+							max_length={24}
+							on_submit={value =>
 								submitEditableField({
 									id: agent.id,
 									key: 'name',
 									value
 								})
 							}
-							onCancel={cancelEditField}
+							on_cancel={cancelEditField}
 						></EditableField>
 					) : (
 						<div
@@ -59,19 +59,19 @@ const Index = ({ agent }: IProps) => {
 					)}
 					{edit_field_key === 'description' ? (
 						<EditableField
-							className='text-std-400 text-sm! leading-5.5'
+							class_name='text-std-400 text-sm! leading-5.5'
 							active
 							value={agent.description || ''}
 							placeholder='Add a short description for this agent'
-							maxLength={60}
-							onSubmit={value =>
+							max_length={60}
+							on_submit={value =>
 								submitEditableField({
 									id: agent.id,
 									key: 'description',
 									value
 								})
 							}
-							onCancel={cancelEditField}
+							on_cancel={cancelEditField}
 						></EditableField>
 					) : (
 						<div

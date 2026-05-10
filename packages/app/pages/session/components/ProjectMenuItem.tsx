@@ -6,7 +6,7 @@ import MenuSessionItem from './MenuSessionItem'
 import type { IPropsProjectMenuItem } from '../types'
 
 const Index = (props: IPropsProjectMenuItem) => {
-	const { item, projectId, projectIndex, sessionIndex, selected, renaming } = props
+	const { item, project_id, project_index, session_index, selected, renaming } = props
 	const { title } = item
 	const { rename_value, selectProjectSession } = useModel()
 
@@ -14,8 +14,8 @@ const Index = (props: IPropsProjectMenuItem) => {
 		if (renaming) return
 
 		selectProjectSession({
-			project_id: projectId,
-			project_index: projectIndex,
+			project_id,
+			project_index,
 			session_id: item.id
 		})
 	}
@@ -23,11 +23,11 @@ const Index = (props: IPropsProjectMenuItem) => {
 	return (
 		<MenuSessionItem
 			item={item}
-			sessionIndex={sessionIndex}
+			session_index={session_index}
 			selected={selected}
 			renaming={renaming}
-			renameValue={rename_value}
-			projectIndex={projectIndex}
+			rename_value={rename_value}
+			project_index={project_index}
 			title={
 				<div
 					className='
@@ -41,7 +41,7 @@ const Index = (props: IPropsProjectMenuItem) => {
 					{title}
 				</div>
 			}
-			onClick={onClick}
+			on_click={onClick}
 		></MenuSessionItem>
 	)
 }

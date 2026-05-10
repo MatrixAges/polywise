@@ -159,10 +159,10 @@ const Index = () => {
 														<PinMenuItem
 															item={item}
 															pin
-															sessionIndex={session_index}
+															session_index={session_index}
 															selected={selected}
 															renaming={renaming}
-															renameValue={
+															rename_value={
 																renaming
 																	? rename_value
 																	: ''
@@ -184,10 +184,10 @@ const Index = () => {
 										<SessionMenuItem
 											item={item}
 											pin={false}
-											sessionIndex={session_index}
+											session_index={session_index}
 											selected={selected}
 											renaming={renaming}
-											renameValue={renaming ? rename_value : ''}
+											rename_value={renaming ? rename_value : ''}
 											key={item.id}
 										></SessionMenuItem>
 									)

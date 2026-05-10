@@ -19,9 +19,9 @@ export interface IPropsMenuItem {
 
 export interface IPropsProjectMenuItem {
 	item: Session
-	projectId: string
-	projectIndex: number
-	sessionIndex: number
+	project_id: string
+	project_index: number
+	session_index: number
 	renaming: boolean
 	selected: boolean
 }
@@ -29,21 +29,21 @@ export interface IPropsProjectMenuItem {
 export interface IPropsSessionMenuItem {
 	item: Session
 	pin: boolean
-	sessionIndex: number
+	session_index: number
 	selected: boolean
 	renaming: boolean
-	renameValue: string
+	rename_value: string
 }
 
 export interface IPropsMenuSessionItem {
 	item: Session
-	sessionIndex: number
+	session_index: number
 	selected: boolean
 	renaming: boolean
-	renameValue: string
+	rename_value: string
 	title?: ReactNode
 	pin?: boolean
-	projectIndex?: number
-	className?: string
-	onClick?: () => void
+	project_index?: number
+	class_name?: string
+	on_click?: () => void
 }

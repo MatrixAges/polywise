@@ -10,14 +10,14 @@ interface IProps {
 	value: string
 	multiline?: boolean
 	placeholder?: string
-	className?: string
-	maxLength?: number
-	onSubmit: (value: string) => void
-	onCancel: () => void
+	class_name?: string
+	max_length?: number
+	on_submit: (value: string) => void
+	on_cancel: () => void
 }
 
 const Index = (props: IProps) => {
-	const { active, value, multiline, placeholder, className, maxLength, onSubmit, onCancel } = props
+	const { active, value, multiline, placeholder, class_name, max_length, on_submit, on_cancel } = props
 	const ref_input = useRef<HTMLInputElement | HTMLTextAreaElement>(null)
 	const ref_is_composing = useRef(false)
 	const [draft_value, setDraftValue] = useState(value)
@@ -40,10 +40,10 @@ const Index = (props: IProps) => {
 	if (multiline) {
 		return (
 			<Textarea
-				className={$cx(className)}
+				className={$cx(class_name)}
 				value={draft_value}
 				placeholder={placeholder}
-				maxLength={maxLength}
+				maxLength={max_length}
 				onChange={event => {
 					setDraftValue(event.target.value)
 				}}
@@ -56,12 +56,12 @@ const Index = (props: IProps) => {
 				onBlur={event => {
 					if (ref_is_composing.current) return
 
-					onSubmit(event.target.value)
+					on_submit(event.target.value)
 				}}
 				onKeyDown={event => {
 					if (event.key === 'Escape') {
 						event.preventDefault()
-						onCancel()
+						on_cancel()
 					}
 				}}
 				ref={ref_input as RefObject<HTMLTextAreaElement>}
@@ -80,11 +80,11 @@ const Index = (props: IProps) => {
 				leading-5.5
 				bg-transparent!
 			`,
-				className
+				class_name
 			)}
 			value={draft_value}
 			placeholder={placeholder}
-			maxLength={maxLength}
+			maxLength={max_length}
 			onChange={event => {
 				setDraftValue(event.target.value)
 			}}
@@ -97,7 +97,7 @@ const Index = (props: IProps) => {
 			onBlur={event => {
 				if (ref_is_composing.current) return
 
-				onSubmit(event.target.value)
+				on_submit(event.target.value)
 			}}
 			onKeyDown={event => {
 				if (event.nativeEvent.isComposing || ref_is_composing.current || event.keyCode === 229) {
@@ -106,12 +106,12 @@ const Index = (props: IProps) => {
 
 				if (event.key === 'Enter') {
 					event.preventDefault()
-					onSubmit(event.currentTarget.value)
+					on_submit(event.currentTarget.value)
 				}
 
 				if (event.key === 'Escape') {
 					event.preventDefault()
-					onCancel()
+					on_cancel()
 				}
 			}}
 			ref={ref_input as RefObject<HTMLInputElement>}

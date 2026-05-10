@@ -4,20 +4,20 @@ import { useModel } from '@/pages/session/context'
 import type { Session } from '@core/db'
 
 interface IProps {
-	sessionItem: Session
+	session_item: Session
 }
 
 const Index = (props: IProps) => {
-	const { sessionItem } = props
+	const { session_item } = props
 	const { onRenameSession, removeSession } = useModel()
 
 	return (
 		<ContextMenuContent>
-			<ContextMenuItem onClick={() => onRenameSession(sessionItem.id, sessionItem.title)}>
+			<ContextMenuItem onClick={() => onRenameSession(session_item.id, session_item.title)}>
 				Rename
 			</ContextMenuItem>
 			<ContextMenuSeparator />
-			<ContextMenuItem variant='destructive' onClick={() => removeSession(sessionItem.id)}>
+			<ContextMenuItem variant='destructive' onClick={() => removeSession(session_item.id)}>
 				Delete
 			</ContextMenuItem>
 		</ContextMenuContent>
