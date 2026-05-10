@@ -18,6 +18,12 @@ export default async (s: Index, bash: Bash, system?: boolean) => {
 
 	const { tools } = await createBashTool({
 		destination: '/',
+		extraInstructions: [
+			'Prefer narrow, scoped commands over broad recursive scans.',
+			'Do not scan from filesystem root such as `find /`, `grep -r /`, or similar whole-tree discovery commands unless the user explicitly requires it.',
+			'Start from the current working directory or another precise known path, and limit the search scope as much as possible.',
+			'For custom tools, use `meta_tool` instead of inspecting tool files with bash.'
+		].join('\n'),
 		sandbox: {
 			async readFile(virtual_path) {
 				const real_path = getRealPath(s.cwd, virtual_path, path_mappings)
