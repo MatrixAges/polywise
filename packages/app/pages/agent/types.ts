@@ -9,8 +9,19 @@ export type AgentSessionItem = AgentSessionResponse['sessions'][number]
 export type AgentSkillItem = RPCOutput['agent']['getSkills'][number]
 export type AgentArticleItem = RPCOutput['agent']['getArticles'][number]
 export type SkillItem = RPCOutput['skill']['query'][number]
+export type AgentToolItem = RPCOutput['tool']['query'][number]
 export type AgentPageMode = 'sessions' | 'detail'
-export type AgentTab = 'sessions' | 'info' | 'prompt' | 'soul' | 'identity' | 'memory' | 'skills' | 'content' | 'graph'
+export type AgentTab =
+	| 'sessions'
+	| 'info'
+	| 'prompt'
+	| 'soul'
+	| 'identity'
+	| 'memory'
+	| 'skills'
+	| 'tools'
+	| 'content'
+	| 'graph'
 export type ArticleForType = 'linkcase' | 'wiki' | 'memory' | 'user'
 export type AvatarMode = 'upload' | 'nice' | 'notion'
 
@@ -19,6 +30,12 @@ export interface ISkillOption {
 	label: string
 	description: string
 	path: string
+}
+
+export interface IToolOption {
+	value: string
+	label: string
+	description: string
 }
 
 export interface IAgentAvatarNice {
@@ -47,6 +64,7 @@ export interface IUpdateAgentArgs {
 	soul?: string
 	identity?: string
 	memory?: string
+	tools?: Array<string>
 	model?: DefaultModel
 	photo?: Uint8Array | null
 	avatar?: AgentAvatarConfig | null

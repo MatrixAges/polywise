@@ -135,6 +135,7 @@ export default class Index {
 		this.event = event
 
 		await this.initSession(is_cron, title)
+		await this.getOwnerAgent()
 		await this.loadSkillMap()
 		await this.loadCustomToolsMap()
 

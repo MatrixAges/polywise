@@ -15,6 +15,7 @@ import setActive from './setActive'
 import skill from './skill'
 import test from './test'
 import todo from './todo'
+import tool from './tool'
 import update from './update'
 
 import type { inferRouterInputs, inferRouterOutputs } from '@trpc/server'
@@ -24,6 +25,7 @@ export const router = r({
 	file,
 	project,
 	skill,
+	tool,
 	todo,
 	session,
 	provider,

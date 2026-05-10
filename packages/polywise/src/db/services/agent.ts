@@ -13,6 +13,21 @@ interface ArgsGetAgents {
 	limit?: number
 }
 
+const normalizeAgentTools = (value: unknown): Array<string> => {
+	if (!Array.isArray(value)) {
+		return []
+	}
+
+	return Array.from(
+		new Set(
+			value
+				.filter((item): item is string => typeof item === 'string')
+				.map(item => item.trim())
+				.filter(Boolean)
+		)
+	)
+}
+
 const isValidAgentModel = (value: unknown): value is TableModel => {
 	if (!value || typeof value !== 'object') {
 		return false
@@ -51,14 +66,23 @@ export const normalizeAgentModel = (value: unknown): TableModel => {
 }
 
 const normalizeAgentValues = <T extends Partial<AgentInsert>>(values: T): T => {
-	if (!('model' in values)) {
-		return values
+	let next_values = values as Partial<AgentInsert>
+
+	if ('model' in next_values) {
+		next_values = {
+			...next_values,
+			model: normalizeAgentModel(next_values.model)
+		}
 	}
 
-	return {
-		...values,
-		model: normalizeAgentModel(values.model)
-	} as T
+	if ('tools' in next_values) {
+		next_values = {
+			...next_values,
+			tools: normalizeAgentTools(next_values.tools)
+		}
+	}
+
+	return next_values as T
 }
 
 const normalizeAgent = (row: Agent | undefined) => {
@@ -66,7 +90,11 @@ const normalizeAgent = (row: Agent | undefined) => {
 		return row
 	}
 
-	const next_row = { ...row, model: normalizeAgentModel(row.model) }
+	const next_row = {
+		...row,
+		model: normalizeAgentModel(row.model),
+		tools: normalizeAgentTools(row.tools)
+	}
 	const photo = row.photo
 
 	if (!photo) {

@@ -10,6 +10,7 @@ import DetailInfo from './DetailInfo'
 import DetailMenu from './DetailMenu'
 import GraphPanel from './GraphPanel'
 import SkillSelect from './SkillSelect'
+import ToolSelect from './ToolSelect'
 
 import type { AgentTab } from '../types'
 
@@ -65,6 +66,7 @@ const Index = () => {
 				.with('content', () => <ContentPanel></ContentPanel>)
 				.with('graph', () => <GraphPanel agent={selected_agent}></GraphPanel>)
 				.with('skills', () => <SkillSelect></SkillSelect>)
+				.with('tools', () => <ToolSelect></ToolSelect>)
 				.when(isTextTab, text_tab => (
 					<Textarea
 						className='

@@ -19,10 +19,12 @@ import type {
 	AgentSessionItem,
 	AgentSkillItem,
 	AgentTab,
+	AgentToolItem,
 	ArticleForType,
 	AvatarMode,
 	IEditableFieldArgs,
 	ISkillOption,
+	IToolOption,
 	IUpdateAgentArgs
 } from './types'
 
@@ -31,6 +33,7 @@ export default class Index {
 	agents = [] as Array<AgentItem>
 	skill_items = [] as Array<AgentSkillItem>
 	skill_options = [] as Array<ISkillOption>
+	tool_options = [] as Array<IToolOption>
 	selected_agent_id = ''
 	page_mode = 'sessions' as AgentPageMode
 	current_tab = 'info' as AgentTab
@@ -60,6 +63,10 @@ export default class Index {
 
 	get selected_skill_ids() {
 		return this.skill_items.map(item => item.id)
+	}
+
+	get selected_tool_names() {
+		return this.selected_agent?.tools || []
 	}
 
 	get selected_article() {
@@ -113,8 +120,11 @@ export default class Index {
 	}
 
 	async refresh() {
-		const agent_items = await rpc.agent.query.query()
-		const skill_items = await rpc.skill.query.query()
+		const [agent_items, skill_items, tool_items] = await Promise.all([
+			rpc.agent.query.query(),
+			rpc.skill.query.query(),
+			rpc.tool.query.query()
+		])
 
 		this.agents = agent_items as Array<AgentItem>
 		this.skill_options = (skill_items as Array<AgentSkillItem>).map(item => ({
@@ -122,6 +132,11 @@ export default class Index {
 			label: item.name,
 			description: item.desc,
 			path: item.path
+		}))
+		this.tool_options = (tool_items as Array<AgentToolItem>).map(item => ({
+			value: item.name,
+			label: item.name,
+			description: item.description
 		}))
 
 		if (!this.agents.length) {
@@ -446,6 +461,15 @@ export default class Index {
 		const next_skill_items = await rpc.agent.getSkills.query({ agent_id: this.selected_agent_id })
 
 		this.skill_items = next_skill_items as Array<AgentSkillItem>
+	}
+
+	async setTools(tool_names: Array<string>) {
+		if (!this.selected_agent_id) return
+
+		await this.updateAgent({
+			id: this.selected_agent_id,
+			tools: tool_names
+		})
 	}
 
 	async createArticle() {

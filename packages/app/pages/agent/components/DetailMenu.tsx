@@ -1,4 +1,14 @@
-import { BookOpenText, Brain, Database, GitBranch, Info, MessageSquareText, Sparkles, UserRound } from 'lucide-react'
+import {
+	BookOpenText,
+	Brain,
+	Database,
+	GitBranch,
+	Info,
+	MessageSquareText,
+	Sparkles,
+	UserRound,
+	Wrench
+} from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { useModel } from '../context'
@@ -12,6 +22,7 @@ const tabs = [
 	{ key: 'identity', title: 'identity', Icon: UserRound },
 	{ key: 'memory', title: 'memory', Icon: Database },
 	{ key: 'skills', title: 'skills', Icon: Sparkles },
+	{ key: 'tools', title: 'tools', Icon: Wrench },
 	{ key: 'content', title: 'content', Icon: BookOpenText },
 	{ key: 'graph', title: 'graph', Icon: GitBranch }
 ] as const

@@ -15,6 +15,8 @@ export default sqliteTable(
 		photo: blob('photo'),
 		// Agent avatar: generate by program
 		avatar: text('avatar', { mode: 'json' }).$type<any>(),
+		// Enabled custom tools for this agent
+		tools: text('tools', { mode: 'json' }).$type<Array<string>>().default([]).notNull(),
 		// How agent run
 		prompt: text('prompt'),
 		// What's in agent's mind

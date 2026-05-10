@@ -25,6 +25,7 @@ import {
 	createContentTool,
 	createContextTool,
 	createCronTool,
+	createCustomToolSet,
 	createEditFileTool,
 	createErrorCollectTool,
 	createGlobTool,
@@ -117,6 +118,7 @@ export default async (s: Index, message: Message) => {
 	const custom_tools_prompt = getCustomToolsPrompt(s.custom_tools_map)
 	const skill_prompt = getSkillPrompt(s.skill_map)
 	const title_focus = getTitleFocus({ s, message, is_first_message })
+	const custom_tools = await createCustomToolSet(s)
 
 	const mode_prompt = match({ mode: s.mode, plan_stage: s.plan_stage })
 		.with({ mode: 'plan' }, () => plan_mode_prompt)
@@ -141,6 +143,7 @@ export default async (s: Index, message: Message) => {
 		.join('\n\n')
 
 	const tools = {
+		...custom_tools,
 		...s.model.tools,
 		...mcp_tools,
 		context_tool: createContextTool(s),

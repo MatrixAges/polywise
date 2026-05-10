@@ -45,6 +45,7 @@ export const todo_update_input_schema = todo_insert_schema
 export const agent_insert_schema = createInsertSchema(agent, {
 	photo: z.unknown().optional(),
 	avatar: z.unknown().optional(),
+	tools: z.array(z.string()).optional(),
 	model: agent_model_schema,
 	created_at: todo_timestamp_schema.optional(),
 	updated_at: todo_timestamp_schema.optional()
