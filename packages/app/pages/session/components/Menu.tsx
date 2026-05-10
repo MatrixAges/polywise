@@ -18,7 +18,7 @@ const Index = () => {
 				w-[210px] h-full
 				bg-std-50/60
 				border-r border-border-light
-				dark:bg-std-50
+				dark:bg-transparent
 			'
 		>
 			<div

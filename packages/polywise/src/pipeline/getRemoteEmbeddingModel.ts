@@ -19,7 +19,7 @@ export default async () => {
 			}
 		: undefined
 
-	const provider_name = custom_list.some(item => item.name === provider) ? 'open_responses' : provider
+	const provider_name = custom_list.some(item => item.name === provider) ? 'open_compatible' : provider
 
 	return getModel({
 		provider: provider_name,

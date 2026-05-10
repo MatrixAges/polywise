@@ -3,15 +3,16 @@ import { Pin } from 'lucide-react'
 
 import { ArrowLeft, Grip } from '@/components/animate'
 import RenameInput from '@/pages/session/components/RenameInput'
+import { fromNow } from '@/utils'
 
 import { useModel } from '../context'
 
 import type { IPropsMenuSessionItem } from '../types'
 
 const Index = (props: IPropsMenuSessionItem) => {
-	const { item, session_index, selected, renaming, rename_value, title, pin, project_index, class_name, on_click } =
+	const { item, session_index, selected, renaming, rename_value, title, pin, project_index, class_name, onClick } =
 		props
-	const { is_runing, unread } = item
+	const { is_runing, unread, updated_at } = item
 	const { setRenameValue, renameSession, onCancelRename } = useModel()
 
 	const Status = useMemo(() => {
@@ -24,8 +25,20 @@ const Index = (props: IPropsMenuSessionItem) => {
 
 	return (
 		<div
-			className={$cx('click_button group', class_name, renaming && 'no_transition', selected && 'active')}
-			onClick={renaming ? undefined : on_click}
+			className={$cx(
+				`
+				flex flex-col
+				items-start
+				gap-1
+				rounded-sm
+				group
+				click_button
+			`,
+				class_name,
+				renaming && 'no_transition',
+				selected && 'active'
+			)}
+			onClick={renaming ? undefined : onClick}
 			data-pin={pin ? 'true' : 'false'}
 			data-project-index={project_index}
 			data-session-index={session_index}
@@ -44,7 +57,17 @@ const Index = (props: IPropsMenuSessionItem) => {
 					title || <span className='truncate'>{item.title}</span>
 				)}
 			</div>
-			{Status}
+			<div
+				className='
+					flex
+					items-center justify-between
+					w-full
+					text-std-400 text-xs
+				'
+			>
+				<span>{fromNow(updated_at)}</span>
+				{Status}
+			</div>
 		</div>
 	)
 }

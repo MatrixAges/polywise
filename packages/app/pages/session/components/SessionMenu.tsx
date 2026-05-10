@@ -134,16 +134,6 @@ const Index = () => {
 							>
 								{pins.length > 0 && (
 									<>
-										<div
-											className='
-												px-2.5 pt-1
-												text-[11px] text-std-400 font-medium
-												tracking-wide
-												uppercase
-											'
-										>
-											Pinned
-										</div>
 										<DndContext sensors={sensors} onDragEnd={onDragEnd}>
 											<SortableContext
 												items={pins.map(item => item.id)}

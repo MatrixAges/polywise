@@ -28,8 +28,11 @@ type RenderBlock =
 	| {
 			type: 'tools'
 			items: Array<PartWithDuration>
-			defaultOpen: boolean
 			summary: string
+	  }
+	| {
+			type: 'active-tool'
+			item: PartWithDuration
 	  }
 
 const isPartDurationPart = (part: SessionMessage['parts'][number] | undefined): part is MessagePartDurationUIPart => {
@@ -119,13 +122,21 @@ const getRenderBlocks = (items: Array<PartWithDuration>, streaming: boolean) => 
 	const blocks = [] as Array<RenderBlock>
 	let current_tool_group = [] as Array<PartWithDuration>
 
-	const flushToolGroup = (default_open = false) => {
+	const flushToolGroup = (show_active_tool = false) => {
 		if (current_tool_group.length === 0) return
+
+		if (show_active_tool) {
+			blocks.push({
+				type: 'active-tool',
+				item: current_tool_group[current_tool_group.length - 1]
+			})
+			current_tool_group = []
+			return
+		}
 
 		blocks.push({
 			type: 'tools',
 			items: current_tool_group,
-			defaultOpen: default_open,
 			summary: getToolsSummary(current_tool_group)
 		})
 
@@ -140,7 +151,7 @@ const getRenderBlocks = (items: Array<PartWithDuration>, streaming: boolean) => 
 			return
 		}
 
-		flushToolGroup(false)
+		flushToolGroup()
 		blocks.push({
 			type: 'part',
 			item
@@ -154,6 +165,7 @@ const getRenderBlocks = (items: Array<PartWithDuration>, streaming: boolean) => 
 
 const getBlockDuration = (block: RenderBlock) => {
 	if (block.type === 'part') return block.item.duration ?? 0
+	if (block.type === 'active-tool') return block.item.duration ?? 0
 
 	return block.items.reduce((total, item) => total + (item.duration ?? 0), 0)
 }
@@ -180,17 +192,16 @@ const formatDuration = (duration: number) => {
 }
 
 const ToolSummaryBlock = (props: {
-	defaultOpen: boolean
 	items: Array<PartWithDuration>
 	messageId: string
 	streaming: boolean
 	summary: string
 	answer: IPropsMessage['answer']
 }) => {
-	const { defaultOpen, items, messageId, streaming, summary, answer } = props
+	const { items, messageId, streaming, summary, answer } = props
 
 	return (
-		<Collapsible className='group/process mb-0! w-full' defaultOpen={defaultOpen}>
+		<Collapsible className='group/process mb-0! w-full'>
 			<CollapsibleTrigger
 				className='
 					flex
@@ -322,14 +333,21 @@ const Index = (props: IPropsMessage) => {
 	const renderBlock = (block: RenderBlock, index: number, total_blocks: number) => {
 		return block.type === 'tools' ? (
 			<ToolSummaryBlock
-				defaultOpen={block.defaultOpen}
 				items={block.items}
 				summary={block.summary}
-				messageId={`${message.id}-${index}-${block.defaultOpen ? 'open' : 'closed'}`}
+				messageId={`${message.id}-${index}-summary`}
 				streaming={streaming}
 				answer={answer}
-				key={`${message.id}-process-${index}-${block.defaultOpen ? 'open' : 'closed'}`}
+				key={`${message.id}-process-${index}-summary`}
 			></ToolSummaryBlock>
+		) : block.type === 'active-tool' ? (
+			<Part
+				streaming={streaming && index === total_blocks - 1}
+				part={block.item.part}
+				duration={block.item.duration}
+				answer={answer}
+				key={`${message.id}-active-tool-${index}`}
+			></Part>
 		) : (
 			<Part
 				streaming={streaming && index === total_blocks - 1}

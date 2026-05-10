@@ -98,6 +98,22 @@ const normalizeJinaModel = (model: string, type: ModelType) => {
 	return model
 }
 
+const normalizeOpenResponsesUrl = (value?: string) => {
+	if (!value) return value
+
+	const normalized = value.replace(/\/+$/, '')
+
+	if (normalized.endsWith('/responses')) {
+		return normalized
+	}
+
+	if (normalized.endsWith('/v1')) {
+		return `${normalized}/responses`
+	}
+
+	return `${normalized}/v1/responses`
+}
+
 const mergeProviderOptions = (...values: Array<ProviderOptions | undefined>) => {
 	const merged = values.reduce<Record<string, unknown>>((target, current) => {
 		if (!current) return target
@@ -156,7 +172,7 @@ const getEffortProviderOptions = (
 		}
 		case 'xiaomi_mimo':
 		case 'open_compatible':
-			return { 'openai-compatible': { reasoningEffort: effort } } as ProviderOptions
+			return { openaiCompatible: { reasoningEffort: effort } } as ProviderOptions
 		case 'google_gemini': {
 			const thinkingLevel = getSupportedEffort(effort, ['minimal', 'low', 'medium', 'high'])
 			const thinkingBudget = getThinkingBudget(effort)
@@ -273,7 +289,10 @@ export const getModel = async <T extends ModelType = 'text'>(args: GetModelArgs<
 			case 'xiaomi_mimo':
 			case 'open_compatible':
 				return {
-					model: (await import('@ai-sdk/openai-compatible')).createOpenAICompatible(options)(model),
+					model: (await import('@ai-sdk/openai-compatible')).createOpenAICompatible({
+						...options,
+						supportsStructuredOutputs: true
+					})(model),
 					provider_options: effort_provider_options
 				}
 			case 'a2a':
@@ -289,7 +308,7 @@ export const getModel = async <T extends ModelType = 'text'>(args: GetModelArgs<
 					model: (await import('@ai-sdk/open-responses')).createOpenResponses({
 						...options,
 						name: 'open_responses',
-						url: options.baseURL as string
+						url: normalizeOpenResponsesUrl(options?.baseURL)
 					})(model),
 					provider_options: effort_provider_options
 				}

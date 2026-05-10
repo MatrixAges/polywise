@@ -25,7 +25,7 @@ export default async (s: Index) => {
 	let target_provider_name = provider
 
 	if (custom_providers.find(item => item.name === provider)) {
-		target_provider_name = 'open_responses'
+		target_provider_name = 'open_compatible'
 	}
 
 	s.model = await getModel({ provider: target_provider_name, model, effort, options: target_options })

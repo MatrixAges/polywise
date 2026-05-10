@@ -18,15 +18,19 @@ export default async (s: Session, focus: string) => {
 
 	const recent_messages = s.model_messages.slice(-4).map(extract).filter(Boolean).join('\n')
 
-	const res = await agent.generate({
-		prompt: getTitlePrompt({
-			recent_messages,
-			title: s.session.title,
-			focus,
-			intent: s.context.intent
+	try {
+		const res = await agent.generate({
+			prompt: getTitlePrompt({
+				recent_messages,
+				title: s.session.title,
+				focus,
+				intent: s.context.intent
+			})
 		})
-	})
-	const next_title = normalizeTitle((res.output as TitleAgentOutput)?.title || '')
+		const next_title = normalizeTitle((res.output as TitleAgentOutput)?.title || '')
 
-	return next_title
+		return next_title
+	} catch {
+		return ''
+	}
 }

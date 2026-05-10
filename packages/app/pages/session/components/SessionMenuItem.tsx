@@ -15,7 +15,7 @@ const Index = (props: IPropsSessionMenuItem) => {
 			selected={selected}
 			renaming={renaming}
 			rename_value={rename_value}
-			on_click={() => selectGlobalSession(item.id)}
+			onClick={() => selectGlobalSession(item.id)}
 		></MenuSessionItem>
 	)
 }

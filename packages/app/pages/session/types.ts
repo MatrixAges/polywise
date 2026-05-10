@@ -45,5 +45,5 @@ export interface IPropsMenuSessionItem {
 	pin?: boolean
 	project_index?: number
 	class_name?: string
-	on_click?: () => void
+	onClick?: () => void
 }

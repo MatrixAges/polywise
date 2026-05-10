@@ -269,7 +269,7 @@ export default async (s: Index, message: Message) => {
 			}
 
 			if (title_focus) {
-				updateTitle(s, title_focus)
+				void updateTitle(s, title_focus).catch(() => {})
 			}
 		},
 		onFinish: async ({ responseMessage }) => {
