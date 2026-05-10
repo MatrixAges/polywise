@@ -5,7 +5,7 @@ import { match } from 'ts-pattern'
 import { Textarea } from '@/__shadcn__/components/ui/textarea'
 
 import { useModel } from '../context'
-import BrainPanel from './BrainPanel'
+import ContentPanel from './ContentPanel'
 import DetailInfo from './DetailInfo'
 import DetailMenu from './DetailMenu'
 import GraphPanel from './GraphPanel'
@@ -62,7 +62,7 @@ const Index = () => {
 			<DetailMenu active_tab={active_tab}></DetailMenu>
 			{match(active_tab)
 				.with('info', () => <DetailInfo agent={selected_agent}></DetailInfo>)
-				.with('content', () => <BrainPanel></BrainPanel>)
+				.with('content', () => <ContentPanel></ContentPanel>)
 				.with('graph', () => <GraphPanel agent={selected_agent}></GraphPanel>)
 				.with('skills', () => <SkillSelect></SkillSelect>)
 				.when(isTextTab, text_tab => (

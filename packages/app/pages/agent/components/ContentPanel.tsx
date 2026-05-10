@@ -1,7 +1,6 @@
 import { Album, BookOpenText, Brain, Plus, Save, Trash2, UserRound } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
-import { Button } from '@/__shadcn__/components/ui/button'
 import { Input } from '@/__shadcn__/components/ui/input'
 import { Textarea } from '@/__shadcn__/components/ui/textarea'
 import { Tabs } from '@/components'
@@ -39,16 +38,12 @@ const Index = () => {
 			className='
 				flex flex-1
 				h-full
-				px-6
 			'
 		>
 			<div
 				className='
 					flex flex-col shrink-0
 					w-48
-					gap-3
-					py-3
-					pr-3
 				'
 			>
 				<div className='flex items-center justify-between gap-2'>
