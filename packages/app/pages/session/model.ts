@@ -16,7 +16,8 @@ type SelectedSessionSource = '' | 'project' | 'session'
 @injectable()
 export default class Index {
 	selected_project_id = ''
-	selected_session_id = ''
+	project_selected_session_id = ''
+	normal_selected_session_id = ''
 	selected_session_source = '' as SelectedSessionSource
 	files_project_id = ''
 	files_session_id = ''
@@ -52,11 +53,24 @@ export default class Index {
 		)
 	}
 
+	get selected_session_id() {
+		if (this.selected_session_source === 'project') {
+			return this.project_selected_session_id
+		}
+
+		if (this.selected_session_source === 'session') {
+			return this.normal_selected_session_id
+		}
+
+		return ''
+	}
+
 	async init() {
 		const deinit = setStorageWhenChange(
 			[
-				{ project_selected_project_id: 'selected_project_id' },
-				{ project_selected_session_id: 'selected_session_id' },
+				'selected_project_id',
+				'project_selected_session_id',
+				'normal_selected_session_id',
 				'selected_session_source',
 				'menu_tab',
 				{ project_side_panel_open: 'side_panel_open' },
@@ -68,6 +82,15 @@ export default class Index {
 		)
 
 		this.util.acts = [deinit]
+
+		if (
+			this.selected_session_source === 'session' &&
+			!this.normal_selected_session_id &&
+			this.project_selected_session_id
+		) {
+			this.normal_selected_session_id = this.project_selected_session_id
+			this.project_selected_session_id = ''
+		}
 
 		await Promise.all([this.getProjectList(), this.refreshSessions()])
 
@@ -106,7 +129,7 @@ export default class Index {
 
 		this.menu_tab = 'projects'
 		this.selected_project_id = project_id
-		this.selected_session_id = session_id
+		this.project_selected_session_id = session_id
 		this.selected_session_source = 'project'
 		this.content_tab = 'session'
 
@@ -120,7 +143,7 @@ export default class Index {
 
 	selectGlobalSession(session_id: string) {
 		this.menu_tab = 'sessions'
-		this.selected_session_id = session_id
+		this.normal_selected_session_id = session_id
 		this.selected_session_source = 'session'
 		this.content_tab = 'session'
 
@@ -238,10 +261,13 @@ export default class Index {
 
 			const session_id_list = this.pins.map(item => item.id).concat(this.sessions.map(item => item.id))
 
-			if (this.selected_session_source === 'session' && this.selected_session_id) {
-				if (!session_id_list.includes(this.selected_session_id)) {
-					this.selected_session_id = ''
-					this.selected_session_source = ''
+			if (this.normal_selected_session_id) {
+				if (!session_id_list.includes(this.normal_selected_session_id)) {
+					this.normal_selected_session_id = ''
+
+					if (this.selected_session_source === 'session') {
+						this.selected_session_source = ''
+					}
 				}
 			}
 		} finally {
@@ -280,6 +306,19 @@ export default class Index {
 		const data = (await rpc.project.getList.query()) as Index['projects']
 
 		this.projects = data
+
+		if (this.selected_project_id) {
+			const exists = data.some(item => item.project.id === this.selected_project_id)
+
+			if (!exists) {
+				this.selected_project_id = ''
+				this.project_selected_session_id = ''
+
+				if (this.selected_session_source === 'project') {
+					this.selected_session_source = ''
+				}
+			}
+		}
 	}
 
 	async getMoreSessions(project_index: number) {
@@ -363,9 +402,9 @@ export default class Index {
 
 		if (this.selected_project_id === project_item.id) {
 			this.selected_project_id = ''
+			this.project_selected_session_id = ''
 
 			if (this.selected_session_source === 'project') {
-				this.selected_session_id = ''
 				this.selected_session_source = ''
 			}
 		}
@@ -386,12 +425,12 @@ export default class Index {
 
 		if (!res) return
 
-		this.selected_session_id = res.id
 		this.content_tab = 'session'
 
 		if (project_id) {
 			this.menu_tab = 'projects'
 			this.selected_project_id = project_id
+			this.project_selected_session_id = res.id
 			this.selected_session_source = 'project'
 
 			if (!this.expand_project_ids.includes(project_id)) {
@@ -408,6 +447,7 @@ export default class Index {
 			}
 		} else {
 			this.menu_tab = 'sessions'
+			this.normal_selected_session_id = res.id
 			this.selected_session_source = 'session'
 
 			await this.refreshSessions()
@@ -447,9 +487,20 @@ export default class Index {
 	async removeSession(session_id: string) {
 		await rpc.session.remove.mutate({ id: session_id })
 
-		if (this.selected_session_id === session_id) {
-			this.selected_session_id = ''
-			this.selected_session_source = ''
+		if (this.project_selected_session_id === session_id) {
+			this.project_selected_session_id = ''
+
+			if (this.selected_session_source === 'project') {
+				this.selected_session_source = ''
+			}
+		}
+
+		if (this.normal_selected_session_id === session_id) {
+			this.normal_selected_session_id = ''
+
+			if (this.selected_session_source === 'session') {
+				this.selected_session_source = ''
+			}
 		}
 
 		if (this.rename_session_id === session_id) {

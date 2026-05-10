@@ -18,7 +18,7 @@ const Index = (props: IPropsMenuItem) => {
 	const { project, sessions, has_more } = item
 	const { attributes, listeners, transform, transition, isDragging, setNodeRef } = useSortable({ id: project.id })
 	const {
-		selected_session_id,
+		project_selected_session_id,
 		rename_session_id,
 		rename_value,
 		createSession,
@@ -136,7 +136,7 @@ const Index = (props: IPropsMenuItem) => {
 							project_index={index}
 							session_index={idx}
 							renaming={rename_session_id === it.id}
-							selected={selected_session_id === it.id}
+							selected={project_selected_session_id === it.id}
 							key={it.id}
 						></ProjectMenuItem>
 					))}
