@@ -36,14 +36,14 @@ const Index = () => {
 				className='
 					flex
 					items-center justify-between
-					px-2.5 py-1.5
-					border-border-light border-b
+					h-9
+					px-1.5
 				'
 			>
-				<Tabs items={panel_tabs} active={x.active_tab} onClick={x.setActiveTab}></Tabs>
+				<Tabs small items={panel_tabs} active={x.active_tab} onClick={x.setActiveTab}></Tabs>
 				<DropdownMenu>
 					<DropdownMenuTrigger>
-						<div className='icon_button'>
+						<div className='icon_button small'>
 							<Ellipsis />
 						</div>
 					</DropdownMenuTrigger>

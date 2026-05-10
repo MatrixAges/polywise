@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { useMemoizedFn } from 'ahooks'
-import { MessageSquareText } from 'lucide-react'
+import { MessageCircleCheck } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { todo_priority_icon_map } from '@/appdata'
@@ -163,7 +163,7 @@ const Index = (props: IProps) => {
 							gap-1
 						'
 					>
-						<MessageSquareText className='size-3'></MessageSquareText>
+						<MessageCircleCheck className='size-3'></MessageCircleCheck>
 						<span className='flex-1 truncate group-data-[mode=list]:w-[160px]'>
 							{report || item.session.title}
 						</span>

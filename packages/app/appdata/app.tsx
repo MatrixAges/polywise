@@ -6,7 +6,7 @@ import {
 	Database,
 	House,
 	Library,
-	MessageSquareText,
+	MessageCircleCheck,
 	Route
 } from 'lucide-react'
 
@@ -18,7 +18,7 @@ export const nav_items = [
 	{ key: '', Icon: House, title: 'home' },
 	// { key: 'todo', Icon: CircleCheckBig },
 	{ key: 'linkcase', Icon: Album },
-	{ key: 'session', Icon: MessageSquareText },
+	{ key: 'session', Icon: MessageCircleCheck },
 	// { key: 'workflow', Icon: Route },
 	{ key: 'agent', Icon: Bot }
 	// { key: 'library', Icon: Library },

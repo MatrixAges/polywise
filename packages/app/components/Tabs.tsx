@@ -15,13 +15,12 @@ interface IProps {
 	under?: boolean
 	deps?: DependencyList
 	simple?: boolean
-	itemClassName?: string
-	iconSize?: number
+	small?: boolean
 	onClick?: (v: string, item: Item) => void
 }
 
 const Index = (props: IProps) => {
-	const { items, active, under, simple, itemClassName, iconSize, onClick } = props
+	const { items, active, under, simple, small, onClick } = props
 
 	const getActive = useMemoizedFn((v: string) => {
 		if (!active) return
@@ -54,12 +53,11 @@ const Index = (props: IProps) => {
 						rounded-full
 						clickable
 					`,
-							simple
-								? 'h-5 w-5 gap-0.5'
-								: `
-						w-7 h-7
+							`
+						${simple || small ? 'h-6 w-6' : 'h-7 w-7'}
 						gap-1
-						data-[active=true]:w-auto data-[active=true]:px-2
+						data-[active=true]:w-auto
+						${small ? 'data-[active=true]:px-2' : 'data-[active=true]:px-2.5'}
 					`,
 							under
 								? `
@@ -72,16 +70,18 @@ const Index = (props: IProps) => {
 						hover:bg-active active:bg-click
 						data-[active=true]:bg-active data-[active=true]:text-std-900
 					`,
-							itemClassName
+							simple && 'w-6! px-0!'
 						)}
 						title={key || title}
 						data-active={getActive(key)}
 						onClick={() => onClick?.(key, item)}
 						key={key}
 					>
-						{Icon && <Icon size={iconSize ?? (simple ? 11 : 14)} />}
+						{Icon && <Icon size={small || simple ? 12 : 14} />}
 						{!simple && getActive(key) && (
-							<span className='font-medium capitalize'>{key || title}</span>
+							<span className={$cx('font-medium capitalize', small && 'text-xs')}>
+								{key || title}
+							</span>
 						)}
 					</div>
 				)

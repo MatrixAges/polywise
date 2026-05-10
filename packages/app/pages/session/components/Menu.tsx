@@ -1,4 +1,4 @@
-import { FolderPlus, Folders, MessageSquareText, Plus } from 'lucide-react'
+import { FolderPlus, Folders, MessageCircleCheck, Plus } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { Tabs, Tooltip } from '@/components'
@@ -16,25 +16,25 @@ const Index = () => {
 				overflow-y-hidden
 				flex flex-col
 				w-[210px] h-full
-				border-border-light border-r
+				bg-std-50/60
+				border-r border-border-light
+				dark:bg-std-50
 			'
 		>
 			<div
 				className='
 					flex
 					items-center
-					h-8
-					px-3
-					border-b border-border-light
+					h-9
+					pl-1.5 pr-2.5
 				'
 			>
 				<div className='flex min-w-0 flex-1'>
 					<Tabs
-						itemClassName='h-5.5!'
-						iconSize={12}
+						small
 						items={[
 							{ key: 'projects', Icon: Folders },
-							{ key: 'sessions', Icon: MessageSquareText }
+							{ key: 'sessions', Icon: MessageCircleCheck }
 						]}
 						active={menu_tab}
 						onClick={v => setMenuTab(v as 'projects' | 'sessions')}
@@ -42,7 +42,7 @@ const Index = () => {
 				</div>
 				<Tooltip title={menu_tab === 'projects' ? 'New Project' : 'New Session'}>
 					<div
-						className='icon_button small -mr-1'
+						className='icon_button small'
 						onClick={menu_tab === 'projects' ? onToggleAddModal : () => createSession()}
 					>
 						{menu_tab === 'projects' ? <FolderPlus></FolderPlus> : <Plus></Plus>}

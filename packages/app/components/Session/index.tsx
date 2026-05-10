@@ -80,8 +80,8 @@ const Index = (props: IProps) => {
 					className='
 						flex
 						items-center justify-between
-						w-full h-8
-						px-3
+						w-full h-9
+						px-2.5
 						text-xsm
 					'
 				>

@@ -1,13 +1,13 @@
 import { useMemoizedFn } from 'ahooks'
-import { File, MessageSquareText, X } from 'lucide-react'
+import { File, MessageCircleCheck, X } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
-import { FileTree, Tabs, TextTabs } from '@/components'
+import { FileTree, Tabs } from '@/components'
 
 import { useModel } from '../context'
 
 const Index = () => {
-	const { side_panel_tab, content_tab, project_files, setSidePanelTab, closeFiles, setContentTab } = useModel()
+	const { content_tab, project_files, setSidePanelTab, closeFiles, setContentTab } = useModel()
 
 	const onSelectPath = useMemoizedFn(args => {
 		project_files.selectPath(args)
@@ -21,29 +21,27 @@ const Index = () => {
 				overflow-y-hidden
 				flex flex-col
 				w-[300px] h-full
-				bg-std-50/60
 				border-border-light border-l
-				dark:bg-std-50
 			'
 		>
 			<div
 				className='
 					flex
 					items-center justify-between
-					h-8
-					px-3
-					border-b border-border-light
+					h-9
+					px-2.5
+					border-border-light border-b
 				'
 			>
-				<TextTabs items={['files']} active={side_panel_tab} setActive={setSidePanelTab}></TextTabs>
+				<span className='text-sm font-medium'>Files</span>
 				<div className='flex items-center'>
 					<Tabs
 						items={[
-							{ key: 'session', Icon: MessageSquareText },
+							{ key: 'session', Icon: MessageCircleCheck },
 							{ key: 'file', Icon: File }
 						]}
-						active={content_tab}
 						simple
+						active={content_tab}
 						onClick={setContentTab}
 					></Tabs>
 					<div
