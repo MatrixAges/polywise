@@ -2,7 +2,7 @@ import { tool } from 'ai'
 import { globby } from 'globby'
 import { array, boolean, object, string } from 'zod'
 
-import { checkPermission, toDisplayPath } from '../utils'
+import { checkPermission, getRealPath, toDisplayPath } from '../utils'
 
 import type Session from '../session'
 
@@ -19,14 +19,18 @@ export const createGlobTool = (s: Session) => {
 		description: 'Search for files matching glob patterns. Use to find files by name or pattern.',
 		inputSchema,
 		execute: async input => {
-			const paths = extractPaths(input, s.cwd)
 			const path_mappings: Record<string, string> = {}
 
 			if (s.skills_dir) {
 				path_mappings['/skills'] = s.skills_dir
 			}
 
-			for (const path of paths) {
+			const real_cwd = input.cwd ? getRealPath(s.cwd, input.cwd, path_mappings) : s.cwd
+			const permission_paths = extractPaths(input, s.cwd).map(path =>
+				path.startsWith('/') ? getRealPath(s.cwd, path, path_mappings) : path
+			)
+
+			for (const path of permission_paths) {
 				const perm_error = await checkPermission(s, 'glob', 'read', path)
 
 				if (perm_error) {
@@ -34,16 +38,20 @@ export const createGlobTool = (s: Session) => {
 				}
 			}
 
-			const files = await globby(input.patterns, {
-				cwd: input.cwd ?? s.cwd,
+			const real_patterns = input.patterns.map(pattern =>
+				pattern.startsWith('/') ? getRealPath(s.cwd, pattern, path_mappings) : pattern
+			)
+
+			const files = await globby(real_patterns, {
+				cwd: real_cwd,
 				absolute: true,
-				gitignore: input.disable_gitignore !== true
+				gitignore: input.disable_gitignore !== true,
+				// Skip unreadable directories instead of failing the entire glob request.
+				suppressErrors: true
 			})
 
 			return {
-				files: files.map(file =>
-					toDisplayPath({ real_path: file, cwd: input.cwd ?? s.cwd, path_mappings })
-				),
+				files: files.map(file => toDisplayPath({ real_path: file, cwd: real_cwd, path_mappings })),
 				count: files.length
 			}
 		}
