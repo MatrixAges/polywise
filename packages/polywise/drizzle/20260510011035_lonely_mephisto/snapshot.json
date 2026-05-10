@@ -1,7 +1,7 @@
 {
   "version": "7",
   "dialect": "sqlite",
-  "id": "beb09375-e6d3-4631-890e-39346f679185",
+  "id": "2dbbcbe9-8d1b-4ffc-9336-e452705bec76",
   "prevIds": [
     "00000000-0000-0000-0000-000000000000"
   ],
@@ -24,6 +24,10 @@
     },
     {
       "name": "edge",
+      "entityType": "tables"
+    },
+    {
+      "name": "file",
       "entityType": "tables"
     },
     {
@@ -716,6 +720,46 @@
       "name": "created_at",
       "entityType": "columns",
       "table": "edge"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "file"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "path",
+      "entityType": "columns",
+      "table": "file"
+    },
+    {
+      "type": "integer",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "table": "file"
+    },
+    {
+      "type": "integer",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "table": "file"
     },
     {
       "type": "text",
@@ -2527,6 +2571,15 @@
         "id"
       ],
       "nameExplicit": false,
+      "name": "file_pk",
+      "table": "file",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
       "name": "link_pk",
       "table": "link",
       "entityType": "pks"
@@ -2922,6 +2975,48 @@
       "name": "edge_source_target_idx",
       "entityType": "indexes",
       "table": "edge"
+    },
+    {
+      "columns": [
+        {
+          "value": "path",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "file_path_idx",
+      "entityType": "indexes",
+      "table": "file"
+    },
+    {
+      "columns": [
+        {
+          "value": "created_at",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "file_created_at_idx",
+      "entityType": "indexes",
+      "table": "file"
+    },
+    {
+      "columns": [
+        {
+          "value": "updated_at",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "file_updated_at_idx",
+      "entityType": "indexes",
+      "table": "file"
     },
     {
       "columns": [

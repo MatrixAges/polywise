@@ -1,4 +1,5 @@
 export { default as document } from './document'
+export { default as file } from './file'
 export { default as article } from './article'
 export { default as chunk } from './chunk'
 export { default as node } from './node'

@@ -78,6 +78,13 @@ CREATE TABLE `edge` (
 	CONSTRAINT `fk_edge_target_id_node_id_fk` FOREIGN KEY (`target_id`) REFERENCES `node`(`id`) ON DELETE CASCADE
 );
 --> statement-breakpoint
+CREATE TABLE `file` (
+	`id` text PRIMARY KEY,
+	`path` text NOT NULL,
+	`created_at` integer,
+	`updated_at` integer
+);
+--> statement-breakpoint
 CREATE TABLE `link` (
 	`id` text PRIMARY KEY,
 	`url` text NOT NULL,
@@ -320,6 +327,9 @@ CREATE INDEX `edge_source_idx` ON `edge` (`source_id`);--> statement-breakpoint
 CREATE INDEX `edge_target_idx` ON `edge` (`target_id`);--> statement-breakpoint
 CREATE INDEX `edge_created_at_idx` ON `edge` (`created_at`);--> statement-breakpoint
 CREATE UNIQUE INDEX `edge_source_target_idx` ON `edge` (`source_id`,`target_id`);--> statement-breakpoint
+CREATE INDEX `file_path_idx` ON `file` (`path`);--> statement-breakpoint
+CREATE INDEX `file_created_at_idx` ON `file` (`created_at`);--> statement-breakpoint
+CREATE INDEX `file_updated_at_idx` ON `file` (`updated_at`);--> statement-breakpoint
 CREATE INDEX `link_status_idx` ON `link` (`status`);--> statement-breakpoint
 CREATE INDEX `link_generate_at_idx` ON `link` (`generate_at`);--> statement-breakpoint
 CREATE INDEX `link_created_at_idx` ON `link` (`created_at`);--> statement-breakpoint
