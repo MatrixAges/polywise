@@ -142,7 +142,9 @@ export default class Index {
 			this.expand_project_ids = $copy(this.expand_project_ids)
 		}
 
-		void this.setFilesProjectId(project_index)
+		if (this.side_panel_open) {
+			void this.setFilesProjectId(project_index)
+		}
 	}
 
 	selectGlobalSession(session_id: string) {
@@ -229,10 +231,17 @@ export default class Index {
 
 		if (!project) return
 
+		const reuse_current_project_files =
+			this.side_panel_open &&
+			this.files_project_id === project.id &&
+			this.project_files.root_path === project.dir
+
 		this.files_project_id = project.id
 		this.files_session_id = ''
 		this.side_panel_open = true
 		this.content_tab = 'session'
+
+		if (reuse_current_project_files) return
 
 		await this.project_files.init(project.dir, { dir_only: false, show_hidden: true })
 	}
@@ -412,6 +421,7 @@ export default class Index {
 
 	async createSession(project_id?: string, input?: string) {
 		const input_text = typeof input === 'string' ? input : ''
+		const should_keep_side_panel_open = this.side_panel_open
 		const res = await rpc.session.create.mutate({ project_id })
 
 		if (!res) return
@@ -432,7 +442,7 @@ export default class Index {
 
 			const project_index = this.projects.findIndex(item => item.project.id === project_id)
 
-			if (project_index >= 0) {
+			if (should_keep_side_panel_open && project_index >= 0) {
 				await this.setFilesProjectId(project_index)
 			}
 		} else {

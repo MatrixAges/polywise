@@ -20,7 +20,7 @@ const Index = () => {
 			className='
 				overflow-y-hidden
 				flex flex-col shrink-0
-				w-[300px] h-full
+				w-[260px] h-full
 				border-border-light border-l
 			'
 		>

@@ -30,7 +30,8 @@ const Index = ({ file }: FileContentProps) => {
 						unsafeCSS: `
 							[data-diffs-header='default']{
 								position:sticky;
-								min-height:2.16rem;
+								min-height:2.43rem;
+                                                font-weight:500;
 								border-bottom:1px solid var(--color-border-light);
 								font-size:12px;
 							}
