@@ -2,7 +2,7 @@ import type { PatchRecord } from '../../telemetry'
 
 export type ScopeType = 'global' | 'project' | 'agent'
 
-export type SuperegoToolName = 'memory_tool' | 'wiki_tool' | 'skill_tool'
+export type SuperegoToolName = 'content_tool' | 'skill_tool'
 
 export type SuperegoToolAction = 'add' | 'search' | 'update' | 'remove' | 'read' | 'create' | 'build'
 

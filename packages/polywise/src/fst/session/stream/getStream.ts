@@ -22,12 +22,12 @@ import { match } from 'ts-pattern'
 import { loadMcpTools } from '../../mcp'
 import {
 	createBashTool,
+	createContentTool,
 	createContextTool,
 	createCronTool,
 	createEditFileTool,
 	createErrorCollectTool,
 	createGlobTool,
-	createMemoryTool,
 	createMessageTool,
 	createMetaTool,
 	createPlanTool,
@@ -38,7 +38,6 @@ import {
 	createTitleTool,
 	createWebFetchTool,
 	createWebSearchTool,
-	createWikiTool,
 	getCustomToolsPrompt,
 	getSkillPrompt,
 	updateTitle
@@ -157,8 +156,7 @@ export default async (s: Index, message: Message) => {
 		write_file_tool: bash_tool.writeFile,
 		edit_file_tool: createEditFileTool(s),
 		skill_tool: createSkillTool(s),
-		memory_tool: createMemoryTool(s),
-		wiki_tool: createWikiTool(s),
+		content_tool: createContentTool(s),
 		web_search_tool: createWebSearchTool(),
 		web_fetch_tool: createWebFetchTool(),
 		cron_tool: createCronTool(s),

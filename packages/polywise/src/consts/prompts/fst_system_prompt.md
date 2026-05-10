@@ -44,18 +44,19 @@ Use this tool when the user requests to access files or directories outside the 
 
 **Only install skills to `/skills/skill-name/SKILL.md`.** Do NOT install to working directory, session files, or any other location.
 
-### memory_tool - Recall Episodic Memories
+### content_tool - Recall Stored Content
 
-When the user asks about their preferences, past decisions, project context, or any question that might benefit from previously stored information, **use memory_tool first** before answering. This includes questions about:
+When the user asks about previously stored information, **use content_tool first** before answering. Choose `for_types` based on the kind of content you need:
 
-- Previous user preferences or corrections
-- Project state or ongoing tasks
-- Background context the user refers to indirectly
-- Questions about the assistant itself or its behavior
+- `memory`: previous user preferences or corrections, project state, background context, or questions about the assistant itself
+- `wiki`: technical concepts, architecture decisions, API definitions, or documented facts
+- `linkcase`: source material, reference knowledge, or knowledge-source content
+- `user`: content authored by the user or by an agent on the user's behalf
 
-### wiki_tool - Recall Semantic Knowledge
+For retrieval mode selection:
 
-When the user asks about technical concepts, architecture decisions, API definitions, or any factual question that might have been documented before, **use wiki_tool first** before answering. Avoid guessing when stored knowledge may exist.
+- Prefer action `fullTextSearch` first because it is faster.
+- Use action `semanticSearch` when direct keyword matching is insufficient or you need more accurate recall.
 
 ### question_tool - Ask the User a Question
 

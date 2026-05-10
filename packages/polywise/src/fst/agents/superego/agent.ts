@@ -3,8 +3,7 @@ import { Output, stepCountIs, ToolLoopAgent } from 'ai'
 import { array, enum as Enum, object, string } from 'zod'
 
 import { createSkillTool } from '../../tools'
-import { createMemoryTool } from './memory_tool'
-import { createWikiTool } from './wiki_tool'
+import { createContentTool } from './content_tool'
 
 import type { LanguageModel } from 'ai'
 import type Session from '../../session'
@@ -15,7 +14,7 @@ const schema = object({
 	summary: string().describe('Concise summary of what was extracted or why extraction was skipped'),
 	actions: array(
 		object({
-			tool: Enum(['memory_tool', 'wiki_tool', 'skill_tool']).describe('Tool used by superego'),
+			tool: Enum(['content_tool', 'skill_tool']).describe('Tool used by superego'),
 			action: Enum(['add', 'search', 'update', 'remove', 'read', 'create', 'build']).describe(
 				'Action applied during extraction or skill maintenance'
 			),
@@ -32,8 +31,7 @@ export default (model: LanguageModel, session: Session, scope: SessionScope): To
 		instructions: prompt,
 		output: Output.object({ schema }),
 		tools: {
-			memory_tool: createMemoryTool(scope),
-			wiki_tool: createWikiTool(scope),
+			content_tool: createContentTool(scope),
 			skill_tool: createSkillTool(session)
 		},
 		stopWhen: stepCountIs(20)
