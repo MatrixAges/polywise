@@ -1,3 +1,4 @@
+import { asSchema } from 'ai'
 import { readFile, writeFile } from 'atomically'
 import { createBashTool } from 'bash-tool'
 
@@ -5,6 +6,7 @@ import checkPermission from '../checkPermission'
 import getRealPath from '../getRealPath'
 import executeCommand from './executeCommand'
 
+import type { Tool } from 'ai'
 import type { Sandbox } from 'bash-tool'
 import type { Bash } from 'just-bash'
 import type Index from '../../session'
@@ -68,6 +70,19 @@ export default async (s: Index, bash: Bash, system?: boolean) => {
 			}
 		} as Sandbox
 	})
+
+	// bash-tool returns AI SDK FlexibleSchema values, so normalize with asSchema instead of the Zod-only zodSchema helper.
+	for (const tool of Object.values(tools) as Tool[]) {
+		if (!tool || typeof tool !== 'object') continue
+
+		if ('inputSchema' in tool && tool.inputSchema !== undefined) {
+			tool.inputSchema = asSchema(tool.inputSchema)
+		}
+
+		if ('outputSchema' in tool && tool.outputSchema !== undefined) {
+			tool.outputSchema = asSchema(tool.outputSchema)
+		}
+	}
 
 	return tools
 }
