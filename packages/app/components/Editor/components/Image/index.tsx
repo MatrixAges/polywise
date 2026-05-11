@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/__shadcn__/components/ui/button'
 import { Input } from '@/__shadcn__/components/ui/input'
-import { ipc } from '@/utils'
+import { uploadFile } from '@/utils/file'
 
 import { getFileAlt } from '../../utils'
 import Model from './model'
@@ -31,14 +31,16 @@ const Index = (props: IPropsModal) => {
 	})
 
 	const onLocalFileUploaderChange = useMemoizedFn(async () => {
-		const res = await ipc.app.openDialog.query({ mime: 'image/*' })
+		const file = await uploadFile({ max_count: 1, accept: 'image/*' })
 
-		if (!res?.length) return
+		if (!file || Array.isArray(file)) return
 
-		const file = res[0]
+		const local_file = window.$shell?.getPathForFile(file)
 
-		setSrc(file.path)
-		setAlt(file.name)
+		if (!local_file) return
+
+		setSrc(local_file.path)
+		setAlt(local_file.name)
 	})
 
 	const onUploadFile = useMemoizedFn(async (e: ChangeEvent<HTMLInputElement>) => {
@@ -50,15 +52,7 @@ const Index = (props: IPropsModal) => {
 
 		if (!local_file) return
 
-		const res = await ipc.file.upload.mutate({ path: local_file.path })
-
-		if (!Array.isArray(res)) {
-			window.alert(res)
-
-			return
-		}
-
-		setSrc(res[0])
+		setSrc(local_file.path)
 		setAlt(getFileAlt(local_file.name))
 		e.target.value = ''
 	})
@@ -163,4 +157,4 @@ const Index = (props: IPropsModal) => {
 	)
 }
 
-export default new $app.handle(Index).by(observer).by($app.memo).get()
+export default new $app.Handle(Index).by(observer).by($app.memo).get()

@@ -9,8 +9,8 @@ interface IProps {
 const Index = (props: IProps) => {
 	const { id, size, icon_type = 'icon' } = props
 
-	if (!id) return null
-	if (icon_type === 'emoji') return id
+	if (!id) return <></>
+	if (icon_type === 'emoji') return <>{id}</>
 
 	return <i className={`ph ph-${id}`} style={{ fontSize: size }}></i>
 }

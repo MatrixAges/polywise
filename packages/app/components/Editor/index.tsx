@@ -120,6 +120,6 @@ const Index = (props: IProps) => {
 	)
 }
 
-export default new $app.handle(Index).by(observer).by($app.memo).get()
+export default new $app.Handle(Index).by(observer).by($app.memo).get()
 
 export * from './types'

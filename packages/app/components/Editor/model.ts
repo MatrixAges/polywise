@@ -54,6 +54,9 @@ export default class Index {
 
 	init(args: ArgsInit) {
 		const { id, value, readonly, onChange } = args
+		const normalized_value = value.trim()
+		const content_type =
+			normalized_value.startsWith('{') || normalized_value.startsWith('[') ? 'json' : 'markdown'
 
 		this.id = id
 
@@ -61,6 +64,7 @@ export default class Index {
 			editable: !readonly,
 			extensions: [...getExtensions({ id: this.id, setToc: v => (this.toc = v) }), ...this.getExtensions()],
 			content: value ? getContentString(value) : '',
+			contentType: content_type,
 			onCreate: ({ editor }) => {
 				migrateMathStrings(editor)
 
@@ -71,9 +75,7 @@ export default class Index {
 				this.update()
 			},
 			onUpdate: ({ editor }) => {
-				const content = editor.getJSON()
-
-				onChange(JSON.stringify(content))
+				onChange(editor.getMarkdown())
 			},
 			onTransaction: ({ editor, transaction }) => {
 				if (this.mounted) this.updateReactNodes()
@@ -100,8 +102,10 @@ export default class Index {
 
 		this.mounted = true
 
-		if (this.editor.options.element?.childNodes) {
-			this.ref_container.append(...Array.from(this.editor.options.element.childNodes))
+		const source_element = this.editor.options.element instanceof Element ? this.editor.options.element : null
+
+		if (source_element?.childNodes.length) {
+			this.ref_container.append(...Array.from(source_element.childNodes))
 		}
 
 		this.editor.setOptions({ element: this.ref_container })

@@ -1,8 +1,9 @@
 import type { Editor } from '@tiptap/core'
-import type { IProps } from '..'
 
-export default async (editor: Editor, uploadImage: IProps['uploadImage']) => {
-	let url = '' as string | null
+type UploadImage = (() => Promise<string | null | undefined>) | undefined
+
+export default async (editor: Editor, uploadImage: UploadImage) => {
+	let url: string | null | undefined = ''
 
 	if (uploadImage) {
 		url = await uploadImage()

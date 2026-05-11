@@ -19,7 +19,7 @@ const Index = (props: IProps) => {
 	const { value, onClick } = props
 	const ref = useRef(null)
 	const global = useGlobal()
-	const theme = global.setting.theme_value
+	const theme = global.theme.theme_value
 	const width = useSize(() => ref.current!, 'width') as number
 
 	useEffect(() => {
@@ -62,4 +62,4 @@ const Index = (props: IProps) => {
 	)
 }
 
-export default new $app.handle(Index).by(observer).by($app.memo).get()
+export default new $app.Handle(Index).by(observer).by($app.memo).get()

@@ -1,11 +1,11 @@
 import to from 'await-to-js'
 import mermaid from 'mermaid'
-import { id } from 'stk/common'
-import { local } from 'stk/storage'
 
 export default async (value: string, container: HTMLElement, width?: number) => {
+	const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+
 	mermaid.initialize({
-		theme: local.theme === 'dark' ? 'dark' : 'default',
+		theme,
 		fontSize: 13,
 		fontFamily: 'var(--font_family)',
 		gantt: {
@@ -24,7 +24,10 @@ export default async (value: string, container: HTMLElement, width?: number) => 
 		}
 	})
 
-	const [err, res] = await to(mermaid.render(id(), value, container))
+	const uid =
+		typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `mermaid-${Date.now()}`
+
+	const [err, res] = await to(mermaid.render(uid, value, container))
 
 	if (err) return
 

@@ -9,6 +9,7 @@ import { getHierarchicalIndexes, TableOfContents } from '@tiptap/extension-table
 import { TextStyle } from '@tiptap/extension-text-style'
 import Typography from '@tiptap/extension-typography'
 import { CharacterCount } from '@tiptap/extensions'
+import { Markdown } from '@tiptap/markdown'
 import StarterKit from '@tiptap/starter-kit'
 import { pick } from 'es-toolkit'
 
@@ -26,6 +27,7 @@ export default (args: Args) => {
 	const { id, setToc } = args
 
 	return [
+		Markdown,
 		StarterKit.configure({
 			codeBlock: false,
 			bulletList: false,

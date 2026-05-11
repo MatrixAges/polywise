@@ -23,6 +23,8 @@ import styles from './index.module.css'
 
 import type { IPropsActionBar } from '../../types'
 
+type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6
+
 const Index = (props: IPropsActionBar) => {
 	const { editor, signal, focus, rich_text, text_only, update } = props
 
@@ -54,7 +56,7 @@ const Index = (props: IPropsActionBar) => {
 		update()
 	})
 
-	const onChangeLink = useMemoizedFn((_e?: FocusEvent<HTMLInputElement>) => {
+	const onChangeLink = useMemoizedFn(() => {
 		const next = window.prompt('Link URL', editor.getAttributes('link')?.href || '')
 
 		if (next === null) return
@@ -66,7 +68,7 @@ const Index = (props: IPropsActionBar) => {
 	})
 
 	const onChangeHeading = useMemoizedFn(v => {
-		editor.commands.toggleHeading({ level: Number(v) })
+		editor.commands.toggleHeading({ level: Number(v) as HeadingLevel })
 
 		update()
 	})

@@ -1,7 +1,12 @@
-import { mergeAttributes, Node } from '@tiptap/core'
+import { createBlockMarkdownSpec, mergeAttributes, Node } from '@tiptap/core'
 import { ReactNodeViewRenderer } from '@tiptap/react'
 
 import Component from './Component'
+
+const markdown_spec = createBlockMarkdownSpec({
+	nodeName: 'mermaid',
+	name: 'mermaid'
+})
 
 export default Node.create({
 	name: 'mermaid',
@@ -52,6 +57,15 @@ export default Node.create({
 	addNodeView() {
 		return ReactNodeViewRenderer(Component)
 	},
+	parseMarkdown(token, helpers) {
+		return helpers.createNode('mermaid', { value: token.content || '' })
+	},
+	renderMarkdown(node) {
+		const value = String(node.attrs?.value || '')
+
+		return `:::mermaid\n${value}\n:::`
+	},
+	markdownTokenizer: markdown_spec.markdownTokenizer,
 	parseHTML() {
 		return [{ tag: 'mermaid' }]
 	},
