@@ -17,6 +17,7 @@ import {
 	getMessages,
 	getMessagesCount,
 	loadMessages,
+	removeMessage,
 	trimMessages,
 	unarchiveMessages
 } from './messages'
@@ -159,6 +160,7 @@ export default class Index {
 	archiveMessages = () => archiveMessages(this)
 	unarchiveMessages = () => unarchiveMessages(this)
 	getMessagesCount = () => getMessagesCount(this)
+	removeMessage = (message_id: string) => removeMessage(this, message_id)
 
 	insertMessage = (v: Message) => insertMessage(this, v)
 	appendMessage = (v: Message) => appendMessage(this, v)

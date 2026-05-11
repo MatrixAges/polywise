@@ -286,6 +286,19 @@ export default class Index {
 		rpc.session.clear.mutate(this.id)
 	}
 
+	async removeMessage(message_id: string) {
+		if (this.status === 'streaming' || this.status === 'submitted') return
+
+		const res = await alert({
+			title: 'Delete Message',
+			desc: 'Confirm deleting this message?'
+		})
+
+		if (!res) return
+
+		rpc.session.removeMessage.mutate({ id: this.id, message_id })
+	}
+
 	async archive() {
 		const res = await alert({
 			title: 'Archive Session Messages',

@@ -1,8 +1,11 @@
 import { useMemo } from 'react'
-import { ChevronRightIcon } from 'lucide-react'
+import { useMemoizedFn } from 'ahooks'
+import dayjs from 'dayjs'
+import { ChevronRightIcon, Copy, Trash2 } from 'lucide-react'
 
 import { Message, MessageContent } from '@/__shadcn__/components/ai-elements'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/__shadcn__/components/ui/collapsible'
+import { copy, formatDateTime, formatTime } from '@/utils'
 import getToolIcon from '@/utils/getToolIcon'
 
 import LoadingDots from './LoadingDots'
@@ -192,6 +195,27 @@ const formatDuration = (duration: number) => {
 	return `${hours}h ${rest_minutes}m ${seconds}s`
 }
 
+const getMessageCopyText = (message: SessionMessage) => {
+	return message.parts
+		.map(part => {
+			if (part.type === 'text' || part.type === 'reasoning') return part.text
+			if (part.type === 'source-url') return part.url
+
+			return ''
+		})
+		.filter(Boolean)
+		.join('\n\n')
+		.trim()
+}
+
+const formatMessageTime = (created_at?: Date) => {
+	if (!created_at) return ''
+
+	return dayjs(created_at).isSame(dayjs(), 'day')
+		? formatTime(created_at, 'HH:mm:ss')
+		: formatDateTime(created_at, 'YYYY-MM-DD HH:mm:ss')
+}
+
 const ToolSummaryBlock = (props: {
 	items: Array<PartWithDuration>
 	messageId: string
@@ -295,8 +319,10 @@ const ProcessSummaryBlock = (props: { children: React.ReactNode; duration: numbe
 }
 
 const Index = (props: IPropsMessage) => {
-	const { streaming, message, answer } = props
+	const { streaming, is_streaming, message, answer, removeMessage } = props
 	const { parts } = message
+	const copy_text = useMemo(() => getMessageCopyText(message), [message])
+	const created_at_text = useMemo(() => formatMessageTime(message.createdAt), [message.createdAt])
 
 	const { source_urls, render_blocks } = useMemo(() => {
 		const source_urls = [] as Array<SourceUrlUIPart>
@@ -337,6 +363,16 @@ const Index = (props: IPropsMessage) => {
 			render_blocks: getRenderBlocks(left_parts, streaming)
 		}
 	}, [parts, streaming])
+
+	const onCopy = useMemoizedFn(() => {
+		if (!copy_text) return
+
+		void copy(copy_text)
+	})
+
+	const onRemove = useMemoizedFn(() => {
+		void removeMessage(message.id)
+	})
 
 	const renderBlock = (block: RenderBlock, index: number, total_blocks: number) => {
 		return block.type === 'tools' ? (
@@ -400,6 +436,41 @@ const Index = (props: IPropsMessage) => {
 				)}
 				{source_urls.length > 0 && <SourceUrls items={source_urls}></SourceUrls>}
 			</MessageContent>
+			{!streaming && (
+				<div
+					className='
+						flex
+						items-center
+						w-fit
+						gap-1
+						text-xsm text-std-400
+						opacity-0
+						transition-opacity
+						group-hover:pointer-events-auto group-hover:opacity-100 group-[.is-user]:ml-auto
+						pointer-events-none
+					'
+				>
+					{created_at_text && <span className='px-1'>{created_at_text}</span>}
+					<button
+						className='icon_button small'
+						disabled={!copy_text}
+						title='Copy message'
+						type='button'
+						onClick={onCopy}
+					>
+						<Copy></Copy>
+					</button>
+					<button
+						className='icon_button small'
+						disabled={is_streaming}
+						title='Delete message'
+						type='button'
+						onClick={onRemove}
+					>
+						<Trash2></Trash2>
+					</button>
+				</div>
+			)}
 		</Message>
 	)
 }

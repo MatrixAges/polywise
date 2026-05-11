@@ -145,8 +145,10 @@ const Index = (props: IProps) => {
 							{x.messages.map((message, index) => (
 								<Message
 									streaming={index === x.messages.length - 1 && streaming}
+									is_streaming={streaming}
 									message={message}
 									answer={x.answer}
+									removeMessage={x.removeMessage}
 									key={message.id}
 								></Message>
 							))}

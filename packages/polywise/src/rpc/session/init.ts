@@ -33,6 +33,7 @@ export default p.input(input_type).subscription(async function* (args) {
 
 	const stop = () => session.abortStream()
 	const clear = () => session.clearMessages()
+	const removeMessage = (message_id: string) => session.removeMessage(message_id)
 	const archive = () => session.archiveMessages()
 	const unarchive = () => session.unarchiveMessages()
 	const load = (type: 'prev' | 'next') => session.loadMessages(type)
@@ -52,6 +53,7 @@ export default p.input(input_type).subscription(async function* (args) {
 		SessionEventStore.removeAllListeners(`${id}/change`)
 		SessionEventStore.removeAllListeners(`${id}/stop`)
 		SessionEventStore.removeAllListeners(`${id}/clear`)
+		SessionEventStore.removeAllListeners(`${id}/removeMessage`)
 		SessionEventStore.removeAllListeners(`${id}/archive`)
 		SessionEventStore.removeAllListeners(`${id}/unarchive`)
 		SessionEventStore.removeAllListeners(`${id}/load`)
@@ -61,6 +63,7 @@ export default p.input(input_type).subscription(async function* (args) {
 
 	SessionEventStore.on(`${id}/stop`, stop)
 	SessionEventStore.on(`${id}/clear`, clear)
+	SessionEventStore.on(`${id}/removeMessage`, removeMessage)
 	SessionEventStore.on(`${id}/archive`, archive)
 	SessionEventStore.on(`${id}/unarchive`, unarchive)
 	SessionEventStore.on(`${id}/load`, load)
@@ -74,6 +77,7 @@ export default p.input(input_type).subscription(async function* (args) {
 	} finally {
 		SessionEventStore.off(`${id}/stop`, stop)
 		SessionEventStore.off(`${id}/clear`, clear)
+		SessionEventStore.off(`${id}/removeMessage`, removeMessage)
 		SessionEventStore.off(`${id}/archive`, archive)
 		SessionEventStore.off(`${id}/unarchive`, unarchive)
 		SessionEventStore.off(`${id}/load`, load)

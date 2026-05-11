@@ -1,7 +1,7 @@
 import { r } from '@core/utils'
 
 import create from './create'
-import { answer, archive, clear, destroy, load, permission, setConfig, stop, unarchive } from './events'
+import { answer, archive, clear, destroy, load, permission, removeMessage, setConfig, stop, unarchive } from './events'
 import getFilesDir from './getFilesDir'
 import getList from './getList'
 import getMoreList from './getMoreList'
@@ -29,6 +29,7 @@ export default r({
 	sortPin,
 	stop,
 	clear,
+	removeMessage,
 	archive,
 	unarchive,
 	load,
