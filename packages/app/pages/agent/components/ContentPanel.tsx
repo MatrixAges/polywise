@@ -2,8 +2,8 @@ import { Album, BookOpenText, Brain, Plus, Save, Trash2, UserRound } from 'lucid
 import { observer } from 'mobx-react-lite'
 
 import { Input } from '@/__shadcn__/components/ui/input'
-import { Textarea } from '@/__shadcn__/components/ui/textarea'
 import { Tabs } from '@/components'
+import Editor from '@/components/Editor'
 
 import { useModel } from '../context'
 
@@ -132,20 +132,51 @@ const Index = () => {
 						</button>
 					</div>
 				</div>
-				<div className='flex flex-1 px-2.5'>
+				<div
+					className='
+						flex flex-1 flex-col
+						min-h-0
+						gap-2
+						p-2.5
+					'
+				>
 					{selected_article_id && (
 						<>
 							<Input
+								className='shrink-0'
 								value={article_title_draft}
 								placeholder='Content title'
 								onChange={event => setArticleTitleDraft(event.target.value)}
 							></Input>
-							<Textarea
-								className='bg-secondary/60 flex-1 border-none focus-within:ring-0!'
-								value={article_draft}
-								onChange={event => setArticleDraft(event.target.value)}
-							></Textarea>
+							<div
+								className='
+									overflow-hidden
+									flex-1
+									min-h-0
+									rounded-md
+									bg-secondary/60
+									border border-border-light
+								'
+							>
+								<Editor
+									id={`agent-article-${selected_article_id}`}
+									key={selected_article_id}
+									value={article_draft}
+									onChange={setArticleDraft}
+								></Editor>
+							</div>
 						</>
+					)}
+					{!selected_article_id && (
+						<div
+							className='
+								flex flex-1
+								items-center justify-center
+								text-sm text-std-400
+							'
+						>
+							Select an article
+						</div>
 					)}
 				</div>
 			</div>

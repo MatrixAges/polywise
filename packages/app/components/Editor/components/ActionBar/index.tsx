@@ -27,6 +27,7 @@ type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6
 
 const Index = (props: IPropsActionBar) => {
 	const { editor, signal, focus, rich_text, text_only, update } = props
+	const format_button_class = 'flex btn_format justify_center align_center clickable'
 
 	const ref = useDelegate(v => {
 		switch (v) {
@@ -100,37 +101,19 @@ const Index = (props: IPropsActionBar) => {
 				<Otherwise>
 					<div className='format_items flex'>
 						<div
-							className={$cx(
-								'
-								flex
-								btn_format justify_center align_center clickable
-							',
-								editor.isActive('bold') && 'active'
-							)}
+							className={$cx(format_button_class, editor.isActive('bold') && 'active')}
 							data-key='bold'
 						>
 							<TextBIcon weight='bold' />
 						</div>
 						<div
-							className={$cx(
-								'
-								flex
-								btn_format justify_center align_center clickable
-							',
-								editor.isActive('italic') && 'active'
-							)}
+							className={$cx(format_button_class, editor.isActive('italic') && 'active')}
 							data-key='italic'
 						>
 							<TextItalicIcon weight='bold' />
 						</div>
 						<div
-							className={$cx(
-								'
-								flex
-								btn_format justify_center align_center clickable
-							',
-								editor.isActive('strike') && 'active'
-							)}
+							className={$cx(format_button_class, editor.isActive('strike') && 'active')}
 							data-key='strike'
 						>
 							<TextStrikethroughIcon weight='bold' />
@@ -138,10 +121,7 @@ const Index = (props: IPropsActionBar) => {
 						<If condition={rich_text}>
 							<div
 								className={$cx(
-									'
-									flex
-									btn_format justify_center align_center clickable
-								',
+									format_button_class,
 									editor.isActive('underline') && 'active'
 								)}
 								data-key='underline'
@@ -150,38 +130,20 @@ const Index = (props: IPropsActionBar) => {
 							</div>
 						</If>
 						<div
-							className={$cx(
-								'
-								flex
-								btn_format justify_center align_center clickable
-							',
-								editor.isActive('code') && 'active'
-							)}
+							className={$cx(format_button_class, editor.isActive('code') && 'active')}
 							data-key='code'
 						>
 							<CodeSimpleIcon weight='bold' />
 						</div>
 						<div
-							className={$cx(
-								'
-								flex
-								btn_format justify_center align_center clickable
-							',
-								editor.isActive('link') && 'active'
-							)}
+							className={$cx(format_button_class, editor.isActive('link') && 'active')}
 							title={link || 'Set link'}
 							onClick={onChangeLink}
 						>
 							<LinkIcon weight='bold' />
 						</div>
 						<If condition={editor.isActive('link')}>
-							<div
-								className='
-									flex
-									btn_format justify_center align_center clickable
-								'
-								onClick={onUnsetLink}
-							>
+							<div className={format_button_class} onClick={onUnsetLink}>
 								<MinusCircleIcon weight='bold'></MinusCircleIcon>
 							</div>
 						</If>

@@ -32,14 +32,14 @@ const Index = (props: IPropsModal) => {
 			<div className='grid grid-cols-6 gap-2'>
 				{emojis.map(item => (
 					<button
-						className='
+						className={`
 							p-2
 							rounded-xl
 							text-xl
 							bg-secondary/60
 							hover:bg-secondary
 							transition
-						'
+						`}
 						key={item}
 						type='button'
 						onClick={() => onSelect(item)}

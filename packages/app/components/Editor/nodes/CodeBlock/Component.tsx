@@ -66,10 +66,10 @@ const Index = (props: ReactNodeViewProps<HTMLDivElement>) => {
 					</SelectContent>
 				</Select>
 				<button
-					className='
+					className={`
 						flex
 						btn_action justify_center align_center clickable
-					'
+					`}
 					onClick={onCopy}
 				>
 					{copied ? <CheckIcon></CheckIcon> : <CopyIcon></CopyIcon>}

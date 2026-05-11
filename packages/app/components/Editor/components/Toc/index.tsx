@@ -30,11 +30,11 @@ const Index = (props: IPropsModalToc) => {
 	return (
 		<div className={$cx('w_100 border_box flex_column flex', styles._local)}>
 			<div
-				className='
+				className={`
 					flex flex_column
 					border_box
 					toc_items w_100
-				'
+				`}
 			>
 				{toc.map((item, index) => (
 					<Item item={item} onClick={onClick} key={index}></Item>

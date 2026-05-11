@@ -84,7 +84,7 @@ const Index = (props: IPropsModal) => {
 				{options.map(item => (
 					<button
 						className={$cx(
-							'
+							`
 							flex
 							items-center justify-center
 							gap-2
@@ -93,7 +93,7 @@ const Index = (props: IPropsModal) => {
 							text-sm
 							border
 							transition
-						',
+						`,
 							x.type === item.value
 								? 'bg-primary text-primary-foreground'
 								: 'bg-secondary/40'

@@ -7,11 +7,11 @@ const Index = (props: IPropsModalTocItem) => {
 	return (
 		<div
 			className={$cx(
-				'
+				`
 				flex
 				border_box
 				toc_item w_100 align_center
-			',
+			`,
 				isActive && !isScrolledOver && 'active',
 				isScrolledOver && 'scrolled'
 			)}

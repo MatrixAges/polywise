@@ -19,21 +19,21 @@ const Index = (props: IPropsMenu) => {
 	return (
 		<div className={$cx('flex_column border_box relative flex', styles._local)}>
 			<div
-				className='
+				className={`
 					flex flex_column
 					border_box
 					menu_wrap w_100
-				'
+				`}
 			>
 				<If condition={latest.length > 0}>
 					<Latest items={latest} onMenuItem={onMenuItem}></Latest>
 				</If>
 				<div
-					className='
+					className={`
 						flex flex_column
 						border_box
 						menu_items w_100
-					'
+					`}
 				>
 					{current_menu_items.map((item, index) => (
 						<Item item={item} index={index} onMenuItem={onMenuItem} key={item.key} />

@@ -96,11 +96,11 @@ const Index = (props: IPropsModalKatex) => {
 				<div className='flex flex-col gap-2'>
 					<span className='text-sm'>{t('preview')}</span>
 					<div
-						className='
+						className={`
 							flex
 							border_box
 							prewview_wrap w_100 justify_center align_center transition_normal
-						'
+						`}
 					>
 						<Choose>
 							<When condition={value}>

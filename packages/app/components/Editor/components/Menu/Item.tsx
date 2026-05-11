@@ -15,10 +15,10 @@ const Index = (props: IPropsMenuItem) => {
 	return (
 		<div
 			className={$cx(
-				'
+				`
 				flex
 				picker_menu_item justify_between align_center cursor_point
-			'
+			`
 			)}
 			onClick={onClick}
 		>

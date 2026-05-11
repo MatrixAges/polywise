@@ -45,11 +45,11 @@ const Index = (props: IProps) => {
 				{colors.map(item => (
 					<span
 						className={$cx(
-							'
+							`
 							flex
 							border_box
 							justify_center align_center clickable
-						',
+						`,
 							item && getColorActive(Color(item).hex()) && 'active'
 						)}
 						style={

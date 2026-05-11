@@ -3,6 +3,7 @@ import { BubbleMenuPlugin } from '@tiptap/extension-bubble-menu'
 import { FloatingMenuPlugin } from '@tiptap/extension-floating-menu'
 import { migrateMathStrings } from '@tiptap/extension-mathematics'
 import { findSuggestionMatch } from '@tiptap/suggestion'
+import { debounce } from 'es-toolkit'
 import { makeAutoObservable } from 'mobx'
 
 import { nextTick } from '@/utils'
@@ -19,6 +20,11 @@ export default class Index {
 	id = ''
 	editor = null as unknown as EditorWithContentComponent
 	mounted = false
+	debounced_on_change = null as unknown as {
+		(v: string): void
+		cancel: () => void
+		flush: () => void
+	}
 
 	ref_container = null as unknown as HTMLDivElement
 	ref_action_bar = null as unknown as HTMLDivElement
@@ -41,6 +47,7 @@ export default class Index {
 			{
 				id: false,
 				editor: false,
+				debounced_on_change: false,
 				ref_container: false,
 				ref_action_bar: false,
 				ref_menu: false,
@@ -59,6 +66,7 @@ export default class Index {
 			normalized_value.startsWith('{') || normalized_value.startsWith('[') ? 'json' : 'markdown'
 
 		this.id = id
+		this.debounced_on_change = debounce(onChange, 450)
 
 		this.editor = new Editor({
 			editable: !readonly,
@@ -75,7 +83,10 @@ export default class Index {
 				this.update()
 			},
 			onUpdate: ({ editor }) => {
-				onChange(editor.getMarkdown())
+				this.debounced_on_change(editor.getMarkdown())
+			},
+			onBlur: () => {
+				this.debounced_on_change.flush()
 			},
 			onTransaction: ({ editor, transaction }) => {
 				if (this.mounted) this.updateReactNodes()
@@ -295,6 +306,7 @@ export default class Index {
 	}
 
 	off() {
+		this.debounced_on_change?.cancel()
 		this.editor.contentComponent?.unsubscribe()
 		this.editor.contentComponent = null
 

@@ -79,11 +79,11 @@ const Index = (props: IProps) => {
 				</If>
 			</div>
 			<div
-				className='
+				className={`
 					relative
 					flex flex_column
 					editor_container w_100 h_100 align_center
-				'
+				`}
 			>
 				<If condition={x.counts === 0}>
 					<p className='w_100 border_box placeholder absolute'>{t('editor.placeholder')}...</p>
