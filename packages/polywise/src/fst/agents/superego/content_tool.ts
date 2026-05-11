@@ -18,6 +18,7 @@ const inputSchema = object({
 	for: Enum(CONTENT_FOR_TYPES)
 		.optional()
 		.describe('[Required for add/search] The content category: memory, wiki, linkcase, or user'),
+	title: string().optional().describe('[Required for add] A short descriptive title for the content'),
 	search_mode: Enum(SEARCH_MODES)
 		.optional()
 		.describe(
@@ -40,6 +41,7 @@ export const createContentTool = (scope: SessionScope) => {
 		description: [
 			'Manage durable content for the learning loop using four categories: memory, wiki, linkcase, and user.',
 			'Use "for" to choose the category for add/search actions.',
+			'For add, provide a concise "title" that summarizes the content being stored.',
 			'For search, prefer "fullTextSearch" first because it is faster. Escalate to "semanticSearch" only when needed for better recall.',
 			'Use update/remove with article_id when an existing entry should be corrected or deleted.'
 		].join('\n'),
@@ -54,7 +56,12 @@ export const createContentTool = (scope: SessionScope) => {
 					return 'Content add failed: content is required'
 				}
 
+				if (!input.title) {
+					return 'Content add failed: title is required'
+				}
+
 				const article_id = await saveArticle({
+					title: input.title,
 					content: input.content,
 					for: input.for,
 					scope_type: scope.type,

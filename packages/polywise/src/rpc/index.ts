@@ -5,6 +5,8 @@ import fullTextSearch from './fullTextSearch'
 import heartbeat from './heartbeat'
 import inspect from './inspect'
 import llama from './llama'
+import notification from './notification'
+import pipeline from './pipeline'
 import project from './project'
 import provider from './provider'
 import remove from './remove'
@@ -29,6 +31,8 @@ export const router = r({
 	todo,
 	session,
 	provider,
+	pipeline,
+	notification,
 	llama,
 	heartbeat,
 	inspect,

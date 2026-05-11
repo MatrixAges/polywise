@@ -1,5 +1,6 @@
 import path from 'path'
 import { pipeline_path } from '@core/consts/app'
+import { emitPipelineRefresh } from '@core/rpc/pipeline/emitter'
 import { writeFile } from 'atomically'
 import fs from 'fs-extra'
 
@@ -61,6 +62,7 @@ export const setPipelineTask = async (article_id: string, task: SaveArticlePipel
 	store[article_id] = task
 
 	await writeFile(pipeline_path, JSON.stringify(store, null, 4), 'utf8')
+	emitPipelineRefresh()
 
 	return task
 }
@@ -73,4 +75,5 @@ export const removePipelineTask = async (article_id: string) => {
 	delete store[article_id]
 
 	await writeFile(pipeline_path, JSON.stringify(store, null, 4), 'utf8')
+	emitPipelineRefresh()
 }

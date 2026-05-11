@@ -17,6 +17,7 @@ const inputSchema = object({
 	for: contentForSchema
 		.optional()
 		.describe('[Required for save] The content category to store: memory, wiki, linkcase, or user'),
+	title: string().optional().describe('[Required for save] A short descriptive title for the content'),
 	for_types: array(contentForSchema)
 		.optional()
 		.describe(
@@ -42,7 +43,7 @@ export const createContentTool = (s: Session) => {
 	return tool({
 		description: [
 			'Manage stored content across four categories: memory (episodic memory), wiki (knowledge), linkcase (knowledge sources), and user (user or agent-authored content).',
-			'Use action "save" to store a new content entry and set the required "for" category.',
+			'Use action "save" to store a new content entry and set the required "for" category and "title".',
 			'Use action "fullTextSearch" first because it is faster and works well for direct keyword or phrase matching.',
 			'Use action "semanticSearch" only when full-text search is insufficient and more accurate semantic retrieval is needed.',
 			'Use "for_types" to narrow retrieval to specific categories, or omit it to search across all stored content.',
@@ -59,7 +60,12 @@ export const createContentTool = (s: Session) => {
 					return { action: 'save' as const, error: 'content is required for save action' }
 				}
 
+				if (!input.title) {
+					return { action: 'save' as const, error: 'title is required for save action' }
+				}
+
 				const article_id = await saveArticle({
+					title: input.title,
 					content: input.content,
 					for: input.for,
 					scope_type: s.scope.type,
