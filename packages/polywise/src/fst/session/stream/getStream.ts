@@ -70,17 +70,19 @@ const getAgentSystemPrompt = async (session_id: string) => {
 	}
 
 	const profile_prompt = [
-		'Agent Session Profile',
-		`Name: ${agent_row.agent.name}`,
-		agent_row.agent.identity ? `Identity: ${agent_row.agent.identity}` : '',
-		agent_row.agent.soul ? `Soul: ${agent_row.agent.soul}` : '',
-		agent_row.agent.memory ? `Memory: ${agent_row.agent.memory}` : '',
-		agent_row.agent.prompt ? `Prompt: ${agent_row.agent.prompt}` : ''
+		'# Agent Session Profile',
+		'## Name',
+		agent_row.agent.name,
+		agent_row.agent.identity ? `## Identity\n${agent_row.agent.identity}` : '',
+		agent_row.agent.soul ? `## Soul\n${agent_row.agent.soul}` : '',
+		agent_row.agent.memory ? `## Memory\n${agent_row.agent.memory}` : '',
+		agent_row.agent.prompt ? `## Prompt\n${agent_row.agent.prompt}` : '',
+		'Follow this agent session profile as a hard system-level role constraint.'
 	]
 		.filter(Boolean)
-		.join('\n')
+		.join('\n\n')
 
-	return `${profile_prompt}\nFollow this agent session profile as a hard system-level role constraint.`
+	return profile_prompt
 }
 
 const isAsyncIterable = (value: unknown): value is AsyncIterable<unknown> => {

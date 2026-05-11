@@ -7,13 +7,15 @@ import { observer } from 'mobx-react-lite'
 import { Spinner } from '@/__shadcn__/components/ui/spinner'
 
 import { useModel } from '../context'
+import CreateDialog from './CreateDialog'
 import MenuItem from './MenuItem'
 import { SkillDialog } from './Skill'
 
 import type { DragEndEvent } from '@dnd-kit/core'
 
 const Index = () => {
-	const { agents, selected_agent_id, createAgent, create_agent_loading, sortAgent } = useModel()
+	const { agents, selected_agent_id, create_agent_loading, sortAgent } = useModel()
+	const [create_dialog_open, setCreateDialogOpen] = useState(false)
 	const [skill_dialog_open, setSkillDialogOpen] = useState(false)
 	const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }))
 
@@ -66,7 +68,7 @@ const Index = () => {
 						<button
 							className='icon_button small'
 							type='button'
-							onClick={createAgent}
+							onClick={() => setCreateDialogOpen(true)}
 							disabled={create_agent_loading}
 						>
 							{create_agent_loading ? (
@@ -103,6 +105,7 @@ const Index = () => {
 					</div>
 				</div>
 			</div>
+			<CreateDialog open={create_dialog_open} onOpenChange={setCreateDialogOpen}></CreateDialog>
 			<SkillDialog open={skill_dialog_open} onOpenChange={setSkillDialogOpen}></SkillDialog>
 		</>
 	)

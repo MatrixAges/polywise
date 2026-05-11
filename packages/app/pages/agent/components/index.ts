@@ -1,5 +1,6 @@
 export { default as Menu } from './Menu'
 export { default as AvatarDialog } from './AvatarDialog'
+export { default as CreateDialog } from './CreateDialog'
 export { default as Detail } from './Detail'
 export { default as DetailMenu } from './DetailMenu'
 export { default as DetailInfo } from './DetailInfo'

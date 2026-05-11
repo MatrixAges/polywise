@@ -27,15 +27,48 @@ const getFallbackAgentProfile = async () => {
 	return {
 		name: `Agent ${agent_items.length + 1}`,
 		description: 'A flexible AI assistant for planning, writing, and everyday problem solving.',
-		prompt: 'Help the user solve problems clearly and efficiently. Ask only when needed, stay practical, and provide concrete next steps.',
-		soul: 'Calm, pragmatic, precise, and collaborative.',
-		identity: 'A general-purpose AI agent focused on execution, analysis, and structured communication.',
-		memory: 'Prioritize clarity, preserve context, and adapt to the user task at hand.'
+		prompt: [
+			'## Mission',
+			'- Help the user solve problems clearly and efficiently.',
+			'## Operating Rules',
+			'- Ask only when needed.',
+			'- Stay practical and provide concrete next steps.'
+		].join('\n'),
+		soul: [
+			'## Tone',
+			'- Calm',
+			'- Pragmatic',
+			'- Precise',
+			'- Collaborative',
+			'## Style',
+			'- Prefer clarity over flourish.',
+			'- Stay direct without sounding cold.'
+		].join('\n'),
+		identity: [
+			'## Role',
+			'- A general-purpose AI agent for execution, analysis, and structured communication.',
+			'## Strengths',
+			'- Planning',
+			'- Writing',
+			'- Problem solving'
+		].join('\n'),
+		memory: [
+			'## Standing Context',
+			'- Prioritize clarity.',
+			'- Preserve relevant context.',
+			'- Adapt to the user task at hand.',
+			'## Defaults',
+			'- Prefer actionable output.',
+			'- Avoid unnecessary questions.'
+		].join('\n')
 	}
 }
 
 const getAgentProfilePrompt = (input: AgentCreateInput) => {
 	const fields = [
+		['purpose', input.purpose],
+		['name', input.name],
+		['description', input.description],
 		['prompt', input.prompt],
 		['soul', input.soul],
 		['identity', input.identity],
@@ -45,11 +78,15 @@ const getAgentProfilePrompt = (input: AgentCreateInput) => {
 	return [
 		'Create a fresh AI agent profile.',
 		'Return a short, memorable name, a concise description, and complete fields for prompt, soul, identity, and memory.',
+		'Use the purpose sentence as the main design anchor when it is present.',
 		'Make the result feel specific and varied instead of generic or numbered.',
 		'The prompt should be directly usable as the agent system prompt.',
 		'The soul should capture tone and temperament.',
 		'The identity should define role and expertise.',
 		'The memory should contain durable standing context, not a transcript.',
+		'Prompt, soul, identity, and memory must each be structured Markdown, not a wall of prose.',
+		'Use short headings and bullet lists. Keep sections compact and directly usable.',
+		'Do not use code fences.',
 		'Use the same language as the most informative source text. If the source is mostly empty, respond in English.',
 		'Source fields:',
 		...fields.map(([label, value]) => `${label}: ${normalizeBlock(value) || '(empty)'}`)
@@ -75,7 +112,7 @@ export default p.input(input_type).mutation(async ({ input }) => {
 			schema: generated_agent_schema,
 			prompt: getAgentProfilePrompt(input),
 			instructions:
-				'Generate a concise AI agent profile. Keep the name short and distinctive. Keep the description to one sentence. Return usable text for prompt, soul, identity, and memory. Do not include markdown, quotes, or numbering.'
+				'Generate a concise AI agent profile. Keep the name short and distinctive. Keep the description to one sentence. For prompt, soul, identity, and memory, return valid structured Markdown with short headings and bullet lists. Do not use code fences. Do not wrap the fields in quotes.'
 		})
 	} catch {}
 

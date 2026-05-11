@@ -514,13 +514,14 @@ export default class Index {
 		this.article_draft = value
 	}
 
-	async createAgent() {
+	async createAgent(purpose?: string) {
 		if (this.create_agent_loading) return
 
 		this.create_agent_loading = true
 
 		try {
 			const next_agent = await rpc.agent.create.mutate({
+				purpose: purpose?.trim() || undefined,
 				avatar: {
 					type: 'nice',
 					data: genConfig()

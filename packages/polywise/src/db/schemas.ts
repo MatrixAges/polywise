@@ -61,7 +61,8 @@ export const agent_create_input_schema = agent_insert_schema
 	.extend({
 		name: z.string().optional(),
 		description: z.string().optional(),
-		model: agent_model_schema.optional()
+		model: agent_model_schema.optional(),
+		purpose: z.string().optional()
 	})
 
 export const agent_update_input_schema = agent_insert_schema
