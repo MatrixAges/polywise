@@ -3,7 +3,7 @@ import { CircleCheck, CircleDashed, CircleSlash, CircleX, Loader, View } from 'l
 import type { LucideIcon } from 'lucide-react'
 
 export const todo_status_icon_map = {
-	draft: {
+	backlog: {
 		Icon: CircleDashed,
 		color: 'text-std-300'
 	},

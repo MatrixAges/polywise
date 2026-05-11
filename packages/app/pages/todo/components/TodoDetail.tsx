@@ -25,7 +25,7 @@ import type { RPCInput } from '@/types'
 import type { Todo } from '@core/db'
 
 const todo_status_options: Array<{ label: string; value: string }> = [
-	{ label: 'Draft', value: 'draft' },
+	{ label: 'Backlog', value: 'backlog' },
 	{ label: 'Processing', value: 'processing' },
 	{ label: 'Unreview', value: 'unreview' },
 	{ label: 'Done', value: 'done' },

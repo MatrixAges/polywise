@@ -24,7 +24,7 @@ context_tool is an internal tool completely invisible to the user. You MUST stri
 
 ## When to Call context_tool
 - User intent changes
-- Task status changes (draft → processing → unreview → done → archive)
+- Task status changes (backlog → processing → unreview → done → archive)
 - New files are referenced or modified
 - New constraints, blockers, or lessons learned emerge
 - Significant progress is made

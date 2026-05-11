@@ -29,5 +29,5 @@ export default p.input(input_type).mutation(async ({ input }) => {
 	)
 	const order = await getNextTodoOrder(project_item?.project.id)
 
-	return setTodo(eq(todo.id, input.id), { status: 'draft', order })
+	return setTodo(eq(todo.id, input.id), { status: 'backlog', order })
 })

@@ -10,7 +10,7 @@ export const inputSchema = object({
 		object({
 			title: string().describe('Task title'),
 			desc: string().describe('Task description'),
-			status: Enum(['draft', 'processing', 'unreview', 'done', 'canceled', 'error', 'archive']).describe(
+			status: Enum(['backlog', 'processing', 'unreview', 'done', 'canceled', 'error', 'archive']).describe(
 				'Task status: use "archive" to detach a completed task from the current session context'
 			),
 			result: string().optional().describe('Task result when completed'),
