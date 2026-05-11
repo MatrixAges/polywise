@@ -42,7 +42,7 @@ const Index = () => {
 					flex flex-col
 					w-[210px] h-full
 					bg-std-50/60
-					dark:bg-transparent
+					dark:bg-std-100/60 dark:border-r dark:border-border-light/60
 				'
 			>
 				<div
@@ -86,7 +86,7 @@ const Index = () => {
 							flex flex-col
 							w-full
 							gap-0.5
-							p-1.5 pt-0
+							p-2 pt-0
 						'
 					>
 						<DndContext sensors={sensors} onDragEnd={onDragEnd}>
