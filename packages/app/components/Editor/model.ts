@@ -64,11 +64,15 @@ export default class Index {
 		return cn('tiptap', className)
 	}
 
+	getContentType(value: string) {
+		const normalized_value = value.trim()
+
+		return normalized_value.startsWith('{') || normalized_value.startsWith('[') ? 'json' : 'markdown'
+	}
+
 	init(args: ArgsInit) {
 		const { id, value, className, readonly, onChange, onBlur } = args
-		const normalized_value = value.trim()
-		const content_type =
-			normalized_value.startsWith('{') || normalized_value.startsWith('[') ? 'json' : 'markdown'
+		const content_type = this.getContentType(value)
 
 		this.id = id
 		this.debounced_on_change = debounce(onChange, 450)
@@ -117,6 +121,22 @@ export default class Index {
 		}) as Index['editor']
 
 		this.on()
+	}
+
+	syncValue(value: string) {
+		if (!this.mounted || !this.editor || this.editor.isDestroyed) return
+
+		const current_value = this.editor.getMarkdown()
+
+		if (current_value === value) return
+
+		this.debounced_on_change?.cancel()
+		this.editor.commands.setContent(getContentString(value), {
+			emitUpdate: false
+		})
+
+		this.counts = this.editor.storage.characterCount.characters()
+		this.updateReactNodes()
 	}
 
 	mount() {

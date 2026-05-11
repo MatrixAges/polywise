@@ -37,6 +37,10 @@ const Index = (props: IProps) => {
 	}, [theme, x.mounted])
 
 	useLayoutEffect(() => {
+		x.syncValue(value)
+	}, [value, x, x.mounted])
+
+	useLayoutEffect(() => {
 		if (!x.mounted) return
 
 		x.editor.setOptions({

@@ -26,6 +26,43 @@ const placeholder_map = {
 
 const isTextTab = (tab: DetailTab): tab is TextTab => tab in placeholder_map
 
+const TextTabEditor = ({
+	agent_id,
+	text_tab,
+	field_value,
+	onSubmit
+}: {
+	agent_id: string
+	text_tab: TextTab
+	field_value: string
+	onSubmit: (value: string) => void
+}) => {
+	const [draft_value, setDraftValue] = useState(field_value)
+
+	useEffect(() => {
+		setDraftValue(field_value)
+	}, [field_value])
+
+	return (
+		<div
+			className='
+				overflow-y-scroll
+				flex-1
+				h-full
+				min-h-0
+			'
+		>
+			<Editor
+				id={`agent-${agent_id}-${text_tab}`}
+				className='pt-6!'
+				value={draft_value}
+				onChange={setDraftValue}
+				onBlur={onSubmit}
+			></Editor>
+		</div>
+	)
+}
+
 const Index = () => {
 	const { selected_agent, current_tab, submitEditableField } = useModel()
 	const active_tab: DetailTab = current_tab === 'sessions' ? 'info' : current_tab
@@ -33,11 +70,6 @@ const Index = () => {
 		selected_agent && isTextTab(active_tab)
 			? (selected_agent[active_tab] as string | null | undefined) || ''
 			: ''
-	const [draft_value, setDraftValue] = useState(field_value)
-
-	useEffect(() => {
-		setDraftValue(field_value)
-	}, [selected_agent?.id, active_tab])
 
 	if (!selected_agent) {
 		return (
@@ -74,29 +106,19 @@ const Index = () => {
 					.with('skills', () => <SkillsPanel></SkillsPanel>)
 					.with('tools', () => <ToolsPanel></ToolsPanel>)
 					.when(isTextTab, text_tab => (
-						<div
-							className='
-							overflow-y-scroll
-							flex-1
-							h-full
-							min-h-0
-						'
-						>
-							<Editor
-								id={`agent-${selected_agent.id}-${text_tab}`}
-								className='pt-6!'
-								value={draft_value}
-								onChange={setDraftValue}
-								onBlur={value => {
-									submitEditableField({
-										id: selected_agent.id,
-										key: text_tab,
-										value
-									})
-								}}
-								key={`${selected_agent.id}-${text_tab}`}
-							></Editor>
-						</div>
+						<TextTabEditor
+							key={`${selected_agent.id}-${text_tab}`}
+							agent_id={selected_agent.id}
+							text_tab={text_tab}
+							field_value={field_value}
+							onSubmit={value => {
+								submitEditableField({
+									id: selected_agent.id,
+									key: text_tab,
+									value
+								})
+							}}
+						></TextTabEditor>
 					))
 					.exhaustive()}
 			</div>
