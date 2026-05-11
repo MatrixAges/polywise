@@ -7,14 +7,20 @@ import {
 	ListNumbersIcon,
 	MinusCircleIcon,
 	TextBIcon,
+	TextHFiveIcon,
+	TextHFourIcon,
 	TextHIcon,
+	TextHOneIcon,
+	TextHSixIcon,
+	TextHThreeIcon,
+	TextHTwoIcon,
 	TextItalicIcon,
 	TextStrikethroughIcon,
 	TextUnderlineIcon
 } from '@phosphor-icons/react'
 import { useMemoizedFn } from 'ahooks'
 
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/__shadcn__/components/ui/select'
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/__shadcn__/components/ui/select'
 import { useDelegate } from '@/hooks'
 
 import { getHeadingLevel, getListType } from '../../utils'
@@ -24,6 +30,39 @@ import styles from './index.module.css'
 import type { IPropsActionBar } from '../../types'
 
 type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6
+type ListType = 'bullet' | 'number' | 'check'
+
+const getHeadingIcon = (level?: HeadingLevel | null) => {
+	switch (level) {
+		case 1:
+			return <TextHOneIcon weight='bold' />
+		case 2:
+			return <TextHTwoIcon weight='bold' />
+		case 3:
+			return <TextHThreeIcon weight='bold' />
+		case 4:
+			return <TextHFourIcon weight='bold' />
+		case 5:
+			return <TextHFiveIcon weight='bold' />
+		case 6:
+			return <TextHSixIcon weight='bold' />
+		default:
+			return <TextHIcon weight='bold' />
+	}
+}
+
+const getListIcon = (value?: ListType | null) => {
+	switch (value) {
+		case 'bullet':
+			return <ListBulletsIcon weight='bold' size={13} />
+		case 'number':
+			return <ListNumbersIcon weight='bold' size={13} />
+		case 'check':
+			return <ListChecksIcon weight='bold' size={13} />
+		default:
+			return <ListIcon weight='bold' />
+	}
+}
 
 const Index = (props: IPropsActionBar) => {
 	const { editor, signal, focus, rich_text, text_only, update } = props
@@ -95,8 +134,8 @@ const Index = (props: IPropsActionBar) => {
 	})
 
 	const link = editor.getAttributes('link')?.href
-	const heading = getHeadingLevel(editor)
-	const list = getListType(editor)
+	const heading = getHeadingLevel(editor) as HeadingLevel | null
+	const list = getListType(editor) as ListType | null
 
 	return (
 		<div className={$cx('flex items-center', signal, styles._local)} ref={ref}>
@@ -166,17 +205,15 @@ const Index = (props: IPropsActionBar) => {
 									)}
 									noStyle
 								>
-									<div className='flex items-center gap-1'>
-										<SelectValue placeholder='H' />
-									</div>
+									{getHeadingIcon(heading)}
 								</SelectTrigger>
-								<SelectContent className={styles.dropdown}>
-									<SelectItem value='1'>H1</SelectItem>
-									<SelectItem value='2'>H2</SelectItem>
-									<SelectItem value='3'>H3</SelectItem>
-									<SelectItem value='4'>H4</SelectItem>
-									<SelectItem value='5'>H5</SelectItem>
-									<SelectItem value='6'>H6</SelectItem>
+								<SelectContent align='start' sideOffset={3} className={styles.dropdown}>
+									<SelectItem value='1'>{getHeadingIcon(1)}</SelectItem>
+									<SelectItem value='2'>{getHeadingIcon(2)}</SelectItem>
+									<SelectItem value='3'>{getHeadingIcon(3)}</SelectItem>
+									<SelectItem value='4'>{getHeadingIcon(4)}</SelectItem>
+									<SelectItem value='5'>{getHeadingIcon(5)}</SelectItem>
+									<SelectItem value='6'>{getHeadingIcon(6)}</SelectItem>
 								</SelectContent>
 							</Select>
 						</div>
@@ -187,21 +224,12 @@ const Index = (props: IPropsActionBar) => {
 									className={$cx('select_list select select_btn', list && 'active')}
 									noStyle
 								>
-									<div className='flex items-center gap-1'>
-										<ListIcon weight='bold' />
-										<SelectValue placeholder='List' />
-									</div>
+									{getListIcon(list)}
 								</SelectTrigger>
-								<SelectContent className={styles.dropdown}>
-									<SelectItem value='bullet'>
-										<ListBulletsIcon weight='bold' size={16} />
-									</SelectItem>
-									<SelectItem value='number'>
-										<ListNumbersIcon weight='bold' size={16} />
-									</SelectItem>
-									<SelectItem value='check'>
-										<ListChecksIcon weight='bold' size={16} />
-									</SelectItem>
+								<SelectContent align='start' sideOffset={3} className={styles.dropdown}>
+									<SelectItem value='bullet'>{getListIcon('bullet')}</SelectItem>
+									<SelectItem value='number'>{getListIcon('number')}</SelectItem>
+									<SelectItem value='check'>{getListIcon('check')}</SelectItem>
 								</SelectContent>
 							</Select>
 						</div>
