@@ -15,6 +15,13 @@ import { Streamdown } from 'streamdown'
 
 import type { UIMessage } from 'ai'
 import type { ComponentProps, HTMLAttributes } from 'react'
+import type {
+	CjkPlugin as StreamdownCjkPlugin,
+	CodeHighlighterPlugin as StreamdownCodeHighlighterPlugin,
+	DiagramPlugin as StreamdownDiagramPlugin,
+	MathPlugin as StreamdownMathPlugin,
+	PluginConfig
+} from 'streamdown'
 
 export type MessageProps = HTMLAttributes<HTMLDivElement> & {
 	from: UIMessage['role']
@@ -27,7 +34,7 @@ export const Message = ({ className, from, ...props }: MessageProps) => (
 			from === 'user' ? 'is-user ml-auto justify-end' : 'is-assistant',
 			className
 		)}
-            data-streamdown='true'
+		data-streamdown='true'
 		{...props}
 	/>
 )
@@ -94,21 +101,28 @@ export const MessageAction = ({
 
 export type MessageResponseProps = ComponentProps<typeof Streamdown>
 
-const streamdown_plugins = { cjk, code, math, mermaid }
+// `streamdown` and the standalone plugin packages can resolve different
+// `unified` instances, so we normalize them to `streamdown`'s plugin types here.
+const streamdownPlugins: PluginConfig = {
+	cjk: cjk as unknown as StreamdownCjkPlugin,
+	code: code as unknown as StreamdownCodeHighlighterPlugin,
+	math: math as unknown as StreamdownMathPlugin,
+	mermaid: mermaid as unknown as StreamdownDiagramPlugin
+}
 
 export const MessageResponse = memo(
 	({ className, ...props }: MessageResponseProps) => {
-            return (
-		<Streamdown
-			className={cn(
-				'size-full [&>*:first-child]:mt-0 [&>*:last-child]:mb-0',
-				className
-			)}
-			plugins={streamdown_plugins}
-			{...props}
-		/>
-	      )
-      },
+		return (
+			<Streamdown
+				className={cn(
+					'size-full [&>*:first-child]:mt-0 [&>*:last-child]:mb-0',
+					className
+				)}
+				plugins={streamdownPlugins}
+				{...props}
+			/>
+		)
+	},
 	(prevProps, nextProps) =>
 		prevProps.children === nextProps.children &&
 		nextProps.isAnimating === prevProps.isAnimating

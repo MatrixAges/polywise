@@ -24,6 +24,13 @@ import {
   useState,
 } from "react";
 import { Streamdown } from "streamdown";
+import type {
+  CjkPlugin as StreamdownCjkPlugin,
+  CodeHighlighterPlugin as StreamdownCodeHighlighterPlugin,
+  DiagramPlugin as StreamdownDiagramPlugin,
+  MathPlugin as StreamdownMathPlugin,
+  PluginConfig,
+} from "streamdown";
 
 import { Shimmer } from "./shimmer";
 
@@ -201,7 +208,14 @@ export type ReasoningContentProps = ComponentProps<
   children: string;
 };
 
-const streamdownPlugins = { cjk, code, math, mermaid };
+// `streamdown` and the standalone plugin packages can resolve different
+// `unified` instances, so we normalize them to `streamdown`'s plugin types here.
+const streamdownPlugins: PluginConfig = {
+  cjk: cjk as unknown as StreamdownCjkPlugin,
+  code: code as unknown as StreamdownCodeHighlighterPlugin,
+  math: math as unknown as StreamdownMathPlugin,
+  mermaid: mermaid as unknown as StreamdownDiagramPlugin,
+};
 
 export const ReasoningContent = memo(
   ({ className, children, ...props }: ReasoningContentProps) => (
