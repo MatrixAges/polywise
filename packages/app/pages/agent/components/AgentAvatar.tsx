@@ -20,7 +20,7 @@ interface IProps {
 const default_avatar_url = '/images/bird.jpg'
 
 const size_map = {
-	small: 32,
+	small: 36,
 	large: 60
 } as const
 

@@ -28,7 +28,7 @@ const Index = (props: IAgentMenuSessionItemProps) => {
 				items-start
 				gap-1
 				px-3 py-2.5
-				rounded-xl
+				rounded-sm
 				group
 				click_button
 			`,

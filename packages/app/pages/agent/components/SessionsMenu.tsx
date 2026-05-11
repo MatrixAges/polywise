@@ -137,17 +137,12 @@ const Index = () => {
 				className='
 					flex
 					items-center justify-between
-					h-10
-					px-2.5
+					h-9
+					px-3
 				'
 			>
-				<div className='min-w-0'>
-					<div className='text-xsm text-std-500 font-medium'>Sessions</div>
-					<div className='text-std-400 truncate text-xs'>
-						{selected_agent?.description || 'Recent chats'}
-					</div>
-				</div>
-				<button className='icon_button small shrink-0' type='button' onClick={createSession}>
+				<div className='text-xsm text-std-500 font-medium'>Sessions</div>
+				<button className='icon_button small -mr-1' type='button' onClick={createSession}>
 					<Plus className='size-3.5'></Plus>
 				</button>
 			</div>
@@ -229,11 +224,6 @@ const Index = () => {
 											></SessionMenuItem>
 										)
 									})}
-									{!pins.length && !session_items.length && !session_loading ? (
-										<div className='text-std-400 px-3 py-6 text-sm'>
-											No sessions yet
-										</div>
-									) : null}
 									{(session_loading || session_loading_more) &&
 									!session_items.length &&
 									!pins.length ? (
