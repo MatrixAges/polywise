@@ -128,9 +128,7 @@ const Index = () => {
 				overflow-hidden
 				flex flex-col shrink-0
 				w-[240px] h-full
-				bg-std-50/60
 				border-r border-border-light
-				dark:bg-transparent
 			'
 		>
 			<div
