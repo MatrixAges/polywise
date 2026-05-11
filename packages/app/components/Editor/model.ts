@@ -60,7 +60,7 @@ export default class Index {
 	}
 
 	init(args: ArgsInit) {
-		const { id, value, readonly, onChange } = args
+		const { id, value, readonly, onChange, onBlur } = args
 		const normalized_value = value.trim()
 		const content_type =
 			normalized_value.startsWith('{') || normalized_value.startsWith('[') ? 'json' : 'markdown'
@@ -87,6 +87,7 @@ export default class Index {
 			},
 			onBlur: () => {
 				this.debounced_on_change.flush()
+				onBlur?.(this.editor.getMarkdown())
 			},
 			onTransaction: ({ editor, transaction }) => {
 				if (this.mounted) this.updateReactNodes()

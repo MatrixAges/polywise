@@ -37,6 +37,7 @@ const config = {
 		template: './public/index.html'
 	},
 	tools: {
+		swc: { jsc: { experimental: { plugins: [['@axew/swc-plugin-jsx-control-statements', {}]] } } },
 		lightningcssLoader: {
 			targets: 'chrome >= 120',
 			exclude: { isSelector: true }

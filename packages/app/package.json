@@ -113,6 +113,7 @@
     "zod": "catalog:"
   },
   "devDependencies": {
+    "@axew/swc-plugin-jsx-control-statements": "^0.8.0",
     "@csstools/postcss-is-pseudo-class": "^6.0.0",
     "@rsbuild/core": "catalog:",
     "@rsbuild/plugin-react": "catalog:",
@@ -139,7 +140,5 @@
     "ts-json-schema-generator": "^2.9.0",
     "type-fest": "catalog:",
     "typescript": "catalog:"
-  },
-  "peerDependencies": {},
-  "optionalDependencies": {}
+  }
 }

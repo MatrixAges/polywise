@@ -1,5 +1,24 @@
 packages:
-  - "packages/*"
+      - 'packages/*'
+
+allowBuilds:
+      '@mongodb-js/zstd': true
+      better-sqlite3: true
+      bufferutil: true
+      bun: true
+      core-js: true
+      core-js-pure: true
+      electron-winstaller: true
+      esbuild: true
+      lmdb: true
+      msgpackr-extract: true
+      node-liblzma: true
+      node-llama-cpp: true
+      simple-git-hooks: true
+      simsimd: true
+      usearch: true
+      utf-8-validate: true
+
 catalog:
       '@abraham/reflection': ^0.13.0
       '@ai-sdk/openai': 3.0.63
@@ -53,6 +72,7 @@ catalog:
       uuid: 14.0.0
       watchpack: ^2.5.1
       zod: 4.4.3
+
 ignoredBuiltDependencies:
       - electron-winstaller
 

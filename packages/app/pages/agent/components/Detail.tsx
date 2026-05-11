@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { observer } from 'mobx-react-lite'
 import { match } from 'ts-pattern'
 
-import { Textarea } from '@/__shadcn__/components/ui/textarea'
+import Editor from '@/components/Editor'
 
 import { useModel } from '../context'
 import ContentPanel from './ContentPanel'
@@ -34,9 +34,11 @@ const Index = () => {
 			? (selected_agent[active_tab] as string | null | undefined) || ''
 			: ''
 	const [draft_value, setDraftValue] = useState(field_value)
+	const [editor_version, setEditorVersion] = useState(0)
 
 	useEffect(() => {
 		setDraftValue(field_value)
+		setEditorVersion(value => value + 1)
 	}, [active_tab, field_value])
 
 	if (!selected_agent) {
@@ -74,32 +76,29 @@ const Index = () => {
 					.with('skills', () => <SkillsPanel></SkillsPanel>)
 					.with('tools', () => <ToolsPanel></ToolsPanel>)
 					.when(isTextTab, text_tab => (
-						<Textarea
+						<div
 							className='
-							overflow-y-auto
+							overflow-hidden
 							flex-1
 							h-full
 							min-h-0
-							p-6
-							rounded-none
-							text-sm!
 							bg-secondary/10
-							border-none
-							focus-within:ring-0!
 						'
-							value={draft_value}
-							placeholder={placeholder_map[text_tab]}
-							onChange={event => {
-								setDraftValue(event.target.value)
-							}}
-							onBlur={event => {
-								submitEditableField({
-									id: selected_agent.id,
-									key: text_tab,
-									value: event.target.value
-								})
-							}}
-						></Textarea>
+						>
+							<Editor
+								id={`agent-${selected_agent.id}-${text_tab}`}
+								key={`${selected_agent.id}-${text_tab}-${editor_version}`}
+								value={draft_value}
+								onChange={setDraftValue}
+								onBlur={value => {
+									submitEditableField({
+										id: selected_agent.id,
+										key: text_tab,
+										value
+									})
+								}}
+							></Editor>
+						</div>
 					))
 					.exhaustive()}
 			</div>
