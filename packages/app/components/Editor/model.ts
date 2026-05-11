@@ -287,7 +287,9 @@ export default class Index {
 	}
 
 	updateReactNodes() {
-		this.react_nodes = Object.values(this.editor.contentComponent?.getSnapshot()!)
+		const snapshot = this.editor.contentComponent?.getSnapshot()
+
+		this.react_nodes = snapshot ? Object.values(snapshot) : []
 
 		this.update()
 	}

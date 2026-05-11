@@ -16,15 +16,17 @@ import styles from './index.module.css'
 import type { IProps, IPropsActionBar, IPropsMenu, IPropsModal } from './types'
 
 const Index = (props: IProps) => {
-	const { id, value, readonly, rich_text, text_only, onChange } = props
+	const { id, value, readonly, rich_text, text_only, onChange, onBlur } = props
 	const [x] = useState(() => new Model())
 	const { t } = useTranslation()
 	const theme = useTheme()
+	const handleChange = useMemoizedFn((next_value: string) => onChange(next_value))
+	const handleBlur = useMemoizedFn((next_value: string) => onBlur?.(next_value))
 
 	const { setRef } = useAliveEffect({
-		init: () => x.init({ id, value, readonly, onChange }),
+		init: () => x.init({ id, value, readonly, onChange: handleChange, onBlur: handleBlur }),
 		deinit: () => x.off(),
-		deps: [readonly, onChange],
+		deps: [readonly],
 		normal: true
 	})
 
