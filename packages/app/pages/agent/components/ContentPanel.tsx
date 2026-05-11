@@ -44,6 +44,7 @@ const Index = () => {
 				className='
 					flex flex-col shrink-0
 					w-48
+					border-x border-border-light
 				'
 			>
 				<div
@@ -53,6 +54,7 @@ const Index = () => {
 						h-9
 						gap-2
 						px-2.5
+						border-b border-border-light
 					'
 				>
 					<Tabs
@@ -106,6 +108,7 @@ const Index = () => {
 						h-9
 						gap-2
 						px-2.5
+						border-b border-border-light
 					'
 				>
 					<div className='text-sm font-medium capitalize'>{article_for}</div>

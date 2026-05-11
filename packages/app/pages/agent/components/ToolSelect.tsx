@@ -22,7 +22,7 @@ const Index = () => {
 	const selected_items = tool_options.filter(item => selected_tool_names.includes(item.value))
 
 	return (
-		<div className='flex flex-col p-6'>
+		<div className='flex w-full flex-col p-6'>
 			<Combobox<IToolOption, true>
 				multiple
 				items={tool_options}
@@ -30,7 +30,14 @@ const Index = () => {
 				onValueChange={value => setTools(value.map(item => item.value))}
 				isItemEqualToValue={(item_value, value) => item_value.value === value.value}
 			>
-				<ComboboxChips className='border-none bg-transparent p-0! focus-within:ring-0' ref={ref_anchor}>
+				<ComboboxChips
+					className='
+						w-full
+						bg-transparent!
+						focus-within:ring-0
+					'
+					ref={ref_anchor}
+				>
 					{selected_items.map(item => (
 						<ComboboxChip key={item.value}>{item.label}</ComboboxChip>
 					))}

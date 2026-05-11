@@ -50,7 +50,7 @@ const Index = ({ agent }: IProps) => {
 						)}
 						{edit_field_key === 'description' ? (
 							<EditableField
-								class_name='text-std-400 text-sm! leading-5.5'
+								class_name='text-std-400 text-sm! leading-4.5'
 								active
 								value={agent.description || ''}
 								placeholder='Add a short description for this agent'
@@ -66,7 +66,7 @@ const Index = ({ agent }: IProps) => {
 							></EditableField>
 						) : (
 							<button
-								className='text-std-400 text-left text-sm leading-5.5'
+								className='text-std-400 text-left text-sm leading-4.5'
 								type='button'
 								onClick={() => startEditField('description')}
 							>
