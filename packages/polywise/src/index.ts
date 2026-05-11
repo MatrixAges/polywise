@@ -4,13 +4,14 @@ import { initConfig } from './config'
 import { initEnv } from './env'
 import { initAutoClean, initMcps } from './fst'
 import ensureSkillDefaults from './rpc/skill/ensureDefaults'
-import { initDefaults, initServer } from './utils'
+import { calibrateRunningSessions, initDefaults, initServer } from './utils'
 
 await initServer()
 await initDefaults()
 await initConfig()
 await initMcps()
 await initEnv()
+await calibrateRunningSessions()
 await ensureSkillDefaults()
 
 initAutoClean()
