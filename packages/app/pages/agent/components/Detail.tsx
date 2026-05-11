@@ -78,7 +78,7 @@ const Index = () => {
 					.when(isTextTab, text_tab => (
 						<div
 							className='
-							overflow-hidden
+							overflow-y-scroll
 							flex-1
 							h-full
 							min-h-0

@@ -11,6 +11,7 @@ import {
 	DialogTitle
 } from '@/__shadcn__/components/ui/dialog'
 import { Input } from '@/__shadcn__/components/ui/input'
+import { Spinner } from '@/__shadcn__/components/ui/spinner'
 
 import { useModel } from '../context'
 
@@ -71,7 +72,8 @@ const Index = ({ open, onOpenChange }: IProps) => {
 							Cancel
 						</Button>
 						<Button type='submit' disabled={!next_purpose || create_agent_loading}>
-							Create
+							{create_agent_loading && <Spinner className='size-3.5'></Spinner>}
+							{create_agent_loading ? 'Creating...' : 'Create'}
 						</Button>
 					</DialogFooter>
 				</form>
