@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { DndContext, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { useMemoizedFn } from 'ahooks'
-import { Plus } from 'lucide-react'
+import { PanelLeftClose, Plus } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { ContextMenu, ContextMenuTrigger } from '@/__shadcn__/components/ui/context-menu'
@@ -24,7 +24,6 @@ interface IMenuTarget {
 
 const Index = () => {
 	const {
-		selected_agent,
 		pins,
 		session_items,
 		pin_map,
@@ -34,6 +33,7 @@ const Index = () => {
 		session_loading,
 		session_loading_more,
 		session_has_more,
+		setSessionMenuOpen,
 		createSession,
 		loadMoreSessions,
 		sortPin
@@ -127,7 +127,7 @@ const Index = () => {
 			className='
 				overflow-hidden
 				flex flex-col shrink-0
-				w-[240px] h-full
+				w-[210px] h-full
 				border-r border-border-light
 			'
 		>
@@ -140,9 +140,18 @@ const Index = () => {
 				'
 			>
 				<div className='text-xsm text-std-500 font-medium'>Sessions</div>
-				<button className='icon_button small -mr-1' type='button' onClick={createSession}>
-					<Plus className='size-3.5'></Plus>
-				</button>
+				<div className='-mr-1 flex gap-1'>
+					<button
+						className='icon_button small'
+						type='button'
+						onClick={() => setSessionMenuOpen(false)}
+					>
+						<PanelLeftClose className='size-3.5'></PanelLeftClose>
+					</button>
+					<button className='icon_button small' type='button' onClick={createSession}>
+						<Plus className='size-3.5'></Plus>
+					</button>
+				</div>
 			</div>
 			<div className='min-h-0 flex-1'>
 				<ContextMenu>

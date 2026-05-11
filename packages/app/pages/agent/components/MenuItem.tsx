@@ -42,7 +42,7 @@ const Index = (props: IProps) => {
 				relative
 				flex
 				gap-2
-				p-2
+				px-3 py-2.5
 				rounded-sm
 				group
 				cursor-pointer

@@ -6,7 +6,7 @@ import { useModel } from '../context'
 import SessionsMenu from './SessionsMenu'
 
 const Index = () => {
-	const { selected_agent, selected_session_id, setPageMode } = useModel()
+	const { selected_agent, selected_session_id, session_menu_open } = useModel()
 
 	if (!selected_agent) {
 		return (
@@ -30,7 +30,7 @@ const Index = () => {
 				min-w-0
 			'
 		>
-			<SessionsMenu></SessionsMenu>
+			{session_menu_open && <SessionsMenu></SessionsMenu>}
 			{selected_session_id && <Session type='page' id={selected_session_id}></Session>}
 		</div>
 	)

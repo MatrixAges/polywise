@@ -60,6 +60,7 @@ export default class Index {
 	page_mode = 'sessions' as AgentPageMode
 	current_tab = 'info' as AgentTab
 	edit_field_key = '' as '' | 'name' | 'description' | AgentTab
+	session_menu_open = true
 	article_items = [] as Array<AgentArticleItem>
 	article_for = 'memory' as ArticleForType
 	selected_article_id = ''
@@ -123,7 +124,11 @@ export default class Index {
 
 	async init() {
 		const deinit = setStorageWhenChange(
-			[{ agent_selected_agent_id: 'selected_agent_id' }, { agent_current_tab: 'current_tab' }],
+			[
+				{ agent_selected_agent_id: 'selected_agent_id' },
+				{ agent_current_tab: 'current_tab' },
+				{ agent_session_menu_open: 'session_menu_open' }
+			],
 			this
 		)
 
@@ -459,6 +464,14 @@ export default class Index {
 		if (mode === 'detail' && this.current_tab === 'sessions') {
 			this.current_tab = 'info'
 		}
+	}
+
+	setSessionMenuOpen(open: boolean) {
+		this.session_menu_open = open
+	}
+
+	toggleSessionMenu() {
+		this.session_menu_open = !this.session_menu_open
 	}
 
 	setArticleFor(for_type: ArticleForType) {

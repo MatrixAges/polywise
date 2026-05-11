@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { DndContext, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
-import { Plus, Sparkles } from 'lucide-react'
+import { PanelLeftOpen, Plus, Sparkles } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { useModel } from '../context'
@@ -12,7 +12,7 @@ import { SkillDialog } from './Skill'
 import type { DragEndEvent } from '@dnd-kit/core'
 
 const Index = () => {
-	const { agents, selected_agent_id, sortAgent } = useModel()
+	const { agents, page_mode, selected_agent_id, session_menu_open, setSessionMenuOpen, sortAgent } = useModel()
 	const [create_dialog_open, setCreateDialogOpen] = useState(false)
 	const [skill_dialog_open, setSkillDialogOpen] = useState(false)
 	const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }))
@@ -50,12 +50,21 @@ const Index = () => {
 					className='
 						flex
 						items-center justify-between
-						h-8
-						px-2.5
+						h-9
+						px-3
 					'
 				>
 					<span className='text-xsm text-std-500 gap-2 font-medium'>Agents</span>
-					<div className='flex gap-1'>
+					<div className='-mr-1 flex gap-1'>
+						{page_mode === 'sessions' && !session_menu_open && (
+							<button
+								className='icon_button small'
+								type='button'
+								onClick={() => setSessionMenuOpen(true)}
+							>
+								<PanelLeftOpen className='size-3.5'></PanelLeftOpen>
+							</button>
+						)}
 						<button
 							className='icon_button small'
 							type='button'

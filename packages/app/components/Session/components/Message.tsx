@@ -1,7 +1,7 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useMemoizedFn } from 'ahooks'
 import dayjs from 'dayjs'
-import { ChevronRightIcon, Copy, Trash2 } from 'lucide-react'
+import { Check, ChevronRightIcon, Copy, Trash2 } from 'lucide-react'
 
 import { Message, MessageContent } from '@/__shadcn__/components/ai-elements'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/__shadcn__/components/ui/collapsible'
@@ -329,6 +329,8 @@ const ProcessSummaryBlock = (props: { children: React.ReactNode; duration: numbe
 const Index = (props: IPropsMessage) => {
 	const { streaming, is_streaming, message, answer, removeMessage } = props
 	const { parts } = message
+	const [is_copied, setIsCopied] = useState(false)
+	const copy_reset_timeout_ref = useRef<number>(0)
 	const copy_text = useMemo(() => getMessageCopyText(message), [message])
 	const created_at_text = useMemo(
 		() => formatMessageTime(getMessageTime(message)),
@@ -375,10 +377,21 @@ const Index = (props: IPropsMessage) => {
 		}
 	}, [parts, streaming])
 
-	const onCopy = useMemoizedFn(() => {
+	useEffect(() => {
+		return () => {
+			window.clearTimeout(copy_reset_timeout_ref.current)
+		}
+	}, [])
+
+	const onCopy = useMemoizedFn(async () => {
 		if (!copy_text) return
 
-		void copy(copy_text)
+		await copy(copy_text)
+		setIsCopied(true)
+		window.clearTimeout(copy_reset_timeout_ref.current)
+		copy_reset_timeout_ref.current = window.setTimeout(() => {
+			setIsCopied(false)
+		}, 2000)
 	})
 
 	const onRemove = useMemoizedFn(() => {
@@ -468,11 +481,11 @@ const Index = (props: IPropsMessage) => {
 					<button
 						className='icon_button small'
 						disabled={!copy_text}
-						title='Copy message'
+						title={is_copied ? 'Copied' : 'Copy message'}
 						type='button'
-						onClick={onCopy}
+						onClick={() => void onCopy()}
 					>
-						<Copy></Copy>
+						{is_copied ? <Check></Check> : <Copy></Copy>}
 					</button>
 					<button
 						className='icon_button small'
