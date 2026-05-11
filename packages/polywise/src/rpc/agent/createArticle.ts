@@ -1,5 +1,5 @@
 import { addAgentArticle } from '@core/db/services/externals'
-import save from '@core/io/save'
+import { saveArticle } from '@core/io'
 import { boolean, object, string, enum as zod_enum } from 'zod'
 
 import { p } from '../../utils/trpc'
@@ -13,8 +13,7 @@ const input_type = object({
 })
 
 export default p.input(input_type).mutation(async ({ input }) => {
-	const article_id = await save({
-		type: 'article',
+	const article_id = await saveArticle({
 		title: input.title,
 		content: input.content,
 		for: input.for,

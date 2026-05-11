@@ -1,4 +1,4 @@
-import { save } from '@core/io'
+import { saveArticle } from '@core/io'
 import { boolean, object, string, enum as zod_enum } from 'zod'
 
 import { p } from '../utils/trpc'
@@ -18,7 +18,12 @@ export default p
 	.mutation(async ({ input }) => {
 		const { id, content, for: for_type, exec_pipeline } = input
 
-		const updated_id = await save({ type: 'article', content: content, for: for_type, id, exec_pipeline })
+		const updated_id = await saveArticle({
+			content: content,
+			for: for_type,
+			article_id: id,
+			exec_pipeline
+		})
 
 		return { ok: true, id: updated_id }
 	})

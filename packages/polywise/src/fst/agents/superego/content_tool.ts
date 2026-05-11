@@ -1,7 +1,7 @@
 import { article } from '@core/db/schema'
 import { setArticle } from '@core/db/services'
 import { addAgentArticle } from '@core/db/services/externals'
-import { fullTextSearch, remove, save, SemanticSearch } from '@core/io'
+import { fullTextSearch, remove, saveArticle, SemanticSearch } from '@core/io'
 import { tool } from 'ai'
 import { eq } from 'drizzle-orm'
 import { enum as Enum, object, string } from 'zod'
@@ -54,13 +54,13 @@ export const createContentTool = (scope: SessionScope) => {
 					return 'Content add failed: content is required'
 				}
 
-				const article_id = await save({
-					type: 'article',
+				const article_id = await saveArticle({
 					content: input.content,
 					for: input.for,
 					scope_type: scope.type,
 					scope_id: scope.id,
-					source: 'superego'
+					source: 'superego',
+					exec_pipeline: true
 				})
 
 				if (scope.type === 'agent' && scope.id) {

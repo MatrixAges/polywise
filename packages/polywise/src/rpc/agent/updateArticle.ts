@@ -1,6 +1,6 @@
 import { article } from '@core/db/schema'
 import { getArticle } from '@core/db/services'
-import save from '@core/io/save'
+import { saveArticle } from '@core/io'
 import { eq } from 'drizzle-orm'
 import { boolean, object, string, enum as zod_enum } from 'zod'
 
@@ -21,9 +21,8 @@ export default p.input(input_type).mutation(async ({ input }) => {
 		throw new Error(`Article not found: ${input.article_id}`)
 	}
 
-	return save({
-		type: 'article',
-		id: input.article_id,
+	return saveArticle({
+		article_id: input.article_id,
 		title: input.title,
 		content: input.content,
 		for: input.for,
