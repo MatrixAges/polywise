@@ -2,6 +2,7 @@ import {
 	agent,
 	article,
 	chunk,
+	document,
 	edge,
 	file,
 	link,
@@ -24,6 +25,8 @@ export type Skill = InferSelectModel<typeof skill>
 export type SkillInsert = InferInsertModel<typeof skill>
 export type Article = InferSelectModel<typeof article>
 export type ArticleInsert = InferInsertModel<typeof article>
+export type Document = InferSelectModel<typeof document>
+export type DocumentInsert = InferInsertModel<typeof document>
 export type Chunk = InferSelectModel<typeof chunk>
 export type ChunkInsert = InferInsertModel<typeof chunk>
 export type Edge = InferSelectModel<typeof edge>

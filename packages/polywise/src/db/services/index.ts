@@ -1,6 +1,7 @@
 export * from './agent'
 export * from './article'
 export * from './chunk'
+export * from './document'
 export * from './edge'
 export * from './externals'
 export * from './message'

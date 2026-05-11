@@ -31,8 +31,8 @@ export default sqliteTable(
 		hit_at: integer('hit_at', { mode: 'timestamp' }),
 		// Long article (content exceeds 12000 characters)
 		is_long: integer('is_long', { mode: 'boolean' }).generatedAlwaysAs(sql`length(content) > 12000`),
-		// Whether triples have been generated
-		is_tripled: integer('is_tripled', { mode: 'boolean' }).default(false).notNull(),
+		// Whether the article save pipeline has finished
+		is_pipelined: integer('is_pipelined', { mode: 'boolean' }).default(false).notNull(),
 		created_at: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
 		updated_at: integer('updated_at', { mode: 'timestamp' })
 			.$defaultFn(() => new Date())
@@ -43,7 +43,7 @@ export default sqliteTable(
 		index('article_for_idx').on(t.for),
 		index('article_scope_idx').on(t.scope_type, t.scope_id),
 		index('article_source_idx').on(t.source),
-		index('article_is_tripled_idx').on(t.is_tripled),
+		index('article_is_pipelined_idx').on(t.is_pipelined),
 		index('article_created_at_idx').on(t.created_at),
 		index('article_updated_at_idx').on(t.updated_at),
 		uniqueIndex('article_hash_idx').on(t.hash)

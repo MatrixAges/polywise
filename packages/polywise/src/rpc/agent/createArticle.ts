@@ -1,6 +1,6 @@
 import { addAgentArticle } from '@core/db/services/externals'
 import save from '@core/io/save'
-import { object, string, enum as zod_enum } from 'zod'
+import { boolean, object, string, enum as zod_enum } from 'zod'
 
 import { p } from '../../utils/trpc'
 
@@ -8,7 +8,8 @@ const input_type = object({
 	agent_id: string(),
 	title: string(),
 	content: string(),
-	for: zod_enum(['linkcase', 'wiki', 'memory', 'user'])
+	for: zod_enum(['linkcase', 'wiki', 'memory', 'user']),
+	exec_pipeline: boolean().optional()
 })
 
 export default p.input(input_type).mutation(async ({ input }) => {
@@ -18,7 +19,8 @@ export default p.input(input_type).mutation(async ({ input }) => {
 		content: input.content,
 		for: input.for,
 		scope_type: 'agent',
-		scope_id: input.agent_id
+		scope_id: input.agent_id,
+		exec_pipeline: input.exec_pipeline
 	})
 
 	await addAgentArticle(input.agent_id, article_id)

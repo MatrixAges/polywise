@@ -2,7 +2,7 @@ import { article } from '@core/db/schema'
 import { getArticle } from '@core/db/services'
 import save from '@core/io/save'
 import { eq } from 'drizzle-orm'
-import { object, string, enum as zod_enum } from 'zod'
+import { boolean, object, string, enum as zod_enum } from 'zod'
 
 import { p } from '../../utils/trpc'
 
@@ -10,7 +10,8 @@ const input_type = object({
 	article_id: string(),
 	title: string(),
 	content: string(),
-	for: zod_enum(['linkcase', 'wiki', 'memory', 'user'])
+	for: zod_enum(['linkcase', 'wiki', 'memory', 'user']),
+	exec_pipeline: boolean().optional()
 })
 
 export default p.input(input_type).mutation(async ({ input }) => {
@@ -27,6 +28,7 @@ export default p.input(input_type).mutation(async ({ input }) => {
 		content: input.content,
 		for: input.for,
 		scope_type: (current_article.scope_type as 'global' | 'project' | 'agent' | null) || 'agent',
-		scope_id: current_article.scope_id
+		scope_id: current_article.scope_id,
+		exec_pipeline: input.exec_pipeline
 	})
 })

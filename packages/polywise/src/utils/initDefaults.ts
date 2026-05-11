@@ -5,7 +5,7 @@ import defaultSkillCreator from '@core/fst/agents/skill_creator/defaultSkill'
 import { ensureWithValue } from '@core/utils'
 import fs from 'fs-extra'
 
-import { cron_path } from '../consts/app'
+import { cron_path, pipeline_path } from '../consts/app'
 
 import type { AppConfig, ProviderConfig } from '@core/types'
 
@@ -58,4 +58,6 @@ export default async () => {
 		version: 1,
 		tasks: []
 	})
+
+	await ensureWithValue(pipeline_path, {})
 }
