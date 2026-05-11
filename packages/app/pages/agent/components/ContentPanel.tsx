@@ -34,12 +34,7 @@ const Index = () => {
 	} = useModel()
 
 	return (
-		<div
-			className='
-				flex flex-1
-				h-full
-			'
-		>
+		<div className='flex h-full flex-1'>
 			<div
 				className='
 					flex flex-col shrink-0

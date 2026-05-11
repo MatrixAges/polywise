@@ -95,7 +95,8 @@ const Index = () => {
 			<DetailMenu active_tab={active_tab}></DetailMenu>
 			<div
 				className={$cx(
-					'page_wrap p-0',
+					'flex-1',
+					active_tab !== 'content' && 'page_wrap p-0',
 					!['content', 'graph'].includes(active_tab) && !isTextTab(active_tab) && 'p-6'
 				)}
 			>
