@@ -1,5 +1,7 @@
 export { default as ErrorBoundary } from './ErrorBoundary'
 export { default as Alert } from './Alert'
+export { default as Modal } from './Modal'
+export { default as Icon } from './Icon'
 export { default as Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from './Dialog'
 export { default as Drawer } from './Drawer'
 export { default as Tooltip } from './Tooltip'

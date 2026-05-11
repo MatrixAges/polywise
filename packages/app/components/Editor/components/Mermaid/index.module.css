@@ -1,0 +1,50 @@
+._local {
+	:global {
+		.inline_wrap {
+			z-index: 10;
+			right: 0;
+			margin-bottom: 0;
+
+			.ani-row {
+				flex-direction: row !important;
+				flex-wrap: nowrap;
+
+				.ani-form-item-label {
+					padding-bottom: 0;
+					margin-right: 4px;
+
+					label {
+						&::after {
+							display: none;
+						}
+					}
+				}
+
+				.ani-form-item-control {
+					display: flex;
+					width: unset;
+
+					.ani-form-item-control-input {
+						min-height: unset;
+					}
+				}
+			}
+		}
+
+		.prewview_wrap {
+			min-height: 120px;
+			padding: 18px 0;
+			border: 1px dashed var(--color_border_light);
+			border-radius: var(--radius);
+
+			&:hover {
+				border-color: var(--color_text);
+			}
+
+			.preview {
+				color: var(--color_text_light);
+				font-size: 18px;
+			}
+		}
+	}
+}

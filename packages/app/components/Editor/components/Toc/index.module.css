@@ -1,0 +1,46 @@
+._local {
+	overflow-y: scroll;
+	max-height: 80vh;
+	font-size: 12px;
+
+	:global {
+		.toc_items {
+			padding-top: 6px;
+			gap: 6px;
+
+			.toc_item {
+				&:hover,
+				&.active {
+					.signal_wrap {
+						.signal {
+							background-color: var(--color_text);
+						}
+					}
+
+					a {
+						color: var(--color_text);
+					}
+				}
+
+				.signal_wrap {
+					display: inline-flex;
+					width: 15px;
+					margin-right: 6px;
+					vertical-align: 3px;
+
+					.signal {
+						height: 3px;
+						border-radius: 3px;
+						background-color: var(--color_text_light);
+						transition: background-color ease 0.3s;
+					}
+				}
+
+				a {
+					width: calc(100% - 21px);
+					color: var(--color_text_greylight);
+				}
+			}
+		}
+	}
+}

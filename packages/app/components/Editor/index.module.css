@@ -1,0 +1,241 @@
+._local {
+	:global {
+		.float_el {
+			z-index: 100;
+			left: -100%;
+			visibility: hidden;
+
+			&.float_menu {
+				overflow-y: scroll;
+				border: var(--border_light);
+				border-radius: var(--radius);
+				background-color: var(--color_bg);
+				box-shadow: var(--shadow);
+			}
+		}
+
+		.editor_container {
+			& > .placeholder {
+				top: calc(var(--page_padding) * 0.72);
+				max-width: var(--content_width);
+				padding: 0 var(--page_padding);
+				margin-bottom: 0;
+				color: var(--color_text_softlight);
+			}
+		}
+
+		.ProseMirror-selectednode {
+			outline: 2px solid var(--color_border_light);
+			outline-offset: 2px;
+		}
+
+		.editor_wrap {
+			overflow-y: scroll;
+			height: 100%;
+			outline: none;
+		}
+
+		.tiptap {
+			max-width: var(--content_width);
+			min-height: 100%;
+			box-sizing: border-box;
+			padding: var(--page_padding);
+			padding-top: calc(var(--page_padding) * 0.72);
+			padding-bottom: 120px;
+			margin: 0 auto;
+			outline: none;
+
+			&.resize-cursor {
+				cursor: ew-resize;
+				cursor: col-resize;
+			}
+
+			.react-renderer {
+				background-color: transparent !important;
+			}
+		}
+
+		p.is-editor-empty:first-child::before {
+			float: left;
+			height: 0;
+			color: var(--color_text_light);
+			content: attr(data-placeholder);
+			pointer-events: none;
+		}
+
+		ul[data-type='taskList'] {
+			list-style: none;
+
+			& > li {
+				position: relative;
+
+				& > label {
+					position: absolute;
+					top: 0.08em;
+					left: -20px;
+
+					input {
+						margin: 0;
+					}
+				}
+			}
+		}
+
+		pre {
+			position: relative;
+			padding: 12px 16px;
+			border-radius: var(--radius_12);
+			border-radius: var(--radius);
+			background: var(--bg_component) !important;
+			font-family: var(--font_mono);
+			margin-block: var(--margin_y);
+
+			&::before {
+				position: absolute;
+				top: 4px;
+				right: 8px;
+				color: var(--color_text_softlight);
+				content: attr(data-language);
+				font-family: var(--font_family);
+				font-size: 10px;
+			}
+
+			code {
+				display: unset;
+				padding: 0;
+				margin: unset;
+				border-radius: unset;
+				color: inherit;
+				background-color: unset;
+				word-break: unset;
+				caret-color: var(--color_text);
+			}
+		}
+
+		.tiptap-mathematics-render {
+			border-radius: var(--radius_2);
+
+			&:hover {
+				background-color: var(--bg_component);
+			}
+
+			&.ProseMirror-selectednode {
+				outline-offset: 0px;
+			}
+
+			&[data-type='block-math'] {
+				display: block;
+				padding: var(--margin_y);
+				text-align: center;
+				margin-block: var(--margin_y);
+			}
+
+			&[data-type='inline-math'] {
+				display: inline-block;
+				padding: 0.18em;
+				margin: 0 0.6em;
+				font-size: 0.82em;
+			}
+		}
+
+		table {
+			td,
+			th {
+				position: relative;
+
+				&:has(.column-resize-handle:last-child) {
+					> *:nth-last-child(2) {
+						margin-bottom: 0;
+					}
+				}
+			}
+
+			.selectedCell:after {
+				position: absolute;
+				z-index: 0;
+				top: 0;
+				right: 0;
+				bottom: 0;
+				left: 0;
+				background: var(--bg_hover);
+				content: '';
+				pointer-events: none;
+			}
+
+			.column-resize-handle {
+				position: absolute;
+				z-index: 3;
+				top: 0;
+				right: -1px;
+				bottom: -2px;
+				width: 3px;
+				background-color: var(--color_text);
+				pointer-events: none;
+			}
+		}
+
+		.details {
+			display: flex;
+			box-sizing: border-box;
+			padding: 0.5rem;
+			border: var(--border_light);
+			border-radius: 0.5rem;
+			gap: 0.25rem;
+			margin-block: var(--margin_y);
+
+			&.is-open > button::before {
+				transform: rotate(90deg);
+			}
+
+			summary {
+				font-weight: 500;
+			}
+
+			> button {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				width: 1.25rem;
+				height: 1.25rem;
+				line-height: 1;
+				padding: 0;
+				margin-top: 0.1rem;
+				border-radius: 4px;
+				background: transparent;
+
+				&::before {
+					content: '\25B6';
+				}
+			}
+
+			> div {
+				display: flex;
+				flex-direction: column;
+				width: 100%;
+				gap: 1rem;
+
+				> [data-type='detailsContent'] > :last-child {
+					margin-bottom: 0.5rem;
+				}
+			}
+
+			.details {
+				margin: 0.5rem 0;
+			}
+		}
+	}
+}
+
+.modal {
+	&.emoji {
+		padding: 0;
+		padding-top: 12px;
+
+		:global {
+			.modal_header {
+				padding: 0 12px;
+				margin-bottom: 0;
+			}
+		}
+	}
+}

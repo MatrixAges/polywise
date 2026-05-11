@@ -1,0 +1,28 @@
+._local {
+	width: 150px;
+	line-height: 1;
+	font-size: 12px;
+
+	:global {
+		.action_items {
+			.divider {
+				width: 100%;
+				height: 1px;
+				margin: 6px 0;
+				background-color: var(--color_border);
+			}
+
+			.action_item {
+				padding: 6px 0;
+				transition: padding ease 0.18s;
+
+				&:hover {
+					padding-right: 6px;
+					padding-left: 6px;
+					border-radius: var(--radius_small);
+					background-color: var(--color_bg_2);
+				}
+			}
+		}
+	}
+}

@@ -1,7 +1,7 @@
 {
 	"name": "monorepo",
 	"author": "1yasa",
-	"packageManager": "pnpm@10.33.4",
+	"packageManager": "pnpm@11.0.9",
 	"scripts": {
 		"deps": "ncu -i",
 		"deps:w": "ncu -u -i --workspaces",
@@ -15,13 +15,13 @@
 	},
 	"devDependencies": {
 		"@ianvs/prettier-plugin-sort-imports": "^4.7.1",
-		"pcu": "^1.2.0",
+		"pcu": "^1.3.0",
 		"prettier": "^3.8.3",
-		"npm-check-updates": "^21.0.3",
+		"npm-check-updates": "^22.1.1",
 		"prettier-plugin-tailwindcss-pro": "^0.2.0",
 		"pretty-quick": "^4.2.2",
 		"simple-git-hooks": "^2.13.1",
-		"turbo": "^2.9.6",
+		"turbo": "^2.9.12",
 		"@types/node": "catalog:",
 		"bun": "catalog:",
 		"bun-types": "catalog:"

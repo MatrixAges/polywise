@@ -1,0 +1,61 @@
+._local {
+	line-height: 1;
+
+	font-size: 12px;
+
+	:global {
+		.menu_wrap {
+			.latest_blocks {
+				padding: 3px;
+				border-bottom: 1px dashed var(--color_border_light);
+				background-color: var(--color_bg);
+
+				.latest_block {
+					width: calc((100% - 12px) / 5);
+					margin-right: 3px;
+					border-radius: var(--radius_3);
+					font-size: 14px;
+					aspect-ratio: 1;
+
+					&:hover {
+						background-color: var(--color_bg_1);
+					}
+
+					&:last-child {
+						margin-right: 0;
+					}
+				}
+			}
+
+			.menu_items {
+				padding: 3px;
+
+				.picker_menu_item {
+					padding: 6px 8px;
+					border-radius: var(--radius_3);
+					user-select: none;
+					gap: 12px;
+
+					&:hover,
+					&.selected {
+						background-color: var(--color_bg_1);
+					}
+
+					.left_wrap {
+						.icon_wrap {
+							font-size: 16px;
+						}
+
+						.text {
+							white-space: nowrap;
+						}
+					}
+
+					.shortcut {
+						color: var(--color_text_light);
+					}
+				}
+			}
+		}
+	}
+}

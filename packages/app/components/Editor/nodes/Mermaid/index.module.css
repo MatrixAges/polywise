@@ -1,0 +1,16 @@
+.wrapper {
+	padding: 18px;
+	border-radius: var(--radius);
+	background-color: var(--bg_component);
+	margin-block: var(--margin_y);
+}
+
+._local {
+	&.disable_select {
+		user-select: none;
+	}
+
+	svg {
+		font-size: 13px !important;
+	}
+}

@@ -1,0 +1,88 @@
+._local {
+	&:hover,
+	&:focus-within {
+		&::before {
+			opacity: 0;
+		}
+
+		:global {
+			.actions_wrap {
+				.select {
+					opacity: 1;
+				}
+
+				.btn_action {
+					opacity: 1;
+				}
+			}
+		}
+	}
+
+	:global {
+		.actions_wrap {
+			top: 6px;
+			right: 6px;
+			gap: 4px;
+
+			.select {
+				align-items: center;
+				height: 24px;
+				border-radius: var(--radius);
+				opacity: 0;
+				transition: opacity ease 0.3s;
+				backdrop-filter: var(--glass_blur);
+
+				.ani-select-selector {
+					width: 90px;
+					height: 24px;
+					padding: 0 6px !important;
+					border: var(--border_soft);
+					background-color: var(--bg_component);
+					font-size: 12px;
+
+					&::after {
+						display: none;
+					}
+
+					.ani-select-selection-wrap {
+						height: 100%;
+
+						.ani-select-selection-search {
+							padding-right: 12px;
+						}
+
+						.ani-select-selection-item {
+							padding-right: 12px;
+						}
+
+						input {
+							height: 100%;
+							line-height: 24px;
+							font-size: 12px;
+						}
+					}
+				}
+
+				.ani-select-arrow {
+					top: unset;
+					right: 6px;
+					margin-top: unset;
+					vertical-align: unset;
+				}
+			}
+
+			.btn_action {
+				width: 24px;
+				height: 24px;
+				padding: 0;
+				border: var(--border_soft);
+				border-radius: var(--radius);
+				opacity: 0;
+				background-color: var(--bg_component);
+				transition: opacity ease 0.3s;
+				font-size: 14px;
+				backdrop-filter: var(--glass_blur);
+			}
+		}
+	}
+}

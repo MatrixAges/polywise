@@ -1,0 +1,125 @@
+import { useLayoutEffect, useMemo, useState } from 'react'
+import { useMemoizedFn } from 'ahooks'
+import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
+
+import { Modal } from '@/components'
+import { useAliveEffect, useTheme } from '@/hooks'
+import markdown from '@/styles/markdown.module.css'
+
+import { ActionBar, Emoji, Image, Katex, Menu, Mermaid, Toc } from './components'
+import { modal_size } from './metadata'
+import Model from './model'
+
+import styles from './index.module.css'
+
+import type { IProps, IPropsActionBar, IPropsMenu, IPropsModal } from './types'
+
+const Index = (props: IProps) => {
+	const { id, value, readonly, rich_text, text_only, onChange } = props
+	const [x] = useState(() => new Model())
+	const { t } = useTranslation()
+	const theme = useTheme()
+
+	const { setRef } = useAliveEffect({
+		init: () => x.init({ id, value, readonly, onChange }),
+		deinit: () => x.off(),
+		deps: [readonly, onChange],
+		normal: true
+	})
+
+	useLayoutEffect(() => {
+		if (!x.mounted) return
+
+		x.editor.commands.updateAttributes('codeBlock', { theme: `github-${theme}` })
+	}, [theme, x.mounted])
+
+	const setActionBar = useMemoizedFn(v => v && (x.ref_action_bar = v))
+	const setMenu = useMemoizedFn(v => v && (x.ref_menu = v))
+	const setContainer = useMemoizedFn(v => v && (x.ref_container = v))
+
+	const props_actions_bar: IPropsActionBar = {
+		editor: x.editor,
+		signal: x.signal,
+		focus: x.focus,
+		rich_text,
+		text_only,
+		update: x.update
+	}
+
+	const props_menu: IPropsMenu = {
+		editor: x.editor,
+		current_menu_items: $copy(x.current_menu_items),
+		latest_menu_items: $copy(x.latest_menu_items),
+		onMenuItem: x.onMenuItem
+	}
+
+	const props_modal: IPropsModal = {
+		editor: x.editor
+	}
+
+	const modal_width = useMemo(() => {
+		if (!x.modal_type) return 300
+
+		return modal_size[x.modal_type as keyof typeof modal_size] ?? 300
+	}, [x.modal_type])
+
+	const onCloseModal = useMemoizedFn(() => (x.modal_visible = false))
+
+	return (
+		<div className={$cx('w_100 h_100 flex_column flex', x.signal, markdown._local, styles._local)} ref={setRef}>
+			<div className='float_el absolute' ref={setActionBar}>
+				<If condition={x.editor !== null}>
+					<ActionBar {...props_actions_bar}></ActionBar>
+				</If>
+			</div>
+			<div className='float_menu float_el absolute' ref={setMenu}>
+				<If condition={x.editor !== null}>
+					<Menu {...props_menu}></Menu>
+				</If>
+			</div>
+			<div
+				className='
+					relative
+					flex flex_column
+					editor_container w_100 h_100 align_center
+				'
+			>
+				<If condition={x.counts === 0}>
+					<p className='w_100 border_box placeholder absolute'>{t('editor.placeholder')}...</p>
+				</If>
+				<div className='editor_wrap w_100 h_100 border_box' ref={setContainer}></div>
+				<If condition={x.editor?.contentComponent}>{x.react_nodes}</If>
+			</div>
+			<Modal
+				className={$cx(styles.modal, x.modal_type && styles[x.modal_type])}
+				title={x.modal_type ? t('insert') + t('b') + t(`editor.block.${x.modal_type}`) : ''}
+				width={modal_width}
+				open={x.modal_visible}
+				onClose={onCloseModal}
+			>
+				<Choose>
+					<When condition={x.modal_type === 'image'}>
+						<Image {...props_modal}></Image>
+					</When>
+					<When condition={x.modal_type === 'emoji'}>
+						<Emoji {...props_modal}></Emoji>
+					</When>
+					<When condition={x.modal_type === 'function'}>
+						<Katex context={x.modal_context} {...props_modal}></Katex>
+					</When>
+					<When condition={x.modal_type === 'mermaid'}>
+						<Mermaid context={x.modal_context} {...props_modal}></Mermaid>
+					</When>
+					<When condition={x.modal_type === 'toc'}>
+						<Toc toc={x.toc} {...props_modal}></Toc>
+					</When>
+				</Choose>
+			</Modal>
+		</div>
+	)
+}
+
+export default new $app.handle(Index).by(observer).by($app.memo).get()
+
+export * from './types'

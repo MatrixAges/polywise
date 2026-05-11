@@ -1,4 +1,5 @@
 export * from './app'
 export * from './dayjs'
+export * from './editor'
 export * from './utils'
 export * from './rpc'

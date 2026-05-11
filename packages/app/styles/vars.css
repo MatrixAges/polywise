@@ -12,6 +12,34 @@
 	--color_std_rgb: 255, 255, 255;
 	--color_contrast: black;
 	--color_contrast_rgb: 0, 0, 0;
+
+	/* Editor compatibility aliases mapped to the current app theme tokens */
+	--content_width: 640px;
+	--page_padding: calc(var(--spacing) * 2.5);
+	--color_bg: var(--background);
+	--color_bg_1: var(--secondary);
+	--color_bg_2: var(--muted);
+	--color_bg_rgb: 255, 255, 255;
+	--color_text: var(--foreground);
+	--color_text_rgb: 0, 0, 0;
+	--color_text_sub: var(--muted-foreground);
+	--color_text_light: var(--muted-foreground);
+	--color_text_softlight: var(--muted-foreground);
+	--color_text_greylight: var(--muted-foreground);
+	--color_blue: var(--primary);
+	--color_border: var(--border);
+	--color_border_light: var(--border);
+	--color_danger: var(--destructive);
+	--bg_component: var(--card);
+	--bg_hover: var(--accent);
+	--radius_small: var(--radius-sm);
+	--radius_2: var(--radius-sm);
+	--radius_3: var(--radius-md);
+	--radius_4: var(--radius-md);
+	--radius_12: var(--radius-lg);
+	--border_light: 1px solid var(--border);
+	--border_soft: 1px solid var(--border);
+	--shadow: 0 12px 32px rgba(var(--color_text_rgb), 0.08);
 }
 
 [data-theme='dark'] {
@@ -19,4 +47,6 @@
 	--color_std_rgb: 0, 0, 0;
 	--color_contrast: white;
 	--color_contrast_rgb: 255, 255, 255;
+	--color_bg_rgb: 0, 0, 0;
+	--color_text_rgb: 255, 255, 255;
 }

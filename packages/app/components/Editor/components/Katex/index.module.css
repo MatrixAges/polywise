@@ -1,0 +1,54 @@
+._local {
+	padding-top: 4px;
+
+	:global {
+		.inline_wrap {
+			z-index: 10;
+			top: 2px;
+			right: 0;
+			margin-bottom: 0;
+
+			.ani-row {
+				flex-direction: row !important;
+				flex-wrap: nowrap;
+
+				.ani-form-item-label {
+					display: flex;
+					padding-bottom: 0;
+					margin-right: 4px;
+
+					label {
+						&::after {
+							display: none;
+						}
+					}
+				}
+
+				.ani-form-item-control {
+					display: flex;
+					width: unset;
+
+					.ani-form-item-control-input {
+						min-height: unset;
+					}
+				}
+			}
+		}
+
+		.prewview_wrap {
+			min-height: 60px;
+			padding: 24px;
+			border: 1px dashed var(--color_border_light);
+			border-radius: var(--radius);
+
+			&:hover {
+				border-color: var(--color_text);
+			}
+
+			.preview {
+				color: var(--color_text_light);
+				font-size: 18px;
+			}
+		}
+	}
+}
