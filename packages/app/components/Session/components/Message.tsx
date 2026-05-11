@@ -208,12 +208,20 @@ const getMessageCopyText = (message: SessionMessage) => {
 		.trim()
 }
 
-const formatMessageTime = (created_at?: Date) => {
-	if (!created_at) return ''
+const getMessageTime = (message: SessionMessage) => {
+	if (typeof message.metadata?.timestamp === 'number') {
+		return new Date(message.metadata.timestamp)
+	}
 
-	return dayjs(created_at).isSame(dayjs(), 'day')
-		? formatTime(created_at, 'HH:mm:ss')
-		: formatDateTime(created_at, 'YYYY-MM-DD HH:mm:ss')
+	return message.createdAt
+}
+
+const formatMessageTime = (time?: Date) => {
+	if (!time) return ''
+
+	return dayjs(time).isSame(dayjs(), 'day')
+		? formatTime(time, 'HH:mm:ss')
+		: formatDateTime(time, 'YYYY-MM-DD HH:mm:ss')
 }
 
 const ToolSummaryBlock = (props: {
@@ -322,7 +330,10 @@ const Index = (props: IPropsMessage) => {
 	const { streaming, is_streaming, message, answer, removeMessage } = props
 	const { parts } = message
 	const copy_text = useMemo(() => getMessageCopyText(message), [message])
-	const created_at_text = useMemo(() => formatMessageTime(message.createdAt), [message.createdAt])
+	const created_at_text = useMemo(
+		() => formatMessageTime(getMessageTime(message)),
+		[message.createdAt, message.metadata?.timestamp]
+	)
 
 	const { source_urls, render_blocks } = useMemo(() => {
 		const source_urls = [] as Array<SourceUrlUIPart>
@@ -438,7 +449,8 @@ const Index = (props: IPropsMessage) => {
 			</MessageContent>
 			{!streaming && (
 				<div
-					className='
+					className={$cx(
+						`
 						flex
 						items-center
 						w-fit
@@ -448,7 +460,9 @@ const Index = (props: IPropsMessage) => {
 						transition-opacity
 						group-hover:pointer-events-auto group-hover:opacity-100 group-[.is-user]:ml-auto
 						pointer-events-none
-					'
+					`,
+						message.role === 'assistant' && 'flex-row-reverse'
+					)}
 				>
 					{created_at_text && <span className='px-1'>{created_at_text}</span>}
 					<button

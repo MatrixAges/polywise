@@ -255,6 +255,12 @@ export default async (s: Index, message: Message) => {
 		},
 		onFinish: async ({ responseMessage }) => {
 			const was_running = s.session.is_runing
+			const timestamp = Date.now()
+
+			responseMessage.metadata = {
+				...(responseMessage.metadata ?? {}),
+				timestamp
+			} as MessageMetadata
 
 			if (config.chaos_detect) stopStream(s.id)
 
