@@ -2,11 +2,12 @@ import type { TableOfContentDataItem } from '@tiptap/extension-table-of-contents
 import type { MouseEvent } from 'react'
 import type Model from './model'
 
-export interface ArgsInit extends Pick<IProps, 'id' | 'value' | 'readonly' | 'onChange' | 'onBlur'> {}
+export interface ArgsInit extends Pick<IProps, 'id' | 'value' | 'className' | 'readonly' | 'onChange' | 'onBlur'> {}
 
 export interface IProps {
 	id: string
 	value: string
+	className?: string
 	readonly?: boolean
 	rich_text?: boolean
 	text_only?: boolean

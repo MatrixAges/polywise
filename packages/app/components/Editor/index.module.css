@@ -11,6 +11,12 @@
 				border-radius: var(--radius);
 				background-color: var(--color_bg);
 				box-shadow: var(--shadow);
+
+				&[data-floating-visible='false'] {
+					visibility: hidden !important;
+					opacity: 0 !important;
+					pointer-events: none;
+				}
 			}
 		}
 

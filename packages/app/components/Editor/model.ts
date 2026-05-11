@@ -6,6 +6,7 @@ import { findSuggestionMatch } from '@tiptap/suggestion'
 import { debounce } from 'es-toolkit'
 import { makeAutoObservable } from 'mobx'
 
+import { cn } from '@/__shadcn__/lib/utils'
 import { nextTick } from '@/utils'
 
 import getExtensions from './extensions'
@@ -59,8 +60,12 @@ export default class Index {
 		)
 	}
 
+	getEditorClassName(className?: string) {
+		return cn('tiptap', className)
+	}
+
 	init(args: ArgsInit) {
-		const { id, value, readonly, onChange, onBlur } = args
+		const { id, value, className, readonly, onChange, onBlur } = args
 		const normalized_value = value.trim()
 		const content_type =
 			normalized_value.startsWith('{') || normalized_value.startsWith('[') ? 'json' : 'markdown'
@@ -73,6 +78,11 @@ export default class Index {
 			extensions: [...getExtensions({ id: this.id, setToc: v => (this.toc = v) }), ...this.getExtensions()],
 			content: value ? getContentString(value) : '',
 			contentType: content_type,
+			editorProps: {
+				attributes: {
+					class: this.getEditorClassName(className)
+				}
+			},
 			onCreate: ({ editor }) => {
 				migrateMathStrings(editor)
 
@@ -260,6 +270,8 @@ export default class Index {
 				offset: 6,
 				shift: { padding: 6, boundary: this.ref_container },
 				flip: { boundary: this.ref_container },
+				onShow: () => this.ref_menu?.setAttribute('data-floating-visible', 'true'),
+				onHide: () => this.ref_menu?.setAttribute('data-floating-visible', 'false'),
 				size: {
 					padding: 6,
 					apply: ({ availableHeight }) => {
@@ -269,7 +281,15 @@ export default class Index {
 					}
 				}
 			},
-			shouldShow: ({ state }) => {
+			shouldShow: ({ editor, view, state }) => {
+				if (!editor.isEditable || !view.hasFocus() || !state.selection.empty) {
+					return false
+				}
+
+				if (!state.selection.$from.parent.isTextblock || state.selection.$from.parent.type.spec.code) {
+					return false
+				}
+
 				const match = findSuggestionMatch({
 					char: '/',
 					$position: state.selection.$from,

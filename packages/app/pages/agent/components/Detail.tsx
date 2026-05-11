@@ -86,6 +86,7 @@ const Index = () => {
 						>
 							<Editor
 								id={`agent-${selected_agent.id}-${text_tab}`}
+								className='pt-6!'
 								value={draft_value}
 								onChange={setDraftValue}
 								onBlur={value => {
