@@ -167,7 +167,6 @@ const Index = (props: IPropsActionBar) => {
 									noStyle
 								>
 									<div className='flex items-center gap-1'>
-										<TextHIcon weight='bold' />
 										<SelectValue placeholder='H' />
 									</div>
 								</SelectTrigger>
