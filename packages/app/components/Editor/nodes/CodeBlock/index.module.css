@@ -7,10 +7,7 @@
 
 		:global {
 			.actions_wrap {
-				.select {
-					opacity: 1;
-				}
-
+				.select,
 				.btn_action {
 					opacity: 1;
 				}
@@ -25,49 +22,27 @@
 			gap: 4px;
 
 			.select {
+				display: flex;
 				align-items: center;
+				width: 90px;
 				height: 24px;
+				padding: 0 6px;
+				border: var(--border_soft);
 				border-radius: var(--radius);
 				opacity: 0;
+				background-color: var(--bg_component);
 				transition: opacity ease 0.3s;
 				backdrop-filter: var(--glass_blur);
 
-				.ani-select-selector {
-					width: 90px;
-					height: 24px;
-					padding: 0 6px !important;
-					border: var(--border_soft);
-					background-color: var(--bg_component);
-					font-size: 12px;
-
-					&::after {
-						display: none;
-					}
-
-					.ani-select-selection-wrap {
-						height: 100%;
-
-						.ani-select-selection-search {
-							padding-right: 12px;
-						}
-
-						.ani-select-selection-item {
-							padding-right: 12px;
-						}
-
-						input {
-							height: 100%;
-							line-height: 24px;
-							font-size: 12px;
-						}
-					}
+				> div {
+					display: flex;
+					align-items: center;
+					width: 100%;
+					height: 100%;
 				}
 
-				.ani-select-arrow {
-					top: unset;
-					right: 6px;
-					margin-top: unset;
-					vertical-align: unset;
+				[data-slot='select-value'] {
+					font-size: 12px;
 				}
 			}
 

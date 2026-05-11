@@ -11,8 +11,6 @@ import { getFileAlt } from '../../utils'
 import Model from './model'
 import options from './options'
 
-import styles from './index.module.css'
-
 import type { ChangeEvent, FormEvent } from 'react'
 import type { IPropsModal } from '../../types'
 
@@ -79,7 +77,7 @@ const Index = (props: IPropsModal) => {
 	})
 
 	return (
-		<div className={$cx('flex w-full flex-col', styles._local)}>
+		<div className='flex w-full flex-col'>
 			<div className='mb-4 grid grid-cols-2 gap-2'>
 				{options.map(item => (
 					<button
