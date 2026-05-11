@@ -42,7 +42,6 @@ const Index = () => {
 					flex flex-col
 					w-[210px] h-full
 					bg-std-50/60
-					border-border-light border-r
 					dark:bg-transparent
 				'
 			>
