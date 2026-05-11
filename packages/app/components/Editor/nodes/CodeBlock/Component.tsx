@@ -29,6 +29,8 @@ const Index = (props: ReactNodeViewProps<HTMLDivElement>) => {
 	}, [editor])
 
 	const onSelectLang = useMemoizedFn(v => {
+		if (v === null) return
+
 		updateAttributes({ language: v })
 	})
 
@@ -53,7 +55,7 @@ const Index = (props: ReactNodeViewProps<HTMLDivElement>) => {
 		>
 			<NodeViewContent />
 			<div className='actions_wrap absolute flex' contentEditable={false}>
-				<Select value={language} onValueChange={onSelectLang}>
+				<Select value={language ?? null} onValueChange={onSelectLang}>
 					<SelectTrigger className='select' noStyle>
 						<SelectValue />
 					</SelectTrigger>

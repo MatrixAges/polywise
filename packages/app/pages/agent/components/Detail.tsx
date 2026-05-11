@@ -34,12 +34,10 @@ const Index = () => {
 			? (selected_agent[active_tab] as string | null | undefined) || ''
 			: ''
 	const [draft_value, setDraftValue] = useState(field_value)
-	const [editor_version, setEditorVersion] = useState(0)
 
 	useEffect(() => {
 		setDraftValue(field_value)
-		setEditorVersion(value => value + 1)
-	}, [active_tab, field_value])
+	}, [selected_agent?.id, active_tab])
 
 	if (!selected_agent) {
 		return (
@@ -96,7 +94,7 @@ const Index = () => {
 										value
 									})
 								}}
-								key={`${selected_agent.id}-${text_tab}-${editor_version}`}
+								key={`${selected_agent.id}-${text_tab}`}
 							></Editor>
 						</div>
 					))

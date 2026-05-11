@@ -69,12 +69,16 @@ const Index = (props: IPropsActionBar) => {
 	})
 
 	const onChangeHeading = useMemoizedFn(v => {
+		if (v === null) return
+
 		editor.commands.toggleHeading({ level: Number(v) as HeadingLevel })
 
 		update()
 	})
 
 	const onChangeList = useMemoizedFn(v => {
+		if (v === null) return
+
 		switch (v) {
 			case 'bullet':
 				editor.commands.toggleBulletList()
@@ -152,7 +156,7 @@ const Index = (props: IPropsActionBar) => {
 						<span className='d_line'></span>
 						<div className='format_items flex'>
 							<Select
-								value={heading ? String(heading) : undefined}
+								value={heading ? String(heading) : null}
 								onValueChange={onChangeHeading}
 							>
 								<SelectTrigger
@@ -179,7 +183,7 @@ const Index = (props: IPropsActionBar) => {
 						</div>
 						<span className='d_line'></span>
 						<div className='list_wrap format_items flex'>
-							<Select value={list || undefined} onValueChange={onChangeList}>
+							<Select value={list || null} onValueChange={onChangeList}>
 								<SelectTrigger
 									className={$cx('select_list select select_btn', list && 'active')}
 									noStyle
