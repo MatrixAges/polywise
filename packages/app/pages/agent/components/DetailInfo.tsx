@@ -15,7 +15,7 @@ const Index = ({ agent }: IProps) => {
 	const { edit_field_key, startEditField, cancelEditField, submitEditableField } = useModel()
 
 	return (
-		<div className='flex w-full flex-col p-6'>
+		<div className='flex w-full flex-col'>
 			<div className='flex items-center justify-between gap-4'>
 				<div className='flex items-center gap-4'>
 					<AgentAvatar item={agent} size='large'></AgentAvatar>

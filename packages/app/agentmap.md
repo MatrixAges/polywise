@@ -158,7 +158,7 @@ This document provides an overview of the packages/app module structure and arch
 						"desc": "Right agent detail panel with profile editor, model selector, multi-skill combobox, article tab, and avatar dialog mount",
 						"role": "Component"
 					},
-					"SkillSelect.tsx": {
+					"SkillsPanel.tsx": {
 						"desc": "Agent skill multi-select combobox that shows selected skills as removable chips and persists the full linked skill id set",
 						"role": "Component"
 					},

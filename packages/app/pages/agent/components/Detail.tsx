@@ -9,8 +9,8 @@ import ContentPanel from './ContentPanel'
 import DetailInfo from './DetailInfo'
 import DetailMenu from './DetailMenu'
 import GraphPanel from './GraphPanel'
-import SkillSelect from './SkillSelect'
-import ToolSelect from './ToolSelect'
+import SkillsPanel from './SkillsPanel'
+import ToolsPanel from './ToolsPanel'
 
 import type { AgentTab } from '../types'
 
@@ -61,41 +61,48 @@ const Index = () => {
 			'
 		>
 			<DetailMenu active_tab={active_tab}></DetailMenu>
-			{match(active_tab)
-				.with('info', () => <DetailInfo agent={selected_agent}></DetailInfo>)
-				.with('content', () => <ContentPanel></ContentPanel>)
-				.with('graph', () => <GraphPanel agent={selected_agent}></GraphPanel>)
-				.with('skills', () => <SkillSelect></SkillSelect>)
-				.with('tools', () => <ToolSelect></ToolSelect>)
-				.when(isTextTab, text_tab => (
-					<Textarea
-						className='
-						overflow-y-auto
-						flex-1
-						h-full
-						min-h-0
-						p-4 px-6
-						rounded-none
-						text-sm!
-						bg-secondary/10
-						border-none
-						focus-within:ring-0!
-					'
-						value={draft_value}
-						placeholder={placeholder_map[text_tab]}
-						onChange={event => {
-							setDraftValue(event.target.value)
-						}}
-						onBlur={event => {
-							submitEditableField({
-								id: selected_agent.id,
-								key: text_tab,
-								value: event.target.value
-							})
-						}}
-					></Textarea>
-				))
-				.exhaustive()}
+			<div
+				className={$cx(
+					'page_wrap p-0',
+					!['content', 'graph'].includes(active_tab) && !isTextTab(active_tab) && 'p-6'
+				)}
+			>
+				{match(active_tab)
+					.with('info', () => <DetailInfo agent={selected_agent}></DetailInfo>)
+					.with('content', () => <ContentPanel></ContentPanel>)
+					.with('graph', () => <GraphPanel agent={selected_agent}></GraphPanel>)
+					.with('skills', () => <SkillsPanel></SkillsPanel>)
+					.with('tools', () => <ToolsPanel></ToolsPanel>)
+					.when(isTextTab, text_tab => (
+						<Textarea
+							className='
+							overflow-y-auto
+							flex-1
+							h-full
+							min-h-0
+							p-6
+							rounded-none
+							text-sm!
+							bg-secondary/10
+							border-none
+							focus-within:ring-0!
+						'
+							value={draft_value}
+							placeholder={placeholder_map[text_tab]}
+							onChange={event => {
+								setDraftValue(event.target.value)
+							}}
+							onBlur={event => {
+								submitEditableField({
+									id: selected_agent.id,
+									key: text_tab,
+									value: event.target.value
+								})
+							}}
+						></Textarea>
+					))
+					.exhaustive()}
+			</div>
 		</div>
 	)
 }

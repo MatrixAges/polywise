@@ -37,53 +37,52 @@ const Index = () => {
 	const selected_items = tool_options.filter(item => selected_tool_names.includes(item.value))
 
 	return (
-		<div className='flex min-h-0 w-full flex-col'>
-			<div className='p-6 pb-4'>
-				<Combobox<IToolOption, true>
-					multiple
-					items={tool_options}
-					value={selected_items}
-					onValueChange={value => setTools(value.map(item => item.value))}
-					isItemEqualToValue={(item_value, value) => item_value.value === value.value}
-				>
-					<ComboboxChips
-						className='
-							w-full
-							bg-transparent!
-							focus-within:ring-0
-						'
-						ref={ref_anchor}
-					>
-						{selected_items.map(item => (
-							<ComboboxChip key={item.value}>{item.label}</ComboboxChip>
-						))}
-						<ComboboxChipsInput placeholder='Search and select custom tools for agent' />
-					</ComboboxChips>
-					<ComboboxContent anchor={ref_anchor}>
-						<ComboboxEmpty>No tools found.</ComboboxEmpty>
-						<ComboboxList>
-							{(item: IToolOption) => (
-								<ComboboxItem value={item} key={item.value}>
-									<div className='flex min-w-0 flex-col'>
-										<span>{item.label}</span>
-										<span className='text-std-400 truncate text-xs'>
-											{item.description}
-										</span>
-									</div>
-								</ComboboxItem>
-							)}
-						</ComboboxList>
-					</ComboboxContent>
-				</Combobox>
-			</div>
-			<Separator />
-			<div
-				className='
-					flex flex-1 flex-col
-					min-h-0
-					p-6 pt-4
-				'
+		<div
+			className='
+				flex flex-col
+				w-full
+				min-h-0
+				gap-3
+			'
+		>
+			<Combobox<IToolOption, true>
+				multiple
+				items={tool_options}
+				value={selected_items}
+				onValueChange={value => setTools(value.map(item => item.value))}
+				isItemEqualToValue={(item_value, value) => item_value.value === value.value}
 			>
+				<ComboboxChips
+					className='
+						w-full
+						bg-transparent!
+						focus-within:ring-0
+					'
+					ref={ref_anchor}
+				>
+					{selected_items.map(item => (
+						<ComboboxChip key={item.value}>{item.label}</ComboboxChip>
+					))}
+					<ComboboxChipsInput placeholder='Search and select custom tools for agent' />
+				</ComboboxChips>
+				<ComboboxContent anchor={ref_anchor}>
+					<ComboboxEmpty>No tools found.</ComboboxEmpty>
+					<ComboboxList>
+						{(item: IToolOption) => (
+							<ComboboxItem value={item} key={item.value}>
+								<div className='flex min-w-0 flex-col'>
+									<span>{item.label}</span>
+									<span className='text-std-400 truncate text-xs'>
+										{item.description}
+									</span>
+								</div>
+							</ComboboxItem>
+						)}
+					</ComboboxList>
+				</ComboboxContent>
+			</Combobox>
+			<Separator />
+			<div className='flex flex-col'>
 				<CallLogPanel
 					available_dates={tool_log_available_dates}
 					date={tool_log_date}

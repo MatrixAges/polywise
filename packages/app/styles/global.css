@@ -20,7 +20,7 @@ body {
 @layer components {
 	.page_wrap {
 		margin: 0 auto;
-		max-width: 600px;
+		max-width: 640px;
 		width: 100%;
 		padding: calc(var(--spacing) * 2.5);
 	}

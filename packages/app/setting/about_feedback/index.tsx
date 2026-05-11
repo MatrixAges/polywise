@@ -41,9 +41,7 @@ const Index = () => {
 				</h1>
 				<h2
 					className='
-						ml-3
-						text-std-800 text-2xl font-medium tracking-[8.9px]
-						uppercase
+						text-std-800 text-2xl font-medium
 					'
 				>
 					agentic content system

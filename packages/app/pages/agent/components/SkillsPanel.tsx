@@ -37,53 +37,52 @@ const Index = () => {
 	const selected_items = skill_options.filter(item => selected_skill_ids.includes(item.value))
 
 	return (
-		<div className='flex min-h-0 w-full flex-col'>
-			<div className='p-6 pb-4'>
-				<Combobox<ISkillOption, true>
-					multiple
-					items={skill_options}
-					value={selected_items}
-					onValueChange={value => setSkills(value.map(item => item.value))}
-					isItemEqualToValue={(item_value, value) => item_value.value === value.value}
-				>
-					<ComboboxChips
-						className='
-							w-full
-							bg-transparent!
-							focus-within:ring-0
-						'
-						ref={ref_anchor}
-					>
-						{selected_items.map(item => (
-							<ComboboxChip key={item.value}>{item.label}</ComboboxChip>
-						))}
-						<ComboboxChipsInput placeholder='Search and select skills for agent' />
-					</ComboboxChips>
-					<ComboboxContent anchor={ref_anchor}>
-						<ComboboxEmpty>No skills found.</ComboboxEmpty>
-						<ComboboxList>
-							{(item: ISkillOption) => (
-								<ComboboxItem value={item} key={item.value}>
-									<div className='flex min-w-0 flex-col'>
-										<span>{item.label}</span>
-										<span className='text-std-400 truncate text-xs'>
-											{item.description || item.path}
-										</span>
-									</div>
-								</ComboboxItem>
-							)}
-						</ComboboxList>
-					</ComboboxContent>
-				</Combobox>
-			</div>
-			<Separator />
-			<div
-				className='
-					flex flex-1 flex-col
-					min-h-0
-					p-6 pt-4
-				'
+		<div
+			className='
+				flex flex-col
+				w-full
+				min-h-0
+				gap-3
+			'
+		>
+			<Combobox<ISkillOption, true>
+				multiple
+				items={skill_options}
+				value={selected_items}
+				onValueChange={value => setSkills(value.map(item => item.value))}
+				isItemEqualToValue={(item_value, value) => item_value.value === value.value}
 			>
+				<ComboboxChips
+					className='
+						w-full
+						bg-transparent!
+						focus-within:ring-0
+					'
+					ref={ref_anchor}
+				>
+					{selected_items.map(item => (
+						<ComboboxChip key={item.value}>{item.label}</ComboboxChip>
+					))}
+					<ComboboxChipsInput placeholder='Search and select skills for agent' />
+				</ComboboxChips>
+				<ComboboxContent anchor={ref_anchor}>
+					<ComboboxEmpty>No skills found.</ComboboxEmpty>
+					<ComboboxList>
+						{(item: ISkillOption) => (
+							<ComboboxItem value={item} key={item.value}>
+								<div className='flex min-w-0 flex-col'>
+									<span>{item.label}</span>
+									<span className='text-std-400 truncate text-xs'>
+										{item.description || item.path}
+									</span>
+								</div>
+							</ComboboxItem>
+						)}
+					</ComboboxList>
+				</ComboboxContent>
+			</Combobox>
+			<Separator />
+			<div className='flex flex-col'>
 				<CallLogPanel
 					available_dates={skill_log_available_dates}
 					date={skill_log_date}

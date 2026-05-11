@@ -3,6 +3,8 @@ import { number, object, string } from 'zod'
 import { p } from '../../utils/trpc'
 import { readAgentLogPage } from './logs'
 
+import type { AgentToolLogEntry } from './logs'
+
 const input_type = object({
 	agent_id: string(),
 	date: string()
@@ -12,7 +14,7 @@ const input_type = object({
 })
 
 export default p.input(input_type).query(async ({ input }) => {
-	return readAgentLogPage({
+	return readAgentLogPage<AgentToolLogEntry>({
 		agent_id: input.agent_id,
 		date: input.date,
 		kind: 'tools',
