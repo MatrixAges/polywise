@@ -127,12 +127,14 @@ export default class Index {
 		if (!this.mounted || !this.editor || this.editor.isDestroyed) return
 
 		const current_value = this.editor.getMarkdown()
+		const content_type = this.getContentType(value)
 
 		if (current_value === value) return
 
 		this.debounced_on_change?.cancel()
 		this.editor.commands.setContent(getContentString(value), {
-			emitUpdate: false
+			emitUpdate: false,
+			contentType: content_type
 		})
 
 		this.counts = this.editor.storage.characterCount.characters()
