@@ -4,6 +4,7 @@ import { z } from 'zod'
 
 import readSchemas, { loadCustomToolModule, validateSchemaValue } from './readSchemas'
 
+import type { ToolSet } from 'ai'
 import type Session from '../../session'
 import type { JsonSchema } from './readSchemas'
 
@@ -36,12 +37,15 @@ const getSchema = (schema?: JsonSchema) => {
 }
 
 export default async (s: Session) => {
-	const custom_tools = await Promise.all(
-		s.custom_tools_map.map(async custom_tool => {
-			const tool_path = path.resolve(s.tools_dir, custom_tool.name, 'index.mjs')
+	const custom_tools = [] as Array<readonly [string, ToolSet[string]]>
+
+	for (const custom_tool of s.custom_tools_map) {
+		const tool_path = path.resolve(s.tools_dir, custom_tool.name, 'index.mjs')
+
+		try {
 			const { input_schema, output_schema } = await readSchemas(tool_path)
 
-			return [
+			custom_tools.push([
 				custom_tool.name,
 				tool({
 					description: custom_tool.description,
@@ -49,9 +53,13 @@ export default async (s: Session) => {
 					outputSchema: output_schema ? getSchema(output_schema) : undefined,
 					execute: createExecute(s, tool_path)
 				})
-			] as const
-		})
-	)
+			] as const)
+		} catch (error) {
+			const message = error instanceof Error ? error.message : String(error)
 
-	return Object.fromEntries(custom_tools)
+			console.warn(`[polywise] skip custom tool "${custom_tool.name}": ${message}`)
+		}
+	}
+
+	return Object.fromEntries(custom_tools) as ToolSet
 }
