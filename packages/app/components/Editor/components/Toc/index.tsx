@@ -28,12 +28,13 @@ const Index = (props: IPropsModalToc) => {
 	})
 
 	return (
-		<div className={$cx('w_100 border_box flex_column flex', styles._local)}>
+		<div className={$cx('box-border flex w-full flex-col', styles._local)}>
 			<div
 				className={`
-					flex flex_column
-					border_box
-					toc_items w_100
+					box-border
+					flex flex-col
+					w-full
+					toc_items
 				`}
 			>
 				{toc.map((item, index) => (

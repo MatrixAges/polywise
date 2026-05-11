@@ -17,13 +17,14 @@ const Index = (props: IPropsMenuItem) => {
 			className={$cx(
 				`
 				flex
-				picker_menu_item justify_between align_center cursor_point
+				items-center justify-between
+				picker_menu_item cursor-pointer
 			`
 			)}
 			onClick={onClick}
 		>
-			<div className='left_wrap align_center flex'>
-				<div className='icon_wrap mr_6 flex'>
+			<div className='left_wrap flex items-center'>
+				<div className='icon_wrap mr-1.5 flex'>
 					<Icon id={icon}></Icon>
 				</div>
 				<span className='text'>{t(`editor.block.${item.key}`)}</span>

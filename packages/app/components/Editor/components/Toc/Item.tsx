@@ -8,19 +8,21 @@ const Index = (props: IPropsModalTocItem) => {
 		<div
 			className={$cx(
 				`
+				box-border
 				flex
-				border_box
-				toc_item w_100 align_center
+				items-center
+				w-full
+				toc_item
 			`,
 				isActive && !isScrolledOver && 'active',
 				isScrolledOver && 'scrolled'
 			)}
 		>
-			<span className='signal_wrap align_center'>
-				<span className='signal inline_block' style={{ width: (6 - level) * 3 }}></span>
+			<span className='signal_wrap items-center'>
+				<span className='signal inline-block' style={{ width: (6 - level) * 3 }}></span>
 			</span>
 			<a
-				className='line_clamp_1 clickable'
+				className='block cursor-pointer truncate'
 				href={`#${id}`}
 				onClick={e => onClick(e, item.id)}
 				data-item-index={itemIndex}

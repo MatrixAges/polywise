@@ -50,7 +50,7 @@ const Index = (props: IPropsModalMermaid) => {
 	})
 
 	return (
-		<div className={$cx('w_100 relative', styles._local)}>
+		<div className={$cx('relative w-full', styles._local)}>
 			<form className='flex flex-col gap-3' onSubmit={onFinish}>
 				<div className='flex flex-col gap-2'>
 					<span className='text-sm'>{t('editor.Mermaid.modal.label.definition')}</span>
@@ -64,9 +64,12 @@ const Index = (props: IPropsModalMermaid) => {
 					<span className='text-sm'>{t('preview')}</span>
 					<div
 						className={`
+							box-border
 							flex
-							border_box
-							prewview_wrap w_100 justify_center align_center transition_normal
+							items-center justify-center
+							w-full
+							transition-all
+							prewview_wrap
 						`}
 					>
 						<Choose>

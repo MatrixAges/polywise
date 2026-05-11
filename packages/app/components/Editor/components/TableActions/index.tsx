@@ -80,14 +80,14 @@ const Index = (props: IProps) => {
 	)
 
 	return (
-		<div className={$cx('flex_column flex', styles._local)}>
-			<div className='action_items w_100 flex_column flex'>
+		<div className={$cx('flex flex-col', styles._local)}>
+			<div className='action_items flex w-full flex-col'>
 				{actions.map(({ label, action }, index) =>
 					label === 'divider' ? (
 						<span className='divider' key={index}></span>
 					) : (
 						<div
-							className='action_item align_center clickable flex'
+							className='action_item flex cursor-pointer items-center'
 							onClick={action}
 							key={index}
 						>

@@ -17,12 +17,13 @@ const Index = (props: IPropsMenu) => {
 	)
 
 	return (
-		<div className={$cx('flex_column border_box relative flex', styles._local)}>
+		<div className={$cx('relative box-border flex flex-col', styles._local)}>
 			<div
 				className={`
-					flex flex_column
-					border_box
-					menu_wrap w_100
+					box-border
+					flex flex-col
+					w-full
+					menu_wrap
 				`}
 			>
 				<If condition={latest.length > 0}>
@@ -30,9 +31,10 @@ const Index = (props: IPropsMenu) => {
 				</If>
 				<div
 					className={`
-						flex flex_column
-						border_box
-						menu_items w_100
+						box-border
+						flex flex-col
+						w-full
+						menu_items
 					`}
 				>
 					{current_menu_items.map((item, index) => (

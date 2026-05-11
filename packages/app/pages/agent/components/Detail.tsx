@@ -82,12 +82,10 @@ const Index = () => {
 							flex-1
 							h-full
 							min-h-0
-							bg-secondary/10
 						'
 						>
 							<Editor
 								id={`agent-${selected_agent.id}-${text_tab}`}
-								key={`${selected_agent.id}-${text_tab}-${editor_version}`}
 								value={draft_value}
 								onChange={setDraftValue}
 								onBlur={value => {
@@ -97,6 +95,7 @@ const Index = () => {
 										value
 									})
 								}}
+								key={`${selected_agent.id}-${text_tab}-${editor_version}`}
 							></Editor>
 						</div>
 					))

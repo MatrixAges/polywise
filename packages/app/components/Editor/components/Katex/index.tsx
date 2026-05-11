@@ -66,7 +66,7 @@ const Index = (props: IPropsModalKatex) => {
 	})
 
 	return (
-		<div className={$cx('w_100 relative', styles._local)}>
+		<div className={$cx('relative w-full', styles._local)}>
 			<form className='flex flex-col gap-3' onSubmit={onFinish}>
 				<If condition={!context}>
 					<label className='flex items-center gap-2 text-sm'>
@@ -97,9 +97,12 @@ const Index = (props: IPropsModalKatex) => {
 					<span className='text-sm'>{t('preview')}</span>
 					<div
 						className={`
+							box-border
 							flex
-							border_box
-							prewview_wrap w_100 justify_center align_center transition_normal
+							items-center justify-center
+							w-full
+							transition-all
+							prewview_wrap
 						`}
 					>
 						<Choose>

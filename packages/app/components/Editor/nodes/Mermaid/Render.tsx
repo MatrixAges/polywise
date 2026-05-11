@@ -48,7 +48,7 @@ const Index = (props: IProps) => {
 		>
 			<div
 				className={$cx(
-					'w_100 border_box justify_center',
+					'box-border flex w-full justify-center',
 					styles._local,
 					onClick && styles.disable_select
 				)}

@@ -40,15 +40,16 @@ const Index = (props: IProps) => {
 	const { getColorActive, getbackgroundActive, onSelect } = props
 
 	return (
-		<div className={$cx('flex_column flex', styles._local)}>
+		<div className={$cx('flex flex-col', styles._local)}>
 			<div className='color_items color'>
 				{colors.map(item => (
 					<span
 						className={$cx(
 							`
+							box-border
 							flex
-							border_box
-							justify_center align_center clickable
+							items-center justify-center
+							cursor-pointer
 						`,
 							item && getColorActive(Color(item).hex()) && 'active'
 						)}
@@ -69,7 +70,7 @@ const Index = (props: IProps) => {
 				{backgrounds.map(item => (
 					<span
 						className={$cx(
-							'border_box clickable',
+							'box-border cursor-pointer',
 							item && getbackgroundActive(Color(item).hex()) && 'active'
 						)}
 						style={

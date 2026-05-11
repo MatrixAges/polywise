@@ -79,7 +79,7 @@ const Index = (props: IPropsModal) => {
 	})
 
 	return (
-		<div className={$cx('w_100 flex_column flex', styles._local)}>
+		<div className={$cx('flex w-full flex-col', styles._local)}>
 			<div className='mb-4 grid grid-cols-2 gap-2'>
 				{options.map(item => (
 					<button

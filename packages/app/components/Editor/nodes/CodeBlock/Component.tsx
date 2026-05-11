@@ -68,7 +68,8 @@ const Index = (props: ReactNodeViewProps<HTMLDivElement>) => {
 				<button
 					className={`
 						flex
-						btn_action justify_center align_center clickable
+						items-center justify-center
+						btn_action cursor-pointer
 					`}
 					onClick={onCopy}
 				>

@@ -9,15 +9,18 @@ const Index = (props: IPropsMenuLatest) => {
 		<div
 			className={`
 				sticky
+				top-0
 				flex
-				top_0 latest_blocks align_center
+				items-center
+				latest_blocks
 			`}
 		>
 			{items.map(item => (
 				<span
 					className={`
 						flex
-						latest_block justify_center align_center clickable
+						items-center justify-center
+						latest_block cursor-pointer
 					`}
 					key={item.shortcut}
 					onClick={() => onMenuItem(item.index)}

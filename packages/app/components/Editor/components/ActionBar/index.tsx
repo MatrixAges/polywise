@@ -27,7 +27,7 @@ type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6
 
 const Index = (props: IPropsActionBar) => {
 	const { editor, signal, focus, rich_text, text_only, update } = props
-	const format_button_class = 'flex btn_format justify_center align_center clickable'
+	const format_button_class = 'btn_format flex cursor-pointer items-center justify-center'
 
 	const ref = useDelegate(v => {
 		switch (v) {
@@ -95,7 +95,7 @@ const Index = (props: IPropsActionBar) => {
 	const list = getListType(editor)
 
 	return (
-		<div className={$cx('align_center flex', signal, styles._local)} ref={ref}>
+		<div className={$cx('flex items-center', signal, styles._local)} ref={ref}>
 			<Choose>
 				<When condition={focus === 'table'}>123</When>
 				<Otherwise>

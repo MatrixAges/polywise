@@ -69,7 +69,7 @@ const Index = (props: IProps) => {
 	const onCloseModal = useMemoizedFn(() => (x.modal_visible = false))
 
 	return (
-		<div className={$cx('w_100 h_100 flex_column flex', x.signal, markdown._local, styles._local)} ref={setRef}>
+		<div className={$cx('flex h-full w-full flex-col', x.signal, markdown._local, styles._local)} ref={setRef}>
 			<div className='float_el absolute' ref={setActionBar}>
 				<If condition={x.editor !== null}>
 					<ActionBar {...props_actions_bar}></ActionBar>
@@ -83,14 +83,16 @@ const Index = (props: IProps) => {
 			<div
 				className={`
 					relative
-					flex flex_column
-					editor_container w_100 h_100 align_center
+					flex flex-col
+					items-center
+					w-full h-full
+					editor_container
 				`}
 			>
 				<If condition={x.counts === 0}>
-					<p className='w_100 border_box placeholder absolute'>{t('editor.placeholder')}...</p>
+					<p className='placeholder absolute box-border w-full'>{t('editor.placeholder')}...</p>
 				</If>
-				<div className='editor_wrap w_100 h_100 border_box' ref={setContainer}></div>
+				<div className='editor_wrap box-border h-full w-full' ref={setContainer}></div>
 				<If condition={x.editor?.contentComponent}>{x.react_nodes}</If>
 			</div>
 			<Modal

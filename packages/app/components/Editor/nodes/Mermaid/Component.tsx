@@ -16,7 +16,7 @@ const Index = (props: ReactNodeViewProps<HTMLDivElement>) => {
 	})
 
 	return (
-		<NodeViewWrapper className={$cx('w_100 border_box', styles.wrapper)}>
+		<NodeViewWrapper className={$cx('box-border w-full', styles.wrapper)}>
 			<Render value={value} onClick={onClick}></Render>
 		</NodeViewWrapper>
 	)
