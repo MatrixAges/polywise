@@ -1,4 +1,5 @@
 import { arrayMove } from '@dnd-kit/sortable'
+import dayjs from 'dayjs'
 import { makeAutoObservable } from 'mobx'
 import { genConfig } from 'react-nice-avatar'
 import { setStorageWhenChange } from 'stk/mobx'
@@ -19,8 +20,12 @@ import type {
 	AgentPageMode,
 	AgentSessionItem,
 	AgentSkillItem,
+	AgentSkillLogItem,
+	AgentSkillLogResponse,
 	AgentTab,
 	AgentToolItem,
+	AgentToolLogItem,
+	AgentToolLogResponse,
 	ArticleForType,
 	AvatarMode,
 	IEditableFieldArgs,
@@ -35,6 +40,22 @@ export default class Index {
 	skill_items = [] as Array<AgentSkillItem>
 	skill_options = [] as Array<ISkillOption>
 	tool_options = [] as Array<IToolOption>
+	tool_log_items = [] as Array<AgentToolLogItem>
+	tool_log_date = dayjs().format('YYYY-MM-DD')
+	tool_log_page = 1
+	tool_log_total = 0
+	tool_log_has_more = false
+	tool_log_loading = false
+	tool_log_available_dates = [] as Array<string>
+	tool_log_request_key = 0
+	skill_log_items = [] as Array<AgentSkillLogItem>
+	skill_log_date = dayjs().format('YYYY-MM-DD')
+	skill_log_page = 1
+	skill_log_total = 0
+	skill_log_has_more = false
+	skill_log_loading = false
+	skill_log_available_dates = [] as Array<string>
+	skill_log_request_key = 0
 	selected_agent_id = ''
 	page_mode = 'sessions' as AgentPageMode
 	current_tab = 'info' as AgentTab
@@ -164,6 +185,8 @@ export default class Index {
 			this.session_has_more = false
 			this.session_loading = false
 			this.session_loading_more = false
+			this.resetToolLogs()
+			this.resetSkillLogs()
 
 			return
 		}
@@ -174,8 +197,12 @@ export default class Index {
 			this.selected_agent_id = this.agents[0].id
 		}
 
-		await this.refreshAgentRelated()
-		await this.refreshSessions()
+		await Promise.all([
+			this.refreshAgentRelated(),
+			this.refreshSessions(),
+			this.refreshToolLogs(),
+			this.refreshSkillLogs()
+		])
 	}
 
 	async refreshAgentRelated() {
@@ -260,6 +287,100 @@ export default class Index {
 		}
 	}
 
+	resetToolLogs() {
+		this.tool_log_items = []
+		this.tool_log_total = 0
+		this.tool_log_has_more = false
+		this.tool_log_page = 1
+		this.tool_log_available_dates = []
+		this.tool_log_loading = false
+	}
+
+	resetSkillLogs() {
+		this.skill_log_items = []
+		this.skill_log_total = 0
+		this.skill_log_has_more = false
+		this.skill_log_page = 1
+		this.skill_log_available_dates = []
+		this.skill_log_loading = false
+	}
+
+	async refreshToolLogs(args?: { date?: string; page?: number }) {
+		if (!this.selected_agent_id) {
+			this.resetToolLogs()
+
+			return
+		}
+
+		const agent_id = this.selected_agent_id
+		const request_key = this.tool_log_request_key + 1
+		const page = args?.page ?? this.tool_log_page
+
+		this.tool_log_request_key = request_key
+		this.tool_log_loading = true
+
+		try {
+			const response = (await rpc.agent.getToolLogs.query({
+				agent_id,
+				date: args?.date,
+				page
+			})) as AgentToolLogResponse
+
+			if (this.tool_log_request_key !== request_key || this.selected_agent_id !== agent_id) {
+				return
+			}
+
+			this.tool_log_items = response.items as Array<AgentToolLogItem>
+			this.tool_log_total = response.total
+			this.tool_log_has_more = response.has_more
+			this.tool_log_page = response.page
+			this.tool_log_date = response.date
+			this.tool_log_available_dates = response.available_dates
+		} finally {
+			if (this.tool_log_request_key === request_key) {
+				this.tool_log_loading = false
+			}
+		}
+	}
+
+	async refreshSkillLogs(args?: { date?: string; page?: number }) {
+		if (!this.selected_agent_id) {
+			this.resetSkillLogs()
+
+			return
+		}
+
+		const agent_id = this.selected_agent_id
+		const request_key = this.skill_log_request_key + 1
+		const page = args?.page ?? this.skill_log_page
+
+		this.skill_log_request_key = request_key
+		this.skill_log_loading = true
+
+		try {
+			const response = (await rpc.agent.getSkillLogs.query({
+				agent_id,
+				date: args?.date,
+				page
+			})) as AgentSkillLogResponse
+
+			if (this.skill_log_request_key !== request_key || this.selected_agent_id !== agent_id) {
+				return
+			}
+
+			this.skill_log_items = response.items as Array<AgentSkillLogItem>
+			this.skill_log_total = response.total
+			this.skill_log_has_more = response.has_more
+			this.skill_log_page = response.page
+			this.skill_log_date = response.date
+			this.skill_log_available_dates = response.available_dates
+		} finally {
+			if (this.skill_log_request_key === request_key) {
+				this.skill_log_loading = false
+			}
+		}
+	}
+
 	async loadMoreSessions() {
 		if (!this.selected_agent_id) return
 		if (this.session_loading) return
@@ -316,6 +437,8 @@ export default class Index {
 		if (!same_agent) {
 			void this.refreshAgentRelated()
 			void this.refreshSessions()
+			void this.refreshToolLogs()
+			void this.refreshSkillLogs()
 		}
 	}
 
@@ -414,8 +537,12 @@ export default class Index {
 				this.selected_agent_id = next_agent.id
 				this.page_mode = 'detail'
 				this.current_tab = 'info'
-				await this.refreshAgentRelated()
-				await this.refreshSessions()
+				await Promise.all([
+					this.refreshAgentRelated(),
+					this.refreshSessions(),
+					this.refreshToolLogs(),
+					this.refreshSkillLogs()
+				])
 			}
 		} finally {
 			this.create_agent_loading = false
@@ -524,6 +651,30 @@ export default class Index {
 			id: this.selected_agent_id,
 			tools: tool_names
 		})
+	}
+
+	setToolLogDate(date: string) {
+		if (!date) return
+
+		void this.refreshToolLogs({ date, page: 1 })
+	}
+
+	setToolLogPage(page: number) {
+		if (page < 1) return
+
+		void this.refreshToolLogs({ date: this.tool_log_date, page })
+	}
+
+	setSkillLogDate(date: string) {
+		if (!date) return
+
+		void this.refreshSkillLogs({ date, page: 1 })
+	}
+
+	setSkillLogPage(page: number) {
+		if (page < 1) return
+
+		void this.refreshSkillLogs({ date: this.skill_log_date, page })
 	}
 
 	async createArticle() {

@@ -1,5 +1,6 @@
 import path from 'path'
 import { getSkill } from '@core/db/services'
+import { appendAgentSkillLog } from '@core/rpc/agent/logs'
 import { readFile } from 'atomically'
 import { eq } from 'drizzle-orm'
 
@@ -124,144 +125,190 @@ const writeSkillFile = async (args: {
 }
 
 export default async (s: Session, input: SkillToolInput) => {
-	if (input.action === 'search') {
-		if (!input.keyword) {
-			return { action: 'search', error: 'keyword is required for search action' }
-		}
+	const logSkillResult = async (output: unknown) => {
+		const skill_name = input.skill_name || input.build_name || ''
+		const status =
+			output && typeof output === 'object' && 'error' in output && output.error ? 'error' : 'success'
 
-		const max_results = input.max_results ?? 5
-		const skill_map = await readSkillMap(s)
-		const results = search(skill_map, input.keyword, max_results)
+		await appendAgentSkillLog({
+			action: input.action,
+			agent_id: s.owner_agent?.id,
+			input,
+			output,
+			session_id: s.id,
+			skill_name,
+			status
+		})
 
-		if (results.length === 0) {
-			return {
-				action: 'search',
-				results: [],
-				count: 0,
-				hint: 'No local skills matched. Consider browsing https://skills.sh/ with web_fetch_tool to find community skills.'
-			}
-		}
-
-		return {
-			action: 'search',
-			results: results.map(r => ({
-				name: r.name,
-				description: r.description,
-				score: r.score
-			})),
-			count: results.length
-		}
+		return output
 	}
 
-	if (input.action === 'read') {
-		if (!input.skill_name) {
-			return { action: 'read', error: 'skill_name is required for read action' }
+	try {
+		if (input.action === 'search') {
+			if (!input.keyword) {
+				return logSkillResult({ action: 'search', error: 'keyword is required for search action' })
+			}
+
+			const max_results = input.max_results ?? 5
+			const skill_map = await readSkillMap(s)
+			const results = search(skill_map, input.keyword, max_results)
+
+			if (results.length === 0) {
+				return logSkillResult({
+					action: 'search',
+					results: [],
+					count: 0,
+					hint: 'No local skills matched. Consider browsing https://skills.sh/ with web_fetch_tool to find community skills.'
+				})
+			}
+
+			return logSkillResult({
+				action: 'search',
+				results: results.map(r => ({
+					name: r.name,
+					description: r.description,
+					score: r.score
+				})),
+				count: results.length
+			})
 		}
 
-		const skill_map = await readSkillMap(s)
-		const target = skill_map.find(item => item.name === input.skill_name)
+		if (input.action === 'read') {
+			if (!input.skill_name) {
+				return logSkillResult({ action: 'read', error: 'skill_name is required for read action' })
+			}
 
-		if (!target) {
-			return {
+			const skill_map = await readSkillMap(s)
+			const target = skill_map.find(item => item.name === input.skill_name)
+
+			if (!target) {
+				return logSkillResult({
+					action: 'read',
+					skill_name: input.skill_name,
+					error: `Skill "${input.skill_name}" not found in skill_map. Use action "search" to find available skills.`
+				})
+			}
+
+			const skill_file_path = getSkillFilePath(s, target.name)
+
+			const perm_error = await checkPermission(s, 'file', 'read', skill_file_path)
+
+			if (perm_error) {
+				return logSkillResult({ action: 'read', skill_name: input.skill_name, error: perm_error })
+			}
+
+			const content = await readFile(skill_file_path, 'utf8')
+
+			return logSkillResult({
 				action: 'read',
 				skill_name: input.skill_name,
-				error: `Skill "${input.skill_name}" not found in skill_map. Use action "search" to find available skills.`
+				content,
+				skill: target
+			})
+		}
+
+		if (input.action === 'create') {
+			if (!input.build_name) {
+				return logSkillResult({ action: 'create', error: 'build_name is required for create action' })
 			}
+
+			if (!input.build_description) {
+				return logSkillResult({
+					action: 'create',
+					error: 'build_description is required for create action'
+				})
+			}
+
+			if (!input.build_content) {
+				return logSkillResult({
+					action: 'create',
+					error: 'build_content is required for create action'
+				})
+			}
+
+			const result = await writeSkillFile({
+				session: s,
+				skill_name: input.build_name,
+				description: input.build_description,
+				content: input.build_content,
+				require_existing: false
+			})
+
+			if ('error' in result) {
+				return logSkillResult({ action: 'create', skill_name: input.build_name, error: result.error })
+			}
+
+			return logSkillResult({
+				action: 'create',
+				skill_name: input.build_name,
+				skill: result.skill,
+				count: result.count
+			})
 		}
 
-		const skill_file_path = getSkillFilePath(s, target.name)
+		if (input.action === 'update') {
+			if (!input.skill_name) {
+				return logSkillResult({ action: 'update', error: 'skill_name is required for update action' })
+			}
 
-		const perm_error = await checkPermission(s, 'file', 'read', skill_file_path)
+			if (!input.build_description) {
+				return logSkillResult({
+					action: 'update',
+					error: 'build_description is required for update action'
+				})
+			}
 
-		if (perm_error) {
-			return { action: 'read', skill_name: input.skill_name, error: perm_error }
+			if (!input.build_content) {
+				return logSkillResult({
+					action: 'update',
+					error: 'build_content is required for update action'
+				})
+			}
+
+			const result = await writeSkillFile({
+				session: s,
+				skill_name: input.skill_name,
+				description: input.build_description,
+				content: input.build_content,
+				require_existing: true
+			})
+
+			if ('error' in result) {
+				return logSkillResult({ action: 'update', skill_name: input.skill_name, error: result.error })
+			}
+
+			return logSkillResult({
+				action: 'update',
+				skill_name: input.skill_name,
+				skill: result.skill,
+				count: result.count
+			})
 		}
 
-		const content = await readFile(skill_file_path, 'utf8')
+		if (input.action === 'build') {
+			const skill_map = await rebuildSkillMap(s)
 
-		return {
-			action: 'read',
-			skill_name: input.skill_name,
-			content,
-			skill: target
-		}
-	}
-
-	if (input.action === 'create') {
-		if (!input.build_name) {
-			return { action: 'create', error: 'build_name is required for create action' }
+			return logSkillResult({
+				action: 'build',
+				count: skill_map.length,
+				skills: skill_map.map(item => item.name)
+			})
 		}
 
-		if (!input.build_description) {
-			return { action: 'create', error: 'build_description is required for create action' }
-		}
-
-		if (!input.build_content) {
-			return { action: 'create', error: 'build_content is required for create action' }
-		}
-
-		const result = await writeSkillFile({
-			session: s,
-			skill_name: input.build_name,
-			description: input.build_description,
-			content: input.build_content,
-			require_existing: false
+		return logSkillResult({ error: 'Unknown action' })
+	} catch (error) {
+		await appendAgentSkillLog({
+			action: input.action,
+			agent_id: s.owner_agent?.id,
+			input,
+			output:
+				error instanceof Error
+					? { name: error.name, message: error.message, stack: error.stack || '' }
+					: { message: String(error) },
+			session_id: s.id,
+			skill_name: input.skill_name || input.build_name || '',
+			status: 'error'
 		})
-
-		if ('error' in result) {
-			return { action: 'create', skill_name: input.build_name, error: result.error }
-		}
-
-		return {
-			action: 'create',
-			skill_name: input.build_name,
-			skill: result.skill,
-			count: result.count
-		}
+		throw error
 	}
-
-	if (input.action === 'update') {
-		if (!input.skill_name) {
-			return { action: 'update', error: 'skill_name is required for update action' }
-		}
-
-		if (!input.build_description) {
-			return { action: 'update', error: 'build_description is required for update action' }
-		}
-
-		if (!input.build_content) {
-			return { action: 'update', error: 'build_content is required for update action' }
-		}
-
-		const result = await writeSkillFile({
-			session: s,
-			skill_name: input.skill_name,
-			description: input.build_description,
-			content: input.build_content,
-			require_existing: true
-		})
-
-		if ('error' in result) {
-			return { action: 'update', skill_name: input.skill_name, error: result.error }
-		}
-
-		return {
-			action: 'update',
-			skill_name: input.skill_name,
-			skill: result.skill,
-			count: result.count
-		}
-	}
-
-	if (input.action === 'build') {
-		const skill_map = await rebuildSkillMap(s)
-
-		return {
-			action: 'build',
-			count: skill_map.length,
-			skills: skill_map.map(item => item.name)
-		}
-	}
-
-	return { error: 'Unknown action' }
 }

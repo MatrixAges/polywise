@@ -9,8 +9,12 @@ export type AgentSessionResponse = RPCOutput['agent']['getSessions']
 export type AgentSessionItem = AgentSessionResponse['sessions'][number]
 export type AgentSkillItem = RPCOutput['agent']['getSkills'][number]
 export type AgentArticleItem = RPCOutput['agent']['getArticles'][number]
+export type AgentSkillLogResponse = RPCOutput['agent']['getSkillLogs']
+export type AgentSkillLogItem = AgentSkillLogResponse['items'][number]
 export type SkillItem = RPCOutput['skill']['query'][number]
 export type AgentToolItem = RPCOutput['tool']['query'][number]
+export type AgentToolLogResponse = RPCOutput['agent']['getToolLogs']
+export type AgentToolLogItem = AgentToolLogResponse['items'][number]
 export type AgentPageMode = 'sessions' | 'detail'
 export type AgentTab =
 	| 'sessions'

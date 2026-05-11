@@ -10,8 +10,10 @@ export interface AgentSessionPinItem {
 }
 
 export const getAgentDirPath = (agent_id: string) => path.resolve(app.agents_path, agent_id)
-
 export const getAgentPinPath = (agent_id: string) => path.resolve(getAgentDirPath(agent_id), 'pin.json')
+export const getAgentLogDirPath = (agent_id: string) => path.resolve(getAgentDirPath(agent_id), '.logs')
+export const getAgentToolLogDirPath = (agent_id: string) => path.resolve(getAgentLogDirPath(agent_id), 'tools')
+export const getAgentSkillLogDirPath = (agent_id: string) => path.resolve(getAgentLogDirPath(agent_id), 'skills')
 
 const normalizePinList = (value: unknown) => {
 	const now = Date.now()

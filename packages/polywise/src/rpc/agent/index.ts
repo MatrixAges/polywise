@@ -5,7 +5,9 @@ import createArticle from './createArticle'
 import createSession from './createSession'
 import getArticles from './getArticles'
 import getSessions from './getSessions'
+import getSkillLogs from './getSkillLogs'
 import getSkills from './getSkills'
+import getToolLogs from './getToolLogs'
 import pin from './pin'
 import query from './query'
 import remove from './remove'
@@ -21,8 +23,10 @@ export default r({
 	createArticle,
 	createSession,
 	getArticles,
+	getSkillLogs,
 	getSessions,
 	getSkills,
+	getToolLogs,
 	pin,
 	remove,
 	removeArticle,

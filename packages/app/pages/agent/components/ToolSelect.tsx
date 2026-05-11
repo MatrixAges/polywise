@@ -11,54 +11,93 @@ import {
 	ComboboxList,
 	useComboboxAnchor
 } from '@/__shadcn__/components/ui/combobox'
+import { Separator } from '@/__shadcn__/components/ui/separator'
 
 import { useModel } from '../context'
+import CallLogPanel from './CallLogPanel'
 
 import type { IToolOption } from '../types'
 
 const Index = () => {
-	const { tool_options, selected_tool_names, setTools } = useModel()
+	const {
+		tool_options,
+		selected_tool_names,
+		setTools,
+		tool_log_available_dates,
+		tool_log_date,
+		tool_log_has_more,
+		tool_log_items,
+		tool_log_loading,
+		tool_log_page,
+		tool_log_total,
+		setToolLogDate,
+		setToolLogPage
+	} = useModel()
 	const ref_anchor = useComboboxAnchor()
 	const selected_items = tool_options.filter(item => selected_tool_names.includes(item.value))
 
 	return (
-		<div className='flex w-full flex-col p-6'>
-			<Combobox<IToolOption, true>
-				multiple
-				items={tool_options}
-				value={selected_items}
-				onValueChange={value => setTools(value.map(item => item.value))}
-				isItemEqualToValue={(item_value, value) => item_value.value === value.value}
-			>
-				<ComboboxChips
-					className='
-						w-full
-						bg-transparent!
-						focus-within:ring-0
-					'
-					ref={ref_anchor}
+		<div className='flex min-h-0 w-full flex-col'>
+			<div className='p-6 pb-4'>
+				<Combobox<IToolOption, true>
+					multiple
+					items={tool_options}
+					value={selected_items}
+					onValueChange={value => setTools(value.map(item => item.value))}
+					isItemEqualToValue={(item_value, value) => item_value.value === value.value}
 				>
-					{selected_items.map(item => (
-						<ComboboxChip key={item.value}>{item.label}</ComboboxChip>
-					))}
-					<ComboboxChipsInput placeholder='Search and select custom tools for agent' />
-				</ComboboxChips>
-				<ComboboxContent anchor={ref_anchor}>
-					<ComboboxEmpty>No tools found.</ComboboxEmpty>
-					<ComboboxList>
-						{(item: IToolOption) => (
-							<ComboboxItem value={item} key={item.value}>
-								<div className='flex min-w-0 flex-col'>
-									<span>{item.label}</span>
-									<span className='text-std-400 truncate text-xs'>
-										{item.description}
-									</span>
-								</div>
-							</ComboboxItem>
-						)}
-					</ComboboxList>
-				</ComboboxContent>
-			</Combobox>
+					<ComboboxChips
+						className='
+							w-full
+							bg-transparent!
+							focus-within:ring-0
+						'
+						ref={ref_anchor}
+					>
+						{selected_items.map(item => (
+							<ComboboxChip key={item.value}>{item.label}</ComboboxChip>
+						))}
+						<ComboboxChipsInput placeholder='Search and select custom tools for agent' />
+					</ComboboxChips>
+					<ComboboxContent anchor={ref_anchor}>
+						<ComboboxEmpty>No tools found.</ComboboxEmpty>
+						<ComboboxList>
+							{(item: IToolOption) => (
+								<ComboboxItem value={item} key={item.value}>
+									<div className='flex min-w-0 flex-col'>
+										<span>{item.label}</span>
+										<span className='text-std-400 truncate text-xs'>
+											{item.description}
+										</span>
+									</div>
+								</ComboboxItem>
+							)}
+						</ComboboxList>
+					</ComboboxContent>
+				</Combobox>
+			</div>
+			<Separator />
+			<div
+				className='
+					flex flex-1 flex-col
+					min-h-0
+					p-6 pt-4
+				'
+			>
+				<CallLogPanel
+					available_dates={tool_log_available_dates}
+					date={tool_log_date}
+					empty_text='No tool call logs for this date.'
+					has_more={tool_log_has_more}
+					items={tool_log_items}
+					loading={tool_log_loading}
+					onDateChange={setToolLogDate}
+					onPageChange={setToolLogPage}
+					page={tool_log_page}
+					renderSummary={item => item.tool_name}
+					total={tool_log_total}
+				/>
+			</div>
 		</div>
 	)
 }
