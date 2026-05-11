@@ -4,6 +4,7 @@ CREATE TABLE `agent` (
 	`description` text,
 	`photo` blob,
 	`avatar` text,
+	`tools` text DEFAULT '[]' NOT NULL,
 	`prompt` text,
 	`soul` text,
 	`identity` text,
@@ -29,7 +30,7 @@ CREATE TABLE `article` (
 	`hit_count` integer,
 	`hit_at` integer,
 	`is_long` integer GENERATED ALWAYS AS (length(content) > 12000) VIRTUAL,
-	`is_tripled` integer DEFAULT false NOT NULL,
+	`is_pipelined` integer DEFAULT false NOT NULL,
 	`created_at` integer,
 	`updated_at` integer,
 	CONSTRAINT `fk_article_document_id_document_id_fk` FOREIGN KEY (`document_id`) REFERENCES `document`(`id`) ON DELETE CASCADE
@@ -53,7 +54,7 @@ CREATE TABLE `document` (
 	`path` text,
 	`hit_count` integer,
 	`hit_at` integer,
-	`is_tripled` integer DEFAULT false NOT NULL,
+	`is_pipelined` integer DEFAULT false NOT NULL,
 	`created_at` integer,
 	`updated_at` integer
 );
@@ -172,7 +173,7 @@ CREATE TABLE `todo` (
 	`title` text NOT NULL,
 	`description` text,
 	`priority` text DEFAULT 'none',
-	`status` text DEFAULT 'draft' NOT NULL,
+	`status` text DEFAULT 'backlog' NOT NULL,
 	`result` text,
 	`error` text,
 	`order` real NOT NULL,
@@ -313,13 +314,13 @@ CREATE INDEX `article_document_id_idx` ON `article` (`document_id`);--> statemen
 CREATE INDEX `article_for_idx` ON `article` (`for`);--> statement-breakpoint
 CREATE INDEX `article_scope_idx` ON `article` (`scope_type`,`scope_id`);--> statement-breakpoint
 CREATE INDEX `article_source_idx` ON `article` (`source`);--> statement-breakpoint
-CREATE INDEX `article_is_tripled_idx` ON `article` (`is_tripled`);--> statement-breakpoint
+CREATE INDEX `article_is_pipelined_idx` ON `article` (`is_pipelined`);--> statement-breakpoint
 CREATE INDEX `article_created_at_idx` ON `article` (`created_at`);--> statement-breakpoint
 CREATE INDEX `article_updated_at_idx` ON `article` (`updated_at`);--> statement-breakpoint
 CREATE UNIQUE INDEX `article_hash_idx` ON `article` (`hash`);--> statement-breakpoint
 CREATE INDEX `chunk_article_id_idx` ON `chunk` (`article_id`);--> statement-breakpoint
 CREATE INDEX `chunk_created_at_idx` ON `chunk` (`created_at`);--> statement-breakpoint
-CREATE INDEX `document_is_tripled_idx` ON `document` (`is_tripled`);--> statement-breakpoint
+CREATE INDEX `document_is_pipelined_idx` ON `document` (`is_pipelined`);--> statement-breakpoint
 CREATE INDEX `document_created_at_idx` ON `document` (`created_at`);--> statement-breakpoint
 CREATE INDEX `document_updated_at_idx` ON `document` (`updated_at`);--> statement-breakpoint
 CREATE INDEX `edge_agent_id_idx` ON `edge` (`agent_id`);--> statement-breakpoint

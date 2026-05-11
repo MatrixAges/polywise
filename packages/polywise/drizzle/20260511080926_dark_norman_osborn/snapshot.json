@@ -1,10 +1,10 @@
 {
-  "id": "74ac1312-a06d-4908-aa8c-bea95ad8c0c8",
-  "prevIds": [
-    "2dbbcbe9-8d1b-4ffc-9336-e452705bec76"
-  ],
   "version": "7",
   "dialect": "sqlite",
+  "id": "6c526544-bb8a-4f1b-8c1d-307b0ce80e2e",
+  "prevIds": [
+    "00000000-0000-0000-0000-000000000000"
+  ],
   "ddl": [
     {
       "name": "agent",
@@ -165,6 +165,16 @@
       "default": null,
       "generated": null,
       "name": "avatar",
+      "entityType": "columns",
+      "table": "agent"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "'[]'",
+      "generated": null,
+      "name": "tools",
       "entityType": "columns",
       "table": "agent"
     },
@@ -1385,7 +1395,7 @@
       "type": "text",
       "notNull": true,
       "autoincrement": false,
-      "default": "'draft'",
+      "default": "'backlog'",
       "generated": null,
       "name": "status",
       "entityType": "columns",
