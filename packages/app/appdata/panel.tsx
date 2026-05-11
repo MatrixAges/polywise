@@ -1,8 +1,8 @@
-import { Bell, Bookmark, Bot, Workflow } from 'lucide-react'
+import { Bell, Bookmark, Bot, Network } from 'lucide-react'
 
 export const panel_tabs = [
 	{ key: 'session', Icon: Bot },
 	{ key: 'bookmark', Icon: Bookmark },
-	{ key: 'pipeline', Icon: Workflow },
-	{ key: 'notification', Icon: Bell }
+	{ key: 'notification', Icon: Bell },
+	{ key: 'pipeline', Icon: Network }
 ]
