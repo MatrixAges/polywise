@@ -12,7 +12,7 @@ import {
 } from '@/__shadcn__/components/ui/dialog'
 import { Input } from '@/__shadcn__/components/ui/input'
 import { Spinner } from '@/__shadcn__/components/ui/spinner'
-import { TextTabs } from '@/components'
+import { Tabs } from '@/components'
 
 import { useModel } from '../context'
 
@@ -68,21 +68,6 @@ const Index = () => {
 								: 'Enter the basic agent info manually. Name and description are set here, and the remaining fields stay empty.'}
 						</DialogDescription>
 					</DialogHeader>
-					<div
-						className='
-							flex
-							w-full h-8
-							border-b border-border-light
-						'
-					>
-						<TextTabs
-							className='w-full justify-around'
-							itemClassName='h-8 px-2 text-sm'
-							items={[...create_mode_items]}
-							active={create_agent_mode}
-							setActive={setCreateAgentMode}
-						></TextTabs>
-					</div>
 					{create_agent_mode === 'auto' ? (
 						<Input
 							autoFocus
@@ -108,25 +93,32 @@ const Index = () => {
 							></Input>
 						</div>
 					)}
-					<DialogFooter>
-						<Button
-							variant='outline'
-							type='button'
-							onClick={() => setCreateDialogOpen(false)}
-							disabled={create_agent_loading}
-						>
-							Cancel
-						</Button>
-						<Button
-							type='submit'
-							disabled={
-								create_agent_loading ||
-								(create_agent_mode === 'auto' ? !next_purpose : !next_name)
-							}
-						>
-							{create_agent_loading && <Spinner className='size-3.5'></Spinner>}
-							{create_agent_loading ? 'Creating...' : 'Create'}
-						</Button>
+					<DialogFooter className='flex items-center justify-between sm:justify-between'>
+						<Tabs
+							items={[...create_mode_items]}
+							active={create_agent_mode}
+							onClick={mode => setCreateAgentMode(mode as 'auto' | 'input')}
+						></Tabs>
+						<div className='flex items-center gap-2'>
+							<Button
+								variant='outline'
+								type='button'
+								onClick={() => setCreateDialogOpen(false)}
+								disabled={create_agent_loading}
+							>
+								Cancel
+							</Button>
+							<Button
+								type='submit'
+								disabled={
+									create_agent_loading ||
+									(create_agent_mode === 'auto' ? !next_purpose : !next_name)
+								}
+							>
+								{create_agent_loading && <Spinner className='size-3.5'></Spinner>}
+								{create_agent_loading ? 'Creating...' : 'Create'}
+							</Button>
+						</div>
 					</DialogFooter>
 				</form>
 			</DialogContent>
