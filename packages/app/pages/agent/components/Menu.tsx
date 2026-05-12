@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { DndContext, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
-import { PanelLeftOpen, Plus, Sparkles } from 'lucide-react'
+import { Bot, MessagesSquare, PanelLeftOpen, Plus, Sparkles } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
-import { Tabs, TabsList, TabsTrigger } from '@/__shadcn__/components/ui/tabs'
+import { Tabs } from '@/components'
 
 import { useModel } from '../context'
 import CreateDialog from './CreateDialog'
@@ -68,25 +68,22 @@ const Index = () => {
 					className='
 						flex
 						items-center justify-between
-						h-11
+						h-9
 						px-2
 					'
 				>
-					<Tabs
-						value={menu_scope}
-						onValueChange={value => setMenuScope(value as 'agent' | 'group')}
-						className='gap-0'
-					>
-						<TabsList variant='line' className='gap-0 p-0'>
-							<TabsTrigger className='text-xsm px-2 py-1' value='agent'>
-								Agents
-							</TabsTrigger>
-							<TabsTrigger className='text-xsm px-2 py-1' value='group'>
-								Groups
-							</TabsTrigger>
-						</TabsList>
-					</Tabs>
-					<div className='-mr-1 flex gap-1'>
+					<div className='flex min-w-0 flex-1'>
+						<Tabs
+							small
+							items={[
+								{ key: 'agent', title: 'Agents', Icon: Bot },
+								{ key: 'group', title: 'Groups', Icon: MessagesSquare }
+							]}
+							active={menu_scope}
+							onClick={v => setMenuScope(v as 'agent' | 'group')}
+						></Tabs>
+					</div>
+					<div className='flex gap-1'>
 						{menu_scope === 'agent' && page_mode === 'sessions' && !session_menu_open && (
 							<button
 								className='icon_button small'
@@ -128,7 +125,7 @@ const Index = () => {
 							flex flex-col
 							w-full
 							gap-0.5
-							p-2 pt-0
+							p-1.5 pt-0
 						'
 					>
 						<DndContext sensors={sensors} onDragEnd={onDragEnd}>

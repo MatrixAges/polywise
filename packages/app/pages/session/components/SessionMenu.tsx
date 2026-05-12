@@ -121,7 +121,7 @@ const Index = () => {
 							className='
 								overflow-y-auto
 								w-full h-full
-								px-2
+								px-1.5
 							'
 							onScroll={onScroll}
 						>

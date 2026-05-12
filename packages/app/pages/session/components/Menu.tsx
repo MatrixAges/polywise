@@ -25,8 +25,7 @@ const Index = () => {
 					flex
 					items-center
 					h-9
-					px-3
-					pl-2
+					px-2
 				'
 			>
 				<div className='flex min-w-0 flex-1'>
@@ -42,7 +41,7 @@ const Index = () => {
 				</div>
 				<Tooltip title={menu_tab === 'projects' ? 'New Project' : 'New Session'}>
 					<div
-						className='icon_button small -mr-1'
+						className='icon_button small'
 						onClick={menu_tab === 'projects' ? onToggleAddModal : () => createSession()}
 					>
 						{menu_tab === 'projects' ? <FolderPlus></FolderPlus> : <Plus></Plus>}
