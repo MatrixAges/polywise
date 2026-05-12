@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo } from 'react'
 import { observer } from 'mobx-react-lite'
 import NiceAvatar from 'react-nice-avatar'
 import NotionAvatar from 'react-notion-avatar'
@@ -34,27 +34,22 @@ const Index = (props: IProps) => {
 	const photo = item.photo as Uint8Array | null
 	const wrapper_style = { width: box_size, height: box_size } as CSSProperties
 	const is_rounded = shape === 'rounded'
-	const [resolved_photo_url, setPhotoUrl] = useState(photo_url)
+	const object_photo_url = useMemo(() => {
+		if (photo_url || !photo) {
+			return ''
+		}
+
+		return URL.createObjectURL(new Blob([new Uint8Array(photo)]))
+	}, [photo, photo_url])
+	const resolved_photo_url = photo_url || object_photo_url || (avatar_config ? '' : default_avatar_url)
 
 	useEffect(() => {
-		if (photo_url) {
-			setPhotoUrl(photo_url)
-
+		if (!object_photo_url) {
 			return
 		}
 
-		if (!photo) {
-			setPhotoUrl(avatar_config ? '' : default_avatar_url)
-
-			return
-		}
-
-		const next_url = URL.createObjectURL(new Blob([new Uint8Array(photo)]))
-
-		setPhotoUrl(next_url)
-
-		return () => URL.revokeObjectURL(next_url)
-	}, [avatar_config, photo, photo_url])
+		return () => URL.revokeObjectURL(object_photo_url)
+	}, [object_photo_url])
 
 	return (
 		<div

@@ -1,4 +1,3 @@
-import { useEffect, useMemo, useState } from 'react'
 import { observer } from 'mobx-react-lite'
 
 import { Button } from '@/__shadcn__/components/ui/button'
@@ -16,48 +15,29 @@ import { Textarea } from '@/__shadcn__/components/ui/textarea'
 
 import { useModel } from '../context'
 
-import type { GroupItem } from '../types'
-
-interface IProps {
-	open: boolean
-	group?: GroupItem | null
-	onOpenChange: (open: boolean) => void
-}
-
-const Index = ({ open, group, onOpenChange }: IProps) => {
-	const { agents, createGroup, updateGroup, create_group_loading, update_group_loading } = useModel()
-	const [name, setName] = useState('')
-	const [description, setDescription] = useState('')
-	const [selected_agent_ids, setSelectedAgentIds] = useState<Array<string>>([])
-
-	useEffect(() => {
-		if (!open) {
-			setName('')
-			setDescription('')
-			setSelectedAgentIds([])
-
-			return
-		}
-
-		setName(group?.name || '')
-		setDescription(group?.description || '')
-		setSelectedAgentIds(group?.agents.map(item => item.id) || [])
-	}, [group, open])
-
+const Index = () => {
+	const {
+		agents,
+		editing_group,
+		group_dialog_open,
+		group_dialog_name,
+		group_dialog_description,
+		group_dialog_selected_agent_ids,
+		create_group_loading,
+		update_group_loading,
+		setGroupDialogOpen,
+		setGroupDialogName,
+		setGroupDialogDescription,
+		toggleGroupDialogAgent,
+		submitGroupDialog
+	} = useModel()
 	const loading = create_group_loading || update_group_loading
-	const mode = group ? 'edit' : 'create'
-	const next_name = name.trim()
-
-	const selected_set = useMemo(() => new Set(selected_agent_ids), [selected_agent_ids])
-
-	const toggleAgent = (agent_id: string) => {
-		setSelectedAgentIds(current =>
-			current.includes(agent_id) ? current.filter(item => item !== agent_id) : [...current, agent_id]
-		)
-	}
+	const mode = editing_group ? 'edit' : 'create'
+	const next_name = group_dialog_name.trim()
+	const selected_set = new Set(group_dialog_selected_agent_ids)
 
 	return (
-		<Dialog open={open} onOpenChange={next_open => !loading && onOpenChange(next_open)}>
+		<Dialog open={group_dialog_open} onOpenChange={next_open => !loading && setGroupDialogOpen(next_open)}>
 			<DialogContent className='w-[640px] max-w-none!'>
 				<form
 					className='flex flex-col gap-4'
@@ -66,22 +46,7 @@ const Index = ({ open, group, onOpenChange }: IProps) => {
 
 						if (!next_name) return
 
-						if (mode === 'create') {
-							await createGroup({
-								name: next_name,
-								description: description.trim(),
-								agent_ids: selected_agent_ids
-							})
-						} else if (group?.id) {
-							await updateGroup({
-								id: group.id,
-								name: next_name,
-								description: description.trim(),
-								agent_ids: selected_agent_ids
-							})
-						}
-
-						onOpenChange(false)
+						await submitGroupDialog()
 					}}
 				>
 					<DialogHeader>
@@ -94,17 +59,17 @@ const Index = ({ open, group, onOpenChange }: IProps) => {
 					<div className='grid gap-3'>
 						<Input
 							autoFocus
-							value={name}
+							value={group_dialog_name}
 							maxLength={120}
 							placeholder='Group name'
-							onChange={event => setName(event.target.value)}
+							onChange={event => setGroupDialogName(event.target.value)}
 						></Input>
 						<Textarea
-							value={description}
+							value={group_dialog_description}
 							maxLength={500}
 							rows={4}
 							placeholder='Describe what this group is for'
-							onChange={event => setDescription(event.target.value)}
+							onChange={event => setGroupDialogDescription(event.target.value)}
 						></Textarea>
 					</div>
 					<div className='grid gap-2'>
@@ -140,7 +105,7 @@ const Index = ({ open, group, onOpenChange }: IProps) => {
 										)}
 										type='button'
 										key={agent.id}
-										onClick={() => toggleAgent(agent.id)}
+										onClick={() => toggleGroupDialogAgent(agent.id)}
 									>
 										<div
 											className={$cx(
@@ -176,14 +141,14 @@ const Index = ({ open, group, onOpenChange }: IProps) => {
 						<Button
 							variant='outline'
 							type='button'
-							onClick={() => onOpenChange(false)}
+							onClick={() => setGroupDialogOpen(false)}
 							disabled={loading}
 						>
 							Cancel
 						</Button>
 						<Button
 							type='submit'
-							disabled={!next_name || !selected_agent_ids.length || loading}
+							disabled={!next_name || !group_dialog_selected_agent_ids.length || loading}
 						>
 							{loading && <Spinner className='size-3.5'></Spinner>}
 							{mode === 'create'

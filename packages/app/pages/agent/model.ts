@@ -82,9 +82,17 @@ export default class Index {
 	session_request_key = 0
 	session_loading = false
 	session_loading_more = false
+	create_dialog_open = false
+	create_agent_purpose = ''
 	create_agent_loading = false
+	group_dialog_open = false
+	editing_group_id = ''
+	group_dialog_name = ''
+	group_dialog_description = ''
+	group_dialog_selected_agent_ids = [] as Array<string>
 	create_group_loading = false
 	update_group_loading = false
+	skill_dialog_open = false
 	avatar_dialog_open = false
 	avatar_mode = 'upload' as AvatarMode
 	avatar_preview_url = ''
@@ -100,6 +108,10 @@ export default class Index {
 
 	get selected_group() {
 		return this.groups.find(item => item.id === this.selected_group_id) || null
+	}
+
+	get editing_group() {
+		return this.groups.find(item => item.id === this.editing_group_id) || null
 	}
 
 	get selected_group_session_id() {
@@ -523,6 +535,27 @@ export default class Index {
 		this.session_menu_open = open
 	}
 
+	setCreateDialogOpen(open: boolean) {
+		this.create_dialog_open = open
+
+		if (!open) {
+			this.create_agent_purpose = ''
+		}
+	}
+
+	openCreateAgentDialog() {
+		this.create_agent_purpose = ''
+		this.create_dialog_open = true
+	}
+
+	closeCreateAgentDialog() {
+		this.setCreateDialogOpen(false)
+	}
+
+	setCreateAgentPurpose(value: string) {
+		this.create_agent_purpose = value
+	}
+
 	setMenuScope(scope: AgentMenuScope) {
 		this.menu_scope = scope
 
@@ -541,6 +574,18 @@ export default class Index {
 
 	toggleSessionMenu() {
 		this.session_menu_open = !this.session_menu_open
+	}
+
+	setSkillDialogOpen(open: boolean) {
+		this.skill_dialog_open = open
+	}
+
+	openSkillDialog() {
+		this.skill_dialog_open = true
+	}
+
+	closeSkillDialog() {
+		this.skill_dialog_open = false
 	}
 
 	setArticleFor(for_type: ArticleForType) {
@@ -654,6 +699,77 @@ export default class Index {
 		}
 	}
 
+	async submitCreateAgentDialog() {
+		const purpose = this.create_agent_purpose.trim()
+
+		if (!purpose) {
+			return
+		}
+
+		await this.createAgent(purpose)
+		this.closeCreateAgentDialog()
+	}
+
+	setGroupDialogOpen(open: boolean) {
+		if (open) {
+			this.group_dialog_open = true
+
+			return
+		}
+
+		this.closeGroupDialog()
+	}
+
+	openCreateGroupDialog() {
+		this.editing_group_id = ''
+		this.group_dialog_name = ''
+		this.group_dialog_description = ''
+		this.group_dialog_selected_agent_ids = []
+		this.group_dialog_open = true
+	}
+
+	openEditGroupDialog(group_id: string) {
+		const group = this.groups.find(item => item.id === group_id)
+
+		if (!group) {
+			return
+		}
+
+		this.editing_group_id = group.id
+		this.group_dialog_name = group.name || ''
+		this.group_dialog_description = group.description || ''
+		this.group_dialog_selected_agent_ids = group.agents.map(item => item.id)
+		this.group_dialog_open = true
+	}
+
+	closeGroupDialog() {
+		this.group_dialog_open = false
+		this.editing_group_id = ''
+		this.group_dialog_name = ''
+		this.group_dialog_description = ''
+		this.group_dialog_selected_agent_ids = []
+	}
+
+	setGroupDialogName(value: string) {
+		this.group_dialog_name = value
+	}
+
+	setGroupDialogDescription(value: string) {
+		this.group_dialog_description = value
+	}
+
+	toggleGroupDialogAgent(agent_id: string) {
+		if (this.group_dialog_selected_agent_ids.includes(agent_id)) {
+			this.group_dialog_selected_agent_ids = this.group_dialog_selected_agent_ids.filter(
+				item => item !== agent_id
+			)
+
+			return
+		}
+
+		this.group_dialog_selected_agent_ids = [...this.group_dialog_selected_agent_ids, agent_id]
+	}
+
 	async createGroup(args: IGroupDialogSubmitArgs) {
 		if (this.create_group_loading) return null
 
@@ -674,6 +790,31 @@ export default class Index {
 		} finally {
 			this.create_group_loading = false
 		}
+	}
+
+	async submitGroupDialog() {
+		const name = this.group_dialog_name.trim()
+
+		if (!name || !this.group_dialog_selected_agent_ids.length) {
+			return null
+		}
+
+		if (this.editing_group_id) {
+			await this.updateGroup({
+				id: this.editing_group_id,
+				name,
+				description: this.group_dialog_description.trim(),
+				agent_ids: this.group_dialog_selected_agent_ids
+			})
+		} else {
+			await this.createGroup({
+				name,
+				description: this.group_dialog_description.trim(),
+				agent_ids: this.group_dialog_selected_agent_ids
+			})
+		}
+
+		this.closeGroupDialog()
 	}
 
 	async updateGroup(args: IGroupDialogSubmitArgs) {

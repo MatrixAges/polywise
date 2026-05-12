@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { Bot, MessagesSquare, PanelLeftOpen, Plus, Sparkles } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
@@ -12,12 +11,16 @@ import GroupsMenu from './GroupsMenu'
 import { SkillDialog } from './Skill'
 
 const Index = () => {
-	const { groups, menu_scope, page_mode, session_menu_open, setMenuScope, setSessionMenuOpen } = useModel()
-	const [create_dialog_open, setCreateDialogOpen] = useState(false)
-	const [group_dialog_open, setGroupDialogOpen] = useState(false)
-	const [editing_group_id, setEditingGroupId] = useState('')
-	const [skill_dialog_open, setSkillDialogOpen] = useState(false)
-	const editing_group = groups.find(item => item.id === editing_group_id) || null
+	const {
+		menu_scope,
+		page_mode,
+		session_menu_open,
+		setMenuScope,
+		setSessionMenuOpen,
+		openCreateAgentDialog,
+		openCreateGroupDialog,
+		openSkillDialog
+	} = useModel()
 
 	return (
 		<>
@@ -60,11 +63,7 @@ const Index = () => {
 							</button>
 						)}
 						{menu_scope === 'agent' && (
-							<button
-								className='icon_button small'
-								type='button'
-								onClick={() => setSkillDialogOpen(true)}
-							>
+							<button className='icon_button small' type='button' onClick={openSkillDialog}>
 								<Sparkles className='size-3'></Sparkles>
 							</button>
 						)}
@@ -73,12 +72,11 @@ const Index = () => {
 							type='button'
 							onClick={() => {
 								if (menu_scope === 'group') {
-									setEditingGroupId('')
-									setGroupDialogOpen(true)
+									openCreateGroupDialog()
 									return
 								}
 
-								setCreateDialogOpen(true)
+								openCreateAgentDialog()
 							}}
 						>
 							<Plus className='size-3.5'></Plus>
@@ -94,32 +92,13 @@ const Index = () => {
 							p-1.5 pt-0
 						'
 					>
-						{menu_scope === 'agent' ? (
-							<AgentsMenu></AgentsMenu>
-						) : (
-							<GroupsMenu
-								onEditGroup={id => {
-									setEditingGroupId(id)
-									setGroupDialogOpen(true)
-								}}
-							></GroupsMenu>
-						)}
+						{menu_scope === 'agent' ? <AgentsMenu></AgentsMenu> : <GroupsMenu></GroupsMenu>}
 					</div>
 				</div>
 			</div>
-			<CreateDialog open={create_dialog_open} onOpenChange={setCreateDialogOpen}></CreateDialog>
-			<GroupDialog
-				open={group_dialog_open}
-				group={editing_group}
-				onOpenChange={open => {
-					setGroupDialogOpen(open)
-
-					if (!open) {
-						setEditingGroupId('')
-					}
-				}}
-			></GroupDialog>
-			<SkillDialog open={skill_dialog_open} onOpenChange={setSkillDialogOpen}></SkillDialog>
+			<CreateDialog></CreateDialog>
+			<GroupDialog></GroupDialog>
+			<SkillDialog></SkillDialog>
 		</>
 	)
 }

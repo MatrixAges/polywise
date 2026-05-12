@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react'
 import { observer } from 'mobx-react-lite'
 
 import { Button } from '@/__shadcn__/components/ui/button'
@@ -15,25 +14,22 @@ import { Spinner } from '@/__shadcn__/components/ui/spinner'
 
 import { useModel } from '../context'
 
-interface IProps {
-	open: boolean
-	onOpenChange: (open: boolean) => void
-}
-
-const Index = ({ open, onOpenChange }: IProps) => {
-	const { createAgent, create_agent_loading } = useModel()
-	const [purpose, setPurpose] = useState('')
-
-	useEffect(() => {
-		if (!open) {
-			setPurpose('')
-		}
-	}, [open])
-
-	const next_purpose = purpose.trim()
+const Index = () => {
+	const {
+		create_dialog_open,
+		create_agent_purpose,
+		create_agent_loading,
+		setCreateDialogOpen,
+		setCreateAgentPurpose,
+		submitCreateAgentDialog
+	} = useModel()
+	const next_purpose = create_agent_purpose.trim()
 
 	return (
-		<Dialog open={open} onOpenChange={next_open => !create_agent_loading && onOpenChange(next_open)}>
+		<Dialog
+			open={create_dialog_open}
+			onOpenChange={next_open => !create_agent_loading && setCreateDialogOpen(next_open)}
+		>
 			<DialogContent className='w-[520px] max-w-none!'>
 				<form
 					className='flex flex-col gap-4'
@@ -44,8 +40,7 @@ const Index = ({ open, onOpenChange }: IProps) => {
 							return
 						}
 
-						await createAgent(next_purpose)
-						onOpenChange(false)
+						await submitCreateAgentDialog()
 					}}
 				>
 					<DialogHeader>
@@ -57,16 +52,16 @@ const Index = ({ open, onOpenChange }: IProps) => {
 					</DialogHeader>
 					<Input
 						autoFocus
-						value={purpose}
+						value={create_agent_purpose}
 						maxLength={120}
 						placeholder='Example: Break complex product requests into clear execution plans'
-						onChange={event => setPurpose(event.target.value)}
+						onChange={event => setCreateAgentPurpose(event.target.value)}
 					></Input>
 					<DialogFooter>
 						<Button
 							variant='outline'
 							type='button'
-							onClick={() => onOpenChange(false)}
+							onClick={() => setCreateDialogOpen(false)}
 							disabled={create_agent_loading}
 						>
 							Cancel

@@ -1,15 +1,13 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { Pencil } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { Session } from '@/components'
 
 import { useModel } from '../context'
-import GroupDialog from './GroupDialog'
 
 const Index = () => {
-	const { selected_group, selected_group_session_id, openGroup } = useModel()
-	const [edit_open, setEditOpen] = useState(false)
+	const { selected_group, selected_group_session_id, openGroup, openEditGroupDialog } = useModel()
 
 	useEffect(() => {
 		if (selected_group && !selected_group_session_id) {
@@ -54,7 +52,11 @@ const Index = () => {
 							{selected_group.description || `${selected_group.agents.length} agents`}
 						</div>
 					</div>
-					<button className='icon_button small' type='button' onClick={() => setEditOpen(true)}>
+					<button
+						className='icon_button small'
+						type='button'
+						onClick={() => openEditGroupDialog(selected_group.id)}
+					>
 						<Pencil className='size-3'></Pencil>
 					</button>
 				</div>
@@ -75,7 +77,6 @@ const Index = () => {
 					)}
 				</div>
 			</div>
-			<GroupDialog open={edit_open} group={selected_group} onOpenChange={setEditOpen}></GroupDialog>
 		</>
 	)
 }
