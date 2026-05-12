@@ -1,4 +1,3 @@
-import { Upload } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { Button } from '@/__shadcn__/components/ui/button'
@@ -12,7 +11,7 @@ import {
 } from '@/__shadcn__/components/ui/dialog'
 import { Input } from '@/__shadcn__/components/ui/input'
 import { Spinner } from '@/__shadcn__/components/ui/spinner'
-import { uploadFile } from '@/utils'
+import { alert, uploadFile } from '@/utils'
 
 import { useModel } from '../context'
 import AgentAvatar from './AgentAvatar'
@@ -30,7 +29,6 @@ const Index = () => {
 		group_dialog_selected_agent_ids,
 		group_dialog_photo,
 		group_dialog_photo_url,
-		group_dialog_file_name,
 		create_group_loading,
 		update_group_loading,
 		setGroupDialogOpen,
@@ -39,7 +37,8 @@ const Index = () => {
 		setGroupDialogPhoto,
 		clearGroupDialogPhoto,
 		toggleGroupDialogAgent,
-		submitGroupDialog
+		submitGroupDialog,
+		removeGroup
 	} = useModel()
 	const loading = create_group_loading || update_group_loading
 	const mode = editing_group ? 'edit' : 'create'
@@ -60,6 +59,22 @@ const Index = () => {
 			file_name: file.name,
 			preview_url
 		})
+	}
+	const onRemove = async () => {
+		if (!editing_group || loading) {
+			return
+		}
+
+		const res = await alert({
+			title: 'Remove Group',
+			desc: 'Confirm remove this group and all linked group sessions?'
+		})
+
+		if (!res) {
+			return
+		}
+
+		await removeGroup(editing_group.id)
 	}
 
 	return (
@@ -82,7 +97,14 @@ const Index = () => {
 							the shared group chat.
 						</DialogDescription>
 					</DialogHeader>
-					<div className='flex flex-col items-center gap-3'>
+					<div
+						className='
+							flex flex-col
+							items-center
+							gap-3
+							py-2
+						'
+					>
 						<GroupAvatar
 							item={{
 								name: next_name || group_dialog_name || 'Group',
@@ -90,24 +112,10 @@ const Index = () => {
 							}}
 							size={72}
 							photo_url={group_dialog_photo_url}
+							onUpload={onUpload}
+							onClear={clearGroupDialogPhoto}
+							disabled={loading}
 						></GroupAvatar>
-						<div className='flex items-center gap-2'>
-							<Button variant='outline' type='button' onClick={onUpload} disabled={loading}>
-								<Upload className='size-3.5'></Upload>
-								Choose Photo
-							</Button>
-							<Button
-								variant='outline'
-								type='button'
-								onClick={clearGroupDialogPhoto}
-								disabled={loading}
-							>
-								Clear Photo
-							</Button>
-						</div>
-						<div className='text-std-400 text-xs'>
-							{group_dialog_file_name || 'No photo selected'}
-						</div>
 					</div>
 					<div className='grid gap-3'>
 						<Input
@@ -183,41 +191,46 @@ const Index = () => {
 									</button>
 								)
 							})}
-							{!agents.length && (
-								<div
-									className='
-										col-span-3
-										px-2 py-4
-										text-std-400 text-sm
-									'
-								>
-									Create agents first.
-								</div>
-							)}
 						</div>
 					</div>
-					<DialogFooter>
-						<Button
-							variant='outline'
-							type='button'
-							onClick={() => setGroupDialogOpen(false)}
-							disabled={loading}
-						>
-							Cancel
-						</Button>
-						<Button
-							type='submit'
-							disabled={!next_name || !group_dialog_selected_agent_ids.length || loading}
-						>
-							{loading && <Spinner className='size-3.5'></Spinner>}
-							{mode === 'create'
-								? create_group_loading
-									? 'Creating...'
-									: 'Create'
-								: update_group_loading
-									? 'Saving...'
-									: 'Save'}
-						</Button>
+					<DialogFooter className='flex items-center justify-between sm:justify-between'>
+						<div>
+							{editing_group && (
+								<Button
+									variant='destructive'
+									type='button'
+									onClick={onRemove}
+									disabled={loading}
+								>
+									Remove Group
+								</Button>
+							)}
+						</div>
+						<div className='flex items-center gap-2'>
+							<Button
+								variant='outline'
+								type='button'
+								onClick={() => setGroupDialogOpen(false)}
+								disabled={loading}
+							>
+								Cancel
+							</Button>
+							<Button
+								type='submit'
+								disabled={
+									!next_name || !group_dialog_selected_agent_ids.length || loading
+								}
+							>
+								{loading && <Spinner className='size-3.5'></Spinner>}
+								{mode === 'create'
+									? create_group_loading
+										? 'Creating...'
+										: 'Create'
+									: update_group_loading
+										? 'Saving...'
+										: 'Save'}
+							</Button>
+						</div>
 					</DialogFooter>
 				</form>
 			</DialogContent>

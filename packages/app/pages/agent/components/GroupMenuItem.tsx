@@ -1,10 +1,7 @@
-import { Pencil, Trash2 } from 'lucide-react'
-
-import { alert } from '@/utils'
+import { Pencil } from 'lucide-react'
 
 import GroupAvatar from './GroupAvatar'
 
-import type { MouseEvent } from 'react'
 import type { GroupItem } from '../types'
 
 interface IProps {
@@ -12,25 +9,9 @@ interface IProps {
 	selected: boolean
 	onClick: () => void
 	onEdit: () => void
-	onRemove: () => Promise<void>
 }
 
-const Index = ({ item, selected, onClick, onEdit, onRemove }: IProps) => {
-	const handleRemove = async (event: MouseEvent<HTMLButtonElement>) => {
-		event.stopPropagation()
-
-		const res = await alert({
-			title: 'Remove Group',
-			desc: 'Confirm remove this group and all linked group sessions?'
-		})
-
-		if (!res) {
-			return
-		}
-
-		await onRemove()
-	}
-
+const Index = ({ item, selected, onClick, onEdit }: IProps) => {
 	return (
 		<div
 			className={$cx(
@@ -48,7 +29,13 @@ const Index = ({ item, selected, onClick, onEdit, onRemove }: IProps) => {
 			onClick={onClick}
 		>
 			<GroupAvatar item={item} size='small'></GroupAvatar>
-			<div className='min-w-0 flex-1'>
+			<div
+				className='
+					flex flex-1 flex-col
+					min-w-0
+					gap-0.5
+				'
+			>
 				<div className='truncate text-sm font-medium'>{item.name}</div>
 				<div className='text-std-400 truncate text-xs'>
 					{item.description || `${item.agents.length} agents`}
@@ -63,9 +50,6 @@ const Index = ({ item, selected, onClick, onEdit, onRemove }: IProps) => {
 					group-hover:opacity-100
 				'
 			>
-				<button className='icon_button small' type='button' onClick={event => void handleRemove(event)}>
-					<Trash2 className='size-3'></Trash2>
-				</button>
 				<button
 					className='icon_button small'
 					type='button'

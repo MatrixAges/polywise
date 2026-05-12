@@ -1,6 +1,7 @@
 import { useEffect, useMemo } from 'react'
+import { Upload, X } from 'lucide-react'
 
-import type { CSSProperties } from 'react'
+import type { CSSProperties, MouseEvent } from 'react'
 import type { GroupItem } from '../types'
 
 interface IProps {
@@ -8,6 +9,9 @@ interface IProps {
 	size?: 'small' | 'large' | number
 	shape?: 'circle' | 'rounded'
 	photo_url?: string
+	onUpload?: () => void | Promise<void>
+	onClear?: () => void | Promise<void>
+	disabled?: boolean
 }
 
 const default_avatar_url = '/images/bird.jpg'
@@ -17,11 +21,20 @@ const size_map = {
 	large: 60
 } as const
 
-const Index = ({ item, size = 'large', shape = 'circle', photo_url = '' }: IProps) => {
+const Index = ({
+	item,
+	size = 'large',
+	shape = 'circle',
+	photo_url = '',
+	onUpload,
+	onClear,
+	disabled = false
+}: IProps) => {
 	const box_size = typeof size === 'number' ? size : size_map[size]
 	const photo = item.photo as Uint8Array | null
 	const wrapper_style = { width: box_size, height: box_size } as CSSProperties
 	const is_rounded = shape === 'rounded'
+	const editable = Boolean(onUpload || onClear)
 	const object_photo_url = useMemo(() => {
 		if (photo_url || !photo) {
 			return ''
@@ -39,12 +52,62 @@ const Index = ({ item, size = 'large', shape = 'circle', photo_url = '' }: IProp
 		return () => URL.revokeObjectURL(object_photo_url)
 	}, [object_photo_url])
 
+	const has_custom_photo = Boolean(photo_url || photo)
+	const stopPropagation = (event: MouseEvent<HTMLButtonElement>) => event.stopPropagation()
+
 	return (
 		<div
-			className={$cx('bg-secondary/40 overflow-hidden', is_rounded ? 'rounded-[24px]' : 'rounded-full')}
+			className={$cx(
+				'group bg-secondary/40 relative overflow-hidden',
+				is_rounded ? 'rounded-[24px]' : 'rounded-full'
+			)}
 			style={wrapper_style}
 		>
 			<img className='h-full w-full object-cover' src={resolved_photo_url} alt={item.name || 'Group'} />
+			{editable && (
+				<div
+					className={`
+						absolute
+						inset-0
+						flex
+						items-center justify-center
+						gap-2
+						bg-black/45
+						opacity-0
+						transition-opacity
+						group-hover:opacity-100
+					`}
+				>
+					{onUpload && (
+						<button
+							className='icon_button small'
+							type='button'
+							title='Upload photo'
+							disabled={disabled}
+							onClick={event => {
+								stopPropagation(event)
+								void onUpload()
+							}}
+						>
+							<Upload className='size-3.5'></Upload>
+						</button>
+					)}
+					{onClear && (
+						<button
+							className='icon_button small'
+							type='button'
+							title='Clear photo'
+							disabled={disabled || !has_custom_photo}
+							onClick={event => {
+								stopPropagation(event)
+								void onClear()
+							}}
+						>
+							<X className='size-3.5'></X>
+						</button>
+					)}
+				</div>
+			)}
 		</div>
 	)
 }
