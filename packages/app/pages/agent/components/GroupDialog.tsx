@@ -1,3 +1,4 @@
+import { Upload } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { Button } from '@/__shadcn__/components/ui/button'
@@ -11,9 +12,13 @@ import {
 } from '@/__shadcn__/components/ui/dialog'
 import { Input } from '@/__shadcn__/components/ui/input'
 import { Spinner } from '@/__shadcn__/components/ui/spinner'
+import { uploadFile } from '@/utils'
 
 import { useModel } from '../context'
 import AgentAvatar from './AgentAvatar'
+import GroupAvatar from './GroupAvatar'
+
+const accept = '.jpg,.jpeg,.svg,.png,.webp,image/jpeg,image/png,image/svg+xml,image/webp'
 
 const Index = () => {
 	const {
@@ -23,11 +28,16 @@ const Index = () => {
 		group_dialog_name,
 		group_dialog_description,
 		group_dialog_selected_agent_ids,
+		group_dialog_photo,
+		group_dialog_photo_url,
+		group_dialog_file_name,
 		create_group_loading,
 		update_group_loading,
 		setGroupDialogOpen,
 		setGroupDialogName,
 		setGroupDialogDescription,
+		setGroupDialogPhoto,
+		clearGroupDialogPhoto,
 		toggleGroupDialogAgent,
 		submitGroupDialog
 	} = useModel()
@@ -35,6 +45,22 @@ const Index = () => {
 	const mode = editing_group ? 'edit' : 'create'
 	const next_name = group_dialog_name.trim()
 	const selected_set = new Set(group_dialog_selected_agent_ids)
+	const onUpload = async () => {
+		const file = (await uploadFile({ max_count: 1, accept })) as File | false
+
+		if (!(file instanceof File)) {
+			return
+		}
+
+		const array_buffer = await file.arrayBuffer()
+		const preview_url = URL.createObjectURL(file)
+
+		setGroupDialogPhoto({
+			photo: new Uint8Array(array_buffer),
+			file_name: file.name,
+			preview_url
+		})
+	}
 
 	return (
 		<Dialog open={group_dialog_open} onOpenChange={next_open => !loading && setGroupDialogOpen(next_open)}>
@@ -56,6 +82,33 @@ const Index = () => {
 							the shared group chat.
 						</DialogDescription>
 					</DialogHeader>
+					<div className='flex flex-col items-center gap-3'>
+						<GroupAvatar
+							item={{
+								name: next_name || group_dialog_name || 'Group',
+								photo: group_dialog_photo
+							}}
+							size={72}
+							photo_url={group_dialog_photo_url}
+						></GroupAvatar>
+						<div className='flex items-center gap-2'>
+							<Button variant='outline' type='button' onClick={onUpload} disabled={loading}>
+								<Upload className='size-3.5'></Upload>
+								Choose Photo
+							</Button>
+							<Button
+								variant='outline'
+								type='button'
+								onClick={clearGroupDialogPhoto}
+								disabled={loading}
+							>
+								Clear Photo
+							</Button>
+						</div>
+						<div className='text-std-400 text-xs'>
+							{group_dialog_file_name || 'No photo selected'}
+						</div>
+					</div>
 					<div className='grid gap-3'>
 						<Input
 							autoFocus
@@ -77,7 +130,7 @@ const Index = () => {
 							className='
 								overflow-y-auto
 								grid grid-cols-4
-								max-h-[300px]
+								max-h-[210px]
 								gap-2
 								p-2
 								rounded-md

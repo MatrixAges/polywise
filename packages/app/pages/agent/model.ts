@@ -90,6 +90,9 @@ export default class Index {
 	group_dialog_name = ''
 	group_dialog_description = ''
 	group_dialog_selected_agent_ids = [] as Array<string>
+	group_dialog_photo = null as Uint8Array | null
+	group_dialog_photo_url = ''
+	group_dialog_file_name = ''
 	create_group_loading = false
 	update_group_loading = false
 	skill_dialog_open = false
@@ -167,6 +170,10 @@ export default class Index {
 			() => {
 				if (this.avatar_preview_url) {
 					URL.revokeObjectURL(this.avatar_preview_url)
+				}
+
+				if (this.group_dialog_photo_url) {
+					URL.revokeObjectURL(this.group_dialog_photo_url)
 				}
 			}
 		]
@@ -717,6 +724,9 @@ export default class Index {
 		this.group_dialog_name = ''
 		this.group_dialog_description = ''
 		this.group_dialog_selected_agent_ids = []
+		this.group_dialog_photo = null
+		this.group_dialog_file_name = ''
+		this.resetGroupDialogPhotoPreview()
 		this.group_dialog_open = true
 	}
 
@@ -731,6 +741,16 @@ export default class Index {
 		this.group_dialog_name = group.name || ''
 		this.group_dialog_description = group.description || ''
 		this.group_dialog_selected_agent_ids = group.agents.map(item => item.id)
+		this.group_dialog_photo = group.photo ? new Uint8Array(group.photo as Uint8Array) : null
+		this.group_dialog_file_name = group.photo ? 'current photo' : ''
+		this.resetGroupDialogPhotoPreview()
+
+		if (group.photo) {
+			const blob = new Blob([new Uint8Array(group.photo as Uint8Array)])
+
+			this.group_dialog_photo_url = URL.createObjectURL(blob)
+		}
+
 		this.group_dialog_open = true
 	}
 
@@ -740,6 +760,9 @@ export default class Index {
 		this.group_dialog_name = ''
 		this.group_dialog_description = ''
 		this.group_dialog_selected_agent_ids = []
+		this.group_dialog_photo = null
+		this.group_dialog_file_name = ''
+		this.resetGroupDialogPhotoPreview()
 	}
 
 	setGroupDialogName(value: string) {
@@ -748,6 +771,29 @@ export default class Index {
 
 	setGroupDialogDescription(value: string) {
 		this.group_dialog_description = value
+	}
+
+	resetGroupDialogPhotoPreview() {
+		if (this.group_dialog_photo_url) {
+			URL.revokeObjectURL(this.group_dialog_photo_url)
+		}
+
+		this.group_dialog_photo_url = ''
+	}
+
+	setGroupDialogPhoto(args: { photo: Uint8Array; file_name: string; preview_url: string }) {
+		const { photo, file_name, preview_url } = args
+
+		this.group_dialog_photo = photo
+		this.group_dialog_file_name = file_name
+		this.resetGroupDialogPhotoPreview()
+		this.group_dialog_photo_url = preview_url
+	}
+
+	clearGroupDialogPhoto() {
+		this.group_dialog_photo = null
+		this.group_dialog_file_name = ''
+		this.resetGroupDialogPhotoPreview()
 	}
 
 	toggleGroupDialogAgent(agent_id: string) {
@@ -771,6 +817,7 @@ export default class Index {
 			const res = await rpc.group.create.mutate({
 				name: args.name,
 				description: args.description || undefined,
+				photo: args.photo,
 				agent_ids: args.agent_ids
 			})
 
@@ -796,12 +843,14 @@ export default class Index {
 				id: this.editing_group_id,
 				name,
 				description: this.group_dialog_description.trim(),
+				photo: this.group_dialog_photo,
 				agent_ids: this.group_dialog_selected_agent_ids
 			})
 		} else {
 			await this.createGroup({
 				name,
 				description: this.group_dialog_description.trim(),
+				photo: this.group_dialog_photo,
 				agent_ids: this.group_dialog_selected_agent_ids
 			})
 		}
@@ -818,7 +867,8 @@ export default class Index {
 			await rpc.group.update.mutate({
 				id: args.id,
 				name: args.name,
-				description: args.description
+				description: args.description,
+				photo: args.photo
 			})
 			await rpc.group.setAgents.mutate({
 				id: args.id,
@@ -846,6 +896,23 @@ export default class Index {
 		await rpc.agent.remove.mutate({ id: agent_id })
 
 		await this.refresh()
+	}
+
+	async removeGroup(group_id: string) {
+		if (!group_id) return
+
+		await rpc.group.remove.mutate(group_id)
+
+		if (this.selected_group_id === group_id) {
+			this.selected_group_id = ''
+		}
+
+		if (this.editing_group_id === group_id) {
+			this.closeGroupDialog()
+		}
+
+		this.menu_scope = 'group'
+		await this.refreshGroups()
 	}
 
 	async sortAgent(from: number, to: number) {

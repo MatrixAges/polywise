@@ -4,7 +4,7 @@ import { useModel } from '../context'
 import GroupMenuItem from './GroupMenuItem'
 
 const Index = () => {
-	const { groups, selected_group_id, openGroup, openEditGroupDialog } = useModel()
+	const { groups, selected_group_id, openGroup, openEditGroupDialog, removeGroup } = useModel()
 
 	return (
 		<div className='flex flex-col gap-0.5'>
@@ -15,6 +15,7 @@ const Index = () => {
 					key={item.id}
 					onClick={() => void openGroup(item.id)}
 					onEdit={() => openEditGroupDialog(item.id)}
+					onRemove={() => removeGroup(item.id)}
 				></GroupMenuItem>
 			))}
 		</div>

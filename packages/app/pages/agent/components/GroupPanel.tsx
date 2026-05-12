@@ -5,6 +5,7 @@ import { observer } from 'mobx-react-lite'
 import { Session } from '@/components'
 
 import { useModel } from '../context'
+import GroupAvatar from './GroupAvatar'
 
 const Index = () => {
 	const { selected_group, selected_group_session_id, openGroup, openEditGroupDialog } = useModel()
@@ -46,10 +47,13 @@ const Index = () => {
 						border-b border-border-light
 					'
 				>
-					<div className='min-w-0'>
-						<div className='truncate text-sm font-medium'>{selected_group.name}</div>
-						<div className='text-xsm text-std-400 truncate'>
-							{selected_group.description || `${selected_group.agents.length} agents`}
+					<div className='flex min-w-0 items-center gap-3'>
+						<GroupAvatar item={selected_group} size='small'></GroupAvatar>
+						<div className='min-w-0'>
+							<div className='truncate text-sm font-medium'>{selected_group.name}</div>
+							<div className='text-xsm text-std-400 truncate'>
+								{selected_group.description || `${selected_group.agents.length} agents`}
+							</div>
 						</div>
 					</div>
 					<button

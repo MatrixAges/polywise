@@ -102,5 +102,6 @@ export interface IGroupDialogSubmitArgs {
 	id?: string
 	name: string
 	description: string
+	photo?: Uint8Array | null
 	agent_ids: Array<string>
 }

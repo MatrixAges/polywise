@@ -2,7 +2,7 @@ import { group } from '@core/db/schema'
 import { env } from '@core/env'
 import { SQL } from 'drizzle-orm'
 
-import type { GroupInsert } from '@core/db'
+import type { Group, GroupInsert } from '@core/db'
 
 interface ArgsGetGroups {
 	where?: SQL
@@ -11,12 +11,38 @@ interface ArgsGetGroups {
 	offset?: number
 }
 
+const normalizeGroup = (row: Group | undefined) => {
+	if (!row) {
+		return row
+	}
+
+	const photo = row.photo
+
+	if (!photo) {
+		return row
+	}
+
+	if (photo instanceof Uint8Array && photo.constructor === Uint8Array) {
+		return row
+	}
+
+	if (photo instanceof Uint8Array) {
+		return { ...row, photo: new Uint8Array(photo) }
+	}
+
+	if (photo instanceof ArrayBuffer) {
+		return { ...row, photo: new Uint8Array(photo) }
+	}
+
+	return row
+}
+
 export const addGroup = async (values: GroupInsert) => {
 	return env.db
 		.insert(group)
 		.values(values)
 		.returning()
-		.then(res => res[0])
+		.then(res => normalizeGroup(res[0]))
 }
 
 export const getGroup = async (where: SQL) => {
@@ -25,7 +51,7 @@ export const getGroup = async (where: SQL) => {
 		.from(group)
 		.where(where)
 		.limit(1)
-		.then(res => res[0])
+		.then(res => normalizeGroup(res[0]))
 }
 
 export const getGroups = async (args: ArgsGetGroups = {}) => {
@@ -44,7 +70,7 @@ export const getGroups = async (args: ArgsGetGroups = {}) => {
 	if (limit) query = query.limit(limit)
 	if (offset) query = query.offset(offset)
 
-	return query
+	return query.then(res => res.map(item => normalizeGroup(item) as Group))
 }
 
 export const setGroup = async (where: SQL, values: Partial<GroupInsert>) => {
@@ -53,7 +79,7 @@ export const setGroup = async (where: SQL, values: Partial<GroupInsert>) => {
 		.set(values)
 		.where(where)
 		.returning()
-		.then(res => res[0])
+		.then(res => normalizeGroup(res[0]))
 }
 
 export const removeGroup = async (where: SQL) => {
@@ -61,5 +87,5 @@ export const removeGroup = async (where: SQL) => {
 		.delete(group)
 		.where(where)
 		.returning()
-		.then(res => res[0])
+		.then(res => normalizeGroup(res[0]))
 }

@@ -1,4 +1,4 @@
-import { index, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
+import { blob, index, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 import { getId } from 'stk/utils'
 
 export default sqliteTable(
@@ -7,6 +7,7 @@ export default sqliteTable(
 		id: text('id').primaryKey().$defaultFn(getId),
 		name: text('name').notNull(),
 		description: text('description'),
+		photo: blob('photo'),
 		created_at: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
 		updated_at: integer('updated_at', { mode: 'timestamp' })
 			.$defaultFn(() => new Date())

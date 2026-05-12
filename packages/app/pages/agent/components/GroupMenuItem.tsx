@@ -1,5 +1,10 @@
-import { Pencil } from 'lucide-react'
+import { Pencil, Trash2 } from 'lucide-react'
 
+import { alert } from '@/utils'
+
+import GroupAvatar from './GroupAvatar'
+
+import type { MouseEvent } from 'react'
 import type { GroupItem } from '../types'
 
 interface IProps {
@@ -7,15 +12,24 @@ interface IProps {
 	selected: boolean
 	onClick: () => void
 	onEdit: () => void
+	onRemove: () => Promise<void>
 }
 
-const Index = ({ item, selected, onClick, onEdit }: IProps) => {
-	const initials = item.name
-		.split(/\s+/)
-		.map(part => part[0])
-		.join('')
-		.slice(0, 2)
-		.toUpperCase()
+const Index = ({ item, selected, onClick, onEdit, onRemove }: IProps) => {
+	const handleRemove = async (event: MouseEvent<HTMLButtonElement>) => {
+		event.stopPropagation()
+
+		const res = await alert({
+			title: 'Remove Group',
+			desc: 'Confirm remove this group and all linked group sessions?'
+		})
+
+		if (!res) {
+			return
+		}
+
+		await onRemove()
+	}
 
 	return (
 		<div
@@ -33,18 +47,7 @@ const Index = ({ item, selected, onClick, onEdit }: IProps) => {
 			)}
 			onClick={onClick}
 		>
-			<div
-				className='
-					flex shrink-0
-					items-center justify-center
-					size-9
-					rounded-full
-					text-xs text-std-600 font-semibold
-					bg-std-100
-				'
-			>
-				{initials || 'G'}
-			</div>
+			<GroupAvatar item={item} size='small'></GroupAvatar>
 			<div className='min-w-0 flex-1'>
 				<div className='truncate text-sm font-medium'>{item.name}</div>
 				<div className='text-std-400 truncate text-xs'>
@@ -60,6 +63,9 @@ const Index = ({ item, selected, onClick, onEdit }: IProps) => {
 					group-hover:opacity-100
 				'
 			>
+				<button className='icon_button small' type='button' onClick={event => void handleRemove(event)}>
+					<Trash2 className='size-3'></Trash2>
+				</button>
 				<button
 					className='icon_button small'
 					type='button'
