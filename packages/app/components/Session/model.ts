@@ -13,6 +13,13 @@ import type { Context, Message, Permission } from '@core/fst'
 import type { AbstractChat } from 'ai'
 import type { IProps } from './index'
 
+interface GroupAgentSummary {
+	id: string
+	name: string
+	photo: Uint8Array | null
+	avatar?: unknown
+}
+
 @injectable()
 export default class Index {
 	id = ''
@@ -33,6 +40,7 @@ export default class Index {
 	permission = null as unknown as Permission
 	archived_at = null as null | number
 	mode = 'normal' as 'normal' | 'plan' | 'plan-exec'
+	group_agents = [] as Array<GroupAgentSummary>
 
 	signal = 0
 	open_context_modal = false
@@ -121,6 +129,7 @@ export default class Index {
 							this.has_newer = has_newer
 							this.permission = permission as Permission
 							this.mode = mode ?? 'normal'
+							this.group_agents = res.data.group?.agents ?? []
 
 							const target_messages = messages as unknown as Array<Message>
 
@@ -369,7 +378,7 @@ export default class Index {
 		this.has_older = false
 		this.has_newer = false
 
-		this.chat = null as unknown as Chat
+		this.chat = null as unknown as Chat<Message>
 		this.session = {} as unknown as Session
 		this.context = null as unknown as Context
 		this.status = 'ready' as AbstractChat<Message>['status']

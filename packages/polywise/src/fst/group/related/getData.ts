@@ -20,7 +20,13 @@ export default async (s: Group) => {
 			group: {
 				id: s.group.id,
 				name: s.group.name,
-				description: s.group.description ?? null
+				description: s.group.description ?? null,
+				agents: s.agents.map(agent => ({
+					id: agent.id,
+					name: agent.name,
+					photo: agent.photo ?? null,
+					avatar: agent.avatar ?? null
+				}))
 			}
 		}
 	} as ChatEventRes

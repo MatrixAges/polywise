@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useMemoizedFn } from 'ahooks'
 import dayjs from 'dayjs'
 import { Check, ChevronRightIcon, Copy, Trash2 } from 'lucide-react'
+import NiceAvatar from 'react-nice-avatar'
+import NotionAvatar from 'react-notion-avatar'
 
 import { Message, MessageContent } from '@/__shadcn__/components/ai-elements'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/__shadcn__/components/ui/collapsible'
@@ -12,8 +14,10 @@ import LoadingDots from './LoadingDots'
 import Part from './Part'
 import SourceUrls from './SourceUrls'
 
+import type { AgentAvatarConfig } from '@/pages/agent/types'
 import type { MessagePartDurationUIPart, Message as SessionMessage } from '@core/fst'
 import type { FileUIPart, SourceUrlUIPart, ToolUIPart } from 'ai'
+import type { CSSProperties } from 'react'
 import type { IPropsMessage } from '../types'
 
 type DurationAwarePart = Exclude<
@@ -38,6 +42,15 @@ type RenderBlock =
 			type: 'active-tool'
 			item: PartWithDuration
 	  }
+
+interface SenderAgentSummary {
+	id: string
+	name: string
+	photo: Uint8Array | null
+	avatar?: unknown
+}
+
+const default_avatar_url = '/images/bird.jpg'
 
 const isPartDurationPart = (part: SessionMessage['parts'][number] | undefined): part is MessagePartDurationUIPart => {
 	return part?.type === 'data-part-duration'
@@ -224,6 +237,62 @@ const formatMessageTime = (time?: Date) => {
 		: formatDateTime(time, 'YYYY-MM-DD HH:mm:ss')
 }
 
+const SenderAvatar = (props: { agent: SenderAgentSummary }) => {
+	const { agent } = props
+	const avatar_config = (agent.avatar as AgentAvatarConfig | null) ?? null
+	const wrapper_style = { width: 20, height: 20 } as CSSProperties
+	const object_photo_url = useMemo(() => {
+		if (!agent.photo) {
+			return ''
+		}
+
+		return URL.createObjectURL(new Blob([new Uint8Array(agent.photo)]))
+	}, [agent.photo])
+	const resolved_photo_url = object_photo_url || (avatar_config ? '' : default_avatar_url)
+
+	useEffect(() => {
+		if (!object_photo_url) {
+			return
+		}
+
+		return () => URL.revokeObjectURL(object_photo_url)
+	}, [object_photo_url])
+
+	return resolved_photo_url ? (
+		<div
+			className='
+					overflow-hidden
+					shrink-0
+					size-5
+					rounded-full
+					bg-secondary/40
+				'
+			style={wrapper_style}
+		>
+			<img className='h-full w-full object-cover' src={resolved_photo_url} alt={agent.name} />
+		</div>
+	) : avatar_config?.type === 'nice' ? (
+		<NiceAvatar style={wrapper_style} shape='circle' {...avatar_config.data} />
+	) : avatar_config?.type === 'notion' ? (
+		<NotionAvatar style={wrapper_style} shape='circle' config={avatar_config.data} />
+	) : (
+		<div
+			className='
+							flex shrink-0
+							items-center justify-center
+							size-5
+							rounded-full
+							text-[10px] font-medium
+							uppercase
+							bg-secondary
+						'
+			style={wrapper_style}
+		>
+			{agent.name.slice(0, 1)}
+		</div>
+	)
+}
+
 const ToolSummaryBlock = (props: {
 	items: Array<PartWithDuration>
 	messageId: string
@@ -327,7 +396,7 @@ const ProcessSummaryBlock = (props: { children: React.ReactNode; duration: numbe
 }
 
 const Index = (props: IPropsMessage) => {
-	const { streaming, is_streaming, message, answer, removeMessage } = props
+	const { streaming, is_streaming = false, message, answer, removeMessage, group_agents = [] } = props
 	const { parts } = message
 	const [is_copied, setIsCopied] = useState(false)
 	const copy_reset_timeout_ref = useRef<number>(0)
@@ -337,6 +406,10 @@ const Index = (props: IPropsMessage) => {
 		[message.createdAt, message.metadata?.timestamp]
 	)
 	const sender_name = message.metadata?.sender
+	const sender_agent = useMemo(
+		() => group_agents.find(item => item.id === message.metadata?.sender_id),
+		[group_agents, message.metadata?.sender_id]
+	)
 
 	const { source_urls, render_blocks } = useMemo(() => {
 		const source_urls = [] as Array<SourceUrlUIPart>
@@ -396,6 +469,8 @@ const Index = (props: IPropsMessage) => {
 	})
 
 	const onRemove = useMemoizedFn(() => {
+		if (!removeMessage) return
+
 		void removeMessage(message.id)
 	})
 
@@ -442,11 +517,15 @@ const Index = (props: IPropsMessage) => {
 				{sender_name && message.role === 'assistant' && (
 					<div
 						className='
+							flex
+							items-center
+							gap-2
 							mb-2
 							text-xsm text-std-500 font-medium tracking-[0.08em]
 							uppercase
 						'
 					>
+						{sender_agent && <SenderAvatar agent={sender_agent}></SenderAvatar>}
 						{sender_name}
 					</div>
 				)}
@@ -492,7 +571,7 @@ const Index = (props: IPropsMessage) => {
 					{created_at_text && <span className='px-1'>{created_at_text}</span>}
 					<button
 						className='icon_button small'
-						disabled={is_streaming}
+						disabled={is_streaming || !removeMessage}
 						title='Delete message'
 						type='button'
 						onClick={onRemove}

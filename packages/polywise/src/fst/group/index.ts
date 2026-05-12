@@ -133,7 +133,13 @@ export default class Group extends Session {
 				group: {
 					id: this.group.id,
 					name: this.group.name,
-					description: this.group.description ?? null
+					description: this.group.description ?? null,
+					agents: this.agents.map(agent => ({
+						id: agent.id,
+						name: agent.name,
+						photo: agent.photo ?? null,
+						avatar: agent.avatar ?? null
+					}))
 				}
 			}
 		})

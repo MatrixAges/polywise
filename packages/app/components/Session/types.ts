@@ -6,10 +6,12 @@ import type Model from './model'
 
 type VisibleMessagePart = Exclude<Message['parts'][number], MessagePartDurationUIPart>
 
-export interface IPropsMessage extends Pick<Model, 'answer' | 'removeMessage'> {
+export interface IPropsMessage extends Pick<Model, 'answer'> {
 	streaming: boolean
-	is_streaming: boolean
+	is_streaming?: boolean
 	message: Message
+	group_agents?: Model['group_agents']
+	removeMessage?: Model['removeMessage']
 }
 
 export interface IPropsPart extends Pick<IPropsMessage, 'streaming' | 'answer'> {

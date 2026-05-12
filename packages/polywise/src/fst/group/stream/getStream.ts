@@ -56,24 +56,22 @@ export default async (s: Group, message: Message) => {
 		generateId: getId,
 		execute: async ({ writer }) => {
 			const runWave = async (items: typeof effective_selected) => {
-				const members = await Promise.all(
-					items.map(item =>
-						runMember({
-							s,
-							agent: item.agent,
-							evaluation: item,
-							messages: base_messages,
-							original_message: message,
-							turn_id: s.active_turn_id!
-						})
-					)
-				)
+				for (const item of items) {
+					// AI SDK chat processing assumes a single active assistant stream.
+					// Interleaving multiple member streams in one response can scramble
+					// start/end step state and break reasoning/text chunk ordering.
+					const member = await runMember({
+						s,
+						agent: item.agent,
+						evaluation: item,
+						messages: base_messages,
+						original_message: message,
+						turn_id: s.active_turn_id!
+					})
 
-				members.forEach(item => {
-					writer.merge(item.stream)
-				})
-
-				await Promise.all(members.map(item => item.done))
+					writer.merge(member.stream)
+					await member.done
+				}
 			}
 
 			try {

@@ -148,6 +148,7 @@ const Index = (props: IProps) => {
 									is_streaming={streaming}
 									message={message}
 									answer={x.answer}
+									group_agents={x.group_agents}
 									removeMessage={x.removeMessage}
 									key={message.id}
 								></Message>
