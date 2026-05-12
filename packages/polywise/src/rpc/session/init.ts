@@ -1,6 +1,5 @@
 import events from 'events'
-import { Session } from '@core/fst'
-import { p, SessionEventStore, SessionStore } from '@core/utils'
+import { connectSession, GroupStore, p, SessionEventStore, SessionStore } from '@core/utils'
 import { getId } from 'stk/utils'
 import { boolean, object, string } from 'zod'
 
@@ -15,18 +14,15 @@ export default p.input(input_type).subscription(async function* (args) {
 	const { signal, input } = args
 
 	let id = input.id
-	let session = SessionStore.get(id) as Session
+	let session = SessionStore.get(id)
 
 	if (session) {
 		yield session.getData()
 	} else {
-		session = new Session()
-
 		if (!input.global) id = getId()
 
-		const res = await session.init({ id, event: SessionEventStore })
-
-		SessionStore.set(id, session)
+		session = await connectSession({ id })
+		const res = await session.getData()
 
 		yield res
 	}
@@ -49,6 +45,7 @@ export default p.input(input_type).subscription(async function* (args) {
 		session.abortStream()
 
 		SessionStore.delete(id)
+		GroupStore.delete(id)
 
 		SessionEventStore.removeAllListeners(`${id}/change`)
 		SessionEventStore.removeAllListeners(`${id}/stop`)

@@ -17,6 +17,7 @@ import type {
 	AgentArticleItem,
 	AgentAvatarConfig,
 	AgentItem,
+	AgentMenuScope,
 	AgentPageMode,
 	AgentSessionItem,
 	AgentSkillItem,
@@ -28,7 +29,9 @@ import type {
 	AgentToolLogResponse,
 	ArticleForType,
 	AvatarMode,
+	GroupItem,
 	IEditableFieldArgs,
+	IGroupDialogSubmitArgs,
 	ISkillOption,
 	IToolOption,
 	IUpdateAgentArgs
@@ -48,6 +51,7 @@ export default class Index {
 	tool_log_loading = false
 	tool_log_available_dates = [] as Array<string>
 	tool_log_request_key = 0
+	menu_scope = 'agent' as AgentMenuScope
 	skill_log_items = [] as Array<AgentSkillLogItem>
 	skill_log_date = dayjs().format('YYYY-MM-DD')
 	skill_log_page = 1
@@ -79,15 +83,27 @@ export default class Index {
 	session_loading = false
 	session_loading_more = false
 	create_agent_loading = false
+	create_group_loading = false
+	update_group_loading = false
 	avatar_dialog_open = false
 	avatar_mode = 'upload' as AvatarMode
 	avatar_preview_url = ''
 	avatar_file_name = ''
 	pending_photo = null as Uint8Array | null
 	pending_avatar = null as AgentAvatarConfig | null
+	groups = [] as Array<GroupItem>
+	selected_group_id = ''
 
 	get selected_agent() {
 		return this.agents.find(item => item.id === this.selected_agent_id) || null
+	}
+
+	get selected_group() {
+		return this.groups.find(item => item.id === this.selected_group_id) || null
+	}
+
+	get selected_group_session_id() {
+		return this.selected_group?.session_ids?.[0] || ''
 	}
 
 	get selected_skill_ids() {
@@ -126,6 +142,8 @@ export default class Index {
 		const deinit = setStorageWhenChange(
 			[
 				{ agent_selected_agent_id: 'selected_agent_id' },
+				{ agent_selected_group_id: 'selected_group_id' },
+				{ agent_menu_scope: 'menu_scope' },
 				{ agent_current_tab: 'current_tab' },
 				{ agent_session_menu_open: 'session_menu_open' }
 			],
@@ -154,10 +172,11 @@ export default class Index {
 	}
 
 	async refresh() {
-		const [agent_items, skill_items, tool_items] = await Promise.all([
+		const [agent_items, skill_items, tool_items, group_items] = await Promise.all([
 			rpc.agent.query.query(),
 			rpc.skill.query.query(),
-			rpc.tool.query.query()
+			rpc.tool.query.query(),
+			rpc.group.query.query({})
 		])
 
 		this.agents = agent_items as Array<AgentItem>
@@ -172,6 +191,7 @@ export default class Index {
 			label: item.name,
 			description: item.description
 		}))
+		this.groups = group_items as Array<GroupItem>
 
 		if (!this.agents.length) {
 			this.selected_agent_id = ''
@@ -192,22 +212,51 @@ export default class Index {
 			this.session_loading_more = false
 			this.resetToolLogs()
 			this.resetSkillLogs()
+		}
+
+		const has_selected_agent = this.agents.some(item => item.id === this.selected_agent_id)
+		const has_selected_group = this.groups.some(item => item.id === this.selected_group_id)
+
+		if (this.agents.length && !has_selected_agent) {
+			this.selected_agent_id = this.agents[0].id
+		}
+
+		if (this.groups.length && !has_selected_group) {
+			this.selected_group_id = this.groups[0].id
+		}
+
+		if (!this.groups.length && this.menu_scope === 'group') {
+			this.menu_scope = 'agent'
+		}
+
+		if (this.selected_agent_id) {
+			await Promise.all([
+				this.refreshAgentRelated(),
+				this.refreshSessions(),
+				this.refreshToolLogs(),
+				this.refreshSkillLogs()
+			])
+		}
+	}
+
+	async refreshGroups() {
+		const group_items = await rpc.group.query.query({})
+
+		this.groups = group_items as Array<GroupItem>
+
+		if (!this.groups.length) {
+			this.selected_group_id = ''
+
+			if (this.menu_scope === 'group') {
+				this.menu_scope = 'agent'
+			}
 
 			return
 		}
 
-		const has_selected_agent = this.agents.some(item => item.id === this.selected_agent_id)
-
-		if (!has_selected_agent) {
-			this.selected_agent_id = this.agents[0].id
+		if (!this.groups.some(item => item.id === this.selected_group_id)) {
+			this.selected_group_id = this.groups[0].id
 		}
-
-		await Promise.all([
-			this.refreshAgentRelated(),
-			this.refreshSessions(),
-			this.refreshToolLogs(),
-			this.refreshSkillLogs()
-		])
 	}
 
 	async refreshAgentRelated() {
@@ -416,10 +465,12 @@ export default class Index {
 	}
 
 	openAgentSessions(agent_id: string) {
+		this.menu_scope = 'agent'
 		this.selectAgent(agent_id, 'sessions')
 	}
 
 	openAgentDetail(agent_id: string) {
+		this.menu_scope = 'agent'
 		this.selectAgent(agent_id, 'detail')
 	}
 
@@ -458,6 +509,7 @@ export default class Index {
 	}
 
 	setPageMode(mode: AgentPageMode) {
+		this.menu_scope = 'agent'
 		this.page_mode = mode
 		this.edit_field_key = ''
 
@@ -468,6 +520,22 @@ export default class Index {
 
 	setSessionMenuOpen(open: boolean) {
 		this.session_menu_open = open
+	}
+
+	setMenuScope(scope: AgentMenuScope) {
+		this.menu_scope = scope
+
+		if (scope === 'group') {
+			if (!this.selected_group_id && this.groups[0]) {
+				this.selected_group_id = this.groups[0].id
+			}
+
+			return
+		}
+
+		if (!this.selected_agent_id && this.agents[0]) {
+			this.selected_agent_id = this.agents[0].id
+		}
 	}
 
 	toggleSessionMenu() {
@@ -497,6 +565,28 @@ export default class Index {
 
 	setSelectedSession(session_id: string) {
 		this.selected_session_id = session_id
+	}
+
+	async openGroup(group_id: string) {
+		this.menu_scope = 'group'
+		this.selected_group_id = group_id
+
+		const group_item = this.groups.find(item => item.id === group_id)
+
+		if (group_item?.session_ids?.length) {
+			return
+		}
+
+		const session = await rpc.group.createSession.mutate({
+			group_id,
+			title: group_item?.name
+		})
+
+		await this.refreshGroups()
+
+		if (session?.id && !this.selected_group_id) {
+			this.selected_group_id = group_id
+		}
 	}
 
 	onRenameSession(session_id: string, title: string) {
@@ -560,6 +650,54 @@ export default class Index {
 			}
 		} finally {
 			this.create_agent_loading = false
+		}
+	}
+
+	async createGroup(args: IGroupDialogSubmitArgs) {
+		if (this.create_group_loading) return null
+
+		this.create_group_loading = true
+
+		try {
+			const res = await rpc.group.create.mutate({
+				name: args.name,
+				description: args.description || undefined,
+				agent_ids: args.agent_ids
+			})
+
+			await this.refreshGroups()
+			this.menu_scope = 'group'
+			this.selected_group_id = res.group.id
+
+			return res.group
+		} finally {
+			this.create_group_loading = false
+		}
+	}
+
+	async updateGroup(args: IGroupDialogSubmitArgs) {
+		if (!args.id || this.update_group_loading) return null
+
+		this.update_group_loading = true
+
+		try {
+			await rpc.group.update.mutate({
+				id: args.id,
+				name: args.name,
+				description: args.description
+			})
+			await rpc.group.setAgents.mutate({
+				id: args.id,
+				agent_ids: args.agent_ids
+			})
+
+			await this.refreshGroups()
+			this.menu_scope = 'group'
+			this.selected_group_id = args.id
+
+			return this.groups.find(item => item.id === args.id) || null
+		} finally {
+			this.update_group_loading = false
 		}
 	}
 

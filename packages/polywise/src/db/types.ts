@@ -5,6 +5,8 @@ import {
 	document,
 	edge,
 	file,
+	group,
+	group_todo,
 	link,
 	message,
 	node,
@@ -33,6 +35,10 @@ export type Edge = InferSelectModel<typeof edge>
 export type EdgeInsert = InferInsertModel<typeof edge>
 export type File = InferSelectModel<typeof file>
 export type FileInsert = InferInsertModel<typeof file>
+export type Group = InferSelectModel<typeof group>
+export type GroupInsert = InferInsertModel<typeof group>
+export type GroupTodo = InferSelectModel<typeof group_todo>
+export type GroupTodoInsert = InferInsertModel<typeof group_todo>
 export type Message = InferSelectModel<typeof message>
 export type MessageInsert = InferInsertModel<typeof message>
 export type Node = InferSelectModel<typeof node>

@@ -2,6 +2,7 @@ import { r } from '../utils/trpc'
 import agent from './agent'
 import file from './file'
 import fullTextSearch from './fullTextSearch'
+import group from './group'
 import heartbeat from './heartbeat'
 import inspect from './inspect'
 import llama from './llama'
@@ -24,6 +25,7 @@ import type { inferRouterInputs, inferRouterOutputs } from '@trpc/server'
 
 export const router = r({
 	agent,
+	group,
 	file,
 	project,
 	skill,

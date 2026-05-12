@@ -68,7 +68,7 @@ export const createContentTool = (s: Session) => {
 					title: input.title,
 					content: input.content,
 					for: input.for,
-					scope_type: s.scope.type,
+					scope_type: s.scope.type === 'group' ? 'global' : s.scope.type,
 					scope_id: s.scope.id,
 					source: 'agent',
 					exec_pipeline: true
@@ -102,7 +102,7 @@ export const createContentTool = (s: Session) => {
 				intent: getSearchIntent(for_types),
 				type: 'article',
 				for_types,
-				scope_type: s.scope.type,
+				scope_type: s.scope.type === 'group' ? 'global' : s.scope.type,
 				scope_id: s.scope.id || undefined
 			})
 

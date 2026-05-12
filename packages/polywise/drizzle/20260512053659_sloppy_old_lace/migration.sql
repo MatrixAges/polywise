@@ -86,6 +86,37 @@ CREATE TABLE `file` (
 	`updated_at` integer
 );
 --> statement-breakpoint
+CREATE TABLE `group` (
+	`id` text PRIMARY KEY,
+	`name` text NOT NULL,
+	`description` text,
+	`created_at` integer,
+	`updated_at` integer
+);
+--> statement-breakpoint
+CREATE TABLE `group_todo` (
+	`id` text PRIMARY KEY,
+	`group_id` text NOT NULL,
+	`title` text NOT NULL,
+	`description` text,
+	`priority` text DEFAULT 'none',
+	`status` text DEFAULT 'backlog' NOT NULL,
+	`result` text,
+	`error` text,
+	`order` real NOT NULL,
+	`assignee_agent_id` text,
+	`started_by_agent_id` text,
+	`completed_by_agent_id` text,
+	`started_at` integer,
+	`finished_at` integer,
+	`created_at` integer,
+	`updated_at` integer,
+	CONSTRAINT `fk_group_todo_group_id_group_id_fk` FOREIGN KEY (`group_id`) REFERENCES `group`(`id`) ON DELETE CASCADE,
+	CONSTRAINT `fk_group_todo_assignee_agent_id_agent_id_fk` FOREIGN KEY (`assignee_agent_id`) REFERENCES `agent`(`id`) ON DELETE SET NULL,
+	CONSTRAINT `fk_group_todo_started_by_agent_id_agent_id_fk` FOREIGN KEY (`started_by_agent_id`) REFERENCES `agent`(`id`) ON DELETE SET NULL,
+	CONSTRAINT `fk_group_todo_completed_by_agent_id_agent_id_fk` FOREIGN KEY (`completed_by_agent_id`) REFERENCES `agent`(`id`) ON DELETE SET NULL
+);
+--> statement-breakpoint
 CREATE TABLE `link` (
 	`id` text PRIMARY KEY,
 	`url` text NOT NULL,
@@ -228,6 +259,25 @@ CREATE TABLE `agent_todo` (
 	CONSTRAINT `fk_agent_todo_todo_id_todo_id_fk` FOREIGN KEY (`todo_id`) REFERENCES `todo`(`id`) ON DELETE CASCADE
 );
 --> statement-breakpoint
+CREATE TABLE `group_agent` (
+	`group_id` text NOT NULL,
+	`agent_id` text NOT NULL,
+	`order` real NOT NULL,
+	`created_at` integer,
+	CONSTRAINT `group_agent_pk` PRIMARY KEY(`group_id`, `agent_id`),
+	CONSTRAINT `fk_group_agent_group_id_group_id_fk` FOREIGN KEY (`group_id`) REFERENCES `group`(`id`) ON DELETE CASCADE,
+	CONSTRAINT `fk_group_agent_agent_id_agent_id_fk` FOREIGN KEY (`agent_id`) REFERENCES `agent`(`id`) ON DELETE CASCADE
+);
+--> statement-breakpoint
+CREATE TABLE `group_session` (
+	`group_id` text NOT NULL,
+	`session_id` text NOT NULL,
+	`created_at` integer,
+	CONSTRAINT `group_session_pk` PRIMARY KEY(`group_id`, `session_id`),
+	CONSTRAINT `fk_group_session_group_id_group_id_fk` FOREIGN KEY (`group_id`) REFERENCES `group`(`id`) ON DELETE CASCADE,
+	CONSTRAINT `fk_group_session_session_id_session_id_fk` FOREIGN KEY (`session_id`) REFERENCES `session`(`id`) ON DELETE CASCADE
+);
+--> statement-breakpoint
 CREATE TABLE `link_article` (
 	`link_id` text NOT NULL,
 	`article_id` text NOT NULL,
@@ -331,6 +381,13 @@ CREATE UNIQUE INDEX `edge_source_target_idx` ON `edge` (`source_id`,`target_id`)
 CREATE INDEX `file_path_idx` ON `file` (`path`);--> statement-breakpoint
 CREATE INDEX `file_created_at_idx` ON `file` (`created_at`);--> statement-breakpoint
 CREATE INDEX `file_updated_at_idx` ON `file` (`updated_at`);--> statement-breakpoint
+CREATE INDEX `group_name_idx` ON `group` (`name`);--> statement-breakpoint
+CREATE INDEX `group_updated_at_idx` ON `group` (`updated_at`);--> statement-breakpoint
+CREATE INDEX `group_todo_group_idx` ON `group_todo` (`group_id`);--> statement-breakpoint
+CREATE INDEX `group_todo_status_idx` ON `group_todo` (`status`);--> statement-breakpoint
+CREATE INDEX `group_todo_order_idx` ON `group_todo` (`order`);--> statement-breakpoint
+CREATE INDEX `group_todo_assignee_idx` ON `group_todo` (`assignee_agent_id`);--> statement-breakpoint
+CREATE INDEX `group_todo_updated_at_idx` ON `group_todo` (`updated_at`);--> statement-breakpoint
 CREATE INDEX `link_status_idx` ON `link` (`status`);--> statement-breakpoint
 CREATE INDEX `link_generate_at_idx` ON `link` (`generate_at`);--> statement-breakpoint
 CREATE INDEX `link_created_at_idx` ON `link` (`created_at`);--> statement-breakpoint
@@ -367,6 +424,10 @@ CREATE INDEX `agent_session_session_id_idx` ON `agent_session` (`session_id`);--
 CREATE UNIQUE INDEX `agent_session_agent_session_idx` ON `agent_session` (`agent_id`,`session_id`);--> statement-breakpoint
 CREATE INDEX `agent_skill_id_idx` ON `agent_skill` (`skill_id`);--> statement-breakpoint
 CREATE INDEX `agent_todo_todo_id_idx` ON `agent_todo` (`todo_id`);--> statement-breakpoint
+CREATE INDEX `group_agent_group_idx` ON `group_agent` (`group_id`);--> statement-breakpoint
+CREATE INDEX `group_agent_agent_idx` ON `group_agent` (`agent_id`);--> statement-breakpoint
+CREATE INDEX `group_session_group_idx` ON `group_session` (`group_id`);--> statement-breakpoint
+CREATE UNIQUE INDEX `group_session_session_idx` ON `group_session` (`session_id`);--> statement-breakpoint
 CREATE INDEX `link_article_article_id_idx` ON `link_article` (`article_id`);--> statement-breakpoint
 CREATE INDEX `node_chunk_chunk_id_idx` ON `node_chunk` (`chunk_id`);--> statement-breakpoint
 CREATE INDEX `notification_session_session_id_idx` ON `notification_session` (`session_id`);--> statement-breakpoint

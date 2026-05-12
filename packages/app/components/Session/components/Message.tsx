@@ -336,6 +336,7 @@ const Index = (props: IPropsMessage) => {
 		() => formatMessageTime(getMessageTime(message)),
 		[message.createdAt, message.metadata?.timestamp]
 	)
+	const sender_name = message.metadata?.sender
 
 	const { source_urls, render_blocks } = useMemo(() => {
 		const source_urls = [] as Array<SourceUrlUIPart>
@@ -438,6 +439,17 @@ const Index = (props: IPropsMessage) => {
 	return (
 		<Message from={message.role}>
 			<MessageContent>
+				{sender_name && message.role === 'assistant' && (
+					<div
+						className='
+							mb-2
+							text-xsm text-std-500 font-medium tracking-[0.08em]
+							uppercase
+						'
+					>
+						{sender_name}
+					</div>
+				)}
 				{render_blocks.length ? (
 					<>
 						{has_final_output && process_blocks.length > 0 && (

@@ -1,7 +1,7 @@
 {
   "version": "7",
   "dialect": "sqlite",
-  "id": "6c526544-bb8a-4f1b-8c1d-307b0ce80e2e",
+  "id": "0f39827c-8cd5-40a4-b40a-5522682575e6",
   "prevIds": [
     "00000000-0000-0000-0000-000000000000"
   ],
@@ -28,6 +28,14 @@
     },
     {
       "name": "file",
+      "entityType": "tables"
+    },
+    {
+      "name": "group",
+      "entityType": "tables"
+    },
+    {
+      "name": "group_todo",
       "entityType": "tables"
     },
     {
@@ -80,6 +88,14 @@
     },
     {
       "name": "agent_todo",
+      "entityType": "tables"
+    },
+    {
+      "name": "group_agent",
+      "entityType": "tables"
+    },
+    {
+      "name": "group_session",
       "entityType": "tables"
     },
     {
@@ -770,6 +786,216 @@
       "name": "updated_at",
       "entityType": "columns",
       "table": "file"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "group"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "name",
+      "entityType": "columns",
+      "table": "group"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "description",
+      "entityType": "columns",
+      "table": "group"
+    },
+    {
+      "type": "integer",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "table": "group"
+    },
+    {
+      "type": "integer",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "table": "group"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "group_todo"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "group_id",
+      "entityType": "columns",
+      "table": "group_todo"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "title",
+      "entityType": "columns",
+      "table": "group_todo"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "description",
+      "entityType": "columns",
+      "table": "group_todo"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": "'none'",
+      "generated": null,
+      "name": "priority",
+      "entityType": "columns",
+      "table": "group_todo"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "'backlog'",
+      "generated": null,
+      "name": "status",
+      "entityType": "columns",
+      "table": "group_todo"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "result",
+      "entityType": "columns",
+      "table": "group_todo"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "error",
+      "entityType": "columns",
+      "table": "group_todo"
+    },
+    {
+      "type": "real",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "order",
+      "entityType": "columns",
+      "table": "group_todo"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "assignee_agent_id",
+      "entityType": "columns",
+      "table": "group_todo"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "started_by_agent_id",
+      "entityType": "columns",
+      "table": "group_todo"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "completed_by_agent_id",
+      "entityType": "columns",
+      "table": "group_todo"
+    },
+    {
+      "type": "integer",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "started_at",
+      "entityType": "columns",
+      "table": "group_todo"
+    },
+    {
+      "type": "integer",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "finished_at",
+      "entityType": "columns",
+      "table": "group_todo"
+    },
+    {
+      "type": "integer",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "table": "group_todo"
+    },
+    {
+      "type": "integer",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "table": "group_todo"
     },
     {
       "type": "text",
@@ -1637,6 +1863,76 @@
       "autoincrement": false,
       "default": null,
       "generated": null,
+      "name": "group_id",
+      "entityType": "columns",
+      "table": "group_agent"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "agent_id",
+      "entityType": "columns",
+      "table": "group_agent"
+    },
+    {
+      "type": "real",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "order",
+      "entityType": "columns",
+      "table": "group_agent"
+    },
+    {
+      "type": "integer",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "table": "group_agent"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "group_id",
+      "entityType": "columns",
+      "table": "group_session"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "session_id",
+      "entityType": "columns",
+      "table": "group_session"
+    },
+    {
+      "type": "integer",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "table": "group_session"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
       "name": "link_id",
       "entityType": "columns",
       "table": "link_article"
@@ -1988,6 +2284,66 @@
     },
     {
       "columns": [
+        "group_id"
+      ],
+      "tableTo": "group",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "nameExplicit": false,
+      "name": "fk_group_todo_group_id_group_id_fk",
+      "entityType": "fks",
+      "table": "group_todo"
+    },
+    {
+      "columns": [
+        "assignee_agent_id"
+      ],
+      "tableTo": "agent",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "SET NULL",
+      "nameExplicit": false,
+      "name": "fk_group_todo_assignee_agent_id_agent_id_fk",
+      "entityType": "fks",
+      "table": "group_todo"
+    },
+    {
+      "columns": [
+        "started_by_agent_id"
+      ],
+      "tableTo": "agent",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "SET NULL",
+      "nameExplicit": false,
+      "name": "fk_group_todo_started_by_agent_id_agent_id_fk",
+      "entityType": "fks",
+      "table": "group_todo"
+    },
+    {
+      "columns": [
+        "completed_by_agent_id"
+      ],
+      "tableTo": "agent",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "SET NULL",
+      "nameExplicit": false,
+      "name": "fk_group_todo_completed_by_agent_id_agent_id_fk",
+      "entityType": "fks",
+      "table": "group_todo"
+    },
+    {
+      "columns": [
         "session_id"
       ],
       "tableTo": "session",
@@ -2165,6 +2521,66 @@
       "name": "fk_agent_todo_todo_id_todo_id_fk",
       "entityType": "fks",
       "table": "agent_todo"
+    },
+    {
+      "columns": [
+        "group_id"
+      ],
+      "tableTo": "group",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "nameExplicit": false,
+      "name": "fk_group_agent_group_id_group_id_fk",
+      "entityType": "fks",
+      "table": "group_agent"
+    },
+    {
+      "columns": [
+        "agent_id"
+      ],
+      "tableTo": "agent",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "nameExplicit": false,
+      "name": "fk_group_agent_agent_id_agent_id_fk",
+      "entityType": "fks",
+      "table": "group_agent"
+    },
+    {
+      "columns": [
+        "group_id"
+      ],
+      "tableTo": "group",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "nameExplicit": false,
+      "name": "fk_group_session_group_id_group_id_fk",
+      "entityType": "fks",
+      "table": "group_session"
+    },
+    {
+      "columns": [
+        "session_id"
+      ],
+      "tableTo": "session",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "nameExplicit": false,
+      "name": "fk_group_session_session_id_session_id_fk",
+      "entityType": "fks",
+      "table": "group_session"
     },
     {
       "columns": [
@@ -2463,6 +2879,26 @@
     },
     {
       "columns": [
+        "group_id",
+        "agent_id"
+      ],
+      "nameExplicit": false,
+      "name": "group_agent_pk",
+      "entityType": "pks",
+      "table": "group_agent"
+    },
+    {
+      "columns": [
+        "group_id",
+        "session_id"
+      ],
+      "nameExplicit": false,
+      "name": "group_session_pk",
+      "entityType": "pks",
+      "table": "group_session"
+    },
+    {
+      "columns": [
         "link_id",
         "article_id"
       ],
@@ -2583,6 +3019,24 @@
       "nameExplicit": false,
       "name": "file_pk",
       "table": "file",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "group_pk",
+      "table": "group",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "group_todo_pk",
+      "table": "group_todo",
       "entityType": "pks"
     },
     {
@@ -3027,6 +3481,104 @@
       "name": "file_updated_at_idx",
       "entityType": "indexes",
       "table": "file"
+    },
+    {
+      "columns": [
+        {
+          "value": "name",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "group_name_idx",
+      "entityType": "indexes",
+      "table": "group"
+    },
+    {
+      "columns": [
+        {
+          "value": "updated_at",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "group_updated_at_idx",
+      "entityType": "indexes",
+      "table": "group"
+    },
+    {
+      "columns": [
+        {
+          "value": "group_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "group_todo_group_idx",
+      "entityType": "indexes",
+      "table": "group_todo"
+    },
+    {
+      "columns": [
+        {
+          "value": "status",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "group_todo_status_idx",
+      "entityType": "indexes",
+      "table": "group_todo"
+    },
+    {
+      "columns": [
+        {
+          "value": "order",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "group_todo_order_idx",
+      "entityType": "indexes",
+      "table": "group_todo"
+    },
+    {
+      "columns": [
+        {
+          "value": "assignee_agent_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "group_todo_assignee_idx",
+      "entityType": "indexes",
+      "table": "group_todo"
+    },
+    {
+      "columns": [
+        {
+          "value": "updated_at",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "group_todo_updated_at_idx",
+      "entityType": "indexes",
+      "table": "group_todo"
     },
     {
       "columns": [
@@ -3535,6 +4087,62 @@
       "name": "agent_todo_todo_id_idx",
       "entityType": "indexes",
       "table": "agent_todo"
+    },
+    {
+      "columns": [
+        {
+          "value": "group_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "group_agent_group_idx",
+      "entityType": "indexes",
+      "table": "group_agent"
+    },
+    {
+      "columns": [
+        {
+          "value": "agent_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "group_agent_agent_idx",
+      "entityType": "indexes",
+      "table": "group_agent"
+    },
+    {
+      "columns": [
+        {
+          "value": "group_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "group_session_group_idx",
+      "entityType": "indexes",
+      "table": "group_session"
+    },
+    {
+      "columns": [
+        {
+          "value": "session_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "origin": "manual",
+      "name": "group_session_session_idx",
+      "entityType": "indexes",
+      "table": "group_session"
     },
     {
       "columns": [

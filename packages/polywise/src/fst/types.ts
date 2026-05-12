@@ -23,8 +23,14 @@ export interface MessageDataParts extends UIDataTypes {
 }
 
 export interface MessageMetadata {
-	usage: LanguageModelUsage
+	usage?: LanguageModelUsage
 	timestamp: number
+	sender?: string
+	sender_id?: string
+	group_id?: string
+	group_name?: string
+	group_turn_id?: string
+	leadership?: 'none' | 'advisory' | 'blocking'
 }
 
 export type Message = UIMessage<MessageMetadata, MessageDataParts, UITools> & { createdAt?: Date }
@@ -68,7 +74,7 @@ export interface CustomToolMeta {
 }
 
 export interface SessionScope {
-	type: 'global' | 'project' | 'agent'
+	type: 'global' | 'project' | 'agent' | 'group'
 	id: string | null
 }
 
@@ -85,5 +91,10 @@ export type ChatEventRes = {
 		has_newer: boolean
 		permission: Permission | null
 		mode: SessionMode
+		group?: {
+			id: string
+			name: string
+			description: string | null
+		}
 	}
 }

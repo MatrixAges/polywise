@@ -4,18 +4,37 @@ import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { PanelLeftOpen, Plus, Sparkles } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
+import { Tabs, TabsList, TabsTrigger } from '@/__shadcn__/components/ui/tabs'
+
 import { useModel } from '../context'
 import CreateDialog from './CreateDialog'
+import GroupDialog from './GroupDialog'
+import GroupMenuItem from './GroupMenuItem'
 import MenuItem from './MenuItem'
 import { SkillDialog } from './Skill'
 
 import type { DragEndEvent } from '@dnd-kit/core'
 
 const Index = () => {
-	const { agents, page_mode, selected_agent_id, session_menu_open, setSessionMenuOpen, sortAgent } = useModel()
+	const {
+		agents,
+		groups,
+		menu_scope,
+		page_mode,
+		selected_agent_id,
+		selected_group_id,
+		session_menu_open,
+		setMenuScope,
+		setSessionMenuOpen,
+		sortAgent,
+		openGroup
+	} = useModel()
 	const [create_dialog_open, setCreateDialogOpen] = useState(false)
+	const [group_dialog_open, setGroupDialogOpen] = useState(false)
+	const [editing_group_id, setEditingGroupId] = useState('')
 	const [skill_dialog_open, setSkillDialogOpen] = useState(false)
 	const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }))
+	const editing_group = groups.find(item => item.id === editing_group_id) || null
 
 	const onDragEnd = (args: DragEndEvent) => {
 		const { active, over } = args
@@ -49,13 +68,26 @@ const Index = () => {
 					className='
 						flex
 						items-center justify-between
-						h-9
-						px-3
+						h-11
+						px-2
 					'
 				>
-					<span className='text-xsm text-std-500 gap-2 font-medium'>Agents</span>
+					<Tabs
+						value={menu_scope}
+						onValueChange={value => setMenuScope(value as 'agent' | 'group')}
+						className='gap-0'
+					>
+						<TabsList variant='line' className='gap-0 p-0'>
+							<TabsTrigger className='text-xsm px-2 py-1' value='agent'>
+								Agents
+							</TabsTrigger>
+							<TabsTrigger className='text-xsm px-2 py-1' value='group'>
+								Groups
+							</TabsTrigger>
+						</TabsList>
+					</Tabs>
 					<div className='-mr-1 flex gap-1'>
-						{page_mode === 'sessions' && !session_menu_open && (
+						{menu_scope === 'agent' && page_mode === 'sessions' && !session_menu_open && (
 							<button
 								className='icon_button small'
 								type='button'
@@ -64,17 +96,27 @@ const Index = () => {
 								<PanelLeftOpen className='size-3.5'></PanelLeftOpen>
 							</button>
 						)}
+						{menu_scope === 'agent' && (
+							<button
+								className='icon_button small'
+								type='button'
+								onClick={() => setSkillDialogOpen(true)}
+							>
+								<Sparkles className='size-3'></Sparkles>
+							</button>
+						)}
 						<button
 							className='icon_button small'
 							type='button'
-							onClick={() => setSkillDialogOpen(true)}
-						>
-							<Sparkles className='size-3'></Sparkles>
-						</button>
-						<button
-							className='icon_button small'
-							type='button'
-							onClick={() => setCreateDialogOpen(true)}
+							onClick={() => {
+								if (menu_scope === 'group') {
+									setEditingGroupId('')
+									setGroupDialogOpen(true)
+									return
+								}
+
+								setCreateDialogOpen(true)
+							}}
 						>
 							<Plus className='size-3.5'></Plus>
 						</button>
@@ -90,23 +132,56 @@ const Index = () => {
 						'
 					>
 						<DndContext sensors={sensors} onDragEnd={onDragEnd}>
-							<SortableContext
-								items={agents.map(item => item.id)}
-								strategy={verticalListSortingStrategy}
-							>
-								{agents.map(item => (
-									<MenuItem
-										item={item}
-										selected={selected_agent_id === item.id}
-										key={item.id}
-									></MenuItem>
-								))}
-							</SortableContext>
+							{menu_scope === 'agent' ? (
+								<SortableContext
+									items={agents.map(item => item.id)}
+									strategy={verticalListSortingStrategy}
+								>
+									{agents.map(item => (
+										<MenuItem
+											item={item}
+											selected={selected_agent_id === item.id}
+											key={item.id}
+										></MenuItem>
+									))}
+								</SortableContext>
+							) : (
+								<div className='flex flex-col gap-0.5'>
+									{groups.map(item => (
+										<GroupMenuItem
+											item={item}
+											selected={selected_group_id === item.id}
+											key={item.id}
+											onClick={() => void openGroup(item.id)}
+											onEdit={() => {
+												setEditingGroupId(item.id)
+												setGroupDialogOpen(true)
+											}}
+										></GroupMenuItem>
+									))}
+									{!groups.length && (
+										<div className='text-std-400 px-3 py-4 text-sm'>
+											No groups yet.
+										</div>
+									)}
+								</div>
+							)}
 						</DndContext>
 					</div>
 				</div>
 			</div>
 			<CreateDialog open={create_dialog_open} onOpenChange={setCreateDialogOpen}></CreateDialog>
+			<GroupDialog
+				open={group_dialog_open}
+				group={editing_group}
+				onOpenChange={open => {
+					setGroupDialogOpen(open)
+
+					if (!open) {
+						setEditingGroupId('')
+					}
+				}}
+			></GroupDialog>
 			<SkillDialog open={skill_dialog_open} onOpenChange={setSkillDialogOpen}></SkillDialog>
 		</>
 	)

@@ -1,0 +1,141 @@
+import path from 'path'
+import { app } from '@core/consts'
+import { group, group_session } from '@core/db/schema'
+import { getGroup, getSessionGroup } from '@core/db/services'
+import { eq } from 'drizzle-orm'
+import fs from 'fs-extra'
+
+import Session from '../session'
+import getContext from './context/getContext'
+import setContext from './context/setContext'
+import getAgents from './related/getAgents'
+import getData from './related/getData'
+import getState from './state/getState'
+import setState from './state/setState'
+import getStream from './stream/getStream'
+import clearTasks from './task/clearTasks'
+import getTasks from './task/getTasks'
+import setTasks from './task/setTasks'
+
+import type { Group as GroupRow } from '@core/db'
+import type { InitArgs } from '../types'
+import type { GroupBarrierState, GroupContext, GroupInitArgs, GroupWriteLock } from './types'
+
+export default class Group extends Session {
+	group_id = ''
+	group = null as unknown as GroupRow
+	active_turn_id = null as string | null
+	write_lock = {
+		agent_id: null,
+		agent_name: null,
+		acquired_at: null,
+		reason: null
+	} as GroupWriteLock
+	barrier = null as GroupBarrierState | null
+	context = {} as GroupContext
+
+	override get scope() {
+		return { type: 'group' as const, id: this.group_id }
+	}
+
+	get group_dir() {
+		return path.resolve(`${app.app_path}/groups/${this.group_id}`)
+	}
+
+	override get context_dir() {
+		return path.resolve(`${this.group_dir}/context.json`)
+	}
+
+	override get state_dir() {
+		return path.resolve(`${this.group_dir}/state.json`)
+	}
+
+	override get context_history_dir() {
+		return path.resolve(`${this.group_dir}/context_history`)
+	}
+
+	override get has_todo_session_link() {
+		return Promise.resolve(false)
+	}
+
+	async init(args: InitArgs & GroupInitArgs) {
+		const { id, event, is_cron, title, group_id } = args
+
+		this.id = id
+		this.event = event
+
+		if (group_id) {
+			this.group_id = group_id
+		} else {
+			const relation = await getSessionGroup(eq(group_session.session_id, id))
+
+			if (!relation) {
+				throw new Error(`Group session relation not found for session ${id}`)
+			}
+
+			this.group_id = relation.group.id
+		}
+
+		const target_group = await getGroup(eq(group.id, this.group_id))
+
+		if (!target_group) {
+			throw new Error(`Group ${this.group_id} not found`)
+		}
+
+		this.group = target_group
+
+		await fs.ensureDir(this.group_dir)
+		await fs.ensureDir(this.context_history_dir)
+		await fs.ensureDir(this.session_dir)
+		await fs.ensureDir(this.files_dir)
+
+		await this.initSession(is_cron, title || target_group.name)
+		await this.getAgents()
+		await this.loadSkillMap()
+		await this.loadCustomToolsMap()
+
+		return this.getData()
+	}
+
+	override getData = () => getData(this)
+	override getAgents = () => getAgents(this)
+	override getOwnerAgent = async () => {
+		this.owner_agent = null
+	}
+
+	override getContext = () => getContext(this)
+	override setContext = (
+		v: Partial<GroupContext>,
+		args?: { agent_id?: string; agent_name?: string; turn_id?: string | null }
+	) => setContext(this, v, args)
+	override getTasks = () => getTasks(this)
+	override setTasks = (v: GroupContext['tasks'], args?: { agent_id?: string; agent_name?: string }) =>
+		setTasks(this, v, args)
+	override clearTasks = () => clearTasks(this)
+
+	override getState = () => getState(this)
+	override setState = () => setState(this)
+
+	override getStream = (message: Parameters<typeof getStream>[1]) => getStream(this, message)
+
+	override sync = () => {
+		this.event.emit(`${this.id}/change`, {
+			type: 'sync',
+			data: {
+				session: this.session,
+				messages: this.ui_messages,
+				context: this.context,
+				archived_at: this.archived_at,
+				has_older: this.ui_has_older,
+				has_newer: this.ui_has_newer,
+				permission: this.permission,
+				mode: this.mode,
+				group: {
+					id: this.group.id,
+					name: this.group.name,
+					description: this.group.description ?? null
+				}
+			}
+		})
+	}
+}

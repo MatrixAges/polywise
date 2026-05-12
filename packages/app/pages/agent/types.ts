@@ -5,6 +5,7 @@ import type { AvatarConfig as NiceAvatarConfig } from 'react-nice-avatar'
 import type { AvatarConfig as NotionAvatarConfig } from 'react-notion-avatar'
 
 export type AgentItem = RPCOutput['agent']['query'][number]
+export type GroupItem = RPCOutput['group']['query'][number]
 export type AgentSessionResponse = RPCOutput['agent']['getSessions']
 export type AgentSessionItem = AgentSessionResponse['sessions'][number]
 export type AgentSkillItem = RPCOutput['agent']['getSkills'][number]
@@ -16,6 +17,7 @@ export type AgentToolItem = RPCOutput['tool']['query'][number]
 export type AgentToolLogResponse = RPCOutput['agent']['getToolLogs']
 export type AgentToolLogItem = AgentToolLogResponse['items'][number]
 export type AgentPageMode = 'sessions' | 'detail'
+export type AgentMenuScope = 'agent' | 'group'
 export type AgentTab =
 	| 'sessions'
 	| 'info'
@@ -94,4 +96,11 @@ export interface IUpdateAgentArgs {
 	model?: DefaultModel
 	photo?: Uint8Array | null
 	avatar?: AgentAvatarConfig | null
+}
+
+export interface IGroupDialogSubmitArgs {
+	id?: string
+	name: string
+	description: string
+	agent_ids: Array<string>
 }
