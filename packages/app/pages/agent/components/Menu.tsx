@@ -1,57 +1,23 @@
 import { useState } from 'react'
-import { DndContext, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
-import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { Bot, MessagesSquare, PanelLeftOpen, Plus, Sparkles } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { Tabs } from '@/components'
 
 import { useModel } from '../context'
+import AgentsMenu from './AgentsMenu'
 import CreateDialog from './CreateDialog'
 import GroupDialog from './GroupDialog'
-import GroupMenuItem from './GroupMenuItem'
-import MenuItem from './MenuItem'
+import GroupsMenu from './GroupsMenu'
 import { SkillDialog } from './Skill'
 
-import type { DragEndEvent } from '@dnd-kit/core'
-
 const Index = () => {
-	const {
-		agents,
-		groups,
-		menu_scope,
-		page_mode,
-		selected_agent_id,
-		selected_group_id,
-		session_menu_open,
-		setMenuScope,
-		setSessionMenuOpen,
-		sortAgent,
-		openGroup
-	} = useModel()
+	const { groups, menu_scope, page_mode, session_menu_open, setMenuScope, setSessionMenuOpen } = useModel()
 	const [create_dialog_open, setCreateDialogOpen] = useState(false)
 	const [group_dialog_open, setGroupDialogOpen] = useState(false)
 	const [editing_group_id, setEditingGroupId] = useState('')
 	const [skill_dialog_open, setSkillDialogOpen] = useState(false)
-	const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }))
 	const editing_group = groups.find(item => item.id === editing_group_id) || null
-
-	const onDragEnd = (args: DragEndEvent) => {
-		const { active, over } = args
-
-		if (!over?.id || active.id === over.id) {
-			return
-		}
-
-		const from = agents.findIndex(item => item.id === active.id)
-		const to = agents.findIndex(item => item.id === over.id)
-
-		if (from < 0 || to < 0) {
-			return
-		}
-
-		sortAgent(from, to)
-	}
 
 	return (
 		<>
@@ -90,7 +56,7 @@ const Index = () => {
 								type='button'
 								onClick={() => setSessionMenuOpen(true)}
 							>
-								<PanelLeftOpen className='size-3.5'></PanelLeftOpen>
+								<PanelLeftOpen className='size-3'></PanelLeftOpen>
 							</button>
 						)}
 						{menu_scope === 'agent' && (
@@ -128,42 +94,16 @@ const Index = () => {
 							p-1.5 pt-0
 						'
 					>
-						<DndContext sensors={sensors} onDragEnd={onDragEnd}>
-							{menu_scope === 'agent' ? (
-								<SortableContext
-									items={agents.map(item => item.id)}
-									strategy={verticalListSortingStrategy}
-								>
-									{agents.map(item => (
-										<MenuItem
-											item={item}
-											selected={selected_agent_id === item.id}
-											key={item.id}
-										></MenuItem>
-									))}
-								</SortableContext>
-							) : (
-								<div className='flex flex-col gap-0.5'>
-									{groups.map(item => (
-										<GroupMenuItem
-											item={item}
-											selected={selected_group_id === item.id}
-											key={item.id}
-											onClick={() => void openGroup(item.id)}
-											onEdit={() => {
-												setEditingGroupId(item.id)
-												setGroupDialogOpen(true)
-											}}
-										></GroupMenuItem>
-									))}
-									{!groups.length && (
-										<div className='text-std-400 px-3 py-4 text-sm'>
-											No groups yet.
-										</div>
-									)}
-								</div>
-							)}
-						</DndContext>
+						{menu_scope === 'agent' ? (
+							<AgentsMenu></AgentsMenu>
+						) : (
+							<GroupsMenu
+								onEditGroup={id => {
+									setEditingGroupId(id)
+									setGroupDialogOpen(true)
+								}}
+							></GroupsMenu>
+						)}
 					</div>
 				</div>
 			</div>
