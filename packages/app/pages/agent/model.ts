@@ -84,6 +84,7 @@ export default class Index {
 	session_loading = false
 	session_loading_more = false
 	session_initialized = false
+	session_status_map = {} as SessionStatusPayload
 	create_dialog_open = false
 	create_agent_mode = 'auto' as AgentCreateMode
 	create_agent_purpose = ''
@@ -124,6 +125,12 @@ export default class Index {
 
 	get selected_group_session_id() {
 		return this.selected_group?.session_ids?.[0] || ''
+	}
+
+	get selected_group_session_status() {
+		return this.selected_group_session_id
+			? (this.session_status_map[this.selected_group_session_id] ?? null)
+			: null
 	}
 
 	get selected_skill_ids() {
@@ -192,6 +199,7 @@ export default class Index {
 		}
 
 		await this.refresh()
+		await this.hydrateSessionStatusMap()
 		this.watchSessionStatus()
 	}
 
@@ -1289,6 +1297,27 @@ export default class Index {
 		})
 	}
 
+	async hydrateSessionStatusMap() {
+		const running_list = (await rpc.session.getStatusList.query({
+			status: 'running'
+		})) as Array<AgentSessionItem>
+		const next_map = {} as SessionStatusPayload
+
+		running_list.forEach(item => {
+			next_map[item.id] = {
+				title: item.title,
+				report: item.report ?? null,
+				running: item.is_runing,
+				unread: item.unread ?? false,
+				running_since: item.running_since ? new Date(item.running_since).getTime() : null,
+				running_done: item.running_done ? new Date(item.running_done).getTime() : null,
+				status: null
+			}
+		})
+
+		this.session_status_map = next_map
+	}
+
 	watchSessionStatus() {
 		const deinit = rpc.session.watchSessionStatus.subscribe(undefined, {
 			onData: res => {
@@ -1296,6 +1325,10 @@ export default class Index {
 					return
 				}
 
+				this.session_status_map = {
+					...this.session_status_map,
+					...res
+				}
 				this.pins = this.patchSessionList(this.pins, res)
 				this.session_items = this.patchSessionList(this.session_items, res)
 			}

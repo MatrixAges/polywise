@@ -13,19 +13,35 @@ import Model from './model'
 import type { ReactNode } from 'react'
 import type { IPropsInput } from './types'
 
+export interface SessionSyncStateHookArgs {
+	id: string
+	chat_streaming: boolean
+}
+
+export interface SessionSyncStateHookResult {
+	group_streaming?: boolean
+}
+
+const use_empty_sync_state = (_args: SessionSyncStateHookArgs) => undefined as SessionSyncStateHookResult | undefined
+
 export interface IProps {
 	type: 'dialog' | 'page' | 'global'
 	id: string
 	input?: string
 	actions?: ReactNode
 	create?: (input: string) => void
+	group_streaming?: boolean
+	useSyncState?: (args: SessionSyncStateHookArgs) => SessionSyncStateHookResult | undefined
 }
 
 const Index = (props: IProps) => {
-	const { type, id, input, actions, create } = props
+	const { type, id, input, actions, create, group_streaming, useSyncState = use_empty_sync_state } = props
 	const [x] = useState(() => container.resolve(Model))
 
-	const streaming = x.status === 'streaming' || x.status === 'submitted'
+	const chat_streaming = x.status === 'streaming' || x.status === 'submitted'
+	const sync_state = useSyncState({ id, chat_streaming })
+	const controlled_group_streaming = sync_state?.group_streaming ?? group_streaming
+	const input_streaming = controlled_group_streaming ?? chat_streaming
 	const last_message = x.messages.at(-1)
 	const is_page = type === 'page' || type === 'dialog'
 
@@ -42,7 +58,7 @@ const Index = (props: IProps) => {
 
 	const props_input: IPropsInput = {
 		type,
-		streaming,
+		streaming: input_streaming,
 		archived: x.archived_at !== null,
 		mode: x.mode,
 		send: useMemoizedFn((v: string) => {
@@ -61,7 +77,10 @@ const Index = (props: IProps) => {
 		toggleContextModal
 	}
 
-	const show_loading = useMemo(() => streaming && last_message?.role === 'user', [streaming, last_message])
+	const show_loading = useMemo(
+		() => input_streaming && last_message?.role === 'user',
+		[input_streaming, last_message]
+	)
 	const empty = x.messages.length === 0
 
 	return (
@@ -144,8 +163,8 @@ const Index = (props: IProps) => {
 						>
 							{x.messages.map((message, index) => (
 								<Message
-									streaming={index === x.messages.length - 1 && streaming}
-									is_streaming={streaming}
+									streaming={index === x.messages.length - 1 && chat_streaming}
+									is_streaming={chat_streaming}
 									message={message}
 									answer={x.answer}
 									group_agents={x.group_agents}

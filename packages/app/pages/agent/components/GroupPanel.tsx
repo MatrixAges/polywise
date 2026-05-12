@@ -7,8 +7,24 @@ import { Session } from '@/components'
 import { useModel } from '../context'
 import GroupAvatar from './GroupAvatar'
 
+import type { SessionSyncStateHookArgs, SessionSyncStateHookResult } from '@/components/Session'
+
+const useGroupSyncState = (_args: SessionSyncStateHookArgs): SessionSyncStateHookResult => {
+	const { selected_group_session_status } = useModel()
+
+	return {
+		group_streaming: selected_group_session_status?.running
+	}
+}
+
 const Index = () => {
-	const { selected_group, selected_group_session_id, openGroup, openEditGroupDialog } = useModel()
+	const {
+		selected_group,
+		selected_group_session_id,
+		selected_group_session_status,
+		openGroup,
+		openEditGroupDialog
+	} = useModel()
 
 	useEffect(() => {
 		if (selected_group && !selected_group_session_id) {
@@ -38,7 +54,14 @@ const Index = () => {
 				min-w-0
 			'
 		>
-			{selected_group_session_id && <Session type='dialog' id={selected_group_session_id}></Session>}
+			{selected_group_session_id && (
+				<Session
+					type='dialog'
+					id={selected_group_session_id}
+					group_streaming={selected_group_session_status?.running}
+					useSyncState={useGroupSyncState}
+				></Session>
+			)}
 		</div>
 	)
 }
