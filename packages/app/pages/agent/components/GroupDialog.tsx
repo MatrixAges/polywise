@@ -76,8 +76,8 @@ const Index = () => {
 						<div
 							className='
 								overflow-y-auto
-								flex flex-wrap
-								max-h-[260px]
+								grid grid-cols-4
+								max-h-[300px]
 								gap-2
 								p-2
 								rounded-md
@@ -91,12 +91,13 @@ const Index = () => {
 									<button
 										className={$cx(
 											`
-										flex
-										items-center
-										gap-2
-										px-3 py-2.5
+										flex flex-col
+										items-center justify-start
+										gap-3
+										px-3 pt-4
+										pb-3
 										rounded-md
-										text-left
+										text-center
 										border border-border-light
 										transition-colors
 									`,
@@ -108,14 +109,21 @@ const Index = () => {
 									>
 										<AgentAvatar
 											item={agent}
-											size={28}
+											size={48}
 											clickable={false}
 										></AgentAvatar>
-										<div className='min-w-0 flex-1'>
+										<div
+											className='
+											flex flex-col
+											w-full
+											min-w-0
+											gap-1
+										'
+										>
 											<div className='truncate text-sm font-medium'>
 												{agent.name}
 											</div>
-											<div className='text-std-400 truncate text-xs'>
+											<div className='text-std-400 line-clamp-3 text-xs'>
 												{agent.description || 'No description'}
 											</div>
 										</div>
@@ -123,7 +131,13 @@ const Index = () => {
 								)
 							})}
 							{!agents.length && (
-								<div className='text-std-400 px-2 py-4 text-sm'>
+								<div
+									className='
+										col-span-3
+										px-2 py-4
+										text-std-400 text-sm
+									'
+								>
 									Create agents first.
 								</div>
 							)}
