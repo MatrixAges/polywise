@@ -51,7 +51,7 @@ import {
 } from '../../utils'
 
 import type { ToolSet, UIMessageChunk } from 'ai'
-import type { Message, MessageDataParts, MessageMetadata } from '../../types'
+import type { Message, MessageDataParts, MessageMetadata, MessagePartDurationUIPart } from '../../types'
 import type Index from '../index'
 
 const model_threshold_value = 12
@@ -202,6 +202,7 @@ export default async (s: Index, message: Message) => {
 	})
 	await s.runing(true)
 	s.sync()
+	const duration_parts = [] as Array<MessagePartDurationUIPart>
 
 	return createUIMessageStream({
 		originalMessages: [message],
@@ -241,6 +242,7 @@ export default async (s: Index, message: Message) => {
 				const duration_chunk = getPartDurationChunk(chunk, tracker)
 
 				if (duration_chunk) {
+					duration_parts.push(duration_chunk)
 					writer.write(duration_chunk)
 				}
 			}
@@ -252,6 +254,10 @@ export default async (s: Index, message: Message) => {
 		onFinish: async ({ responseMessage }) => {
 			const was_running = s.session.is_runing
 			const timestamp = Date.now()
+
+			if (duration_parts.length > 0) {
+				responseMessage.parts = [...responseMessage.parts, ...duration_parts]
+			}
 
 			responseMessage.metadata = {
 				...(responseMessage.metadata ?? {}),

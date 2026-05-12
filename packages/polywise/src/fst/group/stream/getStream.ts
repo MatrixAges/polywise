@@ -34,10 +34,9 @@ export default async (s: Group, message: Message) => {
 	const base_messages = await convertToModelMessages(s.model_messages)
 	const evaluations = await Promise.all(s.agents.map(agent => evaluateMember(s, agent, base_messages)))
 	const selected = evaluations.filter(item => item.should_answer)
-	const effective_selected = selected.length ? selected : evaluations.slice(0, 1)
-	const leader = effective_selected.find(item => item.leadership === 'blocking') ?? null
-	const first_wave = leader ? [leader] : effective_selected
-	const second_wave = leader ? effective_selected.filter(item => item.agent.id !== leader.agent.id) : []
+	const leader = selected.find(item => item.leadership === 'blocking') ?? null
+	const first_wave = leader ? [leader] : selected
+	const second_wave = leader ? selected.filter(item => item.agent.id !== leader.agent.id) : []
 
 	if (leader) {
 		await setBarrier(s, {
@@ -55,7 +54,7 @@ export default async (s: Group, message: Message) => {
 		originalMessages: [message],
 		generateId: getId,
 		execute: async ({ writer }) => {
-			const runWave = async (items: typeof effective_selected) => {
+			const runWave = async (items: typeof selected) => {
 				for (const item of items) {
 					// AI SDK chat processing assumes a single active assistant stream.
 					// Interleaving multiple member streams in one response can scramble

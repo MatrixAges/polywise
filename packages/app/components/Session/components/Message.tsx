@@ -531,7 +531,7 @@ const Index = (props: IPropsMessage) => {
 				)}
 				{render_blocks.length ? (
 					<>
-						{has_final_output && process_blocks.length > 0 && (
+						{has_final_output && process_blocks.length > 0 && process_duration > 0 && (
 							<ProcessSummaryBlock duration={process_duration}>
 								{process_blocks.map((block, index) =>
 									renderBlock(block, index, process_blocks.length)

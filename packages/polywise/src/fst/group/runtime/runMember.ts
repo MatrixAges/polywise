@@ -22,12 +22,13 @@ import { getId } from 'stk/utils'
 
 import { sanitizeToolSet, wrapToolSetWithAgentLogging } from '../../utils'
 import { createGroupCoordinationTool } from '../tools/coordination'
+import { createGroupMemberTool } from '../tools/member'
 import { createGroupProgressTool } from '../tools/progress'
 import getAgentModel from './getAgentModel'
 
 import type { Agent } from '@core/db'
 import type { ModelMessage, ToolSet, UIMessageChunk } from 'ai'
-import type { Message, MessageDataParts, MessageMetadata } from '../../types'
+import type { Message, MessageDataParts, MessageMetadata, MessagePartDurationUIPart } from '../../types'
 import type Group from '../index'
 import type { GroupMemberEvaluation } from '../types'
 
@@ -94,6 +95,7 @@ export default async (args: {
 			...model.tools,
 			group_progress_tool: createGroupProgressTool(s, agent),
 			group_coordination_tool: createGroupCoordinationTool(s, agent),
+			group_member_tool: createGroupMemberTool(s, agent),
 			meta_tool: createMetaTool(s),
 			glob_tool: createGlobTool(s),
 			search_file_tool: createSearchFileTool(s, bash_tool.env),
@@ -131,6 +133,7 @@ export default async (args: {
 		evaluation.needs_write_lock
 			? 'Your work is expected to need shared writes. Acquire the group write lock before any write-capable tool use.'
 			: 'Only acquire the group write lock if you truly need shared writes.',
+		'Only your own profile is preloaded. Use group_member_tool to inspect specific members on demand.',
 		'You can update shared context with group_progress_tool and shared todos/lock state with group_coordination_tool.',
 		'Do not wait for or react to other agents in the same turn. Work from the shared history and current group context only.',
 		system_tools_prompt,
@@ -154,6 +157,7 @@ export default async (args: {
 		stopWhen: stepCountIs(180),
 		experimental_transform: smoothStream()
 	})
+	const duration_parts = [] as Array<MessagePartDurationUIPart>
 
 	const stream = res
 		.toUIMessageStream({
@@ -175,6 +179,10 @@ export default async (args: {
 				} satisfies MessageMetadata
 			},
 			onFinish: async ({ responseMessage }) => {
+				if (duration_parts.length > 0) {
+					responseMessage.parts = [...responseMessage.parts, ...duration_parts]
+				}
+
 				responseMessage.metadata = {
 					...(responseMessage.metadata ?? {}),
 					timestamp: Date.now(),
@@ -206,6 +214,7 @@ export default async (args: {
 					const duration_chunk = getPartDurationChunk(chunk, tracker)
 
 					if (duration_chunk) {
+						duration_parts.push(duration_chunk)
 						controller.enqueue(duration_chunk)
 					}
 				}

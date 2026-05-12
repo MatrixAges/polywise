@@ -36,7 +36,13 @@ export default async (s: Group, agent: Agent, messages: Array<ModelMessage>) => 
 			fst_system_prompt,
 			'# Group Evaluation Task',
 			'Decide whether you should respond to the current user turn as a member of a group.',
-			'Only respond when you can add distinct value.',
+			'Silence is the default. Set should_answer=true only when you are one of the clearly best members to answer this turn.',
+			'Only respond when you can add distinct value that is specific to your role, identity, expertise, responsibilities, or current execution state.',
+			'If another member is more directly addressed, more clearly responsible, or obviously better positioned to answer, set should_answer=false.',
+			'If the user is calling attendance, summoning a role, or asking for a specific perspective, only answer when that is clearly you.',
+			'Do not answer just to acknowledge presence, agree, or restate what another likely member would say.',
+			'If your likely response would be redundant, generic, low-information, or merely supportive, set should_answer=false.',
+			'Prefer fewer responders. Multiple members should answer the same turn only when they are providing meaningfully different and necessary contributions.',
 			'Use leadership=blocking only when your decision must land first because it changes the execution path, shared plan, or write strategy for the whole group.',
 			'Use leadership=advisory when your answer is central but others do not need to wait.',
 			'If you need to edit files or run write-capable commands, set needs_write_lock=true.',
@@ -63,7 +69,7 @@ export default async (s: Group, agent: Agent, messages: Array<ModelMessage>) => 
 	} catch (error) {
 		return {
 			agent,
-			should_answer: true,
+			should_answer: false,
 			reason: error instanceof Error ? error.message : 'evaluation failed',
 			confidence: 'low',
 			leadership: 'none',
