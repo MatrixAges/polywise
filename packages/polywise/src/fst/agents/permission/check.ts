@@ -19,10 +19,12 @@ export default (s: Session, tool: string, action: string, path: string): 'allowe
 		return 'needs_approval'
 	}
 
-	if (is_path_in_dir(path, s.files_dir)) return 'allowed'
-
-	if (s.project && is_path_in_dir(path, s.project.dir)) {
-		return 'allowed'
+	for (const root of [s.cwd, s.files_dir, s.project?.dir, ...s.additional_mounts.map(item => item.path)].filter(
+		Boolean
+	) as Array<string>) {
+		if (is_path_in_dir(path, root)) {
+			return 'allowed'
+		}
 	}
 
 	const has_permission = s.permissions.some(p => match_permission(p, tool, action, path))

@@ -2,7 +2,7 @@ import { tool } from 'ai'
 import { globby } from 'globby'
 import { array, boolean, object, string } from 'zod'
 
-import { checkPermission, getRealPath, toDisplayPath } from '../utils'
+import { checkPermission, getPathMappings, getRealPath, toDisplayPath } from '../utils'
 
 import type Session from '../session'
 
@@ -19,11 +19,7 @@ export const createGlobTool = (s: Session) => {
 		description: 'Search for files matching glob patterns. Use to find files by name or pattern.',
 		inputSchema,
 		execute: async input => {
-			const path_mappings: Record<string, string> = {}
-
-			if (s.skills_dir) {
-				path_mappings['/skills'] = s.skills_dir
-			}
+			const path_mappings = getPathMappings(s)
 
 			const real_cwd = input.cwd ? getRealPath(s.cwd, input.cwd, path_mappings) : s.cwd
 			const permission_paths = extractPaths(input, s.cwd).map(path =>

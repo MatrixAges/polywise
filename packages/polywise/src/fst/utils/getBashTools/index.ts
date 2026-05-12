@@ -3,6 +3,7 @@ import { readFile, writeFile } from 'atomically'
 import { createBashTool } from 'bash-tool'
 
 import checkPermission from '../checkPermission'
+import getPathMappings from '../getPathMappings'
 import getRealPath from '../getRealPath'
 import executeCommand from './executeCommand'
 
@@ -26,9 +27,7 @@ const normalizeSchema = <T>(schema: T): T => {
 export default async (s: Index, bash: Bash, system?: boolean) => {
 	const is_plan_mode = s.mode === 'plan' || (s.mode === 'plan-exec' && s.plan_stage === 'plan')
 
-	const path_mappings: Record<string, string> = {
-		'/skills': s.skills_dir
-	}
+	const path_mappings = getPathMappings(s)
 
 	const { tools } = await createBashTool({
 		destination: '/',

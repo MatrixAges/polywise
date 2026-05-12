@@ -1,11 +1,11 @@
 import { useEffect } from 'react'
-import { Pencil } from 'lucide-react'
+import { Folders } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
-import { Session } from '@/components'
+import { FileContent, Session } from '@/components'
 
 import { useModel } from '../context'
-import GroupAvatar from './GroupAvatar'
+import GroupFoldersPanel from './GroupFoldersPanel'
 
 import type { SessionSyncStateHookArgs, SessionSyncStateHookResult } from '@/components/Session'
 
@@ -22,8 +22,12 @@ const Index = () => {
 		selected_group,
 		selected_group_session_id,
 		selected_group_session_status,
+		group_side_panel_open,
+		group_content_tab,
+		group_files,
 		openGroup,
-		openEditGroupDialog
+		toggleGroupFolders,
+		syncGroupFolderPanel
 	} = useModel()
 
 	useEffect(() => {
@@ -31,6 +35,12 @@ const Index = () => {
 			void openGroup(selected_group.id)
 		}
 	}, [openGroup, selected_group, selected_group_session_id])
+
+	useEffect(() => {
+		if (group_side_panel_open) {
+			void syncGroupFolderPanel()
+		}
+	}, [group_side_panel_open, selected_group?.id, syncGroupFolderPanel])
 
 	if (!selected_group) {
 		return (
@@ -54,14 +64,33 @@ const Index = () => {
 				min-w-0
 			'
 		>
-			{selected_group_session_id && (
-				<Session
-					type='dialog'
-					id={selected_group_session_id}
-					group_streaming={selected_group_session_status?.running}
-					useSyncState={useGroupSyncState}
-				></Session>
-			)}
+			<div className='flex h-full min-w-0 flex-1'>
+				<div className='flex min-w-0 flex-1'>
+					{group_content_tab === 'session'
+						? selected_group_session_id && (
+								<Session
+									type='page'
+									id={selected_group_session_id}
+									actions={
+										<div className='flex items-center'>
+											<span
+												className='icon_button small'
+												onClick={toggleGroupFolders}
+											>
+												<Folders></Folders>
+											</span>
+										</div>
+									}
+									group_streaming={selected_group_session_status?.running}
+									useSyncState={useGroupSyncState}
+								></Session>
+							)
+						: group_files.select_file && (
+								<FileContent file={group_files.select_file}></FileContent>
+							)}
+				</div>
+				{group_side_panel_open && <GroupFoldersPanel></GroupFoldersPanel>}
+			</div>
 		</div>
 	)
 }

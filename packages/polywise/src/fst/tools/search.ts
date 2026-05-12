@@ -3,7 +3,7 @@ import { tool } from 'ai'
 import { array, boolean, number, object, string } from 'zod'
 
 import grep from '../../utils/grep'
-import { checkPermission, toDisplayPath } from '../utils'
+import { checkPermission, getPathMappings, toDisplayPath } from '../utils'
 import getRealPath from '../utils/getRealPath'
 
 import type { Bash } from 'just-bash'
@@ -82,11 +82,7 @@ export const createSearchFileTool = (s: Session, bash: Bash) => {
 		execute: async input => {
 			void bash
 
-			const path_mappings: Record<string, string> = {}
-
-			if (s.skills_dir) {
-				path_mappings['/skills'] = s.skills_dir
-			}
+			const path_mappings = getPathMappings(s)
 
 			const search_target_list = getSearchTargets({
 				cwd: s.cwd,

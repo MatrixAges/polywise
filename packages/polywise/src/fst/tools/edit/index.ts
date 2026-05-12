@@ -5,7 +5,7 @@ import { createTwoFilesPatch } from 'diff'
 import fs from 'fs-extra'
 import { array, object, string } from 'zod'
 
-import { checkPermissions, getRealPath, toDisplayPath } from '../../utils'
+import { checkPermissions, getPathMappings, getRealPath, toDisplayPath } from '../../utils'
 import apply from './apply'
 import count from './count'
 import error from './error'
@@ -40,12 +40,13 @@ export const createEditFileTool = (s: Session) => {
 
 			const edits = input.edits
 			const file_path = edits[0].file_path
-			const real_path = getRealPath(s.cwd, file_path)
+			const path_mappings = getPathMappings(s)
+			const real_path = getRealPath(s.cwd, file_path, path_mappings)
 			const file_name = path.basename(file_path)
 			const display_path = toDisplayPath({
 				real_path,
 				cwd: s.cwd,
-				path_mappings: getPathMappings(s)
+				path_mappings
 			})
 
 			const perm_error = await checkPermissions(s, file_path, real_path)

@@ -8,6 +8,13 @@ import type Session from '../session'
 export const createBashTool = async (s: Session) => {
 	const mounts = [] as Array<MountConfig>
 
+	for (const mount of s.additional_mounts) {
+		mounts.push({
+			mountPoint: mount.mountPoint,
+			filesystem: new ReadWriteFs({ root: mount.path, allowSymlinks: true })
+		})
+	}
+
 	if (s.skills_dir) {
 		mounts.push({
 			mountPoint: '/skills',

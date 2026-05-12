@@ -4,7 +4,7 @@ import type Group from '../index'
 export default async (s: Group) => {
 	s.active()
 
-	await Promise.all([s.getAgents(), s.getProject(), s.getMessages()])
+	await Promise.all([s.getAgents(), s.getFolders(), s.getProject(), s.getMessages()])
 
 	return {
 		type: 'sync',

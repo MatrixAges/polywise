@@ -2,7 +2,7 @@ import dayjs from 'dayjs'
 import { array, object, string, unknown } from 'zod'
 
 import { addGroup, addSession } from '../../db/services'
-import { addGroupAgent, addGroupSession } from '../../db/services/externals'
+import { addGroupAgent, addGroupFolder, addGroupSession } from '../../db/services/externals'
 import { p } from '../../utils/trpc'
 
 const input_type = object({
@@ -10,6 +10,7 @@ const input_type = object({
 	description: string().optional(),
 	photo: unknown().optional(),
 	agent_ids: array(string()).default([]),
+	folder_paths: array(string()).default([]),
 	title: string().optional()
 })
 
@@ -26,6 +27,10 @@ export default p.input(input_type).mutation(async ({ input }) => {
 
 	for (const [index, agent_id] of input.agent_ids.entries()) {
 		await addGroupAgent(group.id, agent_id, index)
+	}
+
+	for (const [index, folder_path] of input.folder_paths.entries()) {
+		await addGroupFolder(group.id, folder_path, index)
 	}
 
 	const session = await addSession({

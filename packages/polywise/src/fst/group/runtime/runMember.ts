@@ -45,6 +45,22 @@ const getAgentProfilePrompt = (agent: Agent) =>
 		.filter(Boolean)
 		.join('\n\n')
 
+const getMountedFolderPrompt = (s: Group) => {
+	if (!s.folders.length) {
+		return ''
+	}
+
+	const lines = ['# Mounted Group Folders', `- / -> ${s.cwd}`]
+
+	for (const mount of s.additional_mounts) {
+		lines.push(`- ${mount.mountPoint} -> ${mount.path}`)
+	}
+
+	lines.push('Use these mounted paths when reading or writing files for the group.')
+
+	return lines.join('\n')
+}
+
 const gateWriteTool = <T extends { execute?: (...args: Array<any>) => any }>(
 	tool_item: T,
 	check: () => Promise<void>,
@@ -128,6 +144,7 @@ export default async (args: {
 		'# Group Runtime Rules',
 		`Group Name: ${s.group.name}`,
 		s.group.description ? `Group Description: ${s.group.description}` : '',
+		getMountedFolderPrompt(s),
 		`Leadership Mode For This Turn: ${evaluation.leadership}`,
 		evaluation.reason ? `Selection Reason: ${evaluation.reason}` : '',
 		evaluation.needs_write_lock

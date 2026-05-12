@@ -13,6 +13,8 @@ import type Group from '../index'
 const model_threshold_value = 12
 
 export default async (s: Group, message: Message) => {
+	await s.getFolders()
+
 	const total_messages_count = s.context.total_messages_count ?? 0
 
 	if (!s.session.is_runing) {

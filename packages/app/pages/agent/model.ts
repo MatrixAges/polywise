@@ -7,7 +7,7 @@ import { injectable } from 'tsyringe'
 
 import { local_models } from '@/appdata'
 import { Setting } from '@/models'
-import { Util } from '@/models/common'
+import { Files, Util } from '@/models/common'
 import { rpc } from '@/utils'
 
 import type { RPCInput } from '@/types'
@@ -92,15 +92,20 @@ export default class Index {
 	create_agent_description = ''
 	create_agent_loading = false
 	group_dialog_open = false
+	group_dialog_tab = 'info' as 'info' | 'folders'
 	editing_group_id = ''
 	group_dialog_name = ''
 	group_dialog_description = ''
 	group_dialog_selected_agent_ids = [] as Array<string>
+	group_dialog_folder_paths = [] as Array<string>
 	group_dialog_photo = null as Uint8Array | null
 	group_dialog_photo_url = ''
 	group_dialog_file_name = ''
 	create_group_loading = false
 	update_group_loading = false
+	group_side_panel_open = false
+	group_content_tab = 'session' as 'session' | 'file'
+	selected_group_folder_path = ''
 	skill_dialog_open = false
 	avatar_dialog_open = false
 	avatar_mode = 'upload' as AvatarMode
@@ -133,6 +138,10 @@ export default class Index {
 			: null
 	}
 
+	get selected_group_folders() {
+		return this.selected_group?.folders || []
+	}
+
 	get selected_skill_ids() {
 		return this.skill_items.map(item => item.id)
 	}
@@ -147,9 +156,15 @@ export default class Index {
 
 	constructor(
 		public util: Util,
-		public setting: Setting
+		public setting: Setting,
+		public group_dialog_files: Files,
+		public group_files: Files
 	) {
-		makeAutoObservable(this, { util: false, setting: false }, { autoBind: true })
+		makeAutoObservable(
+			this,
+			{ util: false, setting: false, group_dialog_files: false, group_files: false },
+			{ autoBind: true }
+		)
 	}
 
 	get default_model(): DefaultModel {
@@ -275,12 +290,19 @@ export default class Index {
 
 		if (!this.groups.length) {
 			this.selected_group_id = ''
+			this.selected_group_folder_path = ''
+			this.group_content_tab = 'session'
+			this.group_side_panel_open = false
 
 			return
 		}
 
 		if (!this.groups.some(item => item.id === this.selected_group_id)) {
 			this.selected_group_id = this.groups[0].id
+		}
+
+		if (this.group_side_panel_open) {
+			await this.syncGroupFolderPanel()
 		}
 	}
 
@@ -653,6 +675,10 @@ export default class Index {
 
 		const group_item = this.groups.find(item => item.id === group_id)
 
+		if (this.group_side_panel_open) {
+			void this.syncGroupFolderPanel()
+		}
+
 		if (group_item?.session_ids?.length) {
 			return
 		}
@@ -666,6 +692,101 @@ export default class Index {
 
 		if (session?.id && !this.selected_group_id) {
 			this.selected_group_id = group_id
+		}
+	}
+
+	setGroupDialogTab(tab: 'info' | 'folders') {
+		this.group_dialog_tab = tab
+	}
+
+	async initGroupDialogFiles(root_path?: string) {
+		const next_root = root_path || (await rpc.file.homedir.query())
+
+		await this.group_dialog_files.init(next_root, { dir_only: true, show_hidden: true })
+	}
+
+	addGroupDialogFolder(folder_path = this.group_dialog_files.input_path.trim()) {
+		const next_path = folder_path.trim()
+
+		if (!next_path || this.group_dialog_folder_paths.includes(next_path)) {
+			return
+		}
+
+		this.group_dialog_folder_paths = [...this.group_dialog_folder_paths, next_path]
+	}
+
+	removeGroupDialogFolder(folder_path: string) {
+		this.group_dialog_folder_paths = this.group_dialog_folder_paths.filter(item => item !== folder_path)
+	}
+
+	closeGroupFolders() {
+		this.group_side_panel_open = false
+		this.group_content_tab = 'session'
+	}
+
+	async toggleGroupFolders() {
+		if (this.group_side_panel_open) {
+			this.closeGroupFolders()
+
+			return
+		}
+
+		this.group_side_panel_open = true
+		await this.syncGroupFolderPanel()
+	}
+
+	setGroupContentTab(tab: 'session' | 'file') {
+		this.group_content_tab = tab
+	}
+
+	async setGroupFolderPath(folder_path: string) {
+		const next_path = folder_path.trim()
+
+		if (!next_path) {
+			this.selected_group_folder_path = ''
+			this.group_content_tab = 'session'
+
+			return
+		}
+
+		const reuse_current_folder =
+			this.group_side_panel_open &&
+			this.selected_group_folder_path === next_path &&
+			this.group_files.root_path === next_path
+
+		this.selected_group_folder_path = next_path
+		this.group_side_panel_open = true
+		this.group_content_tab = 'session'
+
+		if (reuse_current_folder) {
+			return
+		}
+
+		await this.group_files.init(next_path, { dir_only: false, show_hidden: true })
+	}
+
+	async syncGroupFolderPanel() {
+		const folders = this.selected_group_folders
+
+		if (!folders.length) {
+			this.selected_group_folder_path = ''
+			this.group_content_tab = 'session'
+
+			return
+		}
+
+		const next_folder_path = folders.some(item => item.path === this.selected_group_folder_path)
+			? this.selected_group_folder_path
+			: folders[0].path
+
+		await this.setGroupFolderPath(next_folder_path)
+	}
+
+	async selectGroupFilePath(args: { directory: boolean; path: string }) {
+		await this.group_files.selectPath(args)
+
+		if (!args.directory) {
+			this.group_content_tab = 'file'
 		}
 	}
 
@@ -770,14 +891,17 @@ export default class Index {
 	}
 
 	openCreateGroupDialog() {
+		this.group_dialog_tab = 'info'
 		this.editing_group_id = ''
 		this.group_dialog_name = ''
 		this.group_dialog_description = ''
 		this.group_dialog_selected_agent_ids = []
+		this.group_dialog_folder_paths = []
 		this.group_dialog_photo = null
 		this.group_dialog_file_name = ''
 		this.resetGroupDialogPhotoPreview()
 		this.group_dialog_open = true
+		void this.initGroupDialogFiles()
 	}
 
 	openEditGroupDialog(group_id: string) {
@@ -791,8 +915,10 @@ export default class Index {
 		this.group_dialog_name = group.name || ''
 		this.group_dialog_description = group.description || ''
 		this.group_dialog_selected_agent_ids = group.agents.map(item => item.id)
+		this.group_dialog_folder_paths = group.folders.map(item => item.path)
 		this.group_dialog_photo = group.photo ? new Uint8Array(group.photo as Uint8Array) : null
 		this.group_dialog_file_name = group.photo ? 'current photo' : ''
+		this.group_dialog_tab = 'info'
 		this.resetGroupDialogPhotoPreview()
 
 		if (group.photo) {
@@ -802,14 +928,17 @@ export default class Index {
 		}
 
 		this.group_dialog_open = true
+		void this.initGroupDialogFiles(group.folders[0]?.path)
 	}
 
 	closeGroupDialog() {
 		this.group_dialog_open = false
+		this.group_dialog_tab = 'info'
 		this.editing_group_id = ''
 		this.group_dialog_name = ''
 		this.group_dialog_description = ''
 		this.group_dialog_selected_agent_ids = []
+		this.group_dialog_folder_paths = []
 		this.group_dialog_photo = null
 		this.group_dialog_file_name = ''
 		this.resetGroupDialogPhotoPreview()
@@ -868,7 +997,8 @@ export default class Index {
 				name: args.name,
 				description: args.description || undefined,
 				photo: args.photo,
-				agent_ids: args.agent_ids
+				agent_ids: args.agent_ids,
+				folder_paths: args.folder_paths
 			})
 
 			await this.refreshGroups()
@@ -894,14 +1024,16 @@ export default class Index {
 				name,
 				description: this.group_dialog_description.trim(),
 				photo: this.group_dialog_photo,
-				agent_ids: this.group_dialog_selected_agent_ids
+				agent_ids: this.group_dialog_selected_agent_ids,
+				folder_paths: this.group_dialog_folder_paths
 			})
 		} else {
 			await this.createGroup({
 				name,
 				description: this.group_dialog_description.trim(),
 				photo: this.group_dialog_photo,
-				agent_ids: this.group_dialog_selected_agent_ids
+				agent_ids: this.group_dialog_selected_agent_ids,
+				folder_paths: this.group_dialog_folder_paths
 			})
 		}
 
@@ -923,6 +1055,10 @@ export default class Index {
 			await rpc.group.setAgents.mutate({
 				id: args.id,
 				agent_ids: args.agent_ids
+			})
+			await rpc.group.setFolders.mutate({
+				id: args.id,
+				folder_paths: args.folder_paths
 			})
 
 			await this.refreshGroups()

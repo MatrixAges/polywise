@@ -79,6 +79,24 @@ export default class Index {
 		return this.project?.dir || this.files_dir
 	}
 
+	get additional_mounts() {
+		return [] as Array<{ mountPoint: string; path: string }>
+	}
+
+	get path_mappings() {
+		const path_mappings = {} as Record<string, string>
+
+		if (this.skills_dir) {
+			path_mappings['/skills'] = this.skills_dir
+		}
+
+		for (const mount of this.additional_mounts) {
+			path_mappings[mount.mountPoint] = mount.path
+		}
+
+		return path_mappings
+	}
+
 	get scope(): SessionScope {
 		if (this.project) {
 			return { type: 'project', id: this.project.id }

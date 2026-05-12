@@ -1,7 +1,7 @@
 import path from 'path'
 import { app } from '@core/consts'
-import { group, group_session } from '@core/db/schema'
-import { getGroup, getSessionGroup } from '@core/db/services'
+import { group, group_folder, group_session } from '@core/db/schema'
+import { getGroup, getGroupFolders, getSessionGroup } from '@core/db/services'
 import { eq } from 'drizzle-orm'
 import fs from 'fs-extra'
 
@@ -21,9 +21,17 @@ import type { Group as GroupRow } from '@core/db'
 import type { InitArgs } from '../types'
 import type { GroupBarrierState, GroupContext, GroupInitArgs, GroupWriteLock } from './types'
 
+const slugifyMount = (value: string) =>
+	value
+		.toLowerCase()
+		.replace(/[^a-z0-9]+/g, '-')
+		.replace(/^-+|-+$/g, '')
+		.slice(0, 24) || 'folder'
+
 export default class Group extends Session {
 	group_id = ''
 	group = null as unknown as GroupRow
+	folders = [] as Array<{ path: string; order: number }>
 	active_turn_id = null as string | null
 	write_lock = {
 		agent_id: null,
@@ -36,6 +44,36 @@ export default class Group extends Session {
 
 	override get scope() {
 		return { type: 'group' as const, id: this.group_id }
+	}
+
+	override get cwd() {
+		return this.folders[0]?.path || super.cwd
+	}
+
+	override get additional_mounts() {
+		if (!this.folders.length) {
+			return []
+		}
+
+		const used = new Set<string>()
+
+		return this.folders.slice(1).map((folder, index) => {
+			const base = slugifyMount(path.basename(folder.path) || `folder-${index + 2}`)
+			let mount_point = `/folders/${base}`
+			let suffix = 2
+
+			while (used.has(mount_point)) {
+				mount_point = `/folders/${base}-${suffix}`
+				suffix += 1
+			}
+
+			used.add(mount_point)
+
+			return {
+				mountPoint: mount_point,
+				path: folder.path
+			}
+		})
 	}
 
 	get group_dir() {
@@ -83,6 +121,7 @@ export default class Group extends Session {
 		}
 
 		this.group = target_group
+		await this.getFolders()
 
 		await fs.ensureDir(this.group_dir)
 		await fs.ensureDir(this.context_history_dir)
@@ -99,6 +138,18 @@ export default class Group extends Session {
 
 	override getData = () => getData(this)
 	override getAgents = () => getAgents(this)
+	getFolders = async () => {
+		const rows = await getGroupFolders({
+			where: eq(group_folder.group_id, this.group_id)
+		})
+
+		this.folders = rows.map(item => ({
+			path: item.path,
+			order: item.order
+		}))
+
+		return this.folders
+	}
 	override getOwnerAgent = async () => {
 		this.owner_agent = null
 	}
