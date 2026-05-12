@@ -237,10 +237,6 @@ export default class Index {
 			this.selected_group_id = this.groups[0].id
 		}
 
-		if (!this.groups.length && this.menu_scope === 'group') {
-			this.menu_scope = 'agent'
-		}
-
 		if (this.selected_agent_id) {
 			await Promise.all([
 				this.refreshAgentRelated(),
@@ -258,10 +254,6 @@ export default class Index {
 
 		if (!this.groups.length) {
 			this.selected_group_id = ''
-
-			if (this.menu_scope === 'group') {
-				this.menu_scope = 'agent'
-			}
 
 			return
 		}

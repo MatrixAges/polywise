@@ -62,8 +62,7 @@ const Index = (props: IPropsMenuItem) => {
 				className={$cx(
 					`
 					justify-between
-					py-1
-					pl-[5px] pr-1
+					px-0 py-1
 					bg-transparent
 					group
 					click_button select-none

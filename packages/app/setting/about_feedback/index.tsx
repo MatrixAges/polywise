@@ -13,7 +13,7 @@ const Index = () => {
 				page_wrap
 			'
 		>
-			<div className='-mt-6 flex flex-col items-center'>
+			<div className='-mt-8 flex flex-col items-center'>
 				<div
 					className='
 						flex
@@ -30,7 +30,6 @@ const Index = () => {
 				>
 					<Logo width='100%' height='100%'></Logo>
 				</div>
-
 				<h1
 					className='
 						mb-2
@@ -53,7 +52,7 @@ const Index = () => {
 					bottom-6
 					flex flex-col
 					items-center
-					text-std-400
+					text-std-400 text-sm
 				'
 			>
 				<div
@@ -62,7 +61,6 @@ const Index = () => {
 						items-center
 						gap-1
 						mb-4
-						font-medium
 					'
 				>
 					<div className='flex gap-3'>
