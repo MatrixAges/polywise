@@ -25,7 +25,7 @@ const Index = () => {
 					flex
 					items-center
 					h-9
-					px-2
+					px-1.5
 				'
 			>
 				<div className='flex min-w-0 flex-1'>

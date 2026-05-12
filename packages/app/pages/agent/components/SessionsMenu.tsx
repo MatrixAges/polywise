@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { DndContext, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { useMemoizedFn } from 'ahooks'
-import { PanelLeftClose, Plus } from 'lucide-react'
+import { MessageCircleCheck, PanelLeftClose, Plus } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { ContextMenu, ContextMenuTrigger } from '@/__shadcn__/components/ui/context-menu'
@@ -136,17 +136,20 @@ const Index = () => {
 					flex
 					items-center justify-between
 					h-9
-					px-3
+					px-1.5
 				'
 			>
-				<div className='text-xsm text-std-500 font-medium'>Sessions</div>
-				<div className='-mr-1 flex gap-1'>
+				<div className='flex items-center gap-1 pl-1'>
+					<MessageCircleCheck size={11}></MessageCircleCheck>
+					<span className='text-xs font-medium'>Sessions</span>
+				</div>
+				<div className='flex gap-1'>
 					<button
 						className='icon_button small'
 						type='button'
 						onClick={() => setSessionMenuOpen(false)}
 					>
-						<PanelLeftClose className='size-3.5'></PanelLeftClose>
+						<PanelLeftClose className='size-3'></PanelLeftClose>
 					</button>
 					<button className='icon_button small' type='button' onClick={createSession}>
 						<Plus className='size-3.5'></Plus>
@@ -167,7 +170,7 @@ const Index = () => {
 								className='
 									overflow-y-auto
 									w-full h-full
-									px-2
+									px-1.5
 								'
 								onScroll={onScroll}
 							>

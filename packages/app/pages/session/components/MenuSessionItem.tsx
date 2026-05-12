@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { Bubbles } from 'lucide-react'
 
 import { ArrowLeft, Grip } from '@/components/animate'
 import RenameInput from '@/pages/session/components/RenameInput'
@@ -15,10 +16,10 @@ const Index = (props: IPropsMenuSessionItem) => {
 	const { setRenameValue, renameSession, onCancelRename } = useModel()
 
 	const Status = useMemo(() => {
-		if (is_runing) return <Grip className='text-std-400! size-3' />
-		if (unread) return <ArrowLeft className='size-3 text-indigo-500!' />
+		if (is_runing) return <Grip className='text-std-400! size-2.5' />
+		if (unread) return <ArrowLeft className='size-2.5 text-indigo-500!' />
 
-		return null
+		return <Bubbles className='text-std-400 size-2.5' />
 	}, [pin, is_runing, unread])
 
 	return (
@@ -27,7 +28,9 @@ const Index = (props: IPropsMenuSessionItem) => {
 				`
 				flex flex-col
 				items-start
+				w-full
 				gap-1
+				py-2
 				rounded-sm
 				group
 				click_button
@@ -42,29 +45,44 @@ const Index = (props: IPropsMenuSessionItem) => {
 			data-session-index={session_index}
 			data-id={item.id}
 		>
-			<div className='w-full truncate'>
-				{renaming ? (
-					<RenameInput
-						active={renaming}
-						value={rename_value}
-						set_rename_value={setRenameValue}
-						submit_rename={renameSession}
-						cancel_rename={onCancelRename}
-					></RenameInput>
-				) : (
-					title || <span className='truncate'>{item.title}</span>
-				)}
+			<div
+				className='
+					flex
+					items-center
+					w-full
+					gap-1.5
+				'
+			>
+				<div className='flex shrink-0'>{Status}</div>
+				<div
+					className='
+						flex flex-1
+						truncate
+					'
+				>
+					{renaming ? (
+						<RenameInput
+							active={renaming}
+							value={rename_value}
+							set_rename_value={setRenameValue}
+							submit_rename={renameSession}
+							cancel_rename={onCancelRename}
+						></RenameInput>
+					) : (
+						<span className='truncate'>{item.title}</span>
+					)}
+				</div>
 			</div>
 			<div
 				className='
 					flex
 					items-center justify-between
 					w-full
+					pl-4.5
 					text-std-400 text-xs
 				'
 			>
 				<span>{fromNow(updated_at)}</span>
-				{Status}
 			</div>
 		</div>
 	)

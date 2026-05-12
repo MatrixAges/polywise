@@ -466,6 +466,7 @@ export default class Index {
 
 	openAgentSessions(agent_id: string) {
 		this.menu_scope = 'agent'
+		this.session_menu_open = true
 		this.selectAgent(agent_id, 'sessions')
 	}
 

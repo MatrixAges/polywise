@@ -56,8 +56,8 @@ const Index = () => {
 	if (!global.ready) return <Fallback screen></Fallback>
 
 	return (
-		<LucideProvider size={14} strokeWidth={2}>
-			<IconContext.Provider value={{ size: 14, strokeWidth: 2 }}>
+		<LucideProvider size={14} strokeWidth={1.6}>
+			<IconContext.Provider value={{ size: 14, strokeWidth: 1.6 }}>
 				<TooltipProvider delay={600} closeDelay={300}>
 					<GlobalProvider value={global}>
 						<Toaster
