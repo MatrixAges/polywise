@@ -5,9 +5,9 @@ import { createPartDurationTracker, getPartDurationChunk } from '@core/fst/durat
 import { loadMcpTools } from '@core/fst/mcp'
 import {
 	createContentTool,
-	createCustomToolSet,
 	createEditFileTool,
 	createGlobTool,
+	createMetaTool,
 	createSearchFileTool,
 	createWebFetchTool,
 	createWebSearchTool,
@@ -26,8 +26,7 @@ import { createGroupProgressTool } from '../tools/progress'
 import getAgentModel from './getAgentModel'
 
 import type { Agent } from '@core/db'
-import type { ModelMessage, ToolSet } from 'ai'
-import type { UIMessageChunk } from 'ai'
+import type { ModelMessage, ToolSet, UIMessageChunk } from 'ai'
 import type { Message, MessageDataParts, MessageMetadata } from '../../types'
 import type Group from '../index'
 import type { GroupMemberEvaluation } from '../types'
@@ -76,7 +75,6 @@ export default async (args: {
 	const model = await getAgentModel(agent)
 	const bash_tool = await createBashTool(s)
 	const mcp_tools = await loadMcpTools(s)
-	const custom_tools = await createCustomToolSet(s)
 	const system_tools_prompt = await getSystemTools()
 	const custom_tools_prompt = getCustomToolsPrompt(s.custom_tools_map)
 	const skill_prompt = getSkillPrompt(s.skill_map)
@@ -91,38 +89,35 @@ export default async (args: {
 
 	const tools = wrapToolSetWithAgentLogging(
 		s,
-		sanitizeToolSet(
-			{
-				...custom_tools,
-				...mcp_tools,
-				...model.tools,
-				group_progress_tool: createGroupProgressTool(s, agent),
-				group_coordination_tool: createGroupCoordinationTool(s, agent),
-				glob_tool: createGlobTool(s),
-				search_file_tool: createSearchFileTool(s, bash_tool.env),
-				content_tool: createContentTool(s),
-				web_search_tool: createWebSearchTool(),
-				web_fetch_tool: createWebFetchTool(),
-				system_tool: createSystemTool(s),
-				read_file_tool: bash_tool.readFile,
-				bash_tool: gateWriteTool(
-					bash_tool.bash,
-					ensureWriteLock,
-					'Requires the group write lock before execution.'
-				),
-				write_file_tool: gateWriteTool(
-					bash_tool.writeFile,
-					ensureWriteLock,
-					'Requires the group write lock before execution.'
-				),
-				edit_file_tool: gateWriteTool(
-					createEditFileTool(s),
-					ensureWriteLock,
-					'Requires the group write lock before execution.'
-				)
-			} as ToolSet,
-			{ schema_tool_names: [] }
-		)
+		sanitizeToolSet({
+			...mcp_tools,
+			...model.tools,
+			group_progress_tool: createGroupProgressTool(s, agent),
+			group_coordination_tool: createGroupCoordinationTool(s, agent),
+			meta_tool: createMetaTool(s),
+			glob_tool: createGlobTool(s),
+			search_file_tool: createSearchFileTool(s, bash_tool.env),
+			content_tool: createContentTool(s),
+			web_search_tool: createWebSearchTool(),
+			web_fetch_tool: createWebFetchTool(),
+			system_tool: createSystemTool(s),
+			read_file_tool: bash_tool.readFile,
+			bash_tool: gateWriteTool(
+				bash_tool.bash,
+				ensureWriteLock,
+				'Requires the group write lock before execution.'
+			),
+			write_file_tool: gateWriteTool(
+				bash_tool.writeFile,
+				ensureWriteLock,
+				'Requires the group write lock before execution.'
+			),
+			edit_file_tool: gateWriteTool(
+				createEditFileTool(s),
+				ensureWriteLock,
+				'Requires the group write lock before execution.'
+			)
+		} as ToolSet)
 	)
 
 	const system_prompt = [

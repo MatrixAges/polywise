@@ -1,4 +1,4 @@
-import { asSchema } from 'ai'
+import { zodSchema } from '@ai-sdk/provider-utils'
 import { readFile, writeFile } from 'atomically'
 import { createBashTool } from 'bash-tool'
 
@@ -6,10 +6,22 @@ import checkPermission from '../checkPermission'
 import getRealPath from '../getRealPath'
 import executeCommand from './executeCommand'
 
-import type { Tool } from 'ai'
 import type { Sandbox } from 'bash-tool'
 import type { Bash } from 'just-bash'
 import type Index from '../../session'
+
+const normalizeSchema = <T>(schema: T): T => {
+	if (!schema || typeof schema !== 'object') return schema
+
+	const target = schema as Record<string, unknown>
+	const looks_like_legacy_zod =
+		typeof target.parse === 'function' &&
+		typeof target.safeParse === 'function' &&
+		!('_zod' in target) &&
+		!('~standard' in target)
+
+	return (looks_like_legacy_zod ? zodSchema(schema as never) : schema) as T
+}
 
 export default async (s: Index, bash: Bash, system?: boolean) => {
 	const is_plan_mode = s.mode === 'plan' || (s.mode === 'plan-exec' && s.plan_stage === 'plan')
@@ -71,16 +83,10 @@ export default async (s: Index, bash: Bash, system?: boolean) => {
 		} as Sandbox
 	})
 
-	// bash-tool returns AI SDK FlexibleSchema values, so normalize with asSchema instead of the Zod-only zodSchema helper.
-	for (const tool of Object.values(tools) as Tool[]) {
-		if (!tool || typeof tool !== 'object') continue
-
-		if ('inputSchema' in tool && tool.inputSchema !== undefined) {
-			tool.inputSchema = asSchema(tool.inputSchema)
-		}
-
-		if ('outputSchema' in tool && tool.outputSchema !== undefined) {
-			tool.outputSchema = asSchema(tool.outputSchema)
+	for (const tool of [tools.bash, tools.readFile, tools.writeFile]) {
+		tool.inputSchema = normalizeSchema(tool.inputSchema)
+		if ('outputSchema' in tool) {
+			tool.outputSchema = normalizeSchema(tool.outputSchema)
 		}
 	}
 

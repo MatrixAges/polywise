@@ -23,7 +23,6 @@ import {
 	createContentTool,
 	createContextTool,
 	createCronTool,
-	createCustomToolSet,
 	createEditFileTool,
 	createErrorCollectTool,
 	createGlobTool,
@@ -77,8 +76,6 @@ export default async (s: Index, message: Message) => {
 	if (config.chaos_detect) startStream(s, message)
 
 	s.manual_abort = false
-	s.runing(true)
-	s.sync()
 
 	const messages = await convertToModelMessages(s.model_messages)
 
@@ -93,7 +90,6 @@ export default async (s: Index, message: Message) => {
 	const custom_tools_prompt = getCustomToolsPrompt(s.custom_tools_map)
 	const skill_prompt = getSkillPrompt(s.skill_map)
 	const title_focus = getTitleFocus({ s, message, is_first_message })
-	const custom_tools = await createCustomToolSet(s)
 
 	const mode_prompt = match({ mode: s.mode, plan_stage: s.plan_stage })
 		.with({ mode: 'plan' }, () => plan_mode_prompt)
@@ -119,39 +115,34 @@ export default async (s: Index, message: Message) => {
 
 	const tools = wrapToolSetWithAgentLogging(
 		s,
-		sanitizeToolSet(
-			{
-				...custom_tools,
-				...s.model.tools,
-				...mcp_tools,
-				context_tool: createContextTool(s),
-				message_tool: createMessageTool(s),
-				plan_tool: createPlanTool(s),
-				question_tool: createQuestionTool(s.id),
-				glob_tool: createGlobTool(s),
-				search_file_tool: createSearchFileTool(s, bash_tool.env),
-				title_tool: createTitleTool(s),
-				system_tool: createSystemTool(s),
-				bash_tool: bash_tool.bash,
-				read_file_tool: bash_tool.readFile,
-				write_file_tool: bash_tool.writeFile,
-				edit_file_tool: createEditFileTool(s),
-				skill_tool: createSkillTool(s),
-				content_tool: createContentTool(s),
-				web_search_tool: createWebSearchTool(),
-				web_fetch_tool: createWebFetchTool(),
-				cron_tool: createCronTool(s),
-				error_collect_tool: createErrorCollectTool(),
-				meta_tool: createMetaTool(s)
-			} as ToolSet,
-			{ schema_tool_names: ['meta_tool'] }
-		)
+		sanitizeToolSet({
+			...s.model.tools,
+			...mcp_tools,
+			context_tool: createContextTool(s),
+			message_tool: createMessageTool(s),
+			plan_tool: createPlanTool(s),
+			question_tool: createQuestionTool(s.id),
+			glob_tool: createGlobTool(s),
+			search_file_tool: createSearchFileTool(s, bash_tool.env),
+			title_tool: createTitleTool(s),
+			system_tool: createSystemTool(s),
+			bash_tool: bash_tool.bash,
+			read_file_tool: bash_tool.readFile,
+			write_file_tool: bash_tool.writeFile,
+			edit_file_tool: createEditFileTool(s),
+			skill_tool: createSkillTool(s),
+			content_tool: createContentTool(s),
+			web_search_tool: createWebSearchTool(),
+			web_fetch_tool: createWebFetchTool(),
+			cron_tool: createCronTool(s),
+			error_collect_tool: createErrorCollectTool(),
+			meta_tool: createMetaTool(s)
+		} as ToolSet)
 	)
 
 	if (has_todo_session_link) {
 		tools.report_tool = createReportTool(s)
 	}
-
 	const res = streamText({
 		model: s.model.model,
 		system: system_prompt,
@@ -209,6 +200,8 @@ export default async (s: Index, message: Message) => {
 			})
 		}
 	})
+	await s.runing(true)
+	s.sync()
 
 	return createUIMessageStream({
 		originalMessages: [message],
