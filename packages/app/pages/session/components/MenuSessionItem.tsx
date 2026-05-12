@@ -79,7 +79,7 @@ const Index = (props: IPropsMenuSessionItem) => {
 					items-center justify-between
 					w-full
 					pl-4.5
-					text-std-400 text-xs
+					text-std-400 text-xs font-normal
 				'
 			>
 				<span>{fromNow(updated_at)}</span>
