@@ -108,105 +108,94 @@ const Index = () => {
 	}, [menu_target, pins, sessions])
 
 	return (
-		<div
-			className='
-				flex flex-col
-				w-full
-			'
-		>
-			<ContextMenu>
-				<ContextMenuTrigger className='flex min-h-0 w-full flex-1'>
-					<div className='flex h-full w-full' onContextMenuCapture={onMenuContextCapture}>
+		<ContextMenu>
+			<ContextMenuTrigger className='flex min-h-0 w-full flex-1'>
+				<div className='flex h-full w-full' onContextMenuCapture={onMenuContextCapture}>
+					<div
+						className='
+							overflow-y-auto
+							w-full h-full
+							px-1.5
+						'
+						onScroll={onScroll}
+					>
 						<div
 							className='
-								overflow-y-auto
-								w-full h-full
-								px-1.5
+								flex flex-col
+								gap-1
+								pb-3
 							'
-							onScroll={onScroll}
 						>
-							<div
-								className='
-									flex flex-col
-									gap-1
-									pb-3
-								'
-							>
-								{pins.length > 0 && (
-									<>
-										<DndContext sensors={sensors} onDragEnd={onDragEnd}>
-											<SortableContext
-												items={pins.map(item => item.id)}
-												strategy={verticalListSortingStrategy}
-											>
-												{pins.map((item, session_index) => {
-													const selected =
-														normal_selected_session_id ===
-														item.id
-													const renaming =
-														rename_session_id === item.id
+							{pins.length > 0 && (
+								<>
+									<DndContext sensors={sensors} onDragEnd={onDragEnd}>
+										<SortableContext
+											items={pins.map(item => item.id)}
+											strategy={verticalListSortingStrategy}
+										>
+											{pins.map((item, session_index) => {
+												const selected =
+													normal_selected_session_id === item.id
+												const renaming = rename_session_id === item.id
 
-													return (
-														<PinMenuItem
-															item={item}
-															pin
-															session_index={session_index}
-															selected={selected}
-															renaming={renaming}
-															rename_value={
-																renaming
-																	? rename_value
-																	: ''
-															}
-															key={item.id}
-														></PinMenuItem>
-													)
-												})}
-											</SortableContext>
-										</DndContext>
-										<div className='border-border-light my-1 border-b'></div>
-									</>
-								)}
-								{sessions.map((item, session_index) => {
-									const selected = normal_selected_session_id === item.id
-									const renaming = rename_session_id === item.id
+												return (
+													<PinMenuItem
+														item={item}
+														pin
+														session_index={session_index}
+														selected={selected}
+														renaming={renaming}
+														rename_value={
+															renaming ? rename_value : ''
+														}
+														key={item.id}
+													></PinMenuItem>
+												)
+											})}
+										</SortableContext>
+									</DndContext>
+									<div className='border-border-light my-1 border-b'></div>
+								</>
+							)}
+							{sessions.map((item, session_index) => {
+								const selected = normal_selected_session_id === item.id
+								const renaming = rename_session_id === item.id
 
-									return (
-										<SessionMenuItem
-											item={item}
-											pin={false}
-											session_index={session_index}
-											selected={selected}
-											renaming={renaming}
-											rename_value={renaming ? rename_value : ''}
-											key={item.id}
-										></SessionMenuItem>
-									)
-								})}
-								{has_more && (
-									<button
-										type='button'
-										className='
-											px-2.5 py-1
-											text-xsm text-std-400
-											text-left
-											disabled:cursor-not-allowed disabled:opacity-50
-											hover:text-std-800
-											clickit
-										'
-										onClick={() => loadMore()}
-										disabled={loading || loading_more}
-									>
-										{loading || loading_more ? 'Loading...' : 'Show more'}
-									</button>
-								)}
-							</div>
+								return (
+									<SessionMenuItem
+										item={item}
+										pin={false}
+										session_index={session_index}
+										selected={selected}
+										renaming={renaming}
+										rename_value={renaming ? rename_value : ''}
+										key={item.id}
+									></SessionMenuItem>
+								)
+							})}
+							{has_more && (
+								<button
+									type='button'
+									className='
+										px-2.5 py-1
+										text-xsm text-std-400
+										text-left
+										disabled:cursor-not-allowed disabled:opacity-50
+										hover:text-std-800
+										clickit
+									'
+									onClick={() => loadMore()}
+									disabled={loading || loading_more}
+								>
+									{loading || loading_more ? 'Loading...' : 'Show more'}
+								</button>
+							)}
 						</div>
 					</div>
-				</ContextMenuTrigger>
-				{menu_content}
-			</ContextMenu>
-		</div>
+				</div>
+			</ContextMenuTrigger>
+			{menu_content}
+		</ContextMenu>
 	)
 }
 

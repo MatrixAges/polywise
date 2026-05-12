@@ -109,50 +109,43 @@ const Index = () => {
 	}, [menu_target, projects])
 
 	return (
-		<div
-			className='
-				flex flex-col
-				w-full
-			'
-		>
-			<ContextMenu>
-				<ContextMenuTrigger className='flex min-h-0 w-full flex-1'>
+		<ContextMenu>
+			<ContextMenuTrigger className='flex min-h-0 w-full flex-1'>
+				<div
+					className='flex min-h-0 flex-1 overflow-y-scroll'
+					onContextMenuCapture={onMenuContextCapture}
+				>
 					<div
-						className='flex min-h-0 flex-1 overflow-y-scroll'
-						onContextMenuCapture={onMenuContextCapture}
+						className='
+							flex flex-col
+							w-full
+							gap-1
+							px-1.5
+							pb-3
+						'
 					>
-						<div
-							className='
-								flex flex-col
-								w-full
-								gap-1
-								px-1.5
-								pb-3
-							'
-						>
-							<DndContext sensors={sensors} onDragEnd={onDragProjectEnd}>
-								<SortableContext
-									items={projects.map(item => item.project.id)}
-									strategy={verticalListSortingStrategy}
-								>
-									{projects.map((item, index) => (
-										<MenuItem
-											item={item}
-											index={index}
-											renaming={rename_project_id === item.project.id}
-											selected={selected_project_id === item.project.id}
-											expand={expand_project_ids.includes(item.project.id)}
-											key={item.project.id}
-										></MenuItem>
-									))}
-								</SortableContext>
-							</DndContext>
-						</div>
+						<DndContext sensors={sensors} onDragEnd={onDragProjectEnd}>
+							<SortableContext
+								items={projects.map(item => item.project.id)}
+								strategy={verticalListSortingStrategy}
+							>
+								{projects.map((item, index) => (
+									<MenuItem
+										item={item}
+										index={index}
+										renaming={rename_project_id === item.project.id}
+										selected={selected_project_id === item.project.id}
+										expand={expand_project_ids.includes(item.project.id)}
+										key={item.project.id}
+									></MenuItem>
+								))}
+							</SortableContext>
+						</DndContext>
 					</div>
-				</ContextMenuTrigger>
-				{menu_content}
-			</ContextMenu>
-		</div>
+				</div>
+			</ContextMenuTrigger>
+			{menu_content}
+		</ContextMenu>
 	)
 }
 

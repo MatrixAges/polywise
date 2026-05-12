@@ -89,10 +89,11 @@ const Index = () => {
 							flex flex-col
 							w-full
 							gap-0.5
-							p-1.5 pt-0
+							px-1.5
 						'
 					>
 						{menu_scope === 'agent' ? <AgentsMenu></AgentsMenu> : <GroupsMenu></GroupsMenu>}
+						<div className='h-1 opacity-0'>-</div>
 					</div>
 				</div>
 			</div>

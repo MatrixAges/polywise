@@ -82,6 +82,7 @@ export default class Index {
 	session_request_key = 0
 	session_loading = false
 	session_loading_more = false
+	session_initialized = false
 	create_dialog_open = false
 	create_agent_purpose = ''
 	create_agent_loading = false
@@ -229,6 +230,7 @@ export default class Index {
 			this.session_has_more = false
 			this.session_loading = false
 			this.session_loading_more = false
+			this.session_initialized = false
 			this.resetToolLogs()
 			this.resetSkillLogs()
 		}
@@ -312,6 +314,7 @@ export default class Index {
 			this.rename_value = ''
 			this.session_page = 1
 			this.session_has_more = false
+			this.session_initialized = false
 
 			return
 		}
@@ -345,6 +348,8 @@ export default class Index {
 			if (!has_selected_session) {
 				this.selected_session_id = this.pins[0]?.id || this.session_items[0]?.id || ''
 			}
+
+			this.session_initialized = true
 		} finally {
 			if (this.session_request_key === request_key) {
 				this.session_loading = false

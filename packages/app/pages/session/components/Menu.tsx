@@ -49,7 +49,15 @@ const Index = () => {
 				</Tooltip>
 			</div>
 			<div className='min-h-0 flex-1 overflow-y-scroll'>
-				{menu_tab === 'projects' ? <ProjectsMenu></ProjectsMenu> : <SessionMenu></SessionMenu>}
+				<div
+					className='
+						flex flex-col
+						w-full
+					'
+				>
+					{menu_tab === 'projects' ? <ProjectsMenu></ProjectsMenu> : <SessionMenu></SessionMenu>}
+					<div className='h-1 opacity-0'>-</div>
+				</div>
 			</div>
 		</div>
 	)

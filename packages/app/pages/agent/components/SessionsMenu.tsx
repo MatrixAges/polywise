@@ -32,6 +32,7 @@ const Index = () => {
 		rename_value,
 		session_loading,
 		session_loading_more,
+		session_initialized,
 		session_has_more,
 		setSessionMenuOpen,
 		createSession,
@@ -234,7 +235,8 @@ const Index = () => {
 											></SessionMenuItem>
 										)
 									})}
-									{(session_loading || session_loading_more) &&
+									{!session_initialized &&
+									(session_loading || session_loading_more) &&
 									!session_items.length &&
 									!pins.length ? (
 										<div
