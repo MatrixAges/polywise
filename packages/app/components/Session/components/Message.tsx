@@ -492,21 +492,21 @@ const Index = (props: IPropsMessage) => {
 					{created_at_text && <span className='px-1'>{created_at_text}</span>}
 					<button
 						className='icon_button small'
-						disabled={!copy_text}
-						title={is_copied ? 'Copied' : 'Copy message'}
-						type='button'
-						onClick={() => void onCopy()}
-					>
-						{is_copied ? <Check></Check> : <Copy></Copy>}
-					</button>
-					<button
-						className='icon_button small'
 						disabled={is_streaming}
 						title='Delete message'
 						type='button'
 						onClick={onRemove}
 					>
 						<Trash2></Trash2>
+					</button>
+					<button
+						className='icon_button small'
+						disabled={!copy_text}
+						title={is_copied ? 'Copied' : 'Copy message'}
+						type='button'
+						onClick={() => void onCopy()}
+					>
+						{is_copied ? <Check></Check> : <Copy></Copy>}
 					</button>
 				</div>
 			)}
