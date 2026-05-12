@@ -18,6 +18,7 @@ export type AgentToolLogResponse = RPCOutput['agent']['getToolLogs']
 export type AgentToolLogItem = AgentToolLogResponse['items'][number]
 export type AgentPageMode = 'sessions' | 'detail'
 export type AgentMenuScope = 'agent' | 'group'
+export type AgentCreateMode = 'auto' | 'input'
 export type AgentTab =
 	| 'sessions'
 	| 'info'

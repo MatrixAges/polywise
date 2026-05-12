@@ -16,6 +16,7 @@ import type { DefaultModel } from '@core/types'
 import type {
 	AgentArticleItem,
 	AgentAvatarConfig,
+	AgentCreateMode,
 	AgentItem,
 	AgentMenuScope,
 	AgentPageMode,
@@ -84,7 +85,10 @@ export default class Index {
 	session_loading_more = false
 	session_initialized = false
 	create_dialog_open = false
+	create_agent_mode = 'auto' as AgentCreateMode
 	create_agent_purpose = ''
+	create_agent_name = ''
+	create_agent_description = ''
 	create_agent_loading = false
 	group_dialog_open = false
 	editing_group_id = ''
@@ -543,12 +547,18 @@ export default class Index {
 		this.create_dialog_open = open
 
 		if (!open) {
+			this.create_agent_mode = 'auto'
 			this.create_agent_purpose = ''
+			this.create_agent_name = ''
+			this.create_agent_description = ''
 		}
 	}
 
 	openCreateAgentDialog() {
+		this.create_agent_mode = 'auto'
 		this.create_agent_purpose = ''
+		this.create_agent_name = ''
+		this.create_agent_description = ''
 		this.create_dialog_open = true
 	}
 
@@ -558,6 +568,18 @@ export default class Index {
 
 	setCreateAgentPurpose(value: string) {
 		this.create_agent_purpose = value
+	}
+
+	setCreateAgentMode(mode: AgentCreateMode) {
+		this.create_agent_mode = mode
+	}
+
+	setCreateAgentName(value: string) {
+		this.create_agent_name = value
+	}
+
+	setCreateAgentDescription(value: string) {
+		this.create_agent_description = value
 	}
 
 	setMenuScope(scope: AgentMenuScope) {
@@ -667,14 +689,16 @@ export default class Index {
 		this.article_draft = value
 	}
 
-	async createAgent(purpose?: string) {
+	async createAgent(args?: { purpose?: string; name?: string; description?: string }) {
 		if (this.create_agent_loading) return
 
 		this.create_agent_loading = true
 
 		try {
 			const next_agent = await rpc.agent.create.mutate({
-				purpose: purpose?.trim() || undefined,
+				purpose: args?.purpose?.trim() || undefined,
+				name: args?.name?.trim() || undefined,
+				description: args?.description?.trim() || undefined,
 				avatar: {
 					type: 'nice',
 					data: genConfig()
@@ -705,12 +729,25 @@ export default class Index {
 
 	async submitCreateAgentDialog() {
 		const purpose = this.create_agent_purpose.trim()
+		const name = this.create_agent_name.trim()
+		const description = this.create_agent_description.trim()
 
-		if (!purpose) {
+		if (this.create_agent_mode === 'auto' && !purpose) {
 			return
 		}
 
-		await this.createAgent(purpose)
+		if (this.create_agent_mode === 'input' && !name) {
+			return
+		}
+
+		await this.createAgent(
+			this.create_agent_mode === 'auto'
+				? { purpose }
+				: {
+						name,
+						description
+					}
+		)
 		this.closeCreateAgentDialog()
 	}
 
