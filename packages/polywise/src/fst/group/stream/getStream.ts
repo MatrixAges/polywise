@@ -20,6 +20,7 @@ export default async (s: Group, message: Message) => {
 		agent_count: s.agents.length,
 		message_id: message.id
 	})
+	await s.getModel()
 	await s.getAgents()
 	await s.getFolders()
 	console.log('[group-debug][group.getStream] refreshed-members', {
@@ -336,17 +337,24 @@ export default async (s: Group, message: Message) => {
 				s.active_turn_id = null
 				s.reply_queue = []
 				await s.setState()
-
-				if (s.model_messages.length >= model_threshold_value) {
-					await s.trimMessages()
-				}
-
 				await s.stop()
 				console.log('[group-debug][group.getStream] stopped', {
 					session_id: s.id,
 					turn_id,
 					is_running: s.session.is_runing
 				})
+
+				if (s.model_messages.length >= model_threshold_value) {
+					try {
+						await s.trimMessages()
+					} catch (error) {
+						console.log('[group-debug][group.getStream] trim-error', {
+							session_id: s.id,
+							turn_id,
+							error: error instanceof Error ? error.message : String(error)
+						})
+					}
+				}
 
 				if (!SessionEventStore.listenerCount(`${s.id}/change`)) {
 					await s.updateSession({ unread: true })
