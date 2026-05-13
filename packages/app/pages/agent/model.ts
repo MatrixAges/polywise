@@ -38,6 +38,13 @@ import type {
 	IUpdateAgentArgs
 } from './types'
 
+const getFolderName = (folder_path: string) => {
+	const normalized = folder_path.replace(/\/+$/g, '')
+	const segments = normalized.split('/').filter(Boolean)
+
+	return segments.at(-1) || normalized || '/'
+}
+
 @injectable()
 export default class Index {
 	agents = [] as Array<AgentItem>
@@ -97,7 +104,7 @@ export default class Index {
 	group_dialog_name = ''
 	group_dialog_description = ''
 	group_dialog_selected_agent_ids = [] as Array<string>
-	group_dialog_folder_paths = [] as Array<string>
+	group_dialog_folders = [] as Array<{ name: string; path: string }>
 	group_dialog_photo = null as Uint8Array | null
 	group_dialog_photo_url = ''
 	group_dialog_file_name = ''
@@ -708,15 +715,18 @@ export default class Index {
 	addGroupDialogFolder(folder_path = this.group_dialog_files.input_path.trim()) {
 		const next_path = folder_path.trim()
 
-		if (!next_path || this.group_dialog_folder_paths.includes(next_path)) {
+		if (!next_path || this.group_dialog_folders.some(item => item.path === next_path)) {
 			return
 		}
 
-		this.group_dialog_folder_paths = [...this.group_dialog_folder_paths, next_path]
+		this.group_dialog_folders = [
+			...this.group_dialog_folders,
+			{ name: getFolderName(next_path), path: next_path }
+		]
 	}
 
 	removeGroupDialogFolder(folder_path: string) {
-		this.group_dialog_folder_paths = this.group_dialog_folder_paths.filter(item => item !== folder_path)
+		this.group_dialog_folders = this.group_dialog_folders.filter(item => item.path !== folder_path)
 	}
 
 	closeGroupFolders() {
@@ -896,7 +906,7 @@ export default class Index {
 		this.group_dialog_name = ''
 		this.group_dialog_description = ''
 		this.group_dialog_selected_agent_ids = []
-		this.group_dialog_folder_paths = []
+		this.group_dialog_folders = []
 		this.group_dialog_photo = null
 		this.group_dialog_file_name = ''
 		this.resetGroupDialogPhotoPreview()
@@ -915,7 +925,7 @@ export default class Index {
 		this.group_dialog_name = group.name || ''
 		this.group_dialog_description = group.description || ''
 		this.group_dialog_selected_agent_ids = group.agents.map(item => item.id)
-		this.group_dialog_folder_paths = group.folders.map(item => item.path)
+		this.group_dialog_folders = group.folders.map(item => ({ name: item.name, path: item.path }))
 		this.group_dialog_photo = group.photo ? new Uint8Array(group.photo as Uint8Array) : null
 		this.group_dialog_file_name = group.photo ? 'current photo' : ''
 		this.group_dialog_tab = 'info'
@@ -938,7 +948,7 @@ export default class Index {
 		this.group_dialog_name = ''
 		this.group_dialog_description = ''
 		this.group_dialog_selected_agent_ids = []
-		this.group_dialog_folder_paths = []
+		this.group_dialog_folders = []
 		this.group_dialog_photo = null
 		this.group_dialog_file_name = ''
 		this.resetGroupDialogPhotoPreview()
@@ -998,7 +1008,7 @@ export default class Index {
 				description: args.description || undefined,
 				photo: args.photo,
 				agent_ids: args.agent_ids,
-				folder_paths: args.folder_paths
+				folders: args.folders
 			})
 
 			await this.refreshGroups()
@@ -1025,7 +1035,7 @@ export default class Index {
 				description: this.group_dialog_description.trim(),
 				photo: this.group_dialog_photo,
 				agent_ids: this.group_dialog_selected_agent_ids,
-				folder_paths: this.group_dialog_folder_paths
+				folders: this.group_dialog_folders
 			})
 		} else {
 			await this.createGroup({
@@ -1033,7 +1043,7 @@ export default class Index {
 				description: this.group_dialog_description.trim(),
 				photo: this.group_dialog_photo,
 				agent_ids: this.group_dialog_selected_agent_ids,
-				folder_paths: this.group_dialog_folder_paths
+				folders: this.group_dialog_folders
 			})
 		}
 
@@ -1058,7 +1068,7 @@ export default class Index {
 			})
 			await rpc.group.setFolders.mutate({
 				id: args.id,
-				folder_paths: args.folder_paths
+				folders: args.folders
 			})
 
 			await this.refreshGroups()

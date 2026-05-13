@@ -2,15 +2,20 @@ import dayjs from 'dayjs'
 import { array, object, string, unknown } from 'zod'
 
 import { addGroup, addSession } from '../../db/services'
-import { addGroupAgent, addGroupFolder, addGroupSession } from '../../db/services/externals'
+import { addGroupAgent, addGroupSession } from '../../db/services/externals'
 import { p } from '../../utils/trpc'
+
+const folder_item_schema = object({
+	name: string(),
+	path: string()
+})
 
 const input_type = object({
 	name: string(),
 	description: string().optional(),
 	photo: unknown().optional(),
 	agent_ids: array(string()).default([]),
-	folder_paths: array(string()).default([]),
+	folders: array(folder_item_schema).default([]),
 	title: string().optional()
 })
 
@@ -18,7 +23,8 @@ export default p.input(input_type).mutation(async ({ input }) => {
 	const group = await addGroup({
 		name: input.name,
 		description: input.description || undefined,
-		photo: (input.photo as Uint8Array | null | undefined) ?? undefined
+		photo: (input.photo as Uint8Array | null | undefined) ?? undefined,
+		folders: input.folders
 	})
 
 	if (!group) {
@@ -27,10 +33,6 @@ export default p.input(input_type).mutation(async ({ input }) => {
 
 	for (const [index, agent_id] of input.agent_ids.entries()) {
 		await addGroupAgent(group.id, agent_id, index)
-	}
-
-	for (const [index, folder_path] of input.folder_paths.entries()) {
-		await addGroupFolder(group.id, folder_path, index)
 	}
 
 	const session = await addSession({

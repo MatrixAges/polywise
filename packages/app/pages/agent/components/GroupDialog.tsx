@@ -20,12 +20,6 @@ import AgentAvatar from './AgentAvatar'
 import GroupAvatar from './GroupAvatar'
 
 const accept = '.jpg,.jpeg,.svg,.png,.webp,image/jpeg,image/png,image/svg+xml,image/webp'
-const getFolderTitle = (folder_path: string) => {
-	const normalized = folder_path.replace(/\/+$/g, '')
-	const segments = normalized.split('/').filter(Boolean)
-
-	return segments.at(-1) || normalized || '/'
-}
 
 const Index = () => {
 	const {
@@ -36,7 +30,7 @@ const Index = () => {
 		group_dialog_description,
 		group_dialog_tab,
 		group_dialog_selected_agent_ids,
-		group_dialog_folder_paths,
+		group_dialog_folders,
 		group_dialog_photo,
 		group_dialog_photo_url,
 		group_dialog_files,
@@ -245,7 +239,7 @@ const Index = () => {
 							></FileTree>
 							<div className='grid gap-2'>
 								<div className='text-xsm text-std-500 font-medium'>
-									Selected Folders ({group_dialog_folder_paths.length})
+									Selected Folders ({group_dialog_folders.length})
 								</div>
 								<div
 									className='
@@ -258,8 +252,8 @@ const Index = () => {
 										border border-border-light
 									'
 								>
-									{group_dialog_folder_paths.length ? (
-										group_dialog_folder_paths.map(folder_path => (
+									{group_dialog_folders.length ? (
+										group_dialog_folders.map(folder => (
 											<div
 												className='
 													flex
@@ -269,21 +263,21 @@ const Index = () => {
 													rounded-md
 													border border-border-light
 												'
-												key={folder_path}
+												key={folder.path}
 											>
 												<div className='min-w-0 flex-1'>
 													<div className='truncate text-sm font-medium'>
-														{getFolderTitle(folder_path)}
+														{folder.name}
 													</div>
 													<div className='text-std-400 truncate text-xs'>
-														{folder_path}
+														{folder.path}
 													</div>
 												</div>
 												<button
 													className='icon_button small'
 													type='button'
 													onClick={() =>
-														removeGroupDialogFolder(folder_path)
+														removeGroupDialogFolder(folder.path)
 													}
 												>
 													<X className='size-3'></X>

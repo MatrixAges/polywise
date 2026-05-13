@@ -16,25 +16,29 @@ const normalizeGroup = (row: Group | undefined) => {
 		return row
 	}
 
+	const base_row = {
+		...row,
+		folders: Array.isArray(row.folders) ? row.folders : []
+	}
 	const photo = row.photo
 
 	if (!photo) {
-		return row
+		return base_row
 	}
 
 	if (photo instanceof Uint8Array && photo.constructor === Uint8Array) {
-		return row
+		return base_row
 	}
 
 	if (photo instanceof Uint8Array) {
-		return { ...row, photo: new Uint8Array(photo) }
+		return { ...base_row, photo: new Uint8Array(photo) }
 	}
 
 	if (photo instanceof ArrayBuffer) {
-		return { ...row, photo: new Uint8Array(photo) }
+		return { ...base_row, photo: new Uint8Array(photo) }
 	}
 
-	return row
+	return base_row
 }
 
 export const addGroup = async (values: GroupInsert) => {

@@ -5,13 +5,6 @@ import { FileTree, TextTabs } from '@/components'
 
 import { useModel } from '../context'
 
-const getFolderTitle = (folder_path: string) => {
-	const normalized = folder_path.replace(/\/+$/g, '')
-	const segments = normalized.split('/').filter(Boolean)
-
-	return segments.at(-1) || normalized || '/'
-}
-
 const Index = () => {
 	const {
 		selected_group_folders,
@@ -45,7 +38,7 @@ const Index = () => {
 					<TextTabs
 						items={selected_group_folders.map(item => ({
 							key: item.path,
-							title: getFolderTitle(item.path)
+							title: item.name
 						}))}
 						active={selected_group_folder_path}
 						setActive={setGroupFolderPath}

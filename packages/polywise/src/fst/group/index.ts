@@ -1,7 +1,7 @@
 import path from 'path'
 import { app } from '@core/consts'
-import { group, group_folder, group_session } from '@core/db/schema'
-import { getGroup, getGroupFolders, getSessionGroup } from '@core/db/services'
+import { group, group_session } from '@core/db/schema'
+import { getGroup, getSessionGroup } from '@core/db/services'
 import { eq } from 'drizzle-orm'
 import fs from 'fs-extra'
 
@@ -31,7 +31,7 @@ const slugifyMount = (value: string) =>
 export default class Group extends Session {
 	group_id = ''
 	group = null as unknown as GroupRow
-	folders = [] as Array<{ path: string; order: number }>
+	folders = [] as Array<{ name: string; path: string }>
 	active_turn_id = null as string | null
 	write_lock = {
 		agent_id: null,
@@ -58,7 +58,7 @@ export default class Group extends Session {
 		const used = new Set<string>()
 
 		return this.folders.slice(1).map((folder, index) => {
-			const base = slugifyMount(path.basename(folder.path) || `folder-${index + 2}`)
+			const base = slugifyMount(folder.name || path.basename(folder.path) || `folder-${index + 2}`)
 			let mount_point = `/folders/${base}`
 			let suffix = 2
 
@@ -139,14 +139,13 @@ export default class Group extends Session {
 	override getData = () => getData(this)
 	override getAgents = () => getAgents(this)
 	getFolders = async () => {
-		const rows = await getGroupFolders({
-			where: eq(group_folder.group_id, this.group_id)
-		})
+		const next_group = await getGroup(eq(group.id, this.group_id))
 
-		this.folders = rows.map(item => ({
-			path: item.path,
-			order: item.order
-		}))
+		if (next_group) {
+			this.group = next_group
+		}
+
+		this.folders = this.group?.folders ?? []
 
 		return this.folders
 	}

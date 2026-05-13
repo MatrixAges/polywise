@@ -1,0 +1,1 @@
+ALTER TABLE `group` ADD `folders` text;

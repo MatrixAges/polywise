@@ -8,6 +8,7 @@ export default sqliteTable(
 		name: text('name').notNull(),
 		description: text('description'),
 		photo: blob('photo'),
+		folders: text('folders', { mode: 'json' }).$type<Array<{ name: string; path: string }>>(),
 		created_at: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
 		updated_at: integer('updated_at', { mode: 'timestamp' })
 			.$defaultFn(() => new Date())

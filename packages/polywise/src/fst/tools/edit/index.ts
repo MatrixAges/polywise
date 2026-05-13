@@ -9,7 +9,6 @@ import { checkPermissions, getPathMappings, getRealPath, toDisplayPath } from '.
 import apply from './apply'
 import count from './count'
 import error from './error'
-import getPathMappings from './getPathMappings'
 
 import type Session from '../../session'
 
