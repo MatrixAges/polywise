@@ -51,6 +51,21 @@ interface SenderAgentSummary {
 	avatar?: unknown
 }
 
+const getFallbackSenderSummary = (args: { sender_id?: string; sender_name?: string; sender_role?: string }) => {
+	const { sender_id, sender_name, sender_role } = args
+
+	if (!sender_name) {
+		return null
+	}
+
+	return {
+		id: sender_id || sender_name,
+		name: sender_name,
+		role: sender_role || '',
+		photo: null
+	} satisfies SenderAgentSummary
+}
+
 const default_avatar_url = '/images/bird.jpg'
 
 const isPartDurationPart = (part: SessionMessage['parts'][number] | undefined): part is MessagePartDurationUIPart => {
@@ -407,9 +422,17 @@ const Index = (props: IPropsMessage) => {
 		[message.createdAt, message.metadata?.timestamp]
 	)
 	const sender_name = message.metadata?.sender
+	const sender_role = message.metadata?.sender_role
 	const sender_agent = useMemo(
-		() => group_agents.find(item => item.id === message.metadata?.sender_id),
-		[group_agents, message.metadata?.sender_id]
+		() =>
+			group_agents.find(item => item.id === message.metadata?.sender_id) ||
+			group_agents.find(item => item.name === sender_name) ||
+			getFallbackSenderSummary({
+				sender_id: message.metadata?.sender_id,
+				sender_name,
+				sender_role
+			}),
+		[group_agents, message.metadata?.sender_id, sender_name, sender_role]
 	)
 
 	const { source_urls, render_blocks } = useMemo(() => {
@@ -534,9 +557,9 @@ const Index = (props: IPropsMessage) => {
 							>
 								{sender_name}
 							</div>
-							{sender_agent?.role && (
+							{(sender_agent?.role || sender_role) && (
 								<div className='text-std-400 text-[11px] leading-4'>
-									{sender_agent.role}
+									{sender_agent?.role || sender_role}
 								</div>
 							)}
 						</div>

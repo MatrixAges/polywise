@@ -27,6 +27,7 @@ export interface MessageMetadata {
 	timestamp: number
 	sender?: string
 	sender_id?: string
+	sender_role?: string
 	group_id?: string
 	group_name?: string
 	group_turn_id?: string
