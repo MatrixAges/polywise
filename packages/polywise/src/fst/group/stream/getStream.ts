@@ -38,18 +38,21 @@ export default async (s: Group, message: Message) => {
 	const base_messages = await convertToModelMessages(s.model_messages)
 	const turn_id = s.active_turn_id!
 	const evaluations = new Map<string, GroupMemberEvaluation>()
+	const total_evaluations = s.agents.length
 
 	return createUIMessageStream({
 		originalMessages: [message],
 		generateId: getId,
 		execute: async ({ writer }) => {
 			let queue_waiter = null as null | (() => void)
-			let evaluations_finished = false
+			let completed_evaluations = 0
 
 			const notifyQueue = () => {
 				queue_waiter?.()
 				queue_waiter = null
 			}
+
+			const allEvaluationsFinished = () => completed_evaluations >= total_evaluations
 
 			const waitForQueue = () =>
 				new Promise<void>(resolve => {
@@ -109,7 +112,7 @@ export default async (s: Group, message: Message) => {
 					)
 
 					if (!next) {
-						if (evaluations_finished) {
+						if (allEvaluationsFinished()) {
 							break
 						}
 
@@ -189,19 +192,21 @@ export default async (s: Group, message: Message) => {
 				}
 
 				const evaluation = await evaluateMember(s, agent, base_messages)
+				completed_evaluations += 1
 
 				if (s.active_turn_id !== turn_id) {
+					notifyQueue()
 					return
 				}
 
 				evaluations.set(agent.id, evaluation)
 				await enqueueEvaluation(evaluation)
+				notifyQueue()
 			}
 
 			try {
 				const queue_runner = processQueue()
 				await Promise.allSettled(s.agents.map(agent => runEvaluation(agent.id)))
-				evaluations_finished = true
 				notifyQueue()
 				await queue_runner
 			} finally {
