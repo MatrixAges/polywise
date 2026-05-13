@@ -19,7 +19,14 @@ import setTasks from './task/setTasks'
 
 import type { Group as GroupRow } from '@core/db'
 import type { InitArgs } from '../types'
-import type { GroupBarrierState, GroupContext, GroupInitArgs, GroupWriteLock } from './types'
+import type {
+	GroupAgentSummary,
+	GroupBarrierState,
+	GroupContext,
+	GroupInitArgs,
+	GroupReplyQueueItem,
+	GroupWriteLock
+} from './types'
 
 const slugifyMount = (value: string) =>
 	value
@@ -40,6 +47,8 @@ export default class Group extends Session {
 		reason: null
 	} as GroupWriteLock
 	barrier = null as GroupBarrierState | null
+	agents_map = [] as Array<GroupAgentSummary>
+	reply_queue = [] as Array<GroupReplyQueueItem>
 	context = {} as GroupContext
 
 	override get scope() {

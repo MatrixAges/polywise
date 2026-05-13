@@ -10,4 +10,9 @@ export default async (s: Group) => {
 	})
 
 	s.agents = res.map(item => item.agent)
+	s.agents_map = s.agents.map(agent => ({
+		id: agent.id,
+		name: agent.name,
+		description: agent.description ?? null
+	}))
 }

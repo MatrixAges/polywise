@@ -12,6 +12,12 @@ export interface GroupTaskContextItem extends BaseTaskContextItem {
 	finished_at?: number | null
 }
 
+export interface GroupAgentSummary {
+	id: string
+	name: string
+	description: string | null
+}
+
 export interface GroupContext extends Context {
 	group_name?: string
 	group_description?: string
@@ -37,11 +43,29 @@ export interface GroupBarrierState {
 	reason?: string | null
 }
 
+export interface GroupReplyQueueItem {
+	turn_id: string
+	queue_index: number
+	agent_id: string
+	agent_name: string
+	status: 'queued' | 'running' | 'done' | 'failed'
+	source: 'pick' | 'background'
+	reason: string
+	confidence: 'low' | 'medium' | 'high'
+	leadership: 'none' | 'advisory' | 'blocking'
+	needs_write_lock: boolean
+	enqueued_at: number
+	started_at?: number | null
+	finished_at?: number | null
+	error?: string | null
+}
+
 export interface GroupStateData {
 	archived_at: number | null
 	active_turn_id: string | null
 	write_lock: GroupWriteLock
 	barrier: GroupBarrierState | null
+	reply_queue: Array<GroupReplyQueueItem>
 }
 
 export interface GroupMemberEvaluation {
@@ -51,6 +75,12 @@ export interface GroupMemberEvaluation {
 	confidence: 'low' | 'medium' | 'high'
 	leadership: 'none' | 'advisory' | 'blocking'
 	needs_write_lock: boolean
+}
+
+export interface GroupPickedAgent {
+	agent_id: string
+	agent_name: string
+	reason: string
 }
 
 export interface GroupSyncPayload {

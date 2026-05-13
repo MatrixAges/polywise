@@ -25,6 +25,7 @@ import { createGroupCoordinationTool } from '../tools/coordination'
 import { createGroupMemberTool } from '../tools/member'
 import { createGroupProgressTool } from '../tools/progress'
 import getAgentModel from './getAgentModel'
+import getAgentsMapPrompt from './getAgentsMapPrompt'
 
 import type { Agent } from '@core/db'
 import type { ModelMessage, ToolSet, UIMessageChunk } from 'ai'
@@ -144,13 +145,14 @@ export default async (args: {
 		'# Group Runtime Rules',
 		`Group Name: ${s.group.name}`,
 		s.group.description ? `Group Description: ${s.group.description}` : '',
+		getAgentsMapPrompt(s),
 		getMountedFolderPrompt(s),
 		`Leadership Mode For This Turn: ${evaluation.leadership}`,
 		evaluation.reason ? `Selection Reason: ${evaluation.reason}` : '',
 		evaluation.needs_write_lock
 			? 'Your work is expected to need shared writes. Acquire the group write lock before any write-capable tool use.'
 			: 'Only acquire the group write lock if you truly need shared writes.',
-		'Only your own profile is preloaded. Use group_member_tool to inspect specific members on demand.',
+		'Only your own full profile is preloaded. Use group_member_tool to inspect specific members on demand.',
 		'You can update shared context with group_progress_tool and shared todos/lock state with group_coordination_tool.',
 		'Do not wait for or react to other agents in the same turn. Work from the shared history and current group context only.',
 		system_tools_prompt,

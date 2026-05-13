@@ -9,7 +9,8 @@ export default async (s: Group) => {
 			archived_at: s.archived_at,
 			active_turn_id: s.active_turn_id,
 			write_lock: s.write_lock,
-			barrier: s.barrier
+			barrier: s.barrier,
+			reply_queue: s.reply_queue
 		},
 		{ spaces: 4 }
 	)

@@ -4,6 +4,7 @@ import { generateObject } from 'ai'
 import { boolean, enum as Enum, object, string } from 'zod'
 
 import getAgentModel from './getAgentModel'
+import getAgentsMapPrompt from './getAgentsMapPrompt'
 
 import type { Agent } from '@core/db'
 import type { ModelMessage } from 'ai'
@@ -48,6 +49,7 @@ export default async (s: Group, agent: Agent, messages: Array<ModelMessage>) => 
 			'If you need to edit files or run write-capable commands, set needs_write_lock=true.',
 			`Group Name: ${s.group.name}`,
 			s.group.description ? `Group Description: ${s.group.description}` : '',
+			getAgentsMapPrompt(s),
 			getAgentProfilePrompt(agent),
 			getContextPrompt(s.context)
 		]
@@ -59,7 +61,8 @@ export default async (s: Group, agent: Agent, messages: Array<ModelMessage>) => 
 			system: system_prompt,
 			messages,
 			schema: evaluation_schema,
-			providerOptions: model.provider_options
+			providerOptions: model.provider_options,
+			abortSignal: s.abort_controller.signal
 		})
 
 		return {

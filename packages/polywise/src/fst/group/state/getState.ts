@@ -13,7 +13,8 @@ const default_state: GroupStateData = {
 		acquired_at: null,
 		reason: null
 	},
-	barrier: null
+	barrier: null,
+	reply_queue: []
 }
 
 export default async (s: Group) => {
@@ -29,6 +30,7 @@ export default async (s: Group) => {
 			...(state.write_lock || {})
 		}
 		s.barrier = state.barrier ?? null
+		s.reply_queue = Array.isArray(state.reply_queue) ? state.reply_queue : []
 
 		return
 	}
@@ -37,4 +39,5 @@ export default async (s: Group) => {
 	s.active_turn_id = null
 	s.write_lock = { ...default_state.write_lock }
 	s.barrier = null
+	s.reply_queue = []
 }
