@@ -1,7 +1,7 @@
 ._local {
-	--margin_y: 1.2em;
-
-	letter-spacing: 0.12px;
+	font-size: 13px;
+	line-height: 1.62;
+	--margin_y: 1em;
 
 	:global {
 		::selection {
@@ -92,15 +92,15 @@
 
 			li {
 				box-sizing: border-box;
-				margin-block: 0.42em;
+				margin-block: 0.21em;
 
 				ul,
 				ol {
-					margin-block: calc(var(--margin_y) * 0.36);
+					margin-block: calc(var(--margin_y) * 0.24);
 				}
 
 				p {
-					margin-block-end: calc(var(--margin_y) * 0.36);
+					margin-block-end: calc(var(--margin_y) * 0.24);
 				}
 			}
 		}

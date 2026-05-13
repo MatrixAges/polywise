@@ -1,4 +1,4 @@
-import { Activity, useState } from 'react'
+import { useState } from 'react'
 import { Ellipsis, PanelRight, RotateCcw } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 import { container } from 'tsyringe'
@@ -64,13 +64,7 @@ const Index = () => {
 			</div>
 			<div className='flex flex-1 overflow-y-scroll'>
 				<div className='flex w-full'>
-					{panel_tabs.map(({ key }) => {
-						return (
-							<Activity mode={key === x.active_tab ? 'visible' : 'hidden'} key={key}>
-								<Lazy type='panel' path={key}></Lazy>
-							</Activity>
-						)
-					})}
+					<Lazy type='panel' path={x.active_tab}></Lazy>
 				</div>
 			</div>
 		</div>

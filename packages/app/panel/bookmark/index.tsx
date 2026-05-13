@@ -46,69 +46,72 @@ const Index = () => {
 	}
 
 	return (
-		<div className='flex h-full min-h-0 w-full'>
-			<div className='flex min-w-0 flex-1 flex-col'>
+		<div
+			className='
+				flex flex-col
+				w-full h-full
+			'
+		>
+			<div
+				className='
+					overflow-y-scroll
+					flex flex-1
+					w-full
+					min-h-0
+					p-2
+				'
+			>
 				<div
 					className='
-						flex
-						items-center justify-between
-						gap-3
-						p-2
-					'
-				>
-					<Select value={for_type} onValueChange={value => setForType(value as BookmarkForType)}>
-						<SelectTrigger className='min-w-[120px]' size='sm'>
-							<SelectValue />
-						</SelectTrigger>
-						<SelectContent align='start'>
-							{for_type_items.map(item => (
-								<SelectItem value={item.value} key={item.value}>
-									{item.label}
-								</SelectItem>
-							))}
-						</SelectContent>
-					</Select>
-					<div className='flex shrink-0 items-center gap-2'>
-						<Button
-							variant='outline'
-							size='sm'
-							disabled={saving || content.length === 0}
-							onClick={clear}
-						>
-							Clear
-						</Button>
-						<Button
-							size='sm'
-							disabled={saving || content.trim().length === 0}
-							onClick={() => void save()}
-						>
-							{saving ? <LoaderCircle className='size-4 animate-spin' /> : null}
-							<span>{saving ? 'Saving' : 'Save'}</span>
-						</Button>
-					</div>
-				</div>
-				<div
-					className='
-						overflow-y-scroll
-						flex flex-1
 						w-full
-						min-h-0
-						p-2
+						rounded-2xl
 					'
 				>
-					<div
-						className='
-							w-full
-							rounded-2xl
-						'
+					<Editor
+						id='panel-bookmark-editor'
+						className='px-4 pt-4 pb-8'
+						value={content}
+						onChange={setContent}
+					></Editor>
+				</div>
+			</div>
+			<div
+				className='
+					flex
+					items-center justify-between
+					gap-3
+					p-2
+				'
+			>
+				<Select value={for_type} onValueChange={value => setForType(value as BookmarkForType)}>
+					<SelectTrigger className='min-w-[90px]' size='sm'>
+						<SelectValue />
+					</SelectTrigger>
+					<SelectContent align='start'>
+						{for_type_items.map(item => (
+							<SelectItem value={item.value} key={item.value}>
+								{item.label}
+							</SelectItem>
+						))}
+					</SelectContent>
+				</Select>
+				<div className='flex shrink-0 items-center gap-2'>
+					<Button
+						variant='outline'
+						size='sm'
+						disabled={saving || content.length === 0}
+						onClick={clear}
 					>
-						<Editor
-							id='panel-bookmark-editor'
-							className='px-4 pt-4 pb-8'
-							value={content}
-							onChange={setContent}
-						></Editor>
-					</div>
+						Clear
+					</Button>
+					<Button
+						size='sm'
+						disabled={saving || content.trim().length === 0}
+						onClick={() => void save()}
+					>
+						{saving ? <LoaderCircle className='size-4 animate-spin' /> : null}
+						<span>{saving ? 'Saving' : 'Save'}</span>
+					</Button>
 				</div>
 			</div>
 		</div>
