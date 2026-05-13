@@ -13,7 +13,7 @@ import { getEmbedding, getKeywords, getChunks as getPipelineChunks } from '@core
 import { getHash, log } from '@core/utils'
 import { eq } from 'drizzle-orm'
 
-import { removePipelineTask, setPipelineTask } from './pipelineStore'
+import { readPipelineStore, removePipelineTask, setPipelineTask } from './pipelineStore'
 
 import type { Article } from '@core/db/types'
 
@@ -27,6 +27,8 @@ interface ArgsSaveArticle {
 	source?: 'agent' | 'superego'
 	exec_pipeline?: boolean
 }
+
+let pipeline_processing = false
 
 const clearArticleChunks = async (article_id: string) => {
 	const existing_chunks = await getChunks({
@@ -88,6 +90,79 @@ const runArticlePipeline = async (article_id: string, content: string) => {
 
 		log('SAVE', 'saveChunkVector')
 	}
+}
+
+const processPipelineTask = async (article_id: string, created_at: string) => {
+	const current_article = await getArticle(eq(article.id, article_id))
+
+	if (!current_article) {
+		await removePipelineTask(article_id)
+
+		return
+	}
+
+	if (!current_article.content.trim()) {
+		await setArticle(eq(article.id, article_id), {
+			is_pipelined: true,
+			updated_at: new Date()
+		})
+		await removePipelineTask(article_id)
+
+		return
+	}
+
+	try {
+		await clearArticleChunks(article_id)
+		await runArticlePipeline(article_id, current_article.content)
+
+		await setArticle(eq(article.id, article_id), {
+			is_pipelined: true,
+			updated_at: new Date()
+		})
+
+		await removePipelineTask(article_id)
+	} catch (error) {
+		await clearArticleChunks(article_id)
+
+		await setPipelineTask(article_id, {
+			created_at,
+			status: 'error',
+			done_at: new Date().toISOString()
+		})
+
+		throw error
+	}
+}
+
+const kickPipelineWorker = () => {
+	queueMicrotask(async () => {
+		if (pipeline_processing) return
+
+		pipeline_processing = true
+
+		try {
+			while (true) {
+				const store = await readPipelineStore()
+				const next_task = Object.entries(store)
+					.filter(([, task]) => task.status === 'running')
+					.sort(
+						(a, b) => new Date(a[1].created_at).getTime() - new Date(b[1].created_at).getTime()
+					)[0]
+
+				if (!next_task) return
+
+				try {
+					await processPipelineTask(next_task[0], next_task[1].created_at)
+				} catch (error) {
+					log('SAVE', 'pipelineWorkerError', () =>
+						error instanceof Error ? error.message : String(error)
+					)
+				}
+			}
+		} finally {
+			pipeline_processing = false
+		}
+	})
 }
 
 export default async (args: ArgsSaveArticle) => {
@@ -175,29 +250,11 @@ export default async (args: ArgsSaveArticle) => {
 		status: 'running',
 		done_at: null
 	})
+	kickPipelineWorker()
 
-	try {
-		await runArticlePipeline(current_article_id, content)
-
-		await setArticle(eq(article.id, current_article_id), {
-			is_pipelined: true,
-			updated_at: new Date()
-		})
-
-		await removePipelineTask(current_article_id)
-	} catch (error) {
-		await clearArticleChunks(current_article_id)
-
-		await setPipelineTask(current_article_id, {
-			created_at,
-			status: 'error',
-			done_at: new Date().toISOString()
-		})
-
-		throw error
-	}
-
-	log('SAVE', 'Done', () => `article_id: ${current_article_id}`)
+	log('SAVE', 'Queued', () => `article_id: ${current_article_id}`)
 
 	return current_article_id
 }
+
+kickPipelineWorker()
