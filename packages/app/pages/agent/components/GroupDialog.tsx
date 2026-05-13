@@ -318,7 +318,6 @@ const Index = () => {
 								{ key: 'info', title: 'Info', Icon: Info },
 								{ key: 'folders', title: 'Folders', Icon: Folder }
 							]}
-							small
 							active={group_dialog_tab}
 							onClick={tab => setGroupDialogTab(tab as 'info' | 'folders')}
 						></Tabs>
