@@ -30,6 +30,10 @@ export default class Index {
 		}
 	}
 
+	get running_list() {
+		return this.list.filter(item => item.status === 'running')
+	}
+
 	watch() {
 		const deinit = rpc.pipeline.watch.subscribe(undefined, {
 			onData: () => {

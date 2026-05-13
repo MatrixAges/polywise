@@ -28,6 +28,8 @@ const Index = () => {
 		return () => x.deinit()
 	}, [])
 
+	const list = x.running_list
+
 	if (x.loading) {
 		return (
 			<div
@@ -43,7 +45,7 @@ const Index = () => {
 		)
 	}
 
-	if (x.list.length === 0) {
+	if (list.length === 0) {
 		return (
 			<div
 				className='
@@ -53,7 +55,7 @@ const Index = () => {
 					text-sm text-std-400
 				'
 			>
-				No pipeline tasks.
+				No running pipeline tasks.
 			</div>
 		)
 	}
@@ -67,7 +69,7 @@ const Index = () => {
 				p-2
 			'
 		>
-			{x.list.map(item => {
+			{list.map(item => {
 				return (
 					<div
 						key={item.article_id}
