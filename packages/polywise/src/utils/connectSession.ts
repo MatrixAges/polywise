@@ -16,23 +16,11 @@ export default async (args: ConnectSessionArgs) => {
 	const { id, is_cron, title } = args
 
 	let session = SessionStore.get(id)!
-	console.log('[group-debug][connectSession] lookup', {
-		session_id: id,
-		has_cached_session: Boolean(session)
-	})
 
 	if (!session) {
 		const linked_group = await getSessionGroup(eq(group_session.session_id, id))
-		console.log('[group-debug][connectSession] linked-group', {
-			session_id: id,
-			group_id: linked_group?.group.id ?? null
-		})
 
 		session = linked_group ? new Group() : new Session()
-		console.log('[group-debug][connectSession] init-start', {
-			session_id: id,
-			session_type: session.constructor.name
-		})
 
 		await session.init({
 			id,
@@ -41,10 +29,6 @@ export default async (args: ConnectSessionArgs) => {
 			title: title || `Session ${dayjs().format('YYYY-MM-DD HH:mm:ss')}`,
 			...(linked_group ? { group_id: linked_group.group.id } : {})
 		})
-		console.log('[group-debug][connectSession] init-done', {
-			session_id: id,
-			session_type: session.constructor.name
-		})
 
 		SessionStore.set(id, session)
 
@@ -52,11 +36,6 @@ export default async (args: ConnectSessionArgs) => {
 			GroupStore.set(id, session)
 		}
 	}
-
-	console.log('[group-debug][connectSession] return', {
-		session_id: id,
-		session_type: session.constructor.name
-	})
 
 	return session
 }

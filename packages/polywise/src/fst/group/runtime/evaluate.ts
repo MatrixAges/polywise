@@ -33,13 +33,6 @@ const getAgentProfilePrompt = (agent: Agent) =>
 
 export default async (s: Group, agent: Agent, messages: Array<ModelMessage>) => {
 	try {
-		console.log('[group-debug][evaluate] start', {
-			session_id: s.id,
-			group_id: s.group_id,
-			turn_id: s.active_turn_id,
-			agent_id: agent.id,
-			agent_name: agent.name
-		})
 		const model = await getAgentModel(agent)
 		const system_prompt = [
 			fst_system_prompt,
@@ -76,30 +69,12 @@ export default async (s: Group, agent: Agent, messages: Array<ModelMessage>) => 
 			providerOptions: model.provider_options,
 			abortSignal: s.abort_controller.signal
 		})
-		console.log('[group-debug][evaluate] success', {
-			session_id: s.id,
-			group_id: s.group_id,
-			turn_id: s.active_turn_id,
-			agent_id: agent.id,
-			agent_name: agent.name,
-			should_answer: res.object.should_answer,
-			leadership: res.object.leadership,
-			reason: res.object.reason
-		})
 
 		return {
 			agent,
 			...res.object
 		} satisfies GroupMemberEvaluation
 	} catch (error) {
-		console.log('[group-debug][evaluate] error', {
-			session_id: s.id,
-			group_id: s.group_id,
-			turn_id: s.active_turn_id,
-			agent_id: agent.id,
-			agent_name: agent.name,
-			error: error instanceof Error ? error.message : String(error)
-		})
 		return {
 			agent,
 			should_answer: false,

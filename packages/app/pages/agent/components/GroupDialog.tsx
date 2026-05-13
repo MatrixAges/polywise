@@ -1,5 +1,5 @@
 import { Fragment } from 'react'
-import { Plus, X } from 'lucide-react'
+import { Folder, Info, Plus, X } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { Button } from '@/__shadcn__/components/ui/button'
@@ -13,7 +13,7 @@ import {
 } from '@/__shadcn__/components/ui/dialog'
 import { Input } from '@/__shadcn__/components/ui/input'
 import { Spinner } from '@/__shadcn__/components/ui/spinner'
-import { FileTree, TextTabs } from '@/components'
+import { FileTree, Tabs } from '@/components'
 import { alert, uploadFile } from '@/utils'
 
 import { useModel } from '../context'
@@ -313,11 +313,15 @@ const Index = () => {
 						)}
 					</div>
 					<DialogFooter className='flex items-center justify-between sm:justify-between'>
-						<TextTabs
-							items={['info', 'folders']}
+						<Tabs
+							items={[
+								{ key: 'info', title: 'Info', Icon: Info },
+								{ key: 'folders', title: 'Folders', Icon: Folder }
+							]}
+							small
 							active={group_dialog_tab}
-							setActive={setGroupDialogTab}
-						></TextTabs>
+							onClick={tab => setGroupDialogTab(tab as 'info' | 'folders')}
+						></Tabs>
 						<div className='flex items-center gap-2'>
 							{editing_group && (
 								<Fragment>

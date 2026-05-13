@@ -716,7 +716,7 @@ export default class Index {
 	async initGroupDialogFiles(root_path?: string) {
 		const next_root = root_path || (await rpc.file.homedir.query())
 
-		await this.group_dialog_files.init(next_root, { dir_only: true, show_hidden: true })
+		await this.group_dialog_files.init(next_root, { dir_only: true, show_hidden: false })
 	}
 
 	addGroupDialogFolder(folder_path = this.group_dialog_files.input_path.trim()) {
@@ -1016,13 +1016,6 @@ export default class Index {
 			const agent_ids = [...args.agent_ids]
 			const folders = args.folders.map(item => ({ name: item.name, path: item.path }))
 
-			console.log('[group-debug][app.createGroup] submit', {
-				name: args.name,
-				agent_ids_count: agent_ids.length,
-				agent_ids,
-				folders_count: folders.length
-			})
-
 			const res = await rpc.group.create.mutate({
 				name: args.name,
 				description: args.description || undefined,
@@ -1045,15 +1038,6 @@ export default class Index {
 		const name = this.group_dialog_name.trim()
 		const agent_ids = [...this.group_dialog_selected_agent_ids]
 		const folders = this.group_dialog_folders.map(item => ({ name: item.name, path: item.path }))
-
-		console.log('[group-debug][app.submitGroupDialog] snapshot', {
-			mode: this.editing_group_id ? 'edit' : 'create',
-			group_id: this.editing_group_id || null,
-			name,
-			agent_ids_count: agent_ids.length,
-			agent_ids,
-			folders_count: folders.length
-		})
 
 		if (!name || !agent_ids.length) {
 			return null
@@ -1089,14 +1073,6 @@ export default class Index {
 		try {
 			const agent_ids = [...args.agent_ids]
 			const folders = args.folders.map(item => ({ name: item.name, path: item.path }))
-
-			console.log('[group-debug][app.updateGroup] submit', {
-				group_id: args.id,
-				name: args.name,
-				agent_ids_count: agent_ids.length,
-				agent_ids,
-				folders_count: folders.length
-			})
 
 			await rpc.group.update.mutate({
 				id: args.id,

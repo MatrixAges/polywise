@@ -20,14 +20,6 @@ const input_type = object({
 })
 
 export default p.input(input_type).mutation(async ({ input }) => {
-	console.log('[group-debug][rpc.group.create] input', {
-		name: input.name,
-		description_length: input.description?.length ?? 0,
-		agent_ids_count: input.agent_ids.length,
-		agent_ids: input.agent_ids,
-		folders_count: input.folders.length
-	})
-
 	const group = await addGroup({
 		name: input.name,
 		description: input.description || undefined,
@@ -43,22 +35,11 @@ export default p.input(input_type).mutation(async ({ input }) => {
 		await addGroupAgent(group.id, agent_id, index)
 	}
 
-	console.log('[group-debug][rpc.group.create] relations-written', {
-		group_id: group.id,
-		agent_ids_count: input.agent_ids.length,
-		agent_ids: input.agent_ids
-	})
-
 	const session = await addSession({
 		title: input.title || input.name || `Group ${dayjs().format('YYYY-MM-DD HH:mm:ss')}`
 	})
 
 	await addGroupSession(group.id, session.id)
-
-	console.log('[group-debug][rpc.group.create] done', {
-		group_id: group.id,
-		session_id: session.id
-	})
 
 	return { group, session }
 })
