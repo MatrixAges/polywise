@@ -1471,12 +1471,21 @@ export default class Index {
 					return
 				}
 
+				const changed_session_ids = new Set(Object.keys(res))
+				const has_group_session_change = this.groups.some(group =>
+					group.session_ids?.some(session_id => changed_session_ids.has(session_id))
+				)
+
 				this.session_status_map = {
 					...this.session_status_map,
 					...res
 				}
 				this.pins = this.patchSessionList(this.pins, res)
 				this.session_items = this.patchSessionList(this.session_items, res)
+
+				if (has_group_session_change) {
+					void this.refreshGroups()
+				}
 			}
 		})
 
