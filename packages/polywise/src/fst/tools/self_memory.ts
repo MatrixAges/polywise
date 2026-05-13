@@ -6,13 +6,18 @@ import { enum as Enum, object, string } from 'zod'
 
 import type Session from '../session'
 
+const max_memory_length = 6000
+
 const inputSchema = object({
 	action: Enum(['set', 'append', 'clear']).describe(
 		'The memory update to perform. set: replace the whole memory field. append: add a new memory block. clear: erase the memory field.'
 	),
 	memory: string()
+		.max(max_memory_length)
 		.optional()
-		.describe('[Required for set/append] The memory content to store in your own memory field')
+		.describe(
+			`[Required for set/append] The memory content to store in your own memory field. The final memory field must not exceed ${max_memory_length} characters in total.`
+		)
 })
 
 const requireMemory = (action: 'set' | 'append', memory?: string) => {
@@ -23,6 +28,12 @@ const requireMemory = (action: 'set' | 'append', memory?: string) => {
 	}
 
 	return next_memory
+}
+
+const assertMemoryLength = (memory: string) => {
+	if (memory.length > max_memory_length) {
+		throw new Error(`memory must not exceed ${max_memory_length} characters`)
+	}
 }
 
 export const createSelfMemoryTool = (s: Session) => {
@@ -55,6 +66,8 @@ export const createSelfMemoryTool = (s: Session) => {
 						return ''
 				}
 			})()
+
+			assertMemoryLength(next_memory)
 			const updated_agent = await setAgent(eq(agent.id, s.owner_agent.id), { memory: next_memory })
 
 			if (updated_agent) {
