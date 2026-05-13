@@ -18,6 +18,8 @@ import type { Message, MessageDataParts, MessageMetadata, MessagePartDurationUIP
 import type Group from '../index'
 import type { GroupMemberEvaluation } from '../types'
 
+const silent_group_tool_types = new Set(['tool-group_coordination_tool', 'tool-group_progress_tool'])
+
 const getAgentProfilePrompt = (agent: Agent) =>
 	[
 		'# Group Member Profile',
@@ -50,6 +52,35 @@ const getMountedFolderPrompt = (s: Group) => {
 	lines.push('Use these mounted paths when reading or writing files for the group.')
 
 	return lines.join('\n')
+}
+
+const normalizeResponseParts = (parts: Array<Message['parts'][number]>) => {
+	const first_text_index = parts.findIndex(part => part.type === 'text')
+
+	if (first_text_index < 0) {
+		return { parts, drop_duration_parts: false }
+	}
+
+	const first_silent_tool_after_text_index = parts.findIndex(
+		(part, index) => index > first_text_index && silent_group_tool_types.has(part.type)
+	)
+
+	if (first_silent_tool_after_text_index < 0) {
+		return { parts, drop_duration_parts: false }
+	}
+
+	const has_text_after_silent_tool = parts.some(
+		(part, index) => index > first_silent_tool_after_text_index && part.type === 'text'
+	)
+
+	if (!has_text_after_silent_tool) {
+		return { parts, drop_duration_parts: false }
+	}
+
+	return {
+		parts: parts.slice(first_silent_tool_after_text_index),
+		drop_duration_parts: true
+	}
 }
 
 const gateWriteTool = <T extends { execute?: (...args: Array<any>) => any }>(
@@ -192,7 +223,22 @@ export default async (args: {
 					agent_name: agent.name,
 					part_count: responseMessage.parts.length
 				})
-				if (duration_parts.length > 0) {
+				const normalized = normalizeResponseParts(responseMessage.parts)
+
+				responseMessage.parts = normalized.parts
+
+				if (normalized.drop_duration_parts) {
+					console.log('[group-debug][runMember] normalized-duplicate-reply', {
+						session_id: s.id,
+						group_id: s.group_id,
+						turn_id,
+						agent_id: agent.id,
+						agent_name: agent.name,
+						part_count: responseMessage.parts.length
+					})
+				}
+
+				if (duration_parts.length > 0 && !normalized.drop_duration_parts) {
 					responseMessage.parts = [...responseMessage.parts, ...duration_parts]
 				}
 

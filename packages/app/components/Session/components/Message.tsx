@@ -78,7 +78,12 @@ const getTargetTypeFromPart = (part: DurationAwarePart) => {
 	return part.type
 }
 
-const hidden_tool_types = new Set(['tool-context_tool', 'tool-report_tool'])
+const hidden_tool_types = new Set([
+	'tool-context_tool',
+	'tool-report_tool',
+	'tool-group_coordination_tool',
+	'tool-group_progress_tool'
+])
 
 const isHiddenToolPart = (part: DurationAwarePart) => hidden_tool_types.has(part.type)
 
