@@ -11,7 +11,6 @@ import { createGroupCoordinationTool } from '../tools/coordination'
 import { createGroupMemberTool } from '../tools/member'
 import { createGroupProgressTool } from '../tools/progress'
 import getAgentModel from './getAgentModel'
-import getAgentsMapPrompt from './getAgentsMapPrompt'
 
 import type { Agent } from '@core/db'
 import type { ModelMessage, UIMessageChunk } from 'ai'
@@ -128,7 +127,6 @@ export default async (args: {
 		'# Group Runtime Rules',
 		`Group Name: ${s.group.name}`,
 		s.group.description ? `Group Description: ${s.group.description}` : '',
-		getAgentsMapPrompt(s),
 		getMountedFolderPrompt(s),
 		`Leadership Mode For This Turn: ${evaluation.leadership}`,
 		evaluation.reason ? `Selection Reason: ${evaluation.reason}` : '',
@@ -137,9 +135,7 @@ export default async (args: {
 			? 'Your work is expected to need shared writes. Acquire the group write lock before any write-capable tool use.'
 			: 'Only acquire the group write lock if you truly need shared writes.',
 		'Only your own full profile is preloaded. Use group_member_tool to inspect specific members on demand.',
-		'Never say or imply that you are another member from the group agents map.',
 		'If the user asked for another member or role, you still must not impersonate them. Answer only as yourself.',
-		'The group agents map exists only so you know who else exists. Do not write sections for other members, simulate their opinions, or answer as a whole panel unless the user explicitly asked for a multi-member synthesis.',
 		'Do not speak on behalf of other members or summarize what they would say unless the user explicitly asked for a cross-member synthesis.',
 		'Do not address other members by name inside the final user-facing answer, do not assign them tasks, and do not ask them questions there.',
 		'Your final answer must be a self-contained response to the user from your own role only.',

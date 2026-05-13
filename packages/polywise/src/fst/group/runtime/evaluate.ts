@@ -61,7 +61,7 @@ export default async (s: Group, agent: Agent, messages: Array<ModelMessage>) => 
 			'If you need to edit files or run write-capable commands, set needs_write_lock=true.',
 			`Group Name: ${s.group.name}`,
 			s.group.description ? `Group Description: ${s.group.description}` : '',
-			getAgentsMapPrompt(s),
+			getAgentsMapPrompt(s, { include_description: false }),
 			getAgentProfilePrompt(agent),
 			getContextPrompt(s.context)
 		]

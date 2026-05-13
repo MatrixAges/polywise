@@ -1,10 +1,11 @@
 import type Group from '../index'
 
-export default (s: Group) => {
+export default (s: Group, args?: { include_description?: boolean }) => {
 	if (!s.agents_map.length) {
 		return ''
 	}
 
+	const include_description = args?.include_description ?? false
 	const lines = [
 		'# Group Agents Map',
 		'The following lightweight member map is preloaded for routing decisions and awareness only.',
@@ -14,7 +15,9 @@ export default (s: Group) => {
 
 	for (const agent of s.agents_map) {
 		lines.push(
-			`- ${agent.id}: ${agent.name} (${agent.role})${agent.description ? ` - ${agent.description}` : ''}`
+			`- ${agent.id}: ${agent.name} (${agent.role})${
+				include_description && agent.description ? ` - ${agent.description}` : ''
+			}`
 		)
 	}
 
