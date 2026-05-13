@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
-import { Bubbles, Pencil } from 'lucide-react'
+import dayjs from 'dayjs'
+import { Pencil } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { ArrowLeft, Grip } from '@/components/animate'
@@ -24,12 +25,13 @@ const Index = ({ item, selected, onClick, onEdit }: IProps) => {
 	const preview_text = item.last_message?.text
 		? `${item.last_message.sender ? `${item.last_message.sender}：` : ''}${item.last_message.text}`
 		: item.description || `${item.agents.length} agents`
+
 	const Status = useMemo(() => {
 		if (is_runing) return <Grip className='text-std-400! size-2.5' />
 		if (unread) return <ArrowLeft className='size-2.5 text-indigo-500!' />
 
-		return <Bubbles className='text-std-400 size-2.5' />
-	}, [is_runing, unread])
+		return <span className='text-std-400 text-xs'>{dayjs(item.session.updated_at).fromNow(true)}</span>
+	}, [is_runing, unread, item.session.updated_at])
 
 	return (
 		<div
