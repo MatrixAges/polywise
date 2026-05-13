@@ -4,7 +4,6 @@ import { getId } from 'stk/utils'
 
 import evaluateMember from '../runtime/evaluate'
 import { releaseWriteLock, setBarrier } from '../runtime/locks'
-import pickMembers from '../runtime/pickMembers'
 import runMember from '../runtime/runMember'
 
 import type { Message } from '../../types'
@@ -63,10 +62,7 @@ export default async (s: Group, message: Message) => {
 				s.sync()
 			}
 
-			const enqueueEvaluation = async (
-				evaluation: GroupMemberEvaluation,
-				source: GroupReplyQueueItem['source']
-			) => {
+			const enqueueEvaluation = async (evaluation: GroupMemberEvaluation) => {
 				if (!evaluation.should_answer) {
 					return
 				}
@@ -91,7 +87,6 @@ export default async (s: Group, message: Message) => {
 						agent_id: evaluation.agent.id,
 						agent_name: evaluation.agent.name,
 						status: 'queued',
-						source,
 						reason: evaluation.reason,
 						confidence: evaluation.confidence,
 						leadership: evaluation.leadership,
@@ -186,7 +181,7 @@ export default async (s: Group, message: Message) => {
 				await setBarrier(s, null)
 			}
 
-			const runEvaluation = async (agent_id: string, source: GroupReplyQueueItem['source']) => {
+			const runEvaluation = async (agent_id: string) => {
 				const agent = s.agents.find(item => item.id === agent_id)
 
 				if (!agent) {
@@ -200,23 +195,12 @@ export default async (s: Group, message: Message) => {
 				}
 
 				evaluations.set(agent.id, evaluation)
-				await enqueueEvaluation(evaluation, source)
+				await enqueueEvaluation(evaluation)
 			}
 
 			try {
-				const picked_agents = await pickMembers(s, base_messages)
-				const picked_ids = picked_agents.map(item => item.agent_id)
-				const picked_id_set = new Set(picked_ids)
-				const rest_ids = s.agents
-					.map(agent => agent.id)
-					.filter(agent_id => !picked_id_set.has(agent_id))
 				const queue_runner = processQueue()
-				const picked_jobs = picked_ids.map(agent_id => runEvaluation(agent_id, 'pick'))
-				const rest_jobs = Promise.resolve().then(() =>
-					Promise.allSettled(rest_ids.map(agent_id => runEvaluation(agent_id, 'background')))
-				)
-
-				await Promise.allSettled([...picked_jobs, rest_jobs])
+				await Promise.allSettled(s.agents.map(agent => runEvaluation(agent.id)))
 				evaluations_finished = true
 				notifyQueue()
 				await queue_runner

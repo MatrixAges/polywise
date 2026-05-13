@@ -7,38 +7,27 @@ import planexec_exec_prompt from '@core/consts/prompts/planexec_exec_prompt.md'
 import planexec_plan_prompt from '@core/consts/prompts/planexec_plan_prompt.md'
 import { addNotification, addNotificationSession, syncTodoSessionStatusBySessionId } from '@core/db/services'
 import { env } from '@core/env'
-import { createSystemTool } from '@core/fst/agents'
 import { extract, getComplexitySignal } from '@core/fst/agents/superego'
 import { pushPart, startStream, stopStream } from '@core/fst/agents/supervisor'
 import { createPartDurationTracker, getPartDurationChunk } from '@core/fst/duration'
-import { getSystemTools, SessionEventStore } from '@core/utils'
+import { SessionEventStore } from '@core/utils'
 import { convertToModelMessages, createUIMessageStream, smoothStream, stepCountIs, streamText } from 'ai'
 import dayjs from 'dayjs'
 import { getId } from 'stk/utils'
 import { match } from 'ts-pattern'
 
-import { loadMcpTools } from '../../mcp'
 import {
-	createBashTool,
-	createContentTool,
+	buildSharedRuntimeTools,
 	createContextTool,
 	createCronTool,
-	createEditFileTool,
 	createErrorCollectTool,
-	createGlobTool,
 	createMessageTool,
-	createMetaTool,
 	createPlanTool,
 	createQuestionTool,
 	createReportTool,
-	createSearchFileTool,
 	createSelfMemoryTool,
 	createSkillTool,
 	createTitleTool,
-	createWebFetchTool,
-	createWebSearchTool,
-	getCustomToolsPrompt,
-	getSkillPrompt,
 	updateTitle
 } from '../../tools'
 import {
@@ -51,7 +40,7 @@ import {
 	wrapToolSetWithAgentLogging
 } from '../../utils'
 
-import type { ToolSet, UIMessageChunk } from 'ai'
+import type { UIMessageChunk } from 'ai'
 import type { Message, MessageDataParts, MessageMetadata, MessagePartDurationUIPart } from '../../types'
 import type Index from '../index'
 
@@ -82,15 +71,25 @@ export default async (s: Index, message: Message) => {
 
 	if (s.prefill) messages.push({ role: 'assistant', content: s.prefill })
 
-	const bash_tool = await createBashTool(s)
-	const mcp_tools = await loadMcpTools(s)
-	const system_tools_prompt = await getSystemTools()
 	const has_todo_session_link = await s.has_todo_session_link
 	const agent_system_prompt = await getAgentSystemPrompt(s.id)
-
-	const custom_tools_prompt = getCustomToolsPrompt(s.custom_tools_map)
-	const skill_prompt = getSkillPrompt(s.skill_map)
 	const title_focus = getTitleFocus({ s, message, is_first_message })
+	const shared_runtime = await buildSharedRuntimeTools({
+		s,
+		model_tools: s.model.tools,
+		extra_tools: {
+			context_tool: createContextTool(s),
+			message_tool: createMessageTool(s),
+			plan_tool: createPlanTool(s),
+			question_tool: createQuestionTool(s.id),
+			...(s.owner_agent ? { self_memory_tool: createSelfMemoryTool(s) } : {}),
+			title_tool: createTitleTool(s),
+			skill_tool: createSkillTool(s),
+			cron_tool: createCronTool(s),
+			error_collect_tool: createErrorCollectTool(),
+			...(has_todo_session_link ? { report_tool: createReportTool(s) } : {})
+		}
+	})
 
 	const mode_prompt = match({ mode: s.mode, plan_stage: s.plan_stage })
 		.with({ mode: 'plan' }, () => plan_mode_prompt)
@@ -102,9 +101,9 @@ export default async (s: Index, message: Message) => {
 		fst_system_prompt,
 		agent_system_prompt,
 		has_todo_session_link ? fst_report_tool_prompt : '',
-		system_tools_prompt,
-		custom_tools_prompt,
-		skill_prompt,
+		shared_runtime.system_tools_prompt,
+		shared_runtime.custom_tools_prompt,
+		shared_runtime.skill_prompt,
 		`Current Session Title: ${s.session.title}`,
 		has_todo_session_link ? `Current Session Report: ${s.session.report ?? ''}` : '',
 		getContextPrompt(s.context),
@@ -114,37 +113,7 @@ export default async (s: Index, message: Message) => {
 		.filter(Boolean)
 		.join('\n\n')
 
-	const tools = wrapToolSetWithAgentLogging(
-		s,
-		sanitizeToolSet({
-			...s.model.tools,
-			...mcp_tools,
-			context_tool: createContextTool(s),
-			message_tool: createMessageTool(s),
-			plan_tool: createPlanTool(s),
-			question_tool: createQuestionTool(s.id),
-			glob_tool: createGlobTool(s),
-			search_file_tool: createSearchFileTool(s, bash_tool.env),
-			...(s.owner_agent ? { self_memory_tool: createSelfMemoryTool(s) } : {}),
-			title_tool: createTitleTool(s),
-			system_tool: createSystemTool(s),
-			bash_tool: bash_tool.bash,
-			read_file_tool: bash_tool.readFile,
-			write_file_tool: bash_tool.writeFile,
-			edit_file_tool: createEditFileTool(s),
-			skill_tool: createSkillTool(s),
-			content_tool: createContentTool(s),
-			web_search_tool: createWebSearchTool(),
-			web_fetch_tool: createWebFetchTool(),
-			cron_tool: createCronTool(s),
-			error_collect_tool: createErrorCollectTool(),
-			meta_tool: createMetaTool(s)
-		} as ToolSet)
-	)
-
-	if (has_todo_session_link) {
-		tools.report_tool = createReportTool(s)
-	}
+	const tools = wrapToolSetWithAgentLogging(s, sanitizeToolSet(shared_runtime.tools))
 	const res = streamText({
 		model: s.model.model,
 		system: system_prompt,

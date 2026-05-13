@@ -49,7 +49,6 @@ export interface GroupReplyQueueItem {
 	agent_id: string
 	agent_name: string
 	status: 'queued' | 'running' | 'done' | 'failed'
-	source: 'pick' | 'background'
 	reason: string
 	confidence: 'low' | 'medium' | 'high'
 	leadership: 'none' | 'advisory' | 'blocking'
@@ -75,12 +74,6 @@ export interface GroupMemberEvaluation {
 	confidence: 'low' | 'medium' | 'high'
 	leadership: 'none' | 'advisory' | 'blocking'
 	needs_write_lock: boolean
-}
-
-export interface GroupPickedAgent {
-	agent_id: string
-	agent_name: string
-	reason: string
 }
 
 export interface GroupSyncPayload {

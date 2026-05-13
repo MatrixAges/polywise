@@ -15,6 +15,7 @@ export * from './plan'
 export * from './meta'
 export * from './report'
 export * from './self_memory'
+export * from './runtime'
 
 export { createContextTool } from './context'
 export type { ContextInput } from './context'

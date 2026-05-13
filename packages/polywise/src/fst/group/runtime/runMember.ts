@@ -1,21 +1,7 @@
 import fst_system_prompt from '@core/consts/prompts/fst_system_prompt.md'
 import getContextPrompt from '@core/consts/prompts/getContextPrompt'
-import { createSystemTool } from '@core/fst/agents'
 import { createPartDurationTracker, getPartDurationChunk } from '@core/fst/duration'
-import { loadMcpTools } from '@core/fst/mcp'
-import {
-	createContentTool,
-	createEditFileTool,
-	createGlobTool,
-	createMetaTool,
-	createSearchFileTool,
-	createWebFetchTool,
-	createWebSearchTool,
-	getCustomToolsPrompt,
-	getSkillPrompt
-} from '@core/fst/tools'
-import { createBashTool } from '@core/fst/tools/bash'
-import { getSystemTools } from '@core/utils'
+import { buildSharedRuntimeTools } from '@core/fst/tools'
 import { consumeStream, smoothStream, stepCountIs, streamText } from 'ai'
 import dayjs from 'dayjs'
 import { getId } from 'stk/utils'
@@ -28,7 +14,7 @@ import getAgentModel from './getAgentModel'
 import getAgentsMapPrompt from './getAgentsMapPrompt'
 
 import type { Agent } from '@core/db'
-import type { ModelMessage, ToolSet, UIMessageChunk } from 'ai'
+import type { ModelMessage, UIMessageChunk } from 'ai'
 import type { Message, MessageDataParts, MessageMetadata, MessagePartDurationUIPart } from '../../types'
 import type Group from '../index'
 import type { GroupMemberEvaluation } from '../types'
@@ -91,12 +77,6 @@ export default async (args: {
 }) => {
 	const { s, agent, evaluation, messages, original_message, turn_id } = args
 	const model = await getAgentModel(agent)
-	const bash_tool = await createBashTool(s)
-	const mcp_tools = await loadMcpTools(s)
-	const system_tools_prompt = await getSystemTools()
-	const custom_tools_prompt = getCustomToolsPrompt(s.custom_tools_map)
-	const skill_prompt = getSkillPrompt(s.skill_map)
-
 	const ensureWriteLock = async () => {
 		if (s.write_lock.agent_id !== agent.id) {
 			throw new Error(
@@ -105,39 +85,28 @@ export default async (args: {
 		}
 	}
 
-	const tools = wrapToolSetWithAgentLogging(
+	const shared_runtime = await buildSharedRuntimeTools({
 		s,
-		sanitizeToolSet({
-			...mcp_tools,
-			...model.tools,
+		model_tools: model.tools,
+		extra_tools: {
 			group_progress_tool: createGroupProgressTool(s, agent),
 			group_coordination_tool: createGroupCoordinationTool(s, agent),
-			group_member_tool: createGroupMemberTool(s, agent),
-			meta_tool: createMetaTool(s),
-			glob_tool: createGlobTool(s),
-			search_file_tool: createSearchFileTool(s, bash_tool.env),
-			content_tool: createContentTool(s),
-			web_search_tool: createWebSearchTool(),
-			web_fetch_tool: createWebFetchTool(),
-			system_tool: createSystemTool(s),
-			read_file_tool: bash_tool.readFile,
-			bash_tool: gateWriteTool(
-				bash_tool.bash,
-				ensureWriteLock,
-				'Requires the group write lock before execution.'
-			),
-			write_file_tool: gateWriteTool(
-				bash_tool.writeFile,
-				ensureWriteLock,
-				'Requires the group write lock before execution.'
-			),
-			edit_file_tool: gateWriteTool(
-				createEditFileTool(s),
-				ensureWriteLock,
-				'Requires the group write lock before execution.'
-			)
-		} as ToolSet)
-	)
+			group_member_tool: createGroupMemberTool(s, agent)
+		},
+		transform_tool: (key, tool_item) => {
+			if (key === 'bash_tool' || key === 'write_file_tool' || key === 'edit_file_tool') {
+				return gateWriteTool(
+					tool_item as { execute?: (...args: Array<any>) => any },
+					ensureWriteLock,
+					'Requires the group write lock before execution.'
+				) as typeof tool_item
+			}
+
+			return tool_item
+		}
+	})
+
+	const tools = wrapToolSetWithAgentLogging(s, sanitizeToolSet(shared_runtime.tools))
 
 	const system_prompt = [
 		fst_system_prompt,
@@ -155,9 +124,9 @@ export default async (args: {
 		'Only your own full profile is preloaded. Use group_member_tool to inspect specific members on demand.',
 		'You can update shared context with group_progress_tool and shared todos/lock state with group_coordination_tool.',
 		'Do not wait for or react to other agents in the same turn. Work from the shared history and current group context only.',
-		system_tools_prompt,
-		custom_tools_prompt,
-		skill_prompt,
+		shared_runtime.system_tools_prompt,
+		shared_runtime.custom_tools_prompt,
+		shared_runtime.skill_prompt,
 		getContextPrompt(s.context),
 		`Current Session Title: ${s.session.title}`,
 		`Real World Date: ${dayjs().format('YYYY-MM-DD')}`
