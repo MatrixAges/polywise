@@ -19,6 +19,8 @@ export default async (session_id: string) => {
 		'# Agent Session Profile',
 		'## Name',
 		agent_row.agent.name,
+		'## Role',
+		agent_row.agent.role,
 		agent_row.agent.identity ? `## Identity\n${agent_row.agent.identity}` : '',
 		agent_row.agent.soul ? `## Soul\n${agent_row.agent.soul}` : '',
 		agent_row.agent.memory ? `## Memory\n${agent_row.agent.memory}` : '',

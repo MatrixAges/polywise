@@ -9,6 +9,8 @@ export default sqliteTable(
 		id: text('id').primaryKey().$defaultFn(getId),
 		// Agent name
 		name: text('name').notNull(),
+		// Agent role
+		role: text('role').notNull(),
 		// Agent description
 		description: text('description'),
 		// Agent photo: image file, photo take over avatar

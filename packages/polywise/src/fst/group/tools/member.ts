@@ -18,6 +18,7 @@ const inputSchema = object({
 const toMemberSummary = (agent: Agent) => ({
 	id: agent.id,
 	name: agent.name,
+	role: agent.role,
 	description: agent.description ?? null
 })
 

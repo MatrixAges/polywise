@@ -11,7 +11,9 @@ export default (s: Group) => {
 	]
 
 	for (const agent of s.agents_map) {
-		lines.push(`- ${agent.id}: ${agent.name}${agent.description ? ` - ${agent.description}` : ''}`)
+		lines.push(
+			`- ${agent.id}: ${agent.name} (${agent.role})${agent.description ? ` - ${agent.description}` : ''}`
+		)
 	}
 
 	return lines.join('\n')

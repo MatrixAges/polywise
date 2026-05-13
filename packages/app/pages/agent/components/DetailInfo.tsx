@@ -48,6 +48,34 @@ const Index = ({ agent }: IProps) => {
 								{agent.name}
 							</button>
 						)}
+						{edit_field_key === 'role' ? (
+							<EditableField
+								class_name='text-std-500 text-sm! font-medium leading-4.5'
+								active
+								value={agent.role}
+								placeholder='Agent role'
+								max_length={20}
+								on_submit={value =>
+									submitEditableField({
+										id: agent.id,
+										key: 'role',
+										value
+									})
+								}
+								on_cancel={cancelEditField}
+							></EditableField>
+						) : (
+							<button
+								className='
+									text-std-500 text-sm font-medium leading-4.5
+									text-left
+								'
+								type='button'
+								onClick={() => startEditField('role')}
+							>
+								{agent.role}
+							</button>
+						)}
 						{edit_field_key === 'description' ? (
 							<EditableField
 								class_name='text-std-400 text-sm! leading-4.5'

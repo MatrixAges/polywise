@@ -46,6 +46,7 @@ type RenderBlock =
 interface SenderAgentSummary {
 	id: string
 	name: string
+	role: string
 	photo: Uint8Array | null
 	avatar?: unknown
 }
@@ -518,15 +519,27 @@ const Index = (props: IPropsMessage) => {
 					<div
 						className='
 							flex
-							items-center
+							items-start
 							gap-2
 							mb-2
-							text-xsm text-std-500 font-medium tracking-[0.08em]
-							uppercase
 						'
 					>
 						{sender_agent && <SenderAvatar agent={sender_agent}></SenderAvatar>}
-						{sender_name}
+						<div className='flex flex-col gap-0.5'>
+							<div
+								className='
+									text-xsm text-std-500 font-medium tracking-[0.08em]
+									uppercase
+								'
+							>
+								{sender_name}
+							</div>
+							{sender_agent?.role && (
+								<div className='text-std-400 text-[11px] leading-4'>
+									{sender_agent.role}
+								</div>
+							)}
+						</div>
 					</div>
 				)}
 				{render_blocks.length ? (

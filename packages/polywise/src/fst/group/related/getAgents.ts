@@ -13,6 +13,7 @@ export default async (s: Group) => {
 	s.agents_map = s.agents.map(agent => ({
 		id: agent.id,
 		name: agent.name,
+		role: agent.role,
 		description: agent.description ?? null
 	}))
 }

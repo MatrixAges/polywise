@@ -11,6 +11,7 @@ type AgentCreateInput = Infer<typeof input_type>
 
 const generated_agent_schema = object({
 	name: string().describe('A short, distinctive agent name'),
+	role: string().describe('A concise role label, ideally one or two words and no more than 20 characters'),
 	description: string().describe('A concise one-sentence description of the agent focus'),
 	prompt: string().describe('The core instruction prompt that defines how the agent should respond'),
 	soul: string().describe('The tone, temperament, and internal style of the agent'),
@@ -20,12 +21,18 @@ const generated_agent_schema = object({
 
 const normalizeSingleLine = (value?: string | null) => value?.trim().replace(/\s+/g, ' ') || ''
 const normalizeBlock = (value?: string | null) => value?.trim() || ''
+const normalizeRole = (value?: string | null) => {
+	const next_value = normalizeSingleLine(value)
+
+	return next_value && next_value.length <= 20 ? next_value : ''
+}
 
 const getFallbackAgentProfile = async () => {
 	const agent_items = await getAgents()
 
 	return {
 		name: `Agent ${agent_items.length + 1}`,
+		role: 'Assistant',
 		description: 'A flexible AI assistant for planning, writing, and everyday problem solving.',
 		prompt: [
 			'## Mission',
@@ -68,6 +75,7 @@ const getAgentProfilePrompt = (input: AgentCreateInput) => {
 	const fields = [
 		['purpose', input.purpose],
 		['name', input.name],
+		['role', input.role],
 		['description', input.description],
 		['prompt', input.prompt],
 		['soul', input.soul],
@@ -77,9 +85,10 @@ const getAgentProfilePrompt = (input: AgentCreateInput) => {
 
 	return [
 		'Create a fresh AI agent profile.',
-		'Return a short, memorable name, a concise description, and complete fields for prompt, soul, identity, and memory.',
+		'Return a short, memorable name, a concise role, a concise description, and complete fields for prompt, soul, identity, and memory.',
 		'Use the purpose sentence as the main design anchor when it is present.',
 		'Make the result feel specific and varied instead of generic or numbered.',
+		'The role must be no more than 20 characters and should usually be one or two words.',
 		'The prompt should be directly usable as the agent system prompt.',
 		'The soul should capture tone and temperament.',
 		'The identity should define role and expertise.',
@@ -97,6 +106,7 @@ export default p.input(input_type).mutation(async ({ input }) => {
 	const fallback_profile = await getFallbackAgentProfile()
 	let generated_profile = null as {
 		name?: string
+		role?: string
 		description?: string
 		prompt?: string
 		soul?: string
@@ -112,12 +122,13 @@ export default p.input(input_type).mutation(async ({ input }) => {
 			schema: generated_agent_schema,
 			prompt: getAgentProfilePrompt(input),
 			instructions:
-				'Generate a concise AI agent profile. Keep the name short and distinctive. Keep the description to one sentence. For prompt, soul, identity, and memory, return valid structured Markdown with short headings and bullet lists. Do not use code fences. Do not wrap the fields in quotes.'
+				'Generate a concise AI agent profile. Keep the name short and distinctive. Keep the role within 20 characters and preferably one or two words. Keep the description to one sentence. For prompt, soul, identity, and memory, return valid structured Markdown with short headings and bullet lists. Do not use code fences. Do not wrap the fields in quotes.'
 		})
 	} catch {}
 
 	const name =
 		normalizeSingleLine(input.name) || normalizeSingleLine(generated_profile?.name) || fallback_profile.name
+	const role = normalizeRole(input.role) || normalizeRole(generated_profile?.role) || fallback_profile.role
 	const description =
 		normalizeSingleLine(input.description) ||
 		normalizeSingleLine(generated_profile?.description) ||
@@ -133,6 +144,7 @@ export default p.input(input_type).mutation(async ({ input }) => {
 	const next_agent = await addAgent({
 		...input,
 		name,
+		role,
 		description,
 		prompt,
 		soul,

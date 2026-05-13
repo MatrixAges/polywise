@@ -15,6 +15,7 @@ export interface GroupTaskContextItem extends BaseTaskContextItem {
 export interface GroupAgentSummary {
 	id: string
 	name: string
+	role: string
 	description: string | null
 }
 

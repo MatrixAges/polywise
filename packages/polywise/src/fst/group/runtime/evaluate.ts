@@ -22,6 +22,7 @@ const evaluation_schema = object({
 const getAgentProfilePrompt = (agent: Agent) =>
 	[
 		`Agent Name: ${agent.name}`,
+		`Agent Role: ${agent.role}`,
 		agent.identity ? `Identity:\n${agent.identity}` : '',
 		agent.soul ? `Soul:\n${agent.soul}` : '',
 		agent.memory ? `Memory:\n${agent.memory}` : '',

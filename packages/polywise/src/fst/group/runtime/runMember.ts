@@ -23,6 +23,7 @@ const getAgentProfilePrompt = (agent: Agent) =>
 	[
 		'# Group Member Profile',
 		`Name: ${agent.name}`,
+		`Role: ${agent.role}`,
 		agent.identity ? `Identity:\n${agent.identity}` : '',
 		agent.soul ? `Soul:\n${agent.soul}` : '',
 		agent.memory ? `Memory:\n${agent.memory}` : '',

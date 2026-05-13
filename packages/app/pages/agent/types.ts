@@ -81,13 +81,14 @@ export type AgentAvatarConfig = IAgentAvatarNice | IAgentAvatarNotion
 
 export interface IEditableFieldArgs {
 	id: string
-	key: 'name' | 'description' | AgentTab
+	key: 'name' | 'role' | 'description' | AgentTab
 	value: string
 }
 
 export interface IUpdateAgentArgs {
 	id: string
 	name?: string
+	role?: string
 	description?: string
 	prompt?: string
 	soul?: string

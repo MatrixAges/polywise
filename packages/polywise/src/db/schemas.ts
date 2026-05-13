@@ -10,6 +10,7 @@ const agent_model_schema = z.object({
 	effort: z.string().optional(),
 	options: z.unknown().optional()
 })
+const agent_role_schema = z.string().trim().min(1).max(20)
 
 const todo_timestamp_schema = z.number().int()
 
@@ -43,6 +44,7 @@ export const todo_update_input_schema = todo_insert_schema
 	})
 
 export const agent_insert_schema = createInsertSchema(agent, {
+	role: agent_role_schema,
 	photo: z.unknown().optional(),
 	avatar: z.unknown().optional(),
 	tools: z.array(z.string()).optional(),
@@ -60,6 +62,7 @@ export const agent_create_input_schema = agent_insert_schema
 	})
 	.extend({
 		name: z.string().optional(),
+		role: agent_role_schema.optional(),
 		description: z.string().optional(),
 		model: agent_model_schema.optional(),
 		purpose: z.string().optional()

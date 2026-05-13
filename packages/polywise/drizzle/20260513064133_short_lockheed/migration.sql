@@ -1,0 +1,1 @@
+ALTER TABLE `agent` ADD `role` text NOT NULL;

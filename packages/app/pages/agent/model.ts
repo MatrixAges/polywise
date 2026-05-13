@@ -71,7 +71,7 @@ export default class Index {
 	selected_agent_id = ''
 	page_mode = 'sessions' as AgentPageMode
 	current_tab = 'info' as AgentTab
-	edit_field_key = '' as '' | 'name' | 'description' | AgentTab
+	edit_field_key = '' as '' | 'name' | 'role' | 'description' | AgentTab
 	session_menu_open = true
 	article_items = [] as Array<AgentArticleItem>
 	article_for = 'memory' as ArticleForType
@@ -96,6 +96,7 @@ export default class Index {
 	create_agent_mode = 'auto' as AgentCreateMode
 	create_agent_purpose = ''
 	create_agent_name = ''
+	create_agent_role = ''
 	create_agent_description = ''
 	create_agent_loading = false
 	group_dialog_open = false
@@ -587,6 +588,7 @@ export default class Index {
 			this.create_agent_mode = 'auto'
 			this.create_agent_purpose = ''
 			this.create_agent_name = ''
+			this.create_agent_role = ''
 			this.create_agent_description = ''
 		}
 	}
@@ -595,6 +597,7 @@ export default class Index {
 		this.create_agent_mode = 'auto'
 		this.create_agent_purpose = ''
 		this.create_agent_name = ''
+		this.create_agent_role = ''
 		this.create_agent_description = ''
 		this.create_dialog_open = true
 	}
@@ -613,6 +616,10 @@ export default class Index {
 
 	setCreateAgentName(value: string) {
 		this.create_agent_name = value
+	}
+
+	setCreateAgentRole(value: string) {
+		this.create_agent_role = value
 	}
 
 	setCreateAgentDescription(value: string) {
@@ -664,7 +671,7 @@ export default class Index {
 		void this.refreshAgentRelated()
 	}
 
-	startEditField(key: '' | 'name' | 'description' | AgentTab) {
+	startEditField(key: '' | 'name' | 'role' | 'description' | AgentTab) {
 		this.edit_field_key = key
 	}
 
@@ -828,7 +835,7 @@ export default class Index {
 		this.article_draft = value
 	}
 
-	async createAgent(args?: { purpose?: string; name?: string; description?: string }) {
+	async createAgent(args?: { purpose?: string; name?: string; role?: string; description?: string }) {
 		if (this.create_agent_loading) return
 
 		this.create_agent_loading = true
@@ -837,6 +844,7 @@ export default class Index {
 			const next_agent = await rpc.agent.create.mutate({
 				purpose: args?.purpose?.trim() || undefined,
 				name: args?.name?.trim() || undefined,
+				role: args?.role?.trim() || undefined,
 				description: args?.description?.trim() || undefined,
 				avatar: {
 					type: 'nice',
@@ -869,13 +877,14 @@ export default class Index {
 	async submitCreateAgentDialog() {
 		const purpose = this.create_agent_purpose.trim()
 		const name = this.create_agent_name.trim()
+		const role = this.create_agent_role.trim()
 		const description = this.create_agent_description.trim()
 
 		if (this.create_agent_mode === 'auto' && !purpose) {
 			return
 		}
 
-		if (this.create_agent_mode === 'input' && !name) {
+		if (this.create_agent_mode === 'input' && (!name || !role)) {
 			return
 		}
 
@@ -884,6 +893,7 @@ export default class Index {
 				? { purpose }
 				: {
 						name,
+						role,
 						description
 					}
 		)
@@ -1153,6 +1163,10 @@ export default class Index {
 	async submitEditableField(args: IEditableFieldArgs) {
 		const { id, key, value } = args
 		const next_value = value.trim()
+
+		if (key === 'role' && !next_value) {
+			return
+		}
 
 		await this.updateAgent({ id, [key]: next_value })
 		this.edit_field_key = ''

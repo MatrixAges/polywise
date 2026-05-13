@@ -16,6 +16,7 @@ import type { IProps } from './index'
 interface GroupAgentSummary {
 	id: string
 	name: string
+	role: string
 	photo: Uint8Array | null
 	avatar?: unknown
 }

@@ -28,6 +28,14 @@ const normalizeAgentTools = (value: unknown): Array<string> => {
 	)
 }
 
+const normalizeAgentRole = (value: unknown) => {
+	if (typeof value !== 'string') {
+		return ''
+	}
+
+	return value.trim().replace(/\s+/g, ' ')
+}
+
 const isValidAgentModel = (value: unknown): value is TableModel => {
 	if (!value || typeof value !== 'object') {
 		return false
@@ -82,6 +90,13 @@ const normalizeAgentValues = <T extends Partial<AgentInsert>>(values: T): T => {
 		}
 	}
 
+	if ('role' in next_values) {
+		next_values = {
+			...next_values,
+			role: normalizeAgentRole(next_values.role)
+		}
+	}
+
 	return next_values as T
 }
 
@@ -93,7 +108,8 @@ const normalizeAgent = (row: Agent | undefined) => {
 	const next_row = {
 		...row,
 		model: normalizeAgentModel(row.model),
-		tools: normalizeAgentTools(row.tools)
+		tools: normalizeAgentTools(row.tools),
+		role: normalizeAgentRole(row.role)
 	}
 	const photo = row.photo
 
