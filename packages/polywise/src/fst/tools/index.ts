@@ -14,6 +14,7 @@ export * from './error_collect'
 export * from './plan'
 export * from './meta'
 export * from './report'
+export * from './self_memory'
 
 export { createContextTool } from './context'
 export type { ContextInput } from './context'
