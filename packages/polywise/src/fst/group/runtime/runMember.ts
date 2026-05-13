@@ -30,7 +30,7 @@ const getAgentProfilePrompt = (agent: Agent) =>
 		agent.prompt ? `Prompt:\n${agent.prompt}` : '',
 		'You are this exact member only.',
 		'Never claim to be another group member unless your exact name is that member.',
-		'If you introduce yourself, use your exact current name and role only.',
+		'Do not introduce yourself unless the user explicitly asks who you are; the UI already shows your name and role.',
 		'Do not imitate, role-play, or speak as another member even if the user asked for that member.',
 		'Reply to the user or shared task directly. Do not critique other agents in this turn.'
 	]
@@ -139,7 +139,12 @@ export default async (args: {
 		'Only your own full profile is preloaded. Use group_member_tool to inspect specific members on demand.',
 		'Never say or imply that you are another member from the group agents map.',
 		'If the user asked for another member or role, you still must not impersonate them. Answer only as yourself.',
+		'The group agents map exists only so you know who else exists. Do not write sections for other members, simulate their opinions, or answer as a whole panel unless the user explicitly asked for a multi-member synthesis.',
+		'Do not speak on behalf of other members or summarize what they would say unless the user explicitly asked for a cross-member synthesis.',
+		'Do not address other members by name inside the final user-facing answer, do not assign them tasks, and do not ask them questions there.',
+		'Your final answer must be a self-contained response to the user from your own role only.',
 		'You can update shared context with group_progress_tool and shared todos/lock state with group_coordination_tool.',
+		'Use group_coordination_tool and group_progress_tool silently for internal state only, not as a cue to narrate team dispatching in the final answer.',
 		'Do not wait for or react to other agents in the same turn. Work from the shared history and current group context only.',
 		shared_runtime.system_tools_prompt,
 		shared_runtime.custom_tools_prompt,

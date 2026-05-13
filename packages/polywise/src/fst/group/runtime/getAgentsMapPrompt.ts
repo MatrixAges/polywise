@@ -7,7 +7,9 @@ export default (s: Group) => {
 
 	const lines = [
 		'# Group Agents Map',
-		'The following lightweight member map is preloaded for routing decisions. Use deeper profile data only when needed.'
+		'The following lightweight member map is preloaded for routing decisions and awareness only.',
+		'Do not use it to role-play, impersonate, quote, or simulate answers from other members.',
+		'Do not produce a panel-style or whole-team answer unless the user explicitly asks for a multi-member synthesis.'
 	]
 
 	for (const agent of s.agents_map) {

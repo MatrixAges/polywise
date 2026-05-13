@@ -51,6 +51,8 @@ export default async (s: Group, agent: Agent, messages: Array<ModelMessage>) => 
 			'If another member is more directly addressed, more clearly responsible, or obviously better positioned to answer, set should_answer=false.',
 			'If the user explicitly asks for a different member by name, or for a role that clearly belongs to another member in the group agents map, set should_answer=false.',
 			'If the user is calling attendance, summoning a role, or asking for a specific perspective, only answer when that is clearly you.',
+			'If your answer would mainly imitate a product manager, panel host, or whole-team spokesperson rather than your actual role, set should_answer=false.',
+			'If your answer would mostly summarize what other members would say instead of giving your own role-specific perspective, set should_answer=false.',
 			'Do not answer just to acknowledge presence, agree, or restate what another likely member would say.',
 			'If your likely response would be redundant, generic, low-information, or merely supportive, set should_answer=false.',
 			'Prefer fewer responders. Multiple members should answer the same turn only when they are providing meaningfully different and necessary contributions.',
