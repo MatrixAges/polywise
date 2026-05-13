@@ -159,9 +159,7 @@ export default async (args: {
 				return {
 					usage: part.totalUsage,
 					timestamp: Date.now(),
-					sender: agent.name,
 					sender_id: agent.id,
-					sender_role: agent.role,
 					group_id: s.group_id,
 					group_name: s.group.name,
 					group_turn_id: turn_id,
@@ -176,9 +174,7 @@ export default async (args: {
 				responseMessage.metadata = {
 					...(responseMessage.metadata ?? {}),
 					timestamp: Date.now(),
-					sender: agent.name,
 					sender_id: agent.id,
-					sender_role: agent.role,
 					group_id: s.group_id,
 					group_name: s.group.name,
 					group_turn_id: turn_id,

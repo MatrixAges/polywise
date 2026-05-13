@@ -421,19 +421,21 @@ const Index = (props: IPropsMessage) => {
 		() => formatMessageTime(getMessageTime(message)),
 		[message.createdAt, message.metadata?.timestamp]
 	)
-	const sender_name = message.metadata?.sender
-	const sender_role = message.metadata?.sender_role
+	const metadata_sender_name = message.metadata?.sender
+	const metadata_sender_role = message.metadata?.sender_role
 	const sender_agent = useMemo(
 		() =>
 			group_agents.find(item => item.id === message.metadata?.sender_id) ||
-			group_agents.find(item => item.name === sender_name) ||
+			group_agents.find(item => item.name === metadata_sender_name) ||
 			getFallbackSenderSummary({
 				sender_id: message.metadata?.sender_id,
-				sender_name,
-				sender_role
+				sender_name: metadata_sender_name,
+				sender_role: metadata_sender_role
 			}),
-		[group_agents, message.metadata?.sender_id, sender_name, sender_role]
+		[group_agents, message.metadata?.sender_id, metadata_sender_name, metadata_sender_role]
 	)
+	const sender_name = sender_agent?.name || metadata_sender_name
+	const sender_role = sender_agent?.role || metadata_sender_role
 
 	const { source_urls, render_blocks } = useMemo(() => {
 		const source_urls = [] as Array<SourceUrlUIPart>

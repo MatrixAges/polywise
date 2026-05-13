@@ -99,6 +99,7 @@ export type ChatEventRes = {
 			agents: Array<{
 				id: string
 				name: string
+				role: string
 				photo: Uint8Array | null
 				avatar?: unknown
 			}>

@@ -105,6 +105,91 @@ export default class Group extends Session {
 		return Promise.resolve(false)
 	}
 
+	getMessageSenderAgent(message: (typeof this.ui_messages)[number]) {
+		if (message.role !== 'assistant') {
+			return null
+		}
+
+		const sender_id = message.metadata?.sender_id
+
+		if (sender_id) {
+			return this.agents.find(agent => agent.id === sender_id) ?? null
+		}
+
+		const sender_name = message.metadata?.sender
+
+		if (sender_name) {
+			return this.agents.find(agent => agent.name === sender_name) ?? null
+		}
+
+		return null
+	}
+
+	hydrateGroupMessage(message: (typeof this.ui_messages)[number]) {
+		if (message.role !== 'assistant') {
+			return message
+		}
+
+		const sender_agent = this.getMessageSenderAgent(message)
+
+		if (!sender_agent) {
+			return message
+		}
+
+		const next_metadata = {
+			...message.metadata,
+			sender: sender_agent.name,
+			sender_id: message.metadata?.sender_id ?? sender_agent.id,
+			sender_role: sender_agent.role
+		}
+
+		if (
+			message.metadata?.sender === next_metadata.sender &&
+			message.metadata?.sender_id === next_metadata.sender_id &&
+			message.metadata?.sender_role === next_metadata.sender_role
+		) {
+			return message
+		}
+
+		return {
+			...message,
+			metadata: next_metadata
+		}
+	}
+
+	getHydratedUiMessages() {
+		return this.ui_messages.map(message => this.hydrateGroupMessage(message))
+	}
+
+	getGroupPayload() {
+		return {
+			id: this.group.id,
+			name: this.group.name,
+			description: this.group.description ?? null,
+			agents: this.agents.map(agent => ({
+				id: agent.id,
+				name: agent.name,
+				role: agent.role,
+				photo: agent.photo ?? null,
+				avatar: agent.avatar ?? null
+			}))
+		}
+	}
+
+	getSyncData() {
+		return {
+			session: this.session,
+			messages: this.getHydratedUiMessages(),
+			context: this.context,
+			archived_at: this.archived_at,
+			has_older: this.ui_has_older,
+			has_newer: this.ui_has_newer,
+			permission: this.permission,
+			mode: this.mode,
+			group: this.getGroupPayload()
+		}
+	}
+
 	async init(args: InitArgs & GroupInitArgs) {
 		const { id, event, is_cron, title, group_id } = args
 
@@ -180,28 +265,7 @@ export default class Group extends Session {
 	override sync = () => {
 		this.event.emit(`${this.id}/change`, {
 			type: 'sync',
-			data: {
-				session: this.session,
-				messages: this.ui_messages,
-				context: this.context,
-				archived_at: this.archived_at,
-				has_older: this.ui_has_older,
-				has_newer: this.ui_has_newer,
-				permission: this.permission,
-				mode: this.mode,
-				group: {
-					id: this.group.id,
-					name: this.group.name,
-					description: this.group.description ?? null,
-					agents: this.agents.map(agent => ({
-						id: agent.id,
-						name: agent.name,
-						role: agent.role,
-						photo: agent.photo ?? null,
-						avatar: agent.avatar ?? null
-					}))
-				}
-			}
+			data: this.getSyncData()
 		})
 	}
 }

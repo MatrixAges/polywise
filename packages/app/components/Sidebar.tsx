@@ -24,7 +24,8 @@ const Index = (props: IProps) => {
 				overflow-y-scroll
 				flex
 				w-full h-full
-				border-border-light border-r
+				bg-std-50/60
+				dark:bg-std-100/60 dark:border-r dark:border-border-light/60
 			'
 			style={{ width }}
 		>
