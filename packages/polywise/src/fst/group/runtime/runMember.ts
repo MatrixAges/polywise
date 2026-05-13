@@ -28,6 +28,10 @@ const getAgentProfilePrompt = (agent: Agent) =>
 		agent.soul ? `Soul:\n${agent.soul}` : '',
 		agent.memory ? `Memory:\n${agent.memory}` : '',
 		agent.prompt ? `Prompt:\n${agent.prompt}` : '',
+		'You are this exact member only.',
+		'Never claim to be another group member unless your exact name is that member.',
+		'If you introduce yourself, use your exact current name and role only.',
+		'Do not imitate, role-play, or speak as another member even if the user asked for that member.',
 		'Reply to the user or shared task directly. Do not critique other agents in this turn.'
 	]
 		.filter(Boolean)
@@ -128,10 +132,13 @@ export default async (args: {
 		getMountedFolderPrompt(s),
 		`Leadership Mode For This Turn: ${evaluation.leadership}`,
 		evaluation.reason ? `Selection Reason: ${evaluation.reason}` : '',
+		`Current Active Member: ${agent.name} (${agent.role})`,
 		evaluation.needs_write_lock
 			? 'Your work is expected to need shared writes. Acquire the group write lock before any write-capable tool use.'
 			: 'Only acquire the group write lock if you truly need shared writes.',
 		'Only your own full profile is preloaded. Use group_member_tool to inspect specific members on demand.',
+		'Never say or imply that you are another member from the group agents map.',
+		'If the user asked for another member or role, you still must not impersonate them. Answer only as yourself.',
 		'You can update shared context with group_progress_tool and shared todos/lock state with group_coordination_tool.',
 		'Do not wait for or react to other agents in the same turn. Work from the shared history and current group context only.',
 		shared_runtime.system_tools_prompt,
@@ -163,12 +170,12 @@ export default async (args: {
 			sendSources: true,
 			generateMessageId: getId,
 			messageMetadata: ({ part }) => {
-				if (part.type !== 'finish') return
-
 				return {
-					usage: part.totalUsage,
+					...(part.type === 'finish' ? { usage: part.totalUsage } : {}),
 					timestamp: Date.now(),
+					sender: agent.name,
 					sender_id: agent.id,
+					sender_role: agent.role,
 					group_id: s.group_id,
 					group_name: s.group.name,
 					group_turn_id: turn_id,
@@ -191,7 +198,9 @@ export default async (args: {
 				responseMessage.metadata = {
 					...(responseMessage.metadata ?? {}),
 					timestamp: Date.now(),
+					sender: agent.name,
 					sender_id: agent.id,
+					sender_role: agent.role,
 					group_id: s.group_id,
 					group_name: s.group.name,
 					group_turn_id: turn_id,
