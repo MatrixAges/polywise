@@ -192,6 +192,10 @@ export default class Group extends Session {
 
 	async init(args: InitArgs & GroupInitArgs) {
 		const { id, event, is_cron, title, group_id } = args
+		console.log('[group-debug][group.init] start', {
+			session_id: id,
+			group_id: group_id ?? null
+		})
 
 		this.id = id
 		this.event = event
@@ -216,6 +220,12 @@ export default class Group extends Session {
 
 		this.group = target_group
 		await this.getFolders()
+		console.log('[group-debug][group.init] resolved', {
+			session_id: id,
+			group_id: this.group_id,
+			group_name: this.group.name,
+			folder_count: this.folders.length
+		})
 
 		await fs.ensureDir(this.group_dir)
 		await fs.ensureDir(this.context_history_dir)
@@ -226,6 +236,12 @@ export default class Group extends Session {
 		await this.getAgents()
 		await this.loadSkillMap()
 		await this.loadCustomToolsMap()
+		console.log('[group-debug][group.init] ready', {
+			session_id: id,
+			group_id: this.group_id,
+			agent_count: this.agents.length,
+			agents_map_count: this.agents_map.length
+		})
 
 		return this.getData()
 	}

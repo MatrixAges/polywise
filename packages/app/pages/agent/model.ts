@@ -1013,12 +1013,22 @@ export default class Index {
 		this.create_group_loading = true
 
 		try {
+			const agent_ids = [...args.agent_ids]
+			const folders = args.folders.map(item => ({ name: item.name, path: item.path }))
+
+			console.log('[group-debug][app.createGroup] submit', {
+				name: args.name,
+				agent_ids_count: agent_ids.length,
+				agent_ids,
+				folders_count: folders.length
+			})
+
 			const res = await rpc.group.create.mutate({
 				name: args.name,
 				description: args.description || undefined,
 				photo: args.photo,
-				agent_ids: args.agent_ids,
-				folders: args.folders
+				agent_ids,
+				folders
 			})
 
 			await this.refreshGroups()
@@ -1033,8 +1043,19 @@ export default class Index {
 
 	async submitGroupDialog() {
 		const name = this.group_dialog_name.trim()
+		const agent_ids = [...this.group_dialog_selected_agent_ids]
+		const folders = this.group_dialog_folders.map(item => ({ name: item.name, path: item.path }))
 
-		if (!name || !this.group_dialog_selected_agent_ids.length) {
+		console.log('[group-debug][app.submitGroupDialog] snapshot', {
+			mode: this.editing_group_id ? 'edit' : 'create',
+			group_id: this.editing_group_id || null,
+			name,
+			agent_ids_count: agent_ids.length,
+			agent_ids,
+			folders_count: folders.length
+		})
+
+		if (!name || !agent_ids.length) {
 			return null
 		}
 
@@ -1044,16 +1065,16 @@ export default class Index {
 				name,
 				description: this.group_dialog_description.trim(),
 				photo: this.group_dialog_photo,
-				agent_ids: this.group_dialog_selected_agent_ids,
-				folders: this.group_dialog_folders
+				agent_ids,
+				folders
 			})
 		} else {
 			await this.createGroup({
 				name,
 				description: this.group_dialog_description.trim(),
 				photo: this.group_dialog_photo,
-				agent_ids: this.group_dialog_selected_agent_ids,
-				folders: this.group_dialog_folders
+				agent_ids,
+				folders
 			})
 		}
 
@@ -1066,6 +1087,17 @@ export default class Index {
 		this.update_group_loading = true
 
 		try {
+			const agent_ids = [...args.agent_ids]
+			const folders = args.folders.map(item => ({ name: item.name, path: item.path }))
+
+			console.log('[group-debug][app.updateGroup] submit', {
+				group_id: args.id,
+				name: args.name,
+				agent_ids_count: agent_ids.length,
+				agent_ids,
+				folders_count: folders.length
+			})
+
 			await rpc.group.update.mutate({
 				id: args.id,
 				name: args.name,
@@ -1074,11 +1106,11 @@ export default class Index {
 			})
 			await rpc.group.setAgents.mutate({
 				id: args.id,
-				agent_ids: args.agent_ids
+				agent_ids
 			})
 			await rpc.group.setFolders.mutate({
 				id: args.id,
-				folders: args.folders
+				folders
 			})
 
 			await this.refreshGroups()

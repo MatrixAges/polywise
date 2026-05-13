@@ -77,6 +77,15 @@ export default async (args: {
 	turn_id: string
 }) => {
 	const { s, agent, evaluation, messages, original_message, turn_id } = args
+	console.log('[group-debug][runMember] start', {
+		session_id: s.id,
+		group_id: s.group_id,
+		turn_id,
+		agent_id: agent.id,
+		agent_name: agent.name,
+		leadership: evaluation.leadership,
+		needs_write_lock: evaluation.needs_write_lock
+	})
 	const model = await getAgentModel(agent)
 	const ensureWriteLock = async () => {
 		if (s.write_lock.agent_id !== agent.id) {
@@ -167,6 +176,14 @@ export default async (args: {
 				} satisfies MessageMetadata
 			},
 			onFinish: async ({ responseMessage }) => {
+				console.log('[group-debug][runMember] finish', {
+					session_id: s.id,
+					group_id: s.group_id,
+					turn_id,
+					agent_id: agent.id,
+					agent_name: agent.name,
+					part_count: responseMessage.parts.length
+				})
 				if (duration_parts.length > 0) {
 					responseMessage.parts = [...responseMessage.parts, ...duration_parts]
 				}
@@ -185,6 +202,15 @@ export default async (args: {
 				s.sync()
 			},
 			onError: error => {
+				console.log('[group-debug][runMember] stream-error', {
+					session_id: s.id,
+					group_id: s.group_id,
+					turn_id,
+					agent_id: agent.id,
+					agent_name: agent.name,
+					error: error instanceof Error ? error.message : String(error),
+					manual_abort: s.manual_abort
+				})
 				if (s.manual_abort) return ''
 
 				return `Stream error: ${error instanceof Error ? error.message : String(error)}`
@@ -214,7 +240,16 @@ export default async (args: {
 		stream: merge_stream,
 		done: consumeStream({
 			stream: wait_stream,
-			onError: s.manual_abort ? undefined : undefined
+			onError: error => {
+				console.log('[group-debug][runMember] consume-error', {
+					session_id: s.id,
+					group_id: s.group_id,
+					turn_id,
+					agent_id: agent.id,
+					agent_name: agent.name,
+					error: error instanceof Error ? error.message : String(error)
+				})
+			}
 		})
 	}
 }

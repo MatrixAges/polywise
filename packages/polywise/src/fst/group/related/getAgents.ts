@@ -16,4 +16,11 @@ export default async (s: Group) => {
 		role: agent.role,
 		description: agent.description ?? null
 	}))
+
+	console.log('[group-debug][group.getAgents] loaded', {
+		session_id: s.id,
+		group_id: s.group_id,
+		agent_count: s.agents.length,
+		agent_ids: s.agents.map(agent => agent.id)
+	})
 }
