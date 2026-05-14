@@ -1,4 +1,4 @@
-import { Globe, Loader, Search, TriangleAlert } from 'lucide-react'
+import { Globe, Loader, PencilLine, Search, TriangleAlert } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { Button } from '@/__shadcn__/components/ui/button'
@@ -100,8 +100,17 @@ const Index = () => {
 								</SelectGroup>
 							</SelectContent>
 						</Select>
+						{x.select_mode ? (
+							<Button variant='ghost' size='xs' onClick={x.exitSelectMode}>
+								Done
+							</Button>
+						) : (
+							<Button variant='ghost' size='icon-xs' onClick={x.enterSelectMode}>
+								<PencilLine className='size-3.5'></PencilLine>
+							</Button>
+						)}
 					</div>
-					{(x.has_checked_items || x.items.length > 0) && (
+					{x.select_mode && (x.has_checked_items || x.items.length > 0) && (
 						<div
 							className='
 								flex
@@ -183,26 +192,28 @@ const Index = () => {
 										onClick={() => x.selectLink(item.id)}
 										key={item.id}
 									>
-										<div
-											className='
-											flex shrink-0
-											items-center justify-center
-											size-5
-										'
-											onClick={event => event.stopPropagation()}
-										>
-											<input
-												className='accent-primary size-4 cursor-pointer'
-												type='checkbox'
-												checked={x.isLinkChecked(item.id)}
-												onChange={event =>
-													x.toggleLinkChecked(
-														item.id,
-														event.currentTarget.checked
-													)
-												}
-											/>
-										</div>
+										{x.select_mode && (
+											<div
+												className='
+												flex shrink-0
+												items-center justify-center
+												size-5
+											'
+												onClick={event => event.stopPropagation()}
+											>
+												<input
+													className='accent-primary size-4 cursor-pointer'
+													type='checkbox'
+													checked={x.isLinkChecked(item.id)}
+													onChange={event =>
+														x.toggleLinkChecked(
+															item.id,
+															event.currentTarget.checked
+														)
+													}
+												/>
+											</div>
+										)}
 										<div
 											className='
 											overflow-hidden

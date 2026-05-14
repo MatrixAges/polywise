@@ -29,6 +29,7 @@ export default class Index {
 	loading = false
 	loading_more = false
 	selected_id = ''
+	select_mode = false
 	checked_ids = [] as Array<string>
 	detail = null as LinkcaseDetail | null
 	detail_loading = false
@@ -96,7 +97,7 @@ export default class Index {
 	}
 
 	get has_checked_items() {
-		return this.checked_count > 0
+		return this.select_mode && this.checked_count > 0
 	}
 
 	get menu_target_item() {
@@ -168,6 +169,15 @@ export default class Index {
 
 	setSessionDialogOpen(value: boolean) {
 		this.session_dialog_open = value
+	}
+
+	enterSelectMode() {
+		this.select_mode = true
+	}
+
+	exitSelectMode() {
+		this.select_mode = false
+		this.clearCheckedLinks()
 	}
 
 	isLinkChecked(id: string) {
