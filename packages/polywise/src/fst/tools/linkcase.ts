@@ -36,7 +36,7 @@ const inputSchema = object({
 		.describe(
 			'[Required for commit_preview] Preview key returned by fetch_preview for the content you want to persist.'
 		),
-	provider: Enum(['agent-browser', 'opencli', 'curl.md', 'r.jina.ai'])
+	provider: Enum(['agent-browser', 'opencli', 'crawl4ai', 'dokobot', 'r.jina.ai'])
 		.optional()
 		.describe(
 			'[Required for fetch_preview] Run exactly this provider and return its content preview without automatic fallback.'

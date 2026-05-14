@@ -45,10 +45,6 @@ const getSearchDirs = (command: string) => {
 		dirs.add(dir)
 	}
 
-	if (command === 'curl.md' && process.env.CURLMD_INSTALL_DIR) {
-		dirs.add(process.env.CURLMD_INSTALL_DIR)
-	}
-
 	dirs.add(path.resolve(os.homedir(), '.local/bin'))
 
 	const npm_global_bin = getNpmGlobalBinDir()

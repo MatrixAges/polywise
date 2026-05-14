@@ -1,7 +1,13 @@
 import { p } from '@core/utils'
 
 import { linkcase_content_providers } from './providers'
-import { getAgentBrowserChromeProfileCheck, getOpencliBrowserBridgeCheck, isToolInstalled } from './runtime'
+import {
+	getAgentBrowserChromeProfileCheck,
+	getCrawl4aiProfileCheck,
+	getDokobotBridgeCheck,
+	getOpencliBrowserBridgeCheck,
+	isToolInstalled
+} from './runtime'
 
 export default p.query(async () => {
 	const providers = await Promise.all(
@@ -26,6 +32,25 @@ export default p.query(async () => {
 
 			if (item.id === 'agent-browser') {
 				checks.push(await getAgentBrowserChromeProfileCheck())
+			}
+
+			if (item.id === 'crawl4ai') {
+				checks.push(await getCrawl4aiProfileCheck())
+			}
+
+			if (item.id === 'dokobot') {
+				checks.push(
+					installed
+						? await getDokobotBridgeCheck()
+						: {
+								id: 'browser-bridge',
+								label: 'Browser bridge',
+								status: 'missing',
+								detail: 'Install Dokobot CLI first, then set up the extension bridge for local mode.',
+								action_label: 'Setup guide',
+								action_url: 'https://dokobot.ai/zh-CN/help/agent-features'
+							}
+				)
 			}
 
 			return {

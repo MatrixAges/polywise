@@ -2,8 +2,9 @@ import { config } from '@core/config'
 import { default_fetch_fallback_chain } from '@core/types'
 
 import fetchWithAgentBrowser from './agentBrowser'
-import fetchWithCurlMd from './curlmd'
+import fetchWithCrawl4ai from './crawl4ai'
 import fetchDirect from './direct'
+import fetchWithDokobot from './dokobot'
 import fetchWithOpencli from './opencli'
 import fetchWithRJina from './rjina'
 import { getErrorMessage } from './runtime'
@@ -14,7 +15,8 @@ import type { FetchAttempt, FetchProviderHandler, FetchProviderResult, FetchResu
 const provider_handlers: Record<WebfetchFallbackProvider, FetchProviderHandler> = {
 	'agent-browser': fetchWithAgentBrowser,
 	opencli: fetchWithOpencli,
-	'curl.md': fetchWithCurlMd,
+	crawl4ai: fetchWithCrawl4ai,
+	dokobot: fetchWithDokobot,
 	'r.jina.ai': fetchWithRJina
 }
 

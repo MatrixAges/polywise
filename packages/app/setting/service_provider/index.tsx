@@ -246,7 +246,7 @@ const Index = () => {
 						<FieldTitle className='text-base'>Enable Webfetch Chain</FieldTitle>
 						<FieldDescription>
 							Use `fetch_fallback_chain` for `webfetch`. Linkcase fetch always uses the
-							chain: agent-browser, opencli, curl.md, r.jina.ai.
+							chain: agent-browser, opencli, crawl4ai, dokobot, r.jina.ai.
 						</FieldDescription>
 					</FieldContent>
 					<Controller type='switch' name='enbale_webfetch_chain' control={control}>

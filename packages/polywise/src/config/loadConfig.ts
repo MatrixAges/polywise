@@ -10,6 +10,7 @@ import { config, providers } from './index'
 import type { ConfigProvider, PresetProvider, ProviderConfig } from '@core/types'
 
 const mergeable_provider_keys = ['apiKey', 'baseURL', 'headers', 'models'] as const
+const fetch_fallback_provider_set = new Set<string>(default_fetch_fallback_chain)
 
 const mergePresetProvider = (local_provider: ConfigProvider | undefined, preset_provider: PresetProvider) => {
 	if (!local_provider) return { provider: preset_provider, changed: true }
@@ -87,6 +88,21 @@ export default async () => {
 	if (!Array.isArray(config.fetch_fallback_chain) || !config.fetch_fallback_chain.length) {
 		config.fetch_fallback_chain = [...default_fetch_fallback_chain]
 		has_changed_config = true
+	} else {
+		const current_chain = config.fetch_fallback_chain as Array<string>
+		const migrated_chain = current_chain
+			.map(item => (item === 'curl.md' ? 'crawl4ai' : item))
+			.filter(item => fetch_fallback_provider_set.has(item))
+
+		if (
+			migrated_chain.length !== current_chain.length ||
+			migrated_chain.some((item, index) => item !== current_chain[index])
+		) {
+			config.fetch_fallback_chain = migrated_chain.length
+				? (migrated_chain as typeof config.fetch_fallback_chain)
+				: [...default_fetch_fallback_chain]
+			has_changed_config = true
+		}
 	}
 
 	const { provider_config, has_changed_provider } = mergePresetProviders(res_providers)

@@ -1,4 +1,7 @@
 import { spawn } from 'child_process'
+import { readdir } from 'fs/promises'
+import os from 'os'
+import path from 'path'
 
 import { resolveCommand } from '../../utils/resolveCommand'
 
@@ -53,6 +56,8 @@ export const runShellCommand = async (command: string) => {
 }
 
 const opencli_browser_bridge_install_url = 'https://github.com/jackwener/opencli/releases'
+const crawl4ai_identity_docs_url = 'https://docs.crawl4ai.com/advanced/identity-based-crawling/'
+const dokobot_agent_features_url = 'https://dokobot.ai/zh-CN/help/agent-features'
 
 const getStatusFromDoctorOutput = (output: string): LinkcaseProviderCheckStatus => {
 	if (/\[OK\]\s+Extension:/i.test(output) && /\[OK\]\s+Connectivity:/i.test(output)) return 'ok'
@@ -133,5 +138,81 @@ export const getAgentBrowserChromeProfileCheck = async (): Promise<LinkcaseProvi
 			profile_count > 0
 				? `CDP attach is available; detected ${profile_count} local Chrome profile${profile_count === 1 ? '' : 's'}.`
 				: 'CDP attach is available; no local Chrome profiles were listed.'
+	}
+}
+
+export const getCrawl4aiProfileCheck = async (): Promise<LinkcaseProviderCheck> => {
+	const profiles_dir = path.join(os.homedir(), '.crawl4ai', 'profiles')
+
+	try {
+		const entries = await readdir(profiles_dir, { withFileTypes: true })
+		const profile_count = entries.filter(entry => entry.isDirectory()).length
+
+		return {
+			id: 'managed-profiles',
+			label: 'Managed profiles',
+			status: 'info',
+			detail:
+				profile_count > 0
+					? `Detected ${profile_count} Crawl4AI managed profile${profile_count === 1 ? '' : 's'} for logged-in browsing sessions.`
+					: 'No Crawl4AI managed profiles detected yet. Create one with `crwl profiles` if you want logged-in session reuse.',
+			action_label: 'Session docs',
+			action_url: crawl4ai_identity_docs_url
+		}
+	} catch {
+		return {
+			id: 'managed-profiles',
+			label: 'Managed profiles',
+			status: 'info',
+			detail: 'No Crawl4AI managed profiles detected yet. Create one with `crwl profiles` if you want logged-in session reuse.',
+			action_label: 'Session docs',
+			action_url: crawl4ai_identity_docs_url
+		}
+	}
+}
+
+export const getDokobotBridgeCheck = async (): Promise<LinkcaseProviderCheck> => {
+	const result = await runShellCommand('dokobot doko list')
+	const output = `${result.stdout}\n${result.stderr}`.trim()
+
+	if (result.exitCode !== 0) {
+		return {
+			id: 'browser-bridge',
+			label: 'Browser bridge',
+			status: 'warning',
+			detail:
+				output ||
+				'Dokobot CLI is installed, but the local browser bridge is not ready. Install the extension, enable Remote Control, and run `dokobot install-bridge`.',
+			action_label: 'Setup guide',
+			action_url: dokobot_agent_features_url
+		}
+	}
+
+	if (!output || /no\s+(registered\s+)?(devices|device|bridges?)/i.test(output)) {
+		return {
+			id: 'browser-bridge',
+			label: 'Browser bridge',
+			status: 'missing',
+			detail: 'No Dokobot local bridge/device was detected. Install the extension, enable Remote Control, and run `dokobot install-bridge`.',
+			action_label: 'Setup guide',
+			action_url: dokobot_agent_features_url
+		}
+	}
+
+	const device_lines = output
+		.split('\n')
+		.map(line => line.trim())
+		.filter(Boolean)
+
+	return {
+		id: 'browser-bridge',
+		label: 'Browser bridge',
+		status: 'ok',
+		detail:
+			device_lines.length > 0
+				? `Dokobot bridge/device list returned ${device_lines.length} line${device_lines.length === 1 ? '' : 's'}.`
+				: 'Dokobot local bridge is responding.',
+		action_label: 'Setup guide',
+		action_url: dokobot_agent_features_url
 	}
 }
