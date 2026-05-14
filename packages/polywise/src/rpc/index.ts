@@ -15,6 +15,7 @@ import search from './search'
 import session from './session'
 import setActive from './setActive'
 import skill from './skill'
+import sniffer from './sniffer'
 import test from './test'
 import todo from './todo'
 import tool from './tool'
@@ -32,6 +33,7 @@ export const router = r({
 	tool,
 	todo,
 	session,
+	sniffer,
 	provider,
 	pipeline,
 	notification,

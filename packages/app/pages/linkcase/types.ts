@@ -4,6 +4,9 @@ export type LinkcaseItem = RPCOutput['linkcase']['query']['items'][number]
 export type LinkcaseDetail = NonNullable<RPCOutput['linkcase']['read']>
 export type LinkcaseFilterType = 'title' | 'link'
 export type LinkcaseBatchIntervalUnit = 'second' | 'minute'
+export type LinkcaseSnifferBrowserStatus = RPCOutput['sniffer']['status']['browsers'][number]
+export type LinkcaseSnifferBrowserId = LinkcaseSnifferBrowserStatus['id']
+export type LinkcaseSnifferImportResult = RPCOutput['sniffer']['importBookmarks']
 
 const bytes_to_base64 = (value: Uint8Array) => {
 	let binary = ''

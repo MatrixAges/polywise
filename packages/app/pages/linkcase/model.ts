@@ -1,5 +1,6 @@
 import { global_linkcase_session_id, global_linkcase_session_title } from '@core/consts'
 import { makeAutoObservable } from 'mobx'
+import { toast } from 'sonner'
 import { injectable } from 'tsyringe'
 
 import { server_sys_session_url } from '@/appdata'
@@ -9,7 +10,14 @@ import { alert, rpc } from '@/utils'
 import type { Message } from '@core/fst'
 import type { SessionStatusPayload } from '@core/rpc/session/watchSessionStatus'
 import type { MouseEvent, UIEvent } from 'react'
-import type { LinkcaseBatchIntervalUnit, LinkcaseDetail, LinkcaseFilterType, LinkcaseItem } from './types'
+import type {
+	LinkcaseBatchIntervalUnit,
+	LinkcaseDetail,
+	LinkcaseFilterType,
+	LinkcaseItem,
+	LinkcaseSnifferBrowserId,
+	LinkcaseSnifferBrowserStatus
+} from './types'
 
 @injectable()
 export default class Index {
@@ -27,6 +35,10 @@ export default class Index {
 	filter_type = 'title' as LinkcaseFilterType
 	session_dialog_open = false
 	start_dialog_open = false
+	sniffer_dialog_open = false
+	sniffer_statuses = [] as Array<LinkcaseSnifferBrowserStatus>
+	sniffer_status_loading = false
+	sniffer_importing_browser = '' as LinkcaseSnifferBrowserId | ''
 	batch_count = 3
 	batch_interval_value = 5
 	batch_interval_unit = 'minute' as LinkcaseBatchIntervalUnit
@@ -111,6 +123,10 @@ export default class Index {
 		this.start_dialog_open = value
 	}
 
+	setSnifferDialogOpen(value: boolean) {
+		this.sniffer_dialog_open = value
+	}
+
 	setSearchKeyword(value: string) {
 		this.search_keyword = value
 
@@ -140,6 +156,10 @@ export default class Index {
 
 	setBatchIntervalUnit(value: string) {
 		this.batch_interval_unit = value as LinkcaseBatchIntervalUnit
+	}
+
+	getSnifferStatus(browser: LinkcaseSnifferBrowserId) {
+		return this.sniffer_statuses.find(item => item.id === browser) ?? null
 	}
 
 	toListItem(item: LinkcaseItem | LinkcaseDetail): LinkcaseItem {
@@ -306,6 +326,66 @@ export default class Index {
 			await this.reloadList()
 		} finally {
 			this.current_fetching_id = ''
+		}
+	}
+
+	async loadSnifferStatus() {
+		this.sniffer_status_loading = true
+
+		try {
+			const response = await rpc.sniffer.status.query()
+
+			this.sniffer_statuses = response.browsers
+		} catch (error) {
+			toast.error(error instanceof Error ? error.message : 'Failed to inspect browser bookmarks')
+		} finally {
+			this.sniffer_status_loading = false
+		}
+	}
+
+	openSnifferDialog() {
+		this.sniffer_dialog_open = true
+
+		void this.loadSnifferStatus()
+	}
+
+	async importBrowserBookmarks(browser: LinkcaseSnifferBrowserId) {
+		if (this.sniffer_importing_browser) {
+			return
+		}
+
+		this.sniffer_importing_browser = browser
+
+		try {
+			const result = await rpc.sniffer.importBookmarks.mutate({ browser })
+			const summary = [
+				`${result.name}: imported ${result.inserted_count} link(s).`,
+				result.ignored_existing_count > 0
+					? `Ignored ${result.ignored_existing_count} existing item(s).`
+					: '',
+				result.ignored_duplicate_count > 0
+					? `Ignored ${result.ignored_duplicate_count} duplicate item(s).`
+					: '',
+				result.ignored_invalid_count > 0
+					? `Ignored ${result.ignored_invalid_count} invalid item(s).`
+					: ''
+			]
+				.filter(Boolean)
+				.join(' ')
+
+			if (!result.available) {
+				toast.error(result.message)
+
+				return
+			}
+
+			toast.success(summary || result.message)
+			await this.reloadList()
+			await this.loadSnifferStatus()
+		} catch (error) {
+			toast.error(error instanceof Error ? error.message : 'Bookmark import failed')
+		} finally {
+			this.sniffer_importing_browser = ''
 		}
 	}
 

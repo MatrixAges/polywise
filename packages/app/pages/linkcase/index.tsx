@@ -2,7 +2,7 @@ import { useLayoutEffect, useState } from 'react'
 import { observer } from 'mobx-react-lite'
 import { container } from 'tsyringe'
 
-import { BatchSessionDialog, BatchStartDialog, Content, Menu } from './components'
+import { BatchSessionDialog, BatchStartDialog, BookmarkSnifferDialog, Content, Menu } from './components'
 import { Context } from './context'
 import Model from './model'
 
@@ -23,6 +23,7 @@ const Index = () => {
 			</div>
 			<BatchSessionDialog></BatchSessionDialog>
 			<BatchStartDialog></BatchStartDialog>
+			<BookmarkSnifferDialog></BookmarkSnifferDialog>
 		</Context>
 	)
 }

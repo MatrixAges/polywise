@@ -1,10 +1,11 @@
-import { blob, index, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
+import { blob, index, integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core'
 import { getId } from 'stk/utils'
 
 export default sqliteTable(
 	'link',
 	{
 		id: text('id').primaryKey().$defaultFn(getId),
+		hash: text('hash'),
 		url: text('url').notNull(),
 		title: text('title').notNull(),
 		favicon: blob('favicon'),
@@ -19,6 +20,7 @@ export default sqliteTable(
 			.$onUpdateFn(() => new Date())
 	},
 	t => [
+		uniqueIndex('link_hash_idx').on(t.hash),
 		index('link_status_idx').on(t.status),
 		index('link_generate_at_idx').on(t.generate_at),
 		index('link_created_at_idx').on(t.created_at),

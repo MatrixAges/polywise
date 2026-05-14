@@ -1,5 +1,5 @@
 import dayjs from 'dayjs'
-import { Bot, Globe, Loader, RefreshCw, TimerReset } from 'lucide-react'
+import { ArrowDownToLine, Bot, Globe, Loader, RefreshCw, TimerReset } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { MessageResponse } from '@/__shadcn__/components/ai-elements/message'
@@ -157,6 +157,10 @@ const Index = () => {
 					</div>
 					<Bot className='text-std-400 size-4 shrink-0'></Bot>
 				</button>
+				<Button variant='outline' size='sm' onClick={x.openSnifferDialog}>
+					<ArrowDownToLine className='size-3.5'></ArrowDownToLine>
+					<span>Bookmarks</span>
+				</Button>
 				<Button
 					variant={x.batch_scheduler_enabled ? 'outline' : 'default'}
 					size='sm'
