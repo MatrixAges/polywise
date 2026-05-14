@@ -31,7 +31,7 @@ export interface MessageMetadata {
 	group_id?: string
 	group_name?: string
 	group_turn_id?: string
-	leadership?: 'none' | 'advisory' | 'blocking'
+	leadership?: 'none' | 'advisory'
 }
 
 export type Message = UIMessage<MessageMetadata, MessageDataParts, UITools> & { createdAt?: Date }

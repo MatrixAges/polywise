@@ -39,7 +39,7 @@ export interface GroupWriteLock {
 export interface GroupBarrierState {
 	leader_agent_id: string | null
 	leader_agent_name: string | null
-	leadership: 'none' | 'advisory' | 'blocking'
+	leadership: 'none' | 'advisory'
 	waiting_agent_ids: Array<string>
 	reason?: string | null
 }
@@ -52,7 +52,8 @@ export interface GroupReplyQueueItem {
 	status: 'queued' | 'running' | 'done' | 'failed'
 	reason: string
 	confidence: 'low' | 'medium' | 'high'
-	leadership: 'none' | 'advisory' | 'blocking'
+	leadership: 'none' | 'advisory'
+	exclusive: boolean
 	needs_write_lock: boolean
 	enqueued_at: number
 	started_at?: number | null
@@ -73,7 +74,8 @@ export interface GroupMemberEvaluation {
 	should_answer: boolean
 	reason: string
 	confidence: 'low' | 'medium' | 'high'
-	leadership: 'none' | 'advisory' | 'blocking'
+	leadership: 'none' | 'advisory'
+	exclusive: boolean
 	needs_write_lock: boolean
 }
 

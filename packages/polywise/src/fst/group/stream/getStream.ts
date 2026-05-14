@@ -11,6 +11,7 @@ import type Group from '../index'
 import type { GroupMemberEvaluation, GroupReplyQueueItem } from '../types'
 
 const model_threshold_value = 12
+const exclusive_grace_ms = 300
 
 export default async (s: Group, message: Message) => {
 	await s.getModel()
@@ -48,23 +49,76 @@ export default async (s: Group, message: Message) => {
 		execute: async ({ writer }) => {
 			let queue_waiter = null as null | (() => void)
 			let completed_evaluations = 0
+			let exclusive_agent_id = null as string | null
+			let evaluation_gate_closed = false
+			const evaluation_abort_controller = new AbortController()
 
 			const notifyQueue = () => {
 				queue_waiter?.()
 				queue_waiter = null
 			}
 
-			const allEvaluationsFinished = () => completed_evaluations >= total_evaluations
+			const allEvaluationsFinished = () =>
+				evaluation_gate_closed || completed_evaluations >= total_evaluations
 
 			const waitForQueue = () =>
 				new Promise<void>(resolve => {
 					queue_waiter = resolve
 				})
 
+			const waitForQueueOrTimeout = (timeout: number) =>
+				new Promise<void>(resolve => {
+					let settled = false
+					const onQueue = () => {
+						if (settled) {
+							return
+						}
+
+						settled = true
+						clearTimeout(timer)
+						queue_waiter = null
+						resolve()
+					}
+					const timer = setTimeout(() => {
+						if (settled) {
+							return
+						}
+
+						settled = true
+
+						if (queue_waiter === onQueue) {
+							queue_waiter = null
+						}
+
+						resolve()
+					}, timeout)
+
+					queue_waiter = onQueue
+				})
+
 			const updateQueueItem = async (item: GroupReplyQueueItem, patch: Partial<GroupReplyQueueItem>) => {
 				Object.assign(item, patch)
 				await s.setState()
 				s.sync()
+			}
+
+			const setQueue = async (items: Array<GroupReplyQueueItem>) => {
+				s.reply_queue = items.map((item, index) => ({
+					...item,
+					queue_index: index
+				}))
+				await s.setState()
+				s.sync()
+			}
+
+			const closeEvaluationGate = () => {
+				if (evaluation_gate_closed) {
+					return
+				}
+
+				evaluation_gate_closed = true
+				evaluation_abort_controller.abort()
+				notifyQueue()
 			}
 
 			const enqueueEvaluation = async (evaluation: GroupMemberEvaluation) => {
@@ -84,34 +138,51 @@ export default async (s: Group, message: Message) => {
 					return
 				}
 
-				s.reply_queue = [
-					...s.reply_queue,
-					{
-						turn_id,
-						queue_index: s.reply_queue.length,
-						agent_id: evaluation.agent.id,
-						agent_name: evaluation.agent.name,
-						status: 'queued',
-						reason: evaluation.reason,
-						confidence: evaluation.confidence,
-						leadership: evaluation.leadership,
-						needs_write_lock: evaluation.needs_write_lock,
-						enqueued_at: Date.now(),
-						started_at: null,
-						finished_at: null,
-						error: null
-					}
-				]
-				await s.setState()
-				s.sync()
+				const next_item = {
+					turn_id,
+					queue_index: s.reply_queue.length,
+					agent_id: evaluation.agent.id,
+					agent_name: evaluation.agent.name,
+					status: 'queued',
+					reason: evaluation.reason,
+					confidence: evaluation.confidence,
+					leadership: evaluation.leadership,
+					exclusive: evaluation.exclusive,
+					needs_write_lock: evaluation.needs_write_lock,
+					enqueued_at: Date.now(),
+					started_at: null,
+					finished_at: null,
+					error: null
+				} satisfies GroupReplyQueueItem
+
+				if (evaluation.exclusive) {
+					exclusive_agent_id = evaluation.agent.id
+
+					const preserved = s.reply_queue.filter(
+						item => item.turn_id !== turn_id || item.status !== 'queued'
+					)
+
+					await setQueue([...preserved, next_item])
+					closeEvaluationGate()
+					return
+				}
+
+				if (exclusive_agent_id && exclusive_agent_id !== evaluation.agent.id) {
+					return
+				}
+
+				await setQueue([...s.reply_queue, next_item])
 				notifyQueue()
 			}
 
 			const processQueue = async () => {
 				while (!s.manual_abort && s.active_turn_id === turn_id) {
-					const next = s.reply_queue.find(
-						item => item.turn_id === turn_id && item.status === 'queued'
+					const exclusive_next = s.reply_queue.find(
+						item => item.turn_id === turn_id && item.status === 'queued' && item.exclusive
 					)
+					const next =
+						exclusive_next ??
+						s.reply_queue.find(item => item.turn_id === turn_id && item.status === 'queued')
 
 					if (!next) {
 						if (allEvaluationsFinished()) {
@@ -119,6 +190,16 @@ export default async (s: Group, message: Message) => {
 						}
 
 						await waitForQueue()
+						continue
+					}
+
+					if (
+						!next.exclusive &&
+						!exclusive_agent_id &&
+						!allEvaluationsFinished() &&
+						Date.now() - next.enqueued_at < exclusive_grace_ms
+					) {
+						await waitForQueueOrTimeout(exclusive_grace_ms - (Date.now() - next.enqueued_at))
 						continue
 					}
 
@@ -190,13 +271,28 @@ export default async (s: Group, message: Message) => {
 				const agent = s.agents.find(item => item.id === agent_id)
 
 				if (!agent) {
+					completed_evaluations += 1
+					notifyQueue()
 					return
 				}
 
-				const evaluation = await evaluateMember(s, agent, base_messages)
+				if (exclusive_agent_id && exclusive_agent_id !== agent.id) {
+					completed_evaluations += 1
+					notifyQueue()
+					return
+				}
+
+				const evaluation = await evaluateMember(s, agent, base_messages, {
+					abort_signal: evaluation_abort_controller.signal
+				})
 				completed_evaluations += 1
 
 				if (s.active_turn_id !== turn_id) {
+					notifyQueue()
+					return
+				}
+
+				if (exclusive_agent_id && exclusive_agent_id !== agent.id) {
 					notifyQueue()
 					return
 				}

@@ -1,6 +1,6 @@
 import fst_system_prompt from '@core/consts/prompts/fst_system_prompt.md'
 import getContextPrompt from '@core/consts/prompts/getContextPrompt'
-import { generateObject } from 'ai'
+import { generateText, Output } from 'ai'
 import { boolean, enum as Enum, object, string } from 'zod'
 
 import getAgentModel from './getAgentModel'
@@ -15,7 +15,8 @@ const evaluation_schema = object({
 	should_answer: boolean(),
 	reason: string(),
 	confidence: Enum(['low', 'medium', 'high']),
-	leadership: Enum(['none', 'advisory', 'blocking']),
+	leadership: Enum(['none', 'advisory']),
+	exclusive: boolean(),
 	needs_write_lock: boolean()
 })
 
@@ -31,7 +32,37 @@ const getAgentProfilePrompt = (agent: Agent) =>
 		.filter(Boolean)
 		.join('\n\n')
 
-export default async (s: Group, agent: Agent, messages: Array<ModelMessage>) => {
+const mergeAbortSignals = (...signals: Array<AbortSignal | undefined>) => {
+	const active = signals.filter(Boolean) as Array<AbortSignal>
+
+	if (!active.length) {
+		return undefined
+	}
+
+	if (active.length === 1) {
+		return active[0]
+	}
+
+	const controller = new AbortController()
+	const abort = () => {
+		if (!controller.signal.aborted) {
+			controller.abort()
+		}
+	}
+
+	for (const signal of active) {
+		if (signal.aborted) {
+			abort()
+			break
+		}
+
+		signal.addEventListener('abort', abort, { once: true })
+	}
+
+	return controller.signal
+}
+
+export default async (s: Group, agent: Agent, messages: Array<ModelMessage>, args?: { abort_signal?: AbortSignal }) => {
 	try {
 		const model = await getAgentModel(agent)
 		const system_prompt = [
@@ -39,18 +70,27 @@ export default async (s: Group, agent: Agent, messages: Array<ModelMessage>) => 
 			'# Group Evaluation Task',
 			'Decide whether you should respond to the current user turn as a member of a group.',
 			'Silence is the default. Set should_answer=true only when you are one of the clearly best members to answer this turn.',
+			'For most turns, the ideal outcome is one responder, not a panel.',
 			'Only respond when you can add distinct value that is specific to your role, identity, expertise, responsibilities, or current execution state.',
 			`You are exactly ${agent.name} (${agent.role}). Never volunteer to answer as another member.`,
 			'If another member is more directly addressed, more clearly responsible, or obviously better positioned to answer, set should_answer=false.',
 			'If the user explicitly asks for a different member by name, or for a role that clearly belongs to another member in the group agents map, set should_answer=false.',
 			'If the user is calling attendance, summoning a role, or asking for a specific perspective, only answer when that is clearly you.',
+			'If the user asks for a broad owner-style perspective such as product, design, architecture, strategy, planning, or leadership, only the natural owner of that perspective should answer.',
+			'If you are not that owner, set should_answer=false even if you could provide helpful supporting details.',
+			'Specialists should stay silent unless explicitly requested, or unless missing their answer would leave a critical blind spot that the requested owner cannot reasonably cover.',
+			'If you are unsure whether you are the best responder, choose silence and set should_answer=false.',
+			'Do not answer broad exploratory prompts just because you can contribute; answer only if the prompt is actually yours to own.',
 			'If your answer would mainly imitate a product manager, panel host, or whole-team spokesperson rather than your actual role, set should_answer=false.',
 			'If your answer would mostly summarize what other members would say instead of giving your own role-specific perspective, set should_answer=false.',
 			'Do not answer just to acknowledge presence, agree, or restate what another likely member would say.',
 			'If your likely response would be redundant, generic, low-information, or merely supportive, set should_answer=false.',
 			'Prefer fewer responders. Multiple members should answer the same turn only when they are providing meaningfully different and necessary contributions.',
-			'Use leadership=blocking only when your decision must land first because it changes the execution path, shared plan, or write strategy for the whole group.',
-			'Use leadership=advisory when your answer is central but others do not need to wait.',
+			'Set exclusive=true only when this turn should be answered by you alone because you are the clearly requested or natural owner for the requested perspective.',
+			'Set exclusive=false when the user explicitly wants multiple perspectives, a debate, a panel response, or whole-team input.',
+			'If exclusive=true, then should_answer must also be true.',
+			'Use leadership=advisory only when your answer is central but not exclusive.',
+			'Use leadership=none for ordinary participation.',
 			'If you need to edit files or run write-capable commands, set needs_write_lock=true.',
 			`Group Name: ${s.group.name}`,
 			s.group.description ? `Group Description: ${s.group.description}` : '',
@@ -61,18 +101,22 @@ export default async (s: Group, agent: Agent, messages: Array<ModelMessage>) => 
 			.filter(Boolean)
 			.join('\n\n')
 
-		const res = await generateObject({
+		const res = await generateText({
 			model: model.model,
 			system: system_prompt,
 			messages,
-			schema: evaluation_schema,
+			output: Output.object({
+				schema: evaluation_schema,
+				name: 'group_member_evaluation',
+				description: 'Structured decision for whether this group member should answer now.'
+			}),
 			providerOptions: model.provider_options,
-			abortSignal: s.abort_controller.signal
+			abortSignal: mergeAbortSignals(s.abort_controller.signal, args?.abort_signal)
 		})
 
 		return {
 			agent,
-			...res.object
+			...res.output
 		} satisfies GroupMemberEvaluation
 	} catch (error) {
 		return {
@@ -81,6 +125,7 @@ export default async (s: Group, agent: Agent, messages: Array<ModelMessage>) => 
 			reason: error instanceof Error ? error.message : 'evaluation failed',
 			confidence: 'low',
 			leadership: 'none',
+			exclusive: false,
 			needs_write_lock: false
 		} satisfies GroupMemberEvaluation
 	}

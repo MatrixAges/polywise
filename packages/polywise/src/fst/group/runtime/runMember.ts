@@ -119,6 +119,7 @@ export default async (args: {
 		`Group Name: ${s.group.name}`,
 		s.group.description ? `Group Description: ${s.group.description}` : '',
 		getMountedFolderPrompt(s),
+		`Exclusive Turn: ${evaluation.exclusive ? 'true' : 'false'}`,
 		`Leadership Mode For This Turn: ${evaluation.leadership}`,
 		evaluation.reason ? `Selection Reason: ${evaluation.reason}` : '',
 		`Current Active Member: ${agent.name} (${agent.role})`,
@@ -130,6 +131,9 @@ export default async (args: {
 		'Do not speak on behalf of other members or summarize what they would say unless the user explicitly asked for a cross-member synthesis.',
 		'Do not address other members by name inside the final user-facing answer, do not assign them tasks, and do not ask them questions there.',
 		'Your final answer must be a self-contained response to the user from your own role only.',
+		evaluation.exclusive
+			? 'This turn is exclusive to you. Deliver the whole answer yourself and do not invite, dispatch, or tee up other members.'
+			: 'If you are speaking in a non-exclusive turn, still avoid turning the answer into a host-style roundtable summary.',
 		'You can update shared context with group_progress_tool and shared todos/lock state with group_coordination_tool.',
 		'Use group_coordination_tool and group_progress_tool silently for internal state only, not as a cue to narrate team dispatching in the final answer.',
 		'group_coordination_tool and group_progress_tool are terminal internal actions. If you call either one, end the turn immediately and do not generate any additional user-facing text after the tool call.',
