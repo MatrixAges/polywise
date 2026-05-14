@@ -26,6 +26,8 @@ export default {
 		target: 'node',
 		minify: true,
 		externals: [
+			// /^globby(\/.*)?$/,
+			/^trpc-to-openapi(\/.*)?$/,
 			/^@chonkiejs\/core(\/.*)?$/,
 			/^@node-rs\/xxhash(\/.*)?$/,
 			/^@node-rs\/jieba(\/.*)?$/,
@@ -48,7 +50,9 @@ export default {
 	tools: {
 		rspack: {
 			target: 'node',
-			module: { rules: [{ test: /\.(md|txt)$/i, type: 'asset/source' }] },
+			module: {
+				rules: [{ test: /\.(md|txt)$/i, type: 'asset/source' }]
+			},
 			optimization: { moduleIds: 'hashed' }
 		}
 	}

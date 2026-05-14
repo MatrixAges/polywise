@@ -297,12 +297,6 @@ export const getModel = async <T extends ModelType = 'text'>(args: GetModelArgs<
 				}
 			case 'a2a':
 				return { model: (await import('a2a-ai-provider')).a2a(model) }
-			case 'acp':
-				return {
-					model: (await import('@mcpc-tech/acp-ai-provider'))
-						.createACPProvider(options)
-						.languageModel()
-				}
 			case 'open_responses':
 				return {
 					model: (await import('@ai-sdk/open-responses')).createOpenResponses({

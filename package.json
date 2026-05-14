@@ -2,6 +2,11 @@
 	"name": "monorepo",
 	"author": "1yasa",
 	"packageManager": "pnpm@11.1.1",
+	"pnpm": {
+		"overrides": {
+			"h3": "1.15.11"
+		}
+	},
 	"scripts": {
 		"deps": "ncu -i",
 		"deps:w": "ncu -u -i --workspaces",
