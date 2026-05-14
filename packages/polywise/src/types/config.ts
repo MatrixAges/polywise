@@ -3,6 +3,10 @@ export interface Workspace {
 	endpoint?: string
 }
 
+export const default_fetch_fallback_chain = ['agent-browser', 'opencli', 'curl.md', 'r.jina.ai'] as const
+
+export type WebfetchFallbackProvider = (typeof default_fetch_fallback_chain)[number]
+
 export interface DefaultModel {
 	provider: string
 	model: string
@@ -48,6 +52,8 @@ export interface AppConfig {
 	submit_mode: 'enter' | 'ctrl+enter'
 	default_model: DefaultModel
 	jina_api_key?: string
+	enbale_webfetch_chain: boolean
+	fetch_fallback_chain: Array<WebfetchFallbackProvider>
 	mcp?: McpConfig
 	embedding_model?: DefaultModel
 	rerank_model?: DefaultModel

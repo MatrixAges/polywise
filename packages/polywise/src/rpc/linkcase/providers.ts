@@ -1,5 +1,13 @@
 export const linkcase_content_providers = [
 	{
+		id: 'agent-browser',
+		name: 'Agent Browser',
+		description: 'Native browser automation provider for agent-driven page navigation and extraction.',
+		detect: 'agent-browser',
+		install: 'npm install -g agent-browser && agent-browser install',
+		docs_url: 'https://agent-browser.dev/installation'
+	},
+	{
 		id: 'opencli',
 		name: 'OpenCLI',
 		description:
@@ -7,14 +15,6 @@ export const linkcase_content_providers = [
 		detect: 'opencli',
 		install: 'npm install -g @jackwener/opencli',
 		docs_url: 'https://opencli.info/docs/guide/installation.html'
-	},
-	{
-		id: 'agent-browser',
-		name: 'Agent Browser',
-		description: 'Native browser automation provider for agent-driven page navigation and extraction.',
-		detect: 'agent-browser',
-		install: 'npm install -g agent-browser && agent-browser install',
-		docs_url: 'https://agent-browser.dev/installation'
 	},
 	{
 		id: 'curl.md',

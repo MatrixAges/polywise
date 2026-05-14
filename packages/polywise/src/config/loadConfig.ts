@@ -1,4 +1,5 @@
 import { preset_providers } from '@core/consts/providers'
+import { default_fetch_fallback_chain } from '@core/types'
 import { clearObject, initDefaults, log } from '@core/utils'
 import { to } from 'await-to-js'
 import fs from 'fs-extra'
@@ -75,6 +76,16 @@ export default async () => {
 
 	if (config.jina_api_key === undefined) {
 		config.jina_api_key = ''
+		has_changed_config = true
+	}
+
+	if (config.enbale_webfetch_chain === undefined) {
+		config.enbale_webfetch_chain = false
+		has_changed_config = true
+	}
+
+	if (!Array.isArray(config.fetch_fallback_chain) || !config.fetch_fallback_chain.length) {
+		config.fetch_fallback_chain = [...default_fetch_fallback_chain]
 		has_changed_config = true
 	}
 

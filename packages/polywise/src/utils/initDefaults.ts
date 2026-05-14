@@ -2,6 +2,7 @@ import path from 'path'
 import { app } from '@core/consts'
 import { preset_providers } from '@core/consts/providers'
 import defaultSkillCreator from '@core/fst/agents/skill_creator/defaultSkill'
+import { default_fetch_fallback_chain } from '@core/types'
 import { ensureWithValue } from '@core/utils'
 import fs from 'fs-extra'
 
@@ -24,6 +25,8 @@ export default async () => {
 				current_workspace: 'Default',
 				default_model,
 				jina_api_key: '',
+				enbale_webfetch_chain: false,
+				fetch_fallback_chain: [...default_fetch_fallback_chain],
 				mcp: { enabled: true },
 				enable_triple: false,
 				triple_model: default_model,

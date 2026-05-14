@@ -9,6 +9,7 @@ import { Button } from '@/__shadcn__/components/ui/button'
 import { Field, FieldContent, FieldDescription, FieldGroup, FieldTitle } from '@/__shadcn__/components/ui/field'
 import { Input } from '@/__shadcn__/components/ui/input'
 import { Spinner } from '@/__shadcn__/components/ui/spinner'
+import { Switch } from '@/__shadcn__/components/ui/switch'
 import { Controller } from '@/components'
 import { useGlobal } from '@/context'
 import { useForm } from '@/hooks'
@@ -161,6 +162,18 @@ const Index = () => {
 					</FieldContent>
 					<Controller type='input' name='jina_api_key' control={control}>
 						<Input type='text' placeholder='jina_...' autoComplete='off' />
+					</Controller>
+				</Field>
+				<Field className='items-center! py-3' orientation='horizontal'>
+					<FieldContent>
+						<FieldTitle className='text-base'>Enable Webfetch Chain</FieldTitle>
+						<FieldDescription>
+							Use `fetch_fallback_chain` for `webfetch`. Linkcase fetch always uses the
+							chain: agent-browser, opencli, curl.md, r.jina.ai.
+						</FieldDescription>
+					</FieldContent>
+					<Controller type='switch' name='enbale_webfetch_chain' control={control}>
+						<Switch></Switch>
 					</Controller>
 				</Field>
 			</FieldGroup>
