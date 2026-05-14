@@ -4,6 +4,7 @@ import { ArrowDownToLine, RefreshCw, SquareArrowOutUpRight } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 import { toast } from 'sonner'
 
+import { Badge } from '@/__shadcn__/components/ui/badge'
 import { Button } from '@/__shadcn__/components/ui/button'
 import { Field, FieldContent, FieldDescription, FieldGroup, FieldTitle } from '@/__shadcn__/components/ui/field'
 import { Input } from '@/__shadcn__/components/ui/input'
@@ -19,7 +20,20 @@ import type { AppConfig } from '@core/types'
 type LinkcaseProvider = Awaited<ReturnType<typeof rpc.linkcase.getContentProviders.query>>['providers'][number]
 
 const provider_status_text = (provider: LinkcaseProvider) => {
-	return provider.installed ? 'Installed' : 'Not installed'
+	if (!provider.installed) return 'Not installed'
+	return provider.ready ? 'Ready' : 'Needs setup'
+}
+
+const provider_status_variant = (provider: LinkcaseProvider) => {
+	if (!provider.installed) return 'outline'
+	return provider.ready ? 'secondary' : 'destructive'
+}
+
+const check_status_variant = (status: LinkcaseProvider['checks'][number]['status']) => {
+	if (status === 'ok') return 'secondary'
+	if (status === 'warning') return 'destructive'
+	if (status === 'missing') return 'outline'
+	return 'outline'
 }
 
 const Index = () => {
@@ -99,45 +113,108 @@ const Index = () => {
 						<div
 							key={provider.id}
 							className='
-								flex
-								items-center justify-between
+								flex flex-col
 								gap-2
 								px-4 py-3
 								rounded-2xl
 								bg-muted/40
 							'
 						>
-							<div className='flex flex-col gap-1'>
-								<div className='flex items-center gap-2'>
-									<span className='font-medium'>{provider.name}</span>
-									<a
-										className='
-											text-std-400 text-xs
-											underline
-											decoration-std-150 underline-offset-4
-										'
-										href={provider.docs_url}
-										target='_blank'
-									>
-										Installation docs
-									</a>
+							<div className='flex items-start justify-between gap-3'>
+								<div className='flex flex-col gap-2'>
+									<div className='flex flex-wrap items-center gap-2'>
+										<span className='font-medium'>{provider.name}</span>
+										<Badge variant={provider_status_variant(provider)}>
+											{provider_status_text(provider)}
+										</Badge>
+										<a
+											className='
+												text-std-400 text-xs
+												underline
+												decoration-std-150 underline-offset-4
+											'
+											href={provider.docs_url}
+											target='_blank'
+										>
+											Installation docs
+										</a>
+									</div>
+									<div className='text-std-500 text-sm'>{provider.description}</div>
 								</div>
-								<div className='text-std-500 text-sm'>{provider.description}</div>
+								<Button
+									type='button'
+									variant={provider.installed ? 'outline' : 'default'}
+									size='sm'
+									disabled={provider.installed || installing_id === provider.id}
+									onClick={() => void installProvider(provider.id)}
+								>
+									{installing_id === provider.id ? (
+										<Spinner className='size-4' />
+									) : (
+										<ArrowDownToLine className='size-4' />
+									)}
+									<span>{provider.installed ? 'Installed' : 'Install'}</span>
+								</Button>
 							</div>
-							<Button
-								type='button'
-								variant={provider.installed ? 'outline' : 'default'}
-								size='sm'
-								disabled={provider.installed || installing_id === provider.id}
-								onClick={() => void installProvider(provider.id)}
-							>
-								{installing_id === provider.id ? (
-									<Spinner className='size-4' />
-								) : (
-									<ArrowDownToLine className='size-4' />
-								)}
-								<span>{provider.installed ? 'Installed' : 'Install'}</span>
-							</Button>
+							{provider.checks.length > 0 && (
+								<div
+									className='
+										flex flex-col
+										gap-2
+										p-3
+										rounded-xl
+										bg-background/70
+										border border-border/60
+									'
+								>
+									{provider.checks.map(check => (
+										<div
+											key={`${provider.id}-${check.id}`}
+											className='
+												flex flex-wrap
+												items-start justify-between
+												gap-3
+											'
+										>
+											<div className='flex min-w-0 flex-col gap-1'>
+												<div className='flex flex-wrap items-center gap-2'>
+													<span className='text-sm font-medium'>
+														{check.label}
+													</span>
+													<Badge
+														variant={check_status_variant(
+															check.status
+														)}
+													>
+														{check.status}
+													</Badge>
+												</div>
+												<div className='text-std-500 text-sm break-words whitespace-pre-wrap'>
+													{check.detail}
+												</div>
+											</div>
+											{check.action_url && check.action_label && (
+												<a
+													className='
+														inline-flex
+														items-center
+														gap-1
+														text-std-400 text-xs
+														underline
+														decoration-std-150
+														underline-offset-4
+													'
+													href={check.action_url}
+													target='_blank'
+												>
+													<span>{check.action_label}</span>
+													<SquareArrowOutUpRight className='size-3' />
+												</a>
+											)}
+										</div>
+									))}
+								</div>
+							)}
 						</div>
 					))}
 				</div>

@@ -2,7 +2,8 @@ export const linkcase_content_providers = [
 	{
 		id: 'agent-browser',
 		name: 'Agent Browser',
-		description: 'Native browser automation provider for agent-driven page navigation and extraction.',
+		description:
+			'Native browser automation provider for agent-driven page navigation and extraction, with Chrome profile and CDP attach support.',
 		detect: 'agent-browser',
 		install_commands: ['npm install -g agent-browser && agent-browser install'],
 		docs_url: 'https://agent-browser.dev/installation'
@@ -10,7 +11,8 @@ export const linkcase_content_providers = [
 	{
 		id: 'opencli',
 		name: 'OpenCLI',
-		description: 'CLI browser/content provider for turning websites into agent-friendly commands.',
+		description:
+			'CLI browser/content provider that uses Browser Bridge to drive your logged-in Chrome session.',
 		detect: 'opencli',
 		install_commands: ['npm install -g @jackwener/opencli'],
 		docs_url: 'https://opencli.info/docs/guide/installation.html'
@@ -26,3 +28,14 @@ export const linkcase_content_providers = [
 ] as const
 
 export type LinkcaseContentProviderId = (typeof linkcase_content_providers)[number]['id']
+
+export type LinkcaseProviderCheckStatus = 'ok' | 'warning' | 'missing' | 'info'
+
+export type LinkcaseProviderCheck = {
+	id: string
+	label: string
+	status: LinkcaseProviderCheckStatus
+	detail: string
+	action_url?: string
+	action_label?: string
+}
