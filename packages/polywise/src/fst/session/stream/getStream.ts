@@ -53,6 +53,12 @@ const linkcase_session_prompt = [
 	'This session is dedicated to scheduled and batch Linkcase fetching.',
 	'Use linkcase_tool as the primary tool for queue inspection and batch fetch execution.',
 	'Prefer linkcase_tool action "fetch_next" for scheduled runs unless the user explicitly provides target ids.',
+	'For AI-guided targeted fetch runs, do not use linkcase_tool action "fetch_ids".',
+	'Instead, use linkcase_tool action "fetch_preview" with exactly one provider at a time in this order: agent-browser, opencli, curl.md, r.jina.ai.',
+	'After each preview, inspect content_preview yourself and decide whether it is the actual target page content.',
+	'If the preview is blocked, irrelevant, partial in the wrong way, or clearly not the target content, continue to the next provider.',
+	'Only when a preview looks correct should you call linkcase_tool action "commit_preview" with the preview_key.',
+	'If every provider fails or every preview looks wrong, call linkcase_tool action "mark_failed" with a concise reason.',
 	'Do not ask follow-up questions during scheduled runs. Execute the fetch plan and return a compact summary of successes, failures, and remaining issues.'
 ].join('\n')
 

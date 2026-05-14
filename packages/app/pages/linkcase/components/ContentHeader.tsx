@@ -1,4 +1,4 @@
-import { Globe, Loader, RefreshCw } from 'lucide-react'
+import { Bot, Globe, Loader, RefreshCw } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { Button } from '@/__shadcn__/components/ui/button'
@@ -50,10 +50,23 @@ const Index = () => {
 			</div>
 			<div className='flex shrink-0 items-center gap-2'>
 				<Button
+					variant='outline'
+					size='sm'
+					disabled={!item || Boolean(x.current_ai_fetching_id) || x.linkcase_session_running}
+					onClick={() => void x.fetchSelectedLinkByAI()}
+				>
+					{x.current_ai_fetching_id === item?.id ? (
+						<Loader className='size-3.5 animate-spin'></Loader>
+					) : (
+						<Bot className='size-3.5'></Bot>
+					)}
+					<span>AI Fetch</span>
+				</Button>
+				<Button
 					variant='secondary'
 					size='sm'
 					disabled={!item || x.current_fetching_id === item.id}
-					onClick={() => x.fetchSelectedLink()}
+					onClick={() => void x.fetchSelectedLink()}
 				>
 					{x.current_fetching_id === item?.id ? (
 						<Loader className='size-3.5 animate-spin'></Loader>

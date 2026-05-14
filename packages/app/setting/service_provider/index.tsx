@@ -4,7 +4,6 @@ import { ArrowDownToLine, RefreshCw, SquareArrowOutUpRight } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 import { toast } from 'sonner'
 
-import { Badge } from '@/__shadcn__/components/ui/badge'
 import { Button } from '@/__shadcn__/components/ui/button'
 import { Field, FieldContent, FieldDescription, FieldGroup, FieldTitle } from '@/__shadcn__/components/ui/field'
 import { Input } from '@/__shadcn__/components/ui/input'

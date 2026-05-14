@@ -47,6 +47,14 @@ const runProvider = async (
 	return await provider_handlers[provider]({ url, max_chars })
 }
 
+export const fetchWithProvider = async (
+	provider: WebfetchFallbackProvider,
+	url: string,
+	max_chars: number
+): Promise<FetchProviderResult> => {
+	return await runProvider(provider, url, max_chars)
+}
+
 const runChain = async (
 	providers: Array<WebfetchFallbackProvider>,
 	url: string,

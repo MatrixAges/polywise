@@ -1,24 +1,9 @@
 import { spawn } from 'child_process'
 
+import { resolveCommand } from '../../utils/resolveCommand'
+
 export const isToolInstalled = async (tool_name: string) => {
-	const shell = process.env.SHELL ?? '/bin/sh'
-
-	return await new Promise<boolean>(resolve => {
-		const child =
-			process.platform === 'win32'
-				? spawn('where', [tool_name], {
-						shell: false,
-						stdio: 'ignore'
-					})
-				: spawn(shell, ['-lc', `command -v ${tool_name}`], {
-						shell: false,
-						env: process.env,
-						stdio: 'ignore'
-					})
-
-		child.on('error', () => resolve(false))
-		child.on('close', code => resolve(code === 0))
-	})
+	return Boolean(await resolveCommand(tool_name))
 }
 
 export const runShellCommand = async (command: string) => {

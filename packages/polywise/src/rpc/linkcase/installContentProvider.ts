@@ -23,20 +23,35 @@ export default p.input(input_type).mutation(async ({ input }) => {
 		}
 	}
 
-	const result = await runShellCommand(provider.install)
-	const installed = await isToolInstalled(provider.detect)
+	const outputs: Array<string> = []
+	let last_result: Awaited<ReturnType<typeof runShellCommand>> | null = null
 
-	if (!installed) {
-		throw new Error(
-			[result.stderr, result.stdout].filter(Boolean).join('\n') || `Failed to install ${provider.name}`
-		)
+	for (const command of provider.install_commands) {
+		const result = await runShellCommand(command)
+		last_result = result
+
+		if (result.stdout.trim()) {
+			outputs.push(`$ ${command}\n${result.stdout.trim()}`)
+		}
+
+		if (result.stderr.trim()) {
+			outputs.push(`$ ${command}\n${result.stderr.trim()}`)
+		}
+
+		const installed = await isToolInstalled(provider.detect)
+
+		if (installed) {
+			return {
+				ok: result.exitCode === 0,
+				installed,
+				provider,
+				stdout: result.stdout,
+				stderr: result.stderr
+			}
+		}
 	}
 
-	return {
-		ok: result.exitCode === 0,
-		installed,
-		provider,
-		stdout: result.stdout,
-		stderr: result.stderr
-	}
+	throw new Error(
+		outputs.join('\n\n') || last_result?.stderr || last_result?.stdout || `Failed to install ${provider.name}`
+	)
 })

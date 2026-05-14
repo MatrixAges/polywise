@@ -35,6 +35,7 @@ export default class Index {
 	detail_loading = false
 	menu_target_index = -1
 	current_fetching_id = ''
+	current_ai_fetching_id = ''
 	selection_fetch_submit_loading = false
 	selection_remove_loading = false
 	search_keyword = ''
@@ -502,6 +503,47 @@ export default class Index {
 		await this.fetchLink(this.selected_id)
 	}
 
+	async fetchSelectedLinkByAI() {
+		if (!this.selected_id) {
+			return
+		}
+
+		const item = this.selected_item
+
+		if (!item) {
+			return
+		}
+
+		if (
+			this.current_ai_fetching_id ||
+			this.selection_fetch_submit_loading ||
+			this.batch_submit_loading ||
+			this.linkcase_session_running
+		) {
+			toast.error('Linkcase batch session is busy. Wait for the current run to finish.')
+
+			return
+		}
+
+		this.current_ai_fetching_id = item.id
+		this.batch_last_error = ''
+		this.batch_last_run_at = Date.now()
+
+		try {
+			await this.submitSessionPrompt(this.buildAIFetchPrompt(item))
+			this.batch_runs += 1
+			this.session_dialog_open = true
+			toast.success(`Submitted AI fetch for ${item.title || item.url}.`)
+		} catch (error) {
+			const message = error instanceof Error ? error.message : String(error)
+
+			this.batch_last_error = message
+			toast.error(message)
+		} finally {
+			this.current_ai_fetching_id = ''
+		}
+	}
+
 	async fetchLink(id: string) {
 		if (this.current_fetching_id) {
 			return
@@ -608,10 +650,21 @@ export default class Index {
 			'Run one targeted Linkcase batch fetch.',
 			`Use linkcase_tool action "fetch_ids" with these exact ids: ${JSON.stringify(items.map(item => item.id))}.`,
 			'Fetch exactly those ids once and do not replace them with other candidates.',
-			'If fetched content is empty or looks like a human verification, captcha, or security-check page, treat it as a failure.',
-			'Return a concise summary with id, title, status, source, error, and article_id.',
+			'Judge whether the final fetched result actually matches the target content, and call out clearly if it does not.',
+			'Return a concise summary with id, title, status, source, error, article_id, and your quality judgment.',
 			'Targets:',
 			...items.map((item, index) => `${index + 1}. ${item.id} | ${item.title || item.url} | ${item.url}`)
+		].join('\n')
+	}
+
+	buildAIFetchPrompt(item: LinkcaseItem) {
+		return [
+			'Run one AI-guided Linkcase fetch for exactly one target link.',
+			`Target id: ${item.id}`,
+			`Target title: ${item.title || item.url}`,
+			`Target url: ${item.url}`,
+			'Use the Linkcase batch session AI fetch workflow for this target.',
+			'Return a concise summary with provider attempts, final decision, status, source, and article_id if committed.'
 		].join('\n')
 	}
 

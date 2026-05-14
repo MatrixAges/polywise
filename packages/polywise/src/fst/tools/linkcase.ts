@@ -1,23 +1,46 @@
 import { link } from '@core/db/schema'
 import { getLinks } from '@core/db/services'
 import {
+	commitLinkcasePreview,
 	fetchLinkcaseLink,
 	getLinkcaseKeywordWhere,
 	hydrateLinkcaseItems,
-	linkcase_statuses
+	linkcase_statuses,
+	markLinkcaseFetchFailure,
+	previewLinkcaseLinkWithProvider
 } from '@core/rpc/linkcase/utils'
 import { tool } from 'ai'
 import { and, inArray, notInArray } from 'drizzle-orm'
 import { array, boolean, enum as Enum, number, object, string, z } from 'zod'
 
+import type { WebfetchFallbackProvider } from '@core/types'
 import type { SQL } from 'drizzle-orm'
 import type Session from '../session'
 
 const inputSchema = object({
-	action: Enum(['status', 'list', 'fetch_next', 'fetch_ids']).describe(
-		'The action to perform. status: count links by current status. list: list candidate links without fetching. fetch_next: automatically select and fetch the next batch. fetch_ids: fetch an explicit list of link ids.'
+	action: Enum([
+		'status',
+		'list',
+		'fetch_next',
+		'fetch_ids',
+		'fetch_preview',
+		'commit_preview',
+		'mark_failed'
+	]).describe(
+		'The action to perform. status: count links by current status. list: list candidate links without fetching. fetch_next: automatically select and fetch the next batch. fetch_ids: fetch an explicit list of link ids. fetch_preview: fetch one link through one explicit provider without saving so the agent can inspect the result. commit_preview: persist a previously inspected preview. mark_failed: finalize a failed AI-driven fetch attempt.'
 	),
 	ids: array(string()).optional().describe('[Required for fetch_ids] Exact link ids to fetch in sequence.'),
+	id: string().optional().describe('[Required for fetch_preview/mark_failed] Exact link id to inspect or mark.'),
+	preview_key: string()
+		.optional()
+		.describe(
+			'[Required for commit_preview] Preview key returned by fetch_preview for the content you want to persist.'
+		),
+	provider: Enum(['agent-browser', 'opencli', 'curl.md', 'r.jina.ai'])
+		.optional()
+		.describe(
+			'[Required for fetch_preview] Run exactly this provider and return its content preview without automatic fallback.'
+		),
 	count: number()
 		.int()
 		.min(1)
@@ -42,12 +65,19 @@ const inputSchema = object({
 		.describe('[Optional] Keep only links that do not yet have any fetched article.'),
 	exec_pipeline: boolean()
 		.optional()
-		.describe('[Optional for fetch actions] Whether to run the saved article through the content pipeline.'),
+		.describe(
+			'[Optional for fetch actions and commit_preview] Whether to run the saved article through the content pipeline.'
+		),
 	max_chars: number()
 		.int()
 		.positive()
 		.optional()
-		.describe('[Optional for fetch actions] Maximum fetched markdown characters before truncation.')
+		.describe('[Optional for fetch actions] Maximum fetched markdown characters before truncation.'),
+	error: string()
+		.optional()
+		.describe(
+			'[Required for mark_failed] Agent-authored reason explaining why the current fetch should be considered failed.'
+		)
 })
 
 const default_fetch_statuses = ['none', 'fail', 'timeout'] as const
@@ -118,6 +148,7 @@ export const createLinkcaseTool = (_s: Session) => {
 			'Batch-manage Linkcase link fetching.',
 			'Use fetch_next for automated scheduled runs. It prefers links with status none, fail, or timeout unless you override include_statuses.',
 			'Fetching always uses the fallback chain and treats empty content as a failed attempt until a downstream provider succeeds or the chain is exhausted.',
+			'For AI-guided fetch validation, use fetch_preview with one provider at a time. Inspect the returned content_preview yourself, decide whether it is the real target content, and either continue with the next provider, commit_preview, or mark_failed.',
 			'Use list or status first when you need to inspect the queue before fetching.'
 		].join('\n'),
 		inputSchema,
@@ -149,6 +180,69 @@ export const createLinkcaseTool = (_s: Session) => {
 					action: 'list' as const,
 					count: candidates.length,
 					items: candidates.map(summarizeItem)
+				}
+			}
+
+			if (input.action === 'fetch_preview') {
+				if (!input.id) {
+					return {
+						action: 'fetch_preview' as const,
+						error: 'id is required for fetch_preview action'
+					}
+				}
+
+				if (!input.provider) {
+					return {
+						action: 'fetch_preview' as const,
+						error: 'provider is required for fetch_preview action'
+					}
+				}
+
+				return {
+					action: 'fetch_preview' as const,
+					...(await previewLinkcaseLinkWithProvider({
+						id: input.id,
+						provider: input.provider as WebfetchFallbackProvider,
+						max_chars: input.max_chars
+					}))
+				}
+			}
+
+			if (input.action === 'commit_preview') {
+				if (!input.preview_key) {
+					return {
+						action: 'commit_preview' as const,
+						error: 'preview_key is required for commit_preview action'
+					}
+				}
+
+				return {
+					action: 'commit_preview' as const,
+					...(await commitLinkcasePreview({
+						preview_key: input.preview_key,
+						exec_pipeline: input.exec_pipeline
+					}))
+				}
+			}
+
+			if (input.action === 'mark_failed') {
+				if (!input.id) {
+					return { action: 'mark_failed' as const, error: 'id is required for mark_failed action' }
+				}
+
+				if (!input.error?.trim()) {
+					return {
+						action: 'mark_failed' as const,
+						error: 'error is required for mark_failed action'
+					}
+				}
+
+				return {
+					action: 'mark_failed' as const,
+					...(await markLinkcaseFetchFailure({
+						id: input.id,
+						error: input.error.trim()
+					}))
 				}
 			}
 

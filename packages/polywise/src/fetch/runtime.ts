@@ -1,6 +1,8 @@
 import { spawn } from 'child_process'
 import TurndownService from 'turndown'
 
+import { resolveCommand } from '../utils/resolveCommand'
+
 const turndown = new TurndownService({
 	headingStyle: 'atx',
 	hr: '---',
@@ -29,12 +31,22 @@ export const getErrorMessage = (error: unknown) => {
 }
 
 export const runCommand = async (command: string, args: Array<string>, timeout = 30000) => {
+	const resolved_command = await resolveCommand(command)
+
+	if (!resolved_command) {
+		return {
+			stdout: '',
+			stderr: `Command not found: ${command}`,
+			exitCode: 127
+		}
+	}
+
 	return await new Promise<{ stdout: string; stderr: string; exitCode: number }>(resolve => {
 		const stdout_chunks: Array<string> = []
 		const stderr_chunks: Array<string> = []
 		let settled = false
 
-		const child = spawn(command, args, {
+		const child = spawn(resolved_command, args, {
 			shell: false,
 			env: process.env
 		})

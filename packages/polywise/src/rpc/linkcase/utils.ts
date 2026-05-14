@@ -1,11 +1,12 @@
 import { article, link, link_article } from '@core/db/schema'
 import { getArticle, getLink, getLinks, setLink } from '@core/db/services'
 import { addLinkArticle, getLinkArticles } from '@core/db/services/externals'
-import { fetchWithFallbackChain } from '@core/fetch'
+import { fetchWithFallbackChain, fetchWithProvider } from '@core/fetch'
 import { saveArticle } from '@core/io'
 import { eq, inArray, like, or } from 'drizzle-orm'
 
 import type { Link } from '@core/db'
+import type { WebfetchFallbackProvider } from '@core/types'
 import type { SQL } from 'drizzle-orm'
 
 export const DEFAULT_LINKCASE_FETCH_MAX_CHARS = 50000
@@ -22,6 +23,29 @@ type LinkcasePreviewArticle = {
 	updated_at: Date | null
 	is_pipelined: boolean
 	fetched_at: Date | null
+}
+
+type LinkcaseFetchPreviewCacheItem = {
+	id: string
+	url: string
+	title: string
+	source: WebfetchFallbackProvider
+	content: string
+	truncated: boolean
+	created_at: number
+}
+
+const linkcase_fetch_preview_cache = new Map<string, LinkcaseFetchPreviewCacheItem>()
+const LINKCASE_FETCH_PREVIEW_TTL_MS = 10 * 60 * 1000
+
+const cleanupLinkcaseFetchPreviewCache = () => {
+	const cutoff = Date.now() - LINKCASE_FETCH_PREVIEW_TTL_MS
+
+	for (const [key, item] of linkcase_fetch_preview_cache.entries()) {
+		if (item.created_at < cutoff) {
+			linkcase_fetch_preview_cache.delete(key)
+		}
+	}
 }
 
 const normalizeKeyword = (keyword?: string) => keyword?.trim() ?? ''
@@ -131,44 +155,124 @@ const isTimeoutError = (message?: string) => {
 	return typeof message === 'string' && /timeout|timed out|aborted|abort/i.test(message)
 }
 
-const human_verification_hard_markers = [
-	'verify you are human',
-	"verify you're human",
-	'human verification',
-	'checking your browser before accessing',
-	'checking if the site connection is secure',
-	'please enable javascript and cookies to continue',
-	'complete the security check',
-	'press and hold',
-	'are you human',
-	'are you a human',
-	'robot or human',
-	'unusual traffic from your computer network',
-	'attention required!'
-]
+const saveLinkcaseArticle = async (args: { id: string; title: string; content: string; exec_pipeline?: boolean }) => {
+	const article_id = await saveArticle({
+		title: args.title,
+		content: args.content,
+		for: 'linkcase',
+		exec_pipeline: args.exec_pipeline
+	})
 
-const human_verification_soft_markers = ['captcha', 'cloudflare ray id', 'cf challenge', 'turnstile']
+	await addLinkArticle(args.id, article_id)
 
-const getLinkcaseValidationError = (content: string) => {
-	const normalized = content.trim().toLowerCase().replace(/\s+/g, ' ').slice(0, 4000)
+	const article_item = await getArticle(eq(article.id, article_id))
+	const updated_link = await setLink(eq(link.id, args.id), {
+		status: 'success',
+		generate_at: new Date()
+	})
 
-	if (!normalized) {
-		return 'Fetched content is empty'
+	return {
+		article: article_item ?? null,
+		link: updated_link
+	}
+}
+
+export const previewLinkcaseLinkWithProvider = async (args: {
+	id: string
+	provider: WebfetchFallbackProvider
+	max_chars?: number
+}) => {
+	const current_link = await getLink(eq(link.id, args.id))
+
+	if (!current_link) {
+		throw new Error(`Link not found: ${args.id}`)
 	}
 
-	const hard_marker = human_verification_hard_markers.find(marker => normalized.includes(marker))
+	cleanupLinkcaseFetchPreviewCache()
 
-	if (hard_marker) {
-		return `Fetched content looks like a human verification page (${hard_marker})`
+	const max_chars = args.max_chars ?? DEFAULT_LINKCASE_FETCH_MAX_CHARS
+	const result = await fetchWithProvider(args.provider, current_link.url, max_chars)
+	const preview_key = crypto.randomUUID()
+
+	linkcase_fetch_preview_cache.set(preview_key, {
+		id: current_link.id,
+		url: current_link.url,
+		title: current_link.title || current_link.url,
+		source: args.provider,
+		content: result.content,
+		truncated: result.truncated,
+		created_at: Date.now()
+	})
+
+	return {
+		ok: true as const,
+		id: current_link.id,
+		title: current_link.title,
+		url: current_link.url,
+		source: args.provider,
+		truncated: result.truncated,
+		content_preview: result.content.slice(0, 4000),
+		content_length: result.content.length,
+		preview_key
+	}
+}
+
+export const commitLinkcasePreview = async (args: { preview_key: string; exec_pipeline?: boolean }) => {
+	cleanupLinkcaseFetchPreviewCache()
+
+	const cached = linkcase_fetch_preview_cache.get(args.preview_key)
+
+	if (!cached) {
+		throw new Error(`Preview not found or expired: ${args.preview_key}`)
 	}
 
-	const matched_soft_markers = human_verification_soft_markers.filter(marker => normalized.includes(marker))
+	const current_link = await getLink(eq(link.id, cached.id))
 
-	if (matched_soft_markers.length >= 2) {
-		return `Fetched content looks like a human verification page (${matched_soft_markers.join(', ')})`
+	if (!current_link) {
+		linkcase_fetch_preview_cache.delete(args.preview_key)
+		throw new Error(`Link not found: ${cached.id}`)
 	}
 
-	return null
+	const saved = await saveLinkcaseArticle({
+		id: current_link.id,
+		title: current_link.title,
+		content: cached.content,
+		exec_pipeline: args.exec_pipeline
+	})
+
+	linkcase_fetch_preview_cache.delete(args.preview_key)
+
+	return {
+		ok: true as const,
+		id: current_link.id,
+		title: current_link.title,
+		url: current_link.url,
+		source: cached.source,
+		truncated: cached.truncated,
+		article: saved.article,
+		link: saved.link ?? current_link
+	}
+}
+
+export const markLinkcaseFetchFailure = async (args: { id: string; error: string }) => {
+	const current_link = await getLink(eq(link.id, args.id))
+
+	if (!current_link) {
+		throw new Error(`Link not found: ${args.id}`)
+	}
+
+	const status = isTimeoutError(args.error) ? 'timeout' : 'fail'
+	const updated_link = await setLink(eq(link.id, args.id), { status })
+
+	return {
+		ok: false as const,
+		id: current_link.id,
+		title: current_link.title,
+		url: current_link.url,
+		status,
+		error: args.error,
+		link: updated_link ?? current_link
+	}
 }
 
 export const fetchLinkcaseLink = async (args: { id: string; exec_pipeline?: boolean; max_chars?: number }) => {
@@ -202,43 +306,18 @@ export const fetchLinkcaseLink = async (args: { id: string; exec_pipeline?: bool
 		}
 	}
 
-	const validation_error = getLinkcaseValidationError(result.content)
-
-	if (validation_error) {
-		const updated_link = await setLink(eq(link.id, args.id), {
-			status: 'fail'
-		})
-
-		return {
-			ok: false as const,
-			link: updated_link ?? current_link,
-			article: null,
-			source: result.source,
-			error: validation_error,
-			attempts: result.attempts
-		}
-	}
-
 	try {
-		const article_id = await saveArticle({
+		const saved = await saveLinkcaseArticle({
+			id: current_link.id,
 			title: current_link.title,
 			content: result.content,
-			for: 'linkcase',
 			exec_pipeline: args.exec_pipeline
-		})
-
-		await addLinkArticle(current_link.id, article_id)
-
-		const article_item = await getArticle(eq(article.id, article_id))
-		const updated_link = await setLink(eq(link.id, args.id), {
-			status: 'success',
-			generate_at: new Date()
 		})
 
 		return {
 			ok: true as const,
-			link: updated_link ?? current_link,
-			article: article_item ?? null,
+			link: saved.link ?? current_link,
+			article: saved.article,
 			source: result.source,
 			truncated: result.truncated,
 			attempts: result.attempts
