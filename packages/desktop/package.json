@@ -27,7 +27,7 @@
     "deepmerge-ts": "catalog:",
     "dotenv": "^17.4.2",
     "electron-conf": "catalog:",
-    "electron-log": "^5.4.3",
+    "electron-log": "^5.4.4",
     "electron-updater": "^6.8.3",
     "erpc": "workspace:*",
     "es-toolkit": "catalog:",

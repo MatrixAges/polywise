@@ -1,7 +1,7 @@
 {
 	"name": "monorepo",
 	"author": "1yasa",
-	"packageManager": "pnpm@11.0.9",
+	"packageManager": "pnpm@11.1.1",
 	"scripts": {
 		"deps": "ncu -i",
 		"deps:w": "ncu -u -i --workspaces",
@@ -17,7 +17,7 @@
 		"@ianvs/prettier-plugin-sort-imports": "^4.7.1",
 		"pcu": "^1.3.0",
 		"prettier": "^3.8.3",
-		"npm-check-updates": "^22.1.1",
+		"npm-check-updates": "^22.2.0",
 		"prettier-plugin-tailwindcss-pro": "^0.2.0",
 		"pretty-quick": "^4.2.2",
 		"simple-git-hooks": "^2.13.1",
