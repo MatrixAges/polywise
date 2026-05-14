@@ -1,6 +1,10 @@
 import { useEffect, useState } from 'react'
+import { default_fetch_fallback_chain } from '@core/types'
+import { DndContext, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
+import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import { useMemoizedFn } from 'ahooks'
-import { ArrowDownToLine, RefreshCw, SquareArrowOutUpRight } from 'lucide-react'
+import { ArrowDownToLine, GripVertical, RefreshCw, SquareArrowOutUpRight } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 import { toast } from 'sonner'
 
@@ -16,8 +20,10 @@ import { useForm } from '@/hooks'
 import { rpc } from '@/utils'
 
 import type { AppConfig } from '@core/types'
+import type { DragEndEvent } from '@dnd-kit/core'
 
 type LinkcaseProvider = Awaited<ReturnType<typeof rpc.linkcase.getContentProviders.query>>['providers'][number]
+type LinkcaseProviderId = LinkcaseProvider['id']
 
 const provider_status_text = (provider: LinkcaseProvider) => {
 	if (!provider.installed) return 'Not installed'
@@ -36,6 +42,224 @@ const check_status_variant = (status: LinkcaseProvider['checks'][number]['status
 	return 'outline'
 }
 
+const getFallbackChain = (config: AppConfig) => {
+	if (Array.isArray(config.fetch_fallback_chain) && config.fetch_fallback_chain.length) {
+		return config.fetch_fallback_chain
+	}
+
+	return [...default_fetch_fallback_chain] as AppConfig['fetch_fallback_chain']
+}
+
+const orderProvidersByChain = (
+	providers: Array<LinkcaseProvider>,
+	fallback_chain: AppConfig['fetch_fallback_chain']
+) => {
+	const order_map = new Map(fallback_chain.map((id, index) => [id, index]))
+	const original_order_map = new Map(providers.map((provider, index) => [provider.id, index]))
+
+	return [...providers].sort((a, b) => {
+		const a_index = order_map.get(a.id) ?? Number.MAX_SAFE_INTEGER
+		const b_index = order_map.get(b.id) ?? Number.MAX_SAFE_INTEGER
+
+		if (a_index !== b_index) {
+			return a_index - b_index
+		}
+
+		return (original_order_map.get(a.id) ?? 0) - (original_order_map.get(b.id) ?? 0)
+	})
+}
+
+const buildNextFallbackChain = (
+	ordered_provider_ids: Array<LinkcaseProviderId>,
+	current_chain: AppConfig['fetch_fallback_chain']
+) => {
+	const ordered_provider_id_set = new Set<LinkcaseProviderId>(ordered_provider_ids)
+	const hidden_provider_ids = current_chain.filter(item => !ordered_provider_id_set.has(item as LinkcaseProviderId))
+
+	return [...ordered_provider_ids, ...hidden_provider_ids] as AppConfig['fetch_fallback_chain']
+}
+
+type SortableProviderCardProps = {
+	provider: LinkcaseProvider
+	drag_disabled: boolean
+	installing_id: string | null
+	managing_action_id: string | null
+	onInstall: (id: LinkcaseProviderId) => Promise<void>
+	onManage: (action: 'create_profile' | 'recreate_profile') => Promise<void>
+}
+
+const SortableProviderCard = (props: SortableProviderCardProps) => {
+	const { provider, drag_disabled, installing_id, managing_action_id, onInstall, onManage } = props
+	const { attributes, listeners, transform, transition, isDragging, setNodeRef } = useSortable({
+		id: provider.id,
+		disabled: drag_disabled
+	})
+
+	return (
+		<div
+			ref={setNodeRef}
+			style={{ transform: CSS.Transform.toString(transform), transition }}
+			className={`
+				flex flex-col
+				gap-2
+				px-4 py-3
+				rounded-2xl
+				bg-muted/40
+				group
+				${isDragging ? 'dragging z-10 backdrop-blur-lg' : ''}`}
+		>
+			<div className='flex items-start justify-between gap-3'>
+				<div className='flex flex-col gap-2'>
+					<div className='flex flex-wrap items-center gap-2'>
+						<span className='font-medium'>{provider.name}</span>
+						<Badge variant={provider_status_variant(provider)}>
+							{provider_status_text(provider)}
+						</Badge>
+						<a
+							className='
+								text-std-400 text-xs
+								underline
+								decoration-std-150 underline-offset-4
+							'
+							href={provider.docs_url}
+							target='_blank'
+						>
+							Installation docs
+						</a>
+					</div>
+					<div className='text-std-500 text-sm'>{provider.description}</div>
+				</div>
+				<div className='flex items-center gap-2'>
+					<Button
+						type='button'
+						variant={provider.installed ? 'outline' : 'default'}
+						size='sm'
+						disabled={
+							provider.installed ||
+							installing_id === provider.id ||
+							managing_action_id !== null
+						}
+						onClick={() => void onInstall(provider.id)}
+					>
+						{installing_id === provider.id ? (
+							<Spinner className='size-4' />
+						) : (
+							<ArrowDownToLine className='size-4' />
+						)}
+						<span>{provider.installed ? 'Installed' : 'Install'}</span>
+					</Button>
+					<button
+						type='button'
+						aria-label={`Drag to reorder ${provider.name}`}
+						className={`
+							opacity-0
+							transition-opacity
+							group-hover:opacity-100
+							active:cursor-grabbing
+							focus-visible:opacity-100
+							icon_button small cursor-grab
+							${isDragging ? 'opacity-100' : ''}
+						`}
+						disabled={drag_disabled}
+						{...attributes}
+						{...listeners}
+					>
+						<GripVertical className='size-3.5' />
+					</button>
+				</div>
+			</div>
+			{provider.id === 'crawl4ai' && provider.installed && (
+				<div className='flex flex-wrap gap-2'>
+					<Button
+						type='button'
+						variant='outline'
+						size='sm'
+						disabled={
+							!provider.crawl4ai_profile?.preferred_source_profile_name ||
+							Boolean(provider.crawl4ai_profile?.managed_profile_exists) ||
+							managing_action_id !== null
+						}
+						onClick={() => void onManage('create_profile')}
+					>
+						{managing_action_id === 'crawl4ai:create_profile' ? (
+							<Spinner className='size-4' />
+						) : null}
+						<span>Create From Chrome</span>
+					</Button>
+					<Button
+						type='button'
+						variant='outline'
+						size='sm'
+						disabled={
+							!provider.crawl4ai_profile?.preferred_source_profile_name ||
+							!provider.crawl4ai_profile?.managed_profile_exists ||
+							managing_action_id !== null
+						}
+						onClick={() => void onManage('recreate_profile')}
+					>
+						{managing_action_id === 'crawl4ai:recreate_profile' ? (
+							<Spinner className='size-4' />
+						) : null}
+						<span>Recreate Profile</span>
+					</Button>
+				</div>
+			)}
+			{provider.checks.length > 0 && (
+				<div
+					className='
+						flex flex-col
+						gap-2
+						p-3
+						rounded-xl
+						bg-background/70
+						border border-border/60
+					'
+				>
+					{provider.checks.map(check => (
+						<div
+							key={`${provider.id}-${check.id}`}
+							className='
+								flex flex-wrap
+								items-start justify-between
+								gap-3
+							'
+						>
+							<div className='flex min-w-0 flex-col gap-1'>
+								<div className='flex flex-wrap items-center gap-2'>
+									<span className='text-sm font-medium'>{check.label}</span>
+									<Badge variant={check_status_variant(check.status)}>
+										{check.status}
+									</Badge>
+								</div>
+								<div className='text-std-500 text-sm break-words whitespace-pre-wrap'>
+									{check.detail}
+								</div>
+							</div>
+							{check.action_url && check.action_label && (
+								<a
+									className='
+										inline-flex
+										items-center
+										gap-1
+										text-std-400 text-xs
+										underline
+										decoration-std-150 underline-offset-4
+									'
+									href={check.action_url}
+									target='_blank'
+								>
+									<span>{check.action_label}</span>
+									<SquareArrowOutUpRight className='size-3' />
+								</a>
+							)}
+						</div>
+					))}
+				</div>
+			)}
+		</div>
+	)
+}
+
 const Index = () => {
 	const global = useGlobal()
 	const s = global.setting
@@ -43,6 +267,10 @@ const Index = () => {
 	const [loading, setLoading] = useState(false)
 	const [installing_id, setInstallingId] = useState<string | null>(null)
 	const [managing_action_id, setManagingActionId] = useState<string | null>(null)
+	const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }))
+	const fallback_chain = getFallbackChain(s.config)
+	const fallback_chain_key = fallback_chain.join('|')
+	const drag_disabled = loading || installing_id !== null || managing_action_id !== null
 
 	const onChange = useMemoizedFn((values: AppConfig) => {
 		s.setConfig('config', values)
@@ -53,7 +281,7 @@ const Index = () => {
 
 		try {
 			const res = await rpc.linkcase.getContentProviders.query()
-			setProviders(res.providers)
+			setProviders(orderProvidersByChain(res.providers, fallback_chain))
 		} catch (error) {
 			toast.error(error instanceof Error ? error.message : 'Failed to load Linkcase providers')
 		} finally {
@@ -61,7 +289,7 @@ const Index = () => {
 		}
 	})
 
-	const installProvider = useMemoizedFn(async (id: LinkcaseProvider['id']) => {
+	const installProvider = useMemoizedFn(async (id: LinkcaseProviderId) => {
 		setInstallingId(id)
 
 		try {
@@ -75,12 +303,12 @@ const Index = () => {
 		}
 	})
 
-	const manageProvider = useMemoizedFn(async (id: 'crawl4ai', action: 'create_profile' | 'recreate_profile') => {
-		const action_id = `${id}:${action}`
+	const manageProvider = useMemoizedFn(async (action: 'create_profile' | 'recreate_profile') => {
+		const action_id = `crawl4ai:${action}`
 		setManagingActionId(action_id)
 
 		try {
-			const res = await rpc.linkcase.manageContentProvider.mutate({ id, action })
+			const res = await rpc.linkcase.manageContentProvider.mutate({ id: 'crawl4ai', action })
 			toast.success(
 				res.created
 					? action === 'recreate_profile'
@@ -96,11 +324,39 @@ const Index = () => {
 		}
 	})
 
+	const onDragEnd = useMemoizedFn((event: DragEndEvent) => {
+		const { active, over } = event
+
+		if (!over?.id || active.id === over.id) {
+			return
+		}
+
+		const from = providers.findIndex(item => item.id === active.id)
+		const to = providers.findIndex(item => item.id === over.id)
+
+		if (from < 0 || to < 0) {
+			return
+		}
+
+		const next_providers = arrayMove(providers, from, to)
+		const next_chain = buildNextFallbackChain(
+			next_providers.map(item => item.id),
+			fallback_chain
+		)
+
+		setProviders(next_providers)
+		s.setConfig('config', { fetch_fallback_chain: next_chain } as AppConfig, true)
+	})
+
 	const { control } = useForm<AppConfig>({ values: $copy(s.config) }, onChange)
 
 	useEffect(() => {
 		void refreshProviders()
 	}, [refreshProviders])
+
+	useEffect(() => {
+		setProviders(prev => orderProvidersByChain(prev, fallback_chain))
+	}, [fallback_chain_key])
 
 	return (
 		<div
@@ -116,7 +372,9 @@ const Index = () => {
 					<FieldContent>
 						<FieldTitle className='text-base'>Linkcase Content Providers</FieldTitle>
 						<FieldDescription>
-							Detect and install the local providers used by Linkcase.
+							Detect, install, and drag to reorder the local providers used by Linkcase.
+							This also rewrites `fetch_fallback_chain`; `r.jina.ai` stays as the final
+							remote fallback.
 						</FieldDescription>
 					</FieldContent>
 					<Button
@@ -130,165 +388,26 @@ const Index = () => {
 						<span>Refresh</span>
 					</Button>
 				</div>
-				<div className='mb-2 flex flex-col gap-2'>
-					{providers.map(provider => (
-						<div
-							key={provider.id}
-							className='
-								flex flex-col
-								gap-2
-								px-4 py-3
-								rounded-2xl
-								bg-muted/40
-							'
-						>
-							<div className='flex items-start justify-between gap-3'>
-								<div className='flex flex-col gap-2'>
-									<div className='flex flex-wrap items-center gap-2'>
-										<span className='font-medium'>{provider.name}</span>
-										<Badge variant={provider_status_variant(provider)}>
-											{provider_status_text(provider)}
-										</Badge>
-										<a
-											className='
-												text-std-400 text-xs
-												underline
-												decoration-std-150 underline-offset-4
-											'
-											href={provider.docs_url}
-											target='_blank'
-										>
-											Installation docs
-										</a>
-									</div>
-									<div className='text-std-500 text-sm'>{provider.description}</div>
-								</div>
-								<Button
-									type='button'
-									variant={provider.installed ? 'outline' : 'default'}
-									size='sm'
-									disabled={
-										provider.installed ||
-										installing_id === provider.id ||
-										managing_action_id !== null
-									}
-									onClick={() => void installProvider(provider.id)}
-								>
-									{installing_id === provider.id ? (
-										<Spinner className='size-4' />
-									) : (
-										<ArrowDownToLine className='size-4' />
-									)}
-									<span>{provider.installed ? 'Installed' : 'Install'}</span>
-								</Button>
-							</div>
-							{provider.id === 'crawl4ai' && provider.installed && (
-								<div className='flex flex-wrap gap-2'>
-									<Button
-										type='button'
-										variant='outline'
-										size='sm'
-										disabled={
-											!provider.crawl4ai_profile
-												?.preferred_source_profile_name ||
-											Boolean(
-												provider.crawl4ai_profile
-													?.managed_profile_exists
-											) ||
-											managing_action_id !== null
-										}
-										onClick={() =>
-											void manageProvider('crawl4ai', 'create_profile')
-										}
-									>
-										{managing_action_id === 'crawl4ai:create_profile' ? (
-											<Spinner className='size-4' />
-										) : null}
-										<span>Create From Chrome</span>
-									</Button>
-									<Button
-										type='button'
-										variant='outline'
-										size='sm'
-										disabled={
-											!provider.crawl4ai_profile
-												?.preferred_source_profile_name ||
-											!provider.crawl4ai_profile?.managed_profile_exists ||
-											managing_action_id !== null
-										}
-										onClick={() =>
-											void manageProvider('crawl4ai', 'recreate_profile')
-										}
-									>
-										{managing_action_id === 'crawl4ai:recreate_profile' ? (
-											<Spinner className='size-4' />
-										) : null}
-										<span>Recreate Profile</span>
-									</Button>
-								</div>
-							)}
-							{provider.checks.length > 0 && (
-								<div
-									className='
-										flex flex-col
-										gap-2
-										p-3
-										rounded-xl
-										bg-background/70
-										border border-border/60
-									'
-								>
-									{provider.checks.map(check => (
-										<div
-											key={`${provider.id}-${check.id}`}
-											className='
-												flex flex-wrap
-												items-start justify-between
-												gap-3
-											'
-										>
-											<div className='flex min-w-0 flex-col gap-1'>
-												<div className='flex flex-wrap items-center gap-2'>
-													<span className='text-sm font-medium'>
-														{check.label}
-													</span>
-													<Badge
-														variant={check_status_variant(
-															check.status
-														)}
-													>
-														{check.status}
-													</Badge>
-												</div>
-												<div className='text-std-500 text-sm break-words whitespace-pre-wrap'>
-													{check.detail}
-												</div>
-											</div>
-											{check.action_url && check.action_label && (
-												<a
-													className='
-														inline-flex
-														items-center
-														gap-1
-														text-std-400 text-xs
-														underline
-														decoration-std-150
-														underline-offset-4
-													'
-													href={check.action_url}
-													target='_blank'
-												>
-													<span>{check.action_label}</span>
-													<SquareArrowOutUpRight className='size-3' />
-												</a>
-											)}
-										</div>
-									))}
-								</div>
-							)}
+				<DndContext sensors={sensors} onDragEnd={onDragEnd}>
+					<SortableContext
+						items={providers.map(provider => provider.id)}
+						strategy={verticalListSortingStrategy}
+					>
+						<div className='mb-2 flex flex-col gap-2'>
+							{providers.map(provider => (
+								<SortableProviderCard
+									key={provider.id}
+									provider={provider}
+									drag_disabled={drag_disabled}
+									installing_id={installing_id}
+									managing_action_id={managing_action_id}
+									onInstall={installProvider}
+									onManage={manageProvider}
+								/>
+							))}
 						</div>
-					))}
-				</div>
+					</SortableContext>
+				</DndContext>
 			</FieldGroup>
 			<FieldGroup className='gap-0'>
 				<Field className='items-center! py-3' orientation='vertical'>
@@ -316,8 +435,9 @@ const Index = () => {
 					<FieldContent>
 						<FieldTitle className='text-base'>Enable Webfetch Chain</FieldTitle>
 						<FieldDescription>
-							Use `fetch_fallback_chain` for `webfetch`. Linkcase fetch always uses the
-							chain: agent-browser, opencli, crawl4ai, dokobot, r.jina.ai.
+							Use `fetch_fallback_chain` for `webfetch`. Linkcase and `webfetch` now share
+							the same ordered local provider chain, with `r.jina.ai` kept as the final
+							remote fallback.
 						</FieldDescription>
 					</FieldContent>
 					<Controller type='switch' name='enbale_webfetch_chain' control={control}>

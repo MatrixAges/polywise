@@ -12,6 +12,7 @@ import { env } from '@core/env'
 import { extract, getComplexitySignal } from '@core/fst/agents/superego'
 import { pushPart, startStream, stopStream } from '@core/fst/agents/supervisor'
 import { createPartDurationTracker, getPartDurationChunk } from '@core/fst/duration'
+import { default_fetch_fallback_chain } from '@core/types'
 import { SessionEventStore } from '@core/utils'
 import { convertToModelMessages, createUIMessageStream, smoothStream, stepCountIs, streamText } from 'ai'
 import dayjs from 'dayjs'
@@ -48,19 +49,26 @@ import type { Message, MessageDataParts, MessageMetadata, MessagePartDurationUIP
 import type Index from '../index'
 
 const model_threshold_value = 12
-const linkcase_session_prompt = [
-	'# Linkcase Batch Session',
-	'This session is dedicated to scheduled and batch Linkcase fetching.',
-	'Use linkcase_tool as the primary tool for queue inspection and batch fetch execution.',
-	'Prefer linkcase_tool action "fetch_next" for scheduled runs unless the user explicitly provides target ids.',
-	'For AI-guided targeted fetch runs, do not use linkcase_tool action "fetch_ids".',
-	'Instead, use linkcase_tool action "fetch_preview" with exactly one provider at a time in this order: agent-browser, opencli, crawl4ai, dokobot, r.jina.ai.',
-	'After each preview, inspect content_preview yourself and decide whether it is the actual target page content.',
-	'If the preview is blocked, irrelevant, partial in the wrong way, or clearly not the target content, continue to the next provider.',
-	'Only when a preview looks correct should you call linkcase_tool action "commit_preview" with the preview_key.',
-	'If every provider fails or every preview looks wrong, call linkcase_tool action "mark_failed" with a concise reason.',
-	'Do not ask follow-up questions during scheduled runs. Execute the fetch plan and return a compact summary of successes, failures, and remaining issues.'
-].join('\n')
+const getLinkcaseSessionPrompt = () => {
+	const provider_chain =
+		Array.isArray(config.fetch_fallback_chain) && config.fetch_fallback_chain.length
+			? config.fetch_fallback_chain
+			: [...default_fetch_fallback_chain]
+
+	return [
+		'# Linkcase Batch Session',
+		'This session is dedicated to scheduled and batch Linkcase fetching.',
+		'Use linkcase_tool as the primary tool for queue inspection and batch fetch execution.',
+		'Prefer linkcase_tool action "fetch_next" for scheduled runs unless the user explicitly provides target ids.',
+		'For AI-guided targeted fetch runs, do not use linkcase_tool action "fetch_ids".',
+		`Instead, use linkcase_tool action "fetch_preview" with exactly one provider at a time in this configured order: ${provider_chain.join(', ')}.`,
+		'After each preview, inspect content_preview yourself and decide whether it is the actual target page content.',
+		'If the preview is blocked, irrelevant, partial in the wrong way, or clearly not the target content, continue to the next provider.',
+		'Only when a preview looks correct should you call linkcase_tool action "commit_preview" with the preview_key.',
+		'If every provider fails or every preview looks wrong, call linkcase_tool action "mark_failed" with a concise reason.',
+		'Do not ask follow-up questions during scheduled runs. Execute the fetch plan and return a compact summary of successes, failures, and remaining issues.'
+	].join('\n')
+}
 
 export default async (s: Index, message: Message) => {
 	await s.getModel()
@@ -120,7 +128,7 @@ export default async (s: Index, message: Message) => {
 		fst_system_prompt,
 		has_title_tool ? fst_title_tool_prompt : '',
 		agent_system_prompt,
-		is_linkcase_batch_session ? linkcase_session_prompt : '',
+		is_linkcase_batch_session ? getLinkcaseSessionPrompt() : '',
 		has_todo_session_link ? fst_report_tool_prompt : '',
 		shared_runtime.system_tools_prompt,
 		shared_runtime.custom_tools_prompt,

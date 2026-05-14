@@ -1,3 +1,5 @@
+import { config } from '@core/config'
+import { default_fetch_fallback_chain } from '@core/types'
 import { p } from '@core/utils'
 
 import { getPolywiseCrawl4aiManagedProfile } from '../../utils/crawl4aiProfile'
@@ -11,8 +13,19 @@ import {
 } from './runtime'
 
 export default p.query(async () => {
+	const fallback_chain =
+		Array.isArray(config.fetch_fallback_chain) && config.fetch_fallback_chain.length
+			? config.fetch_fallback_chain
+			: [...default_fetch_fallback_chain]
+	const provider_order_map = new Map(fallback_chain.map((id, index) => [id, index]))
+	const ordered_provider_defs = [...linkcase_content_providers].sort((a, b) => {
+		const a_index = provider_order_map.get(a.id) ?? Number.MAX_SAFE_INTEGER
+		const b_index = provider_order_map.get(b.id) ?? Number.MAX_SAFE_INTEGER
+
+		return a_index - b_index
+	})
 	const providers = await Promise.all(
-		linkcase_content_providers.map(async item => {
+		ordered_provider_defs.map(async item => {
 			const installed = await isToolInstalled(item.detect)
 			const checks = []
 			const crawl4ai_profile =
