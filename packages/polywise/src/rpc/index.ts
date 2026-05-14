@@ -1,10 +1,8 @@
 import { r } from '../utils/trpc'
 import agent from './agent'
 import file from './file'
-import fullTextSearch from './fullTextSearch'
 import group from './group'
 import heartbeat from './heartbeat'
-import inspect from './inspect'
 import llama from './llama'
 import notification from './notification'
 import pipeline from './pipeline'
@@ -12,7 +10,7 @@ import project from './project'
 import provider from './provider'
 import remove from './remove'
 import save from './save'
-import SemanticSearch from './SemanticSearch'
+import search from './search'
 import session from './session'
 import setActive from './setActive'
 import skill from './skill'
@@ -37,10 +35,8 @@ export const router = r({
 	notification,
 	llama,
 	heartbeat,
-	inspect,
-	fullTextSearch,
+	search,
 	save,
-	SemanticSearch,
 	setActive,
 	test,
 	update,

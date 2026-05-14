@@ -1,18 +1,18 @@
 import { addAgentArticle } from '@core/db/services/externals'
-import { fullTextSearch, saveArticle, SemanticSearch } from '@core/io'
+import { fullTextSearch, hybirdSearch, relationSearch, saveArticle, semanticSearch } from '@core/io'
 import { tool } from 'ai'
 import { array, enum as Enum, number, object, string } from 'zod'
 
 import type Session from '../session'
 
 const CONTENT_FOR_TYPES = ['memory', 'wiki', 'linkcase', 'user'] as const
-const QUERY_MODES = ['save', 'fullTextSearch', 'semanticSearch'] as const
+const QUERY_MODES = ['save', 'fullTextSearch', 'semanticSearch', 'relationSearch', 'hybirdSearch'] as const
 
 const contentForSchema = Enum(CONTENT_FOR_TYPES)
 
 const inputSchema = object({
 	action: Enum(QUERY_MODES).describe(
-		'The action to perform. save: store a new content entry. fullTextSearch: run faster direct keyword/phrase matching. semanticSearch: run slower semantic retrieval when more accurate matches are needed.'
+		'The action to perform. save: store a new content entry. fullTextSearch: run faster direct keyword/phrase matching. semanticSearch: run pure vector retrieval. relationSearch: expand graph-related entities and events for deep research. hybirdSearch: combine keyword, vector, and relation retrieval.'
 	),
 	for: contentForSchema
 		.optional()
@@ -21,15 +21,17 @@ const inputSchema = object({
 	for_types: array(contentForSchema)
 		.optional()
 		.describe(
-			'[Optional for fullTextSearch/semanticSearch] Limit search to one or more content categories. Omit to search across memory, wiki, linkcase, and user content.'
+			'[Optional for search actions] Limit search to one or more content categories. Omit to search across memory, wiki, linkcase, and user content.'
 		),
 	content: string().optional().describe('[Required for save] The content to store'),
-	query: string()
+	query: string().optional().describe('[Required for search actions] Search query for stored content'),
+	max_results: number().optional().describe('[Optional for search actions] Maximum results to return (default 5)'),
+	depth: number()
+		.int()
+		.min(1)
+		.max(6)
 		.optional()
-		.describe('[Required for fullTextSearch/semanticSearch] Search query for stored content'),
-	max_results: number()
-		.optional()
-		.describe('[Optional for fullTextSearch/semanticSearch] Maximum results to return (default 5)')
+		.describe('[Optional for relationSearch/hybirdSearch] Graph expansion depth (default 2)')
 })
 
 const getSearchIntent = (for_types?: Array<(typeof CONTENT_FOR_TYPES)[number]>) => {
@@ -45,9 +47,11 @@ export const createContentTool = (s: Session) => {
 			'Manage stored content across four categories: memory (episodic memory), wiki (knowledge), linkcase (knowledge sources), and user (user or agent-authored content).',
 			'Use action "save" to store a new content entry and set the required "for" category and "title".',
 			'Use action "fullTextSearch" first because it is faster and works well for direct keyword or phrase matching.',
-			'Use action "semanticSearch" only when full-text search is insufficient and more accurate semantic retrieval is needed.',
+			'Use action "semanticSearch" when you want pure vector retrieval without keyword or relation expansion.',
+			'Use action "relationSearch" to explore entities and events connected to the query target for deeper research.',
+			'Use action "hybirdSearch" when you want the broadest recall by combining keyword, vector, and relation retrieval.',
 			'Use "for_types" to narrow retrieval to specific categories, or omit it to search across all stored content.',
-			'Results are sorted by update time, with the most recent first.'
+			'Search results are ranked by relevance, with recency used as a secondary signal.'
 		].join('\n'),
 		inputSchema,
 		execute: async input => {
@@ -96,14 +100,20 @@ export const createContentTool = (s: Session) => {
 			}
 
 			const for_types = input.for_types?.length ? input.for_types : undefined
-			const runSearch = action === 'fullTextSearch' ? fullTextSearch : SemanticSearch
+			const runSearch = {
+				fullTextSearch,
+				semanticSearch,
+				relationSearch,
+				hybirdSearch
+			}[action]
 			const results = await runSearch({
 				query: input.query,
 				intent: getSearchIntent(for_types),
 				type: 'article',
 				for_types,
 				scope_type: s.scope.type === 'group' ? 'global' : s.scope.type,
-				scope_id: s.scope.id || undefined
+				scope_id: s.scope.id || undefined,
+				depth: input.depth
 			})
 
 			const max_results = input.max_results ?? 5

@@ -1,15 +1,15 @@
 import { article } from '@core/db/schema'
 import { setArticle } from '@core/db/services'
 import { addAgentArticle } from '@core/db/services/externals'
-import { fullTextSearch, remove, saveArticle, SemanticSearch } from '@core/io'
+import { fullTextSearch, hybirdSearch, relationSearch, remove, saveArticle, semanticSearch } from '@core/io'
 import { tool } from 'ai'
 import { eq } from 'drizzle-orm'
-import { enum as Enum, object, string } from 'zod'
+import { enum as Enum, number, object, string } from 'zod'
 
 import type { SessionScope } from '../../types'
 
 const CONTENT_FOR_TYPES = ['memory', 'wiki', 'linkcase', 'user'] as const
-const SEARCH_MODES = ['fullTextSearch', 'semanticSearch'] as const
+const SEARCH_MODES = ['fullTextSearch', 'semanticSearch', 'relationSearch', 'hybirdSearch'] as const
 
 const inputSchema = object({
 	action: Enum(['add', 'search', 'update', 'remove']).describe(
@@ -22,10 +22,16 @@ const inputSchema = object({
 	search_mode: Enum(SEARCH_MODES)
 		.optional()
 		.describe(
-			'[Optional for search] Prefer fullTextSearch first; use semanticSearch only when direct matching is insufficient'
+			'[Optional for search] Prefer fullTextSearch first; use semanticSearch for pure vector retrieval, relationSearch for graph expansion, or hybirdSearch for the combined path.'
 		),
 	content: string().optional().describe('[Required for add/update] The content to store or update'),
 	query: string().optional().describe('[Required for search] Search query to find existing content'),
+	depth: number()
+		.int()
+		.min(1)
+		.max(6)
+		.optional()
+		.describe('[Optional for relationSearch/hybirdSearch] Graph expansion depth (default 2)'),
 	article_id: string().optional().describe('[Required for update/remove] The article id to modify or delete')
 })
 
@@ -42,7 +48,7 @@ export const createContentTool = (scope: SessionScope) => {
 			'Manage durable content for the learning loop using four categories: memory, wiki, linkcase, and user.',
 			'Use "for" to choose the category for add/search actions.',
 			'For add, provide a concise "title" that summarizes the content being stored.',
-			'For search, prefer "fullTextSearch" first because it is faster. Escalate to "semanticSearch" only when needed for better recall.',
+			'For search, prefer "fullTextSearch" first because it is faster, "semanticSearch" for pure vector retrieval, "relationSearch" for connected entities and events, and "hybirdSearch" for the combined path.',
 			'Use update/remove with article_id when an existing entry should be corrected or deleted.'
 		].join('\n'),
 		inputSchema,
@@ -87,14 +93,20 @@ export const createContentTool = (scope: SessionScope) => {
 				}
 
 				const search_mode = input.search_mode ?? 'fullTextSearch'
-				const runSearch = search_mode === 'fullTextSearch' ? fullTextSearch : SemanticSearch
+				const runSearch = {
+					fullTextSearch,
+					semanticSearch,
+					relationSearch,
+					hybirdSearch
+				}[search_mode]
 				const results = await runSearch({
 					query: input.query,
 					intent: `${input.for} content search`,
 					type: 'article',
 					for_types: [input.for],
 					scope_type: scope.type === 'group' ? 'global' : scope.type,
-					scope_id: scope.id ?? undefined
+					scope_id: scope.id ?? undefined,
+					depth: input.depth
 				})
 
 				const top = results.results.slice(0, 3)

@@ -1,5 +1,7 @@
 export { default as saveArticle } from './save/saveArticle'
 export { default as saveDocument } from './save/saveDocument'
 export { default as fullTextSearch } from './fullTextSearch'
-export { default as SemanticSearch } from './search'
+export { default as hybirdSearch } from './hybirdSearch'
+export { default as semanticSearch } from './semanticSearch'
+export { default as relationSearch } from './relationSearch'
 export { default as remove } from './remove'

@@ -3,12 +3,11 @@ import { article, chunk } from '@core/db/schema'
 import { getArticles, getChunks } from '@core/db/services'
 import { log } from '@core/utils'
 import { and, desc, inArray, like, or } from 'drizzle-orm'
-import { z } from 'zod'
 
-import { input_type } from '../rpc/SemanticSearch'
 import searchByKeywords from './search/searchByKeywords'
 
-type ArgsSearch = z.infer<typeof input_type>
+import type { ArgsSearch } from './search'
+
 type ScopeType = 'global' | 'project' | 'agent'
 
 interface ChunkResult {

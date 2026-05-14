@@ -1,16 +1,16 @@
-import { SemanticSearch } from '@core/io'
 import { array, boolean, literal, number, object, string, union } from 'zod'
 
-import { p } from '../utils/trpc'
+const scope_type = union([literal('global'), literal('project'), literal('agent')])
 
 export const input_type = object({
 	query: string(),
 	intent: string().optional(),
 	enable_rewrite: boolean().optional(),
 	enable_recall: boolean().optional(),
+	depth: number().int().min(1).max(6).optional(),
 	type: union([literal('chunk'), literal('article')]).optional(),
 	for_types: array(union([literal('linkcase'), literal('wiki'), literal('memory'), literal('user')])).optional(),
-	scope_type: union([literal('global'), literal('project'), literal('agent')]).optional(),
+	scope_type: scope_type.optional(),
 	scope_id: string().optional()
 }).strict()
 
@@ -19,7 +19,7 @@ const result_shape = object({
 	content: string(),
 	score: number(),
 	updated_at: string().datetime().nullable(),
-	scope_type: union([literal('global'), literal('project'), literal('agent')]).nullable(),
+	scope_type: scope_type.nullable(),
 	scope_id: string().nullable()
 })
 
@@ -34,13 +34,3 @@ const article_output = object({
 })
 
 export const output_type = union([chunk_output, article_output])
-
-export default p
-	.meta({ openapi: { method: 'GET', path: '/SemanticSearch' } })
-	.input(input_type)
-	.output(output_type)
-	.query(async ({ input }) => {
-		const results = await SemanticSearch(input)
-
-		return results
-	})
