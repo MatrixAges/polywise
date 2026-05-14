@@ -5,6 +5,7 @@ import fetch from './fetch'
 import getContentProviders from './getContentProviders'
 import installContentProvider from './installContentProvider'
 import query from './query'
+import read from './read'
 import remove from './remove'
 
 export default r({
@@ -13,5 +14,6 @@ export default r({
 	fetch,
 	installContentProvider,
 	query,
+	read,
 	remove
 })

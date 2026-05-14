@@ -1,3 +1,4 @@
+import { global_linkcase_session_id, global_linkcase_session_title } from '@core/consts'
 import { group_session } from '@core/db/schema'
 import { getSessionGroup } from '@core/db/services'
 import { Group, Session } from '@core/fst'
@@ -26,7 +27,11 @@ export default async (args: ConnectSessionArgs) => {
 			id,
 			event: SessionEventStore,
 			is_cron,
-			title: title || `Session ${dayjs().format('YYYY-MM-DD HH:mm:ss')}`,
+			title:
+				title ||
+				(id === global_linkcase_session_id
+					? global_linkcase_session_title
+					: `Session ${dayjs().format('YYYY-MM-DD HH:mm:ss')}`),
 			...(linked_group ? { group_id: linked_group.group.id } : {})
 		})
 
