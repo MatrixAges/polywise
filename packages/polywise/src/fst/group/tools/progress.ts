@@ -1,5 +1,5 @@
 import { tool } from 'ai'
-import { array, enum as Enum, object, record, string } from 'zod'
+import { array, enum as Enum, number, object, record, string, union } from 'zod'
 
 import type { Agent } from '@core/db'
 import type Group from '../index'
@@ -15,8 +15,8 @@ const task_schema = object({
 	assignee_agent_id: string().optional(),
 	started_by_agent_id: string().optional(),
 	completed_by_agent_id: string().optional(),
-	started_at: string().optional(),
-	finished_at: string().optional()
+	started_at: union([string(), number()]).optional(),
+	finished_at: union([string(), number()]).optional()
 })
 
 const inputSchema = object({
@@ -37,10 +37,10 @@ const inputSchema = object({
 	blockers: array(string()).optional()
 })
 
-const parseTime = (value?: string) => {
-	if (!value) return undefined
+const parseTime = (value?: string | number) => {
+	if (value === undefined || value === null || value === '') return undefined
 
-	const timestamp = new Date(value).getTime()
+	const timestamp = typeof value === 'number' ? value : new Date(value).getTime()
 
 	return Number.isFinite(timestamp) ? timestamp : undefined
 }

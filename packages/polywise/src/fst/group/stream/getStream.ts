@@ -11,7 +11,7 @@ import type Group from '../index'
 import type { GroupMemberEvaluation, GroupReplyQueueItem } from '../types'
 
 const model_threshold_value = 12
-const exclusive_grace_ms = 300
+const exclusive_grace_ms = 4000
 
 export default async (s: Group, message: Message) => {
 	await s.getModel()

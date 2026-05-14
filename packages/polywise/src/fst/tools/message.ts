@@ -154,7 +154,7 @@ export const createMessageTool = (session: Session) => {
 
 	return tool({
 		description:
-			'Read conversation history. Use get_total_count to check total messages, get_current_messages_count to check your context window size, get_prev_messages to read history, and search to query database messages by content within a required created_at range.',
+			'Read conversation history. Use get_total_count to check total messages, get_context_messages_count to check your context window size, get_prev_messages to read history, and search to query database messages by content within a required created_at range.',
 		inputSchema,
 		execute: async input => {
 			const { action } = input

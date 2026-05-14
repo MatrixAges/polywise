@@ -1,7 +1,7 @@
 import fst_system_prompt from '@core/consts/prompts/fst_system_prompt.md'
 import getContextPrompt from '@core/consts/prompts/getContextPrompt'
 import { createPartDurationTracker, getPartDurationChunk } from '@core/fst/duration'
-import { buildSharedRuntimeTools } from '@core/fst/tools'
+import { buildSharedRuntimeTools, createMessageTool } from '@core/fst/tools'
 import { consumeStream, smoothStream, stepCountIs, streamText } from 'ai'
 import dayjs from 'dayjs'
 import { getId } from 'stk/utils'
@@ -95,7 +95,8 @@ export default async (args: {
 		extra_tools: {
 			group_progress_tool: createGroupProgressTool(s, agent),
 			group_coordination_tool: createGroupCoordinationTool(s, agent),
-			group_member_tool: createGroupMemberTool(s, agent)
+			group_member_tool: createGroupMemberTool(s, agent),
+			message_tool: createMessageTool(s)
 		},
 		transform_tool: (key, tool_item) => {
 			if (key === 'bash_tool' || key === 'write_file_tool' || key === 'edit_file_tool') {
@@ -127,6 +128,10 @@ export default async (args: {
 			? 'Your work is expected to need shared writes. Acquire the group write lock before any write-capable tool use.'
 			: 'Only acquire the group write lock if you truly need shared writes.',
 		'Only your own full profile is preloaded. Use group_member_tool to inspect specific members on demand.',
+		'Only call tools that are actually declared in this run. Ignore any generic tool name that is not present in the available tool list.',
+		'If you need older chat history, use message_tool. Do not call messages_tool.',
+		'question_tool is not available in group member runtime.',
+		'Use group_progress_tool instead of context_tool for shared state updates in group runtime.',
 		'If the user asked for another member or role, you still must not impersonate them. Answer only as yourself.',
 		'Do not speak on behalf of other members or summarize what they would say unless the user explicitly asked for a cross-member synthesis.',
 		'Do not address other members by name inside the final user-facing answer, do not assign them tasks, and do not ask them questions there.',
@@ -150,6 +155,28 @@ export default async (args: {
 		.join('\n\n')
 
 	const tracker = createPartDurationTracker()
+	const stopAfterTerminalInternalTool = ({
+		steps
+	}: {
+		steps: Array<{ text: string; toolCalls: Array<{ toolName: string }> }>
+	}) => {
+		const last_step = steps[steps.length - 1]
+
+		if (!last_step) {
+			return false
+		}
+
+		const has_terminal_internal_tool = last_step.toolCalls.some(
+			tool_call =>
+				tool_call.toolName === 'group_progress_tool' || tool_call.toolName === 'group_coordination_tool'
+		)
+
+		if (!has_terminal_internal_tool) {
+			return false
+		}
+
+		return steps.some(step => step.text.trim().length > 0)
+	}
 	const res = streamText({
 		model: model.model,
 		system: system_prompt,
@@ -157,7 +184,7 @@ export default async (args: {
 		tools,
 		abortSignal: s.abort_controller.signal,
 		providerOptions: model.provider_options,
-		stopWhen: stepCountIs(180),
+		stopWhen: [stepCountIs(180), stopAfterTerminalInternalTool],
 		experimental_transform: smoothStream()
 	})
 	const duration_parts = [] as Array<MessagePartDurationUIPart>
