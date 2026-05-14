@@ -64,7 +64,7 @@ const mergeAbortSignals = (...signals: Array<AbortSignal | undefined>) => {
 
 export default async (s: Group, agent: Agent, messages: Array<ModelMessage>, args?: { abort_signal?: AbortSignal }) => {
 	try {
-		const model = await getAgentModel(agent)
+		const model = await getAgentModel(agent, { omit_effort: true })
 		const system_prompt = [
 			fst_system_prompt,
 			'# Group Evaluation Task',
