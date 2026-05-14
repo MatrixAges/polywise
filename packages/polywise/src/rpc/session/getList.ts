@@ -1,4 +1,4 @@
-import { blocked_session_id } from '@core/consts'
+import { blocked_session_ids, isBlockedSessionId } from '@core/consts'
 import { session } from '@core/db/schema'
 import { getSessions } from '@core/db/services'
 import { getAgentSessionIdList, getProjectSessionIdList } from '@core/db/services/externals'
@@ -33,7 +33,7 @@ const getPinSessionList = async (args: {
 		.map(item => item.id)
 		.filter(session_id => !project_session_id_set.has(session_id))
 		.filter(session_id => !agent_session_id_set.has(session_id))
-		.filter(session_id => session_id !== blocked_session_id)
+		.filter(session_id => !isBlockedSessionId(session_id))
 
 	if (!pin_session_id_list.length) {
 		return []
@@ -52,7 +52,7 @@ const getUnpinSessionList = async (args: {
 		...pin_session_id_list,
 		...project_session_id_list,
 		...agent_session_id_list,
-		blocked_session_id
+		...blocked_session_ids
 	]
 
 	return getSessions({
@@ -63,7 +63,7 @@ const getUnpinSessionList = async (args: {
 }
 
 export default p.query(async () => {
-	const pin_list = (await readPinList()).filter(item => item.id !== blocked_session_id)
+	const pin_list = (await readPinList()).filter(item => !isBlockedSessionId(item.id))
 	const [project_session_id_list, agent_session_id_list] = await Promise.all([
 		getProjectSessionIdList(),
 		getAgentSessionIdList()

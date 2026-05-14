@@ -1,4 +1,4 @@
-import { blocked_session_id } from '@core/consts'
+import { blocked_session_ids } from '@core/consts'
 import { session } from '@core/db/schema'
 import { getSessions } from '@core/db/services'
 import { getAgentSessionIdList, getProjectSessionIdList } from '@core/db/services/externals'
@@ -23,7 +23,7 @@ export default p.input(input_type).query(async ({ input }) => {
 		...pin_session_id_list,
 		...project_session_id_list,
 		...agent_session_id_list,
-		blocked_session_id
+		...blocked_session_ids
 	]
 
 	return getSessions({

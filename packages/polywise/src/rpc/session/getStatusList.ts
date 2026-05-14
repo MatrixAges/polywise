@@ -1,7 +1,7 @@
-import { blocked_session_id } from '@core/consts'
+import { blocked_session_ids, isBlockedSessionId } from '@core/consts'
 import { session, todo, todo_session } from '@core/db/schema'
 import { getSessions } from '@core/db/services'
-import { and, desc, eq, inArray, isNull, or } from 'drizzle-orm'
+import { and, desc, eq, inArray, isNull, notInArray, or } from 'drizzle-orm'
 import { enum as Enum, object } from 'zod'
 
 import { env } from '../../env'
@@ -39,7 +39,7 @@ const getErrorSessionMap = async () => {
 
 	return new Map(
 		rows
-			.filter(item => item.session.id !== blocked_session_id)
+			.filter(item => !isBlockedSessionId(item.session.id))
 			.map(item => [
 				item.session.id,
 				{
@@ -58,24 +58,29 @@ const input_type = object({ status: Enum(['running', 'unread', 'error']) })
 
 const getRunningList = async () => {
 	const running_list = await getSessions({
-		where: and(eq(session.is_runing, true), is_non_cron_session),
+		where: and(
+			eq(session.is_runing, true),
+			is_non_cron_session,
+			notInArray(session.id, [...blocked_session_ids])
+		),
 		orderBy: desc(session.updated_at)
 	})
-	const running_map = await getSessionMap(
-		running_list.map(item => item.id).filter(session_id => session_id !== blocked_session_id)
-	)
+	const running_map = await getSessionMap(running_list.map(item => item.id))
 
 	return sortSessionList(Array.from(running_map.values()))
 }
 
 const getUnreadList = async () => {
 	const unread_list = await getSessions({
-		where: and(eq(session.unread, true), is_non_cron_session, is_non_im_session),
+		where: and(
+			eq(session.unread, true),
+			is_non_cron_session,
+			is_non_im_session,
+			notInArray(session.id, [...blocked_session_ids])
+		),
 		orderBy: desc(session.updated_at)
 	})
-	const unread_map = await getSessionMap(
-		unread_list.map(item => item.id).filter(session_id => session_id !== blocked_session_id)
-	)
+	const unread_map = await getSessionMap(unread_list.map(item => item.id))
 
 	return sortSessionList(Array.from(unread_map.values()))
 }

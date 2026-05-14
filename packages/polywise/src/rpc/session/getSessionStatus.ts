@@ -1,7 +1,7 @@
 import events from 'events'
-import { blocked_session_id } from '@core/consts'
+import { blocked_session_ids } from '@core/consts'
 import { session, todo, todo_session } from '@core/db/schema'
-import { and, countDistinct, eq, isNull, or } from 'drizzle-orm'
+import { and, countDistinct, eq, isNull, notInArray, or } from 'drizzle-orm'
 
 import { env } from '../../env'
 import { p } from '../../utils/trpc'
@@ -13,7 +13,13 @@ const countRunningSession = async () => {
 	const [data] = await env.db
 		.select({ total: countDistinct(session.id) })
 		.from(session)
-		.where(and(eq(session.is_runing, true), is_non_cron_session))
+		.where(
+			and(
+				eq(session.is_runing, true),
+				is_non_cron_session,
+				notInArray(session.id, [...blocked_session_ids])
+			)
+		)
 
 	return data?.total ?? 0
 }
@@ -22,7 +28,14 @@ const countUnreadSession = async () => {
 	const [data] = await env.db
 		.select({ total: countDistinct(session.id) })
 		.from(session)
-		.where(and(eq(session.unread, true), is_non_cron_session, is_non_im_session))
+		.where(
+			and(
+				eq(session.unread, true),
+				is_non_cron_session,
+				is_non_im_session,
+				notInArray(session.id, [...blocked_session_ids])
+			)
+		)
 
 	return data?.total ?? 0
 }
@@ -33,20 +46,9 @@ const countErrorSession = async () => {
 		.from(todo_session)
 		.innerJoin(todo, and(eq(todo.id, todo_session.todo_id), eq(todo.status, 'error')))
 		.innerJoin(session, eq(session.id, todo_session.session_id))
-		.where(eq(todo.status, 'error'))
+		.where(and(eq(todo.status, 'error'), notInArray(session.id, [...blocked_session_ids])))
 
-	if (!data?.total) {
-		return 0
-	}
-
-	const [blocked_data] = await env.db
-		.select({ total: countDistinct(session.id) })
-		.from(todo_session)
-		.innerJoin(todo, and(eq(todo.id, todo_session.todo_id), eq(todo.status, 'error')))
-		.innerJoin(session, eq(session.id, todo_session.session_id))
-		.where(and(eq(todo.status, 'error'), eq(session.id, blocked_session_id)))
-
-	return data.total - (blocked_data?.total ?? 0)
+	return data?.total ?? 0
 }
 
 const getSessionStatusCount = async () => {
