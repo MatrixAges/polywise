@@ -131,6 +131,46 @@ const isTimeoutError = (message?: string) => {
 	return typeof message === 'string' && /timeout|timed out|aborted|abort/i.test(message)
 }
 
+const human_verification_hard_markers = [
+	'verify you are human',
+	"verify you're human",
+	'human verification',
+	'checking your browser before accessing',
+	'checking if the site connection is secure',
+	'please enable javascript and cookies to continue',
+	'complete the security check',
+	'press and hold',
+	'are you human',
+	'are you a human',
+	'robot or human',
+	'unusual traffic from your computer network',
+	'attention required!'
+]
+
+const human_verification_soft_markers = ['captcha', 'cloudflare ray id', 'cf challenge', 'turnstile']
+
+const getLinkcaseValidationError = (content: string) => {
+	const normalized = content.trim().toLowerCase().replace(/\s+/g, ' ').slice(0, 4000)
+
+	if (!normalized) {
+		return 'Fetched content is empty'
+	}
+
+	const hard_marker = human_verification_hard_markers.find(marker => normalized.includes(marker))
+
+	if (hard_marker) {
+		return `Fetched content looks like a human verification page (${hard_marker})`
+	}
+
+	const matched_soft_markers = human_verification_soft_markers.filter(marker => normalized.includes(marker))
+
+	if (matched_soft_markers.length >= 2) {
+		return `Fetched content looks like a human verification page (${matched_soft_markers.join(', ')})`
+	}
+
+	return null
+}
+
 export const fetchLinkcaseLink = async (args: { id: string; exec_pipeline?: boolean; max_chars?: number }) => {
 	const current_link = await getLink(eq(link.id, args.id))
 
@@ -158,6 +198,23 @@ export const fetchLinkcaseLink = async (args: { id: string; exec_pipeline?: bool
 			article: null,
 			source: result.source,
 			error: result.error,
+			attempts: result.attempts
+		}
+	}
+
+	const validation_error = getLinkcaseValidationError(result.content)
+
+	if (validation_error) {
+		const updated_link = await setLink(eq(link.id, args.id), {
+			status: 'fail'
+		})
+
+		return {
+			ok: false as const,
+			link: updated_link ?? current_link,
+			article: null,
+			source: result.source,
+			error: validation_error,
 			attempts: result.attempts
 		}
 	}

@@ -29,10 +29,13 @@ export default class Index {
 	loading = false
 	loading_more = false
 	selected_id = ''
+	checked_ids = [] as Array<string>
 	detail = null as LinkcaseDetail | null
 	detail_loading = false
 	menu_target_index = -1
 	current_fetching_id = ''
+	selection_fetch_submit_loading = false
+	selection_remove_loading = false
 	search_keyword = ''
 	filter_type = 'title' as LinkcaseFilterType
 	session_dialog_open = false
@@ -82,8 +85,48 @@ export default class Index {
 		return this.items.find(item => item.id === this.selected_id) ?? null
 	}
 
+	get checked_items() {
+		const checked_id_set = new Set(this.checked_ids)
+
+		return this.items.filter(item => checked_id_set.has(item.id))
+	}
+
+	get checked_count() {
+		return this.checked_ids.length
+	}
+
+	get has_checked_items() {
+		return this.checked_count > 0
+	}
+
 	get menu_target_item() {
 		return this.items[this.menu_target_index] ?? null
+	}
+
+	get all_loaded_checked() {
+		if (this.items.length === 0) {
+			return false
+		}
+
+		const checked_id_set = new Set(this.checked_ids)
+
+		return this.items.every(item => checked_id_set.has(item.id))
+	}
+
+	get menu_action_ids() {
+		const menu_target = this.menu_target_item
+
+		if (this.has_checked_items && (!menu_target || this.checked_ids.includes(menu_target.id))) {
+			return [...this.checked_ids]
+		}
+
+		return menu_target ? [menu_target.id] : [...this.checked_ids]
+	}
+
+	get menu_action_items() {
+		const target_id_set = new Set(this.menu_action_ids)
+
+		return this.items.filter(item => target_id_set.has(item.id))
 	}
 
 	get batch_interval_ms() {
@@ -99,6 +142,10 @@ export default class Index {
 
 		if (this.batch_submit_loading) {
 			return 'Submitting scheduled batch fetch'
+		}
+
+		if (this.selection_fetch_submit_loading) {
+			return 'Submitting selected links to batch session'
 		}
 
 		if (this.batch_last_error) {
@@ -121,6 +168,43 @@ export default class Index {
 
 	setSessionDialogOpen(value: boolean) {
 		this.session_dialog_open = value
+	}
+
+	isLinkChecked(id: string) {
+		return this.checked_ids.includes(id)
+	}
+
+	setCheckedIds(ids: Array<string>) {
+		this.checked_ids = Array.from(new Set(ids))
+	}
+
+	toggleLinkChecked(id: string, checked?: boolean) {
+		const next_checked = checked ?? !this.isLinkChecked(id)
+		const checked_id_set = new Set(this.checked_ids)
+
+		if (next_checked) {
+			checked_id_set.add(id)
+		} else {
+			checked_id_set.delete(id)
+		}
+
+		this.checked_ids = Array.from(checked_id_set)
+	}
+
+	clearCheckedLinks() {
+		this.checked_ids = []
+	}
+
+	toggleCheckAllLoadedLinks() {
+		if (this.all_loaded_checked) {
+			const loaded_id_set = new Set(this.items.map(item => item.id))
+
+			this.checked_ids = this.checked_ids.filter(id => !loaded_id_set.has(id))
+
+			return
+		}
+
+		this.setCheckedIds([...this.checked_ids, ...this.items.map(item => item.id)])
 	}
 
 	setStartDialogOpen(value: boolean) {
@@ -320,10 +404,15 @@ export default class Index {
 				this.items.push(...response.items.filter(item => !existing_ids.has(item.id)))
 			} else {
 				this.items = response.items
+				this.menu_target_index = -1
 			}
+
+			const loaded_id_set = new Set(this.items.map(item => item.id))
+			this.checked_ids = this.checked_ids.filter(id => loaded_id_set.has(id))
 
 			if (this.items.length === 0) {
 				this.selected_id = ''
+				this.checked_ids = []
 				this.detail = null
 
 				return
@@ -349,6 +438,14 @@ export default class Index {
 	async reloadList() {
 		this.page = 0
 		await this.loadList()
+	}
+
+	loadMoreList() {
+		if (this.loading || this.loading_more || !this.has_more) {
+			return
+		}
+
+		void this.loadList({ append: true })
 	}
 
 	async loadDetail(id = this.selected_id) {
@@ -493,47 +590,164 @@ export default class Index {
 	}
 
 	async removeLink(id: string) {
-		const target = this.items.find(item => item.id === id)
+		await this.removeLinks([id])
+	}
+
+	buildTargetFetchPrompt(items: Array<LinkcaseItem>) {
+		return [
+			'Run one targeted Linkcase batch fetch.',
+			`Use linkcase_tool action "fetch_ids" with these exact ids: ${JSON.stringify(items.map(item => item.id))}.`,
+			'Fetch exactly those ids once and do not replace them with other candidates.',
+			'If fetched content is empty or looks like a human verification, captcha, or security-check page, treat it as a failure.',
+			'Return a concise summary with id, title, status, source, error, and article_id.',
+			'Targets:',
+			...items.map((item, index) => `${index + 1}. ${item.id} | ${item.title || item.url} | ${item.url}`)
+		].join('\n')
+	}
+
+	async fetchLinksBySession(ids: Array<string>) {
+		const unique_ids = Array.from(new Set(ids))
+		const target_items = this.items.filter(item => unique_ids.includes(item.id))
+
+		if (target_items.length === 0) {
+			return
+		}
+
+		if (this.selection_fetch_submit_loading || this.batch_submit_loading || this.linkcase_session_running) {
+			toast.error('Linkcase batch session is busy. Wait for the current run to finish.')
+
+			return
+		}
+
+		this.selection_fetch_submit_loading = true
+		this.batch_last_error = ''
+		this.batch_last_run_at = Date.now()
+
+		try {
+			await this.submitSessionPrompt(this.buildTargetFetchPrompt(target_items))
+			this.batch_runs += 1
+			this.session_dialog_open = true
+			toast.success(`Submitted ${target_items.length} link(s) to Linkcase batch session.`)
+		} catch (error) {
+			const message = error instanceof Error ? error.message : String(error)
+
+			this.batch_last_error = message
+			toast.error(message)
+		} finally {
+			this.selection_fetch_submit_loading = false
+		}
+	}
+
+	async fetchCheckedLinks() {
+		await this.fetchLinksBySession(this.checked_ids)
+	}
+
+	async fetchMenuLinks() {
+		await this.fetchLinksBySession(this.menu_action_ids)
+	}
+
+	applyRemovedLinks(ids: Array<string>) {
+		const removed_id_set = new Set(ids)
+		const previous_items = this.items
+		const selected_removed = this.selected_id ? removed_id_set.has(this.selected_id) : false
+		const selected_index = previous_items.findIndex(item => item.id === this.selected_id)
+
+		this.items = previous_items.filter(item => !removed_id_set.has(item.id))
+		this.checked_ids = this.checked_ids.filter(id => !removed_id_set.has(id))
+		this.menu_target_index = -1
+
+		if (this.items.length === 0) {
+			this.selected_id = ''
+			this.detail = null
+
+			return
+		}
+
+		if (!selected_removed && this.items.some(item => item.id === this.selected_id)) {
+			return
+		}
+
+		const next_item =
+			previous_items.slice(selected_index + 1).find(item => !removed_id_set.has(item.id)) ??
+			previous_items
+				.slice(0, Math.max(selected_index, 0))
+				.reverse()
+				.find(item => !removed_id_set.has(item.id)) ??
+			this.items[0]
+
+		this.selected_id = next_item?.id ?? ''
+		this.detail = null
+
+		if (next_item) {
+			void this.loadDetail(next_item.id)
+		}
+	}
+
+	async removeLinks(ids: Array<string>) {
+		const unique_ids = Array.from(new Set(ids))
+		const target_items = this.items.filter(item => unique_ids.includes(item.id))
+		const count = target_items.length
+
+		if (count === 0 || this.selection_remove_loading) {
+			return
+		}
+
 		const confirmed = await alert({
-			title: 'Remove Link',
-			desc: `Remove ${target?.title || target?.url || 'this link'} and its unattached fetched articles?`
+			title: count > 1 ? 'Remove Links' : 'Remove Link',
+			desc:
+				count > 1
+					? `Remove ${count} links and their unattached fetched articles?`
+					: `Remove ${target_items[0]?.title || target_items[0]?.url || 'this link'} and its unattached fetched articles?`
 		})
 
 		if (!confirmed) {
 			return
 		}
 
-		const current_index = this.items.findIndex(item => item.id === id)
+		this.selection_remove_loading = true
+		const removed_ids = [] as Array<string>
 
-		await rpc.linkcase.remove.mutate({ id })
+		try {
+			for (const id of unique_ids) {
+				const response = await rpc.linkcase.remove.mutate({ id })
 
-		this.items = this.items.filter(item => item.id !== id)
-		this.menu_target_index = -1
-
-		if (this.selected_id === id) {
-			const next_item = this.items[current_index] ?? this.items[current_index - 1] ?? null
-
-			this.selected_id = next_item?.id ?? ''
-			this.detail = null
-
-			if (next_item) {
-				void this.loadDetail(next_item.id)
+				if (response) {
+					removed_ids.push(id)
+				}
 			}
+
+			this.applyRemovedLinks(removed_ids)
+
+			if (removed_ids.length > 0) {
+				toast.success(`Removed ${removed_ids.length} link(s).`)
+			}
+		} catch (error) {
+			if (removed_ids.length > 0) {
+				this.applyRemovedLinks(removed_ids)
+			}
+
+			toast.error(error instanceof Error ? error.message : 'Failed to remove selected links')
+		} finally {
+			this.selection_remove_loading = false
 		}
+	}
+
+	async removeCheckedLinks() {
+		await this.removeLinks(this.checked_ids)
+	}
+
+	async removeMenuLinks() {
+		await this.removeLinks(this.menu_action_ids)
 	}
 
 	onMenuScroll(event: UIEvent<HTMLDivElement>) {
 		const element = event.currentTarget
 
-		if (this.loading || this.loading_more || !this.has_more) {
-			return
-		}
-
 		if (element.scrollTop + element.clientHeight < element.scrollHeight - 120) {
 			return
 		}
 
-		void this.loadList({ append: true })
+		this.loadMoreList()
 	}
 
 	findMenuTarget(target: EventTarget | null) {
@@ -601,6 +815,31 @@ export default class Index {
 		].join('\n')
 	}
 
+	async submitSessionPrompt(text: string) {
+		const message = {
+			id: crypto.randomUUID(),
+			role: 'user',
+			parts: [{ type: 'text', text }]
+		} satisfies Message
+
+		const response = await fetch(server_sys_session_url, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({
+				id: this.global_session_id,
+				message
+			})
+		})
+
+		if (!response.ok) {
+			throw new Error(`Batch session submit failed: ${response.status}`)
+		}
+
+		this.consumeSessionResponse(response)
+	}
+
 	consumeSessionResponse(response: Response) {
 		if (!response.body) {
 			return
@@ -624,28 +863,7 @@ export default class Index {
 	}
 
 	async submitBatchPrompt() {
-		const message = {
-			id: crypto.randomUUID(),
-			role: 'user',
-			parts: [{ type: 'text', text: this.buildBatchPrompt() }]
-		} satisfies Message
-
-		const response = await fetch(server_sys_session_url, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify({
-				id: this.global_session_id,
-				message
-			})
-		})
-
-		if (!response.ok) {
-			throw new Error(`Batch session submit failed: ${response.status}`)
-		}
-
-		this.consumeSessionResponse(response)
+		await this.submitSessionPrompt(this.buildBatchPrompt())
 	}
 
 	async runBatchCycle() {

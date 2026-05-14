@@ -1,10 +1,13 @@
 import { Globe, Loader, Search, TriangleAlert } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
+import { Button } from '@/__shadcn__/components/ui/button'
 import {
 	ContextMenu,
 	ContextMenuContent,
 	ContextMenuItem,
+	ContextMenuLabel,
+	ContextMenuSeparator,
 	ContextMenuTrigger
 } from '@/__shadcn__/components/ui/context-menu'
 import { Input } from '@/__shadcn__/components/ui/input'
@@ -33,6 +36,7 @@ const status_style_map = {
 const Index = () => {
 	const x = useModel()
 	const menu_target = x.menu_target_item
+	const menu_action_count = x.menu_action_ids.length
 
 	return (
 		<ContextMenu>
@@ -97,6 +101,54 @@ const Index = () => {
 							</SelectContent>
 						</Select>
 					</div>
+					{(x.has_checked_items || x.items.length > 0) && (
+						<div
+							className='
+								flex
+								items-center
+								gap-2
+								px-3 py-2
+								bg-secondary/20
+								border-b border-border-light
+							'
+						>
+							<div className='text-std-400 min-w-0 flex-1 text-xs'>
+								{x.has_checked_items
+									? `${x.checked_count} selected`
+									: 'Select links for batch actions'}
+							</div>
+							<Button variant='ghost' size='xs' onClick={x.toggleCheckAllLoadedLinks}>
+								{x.all_loaded_checked ? 'Unselect all' : 'Select all'}
+							</Button>
+							{x.has_checked_items && (
+								<>
+									<Button
+										variant='outline'
+										size='xs'
+										disabled={
+											x.selection_fetch_submit_loading ||
+											x.batch_submit_loading ||
+											x.linkcase_session_running
+										}
+										onClick={() => void x.fetchCheckedLinks()}
+									>
+										{x.selection_fetch_submit_loading ? 'Submitting' : 'Fetch'}
+									</Button>
+									<Button
+										variant='destructive'
+										size='xs'
+										disabled={x.selection_remove_loading}
+										onClick={() => void x.removeCheckedLinks()}
+									>
+										{x.selection_remove_loading ? 'Removing' : 'Delete'}
+									</Button>
+									<Button variant='ghost' size='xs' onClick={x.clearCheckedLinks}>
+										Clear
+									</Button>
+								</>
+							)}
+						</div>
+					)}
 					<div
 						className='
 							overflow-y-auto
@@ -131,6 +183,26 @@ const Index = () => {
 										onClick={() => x.selectLink(item.id)}
 										key={item.id}
 									>
+										<div
+											className='
+											flex shrink-0
+											items-center justify-center
+											size-5
+										'
+											onClick={event => event.stopPropagation()}
+										>
+											<input
+												className='accent-primary size-4 cursor-pointer'
+												type='checkbox'
+												checked={x.isLinkChecked(item.id)}
+												onChange={event =>
+													x.toggleLinkChecked(
+														item.id,
+														event.currentTarget.checked
+													)
+												}
+											/>
+										</div>
 										<div
 											className='
 											overflow-hidden
@@ -176,6 +248,20 @@ const Index = () => {
 									</div>
 								)
 							})}
+							{(x.has_more || x.loading_more) && (
+								<Button
+									className='w-full'
+									variant='outline'
+									size='sm'
+									disabled={x.loading || x.loading_more}
+									onClick={x.loadMoreList}
+								>
+									{x.loading_more && (
+										<Loader className='size-3 animate-spin'></Loader>
+									)}
+									{x.loading_more ? 'Loading more' : 'Load more'}
+								</Button>
+							)}
 							{x.loading_more && (
 								<div
 									className='
@@ -210,13 +296,23 @@ const Index = () => {
 					</div>
 				</div>
 			</ContextMenuTrigger>
-			{menu_target && (
+			{menu_target && menu_action_count > 0 && (
 				<ContextMenuContent>
-					<ContextMenuItem onClick={() => x.fetchLink(menu_target.id)}>
-						{menu_target.article ? 'Refetch' : 'Fetch'}
+					{menu_action_count > 1 && (
+						<>
+							<ContextMenuLabel>{menu_action_count} links selected</ContextMenuLabel>
+							<ContextMenuSeparator></ContextMenuSeparator>
+						</>
+					)}
+					<ContextMenuItem onClick={() => void x.fetchMenuLinks()}>
+						{menu_action_count > 1
+							? `Fetch selected (${menu_action_count})`
+							: menu_target.article
+								? 'Refetch'
+								: 'Fetch'}
 					</ContextMenuItem>
-					<ContextMenuItem variant='destructive' onClick={() => x.removeLink(menu_target.id)}>
-						Remove
+					<ContextMenuItem variant='destructive' onClick={() => void x.removeMenuLinks()}>
+						{menu_action_count > 1 ? `Remove selected (${menu_action_count})` : 'Remove'}
 					</ContextMenuItem>
 				</ContextMenuContent>
 			)}
