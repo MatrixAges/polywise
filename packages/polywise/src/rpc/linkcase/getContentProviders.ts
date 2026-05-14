@@ -1,5 +1,6 @@
 import { p } from '@core/utils'
 
+import { getPolywiseCrawl4aiManagedProfile } from '../../utils/crawl4aiProfile'
 import { linkcase_content_providers } from './providers'
 import {
 	getAgentBrowserChromeProfileCheck,
@@ -14,6 +15,8 @@ export default p.query(async () => {
 		linkcase_content_providers.map(async item => {
 			const installed = await isToolInstalled(item.detect)
 			const checks = []
+			const crawl4ai_profile =
+				item.id === 'crawl4ai' ? await getPolywiseCrawl4aiManagedProfile() : undefined
 
 			if (item.id === 'opencli') {
 				checks.push(
@@ -57,7 +60,8 @@ export default p.query(async () => {
 				...item,
 				installed,
 				ready: installed && checks.every(check => check.status === 'ok' || check.status === 'info'),
-				checks
+				checks,
+				crawl4ai_profile
 			}
 		})
 	)

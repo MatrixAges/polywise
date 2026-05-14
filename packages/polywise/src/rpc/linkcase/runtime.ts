@@ -1,8 +1,6 @@
 import { spawn } from 'child_process'
-import { readdir } from 'fs/promises'
-import os from 'os'
-import path from 'path'
 
+import { getPolywiseCrawl4aiManagedProfile } from '../../utils/crawl4aiProfile'
 import { resolveCommand } from '../../utils/resolveCommand'
 
 import type { LinkcaseProviderCheck, LinkcaseProviderCheckStatus } from './providers'
@@ -142,32 +140,20 @@ export const getAgentBrowserChromeProfileCheck = async (): Promise<LinkcaseProvi
 }
 
 export const getCrawl4aiProfileCheck = async (): Promise<LinkcaseProviderCheck> => {
-	const profiles_dir = path.join(os.homedir(), '.crawl4ai', 'profiles')
+	const managed = await getPolywiseCrawl4aiManagedProfile()
+	const source_profile = managed.source_profile_name || managed.profile_name || 'unknown'
 
-	try {
-		const entries = await readdir(profiles_dir, { withFileTypes: true })
-		const profile_count = entries.filter(entry => entry.isDirectory()).length
-
-		return {
-			id: 'managed-profiles',
-			label: 'Managed profiles',
-			status: 'info',
-			detail:
-				profile_count > 0
-					? `Detected ${profile_count} Crawl4AI managed profile${profile_count === 1 ? '' : 's'} for logged-in browsing sessions.`
-					: 'No Crawl4AI managed profiles detected yet. Create one with `crwl profiles` if you want logged-in session reuse.',
-			action_label: 'Session docs',
-			action_url: crawl4ai_identity_docs_url
-		}
-	} catch {
-		return {
-			id: 'managed-profiles',
-			label: 'Managed profiles',
-			status: 'info',
-			detail: 'No Crawl4AI managed profiles detected yet. Create one with `crwl profiles` if you want logged-in session reuse.',
-			action_label: 'Session docs',
-			action_url: crawl4ai_identity_docs_url
-		}
+	return {
+		id: 'managed-profiles',
+		label: 'Managed profiles',
+		status: managed.managed_profile_exists ? 'ok' : 'info',
+		detail: managed.managed_profile_exists
+			? `Polywise managed profile is ready at ${managed.managed_profile_path}. It is a snapshot cloned from Chrome profile ${source_profile}; use Recreate Profile to refresh cookies or login state later.`
+			: managed.preferred_source_profile_name
+				? `No managed profile detected yet. Click Create From Chrome to clone a snapshot of the current Chrome profile ${managed.preferred_source_profile_name}.`
+				: 'No local Chrome profile was detected for session cloning.',
+		action_label: 'Session docs',
+		action_url: crawl4ai_identity_docs_url
 	}
 }
 

@@ -42,6 +42,7 @@ const Index = () => {
 	const [providers, setProviders] = useState<Array<LinkcaseProvider>>([])
 	const [loading, setLoading] = useState(false)
 	const [installing_id, setInstallingId] = useState<string | null>(null)
+	const [managing_action_id, setManagingActionId] = useState<string | null>(null)
 
 	const onChange = useMemoizedFn((values: AppConfig) => {
 		s.setConfig('config', values)
@@ -71,6 +72,27 @@ const Index = () => {
 			toast.error(error instanceof Error ? error.message : 'Install failed')
 		} finally {
 			setInstallingId(null)
+		}
+	})
+
+	const manageProvider = useMemoizedFn(async (id: 'crawl4ai', action: 'create_profile' | 'recreate_profile') => {
+		const action_id = `${id}:${action}`
+		setManagingActionId(action_id)
+
+		try {
+			const res = await rpc.linkcase.manageContentProvider.mutate({ id, action })
+			toast.success(
+				res.created
+					? action === 'recreate_profile'
+						? 'Crawl4AI profile recreated from current Chrome session'
+						: 'Crawl4AI profile created from current Chrome session'
+					: 'Crawl4AI profile already exists'
+			)
+			await refreshProviders()
+		} catch (error) {
+			toast.error(error instanceof Error ? error.message : 'Provider action failed')
+		} finally {
+			setManagingActionId(null)
 		}
 	})
 
@@ -145,7 +167,11 @@ const Index = () => {
 									type='button'
 									variant={provider.installed ? 'outline' : 'default'}
 									size='sm'
-									disabled={provider.installed || installing_id === provider.id}
+									disabled={
+										provider.installed ||
+										installing_id === provider.id ||
+										managing_action_id !== null
+									}
 									onClick={() => void installProvider(provider.id)}
 								>
 									{installing_id === provider.id ? (
@@ -156,6 +182,51 @@ const Index = () => {
 									<span>{provider.installed ? 'Installed' : 'Install'}</span>
 								</Button>
 							</div>
+							{provider.id === 'crawl4ai' && provider.installed && (
+								<div className='flex flex-wrap gap-2'>
+									<Button
+										type='button'
+										variant='outline'
+										size='sm'
+										disabled={
+											!provider.crawl4ai_profile
+												?.preferred_source_profile_name ||
+											Boolean(
+												provider.crawl4ai_profile
+													?.managed_profile_exists
+											) ||
+											managing_action_id !== null
+										}
+										onClick={() =>
+											void manageProvider('crawl4ai', 'create_profile')
+										}
+									>
+										{managing_action_id === 'crawl4ai:create_profile' ? (
+											<Spinner className='size-4' />
+										) : null}
+										<span>Create From Chrome</span>
+									</Button>
+									<Button
+										type='button'
+										variant='outline'
+										size='sm'
+										disabled={
+											!provider.crawl4ai_profile
+												?.preferred_source_profile_name ||
+											!provider.crawl4ai_profile?.managed_profile_exists ||
+											managing_action_id !== null
+										}
+										onClick={() =>
+											void manageProvider('crawl4ai', 'recreate_profile')
+										}
+									>
+										{managing_action_id === 'crawl4ai:recreate_profile' ? (
+											<Spinner className='size-4' />
+										) : null}
+										<span>Recreate Profile</span>
+									</Button>
+								</div>
+							)}
 							{provider.checks.length > 0 && (
 								<div
 									className='

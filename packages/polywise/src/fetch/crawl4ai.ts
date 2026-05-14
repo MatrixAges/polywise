@@ -1,8 +1,9 @@
+import { resolvePolywiseCrawl4aiProfileConfig } from '../utils/crawl4aiProfile'
 import { runCommand, trimContent } from './runtime'
 
 import type { FetchProviderHandler } from './types'
 
-const getCrawl4aiArgs = (url: string) => {
+const getCrawl4aiArgs = async (url: string) => {
 	const args = [
 		url,
 		'-o',
@@ -12,13 +13,14 @@ const getCrawl4aiArgs = (url: string) => {
 		'wait_until=networkidle,delay_before_return_html=1,scan_full_page=true,process_iframes=false,remove_overlay_elements=true,magic=true'
 	]
 	const browser_config = process.env.CRAWL4AI_BROWSER_CONFIG?.trim()
-	const profile_path = process.env.CRAWL4AI_PROFILE_PATH?.trim()
 	const browser_type = process.env.CRAWL4AI_BROWSER_TYPE?.trim() || 'chromium'
+	const profile_config = await resolvePolywiseCrawl4aiProfileConfig()
 
-	if (profile_path) {
+	if (profile_config?.user_data_dir) {
 		const managed_browser_config = [
 			'use_managed_browser=true',
-			`user_data_dir=${profile_path}`,
+			`user_data_dir=${profile_config.user_data_dir}`,
+			profile_config.profile_name ? `profile_name=${profile_config.profile_name}` : '',
 			`browser_type=${browser_type}`,
 			'headless=true',
 			browser_config
@@ -35,7 +37,7 @@ const getCrawl4aiArgs = (url: string) => {
 }
 
 const fetchWithCrawl4ai: FetchProviderHandler = async ({ url, max_chars }) => {
-	const result = await runCommand('crwl', getCrawl4aiArgs(url), 60000)
+	const result = await runCommand('crwl', await getCrawl4aiArgs(url), 60000)
 
 	if (result.exitCode !== 0) {
 		throw new Error(result.stderr || result.stdout || 'crwl failed')
