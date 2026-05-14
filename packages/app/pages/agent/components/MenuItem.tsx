@@ -63,7 +63,7 @@ const Index = (props: IProps) => {
 				'
 			>
 				<div className='truncate text-sm font-medium'>{item.name}</div>
-				<div className='text-std-400 truncate text-xs'>{item.description || 'No description'}</div>
+				<div className='text-std-400 truncate text-xs'>{item.role || 'No Role'}</div>
 			</div>
 			<div
 				className='

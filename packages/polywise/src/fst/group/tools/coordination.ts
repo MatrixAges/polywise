@@ -22,7 +22,8 @@ export const createGroupCoordinationTool = (s: Group, agent: Agent) => {
 		description: [
 			'Coordinate access to shared writes and shared todos inside the group runtime.',
 			'Acquire the lock before using write-capable workspace tools.',
-			'Claim a todo when you start executing it; complete or fail it when done.'
+			'Claim a todo when you start executing it; complete or fail it when done.',
+			'This is an internal state tool. After calling it, do not produce any additional user-facing summary in the same turn.'
 		].join('\n'),
 		inputSchema,
 		execute: async input => {

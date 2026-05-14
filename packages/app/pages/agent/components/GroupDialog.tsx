@@ -175,8 +175,7 @@ const Index = () => {
 													flex flex-col
 													items-center justify-start
 													gap-3
-													px-3 pt-4
-													pb-3
+													px-3 py-4
 													rounded-md
 													text-center
 													border border-border-light
@@ -207,9 +206,8 @@ const Index = () => {
 														<div className='truncate text-sm font-medium'>
 															{agent.name}
 														</div>
-														<div className='text-std-400 line-clamp-3 text-xs'>
-															{agent.description ||
-																'No description'}
+														<div className='text-std-400 truncate text-xs font-medium'>
+															{agent.role || 'No role'}
 														</div>
 													</div>
 												</button>
@@ -271,7 +269,6 @@ const Index = () => {
 														gap-3
 														px-3 py-2
 														rounded-md
-														border border-border-light
 													'
 													key={folder.path}
 												>

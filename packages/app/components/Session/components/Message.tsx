@@ -261,7 +261,7 @@ const formatMessageTime = (time?: Date) => {
 const SenderAvatar = (props: { agent: SenderAgentSummary }) => {
 	const { agent } = props
 	const avatar_config = (agent.avatar as AgentAvatarConfig | null) ?? null
-	const wrapper_style = { width: 20, height: 20 } as CSSProperties
+	const wrapper_style = { width: 36, height: 36 } as CSSProperties
 	const object_photo_url = useMemo(() => {
 		if (!agent.photo) {
 			return ''
@@ -549,25 +549,18 @@ const Index = (props: IPropsMessage) => {
 					<div
 						className='
 							flex
-							items-start
+							items-center
 							gap-2
 							mb-2
 						'
 					>
 						{sender_agent && <SenderAvatar agent={sender_agent}></SenderAvatar>}
-						<div className='flex flex-col gap-0.5'>
-							<div
-								className='
-									text-xsm text-std-500 font-medium tracking-[0.08em]
-									uppercase
-								'
-							>
-								{sender_name}
-							</div>
+						<div className='flex flex-col gap-1.5'>
+							<span className='text-xsm leading-none! font-semibold'>{sender_name}</span>
 							{(sender_agent?.role || sender_role) && (
-								<div className='text-std-400 text-[11px] leading-4'>
+								<span className='text-std-400 text-xs leading-none!'>
 									{sender_agent?.role || sender_role}
-								</div>
+								</span>
 							)}
 						</div>
 					</div>

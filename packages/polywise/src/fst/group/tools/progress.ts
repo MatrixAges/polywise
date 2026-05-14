@@ -50,7 +50,8 @@ export const createGroupProgressTool = (s: Group, agent: Agent) => {
 		description: [
 			'Update the shared group context and shared group todos when your work materially changes the group state.',
 			'Use this when you clarify task status, shared progress, blockers, or file state.',
-			'Do not use it for minor commentary.'
+			'Do not use it for minor commentary.',
+			'This is an internal state tool. After calling it, do not produce any additional user-facing summary in the same turn.'
 		].join('\n'),
 		inputSchema,
 		execute: async input => {
