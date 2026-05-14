@@ -95,34 +95,35 @@ const Index = () => {
 						<span>Refresh</span>
 					</Button>
 				</div>
-				<div className='flex flex-col gap-2'>
+				<div className='mb-2 flex flex-col gap-2'>
 					{providers.map(provider => (
 						<div
 							key={provider.id}
 							className='
 								flex
 								items-center justify-between
-								px-3 py-3
+								gap-2
+								px-4 py-3
 								rounded-2xl
-								bg-muted/20
-								border border-border-light
+								bg-muted/40
 							'
 						>
 							<div className='flex flex-col gap-1'>
 								<div className='flex items-center gap-2'>
 									<span className='font-medium'>{provider.name}</span>
-									<Badge variant={provider.installed ? 'default' : 'outline'}>
-										{provider_status_text(provider)}
-									</Badge>
+									<a
+										className='
+											text-std-400 text-xs
+											underline
+											decoration-std-150 underline-offset-4
+										'
+										href={provider.docs_url}
+										target='_blank'
+									>
+										Installation docs
+									</a>
 								</div>
 								<div className='text-std-500 text-sm'>{provider.description}</div>
-								<a
-									className='text-std-400 text-xs underline underline-offset-4'
-									href={provider.docs_url}
-									target='_blank'
-								>
-									Installation docs
-								</a>
 							</div>
 							<Button
 								type='button'
@@ -142,7 +143,6 @@ const Index = () => {
 					))}
 				</div>
 			</FieldGroup>
-			<div className='bg-border-light my-2 h-px w-full'></div>
 			<FieldGroup className='gap-0'>
 				<Field className='items-center! py-3' orientation='vertical'>
 					<FieldContent>
@@ -164,6 +164,7 @@ const Index = () => {
 						<Input type='text' placeholder='jina_...' autoComplete='off' />
 					</Controller>
 				</Field>
+				<div className='bg-border-light my-2 h-px w-full'></div>
 				<Field className='items-center! py-3' orientation='horizontal'>
 					<FieldContent>
 						<FieldTitle className='text-base'>Enable Webfetch Chain</FieldTitle>
