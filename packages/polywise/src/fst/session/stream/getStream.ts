@@ -1,6 +1,7 @@
 import { config } from '@core/config'
 import fst_report_tool_prompt from '@core/consts/prompts/fst_report_tool_prompt.md'
 import fst_system_prompt from '@core/consts/prompts/fst_system_prompt.md'
+import fst_title_tool_prompt from '@core/consts/prompts/fst_title_tool_prompt.md'
 import getContextPrompt from '@core/consts/prompts/getContextPrompt'
 import plan_mode_prompt from '@core/consts/prompts/plan_mode_prompt.md'
 import planexec_exec_prompt from '@core/consts/prompts/planexec_exec_prompt.md'
@@ -96,9 +97,11 @@ export default async (s: Index, message: Message) => {
 		.with({ mode: 'plan-exec', plan_stage: 'plan' }, () => planexec_plan_prompt)
 		.with({ mode: 'plan-exec', plan_stage: 'exec' }, () => planexec_exec_prompt)
 		.otherwise(() => '')
+	const has_title_tool = 'title_tool' in shared_runtime.tools
 
 	const system_prompt = [
 		fst_system_prompt,
+		has_title_tool ? fst_title_tool_prompt : '',
 		agent_system_prompt,
 		has_todo_session_link ? fst_report_tool_prompt : '',
 		shared_runtime.system_tools_prompt,
