@@ -238,22 +238,14 @@ const BrowserCard = observer((props: { browser: LinkcaseSnifferBrowserStatus }) 
 						</div>
 						<div className='flex items-center gap-2'>
 							<button
-								className='
-									text-std-400 text-xs
-									underline
-									decoration-border-light underline-offset-4
-								'
+								className='text-std-400 text-xs'
 								type='button'
 								onClick={() => x.setSnifferSelectedFolderKeys(browser.id, folder_keys)}
 							>
 								Select all
 							</button>
 							<button
-								className='
-									text-std-400 text-xs
-									underline
-									decoration-border-light underline-offset-4
-								'
+								className='text-std-400 text-xs'
 								type='button'
 								onClick={() => x.setSnifferSelectedFolderKeys(browser.id, [])}
 							>
@@ -284,7 +276,7 @@ const Index = () => {
 			open={x.sniffer_dialog_open}
 			title='Import Browser Bookmarks'
 			desc='Choose one browser at a time. Click Folders to open the folder selector, then import only the checked bookmark folders.'
-			className='w-[760px]'
+			className='w-[600px] max-w-[90vw]!'
 			setOpen={x.setSnifferDialogOpen}
 		>
 			<div className='flex flex-col gap-4'>
