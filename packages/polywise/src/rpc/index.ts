@@ -3,6 +3,7 @@ import agent from './agent'
 import file from './file'
 import group from './group'
 import heartbeat from './heartbeat'
+import linkcase from './linkcase'
 import llama from './llama'
 import notification from './notification'
 import pipeline from './pipeline'
@@ -25,6 +26,7 @@ export const router = r({
 	agent,
 	group,
 	file,
+	linkcase,
 	project,
 	skill,
 	tool,
