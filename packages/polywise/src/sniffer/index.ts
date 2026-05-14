@@ -10,7 +10,13 @@ import { getFirefoxBookmarkStatus, readFirefoxBookmarks } from './firefox'
 import { sniffer_browser_ids } from './types'
 
 import type { LinkInsert } from '@core/db'
-import type { SnifferBrowserId, SnifferBrowserStatus, SnifferImportResult, SnifferReadResult } from './types'
+import type {
+	SnifferBrowserId,
+	SnifferBrowserStatus,
+	SnifferImportResult,
+	SnifferReadArgs,
+	SnifferReadResult
+} from './types'
 
 const getBrowserStatusMap = () => ({
 	chrome: () => getChromiumBookmarkStatus(chrome_browser_config),
@@ -92,7 +98,10 @@ const buildImportResult = (args: {
 	}
 }
 
-export const importBrowserBookmarks = async (browser: SnifferBrowserId): Promise<SnifferImportResult> => {
+export const importBrowserBookmarks = async (
+	browser: SnifferBrowserId,
+	args: SnifferReadArgs = {}
+): Promise<SnifferImportResult> => {
 	const status = await getSnifferStatus(browser)
 
 	if (!status.available) {
@@ -114,8 +123,27 @@ export const importBrowserBookmarks = async (browser: SnifferBrowserId): Promise
 		}
 	}
 
+	if (Array.isArray(args.folder_keys) && args.folder_keys.length === 0) {
+		return {
+			browser,
+			name: status.name,
+			available: true,
+			source_count: status.source_count,
+			total_bookmarks: 0,
+			candidate_count: 0,
+			inserted_count: 0,
+			ignored_existing_count: 0,
+			ignored_duplicate_count: 0,
+			ignored_invalid_count: 0,
+			error_count: 0,
+			errors: [],
+			inserted_preview: [],
+			message: 'No bookmark folders selected.'
+		}
+	}
+
 	const reader_map = getBrowserReaderMap()
-	const read_result = await reader_map[browser](status.sources)
+	const read_result = await reader_map[browser](status.sources, args)
 	const candidate_map = new Map<string, LinkInsert>()
 	let ignored_invalid_count = 0
 	let ignored_duplicate_count = 0

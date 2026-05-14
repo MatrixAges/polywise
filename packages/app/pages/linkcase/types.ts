@@ -6,7 +6,28 @@ export type LinkcaseFilterType = 'title' | 'link'
 export type LinkcaseBatchIntervalUnit = 'second' | 'minute'
 export type LinkcaseSnifferBrowserStatus = RPCOutput['sniffer']['status']['browsers'][number]
 export type LinkcaseSnifferBrowserId = LinkcaseSnifferBrowserStatus['id']
+export type LinkcaseSnifferSourceStatus = LinkcaseSnifferBrowserStatus['sources'][number]
+export type LinkcaseSnifferFolderNode = LinkcaseSnifferSourceStatus['folders'][number]
 export type LinkcaseSnifferImportResult = RPCOutput['sniffer']['importBookmarks']
+
+export const getLinkcaseSnifferFolderKeys = (folders: Array<LinkcaseSnifferFolderNode>): Array<string> => {
+	const keys = [] as Array<string>
+
+	const visit = (nodes: Array<LinkcaseSnifferFolderNode>) => {
+		for (const node of nodes) {
+			keys.push(node.key)
+			visit(node.children)
+		}
+	}
+
+	visit(folders)
+
+	return keys
+}
+
+export const getLinkcaseSnifferBrowserFolderKeys = (browser: LinkcaseSnifferBrowserStatus): Array<string> => {
+	return browser.sources.flatMap(source => getLinkcaseSnifferFolderKeys(source.folders))
+}
 
 const bytes_to_base64 = (value: Uint8Array) => {
 	let binary = ''

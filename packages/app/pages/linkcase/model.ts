@@ -7,6 +7,8 @@ import { server_sys_session_url } from '@/appdata'
 import { Util } from '@/models/common'
 import { alert, rpc } from '@/utils'
 
+import { getLinkcaseSnifferBrowserFolderKeys } from './types'
+
 import type { Message } from '@core/fst'
 import type { SessionStatusPayload } from '@core/rpc/session/watchSessionStatus'
 import type { MouseEvent, UIEvent } from 'react'
@@ -39,6 +41,8 @@ export default class Index {
 	sniffer_statuses = [] as Array<LinkcaseSnifferBrowserStatus>
 	sniffer_status_loading = false
 	sniffer_importing_browser = '' as LinkcaseSnifferBrowserId | ''
+	sniffer_expanded_browser_ids = [] as Array<LinkcaseSnifferBrowserId>
+	sniffer_selected_folder_keys = {} as Partial<Record<LinkcaseSnifferBrowserId, Array<string>>>
 	batch_count = 3
 	batch_interval_value = 5
 	batch_interval_unit = 'minute' as LinkcaseBatchIntervalUnit
@@ -127,6 +131,41 @@ export default class Index {
 		this.sniffer_dialog_open = value
 	}
 
+	setSnifferSelectedFolderKeys(browser: LinkcaseSnifferBrowserId, keys: Array<string>) {
+		this.sniffer_selected_folder_keys = {
+			...this.sniffer_selected_folder_keys,
+			[browser]: Array.from(new Set(keys))
+		}
+	}
+
+	toggleSnifferFolderKeys(browser: LinkcaseSnifferBrowserId, keys: Array<string>, checked: boolean) {
+		const next_keys = new Set(this.getSnifferSelectedFolderKeys(browser))
+
+		for (const key of keys) {
+			if (checked) {
+				next_keys.add(key)
+			} else {
+				next_keys.delete(key)
+			}
+		}
+
+		this.setSnifferSelectedFolderKeys(browser, Array.from(next_keys))
+	}
+
+	toggleSnifferBrowserExpanded(browser: LinkcaseSnifferBrowserId) {
+		if (this.sniffer_expanded_browser_ids.includes(browser)) {
+			this.sniffer_expanded_browser_ids = this.sniffer_expanded_browser_ids.filter(id => id !== browser)
+
+			return
+		}
+
+		this.sniffer_expanded_browser_ids = [...this.sniffer_expanded_browser_ids, browser]
+	}
+
+	isSnifferBrowserExpanded(browser: LinkcaseSnifferBrowserId) {
+		return this.sniffer_expanded_browser_ids.includes(browser)
+	}
+
 	setSearchKeyword(value: string) {
 		this.search_keyword = value
 
@@ -160,6 +199,58 @@ export default class Index {
 
 	getSnifferStatus(browser: LinkcaseSnifferBrowserId) {
 		return this.sniffer_statuses.find(item => item.id === browser) ?? null
+	}
+
+	getSnifferBrowserFolderKeys(browser: LinkcaseSnifferBrowserId) {
+		const status = this.getSnifferStatus(browser)
+
+		return status ? getLinkcaseSnifferBrowserFolderKeys(status) : []
+	}
+
+	getSnifferSelectedFolderKeys(browser: LinkcaseSnifferBrowserId) {
+		return this.sniffer_selected_folder_keys[browser] ?? []
+	}
+
+	getSnifferSelectedFolderCount(browser: LinkcaseSnifferBrowserId) {
+		return this.getSnifferSelectedFolderKeys(browser).length
+	}
+
+	getSnifferFolderSelectionState(browser: LinkcaseSnifferBrowserId, folder_keys: Array<string>) {
+		if (folder_keys.length === 0) {
+			return 'unchecked' as const
+		}
+
+		const selected = new Set(this.getSnifferSelectedFolderKeys(browser))
+		const selected_count = folder_keys.filter(key => selected.has(key)).length
+
+		if (selected_count === 0) {
+			return 'unchecked' as const
+		}
+
+		if (selected_count === folder_keys.length) {
+			return 'checked' as const
+		}
+
+		return 'indeterminate' as const
+	}
+
+	getSnifferSelectedFolderKeysForImport(browser: LinkcaseSnifferBrowserId) {
+		return this.getSnifferSelectedFolderKeys(browser)
+	}
+
+	syncSnifferSelections(statuses: Array<LinkcaseSnifferBrowserStatus>) {
+		const next_selections = { ...this.sniffer_selected_folder_keys }
+
+		for (const status of statuses) {
+			const all_keys = getLinkcaseSnifferBrowserFolderKeys(status)
+			const existing_keys = next_selections[status.id] ?? []
+			const filtered_keys = existing_keys.filter(key => all_keys.includes(key))
+			const has_existing = Object.prototype.hasOwnProperty.call(next_selections, status.id)
+
+			next_selections[status.id] = has_existing ? filtered_keys : all_keys
+		}
+
+		this.sniffer_selected_folder_keys = next_selections
 	}
 
 	toListItem(item: LinkcaseItem | LinkcaseDetail): LinkcaseItem {
@@ -336,6 +427,7 @@ export default class Index {
 			const response = await rpc.sniffer.status.query()
 
 			this.sniffer_statuses = response.browsers
+			this.syncSnifferSelections(response.browsers)
 		} catch (error) {
 			toast.error(error instanceof Error ? error.message : 'Failed to inspect browser bookmarks')
 		} finally {
@@ -354,10 +446,21 @@ export default class Index {
 			return
 		}
 
+		const folder_keys = this.getSnifferSelectedFolderKeysForImport(browser)
+
+		if (folder_keys.length === 0) {
+			toast.error('Select at least one bookmark folder.')
+
+			return
+		}
+
 		this.sniffer_importing_browser = browser
 
 		try {
-			const result = await rpc.sniffer.importBookmarks.mutate({ browser })
+			const result = await rpc.sniffer.importBookmarks.mutate({
+				browser,
+				folder_keys
+			})
 			const summary = [
 				`${result.name}: imported ${result.inserted_count} link(s).`,
 				result.ignored_existing_count > 0

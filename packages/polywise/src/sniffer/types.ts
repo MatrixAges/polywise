@@ -2,9 +2,21 @@ export const sniffer_browser_ids = ['chrome', 'firefox', 'edge'] as const
 
 export type SnifferBrowserId = (typeof sniffer_browser_ids)[number]
 
+export interface SnifferFolderNode {
+	key: string
+	name: string
+	path: string
+	bookmark_count: number
+	children: Array<SnifferFolderNode>
+}
+
 export interface SnifferSourceStatus {
+	id: string
 	profile_name: string
 	path: string
+	bookmark_count: number
+	folders: Array<SnifferFolderNode>
+	error?: string
 }
 
 export interface SnifferBrowserStatus {
@@ -21,7 +33,14 @@ export interface SnifferBookmarkItem {
 	title: string
 	url: string
 	profile_name: string
+	source_id: string
 	source_path: string
+	folder_key: string
+	folder_path: string
+}
+
+export interface SnifferReadArgs {
+	folder_keys?: Array<string>
 }
 
 export interface SnifferReadResult {
@@ -49,3 +68,6 @@ export interface SnifferImportResult {
 	}>
 	message: string
 }
+
+export const buildSnifferFolderKey = (source_id: string, folder_id: string | number) =>
+	`${source_id}::${String(folder_id)}`

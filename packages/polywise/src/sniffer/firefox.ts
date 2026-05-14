@@ -4,13 +4,53 @@ import path from 'node:path'
 import Sqlite from 'better-sqlite3'
 import fs from 'fs-extra'
 
-import type { SnifferBookmarkItem, SnifferBrowserStatus, SnifferReadResult, SnifferSourceStatus } from './types'
+import { buildSnifferFolderKey } from './types'
+
+import type {
+	SnifferBookmarkItem,
+	SnifferBrowserStatus,
+	SnifferFolderNode,
+	SnifferReadArgs,
+	SnifferReadResult,
+	SnifferSourceStatus
+} from './types'
 
 interface FirefoxProfileEntry {
 	Name?: string
 	Path?: string
 	IsRelative?: string
 }
+
+interface FirefoxBookmarkRow {
+	id: number
+	parent: number
+	type: number
+	title: string
+	url: string | null
+	position: number
+}
+
+interface FirefoxRootRow {
+	root_name: string
+	folder_id: number
+}
+
+interface FirefoxBookmarkSnapshot {
+	rows: Array<FirefoxBookmarkRow>
+	roots: Array<FirefoxRootRow>
+}
+
+interface FirefoxSourceSnapshot {
+	items: Array<SnifferBookmarkItem>
+	folders: Array<SnifferFolderNode>
+}
+
+const firefox_root_name_map = {
+	toolbar: 'Bookmarks Toolbar',
+	menu: 'Bookmarks Menu',
+	unfiled: 'Other Bookmarks',
+	mobile: 'Mobile Bookmarks'
+} as const
 
 const getFirefoxRootDir = () => {
 	if (process.platform === 'darwin') {
@@ -99,8 +139,11 @@ const resolveFirefoxSources = async () => {
 			}
 
 			source_list.push({
+				id: sqlite_path,
 				profile_name: profile.Name || path.basename(profile_dir),
-				path: sqlite_path
+				path: sqlite_path,
+				bookmark_count: 0,
+				folders: []
 			})
 		}
 	}
@@ -129,15 +172,18 @@ const resolveFirefoxSources = async () => {
 		}
 
 		source_list.push({
+			id: sqlite_path,
 			profile_name: entry.name,
-			path: sqlite_path
+			path: sqlite_path,
+			bookmark_count: 0,
+			folders: []
 		})
 	}
 
 	return source_list
 }
 
-const queryFirefoxBookmarks = (database_path: string) => {
+const queryFirefoxBookmarks = (database_path: string): Promise<FirefoxBookmarkSnapshot> => {
 	const temp_path = path.resolve(os.tmpdir(), `polywise-firefox-${randomUUID()}.sqlite`)
 	const temp_sidecar_paths = [`${temp_path}-wal`, `${temp_path}-shm`]
 
@@ -158,18 +204,37 @@ const queryFirefoxBookmarks = (database_path: string) => {
 			const database = new Sqlite(temp_path, { readonly: true, fileMustExist: true })
 
 			try {
-				return database
+				const rows = database
 					.prepare(
 						`
 							SELECT
+								b.id AS id,
+								b.parent AS parent,
+								b.type AS type,
 								COALESCE(b.title, '') AS title,
-								p.url AS url
+								p.url AS url,
+								b.position AS position
 							FROM moz_bookmarks b
-							INNER JOIN moz_places p ON p.id = b.fk
-							WHERE b.type = 1 AND p.url IS NOT NULL
+							LEFT JOIN moz_places p ON p.id = b.fk
+							WHERE b.type IN (1, 2)
 						`
 					)
-					.all() as Array<{ title: string; url: string }>
+					.all() as Array<FirefoxBookmarkRow>
+				const roots = database
+					.prepare(
+						`
+							SELECT
+								root_name,
+								folder_id
+							FROM moz_bookmarks_roots
+						`
+					)
+					.all() as Array<FirefoxRootRow>
+
+				return {
+					rows,
+					roots
+				}
 			} finally {
 				database.close()
 			}
@@ -178,6 +243,137 @@ const queryFirefoxBookmarks = (database_path: string) => {
 			await Promise.all(temp_sidecar_paths.map(item => fs.remove(item)))
 			await fs.remove(temp_path)
 		})
+}
+
+const buildFirefoxFolderSnapshot = (args: {
+	source: SnifferSourceStatus
+	folder_id: number
+	folder_name: string
+	parent_path: string
+	rows_by_parent: Map<number, Array<FirefoxBookmarkRow>>
+}): { folder: SnifferFolderNode; items: Array<SnifferBookmarkItem> } | null => {
+	const { source, folder_id, folder_name, parent_path, rows_by_parent } = args
+	const folder_key = buildSnifferFolderKey(source.id, folder_id)
+	const folder_path = parent_path ? `${parent_path}/${folder_name}` : folder_name
+	const items = [] as Array<SnifferBookmarkItem>
+	const children = [] as Array<SnifferFolderNode>
+
+	for (const row of rows_by_parent.get(folder_id) ?? []) {
+		if (row.type === 1 && typeof row.url === 'string') {
+			items.push({
+				title: row.title?.trim() || row.url,
+				url: row.url,
+				profile_name: source.profile_name,
+				source_id: source.id,
+				source_path: source.path,
+				folder_key,
+				folder_path
+			})
+
+			continue
+		}
+
+		if (row.type !== 2) {
+			continue
+		}
+
+		const child_snapshot = buildFirefoxFolderSnapshot({
+			source,
+			folder_id: row.id,
+			folder_name: row.title?.trim() || `Folder ${row.id}`,
+			parent_path: folder_path,
+			rows_by_parent
+		})
+
+		if (!child_snapshot) {
+			continue
+		}
+
+		children.push(child_snapshot.folder)
+		items.push(...child_snapshot.items)
+	}
+
+	if (items.length === 0) {
+		return null
+	}
+
+	return {
+		folder: {
+			key: folder_key,
+			name: folder_name,
+			path: folder_path,
+			bookmark_count: items.length,
+			children
+		},
+		items
+	}
+}
+
+const readFirefoxSource = async (source: SnifferSourceStatus): Promise<FirefoxSourceSnapshot> => {
+	const snapshot = await queryFirefoxBookmarks(source.path)
+	const items = [] as Array<SnifferBookmarkItem>
+	const folders = [] as Array<SnifferFolderNode>
+	const rows_by_parent = new Map<number, Array<FirefoxBookmarkRow>>()
+
+	for (const row of snapshot.rows) {
+		const list = rows_by_parent.get(row.parent) ?? []
+
+		list.push(row)
+		rows_by_parent.set(row.parent, list)
+	}
+
+	for (const list of rows_by_parent.values()) {
+		list.sort((a, b) => a.position - b.position)
+	}
+
+	const root_rows = snapshot.roots.filter(root => root.root_name in firefox_root_name_map)
+
+	for (const root of root_rows) {
+		const folder_snapshot = buildFirefoxFolderSnapshot({
+			source,
+			folder_id: root.folder_id,
+			folder_name:
+				firefox_root_name_map[root.root_name as keyof typeof firefox_root_name_map] || root.root_name,
+			parent_path: '',
+			rows_by_parent
+		})
+
+		if (!folder_snapshot) {
+			continue
+		}
+
+		folders.push(folder_snapshot.folder)
+		items.push(...folder_snapshot.items)
+	}
+
+	return {
+		items,
+		folders
+	}
+}
+
+const hydrateFirefoxSources = async (sources: Array<SnifferSourceStatus>) => {
+	return Promise.all(
+		sources.map(async source => {
+			try {
+				const snapshot = await readFirefoxSource(source)
+
+				return {
+					...source,
+					bookmark_count: snapshot.items.length,
+					folders: snapshot.folders,
+					error: undefined
+				} satisfies SnifferSourceStatus
+			} catch (error) {
+				return {
+					...source,
+					bookmark_count: 0,
+					folders: [],
+					error: error instanceof Error ? error.message : String(error)
+				} satisfies SnifferSourceStatus
+			}
+		})
+	)
 }
 
 export const getFirefoxBookmarkStatus = async (): Promise<SnifferBrowserStatus> => {
@@ -195,7 +391,8 @@ export const getFirefoxBookmarkStatus = async (): Promise<SnifferBrowserStatus> 
 		}
 	}
 
-	const sources = await resolveFirefoxSources()
+	const resolved_sources = await resolveFirefoxSources()
+	const sources = await hydrateFirefoxSources(resolved_sources)
 
 	return {
 		id: 'firefox',
@@ -211,22 +408,22 @@ export const getFirefoxBookmarkStatus = async (): Promise<SnifferBrowserStatus> 
 	}
 }
 
-export const readFirefoxBookmarks = async (sources: Array<SnifferSourceStatus>): Promise<SnifferReadResult> => {
+export const readFirefoxBookmarks = async (
+	sources: Array<SnifferSourceStatus>,
+	args: SnifferReadArgs = {}
+): Promise<SnifferReadResult> => {
 	const items = [] as Array<SnifferBookmarkItem>
 	const errors = [] as Array<string>
+	const selected_folder_key_set = Array.isArray(args.folder_keys) ? new Set(args.folder_keys) : null
 
 	for (const source of sources) {
 		try {
-			const rows = await queryFirefoxBookmarks(source.path)
+			const snapshot = await readFirefoxSource(source)
+			const next_items = selected_folder_key_set
+				? snapshot.items.filter(item => selected_folder_key_set.has(item.folder_key))
+				: snapshot.items
 
-			for (const row of rows) {
-				items.push({
-					title: row.title?.trim() || row.url,
-					url: row.url,
-					profile_name: source.profile_name,
-					source_path: source.path
-				})
-			}
+			items.push(...next_items)
 		} catch (error) {
 			errors.push(`${source.profile_name}: ${error instanceof Error ? error.message : String(error)}`)
 		}
