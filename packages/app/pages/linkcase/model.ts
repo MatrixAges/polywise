@@ -98,6 +98,10 @@ export default class Index {
 	}
 
 	get selected_item() {
+		if (this.detail && this.detail.id === this.selected_id) {
+			return this.toListItem(this.detail)
+		}
+
 		return this.items.find(item => item.id === this.selected_id) ?? null
 	}
 
@@ -538,6 +542,7 @@ export default class Index {
 	async loadList(args?: { append?: boolean }) {
 		const append = args?.append ?? false
 		const target_page = append ? this.page + 1 : 1
+		const previous_selected_id = this.selected_id
 		const request_key = `${target_page}:${this.search_keyword}:${this.filter_type}:${Date.now()}`
 
 		if (append) {
@@ -587,7 +592,13 @@ export default class Index {
 
 			this.selected_id = next_selected_id
 
-			if (!append) {
+			const should_reload_detail =
+				!append &&
+				(next_selected_id !== previous_selected_id ||
+					!this.detail ||
+					this.detail.id !== next_selected_id)
+
+			if (should_reload_detail) {
 				void this.loadDetail(next_selected_id)
 			}
 		} finally {

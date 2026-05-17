@@ -25,7 +25,7 @@ const Index = () => {
 				{(x.has_more || x.loading_more) && (
 					<div className='px-1.5'>
 						<Button
-							className='w-full'
+							className='text-std-400 text-xsm! w-full bg-transparent'
 							variant='outline'
 							size='sm'
 							disabled={x.loading || x.loading_more}
