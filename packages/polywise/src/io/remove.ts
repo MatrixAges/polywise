@@ -1,4 +1,4 @@
-import { deleteChunkVector, getChunkRowid } from '@core/db/prepare'
+import { deleteChunkFts, deleteChunkVector, getChunkRowid } from '@core/db/prepare'
 import { article, chunk, node_chunk } from '@core/db/schema'
 import { getArticle, getChunks, removeArticle, removeChunks, removeNodeChunk } from '@core/db/services'
 import { env } from '@core/env'
@@ -23,6 +23,7 @@ export default async (article_id: string) => {
 
 		if (rowid_res) {
 			deleteChunkVector().run(BigInt(rowid_res.rowid))
+			deleteChunkFts().run(BigInt(rowid_res.rowid))
 			log('SYSTEM', 'deleteChunkVector', () => `chunk_rowid: ${rowid_res.rowid}`)
 		}
 

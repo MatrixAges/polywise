@@ -16,8 +16,9 @@ import {
 import { addLinkArticle, addNodeChunk, getLinkArticles } from '@core/db/services/externals'
 import { fetchWithFallbackChain, fetchWithProvider } from '@core/fetch'
 import { saveArticle } from '@core/io'
+import { readPipelineStore } from '@core/io/save/pipelineStore'
 import { getEmbedding, getTriples } from '@core/pipeline'
-import { SessionStore } from '@core/utils'
+import { log, SessionStore } from '@core/utils'
 import { and, asc, eq, inArray, isNull, like, or } from 'drizzle-orm'
 
 import { getLinkFavicon } from './getLinkFavicon'
@@ -42,6 +43,8 @@ type LinkcaseExtractResult = {
 	triple_count: number
 	chunk_count: number
 	reused_article: boolean
+	is_pipelined: boolean
+	queued: boolean
 }
 type LinkcasePreviewArticle = {
 	id: string
@@ -74,12 +77,13 @@ type LinkcaseRunningTask =
 	  }
 
 const linkcase_fetch_preview_cache = new Map<string, LinkcaseFetchPreviewCacheItem>()
+const linkcase_extract_running_tasks = new Map<string, Promise<void>>()
 const linkcase_batch_running_state = {
 	action: '',
 	started_at: 0
 }
 const LINKCASE_FETCH_PREVIEW_TTL_MS = 10 * 60 * 1000
-const LINKCASE_PIPELINE_WAIT_MS = 15_000
+const LINKCASE_PIPELINE_WAIT_MS = 90_000
 const LINKCASE_PIPELINE_POLL_MS = 250
 const LINKCASE_TASK_BUSY_ERROR_PREFIX = 'Linkcase task is already running'
 
@@ -356,8 +360,13 @@ const waitForArticlePipeline = async (article_id: string) => {
 			where: eq(chunk.article_id, article_id),
 			orderBy: asc(chunk.position)
 		})
+		const pipeline_task = (await readPipelineStore())[article_id]
 
-		if (current_article?.is_pipelined && current_chunks.length > 0) {
+		if (pipeline_task?.status === 'error') {
+			throw new Error(pipeline_task.error_message || `Article pipeline failed: ${article_id}`)
+		}
+
+		if (current_article?.is_pipelined) {
 			return current_chunks
 		}
 
@@ -460,6 +469,57 @@ const linkNodesToChunks = async (
 	}
 }
 
+const runLinkcaseExtractTask = (args: { id: string; article_id: string; content: string }) => {
+	const running_task = linkcase_extract_running_tasks.get(args.article_id)
+
+	if (running_task) {
+		return running_task
+	}
+
+	const task = (async () => {
+		const content_chunks = await waitForArticlePipeline(args.article_id)
+		const triples = await getTriples(args.content)
+
+		for (const triple of triples) {
+			const head_name = normalizeTripleText(triple.head)
+			const tail_name = normalizeTripleText(triple.tail)
+			const relation = normalizeTripleText(triple.relation)
+
+			if (!head_name || !tail_name || !relation) {
+				continue
+			}
+
+			const [head_node, tail_node] = await Promise.all([
+				ensureGlobalNode(head_name),
+				ensureGlobalNode(tail_name)
+			])
+
+			if (!head_node || !tail_node) {
+				continue
+			}
+
+			await ensureGlobalEdge(head_node.id, tail_node.id, relation)
+			await linkNodesToChunks([head_node.id, tail_node.id], content_chunks, [head_name, tail_name])
+		}
+	})()
+
+	linkcase_extract_running_tasks.set(args.article_id, task)
+
+	void task
+		.catch(error => {
+			log('SAVE', 'linkcaseExtractTaskError', () => ({
+				id: args.id,
+				article_id: args.article_id,
+				error: error instanceof Error ? error.message : String(error)
+			}))
+		})
+		.finally(() => {
+			linkcase_extract_running_tasks.delete(args.article_id)
+		})
+
+	return task
+}
+
 export const extractLinkcaseArticle = async (args: { id: string; force?: boolean }): Promise<LinkcaseExtractResult> => {
 	const item = await getLinkcaseReadItem(args.id)
 
@@ -487,7 +547,41 @@ export const extractLinkcaseArticle = async (args: { id: string; force?: boolean
 			article_id: article_item.id,
 			triple_count: 0,
 			chunk_count: content_chunks.length,
-			reused_article: true
+			reused_article: true,
+			is_pipelined: true,
+			queued: false
+		}
+	}
+
+	if (article_item?.id) {
+		if (linkcase_extract_running_tasks.has(article_item.id)) {
+			return {
+				id: item.id,
+				title: item.title,
+				url: item.url,
+				article_id: article_item.id,
+				triple_count: 0,
+				chunk_count: 0,
+				reused_article: true,
+				is_pipelined: false,
+				queued: true
+			}
+		}
+
+		const pipeline_task = (await readPipelineStore())[article_item.id]
+
+		if (pipeline_task?.status === 'running') {
+			return {
+				id: item.id,
+				title: item.title,
+				url: item.url,
+				article_id: article_item.id,
+				triple_count: 0,
+				chunk_count: 0,
+				reused_article: true,
+				is_pipelined: false,
+				queued: true
+			}
 		}
 	}
 
@@ -498,40 +592,22 @@ export const extractLinkcaseArticle = async (args: { id: string; force?: boolean
 		for: 'linkcase',
 		exec_pipeline: true
 	})
-	const content_chunks = await waitForArticlePipeline(article_id)
-	const triples = await getTriples(content)
-	const node_id_map = new Map<string, string>()
-
-	for (const triple of triples) {
-		const head_name = normalizeTripleText(triple.head)
-		const tail_name = normalizeTripleText(triple.tail)
-		const relation = normalizeTripleText(triple.relation)
-
-		if (!head_name || !tail_name || !relation) {
-			continue
-		}
-
-		const [head_node, tail_node] = await Promise.all([ensureGlobalNode(head_name), ensureGlobalNode(tail_name)])
-
-		if (!head_node || !tail_node) {
-			continue
-		}
-
-		node_id_map.set(head_name, head_node.id)
-		node_id_map.set(tail_name, tail_node.id)
-
-		await ensureGlobalEdge(head_node.id, tail_node.id, relation)
-		await linkNodesToChunks([head_node.id, tail_node.id], content_chunks, [head_name, tail_name])
-	}
+	runLinkcaseExtractTask({
+		id: item.id,
+		article_id,
+		content
+	})
 
 	return {
 		id: item.id,
 		title: item.title,
 		url: item.url,
 		article_id,
-		triple_count: triples.length,
-		chunk_count: content_chunks.length,
-		reused_article: Boolean(article_item?.id)
+		triple_count: 0,
+		chunk_count: 0,
+		reused_article: Boolean(article_item?.id),
+		is_pipelined: false,
+		queued: true
 	}
 }
 

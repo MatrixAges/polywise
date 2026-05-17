@@ -786,9 +786,16 @@ export default class Index {
 				fetched: [],
 				extracted: [result]
 			})
-			toast.success(
-				`Extracted ${result.title || result.url} with ${result.triple_count} triple${result.triple_count === 1 ? '' : 's'}.`
-			)
+
+			if (result.queued) {
+				toast.success(
+					`Queued extract for ${result.title || result.url}. Pipeline will continue in the background.`
+				)
+			} else {
+				toast.success(
+					`Extracted ${result.title || result.url} with ${result.triple_count} triple${result.triple_count === 1 ? '' : 's'}.`
+				)
+			}
 		} catch (error) {
 			toast.error(error instanceof Error ? error.message : 'Failed to extract link content')
 		} finally {
@@ -1306,7 +1313,7 @@ export default class Index {
 				article: {
 					...current_item.article,
 					id: item.article_id,
-					is_pipelined: true
+					is_pipelined: item.is_pipelined
 				}
 			}
 		}

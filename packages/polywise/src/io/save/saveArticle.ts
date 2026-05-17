@@ -29,6 +29,7 @@ interface ArgsSaveArticle {
 }
 
 let pipeline_processing = false
+const getErrorMessage = (error: unknown) => (error instanceof Error ? error.message : String(error)) || 'Unknown error'
 
 const clearArticleChunks = async (article_id: string) => {
 	const existing_chunks = await getChunks({
@@ -78,6 +79,8 @@ const runArticlePipeline = async (article_id: string, content: string) => {
 
 		log('SAVE', 'getChunkRowid', () => `chunk_rowid: ${rowid}`)
 
+		// Chunk rowids can be reused while external FTS/vector tables still contain stale rows.
+		deleteChunkFts().run(BigInt(rowid))
 		insertChunkFts().run(BigInt(rowid), keywords.join(','))
 
 		log('SAVE', 'insertChunkFts', () => `chunk_rowid: ${rowid}`)
@@ -86,6 +89,7 @@ const runArticlePipeline = async (article_id: string, content: string) => {
 
 		log('SAVE', 'getChunkEmbedding')
 
+		deleteChunkVector().run(BigInt(rowid))
 		insertChunkVector().run(BigInt(rowid), Buffer.from(new Float32Array(vector).buffer))
 
 		log('SAVE', 'saveChunkVector')
@@ -127,7 +131,8 @@ const processPipelineTask = async (article_id: string, created_at: string) => {
 		await setPipelineTask(article_id, {
 			created_at,
 			status: 'error',
-			done_at: new Date().toISOString()
+			done_at: new Date().toISOString(),
+			error_message: getErrorMessage(error)
 		})
 
 		throw error
@@ -248,7 +253,8 @@ export default async (args: ArgsSaveArticle) => {
 	await setPipelineTask(current_article_id, {
 		created_at,
 		status: 'running',
-		done_at: null
+		done_at: null,
+		error_message: null
 	})
 	kickPipelineWorker()
 

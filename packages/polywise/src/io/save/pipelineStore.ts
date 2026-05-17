@@ -10,6 +10,7 @@ export interface SaveArticlePipelineTask {
 	created_at: string
 	status: SaveArticlePipelineTaskStatus
 	done_at: string | null
+	error_message?: string | null
 }
 
 export type SaveArticlePipelineStore = Record<string, SaveArticlePipelineTask>
@@ -24,11 +25,14 @@ const normalizeTask = (value: unknown): SaveArticlePipelineTask | null => {
 	if (typeof item.created_at !== 'string') return null
 	if (item.status !== 'running' && item.status !== 'done' && item.status !== 'error') return null
 	if (item.done_at !== null && typeof item.done_at !== 'string') return null
+	if (item.error_message !== undefined && item.error_message !== null && typeof item.error_message !== 'string')
+		return null
 
 	return {
 		created_at: item.created_at,
 		status: item.status,
-		done_at: item.done_at
+		done_at: item.done_at,
+		error_message: item.error_message ?? null
 	}
 }
 
