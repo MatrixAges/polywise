@@ -1,5 +1,7 @@
-import { link } from '@core/db/schema'
-import { getLinks } from '@core/db/services'
+import { link, link_article } from '@core/db/schema'
+import { getLink, getLinks, removeLink } from '@core/db/services'
+import { getLinkArticles } from '@core/db/services/externals'
+import removeArticle from '@core/io/remove'
 import {
 	commitLinkcasePreview,
 	createLinkcaseItem,
@@ -12,7 +14,7 @@ import {
 	readLinkcasePreview
 } from '@core/rpc/linkcase/utils'
 import { tool } from 'ai'
-import { and, inArray, notInArray } from 'drizzle-orm'
+import { and, eq, inArray, notInArray } from 'drizzle-orm'
 import { array, boolean, enum as Enum, number, object, string, z } from 'zod'
 
 import type { WebfetchFallbackProvider } from '@core/types'
@@ -32,6 +34,7 @@ const linkCreateInputSchema = object({
 const inputSchema = object({
 	action: Enum([
 		'create',
+		'remove',
 		'status',
 		'list',
 		'fetch_next',
@@ -41,7 +44,7 @@ const inputSchema = object({
 		'commit_preview',
 		'mark_failed'
 	]).describe(
-		'The action to perform. create: add one or more new links, optionally with title and cleaned content. status: count links by current status. list: list candidate links without fetching. fetch_next: automatically select and fetch the next batch. fetch_ids: fetch an explicit list of link ids. fetch_preview: fetch one link through one explicit provider without saving so the agent can inspect the result. read_preview: read another page from a previously fetched preview without switching providers. commit_preview: persist a previously inspected preview. mark_failed: finalize a failed AI-driven fetch attempt.'
+		'The action to perform. create: add one or more new links, optionally with title and cleaned content. remove: delete one or more existing links and clean up orphaned fetched articles. status: count links by current status. list: list candidate links without fetching. fetch_next: automatically select and fetch the next batch. fetch_ids: fetch an explicit list of link ids. fetch_preview: fetch one link through one explicit provider without saving so the agent can inspect the result. read_preview: read another page from a previously fetched preview without switching providers. commit_preview: persist a previously inspected preview. mark_failed: finalize a failed AI-driven fetch attempt.'
 	),
 	url: string().url().optional().describe('[Required for create] Link URL to add.'),
 	title: string()
@@ -54,8 +57,18 @@ const inputSchema = object({
 		.describe(
 			'[Optional for create] Batch-create up to 50 links in one call. When links is provided, it overrides the top-level url/title/content fields.'
 		),
-	ids: array(string()).optional().describe('[Required for fetch_ids] Exact link ids to fetch in sequence.'),
-	id: string().optional().describe('[Required for fetch_preview/mark_failed] Exact link id to inspect or mark.'),
+	ids: array(string())
+		.min(1)
+		.max(50)
+		.optional()
+		.describe(
+			'[Required for fetch_ids, optional for remove] Exact link ids to fetch in sequence or delete in batch.'
+		),
+	id: string()
+		.optional()
+		.describe(
+			'[Required for fetch_preview/mark_failed, optional for remove] Exact link id to inspect, mark, or delete.'
+		),
 	preview_key: string()
 		.optional()
 		.describe(
@@ -189,11 +202,47 @@ const getCandidates = async (input: LinkcaseToolInput, use_default_fetch_statuse
 	return filtered_items.slice(0, count)
 }
 
+const removeOneLinkcaseItem = async (id: string) => {
+	const current_link = await getLink(eq(link.id, id))
+
+	if (!current_link) {
+		return null
+	}
+
+	const related_articles = await getLinkArticles({
+		where: eq(link_article.link_id, id)
+	})
+
+	await removeLink(eq(link.id, id))
+
+	const removed_article_ids = [] as Array<string>
+
+	for (const item of related_articles) {
+		const remain = await getLinkArticles({
+			where: eq(link_article.article_id, item.article.id),
+			limit: 1
+		})
+
+		if (remain.length > 0) {
+			continue
+		}
+
+		await removeArticle(item.article.id)
+		removed_article_ids.push(item.article.id)
+	}
+
+	return {
+		link: current_link,
+		removed_article_ids
+	}
+}
+
 export const createLinkcaseTool = (_s: Session) => {
 	return tool({
 		description: [
 			'Batch-manage Linkcase link fetching.',
 			'Use create to add one or multiple links to Linkcase, optionally with title and cleaned content.',
+			'Use remove to delete one or multiple links by id. It also removes fetched articles that are no longer referenced by any remaining link.',
 			'Use fetch_next for automated scheduled runs. It prefers links with status none, fail, or timeout unless you override include_statuses.',
 			'Fetching always uses the fallback chain and treats empty content as a failed attempt until a downstream provider succeeds or the chain is exhausted.',
 			'For AI-guided fetch validation, use fetch_preview with one provider at a time. Inspect the returned content_preview yourself, decide whether it is the real target content, and either continue with the next provider, commit_preview, or mark_failed.',
@@ -255,6 +304,71 @@ export const createLinkcaseTool = (_s: Session) => {
 					success_count,
 					fail_count: results.length - success_count,
 					item: results.length === 1 ? (first_success?.item ?? null) : null,
+					items: results
+				}
+			}
+
+			if (input.action === 'remove') {
+				const target_ids = Array.from(
+					new Set(input.ids?.length ? input.ids : input.id ? [input.id] : [])
+				)
+
+				if (target_ids.length === 0) {
+					return {
+						action: 'remove' as const,
+						error: 'id or ids is required for remove action'
+					}
+				}
+
+				const results = [] as Array<Record<string, unknown>>
+
+				for (const id of target_ids) {
+					try {
+						const removed = await removeOneLinkcaseItem(id)
+
+						if (!removed) {
+							results.push({
+								id,
+								ok: false as const,
+								error: 'Link not found'
+							})
+							continue
+						}
+
+						results.push({
+							id,
+							ok: true as const,
+							link: stripFaviconFromLink(removed.link),
+							removed_article_ids: removed.removed_article_ids
+						})
+					} catch (error) {
+						results.push({
+							id,
+							ok: false as const,
+							error: error instanceof Error ? error.message : String(error)
+						})
+					}
+				}
+
+				const success_count = results.filter(item => item.ok === true).length
+				const removed_article_count = results.reduce(
+					(total, item) =>
+						total +
+						(Array.isArray(item.removed_article_ids) ? item.removed_article_ids.length : 0),
+					0
+				)
+				const first_success = results.find(item => item.ok === true && item.link) as
+					| { link: unknown }
+					| undefined
+
+				return {
+					action: 'remove' as const,
+					ok: success_count > 0,
+					count: results.length,
+					success_count,
+					fail_count: results.length - success_count,
+					removed_article_count,
+					link: results.length === 1 ? (first_success?.link ?? null) : null,
 					items: results
 				}
 			}
