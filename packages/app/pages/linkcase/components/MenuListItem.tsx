@@ -1,19 +1,41 @@
-import { Globe } from 'lucide-react'
+import { CircleCheck, CircleDashed, CircleSlash, CircleX, Clock3, Globe, LoaderCircle } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+
+import { Tooltip } from '@/components'
 
 import { useModel } from '../context'
 import { getLinkFaviconSrc } from '../types'
 
+import type { LucideIcon } from 'lucide-react'
 import type { LinkcaseItem } from '../types'
 
-const status_style_map = {
-	none: 'bg-std-200/60 text-std-500',
-	pending: 'bg-amber-100 text-amber-700',
-	success: 'bg-emerald-100 text-emerald-700',
-	fail: 'bg-rose-100 text-rose-700',
-	timeout: 'bg-orange-100 text-orange-700',
-	ignore: 'bg-slate-100 text-slate-600'
-} as const
+const status_icon_map = {
+	none: {
+		Icon: CircleDashed,
+		color: 'text-std-400/70'
+	},
+	pending: {
+		Icon: LoaderCircle,
+		color: 'text-amber-600',
+		className: 'animate-spin'
+	},
+	success: {
+		Icon: CircleCheck,
+		color: 'text-emerald-600'
+	},
+	fail: {
+		Icon: CircleX,
+		color: 'text-rose-600'
+	},
+	timeout: {
+		Icon: Clock3,
+		color: 'text-orange-600'
+	},
+	ignore: {
+		Icon: CircleSlash,
+		color: 'text-slate-500'
+	}
+} as Record<string, { Icon: LucideIcon; color: string; className?: string }>
 
 interface IProps {
 	item: LinkcaseItem
@@ -24,6 +46,7 @@ const Index = ({ item, index }: IProps) => {
 	const x = useModel()
 	const favicon_src = getLinkFaviconSrc(item.favicon)
 	const selected = x.selected_id === item.id
+	const status_icon = status_icon_map[item.status]
 
 	return (
 		<div
@@ -38,7 +61,7 @@ const Index = ({ item, index }: IProps) => {
 				group
 				click_button
 			`,
-				selected && 'active bg-secondary/60'
+				selected && 'active bg-secondary'
 			)}
 			data-index={index}
 			onClick={() => x.selectLink(item.id)}
@@ -87,20 +110,21 @@ const Index = ({ item, index }: IProps) => {
 				<div className='text-std-500 text-xsm truncate font-medium'>{item.title || item.url}</div>
 				<div className='text-std-400/60 truncate text-xs'>{item.url}</div>
 			</div>
-			{item.status !== 'none' && (
-				<div
-					className={$cx(
-						`
-						shrink-0
-						px-1.5 py-0.5
-						rounded-full
-						text-xs
-					`,
-						status_style_map[item.status]
-					)}
-				>
-					{item.status}
-				</div>
+			{item.status !== 'none' && status_icon && (
+				<Tooltip title={item.status}>
+					<div
+						className='
+							flex shrink-0
+							items-center justify-center
+							size-5
+							rounded-full
+						'
+					>
+						<status_icon.Icon
+							className={$cx('size-3.5', status_icon.color, status_icon.className)}
+						></status_icon.Icon>
+					</div>
+				</Tooltip>
 			)}
 		</div>
 	)

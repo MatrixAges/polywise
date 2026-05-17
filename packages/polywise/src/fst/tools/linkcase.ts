@@ -98,6 +98,16 @@ const default_fetch_statuses = ['none', 'fail', 'timeout'] as const
 
 type LinkcaseToolInput = z.infer<typeof inputSchema>
 
+const stripFaviconFromLink = (value: unknown) => {
+	if (!value || typeof value !== 'object' || !('favicon' in value)) {
+		return value
+	}
+
+	const { favicon: _favicon, ...rest } = value as Record<string, unknown>
+
+	return rest
+}
+
 const buildWhere = (input: LinkcaseToolInput, use_default_fetch_statuses = false) => {
 	const match_title = input.match_title ?? true
 	const match_url = input.match_url ?? true
@@ -265,13 +275,16 @@ export const createLinkcaseTool = (_s: Session) => {
 					}
 				}
 
+				const result = await commitLinkcasePreview({
+					preview_key: input.preview_key,
+					content: input.content,
+					exec_pipeline: input.exec_pipeline
+				})
+
 				return {
 					action: 'commit_preview' as const,
-					...(await commitLinkcasePreview({
-						preview_key: input.preview_key,
-						content: input.content,
-						exec_pipeline: input.exec_pipeline
-					}))
+					...result,
+					link: stripFaviconFromLink(result.link)
 				}
 			}
 
@@ -287,12 +300,15 @@ export const createLinkcaseTool = (_s: Session) => {
 					}
 				}
 
+				const result = await markLinkcaseFetchFailure({
+					id: input.id,
+					error: input.error.trim()
+				})
+
 				return {
 					action: 'mark_failed' as const,
-					...(await markLinkcaseFetchFailure({
-						id: input.id,
-						error: input.error.trim()
-					}))
+					...result,
+					link: stripFaviconFromLink(result.link)
 				}
 			}
 
