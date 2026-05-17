@@ -1,7 +1,7 @@
 import { spawn } from 'child_process'
 import TurndownService from 'turndown'
 
-import { resolveCommand } from '../utils/resolveCommand'
+import { getRuntimeCommandEnv, resolveCommand } from '../utils/resolveCommand'
 
 const turndown = new TurndownService({
 	headingStyle: 'atx',
@@ -32,6 +32,7 @@ export const getErrorMessage = (error: unknown) => {
 
 export const runCommand = async (command: string, args: Array<string>, timeout = 30000) => {
 	const resolved_command = await resolveCommand(command)
+	const env = getRuntimeCommandEnv()
 
 	if (!resolved_command) {
 		return {
@@ -48,7 +49,7 @@ export const runCommand = async (command: string, args: Array<string>, timeout =
 
 		const child = spawn(resolved_command, args, {
 			shell: false,
-			env: process.env
+			env
 		})
 
 		const timer = setTimeout(() => {

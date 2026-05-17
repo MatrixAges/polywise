@@ -1,5 +1,6 @@
 import os from 'node:os'
 import path from 'node:path'
+import { app_path } from '@core/consts/app'
 import fs from 'fs-extra'
 
 type Crawl4aiManagedProfileMeta = {
@@ -61,8 +62,12 @@ const getChromeUserDataDir = () => {
 	return chrome_user_data_dir_map[process.platform as keyof typeof chrome_user_data_dir_map] || ''
 }
 
+export const getCrawl4aiBaseDirectory = () => {
+	return process.env.CRAWL4_AI_BASE_DIRECTORY?.trim() || app_path
+}
+
 const getManagedProfilesRoot = () => {
-	return path.resolve(os.homedir(), '.crawl4ai', 'profiles')
+	return path.resolve(getCrawl4aiBaseDirectory(), '.crawl4ai', 'profiles')
 }
 
 const getManagedProfilePath = () => {

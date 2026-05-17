@@ -1,7 +1,7 @@
 import { spawn } from 'child_process'
 
 import { getPolywiseCrawl4aiManagedProfile } from '../../utils/crawl4aiProfile'
-import { resolveCommand } from '../../utils/resolveCommand'
+import { getRuntimeCommandEnv, resolveCommand } from '../../utils/resolveCommand'
 
 import type { LinkcaseProviderCheck, LinkcaseProviderCheckStatus } from './providers'
 
@@ -11,6 +11,7 @@ export const isToolInstalled = async (tool_name: string) => {
 
 export const runShellCommand = async (command: string, timeout = 30000) => {
 	const shell = process.env.SHELL ?? '/bin/sh'
+	const env = getRuntimeCommandEnv()
 
 	return await new Promise<{ stdout: string; stderr: string; exitCode: number }>(resolve => {
 		const stdout_chunks: Array<string> = []
@@ -21,11 +22,11 @@ export const runShellCommand = async (command: string, timeout = 30000) => {
 		const child = use_windows_shell
 			? spawn('cmd', ['/d', '/s', '/c', command], {
 					shell: false,
-					env: process.env
+					env
 				})
 			: spawn(shell, ['-lc', command], {
 					shell: false,
-					env: process.env
+					env
 				})
 
 		const timer = setTimeout(() => {

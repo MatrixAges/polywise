@@ -41,7 +41,7 @@ export const linkcase_content_providers = [
 				timeout_ms: 15 * 60 * 1000
 			},
 			{
-				command: 'crawl4ai-setup',
+				command: `python3 -c "from crawl4ai.install import post_install; post_install()"`,
 				timeout_ms: 10 * 60 * 1000
 			}
 		],

@@ -4,6 +4,8 @@ import { access } from 'fs/promises'
 import os from 'os'
 import path from 'path'
 
+import { getCrawl4aiBaseDirectory } from './crawl4aiProfile'
+
 const isExecutable = async (file_path: string) => {
 	try {
 		await access(file_path, constants.X_OK)
@@ -37,7 +39,33 @@ const getNpmGlobalBinDir = () => {
 	return process.platform === 'win32' ? prefix : path.join(prefix, 'bin')
 }
 
-const getSearchDirs = (command: string) => {
+const getPythonUserBinDirs = () => {
+	const result = [] as Array<string>
+
+	for (const command of ['python3', 'python']) {
+		const python_user_base = spawnSync(command, ['-c', 'import site; print(site.USER_BASE)'], {
+			encoding: 'utf8',
+			shell: false,
+			env: process.env
+		})
+
+		if (python_user_base.status !== 0) {
+			continue
+		}
+
+		const user_base = python_user_base.stdout.trim()
+
+		if (!user_base) {
+			continue
+		}
+
+		result.push(process.platform === 'win32' ? user_base : path.join(user_base, 'bin'))
+	}
+
+	return result
+}
+
+export const getCommandSearchDirs = () => {
 	const dirs = new Set<string>()
 	const path_dirs = (process.env.PATH || '').split(path.delimiter).filter(Boolean)
 
@@ -52,7 +80,25 @@ const getSearchDirs = (command: string) => {
 		dirs.add(npm_global_bin)
 	}
 
+	for (const dir of getPythonUserBinDirs()) {
+		dirs.add(dir)
+	}
+
 	return Array.from(dirs)
+}
+
+export const getRuntimeCommandEnv = (env: NodeJS.ProcessEnv = process.env) => {
+	const path_dirs = new Set((env.PATH || '').split(path.delimiter).filter(Boolean))
+
+	for (const dir of getCommandSearchDirs()) {
+		path_dirs.add(dir)
+	}
+
+	return {
+		...env,
+		PATH: Array.from(path_dirs).join(path.delimiter),
+		CRAWL4_AI_BASE_DIRECTORY: env.CRAWL4_AI_BASE_DIRECTORY?.trim() || getCrawl4aiBaseDirectory()
+	}
 }
 
 export const resolveCommand = async (command: string) => {
@@ -62,7 +108,7 @@ export const resolveCommand = async (command: string) => {
 
 	const extensions = getCommandExtensions()
 
-	for (const dir of getSearchDirs(command)) {
+	for (const dir of getCommandSearchDirs()) {
 		for (const ext of extensions) {
 			const candidate =
 				process.platform === 'win32' && ext && command.toLowerCase().endsWith(ext)
