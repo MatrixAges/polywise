@@ -79,7 +79,7 @@ const Index = () => {
 							}
 							onClick={x.openEditDialog}
 						>
-							<PencilLine className='size-3.5'></PencilLine>
+							<PencilLine className='size-3'></PencilLine>
 						</Button>
 					</div>
 				</Tooltip>

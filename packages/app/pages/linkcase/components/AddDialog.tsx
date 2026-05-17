@@ -58,16 +58,13 @@ const Index = () => {
 				<div
 					className='
 						sticky
-						bottom-0
 						flex
 						items-center justify-end
 						gap-2
 						px-1 pt-3
-						mt-1
-						bg-background/96
-						border-t border-border-light
-						backdrop-blur
-						-mx-1 -mb-1
+						mb-[-10px]
+						bg-background
+						-bottom-px
 					'
 				>
 					<Button

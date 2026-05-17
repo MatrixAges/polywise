@@ -1,5 +1,5 @@
 import { Tooltip as TooltipPrimitive } from "@base-ui/react/tooltip"
-
+import { Fragment } from "react"
 import { cn } from "@/__shadcn__/lib/utils/index"
 
 function TooltipProvider({
@@ -20,7 +20,7 @@ function Tooltip({ ...props }: TooltipPrimitive.Root.Props) {
 }
 
 function TooltipTrigger({ ...props }: TooltipPrimitive.Trigger.Props) {
-  return <TooltipPrimitive.Trigger data-slot="tooltip-trigger" {...props} />
+  return <TooltipPrimitive.Trigger data-slot="tooltip-trigger" {...props} render={(props) => <div {...props} />} />
 }
 
 function TooltipContent({
