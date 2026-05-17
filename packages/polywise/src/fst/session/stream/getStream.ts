@@ -1,5 +1,6 @@
 import { config } from '@core/config'
 import { global_linkcase_session_id } from '@core/consts'
+import fst_linkcase_system_prompt from '@core/consts/prompts/fst_linkcase_system_prompt.md'
 import fst_report_tool_prompt from '@core/consts/prompts/fst_report_tool_prompt.md'
 import fst_system_prompt from '@core/consts/prompts/fst_system_prompt.md'
 import fst_title_tool_prompt from '@core/consts/prompts/fst_title_tool_prompt.md'
@@ -49,31 +50,18 @@ import type { Message, MessageDataParts, MessageMetadata, MessagePartDurationUIP
 import type Index from '../index'
 
 const model_threshold_value = 12
-const getLinkcaseSessionPrompt = () => {
+const getLinkcaseSystemPrompt = (session_title: string) => {
 	const provider_chain =
 		Array.isArray(config.fetch_fallback_chain) && config.fetch_fallback_chain.length
 			? config.fetch_fallback_chain
 			: [...default_fetch_fallback_chain]
 
 	return [
-		'# Linkcase Batch Session',
-		'This session is dedicated to scheduled and batch Linkcase fetching.',
-		'Use linkcase_tool as the primary tool for queue inspection and batch fetch execution.',
-		'Prefer linkcase_tool action "fetch_next" for scheduled runs unless the user explicitly provides target ids.',
-		'For AI-guided targeted fetch runs, do not use linkcase_tool action "fetch_ids".',
+		fst_linkcase_system_prompt,
 		`Instead, use linkcase_tool action "fetch_preview" with exactly one provider at a time in this configured order: ${provider_chain.join(', ')}.`,
-		'After each preview, inspect content_preview yourself and decide whether it is the actual target page content.',
-		'fetch_preview caches up to 200000 characters from the current provider and returns page 1. Use linkcase_tool action "read_preview" with the same preview_key to inspect later pages, 30000 characters per page.',
-		'Do not switch providers just because page 1 starts with navigation or site chrome. Read more pages from the same preview first when needed.',
-		'Accept a preview when the correct target article body is present and substantially complete, even if there is leading or trailing site boilerplate around it.',
-		'Do not switch providers just because another provider might be cleaner. If the current preview already contains the correct and substantially complete target article body, accept it.',
-		'Do not spend turns manually cleaning, rewriting, or comparing cosmetic noise once the correct article body is present. commit_preview saves the raw fetched content.',
-		'Filter out and actively reject previews dominated by navigation links, headers, footers, ads, sponsored blocks, popups, cookie notices, related links, recommendation feeds, comment sections, or other non-target boilerplate.',
-		'Only continue to the next provider after you have checked enough pages from the current preview and still conclude that the target body is absent, blocked, wrong, or unusably incomplete.',
-		'If one provider already shows the correct target article body, commit it immediately and stop the provider chain.',
-		'Only when a preview looks correct should you call linkcase_tool action "commit_preview" with the preview_key.',
-		'If every provider fails or every preview looks wrong, call linkcase_tool action "mark_failed" with a concise reason.',
-		'Do not ask follow-up questions during scheduled runs. Execute the fetch plan and return a compact summary of successes, failures, and remaining issues.'
+		'`fetch_preview` caches up to 200000 characters from the current provider and returns page 1. Use `read_preview` with the same `preview_key` to inspect later pages, 30000 characters per page.',
+		`Current Session Title: ${session_title}`,
+		`Real World Date: ${dayjs().format('YYYY-MM-DD')}`
 	].join('\n')
 }
 
@@ -106,23 +94,31 @@ export default async (s: Index, message: Message) => {
 	const agent_system_prompt = await getAgentSystemPrompt(s.id)
 	const is_linkcase_batch_session = s.id === global_linkcase_session_id
 	const title_focus = is_linkcase_batch_session ? '' : getTitleFocus({ s, message, is_first_message })
-	const shared_runtime = await buildSharedRuntimeTools({
-		s,
-		model_tools: s.model.tools,
-		extra_tools: {
-			context_tool: createContextTool(s),
-			message_tool: createMessageTool(s),
-			plan_tool: createPlanTool(s),
-			question_tool: createQuestionTool(s.id),
-			...(s.owner_agent ? { self_memory_tool: createSelfMemoryTool(s) } : {}),
-			...(!is_linkcase_batch_session ? { title_tool: createTitleTool(s) } : {}),
-			skill_tool: createSkillTool(s),
-			cron_tool: createCronTool(s),
-			error_collect_tool: createErrorCollectTool(),
-			...(is_linkcase_batch_session ? { linkcase_tool: createLinkcaseTool(s) } : {}),
-			...(has_todo_session_link ? { report_tool: createReportTool(s) } : {})
-		}
-	})
+	const shared_runtime = is_linkcase_batch_session
+		? {
+				tools: {
+					linkcase_tool: createLinkcaseTool(s)
+				},
+				system_tools_prompt: '',
+				custom_tools_prompt: '',
+				skill_prompt: ''
+			}
+		: await buildSharedRuntimeTools({
+				s,
+				model_tools: s.model.tools,
+				extra_tools: {
+					context_tool: createContextTool(s),
+					message_tool: createMessageTool(s),
+					plan_tool: createPlanTool(s),
+					question_tool: createQuestionTool(s.id),
+					...(s.owner_agent ? { self_memory_tool: createSelfMemoryTool(s) } : {}),
+					title_tool: createTitleTool(s),
+					skill_tool: createSkillTool(s),
+					cron_tool: createCronTool(s),
+					error_collect_tool: createErrorCollectTool(),
+					...(has_todo_session_link ? { report_tool: createReportTool(s) } : {})
+				}
+			})
 
 	const mode_prompt = match({ mode: s.mode, plan_stage: s.plan_stage })
 		.with({ mode: 'plan' }, () => plan_mode_prompt)
@@ -131,23 +127,24 @@ export default async (s: Index, message: Message) => {
 		.otherwise(() => '')
 	const has_title_tool = 'title_tool' in shared_runtime.tools
 
-	const system_prompt = [
-		fst_system_prompt,
-		has_title_tool ? fst_title_tool_prompt : '',
-		agent_system_prompt,
-		is_linkcase_batch_session ? getLinkcaseSessionPrompt() : '',
-		has_todo_session_link ? fst_report_tool_prompt : '',
-		shared_runtime.system_tools_prompt,
-		shared_runtime.custom_tools_prompt,
-		shared_runtime.skill_prompt,
-		`Current Session Title: ${s.session.title}`,
-		has_todo_session_link ? `Current Session Report: ${s.session.report ?? ''}` : '',
-		getContextPrompt(s.context),
-		mode_prompt,
-		`Real World Date: ${dayjs().format('YYYY-MM-DD')}`
-	]
-		.filter(Boolean)
-		.join('\n\n')
+	const system_prompt = is_linkcase_batch_session
+		? getLinkcaseSystemPrompt(s.session.title)
+		: [
+				fst_system_prompt,
+				has_title_tool ? fst_title_tool_prompt : '',
+				agent_system_prompt,
+				has_todo_session_link ? fst_report_tool_prompt : '',
+				shared_runtime.system_tools_prompt,
+				shared_runtime.custom_tools_prompt,
+				shared_runtime.skill_prompt,
+				`Current Session Title: ${s.session.title}`,
+				has_todo_session_link ? `Current Session Report: ${s.session.report ?? ''}` : '',
+				getContextPrompt(s.context),
+				mode_prompt,
+				`Real World Date: ${dayjs().format('YYYY-MM-DD')}`
+			]
+				.filter(Boolean)
+				.join('\n\n')
 
 	const tools = wrapToolSetWithAgentLogging(s, sanitizeToolSet(shared_runtime.tools))
 	const res = streamText({

@@ -24,6 +24,7 @@ import type {
 
 const linkcase_batch_config_storage_key = 'linkcase_batch_scheduler_config'
 const linkcase_batch_retry_ms = 1_000
+const linkcase_task_busy_error_prefix = 'Linkcase task is already running'
 type LinkcaseBatchAction = 'fetch' | 'extract'
 
 @injectable()
@@ -893,15 +894,17 @@ export default class Index {
 	buildTargetFetchPrompt(items: Array<LinkcaseItem>) {
 		return [
 			'Run one targeted Linkcase batch fetch.',
-			`Use linkcase_tool action "fetch_ids" with these exact ids: ${JSON.stringify(items.map(item => item.id))}.`,
-			'Fetch exactly those ids once and do not replace them with other candidates.',
+			`Process exactly these target ids and do not replace them with other candidates: ${JSON.stringify(items.map(item => item.id))}.`,
+			'For each target, use the AI-guided preview workflow: fetch_preview, optionally read_preview, then commit_preview or mark_failed.',
 			'Judge whether the final fetched result actually matches the target content, and call out clearly if it does not.',
 			'When evaluating fetched content, keep only the main topic content and ignore unrelated noise.',
 			'fetch_preview caches up to 200000 characters for one provider. If the first page is noisy, use linkcase_tool action "read_preview" on the same preview_key to inspect later 30000-character pages before trying another provider.',
 			'If a provider preview already contains the correct and substantially complete target article body, stop the provider chain immediately and commit that preview.',
 			'Do not keep testing later providers just to search for cleaner formatting or less trailing boilerplate.',
-			'Filter out website navigation, menus, login prompts, ads, sponsored blocks, popups, cookie notices, footers, tag pages, related links, recommendation feeds, and other non-target information.',
-			'Leading or trailing site boilerplate is acceptable if the target article body itself is clearly present and substantially complete.',
+			'Before commit_preview, rewrite the fetched result into cleaned markdown that keeps only the core article body.',
+			'Filter out website navigation, menus, login prompts, ads, sponsored blocks, popups, cookie notices, footers, tag pages, related links, recommendation feeds, share widgets, author cards, post navigation, comment sections, subscribe prompts, and other non-target information.',
+			'The saved result should keep only the core article body. It is acceptable to remove or rewrite non-body formatting so long as the article meaning stays intact.',
+			'Do not call commit_preview without passing the cleaned core body in the content field.',
 			'If a result is dominated by noise and the target article body is still absent or unusably incomplete after checking relevant preview pages, treat it as a bad fetch and say so clearly.',
 			'Return a concise summary with id, title, status, source, error, article_id, and your quality judgment.',
 			'Targets:',
@@ -920,8 +923,11 @@ export default class Index {
 			'If one provider preview already shows the correct and substantially complete target article body, commit it immediately and do not continue to later providers.',
 			'Do not continue to other providers only because they might look cleaner or contain less trailing boilerplate.',
 			'The target output should focus on the page main content only.',
-			'Filter out unrelated noise such as site navigation, category links, headers, footers, ads, sponsored content, popups, cookie banners, related reading, recommendation feeds, comment sections, and other boilerplate that is not central to the target topic.',
-			'Leading or trailing boilerplate is acceptable if the target article body is clearly present and substantially complete.',
+			'Never save raw fetched preview text directly.',
+			'Before commit_preview, rewrite the fetched result into cleaned markdown that keeps only the core article body.',
+			'Filter out unrelated noise such as site navigation, category links, headers, footers, ads, sponsored content, popups, cookie banners, related reading, recommendation feeds, share widgets, author cards, post navigation, comment sections, subscribe prompts, and other boilerplate that is not central to the target topic.',
+			'The saved result should keep only the core article body. It is acceptable to remove or rewrite non-body formatting so long as the article meaning stays intact.',
+			'Do not call commit_preview without passing the cleaned core body in the content field.',
 			'If a provider result still lacks the target body after you inspect relevant preview pages, do not accept it as the final fetch result.',
 			'Return a concise summary with provider attempts, final decision, status, source, and article_id if committed.'
 		].join('\n')
@@ -1298,6 +1304,10 @@ export default class Index {
 		await this.submitSessionPrompt(this.buildBatchPrompt())
 	}
 
+	isLinkcaseTaskBusyError(message: string) {
+		return message.startsWith(linkcase_task_busy_error_prefix)
+	}
+
 	async runBatchCycle(action: LinkcaseBatchAction) {
 		if (!this.batch_scheduler_enabled || !this.getBatchActionEnabled(action)) {
 			return
@@ -1313,6 +1323,7 @@ export default class Index {
 		this.batch_running_action = action
 		this.batch_last_error = ''
 		this.batch_last_run_at = Date.now()
+		let next_delay_ms = undefined as number | undefined
 
 		try {
 			const result = await rpc.linkcase.runBatch.mutate({
@@ -1324,11 +1335,17 @@ export default class Index {
 			this.batch_runs += 1
 			this.patchBatchResult(result)
 		} catch (error) {
-			this.batch_last_error = error instanceof Error ? error.message : String(error)
+			const message = error instanceof Error ? error.message : String(error)
+
+			if (this.isLinkcaseTaskBusyError(message)) {
+				next_delay_ms = linkcase_batch_retry_ms
+			} else {
+				this.batch_last_error = message
+			}
 		} finally {
 			this.batch_submit_loading = false
 			this.batch_running_action = ''
-			this.queueNextBatchRun(action)
+			this.queueNextBatchRun(action, next_delay_ms)
 		}
 	}
 

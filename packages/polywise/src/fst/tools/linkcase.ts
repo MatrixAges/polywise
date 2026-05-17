@@ -38,6 +38,11 @@ const inputSchema = object({
 		.describe(
 			'[Required for read_preview/commit_preview] Preview key returned by fetch_preview for the content you want to inspect or persist.'
 		),
+	content: string()
+		.optional()
+		.describe(
+			'[Required for commit_preview] Cleaned core article body to save. Remove ads, share widgets, related links, author cards, post navigation, comments, subscribe prompts, cookie notices, and any other non-body text. You may rewrite markdown formatting, but preserve the article meaning.'
+		),
 	page: number()
 		.int()
 		.min(1)
@@ -160,7 +165,8 @@ export const createLinkcaseTool = (_s: Session) => {
 			'For AI-guided fetch validation, use fetch_preview with one provider at a time. Inspect the returned content_preview yourself, decide whether it is the real target content, and either continue with the next provider, commit_preview, or mark_failed.',
 			'fetch_preview caches up to max_chars characters, which defaults to 200000, and returns page 1 of that cached preview.',
 			'Use read_preview with the same preview_key to inspect later pages from the current provider before switching to another provider. Each preview page contains up to 30000 characters.',
-			'If the current preview already contains the correct and substantially complete target article body, commit it immediately instead of trying more providers for cosmetic cleanup.',
+			'When using commit_preview, do not save the raw preview. First rewrite the result into cleaned core body content and pass that cleaned content through the content field.',
+			'If the current preview already contains the correct and substantially complete target article body, clean it and commit it immediately instead of trying more providers for cosmetic cleanup.',
 			'Use list or status first when you need to inspect the queue before fetching.'
 		].join('\n'),
 		inputSchema,
@@ -252,10 +258,18 @@ export const createLinkcaseTool = (_s: Session) => {
 					}
 				}
 
+				if (!input.content?.trim()) {
+					return {
+						action: 'commit_preview' as const,
+						error: 'content is required for commit_preview action'
+					}
+				}
+
 				return {
 					action: 'commit_preview' as const,
 					...(await commitLinkcasePreview({
 						preview_key: input.preview_key,
+						content: input.content,
 						exec_pipeline: input.exec_pipeline
 					}))
 				}

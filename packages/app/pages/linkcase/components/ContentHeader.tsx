@@ -45,7 +45,7 @@ const Index = () => {
 						<Globe className='sizefull'></Globe>
 					)}
 				</div>
-				<div className='flex flex-col'>
+				<div className='flex flex-1 flex-col truncate'>
 					<div
 						className='
 							flex
@@ -65,6 +65,7 @@ const Index = () => {
 			</div>
 			<div className='flex shrink-0 items-center gap-2'>
 				<Button
+					className='h-7'
 					variant='outline'
 					size='xs'
 					disabled={!item || Boolean(x.current_ai_fetching_id) || x.linkcase_session_running}
@@ -78,8 +79,9 @@ const Index = () => {
 					<span>Fetch</span>
 				</Button>
 				<Button
+					className='h-7'
+					variant='default'
 					size='xs'
-					className='border-black bg-black text-white hover:bg-black/90'
 					disabled={!can_extract || extracting}
 					onClick={() => void x.extractSelectedLink()}
 				>

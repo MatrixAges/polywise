@@ -36,22 +36,6 @@ const Index = () => {
 						</Button>
 					</div>
 				)}
-				{!x.loading && x.items.length === 0 && (
-					<div
-						className='
-							flex flex-col
-							items-center justify-center
-							min-h-[180px]
-							gap-2
-							rounded-3xl
-							text-sm text-std-300
-							border border-dashed border-border-light
-						'
-					>
-						<TriangleAlert className='size-4'></TriangleAlert>
-						<span>No links found</span>
-					</div>
-				)}
 			</div>
 		</div>
 	)

@@ -1,3 +1,4 @@
+import { global_linkcase_session_id } from '@core/consts'
 import { getNodeRowid, insertNodeVector } from '@core/db/prepare'
 import { article, chunk, edge, link, link_article, node } from '@core/db/schema'
 import {
@@ -15,6 +16,7 @@ import { addLinkArticle, addNodeChunk, getLinkArticles } from '@core/db/services
 import { fetchWithFallbackChain, fetchWithProvider } from '@core/fetch'
 import { saveArticle } from '@core/io'
 import { getEmbedding, getTriples } from '@core/pipeline'
+import { SessionStore } from '@core/utils'
 import { and, asc, eq, inArray, isNull, like, or } from 'drizzle-orm'
 
 import { getLinkFavicon } from './getLinkFavicon'
@@ -58,11 +60,26 @@ type LinkcaseFetchPreviewCacheItem = {
 	truncated: boolean
 	created_at: number
 }
+type LinkcaseRunningTask =
+	| {
+			kind: 'session'
+			started_at: number
+	  }
+	| {
+			kind: 'batch'
+			action: string
+			started_at: number
+	  }
 
 const linkcase_fetch_preview_cache = new Map<string, LinkcaseFetchPreviewCacheItem>()
+const linkcase_batch_running_state = {
+	action: '',
+	started_at: 0
+}
 const LINKCASE_FETCH_PREVIEW_TTL_MS = 10 * 60 * 1000
 const LINKCASE_PIPELINE_WAIT_MS = 15_000
 const LINKCASE_PIPELINE_POLL_MS = 250
+const LINKCASE_TASK_BUSY_ERROR_PREFIX = 'Linkcase task is already running'
 
 const cleanupLinkcaseFetchPreviewCache = () => {
 	const cutoff = Date.now() - LINKCASE_FETCH_PREVIEW_TTL_MS
@@ -77,209 +94,52 @@ const cleanupLinkcaseFetchPreviewCache = () => {
 const normalizeKeyword = (keyword?: string) => keyword?.trim() ?? ''
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 const normalizeTripleText = (value: string) => value.replace(/\s+/g, ' ').trim()
-const linkcase_stop_line_patterns = [
-	/^分享至$/u,
-	/^扫描关注/u,
-	/^评论$/u,
-	/^\(\s*\*\d+\*\s*人参与/u,
-	/^热门评论$/u,
-	/^最新评论$/u,
-	/^热门标签$/u,
-	/^本周人气攻略$/u,
-	/^热门攻略推荐$/u,
-	/^48小时热点资讯$/u,
-	/^精品网页游戏$/u,
-	/^热门游戏推荐$/u,
-	/^关于游侠/u,
-	/^更多内容[:：]/u,
-	/^\*\*更多内容[:：]/u,
-	/^正版购买[:：]/u,
-	/^\*\*正版购买[:：]/u,
-	/^立即购买$/u,
-	/^查看.+攻略大全/u,
-	/^.{0,30}相关攻略$/u,
-	/^.{0,30}相关下载$/u
-]
+const prepareLinkcaseArticleContent = (content: string) => content.replace(/\r\n?/g, '\n').trim()
+const getRunningLinkcaseTask = (): LinkcaseRunningTask | null => {
+	const linkcase_session = SessionStore.get(global_linkcase_session_id)
 
-const normalizeFetchedContent = (content: string) =>
-	content
-		.replace(/\r\n?/g, '\n')
-		.replace(/^Title:\s.*$/gmu, '')
-		.replace(/^URL Source:\s.*$/gmu, '')
-		.replace(/^Published Time:\s.*$/gmu, '')
-		.replace(/^Markdown Content:\s*/gmu, '')
-		.trim()
-
-const isLikelyLinkOrListLine = (line: string) => {
-	const text = line.trim()
-
-	if (!text) {
-		return false
-	}
-
-	if (/^[-*]\s+/u.test(text)) {
-		return true
-	}
-
-	if (/^!\[[^\]]*\]\([^)]+\)$/u.test(text)) {
-		return true
-	}
-
-	if (/^(?:\[[^\]]*\]\([^)]+\)\s*)+$/u.test(text)) {
-		return true
-	}
-
-	if (/^\|$/u.test(text)) {
-		return true
-	}
-
-	if (
-		text.includes('|') &&
-		text.length <= 80 &&
-		!/[。！？.!?：:]/u.test(text) &&
-		!/^\d{4}-\d{2}-\d{2}/u.test(text)
-	) {
-		return true
-	}
-
-	return false
-}
-
-const isLikelyParagraphLine = (line: string) => {
-	const text = line.trim()
-
-	if (!text) {
-		return false
-	}
-
-	if (/^#{1,6}\s+/u.test(text)) {
-		return false
-	}
-
-	if (isLikelyLinkOrListLine(text)) {
-		return false
-	}
-
-	if (linkcase_stop_line_patterns.some(pattern => pattern.test(text))) {
-		return false
-	}
-
-	return /[\p{L}\p{N}]/u.test(text) && text.length >= 12
-}
-
-const scoreHeadingCandidate = (lines: Array<string>, index: number) => {
-	const window = lines.slice(index + 1, index + 41)
-	const early_window = window.slice(0, 12)
-	const body_count = window.filter(isLikelyParagraphLine).length
-	const list_count = window.filter(isLikelyLinkOrListLine).length
-	const heading_bonus = /《.+》|怎么办|方法|教程|指南|攻略|测评|评测|新闻|公告/u.test(lines[index] ?? '') ? 4 : 0
-	const breadcrumb_bonus = index > 0 && /当前位置/u.test(lines[index - 1] ?? '') ? 2 : 0
-	const date_bonus = early_window.some(line => /\b\d{4}-\d{2}-\d{2}\b/u.test(line)) ? 4 : 0
-	const early_list_penalty =
-		early_window.filter(isLikelyLinkOrListLine).length >= 5 &&
-		early_window.filter(isLikelyParagraphLine).length === 0
-			? 10
-			: 0
-
-	return body_count * 3 - list_count * 2 + heading_bonus + breadcrumb_bonus + date_bonus - early_list_penalty
-}
-
-const findArticleStartIndex = (lines: Array<string>) => {
-	const heading_indexes = lines
-		.map((line, index) => (/^#{1,3}\s+\S/u.test(line.trim()) ? index : -1))
-		.filter(index => index >= 0)
-
-	if (heading_indexes.length > 0) {
-		const best = heading_indexes
-			.map(index => ({ index, score: scoreHeadingCandidate(lines, index) }))
-			.sort((a, b) => b.score - a.score)[0]
-
-		if (best && best.score > 0) {
-			return best.index
+	if (linkcase_session?.running_since) {
+		return {
+			kind: 'session',
+			started_at: linkcase_session.running_since.getTime()
 		}
 	}
 
-	const breadcrumb_index = lines.findIndex(line => /当前位置/u.test(line))
-
-	if (breadcrumb_index >= 0) {
-		const fallback_heading_index = lines.findIndex(
-			(line, index) => index > breadcrumb_index && /^#{1,3}\s+\S/u.test(line.trim())
-		)
-
-		if (fallback_heading_index >= 0) {
-			return fallback_heading_index
+	if (linkcase_batch_running_state.action) {
+		return {
+			kind: 'batch',
+			action: linkcase_batch_running_state.action,
+			started_at: linkcase_batch_running_state.started_at
 		}
 	}
 
-	return lines.findIndex(isLikelyParagraphLine)
+	return null
 }
 
-const findArticleEndIndex = (lines: Array<string>, start_index: number) => {
-	for (let i = start_index + 1; i < lines.length; i++) {
-		const text = lines[i]?.trim() ?? ''
-
-		if (!text) {
-			continue
-		}
-
-		if (linkcase_stop_line_patterns.some(pattern => pattern.test(text))) {
-			return i
-		}
+const getLinkcaseTaskBusyError = (task: LinkcaseRunningTask) => {
+	if (task.kind === 'session') {
+		return `${LINKCASE_TASK_BUSY_ERROR_PREFIX}: batch session`
 	}
 
-	return lines.length
+	return `${LINKCASE_TASK_BUSY_ERROR_PREFIX}: scheduled ${task.action}`
 }
 
-const cleanupTrailingNoiseLines = (lines: Array<string>) => {
-	let end = lines.length
+const withLinkcaseBatchRunLock = async <T>(action: string, fn: () => Promise<T>) => {
+	const running_task = getRunningLinkcaseTask()
 
-	while (end > 0) {
-		const text = lines[end - 1]?.trim() ?? ''
-
-		if (!text) {
-			end--
-			continue
-		}
-
-		if (
-			isLikelyLinkOrListLine(text) ||
-			/^CopyRight\b/u.test(text) ||
-			/^登录/u.test(text) ||
-			/^下载APP$/u.test(text) ||
-			/^去登录$/u.test(text)
-		) {
-			end--
-			continue
-		}
-
-		break
+	if (running_task) {
+		throw new Error(getLinkcaseTaskBusyError(running_task))
 	}
 
-	return lines.slice(0, end)
-}
+	linkcase_batch_running_state.action = action
+	linkcase_batch_running_state.started_at = Date.now()
 
-const cleanLinkcaseFetchedContent = (content: string) => {
-	const normalized = normalizeFetchedContent(content)
-
-	if (!normalized) {
-		return normalized
+	try {
+		return await fn()
+	} finally {
+		linkcase_batch_running_state.action = ''
+		linkcase_batch_running_state.started_at = 0
 	}
-
-	const lines = normalized.split('\n')
-	const start_index = findArticleStartIndex(lines)
-
-	if (start_index < 0) {
-		return normalized
-	}
-
-	const end_index = findArticleEndIndex(lines, start_index)
-	const cleaned_lines = cleanupTrailingNoiseLines(lines.slice(start_index, end_index))
-	const cleaned = cleaned_lines
-		.join('\n')
-		.replace(/\n{3,}/g, '\n\n')
-		.trim()
-
-	return cleaned.length >= 80 ? cleaned : normalized
 }
 
 const getPreviewPage = (content: string, page: number, page_size = LINKCASE_FETCH_PREVIEW_PAGE_SIZE) => {
@@ -409,10 +269,9 @@ const isTimeoutError = (message?: string) => {
 }
 
 const saveLinkcaseArticle = async (args: { id: string; title: string; content: string; exec_pipeline?: boolean }) => {
-	const cleaned_content = cleanLinkcaseFetchedContent(args.content)
 	const article_id = await saveArticle({
 		title: args.title,
-		content: cleaned_content,
+		content: prepareLinkcaseArticleContent(args.content),
 		for: 'linkcase',
 		exec_pipeline: args.exec_pipeline
 	})
@@ -701,7 +560,11 @@ export const readLinkcasePreview = async (args: { preview_key: string; page: num
 	}
 }
 
-export const commitLinkcasePreview = async (args: { preview_key: string; exec_pipeline?: boolean }) => {
+export const commitLinkcasePreview = async (args: {
+	preview_key: string
+	content: string
+	exec_pipeline?: boolean
+}) => {
 	cleanupLinkcaseFetchPreviewCache()
 
 	const cached = linkcase_fetch_preview_cache.get(args.preview_key)
@@ -720,7 +583,7 @@ export const commitLinkcasePreview = async (args: { preview_key: string; exec_pi
 	const saved = await saveLinkcaseArticle({
 		id: current_link.id,
 		title: current_link.title,
-		content: cached.content,
+		content: args.content,
 		exec_pipeline: args.exec_pipeline
 	})
 
@@ -840,80 +703,84 @@ export const runLinkcaseBatch = async (args: { count: number; run_fetch: boolean
 		throw new Error('Select at least one batch action.')
 	}
 
-	const fetched = [] as Array<{
-		id: string
-		title: string
-		url: string
-		ok: boolean
-		status: string
-		article_id: string | null
-		error: string | null
-	}>
-	const extracted = [] as Array<LinkcaseExtractResult>
+	const action = args.run_fetch && args.run_extract ? 'fetch + extract' : args.run_fetch ? 'fetch' : 'extract'
 
-	if (args.run_fetch) {
-		const targets = await listBatchFetchCandidates(args.count)
+	return withLinkcaseBatchRunLock(action, async () => {
+		const fetched = [] as Array<{
+			id: string
+			title: string
+			url: string
+			ok: boolean
+			status: string
+			article_id: string | null
+			error: string | null
+		}>
+		const extracted = [] as Array<LinkcaseExtractResult>
 
-		for (const item of targets) {
-			try {
-				const result = await fetchLinkcaseLink({ id: item.id })
+		if (args.run_fetch) {
+			const targets = await listBatchFetchCandidates(args.count)
 
-				fetched.push({
-					id: item.id,
-					title: item.title,
-					url: item.url,
-					ok: result.ok,
-					status: result.link.status,
-					article_id: result.article?.id ?? null,
-					error: result.ok ? null : (result.error ?? 'Unknown fetch error')
-				})
-			} catch (error) {
-				fetched.push({
-					id: item.id,
-					title: item.title,
-					url: item.url,
-					ok: false,
-					status: 'fail',
-					article_id: null,
-					error: error instanceof Error ? error.message : String(error)
-				})
-			}
-		}
-	}
+			for (const item of targets) {
+				try {
+					const result = await fetchLinkcaseLink({ id: item.id })
 
-	if (args.run_extract) {
-		const extract_target_ids = new Set<string>()
-
-		for (const item of fetched) {
-			if (item.ok && item.id) {
-				extract_target_ids.add(item.id)
-			}
-		}
-
-		if (extract_target_ids.size < args.count) {
-			const fallback_targets = await listBatchExtractCandidates(args.count)
-
-			for (const item of fallback_targets) {
-				if (extract_target_ids.size >= args.count) {
-					break
+					fetched.push({
+						id: item.id,
+						title: item.title,
+						url: item.url,
+						ok: result.ok,
+						status: result.link.status,
+						article_id: result.article?.id ?? null,
+						error: result.ok ? null : (result.error ?? 'Unknown fetch error')
+					})
+				} catch (error) {
+					fetched.push({
+						id: item.id,
+						title: item.title,
+						url: item.url,
+						ok: false,
+						status: 'fail',
+						article_id: null,
+						error: error instanceof Error ? error.message : String(error)
+					})
 				}
-
-				extract_target_ids.add(item.id)
 			}
 		}
 
-		for (const id of extract_target_ids) {
-			extracted.push(await extractLinkcaseArticle({ id, force: false }))
-		}
-	}
+		if (args.run_extract) {
+			const extract_target_ids = new Set<string>()
 
-	return {
-		ok: true as const,
-		fetch_count: fetched.length,
-		extract_count: extracted.length,
-		fetched,
-		extracted
-	}
+			for (const item of fetched) {
+				if (item.ok && item.id) {
+					extract_target_ids.add(item.id)
+				}
+			}
+
+			if (extract_target_ids.size < args.count) {
+				const fallback_targets = await listBatchExtractCandidates(args.count)
+
+				for (const item of fallback_targets) {
+					if (extract_target_ids.size >= args.count) {
+						break
+					}
+
+					extract_target_ids.add(item.id)
+				}
+			}
+
+			for (const id of extract_target_ids) {
+				extracted.push(await extractLinkcaseArticle({ id, force: false }))
+			}
+		}
+
+		return {
+			ok: true as const,
+			fetch_count: fetched.length,
+			extract_count: extracted.length,
+			fetched,
+			extracted
+		}
+	})
 }
 
 export const getLinkcaseKeywordWhere = (keyword?: string, match_title = true, match_url = true) => {
