@@ -45,6 +45,11 @@ export default class Index {
 	selection_remove_loading = false
 	search_keyword = ''
 	filter_type = 'title' as LinkcaseFilterType
+	add_dialog_open = false
+	add_submit_loading = false
+	add_title = ''
+	add_url = ''
+	add_content = ''
 	session_dialog_open = false
 	start_dialog_open = false
 	sniffer_dialog_open = false
@@ -212,6 +217,37 @@ export default class Index {
 
 	setSessionDialogOpen(value: boolean) {
 		this.session_dialog_open = value
+	}
+
+	resetAddDraft() {
+		this.add_title = ''
+		this.add_url = ''
+		this.add_content = ''
+	}
+
+	openAddDialog() {
+		this.resetAddDraft()
+		this.add_dialog_open = true
+	}
+
+	setAddDialogOpen(value: boolean) {
+		this.add_dialog_open = value
+
+		if (!value && !this.add_submit_loading) {
+			this.resetAddDraft()
+		}
+	}
+
+	setAddTitle(value: string) {
+		this.add_title = value
+	}
+
+	setAddUrl(value: string) {
+		this.add_url = value
+	}
+
+	setAddContent(value: string) {
+		this.add_content = value
 	}
 
 	enterSelectMode() {
@@ -805,6 +841,48 @@ export default class Index {
 			toast.error(error instanceof Error ? error.message : 'Bookmark import failed')
 		} finally {
 			this.sniffer_importing_browser = ''
+		}
+	}
+
+	async submitAddLink() {
+		if (this.add_submit_loading) {
+			return
+		}
+
+		const url = this.add_url.trim()
+		const title = this.add_title.trim() || undefined
+		const content = this.add_content.trim() || undefined
+
+		if (!url) {
+			toast.error('Link is required.')
+
+			return
+		}
+
+		this.add_submit_loading = true
+
+		try {
+			const response = await rpc.linkcase.create.mutate({
+				url,
+				title,
+				content
+			})
+
+			if (!response) {
+				throw new Error('Failed to create link.')
+			}
+
+			this.selected_id = response.id
+			this.detail = response
+			this.add_dialog_open = false
+			this.resetAddDraft()
+
+			await this.reloadList()
+			toast.success(`Added ${response.title || response.url}.`)
+		} catch (error) {
+			toast.error(error instanceof Error ? error.message : 'Failed to add link')
+		} finally {
+			this.add_submit_loading = false
 		}
 	}
 

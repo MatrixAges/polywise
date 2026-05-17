@@ -64,7 +64,7 @@ const Index = () => {
 					) : (
 						<Bot className='size-3.5'></Bot>
 					)}
-					<span>{has_content ? 'Refetch' : 'Fetch'}</span>
+					<span>Fetch</span>
 				</Button>
 				<Button
 					size='xs'

@@ -33,7 +33,7 @@ const Index = () => {
 				</div>
 			) : has_content ? (
 				<div className='mx-auto w-full max-w-4xl'>
-					<MessageResponse className='w-full text-[15px] leading-7'>
+					<MessageResponse className='w-full leading-7'>
 						{x.detail?.article?.content || ''}
 					</MessageResponse>
 				</div>

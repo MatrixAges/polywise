@@ -1,5 +1,5 @@
 import dayjs from 'dayjs'
-import { ArrowDownToLine, Bot, TimerReset } from 'lucide-react'
+import { ArrowDownToLine, Bot, Plus, TimerReset } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { Button } from '@/__shadcn__/components/ui/button'
@@ -77,6 +77,10 @@ const Index = () => {
 						<Bot className='text-std-400 size-4 shrink-0'></Bot>
 					</button>
 					<div className='flex shrink-0 flex-col gap-2'>
+						<Button variant='outline' size='sm' onClick={x.openAddDialog}>
+							<Plus className='size-3.5'></Plus>
+							<span>Add Link</span>
+						</Button>
 						<Button variant='outline' size='sm' onClick={x.openSnifferDialog}>
 							<ArrowDownToLine className='size-3.5'></ArrowDownToLine>
 							<span>Bookmarks</span>
