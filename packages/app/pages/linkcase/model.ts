@@ -1,6 +1,7 @@
 import { global_linkcase_session_id, global_linkcase_session_title } from '@core/consts'
 import { makeAutoObservable } from 'mobx'
 import { toast } from 'sonner'
+import { setStorageWhenChange } from 'stk/mobx'
 import { injectable } from 'tsyringe'
 
 import { server_sys_session_url } from '@/appdata'
@@ -26,6 +27,17 @@ const linkcase_batch_config_storage_key = 'linkcase_batch_scheduler_config'
 const linkcase_batch_retry_ms = 1_000
 const linkcase_task_busy_error_prefix = 'Linkcase task is already running'
 type LinkcaseBatchAction = 'fetch' | 'extract'
+type LinkcaseBatchConfig = {
+	batch_count: number
+	batch_interval_value: number
+	batch_interval_unit: LinkcaseBatchIntervalUnit
+	batch_fetch_interval_value: number
+	batch_fetch_interval_unit: LinkcaseBatchIntervalUnit
+	batch_action_fetch_enabled: boolean
+	batch_extract_interval_value: number
+	batch_extract_interval_unit: LinkcaseBatchIntervalUnit
+	batch_action_extract_enabled: boolean
+}
 
 @injectable()
 export default class Index {
@@ -211,9 +223,74 @@ export default class Index {
 	}
 
 	async init() {
-		this.restoreBatchConfig()
+		this.migrateLegacyBatchConfig()
+		const deinit = setStorageWhenChange(
+			[
+				{
+					batch_count: {
+						local_key: 'linkcase_batch_count',
+						fromStorage: value => Math.min(Math.max(Number(value) || 1, 1), 10),
+						toStorage: value => Math.min(Math.max(Number(value) || 1, 1), 10)
+					}
+				},
+				{
+					batch_fetch_interval_value: {
+						local_key: 'linkcase_batch_fetch_interval_value',
+						fromStorage: value => Math.max(Number(value) || 1, 1),
+						toStorage: value => Math.max(Number(value) || 1, 1)
+					}
+				},
+				{
+					batch_fetch_interval_unit: {
+						local_key: 'linkcase_batch_fetch_interval_unit',
+						fromStorage: value => (value === 'second' || value === 'minute' ? value : 'minute'),
+						toStorage: value => (value === 'second' || value === 'minute' ? value : 'minute')
+					}
+				},
+				{
+					batch_action_fetch_enabled: {
+						local_key: 'linkcase_batch_action_fetch_enabled',
+						fromStorage: value => Boolean(value),
+						toStorage: value => Boolean(value)
+					}
+				},
+				{
+					batch_extract_interval_value: {
+						local_key: 'linkcase_batch_extract_interval_value',
+						fromStorage: value => Math.max(Number(value) || 1, 1),
+						toStorage: value => Math.max(Number(value) || 1, 1)
+					}
+				},
+				{
+					batch_extract_interval_unit: {
+						local_key: 'linkcase_batch_extract_interval_unit',
+						fromStorage: value => (value === 'second' || value === 'minute' ? value : 'minute'),
+						toStorage: value => (value === 'second' || value === 'minute' ? value : 'minute')
+					}
+				},
+				{
+					batch_action_extract_enabled: {
+						local_key: 'linkcase_batch_action_extract_enabled',
+						fromStorage: value => Boolean(value),
+						toStorage: value => Boolean(value)
+					}
+				}
+			],
+			this
+		)
+
+		this.util.acts = [deinit]
+		this.resetMenuSelectionState()
 		this.watchSessionStatus()
 		await this.reloadList()
+	}
+
+	resetMenuSelectionState() {
+		this.selected_id = ''
+		this.select_mode = false
+		this.checked_ids = []
+		this.detail = null
+		this.menu_target_index = -1
 	}
 
 	setSessionDialogOpen(value: boolean) {
@@ -361,46 +438,39 @@ export default class Index {
 
 	setBatchCount(value: string) {
 		this.batch_count = Math.min(Math.max(Number(value) || 1, 1), 10)
-		this.persistBatchConfig()
 	}
 
 	setBatchFetchIntervalValue(value: string) {
 		this.batch_fetch_interval_value = Math.max(Number(value) || 1, 1)
-		this.persistBatchConfig()
 		this.refreshBatchSchedule('fetch')
 	}
 
 	setBatchFetchIntervalUnit(value: string) {
 		this.batch_fetch_interval_unit = value as LinkcaseBatchIntervalUnit
-		this.persistBatchConfig()
 		this.refreshBatchSchedule('fetch')
 	}
 
 	setBatchExtractIntervalValue(value: string) {
 		this.batch_extract_interval_value = Math.max(Number(value) || 1, 1)
-		this.persistBatchConfig()
 		this.refreshBatchSchedule('extract')
 	}
 
 	setBatchExtractIntervalUnit(value: string) {
 		this.batch_extract_interval_unit = value as LinkcaseBatchIntervalUnit
-		this.persistBatchConfig()
 		this.refreshBatchSchedule('extract')
 	}
 
 	setBatchActionFetchEnabled(value: boolean) {
 		this.batch_action_fetch_enabled = value
-		this.persistBatchConfig()
 		this.refreshBatchSchedule('fetch')
 	}
 
 	setBatchActionExtractEnabled(value: boolean) {
 		this.batch_action_extract_enabled = value
-		this.persistBatchConfig()
 		this.refreshBatchSchedule('extract')
 	}
 
-	restoreBatchConfig() {
+	migrateLegacyBatchConfig() {
 		if (typeof window === 'undefined') {
 			return
 		}
@@ -412,76 +482,69 @@ export default class Index {
 				return
 			}
 
-			const parsed = JSON.parse(raw) as Partial<{
-				batch_count: number
-				batch_interval_value: number
-				batch_interval_unit: LinkcaseBatchIntervalUnit
-				batch_fetch_interval_value: number
-				batch_fetch_interval_unit: LinkcaseBatchIntervalUnit
-				batch_action_fetch_enabled: boolean
-				batch_extract_interval_value: number
-				batch_extract_interval_unit: LinkcaseBatchIntervalUnit
-				batch_action_extract_enabled: boolean
-			}>
+			const parsed = JSON.parse(raw) as Partial<LinkcaseBatchConfig>
+			const migration_map = {
+				batch_count: 'linkcase_batch_count',
+				batch_fetch_interval_value: 'linkcase_batch_fetch_interval_value',
+				batch_fetch_interval_unit: 'linkcase_batch_fetch_interval_unit',
+				batch_action_fetch_enabled: 'linkcase_batch_action_fetch_enabled',
+				batch_extract_interval_value: 'linkcase_batch_extract_interval_value',
+				batch_extract_interval_unit: 'linkcase_batch_extract_interval_unit',
+				batch_action_extract_enabled: 'linkcase_batch_action_extract_enabled'
+			} satisfies Record<string, string>
 
-			if (typeof parsed.batch_count === 'number') {
-				this.batch_count = Math.min(Math.max(parsed.batch_count, 1), 10)
+			if (window.localStorage.getItem(migration_map.batch_count) === null) {
+				this.batch_count = Math.min(Math.max(parsed.batch_count || 1, 1), 10)
 			}
 
-			if (typeof parsed.batch_fetch_interval_value === 'number') {
-				this.batch_fetch_interval_value = Math.max(parsed.batch_fetch_interval_value, 1)
-			} else if (typeof parsed.batch_interval_value === 'number') {
-				this.batch_fetch_interval_value = Math.max(parsed.batch_interval_value, 1)
+			if (window.localStorage.getItem(migration_map.batch_fetch_interval_value) === null) {
+				this.batch_fetch_interval_value = Math.max(
+					parsed.batch_fetch_interval_value || parsed.batch_interval_value || 1,
+					1
+				)
 			}
 
-			if (parsed.batch_fetch_interval_unit === 'second' || parsed.batch_fetch_interval_unit === 'minute') {
-				this.batch_fetch_interval_unit = parsed.batch_fetch_interval_unit
-			} else if (parsed.batch_interval_unit === 'second' || parsed.batch_interval_unit === 'minute') {
-				this.batch_fetch_interval_unit = parsed.batch_interval_unit
+			if (window.localStorage.getItem(migration_map.batch_fetch_interval_unit) === null) {
+				this.batch_fetch_interval_unit =
+					parsed.batch_fetch_interval_unit === 'second' ||
+					parsed.batch_fetch_interval_unit === 'minute'
+						? parsed.batch_fetch_interval_unit
+						: parsed.batch_interval_unit === 'second' || parsed.batch_interval_unit === 'minute'
+							? parsed.batch_interval_unit
+							: 'minute'
 			}
 
-			if (typeof parsed.batch_action_fetch_enabled === 'boolean') {
-				this.batch_action_fetch_enabled = parsed.batch_action_fetch_enabled
+			if (window.localStorage.getItem(migration_map.batch_action_fetch_enabled) === null) {
+				this.batch_action_fetch_enabled =
+					typeof parsed.batch_action_fetch_enabled === 'boolean'
+						? parsed.batch_action_fetch_enabled
+						: true
 			}
 
-			if (typeof parsed.batch_extract_interval_value === 'number') {
-				this.batch_extract_interval_value = Math.max(parsed.batch_extract_interval_value, 1)
-			} else if (typeof parsed.batch_interval_value === 'number') {
-				this.batch_extract_interval_value = Math.max(parsed.batch_interval_value, 1)
+			if (window.localStorage.getItem(migration_map.batch_extract_interval_value) === null) {
+				this.batch_extract_interval_value = Math.max(
+					parsed.batch_extract_interval_value || parsed.batch_interval_value || 1,
+					1
+				)
 			}
 
-			if (
-				parsed.batch_extract_interval_unit === 'second' ||
-				parsed.batch_extract_interval_unit === 'minute'
-			) {
-				this.batch_extract_interval_unit = parsed.batch_extract_interval_unit
-			} else if (parsed.batch_interval_unit === 'second' || parsed.batch_interval_unit === 'minute') {
-				this.batch_extract_interval_unit = parsed.batch_interval_unit
+			if (window.localStorage.getItem(migration_map.batch_extract_interval_unit) === null) {
+				this.batch_extract_interval_unit =
+					parsed.batch_extract_interval_unit === 'second' ||
+					parsed.batch_extract_interval_unit === 'minute'
+						? parsed.batch_extract_interval_unit
+						: parsed.batch_interval_unit === 'second' || parsed.batch_interval_unit === 'minute'
+							? parsed.batch_interval_unit
+							: 'minute'
 			}
 
-			if (typeof parsed.batch_action_extract_enabled === 'boolean') {
-				this.batch_action_extract_enabled = parsed.batch_action_extract_enabled
+			if (window.localStorage.getItem(migration_map.batch_action_extract_enabled) === null) {
+				this.batch_action_extract_enabled =
+					typeof parsed.batch_action_extract_enabled === 'boolean'
+						? parsed.batch_action_extract_enabled
+						: false
 			}
 		} catch {}
-	}
-
-	persistBatchConfig() {
-		if (typeof window === 'undefined') {
-			return
-		}
-
-		window.localStorage.setItem(
-			linkcase_batch_config_storage_key,
-			JSON.stringify({
-				batch_count: this.batch_count,
-				batch_fetch_interval_value: this.batch_fetch_interval_value,
-				batch_fetch_interval_unit: this.batch_fetch_interval_unit,
-				batch_action_fetch_enabled: this.batch_action_fetch_enabled,
-				batch_extract_interval_value: this.batch_extract_interval_value,
-				batch_extract_interval_unit: this.batch_extract_interval_unit,
-				batch_action_extract_enabled: this.batch_action_extract_enabled
-			})
-		)
 	}
 
 	getSnifferStatus(browser: LinkcaseSnifferBrowserId) {
@@ -1421,6 +1484,7 @@ export default class Index {
 			this.search_timer = 0
 		}
 
+		this.resetMenuSelectionState()
 		this.stopBatchSchedule()
 		this.util.deinit()
 	}
