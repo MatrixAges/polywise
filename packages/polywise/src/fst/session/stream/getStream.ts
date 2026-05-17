@@ -63,9 +63,14 @@ const getLinkcaseSessionPrompt = () => {
 		'For AI-guided targeted fetch runs, do not use linkcase_tool action "fetch_ids".',
 		`Instead, use linkcase_tool action "fetch_preview" with exactly one provider at a time in this configured order: ${provider_chain.join(', ')}.`,
 		'After each preview, inspect content_preview yourself and decide whether it is the actual target page content.',
-		'Only accept previews whose main body is focused on the target topic instead of surrounding site chrome.',
+		'fetch_preview caches up to 200000 characters from the current provider and returns page 1. Use linkcase_tool action "read_preview" with the same preview_key to inspect later pages, 30000 characters per page.',
+		'Do not switch providers just because page 1 starts with navigation or site chrome. Read more pages from the same preview first when needed.',
+		'Accept a preview when the correct target article body is present and substantially complete, even if there is leading or trailing site boilerplate around it.',
+		'Do not switch providers just because another provider might be cleaner. If the current preview already contains the correct and substantially complete target article body, accept it.',
+		'Do not spend turns manually cleaning, rewriting, or comparing cosmetic noise once the correct article body is present. commit_preview saves the raw fetched content.',
 		'Filter out and actively reject previews dominated by navigation links, headers, footers, ads, sponsored blocks, popups, cookie notices, related links, recommendation feeds, comment sections, or other non-target boilerplate.',
-		'If the preview is blocked, irrelevant, too noisy, partial in the wrong way, or clearly not the target content, continue to the next provider.',
+		'Only continue to the next provider after you have checked enough pages from the current preview and still conclude that the target body is absent, blocked, wrong, or unusably incomplete.',
+		'If one provider already shows the correct target article body, commit it immediately and stop the provider chain.',
 		'Only when a preview looks correct should you call linkcase_tool action "commit_preview" with the preview_key.',
 		'If every provider fails or every preview looks wrong, call linkcase_tool action "mark_failed" with a concise reason.',
 		'Do not ask follow-up questions during scheduled runs. Execute the fetch plan and return a compact summary of successes, failures, and remaining issues.'
@@ -100,7 +105,7 @@ export default async (s: Index, message: Message) => {
 	const has_todo_session_link = await s.has_todo_session_link
 	const agent_system_prompt = await getAgentSystemPrompt(s.id)
 	const is_linkcase_batch_session = s.id === global_linkcase_session_id
-	const title_focus = getTitleFocus({ s, message, is_first_message })
+	const title_focus = is_linkcase_batch_session ? '' : getTitleFocus({ s, message, is_first_message })
 	const shared_runtime = await buildSharedRuntimeTools({
 		s,
 		model_tools: s.model.tools,
@@ -110,7 +115,7 @@ export default async (s: Index, message: Message) => {
 			plan_tool: createPlanTool(s),
 			question_tool: createQuestionTool(s.id),
 			...(s.owner_agent ? { self_memory_tool: createSelfMemoryTool(s) } : {}),
-			title_tool: createTitleTool(s),
+			...(!is_linkcase_batch_session ? { title_tool: createTitleTool(s) } : {}),
 			skill_tool: createSkillTool(s),
 			cron_tool: createCronTool(s),
 			error_collect_tool: createErrorCollectTool(),

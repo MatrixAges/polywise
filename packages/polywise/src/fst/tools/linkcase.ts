@@ -7,7 +7,8 @@ import {
 	hydrateLinkcaseItems,
 	linkcase_statuses,
 	markLinkcaseFetchFailure,
-	previewLinkcaseLinkWithProvider
+	previewLinkcaseLinkWithProvider,
+	readLinkcasePreview
 } from '@core/rpc/linkcase/utils'
 import { tool } from 'ai'
 import { and, inArray, notInArray } from 'drizzle-orm'
@@ -24,17 +25,25 @@ const inputSchema = object({
 		'fetch_next',
 		'fetch_ids',
 		'fetch_preview',
+		'read_preview',
 		'commit_preview',
 		'mark_failed'
 	]).describe(
-		'The action to perform. status: count links by current status. list: list candidate links without fetching. fetch_next: automatically select and fetch the next batch. fetch_ids: fetch an explicit list of link ids. fetch_preview: fetch one link through one explicit provider without saving so the agent can inspect the result. commit_preview: persist a previously inspected preview. mark_failed: finalize a failed AI-driven fetch attempt.'
+		'The action to perform. status: count links by current status. list: list candidate links without fetching. fetch_next: automatically select and fetch the next batch. fetch_ids: fetch an explicit list of link ids. fetch_preview: fetch one link through one explicit provider without saving so the agent can inspect the result. read_preview: read another page from a previously fetched preview without switching providers. commit_preview: persist a previously inspected preview. mark_failed: finalize a failed AI-driven fetch attempt.'
 	),
 	ids: array(string()).optional().describe('[Required for fetch_ids] Exact link ids to fetch in sequence.'),
 	id: string().optional().describe('[Required for fetch_preview/mark_failed] Exact link id to inspect or mark.'),
 	preview_key: string()
 		.optional()
 		.describe(
-			'[Required for commit_preview] Preview key returned by fetch_preview for the content you want to persist.'
+			'[Required for read_preview/commit_preview] Preview key returned by fetch_preview for the content you want to inspect or persist.'
+		),
+	page: number()
+		.int()
+		.min(1)
+		.optional()
+		.describe(
+			'[Required for read_preview] 1-based preview page to read. Each page contains up to 30000 characters.'
 		),
 	provider: Enum(['agent-browser', 'opencli', 'crawl4ai', 'dokobot', 'r.jina.ai'])
 		.optional()
@@ -149,6 +158,9 @@ export const createLinkcaseTool = (_s: Session) => {
 			'Use fetch_next for automated scheduled runs. It prefers links with status none, fail, or timeout unless you override include_statuses.',
 			'Fetching always uses the fallback chain and treats empty content as a failed attempt until a downstream provider succeeds or the chain is exhausted.',
 			'For AI-guided fetch validation, use fetch_preview with one provider at a time. Inspect the returned content_preview yourself, decide whether it is the real target content, and either continue with the next provider, commit_preview, or mark_failed.',
+			'fetch_preview caches up to max_chars characters, which defaults to 200000, and returns page 1 of that cached preview.',
+			'Use read_preview with the same preview_key to inspect later pages from the current provider before switching to another provider. Each preview page contains up to 30000 characters.',
+			'If the current preview already contains the correct and substantially complete target article body, commit it immediately instead of trying more providers for cosmetic cleanup.',
 			'Use list or status first when you need to inspect the queue before fetching.'
 		].join('\n'),
 		inputSchema,
@@ -204,6 +216,30 @@ export const createLinkcaseTool = (_s: Session) => {
 						id: input.id,
 						provider: input.provider as WebfetchFallbackProvider,
 						max_chars: input.max_chars
+					}))
+				}
+			}
+
+			if (input.action === 'read_preview') {
+				if (!input.preview_key) {
+					return {
+						action: 'read_preview' as const,
+						error: 'preview_key is required for read_preview action'
+					}
+				}
+
+				if (!input.page) {
+					return {
+						action: 'read_preview' as const,
+						error: 'page is required for read_preview action'
+					}
+				}
+
+				return {
+					action: 'read_preview' as const,
+					...(await readLinkcasePreview({
+						preview_key: input.preview_key,
+						page: input.page
 					}))
 				}
 			}

@@ -897,8 +897,12 @@ export default class Index {
 			'Fetch exactly those ids once and do not replace them with other candidates.',
 			'Judge whether the final fetched result actually matches the target content, and call out clearly if it does not.',
 			'When evaluating fetched content, keep only the main topic content and ignore unrelated noise.',
+			'fetch_preview caches up to 200000 characters for one provider. If the first page is noisy, use linkcase_tool action "read_preview" on the same preview_key to inspect later 30000-character pages before trying another provider.',
+			'If a provider preview already contains the correct and substantially complete target article body, stop the provider chain immediately and commit that preview.',
+			'Do not keep testing later providers just to search for cleaner formatting or less trailing boilerplate.',
 			'Filter out website navigation, menus, login prompts, ads, sponsored blocks, popups, cookie notices, footers, tag pages, related links, recommendation feeds, and other non-target information.',
-			'If a result is dominated by noise, unrelated sections, or boilerplate instead of the main content, treat it as a bad fetch and say so clearly.',
+			'Leading or trailing site boilerplate is acceptable if the target article body itself is clearly present and substantially complete.',
+			'If a result is dominated by noise and the target article body is still absent or unusably incomplete after checking relevant preview pages, treat it as a bad fetch and say so clearly.',
 			'Return a concise summary with id, title, status, source, error, article_id, and your quality judgment.',
 			'Targets:',
 			...items.map((item, index) => `${index + 1}. ${item.id} | ${item.title || item.url} | ${item.url}`)
@@ -912,9 +916,13 @@ export default class Index {
 			`Target title: ${item.title || item.url}`,
 			`Target url: ${item.url}`,
 			'Use the Linkcase batch session AI fetch workflow for this target.',
+			'fetch_preview caches up to 200000 characters for one provider. If the first page is noisy, use linkcase_tool action "read_preview" on the same preview_key to inspect later 30000-character pages before trying another provider.',
+			'If one provider preview already shows the correct and substantially complete target article body, commit it immediately and do not continue to later providers.',
+			'Do not continue to other providers only because they might look cleaner or contain less trailing boilerplate.',
 			'The target output should focus on the page main content only.',
 			'Filter out unrelated noise such as site navigation, category links, headers, footers, ads, sponsored content, popups, cookie banners, related reading, recommendation feeds, comment sections, and other boilerplate that is not central to the target topic.',
-			'If a provider result contains too much irrelevant content or the main body is drowned out by noise, do not accept it as the final fetch result.',
+			'Leading or trailing boilerplate is acceptable if the target article body is clearly present and substantially complete.',
+			'If a provider result still lacks the target body after you inspect relevant preview pages, do not accept it as the final fetch result.',
 			'Return a concise summary with provider attempts, final decision, status, source, and article_id if committed.'
 		].join('\n')
 	}

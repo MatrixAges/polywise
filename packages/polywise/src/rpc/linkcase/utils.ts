@@ -23,7 +23,8 @@ import type { Link } from '@core/db'
 import type { WebfetchFallbackProvider } from '@core/types'
 import type { SQL } from 'drizzle-orm'
 
-export const DEFAULT_LINKCASE_FETCH_MAX_CHARS = 50000
+export const DEFAULT_LINKCASE_FETCH_MAX_CHARS = 200_000
+export const LINKCASE_FETCH_PREVIEW_PAGE_SIZE = 30_000
 export const linkcase_filter_types = ['title', 'link'] as const
 export const linkcase_statuses = ['none', 'pending', 'success', 'fail', 'timeout', 'ignore'] as const
 
@@ -76,6 +77,27 @@ const cleanupLinkcaseFetchPreviewCache = () => {
 const normalizeKeyword = (keyword?: string) => keyword?.trim() ?? ''
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 const normalizeTripleText = (value: string) => value.replace(/\s+/g, ' ').trim()
+
+const getPreviewPage = (content: string, page: number, page_size = LINKCASE_FETCH_PREVIEW_PAGE_SIZE) => {
+	const safe_page = Math.max(1, page)
+	const safe_page_size = Math.max(1, page_size)
+	const content_length = content.length
+	const page_count = Math.max(1, Math.ceil(content_length / safe_page_size))
+	const normalized_page = Math.min(safe_page, page_count)
+	const start = (normalized_page - 1) * safe_page_size
+	const end = Math.min(start + safe_page_size, content_length)
+
+	return {
+		page: normalized_page,
+		page_size: safe_page_size,
+		page_count,
+		content_preview: content.slice(start, end),
+		content_preview_start: start,
+		content_preview_end: end,
+		has_prev_page: normalized_page > 1,
+		has_next_page: normalized_page < page_count
+	}
+}
 
 const serializeArticlePreview = (item?: LinkArticleRow): LinkcasePreviewArticle | null => {
 	if (!item) {
@@ -411,6 +433,7 @@ export const previewLinkcaseLinkWithProvider = async (args: {
 	const max_chars = args.max_chars ?? DEFAULT_LINKCASE_FETCH_MAX_CHARS
 	const result = await fetchWithProvider(args.provider, current_link.url, max_chars)
 	const preview_key = crypto.randomUUID()
+	const preview_page = getPreviewPage(result.content, 1)
 
 	linkcase_fetch_preview_cache.set(preview_key, {
 		id: current_link.id,
@@ -429,9 +452,47 @@ export const previewLinkcaseLinkWithProvider = async (args: {
 		url: current_link.url,
 		source: args.provider,
 		truncated: result.truncated,
-		content_preview: result.content.slice(0, 4000),
+		content_preview: preview_page.content_preview,
+		content_preview_start: preview_page.content_preview_start,
+		content_preview_end: preview_page.content_preview_end,
 		content_length: result.content.length,
+		page: preview_page.page,
+		page_size: preview_page.page_size,
+		page_count: preview_page.page_count,
+		has_prev_page: preview_page.has_prev_page,
+		has_next_page: preview_page.has_next_page,
 		preview_key
+	}
+}
+
+export const readLinkcasePreview = async (args: { preview_key: string; page: number }) => {
+	cleanupLinkcaseFetchPreviewCache()
+
+	const cached = linkcase_fetch_preview_cache.get(args.preview_key)
+
+	if (!cached) {
+		throw new Error(`Preview not found or expired: ${args.preview_key}`)
+	}
+
+	const preview_page = getPreviewPage(cached.content, args.page)
+
+	return {
+		ok: true as const,
+		id: cached.id,
+		title: cached.title,
+		url: cached.url,
+		source: cached.source,
+		truncated: cached.truncated,
+		content_length: cached.content.length,
+		page: preview_page.page,
+		page_size: preview_page.page_size,
+		page_count: preview_page.page_count,
+		content_preview: preview_page.content_preview,
+		content_preview_start: preview_page.content_preview_start,
+		content_preview_end: preview_page.content_preview_end,
+		has_prev_page: preview_page.has_prev_page,
+		has_next_page: preview_page.has_next_page,
+		preview_key: args.preview_key
 	}
 }
 
