@@ -63,7 +63,9 @@ const getLinkcaseSessionPrompt = () => {
 		'For AI-guided targeted fetch runs, do not use linkcase_tool action "fetch_ids".',
 		`Instead, use linkcase_tool action "fetch_preview" with exactly one provider at a time in this configured order: ${provider_chain.join(', ')}.`,
 		'After each preview, inspect content_preview yourself and decide whether it is the actual target page content.',
-		'If the preview is blocked, irrelevant, partial in the wrong way, or clearly not the target content, continue to the next provider.',
+		'Only accept previews whose main body is focused on the target topic instead of surrounding site chrome.',
+		'Filter out and actively reject previews dominated by navigation links, headers, footers, ads, sponsored blocks, popups, cookie notices, related links, recommendation feeds, comment sections, or other non-target boilerplate.',
+		'If the preview is blocked, irrelevant, too noisy, partial in the wrong way, or clearly not the target content, continue to the next provider.',
 		'Only when a preview looks correct should you call linkcase_tool action "commit_preview" with the preview_key.',
 		'If every provider fails or every preview looks wrong, call linkcase_tool action "mark_failed" with a concise reason.',
 		'Do not ask follow-up questions during scheduled runs. Execute the fetch plan and return a compact summary of successes, failures, and remaining issues.'

@@ -39,7 +39,6 @@ export default class Index {
 	detail = null as LinkcaseDetail | null
 	detail_loading = false
 	menu_target_index = -1
-	current_fetching_id = ''
 	current_ai_fetching_id = ''
 	current_extracting_id = ''
 	selection_fetch_submit_loading = false
@@ -658,14 +657,6 @@ export default class Index {
 		await this.loadDetail(id)
 	}
 
-	async fetchSelectedLink() {
-		if (!this.selected_id) {
-			return
-		}
-
-		await this.fetchLink(this.selected_id)
-	}
-
 	async extractSelectedLink() {
 		if (!this.selected_id) {
 			return
@@ -742,31 +733,6 @@ export default class Index {
 			toast.error(message)
 		} finally {
 			this.current_ai_fetching_id = ''
-		}
-	}
-
-	async fetchLink(id: string) {
-		if (this.current_fetching_id) {
-			return
-		}
-
-		this.current_fetching_id = id
-
-		try {
-			await rpc.linkcase.fetch.mutate({ id })
-			const response = await rpc.linkcase.read.query({ id })
-
-			if (response) {
-				this.patchListItem(response)
-
-				if (this.selected_id === id) {
-					this.detail = response
-				}
-			}
-
-			await this.reloadList()
-		} finally {
-			this.current_fetching_id = ''
 		}
 	}
 
@@ -852,6 +818,9 @@ export default class Index {
 			`Use linkcase_tool action "fetch_ids" with these exact ids: ${JSON.stringify(items.map(item => item.id))}.`,
 			'Fetch exactly those ids once and do not replace them with other candidates.',
 			'Judge whether the final fetched result actually matches the target content, and call out clearly if it does not.',
+			'When evaluating fetched content, keep only the main topic content and ignore unrelated noise.',
+			'Filter out website navigation, menus, login prompts, ads, sponsored blocks, popups, cookie notices, footers, tag pages, related links, recommendation feeds, and other non-target information.',
+			'If a result is dominated by noise, unrelated sections, or boilerplate instead of the main content, treat it as a bad fetch and say so clearly.',
 			'Return a concise summary with id, title, status, source, error, article_id, and your quality judgment.',
 			'Targets:',
 			...items.map((item, index) => `${index + 1}. ${item.id} | ${item.title || item.url} | ${item.url}`)
@@ -865,6 +834,9 @@ export default class Index {
 			`Target title: ${item.title || item.url}`,
 			`Target url: ${item.url}`,
 			'Use the Linkcase batch session AI fetch workflow for this target.',
+			'The target output should focus on the page main content only.',
+			'Filter out unrelated noise such as site navigation, category links, headers, footers, ads, sponsored content, popups, cookie banners, related reading, recommendation feeds, comment sections, and other boilerplate that is not central to the target topic.',
+			'If a provider result contains too much irrelevant content or the main body is drowned out by noise, do not accept it as the final fetch result.',
 			'Return a concise summary with provider attempts, final decision, status, source, and article_id if committed.'
 		].join('\n')
 	}

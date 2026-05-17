@@ -1,4 +1,4 @@
-import { Bot, Database, Globe, Loader, RefreshCw } from 'lucide-react'
+import { Bot, Database, Globe, Loader } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { Button } from '@/__shadcn__/components/ui/button'
@@ -63,19 +63,6 @@ const Index = () => {
 						<Loader className='size-3.5 animate-spin'></Loader>
 					) : (
 						<Bot className='size-3.5'></Bot>
-					)}
-					<span>AI Fetch</span>
-				</Button>
-				<Button
-					variant='secondary'
-					size='xs'
-					disabled={!item || x.current_fetching_id === item.id}
-					onClick={() => void x.fetchSelectedLink()}
-				>
-					{x.current_fetching_id === item?.id ? (
-						<Loader className='size-3.5 animate-spin'></Loader>
-					) : (
-						<RefreshCw className='size-3.5'></RefreshCw>
 					)}
 					<span>{has_content ? 'Refetch' : 'Fetch'}</span>
 				</Button>
