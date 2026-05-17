@@ -69,7 +69,7 @@ const Index = ({ item, index }: IProps) => {
 					size-7
 					p-1.5
 					rounded-full
-					text-std-400
+					text-std-400/80
 					bg-secondary
 				'
 			>

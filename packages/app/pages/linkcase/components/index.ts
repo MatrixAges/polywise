@@ -1,5 +1,6 @@
 export { default as Menu } from './Menu'
 export { default as Content } from './Content'
+export { default as ControlCenter } from './ControlCenter'
 export { default as BatchSessionDialog } from './BatchSessionDialog'
 export { default as BatchStartDialog } from './BatchStartDialog'
 export { default as BookmarkSnifferDialog } from './BookmarkSnifferDialog'

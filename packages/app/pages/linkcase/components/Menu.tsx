@@ -4,7 +4,6 @@ import { ContextMenu, ContextMenuTrigger } from '@/__shadcn__/components/ui/cont
 
 import { useModel } from '../context'
 import MenuContextActions from './MenuContextActions'
-import MenuFooter from './MenuFooter'
 import MenuList from './MenuList'
 import MenuSelectionBar from './MenuSelectionBar'
 import MenuToolbar from './MenuToolbar'
@@ -27,7 +26,6 @@ const Index = () => {
 					<MenuToolbar></MenuToolbar>
 					<MenuSelectionBar></MenuSelectionBar>
 					<MenuList></MenuList>
-					<MenuFooter></MenuFooter>
 				</div>
 			</ContextMenuTrigger>
 			<MenuContextActions></MenuContextActions>
