@@ -7,7 +7,7 @@ import fetchDirect from './direct'
 import fetchWithDokobot from './dokobot'
 import fetchWithOpencli from './opencli'
 import fetchWithRJina from './rjina'
-import { getErrorMessage } from './runtime'
+import { extractTitleFromContent, getErrorMessage } from './runtime'
 
 import type { WebfetchFallbackProvider } from '@core/types'
 import type { FetchAttempt, FetchProviderHandler, FetchProviderResult, FetchResult, FetchSource } from './types'
@@ -46,7 +46,13 @@ const runProvider = async (
 	url: string,
 	max_chars: number
 ): Promise<FetchProviderResult> => {
-	return await provider_handlers[provider]({ url, max_chars })
+	const result = await provider_handlers[provider]({ url, max_chars })
+	const title = result.title?.trim() || extractTitleFromContent(result.content)
+
+	return {
+		...result,
+		...(title ? { title } : {})
+	}
 }
 
 export const fetchWithProvider = async (

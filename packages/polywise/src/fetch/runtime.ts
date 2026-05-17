@@ -26,6 +26,43 @@ export const trimContent = (content: string, max_chars: number) => {
 	}
 }
 
+export const extractTitleFromContent = (content: string) => {
+	const lines = content
+		.replace(/\r\n?/g, '\n')
+		.split('\n')
+		.map(line => line.trim())
+		.filter(Boolean)
+		.slice(0, 20)
+
+	for (const line of lines) {
+		if (/^(URL Source|Published Time|Markdown Content)\s*:/i.test(line)) {
+			continue
+		}
+
+		const candidate = line
+			.replace(/^#{1,6}\s+/, '')
+			.replace(/^Title\s*:\s*/i, '')
+			.replace(/^\*\*(.+)\*\*$/, '$1')
+			.trim()
+
+		if (!candidate) {
+			continue
+		}
+
+		if (/^https?:\/\//i.test(candidate)) {
+			continue
+		}
+
+		if (candidate.length < 3 || candidate.length > 200) {
+			continue
+		}
+
+		return candidate
+	}
+
+	return ''
+}
+
 export const getErrorMessage = (error: unknown) => {
 	return error instanceof Error ? error.message : 'Unknown error'
 }

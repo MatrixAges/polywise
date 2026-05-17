@@ -56,6 +56,7 @@ type LinkcaseFetchPreviewCacheItem = {
 	id: string
 	url: string
 	title: string
+	fetched_title: string | null
 	source: WebfetchFallbackProvider
 	content: string
 	truncated: boolean
@@ -310,9 +311,19 @@ const isTimeoutError = (message?: string) => {
 	return typeof message === 'string' && /timeout|timed out|aborted|abort/i.test(message)
 }
 
-const saveLinkcaseArticle = async (args: { id: string; title: string; content: string; exec_pipeline?: boolean }) => {
+const saveLinkcaseArticle = async (args: {
+	id: string
+	url: string
+	title: string
+	fetched_title?: string | null
+	content: string
+	exec_pipeline?: boolean
+}) => {
+	const current_title = args.title.trim()
+	const fetched_title = args.fetched_title?.trim() || ''
+	const final_title = current_title || fetched_title || args.url
 	const article_id = await saveArticle({
-		title: args.title,
+		title: final_title,
 		content: prepareLinkcaseArticleContent(args.content),
 		for: 'linkcase',
 		exec_pipeline: args.exec_pipeline
@@ -324,6 +335,7 @@ const saveLinkcaseArticle = async (args: { id: string; title: string; content: s
 	const current_link = await getLink(eq(link.id, args.id))
 	const favicon = current_link ? await getLinkFavicon(current_link.url).catch(() => null) : null
 	const updated_link = await setLink(eq(link.id, args.id), {
+		...(!current_title && fetched_title ? { title: fetched_title } : {}),
 		status: 'success',
 		generate_at: new Date(),
 		...(favicon ? { favicon } : {})
@@ -544,7 +556,8 @@ export const previewLinkcaseLinkWithProvider = async (args: {
 	linkcase_fetch_preview_cache.set(preview_key, {
 		id: current_link.id,
 		url: current_link.url,
-		title: current_link.title || current_link.url,
+		title: result.title?.trim() || current_link.title || current_link.url,
+		fetched_title: result.title?.trim() || null,
 		source: args.provider,
 		content: result.content,
 		truncated: result.truncated,
@@ -554,7 +567,7 @@ export const previewLinkcaseLinkWithProvider = async (args: {
 	return {
 		ok: true as const,
 		id: current_link.id,
-		title: current_link.title,
+		title: result.title?.trim() || current_link.title,
 		url: current_link.url,
 		source: args.provider,
 		truncated: result.truncated,
@@ -624,7 +637,9 @@ export const commitLinkcasePreview = async (args: {
 
 	const saved = await saveLinkcaseArticle({
 		id: current_link.id,
+		url: current_link.url,
 		title: current_link.title,
+		fetched_title: cached.fetched_title,
 		content: args.content,
 		exec_pipeline: args.exec_pipeline
 	})
@@ -634,7 +649,7 @@ export const commitLinkcasePreview = async (args: {
 	return {
 		ok: true as const,
 		id: current_link.id,
-		title: current_link.title,
+		title: saved.link?.title || cached.fetched_title || current_link.title,
 		url: current_link.url,
 		source: cached.source,
 		truncated: cached.truncated,
@@ -698,7 +713,9 @@ export const fetchLinkcaseLink = async (args: { id: string; exec_pipeline?: bool
 	try {
 		const saved = await saveLinkcaseArticle({
 			id: current_link.id,
+			url: current_link.url,
 			title: current_link.title,
+			fetched_title: result.title,
 			content: result.content,
 			exec_pipeline: args.exec_pipeline
 		})

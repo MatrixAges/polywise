@@ -12,6 +12,7 @@ export interface FetchProviderSuccess {
 	source: FetchSource
 	content: string
 	truncated: boolean
+	title?: string
 }
 
 export interface FetchSuccess extends FetchProviderSuccess {
