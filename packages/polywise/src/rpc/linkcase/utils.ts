@@ -9,8 +9,10 @@ import {
 	getChunks,
 	getEdge,
 	getLink,
+	getLinkHash,
 	getLinks,
 	getNode,
+	normalizeLinkUrl,
 	removeLink,
 	setLink
 } from '@core/db/services'
@@ -349,6 +351,61 @@ export const createLinkcaseItem = async (args: { url: string; title?: string; co
 	}
 
 	return getLinkcaseReadItem(created_link.id)
+}
+
+export const updateLinkcaseItem = async (args: { id: string; url: string; title?: string; content?: string }) => {
+	const current_link = await getLink(eq(link.id, args.id))
+
+	if (!current_link) {
+		throw new Error(`Link not found: ${args.id}`)
+	}
+
+	const url = normalizeLinkUrl(args.url)
+	const title = args.title?.trim() || url
+	const content = args.content?.trim() || ''
+	const hash = getLinkHash(url)
+	const conflict = (await getLink(eq(link.hash, hash))) ?? (await getLink(eq(link.url, url))) ?? null
+
+	if (conflict && conflict.id !== args.id) {
+		throw new Error('A link with the same URL already exists.')
+	}
+
+	const related_articles = await getLinkArticles({
+		where: eq(link_article.link_id, args.id),
+		limit: 1
+	})
+	const current_article = related_articles[0]?.article ?? null
+	const favicon = await getLinkFavicon(url).catch(() => current_link.favicon ?? null)
+
+	await setLink(eq(link.id, args.id), {
+		url,
+		hash,
+		title,
+		favicon,
+		status: content ? 'success' : current_article ? 'none' : current_link.status,
+		generate_at: content ? new Date() : current_article ? null : current_link.generate_at
+	})
+
+	if (current_article) {
+		await saveArticle({
+			article_id: current_article.id,
+			title,
+			content,
+			for: 'linkcase',
+			exec_pipeline: false
+		})
+	} else if (content) {
+		const article_id = await saveArticle({
+			title,
+			content,
+			for: 'linkcase',
+			exec_pipeline: false
+		})
+
+		await addLinkArticle(args.id, article_id)
+	}
+
+	return getLinkcaseReadItem(args.id)
 }
 
 const isTimeoutError = (message?: string) => {

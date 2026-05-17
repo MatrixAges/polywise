@@ -1,7 +1,8 @@
-import { ArrowUpRight, Bot, Database, Globe, Loader } from 'lucide-react'
+import { ArrowUpRight, Bot, Database, Globe, Loader, PencilLine } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { Button } from '@/__shadcn__/components/ui/button'
+import { Tooltip } from '@/components'
 
 import { useModel } from '../context'
 import { getLinkFaviconSrc } from '../types'
@@ -64,6 +65,24 @@ const Index = () => {
 				</div>
 			</div>
 			<div className='flex shrink-0 items-center gap-2'>
+				<Tooltip title='Edit link'>
+					<div>
+						<Button
+							className='size-7 px-0'
+							variant='outline'
+							size='xs'
+							disabled={
+								!item ||
+								Boolean(x.current_ai_fetching_id) ||
+								Boolean(x.current_extracting_id) ||
+								x.linkcase_session_running
+							}
+							onClick={x.openEditDialog}
+						>
+							<PencilLine className='size-3.5'></PencilLine>
+						</Button>
+					</div>
+				</Tooltip>
 				<Button
 					className='h-7'
 					variant='outline'

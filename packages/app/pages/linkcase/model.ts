@@ -61,6 +61,8 @@ export default class Index {
 	search_keyword = ''
 	filter_type = 'title' as LinkcaseFilterType
 	add_dialog_open = false
+	add_dialog_mode = 'add' as 'add' | 'edit'
+	editing_link_id = ''
 	add_submit_loading = false
 	add_title = ''
 	add_url = ''
@@ -308,6 +310,8 @@ export default class Index {
 	}
 
 	resetAddDraft() {
+		this.add_dialog_mode = 'add'
+		this.editing_link_id = ''
 		this.add_title = ''
 		this.add_url = ''
 		this.add_content = ''
@@ -315,6 +319,22 @@ export default class Index {
 
 	openAddDialog() {
 		this.resetAddDraft()
+		this.add_dialog_open = true
+	}
+
+	openEditDialog() {
+		const item = this.selected_item
+		const detail = this.detail && this.detail.id === item?.id ? this.detail : null
+
+		if (!item) {
+			return
+		}
+
+		this.add_dialog_mode = 'edit'
+		this.editing_link_id = item.id
+		this.add_title = item.title || ''
+		this.add_url = item.url || ''
+		this.add_content = detail?.article?.content || ''
 		this.add_dialog_open = true
 	}
 
@@ -938,14 +958,16 @@ export default class Index {
 		}
 	}
 
-	async submitAddLink() {
+	async submitLinkDialog() {
 		if (this.add_submit_loading) {
 			return
 		}
 
 		const url = this.add_url.trim()
 		const title = this.add_title.trim() || undefined
-		const content = this.add_content.trim() || undefined
+		const content = this.add_content.trim()
+		const editing_id = this.editing_link_id
+		const editing = this.add_dialog_mode === 'edit' && Boolean(editing_id)
 
 		if (!url) {
 			toast.error('Link is required.')
@@ -956,14 +978,21 @@ export default class Index {
 		this.add_submit_loading = true
 
 		try {
-			const response = await rpc.linkcase.create.mutate({
-				url,
-				title,
-				content
-			})
+			const response = editing
+				? await rpc.linkcase.update.mutate({
+						id: editing_id,
+						url,
+						title,
+						content
+					})
+				: await rpc.linkcase.create.mutate({
+						url,
+						title,
+						content: content || undefined
+					})
 
 			if (!response) {
-				throw new Error('Failed to create link.')
+				throw new Error(editing ? 'Failed to update link.' : 'Failed to create link.')
 			}
 
 			this.selected_id = response.id
@@ -972,9 +1001,15 @@ export default class Index {
 			this.resetAddDraft()
 
 			await this.reloadList()
-			toast.success(`Added ${response.title || response.url}.`)
+			toast.success(`${editing ? 'Updated' : 'Added'} ${response.title || response.url}.`)
 		} catch (error) {
-			toast.error(error instanceof Error ? error.message : 'Failed to add link')
+			toast.error(
+				error instanceof Error
+					? error.message
+					: editing
+						? 'Failed to update link'
+						: 'Failed to add link'
+			)
 		} finally {
 			this.add_submit_loading = false
 		}

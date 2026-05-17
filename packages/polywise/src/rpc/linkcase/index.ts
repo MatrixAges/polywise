@@ -10,6 +10,7 @@ import query from './query'
 import read from './read'
 import remove from './remove'
 import runBatch from './runBatch'
+import update from './update'
 
 export default r({
 	create,
@@ -21,5 +22,6 @@ export default r({
 	query,
 	read,
 	remove,
+	update,
 	runBatch
 })

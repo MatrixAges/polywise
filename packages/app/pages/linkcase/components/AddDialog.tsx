@@ -9,12 +9,18 @@ import { useModel } from '../context'
 
 const Index = () => {
 	const x = useModel()
+	const editing = x.add_dialog_mode === 'edit' && Boolean(x.editing_link_id)
+	const title = editing ? 'Edit Link' : 'Add Link'
+	const desc = editing
+		? 'Update the link metadata and optional cleaned content.'
+		: 'Create a Linkcase entry manually. Favicon is fetched from the website automatically.'
+	const submit_text = x.add_submit_loading ? (editing ? 'Saving...' : 'Adding...') : editing ? 'Save' : 'Add'
 
 	return (
 		<Dialog
 			open={x.add_dialog_open}
-			title='Add Link'
-			desc='Create a Linkcase entry manually. Favicon is fetched from the website automatically.'
+			title={title}
+			desc={desc}
 			className='w-[640px]! max-w-[640px]!'
 			setOpen={x.setAddDialogOpen}
 		>
@@ -76,9 +82,9 @@ const Index = () => {
 						className='w-20'
 						size='sm'
 						disabled={x.add_submit_loading || !x.add_url.trim()}
-						onClick={x.submitAddLink}
+						onClick={x.submitLinkDialog}
 					>
-						{x.add_submit_loading ? 'Adding...' : 'Add'}
+						{submit_text}
 					</Button>
 				</div>
 			</div>
