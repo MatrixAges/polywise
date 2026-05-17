@@ -11,7 +11,7 @@ const Index = () => {
 		<Dialog
 			open={x.session_dialog_open}
 			title='Linkcase Batch Session'
-			className='w-[800px] max-w-[80vw]!'
+			className='w-[640px] max-w-[80vw]! pb-4'
 			maxHeight='h-[80vh]'
 			setOpen={x.setSessionDialogOpen}
 		>

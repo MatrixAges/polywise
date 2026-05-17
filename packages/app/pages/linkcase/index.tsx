@@ -27,9 +27,11 @@ const Index = () => {
 		<Context value={x}>
 			<div className='flex h-full overflow-hidden'>
 				<Menu></Menu>
-				<Content></Content>
+				<div className='relative flex min-w-0 flex-1'>
+					<Content></Content>
+					<ControlCenter></ControlCenter>
+				</div>
 			</div>
-			<ControlCenter></ControlCenter>
 			<AddDialog></AddDialog>
 			<BatchSessionDialog></BatchSessionDialog>
 			<BatchStartDialog></BatchStartDialog>

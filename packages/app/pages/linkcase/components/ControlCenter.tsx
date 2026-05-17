@@ -12,8 +12,8 @@ const Index = () => {
 	return (
 		<div
 			className='
-				fixed
-				right-5 bottom-5
+				absolute
+				right-3 bottom-3
 				z-20
 			'
 		>

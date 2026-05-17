@@ -21,7 +21,7 @@ const Index = () => {
 				flex shrink-0
 				items-center justify-between
 				h-12
-				gap-2
+				gap-3
 				px-2.5
 				border-b border-border-light
 			'
