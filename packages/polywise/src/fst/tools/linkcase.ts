@@ -19,6 +19,16 @@ import type { WebfetchFallbackProvider } from '@core/types'
 import type { SQL } from 'drizzle-orm'
 import type Session from '../session'
 
+const linkCreateInputSchema = object({
+	url: string().url().describe('Link URL to add.'),
+	title: string().optional().describe('Human-readable title. Defaults to the URL when omitted.'),
+	content: string()
+		.optional()
+		.describe(
+			'Optional cleaned core article body to save together with the link. Remove ads, related links, comments, and other non-body noise.'
+		)
+})
+
 const inputSchema = object({
 	action: Enum([
 		'create',
@@ -31,12 +41,19 @@ const inputSchema = object({
 		'commit_preview',
 		'mark_failed'
 	]).describe(
-		'The action to perform. create: add one new link, optionally with title and cleaned content. status: count links by current status. list: list candidate links without fetching. fetch_next: automatically select and fetch the next batch. fetch_ids: fetch an explicit list of link ids. fetch_preview: fetch one link through one explicit provider without saving so the agent can inspect the result. read_preview: read another page from a previously fetched preview without switching providers. commit_preview: persist a previously inspected preview. mark_failed: finalize a failed AI-driven fetch attempt.'
+		'The action to perform. create: add one or more new links, optionally with title and cleaned content. status: count links by current status. list: list candidate links without fetching. fetch_next: automatically select and fetch the next batch. fetch_ids: fetch an explicit list of link ids. fetch_preview: fetch one link through one explicit provider without saving so the agent can inspect the result. read_preview: read another page from a previously fetched preview without switching providers. commit_preview: persist a previously inspected preview. mark_failed: finalize a failed AI-driven fetch attempt.'
 	),
 	url: string().url().optional().describe('[Required for create] Link URL to add.'),
 	title: string()
 		.optional()
 		.describe('[Optional for create] Human-readable title. Defaults to the URL when omitted.'),
+	links: array(linkCreateInputSchema)
+		.min(1)
+		.max(50)
+		.optional()
+		.describe(
+			'[Optional for create] Batch-create up to 50 links in one call. When links is provided, it overrides the top-level url/title/content fields.'
+		),
 	ids: array(string()).optional().describe('[Required for fetch_ids] Exact link ids to fetch in sequence.'),
 	id: string().optional().describe('[Required for fetch_preview/mark_failed] Exact link id to inspect or mark.'),
 	preview_key: string()
@@ -176,7 +193,7 @@ export const createLinkcaseTool = (_s: Session) => {
 	return tool({
 		description: [
 			'Batch-manage Linkcase link fetching.',
-			'Use create to add one new link to Linkcase, optionally with title and cleaned content.',
+			'Use create to add one or multiple links to Linkcase, optionally with title and cleaned content.',
 			'Use fetch_next for automated scheduled runs. It prefers links with status none, fail, or timeout unless you override include_statuses.',
 			'Fetching always uses the fallback chain and treats empty content as a failed attempt until a downstream provider succeeds or the chain is exhausted.',
 			'For AI-guided fetch validation, use fetch_preview with one provider at a time. Inspect the returned content_preview yourself, decide whether it is the real target content, and either continue with the next provider, commit_preview, or mark_failed.',
@@ -189,23 +206,56 @@ export const createLinkcaseTool = (_s: Session) => {
 		inputSchema,
 		execute: async input => {
 			if (input.action === 'create') {
-				if (!input.url) {
+				const create_inputs = input.links?.length
+					? input.links
+					: input.url
+						? [{ url: input.url, title: input.title, content: input.content }]
+						: []
+
+				if (create_inputs.length === 0) {
 					return {
 						action: 'create' as const,
-						error: 'url is required for create action'
+						error: 'url or links is required for create action'
 					}
 				}
 
-				const item = await createLinkcaseItem({
-					url: input.url,
-					title: input.title,
-					content: input.content
-				})
+				const results = [] as Array<Record<string, unknown>>
+
+				for (const item of create_inputs) {
+					try {
+						const created_item = await createLinkcaseItem({
+							url: item.url,
+							title: item.title,
+							content: item.content
+						})
+
+						results.push({
+							ok: true as const,
+							url: item.url,
+							item: created_item ? stripFaviconFromLink(created_item) : null
+						})
+					} catch (error) {
+						results.push({
+							ok: false as const,
+							url: item.url,
+							error: error instanceof Error ? error.message : String(error)
+						})
+					}
+				}
+
+				const success_count = results.filter(item => item.ok === true).length
+				const first_success = results.find(item => item.ok === true && item.item) as
+					| { item: unknown }
+					| undefined
 
 				return {
 					action: 'create' as const,
-					ok: true as const,
-					item: item ? stripFaviconFromLink(item) : null
+					ok: success_count > 0,
+					count: results.length,
+					success_count,
+					fail_count: results.length - success_count,
+					item: results.length === 1 ? (first_success?.item ?? null) : null,
+					items: results
 				}
 			}
 

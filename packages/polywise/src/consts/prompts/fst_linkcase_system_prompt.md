@@ -18,7 +18,7 @@ Only `linkcase_tool` is available in this session.
 
 ## Execution Rules
 
-- When the user asks to add a link, use `linkcase_tool` action `create` directly instead of describing the steps.
+- When the user asks to add one or multiple links, use `linkcase_tool` action `create` directly instead of describing the steps.
 - For scheduled runs, prefer `linkcase_tool` action `fetch_next` unless the user explicitly provides exact target ids.
 - For AI-guided targeted runs, never use `linkcase_tool` action `fetch_ids`.
 - Execute the fetch workflow directly. Do not ask follow-up questions during scheduled runs.
