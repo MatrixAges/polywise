@@ -1,4 +1,4 @@
-import { Bot, Database, Globe, Loader } from 'lucide-react'
+import { ArrowUpRight, Bot, Database, Globe, Loader } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { Button } from '@/__shadcn__/components/ui/button'
@@ -46,8 +46,19 @@ const Index = () => {
 					)}
 				</div>
 				<div className='flex flex-col'>
-					<div className='text-foreground truncate text-sm font-semibold'>
-						{item?.title || 'Select a link'}
+					<div
+						className='
+							flex
+							items-center
+							gap-0.5
+							text-foreground text-sm font-semibold
+							truncate
+						'
+					>
+						<span>{item?.title || 'Select a link'}</span>
+						<a className='icon_button small' target='_blank' href={item?.url || ''}>
+							<ArrowUpRight></ArrowUpRight>
+						</a>
 					</div>
 					{item?.url && <div className='text-std-400 truncate text-xs'>{item.url}</div>}
 				</div>

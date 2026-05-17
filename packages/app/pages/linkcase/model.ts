@@ -1387,7 +1387,13 @@ export default class Index {
 		this.linkcase_session_title = status.title || global_linkcase_session_title
 
 		if (previous_running && !status.running) {
-			void this.reloadList()
+			void (async () => {
+				await this.reloadList()
+
+				if (this.selected_id) {
+					await this.loadDetail(this.selected_id)
+				}
+			})()
 		}
 	}
 

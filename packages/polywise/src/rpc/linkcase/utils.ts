@@ -77,6 +77,210 @@ const cleanupLinkcaseFetchPreviewCache = () => {
 const normalizeKeyword = (keyword?: string) => keyword?.trim() ?? ''
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 const normalizeTripleText = (value: string) => value.replace(/\s+/g, ' ').trim()
+const linkcase_stop_line_patterns = [
+	/^分享至$/u,
+	/^扫描关注/u,
+	/^评论$/u,
+	/^\(\s*\*\d+\*\s*人参与/u,
+	/^热门评论$/u,
+	/^最新评论$/u,
+	/^热门标签$/u,
+	/^本周人气攻略$/u,
+	/^热门攻略推荐$/u,
+	/^48小时热点资讯$/u,
+	/^精品网页游戏$/u,
+	/^热门游戏推荐$/u,
+	/^关于游侠/u,
+	/^更多内容[:：]/u,
+	/^\*\*更多内容[:：]/u,
+	/^正版购买[:：]/u,
+	/^\*\*正版购买[:：]/u,
+	/^立即购买$/u,
+	/^查看.+攻略大全/u,
+	/^.{0,30}相关攻略$/u,
+	/^.{0,30}相关下载$/u
+]
+
+const normalizeFetchedContent = (content: string) =>
+	content
+		.replace(/\r\n?/g, '\n')
+		.replace(/^Title:\s.*$/gmu, '')
+		.replace(/^URL Source:\s.*$/gmu, '')
+		.replace(/^Published Time:\s.*$/gmu, '')
+		.replace(/^Markdown Content:\s*/gmu, '')
+		.trim()
+
+const isLikelyLinkOrListLine = (line: string) => {
+	const text = line.trim()
+
+	if (!text) {
+		return false
+	}
+
+	if (/^[-*]\s+/u.test(text)) {
+		return true
+	}
+
+	if (/^!\[[^\]]*\]\([^)]+\)$/u.test(text)) {
+		return true
+	}
+
+	if (/^(?:\[[^\]]*\]\([^)]+\)\s*)+$/u.test(text)) {
+		return true
+	}
+
+	if (/^\|$/u.test(text)) {
+		return true
+	}
+
+	if (
+		text.includes('|') &&
+		text.length <= 80 &&
+		!/[。！？.!?：:]/u.test(text) &&
+		!/^\d{4}-\d{2}-\d{2}/u.test(text)
+	) {
+		return true
+	}
+
+	return false
+}
+
+const isLikelyParagraphLine = (line: string) => {
+	const text = line.trim()
+
+	if (!text) {
+		return false
+	}
+
+	if (/^#{1,6}\s+/u.test(text)) {
+		return false
+	}
+
+	if (isLikelyLinkOrListLine(text)) {
+		return false
+	}
+
+	if (linkcase_stop_line_patterns.some(pattern => pattern.test(text))) {
+		return false
+	}
+
+	return /[\p{L}\p{N}]/u.test(text) && text.length >= 12
+}
+
+const scoreHeadingCandidate = (lines: Array<string>, index: number) => {
+	const window = lines.slice(index + 1, index + 41)
+	const early_window = window.slice(0, 12)
+	const body_count = window.filter(isLikelyParagraphLine).length
+	const list_count = window.filter(isLikelyLinkOrListLine).length
+	const heading_bonus = /《.+》|怎么办|方法|教程|指南|攻略|测评|评测|新闻|公告/u.test(lines[index] ?? '') ? 4 : 0
+	const breadcrumb_bonus = index > 0 && /当前位置/u.test(lines[index - 1] ?? '') ? 2 : 0
+	const date_bonus = early_window.some(line => /\b\d{4}-\d{2}-\d{2}\b/u.test(line)) ? 4 : 0
+	const early_list_penalty =
+		early_window.filter(isLikelyLinkOrListLine).length >= 5 &&
+		early_window.filter(isLikelyParagraphLine).length === 0
+			? 10
+			: 0
+
+	return body_count * 3 - list_count * 2 + heading_bonus + breadcrumb_bonus + date_bonus - early_list_penalty
+}
+
+const findArticleStartIndex = (lines: Array<string>) => {
+	const heading_indexes = lines
+		.map((line, index) => (/^#{1,3}\s+\S/u.test(line.trim()) ? index : -1))
+		.filter(index => index >= 0)
+
+	if (heading_indexes.length > 0) {
+		const best = heading_indexes
+			.map(index => ({ index, score: scoreHeadingCandidate(lines, index) }))
+			.sort((a, b) => b.score - a.score)[0]
+
+		if (best && best.score > 0) {
+			return best.index
+		}
+	}
+
+	const breadcrumb_index = lines.findIndex(line => /当前位置/u.test(line))
+
+	if (breadcrumb_index >= 0) {
+		const fallback_heading_index = lines.findIndex(
+			(line, index) => index > breadcrumb_index && /^#{1,3}\s+\S/u.test(line.trim())
+		)
+
+		if (fallback_heading_index >= 0) {
+			return fallback_heading_index
+		}
+	}
+
+	return lines.findIndex(isLikelyParagraphLine)
+}
+
+const findArticleEndIndex = (lines: Array<string>, start_index: number) => {
+	for (let i = start_index + 1; i < lines.length; i++) {
+		const text = lines[i]?.trim() ?? ''
+
+		if (!text) {
+			continue
+		}
+
+		if (linkcase_stop_line_patterns.some(pattern => pattern.test(text))) {
+			return i
+		}
+	}
+
+	return lines.length
+}
+
+const cleanupTrailingNoiseLines = (lines: Array<string>) => {
+	let end = lines.length
+
+	while (end > 0) {
+		const text = lines[end - 1]?.trim() ?? ''
+
+		if (!text) {
+			end--
+			continue
+		}
+
+		if (
+			isLikelyLinkOrListLine(text) ||
+			/^CopyRight\b/u.test(text) ||
+			/^登录/u.test(text) ||
+			/^下载APP$/u.test(text) ||
+			/^去登录$/u.test(text)
+		) {
+			end--
+			continue
+		}
+
+		break
+	}
+
+	return lines.slice(0, end)
+}
+
+const cleanLinkcaseFetchedContent = (content: string) => {
+	const normalized = normalizeFetchedContent(content)
+
+	if (!normalized) {
+		return normalized
+	}
+
+	const lines = normalized.split('\n')
+	const start_index = findArticleStartIndex(lines)
+
+	if (start_index < 0) {
+		return normalized
+	}
+
+	const end_index = findArticleEndIndex(lines, start_index)
+	const cleaned_lines = cleanupTrailingNoiseLines(lines.slice(start_index, end_index))
+	const cleaned = cleaned_lines
+		.join('\n')
+		.replace(/\n{3,}/g, '\n\n')
+		.trim()
+
+	return cleaned.length >= 80 ? cleaned : normalized
+}
 
 const getPreviewPage = (content: string, page: number, page_size = LINKCASE_FETCH_PREVIEW_PAGE_SIZE) => {
 	const safe_page = Math.max(1, page)
@@ -205,9 +409,10 @@ const isTimeoutError = (message?: string) => {
 }
 
 const saveLinkcaseArticle = async (args: { id: string; title: string; content: string; exec_pipeline?: boolean }) => {
+	const cleaned_content = cleanLinkcaseFetchedContent(args.content)
 	const article_id = await saveArticle({
 		title: args.title,
-		content: args.content,
+		content: cleaned_content,
 		for: 'linkcase',
 		exec_pipeline: args.exec_pipeline
 	})
