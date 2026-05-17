@@ -52,6 +52,37 @@ const Index = () => {
 								onCheckedChange={x.setBatchActionFetchEnabled}
 							></Switch>
 						</div>
+						<div className='mt-3 flex items-center gap-2'>
+							<Input
+								type='number'
+								min={1}
+								value={String(x.batch_fetch_interval_value)}
+								onChange={event => x.setBatchFetchIntervalValue(event.target.value)}
+							></Input>
+							<Select
+								value={x.batch_fetch_interval_unit}
+								onValueChange={value => value && x.setBatchFetchIntervalUnit(value)}
+							>
+								<SelectTrigger
+									className='
+										w-[140px]
+										px-3 py-2
+										rounded-4xl
+										text-sm
+										bg-secondary/60
+									'
+								>
+									<SelectValue />
+								</SelectTrigger>
+								<SelectContent>
+									<SelectGroup>
+										<SelectLabel>Unit</SelectLabel>
+										<SelectItem value='second'>seconds</SelectItem>
+										<SelectItem value='minute'>minutes</SelectItem>
+									</SelectGroup>
+								</SelectContent>
+							</Select>
+						</div>
 					</div>
 					<div
 						className='
@@ -72,6 +103,37 @@ const Index = () => {
 								checked={x.batch_action_extract_enabled}
 								onCheckedChange={x.setBatchActionExtractEnabled}
 							></Switch>
+						</div>
+						<div className='mt-3 flex items-center gap-2'>
+							<Input
+								type='number'
+								min={1}
+								value={String(x.batch_extract_interval_value)}
+								onChange={event => x.setBatchExtractIntervalValue(event.target.value)}
+							></Input>
+							<Select
+								value={x.batch_extract_interval_unit}
+								onValueChange={value => value && x.setBatchExtractIntervalUnit(value)}
+							>
+								<SelectTrigger
+									className='
+										w-[140px]
+										px-3 py-2
+										rounded-4xl
+										text-sm
+										bg-secondary/60
+									'
+								>
+									<SelectValue />
+								</SelectTrigger>
+								<SelectContent>
+									<SelectGroup>
+										<SelectLabel>Unit</SelectLabel>
+										<SelectItem value='second'>seconds</SelectItem>
+										<SelectItem value='minute'>minutes</SelectItem>
+									</SelectGroup>
+								</SelectContent>
+							</Select>
 						</div>
 					</div>
 				</div>
@@ -102,40 +164,6 @@ const Index = () => {
 							</SelectGroup>
 						</SelectContent>
 					</Select>
-				</div>
-				<div className='flex flex-col gap-2'>
-					<div className='text-sm font-medium'>Run every</div>
-					<div className='flex items-center gap-2'>
-						<Input
-							type='number'
-							min={1}
-							value={String(x.batch_interval_value)}
-							onChange={event => x.setBatchIntervalValue(event.target.value)}
-						></Input>
-						<Select
-							value={x.batch_interval_unit}
-							onValueChange={value => value && x.setBatchIntervalUnit(value)}
-						>
-							<SelectTrigger
-								className='
-									w-[140px]
-									px-3 py-2
-									rounded-4xl
-									text-sm
-									bg-secondary/60
-								'
-							>
-								<SelectValue />
-							</SelectTrigger>
-							<SelectContent>
-								<SelectGroup>
-									<SelectLabel>Unit</SelectLabel>
-									<SelectItem value='second'>seconds</SelectItem>
-									<SelectItem value='minute'>minutes</SelectItem>
-								</SelectGroup>
-							</SelectContent>
-						</Select>
-					</div>
 				</div>
 				<div
 					className='

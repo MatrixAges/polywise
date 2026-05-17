@@ -9,6 +9,7 @@ import { useModel } from '../context'
 const Index = () => {
 	const x = useModel()
 	const toolbar_status = x.batch_status_text
+	const next_run_summary = x.batch_next_run_texts.join(' · ')
 
 	return (
 		<div
@@ -47,9 +48,11 @@ const Index = () => {
 				<div className='min-w-0 flex-1'>
 					<div className='truncate text-sm font-medium'>{toolbar_status}</div>
 					<div className='text-std-400 truncate text-xs'>
-						{x.batch_last_run_at
-							? `Last submit ${dayjs(x.batch_last_run_at).format('HH:mm:ss')}`
-							: 'Open session to inspect batch fetch runs'}
+						{next_run_summary
+							? next_run_summary
+							: x.batch_last_run_at
+								? `Last submit ${dayjs(x.batch_last_run_at).format('HH:mm:ss')}`
+								: 'Open session to inspect batch fetch runs'}
 					</div>
 				</div>
 				<Bot className='text-std-400 size-4 shrink-0'></Bot>
