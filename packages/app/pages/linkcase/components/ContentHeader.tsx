@@ -1,4 +1,4 @@
-import { Bot, Globe, Loader, RefreshCw } from 'lucide-react'
+import { Bot, Database, Globe, Loader, RefreshCw } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { Button } from '@/__shadcn__/components/ui/button'
@@ -11,6 +11,8 @@ const Index = () => {
 	const item = x.selected_item
 	const favicon_src = getLinkFaviconSrc(item?.favicon)
 	const has_content = Boolean(x.detail?.article?.content?.trim())
+	const extracting = x.current_extracting_id === item?.id
+	const extracted = Boolean(x.detail?.article?.is_pipelined)
 
 	return (
 		<div
@@ -49,6 +51,19 @@ const Index = () => {
 				</div>
 			</div>
 			<div className='flex shrink-0 items-center gap-2'>
+				<Button
+					variant='outline'
+					size='sm'
+					disabled={!item || !has_content || extracting}
+					onClick={() => void x.extractSelectedLink()}
+				>
+					{extracting ? (
+						<Loader className='size-3.5 animate-spin'></Loader>
+					) : (
+						<Database className='size-3.5'></Database>
+					)}
+					<span>{extracted ? 'Re-extract' : 'Extract'}</span>
+				</Button>
 				<Button
 					variant='outline'
 					size='sm'

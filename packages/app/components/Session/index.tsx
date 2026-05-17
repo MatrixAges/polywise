@@ -31,11 +31,21 @@ export interface IProps {
 	actions?: ReactNode
 	create?: (input: string) => void
 	group_streaming?: boolean
+	show_loading_dots?: boolean
 	useSyncState?: (args: SessionSyncStateHookArgs) => SessionSyncStateHookResult | undefined
 }
 
 const Index = (props: IProps) => {
-	const { type, id, input, actions, create, group_streaming, useSyncState = use_empty_sync_state } = props
+	const {
+		type,
+		id,
+		input,
+		actions,
+		create,
+		group_streaming,
+		show_loading_dots = true,
+		useSyncState = use_empty_sync_state
+	} = props
 	const [x] = useState(() => container.resolve(Model))
 
 	const chat_streaming = x.status === 'streaming' || x.status === 'submitted'
@@ -78,8 +88,8 @@ const Index = (props: IProps) => {
 	}
 
 	const show_loading = useMemo(
-		() => input_streaming && last_message?.role === 'user',
-		[input_streaming, last_message]
+		() => show_loading_dots && input_streaming && last_message?.role === 'user',
+		[show_loading_dots, input_streaming, last_message]
 	)
 	const empty = x.messages.length === 0
 

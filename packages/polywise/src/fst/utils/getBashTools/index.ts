@@ -82,12 +82,12 @@ export default async (s: Index, bash: Bash, system?: boolean) => {
 		} as Sandbox
 	})
 
-	for (const tool of [tools.bash, tools.readFile, tools.writeFile]) {
-		tool.inputSchema = normalizeSchema(tool.inputSchema)
-		if ('outputSchema' in tool) {
-			tool.outputSchema = normalizeSchema(tool.outputSchema)
-		}
-	}
+	// for (const tool of [tools.bash, tools.readFile, tools.writeFile]) {
+	// 	tool.inputSchema = normalizeSchema(tool.inputSchema)
+	// 	if ('outputSchema' in tool) {
+	// 		tool.outputSchema = normalizeSchema(tool.outputSchema)
+	// 	}
+	// }
 
 	return tools
 }

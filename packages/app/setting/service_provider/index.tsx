@@ -42,8 +42,8 @@ const check_status_variant = (status: LinkcaseProvider['checks'][number]['status
 	return 'outline'
 }
 
-const getFallbackChain = (config: AppConfig) => {
-	if (Array.isArray(config.fetch_fallback_chain) && config.fetch_fallback_chain.length) {
+const getFallbackChain = (config?: Partial<AppConfig> | null) => {
+	if (Array.isArray(config?.fetch_fallback_chain) && config.fetch_fallback_chain.length) {
 		return config.fetch_fallback_chain
 	}
 
@@ -263,12 +263,13 @@ const SortableProviderCard = (props: SortableProviderCardProps) => {
 const Index = () => {
 	const global = useGlobal()
 	const s = global.setting
+	const current_config = (s.config ? $copy(s.config) : {}) as Partial<AppConfig>
 	const [providers, setProviders] = useState<Array<LinkcaseProvider>>([])
 	const [loading, setLoading] = useState(false)
 	const [installing_id, setInstallingId] = useState<string | null>(null)
 	const [managing_action_id, setManagingActionId] = useState<string | null>(null)
 	const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }))
-	const fallback_chain = getFallbackChain(s.config)
+	const fallback_chain = getFallbackChain(current_config)
 	const fallback_chain_key = fallback_chain.join('|')
 	const drag_disabled = loading || installing_id !== null || managing_action_id !== null
 
@@ -348,7 +349,16 @@ const Index = () => {
 		s.setConfig('config', { fetch_fallback_chain: next_chain } as AppConfig, true)
 	})
 
-	const { control } = useForm<AppConfig>({ values: $copy(s.config) }, onChange)
+	const { control } = useForm<AppConfig>(
+		{
+			values: {
+				...current_config,
+				fetch_fallback_chain: fallback_chain,
+				enbale_webfetch_chain: current_config.enbale_webfetch_chain ?? false
+			} as AppConfig
+		},
+		onChange
+	)
 
 	useEffect(() => {
 		void refreshProviders()

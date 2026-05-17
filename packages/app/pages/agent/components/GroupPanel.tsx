@@ -71,6 +71,7 @@ const Index = () => {
 								<Session
 									type='page'
 									id={selected_group_session_id}
+									show_loading_dots={false}
 									actions={
 										<div className='flex items-center'>
 											<span

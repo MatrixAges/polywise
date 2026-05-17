@@ -1,9 +1,21 @@
-import { article, link, link_article } from '@core/db/schema'
-import { getArticle, getLink, getLinks, setLink } from '@core/db/services'
-import { addLinkArticle, getLinkArticles } from '@core/db/services/externals'
+import { getNodeRowid, insertNodeVector } from '@core/db/prepare'
+import { article, chunk, edge, link, link_article, node } from '@core/db/schema'
+import {
+	addEdge,
+	addNode,
+	getArticle,
+	getChunks,
+	getEdge,
+	getLink,
+	getLinks,
+	getNode,
+	setLink
+} from '@core/db/services'
+import { addLinkArticle, addNodeChunk, getLinkArticles } from '@core/db/services/externals'
 import { fetchWithFallbackChain, fetchWithProvider } from '@core/fetch'
 import { saveArticle } from '@core/io'
-import { eq, inArray, like, or } from 'drizzle-orm'
+import { getEmbedding, getTriples } from '@core/pipeline'
+import { and, asc, eq, inArray, isNull, like, or } from 'drizzle-orm'
 
 import type { Link } from '@core/db'
 import type { WebfetchFallbackProvider } from '@core/types'
@@ -16,6 +28,15 @@ export const linkcase_statuses = ['none', 'pending', 'success', 'fail', 'timeout
 export type LinkcaseFilterType = (typeof linkcase_filter_types)[number]
 export type LinkcaseStatus = (typeof linkcase_statuses)[number]
 type LinkArticleRow = Awaited<ReturnType<typeof getLinkArticles>>[number]
+type LinkcaseExtractResult = {
+	id: string
+	title: string
+	url: string
+	article_id: string
+	triple_count: number
+	chunk_count: number
+	reused_article: boolean
+}
 type LinkcasePreviewArticle = {
 	id: string
 	title: string | null
@@ -37,6 +58,8 @@ type LinkcaseFetchPreviewCacheItem = {
 
 const linkcase_fetch_preview_cache = new Map<string, LinkcaseFetchPreviewCacheItem>()
 const LINKCASE_FETCH_PREVIEW_TTL_MS = 10 * 60 * 1000
+const LINKCASE_PIPELINE_WAIT_MS = 15_000
+const LINKCASE_PIPELINE_POLL_MS = 250
 
 const cleanupLinkcaseFetchPreviewCache = () => {
 	const cutoff = Date.now() - LINKCASE_FETCH_PREVIEW_TTL_MS
@@ -49,6 +72,8 @@ const cleanupLinkcaseFetchPreviewCache = () => {
 }
 
 const normalizeKeyword = (keyword?: string) => keyword?.trim() ?? ''
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
+const normalizeTripleText = (value: string) => value.replace(/\s+/g, ' ').trim()
 
 const serializeArticlePreview = (item?: LinkArticleRow): LinkcasePreviewArticle | null => {
 	if (!item) {
@@ -174,6 +199,194 @@ const saveLinkcaseArticle = async (args: { id: string; title: string; content: s
 	return {
 		article: article_item ?? null,
 		link: updated_link
+	}
+}
+
+const waitForArticlePipeline = async (article_id: string) => {
+	const deadline = Date.now() + LINKCASE_PIPELINE_WAIT_MS
+
+	while (Date.now() < deadline) {
+		const current_article = await getArticle(eq(article.id, article_id))
+		const current_chunks = await getChunks({
+			where: eq(chunk.article_id, article_id),
+			orderBy: asc(chunk.position)
+		})
+
+		if (current_article?.is_pipelined && current_chunks.length > 0) {
+			return current_chunks
+		}
+
+		await sleep(LINKCASE_PIPELINE_POLL_MS)
+	}
+
+	throw new Error(`Timed out while waiting for article pipeline: ${article_id}`)
+}
+
+const ensureGlobalNode = async (name: string) => {
+	const normalized_name = normalizeTripleText(name)
+
+	if (!normalized_name) {
+		return null
+	}
+
+	const existing = await getNode(and(isNull(node.agent_id), eq(node.name, normalized_name)))
+
+	if (existing) {
+		return existing
+	}
+
+	const inserted = await addNode({
+		agent_id: null,
+		name: normalized_name
+	})
+	const embedding = await getEmbedding(normalized_name)
+	const row = getNodeRowid().get(inserted.id) as { rowid: number } | undefined
+
+	if (row) {
+		insertNodeVector().run(BigInt(row.rowid), Buffer.from(new Float32Array(embedding).buffer))
+	}
+
+	return inserted
+}
+
+const ensureGlobalEdge = async (source_id: string, target_id: string, relation: string) => {
+	const normalized_relation = normalizeTripleText(relation)
+
+	if (!normalized_relation) {
+		return null
+	}
+
+	const existing = await getEdge(and(eq(edge.source_id, source_id), eq(edge.target_id, target_id)))
+
+	if (existing) {
+		return existing
+	}
+
+	return addEdge({
+		agent_id: null,
+		source_id,
+		target_id,
+		relation: normalized_relation
+	})
+}
+
+const findRelatedChunks = (content_chunks: Awaited<ReturnType<typeof getChunks>>, entity_names: Array<string>) => {
+	const normalized_entities = entity_names
+		.map(item => item.toLowerCase())
+		.filter(Boolean)
+		.filter((item, index, list) => list.indexOf(item) === index)
+
+	if (normalized_entities.length === 0) {
+		return content_chunks.slice(0, 1)
+	}
+
+	const matched_chunks = content_chunks.filter(chunk_item => {
+		const text = chunk_item.content?.toLowerCase() ?? ''
+
+		return normalized_entities.some(entity => text.includes(entity))
+	})
+
+	return matched_chunks.length > 0 ? matched_chunks : content_chunks.slice(0, 1)
+}
+
+const linkNodesToChunks = async (
+	node_ids: Array<string>,
+	content_chunks: Awaited<ReturnType<typeof getChunks>>,
+	entity_names: Array<string>
+) => {
+	if (node_ids.length === 0 || content_chunks.length === 0) {
+		return
+	}
+
+	const target_chunks = findRelatedChunks(content_chunks, entity_names)
+	const seen_pairs = new Set<string>()
+
+	for (const node_id of node_ids) {
+		for (const chunk_item of target_chunks) {
+			const pair_key = `${node_id}:${chunk_item.id}`
+
+			if (seen_pairs.has(pair_key)) {
+				continue
+			}
+
+			seen_pairs.add(pair_key)
+			await addNodeChunk(node_id, chunk_item.id).catch(() => null)
+		}
+	}
+}
+
+export const extractLinkcaseArticle = async (args: { id: string; force?: boolean }): Promise<LinkcaseExtractResult> => {
+	const item = await getLinkcaseReadItem(args.id)
+
+	if (!item) {
+		throw new Error(`Link not found: ${args.id}`)
+	}
+
+	const article_item = item.article
+	const content = article_item?.content?.trim()
+
+	if (!content) {
+		throw new Error(`No fetched content available for ${item.title || item.url}`)
+	}
+
+	if (article_item?.is_pipelined && !args.force) {
+		const content_chunks = await getChunks({
+			where: eq(chunk.article_id, article_item.id),
+			orderBy: asc(chunk.position)
+		})
+
+		return {
+			id: item.id,
+			title: item.title,
+			url: item.url,
+			article_id: article_item.id,
+			triple_count: 0,
+			chunk_count: content_chunks.length,
+			reused_article: true
+		}
+	}
+
+	const article_id = await saveArticle({
+		article_id: article_item?.id,
+		title: article_item?.title || item.title,
+		content,
+		for: 'linkcase',
+		exec_pipeline: true
+	})
+	const content_chunks = await waitForArticlePipeline(article_id)
+	const triples = await getTriples(content)
+	const node_id_map = new Map<string, string>()
+
+	for (const triple of triples) {
+		const head_name = normalizeTripleText(triple.head)
+		const tail_name = normalizeTripleText(triple.tail)
+		const relation = normalizeTripleText(triple.relation)
+
+		if (!head_name || !tail_name || !relation) {
+			continue
+		}
+
+		const [head_node, tail_node] = await Promise.all([ensureGlobalNode(head_name), ensureGlobalNode(tail_name)])
+
+		if (!head_node || !tail_node) {
+			continue
+		}
+
+		node_id_map.set(head_name, head_node.id)
+		node_id_map.set(tail_name, tail_node.id)
+
+		await ensureGlobalEdge(head_node.id, tail_node.id, relation)
+		await linkNodesToChunks([head_node.id, tail_node.id], content_chunks, [head_name, tail_name])
+	}
+
+	return {
+		id: item.id,
+		title: item.title,
+		url: item.url,
+		article_id,
+		triple_count: triples.length,
+		chunk_count: content_chunks.length,
+		reused_article: Boolean(article_item?.id)
 	}
 }
 
@@ -328,6 +541,107 @@ export const fetchLinkcaseLink = async (args: { id: string; exec_pipeline?: bool
 		})
 
 		throw error
+	}
+}
+
+const listBatchFetchCandidates = async (count: number) => {
+	return hydrateLinkcaseItems(
+		await getLinks({
+			where: inArray(link.status, ['none', 'fail', 'timeout']),
+			limit: Math.max(count * 4, 20)
+		})
+	).then(items => items.slice(0, count))
+}
+
+const listBatchExtractCandidates = async (count: number) => {
+	const items = await hydrateLinkcaseItems(
+		await getLinks({
+			where: eq(link.status, 'success'),
+			limit: Math.max(count * 6, 30)
+		})
+	)
+
+	return items.filter(item => item.article?.id && !item.article.is_pipelined).slice(0, count)
+}
+
+export const runLinkcaseBatch = async (args: { count: number; run_fetch: boolean; run_extract: boolean }) => {
+	if (!args.run_fetch && !args.run_extract) {
+		throw new Error('Select at least one batch action.')
+	}
+
+	const fetched = [] as Array<{
+		id: string
+		title: string
+		url: string
+		ok: boolean
+		status: string
+		article_id: string | null
+		error: string | null
+	}>
+	const extracted = [] as Array<LinkcaseExtractResult>
+
+	if (args.run_fetch) {
+		const targets = await listBatchFetchCandidates(args.count)
+
+		for (const item of targets) {
+			try {
+				const result = await fetchLinkcaseLink({ id: item.id })
+
+				fetched.push({
+					id: item.id,
+					title: item.title,
+					url: item.url,
+					ok: result.ok,
+					status: result.link.status,
+					article_id: result.article?.id ?? null,
+					error: result.ok ? null : (result.error ?? 'Unknown fetch error')
+				})
+			} catch (error) {
+				fetched.push({
+					id: item.id,
+					title: item.title,
+					url: item.url,
+					ok: false,
+					status: 'fail',
+					article_id: null,
+					error: error instanceof Error ? error.message : String(error)
+				})
+			}
+		}
+	}
+
+	if (args.run_extract) {
+		const extract_target_ids = new Set<string>()
+
+		for (const item of fetched) {
+			if (item.ok && item.id) {
+				extract_target_ids.add(item.id)
+			}
+		}
+
+		if (extract_target_ids.size < args.count) {
+			const fallback_targets = await listBatchExtractCandidates(args.count)
+
+			for (const item of fallback_targets) {
+				if (extract_target_ids.size >= args.count) {
+					break
+				}
+
+				extract_target_ids.add(item.id)
+			}
+		}
+
+		for (const id of extract_target_ids) {
+			extracted.push(await extractLinkcaseArticle({ id, force: false }))
+		}
+	}
+
+	return {
+		ok: true as const,
+		fetch_count: fetched.length,
+		extract_count: extracted.length,
+		fetched,
+		extracted
 	}
 }
 

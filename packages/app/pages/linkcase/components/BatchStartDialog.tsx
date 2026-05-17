@@ -11,6 +11,7 @@ import {
 	SelectTrigger,
 	SelectValue
 } from '@/__shadcn__/components/ui/select'
+import { Switch } from '@/__shadcn__/components/ui/switch'
 import { Dialog } from '@/components'
 
 import { useModel } from '../context'
@@ -23,14 +24,59 @@ const Index = () => {
 	return (
 		<Dialog
 			open={x.start_dialog_open}
-			title='Start Batch Fetch'
-			desc='Configure how many links to fetch per run and how often to schedule it.'
+			title='Start Batch Run'
+			desc='Configure schedule interval and choose whether each run should fetch, extract, or do both.'
 			className='w-[460px]'
 			setOpen={x.setStartDialogOpen}
 		>
 			<div className='flex flex-col gap-4'>
+				<div className='flex flex-col gap-3'>
+					<div className='text-sm font-medium'>Actions</div>
+					<div
+						className='
+							p-3
+							rounded-3xl
+							bg-secondary/30
+							border border-border-light
+						'
+					>
+						<div className='flex items-center justify-between gap-3'>
+							<div>
+								<div className='text-sm font-medium'>Fetch</div>
+								<div className='text-std-400 text-xs'>
+									Pull fresh markdown into Linkcase.
+								</div>
+							</div>
+							<Switch
+								checked={x.batch_action_fetch_enabled}
+								onCheckedChange={x.setBatchActionFetchEnabled}
+							></Switch>
+						</div>
+					</div>
+					<div
+						className='
+							p-3
+							rounded-3xl
+							bg-secondary/30
+							border border-border-light
+						'
+					>
+						<div className='flex items-center justify-between gap-3'>
+							<div>
+								<div className='text-sm font-medium'>Extract</div>
+								<div className='text-std-400 text-xs'>
+									Save content into vectors and generate triples.
+								</div>
+							</div>
+							<Switch
+								checked={x.batch_action_extract_enabled}
+								onCheckedChange={x.setBatchActionExtractEnabled}
+							></Switch>
+						</div>
+					</div>
+				</div>
 				<div className='flex flex-col gap-2'>
-					<div className='text-sm font-medium'>Each run fetches</div>
+					<div className='text-sm font-medium'>Each run processes</div>
 					<Select
 						value={String(x.batch_count)}
 						onValueChange={value => value && x.setBatchCount(value)}
@@ -102,7 +148,11 @@ const Index = () => {
 					<Button variant='ghost' size='sm' onClick={() => x.setStartDialogOpen(false)}>
 						Cancel
 					</Button>
-					<Button size='sm' onClick={x.startBatchSchedule}>
+					<Button
+						size='sm'
+						disabled={!x.batch_action_fetch_enabled && !x.batch_action_extract_enabled}
+						onClick={x.startBatchSchedule}
+					>
 						Start
 					</Button>
 				</div>

@@ -4,6 +4,7 @@ export type LinkcaseItem = RPCOutput['linkcase']['query']['items'][number]
 export type LinkcaseDetail = NonNullable<RPCOutput['linkcase']['read']>
 export type LinkcaseFilterType = 'title' | 'link'
 export type LinkcaseBatchIntervalUnit = 'second' | 'minute'
+export type LinkcaseBatchRunResult = RPCOutput['linkcase']['runBatch']
 export type LinkcaseSnifferBrowserStatus = RPCOutput['sniffer']['status']['browsers'][number]
 export type LinkcaseSnifferBrowserId = LinkcaseSnifferBrowserStatus['id']
 export type LinkcaseSnifferSourceStatus = LinkcaseSnifferBrowserStatus['sources'][number]

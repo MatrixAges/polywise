@@ -14,12 +14,15 @@ import type { SessionStatusPayload } from '@core/rpc/session/watchSessionStatus'
 import type { MouseEvent, UIEvent } from 'react'
 import type {
 	LinkcaseBatchIntervalUnit,
+	LinkcaseBatchRunResult,
 	LinkcaseDetail,
 	LinkcaseFilterType,
 	LinkcaseItem,
 	LinkcaseSnifferBrowserId,
 	LinkcaseSnifferBrowserStatus
 } from './types'
+
+const linkcase_batch_config_storage_key = 'linkcase_batch_scheduler_config'
 
 @injectable()
 export default class Index {
@@ -36,6 +39,7 @@ export default class Index {
 	menu_target_index = -1
 	current_fetching_id = ''
 	current_ai_fetching_id = ''
+	current_extracting_id = ''
 	selection_fetch_submit_loading = false
 	selection_remove_loading = false
 	search_keyword = ''
@@ -51,6 +55,8 @@ export default class Index {
 	batch_count = 3
 	batch_interval_value = 5
 	batch_interval_unit = 'minute' as LinkcaseBatchIntervalUnit
+	batch_action_fetch_enabled = true
+	batch_action_extract_enabled = false
 	batch_scheduler_enabled = false
 	batch_submit_loading = false
 	batch_next_run_at = null as number | null
@@ -138,12 +144,14 @@ export default class Index {
 	}
 
 	get batch_status_text() {
+		const action_label = this.batch_action_label
+
 		if (this.linkcase_session_running) {
 			return 'Batch fetch session is running'
 		}
 
 		if (this.batch_submit_loading) {
-			return 'Submitting scheduled batch fetch'
+			return `Running scheduled ${action_label}`
 		}
 
 		if (this.selection_fetch_submit_loading) {
@@ -151,19 +159,32 @@ export default class Index {
 		}
 
 		if (this.batch_last_error) {
-			return `Batch fetch warning: ${this.batch_last_error}`
+			return `Batch ${action_label} warning: ${this.batch_last_error}`
 		}
 
 		if (this.batch_scheduler_enabled && this.batch_next_run_at) {
 			const seconds = Math.max(Math.ceil((this.batch_next_run_at - Date.now()) / 1000), 0)
 
-			return `Scheduled batch fetch: ${this.batch_count} links every ${this.batch_interval_value} ${this.batch_interval_unit}${this.batch_interval_value > 1 ? 's' : ''}, next in ${seconds}s`
+			return `Scheduled ${action_label}: ${this.batch_count} links every ${this.batch_interval_value} ${this.batch_interval_unit}${this.batch_interval_value > 1 ? 's' : ''}, next in ${seconds}s`
 		}
 
-		return 'Batch fetch idle'
+		return `Batch ${action_label} idle`
+	}
+
+	get batch_action_label() {
+		if (this.batch_action_fetch_enabled && this.batch_action_extract_enabled) {
+			return 'fetch + extract'
+		}
+
+		if (this.batch_action_extract_enabled) {
+			return 'extract'
+		}
+
+		return 'fetch'
 	}
 
 	async init() {
+		this.restoreBatchConfig()
 		this.watchSessionStatus()
 		await this.reloadList()
 	}
@@ -282,14 +303,86 @@ export default class Index {
 
 	setBatchCount(value: string) {
 		this.batch_count = Math.min(Math.max(Number(value) || 1, 1), 10)
+		this.persistBatchConfig()
 	}
 
 	setBatchIntervalValue(value: string) {
 		this.batch_interval_value = Math.max(Number(value) || 1, 1)
+		this.persistBatchConfig()
 	}
 
 	setBatchIntervalUnit(value: string) {
 		this.batch_interval_unit = value as LinkcaseBatchIntervalUnit
+		this.persistBatchConfig()
+	}
+
+	setBatchActionFetchEnabled(value: boolean) {
+		this.batch_action_fetch_enabled = value
+		this.persistBatchConfig()
+	}
+
+	setBatchActionExtractEnabled(value: boolean) {
+		this.batch_action_extract_enabled = value
+		this.persistBatchConfig()
+	}
+
+	restoreBatchConfig() {
+		if (typeof window === 'undefined') {
+			return
+		}
+
+		try {
+			const raw = window.localStorage.getItem(linkcase_batch_config_storage_key)
+
+			if (!raw) {
+				return
+			}
+
+			const parsed = JSON.parse(raw) as Partial<{
+				batch_count: number
+				batch_interval_value: number
+				batch_interval_unit: LinkcaseBatchIntervalUnit
+				batch_action_fetch_enabled: boolean
+				batch_action_extract_enabled: boolean
+			}>
+
+			if (typeof parsed.batch_count === 'number') {
+				this.batch_count = Math.min(Math.max(parsed.batch_count, 1), 10)
+			}
+
+			if (typeof parsed.batch_interval_value === 'number') {
+				this.batch_interval_value = Math.max(parsed.batch_interval_value, 1)
+			}
+
+			if (parsed.batch_interval_unit === 'second' || parsed.batch_interval_unit === 'minute') {
+				this.batch_interval_unit = parsed.batch_interval_unit
+			}
+
+			if (typeof parsed.batch_action_fetch_enabled === 'boolean') {
+				this.batch_action_fetch_enabled = parsed.batch_action_fetch_enabled
+			}
+
+			if (typeof parsed.batch_action_extract_enabled === 'boolean') {
+				this.batch_action_extract_enabled = parsed.batch_action_extract_enabled
+			}
+		} catch {}
+	}
+
+	persistBatchConfig() {
+		if (typeof window === 'undefined') {
+			return
+		}
+
+		window.localStorage.setItem(
+			linkcase_batch_config_storage_key,
+			JSON.stringify({
+				batch_count: this.batch_count,
+				batch_interval_value: this.batch_interval_value,
+				batch_interval_unit: this.batch_interval_unit,
+				batch_action_fetch_enabled: this.batch_action_fetch_enabled,
+				batch_action_extract_enabled: this.batch_action_extract_enabled
+			})
+		)
 	}
 
 	getSnifferStatus(browser: LinkcaseSnifferBrowserId) {
@@ -501,6 +594,44 @@ export default class Index {
 		}
 
 		await this.fetchLink(this.selected_id)
+	}
+
+	async extractSelectedLink() {
+		if (!this.selected_id) {
+			return
+		}
+
+		const item = this.selected_item
+		const has_content = Boolean(this.detail?.article?.content?.trim())
+
+		if (!item || !has_content || this.current_extracting_id) {
+			return
+		}
+
+		this.current_extracting_id = item.id
+
+		try {
+			const result = await rpc.linkcase.extract.mutate({
+				id: item.id,
+				force: true
+			})
+
+			await this.loadDetail(item.id)
+			this.patchBatchResult({
+				ok: true,
+				fetch_count: 0,
+				extract_count: 1,
+				fetched: [],
+				extracted: [result]
+			})
+			toast.success(
+				`Extracted ${result.title || result.url} with ${result.triple_count} triple${result.triple_count === 1 ? '' : 's'}.`
+			)
+		} catch (error) {
+			toast.error(error instanceof Error ? error.message : 'Failed to extract link content')
+		} finally {
+			this.current_extracting_id = ''
+		}
 	}
 
 	async fetchSelectedLinkByAI() {
@@ -878,6 +1009,52 @@ export default class Index {
 		].join('\n')
 	}
 
+	patchBatchResult(result: LinkcaseBatchRunResult) {
+		const next_selected_id = this.selected_id
+
+		for (const item of result.fetched) {
+			const current_index = this.items.findIndex(current => current.id === item.id)
+
+			if (current_index === -1) {
+				continue
+			}
+
+			const current_item = this.items[current_index]
+
+			this.items[current_index] = {
+				...current_item,
+				status: item.status
+			}
+		}
+
+		for (const item of result.extracted) {
+			const current_index = this.items.findIndex(current => current.id === item.id)
+
+			if (current_index === -1) {
+				continue
+			}
+
+			const current_item = this.items[current_index]
+
+			if (!current_item.article) {
+				continue
+			}
+
+			this.items[current_index] = {
+				...current_item,
+				article: {
+					...current_item.article,
+					id: item.article_id,
+					is_pipelined: true
+				}
+			}
+		}
+
+		if (next_selected_id) {
+			void this.loadDetail(next_selected_id)
+		}
+	}
+
 	async submitSessionPrompt(text: string) {
 		const message = {
 			id: crypto.randomUUID(),
@@ -945,8 +1122,14 @@ export default class Index {
 		this.batch_last_run_at = Date.now()
 
 		try {
-			await this.submitBatchPrompt()
+			const result = await rpc.linkcase.runBatch.mutate({
+				count: this.batch_count,
+				run_fetch: this.batch_action_fetch_enabled,
+				run_extract: this.batch_action_extract_enabled
+			})
+
 			this.batch_runs += 1
+			this.patchBatchResult(result)
 		} catch (error) {
 			this.batch_last_error = error instanceof Error ? error.message : String(error)
 		} finally {
@@ -956,6 +1139,12 @@ export default class Index {
 	}
 
 	startBatchSchedule() {
+		if (!this.batch_action_fetch_enabled && !this.batch_action_extract_enabled) {
+			toast.error('Select at least one batch action.')
+
+			return
+		}
+
 		this.batch_scheduler_enabled = true
 		this.start_dialog_open = false
 		this.batch_last_error = ''
