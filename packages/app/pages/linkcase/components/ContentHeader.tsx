@@ -13,6 +13,7 @@ const Index = () => {
 	const has_content = Boolean(x.detail?.article?.content?.trim())
 	const extracting = x.current_extracting_id === item?.id
 	const extracted = Boolean(x.detail?.article?.is_pipelined)
+	const can_extract = Boolean(item && item.status === 'success' && has_content)
 
 	return (
 		<div
@@ -54,19 +55,6 @@ const Index = () => {
 				<Button
 					variant='outline'
 					size='sm'
-					disabled={!item || !has_content || extracting}
-					onClick={() => void x.extractSelectedLink()}
-				>
-					{extracting ? (
-						<Loader className='size-3.5 animate-spin'></Loader>
-					) : (
-						<Database className='size-3.5'></Database>
-					)}
-					<span>{extracted ? 'Re-extract' : 'Extract'}</span>
-				</Button>
-				<Button
-					variant='outline'
-					size='sm'
 					disabled={!item || Boolean(x.current_ai_fetching_id) || x.linkcase_session_running}
 					onClick={() => void x.fetchSelectedLinkByAI()}
 				>
@@ -89,6 +77,19 @@ const Index = () => {
 						<RefreshCw className='size-3.5'></RefreshCw>
 					)}
 					<span>{has_content ? 'Refetch' : 'Fetch'}</span>
+				</Button>
+				<Button
+					size='sm'
+					className='border-black bg-black text-white hover:bg-black/90'
+					disabled={!can_extract || extracting}
+					onClick={() => void x.extractSelectedLink()}
+				>
+					{extracting ? (
+						<Loader className='size-3.5 animate-spin'></Loader>
+					) : (
+						<Database className='size-3.5'></Database>
+					)}
+					<span>{extracted ? 'Re-extract' : 'Extract'}</span>
 				</Button>
 			</div>
 		</div>
