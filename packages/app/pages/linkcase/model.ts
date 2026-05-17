@@ -26,6 +26,7 @@ import type {
 const linkcase_batch_config_storage_key = 'linkcase_batch_scheduler_config'
 const linkcase_batch_retry_ms = 1_000
 const linkcase_task_busy_error_prefix = 'Linkcase task is already running'
+const parseStoredBoolean = (value: unknown) => value === true || value === 'true'
 type LinkcaseBatchAction = 'fetch' | 'extract'
 type LinkcaseBatchConfig = {
 	batch_count: number
@@ -34,6 +35,7 @@ type LinkcaseBatchConfig = {
 	batch_fetch_interval_value: number
 	batch_fetch_interval_unit: LinkcaseBatchIntervalUnit
 	batch_action_fetch_enabled: boolean
+	batch_auto_remove_dead_links: boolean
 	batch_extract_interval_value: number
 	batch_extract_interval_unit: LinkcaseBatchIntervalUnit
 	batch_action_extract_enabled: boolean
@@ -73,6 +75,7 @@ export default class Index {
 	sniffer_selected_folder_keys = {} as Partial<Record<LinkcaseSnifferBrowserId, Array<string>>>
 	batch_count = 3
 	batch_action_fetch_enabled = true
+	batch_auto_remove_dead_links = false
 	batch_fetch_interval_value = 5
 	batch_fetch_interval_unit = 'minute' as LinkcaseBatchIntervalUnit
 	batch_action_extract_enabled = false
@@ -250,7 +253,14 @@ export default class Index {
 				{
 					batch_action_fetch_enabled: {
 						local_key: 'linkcase_batch_action_fetch_enabled',
-						fromStorage: value => Boolean(value),
+						fromStorage: parseStoredBoolean,
+						toStorage: value => Boolean(value)
+					}
+				},
+				{
+					batch_auto_remove_dead_links: {
+						local_key: 'linkcase_batch_auto_remove_dead_links',
+						fromStorage: parseStoredBoolean,
 						toStorage: value => Boolean(value)
 					}
 				},
@@ -271,7 +281,7 @@ export default class Index {
 				{
 					batch_action_extract_enabled: {
 						local_key: 'linkcase_batch_action_extract_enabled',
-						fromStorage: value => Boolean(value),
+						fromStorage: parseStoredBoolean,
 						toStorage: value => Boolean(value)
 					}
 				}
@@ -465,6 +475,10 @@ export default class Index {
 		this.refreshBatchSchedule('fetch')
 	}
 
+	setBatchAutoRemoveDeadLinks(value: boolean) {
+		this.batch_auto_remove_dead_links = value
+	}
+
 	setBatchActionExtractEnabled(value: boolean) {
 		this.batch_action_extract_enabled = value
 		this.refreshBatchSchedule('extract')
@@ -488,6 +502,7 @@ export default class Index {
 				batch_fetch_interval_value: 'linkcase_batch_fetch_interval_value',
 				batch_fetch_interval_unit: 'linkcase_batch_fetch_interval_unit',
 				batch_action_fetch_enabled: 'linkcase_batch_action_fetch_enabled',
+				batch_auto_remove_dead_links: 'linkcase_batch_auto_remove_dead_links',
 				batch_extract_interval_value: 'linkcase_batch_extract_interval_value',
 				batch_extract_interval_unit: 'linkcase_batch_extract_interval_unit',
 				batch_action_extract_enabled: 'linkcase_batch_action_extract_enabled'
@@ -519,6 +534,13 @@ export default class Index {
 					typeof parsed.batch_action_fetch_enabled === 'boolean'
 						? parsed.batch_action_fetch_enabled
 						: true
+			}
+
+			if (window.localStorage.getItem(migration_map.batch_auto_remove_dead_links) === null) {
+				this.batch_auto_remove_dead_links =
+					typeof parsed.batch_auto_remove_dead_links === 'boolean'
+						? parsed.batch_auto_remove_dead_links
+						: false
 			}
 
 			if (window.localStorage.getItem(migration_map.batch_extract_interval_value) === null) {
@@ -1181,6 +1203,23 @@ export default class Index {
 	}
 
 	buildBatchPrompt() {
+		if (this.batch_auto_remove_dead_links) {
+			return [
+				'Run one scheduled Linkcase batch fetch cycle.',
+				`First list up to ${this.batch_count} candidate links with status none, fail, or timeout.`,
+				'Do not use linkcase_tool action "fetch_next" for this run.',
+				'For each selected target, use the AI-guided preview workflow: fetch_preview, optionally read_preview, then commit_preview, mark_failed, or remove.',
+				'Judge from the fetched preview content itself.',
+				'Only remove a link when you are confident the target content is truly gone or there is no meaningful core content worth keeping.',
+				'If the page is blocked by verification, anti-bot checks, login, subscription, or any other access barrier that prevents a confident judgment, do not remove it.',
+				'When you cannot confidently confirm a dead link, keep it and mark_failed with a concise reason.',
+				'If one provider preview already contains the correct and substantially complete target article body, commit it immediately and stop the provider chain.',
+				'Before commit_preview, rewrite the fetched result into cleaned markdown that keeps only the core article body.',
+				'If no candidates match, report that clearly.',
+				'Return a concise summary with id, title, final action, status, source, article_id, and any removal or failure reason.'
+			].join('\n')
+		}
+
 		return [
 			'Run one scheduled Linkcase batch fetch cycle.',
 			`Use linkcase_tool action "fetch_next" to fetch up to ${this.batch_count} links.`,
@@ -1397,6 +1436,13 @@ export default class Index {
 		let next_delay_ms = undefined as number | undefined
 
 		try {
+			if (action === 'fetch' && this.batch_auto_remove_dead_links) {
+				await this.submitBatchPrompt()
+				this.batch_runs += 1
+
+				return
+			}
+
 			const result = await rpc.linkcase.runBatch.mutate({
 				count: this.batch_count,
 				run_fetch: action === 'fetch',

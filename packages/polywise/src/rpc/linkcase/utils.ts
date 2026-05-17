@@ -11,11 +11,12 @@ import {
 	getLink,
 	getLinks,
 	getNode,
+	removeLink,
 	setLink
 } from '@core/db/services'
 import { addLinkArticle, addNodeChunk, getLinkArticles } from '@core/db/services/externals'
 import { fetchWithFallbackChain, fetchWithProvider } from '@core/fetch'
-import { saveArticle } from '@core/io'
+import { remove as removeArticle, saveArticle } from '@core/io'
 import { readPipelineStore } from '@core/io/save/pipelineStore'
 import { getEmbedding, getTriples } from '@core/pipeline'
 import { log, SessionStore } from '@core/utils'
@@ -53,6 +54,10 @@ type LinkcasePreviewArticle = {
 	updated_at: Date | null
 	is_pipelined: boolean
 	fetched_at: Date | null
+}
+type LinkcaseRemoveResult = {
+	link: Link
+	removed_article_ids: Array<string>
 }
 
 type LinkcaseFetchPreviewCacheItem = {
@@ -267,6 +272,41 @@ export const getLinkcaseReadItem = async (id: string) => {
 					content: current_article.content
 				}
 			: null
+	}
+}
+
+export const removeLinkcaseItem = async (id: string): Promise<LinkcaseRemoveResult | null> => {
+	const current_link = await getLink(eq(link.id, id))
+
+	if (!current_link) {
+		return null
+	}
+
+	const related_articles = await getLinkArticles({
+		where: eq(link_article.link_id, id)
+	})
+
+	await removeLink(eq(link.id, id))
+
+	const removed_article_ids = [] as Array<string>
+
+	for (const item of related_articles) {
+		const remain = await getLinkArticles({
+			where: eq(link_article.article_id, item.article.id),
+			limit: 1
+		})
+
+		if (remain.length > 0) {
+			continue
+		}
+
+		await removeArticle(item.article.id)
+		removed_article_ids.push(item.article.id)
+	}
+
+	return {
+		link: current_link,
+		removed_article_ids
 	}
 }
 

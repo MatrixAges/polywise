@@ -167,6 +167,28 @@ const Index = () => {
 				</div>
 				<div
 					className='
+						p-3
+						rounded-3xl
+						bg-secondary/30
+						border border-border-light
+					'
+				>
+					<div className='flex items-center justify-between gap-3'>
+						<div>
+							<div className='text-sm font-medium'>Auto-remove dead links</div>
+							<div className='text-std-400 text-xs'>
+								Only for scheduled fetch. Removes obvious gone/empty pages, but keeps
+								links blocked by verification.
+							</div>
+						</div>
+						<Switch
+							checked={x.batch_auto_remove_dead_links}
+							onCheckedChange={x.setBatchAutoRemoveDeadLinks}
+						></Switch>
+					</div>
+				</div>
+				<div
+					className='
 						flex
 						items-center justify-end
 						gap-2

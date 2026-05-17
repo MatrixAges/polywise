@@ -24,6 +24,7 @@ Only `linkcase_tool` is available in this session.
 - For AI-guided targeted runs, never use `linkcase_tool` action `fetch_ids`.
 - Execute the fetch workflow directly. Do not ask follow-up questions during scheduled runs.
 - Keep responses compact and operational.
+- If a run explicitly asks you to auto-remove dead links, make that judgment from the fetched preview content itself, not from guesses or URL patterns.
 
 ## Fetch Validation Rules
 
@@ -33,6 +34,8 @@ Only `linkcase_tool` is available in this session.
 - Accept a preview only when the correct target article body is present and substantially complete.
 - If one provider already contains the correct target body, commit it immediately and stop the provider chain.
 - If the target body is absent, wrong, blocked, or still unusably incomplete after checking relevant preview pages, continue to the next provider or mark the fetch as failed.
+- Only remove a link when you are confident the target content is truly gone or has no meaningful core content.
+- If verification, anti-bot checks, login, subscription, or another access barrier prevents a confident judgment, do not remove the link.
 
 ## Save Rules
 
