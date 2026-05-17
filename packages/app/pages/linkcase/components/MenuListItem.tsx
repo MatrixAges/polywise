@@ -31,14 +31,14 @@ const Index = ({ item, index }: IProps) => {
 				`
 				flex
 				items-center
-				gap-3
-				px-3 py-2.5
-				rounded-2xl
+				gap-1.5
+				p-1.5
+				rounded-none
 				border border-transparent
 				group
 				click_button
 			`,
-				selected && 'active border-border-light bg-secondary/80'
+				selected && 'active bg-secondary/60'
 			)}
 			data-index={index}
 			onClick={() => x.selectLink(item.id)}
@@ -66,8 +66,9 @@ const Index = ({ item, index }: IProps) => {
 					overflow-hidden
 					flex shrink-0
 					items-center justify-center
-					size-9
-					rounded-2xl
+					size-7
+					p-1.5
+					rounded-full
 					text-std-400
 					bg-secondary
 				'
@@ -75,26 +76,33 @@ const Index = ({ item, index }: IProps) => {
 				{favicon_src ? (
 					<img className='size-full object-cover' src={favicon_src} alt={item.title} />
 				) : (
-					<Globe className='size-4'></Globe>
+					<Globe className='size-full'></Globe>
 				)}
-			</div>
-			<div className='min-w-0 flex-1'>
-				<div className='text-foreground truncate text-sm font-medium'>{item.title || item.url}</div>
-				<div className='text-std-400 truncate text-xs'>{item.url}</div>
 			</div>
 			<div
-				className={$cx(
-					`
-					shrink-0
-					px-2 py-0.5
-					rounded-full
-					text-[11px] font-medium
-				`,
-					status_style_map[item.status]
-				)}
+				className='
+					flex flex-1 flex-col
+					min-w-0
+				'
 			>
-				{item.status}
+				<div className='text-std-600 text-xsm truncate font-medium'>{item.title || item.url}</div>
+				<div className='text-std-400/80 truncate text-xs'>{item.url}</div>
 			</div>
+			{item.status !== 'none' && (
+				<div
+					className={$cx(
+						`
+						shrink-0
+						px-1.5 py-0.5
+						rounded-full
+						text-xs
+					`,
+						status_style_map[item.status]
+					)}
+				>
+					{item.status}
+				</div>
+			)}
 		</div>
 	)
 }

@@ -18,7 +18,7 @@ const Index = () => {
 				<div
 					className='
 						flex flex-col shrink-0
-						w-[320px] h-full
+						w-[210px] h-full
 						bg-std-50/50
 						border-r border-border-light
 					'

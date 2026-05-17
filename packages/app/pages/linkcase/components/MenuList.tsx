@@ -15,11 +15,10 @@ const Index = () => {
 				overflow-y-auto
 				flex-1
 				min-h-0
-				px-2 py-2
 			'
 			onScroll={x.onMenuScroll}
 		>
-			<div className='flex flex-col gap-1'>
+			<div className='flex flex-col gap-0.5'>
 				{x.items.map((item, index) => (
 					<MenuListItem item={item} index={index} key={item.id}></MenuListItem>
 				))}
