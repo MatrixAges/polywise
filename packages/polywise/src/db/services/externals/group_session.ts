@@ -48,6 +48,12 @@ export const getGroupSession = async (where: SQL) => {
 		.then(res => res[0])
 }
 
+export const getGroupSessionIdList = async () => {
+	const list = await env.db.select({ session_id: group_session.session_id }).from(group_session)
+
+	return list.map(item => item.session_id)
+}
+
 export const removeGroupSession = async (where: SQL) => {
 	return env.db
 		.delete(group_session)
