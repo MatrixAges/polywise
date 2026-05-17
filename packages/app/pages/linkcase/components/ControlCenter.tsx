@@ -99,15 +99,25 @@ const Index = () => {
 						<Plus className='size-3.5'></Plus>
 					</div>
 				</Tooltip>
-				<Tooltip title={x.batch_scheduler_enabled ? 'Stop batch schedule' : 'Start batch schedule'}>
+				<Tooltip title='Scheduled tasks'>
 					<div
-						className='icon_button text-std-150 hover:bg-std-black'
-						onClick={
-							x.batch_scheduler_enabled
-								? x.stopBatchSchedule
-								: () => x.setStartDialogOpen(true)
-						}
+						className={$cx(
+							'icon_button text-std-150 hover:bg-std-black relative',
+							x.batch_scheduler_enabled && 'text-emerald-300'
+						)}
+						onClick={x.openBatchPanel}
 					>
+						{x.batch_scheduler_enabled && (
+							<span
+								className='
+									absolute
+									top-1.5 right-1.5
+									size-1.5
+									rounded-full
+									bg-emerald-400
+								'
+							></span>
+						)}
 						<TimerReset className='size-3.5'></TimerReset>
 					</div>
 				</Tooltip>

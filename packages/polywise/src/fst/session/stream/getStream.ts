@@ -97,7 +97,8 @@ export default async (s: Index, message: Message) => {
 	const shared_runtime = is_linkcase_batch_session
 		? {
 				tools: {
-					linkcase_tool: createLinkcaseTool(s)
+					linkcase_tool: createLinkcaseTool(s),
+					cron_tool: createCronTool(s)
 				},
 				system_tools_prompt: '',
 				custom_tools_prompt: '',

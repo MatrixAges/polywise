@@ -14,8 +14,11 @@ import type { Message } from '@core/fst'
 import type { SessionStatusPayload } from '@core/rpc/session/watchSessionStatus'
 import type { MouseEvent, UIEvent } from 'react'
 import type {
+	LinkcaseBatchAction,
 	LinkcaseBatchIntervalUnit,
+	LinkcaseBatchPanelTab,
 	LinkcaseBatchRunResult,
+	LinkcaseBatchTask,
 	LinkcaseDetail,
 	LinkcaseFilterType,
 	LinkcaseItem,
@@ -24,10 +27,7 @@ import type {
 } from './types'
 
 const linkcase_batch_config_storage_key = 'linkcase_batch_scheduler_config'
-const linkcase_batch_retry_ms = 1_000
-const linkcase_task_busy_error_prefix = 'Linkcase task is already running'
 const parseStoredBoolean = (value: unknown) => value === true || value === 'true'
-type LinkcaseBatchAction = 'fetch' | 'extract'
 type LinkcaseBatchConfig = {
 	batch_count: number
 	batch_interval_value: number
@@ -83,11 +83,10 @@ export default class Index {
 	batch_action_extract_enabled = false
 	batch_extract_interval_value = 5
 	batch_extract_interval_unit = 'minute' as LinkcaseBatchIntervalUnit
-	batch_scheduler_enabled = false
+	batch_panel_tab = 'create' as LinkcaseBatchPanelTab
+	batch_tasks = [] as Array<LinkcaseBatchTask>
 	batch_submit_loading = false
 	batch_running_action = '' as LinkcaseBatchAction | ''
-	batch_fetch_next_run_at = null as number | null
-	batch_extract_next_run_at = null as number | null
 	batch_last_run_at = null as number | null
 	batch_last_error = ''
 	batch_runs = 0
@@ -97,8 +96,9 @@ export default class Index {
 	list_request_key = ''
 	detail_request_key = ''
 	search_timer = 0 as ReturnType<typeof setTimeout> | 0
-	batch_fetch_timer = 0 as ReturnType<typeof setTimeout> | 0
-	batch_extract_timer = 0 as ReturnType<typeof setTimeout> | 0
+	batch_clock = Date.now()
+	batch_clock_timer = 0 as ReturnType<typeof setInterval> | number | 0
+	batch_task_refresh_timer = 0 as ReturnType<typeof setInterval> | number | 0
 
 	constructor(public util: Util) {
 		makeAutoObservable(
@@ -108,8 +108,8 @@ export default class Index {
 				list_request_key: false,
 				detail_request_key: false,
 				search_timer: false,
-				batch_fetch_timer: false,
-				batch_extract_timer: false
+				batch_clock_timer: false,
+				batch_task_refresh_timer: false
 			},
 			{ autoBind: true }
 		)
@@ -171,33 +171,19 @@ export default class Index {
 		return this.items.filter(item => target_id_set.has(item.id))
 	}
 
-	get batch_next_run_texts() {
-		const lines = [] as Array<string>
-
-		if (this.batch_scheduler_enabled && this.batch_action_fetch_enabled && this.batch_fetch_next_run_at) {
-			const seconds = Math.max(Math.ceil((this.batch_fetch_next_run_at - Date.now()) / 1000), 0)
-
-			lines.push(`Fetch next in ${seconds}s`)
-		}
-
-		if (this.batch_scheduler_enabled && this.batch_action_extract_enabled && this.batch_extract_next_run_at) {
-			const seconds = Math.max(Math.ceil((this.batch_extract_next_run_at - Date.now()) / 1000), 0)
-
-			lines.push(`Extract next in ${seconds}s`)
-		}
-
-		return lines
-	}
-
 	get batch_status_text() {
-		const action_label = this.batch_action_label
+		const active_task_count = this.batch_tasks.filter(task => task.enabled).length
+		const paused_task_count = this.batch_tasks.length - active_task_count
+		const next_task = this.batch_tasks
+			.filter(task => task.enabled && task.next_run_at)
+			.sort((a, b) => new Date(a.next_run_at ?? 0).getTime() - new Date(b.next_run_at ?? 0).getTime())[0]
 
 		if (this.linkcase_session_running) {
 			return 'Batch fetch session is running'
 		}
 
 		if (this.batch_submit_loading) {
-			return `Running scheduled ${this.batch_running_action || action_label}`
+			return `Running scheduled ${this.batch_running_action || 'task'}`
 		}
 
 		if (this.selection_fetch_submit_loading) {
@@ -205,26 +191,40 @@ export default class Index {
 		}
 
 		if (this.batch_last_error) {
-			return `Batch ${action_label} warning: ${this.batch_last_error}`
+			return `Batch warning: ${this.batch_last_error}`
 		}
 
-		if (this.batch_scheduler_enabled) {
-			return this.batch_next_run_texts.join(' · ') || `Scheduled ${action_label}`
+		if (next_task?.next_run_at) {
+			return `${active_task_count} active task${active_task_count === 1 ? '' : 's'} · next in ${this.formatBatchRelativeTime(next_task.next_run_at)}`
 		}
 
-		return `Batch ${action_label} idle`
+		if (paused_task_count > 0) {
+			return `${paused_task_count} paused task${paused_task_count === 1 ? '' : 's'}`
+		}
+
+		return 'No scheduled tasks'
 	}
 
-	get batch_action_label() {
-		if (this.batch_action_fetch_enabled && this.batch_action_extract_enabled) {
-			return 'fetch + extract'
-		}
+	get batch_scheduler_enabled() {
+		return this.batch_tasks.some(task => task.enabled)
+	}
 
-		if (this.batch_action_extract_enabled) {
-			return 'extract'
-		}
+	get batch_task_count() {
+		return this.batch_tasks.length
+	}
 
-		return 'fetch'
+	get sorted_batch_tasks() {
+		return [...this.batch_tasks].sort((a, b) => {
+			if (a.enabled !== b.enabled) {
+				return a.enabled ? -1 : 1
+			}
+
+			if ((a.last_status === 'running') !== (b.last_status === 'running')) {
+				return a.last_status === 'running' ? -1 : 1
+			}
+
+			return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+		})
 	}
 
 	async init() {
@@ -292,6 +292,9 @@ export default class Index {
 		)
 
 		this.util.acts = [deinit]
+		void this.loadBatchTasks()
+		this.startBatchClock()
+		this.startBatchTaskRefresh()
 		this.resetMenuSelectionState()
 		this.watchSessionStatus()
 		await this.reloadList()
@@ -408,6 +411,18 @@ export default class Index {
 		this.start_dialog_open = value
 	}
 
+	openBatchPanel() {
+		this.batch_panel_tab = this.batch_task_count > 0 ? 'tasks' : 'create'
+		this.start_dialog_open = true
+		void this.loadBatchTasks()
+	}
+
+	setBatchPanelTab(value: string) {
+		if (value === 'create' || value === 'tasks') {
+			this.batch_panel_tab = value
+		}
+	}
+
 	setSnifferDialogOpen(value: boolean) {
 		this.sniffer_dialog_open = value
 	}
@@ -472,27 +487,22 @@ export default class Index {
 
 	setBatchFetchIntervalValue(value: string) {
 		this.batch_fetch_interval_value = Math.max(Number(value) || 1, 1)
-		this.refreshBatchSchedule('fetch')
 	}
 
 	setBatchFetchIntervalUnit(value: string) {
 		this.batch_fetch_interval_unit = value as LinkcaseBatchIntervalUnit
-		this.refreshBatchSchedule('fetch')
 	}
 
 	setBatchExtractIntervalValue(value: string) {
 		this.batch_extract_interval_value = Math.max(Number(value) || 1, 1)
-		this.refreshBatchSchedule('extract')
 	}
 
 	setBatchExtractIntervalUnit(value: string) {
 		this.batch_extract_interval_unit = value as LinkcaseBatchIntervalUnit
-		this.refreshBatchSchedule('extract')
 	}
 
 	setBatchActionFetchEnabled(value: boolean) {
 		this.batch_action_fetch_enabled = value
-		this.refreshBatchSchedule('fetch')
 	}
 
 	setBatchAutoRemoveDeadLinks(value: boolean) {
@@ -501,7 +511,6 @@ export default class Index {
 
 	setBatchActionExtractEnabled(value: boolean) {
 		this.batch_action_extract_enabled = value
-		this.refreshBatchSchedule('extract')
 	}
 
 	migrateLegacyBatchConfig() {
@@ -587,6 +596,188 @@ export default class Index {
 						: false
 			}
 		} catch {}
+	}
+
+	startBatchClock() {
+		if (this.batch_clock_timer || typeof window === 'undefined') {
+			return
+		}
+
+		this.batch_clock_timer = window.setInterval(() => {
+			this.batch_clock = Date.now()
+		}, 1000)
+	}
+
+	stopBatchClock() {
+		if (!this.batch_clock_timer) {
+			return
+		}
+
+		clearInterval(this.batch_clock_timer)
+		this.batch_clock_timer = 0
+	}
+
+	startBatchTaskRefresh() {
+		if (this.batch_task_refresh_timer || typeof window === 'undefined') {
+			return
+		}
+
+		this.batch_task_refresh_timer = window.setInterval(() => {
+			void this.loadBatchTasks()
+		}, 5000)
+	}
+
+	stopBatchTaskRefresh() {
+		if (!this.batch_task_refresh_timer) {
+			return
+		}
+
+		clearInterval(this.batch_task_refresh_timer)
+		this.batch_task_refresh_timer = 0
+	}
+
+	getBatchTask(task_id: string) {
+		return this.batch_tasks.find(task => task.id === task_id) ?? null
+	}
+
+	async loadBatchTasks() {
+		try {
+			const response = await rpc.linkcase.getSchedules.query()
+			this.batch_tasks = response.tasks
+			this.batch_last_error = ''
+		} catch (error) {
+			this.batch_last_error = error instanceof Error ? error.message : 'Failed to load scheduled tasks'
+		}
+	}
+
+	getBatchTaskActionLabel(action: LinkcaseBatchAction) {
+		return action === 'fetch' ? 'Fetch' : 'Extract'
+	}
+
+	formatBatchAbsoluteTime(value: string | null) {
+		if (!value) {
+			return 'Never'
+		}
+
+		return new Date(value).toLocaleString()
+	}
+
+	formatBatchRelativeTime(value: string | null) {
+		if (!value) {
+			return 'not scheduled'
+		}
+
+		const diff_ms = Math.max(new Date(value).getTime() - this.batch_clock, 0)
+		const total_seconds = Math.ceil(diff_ms / 1000)
+
+		if (total_seconds < 60) {
+			return `${total_seconds}s`
+		}
+
+		const minutes = Math.floor(total_seconds / 60)
+		const seconds = total_seconds % 60
+
+		if (minutes < 60) {
+			return seconds > 0 ? `${minutes}m ${seconds}s` : `${minutes}m`
+		}
+
+		const hours = Math.floor(minutes / 60)
+		const remain_minutes = minutes % 60
+
+		return remain_minutes > 0 ? `${hours}h ${remain_minutes}m` : `${hours}h`
+	}
+
+	getBatchTaskStatusText(task: LinkcaseBatchTask) {
+		if (task.last_status === 'running') {
+			return 'Running now'
+		}
+
+		if (!task.enabled) {
+			return 'Paused'
+		}
+
+		if (task.next_run_at) {
+			return `Next in ${this.formatBatchRelativeTime(task.next_run_at)}`
+		}
+
+		return 'Waiting to schedule'
+	}
+
+	async startBatchSchedule() {
+		if (!this.batch_action_fetch_enabled && !this.batch_action_extract_enabled) {
+			toast.error('Select at least one batch action.')
+
+			return
+		}
+
+		try {
+			const creates = [] as Array<Promise<unknown>>
+
+			if (this.batch_action_fetch_enabled) {
+				creates.push(
+					rpc.linkcase.createSchedule.mutate({
+						action: 'fetch',
+						interval_value: this.batch_fetch_interval_value,
+						interval_unit: this.batch_fetch_interval_unit,
+						count: this.batch_count,
+						auto_remove_dead_links: this.batch_auto_remove_dead_links
+					})
+				)
+			}
+
+			if (this.batch_action_extract_enabled) {
+				creates.push(
+					rpc.linkcase.createSchedule.mutate({
+						action: 'extract',
+						interval_value: this.batch_extract_interval_value,
+						interval_unit: this.batch_extract_interval_unit,
+						count: this.batch_count,
+						auto_remove_dead_links: false
+					})
+				)
+			}
+
+			await Promise.all(creates)
+			await this.loadBatchTasks()
+			this.batch_last_error = ''
+			this.batch_panel_tab = 'tasks'
+			toast.success(`Added ${creates.length} scheduled task${creates.length === 1 ? '' : 's'}.`)
+		} catch (error) {
+			const message = error instanceof Error ? error.message : 'Failed to create scheduled tasks'
+			this.batch_last_error = message
+			toast.error(message)
+		}
+	}
+
+	async toggleBatchTaskEnabled(task_id: string) {
+		const task = this.getBatchTask(task_id)
+
+		if (!task) {
+			return
+		}
+
+		try {
+			await rpc.linkcase.updateSchedule.mutate({
+				id: task.id,
+				enabled: !task.enabled
+			})
+			await this.loadBatchTasks()
+		} catch (error) {
+			const message = error instanceof Error ? error.message : 'Failed to update scheduled task'
+			this.batch_last_error = message
+			toast.error(message)
+		}
+	}
+
+	async removeBatchTask(task_id: string) {
+		try {
+			await rpc.linkcase.removeSchedule.mutate({ id: task_id })
+			await this.loadBatchTasks()
+		} catch (error) {
+			const message = error instanceof Error ? error.message : 'Failed to remove scheduled task'
+			this.batch_last_error = message
+			toast.error(message)
+		}
 	}
 
 	getSnifferStatus(browser: LinkcaseSnifferBrowserId) {
@@ -1237,120 +1428,6 @@ export default class Index {
 		this.menu_target_index = next_index
 	}
 
-	buildBatchPrompt() {
-		if (this.batch_auto_remove_dead_links) {
-			return [
-				'Run one scheduled Linkcase batch fetch cycle.',
-				`First list up to ${this.batch_count} candidate links with status none, fail, or timeout.`,
-				'Do not use linkcase_tool action "fetch_next" for this run.',
-				'For each selected target, use the AI-guided preview workflow: fetch_preview, optionally read_preview, then commit_preview, mark_failed, or remove.',
-				'Judge from the fetched preview content itself.',
-				'Only remove a link when you are confident the target content is truly gone or there is no meaningful core content worth keeping.',
-				'If the page is blocked by verification, anti-bot checks, login, subscription, or any other access barrier that prevents a confident judgment, do not remove it.',
-				'When you cannot confidently confirm a dead link, keep it and mark_failed with a concise reason.',
-				'If one provider preview already contains the correct and substantially complete target article body, commit it immediately and stop the provider chain.',
-				'Before commit_preview, rewrite the fetched result into cleaned markdown that keeps only the core article body.',
-				'If no candidates match, report that clearly.',
-				'Return a concise summary with id, title, final action, status, source, article_id, and any removal or failure reason.'
-			].join('\n')
-		}
-
-		return [
-			'Run one scheduled Linkcase batch fetch cycle.',
-			`Use linkcase_tool action "fetch_next" to fetch up to ${this.batch_count} links.`,
-			'Default priority should remain links with status none, fail, or timeout.',
-			'If no candidates match, report that clearly.',
-			'Return a concise summary with id, title, status, source, and any failures.'
-		].join('\n')
-	}
-
-	getBatchActionEnabled(action: LinkcaseBatchAction) {
-		return action === 'fetch' ? this.batch_action_fetch_enabled : this.batch_action_extract_enabled
-	}
-
-	getBatchIntervalMs(action: LinkcaseBatchAction) {
-		const unit = action === 'fetch' ? this.batch_fetch_interval_unit : this.batch_extract_interval_unit
-		const value = action === 'fetch' ? this.batch_fetch_interval_value : this.batch_extract_interval_value
-		const multiplier = unit === 'minute' ? 60_000 : 1_000
-
-		return Math.max(value, 1) * multiplier
-	}
-
-	setBatchNextRunAt(action: LinkcaseBatchAction, value: number | null) {
-		if (action === 'fetch') {
-			this.batch_fetch_next_run_at = value
-			return
-		}
-
-		this.batch_extract_next_run_at = value
-	}
-
-	clearBatchTimer(action?: LinkcaseBatchAction) {
-		if (!action || action === 'fetch') {
-			if (this.batch_fetch_timer) {
-				clearTimeout(this.batch_fetch_timer)
-				this.batch_fetch_timer = 0
-			}
-		}
-
-		if (!action || action === 'extract') {
-			if (this.batch_extract_timer) {
-				clearTimeout(this.batch_extract_timer)
-				this.batch_extract_timer = 0
-			}
-		}
-	}
-
-	refreshBatchSchedule(action: LinkcaseBatchAction) {
-		if (!this.batch_scheduler_enabled) {
-			return
-		}
-
-		if (!this.getBatchActionEnabled(action)) {
-			this.clearBatchTimer(action)
-			this.setBatchNextRunAt(action, null)
-			return
-		}
-
-		if (this.batch_running_action === action) {
-			return
-		}
-
-		this.queueNextBatchRun(action)
-	}
-
-	queueNextBatchRun(action: LinkcaseBatchAction, delay_ms?: number) {
-		if (!this.batch_scheduler_enabled || !this.getBatchActionEnabled(action)) {
-			this.setBatchNextRunAt(action, null)
-			this.clearBatchTimer(action)
-
-			return
-		}
-
-		const next_delay_ms = delay_ms ?? this.getBatchIntervalMs(action)
-
-		this.clearBatchTimer(action)
-		this.setBatchNextRunAt(action, Date.now() + next_delay_ms)
-
-		const timer = setTimeout(() => {
-			if (action === 'fetch') {
-				this.batch_fetch_timer = 0
-			} else {
-				this.batch_extract_timer = 0
-			}
-
-			this.setBatchNextRunAt(action, null)
-			void this.runBatchCycle(action)
-		}, next_delay_ms)
-
-		if (action === 'fetch') {
-			this.batch_fetch_timer = timer
-			return
-		}
-
-		this.batch_extract_timer = timer
-	}
-
 	patchBatchResult(result: LinkcaseBatchRunResult) {
 		const next_selected_id = this.selected_id
 
@@ -1445,93 +1522,6 @@ export default class Index {
 		void pump()
 	}
 
-	async submitBatchPrompt() {
-		await this.submitSessionPrompt(this.buildBatchPrompt())
-	}
-
-	isLinkcaseTaskBusyError(message: string) {
-		return message.startsWith(linkcase_task_busy_error_prefix)
-	}
-
-	async runBatchCycle(action: LinkcaseBatchAction) {
-		if (!this.batch_scheduler_enabled || !this.getBatchActionEnabled(action)) {
-			return
-		}
-
-		if (this.batch_submit_loading || this.linkcase_session_running) {
-			this.queueNextBatchRun(action, linkcase_batch_retry_ms)
-
-			return
-		}
-
-		this.batch_submit_loading = true
-		this.batch_running_action = action
-		this.batch_last_error = ''
-		this.batch_last_run_at = Date.now()
-		let next_delay_ms = undefined as number | undefined
-
-		try {
-			if (action === 'fetch' && this.batch_auto_remove_dead_links) {
-				await this.submitBatchPrompt()
-				this.batch_runs += 1
-
-				return
-			}
-
-			const result = await rpc.linkcase.runBatch.mutate({
-				count: this.batch_count,
-				run_fetch: action === 'fetch',
-				run_extract: action === 'extract'
-			})
-
-			this.batch_runs += 1
-			this.patchBatchResult(result)
-		} catch (error) {
-			const message = error instanceof Error ? error.message : String(error)
-
-			if (this.isLinkcaseTaskBusyError(message)) {
-				next_delay_ms = linkcase_batch_retry_ms
-			} else {
-				this.batch_last_error = message
-			}
-		} finally {
-			this.batch_submit_loading = false
-			this.batch_running_action = ''
-			this.queueNextBatchRun(action, next_delay_ms)
-		}
-	}
-
-	startBatchSchedule() {
-		if (!this.batch_action_fetch_enabled && !this.batch_action_extract_enabled) {
-			toast.error('Select at least one batch action.')
-
-			return
-		}
-
-		this.batch_scheduler_enabled = true
-		this.start_dialog_open = false
-		this.batch_last_error = ''
-		this.clearBatchTimer()
-		this.batch_fetch_next_run_at = null
-		this.batch_extract_next_run_at = null
-
-		if (this.batch_action_fetch_enabled) {
-			void this.runBatchCycle('fetch')
-		}
-
-		if (this.batch_action_extract_enabled) {
-			void this.runBatchCycle('extract')
-		}
-	}
-
-	stopBatchSchedule() {
-		this.batch_scheduler_enabled = false
-		this.batch_running_action = ''
-		this.batch_fetch_next_run_at = null
-		this.batch_extract_next_run_at = null
-		this.clearBatchTimer()
-	}
-
 	watchSessionStatus() {
 		const deinit = rpc.session.watchSessionStatus.subscribe(undefined, {
 			onData: response => {
@@ -1557,6 +1547,7 @@ export default class Index {
 
 		if (previous_running && !status.running) {
 			void (async () => {
+				await this.loadBatchTasks()
 				await this.reloadList()
 
 				if (this.selected_id) {
@@ -1573,7 +1564,8 @@ export default class Index {
 		}
 
 		this.resetMenuSelectionState()
-		this.stopBatchSchedule()
+		this.stopBatchClock()
+		this.stopBatchTaskRefresh()
 		this.util.deinit()
 	}
 }
