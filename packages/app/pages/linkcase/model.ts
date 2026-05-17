@@ -1252,7 +1252,8 @@ export default class Index {
 			},
 			body: JSON.stringify({
 				id: this.global_session_id,
-				message
+				message,
+				archive_before_submit: true
 			})
 		})
 

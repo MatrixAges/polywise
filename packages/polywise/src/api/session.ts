@@ -8,9 +8,17 @@ import type { Message } from '@core/fst'
 import type { HonoContext } from '@core/types'
 
 export const post = async (c: HonoContext) => {
-	const { id, message } = await c.req.json<{ id: string; message: Message }>()
+	const { id, message, archive_before_submit } = await c.req.json<{
+		id: string
+		message: Message
+		archive_before_submit?: boolean
+	}>()
 
 	const session = await connectSession({ id })
+
+	if (archive_before_submit) {
+		await session.archiveMessages()
+	}
 
 	const stream = await session.getStream(message)
 	const target_store = session instanceof Group ? GroupStreamStore : SessionStreamStore
