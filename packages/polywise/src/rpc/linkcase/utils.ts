@@ -711,7 +711,7 @@ export const runLinkcaseBatch = async (args: { count: number; run_fetch: boolean
 			title: string
 			url: string
 			ok: boolean
-			status: string
+			status: LinkcaseStatus
 			article_id: string | null
 			error: string | null
 		}>

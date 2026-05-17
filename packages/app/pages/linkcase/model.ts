@@ -543,6 +543,7 @@ export default class Index {
 	toListItem(item: LinkcaseItem | LinkcaseDetail): LinkcaseItem {
 		return {
 			id: item.id,
+			hash: item.hash,
 			url: item.url,
 			title: item.title,
 			favicon: item.favicon,
