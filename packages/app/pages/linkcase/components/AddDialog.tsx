@@ -15,7 +15,7 @@ const Index = () => {
 			open={x.add_dialog_open}
 			title='Add Link'
 			desc='Create a Linkcase entry manually. Favicon is fetched from the website automatically.'
-			className='w-[560px]'
+			className='w-[640px]! max-w-[640px]!'
 			setOpen={x.setAddDialogOpen}
 		>
 			<div className='flex flex-col gap-4'>
@@ -43,7 +43,7 @@ const Index = () => {
 						</div>
 					</div>
 					<Textarea
-						className='min-h-[240px]'
+						className='min-h-[240px] focus-within:ring-0!'
 						value={x.add_content}
 						placeholder='If you already have the main body content, paste it here. Leave empty to add the link only.'
 						onChange={event => x.setAddContent(event.target.value)}

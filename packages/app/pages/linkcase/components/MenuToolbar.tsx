@@ -60,9 +60,10 @@ const Index = () => {
 							w-auto! h-8
 							p-0! px-3 py-2
 							rounded-4xl
-							text-xsm text-std-400
+							text-xs! text-std-300
 							bg-layout-over
 						'
+						noStyle
 					>
 						<SelectValue />
 					</SelectTrigger>

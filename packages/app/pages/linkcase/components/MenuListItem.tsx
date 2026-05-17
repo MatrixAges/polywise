@@ -68,7 +68,7 @@ const Index = ({ item, index }: IProps) => {
 					size-7
 					p-1.5
 					rounded-full
-					text-std-400/80
+					text-std-400/60
 					bg-secondary
 				'
 			>
@@ -84,8 +84,8 @@ const Index = ({ item, index }: IProps) => {
 					min-w-0
 				'
 			>
-				<div className='text-std-600 text-xsm truncate font-medium'>{item.title || item.url}</div>
-				<div className='text-std-400/80 truncate text-xs'>{item.url}</div>
+				<div className='text-std-500 text-xsm truncate font-medium'>{item.title || item.url}</div>
+				<div className='text-std-400/60 truncate text-xs'>{item.url}</div>
 			</div>
 			{item.status !== 'none' && (
 				<div
