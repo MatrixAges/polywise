@@ -18,8 +18,8 @@ const Index = () => {
 					className='
 						flex flex-col shrink-0
 						w-[240px] h-full
-						bg-std-50/50
-						border-r border-border-light
+						bg-std-50/60
+						dark:bg-std-100/60 dark:border-r dark:border-border-light/60
 					'
 					onContextMenuCapture={x.onMenuContextCapture}
 				>
