@@ -3,35 +3,51 @@ import { runCommand, trimContent } from './runtime'
 
 import type { FetchProviderHandler } from './types'
 
+const default_run_config_parts = [
+	'wait_until=networkidle',
+	'delay_before_return_html=3',
+	'scan_full_page=true',
+	'scroll_delay=0.4',
+	'process_iframes=false',
+	'remove_overlay_elements=true',
+	'simulate_user=true',
+	'override_navigator=true',
+	'magic=true'
+]
+
+const default_browser_config_parts = [
+	'headless=false',
+	'enable_stealth=true',
+	'user_agent_mode=random',
+	'viewport_width=1440',
+	'viewport_height=900'
+]
+
 const getCrawl4aiArgs = async (url: string) => {
-	const args = [
-		url,
-		'-o',
-		'markdown',
-		'--bypass-cache',
-		'-c',
-		'wait_until=networkidle,delay_before_return_html=1,scan_full_page=true,process_iframes=false,remove_overlay_elements=true,magic=true'
-	]
+	const crawler_config = process.env.CRAWL4AI_RUN_CONFIG?.trim()
+	const args = [url, '-o', 'markdown', '--bypass-cache']
 	const browser_config = process.env.CRAWL4AI_BROWSER_CONFIG?.trim()
 	const browser_type = process.env.CRAWL4AI_BROWSER_TYPE?.trim() || 'chromium'
 	const profile_config = await resolvePolywiseCrawl4aiProfileConfig()
+	const browser_config_parts = [...default_browser_config_parts]
+
+	args.push('-c', [...default_run_config_parts, crawler_config].filter(Boolean).join(','))
 
 	if (profile_config?.user_data_dir) {
-		const managed_browser_config = [
+		browser_config_parts.push(
 			'use_managed_browser=true',
 			`user_data_dir=${profile_config.user_data_dir}`,
-			profile_config.profile_name ? `profile_name=${profile_config.profile_name}` : '',
-			`browser_type=${browser_type}`,
-			'headless=true',
-			browser_config
-		]
-			.filter(Boolean)
-			.join(',')
+			`browser_type=${browser_type}`
+		)
 
-		args.push('-b', managed_browser_config)
-	} else if (browser_config) {
-		args.push('-b', browser_config)
+		if (profile_config.profile_name) {
+			browser_config_parts.push(`profile_name=${profile_config.profile_name}`)
+		}
+	} else {
+		browser_config_parts.push(`browser_type=${browser_type}`)
 	}
+
+	args.push('-b', [...browser_config_parts, browser_config].filter(Boolean).join(','))
 
 	return args
 }
