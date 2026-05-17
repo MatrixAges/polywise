@@ -20,19 +20,20 @@ const Index = () => {
 			className='
 				flex shrink-0
 				items-center justify-between
-				h-14
-				gap-3
-				px-5
+				h-12
+				gap-2
+				px-2.5
 				border-b border-border-light
 			'
 		>
-			<div className='flex min-w-0 items-center gap-3'>
+			<div className='flex min-w-0 items-center gap-2'>
 				<div
 					className='
 						overflow-hidden
 						flex shrink-0
 						items-center justify-center
-						size-10
+						size-7.5
+						p-2
 						rounded-2xl
 						text-std-400
 						bg-secondary
@@ -41,10 +42,10 @@ const Index = () => {
 					{favicon_src ? (
 						<img className='size-full object-cover' src={favicon_src} alt={item?.title || ''} />
 					) : (
-						<Globe className='size-4'></Globe>
+						<Globe className='sizefull'></Globe>
 					)}
 				</div>
-				<div className='min-w-0'>
+				<div className='flex flex-col'>
 					<div className='text-foreground truncate text-sm font-semibold'>
 						{item?.title || 'Select a link'}
 					</div>
@@ -54,7 +55,7 @@ const Index = () => {
 			<div className='flex shrink-0 items-center gap-2'>
 				<Button
 					variant='outline'
-					size='sm'
+					size='xs'
 					disabled={!item || Boolean(x.current_ai_fetching_id) || x.linkcase_session_running}
 					onClick={() => void x.fetchSelectedLinkByAI()}
 				>
@@ -67,7 +68,7 @@ const Index = () => {
 				</Button>
 				<Button
 					variant='secondary'
-					size='sm'
+					size='xs'
 					disabled={!item || x.current_fetching_id === item.id}
 					onClick={() => void x.fetchSelectedLink()}
 				>
@@ -79,7 +80,7 @@ const Index = () => {
 					<span>{has_content ? 'Refetch' : 'Fetch'}</span>
 				</Button>
 				<Button
-					size='sm'
+					size='xs'
 					className='border-black bg-black text-white hover:bg-black/90'
 					disabled={!can_extract || extracting}
 					onClick={() => void x.extractSelectedLink()}
