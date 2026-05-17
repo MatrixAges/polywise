@@ -3,7 +3,7 @@ export interface Workspace {
 	endpoint?: string
 }
 
-export const default_fetch_fallback_chain = ['agent-browser', 'opencli', 'crawl4ai', 'dokobot', 'r.jina.ai'] as const
+export const default_fetch_fallback_chain = ['agent-browser', 'opencli', 'dokobot', 'crawl4ai', 'r.jina.ai'] as const
 
 export type WebfetchFallbackProvider = (typeof default_fetch_fallback_chain)[number]
 
