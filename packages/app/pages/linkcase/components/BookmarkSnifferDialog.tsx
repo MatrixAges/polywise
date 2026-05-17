@@ -155,8 +155,8 @@ const BrowserCard = observer((props: { browser: LinkcaseSnifferBrowserStatus }) 
 				border border-border-light
 			'
 		>
-			<div className='flex items-start justify-between gap-4'>
-				<div className='min-w-0 flex-1'>
+			<div className='flex items-center justify-between gap-3'>
+				<div className='flex flex-1 flex-col gap-2'>
 					<div className='flex items-center gap-2'>
 						<div className='text-sm font-semibold'>{browser.name}</div>
 						<div
@@ -170,13 +170,11 @@ const BrowserCard = observer((props: { browser: LinkcaseSnifferBrowserStatus }) 
 							{browser.available ? 'ready' : 'unavailable'}
 						</div>
 					</div>
-					<div className='text-std-400 mt-1 text-sm'>{browser.message}</div>
 					<div
 						className='
 							flex flex-wrap
 							items-center
 							gap-x-3 gap-y-1
-							mt-2
 							text-std-300 text-xs
 						'
 					>

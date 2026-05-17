@@ -11,14 +11,11 @@ const Index = () => {
 		<Dialog
 			open={x.session_dialog_open}
 			title='Linkcase Batch Session'
-			desc='Session id: global_linkcase_session'
-			className='w-[1100px] max-w-none! gap-4'
-			maxHeight='h-[78vh]'
+			className='w-[800px] max-w-[80vw]!'
+			maxHeight='h-[80vh]'
 			setOpen={x.setSessionDialogOpen}
 		>
-			<div className='h-[68vh]'>
-				<Session type='dialog' id={x.global_session_id}></Session>
-			</div>
+			<Session type='dialog' id={x.global_session_id}></Session>
 		</Dialog>
 	)
 }
