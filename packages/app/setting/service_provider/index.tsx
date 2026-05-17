@@ -152,11 +152,7 @@ const SortableProviderCard = (props: SortableProviderCardProps) => {
 						type='button'
 						aria-label={`Drag to reorder ${provider.name}`}
 						className={`
-							opacity-0
-							transition-opacity
-							group-hover:opacity-100
 							active:cursor-grabbing
-							focus-visible:opacity-100
 							icon_button small cursor-grab
 							${isDragging ? 'opacity-100' : ''}
 						`}
@@ -231,7 +227,7 @@ const SortableProviderCard = (props: SortableProviderCardProps) => {
 										{check.status}
 									</Badge>
 								</div>
-								<div className='text-std-500 text-sm break-words whitespace-pre-wrap'>
+								<div className='text-std-500 text-sm wrap-break-word whitespace-pre-wrap'>
 									{check.detail}
 								</div>
 							</div>
