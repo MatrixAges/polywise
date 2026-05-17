@@ -27,11 +27,13 @@ type LinkcaseProviderId = LinkcaseProvider['id']
 
 const provider_status_text = (provider: LinkcaseProvider) => {
 	if (!provider.installed) return 'Not installed'
+	if (provider.runtime_probe_deferred) return 'Check on refresh'
 	return provider.ready ? 'Ready' : 'Needs setup'
 }
 
 const provider_status_variant = (provider: LinkcaseProvider) => {
 	if (!provider.installed) return 'outline'
+	if (provider.runtime_probe_deferred) return 'outline'
 	return provider.ready ? 'secondary' : 'destructive'
 }
 
@@ -273,11 +275,11 @@ const Index = () => {
 		s.setConfig('config', values)
 	})
 
-	const refreshProviders = useMemoizedFn(async () => {
+	const refreshProviders = useMemoizedFn(async (probe_runtime = false) => {
 		setLoading(true)
 
 		try {
-			const res = await rpc.linkcase.getContentProviders.query()
+			const res = await rpc.linkcase.getContentProviders.query({ probe_runtime })
 			setProviders(orderProvidersByChain(res.providers, fallback_chain))
 		} catch (error) {
 			toast.error(error instanceof Error ? error.message : 'Failed to load Linkcase providers')
@@ -292,7 +294,7 @@ const Index = () => {
 		try {
 			await rpc.linkcase.installContentProvider.mutate({ id })
 			toast.success('Installed')
-			await refreshProviders()
+			await refreshProviders(false)
 		} catch (error) {
 			toast.error(error instanceof Error ? error.message : 'Install failed')
 		} finally {
@@ -313,7 +315,7 @@ const Index = () => {
 						: 'Crawl4AI profile created from current Chrome session'
 					: 'Crawl4AI profile already exists'
 			)
-			await refreshProviders()
+			await refreshProviders(false)
 		} catch (error) {
 			toast.error(error instanceof Error ? error.message : 'Provider action failed')
 		} finally {
@@ -357,7 +359,7 @@ const Index = () => {
 	)
 
 	useEffect(() => {
-		void refreshProviders()
+		void refreshProviders(false)
 	}, [refreshProviders])
 
 	useEffect(() => {
@@ -380,14 +382,15 @@ const Index = () => {
 						<FieldDescription>
 							Detect, install, and drag to reorder the local providers used by Linkcase.
 							This also rewrites `fetch_fallback_chain`; `r.jina.ai` stays as the final
-							remote fallback.
+							remote fallback. Opening this page does not start OpenCLI; click Refresh to
+							run active runtime checks.
 						</FieldDescription>
 					</FieldContent>
 					<Button
 						type='button'
 						variant='outline'
 						size='sm'
-						onClick={() => void refreshProviders()}
+						onClick={() => void refreshProviders(true)}
 						disabled={loading}
 					>
 						{loading ? <Spinner className='size-4' /> : <RefreshCw className='size-4' />}

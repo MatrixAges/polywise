@@ -26,16 +26,23 @@ export default p.input(input_type).mutation(async ({ input }) => {
 	const outputs: Array<string> = []
 	let last_result: Awaited<ReturnType<typeof runShellCommand>> | null = null
 
-	for (const command of provider.install_commands) {
-		const result = await runShellCommand(command)
+	for (const install_item of provider.install_commands) {
+		const install_command =
+			typeof install_item === 'string'
+				? { command: install_item, timeout_ms: 10 * 60 * 1000 }
+				: {
+						command: install_item.command,
+						timeout_ms: install_item.timeout_ms ?? 10 * 60 * 1000
+					}
+		const result = await runShellCommand(install_command.command, install_command.timeout_ms)
 		last_result = result
 
 		if (result.stdout.trim()) {
-			outputs.push(`$ ${command}\n${result.stdout.trim()}`)
+			outputs.push(`$ ${install_command.command}\n${result.stdout.trim()}`)
 		}
 
 		if (result.stderr.trim()) {
-			outputs.push(`$ ${command}\n${result.stderr.trim()}`)
+			outputs.push(`$ ${install_command.command}\n${result.stderr.trim()}`)
 		}
 
 		const installed = await isToolInstalled(provider.detect)
@@ -48,6 +55,10 @@ export default p.input(input_type).mutation(async ({ input }) => {
 				stdout: result.stdout,
 				stderr: result.stderr
 			}
+		}
+
+		if (result.exitCode !== 0) {
+			break
 		}
 	}
 

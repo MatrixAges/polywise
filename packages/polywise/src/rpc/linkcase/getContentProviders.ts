@@ -1,6 +1,7 @@
 import { config } from '@core/config'
 import { default_fetch_fallback_chain } from '@core/types'
 import { p } from '@core/utils'
+import { z } from 'zod'
 
 import { getPolywiseCrawl4aiManagedProfile } from '../../utils/crawl4aiProfile'
 import { linkcase_content_providers } from './providers'
@@ -12,7 +13,12 @@ import {
 	isToolInstalled
 } from './runtime'
 
-export default p.query(async () => {
+const input_type = z.object({
+	probe_runtime: z.boolean().default(false)
+})
+
+export default p.input(input_type).query(async ({ input }) => {
+	const probe_runtime = input.probe_runtime
 	const fallback_chain =
 		Array.isArray(config.fetch_fallback_chain) && config.fetch_fallback_chain.length
 			? config.fetch_fallback_chain
@@ -34,7 +40,7 @@ export default p.query(async () => {
 			if (item.id === 'opencli') {
 				checks.push(
 					installed
-						? await getOpencliBrowserBridgeCheck()
+						? await getOpencliBrowserBridgeCheck(probe_runtime)
 						: {
 								id: 'browser-bridge',
 								label: 'Browser Bridge',
@@ -72,7 +78,11 @@ export default p.query(async () => {
 			return {
 				...item,
 				installed,
-				ready: installed && checks.every(check => check.status === 'ok' || check.status === 'info'),
+				ready:
+					installed &&
+					checks.every(check => check.status === 'ok' || check.status === 'info') &&
+					(item.id !== 'opencli' || probe_runtime),
+				runtime_probe_deferred: item.id === 'opencli' && installed && !probe_runtime,
 				checks,
 				crawl4ai_profile
 			}

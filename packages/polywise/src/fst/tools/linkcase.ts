@@ -2,6 +2,7 @@ import { link } from '@core/db/schema'
 import { getLinks } from '@core/db/services'
 import {
 	commitLinkcasePreview,
+	createLinkcaseItem,
 	fetchLinkcaseLink,
 	getLinkcaseKeywordWhere,
 	hydrateLinkcaseItems,
@@ -20,6 +21,7 @@ import type Session from '../session'
 
 const inputSchema = object({
 	action: Enum([
+		'create',
 		'status',
 		'list',
 		'fetch_next',
@@ -29,8 +31,12 @@ const inputSchema = object({
 		'commit_preview',
 		'mark_failed'
 	]).describe(
-		'The action to perform. status: count links by current status. list: list candidate links without fetching. fetch_next: automatically select and fetch the next batch. fetch_ids: fetch an explicit list of link ids. fetch_preview: fetch one link through one explicit provider without saving so the agent can inspect the result. read_preview: read another page from a previously fetched preview without switching providers. commit_preview: persist a previously inspected preview. mark_failed: finalize a failed AI-driven fetch attempt.'
+		'The action to perform. create: add one new link, optionally with title and cleaned content. status: count links by current status. list: list candidate links without fetching. fetch_next: automatically select and fetch the next batch. fetch_ids: fetch an explicit list of link ids. fetch_preview: fetch one link through one explicit provider without saving so the agent can inspect the result. read_preview: read another page from a previously fetched preview without switching providers. commit_preview: persist a previously inspected preview. mark_failed: finalize a failed AI-driven fetch attempt.'
 	),
+	url: string().url().optional().describe('[Required for create] Link URL to add.'),
+	title: string()
+		.optional()
+		.describe('[Optional for create] Human-readable title. Defaults to the URL when omitted.'),
 	ids: array(string()).optional().describe('[Required for fetch_ids] Exact link ids to fetch in sequence.'),
 	id: string().optional().describe('[Required for fetch_preview/mark_failed] Exact link id to inspect or mark.'),
 	preview_key: string()
@@ -41,7 +47,7 @@ const inputSchema = object({
 	content: string()
 		.optional()
 		.describe(
-			'[Required for commit_preview] Cleaned core article body to save. Remove ads, share widgets, related links, author cards, post navigation, comments, subscribe prompts, cookie notices, and any other non-body text. You may rewrite markdown formatting, but preserve the article meaning.'
+			'[Required for commit_preview, optional for create] Cleaned core article body to save. Remove ads, share widgets, related links, author cards, post navigation, comments, subscribe prompts, cookie notices, and any other non-body text. You may rewrite markdown formatting, but preserve the article meaning.'
 		),
 	page: number()
 		.int()
@@ -170,6 +176,7 @@ export const createLinkcaseTool = (_s: Session) => {
 	return tool({
 		description: [
 			'Batch-manage Linkcase link fetching.',
+			'Use create to add one new link to Linkcase, optionally with title and cleaned content.',
 			'Use fetch_next for automated scheduled runs. It prefers links with status none, fail, or timeout unless you override include_statuses.',
 			'Fetching always uses the fallback chain and treats empty content as a failed attempt until a downstream provider succeeds or the chain is exhausted.',
 			'For AI-guided fetch validation, use fetch_preview with one provider at a time. Inspect the returned content_preview yourself, decide whether it is the real target content, and either continue with the next provider, commit_preview, or mark_failed.',
@@ -181,6 +188,27 @@ export const createLinkcaseTool = (_s: Session) => {
 		].join('\n'),
 		inputSchema,
 		execute: async input => {
+			if (input.action === 'create') {
+				if (!input.url) {
+					return {
+						action: 'create' as const,
+						error: 'url is required for create action'
+					}
+				}
+
+				const item = await createLinkcaseItem({
+					url: input.url,
+					title: input.title,
+					content: input.content
+				})
+
+				return {
+					action: 'create' as const,
+					ok: true as const,
+					item: item ? stripFaviconFromLink(item) : null
+				}
+			}
+
 			if (input.action === 'status') {
 				const rows = await getLinks({
 					where: buildWhere(input, false)

@@ -1,3 +1,10 @@
+export type LinkcaseInstallCommand =
+	| string
+	| {
+			command: string
+			timeout_ms?: number
+	  }
+
 export const linkcase_content_providers = [
 	{
 		id: 'agent-browser',
@@ -5,7 +12,12 @@ export const linkcase_content_providers = [
 		description:
 			'Native browser automation provider for agent-driven page navigation and extraction, with Chrome profile and CDP attach support.',
 		detect: 'agent-browser',
-		install_commands: ['npm install -g agent-browser && agent-browser install'],
+		install_commands: [
+			{
+				command: 'npm install -g agent-browser && agent-browser install',
+				timeout_ms: 10 * 60 * 1000
+			}
+		],
 		docs_url: 'https://agent-browser.dev/installation'
 	},
 	{
@@ -14,7 +26,7 @@ export const linkcase_content_providers = [
 		description:
 			'CLI browser/content provider that uses Browser Bridge to drive your logged-in Chrome session.',
 		detect: 'opencli',
-		install_commands: ['npm install -g @jackwener/opencli'],
+		install_commands: [{ command: 'npm install -g @jackwener/opencli', timeout_ms: 10 * 60 * 1000 }],
 		docs_url: 'https://opencli.info/docs/guide/installation.html'
 	},
 	{
@@ -23,7 +35,16 @@ export const linkcase_content_providers = [
 		description:
 			'CLI crawler with markdown output and managed Chromium profile support for logged-in local sessions.',
 		detect: 'crwl',
-		install_commands: ['python3 -m pip install -U crawl4ai && crawl4ai-setup'],
+		install_commands: [
+			{
+				command: 'python3 -m pip install -U crawl4ai',
+				timeout_ms: 15 * 60 * 1000
+			},
+			{
+				command: 'crawl4ai-setup',
+				timeout_ms: 10 * 60 * 1000
+			}
+		],
 		docs_url: 'https://docs.crawl4ai.com/core/cli/'
 	},
 	{
@@ -32,7 +53,7 @@ export const linkcase_content_providers = [
 		description:
 			'Local browser agent CLI that can read through your logged-in Chrome session via the Dokobot extension bridge.',
 		detect: 'dokobot',
-		install_commands: ['npm i -g @dokobot/cli@latest'],
+		install_commands: [{ command: 'npm i -g @dokobot/cli@latest', timeout_ms: 10 * 60 * 1000 }],
 		docs_url: 'https://dokobot.ai/zh-CN/help/install-cli'
 	}
 ] as const

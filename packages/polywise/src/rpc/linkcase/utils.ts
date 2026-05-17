@@ -3,6 +3,7 @@ import { getNodeRowid, insertNodeVector } from '@core/db/prepare'
 import { article, chunk, edge, link, link_article, node } from '@core/db/schema'
 import {
 	addEdge,
+	addLink,
 	addNode,
 	getArticle,
 	getChunks,
@@ -262,6 +263,47 @@ export const getLinkcaseReadItem = async (id: string) => {
 				}
 			: null
 	}
+}
+
+export const createLinkcaseItem = async (args: { url: string; title?: string; content?: string }) => {
+	const url = args.url.trim()
+	const title = args.title?.trim() || url
+	const content = args.content?.trim() || ''
+	const favicon = await getLinkFavicon(url).catch(() => null)
+
+	const created_link = await addLink({
+		url,
+		title,
+		...(favicon ? { favicon } : {})
+	})
+
+	if (!created_link) {
+		throw new Error(`Failed to create link: ${url}`)
+	}
+
+	await setLink(eq(link.id, created_link.id), {
+		title,
+		...(favicon ? { favicon } : {}),
+		...(content
+			? {
+					status: 'success' as const,
+					generate_at: new Date()
+				}
+			: {})
+	})
+
+	if (content) {
+		const article_id = await saveArticle({
+			title,
+			content,
+			for: 'linkcase',
+			exec_pipeline: false
+		})
+
+		await addLinkArticle(created_link.id, article_id)
+	}
+
+	return getLinkcaseReadItem(created_link.id)
 }
 
 const isTimeoutError = (message?: string) => {

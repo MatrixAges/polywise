@@ -9,12 +9,13 @@ export const isToolInstalled = async (tool_name: string) => {
 	return Boolean(await resolveCommand(tool_name))
 }
 
-export const runShellCommand = async (command: string) => {
+export const runShellCommand = async (command: string, timeout = 30000) => {
 	const shell = process.env.SHELL ?? '/bin/sh'
 
 	return await new Promise<{ stdout: string; stderr: string; exitCode: number }>(resolve => {
 		const stdout_chunks: Array<string> = []
 		const stderr_chunks: Array<string> = []
+		let settled = false
 		const use_windows_shell = process.platform === 'win32'
 
 		const child = use_windows_shell
@@ -27,6 +28,19 @@ export const runShellCommand = async (command: string) => {
 					env: process.env
 				})
 
+		const timer = setTimeout(() => {
+			if (settled) return
+
+			settled = true
+			child.kill('SIGKILL')
+
+			resolve({
+				stdout: stdout_chunks.join(''),
+				stderr: stderr_chunks.join('') || `Command timed out after ${timeout}ms`,
+				exitCode: 124
+			})
+		}, timeout)
+
 		child.stdout?.on('data', chunk => {
 			stdout_chunks.push(String(chunk))
 		})
@@ -36,6 +50,11 @@ export const runShellCommand = async (command: string) => {
 		})
 
 		child.on('error', error => {
+			if (settled) return
+
+			settled = true
+			clearTimeout(timer)
+
 			resolve({
 				stdout: stdout_chunks.join(''),
 				stderr: error.message || stderr_chunks.join(''),
@@ -44,6 +63,11 @@ export const runShellCommand = async (command: string) => {
 		})
 
 		child.on('close', code => {
+			if (settled) return
+
+			settled = true
+			clearTimeout(timer)
+
 			resolve({
 				stdout: stdout_chunks.join(''),
 				stderr: stderr_chunks.join(''),
@@ -64,8 +88,19 @@ const getStatusFromDoctorOutput = (output: string): LinkcaseProviderCheckStatus 
 	return 'info'
 }
 
-export const getOpencliBrowserBridgeCheck = async (): Promise<LinkcaseProviderCheck> => {
-	const result = await runShellCommand('opencli doctor')
+export const getOpencliBrowserBridgeCheck = async (probe_runtime = false): Promise<LinkcaseProviderCheck> => {
+	if (!probe_runtime) {
+		return {
+			id: 'browser-bridge',
+			label: 'Browser Bridge',
+			status: 'info',
+			detail: 'Runtime probe is deferred until you click Refresh or OpenCLI is used, so opening this page does not start the Browser Bridge.',
+			action_label: 'Install bridge',
+			action_url: opencli_browser_bridge_install_url
+		}
+	}
+
+	const result = await runShellCommand('opencli doctor', 15000)
 	const output = `${result.stdout}\n${result.stderr}`.trim()
 
 	if (!output) {
@@ -110,7 +145,7 @@ export const getOpencliBrowserBridgeCheck = async (): Promise<LinkcaseProviderCh
 }
 
 export const getAgentBrowserChromeProfileCheck = async (): Promise<LinkcaseProviderCheck> => {
-	const result = await runShellCommand('agent-browser profiles')
+	const result = await runShellCommand('agent-browser profiles', 15000)
 	const output = `${result.stdout}\n${result.stderr}`.trim()
 
 	if (result.exitCode !== 0) {
@@ -158,7 +193,7 @@ export const getCrawl4aiProfileCheck = async (): Promise<LinkcaseProviderCheck> 
 }
 
 export const getDokobotBridgeCheck = async (): Promise<LinkcaseProviderCheck> => {
-	const result = await runShellCommand('dokobot doko list')
+	const result = await runShellCommand('dokobot doko list', 15000)
 	const output = `${result.stdout}\n${result.stderr}`.trim()
 
 	if (result.exitCode !== 0) {
