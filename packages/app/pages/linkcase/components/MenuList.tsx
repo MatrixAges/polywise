@@ -23,29 +23,17 @@ const Index = () => {
 					<MenuListItem item={item} index={index} key={item.id}></MenuListItem>
 				))}
 				{(x.has_more || x.loading_more) && (
-					<Button
-						className='w-full'
-						variant='outline'
-						size='sm'
-						disabled={x.loading || x.loading_more}
-						onClick={x.loadMoreList}
-					>
-						{x.loading_more && <Loader className='size-3 animate-spin'></Loader>}
-						{x.loading_more ? 'Loading more' : 'Load more'}
-					</Button>
-				)}
-				{x.loading_more && (
-					<div
-						className='
-							flex
-							items-center justify-center
-							gap-2
-							py-3
-							text-xs text-std-300
-						'
-					>
-						<Loader className='size-3 animate-spin'></Loader>
-						<span>Loading more</span>
+					<div className='px-1.5'>
+						<Button
+							className='w-full'
+							variant='outline'
+							size='sm'
+							disabled={x.loading || x.loading_more}
+							onClick={x.loadMoreList}
+						>
+							{x.loading_more && <Loader className='size-3 animate-spin'></Loader>}
+							{x.loading_more ? 'Loading more' : 'Load more'}
+						</Button>
 					</div>
 				)}
 				{!x.loading && x.items.length === 0 && (
