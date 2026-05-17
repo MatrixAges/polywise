@@ -14,23 +14,29 @@ const Index = () => {
 	return (
 		<div
 			className='
-				flex
-				items-center
+				flex flex-col
 				gap-2
-				px-3 py-2
+				px-2 py-2
 				bg-secondary/20
 				border-b border-border-light
 			'
 		>
-			<div className='text-std-400 min-w-0 flex-1 text-xs'>
-				{x.has_checked_items ? `${x.checked_count} selected` : 'Select links for batch actions'}
+			<div
+				className='
+					flex
+					items-center justify-between
+					text-std-400 text-xs
+				'
+			>
+				{x.has_checked_items ? `${x.checked_count} selected` : 'Select links'}
+				<Button variant='ghost' size='xs' onClick={x.toggleCheckAllLoadedLinks}>
+					{x.all_loaded_checked ? 'Unselect all' : 'Select all'}
+				</Button>
 			</div>
-			<Button variant='ghost' size='xs' onClick={x.toggleCheckAllLoadedLinks}>
-				{x.all_loaded_checked ? 'Unselect all' : 'Select all'}
-			</Button>
 			{x.has_checked_items && (
-				<>
+				<div className='flex justify-between gap-1.5'>
 					<Button
+						className='flex-1'
 						variant='outline'
 						size='xs'
 						disabled={
@@ -42,7 +48,11 @@ const Index = () => {
 					>
 						{x.selection_fetch_submit_loading ? 'Submitting' : 'Fetch'}
 					</Button>
+					<Button className='flex-1' variant='outline' size='xs' onClick={x.clearCheckedLinks}>
+						Clear
+					</Button>
 					<Button
+						className='flex-1'
 						variant='destructive'
 						size='xs'
 						disabled={x.selection_remove_loading}
@@ -50,10 +60,7 @@ const Index = () => {
 					>
 						{x.selection_remove_loading ? 'Removing' : 'Delete'}
 					</Button>
-					<Button variant='ghost' size='xs' onClick={x.clearCheckedLinks}>
-						Clear
-					</Button>
-				</>
+				</div>
 			)}
 		</div>
 	)

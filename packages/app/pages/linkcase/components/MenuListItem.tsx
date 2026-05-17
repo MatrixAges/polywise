@@ -49,12 +49,11 @@ const Index = ({ item, index }: IProps) => {
 					className='
 						flex shrink-0
 						items-center justify-center
-						size-5
 					'
 					onClick={event => event.stopPropagation()}
 				>
 					<input
-						className='accent-primary size-4 cursor-pointer'
+						className='accent-primary size-3 cursor-pointer'
 						type='checkbox'
 						checked={x.isLinkChecked(item.id)}
 						onChange={event => x.toggleLinkChecked(item.id, event.currentTarget.checked)}
