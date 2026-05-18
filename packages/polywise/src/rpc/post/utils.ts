@@ -460,6 +460,207 @@ export const listPostRelatedArticles = async (post_id: string) => {
 		)
 }
 
+const splitRelatedSearchTerms = (query: string) => {
+	const raw = query.trim()
+
+	if (!raw) {
+		return []
+	}
+
+	const parts = raw
+		.split(/[\s,，。！？!?:：;；、/\\|()[\]{}"'`]+/u)
+		.map(item => item.trim())
+		.filter(Boolean)
+
+	return Array.from(new Set([raw, ...parts.filter(item => item.length >= 2)])).slice(0, 12)
+}
+
+const getRelatedSnippet = (content: string, terms: Array<string>) => {
+	const text = content.replace(/\s+/g, ' ').trim()
+
+	if (!text) {
+		return ''
+	}
+
+	const lower_text = text.toLowerCase()
+	const first_match_index = terms
+		.map(term => lower_text.indexOf(term.toLowerCase()))
+		.filter(index => index >= 0)
+		.sort((a, b) => a - b)[0]
+
+	if (typeof first_match_index !== 'number') {
+		return text.slice(0, 240)
+	}
+
+	const start = Math.max(0, first_match_index - 90)
+	const end = Math.min(text.length, first_match_index + 150)
+	const snippet = text.slice(start, end)
+
+	return `${start > 0 ? '...' : ''}${snippet}${end < text.length ? '...' : ''}`
+}
+
+const getRelatedSourceScore = (args: {
+	query: string
+	terms: Array<string>
+	title: string | null
+	content: string
+	keywords?: string | null
+	updated_at: Date | null
+}) => {
+	const { query, terms, title, content, keywords = '', updated_at } = args
+	const lower_query = query.trim().toLowerCase()
+	const haystack = `${title ?? ''}\n${content}\n${keywords}`.toLowerCase()
+	const lower_title = (title ?? '').toLowerCase()
+	let score = 0
+
+	if (lower_query && haystack.includes(lower_query)) {
+		score += 8
+	}
+
+	if (lower_query && lower_title.includes(lower_query)) {
+		score += 5
+	}
+
+	for (const term of terms) {
+		const lower_term = term.toLowerCase()
+
+		if (haystack.includes(lower_term)) {
+			score += term === query ? 3 : 1.5
+		}
+
+		if (lower_title.includes(lower_term)) {
+			score += 1.5
+		}
+	}
+
+	if (updated_at) {
+		const day_ms = 24 * 60 * 60 * 1000
+		const days_ago = Math.max(0, (Date.now() - updated_at.getTime()) / day_ms)
+
+		score += 1 / (1 + days_ago * 0.1)
+	}
+
+	return score
+}
+
+export const searchPostRelatedArticleSources = async (args: {
+	post_id: string
+	query: string
+	max_results?: number
+}) => {
+	const query = args.query.trim()
+
+	if (!query) {
+		return {
+			query,
+			related_article_count: 0,
+			results: []
+		}
+	}
+
+	const related_articles = await env.db
+		.select({
+			id: article.id,
+			title: article.title,
+			content: article.content,
+			for_type: article.for,
+			updated_at: article.updated_at
+		})
+		.from(post_article)
+		.innerJoin(article, eq(post_article.article_id, article.id))
+		.where(eq(post_article.post_id, args.post_id))
+
+	if (related_articles.length === 0) {
+		return {
+			query,
+			related_article_count: 0,
+			results: []
+		}
+	}
+
+	const related_article_ids = related_articles.map(item => item.id)
+	const related_chunks = await getChunks({
+		where: inArray(chunk.article_id, related_article_ids),
+		orderBy: [desc(chunk.created_at), asc(chunk.position)]
+	})
+	const terms = splitRelatedSearchTerms(query)
+	const max_results = Math.min(Math.max(args.max_results ?? 5, 1), 8)
+	const chunk_map = new Map<string, Array<(typeof related_chunks)[number]>>()
+
+	for (const item of related_chunks) {
+		if (!item.article_id) {
+			continue
+		}
+
+		const list = chunk_map.get(item.article_id) ?? []
+
+		list.push(item)
+		chunk_map.set(item.article_id, list)
+	}
+
+	const results = related_articles
+		.map(article_item => {
+			const article_chunks = chunk_map.get(article_item.id) ?? []
+			const chunk_hits = article_chunks
+				.map(chunk_item => {
+					const content = chunk_item.content ?? ''
+					const score = getRelatedSourceScore({
+						query,
+						terms,
+						title: article_item.title,
+						content,
+						keywords: chunk_item.keywords,
+						updated_at: article_item.updated_at
+					})
+
+					return {
+						content,
+						keywords: chunk_item.keywords,
+						score
+					}
+				})
+				.filter(item => item.score > 0)
+				.sort((a, b) => b.score - a.score)
+			const best_chunk = chunk_hits[0]
+			const article_score = getRelatedSourceScore({
+				query,
+				terms,
+				title: article_item.title,
+				content: article_item.content,
+				updated_at: article_item.updated_at
+			})
+			const best_score = Math.max(best_chunk?.score ?? 0, article_score)
+
+			if (best_score <= 0) {
+				return null
+			}
+
+			const snippet_source = best_chunk?.content || article_item.content
+			const matched_terms = terms.filter(term =>
+				`${article_item.title ?? ''}\n${snippet_source}`.toLowerCase().includes(term.toLowerCase())
+			)
+
+			return {
+				article_id: article_item.id,
+				title: article_item.title,
+				for_type: article_item.for_type,
+				score: Math.round(best_score * 100) / 100,
+				updated_at: article_item.updated_at?.toISOString() ?? null,
+				snippet: getRelatedSnippet(snippet_source, matched_terms.length ? matched_terms : terms),
+				matched_terms: matched_terms.slice(0, 6)
+			}
+		})
+		.filter(item => item !== null)
+		.sort((a, b) => b.score - a.score)
+		.slice(0, max_results)
+
+	return {
+		query,
+		related_article_count: related_articles.length,
+		results
+	}
+}
+
 export const searchRelatedArticleCandidates = async (args: { post_id: string; query: string; page: number }) => {
 	const keyword = args.query.trim()
 

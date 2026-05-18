@@ -4,9 +4,14 @@ import { getPostSessions } from '@core/db/services/externals'
 import { saveArticle } from '@core/io'
 import { tool } from 'ai'
 import { eq } from 'drizzle-orm'
-import { boolean, enum as Enum, object, string } from 'zod'
+import { boolean, enum as Enum, number, object, string } from 'zod'
 
-import { getPostById, getPostSessionTitle, normalizePostForType } from '../../rpc/post/utils'
+import {
+	getPostById,
+	getPostSessionTitle,
+	normalizePostForType,
+	searchPostRelatedArticleSources
+} from '../../rpc/post/utils'
 
 import type Session from '../session'
 
@@ -237,15 +242,25 @@ export const createPostTool = (session: Session) =>
 		description: [
 			'Operate on the current post linked to this session.',
 			'Use get_post before editing when you need the latest content.',
+			'Use search_related_articles first when drafting, revising, or fact-checking against the post-linked related articles.',
 			'Use get_outline and update_outline when you need to inspect or change the markdown heading structure.',
 			'Use replace_selection for targeted rewrites from the user-selected passage.',
 			'Use update_post for broader title/content/for_type updates.'
 		].join('\n'),
 		inputSchema: object({
-			action: Enum(['get_post', 'get_outline', 'update_outline', 'update_post', 'replace_selection']),
+			action: Enum([
+				'get_post',
+				'search_related_articles',
+				'get_outline',
+				'update_outline',
+				'update_post',
+				'replace_selection'
+			]),
 			title: string().optional(),
 			content: string().optional(),
 			for_type: string().optional(),
+			query: string().optional(),
+			max_results: number().int().min(1).max(8).optional(),
 			outline_markdown: string().optional(),
 			selection_text: string().optional(),
 			replacement: string().optional(),
@@ -280,6 +295,27 @@ export const createPostTool = (session: Session) =>
 						ok: true,
 						post: current_post
 					}
+				case 'search_related_articles': {
+					if (!input.query?.trim()) {
+						return {
+							ok: false,
+							error: 'query is required for search_related_articles'
+						}
+					}
+
+					const search_result = await searchPostRelatedArticleSources({
+						post_id: current_post.id,
+						query: input.query,
+						max_results: input.max_results
+					})
+
+					return {
+						ok: true,
+						query: search_result.query,
+						related_article_count: search_result.related_article_count,
+						results: search_result.results
+					}
+				}
 				case 'get_outline': {
 					const outline = parseOutlineLines(current_post.content)
 
