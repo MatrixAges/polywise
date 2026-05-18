@@ -1,4 +1,5 @@
 import { spawn } from 'child_process'
+import os from 'os'
 import path from 'path'
 import { tool } from 'ai'
 import { readFile, writeFile } from 'atomically'
@@ -10,6 +11,7 @@ import { createSystemSpec, getPathMappings, getRealPath, getSystemToolsPrompt } 
 import type Session from '../session'
 
 const MAX_OUTPUT_LENGTH = 30_000
+const USER_HOME_DIR = os.homedir()
 
 const getHostWorkingDir = (s: Session) => {
 	if (s.project?.dir) {
@@ -21,10 +23,6 @@ const getHostWorkingDir = (s: Session) => {
 
 		if (first_mount) {
 			return first_mount
-		}
-
-		if (process.cwd() && process.cwd() !== s.files_dir) {
-			return process.cwd()
 		}
 	}
 
@@ -44,6 +42,7 @@ const truncateOutput = (output: string, stream_name: 'stdout' | 'stderr') => {
 const getPathAnchorPrompt = (s: Session, host_cwd: string) => {
 	const lines = [
 		'Path anchors:',
+		`- user home directory -> ${USER_HOME_DIR}`,
 		`- default working directory -> ${host_cwd}`,
 		`- session scratch directory -> ${s.files_dir}`,
 		`- legacy virtual root / -> ${s.cwd}`
@@ -68,11 +67,14 @@ const getAccessPrompt = (s: Session, host_cwd: string) => {
 	return [
 		'Full host access is enabled.',
 		'You are not restricted to the default working directory. It only controls how relative paths are resolved.',
+		'If the default working directory looks like a session scratch area, do not treat it as the main target automatically.',
 		'You may read, write, and execute against any absolute host path on disk.',
+		'When you need a broad filesystem starting point, begin from the user home directory or another explicit absolute path.',
 		'When the target is outside the default working directory, use an absolute host path directly.',
 		'For bash_tool, prefer the real host paths below instead of assuming virtual mounted paths exist in the shell.',
 		getPathAnchorPrompt(s, host_cwd),
 		'Environment variables exposed to shell commands:',
+		'- POLYWISE_USER_HOME',
 		'- POLYWISE_DEFAULT_CWD',
 		'- POLYWISE_SESSION_FILES_DIR',
 		'- POLYWISE_VIRTUAL_ROOT',
@@ -82,6 +84,7 @@ const getAccessPrompt = (s: Session, host_cwd: string) => {
 
 const getCommandEnv = (s: Session, host_cwd: string) => ({
 	...process.env,
+	POLYWISE_USER_HOME: USER_HOME_DIR,
 	POLYWISE_DEFAULT_CWD: host_cwd,
 	POLYWISE_SESSION_FILES_DIR: s.files_dir,
 	POLYWISE_VIRTUAL_ROOT: s.cwd,
