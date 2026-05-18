@@ -3,6 +3,7 @@ import { observer } from 'mobx-react-lite'
 import { useNavigate } from 'react-router'
 
 import { Button } from '@/__shadcn__/components/ui/button'
+import { fromNow } from '@/utils'
 
 import { useModel } from '../context'
 
@@ -53,7 +54,6 @@ const Index = () => {
 						<div className='text-foreground line-clamp-2 text-base font-semibold'>
 							{item.title || 'Untitled post'}
 						</div>
-						<div className='text-std-400 shrink-0 text-[11px] uppercase'>{item.for_type}</div>
 					</div>
 					<div className='text-std-400 line-clamp-3 text-xs leading-5'>
 						{item.content_preview || 'Empty content'}
@@ -67,8 +67,8 @@ const Index = () => {
 							text-[11px] text-std-300
 						'
 					>
+						<span>{fromNow(item.updated_at)}</span>
 						<span>{item.related_article_count} related</span>
-						<span>{item.has_session ? 'session ready' : 'no session'}</span>
 					</div>
 				</div>
 			))}

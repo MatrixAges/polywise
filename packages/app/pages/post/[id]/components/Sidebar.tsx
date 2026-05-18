@@ -1,8 +1,5 @@
-import { ArrowLeft } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
-import { useNavigate } from 'react-router'
 
-import { Button } from '@/__shadcn__/components/ui/button'
 import { TextTabs } from '@/components'
 
 import { detail_tab_items } from '../../utils'
@@ -15,7 +12,6 @@ import type { DetailTab } from '../../types'
 
 const Index = () => {
 	const x = useModel()
-	const navigate = useNavigate()
 
 	return (
 		<div
@@ -30,21 +26,6 @@ const Index = () => {
 					flex
 					items-center
 					h-12
-					gap-2
-					px-2.5
-					border-b border-border-light
-				'
-			>
-				<Button className='h-8 px-2.5' variant='ghost' size='sm' onClick={() => navigate('/post')}>
-					<ArrowLeft className='size-4'></ArrowLeft>
-					<span>Posts</span>
-				</Button>
-			</div>
-			<div
-				className='
-					flex
-					items-center
-					h-11
 					px-2.5
 					border-b border-border-light
 				'

@@ -4,10 +4,11 @@ import { useNavigate } from 'react-router'
 
 import { Button } from '@/__shadcn__/components/ui/button'
 import { Input } from '@/__shadcn__/components/ui/input'
-import { TextTabs } from '@/components'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/__shadcn__/components/ui/select'
 import Editor from '@/components/Editor'
+import { fromNow } from '@/utils'
 
-import { for_type_tab_items } from '../../utils'
+import { post_for_types } from '../../utils'
 import { useModel } from '../context'
 
 import type { Editor as TiptapEditor } from '@tiptap/core'
@@ -35,14 +36,37 @@ const Index = () => {
 	return (
 		<>
 			<div className='border-border-light border-b px-4 py-3'>
-				<div className='flex items-center gap-3'>
+				<div className='flex items-start gap-3'>
 					<Input
-						className='h-9 flex-1 text-base font-semibold'
+						className='
+							flex-1
+							h-9
+							px-0
+							rounded-none
+							text-base font-semibold
+							bg-transparent
+							focus:bg-transparent
+						'
 						placeholder='Untitled post'
 						value={x.draft_title}
 						onChange={event => x.setDraftTitle(event.target.value)}
 						onBlur={() => void x.saveCurrentPost({ silent: true })}
 					></Input>
+					<Select
+						value={x.draft_for_type}
+						onValueChange={value => value && x.setDraftForType(value as PostForType)}
+					>
+						<SelectTrigger className='h-9 min-w-[112px]' size='sm'>
+							<SelectValue />
+						</SelectTrigger>
+						<SelectContent align='end'>
+							{post_for_types.map(item => (
+								<SelectItem value={item} key={item}>
+									{item}
+								</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
 					<Button
 						className='h-9'
 						variant='outline'
@@ -88,20 +112,10 @@ const Index = () => {
 						flex
 						items-center justify-between
 						gap-4
-						mt-3
+						mt-2
 					'
 				>
-					<div className='h-7'>
-						<TextTabs
-							items={for_type_tab_items.map(item => ({
-								key: item.key,
-								title: item.title,
-								Icon: item.Icon
-							}))}
-							active={x.draft_for_type}
-							setActive={(value: PostForType) => x.setDraftForType(value)}
-						></TextTabs>
-					</div>
+					<div className='text-std-400 text-xs'>Updated {fromNow(x.selected_post.updated_at)}</div>
 					<div className='text-std-400 text-xs'>{x.dirty ? 'Unsaved changes' : 'Saved'}</div>
 				</div>
 			</div>
