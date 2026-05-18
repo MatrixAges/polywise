@@ -4,6 +4,7 @@ import {
 	Bot,
 	CircleCheckBig,
 	Database,
+	FilePenLine,
 	House,
 	Library,
 	MessageCircleCheck,
@@ -20,7 +21,8 @@ export const nav_items = [
 	{ key: 'session', Icon: MessageCircleCheck },
 	// { key: 'workflow', Icon: Route },
 	{ key: 'agent', Icon: Bot },
-	{ key: 'linkcase', Icon: Album }
+	{ key: 'linkcase', Icon: Album },
+	{ key: 'post', Icon: FilePenLine }
 	// { key: 'library', Icon: Library },
 	// { key: 'database', Icon: Database },
 	// is_electron && { key: 'browser', Icon: AppWindowMac },

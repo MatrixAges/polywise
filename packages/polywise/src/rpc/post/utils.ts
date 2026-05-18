@@ -16,6 +16,13 @@ export const post_for_types = ['user', 'wiki', 'memory'] as const
 export type PostForType = (typeof post_for_types)[number]
 
 const post_extract_running_tasks = new Map<string, Promise<void>>()
+const post_session_ensure_tasks = new Map<
+	string,
+	Promise<{
+		session_id: string
+		created: boolean
+	}>
+>()
 const POST_PIPELINE_WAIT_MS = 90_000
 const POST_PIPELINE_POLL_MS = 250
 const post_for_type_set = new Set<string>(post_for_types)
@@ -95,33 +102,64 @@ export const getPostById = async (id: string) => {
 }
 
 export const ensurePostSession = async (post_id: string) => {
-	const existing = await getPostSessions({
-		where: eq(post_session.post_id, post_id)
-	}).then(res => res[0])
+	const running_task = post_session_ensure_tasks.get(post_id)
 
-	if (existing) {
-		return {
-			session_id: existing.session.id,
-			created: false
+	if (running_task) {
+		return running_task
+	}
+
+	const task = (async () => {
+		const existing = await getPostSessions({
+			where: eq(post_session.post_id, post_id)
+		}).then(res => res[0])
+
+		if (existing) {
+			return {
+				session_id: existing.session.id,
+				created: false
+			}
 		}
-	}
 
-	const post = await getPostById(post_id)
+		const post = await getPostById(post_id)
 
-	if (!post) {
-		throw new Error(`Post not found: ${post_id}`)
-	}
+		if (!post) {
+			throw new Error(`Post not found: ${post_id}`)
+		}
 
-	const created_session = await addSession({
-		title: getPostSessionTitle(post)
+		const created_session = await addSession({
+			title: getPostSessionTitle(post)
+		})
+
+		try {
+			await addPostSession(post_id, created_session.id)
+		} catch (error) {
+			const linked_session = await getPostSessions({
+				where: eq(post_session.post_id, post_id)
+			}).then(res => res[0])
+
+			if (linked_session) {
+				await removeSessionById(created_session.id).catch(() => null)
+
+				return {
+					session_id: linked_session.session.id,
+					created: false
+				}
+			}
+
+			throw error
+		}
+
+		return {
+			session_id: created_session.id,
+			created: true
+		}
+	})().finally(() => {
+		post_session_ensure_tasks.delete(post_id)
 	})
 
-	await addPostSession(post_id, created_session.id)
+	post_session_ensure_tasks.set(post_id, task)
 
-	return {
-		session_id: created_session.id,
-		created: true
-	}
+	return task
 }
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))

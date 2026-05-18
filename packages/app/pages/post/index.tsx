@@ -61,6 +61,23 @@ const createListStateMap = (): ListStateMap => ({
 	memory: createEmptyListState()
 })
 const getPreview = (content: string) => content.replace(/\s+/g, ' ').trim().slice(0, 180)
+const mergePostList = <T extends { id: string }>(...lists: Array<Array<T>>) => {
+	const result = [] as Array<T>
+	const seen = new Set<string>()
+
+	for (const list of lists) {
+		for (const item of list) {
+			if (seen.has(item.id)) {
+				continue
+			}
+
+			seen.add(item.id)
+			result.push(item)
+		}
+	}
+
+	return result
+}
 
 const toListItem = (post: PostDetail): PostListItem => ({
 	id: post.id,
@@ -138,6 +155,7 @@ const Index = () => {
 	const save_timer_ref = useRef<ReturnType<typeof setTimeout> | 0>(0)
 	const search_timer_ref = useRef<ReturnType<typeof setTimeout> | 0>(0)
 	const read_request_key_ref = useRef('')
+	const related_search_request_key_ref = useRef('')
 	const save_promise_ref = useRef<Promise<PostDetail | null> | null>(null)
 	const dirty_ref = useRef(false)
 	const selected_id_ref = useRef('')
@@ -315,7 +333,9 @@ const Index = () => {
 			setListMap(current => ({
 				...current,
 				[target_for_type]: {
-					list: append ? [...current[target_for_type].list, ...response.list] : response.list,
+					list: append
+						? mergePostList(current[target_for_type].list, response.list)
+						: response.list,
 					page,
 					has_more: response.has_more,
 					loading: false,
@@ -340,7 +360,9 @@ const Index = () => {
 	})
 
 	const saveCurrentPost = useMemoizedFn(async (args?: { silent?: boolean; force?: boolean }) => {
-		if (!selected_id_ref.current) {
+		const post_id = selected_id_ref.current
+
+		if (!post_id) {
 			return null
 		}
 
@@ -352,23 +374,37 @@ const Index = () => {
 			return save_promise_ref.current
 		}
 
+		const next_title = draft_title_ref.current
+		const next_content = draft_content_ref.current
+		const next_for_type = draft_for_type_ref.current
+
 		setSaving(true)
 
 		const promise = rpc.post.update
 			.mutate({
-				id: selected_id_ref.current,
-				title: draft_title_ref.current,
-				content: draft_content_ref.current,
-				for_type: draft_for_type_ref.current
+				id: post_id,
+				title: next_title,
+				content: next_content,
+				for_type: next_for_type
 			})
 			.then(response => {
-				setSelectedPost(response)
-				setDraftTitle(response.title ?? '')
-				setDraftContent(response.content)
-				setDraftForType(response.for_type)
-				setSessionId(response.session_id)
-				setDirty(false)
 				updateListCaches(response)
+
+				if (selected_id_ref.current === post_id) {
+					setSelectedPost(response)
+					setSessionId(response.session_id)
+
+					if (
+						draft_title_ref.current === next_title &&
+						draft_content_ref.current === next_content &&
+						draft_for_type_ref.current === next_for_type
+					) {
+						setDraftTitle(response.title ?? '')
+						setDraftContent(response.content)
+						setDraftForType(response.for_type)
+						setDirty(false)
+					}
+				}
 
 				if (!args?.silent) {
 					toast.success('Post saved.')
@@ -394,28 +430,39 @@ const Index = () => {
 	})
 
 	const ensureSession = useMemoizedFn(async () => {
-		if (!selected_id_ref.current) {
+		const post_id = selected_id_ref.current
+
+		if (!post_id) {
 			return null
 		}
 
-		if (session_id_ref.current) {
+		if (selected_post_ref.current?.id === post_id && session_id_ref.current) {
 			return session_id_ref.current
 		}
 
 		setEnsuringSession(true)
 
 		try {
+			if (dirty_ref.current && selected_id_ref.current === post_id) {
+				await saveCurrentPost({ silent: true, force: true })
+			}
+
 			const response = await rpc.post.session.ensure.mutate({
-				post_id: selected_id_ref.current
+				post_id
 			})
 
-			setSessionId(response.session_id)
+			if (selected_id_ref.current === post_id) {
+				setSessionId(response.session_id)
 
-			if (selected_post_ref.current) {
-				updateListCaches({
-					...selected_post_ref.current,
-					session_id: response.session_id
-				})
+				if (selected_post_ref.current?.id === post_id) {
+					const next_post = {
+						...selected_post_ref.current,
+						session_id: response.session_id
+					}
+
+					setSelectedPost(next_post)
+					updateListCaches(next_post)
+				}
 			}
 
 			return response.session_id
@@ -425,6 +472,12 @@ const Index = () => {
 	})
 
 	const submitRewriteSelection = useMemoizedFn(async (editor: TiptapEditor) => {
+		const post_id = selected_id_ref.current
+
+		if (!post_id) {
+			return
+		}
+
 		const { from, to } = editor.state.selection
 		const selection_text = editor.state.doc.textBetween(from, to, '\n')
 
@@ -439,12 +492,6 @@ const Index = () => {
 		}
 
 		await saveCurrentPost({ silent: true })
-
-		const current_session_id = await ensureSession()
-
-		if (!current_session_id) {
-			return
-		}
 
 		const before_context = editor.state.doc.textBetween(Math.max(0, from - 80), from, '\n')
 		const after_context = editor.state.doc.textBetween(
@@ -465,11 +512,21 @@ const Index = () => {
 
 		setMenuTab('detail')
 		setDetailTab('session')
-		await rpc.session.answer.mutate({ id: current_session_id, answer: prompt })
+		const response = await rpc.post.session.submit.mutate({
+			post_id,
+			message: prompt
+		})
+
+		if (selected_id_ref.current === post_id) {
+			setSessionId(response.session_id)
+		}
+
 		toast.success('Rewrite request sent to post session.')
 	})
 
 	const handleCreatePost = useMemoizedFn(async () => {
+		await saveCurrentPost({ silent: true })
+
 		const response = await rpc.post.create.mutate({
 			for_type,
 			title: '',
@@ -486,16 +543,19 @@ const Index = () => {
 	})
 
 	const handleDeletePost = useMemoizedFn(async () => {
-		if (!selected_post_ref.current) {
+		const deleting_post = selected_post_ref.current
+
+		if (!deleting_post) {
 			return
 		}
 
-		if (!window.confirm(`Delete post "${selected_post_ref.current.title || 'Untitled'}"?`)) {
+		if (!window.confirm(`Delete post "${deleting_post.title || 'Untitled'}"?`)) {
 			return
 		}
 
-		await rpc.post.remove.mutate({ id: selected_post_ref.current.id })
-		removePostFromCaches(selected_post_ref.current.id)
+		await rpc.post.remove.mutate({ id: deleting_post.id })
+		removePostFromCaches(deleting_post.id)
+		const deleted_post_id = deleting_post.id
 		setSelectedId('')
 		setSelectedPost(null)
 		setDraftTitle('')
@@ -507,7 +567,7 @@ const Index = () => {
 		setRelatedSearchList([])
 		toast.success('Post removed.')
 
-		const fallback_item = list_map[for_type].list.find(item => item.id !== selected_post_ref.current?.id)
+		const fallback_item = list_map[for_type].list.find(item => item.id !== deleted_post_id)
 
 		if (fallback_item) {
 			void loadPost(fallback_item.id)
@@ -552,12 +612,14 @@ const Index = () => {
 	})
 
 	const handleAddRelatedArticle = useMemoizedFn(async (article_id: string) => {
-		if (!selected_id_ref.current) {
+		const post_id = selected_id_ref.current
+
+		if (!post_id) {
 			return
 		}
 
 		await rpc.post.article.add.mutate({
-			post_id: selected_id_ref.current,
+			post_id,
 			article_id
 		})
 		await Promise.all([loadRelatedArticles(), reloadCurrentPost()])
@@ -565,12 +627,14 @@ const Index = () => {
 	})
 
 	const handleRemoveRelatedArticle = useMemoizedFn(async (article_id: string) => {
-		if (!selected_id_ref.current) {
+		const post_id = selected_id_ref.current
+
+		if (!post_id) {
 			return
 		}
 
 		await rpc.post.article.remove.mutate({
-			post_id: selected_id_ref.current,
+			post_id,
 			article_id
 		})
 		await Promise.all([loadRelatedArticles(), reloadCurrentPost()])
@@ -622,6 +686,9 @@ const Index = () => {
 		}
 
 		setRelatedSearchLoading(true)
+		const request_key = `${selected_id}:${related_search.trim()}:${Date.now()}`
+
+		related_search_request_key_ref.current = request_key
 
 		search_timer_ref.current = setTimeout(() => {
 			void rpc.post.article.search
@@ -631,12 +698,17 @@ const Index = () => {
 					page: 1
 				})
 				.then(response => {
-					if (selected_id_ref.current === selected_id) {
+					if (
+						selected_id_ref.current === selected_id &&
+						related_search_request_key_ref.current === request_key
+					) {
 						setRelatedSearchList(response.list)
 					}
 				})
 				.finally(() => {
-					setRelatedSearchLoading(false)
+					if (related_search_request_key_ref.current === request_key) {
+						setRelatedSearchLoading(false)
+					}
 				})
 		}, 280)
 
@@ -705,6 +777,14 @@ const Index = () => {
 		return () => window.removeEventListener('keydown', onKeyDown)
 	}, [])
 
+	useEffect(() => {
+		return () => {
+			if (dirty_ref.current && selected_id_ref.current) {
+				void saveCurrentPost({ silent: true, force: true })
+			}
+		}
+	}, [])
+
 	return (
 		<div className='flex h-full overflow-hidden'>
 			<div
@@ -730,7 +810,19 @@ const Index = () => {
 							Icon: item.Icon
 						}))}
 						active={menu_tab}
-						onClick={key => setMenuTab(key as MenuTab)}
+						onClick={key => {
+							const next_tab = key as MenuTab
+
+							setMenuTab(next_tab)
+
+							if (
+								next_tab === 'detail' &&
+								!selected_id_ref.current &&
+								current_list_state.list[0]
+							) {
+								void loadPost(current_list_state.list[0].id)
+							}
+						}}
 					></Tabs>
 				</div>
 				{menu_tab === 'list' ? (
@@ -785,14 +877,14 @@ const Index = () => {
 									{current_list_state.list.map(item => (
 										<div
 											className={$cx(
-												'
+												`
 												p-3
 												rounded-xl
 												border border-border-light
 												transition-colors
 												hover:bg-secondary/70
 												cursor-pointer
-											',
+											`,
 												selected_id === item.id &&
 													'border-std-black bg-secondary'
 											)}
