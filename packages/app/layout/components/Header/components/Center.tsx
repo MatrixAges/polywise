@@ -8,7 +8,15 @@ const Index = () => {
 	const { pathname } = useLocation()
 	const navigate = useNavigate()
 
-	const getActive = useMemoizedFn(key => pathname === `/${key}`)
+	const getActive = useMemoizedFn(key => {
+		if (!key) {
+			return pathname === '/'
+		}
+
+		const base_path = `/${key}`
+
+		return pathname === base_path || pathname.startsWith(`${base_path}/`)
+	})
 	const onClick = useMemoizedFn(key => navigate(`/${key}`))
 
 	return (
