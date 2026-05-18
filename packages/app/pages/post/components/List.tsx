@@ -28,7 +28,7 @@ const Index = () => {
 	}
 
 	return (
-		<>
+		<div className='flex w-full flex-col'>
 			{x.current_list_state.list.map(item => (
 				<div
 					className='
@@ -102,7 +102,7 @@ const Index = () => {
 					</Button>
 				</div>
 			) : null}
-		</>
+		</div>
 	)
 }
 
