@@ -30,100 +30,96 @@ const Index = () => {
 					flex flex-col
 					w-full
 					min-h-full
-					py-5
+					pt-0
 					page_wrap
 				'
 			>
-				<div className='border-border-light bg-background/70 rounded-[28px] border'>
-					<div
-						className='
-							flex
-							items-center justify-between
-							gap-3
-							px-4 py-3
-							border-b border-border-light
-						'
-					>
-						<div className='min-w-0 flex-1'>
-							<Tabs
-								small
-								items={for_type_tab_items.map(item => ({
-									key: item.key,
-									title: item.title,
-									Icon: item.Icon
-								}))}
-								active={x.for_type}
-								onClick={value => x.setForType(value as PostForType)}
-							></Tabs>
-						</div>
-						<div className='flex shrink-0 items-center gap-1.5'>
-							{is_search_open ? (
-								<div className='relative w-[220px]'>
-									<Search
-										className='
-											absolute
-											top-1/2
-											left-3
-											size-3.5
-											text-std-300
-											pointer-events-none -translate-y-1/2
-										'
-									></Search>
-									<Input
-										autoFocus
-										className='
-											h-8
-											pl-8 pr-8
-											rounded-full
-											text-sm
-										'
-										placeholder={`Search ${x.for_type} articles`}
-										value={x.current_search}
-										onChange={event => x.setSearch(event.target.value)}
-									></Input>
-									<button
-										className='
-											absolute
-											top-1 right-1
-											w-6 h-6
-											icon_button small
-										'
-										type='button'
-										title='Close search'
-										onClick={closeSearch}
-									>
-										<X className='size-3.5'></X>
-									</button>
-								</div>
-							) : (
+				<div
+					className='
+						flex
+						items-center justify-between
+						gap-3
+						px-4 py-3
+					'
+				>
+					<div className='min-w-0 flex-1'>
+						<Tabs
+							items={for_type_tab_items.map(item => ({
+								key: item.key,
+								title: item.title,
+								Icon: item.Icon
+							}))}
+							active={x.for_type}
+							onClick={value => x.setForType(value as PostForType)}
+						></Tabs>
+					</div>
+					<div className='flex shrink-0 items-center gap-1.5'>
+						{is_search_open ? (
+							<div className='relative w-[220px]'>
+								<Search
+									className='
+										absolute
+										top-1/2
+										left-3
+										size-3.5
+										text-std-300
+										pointer-events-none -translate-y-1/2
+									'
+								></Search>
+								<Input
+									autoFocus
+									className='
+										h-8
+										pl-8 pr-8
+										rounded-full
+										text-sm
+									'
+									placeholder={`Search ${x.for_type} articles`}
+									value={x.current_search}
+									onChange={event => x.setSearch(event.target.value)}
+								></Input>
 								<button
-									className='icon_button small'
+									className='
+										absolute
+										top-1 right-1
+										w-6 h-6
+										icon_button small
+									'
 									type='button'
-									title='Search posts'
-									onClick={() => setSearchOpen(true)}
+									title='Close search'
+									onClick={closeSearch}
 								>
-									<Search className='size-3.5'></Search>
+									<X className='size-3.5'></X>
 								</button>
-							)}
+							</div>
+						) : (
 							<button
 								className='icon_button small'
 								type='button'
-								title='New post'
-								onClick={async () => {
-									const id = await x.createPost()
-
-									if (id) {
-										navigate(`/post/${id}`)
-									}
-								}}
+								title='Search posts'
+								onClick={() => setSearchOpen(true)}
 							>
-								<Plus className='size-3.5'></Plus>
+								<Search className='size-3.5'></Search>
 							</button>
-						</div>
+						)}
+						<button
+							className='icon_button small'
+							type='button'
+							title='New post'
+							onClick={async () => {
+								const id = await x.createPost()
+
+								if (id) {
+									navigate(`/post/${id}`)
+								}
+							}}
+						>
+							<Plus className='size-3.5'></Plus>
+						</button>
 					</div>
-					<div className='flex flex-col gap-2 p-3'>
-						<List></List>
-					</div>
+				</div>
+				<div className='flex flex-col gap-2 p-3'>
+					<List></List>
 				</div>
 			</div>
 		</div>
