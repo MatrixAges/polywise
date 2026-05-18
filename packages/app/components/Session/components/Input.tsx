@@ -270,44 +270,6 @@ const Index = (props: IPropsInput) => {
 									</SelectGroup>
 								</SelectContent>
 							</Select>
-							{show_audit_mode_select && (
-								<Select
-									items={audit_modes}
-									value={audit_mode}
-									onValueChange={setAuditMode}
-								>
-									<SelectTrigger
-										className={$cx(
-											`
-											h-auto!
-											p-0
-											text-xsm!
-											bg-transparent
-										`,
-											audit_mode === 'full'
-												? 'text-std-600'
-												: 'text-std-400'
-										)}
-										noActiveStyle
-									>
-										<SelectValue />
-									</SelectTrigger>
-									<SelectContent
-										className='w-[140px]'
-										alignItemWithTrigger={false}
-										side='top'
-									>
-										<SelectGroup>
-											<SelectLabel>Audit Mode</SelectLabel>
-											{audit_modes.map(item => (
-												<SelectItem value={item.value} key={item.value}>
-													{item.label}
-												</SelectItem>
-											))}
-										</SelectGroup>
-									</SelectContent>
-								</Select>
-							)}
 							<button
 								className='icon_button primary h-6 w-6'
 								onClick={streaming ? stop : onSend}
@@ -326,7 +288,34 @@ const Index = (props: IPropsInput) => {
 						text-xs
 					'
 				>
-					<div className='flex gap-1'>
+					<div className='flex gap-1.5'>
+						{show_audit_mode_select && (
+							<Select items={audit_modes} value={audit_mode} onValueChange={setAuditMode}>
+								<SelectTrigger
+									className={$cx(
+										`
+										h-auto!
+										p-0
+										text-xs
+										bg-transparent
+									`,
+										audit_mode === 'full' ? 'text-red-700/72' : 'text-std-400'
+									)}
+								>
+									<SelectValue />
+								</SelectTrigger>
+								<SelectContent className='w-[150px]' align='start'>
+									<SelectGroup>
+										<SelectLabel>Audit Mode</SelectLabel>
+										{audit_modes.map(item => (
+											<SelectItem value={item.value} key={item.value}>
+												{item.label}
+											</SelectItem>
+										))}
+									</SelectGroup>
+								</SelectContent>
+							</Select>
+						)}
 						<Select
 							items={submit_modes}
 							value={s.config?.submit_mode ?? 'enter'}
@@ -342,7 +331,7 @@ const Index = (props: IPropsInput) => {
 							>
 								<SelectValue />
 							</SelectTrigger>
-							<SelectContent className='w-[180px]' align='start'>
+							<SelectContent className='w-[150px]' align='start'>
 								<SelectGroup>
 									<SelectLabel>Submit Mode</SelectLabel>
 									{submit_modes.map(item => (
