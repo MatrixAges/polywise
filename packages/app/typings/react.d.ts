@@ -1,9 +1,6 @@
 import 'react'
 
-type AnyOnClickHandler<T> = {
-	(event: React.MouseEvent<T>): any
-	(...args: any[]): any
-}
+type AnyOnClickHandler<T> = React.MouseEventHandler<T> | ((...args: any[]) => any)
 
 declare module 'react' {
 	interface DragEvent {
