@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router'
 
 import { Button } from '@/__shadcn__/components/ui/button'
 import { Input } from '@/__shadcn__/components/ui/input'
-import { Tabs } from '@/components'
+import { TextTabs } from '@/components'
 
 import { useModel } from '../context'
 import { for_type_tab_items } from '../utils'
@@ -30,7 +30,7 @@ const Index = () => {
 				overflow-hidden
 				flex flex-col
 				w-full h-full
-				pt-0
+				px-6 pt-0
 				page_wrap
 			'
 		>
@@ -38,19 +38,22 @@ const Index = () => {
 				className='
 					flex shrink-0
 					items-center justify-between
-					h-14
+					h-12
 					gap-3
 				'
 			>
-				<Tabs
-					items={for_type_tab_items.map(item => ({
-						key: item.key,
-						title: item.title,
-						Icon: item.Icon
-					}))}
-					active={x.for_type}
-					onClick={value => x.setForType(value as PostForType)}
-				></Tabs>
+				<div className='h-8'>
+					<TextTabs
+						className='gap-3'
+						items={for_type_tab_items.map(item => ({
+							key: item.key,
+							title: item.title,
+							Icon: item.Icon
+						}))}
+						active={x.for_type}
+						setActive={value => x.setForType(value as PostForType)}
+					></TextTabs>
+				</div>
 				<div className='flex shrink-0 items-center gap-3'>
 					{is_search_open ? (
 						<div className='relative flex w-[150px] items-center'>

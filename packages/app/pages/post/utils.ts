@@ -61,9 +61,9 @@ export const parseOutline = (content: string) => {
 export const normalizeHeadingText = (value: string) => value.replace(/\s+/g, ' ').trim()
 
 export const for_type_tab_items = [
-	{ key: 'user', title: 'user', Icon: UserRound },
 	{ key: 'wiki', title: 'wiki', Icon: BookOpen },
-	{ key: 'memory', title: 'memory', Icon: Brain }
+	{ key: 'memory', title: 'memory', Icon: Brain },
+	{ key: 'user', title: 'user', Icon: UserRound }
 ] as const
 
 export const detail_tab_items = [
