@@ -1,10 +1,11 @@
 import { makeAutoObservable } from 'mobx'
+import { setStorageWhenChange } from 'stk/mobx'
 import { injectable } from 'tsyringe'
 
 import { Util } from '@/models/common'
 import { rpc } from '@/utils'
 
-import { createListStateMap, mergePostList } from './utils'
+import { createListStateMap, mergePostList, post_for_types } from './utils'
 
 import type { PostForType } from './types'
 
@@ -22,6 +23,26 @@ export default class Index {
 	}
 
 	async init() {
+		const deinit = setStorageWhenChange(
+			[
+				{
+					for_type: {
+						local_key: 'post_for_type',
+						fromStorage: value =>
+							post_for_types.includes(value as PostForType)
+								? (value as PostForType)
+								: 'user',
+						toStorage: value =>
+							post_for_types.includes(value as PostForType)
+								? (value as PostForType)
+								: 'user'
+					}
+				}
+			],
+			this
+		)
+
+		this.util.acts = [deinit]
 		await this.ensureListLoaded(this.for_type)
 	}
 
