@@ -1,86 +1,21 @@
-import { useEffect, useLayoutEffect, useState } from 'react'
-import { useMemoizedFn } from 'ahooks'
+import { useEffect, useRef } from 'react'
 import { Loader2, Plus } from 'lucide-react'
+import { observer } from 'mobx-react-lite'
 import { useNavigate } from 'react-router'
+import { container } from 'tsyringe'
 
 import { Button } from '@/__shadcn__/components/ui/button'
 import { TextTabs } from '@/components'
-import { rpc } from '@/utils'
 
-import { createListStateMap, for_type_tab_items, mergePostList } from './shared'
+import { Context, useModel } from './context'
+import Model from './model'
+import { for_type_tab_items } from './shared'
 
 import type { PostForType } from './shared'
 
-const Index = () => {
+const Content = observer(() => {
+	const x = useModel()
 	const navigate = useNavigate()
-	const [for_type, setForType] = useState<PostForType>('user')
-	const [list_map, setListMap] = useState(createListStateMap)
-
-	const current_list_state = list_map[for_type]
-
-	const loadList = useMemoizedFn(async (target_for_type: PostForType, page = 1, append = false) => {
-		setListMap(current => ({
-			...current,
-			[target_for_type]: {
-				...current[target_for_type],
-				loading: true
-			}
-		}))
-
-		try {
-			const response = await rpc.post.query.query({
-				page,
-				for_type: target_for_type
-			})
-
-			setListMap(current => ({
-				...current,
-				[target_for_type]: {
-					list: append
-						? mergePostList(current[target_for_type].list, response.list)
-						: response.list,
-					page,
-					has_more: response.has_more,
-					loading: false,
-					inited: true
-				}
-			}))
-		} catch (error) {
-			setListMap(current => ({
-				...current,
-				[target_for_type]: {
-					...current[target_for_type],
-					loading: false
-				}
-			}))
-
-			throw error
-		}
-	})
-
-	const handleCreatePost = useMemoizedFn(async () => {
-		const response = await rpc.post.create.mutate({
-			for_type,
-			title: '',
-			content: ''
-		})
-
-		if (!response) {
-			return
-		}
-
-		navigate(`/post/${response.id}`)
-	})
-
-	useLayoutEffect(() => {
-		void loadList(for_type, 1, false)
-	}, [])
-
-	useEffect(() => {
-		if (!list_map[for_type].inited && !list_map[for_type].loading) {
-			void loadList(for_type, 1, false)
-		}
-	}, [for_type])
 
 	return (
 		<div className='h-full overflow-y-auto'>
@@ -107,7 +42,16 @@ const Index = () => {
 							Browse social posts by source type and continue writing from the detail page.
 						</div>
 					</div>
-					<Button className='shrink-0' onClick={() => void handleCreatePost()}>
+					<Button
+						className='shrink-0'
+						onClick={async () => {
+							const id = await x.createPost()
+
+							if (id) {
+								navigate(`/post/${id}`)
+							}
+						}}
+					>
 						<Plus className='size-4'></Plus>
 						<span>New post</span>
 					</Button>
@@ -129,14 +73,16 @@ const Index = () => {
 									title: item.title,
 									Icon: item.Icon
 								}))}
-								active={for_type}
-								setActive={(value: PostForType) => setForType(value)}
+								active={x.for_type}
+								setActive={(value: PostForType) => x.setForType(value)}
 							></TextTabs>
 						</div>
-						<div className='text-std-400 text-xs'>{current_list_state.list.length} loaded</div>
+						<div className='text-std-400 text-xs'>
+							{x.current_list_state.list.length} loaded
+						</div>
 					</div>
 					<div className='flex flex-col gap-2 p-3'>
-						{current_list_state.list.length === 0 && !current_list_state.loading ? (
+						{x.current_list_state.list.length === 0 && !x.current_list_state.loading ? (
 							<div
 								className='
 									flex
@@ -150,7 +96,7 @@ const Index = () => {
 							</div>
 						) : (
 							<>
-								{current_list_state.list.map(item => (
+								{x.current_list_state.list.map(item => (
 									<div
 										className='
 											p-4
@@ -200,7 +146,8 @@ const Index = () => {
 										</div>
 									</div>
 								))}
-								{current_list_state.loading && current_list_state.list.length > 0 ? (
+								{x.current_list_state.loading &&
+								x.current_list_state.list.length > 0 ? (
 									<div
 										className='
 											flex
@@ -214,22 +161,22 @@ const Index = () => {
 										Loading...
 									</div>
 								) : null}
-								{current_list_state.has_more ? (
+								{x.current_list_state.has_more ? (
 									<div className='pt-2'>
 										<Button
 											className='w-full'
 											variant='outline'
 											size='sm'
-											disabled={current_list_state.loading}
+											disabled={x.current_list_state.loading}
 											onClick={() =>
-												void loadList(
-													for_type,
-													current_list_state.page + 1,
+												void x.loadList(
+													x.for_type,
+													x.current_list_state.page + 1,
 													true
 												)
 											}
 										>
-											{current_list_state.loading ? (
+											{x.current_list_state.loading ? (
 												<Loader2 className='size-3.5 animate-spin'></Loader2>
 											) : null}
 											<span>Load more</span>
@@ -243,6 +190,28 @@ const Index = () => {
 			</div>
 		</div>
 	)
+})
+
+const Index = () => {
+	const ref_model = useRef<Model | null>(null)
+
+	if (!ref_model.current) {
+		ref_model.current = container.resolve(Model)
+	}
+
+	const x = ref_model.current
+
+	useEffect(() => {
+		void x.init()
+
+		return () => x.deinit()
+	}, [x])
+
+	return (
+		<Context value={x}>
+			<Content></Content>
+		</Context>
+	)
 }
 
-export const Component = new $app.Handle(Index).by($app.memo).get()
+export const Component = new $app.Handle(Index).by(observer).by($app.memo).get()
