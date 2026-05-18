@@ -3,6 +3,7 @@ import { Plus, Search, X } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 import { useNavigate } from 'react-router'
 
+import { Button } from '@/__shadcn__/components/ui/button'
 import { Input } from '@/__shadcn__/components/ui/input'
 import { Tabs } from '@/components'
 
@@ -50,14 +51,14 @@ const Index = () => {
 					active={x.for_type}
 					onClick={value => x.setForType(value as PostForType)}
 				></Tabs>
-				<div className='flex shrink-0 items-center gap-1.5'>
+				<div className='flex shrink-0 items-center gap-3'>
 					{is_search_open ? (
-						<div className='relative w-[220px]'>
+						<div className='relative flex w-[150px] items-center'>
 							<Search
 								className='
 									absolute
 									top-1/2
-									left-3
+									left-2
 									size-3.5
 									text-std-300
 									pointer-events-none -translate-y-1/2
@@ -66,20 +67,20 @@ const Index = () => {
 							<Input
 								autoFocus
 								className='
-									h-8
-									pl-8 pr-8
+									h-7
+									pl-6.5 pr-8
 									rounded-full
 									text-sm
 								'
-								placeholder={`Search ${x.for_type} articles`}
+								placeholder='Search articles'
 								value={x.current_search}
 								onChange={event => x.setSearch(event.target.value)}
 							></Input>
 							<button
 								className='
 									absolute
-									top-1 right-1
-									w-6 h-6
+									right-0
+									w-7 h-7
 									icon_button small
 								'
 								type='button'
@@ -90,18 +91,20 @@ const Index = () => {
 							</button>
 						</div>
 					) : (
-						<button
-							className='icon_button small'
-							type='button'
+						<Button
+							className='h-7 w-7'
+							variant='secondary'
+							size='xs'
 							title='Search posts'
 							onClick={() => setSearchOpen(true)}
 						>
 							<Search className='size-3.5'></Search>
-						</button>
+						</Button>
 					)}
-					<button
-						className='icon_button small'
-						type='button'
+					<Button
+						className='h-7 w-7'
+						variant='default'
+						size='xs'
 						title='New post'
 						onClick={async () => {
 							const id = await x.createPost()
@@ -112,7 +115,7 @@ const Index = () => {
 						}}
 					>
 						<Plus className='size-3.5'></Plus>
-					</button>
+					</Button>
 				</div>
 			</div>
 			<div className='min-h-0 flex-1 overflow-y-auto'>
