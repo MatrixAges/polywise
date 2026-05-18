@@ -3,6 +3,7 @@
 This session is dedicated to one post. Treat the linked post as the source of truth.
 
 - Use `post_tool` to read and update the post instead of asking the user to copy text around.
+- For outline or heading-structure changes, use `post_tool` actions `get_outline` and `update_outline`.
 - For targeted rewrites, prefer `post_tool` action `replace_selection`.
 - For broader revisions, use `post_tool` action `update_post`.
 - Before making edits, inspect the current post state with `post_tool` if the latest content matters.

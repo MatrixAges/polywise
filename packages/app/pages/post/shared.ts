@@ -1,0 +1,91 @@
+import { BookOpen, Brain, Files, Link2, MessageSquare, UserRound } from 'lucide-react'
+
+import type { RPCOutput } from '@/types/rpc'
+
+export type PostForType = 'user' | 'wiki' | 'memory'
+export type DetailTab = 'outline' | 'related' | 'session'
+export type PostListItem = RPCOutput['post']['query']['list'][number]
+export type PostDetail = RPCOutput['post']['read']
+export type RelatedArticle = RPCOutput['post']['article']['query'][number]
+export type RelatedSearchItem = RPCOutput['post']['article']['search']['list'][number]
+
+export type ListState = {
+	list: Array<PostListItem>
+	page: number
+	has_more: boolean
+	loading: boolean
+	inited: boolean
+}
+
+export type ListStateMap = Record<PostForType, ListState>
+
+export const post_for_types = ['user', 'wiki', 'memory'] as const
+
+export const createEmptyListState = (): ListState => ({
+	list: [],
+	page: 1,
+	has_more: false,
+	loading: false,
+	inited: false
+})
+
+export const createListStateMap = (): ListStateMap => ({
+	user: createEmptyListState(),
+	wiki: createEmptyListState(),
+	memory: createEmptyListState()
+})
+
+export const getPreview = (content: string) => content.replace(/\s+/g, ' ').trim().slice(0, 180)
+
+export const mergePostList = <T extends { id: string }>(...lists: Array<Array<T>>) => {
+	const result = [] as Array<T>
+	const seen = new Set<string>()
+
+	for (const list of lists) {
+		for (const item of list) {
+			if (seen.has(item.id)) {
+				continue
+			}
+
+			seen.add(item.id)
+			result.push(item)
+		}
+	}
+
+	return result
+}
+
+export const parseOutline = (content: string) => {
+	const lines = content.split('\n')
+	const items = [] as Array<{ id: string; level: number; text: string }>
+
+	for (const line of lines) {
+		const match = /^(#{1,6})\s+(.+)$/.exec(line.trim())
+
+		if (!match) {
+			continue
+		}
+
+		items.push({
+			id: `${items.length}-${match[2]}`,
+			level: match[1].length,
+			text: match[2]
+		})
+	}
+
+	return items
+}
+
+export const normalizeHeadingText = (value: string) => value.replace(/\s+/g, ' ').trim()
+
+export const for_type_tab_items = [
+	{ key: 'user', title: 'user', Icon: UserRound },
+	{ key: 'wiki', title: 'wiki', Icon: BookOpen },
+	{ key: 'memory', title: 'memory', Icon: Brain }
+] as const
+
+export const detail_tab_items = [
+	{ key: 'outline', title: 'Outline', Icon: Files },
+	{ key: 'related', title: 'Related Articles', Icon: Link2 },
+	{ key: 'session', title: 'Post Session', Icon: MessageSquare }
+] as const
