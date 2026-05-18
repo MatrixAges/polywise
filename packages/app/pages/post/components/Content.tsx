@@ -1,5 +1,6 @@
 import { observer } from 'mobx-react-lite'
 
+import { Input } from '@/__shadcn__/components/ui/input'
 import { TextTabs } from '@/components'
 
 import { useModel } from '../context'
@@ -45,8 +46,13 @@ const Index = () => {
 								setActive={(value: PostForType) => x.setForType(value)}
 							></TextTabs>
 						</div>
-						<div className='text-std-400 text-xs'>
-							{x.current_list_state.list.length} loaded
+						<div className='w-full max-w-[260px]'>
+							<Input
+								className='h-8 rounded-full text-sm'
+								placeholder={`Search ${x.for_type} articles`}
+								value={x.current_search}
+								onChange={event => x.setSearch(event.target.value)}
+							></Input>
 						</div>
 					</div>
 					<div className='flex flex-col gap-2 p-3'>

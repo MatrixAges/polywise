@@ -7,7 +7,8 @@ export default p
 	.input(
 		object({
 			page: number().int().min(1),
-			for_type: string().optional()
+			for_type: string().optional(),
+			query: string().optional()
 		})
 	)
 	.query(async ({ input }) => queryPosts(input))

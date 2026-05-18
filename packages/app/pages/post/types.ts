@@ -13,6 +13,7 @@ export type ListState = {
 	has_more: boolean
 	loading: boolean
 	inited: boolean
+	query: string
 }
 
 export type ListStateMap = Record<PostForType, ListState>

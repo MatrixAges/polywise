@@ -708,10 +708,15 @@ export const searchRelatedArticleCandidates = async (args: { post_id: string; qu
 	return { list, has_more }
 }
 
-export const queryPosts = async (args: { page: number; for_type?: string }) => {
+export const queryPosts = async (args: { page: number; for_type?: string; query?: string }) => {
 	const page_size = 12
 	const target_for_type = args.for_type && isPostForType(args.for_type) ? args.for_type : undefined
-	const where = target_for_type ? eq(article.for, target_for_type) : inArray(article.for, post_for_types)
+	const keyword = args.query?.trim() ?? ''
+	const type_where = target_for_type ? eq(article.for, target_for_type) : inArray(article.for, post_for_types)
+	const search_where = keyword
+		? or(like(article.title, `%${keyword}%`), like(article.content, `%${keyword}%`))
+		: undefined
+	const where = search_where ? and(type_where, search_where) : type_where
 	const rows = await env.db
 		.select({
 			id: article.id,

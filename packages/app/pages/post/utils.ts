@@ -9,7 +9,8 @@ export const createEmptyListState = (): ListState => ({
 	page: 1,
 	has_more: false,
 	loading: false,
-	inited: false
+	inited: false,
+	query: ''
 })
 
 export const createListStateMap = (): ListStateMap => ({
