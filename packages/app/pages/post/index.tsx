@@ -127,6 +127,8 @@ const parseOutline = (content: string) => {
 	return items
 }
 
+const normalizeHeadingText = (value: string) => value.replace(/\s+/g, ' ').trim()
+
 const for_type_tab_items = [
 	{ key: 'user', title: 'user', Icon: UserRound },
 	{ key: 'wiki', title: 'wiki', Icon: BookOpen },
@@ -134,14 +136,14 @@ const for_type_tab_items = [
 ] as const
 
 const menu_tab_items = [
-	{ key: 'list', title: 'post 列表', Icon: LayoutPanelLeft },
-	{ key: 'detail', title: 'post 详情', Icon: FileStack }
+	{ key: 'list', title: 'Post List', Icon: LayoutPanelLeft },
+	{ key: 'detail', title: 'Post Details', Icon: FileStack }
 ] as const
 
 const detail_tab_items = [
-	{ key: 'outline', title: '文章大纲', Icon: Files },
-	{ key: 'related', title: '关联文章', Icon: Link2 },
-	{ key: 'session', title: 'post session', Icon: MessageSquare }
+	{ key: 'outline', title: 'Outline', Icon: Files },
+	{ key: 'related', title: 'Related Articles', Icon: Link2 },
+	{ key: 'session', title: 'Post Session', Icon: MessageSquare }
 ] as const
 
 const Index = () => {
@@ -171,6 +173,7 @@ const Index = () => {
 	const read_request_key_ref = useRef('')
 	const related_search_request_key_ref = useRef('')
 	const save_promise_ref = useRef<Promise<PostDetail | null> | null>(null)
+	const editor_area_ref = useRef<HTMLDivElement | null>(null)
 	const dirty_ref = useRef(false)
 	const selected_id_ref = useRef('')
 	const selected_post_ref = useRef<PostDetail | null>(null)
@@ -502,7 +505,10 @@ const Index = () => {
 			return
 		}
 
-		const instruction = window.prompt('改写要求', '润色这段文字，保持原意并更清晰。')
+		const instruction = window.prompt(
+			'Rewrite instructions',
+			'Polish this passage while preserving its meaning.'
+		)
 
 		if (instruction === null) {
 			return
@@ -655,6 +661,33 @@ const Index = () => {
 			article_id
 		})
 		await Promise.all([loadRelatedArticles(), reloadCurrentPost()])
+	})
+
+	const scrollToOutlineItem = useMemoizedFn((item: { text: string; level: number }) => {
+		const editor_area = editor_area_ref.current
+		const scroll_host = editor_area?.querySelector('.editor_wrap') as HTMLDivElement | null
+
+		if (!scroll_host) {
+			return
+		}
+
+		const headings = Array.from(scroll_host.querySelectorAll(`h${item.level}`)) as Array<HTMLHeadingElement>
+		const target = headings.find(
+			heading => normalizeHeadingText(heading.textContent ?? '') === normalizeHeadingText(item.text)
+		)
+
+		if (!target) {
+			return
+		}
+
+		const host_rect = scroll_host.getBoundingClientRect()
+		const target_rect = target.getBoundingClientRect()
+		const next_top = scroll_host.scrollTop + (target_rect.top - host_rect.top) - 24
+
+		scroll_host.scrollTo({
+			top: Math.max(0, next_top),
+			behavior: 'smooth'
+		})
 	})
 
 	useLayoutEffect(() => {
@@ -962,7 +995,7 @@ const Index = () => {
 											{current_list_state.loading && (
 												<Loader2 className='size-3.5 animate-spin'></Loader2>
 											)}
-											<span>加载更多</span>
+											<span>Load more</span>
 										</Button>
 									)}
 								</div>
@@ -1025,11 +1058,13 @@ const Index = () => {
 															rounded-lg
 															text-sm text-foreground
 															hover:bg-secondary
+															cursor-pointer
 														'
 													style={{
 														paddingLeft:
 															12 + (item.level - 1) * 14
 													}}
+													onClick={() => scrollToOutlineItem(item)}
 													key={item.id}
 												>
 													{item.text}
@@ -1334,7 +1369,7 @@ const Index = () => {
 								</div>
 							</div>
 						</div>
-						<div className='min-h-0 flex-1 overflow-hidden'>
+						<div className='min-h-0 flex-1 overflow-hidden' ref={editor_area_ref}>
 							{post_loading ? (
 								<div
 									className='
