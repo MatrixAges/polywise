@@ -5,10 +5,10 @@ import { injectable } from 'tsyringe'
 import { Util } from '@/models/common'
 import { rpc } from '@/utils'
 
-import { normalizeHeadingText, parseOutline } from '../shared'
+import { normalizeHeadingText, parseOutline } from '../utils'
 
 import type { Editor as TiptapEditor } from '@tiptap/core'
-import type { DetailTab, PostDetail, PostForType, RelatedArticle, RelatedSearchItem } from '../shared'
+import type { DetailTab, PostDetail, PostForType, RelatedArticle, RelatedSearchItem } from '../types'
 
 @injectable()
 export default class Index {

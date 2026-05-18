@@ -1,23 +1,6 @@
 import { BookOpen, Brain, Files, Link2, MessageSquare, UserRound } from 'lucide-react'
 
-import type { RPCOutput } from '@/types/rpc'
-
-export type PostForType = 'user' | 'wiki' | 'memory'
-export type DetailTab = 'outline' | 'related' | 'session'
-export type PostListItem = RPCOutput['post']['query']['list'][number]
-export type PostDetail = RPCOutput['post']['read']
-export type RelatedArticle = RPCOutput['post']['article']['query'][number]
-export type RelatedSearchItem = RPCOutput['post']['article']['search']['list'][number]
-
-export type ListState = {
-	list: Array<PostListItem>
-	page: number
-	has_more: boolean
-	loading: boolean
-	inited: boolean
-}
-
-export type ListStateMap = Record<PostForType, ListState>
+import type { ListState, ListStateMap } from './types'
 
 export const post_for_types = ['user', 'wiki', 'memory'] as const
 
@@ -34,8 +17,6 @@ export const createListStateMap = (): ListStateMap => ({
 	wiki: createEmptyListState(),
 	memory: createEmptyListState()
 })
-
-export const getPreview = (content: string) => content.replace(/\s+/g, ' ').trim().slice(0, 180)
 
 export const mergePostList = <T extends { id: string }>(...lists: Array<Array<T>>) => {
 	const result = [] as Array<T>

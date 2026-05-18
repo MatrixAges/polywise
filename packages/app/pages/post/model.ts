@@ -4,9 +4,9 @@ import { injectable } from 'tsyringe'
 import { Util } from '@/models/common'
 import { rpc } from '@/utils'
 
-import { createListStateMap, mergePostList } from './shared'
+import { createListStateMap, mergePostList } from './utils'
 
-import type { PostForType } from './shared'
+import type { PostForType } from './types'
 
 @injectable()
 export default class Index {
