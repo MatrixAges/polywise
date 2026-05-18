@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import { observer } from 'mobx-react-lite'
 import { container } from 'tsyringe'
 
-import { Content } from './components'
+import { Header, List } from './components'
 import { Context } from './context'
 import Model from './model'
 
@@ -23,7 +23,24 @@ const Index = () => {
 
 	return (
 		<Context value={x}>
-			<Content></Content>
+			<div className='h-full overflow-hidden'>
+				<div
+					className='
+						overflow-hidden
+						flex flex-col
+						w-full h-full
+						px-6 pt-0
+						page_wrap
+					'
+				>
+					<Header></Header>
+					<div className='min-h-0 flex-1 overflow-y-auto'>
+						<div className='flex flex-col gap-2'>
+							<List></List>
+						</div>
+					</div>
+				</div>
+			</div>
 		</Context>
 	)
 }
