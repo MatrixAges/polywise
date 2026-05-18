@@ -1,4 +1,4 @@
-import { Loader2, Plus, X } from 'lucide-react'
+import { Loader2, Plus, Search, X } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { Button } from '@/__shadcn__/components/ui/button'
@@ -13,6 +13,16 @@ const Index = () => {
 		<div className='flex h-full flex-col overflow-hidden'>
 			<div className='border-border-light border-b p-2.5'>
 				<div className='relative'>
+					<Search
+						className='
+							absolute
+							top-1/2
+							left-3
+							size-4
+							text-std-300
+							pointer-events-none -translate-y-1/2
+						'
+					></Search>
 					<Input
 						className='pl-8'
 						placeholder='Search article to relate'

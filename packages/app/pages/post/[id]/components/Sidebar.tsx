@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react-lite'
 
-import { TextTabs } from '@/components'
+import { Tabs } from '@/components'
 
 import { detail_tab_items } from '../../utils'
 import { useModel } from '../context'
@@ -31,16 +31,17 @@ const Index = () => {
 				'
 			>
 				{x.selected_post ? (
-					<div className='h-full'>
-						<TextTabs
+					<div className='min-w-0 flex-1'>
+						<Tabs
+							small
 							items={detail_tab_items.map(item => ({
 								key: item.key,
 								title: item.title,
 								Icon: item.Icon
 							}))}
 							active={x.detail_tab}
-							setActive={(value: DetailTab) => x.setDetailTab(value)}
-						></TextTabs>
+							onClick={value => x.setDetailTab(value as DetailTab)}
+						></Tabs>
 					</div>
 				) : (
 					<span className='text-std-400 text-sm'>Loading post</span>
