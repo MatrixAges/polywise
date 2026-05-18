@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useMemoizedFn } from 'ahooks'
 import {
 	BookOpen,
+	Bot,
 	Brain,
 	Database,
 	Files,
@@ -13,7 +14,6 @@ import {
 	Plus,
 	Save,
 	Search,
-	Sparkles,
 	Trash2,
 	UserRound,
 	X
@@ -167,6 +167,10 @@ const Index = () => {
 	const [related_search_loading, setRelatedSearchLoading] = useState(false)
 	const [related_search_list, setRelatedSearchList] = useState<Array<RelatedSearchItem>>([])
 	const [ensuring_session, setEnsuringSession] = useState(false)
+	const [session_draft_input, setSessionDraftInput] = useState<{
+		key: string
+		value: string
+	} | null>(null)
 
 	const save_timer_ref = useRef<ReturnType<typeof setTimeout> | 0>(0)
 	const search_timer_ref = useRef<ReturnType<typeof setTimeout> | 0>(0)
@@ -192,6 +196,10 @@ const Index = () => {
 
 	useEffect(() => {
 		selected_id_ref.current = selected_id
+	}, [selected_id])
+
+	useEffect(() => {
+		setSessionDraftInput(null)
 	}, [selected_id])
 
 	useEffect(() => {
@@ -491,7 +499,7 @@ const Index = () => {
 		}
 	})
 
-	const submitRewriteSelection = useMemoizedFn(async (editor: TiptapEditor) => {
+	const addReferenceToPostSessionInput = useMemoizedFn(async (editor: TiptapEditor) => {
 		const post_id = selected_id_ref.current
 
 		if (!post_id) {
@@ -505,15 +513,6 @@ const Index = () => {
 			return
 		}
 
-		const instruction = window.prompt(
-			'Rewrite instructions',
-			'Polish this passage while preserving its meaning.'
-		)
-
-		if (instruction === null) {
-			return
-		}
-
 		await saveCurrentPost({ silent: true })
 
 		const before_context = editor.state.doc.textBetween(Math.max(0, from - 80), from, '\n')
@@ -523,9 +522,8 @@ const Index = () => {
 			'\n'
 		)
 		const prompt = [
-			'Rewrite the selected passage in the current post.',
-			`Instruction: ${instruction || 'Polish the writing while preserving meaning.'}`,
-			'Use post_tool action "replace_selection" to update the post directly.',
+			'Reference from the current post:',
+			'Use the marked passage below when answering or editing the current post.',
 			`Selected text:\n<<<SELECTION\n${selection_text}\nSELECTION>>>`,
 			before_context ? `Before context:\n<<<BEFORE\n${before_context}\nBEFORE>>>` : '',
 			after_context ? `After context:\n<<<AFTER\n${after_context}\nAFTER>>>` : ''
@@ -535,16 +533,17 @@ const Index = () => {
 
 		setMenuTab('detail')
 		setDetailTab('session')
-		const response = await rpc.post.session.submit.mutate({
-			post_id,
-			message: prompt
-		})
+		const next_session_id = await ensureSession()
 
-		if (selected_id_ref.current === post_id) {
-			setSessionId(response.session_id)
+		if (!next_session_id || selected_id_ref.current !== post_id) {
+			return
 		}
 
-		toast.success('Rewrite request sent to post session.')
+		setSessionDraftInput({
+			key: `${post_id}:${Date.now()}`,
+			value: prompt
+		})
+		toast.success('Reference added to post session input.')
 	})
 
 	const handleCreatePost = useMemoizedFn(async () => {
@@ -1251,6 +1250,7 @@ const Index = () => {
 								<Session
 									type='global'
 									id={session_id}
+									draft_input={session_draft_input ?? undefined}
 									show_session_mode_select={false}
 									show_audit_mode_select={false}
 								></Session>
@@ -1403,15 +1403,15 @@ const Index = () => {
 													btn_format cursor-pointer
 												'
 											onClick={() =>
-												void submitRewriteSelection(
+												void addReferenceToPostSessionInput(
 													editor as TiptapEditor
 												)
 											}
-											title='Rewrite selection with AI'
+											title='Add reference to post session'
 										>
-											<Sparkles className='size-3.5'></Sparkles>
+											<Bot className='size-3.5'></Bot>
 											<span className='text-xs font-medium'>
-												AI Rewrite
+												Add Reference
 											</span>
 										</div>
 									)}

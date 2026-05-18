@@ -29,6 +29,7 @@ export interface IProps {
 	type: 'dialog' | 'page' | 'global'
 	id: string
 	input?: string
+	draft_input?: { key: string; value: string }
 	actions?: ReactNode
 	create?: (input: string) => void
 	group_streaming?: boolean
@@ -43,6 +44,7 @@ const Index = (props: IProps) => {
 		type,
 		id,
 		input,
+		draft_input,
 		actions,
 		create,
 		group_streaming,
@@ -77,6 +79,7 @@ const Index = (props: IProps) => {
 		archived: x.archived_at !== null,
 		mode: x.mode,
 		audit_mode: x.audit_mode,
+		draft_input,
 		show_session_mode_select,
 		show_audit_mode_select: show_audit_mode_select && id !== global_linkcase_session_id,
 		send: useMemoizedFn((v: string) => {

@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef } from 'react'
+import { useEffect, useLayoutEffect, useRef } from 'react'
 import { PauseIcon, PlayIcon } from '@phosphor-icons/react'
 import { useMemoizedFn, useToggle } from 'ahooks'
 import { Archive, ArrowDownToLine, BrushCleaning, Layers2, Maximize, PackageOpen } from 'lucide-react'
@@ -53,6 +53,7 @@ const Index = (props: IPropsInput) => {
 		archived,
 		mode,
 		audit_mode,
+		draft_input,
 		show_session_mode_select,
 		show_audit_mode_select,
 		send,
@@ -86,6 +87,18 @@ const Index = (props: IPropsInput) => {
 			el.removeEventListener('compositionend', setLeft)
 		}
 	}, [])
+
+	useEffect(() => {
+		const el = ref.current
+
+		if (!el || !draft_input) {
+			return
+		}
+
+		el.value = draft_input.value
+		el.focus()
+		el.setSelectionRange(el.value.length, el.value.length)
+	}, [draft_input?.key])
 
 	const onChangeDefaultMode = useMemoizedFn(v => {
 		s.setConfig('config', { default_model: v } as AppConfig, true)
