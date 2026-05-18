@@ -28,6 +28,7 @@ export interface IPropsInput extends Pick<
 	archived: boolean
 	mode: 'normal' | 'plan' | 'plan-exec'
 	audit_mode: 'limited' | 'auto' | 'full'
+	show_session_mode_select: boolean
 	show_audit_mode_select: boolean
 	toggleContextModal: () => void
 }

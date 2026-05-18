@@ -92,6 +92,20 @@ const toListItem = (post: PostDetail): PostListItem => ({
 	has_session: Boolean(post.session_id)
 })
 
+const replaceItemPreservingOrder = <T extends { id: string }>(list: Array<T>, next_item: T) => {
+	const target_index = list.findIndex(item => item.id === next_item.id)
+
+	if (target_index === -1) {
+		return list
+	}
+
+	const next_list = [...list]
+
+	next_list[target_index] = next_item
+
+	return next_list
+}
+
 const parseOutline = (content: string) => {
 	const lines = content.split('\n')
 	const items = [] as Array<{ id: string; level: number; text: string }>
@@ -197,8 +211,9 @@ const Index = () => {
 		session_id_ref.current = session_id
 	}, [session_id])
 
-	const updateListCaches = useMemoizedFn((post: PostDetail) => {
+	const updateListCaches = useMemoizedFn((post: PostDetail, args?: { promote?: boolean }) => {
 		const next_item = toListItem(post)
+		const promote = args?.promote ?? true
 
 		setListMap(current => {
 			const next = { ...current }
@@ -212,7 +227,9 @@ const Index = () => {
 					list:
 						key === post.for_type
 							? existing_state.inited
-								? [next_item, ...filtered_list]
+								? promote
+									? [next_item, ...filtered_list]
+									: replaceItemPreservingOrder(existing_state.list, next_item)
 								: filtered_list
 							: filtered_list
 				}
@@ -281,7 +298,7 @@ const Index = () => {
 			setDraftForType(response.for_type)
 			setSessionId(response.session_id)
 			setDirty(false)
-			updateListCaches(response)
+			updateListCaches(response, { promote: false })
 
 			if (detail_tab === 'related') {
 				void loadRelatedArticles(response.id)
@@ -304,7 +321,7 @@ const Index = () => {
 
 		setSelectedPost(response)
 		setSessionId(response.session_id)
-		updateListCaches(response)
+		updateListCaches(response, { promote: false })
 
 		if (!dirty_ref.current) {
 			setDraftTitle(response.title ?? '')
@@ -388,7 +405,7 @@ const Index = () => {
 				for_type: next_for_type
 			})
 			.then(response => {
-				updateListCaches(response)
+				updateListCaches(response, { promote: true })
 
 				if (selected_id_ref.current === post_id) {
 					setSelectedPost(response)
@@ -461,7 +478,7 @@ const Index = () => {
 					}
 
 					setSelectedPost(next_post)
-					updateListCaches(next_post)
+					updateListCaches(next_post, { promote: false })
 				}
 			}
 
@@ -537,7 +554,7 @@ const Index = () => {
 			return
 		}
 
-		updateListCaches(response)
+		updateListCaches(response, { promote: true })
 		setMenuTab('detail')
 		await loadPost(response.id)
 	})
@@ -1196,7 +1213,12 @@ const Index = () => {
 									</div>
 								</div>
 							) : session_id ? (
-								<Session type='global' id={session_id}></Session>
+								<Session
+									type='global'
+									id={session_id}
+									show_session_mode_select={false}
+									show_audit_mode_select={false}
+								></Session>
 							) : (
 								<div
 									className='

@@ -33,6 +33,8 @@ export interface IProps {
 	create?: (input: string) => void
 	group_streaming?: boolean
 	show_loading_dots?: boolean
+	show_session_mode_select?: boolean
+	show_audit_mode_select?: boolean
 	useSyncState?: (args: SessionSyncStateHookArgs) => SessionSyncStateHookResult | undefined
 }
 
@@ -45,6 +47,8 @@ const Index = (props: IProps) => {
 		create,
 		group_streaming,
 		show_loading_dots = true,
+		show_session_mode_select = true,
+		show_audit_mode_select = true,
 		useSyncState = use_empty_sync_state
 	} = props
 	const [x] = useState(() => container.resolve(Model))
@@ -73,7 +77,8 @@ const Index = (props: IProps) => {
 		archived: x.archived_at !== null,
 		mode: x.mode,
 		audit_mode: x.audit_mode,
-		show_audit_mode_select: id !== global_linkcase_session_id,
+		show_session_mode_select,
+		show_audit_mode_select: show_audit_mode_select && id !== global_linkcase_session_id,
 		send: useMemoizedFn((v: string) => {
 			if (create) {
 				create(v)

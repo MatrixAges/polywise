@@ -53,6 +53,7 @@ const Index = (props: IPropsInput) => {
 		archived,
 		mode,
 		audit_mode,
+		show_session_mode_select,
 		show_audit_mode_select,
 		send,
 		stop,
@@ -243,33 +244,35 @@ const Index = (props: IPropsInput) => {
 							</Select>
 						</div>
 						<div className='flex items-center gap-3'>
-							<Select items={session_modes} value={mode} onValueChange={setMode}>
-								<SelectTrigger
-									className='
-										h-auto!
-										p-0
-										text-xsm! text-std-400
-										bg-transparent
-									'
-									noActiveStyle
-								>
-									<SelectValue />
-								</SelectTrigger>
-								<SelectContent
-									className='w-[120px]'
-									alignItemWithTrigger={false}
-									side='top'
-								>
-									<SelectGroup>
-										<SelectLabel>Mode</SelectLabel>
-										{session_modes.map(item => (
-											<SelectItem value={item.value} key={item.value}>
-												{item.label}
-											</SelectItem>
-										))}
-									</SelectGroup>
-								</SelectContent>
-							</Select>
+							{show_session_mode_select && (
+								<Select items={session_modes} value={mode} onValueChange={setMode}>
+									<SelectTrigger
+										className='
+											h-auto!
+											p-0
+											text-xsm! text-std-400
+											bg-transparent
+										'
+										noActiveStyle
+									>
+										<SelectValue />
+									</SelectTrigger>
+									<SelectContent
+										className='w-[120px]'
+										alignItemWithTrigger={false}
+										side='top'
+									>
+										<SelectGroup>
+											<SelectLabel>Mode</SelectLabel>
+											{session_modes.map(item => (
+												<SelectItem value={item.value} key={item.value}>
+													{item.label}
+												</SelectItem>
+											))}
+										</SelectGroup>
+									</SelectContent>
+								</Select>
+							)}
 							<button
 								className='icon_button primary h-6 w-6'
 								onClick={streaming ? stop : onSend}
