@@ -21,12 +21,14 @@ export interface IPropsPart extends Pick<IPropsMessage, 'streaming' | 'answer'> 
 
 export interface IPropsInput extends Pick<
 	Model,
-	'send' | 'stop' | 'clear' | 'archive' | 'unarchive' | 'scrollToBottom' | 'setMode'
+	'send' | 'stop' | 'clear' | 'archive' | 'unarchive' | 'scrollToBottom' | 'setMode' | 'setAuditMode'
 > {
 	type: IProps['type']
 	streaming: boolean
 	archived: boolean
 	mode: 'normal' | 'plan' | 'plan-exec'
+	audit_mode: 'limited' | 'auto' | 'full'
+	show_audit_mode_select: boolean
 	toggleContextModal: () => void
 }
 

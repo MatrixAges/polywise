@@ -34,8 +34,11 @@ export default p.input(input_type).subscription(async function* (args) {
 	const unarchive = () => session.unarchiveMessages()
 	const load = (type: 'prev' | 'next') => session.loadMessages(type)
 
-	const setConfig = async (patch: { mode: string }) => {
-		await session.setConfig({ mode: patch.mode as 'normal' | 'plan' | 'plan-exec' })
+	const setConfig = async (patch: { mode?: string; audit_mode?: 'limited' | 'auto' | 'full' }) => {
+		await session.setConfig({
+			...(patch.mode ? { mode: patch.mode as 'normal' | 'plan' | 'plan-exec' } : {}),
+			...(patch.audit_mode ? { audit_mode: patch.audit_mode } : {})
+		})
 		const data = await session.getData()
 
 		SessionEventStore.emit(`${id}/change`, data)

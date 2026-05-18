@@ -32,6 +32,12 @@ const session_modes = [
 	{ label: 'Plan-Exec', value: 'plan-exec' }
 ]
 
+const audit_modes = [
+	{ label: 'Limited', value: 'limited' },
+	{ label: 'Auto', value: 'auto' },
+	{ label: 'Full Access', value: 'full' }
+]
+
 const effort_modes = [
 	{ label: 'Default', value: 'default' },
 	{ label: 'Low', value: 'low' },
@@ -46,6 +52,8 @@ const Index = (props: IPropsInput) => {
 		streaming,
 		archived,
 		mode,
+		audit_mode,
+		show_audit_mode_select,
 		send,
 		stop,
 		clear,
@@ -53,7 +61,8 @@ const Index = (props: IPropsInput) => {
 		unarchive,
 		scrollToBottom,
 		toggleContextModal,
-		setMode
+		setMode,
+		setAuditMode
 	} = props
 	const global = useGlobal()
 	const ref = useRef<HTMLTextAreaElement>(null)
@@ -261,6 +270,44 @@ const Index = (props: IPropsInput) => {
 									</SelectGroup>
 								</SelectContent>
 							</Select>
+							{show_audit_mode_select && (
+								<Select
+									items={audit_modes}
+									value={audit_mode}
+									onValueChange={setAuditMode}
+								>
+									<SelectTrigger
+										className={$cx(
+											`
+											h-auto!
+											p-0
+											text-xsm!
+											bg-transparent
+										`,
+											audit_mode === 'full'
+												? 'text-std-600'
+												: 'text-std-400'
+										)}
+										noActiveStyle
+									>
+										<SelectValue />
+									</SelectTrigger>
+									<SelectContent
+										className='w-[140px]'
+										alignItemWithTrigger={false}
+										side='top'
+									>
+										<SelectGroup>
+											<SelectLabel>Audit Mode</SelectLabel>
+											{audit_modes.map(item => (
+												<SelectItem value={item.value} key={item.value}>
+													{item.label}
+												</SelectItem>
+											))}
+										</SelectGroup>
+									</SelectContent>
+								</Select>
+							)}
 							<button
 								className='icon_button primary h-6 w-6'
 								onClick={streaming ? stop : onSend}

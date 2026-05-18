@@ -1,4 +1,5 @@
 import { Fragment, useMemo, useState } from 'react'
+import { global_linkcase_session_id } from '@core/consts'
 import { useMemoizedFn } from 'ahooks'
 import { observer } from 'mobx-react-lite'
 import { container } from 'tsyringe'
@@ -71,6 +72,8 @@ const Index = (props: IProps) => {
 		streaming: input_streaming,
 		archived: x.archived_at !== null,
 		mode: x.mode,
+		audit_mode: x.audit_mode,
+		show_audit_mode_select: id !== global_linkcase_session_id,
 		send: useMemoizedFn((v: string) => {
 			if (create) {
 				create(v)
@@ -84,6 +87,7 @@ const Index = (props: IProps) => {
 		unarchive: x.unarchive,
 		scrollToBottom: x.scrollToBottom,
 		setMode: x.setMode,
+		setAuditMode: x.setAuditMode,
 		toggleContextModal
 	}
 

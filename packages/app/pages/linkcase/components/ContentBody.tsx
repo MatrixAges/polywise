@@ -32,7 +32,7 @@ const Index = () => {
 					<span>Loading content</span>
 				</div>
 			) : has_content ? (
-				<div className='page_wrap'>
+				<div className='page_wrap' data-streamdown>
 					<MessageResponse className='w-full leading-7'>
 						{x.detail?.article?.content || ''}
 					</MessageResponse>

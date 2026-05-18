@@ -186,6 +186,7 @@ export default class Group extends Session {
 			has_newer: this.ui_has_newer,
 			permission: this.permission,
 			mode: this.mode,
+			audit_mode: this.audit_mode,
 			group: this.getGroupPayload()
 		}
 	}

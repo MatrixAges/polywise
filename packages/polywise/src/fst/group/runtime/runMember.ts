@@ -1,4 +1,5 @@
 import fst_system_prompt from '@core/consts/prompts/fst_system_prompt.md'
+import fst_system_tool_prompt from '@core/consts/prompts/fst_system_tool_prompt.md'
 import getContextPrompt from '@core/consts/prompts/getContextPrompt'
 import { createPartDurationTracker, getPartDurationChunk } from '@core/fst/duration'
 import { buildSharedRuntimeTools, createMessageTool } from '@core/fst/tools'
@@ -144,6 +145,7 @@ export default async (args: {
 		'group_coordination_tool and group_progress_tool are terminal internal actions. If you call either one, end the turn immediately and do not generate any additional user-facing text after the tool call.',
 		'If you need those internal tools, call them before writing the final user-facing answer whenever possible.',
 		'Do not wait for or react to other agents in the same turn. Work from the shared history and current group context only.',
+		shared_runtime.has_system_tool ? fst_system_tool_prompt : '',
 		shared_runtime.system_tools_prompt,
 		shared_runtime.custom_tools_prompt,
 		shared_runtime.skill_prompt,

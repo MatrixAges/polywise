@@ -37,6 +37,7 @@ import type {
 	Message,
 	Permission,
 	Permissions,
+	SessionAuditMode,
 	SessionMode,
 	SessionScope,
 	SkillMeta
@@ -73,6 +74,7 @@ export default class Index {
 	running_since = null as Date | null
 	superego_append_count = 0
 	mode = 'normal' as SessionMode
+	audit_mode = 'auto' as SessionAuditMode
 	plan_stage = 'plan' as 'plan' | 'exec'
 
 	get cwd() {

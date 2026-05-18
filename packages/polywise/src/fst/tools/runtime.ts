@@ -7,6 +7,7 @@ import { createContentTool } from './content'
 import { createEditFileTool } from './edit'
 import { createGlobTool } from './glob'
 import { createMetaTool, getCustomToolsPrompt } from './meta'
+import { createNativeAccessTools } from './native'
 import { createSearchFileTool } from './search'
 import { getSkillPrompt } from './skill'
 import { createWebFetchTool } from './webfetch'
@@ -43,7 +44,9 @@ const applyTransform = <T>(
 
 export const buildSharedRuntimeTools = async (args: BuildSharedRuntimeToolsArgs) => {
 	const { s, model_tools = {}, extra_tools = {}, transform_tool } = args
-	const bash_tool = await createBashTool(s)
+	const is_full_access = s.audit_mode === 'full'
+	const has_system_tool = s.audit_mode === 'auto'
+	const bash_tool = is_full_access ? await createNativeAccessTools(s) : await createBashTool(s)
 	const mcp_tools = await loadMcpTools(s)
 	const system_tools_prompt = await getSystemTools()
 	const custom_tools_prompt = getCustomToolsPrompt(s.custom_tools_map)
@@ -55,25 +58,25 @@ export const buildSharedRuntimeTools = async (args: BuildSharedRuntimeToolsArgs)
 		...extra_tools,
 		meta_tool: applyTransform(transform_tool, 'meta_tool', createMetaTool(s)),
 		glob_tool: applyTransform(transform_tool, 'glob_tool', createGlobTool(s)),
-		search_file_tool: applyTransform(
-			transform_tool,
-			'search_file_tool',
-			createSearchFileTool(s, bash_tool.env)
-		),
+		search_file_tool: applyTransform(transform_tool, 'search_file_tool', createSearchFileTool(s)),
 		content_tool: applyTransform(transform_tool, 'content_tool', createContentTool(s)),
 		web_search_tool: applyTransform(transform_tool, 'web_search_tool', createWebSearchTool()),
 		web_fetch_tool: applyTransform(transform_tool, 'web_fetch_tool', createWebFetchTool()),
-		system_tool: applyTransform(transform_tool, 'system_tool', createSystemTool(s)),
 		read_file_tool: applyTransform(transform_tool, 'read_file_tool', bash_tool.readFile),
 		bash_tool: applyTransform(transform_tool, 'bash_tool', bash_tool.bash),
 		write_file_tool: applyTransform(transform_tool, 'write_file_tool', bash_tool.writeFile),
 		edit_file_tool: applyTransform(transform_tool, 'edit_file_tool', createEditFileTool(s))
 	} as ToolSet
 
+	if (has_system_tool) {
+		tools.system_tool = applyTransform(transform_tool, 'system_tool', createSystemTool(s))
+	}
+
 	return {
 		tools,
 		system_tools_prompt,
 		custom_tools_prompt,
-		skill_prompt
+		skill_prompt,
+		has_system_tool
 	}
 }

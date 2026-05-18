@@ -3,6 +3,7 @@ import { global_linkcase_session_id } from '@core/consts'
 import fst_linkcase_system_prompt from '@core/consts/prompts/fst_linkcase_system_prompt.md'
 import fst_report_tool_prompt from '@core/consts/prompts/fst_report_tool_prompt.md'
 import fst_system_prompt from '@core/consts/prompts/fst_system_prompt.md'
+import fst_system_tool_prompt from '@core/consts/prompts/fst_system_tool_prompt.md'
 import fst_title_tool_prompt from '@core/consts/prompts/fst_title_tool_prompt.md'
 import getContextPrompt from '@core/consts/prompts/getContextPrompt'
 import plan_mode_prompt from '@core/consts/prompts/plan_mode_prompt.md'
@@ -100,6 +101,7 @@ export default async (s: Index, message: Message) => {
 					linkcase_tool: createLinkcaseTool(s),
 					cron_tool: createCronTool(s)
 				},
+				has_system_tool: false,
 				system_tools_prompt: '',
 				custom_tools_prompt: '',
 				skill_prompt: ''
@@ -135,6 +137,7 @@ export default async (s: Index, message: Message) => {
 				has_title_tool ? fst_title_tool_prompt : '',
 				agent_system_prompt,
 				has_todo_session_link ? fst_report_tool_prompt : '',
+				shared_runtime.has_system_tool ? fst_system_tool_prompt : '',
 				shared_runtime.system_tools_prompt,
 				shared_runtime.custom_tools_prompt,
 				shared_runtime.skill_prompt,

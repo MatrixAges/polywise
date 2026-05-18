@@ -37,6 +37,17 @@ export const permission = p.input(object({ id: string(), approved: boolean() }))
 	SessionEventStore.emit(`${input.id}/permission`, input.approved)
 })
 
-export const setConfig = p.input(object({ id: string(), mode: string() })).mutation(async ({ input }) => {
-	SessionEventStore.emit(`${input.id}/setConfig`, { mode: input.mode })
-})
+export const setConfig = p
+	.input(
+		object({
+			id: string(),
+			mode: string().optional(),
+			audit_mode: Enum(['limited', 'auto', 'full']).optional()
+		})
+	)
+	.mutation(async ({ input }) => {
+		SessionEventStore.emit(`${input.id}/setConfig`, {
+			...(input.mode ? { mode: input.mode } : {}),
+			...(input.audit_mode ? { audit_mode: input.audit_mode } : {})
+		})
+	})

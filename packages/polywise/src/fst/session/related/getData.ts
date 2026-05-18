@@ -16,7 +16,8 @@ export default async (s: Index) => {
 			has_older: s.ui_has_older,
 			has_newer: s.ui_has_newer,
 			permission: s.permission,
-			mode: s.mode
+			mode: s.mode,
+			audit_mode: s.audit_mode
 		}
 	} as ChatEventRes
 }

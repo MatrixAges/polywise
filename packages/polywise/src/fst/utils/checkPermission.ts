@@ -11,6 +11,10 @@ export default async (
 	shell_injection_path?: string,
 	skip_check?: boolean
 ) => {
+	if (s.audit_mode === 'full') {
+		return null
+	}
+
 	if (shell_injection_path && detectShellInjectionRisk(shell_injection_path)) {
 		const is_approved = await approve(
 			s,

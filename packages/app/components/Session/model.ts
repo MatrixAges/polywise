@@ -41,6 +41,7 @@ export default class Index {
 	permission = null as unknown as Permission
 	archived_at = null as null | number
 	mode = 'normal' as 'normal' | 'plan' | 'plan-exec'
+	audit_mode = 'auto' as 'limited' | 'auto' | 'full'
 	group_agents = [] as Array<GroupAgentSummary>
 
 	signal = 0
@@ -64,7 +65,8 @@ export default class Index {
 				status: false,
 				messages: false,
 				permission: false,
-				mode: true
+				mode: true,
+				audit_mode: true
 			},
 			{ autoBind: true }
 		)
@@ -120,7 +122,8 @@ export default class Index {
 								has_older,
 								has_newer,
 								permission,
-								mode
+								mode,
+								audit_mode
 							} = res.data
 
 							this.session = session as Session
@@ -130,6 +133,7 @@ export default class Index {
 							this.has_newer = has_newer
 							this.permission = permission as Permission
 							this.mode = mode ?? 'normal'
+							this.audit_mode = audit_mode ?? 'auto'
 							this.group_agents = res.data.group?.agents ?? []
 
 							const target_messages = messages as unknown as Array<Message>
@@ -336,6 +340,14 @@ export default class Index {
 		rpc.session.setConfig.mutate({ id: this.id, mode })
 	}
 
+	setAuditMode(audit_mode: 'limited' | 'auto' | 'full' | null) {
+		if (!audit_mode) return
+
+		this.audit_mode = audit_mode
+
+		rpc.session.setConfig.mutate({ id: this.id, audit_mode })
+	}
+
 	on() {
 		const off_status = this.chat['~registerStatusCallback'](() => {
 			this.status = this.chat.status
@@ -387,6 +399,7 @@ export default class Index {
 		this.permission = null as unknown as Permission
 		this.archived_at = null as null | number
 		this.mode = 'normal'
+		this.audit_mode = 'auto'
 
 		this.signal = 0
 		this.open_context_modal = false

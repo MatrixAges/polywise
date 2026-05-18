@@ -6,7 +6,6 @@ import grep from '../../utils/grep'
 import { checkPermission, getPathMappings, toDisplayPath } from '../utils'
 import getRealPath from '../utils/getRealPath'
 
-import type { Bash } from 'just-bash'
 import type Session from '../session'
 
 interface SearchMatch {
@@ -74,14 +73,12 @@ const getSearchTargets = (args: { cwd: string; paths?: Array<string>; path_mappi
 	})
 }
 
-export const createSearchFileTool = (s: Session, bash: Bash) => {
+export const createSearchFileTool = (s: Session) => {
 	return tool({
 		description:
 			'Search for keyword in file contents. Returns matching files with line numbers and snippets. Use for code/text content search.',
 		inputSchema,
 		execute: async input => {
-			void bash
-
 			const path_mappings = getPathMappings(s)
 
 			const search_target_list = getSearchTargets({

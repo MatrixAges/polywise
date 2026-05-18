@@ -25,12 +25,6 @@ Use this tool when you need to access conversation history beyond your current c
 
 Use this tool to update task progress, tracked files, constraints, and blockers when significant changes occur.
 
-### system_tool - Access Files Outside Working Directory
-
-Use this tool when the user requests to access files or directories outside the project working directory.
-
-- When returning results, summarize and format them in a user-friendly way, do NOT copy raw output
-
 ### Skills Directory
 
 **Only install skills to `/skills/skill-name/SKILL.md`.** Do NOT install to working directory, session files, or any other location.

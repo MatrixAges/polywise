@@ -21,6 +21,7 @@ export default async (s: Index, is_cron?: boolean, title?: string) => {
 
 	const session_config = await s.getConfig()
 	s.mode = session_config.mode ?? 'normal'
+	s.audit_mode = session_config.audit_mode ?? 'auto'
 
 	await s.getContext()
 	await s.getState()

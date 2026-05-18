@@ -80,6 +80,7 @@ export interface SessionScope {
 }
 
 export type SessionMode = 'normal' | 'plan' | 'plan-exec'
+export type SessionAuditMode = 'limited' | 'auto' | 'full'
 
 export type ChatEventRes = {
 	type: 'sync'
@@ -92,6 +93,7 @@ export type ChatEventRes = {
 		has_newer: boolean
 		permission: Permission | null
 		mode: SessionMode
+		audit_mode: SessionAuditMode
 		group?: {
 			id: string
 			name: string

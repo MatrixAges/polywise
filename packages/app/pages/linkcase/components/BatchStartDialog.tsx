@@ -1,3 +1,4 @@
+import { ListCheck, Plus } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { Button } from '@/__shadcn__/components/ui/button'
@@ -12,7 +13,7 @@ import {
 	SelectValue
 } from '@/__shadcn__/components/ui/select'
 import { Switch } from '@/__shadcn__/components/ui/switch'
-import { Dialog, DialogFooter, TextTabs } from '@/components'
+import { Dialog, DialogFooter, Tabs } from '@/components'
 
 import { useModel } from '../context'
 
@@ -307,20 +308,23 @@ const Index = () => {
 						pb-1
 						mt-2
 						bg-background/95
-						border-t border-border-light
 						backdrop-blur
 					'
 				>
-					<TextTabs
-						className='h-8'
-						itemClassName='h-8 px-2 text-sm'
-						items={[
-							{ key: 'create', title: 'Add Task' },
-							{ key: 'tasks', title: `Task List (${x.batch_task_count})` }
-						]}
-						active={x.batch_panel_tab}
-						setActive={x.setBatchPanelTab}
-					></TextTabs>
+					<div className='flex h-8 flex-1'>
+						<Tabs
+							items={[
+								{ key: 'create', title: 'Add Task', Icon: Plus },
+								{
+									key: 'tasks',
+									title: `Task List (${x.batch_task_count})`,
+									Icon: ListCheck
+								}
+							]}
+							active={x.batch_panel_tab}
+							onClick={x.setBatchPanelTab}
+						></Tabs>
+					</div>
 					<div className='flex items-center gap-2'>
 						<Button variant='ghost' size='sm' onClick={() => x.setStartDialogOpen(false)}>
 							Close
