@@ -1,5 +1,6 @@
+import path from 'path'
 import { getNodeRowid, insertNodeVector } from '@core/db/prepare'
-import { article, chunk, edge, node, post_article, post_session } from '@core/db/schema'
+import { article, chunk, edge, node, post_article, post_project, post_session, project } from '@core/db/schema'
 import { addEdge, addNode, addSession, getArticle, getChunks, getEdge, getNode } from '@core/db/services'
 import { addNodeChunk, addPostSession, getPostSessions } from '@core/db/services/externals'
 import { env } from '@core/env'
@@ -7,6 +8,7 @@ import { remove, saveArticle } from '@core/io'
 import { readPipelineStore } from '@core/io/save/pipelineStore'
 import { getEmbedding, getTriples } from '@core/pipeline'
 import { log } from '@core/utils'
+import grep from '@core/utils/grep'
 import dayjs from 'dayjs'
 import { and, asc, desc, eq, inArray, like, notInArray, or, sql } from 'drizzle-orm'
 
@@ -460,6 +462,21 @@ export const listPostRelatedArticles = async (post_id: string) => {
 		)
 }
 
+export const listPostRelatedProjects = async (post_id: string) => {
+	return env.db
+		.select({
+			id: project.id,
+			name: project.name,
+			dir: project.dir,
+			created_at: project.created_at,
+			updated_at: project.updated_at
+		})
+		.from(post_project)
+		.innerJoin(project, eq(post_project.project_id, project.id))
+		.where(eq(post_project.post_id, post_id))
+		.orderBy(desc(post_project.created_at), project.order, desc(project.updated_at), asc(project.created_at))
+}
+
 const splitRelatedSearchTerms = (query: string) => {
 	const raw = query.trim()
 
@@ -543,6 +560,75 @@ const getRelatedSourceScore = (args: {
 	return score
 }
 
+const normalizeRelatedSourceMaxResults = (value?: number) => Math.min(Math.max(value ?? 5, 1), 8)
+
+const getRelatedProjectFileScore = (args: {
+	query: string
+	terms: Array<string>
+	project_name: string
+	relative_path: string
+	content: string
+	updated_at: Date | null
+}) => {
+	const { query, terms, project_name, relative_path, content, updated_at } = args
+	const lower_query = query.trim().toLowerCase()
+	const lower_path = relative_path.toLowerCase()
+	const haystack = `${project_name}\n${relative_path}\n${content}`.toLowerCase()
+	let score = 0
+
+	if (lower_query && haystack.includes(lower_query)) {
+		score += 8
+	}
+
+	if (lower_query && lower_path.includes(lower_query)) {
+		score += 4
+	}
+
+	for (const term of terms) {
+		const lower_term = term.toLowerCase()
+
+		if (haystack.includes(lower_term)) {
+			score += term === query ? 3 : 1.5
+		}
+
+		if (lower_path.includes(lower_term)) {
+			score += 2
+		}
+	}
+
+	if (updated_at) {
+		const day_ms = 24 * 60 * 60 * 1000
+		const days_ago = Math.max(0, (Date.now() - updated_at.getTime()) / day_ms)
+
+		score += 1 / (1 + days_ago * 0.1)
+	}
+
+	return score
+}
+
+const parseProjectMatchLine = (line: string) => {
+	const match = /^(.*?):(\d+):(.*)$/u.exec(line)
+
+	if (!match) {
+		return null
+	}
+
+	return {
+		absolute_path: path.resolve(match[1]),
+		line: Number(match[2]),
+		content: match[3].trim()
+	}
+}
+
+const resolveMatchedProject = (
+	related_projects: Array<Awaited<ReturnType<typeof listPostRelatedProjects>>[number]>,
+	absolute_path: string
+) =>
+	related_projects.find(
+		project_row =>
+			absolute_path === project_row.dir || absolute_path.startsWith(`${project_row.dir}${path.sep}`)
+	)
+
 export const searchPostRelatedArticleSources = async (args: {
 	post_id: string
 	query: string
@@ -584,7 +670,7 @@ export const searchPostRelatedArticleSources = async (args: {
 		orderBy: [desc(chunk.created_at), asc(chunk.position)]
 	})
 	const terms = splitRelatedSearchTerms(query)
-	const max_results = Math.min(Math.max(args.max_results ?? 5, 1), 8)
+	const max_results = normalizeRelatedSourceMaxResults(args.max_results)
 	const chunk_map = new Map<string, Array<(typeof related_chunks)[number]>>()
 
 	for (const item of related_chunks) {
@@ -641,6 +727,7 @@ export const searchPostRelatedArticleSources = async (args: {
 			)
 
 			return {
+				source_type: 'article' as const,
 				article_id: article_item.id,
 				title: article_item.title,
 				for_type: article_item.for_type,
@@ -658,6 +745,146 @@ export const searchPostRelatedArticleSources = async (args: {
 		query,
 		related_article_count: related_articles.length,
 		results
+	}
+}
+
+export const searchPostRelatedProjectSources = async (args: {
+	post_id: string
+	query: string
+	max_results?: number
+}) => {
+	const query = args.query.trim()
+
+	if (!query) {
+		return {
+			query,
+			related_project_count: 0,
+			results: []
+		}
+	}
+
+	const related_projects = await listPostRelatedProjects(args.post_id)
+
+	if (related_projects.length === 0) {
+		return {
+			query,
+			related_project_count: 0,
+			results: []
+		}
+	}
+
+	const terms = splitRelatedSearchTerms(query)
+	const max_results = normalizeRelatedSourceMaxResults(args.max_results)
+	const sorted_related_projects = [...related_projects].sort((a, b) => b.dir.length - a.dir.length)
+	const raw_lines = await grep(
+		related_projects.map(item => item.dir),
+		terms.length > 0 ? terms : query,
+		{
+			max_count: Math.max(max_results * 10, 40),
+			with_filename: true,
+			with_line_number: true
+		}
+	)
+	const file_hit_map = new Map<
+		string,
+		{
+			source_type: 'project_file'
+			project_id: string
+			project_name: string
+			absolute_path: string
+			relative_path: string
+			line: number
+			score: number
+			snippet: string
+			matched_terms: Array<string>
+			match_count: number
+		}
+	>()
+
+	for (const raw_line of raw_lines) {
+		const item = parseProjectMatchLine(raw_line)
+
+		if (!item) {
+			continue
+		}
+
+		const project_item = resolveMatchedProject(sorted_related_projects, item.absolute_path)
+
+		if (!project_item) {
+			continue
+		}
+
+		const relative_path =
+			path.relative(project_item.dir, item.absolute_path) || path.basename(item.absolute_path)
+		const score = getRelatedProjectFileScore({
+			query,
+			terms,
+			project_name: project_item.name,
+			relative_path,
+			content: item.content,
+			updated_at: project_item.updated_at
+		})
+
+		if (score <= 0) {
+			continue
+		}
+
+		const matched_terms = terms.filter(term =>
+			`${project_item.name}\n${relative_path}\n${item.content}`.toLowerCase().includes(term.toLowerCase())
+		)
+		const file_key = `${project_item.id}:${relative_path}`
+		const current = file_hit_map.get(file_key)
+		const next_score = Math.round(score * 100) / 100
+
+		if (!current || next_score > current.score) {
+			file_hit_map.set(file_key, {
+				source_type: 'project_file',
+				project_id: project_item.id,
+				project_name: project_item.name,
+				absolute_path: item.absolute_path,
+				relative_path,
+				line: item.line,
+				score: next_score,
+				snippet: getRelatedSnippet(item.content, matched_terms.length ? matched_terms : terms),
+				matched_terms: matched_terms.slice(0, 6),
+				match_count: (current?.match_count ?? 0) + 1
+			})
+
+			continue
+		}
+
+		current.match_count += 1
+	}
+
+	const results = Array.from(file_hit_map.values())
+		.map(item => ({
+			...item,
+			score: Math.round((item.score + Math.min(item.match_count - 1, 3) * 0.35) * 100) / 100
+		}))
+		.sort((a, b) => b.score - a.score)
+		.slice(0, max_results)
+
+	return {
+		query,
+		related_project_count: related_projects.length,
+		results
+	}
+}
+
+export const searchPostRelatedSources = async (args: { post_id: string; query: string; max_results?: number }) => {
+	const max_results = normalizeRelatedSourceMaxResults(args.max_results)
+	const [article_result, project_result] = await Promise.all([
+		searchPostRelatedArticleSources(args),
+		searchPostRelatedProjectSources(args)
+	])
+
+	return {
+		query: article_result.query || project_result.query,
+		related_article_count: article_result.related_article_count,
+		related_project_count: project_result.related_project_count,
+		results: [...article_result.results, ...project_result.results]
+			.sort((a, b) => b.score - a.score)
+			.slice(0, max_results)
 	}
 }
 

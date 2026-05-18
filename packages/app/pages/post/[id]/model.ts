@@ -8,7 +8,16 @@ import { rpc } from '@/utils'
 import { normalizeHeadingText, parseOutline } from '../utils'
 
 import type { Editor as TiptapEditor } from '@tiptap/core'
-import type { DetailTab, PostDetail, PostForType, RelatedArticle, RelatedSearchItem } from '../types'
+import type {
+	DetailTab,
+	PostDetail,
+	PostForType,
+	ProjectOptionItem,
+	RelatedArticle,
+	RelatedProject,
+	RelatedSearchItem,
+	RelatedSourceTab
+} from '../types'
 
 @injectable()
 export default class Index {
@@ -23,11 +32,16 @@ export default class Index {
 	extracting = false
 	dirty = false
 	session_id = null as string | null
+	related_tab = 'article' as RelatedSourceTab
 	related_articles = [] as Array<RelatedArticle>
 	related_loading = false
 	related_search = ''
 	related_search_loading = false
 	related_search_list = [] as Array<RelatedSearchItem>
+	related_projects = [] as Array<RelatedProject>
+	related_projects_loading = false
+	related_project_options = [] as Array<ProjectOptionItem>
+	related_project_options_loading = false
 	ensuring_session = false
 	session_draft_input = null as { key: string; value: string } | null
 	not_found = false
@@ -93,9 +107,12 @@ export default class Index {
 		}
 
 		this.session_draft_input = null
+		this.related_tab = 'article'
 		this.related_search = ''
 		this.related_search_list = []
 		this.related_search_loading = false
+		this.related_projects = []
+		this.related_projects_loading = false
 		this.clearSearchTimer()
 
 		if (this.route_post_id && this.route_post_id !== post_id && this.dirty) {
@@ -111,8 +128,7 @@ export default class Index {
 		this.detail_tab = value
 
 		if (value === 'related' && this.route_post_id) {
-			void this.loadRelatedArticles(this.route_post_id)
-			this.scheduleRelatedSearch()
+			void this.loadActiveRelatedTab(this.route_post_id)
 		}
 
 		if (value !== 'related') {
@@ -144,6 +160,14 @@ export default class Index {
 	setRelatedSearch(value: string) {
 		this.related_search = value
 		this.scheduleRelatedSearch()
+	}
+
+	setRelatedTab(value: RelatedSourceTab) {
+		this.related_tab = value
+
+		if (this.detail_tab === 'related' && this.route_post_id) {
+			void this.loadActiveRelatedTab(this.route_post_id)
+		}
 	}
 
 	clearRelatedSearch() {
@@ -405,6 +429,58 @@ export default class Index {
 		}
 	}
 
+	async loadActiveRelatedTab(post_id = this.route_post_id) {
+		if (this.related_tab === 'article') {
+			await this.loadRelatedArticles(post_id)
+			this.scheduleRelatedSearch()
+
+			return
+		}
+
+		this.clearSearchTimer()
+		this.related_search_list = []
+		this.related_search_loading = false
+		await this.loadRelatedProjects(post_id)
+	}
+
+	async loadRelatedProjects(post_id = this.route_post_id) {
+		if (!post_id) {
+			this.related_projects = []
+
+			return
+		}
+
+		this.related_projects_loading = true
+
+		try {
+			const response = await rpc.post.project.query.query({ post_id })
+
+			if ((this.selected_post?.id ?? this.route_post_id) === post_id) {
+				this.related_projects = response
+			}
+		} finally {
+			this.related_projects_loading = false
+		}
+	}
+
+	async loadRelatedProjectOptions(args?: { force?: boolean }) {
+		if (this.related_project_options_loading) {
+			return
+		}
+
+		if (!args?.force && this.related_project_options.length > 0) {
+			return
+		}
+
+		this.related_project_options_loading = true
+
+		try {
+			this.related_project_options = await rpc.project.list.query()
+		} finally {
+			this.related_project_options_loading = false
+		}
+	}
+
 	async addRelatedArticle(article_id: string) {
 		if (!this.route_post_id) {
 			return
@@ -428,6 +504,30 @@ export default class Index {
 			article_id
 		})
 		await Promise.all([this.loadRelatedArticles(), this.reloadCurrentPost()])
+	}
+
+	async addRelatedProject(project_id: string) {
+		if (!this.route_post_id) {
+			return
+		}
+
+		await rpc.post.project.add.mutate({
+			post_id: this.route_post_id,
+			project_id
+		})
+		await Promise.all([this.loadRelatedProjects(), this.reloadCurrentPost()])
+	}
+
+	async removeRelatedProject(project_id: string) {
+		if (!this.route_post_id) {
+			return
+		}
+
+		await rpc.post.project.remove.mutate({
+			post_id: this.route_post_id,
+			project_id
+		})
+		await Promise.all([this.loadRelatedProjects(), this.reloadCurrentPost()])
 	}
 
 	scrollToOutlineItem(item: { text: string; level: number }) {

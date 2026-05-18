@@ -10,7 +10,8 @@ import {
 	getPostById,
 	getPostSessionTitle,
 	normalizePostForType,
-	searchPostRelatedArticleSources
+	searchPostRelatedArticleSources,
+	searchPostRelatedSources
 } from '../../rpc/post/utils'
 
 import type Session from '../session'
@@ -242,7 +243,7 @@ export const createPostTool = (session: Session) =>
 		description: [
 			'Operate on the current post linked to this session.',
 			'Use get_post before editing when you need the latest content.',
-			'Use search_related_articles first when drafting, revising, or fact-checking against the post-linked related articles.',
+			'Use search_related_sources first when drafting, revising, or fact-checking against the post-linked related articles and projects.',
 			'Use get_outline and update_outline when you need to inspect or change the markdown heading structure.',
 			'Use replace_selection for targeted rewrites from the user-selected passage.',
 			'Use update_post for broader title/content/for_type updates.'
@@ -250,6 +251,7 @@ export const createPostTool = (session: Session) =>
 		inputSchema: object({
 			action: Enum([
 				'get_post',
+				'search_related_sources',
 				'search_related_articles',
 				'get_outline',
 				'update_outline',
@@ -295,6 +297,28 @@ export const createPostTool = (session: Session) =>
 						ok: true,
 						post: current_post
 					}
+				case 'search_related_sources': {
+					if (!input.query?.trim()) {
+						return {
+							ok: false,
+							error: `query is required for ${input.action}`
+						}
+					}
+
+					const search_result = await searchPostRelatedSources({
+						post_id: current_post.id,
+						query: input.query,
+						max_results: input.max_results
+					})
+
+					return {
+						ok: true,
+						query: search_result.query,
+						related_article_count: search_result.related_article_count,
+						related_project_count: search_result.related_project_count,
+						results: search_result.results
+					}
+				}
 				case 'search_related_articles': {
 					if (!input.query?.trim()) {
 						return {
