@@ -4,11 +4,11 @@ import {
 	Bot,
 	CircleCheckBig,
 	Database,
-	FilePenLine,
 	House,
 	Library,
 	MessageCircleCheck,
-	Route
+	Route,
+	ScrollText
 } from 'lucide-react'
 
 import { is_electron } from '@/utils/is'
@@ -22,7 +22,7 @@ export const nav_items = [
 	// { key: 'workflow', Icon: Route },
 	{ key: 'agent', Icon: Bot },
 	{ key: 'linkcase', Icon: Album },
-	{ key: 'post', Icon: FilePenLine }
+	{ key: 'post', Icon: ScrollText }
 	// { key: 'library', Icon: Library },
 	// { key: 'database', Icon: Database },
 	// is_electron && { key: 'browser', Icon: AppWindowMac },
