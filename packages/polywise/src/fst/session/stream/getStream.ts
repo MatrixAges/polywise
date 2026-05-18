@@ -1,6 +1,7 @@
 import { config } from '@core/config'
 import { global_linkcase_session_id } from '@core/consts'
 import fst_linkcase_system_prompt from '@core/consts/prompts/fst_linkcase_system_prompt.md'
+import fst_post_system_prompt from '@core/consts/prompts/fst_post_system_prompt.md'
 import fst_report_tool_prompt from '@core/consts/prompts/fst_report_tool_prompt.md'
 import fst_system_prompt from '@core/consts/prompts/fst_system_prompt.md'
 import fst_system_tool_prompt from '@core/consts/prompts/fst_system_tool_prompt.md'
@@ -9,7 +10,9 @@ import getContextPrompt from '@core/consts/prompts/getContextPrompt'
 import plan_mode_prompt from '@core/consts/prompts/plan_mode_prompt.md'
 import planexec_exec_prompt from '@core/consts/prompts/planexec_exec_prompt.md'
 import planexec_plan_prompt from '@core/consts/prompts/planexec_plan_prompt.md'
+import { post_session } from '@core/db/schema'
 import { addNotification, addNotificationSession, syncTodoSessionStatusBySessionId } from '@core/db/services'
+import { getPostSessions } from '@core/db/services/externals'
 import { env } from '@core/env'
 import { extract, getComplexitySignal } from '@core/fst/agents/superego'
 import { pushPart, startStream, stopStream } from '@core/fst/agents/supervisor'
@@ -18,22 +21,27 @@ import { default_fetch_fallback_chain } from '@core/types'
 import { SessionEventStore } from '@core/utils'
 import { convertToModelMessages, createUIMessageStream, smoothStream, stepCountIs, streamText } from 'ai'
 import dayjs from 'dayjs'
+import { eq } from 'drizzle-orm'
 import { getId } from 'stk/utils'
 import { match } from 'ts-pattern'
 
 import {
 	buildSharedRuntimeTools,
+	createContentTool,
 	createContextTool,
 	createCronTool,
 	createErrorCollectTool,
 	createLinkcaseTool,
 	createMessageTool,
 	createPlanTool,
+	createPostTool,
 	createQuestionTool,
 	createReportTool,
 	createSelfMemoryTool,
 	createSkillTool,
 	createTitleTool,
+	createWebFetchTool,
+	createWebSearchTool,
 	updateTitle
 } from '../../tools'
 import {
@@ -94,6 +102,10 @@ export default async (s: Index, message: Message) => {
 	const has_todo_session_link = await s.has_todo_session_link
 	const agent_system_prompt = await getAgentSystemPrompt(s.id)
 	const is_linkcase_batch_session = s.id === global_linkcase_session_id
+	const linked_post = await getPostSessions({
+		where: eq(post_session.session_id, s.id)
+	}).then(res => res[0])
+	const is_post_session = Boolean(linked_post)
 	const title_focus = is_linkcase_batch_session ? '' : getTitleFocus({ s, message, is_first_message })
 	const shared_runtime = is_linkcase_batch_session
 		? {
@@ -106,22 +118,38 @@ export default async (s: Index, message: Message) => {
 				custom_tools_prompt: '',
 				skill_prompt: ''
 			}
-		: await buildSharedRuntimeTools({
-				s,
-				model_tools: s.model.tools,
-				extra_tools: {
-					context_tool: createContextTool(s),
-					message_tool: createMessageTool(s),
-					plan_tool: createPlanTool(s),
-					question_tool: createQuestionTool(s.id),
-					...(s.owner_agent ? { self_memory_tool: createSelfMemoryTool(s) } : {}),
-					title_tool: createTitleTool(s),
-					skill_tool: createSkillTool(s),
-					cron_tool: createCronTool(s),
-					error_collect_tool: createErrorCollectTool(),
-					...(has_todo_session_link ? { report_tool: createReportTool(s) } : {})
+		: is_post_session
+			? {
+					tools: {
+						context_tool: createContextTool(s),
+						message_tool: createMessageTool(s),
+						question_tool: createQuestionTool(s.id),
+						content_tool: createContentTool(s),
+						web_search_tool: createWebSearchTool(),
+						web_fetch_tool: createWebFetchTool(),
+						post_tool: createPostTool(s)
+					},
+					has_system_tool: false,
+					system_tools_prompt: '',
+					custom_tools_prompt: '',
+					skill_prompt: ''
 				}
-			})
+			: await buildSharedRuntimeTools({
+					s,
+					model_tools: s.model.tools,
+					extra_tools: {
+						context_tool: createContextTool(s),
+						message_tool: createMessageTool(s),
+						plan_tool: createPlanTool(s),
+						question_tool: createQuestionTool(s.id),
+						...(s.owner_agent ? { self_memory_tool: createSelfMemoryTool(s) } : {}),
+						title_tool: createTitleTool(s),
+						skill_tool: createSkillTool(s),
+						cron_tool: createCronTool(s),
+						error_collect_tool: createErrorCollectTool(),
+						...(has_todo_session_link ? { report_tool: createReportTool(s) } : {})
+					}
+				})
 
 	const mode_prompt = match({ mode: s.mode, plan_stage: s.plan_stage })
 		.with({ mode: 'plan' }, () => plan_mode_prompt)
@@ -132,25 +160,42 @@ export default async (s: Index, message: Message) => {
 
 	const system_prompt = is_linkcase_batch_session
 		? getLinkcaseSystemPrompt(s.session.title)
-		: [
-				fst_system_prompt,
-				has_title_tool ? fst_title_tool_prompt : '',
-				agent_system_prompt,
-				has_todo_session_link ? fst_report_tool_prompt : '',
-				shared_runtime.has_system_tool ? fst_system_tool_prompt : '',
-				shared_runtime.system_tools_prompt,
-				shared_runtime.custom_tools_prompt,
-				shared_runtime.skill_prompt,
-				`Current Session Title: ${s.session.title}`,
-				has_todo_session_link ? `Current Session Report: ${s.session.report ?? ''}` : '',
-				getContextPrompt(s.context),
-				mode_prompt,
-				`Real World Date: ${dayjs().format('YYYY-MM-DD')}`
-			]
-				.filter(Boolean)
-				.join('\n\n')
+		: is_post_session
+			? [
+					fst_system_prompt,
+					fst_post_system_prompt,
+					`Current Session Title: ${s.session.title}`,
+					linked_post
+						? [
+								`Current Post Title: ${linked_post.article.title ?? ''}`,
+								`Current Post Type: ${linked_post.article.for}`,
+								`Current Post ID: ${linked_post.article.id}`
+							].join('\n')
+						: '',
+					getContextPrompt(s.context),
+					`Real World Date: ${dayjs().format('YYYY-MM-DD')}`
+				]
+					.filter(Boolean)
+					.join('\n\n')
+			: [
+					fst_system_prompt,
+					has_title_tool ? fst_title_tool_prompt : '',
+					agent_system_prompt,
+					has_todo_session_link ? fst_report_tool_prompt : '',
+					shared_runtime.has_system_tool ? fst_system_tool_prompt : '',
+					shared_runtime.system_tools_prompt,
+					shared_runtime.custom_tools_prompt,
+					shared_runtime.skill_prompt,
+					`Current Session Title: ${s.session.title}`,
+					has_todo_session_link ? `Current Session Report: ${s.session.report ?? ''}` : '',
+					getContextPrompt(s.context),
+					mode_prompt,
+					`Real World Date: ${dayjs().format('YYYY-MM-DD')}`
+				]
+					.filter(Boolean)
+					.join('\n\n')
 
-	const tools = wrapToolSetWithAgentLogging(s, sanitizeToolSet(shared_runtime.tools))
+	const tools = wrapToolSetWithAgentLogging(s, sanitizeToolSet(shared_runtime.tools as any))
 	const res = streamText({
 		model: s.model.model,
 		system: system_prompt,

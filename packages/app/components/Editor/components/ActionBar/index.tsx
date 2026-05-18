@@ -65,7 +65,7 @@ const getListIcon = (value?: ListType | null) => {
 }
 
 const Index = (props: IPropsActionBar) => {
-	const { editor, signal, focus, rich_text, text_only, update } = props
+	const { editor, signal, focus, rich_text, text_only, update, extra } = props
 	const format_button_class = 'btn_format flex cursor-pointer items-center justify-center'
 
 	const ref = useDelegate(v => {
@@ -233,6 +233,10 @@ const Index = (props: IPropsActionBar) => {
 								</SelectContent>
 							</Select>
 						</div>
+					</If>
+					<If condition={Boolean(extra)}>
+						<span className='d_line'></span>
+						<div className='format_items flex items-center'>{extra}</div>
 					</If>
 				</Otherwise>
 			</Choose>

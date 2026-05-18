@@ -34,6 +34,10 @@ const routes: Array<RouteObject> = [
 				lazy: () => import('@/pages/agent')
 			},
 			{
+				path: '/post',
+				lazy: () => import('@/pages/post')
+			},
+			{
 				path: '/setting',
 				lazy: () => import('@/setting'),
 				children: [

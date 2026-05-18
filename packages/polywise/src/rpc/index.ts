@@ -7,6 +7,7 @@ import linkcase from './linkcase'
 import llama from './llama'
 import notification from './notification'
 import pipeline from './pipeline'
+import post from './post'
 import project from './project'
 import provider from './provider'
 import remove from './remove'
@@ -28,6 +29,7 @@ export const router = r({
 	group,
 	file,
 	linkcase,
+	post,
 	project,
 	skill,
 	tool,

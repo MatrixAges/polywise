@@ -1,5 +1,5 @@
 import type { TableOfContentDataItem } from '@tiptap/extension-table-of-contents'
-import type { MouseEvent } from 'react'
+import type { MouseEvent, ReactNode } from 'react'
 import type Model from './model'
 
 export interface ArgsInit extends Pick<IProps, 'id' | 'value' | 'className' | 'readonly' | 'onChange' | 'onBlur'> {}
@@ -13,6 +13,12 @@ export interface IProps {
 	text_only?: boolean
 	onChange: (v: string) => void
 	onBlur?: (v: string) => void
+	renderActionBarExtra?: (args: {
+		editor: Model['editor']
+		signal: Model['signal']
+		focus: Model['focus']
+		update: Model['update']
+	}) => ReactNode
 }
 
 export interface IPropsActionBar extends Pick<IProps, 'rich_text' | 'text_only'> {
@@ -20,6 +26,7 @@ export interface IPropsActionBar extends Pick<IProps, 'rich_text' | 'text_only'>
 	signal: Model['signal']
 	focus: Model['focus']
 	update: Model['update']
+	extra?: ReactNode
 }
 
 export interface IPropsMenu {

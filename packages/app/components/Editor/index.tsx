@@ -16,7 +16,7 @@ import styles from './index.module.css'
 import type { IProps, IPropsActionBar, IPropsMenu, IPropsModal } from './types'
 
 const Index = (props: IProps) => {
-	const { id, value, className, readonly, rich_text, text_only, onChange, onBlur } = props
+	const { id, value, className, readonly, rich_text, text_only, onChange, onBlur, renderActionBarExtra } = props
 	const [x] = useState(() => new Model())
 	const { t } = useTranslation()
 	const theme = useTheme()
@@ -62,7 +62,13 @@ const Index = (props: IProps) => {
 		focus: x.focus,
 		rich_text,
 		text_only,
-		update: x.update
+		update: x.update,
+		extra: renderActionBarExtra?.({
+			editor: x.editor,
+			signal: x.signal,
+			focus: x.focus,
+			update: x.update
+		})
 	}
 
 	const props_menu: IPropsMenu = {

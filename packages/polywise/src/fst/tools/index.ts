@@ -16,6 +16,7 @@ export * from './meta'
 export * from './report'
 export * from './self_memory'
 export * from './linkcase'
+export * from './post'
 export * from './runtime'
 
 export { createContextTool } from './context'
