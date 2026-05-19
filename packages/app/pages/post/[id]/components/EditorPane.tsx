@@ -52,6 +52,13 @@ const Index = () => {
 						onBlur={() => x.saveCurrentPost({ silent: true })}
 					></Input>
 					<button
+						className={$cx('icon_button small', x.session_panel_open && 'text-std-800!')}
+						title='Toggle session panel'
+						onClick={() => x.toggleSessionPanel()}
+					>
+						<MessageCircleCheck className='size-3'></MessageCircleCheck>
+					</button>
+					<button
 						className='icon_button small text-std-800!'
 						disabled={x.extracting || x.post_loading}
 						onClick={() => x.extractPost()}
@@ -72,13 +79,6 @@ const Index = () => {
 						) : (
 							<Save className='size-3'></Save>
 						)}
-					</button>
-					<button
-						className={$cx('icon_button small', x.session_panel_open && 'text-std-800!')}
-						title='Toggle session panel'
-						onClick={() => x.toggleSessionPanel()}
-					>
-						<MessageCircleCheck className='size-3'></MessageCircleCheck>
 					</button>
 				</div>
 			</div>
@@ -107,7 +107,7 @@ const Index = () => {
 						<Editor
 							id={x.selected_post.id}
 							value={x.draft_content}
-							className='min-h-full px-6! pt-4.5!'
+							className='min-h-full px-6! pt-4.5! text-[14px]'
 							rich_text
 							onChange={value => x.setDraftContent(value)}
 							onCharacterCountChange={setCharacterCount}
