@@ -586,7 +586,6 @@ export default class Index {
 			key: `${this.route_post_id}:${Date.now()}`,
 			value: prompt
 		}
-		toast.success('Reference added to post session input.')
 	}
 
 	async deletePost() {

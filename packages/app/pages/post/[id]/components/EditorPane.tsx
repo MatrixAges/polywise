@@ -1,3 +1,4 @@
+import { SparkleIcon } from '@phosphor-icons/react'
 import { Astroid, Bot, Database, Loader2, Save, Trash2 } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 import { useNavigate } from 'react-router'
@@ -150,7 +151,7 @@ const Index = () => {
 								onClick={() => x.addReferenceToPostSessionInput(editor as TiptapEditor)}
 								title='Add Reference'
 							>
-								<Astroid className='size-3.5'></Astroid>
+								<SparkleIcon className='size-3.5' weight='bold'></SparkleIcon>
 							</div>
 						)}
 					></Editor>
