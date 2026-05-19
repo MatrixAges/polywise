@@ -1,3 +1,4 @@
+import type { MouseEvent } from 'react'
 import type { IPropsModalTocItem } from '../../types'
 
 const Index = (props: IPropsModalTocItem) => {
@@ -24,7 +25,7 @@ const Index = (props: IPropsModalTocItem) => {
 			<a
 				className='block cursor-pointer truncate'
 				href={`#${id}`}
-				onClick={e => onClick(e, item.id)}
+				onClick={(e: MouseEvent<HTMLAnchorElement>) => onClick(e, item.id)}
 				data-item-index={itemIndex}
 			>
 				{textContent}

@@ -10,25 +10,44 @@ const Index = () => {
 	}
 
 	return (
-		<div className='flex flex-col pb-3'>
+		<div
+			className='
+				box-border
+				flex flex-col
+				w-full
+				pb-3
+			'
+		>
 			{x.outline_items.map(item => (
-				<div
+				<button
 					className='
+						box-border
 						flex
 						items-center
-						py-1
-						pr-[3px]
-						rounded-sm
-						text-xsm text-foreground
-						hover:bg-secondary
+						w-full
+						gap-2
+						p-1
+						text-xsm text-std-600
+						hover:text-std-black
 						cursor-pointer
 					'
-					style={{ paddingLeft: 3 + 6 + (item.level - 1) * 12 }}
 					onClick={() => x.scrollToOutlineItem(item)}
 					key={item.id}
 				>
-					{item.text}
-				</div>
+					<span
+						className='
+							flex shrink-0
+							items-center justify-end
+							w-[12px]
+						'
+					>
+						<span
+							className='bg-std-200 h-[3px] rounded-full'
+							style={{ width: (6 - item.level) * 2.4 }}
+						></span>
+					</span>
+					<span className='truncate'>{item.text}</span>
+				</button>
 			))}
 		</div>
 	)

@@ -6,12 +6,13 @@ import Item from './Item'
 
 import styles from './index.module.css'
 
+import type { MouseEvent } from 'react'
 import type { IPropsModalToc } from '../../types'
 
 const Index = (props: IPropsModalToc) => {
 	const { editor, toc } = props
 
-	const onClick = useMemoizedFn((e, id) => {
+	const onClick = useMemoizedFn((e: MouseEvent<HTMLAnchorElement>, id: string) => {
 		e.preventDefault()
 
 		const element = editor.view.dom.querySelector(`[data-toc-id="${id}"`)!
