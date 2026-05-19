@@ -52,21 +52,6 @@ const Index = () => {
 						onChange={event => x.setDraftTitle(event.target.value)}
 						onBlur={() => void x.saveCurrentPost({ silent: true })}
 					></Input>
-					<Select
-						value={x.draft_for_type}
-						onValueChange={value => value && x.setDraftForType(value as PostForType)}
-					>
-						<SelectTrigger className='min-w-auto' noStyle>
-							<SelectValue />
-						</SelectTrigger>
-						<SelectContent align='end'>
-							{post_for_types.map(item => (
-								<SelectItem value={item} key={item}>
-									{item}
-								</SelectItem>
-							))}
-						</SelectContent>
-					</Select>
 					<Button
 						className='h-9'
 						variant='outline'
@@ -161,7 +146,33 @@ const Index = () => {
 						text-std-300 text-xs
 					'
 				>
-					<div>Updated {fromNow(x.selected_post.updated_at)}</div>
+					<div className='flex items-center gap-3'>
+						<Select
+							value={x.draft_for_type}
+							onValueChange={value => value && x.setDraftForType(value as PostForType)}
+						>
+							<SelectTrigger
+								className='
+									min-w-0
+									gap-0
+									text-xs text-std-300
+									capitalize
+								'
+								noStyle
+								noActiveStyle
+							>
+								<SelectValue className='capitalize' />
+							</SelectTrigger>
+							<SelectContent align='start'>
+								{post_for_types.map(item => (
+									<SelectItem value={item} key={item}>
+										<span className='capitalize'>{item}</span>
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
+						<div>Updated {fromNow(x.selected_post.updated_at)}</div>
+					</div>
 					<div className='flex items-center gap-3'>
 						<span>{x.dirty ? 'Unsaved changes' : 'Saved'}</span>
 						<span>{character_count} characters</span>
