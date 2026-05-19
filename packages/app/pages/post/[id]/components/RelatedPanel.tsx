@@ -11,20 +11,20 @@ const Index = () => {
 
 	return (
 		<div className='flex h-full flex-col overflow-hidden'>
-			<div className='border-border-light border-b p-2.5'>
+			<div className='p-1.5'>
 				<div className='relative'>
 					<Search
 						className='
 							absolute
 							top-1/2
-							left-3
-							size-4
+							left-1.5
+							size-3.5
 							text-std-300
 							pointer-events-none -translate-y-1/2
 						'
 					></Search>
 					<Input
-						className='pl-8'
+						className='h-8 pl-6'
 						placeholder='Search article to relate'
 						value={x.related_search}
 						onChange={event => x.setRelatedSearch(event.target.value)}
@@ -62,7 +62,7 @@ const Index = () => {
 									flex
 									items-center
 									gap-2
-									px-2 py-2
+									p-1.5
 									text-sm text-std-400
 								'
 							>
@@ -70,7 +70,7 @@ const Index = () => {
 								Searching...
 							</div>
 						) : x.related_search_list.length === 0 ? (
-							<div className='text-std-400 px-2 py-2 text-sm'>No matches.</div>
+							<div className='text-std-400 p-1.5 text-sm'>No matches.</div>
 						) : (
 							x.related_search_list.map(item => (
 								<div
@@ -78,7 +78,7 @@ const Index = () => {
 											flex
 											items-start justify-between
 											gap-2
-											px-2 py-2
+											p-1.5
 											rounded-md
 											hover:bg-secondary
 										'
@@ -107,7 +107,14 @@ const Index = () => {
 					</div>
 				) : null}
 			</div>
-			<div className='min-h-0 flex-1 overflow-y-auto p-2.5'>
+			<div
+				className='
+					overflow-y-auto
+					flex-1
+					min-h-0
+					px-2.5
+				'
+			>
 				{x.related_loading ? (
 					<div
 						className='
@@ -122,11 +129,17 @@ const Index = () => {
 						Loading related articles...
 					</div>
 				) : x.related_articles.length === 0 ? (
-					<div className='text-std-400 px-3 py-4 text-sm'>No related articles.</div>
+					<div className='text-std-400 px-1.5 py-4 text-sm'>No related articles.</div>
 				) : (
-					<div className='flex flex-col gap-2'>
+					<div className='flex flex-col gap-2 pb-3'>
 						{x.related_articles.map(item => (
-							<div className='border-border-light rounded-xl border p-3' key={item.id}>
+							<div
+								className='
+										py-1
+										border-b border-border-light
+									'
+								key={item.id}
+							>
 								<div
 									className='
 											flex
@@ -135,23 +148,23 @@ const Index = () => {
 											mb-1
 										'
 								>
-									<div className='min-w-0 text-sm font-semibold'>
+									<div className='text-xsm line-clamp-3 font-medium'>
 										{item.title || 'Untitled article'}
 									</div>
-									<Button
-										className='h-7 shrink-0'
-										variant='ghost'
-										size='xs'
+								</div>
+								<div className='text-std-400 line-clamp-2 text-xs'>
+									{item.content_preview || 'Empty content'}
+								</div>
+								<div className='mt-2 flex items-center justify-between'>
+									<span className='text-std-300 text-[10px] uppercase'>
+										{item.for_type}
+									</span>
+									<span
+										className='icon_button small text-std-300'
 										onClick={() => void x.removeRelatedArticle(item.id)}
 									>
 										<X className='size-3.5'></X>
-									</Button>
-								</div>
-								<div className='text-std-400 line-clamp-3 text-xs'>
-									{item.content_preview || 'Empty content'}
-								</div>
-								<div className='text-std-300 mt-2 text-[11px] uppercase'>
-									{item.for_type}
+									</span>
 								</div>
 							</div>
 						))}

@@ -32,8 +32,8 @@ const Index = () => {
 					<Tabs
 						small
 						items={[
-							{ key: 'projects', Icon: Folders },
-							{ key: 'sessions', Icon: MessageCircleCheck }
+							{ key: 'sessions', Icon: MessageCircleCheck },
+							{ key: 'projects', Icon: Folders }
 						]}
 						active={menu_tab}
 						onClick={v => setMenuTab(v as 'projects' | 'sessions')}
