@@ -1,4 +1,4 @@
-import { Loader2, MessageCircleCheck, X } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { Button } from '@/__shadcn__/components/ui/button'

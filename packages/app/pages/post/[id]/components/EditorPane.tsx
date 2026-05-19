@@ -1,9 +1,8 @@
-import { useState } from 'react'
+import { Fragment, useState } from 'react'
 import { SparkleIcon } from '@phosphor-icons/react'
-import { Astroid, Bot, Database, Loader2, MessageCircleCheck, Save } from 'lucide-react'
+import { Database, Loader2, MessageCircleCheck, Save } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
-import { Button } from '@/__shadcn__/components/ui/button'
 import { Input } from '@/__shadcn__/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/__shadcn__/components/ui/select'
 import Editor from '@/components/Editor'
@@ -35,9 +34,9 @@ const Index = () => {
 	}
 
 	return (
-		<>
-			<div className='border-border-light h-9 border-b px-4'>
-				<div className='flex items-start gap-3'>
+		<Fragment>
+			<div className='border-border-light h-9 border-b px-3'>
+				<div className='flex items-center gap-2'>
 					<Input
 						className='
 							flex-1
@@ -50,41 +49,36 @@ const Index = () => {
 						placeholder='Untitled post'
 						value={x.draft_title}
 						onChange={event => x.setDraftTitle(event.target.value)}
-						onBlur={() => void x.saveCurrentPost({ silent: true })}
+						onBlur={() => x.saveCurrentPost({ silent: true })}
 					></Input>
-					<Button
-						className='h-9'
-						variant='outline'
-						disabled={!x.dirty || x.saving}
-						onClick={() => void x.saveCurrentPost()}
-					>
-						{x.saving ? (
-							<Loader2 className='size-4 animate-spin'></Loader2>
-						) : (
-							<Save className='size-4'></Save>
-						)}
-						<span>{x.saving ? 'Saving' : 'Save'}</span>
-					</Button>
-					<Button
-						className='h-9'
-						variant='outline'
+					<button
+						className='icon_button small text-std-800!'
 						disabled={x.extracting || x.post_loading}
-						onClick={() => void x.extractPost()}
+						onClick={() => x.extractPost()}
 					>
 						{x.extracting ? (
-							<Loader2 className='size-4 animate-spin'></Loader2>
+							<Loader2 className='size-3 animate-spin'></Loader2>
 						) : (
-							<Database className='size-4'></Database>
+							<Database className='size-3'></Database>
 						)}
-						<span>{x.selected_post.is_pipelined ? 'Re-extract' : 'Extract'}</span>
-					</Button>
+					</button>
 					<button
-						className={$cx('icon_button h-9 w-9 shrink-0', x.session_panel_open && 'active')}
-						type='button'
+						className='icon_button small text-std-800!'
+						disabled={!x.dirty || x.saving}
+						onClick={() => x.saveCurrentPost()}
+					>
+						{x.saving ? (
+							<Loader2 className='size-3 animate-spin'></Loader2>
+						) : (
+							<Save className='size-3'></Save>
+						)}
+					</button>
+					<button
+						className={$cx('icon_button small', x.session_panel_open && 'text-std-800!')}
 						title='Toggle session panel'
 						onClick={() => x.toggleSessionPanel()}
 					>
-						<MessageCircleCheck className='size-4'></MessageCircleCheck>
+						<MessageCircleCheck className='size-3'></MessageCircleCheck>
 					</button>
 				</div>
 			</div>
@@ -142,7 +136,7 @@ const Index = () => {
 						items-center justify-between
 						h-7
 						gap-4
-						px-4
+						px-3
 						text-std-300 text-xs
 					'
 				>
@@ -179,7 +173,7 @@ const Index = () => {
 					</div>
 				</div>
 			</div>
-		</>
+		</Fragment>
 	)
 }
 
