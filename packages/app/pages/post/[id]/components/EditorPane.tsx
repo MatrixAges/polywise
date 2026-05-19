@@ -15,9 +15,38 @@ import { useModel } from '../context'
 import type { Editor as TiptapEditor } from '@tiptap/core'
 import type { PostForType } from '../../types'
 
+const getPostWordCount = (content: string) => {
+	const text = content
+		.replace(/```[\s\S]*?```/g, match => match.replace(/^```[^\n]*\n?/, '').replace(/\n?```$/, ''))
+		.replace(/`([^`]+)`/g, '$1')
+		.replace(/!\[([^\]]*)\]\([^)]+\)/g, '$1')
+		.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+		.replace(/^#{1,6}\s+/gm, '')
+		.replace(/^>\s?/gm, '')
+		.replace(/[*_~]/g, '')
+		.replace(/\r/g, ' ')
+		.replace(/\n+/g, ' ')
+		.trim()
+
+	if (!text) {
+		return 0
+	}
+
+	const cjk_count = (text.match(/[\u3400-\u9fff]/g) ?? []).length
+	const latin_count = text
+		.replace(/[\u3400-\u9fff]/g, ' ')
+		.replace(/[^A-Za-z0-9]+/g, ' ')
+		.trim()
+		.split(/\s+/)
+		.filter(Boolean).length
+
+	return cjk_count + latin_count
+}
+
 const Index = () => {
 	const x = useModel()
 	const navigate = useNavigate()
+	const word_count = getPostWordCount(x.draft_content)
 
 	if (!x.selected_post) {
 		return (
@@ -116,54 +145,70 @@ const Index = () => {
 						<MessageCircleCheck className='size-4'></MessageCircleCheck>
 					</button>
 				</div>
+			</div>
+			<div
+				className='
+					overflow-hidden
+					flex flex-1 flex-col
+					min-h-0
+				'
+				ref={x.setEditorArea}
+			>
+				<div className='min-h-0 flex-1 overflow-hidden'>
+					{x.post_loading ? (
+						<div
+							className='
+								flex
+								items-center justify-center
+								h-full
+								text-sm text-std-400
+							'
+						>
+							<Loader2 className='mr-2 size-4 animate-spin'></Loader2>
+							Loading post...
+						</div>
+					) : (
+						<Editor
+							id={x.selected_post.id}
+							value={x.draft_content}
+							className='min-h-full px-5 py-4'
+							rich_text
+							onChange={value => x.setDraftContent(value)}
+							onBlur={() => void x.saveCurrentPost({ silent: true })}
+							renderActionBarExtra={({ editor }) => (
+								<div
+									className='
+											flex
+											items-center justify-center
+											w-[32px] h-full
+										'
+									onClick={() =>
+										x.addReferenceToPostSessionInput(editor as TiptapEditor)
+									}
+									title='Add Reference'
+								>
+									<SparkleIcon className='size-3.5' weight='bold'></SparkleIcon>
+								</div>
+							)}
+						></Editor>
+					)}
+				</div>
 				<div
 					className='
 						flex
 						items-center justify-between
 						gap-4
-						mt-2
+						px-4 py-2.5
+						text-std-400 text-xs
+						border-border-light border-t
 					'
 				>
-					<div className='text-std-400 text-xs'>Updated {fromNow(x.selected_post.updated_at)}</div>
-					<div className='text-std-400 text-xs'>{x.dirty ? 'Unsaved changes' : 'Saved'}</div>
-				</div>
-			</div>
-			<div className='min-h-0 flex-1 overflow-hidden' ref={x.setEditorArea}>
-				{x.post_loading ? (
-					<div
-						className='
-							flex
-							items-center justify-center
-							h-full
-							text-sm text-std-400
-						'
-					>
-						<Loader2 className='mr-2 size-4 animate-spin'></Loader2>
-						Loading post...
+					<div>Updated {fromNow(x.selected_post.updated_at)}</div>
+					<div className='flex items-center gap-3'>
+						<span>{x.dirty ? 'Unsaved changes' : 'Saved'}</span>
+						<span>{word_count} characters</span>
 					</div>
-				) : (
-					<Editor
-						id={x.selected_post.id}
-						value={x.draft_content}
-						className='min-h-full px-5 py-4'
-						rich_text
-						onChange={value => x.setDraftContent(value)}
-						onBlur={() => void x.saveCurrentPost({ silent: true })}
-						renderActionBarExtra={({ editor }) => (
-							<div
-								className='
-										flex
-										items-center justify-center
-										w-[32px] h-full
-									'
-								onClick={() => x.addReferenceToPostSessionInput(editor as TiptapEditor)}
-								title='Add Reference'
-							>
-								<SparkleIcon className='size-3.5' weight='bold'></SparkleIcon>
-							</div>
-						)}
-					></Editor>
-				)}
+				</div>
 			</div>
 		</>
 	)
