@@ -53,7 +53,7 @@ const Index = () => {
 								className='
 									overflow-hidden
 									flex flex-col shrink-0
-									w-[300px] h-full
+									w-[320px] h-full
 									bg-std-50/60
 									border-border-light border-l
 									dark:bg-std-100/60
