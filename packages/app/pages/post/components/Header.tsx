@@ -32,7 +32,7 @@ const Index = () => {
 				gap-3
 			'
 		>
-			<div className='h-8'>
+			<div className='h-7'>
 				<TextTabs
 					className='gap-3'
 					items={for_type_tab_items.map(item => ({
@@ -60,10 +60,11 @@ const Index = () => {
 						<Input
 							autoFocus
 							className='
-								h-7
+								h-6
 								pl-6.5 pr-8
 								rounded-full
 								text-sm
+								placeholder:text-xs!
 							'
 							placeholder='Search articles'
 							value={x.current_search}
@@ -73,7 +74,7 @@ const Index = () => {
 							className='
 								absolute
 								right-0
-								w-7 h-7
+								w-6 h-6
 								icon_button small
 							'
 							type='button'
@@ -85,7 +86,7 @@ const Index = () => {
 					</div>
 				) : (
 					<Button
-						className='h-7 w-7'
+						className='h-6 w-6'
 						variant='secondary'
 						size='xs'
 						title='Search posts'
@@ -95,7 +96,7 @@ const Index = () => {
 					</Button>
 				)}
 				<Button
-					className='h-7 w-7'
+					className='h-6 w-6'
 					variant='default'
 					size='xs'
 					title='New post'
