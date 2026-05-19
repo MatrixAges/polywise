@@ -50,6 +50,14 @@
 		}
 	}
 
+	ul {
+		list-style-type: disc;
+	}
+
+	ol {
+		list-style-type: decimal;
+	}
+
 	div[data-streamdown='table-wrapper'] {
 		@apply bg-secondary border-none;
 

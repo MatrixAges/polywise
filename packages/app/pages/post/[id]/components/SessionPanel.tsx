@@ -27,14 +27,18 @@ const Index = () => {
 							items-center justify-center
 							h-full
 							gap-3
-							px-6
+							px-15
 							text-center
 						'
 					>
 						<div className='text-std-400 text-sm'>
 							Create a dedicated post session for AI-assisted writing.
 						</div>
-						<Button disabled={x.ensuring_session} onClick={() => void x.ensureSession()}>
+						<Button
+							size='sm'
+							disabled={x.ensuring_session}
+							onClick={() => void x.ensureSession()}
+						>
 							{x.ensuring_session && <Loader2 className='size-4 animate-spin'></Loader2>}
 							<span>Create session</span>
 						</Button>

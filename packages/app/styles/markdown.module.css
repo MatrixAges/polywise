@@ -48,7 +48,7 @@
 		}
 
 		h1 {
-			font-size: 1.8em;
+			font-size: 1.2em;
 		}
 
 		h1,
@@ -57,7 +57,7 @@
 		h4,
 		h5,
 		h6 {
-			margin-block-end: 1em;
+			margin-block-end: 0.6em;
 			color: var(--color_text);
 			font-weight: 500;
 
@@ -69,13 +69,16 @@
 		h1,
 		h2 {
 			margin-block-start: 1.8em;
+			padding-block-end: 0.3em;
+
+			border-bottom: 1px solid var(--color-border-light);
 		}
 
 		h3,
 		h4,
 		h5,
 		h6 {
-			margin-block-start: 2.1em;
+			margin-block-start: 1.5em;
 		}
 
 		ul,
@@ -107,6 +110,10 @@
 
 		ul {
 			list-style-type: disc;
+		}
+
+		ol {
+			list-style-type: decimal;
 		}
 
 		.contains-task-list {

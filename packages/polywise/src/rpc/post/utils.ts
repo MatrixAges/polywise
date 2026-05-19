@@ -489,7 +489,15 @@ const splitRelatedSearchTerms = (query: string) => {
 		.map(item => item.trim())
 		.filter(Boolean)
 
-	return Array.from(new Set([raw, ...parts.filter(item => item.length >= 2)])).slice(0, 12)
+	const embedded_identifier_matches = raw.match(/[@a-zA-Z][@a-zA-Z0-9._/-]*/g) ?? []
+	const normalized_identifiers = embedded_identifier_matches
+		.map(item => item.replace(/^[./-]+|[./-]+$/g, '').trim())
+		.filter(item => item.length >= 2)
+
+	return Array.from(new Set([raw, ...parts.filter(item => item.length >= 2), ...normalized_identifiers])).slice(
+		0,
+		12
+	)
 }
 
 const getRelatedSnippet = (content: string, terms: Array<string>) => {
@@ -620,14 +628,25 @@ const parseProjectMatchLine = (line: string) => {
 	}
 }
 
+const normalizeProjectDir = (dir: string) => {
+	const resolved = path.resolve(dir)
+
+	if (resolved === path.sep) {
+		return resolved
+	}
+
+	return resolved.replace(new RegExp(`${path.sep.replace(/\\/g, '\\\\')}+$`, 'u'), '')
+}
+
 const resolveMatchedProject = (
 	related_projects: Array<Awaited<ReturnType<typeof listPostRelatedProjects>>[number]>,
 	absolute_path: string
 ) =>
-	related_projects.find(
-		project_row =>
-			absolute_path === project_row.dir || absolute_path.startsWith(`${project_row.dir}${path.sep}`)
-	)
+	related_projects.find(project_row => {
+		const normalized_dir = normalizeProjectDir(project_row.dir)
+
+		return absolute_path === normalized_dir || absolute_path.startsWith(`${normalized_dir}${path.sep}`)
+	})
 
 export const searchPostRelatedArticleSources = async (args: {
 	post_id: string
@@ -780,6 +799,17 @@ export const searchPostRelatedProjectSources = async (args: {
 		related_projects.map(item => item.dir),
 		terms.length > 0 ? terms : query,
 		{
+			glob: [
+				'!**/node_modules/**',
+				'!**/dist/**',
+				'!**/build/**',
+				'!**/.next/**',
+				'!**/.turbo/**',
+				'!**/coverage/**',
+				'!**/pnpm-lock.yaml',
+				'!**/package-lock.json',
+				'!**/yarn.lock'
+			],
 			max_count: Math.max(max_results * 10, 40),
 			with_filename: true,
 			with_line_number: true
@@ -868,23 +898,6 @@ export const searchPostRelatedProjectSources = async (args: {
 		query,
 		related_project_count: related_projects.length,
 		results
-	}
-}
-
-export const searchPostRelatedSources = async (args: { post_id: string; query: string; max_results?: number }) => {
-	const max_results = normalizeRelatedSourceMaxResults(args.max_results)
-	const [article_result, project_result] = await Promise.all([
-		searchPostRelatedArticleSources(args),
-		searchPostRelatedProjectSources(args)
-	])
-
-	return {
-		query: article_result.query || project_result.query,
-		related_article_count: article_result.related_article_count,
-		related_project_count: project_result.related_project_count,
-		results: [...article_result.results, ...project_result.results]
-			.sort((a, b) => b.score - a.score)
-			.slice(0, max_results)
 	}
 }
 

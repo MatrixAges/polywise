@@ -14,7 +14,7 @@ import {
 	getPostSessionTitle,
 	normalizePostForType,
 	searchPostRelatedArticleSources,
-	searchPostRelatedSources
+	searchPostRelatedProjectSources
 } from '../../rpc/post/utils'
 
 import type { Root, RootContent } from 'mdast'
@@ -495,7 +495,8 @@ export const createPostTool = (session: Session) =>
 		description: [
 			'Operate on the current post linked to this session.',
 			'Use get_post before editing when you need the latest content.',
-			'Use search_related_sources first when drafting, revising, or fact-checking against the post-linked related articles and projects.',
+			'Use search_related_projects when the user specifically asks about implementation details, code usage, or framework usage inside related projects.',
+			'Use search_related_articles when the user specifically wants only related article context.',
 			'Use get_outline and update_outline when you need to inspect or change the markdown heading structure.',
 			'Use get_selection to resolve a compact selection reference like ref: [start, end] into the current selected passage.',
 			'Use replace_selection for targeted rewrites from the user-selected passage or a compact selection reference.',
@@ -504,8 +505,8 @@ export const createPostTool = (session: Session) =>
 		inputSchema: object({
 			action: Enum([
 				'get_post',
-				'search_related_sources',
 				'search_related_articles',
+				'search_related_projects',
 				'get_outline',
 				'get_selection',
 				'update_outline',
@@ -554,28 +555,6 @@ export const createPostTool = (session: Session) =>
 						ok: true,
 						post: current_post
 					}
-				case 'search_related_sources': {
-					if (!input.query?.trim()) {
-						return {
-							ok: false,
-							error: `query is required for ${input.action}`
-						}
-					}
-
-					const search_result = await searchPostRelatedSources({
-						post_id: current_post.id,
-						query: input.query,
-						max_results: input.max_results
-					})
-
-					return {
-						ok: true,
-						query: search_result.query,
-						related_article_count: search_result.related_article_count,
-						related_project_count: search_result.related_project_count,
-						results: search_result.results
-					}
-				}
 				case 'search_related_articles': {
 					if (!input.query?.trim()) {
 						return {
@@ -594,6 +573,27 @@ export const createPostTool = (session: Session) =>
 						ok: true,
 						query: search_result.query,
 						related_article_count: search_result.related_article_count,
+						results: search_result.results
+					}
+				}
+				case 'search_related_projects': {
+					if (!input.query?.trim()) {
+						return {
+							ok: false,
+							error: 'query is required for search_related_projects'
+						}
+					}
+
+					const search_result = await searchPostRelatedProjectSources({
+						post_id: current_post.id,
+						query: input.query,
+						max_results: input.max_results
+					})
+
+					return {
+						ok: true,
+						query: search_result.query,
+						related_project_count: search_result.related_project_count,
 						results: search_result.results
 					}
 				}

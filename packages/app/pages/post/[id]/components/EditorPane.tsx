@@ -35,7 +35,7 @@ const Index = () => {
 
 	return (
 		<Fragment>
-			<div className='border-border-light h-9 border-b px-3'>
+			<div className='h-9 px-3'>
 				<div className='flex items-center gap-2'>
 					<Input
 						className='
@@ -107,7 +107,7 @@ const Index = () => {
 						<Editor
 							id={x.selected_post.id}
 							value={x.draft_content}
-							className='min-h-full px-6! pt-6!'
+							className='min-h-full px-6! pt-4.5!'
 							rich_text
 							onChange={value => x.setDraftContent(value)}
 							onCharacterCountChange={setCharacterCount}
