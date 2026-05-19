@@ -7,7 +7,7 @@ import { eq } from 'drizzle-orm'
 import { remark } from 'remark'
 import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
-import { boolean, enum as Enum, number, object, string, tuple } from 'zod'
+import { array, boolean, enum as Enum, number, object, string } from 'zod'
 
 import {
 	getPostById,
@@ -239,7 +239,7 @@ const resolveSelectionInput = (args: {
 	after_context?: string
 	before_context?: string
 	content: string
-	ref?: [number, number]
+	ref?: Array<number>
 	selection_end?: number
 	selection_start?: number
 	selection_text?: string
@@ -518,7 +518,7 @@ export const createPostTool = (session: Session) =>
 			query: string().optional(),
 			max_results: number().int().min(1).max(8).optional(),
 			outline_markdown: string().optional(),
-			ref: tuple([number().int().min(0), number().int().min(0)]).optional(),
+			ref: array(number().int().min(0)).length(2).optional(),
 			selection_text: string().optional(),
 			selection_start: number().int().min(0).optional(),
 			selection_end: number().int().min(0).optional(),
