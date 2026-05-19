@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { SparkleIcon } from '@phosphor-icons/react'
 import { Astroid, Bot, Database, Loader2, MessageCircleCheck, Save, Trash2 } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
@@ -15,38 +16,10 @@ import { useModel } from '../context'
 import type { Editor as TiptapEditor } from '@tiptap/core'
 import type { PostForType } from '../../types'
 
-const getPostWordCount = (content: string) => {
-	const text = content
-		.replace(/```[\s\S]*?```/g, match => match.replace(/^```[^\n]*\n?/, '').replace(/\n?```$/, ''))
-		.replace(/`([^`]+)`/g, '$1')
-		.replace(/!\[([^\]]*)\]\([^)]+\)/g, '$1')
-		.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-		.replace(/^#{1,6}\s+/gm, '')
-		.replace(/^>\s?/gm, '')
-		.replace(/[*_~]/g, '')
-		.replace(/\r/g, ' ')
-		.replace(/\n+/g, ' ')
-		.trim()
-
-	if (!text) {
-		return 0
-	}
-
-	const cjk_count = (text.match(/[\u3400-\u9fff]/g) ?? []).length
-	const latin_count = text
-		.replace(/[\u3400-\u9fff]/g, ' ')
-		.replace(/[^A-Za-z0-9]+/g, ' ')
-		.trim()
-		.split(/\s+/)
-		.filter(Boolean).length
-
-	return cjk_count + latin_count
-}
-
 const Index = () => {
 	const x = useModel()
 	const navigate = useNavigate()
-	const word_count = getPostWordCount(x.draft_content)
+	const [character_count, setCharacterCount] = useState(0)
 
 	if (!x.selected_post) {
 		return (
@@ -174,6 +147,7 @@ const Index = () => {
 							className='min-h-full px-5 py-4'
 							rich_text
 							onChange={value => x.setDraftContent(value)}
+							onCharacterCountChange={setCharacterCount}
 							onBlur={() => void x.saveCurrentPost({ silent: true })}
 							renderActionBarExtra={({ editor }) => (
 								<div
@@ -206,7 +180,7 @@ const Index = () => {
 					<div>Updated {fromNow(x.selected_post.updated_at)}</div>
 					<div className='flex items-center gap-3'>
 						<span>{x.dirty ? 'Unsaved changes' : 'Saved'}</span>
-						<span>{word_count} characters</span>
+						<span>{character_count} characters</span>
 					</div>
 				</div>
 			</div>

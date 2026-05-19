@@ -26,6 +26,7 @@ export default class Index {
 		cancel: () => void
 		flush: () => void
 	}
+	on_character_count_change = null as ((count: number) => void) | null
 
 	ref_container = null as unknown as HTMLDivElement
 	ref_action_bar = null as unknown as HTMLDivElement
@@ -49,6 +50,7 @@ export default class Index {
 				id: false,
 				editor: false,
 				debounced_on_change: false,
+				on_character_count_change: false,
 				ref_container: false,
 				ref_action_bar: false,
 				ref_menu: false,
@@ -70,12 +72,23 @@ export default class Index {
 		return normalized_value.startsWith('{') || normalized_value.startsWith('[') ? 'json' : 'markdown'
 	}
 
+	emitCharacterCount(
+		onCharacterCountChange = this.on_character_count_change,
+		editor: Pick<Editor, 'storage'> = this.editor
+	) {
+		const count = editor.storage.characterCount.characters()
+
+		this.counts = count
+		onCharacterCountChange?.(count)
+	}
+
 	init(args: ArgsInit) {
-		const { id, value, className, readonly, onChange, onBlur } = args
+		const { id, value, className, readonly, onChange, onBlur, onCharacterCountChange } = args
 		const content_type = this.getContentType(value)
 
 		this.id = id
 		this.debounced_on_change = debounce(onChange, 450)
+		this.on_character_count_change = onCharacterCountChange ?? null
 
 		this.editor = new Editor({
 			editable: !readonly,
@@ -95,6 +108,7 @@ export default class Index {
 				this.registerMenu()
 
 				this.update()
+				this.emitCharacterCount(onCharacterCountChange, editor)
 			},
 			onUpdate: ({ editor }) => {
 				this.debounced_on_change(editor.getMarkdown())
@@ -116,7 +130,7 @@ export default class Index {
 					this.focus = null
 				}
 
-				this.counts = editor.storage.characterCount.characters()
+				this.emitCharacterCount(onCharacterCountChange, editor)
 			}
 		}) as Index['editor']
 
@@ -137,7 +151,7 @@ export default class Index {
 			contentType: content_type
 		})
 
-		this.counts = this.editor.storage.characterCount.characters()
+		this.emitCharacterCount()
 		this.updateReactNodes()
 	}
 

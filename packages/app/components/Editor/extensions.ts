@@ -23,6 +23,18 @@ interface Args {
 	setToc: (v: Toc) => void
 }
 
+const getCharacterCount = (text: string) => {
+	const cjk_count = (text.match(/[\u3400-\u9fff]/g) ?? []).length
+	const latin_count = text
+		.replace(/[\u3400-\u9fff]/g, ' ')
+		.replace(/[^A-Za-z0-9]+/g, ' ')
+		.trim()
+		.split(/\s+/)
+		.filter(Boolean).length
+
+	return cjk_count + latin_count
+}
+
 export default (args: Args) => {
 	const { id, setToc } = args
 
@@ -91,7 +103,9 @@ export default (args: Args) => {
 		Image,
 		TextStyle,
 		Color,
-		CharacterCount,
+		CharacterCount.configure({
+			textCounter: getCharacterCount
+		}),
 		CodeBlock,
 		Mermaid
 	] as EditorOptions['extensions']

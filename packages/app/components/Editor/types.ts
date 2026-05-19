@@ -2,7 +2,10 @@ import type { TableOfContentDataItem } from '@tiptap/extension-table-of-contents
 import type { MouseEvent, ReactNode } from 'react'
 import type Model from './model'
 
-export interface ArgsInit extends Pick<IProps, 'id' | 'value' | 'className' | 'readonly' | 'onChange' | 'onBlur'> {}
+export interface ArgsInit extends Pick<
+	IProps,
+	'id' | 'value' | 'className' | 'readonly' | 'onChange' | 'onBlur' | 'onCharacterCountChange'
+> {}
 
 export interface IProps {
 	id: string
@@ -13,6 +16,7 @@ export interface IProps {
 	text_only?: boolean
 	onChange: (v: string) => void
 	onBlur?: (v: string) => void
+	onCharacterCountChange?: (count: number) => void
 	renderActionBarExtra?: (args: {
 		editor: Model['editor']
 		signal: Model['signal']

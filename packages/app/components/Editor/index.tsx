@@ -16,15 +16,36 @@ import styles from './index.module.css'
 import type { IProps, IPropsActionBar, IPropsMenu, IPropsModal } from './types'
 
 const Index = (props: IProps) => {
-	const { id, value, className, readonly, rich_text, text_only, onChange, onBlur, renderActionBarExtra } = props
+	const {
+		id,
+		value,
+		className,
+		readonly,
+		rich_text,
+		text_only,
+		onChange,
+		onBlur,
+		onCharacterCountChange,
+		renderActionBarExtra
+	} = props
 	const [x] = useState(() => new Model())
 	const { t } = useTranslation()
 	const theme = useTheme()
 	const handleChange = useMemoizedFn((next_value: string) => onChange(next_value))
 	const handleBlur = useMemoizedFn((next_value: string) => onBlur?.(next_value))
+	const handleCharacterCountChange = useMemoizedFn((count: number) => onCharacterCountChange?.(count))
 
 	const { setRef } = useAliveEffect({
-		init: () => x.init({ id, value, className, readonly, onChange: handleChange, onBlur: handleBlur }),
+		init: () =>
+			x.init({
+				id,
+				value,
+				className,
+				readonly,
+				onChange: handleChange,
+				onBlur: handleBlur,
+				onCharacterCountChange: handleCharacterCountChange
+			}),
 		deinit: () => x.off(),
 		deps: [readonly],
 		normal: true
