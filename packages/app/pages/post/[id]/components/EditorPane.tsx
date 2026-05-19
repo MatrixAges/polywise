@@ -1,8 +1,7 @@
 import { useState } from 'react'
 import { SparkleIcon } from '@phosphor-icons/react'
-import { Astroid, Bot, Database, Loader2, MessageCircleCheck, Save, Trash2 } from 'lucide-react'
+import { Astroid, Bot, Database, Loader2, MessageCircleCheck, Save } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
-import { useNavigate } from 'react-router'
 
 import { Button } from '@/__shadcn__/components/ui/button'
 import { Input } from '@/__shadcn__/components/ui/input'
@@ -18,7 +17,6 @@ import type { PostForType } from '../../types'
 
 const Index = () => {
 	const x = useModel()
-	const navigate = useNavigate()
 	const [character_count, setCharacterCount] = useState(0)
 
 	if (!x.selected_post) {
@@ -38,15 +36,14 @@ const Index = () => {
 
 	return (
 		<>
-			<div className='border-border-light border-b px-4 py-3'>
+			<div className='border-border-light h-9 border-b px-4'>
 				<div className='flex items-start gap-3'>
 					<Input
 						className='
 							flex-1
-							h-9
 							px-0
 							rounded-none
-							text-base font-semibold
+							text-xsm! font-medium
 							bg-transparent
 							focus:bg-transparent
 						'
@@ -59,7 +56,7 @@ const Index = () => {
 						value={x.draft_for_type}
 						onValueChange={value => value && x.setDraftForType(value as PostForType)}
 					>
-						<SelectTrigger className='h-9 min-w-[112px]' size='sm'>
+						<SelectTrigger className='min-w-auto' noStyle>
 							<SelectValue />
 						</SelectTrigger>
 						<SelectContent align='end'>
@@ -96,19 +93,6 @@ const Index = () => {
 						)}
 						<span>{x.selected_post.is_pipelined ? 'Re-extract' : 'Extract'}</span>
 					</Button>
-					<Button
-						className='h-9'
-						variant='outline'
-						disabled={x.saving || x.extracting}
-						onClick={async () => {
-							if (await x.deletePost()) {
-								navigate('/post')
-							}
-						}}
-					>
-						<Trash2 className='size-4'></Trash2>
-						<span>Delete</span>
-					</Button>
 					<button
 						className={$cx('icon_button h-9 w-9 shrink-0', x.session_panel_open && 'active')}
 						type='button'
@@ -144,7 +128,7 @@ const Index = () => {
 						<Editor
 							id={x.selected_post.id}
 							value={x.draft_content}
-							className='min-h-full px-5 py-4'
+							className='min-h-full px-6! pt-6!'
 							rich_text
 							onChange={value => x.setDraftContent(value)}
 							onCharacterCountChange={setCharacterCount}
@@ -171,10 +155,10 @@ const Index = () => {
 					className='
 						flex
 						items-center justify-between
+						h-7
 						gap-4
-						px-4 py-2.5
-						text-std-400 text-xs
-						border-border-light border-t
+						px-4
+						text-std-300 text-xs
 					'
 				>
 					<div>Updated {fromNow(x.selected_post.updated_at)}</div>
