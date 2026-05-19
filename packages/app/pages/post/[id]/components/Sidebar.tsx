@@ -5,6 +5,7 @@ import { Tabs } from '@/components'
 import { detail_tab_items } from '../../utils'
 import { useModel } from '../context'
 import OutlinePanel from './OutlinePanel'
+import ProjectPanel from './ProjectPanel'
 import RelatedPanel from './RelatedPanel'
 import SessionPanel from './SessionPanel'
 
@@ -67,6 +68,8 @@ const Index = () => {
 					</div>
 				) : x.detail_tab === 'related' ? (
 					<RelatedPanel></RelatedPanel>
+				) : x.detail_tab === 'project' ? (
+					<ProjectPanel></ProjectPanel>
 				) : (
 					<SessionPanel></SessionPanel>
 				)}

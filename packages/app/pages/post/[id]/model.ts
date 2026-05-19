@@ -15,8 +15,7 @@ import type {
 	ProjectOptionItem,
 	RelatedArticle,
 	RelatedProject,
-	RelatedSearchItem,
-	RelatedSourceTab
+	RelatedSearchItem
 } from '../types'
 
 @injectable()
@@ -32,7 +31,6 @@ export default class Index {
 	extracting = false
 	dirty = false
 	session_id = null as string | null
-	related_tab = 'article' as RelatedSourceTab
 	related_articles = [] as Array<RelatedArticle>
 	related_loading = false
 	related_search = ''
@@ -107,7 +105,6 @@ export default class Index {
 		}
 
 		this.session_draft_input = null
-		this.related_tab = 'article'
 		this.related_search = ''
 		this.related_search_list = []
 		this.related_search_loading = false
@@ -128,7 +125,12 @@ export default class Index {
 		this.detail_tab = value
 
 		if (value === 'related' && this.route_post_id) {
-			void this.loadActiveRelatedTab(this.route_post_id)
+			void this.loadRelatedArticles(this.route_post_id)
+			this.scheduleRelatedSearch()
+		}
+
+		if (value === 'project' && this.route_post_id) {
+			void this.loadRelatedProjects(this.route_post_id)
 		}
 
 		if (value !== 'related') {
@@ -160,14 +162,6 @@ export default class Index {
 	setRelatedSearch(value: string) {
 		this.related_search = value
 		this.scheduleRelatedSearch()
-	}
-
-	setRelatedTab(value: RelatedSourceTab) {
-		this.related_tab = value
-
-		if (this.detail_tab === 'related' && this.route_post_id) {
-			void this.loadActiveRelatedTab(this.route_post_id)
-		}
 	}
 
 	clearRelatedSearch() {
@@ -274,6 +268,10 @@ export default class Index {
 
 			if (this.detail_tab === 'related') {
 				void this.loadRelatedArticles(response.id)
+			}
+
+			if (this.detail_tab === 'project') {
+				void this.loadRelatedProjects(response.id)
 			}
 
 			return response
@@ -427,20 +425,6 @@ export default class Index {
 		} finally {
 			this.related_loading = false
 		}
-	}
-
-	async loadActiveRelatedTab(post_id = this.route_post_id) {
-		if (this.related_tab === 'article') {
-			await this.loadRelatedArticles(post_id)
-			this.scheduleRelatedSearch()
-
-			return
-		}
-
-		this.clearSearchTimer()
-		this.related_search_list = []
-		this.related_search_loading = false
-		await this.loadRelatedProjects(post_id)
 	}
 
 	async loadRelatedProjects(post_id = this.route_post_id) {
@@ -650,6 +634,10 @@ export default class Index {
 
 					if (this.detail_tab === 'related') {
 						void this.loadRelatedArticles()
+					}
+
+					if (this.detail_tab === 'project') {
+						void this.loadRelatedProjects()
 					}
 				}
 			}
