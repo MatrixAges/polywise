@@ -67,7 +67,7 @@ export const for_type_tab_items = [
 ] as const
 
 export const detail_tab_items = [
+	{ key: 'outline', title: 'Outline', Icon: TableOfContents },
 	{ key: 'related', title: 'Related', Icon: Paperclip },
-	{ key: 'project', title: 'Project', Icon: FolderGit2 },
-	{ key: 'outline', title: 'Outline', Icon: TableOfContents }
+	{ key: 'project', title: 'Project', Icon: FolderGit2 }
 ] as const

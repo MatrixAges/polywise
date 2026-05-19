@@ -10,17 +10,20 @@ const Index = () => {
 	}
 
 	return (
-		<div className='flex flex-col gap-1.5'>
+		<div className='flex flex-col pb-3'>
 			{x.outline_items.map(item => (
 				<div
 					className='
-						px-3 py-2
-						rounded-lg
-						text-sm text-foreground
+						flex
+						items-center
+						py-1
+						pr-[3px]
+						rounded-sm
+						text-xsm text-foreground
 						hover:bg-secondary
 						cursor-pointer
 					'
-					style={{ paddingLeft: 12 + (item.level - 1) * 14 }}
+					style={{ paddingLeft: 3 + 6 + (item.level - 1) * 12 }}
 					onClick={() => x.scrollToOutlineItem(item)}
 					key={item.id}
 				>

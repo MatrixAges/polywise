@@ -17,7 +17,7 @@ const Index = () => {
 		<div
 			className='
 				flex flex-col shrink-0
-				w-[300px]
+				w-[210px]
 				bg-std-50/60
 				dark:bg-std-100/60 dark:border-r dark:border-border-light/60
 			'
@@ -54,7 +54,7 @@ const Index = () => {
 							flex
 							items-center justify-center
 							h-full
-							px-6
+							px-1.5
 							text-sm text-std-400
 							text-center
 						'
@@ -62,7 +62,7 @@ const Index = () => {
 						{x.post_loading ? 'Loading post...' : 'Select a post from the list.'}
 					</div>
 				) : x.detail_tab === 'outline' ? (
-					<div className='h-full overflow-y-auto p-2.5'>
+					<div className='h-full overflow-y-auto px-1.5'>
 						<OutlinePanel></OutlinePanel>
 					</div>
 				) : x.detail_tab === 'related' ? (
