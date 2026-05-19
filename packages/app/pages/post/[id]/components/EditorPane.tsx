@@ -1,5 +1,5 @@
 import { SparkleIcon } from '@phosphor-icons/react'
-import { Astroid, Bot, Database, Loader2, Save, Trash2 } from 'lucide-react'
+import { Astroid, Bot, Database, Loader2, MessageCircleCheck, Save, Trash2 } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 import { useNavigate } from 'react-router'
 
@@ -107,6 +107,14 @@ const Index = () => {
 						<Trash2 className='size-4'></Trash2>
 						<span>Delete</span>
 					</Button>
+					<button
+						className={$cx('icon_button h-9 w-9 shrink-0', x.session_panel_open && 'active')}
+						type='button'
+						title='Toggle session panel'
+						onClick={() => x.toggleSessionPanel()}
+					>
+						<MessageCircleCheck className='size-4'></MessageCircleCheck>
+					</button>
 				</div>
 				<div
 					className='

@@ -1,4 +1,4 @@
-import { Loader2 } from 'lucide-react'
+import { Loader2, MessageCircleCheck, X } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { Button } from '@/__shadcn__/components/ui/button'
@@ -9,34 +9,67 @@ import { useModel } from '../context'
 const Index = () => {
 	const x = useModel()
 
-	if (x.session_id) {
-		return (
-			<Session
-				type='global'
-				id={x.session_id}
-				draft_input={x.session_draft_input ?? undefined}
-				show_session_mode_select={false}
-				show_audit_mode_select={false}
-			></Session>
-		)
-	}
-
 	return (
-		<div
-			className='
-				flex flex-col
-				items-center justify-center
-				h-full
-				gap-3
-				px-6
-				text-center
-			'
-		>
-			<div className='text-std-400 text-sm'>Create a dedicated post session for AI-assisted writing.</div>
-			<Button disabled={x.ensuring_session} onClick={() => void x.ensureSession()}>
-				{x.ensuring_session && <Loader2 className='size-4 animate-spin'></Loader2>}
-				<span>Create session</span>
-			</Button>
+		<div className='flex h-full flex-col overflow-hidden'>
+			<div
+				className='
+					flex
+					items-center justify-between
+					h-9
+					px-2.5
+					border-border-light border-b
+				'
+			>
+				<div
+					className='
+						flex
+						items-center
+						gap-2
+						text-sm font-medium
+					'
+				>
+					<MessageCircleCheck className='text-std-400 size-4'></MessageCircleCheck>
+					<span>Post Session</span>
+				</div>
+				<button
+					className='icon_button small mr-[-3px]'
+					type='button'
+					title='Close session panel'
+					onClick={() => x.setSessionPanelOpen(false)}
+				>
+					<X></X>
+				</button>
+			</div>
+			<div className='min-h-0 flex-1'>
+				{x.session_id ? (
+					<Session
+						type='global'
+						id={x.session_id}
+						draft_input={x.session_draft_input ?? undefined}
+						show_session_mode_select={false}
+						show_audit_mode_select={false}
+					></Session>
+				) : (
+					<div
+						className='
+							flex flex-col
+							items-center justify-center
+							h-full
+							gap-3
+							px-6
+							text-center
+						'
+					>
+						<div className='text-std-400 text-sm'>
+							Create a dedicated post session for AI-assisted writing.
+						</div>
+						<Button disabled={x.ensuring_session} onClick={() => void x.ensureSession()}>
+							{x.ensuring_session && <Loader2 className='size-4 animate-spin'></Loader2>}
+							<span>Create session</span>
+						</Button>
+					</div>
+				)}
+			</div>
 		</div>
 	)
 }

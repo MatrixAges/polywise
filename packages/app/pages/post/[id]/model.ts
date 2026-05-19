@@ -41,6 +41,7 @@ export default class Index {
 	related_project_options = [] as Array<ProjectOptionItem>
 	related_project_options_loading = false
 	ensuring_session = false
+	session_panel_open = false
 	session_draft_input = null as { key: string; value: string } | null
 	not_found = false
 	editor_area = null as HTMLDivElement | null
@@ -138,10 +139,6 @@ export default class Index {
 			this.related_search_list = []
 			this.related_search_loading = false
 		}
-
-		if (value === 'session' && this.route_post_id && !this.session_id && !this.ensuring_session) {
-			void this.ensureSession()
-		}
 	}
 
 	setDraftTitle(value: string) {
@@ -169,6 +166,18 @@ export default class Index {
 		this.related_search_list = []
 		this.related_search_loading = false
 		this.clearSearchTimer()
+	}
+
+	setSessionPanelOpen(value: boolean) {
+		this.session_panel_open = value
+	}
+
+	toggleSessionPanel() {
+		this.session_panel_open = !this.session_panel_open
+
+		if (this.session_panel_open && this.route_post_id && !this.session_id && !this.ensuring_session) {
+			void this.ensureSession()
+		}
 	}
 
 	markDirty() {
@@ -559,7 +568,7 @@ export default class Index {
 		const selection_end = selection_start + selection_text.length
 		const prompt = `REFERENCE: [${selection_start},${selection_end}]`
 
-		this.setDetailTab('session')
+		this.setSessionPanelOpen(true)
 		const next_session_id = await this.ensureSession()
 
 		if (!next_session_id) {
