@@ -112,7 +112,7 @@ const Index = () => {
 					overflow-y-auto
 					flex-1
 					min-h-0
-					px-2.5
+					px-3.5
 				'
 			>
 				{x.related_loading ? (

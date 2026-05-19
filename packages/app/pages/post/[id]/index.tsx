@@ -3,12 +3,15 @@ import { observer } from 'mobx-react-lite'
 import { useParams } from 'react-router'
 import { container } from 'tsyringe'
 
-import { Content } from './components'
+import { useGlobal } from '@/context'
+
+import { EditorPane, NotFound, SessionPanel, Sidebar } from './components'
 import { Context } from './context'
 import Model from './model'
 
 const Index = () => {
 	const params = useParams()
+	const global = useGlobal()
 	const route_post_id = params.id ?? ''
 	const ref_model = useRef<Model | null>(null)
 
@@ -19,18 +22,49 @@ const Index = () => {
 	const x = ref_model.current
 
 	useEffect(() => {
-		void x.init()
+		x.init()
 
 		return () => x.deinit()
 	}, [x])
 
 	useEffect(() => {
-		void x.setRoutePostId(route_post_id)
+		x.setRoutePostId(route_post_id)
 	}, [route_post_id, x])
 
 	return (
 		<Context value={x}>
-			<Content></Content>
+			{x.not_found ? (
+				<NotFound></NotFound>
+			) : (
+				<div className='flex h-full overflow-hidden'>
+					{!global.setting.sidebar_collapsed && <Sidebar></Sidebar>}
+					<div
+						className='
+							overflow-hidden
+							flex flex-1
+							min-w-0
+						'
+					>
+						<div className='flex min-w-0 flex-1 flex-col'>
+							<EditorPane></EditorPane>
+						</div>
+						{x.session_panel_open && (
+							<div
+								className='
+									overflow-hidden
+									flex flex-col shrink-0
+									w-[320px] h-full
+									bg-std-50/60
+									border-border-light border-l
+									dark:bg-std-100/60
+								'
+							>
+								<SessionPanel></SessionPanel>
+							</div>
+						)}
+					</div>
+				</div>
+			)}
 		</Context>
 	)
 }

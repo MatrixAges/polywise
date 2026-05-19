@@ -1,4 +1,3 @@
-export { default as Content } from './Content'
 export { default as EditorPane } from './EditorPane'
 export { default as NotFound } from './NotFound'
 export { default as OutlinePanel } from './OutlinePanel'

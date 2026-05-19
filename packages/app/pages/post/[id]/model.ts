@@ -110,7 +110,8 @@ export default class Index {
 						toStorage: value =>
 							detail_tabs.includes(value as DetailTab) ? (value as DetailTab) : 'outline'
 					}
-				}
+				},
+				{ post_session_panel_open: 'session_panel_open' }
 			],
 			this
 		)

@@ -11,35 +11,6 @@ const Index = () => {
 
 	return (
 		<div className='flex h-full flex-col overflow-hidden'>
-			<div
-				className='
-					flex
-					items-center justify-between
-					h-9
-					px-2.5
-					border-border-light border-b
-				'
-			>
-				<div
-					className='
-						flex
-						items-center
-						gap-2
-						text-sm font-medium
-					'
-				>
-					<MessageCircleCheck className='text-std-400 size-4'></MessageCircleCheck>
-					<span>Post Session</span>
-				</div>
-				<button
-					className='icon_button small mr-[-3px]'
-					type='button'
-					title='Close session panel'
-					onClick={() => x.setSessionPanelOpen(false)}
-				>
-					<X></X>
-				</button>
-			</div>
 			<div className='min-h-0 flex-1'>
 				{x.session_id ? (
 					<Session
