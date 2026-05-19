@@ -5,7 +5,7 @@ import { container } from 'tsyringe'
 
 import { useGlobal } from '@/context'
 
-import { EditorPane, NotFound, SessionPanel, Sidebar } from './components'
+import { EditorPanel, NotFound, SessionPanel, Sidebar } from './components'
 import { Context } from './context'
 import Model from './model'
 
@@ -46,7 +46,7 @@ const Index = () => {
 						'
 					>
 						<div className='flex min-w-0 flex-1 flex-col'>
-							<EditorPane></EditorPane>
+							<EditorPanel></EditorPanel>
 						</div>
 						{x.session_panel_open && (
 							<div

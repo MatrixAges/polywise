@@ -1,4 +1,6 @@
-export { default as EditorPane } from './EditorPane'
+export { default as EditorPanel } from './EditorPanel'
+export { default as EditorPanelFooter } from './EditorPanelFooter'
+export { default as EditorPanelHeader } from './EditorPanelHeader'
 export { default as NotFound } from './NotFound'
 export { default as OutlinePanel } from './OutlinePanel'
 export { default as RelatedPanel } from './RelatedPanel'
