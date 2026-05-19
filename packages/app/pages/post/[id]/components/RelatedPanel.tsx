@@ -11,7 +11,7 @@ const Index = () => {
 
 	return (
 		<div className='flex h-full flex-col overflow-hidden'>
-			<div className='p-1.5'>
+			<div className='px-2.5 py-1.5'>
 				<div className='relative'>
 					<Search
 						className='

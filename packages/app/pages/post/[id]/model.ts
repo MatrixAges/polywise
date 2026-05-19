@@ -1,5 +1,6 @@
 import { makeAutoObservable } from 'mobx'
 import { toast } from 'sonner'
+import { setStorageWhenChange } from 'stk/mobx'
 import { injectable } from 'tsyringe'
 
 import { Util } from '@/models/common'
@@ -17,6 +18,8 @@ import type {
 	RelatedProject,
 	RelatedSearchItem
 } from '../types'
+
+const detail_tabs = ['outline', 'related', 'project'] as const satisfies Array<DetailTab>
 
 @injectable()
 export default class Index {
@@ -40,6 +43,8 @@ export default class Index {
 	related_projects_loading = false
 	related_project_options = [] as Array<ProjectOptionItem>
 	related_project_options_loading = false
+	project_dialog_open = false
+	project_query = ''
 	ensuring_session = false
 	session_panel_open = false
 	session_draft_input = null as { key: string; value: string } | null
@@ -73,7 +78,44 @@ export default class Index {
 		return parseOutline(this.draft_content)
 	}
 
+	get related_project_id_set() {
+		return new Set(this.related_projects.map(item => item.id))
+	}
+
+	get filtered_related_project_options() {
+		const keyword = this.project_query.trim().toLowerCase()
+		const related_project_id_set = this.related_project_id_set
+
+		return this.related_project_options.filter(item => {
+			if (related_project_id_set.has(item.id)) {
+				return false
+			}
+
+			if (!keyword) {
+				return true
+			}
+
+			return `${item.name}\n${item.dir}`.toLowerCase().includes(keyword)
+		})
+	}
+
 	async init() {
+		const deinit = setStorageWhenChange(
+			[
+				{
+					detail_tab: {
+						local_key: 'post_detail_tab',
+						fromStorage: value =>
+							detail_tabs.includes(value as DetailTab) ? (value as DetailTab) : 'outline',
+						toStorage: value =>
+							detail_tabs.includes(value as DetailTab) ? (value as DetailTab) : 'outline'
+					}
+				}
+			],
+			this
+		)
+
+		this.util.acts = [deinit]
 		this.watchSessionStatus()
 		this.bindSaveHotKey()
 	}
@@ -111,6 +153,8 @@ export default class Index {
 		this.related_search_loading = false
 		this.related_projects = []
 		this.related_projects_loading = false
+		this.project_dialog_open = false
+		this.project_query = ''
 		this.clearSearchTimer()
 
 		if (this.route_post_id && this.route_post_id !== post_id && this.dirty) {
@@ -166,6 +210,26 @@ export default class Index {
 		this.related_search_list = []
 		this.related_search_loading = false
 		this.clearSearchTimer()
+	}
+
+	setProjectDialogOpen(value: boolean) {
+		this.project_dialog_open = value
+
+		if (value) {
+			void this.loadRelatedProjectOptions()
+
+			return
+		}
+
+		this.project_query = ''
+	}
+
+	setProjectQuery(value: string) {
+		this.project_query = value
+	}
+
+	clearProjectQuery() {
+		this.project_query = ''
 	}
 
 	setSessionPanelOpen(value: boolean) {
@@ -509,6 +573,7 @@ export default class Index {
 			project_id
 		})
 		await Promise.all([this.loadRelatedProjects(), this.reloadCurrentPost()])
+		this.clearProjectQuery()
 	}
 
 	async removeRelatedProject(project_id: string) {
