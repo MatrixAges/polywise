@@ -1,4 +1,4 @@
-import { Bot, Database, Loader2, Save, Trash2 } from 'lucide-react'
+import { Astroid, Bot, Database, Loader2, Save, Trash2 } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 import { useNavigate } from 'react-router'
 
@@ -144,18 +144,13 @@ const Index = () => {
 							<div
 								className='
 										flex
-										items-center
-										gap-1
-										px-2
-										btn_format cursor-pointer
+										items-center justify-center
+										w-[32px] h-full
 									'
-								onClick={() =>
-									void x.addReferenceToPostSessionInput(editor as TiptapEditor)
-								}
-								title='Add reference to post session'
+								onClick={() => x.addReferenceToPostSessionInput(editor as TiptapEditor)}
+								title='Add Reference'
 							>
-								<Bot className='size-3.5'></Bot>
-								<span className='text-xs font-medium'>Add Reference</span>
+								<Astroid className='size-3.5'></Astroid>
 							</div>
 						)}
 					></Editor>

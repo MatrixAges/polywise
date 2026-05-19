@@ -28,7 +28,7 @@ const Index = () => {
 	}
 
 	return (
-		<div className='flex w-full flex-col'>
+		<div className='flex w-full flex-col py-2'>
 			{x.current_list_state.list.map(item => (
 				<div
 					className='

@@ -562,6 +562,7 @@ export default class Index {
 		}
 
 		const { from, to } = editor.state.selection
+		const text_before_selection = editor.state.doc.textBetween(0, from, '\n')
 		const selection_text = editor.state.doc.textBetween(from, to, '\n')
 
 		if (!selection_text.trim()) {
@@ -570,21 +571,9 @@ export default class Index {
 
 		await this.saveCurrentPost({ silent: true })
 
-		const before_context = editor.state.doc.textBetween(Math.max(0, from - 80), from, '\n')
-		const after_context = editor.state.doc.textBetween(
-			to,
-			Math.min(editor.state.doc.content.size, to + 80),
-			'\n'
-		)
-		const prompt = [
-			'Reference from the current post:',
-			'Use the marked passage below when answering or editing the current post.',
-			`Selected text:\n<<<SELECTION\n${selection_text}\nSELECTION>>>`,
-			before_context ? `Before context:\n<<<BEFORE\n${before_context}\nBEFORE>>>` : '',
-			after_context ? `After context:\n<<<AFTER\n${after_context}\nAFTER>>>` : ''
-		]
-			.filter(Boolean)
-			.join('\n\n')
+		const selection_start = text_before_selection.length
+		const selection_end = selection_start + selection_text.length
+		const prompt = `REFERENCE: [${selection_start},${selection_end}]`
 
 		this.setDetailTab('session')
 		const next_session_id = await this.ensureSession()

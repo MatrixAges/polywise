@@ -236,7 +236,7 @@ const Index = (props: IPropsActionBar) => {
 					</If>
 					<If condition={Boolean(extra)}>
 						<span className='d_line'></span>
-						<div className='format_items flex items-center'>{extra}</div>
+						<div className={$cx(format_button_class, 'mx-[4px]!')}>{extra}</div>
 					</If>
 				</Otherwise>
 			</Choose>

@@ -4,7 +4,10 @@ import { getPostSessions } from '@core/db/services/externals'
 import { saveArticle } from '@core/io'
 import { tool } from 'ai'
 import { eq } from 'drizzle-orm'
-import { boolean, enum as Enum, number, object, string } from 'zod'
+import { remark } from 'remark'
+import remarkGfm from 'remark-gfm'
+import remarkMath from 'remark-math'
+import { boolean, enum as Enum, number, object, string, tuple } from 'zod'
 
 import {
 	getPostById,
@@ -14,6 +17,7 @@ import {
 	searchPostRelatedSources
 } from '../../rpc/post/utils'
 
+import type { Root, RootContent } from 'mdast'
 import type Session from '../session'
 
 type OutlineItem = {
@@ -24,6 +28,254 @@ type OutlineItem = {
 type OutlineSection = OutlineItem & {
 	body: string
 	key: string
+}
+
+type DisplayTextSegment = {
+	display_end: number
+	display_start: number
+	source_start?: number
+}
+
+type DisplayTextRender = {
+	segments: Array<DisplayTextSegment>
+	text: string
+}
+
+type ResolvedSelection = {
+	selection_text: string
+	selection_end?: number
+	selection_start?: number
+	source_from?: number
+	source_to?: number
+}
+
+const post_markdown_processor = remark().use(remarkGfm).use(remarkMath)
+
+const joinRenderedParts = (parts: Array<DisplayTextRender>, separator = ''): DisplayTextRender => {
+	const non_empty_parts = parts.filter(part => part.text)
+
+	if (non_empty_parts.length === 0) {
+		return {
+			text: '',
+			segments: []
+		}
+	}
+
+	let text = ''
+	const segments = [] as Array<DisplayTextSegment>
+
+	for (const part of non_empty_parts) {
+		if (text && separator) {
+			text += separator
+		}
+
+		const offset = text.length
+
+		text += part.text
+		segments.push(
+			...part.segments.map(segment => ({
+				...segment,
+				display_start: segment.display_start + offset,
+				display_end: segment.display_end + offset
+			}))
+		)
+	}
+
+	return {
+		text,
+		segments
+	}
+}
+
+const renderPostDisplayText = (node: Root | RootContent): DisplayTextRender => {
+	const n = node as RootContent & {
+		alt?: string
+		children?: Array<RootContent>
+		type: string
+		value?: string
+	}
+	const node_type = n.type as string
+
+	switch (node_type) {
+		case 'root':
+		case 'blockquote':
+		case 'list':
+		case 'listItem':
+			return joinRenderedParts((n.children ?? []).map(renderPostDisplayText), '\n')
+		case 'table':
+			return joinRenderedParts((n.children ?? []).map(renderPostDisplayText), '\n')
+		case 'tableRow':
+			return joinRenderedParts((n.children ?? []).map(renderPostDisplayText), '\t')
+		case 'paragraph':
+		case 'heading':
+		case 'emphasis':
+		case 'strong':
+		case 'delete':
+		case 'link':
+		case 'linkReference':
+		case 'tableCell':
+		case 'footnote':
+		case 'footnoteDefinition':
+			return joinRenderedParts((n.children ?? []).map(renderPostDisplayText), '')
+		case 'break':
+			return {
+				text: '\n',
+				segments: []
+			}
+		case 'text': {
+			const text = n.value ?? ''
+			const source_start = n.position?.start.offset
+
+			return {
+				text,
+				segments:
+					text && source_start !== undefined
+						? [
+								{
+									display_start: 0,
+									display_end: text.length,
+									source_start
+								}
+							]
+						: []
+			}
+		}
+		case 'inlineCode':
+		case 'code':
+			return {
+				text: n.value ?? '',
+				segments: []
+			}
+		case 'image':
+			return {
+				text: n.alt ?? '',
+				segments: []
+			}
+		default:
+			return Array.isArray(n.children)
+				? joinRenderedParts(n.children.map(renderPostDisplayText), '')
+				: {
+						text: '',
+						segments: []
+					}
+	}
+}
+
+const getSelectionSourceRange = (
+	segments: Array<DisplayTextSegment>,
+	selection_start: number,
+	selection_end: number
+) => {
+	const mapped_segments = segments.filter(
+		segment =>
+			segment.source_start !== undefined &&
+			segment.display_end > selection_start &&
+			segment.display_start < selection_end
+	)
+
+	if (mapped_segments.length === 0) {
+		return null
+	}
+
+	const first_segment = mapped_segments[0]
+	const last_segment = mapped_segments.at(-1)
+
+	if (!last_segment || first_segment.source_start === undefined || last_segment.source_start === undefined) {
+		return null
+	}
+
+	return {
+		from: first_segment.source_start + Math.max(0, selection_start - first_segment.display_start),
+		to:
+			last_segment.source_start +
+			Math.min(selection_end, last_segment.display_end) -
+			last_segment.display_start
+	}
+}
+
+const resolveSelectionFromReference = (args: {
+	content: string
+	selection_end: number
+	selection_start: number
+}):
+	| ({ ok: true } & ResolvedSelection)
+	| {
+			error: string
+			ok: false
+	  } => {
+	const { content } = args
+	const rendered = renderPostDisplayText(post_markdown_processor.parse(content) as Root)
+	const expected_length = Math.max(0, Math.floor(args.selection_end) - Math.floor(args.selection_start))
+
+	if (expected_length <= 0) {
+		return {
+			ok: false as const,
+			error: 'selection_end must be greater than selection_start'
+		}
+	}
+
+	const target_start = Math.max(0, Math.min(rendered.text.length, Math.floor(args.selection_start)))
+	const target_end = Math.min(rendered.text.length, target_start + expected_length)
+	if (target_end > rendered.text.length) {
+		return {
+			ok: false as const,
+			error: 'Selection ref is out of range for the current post'
+		}
+	}
+
+	const source_range = getSelectionSourceRange(rendered.segments, target_start, target_end)
+
+	return {
+		ok: true as const,
+		selection_text: rendered.text.slice(target_start, target_end),
+		selection_start: target_start,
+		selection_end: target_end,
+		source_from: source_range?.from,
+		source_to: source_range?.to
+	}
+}
+
+const resolveSelectionInput = (args: {
+	after_context?: string
+	before_context?: string
+	content: string
+	ref?: [number, number]
+	selection_end?: number
+	selection_start?: number
+	selection_text?: string
+}):
+	| ({ ok: true } & ResolvedSelection)
+	| {
+			error: string
+			ok: false
+	  } => {
+	if (args.selection_text?.trim()) {
+		return {
+			ok: true as const,
+			selection_text: args.selection_text.trim()
+		}
+	}
+
+	if (Array.isArray(args.ref) && args.ref.length === 2) {
+		return resolveSelectionFromReference({
+			content: args.content,
+			selection_start: args.ref[0],
+			selection_end: args.ref[1]
+		})
+	}
+
+	if (typeof args.selection_start !== 'number' || typeof args.selection_end !== 'number') {
+		return {
+			ok: false as const,
+			error: 'selection_text, ref, or selection_start/selection_end is required'
+		}
+	}
+
+	return resolveSelectionFromReference({
+		content: args.content,
+		selection_start: args.selection_start,
+		selection_end: args.selection_end
+	})
 }
 
 const findSelectionIndex = (args: {
@@ -245,7 +497,8 @@ export const createPostTool = (session: Session) =>
 			'Use get_post before editing when you need the latest content.',
 			'Use search_related_sources first when drafting, revising, or fact-checking against the post-linked related articles and projects.',
 			'Use get_outline and update_outline when you need to inspect or change the markdown heading structure.',
-			'Use replace_selection for targeted rewrites from the user-selected passage.',
+			'Use get_selection to resolve a compact selection reference like ref: [start, end] into the current selected passage.',
+			'Use replace_selection for targeted rewrites from the user-selected passage or a compact selection reference.',
 			'Use update_post for broader title/content/for_type updates.'
 		].join('\n'),
 		inputSchema: object({
@@ -254,6 +507,7 @@ export const createPostTool = (session: Session) =>
 				'search_related_sources',
 				'search_related_articles',
 				'get_outline',
+				'get_selection',
 				'update_outline',
 				'update_post',
 				'replace_selection'
@@ -264,7 +518,10 @@ export const createPostTool = (session: Session) =>
 			query: string().optional(),
 			max_results: number().int().min(1).max(8).optional(),
 			outline_markdown: string().optional(),
+			ref: tuple([number().int().min(0), number().int().min(0)]).optional(),
 			selection_text: string().optional(),
+			selection_start: number().int().min(0).optional(),
+			selection_end: number().int().min(0).optional(),
 			replacement: string().optional(),
 			before_context: string().optional(),
 			after_context: string().optional(),
@@ -353,6 +610,36 @@ export const createPostTool = (session: Session) =>
 						has_preamble: Boolean(outline.preamble.trim())
 					}
 				}
+				case 'get_selection': {
+					const resolved_selection = resolveSelectionInput({
+						content: current_post.content,
+						ref: input.ref,
+						selection_text: input.selection_text,
+						selection_start: input.selection_start,
+						selection_end: input.selection_end,
+						before_context: input.before_context,
+						after_context: input.after_context
+					})
+
+					if (!resolved_selection.ok) {
+						return {
+							ok: false,
+							error: resolved_selection.error
+						}
+					}
+
+					return {
+						ok: true,
+						selection_text: resolved_selection.selection_text,
+						ref:
+							typeof resolved_selection.selection_start === 'number' &&
+							typeof resolved_selection.selection_end === 'number'
+								? [resolved_selection.selection_start, resolved_selection.selection_end]
+								: undefined,
+						selection_start: resolved_selection.selection_start,
+						selection_end: resolved_selection.selection_end
+					}
+				}
 				case 'update_outline': {
 					const parsed_outline = parseRequestedOutline(input.outline_markdown)
 
@@ -409,13 +696,21 @@ export const createPostTool = (session: Session) =>
 					}
 				}
 				case 'replace_selection': {
-					const selection_text = input.selection_text?.trim()
 					const replacement = input.replacement
+					const resolved_selection = resolveSelectionInput({
+						content: current_post.content,
+						ref: input.ref,
+						selection_text: input.selection_text,
+						selection_start: input.selection_start,
+						selection_end: input.selection_end,
+						before_context: input.before_context,
+						after_context: input.after_context
+					})
 
-					if (!selection_text) {
+					if (!resolved_selection.ok) {
 						return {
 							ok: false,
-							error: 'selection_text is required for replace_selection'
+							error: resolved_selection.error
 						}
 					}
 
@@ -426,32 +721,47 @@ export const createPostTool = (session: Session) =>
 						}
 					}
 
-					const match_index = findSelectionIndex({
-						content: current_post.content,
-						selection_text,
-						before_context: input.before_context,
-						after_context: input.after_context
-					})
+					let next_content = ''
 
-					if (match_index === -1) {
-						return {
-							ok: false,
-							error: 'Could not find the selected text in the current post'
+					if (
+						typeof resolved_selection.source_from === 'number' &&
+						typeof resolved_selection.source_to === 'number'
+					) {
+						next_content = [
+							current_post.content.slice(0, resolved_selection.source_from),
+							replacement,
+							current_post.content.slice(resolved_selection.source_to)
+						].join('')
+					} else {
+						const match_index = findSelectionIndex({
+							content: current_post.content,
+							selection_text: resolved_selection.selection_text,
+							before_context: input.before_context,
+							after_context: input.after_context
+						})
+
+						if (match_index === -1) {
+							return {
+								ok: false,
+								error: 'Could not find the selected text in the current post'
+							}
 						}
-					}
 
-					if (match_index === -2) {
-						return {
-							ok: false,
-							error: 'The selected text is ambiguous. Use before_context and after_context to disambiguate.'
+						if (match_index === -2) {
+							return {
+								ok: false,
+								error: 'The selected text is ambiguous. Use before_context and after_context to disambiguate.'
+							}
 						}
-					}
 
-					const next_content = [
-						current_post.content.slice(0, match_index),
-						replacement,
-						current_post.content.slice(match_index + selection_text.length)
-					].join('')
+						next_content = [
+							current_post.content.slice(0, match_index),
+							replacement,
+							current_post.content.slice(
+								match_index + resolved_selection.selection_text.length
+							)
+						].join('')
+					}
 
 					await saveArticle({
 						article_id: current_post.id,

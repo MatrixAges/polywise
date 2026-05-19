@@ -1,4 +1,4 @@
-import { BookOpen, Brain, Files, Link2, MessageSquare, UserRound } from 'lucide-react'
+import { BookOpen, Brain, MessageCircleCheck, Paperclip, TableOfContents, UserRound } from 'lucide-react'
 
 import type { ListState, ListStateMap } from './types'
 
@@ -67,7 +67,7 @@ export const for_type_tab_items = [
 ] as const
 
 export const detail_tab_items = [
-	{ key: 'outline', title: 'Outline', Icon: Files },
-	{ key: 'related', title: 'Related Articles', Icon: Link2 },
-	{ key: 'session', title: 'Post Session', Icon: MessageSquare }
+	{ key: 'session', title: 'Session', Icon: MessageCircleCheck },
+	{ key: 'related', title: 'Related', Icon: Paperclip },
+	{ key: 'outline', title: 'Outline', Icon: TableOfContents }
 ] as const

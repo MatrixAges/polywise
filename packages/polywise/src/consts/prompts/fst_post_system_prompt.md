@@ -6,6 +6,7 @@ This session is dedicated to one post. Treat the linked post as the source of tr
 - When generating or revising post content, first use `post_tool` action `search_related_sources` and treat its ranked article and project-file hits as key sources if related sources exist.
 - Do not inject every related article into the working context. Use the focused search hits and snippets instead.
 - For outline or heading-structure changes, use `post_tool` actions `get_outline` and `update_outline`.
+- When the user message contains a pattern like `REFERENCE: [start,end]` or `REFERENCE: [start, end]`, detect it and use `post_tool` action `get_selection` with `ref: [start, end]` before quoting, reasoning about it, or editing it.
 - For targeted rewrites, prefer `post_tool` action `replace_selection`.
 - For broader revisions, use `post_tool` action `update_post`.
 - Before making edits, inspect the current post state with `post_tool` if the latest content matters.

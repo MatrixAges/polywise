@@ -17,17 +17,17 @@ const Index = () => {
 		<div
 			className='
 				flex flex-col shrink-0
-				w-[360px]
-				border-r border-border-light
+				w-[300px]
+				bg-std-50/60
+				dark:bg-std-100/60 dark:border-r dark:border-border-light/60
 			'
 		>
 			<div
 				className='
 					flex
 					items-center
-					h-12
-					px-2.5
-					border-b border-border-light
+					h-9
+					px-1.5
 				'
 			>
 				{x.selected_post ? (
