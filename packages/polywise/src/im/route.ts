@@ -59,6 +59,12 @@ export const buildImRouteKey = (route: ImRoute) => {
 		return `im:discord:${route.account_id}:guild:${route.guild_id || 'unknown'}:channel:${route.chat_id}`
 	}
 
+	if (route.platform === 'feishu') {
+		return route.chat_type === 'dm'
+			? `im:feishu:${route.account_id}:dm:${route.chat_id}`
+			: `im:feishu:${route.account_id}:chat:${route.chat_id}`
+	}
+
 	return `im:wechat:${route.account_id}:dm:${route.chat_id}`
 }
 
@@ -69,6 +75,10 @@ export const buildImPeerKey = (route: ImRoute) => {
 		}
 
 		return `discord:${route.account_id}:${route.chat_type}:${route.chat_id}`
+	}
+
+	if (route.platform === 'feishu') {
+		return `feishu:${route.account_id}:${route.chat_type}:${route.chat_id}`
 	}
 
 	return `wechat:${route.account_id}:dm:${route.chat_id}`
@@ -83,6 +93,14 @@ export const buildImSessionTitle = (event: ImInboundEvent) => {
 		}
 
 		return buildDiscordHierarchicalTitle(event.route)
+	}
+
+	if (event.platform === 'feishu') {
+		if (event.route.chat_type === 'dm') {
+			return `Feishu DM ${sender}`
+		}
+
+		return event.route.title?.trim() || `Feishu Chat ${event.route.chat_id}`
 	}
 
 	return `WeChat DM ${sender}`

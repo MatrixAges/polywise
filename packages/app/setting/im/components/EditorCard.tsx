@@ -11,6 +11,7 @@ import { Switch } from '@/__shadcn__/components/ui/switch'
 
 import { useModel } from '../context'
 import DiscordFields from './DiscordFields'
+import FeishuFields from './FeishuFields'
 import RuntimeOptions from './RuntimeOptions'
 import SessionTargetOptions from './SessionTargetOptions'
 import WeChatFields from './WeChatFields'
@@ -29,7 +30,13 @@ const Index = () => {
 				border
 			'
 		>
-			{x.form.platform === 'discord' ? <DiscordFields></DiscordFields> : <WeChatFields></WeChatFields>}
+			{x.form.platform === 'discord' ? (
+				<DiscordFields></DiscordFields>
+			) : x.form.platform === 'feishu' ? (
+				<FeishuFields></FeishuFields>
+			) : (
+				<WeChatFields></WeChatFields>
+			)}
 			<Separator className='bg-border/80 h-px w-full' />
 			<FieldGroup className='gap-0'>
 				<Field className='items-center! py-3' orientation='horizontal'>

@@ -1,7 +1,7 @@
 import type Session from '@core/fst/session'
 import type { Message as FstMessage } from '@core/fst/types'
 
-export type ImPlatform = 'discord' | 'wechat'
+export type ImPlatform = 'discord' | 'wechat' | 'feishu'
 export type ImChatType = 'dm' | 'channel' | 'thread'
 
 export interface ImRoute {
@@ -89,6 +89,12 @@ export interface ImAdapter {
 	}): Promise<ImRoute | null>
 	handleBridgeEvent?(payload: unknown): Promise<ImInboundEvent | null>
 	handleBridgeStatus?(payload: unknown): Promise<void>
+	handleWebhookRequest?(raw_body: string): Promise<{
+		matched: boolean
+		challenge?: string
+		event?: ImInboundEvent
+		error?: string
+	}>
 	verifyBridgePayload?(raw_body: string, signature: string | undefined): Promise<boolean>
 }
 
@@ -111,6 +117,11 @@ export interface ImRuntime {
 		raw_body: string,
 		signature: string | undefined
 	): Promise<{ ok: boolean; error?: string }>
+	handleFeishuWebhookEvent(raw_body: string): Promise<{
+		ok: boolean
+		error?: string
+		challenge?: string
+	}>
 	getHealth(): {
 		adapters: Array<{ platform: ImPlatform; account_id: string }>
 		routes: Array<{ route_key: string; running: boolean; pending: number; last_active_at: number }>

@@ -4,6 +4,7 @@ import { env } from '@core/env'
 import { and, asc, eq } from 'drizzle-orm'
 
 import DiscordAdapter from './adapters/discord'
+import FeishuAdapter from './adapters/feishu'
 import WechatAdapter from './adapters/wechat'
 import { buildImUserMessage, parseImCommand, shouldReplyInDirectMessage } from './message'
 import { buildImRouteKey, getAdapterKey } from './route'
@@ -22,6 +23,12 @@ const buildAdapter = (account: ImAccount, emit_inbound: (event: ImInboundEvent) 
 
 	if (account.platform === 'wechat') {
 		const adapter = new WechatAdapter(account)
+		adapter.setInboundHandler(emit_inbound)
+		return adapter
+	}
+
+	if (account.platform === 'feishu') {
+		const adapter = new FeishuAdapter(account)
 		adapter.setInboundHandler(emit_inbound)
 		return adapter
 	}
@@ -272,6 +279,47 @@ export const createImRuntime = (): ImRuntime => {
 			await adapter.handleBridgeStatus(payload)
 
 			return { ok: true }
+		},
+		async handleFeishuWebhookEvent(raw_body: string) {
+			const candidates = Array.from(adapters.values()).filter(
+				adapter => adapter.platform === 'feishu' && adapter.handleWebhookRequest
+			)
+
+			if (!candidates.length) {
+				return { ok: false, error: 'Feishu adapter not found' }
+			}
+
+			let last_error = ''
+
+			for (const adapter of candidates) {
+				const result = await adapter.handleWebhookRequest!(raw_body)
+
+				if (result.error) {
+					last_error = result.error
+				}
+
+				if (!result.matched) {
+					continue
+				}
+
+				if (result.challenge) {
+					return {
+						ok: true,
+						challenge: result.challenge
+					}
+				}
+
+				if (result.event) {
+					await handleInboundEvent(result.event)
+				}
+
+				return { ok: true }
+			}
+
+			return {
+				ok: false,
+				error: last_error || 'Feishu webhook did not match any configured account'
+			}
 		},
 		getHealth() {
 			return {

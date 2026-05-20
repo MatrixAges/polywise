@@ -29,6 +29,10 @@ export type ImFormState = {
 	discord_allowed_guild_ids: string
 	discord_allowed_channel_ids: string
 	discord_allowed_user_ids: string
+	feishu_app_id: string
+	feishu_app_secret: string
+	feishu_verification_token: string
+	feishu_encrypt_key: string
 	wechat_bot_token: string
 	wechat_api_base_url: string
 	session_target_type: ImSessionTargetType
@@ -51,6 +55,10 @@ const emptyForm = (): ImFormState => ({
 	discord_allowed_guild_ids: '',
 	discord_allowed_channel_ids: '',
 	discord_allowed_user_ids: '',
+	feishu_app_id: '',
+	feishu_app_secret: '',
+	feishu_verification_token: '',
+	feishu_encrypt_key: '',
 	wechat_bot_token: '',
 	wechat_api_base_url: 'https://ilinkai.weixin.qq.com',
 	session_target_type: 'global',
@@ -63,9 +71,17 @@ const emptyForm = (): ImFormState => ({
 	runtime_agent_ids: []
 })
 
-const defaultAccountIdByPlatform = (platform: ImPlatform) => (platform === 'discord' ? 'discord-main' : 'wechat-main')
+const defaultAccountIdByPlatform = (platform: ImPlatform) => {
+	if (platform === 'discord') return 'discord-main'
+	if (platform === 'feishu') return 'feishu-main'
+	return 'wechat-main'
+}
 const defaultLabelByPlatform = (platform: ImPlatform) =>
-	platform === 'discord' ? 'Primary Discord Bot' : 'Primary WeChat Assistant'
+	platform === 'discord'
+		? 'Primary Discord Bot'
+		: platform === 'feishu'
+			? 'Primary Feishu Bot'
+			: 'Primary WeChat Assistant'
 
 const parseStringList = (value: string) =>
 	value
@@ -119,9 +135,48 @@ const parseConfig = (account: ImAccountItem): ImFormState => {
 			discord_allowed_guild_ids: '',
 			discord_allowed_channel_ids: '',
 			discord_allowed_user_ids: '',
+			feishu_app_id: '',
+			feishu_app_secret: '',
+			feishu_verification_token: '',
+			feishu_encrypt_key: '',
 			wechat_bot_token: typeof config.bot_token === 'string' ? config.bot_token : '',
 			wechat_api_base_url:
 				typeof config.api_base_url === 'string' ? config.api_base_url : 'https://ilinkai.weixin.qq.com',
+			session_target_type,
+			session_target_agent_id,
+			session_target_group_id,
+			runtime_audit_mode:
+				runtime.audit_mode === 'limited' || runtime.audit_mode === 'full' ? runtime.audit_mode : 'auto',
+			runtime_disable_map: Array.isArray(runtime.disable_map)
+				? runtime.disable_map.filter((item): item is string => typeof item === 'string')
+				: [],
+			runtime_sub_agent_keys: parseRuntimeSubAgentKeys(runtime),
+			runtime_enable_agent_tool: runtime.enable_agent_tool !== false,
+			runtime_agent_ids: Array.isArray(runtime.agent_ids)
+				? runtime.agent_ids.filter((item): item is string => typeof item === 'string')
+				: []
+		}
+	}
+
+	if (account.platform === 'feishu') {
+		return {
+			id: account.id,
+			platform: 'feishu',
+			account_id: account.account_id,
+			label: account.label || '',
+			enabled: account.enabled,
+			discord_token: '',
+			discord_require_mention: true,
+			discord_allowed_guild_ids: '',
+			discord_allowed_channel_ids: '',
+			discord_allowed_user_ids: '',
+			feishu_app_id: typeof config.app_id === 'string' ? config.app_id : '',
+			feishu_app_secret: typeof config.app_secret === 'string' ? config.app_secret : '',
+			feishu_verification_token:
+				typeof config.verification_token === 'string' ? config.verification_token : '',
+			feishu_encrypt_key: typeof config.encrypt_key === 'string' ? config.encrypt_key : '',
+			wechat_bot_token: '',
+			wechat_api_base_url: 'https://ilinkai.weixin.qq.com',
 			session_target_type,
 			session_target_agent_id,
 			session_target_group_id,
@@ -155,6 +210,10 @@ const parseConfig = (account: ImAccountItem): ImFormState => {
 		discord_allowed_user_ids: formatStringList(
 			Array.isArray(config.allowed_user_ids) ? config.allowed_user_ids : []
 		),
+		feishu_app_id: '',
+		feishu_app_secret: '',
+		feishu_verification_token: '',
+		feishu_encrypt_key: '',
 		wechat_bot_token: '',
 		wechat_api_base_url: 'https://ilinkai.weixin.qq.com',
 		session_target_type,
@@ -205,6 +264,32 @@ const stringifyConfig = (form: ImFormState) => {
 		return JSON.stringify({
 			bot_token: form.wechat_bot_token.trim(),
 			api_base_url: form.wechat_api_base_url.trim() || 'https://ilinkai.weixin.qq.com',
+			session_target,
+			runtime: {
+				audit_mode: form.runtime_audit_mode,
+				disable_map: form.runtime_disable_map,
+				enable_sub_agent: form.runtime_sub_agent_keys.length > 0,
+				sub_agent_keys: form.runtime_sub_agent_keys,
+				enable_agent_tool: form.runtime_enable_agent_tool,
+				agent_ids: form.runtime_agent_ids
+			}
+		})
+	}
+
+	if (form.platform === 'feishu') {
+		if (!form.feishu_app_id.trim()) {
+			throw new Error('Feishu app ID is required')
+		}
+
+		if (!form.feishu_app_secret.trim()) {
+			throw new Error('Feishu app secret is required')
+		}
+
+		return JSON.stringify({
+			app_id: form.feishu_app_id.trim(),
+			app_secret: form.feishu_app_secret.trim(),
+			verification_token: form.feishu_verification_token.trim() || undefined,
+			encrypt_key: form.feishu_encrypt_key.trim() || undefined,
 			session_target,
 			runtime: {
 				audit_mode: form.runtime_audit_mode,

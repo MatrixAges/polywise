@@ -56,6 +56,7 @@
     "@hono/node-server": "catalog:",
     "@hono/trpc-server": "catalog:",
     "@hono/zod-validator": "^0.8.0",
+    "@larksuiteoapi/node-sdk": "^1.64.0",
     "@node-rs/jieba": "^2.0.1",
     "@node-rs/xxhash": "^1.7.6",
     "@openrouter/ai-sdk-provider": "^2.9.0",
@@ -143,7 +144,5 @@
     "picocolors": "^1.1.1",
     "reflect-metadata": "catalog:",
     "type-fest": "catalog:"
-  },
-  "peerDependencies": {},
-  "optionalDependencies": {}
+  }
 }

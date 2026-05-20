@@ -1,4 +1,4 @@
-import { Bot, MessageCircle, QrCode } from 'lucide-react'
+import { Bird, Bot, QrCode } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { TextTabs } from '@/components'
@@ -9,7 +9,8 @@ import type { ImPlatform } from '../model'
 
 const items = [
 	{ key: 'wechat', title: 'WeChat', Icon: QrCode },
-	{ key: 'discord', title: 'Discord', Icon: Bot }
+	{ key: 'discord', title: 'Discord', Icon: Bot },
+	{ key: 'feishu', title: 'Feishu', Icon: Bird }
 ]
 
 const docsMap = {
@@ -20,6 +21,10 @@ const docsMap = {
 	discord: {
 		label: 'Discord ClawBot guide',
 		href: 'https://docs.openclaw.ai/channels/discord'
+	},
+	feishu: {
+		label: 'Feishu Open Platform docs',
+		href: 'https://open.feishu.cn/document/mcp_open_tools/integrating-agents-with-feishu/overview'
 	}
 } as const
 

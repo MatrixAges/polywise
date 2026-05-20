@@ -27,3 +27,16 @@ export const wechat_status = async (c: HonoContext) => {
 
 	return c.json(result, result.ok ? 200 : 400)
 }
+
+export const feishu_events = async (c: HonoContext) => {
+	if (!env.im) return c.json({ ok: false, error: 'IM runtime not initialized' }, 503)
+
+	const raw_body = await c.req.text()
+	const result = await env.im.handleFeishuWebhookEvent(raw_body)
+
+	if (result.challenge) {
+		return c.json({ challenge: result.challenge }, 200)
+	}
+
+	return c.json({ ok: result.ok, ...(result.error ? { error: result.error } : {}) }, result.ok ? 200 : 400)
+}

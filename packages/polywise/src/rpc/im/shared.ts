@@ -1,7 +1,7 @@
 import { boolean, object, string, enum as zod_enum } from 'zod'
 
-export const im_platform_schema = zod_enum(['discord', 'wechat'])
-export type ImPlatformValue = 'discord' | 'wechat'
+export const im_platform_schema = zod_enum(['discord', 'wechat', 'feishu'])
+export type ImPlatformValue = 'discord' | 'wechat' | 'feishu'
 
 export const im_account_schema = object({
 	id: string(),

@@ -7,6 +7,7 @@ const api = new Hono()
 	.get('/session', session.get)
 	.post('/session', session.post)
 	.get('/im/health', im.health)
+	.post('/im/feishu/events', im.feishu_events)
 	.post('/im/wechat/events', im.wechat_events)
 	.post('/im/wechat/status', im.wechat_status)
 

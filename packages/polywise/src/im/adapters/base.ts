@@ -18,5 +18,8 @@ export abstract class BaseImAdapter implements ImAdapter {
 	): ReturnType<NonNullable<ImAdapter['editMessage']>>
 	handleBridgeEvent?(payload: unknown): Promise<Awaited<ReturnType<NonNullable<ImAdapter['handleBridgeEvent']>>>>
 	handleBridgeStatus?(payload: unknown): Promise<void>
+	handleWebhookRequest?(
+		raw_body: string
+	): Promise<Awaited<ReturnType<NonNullable<ImAdapter['handleWebhookRequest']>>>>
 	verifyBridgePayload?(raw_body: string, signature: string | undefined): Promise<boolean>
 }
