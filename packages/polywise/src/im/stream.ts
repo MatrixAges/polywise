@@ -55,7 +55,7 @@ const formatGroupSenderPrefix = (message?: FstMessage) => {
 	}
 
 	if (!sender_role) {
-		return `${sender}`
+		return sender
 	}
 
 	return `${sender}(${sender_role})`
@@ -89,6 +89,7 @@ export const deliverImSessionStream = async (args: {
 	const stream_edit_interval_ms =
 		adapter.platform === 'feishu' ? feishu_stream_edit_interval_ms : im_stream_edit_interval_ms
 	const disable_live_stream = adapter.platform === 'feishu' && session.scope.type === 'group'
+	const delivered_message_ids = new Set<string>()
 	const ordered_part_ids = [] as Array<string>
 	const part_state_by_id = new Map<
 		string,
@@ -118,6 +119,37 @@ export const deliverImSessionStream = async (args: {
 		return part_state
 	}
 
+	const flushCompletedAssistantMessages = async () => {
+		if (!disable_live_stream) {
+			return [] as Array<string>
+		}
+
+		const delivery_texts = [] as Array<string>
+		const assistant_messages = session.ui_messages
+			.slice(baseline_message_count)
+			.filter(message => message.role === 'assistant') as Array<FstMessage>
+
+		for (const message of assistant_messages) {
+			const message_id = String(message.id || '').trim()
+
+			if (!message_id || delivered_message_ids.has(message_id)) {
+				continue
+			}
+
+			const text = formatImDeliveryText(session, message)
+
+			if (!text) {
+				continue
+			}
+
+			await sendFinalMessage(adapter, route, text)
+			delivered_message_ids.add(message_id)
+			delivery_texts.push(text)
+		}
+
+		return delivery_texts
+	}
+
 	while (true) {
 		const { done, value } = await reader.read()
 
@@ -140,7 +172,10 @@ export const deliverImSessionStream = async (args: {
 			await adapter.sendTyping(route).catch(() => null)
 		}
 
-		if (disable_live_stream) continue
+		if (disable_live_stream) {
+			await flushCompletedAssistantMessages()
+			continue
+		}
 		if (!adapter.capabilities.message_edit) continue
 		if (chunk.type !== 'text-delta') continue
 
@@ -180,13 +215,12 @@ export const deliverImSessionStream = async (args: {
 	const final_text = streamed_parts.join('\n\n') || formatImDeliveryText(session, response_message)
 
 	if (disable_live_stream) {
-		const delivery_texts = response_messages
-			.map(message => formatImDeliveryText(session, message))
-			.filter(Boolean)
+		const delivery_texts = await flushCompletedAssistantMessages()
 
 		if (delivery_texts.length > 0) {
-			for (const text of delivery_texts) {
-				await sendFinalMessage(adapter, route, text)
+			return {
+				response_message: response_messages.at(-1) || response_message,
+				final_text: delivery_texts.join('\n\n')
 			}
 		} else {
 			await sendFinalMessage(adapter, route, final_text)
@@ -194,7 +228,7 @@ export const deliverImSessionStream = async (args: {
 
 		return {
 			response_message: response_messages.at(-1) || response_message,
-			final_text: delivery_texts.join('\n\n') || final_text
+			final_text
 		}
 	}
 
