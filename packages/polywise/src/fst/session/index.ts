@@ -79,6 +79,7 @@ export default class Index {
 	plan_stage = 'plan' as 'plan' | 'exec'
 	disable_map = [] as SessionRuntimeConfig['disable_map']
 	enable_sub_agent = true
+	sub_agent_keys = [] as SessionRuntimeConfig['sub_agent_keys']
 	enable_agent_tool = true
 	agent_ids = [] as SessionRuntimeConfig['agent_ids']
 

@@ -23,6 +23,7 @@ export default async (s: Index) => {
 				mode: s.mode,
 				audit_mode: s.audit_mode,
 				enable_sub_agent: s.enable_sub_agent,
+				sub_agent_keys: s.sub_agent_keys,
 				enable_agent_tool: s.enable_agent_tool,
 				agent_ids: s.agent_ids
 			}

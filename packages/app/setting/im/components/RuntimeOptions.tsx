@@ -4,10 +4,12 @@ import { observer } from 'mobx-react-lite'
 import { Badge } from '@/__shadcn__/components/ui/badge'
 import { Button } from '@/__shadcn__/components/ui/button'
 import { Field, FieldContent, FieldDescription, FieldGroup, FieldTitle } from '@/__shadcn__/components/ui/field'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/__shadcn__/components/ui/select'
 import { Separator } from '@/__shadcn__/components/ui/separator'
 import { Switch } from '@/__shadcn__/components/ui/switch'
 
 import { useModel } from '../context'
+import SessionTargetIdentity from './SessionTargetIdentity'
 
 const Index = () => {
 	const x = useModel()
@@ -21,8 +23,8 @@ const Index = () => {
 				<div className='flex flex-col gap-1'>
 					<div className='text-sm font-medium'>Runtime Options</div>
 					<div className='text-std-500 text-sm'>
-						These options are copied into each IM-linked session before the runtime handles a
-						message.
+						These options are copied into the IM-linked session before the runtime handles a
+						message, regardless of whether the target is global, agent, or group.
 					</div>
 				</div>
 			</div>
@@ -38,15 +40,26 @@ const Index = () => {
 			>
 				<Field className='items-center! py-3' orientation='horizontal'>
 					<FieldContent>
-						<FieldTitle className='text-base'>Sub-agent</FieldTitle>
+						<FieldTitle className='text-base'>Audit Mode</FieldTitle>
 						<FieldDescription>
-							Allow the runtime to use the internal `system_tool` delegation flow
+							Control how much runtime access this IM-linked session gets.
 						</FieldDescription>
 					</FieldContent>
-					<Switch
-						checked={x.form.runtime_enable_sub_agent}
-						onCheckedChange={value => x.updateForm('runtime_enable_sub_agent', value)}
-					/>
+					<Select
+						value={x.form.runtime_audit_mode}
+						onValueChange={value =>
+							x.updateForm('runtime_audit_mode', value as typeof x.form.runtime_audit_mode)
+						}
+					>
+						<SelectTrigger className='w-[180px]'>
+							<SelectValue />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value='limited'>Limited</SelectItem>
+							<SelectItem value='auto'>Auto</SelectItem>
+							<SelectItem value='full'>Full</SelectItem>
+						</SelectContent>
+					</Select>
 				</Field>
 				<Separator className='bg-border/80 h-px w-full' />
 				<Field className='items-center! py-3' orientation='horizontal'>
@@ -62,6 +75,47 @@ const Index = () => {
 					/>
 				</Field>
 			</FieldGroup>
+
+			<div className='bg-background/70 rounded-2xl border p-4'>
+				<div className='flex flex-col gap-1'>
+					<div className='text-sm font-medium'>Sub-agents</div>
+					<div className='text-std-500 text-sm'>
+						Enable only the internal helper agents this IM-linked session is allowed to use.
+					</div>
+				</div>
+				<div className='mt-4 grid gap-3 md:grid-cols-2'>
+					{x.runtimeSubAgentItems.map(item => {
+						const selected = x.form.runtime_sub_agent_keys.includes(item.key)
+
+						return (
+							<button
+								type='button'
+								key={item.key}
+								onClick={() => x.toggleRuntimeSubAgent(item.key)}
+								className={`
+								flex flex-col
+								items-start
+								gap-1
+								px-4 py-3
+								rounded-2xl
+								text-left
+								border
+								transition
+								${selected ? 'border-foreground/15 bg-muted/70' : 'bg-muted/35 hover:bg-muted/55 border-transparent'}
+								`}
+							>
+								<div className='text-sm font-medium'>{item.label}</div>
+								<div className='text-std-500 text-sm'>{item.description}</div>
+							</button>
+						)
+					})}
+				</div>
+				<div className='text-std-400 mt-3 text-xs'>
+					{x.form.runtime_sub_agent_keys.length
+						? `${x.form.runtime_sub_agent_keys.length} sub-agents enabled`
+						: 'All internal helper agents are disabled'}
+				</div>
+			</div>
 
 			<div className='bg-background/70 rounded-2xl border p-4'>
 				<div
@@ -92,7 +146,7 @@ const Index = () => {
 					</Button>
 				</div>
 
-				<div className='mt-4 flex flex-wrap gap-2'>
+				<div className='mt-4 grid gap-3 md:grid-cols-2'>
 					{!x.agents.length ? (
 						<Badge variant='outline'>No agents found</Badge>
 					) : (
@@ -102,13 +156,12 @@ const Index = () => {
 							return (
 								<Button
 									type='button'
-									size='sm'
 									variant={selected ? 'default' : 'outline'}
-									className='h-auto min-h-9 px-3 py-2'
+									className='h-auto justify-start px-3 py-3'
 									key={agent.id}
 									onClick={() => x.toggleRuntimeAgent(agent.id)}
 								>
-									<span className='truncate'>{agent.name}</span>
+									<SessionTargetIdentity agent={agent} compact />
 								</Button>
 							)
 						})

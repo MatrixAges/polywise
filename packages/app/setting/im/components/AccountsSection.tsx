@@ -5,6 +5,7 @@ import { Separator } from '@/__shadcn__/components/ui/separator'
 import { Spinner } from '@/__shadcn__/components/ui/spinner'
 
 import { useModel } from '../context'
+import SessionTargetIdentity from './SessionTargetIdentity'
 
 const statusVariant = (status: string, enabled: boolean) => {
 	if (!enabled) return 'outline'
@@ -82,8 +83,43 @@ const Index = () => {
 									</Badge>
 								</div>
 								<div className='text-std-500 text-sm'>
-									{account.platform} · {account.account_id} ·{' '}
-									{x.getSessionTargetSummary(account)}
+									{account.platform} · {account.account_id}
+								</div>
+								<div
+									className='
+											w-full
+											px-3 py-2
+											rounded-2xl
+											bg-background/75
+											border
+										'
+								>
+									<div
+										className='
+												mb-2
+												text-std-400 text-[11px] tracking-[0.16em]
+												uppercase
+											'
+									>
+										{x.getSessionTargetSummary(account)}
+									</div>
+									{(() => {
+										const detail = x.getSessionTargetDetail(account)
+
+										if (detail.type === 'agent') {
+											return <SessionTargetIdentity agent={detail.agent} />
+										}
+
+										if (detail.type === 'group') {
+											return <SessionTargetIdentity group={detail.group} />
+										}
+
+										return (
+											<div className='text-std-400 text-sm'>
+												Global session with shared IM runtime controls
+											</div>
+										)
+									})()}
 								</div>
 								{account.last_error && (
 									<div className='text-xs text-red-500'>{account.last_error}</div>

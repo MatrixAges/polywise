@@ -17,6 +17,7 @@ import { env } from '@core/env'
 import { extract, getComplexitySignal } from '@core/fst/agents/superego'
 import { pushPart, startStream, stopStream } from '@core/fst/agents/supervisor'
 import { createPartDurationTracker, getPartDurationChunk } from '@core/fst/duration'
+import { hasSessionSubAgent } from '@core/fst/session/config/shared'
 import { default_fetch_fallback_chain } from '@core/types'
 import { SessionEventStore } from '@core/utils'
 import { convertToModelMessages, createUIMessageStream, smoothStream, stepCountIs, streamText } from 'ai'
@@ -344,13 +345,19 @@ export default async (s: Index, message: Message) => {
 				recent_message_count: s.model_messages.length
 			})
 
-			s.superego_append_count++
+			if (hasSessionSubAgent(s, 'superego_agent')) {
+				s.superego_append_count++
+			} else {
+				s.superego_append_count = 0
+			}
 
-			if (s.model_messages.length >= model_threshold_value) {
+			if (hasSessionSubAgent(s, 'trim_agent') && s.model_messages.length >= model_threshold_value) {
 				await s.trimMessages()
 			}
 
-			extract(s, complexity_signal)
+			if (hasSessionSubAgent(s, 'superego_agent')) {
+				extract(s, complexity_signal)
+			}
 
 			if (was_running && s.mode === 'plan-exec' && s.plan_stage === 'plan') {
 				s.plan_stage = 'exec'

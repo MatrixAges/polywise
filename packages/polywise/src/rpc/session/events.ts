@@ -45,6 +45,7 @@ export const setConfig = p
 			audit_mode: Enum(['limited', 'auto', 'full']).optional(),
 			disable_map: array(string()).optional(),
 			enable_sub_agent: boolean().optional(),
+			sub_agent_keys: array(string()).optional(),
 			enable_agent_tool: boolean().optional(),
 			agent_ids: array(string()).optional()
 		})
@@ -55,6 +56,7 @@ export const setConfig = p
 			...(input.audit_mode ? { audit_mode: input.audit_mode } : {}),
 			...(input.disable_map ? { disable_map: input.disable_map } : {}),
 			...(typeof input.enable_sub_agent === 'boolean' ? { enable_sub_agent: input.enable_sub_agent } : {}),
+			...(input.sub_agent_keys ? { sub_agent_keys: input.sub_agent_keys } : {}),
 			...(typeof input.enable_agent_tool === 'boolean'
 				? { enable_agent_tool: input.enable_agent_tool }
 				: {}),

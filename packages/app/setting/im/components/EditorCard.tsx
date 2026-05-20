@@ -71,12 +71,8 @@ const Index = () => {
 			</FieldGroup>
 			<Separator className='bg-border/80 h-px w-full' />
 			<SessionTargetOptions />
-			{x.isGlobalSessionTarget ? (
-				<>
-					<Separator className='bg-border/80 h-px w-full' />
-					<RuntimeOptions />
-				</>
-			) : null}
+			<Separator className='bg-border/80 h-px w-full' />
+			<RuntimeOptions />
 			<div className='flex items-center justify-end gap-2'>
 				{x.selectedAccount && (
 					<Badge variant='outline'>Active routes: {x.getActiveRouteCount(x.selectedAccount)}</Badge>

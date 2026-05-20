@@ -1,4 +1,4 @@
-import { configurable_session_tool_items } from '@core/fst/session/config/shared'
+import { configurable_session_tool_items, configurable_sub_agent_items } from '@core/fst/session/config/shared'
 import { makeAutoObservable } from 'mobx'
 import { toast } from 'sonner'
 import { injectable } from 'tsyringe'
@@ -15,6 +15,7 @@ export type ImEditorMode = 'new' | 'edit'
 export type WechatQrLoginStart = Awaited<ReturnType<typeof rpc.im.startWechatQrLogin.mutate>>
 export type WechatQrLoginWait = Awaited<ReturnType<typeof rpc.im.waitWechatQrLogin.query>>
 export type RuntimeToolItem = (typeof configurable_session_tool_items)[number]['key']
+export type RuntimeSubAgentItem = (typeof configurable_sub_agent_items)[number]['key']
 export type ImSessionTargetType = 'global' | 'agent' | 'group'
 
 export type ImFormState = {
@@ -33,8 +34,9 @@ export type ImFormState = {
 	session_target_type: ImSessionTargetType
 	session_target_agent_id: string
 	session_target_group_id: string
+	runtime_audit_mode: 'limited' | 'auto' | 'full'
 	runtime_disable_map: Array<string>
-	runtime_enable_sub_agent: boolean
+	runtime_sub_agent_keys: Array<RuntimeSubAgentItem>
 	runtime_enable_agent_tool: boolean
 	runtime_agent_ids: Array<string>
 }
@@ -54,8 +56,9 @@ const emptyForm = (): ImFormState => ({
 	session_target_type: 'global',
 	session_target_agent_id: '',
 	session_target_group_id: '',
+	runtime_audit_mode: 'auto',
 	runtime_disable_map: [],
-	runtime_enable_sub_agent: true,
+	runtime_sub_agent_keys: configurable_sub_agent_items.map(item => item.key),
 	runtime_enable_agent_tool: true,
 	runtime_agent_ids: []
 })
@@ -67,6 +70,23 @@ const parseStringList = (value: string) =>
 		.filter(Boolean)
 
 const formatStringList = (value?: Array<string>) => (value?.length ? value.join('\n') : '')
+const parseRuntimeSubAgentKeys = (runtime: Record<string, unknown>) => {
+	if (Array.isArray(runtime.sub_agent_keys)) {
+		return Array.from(
+			new Set(
+				runtime.sub_agent_keys.filter((item): item is RuntimeSubAgentItem =>
+					configurable_sub_agent_items.some(target => target.key === item)
+				)
+			)
+		)
+	}
+
+	if (runtime.enable_sub_agent === false) {
+		return [] as Array<RuntimeSubAgentItem>
+	}
+
+	return configurable_sub_agent_items.map(item => item.key)
+}
 
 const parseConfig = (account: ImAccountItem): ImFormState => {
 	const config = account.config_json ? JSON.parse(account.config_json) : {}
@@ -101,10 +121,12 @@ const parseConfig = (account: ImAccountItem): ImFormState => {
 			session_target_type,
 			session_target_agent_id,
 			session_target_group_id,
+			runtime_audit_mode:
+				runtime.audit_mode === 'limited' || runtime.audit_mode === 'full' ? runtime.audit_mode : 'auto',
 			runtime_disable_map: Array.isArray(runtime.disable_map)
 				? runtime.disable_map.filter((item): item is string => typeof item === 'string')
 				: [],
-			runtime_enable_sub_agent: runtime.enable_sub_agent !== false,
+			runtime_sub_agent_keys: parseRuntimeSubAgentKeys(runtime),
 			runtime_enable_agent_tool: runtime.enable_agent_tool !== false,
 			runtime_agent_ids: Array.isArray(runtime.agent_ids)
 				? runtime.agent_ids.filter((item): item is string => typeof item === 'string')
@@ -134,10 +156,12 @@ const parseConfig = (account: ImAccountItem): ImFormState => {
 		session_target_type,
 		session_target_agent_id,
 		session_target_group_id,
+		runtime_audit_mode:
+			runtime.audit_mode === 'limited' || runtime.audit_mode === 'full' ? runtime.audit_mode : 'auto',
 		runtime_disable_map: Array.isArray(runtime.disable_map)
 			? runtime.disable_map.filter((item): item is string => typeof item === 'string')
 			: [],
-		runtime_enable_sub_agent: runtime.enable_sub_agent !== false,
+		runtime_sub_agent_keys: parseRuntimeSubAgentKeys(runtime),
 		runtime_enable_agent_tool: runtime.enable_agent_tool !== false,
 		runtime_agent_ids: Array.isArray(runtime.agent_ids)
 			? runtime.agent_ids.filter((item): item is string => typeof item === 'string')
@@ -179,8 +203,10 @@ const stringifyConfig = (form: ImFormState) => {
 			api_base_url: form.wechat_api_base_url.trim() || 'https://ilinkai.weixin.qq.com',
 			session_target,
 			runtime: {
+				audit_mode: form.runtime_audit_mode,
 				disable_map: form.runtime_disable_map,
-				enable_sub_agent: form.runtime_enable_sub_agent,
+				enable_sub_agent: form.runtime_sub_agent_keys.length > 0,
+				sub_agent_keys: form.runtime_sub_agent_keys,
 				enable_agent_tool: form.runtime_enable_agent_tool,
 				agent_ids: form.runtime_agent_ids
 			}
@@ -199,8 +225,10 @@ const stringifyConfig = (form: ImFormState) => {
 		allowed_user_ids: parseStringList(form.discord_allowed_user_ids),
 		session_target,
 		runtime: {
+			audit_mode: form.runtime_audit_mode,
 			disable_map: form.runtime_disable_map,
-			enable_sub_agent: form.runtime_enable_sub_agent,
+			enable_sub_agent: form.runtime_sub_agent_keys.length > 0,
+			sub_agent_keys: form.runtime_sub_agent_keys,
 			enable_agent_tool: form.runtime_enable_agent_tool,
 			agent_ids: form.runtime_agent_ids
 		}
@@ -262,16 +290,16 @@ export default class Model {
 		return configurable_session_tool_items
 	}
 
+	get runtimeSubAgentItems() {
+		return configurable_sub_agent_items
+	}
+
 	get selectedTargetAgent() {
 		return this.agents.find(item => item.id === this.form.session_target_agent_id) || null
 	}
 
 	get selectedTargetGroup() {
 		return this.groups.find(item => item.id === this.form.session_target_group_id) || null
-	}
-
-	get isGlobalSessionTarget() {
-		return this.form.session_target_type === 'global'
 	}
 
 	async init() {
@@ -316,6 +344,18 @@ export default class Model {
 		}
 
 		this.form.runtime_agent_ids = Array.from(next)
+	}
+
+	toggleRuntimeSubAgent(sub_agent_key: RuntimeSubAgentItem) {
+		const next = new Set(this.form.runtime_sub_agent_keys)
+
+		if (next.has(sub_agent_key)) {
+			next.delete(sub_agent_key)
+		} else {
+			next.add(sub_agent_key)
+		}
+
+		this.form.runtime_sub_agent_keys = Array.from(next)
 	}
 
 	clearWechatQrPollTimer() {
@@ -497,6 +537,20 @@ export default class Model {
 	}
 
 	getSessionTargetSummary(account: ImAccountItem) {
+		const detail = this.getSessionTargetDetail(account)
+
+		if (detail.type === 'agent') {
+			return detail.agent ? `agent · ${detail.agent.name}` : 'agent'
+		}
+
+		if (detail.type === 'group') {
+			return detail.group ? `group · ${detail.group.name}` : 'group'
+		}
+
+		return 'global'
+	}
+
+	getSessionTargetDetail(account: ImAccountItem) {
 		const config = account.config_json ? JSON.parse(account.config_json) : {}
 		const session_target =
 			typeof config.session_target === 'object' && config.session_target
@@ -509,19 +563,27 @@ export default class Model {
 
 		if (type === 'agent') {
 			const agent_id = typeof session_target.agent_id === 'string' ? session_target.agent_id : ''
-			const agent = this.agents.find(item => item.id === agent_id)
-
-			return agent ? `agent · ${agent.name}` : 'agent'
+			return {
+				type,
+				agent: this.agents.find(item => item.id === agent_id) || null,
+				group: null
+			}
 		}
 
 		if (type === 'group') {
 			const group_id = typeof session_target.group_id === 'string' ? session_target.group_id : ''
-			const group = this.groups.find(item => item.id === group_id)
-
-			return group ? `group · ${group.name}` : 'group'
+			return {
+				type,
+				agent: null,
+				group: this.groups.find(item => item.id === group_id) || null
+			}
 		}
 
-		return 'global'
+		return {
+			type: 'global' as const,
+			agent: null,
+			group: null
+		}
 	}
 
 	async load(nextSelectedId?: string) {

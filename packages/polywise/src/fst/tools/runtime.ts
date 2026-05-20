@@ -1,5 +1,6 @@
 import { createSystemTool } from '@core/fst/agents'
 import { loadMcpTools } from '@core/fst/mcp'
+import { hasSessionSubAgent } from '@core/fst/session/config/shared'
 import { getSystemTools } from '@core/utils'
 
 import { createAgentTool } from './agent'
@@ -48,7 +49,8 @@ export const buildSharedRuntimeTools = async (args: BuildSharedRuntimeToolsArgs)
 	const { s, model_tools = {}, extra_tools = {}, transform_tool } = args
 	const is_full_access = s.audit_mode === 'full'
 	const disable_map = new Set(s.disable_map)
-	const has_system_tool = s.audit_mode === 'auto' && s.enable_sub_agent && !disable_map.has('system_tool')
+	const has_system_tool =
+		s.audit_mode === 'auto' && hasSessionSubAgent(s, 'system_agent') && !disable_map.has('system_tool')
 	const has_agent_tool = s.enable_agent_tool && !disable_map.has('agent_tool')
 	const bash_tool = is_full_access ? await createNativeAccessTools(s) : await createBashTool(s)
 	const mcp_tools = await loadMcpTools(s)

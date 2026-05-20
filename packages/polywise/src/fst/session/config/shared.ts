@@ -52,12 +52,37 @@ export const configurable_session_tool_items = [
 ] as const
 
 export type ConfigurableSessionToolKey = (typeof configurable_session_tool_items)[number]['key']
+export const configurable_sub_agent_items = [
+	{
+		key: 'system_agent',
+		label: 'System Agent',
+		description: 'Expose the internal `system_tool` delegation path for runtime execution.'
+	},
+	{
+		key: 'superego_agent',
+		label: 'Superego Agent',
+		description: 'Run the reflection loop that extracts durable lessons from recent conversations.'
+	},
+	{
+		key: 'trim_agent',
+		label: 'Trim Agent',
+		description: 'Compact long message history automatically when the context grows too large.'
+	},
+	{
+		key: 'skill_creator',
+		label: 'Skill Creator',
+		description: 'Allow superego to create or update reusable skills from validated patterns.'
+	}
+] as const
+
+export type SessionSubAgentKey = (typeof configurable_sub_agent_items)[number]['key']
 
 export interface SessionRuntimeConfig {
 	disable_map: Array<string>
 	mode: 'normal' | 'plan' | 'plan-exec'
 	audit_mode: 'limited' | 'auto' | 'full'
 	enable_sub_agent: boolean
+	sub_agent_keys: Array<SessionSubAgentKey>
 	enable_agent_tool: boolean
 	agent_ids: Array<string>
 }
@@ -67,8 +92,27 @@ export const default_session_runtime_config: SessionRuntimeConfig = {
 	mode: 'normal',
 	audit_mode: 'auto',
 	enable_sub_agent: true,
+	sub_agent_keys: configurable_sub_agent_items.map(item => item.key),
 	enable_agent_tool: true,
 	agent_ids: []
+}
+
+const normalizeSubAgentKeys = (input: Partial<SessionRuntimeConfig> | null | undefined): Array<SessionSubAgentKey> => {
+	if (Array.isArray(input?.sub_agent_keys)) {
+		return Array.from(
+			new Set(
+				input.sub_agent_keys.filter((value): value is SessionSubAgentKey =>
+					configurable_sub_agent_items.some(item => item.key === value)
+				)
+			)
+		)
+	}
+
+	if (input?.enable_sub_agent === false) {
+		return []
+	}
+
+	return [...default_session_runtime_config.sub_agent_keys]
 }
 
 export const normalizeSessionRuntimeConfig = (
@@ -105,15 +149,14 @@ export const normalizeSessionRuntimeConfig = (
 		input?.audit_mode === 'limited' || input?.audit_mode === 'auto' || input?.audit_mode === 'full'
 			? input.audit_mode
 			: default_session_runtime_config.audit_mode
+	const sub_agent_keys = normalizeSubAgentKeys(input)
 
 	return {
 		disable_map,
 		mode,
 		audit_mode,
-		enable_sub_agent:
-			typeof input?.enable_sub_agent === 'boolean'
-				? input.enable_sub_agent
-				: default_session_runtime_config.enable_sub_agent,
+		enable_sub_agent: sub_agent_keys.length > 0,
+		sub_agent_keys,
 		enable_agent_tool:
 			typeof input?.enable_agent_tool === 'boolean'
 				? input.enable_agent_tool
@@ -121,3 +164,6 @@ export const normalizeSessionRuntimeConfig = (
 		agent_ids
 	}
 }
+
+export const hasSessionSubAgent = (config: Pick<SessionRuntimeConfig, 'sub_agent_keys'>, key: SessionSubAgentKey) =>
+	config.sub_agent_keys.includes(key)

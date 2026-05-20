@@ -5,6 +5,7 @@ import { Button } from '@/__shadcn__/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/__shadcn__/components/ui/select'
 
 import { useModel } from '../context'
+import SessionTargetIdentity from './SessionTargetIdentity'
 
 const targetItems = [
 	{ key: 'global', label: 'Global Session', Icon: Boxes },
@@ -66,24 +67,28 @@ const Index = () => {
 						<div className='text-sm font-medium'>Owner Agent</div>
 						<div className='text-std-500 text-sm'>
 							Bind each IM route to an agent-owned session. The selected agent profile and
-							tools become the session identity.
+							tools become the session identity. Runtime controls below still apply to the
+							linked session.
 						</div>
 					</div>
 					<Select
 						value={x.form.session_target_agent_id}
-						onValueChange={value => x.updateForm('session_target_agent_id', value)}
+						onValueChange={value => x.updateForm('session_target_agent_id', value ?? '')}
 					>
-						<SelectTrigger>
+						<SelectTrigger className='w-[180px]!'>
 							<SelectValue placeholder='Select an agent' />
 						</SelectTrigger>
 						<SelectContent>
 							{x.agents.map(agent => (
-								<SelectItem value={agent.id} key={agent.id}>
-									{agent.name}
+								<SelectItem value={agent.id} key={agent.id} className='py-3'>
+									<SessionTargetIdentity agent={agent} compact />
 								</SelectItem>
 							))}
 						</SelectContent>
 					</Select>
+					<div className='mt-3'>
+						<SessionTargetIdentity agent={x.selectedTargetAgent} />
+					</div>
 				</div>
 			) : null}
 
@@ -93,24 +98,27 @@ const Index = () => {
 						<div className='text-sm font-medium'>Group</div>
 						<div className='text-std-500 text-sm'>
 							Bind each IM route to a group session so the group runtime handles the
-							conversation.
+							conversation. Runtime controls below still apply to the linked session.
 						</div>
 					</div>
 					<Select
 						value={x.form.session_target_group_id}
-						onValueChange={value => x.updateForm('session_target_group_id', value)}
+						onValueChange={value => x.updateForm('session_target_group_id', value ?? '')}
 					>
-						<SelectTrigger>
+						<SelectTrigger className='w-[240px]!'>
 							<SelectValue placeholder='Select a group' />
 						</SelectTrigger>
 						<SelectContent>
 							{x.groups.map(group => (
-								<SelectItem value={group.id} key={group.id}>
-									{group.name}
+								<SelectItem value={group.id} key={group.id} className='py-3'>
+									<SessionTargetIdentity group={group} compact />
 								</SelectItem>
 							))}
 						</SelectContent>
 					</Select>
+					<div className='mt-3'>
+						<SessionTargetIdentity group={x.selectedTargetGroup} />
+					</div>
 				</div>
 			) : null}
 		</div>

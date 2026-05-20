@@ -24,6 +24,7 @@ export default async (s: Index, is_cron?: boolean, title?: string) => {
 	s.mode = session_config.mode
 	s.audit_mode = session_config.audit_mode
 	s.enable_sub_agent = session_config.enable_sub_agent
+	s.sub_agent_keys = session_config.sub_agent_keys
 	s.enable_agent_tool = session_config.enable_agent_tool
 	s.agent_ids = session_config.agent_ids
 

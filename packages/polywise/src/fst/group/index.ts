@@ -192,6 +192,7 @@ export default class Group extends Session {
 				mode: this.mode,
 				audit_mode: this.audit_mode,
 				enable_sub_agent: this.enable_sub_agent,
+				sub_agent_keys: this.sub_agent_keys,
 				enable_agent_tool: this.enable_agent_tool,
 				agent_ids: this.agent_ids
 			},

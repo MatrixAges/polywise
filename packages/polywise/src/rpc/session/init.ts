@@ -39,6 +39,7 @@ export default p.input(input_type).subscription(async function* (args) {
 		audit_mode?: 'limited' | 'auto' | 'full'
 		disable_map?: Array<string>
 		enable_sub_agent?: boolean
+		sub_agent_keys?: Array<string>
 		enable_agent_tool?: boolean
 		agent_ids?: Array<string>
 	}) => {
@@ -47,6 +48,7 @@ export default p.input(input_type).subscription(async function* (args) {
 			...(patch.audit_mode ? { audit_mode: patch.audit_mode } : {}),
 			...(patch.disable_map ? { disable_map: patch.disable_map } : {}),
 			...(typeof patch.enable_sub_agent === 'boolean' ? { enable_sub_agent: patch.enable_sub_agent } : {}),
+			...(patch.sub_agent_keys ? { sub_agent_keys: patch.sub_agent_keys as any } : {}),
 			...(typeof patch.enable_agent_tool === 'boolean'
 				? { enable_agent_tool: patch.enable_agent_tool }
 				: {}),

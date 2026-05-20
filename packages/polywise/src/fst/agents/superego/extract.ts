@@ -1,5 +1,6 @@
 import path from 'path'
 import { app } from '@core/consts'
+import { hasSessionSubAgent } from '@core/fst/session/config/shared'
 import { convertToModelMessages } from 'ai'
 import dayjs from 'dayjs'
 import fs from 'fs-extra'
@@ -224,51 +225,54 @@ export default async (s: Session, complexity_signal?: ComplexitySignal) => {
 				max_count: 5
 			})
 
-			skill_draft = await createSkillDraft({
-				session: s,
-				conversation,
-				complexity_signal,
-				failure_telemetry,
-				related_failures,
-				related_skill_name,
-				related_skill_score,
-				related_skill,
-				patch_priority: failure_telemetry?.suggestion.level || 'observe',
-				existing_skill_preferred_action: failure_telemetry?.suggestion.suggested_action || 'observe'
-			})
-
-			if (skill_draft.action === 'create' && skill_draft.name && skill_draft.content) {
-				await executeSkillTool(s, {
-					action: 'create',
-					build_name: skill_draft.name,
-					build_description: skill_draft.description,
-					build_content: skill_draft.content
+			if (hasSessionSubAgent(s, 'skill_creator')) {
+				skill_draft = await createSkillDraft({
+					session: s,
+					conversation,
+					complexity_signal,
+					failure_telemetry,
+					related_failures,
+					related_skill_name,
+					related_skill_score,
+					related_skill,
+					patch_priority: failure_telemetry?.suggestion.level || 'observe',
+					existing_skill_preferred_action:
+						failure_telemetry?.suggestion.suggested_action || 'observe'
 				})
 
-				base_result.actions.push({
-					tool: 'skill_tool',
-					action: 'create',
-					target: skill_draft.name
-				})
-			}
+				if (skill_draft.action === 'create' && skill_draft.name && skill_draft.content) {
+					await executeSkillTool(s, {
+						action: 'create',
+						build_name: skill_draft.name,
+						build_description: skill_draft.description,
+						build_content: skill_draft.content
+					})
 
-			if (
-				skill_draft.action === 'update' &&
-				(related_skill_name || skill_draft.name) &&
-				skill_draft.content
-			) {
-				await executeSkillTool(s, {
-					action: 'update',
-					skill_name: related_skill_name || skill_draft.name,
-					build_description: skill_draft.description,
-					build_content: skill_draft.content
-				})
+					base_result.actions.push({
+						tool: 'skill_tool',
+						action: 'create',
+						target: skill_draft.name
+					})
+				}
 
-				base_result.actions.push({
-					tool: 'skill_tool',
-					action: 'update',
-					target: related_skill_name || skill_draft.name
-				})
+				if (
+					skill_draft.action === 'update' &&
+					(related_skill_name || skill_draft.name) &&
+					skill_draft.content
+				) {
+					await executeSkillTool(s, {
+						action: 'update',
+						skill_name: related_skill_name || skill_draft.name,
+						build_description: skill_draft.description,
+						build_content: skill_draft.content
+					})
+
+					base_result.actions.push({
+						tool: 'skill_tool',
+						action: 'update',
+						target: related_skill_name || skill_draft.name
+					})
+				}
 			}
 		}
 

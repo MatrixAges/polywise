@@ -1,3 +1,5 @@
+import { extract } from '@core/fst/agents/superego'
+import { hasSessionSubAgent } from '@core/fst/session/config/shared'
 import { SessionEventStore } from '@core/utils'
 import { convertToModelMessages, createUIMessageStream } from 'ai'
 import { getId } from 'stk/utils'
@@ -352,7 +354,14 @@ export default async (s: Group, message: Message) => {
 				await s.setState()
 				await s.stop()
 
-				if (s.model_messages.length >= model_threshold_value) {
+				if (hasSessionSubAgent(s, 'superego_agent')) {
+					s.superego_append_count++
+					void extract(s)
+				} else {
+					s.superego_append_count = 0
+				}
+
+				if (hasSessionSubAgent(s, 'trim_agent') && s.model_messages.length >= model_threshold_value) {
 					try {
 						await s.trimMessages()
 					} catch {}
