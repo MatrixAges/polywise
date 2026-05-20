@@ -11,8 +11,8 @@ import type { RPCInput } from '@/types'
 type BookmarkForType = Extract<RPCInput['save']['for'], 'memory' | 'wiki' | 'user'>
 
 const for_type_items: Array<{ value: BookmarkForType; label: string }> = [
-	{ value: 'memory', label: 'Memory' },
 	{ value: 'wiki', label: 'Wiki' },
+	{ value: 'memory', label: 'Memory' },
 	{ value: 'user', label: 'User' }
 ]
 

@@ -31,7 +31,12 @@ interface DiscordChannelInfo {
 	thread_metadata?: unknown
 }
 
-const channel_cache_ttl_ms = 5 * 60 * 1000
+interface DiscordGuildInfo {
+	id: string
+	name?: string
+}
+
+const discord_info_cache_ttl_ms = 5 * 60 * 1000
 
 export default class DiscordAdapter extends BaseImAdapter {
 	platform = 'discord' as const
@@ -51,6 +56,7 @@ export default class DiscordAdapter extends BaseImAdapter {
 	bot_user_id = ''
 	opening_promise: Promise<void> | null = null
 	channel_cache = new Map<string, { value: DiscordChannelInfo; expires_at: number }>()
+	guild_cache = new Map<string, { value: DiscordGuildInfo; expires_at: number }>()
 	emit_inbound: ((event: ImInboundEvent) => Promise<void>) | null = null
 
 	constructor(account: ImAccount) {
@@ -275,7 +281,25 @@ export default class DiscordAdapter extends BaseImAdapter {
 
 		this.channel_cache.set(channel_id, {
 			value: body,
-			expires_at: Date.now() + channel_cache_ttl_ms
+			expires_at: Date.now() + discord_info_cache_ttl_ms
+		})
+
+		return body
+	}
+
+	private async getGuildInfo(guild_id: string) {
+		const cached = this.guild_cache.get(guild_id)
+
+		if (cached && cached.expires_at > Date.now()) {
+			return cached.value
+		}
+
+		const response = await this.api(`/guilds/${guild_id}`, { method: 'GET' })
+		const body = (await response.json()) as DiscordGuildInfo
+
+		this.guild_cache.set(guild_id, {
+			value: body,
+			expires_at: Date.now() + discord_info_cache_ttl_ms
 		})
 
 		return body
@@ -331,14 +355,24 @@ export default class DiscordAdapter extends BaseImAdapter {
 		if (!should_handle) return
 
 		const info = in_dm ? null : await this.getChannelInfo(channel_id)
+		const guild_info =
+			in_dm || typeof message.guild_id !== 'string'
+				? null
+				: await this.getGuildInfo(message.guild_id).catch(() => null)
 		const is_thread = Boolean(info?.parent_id) || [10, 11, 12].includes(Number(info?.type || 0))
+		const parent_info =
+			!is_thread || !info?.parent_id
+				? null
+				: await this.getChannelInfo(String(info.parent_id)).catch(() => null)
 		const route = {
 			platform: 'discord' as const,
 			account_id: this.account_id,
 			chat_type: in_dm ? ('dm' as const) : is_thread ? ('thread' as const) : ('channel' as const),
 			chat_id: channel_id,
 			parent_chat_id: is_thread ? String(info?.parent_id || '') || undefined : undefined,
+			parent_title: typeof parent_info?.name === 'string' ? parent_info.name : undefined,
 			guild_id: typeof message.guild_id === 'string' ? message.guild_id : undefined,
+			guild_name: typeof guild_info?.name === 'string' ? guild_info.name : undefined,
 			thread_id: is_thread ? channel_id : undefined,
 			title: typeof info?.name === 'string' ? info.name : undefined
 		}

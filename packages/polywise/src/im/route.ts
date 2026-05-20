@@ -2,6 +2,50 @@ import type { ImInboundEvent, ImRoute } from './types'
 
 export const getAdapterKey = (platform: string, account_id: string) => `${platform}:${account_id}`
 
+const getDiscordGuildLabel = (route: ImRoute) => {
+	return route.guild_name?.trim() || route.guild_id?.trim() || 'Discord'
+}
+
+const getDiscordChannelLabel = (route: ImRoute) => {
+	return route.title?.trim() || route.chat_id
+}
+
+const getDiscordParentLabel = (route: ImRoute) => {
+	return route.parent_title?.trim() || route.parent_chat_id?.trim() || 'unknown'
+}
+
+const buildDiscordHierarchicalTitle = (route: ImRoute) => {
+	if (route.chat_type === 'thread') {
+		return [getDiscordGuildLabel(route), getDiscordParentLabel(route), getDiscordChannelLabel(route)].join(': ')
+	}
+
+	return [getDiscordGuildLabel(route), getDiscordChannelLabel(route)].join(': ')
+}
+
+const getLegacyDiscordSessionTitles = (route: ImRoute) => {
+	if (route.chat_type === 'dm') {
+		return [] as Array<string>
+	}
+
+	const titles = [] as Array<string>
+
+	if (route.title?.trim()) {
+		titles.push(route.title.trim())
+	}
+
+	if (route.chat_type === 'thread') {
+		titles.push(`Discord Thread ${route.thread_id || route.chat_id}`)
+	} else {
+		titles.push(`Discord Channel ${route.chat_id}`)
+	}
+
+	titles.push(
+		`${getDiscordGuildLabel(route)} · ${route.chat_type === 'thread' ? route.thread_id || route.chat_id : route.chat_id}`
+	)
+
+	return titles
+}
+
 export const buildImRouteKey = (route: ImRoute) => {
 	if (route.platform === 'discord') {
 		if (route.chat_type === 'dm') {
@@ -38,12 +82,22 @@ export const buildImSessionTitle = (event: ImInboundEvent) => {
 			return `Discord DM ${sender}`
 		}
 
-		if (event.route.chat_type === 'thread') {
-			return event.route.title || `Discord Thread ${event.route.thread_id || event.route.chat_id}`
-		}
-
-		return event.route.title || `Discord Channel ${event.route.chat_id}`
+		return buildDiscordHierarchicalTitle(event.route)
 	}
 
 	return `WeChat DM ${sender}`
+}
+
+export const shouldRefreshImSessionTitle = (current_title: string, event: ImInboundEvent) => {
+	if (event.platform !== 'discord') {
+		return false
+	}
+
+	const next_title = buildImSessionTitle(event)
+
+	if (current_title === next_title) {
+		return false
+	}
+
+	return getLegacyDiscordSessionTitles(event.route).includes(current_title)
 }

@@ -11,7 +11,7 @@ import {
 import { connectSession, GroupStore, SessionStore } from '@core/utils'
 import { and, eq } from 'drizzle-orm'
 
-import { buildImRouteKey, buildImSessionTitle } from './route'
+import { buildImRouteKey, buildImSessionTitle, shouldRefreshImSessionTitle } from './route'
 import { getImAccountRuntimeConfig, getImAccountSessionTargetConfig } from './runtimeConfig'
 
 import type { SessionInsert } from '@core/db'
@@ -75,12 +75,13 @@ const syncImSessionBindingConfig = async (binding: ImSessionBinding, event: ImIn
 
 export const ensureImSessionBinding = async (event: ImInboundEvent): Promise<ImSessionBinding> => {
 	const route_key = buildImRouteKey(event.route)
+	const next_title = buildImSessionTitle(event)
 	let row = await getSession(eq(session.key, route_key))
 
 	if (!row) {
 		try {
 			row = await addSession({
-				title: buildImSessionTitle(event),
+				title: next_title,
 				key: route_key,
 				is_im: true
 			} satisfies SessionInsert)
@@ -100,6 +101,12 @@ export const ensureImSessionBinding = async (event: ImInboundEvent): Promise<ImS
 		})
 	}
 
+	if (shouldRefreshImSessionTitle(row.title, event)) {
+		row = await setSession(eq(session.id, row.id), {
+			title: next_title
+		})
+	}
+
 	const target = await connectImSession(row.id, row.title)
 	const binding = {
 		route_key,
@@ -115,13 +122,14 @@ export const ensureImSessionBinding = async (event: ImInboundEvent): Promise<ImS
 export const resetImSessionBinding = async (event: ImInboundEvent): Promise<ImSessionBinding> => {
 	const route_key = buildImRouteKey(event.route)
 	const current = await getSession(eq(session.key, route_key))
+	const next_title = buildImSessionTitle(event)
 
 	if (current) {
 		await setSession(eq(session.id, current.id), { key: null })
 	}
 
 	const next = await addSession({
-		title: current?.title || buildImSessionTitle(event),
+		title: current?.title && !shouldRefreshImSessionTitle(current.title, event) ? current.title : next_title,
 		key: route_key,
 		is_im: true
 	} satisfies SessionInsert)

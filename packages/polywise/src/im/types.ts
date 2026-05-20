@@ -10,7 +10,9 @@ export interface ImRoute {
 	chat_type: ImChatType
 	chat_id: string
 	parent_chat_id?: string
+	parent_title?: string
 	guild_id?: string
+	guild_name?: string
 	thread_id?: string
 	title?: string
 }
