@@ -9,6 +9,7 @@ export type ImAccountItem = ImAccountsResponse['accounts'][number]
 export type ImHealth = Awaited<ReturnType<typeof rpc.im.health.query>>
 export type ImPlatform = ImAccountItem['platform']
 export type ImEditorMode = 'new' | 'edit'
+export type WechatClawbotStatus = Awaited<ReturnType<typeof rpc.im.wechatClawbotStatus.query>>
 
 export type ImFormState = {
 	id?: string
@@ -128,6 +129,9 @@ export default class Model {
 	saving = false
 	reloading = false
 	removing = false
+	wechat_clawbot_status = null as WechatClawbotStatus | null
+	wechat_clawbot_loading = false
+	wechat_clawbot_installing = false
 
 	constructor() {
 		makeAutoObservable(this, {}, { autoBind: true })
@@ -146,13 +150,46 @@ export default class Model {
 	}
 
 	async init() {
-		await this.load()
+		await Promise.all([this.load(), this.loadWechatClawbotStatus()])
 	}
 
 	deinit() {}
 
 	updateForm<K extends keyof ImFormState>(key: K, value: ImFormState[K]) {
 		this.form[key] = value
+	}
+
+	async loadWechatClawbotStatus() {
+		this.wechat_clawbot_loading = true
+
+		try {
+			this.wechat_clawbot_status = await rpc.im.wechatClawbotStatus.query()
+		} catch (error) {
+			this.wechat_clawbot_status = {
+				status: 'warning',
+				openclaw_installed: false,
+				plugin_installed: false,
+				ready: false,
+				detail: error instanceof Error ? error.message : String(error),
+				install_command: 'npx -y @tencent-weixin/openclaw-weixin-cli@latest install'
+			}
+		} finally {
+			this.wechat_clawbot_loading = false
+		}
+	}
+
+	async installWechatClawbot() {
+		this.wechat_clawbot_installing = true
+
+		try {
+			const result = await rpc.im.installWechatClawbot.mutate()
+			await this.loadWechatClawbotStatus()
+			toast.success(result.ready ? 'WeChat ClawBot is ready' : 'WeChat ClawBot install finished')
+		} catch (error) {
+			toast.error(error instanceof Error ? error.message : String(error))
+		} finally {
+			this.wechat_clawbot_installing = false
+		}
 	}
 
 	getActiveRouteCount(account: ImAccountItem) {
