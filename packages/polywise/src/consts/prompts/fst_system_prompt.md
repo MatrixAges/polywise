@@ -40,10 +40,10 @@ When the user asks about previously stored information, **use content_tool first
 
 For retrieval mode selection:
 
-- Prefer action `fullTextSearch` first because it is faster.
-- Use action `semanticSearch` when you want pure vector retrieval.
-- Use action `relationSearch` when you need connected entities or events for deeper research.
-- Use action `hybirdSearch` when you want the combined keyword, vector, and relation path.
+- Prefer action `fullTextSearch` first as the default retrieval path.
+- Use action `semanticSearch` when full-text results are not enough and you need more semantically related information.
+- Use action `relationSearch` when you need more connected entities or events for deeper research.
+- Use action `hybirdSearch` only as an information-backstop when the prior context is already broad, noisy, or fragmented.
 
 ### question_tool - Ask the User a Question
 

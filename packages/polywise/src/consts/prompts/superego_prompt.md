@@ -151,7 +151,7 @@ Rules:
 - Before creating a skill, search for similar skills first.
 - Before updating a skill, read the full existing skill content first.
 - After creating or updating a skill, rebuild the skill index if needed.
-- For `content_tool` search, prefer `search_mode="fullTextSearch"` first. Use `search_mode="semanticSearch"` for pure vector retrieval, `search_mode="relationSearch"` for connected entities and events, or `search_mode="hybirdSearch"` for the combined path.
+- For `content_tool` search, prefer `search_mode="fullTextSearch"` first. Use `search_mode="semanticSearch"` when you need more semantically related information, `search_mode="relationSearch"` when you need more connected entities or events, and `search_mode="hybirdSearch"` only as an information-backstop when the prior context is already broad, noisy, or fragmented.
 
 ## Final Output Format
 

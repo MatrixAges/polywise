@@ -51,13 +51,14 @@ const buildClientVersion = (version: string) => {
 }
 
 const normalizeBaseUrl = (value: string) => (value.endsWith('/') ? value : `${value}/`)
+const buildWechatUin = () => Buffer.from(String(randomBytes(4).readUInt32BE(0)), 'utf8').toString('base64')
 
 const buildWechatHeaders = (token?: string) => {
 	const headers: Record<string, string> = {
 		'content-type': 'application/json',
 		'iLink-App-Id': ilink_app_id,
 		'iLink-App-ClientVersion': String(buildClientVersion(wechat_clawbot_channel_version)),
-		'X-WECHAT-UIN': randomBytes(4).toString('base64')
+		'X-WECHAT-UIN': buildWechatUin()
 	}
 
 	if (token?.trim()) {

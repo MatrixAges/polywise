@@ -6,6 +6,15 @@ import { ChevronDownIcon, CheckIcon, ChevronUpIcon } from "lucide-react"
 
 const Select = SelectPrimitive.Root
 
+function hasSelectGroupChild(children: React.ReactNode): boolean {
+  return React.Children.toArray(children).some(child => {
+    if (!React.isValidElement<{ children?: React.ReactNode }>(child)) return false
+    if (child.type === SelectGroup || child.type === SelectPrimitive.Group) return true
+    if (child.type === React.Fragment) return hasSelectGroupChild(child.props.children)
+    return false
+  })
+}
+
 function SelectGroup({ className, ...props }: SelectPrimitive.Group.Props) {
   return (
     <SelectPrimitive.Group
@@ -76,6 +85,8 @@ function SelectContent({
     SelectPrimitive.Positioner.Props,
     "align" | "alignOffset" | "side" | "sideOffset" | "alignItemWithTrigger"
   >) {
+  const hasGroupedChildren = hasSelectGroupChild(children)
+
   return (
     <SelectPrimitive.Portal>
       <SelectPrimitive.Positioner
@@ -93,7 +104,9 @@ function SelectContent({
           {...props}
         >
           <SelectScrollUpButton />
-          <SelectPrimitive.List>{children}</SelectPrimitive.List>
+          <SelectPrimitive.List className={cn(!hasGroupedChildren && "p-1")}>
+            {children}
+          </SelectPrimitive.List>
           <SelectScrollDownButton />
         </SelectPrimitive.Popup>
       </SelectPrimitive.Positioner>

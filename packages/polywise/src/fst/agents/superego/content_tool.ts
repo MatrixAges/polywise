@@ -22,7 +22,7 @@ const inputSchema = object({
 	search_mode: Enum(SEARCH_MODES)
 		.optional()
 		.describe(
-			'[Optional for search] Prefer fullTextSearch first; use semanticSearch for pure vector retrieval, relationSearch for graph expansion, or hybirdSearch for the combined path.'
+			'[Optional for search] Prefer fullTextSearch first; use semanticSearch when you need more semantically related information, relationSearch when you need more associated entities or events, and hybirdSearch only as a fallback when the context is already broad, noisy, or fragmented.'
 		),
 	content: string().optional().describe('[Required for add/update] The content to store or update'),
 	query: string().optional().describe('[Required for search] Search query to find existing content'),
@@ -48,7 +48,7 @@ export const createContentTool = (scope: SessionScope) => {
 			'Manage durable content for the learning loop using four categories: memory, wiki, linkcase, and user.',
 			'Use "for" to choose the category for add/search actions.',
 			'For add, provide a concise "title" that summarizes the content being stored.',
-			'For search, prefer "fullTextSearch" first because it is faster, "semanticSearch" for pure vector retrieval, "relationSearch" for connected entities and events, and "hybirdSearch" for the combined path.',
+			'For search, use "fullTextSearch" first, then "semanticSearch" or "relationSearch" when more related context is needed; reserve "hybirdSearch" for information-backstop cases where the prior context is already broad, noisy, or fragmented.',
 			'Use update/remove with article_id when an existing entry should be corrected or deleted.'
 		].join('\n'),
 		inputSchema,

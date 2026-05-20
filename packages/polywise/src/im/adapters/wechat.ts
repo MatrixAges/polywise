@@ -27,8 +27,10 @@ interface WechatAdapterConfig {
 
 interface WechatClawbotEnvelope<T> {
 	ret?: number
+	errcode?: number
 	errmsg?: string
 	data?: T
+	[key: string]: unknown
 }
 
 interface WechatClawbotMessageItem {
@@ -43,12 +45,15 @@ interface WechatClawbotInboundMessage {
 	from_user_id?: string
 	from_user_nick?: string
 	msg_id?: string
+	message_id?: string | number
 	client_id?: string
 	context_token?: string
 	message_type?: number
 	message_state?: number
 	recv_time?: number
 	create_time?: number
+	create_time_ms?: number
+	update_time_ms?: number
 	item_list?: Array<WechatClawbotMessageItem>
 }
 
@@ -61,7 +66,7 @@ interface WechatPeerRuntimeState {
 
 const getSignature = (secret: string, raw_body: string) => createHmac('sha256', secret).update(raw_body).digest('hex')
 
-const buildWechatUin = () => randomBytes(4).toString('base64')
+const buildWechatUin = () => Buffer.from(String(randomBytes(4).readUInt32BE(0)), 'utf8').toString('base64')
 
 const extractText = (items: Array<WechatClawbotMessageItem> | undefined) =>
 	(items || [])
@@ -174,6 +179,10 @@ export default class WechatAdapter extends BaseImAdapter {
 			throw new Error(`WeChat ClawBot token missing for account ${this.account_id}`)
 		}
 
+		const payload =
+			'base_info' in body
+				? body
+				: { ...body, base_info: { channel_version: wechat_clawbot_channel_version } }
 		const response = await fetch(new URL(path, this.apiBaseUrl), {
 			method: 'POST',
 			headers: {
@@ -182,7 +191,7 @@ export default class WechatAdapter extends BaseImAdapter {
 				Authorization: `Bearer ${token}`,
 				'X-WECHAT-UIN': this.wechat_uin
 			},
-			body: JSON.stringify(body),
+			body: JSON.stringify(payload),
 			signal
 		})
 
@@ -196,7 +205,15 @@ export default class WechatAdapter extends BaseImAdapter {
 			throw new Error(json.errmsg || `WeChat ClawBot API returned ${json.ret}`)
 		}
 
-		return (json.data ?? {}) as T
+		if (typeof json.errcode === 'number' && json.errcode !== 0) {
+			throw new Error(json.errmsg || `WeChat ClawBot API returned errcode ${json.errcode}`)
+		}
+
+		if (json.data !== undefined) {
+			return json.data as T
+		}
+
+		return json as T
 	}
 
 	private async getPeerRuntimeState(route: ImRoute) {
@@ -280,9 +297,13 @@ export default class WechatAdapter extends BaseImAdapter {
 			last_message_id:
 				typeof message.msg_id === 'string'
 					? message.msg_id
-					: typeof message.client_id === 'string'
-						? message.client_id
-						: undefined
+					: typeof message.message_id === 'number'
+						? String(message.message_id)
+						: typeof message.message_id === 'string'
+							? message.message_id
+							: typeof message.client_id === 'string'
+								? message.client_id
+								: undefined
 		})
 
 		return {
@@ -297,18 +318,26 @@ export default class WechatAdapter extends BaseImAdapter {
 				id:
 					typeof message.msg_id === 'string'
 						? message.msg_id
-						: typeof message.client_id === 'string'
-							? message.client_id
-							: peer_id,
+						: typeof message.message_id === 'number'
+							? String(message.message_id)
+							: typeof message.message_id === 'string'
+								? message.message_id
+								: typeof message.client_id === 'string'
+									? message.client_id
+									: peer_id,
 				text,
 				raw: message
 			},
 			received_at:
 				typeof message.recv_time === 'number'
 					? message.recv_time
-					: typeof message.create_time === 'number'
-						? message.create_time
-						: Date.now()
+					: typeof message.create_time_ms === 'number'
+						? message.create_time_ms
+						: typeof message.update_time_ms === 'number'
+							? message.update_time_ms
+							: typeof message.create_time === 'number'
+								? message.create_time
+								: Date.now()
 		}
 	}
 
@@ -388,6 +417,7 @@ export default class WechatAdapter extends BaseImAdapter {
 
 		const response = await this.callClawbotApi<{ msg_id?: string }>('sendmessage', {
 			msg: {
+				from_user_id: '',
 				to_user_id: args.route.chat_id,
 				context_token: state.context_token,
 				client_id,

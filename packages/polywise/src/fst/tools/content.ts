@@ -12,7 +12,7 @@ const contentForSchema = Enum(CONTENT_FOR_TYPES)
 
 const inputSchema = object({
 	action: Enum(QUERY_MODES).describe(
-		'The action to perform. save: store a new content entry. fullTextSearch: run faster direct keyword/phrase matching. semanticSearch: run pure vector retrieval. relationSearch: expand graph-related entities and events for deep research. hybirdSearch: combine keyword, vector, and relation retrieval.'
+		'The action to perform. save: store a new content entry. fullTextSearch: run the preferred first-pass keyword/phrase lookup. semanticSearch: expand retrieval when you need semantically related content beyond direct term matches. relationSearch: expand graph-related entities and events when you need deeper associations. hybirdSearch: use only as a fallback when the context is already broad, noisy, or fragmented and you need a catch-all retrieval pass.'
 	),
 	for: contentForSchema
 		.optional()
@@ -46,10 +46,10 @@ export const createContentTool = (s: Session) => {
 		description: [
 			'Manage stored content across four categories: memory (episodic memory), wiki (knowledge), linkcase (knowledge sources), and user (user or agent-authored content).',
 			'Use action "save" to store a new content entry and set the required "for" category and "title".',
-			'Use action "fullTextSearch" first because it is faster and works well for direct keyword or phrase matching.',
-			'Use action "semanticSearch" when you want pure vector retrieval without keyword or relation expansion.',
-			'Use action "relationSearch" to explore entities and events connected to the query target for deeper research.',
-			'Use action "hybirdSearch" when you want the broadest recall by combining keyword, vector, and relation retrieval.',
+			'Use action "fullTextSearch" first for the initial lookup because it is the preferred direct match path.',
+			'Use action "semanticSearch" when full-text hits are insufficient and you need semantically related information.',
+			'Use action "relationSearch" when you need more associated entities, events, or graph-connected context.',
+			'Use action "hybirdSearch" only as an information-backstop when the prior context is already abundant, messy, or fragmented and you need a catch-all retrieval pass.',
 			'Use "for_types" to narrow retrieval to specific categories, or omit it to search across all stored content.',
 			'Search results are ranked by relevance, with recency used as a secondary signal.'
 		].join('\n'),
