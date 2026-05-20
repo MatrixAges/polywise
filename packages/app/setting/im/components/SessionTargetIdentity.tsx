@@ -17,9 +17,10 @@ const Index = ({ agent, group, compact = false }: IProps) => {
 		return (
 			<div
 				className='
+					overflow-hidden
 					flex
 					items-center justify-start
-					w-full
+					w-full max-w-full
 					min-w-0
 					gap-3
 					text-left
@@ -33,14 +34,34 @@ const Index = ({ agent, group, compact = false }: IProps) => {
 				/>
 				<div
 					className='
+						overflow-hidden
 						flex flex-1 flex-col
 						items-start
+						w-full max-w-full
 						min-w-0
 						text-left
 					'
 				>
-					<div className='truncate text-sm font-medium'>{agent.name}</div>
-					<div className='text-std-500 truncate text-xs'>{agent.role || 'No role'}</div>
+					<div
+						className='
+							w-full
+							min-w-0
+							text-sm font-medium
+							truncate
+						'
+					>
+						{agent.name}
+					</div>
+					<div
+						className='
+							w-full
+							min-w-0
+							text-std-500 text-xs
+							truncate
+						'
+					>
+						{agent.role || 'No role'}
+					</div>
 				</div>
 			</div>
 		)
@@ -50,9 +71,10 @@ const Index = ({ agent, group, compact = false }: IProps) => {
 		return (
 			<div
 				className='
+					overflow-hidden
 					flex
 					items-center justify-start
-					w-full
+					w-full max-w-full
 					min-w-0
 					gap-3
 					text-left
@@ -61,14 +83,32 @@ const Index = ({ agent, group, compact = false }: IProps) => {
 				<EntityAvatar name={group.name} photo={group_photo ?? null} avatar={null} size={avatar_size} />
 				<div
 					className='
+						overflow-hidden
 						flex flex-1 flex-col
 						items-start
+						w-full max-w-full
 						min-w-0
 						text-left
 					'
 				>
-					<div className='truncate text-sm font-medium'>{group.name}</div>
-					<div className='text-std-500 truncate text-xs'>
+					<div
+						className='
+							w-full
+							min-w-0
+							text-sm font-medium
+							truncate
+						'
+					>
+						{group.name}
+					</div>
+					<div
+						className='
+							w-full
+							min-w-0
+							text-std-500 text-xs
+							truncate
+						'
+					>
 						{group.description || `${group.agents.length} agents`}
 					</div>
 				</div>

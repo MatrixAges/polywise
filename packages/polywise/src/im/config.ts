@@ -1,5 +1,5 @@
 export const im_stream_edit_interval_ms = 900
-export const feishu_stream_edit_interval_ms = 2200
+export const feishu_stream_edit_interval_ms = 1200
 export const im_typing_keepalive_ms = 3500
 export const discord_gateway_version = '10'
 export const discord_api_base_url = 'https://discord.com/api/v10'

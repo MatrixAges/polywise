@@ -41,20 +41,50 @@ export const deliverImSessionStream = async (args: {
 	const reader = stream.getReader()
 	const stream_edit_interval_ms =
 		adapter.platform === 'feishu' ? feishu_stream_edit_interval_ms : im_stream_edit_interval_ms
-	let draft_receipt: ImSendReceipt | null = null
-	let draft_text = ''
-	let last_edit_at = 0
+	const ordered_part_ids = [] as Array<string>
+	const part_state_by_id = new Map<
+		string,
+		{
+			text: string
+			receipt: ImSendReceipt | null
+			last_edit_at: number
+		}
+	>()
 	let last_typing_at = 0
+
+	const ensurePartState = (part_id: string) => {
+		let part_state = part_state_by_id.get(part_id)
+
+		if (part_state) {
+			return part_state
+		}
+
+		part_state = {
+			text: '',
+			receipt: null,
+			last_edit_at: 0
+		}
+		part_state_by_id.set(part_id, part_state)
+		ordered_part_ids.push(part_id)
+
+		return part_state
+	}
 
 	while (true) {
 		const { done, value } = await reader.read()
 
 		if (done) break
 
-		const chunk = value as { type?: string; delta?: string }
+		const chunk = value as { type?: string; delta?: string; id?: string }
+		const part_id = String(chunk.id || 'default')
+
+		if (chunk.type === 'text-start') {
+			ensurePartState(part_id)
+		}
 
 		if (chunk.type === 'text-delta' && typeof chunk.delta === 'string') {
-			draft_text += chunk.delta
+			const part_state = ensurePartState(part_id)
+			part_state.text += chunk.delta
 		}
 
 		if (adapter.capabilities.typing && Date.now() - last_typing_at >= im_typing_keepalive_ms) {
@@ -63,24 +93,30 @@ export const deliverImSessionStream = async (args: {
 		}
 
 		if (!adapter.capabilities.message_edit) continue
-		if (!draft_text.trim()) continue
-		if (Date.now() - last_edit_at < stream_edit_interval_ms) continue
+		if (chunk.type !== 'text-delta') continue
 
-		last_edit_at = Date.now()
+		const part_state = part_state_by_id.get(part_id)
 
-		if (!draft_receipt) {
-			draft_receipt = await adapter.sendMessage({
+		if (!part_state?.text.trim()) continue
+
+		const now = Date.now()
+		if (now - part_state.last_edit_at < stream_edit_interval_ms) continue
+
+		part_state.last_edit_at = now
+
+		if (!part_state.receipt) {
+			part_state.receipt = await adapter.sendMessage({
 				route,
-				text: draft_text.trim() || discord_message_placeholder
+				text: part_state.text.trim() || discord_message_placeholder
 			})
 			continue
 		}
 
 		if (adapter.editMessage) {
-			draft_receipt = await adapter.editMessage({
+			part_state.receipt = await adapter.editMessage({
 				route,
-				receipt: draft_receipt,
-				text: draft_text.trim() || discord_message_placeholder
+				receipt: part_state.receipt,
+				text: part_state.text.trim() || discord_message_placeholder
 			})
 		}
 	}
@@ -88,14 +124,42 @@ export const deliverImSessionStream = async (args: {
 	const response_message = (await waitForAssistantMessage(session, baseline_message_count)) as
 		| FstMessage
 		| undefined
-	const final_text = draft_text.trim() || extractAssistantText(response_message)
+	const streamed_parts = ordered_part_ids
+		.map(part_id => part_state_by_id.get(part_id)?.text.trim() || '')
+		.filter(Boolean)
+	const final_text = streamed_parts.join('\n\n') || extractAssistantText(response_message)
 
-	if (adapter.capabilities.message_edit && draft_receipt && adapter.editMessage) {
-		draft_receipt = await adapter.editMessage({
-			route,
-			receipt: draft_receipt,
-			text: final_text || discord_message_placeholder
-		})
+	if (adapter.capabilities.message_edit) {
+		let has_delivered_part = false
+
+		for (const part_id of ordered_part_ids) {
+			const part_state = part_state_by_id.get(part_id)
+			const part_text = part_state?.text.trim()
+
+			if (!part_text) {
+				continue
+			}
+
+			has_delivered_part = true
+
+			if (part_state?.receipt && adapter.editMessage) {
+				part_state.receipt = await adapter.editMessage({
+					route,
+					receipt: part_state.receipt,
+					text: part_text || discord_message_placeholder
+				})
+				continue
+			}
+
+			part_state!.receipt = await adapter.sendMessage({
+				route,
+				text: part_text || discord_message_placeholder
+			})
+		}
+
+		if (!has_delivered_part) {
+			await sendFinalMessage(adapter, route, final_text)
+		}
 	} else {
 		await sendFinalMessage(adapter, route, final_text)
 	}
