@@ -21,10 +21,8 @@ export type ImFormState = {
 	discord_allowed_guild_ids: string
 	discord_allowed_channel_ids: string
 	discord_allowed_user_ids: string
-	wechat_bridge_base_url: string
-	wechat_secret: string
-	wechat_send_path: string
-	wechat_typing_path: string
+	wechat_bot_token: string
+	wechat_api_base_url: string
 }
 
 const emptyForm = (): ImFormState => ({
@@ -37,10 +35,8 @@ const emptyForm = (): ImFormState => ({
 	discord_allowed_guild_ids: '',
 	discord_allowed_channel_ids: '',
 	discord_allowed_user_ids: '',
-	wechat_bridge_base_url: '',
-	wechat_secret: '',
-	wechat_send_path: '/send',
-	wechat_typing_path: '/typing'
+	wechat_bot_token: '',
+	wechat_api_base_url: 'https://ilinkai.weixin.qq.com/ilink/bot/'
 })
 
 const parseStringList = (value: string) =>
@@ -66,10 +62,11 @@ const parseConfig = (account: ImAccountItem): ImFormState => {
 			discord_allowed_guild_ids: '',
 			discord_allowed_channel_ids: '',
 			discord_allowed_user_ids: '',
-			wechat_bridge_base_url: typeof config.bridge_base_url === 'string' ? config.bridge_base_url : '',
-			wechat_secret: typeof config.secret === 'string' ? config.secret : '',
-			wechat_send_path: typeof config.send_path === 'string' ? config.send_path : '/send',
-			wechat_typing_path: typeof config.typing_path === 'string' ? config.typing_path : '/typing'
+			wechat_bot_token: typeof config.bot_token === 'string' ? config.bot_token : '',
+			wechat_api_base_url:
+				typeof config.api_base_url === 'string'
+					? config.api_base_url
+					: 'https://ilinkai.weixin.qq.com/ilink/bot/'
 		}
 	}
 
@@ -90,28 +87,20 @@ const parseConfig = (account: ImAccountItem): ImFormState => {
 		discord_allowed_user_ids: formatStringList(
 			Array.isArray(config.allowed_user_ids) ? config.allowed_user_ids : []
 		),
-		wechat_bridge_base_url: '',
-		wechat_secret: '',
-		wechat_send_path: '/send',
-		wechat_typing_path: '/typing'
+		wechat_bot_token: '',
+		wechat_api_base_url: 'https://ilinkai.weixin.qq.com/ilink/bot/'
 	}
 }
 
 const stringifyConfig = (form: ImFormState) => {
 	if (form.platform === 'wechat') {
-		if (!form.wechat_bridge_base_url.trim()) {
-			throw new Error('WeChat bridge base URL is required')
-		}
-
-		if (!form.wechat_secret.trim()) {
-			throw new Error('WeChat secret is required')
+		if (!form.wechat_bot_token.trim()) {
+			throw new Error('WeChat ClawBot token is required')
 		}
 
 		return JSON.stringify({
-			bridge_base_url: form.wechat_bridge_base_url.trim(),
-			secret: form.wechat_secret.trim(),
-			send_path: form.wechat_send_path.trim() || '/send',
-			typing_path: form.wechat_typing_path.trim() || '/typing'
+			bot_token: form.wechat_bot_token.trim(),
+			api_base_url: form.wechat_api_base_url.trim() || 'https://ilinkai.weixin.qq.com/ilink/bot/'
 		})
 	}
 
@@ -153,7 +142,7 @@ export default class Model {
 	}
 
 	get labelPlaceholder() {
-		return this.form.platform === 'discord' ? 'Primary Discord Bot' : 'Primary WeChat Bridge'
+		return this.form.platform === 'discord' ? 'Primary Discord Bot' : 'Primary WeChat ClawBot'
 	}
 
 	async init() {

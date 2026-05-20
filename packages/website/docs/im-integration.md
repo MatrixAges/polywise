@@ -5,7 +5,7 @@
 Polywise can be connected to external messaging platforms through two integration types:
 
 - Discord bot
-- Personal WeChat bridge
+- WeChat ClawBot / iLink direct channel
 
 This document only covers how to integrate with Polywise from the platform side.
 
@@ -18,6 +18,7 @@ Polywise exposes the following IM-related endpoints:
 - `POST /im/wechat/status`
 
 Use `GET /im/health` to confirm that the IM service is available.
+The WeChat HTTP callback endpoints are kept for legacy bridge compatibility, but the default WeChat integration is now direct ClawBot / iLink polling.
 
 ## Account Setup
 
@@ -82,17 +83,17 @@ For Discord replies, Polywise may send:
 
 No additional Discord webhook setup is required beyond the bot token and the required channel permissions.
 
-## WeChat Bridge Integration
+## WeChat ClawBot Integration
 
 ### Integration Model
 
-WeChat is integrated through a bridge service.
+WeChat is integrated directly through the ClawBot / iLink bot channel.
 
-The bridge is responsible for:
+Polywise:
 
-- receiving WeChat events
-- forwarding inbound messages to Polywise
-- accepting outbound send and typing requests from Polywise
+- polls inbound messages from the iLink API using `getupdates`
+- sends outbound replies using `sendmessage`
+- keeps typing state alive using `getconfig` + `sendtyping`
 
 ### Account Configuration
 
@@ -106,98 +107,47 @@ Example `config_json`:
 
 ```json
 {
-	"bridge_base_url": "https://your-wechat-bridge.example.com",
-	"secret": "shared-secret",
-	"send_path": "/send",
-	"typing_path": "/typing"
+	"bot_token": "ILINK_BOT_TOKEN",
+	"api_base_url": "https://ilinkai.weixin.qq.com/ilink/bot/"
 }
 ```
 
 Field descriptions:
 
-- `bridge_base_url`: bridge base URL, required
-- `secret`: shared secret between Polywise and the bridge, required
-- `send_path`: message send path, defaults to `/send`
-- `typing_path`: typing path, defaults to `/typing`
+- `bot_token`: WeChat ClawBot / iLink bot token, required
+- `api_base_url`: iLink API base URL, optional
 
-### Bridge to Polywise
+### Inbound Polling
 
-The bridge sends callbacks to:
+Polywise polls:
 
-- `POST /im/wechat/events`
-- `POST /im/wechat/status`
+- `POST <api_base_url>/getupdates`
 
-Headers:
+The adapter stores the latest `get_updates_buf` cursor and the peer `context_token`, then normalizes text items into the internal IM event format.
 
-```txt
-x-polywise-signature: <hex(hmac_sha256(secret, raw_body))>
-content-type: application/json
-```
-
-Minimum payload for `/im/wechat/events`:
-
-```json
-{
-	"account_id": "wx-main",
-	"peer_id": "wxid_xxx",
-	"peer_name": "Alice",
-	"sender_id": "wxid_xxx",
-	"sender_name": "Alice",
-	"message_id": "msg_123",
-	"text": "Hello",
-	"context_token": "optional-token",
-	"received_at": 1747730000000
-}
-```
-
-Required fields:
-
-- `account_id`: must match `im_account.account_id`
-- `peer_id` or `sender_id`: peer identifier
-- `text`: inbound text message
-
-### Polywise to Bridge
+### Outbound Replies
 
 Polywise sends outbound requests to:
 
-- `POST <bridge_base_url>/send`
-- `POST <bridge_base_url>/typing`
+- `POST <api_base_url>/sendmessage`
+- `POST <api_base_url>/getconfig`
+- `POST <api_base_url>/sendtyping`
 
-Both paths can be overridden through `send_path` and `typing_path`.
+The `context_token` received from the latest inbound message is reused when sending replies.
 
-Headers:
+### Legacy Bridge Compatibility
 
-```txt
-x-polywise-signature: <hex(hmac_sha256(secret, raw_body))>
-content-type: application/json
-```
+Legacy bridge-mode accounts are still supported if `config_json` contains:
 
-Send message payload:
+- `bridge_base_url`
+- `secret`
+- optional `send_path`
+- optional `typing_path`
 
-```json
-{
-	"account_id": "wx-main",
-	"peer_id": "wxid_xxx",
-	"text": "Hello, this is Polywise."
-}
-```
+Legacy mode uses the webhook endpoints:
 
-Typing payload:
-
-```json
-{
-	"account_id": "wx-main",
-	"peer_id": "wxid_xxx"
-}
-```
-
-Recommended `/send` response:
-
-```json
-{
-	"message_id": "bridge_msg_123"
-}
-```
+- `POST /im/wechat/events`
+- `POST /im/wechat/status`
 
 ## Control Commands
 
@@ -221,13 +171,13 @@ Recommended validation order:
 2. Start Polywise and verify `GET /im/health`.
 3. For Discord, send a DM to the bot and confirm a reply.
 4. For Discord guild channels, verify mention or reply behavior if `require_mention` is enabled.
-5. For WeChat, send a signed event to `POST /im/wechat/events`.
-6. Confirm that Polywise calls the bridge `/typing` and `/send` endpoints.
+5. For WeChat, configure a valid ClawBot token and confirm that `getupdates` returns inbound messages.
+6. Confirm that Polywise sends `sendtyping` and `sendmessage` successfully.
 7. Verify `/stop` and `/reset`.
 
 ## Current Limitations
 
 - WeChat currently supports direct-message style integration only
 - attachment handling is not implemented yet
-- `POST /im/wechat/status` is reserved for status callbacks
+- legacy `POST /im/wechat/status` is reserved for bridge-mode status callbacks
 - Discord voice is not supported

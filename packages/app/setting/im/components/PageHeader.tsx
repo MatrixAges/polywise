@@ -8,18 +8,18 @@ import { useModel } from '../context'
 import type { ImPlatform } from '../model'
 
 const items = [
-	{ key: 'discord', title: 'Discord', Icon: Bot },
-	{ key: 'wechat', title: 'WeChat', Icon: QrCode }
+	{ key: 'wechat', title: 'WeChat', Icon: QrCode },
+	{ key: 'discord', title: 'Discord', Icon: Bot }
 ]
 
 const docsMap = {
-	discord: {
-		label: 'OpenClaw Discord guide',
-		href: 'https://docs.openclaw.ai/channels/discord'
-	},
 	wechat: {
 		label: 'OpenClaw WeChat guide',
 		href: 'https://www.runoob.com/ai-agent/openclaw-weixin.html'
+	},
+	discord: {
+		label: 'OpenClaw Discord guide',
+		href: 'https://docs.openclaw.ai/channels/discord'
 	}
 } as const
 
@@ -28,7 +28,7 @@ const Index = () => {
 	const docs = docsMap[x.form.platform]
 
 	return (
-		<div className='flex flex-col gap-2'>
+		<div className='flex flex-col gap-4'>
 			<div className='h-9'>
 				<TextTabs
 					className='gap-3'

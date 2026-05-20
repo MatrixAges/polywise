@@ -21,7 +21,9 @@ const buildAdapter = (account: ImAccount, emit_inbound: (event: ImInboundEvent) 
 	}
 
 	if (account.platform === 'wechat') {
-		return new WechatAdapter(account)
+		const adapter = new WechatAdapter(account)
+		adapter.setInboundHandler(emit_inbound)
+		return adapter
 	}
 
 	return null

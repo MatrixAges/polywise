@@ -12,50 +12,31 @@ const Index = () => {
 		<FieldGroup className='gap-0'>
 			<Field className='items-center! py-3' orientation='horizontal'>
 				<FieldContent>
-					<FieldTitle className='text-base'>Bridge Base URL</FieldTitle>
-					<FieldDescription>Base URL for the WeChat bridge service</FieldDescription>
+					<FieldTitle className='text-base'>ClawBot Token</FieldTitle>
+					<FieldDescription>
+						Bot token from the WeChat ClawBot / iLink channel configuration
+					</FieldDescription>
 				</FieldContent>
 				<Input
 					className='max-w-[420px]'
-					value={x.form.wechat_bridge_base_url}
-					onChange={event => x.updateForm('wechat_bridge_base_url', event.target.value)}
-					placeholder='https://your-wechat-bridge.example.com'
+					value={x.form.wechat_bot_token}
+					onChange={event => x.updateForm('wechat_bot_token', event.target.value)}
+					placeholder='ILINK_BOT_TOKEN'
 				/>
 			</Field>
 			<Field className='items-center! py-3' orientation='horizontal'>
 				<FieldContent>
-					<FieldTitle className='text-base'>Shared Secret</FieldTitle>
-					<FieldDescription>Used to sign bridge callbacks and outbound requests</FieldDescription>
+					<FieldTitle className='text-base'>API Base URL</FieldTitle>
+					<FieldDescription>
+						Default ClawBot API base. Only change this if your channel exposes a custom
+						endpoint.
+					</FieldDescription>
 				</FieldContent>
 				<Input
 					className='max-w-[420px]'
-					value={x.form.wechat_secret}
-					onChange={event => x.updateForm('wechat_secret', event.target.value)}
-					placeholder='shared-secret'
-				/>
-			</Field>
-			<Field className='items-center! py-3' orientation='horizontal'>
-				<FieldContent>
-					<FieldTitle className='text-base'>Send Path</FieldTitle>
-					<FieldDescription>Bridge endpoint for outbound messages</FieldDescription>
-				</FieldContent>
-				<Input
-					className='max-w-[220px]'
-					value={x.form.wechat_send_path}
-					onChange={event => x.updateForm('wechat_send_path', event.target.value)}
-					placeholder='/send'
-				/>
-			</Field>
-			<Field className='items-center! py-3' orientation='horizontal'>
-				<FieldContent>
-					<FieldTitle className='text-base'>Typing Path</FieldTitle>
-					<FieldDescription>Bridge endpoint for typing notifications</FieldDescription>
-				</FieldContent>
-				<Input
-					className='max-w-[220px]'
-					value={x.form.wechat_typing_path}
-					onChange={event => x.updateForm('wechat_typing_path', event.target.value)}
-					placeholder='/typing'
+					value={x.form.wechat_api_base_url}
+					onChange={event => x.updateForm('wechat_api_base_url', event.target.value)}
+					placeholder='https://ilinkai.weixin.qq.com/ilink/bot/'
 				/>
 			</Field>
 		</FieldGroup>
