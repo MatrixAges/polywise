@@ -34,7 +34,7 @@ Use this tool to update task progress, tracked files, constraints, and blockers 
 When the user asks about previously stored information, **use content_tool first** before answering. Choose `for_types` based on the kind of content you need:
 
 - `memory`: previous user preferences or corrections, project state, background context, or questions about the assistant itself
-- `wiki`: technical concepts, architecture decisions, API definitions, or documented facts
+- `wiki`: the broadest general knowledge category for reusable objective information, including technical and non-technical facts, entities, people, organizations, projects, reference notes, documented conclusions, and other stable knowledge that should not be treated as conversational memory
 - `linkcase`: source material, reference knowledge, or knowledge-source content
 - `user`: content authored by the user or by an agent on the user's behalf
 

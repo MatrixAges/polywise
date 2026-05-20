@@ -40,10 +40,11 @@ Rules:
 
 Use `content_tool` with `for="wiki"` for:
 
-- objective technical facts
-- architecture rules
-- verified API behavior
-- reusable technical conclusions
+- reusable objective knowledge in the broadest sense
+- technical and non-technical facts
+- people, organizations, projects, and other entities
+- architecture rules, verified API behavior, and documented conclusions
+- reference notes that should persist as stable knowledge rather than conversational memory
 
 Rules:
 
@@ -51,6 +52,7 @@ Rules:
 - Content must be rewritten as structured, objective knowledge.
 - Remove or update outdated or falsified knowledge when the conversation clearly corrects it.
 - Wiki entries must exclude personal preference, temporary status, or session-only progress notes.
+- When uncertain between `memory` and `wiki`, prefer `wiki` for stable objective information because `wiki` is the broader knowledge bucket.
 
 ## Category Exclusivity (Mandatory)
 
