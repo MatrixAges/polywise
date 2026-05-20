@@ -96,14 +96,16 @@ No additional Discord webhook setup is required beyond the bot token and the req
 
 ### Integration Model
 
-Feishu is integrated as a self-built app bot with event subscription callbacks.
+Feishu is integrated as a self-built app bot with long connection mode by default.
 
 Polywise:
 
-- receives inbound messages through Feishu event subscriptions
-- verifies the subscription challenge
+- opens a Feishu long connection from the local Polywise runtime
+- receives inbound bot messages through that connection
 - exchanges `app_id` and `app_secret` for a tenant access token
 - sends outbound replies through the Feishu message API
+
+No public callback URL is required for the default Feishu setup.
 
 ### Account Configuration
 
@@ -119,8 +121,6 @@ Example `config_json`:
 {
 	"app_id": "cli_xxxxxxxxxxxxx",
 	"app_secret": "xxxxxxxxxxxxxxxx",
-	"verification_token": "xxxxxxxxxxxxxxxx",
-	"encrypt_key": "xxxxxxxxxxxxxxxx",
 	"session_target": {
 		"type": "global"
 	}
@@ -131,8 +131,8 @@ Field descriptions:
 
 - `app_id`: Feishu self-built app App ID, required
 - `app_secret`: Feishu self-built app App Secret, required
-- `verification_token`: event subscription verification token, required
-- `encrypt_key`: event subscription encrypt key, optional unless encryption is enabled
+- `verification_token`: optional, only used for webhook fallback mode
+- `encrypt_key`: optional, only used for encrypted webhook fallback mode
 
 ### Feishu App Setup
 
@@ -140,9 +140,20 @@ In Feishu Open Platform:
 
 1. Create a self-built app.
 2. Enable the bot capability.
-3. Add an event subscription request URL pointing to `POST /sys/im/feishu/events`.
-4. Subscribe to message receive events for the bot.
-5. Copy the app's `App ID`, `App Secret`, `Verification Token`, and optional `Encrypt Key` into the Polywise IM settings page.
+3. Subscribe to bot message receive events and choose long connection mode.
+4. Install the optional Feishu Node SDK on the machine running Polywise:
+
+```bash
+pnpm --filter polywise add @larksuiteoapi/node-sdk
+```
+
+5. Copy the app's `App ID` and `App Secret` into the Polywise IM settings page.
+
+If you intentionally switch to webhook mode later, Polywise also exposes:
+
+- `POST /sys/im/feishu/events`
+
+In that fallback mode, `Verification Token` and `Encrypt Key` become relevant again.
 
 Polywise currently normalizes text messages from Feishu. Rich text, file attachments, and message cards are not handled yet.
 

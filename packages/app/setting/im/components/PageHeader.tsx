@@ -23,8 +23,8 @@ const docsMap = {
 		href: 'https://docs.openclaw.ai/channels/discord'
 	},
 	feishu: {
-		label: 'Feishu Open Platform docs',
-		href: 'https://open.feishu.cn/document/mcp_open_tools/integrating-agents-with-feishu/overview'
+		label: 'Feishu long connection docs',
+		href: 'https://open.feishu.cn/document/uAjLw4CM/ukTMukTMukTM/event-subscription-guide/long-connection-mode'
 	}
 } as const
 

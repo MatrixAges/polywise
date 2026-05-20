@@ -37,7 +37,6 @@ catalog:
       '@types/node': 25.7.0
       '@types/react': 19.2.14
       '@types/react-dom': 19.2.3
-      '@types/uuid': 11.0.0
       '@types/watchpack': ^2.4.5
       ahooks: ^3.9.7
       ai: 6.0.182
