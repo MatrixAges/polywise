@@ -49,9 +49,6 @@ const EditorCard = ({ accountIdInputRef, editorCardRef }: Props) => {
 					'
 				>
 					<div className='flex flex-col gap-2'>
-						<Badge variant='outline' className='w-fit'>
-							{x.editorMode === 'edit' ? 'Editing account' : 'Creating account'}
-						</Badge>
 						<div>
 							<div className='text-base font-semibold'>
 								{x.editorMode === 'edit' ? 'Edit IM Account' : 'Create IM Account'}
@@ -62,44 +59,8 @@ const EditorCard = ({ accountIdInputRef, editorCardRef }: Props) => {
 							</div>
 						</div>
 					</div>
-					<div className='flex items-center gap-2'>
-						{x.selectedAccount && (
-							<Badge variant='outline'>
-								Active routes: {x.getActiveRouteCount(x.selectedAccount)}
-							</Badge>
-						)}
-						<Button
-							type='button'
-							variant='outline'
-							onClick={() => void x.remove()}
-							disabled={x.removing}
-						>
-							{x.removing ? <Spinner className='size-4' /> : <Trash2 className='size-4' />}
-							<span>{x.editorMode === 'edit' ? 'Delete' : 'Clear'}</span>
-						</Button>
-						<Button type='button' onClick={() => void x.save()} disabled={x.saving}>
-							{x.saving ? <Spinner className='size-4' /> : null}
-							<span>{x.editorMode === 'edit' ? 'Save Changes' : 'Create Account'}</span>
-						</Button>
-					</div>
 				</div>
-
-				{x.editorMode === 'new' ? (
-					<div
-						className='
-							px-4 py-3
-							rounded-2xl
-							text-sm text-std-500
-							bg-muted/25
-							border
-						'
-					>
-						Choose a platform, enter a unique Account ID, then complete the platform-specific
-						fields below.
-					</div>
-				) : null}
 			</div>
-
 			<FieldGroup className='gap-0'>
 				<Field className='items-center! py-3' orientation='horizontal'>
 					<FieldContent>
@@ -139,10 +100,21 @@ const EditorCard = ({ accountIdInputRef, editorCardRef }: Props) => {
 					/>
 				</Field>
 			</FieldGroup>
-
 			<Separator />
-
 			{x.form.platform === 'discord' ? <DiscordFields></DiscordFields> : <WeChatFields></WeChatFields>}
+			<div className='flex items-center justify-end gap-2'>
+				{x.selectedAccount && (
+					<Badge variant='outline'>Active routes: {x.getActiveRouteCount(x.selectedAccount)}</Badge>
+				)}
+				<Button type='button' variant='outline' onClick={() => void x.remove()} disabled={x.removing}>
+					{x.removing ? <Spinner className='size-4' /> : <Trash2 className='size-4' />}
+					<span>{x.editorMode === 'edit' ? 'Delete' : 'Clear'}</span>
+				</Button>
+				<Button type='button' onClick={() => void x.save()} disabled={x.saving}>
+					{x.saving ? <Spinner className='size-4' /> : null}
+					<span>{x.editorMode === 'edit' ? 'Save Changes' : 'Create Account'}</span>
+				</Button>
+			</div>
 		</div>
 	)
 }
