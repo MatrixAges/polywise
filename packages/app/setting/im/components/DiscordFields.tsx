@@ -7,7 +7,7 @@ import { Textarea } from '@/__shadcn__/components/ui/textarea'
 
 import { useModel } from '../context'
 
-const DiscordFields = () => {
+const Index = () => {
 	const x = useModel()
 
 	return (
@@ -76,4 +76,4 @@ const DiscordFields = () => {
 	)
 }
 
-export default observer(DiscordFields)
+export default observer(Index)

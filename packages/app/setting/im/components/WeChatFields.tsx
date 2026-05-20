@@ -5,7 +5,7 @@ import { Input } from '@/__shadcn__/components/ui/input'
 
 import { useModel } from '../context'
 
-const WeChatFields = () => {
+const Index = () => {
 	const x = useModel()
 
 	return (
@@ -62,4 +62,4 @@ const WeChatFields = () => {
 	)
 }
 
-export default observer(WeChatFields)
+export default observer(Index)

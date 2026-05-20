@@ -13,7 +13,7 @@ const statusVariant = (status: string, enabled: boolean) => {
 	return 'outline'
 }
 
-const AccountsSection = () => {
+const Index = () => {
 	const x = useModel()
 
 	return (
@@ -112,4 +112,4 @@ const AccountsSection = () => {
 	)
 }
 
-export default observer(AccountsSection)
+export default observer(Index)

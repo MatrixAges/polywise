@@ -13,7 +13,7 @@ import { useModel } from '../context'
 import DiscordFields from './DiscordFields'
 import WeChatFields from './WeChatFields'
 
-const EditorCard = () => {
+const Index = () => {
 	const x = useModel()
 
 	return (
@@ -110,4 +110,4 @@ const EditorCard = () => {
 	)
 }
 
-export default observer(EditorCard)
+export default observer(Index)
