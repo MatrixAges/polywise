@@ -1,5 +1,5 @@
 import { agent_session, group_session, im_account, session } from '@core/db/schema'
-import { addSession, getImAccount, getSession, setSession } from '@core/db/services'
+import { addSession, getImAccount, getSession, getSessions, setSession } from '@core/db/services'
 import {
 	addAgentSession,
 	addGroupSession,
@@ -9,7 +9,7 @@ import {
 	removeGroupSession
 } from '@core/db/services/externals'
 import { connectSession, GroupStore, SessionStore } from '@core/utils'
-import { and, eq } from 'drizzle-orm'
+import { and, eq, like } from 'drizzle-orm'
 
 import { buildImRouteKey, buildImSessionTitle, shouldRefreshImSessionTitle } from './route'
 import { getImAccountRuntimeConfig, getImAccountSessionTargetConfig } from './runtimeConfig'
@@ -144,4 +144,19 @@ export const resetImSessionBinding = async (event: ImInboundEvent): Promise<ImSe
 	await syncImSessionBindingConfig(binding, event)
 
 	return binding
+}
+
+export const detachImAccountRouteBindings = async (args: { platform: string; account_id: string }) => {
+	const prefix = `im:${args.platform}:${args.account_id}:`
+	const rows = await getSessions({
+		where: like(session.key, `${prefix}%`)
+	})
+
+	for (const row of rows) {
+		await setSession(eq(session.id, row.id), { key: null })
+		SessionStore.delete(row.id)
+		GroupStore.delete(row.id)
+	}
+
+	return rows.length
 }

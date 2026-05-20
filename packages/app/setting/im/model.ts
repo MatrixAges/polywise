@@ -31,6 +31,9 @@ export type ImFormState = {
 	discord_allowed_user_ids: string
 	feishu_app_id: string
 	feishu_app_secret: string
+	feishu_require_mention: boolean
+	feishu_allowed_chat_ids: string
+	feishu_allowed_user_ids: string
 	feishu_verification_token: string
 	feishu_encrypt_key: string
 	wechat_bot_token: string
@@ -57,6 +60,9 @@ const emptyForm = (): ImFormState => ({
 	discord_allowed_user_ids: '',
 	feishu_app_id: '',
 	feishu_app_secret: '',
+	feishu_require_mention: true,
+	feishu_allowed_chat_ids: '',
+	feishu_allowed_user_ids: '',
 	feishu_verification_token: '',
 	feishu_encrypt_key: '',
 	wechat_bot_token: '',
@@ -137,6 +143,9 @@ const parseConfig = (account: ImAccountItem): ImFormState => {
 			discord_allowed_user_ids: '',
 			feishu_app_id: '',
 			feishu_app_secret: '',
+			feishu_require_mention: true,
+			feishu_allowed_chat_ids: '',
+			feishu_allowed_user_ids: '',
 			feishu_verification_token: '',
 			feishu_encrypt_key: '',
 			wechat_bot_token: typeof config.bot_token === 'string' ? config.bot_token : '',
@@ -172,6 +181,13 @@ const parseConfig = (account: ImAccountItem): ImFormState => {
 			discord_allowed_user_ids: '',
 			feishu_app_id: typeof config.app_id === 'string' ? config.app_id : '',
 			feishu_app_secret: typeof config.app_secret === 'string' ? config.app_secret : '',
+			feishu_require_mention: config.require_mention !== false,
+			feishu_allowed_chat_ids: formatStringList(
+				Array.isArray(config.allowed_chat_ids) ? config.allowed_chat_ids : []
+			),
+			feishu_allowed_user_ids: formatStringList(
+				Array.isArray(config.allowed_user_ids) ? config.allowed_user_ids : []
+			),
 			feishu_verification_token:
 				typeof config.verification_token === 'string' ? config.verification_token : '',
 			feishu_encrypt_key: typeof config.encrypt_key === 'string' ? config.encrypt_key : '',
@@ -212,6 +228,9 @@ const parseConfig = (account: ImAccountItem): ImFormState => {
 		),
 		feishu_app_id: '',
 		feishu_app_secret: '',
+		feishu_require_mention: true,
+		feishu_allowed_chat_ids: '',
+		feishu_allowed_user_ids: '',
 		feishu_verification_token: '',
 		feishu_encrypt_key: '',
 		wechat_bot_token: '',
@@ -288,6 +307,9 @@ const stringifyConfig = (form: ImFormState) => {
 		return JSON.stringify({
 			app_id: form.feishu_app_id.trim(),
 			app_secret: form.feishu_app_secret.trim(),
+			require_mention: form.feishu_require_mention,
+			allowed_chat_ids: parseStringList(form.feishu_allowed_chat_ids),
+			allowed_user_ids: parseStringList(form.feishu_allowed_user_ids),
 			verification_token: form.feishu_verification_token.trim() || undefined,
 			encrypt_key: form.feishu_encrypt_key.trim() || undefined,
 			session_target,

@@ -1,8 +1,10 @@
 import { im_account } from '@core/db/schema'
-import { setImAccount } from '@core/db/services'
+import { getImAccount, setImAccount } from '@core/db/services'
 import { eq } from 'drizzle-orm'
 import { object, string } from 'zod'
 
+import { getImAccountSessionTargetConfig } from '../../im/runtimeConfig'
+import { detachImAccountRouteBindings } from '../../im/session'
 import { p } from '../../utils/trpc'
 import { im_account_input_schema, im_account_schema, normalizeImAccount } from './shared'
 
@@ -16,6 +18,19 @@ export default p
 	.input(input_type)
 	.output(im_account_schema)
 	.mutation(async ({ input }) => {
+		const current = await getImAccount(eq(im_account.id, input.id))
+
+		if (!current) {
+			throw new Error('IM account not found')
+		}
+
+		const previous_target = getImAccountSessionTargetConfig(current)
+		const next_target = getImAccountSessionTargetConfig({
+			config_json: normalizeConfigJson(input.config_json)
+		})
+		const target_changed = JSON.stringify(previous_target) !== JSON.stringify(next_target)
+		const route_scope_changed = current.platform !== input.platform || current.account_id !== input.account_id
+
 		const updated = await setImAccount(eq(im_account.id, input.id), {
 			platform: input.platform,
 			account_id: input.account_id,
@@ -24,8 +39,11 @@ export default p
 			config_json: normalizeConfigJson(input.config_json)
 		})
 
-		if (!updated) {
-			throw new Error('IM account not found')
+		if (route_scope_changed || target_changed) {
+			await detachImAccountRouteBindings({
+				platform: current.platform,
+				account_id: current.account_id
+			})
 		}
 
 		return normalizeImAccount(updated)

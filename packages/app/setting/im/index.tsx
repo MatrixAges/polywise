@@ -26,16 +26,15 @@ const Index = () => {
 					page_wrap
 				'
 			>
-				<PageHeader></PageHeader>
-
+				<AccountsSection></AccountsSection>
 				<div
 					className='
 						flex flex-col
 						gap-5
 					'
 				>
+					<PageHeader></PageHeader>
 					<EditorCard></EditorCard>
-					<AccountsSection></AccountsSection>
 				</div>
 			</div>
 		</Context>

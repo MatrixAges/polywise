@@ -3,6 +3,8 @@ import { observer } from 'mobx-react-lite'
 import { Field, FieldContent, FieldDescription, FieldGroup, FieldTitle } from '@/__shadcn__/components/ui/field'
 import { Input } from '@/__shadcn__/components/ui/input'
 import { Separator } from '@/__shadcn__/components/ui/separator'
+import { Switch } from '@/__shadcn__/components/ui/switch'
+import { Textarea } from '@/__shadcn__/components/ui/textarea'
 
 import { useModel } from '../context'
 
@@ -48,10 +50,50 @@ const Index = () => {
 					placeholder='App Secret'
 				/>
 			</Field>
+			<Field className='items-center! py-3' orientation='horizontal'>
+				<FieldContent>
+					<FieldTitle className='text-base'>Require Mention</FieldTitle>
+					<FieldDescription>
+						Only respond in Feishu group chats when the bot is mentioned.
+					</FieldDescription>
+				</FieldContent>
+				<Switch
+					checked={x.form.feishu_require_mention}
+					onCheckedChange={value => x.updateForm('feishu_require_mention', value)}
+				/>
+			</Field>
+			<Field className='items-start! py-3' orientation='horizontal'>
+				<FieldContent>
+					<FieldTitle className='text-base'>Allowed Group IDs</FieldTitle>
+					<FieldDescription>
+						One per line or comma-separated. Leave empty for all Feishu groups.
+					</FieldDescription>
+				</FieldContent>
+				<Textarea
+					className='min-h-[88px] max-w-[420px]'
+					value={x.form.feishu_allowed_chat_ids}
+					onChange={event => x.updateForm('feishu_allowed_chat_ids', event.target.value)}
+					placeholder='oc_xxxxxxxxxxxxx'
+				/>
+			</Field>
+			<Field className='items-start! py-3' orientation='horizontal'>
+				<FieldContent>
+					<FieldTitle className='text-base'>Allowed User IDs</FieldTitle>
+					<FieldDescription>
+						One per line or comma-separated. Leave empty for all Feishu users.
+					</FieldDescription>
+				</FieldContent>
+				<Textarea
+					className='min-h-[88px] max-w-[420px]'
+					value={x.form.feishu_allowed_user_ids}
+					onChange={event => x.updateForm('feishu_allowed_user_ids', event.target.value)}
+					placeholder='ou_xxxxxxxxxxxxx'
+				/>
+			</Field>
 			<Separator className='my-3 h-px w-full' />
 			<Field className='items-center! py-3' orientation='horizontal'>
 				<FieldContent>
-					<FieldTitle className='text-base'>Verification Token</FieldTitle>
+					<FieldTitle className='text-base'>Verification Token (Optional)</FieldTitle>
 					<FieldDescription>
 						Optional. Only used when you enable webhook callback mode instead of long
 						connection.

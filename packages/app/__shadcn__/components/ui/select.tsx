@@ -141,7 +141,7 @@ function SelectItem({
       )}
       {...props}
     >
-      <SelectPrimitive.ItemText className="flex flex-1 w-full shrink-0 gap-2 whitespace-nowrap">
+      <SelectPrimitive.ItemText className="flex flex-1 w-full min-w-0 gap-2 whitespace-nowrap">
         {children}
       </SelectPrimitive.ItemText>
       <SelectPrimitive.ItemIndicator

@@ -1,4 +1,9 @@
-import { discord_message_placeholder, im_stream_edit_interval_ms, im_typing_keepalive_ms } from './config'
+import {
+	discord_message_placeholder,
+	feishu_stream_edit_interval_ms,
+	im_stream_edit_interval_ms,
+	im_typing_keepalive_ms
+} from './config'
 import { extractAssistantText } from './message'
 import { sleep } from './utils'
 
@@ -34,6 +39,8 @@ export const deliverImSessionStream = async (args: {
 }): Promise<ImRouteExecutionResult> => {
 	const { adapter, route, stream, session, baseline_message_count } = args
 	const reader = stream.getReader()
+	const stream_edit_interval_ms =
+		adapter.platform === 'feishu' ? feishu_stream_edit_interval_ms : im_stream_edit_interval_ms
 	let draft_receipt: ImSendReceipt | null = null
 	let draft_text = ''
 	let last_edit_at = 0
@@ -57,7 +64,7 @@ export const deliverImSessionStream = async (args: {
 
 		if (!adapter.capabilities.message_edit) continue
 		if (!draft_text.trim()) continue
-		if (Date.now() - last_edit_at < im_stream_edit_interval_ms) continue
+		if (Date.now() - last_edit_at < stream_edit_interval_ms) continue
 
 		last_edit_at = Date.now()
 

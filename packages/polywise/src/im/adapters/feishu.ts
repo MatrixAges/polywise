@@ -9,6 +9,9 @@ import type { ImInboundEvent, ImRoute, ImSendReceipt } from '../types'
 interface FeishuAdapterConfig {
 	app_id?: string
 	app_secret?: string
+	require_mention?: boolean
+	allowed_chat_ids?: Array<string>
+	allowed_user_ids?: Array<string>
 	verification_token?: string
 	encrypt_key?: string
 }
@@ -70,15 +73,27 @@ interface FeishuChannelMessage {
 	senderId: string
 	senderName?: string
 	content: string
+	mentionedBot?: boolean
+	mentionAll?: boolean
 	replyToMessageId?: string
 	threadId?: string
 	createTime: number
 	raw?: unknown
 }
 
+interface FeishuChatInfo {
+	chatId: string
+	name?: string
+	description?: string
+	chatType: 'p2p' | 'group'
+}
+
 interface FeishuChannel {
 	connect(): Promise<void>
 	disconnect(): Promise<void>
+	send(to: string, input: { text: string }, opts?: { replyTo?: string }): Promise<{ messageId: string }>
+	editMessage(messageId: string, text: string): Promise<void>
+	getChatInfo(chatId: string): Promise<FeishuChatInfo>
 	on(name: 'message', handler: (msg: FeishuChannelMessage) => void | Promise<void>): () => void
 	on(name: 'error', handler: (error: unknown) => void): () => void
 	on(name: 'reconnecting' | 'reconnected', handler: () => void): () => void
@@ -95,10 +110,18 @@ interface FeishuSdkModule {
 		source?: string
 		includeRawEvent?: boolean
 		loggerLevel?: unknown
+		policy?: {
+			groupAllowlist?: Array<string>
+			dmMode?: 'open' | 'allowlist'
+			dmAllowlist?: Array<string>
+			requireMention?: boolean
+			respondToMentionAll?: boolean
+		}
 	}): FeishuChannel
 }
 
 const normalizeBaseUrl = (value: string) => (value.endsWith('/') ? value : `${value}/`)
+const feishu_chat_info_cache_ttl_ms = 5 * 60 * 1000
 
 const parseJson = <T>(value: string, fallback: T): T => {
 	try {
@@ -119,7 +142,7 @@ export default class FeishuAdapter extends BaseImAdapter {
 	platform = 'feishu' as const
 	capabilities = {
 		typing: false,
-		message_edit: false,
+		message_edit: true,
 		threads: false,
 		attachments: false
 	}
@@ -129,12 +152,16 @@ export default class FeishuAdapter extends BaseImAdapter {
 	channel: FeishuChannel | null = null
 	unsubscribers = [] as Array<() => void>
 	inbound_handler: ((event: ImInboundEvent) => Promise<void>) | null = null
+	chat_cache = new Map<string, { value: FeishuChatInfo; expires_at: number }>()
 
 	constructor(account: ImAccount) {
 		super(account.account_id)
 		this.config = parseJson(account.config_json || '{}', {
 			app_id: '',
 			app_secret: '',
+			require_mention: true,
+			allowed_chat_ids: [],
+			allowed_user_ids: [],
 			verification_token: '',
 			encrypt_key: ''
 		} satisfies FeishuAdapterConfig)
@@ -196,6 +223,42 @@ export default class FeishuAdapter extends BaseImAdapter {
 		}
 	}
 
+	private isAllowedChat(message: FeishuChannelMessage) {
+		if (message.chatType === 'p2p') return true
+		if (!this.config.allowed_chat_ids?.length) return true
+		return this.config.allowed_chat_ids.includes(String(message.chatId))
+	}
+
+	private isAllowedUser(message: FeishuChannelMessage) {
+		if (!this.config.allowed_user_ids?.length) return true
+		return this.config.allowed_user_ids.includes(String(message.senderId))
+	}
+
+	private shouldHandleMessage(message: FeishuChannelMessage) {
+		if (message.chatType === 'p2p') return true
+		if (this.config.require_mention === false) return true
+		return Boolean(message.mentionedBot)
+	}
+
+	private async getChatInfo(chatId: string) {
+		const cached = this.chat_cache.get(chatId)
+
+		if (cached && cached.expires_at > Date.now()) {
+			return cached.value
+		}
+
+		const value = await this.channel?.getChatInfo(chatId)
+
+		if (value) {
+			this.chat_cache.set(chatId, {
+				value,
+				expires_at: Date.now() + feishu_chat_info_cache_ttl_ms
+			})
+		}
+
+		return value || null
+	}
+
 	async connect() {
 		if (!this.appId || !this.appSecret) {
 			throw new Error(`Feishu app credentials missing for account ${this.account_id}`)
@@ -212,15 +275,39 @@ export default class FeishuAdapter extends BaseImAdapter {
 			transport: 'websocket',
 			source: 'polywise',
 			includeRawEvent: true,
-			loggerLevel: sdk.LoggerLevel?.error
+			loggerLevel: sdk.LoggerLevel?.error,
+			policy: {
+				groupAllowlist: this.config.allowed_chat_ids?.length ? this.config.allowed_chat_ids : undefined,
+				dmMode: this.config.allowed_user_ids?.length ? 'allowlist' : 'open',
+				dmAllowlist: this.config.allowed_user_ids?.length ? this.config.allowed_user_ids : undefined,
+				requireMention: this.config.require_mention !== false,
+				respondToMentionAll: false
+			}
 		})
 
 		this.unsubscribers.push(
 			channel.on('message', async message => {
+				if (!this.isAllowedChat(message)) {
+					return
+				}
+
+				if (!this.isAllowedUser(message)) {
+					return
+				}
+
+				if (!this.shouldHandleMessage(message)) {
+					return
+				}
+
 				const event = this.normalizeChannelMessage(message)
 
 				if (!event) {
 					return
+				}
+
+				if (event.route.chat_type !== 'dm') {
+					const chat = await this.getChatInfo(event.route.chat_id).catch(() => null)
+					event.route.title = chat?.name?.trim() || event.route.title
 				}
 
 				await this.inbound_handler?.(event)
@@ -243,6 +330,7 @@ export default class FeishuAdapter extends BaseImAdapter {
 	async disconnect() {
 		const current = this.channel
 		this.channel = null
+		this.chat_cache.clear()
 
 		for (const unsubscribe of this.unsubscribers.splice(0)) {
 			try {
@@ -443,6 +531,15 @@ export default class FeishuAdapter extends BaseImAdapter {
 	async sendTyping(_route: ImRoute) {}
 
 	async sendMessage(args: { route: ImRoute; text: string }): Promise<ImSendReceipt> {
+		if (this.channel) {
+			const result = await this.channel.send(args.route.chat_id, { text: args.text })
+
+			return {
+				id: result.messageId,
+				raw: result
+			}
+		}
+
 		const response = await this.feishuApi(`open-apis/im/v1/messages?receive_id_type=chat_id`, {
 			method: 'POST',
 			body: JSON.stringify({
@@ -463,5 +560,22 @@ export default class FeishuAdapter extends BaseImAdapter {
 			id: body.data?.message_id,
 			raw: body
 		}
+	}
+
+	async editMessage(args: { route: ImRoute; receipt: ImSendReceipt; text: string }): Promise<ImSendReceipt> {
+		if (!args.receipt.id) {
+			return this.sendMessage({ route: args.route, text: args.text })
+		}
+
+		if (this.channel) {
+			await this.channel.editMessage(args.receipt.id, args.text)
+
+			return {
+				...args.receipt,
+				id: args.receipt.id
+			}
+		}
+
+		return args.receipt
 	}
 }
