@@ -167,7 +167,7 @@ const refreshWechatQrCode = async (login: ActiveWechatQrLogin) => {
 
 		return {
 			ok: false as const,
-			message: '二维码多次失效，连接流程已停止，请重新开始。'
+			message: 'The QR code expired too many times. Start the connection flow again.'
 		}
 	}
 
@@ -181,7 +181,7 @@ const refreshWechatQrCode = async (login: ActiveWechatQrLogin) => {
 	return {
 		ok: true as const,
 		qrcode_url: next.qrcode_url,
-		message: '二维码已刷新，请重新扫码。'
+		message: 'The QR code was refreshed. Scan the new code to continue.'
 	}
 }
 
@@ -201,7 +201,7 @@ export const startWechatQrLogin = async () => {
 	return {
 		session_key,
 		qrcode_url: qr.qrcode_url,
-		message: '请使用微信扫码，并在手机上确认授权。'
+		message: 'Scan the QR code with WeChat and confirm on your phone.'
 	}
 }
 
@@ -211,7 +211,7 @@ export const waitWechatQrLogin = async (args: { session_key: string; verify_code
 	if (!login) {
 		return {
 			status: 'error' as const,
-			message: '当前没有进行中的微信连接，请重新开始。'
+			message: 'There is no active WeChat connection flow. Start again.'
 		}
 	}
 
@@ -220,7 +220,7 @@ export const waitWechatQrLogin = async (args: { session_key: string; verify_code
 
 		return {
 			status: 'error' as const,
-			message: '二维码登录已超时，请重新开始。'
+			message: 'The QR login session timed out. Start again.'
 		}
 	}
 
@@ -234,7 +234,7 @@ export const waitWechatQrLogin = async (args: { session_key: string; verify_code
 		case 'wait':
 			return {
 				status: 'pending' as const,
-				message: '等待扫码中…'
+				message: 'Waiting for scan...'
 			}
 		case 'scaned':
 		case 'scaned_but_redirect':
@@ -244,12 +244,12 @@ export const waitWechatQrLogin = async (args: { session_key: string; verify_code
 
 			return {
 				status: 'scanned' as const,
-				message: '已扫码，等待手机确认…'
+				message: 'Scanned. Waiting for confirmation on your phone...'
 			}
 		case 'need_verifycode':
 			return {
 				status: 'needs_verify_code' as const,
-				message: '请输入手机微信上显示的数字验证码。'
+				message: 'Enter the numeric verification code shown in WeChat.'
 			}
 		case 'verify_code_blocked': {
 			const refreshed = await refreshWechatQrCode(login)
@@ -263,7 +263,7 @@ export const waitWechatQrLogin = async (args: { session_key: string; verify_code
 
 			return {
 				status: 'needs_verify_code' as const,
-				message: '验证码错误，二维码已刷新，请重新扫码并输入新验证码。',
+				message: 'The verification code was rejected. The QR code was refreshed. Scan again and enter the new code.',
 				qrcode_url: refreshed.qrcode_url
 			}
 		}
@@ -288,7 +288,7 @@ export const waitWechatQrLogin = async (args: { session_key: string; verify_code
 
 			return {
 				status: 'already_connected' as const,
-				message: '这个微信账号已经连接过当前工作区，无需重复授权。'
+				message: 'This WeChat account is already connected to the current workspace.'
 			}
 		case 'confirmed':
 			active_logins.delete(args.session_key)
@@ -296,13 +296,13 @@ export const waitWechatQrLogin = async (args: { session_key: string; verify_code
 			if (!result.bot_token || !result.ilink_bot_id) {
 				return {
 					status: 'error' as const,
-					message: '微信已确认，但服务端没有返回完整凭据。'
+					message: 'The login was confirmed, but the server did not return complete credentials.'
 				}
 			}
 
 			return {
 				status: 'connected' as const,
-				message: '微信连接成功。',
+				message: 'WeChat connected successfully.',
 				account_id: result.ilink_bot_id,
 				bot_token: result.bot_token,
 				base_url: result.baseurl || wechat_clawbot_api_base_url,

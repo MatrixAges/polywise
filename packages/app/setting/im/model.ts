@@ -28,7 +28,7 @@ export type ImFormState = {
 }
 
 const emptyForm = (): ImFormState => ({
-	platform: 'discord',
+	platform: 'wechat',
 	account_id: '',
 	label: '',
 	enabled: true,

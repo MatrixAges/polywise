@@ -1,4 +1,5 @@
-import { CheckCircle2, LoaderCircle, QrCode, ShieldEllipsis } from 'lucide-react'
+import { useEffect, useRef } from 'react'
+import { CheckCircle2, ExternalLink, LoaderCircle, QrCode, ShieldEllipsis } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { Badge } from '@/__shadcn__/components/ui/badge'
@@ -35,6 +36,21 @@ const statusVariant = (x: ReturnType<typeof useModel>) => {
 
 const Index = () => {
 	const x = useModel()
+	const last_opened_qr_url_ref = useRef('')
+
+	useEffect(() => {
+		if (!x.wechat_qr_dialog_open || !x.wechat_qr_code_url) return
+		if (last_opened_qr_url_ref.current === x.wechat_qr_code_url) return
+
+		last_opened_qr_url_ref.current = x.wechat_qr_code_url
+		window.open(x.wechat_qr_code_url, '_blank', 'noopener,noreferrer')
+	}, [x.wechat_qr_dialog_open, x.wechat_qr_code_url])
+
+	const openQrWindow = () => {
+		if (!x.wechat_qr_code_url) return
+		last_opened_qr_url_ref.current = x.wechat_qr_code_url
+		window.open(x.wechat_qr_code_url, '_blank', 'noopener,noreferrer')
+	}
 
 	return (
 		<>
@@ -56,8 +72,8 @@ const Index = () => {
 							<Badge variant={statusVariant(x)}>{statusLabel(x)}</Badge>
 						</div>
 						<div className='text-std-500 text-sm'>
-							像 Hermes 一样扫码授权。连接成功后会自动填充账号凭据，保存当前 account
-							后即可生效。
+							Use a Hermes-style QR authorization flow. Once connected, the current form is
+							auto-filled and you only need to save the account.
 						</div>
 						<div className='grid gap-2 text-sm sm:grid-cols-2'>
 							<div
@@ -128,8 +144,10 @@ const Index = () => {
 							<div className='flex flex-col gap-1'>
 								<FieldTitle className='text-base'>How it works</FieldTitle>
 								<FieldDescription>
-									点击连接后会拉起微信二维码。扫码并在手机上确认后，系统会自动写入当前表单
-									需要的 `bot token`、`account id` 和 API 地址。
+									Click connect to generate a QR login session. The QR code opens in
+									a browser window. After you scan and confirm on your phone, the
+									form is filled with the required `bot token`, `account id`, and
+									API endpoint automatically.
 								</FieldDescription>
 							</div>
 						</div>
@@ -154,49 +172,44 @@ const Index = () => {
 							) : null}
 						</div>
 
-						{x.wechat_qr_code_url ? (
-							<div className='rounded-3xl border bg-white p-4'>
-								<img
-									alt='WeChat QR Code'
-									className='
-										aspect-square
-										object-contain
-										w-full max-w-[320px]
-										mx-auto
-										rounded-2xl
-									'
-									src={x.wechat_qr_code_url}
-								/>
+						<div
+							className='
+								flex flex-col
+								gap-3
+								p-4
+								rounded-3xl
+								bg-muted/35
+								border
+							'
+						>
+							<div className='flex items-start gap-3'>
+								<QrCode className='text-std-400 mt-0.5 size-4 shrink-0' />
+								<div className='flex flex-col gap-1'>
+									<div className='text-sm font-medium'>
+										QR code opens in your browser
+									</div>
+									<div className='text-std-500 text-sm'>
+										Inline rendering is skipped here. A new browser window is
+										opened automatically when a QR session starts or refreshes.
+									</div>
+								</div>
 							</div>
-						) : (
-							<div
-								className='
-									flex
-									items-center justify-center
-									p-12
-									rounded-3xl
-									bg-muted/35
-									border
-								'
-							>
-								<Spinner />
+							<div className='flex flex-wrap items-center gap-2'>
+								<Button
+									type='button'
+									variant='outline'
+									size='sm'
+									onClick={openQrWindow}
+									disabled={!x.wechat_qr_code_url}
+								>
+									<ExternalLink className='size-4' />
+									<span>Open QR Window</span>
+								</Button>
+								<div className='text-std-400 text-xs'>
+									If nothing opened, allow pop-ups for this app and try again.
+								</div>
 							</div>
-						)}
-
-						{x.wechat_qr_code_url ? (
-							<a
-								className='
-									w-fit
-									text-std-400 text-xs
-									underline
-									decoration-std-150 underline-offset-4
-								'
-								href={x.wechat_qr_code_url}
-								target='_blank'
-							>
-								Open QR in browser
-							</a>
-						) : null}
+						</div>
 
 						{x.wechat_qr_status === 'needs_verify_code' ? (
 							<div
@@ -211,7 +224,8 @@ const Index = () => {
 							>
 								<div className='text-sm font-medium'>Phone verification code</div>
 								<div className='text-std-500 text-sm'>
-									如果微信扫码后出现数字验证码，把手机上显示的数字填到这里。
+									If WeChat shows a numeric verification challenge after scanning,
+									enter the code from your phone here.
 								</div>
 								<div className='flex items-center gap-2'>
 									<Input
@@ -229,7 +243,8 @@ const Index = () => {
 
 					<DialogFooter className='items-center justify-between sm:justify-between'>
 						<div className='text-std-400 text-xs'>
-							连接成功后，当前表单会自动回填，随后点击保存即可。
+							After the connection succeeds, the form is filled automatically and you can
+							save the account.
 						</div>
 						<div className='flex items-center gap-2'>
 							{x.wechat_qr_status === 'needs_verify_code' ? (
