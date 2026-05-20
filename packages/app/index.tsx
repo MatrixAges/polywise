@@ -62,6 +62,10 @@ const routes: Array<RouteObject> = [
 						lazy: () => import('@/setting/service_provider')
 					},
 					{
+						path: 'im',
+						lazy: () => import('@/setting/im')
+					},
+					{
 						path: 'about_feedback',
 						lazy: () => import('@/setting/about_feedback')
 					}

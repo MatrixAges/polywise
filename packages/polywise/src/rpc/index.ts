@@ -3,6 +3,7 @@ import agent from './agent'
 import file from './file'
 import group from './group'
 import heartbeat from './heartbeat'
+import im from './im'
 import linkcase from './linkcase'
 import llama from './llama'
 import notification from './notification'
@@ -27,6 +28,7 @@ import type { inferRouterInputs, inferRouterOutputs } from '@trpc/server'
 export const router = r({
 	agent,
 	group,
+	im,
 	file,
 	linkcase,
 	post,
