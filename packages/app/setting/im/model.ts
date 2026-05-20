@@ -149,6 +149,14 @@ export default class Model {
 		return this.accounts.find(item => item.id === this.selectedId) || null
 	}
 
+	get accountIdPlaceholder() {
+		return this.form.platform === 'discord' ? 'discord-main' : 'wechat-main'
+	}
+
+	get labelPlaceholder() {
+		return this.form.platform === 'discord' ? 'Primary Discord Bot' : 'Primary WeChat Bridge'
+	}
+
 	async init() {
 		await this.load()
 	}
@@ -204,14 +212,27 @@ export default class Model {
 		this.form = parseConfig(account)
 	}
 
-	createNew(options?: { reveal?: boolean }) {
+	createNew(options?: { platform?: ImPlatform; reveal?: boolean }) {
+		const platform = options?.platform || this.form.platform
+
 		if (options?.reveal) {
 			this.editorRevealKey += 1
 		}
 
 		this.editorMode = 'new'
 		this.selectedId = ''
-		this.form = emptyForm()
+		this.form = { ...emptyForm(), platform }
+	}
+
+	selectPlatform(platform: ImPlatform) {
+		this.editorRevealKey += 1
+
+		if (this.editorMode === 'new') {
+			this.form.platform = platform
+			return
+		}
+
+		this.createNew({ platform })
 	}
 
 	async save() {

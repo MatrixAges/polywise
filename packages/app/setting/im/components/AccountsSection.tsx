@@ -1,8 +1,6 @@
-import { Plus } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { Badge } from '@/__shadcn__/components/ui/badge'
-import { Button } from '@/__shadcn__/components/ui/button'
 import { Separator } from '@/__shadcn__/components/ui/separator'
 import { Spinner } from '@/__shadcn__/components/ui/spinner'
 
@@ -38,7 +36,7 @@ const AccountsSection = () => {
 				<div>
 					<div className='text-sm font-medium'>Existing Accounts</div>
 					<div className='text-std-500 text-sm'>
-						Public account list for switching into edit mode
+						Select an account to edit, or switch the header tabs to start a new draft
 					</div>
 				</div>
 				<Badge variant='outline'>{x.accounts.length}</Badge>
@@ -104,17 +102,9 @@ const AccountsSection = () => {
 							'
 					>
 						<div className='text-std-500 text-sm'>
-							No IM accounts configured yet. Create your first Discord or WeChat account
-							above.
+							No IM accounts configured yet. Choose Discord or WeChat in the header and fill
+							the form above.
 						</div>
-						<Button
-							type='button'
-							variant='outline'
-							onClick={() => x.createNew({ reveal: true })}
-						>
-							<Plus className='size-4' />
-							<span>New Account</span>
-						</Button>
 					</div>
 				)}
 			</div>

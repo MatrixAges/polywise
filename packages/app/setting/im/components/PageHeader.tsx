@@ -1,10 +1,16 @@
-import { MessageCircle, Plus, RefreshCw } from 'lucide-react'
+import { Bot, MessageCircle, QrCode } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
-import { Button } from '@/__shadcn__/components/ui/button'
-import { Spinner } from '@/__shadcn__/components/ui/spinner'
+import { TextTabs } from '@/components'
 
 import { useModel } from '../context'
+
+import type { ImPlatform } from '../model'
+
+const items = [
+	{ key: 'discord', title: 'Discord', Icon: Bot },
+	{ key: 'wechat', title: 'WeChat', Icon: QrCode }
+]
 
 const PageHeader = () => {
 	const x = useModel()
@@ -30,16 +36,12 @@ const PageHeader = () => {
 					</div>
 				</div>
 			</div>
-			<div className='flex items-center gap-2'>
-				<Button type='button' variant='outline' onClick={() => x.createNew({ reveal: true })}>
-					<Plus className='size-4' />
-					<span>New Account</span>
-				</Button>
-				<Button type='button' variant='outline' onClick={() => void x.reload()} disabled={x.reloading}>
-					{x.reloading ? <Spinner className='size-4' /> : <RefreshCw className='size-4' />}
-					<span>Reload Runtime</span>
-				</Button>
-			</div>
+			<TextTabs
+				className='gap-3'
+				items={items}
+				active={x.form.platform}
+				setActive={value => x.selectPlatform(value as ImPlatform)}
+			></TextTabs>
 		</div>
 	)
 }

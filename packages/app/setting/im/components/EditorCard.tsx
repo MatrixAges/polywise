@@ -57,8 +57,8 @@ const EditorCard = ({ accountIdInputRef, editorCardRef }: Props) => {
 								{x.editorMode === 'edit' ? 'Edit IM Account' : 'Create IM Account'}
 							</div>
 							<div className='text-std-500 text-sm'>
-								Start with the platform at the top, then fill in the account identity
-								and runtime credentials.
+								Select an account below to edit it, or switch the tabs in the header to
+								start a new draft.
 							</div>
 						</div>
 					</div>
@@ -111,7 +111,7 @@ const EditorCard = ({ accountIdInputRef, editorCardRef }: Props) => {
 						className='max-w-[280px]'
 						value={x.form.account_id}
 						onChange={event => x.updateForm('account_id', event.target.value)}
-						placeholder='discord-main'
+						placeholder={x.accountIdPlaceholder}
 					/>
 				</Field>
 				<Field className='items-center! py-3' orientation='horizontal'>
@@ -123,7 +123,7 @@ const EditorCard = ({ accountIdInputRef, editorCardRef }: Props) => {
 						className='max-w-[280px]'
 						value={x.form.label}
 						onChange={event => x.updateForm('label', event.target.value)}
-						placeholder='Primary Discord Bot'
+						placeholder={x.labelPlaceholder}
 					/>
 				</Field>
 				<Field className='items-center! py-3' orientation='horizontal'>

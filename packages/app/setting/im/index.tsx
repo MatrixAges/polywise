@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { observer } from 'mobx-react-lite'
 import { container } from 'tsyringe'
 
-import { AccountsSection, EditorCard, PageHeader, PlatformTabs } from './components'
+import { AccountsSection, EditorCard, PageHeader } from './components'
 import { Context } from './context'
 import Model from './model'
 
@@ -49,7 +49,6 @@ const Index = () => {
 						gap-5
 					'
 				>
-					<PlatformTabs></PlatformTabs>
 					<EditorCard
 						editorCardRef={editorCardRef}
 						accountIdInputRef={accountIdInputRef}
