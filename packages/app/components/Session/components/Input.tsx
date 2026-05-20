@@ -315,7 +315,9 @@ const Index = (props: IPropsInput) => {
 										text-xs
 										bg-transparent
 									`,
-										audit_mode === 'full' ? 'text-red-700/72' : 'text-std-400'
+										audit_mode === 'full'
+											? 'text-red-700/72 dark:text-red-300/72'
+											: 'text-std-400'
 									)}
 								>
 									<SelectValue />

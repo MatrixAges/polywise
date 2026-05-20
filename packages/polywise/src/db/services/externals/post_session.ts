@@ -22,6 +22,12 @@ export const getPostSessions = async (args: ArgsGetPostSessions = {}) => {
 	return query
 }
 
+export const getPostSessionIdList = async () => {
+	const list = await env.db.select({ session_id: post_session.session_id }).from(post_session)
+
+	return list.map(item => item.session_id)
+}
+
 export const addPostSession = async (post_id: string, session_id: string) => {
 	return env.db
 		.insert(post_session)

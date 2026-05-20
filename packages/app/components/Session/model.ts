@@ -173,6 +173,8 @@ export default class Index {
 	}
 
 	send(v: string) {
+		if (!v) return
+
 		this.chat.sendMessage({ text: v })
 
 		this.scrollToBottom({ force: true })

@@ -1,7 +1,12 @@
 import { blocked_session_ids, isBlockedSessionId } from '@core/consts'
 import { session } from '@core/db/schema'
 import { getSessions } from '@core/db/services'
-import { getAgentSessionIdList, getGroupSessionIdList, getProjectSessionIdList } from '@core/db/services/externals'
+import {
+	getAgentSessionIdList,
+	getGroupSessionIdList,
+	getPostSessionIdList,
+	getProjectSessionIdList
+} from '@core/db/services/externals'
 import { desc, inArray, notInArray } from 'drizzle-orm'
 
 import { p } from '../../utils/trpc'
@@ -28,13 +33,15 @@ const getPinSessionList = async (args: {
 	project_session_id_set: Set<string>
 	group_session_id_set: Set<string>
 	agent_session_id_set: Set<string>
+	post_session_id_set: Set<string>
 }) => {
-	const { pin_list, project_session_id_set, group_session_id_set, agent_session_id_set } = args
+	const { pin_list, project_session_id_set, group_session_id_set, agent_session_id_set, post_session_id_set } = args
 	const pin_session_id_list = pin_list
 		.map(item => item.id)
 		.filter(session_id => !project_session_id_set.has(session_id))
 		.filter(session_id => !group_session_id_set.has(session_id))
 		.filter(session_id => !agent_session_id_set.has(session_id))
+		.filter(session_id => !post_session_id_set.has(session_id))
 		.filter(session_id => !isBlockedSessionId(session_id))
 
 	if (!pin_session_id_list.length) {
@@ -49,13 +56,21 @@ const getUnpinSessionList = async (args: {
 	project_session_id_list: Array<string>
 	group_session_id_list: Array<string>
 	agent_session_id_list: Array<string>
+	post_session_id_list: Array<string>
 }) => {
-	const { pin_session_id_list, project_session_id_list, group_session_id_list, agent_session_id_list } = args
+	const {
+		pin_session_id_list,
+		project_session_id_list,
+		group_session_id_list,
+		agent_session_id_list,
+		post_session_id_list
+	} = args
 	const exclude_session_id_list = [
 		...pin_session_id_list,
 		...project_session_id_list,
 		...group_session_id_list,
 		...agent_session_id_list,
+		...post_session_id_list,
 		...blocked_session_ids
 	]
 
@@ -68,26 +83,31 @@ const getUnpinSessionList = async (args: {
 
 export default p.query(async () => {
 	const pin_list = (await readPinList()).filter(item => !isBlockedSessionId(item.id))
-	const [project_session_id_list, group_session_id_list, agent_session_id_list] = await Promise.all([
-		getProjectSessionIdList(),
-		getGroupSessionIdList(),
-		getAgentSessionIdList()
-	])
+	const [project_session_id_list, group_session_id_list, agent_session_id_list, post_session_id_list] =
+		await Promise.all([
+			getProjectSessionIdList(),
+			getGroupSessionIdList(),
+			getAgentSessionIdList(),
+			getPostSessionIdList()
+		])
 	const project_session_id_set = new Set(project_session_id_list)
 	const group_session_id_set = new Set(group_session_id_list)
 	const agent_session_id_set = new Set(agent_session_id_list)
+	const post_session_id_set = new Set(post_session_id_list)
 	const pin_map = getPinMap(pin_list)
 	const pin_session_list = await getPinSessionList({
 		pin_list,
 		project_session_id_set,
 		group_session_id_set,
-		agent_session_id_set
+		agent_session_id_set,
+		post_session_id_set
 	})
 	const unpin_session_list = await getUnpinSessionList({
 		pin_session_id_list: pin_session_list.map(item => item.id),
 		project_session_id_list,
 		group_session_id_list,
-		agent_session_id_list
+		agent_session_id_list,
+		post_session_id_list
 	})
 	const pin_session_map = new Map(pin_session_list.map(item => [item.id, item]))
 	const pins = pin_list
