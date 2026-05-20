@@ -2,12 +2,12 @@ import { r } from '@core/utils'
 
 import create from './create'
 import health from './health'
-import installWechatClawbot from './installWechatClawbot'
 import query from './query'
 import reload from './reload'
 import remove from './remove'
+import startWechatQrLogin from './startWechatQrLogin'
 import update from './update'
-import wechatClawbotStatus from './wechatClawbotStatus'
+import waitWechatQrLogin from './waitWechatQrLogin'
 
 export default r({
 	create,
@@ -16,6 +16,6 @@ export default r({
 	remove,
 	health,
 	reload,
-	wechatClawbotStatus,
-	installWechatClawbot
+	startWechatQrLogin,
+	waitWechatQrLogin
 })

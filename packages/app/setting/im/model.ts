@@ -9,7 +9,8 @@ export type ImAccountItem = ImAccountsResponse['accounts'][number]
 export type ImHealth = Awaited<ReturnType<typeof rpc.im.health.query>>
 export type ImPlatform = ImAccountItem['platform']
 export type ImEditorMode = 'new' | 'edit'
-export type WechatClawbotStatus = Awaited<ReturnType<typeof rpc.im.wechatClawbotStatus.query>>
+export type WechatQrLoginStart = Awaited<ReturnType<typeof rpc.im.startWechatQrLogin.mutate>>
+export type WechatQrLoginWait = Awaited<ReturnType<typeof rpc.im.waitWechatQrLogin.query>>
 
 export type ImFormState = {
 	id?: string
@@ -37,7 +38,7 @@ const emptyForm = (): ImFormState => ({
 	discord_allowed_channel_ids: '',
 	discord_allowed_user_ids: '',
 	wechat_bot_token: '',
-	wechat_api_base_url: 'https://ilinkai.weixin.qq.com/ilink/bot/'
+	wechat_api_base_url: 'https://ilinkai.weixin.qq.com'
 })
 
 const parseStringList = (value: string) =>
@@ -65,9 +66,7 @@ const parseConfig = (account: ImAccountItem): ImFormState => {
 			discord_allowed_user_ids: '',
 			wechat_bot_token: typeof config.bot_token === 'string' ? config.bot_token : '',
 			wechat_api_base_url:
-				typeof config.api_base_url === 'string'
-					? config.api_base_url
-					: 'https://ilinkai.weixin.qq.com/ilink/bot/'
+				typeof config.api_base_url === 'string' ? config.api_base_url : 'https://ilinkai.weixin.qq.com'
 		}
 	}
 
@@ -89,19 +88,19 @@ const parseConfig = (account: ImAccountItem): ImFormState => {
 			Array.isArray(config.allowed_user_ids) ? config.allowed_user_ids : []
 		),
 		wechat_bot_token: '',
-		wechat_api_base_url: 'https://ilinkai.weixin.qq.com/ilink/bot/'
+		wechat_api_base_url: 'https://ilinkai.weixin.qq.com'
 	}
 }
 
 const stringifyConfig = (form: ImFormState) => {
 	if (form.platform === 'wechat') {
 		if (!form.wechat_bot_token.trim()) {
-			throw new Error('WeChat ClawBot token is required')
+			throw new Error('Connect WeChat first')
 		}
 
 		return JSON.stringify({
 			bot_token: form.wechat_bot_token.trim(),
-			api_base_url: form.wechat_api_base_url.trim() || 'https://ilinkai.weixin.qq.com/ilink/bot/'
+			api_base_url: form.wechat_api_base_url.trim() || 'https://ilinkai.weixin.qq.com'
 		})
 	}
 
@@ -129,9 +128,23 @@ export default class Model {
 	saving = false
 	reloading = false
 	removing = false
-	wechat_clawbot_status = null as WechatClawbotStatus | null
-	wechat_clawbot_loading = false
-	wechat_clawbot_installing = false
+	wechat_qr_dialog_open = false
+	wechat_qr_loading = false
+	wechat_qr_polling = false
+	wechat_qr_verify_loading = false
+	wechat_qr_session_key = ''
+	wechat_qr_code_url = ''
+	wechat_qr_message = ''
+	wechat_qr_status = 'idle' as
+		| 'idle'
+		| 'pending'
+		| 'scanned'
+		| 'needs_verify_code'
+		| 'connected'
+		| 'already_connected'
+		| 'error'
+	wechat_qr_verify_code = ''
+	wechat_qr_poll_timer = 0 as ReturnType<typeof setTimeout> | 0
 
 	constructor() {
 		makeAutoObservable(this, {}, { autoBind: true })
@@ -142,54 +155,160 @@ export default class Model {
 	}
 
 	get accountIdPlaceholder() {
-		return this.form.platform === 'discord' ? 'discord-main' : 'wechat-main'
+		return this.form.platform === 'discord' ? 'discord-main' : 'Auto-filled after connect'
 	}
 
 	get labelPlaceholder() {
-		return this.form.platform === 'discord' ? 'Primary Discord Bot' : 'Primary WeChat ClawBot'
+		return this.form.platform === 'discord' ? 'Primary Discord Bot' : 'Primary WeChat Assistant'
+	}
+
+	get wechatConnectionReady() {
+		return Boolean(this.form.wechat_bot_token.trim())
 	}
 
 	async init() {
-		await Promise.all([this.load(), this.loadWechatClawbotStatus()])
+		await this.load()
 	}
 
-	deinit() {}
+	deinit() {
+		this.clearWechatQrPollTimer()
+	}
 
 	updateForm<K extends keyof ImFormState>(key: K, value: ImFormState[K]) {
 		this.form[key] = value
 	}
 
-	async loadWechatClawbotStatus() {
-		this.wechat_clawbot_loading = true
+	clearWechatQrPollTimer() {
+		if (!this.wechat_qr_poll_timer) return
 
-		try {
-			this.wechat_clawbot_status = await rpc.im.wechatClawbotStatus.query()
-		} catch (error) {
-			this.wechat_clawbot_status = {
-				status: 'warning',
-				openclaw_installed: false,
-				plugin_installed: false,
-				ready: false,
-				detail: error instanceof Error ? error.message : String(error),
-				install_command: 'npx -y @tencent-weixin/openclaw-weixin-cli@latest install'
-			}
-		} finally {
-			this.wechat_clawbot_loading = false
-		}
+		clearTimeout(this.wechat_qr_poll_timer)
+		this.wechat_qr_poll_timer = 0
 	}
 
-	async installWechatClawbot() {
-		this.wechat_clawbot_installing = true
+	closeWechatQrDialog() {
+		this.clearWechatQrPollTimer()
+		this.wechat_qr_dialog_open = false
+		this.wechat_qr_loading = false
+		this.wechat_qr_polling = false
+		this.wechat_qr_verify_loading = false
+		this.wechat_qr_session_key = ''
+		this.wechat_qr_code_url = ''
+		this.wechat_qr_message = ''
+		this.wechat_qr_status = 'idle'
+		this.wechat_qr_verify_code = ''
+	}
+
+	scheduleWechatQrPoll() {
+		this.clearWechatQrPollTimer()
+
+		if (!this.wechat_qr_session_key || this.wechat_qr_status === 'needs_verify_code') {
+			return
+		}
+
+		this.wechat_qr_poll_timer = setTimeout(() => {
+			this.wechat_qr_poll_timer = 0
+			void this.pollWechatQrLogin()
+		}, 1500)
+	}
+
+	async startWechatQrLogin() {
+		this.clearWechatQrPollTimer()
+		this.wechat_qr_loading = true
+		this.wechat_qr_polling = false
+		this.wechat_qr_verify_loading = false
+		this.wechat_qr_verify_code = ''
 
 		try {
-			const result = await rpc.im.installWechatClawbot.mutate()
-			await this.loadWechatClawbotStatus()
-			toast.success(result.ready ? 'WeChat ClawBot is ready' : 'WeChat ClawBot install finished')
+			const result = await rpc.im.startWechatQrLogin.mutate()
+
+			this.wechat_qr_dialog_open = true
+			this.wechat_qr_session_key = result.session_key
+			this.wechat_qr_code_url = result.qrcode_url
+			this.wechat_qr_message = result.message
+			this.wechat_qr_status = 'pending'
+			this.scheduleWechatQrPoll()
 		} catch (error) {
 			toast.error(error instanceof Error ? error.message : String(error))
 		} finally {
-			this.wechat_clawbot_installing = false
+			this.wechat_qr_loading = false
 		}
+	}
+
+	async pollWechatQrLogin(verify_code?: string) {
+		if (!this.wechat_qr_session_key) return
+		const session_key = this.wechat_qr_session_key
+
+		const is_verify_attempt = Boolean(verify_code?.trim())
+
+		if (is_verify_attempt) {
+			this.wechat_qr_verify_loading = true
+		} else {
+			this.wechat_qr_polling = true
+		}
+
+		try {
+			const result = await rpc.im.waitWechatQrLogin.query({
+				session_key,
+				verify_code: verify_code?.trim() || undefined
+			})
+
+			if (this.wechat_qr_session_key !== session_key) {
+				return
+			}
+
+			this.wechat_qr_status = result.status
+			this.wechat_qr_message = result.message
+
+			if (result.qrcode_url) {
+				this.wechat_qr_code_url = result.qrcode_url
+			}
+
+			if (result.status === 'connected' && result.bot_token && result.account_id) {
+				this.form.platform = 'wechat'
+				this.form.wechat_bot_token = result.bot_token
+				this.form.wechat_api_base_url = result.base_url?.trim() || 'https://ilinkai.weixin.qq.com'
+				if (!this.form.account_id.trim() || this.editorMode === 'new') {
+					this.form.account_id = result.account_id
+				}
+				if (!this.form.label.trim()) {
+					this.form.label = `WeChat ${result.account_id}`
+				}
+				this.wechat_qr_verify_code = ''
+				toast.success('WeChat connected. Save the account to apply.')
+				return
+			}
+
+			if (result.status === 'already_connected') {
+				toast.success('This WeChat account is already connected.')
+				return
+			}
+
+			if (result.status === 'error') {
+				toast.error(result.message)
+				return
+			}
+
+			if (result.status === 'needs_verify_code') {
+				this.wechat_qr_verify_code = ''
+				return
+			}
+
+			this.scheduleWechatQrPoll()
+		} catch (error) {
+			toast.error(error instanceof Error ? error.message : String(error))
+		} finally {
+			this.wechat_qr_polling = false
+			this.wechat_qr_verify_loading = false
+		}
+	}
+
+	async submitWechatQrVerifyCode() {
+		if (!this.wechat_qr_verify_code.trim()) {
+			toast.error('Verification code is required')
+			return
+		}
+
+		await this.pollWechatQrLogin(this.wechat_qr_verify_code)
 	}
 
 	getActiveRouteCount(account: ImAccountItem) {
@@ -225,6 +344,8 @@ export default class Model {
 	}
 
 	selectAccount(account: ImAccountItem | null) {
+		this.closeWechatQrDialog()
+
 		if (!account) {
 			this.editorMode = 'new'
 			this.selectedId = ''
@@ -238,6 +359,8 @@ export default class Model {
 	}
 
 	createNew(options?: { platform?: ImPlatform }) {
+		this.closeWechatQrDialog()
+
 		const platform = options?.platform || this.form.platform
 		this.editorMode = 'new'
 		this.selectedId = ''

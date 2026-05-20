@@ -14,11 +14,11 @@ const items = [
 
 const docsMap = {
 	wechat: {
-		label: 'OpenClaw WeChat guide',
+		label: 'WeChat ClawBot guide',
 		href: 'https://www.runoob.com/ai-agent/openclaw-weixin.html'
 	},
 	discord: {
-		label: 'OpenClaw Discord guide',
+		label: 'Discord ClawBot guide',
 		href: 'https://docs.openclaw.ai/channels/discord'
 	}
 } as const

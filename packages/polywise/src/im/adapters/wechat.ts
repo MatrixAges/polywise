@@ -70,6 +70,10 @@ const extractText = (items: Array<WechatClawbotMessageItem> | undefined) =>
 		.join('\n')
 
 const normalizeBaseUrl = (value: string) => (value.endsWith('/') ? value : `${value}/`)
+const normalizeApiBaseUrl = (value: string) => {
+	const normalized = normalizeBaseUrl(value)
+	return /\/ilink\/bot\/?$/i.test(normalized) ? normalized : new URL('ilink/bot/', normalized).toString()
+}
 
 export default class WechatAdapter extends BaseImAdapter {
 	platform = 'wechat' as const
@@ -108,7 +112,7 @@ export default class WechatAdapter extends BaseImAdapter {
 	}
 
 	get apiBaseUrl() {
-		return normalizeBaseUrl((this.config.api_base_url || wechat_clawbot_api_base_url).trim())
+		return normalizeApiBaseUrl((this.config.api_base_url || wechat_clawbot_api_base_url).trim())
 	}
 
 	async connect() {
