@@ -27,32 +27,8 @@ const Index = () => {
 				border
 			'
 		>
-			<div
-				className='
-					flex flex-col
-					gap-4
-				'
-			>
-				<div
-					className='
-						flex flex-wrap
-						items-start justify-between
-						gap-3
-					'
-				>
-					<div className='flex flex-col gap-2'>
-						<div>
-							<div className='text-base font-semibold'>
-								{x.editorMode === 'edit' ? 'Edit IM Account' : 'Create IM Account'}
-							</div>
-							<div className='text-std-500 text-sm'>
-								Select an account below to edit it, or switch the tabs in the header to
-								start a new draft.
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
+			{x.form.platform === 'discord' ? <DiscordFields></DiscordFields> : <WeChatFields></WeChatFields>}
+			<Separator className='bg-border/80 h-px w-full' />
 			<FieldGroup className='gap-0'>
 				<Field className='items-center! py-3' orientation='horizontal'>
 					<FieldContent>
@@ -91,8 +67,6 @@ const Index = () => {
 					/>
 				</Field>
 			</FieldGroup>
-			<Separator className='bg-border/80 h-px w-full' />
-			{x.form.platform === 'discord' ? <DiscordFields></DiscordFields> : <WeChatFields></WeChatFields>}
 			<div className='flex items-center justify-end gap-2'>
 				{x.selectedAccount && (
 					<Badge variant='outline'>Active routes: {x.getActiveRouteCount(x.selectedAccount)}</Badge>

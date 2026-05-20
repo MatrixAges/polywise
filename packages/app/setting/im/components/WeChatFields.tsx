@@ -72,8 +72,8 @@ const Index = () => {
 							<Badge variant={statusVariant(x)}>{statusLabel(x)}</Badge>
 						</div>
 						<div className='text-std-500 text-sm'>
-							Use a Hermes-style QR authorization flow. Once connected, the current form is
-							auto-filled and you only need to save the account.
+							Use a Hermes-style QR authorization flow. Once connected, an IM account is
+							created automatically and the current form is filled from the saved account.
 						</div>
 						<div className='grid gap-2 text-sm sm:grid-cols-2'>
 							<div
@@ -146,8 +146,8 @@ const Index = () => {
 								<FieldDescription>
 									Click connect to generate a QR login session. The QR code opens in
 									a browser window. After you scan and confirm on your phone, the
-									form is filled with the required `bot token`, `account id`, and
-									API endpoint automatically.
+									account is created automatically and the form is filled with the
+									required `bot token`, `account id`, and API endpoint.
 								</FieldDescription>
 							</div>
 						</div>
@@ -243,8 +243,7 @@ const Index = () => {
 
 					<DialogFooter className='items-center justify-between sm:justify-between'>
 						<div className='text-std-400 text-xs'>
-							After the connection succeeds, the form is filled automatically and you can
-							save the account.
+							After the connection succeeds, the IM account is saved automatically.
 						</div>
 						<div className='flex items-center gap-2'>
 							{x.wechat_qr_status === 'needs_verify_code' ? (

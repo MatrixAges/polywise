@@ -274,7 +274,10 @@ export default class Model {
 					this.form.label = `WeChat ${result.account_id}`
 				}
 				this.wechat_qr_verify_code = ''
-				toast.success('WeChat connected. Save the account to apply.')
+				await this.persistForm({
+					success_message: 'WeChat connected and saved.'
+				})
+				this.closeWechatQrDialog()
 				return
 			}
 
@@ -309,6 +312,42 @@ export default class Model {
 		}
 
 		await this.pollWechatQrLogin(this.wechat_qr_verify_code)
+	}
+
+	private getPersistPayload() {
+		if (!this.form.account_id.trim()) {
+			throw new Error('Account ID is required')
+		}
+
+		return {
+			platform: this.form.platform,
+			account_id: this.form.account_id.trim(),
+			label: this.form.label.trim(),
+			enabled: this.form.enabled,
+			config_json: stringifyConfig(this.form)
+		}
+	}
+
+	private async persistForm(options?: { success_message?: string; silent?: boolean }) {
+		const payload = this.getPersistPayload()
+		const matched_account = this.accounts.find(
+			item => item.platform === payload.platform && item.account_id === payload.account_id
+		)
+		const target_id = this.form.id || matched_account?.id
+		const is_editing = Boolean(target_id)
+
+		const saved = target_id
+			? await rpc.im.update.mutate({ id: target_id, ...payload })
+			: await rpc.im.create.mutate(payload)
+
+		await rpc.im.reload.mutate()
+		await this.load(saved.id)
+
+		if (!options?.silent) {
+			toast.success(options?.success_message || (is_editing ? 'IM account updated' : 'IM account created'))
+		}
+
+		return saved
 	}
 
 	getActiveRouteCount(account: ImAccountItem) {
@@ -377,30 +416,10 @@ export default class Model {
 	}
 
 	async save() {
-		if (!this.form.account_id.trim()) {
-			toast.error('Account ID is required')
-			return
-		}
-
 		this.saving = true
-		const isEditing = Boolean(this.form.id)
 
 		try {
-			const payload = {
-				platform: this.form.platform,
-				account_id: this.form.account_id.trim(),
-				label: this.form.label.trim(),
-				enabled: this.form.enabled,
-				config_json: stringifyConfig(this.form)
-			}
-
-			const saved = this.form.id
-				? await rpc.im.update.mutate({ id: this.form.id, ...payload })
-				: await rpc.im.create.mutate(payload)
-
-			await rpc.im.reload.mutate()
-			await this.load(saved.id)
-			toast.success(isEditing ? 'IM account updated' : 'IM account created')
+			await this.persistForm()
 		} catch (error) {
 			toast.error(error instanceof Error ? error.message : String(error))
 		} finally {
