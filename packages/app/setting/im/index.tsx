@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { observer } from 'mobx-react-lite'
 import { container } from 'tsyringe'
 
@@ -8,27 +8,12 @@ import Model from './model'
 
 const Index = () => {
 	const [x] = useState(() => container.resolve(Model))
-	const editorCardRef = useRef<HTMLDivElement | null>(null)
-	const accountIdInputRef = useRef<HTMLInputElement | null>(null)
 
 	useEffect(() => {
 		void x.init()
 
 		return () => x.deinit()
 	}, [x])
-
-	useEffect(() => {
-		if (!x.editorRevealKey) return
-
-		editorCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-
-		const timer = window.setTimeout(() => {
-			accountIdInputRef.current?.focus()
-			accountIdInputRef.current?.select()
-		}, 140)
-
-		return () => window.clearTimeout(timer)
-	}, [x, x.editorRevealKey])
 
 	return (
 		<Context value={x}>
@@ -49,10 +34,7 @@ const Index = () => {
 						gap-5
 					'
 				>
-					<EditorCard
-						editorCardRef={editorCardRef}
-						accountIdInputRef={accountIdInputRef}
-					></EditorCard>
+					<EditorCard></EditorCard>
 					<AccountsSection></AccountsSection>
 				</div>
 			</div>

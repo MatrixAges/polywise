@@ -139,7 +139,6 @@ export default class Model {
 	saving = false
 	reloading = false
 	removing = false
-	editorRevealKey = 0
 
 	constructor() {
 		makeAutoObservable(this, {}, { autoBind: true })
@@ -212,21 +211,14 @@ export default class Model {
 		this.form = parseConfig(account)
 	}
 
-	createNew(options?: { platform?: ImPlatform; reveal?: boolean }) {
+	createNew(options?: { platform?: ImPlatform }) {
 		const platform = options?.platform || this.form.platform
-
-		if (options?.reveal) {
-			this.editorRevealKey += 1
-		}
-
 		this.editorMode = 'new'
 		this.selectedId = ''
 		this.form = { ...emptyForm(), platform }
 	}
 
 	selectPlatform(platform: ImPlatform) {
-		this.editorRevealKey += 1
-
 		if (this.editorMode === 'new') {
 			this.form.platform = platform
 			return

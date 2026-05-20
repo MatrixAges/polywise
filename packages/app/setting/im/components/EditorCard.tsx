@@ -13,19 +13,11 @@ import { useModel } from '../context'
 import DiscordFields from './DiscordFields'
 import WeChatFields from './WeChatFields'
 
-import type { RefObject } from 'react'
-
-type Props = {
-	accountIdInputRef: RefObject<HTMLInputElement | null>
-	editorCardRef: RefObject<HTMLDivElement | null>
-}
-
-const EditorCard = ({ accountIdInputRef, editorCardRef }: Props) => {
+const EditorCard = () => {
 	const x = useModel()
 
 	return (
 		<div
-			ref={editorCardRef}
 			className='
 				flex flex-col
 				gap-5
@@ -68,7 +60,6 @@ const EditorCard = ({ accountIdInputRef, editorCardRef }: Props) => {
 						<FieldDescription>Unique identifier used by inbound events</FieldDescription>
 					</FieldContent>
 					<Input
-						ref={accountIdInputRef}
 						className='max-w-[280px]'
 						value={x.form.account_id}
 						onChange={event => x.updateForm('account_id', event.target.value)}
@@ -100,7 +91,7 @@ const EditorCard = ({ accountIdInputRef, editorCardRef }: Props) => {
 					/>
 				</Field>
 			</FieldGroup>
-			<Separator />
+			<Separator className='bg-border/80 h-px w-full' />
 			{x.form.platform === 'discord' ? <DiscordFields></DiscordFields> : <WeChatFields></WeChatFields>}
 			<div className='flex items-center justify-end gap-2'>
 				{x.selectedAccount && (
