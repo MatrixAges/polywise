@@ -1,5 +1,5 @@
 import { p, SessionEventStore } from '@core/utils'
-import { boolean, enum as Enum, object, string } from 'zod'
+import { array, boolean, enum as Enum, object, string } from 'zod'
 
 export const stop = p.input(string()).mutation(async ({ input }) => {
 	SessionEventStore.emit(`${input}/stop`)
@@ -42,12 +42,22 @@ export const setConfig = p
 		object({
 			id: string(),
 			mode: string().optional(),
-			audit_mode: Enum(['limited', 'auto', 'full']).optional()
+			audit_mode: Enum(['limited', 'auto', 'full']).optional(),
+			disable_map: array(string()).optional(),
+			enable_sub_agent: boolean().optional(),
+			enable_agent_tool: boolean().optional(),
+			agent_ids: array(string()).optional()
 		})
 	)
 	.mutation(async ({ input }) => {
 		SessionEventStore.emit(`${input.id}/setConfig`, {
 			...(input.mode ? { mode: input.mode } : {}),
-			...(input.audit_mode ? { audit_mode: input.audit_mode } : {})
+			...(input.audit_mode ? { audit_mode: input.audit_mode } : {}),
+			...(input.disable_map ? { disable_map: input.disable_map } : {}),
+			...(typeof input.enable_sub_agent === 'boolean' ? { enable_sub_agent: input.enable_sub_agent } : {}),
+			...(typeof input.enable_agent_tool === 'boolean'
+				? { enable_agent_tool: input.enable_agent_tool }
+				: {}),
+			...(input.agent_ids ? { agent_ids: input.agent_ids } : {})
 		})
 	})

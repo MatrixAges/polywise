@@ -11,12 +11,16 @@ interface IProps {
 
 const Index = (props: IProps) => {
 	const { item, pin } = props
-	const { createSession, onRenameSession, togglePinSession, removeSession } = useModel()
+	const { createSession, menu_tab, onRenameSession, togglePinSession, removeSession } = useModel()
 
 	return (
 		<ContextMenuContent>
-			<ContextMenuItem onClick={() => createSession()}>New Session</ContextMenuItem>
-			<ContextMenuSeparator />
+			{menu_tab !== 'im' ? (
+				<>
+					<ContextMenuItem onClick={() => createSession()}>New Session</ContextMenuItem>
+					<ContextMenuSeparator />
+				</>
+			) : null}
 			<ContextMenuItem onClick={() => onRenameSession(item.id, item.title)}>Rename</ContextMenuItem>
 			<ContextMenuItem onClick={() => togglePinSession(item.id)}>{pin ? 'Unpin' : 'Pin'}</ContextMenuItem>
 			<ContextMenuSeparator />

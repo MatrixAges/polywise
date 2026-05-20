@@ -1,6 +1,7 @@
 import type { Session } from '@core/db'
 import type { LanguageModelUsage, UIDataTypes, UIMessage, UITools } from 'ai'
 import type { EventEmitter } from 'events'
+import type { SessionRuntimeConfig } from './session/config/shared'
 import type { ContextInput } from './tools'
 
 export type MessagePartDurationTargetType =
@@ -94,6 +95,7 @@ export type ChatEventRes = {
 		permission: Permission | null
 		mode: SessionMode
 		audit_mode: SessionAuditMode
+		runtime_config: SessionRuntimeConfig
 		group?: {
 			id: string
 			name: string

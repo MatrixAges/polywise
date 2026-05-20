@@ -18,6 +18,7 @@ export * from './self_memory'
 export * from './linkcase'
 export * from './post'
 export * from './runtime'
+export * from './agent'
 
 export { createContextTool } from './context'
 export type { ContextInput } from './context'

@@ -32,6 +32,7 @@ interface WechatClawbotEnvelope<T> {
 }
 
 interface WechatClawbotMessageItem {
+	type?: number
 	item_type?: number
 	text_item?: {
 		text?: string
@@ -64,7 +65,7 @@ const buildWechatUin = () => randomBytes(4).toString('base64')
 
 const extractText = (items: Array<WechatClawbotMessageItem> | undefined) =>
 	(items || [])
-		.filter(item => item.item_type === 1 && typeof item.text_item?.text === 'string')
+		.filter(item => (item.type ?? item.item_type) === 1 && typeof item.text_item?.text === 'string')
 		.map(item => item.text_item!.text!.trim())
 		.filter(Boolean)
 		.join('\n')
@@ -386,24 +387,23 @@ export default class WechatAdapter extends BaseImAdapter {
 		}
 
 		const response = await this.callClawbotApi<{ msg_id?: string }>('sendmessage', {
-			base_info: {
-				channel_version: wechat_clawbot_channel_version
-			},
-			context_token: state.context_token,
-			message: {
-				from_user_id: '',
+			msg: {
 				to_user_id: args.route.chat_id,
+				context_token: state.context_token,
 				client_id,
 				message_type: 2,
 				message_state: 2,
 				item_list: [
 					{
-						item_type: 1,
+						type: 1,
 						text_item: {
 							text: args.text
 						}
 					}
 				]
+			},
+			base_info: {
+				channel_version: wechat_clawbot_channel_version
 			}
 		})
 

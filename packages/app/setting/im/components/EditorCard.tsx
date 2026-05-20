@@ -11,6 +11,7 @@ import { Switch } from '@/__shadcn__/components/ui/switch'
 
 import { useModel } from '../context'
 import DiscordFields from './DiscordFields'
+import RuntimeOptions from './RuntimeOptions'
 import WeChatFields from './WeChatFields'
 
 const Index = () => {
@@ -67,6 +68,8 @@ const Index = () => {
 					/>
 				</Field>
 			</FieldGroup>
+			<Separator className='bg-border/80 h-px w-full' />
+			<RuntimeOptions />
 			<div className='flex items-center justify-end gap-2'>
 				{x.selectedAccount && (
 					<Badge variant='outline'>Active routes: {x.getActiveRouteCount(x.selectedAccount)}</Badge>
@@ -77,7 +80,7 @@ const Index = () => {
 				</Button>
 				<Button type='button' onClick={() => void x.save()} disabled={x.saving}>
 					{x.saving ? <Spinner className='size-4' /> : null}
-					<span>{x.editorMode === 'edit' ? 'Save Changes' : 'Create Account'}</span>
+					<span>{x.editorMode === 'edit' ? 'Save Changes' : 'Save Account'}</span>
 				</Button>
 			</div>
 		</div>

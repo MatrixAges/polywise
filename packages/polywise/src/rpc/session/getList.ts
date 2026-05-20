@@ -7,7 +7,8 @@ import {
 	getPostSessionIdList,
 	getProjectSessionIdList
 } from '@core/db/services/externals'
-import { desc, inArray, notInArray } from 'drizzle-orm'
+import { and, desc, eq, inArray, isNull, notInArray, or } from 'drizzle-orm'
+import { enum as Enum, object } from 'zod'
 
 import { p } from '../../utils/trpc'
 import { readPinList } from './utils'
@@ -16,11 +17,17 @@ import type { Session } from '@core/db'
 import type { SessionPinItem } from './utils'
 
 const session_page_size = 10
+const input_type = object({
+	kind: Enum(['default', 'im']).optional()
+})
+
+const getKindWhere = (kind: 'default' | 'im') =>
+	kind === 'im' ? eq(session.is_im, true) : or(isNull(session.is_im), eq(session.is_im, false))
 
 const getPinMap = (pin_list: Array<SessionPinItem>) => {
 	return pin_list.reduce(
-		(total, item) => {
-			total[item.id] = item.pin_at
+		(total, item, index) => {
+			total[item.id] = index
 
 			return total
 		},
@@ -29,13 +36,21 @@ const getPinMap = (pin_list: Array<SessionPinItem>) => {
 }
 
 const getPinSessionList = async (args: {
+	kind: 'default' | 'im'
 	pin_list: Array<SessionPinItem>
 	project_session_id_set: Set<string>
 	group_session_id_set: Set<string>
 	agent_session_id_set: Set<string>
 	post_session_id_set: Set<string>
 }) => {
-	const { pin_list, project_session_id_set, group_session_id_set, agent_session_id_set, post_session_id_set } = args
+	const {
+		kind,
+		pin_list,
+		project_session_id_set,
+		group_session_id_set,
+		agent_session_id_set,
+		post_session_id_set
+	} = args
 	const pin_session_id_list = pin_list
 		.map(item => item.id)
 		.filter(session_id => !project_session_id_set.has(session_id))
@@ -48,10 +63,13 @@ const getPinSessionList = async (args: {
 		return []
 	}
 
-	return getSessions({ where: inArray(session.id, pin_session_id_list) })
+	return getSessions({
+		where: and(inArray(session.id, pin_session_id_list), getKindWhere(kind))!
+	})
 }
 
 const getUnpinSessionList = async (args: {
+	kind: 'default' | 'im'
 	pin_session_id_list: Array<string>
 	project_session_id_list: Array<string>
 	group_session_id_list: Array<string>
@@ -59,6 +77,7 @@ const getUnpinSessionList = async (args: {
 	post_session_id_list: Array<string>
 }) => {
 	const {
+		kind,
 		pin_session_id_list,
 		project_session_id_list,
 		group_session_id_list,
@@ -75,13 +94,14 @@ const getUnpinSessionList = async (args: {
 	]
 
 	return getSessions({
-		where: notInArray(session.id, exclude_session_id_list),
+		where: and(notInArray(session.id, exclude_session_id_list), getKindWhere(kind))!,
 		orderBy: desc(session.created_at),
 		limit: session_page_size
 	})
 }
 
-export default p.query(async () => {
+export default p.input(input_type).query(async ({ input }) => {
+	const kind = input?.kind || 'default'
 	const pin_list = (await readPinList()).filter(item => !isBlockedSessionId(item.id))
 	const [project_session_id_list, group_session_id_list, agent_session_id_list, post_session_id_list] =
 		await Promise.all([
@@ -96,6 +116,7 @@ export default p.query(async () => {
 	const post_session_id_set = new Set(post_session_id_list)
 	const pin_map = getPinMap(pin_list)
 	const pin_session_list = await getPinSessionList({
+		kind,
 		pin_list,
 		project_session_id_set,
 		group_session_id_set,
@@ -103,6 +124,7 @@ export default p.query(async () => {
 		post_session_id_set
 	})
 	const unpin_session_list = await getUnpinSessionList({
+		kind,
 		pin_session_id_list: pin_session_list.map(item => item.id),
 		project_session_id_list,
 		group_session_id_list,

@@ -7,17 +7,23 @@ import {
 	getPostSessionIdList,
 	getProjectSessionIdList
 } from '@core/db/services/externals'
-import { desc, notInArray } from 'drizzle-orm'
-import { number, object } from 'zod'
+import { and, desc, eq, isNull, notInArray, or } from 'drizzle-orm'
+import { enum as Enum, number, object } from 'zod'
 
 import { p } from '../../utils/trpc'
 import { readPinList } from './utils'
 
-const input_type = object({ page: number().int().min(0) })
+const input_type = object({
+	page: number().int().min(0),
+	kind: Enum(['default', 'im']).optional()
+})
 
 const session_page_size = 10
+const getKindWhere = (kind: 'default' | 'im') =>
+	kind === 'im' ? eq(session.is_im, true) : or(isNull(session.is_im), eq(session.is_im, false))
 
 export default p.input(input_type).query(async ({ input }) => {
+	const kind = input.kind || 'default'
 	const pin_list = await readPinList()
 	const [project_session_id_list, group_session_id_list, agent_session_id_list, post_session_id_list] =
 		await Promise.all([
@@ -37,7 +43,9 @@ export default p.input(input_type).query(async ({ input }) => {
 	]
 
 	return getSessions({
-		where: exclude_session_id_list.length ? notInArray(session.id, exclude_session_id_list) : undefined,
+		where: exclude_session_id_list.length
+			? and(notInArray(session.id, exclude_session_id_list), getKindWhere(kind))!
+			: getKindWhere(kind),
 		orderBy: desc(session.created_at),
 		limit: session_page_size,
 		offset: input.page * session_page_size

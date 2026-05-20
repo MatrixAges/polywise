@@ -10,13 +10,17 @@ import type { Project, Session } from '@core/db'
 import type { UIEvent } from 'react'
 import type { ISessionMenuData } from './types'
 
-type MenuTab = 'projects' | 'sessions'
+type MenuTab = 'projects' | 'sessions' | 'im'
+type SessionListKind = 'sessions' | 'im'
+
+const getRpcSessionKind = (kind: SessionListKind) => (kind === 'im' ? 'im' : 'default')
 
 @injectable()
 export default class Index {
 	selected_project_id = ''
 	project_selected_session_id = ''
 	normal_selected_session_id = ''
+	im_selected_session_id = ''
 	files_project_id = ''
 	files_session_id = ''
 	rename_project_id = ''
@@ -24,19 +28,25 @@ export default class Index {
 	rename_value = ''
 	menu_tab = 'projects' as MenuTab
 	projects = [] as Array<{ project: Project; sessions: Array<Session>; has_more: boolean }>
-	pins = [] as Array<Session>
-	sessions = [] as Array<Session>
-	pin_map = {} as Record<string, number>
+	normal_pins = [] as Array<Session>
+	normal_sessions = [] as Array<Session>
+	normal_pin_map = {} as Record<string, number>
+	im_pins = [] as Array<Session>
+	im_sessions = [] as Array<Session>
+	im_pin_map = {} as Record<string, number>
 	add_modal_open = false
 	side_panel_open = false
 	side_panel_tab = 'files' as 'files' | 'todos'
 	content_tab = 'session' as 'session' | 'file'
 	expand_project_ids = [] as Array<string>
 	page_map = new Map<string, number>()
-	session_page = 1
+	normal_session_page = 1
+	im_session_page = 1
 	loading = false
-	loading_more = false
-	has_more = true
+	normal_loading_more = false
+	im_loading_more = false
+	normal_has_more = true
+	im_has_more = true
 	temp_input = ''
 
 	constructor(
@@ -60,7 +70,31 @@ export default class Index {
 			return this.normal_selected_session_id
 		}
 
-		return ''
+		return this.im_selected_session_id
+	}
+
+	get pins() {
+		return this.menu_tab === 'im' ? this.im_pins : this.normal_pins
+	}
+
+	get sessions() {
+		return this.menu_tab === 'im' ? this.im_sessions : this.normal_sessions
+	}
+
+	get pin_map() {
+		return this.menu_tab === 'im' ? this.im_pin_map : this.normal_pin_map
+	}
+
+	get has_more() {
+		return this.menu_tab === 'im' ? this.im_has_more : this.normal_has_more
+	}
+
+	get loading_more() {
+		return this.menu_tab === 'im' ? this.im_loading_more : this.normal_loading_more
+	}
+
+	get menu_selected_session_id() {
+		return this.menu_tab === 'im' ? this.im_selected_session_id : this.normal_selected_session_id
 	}
 
 	async init() {
@@ -69,6 +103,7 @@ export default class Index {
 				'selected_project_id',
 				'project_selected_session_id',
 				'normal_selected_session_id',
+				'im_selected_session_id',
 				'menu_tab',
 				{ project_side_panel_open: 'side_panel_open' },
 				'files_project_id',
@@ -80,7 +115,7 @@ export default class Index {
 
 		this.util.acts = [deinit]
 
-		await Promise.all([this.getProjectList(), this.refreshSessions()])
+		await Promise.all([this.getProjectList(), this.refreshSessions('sessions'), this.refreshSessions('im')])
 
 		this.watchSessionStatus()
 
@@ -107,10 +142,12 @@ export default class Index {
 			return
 		}
 
-		if (!this.normal_selected_session_id) return
+		const target_session_id = v === 'im' ? this.im_selected_session_id : this.normal_selected_session_id
+
+		if (!target_session_id) return
 
 		if (this.side_panel_open) {
-			void this.setFilesSessionId(this.normal_selected_session_id)
+			void this.setFilesSessionId(target_session_id)
 		}
 	}
 
@@ -147,9 +184,13 @@ export default class Index {
 		}
 	}
 
-	selectGlobalSession(session_id: string) {
-		this.menu_tab = 'sessions'
-		this.normal_selected_session_id = session_id
+	selectSession(session_id: string) {
+		if (this.menu_tab === 'im') {
+			this.im_selected_session_id = session_id
+		} else {
+			this.menu_tab = 'sessions'
+			this.normal_selected_session_id = session_id
+		}
 		this.content_tab = 'session'
 
 		if (this.side_panel_open) {
@@ -201,6 +242,10 @@ export default class Index {
 			return void this.setFilesSessionId(this.normal_selected_session_id)
 		}
 
+		if (this.menu_tab === 'im' && this.im_selected_session_id) {
+			return void this.setFilesSessionId(this.im_selected_session_id)
+		}
+
 		return void this.setFilesProjectId()
 	}
 
@@ -246,7 +291,7 @@ export default class Index {
 		await this.project_files.init(project.dir, { dir_only: false, show_hidden: true })
 	}
 
-	async setFilesSessionId(session_id = this.normal_selected_session_id) {
+	async setFilesSessionId(session_id = this.selected_session_id) {
 		if (!session_id) return
 
 		const dir = await rpc.session.getFilesDir.query({ id: session_id })
@@ -259,24 +304,80 @@ export default class Index {
 		await this.project_files.init(dir, { dir_only: false, show_hidden: true })
 	}
 
-	async refreshSessions() {
+	private getSessionState(kind: SessionListKind) {
+		return kind === 'im'
+			? {
+					selected_session_id: this.im_selected_session_id,
+					setSelectedSessionId: (value: string) => {
+						this.im_selected_session_id = value
+					},
+					setPins: (value: Array<Session>) => {
+						this.im_pins = value
+					},
+					setSessions: (value: Array<Session>) => {
+						this.im_sessions = value
+					},
+					setPinMap: (value: Record<string, number>) => {
+						this.im_pin_map = value
+					},
+					setPage: (value: number) => {
+						this.im_session_page = value
+					},
+					setHasMore: (value: boolean) => {
+						this.im_has_more = value
+					},
+					getPage: () => this.im_session_page,
+					getSessions: () => this.im_sessions,
+					getPins: () => this.im_pins
+				}
+			: {
+					selected_session_id: this.normal_selected_session_id,
+					setSelectedSessionId: (value: string) => {
+						this.normal_selected_session_id = value
+					},
+					setPins: (value: Array<Session>) => {
+						this.normal_pins = value
+					},
+					setSessions: (value: Array<Session>) => {
+						this.normal_sessions = value
+					},
+					setPinMap: (value: Record<string, number>) => {
+						this.normal_pin_map = value
+					},
+					setPage: (value: number) => {
+						this.normal_session_page = value
+					},
+					setHasMore: (value: boolean) => {
+						this.normal_has_more = value
+					},
+					getPage: () => this.normal_session_page,
+					getSessions: () => this.normal_sessions,
+					getPins: () => this.normal_pins
+				}
+	}
+
+	async refreshSessions(kind: SessionListKind = 'sessions') {
 		this.loading = true
 
 		try {
-			const res = (await rpc.session.getList.query()) as ISessionMenuData
+			const res = (await rpc.session.getList.query({
+				kind: getRpcSessionKind(kind)
+			})) as ISessionMenuData
+			const state = this.getSessionState(kind)
 
-			this.pins = res.pins
-			this.sessions = res.sessions
-			this.pin_map = res.pin_map
-			this.session_page = 1
-			this.has_more = res.has_more
+			state.setPins(res.pins)
+			state.setSessions(res.sessions)
+			state.setPinMap(res.pin_map)
+			state.setPage(1)
+			state.setHasMore(res.has_more)
 
-			const session_id_list = this.pins.map(item => item.id).concat(this.sessions.map(item => item.id))
+			const session_id_list = state
+				.getPins()
+				.map(item => item.id)
+				.concat(state.getSessions().map(item => item.id))
 
-			if (this.normal_selected_session_id) {
-				if (!session_id_list.includes(this.normal_selected_session_id)) {
-					this.normal_selected_session_id = ''
-				}
+			if (state.selected_session_id && !session_id_list.includes(state.selected_session_id)) {
+				state.setSelectedSessionId('')
 			}
 		} finally {
 			this.loading = false
@@ -292,21 +393,33 @@ export default class Index {
 		}
 	}
 
-	async loadMore() {
+	async loadMore(kind = this.menu_tab === 'im' ? 'im' : 'sessions') {
 		if (this.loading) return
-		if (this.loading_more) return
-		if (!this.has_more) return
+		if (kind === 'im' ? this.im_loading_more : this.normal_loading_more) return
+		if (kind === 'im' ? !this.im_has_more : !this.normal_has_more) return
 
-		this.loading_more = true
+		if (kind === 'im') {
+			this.im_loading_more = true
+		} else {
+			this.normal_loading_more = true
+		}
 
 		try {
-			const res = (await rpc.session.getMoreList.query({ page: this.session_page })) as Array<Session>
+			const state = this.getSessionState(kind)
+			const res = (await rpc.session.getMoreList.query({
+				page: state.getPage(),
+				kind: getRpcSessionKind(kind)
+			})) as Array<Session>
 
-			this.sessions = [...this.sessions, ...res]
-			this.session_page += 1
-			this.has_more = res.length >= 10
+			state.setSessions([...state.getSessions(), ...res])
+			state.setPage(state.getPage() + 1)
+			state.setHasMore(res.length >= 10)
 		} finally {
-			this.loading_more = false
+			if (kind === 'im') {
+				this.im_loading_more = false
+			} else {
+				this.normal_loading_more = false
+			}
 		}
 	}
 
@@ -366,10 +479,23 @@ export default class Index {
 		if (from === to) return
 		if (to < 0 || to > this.pins.length - 1) return
 
-		this.pins = arrayMove(this.pins, from, to)
+		const from_id = this.pins[from]?.id
+		const to_id = this.pins[to]?.id
+		const global_from = from_id ? this.pin_map[from_id] : undefined
+		const global_to = to_id ? this.pin_map[to_id] : undefined
 
-		await rpc.session.sortPin.mutate({ from, to })
-		await this.refreshSessions()
+		if (global_from === undefined || global_to === undefined) {
+			return
+		}
+
+		if (this.menu_tab === 'im') {
+			this.im_pins = arrayMove(this.im_pins, from, to)
+		} else {
+			this.normal_pins = arrayMove(this.normal_pins, from, to)
+		}
+
+		await rpc.session.sortPin.mutate({ from: global_from, to: global_to })
+		await this.refreshSessions(this.menu_tab === 'im' ? 'im' : 'sessions')
 	}
 
 	async createProject() {
@@ -416,7 +542,7 @@ export default class Index {
 
 		await rpc.project.remove.mutate({ id: project_item.id })
 
-		await Promise.all([this.getProjectList(), this.refreshSessions()])
+		await Promise.all([this.getProjectList(), this.refreshSessions('sessions'), this.refreshSessions('im')])
 	}
 
 	async createSession(project_id?: string, input?: string) {
@@ -449,7 +575,7 @@ export default class Index {
 			this.menu_tab = 'sessions'
 			this.normal_selected_session_id = res.id
 
-			await this.refreshSessions()
+			await this.refreshSessions('sessions')
 
 			if (this.side_panel_open) {
 				await this.setFilesSessionId(res.id)
@@ -480,7 +606,7 @@ export default class Index {
 
 		this.onCancelRename()
 
-		await Promise.all([this.getProjectList(), this.refreshSessions()])
+		await Promise.all([this.getProjectList(), this.refreshSessions('sessions'), this.refreshSessions('im')])
 	}
 
 	async removeSession(session_id: string) {
@@ -494,6 +620,10 @@ export default class Index {
 			this.normal_selected_session_id = ''
 		}
 
+		if (this.im_selected_session_id === session_id) {
+			this.im_selected_session_id = ''
+		}
+
 		if (this.rename_session_id === session_id) {
 			this.onCancelRename()
 		}
@@ -503,13 +633,13 @@ export default class Index {
 			this.files_session_id = ''
 		}
 
-		await Promise.all([this.getProjectList(), this.refreshSessions()])
+		await Promise.all([this.getProjectList(), this.refreshSessions('sessions'), this.refreshSessions('im')])
 	}
 
 	async togglePinSession(id: string) {
 		await rpc.session.pin.mutate({ id, value: !this.pin_map[id] })
 
-		await this.refreshSessions()
+		await this.refreshSessions(this.menu_tab === 'im' ? 'im' : 'sessions')
 	}
 
 	watchSessionStatus() {
@@ -543,7 +673,7 @@ export default class Index {
 					})
 				}))
 
-				this.sessions = this.sessions.map(session_item => {
+				this.normal_sessions = this.normal_sessions.map(session_item => {
 					const status = res[session_item.id]
 
 					if (status) {
@@ -560,7 +690,41 @@ export default class Index {
 					return session_item
 				})
 
-				this.pins = this.pins.map(session_item => {
+				this.normal_pins = this.normal_pins.map(session_item => {
+					const status = res[session_item.id]
+
+					if (status) {
+						return {
+							...session_item,
+							title: status.title,
+							report: status.report,
+							is_runing: status.running,
+							running_done: status.running_done ? new Date(status.running_done) : null,
+							unread: status.unread
+						}
+					}
+
+					return session_item
+				})
+
+				this.im_sessions = this.im_sessions.map(session_item => {
+					const status = res[session_item.id]
+
+					if (status) {
+						return {
+							...session_item,
+							title: status.title,
+							report: status.report,
+							is_runing: status.running,
+							running_done: status.running_done ? new Date(status.running_done) : null,
+							unread: status.unread
+						}
+					}
+
+					return session_item
+				})
+
+				this.im_pins = this.im_pins.map(session_item => {
 					const status = res[session_item.id]
 
 					if (status) {

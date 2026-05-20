@@ -4,6 +4,8 @@ import dayjs from 'dayjs'
 import { eq } from 'drizzle-orm'
 import fs from 'fs-extra'
 
+import { default_session_runtime_config } from '../config/shared'
+
 import type Index from '../index'
 
 export default async (s: Index, is_cron?: boolean, title?: string) => {
@@ -11,17 +13,19 @@ export default async (s: Index, is_cron?: boolean, title?: string) => {
 
 	await fs.ensureDir(s.session_dir)
 	await fs.ensureDir(s.files_dir)
-	await fs.ensureFile(s.config_dir)
-
 	const session_config_exists = await fs.pathExists(s.config_dir)
 
 	if (!session_config_exists) {
-		await fs.writeJSON(s.config_dir, { disable_map: [], mode: 'normal' }, { spaces: 4 })
+		await fs.writeJSON(s.config_dir, default_session_runtime_config, { spaces: 4 })
 	}
 
 	const session_config = await s.getConfig()
-	s.mode = session_config.mode ?? 'normal'
-	s.audit_mode = session_config.audit_mode ?? 'auto'
+	s.disable_map = session_config.disable_map
+	s.mode = session_config.mode
+	s.audit_mode = session_config.audit_mode
+	s.enable_sub_agent = session_config.enable_sub_agent
+	s.enable_agent_tool = session_config.enable_agent_tool
+	s.agent_ids = session_config.agent_ids
 
 	await s.getContext()
 	await s.getState()

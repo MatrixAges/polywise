@@ -5,7 +5,7 @@ import type { IPropsSessionMenuItem } from '../types'
 
 const Index = (props: IPropsSessionMenuItem) => {
 	const { item, pin, selected, renaming, rename_value, session_index } = props
-	const { selectGlobalSession } = useModel()
+	const { selectSession } = useModel()
 
 	return (
 		<MenuSessionItem
@@ -15,7 +15,7 @@ const Index = (props: IPropsSessionMenuItem) => {
 			selected={selected}
 			renaming={renaming}
 			rename_value={rename_value}
-			onClick={() => selectGlobalSession(item.id)}
+			onClick={() => selectSession(item.id)}
 		></MenuSessionItem>
 	)
 }

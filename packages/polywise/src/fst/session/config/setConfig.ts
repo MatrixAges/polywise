@@ -1,21 +1,22 @@
 import fs from 'fs-extra'
 
 import getConfig from './getConfig'
+import { normalizeSessionRuntimeConfig } from './shared'
 
-import type { SessionAuditMode, SessionMode } from '../../types'
 import type Index from '../index'
 
-export default async (
-	s: Index,
-	patch: Partial<{ disable_map: Array<string>; mode: SessionMode; audit_mode: SessionAuditMode }>
-) => {
+export default async (s: Index, patch: Partial<Awaited<ReturnType<typeof getConfig>>>) => {
 	const current = await getConfig(s)
-	const next = { ...current, ...patch }
+	const next = normalizeSessionRuntimeConfig({ ...current, ...patch })
 
 	await fs.writeJSON(s.config_dir, next, { spaces: 4 })
 
-	if (patch.mode) s.mode = patch.mode
-	if (patch.audit_mode) s.audit_mode = patch.audit_mode
+	s.disable_map = next.disable_map
+	s.mode = next.mode
+	s.audit_mode = next.audit_mode
+	s.enable_sub_agent = next.enable_sub_agent
+	s.enable_agent_tool = next.enable_agent_tool
+	s.agent_ids = next.agent_ids
 
 	return next
 }

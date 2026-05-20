@@ -1,3 +1,4 @@
+import { configurable_session_tool_items } from '@core/fst/session/config/shared'
 import { makeAutoObservable } from 'mobx'
 import { toast } from 'sonner'
 import { injectable } from 'tsyringe'
@@ -7,10 +8,12 @@ import { rpc } from '@/utils'
 export type ImAccountsResponse = Awaited<ReturnType<typeof rpc.im.query.query>>
 export type ImAccountItem = ImAccountsResponse['accounts'][number]
 export type ImHealth = Awaited<ReturnType<typeof rpc.im.health.query>>
+export type AgentItem = Awaited<ReturnType<typeof rpc.agent.query.query>>[number]
 export type ImPlatform = ImAccountItem['platform']
 export type ImEditorMode = 'new' | 'edit'
 export type WechatQrLoginStart = Awaited<ReturnType<typeof rpc.im.startWechatQrLogin.mutate>>
 export type WechatQrLoginWait = Awaited<ReturnType<typeof rpc.im.waitWechatQrLogin.query>>
+export type RuntimeToolItem = (typeof configurable_session_tool_items)[number]['key']
 
 export type ImFormState = {
 	id?: string
@@ -25,6 +28,10 @@ export type ImFormState = {
 	discord_allowed_user_ids: string
 	wechat_bot_token: string
 	wechat_api_base_url: string
+	runtime_disable_map: Array<string>
+	runtime_enable_sub_agent: boolean
+	runtime_enable_agent_tool: boolean
+	runtime_agent_ids: Array<string>
 }
 
 const emptyForm = (): ImFormState => ({
@@ -38,7 +45,11 @@ const emptyForm = (): ImFormState => ({
 	discord_allowed_channel_ids: '',
 	discord_allowed_user_ids: '',
 	wechat_bot_token: '',
-	wechat_api_base_url: 'https://ilinkai.weixin.qq.com'
+	wechat_api_base_url: 'https://ilinkai.weixin.qq.com',
+	runtime_disable_map: [],
+	runtime_enable_sub_agent: true,
+	runtime_enable_agent_tool: true,
+	runtime_agent_ids: []
 })
 
 const parseStringList = (value: string) =>
@@ -51,6 +62,8 @@ const formatStringList = (value?: Array<string>) => (value?.length ? value.join(
 
 const parseConfig = (account: ImAccountItem): ImFormState => {
 	const config = account.config_json ? JSON.parse(account.config_json) : {}
+	const runtime =
+		typeof config.runtime === 'object' && config.runtime ? (config.runtime as Record<string, unknown>) : {}
 
 	if (account.platform === 'wechat') {
 		return {
@@ -66,7 +79,15 @@ const parseConfig = (account: ImAccountItem): ImFormState => {
 			discord_allowed_user_ids: '',
 			wechat_bot_token: typeof config.bot_token === 'string' ? config.bot_token : '',
 			wechat_api_base_url:
-				typeof config.api_base_url === 'string' ? config.api_base_url : 'https://ilinkai.weixin.qq.com'
+				typeof config.api_base_url === 'string' ? config.api_base_url : 'https://ilinkai.weixin.qq.com',
+			runtime_disable_map: Array.isArray(runtime.disable_map)
+				? runtime.disable_map.filter((item): item is string => typeof item === 'string')
+				: [],
+			runtime_enable_sub_agent: runtime.enable_sub_agent !== false,
+			runtime_enable_agent_tool: runtime.enable_agent_tool !== false,
+			runtime_agent_ids: Array.isArray(runtime.agent_ids)
+				? runtime.agent_ids.filter((item): item is string => typeof item === 'string')
+				: []
 		}
 	}
 
@@ -88,7 +109,15 @@ const parseConfig = (account: ImAccountItem): ImFormState => {
 			Array.isArray(config.allowed_user_ids) ? config.allowed_user_ids : []
 		),
 		wechat_bot_token: '',
-		wechat_api_base_url: 'https://ilinkai.weixin.qq.com'
+		wechat_api_base_url: 'https://ilinkai.weixin.qq.com',
+		runtime_disable_map: Array.isArray(runtime.disable_map)
+			? runtime.disable_map.filter((item): item is string => typeof item === 'string')
+			: [],
+		runtime_enable_sub_agent: runtime.enable_sub_agent !== false,
+		runtime_enable_agent_tool: runtime.enable_agent_tool !== false,
+		runtime_agent_ids: Array.isArray(runtime.agent_ids)
+			? runtime.agent_ids.filter((item): item is string => typeof item === 'string')
+			: []
 	}
 }
 
@@ -100,7 +129,13 @@ const stringifyConfig = (form: ImFormState) => {
 
 		return JSON.stringify({
 			bot_token: form.wechat_bot_token.trim(),
-			api_base_url: form.wechat_api_base_url.trim() || 'https://ilinkai.weixin.qq.com'
+			api_base_url: form.wechat_api_base_url.trim() || 'https://ilinkai.weixin.qq.com',
+			runtime: {
+				disable_map: form.runtime_disable_map,
+				enable_sub_agent: form.runtime_enable_sub_agent,
+				enable_agent_tool: form.runtime_enable_agent_tool,
+				agent_ids: form.runtime_agent_ids
+			}
 		})
 	}
 
@@ -113,7 +148,13 @@ const stringifyConfig = (form: ImFormState) => {
 		require_mention: form.discord_require_mention,
 		allowed_guild_ids: parseStringList(form.discord_allowed_guild_ids),
 		allowed_channel_ids: parseStringList(form.discord_allowed_channel_ids),
-		allowed_user_ids: parseStringList(form.discord_allowed_user_ids)
+		allowed_user_ids: parseStringList(form.discord_allowed_user_ids),
+		runtime: {
+			disable_map: form.runtime_disable_map,
+			enable_sub_agent: form.runtime_enable_sub_agent,
+			enable_agent_tool: form.runtime_enable_agent_tool,
+			agent_ids: form.runtime_agent_ids
+		}
 	})
 }
 
@@ -128,6 +169,7 @@ export default class Model {
 	saving = false
 	reloading = false
 	removing = false
+	agents = [] as Array<AgentItem>
 	wechat_qr_dialog_open = false
 	wechat_qr_loading = false
 	wechat_qr_polling = false
@@ -166,6 +208,10 @@ export default class Model {
 		return Boolean(this.form.wechat_bot_token.trim())
 	}
 
+	get runtimeToolItems() {
+		return configurable_session_tool_items
+	}
+
 	async init() {
 		await this.load()
 	}
@@ -176,6 +222,34 @@ export default class Model {
 
 	updateForm<K extends keyof ImFormState>(key: K, value: ImFormState[K]) {
 		this.form[key] = value
+	}
+
+	get runtimeDisableMap() {
+		return new Set(this.form.runtime_disable_map)
+	}
+
+	toggleRuntimeTool(tool_key: string, enabled: boolean) {
+		const next = new Set(this.form.runtime_disable_map)
+
+		if (enabled) {
+			next.delete(tool_key)
+		} else {
+			next.add(tool_key)
+		}
+
+		this.form.runtime_disable_map = Array.from(next)
+	}
+
+	toggleRuntimeAgent(agent_id: string) {
+		const next = new Set(this.form.runtime_agent_ids)
+
+		if (next.has(agent_id)) {
+			next.delete(agent_id)
+		} else {
+			next.add(agent_id)
+		}
+
+		this.form.runtime_agent_ids = Array.from(next)
 	}
 
 	clearWechatQrPollTimer() {
@@ -360,10 +434,15 @@ export default class Model {
 		this.loading = true
 
 		try {
-			const [accountsRes, healthRes] = await Promise.all([rpc.im.query.query(), rpc.im.health.query()])
+			const [accountsRes, healthRes, agentsRes] = await Promise.all([
+				rpc.im.query.query(),
+				rpc.im.health.query(),
+				rpc.agent.query.query()
+			])
 
 			this.accounts = accountsRes.accounts
 			this.health = healthRes
+			this.agents = agentsRes
 
 			const targetId =
 				nextSelectedId !== undefined

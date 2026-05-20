@@ -187,6 +187,14 @@ export default class Group extends Session {
 			permission: this.permission,
 			mode: this.mode,
 			audit_mode: this.audit_mode,
+			runtime_config: {
+				disable_map: this.disable_map,
+				mode: this.mode,
+				audit_mode: this.audit_mode,
+				enable_sub_agent: this.enable_sub_agent,
+				enable_agent_tool: this.enable_agent_tool,
+				agent_ids: this.agent_ids
+			},
 			group: this.getGroupPayload()
 		}
 	}

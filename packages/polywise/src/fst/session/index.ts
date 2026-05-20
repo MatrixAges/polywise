@@ -42,6 +42,7 @@ import type {
 	SessionScope,
 	SkillMeta
 } from '../types'
+import type { SessionRuntimeConfig } from './config/shared'
 
 export default class Index {
 	id = ''
@@ -76,6 +77,10 @@ export default class Index {
 	mode = 'normal' as SessionMode
 	audit_mode = 'auto' as SessionAuditMode
 	plan_stage = 'plan' as 'plan' | 'exec'
+	disable_map = [] as SessionRuntimeConfig['disable_map']
+	enable_sub_agent = true
+	enable_agent_tool = true
+	agent_ids = [] as SessionRuntimeConfig['agent_ids']
 
 	get cwd() {
 		return this.project?.dir || this.files_dir

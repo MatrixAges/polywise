@@ -21,7 +21,7 @@ const Index = () => {
 		const run = async () => {
 			await x.init()
 
-			if (state?.menu_tab === 'projects' || state?.menu_tab === 'sessions') {
+			if (state?.menu_tab === 'projects' || state?.menu_tab === 'sessions' || state?.menu_tab === 'im') {
 				x.setMenuTab(state.menu_tab)
 			}
 

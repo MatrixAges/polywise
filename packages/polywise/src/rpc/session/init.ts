@@ -34,10 +34,23 @@ export default p.input(input_type).subscription(async function* (args) {
 	const unarchive = () => session.unarchiveMessages()
 	const load = (type: 'prev' | 'next') => session.loadMessages(type)
 
-	const setConfig = async (patch: { mode?: string; audit_mode?: 'limited' | 'auto' | 'full' }) => {
+	const setConfig = async (patch: {
+		mode?: string
+		audit_mode?: 'limited' | 'auto' | 'full'
+		disable_map?: Array<string>
+		enable_sub_agent?: boolean
+		enable_agent_tool?: boolean
+		agent_ids?: Array<string>
+	}) => {
 		await session.setConfig({
 			...(patch.mode ? { mode: patch.mode as 'normal' | 'plan' | 'plan-exec' } : {}),
-			...(patch.audit_mode ? { audit_mode: patch.audit_mode } : {})
+			...(patch.audit_mode ? { audit_mode: patch.audit_mode } : {}),
+			...(patch.disable_map ? { disable_map: patch.disable_map } : {}),
+			...(typeof patch.enable_sub_agent === 'boolean' ? { enable_sub_agent: patch.enable_sub_agent } : {}),
+			...(typeof patch.enable_agent_tool === 'boolean'
+				? { enable_agent_tool: patch.enable_agent_tool }
+				: {}),
+			...(patch.agent_ids ? { agent_ids: patch.agent_ids } : {})
 		})
 		const data = await session.getData()
 

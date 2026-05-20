@@ -1,4 +1,4 @@
-import { FolderPlus, Folders, MessageCircleCheck, Plus } from 'lucide-react'
+import { Bot, FolderPlus, Folders, MessageCircleCheck, Plus } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { Tabs, Tooltip } from '@/components'
@@ -9,6 +9,7 @@ import SessionMenu from './SessionMenu'
 
 const Index = () => {
 	const { menu_tab, setMenuTab, onToggleAddModal, createSession } = useModel()
+	const allow_create = menu_tab !== 'im'
 
 	return (
 		<div
@@ -33,20 +34,23 @@ const Index = () => {
 						small
 						items={[
 							{ key: 'sessions', Icon: MessageCircleCheck },
-							{ key: 'projects', Icon: Folders }
+							{ key: 'projects', Icon: Folders },
+							{ key: 'im', title: 'IM', Icon: Bot }
 						]}
 						active={menu_tab}
-						onClick={v => setMenuTab(v as 'projects' | 'sessions')}
+						onClick={v => setMenuTab(v as 'projects' | 'sessions' | 'im')}
 					></Tabs>
 				</div>
-				<Tooltip title={menu_tab === 'projects' ? 'New Project' : 'New Session'}>
-					<div
-						className='icon_button small'
-						onClick={menu_tab === 'projects' ? onToggleAddModal : () => createSession()}
-					>
-						{menu_tab === 'projects' ? <FolderPlus></FolderPlus> : <Plus></Plus>}
-					</div>
-				</Tooltip>
+				{allow_create ? (
+					<Tooltip title={menu_tab === 'projects' ? 'New Project' : 'New Session'}>
+						<div
+							className='icon_button small'
+							onClick={menu_tab === 'projects' ? onToggleAddModal : () => createSession()}
+						>
+							{menu_tab === 'projects' ? <FolderPlus></FolderPlus> : <Plus></Plus>}
+						</div>
+					</Tooltip>
+				) : null}
 			</div>
 			<div className='min-h-0 flex-1 overflow-y-scroll'>
 				<div

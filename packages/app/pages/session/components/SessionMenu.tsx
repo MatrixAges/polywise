@@ -24,7 +24,7 @@ const Index = () => {
 	const {
 		pins,
 		sessions,
-		normal_selected_session_id,
+		menu_selected_session_id,
 		rename_session_id,
 		rename_value,
 		loading,
@@ -135,7 +135,7 @@ const Index = () => {
 										>
 											{pins.map((item, session_index) => {
 												const selected =
-													normal_selected_session_id === item.id
+													menu_selected_session_id === item.id
 												const renaming = rename_session_id === item.id
 
 												return (
@@ -158,7 +158,7 @@ const Index = () => {
 								</>
 							)}
 							{sessions.map((item, session_index) => {
-								const selected = normal_selected_session_id === item.id
+								const selected = menu_selected_session_id === item.id
 								const renaming = rename_session_id === item.id
 
 								return (

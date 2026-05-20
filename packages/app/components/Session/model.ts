@@ -1,3 +1,4 @@
+import { default_session_runtime_config } from '@core/fst/session/config/shared'
 import { makeAutoObservable } from 'mobx'
 import scroll from 'smooth-scroll-into-view-if-needed'
 import { toast } from 'sonner'
@@ -42,6 +43,7 @@ export default class Index {
 	archived_at = null as null | number
 	mode = 'normal' as 'normal' | 'plan' | 'plan-exec'
 	audit_mode = 'auto' as 'limited' | 'auto' | 'full'
+	runtime_config = { ...default_session_runtime_config }
 	group_agents = [] as Array<GroupAgentSummary>
 
 	signal = 0
@@ -123,7 +125,8 @@ export default class Index {
 								has_newer,
 								permission,
 								mode,
-								audit_mode
+								audit_mode,
+								runtime_config
 							} = res.data
 
 							this.session = session as Session
@@ -134,6 +137,7 @@ export default class Index {
 							this.permission = permission as Permission
 							this.mode = mode ?? 'normal'
 							this.audit_mode = audit_mode ?? 'auto'
+							this.runtime_config = runtime_config ?? { ...default_session_runtime_config }
 							this.group_agents = res.data.group?.agents ?? []
 
 							const target_messages = messages as unknown as Array<Message>
@@ -402,6 +406,7 @@ export default class Index {
 		this.archived_at = null as null | number
 		this.mode = 'normal'
 		this.audit_mode = 'auto'
+		this.runtime_config = { ...default_session_runtime_config }
 
 		this.signal = 0
 		this.open_context_modal = false

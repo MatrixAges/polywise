@@ -1,15 +1,35 @@
-import { session } from '@core/db/schema'
-import { addSession, getSession, setSession } from '@core/db/services'
+import { im_account, session } from '@core/db/schema'
+import { addSession, getImAccount, getSession, setSession } from '@core/db/services'
 import { connectSession } from '@core/utils'
-import { eq } from 'drizzle-orm'
+import { and, eq } from 'drizzle-orm'
 
 import { buildImRouteKey, buildImSessionTitle } from './route'
+import { getImAccountRuntimeConfig } from './runtimeConfig'
 
 import type { SessionInsert } from '@core/db'
 import type { ImInboundEvent, ImSessionBinding } from './types'
 
 const connectImSession = async (id: string, title: string) => {
 	return connectSession({ id, title })
+}
+
+const syncImSessionRuntimeConfig = async (binding: ImSessionBinding, event: ImInboundEvent) => {
+	const account = await getImAccount(
+		and(eq(im_account.platform, event.platform), eq(im_account.account_id, event.account_id))!
+	)
+
+	if (!account) {
+		return
+	}
+
+	const next_config = getImAccountRuntimeConfig(account)
+	const current_config = await binding.session.getConfig()
+
+	if (JSON.stringify(current_config) === JSON.stringify(next_config)) {
+		return
+	}
+
+	await binding.session.setConfig(next_config)
 }
 
 export const ensureImSessionBinding = async (event: ImInboundEvent): Promise<ImSessionBinding> => {
@@ -40,12 +60,15 @@ export const ensureImSessionBinding = async (event: ImInboundEvent): Promise<ImS
 	}
 
 	const target = await connectImSession(row.id, row.title)
-
-	return {
+	const binding = {
 		route_key,
 		session_id: row.id,
 		session: target
 	}
+
+	await syncImSessionRuntimeConfig(binding, event)
+
+	return binding
 }
 
 export const resetImSessionBinding = async (event: ImInboundEvent): Promise<ImSessionBinding> => {
@@ -63,10 +86,13 @@ export const resetImSessionBinding = async (event: ImInboundEvent): Promise<ImSe
 	} satisfies SessionInsert)
 
 	const target = await connectImSession(next.id, next.title)
-
-	return {
+	const binding = {
 		route_key,
 		session_id: next.id,
 		session: target
 	}
+
+	await syncImSessionRuntimeConfig(binding, event)
+
+	return binding
 }

@@ -17,7 +17,15 @@ export default async (s: Index) => {
 			has_newer: s.ui_has_newer,
 			permission: s.permission,
 			mode: s.mode,
-			audit_mode: s.audit_mode
+			audit_mode: s.audit_mode,
+			runtime_config: {
+				disable_map: s.disable_map,
+				mode: s.mode,
+				audit_mode: s.audit_mode,
+				enable_sub_agent: s.enable_sub_agent,
+				enable_agent_tool: s.enable_agent_tool,
+				agent_ids: s.agent_ids
+			}
 		}
 	} as ChatEventRes
 }

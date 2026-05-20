@@ -2,6 +2,7 @@ import { createSystemTool } from '@core/fst/agents'
 import { loadMcpTools } from '@core/fst/mcp'
 import { getSystemTools } from '@core/utils'
 
+import { createAgentTool } from './agent'
 import { createBashTool } from './bash'
 import { createContentTool } from './content'
 import { createEditFileTool } from './edit'
@@ -28,6 +29,7 @@ type SharedRuntimeToolKey =
 	| 'web_search_tool'
 	| 'web_fetch_tool'
 	| 'system_tool'
+	| 'agent_tool'
 
 interface BuildSharedRuntimeToolsArgs {
 	s: Session
@@ -45,7 +47,9 @@ const applyTransform = <T>(
 export const buildSharedRuntimeTools = async (args: BuildSharedRuntimeToolsArgs) => {
 	const { s, model_tools = {}, extra_tools = {}, transform_tool } = args
 	const is_full_access = s.audit_mode === 'full'
-	const has_system_tool = s.audit_mode === 'auto'
+	const disable_map = new Set(s.disable_map)
+	const has_system_tool = s.audit_mode === 'auto' && s.enable_sub_agent && !disable_map.has('system_tool')
+	const has_agent_tool = s.enable_agent_tool && !disable_map.has('agent_tool')
 	const bash_tool = is_full_access ? await createNativeAccessTools(s) : await createBashTool(s)
 	const mcp_tools = await loadMcpTools(s)
 	const system_tools_prompt = await getSystemTools()
@@ -68,8 +72,16 @@ export const buildSharedRuntimeTools = async (args: BuildSharedRuntimeToolsArgs)
 		edit_file_tool: applyTransform(transform_tool, 'edit_file_tool', createEditFileTool(s))
 	} as ToolSet
 
+	if (has_agent_tool) {
+		tools.agent_tool = applyTransform(transform_tool, 'agent_tool', createAgentTool(s))
+	}
+
 	if (has_system_tool) {
 		tools.system_tool = applyTransform(transform_tool, 'system_tool', createSystemTool(s))
+	}
+
+	for (const key of disable_map) {
+		delete tools[key]
 	}
 
 	return {
