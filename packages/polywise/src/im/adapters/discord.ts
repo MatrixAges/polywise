@@ -29,6 +29,11 @@ interface DiscordChannelInfo {
 	parent_id?: string
 	name?: string
 	thread_metadata?: unknown
+	recipients?: Array<{
+		id?: string
+		username?: string
+		global_name?: string
+	}>
 }
 
 interface DiscordGuildInfo {
@@ -408,6 +413,38 @@ export default class DiscordAdapter extends BaseImAdapter {
 	async sendTyping(route: ImRoute) {
 		const target_id = route.chat_type === 'thread' ? route.thread_id || route.chat_id : route.chat_id
 		await this.api(`/channels/${target_id}/typing`, { method: 'POST' })
+	}
+
+	async resolveDirectRoute(args: { sender_id: string; sender_name?: string; current_route: ImRoute }) {
+		if (!args.sender_id.trim()) return null
+
+		const response = await this.api('/users/@me/channels', {
+			method: 'POST',
+			body: JSON.stringify({
+				recipient_id: args.sender_id.trim()
+			})
+		})
+		const body = (await response.json()) as DiscordChannelInfo
+		const dm_channel_id = String(body.id || '').trim()
+
+		if (!dm_channel_id) {
+			return null
+		}
+
+		const recipient = Array.isArray(body.recipients) ? body.recipients[0] : null
+		const title =
+			String(recipient?.global_name || '').trim() ||
+			String(recipient?.username || '').trim() ||
+			args.sender_name?.trim() ||
+			'Discord DM'
+
+		return {
+			platform: 'discord' as const,
+			account_id: this.account_id,
+			chat_type: 'dm' as const,
+			chat_id: dm_channel_id,
+			title
+		}
 	}
 
 	async sendMessage(args: { route: ImRoute; text: string }): Promise<ImSendReceipt> {

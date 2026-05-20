@@ -5,7 +5,7 @@ import { and, asc, eq } from 'drizzle-orm'
 
 import DiscordAdapter from './adapters/discord'
 import WechatAdapter from './adapters/wechat'
-import { buildImUserMessage, parseImCommand } from './message'
+import { buildImUserMessage, parseImCommand, shouldReplyInDirectMessage } from './message'
 import { buildImRouteKey, getAdapterKey } from './route'
 import { ensureImSessionBinding, resetImSessionBinding } from './session'
 import { deliverImSessionStream } from './stream'
@@ -86,12 +86,22 @@ export const createImRuntime = (): ImRuntime => {
 		}
 
 		const binding = await ensureImSessionBinding(event)
-		const request_message = buildImUserMessage(event)
+		const reply_route =
+			shouldReplyInDirectMessage(event) && adapter.resolveDirectRoute
+				? (await adapter
+						.resolveDirectRoute({
+							sender_id: event.sender.id,
+							sender_name: event.sender.name,
+							current_route: event.route
+						})
+						.catch(() => null)) || event.route
+				: event.route
+		const request_message = buildImUserMessage(event, { reply_route })
 		const stream = await binding.session.getStream(request_message)
 		const baseline_message_count = binding.session.ui_messages.length
 		const result = await deliverImSessionStream({
 			adapter,
-			route: event.route,
+			route: reply_route,
 			stream,
 			session: binding.session,
 			baseline_message_count

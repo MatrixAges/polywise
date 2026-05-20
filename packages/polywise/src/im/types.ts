@@ -82,6 +82,11 @@ export interface ImAdapter {
 	sendTyping(route: ImRoute): Promise<void>
 	sendMessage(args: { route: ImRoute; text: string }): Promise<ImSendReceipt>
 	editMessage?(args: { route: ImRoute; receipt: ImSendReceipt; text: string }): Promise<ImSendReceipt>
+	resolveDirectRoute?(args: {
+		sender_id: string
+		sender_name?: string
+		current_route: ImRoute
+	}): Promise<ImRoute | null>
 	handleBridgeEvent?(payload: unknown): Promise<ImInboundEvent | null>
 	handleBridgeStatus?(payload: unknown): Promise<void>
 	verifyBridgePayload?(raw_body: string, signature: string | undefined): Promise<boolean>
