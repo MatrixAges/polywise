@@ -15,14 +15,30 @@ const Index = ({ agent, group, compact = false }: IProps) => {
 
 	if (agent) {
 		return (
-			<div className='flex min-w-0 items-center gap-3'>
+			<div
+				className='
+					flex
+					items-center justify-start
+					w-full
+					min-w-0
+					gap-3
+					text-left
+				'
+			>
 				<EntityAvatar
 					name={agent.name}
 					photo={agent_photo ?? null}
 					avatar={agent.avatar ?? null}
 					size={avatar_size}
 				/>
-				<div className='min-w-0 flex-1'>
+				<div
+					className='
+						flex flex-1 flex-col
+						items-start
+						min-w-0
+						text-left
+					'
+				>
 					<div className='truncate text-sm font-medium'>{agent.name}</div>
 					<div className='text-std-500 truncate text-xs'>{agent.role || 'No role'}</div>
 				</div>
@@ -32,9 +48,25 @@ const Index = ({ agent, group, compact = false }: IProps) => {
 
 	if (group) {
 		return (
-			<div className='flex min-w-0 items-center gap-3'>
+			<div
+				className='
+					flex
+					items-center justify-start
+					w-full
+					min-w-0
+					gap-3
+					text-left
+				'
+			>
 				<EntityAvatar name={group.name} photo={group_photo ?? null} avatar={null} size={avatar_size} />
-				<div className='min-w-0 flex-1'>
+				<div
+					className='
+						flex flex-1 flex-col
+						items-start
+						min-w-0
+						text-left
+					'
+				>
 					<div className='truncate text-sm font-medium'>{group.name}</div>
 					<div className='text-std-500 truncate text-xs'>
 						{group.description || `${group.agents.length} agents`}

@@ -14,7 +14,7 @@ interface IProps {
 
 const default_avatar_url = '/images/bird.jpg'
 
-const Index = ({ name, photo, avatar, size = 36, shape = 'rounded' }: IProps) => {
+const Index = ({ name, photo, avatar, size = 36, shape = 'circle' }: IProps) => {
 	const wrapper_style = { width: size, height: size } as CSSProperties
 	const is_rounded = shape === 'rounded'
 	const avatar_config =

@@ -63,6 +63,10 @@ const emptyForm = (): ImFormState => ({
 	runtime_agent_ids: []
 })
 
+const defaultAccountIdByPlatform = (platform: ImPlatform) => (platform === 'discord' ? 'discord-main' : 'wechat-main')
+const defaultLabelByPlatform = (platform: ImPlatform) =>
+	platform === 'discord' ? 'Primary Discord Bot' : 'Primary WeChat Assistant'
+
 const parseStringList = (value: string) =>
 	value
 		.split(/[\n,]/g)
@@ -275,11 +279,11 @@ export default class Model {
 	}
 
 	get accountIdPlaceholder() {
-		return this.form.platform === 'discord' ? 'discord-main' : 'Auto-filled after connect'
+		return defaultAccountIdByPlatform(this.form.platform)
 	}
 
 	get labelPlaceholder() {
-		return this.form.platform === 'discord' ? 'Primary Discord Bot' : 'Primary WeChat Assistant'
+		return defaultLabelByPlatform(this.form.platform)
 	}
 
 	get wechatConnectionReady() {
@@ -494,17 +498,29 @@ export default class Model {
 		await this.pollWechatQrLogin(this.wechat_qr_verify_code)
 	}
 
-	private getPersistPayload() {
-		if (!this.form.account_id.trim()) {
-			throw new Error('Account ID is required')
+	private buildDefaultDraft(platform: ImPlatform) {
+		return {
+			...emptyForm(),
+			platform,
+			account_id: defaultAccountIdByPlatform(platform),
+			label: defaultLabelByPlatform(platform)
 		}
+	}
+
+	private getPersistPayload() {
+		const account_id = this.form.account_id.trim() || defaultAccountIdByPlatform(this.form.platform)
+		const label = this.form.label.trim() || defaultLabelByPlatform(this.form.platform)
 
 		return {
 			platform: this.form.platform,
-			account_id: this.form.account_id.trim(),
-			label: this.form.label.trim(),
+			account_id,
+			label,
 			enabled: this.form.enabled,
-			config_json: stringifyConfig(this.form)
+			config_json: stringifyConfig({
+				...this.form,
+				account_id,
+				label
+			})
 		}
 	}
 
@@ -640,7 +656,7 @@ export default class Model {
 		const platform = options?.platform || this.form.platform
 		this.editorMode = 'new'
 		this.selectedId = ''
-		this.form = { ...emptyForm(), platform }
+		this.form = this.buildDefaultDraft(platform)
 	}
 
 	selectPlatform(platform: ImPlatform) {
