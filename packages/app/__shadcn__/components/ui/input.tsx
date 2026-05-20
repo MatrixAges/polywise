@@ -3,9 +3,13 @@ import { Input as InputPrimitive } from "@base-ui/react/input"
 
 import { cn } from "@/__shadcn__/lib/utils/index"
 
-function Input({ className, type, ...props }: React.ComponentProps<"input">) {
+const Input = React.forwardRef<
+  React.ComponentRef<typeof InputPrimitive>,
+  React.ComponentPropsWithoutRef<typeof InputPrimitive>
+>(({ className, type, ...props }, ref) => {
   return (
     <InputPrimitive
+      ref={ref}
       type={type}
       data-slot="input"
       className={cn(
@@ -15,6 +19,8 @@ function Input({ className, type, ...props }: React.ComponentProps<"input">) {
       {...props}
     />
   )
-}
+})
+
+Input.displayName = "Input"
 
 export { Input }
