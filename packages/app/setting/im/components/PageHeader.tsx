@@ -19,12 +19,12 @@ const docsMap = {
 		href: 'https://www.runoob.com/ai-agent/openclaw-weixin.html'
 	},
 	discord: {
-		label: 'Discord ClawBot guide',
+		label: 'Discord Bot guide',
 		href: 'https://docs.openclaw.ai/channels/discord'
 	},
 	feishu: {
-		label: 'Feishu long connection docs',
-		href: 'https://open.feishu.cn/document/uAjLw4CM/ukTMukTMukTM/event-subscription-guide/long-connection-mode'
+		label: 'Feishu Agent docs',
+		href: 'https://open.feishu.cn/document/mcp_open_tools/integrating-agents-with-feishu/overview'
 	}
 } as const
 

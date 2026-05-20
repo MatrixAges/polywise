@@ -22,8 +22,6 @@ const Index = () => {
 			className='
 				flex flex-col
 				rounded-3xl
-				bg-background/70
-				border
 			'
 		>
 			<div

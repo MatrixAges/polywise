@@ -141,12 +141,7 @@ In Feishu Open Platform:
 1. Create a self-built app.
 2. Enable the bot capability.
 3. Subscribe to bot message receive events and choose long connection mode.
-4. Install the optional Feishu Node SDK on the machine running Polywise:
-
-```bash
-pnpm --filter polywise add @larksuiteoapi/node-sdk
-```
-
+4. Install the normal Polywise project dependencies on the machine running Polywise.
 5. Copy the app's `App ID` and `App Secret` into the Polywise IM settings page.
 
 If you intentionally switch to webhook mode later, Polywise also exposes:

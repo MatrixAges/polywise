@@ -2,6 +2,7 @@ import { observer } from 'mobx-react-lite'
 
 import { Field, FieldContent, FieldDescription, FieldGroup, FieldTitle } from '@/__shadcn__/components/ui/field'
 import { Input } from '@/__shadcn__/components/ui/input'
+import { Separator } from '@/__shadcn__/components/ui/separator'
 
 import { useModel } from '../context'
 
@@ -19,18 +20,8 @@ const Index = () => {
 					</FieldDescription>
 				</FieldContent>
 				<div className='text-std-500 max-w-[420px] text-sm leading-6'>
-					Install the optional SDK on the local Polywise machine:
-					<div
-						className='
-							px-3 py-2
-							mt-2
-							rounded-md
-							text-xs font-mono
-							border
-						'
-					>
-						pnpm --filter polywise add @larksuiteoapi/node-sdk
-					</div>
+					The Feishu SDK is installed as a normal Polywise dependency and loaded lazily at runtime
+					only when a Feishu account is enabled.
 				</div>
 			</Field>
 			<Field className='items-center! py-3' orientation='horizontal'>
@@ -57,6 +48,7 @@ const Index = () => {
 					placeholder='App Secret'
 				/>
 			</Field>
+			<Separator className='my-3 h-px w-full' />
 			<Field className='items-center! py-3' orientation='horizontal'>
 				<FieldContent>
 					<FieldTitle className='text-base'>Verification Token</FieldTitle>
@@ -69,7 +61,7 @@ const Index = () => {
 					className='max-w-[420px]'
 					value={x.form.feishu_verification_token}
 					onChange={event => x.updateForm('feishu_verification_token', event.target.value)}
-					placeholder='Verification Token'
+					placeholder='Verification Token (optional)'
 				/>
 			</Field>
 			<Field className='items-center! py-3' orientation='horizontal'>

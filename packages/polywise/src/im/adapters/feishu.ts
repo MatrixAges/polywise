@@ -85,12 +85,16 @@ interface FeishuChannel {
 }
 
 interface FeishuSdkModule {
+	LoggerLevel?: {
+		error?: unknown
+	}
 	createLarkChannel(args: {
 		appId: string
 		appSecret: string
 		transport: 'websocket'
 		source?: string
 		includeRawEvent?: boolean
+		loggerLevel?: unknown
 	}): FeishuChannel
 }
 
@@ -150,9 +154,8 @@ export default class FeishuAdapter extends BaseImAdapter {
 			const message = error instanceof Error ? error.message : String(error)
 			throw new Error(
 				[
-					'Feishu long connection requires the optional package `@larksuiteoapi/node-sdk`.',
-					'Install it on the machine running Polywise with:',
-					'`pnpm --filter polywise add @larksuiteoapi/node-sdk`',
+					'Feishu long connection requires the installed dependency `@larksuiteoapi/node-sdk`.',
+					'Run your normal dependency install for Polywise on this machine before enabling Feishu.',
 					message ? `Loader error: ${message}` : ''
 				]
 					.filter(Boolean)
@@ -208,7 +211,8 @@ export default class FeishuAdapter extends BaseImAdapter {
 			appSecret: this.appSecret,
 			transport: 'websocket',
 			source: 'polywise',
-			includeRawEvent: true
+			includeRawEvent: true,
+			loggerLevel: sdk.LoggerLevel?.error
 		})
 
 		this.unsubscribers.push(
