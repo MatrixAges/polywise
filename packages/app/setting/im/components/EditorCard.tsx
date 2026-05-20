@@ -12,6 +12,7 @@ import { Switch } from '@/__shadcn__/components/ui/switch'
 import { useModel } from '../context'
 import DiscordFields from './DiscordFields'
 import RuntimeOptions from './RuntimeOptions'
+import SessionTargetOptions from './SessionTargetOptions'
 import WeChatFields from './WeChatFields'
 
 const Index = () => {
@@ -69,7 +70,13 @@ const Index = () => {
 				</Field>
 			</FieldGroup>
 			<Separator className='bg-border/80 h-px w-full' />
-			<RuntimeOptions />
+			<SessionTargetOptions />
+			{x.isGlobalSessionTarget ? (
+				<>
+					<Separator className='bg-border/80 h-px w-full' />
+					<RuntimeOptions />
+				</>
+			) : null}
 			<div className='flex items-center justify-end gap-2'>
 				{x.selectedAccount && (
 					<Badge variant='outline'>Active routes: {x.getActiveRouteCount(x.selectedAccount)}</Badge>

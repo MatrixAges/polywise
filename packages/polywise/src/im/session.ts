@@ -1,10 +1,18 @@
-import { im_account, session } from '@core/db/schema'
+import { agent_session, group_session, im_account, session } from '@core/db/schema'
 import { addSession, getImAccount, getSession, setSession } from '@core/db/services'
-import { connectSession } from '@core/utils'
+import {
+	addAgentSession,
+	addGroupSession,
+	getAgentSession,
+	getGroupSession,
+	removeAgentSession,
+	removeGroupSession
+} from '@core/db/services/externals'
+import { connectSession, GroupStore, SessionStore } from '@core/utils'
 import { and, eq } from 'drizzle-orm'
 
 import { buildImRouteKey, buildImSessionTitle } from './route'
-import { getImAccountRuntimeConfig } from './runtimeConfig'
+import { getImAccountRuntimeConfig, getImAccountSessionTargetConfig } from './runtimeConfig'
 
 import type { SessionInsert } from '@core/db'
 import type { ImInboundEvent, ImSessionBinding } from './types'
@@ -13,13 +21,46 @@ const connectImSession = async (id: string, title: string) => {
 	return connectSession({ id, title })
 }
 
-const syncImSessionRuntimeConfig = async (binding: ImSessionBinding, event: ImInboundEvent) => {
+const syncImSessionBindingConfig = async (binding: ImSessionBinding, event: ImInboundEvent) => {
 	const account = await getImAccount(
 		and(eq(im_account.platform, event.platform), eq(im_account.account_id, event.account_id))!
 	)
 
 	if (!account) {
 		return
+	}
+
+	const session_target = getImAccountSessionTargetConfig(account)
+	const current_group_session = await getGroupSession(eq(group_session.session_id, binding.session_id))
+	const current_agent_session = await getAgentSession(eq(agent_session.session_id, binding.session_id))
+	const next_group_id = session_target.type === 'group' ? session_target.group_id || '' : ''
+	const next_agent_id = session_target.type === 'agent' ? session_target.agent_id || '' : ''
+	let relation_changed = false
+
+	if (current_group_session && current_group_session.group_id !== next_group_id) {
+		await removeGroupSession(eq(group_session.session_id, binding.session_id))
+		relation_changed = true
+	}
+
+	if (current_agent_session && current_agent_session.agent_id !== next_agent_id) {
+		await removeAgentSession(eq(agent_session.session_id, binding.session_id))
+		relation_changed = true
+	}
+
+	if (next_group_id && (!current_group_session || current_group_session.group_id !== next_group_id)) {
+		await addGroupSession(next_group_id, binding.session_id)
+		relation_changed = true
+	}
+
+	if (next_agent_id && (!current_agent_session || current_agent_session.agent_id !== next_agent_id)) {
+		await addAgentSession(next_agent_id, binding.session_id)
+		relation_changed = true
+	}
+
+	if (relation_changed) {
+		SessionStore.delete(binding.session_id)
+		GroupStore.delete(binding.session_id)
+		binding.session = await connectImSession(binding.session_id, binding.session.session.title)
 	}
 
 	const next_config = getImAccountRuntimeConfig(account)
@@ -66,7 +107,7 @@ export const ensureImSessionBinding = async (event: ImInboundEvent): Promise<ImS
 		session: target
 	}
 
-	await syncImSessionRuntimeConfig(binding, event)
+	await syncImSessionBindingConfig(binding, event)
 
 	return binding
 }
@@ -92,7 +133,7 @@ export const resetImSessionBinding = async (event: ImInboundEvent): Promise<ImSe
 		session: target
 	}
 
-	await syncImSessionRuntimeConfig(binding, event)
+	await syncImSessionBindingConfig(binding, event)
 
 	return binding
 }

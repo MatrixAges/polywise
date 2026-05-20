@@ -9,11 +9,13 @@ export type ImAccountsResponse = Awaited<ReturnType<typeof rpc.im.query.query>>
 export type ImAccountItem = ImAccountsResponse['accounts'][number]
 export type ImHealth = Awaited<ReturnType<typeof rpc.im.health.query>>
 export type AgentItem = Awaited<ReturnType<typeof rpc.agent.query.query>>[number]
+export type GroupItem = Awaited<ReturnType<typeof rpc.group.query.query>>[number]
 export type ImPlatform = ImAccountItem['platform']
 export type ImEditorMode = 'new' | 'edit'
 export type WechatQrLoginStart = Awaited<ReturnType<typeof rpc.im.startWechatQrLogin.mutate>>
 export type WechatQrLoginWait = Awaited<ReturnType<typeof rpc.im.waitWechatQrLogin.query>>
 export type RuntimeToolItem = (typeof configurable_session_tool_items)[number]['key']
+export type ImSessionTargetType = 'global' | 'agent' | 'group'
 
 export type ImFormState = {
 	id?: string
@@ -28,6 +30,9 @@ export type ImFormState = {
 	discord_allowed_user_ids: string
 	wechat_bot_token: string
 	wechat_api_base_url: string
+	session_target_type: ImSessionTargetType
+	session_target_agent_id: string
+	session_target_group_id: string
 	runtime_disable_map: Array<string>
 	runtime_enable_sub_agent: boolean
 	runtime_enable_agent_tool: boolean
@@ -46,6 +51,9 @@ const emptyForm = (): ImFormState => ({
 	discord_allowed_user_ids: '',
 	wechat_bot_token: '',
 	wechat_api_base_url: 'https://ilinkai.weixin.qq.com',
+	session_target_type: 'global',
+	session_target_agent_id: '',
+	session_target_group_id: '',
 	runtime_disable_map: [],
 	runtime_enable_sub_agent: true,
 	runtime_enable_agent_tool: true,
@@ -64,6 +72,16 @@ const parseConfig = (account: ImAccountItem): ImFormState => {
 	const config = account.config_json ? JSON.parse(account.config_json) : {}
 	const runtime =
 		typeof config.runtime === 'object' && config.runtime ? (config.runtime as Record<string, unknown>) : {}
+	const session_target =
+		typeof config.session_target === 'object' && config.session_target
+			? (config.session_target as Record<string, unknown>)
+			: {}
+	const session_target_type =
+		session_target.type === 'agent' || session_target.type === 'group' || session_target.type === 'global'
+			? session_target.type
+			: 'global'
+	const session_target_agent_id = typeof session_target.agent_id === 'string' ? session_target.agent_id : ''
+	const session_target_group_id = typeof session_target.group_id === 'string' ? session_target.group_id : ''
 
 	if (account.platform === 'wechat') {
 		return {
@@ -80,6 +98,9 @@ const parseConfig = (account: ImAccountItem): ImFormState => {
 			wechat_bot_token: typeof config.bot_token === 'string' ? config.bot_token : '',
 			wechat_api_base_url:
 				typeof config.api_base_url === 'string' ? config.api_base_url : 'https://ilinkai.weixin.qq.com',
+			session_target_type,
+			session_target_agent_id,
+			session_target_group_id,
 			runtime_disable_map: Array.isArray(runtime.disable_map)
 				? runtime.disable_map.filter((item): item is string => typeof item === 'string')
 				: [],
@@ -110,6 +131,9 @@ const parseConfig = (account: ImAccountItem): ImFormState => {
 		),
 		wechat_bot_token: '',
 		wechat_api_base_url: 'https://ilinkai.weixin.qq.com',
+		session_target_type,
+		session_target_agent_id,
+		session_target_group_id,
 		runtime_disable_map: Array.isArray(runtime.disable_map)
 			? runtime.disable_map.filter((item): item is string => typeof item === 'string')
 			: [],
@@ -122,6 +146,29 @@ const parseConfig = (account: ImAccountItem): ImFormState => {
 }
 
 const stringifyConfig = (form: ImFormState) => {
+	const session_target =
+		form.session_target_type === 'agent'
+			? {
+					type: 'agent' as const,
+					agent_id: form.session_target_agent_id.trim()
+				}
+			: form.session_target_type === 'group'
+				? {
+						type: 'group' as const,
+						group_id: form.session_target_group_id.trim()
+					}
+				: {
+						type: 'global' as const
+					}
+
+	if (session_target.type === 'agent' && !session_target.agent_id) {
+		throw new Error('Select an agent session target')
+	}
+
+	if (session_target.type === 'group' && !session_target.group_id) {
+		throw new Error('Select a group session target')
+	}
+
 	if (form.platform === 'wechat') {
 		if (!form.wechat_bot_token.trim()) {
 			throw new Error('Connect WeChat first')
@@ -130,6 +177,7 @@ const stringifyConfig = (form: ImFormState) => {
 		return JSON.stringify({
 			bot_token: form.wechat_bot_token.trim(),
 			api_base_url: form.wechat_api_base_url.trim() || 'https://ilinkai.weixin.qq.com',
+			session_target,
 			runtime: {
 				disable_map: form.runtime_disable_map,
 				enable_sub_agent: form.runtime_enable_sub_agent,
@@ -149,6 +197,7 @@ const stringifyConfig = (form: ImFormState) => {
 		allowed_guild_ids: parseStringList(form.discord_allowed_guild_ids),
 		allowed_channel_ids: parseStringList(form.discord_allowed_channel_ids),
 		allowed_user_ids: parseStringList(form.discord_allowed_user_ids),
+		session_target,
 		runtime: {
 			disable_map: form.runtime_disable_map,
 			enable_sub_agent: form.runtime_enable_sub_agent,
@@ -170,6 +219,7 @@ export default class Model {
 	reloading = false
 	removing = false
 	agents = [] as Array<AgentItem>
+	groups = [] as Array<GroupItem>
 	wechat_qr_dialog_open = false
 	wechat_qr_loading = false
 	wechat_qr_polling = false
@@ -212,6 +262,18 @@ export default class Model {
 		return configurable_session_tool_items
 	}
 
+	get selectedTargetAgent() {
+		return this.agents.find(item => item.id === this.form.session_target_agent_id) || null
+	}
+
+	get selectedTargetGroup() {
+		return this.groups.find(item => item.id === this.form.session_target_group_id) || null
+	}
+
+	get isGlobalSessionTarget() {
+		return this.form.session_target_type === 'global'
+	}
+
 	async init() {
 		await this.load()
 	}
@@ -222,6 +284,10 @@ export default class Model {
 
 	updateForm<K extends keyof ImFormState>(key: K, value: ImFormState[K]) {
 		this.form[key] = value
+	}
+
+	setSessionTargetType(value: ImSessionTargetType) {
+		this.form.session_target_type = value
 	}
 
 	get runtimeDisableMap() {
@@ -430,19 +496,49 @@ export default class Model {
 		).length
 	}
 
+	getSessionTargetSummary(account: ImAccountItem) {
+		const config = account.config_json ? JSON.parse(account.config_json) : {}
+		const session_target =
+			typeof config.session_target === 'object' && config.session_target
+				? (config.session_target as Record<string, unknown>)
+				: {}
+		const type =
+			session_target.type === 'agent' || session_target.type === 'group' || session_target.type === 'global'
+				? session_target.type
+				: 'global'
+
+		if (type === 'agent') {
+			const agent_id = typeof session_target.agent_id === 'string' ? session_target.agent_id : ''
+			const agent = this.agents.find(item => item.id === agent_id)
+
+			return agent ? `agent · ${agent.name}` : 'agent'
+		}
+
+		if (type === 'group') {
+			const group_id = typeof session_target.group_id === 'string' ? session_target.group_id : ''
+			const group = this.groups.find(item => item.id === group_id)
+
+			return group ? `group · ${group.name}` : 'group'
+		}
+
+		return 'global'
+	}
+
 	async load(nextSelectedId?: string) {
 		this.loading = true
 
 		try {
-			const [accountsRes, healthRes, agentsRes] = await Promise.all([
+			const [accountsRes, healthRes, agentsRes, groupsRes] = await Promise.all([
 				rpc.im.query.query(),
 				rpc.im.health.query(),
-				rpc.agent.query.query()
+				rpc.agent.query.query(),
+				rpc.group.query.query()
 			])
 
 			this.accounts = accountsRes.accounts
 			this.health = healthRes
 			this.agents = agentsRes
+			this.groups = groupsRes
 
 			const targetId =
 				nextSelectedId !== undefined

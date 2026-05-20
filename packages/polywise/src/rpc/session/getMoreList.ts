@@ -36,8 +36,8 @@ export default p.input(input_type).query(async ({ input }) => {
 	const exclude_session_id_list = [
 		...pin_session_id_list,
 		...project_session_id_list,
-		...group_session_id_list,
-		...agent_session_id_list,
+		...(kind === 'im' ? [] : group_session_id_list),
+		...(kind === 'im' ? [] : agent_session_id_list),
 		...post_session_id_list,
 		...blocked_session_ids
 	]

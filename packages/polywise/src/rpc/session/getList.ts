@@ -54,8 +54,8 @@ const getPinSessionList = async (args: {
 	const pin_session_id_list = pin_list
 		.map(item => item.id)
 		.filter(session_id => !project_session_id_set.has(session_id))
-		.filter(session_id => !group_session_id_set.has(session_id))
-		.filter(session_id => !agent_session_id_set.has(session_id))
+		.filter(session_id => (kind === 'im' ? true : !group_session_id_set.has(session_id)))
+		.filter(session_id => (kind === 'im' ? true : !agent_session_id_set.has(session_id)))
 		.filter(session_id => !post_session_id_set.has(session_id))
 		.filter(session_id => !isBlockedSessionId(session_id))
 
@@ -87,8 +87,8 @@ const getUnpinSessionList = async (args: {
 	const exclude_session_id_list = [
 		...pin_session_id_list,
 		...project_session_id_list,
-		...group_session_id_list,
-		...agent_session_id_list,
+		...(kind === 'im' ? [] : group_session_id_list),
+		...(kind === 'im' ? [] : agent_session_id_list),
 		...post_session_id_list,
 		...blocked_session_ids
 	]

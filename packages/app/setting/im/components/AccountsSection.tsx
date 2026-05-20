@@ -82,7 +82,8 @@ const Index = () => {
 									</Badge>
 								</div>
 								<div className='text-std-500 text-sm'>
-									{account.platform} · {account.account_id}
+									{account.platform} · {account.account_id} ·{' '}
+									{x.getSessionTargetSummary(account)}
 								</div>
 								{account.last_error && (
 									<div className='text-xs text-red-500'>{account.last_error}</div>

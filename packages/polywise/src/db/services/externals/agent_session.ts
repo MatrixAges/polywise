@@ -42,6 +42,15 @@ export const getAgentSessionIdList = async () => {
 	return list.map(item => item.session_id)
 }
 
+export const getAgentSession = async (where: SQL) => {
+	return env.db
+		.select()
+		.from(agent_session)
+		.where(where)
+		.limit(1)
+		.then(res => res[0])
+}
+
 export const addAgentSession = async (agent_id: string, session_id: string) => {
 	return env.db
 		.insert(agent_session)
