@@ -30,6 +30,53 @@ const waitForAssistantMessage = async (session: Session, baseline_message_count:
 	return fallback?.role === 'assistant' ? fallback : undefined
 }
 
+const waitForAssistantMessages = async (session: Session, baseline_message_count: number) => {
+	for (let attempt = 0; attempt < 40; attempt++) {
+		const response_messages = session.ui_messages
+			.slice(baseline_message_count)
+			.filter(message => message.role === 'assistant') as Array<FstMessage>
+
+		if (response_messages.length > 0) {
+			return response_messages
+		}
+
+		await sleep(25)
+	}
+
+	return session.ui_messages.filter(message => message.role === 'assistant') as Array<FstMessage>
+}
+
+const formatGroupSenderPrefix = (message?: FstMessage) => {
+	const sender = String(message?.metadata?.sender || '').trim()
+	const sender_role = String(message?.metadata?.sender_role || '').trim()
+
+	if (!sender) {
+		return ''
+	}
+
+	if (!sender_role) {
+		return `${sender}`
+	}
+
+	return `${sender}(${sender_role})`
+}
+
+const formatImDeliveryText = (session: Session, message?: FstMessage) => {
+	const text = extractAssistantText(message)
+
+	if (!text) {
+		return ''
+	}
+
+	if (session.scope.type !== 'group') {
+		return text
+	}
+
+	const prefix = formatGroupSenderPrefix(message)
+
+	return prefix ? `${prefix}\n${text}` : text
+}
+
 export const deliverImSessionStream = async (args: {
 	adapter: ImAdapter
 	route: ImRoute
@@ -41,6 +88,7 @@ export const deliverImSessionStream = async (args: {
 	const reader = stream.getReader()
 	const stream_edit_interval_ms =
 		adapter.platform === 'feishu' ? feishu_stream_edit_interval_ms : im_stream_edit_interval_ms
+	const disable_live_stream = adapter.platform === 'feishu' && session.scope.type === 'group'
 	const ordered_part_ids = [] as Array<string>
 	const part_state_by_id = new Map<
 		string,
@@ -92,6 +140,7 @@ export const deliverImSessionStream = async (args: {
 			await adapter.sendTyping(route).catch(() => null)
 		}
 
+		if (disable_live_stream) continue
 		if (!adapter.capabilities.message_edit) continue
 		if (chunk.type !== 'text-delta') continue
 
@@ -124,10 +173,30 @@ export const deliverImSessionStream = async (args: {
 	const response_message = (await waitForAssistantMessage(session, baseline_message_count)) as
 		| FstMessage
 		| undefined
+	const response_messages = await waitForAssistantMessages(session, baseline_message_count)
 	const streamed_parts = ordered_part_ids
 		.map(part_id => part_state_by_id.get(part_id)?.text.trim() || '')
 		.filter(Boolean)
-	const final_text = streamed_parts.join('\n\n') || extractAssistantText(response_message)
+	const final_text = streamed_parts.join('\n\n') || formatImDeliveryText(session, response_message)
+
+	if (disable_live_stream) {
+		const delivery_texts = response_messages
+			.map(message => formatImDeliveryText(session, message))
+			.filter(Boolean)
+
+		if (delivery_texts.length > 0) {
+			for (const text of delivery_texts) {
+				await sendFinalMessage(adapter, route, text)
+			}
+		} else {
+			await sendFinalMessage(adapter, route, final_text)
+		}
+
+		return {
+			response_message: response_messages.at(-1) || response_message,
+			final_text: delivery_texts.join('\n\n') || final_text
+		}
+	}
 
 	if (adapter.capabilities.message_edit) {
 		let has_delivered_part = false
