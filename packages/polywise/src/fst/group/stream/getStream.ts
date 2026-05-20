@@ -61,7 +61,6 @@ export default async (s: Group, message: Message) => {
 			const completed_candidate_agent_ids = new Set<string>()
 			let exclusive_agent_id = null as string | null
 			let evaluation_gate_closed = false
-			let has_merged_member_stream = false
 			const evaluation_abort_controller = new AbortController()
 
 			const notifyQueue = () => {
@@ -269,16 +268,9 @@ export default async (s: Group, message: Message) => {
 					}
 
 					try {
-						// AI SDK chat processing assumes a single active assistant message per
-						// transport stream. Group members are persisted as separate assistant
-						// messages, so forwarding multiple member UI streams through the same
-						// transport stream causes the client-side active message state to reuse
-						// prior parts during streaming. Final persisted messages are correct,
-						// but streaming reasoning/text can appear stacked onto later members.
-						//
-						// Keep transport streaming for the first replying member only. Later
-						// members still run, persist, and sync into the UI via session updates,
-						// but their UI chunks are not merged into this same transport stream.
+						// AI SDK chat processing assumes a single active assistant stream.
+						// Interleaving multiple member streams in one response can scramble
+						// start/end step state and break reasoning/text chunk ordering.
 						const member = await runMember({
 							s,
 							agent: evaluation.agent,
@@ -288,13 +280,7 @@ export default async (s: Group, message: Message) => {
 							turn_id
 						})
 
-						if (!has_merged_member_stream) {
-							has_merged_member_stream = true
-							writer.merge(member.stream)
-						} else {
-							void member.stream.cancel().catch(() => {})
-						}
-
+						writer.merge(member.stream)
 						await member.done
 
 						await updateQueueItem(next, {
