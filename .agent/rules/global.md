@@ -6,6 +6,7 @@
 - **Complete replacement**: When using editing tools, replacement snippets must include enough context and contain the full business logic; never use `...` to omit code.
 - **Scope restriction**: Limit changes strictly to the files or modules explicitly mentioned by the user; if unmentioned modules are involved, confirm with the user first.
 - **Proposal first**: Before any write-producing action (editing, creating files, or commands that modify files), provide the full draft first and wait for explicit user approval.
+- **Complex-request planning**: For complex requirements, first write a clear, specific, complete, and executable solution in English in `.draft`; during execution, update that plan in `.draft` in a timely manner based on actual progress and new findings.
 - **Temporary logging for failed fixes**: If the user reports that your solution did not work, add temporary `console.log` diagnostics first, ask the user to help restart the service and perform specific actions, locate the exact failure point, and only then implement the actual fix.
 - **Protected directories**: Never read or modify any directory whose name starts with `__` (such as `__codegrave__`).
 - **Concise output**: Do not include pleasantries or unrelated explanation; give the result directly.

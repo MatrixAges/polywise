@@ -14,5 +14,7 @@ export { default as group_todo } from './group_todo'
 export { default as todo } from './todo'
 export { default as project } from './project'
 export { default as notification } from './notification'
+export { default as im_account } from './im_account'
+export { default as im_peer_state } from './im_peer_state'
 
 export * from './externals'
