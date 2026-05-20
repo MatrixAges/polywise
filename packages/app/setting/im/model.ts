@@ -532,7 +532,7 @@ export default class Model {
 				rpc.im.query.query(),
 				rpc.im.health.query(),
 				rpc.agent.query.query(),
-				rpc.group.query.query()
+				rpc.group.query.query({})
 			])
 
 			this.accounts = accountsRes.accounts
