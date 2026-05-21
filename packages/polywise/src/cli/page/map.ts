@@ -37,7 +37,7 @@ export const getPageHelpTree = () => {
 		tree[parent_id].children!.push(item.id)
 		tree[item.id] = {
 			id: item.id,
-			title: item.id,
+			title: item.kind === 'panel' ? item.panel_tab || item.id : item.id,
 			summary: item.summary,
 			kind: 'page',
 			hints: item.params_hint.length ? [`Params: ${item.params_hint.join(', ')}`] : []

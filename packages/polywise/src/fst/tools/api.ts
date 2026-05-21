@@ -1,6 +1,8 @@
 import { getApiMap, getApiMapItem, renderApiHelp } from '@core/cli/api/map'
 import { tool } from 'ai'
-import { array, object, record, string, enum as zod_enum } from 'zod'
+import { array, boolean, number, object, record, string, union, enum as zod_enum } from 'zod'
+
+type ApiInputValue = string | number | boolean
 
 const inputSchema = object({
 	action: zod_enum(['help', 'list', 'schema', 'call']).default('help'),
@@ -9,10 +11,12 @@ const inputSchema = object({
 		.describe('Optional help path segments like ["session"] or ["session", "create"].'),
 	target: string().optional().describe('Target rpc path such as "session.create" for schema or call actions.'),
 	keyword: string().optional().describe('Optional fuzzy keyword for list action.'),
-	input: record(string(), string()).optional().describe('Flat input object for call action.')
+	input: record(string(), union([string(), number(), boolean()]))
+		.optional()
+		.describe('Flat input object for call action. Values may be string, number, or boolean.')
 })
 
-const resolvePathInput = (path: string, input?: Record<string, string>) => {
+const resolvePathInput = (path: string, input?: Record<string, ApiInputValue>) => {
 	const path_input = { ...(input || {}) }
 	const resolved_path = path.replace(/\{([A-Za-z0-9_]+)\}/g, (_, key: string) => {
 		const value = path_input[key]
@@ -28,7 +32,7 @@ const resolvePathInput = (path: string, input?: Record<string, string>) => {
 	}
 }
 
-const buildUrl = (path: string, input?: Record<string, string>) => {
+const buildUrl = (path: string, input?: Record<string, ApiInputValue>) => {
 	const { resolved_path, rest_input } = resolvePathInput(path, input)
 	const url = new URL(resolved_path, 'http://localhost:3072/api')
 
@@ -37,13 +41,16 @@ const buildUrl = (path: string, input?: Record<string, string>) => {
 	}
 
 	for (const [key, value] of Object.entries(rest_input)) {
-		url.searchParams.set(key, value)
+		url.searchParams.set(key, String(value))
 	}
 
 	return url.toString()
 }
 
-const callApi = async (target: NonNullable<ReturnType<typeof getApiMapItem>>, input?: Record<string, string>) => {
+const callApi = async (
+	target: NonNullable<ReturnType<typeof getApiMapItem>>,
+	input?: Record<string, ApiInputValue>
+) => {
 	const method = target.method
 	const is_get_like = method === 'GET' || method === 'DELETE'
 	const { rest_input } = resolvePathInput(target.openapi_path, input)
@@ -54,7 +61,12 @@ const callApi = async (target: NonNullable<ReturnType<typeof getApiMapItem>>, in
 		},
 		...(is_get_like ? {} : { body: JSON.stringify(rest_input) })
 	})
-	const data = await res.json().catch(() => null)
+	const text = await res.text()
+	let data: unknown = text
+
+	try {
+		data = JSON.parse(text)
+	} catch {}
 
 	return {
 		ok: res.ok,
@@ -89,6 +101,7 @@ export const createApiTool = () =>
 									.includes(keyword)
 							: true
 					)
+					.sort((left, right) => left.rpc_path.localeCompare(right.rpc_path))
 					.slice(0, 20)
 
 				return {

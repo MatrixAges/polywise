@@ -120,7 +120,7 @@ export const collectPageSnapshot = (args: {
 	const page_title = normalizeText(heading?.textContent || '') || page?.title || 'unknown'
 	const visible_sections = collectSections()
 	const panel_tab = getActivePanelTab()
-	const page_id = page?.id || null
+	const route_page_id = page?.id || null
 	const panel_page = panel_tab
 		? Array.from(page_map_by_id.values()).find(item => item.panel_tab === panel_tab)?.id
 		: null
@@ -137,9 +137,11 @@ export const collectPageSnapshot = (args: {
 			search: args.search
 		},
 		panel: {
-			active_tab: panel_tab
+			active_tab: panel_tab,
+			page_id: panel_page || null
 		},
-		page_id,
+		page_id: route_page_id,
+		route_page_id,
 		page_title,
 		page_summary,
 		visible_sections,

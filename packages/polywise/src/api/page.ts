@@ -19,9 +19,11 @@ const bridge_input_schema = z.object({
 				params: z.record(z.string(), z.string())
 			}),
 			panel: z.object({
-				active_tab: z.string().nullable()
+				active_tab: z.string().nullable(),
+				page_id: z.string().nullable()
 			}),
 			page_id: z.string().nullable(),
+			route_page_id: z.string().nullable(),
 			page_title: z.string(),
 			page_summary: z.string(),
 			visible_sections: z.array(
@@ -75,10 +77,11 @@ export const command = async (c: HonoContext) => {
 		...(input.params ? { params: input.params } : {})
 	})
 
-	await waitForPageRuntimeAck(command.seq)
+	const acked = await waitForPageRuntimeAck(command.seq)
 
 	return c.json({
 		queued: true,
+		acked,
 		command,
 		runtime: getPageRuntimeStatus()
 	})

@@ -21,6 +21,8 @@ export const getPageRuntimeSnapshot = () => state.snapshot
 export const getPageRuntimeStatus = () => ({
 	snapshot: state.snapshot,
 	last_sync_at: state.last_sync_at,
+	last_sync_age_ms: state.last_sync_at ? Date.now() - state.last_sync_at : null,
+	bridge_online: state.last_sync_at ? Date.now() - state.last_sync_at < 5000 : false,
 	ack_seq: state.ack_seq,
 	pending_count: state.commands.filter(item => item.seq > state.ack_seq).length
 })

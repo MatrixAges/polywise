@@ -76,8 +76,10 @@ export interface PageRuntimeSnapshot {
 	}
 	panel: {
 		active_tab: string | null
+		page_id: string | null
 	}
 	page_id: string | null
+	route_page_id: string | null
 	page_title: string
 	page_summary: string
 	visible_sections: Array<PageVisibleSection>

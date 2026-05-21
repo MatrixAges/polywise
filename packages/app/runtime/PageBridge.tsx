@@ -24,51 +24,48 @@ const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 const clickPanelTab = async (tab: string) => {
 	const target = document.querySelector(`[data-page-tabs="panel"] [data-tab-key="${tab}"]`) as HTMLElement | null
 
-	target?.click()
+	if (!target) {
+		return false
+	}
+
+	target.click()
 	await wait(80)
+
+	return true
 }
 
 const executeCommand = async (command: PageRuntimeCommand, navigate: ReturnType<typeof useNavigate>) => {
 	if (command.type === 'back') {
 		navigate(-1)
 		await wait(80)
-		return
+		return true
 	}
 
 	if (command.type === 'panel' && command.target) {
-		await clickPanelTab(command.target)
-		return
+		return clickPanelTab(command.target)
 	}
 
 	if (command.type === 'navigate' && command.target) {
 		navigate(command.target)
 		await wait(80)
+		return true
 	}
+
+	return false
 }
 
 const syncBridge = async (args: {
 	last_ack_seq: number
-	pathname: string
-	search: string
-	params: Record<string, string | undefined>
+	snapshot: ReturnType<typeof collectPageSnapshot>
 	navigate: ReturnType<typeof useNavigate>
 }) => {
-	const snapshot = collectPageSnapshot({
-		pathname: args.pathname,
-		search: readSearchParams(args.search),
-		params: Object.fromEntries(
-			Object.entries(args.params)
-				.filter(([, value]) => typeof value === 'string' && value.length)
-				.map(([key, value]) => [key, value as string])
-		)
-	})
 	const res = await fetch(`${server_sys_url}/page/bridge`, {
 		method: 'POST',
 		headers: {
 			'content-type': 'application/json'
 		},
 		body: JSON.stringify({
-			snapshot,
+			snapshot: args.snapshot,
 			last_ack_seq: args.last_ack_seq
 		})
 	})
@@ -81,7 +78,12 @@ const syncBridge = async (args: {
 	let ack_seq = args.last_ack_seq
 
 	for (const command of data.pending_commands) {
-		await executeCommand(command, args.navigate)
+		const handled = await executeCommand(command, args.navigate)
+
+		if (!handled) {
+			break
+		}
+
 		ack_seq = Math.max(ack_seq, command.seq)
 	}
 
@@ -94,14 +96,33 @@ const Index = () => {
 	const params = useParams()
 	const params_key = JSON.stringify(params)
 	const last_ack_seq = useRef(0)
+	const last_mutation_signature = useRef('')
 	const inflight = useRef(false)
 
 	useEffect(() => {
 		let disposed = false
 		let debounce_timer = 0 as number | null
 
-		const run = async () => {
+		const getSnapshot = () =>
+			collectPageSnapshot({
+				pathname,
+				search: readSearchParams(search),
+				params: Object.fromEntries(
+					Object.entries(params)
+						.filter(([, value]) => typeof value === 'string' && value.length)
+						.map(([key, value]) => [key, value as string])
+				)
+			})
+
+		const run = async (reason: 'route' | 'poll' | 'mutation') => {
 			if (disposed || inflight.current) {
+				return
+			}
+
+			const snapshot = getSnapshot()
+			const signature = JSON.stringify(snapshot)
+
+			if (reason === 'mutation' && signature === last_mutation_signature.current) {
 				return
 			}
 
@@ -110,11 +131,12 @@ const Index = () => {
 			try {
 				last_ack_seq.current = await syncBridge({
 					last_ack_seq: last_ack_seq.current,
-					pathname,
-					search,
-					params,
+					snapshot,
 					navigate
 				})
+				last_mutation_signature.current = signature
+			} catch {
+				// Ignore transient bridge failures and let the next poll retry.
 			} finally {
 				inflight.current = false
 			}
@@ -127,13 +149,13 @@ const Index = () => {
 
 			debounce_timer = window.setTimeout(() => {
 				debounce_timer = null
-				void run()
+				void run('mutation')
 			}, 140)
 		}
 
-		void run()
+		void run('route')
 
-		const timer = window.setInterval(() => void run(), poll_interval_ms)
+		const timer = window.setInterval(() => void run('poll'), poll_interval_ms)
 		const observer = new MutationObserver(() => scheduleRun())
 
 		observer.observe(document.body, {

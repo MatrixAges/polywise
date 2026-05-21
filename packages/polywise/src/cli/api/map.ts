@@ -31,19 +31,30 @@ type OpenApiOperation = {
 	}
 }
 
-const openapi_doc = (() => {
+let openapi_doc_cache: ReturnType<typeof generateOpenApiDocument> | null | undefined
+let api_map_cache: Array<ApiMapItem> | null = null
+
+const getOpenApiDoc = () => {
+	if (openapi_doc_cache !== undefined) {
+		return openapi_doc_cache
+	}
+
 	try {
-		return generateOpenApiDocument(router, {
+		openapi_doc_cache = generateOpenApiDocument(router, {
 			title: 'Polywise API',
 			version: '0.0.1',
 			baseUrl: 'http://localhost:3072/api'
 		})
 	} catch {
-		return null
+		openapi_doc_cache = null
 	}
-})()
+
+	return openapi_doc_cache
+}
 
 const getOperation = (method: string, openapi_path: string) => {
+	const openapi_doc = getOpenApiDoc()
+
 	if (!openapi_doc) return null
 
 	const path_item = openapi_doc.paths?.[openapi_path] as Record<string, OpenApiOperation> | undefined
@@ -103,49 +114,65 @@ const getParameters = (operation: OpenApiOperation | null) => {
 const toInputHints = (parameters: ReturnType<typeof getParameters>) =>
 	parameters.map(item => `--${item.name} <${item.type}${item.required ? '' : '?'}>`)
 
-export const getApiMap = (): Array<ApiMapItem> =>
-	getProcedureEntries().map(([rpc_path, procedure]) => {
-		const meta = (procedure._def.meta || {}) as {
-			openapi: {
-				method: ApiMapItem['method']
-				path: string
-				summary?: string
-				description?: string
-			}
-			cli?: {
-				group?: Array<string>
-				name?: string
-				summary?: string
-				hidden?: boolean
-				examples?: Array<string>
-			}
-		}
-		const operation = getOperation(meta.openapi.method, meta.openapi.path)
-		const override = manual_api_meta_map[rpc_path]
-		const group_path = meta.cli?.group || override?.group || rpc_path.split('.').slice(0, -1) || ['system']
-		const command_name = meta.cli?.name || override?.name || rpc_path.split('.').at(-1) || rpc_path
-		const parameters = getParameters(operation)
+export const getApiMap = (): Array<ApiMapItem> => {
+	if (api_map_cache) {
+		return api_map_cache
+	}
 
-		return {
-			id: rpc_path,
-			rpc_path,
-			method: meta.openapi.method,
-			openapi_path: meta.openapi.path,
-			cli_path: ['api', ...group_path, command_name],
-			group_path,
-			summary:
-				meta.cli?.summary ||
-				meta.openapi.summary ||
-				override?.summary ||
-				operation?.summary ||
-				operation?.description ||
+	api_map_cache = getProcedureEntries()
+		.map(([rpc_path, procedure]) => {
+			const meta = (procedure._def.meta || {}) as {
+				openapi: {
+					method: ApiMapItem['method']
+					path: string
+					summary?: string
+					description?: string
+				}
+				cli?: {
+					group?: Array<string>
+					name?: string
+					summary?: string
+					hidden?: boolean
+					examples?: Array<string>
+				}
+			}
+			const operation = getOperation(meta.openapi.method, meta.openapi.path)
+			const override = manual_api_meta_map[rpc_path]
+
+			if (meta.cli?.hidden || override?.hidden) {
+				return null
+			}
+
+			const group_path = meta.cli?.group ||
+				override?.group ||
+				rpc_path.split('.').slice(0, -1) || ['system']
+			const command_name = meta.cli?.name || override?.name || rpc_path.split('.').at(-1) || rpc_path
+			const parameters = getParameters(operation)
+
+			return {
+				id: rpc_path,
 				rpc_path,
-			description: meta.openapi.description || operation?.description,
-			input_hint: toInputHints(parameters),
-			examples: meta.cli?.examples || override?.examples || [],
-			parameters
-		}
-	})
+				method: meta.openapi.method,
+				openapi_path: meta.openapi.path,
+				cli_path: ['api', ...group_path, command_name],
+				group_path,
+				summary:
+					meta.cli?.summary ||
+					meta.openapi.summary ||
+					override?.summary ||
+					operation?.summary ||
+					operation?.description ||
+					rpc_path,
+				description: meta.openapi.description || operation?.description,
+				input_hint: toInputHints(parameters),
+				examples: meta.cli?.examples || override?.examples || [],
+				parameters
+			}
+		})
+		.filter(Boolean) as Array<ApiMapItem>
+
+	return api_map_cache
+}
 
 export const getApiMapItem = (rpc_path: string) => getApiMap().find(item => item.rpc_path === rpc_path) || null
 
@@ -162,28 +189,38 @@ export const getApiHelpTree = () => {
 	} as Record<string, HelpNode>
 
 	for (const item of getApiMap()) {
-		const root_group = item.group_path[0] || 'system'
-		const group_id = `group:${root_group}`
+		let parent_id = root_help_id
+		const group_segments = item.group_path.length ? item.group_path : ['system']
 
-		if (!tree[group_id]) {
-			tree[group_id] = {
-				id: group_id,
-				title: root_group,
-				summary: `${root_group} API commands`,
-				kind: 'group',
-				children: [],
-				hints: [`Use \`api ${root_group} -h\` for command details.`]
+		group_segments.forEach((segment, index) => {
+			const group_path = group_segments.slice(0, index + 1)
+			const group_id = `group:${group_path.join('.')}`
+
+			if (!tree[group_id]) {
+				tree[group_id] = {
+					id: group_id,
+					title: segment,
+					summary: `${group_path.join('.')} API commands`,
+					kind: 'group',
+					children: [],
+					hints: [`Use \`api ${group_path.join(' ')} -h\` for the next level.`]
+				}
+				tree[parent_id].children!.push(group_id)
 			}
-			tree[root_help_id].children!.push(group_id)
-		}
 
-		tree[group_id].children!.push(item.id)
+			parent_id = group_id
+		})
+
+		tree[parent_id].children!.push(item.id)
 		tree[item.id] = {
 			id: item.id,
 			title: item.cli_path.at(-1) || item.id,
 			summary: item.summary,
 			kind: 'command',
-			hints: item.input_hint.length ? [`Parameters: ${item.input_hint.join(', ')}`] : [],
+			hints: [
+				`${item.method} ${item.openapi_path}`,
+				...(item.input_hint.length ? [`Parameters: ${item.input_hint.join(', ')}`] : [])
+			],
 			examples: item.examples
 		}
 	}
@@ -199,5 +236,6 @@ const manual_api_meta_map = manual_api_meta as Record<
 		name: string
 		summary: string
 		examples: Array<string>
+		hidden?: boolean
 	}
 >

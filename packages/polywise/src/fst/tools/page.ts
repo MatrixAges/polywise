@@ -30,13 +30,23 @@ export const createPageTool = () =>
 			}
 
 			if (input.action === 'list') {
+				const routes = page_map
+					.filter(item => item.kind === 'route')
+					.sort((a, b) => a.id.localeCompare(b.id))
+				const panels = page_map
+					.filter(item => item.kind === 'panel')
+					.sort((a, b) => a.id.localeCompare(b.id))
+
 				return {
 					count: page_map.length,
-					items: page_map.map(item => ({
+					routes: routes.map(item => ({
 						id: item.id,
-						kind: item.kind,
 						summary: item.summary,
-						route_path: item.route_path || null,
+						route_path: item.route_path || null
+					})),
+					panels: panels.map(item => ({
+						id: item.id,
+						summary: item.summary,
 						panel_tab: item.panel_tab || null
 					}))
 				}
@@ -59,12 +69,21 @@ export const createPageTool = () =>
 					return snapshot
 				}
 
-				const target = page_map_by_id.get(input.target)
+				const target =
+					page_map_by_id.get(input.target) ||
+					Array.from(page_map_by_id.values()).find(
+						item => item.kind === 'panel' && item.panel_tab === input.target
+					)
+				const resolved_target_id = target?.id || input.target
 
 				return {
 					target: target || null,
-					snapshot,
-					matches_current_page: snapshot.page_id === input.target,
+					current_route_page: snapshot.route_page_id,
+					current_panel_page: snapshot.panel.page_id,
+					current_snapshot: snapshot,
+					matches_current_page:
+						snapshot.route_page_id === resolved_target_id ||
+						snapshot.panel.page_id === resolved_target_id,
 					section:
 						snapshot.visible_sections.find(section => section.id === input.target) ||
 						snapshot.visible_sections.find(section => section.title === input.target) ||
@@ -74,11 +93,11 @@ export const createPageTool = () =>
 
 			if (input.action === 'back') {
 				const command = enqueuePageRuntimeCommand({ type: 'back' })
-
-				await waitForPageRuntimeAck(command.seq)
+				const acked = await waitForPageRuntimeAck(command.seq)
 
 				return {
 					queued: true,
+					acked,
 					command
 				}
 			}
@@ -111,10 +130,11 @@ export const createPageTool = () =>
 							})
 						})()
 
-			await waitForPageRuntimeAck(command.seq)
+			const acked = await waitForPageRuntimeAck(command.seq)
 
 			return {
 				queued: true,
+				acked,
 				command,
 				current: getPageRuntimeStatus()
 			}
