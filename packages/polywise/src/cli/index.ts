@@ -45,6 +45,34 @@ const printRenderedHelp = (title: string, data: RenderedHelp | null) => {
 	printText(toHelpText(title, data))
 }
 
+const toCliText = (value: string) =>
+	value
+		.replace(/`api /g, '`')
+		.replace(/\bpolywise api\b/g, 'polywise')
+		.replace(/^api\b/, 'polywise')
+
+const toCliHelp = (data: RenderedHelp | null): RenderedHelp | null => {
+	if (!data) {
+		return null
+	}
+
+	return {
+		...data,
+		title: data.title === 'api' ? 'polywise' : data.title,
+		summary: toCliText(data.summary),
+		items: data.items.map(item => ({
+			...item,
+			summary: toCliText(item.summary)
+		})),
+		hints: data.hints.map(toCliText),
+		examples: data.examples.map(toCliText)
+	}
+}
+
+const printRenderedCliHelp = (data: RenderedHelp | null) => {
+	printRenderedHelp('polywise', toCliHelp(data))
+}
+
 const buildApiUrl = (path: string) => new URL(path.replace(/^\//, ''), `${api_base_url}/`)
 
 const resolveApiPath = (path: string, input: Record<string, unknown>) => {
@@ -103,7 +131,7 @@ const callApi = async (target: ApiMapItem, input: Record<string, unknown>) => {
 
 const renderApiCommandHelpText = (item: ApiMapItem) =>
 	[
-		item.cli_path.join(' '),
+		['polywise', ...item.cli_path.slice(1)].join(' '),
 		item.summary,
 		`${item.method} ${item.openapi_path}`,
 		item.description || '',
@@ -118,7 +146,7 @@ const renderApiCommandHelpText = (item: ApiMapItem) =>
 					)
 				]
 			: ['parameters: none']),
-		...(item.examples.length ? item.examples.map(example => `example: ${example}`) : [])
+		...(item.examples.length ? item.examples.map(example => `example: ${toCliText(example)}`) : [])
 	]
 		.filter(Boolean)
 		.join('\n')
@@ -272,37 +300,23 @@ const buildApiCommands = (node: ApiCommandTreeNode): Array<any> =>
 				desc: `${child.path.join('.')} API group`,
 				shortDesc: `${child.path.join('.')} API group`,
 				help: () => {
-					printRenderedHelp('api', renderApiHelp(child.path))
+					printRenderedCliHelp(renderApiHelp(child.path))
 				},
 				subcommands: buildApiCommands(child) as any
 			})
 		})
 
 const api_tree = createApiTree()
-const api_command = command({
-	name: 'api',
-	desc: 'Backend API CLI with progressive disclosure.',
-	shortDesc: 'Backend API CLI with progressive disclosure.',
-	help: () => {
-		printRenderedHelp('api', renderApiHelp([]))
-	},
-	subcommands: buildApiCommands(api_tree) as any
-})
+const root_commands = buildApiCommands(api_tree)
 
 export const main = async () => {
-	await run([api_command] as any, {
+	await run(root_commands as any, {
 		name: 'polywise',
 		description: 'Polywise CLI',
 		version: cli_version,
 		omitKeysOfUndefinedOptions: true,
 		help: () => {
-			printText(
-				[
-					'polywise cli',
-					'use: polywise api -h',
-					'optional env: POLYWISE_SERVER_URL=http://localhost:3072'
-				].join('\n')
-			)
+			printRenderedCliHelp(renderApiHelp([]))
 		}
 	})
 }

@@ -92,6 +92,9 @@ export interface PageRuntimeCommand {
 	type: 'navigate' | 'panel' | 'back'
 	target?: string
 	params?: Record<string, string>
+	expected_route_pathname?: string
+	expected_route_page_id?: string
+	expected_panel_page_id?: string
 	created_at: number
 }
 

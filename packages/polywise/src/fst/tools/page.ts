@@ -114,7 +114,11 @@ export const createPageTool = () =>
 
 			const command =
 				target.kind === 'panel'
-					? enqueuePageRuntimeCommand({ type: 'panel', target: target.panel_tab! })
+					? enqueuePageRuntimeCommand({
+							type: 'panel',
+							target: target.panel_tab!,
+							expected_panel_page_id: target.id
+						})
 					: (() => {
 							const route_target =
 								buildRoutePath(target.id, input.params) || target.route_path!
@@ -126,7 +130,9 @@ export const createPageTool = () =>
 							return enqueuePageRuntimeCommand({
 								type: 'navigate',
 								target: route_target,
-								params: input.params
+								params: input.params,
+								expected_route_pathname: route_target,
+								expected_route_page_id: target.id
 							})
 						})()
 

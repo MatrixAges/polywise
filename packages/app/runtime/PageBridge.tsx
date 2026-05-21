@@ -21,6 +21,22 @@ const readSearchParams = (search: string) => {
 
 const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 
+const matchesCommandSnapshot = (command: PageRuntimeCommand, snapshot: ReturnType<typeof collectPageSnapshot>) => {
+	if (command.expected_panel_page_id) {
+		return snapshot.panel.page_id === command.expected_panel_page_id
+	}
+
+	if (command.expected_route_page_id) {
+		return snapshot.route_page_id === command.expected_route_page_id
+	}
+
+	if (command.expected_route_pathname) {
+		return snapshot.route.pathname === command.expected_route_pathname
+	}
+
+	return false
+}
+
 const clickPanelTab = async (tab: string) => {
 	const target = document.querySelector(`[data-page-tabs="panel"] [data-tab-key="${tab}"]`) as HTMLElement | null
 
@@ -56,16 +72,18 @@ const executeCommand = async (command: PageRuntimeCommand, navigate: ReturnType<
 
 const syncBridge = async (args: {
 	last_ack_seq: number
-	snapshot: ReturnType<typeof collectPageSnapshot>
+	getSnapshot: () => ReturnType<typeof collectPageSnapshot>
 	navigate: ReturnType<typeof useNavigate>
+	command_attempts: Map<number, number>
 }) => {
+	const initial_snapshot = args.getSnapshot()
 	const res = await fetch(`${server_sys_url}/page/bridge`, {
 		method: 'POST',
 		headers: {
 			'content-type': 'application/json'
 		},
 		body: JSON.stringify({
-			snapshot: args.snapshot,
+			snapshot: initial_snapshot,
 			last_ack_seq: args.last_ack_seq
 		})
 	})
@@ -78,13 +96,34 @@ const syncBridge = async (args: {
 	let ack_seq = args.last_ack_seq
 
 	for (const command of data.pending_commands) {
+		if (matchesCommandSnapshot(command, args.getSnapshot())) {
+			ack_seq = Math.max(ack_seq, command.seq)
+			args.command_attempts.delete(command.seq)
+			continue
+		}
+
+		const last_attempt_at = args.command_attempts.get(command.seq) || 0
+
+		if (Date.now() - last_attempt_at < poll_interval_ms) {
+			break
+		}
+
 		const handled = await executeCommand(command, args.navigate)
+		args.command_attempts.set(command.seq, Date.now())
 
 		if (!handled) {
 			break
 		}
 
-		ack_seq = Math.max(ack_seq, command.seq)
+		const current_snapshot = args.getSnapshot()
+
+		if (matchesCommandSnapshot(command, current_snapshot)) {
+			ack_seq = Math.max(ack_seq, command.seq)
+			args.command_attempts.delete(command.seq)
+			continue
+		}
+
+		break
 	}
 
 	return ack_seq
@@ -98,6 +137,7 @@ const Index = () => {
 	const last_ack_seq = useRef(0)
 	const last_mutation_signature = useRef('')
 	const inflight = useRef(false)
+	const command_attempts = useRef(new Map<number, number>())
 
 	useEffect(() => {
 		let disposed = false
@@ -131,8 +171,9 @@ const Index = () => {
 			try {
 				last_ack_seq.current = await syncBridge({
 					last_ack_seq: last_ack_seq.current,
-					snapshot,
-					navigate
+					getSnapshot,
+					navigate,
+					command_attempts: command_attempts.current
 				})
 				last_mutation_signature.current = signature
 			} catch {
