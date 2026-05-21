@@ -4,6 +4,7 @@ import create from './create'
 import { answer, archive, clear, destroy, load, permission, removeMessage, setConfig, stop, unarchive } from './events'
 import getFilesDir from './getFilesDir'
 import getList from './getList'
+import getMentionAgents from './getMentionAgents'
 import getMentionFiles from './getMentionFiles'
 import getMoreList from './getMoreList'
 import getSessionStatus from './getSessionStatus'
@@ -20,6 +21,7 @@ export default r({
 	init,
 	create,
 	getFilesDir,
+	getMentionAgents,
 	getMentionFiles,
 	getList,
 	getMoreList,

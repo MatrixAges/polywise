@@ -24,7 +24,7 @@ import Mention, { filterMentionItems, formatMentionToken, getActiveMention, getB
 import type { AppConfig } from '@core/types'
 import type { ChangeEvent, KeyboardEvent, SyntheticEvent } from 'react'
 import type { IPropsInput } from '../types'
-import type { FileMentionItem, MentionItem, SkillMentionItem } from './Mention'
+import type { AgentMentionItem, FileMentionItem, MentionItem, SkillMentionItem } from './Mention'
 
 const submit_modes = [
 	{ label: 'Enter Mode', value: 'enter' },
@@ -50,6 +50,19 @@ const effort_modes = [
 	{ label: 'High', value: 'high' },
 	{ label: 'XHigh', value: 'xhigh' }
 ]
+
+const builtin_system_skills = [
+	{
+		key: 'builtin-skill-creator',
+		label: 'skill-creator',
+		desc: 'Create or update reusable local skills from repeated workflows or failure patterns.'
+	},
+	{
+		key: 'builtin-skill-installer',
+		label: 'skill-installer',
+		desc: 'Install a curated skill or a skill from another repository into the local skills directory.'
+	}
+] satisfies Array<Pick<SkillMentionItem, 'key' | 'label' | 'desc'>>
 
 const Index = (props: IPropsInput) => {
 	const {
@@ -79,8 +92,10 @@ const Index = (props: IPropsInput) => {
 	const [value, setValue] = useState('')
 	const [cursor, setCursor] = useState(0)
 	const [skill_items, setSkillItems] = useState<Array<SkillMentionItem>>([])
+	const [agent_items, setAgentItems] = useState<Array<AgentMentionItem>>([])
 	const [file_items, setFileItems] = useState<Array<FileMentionItem>>([])
 	const [loading_skills, setLoadingSkills] = useState(false)
+	const [loading_agents, setLoadingAgents] = useState(false)
 	const [loading_files, setLoadingFiles] = useState(false)
 	const [active_index, setActiveIndex] = useState(0)
 
@@ -88,11 +103,18 @@ const Index = (props: IPropsInput) => {
 	const is_page = type === 'page' || type === 'dialog'
 	const active_mention = getActiveMention(value, cursor)
 	const mention_items = active_mention
-		? filterMentionItems(active_mention.trigger === '/' ? skill_items : file_items, active_mention.query)
+		? filterMentionItems(
+				active_mention.trigger === '/' ? skill_items : [...agent_items, ...file_items],
+				active_mention.query
+			)
 		: []
 	const mention_open = !!active_mention
 	const mention_loading =
-		active_mention?.trigger === '/' ? loading_skills : active_mention?.trigger === '@' ? loading_files : false
+		active_mention?.trigger === '/'
+			? loading_skills
+			: active_mention?.trigger === '@'
+				? loading_agents || loading_files
+				: false
 
 	useLayoutEffect(() => {
 		const el = ref.current
@@ -118,17 +140,32 @@ const Index = (props: IPropsInput) => {
 			.then(items => {
 				if (canceled) return
 
-				setSkillItems(
-					items.map(item => ({
+				const builtin_map = new Map(
+					builtin_system_skills.map(item => [
+						item.label,
+						{
+							...item,
+							type: 'skill' as const,
+							path: `builtin://${item.label}`,
+							skill_type: 'system',
+							search_text: `${item.label} ${item.desc}`.toLowerCase()
+						}
+					])
+				)
+
+				for (const item of items) {
+					builtin_map.set(item.name, {
 						key: item.id,
 						type: 'skill',
 						label: item.name,
 						desc: item.desc || '',
 						path: item.path,
-						skill_type: item.type || '',
+						skill_type: builtin_map.has(item.name) ? 'system' : item.type || '',
 						search_text: `${item.name} ${item.desc || ''} ${item.path || ''}`.toLowerCase()
-					}))
-				)
+					})
+				}
+
+				setSkillItems(Array.from(builtin_map.values()))
 			})
 			.catch(() => {
 				if (!canceled) {
@@ -145,6 +182,46 @@ const Index = (props: IPropsInput) => {
 			canceled = true
 		}
 	}, [])
+
+	useEffect(() => {
+		let canceled = false
+
+		setLoadingAgents(true)
+
+		void rpc.session.getMentionAgents
+			.query({ id: session_id })
+			.then(items => {
+				if (canceled) return
+
+				setAgentItems(
+					items.map(item => ({
+						key: item.id,
+						type: 'agent',
+						label: item.name,
+						role: item.role || '',
+						desc: item.description || '',
+						photo: item.photo ?? null,
+						avatar: item.avatar ?? null,
+						search_text:
+							`${item.name} ${item.role || ''} ${item.description || ''}`.toLowerCase()
+					}))
+				)
+			})
+			.catch(() => {
+				if (!canceled) {
+					setAgentItems([])
+				}
+			})
+			.finally(() => {
+				if (!canceled) {
+					setLoadingAgents(false)
+				}
+			})
+
+		return () => {
+			canceled = true
+		}
+	}, [session_id])
 
 	useEffect(() => {
 		let canceled = false

@@ -179,7 +179,11 @@ export const ensureSkillDefaults = async (args: Omit<WriteSkillArgs, 'mode' | 'i
 	const current_skill = await getCurrentSkill({ name: args.name })
 
 	if (current_skill) {
-		return current_skill
+		if (current_skill.desc === args.desc && current_skill.type === args.type) {
+			return current_skill
+		}
+
+		return writeSkill({ ...args, id: current_skill.id, mode: 'update' })
 	}
 
 	return writeSkill({ ...args, mode: 'ensure', id: undefined })

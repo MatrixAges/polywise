@@ -6,6 +6,7 @@ export default async () => {
 	await ensureSkillDefaults({
 		name: 'skill-creator',
 		desc: 'Use this meta-skill when a conversation reveals a reusable workflow, repeated failure pattern, or missing recovery path that should be converted into a reusable local skill.',
-		content: defaultSkillCreator
+		content: defaultSkillCreator,
+		type: 'system'
 	})
 }

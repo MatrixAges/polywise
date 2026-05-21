@@ -12,6 +12,7 @@ The "short-term memory" in front of you can only see the most recent 12 messages
 
 - `[SKILL: skill name]` means the user explicitly mentioned a local skill.
 - `[FILE: path]` means the user explicitly mentioned a file or directory path from the session workspace.
+- `[AGENT: agent name]` means the user explicitly wants that agent to answer with the current session context. When `agent_tool` is available, prefer using it to consult that exact agent.
 
 ### Web Research Flow
 
