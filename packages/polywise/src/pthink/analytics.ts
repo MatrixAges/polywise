@@ -340,10 +340,7 @@ export const pickPthinkTrigger = (args: {
 		})
 	}
 
-	if (
-		day.pending_posts + day.pending_documents + day.pending_links >= 5 ||
-		day.unread_notifications >= 6
-	) {
+	if (day.pending_posts + day.pending_documents + day.pending_links >= 5 || day.unread_notifications >= 6) {
 		candidates.push({
 			key: 'backlog_pressure',
 			label: 'Backlog pressure',

@@ -21,17 +21,17 @@ export interface HomeRuntimeItem {
 	value: string
 }
 
-export interface HomeRecentSessionItem extends HomeSnapshot['recent']['sessions'][number] {
+export type HomeRecentSessionItem = HomeSnapshot['recent']['sessions'][number] & {
 	status_label: string
 	updated_label: string
 }
 
-export interface HomeRecentPostItem extends HomeSnapshot['recent']['posts'][number] {
+export type HomeRecentPostItem = HomeSnapshot['recent']['posts'][number] & {
 	status_label: string
 	updated_label: string
 }
 
-export interface HomeRecentNotificationItem extends HomeSnapshot['recent']['notifications'][number] {
+export type HomeRecentNotificationItem = HomeSnapshot['recent']['notifications'][number] & {
 	status_label: string
 	created_label: string
 }
