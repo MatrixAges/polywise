@@ -11,7 +11,8 @@ const default_status = (): RewireRuntimeStatus => ({
 	last_status: 'idle',
 	last_error: null,
 	last_summary: null,
-	last_foreground_at: Date.now()
+	last_foreground_at: Date.now(),
+	last_visit_at: Date.now()
 })
 
 export const readRewireStatus = async () => {

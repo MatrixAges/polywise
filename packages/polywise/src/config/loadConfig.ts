@@ -82,28 +82,30 @@ export default async () => {
 
 	if (!config.rewire || typeof config.rewire !== 'object') {
 		config.rewire = {
-			enabled: false,
+			enabled: true,
 			tick_ms: 120000,
-			idle_grace_ms: 180000,
+			idle_grace_ms: 30 * 60 * 1000,
 			replay_window_ms: 24 * 60 * 60 * 1000,
 			max_groups_per_cycle: 20,
 			max_edge_creations_per_cycle: 40,
 			max_edge_prunes_per_cycle: 40,
 			hot_node_degree_limit: 14,
-			cold_node_degree_limit: 2
+			cold_node_degree_limit: 2,
+			monitor_ms: 60000
 		}
 		has_changed_config = true
 	} else {
 		const default_rewire = {
-			enabled: false,
+			enabled: true,
 			tick_ms: 120000,
-			idle_grace_ms: 180000,
+			idle_grace_ms: 30 * 60 * 1000,
 			replay_window_ms: 24 * 60 * 60 * 1000,
 			max_groups_per_cycle: 20,
 			max_edge_creations_per_cycle: 40,
 			max_edge_prunes_per_cycle: 40,
 			hot_node_degree_limit: 14,
-			cold_node_degree_limit: 2
+			cold_node_degree_limit: 2,
+			monitor_ms: 60000
 		}
 		const next_rewire = { ...default_rewire, ...config.rewire }
 

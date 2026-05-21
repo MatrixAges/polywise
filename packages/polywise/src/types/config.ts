@@ -56,6 +56,7 @@ export interface AppRewireConfig {
 	max_edge_prunes_per_cycle?: number
 	hot_node_degree_limit?: number
 	cold_node_degree_limit?: number
+	monitor_ms?: number
 }
 
 export interface AppConfig {

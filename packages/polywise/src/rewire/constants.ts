@@ -4,9 +4,10 @@ import type { AppRewireConfig } from '@core/types'
 import type { RewireConfig } from './types'
 
 export const default_rewire_config: RewireConfig = {
-	enabled: false,
+	enabled: true,
 	tick_ms: 120000,
-	idle_grace_ms: 180000,
+	monitor_ms: 60000,
+	idle_grace_ms: 30 * 60 * 1000,
 	replay_window_ms: 24 * 60 * 60 * 1000,
 	max_groups_per_cycle: 20,
 	max_edge_creations_per_cycle: 40,
@@ -61,6 +62,7 @@ export const getRewireConfig = (override?: Partial<AppRewireConfig> | null): Rew
 	return {
 		enabled: toBoolean(source.enabled, default_rewire_config.enabled),
 		tick_ms: toPositiveInt(source.tick_ms, default_rewire_config.tick_ms),
+		monitor_ms: toPositiveInt(source.monitor_ms, default_rewire_config.monitor_ms),
 		idle_grace_ms: toPositiveInt(source.idle_grace_ms, default_rewire_config.idle_grace_ms),
 		replay_window_ms: toPositiveInt(source.replay_window_ms, default_rewire_config.replay_window_ms),
 		max_groups_per_cycle: toPositiveInt(

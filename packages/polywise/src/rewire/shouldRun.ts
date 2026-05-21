@@ -19,7 +19,12 @@ export default async (runtime: RewireRuntime) => {
 		return { ok: false, reason: 'foreground_active' as const }
 	}
 
-	if (Date.now() - runtime.status.last_foreground_at < current_config.idle_grace_ms) {
+	const last_active_at = Math.max(
+		Number(runtime.status.last_foreground_at ?? 0),
+		Number(runtime.status.last_visit_at ?? 0)
+	)
+
+	if (Date.now() - last_active_at < current_config.idle_grace_ms) {
 		return { ok: false, reason: 'idle_grace' as const }
 	}
 

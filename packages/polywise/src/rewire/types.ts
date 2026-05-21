@@ -3,6 +3,7 @@ export type RewireEdgeState = 'active' | 'silent'
 export interface RewireConfig {
 	enabled: boolean
 	tick_ms: number
+	monitor_ms: number
 	idle_grace_ms: number
 	replay_window_ms: number
 	max_groups_per_cycle: number
@@ -19,6 +20,7 @@ export interface RewireRuntimeStatus {
 	last_error: string | null
 	last_summary: RewireCycleSummary | null
 	last_foreground_at: number
+	last_visit_at: number
 }
 
 export interface RewireCycleSummary {
@@ -38,11 +40,13 @@ export interface RewireCycleSummary {
 
 export interface RewireRuntime {
 	timer: NodeJS.Timeout | null
+	cycle_timer: NodeJS.Timeout | null
 	status: RewireRuntimeStatus
 	start: () => Promise<void>
 	stop: () => Promise<void>
 	runOnce: () => Promise<RewireCycleSummary>
 	touchForeground: () => void
+	touchVisit: () => void
 }
 
 export interface RewireEventInput {

@@ -13,19 +13,38 @@ const defaultStatus = (): RewireRuntimeStatus => ({
 	last_status: 'idle',
 	last_error: null,
 	last_summary: null,
-	last_foreground_at: Date.now()
+	last_foreground_at: Date.now(),
+	last_visit_at: Date.now()
 })
 
 export const createRewireRuntime = (): RewireRuntime => {
 	const status = defaultStatus()
 	let timer: NodeJS.Timeout | null = null
+	let cycle_timer: NodeJS.Timeout | null = null
 
 	const persistStatus = async () => {
 		await writeRewireStatus(status).catch(() => null)
 	}
 
+	const stopCycleTimer = () => {
+		if (cycle_timer) {
+			clearInterval(cycle_timer)
+			cycle_timer = null
+			runtime.cycle_timer = null
+		}
+	}
+
+	const runTick = async () => {
+		if (status.running) {
+			return
+		}
+
+		await runtime.runOnce()
+	}
+
 	const runtime: RewireRuntime = {
 		timer,
+		cycle_timer,
 		status,
 		async start() {
 			const saved_status = await readRewireStatus()
@@ -36,19 +55,18 @@ export const createRewireRuntime = (): RewireRuntime => {
 				last_status: saved_status.last_status ?? 'idle',
 				last_error: saved_status.last_error ?? null,
 				last_summary: saved_status.last_summary ?? null,
-				last_foreground_at: Date.now()
+				last_foreground_at: Date.now(),
+				last_visit_at: Number(saved_status.last_visit_at ?? Date.now())
 			})
 
-			const tick = async () => {
+			const monitor = async () => {
 				const current_runtime = runtime
-
-				if (status.running) {
-					return
-				}
 
 				const allowed = await shouldRun(current_runtime)
 
 				if (!allowed.ok) {
+					stopCycleTimer()
+					status.last_status = 'idle'
 					const next_summary = {
 						cycle_at: Date.now(),
 						skipped: true,
@@ -78,17 +96,32 @@ export const createRewireRuntime = (): RewireRuntime => {
 					return
 				}
 
-				await current_runtime.runOnce()
+				if (!cycle_timer) {
+					cycle_timer = setInterval(() => {
+						void runTick().catch(error => {
+							log('SYSTEM', 'rewireCycleTickError', () =>
+								error instanceof Error ? error.message : String(error)
+							)
+						})
+					}, getRewireConfig().tick_ms)
+					runtime.cycle_timer = cycle_timer
+					void runTick().catch(error => {
+						log('SYSTEM', 'rewireCycleStartError', () =>
+							error instanceof Error ? error.message : String(error)
+						)
+					})
+				}
 			}
 
 			timer = setInterval(() => {
-				void tick().catch(error => {
-					log('SYSTEM', 'rewireTickError', () =>
+				void monitor().catch(error => {
+					log('SYSTEM', 'rewireMonitorError', () =>
 						error instanceof Error ? error.message : String(error)
 					)
 				})
-			}, getRewireConfig().tick_ms)
+			}, getRewireConfig().monitor_ms)
 			runtime.timer = timer
+			await monitor().catch(() => null)
 			await persistStatus()
 		},
 		async stop() {
@@ -97,6 +130,7 @@ export const createRewireRuntime = (): RewireRuntime => {
 				timer = null
 				runtime.timer = null
 			}
+			stopCycleTimer()
 
 			await persistStatus()
 		},
@@ -142,6 +176,19 @@ export const createRewireRuntime = (): RewireRuntime => {
 		},
 		touchForeground() {
 			status.last_foreground_at = Date.now()
+			if (!status.running) {
+				stopCycleTimer()
+				status.last_status = 'idle'
+			}
+		},
+		touchVisit() {
+			const now = Date.now()
+			status.last_visit_at = now
+			status.last_foreground_at = now
+			if (!status.running) {
+				stopCycleTimer()
+				status.last_status = 'idle'
+			}
 		}
 	}
 
