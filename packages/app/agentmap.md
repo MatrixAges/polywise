@@ -188,7 +188,7 @@ This document provides an overview of the packages/app module structure and arch
 					"role": "Page"
 				},
 				"model.ts": {
-					"desc": "Agent page state model that loads agent lists, available skills, selected-agent skill links, and for-filtered agent articles; persists create/update/remove/sort actions, article saves through rpc.agent.createArticle/updateArticle/removeArticle plus the unified save pipeline, manages avatar dialog state, and loads linked sessions for the selected agent",
+					"desc": "Agent page state model that loads agent lists, available skills, selected-agent skill links, and for-filtered related articles; persists relation add/remove actions through rpc.agent.addArticle/searchArticles/getArticles/removeArticle, manages avatar dialog state, and loads linked sessions for the selected agent",
 					"role": "Model"
 				},
 				"types.ts": {

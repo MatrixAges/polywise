@@ -7,7 +7,7 @@ import { writeFile } from 'atomically'
 import { Cron } from 'croner'
 import fs from 'fs-extra'
 
-import { runLinkcaseBatch } from './utils'
+import { runLinkcaseBatch, runLinkcaseScheduledExtractBatch } from './utils'
 
 export const linkcase_schedule_actions = ['fetch', 'extract'] as const
 export const linkcase_schedule_interval_units = ['second', 'minute'] as const
@@ -22,6 +22,7 @@ export type LinkcaseScheduleTask = {
 	interval_unit: LinkcaseScheduleIntervalUnit
 	count: number
 	auto_remove_dead_links: boolean
+	extract_concurrency: number
 	enabled: boolean
 	created_at: string
 	updated_at: string
@@ -43,7 +44,7 @@ type LinkcaseScheduleRuntime = {
 }
 
 const default_store: LinkcaseScheduleStore = {
-	version: 1,
+	version: 2,
 	tasks: []
 }
 
@@ -55,6 +56,7 @@ const runtime: LinkcaseScheduleRuntime = {
 let init_promise: Promise<void> | null = null
 
 const now_iso = () => new Date().toISOString()
+const clampExtractConcurrency = (value: number) => Math.min(Math.max(Number(value) || 1, 1), 10)
 
 const normalizeTask = (value: Partial<LinkcaseScheduleTask> & { id?: unknown }) => {
 	if (typeof value.id !== 'string' || !value.id) return null
@@ -78,6 +80,7 @@ const normalizeTask = (value: Partial<LinkcaseScheduleTask> & { id?: unknown }) 
 		interval_unit,
 		count: Math.min(Math.max(Number(value.count) || 1, 1), 10),
 		auto_remove_dead_links: Boolean(value.auto_remove_dead_links),
+		extract_concurrency: clampExtractConcurrency(value.extract_concurrency ?? 1),
 		enabled: typeof value.enabled === 'boolean' ? value.enabled : true,
 		created_at: typeof value.created_at === 'string' ? value.created_at : now,
 		updated_at: typeof value.updated_at === 'string' ? value.updated_at : now,
@@ -241,11 +244,16 @@ const triggerTask = async (task_id: string) => {
 	try {
 		if (task.action === 'fetch' && task.auto_remove_dead_links) {
 			await submitLinkcaseScheduledPrompt(task)
+		} else if (task.action === 'extract') {
+			await runLinkcaseScheduledExtractBatch({
+				count: task.count,
+				concurrency: task.extract_concurrency
+			})
 		} else {
 			await runLinkcaseBatch({
 				count: task.count,
-				run_fetch: task.action === 'fetch',
-				run_extract: task.action === 'extract'
+				run_fetch: true,
+				run_extract: false
 			})
 		}
 
@@ -291,12 +299,14 @@ export const listLinkcaseSchedules = async () => {
 	return runtime.store.tasks
 }
 
-export const createLinkcaseSchedule = async (
-	input: Pick<
-		LinkcaseScheduleTask,
-		'action' | 'interval_value' | 'interval_unit' | 'count' | 'auto_remove_dead_links'
-	>
-) => {
+export const createLinkcaseSchedule = async (input: {
+	action: LinkcaseScheduleAction
+	interval_value: number
+	interval_unit: LinkcaseScheduleIntervalUnit
+	count: number
+	auto_remove_dead_links: boolean
+	extract_concurrency?: number
+}) => {
 	await initLinkcaseScheduleRuntime()
 
 	const now = now_iso()
@@ -307,6 +317,8 @@ export const createLinkcaseSchedule = async (
 		interval_unit: input.interval_unit,
 		count: Math.min(Math.max(input.count, 1), 10),
 		auto_remove_dead_links: input.action === 'fetch' ? input.auto_remove_dead_links : false,
+		extract_concurrency:
+			input.action === 'extract' ? clampExtractConcurrency(input.extract_concurrency ?? 1) : 1,
 		enabled: true,
 		created_at: now,
 		updated_at: now,
@@ -330,7 +342,9 @@ export const updateLinkcaseSchedule = async (
 			LinkcaseScheduleTask,
 			'enabled' | 'count' | 'interval_value' | 'interval_unit' | 'auto_remove_dead_links'
 		>
-	>
+	> & {
+		extract_concurrency?: number
+	}
 ) => {
 	await initLinkcaseScheduleRuntime()
 
@@ -346,6 +360,9 @@ export const updateLinkcaseSchedule = async (
 	if (input.interval_unit === 'second' || input.interval_unit === 'minute') task.interval_unit = input.interval_unit
 	if (typeof input.auto_remove_dead_links === 'boolean' && task.action === 'fetch') {
 		task.auto_remove_dead_links = input.auto_remove_dead_links
+	}
+	if (typeof input.extract_concurrency === 'number' && task.action === 'extract') {
+		task.extract_concurrency = clampExtractConcurrency(input.extract_concurrency)
 	}
 
 	task.updated_at = now_iso()

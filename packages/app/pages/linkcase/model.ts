@@ -39,6 +39,7 @@ type LinkcaseBatchConfig = {
 	batch_extract_interval_value: number
 	batch_extract_interval_unit: LinkcaseBatchIntervalUnit
 	batch_action_extract_enabled: boolean
+	batch_extract_concurrency: number
 }
 
 @injectable()
@@ -83,6 +84,7 @@ export default class Index {
 	batch_action_extract_enabled = false
 	batch_extract_interval_value = 5
 	batch_extract_interval_unit = 'minute' as LinkcaseBatchIntervalUnit
+	batch_extract_concurrency = 1
 	batch_panel_tab = 'create' as LinkcaseBatchPanelTab
 	batch_tasks = [] as Array<LinkcaseBatchTask>
 	batch_submit_loading = false
@@ -285,6 +287,13 @@ export default class Index {
 						local_key: 'linkcase_batch_action_extract_enabled',
 						fromStorage: parseStoredBoolean,
 						toStorage: value => Boolean(value)
+					}
+				},
+				{
+					batch_extract_concurrency: {
+						local_key: 'linkcase_batch_extract_concurrency',
+						fromStorage: value => Math.min(Math.max(Number(value) || 1, 1), 10),
+						toStorage: value => Math.min(Math.max(Number(value) || 1, 1), 10)
 					}
 				}
 			],
@@ -501,6 +510,10 @@ export default class Index {
 		this.batch_extract_interval_unit = value as LinkcaseBatchIntervalUnit
 	}
 
+	setBatchExtractConcurrency(value: string) {
+		this.batch_extract_concurrency = Math.min(Math.max(Number(value) || 1, 1), 10)
+	}
+
 	setBatchActionFetchEnabled(value: boolean) {
 		this.batch_action_fetch_enabled = value
 	}
@@ -534,7 +547,8 @@ export default class Index {
 				batch_auto_remove_dead_links: 'linkcase_batch_auto_remove_dead_links',
 				batch_extract_interval_value: 'linkcase_batch_extract_interval_value',
 				batch_extract_interval_unit: 'linkcase_batch_extract_interval_unit',
-				batch_action_extract_enabled: 'linkcase_batch_action_extract_enabled'
+				batch_action_extract_enabled: 'linkcase_batch_action_extract_enabled',
+				batch_extract_concurrency: 'linkcase_batch_extract_concurrency'
 			} satisfies Record<string, string>
 
 			if (window.localStorage.getItem(migration_map.batch_count) === null) {
@@ -594,6 +608,13 @@ export default class Index {
 					typeof parsed.batch_action_extract_enabled === 'boolean'
 						? parsed.batch_action_extract_enabled
 						: false
+			}
+
+			if (window.localStorage.getItem(migration_map.batch_extract_concurrency) === null) {
+				this.batch_extract_concurrency = Math.min(
+					Math.max(Number(parsed.batch_extract_concurrency) || 1, 1),
+					10
+				)
 			}
 		} catch {}
 	}
@@ -732,7 +753,8 @@ export default class Index {
 						interval_value: this.batch_extract_interval_value,
 						interval_unit: this.batch_extract_interval_unit,
 						count: this.batch_count,
-						auto_remove_dead_links: false
+						auto_remove_dead_links: false,
+						extract_concurrency: this.batch_extract_concurrency
 					})
 				)
 			}

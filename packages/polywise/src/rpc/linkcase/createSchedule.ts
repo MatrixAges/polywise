@@ -8,7 +8,8 @@ const input_type = object({
 	interval_value: number().int().min(1),
 	interval_unit: Enum(linkcase_schedule_interval_units),
 	count: number().int().min(1).max(10),
-	auto_remove_dead_links: boolean()
+	auto_remove_dead_links: boolean(),
+	extract_concurrency: number().int().min(1).max(10).optional()
 })
 
 export default p.input(input_type).mutation(async ({ input }) => createLinkcaseSchedule(input))

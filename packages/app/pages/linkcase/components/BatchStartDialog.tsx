@@ -18,6 +18,7 @@ import { Dialog, DialogFooter, Tabs } from '@/components'
 import { useModel } from '../context'
 
 const count_options = Array.from({ length: 10 }, (_, index) => String(index + 1))
+const extract_concurrency_options = Array.from({ length: 10 }, (_, index) => String(index + 1))
 
 const Index = () => {
 	const x = useModel()
@@ -116,7 +117,8 @@ const Index = () => {
 									<div>
 										<div className='text-sm font-medium'>Extract</div>
 										<div className='text-std-400 text-xs'>
-											Save content into vectors and generate triples.
+											Save content into vectors and generate triples through
+											a Croner + fastq background queue.
 										</div>
 									</div>
 									<Switch
@@ -155,6 +157,46 @@ const Index = () => {
 												<SelectLabel>Unit</SelectLabel>
 												<SelectItem value='second'>seconds</SelectItem>
 												<SelectItem value='minute'>minutes</SelectItem>
+											</SelectGroup>
+										</SelectContent>
+									</Select>
+								</div>
+								<div
+									className='
+										flex
+										items-center justify-between
+										gap-3
+										mt-3
+									'
+								>
+									<div className='text-std-400 text-xs'>
+										fastq concurrency for scheduled extract runs
+									</div>
+									<Select
+										value={String(x.batch_extract_concurrency)}
+										onValueChange={value =>
+											value && x.setBatchExtractConcurrency(value)
+										}
+									>
+										<SelectTrigger
+											className='
+												w-[140px]
+												px-3 py-2
+												rounded-4xl
+												text-sm
+												bg-secondary/60
+											'
+										>
+											<SelectValue />
+										</SelectTrigger>
+										<SelectContent>
+											<SelectGroup>
+												<SelectLabel>Concurrency</SelectLabel>
+												{extract_concurrency_options.map(value => (
+													<SelectItem value={value} key={value}>
+														{value}
+													</SelectItem>
+												))}
 											</SelectGroup>
 										</SelectContent>
 									</Select>
@@ -255,6 +297,9 @@ const Index = () => {
 											{task.action === 'fetch' &&
 											task.auto_remove_dead_links
 												? ' · auto-remove dead links'
+												: ''}
+											{task.action === 'extract'
+												? ` · fastq x${task.extract_concurrency}`
 												: ''}
 										</div>
 									</div>

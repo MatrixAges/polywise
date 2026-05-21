@@ -15,6 +15,7 @@ import type { SessionStatusPayload } from '@core/rpc/session/watchSessionStatus'
 import type { DefaultModel } from '@core/types'
 import type {
 	AgentArticleItem,
+	AgentArticleSearchItem,
 	AgentAvatarConfig,
 	AgentCreateMode,
 	AgentItem,
@@ -75,10 +76,11 @@ export default class Index {
 	session_menu_open = true
 	article_items = [] as Array<AgentArticleItem>
 	article_for = 'memory' as ArticleForType
-	selected_article_id = ''
-	article_title_draft = ''
-	article_draft = ''
-	article_saving = false
+	article_search = ''
+	article_search_list = [] as Array<AgentArticleSearchItem>
+	article_search_loading = false
+	article_search_request_key = ''
+	article_search_timer = 0
 	pins = [] as Array<AgentSessionItem>
 	session_items = [] as Array<AgentSessionItem>
 	pin_map = {} as Record<string, number>
@@ -158,10 +160,6 @@ export default class Index {
 		return this.selected_agent?.tools || []
 	}
 
-	get selected_article() {
-		return this.article_items.find(item => item.id === this.selected_article_id) || null
-	}
-
 	constructor(
 		public util: Util,
 		public setting: Setting,
@@ -203,6 +201,8 @@ export default class Index {
 		this.util.acts = [
 			deinit,
 			() => {
+				this.clearArticleSearchTimer()
+
 				if (this.avatar_preview_url) {
 					URL.revokeObjectURL(this.avatar_preview_url)
 				}
@@ -252,9 +252,7 @@ export default class Index {
 			this.selected_agent_id = ''
 			this.skill_items = []
 			this.article_items = []
-			this.selected_article_id = ''
-			this.article_title_draft = ''
-			this.article_draft = ''
+			this.clearArticleSearch()
 			this.pins = []
 			this.session_items = []
 			this.pin_map = {}
@@ -318,9 +316,7 @@ export default class Index {
 		if (!this.selected_agent_id) {
 			this.skill_items = []
 			this.article_items = []
-			this.selected_article_id = ''
-			this.article_title_draft = ''
-			this.article_draft = ''
+			this.clearArticleSearch()
 
 			return
 		}
@@ -336,14 +332,7 @@ export default class Index {
 		this.skill_items = skill_items as Array<AgentSkillItem>
 		this.article_items = article_items as Array<AgentArticleItem>
 
-		const has_selected_article = this.article_items.some(item => item.id === this.selected_article_id)
-
-		if (!has_selected_article) {
-			this.selected_article_id = this.article_items[0]?.id || ''
-		}
-
-		this.article_title_draft = this.selected_article?.title || ''
-		this.article_draft = this.selected_article?.content || ''
+		this.scheduleArticleSearch()
 	}
 
 	async refreshSessions() {
@@ -664,11 +653,64 @@ export default class Index {
 		}
 
 		this.article_for = for_type
-		this.selected_article_id = ''
-		this.article_title_draft = ''
-		this.article_draft = ''
+		this.clearArticleSearch()
 
 		void this.refreshAgentRelated()
+	}
+
+	clearArticleSearchTimer() {
+		if (this.article_search_timer) {
+			clearTimeout(this.article_search_timer)
+			this.article_search_timer = 0
+		}
+	}
+
+	scheduleArticleSearch() {
+		this.clearArticleSearchTimer()
+
+		if (!this.selected_agent_id || !this.article_search.trim()) {
+			this.article_search_list = []
+			this.article_search_loading = false
+
+			return
+		}
+
+		this.article_search_loading = true
+		const request_key = `${this.selected_agent_id}:${this.article_for}:${this.article_search.trim()}:${Date.now()}`
+
+		this.article_search_request_key = request_key
+		this.article_search_timer = window.setTimeout(() => {
+			void rpc.agent.searchArticles
+				.query({
+					agent_id: this.selected_agent_id,
+					for_type: this.article_for,
+					query: this.article_search.trim(),
+					page: 1
+				})
+				.then(response => {
+					if (this.article_search_request_key === request_key) {
+						this.article_search_list = response.list as Array<AgentArticleSearchItem>
+					}
+				})
+				.finally(() => {
+					if (this.article_search_request_key === request_key) {
+						this.article_search_loading = false
+					}
+				})
+		}, 280)
+	}
+
+	setArticleSearch(value: string) {
+		this.article_search = value
+		this.scheduleArticleSearch()
+	}
+
+	clearArticleSearch() {
+		this.clearArticleSearchTimer()
+		this.article_search = ''
+		this.article_search_list = []
+		this.article_search_loading = false
+		this.article_search_request_key = ''
 	}
 
 	startEditField(key: '' | 'name' | 'role' | 'description' | AgentTab) {
@@ -819,20 +861,6 @@ export default class Index {
 	onCancelRename() {
 		this.rename_session_id = ''
 		this.rename_value = ''
-	}
-
-	setSelectedArticle(article_id: string) {
-		this.selected_article_id = article_id
-		this.article_title_draft = this.article_items.find(item => item.id === article_id)?.title || ''
-		this.article_draft = this.article_items.find(item => item.id === article_id)?.content || ''
-	}
-
-	setArticleTitleDraft(value: string) {
-		this.article_title_draft = value
-	}
-
-	setArticleDraft(value: string) {
-		this.article_draft = value
 	}
 
 	async createAgent(args?: { purpose?: string; name?: string; role?: string; description?: string }) {
@@ -1248,43 +1276,17 @@ export default class Index {
 		void this.refreshSkillLogs({ date: this.skill_log_date, page })
 	}
 
-	async createArticle() {
+	async addArticle(article_id: string) {
 		if (!this.selected_agent_id) return
 
-		const article_id = await rpc.agent.createArticle.mutate({
+		await rpc.agent.addArticle.mutate({
 			agent_id: this.selected_agent_id,
-			for: this.article_for,
-			title: 'New article',
-			content: ''
+			article_id,
+			for_type: this.article_for
 		})
 
 		await this.refreshAgentRelated()
-
-		if (article_id) {
-			this.selected_article_id = article_id
-			this.article_title_draft =
-				this.article_items.find(item => item.id === article_id)?.title || 'New article'
-			this.article_draft = this.article_items.find(item => item.id === article_id)?.content || ''
-		}
-	}
-
-	async saveArticle() {
-		if (!this.selected_article_id) return
-
-		this.article_saving = true
-
-		try {
-			await rpc.agent.updateArticle.mutate({
-				article_id: this.selected_article_id,
-				for: this.article_for,
-				title: this.article_title_draft.trim() || 'New article',
-				content: this.article_draft
-			})
-
-			await this.refreshAgentRelated()
-		} finally {
-			this.article_saving = false
-		}
+		this.article_search_list = this.article_search_list.filter(item => item.id !== article_id)
 	}
 
 	async removeArticle(article_id: string) {

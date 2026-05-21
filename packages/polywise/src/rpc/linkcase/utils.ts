@@ -23,6 +23,7 @@ import { readPipelineStore } from '@core/io/save/pipelineStore'
 import { getEmbedding, getTriples } from '@core/pipeline'
 import { log, SessionStore } from '@core/utils'
 import { and, asc, eq, inArray, isNull, like, or } from 'drizzle-orm'
+import fastq from 'fastq'
 
 import { getLinkFavicon } from './getLinkFavicon'
 
@@ -93,6 +94,7 @@ const LINKCASE_FETCH_PREVIEW_TTL_MS = 10 * 60 * 1000
 const LINKCASE_PIPELINE_WAIT_MS = 90_000
 const LINKCASE_PIPELINE_POLL_MS = 250
 const LINKCASE_TASK_BUSY_ERROR_PREFIX = 'Linkcase task is already running'
+const LINKCASE_EXTRACT_FASTQ_MAX_CONCURRENCY = 10
 
 const cleanupLinkcaseFetchPreviewCache = () => {
 	const cutoff = Date.now() - LINKCASE_FETCH_PREVIEW_TTL_MS
@@ -928,6 +930,24 @@ const listBatchExtractCandidates = async (count: number) => {
 	)
 
 	return items.filter(item => item.article?.id && !item.article.is_pipelined).slice(0, count)
+}
+
+export const runLinkcaseScheduledExtractBatch = async (args: { count: number; concurrency: number }) => {
+	const concurrency = Math.min(Math.max(Number(args.concurrency) || 1, 1), LINKCASE_EXTRACT_FASTQ_MAX_CONCURRENCY)
+
+	return withLinkcaseBatchRunLock('extract', async () => {
+		const targets = await listBatchExtractCandidates(args.count)
+		const queue = fastq.promise(async (id: string) => extractLinkcaseArticle({ id, force: false }), concurrency)
+		const extracted = await Promise.all(targets.map(item => queue.push(item.id)))
+
+		return {
+			ok: true as const,
+			fetch_count: 0,
+			extract_count: extracted.length,
+			fetched: [],
+			extracted
+		}
+	})
 }
 
 export const runLinkcaseBatch = async (args: { count: number; run_fetch: boolean; run_extract: boolean }) => {

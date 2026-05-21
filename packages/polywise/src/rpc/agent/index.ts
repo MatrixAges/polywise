@@ -1,7 +1,7 @@
 import { r } from '@core/utils'
 
+import addArticle from './addArticle'
 import create from './create'
-import createArticle from './createArticle'
 import createSession from './createSession'
 import getArticles from './getArticles'
 import getSessions from './getSessions'
@@ -12,15 +12,15 @@ import pin from './pin'
 import query from './query'
 import remove from './remove'
 import removeArticle from './removeArticle'
+import searchArticles from './searchArticles'
 import setSkills from './setSkills'
 import sort from './sort'
 import sortPin from './sortPin'
 import update from './update'
-import updateArticle from './updateArticle'
 
 export default r({
+	addArticle,
 	create,
-	createArticle,
 	createSession,
 	getArticles,
 	getSkillLogs,
@@ -31,9 +31,9 @@ export default r({
 	remove,
 	removeArticle,
 	query,
+	searchArticles,
 	setSkills,
 	sort,
 	sortPin,
-	update,
-	updateArticle
+	update
 })

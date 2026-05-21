@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { Bubbles } from 'lucide-react'
+import { Hash } from 'lucide-react'
 
 import { ArrowLeft, Grip } from '@/components/animate'
 import RenameInput from '@/pages/session/components/RenameInput'
@@ -18,7 +18,7 @@ const Index = (props: IAgentMenuSessionItemProps) => {
 		if (is_runing) return <Grip className='text-std-400! size-2.5' />
 		if (unread) return <ArrowLeft className='size-2.5 text-indigo-500!' />
 
-		return <Bubbles className='text-std-400 size-2.5' />
+		return <Hash className='text-std-400 size-2.5' />
 	}, [is_runing, unread])
 
 	return (

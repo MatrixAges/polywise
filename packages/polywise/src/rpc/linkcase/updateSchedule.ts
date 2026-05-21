@@ -9,7 +9,8 @@ const input_type = object({
 	count: number().int().min(1).max(10).optional(),
 	interval_value: number().int().min(1).optional(),
 	interval_unit: Enum(linkcase_schedule_interval_units).optional(),
-	auto_remove_dead_links: boolean().optional()
+	auto_remove_dead_links: boolean().optional(),
+	extract_concurrency: number().int().min(1).max(10).optional()
 })
 
 export default p.input(input_type).mutation(async ({ input }) => {

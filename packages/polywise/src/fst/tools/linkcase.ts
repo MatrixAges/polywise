@@ -3,6 +3,14 @@ import { getLink, getLinks, removeLink } from '@core/db/services'
 import { getLinkArticles } from '@core/db/services/externals'
 import removeArticle from '@core/io/remove'
 import {
+	createLinkcaseSchedule,
+	linkcase_schedule_actions,
+	linkcase_schedule_interval_units,
+	listLinkcaseSchedules,
+	removeLinkcaseSchedule,
+	updateLinkcaseSchedule
+} from '@core/rpc/linkcase/scheduler'
+import {
 	commitLinkcasePreview,
 	createLinkcaseItem,
 	fetchLinkcaseLink,
@@ -37,6 +45,10 @@ const inputSchema = object({
 		'remove',
 		'status',
 		'list',
+		'schedule_list',
+		'schedule_create',
+		'schedule_update',
+		'schedule_remove',
 		'fetch_next',
 		'fetch_ids',
 		'fetch_preview',
@@ -74,6 +86,14 @@ const inputSchema = object({
 		.describe(
 			'[Required for read_preview/commit_preview] Preview key returned by fetch_preview for the content you want to inspect or persist.'
 		),
+	schedule_id: string()
+		.optional()
+		.describe(
+			'[Required for schedule_update/schedule_remove] Exact Linkcase scheduled task id to update or delete.'
+		),
+	scheduled_action: Enum(linkcase_schedule_actions)
+		.optional()
+		.describe('[Required for schedule_create] Whether the scheduled Linkcase task should fetch or extract.'),
 	content: string()
 		.optional()
 		.describe(
@@ -96,7 +116,35 @@ const inputSchema = object({
 		.min(1)
 		.max(10)
 		.optional()
-		.describe('[Optional for list/fetch_next] Maximum number of links to inspect or fetch (default 3).'),
+		.describe(
+			'[Optional for list/fetch_next and schedule_create/schedule_update] Maximum number of links to inspect or process per run (default 3).'
+		),
+	interval_value: number()
+		.int()
+		.min(1)
+		.optional()
+		.describe('[Required for schedule_create, optional for schedule_update] Numeric repeat interval.'),
+	interval_unit: Enum(linkcase_schedule_interval_units)
+		.optional()
+		.describe(
+			'[Required for schedule_create, optional for schedule_update] Repeat interval unit for the scheduled Linkcase task.'
+		),
+	enabled: boolean()
+		.optional()
+		.describe('[Optional for schedule_update] Whether the scheduled Linkcase task should be enabled.'),
+	auto_remove_dead_links: boolean()
+		.optional()
+		.describe(
+			'[Optional for schedule_create/schedule_update] Fetch-only mode that delegates dead-link judgment to the Linkcase AI fetch session.'
+		),
+	extract_concurrency: number()
+		.int()
+		.min(1)
+		.max(10)
+		.optional()
+		.describe(
+			'[Optional for schedule_create/schedule_update] Extract-only fastq concurrency used by Croner-triggered background extract runs.'
+		),
 	keyword: string()
 		.optional()
 		.describe('[Optional] Keyword matched against title and/or url to narrow candidate selection.'),
@@ -190,6 +238,22 @@ const summarizeItem = (item: Awaited<ReturnType<typeof hydrateLinkcaseItems>>[nu
 	updated_at: item.updated_at
 })
 
+const summarizeScheduleTask = (task: Awaited<ReturnType<typeof listLinkcaseSchedules>>[number]) => ({
+	id: task.id,
+	action: task.action,
+	interval_value: task.interval_value,
+	interval_unit: task.interval_unit,
+	count: task.count,
+	enabled: task.enabled,
+	auto_remove_dead_links: task.auto_remove_dead_links,
+	extract_concurrency: task.extract_concurrency,
+	next_run_at: task.next_run_at,
+	last_run_at: task.last_run_at,
+	last_status: task.last_status,
+	last_error: task.last_error,
+	runs: task.runs
+})
+
 const getCandidates = async (input: LinkcaseToolInput, use_default_fetch_statuses = false) => {
 	const count = input.count ?? 3
 	const rows = await getLinks({
@@ -243,6 +307,8 @@ export const createLinkcaseTool = (_s: Session) => {
 			'Batch-manage Linkcase link fetching.',
 			'Use create to add one or multiple links to Linkcase, optionally with title and cleaned content.',
 			'Use remove to delete one or multiple links by id. It also removes fetched articles that are no longer referenced by any remaining link.',
+			'Use schedule_list, schedule_create, schedule_update, and schedule_remove to manage Linkcase built-in scheduled fetch or extract tasks.',
+			'Scheduled extract tasks run in the app background through Croner plus fastq and support extract_concurrency from 1 to 10.',
 			'Use fetch_next for automated scheduled runs. It prefers links with status none, fail, or timeout unless you override include_statuses.',
 			'Fetching always uses the fallback chain and treats empty content as a failed attempt until a downstream provider succeeds or the chain is exhausted.',
 			'For AI-guided fetch validation, use fetch_preview with one provider at a time. Inspect the returned content_preview yourself, decide whether it is the real target content, and either continue with the next provider, commit_preview, or mark_failed.',
@@ -400,6 +466,101 @@ export const createLinkcaseTool = (_s: Session) => {
 					action: 'list' as const,
 					count: candidates.length,
 					items: candidates.map(summarizeItem)
+				}
+			}
+
+			if (input.action === 'schedule_list') {
+				const tasks = await listLinkcaseSchedules()
+
+				return {
+					action: 'schedule_list' as const,
+					count: tasks.length,
+					tasks: tasks.map(summarizeScheduleTask)
+				}
+			}
+
+			if (input.action === 'schedule_create') {
+				if (!input.scheduled_action) {
+					return {
+						action: 'schedule_create' as const,
+						error: 'scheduled_action is required for schedule_create action'
+					}
+				}
+
+				if (!input.interval_value) {
+					return {
+						action: 'schedule_create' as const,
+						error: 'interval_value is required for schedule_create action'
+					}
+				}
+
+				if (!input.interval_unit) {
+					return {
+						action: 'schedule_create' as const,
+						error: 'interval_unit is required for schedule_create action'
+					}
+				}
+
+				const task = await createLinkcaseSchedule({
+					action: input.scheduled_action,
+					interval_value: input.interval_value,
+					interval_unit: input.interval_unit,
+					count: input.count ?? 3,
+					auto_remove_dead_links: input.auto_remove_dead_links ?? false,
+					extract_concurrency: input.extract_concurrency
+				})
+
+				return {
+					action: 'schedule_create' as const,
+					ok: true as const,
+					task: summarizeScheduleTask(task)
+				}
+			}
+
+			if (input.action === 'schedule_update') {
+				if (!input.schedule_id) {
+					return {
+						action: 'schedule_update' as const,
+						error: 'schedule_id is required for schedule_update action'
+					}
+				}
+
+				const patch = {
+					enabled: input.enabled,
+					count: input.count,
+					interval_value: input.interval_value,
+					interval_unit: input.interval_unit,
+					auto_remove_dead_links: input.auto_remove_dead_links,
+					extract_concurrency: input.extract_concurrency
+				}
+
+				if (Object.values(patch).every(value => typeof value === 'undefined')) {
+					return {
+						action: 'schedule_update' as const,
+						error: 'Provide at least one field to update'
+					}
+				}
+
+				const task = await updateLinkcaseSchedule(input.schedule_id, patch)
+
+				return {
+					action: 'schedule_update' as const,
+					ok: true as const,
+					task: summarizeScheduleTask(task)
+				}
+			}
+
+			if (input.action === 'schedule_remove') {
+				if (!input.schedule_id) {
+					return {
+						action: 'schedule_remove' as const,
+						error: 'schedule_id is required for schedule_remove action'
+					}
+				}
+
+				return {
+					action: 'schedule_remove' as const,
+					...(await removeLinkcaseSchedule(input.schedule_id))
 				}
 			}
 
