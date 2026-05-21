@@ -5,12 +5,37 @@ import { p } from '@core/utils'
 import { env } from '../../env'
 
 const week_ms = 7 * 24 * 60 * 60 * 1000
+const day_ms = 24 * 60 * 60 * 1000
+const trend_days = 14
 const organic_post_filter = `json_extract(metadata, '$.pthink.kind') IS NULL`
 
 const countValue = (query: string, params: Array<unknown> = []) => {
 	const row = env.sqlite.prepare(query).get(...params) as { value?: number } | undefined
 
 	return Number(row?.value ?? 0)
+}
+
+const getDayKey = (value: number) => {
+	const date = new Date(value)
+	const year = date.getFullYear()
+	const month = `${date.getMonth() + 1}`.padStart(2, '0')
+	const day = `${date.getDate()}`.padStart(2, '0')
+
+	return `${year}-${month}-${day}`
+}
+
+const getDayLabel = (value: number) => {
+	const date = new Date(value)
+
+	return `${date.getMonth() + 1}/${date.getDate()}`
+}
+
+const getDayStart = (value: number) => {
+	const date = new Date(value)
+
+	date.setHours(0, 0, 0, 0)
+
+	return date.getTime()
 }
 
 const readPostForCounts = () => {
@@ -265,10 +290,246 @@ const buildUsageAnalytics = (last_week: number) => {
 	}
 }
 
+const buildDailyTrendRows = (now: number) => {
+	const start_at = getDayStart(now - (trend_days - 1) * day_ms)
+	const buckets = Array.from({ length: trend_days }, (_, index) => {
+		const ts = start_at + index * day_ms
+
+		return {
+			date: getDayKey(ts),
+			label: getDayLabel(ts),
+			timestamp: ts,
+			input_tokens: 0,
+			output_tokens: 0,
+			reasoning_tokens: 0,
+			total_tokens: 0,
+			assistant_messages: 0,
+			messages: 0,
+			new_sessions: 0,
+			new_posts: 0,
+			new_documents: 0,
+			rewire_events: 0,
+			pthink_reports: 0,
+			notifications: 0
+		}
+	})
+	const bucket_map = new Map(buckets.map(item => [item.date, item]))
+
+	const usage_rows = env.sqlite
+		.prepare(
+			`SELECT
+				strftime('%Y-%m-%d', created_at / 1000, 'unixepoch', 'localtime') AS day_key,
+				COUNT(*) AS assistant_messages,
+				SUM(COALESCE(json_extract(content, '$.metadata.usage.inputTokens'), 0)) AS input_tokens,
+				SUM(COALESCE(json_extract(content, '$.metadata.usage.outputTokens'), 0)) AS output_tokens,
+				SUM(COALESCE(json_extract(content, '$.metadata.usage.reasoningTokens'), 0)) AS reasoning_tokens,
+				SUM(COALESCE(json_extract(content, '$.metadata.usage.totalTokens'), 0)) AS total_tokens
+			FROM message
+			WHERE role = 'assistant'
+				AND created_at >= ?
+				AND json_extract(content, '$.metadata.usage.totalTokens') IS NOT NULL
+			GROUP BY day_key`
+		)
+		.all(start_at) as Array<{
+		day_key: string | null
+		assistant_messages: number | null
+		input_tokens: number | null
+		output_tokens: number | null
+		reasoning_tokens: number | null
+		total_tokens: number | null
+	}>
+
+	for (const row of usage_rows) {
+		if (!row.day_key) {
+			continue
+		}
+
+		const target = bucket_map.get(row.day_key)
+
+		if (!target) {
+			continue
+		}
+
+		target.assistant_messages = Number(row.assistant_messages ?? 0)
+		target.input_tokens = Number(row.input_tokens ?? 0)
+		target.output_tokens = Number(row.output_tokens ?? 0)
+		target.reasoning_tokens = Number(row.reasoning_tokens ?? 0)
+		target.total_tokens = Number(row.total_tokens ?? 0)
+	}
+
+	const message_rows = env.sqlite
+		.prepare(
+			`SELECT
+				strftime('%Y-%m-%d', created_at / 1000, 'unixepoch', 'localtime') AS day_key,
+				COUNT(*) AS value
+			FROM message
+			WHERE created_at >= ?
+			GROUP BY day_key`
+		)
+		.all(start_at) as Array<{ day_key: string | null; value: number | null }>
+
+	for (const row of message_rows) {
+		if (!row.day_key) {
+			continue
+		}
+
+		const target = bucket_map.get(row.day_key)
+
+		if (target) {
+			target.messages = Number(row.value ?? 0)
+		}
+	}
+
+	const session_rows = env.sqlite
+		.prepare(
+			`SELECT
+				strftime('%Y-%m-%d', created_at / 1000, 'unixepoch', 'localtime') AS day_key,
+				COUNT(*) AS value
+			FROM session
+			WHERE created_at >= ?
+			GROUP BY day_key`
+		)
+		.all(start_at) as Array<{ day_key: string | null; value: number | null }>
+
+	for (const row of session_rows) {
+		if (!row.day_key) {
+			continue
+		}
+
+		const target = bucket_map.get(row.day_key)
+
+		if (target) {
+			target.new_sessions = Number(row.value ?? 0)
+		}
+	}
+
+	const post_rows = env.sqlite
+		.prepare(
+			`SELECT
+				strftime('%Y-%m-%d', created_at / 1000, 'unixepoch', 'localtime') AS day_key,
+				COUNT(*) AS value
+			FROM article
+			WHERE created_at >= ?
+				AND "for" IN ('user', 'wiki', 'memory')
+				AND ${organic_post_filter}
+			GROUP BY day_key`
+		)
+		.all(start_at) as Array<{ day_key: string | null; value: number | null }>
+
+	for (const row of post_rows) {
+		if (!row.day_key) {
+			continue
+		}
+
+		const target = bucket_map.get(row.day_key)
+
+		if (target) {
+			target.new_posts = Number(row.value ?? 0)
+		}
+	}
+
+	const document_rows = env.sqlite
+		.prepare(
+			`SELECT
+				strftime('%Y-%m-%d', created_at / 1000, 'unixepoch', 'localtime') AS day_key,
+				COUNT(*) AS value
+			FROM document
+			WHERE created_at >= ?
+			GROUP BY day_key`
+		)
+		.all(start_at) as Array<{ day_key: string | null; value: number | null }>
+
+	for (const row of document_rows) {
+		if (!row.day_key) {
+			continue
+		}
+
+		const target = bucket_map.get(row.day_key)
+
+		if (target) {
+			target.new_documents = Number(row.value ?? 0)
+		}
+	}
+
+	const rewire_rows = env.sqlite
+		.prepare(
+			`SELECT
+				strftime('%Y-%m-%d', created_at / 1000, 'unixepoch', 'localtime') AS day_key,
+				COUNT(*) AS value
+			FROM rewire_event
+			WHERE created_at >= ?
+			GROUP BY day_key`
+		)
+		.all(start_at) as Array<{ day_key: string | null; value: number | null }>
+
+	for (const row of rewire_rows) {
+		if (!row.day_key) {
+			continue
+		}
+
+		const target = bucket_map.get(row.day_key)
+
+		if (target) {
+			target.rewire_events = Number(row.value ?? 0)
+		}
+	}
+
+	const pthink_rows = env.sqlite
+		.prepare(
+			`SELECT
+				strftime('%Y-%m-%d', created_at / 1000, 'unixepoch', 'localtime') AS day_key,
+				COUNT(*) AS value
+			FROM article
+			WHERE created_at >= ?
+				AND "for" = 'memory'
+				AND json_extract(metadata, '$.pthink.kind') IS NOT NULL
+			GROUP BY day_key`
+		)
+		.all(start_at) as Array<{ day_key: string | null; value: number | null }>
+
+	for (const row of pthink_rows) {
+		if (!row.day_key) {
+			continue
+		}
+
+		const target = bucket_map.get(row.day_key)
+
+		if (target) {
+			target.pthink_reports = Number(row.value ?? 0)
+		}
+	}
+
+	const notification_rows = env.sqlite
+		.prepare(
+			`SELECT
+				strftime('%Y-%m-%d', created_at / 1000, 'unixepoch', 'localtime') AS day_key,
+				COUNT(*) AS value
+			FROM notification
+			WHERE created_at >= ?
+			GROUP BY day_key`
+		)
+		.all(start_at) as Array<{ day_key: string | null; value: number | null }>
+
+	for (const row of notification_rows) {
+		if (!row.day_key) {
+			continue
+		}
+
+		const target = bucket_map.get(row.day_key)
+
+		if (target) {
+			target.notifications = Number(row.value ?? 0)
+		}
+	}
+
+	return buckets
+}
+
 export default p.query(async () => {
 	const now = Date.now()
 	const last_week = now - week_ms
 	const usage = buildUsageAnalytics(last_week)
+	const trends = buildDailyTrendRows(now)
 	const pthink_status = await readPthinkStatus()
 
 	const session_total = countValue('SELECT COUNT(*) AS value FROM session')
@@ -469,6 +730,7 @@ export default p.query(async () => {
 			report_week: pthink_report_week,
 			report_today: pthink_report_today
 		},
+		trends,
 		coverage: {
 			has_usage_telemetry: true,
 			note: 'Token usage is aggregated directly from message.metadata.usage. Model usage is inferred from message sender, linked agent, linked project, then default model.'

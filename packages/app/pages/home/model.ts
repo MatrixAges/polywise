@@ -4,6 +4,7 @@ import { injectable } from 'tsyringe'
 import GlobalModel from '@/models/global'
 import { formatDateTime, fromNow, rpc } from '@/utils'
 
+import type { ChartConfig } from '@/__shadcn__/components/ui/chart'
 import type {
 	HomeModelItem,
 	HomeOverviewCard,
@@ -11,7 +12,8 @@ import type {
 	HomeRecentPostItem,
 	HomeRecentSessionItem,
 	HomeRuntimeItem,
-	HomeSnapshot
+	HomeSnapshot,
+	HomeTrendPoint
 } from './types'
 
 const compact_formatter = Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 })
@@ -28,6 +30,26 @@ const weekday_label_map = {
 
 const formatCompact = (value: number) => compact_formatter.format(value)
 const formatInteger = (value: number) => value.toLocaleString('en-US')
+
+const token_trend_config = {
+	total_tokens: { label: 'Total tokens', color: '#f59e0b' },
+	input_tokens: { label: 'Input', color: '#38bdf8' },
+	output_tokens: { label: 'Output', color: '#34d399' },
+	reasoning_tokens: { label: 'Reasoning', color: '#f97316' }
+} satisfies ChartConfig
+
+const activity_trend_config = {
+	messages: { label: 'Messages', color: '#6366f1' },
+	new_posts: { label: 'Posts', color: '#10b981' },
+	new_documents: { label: 'Docs', color: '#14b8a6' },
+	new_sessions: { label: 'Sessions', color: '#8b5cf6' }
+} satisfies ChartConfig
+
+const cognition_trend_config = {
+	rewire_events: { label: 'Rewire events', color: '#fb7185' },
+	pthink_reports: { label: 'PThink reports', color: '#f59e0b' },
+	notifications: { label: 'Notifications', color: '#60a5fa' }
+} satisfies ChartConfig
 
 @injectable()
 export default class Index {
@@ -124,6 +146,68 @@ export default class Index {
 				desc: `${this.data.memory.node_total} nodes · ${this.data.memory.edge_total} edges · ${this.data.memory.rewire_event_week} rewire events this week`
 			}
 		]
+	}
+
+	get trends(): Array<HomeTrendPoint> {
+		return this.data?.trends ?? []
+	}
+
+	get token_trend_config() {
+		return token_trend_config
+	}
+
+	get activity_trend_config() {
+		return activity_trend_config
+	}
+
+	get cognition_trend_config() {
+		return cognition_trend_config
+	}
+
+	get token_trend_summary() {
+		if (!this.data) {
+			return ''
+		}
+
+		return `Last 14 days · ${formatCompact(this.data.usage.total_tokens)} tokens · ${this.data.usage.assistant_messages} assistant replies`
+	}
+
+	get activity_trend_summary() {
+		if (!this.data) {
+			return ''
+		}
+
+		const totals = this.trends.reduce(
+			(acc, item) => {
+				acc.messages += item.messages
+				acc.sessions += item.new_sessions
+				acc.posts += item.new_posts
+
+				return acc
+			},
+			{ messages: 0, sessions: 0, posts: 0 }
+		)
+
+		return `Last 14 days · ${totals.messages.toLocaleString('en-US')} messages · ${totals.sessions.toLocaleString('en-US')} new sessions · ${totals.posts.toLocaleString('en-US')} posts`
+	}
+
+	get cognition_trend_summary() {
+		if (!this.data) {
+			return ''
+		}
+
+		const totals = this.trends.reduce(
+			(acc, item) => {
+				acc.rewire += item.rewire_events
+				acc.reports += item.pthink_reports
+				acc.notifications += item.notifications
+
+				return acc
+			},
+			{ rewire: 0, reports: 0, notifications: 0 }
+		)
+
+		return `Last 14 days · ${totals.rewire.toLocaleString('en-US')} rewire events · ${totals.reports.toLocaleString('en-US')} reports · ${totals.notifications.toLocaleString('en-US')} notifications`
 	}
 
 	get usage_metrics(): Array<HomeModelItem> {

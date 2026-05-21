@@ -9,7 +9,8 @@ import {
 	MemoryPanel,
 	OverviewGrid,
 	PthinkPanel,
-	RecentChanges
+	RecentChanges,
+	TrendPanels
 } from './components'
 import { Context } from './context'
 import Model from './model'
@@ -46,6 +47,7 @@ const Index = () => {
 						<>
 							<Hero></Hero>
 							<OverviewGrid></OverviewGrid>
+							<TrendPanels></TrendPanels>
 							<div className='grid gap-4 xl:grid-cols-[1.15fr_0.85fr]'>
 								<div className='grid gap-4'>
 									<KnowledgeAssets></KnowledgeAssets>

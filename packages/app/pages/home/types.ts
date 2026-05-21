@@ -1,6 +1,7 @@
 import type { RPCOutput } from '@/types'
 
 export type HomeSnapshot = RPCOutput['home']['query']
+export type HomeTrendPoint = HomeSnapshot['trends'][number]
 
 export interface HomeOverviewCard {
 	key: 'sessions' | 'tokens' | 'content' | 'memory'
