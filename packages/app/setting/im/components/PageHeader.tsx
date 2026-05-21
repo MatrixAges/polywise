@@ -1,16 +1,18 @@
-import { Bird, Bot, QrCode } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { FaDiscord } from 'react-icons/fa'
+import { IoLogoWechat } from 'react-icons/io5'
 
 import { TextTabs } from '@/components'
+import Logo from '@/public/icons/feishu.svg?react'
 
 import { useModel } from '../context'
 
 import type { ImPlatform } from '../model'
 
 const items = [
-	{ key: 'wechat', title: 'WeChat', Icon: QrCode },
-	{ key: 'discord', title: 'Discord', Icon: Bot },
-	{ key: 'feishu', title: 'Feishu', Icon: Bird }
+	{ key: 'wechat', title: 'WeChat', Icon: IoLogoWechat },
+	{ key: 'discord', title: 'Discord', Icon: FaDiscord },
+	{ key: 'feishu', title: 'Feishu', Icon: Logo }
 ]
 
 const docsMap = {

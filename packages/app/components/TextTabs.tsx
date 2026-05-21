@@ -1,8 +1,10 @@
 import { useDelegate } from '@/hooks'
 
 import type { LucideIcon } from 'lucide-react'
+import type { FC } from 'react'
+import type { IconType } from 'react-icons'
 
-type TabItem = string | { key: string; title: string; Icon?: LucideIcon }
+type TabItem = string | { key: string; title: string; Icon?: LucideIcon | IconType | FC<any> }
 
 interface IProps {
 	items: Array<TabItem>
