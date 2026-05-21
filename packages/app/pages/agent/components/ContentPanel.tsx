@@ -3,17 +3,17 @@ import { observer } from 'mobx-react-lite'
 
 import { Button } from '@/__shadcn__/components/ui/button'
 import { Input } from '@/__shadcn__/components/ui/input'
-import { Tabs } from '@/components'
+import { TextTabs } from '@/components'
 
 import { useModel } from '../context'
 
 import type { ArticleForType } from '../types'
 
 const article_tab_items = [
-	{ key: 'memory', Icon: Brain },
-	{ key: 'wiki', Icon: BookOpenText },
-	{ key: 'user', Icon: UserRound },
-	{ key: 'linkcase', Icon: Album }
+	{ key: 'memory', title: 'memory', Icon: Brain },
+	{ key: 'wiki', title: 'wiki', Icon: BookOpenText },
+	{ key: 'user', title: 'user', Icon: UserRound },
+	{ key: 'linkcase', title: 'linkcase', Icon: Album }
 ]
 
 const Index = () => {
@@ -36,64 +36,69 @@ const Index = () => {
 				overflow-hidden
 				flex flex-1 flex-col
 				h-full
+				page_wrap
 			'
 		>
 			<div
 				className='
-					flex shrink-0
-					items-center justify-between
-					h-9
-					gap-2
-					px-2.5
-					border-b border-border-light
-				'
-			>
-				<Tabs
-					items={article_tab_items}
-					active={article_for}
-					simple
-					onClick={value => setArticleFor(value as ArticleForType)}
-				></Tabs>
-				<div className='text-sm font-medium capitalize'>{article_for}</div>
-			</div>
-			<div
-				className='
 					shrink-0
 					px-2.5 py-1.5
-					border-b border-border-light
 				'
 			>
-				<div className='relative'>
-					<Search
+				<div className='flex items-center justify-between gap-3'>
+					<div className='h-7 min-w-0'>
+						<TextTabs
+							className='gap-3'
+							items={article_tab_items}
+							active={article_for}
+							setActive={value => setArticleFor(value as ArticleForType)}
+						></TextTabs>
+					</div>
+					<div
 						className='
-							absolute
-							top-1/2
-							left-1.5
-							size-3.5
-							text-std-300
-							pointer-events-none -translate-y-1/2
+							relative
+							flex shrink-0
+							items-center
+							w-[180px]
 						'
-					></Search>
-					<Input
-						className='h-8 pl-6'
-						value={article_search}
-						placeholder={`Search ${article_for} article to relate`}
-						onChange={event => setArticleSearch(event.target.value)}
-					></Input>
-					{article_search ? (
-						<button
+					>
+						<Search
 							className='
 								absolute
-								top-2.5 right-2.5
+								top-1/2
+								left-2
+								size-3.5
 								text-std-300
-								hover:text-foreground
+								pointer-events-none -translate-y-1/2
 							'
-							type='button'
-							onClick={clearArticleSearch}
-						>
-							<X className='size-4'></X>
-						</button>
-					) : null}
+						></Search>
+						<Input
+							className='
+								h-7
+								pl-6.5 pr-8
+								rounded-full
+								text-sm
+								placeholder:text-xs!
+							'
+							value={article_search}
+							placeholder={`Search ${article_for}`}
+							onChange={event => setArticleSearch(event.target.value)}
+						></Input>
+						{article_search ? (
+							<button
+								className='
+									absolute
+									right-0
+									w-7 h-7
+									icon_button small
+								'
+								type='button'
+								onClick={clearArticleSearch}
+							>
+								<X className='size-3.5'></X>
+							</button>
+						) : null}
+					</div>
 				</div>
 				{article_search.trim() ? (
 					<div
@@ -183,7 +188,7 @@ const Index = () => {
 						{article_items.map(item => (
 							<div
 								className='
-									py-1
+									py-2
 									border-b border-border-light
 								'
 								key={item.id}
@@ -193,10 +198,9 @@ const Index = () => {
 										flex
 										items-start justify-between
 										gap-2
-										mb-1
 									'
 								>
-									<div className='text-xsm line-clamp-3 font-medium'>
+									<div className='line-clamp-3 text-sm font-medium'>
 										{item.title || 'Untitled article'}
 									</div>
 									<button
@@ -207,7 +211,7 @@ const Index = () => {
 										<X className='size-3.5'></X>
 									</button>
 								</div>
-								<div className='text-std-400 line-clamp-2 text-xs'>
+								<div className='text-std-400 text-xsm line-clamp-2'>
 									{item.content || 'Empty content'}
 								</div>
 							</div>
