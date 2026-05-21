@@ -4,30 +4,29 @@ const Index = (props: { title: string; desc: string; action?: ReactNode; childre
 	const { title, desc, action, children } = props
 
 	return (
-		<section
-			className='
-				p-5
-				rounded-[28px]
-				bg-background/80
-				border border-border/70
-				shadow-sm
-				backdrop-blur-sm
-			'
-		>
+		<section className='flex flex-col gap-4'>
 			<div
 				className='
 					flex flex-wrap
 					items-start justify-between
-					gap-3
+					gap-4
 				'
 			>
-				<div>
-					<div className='text-base font-semibold'>{title}</div>
-					<div className='text-std-400 mt-1 text-sm'>{desc}</div>
+				<div className='min-w-0'>
+					<div className='text-xl font-semibold tracking-tight'>{title}</div>
+					<div
+						className='
+							max-w-[42rem]
+							mt-1
+							text-std-400 text-sm leading-6
+						'
+					>
+						{desc}
+					</div>
 				</div>
 				{action}
 			</div>
-			<div className='mt-5'>{children}</div>
+			<div className='border-border/70 border-t pt-4'>{children}</div>
 		</section>
 	)
 }

@@ -10,15 +10,13 @@ const Index = () => {
 
 	return (
 		<SectionCard
-			title='PThink Status'
-			desc='agentic post-think 的真实 runtime 状态、节流结果和最近生成的自主报告。'
+			title='PThink'
+			desc='Autonomous reporting status, schedule pressure, and the latest generated reports.'
 		>
 			<div className='grid gap-3'>
 				<div
-					className={`rounded-3xl border p-4${
-						x.pthink_enabled
-							? 'border-emerald-500/20 bg-emerald-500/6'
-							: 'border-border/70 bg-secondary/55'
+					className={`rounded-2xl border p-4${
+						x.pthink_enabled ? 'border-emerald-500/40' : 'border-border/70'
 					}`}
 				>
 					<div
@@ -50,7 +48,7 @@ const Index = () => {
 					<div className='text-std-400 mt-2 text-sm leading-6'>{x.pthink_runtime_label}</div>
 				</div>
 
-				<div className='bg-secondary/60 rounded-3xl p-4'>
+				<div>
 					<div
 						className='
 							flex
@@ -62,23 +60,19 @@ const Index = () => {
 						<CalendarClock className='text-sky-600' />
 						<span>Runtime and config</span>
 					</div>
-					<div
-						className='
-							grid
-							gap-2
-							mt-3
-							text-std-400 text-sm
-						'
-					>
+					<div className='mt-3 grid gap-3 sm:grid-cols-2'>
 						{x.pthink_runtime_items.map(item => (
-							<div className='bg-background/80 rounded-2xl px-3 py-2' key={item.key}>
-								{item.label}: {item.value}
+							<div className='border-border/70 rounded-2xl border p-4' key={item.key}>
+								<div className='text-std-400 text-[11px] tracking-[0.18em] uppercase'>
+									{item.label}
+								</div>
+								<div className='mt-2 text-sm leading-6'>{item.value}</div>
 							</div>
 						))}
 					</div>
 				</div>
 
-				<div className='bg-secondary/60 rounded-3xl p-4'>
+				<div className='border-border/70 rounded-2xl border p-4'>
 					<div
 						className='
 							flex
@@ -90,18 +84,16 @@ const Index = () => {
 						<Sparkles className='text-amber-600' />
 						<span>Recent reports</span>
 					</div>
-					<div className='mt-3 flex flex-col gap-2.5'>
+					<div className='divide-border/60 mt-3 divide-y'>
 						{x.recent_reports.length > 0 ? (
 							x.recent_reports.map(item => (
 								<Link
 									className='
 										block
-										p-3
-										rounded-2xl
-										bg-background/80
-										border border-border/60
+										py-3
 										transition-colors
-										hover:bg-background
+										hover:text-std-900
+										first:pt-0 last:pb-0
 									'
 									key={item.id}
 									to={`/post/${item.id}`}
@@ -125,8 +117,7 @@ const Index = () => {
 									px-3 py-4
 									rounded-2xl
 									text-sm text-std-400
-									bg-background/60
-									border border-dashed border-border/70
+									border border-border/70 border-dashed
 								'
 							>
 								No autonomous report yet.

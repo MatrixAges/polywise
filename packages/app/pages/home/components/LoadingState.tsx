@@ -9,10 +9,8 @@ const Index = () => {
 		<div
 			className='
 				p-6
-				rounded-[32px]
-				bg-background/80
+				rounded-2xl
 				border border-border/70
-				shadow-sm
 			'
 		>
 			<div className='text-lg font-semibold'>Home</div>

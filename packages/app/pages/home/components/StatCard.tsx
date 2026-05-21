@@ -1,22 +1,30 @@
-import { Activity, BrainCircuit, FileStack, Sparkles } from 'lucide-react'
+import { Activity, Bell, Bot, FileStack, GitBranch, MessageSquare, Sparkles, Workflow } from 'lucide-react'
 
-type ToneKey = 'sessions' | 'tokens' | 'content' | 'memory'
+import type { HomeOverviewTone } from '../types'
 
 const icon_map = {
 	sessions: Activity,
+	running: Bot,
+	unread: Bell,
+	messages: MessageSquare,
 	tokens: Sparkles,
-	content: FileStack,
-	memory: BrainCircuit
+	posts: FileStack,
+	pipeline: GitBranch,
+	graph: Workflow
 } as const
 
 const tone_map = {
-	sessions: 'bg-sky-500/12 text-sky-600',
-	tokens: 'bg-amber-500/12 text-amber-600',
-	content: 'bg-emerald-500/12 text-emerald-600',
-	memory: 'bg-rose-500/12 text-rose-600'
+	sessions: 'text-sky-600',
+	running: 'text-violet-600',
+	unread: 'text-amber-600',
+	messages: 'text-indigo-600',
+	tokens: 'text-orange-600',
+	posts: 'text-emerald-600',
+	pipeline: 'text-fuchsia-600',
+	graph: 'text-rose-600'
 } as const
 
-const Index = (props: { title: string; value: string; desc: string; tone_key: ToneKey }) => {
+const Index = (props: { title: string; value: string; desc: string; tone_key: HomeOverviewTone }) => {
 	const Icon = icon_map[props.tone_key]
 	const tone = tone_map[props.tone_key]
 
@@ -24,30 +32,24 @@ const Index = (props: { title: string; value: string; desc: string; tone_key: To
 		<div
 			className='
 				p-4
-				rounded-3xl
-				bg-background/85
+				rounded-2xl
 				border border-border/70
-				shadow-sm
-				backdrop-blur-sm
 			'
 		>
 			<div className='flex items-start justify-between gap-3'>
 				<div className='min-w-0'>
-					<div className='text-std-400 text-xs tracking-[0.22em] uppercase'>{props.title}</div>
-					<div className='mt-3 text-3xl font-semibold tracking-tight'>{props.value}</div>
+					<div className='text-std-400 text-[11px] tracking-[0.22em] uppercase'>{props.title}</div>
+					<div
+						className='
+							mt-3
+							text-[1.75rem] font-semibold leading-none tracking-tight
+						'
+					>
+						{props.value}
+					</div>
 					<div className='text-std-400 mt-2 text-sm leading-5'>{props.desc}</div>
 				</div>
-				<div
-					className={`
-						flex shrink-0
-						items-center justify-center
-						size-10
-						rounded-2xl
-						${tone}
-					`}
-				>
-					<Icon className='size-4' />
-				</div>
+				<Icon className={`mt-0.5 size-4 shrink-0${tone}`} />
 			</div>
 		</div>
 	)

@@ -2,9 +2,18 @@ import type { RPCOutput } from '@/types'
 
 export type HomeSnapshot = RPCOutput['home']['query']
 export type HomeTrendPoint = HomeSnapshot['trends'][number]
+export type HomeOverviewTone =
+	| 'sessions'
+	| 'running'
+	| 'unread'
+	| 'messages'
+	| 'tokens'
+	| 'posts'
+	| 'pipeline'
+	| 'graph'
 
 export interface HomeOverviewCard {
-	key: 'sessions' | 'tokens' | 'content' | 'memory'
+	key: HomeOverviewTone
 	title: string
 	value: string
 	desc: string

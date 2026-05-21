@@ -35,26 +35,23 @@ const Index = () => {
 				<div
 					className='
 						flex flex-col
-						w-full max-w-[1180px]
-						gap-4
-						px-5 py-5
-						mx-auto
-						md:px-7
+						w-full
+						min-h-full
+						gap-10
+						py-6
+						md:py-8
+						page_wrap
 					'
 				>
 					{x.snapshot ? (
 						<>
 							<OverviewGrid></OverviewGrid>
 							<TrendPanels></TrendPanels>
-							<div className='grid gap-4 xl:grid-cols-[1.15fr_0.85fr]'>
-								<div className='grid gap-4'>
-									<KnowledgeAssets></KnowledgeAssets>
-									<RecentChanges></RecentChanges>
-								</div>
-								<div className='grid gap-4'>
-									<MemoryPanel></MemoryPanel>
-									<PthinkPanel></PthinkPanel>
-								</div>
+							<KnowledgeAssets></KnowledgeAssets>
+							<RecentChanges></RecentChanges>
+							<div className='grid gap-10 md:grid-cols-2 md:items-start'>
+								<MemoryPanel></MemoryPanel>
+								<PthinkPanel></PthinkPanel>
 							</div>
 						</>
 					) : (

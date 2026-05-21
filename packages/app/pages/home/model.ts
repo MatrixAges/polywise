@@ -41,14 +41,8 @@ const token_trend_config = {
 const activity_trend_config = {
 	messages: { label: 'Messages', color: '#6366f1' },
 	new_posts: { label: 'Posts', color: '#10b981' },
-	new_documents: { label: 'Docs', color: '#14b8a6' },
-	new_sessions: { label: 'Sessions', color: '#8b5cf6' }
-} satisfies ChartConfig
-
-const cognition_trend_config = {
-	rewire_events: { label: 'Rewire events', color: '#fb7185' },
-	pthink_reports: { label: 'PThink reports', color: '#f59e0b' },
-	notifications: { label: 'Notifications', color: '#60a5fa' }
+	new_sessions: { label: 'Sessions', color: '#8b5cf6' },
+	rewire_events: { label: 'Rewires', color: '#f43f5e' }
 } satisfies ChartConfig
 
 @injectable()
@@ -120,30 +114,60 @@ export default class Index {
 			return []
 		}
 
+		const pending_total =
+			this.data.content.documents_pending +
+			this.data.content.articles_pending +
+			this.data.content.posts_pending
+		const post_counts = this.data.content.post_for_counts
+
 		return [
 			{
 				key: 'sessions',
 				title: 'Sessions',
 				value: formatCompact(this.data.overview.session_total),
-				desc: `${this.data.overview.sessions_running} running · ${this.data.overview.sessions_unread} unread · ${this.data.overview.sessions_week} created this week`
+				desc: `${this.data.overview.sessions_week} created this week`
+			},
+			{
+				key: 'running',
+				title: 'Running',
+				value: formatInteger(this.data.overview.sessions_running),
+				desc: `${this.data.overview.sessions_im} IM · ${this.data.overview.sessions_cron} cron`
+			},
+			{
+				key: 'unread',
+				title: 'Unread',
+				value: formatInteger(this.data.overview.sessions_unread),
+				desc: 'Sessions waiting for follow-up'
+			},
+			{
+				key: 'messages',
+				title: 'Messages',
+				value: formatCompact(this.data.overview.message_total),
+				desc: `${formatCompact(this.data.overview.messages_week)} this week · ${this.data.overview.avg_messages_per_session} avg per session`
 			},
 			{
 				key: 'tokens',
 				title: 'Tokens',
 				value: formatCompact(this.data.usage.total_tokens),
-				desc: `${formatCompact(this.data.usage.week_total_tokens)} this week · avg ${formatCompact(this.data.usage.avg_total_tokens_per_reply)} per assistant reply`
+				desc: `${formatCompact(this.data.usage.week_total_tokens)} this week · ${formatCompact(this.data.usage.avg_total_tokens_per_reply)} per reply`
 			},
 			{
-				key: 'content',
-				title: 'Content',
-				value: formatCompact(this.data.content.article_total + this.data.content.document_total),
-				desc: `${this.data.content.document_total} docs · ${this.data.content.article_total} articles · ${this.data.content.chunk_total} chunks`
+				key: 'posts',
+				title: 'Posts',
+				value: formatCompact(post_counts.user + post_counts.wiki + post_counts.memory),
+				desc: `${post_counts.user} user · ${post_counts.wiki} wiki · ${post_counts.memory} memory`
 			},
 			{
-				key: 'memory',
-				title: 'Memory Graph',
+				key: 'pipeline',
+				title: 'Pipeline',
+				value: formatCompact(pending_total),
+				desc: `${this.data.content.documents_pending} docs · ${this.data.content.articles_pending} articles · ${this.data.content.posts_pending} posts`
+			},
+			{
+				key: 'graph',
+				title: 'Graph',
 				value: formatCompact(this.data.memory.node_total + this.data.memory.edge_total),
-				desc: `${this.data.memory.node_total} nodes · ${this.data.memory.edge_total} edges · ${this.data.memory.rewire_event_week} rewire events this week`
+				desc: `${this.data.memory.node_total} nodes · ${this.data.memory.rewire_event_week} rewires this week`
 			}
 		]
 	}
@@ -158,10 +182,6 @@ export default class Index {
 
 	get activity_trend_config() {
 		return activity_trend_config
-	}
-
-	get cognition_trend_config() {
-		return cognition_trend_config
 	}
 
 	get token_trend_summary() {
@@ -182,32 +202,14 @@ export default class Index {
 				acc.messages += item.messages
 				acc.sessions += item.new_sessions
 				acc.posts += item.new_posts
-
-				return acc
-			},
-			{ messages: 0, sessions: 0, posts: 0 }
-		)
-
-		return `Last 14 days · ${totals.messages.toLocaleString('en-US')} messages · ${totals.sessions.toLocaleString('en-US')} new sessions · ${totals.posts.toLocaleString('en-US')} posts`
-	}
-
-	get cognition_trend_summary() {
-		if (!this.data) {
-			return ''
-		}
-
-		const totals = this.trends.reduce(
-			(acc, item) => {
 				acc.rewire += item.rewire_events
-				acc.reports += item.pthink_reports
-				acc.notifications += item.notifications
 
 				return acc
 			},
-			{ rewire: 0, reports: 0, notifications: 0 }
+			{ messages: 0, sessions: 0, posts: 0, rewire: 0 }
 		)
 
-		return `Last 14 days · ${totals.rewire.toLocaleString('en-US')} rewire events · ${totals.reports.toLocaleString('en-US')} reports · ${totals.notifications.toLocaleString('en-US')} notifications`
+		return `Last 14 days · ${totals.messages.toLocaleString('en-US')} messages · ${totals.sessions.toLocaleString('en-US')} sessions · ${totals.posts.toLocaleString('en-US')} posts · ${totals.rewire.toLocaleString('en-US')} rewires`
 	}
 
 	get usage_metrics(): Array<HomeModelItem> {
@@ -348,7 +350,7 @@ export default class Index {
 		return (this.data?.recent.posts ?? []).map(item => ({
 			...item,
 			updated_label: fromNow(item.updated_at),
-			status_label: item.is_pipelined ? 'pipelined' : 'pending pipeline'
+			status_label: item.is_pipelined ? 'Ready' : 'Pending pipeline'
 		}))
 	}
 
