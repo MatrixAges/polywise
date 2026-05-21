@@ -15,7 +15,7 @@ import type { IPropsMenuItem } from '../types'
 
 const Index = (props: IPropsMenuItem) => {
 	const { item, index, renaming, selected, expand } = props
-	const { project, sessions, has_more } = item
+	const { project, sessions, has_more, loading } = item
 	const { attributes, listeners, transform, transition, isDragging, setNodeRef } = useSortable({ id: project.id })
 	const {
 		project_selected_session_id,
@@ -128,6 +128,9 @@ const Index = (props: IPropsMenuItem) => {
 			</div>
 			{expand && (
 				<div className='flex flex-col gap-1'>
+					{loading && sessions.length === 0 && (
+						<div className='text-muted-foreground pl-6 text-xs'>Loading...</div>
+					)}
 					{sessions.map((it, idx) => (
 						<ProjectMenuItem
 							item={it}
@@ -139,7 +142,7 @@ const Index = (props: IPropsMenuItem) => {
 							key={it.id}
 						></ProjectMenuItem>
 					))}
-					{has_more && (
+					{has_more && !loading && (
 						<div className='click_button pl-6' onClick={() => getMoreSessions(index)}>
 							Loadmore
 						</div>

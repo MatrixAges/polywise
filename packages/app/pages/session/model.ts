@@ -12,6 +12,13 @@ import type { ISessionMenuData } from './types'
 
 type MenuTab = 'projects' | 'sessions' | 'im'
 type SessionListKind = 'sessions' | 'im'
+type ProjectListItem = {
+	project: Project
+	sessions: Array<Session>
+	has_more: boolean
+	loaded: boolean
+	loading: boolean
+}
 
 const getRpcSessionKind = (kind: SessionListKind) => (kind === 'im' ? 'im' : 'default')
 
@@ -27,7 +34,7 @@ export default class Index {
 	rename_session_id = ''
 	rename_value = ''
 	menu_tab = 'projects' as MenuTab
-	projects = [] as Array<{ project: Project; sessions: Array<Session>; has_more: boolean }>
+	projects = [] as Array<ProjectListItem>
 	normal_pins = [] as Array<Session>
 	normal_sessions = [] as Array<Session>
 	normal_pin_map = {} as Record<string, number>
@@ -161,6 +168,12 @@ export default class Index {
 			this.expand_project_ids.splice(index, 1)
 		} else {
 			this.expand_project_ids.push(project_id)
+
+			const project_index = this.projects.findIndex(item => item.project.id === project_id)
+
+			if (project_index >= 0) {
+				void this.loadProjectSessions(project_index)
+			}
 		}
 
 		this.expand_project_ids = $copy(this.expand_project_ids)
@@ -182,6 +195,8 @@ export default class Index {
 		if (this.side_panel_open) {
 			void this.setFilesProjectId(project_index)
 		}
+
+		void this.loadProjectSessions(project_index)
 	}
 
 	selectSession(session_id: string) {
@@ -393,7 +408,7 @@ export default class Index {
 		}
 	}
 
-	async loadMore(kind = this.menu_tab === 'im' ? 'im' : 'sessions') {
+	async loadMore(kind: SessionListKind = this.menu_tab === 'im' ? 'im' : 'sessions') {
 		if (this.loading) return
 		if (kind === 'im' ? this.im_loading_more : this.normal_loading_more) return
 		if (kind === 'im' ? !this.im_has_more : !this.normal_has_more) return
@@ -424,9 +439,24 @@ export default class Index {
 	}
 
 	async getProjectList() {
-		const data = (await rpc.project.getList.query()) as Index['projects']
+		const data = (await rpc.project.getList.query()) as Array<{
+			project: Project
+			sessions: Array<Session>
+			has_more: boolean
+		}>
+		const prev_project_map = new Map(this.projects.map(item => [item.project.id, item]))
 
-		this.projects = data
+		this.projects = data.map(item => {
+			const prev_item = prev_project_map.get(item.project.id)
+
+			return {
+				project: item.project,
+				sessions: prev_item?.sessions ?? [],
+				has_more: prev_item?.has_more ?? false,
+				loaded: prev_item?.loaded ?? false,
+				loading: false
+			}
+		})
 
 		if (this.selected_project_id) {
 			const exists = data.some(item => item.project.id === this.selected_project_id)
@@ -436,19 +466,15 @@ export default class Index {
 				this.project_selected_session_id = ''
 			}
 		}
+
+		await this.syncVisibleProjectSessions()
 	}
 
 	async getMoreSessions(project_index: number) {
 		const project_id = this.projects[project_index].project.id
+		const page = this.page_map.has(project_id) ? this.page_map.get(project_id)! + 1 : 1
 
-		const page = this.page_map.has(project_id) ? this.page_map.get(project_id)! + 1 : 2
-
-		const res = await rpc.project.getMoreSessions.query({ project_id, page })
-
-		this.page_map.set(project_id, page)
-
-		this.projects[project_index].has_more = res.has_more
-		this.projects[project_index].sessions.push(...(res.sessions as Array<Session>))
+		await this.loadProjectSessions(project_index, { page, append: page > 1, force: page === 1 })
 	}
 
 	async sortProject(from: number, to: number) {
@@ -748,5 +774,57 @@ export default class Index {
 
 	deinit() {
 		this.util.deinit()
+	}
+
+	private async syncVisibleProjectSessions() {
+		const visible_project_ids = new Set(this.expand_project_ids)
+
+		if (this.selected_project_id) {
+			visible_project_ids.add(this.selected_project_id)
+		}
+
+		for (const project_id of visible_project_ids) {
+			const project_index = this.projects.findIndex(item => item.project.id === project_id)
+
+			if (project_index >= 0) {
+				await this.loadProjectSessions(project_index, { force: true })
+			}
+		}
+	}
+
+	private async loadProjectSessions(
+		project_index: number,
+		args: { page?: number; append?: boolean; force?: boolean } = {}
+	) {
+		const project_item = this.projects[project_index]
+
+		if (!project_item) return
+
+		const { page = 1, append = false, force = false } = args
+
+		if (project_item.loading) return
+		if (!force && page === 1 && project_item.loaded) return
+
+		project_item.loading = true
+
+		try {
+			const res = await rpc.project.getMoreSessions.query({
+				project_id: project_item.project.id,
+				page
+			})
+
+			this.page_map.set(project_item.project.id, page)
+			project_item.sessions = append
+				? project_item.sessions.concat(res.sessions as Array<Session>)
+				: (res.sessions as Array<Session>)
+			project_item.has_more = res.has_more
+			project_item.loaded = true
+		} finally {
+			const current_project_item = this.projects[project_index]
+
+			if (current_project_item?.project.id === project_item.project.id) {
+				current_project_item.loading = false
+			}
+		}
 	}
 }

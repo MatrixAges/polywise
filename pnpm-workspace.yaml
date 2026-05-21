@@ -1,6 +1,9 @@
 packages:
       - 'packages/*'
 
+overrides:
+      h3: 1.15.11
+
 allowBuilds:
       '@mongodb-js/zstd': true
       better-sqlite3: true

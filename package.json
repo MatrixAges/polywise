@@ -25,10 +25,5 @@
 		"@types/node": "catalog:",
 		"bun": "catalog:",
 		"bun-types": "catalog:"
-	},
-	"pnpm": {
-		"overrides": {
-			"h3": "1.15.11"
-		}
 	}
 }
