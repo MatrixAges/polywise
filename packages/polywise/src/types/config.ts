@@ -59,6 +59,18 @@ export interface AppRewireConfig {
 	monitor_ms?: number
 }
 
+export interface AppPthinkConfig {
+	enabled: boolean
+	idle_grace_ms?: number
+	daily_report_enabled?: boolean
+	daily_report_hour?: number
+	weekly_report_enabled?: boolean
+	weekly_report_weekday?: 'sun' | 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat'
+	weekly_report_hour?: number
+	trigger_enabled?: boolean
+	max_reports_per_day?: number
+}
+
 export interface AppConfig {
 	workspaces: Array<Workspace>
 	current_workspace: string
@@ -76,6 +88,7 @@ export interface AppConfig {
 	rewrite_model?: DefaultModel
 	chaos_detect?: boolean
 	rewire?: AppRewireConfig
+	pthink?: AppPthinkConfig
 }
 
 export interface ProviderConfig {

@@ -13,6 +13,7 @@ export const cron_path = path.resolve(`${app_path}/cron.json`)
 export const linkcase_schedule_path = path.resolve(`${app_path}/linkcase-schedule.json`)
 export const pipeline_path = path.resolve(`${app_path}/pipeline.json`)
 export const rewire_path = path.resolve(`${app_path}/rewire.json`)
+export const pthink_path = path.resolve(`${app_path}/pthink.json`)
 export const agents_path = path.resolve(`${app_path}/agents`)
 export const pin_path = path.resolve(`${app_path}/pin.json`)
 

@@ -8,6 +8,7 @@ export const visit_middleware: MiddlewareHandler = async (_c, next) => {
 		const { env } = await import('@core/env')
 
 		env.rewire?.touchVisit?.()
+		env.pthink?.touchVisit?.()
 	} catch {
 		// ignore runtime bootstrap races
 	}

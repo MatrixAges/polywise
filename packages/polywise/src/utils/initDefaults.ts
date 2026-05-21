@@ -6,7 +6,7 @@ import { default_fetch_fallback_chain } from '@core/types'
 import { ensureWithValue } from '@core/utils'
 import fs from 'fs-extra'
 
-import { cron_path, pipeline_path } from '../consts/app'
+import { cron_path, pipeline_path, pthink_path } from '../consts/app'
 
 import type { AppConfig, ProviderConfig } from '@core/types'
 
@@ -43,6 +43,17 @@ export default async () => {
 					hot_node_degree_limit: 14,
 					cold_node_degree_limit: 2,
 					monitor_ms: 60000
+				},
+				pthink: {
+					enabled: true,
+					idle_grace_ms: 20 * 60 * 1000,
+					daily_report_enabled: true,
+					daily_report_hour: 21,
+					weekly_report_enabled: true,
+					weekly_report_weekday: 'sun',
+					weekly_report_hour: 20,
+					trigger_enabled: true,
+					max_reports_per_day: 3
 				}
 			} as AppConfig)
 		}
@@ -75,4 +86,17 @@ export default async () => {
 	})
 
 	await ensureWithValue(pipeline_path, {})
+	await ensureWithValue(pthink_path, {
+		running: false,
+		last_run_at: null,
+		last_report_at: null,
+		last_status: 'idle',
+		last_error: null,
+		last_reason: null,
+		last_summary: null,
+		last_foreground_at: Date.now(),
+		last_visit_at: Date.now(),
+		report_history: [],
+		trigger_last_fired: {}
+	})
 }

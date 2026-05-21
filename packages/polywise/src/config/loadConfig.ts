@@ -11,6 +11,17 @@ import type { ConfigProvider, PresetProvider, ProviderConfig } from '@core/types
 
 const mergeable_provider_keys = ['apiKey', 'baseURL', 'headers', 'models'] as const
 const fetch_fallback_provider_set = new Set<string>(default_fetch_fallback_chain)
+const default_pthink = {
+	enabled: true,
+	idle_grace_ms: 20 * 60 * 1000,
+	daily_report_enabled: true,
+	daily_report_hour: 21,
+	weekly_report_enabled: true,
+	weekly_report_weekday: 'sun' as const,
+	weekly_report_hour: 20,
+	trigger_enabled: true,
+	max_reports_per_day: 3
+}
 
 const mergePresetProvider = (local_provider: ConfigProvider | undefined, preset_provider: PresetProvider) => {
 	if (!local_provider) return { provider: preset_provider, changed: true }
@@ -118,6 +129,18 @@ export default async () => {
 	if (config.enbale_webfetch_chain === undefined) {
 		config.enbale_webfetch_chain = false
 		has_changed_config = true
+	}
+
+	if (!config.pthink || typeof config.pthink !== 'object') {
+		config.pthink = { ...default_pthink }
+		has_changed_config = true
+	} else {
+		const next_pthink = { ...default_pthink, ...config.pthink }
+
+		if (JSON.stringify(config.pthink) !== JSON.stringify(next_pthink)) {
+			config.pthink = next_pthink
+			has_changed_config = true
+		}
 	}
 
 	if (!Array.isArray(config.fetch_fallback_chain) || !config.fetch_fallback_chain.length) {
