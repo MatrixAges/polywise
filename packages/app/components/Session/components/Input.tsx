@@ -4,6 +4,7 @@ import { useMemoizedFn, useToggle } from 'ahooks'
 import { Archive, ArrowDownToLine, BrushCleaning, Layers2, Maximize, PackageOpen } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
+import { Popover, PopoverContent, PopoverTrigger } from '@/__shadcn__/components/ui/popover'
 import {
 	Select,
 	SelectContent,
@@ -18,9 +19,12 @@ import { ModelSelect, Show, Tooltip } from '@/components'
 import { useGlobal } from '@/context'
 import { rpc } from '@/utils'
 
+import Mention, { filterMentionItems, formatMentionToken, getActiveMention, getBasename } from './Mention'
+
 import type { AppConfig } from '@core/types'
 import type { ChangeEvent, KeyboardEvent, SyntheticEvent } from 'react'
 import type { IPropsInput } from '../types'
+import type { FileMentionItem, MentionItem, SkillMentionItem } from './Mention'
 
 const submit_modes = [
 	{ label: 'Enter Mode', value: 'enter' },
@@ -46,82 +50,6 @@ const effort_modes = [
 	{ label: 'High', value: 'high' },
 	{ label: 'XHigh', value: 'xhigh' }
 ]
-
-type MentionTrigger = '/' | '@'
-
-interface SkillMentionItem {
-	key: string
-	type: 'skill'
-	label: string
-	desc: string
-	path: string
-	search_text: string
-}
-
-interface FileMentionItem {
-	key: string
-	type: 'file'
-	label: string
-	desc: string
-	path: string
-	search_text: string
-}
-
-type MentionItem = SkillMentionItem | FileMentionItem
-
-interface ActiveMention {
-	trigger: MentionTrigger
-	query: string
-	start: number
-	end: number
-}
-
-const mention_limit = 50
-
-const is_whitespace = (value: string) => /\s/.test(value)
-
-const getActiveMention = (value: string, cursor: number) => {
-	if (cursor < 0) return null
-
-	let segment_start = cursor
-
-	while (segment_start > 0 && !is_whitespace(value[segment_start - 1])) {
-		segment_start -= 1
-	}
-
-	const segment = value.slice(segment_start, cursor)
-	const slash_index = segment.lastIndexOf('/')
-	const at_index = segment.lastIndexOf('@')
-	const trigger_index = Math.max(slash_index, at_index)
-
-	if (trigger_index === -1) return null
-
-	const trigger = segment[trigger_index] as MentionTrigger
-
-	if (trigger_index > 0) {
-		return null
-	}
-
-	return {
-		trigger,
-		query: segment.slice(trigger_index + 1),
-		start: segment_start + trigger_index,
-		end: cursor
-	} satisfies ActiveMention
-}
-
-const filterMentionItems = (items: Array<MentionItem>, query: string) => {
-	const normalized_query = query.trim().toLowerCase()
-
-	if (!normalized_query) {
-		return items.slice(0, mention_limit)
-	}
-
-	return items.filter(item => item.search_text.includes(normalized_query)).slice(0, mention_limit)
-}
-
-const formatMentionToken = (item: MentionItem) =>
-	item.type === 'skill' ? `[SKILL: ${item.label}]` : `[FILE: ${item.path}]`
 
 const Index = (props: IPropsInput) => {
 	const {
@@ -195,8 +123,9 @@ const Index = (props: IPropsInput) => {
 						key: item.id,
 						type: 'skill',
 						label: item.name,
-						desc: item.desc || item.path,
+						desc: item.desc || '',
 						path: item.path,
+						skill_type: item.type || '',
 						search_text: `${item.name} ${item.desc || ''} ${item.path || ''}`.toLowerCase()
 					}))
 				)
@@ -232,8 +161,9 @@ const Index = (props: IPropsInput) => {
 						key: item.absolute_path,
 						type: 'file',
 						label: item.path,
-						desc: item.type === 'directory' ? 'Directory' : 'File',
 						path: item.path,
+						basename: getBasename(item.path),
+						file_kind: item.type,
 						search_text: item.path.toLowerCase()
 					}))
 				)
@@ -329,7 +259,6 @@ const Index = (props: IPropsInput) => {
 
 	const onSend = useMemoizedFn(() => {
 		if (streaming || compositing) return
-
 		if (!value) return
 
 		send(value)
@@ -378,12 +307,10 @@ const Index = (props: IPropsInput) => {
 
 				return
 			}
-		} else {
-			if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
-				e.preventDefault()
+		} else if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+			e.preventDefault()
 
-				return onSend()
-			}
+			return onSend()
 		}
 	})
 
@@ -406,168 +333,207 @@ const Index = (props: IPropsInput) => {
 				type === 'dialog' && 'px-px!'
 			)}
 		>
-			<div className={$cx('flex flex-col', full && 'h-full')}>
-				<div
-					className='
-						flex flex-col flex-1
-						rounded-lg
-						bg-card
-						border-t border-border-light/36
-						shadow
-					'
-				>
-					<Textarea
-						className={$cx(
-							`
-							min-h-[54px] max-h-[300px]
-							pb-0
-							bg-transparent
-							border-none
-							focus-visible:ring-0
-						`,
-							full && 'h-full max-h-full'
-						)}
-						ref={ref}
-						autoFocus
-						placeholder='What would you like to know?'
-						maxLength={9999}
-						value={value}
-						onChange={onChangeValue}
-						onKeyDown={onSubmit}
-						onSelect={onSelectTextarea}
-					></Textarea>
-					{mention_open && (
+			<Popover open={mention_open}>
+				<PopoverTrigger>
+					<div className={$cx('flex flex-col', full && 'h-full')}>
 						<div
 							className='
-								flex flex-col
-								mx-2
-								mb-2
+								flex flex-col flex-1
 								rounded-lg
-								bg-background/90
-								border border-border-light
-								shadow-sm
+								bg-card
+								border-t border-border-light/36
+								shadow
 							'
 						>
+							<Textarea
+								className={$cx(
+									`
+									min-h-[54px] max-h-[300px]
+									pb-0
+									bg-transparent
+									border-none
+									focus-visible:ring-0
+								`,
+									full && 'h-full max-h-full'
+								)}
+								ref={ref}
+								autoFocus
+								placeholder='What would you like to know?'
+								maxLength={9999}
+								value={value}
+								onChange={onChangeValue}
+								onKeyDown={onSubmit}
+								onSelect={onSelectTextarea}
+							></Textarea>
 							<div
 								className='
 									flex
 									items-center justify-between
-									px-3 py-2
-									text-xs text-std-400
-									border-border-light border-b
+									w-full
+									px-2 py-1
+									rounded-lg
+									bg-card
 								'
 							>
-								<span>{active_mention?.trigger === '/' ? 'Skills' : 'Files'}</span>
-								<span>{active_mention?.query || 'Type to search'}</span>
+								<div className='flex items-center gap-1.5'>
+									<button className='icon_button' onClick={toggleFull}>
+										<Maximize></Maximize>
+									</button>
+									<ModelSelect
+										ghost
+										value={s.config?.default_model}
+										onChange={onChangeDefaultMode}
+									></ModelSelect>
+									<Select
+										items={effort_modes}
+										value={s.config?.default_model?.effort ?? 'default'}
+										onValueChange={onChangeDefaultEffort}
+									>
+										<SelectTrigger
+											className='
+												h-auto!
+												p-0
+												ml-1
+												text-xsm! text-std-400
+												bg-transparent
+											'
+											noActiveStyle
+										>
+											<SelectValue />
+										</SelectTrigger>
+										<SelectContent
+											className='w-[120px]'
+											alignItemWithTrigger={false}
+											side='top'
+										>
+											<SelectGroup>
+												<SelectLabel>Effort</SelectLabel>
+												{effort_modes.map(item => (
+													<SelectItem
+														value={item.value}
+														key={item.value}
+													>
+														{item.label}
+													</SelectItem>
+												))}
+											</SelectGroup>
+										</SelectContent>
+									</Select>
+								</div>
+								<div className='flex items-center gap-3'>
+									{show_session_mode_select && (
+										<Select
+											items={session_modes}
+											value={mode}
+											onValueChange={setMode}
+										>
+											<SelectTrigger
+												className='
+													h-auto!
+													p-0
+													text-xsm! text-std-400
+													bg-transparent
+												'
+												noActiveStyle
+											>
+												<SelectValue />
+											</SelectTrigger>
+											<SelectContent
+												className='w-[120px]'
+												alignItemWithTrigger={false}
+												side='top'
+											>
+												<SelectGroup>
+													<SelectLabel>Mode</SelectLabel>
+													{session_modes.map(item => (
+														<SelectItem
+															value={item.value}
+															key={item.value}
+														>
+															{item.label}
+														</SelectItem>
+													))}
+												</SelectGroup>
+											</SelectContent>
+										</Select>
+									)}
+									<button
+										className='icon_button primary h-6 w-6'
+										onClick={streaming ? stop : onSend}
+									>
+										<Icon
+											className='fill-std-white h-[10px] w-[10px]'
+											weight='fill'
+										></Icon>
+									</button>
+								</div>
 							</div>
-							<div className='max-h-56 overflow-y-auto py-1'>
-								{mention_loading ? (
-									<div className='text-std-400 px-3 py-2 text-sm'>Loading...</div>
-								) : mention_items.length > 0 ? (
-									mention_items.map((item, index) => (
-										<button
+						</div>
+						<div
+							className='
+								flex
+								items-center justify-between
+								w-full
+								px-2 py-1.5
+								text-xs
+							'
+						>
+							<div className='flex gap-1.5'>
+								{show_audit_mode_select && (
+									<Select
+										items={audit_modes}
+										value={audit_mode}
+										onValueChange={setAuditMode}
+									>
+										<SelectTrigger
 											className={$cx(
 												`
-													flex flex-col
-													w-full
-													px-3 py-2
-													text-left
-													hover:bg-accent/60
-												`,
-												index === active_index && 'bg-accent/72'
+												h-auto!
+												p-0
+												text-xs
+												bg-transparent
+											`,
+												audit_mode === 'full'
+													? 'text-red-700/72 dark:text-red-300/72'
+													: 'text-std-400'
 											)}
-											key={item.key}
-											onMouseDown={e => e.preventDefault()}
-											onClick={() => applyMention(item)}
 										>
-											<span className='truncate text-sm'>{item.label}</span>
-											<span className='text-std-400 truncate text-xs'>
-												{item.desc}
-											</span>
-										</button>
-									))
-								) : (
-									<div className='text-std-400 px-3 py-2 text-sm'>
-										No matches found.
-									</div>
+											<SelectValue />
+										</SelectTrigger>
+										<SelectContent className='w-[150px]' align='start'>
+											<SelectGroup>
+												<SelectLabel>Audit Mode</SelectLabel>
+												{audit_modes.map(item => (
+													<SelectItem
+														value={item.value}
+														key={item.value}
+													>
+														{item.label}
+													</SelectItem>
+												))}
+											</SelectGroup>
+										</SelectContent>
+									</Select>
 								)}
-							</div>
-						</div>
-					)}
-					<div
-						className='
-							flex
-							items-center justify-between
-							w-full
-							px-2 py-1
-							rounded-lg
-							bg-card
-						'
-					>
-						<div className='flex items-center gap-1.5'>
-							<button className='icon_button' onClick={toggleFull}>
-								<Maximize></Maximize>
-							</button>
-							<ModelSelect
-								ghost
-								value={s.config?.default_model}
-								onChange={onChangeDefaultMode}
-							></ModelSelect>
-							<Select
-								items={effort_modes}
-								value={s.config?.default_model?.effort ?? 'default'}
-								onValueChange={onChangeDefaultEffort}
-							>
-								<SelectTrigger
-									className='
-										h-auto!
-										p-0
-										ml-1
-										text-xsm! text-std-400
-										bg-transparent
-									'
-									noActiveStyle
+								<Select
+									items={submit_modes}
+									value={s.config?.submit_mode ?? 'enter'}
+									onValueChange={onChangeSubmitMode}
 								>
-									<SelectValue />
-								</SelectTrigger>
-								<SelectContent
-									className='w-[120px]'
-									alignItemWithTrigger={false}
-									side='top'
-								>
-									<SelectGroup>
-										<SelectLabel>Effort</SelectLabel>
-										{effort_modes.map(item => (
-											<SelectItem value={item.value} key={item.value}>
-												{item.label}
-											</SelectItem>
-										))}
-									</SelectGroup>
-								</SelectContent>
-							</Select>
-						</div>
-						<div className='flex items-center gap-3'>
-							{show_session_mode_select && (
-								<Select items={session_modes} value={mode} onValueChange={setMode}>
 									<SelectTrigger
 										className='
 											h-auto!
 											p-0
-											text-xsm! text-std-400
+											text-xs text-std-400
 											bg-transparent
 										'
-										noActiveStyle
 									>
 										<SelectValue />
 									</SelectTrigger>
-									<SelectContent
-										className='w-[120px]'
-										alignItemWithTrigger={false}
-										side='top'
-									>
+									<SelectContent className='w-[150px]' align='start'>
 										<SelectGroup>
-											<SelectLabel>Mode</SelectLabel>
-											{session_modes.map(item => (
+											<SelectLabel>Submit Mode</SelectLabel>
+											{submit_modes.map(item => (
 												<SelectItem value={item.value} key={item.value}>
 													{item.label}
 												</SelectItem>
@@ -575,113 +541,49 @@ const Index = (props: IPropsInput) => {
 										</SelectGroup>
 									</SelectContent>
 								</Select>
-							)}
-							<button
-								className='icon_button primary h-6 w-6'
-								onClick={streaming ? stop : onSend}
-							>
-								<Icon className='fill-std-white h-[10px] w-[10px]' weight='fill'></Icon>
-							</button>
+								<Tooltip title='Clear'>
+									<div className='icon_button h-5 w-5' onClick={clear}>
+										<BrushCleaning className='stroke-std-400 h-[12px] w-[12px]'></BrushCleaning>
+									</div>
+								</Tooltip>
+								<Show visible={archived}>
+									<Tooltip title='Unarchive'>
+										<div className='icon_button h-5 w-5' onClick={unarchive}>
+											<RightArchiveIcon className='stroke-std-400 h-[12px] w-[12px]'></RightArchiveIcon>
+										</div>
+									</Tooltip>
+								</Show>
+							</div>
+							<div className='flex gap-1'>
+								<Tooltip title='Context'>
+									<div className='icon_button h-5 w-5' onClick={toggleContextModal}>
+										<Layers2 className='stroke-std-400 h-[12px] w-[12px]'></Layers2>
+									</div>
+								</Tooltip>
+								<Tooltip title='Scroll to bottom'>
+									<div className='icon_button h-5 w-5' onClick={scrollToBottom}>
+										<ArrowDownToLine className='stroke-std-400 h-[12px] w-[12px]'></ArrowDownToLine>
+									</div>
+								</Tooltip>
+								<Tooltip title='Archive'>
+									<div className='icon_button h-5 w-5' onClick={archive}>
+										<Archive className='stroke-std-400 h-[12px] w-[12px]'></Archive>
+									</div>
+								</Tooltip>
+							</div>
 						</div>
 					</div>
-				</div>
-				<div
-					className='
-						flex
-						items-center justify-between
-						w-full
-						px-2 py-1.5
-						text-xs
-					'
-				>
-					<div className='flex gap-1.5'>
-						{show_audit_mode_select && (
-							<Select items={audit_modes} value={audit_mode} onValueChange={setAuditMode}>
-								<SelectTrigger
-									className={$cx(
-										`
-										h-auto!
-										p-0
-										text-xs
-										bg-transparent
-									`,
-										audit_mode === 'full'
-											? 'text-red-700/72 dark:text-red-300/72'
-											: 'text-std-400'
-									)}
-								>
-									<SelectValue />
-								</SelectTrigger>
-								<SelectContent className='w-[150px]' align='start'>
-									<SelectGroup>
-										<SelectLabel>Audit Mode</SelectLabel>
-										{audit_modes.map(item => (
-											<SelectItem value={item.value} key={item.value}>
-												{item.label}
-											</SelectItem>
-										))}
-									</SelectGroup>
-								</SelectContent>
-							</Select>
-						)}
-						<Select
-							items={submit_modes}
-							value={s.config?.submit_mode ?? 'enter'}
-							onValueChange={onChangeSubmitMode}
-						>
-							<SelectTrigger
-								className='
-									h-auto!
-									p-0
-									text-xs text-std-400
-									bg-transparent
-								'
-							>
-								<SelectValue />
-							</SelectTrigger>
-							<SelectContent className='w-[150px]' align='start'>
-								<SelectGroup>
-									<SelectLabel>Submit Mode</SelectLabel>
-									{submit_modes.map(item => (
-										<SelectItem value={item.value} key={item.value}>
-											{item.label}
-										</SelectItem>
-									))}
-								</SelectGroup>
-							</SelectContent>
-						</Select>
-						<Tooltip title='Clear'>
-							<div className='icon_button h-5 w-5' onClick={clear}>
-								<BrushCleaning className='stroke-std-400 h-[12px] w-[12px]'></BrushCleaning>
-							</div>
-						</Tooltip>
-						<Show visible={archived}>
-							<Tooltip title='Unarchive'>
-								<div className='icon_button h-5 w-5' onClick={unarchive}>
-									<RightArchiveIcon className='stroke-std-400 h-[12px] w-[12px]'></RightArchiveIcon>
-								</div>
-							</Tooltip>
-						</Show>
-					</div>
-					<div className='flex gap-1'>
-						<Tooltip title='Context'>
-							<div className='icon_button h-5 w-5' onClick={toggleContextModal}>
-								<Layers2 className='stroke-std-400 h-[12px] w-[12px]'></Layers2>
-							</div>
-						</Tooltip>
-						<Tooltip title='Scroll to bottom'>
-							<div className='icon_button h-5 w-5' onClick={scrollToBottom}>
-								<ArrowDownToLine className='stroke-std-400 h-[12px] w-[12px]'></ArrowDownToLine>
-							</div>
-						</Tooltip>
-						<Tooltip title='Archive'>
-							<div className='icon_button h-5 w-5' onClick={archive}>
-								<Archive className='stroke-std-400 h-[12px] w-[12px]'></Archive>
-							</div>
-						</Tooltip>
-					</div>
-				</div>
-			</div>
+				</PopoverTrigger>
+				<PopoverContent className='p-0' side='top' align='start' sideOffset={10}>
+					<Mention
+						activeMention={active_mention}
+						items={mention_items}
+						loading={mention_loading}
+						activeIndex={active_index}
+						onSelect={applyMention}
+					/>
+				</PopoverContent>
+			</Popover>
 		</div>
 	)
 }

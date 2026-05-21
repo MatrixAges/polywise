@@ -1,5 +1,6 @@
 export { default as Permission } from './Permission'
 export { default as Input } from './Input'
+export { default as Mention } from './Mention'
 export { default as Message } from './Message'
 export { default as Context } from './Context'
 export { default as LoadingDots } from './LoadingDots'
