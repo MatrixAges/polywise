@@ -1,19 +1,40 @@
 import { Activity, BrainCircuit, Sparkles } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
-import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from 'recharts'
+import { Area, AreaChart, CartesianGrid, Tooltip, XAxis, YAxis } from 'recharts'
 
-import {
-	ChartContainer,
-	ChartLegend,
-	ChartLegendContent,
-	ChartTooltip,
-	ChartTooltipContent
-} from '@/__shadcn__/components/ui/chart'
+import { ChartContainer, ChartTooltipContent } from '@/__shadcn__/components/ui/chart'
 
 import { useModel } from '../context'
 import SectionCard from './SectionCard'
 
-const chart_card_class = 'bg-secondary/60 rounded-3xl p-4'
+const chart_card_class = 'min-w-0 rounded-3xl bg-secondary/60 p-4'
+
+const InlineLegend = (props: {
+	items: Array<{
+		key: string
+		label: string
+		color: string
+	}>
+}) => {
+	return (
+		<div
+			className='
+				flex flex-wrap
+				items-center
+				gap-3
+				pt-3
+				text-xs text-[rgba(var(--color_text_rgb),0.68)]
+			'
+		>
+			{props.items.map(item => (
+				<div className='flex items-center gap-2' key={item.key}>
+					<span className='size-2.5 rounded-[999px]' style={{ backgroundColor: item.color }} />
+					<span>{item.label}</span>
+				</div>
+			))}
+		</div>
+	)
+}
 
 const Index = () => {
 	const x = useModel()
@@ -95,7 +116,7 @@ const Index = () => {
 								tickLine={false}
 								width={44}
 							/>
-							<ChartTooltip
+							<Tooltip
 								cursor={false}
 								content={
 									<ChartTooltipContent
@@ -105,7 +126,6 @@ const Index = () => {
 									/>
 								}
 							/>
-							<ChartLegend content={<ChartLegendContent className='pt-3' />} />
 							<Area
 								dataKey='input_tokens'
 								fill='url(#fill-input-tokens)'
@@ -132,6 +152,13 @@ const Index = () => {
 							/>
 						</AreaChart>
 					</ChartContainer>
+					<InlineLegend
+						items={[
+							{ key: 'input_tokens', label: 'Input', color: '#38bdf8' },
+							{ key: 'output_tokens', label: 'Output', color: '#34d399' },
+							{ key: 'reasoning_tokens', label: 'Reasoning', color: '#f97316' }
+						]}
+					/>
 				</div>
 
 				<div className={chart_card_class}>
@@ -190,7 +217,7 @@ const Index = () => {
 							<CartesianGrid vertical={false} />
 							<XAxis axisLine={false} dataKey='label' minTickGap={24} tickLine={false} />
 							<YAxis allowDecimals={false} axisLine={false} tickLine={false} width={32} />
-							<ChartTooltip
+							<Tooltip
 								cursor={false}
 								content={
 									<ChartTooltipContent
@@ -200,7 +227,6 @@ const Index = () => {
 									/>
 								}
 							/>
-							<ChartLegend content={<ChartLegendContent className='pt-3' />} />
 							<Area
 								dataKey='messages'
 								fill='url(#fill-messages)'
@@ -227,6 +253,13 @@ const Index = () => {
 							/>
 						</AreaChart>
 					</ChartContainer>
+					<InlineLegend
+						items={[
+							{ key: 'messages', label: 'Messages', color: '#6366f1' },
+							{ key: 'new_posts', label: 'Posts', color: '#10b981' },
+							{ key: 'new_sessions', label: 'Sessions', color: '#8b5cf6' }
+						]}
+					/>
 				</div>
 
 				<div className={chart_card_class}>
@@ -285,7 +318,7 @@ const Index = () => {
 							<CartesianGrid vertical={false} />
 							<XAxis axisLine={false} dataKey='label' minTickGap={24} tickLine={false} />
 							<YAxis allowDecimals={false} axisLine={false} tickLine={false} width={32} />
-							<ChartTooltip
+							<Tooltip
 								cursor={false}
 								content={
 									<ChartTooltipContent
@@ -295,7 +328,6 @@ const Index = () => {
 									/>
 								}
 							/>
-							<ChartLegend content={<ChartLegendContent className='pt-3' />} />
 							<Area
 								dataKey='rewire_events'
 								fill='url(#fill-rewire-events)'
@@ -322,6 +354,13 @@ const Index = () => {
 							/>
 						</AreaChart>
 					</ChartContainer>
+					<InlineLegend
+						items={[
+							{ key: 'rewire_events', label: 'Rewire events', color: '#fb7185' },
+							{ key: 'pthink_reports', label: 'PThink reports', color: '#f59e0b' },
+							{ key: 'notifications', label: 'Notifications', color: '#60a5fa' }
+						]}
+					/>
 				</div>
 			</div>
 		</SectionCard>

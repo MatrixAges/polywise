@@ -1,4 +1,4 @@
-import { makeAutoObservable } from 'mobx'
+import { makeAutoObservable, toJS } from 'mobx'
 import { injectable } from 'tsyringe'
 
 import GlobalModel from '@/models/global'
@@ -149,7 +149,7 @@ export default class Index {
 	}
 
 	get trends(): Array<HomeTrendPoint> {
-		return this.data?.trends ?? []
+		return this.data?.trends ? toJS(this.data.trends) : []
 	}
 
 	get token_trend_config() {

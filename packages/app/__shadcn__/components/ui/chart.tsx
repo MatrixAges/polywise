@@ -91,13 +91,15 @@ export const ChartContainer = React.forwardRef<
 				ref={ref}
 				data-chart={chart_id}
 				className={cn(
-					'h-[220px] w-full text-xs [&_.recharts-cartesian-axis-tick_text]:fill-[rgba(var(--color_text_rgb),0.52)] [&_.recharts-cartesian-grid_line]:stroke-border/50 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-border [&_.recharts-sector]:outline-none [&_.recharts-surface]:outline-none',
+					'h-[220px] w-full min-w-0 min-h-[220px] text-xs [&_.recharts-cartesian-axis-tick_text]:fill-[rgba(var(--color_text_rgb),0.52)] [&_.recharts-cartesian-grid_line]:stroke-border/50 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-border [&_.recharts-sector]:outline-none [&_.recharts-surface]:outline-none',
 					className
 				)}
 				{...props}
 			>
 				<ChartStyle id={chart_id} config={config} />
-				<RechartsPrimitive.ResponsiveContainer>{children}</RechartsPrimitive.ResponsiveContainer>
+				<RechartsPrimitive.ResponsiveContainer height='100%' minWidth={0} width='100%'>
+					{children}
+				</RechartsPrimitive.ResponsiveContainer>
 			</div>
 		</ChartContext.Provider>
 	)

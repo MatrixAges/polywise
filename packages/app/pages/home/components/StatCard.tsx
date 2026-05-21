@@ -1,6 +1,6 @@
 import { Activity, BrainCircuit, FileStack, Sparkles } from 'lucide-react'
 
-import type { HomeOverviewCard } from '../types'
+type ToneKey = 'sessions' | 'tokens' | 'content' | 'memory'
 
 const icon_map = {
 	sessions: Activity,
@@ -16,9 +16,9 @@ const tone_map = {
 	memory: 'bg-rose-500/12 text-rose-600'
 } as const
 
-const Index = (props: HomeOverviewCard) => {
-	const Icon = icon_map[props.key]
-	const tone = tone_map[props.key]
+const Index = (props: { title: string; value: string; desc: string; tone_key: ToneKey }) => {
+	const Icon = icon_map[props.tone_key]
+	const tone = tone_map[props.tone_key]
 
 	return (
 		<div
