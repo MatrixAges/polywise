@@ -525,117 +525,127 @@ const buildDailyTrendRows = (now: number) => {
 	return buckets
 }
 
-export default p.query(async () => {
-	const now = Date.now()
-	const last_week = now - week_ms
-	const usage = buildUsageAnalytics(last_week)
-	const trends = buildDailyTrendRows(now)
-	const pthink_status = await readPthinkStatus()
+export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/home/query',
+			summary: 'Read Query'
+		}
+	})
+	.query(async () => {
+		const now = Date.now()
+		const last_week = now - week_ms
+		const usage = buildUsageAnalytics(last_week)
+		const trends = buildDailyTrendRows(now)
+		const pthink_status = await readPthinkStatus()
 
-	const session_total = countValue('SELECT COUNT(*) AS value FROM session')
-	const message_total = countValue('SELECT COUNT(*) AS value FROM message')
-	const article_total = countValue('SELECT COUNT(*) AS value FROM article')
-	const chunk_total = countValue('SELECT COUNT(*) AS value FROM chunk')
-	const document_total = countValue('SELECT COUNT(*) AS value FROM document')
-	const link_total = countValue('SELECT COUNT(*) AS value FROM link')
-	const agent_total = countValue('SELECT COUNT(*) AS value FROM agent')
-	const group_total = countValue('SELECT COUNT(*) AS value FROM "group"')
-	const project_total = countValue('SELECT COUNT(*) AS value FROM project')
-	const skill_total = countValue('SELECT COUNT(*) AS value FROM skill')
-	const notification_total = countValue('SELECT COUNT(*) AS value FROM notification')
-	const notification_unread = countValue('SELECT COUNT(*) AS value FROM notification WHERE is_read = 0')
-	const im_account_total = countValue('SELECT COUNT(*) AS value FROM im_account')
-	const im_account_enabled = countValue('SELECT COUNT(*) AS value FROM im_account WHERE enabled = 1')
-	const im_peer_total = countValue('SELECT COUNT(*) AS value FROM im_peer_state')
-	const node_total = countValue('SELECT COUNT(*) AS value FROM node')
-	const frozen_node_total = countValue('SELECT COUNT(*) AS value FROM node WHERE is_frozen = 1')
-	const edge_total = countValue('SELECT COUNT(*) AS value FROM edge')
-	const frozen_edge_total = countValue('SELECT COUNT(*) AS value FROM edge WHERE is_frozen = 1')
-	const rewire_event_total = countValue('SELECT COUNT(*) AS value FROM rewire_event')
-	const rewire_event_week = countValue('SELECT COUNT(*) AS value FROM rewire_event WHERE created_at >= ?', [
-		last_week
-	])
+		const session_total = countValue('SELECT COUNT(*) AS value FROM session')
+		const message_total = countValue('SELECT COUNT(*) AS value FROM message')
+		const article_total = countValue('SELECT COUNT(*) AS value FROM article')
+		const chunk_total = countValue('SELECT COUNT(*) AS value FROM chunk')
+		const document_total = countValue('SELECT COUNT(*) AS value FROM document')
+		const link_total = countValue('SELECT COUNT(*) AS value FROM link')
+		const agent_total = countValue('SELECT COUNT(*) AS value FROM agent')
+		const group_total = countValue('SELECT COUNT(*) AS value FROM "group"')
+		const project_total = countValue('SELECT COUNT(*) AS value FROM project')
+		const skill_total = countValue('SELECT COUNT(*) AS value FROM skill')
+		const notification_total = countValue('SELECT COUNT(*) AS value FROM notification')
+		const notification_unread = countValue('SELECT COUNT(*) AS value FROM notification WHERE is_read = 0')
+		const im_account_total = countValue('SELECT COUNT(*) AS value FROM im_account')
+		const im_account_enabled = countValue('SELECT COUNT(*) AS value FROM im_account WHERE enabled = 1')
+		const im_peer_total = countValue('SELECT COUNT(*) AS value FROM im_peer_state')
+		const node_total = countValue('SELECT COUNT(*) AS value FROM node')
+		const frozen_node_total = countValue('SELECT COUNT(*) AS value FROM node WHERE is_frozen = 1')
+		const edge_total = countValue('SELECT COUNT(*) AS value FROM edge')
+		const frozen_edge_total = countValue('SELECT COUNT(*) AS value FROM edge WHERE is_frozen = 1')
+		const rewire_event_total = countValue('SELECT COUNT(*) AS value FROM rewire_event')
+		const rewire_event_week = countValue('SELECT COUNT(*) AS value FROM rewire_event WHERE created_at >= ?', [
+			last_week
+		])
 
-	const sessions_running = countValue('SELECT COUNT(*) AS value FROM session WHERE runing = 1')
-	const sessions_unread = countValue('SELECT COUNT(*) AS value FROM session WHERE unread = 1')
-	const sessions_im = countValue('SELECT COUNT(*) AS value FROM session WHERE im = 1')
-	const sessions_cron = countValue('SELECT COUNT(*) AS value FROM session WHERE cron = 1')
-	const sessions_week = countValue('SELECT COUNT(*) AS value FROM session WHERE created_at >= ?', [last_week])
-	const messages_week = countValue('SELECT COUNT(*) AS value FROM message WHERE created_at >= ?', [last_week])
+		const sessions_running = countValue('SELECT COUNT(*) AS value FROM session WHERE runing = 1')
+		const sessions_unread = countValue('SELECT COUNT(*) AS value FROM session WHERE unread = 1')
+		const sessions_im = countValue('SELECT COUNT(*) AS value FROM session WHERE im = 1')
+		const sessions_cron = countValue('SELECT COUNT(*) AS value FROM session WHERE cron = 1')
+		const sessions_week = countValue('SELECT COUNT(*) AS value FROM session WHERE created_at >= ?', [last_week])
+		const messages_week = countValue('SELECT COUNT(*) AS value FROM message WHERE created_at >= ?', [last_week])
 
-	const documents_pending = countValue('SELECT COUNT(*) AS value FROM document WHERE is_pipelined = 0')
-	const articles_pending = countValue(
-		"SELECT COUNT(*) AS value FROM article WHERE is_pipelined = 0 AND \"for\" NOT IN ('user', 'wiki', 'memory')"
-	)
-	const posts_pending = countValue(
-		`SELECT COUNT(*) AS value FROM article
+		const documents_pending = countValue('SELECT COUNT(*) AS value FROM document WHERE is_pipelined = 0')
+		const articles_pending = countValue(
+			"SELECT COUNT(*) AS value FROM article WHERE is_pipelined = 0 AND \"for\" NOT IN ('user', 'wiki', 'memory')"
+		)
+		const posts_pending = countValue(
+			`SELECT COUNT(*) AS value FROM article
 		WHERE is_pipelined = 0
 			AND "for" IN ('user', 'wiki', 'memory')
 			AND ${organic_post_filter}`
-	)
-	const long_article_total = countValue('SELECT COUNT(*) AS value FROM article WHERE is_long = 1')
-	const link_ready_total = countValue("SELECT COUNT(*) AS value FROM link WHERE status = 'success'")
-	const link_pending_total = countValue("SELECT COUNT(*) AS value FROM link WHERE status IN ('pending', 'none')")
-
-	const post_for_counts = readPostForCounts()
-	const recent_sessions = env.sqlite
-		.prepare(
-			'SELECT id, title, runing, unread, im, cron, updated_at FROM session ORDER BY updated_at DESC LIMIT 6'
 		)
-		.all()
-		.map(row => {
-			const target = row as Record<string, unknown>
+		const long_article_total = countValue('SELECT COUNT(*) AS value FROM article WHERE is_long = 1')
+		const link_ready_total = countValue("SELECT COUNT(*) AS value FROM link WHERE status = 'success'")
+		const link_pending_total = countValue(
+			"SELECT COUNT(*) AS value FROM link WHERE status IN ('pending', 'none')"
+		)
 
-			return {
-				id: String(target.id ?? ''),
-				title: String(target.title ?? ''),
-				is_runing: toBoolean(target.runing),
-				unread: toBoolean(target.unread),
-				is_im: toBoolean(target.im),
-				is_cron: toBoolean(target.cron),
-				updated_at: Number(target.updated_at ?? 0)
-			}
-		})
+		const post_for_counts = readPostForCounts()
+		const recent_sessions = env.sqlite
+			.prepare(
+				'SELECT id, title, runing, unread, im, cron, updated_at FROM session ORDER BY updated_at DESC LIMIT 6'
+			)
+			.all()
+			.map(row => {
+				const target = row as Record<string, unknown>
 
-	const recent_posts = env.sqlite
-		.prepare(
-			`SELECT id, title, "for" AS target_for, is_pipelined, updated_at
+				return {
+					id: String(target.id ?? ''),
+					title: String(target.title ?? ''),
+					is_runing: toBoolean(target.runing),
+					unread: toBoolean(target.unread),
+					is_im: toBoolean(target.im),
+					is_cron: toBoolean(target.cron),
+					updated_at: Number(target.updated_at ?? 0)
+				}
+			})
+
+		const recent_posts = env.sqlite
+			.prepare(
+				`SELECT id, title, "for" AS target_for, is_pipelined, updated_at
 			FROM article
 			WHERE "for" IN ('user', 'wiki', 'memory')
 				AND ${organic_post_filter}
 			ORDER BY updated_at DESC
 			LIMIT 6`
-		)
-		.all()
-		.map(row => {
-			const target = row as Record<string, unknown>
+			)
+			.all()
+			.map(row => {
+				const target = row as Record<string, unknown>
 
-			return {
-				id: String(target.id ?? ''),
-				title: String(target.title ?? ''),
-				for_type: String(target.target_for ?? ''),
-				is_pipelined: toBoolean(target.is_pipelined),
-				updated_at: Number(target.updated_at ?? 0)
-			}
-		})
+				return {
+					id: String(target.id ?? ''),
+					title: String(target.title ?? ''),
+					for_type: String(target.target_for ?? ''),
+					is_pipelined: toBoolean(target.is_pipelined),
+					updated_at: Number(target.updated_at ?? 0)
+				}
+			})
 
-	const recent_notifications = env.sqlite
-		.prepare('SELECT id, title, is_read, created_at FROM notification ORDER BY created_at DESC LIMIT 5')
-		.all()
-		.map(row => {
-			const target = row as Record<string, unknown>
+		const recent_notifications = env.sqlite
+			.prepare('SELECT id, title, is_read, created_at FROM notification ORDER BY created_at DESC LIMIT 5')
+			.all()
+			.map(row => {
+				const target = row as Record<string, unknown>
 
-			return {
-				id: String(target.id ?? ''),
-				title: String(target.title ?? ''),
-				is_read: toBoolean(target.is_read),
-				created_at: Number(target.created_at ?? 0)
-			}
-		})
+				return {
+					id: String(target.id ?? ''),
+					title: String(target.title ?? ''),
+					is_read: toBoolean(target.is_read),
+					created_at: Number(target.created_at ?? 0)
+				}
+			})
 
-	const recent_pthink_reports = env.sqlite
-		.prepare(
-			`SELECT
+		const recent_pthink_reports = env.sqlite
+			.prepare(
+				`SELECT
 				id,
 				title,
 				created_at,
@@ -646,94 +656,95 @@ export default p.query(async () => {
 				AND json_extract(metadata, '$.pthink.kind') IS NOT NULL
 			ORDER BY created_at DESC
 			LIMIT 5`
+			)
+			.all()
+			.map(row => {
+				const target = row as Record<string, unknown>
+
+				return {
+					id: String(target.id ?? ''),
+					title: String(target.title ?? ''),
+					kind: String(target.pthink_kind ?? ''),
+					trigger_key: target.trigger_key ? String(target.trigger_key) : null,
+					created_at: Number(target.created_at ?? 0)
+				}
+			})
+
+		const pthink_report_total = countValue(
+			"SELECT COUNT(*) AS value FROM article WHERE \"for\" = 'memory' AND json_extract(metadata, '$.pthink.kind') IS NOT NULL"
 		)
-		.all()
-		.map(row => {
-			const target = row as Record<string, unknown>
+		const pthink_report_week = countValue(
+			"SELECT COUNT(*) AS value FROM article WHERE \"for\" = 'memory' AND json_extract(metadata, '$.pthink.kind') IS NOT NULL AND created_at >= ?",
+			[last_week]
+		)
+		const pthink_report_today = countValue(
+			"SELECT COUNT(*) AS value FROM article WHERE \"for\" = 'memory' AND json_extract(metadata, '$.pthink.kind') IS NOT NULL AND created_at >= ?",
+			[now - 24 * 60 * 60 * 1000]
+		)
 
-			return {
-				id: String(target.id ?? ''),
-				title: String(target.title ?? ''),
-				kind: String(target.pthink_kind ?? ''),
-				trigger_key: target.trigger_key ? String(target.trigger_key) : null,
-				created_at: Number(target.created_at ?? 0)
+		return {
+			overview: {
+				session_total,
+				sessions_running,
+				sessions_unread,
+				sessions_im,
+				sessions_cron,
+				sessions_week,
+				message_total,
+				messages_week,
+				avg_messages_per_session:
+					session_total > 0 ? Number((message_total / session_total).toFixed(1)) : 0
+			},
+			usage,
+			content: {
+				document_total,
+				article_total,
+				chunk_total,
+				link_total,
+				link_ready_total,
+				link_pending_total,
+				documents_pending,
+				articles_pending,
+				posts_pending,
+				post_for_counts,
+				long_article_total,
+				avg_chunks_per_article: article_total > 0 ? Number((chunk_total / article_total).toFixed(1)) : 0
+			},
+			system: {
+				agent_total,
+				group_total,
+				project_total,
+				skill_total,
+				notification_total,
+				notification_unread,
+				im_account_total,
+				im_account_enabled,
+				im_peer_total
+			},
+			memory: {
+				node_total,
+				frozen_node_total,
+				edge_total,
+				frozen_edge_total,
+				rewire_event_total,
+				rewire_event_week
+			},
+			recent: {
+				sessions: recent_sessions,
+				posts: recent_posts,
+				notifications: recent_notifications,
+				pthink_reports: recent_pthink_reports
+			},
+			pthink: {
+				status: pthink_status,
+				report_total: pthink_report_total,
+				report_week: pthink_report_week,
+				report_today: pthink_report_today
+			},
+			trends,
+			coverage: {
+				has_usage_telemetry: true,
+				note: 'Token usage is aggregated directly from message.metadata.usage. Model usage is inferred from message sender, linked agent, linked project, then default model.'
 			}
-		})
-
-	const pthink_report_total = countValue(
-		"SELECT COUNT(*) AS value FROM article WHERE \"for\" = 'memory' AND json_extract(metadata, '$.pthink.kind') IS NOT NULL"
-	)
-	const pthink_report_week = countValue(
-		"SELECT COUNT(*) AS value FROM article WHERE \"for\" = 'memory' AND json_extract(metadata, '$.pthink.kind') IS NOT NULL AND created_at >= ?",
-		[last_week]
-	)
-	const pthink_report_today = countValue(
-		"SELECT COUNT(*) AS value FROM article WHERE \"for\" = 'memory' AND json_extract(metadata, '$.pthink.kind') IS NOT NULL AND created_at >= ?",
-		[now - 24 * 60 * 60 * 1000]
-	)
-
-	return {
-		overview: {
-			session_total,
-			sessions_running,
-			sessions_unread,
-			sessions_im,
-			sessions_cron,
-			sessions_week,
-			message_total,
-			messages_week,
-			avg_messages_per_session: session_total > 0 ? Number((message_total / session_total).toFixed(1)) : 0
-		},
-		usage,
-		content: {
-			document_total,
-			article_total,
-			chunk_total,
-			link_total,
-			link_ready_total,
-			link_pending_total,
-			documents_pending,
-			articles_pending,
-			posts_pending,
-			post_for_counts,
-			long_article_total,
-			avg_chunks_per_article: article_total > 0 ? Number((chunk_total / article_total).toFixed(1)) : 0
-		},
-		system: {
-			agent_total,
-			group_total,
-			project_total,
-			skill_total,
-			notification_total,
-			notification_unread,
-			im_account_total,
-			im_account_enabled,
-			im_peer_total
-		},
-		memory: {
-			node_total,
-			frozen_node_total,
-			edge_total,
-			frozen_edge_total,
-			rewire_event_total,
-			rewire_event_week
-		},
-		recent: {
-			sessions: recent_sessions,
-			posts: recent_posts,
-			notifications: recent_notifications,
-			pthink_reports: recent_pthink_reports
-		},
-		pthink: {
-			status: pthink_status,
-			report_total: pthink_report_total,
-			report_week: pthink_report_week,
-			report_today: pthink_report_today
-		},
-		trends,
-		coverage: {
-			has_usage_telemetry: true,
-			note: 'Token usage is aggregated directly from message.metadata.usage. Model usage is inferred from message sender, linked agent, linked project, then default model.'
 		}
-	}
-})
+	})

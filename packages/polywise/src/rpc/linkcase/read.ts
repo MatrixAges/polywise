@@ -7,4 +7,13 @@ const input_type = object({
 	id: string()
 })
 
-export default p.input(input_type).query(async ({ input }) => getLinkcaseReadItem(input.id))
+export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/linkcase/read',
+			summary: 'Read Read'
+		}
+	})
+	.input(input_type)
+	.query(async ({ input }) => getLinkcaseReadItem(input.id))

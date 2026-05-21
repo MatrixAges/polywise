@@ -4,6 +4,15 @@ import { any } from 'zod'
 
 const output_type = any()
 
-export default p.output(output_type).query(async () => {
-	return all_providers
-})
+export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/provider/getAll',
+			summary: 'Read Get All'
+		}
+	})
+	.output(output_type)
+	.query(async () => {
+		return all_providers
+	})

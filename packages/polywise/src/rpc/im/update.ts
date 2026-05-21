@@ -15,6 +15,13 @@ const input_type = object({
 const normalizeConfigJson = (value: string) => JSON.stringify(JSON.parse(value))
 
 export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/im/update',
+			summary: 'Run Update'
+		}
+	})
 	.input(input_type)
 	.output(im_account_schema)
 	.mutation(async ({ input }) => {

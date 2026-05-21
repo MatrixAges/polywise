@@ -7,6 +7,15 @@ import { todo } from '../../db/schema'
 
 const input_type = object({ id: string() })
 
-export default p.input(input_type).mutation(async ({ input }) => {
-	return removeTodo(eq(todo.id, input.id))
-})
+export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/todo/remove',
+			summary: 'Run Remove'
+		}
+	})
+	.input(input_type)
+	.mutation(async ({ input }) => {
+		return removeTodo(eq(todo.id, input.id))
+	})

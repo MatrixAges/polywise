@@ -7,6 +7,15 @@ import { p } from '../../utils/trpc'
 
 const input_type = object({ id: string(), name: string() })
 
-export default p.input(input_type).mutation(async ({ input }) => {
-	return setProject(eq(project.id, input.id), { name: input.name })
-})
+export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/project/rename',
+			summary: 'Run Rename'
+		}
+	})
+	.input(input_type)
+	.mutation(async ({ input }) => {
+		return setProject(eq(project.id, input.id), { name: input.name })
+	})

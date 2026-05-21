@@ -9,32 +9,41 @@ const input_type = object({
 
 const normalize_path = (value: string) => value.replace(/\\/g, '/')
 
-export default p.input(input_type).query(async ({ input }) => {
-	const session = await connectSession({ id: input.id })
-	const root = session.cwd
-
-	const list = await globby(['**/*'], {
-		cwd: root,
-		onlyFiles: false,
-		markDirectories: true,
-		gitignore: true,
-		suppressErrors: true
+export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/session/getMentionFiles',
+			summary: 'Read Get Mention Files'
+		}
 	})
+	.input(input_type)
+	.query(async ({ input }) => {
+		const session = await connectSession({ id: input.id })
+		const root = session.cwd
 
-	const items = list
-		.map(item => {
-			const relative_path = normalize_path(item)
-
-			return {
-				path: relative_path,
-				absolute_path: normalize_path(path.resolve(root, item)),
-				type: relative_path.endsWith('/') ? ('directory' as const) : ('file' as const)
-			}
+		const list = await globby(['**/*'], {
+			cwd: root,
+			onlyFiles: false,
+			markDirectories: true,
+			gitignore: true,
+			suppressErrors: true
 		})
-		.sort((a, b) => a.path.localeCompare(b.path))
 
-	return {
-		root: normalize_path(root),
-		items
-	}
-})
+		const items = list
+			.map(item => {
+				const relative_path = normalize_path(item)
+
+				return {
+					path: relative_path,
+					absolute_path: normalize_path(path.resolve(root, item)),
+					type: relative_path.endsWith('/') ? ('directory' as const) : ('file' as const)
+				}
+			})
+			.sort((a, b) => a.path.localeCompare(b.path))
+
+		return {
+			root: normalize_path(root),
+			items
+		}
+	})

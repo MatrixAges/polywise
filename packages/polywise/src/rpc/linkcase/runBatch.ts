@@ -9,4 +9,13 @@ const input_type = object({
 	run_extract: boolean()
 })
 
-export default p.input(input_type).mutation(async ({ input }) => runLinkcaseBatch(input))
+export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/linkcase/runBatch',
+			summary: 'Run Run Batch'
+		}
+	})
+	.input(input_type)
+	.mutation(async ({ input }) => runLinkcaseBatch(input))

@@ -33,25 +33,35 @@ const getNextTodoOrder = async (project_id?: string) => {
 	return min_order - 1
 }
 
-export default p.input(input_type).mutation(async ({ input }) => {
-	const current_project_item = await getProjectTodo({ where: eq(project_todo.todo_id, input.id), limit: 1 }).then(
-		res => res[0]
-	)
-	const current_project_id = current_project_item?.project.id
+export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/todo/assignProject',
+			summary: 'Run Assign Project'
+		}
+	})
+	.input(input_type)
+	.mutation(async ({ input }) => {
+		const current_project_item = await getProjectTodo({
+			where: eq(project_todo.todo_id, input.id),
+			limit: 1
+		}).then(res => res[0])
+		const current_project_id = current_project_item?.project.id
 
-	if (current_project_id === input.project_id) {
-		return getTodo(eq(todo.id, input.id))
-	}
+		if (current_project_id === input.project_id) {
+			return getTodo(eq(todo.id, input.id))
+		}
 
-	const next_order = await getNextTodoOrder(input.project_id)
+		const next_order = await getNextTodoOrder(input.project_id)
 
-	if (current_project_id) {
-		await removeProjectTodo(eq(project_todo.todo_id, input.id))
-	}
+		if (current_project_id) {
+			await removeProjectTodo(eq(project_todo.todo_id, input.id))
+		}
 
-	if (input.project_id) {
-		await addProjectTodo(input.project_id, input.id)
-	}
+		if (input.project_id) {
+			await addProjectTodo(input.project_id, input.id)
+		}
 
-	return setTodo(eq(todo.id, input.id), { order: next_order })
-})
+		return setTodo(eq(todo.id, input.id), { order: next_order })
+	})

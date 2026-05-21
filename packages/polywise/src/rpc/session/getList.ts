@@ -100,46 +100,55 @@ const getUnpinSessionList = async (args: {
 	})
 }
 
-export default p.input(input_type).query(async ({ input }) => {
-	const kind = input?.kind || 'default'
-	const pin_list = (await readPinList()).filter(item => !isBlockedSessionId(item.id))
-	const [project_session_id_list, group_session_id_list, agent_session_id_list, post_session_id_list] =
-		await Promise.all([
-			getProjectSessionIdList(),
-			getGroupSessionIdList(),
-			getAgentSessionIdList(),
-			getPostSessionIdList()
-		])
-	const project_session_id_set = new Set(project_session_id_list)
-	const group_session_id_set = new Set(group_session_id_list)
-	const agent_session_id_set = new Set(agent_session_id_list)
-	const post_session_id_set = new Set(post_session_id_list)
-	const pin_map = getPinMap(pin_list)
-	const pin_session_list = await getPinSessionList({
-		kind,
-		pin_list,
-		project_session_id_set,
-		group_session_id_set,
-		agent_session_id_set,
-		post_session_id_set
+export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/session/getList',
+			summary: 'Read Get List'
+		}
 	})
-	const unpin_session_list = await getUnpinSessionList({
-		kind,
-		pin_session_id_list: pin_session_list.map(item => item.id),
-		project_session_id_list,
-		group_session_id_list,
-		agent_session_id_list,
-		post_session_id_list
-	})
-	const pin_session_map = new Map(pin_session_list.map(item => [item.id, item]))
-	const pins = pin_list
-		.map(item => pin_session_map.get(item.id))
-		.filter((target_session): target_session is Session => Boolean(target_session))
+	.input(input_type)
+	.query(async ({ input }) => {
+		const kind = input?.kind || 'default'
+		const pin_list = (await readPinList()).filter(item => !isBlockedSessionId(item.id))
+		const [project_session_id_list, group_session_id_list, agent_session_id_list, post_session_id_list] =
+			await Promise.all([
+				getProjectSessionIdList(),
+				getGroupSessionIdList(),
+				getAgentSessionIdList(),
+				getPostSessionIdList()
+			])
+		const project_session_id_set = new Set(project_session_id_list)
+		const group_session_id_set = new Set(group_session_id_list)
+		const agent_session_id_set = new Set(agent_session_id_list)
+		const post_session_id_set = new Set(post_session_id_list)
+		const pin_map = getPinMap(pin_list)
+		const pin_session_list = await getPinSessionList({
+			kind,
+			pin_list,
+			project_session_id_set,
+			group_session_id_set,
+			agent_session_id_set,
+			post_session_id_set
+		})
+		const unpin_session_list = await getUnpinSessionList({
+			kind,
+			pin_session_id_list: pin_session_list.map(item => item.id),
+			project_session_id_list,
+			group_session_id_list,
+			agent_session_id_list,
+			post_session_id_list
+		})
+		const pin_session_map = new Map(pin_session_list.map(item => [item.id, item]))
+		const pins = pin_list
+			.map(item => pin_session_map.get(item.id))
+			.filter((target_session): target_session is Session => Boolean(target_session))
 
-	return {
-		pins,
-		sessions: unpin_session_list,
-		pin_map,
-		has_more: unpin_session_list.length >= session_page_size
-	}
-})
+		return {
+			pins,
+			sessions: unpin_session_list,
+			pin_map,
+			has_more: unpin_session_list.length >= session_page_size
+		}
+	})

@@ -13,11 +13,20 @@ const input_type = object({
 	page: number().int().min(1)
 })
 
-export default p.input(input_type).query(async ({ input }) => {
-	return readAgentLogPage<AgentToolLogEntry>({
-		agent_id: input.agent_id,
-		date: input.date,
-		kind: 'tools',
-		page: input.page
+export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/agent/getToolLogs',
+			summary: 'Read Get Tool Logs'
+		}
 	})
-})
+	.input(input_type)
+	.query(async ({ input }) => {
+		return readAgentLogPage<AgentToolLogEntry>({
+			agent_id: input.agent_id,
+			date: input.date,
+			kind: 'tools',
+			page: input.page
+		})
+	})

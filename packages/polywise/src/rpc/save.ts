@@ -16,11 +16,6 @@ export default p
 			method: 'POST',
 			path: '/save',
 			summary: 'Create an article'
-		},
-		cli: {
-			group: ['article'],
-			name: 'save',
-			summary: 'Create an article.'
 		}
 	})
 	.input(input_type)

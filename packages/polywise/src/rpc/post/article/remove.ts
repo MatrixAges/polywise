@@ -7,6 +7,13 @@ import { p } from '../../../utils/trpc'
 import { getPostById } from '../utils'
 
 export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/post/article/remove',
+			summary: 'Run Remove'
+		}
+	})
 	.input(
 		object({
 			post_id: string(),

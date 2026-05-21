@@ -8,16 +8,25 @@ import arrayMove from '../../utils/arrayMove'
 
 const input_type = object({ from: number().int(), to: number().int() })
 
-export default p.input(input_type).mutation(async ({ input }) => {
-	const agents = await getAgents()
+export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/agent/sort',
+			summary: 'Run Sort'
+		}
+	})
+	.input(input_type)
+	.mutation(async ({ input }) => {
+		const agents = await getAgents()
 
-	if (!agents[input.from] || input.to > agents.length - 1) {
-		return agents
-	}
+		if (!agents[input.from] || input.to > agents.length - 1) {
+			return agents
+		}
 
-	const next_agents = arrayMove({ list: agents, from: input.from, to: input.to })
+		const next_agents = arrayMove({ list: agents, from: input.from, to: input.to })
 
-	await Promise.all(next_agents.map((item, index) => setAgent(eq(agent.id, item.id), { order: index })))
+		await Promise.all(next_agents.map((item, index) => setAgent(eq(agent.id, item.id), { order: index })))
 
-	return next_agents
-})
+		return next_agents
+	})

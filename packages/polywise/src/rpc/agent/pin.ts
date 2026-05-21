@@ -9,19 +9,28 @@ const input_type = object({
 	value: boolean()
 })
 
-export default p.input(input_type).mutation(async ({ input }) => {
-	const pin_list = await readPinList(input.agent_id)
-	const next_pin_list = input.value
-		? [
-				{
-					id: input.id,
-					pin_at: Date.now()
-				},
-				...pin_list.filter(item => item.id !== input.id)
-			]
-		: pin_list.filter(item => item.id !== input.id)
+export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/agent/pin',
+			summary: 'Run Pin'
+		}
+	})
+	.input(input_type)
+	.mutation(async ({ input }) => {
+		const pin_list = await readPinList(input.agent_id)
+		const next_pin_list = input.value
+			? [
+					{
+						id: input.id,
+						pin_at: Date.now()
+					},
+					...pin_list.filter(item => item.id !== input.id)
+				]
+			: pin_list.filter(item => item.id !== input.id)
 
-	await writePinList({ agent_id: input.agent_id, pin_list: next_pin_list })
+		await writePinList({ agent_id: input.agent_id, pin_list: next_pin_list })
 
-	return await readPinList(input.agent_id)
-})
+		return await readPinList(input.agent_id)
+	})

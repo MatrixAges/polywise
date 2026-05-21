@@ -1,38 +1,14 @@
 #!/usr/bin/env node
 import { pathToFileURL } from 'node:url'
-import { command, number, positional, run, string } from '@drizzle-team/brocli'
+import { command, number, run, string } from '@drizzle-team/brocli'
 
 import { getApiMap, renderApiHelp } from './api/map'
-import { renderPageHelp } from './page/map'
-import { buildRoutePath, page_map, page_map_by_id } from './page/registry'
 
-import type { ApiMapItem, PageMapItem, RenderedHelp } from './types'
+import type { ApiMapItem, RenderedHelp } from './types'
 
 const cli_version = '0.0.1'
 const server_base_url = (process.env.POLYWISE_SERVER_URL || 'http://localhost:3072').replace(/\/$/, '')
 const api_base_url = `${server_base_url}/api`
-const sys_base_url = `${server_base_url}/sys`
-
-type JsonLike = Record<string, unknown>
-
-interface PageStatePayload {
-	page_map: Array<PageMapItem>
-	runtime: {
-		snapshot: {
-			page_id: string | null
-			route_page_id: string | null
-			panel: {
-				page_id: string | null
-			}
-			visible_sections: Array<{ id: string; title: string }>
-		} | null
-		last_sync_at: number | null
-		last_sync_age_ms: number | null
-		bridge_online: boolean
-		ack_seq: number
-		pending_count: number
-	}
-}
 
 interface ApiCommandTreeNode {
 	name: string
@@ -125,24 +101,6 @@ const callApi = async (target: ApiMapItem, input: Record<string, unknown>) => {
 	})
 }
 
-const getPageState = async (): Promise<PageStatePayload> => {
-	const response = await fetch(`${sys_base_url}/page`)
-
-	return response.json()
-}
-
-const postPageCommand = async (payload: JsonLike) => {
-	const response = await fetch(`${sys_base_url}/page/command`, {
-		method: 'POST',
-		headers: {
-			'content-type': 'application/json'
-		},
-		body: JSON.stringify(payload)
-	})
-
-	printJson(await readResponseBody(response))
-}
-
 const renderApiCommandHelpText = (item: ApiMapItem) =>
 	[
 		item.cli_path.join(' '),
@@ -159,16 +117,6 @@ const renderApiCommandHelpText = (item: ApiMapItem) =>
 				]
 			: ['parameters: none']),
 		...(item.examples.length ? item.examples.map(example => `example: ${example}`) : [])
-	]
-		.filter(Boolean)
-		.join('\n')
-
-const renderPageItemHelpText = (item: PageMapItem, command_path?: string) =>
-	[
-		command_path || `page ${item.kind} ${item.id}`,
-		item.summary,
-		item.kind === 'route' ? `route: ${item.route_path || 'n/a'}` : `panel tab: ${item.panel_tab || 'n/a'}`,
-		item.params_hint.length ? `params: ${item.params_hint.join(', ')}` : 'params: none'
 	]
 		.filter(Boolean)
 		.join('\n')
@@ -305,212 +253,6 @@ const buildApiCommands = (node: ApiCommandTreeNode): Array<any> =>
 			})
 		})
 
-const createPageNavigateOptions = (item: PageMapItem) => {
-	if (!item.params_hint.length) {
-		return undefined
-	}
-
-	return Object.fromEntries(item.params_hint.map(param => [param, string(param).required()]))
-}
-
-const createPageNavigateCommand = (item: PageMapItem, name: string) =>
-	command({
-		name,
-		desc: item.summary,
-		shortDesc: item.summary,
-		options: createPageNavigateOptions(item) as any,
-		help: () => {
-			printText(renderPageItemHelpText(item, `page navigate ${item.kind} ${name}`))
-		},
-		handler: async (options: Record<string, string | undefined>) => {
-			if (item.kind === 'panel') {
-				await postPageCommand({
-					type: 'panel',
-					target: item.panel_tab
-				})
-				return
-			}
-
-			const params = Object.fromEntries(
-				Object.entries(options || {}).filter(([, value]) => typeof value === 'string' && value.length)
-			) as Record<string, string>
-			const route_target = buildRoutePath(item.id, params) || item.route_path || ''
-
-			if (/:([A-Za-z0-9_]+)/.test(route_target)) {
-				throw new Error(`Missing required route params for ${item.id}`)
-			}
-
-			await postPageCommand({
-				type: 'navigate',
-				target: route_target,
-				params
-			})
-		}
-	})
-
-const createPageInfoCommand = (item: PageMapItem, name: string) =>
-	command({
-		name,
-		desc: item.summary,
-		shortDesc: item.summary,
-		help: () => {
-			printText(renderPageItemHelpText(item, `page ${item.kind} ${name}`))
-		},
-		handler: () => {
-			printText(renderPageItemHelpText(item, `page ${item.kind} ${name}`))
-		}
-	})
-
-const route_items = page_map
-	.filter(item => item.kind === 'route')
-	.sort((left, right) => left.id.localeCompare(right.id))
-const panel_items = page_map
-	.filter(item => item.kind === 'panel')
-	.sort((left, right) => left.id.localeCompare(right.id))
-
-const inspectPageState = (state: PageStatePayload, target: string) => {
-	const snapshot = state.runtime.snapshot
-
-	if (!snapshot) {
-		return {
-			error: 'No page runtime snapshot has been reported by the app bridge yet.'
-		}
-	}
-
-	if (!target) {
-		return snapshot
-	}
-
-	const page_target = page_map_by_id.get(target) || panel_items.find(item => item.panel_tab === target) || null
-	const resolved_target_id = page_target?.id || target
-
-	return {
-		target: page_target || null,
-		current_route_page: snapshot.route_page_id,
-		current_panel_page: snapshot.panel.page_id,
-		current_snapshot: snapshot,
-		matches_current_page:
-			snapshot.route_page_id === resolved_target_id || snapshot.panel.page_id === resolved_target_id,
-		section:
-			snapshot.visible_sections.find(section => section.id === target) ||
-			snapshot.visible_sections.find(section => section.title === target) ||
-			null
-	}
-}
-
-const page_command = command({
-	name: 'page',
-	desc: 'Frontend page and panel CLI.',
-	shortDesc: 'Frontend page and panel CLI.',
-	help: () => {
-		printRenderedHelp('page', renderPageHelp([]))
-	},
-	subcommands: [
-		command({
-			name: 'current',
-			desc: 'Show current runtime page snapshot.',
-			shortDesc: 'Show current runtime page snapshot.',
-			handler: async () => {
-				const state = await getPageState()
-				printJson(state.runtime)
-			}
-		}),
-		command({
-			name: 'list',
-			desc: 'List registered routes and panel pages.',
-			shortDesc: 'List registered routes and panel pages.',
-			handler: () => {
-				printJson({
-					count: page_map.length,
-					routes: route_items.map(item => ({
-						id: item.id,
-						summary: item.summary,
-						route_path: item.route_path || null
-					})),
-					panels: panel_items.map(item => ({
-						id: item.id,
-						summary: item.summary,
-						panel_tab: item.panel_tab || null
-					}))
-				})
-			}
-		}),
-		command({
-			name: 'inspect',
-			desc: 'Inspect the current runtime snapshot or a target section/page id.',
-			shortDesc: 'Inspect the current runtime snapshot or a target section/page id.',
-			options: {
-				target: positional('target').desc('Page id or visible section id/title').default('')
-			} as any,
-			handler: async (options: { target: string }) => {
-				const state = await getPageState()
-				printJson(inspectPageState(state, options.target))
-			}
-		}),
-		command({
-			name: 'back',
-			desc: 'Request back navigation in the app runtime.',
-			shortDesc: 'Request back navigation in the app runtime.',
-			handler: async () => {
-				await postPageCommand({ type: 'back' })
-			}
-		}),
-		command({
-			name: 'navigate',
-			desc: 'Navigate to a concrete route or panel target.',
-			shortDesc: 'Navigate to a concrete route or panel target.',
-			help: () => {
-				printText(
-					[
-						'page navigate',
-						'Use `page navigate route -h` or `page navigate panel -h` for the next level.'
-					].join('\n')
-				)
-			},
-			subcommands: [
-				command({
-					name: 'route',
-					desc: 'Navigate to registered routes.',
-					shortDesc: 'Navigate to registered routes.',
-					help: () => {
-						printRenderedHelp('page', renderPageHelp(['route']))
-					},
-					subcommands: route_items.map(item => createPageNavigateCommand(item, item.id)) as any
-				}),
-				command({
-					name: 'panel',
-					desc: 'Navigate to global panel tabs.',
-					shortDesc: 'Navigate to global panel tabs.',
-					help: () => {
-						printRenderedHelp('page', renderPageHelp(['panel']))
-					},
-					subcommands: panel_items.map(item =>
-						createPageNavigateCommand(item, item.panel_tab || item.id)
-					) as any
-				})
-			] as any
-		}),
-		command({
-			name: 'route',
-			desc: 'Inspect registered routes.',
-			shortDesc: 'Inspect registered routes.',
-			help: () => {
-				printRenderedHelp('page', renderPageHelp(['route']))
-			},
-			subcommands: route_items.map(item => createPageInfoCommand(item, item.id)) as any
-		}),
-		command({
-			name: 'panel',
-			desc: 'Inspect registered panel tabs.',
-			shortDesc: 'Inspect registered panel tabs.',
-			help: () => {
-				printRenderedHelp('page', renderPageHelp(['panel']))
-			},
-			subcommands: panel_items.map(item => createPageInfoCommand(item, item.panel_tab || item.id)) as any
-		})
-	] as any
-})
-
 const api_tree = createApiTree()
 const api_command = command({
 	name: 'api',
@@ -523,7 +265,7 @@ const api_command = command({
 })
 
 export const main = async () => {
-	await run([api_command, page_command] as any, {
+	await run([api_command] as any, {
 		name: 'polywise',
 		description: 'Polywise CLI',
 		version: cli_version,
@@ -533,7 +275,6 @@ export const main = async () => {
 				[
 					'polywise cli',
 					'use: polywise api -h',
-					'use: polywise page -h',
 					'optional env: POLYWISE_SERVER_URL=http://localhost:3072'
 				].join('\n')
 			)

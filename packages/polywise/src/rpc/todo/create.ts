@@ -23,24 +23,33 @@ const getNextTodoOrder = async (project_id?: string) => {
 	return min_order - 1
 }
 
-export default p.input(input_type).mutation(async ({ input }) => {
-	const order = await getNextTodoOrder(input.project_id)
-
-	const inserted = await addTodo({
-		title: input.title,
-		description: input.description,
-		priority: input.priority,
-		status: input.status,
-		result: input.result,
-		error: input.error,
-		order,
-		estimate: input.estimate,
-		due_at: input.due_at ? new Date(input.due_at) : undefined
+export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/todo/create',
+			summary: 'Run Create'
+		}
 	})
+	.input(input_type)
+	.mutation(async ({ input }) => {
+		const order = await getNextTodoOrder(input.project_id)
 
-	if (input.project_id) {
-		await addProjectTodo(input.project_id, inserted.id)
-	}
+		const inserted = await addTodo({
+			title: input.title,
+			description: input.description,
+			priority: input.priority,
+			status: input.status,
+			result: input.result,
+			error: input.error,
+			order,
+			estimate: input.estimate,
+			due_at: input.due_at ? new Date(input.due_at) : undefined
+		})
 
-	return inserted
-})
+		if (input.project_id) {
+			await addProjectTodo(input.project_id, inserted.id)
+		}
+
+		return inserted
+	})

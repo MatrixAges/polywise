@@ -63,14 +63,23 @@ const getInboxTodoWithSession = async () => {
 		.orderBy(getTodoStatusOrder(todo.status), asc(todo.order), asc(todo.created_at))
 }
 
-export default p.input(input_type).query(async ({ input }) => {
-	if (input.type !== 'inbox') {
-		const rows = await getProjectTodoWithSession(input.type)
+export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/todo/query',
+			summary: 'Read Query'
+		}
+	})
+	.input(input_type)
+	.query(async ({ input }) => {
+		if (input.type !== 'inbox') {
+			const rows = await getProjectTodoWithSession(input.type)
+
+			return groupTodosByStatus(rows.map(item => ({ todo: item.todo, session: item.session })))
+		}
+
+		const rows = await getInboxTodoWithSession()
 
 		return groupTodosByStatus(rows.map(item => ({ todo: item.todo, session: item.session })))
-	}
-
-	const rows = await getInboxTodoWithSession()
-
-	return groupTodosByStatus(rows.map(item => ({ todo: item.todo, session: item.session })))
-})
+	})

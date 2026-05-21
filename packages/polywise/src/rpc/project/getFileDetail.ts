@@ -8,9 +8,18 @@ import readProjectFile from './utils/readProjectFile'
 
 const input_type = object({ project_id: string(), file_path: string() })
 
-export default p.input(input_type).query(async ({ input }) => {
-	const projects = await getProjects({ where: eq(project.id, input.project_id) })
-	const project_item = projects[0]
+export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/project/getFileDetail',
+			summary: 'Read Get File Detail'
+		}
+	})
+	.input(input_type)
+	.query(async ({ input }) => {
+		const projects = await getProjects({ where: eq(project.id, input.project_id) })
+		const project_item = projects[0]
 
-	return readProjectFile(project_item.dir, input.file_path)
-})
+		return readProjectFile(project_item.dir, input.file_path)
+	})

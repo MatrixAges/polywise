@@ -11,7 +11,9 @@ export const getPageHelpTree = () => {
 			summary: 'Frontend page and panel index with progressive disclosure.',
 			kind: 'root',
 			children: ['group:route', 'group:panel'],
-			hints: ['Use `page current` for runtime state or `page <route|panel> -h` for index details.']
+			hints: [
+				'Use page_tool action `current` for runtime state or action `help` with path `["route"]` / `["panel"]` for index details.'
+			]
 		},
 		'group:route': {
 			id: 'group:route',
@@ -19,7 +21,7 @@ export const getPageHelpTree = () => {
 			summary: 'Application routes.',
 			kind: 'group',
 			children: [],
-			hints: ['Use `page route -h` to inspect route entries.']
+			hints: ['Use page_tool action `help` with path `["route"]` to inspect route entries.']
 		},
 		'group:panel': {
 			id: 'group:panel',
@@ -27,7 +29,7 @@ export const getPageHelpTree = () => {
 			summary: 'Global panel tabs.',
 			kind: 'group',
 			children: [],
-			hints: ['Use `page panel -h` to inspect panel entries.']
+			hints: ['Use page_tool action `help` with path `["panel"]` to inspect panel entries.']
 		}
 	} as Record<string, HelpNode>
 

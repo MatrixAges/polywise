@@ -114,6 +114,27 @@ const getParameters = (operation: OpenApiOperation | null) => {
 const toInputHints = (parameters: ReturnType<typeof getParameters>) =>
 	parameters.map(item => `--${item.name} <${item.type}${item.required ? '' : '?'}>`)
 
+const normalizeCliSegments = (rpc_path: string, openapi_path: string) => {
+	const rpc_segments = rpc_path.split('.').filter(Boolean)
+
+	if (rpc_segments.length > 1) {
+		return rpc_segments
+	}
+
+	const path_segments = openapi_path
+		.split('/')
+		.map(item => item.trim())
+		.filter(Boolean)
+		.map(item => item.replace(/^\{|\}$/g, ''))
+		.filter(item => /^[A-Za-z0-9_-]+$/.test(item))
+
+	if (path_segments.length > 1) {
+		return path_segments
+	}
+
+	return rpc_segments
+}
+
 export const getApiMap = (): Array<ApiMapItem> => {
 	if (api_map_cache) {
 		return api_map_cache
@@ -128,25 +149,17 @@ export const getApiMap = (): Array<ApiMapItem> => {
 					summary?: string
 					description?: string
 				}
-				cli?: {
-					group?: Array<string>
-					name?: string
-					summary?: string
-					hidden?: boolean
-					examples?: Array<string>
-				}
 			}
 			const operation = getOperation(meta.openapi.method, meta.openapi.path)
 			const override = manual_api_meta_map[rpc_path]
 
-			if (meta.cli?.hidden || override?.hidden) {
+			if (override?.hidden) {
 				return null
 			}
 
-			const group_path = meta.cli?.group ||
-				override?.group ||
-				rpc_path.split('.').slice(0, -1) || ['system']
-			const command_name = meta.cli?.name || override?.name || rpc_path.split('.').at(-1) || rpc_path
+			const cli_segments = normalizeCliSegments(rpc_path, meta.openapi.path)
+			const group_path = cli_segments.slice(0, -1)
+			const command_name = cli_segments.at(-1) || rpc_path
 			const parameters = getParameters(operation)
 
 			return {
@@ -156,16 +169,10 @@ export const getApiMap = (): Array<ApiMapItem> => {
 				openapi_path: meta.openapi.path,
 				cli_path: ['api', ...group_path, command_name],
 				group_path,
-				summary:
-					meta.cli?.summary ||
-					meta.openapi.summary ||
-					override?.summary ||
-					operation?.summary ||
-					operation?.description ||
-					rpc_path,
+				summary: meta.openapi.summary || operation?.summary || operation?.description || rpc_path,
 				description: meta.openapi.description || operation?.description,
 				input_hint: toInputHints(parameters),
-				examples: meta.cli?.examples || override?.examples || [],
+				examples: override?.examples || [],
 				parameters
 			}
 		})
@@ -190,7 +197,7 @@ export const getApiHelpTree = () => {
 
 	for (const item of getApiMap()) {
 		let parent_id = root_help_id
-		const group_segments = item.group_path.length ? item.group_path : ['system']
+		const group_segments = item.group_path
 
 		group_segments.forEach((segment, index) => {
 			const group_path = group_segments.slice(0, index + 1)
@@ -232,10 +239,7 @@ export const renderApiHelp = (path: Array<string>) => renderHelpTree(getApiHelpT
 const manual_api_meta_map = manual_api_meta as Record<
 	string,
 	{
-		group: Array<string>
-		name: string
-		summary: string
-		examples: Array<string>
+		examples?: Array<string>
 		hidden?: boolean
 	}
 >

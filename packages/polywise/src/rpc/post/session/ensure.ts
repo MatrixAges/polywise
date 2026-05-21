@@ -3,12 +3,21 @@ import { object, string } from 'zod'
 import { p } from '../../../utils/trpc'
 import { ensurePostSession, getPostById } from '../utils'
 
-export default p.input(object({ post_id: string() })).mutation(async ({ input }) => {
-	const post = await getPostById(input.post_id)
+export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/post/session/ensure',
+			summary: 'Run Ensure'
+		}
+	})
+	.input(object({ post_id: string() }))
+	.mutation(async ({ input }) => {
+		const post = await getPostById(input.post_id)
 
-	if (!post) {
-		throw new Error(`Post not found: ${input.post_id}`)
-	}
+		if (!post) {
+			throw new Error(`Post not found: ${input.post_id}`)
+		}
 
-	return ensurePostSession(input.post_id)
-})
+		return ensurePostSession(input.post_id)
+	})

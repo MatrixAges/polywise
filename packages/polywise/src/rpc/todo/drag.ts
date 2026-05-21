@@ -46,34 +46,43 @@ const getStatusInsertIndex = (args: { todos: Array<typeof todo.$inferSelect>; st
 	}, 0)
 }
 
-export default p.input(input_type).mutation(async ({ input }) => {
-	const todos = await getTodoList(input.project_id)
-	const active_todo = todos.find(item => item.id === input.active_id)!
-	const over_todo = todos.find(item => item.id === input.over_id)!
-	const active_status = input.active_status ?? active_todo.status
-	const over_status = input.over_status ?? over_todo?.status
+export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/todo/drag',
+			summary: 'Run Drag'
+		}
+	})
+	.input(input_type)
+	.mutation(async ({ input }) => {
+		const todos = await getTodoList(input.project_id)
+		const active_todo = todos.find(item => item.id === input.active_id)!
+		const over_todo = todos.find(item => item.id === input.over_id)!
+		const active_status = input.active_status ?? active_todo.status
+		const over_status = input.over_status ?? over_todo?.status
 
-	const remaining_todos = todos.filter(item => item.id !== input.active_id)
-	active_todo.status = over_status
+		const remaining_todos = todos.filter(item => item.id !== input.active_id)
+		active_todo.status = over_status
 
-	const over_index = remaining_todos.findIndex(item => item.id === input.over_id)
+		const over_index = remaining_todos.findIndex(item => item.id === input.over_id)
 
-	const target_index =
-		over_index < 0
-			? getStatusInsertIndex({ todos: remaining_todos, status: over_status as TodoStatus })
-			: over_index
-	remaining_todos.splice(target_index, 0, active_todo)
+		const target_index =
+			over_index < 0
+				? getStatusInsertIndex({ todos: remaining_todos, status: over_status as TodoStatus })
+				: over_index
+		remaining_todos.splice(target_index, 0, active_todo)
 
-	const next_todos = status_list.flatMap(status => remaining_todos.filter(item => item.status === status))
+		const next_todos = status_list.flatMap(status => remaining_todos.filter(item => item.status === status))
 
-	await Promise.all(
-		next_todos.map((item, index) =>
-			setTodo(eq(todo.id, item.id), {
-				order: index,
-				status: item.status
-			})
+		await Promise.all(
+			next_todos.map((item, index) =>
+				setTodo(eq(todo.id, item.id), {
+					order: index,
+					status: item.status
+				})
+			)
 		)
-	)
 
-	return next_todos
-})
+		return next_todos
+	})

@@ -9,6 +9,15 @@ import type { AgentInsert } from '@core/db'
 
 const input_type = agent_update_input_schema
 
-export default p.input(input_type).mutation(async ({ input }) => {
-	return setAgent(eq(agent.id, input.id), omit(input, ['id']) as Partial<AgentInsert>)
-})
+export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/agent/update',
+			summary: 'Run Update'
+		}
+	})
+	.input(input_type)
+	.mutation(async ({ input }) => {
+		return setAgent(eq(agent.id, input.id), omit(input, ['id']) as Partial<AgentInsert>)
+	})

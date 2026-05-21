@@ -8,4 +8,13 @@ const input_type = object({
 	force: boolean().optional()
 })
 
-export default p.input(input_type).mutation(async ({ input }) => extractLinkcaseArticle(input))
+export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/linkcase/extract',
+			summary: 'Run Extract'
+		}
+	})
+	.input(input_type)
+	.mutation(async ({ input }) => extractLinkcaseArticle(input))

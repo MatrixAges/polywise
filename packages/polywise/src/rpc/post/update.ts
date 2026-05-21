@@ -9,6 +9,13 @@ import { p } from '../../utils/trpc'
 import { getPostById, getPostSessionTitle, normalizePostForType } from './utils'
 
 export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/post/update',
+			summary: 'Run Update'
+		}
+	})
 	.input(
 		object({
 			id: string(),

@@ -97,6 +97,15 @@ const getStatusList = async (status: SessionStatusType) => {
 	return sortSessionList(Array.from((await getErrorSessionMap()).values()))
 }
 
-export default p.input(input_type).query(async ({ input }) => {
-	return getStatusList(input.status)
-})
+export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/session/getStatusList',
+			summary: 'Read Get Status List'
+		}
+	})
+	.input(input_type)
+	.query(async ({ input }) => {
+		return getStatusList(input.status)
+	})

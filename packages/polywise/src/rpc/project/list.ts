@@ -10,11 +10,6 @@ export default p
 			method: 'GET',
 			path: '/project/list',
 			summary: 'List projects'
-		},
-		cli: {
-			group: ['project'],
-			name: 'list',
-			summary: 'List projects.'
 		}
 	})
 	.output(array(project_select_schema))

@@ -8,6 +8,13 @@ import { p } from '../../../utils/trpc'
 import { getPostById } from '../utils'
 
 export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/post/project/add',
+			summary: 'Run Add'
+		}
+	})
 	.input(
 		object({
 			post_id: string(),

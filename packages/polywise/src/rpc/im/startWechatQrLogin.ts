@@ -4,6 +4,13 @@ import { p } from '../../utils/trpc'
 import { startWechatQrLogin } from './wechatQrLoginShared'
 
 export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/im/startWechatQrLogin',
+			summary: 'Run Start Wechat Qr Login'
+		}
+	})
 	.output(
 		object({
 			session_key: string(),

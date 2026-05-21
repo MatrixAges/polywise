@@ -102,61 +102,74 @@ const getAgentProfilePrompt = (input: AgentCreateInput) => {
 	].join('\n')
 }
 
-export default p.input(input_type).mutation(async ({ input }) => {
-	const fallback_profile = await getFallbackAgentProfile()
-	let generated_profile = null as {
-		name?: string
-		role?: string
-		description?: string
-		prompt?: string
-		soul?: string
-		identity?: string
-		memory?: string
-	} | null
-
-	try {
-		const model = await getDefaultToolModel()
-
-		generated_profile = await runToolAgent({
-			model,
-			schema: generated_agent_schema,
-			prompt: getAgentProfilePrompt(input),
-			instructions:
-				'Generate a concise AI agent profile. Keep the name short and distinctive. Keep the role within 20 characters and preferably one or two words. Keep the description to one sentence. For prompt, soul, identity, and memory, return valid structured Markdown with short headings and bullet lists. Do not use code fences. Do not wrap the fields in quotes.'
-		})
-	} catch {}
-
-	const name =
-		normalizeSingleLine(input.name) || normalizeSingleLine(generated_profile?.name) || fallback_profile.name
-	const role = normalizeRole(input.role) || normalizeRole(generated_profile?.role) || fallback_profile.role
-	const description =
-		normalizeSingleLine(input.description) ||
-		normalizeSingleLine(generated_profile?.description) ||
-		fallback_profile.description
-	const prompt =
-		normalizeBlock(input.prompt) || normalizeBlock(generated_profile?.prompt) || fallback_profile.prompt
-	const soul = normalizeBlock(input.soul) || normalizeBlock(generated_profile?.soul) || fallback_profile.soul
-	const identity =
-		normalizeBlock(input.identity) || normalizeBlock(generated_profile?.identity) || fallback_profile.identity
-	const memory =
-		normalizeBlock(input.memory) || normalizeBlock(generated_profile?.memory) || fallback_profile.memory
-
-	const next_agent = await addAgent({
-		...input,
-		name,
-		role,
-		description,
-		prompt,
-		soul,
-		identity,
-		memory,
-		model: normalizeAgentModel(input.model),
-		order: Date.now()
+export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/agent/create',
+			summary: 'Run Create'
+		}
 	})
+	.input(input_type)
+	.mutation(async ({ input }) => {
+		const fallback_profile = await getFallbackAgentProfile()
+		let generated_profile = null as {
+			name?: string
+			role?: string
+			description?: string
+			prompt?: string
+			soul?: string
+			identity?: string
+			memory?: string
+		} | null
 
-	if (next_agent?.id) {
-		await readPinList(next_agent.id)
-	}
+		try {
+			const model = await getDefaultToolModel()
 
-	return next_agent
-})
+			generated_profile = await runToolAgent({
+				model,
+				schema: generated_agent_schema,
+				prompt: getAgentProfilePrompt(input),
+				instructions:
+					'Generate a concise AI agent profile. Keep the name short and distinctive. Keep the role within 20 characters and preferably one or two words. Keep the description to one sentence. For prompt, soul, identity, and memory, return valid structured Markdown with short headings and bullet lists. Do not use code fences. Do not wrap the fields in quotes.'
+			})
+		} catch {}
+
+		const name =
+			normalizeSingleLine(input.name) ||
+			normalizeSingleLine(generated_profile?.name) ||
+			fallback_profile.name
+		const role = normalizeRole(input.role) || normalizeRole(generated_profile?.role) || fallback_profile.role
+		const description =
+			normalizeSingleLine(input.description) ||
+			normalizeSingleLine(generated_profile?.description) ||
+			fallback_profile.description
+		const prompt =
+			normalizeBlock(input.prompt) || normalizeBlock(generated_profile?.prompt) || fallback_profile.prompt
+		const soul = normalizeBlock(input.soul) || normalizeBlock(generated_profile?.soul) || fallback_profile.soul
+		const identity =
+			normalizeBlock(input.identity) ||
+			normalizeBlock(generated_profile?.identity) ||
+			fallback_profile.identity
+		const memory =
+			normalizeBlock(input.memory) || normalizeBlock(generated_profile?.memory) || fallback_profile.memory
+
+		const next_agent = await addAgent({
+			...input,
+			name,
+			role,
+			description,
+			prompt,
+			soul,
+			identity,
+			memory,
+			model: normalizeAgentModel(input.model),
+			order: Date.now()
+		})
+
+		if (next_agent?.id) {
+			await readPinList(next_agent.id)
+		}
+
+		return next_agent
+	})

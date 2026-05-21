@@ -17,11 +17,6 @@ export default p
 			method: 'POST',
 			path: '/update',
 			summary: 'Update an article'
-		},
-		cli: {
-			group: ['article'],
-			name: 'update',
-			summary: 'Update an article.'
 		}
 	})
 	.input(input_type)

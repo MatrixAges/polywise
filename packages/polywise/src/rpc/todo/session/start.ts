@@ -39,47 +39,56 @@ const getLinkedSession = async (todo_id: string) => {
 	return null
 }
 
-export default p.input(input_type).mutation(async ({ input }) => {
-	const todo_item = await getTodo(eq(todo.id, input.todo_id))
-
-	if (!todo_item) {
-		throw new Error(`Todo not found: ${input.todo_id}`)
-	}
-
-	const linked_session = await getLinkedSession(input.todo_id)
-	const session_item = linked_session ?? (await addSession({ title: todo_item.title }))
-
-	if (!linked_session) {
-		await addTodoSession(input.todo_id, session_item.id)
-
-		if (input.project_id) {
-			await addProjectSession(input.project_id, session_item.id)
+export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/todo/session/start',
+			summary: 'Run Start'
 		}
-	}
-
-	await syncTodoSessionStatusByTodoId({
-		todo_id: input.todo_id,
-		from_status_list: [...start_status_list],
-		to_status: 'processing'
 	})
+	.input(input_type)
+	.mutation(async ({ input }) => {
+		const todo_item = await getTodo(eq(todo.id, input.todo_id))
 
-	try {
-		await submit({ id: session_item.id }, todo_item.title)
-	} catch (error) {
+		if (!todo_item) {
+			throw new Error(`Todo not found: ${input.todo_id}`)
+		}
+
+		const linked_session = await getLinkedSession(input.todo_id)
+		const session_item = linked_session ?? (await addSession({ title: todo_item.title }))
+
+		if (!linked_session) {
+			await addTodoSession(input.todo_id, session_item.id)
+
+			if (input.project_id) {
+				await addProjectSession(input.project_id, session_item.id)
+			}
+		}
+
 		await syncTodoSessionStatusByTodoId({
 			todo_id: input.todo_id,
-			from_status_list: ['processing'],
-			to_status: 'error'
+			from_status_list: [...start_status_list],
+			to_status: 'processing'
 		})
 
-		await emitChange({
-			session: session_item,
-			running_since: session_item.running_since ?? null,
-			running_done: session_item.running_done ?? null
-		})
+		try {
+			await submit({ id: session_item.id }, todo_item.title)
+		} catch (error) {
+			await syncTodoSessionStatusByTodoId({
+				todo_id: input.todo_id,
+				from_status_list: ['processing'],
+				to_status: 'error'
+			})
 
-		throw error
-	}
+			await emitChange({
+				session: session_item,
+				running_since: session_item.running_since ?? null,
+				running_done: session_item.running_done ?? null
+			})
 
-	return session_item
-})
+			throw error
+		}
+
+		return session_item
+	})

@@ -13,22 +13,31 @@ const input_type = object({
 	merge: boolean().optional()
 })
 
-export default p.input(input_type).mutation(async ({ input }) => {
-	const { path: file_path, data, merge } = input
-
-	let target_data = data
-
-	const target_path = path.resolve(`${app.app_path}/${file_path}`)
-
-	if (merge) {
-		const [err, res] = await to(readFile(target_path))
-
-		if (!err && res) {
-			const target_res = ntry(() => JSON.parse(res.toString()))
-
-			if (target_res) target_data = deepmerge(target_res, data)
+export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/file/write',
+			summary: 'Run Write'
 		}
-	}
+	})
+	.input(input_type)
+	.mutation(async ({ input }) => {
+		const { path: file_path, data, merge } = input
 
-	await writeFile(target_path, JSON.stringify(target_data, null, 4))
-})
+		let target_data = data
+
+		const target_path = path.resolve(`${app.app_path}/${file_path}`)
+
+		if (merge) {
+			const [err, res] = await to(readFile(target_path))
+
+			if (!err && res) {
+				const target_res = ntry(() => JSON.parse(res.toString()))
+
+				if (target_res) target_data = deepmerge(target_res, data)
+			}
+		}
+
+		await writeFile(target_path, JSON.stringify(target_data, null, 4))
+	})

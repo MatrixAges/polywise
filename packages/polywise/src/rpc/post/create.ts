@@ -5,6 +5,13 @@ import { p } from '../../utils/trpc'
 import { getPostById, normalizePostForType } from './utils'
 
 export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/post/create',
+			summary: 'Run Create'
+		}
+	})
 	.input(
 		object({
 			title: string().optional(),

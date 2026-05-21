@@ -30,16 +30,25 @@ const getTodoList = async (project_id?: string) => {
 	return rows.map(item => item.todo)
 }
 
-export default p.input(input_type).mutation(async ({ input }) => {
-	const todos = await getTodoList(input.project_id)
+export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/todo/sort',
+			summary: 'Run Sort'
+		}
+	})
+	.input(input_type)
+	.mutation(async ({ input }) => {
+		const todos = await getTodoList(input.project_id)
 
-	if (!todos[input.from] || input.to > todos.length - 1) {
-		return todos
-	}
+		if (!todos[input.from] || input.to > todos.length - 1) {
+			return todos
+		}
 
-	const next_todos = arrayMove({ list: todos, from: input.from, to: input.to })
+		const next_todos = arrayMove({ list: todos, from: input.from, to: input.to })
 
-	await Promise.all(next_todos.map((item, index) => setTodo(eq(todo.id, item.id), { order: index })))
+		await Promise.all(next_todos.map((item, index) => setTodo(eq(todo.id, item.id), { order: index })))
 
-	return next_todos
-})
+		return next_todos
+	})

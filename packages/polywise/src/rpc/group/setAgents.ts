@@ -10,35 +10,47 @@ const input_type = object({
 	agent_ids: array(string()).min(1)
 })
 
-export default p.input(input_type).mutation(async ({ input }) => {
-	const current = await getGroupAgents({
-		where: eq(group_agent.group_id, input.id)
-	})
-
-	const current_map = new Map(current.map(item => [item.agent.id, item.group_agent]))
-	const next_ids = new Set(input.agent_ids)
-
-	for (const item of current) {
-		if (!next_ids.has(item.agent.id)) {
-			await removeGroupAgent(
-				and(eq(group_agent.group_id, input.id), eq(group_agent.agent_id, item.agent.id))!
-			)
+export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/group/setAgents',
+			summary: 'Run Set Agents'
 		}
-	}
-
-	for (const [index, agent_id] of input.agent_ids.entries()) {
-		const existing = current_map.get(agent_id)
-
-		if (existing) {
-			await setGroupAgent(and(eq(group_agent.group_id, input.id), eq(group_agent.agent_id, agent_id))!, {
-				order: index
-			})
-		} else {
-			await addGroupAgent(input.id, agent_id, index)
-		}
-	}
-
-	return getGroupAgents({
-		where: eq(group_agent.group_id, input.id)
 	})
-})
+	.input(input_type)
+	.mutation(async ({ input }) => {
+		const current = await getGroupAgents({
+			where: eq(group_agent.group_id, input.id)
+		})
+
+		const current_map = new Map(current.map(item => [item.agent.id, item.group_agent]))
+		const next_ids = new Set(input.agent_ids)
+
+		for (const item of current) {
+			if (!next_ids.has(item.agent.id)) {
+				await removeGroupAgent(
+					and(eq(group_agent.group_id, input.id), eq(group_agent.agent_id, item.agent.id))!
+				)
+			}
+		}
+
+		for (const [index, agent_id] of input.agent_ids.entries()) {
+			const existing = current_map.get(agent_id)
+
+			if (existing) {
+				await setGroupAgent(
+					and(eq(group_agent.group_id, input.id), eq(group_agent.agent_id, agent_id))!,
+					{
+						order: index
+					}
+				)
+			} else {
+				await addGroupAgent(input.id, agent_id, index)
+			}
+		}
+
+		return getGroupAgents({
+			where: eq(group_agent.group_id, input.id)
+		})
+	})

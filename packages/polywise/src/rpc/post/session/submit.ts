@@ -5,6 +5,13 @@ import { p } from '../../../utils/trpc'
 import { ensurePostSession, getPostById } from '../utils'
 
 export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/post/session/submit',
+			summary: 'Run Submit'
+		}
+	})
 	.input(
 		object({
 			post_id: string(),

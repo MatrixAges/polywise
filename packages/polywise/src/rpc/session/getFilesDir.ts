@@ -9,10 +9,19 @@ const input_type = object({
 	id: string()
 })
 
-export default p.input(input_type).query(async ({ input }) => {
-	const files_dir = path.resolve(app.app_path, 'sessions', input.id, 'files')
+export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/session/getFilesDir',
+			summary: 'Read Get Files Dir'
+		}
+	})
+	.input(input_type)
+	.query(async ({ input }) => {
+		const files_dir = path.resolve(app.app_path, 'sessions', input.id, 'files')
 
-	await fs.ensureDir(files_dir)
+		await fs.ensureDir(files_dir)
 
-	return files_dir
-})
+		return files_dir
+	})

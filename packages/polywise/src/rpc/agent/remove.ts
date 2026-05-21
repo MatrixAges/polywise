@@ -9,10 +9,19 @@ import { getAgentDirPath } from './utils'
 
 const input_type = object({ id: string() })
 
-export default p.input(input_type).mutation(async ({ input }) => {
-	const next_agent = await removeAgent(eq(agent.id, input.id))
+export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/agent/remove',
+			summary: 'Run Remove'
+		}
+	})
+	.input(input_type)
+	.mutation(async ({ input }) => {
+		const next_agent = await removeAgent(eq(agent.id, input.id))
 
-	await fs.remove(getAgentDirPath(input.id))
+		await fs.remove(getAgentDirPath(input.id))
 
-	return next_agent
-})
+		return next_agent
+	})

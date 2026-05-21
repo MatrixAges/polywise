@@ -6,6 +6,13 @@ import { im_account_input_schema, im_account_schema, normalizeImAccount } from '
 const normalizeConfigJson = (value: string) => JSON.stringify(JSON.parse(value))
 
 export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/im/create',
+			summary: 'Run Create'
+		}
+	})
 	.input(im_account_input_schema)
 	.output(im_account_schema)
 	.mutation(async ({ input }) => {

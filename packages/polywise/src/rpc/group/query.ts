@@ -25,46 +25,55 @@ const getMessageText = (message_item: Message) => {
 	return text_parts.join('\n').trim()
 }
 
-export default p.input(input_type).query(async ({ input }) => {
-	const groups = await getGroups({
-		where: input.id ? eq(group.id, input.id) : undefined,
-		orderBy: asc(group.updated_at)
+export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/group/query',
+			summary: 'Read Query'
+		}
 	})
-
-	return Promise.all(
-		groups.map(async item => {
-			const [agents, sessions] = await Promise.all([
-				getGroupAgents({
-					where: eq(group_agent.group_id, item.id)
-				}),
-				getGroupSessions({
-					where: eq(group_session.group_id, item.id)
-				})
-			])
-			const current_session = sessions[0]?.session ?? null
-			const last_message_row = current_session
-				? await getMessages({
-						where: eq(message.session_id, current_session.id),
-						orderBy: desc(message.created_at),
-						limit: 1
-					}).then(res => res[0] ?? null)
-				: null
-			const last_message = last_message_row ? (JSON.parse(last_message_row.content) as Message) : null
-			const last_message_text = last_message ? getMessageText(last_message) : ''
-
-			return {
-				...item,
-				agents: agents.map(agent_item => agent_item.agent),
-				folders: item.folders ?? [],
-				session_ids: sessions.map(session_item => session_item.session.id),
-				session: current_session,
-				last_message: last_message_text
-					? {
-							sender: last_message?.metadata?.sender || '',
-							text: last_message_text
-						}
-					: null
-			}
+	.input(input_type)
+	.query(async ({ input }) => {
+		const groups = await getGroups({
+			where: input.id ? eq(group.id, input.id) : undefined,
+			orderBy: asc(group.updated_at)
 		})
-	)
-})
+
+		return Promise.all(
+			groups.map(async item => {
+				const [agents, sessions] = await Promise.all([
+					getGroupAgents({
+						where: eq(group_agent.group_id, item.id)
+					}),
+					getGroupSessions({
+						where: eq(group_session.group_id, item.id)
+					})
+				])
+				const current_session = sessions[0]?.session ?? null
+				const last_message_row = current_session
+					? await getMessages({
+							where: eq(message.session_id, current_session.id),
+							orderBy: desc(message.created_at),
+							limit: 1
+						}).then(res => res[0] ?? null)
+					: null
+				const last_message = last_message_row ? (JSON.parse(last_message_row.content) as Message) : null
+				const last_message_text = last_message ? getMessageText(last_message) : ''
+
+				return {
+					...item,
+					agents: agents.map(agent_item => agent_item.agent),
+					folders: item.folders ?? [],
+					session_ids: sessions.map(session_item => session_item.session.id),
+					session: current_session,
+					last_message: last_message_text
+						? {
+								sender: last_message?.metadata?.sender || '',
+								text: last_message_text
+							}
+						: null
+				}
+			})
+		)
+	})

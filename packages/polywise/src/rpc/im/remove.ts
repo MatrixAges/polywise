@@ -10,6 +10,13 @@ const output_type = object({
 })
 
 export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/im/remove',
+			summary: 'Run Remove'
+		}
+	})
 	.input(string())
 	.output(output_type)
 	.mutation(async ({ input }) => {

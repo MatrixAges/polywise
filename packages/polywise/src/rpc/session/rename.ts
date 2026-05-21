@@ -18,11 +18,6 @@ export default p
 			method: 'POST',
 			path: '/session/rename',
 			summary: 'Rename a session'
-		},
-		cli: {
-			group: ['session'],
-			name: 'rename',
-			summary: 'Rename an existing session.'
 		}
 	})
 	.input(input_type)

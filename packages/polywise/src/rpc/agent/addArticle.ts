@@ -9,6 +9,13 @@ import { p } from '../../utils/trpc'
 const article_for_type = article.for.enumValues
 
 export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/agent/addArticle',
+			summary: 'Run Add Article'
+		}
+	})
 	.input(
 		object({
 			agent_id: string(),

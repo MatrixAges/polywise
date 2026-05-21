@@ -20,13 +20,22 @@ const output_type = object({
 	)
 })
 
-export default p.output(output_type).query(async () => {
-	if (!env.im) {
-		return {
-			adapters: [],
-			routes: []
+export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/im/health',
+			summary: 'Read Health'
 		}
-	}
+	})
+	.output(output_type)
+	.query(async () => {
+		if (!env.im) {
+			return {
+				adapters: [],
+				routes: []
+			}
+		}
 
-	return env.im.getHealth()
-})
+		return env.im.getHealth()
+	})

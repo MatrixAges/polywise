@@ -10,14 +10,26 @@ const input_type = object({
 	article_id: string()
 })
 
-export default p.input(input_type).mutation(async ({ input }) => {
-	const where = and(eq(agent_article.agent_id, input.agent_id), eq(agent_article.article_id, input.article_id))
+export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/agent/removeArticle',
+			summary: 'Run Remove Article'
+		}
+	})
+	.input(input_type)
+	.mutation(async ({ input }) => {
+		const where = and(
+			eq(agent_article.agent_id, input.agent_id),
+			eq(agent_article.article_id, input.article_id)
+		)
 
-	if (!where) {
+		if (!where) {
+			return { ok: true }
+		}
+
+		await removeAgentArticle(where)
+
 		return { ok: true }
-	}
-
-	await removeAgentArticle(where)
-
-	return { ok: true }
-})
+	})

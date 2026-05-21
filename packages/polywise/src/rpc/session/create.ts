@@ -17,11 +17,6 @@ export default p
 			method: 'POST',
 			path: '/session/create',
 			summary: 'Create a session'
-		},
-		cli: {
-			group: ['session'],
-			name: 'create',
-			summary: 'Create a new session.'
 		}
 	})
 	.input(input_type)

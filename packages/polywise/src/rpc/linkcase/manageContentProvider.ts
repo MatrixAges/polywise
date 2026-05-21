@@ -8,15 +8,24 @@ const input_type = z.object({
 	action: z.enum(['create_profile', 'recreate_profile'])
 })
 
-export default p.input(input_type).mutation(async ({ input }) => {
-	if (input.id !== 'crawl4ai') {
-		throw new Error(`Unsupported provider action target: ${input.id}`)
-	}
+export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/linkcase/manageContentProvider',
+			summary: 'Run Manage Content Provider'
+		}
+	})
+	.input(input_type)
+	.mutation(async ({ input }) => {
+		if (input.id !== 'crawl4ai') {
+			throw new Error(`Unsupported provider action target: ${input.id}`)
+		}
 
-	const result = await createPolywiseCrawl4aiProfile(input.action === 'recreate_profile')
+		const result = await createPolywiseCrawl4aiProfile(input.action === 'recreate_profile')
 
-	return {
-		ok: true as const,
-		...result
-	}
-})
+		return {
+			ok: true as const,
+			...result
+		}
+	})

@@ -11,12 +11,21 @@ const input_type = object({
 	type: string().optional()
 })
 
-export default p.input(input_type).mutation(async ({ input }) => {
-	return updateSkill({
-		id: input.id,
-		name: input.name,
-		desc: input.desc,
-		content: input.content,
-		type: input.type
+export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/skill/update',
+			summary: 'Run Update'
+		}
 	})
-})
+	.input(input_type)
+	.mutation(async ({ input }) => {
+		return updateSkill({
+			id: input.id,
+			name: input.name,
+			desc: input.desc,
+			content: input.content,
+			type: input.type
+		})
+	})

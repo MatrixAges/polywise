@@ -10,6 +10,15 @@ import type { TodoInsert } from '@core/db'
 
 const input_type = todo_update_input_schema
 
-export default p.input(input_type).mutation(async ({ input }) => {
-	return setTodo(eq(todo.id, input.id), omit(input, ['id']) as Partial<TodoInsert>)
-})
+export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/todo/update',
+			summary: 'Run Update'
+		}
+	})
+	.input(input_type)
+	.mutation(async ({ input }) => {
+		return setTodo(eq(todo.id, input.id), omit(input, ['id']) as Partial<TodoInsert>)
+	})

@@ -12,4 +12,13 @@ const input_type = object({
 	extract_concurrency: number().int().min(1).max(10).optional()
 })
 
-export default p.input(input_type).mutation(async ({ input }) => createLinkcaseSchedule(input))
+export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/linkcase/createSchedule',
+			summary: 'Run Create Schedule'
+		}
+	})
+	.input(input_type)
+	.mutation(async ({ input }) => createLinkcaseSchedule(input))

@@ -23,18 +23,27 @@ const output_type = object({
 	})
 })
 
-export default p.output(output_type).mutation(async () => {
-	if (!env.im) {
-		throw new Error('IM runtime not initialized')
-	}
+export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/im/reload',
+			summary: 'Run Reload'
+		}
+	})
+	.output(output_type)
+	.mutation(async () => {
+		if (!env.im) {
+			throw new Error('IM runtime not initialized')
+		}
 
-	await env.im.stop()
-	env.im.adapters.clear()
-	env.im.routes.clear()
-	await env.im.start()
+		await env.im.stop()
+		env.im.adapters.clear()
+		env.im.routes.clear()
+		await env.im.start()
 
-	return {
-		ok: true,
-		health: env.im.getHealth()
-	}
-})
+		return {
+			ok: true,
+			health: env.im.getHealth()
+		}
+	})

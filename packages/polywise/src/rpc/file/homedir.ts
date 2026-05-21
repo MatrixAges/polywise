@@ -2,6 +2,14 @@ import os from 'os'
 
 import { p } from '../../utils/trpc'
 
-export default p.query(() => {
-	return os.homedir()
-})
+export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/file/homedir',
+			summary: 'Read Homedir'
+		}
+	})
+	.query(() => {
+		return os.homedir()
+	})

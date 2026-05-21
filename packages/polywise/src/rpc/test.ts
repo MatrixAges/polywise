@@ -11,11 +11,6 @@ export default p
 			method: 'GET',
 			path: '/test',
 			summary: 'Test server connectivity'
-		},
-		cli: {
-			group: ['system'],
-			name: 'test',
-			summary: 'Test server connectivity.'
 		}
 	})
 	.input(input_type)

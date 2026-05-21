@@ -8,12 +8,21 @@ import { removeSessionById } from '../session/utils'
 
 const input_type = object({ id: string() })
 
-export default p.input(input_type).mutation(async ({ input }) => {
-	const session_rows = await getProjectSessions({ project_id: input.id })
+export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/project/remove',
+			summary: 'Run Remove'
+		}
+	})
+	.input(input_type)
+	.mutation(async ({ input }) => {
+		const session_rows = await getProjectSessions({ project_id: input.id })
 
-	for (const item of session_rows) {
-		await removeSessionById(item.session.id)
-	}
+		for (const item of session_rows) {
+			await removeSessionById(item.session.id)
+		}
 
-	return removeProject(eq(project.id, input.id))
-})
+		return removeProject(eq(project.id, input.id))
+	})

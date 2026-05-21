@@ -10,5 +10,12 @@ const input_type = object({
 })
 
 export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/sniffer/importBookmarks',
+			summary: 'Run Import Bookmarks'
+		}
+	})
 	.input(input_type)
 	.mutation(async ({ input }) => importBrowserBookmarks(input.browser, { folder_keys: input.folder_keys }))

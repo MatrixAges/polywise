@@ -10,11 +10,20 @@ const input_type = object({
 	title: string().optional()
 })
 
-export default p.input(input_type).mutation(async ({ input }) => {
-	const title = input.title || `Session ${dayjs().format('YYYY-MM-DD HH:mm:ss')}`
-	const session = await addSession({ title })
+export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/agent/createSession',
+			summary: 'Run Create Session'
+		}
+	})
+	.input(input_type)
+	.mutation(async ({ input }) => {
+		const title = input.title || `Session ${dayjs().format('YYYY-MM-DD HH:mm:ss')}`
+		const session = await addSession({ title })
 
-	await addAgentSession(input.agent_id, session.id)
+		await addAgentSession(input.agent_id, session.id)
 
-	return session
-})
+		return session
+	})

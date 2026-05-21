@@ -22,11 +22,6 @@ export default p
 			method: 'GET',
 			path: '/post/read',
 			summary: 'Read a post'
-		},
-		cli: {
-			group: ['post'],
-			name: 'read',
-			summary: 'Read one post.'
 		}
 	})
 	.input(input_type)

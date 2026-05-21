@@ -6,8 +6,17 @@ const output_type = record(Enum(['embedding', 'rerank', 'gen']), boolean())
 
 export type ModelStatus = Infer<typeof output_type>
 
-export default p.output(output_type).query(async () => {
-	const [embedding, rerank, gen] = await Promise.all([hasEmbeddingModel(), hasRerankModel(), hasGenModel()])
+export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/llama/getStatus',
+			summary: 'Read Get Status'
+		}
+	})
+	.output(output_type)
+	.query(async () => {
+		const [embedding, rerank, gen] = await Promise.all([hasEmbeddingModel(), hasRerankModel(), hasGenModel()])
 
-	return { embedding: embedding ? true : false, rerank: rerank ? true : false, gen: gen ? true : false }
-})
+		return { embedding: embedding ? true : false, rerank: rerank ? true : false, gen: gen ? true : false }
+	})

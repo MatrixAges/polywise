@@ -8,6 +8,15 @@ const input_type = object({
 	skill_ids: array(string())
 })
 
-export default p.input(input_type).mutation(async ({ input }) => {
-	return replaceAgentSkills(input)
-})
+export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/agent/setSkills',
+			summary: 'Run Set Skills'
+		}
+	})
+	.input(input_type)
+	.mutation(async ({ input }) => {
+		return replaceAgentSkills(input)
+	})

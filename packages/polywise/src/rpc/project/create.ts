@@ -6,12 +6,21 @@ import { p } from '../../utils/trpc'
 
 const input_type = object({ dir: string() })
 
-export default p.input(input_type).mutation(async ({ input }) => {
-	const { dir } = input
-
-	return addProject({
-		name: path.basename(dir),
-		dir,
-		order: Date.now()
+export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/project/create',
+			summary: 'Run Create'
+		}
 	})
-})
+	.input(input_type)
+	.mutation(async ({ input }) => {
+		const { dir } = input
+
+		return addProject({
+			name: path.basename(dir),
+			dir,
+			order: Date.now()
+		})
+	})

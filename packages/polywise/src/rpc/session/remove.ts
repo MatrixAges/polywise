@@ -12,11 +12,6 @@ export default p
 			method: 'POST',
 			path: '/session/remove',
 			summary: 'Remove a session'
-		},
-		cli: {
-			group: ['session'],
-			name: 'remove',
-			summary: 'Remove an existing session.'
 		}
 	})
 	.input(input_type)

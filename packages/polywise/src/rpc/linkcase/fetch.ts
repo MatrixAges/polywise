@@ -9,4 +9,13 @@ const input_type = object({
 	max_chars: number().int().positive().optional()
 })
 
-export default p.input(input_type).mutation(async ({ input }) => fetchLinkcaseLink(input))
+export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/linkcase/fetch',
+			summary: 'Run Fetch'
+		}
+	})
+	.input(input_type)
+	.mutation(async ({ input }) => fetchLinkcaseLink(input))

@@ -9,6 +9,15 @@ const input_type = object({
 	content: string().optional()
 })
 
-export default p.input(input_type).mutation(async ({ input }) => {
-	return createLinkcaseItem(input)
-})
+export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/linkcase/create',
+			summary: 'Run Create'
+		}
+	})
+	.input(input_type)
+	.mutation(async ({ input }) => {
+		return createLinkcaseItem(input)
+	})

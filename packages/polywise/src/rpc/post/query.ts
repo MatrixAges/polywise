@@ -30,11 +30,6 @@ export default p
 			method: 'GET',
 			path: '/post/query',
 			summary: 'Query posts'
-		},
-		cli: {
-			group: ['post'],
-			name: 'query',
-			summary: 'Query posts.'
 		}
 	})
 	.input(input_type)

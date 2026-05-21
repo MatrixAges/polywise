@@ -4,6 +4,13 @@ import { p } from '../../utils/trpc'
 import { extractPostArticle } from './utils'
 
 export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/post/extract',
+			summary: 'Run Extract'
+		}
+	})
 	.input(
 		object({
 			id: string(),

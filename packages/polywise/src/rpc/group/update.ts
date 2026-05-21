@@ -12,10 +12,19 @@ const input_type = object({
 	photo: unknown().optional()
 })
 
-export default p.input(input_type).mutation(async ({ input }) => {
-	return setGroup(eq(group.id, input.id), {
-		...(input.name !== undefined ? { name: input.name } : {}),
-		...(input.description !== undefined ? { description: input.description } : {}),
-		...(input.photo !== undefined ? { photo: input.photo as Uint8Array | null } : {})
+export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/group/update',
+			summary: 'Run Update'
+		}
 	})
-})
+	.input(input_type)
+	.mutation(async ({ input }) => {
+		return setGroup(eq(group.id, input.id), {
+			...(input.name !== undefined ? { name: input.name } : {}),
+			...(input.description !== undefined ? { description: input.description } : {}),
+			...(input.photo !== undefined ? { photo: input.photo as Uint8Array | null } : {})
+		})
+	})

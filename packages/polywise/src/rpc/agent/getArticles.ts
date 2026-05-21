@@ -11,12 +11,21 @@ const input_type = object({
 	for_type: string().optional()
 })
 
-export default p.input(input_type).query(async ({ input }) => {
-	const target_for = article_for_type.includes((input.for_type || '') as (typeof article_for_type)[number])
-		? input.for_type
-		: undefined
+export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/agent/getArticles',
+			summary: 'Read Get Articles'
+		}
+	})
+	.input(input_type)
+	.query(async ({ input }) => {
+		const target_for = article_for_type.includes((input.for_type || '') as (typeof article_for_type)[number])
+			? input.for_type
+			: undefined
 
-	const rows = await getAgentArticles({ agent_id: input.agent_id, for_type: target_for })
+		const rows = await getAgentArticles({ agent_id: input.agent_id, for_type: target_for })
 
-	return rows.map(item => item.article)
-})
+		return rows.map(item => item.article)
+	})

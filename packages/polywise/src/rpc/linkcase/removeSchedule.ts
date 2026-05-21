@@ -7,4 +7,13 @@ const input_type = object({
 	id: string()
 })
 
-export default p.input(input_type).mutation(async ({ input }) => removeLinkcaseSchedule(input.id))
+export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/linkcase/removeSchedule',
+			summary: 'Run Remove Schedule'
+		}
+	})
+	.input(input_type)
+	.mutation(async ({ input }) => removeLinkcaseSchedule(input.id))

@@ -25,36 +25,45 @@ const getPinMap = (pin_list: Array<AgentSessionPinItem>) => {
 	)
 }
 
-export default p.input(input_type).query(async ({ input }) => {
-	const pin_list = await readPinList(input.agent_id)
-	const pin_map = getPinMap(pin_list)
-	const pin_session_id_list = pin_list.map(item => item.id)
-	const [pin_rows, session_rows] = await Promise.all([
-		pin_session_id_list.length
-			? getAgentSessions({
-					agent_id: input.agent_id,
-					session_ids: pin_session_id_list
-				})
-			: Promise.resolve([]),
-		getAgentSessions({
-			agent_id: input.agent_id,
-			exclude_session_ids: pin_session_id_list,
-			limit: page_size + 1,
-			offset: (input.page - 1) * page_size
-		})
-	])
+export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/agent/getSessions',
+			summary: 'Read Get Sessions'
+		}
+	})
+	.input(input_type)
+	.query(async ({ input }) => {
+		const pin_list = await readPinList(input.agent_id)
+		const pin_map = getPinMap(pin_list)
+		const pin_session_id_list = pin_list.map(item => item.id)
+		const [pin_rows, session_rows] = await Promise.all([
+			pin_session_id_list.length
+				? getAgentSessions({
+						agent_id: input.agent_id,
+						session_ids: pin_session_id_list
+					})
+				: Promise.resolve([]),
+			getAgentSessions({
+				agent_id: input.agent_id,
+				exclude_session_ids: pin_session_id_list,
+				limit: page_size + 1,
+				offset: (input.page - 1) * page_size
+			})
+		])
 
-	const has_more = session_rows.length > page_size
-	const sessions = has_more ? session_rows.slice(0, page_size) : session_rows
-	const pin_session_map = new Map(pin_rows.map(item => [item.session.id, item.session]))
-	const pins = pin_list
-		.map(item => pin_session_map.get(item.id))
-		.filter((target_session): target_session is Session => Boolean(target_session))
+		const has_more = session_rows.length > page_size
+		const sessions = has_more ? session_rows.slice(0, page_size) : session_rows
+		const pin_session_map = new Map(pin_rows.map(item => [item.session.id, item.session]))
+		const pins = pin_list
+			.map(item => pin_session_map.get(item.id))
+			.filter((target_session): target_session is Session => Boolean(target_session))
 
-	return {
-		pins,
-		sessions: sessions.map(item => item.session),
-		pin_map,
-		has_more
-	}
-})
+		return {
+			pins,
+			sessions: sessions.map(item => item.session),
+			pin_map,
+			has_more
+		}
+	})

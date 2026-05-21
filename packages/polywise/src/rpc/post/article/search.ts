@@ -4,6 +4,13 @@ import { p } from '../../../utils/trpc'
 import { getPostById, searchRelatedArticleCandidates } from '../utils'
 
 export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/post/article/search',
+			summary: 'Read Search'
+		}
+	})
 	.input(
 		object({
 			post_id: string(),

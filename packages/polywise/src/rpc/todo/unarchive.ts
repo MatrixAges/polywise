@@ -23,11 +23,20 @@ const getNextTodoOrder = async (project_id?: string) => {
 	return min_order - 1
 }
 
-export default p.input(input_type).mutation(async ({ input }) => {
-	const project_item = await getProjectTodo({ where: eq(project_todo.todo_id, input.id), limit: 1 }).then(
-		res => res[0]
-	)
-	const order = await getNextTodoOrder(project_item?.project.id)
+export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/todo/unarchive',
+			summary: 'Run Unarchive'
+		}
+	})
+	.input(input_type)
+	.mutation(async ({ input }) => {
+		const project_item = await getProjectTodo({ where: eq(project_todo.todo_id, input.id), limit: 1 }).then(
+			res => res[0]
+		)
+		const order = await getNextTodoOrder(project_item?.project.id)
 
-	return setTodo(eq(todo.id, input.id), { status: 'backlog', order })
-})
+		return setTodo(eq(todo.id, input.id), { status: 'backlog', order })
+	})

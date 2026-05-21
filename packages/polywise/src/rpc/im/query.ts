@@ -10,12 +10,21 @@ const output_type = object({
 	accounts: array(im_account_schema)
 })
 
-export default p.output(output_type).query(async () => {
-	const accounts = await getImAccounts({
-		orderBy: asc(im_account.created_at)
+export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/im/query',
+			summary: 'Read Query'
+		}
 	})
+	.output(output_type)
+	.query(async () => {
+		const accounts = await getImAccounts({
+			orderBy: asc(im_account.created_at)
+		})
 
-	return {
-		accounts: accounts.map(normalizeImAccount)
-	}
-})
+		return {
+			accounts: accounts.map(normalizeImAccount)
+		}
+	})

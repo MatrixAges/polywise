@@ -6,18 +6,27 @@ import { enum as Enum } from 'zod'
 
 const input_type = Enum(['embedding', 'rerank', 'gen'])
 
-export default p.input(input_type).mutation(async ({ input }) => {
-	await initLlama()
+export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/llama/download',
+			summary: 'Run Download'
+		}
+	})
+	.input(input_type)
+	.mutation(async ({ input }) => {
+		await initLlama()
 
-	switch (input) {
-		case 'embedding':
-			getEmbeddingModel(env.llama)
-			break
-		case 'rerank':
-			getRerankModel(env.llama)
-			break
-		case 'gen':
-			getGenModel(env.llama)
-			break
-	}
-})
+		switch (input) {
+			case 'embedding':
+				getEmbeddingModel(env.llama)
+				break
+			case 'rerank':
+				getRerankModel(env.llama)
+				break
+			case 'gen':
+				getGenModel(env.llama)
+				break
+		}
+	})

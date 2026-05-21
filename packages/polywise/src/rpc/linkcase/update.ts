@@ -10,6 +10,15 @@ const input_type = object({
 	content: string().optional()
 })
 
-export default p.input(input_type).mutation(async ({ input }) => {
-	return updateLinkcaseItem(input)
-})
+export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/linkcase/update',
+			summary: 'Run Update'
+		}
+	})
+	.input(input_type)
+	.mutation(async ({ input }) => {
+		return updateLinkcaseItem(input)
+	})

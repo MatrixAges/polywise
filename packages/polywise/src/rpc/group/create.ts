@@ -19,27 +19,36 @@ const input_type = object({
 	title: string().optional()
 })
 
-export default p.input(input_type).mutation(async ({ input }) => {
-	const group = await addGroup({
-		name: input.name,
-		description: input.description || undefined,
-		photo: (input.photo as Uint8Array | null | undefined) ?? undefined,
-		folders: input.folders
+export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/group/create',
+			summary: 'Run Create'
+		}
 	})
+	.input(input_type)
+	.mutation(async ({ input }) => {
+		const group = await addGroup({
+			name: input.name,
+			description: input.description || undefined,
+			photo: (input.photo as Uint8Array | null | undefined) ?? undefined,
+			folders: input.folders
+		})
 
-	if (!group) {
-		throw new Error('Failed to create group')
-	}
+		if (!group) {
+			throw new Error('Failed to create group')
+		}
 
-	for (const [index, agent_id] of input.agent_ids.entries()) {
-		await addGroupAgent(group.id, agent_id, index)
-	}
+		for (const [index, agent_id] of input.agent_ids.entries()) {
+			await addGroupAgent(group.id, agent_id, index)
+		}
 
-	const session = await addSession({
-		title: input.title || input.name || `Group ${dayjs().format('YYYY-MM-DD HH:mm:ss')}`
+		const session = await addSession({
+			title: input.title || input.name || `Group ${dayjs().format('YYYY-MM-DD HH:mm:ss')}`
+		})
+
+		await addGroupSession(group.id, session.id)
+
+		return { group, session }
 	})
-
-	await addGroupSession(group.id, session.id)
-
-	return { group, session }
-})

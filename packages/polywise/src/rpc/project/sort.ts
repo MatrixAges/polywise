@@ -8,16 +8,25 @@ import { p } from '../../utils/trpc'
 
 const input_type = object({ from: number().int(), to: number().int() })
 
-export default p.input(input_type).mutation(async ({ input }) => {
-	const projects = await getProjects({ orderBy: 'asc' })
+export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/project/sort',
+			summary: 'Run Sort'
+		}
+	})
+	.input(input_type)
+	.mutation(async ({ input }) => {
+		const projects = await getProjects({ orderBy: 'asc' })
 
-	if (!projects[input.from] || input.to > projects.length - 1) {
-		return projects
-	}
+		if (!projects[input.from] || input.to > projects.length - 1) {
+			return projects
+		}
 
-	const next_projects = arrayMove({ list: projects, from: input.from, to: input.to })
+		const next_projects = arrayMove({ list: projects, from: input.from, to: input.to })
 
-	await Promise.all(next_projects.map((item, index) => setProject(eq(project.id, item.id), { order: index })))
+		await Promise.all(next_projects.map((item, index) => setProject(eq(project.id, item.id), { order: index })))
 
-	return next_projects
-})
+		return next_projects
+	})

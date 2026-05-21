@@ -5,6 +5,15 @@ import { string } from 'zod'
 
 import { p } from '../../../utils/trpc'
 
-export default p.input(string()).mutation(async ({ input }) => {
-	return removeGroupTodo(eq(group_todo.id, input))
-})
+export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/group/todo/remove',
+			summary: 'Run Remove'
+		}
+	})
+	.input(string())
+	.mutation(async ({ input }) => {
+		return removeGroupTodo(eq(group_todo.id, input))
+	})

@@ -20,11 +20,6 @@ export default p
 			method: 'GET',
 			path: '/file/read',
 			summary: 'Read a file'
-		},
-		cli: {
-			group: ['file'],
-			name: 'read',
-			summary: 'Read a local file.'
 		}
 	})
 	.input(input_type)

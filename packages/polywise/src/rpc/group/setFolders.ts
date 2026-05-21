@@ -15,10 +15,19 @@ const input_type = object({
 	folders: array(folder_item_schema)
 })
 
-export default p.input(input_type).mutation(async ({ input }) => {
-	await setGroup(eq(group.id, input.id), {
-		folders: input.folders
+export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/group/setFolders',
+			summary: 'Run Set Folders'
+		}
 	})
+	.input(input_type)
+	.mutation(async ({ input }) => {
+		await setGroup(eq(group.id, input.id), {
+			folders: input.folders
+		})
 
-	return getGroup(eq(group.id, input.id))
-})
+		return getGroup(eq(group.id, input.id))
+	})

@@ -9,6 +9,13 @@ const article_for_type = article.for.enumValues
 const getArticlePreview = (content: string) => content.replace(/\s+/g, ' ').trim().slice(0, 180)
 
 export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/agent/searchArticles',
+			summary: 'Read Search Articles'
+		}
+	})
 	.input(
 		object({
 			agent_id: string(),

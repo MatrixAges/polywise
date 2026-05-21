@@ -34,36 +34,45 @@ const toListItem = (args: { base_path: string; entry: Dirent }) => {
 	} satisfies IFileListItem
 }
 
-export default p.input(input_type).query(async ({ input }) => {
-	const target_path = path.resolve(input.path)
-	const show_hidden = input.show_hidden ?? false
-	const dir_only = input.dir_only ?? false
+export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/file/list',
+			summary: 'Read List'
+		}
+	})
+	.input(input_type)
+	.query(async ({ input }) => {
+		const target_path = path.resolve(input.path)
+		const show_hidden = input.show_hidden ?? false
+		const dir_only = input.dir_only ?? false
 
-	if (!(await fs.pathExists(target_path))) {
-		return [] as Array<IFileListItem>
-	}
-
-	try {
-		const target_stat = await fs.stat(target_path)
-
-		if (!target_stat.isDirectory()) {
+		if (!(await fs.pathExists(target_path))) {
 			return [] as Array<IFileListItem>
 		}
-	} catch {
-		return [] as Array<IFileListItem>
-	}
 
-	let entries = [] as Array<Dirent>
+		try {
+			const target_stat = await fs.stat(target_path)
 
-	try {
-		entries = await fs.readdir(target_path, { withFileTypes: true })
-	} catch {
-		return [] as Array<IFileListItem>
-	}
+			if (!target_stat.isDirectory()) {
+				return [] as Array<IFileListItem>
+			}
+		} catch {
+			return [] as Array<IFileListItem>
+		}
 
-	return entries
-		.filter(entry => entry.name !== '.DS_Store')
-		.filter(entry => show_hidden || !entry.name.startsWith('.'))
-		.filter(entry => !dir_only || entry.isDirectory())
-		.map(entry => toListItem({ base_path: target_path, entry }))
-})
+		let entries = [] as Array<Dirent>
+
+		try {
+			entries = await fs.readdir(target_path, { withFileTypes: true })
+		} catch {
+			return [] as Array<IFileListItem>
+		}
+
+		return entries
+			.filter(entry => entry.name !== '.DS_Store')
+			.filter(entry => show_hidden || !entry.name.startsWith('.'))
+			.filter(entry => !dir_only || entry.isDirectory())
+			.map(entry => toListItem({ base_path: target_path, entry }))
+	})

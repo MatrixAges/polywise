@@ -5,10 +5,19 @@ import { string } from 'zod'
 
 import { p } from '../../utils/trpc'
 
-export default p.input(string()).query(async ({ input }) => {
-	const res = await getGroupSessions({
-		where: eq(group_session.group_id, input)
+export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/group/getSessions',
+			summary: 'Read Get Sessions'
+		}
 	})
+	.input(string())
+	.query(async ({ input }) => {
+		const res = await getGroupSessions({
+			where: eq(group_session.group_id, input)
+		})
 
-	return res.map(item => item.session)
-})
+		return res.map(item => item.session)
+	})

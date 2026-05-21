@@ -13,25 +13,34 @@ const input_type = object({
 	path: string()
 })
 
-export default p.input(input_type).mutation(async ({ input }) => {
-	const current_skill = await getSkill(eq(skill.id, input.skill_id))
-
-	if (!current_skill) {
-		throw new Error(`Skill not found: ${input.skill_id}`)
-	}
-
-	const skill_dir = getSkillItemDirPath(current_skill)
-	const { entry_path } = assertSkillEntryPath({
-		skill_dir,
-		target_path: input.path,
-		error_message: 'Invalid skill entry path'
+export default p
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/skill/removeEntry',
+			summary: 'Run Remove Entry'
+		}
 	})
+	.input(input_type)
+	.mutation(async ({ input }) => {
+		const current_skill = await getSkill(eq(skill.id, input.skill_id))
 
-	if (path.basename(entry_path) === 'SKILL.md') {
-		throw new Error('SKILL.md cannot be removed')
-	}
+		if (!current_skill) {
+			throw new Error(`Skill not found: ${input.skill_id}`)
+		}
 
-	await fs.remove(entry_path)
+		const skill_dir = getSkillItemDirPath(current_skill)
+		const { entry_path } = assertSkillEntryPath({
+			skill_dir,
+			target_path: input.path,
+			error_message: 'Invalid skill entry path'
+		})
 
-	return { path: entry_path }
-})
+		if (path.basename(entry_path) === 'SKILL.md') {
+			throw new Error('SKILL.md cannot be removed')
+		}
+
+		await fs.remove(entry_path)
+
+		return { path: entry_path }
+	})
