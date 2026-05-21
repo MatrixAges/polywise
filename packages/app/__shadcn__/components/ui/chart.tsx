@@ -121,7 +121,13 @@ export const ChartContainer = React.forwardRef<
 			>
 				<ChartStyle id={chart_id} config={config} />
 				{ready ? (
-					<RechartsPrimitive.ResponsiveContainer height='100%' minWidth={0} width='100%'>
+					<RechartsPrimitive.ResponsiveContainer
+						debounce={0}
+						height='100%'
+						initialDimension={{ width: size.width, height: size.height }}
+						minWidth={0}
+						width='100%'
+					>
 						{children}
 					</RechartsPrimitive.ResponsiveContainer>
 				) : null}
