@@ -105,11 +105,11 @@ const readWindowStats = (start_at: number): PthinkWindowStats => {
 			start_at
 		]),
 		unread_notifications: countValue('SELECT COUNT(*) AS value FROM notification WHERE is_read = 0'),
-		open_todos: countValue(
-			"SELECT COUNT(*) AS value FROM todo WHERE status NOT IN ('done', 'archive', 'canceled')"
-		),
 		pending_posts: countValue(
-			"SELECT COUNT(*) AS value FROM article WHERE is_pipelined = 0 AND \"for\" IN ('user', 'wiki', 'memory')"
+			`SELECT COUNT(*) AS value FROM article
+			WHERE is_pipelined = 0
+				AND "for" IN ('user', 'wiki', 'memory')
+				AND ${organic_post_where}`
 		),
 		pending_documents: countValue('SELECT COUNT(*) AS value FROM document WHERE is_pipelined = 0'),
 		pending_links: countValue("SELECT COUNT(*) AS value FROM link WHERE status IN ('pending', 'none')")
@@ -342,17 +342,15 @@ export const pickPthinkTrigger = (args: {
 
 	if (
 		day.pending_posts + day.pending_documents + day.pending_links >= 5 ||
-		day.unread_notifications >= 6 ||
-		day.open_todos >= 10
+		day.unread_notifications >= 6
 	) {
 		candidates.push({
 			key: 'backlog_pressure',
 			label: 'Backlog pressure',
-			detail: `${day.pending_posts + day.pending_documents + day.pending_links} pending pipeline items, ${day.unread_notifications} unread notifications, ${day.open_todos} open todos`,
+			detail: `${day.pending_posts + day.pending_documents + day.pending_links} pending pipeline items, ${day.unread_notifications} unread notifications`,
 			score:
 				(day.pending_posts + day.pending_documents + day.pending_links) * 2500 +
-				day.unread_notifications * 400 +
-				day.open_todos * 300
+				day.unread_notifications * 400
 		})
 	}
 

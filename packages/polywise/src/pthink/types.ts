@@ -76,7 +76,6 @@ export interface PthinkWindowStats {
 	rewire_events: number
 	new_notifications: number
 	unread_notifications: number
-	open_todos: number
 	pending_posts: number
 	pending_documents: number
 	pending_links: number

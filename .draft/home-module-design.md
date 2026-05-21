@@ -63,7 +63,7 @@ Source tables:
 
 - `session`
 - `message`
-- external bindings: `project_session`, `group_session`, `agent_session`, `post_session`, `todo_session`
+- external bindings: `project_session`, `group_session`, `agent_session`, `post_session`
 
 #### Content layer
 
@@ -118,23 +118,7 @@ Source tables:
 
 #### Todo / execution layer
 
-- total todos
-- open todos
-- done / backlog / processing / error / archive split
-- overdue todos
-- todos without linked session
-- project todo distribution
-- sessions created from todos
-- todo completion lag using `created_at -> updated_at`
-
-Source tables:
-
-- `todo`
-- `project_todo`
-- `session_todo`
-- `todo_session`
-- `agent_todo`
-- `todo_tag`
+Todo is not launched yet, so it is excluded from the active homepage and `pthink` analytics scope for now.
 
 #### Memory graph / rewire layer
 
@@ -257,7 +241,6 @@ Not all brainstormed metrics belong on the first screen.
 - pending pipeline counts
 - total docs/articles/chunks
 - link ready vs pending
-- open todos
 - unread notifications
 - enabled IM accounts
 - graph nodes/edges
@@ -269,7 +252,6 @@ Not all brainstormed metrics belong on the first screen.
 
 - per-project activity
 - per-agent activity
-- todo status distribution
 - content health warnings
 - graph stability warnings
 - recent system anomalies
@@ -326,9 +308,6 @@ Suggested shape:
     group_total: number
     project_total: number
     skill_total: number
-    todo_total: number
-    open_todo_total: number
-    todo_status_counts: Record<string, number>
     notification_total: number
     notification_unread: number
     im_account_total: number
@@ -552,7 +531,7 @@ Current implemented trigger families:
 
 - pending pipeline accumulation
 - unread notification accumulation
-- open todo pressure
+- notification pressure
 
 Still good future additions:
 

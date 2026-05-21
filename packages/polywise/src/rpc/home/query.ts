@@ -13,25 +13,6 @@ const countValue = (query: string, params: Array<unknown> = []) => {
 	return Number(row?.value ?? 0)
 }
 
-const readTodoStatusCounts = () => {
-	const rows = env.sqlite.prepare('SELECT status, COUNT(*) AS value FROM todo GROUP BY status').all() as Array<{
-		status: string | null
-		value: number
-	}>
-
-	const counts: Record<string, number> = {}
-
-	for (const row of rows) {
-		if (!row.status) {
-			continue
-		}
-
-		counts[row.status] = Number(row.value ?? 0)
-	}
-
-	return counts
-}
-
 const readPostForCounts = () => {
 	const rows = env.sqlite
 		.prepare(
@@ -300,10 +281,6 @@ export default p.query(async () => {
 	const group_total = countValue('SELECT COUNT(*) AS value FROM "group"')
 	const project_total = countValue('SELECT COUNT(*) AS value FROM project')
 	const skill_total = countValue('SELECT COUNT(*) AS value FROM skill')
-	const todo_total = countValue('SELECT COUNT(*) AS value FROM todo')
-	const open_todo_total = countValue(
-		"SELECT COUNT(*) AS value FROM todo WHERE status NOT IN ('done', 'archive', 'canceled')"
-	)
 	const notification_total = countValue('SELECT COUNT(*) AS value FROM notification')
 	const notification_unread = countValue('SELECT COUNT(*) AS value FROM notification WHERE is_read = 0')
 	const im_account_total = countValue('SELECT COUNT(*) AS value FROM im_account')
@@ -330,15 +307,16 @@ export default p.query(async () => {
 		"SELECT COUNT(*) AS value FROM article WHERE is_pipelined = 0 AND \"for\" NOT IN ('user', 'wiki', 'memory')"
 	)
 	const posts_pending = countValue(
-		"SELECT COUNT(*) AS value FROM article WHERE is_pipelined = 0 AND \"for\" IN ('user', 'wiki', 'memory')"
+		`SELECT COUNT(*) AS value FROM article
+		WHERE is_pipelined = 0
+			AND "for" IN ('user', 'wiki', 'memory')
+			AND ${organic_post_filter}`
 	)
 	const long_article_total = countValue('SELECT COUNT(*) AS value FROM article WHERE is_long = 1')
 	const link_ready_total = countValue("SELECT COUNT(*) AS value FROM link WHERE status = 'success'")
 	const link_pending_total = countValue("SELECT COUNT(*) AS value FROM link WHERE status IN ('pending', 'none')")
 
 	const post_for_counts = readPostForCounts()
-	const todo_status_counts = readTodoStatusCounts()
-
 	const recent_sessions = env.sqlite
 		.prepare(
 			'SELECT id, title, runing, unread, im, cron, updated_at FROM session ORDER BY updated_at DESC LIMIT 6'
@@ -465,9 +443,6 @@ export default p.query(async () => {
 			group_total,
 			project_total,
 			skill_total,
-			todo_total,
-			open_todo_total,
-			todo_status_counts,
 			notification_total,
 			notification_unread,
 			im_account_total,

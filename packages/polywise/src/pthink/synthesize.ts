@@ -65,7 +65,7 @@ const buildFallback = (args: {
 			? `AI activity stayed meaningful, with ${day.assistant_messages} assistant replies driving ${day.total_tokens} tokens over the last day.`
 			: 'Recent activity came more from content or task movement than from model calls.',
 		day.new_posts > 0 || day.new_memory_posts > 0
-			? `Knowledge assets kept moving: ${day.new_posts} new posts landed, including ${day.new_memory_posts} memory reports.`
+			? `Knowledge assets kept moving: ${day.new_posts} new posts landed, including ${day.new_memory_posts} memory posts.`
 			: 'Knowledge assets did not expand much in the last day, so most momentum was operational rather than archival.',
 		day.pending_posts + day.pending_documents + day.pending_links > 0
 			? `There is still backlog pressure with ${day.pending_posts + day.pending_documents + day.pending_links} pending pipeline items.`
@@ -145,7 +145,7 @@ const buildMarkdown = (args: {
 		'',
 		'## Watchlist',
 		`- Pending pipeline: ${day.pending_posts} posts, ${day.pending_documents} documents, ${day.pending_links} links`,
-		`- Open todos: ${day.open_todos} · unread notifications: ${day.unread_notifications}`,
+		`- Unread notifications: ${day.unread_notifications}`,
 		...(kind === 'trigger' && trigger ? [`- Trigger: ${trigger.label} · ${trigger.detail}`] : []),
 		'',
 		'## Suggested Focus',
