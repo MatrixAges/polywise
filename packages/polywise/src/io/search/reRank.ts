@@ -1,5 +1,4 @@
 import {
-	article_relevance_score_weight,
 	article_time_decay_per_day,
 	article_time_fallback,
 	article_time_score_weight,
@@ -45,6 +44,24 @@ export interface RerankedArticleResult extends ArticleSearchResult {
 	reranker_score: number
 	final_score: number
 	content: string
+}
+
+const article_feedback_score_weight = 0.08
+const article_relevance_score_with_feedback_weight = 0.8
+
+const getFeedbackWeight = (hit_count: number | null | undefined, hit_at: Date | null | undefined) => {
+	const count = Math.max(0, Number(hit_count || 0))
+	const count_weight = count <= 0 ? 0 : 1 - 1 / (1 + Math.min(count, 10))
+
+	if (!hit_at) {
+		return count_weight * 0.7
+	}
+
+	const day_ms = 24 * 60 * 60 * 1000
+	const days_ago = Math.max(0, (Date.now() - hit_at.getTime()) / day_ms)
+	const recency_weight = 1 / (1 + days_ago * 0.12)
+
+	return Math.min(1, count_weight * 0.7 + recency_weight * 0.3)
 }
 
 const normalizeText = (text: string) => text.trim().toLowerCase().replace(/\s+/g, '')
@@ -196,6 +213,7 @@ const rerankArticle = async (
 		const articles = await getArticles({
 			where: article_where
 		})
+		const article_map = new Map(articles.map(item => [item.id, item]))
 
 		const content_map = new Map<string, string>()
 
@@ -212,6 +230,7 @@ const rerankArticle = async (
 		const reranked: Array<RerankedArticleResult> = []
 
 		results.forEach((doc, index) => {
+			const article_info = article_map.get(doc.article_id)
 			const rerank_score = scores[index] ?? 0
 			const relevance_score = calculateFinalScore(
 				rerank_score,
@@ -224,8 +243,11 @@ const rerankArticle = async (
 			if (relevance_score === 0) return
 
 			const time_weight = getTimeWeight(doc.updated_at)
+			const feedback_weight = getFeedbackWeight(article_info?.hit_count, article_info?.hit_at)
 			const final_score =
-				relevance_score * article_relevance_score_weight + time_weight * article_time_score_weight
+				relevance_score * article_relevance_score_with_feedback_weight +
+				time_weight * article_time_score_weight +
+				feedback_weight * article_feedback_score_weight
 
 			reranked.push({
 				...doc,
@@ -240,11 +262,14 @@ const rerankArticle = async (
 		if (reranked.length === 0) {
 			const fallback_results = results
 				.map((doc, index) => {
+					const article_info = article_map.get(doc.article_id)
 					const time_weight = getTimeWeight(doc.updated_at)
+					const feedback_weight = getFeedbackWeight(article_info?.hit_count, article_info?.hit_at)
 					const relevance_score = doc.normalized_rrf_score
 					const final_score =
-						relevance_score * article_relevance_score_weight +
-						time_weight * article_time_score_weight
+						relevance_score * article_relevance_score_with_feedback_weight +
+						time_weight * article_time_score_weight +
+						feedback_weight * article_feedback_score_weight
 
 					return {
 						...doc,
