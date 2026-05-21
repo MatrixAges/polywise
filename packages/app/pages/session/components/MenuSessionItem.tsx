@@ -19,7 +19,7 @@ const Index = (props: IPropsMenuSessionItem) => {
 		if (is_runing) return <Grip className='text-std-400! size-2.5' />
 		if (unread) return <ArrowLeft className='size-2.5 text-indigo-500!' />
 
-		return <Hash className='text-std-400 size-2.5' />
+		return <Hash className='text-std-400 size-3' />
 	}, [pin, is_runing, unread])
 
 	return (
