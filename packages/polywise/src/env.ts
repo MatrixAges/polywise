@@ -1,12 +1,14 @@
 import { initCron } from './cron'
 import { initDB, initDrizzle, initSql, migrate } from './db'
 import { initImRuntime } from './im'
+import { initRewireRuntime } from './rewire'
 import { initLinkcaseScheduleRuntime } from './rpc/linkcase/scheduler'
 
 import type { Database } from 'better-sqlite3'
 import type { Llama, LlamaContext, LlamaEmbeddingContext, LlamaModel, LlamaRankingContext } from 'node-llama-cpp'
 import type { CronRuntime } from './cron'
 import type { ImRuntime } from './im'
+import type { RewireRuntime } from './rewire'
 
 interface Env {
 	sqlite: Database
@@ -20,6 +22,7 @@ interface Env {
 	gen_context: LlamaContext
 	cron: CronRuntime
 	im: ImRuntime
+	rewire: RewireRuntime
 	active: boolean
 }
 
@@ -33,6 +36,7 @@ export const initEnv = async () => {
 
 	await initCron()
 	await initImRuntime()
+	await initRewireRuntime()
 	await initLinkcaseScheduleRuntime()
 }
 

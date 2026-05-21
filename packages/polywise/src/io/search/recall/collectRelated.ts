@@ -1,4 +1,5 @@
 import { getEdgeByNodeId, getNodeById } from '@core/db/prepare'
+import { scoreEdgeStrength } from '@core/rewire/constants'
 
 const related_similarity_base = 0.5
 
@@ -11,28 +12,54 @@ export default (nodes: Array<{ id: string }>, depth: number = 2) => {
 		const edges = getEdgeByNodeId(arr.length).all(...arr, ...arr) as Array<{
 			source_id: string
 			target_id: string
+			weight: number | null
+			confidence: number | null
+			bandwidth: number | null
 		}>
 
-		return [...new Set(edges.flatMap(e => [e.source_id, e.target_id]))]
+		return edges
 	}
 
 	const visited = new Set(ids)
 	const depth_map = new Map<string, number>()
-	let frontier = ids
+	const similarity_map = new Map<string, number>()
+	let frontier = new Map(ids.map(id => [id, 1]))
 
 	for (let level = 1; level <= depth; level += 1) {
-		const discovered = getRelated(frontier)
-		const next_frontier: Array<string> = []
+		const discovered = getRelated([...frontier.keys()])
+		const next_frontier = new Map<string, number>()
 
-		discovered.forEach(id => {
-			if (visited.has(id)) return
+		discovered.forEach(edge => {
+			const source_score = frontier.get(edge.source_id)
+			const target_score = frontier.get(edge.target_id)
+			const edge_score = Math.max(0.1, scoreEdgeStrength(edge))
 
-			visited.add(id)
-			depth_map.set(id, level)
-			next_frontier.push(id)
+			if (source_score && !visited.has(edge.target_id)) {
+				const similarity = (related_similarity_base * source_score * edge_score) / level
+				const prev = next_frontier.get(edge.target_id) ?? 0
+
+				if (similarity > prev) {
+					next_frontier.set(edge.target_id, similarity)
+				}
+			}
+
+			if (target_score && !visited.has(edge.source_id)) {
+				const similarity = (related_similarity_base * target_score * edge_score) / level
+				const prev = next_frontier.get(edge.source_id) ?? 0
+
+				if (similarity > prev) {
+					next_frontier.set(edge.source_id, similarity)
+				}
+			}
 		})
 
-		if (next_frontier.length === 0) break
+		if (next_frontier.size === 0) break
+
+		for (const [id, similarity] of next_frontier) {
+			visited.add(id)
+			depth_map.set(id, level)
+			similarity_map.set(id, similarity)
+		}
 
 		frontier = next_frontier
 	}
@@ -45,6 +72,6 @@ export default (nodes: Array<{ id: string }>, depth: number = 2) => {
 
 	return results.map(n => ({
 		...n,
-		similarity: related_similarity_base / (depth_map.get(n.id) || 1)
+		similarity: similarity_map.get(n.id) || related_similarity_base / (depth_map.get(n.id) || 1)
 	}))
 }

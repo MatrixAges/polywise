@@ -1,3 +1,4 @@
+import { env } from '@core/env'
 import { getId } from 'stk/utils'
 
 import cleanupContentCallbackStore from './cleanupContentCallbackStore'
@@ -16,6 +17,7 @@ interface CreateContentSearchTraceArgs extends ContentCallbackSessionRef {
 
 export default async (args: CreateContentSearchTraceArgs) => {
 	const { session_dir, session_id, action, query, article_ids } = args
+	env.rewire?.touchForeground?.()
 	const { center_node_id, normalized_query } = await ensureContentCenterNode(query)
 	const file_path = getContentCallbackStorePath(session_dir)
 	const store = cleanupContentCallbackStore(await readContentCallbackStore(file_path))

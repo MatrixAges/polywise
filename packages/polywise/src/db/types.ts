@@ -14,6 +14,7 @@ import {
 	node,
 	notification,
 	project,
+	rewire_event,
 	session,
 	skill,
 	todo
@@ -53,6 +54,8 @@ export type Notification = InferSelectModel<typeof notification>
 export type NotificationInsert = InferInsertModel<typeof notification>
 export type Project = InferSelectModel<typeof project>
 export type ProjectInsert = InferInsertModel<typeof project>
+export type RewireEvent = InferSelectModel<typeof rewire_event>
+export type RewireEventInsert = InferInsertModel<typeof rewire_event>
 export type Link = InferSelectModel<typeof link>
 export type LinkInsert = InferInsertModel<typeof link>
 export type Todo = InferSelectModel<typeof todo>

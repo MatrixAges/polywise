@@ -189,6 +189,8 @@ export default async (args: ApplyContentGraphFeedbackArgs) => {
 		hit_article_count: hit_article_ids.length,
 		miss_article_count: miss_article_ids.length,
 		hit_node_count: hit_node_list.length,
-		miss_node_count: miss_node_list.length
+		miss_node_count: miss_node_list.length,
+		hit_node_ids: hit_node_list,
+		miss_node_ids: miss_node_list
 	}
 }

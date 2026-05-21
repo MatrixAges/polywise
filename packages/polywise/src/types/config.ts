@@ -46,6 +46,18 @@ export interface McpConfig {
 	[name: string]: McpLocalConfig | McpRemoteConfig | boolean | undefined
 }
 
+export interface AppRewireConfig {
+	enabled: boolean
+	tick_ms?: number
+	idle_grace_ms?: number
+	replay_window_ms?: number
+	max_groups_per_cycle?: number
+	max_edge_creations_per_cycle?: number
+	max_edge_prunes_per_cycle?: number
+	hot_node_degree_limit?: number
+	cold_node_degree_limit?: number
+}
+
 export interface AppConfig {
 	workspaces: Array<Workspace>
 	current_workspace: string
@@ -62,6 +74,7 @@ export interface AppConfig {
 	enable_rewrite: boolean
 	rewrite_model?: DefaultModel
 	chaos_detect?: boolean
+	rewire?: AppRewireConfig
 }
 
 export interface ProviderConfig {

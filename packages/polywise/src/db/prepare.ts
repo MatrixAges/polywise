@@ -111,8 +111,8 @@ export const getNodeByVector = (): Database.Statement => {
 export const getEdgeByNodeId = (count: number): Database.Statement => {
 	const placeholders = Array(count).fill('?').join(',')
 	return env.sqlite.prepare(`
-		SELECT source_id, target_id FROM edge
-		WHERE source_id IN (${placeholders}) OR target_id IN (${placeholders})
+		SELECT source_id, target_id, weight, confidence, bandwidth FROM edge
+		WHERE state = 'active' AND (source_id IN (${placeholders}) OR target_id IN (${placeholders}))
 	`)
 }
 

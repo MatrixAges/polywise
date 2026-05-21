@@ -31,7 +31,18 @@ export default async () => {
 				enable_triple: false,
 				triple_model: default_model,
 				enable_rewrite: false,
-				rewrite_model: default_model
+				rewrite_model: default_model,
+				rewire: {
+					enabled: false,
+					tick_ms: 120000,
+					idle_grace_ms: 180000,
+					replay_window_ms: 24 * 60 * 60 * 1000,
+					max_groups_per_cycle: 20,
+					max_edge_creations_per_cycle: 40,
+					max_edge_prunes_per_cycle: 40,
+					hot_node_degree_limit: 14,
+					cold_node_degree_limit: 2
+				}
 			} as AppConfig)
 		}
 

@@ -38,6 +38,14 @@ export default sqliteTable(
 			.notNull(),
 		// Frozen state (core memory nodes, exempt from forgetting mechanism cleanup)
 		is_frozen: integer('is_frozen', { mode: 'boolean' }).default(false).notNull(),
+		// Structural plasticity state. Silent edges are stored but excluded from ordinary recall until stabilized.
+		state: text('state').default('active').notNull(),
+		// Long-term structural retention score used by background rewire consolidation.
+		stability: real('stability').default(0.0).notNull(),
+		// Recent replay evidence used to decide promotion or pruning in the rewire cycle.
+		rewire_score: real('rewire_score').default(0.0).notNull(),
+		// Last time the background rewire loop touched this edge.
+		last_rewire_at: integer('last_rewire_at', { mode: 'timestamp' }),
 
 		created_at: integer('created_at', { mode: 'timestamp' })
 			.$defaultFn(() => new Date())
@@ -47,6 +55,7 @@ export default sqliteTable(
 		index('edge_agent_id_idx').on(t.agent_id),
 		index('edge_source_idx').on(t.source_id),
 		index('edge_target_idx').on(t.target_id),
+		index('edge_state_idx').on(t.state),
 		index('edge_created_at_idx').on(t.created_at),
 		uniqueIndex('edge_source_target_idx').on(t.source_id, t.target_id)
 	]

@@ -1,3 +1,6 @@
+import { recordRewireEvent } from '@core/rewire'
+import { log } from '@core/utils'
+
 import applyContentGraphFeedback from './applyContentGraphFeedback'
 import buildContentCallbackKey from './buildContentCallbackKey'
 import cleanupContentCallbackStore from './cleanupContentCallbackStore'
@@ -22,6 +25,7 @@ export default async (args: ApplyContentCallbackArgs) => {
 	const { session_dir, session_id, trace_id, reason } = args
 	const hit_items = normalizeItems(args.hit_items)
 	const miss_items = normalizeItems(args.miss_items)
+	const stimulus_key = `content_callback:${trace_id}`
 
 	if (hit_items.length === 0 && miss_items.length === 0) {
 		throw new Error('Content callback failed: hit_items and miss_items cannot both be empty')
@@ -96,6 +100,30 @@ export default async (args: ApplyContentCallbackArgs) => {
 		center_node_id: trace.center_node_id,
 		hit_article_ids: next_hit_items,
 		miss_article_ids: next_miss_items
+	})
+
+	await recordRewireEvent({
+		session_id,
+		stimulus_key,
+		signal: 'content_callback',
+		events: [
+			{ node_id: trace.center_node_id, role: 'center', strength: 1 },
+			...feedback.hit_node_ids.map(node_id => ({
+				node_id,
+				role: 'accepted' as const,
+				strength: 1
+			})),
+			...feedback.miss_node_ids.map(node_id => ({
+				node_id,
+				role: 'rejected' as const,
+				strength: 0.35
+			}))
+		]
+	}).catch(error => {
+		log('SYSTEM', 'rewireEventRecordFailed', () => ({
+			trace_id,
+			error: error instanceof Error ? error.message : String(error)
+		}))
 	})
 
 	trace.applied_hit_items = Array.from(new Set([...trace.applied_hit_items, ...next_hit_items]))
