@@ -107,6 +107,8 @@ const renderApiCommandHelpText = (item: ApiMapItem) =>
 		item.summary,
 		`${item.method} ${item.openapi_path}`,
 		item.description || '',
+		'fallback:',
+		`- --json '{"key":"value"}'`,
 		...(item.parameters.length
 			? [
 					'parameters:',
@@ -120,6 +122,20 @@ const renderApiCommandHelpText = (item: ApiMapItem) =>
 	]
 		.filter(Boolean)
 		.join('\n')
+
+const parseJsonOption = (value: string | undefined) => {
+	if (!value) {
+		return {}
+	}
+
+	const parsed = JSON.parse(value)
+
+	if (!parsed || Array.isArray(parsed) || typeof parsed !== 'object') {
+		throw new Error('--json must be a JSON object')
+	}
+
+	return parsed as Record<string, unknown>
+}
 
 const createApiOptionBuilder = (parameter: ApiMapItem['parameters'][number]) => {
 	let option: any
@@ -140,10 +156,6 @@ const createApiOptionBuilder = (parameter: ApiMapItem['parameters'][number]) => 
 	}
 
 	option = option.desc(`${parameter.in} ${parameter.type}${parameter.required ? ' required' : ''}`)
-
-	if (parameter.required) {
-		option = option.required()
-	}
 
 	return option
 }
@@ -172,11 +184,14 @@ const normalizeApiOptionValue = (
 }
 
 const createApiCommandOptions = (item: ApiMapItem) => {
-	if (!item.parameters.length) {
-		return undefined
-	}
+	const parameter_options = Object.fromEntries(
+		item.parameters.map(parameter => [parameter.name, createApiOptionBuilder(parameter)])
+	)
 
-	return Object.fromEntries(item.parameters.map(parameter => [parameter.name, createApiOptionBuilder(parameter)]))
+	return {
+		json: string('json').desc('JSON object input payload'),
+		...parameter_options
+	}
 }
 
 const buildApiInput = (item: ApiMapItem, options: Record<string, string | number | boolean | undefined>) =>
@@ -236,8 +251,18 @@ const buildApiCommands = (node: ApiCommandTreeNode): Array<any> =>
 					help: () => {
 						printText(renderApiCommandHelpText(item))
 					},
-					handler: async (options: Record<string, string | number | boolean | undefined>) => {
-						await callApi(item, buildApiInput(item, options || {}))
+					handler: async (
+						options: Record<string, string | number | boolean | undefined> & {
+							json?: string
+						}
+					) => {
+						const json_input = parseJsonOption(options?.json)
+						const scalar_input = buildApiInput(item, options || {})
+
+						await callApi(item, {
+							...json_input,
+							...scalar_input
+						})
 					}
 				})
 			}

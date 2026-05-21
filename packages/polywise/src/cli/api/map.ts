@@ -5,6 +5,7 @@ import { renderHelpTree, root_help_id } from '../shared/help'
 import { manual_api_meta } from './meta'
 
 import type { AnyProcedure } from '@trpc/server/unstable-core-do-not-import'
+import type { ZodTypeAny } from 'zod'
 import type { ApiMapItem, HelpNode } from '../types'
 
 type OpenApiOperation = {
@@ -33,6 +34,130 @@ type OpenApiOperation = {
 
 let openapi_doc_cache: ReturnType<typeof generateOpenApiDocument> | null | undefined
 let api_map_cache: Array<ApiMapItem> | null = null
+
+const getZodDef = (schema: ZodTypeAny | null | undefined) =>
+	((schema as any)?._def || (schema as any)?.def || null) as Record<string, unknown> | null
+
+const unwrapZodSchema = (schema: ZodTypeAny | null | undefined): ZodTypeAny | null => {
+	if (!schema) return null
+
+	const def = getZodDef(schema)
+	const type_name = String(def?.typeName || def?.type || '')
+
+	if (type_name === 'ZodOptional' || type_name === 'optional') {
+		return unwrapZodSchema((def?.innerType || def?.innerTypeName || def?.wrapped) as ZodTypeAny)
+	}
+
+	if (type_name === 'ZodNullable' || type_name === 'nullable') {
+		return unwrapZodSchema((def?.innerType || def?.wrapped) as ZodTypeAny)
+	}
+
+	if (type_name === 'ZodDefault' || type_name === 'default') {
+		return unwrapZodSchema((def?.innerType || def?.wrapped) as ZodTypeAny)
+	}
+
+	if (type_name === 'ZodEffects' || type_name === 'effects') {
+		return unwrapZodSchema((def?.schema || def?.innerType) as ZodTypeAny)
+	}
+
+	return schema
+}
+
+const getZodObjectShape = (schema: ZodTypeAny | null) => {
+	const def = getZodDef(schema)
+	const type_name = String(def?.typeName || def?.type || '')
+
+	if (!schema || (type_name !== 'ZodObject' && type_name !== 'object')) {
+		return null
+	}
+
+	const shape = (schema as any)?.shape
+
+	if (typeof shape === 'function') {
+		return shape()
+	}
+
+	if (shape && typeof shape === 'object') {
+		return shape
+	}
+
+	if (typeof def?.shape === 'function') {
+		return def.shape()
+	}
+
+	return (def?.shape as Record<string, ZodTypeAny>) || null
+}
+
+const getZodParameterType = (schema: ZodTypeAny | null | undefined) => {
+	const unwrapped = unwrapZodSchema(schema)
+	const def = getZodDef(unwrapped)
+	const type_name = String(def?.typeName || def?.type || '')
+
+	switch (type_name) {
+		case 'ZodString':
+		case 'string':
+			return 'string'
+		case 'ZodNumber':
+		case 'number':
+			return 'number'
+		case 'ZodBigInt':
+		case 'bigint':
+			return 'integer'
+		case 'ZodBoolean':
+		case 'boolean':
+			return 'boolean'
+		case 'ZodArray':
+		case 'array':
+			return 'array'
+		case 'ZodObject':
+		case 'object':
+			return 'object'
+		case 'ZodEnum':
+		case 'ZodNativeEnum':
+		case 'enum':
+			return 'string'
+		case 'ZodLiteral': {
+			const value = def?.value
+
+			if (typeof value === 'number') return 'number'
+			if (typeof value === 'boolean') return 'boolean'
+			return 'string'
+		}
+		default:
+			return 'string'
+	}
+}
+
+const isZodOptionalLike = (schema: ZodTypeAny | null | undefined) => {
+	const def = getZodDef(schema)
+	const type_name = String(def?.typeName || def?.type || '')
+
+	return (
+		type_name === 'ZodOptional' ||
+		type_name === 'optional' ||
+		type_name === 'ZodDefault' ||
+		type_name === 'default'
+	)
+}
+
+const getProcedureInputParameters = (procedure: AnyProcedure, method: ApiMapItem['method']) => {
+	const inputs = (((procedure as any)?._def?.inputs as Array<ZodTypeAny>) || []).map(item => unwrapZodSchema(item))
+	const object_schema = inputs.map(item => getZodObjectShape(item)).find(Boolean)
+
+	if (!object_schema) {
+		return []
+	}
+
+	const parameter_in = method === 'GET' || method === 'DELETE' ? ('query' as const) : ('body' as const)
+
+	return Object.entries(object_schema).map(([name, schema]) => ({
+		name,
+		in: parameter_in,
+		required: !isZodOptionalLike(schema as ZodTypeAny),
+		type: getZodParameterType(schema as ZodTypeAny),
+		description: undefined
+	}))
+}
 
 const getOpenApiDoc = () => {
 	if (openapi_doc_cache !== undefined) {
@@ -160,7 +285,11 @@ export const getApiMap = (): Array<ApiMapItem> => {
 			const cli_segments = normalizeCliSegments(rpc_path, meta.openapi.path)
 			const group_path = cli_segments.slice(0, -1)
 			const command_name = cli_segments.at(-1) || rpc_path
-			const parameters = getParameters(operation)
+			const openapi_parameters = getParameters(operation)
+			const parameters =
+				openapi_parameters.length > 0
+					? openapi_parameters
+					: getProcedureInputParameters(procedure, meta.openapi.method)
 
 			return {
 				id: rpc_path,
