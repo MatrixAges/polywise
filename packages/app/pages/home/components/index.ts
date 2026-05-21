@@ -1,4 +1,3 @@
-export { default as Hero } from './Hero'
 export { default as KnowledgeAssets } from './KnowledgeAssets'
 export { default as LoadingState } from './LoadingState'
 export { default as MemoryPanel } from './MemoryPanel'

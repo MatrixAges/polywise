@@ -1,6 +1,8 @@
 import * as React from 'react'
 import * as RechartsPrimitive from 'recharts'
 
+import { useSize } from '@/hooks'
+
 import { cn } from '@/__shadcn__/lib/utils/index'
 
 export type ChartConfig = {
@@ -84,11 +86,32 @@ export const ChartContainer = React.forwardRef<
 >(({ id, className, children, config, ...props }, ref) => {
 	const auto_id = React.useId().replace(/:/g, '')
 	const chart_id = id ?? `chart-${auto_id}`
+	const inner_ref = React.useRef<HTMLDivElement | null>(null)
+	const size = useSize(() => inner_ref.current!, undefined) as
+		| { width: number; height: number }
+		| undefined
+	const ready = Boolean(size && size.width > 0 && size.height > 0)
+
+	const set_ref = React.useCallback(
+		(node: HTMLDivElement | null) => {
+			inner_ref.current = node
+
+			if (typeof ref === 'function') {
+				ref(node)
+				return
+			}
+
+			if (ref) {
+				ref.current = node
+			}
+		},
+		[ref]
+	)
 
 	return (
 		<ChartContext.Provider value={{ config }}>
 			<div
-				ref={ref}
+				ref={set_ref}
 				data-chart={chart_id}
 				className={cn(
 					'h-[220px] w-full min-w-0 min-h-[220px] text-xs [&_.recharts-cartesian-axis-tick_text]:fill-[rgba(var(--color_text_rgb),0.52)] [&_.recharts-cartesian-grid_line]:stroke-border/50 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-border [&_.recharts-sector]:outline-none [&_.recharts-surface]:outline-none',
@@ -97,9 +120,11 @@ export const ChartContainer = React.forwardRef<
 				{...props}
 			>
 				<ChartStyle id={chart_id} config={config} />
-				<RechartsPrimitive.ResponsiveContainer height='100%' minWidth={0} width='100%'>
-					{children}
-				</RechartsPrimitive.ResponsiveContainer>
+				{ready ? (
+					<RechartsPrimitive.ResponsiveContainer height='100%' minWidth={0} width='100%'>
+						{children}
+					</RechartsPrimitive.ResponsiveContainer>
+				) : null}
 			</div>
 		</ChartContext.Provider>
 	)

@@ -3,7 +3,6 @@ import { observer } from 'mobx-react-lite'
 import { container } from 'tsyringe'
 
 import {
-	Hero,
 	KnowledgeAssets,
 	LoadingState,
 	MemoryPanel,
@@ -45,7 +44,6 @@ const Index = () => {
 				>
 					{x.snapshot ? (
 						<>
-							<Hero></Hero>
 							<OverviewGrid></OverviewGrid>
 							<TrendPanels></TrendPanels>
 							<div className='grid gap-4 xl:grid-cols-[1.15fr_0.85fr]'>
