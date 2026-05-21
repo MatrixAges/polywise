@@ -574,7 +574,19 @@ const Index = (props: IPropsInput) => {
 						</div>
 					</div>
 				</PopoverTrigger>
-				<PopoverContent className='p-0' side='top' align='start' sideOffset={10}>
+				<PopoverContent
+					className='
+						overflow-visible
+						p-0
+						rounded-none
+						bg-transparent
+						ring-0
+						shadow-none
+					'
+					side='top'
+					align='start'
+					sideOffset={10}
+				>
 					<Mention
 						activeMention={active_mention}
 						items={mention_items}

@@ -56,14 +56,6 @@ export const getBasename = (value: string) => {
 	return segments.at(-1) || value
 }
 
-export const getParentPath = (value: string) => {
-	const segments = getPathSegments(value)
-
-	if (segments.length <= 1) return './'
-
-	return segments.slice(0, -1).join('/')
-}
-
 export const getFileExtension = (value: string) => {
 	const basename = getBasename(value)
 	const index = basename.lastIndexOf('.')
@@ -172,7 +164,6 @@ const Mention: FC<MentionProps> = ({ activeMention, items, loading, activeIndex,
 				rounded-lg
 				bg-background/90
 				border border-border-light
-				shadow-sm
 			'
 	>
 		<div
@@ -234,9 +225,7 @@ const Mention: FC<MentionProps> = ({ activeMention, items, loading, activeIndex,
 								<span className='shrink-0 truncate text-sm font-medium'>
 									{item.basename}
 								</span>
-								<span className='text-std-400 truncate text-xs'>
-									{getParentPath(item.path)}
-								</span>
+								<span className='text-std-400 truncate text-xs'>{item.path}</span>
 							</div>
 						) : (
 							<div
