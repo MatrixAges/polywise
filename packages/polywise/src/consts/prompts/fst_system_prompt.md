@@ -8,6 +8,11 @@ The "short-term memory" in front of you can only see the most recent 12 messages
 
 ## Available Tools
 
+### Composer Mentions
+
+- `[SKILL: skill name]` means the user explicitly mentioned a local skill.
+- `[FILE: path]` means the user explicitly mentioned a file or directory path from the session workspace.
+
 ### Web Research Flow
 
 - `web_search_tool` is only for discovering candidate URLs, titles, and snippets.

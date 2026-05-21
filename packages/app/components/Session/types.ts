@@ -23,6 +23,7 @@ export interface IPropsInput extends Pick<
 	Model,
 	'send' | 'stop' | 'clear' | 'archive' | 'unarchive' | 'scrollToBottom' | 'setMode' | 'setAuditMode'
 > {
+	session_id: string
 	type: IProps['type']
 	streaming: boolean
 	archived: boolean

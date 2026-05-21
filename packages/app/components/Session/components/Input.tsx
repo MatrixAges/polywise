@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { PauseIcon, PlayIcon } from '@phosphor-icons/react'
 import { useMemoizedFn, useToggle } from 'ahooks'
 import { Archive, ArrowDownToLine, BrushCleaning, Layers2, Maximize, PackageOpen } from 'lucide-react'
@@ -16,9 +16,10 @@ import {
 import { Textarea } from '@/__shadcn__/components/ui/textarea'
 import { ModelSelect, Show, Tooltip } from '@/components'
 import { useGlobal } from '@/context'
+import { rpc } from '@/utils'
 
 import type { AppConfig } from '@core/types'
-import type { KeyboardEvent } from 'react'
+import type { ChangeEvent, KeyboardEvent, SyntheticEvent } from 'react'
 import type { IPropsInput } from '../types'
 
 const submit_modes = [
@@ -46,8 +47,85 @@ const effort_modes = [
 	{ label: 'XHigh', value: 'xhigh' }
 ]
 
+type MentionTrigger = '/' | '@'
+
+interface SkillMentionItem {
+	key: string
+	type: 'skill'
+	label: string
+	desc: string
+	path: string
+	search_text: string
+}
+
+interface FileMentionItem {
+	key: string
+	type: 'file'
+	label: string
+	desc: string
+	path: string
+	search_text: string
+}
+
+type MentionItem = SkillMentionItem | FileMentionItem
+
+interface ActiveMention {
+	trigger: MentionTrigger
+	query: string
+	start: number
+	end: number
+}
+
+const mention_limit = 50
+
+const is_whitespace = (value: string) => /\s/.test(value)
+
+const getActiveMention = (value: string, cursor: number) => {
+	if (cursor < 0) return null
+
+	let segment_start = cursor
+
+	while (segment_start > 0 && !is_whitespace(value[segment_start - 1])) {
+		segment_start -= 1
+	}
+
+	const segment = value.slice(segment_start, cursor)
+	const slash_index = segment.lastIndexOf('/')
+	const at_index = segment.lastIndexOf('@')
+	const trigger_index = Math.max(slash_index, at_index)
+
+	if (trigger_index === -1) return null
+
+	const trigger = segment[trigger_index] as MentionTrigger
+
+	if (trigger_index > 0) {
+		return null
+	}
+
+	return {
+		trigger,
+		query: segment.slice(trigger_index + 1),
+		start: segment_start + trigger_index,
+		end: cursor
+	} satisfies ActiveMention
+}
+
+const filterMentionItems = (items: Array<MentionItem>, query: string) => {
+	const normalized_query = query.trim().toLowerCase()
+
+	if (!normalized_query) {
+		return items.slice(0, mention_limit)
+	}
+
+	return items.filter(item => item.search_text.includes(normalized_query)).slice(0, mention_limit)
+}
+
+const formatMentionToken = (item: MentionItem) =>
+	item.type === 'skill' ? `[SKILL: ${item.label}]` : `[FILE: ${item.path}]`
+
 const Index = (props: IPropsInput) => {
 	const {
+		session_id,
 		type,
 		streaming,
 		archived,
@@ -70,9 +148,23 @@ const Index = (props: IPropsInput) => {
 	const ref = useRef<HTMLTextAreaElement>(null)
 	const [compositing, { setLeft, setRight }] = useToggle(false)
 	const [full, { toggle: toggleFull }] = useToggle(false)
+	const [value, setValue] = useState('')
+	const [cursor, setCursor] = useState(0)
+	const [skill_items, setSkillItems] = useState<Array<SkillMentionItem>>([])
+	const [file_items, setFileItems] = useState<Array<FileMentionItem>>([])
+	const [loading_skills, setLoadingSkills] = useState(false)
+	const [loading_files, setLoadingFiles] = useState(false)
+	const [active_index, setActiveIndex] = useState(0)
 
 	const s = global.setting
 	const is_page = type === 'page' || type === 'dialog'
+	const active_mention = getActiveMention(value, cursor)
+	const mention_items = active_mention
+		? filterMentionItems(active_mention.trigger === '/' ? skill_items : file_items, active_mention.query)
+		: []
+	const mention_open = !!active_mention
+	const mention_loading =
+		active_mention?.trigger === '/' ? loading_skills : active_mention?.trigger === '@' ? loading_files : false
 
 	useLayoutEffect(() => {
 		const el = ref.current
@@ -89,16 +181,100 @@ const Index = (props: IPropsInput) => {
 	}, [])
 
 	useEffect(() => {
+		let canceled = false
+
+		setLoadingSkills(true)
+
+		void rpc.skill.query
+			.query()
+			.then(items => {
+				if (canceled) return
+
+				setSkillItems(
+					items.map(item => ({
+						key: item.id,
+						type: 'skill',
+						label: item.name,
+						desc: item.desc || item.path,
+						path: item.path,
+						search_text: `${item.name} ${item.desc || ''} ${item.path || ''}`.toLowerCase()
+					}))
+				)
+			})
+			.catch(() => {
+				if (!canceled) {
+					setSkillItems([])
+				}
+			})
+			.finally(() => {
+				if (!canceled) {
+					setLoadingSkills(false)
+				}
+			})
+
+		return () => {
+			canceled = true
+		}
+	}, [])
+
+	useEffect(() => {
+		let canceled = false
+
+		setLoadingFiles(true)
+
+		void rpc.session.getMentionFiles
+			.query({ id: session_id })
+			.then(res => {
+				if (canceled) return
+
+				setFileItems(
+					res.items.map(item => ({
+						key: item.absolute_path,
+						type: 'file',
+						label: item.path,
+						desc: item.type === 'directory' ? 'Directory' : 'File',
+						path: item.path,
+						search_text: item.path.toLowerCase()
+					}))
+				)
+			})
+			.catch(() => {
+				if (!canceled) {
+					setFileItems([])
+				}
+			})
+			.finally(() => {
+				if (!canceled) {
+					setLoadingFiles(false)
+				}
+			})
+
+		return () => {
+			canceled = true
+		}
+	}, [session_id])
+
+	useEffect(() => {
 		const el = ref.current
 
-		if (!el || !draft_input) {
+		if (!draft_input) {
 			return
 		}
 
-		el.value = draft_input.value
-		el.focus()
-		el.setSelectionRange(el.value.length, el.value.length)
+		setValue(draft_input.value)
+		setCursor(draft_input.value.length)
+
+		requestAnimationFrame(() => {
+			if (!el) return
+
+			el.focus()
+			el.setSelectionRange(draft_input.value.length, draft_input.value.length)
+		})
 	}, [draft_input?.key])
+
+	useEffect(() => {
+		setActiveIndex(0)
+	}, [active_mention?.trigger, active_mention?.query])
 
 	const onChangeDefaultMode = useMemoizedFn(v => {
 		s.setConfig('config', { default_model: v } as AppConfig, true)
@@ -116,16 +292,49 @@ const Index = (props: IPropsInput) => {
 		s.setConfig('config', { submit_mode: v } as AppConfig, true)
 	})
 
+	const syncCursor = useMemoizedFn((target: HTMLTextAreaElement) => {
+		setCursor(target.selectionStart ?? 0)
+	})
+
+	const onChangeValue = useMemoizedFn((e: ChangeEvent<HTMLTextAreaElement>) => {
+		setValue(e.currentTarget.value)
+		syncCursor(e.currentTarget)
+	})
+
+	const onSelectTextarea = useMemoizedFn((e: SyntheticEvent<HTMLTextAreaElement>) => {
+		syncCursor(e.currentTarget)
+	})
+
+	const applyMention = useMemoizedFn((item: MentionItem) => {
+		const mention = getActiveMention(value, cursor)
+
+		if (!mention) return
+
+		const token = formatMentionToken(item)
+		const next_value = `${value.slice(0, mention.start)}${token}${value.slice(mention.end)}`
+		const next_cursor = mention.start + token.length
+
+		setValue(next_value)
+		setCursor(next_cursor)
+
+		requestAnimationFrame(() => {
+			const el = ref.current
+
+			if (!el) return
+
+			el.focus()
+			el.setSelectionRange(next_cursor, next_cursor)
+		})
+	})
+
 	const onSend = useMemoizedFn(() => {
 		if (streaming || compositing) return
-
-		const value = ref.current?.value
 
 		if (!value) return
 
 		send(value)
-
-		ref.current!.value = ''
+		setValue('')
+		setCursor(0)
 	})
 
 	const onSubmit = useMemoizedFn((e: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -133,6 +342,26 @@ const Index = (props: IPropsInput) => {
 		const textarea = e.currentTarget
 
 		if (streaming || compositing) return
+
+		if (mention_open && mention_items.length > 0) {
+			if (e.key === 'ArrowDown') {
+				e.preventDefault()
+
+				return setActiveIndex(index => (index + 1) % mention_items.length)
+			}
+
+			if (e.key === 'ArrowUp') {
+				e.preventDefault()
+
+				return setActiveIndex(index => (index - 1 + mention_items.length) % mention_items.length)
+			}
+
+			if (e.key === 'Enter' || e.key === 'Tab') {
+				e.preventDefault()
+
+				return applyMention(mention_items[Math.min(active_index, mention_items.length - 1)])
+			}
+		}
 
 		if (submit_mode === 'enter') {
 			if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
@@ -202,8 +431,69 @@ const Index = (props: IPropsInput) => {
 						autoFocus
 						placeholder='What would you like to know?'
 						maxLength={9999}
+						value={value}
+						onChange={onChangeValue}
 						onKeyDown={onSubmit}
+						onSelect={onSelectTextarea}
 					></Textarea>
+					{mention_open && (
+						<div
+							className='
+								flex flex-col
+								mx-2
+								mb-2
+								rounded-lg
+								bg-background/90
+								border border-border-light
+								shadow-sm
+							'
+						>
+							<div
+								className='
+									flex
+									items-center justify-between
+									px-3 py-2
+									text-xs text-std-400
+									border-border-light border-b
+								'
+							>
+								<span>{active_mention?.trigger === '/' ? 'Skills' : 'Files'}</span>
+								<span>{active_mention?.query || 'Type to search'}</span>
+							</div>
+							<div className='max-h-56 overflow-y-auto py-1'>
+								{mention_loading ? (
+									<div className='text-std-400 px-3 py-2 text-sm'>Loading...</div>
+								) : mention_items.length > 0 ? (
+									mention_items.map((item, index) => (
+										<button
+											className={$cx(
+												`
+													flex flex-col
+													w-full
+													px-3 py-2
+													text-left
+													hover:bg-accent/60
+												`,
+												index === active_index && 'bg-accent/72'
+											)}
+											key={item.key}
+											onMouseDown={e => e.preventDefault()}
+											onClick={() => applyMention(item)}
+										>
+											<span className='truncate text-sm'>{item.label}</span>
+											<span className='text-std-400 truncate text-xs'>
+												{item.desc}
+											</span>
+										</button>
+									))
+								) : (
+									<div className='text-std-400 px-3 py-2 text-sm'>
+										No matches found.
+									</div>
+								)}
+							</div>
+						</div>
+					)}
 					<div
 						className='
 							flex

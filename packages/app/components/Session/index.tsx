@@ -74,6 +74,7 @@ const Index = (props: IProps) => {
 	const toggleContextModal = useMemoizedFn(() => (x.open_context_modal = !x.open_context_modal))
 
 	const props_input: IPropsInput = {
+		session_id: id,
 		type,
 		streaming: input_streaming,
 		archived: x.archived_at !== null,
