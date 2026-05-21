@@ -56,6 +56,7 @@ const Index = (props: IProps) => {
 							itemClassName
 						)}
 						data-key={key}
+						data-tab-key={key}
 						key={key}
 					>
 						{Icon && <Icon className='size-3.5 shrink-0' />}

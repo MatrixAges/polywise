@@ -8,18 +8,39 @@ const input_type = object({
 	path: string()
 })
 
-export default p.input(input_type).query(async ({ input }) => {
-	const target_path = path.resolve(input.path)
+const output_type = object({
+	name: string(),
+	contents: string(),
+	path: string()
+}).nullable()
 
-	if (!(await fs.pathExists(target_path))) {
-		return null
-	}
+export default p
+	.meta({
+		openapi: {
+			method: 'GET',
+			path: '/file/read',
+			summary: 'Read a file'
+		},
+		cli: {
+			group: ['file'],
+			name: 'read',
+			summary: 'Read a local file.'
+		}
+	})
+	.input(input_type)
+	.output(output_type)
+	.query(async ({ input }) => {
+		const target_path = path.resolve(input.path)
 
-	const contents = await fs.readFile(target_path, 'utf8')
+		if (!(await fs.pathExists(target_path))) {
+			return null
+		}
 
-	return {
-		name: path.basename(target_path),
-		contents,
-		path: target_path
-	}
-})
+		const contents = await fs.readFile(target_path, 'utf8')
+
+		return {
+			name: path.basename(target_path),
+			contents,
+			path: target_path
+		}
+	})

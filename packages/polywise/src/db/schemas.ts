@@ -1,8 +1,8 @@
 import { todo_priority_schema, todo_status_schema } from '@core/consts/db'
-import { createInsertSchema } from 'drizzle-zod'
+import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 import { z } from 'zod'
 
-import { agent, todo } from './schema'
+import { agent, project, session, todo } from './schema'
 
 const agent_model_schema = z.object({
 	provider: z.string(),
@@ -13,6 +13,7 @@ const agent_model_schema = z.object({
 const agent_role_schema = z.string().trim().min(1).max(20)
 
 const todo_timestamp_schema = z.number().int()
+const row_date_schema = z.date()
 
 export const todo_insert_schema = createInsertSchema(todo, {
 	priority: todo_priority_schema.optional(),
@@ -20,6 +21,19 @@ export const todo_insert_schema = createInsertSchema(todo, {
 	due_at: todo_timestamp_schema.optional(),
 	created_at: todo_timestamp_schema.optional(),
 	updated_at: todo_timestamp_schema.optional()
+})
+
+export const session_select_schema = createSelectSchema(session, {
+	created_at: row_date_schema.nullable(),
+	updated_at: row_date_schema.nullable(),
+	running_since: row_date_schema.nullable(),
+	running_done: row_date_schema.nullable()
+})
+
+export const project_select_schema = createSelectSchema(project, {
+	model: agent_model_schema.nullable(),
+	created_at: row_date_schema.nullable(),
+	updated_at: row_date_schema.nullable()
 })
 
 export const todo_create_input_schema = todo_insert_schema

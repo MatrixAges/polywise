@@ -18,6 +18,7 @@ import { PANEL_COLLAPSE_THRESHOLD, PANEL_WIDTH_DEFAULT } from '@/appdata'
 import { Fallback } from '@/components'
 import { GlobalModel, GlobalProvider } from '@/context'
 import Panel from '@/panel'
+import PageBridge from '@/runtime/PageBridge'
 
 import { Alert, Header } from './components'
 
@@ -64,6 +65,7 @@ const Index = () => {
 				>
 					<TooltipProvider delay={600} closeDelay={300}>
 						<GlobalProvider value={global}>
+							<PageBridge></PageBridge>
 							<Toaster
 								position='top-center'
 								toastOptions={{ duration: 3000 }}
@@ -104,7 +106,9 @@ const Index = () => {
 											className='h-full'
 											disabled={s.panel_collapsed}
 										>
-											<Outlet></Outlet>
+											<div data-page-root='route' className='h-full'>
+												<Outlet></Outlet>
+											</div>
 										</ResizablePanel>
 										{!s.panel_collapsed && (
 											<ResizableHandle

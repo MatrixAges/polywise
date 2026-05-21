@@ -76,6 +76,7 @@ const Index = (props: IProps) => {
 						)}
 						title={title || key}
 						data-active={getActive(key)}
+						data-tab-key={key}
 						onClick={() => onClick?.(key, item)}
 						key={key}
 					>

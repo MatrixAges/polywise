@@ -25,6 +25,7 @@ const Index = () => {
 
 	return (
 		<div
+			data-page-root='panel'
 			className='
 				flex flex-col
 				w-full h-full
@@ -33,6 +34,7 @@ const Index = () => {
 			'
 		>
 			<div
+				data-page-tabs='panel'
 				className='
 					flex
 					items-center justify-between

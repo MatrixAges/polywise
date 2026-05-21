@@ -1,9 +1,12 @@
 import { initTRPC } from '@trpc/server'
 import superjson from 'superjson'
 
+import type { CliProcedureMeta } from '@core/cli/api/meta'
 import type { OpenApiMeta } from 'trpc-to-openapi'
 
-const t = initTRPC.meta<OpenApiMeta>().create({
+export type ProcedureMeta = OpenApiMeta & CliProcedureMeta
+
+const t = initTRPC.meta<ProcedureMeta>().create({
 	isServer: true,
 	transformer: superjson
 })

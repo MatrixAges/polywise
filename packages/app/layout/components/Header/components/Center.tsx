@@ -21,6 +21,7 @@ const Index = () => {
 
 	return (
 		<div
+			data-page-tabs='nav'
 			className='
 				flex
 				items-center

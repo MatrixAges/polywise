@@ -14,6 +14,7 @@ export default {
 			source: {
 				entry: {
 					index: './src/index.ts',
+					cli: './src/cli/index.ts',
 					'pipeline/jieba.worker': './src/pipeline/getChunkWords/jieba.worker.ts'
 				}
 			},

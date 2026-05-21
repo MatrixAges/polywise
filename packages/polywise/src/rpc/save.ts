@@ -11,7 +11,18 @@ const input_type = object({
 const output_type = object({ ok: boolean(), id: string() })
 
 export default p
-	.meta({ openapi: { method: 'POST', path: '/save' } })
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/save',
+			summary: 'Create an article'
+		},
+		cli: {
+			group: ['article'],
+			name: 'save',
+			summary: 'Create an article.'
+		}
+	})
 	.input(input_type)
 	.output(output_type)
 	.mutation(async ({ input }) => {

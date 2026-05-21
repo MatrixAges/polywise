@@ -1,5 +1,5 @@
 import { config } from '@core/config'
-import { global_linkcase_session_id } from '@core/consts'
+import { blocked_session_id, global_linkcase_session_id } from '@core/consts'
 import fst_linkcase_system_prompt from '@core/consts/prompts/fst_linkcase_system_prompt.md'
 import fst_post_system_prompt from '@core/consts/prompts/fst_post_system_prompt.md'
 import fst_report_tool_prompt from '@core/consts/prompts/fst_report_tool_prompt.md'
@@ -28,12 +28,14 @@ import { match } from 'ts-pattern'
 
 import {
 	buildSharedRuntimeTools,
+	createApiTool,
 	createContentTool,
 	createContextTool,
 	createCronTool,
 	createErrorCollectTool,
 	createLinkcaseTool,
 	createMessageTool,
+	createPageTool,
 	createPlanTool,
 	createPostTool,
 	createQuestionTool,
@@ -148,7 +150,13 @@ export default async (s: Index, message: Message) => {
 						skill_tool: createSkillTool(s),
 						cron_tool: createCronTool(s),
 						error_collect_tool: createErrorCollectTool(),
-						...(has_todo_session_link ? { report_tool: createReportTool(s) } : {})
+						...(has_todo_session_link ? { report_tool: createReportTool(s) } : {}),
+						...(s.id === blocked_session_id
+							? {
+									api_tool: createApiTool(),
+									page_tool: createPageTool()
+								}
+							: {})
 					}
 				})
 

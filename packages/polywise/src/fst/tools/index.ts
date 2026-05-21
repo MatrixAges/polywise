@@ -19,6 +19,8 @@ export * from './linkcase'
 export * from './post'
 export * from './runtime'
 export * from './agent'
+export * from './api'
+export * from './page'
 
 export { createContextTool } from './context'
 export type { ContextInput } from './context'
