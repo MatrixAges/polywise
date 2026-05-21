@@ -4,6 +4,8 @@ import { array, boolean, number, object, record, string, union, enum as zod_enum
 
 type ApiInputValue = string | number | boolean
 
+const api_base_url = 'http://localhost:3072/api'
+
 const inputSchema = object({
 	action: zod_enum(['help', 'list', 'schema', 'call']).default('help'),
 	path: array(string())
@@ -32,9 +34,11 @@ const resolvePathInput = (path: string, input?: Record<string, ApiInputValue>) =
 	}
 }
 
+const buildApiUrl = (path: string) => new URL(path.replace(/^\//, ''), `${api_base_url}/`)
+
 const buildUrl = (path: string, input?: Record<string, ApiInputValue>) => {
 	const { resolved_path, rest_input } = resolvePathInput(path, input)
-	const url = new URL(resolved_path, 'http://localhost:3072/api')
+	const url = buildApiUrl(resolved_path)
 
 	if (!input) {
 		return url.toString()

@@ -69,6 +69,8 @@ const printRenderedHelp = (title: string, data: RenderedHelp | null) => {
 	printText(toHelpText(title, data))
 }
 
+const buildApiUrl = (path: string) => new URL(path.replace(/^\//, ''), `${api_base_url}/`)
+
 const resolveApiPath = (path: string, input: Record<string, unknown>) => {
 	const rest = { ...input }
 	const resolved_path = path.replace(/\{([A-Za-z0-9_]+)\}/g, (_, key: string) => {
@@ -97,7 +99,7 @@ const readResponseBody = async (response: Response) => {
 
 const callApi = async (target: ApiMapItem, input: Record<string, unknown>) => {
 	const { resolved_path, rest } = resolveApiPath(target.openapi_path, input)
-	const url = new URL(resolved_path, api_base_url)
+	const url = buildApiUrl(resolved_path)
 	const is_query_method = target.method === 'GET' || target.method === 'DELETE'
 
 	if (is_query_method) {
