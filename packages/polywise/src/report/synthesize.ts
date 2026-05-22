@@ -18,6 +18,14 @@ const topic_schema = z.object({
 	im_focus: z.array(z.string()).max(3)
 })
 
+const report_voice_instruction = [
+	'Write in plain English, like a sharp teammate explaining what actually happened.',
+	'Read the concrete message content, session titles, IM snippets, and post titles in the input before writing.',
+	'Do not produce a dashboard-like list of metrics or simply restate labels from the input.',
+	'Name the real topics, problems, ideas, and decisions that show up in the content.',
+	'Explain why the work mattered, what changed in understanding, and what should happen next.'
+].join(' ')
+
 const resolveDefaultTextModel = async () => {
 	const target_config = config.default_model
 	const { provider, model, effort } = target_config
@@ -49,6 +57,40 @@ const toSampleLines = (samples: Array<ReportConversationSample>) =>
 		text: item.text
 	}))
 
+const joinSentenceList = (items: Array<string>, fallback = '') => {
+	const cleaned = items
+		.map(item =>
+			item
+				.trim()
+				.replace(/^[\-\d\.\s]+/, '')
+				.replace(/\s+/g, ' ')
+		)
+		.filter(Boolean)
+		.map(item => (/[.!?]$/.test(item) ? item : `${item}.`))
+
+	if (cleaned.length === 0) {
+		return fallback
+	}
+
+	return cleaned.join(' ')
+}
+
+const toNaturalTopList = (items: Array<string>) => {
+	if (items.length === 0) {
+		return ''
+	}
+
+	if (items.length === 1) {
+		return items[0] || ''
+	}
+
+	if (items.length === 2) {
+		return `${items[0]} and ${items[1]}`
+	}
+
+	return `${items.slice(0, -1).join(', ')}, and ${items[items.length - 1]}`
+}
+
 const buildFallbackTopicSummary = (analytics: ReportAnalytics): ReportTopicSummary => {
 	const day_or_window = analytics.window.period === 'day' ? 'day' : analytics.window.period
 	const top_session = analytics.sessions.top_sessions[0]
@@ -56,36 +98,38 @@ const buildFallbackTopicSummary = (analytics: ReportAnalytics): ReportTopicSumma
 	const top_im = analytics.sessions.top_im_sessions[0]
 
 	return {
-		overview: `This ${day_or_window} combined ${analytics.usage.message_count} messages, ${formatCompactNumber(analytics.usage.total_tokens)} tokens, ${analytics.sessions.new_sessions} new sessions, and ${analytics.content.new_posts} new posts, with the heaviest concentration around ${top_session?.title || 'a distributed set of sessions'}.`,
+		overview: `This ${day_or_window} mostly revolved around ${top_session?.title || 'a broad mix of sessions'}, with ${analytics.usage.message_count} messages and ${formatCompactNumber(analytics.usage.total_tokens)} tokens moving through the workspace. The work was not just busywork: it also produced ${analytics.content.new_posts} new posts and ${analytics.sessions.new_sessions} new sessions, so ideas were still turning into durable artifacts.`,
 		themes: [
 			top_session
-				? `${top_session.title} was the dominant conversation surface with ${top_session.message_count} messages.`
-				: 'Conversation volume was spread across many sessions without a single dominant thread.',
+				? `A lot of the attention stayed on ${top_session.title}, which acted as the main working thread rather than background noise.`
+				: 'Attention moved across several threads instead of collapsing into one dominant conversation.',
 			top_project
-				? `${top_project.name} was the most active project context by message volume.`
-				: 'Project activity was either light or not strongly concentrated in a single project.',
+				? `${top_project.name} was the clearest project anchor, so the work had a visible center of gravity.`
+				: 'The work did not strongly cluster around a single project, which suggests either exploration or fragmented execution.',
 			analytics.content.new_wiki_posts + analytics.content.new_memory_posts > 0
-				? `Knowledge capture stayed active through ${analytics.content.new_wiki_posts} wiki posts and ${analytics.content.new_memory_posts} memory posts.`
-				: 'Knowledge capture lagged behind conversation volume, so some learning likely remains unstored.'
+				? `Knowledge capture stayed alive instead of stopping at chat, with ${analytics.content.new_wiki_posts} wiki posts and ${analytics.content.new_memory_posts} memory posts recorded.`
+				: 'A fair amount of understanding may still be trapped in conversations because knowledge capture lagged behind the discussion volume.'
 		],
 		learnings: [
 			analytics.knowledge.new_nodes > 0 || analytics.knowledge.new_edges > 0
-				? `The knowledge graph expanded by ${analytics.knowledge.new_nodes} nodes and ${analytics.knowledge.new_edges} edges.`
-				: 'Graph growth was limited, which usually means insights were discussed more than encoded.',
+				? `The knowledge graph actually moved, adding ${analytics.knowledge.new_nodes} nodes and ${analytics.knowledge.new_edges} edges, so at least some understanding became structured.`
+				: 'Graph growth stayed limited, which usually means the work produced discussion faster than it produced structured knowledge.',
 			analytics.linkcase.processed_links > 0
-				? `${analytics.linkcase.processed_links} links moved through extraction during this window.`
-				: 'Link ingestion throughput was limited during this window.'
+				? `${analytics.linkcase.processed_links} links made it through extraction, so intake was not completely stalled.`
+				: 'Link ingestion barely moved, which is a sign that backlog can quietly build even when conversations look productive.'
 		],
 		advice: [
 			analytics.linkcase.ready_to_extract > 0
-				? `Extract the ${analytics.linkcase.ready_to_extract} ready linkcase items to avoid knowledge lag.`
-				: 'Keep converting the most valuable sessions into durable posts while context is fresh.',
+				? `Clear the ${analytics.linkcase.ready_to_extract} ready-to-extract linkcase items before they become another passive backlog.`
+				: 'Turn the strongest sessions into durable notes while the reasoning is still fresh, instead of waiting for a later cleanup pass.',
 			analytics.ops.backlog_pending > 0
-				? `Reduce the current backlog of ${analytics.ops.backlog_pending} pending items before the next reporting cycle.`
-				: 'The backlog is under control, so prioritize higher-quality synthesis over throughput.'
+				? `Reduce the ${analytics.ops.backlog_pending}-item backlog so the next cycle is not spent carrying unfinished context forward.`
+				: 'Backlog pressure looks manageable, so the better tradeoff is depth and synthesis quality rather than raw throughput.'
 		],
 		im_focus: top_im
-			? [`${top_im.title} was the most active IM thread with ${top_im.message_count} messages.`]
+			? [
+					`${top_im.title} was the most active IM thread, which means some of the real context likely lived in direct coordination rather than the main workspace.`
+				]
 			: []
 	}
 }
@@ -158,10 +202,16 @@ const summarizeChunk = async (args: {
 		const { model, provider_options } = await resolveDefaultTextModel()
 		const { output } = await generateText({
 			model,
-			system: 'You summarize local AI workspace conversations into English reporting signals. Be specific about themes, learning, IM context, and what should happen next. Avoid generic productivity phrasing.',
+			system: `You summarize local AI workspace conversations into English reporting signals. ${report_voice_instruction}`,
 			prompt: JSON.stringify(
 				{
 					period: args.period,
+					instructions: [
+						'Read the actual conversation text before writing.',
+						'Pull out concrete topics, decisions, repeated concerns, and learning moments.',
+						'If a theme is vague, it means you did not read deeply enough.',
+						'Do not return bullet points that only rename metrics.'
+					],
 					conversation_samples: toSampleLines(args.samples),
 					im_samples: toSampleLines(args.im_samples)
 				},
@@ -225,15 +275,43 @@ export const synthesizeTopicSummary = async (args: {
 		const { model, provider_options } = await resolveDefaultTextModel()
 		const { output } = await generateText({
 			model,
-			system: 'You are merging chunk-level reporting notes into one English summary for a local AI workspace. Preserve concrete themes, learning, IM highlights, and next-step advice. Prefer concise, information-dense phrasing.',
+			system: `You are merging chunk-level reporting notes into one English summary for a local AI workspace. ${report_voice_instruction}`,
 			prompt: JSON.stringify(
 				{
 					period: args.period,
+					instructions: [
+						'Do not turn this into a formal report full of metric labels.',
+						'Write like someone who actually read the work and can explain what the period was about.',
+						'Use the chunk notes plus the workspace context to infer the storyline of the period.'
+					],
 					window: {
 						key: args.analytics.window.key,
 						label: args.analytics.window.label,
 						start: dayjs(args.analytics.window.start_at).format('YYYY-MM-DD HH:mm:ss'),
 						end: dayjs(args.analytics.window.end_at).format('YYYY-MM-DD HH:mm:ss')
+					},
+					workspace_context: {
+						top_sessions: args.analytics.sessions.top_sessions.slice(0, 4).map(item => ({
+							title: item.title,
+							message_count: item.message_count
+						})),
+						top_projects: args.analytics.sessions.top_projects.slice(0, 3).map(item => ({
+							name: item.name,
+							message_count: item.message_count
+						})),
+						recent_posts: args.analytics.content.recent_posts.slice(0, 5).map(item => ({
+							title: item.title,
+							for_type: item.for_type
+						})),
+						metrics: {
+							messages: args.analytics.usage.message_count,
+							total_tokens: args.analytics.usage.total_tokens,
+							new_sessions: args.analytics.sessions.new_sessions,
+							new_posts: args.analytics.content.new_posts,
+							new_nodes: args.analytics.knowledge.new_nodes,
+							new_edges: args.analytics.knowledge.new_edges,
+							ready_to_extract: args.analytics.linkcase.ready_to_extract
+						}
 					},
 					chunk_summaries
 				},
@@ -325,123 +403,104 @@ export const buildReportMetricsMarkdown = (args: { analytics: ReportAnalytics })
 		`${analytics.content.new_wiki_posts} wiki`,
 		`${analytics.content.new_memory_posts} memory`
 	].join(' · ')
+	const narrative_lines = [
+		`The workspace moved through ${analytics.usage.message_count} messages and ${formatCompactNumber(analytics.usage.total_tokens)} tokens in this window, with ${analytics.sessions.active_sessions} active sessions and ${analytics.sessions.new_sessions} newly opened ones.`,
+		`Knowledge capture produced ${stored_knowledge_posts} knowledge-oriented posts (${content_split}), while the graph changed by +${analytics.knowledge.new_nodes} nodes and +${analytics.knowledge.new_edges} edges.`,
+		`Operationally, ${analytics.linkcase.processed_links} links were processed, ${analytics.linkcase.ready_to_extract} are ready to extract, and ${analytics.ops.backlog_pending} items are still sitting in the broader backlog.`
+	]
 
 	return [
-		'### Window Snapshot',
-		`- Tokens: ${formatCompactNumber(analytics.usage.total_tokens)} total · ${formatCompactNumber(analytics.usage.input_tokens)} input · ${formatCompactNumber(analytics.usage.output_tokens)} output · ${formatCompactNumber(analytics.usage.reasoning_tokens)} reasoning`,
-		`- Messages: ${analytics.usage.message_count} total · ${analytics.usage.user_message_count} user · ${analytics.usage.assistant_message_count} assistant`,
-		`- Sessions: ${analytics.sessions.new_sessions} new · ${analytics.sessions.active_sessions} active · ${analytics.sessions.im_sessions} IM`,
-		`- Content: ${analytics.content.new_posts} new posts · ${analytics.content.updated_posts} updated posts · ${analytics.content.new_documents} new documents`,
-		`- Memory graph: +${analytics.knowledge.new_nodes} nodes · +${analytics.knowledge.new_edges} edges · ${analytics.knowledge.rewire_events} rewires`,
-		`- Linkcase: ${analytics.linkcase.new_links} new links · ${analytics.linkcase.processed_links} processed · ${analytics.linkcase.ready_to_extract} ready to extract`,
+		'### At a Glance',
+		...narrative_lines,
 		'',
-		'### Metric Signals',
-		`- Cached input ratio: ${formatPercent(cached_ratio)} of input tokens came from cache reuse.`,
-		`- Durable knowledge capture: ${stored_knowledge_posts} knowledge-oriented posts were stored (${content_split}).`,
+		'### Reading the Numbers',
+		`- ${formatPercent(cached_ratio)} of input tokens came from cache reuse, which suggests how much of the work leaned on already-known context instead of fully new material.`,
 		top_session
-			? `- Dominant session: ${top_session.title} carried ${top_session.message_count} messages.`
-			: '- Dominant session: conversation volume stayed distributed across sessions.',
+			? `- The center of gravity was ${top_session.title}, which carried ${top_session.message_count} messages and likely held the main line of reasoning.`
+			: '- No single session dominated, so the period looked more exploratory than focused.',
 		top_project
-			? `- Dominant project: ${top_project.name} concentrated ${top_project.message_count} messages across ${top_project.session_count} sessions.`
-			: '- Dominant project: no single project became clearly dominant in this window.',
-		`- Pipeline pressure: ${analytics.ops.backlog_pending} pending items remain, with ${analytics.linkcase.pending_links} link(s) still waiting and ${analytics.ops.unread_notifications} unread notification(s).`
+			? `- ${top_project.name} was the clearest project anchor, with ${top_project.message_count} messages across ${top_project.session_count} sessions.`
+			: '- Project attention stayed spread out, which usually means either discovery work or context switching.',
+		`- Pipeline pressure is still real: ${analytics.linkcase.pending_links} links remain pending and ${analytics.ops.unread_notifications} notifications are still unread.`
 	].join('\n')
 }
 
 export const buildReportAnalysisMarkdown = (args: { analytics: ReportAnalytics; topics: ReportTopicSummary }) => {
 	const { analytics, topics } = args
-	const model_lines =
+	const top_session_lines = analytics.sessions.top_sessions
+		.slice(0, 3)
+		.map(item => `${item.title} (${item.message_count} messages)`)
+	const top_project_lines = analytics.sessions.top_projects
+		.slice(0, 3)
+		.map(item => `${item.name} (${item.message_count} messages across ${item.session_count} sessions)`)
+	const recent_post_lines = analytics.content.recent_posts
+		.slice(0, 4)
+		.map(item => `${item.title} (${item.for_type})`)
+	const model_items =
 		analytics.usage.models.length > 0
-			? analytics.usage.models.map(
-					item =>
-						`- ${item.label} · ${item.calls} calls · ${formatCompactNumber(item.total_tokens)} tokens`
-				)
-			: ['- No assistant usage telemetry was recorded in this window.']
-	const provider_lines =
-		analytics.usage.providers.length > 0
-			? analytics.usage.providers.map(
-					item =>
-						`- ${item.provider} · ${item.calls} calls · ${formatCompactNumber(item.total_tokens)} tokens`
-				)
-			: ['- No provider distribution was recorded in this window.']
-	const top_session_lines =
-		analytics.sessions.top_sessions.length > 0
-			? analytics.sessions.top_sessions.map(
-					item =>
-						`- ${item.title} · ${item.message_count} messages · last activity ${formatReportTime(item.last_message_at)}`
-				)
-			: ['- No active sessions were detected in this window.']
-	const top_project_lines =
-		analytics.sessions.top_projects.length > 0
-			? analytics.sessions.top_projects.map(
-					item =>
-						`- ${item.name} · ${item.message_count} messages across ${item.session_count} sessions`
-				)
-			: ['- No project-specific concentration stood out in this window.']
-	const agent_lines =
-		analytics.knowledge.top_agent_changes.length > 0
-			? analytics.knowledge.top_agent_changes.map(
-					item =>
-						`- ${item.name} · ${item.new_sessions} new sessions · ${item.new_articles} new linked articles · ${item.new_memory_posts} memory posts · ${item.new_wiki_posts} wiki posts`
-				)
-			: ['- No material agent-linked content shift stood out in this window.']
-	const post_lines =
-		analytics.content.recent_posts.length > 0
-			? analytics.content.recent_posts.map(
-					item =>
-						`- ${item.title} · ${item.for_type} · updated ${formatReportTime(item.updated_at)}`
-				)
-			: ['- No recent post updates were captured in this window.']
-	const im_lines =
-		topics.im_focus.length > 0
-			? topics.im_focus.map(item => `- ${item}`)
-			: analytics.sessions.top_im_sessions.length > 0
-				? analytics.sessions.top_im_sessions.map(
-						item => `- ${item.title} · ${item.message_count} IM messages in this window`
+			? analytics.usage.models
+					.slice(0, 3)
+					.map(
+						item =>
+							`${item.label} (${item.calls} calls, ${formatCompactNumber(item.total_tokens)} tokens)`
 					)
-				: ['- No notable IM conversation cluster was detected.']
+			: []
+	const im_sentence = joinSentenceList(
+		topics.im_focus.length > 0
+			? topics.im_focus
+			: analytics.sessions.top_im_sessions
+					.slice(0, 2)
+					.map(item => `${item.title} carried ${item.message_count} IM messages in this window`)
+	)
+	const learning_paragraph = joinSentenceList(topics.learnings)
+	const theme_paragraph = joinSentenceList(topics.themes)
+	const advice_lines = topics.advice
+		.map(item => item.trim())
+		.filter(Boolean)
+		.map(item => (/^[0-9]+\./.test(item) ? item : item))
+	const model_summary_line =
+		analytics.usage.models.length > 0
+			? `The heaviest model usage came from ${toNaturalTopList(model_items)}.`
+			: 'Model usage telemetry did not surface a meaningful model mix for this window.'
+	const knowledge_lines =
+		analytics.knowledge.top_agent_changes.length > 0
+			? analytics.knowledge.top_agent_changes
+					.slice(0, 3)
+					.map(
+						item =>
+							`${item.name} added ${item.new_sessions} new sessions, ${item.new_articles} linked articles, ${item.new_memory_posts} memory posts, and ${item.new_wiki_posts} wiki posts`
+					)
+			: []
 
 	return [
-		'### Executive Summary',
+		'### What Happened',
 		topics.overview,
+		theme_paragraph,
 		'',
-		'### Conversation Themes',
-		...topics.themes.map(item => `- ${item}`),
+		'### Why It Mattered',
+		learning_paragraph,
+		im_sentence
+			? `A meaningful part of the context also lived in IM: ${im_sentence}`
+			: 'IM was not a major separate context source in this window.',
+		`On the knowledge side, the graph moved by +${analytics.knowledge.new_nodes} nodes, +${analytics.knowledge.new_edges} edges, and ${analytics.knowledge.rewire_events} rewires, while linkcase left ${analytics.linkcase.ready_to_extract} items ready to extract and ${analytics.linkcase.pending_links} still pending.`,
 		'',
-		'### Learning Signals',
-		...topics.learnings.map(item => `- ${item}`),
+		'### What To Do Next',
+		...advice_lines.map((item, index) => `${index + 1}. ${item.replace(/^[\-\d\.\s]+/, '')}`),
 		'',
-		'### Recommendations',
-		...topics.advice.map(item => `- ${item}`),
-		'',
-		'### IM Activity',
-		...im_lines,
-		'',
-		'### Model Mix',
-		...model_lines,
-		'',
-		'### Provider Mix',
-		...provider_lines,
-		'',
-		'### Active Sessions',
-		...top_session_lines,
-		'',
-		'### Active Projects',
-		...top_project_lines,
-		'',
-		'### Agent and Knowledge Changes',
-		`- Stored knowledge: +${analytics.knowledge.new_nodes} nodes, +${analytics.knowledge.new_edges} edges, ${analytics.knowledge.new_agent_articles} new agent-linked article relations`,
-		`- Memory graph posture: ${analytics.knowledge.active_edges} active edges · ${analytics.knowledge.silent_edges} silent edges · ${analytics.knowledge.unstable_edges} unstable edges`,
-		...agent_lines,
-		'',
-		'### Linkcase and Pipeline',
-		`- Added ${analytics.linkcase.new_links} new links in this window.`,
-		`- Processed ${analytics.linkcase.processed_links} link(s) into extracted content.`,
-		`- ${analytics.linkcase.ready_to_extract} link(s) are ready for extract and ${analytics.linkcase.pending_links} remain pending.`,
-		`- ${analytics.ops.backlog_pending} total items are still waiting in the broader pipeline.`,
-		'',
-		'### Recent Durable Content',
-		...post_lines
+		'### Supporting Signals',
+		top_session_lines.length > 0
+			? `- The busiest sessions were ${toNaturalTopList(top_session_lines)}.`
+			: '- No session clearly stood out as the main working thread.',
+		top_project_lines.length > 0
+			? `- The work clustered most around ${toNaturalTopList(top_project_lines)}.`
+			: '- Project activity remained fairly spread out.',
+		recent_post_lines.length > 0
+			? `- Durable output showed up in ${toNaturalTopList(recent_post_lines)}.`
+			: '- This window did not leave behind much recent durable content.',
+		model_summary_line ? `- ${model_summary_line}` : '',
+		knowledge_lines.length > 0
+			? `- Agent-linked change was most visible in ${toNaturalTopList(knowledge_lines)}.`
+			: '- No single agent dominated the visible knowledge changes.'
 	]
 		.filter(Boolean)
 		.join('\n')
