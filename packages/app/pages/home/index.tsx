@@ -66,8 +66,8 @@ const Index = () => {
 							<>
 								{active_tab === 'stats' && (
 									<div className='flex flex-col gap-10'>
+										<Hotspots></Hotspots>
 										<Overview></Overview>
-										{/* <Hotspots></Hotspots> */}
 										<TokenUsage></TokenUsage>
 										<Trending></Trending>
 										<SessionActivity></SessionActivity>

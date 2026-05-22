@@ -179,7 +179,7 @@ export default class Index {
 			},
 			{
 				key: 'running',
-				title: 'Active week',
+				title: 'Active sessions',
 				value: formatInteger(this.data.overview.sessions_with_messages_week),
 				desc: this.session_recency_mix
 			},
@@ -206,7 +206,7 @@ export default class Index {
 				key: 'pipeline',
 				title: 'Pipeline',
 				value: `+${formatInteger(this.data.content.pipeline_created_week_total)}`,
-				desc: `${this.data.health.backlog_pending_total} queued now · ${this.backlog_breakdown}`
+				desc: `${this.data.health.backlog_pending_total} queued now`
 			},
 			{
 				key: 'graph',

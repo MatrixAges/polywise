@@ -7,7 +7,12 @@ const Index = () => {
 	const x = useModel()
 
 	return (
-		<div className='grid grid-cols-2'>
+		<div
+			className='
+				grid grid-cols-2
+				border border-border-light border-b-0
+			'
+		>
 			{x.overview_cards.map(item => (
 				<StatCard
 					key={item.key}
