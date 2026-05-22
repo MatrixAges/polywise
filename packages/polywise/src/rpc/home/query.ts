@@ -6,11 +6,20 @@ import { env } from '../../env'
 
 const week_ms = 7 * 24 * 60 * 60 * 1000
 const day_ms = 24 * 60 * 60 * 1000
+const second_ms = 1000
 const trend_days = 14
 const organic_post_filter = `json_extract(metadata, '$.pthink.kind') IS NULL`
 
+const normalizeDbParam = (value: unknown) =>
+	typeof value === 'number' && Number.isFinite(value) && Math.abs(value) >= 1_000_000_000_000
+		? Math.floor(value / second_ms)
+		: value
+
+const normalizeDbParams = (params: Array<unknown>) => params.map(normalizeDbParam)
+const toUnixSeconds = (value: number) => Math.floor(value / second_ms)
+
 const countValue = (query: string, params: Array<unknown> = []) => {
-	const row = env.sqlite.prepare(query).get(...params) as { value?: number } | undefined
+	const row = env.sqlite.prepare(query).get(...normalizeDbParams(params)) as { value?: number } | undefined
 
 	return Number(row?.value ?? 0)
 }
@@ -80,10 +89,43 @@ const readPostForCounts = () => {
 	return counts
 }
 
+const readPthinkKindCounts = (start_at?: number) => {
+	const rows = env.sqlite
+		.prepare(
+			`SELECT
+				json_extract(metadata, '$.pthink.kind') AS kind,
+				COUNT(*) AS value
+			FROM article
+			WHERE "for" = 'memory'
+				AND json_extract(metadata, '$.pthink.kind') IS NOT NULL
+				${start_at ? 'AND created_at >= ?' : ''}
+			GROUP BY kind`
+		)
+		.all(...(start_at ? [normalizeDbParam(start_at)] : [])) as Array<{
+		kind?: string | null
+		value?: number | null
+	}>
+
+	const counts = {
+		idle: 0,
+		daily: 0,
+		weekly: 0,
+		trigger: 0
+	}
+
+	for (const row of rows) {
+		if (row.kind === 'idle' || row.kind === 'daily' || row.kind === 'weekly' || row.kind === 'trigger') {
+			counts[row.kind] = Number(row.value ?? 0)
+		}
+	}
+
+	return counts
+}
+
 const readOrganicPostStreak = (today_key: string) => {
 	const rows = env.sqlite
 		.prepare(
-			`SELECT DISTINCT strftime('%Y-%m-%d', created_at / 1000, 'unixepoch', 'localtime') AS day_key
+			`SELECT DISTINCT strftime('%Y-%m-%d', created_at, 'unixepoch', 'localtime') AS day_key
 			FROM article
 			WHERE "for" IN ('user', 'wiki', 'memory')
 				AND ${organic_post_filter}
@@ -150,6 +192,7 @@ const formatModelName = (value: { provider?: string; model?: string } | null | u
 }
 
 const buildUsageAnalytics = (last_week: number) => {
+	const db_last_week = toUnixSeconds(last_week)
 	const assistant_messages = env.sqlite
 		.prepare(
 			`SELECT
@@ -274,7 +317,7 @@ const buildUsageAnalytics = (last_week: number) => {
 		totals.reasoning_tokens += reasoning_tokens
 		totals.cached_input_tokens += cached_input_tokens
 
-		if (Number(row.created_at ?? 0) >= last_week) {
+		if (Number(row.created_at ?? 0) >= db_last_week) {
 			totals.week_total_tokens += total_tokens
 		}
 
@@ -338,6 +381,7 @@ const buildUsageAnalytics = (last_week: number) => {
 
 const buildDailyTrendRows = (now: number) => {
 	const start_at = getDayStart(now - (trend_days - 1) * day_ms)
+	const db_start_at = toUnixSeconds(start_at)
 	const buckets = Array.from({ length: trend_days }, (_, index) => {
 		const ts = start_at + index * day_ms
 
@@ -364,7 +408,7 @@ const buildDailyTrendRows = (now: number) => {
 	const usage_rows = env.sqlite
 		.prepare(
 			`SELECT
-				strftime('%Y-%m-%d', created_at / 1000, 'unixepoch', 'localtime') AS day_key,
+				strftime('%Y-%m-%d', created_at, 'unixepoch', 'localtime') AS day_key,
 				COUNT(*) AS assistant_messages,
 				SUM(COALESCE(json_extract(content, '$.metadata.usage.inputTokens'), 0)) AS input_tokens,
 				SUM(COALESCE(json_extract(content, '$.metadata.usage.outputTokens'), 0)) AS output_tokens,
@@ -376,7 +420,7 @@ const buildDailyTrendRows = (now: number) => {
 				AND json_extract(content, '$.metadata.usage.totalTokens') IS NOT NULL
 			GROUP BY day_key`
 		)
-		.all(start_at) as Array<{
+		.all(db_start_at) as Array<{
 		day_key: string | null
 		assistant_messages: number | null
 		input_tokens: number | null
@@ -406,13 +450,13 @@ const buildDailyTrendRows = (now: number) => {
 	const message_rows = env.sqlite
 		.prepare(
 			`SELECT
-				strftime('%Y-%m-%d', created_at / 1000, 'unixepoch', 'localtime') AS day_key,
+				strftime('%Y-%m-%d', created_at, 'unixepoch', 'localtime') AS day_key,
 				COUNT(*) AS value
 			FROM message
 			WHERE created_at >= ?
 			GROUP BY day_key`
 		)
-		.all(start_at) as Array<{ day_key: string | null; value: number | null }>
+		.all(db_start_at) as Array<{ day_key: string | null; value: number | null }>
 
 	for (const row of message_rows) {
 		if (!row.day_key) {
@@ -429,13 +473,13 @@ const buildDailyTrendRows = (now: number) => {
 	const session_rows = env.sqlite
 		.prepare(
 			`SELECT
-				strftime('%Y-%m-%d', created_at / 1000, 'unixepoch', 'localtime') AS day_key,
+				strftime('%Y-%m-%d', created_at, 'unixepoch', 'localtime') AS day_key,
 				COUNT(*) AS value
 			FROM session
 			WHERE created_at >= ?
 			GROUP BY day_key`
 		)
-		.all(start_at) as Array<{ day_key: string | null; value: number | null }>
+		.all(db_start_at) as Array<{ day_key: string | null; value: number | null }>
 
 	for (const row of session_rows) {
 		if (!row.day_key) {
@@ -452,7 +496,7 @@ const buildDailyTrendRows = (now: number) => {
 	const post_rows = env.sqlite
 		.prepare(
 			`SELECT
-				strftime('%Y-%m-%d', created_at / 1000, 'unixepoch', 'localtime') AS day_key,
+				strftime('%Y-%m-%d', created_at, 'unixepoch', 'localtime') AS day_key,
 				COUNT(*) AS value
 			FROM article
 			WHERE created_at >= ?
@@ -460,7 +504,7 @@ const buildDailyTrendRows = (now: number) => {
 				AND ${organic_post_filter}
 			GROUP BY day_key`
 		)
-		.all(start_at) as Array<{ day_key: string | null; value: number | null }>
+		.all(db_start_at) as Array<{ day_key: string | null; value: number | null }>
 
 	for (const row of post_rows) {
 		if (!row.day_key) {
@@ -477,13 +521,13 @@ const buildDailyTrendRows = (now: number) => {
 	const document_rows = env.sqlite
 		.prepare(
 			`SELECT
-				strftime('%Y-%m-%d', created_at / 1000, 'unixepoch', 'localtime') AS day_key,
+				strftime('%Y-%m-%d', created_at, 'unixepoch', 'localtime') AS day_key,
 				COUNT(*) AS value
 			FROM document
 			WHERE created_at >= ?
 			GROUP BY day_key`
 		)
-		.all(start_at) as Array<{ day_key: string | null; value: number | null }>
+		.all(db_start_at) as Array<{ day_key: string | null; value: number | null }>
 
 	for (const row of document_rows) {
 		if (!row.day_key) {
@@ -500,13 +544,13 @@ const buildDailyTrendRows = (now: number) => {
 	const rewire_rows = env.sqlite
 		.prepare(
 			`SELECT
-				strftime('%Y-%m-%d', created_at / 1000, 'unixepoch', 'localtime') AS day_key,
+				strftime('%Y-%m-%d', created_at, 'unixepoch', 'localtime') AS day_key,
 				COUNT(*) AS value
 			FROM rewire_event
 			WHERE created_at >= ?
 			GROUP BY day_key`
 		)
-		.all(start_at) as Array<{ day_key: string | null; value: number | null }>
+		.all(db_start_at) as Array<{ day_key: string | null; value: number | null }>
 
 	for (const row of rewire_rows) {
 		if (!row.day_key) {
@@ -523,7 +567,7 @@ const buildDailyTrendRows = (now: number) => {
 	const pthink_rows = env.sqlite
 		.prepare(
 			`SELECT
-				strftime('%Y-%m-%d', created_at / 1000, 'unixepoch', 'localtime') AS day_key,
+				strftime('%Y-%m-%d', created_at, 'unixepoch', 'localtime') AS day_key,
 				COUNT(*) AS value
 			FROM article
 			WHERE created_at >= ?
@@ -531,7 +575,7 @@ const buildDailyTrendRows = (now: number) => {
 				AND json_extract(metadata, '$.pthink.kind') IS NOT NULL
 			GROUP BY day_key`
 		)
-		.all(start_at) as Array<{ day_key: string | null; value: number | null }>
+		.all(db_start_at) as Array<{ day_key: string | null; value: number | null }>
 
 	for (const row of pthink_rows) {
 		if (!row.day_key) {
@@ -548,13 +592,13 @@ const buildDailyTrendRows = (now: number) => {
 	const notification_rows = env.sqlite
 		.prepare(
 			`SELECT
-				strftime('%Y-%m-%d', created_at / 1000, 'unixepoch', 'localtime') AS day_key,
+				strftime('%Y-%m-%d', created_at, 'unixepoch', 'localtime') AS day_key,
 				COUNT(*) AS value
 			FROM notification
 			WHERE created_at >= ?
 			GROUP BY day_key`
 		)
-		.all(start_at) as Array<{ day_key: string | null; value: number | null }>
+		.all(db_start_at) as Array<{ day_key: string | null; value: number | null }>
 
 	for (const row of notification_rows) {
 		if (!row.day_key) {
@@ -646,6 +690,21 @@ export default p
 		const sessions_cron = countValue('SELECT COUNT(*) AS value FROM session WHERE cron = 1')
 		const sessions_today = countValue('SELECT COUNT(*) AS value FROM session WHERE created_at >= ?', [last_day])
 		const sessions_week = countValue('SELECT COUNT(*) AS value FROM session WHERE created_at >= ?', [last_week])
+		const sessions_active_24h = countValue('SELECT COUNT(*) AS value FROM session WHERE updated_at >= ?', [
+			last_day
+		])
+		const sessions_warm_72h = countValue(
+			'SELECT COUNT(*) AS value FROM session WHERE updated_at < ? AND updated_at >= ?',
+			[last_day, last_three_days]
+		)
+		const sessions_cooling_week = countValue(
+			'SELECT COUNT(*) AS value FROM session WHERE updated_at < ? AND updated_at >= ?',
+			[last_three_days, last_week]
+		)
+		const sessions_dormant_over_week = countValue(
+			'SELECT COUNT(*) AS value FROM session WHERE updated_at < ?',
+			[last_week]
+		)
 		const sessions_with_messages_week = countValue(
 			'SELECT COUNT(DISTINCT session_id) AS value FROM message WHERE created_at >= ?',
 			[last_week]
@@ -695,6 +754,78 @@ export default p
 		)
 		const links_week_total = countValue('SELECT COUNT(*) AS value FROM link WHERE created_at >= ?', [last_week])
 		const link_fail_total = countValue("SELECT COUNT(*) AS value FROM link WHERE status = 'fail'")
+		const intake_week_total = documents_week_total + articles_week_total + links_week_total
+		const posts_with_session_total = countValue(
+			`SELECT COUNT(*) AS value
+			FROM post_session ps
+			INNER JOIN article a ON ps.post_id = a.id
+			WHERE a."for" IN ('user', 'wiki', 'memory')
+				AND ${organic_post_filter}`
+		)
+		const posts_with_project_total = countValue(
+			`SELECT COUNT(DISTINCT pp.post_id) AS value
+			FROM post_project pp
+			INNER JOIN article a ON pp.post_id = a.id
+			WHERE a."for" IN ('user', 'wiki', 'memory')
+				AND ${organic_post_filter}`
+		)
+		const posts_week_with_session = countValue(
+			`SELECT COUNT(*) AS value
+			FROM post_session ps
+			INNER JOIN article a ON ps.post_id = a.id
+			WHERE a.created_at >= ?
+				AND a."for" IN ('user', 'wiki', 'memory')
+				AND ${organic_post_filter}`,
+			[last_week]
+		)
+		const posts_week_with_project = countValue(
+			`SELECT COUNT(DISTINCT pp.post_id) AS value
+			FROM post_project pp
+			INNER JOIN article a ON pp.post_id = a.id
+			WHERE a.created_at >= ?
+				AND a."for" IN ('user', 'wiki', 'memory')
+				AND ${organic_post_filter}`,
+			[last_week]
+		)
+		const agents_active_week = countValue(
+			`SELECT COUNT(DISTINCT ag.agent_id) AS value
+			FROM agent_session ag
+			INNER JOIN message m ON m.session_id = ag.session_id
+			WHERE m.created_at >= ?`,
+			[last_week]
+		)
+		const agents_with_content_total = countValue(
+			`SELECT COUNT(DISTINCT agent_id) AS value
+			FROM (
+				SELECT agent_id FROM agent_article
+				UNION
+				SELECT agent_id FROM agent_document
+			)`
+		)
+		const oldest_pending_row = env.sqlite
+			.prepare(
+				`SELECT item_type, updated_at
+				FROM (
+					SELECT 'document' AS item_type, updated_at FROM document WHERE is_pipelined = 0
+					UNION ALL
+					SELECT 'article' AS item_type, updated_at
+					FROM article
+					WHERE is_pipelined = 0 AND "for" NOT IN ('user', 'wiki', 'memory')
+					UNION ALL
+					SELECT 'post' AS item_type, updated_at
+					FROM article
+					WHERE is_pipelined = 0
+						AND "for" IN ('user', 'wiki', 'memory')
+						AND ${organic_post_filter}
+					UNION ALL
+					SELECT 'link' AS item_type, updated_at
+					FROM link
+					WHERE status IN ('pending', 'none')
+				)
+				ORDER BY updated_at ASC
+				LIMIT 1`
+			)
+			.get() as { item_type?: string | null; updated_at?: number | null } | undefined
 
 		const post_for_counts = readPostForCounts()
 		const post_total = post_for_counts.user + post_for_counts.wiki + post_for_counts.memory
@@ -722,7 +853,7 @@ export default p
 			)
 			.get() as { value?: number | null } | undefined
 		const last_post_at = Number(last_post_at_row?.value ?? 0)
-		const days_since_last_post = last_post_at ? Math.floor((now - last_post_at) / day_ms) : null
+		const days_since_last_post = last_post_at ? Math.floor((now - last_post_at * second_ms) / day_ms) : null
 		const post_streak_days = readOrganicPostStreak(today_key)
 		const backlog_pending_total = documents_pending + articles_pending + posts_pending + link_pending_total
 		const pipeline_created_week_total =
@@ -740,6 +871,8 @@ export default p
 			total_project_messages > 0 && pthink_analytics.active_projects[0]
 				? round((pthink_analytics.active_projects[0].message_count / total_project_messages) * 100)
 				: 0
+		const pthink_kind_counts_total = readPthinkKindCounts()
+		const pthink_kind_counts_week = readPthinkKindCounts(last_week)
 		const recent_sessions = env.sqlite
 			.prepare(
 				'SELECT id, title, runing, unread, im, cron, updated_at FROM session ORDER BY updated_at DESC LIMIT 6'
@@ -843,6 +976,10 @@ export default p
 				sessions_cron,
 				sessions_today,
 				sessions_week,
+				sessions_active_24h,
+				sessions_warm_72h,
+				sessions_cooling_week,
+				sessions_dormant_over_week,
 				sessions_with_messages_week,
 				stale_unread_sessions_24h,
 				stale_unread_sessions_72h,
@@ -897,14 +1034,28 @@ export default p
 				articles_week_total,
 				posts_pending,
 				pipeline_created_week_total,
+				intake_week_total,
 				post_for_counts,
+				posts_with_session_total,
+				posts_with_project_total,
+				posts_week_with_session,
+				posts_week_with_project,
 				long_article_total,
 				avg_chunks_per_article:
 					article_total > 0 ? Number((chunk_total / article_total).toFixed(1)) : 0,
-				links_week_total
+				links_week_total,
+				oldest_pending_item:
+					oldest_pending_row?.item_type && oldest_pending_row?.updated_at
+						? {
+								type: String(oldest_pending_row.item_type),
+								updated_at: Number(oldest_pending_row.updated_at)
+							}
+						: null
 			},
 			system: {
 				agent_total,
+				agents_active_week,
+				agents_with_content_total,
 				group_total,
 				project_total,
 				skill_total,
@@ -957,7 +1108,9 @@ export default p
 				status: pthink_status,
 				report_total: pthink_report_total,
 				report_week: pthink_report_week,
-				report_today: pthink_report_today
+				report_today: pthink_report_today,
+				kind_counts_total: pthink_kind_counts_total,
+				kind_counts_week: pthink_kind_counts_week
 			},
 			trends,
 			coverage: {

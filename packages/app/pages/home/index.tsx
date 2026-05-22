@@ -1,6 +1,9 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { FileStack, History, Sparkles } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 import { container } from 'tsyringe'
+
+import { TextTabs } from '@/components'
 
 import {
 	KnowledgeAssets,
@@ -14,8 +17,15 @@ import {
 import { Context } from './context'
 import Model from './model'
 
+const top_tab_items = [
+	{ key: 'stats', title: 'Stats', Icon: FileStack },
+	{ key: 'recent', title: 'Recent', Icon: History },
+	{ key: 'report', title: 'Report', Icon: Sparkles }
+] as const
+
 const Index = () => {
 	const ref_model = useRef<Model | null>(null)
+	const [active_tab, setActiveTab] = useState<(typeof top_tab_items)[number]['key']>('stats')
 
 	if (!ref_model.current) {
 		ref_model.current = container.resolve(Model)
@@ -45,12 +55,30 @@ const Index = () => {
 				>
 					{x.snapshot ? (
 						<>
-							<KnowledgeAssets></KnowledgeAssets>
-							<TrendPanels></TrendPanels>
-							<RecentChanges></RecentChanges>
-							<MemoryPanel></MemoryPanel>
-							<PthinkPanel></PthinkPanel>
-							<OverviewGrid></OverviewGrid>
+							<div className='flex items-center'>
+								<div className='h-7'>
+									<TextTabs
+										className='gap-4'
+										items={top_tab_items}
+										active={active_tab}
+										setActive={value =>
+											setActiveTab(
+												value as (typeof top_tab_items)[number]['key']
+											)
+										}
+									></TextTabs>
+								</div>
+							</div>
+							{active_tab === 'stats' ? (
+								<>
+									<KnowledgeAssets></KnowledgeAssets>
+									<TrendPanels></TrendPanels>
+									<MemoryPanel></MemoryPanel>
+									<OverviewGrid></OverviewGrid>
+								</>
+							) : null}
+							{active_tab === 'recent' ? <RecentChanges></RecentChanges> : null}
+							{active_tab === 'report' ? <PthinkPanel></PthinkPanel> : null}
 						</>
 					) : (
 						<LoadingState></LoadingState>

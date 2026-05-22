@@ -87,6 +87,20 @@ const Index = () => {
 					</div>
 				</div>
 
+				<div className='grid gap-3 sm:grid-cols-3'>
+					{x.pthink_depth_items.map(item => (
+						<div className='border-border/70 rounded-2xl border p-4' key={item.key}>
+							<div className='text-std-400 text-[11px] tracking-[0.18em] uppercase'>
+								{item.title}
+							</div>
+							<div className='mt-2 text-xl font-semibold tracking-tight'>{item.value}</div>
+							{item.desc ? (
+								<div className='text-std-400 mt-2 text-sm leading-5'>{item.desc}</div>
+							) : null}
+						</div>
+					))}
+				</div>
+
 				<div className='border-border/70 rounded-2xl border p-4'>
 					<div
 						className='

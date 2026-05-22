@@ -6,10 +6,19 @@ import type { PthinkAnalyticsSnapshot, PthinkRuntimeStatus, PthinkTriggerCandida
 const hour_ms = 60 * 60 * 1000
 const day_ms = 24 * hour_ms
 const week_ms = 7 * day_ms
+const second_ms = 1000
 const organic_post_where = `json_extract(metadata, '$.pthink.kind') IS NULL`
 
+const normalizeDbParam = (value: unknown) =>
+	typeof value === 'number' && Number.isFinite(value) && Math.abs(value) >= 1_000_000_000_000
+		? Math.floor(value / second_ms)
+		: value
+
+const normalizeDbParams = (params: Array<unknown>) => params.map(normalizeDbParam)
+const toUnixSeconds = (value: number) => Math.floor(value / second_ms)
+
 const countValue = (query: string, params: Array<unknown> = []) => {
-	const row = env.sqlite.prepare(query).get(...params) as { value?: number } | undefined
+	const row = env.sqlite.prepare(query).get(...normalizeDbParams(params)) as { value?: number } | undefined
 
 	return Number(row?.value ?? 0)
 }
@@ -56,6 +65,7 @@ const getPendingPipelineItems = (
 ) => stats.pending_posts + stats.pending_articles + stats.pending_documents + stats.pending_links
 
 const readWindowStats = (start_at: number): PthinkWindowStats => {
+	const db_start_at = toUnixSeconds(start_at)
 	const message_row = env.sqlite
 		.prepare(
 			`SELECT
@@ -70,10 +80,10 @@ const readWindowStats = (start_at: number): PthinkWindowStats => {
 			FROM message
 			WHERE created_at >= ?`
 		)
-		.get(start_at) as Record<string, number | null>
+		.get(db_start_at) as Record<string, number | null>
 
 	return {
-		sessions: countValue('SELECT COUNT(*) AS value FROM session WHERE created_at >= ?', [start_at]),
+		sessions: countValue('SELECT COUNT(*) AS value FROM session WHERE created_at >= ?', [db_start_at]),
 		messages: Number(message_row.messages ?? 0),
 		user_messages: Number(message_row.user_messages ?? 0),
 		assistant_messages: Number(message_row.assistant_messages ?? 0),
@@ -87,26 +97,28 @@ const readWindowStats = (start_at: number): PthinkWindowStats => {
 			WHERE created_at >= ?
 				AND "for" IN ('user', 'wiki', 'memory')
 				AND ${organic_post_where}`,
-			[start_at]
+			[db_start_at]
 		),
 		new_memory_posts: countValue(
 			`SELECT COUNT(*) AS value FROM article
 			WHERE created_at >= ?
 				AND "for" = 'memory'
 				AND ${organic_post_where}`,
-			[start_at]
+			[db_start_at]
 		),
 		updated_posts: countValue(
 			`SELECT COUNT(*) AS value FROM article
 			WHERE updated_at >= ?
 				AND "for" IN ('user', 'wiki', 'memory')
 				AND ${organic_post_where}`,
-			[start_at]
+			[db_start_at]
 		),
-		new_documents: countValue('SELECT COUNT(*) AS value FROM document WHERE created_at >= ?', [start_at]),
-		rewire_events: countValue('SELECT COUNT(*) AS value FROM rewire_event WHERE created_at >= ?', [start_at]),
+		new_documents: countValue('SELECT COUNT(*) AS value FROM document WHERE created_at >= ?', [db_start_at]),
+		rewire_events: countValue('SELECT COUNT(*) AS value FROM rewire_event WHERE created_at >= ?', [
+			db_start_at
+		]),
 		new_notifications: countValue('SELECT COUNT(*) AS value FROM notification WHERE created_at >= ?', [
-			start_at
+			db_start_at
 		]),
 		unread_notifications: countValue('SELECT COUNT(*) AS value FROM notification WHERE is_read = 0'),
 		pending_posts: countValue(
@@ -126,6 +138,7 @@ const readWindowStats = (start_at: number): PthinkWindowStats => {
 }
 
 const readTopModels = (start_at: number) => {
+	const db_start_at = toUnixSeconds(start_at)
 	const assistant_messages = env.sqlite
 		.prepare(
 			`SELECT
@@ -138,7 +151,7 @@ const readTopModels = (start_at: number) => {
 				AND created_at >= ?
 				AND json_extract(content, '$.metadata.usage.totalTokens') IS NOT NULL`
 		)
-		.all(start_at) as Array<{
+		.all(db_start_at) as Array<{
 		session_id: string
 		created_at: number
 		sender_id: string | null
@@ -207,6 +220,7 @@ export const buildPthinkAnalytics = (now = Date.now()): PthinkAnalyticsSnapshot 
 	const day_start = now - day_ms
 	const week_start = now - week_ms
 	const six_hour_start = now - 6 * hour_ms
+	const db_week_start = toUnixSeconds(week_start)
 
 	const active_sessions = env.sqlite
 		.prepare(
@@ -222,7 +236,7 @@ export const buildPthinkAnalytics = (now = Date.now()): PthinkAnalyticsSnapshot 
 			ORDER BY message_count DESC, last_message_at DESC
 			LIMIT 5`
 		)
-		.all(week_start)
+		.all(db_week_start)
 		.map(row => {
 			const item = row as Record<string, unknown>
 
@@ -250,7 +264,7 @@ export const buildPthinkAnalytics = (now = Date.now()): PthinkAnalyticsSnapshot 
 			ORDER BY message_count DESC, last_message_at DESC
 			LIMIT 5`
 		)
-		.all(week_start)
+		.all(db_week_start)
 		.map(row => {
 			const item = row as Record<string, unknown>
 

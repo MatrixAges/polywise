@@ -19,6 +19,7 @@ import type {
 } from './types'
 
 const compact_formatter = Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 })
+const day_ms = 24 * 60 * 60 * 1000
 
 const weekday_label_map = {
 	sun: 'Sunday',
@@ -33,6 +34,20 @@ const weekday_label_map = {
 const formatCompact = (value: number) => compact_formatter.format(value)
 const formatInteger = (value: number) => value.toLocaleString('en-US')
 const formatPercent = (value: number) => `${value.toFixed(value % 1 === 0 ? 0 : 1)}%`
+const formatRatio = (value: number) => `${value.toFixed(value >= 10 ? 0 : 1)}x`
+const formatAgeDays = (timestamp?: number | null) => {
+	if (!timestamp) {
+		return 'Clear'
+	}
+
+	const age_days = Math.max(0, (Date.now() - timestamp * 1000) / day_ms)
+
+	if (age_days < 1) {
+		return `${Math.max(1, Math.round(age_days * 24))}h`
+	}
+
+	return `${Math.round(age_days)}d`
+}
 
 const token_trend_config = {
 	total_tokens: { label: 'Total tokens', color: '#f59e0b' },
@@ -126,13 +141,13 @@ export default class Index {
 				key: 'sessions',
 				title: 'Sessions',
 				value: formatInteger(this.data.overview.sessions_week),
-				desc: `${formatCompact(this.data.overview.session_total)} total · ${this.data.overview.sessions_today} today`
+				desc: `${formatCompact(this.data.overview.session_total)} total · ${this.data.overview.sessions_running} running now · ${this.data.overview.sessions_today} created today`
 			},
 			{
 				key: 'running',
 				title: 'Active week',
 				value: formatInteger(this.data.overview.sessions_with_messages_week),
-				desc: `${this.data.overview.sessions_running} running now · ${this.data.overview.sessions_im} IM · ${this.data.overview.sessions_cron} cron`
+				desc: this.session_recency_mix
 			},
 			{
 				key: 'unread',
@@ -251,6 +266,130 @@ export default class Index {
 		}
 
 		return `Cached input ${formatCompact(this.data.usage.cached_input_tokens)} · ${formatCompact(this.data.activity.today.tokens)} tokens today · ${this.data.usage.assistant_messages} assistant replies`
+	}
+
+	get session_recency_mix() {
+		if (!this.data) {
+			return ''
+		}
+
+		return `24h ${this.data.overview.sessions_active_24h} · 72h ${this.data.overview.sessions_warm_72h} · 7d ${this.data.overview.sessions_cooling_week} · dormant ${this.data.overview.sessions_dormant_over_week}`
+	}
+
+	get usage_depth_items(): Array<HomeModelItem> {
+		if (!this.data) {
+			return []
+		}
+
+		const top_model = this.data.usage.models[0]
+		const top_provider = this.data.usage.providers[0]
+		const top_model_share =
+			this.data.usage.week_total_tokens > 0 && top_model
+				? (top_model.total_tokens / this.data.usage.week_total_tokens) * 100
+				: 0
+		const top_provider_share =
+			this.data.usage.total_tokens > 0 && top_provider
+				? (top_provider.total_tokens / this.data.usage.total_tokens) * 100
+				: 0
+		const cached_ratio =
+			this.data.usage.input_tokens > 0
+				? (this.data.usage.cached_input_tokens / this.data.usage.input_tokens) * 100
+				: 0
+		const reasoning_share =
+			this.data.usage.total_tokens > 0
+				? (this.data.usage.reasoning_tokens / this.data.usage.total_tokens) * 100
+				: 0
+
+		return [
+			{
+				key: 'top-model-share',
+				title: 'Top model share',
+				value: formatPercent(top_model_share),
+				desc: top_model
+					? `${top_model.label} · ${top_model.calls} calls this week`
+					: 'No weekly model activity'
+			},
+			{
+				key: 'top-provider-share',
+				title: 'Provider concentration',
+				value: formatPercent(top_provider_share),
+				desc: top_provider
+					? `${top_provider.provider} · ${top_provider.calls} calls total`
+					: 'No provider activity'
+			},
+			{
+				key: 'cached-ratio',
+				title: 'Cached input ratio',
+				value: formatPercent(cached_ratio),
+				desc: `${formatCompact(this.data.usage.cached_input_tokens)} cached of ${formatCompact(this.data.usage.input_tokens)} input tokens`
+			},
+			{
+				key: 'reasoning-share',
+				title: 'Reasoning share',
+				value: formatPercent(reasoning_share),
+				desc: `${formatCompact(this.data.usage.reasoning_tokens)} reasoning of ${formatCompact(this.data.usage.total_tokens)} total tokens`
+			}
+		]
+	}
+
+	get asset_depth_items(): Array<HomeModelItem> {
+		if (!this.data) {
+			return []
+		}
+
+		const session_grounding_week =
+			this.data.activity.week.posts > 0
+				? (this.data.content.posts_week_with_session / this.data.activity.week.posts) * 100
+				: 0
+		const project_tagging_week =
+			this.data.activity.week.posts > 0
+				? (this.data.content.posts_week_with_project / this.data.activity.week.posts) * 100
+				: 0
+		const intake_to_output =
+			this.data.content.intake_week_total > 0
+				? this.data.activity.week.posts / this.data.content.intake_week_total
+				: this.data.activity.week.posts > 0
+					? this.data.activity.week.posts
+					: 0
+		const active_agent_share =
+			this.data.system.agent_total > 0
+				? (this.data.system.agents_active_week / this.data.system.agent_total) * 100
+				: 0
+
+		return [
+			{
+				key: 'grounding',
+				title: 'Session-grounded posts',
+				value: formatPercent(session_grounding_week),
+				desc: `${this.data.content.posts_week_with_session}/${this.data.activity.week.posts} this week · ${this.data.content.posts_with_session_total}/${this.data.content.post_total} total`
+			},
+			{
+				key: 'project-tagging',
+				title: 'Project-tagged posts',
+				value: formatPercent(project_tagging_week),
+				desc: `${this.data.content.posts_week_with_project}/${this.data.activity.week.posts} this week · ${this.data.content.posts_with_project_total}/${this.data.content.post_total} total`
+			},
+			{
+				key: 'intake-output',
+				title: 'Intake to output',
+				value: formatRatio(intake_to_output),
+				desc: `${this.data.activity.week.posts} posts from ${this.data.content.intake_week_total} new docs/articles/links this week`
+			},
+			{
+				key: 'backlog-age',
+				title: 'Oldest backlog age',
+				value: formatAgeDays(this.data.content.oldest_pending_item?.updated_at ?? null),
+				desc: this.data.content.oldest_pending_item
+					? `${this.data.content.oldest_pending_item.type} is the oldest queued item`
+					: 'No queued item right now'
+			},
+			{
+				key: 'agent-coverage',
+				title: 'Active agent coverage',
+				value: formatPercent(active_agent_share),
+				desc: `${this.data.system.agents_active_week}/${this.data.system.agent_total} active this week · ${this.data.system.agents_with_content_total}/${this.data.system.agent_total} with content`
+			}
+		]
 	}
 
 	get posts_total() {
@@ -525,6 +664,45 @@ export default class Index {
 		]
 	}
 
+	get memory_depth_items(): Array<HomeModelItem> {
+		if (!this.data) {
+			return []
+		}
+
+		const frozen_total = this.data.memory.frozen_node_total + this.data.memory.frozen_edge_total
+		const graph_total = this.data.memory.node_total + this.data.memory.edge_total
+		const active_edge_share =
+			this.data.memory.edge_total > 0
+				? (this.data.memory.active_edge_total / this.data.memory.edge_total) * 100
+				: 0
+		const rewire_intensity =
+			this.data.memory.edge_total > 0
+				? (this.data.memory.rewire_event_week / this.data.memory.edge_total) * 100
+				: 0
+		const freeze_ratio = graph_total > 0 ? (frozen_total / graph_total) * 100 : 0
+
+		return [
+			{
+				key: 'rewire-intensity',
+				title: 'Rewire intensity',
+				value: formatPercent(rewire_intensity),
+				desc: `${this.data.memory.rewire_event_week} weekly rewires across ${formatCompact(this.data.memory.edge_total)} total edges`
+			},
+			{
+				key: 'active-edge-share',
+				title: 'Active edge share',
+				value: formatPercent(active_edge_share),
+				desc: `${this.data.memory.active_edge_total} active · ${this.data.memory.silent_edge_total} silent`
+			},
+			{
+				key: 'freeze-ratio',
+				title: 'Frozen ratio',
+				value: formatPercent(freeze_ratio),
+				desc: `${frozen_total.toLocaleString('en-US')} frozen nodes and edges combined`
+			}
+		]
+	}
+
 	get activity_window_items(): Array<HomeModelItem> {
 		if (!this.data) {
 			return []
@@ -588,6 +766,44 @@ export default class Index {
 				key: 'refresh',
 				label: 'Last snapshot refresh',
 				value: this.last_loaded_label
+			}
+		]
+	}
+
+	get pthink_depth_items(): Array<HomeModelItem> {
+		if (!this.data) {
+			return []
+		}
+
+		const week_counts = this.data.pthink.kind_counts_week
+		const total_counts = this.data.pthink.kind_counts_total
+		const week_total = week_counts.idle + week_counts.daily + week_counts.weekly + week_counts.trigger
+		const trigger_share = week_total > 0 ? (week_counts.trigger / week_total) * 100 : 0
+		const scheduled_week = week_counts.idle + week_counts.daily + week_counts.weekly
+		const last_report_gap_hours = this.data.pthink.status.last_report_at
+			? Math.max(0, Math.round((Date.now() - this.data.pthink.status.last_report_at) / (60 * 60 * 1000)))
+			: null
+
+		return [
+			{
+				key: 'trigger-share',
+				title: 'Trigger share',
+				value: formatPercent(trigger_share),
+				desc: `${week_counts.trigger} trigger · ${scheduled_week} scheduled reports this week`
+			},
+			{
+				key: 'report-gap',
+				title: 'Last report gap',
+				value: last_report_gap_hours === null ? 'None' : `${last_report_gap_hours}h`,
+				desc: this.data.pthink.status.last_report_at
+					? `${this.data.pthink.status.last_status} · last report ${fromNow(this.data.pthink.status.last_report_at)}`
+					: 'No autonomous report generated yet'
+			},
+			{
+				key: 'report-mix',
+				title: 'Report mix',
+				value: `${week_counts.daily}/${week_counts.weekly}/${week_counts.trigger}/${week_counts.idle}`,
+				desc: `Daily / weekly / trigger / idle this week · ${total_counts.trigger} trigger total`
 			}
 		]
 	}
