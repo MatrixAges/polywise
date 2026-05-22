@@ -45,7 +45,6 @@ const Index = () => {
 					</div>
 					<div className='text-std-400 mt-2 text-sm leading-6'>{x.pthink_runtime_label}</div>
 				</div>
-
 				<div
 					className='
 						px-4 py-3.5
@@ -67,17 +66,19 @@ const Index = () => {
 				<div
 					className='
 						grid
-						border border-border-light border-t-0 border-b-0
+						border border-border-light border-t-0
 						md:grid-cols-2
 					'
 				>
 					{pthink_runtime_items.map((item, index) => (
 						<div
-							className={`${stat_item_class}border-border-light border-b${
-								index % 2 === 0 && index !== pthink_runtime_items.length - 1
-									? 'md:border-r'
-									: ''
-							}`}
+							className={$cx(
+								stat_item_class,
+								`
+								border-border-light border-r border-b
+								last:border-b-0 even:border-r-0
+							`
+							)}
 							key={item.key}
 						>
 							<div className='text-std-400 text-xs font-medium uppercase'>{item.title}</div>
@@ -85,7 +86,6 @@ const Index = () => {
 						</div>
 					))}
 				</div>
-
 				<div
 					className='
 						grid
@@ -95,9 +95,11 @@ const Index = () => {
 				>
 					{pthink_depth_items.map((item, index) => (
 						<div
-							className={`${stat_item_class}border-border-light border-b md:border-b-0${
-								index < pthink_depth_items.length - 1 ? 'md:border-r' : ''
-							}`}
+							className={$cx(
+								stat_item_class,
+								'border-border-light border-b md:border-b-0',
+								index < pthink_depth_items.length - 1 && 'md:border-r'
+							)}
 							key={item.key}
 						>
 							<div className='text-std-400 text-xs font-medium uppercase'>{item.title}</div>

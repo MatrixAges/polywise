@@ -8,10 +8,10 @@ import {
 	ContentReview,
 	Hotspots,
 	LoadingState,
-	MemoryPanel,
+	Memory,
 	Overview,
 	Pipeline,
-	PthinkPanel,
+	Report,
 	SessionActivity,
 	TokenUsage,
 	Trending
@@ -77,12 +77,12 @@ const Index = () => {
 								)}
 								{active_tab === 'memory' && (
 									<div className='flex flex-col gap-10'>
-										<MemoryPanel></MemoryPanel>
+										<Memory></Memory>
 									</div>
 								)}
 								{active_tab === 'report' && (
 									<div className='flex flex-col gap-10'>
-										<PthinkPanel></PthinkPanel>
+										<Report></Report>
 									</div>
 								)}
 							</>

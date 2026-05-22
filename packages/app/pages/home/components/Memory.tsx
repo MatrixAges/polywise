@@ -35,21 +35,21 @@ const Index = () => {
 						border border-border-light border-b-0
 					'
 				>
-					<div className={`${stat_item_class}border-border-light border-r border-b`}>
+					<div className={$cx(stat_item_class, 'border-border-light border-r border-b')}>
 						<div className='text-std-400 text-xs font-medium uppercase'>Nodes</div>
 						<div className='font-mono text-2xl font-semibold tracking-tight'>
 							{x.node_total_label}
 						</div>
 						<div className='text-std-300 text-xs'>{memory.frozen_node_total} frozen</div>
 					</div>
-					<div className={`${stat_item_class}border-border-light border-b`}>
+					<div className={$cx(stat_item_class, 'border-border-light border-b')}>
 						<div className='text-std-400 text-xs font-medium uppercase'>Edges</div>
 						<div className='font-mono text-2xl font-semibold tracking-tight'>
 							{x.edge_total_label}
 						</div>
 						<div className='text-std-300 text-xs'>{memory.frozen_edge_total} frozen</div>
 					</div>
-					<div className={`${stat_item_class}border-border-light border-r border-b`}>
+					<div className={$cx(stat_item_class, 'border-border-light border-r border-b')}>
 						<div className='text-std-400 text-xs font-medium uppercase'>Weekly Rewires</div>
 						<div className='font-mono text-2xl font-semibold tracking-tight'>
 							{memory.rewire_event_week.toLocaleString('en-US')}
@@ -58,7 +58,7 @@ const Index = () => {
 							{memory.rewire_event_total.toLocaleString('en-US')} total
 						</div>
 					</div>
-					<div className={`${stat_item_class}border-border-light border-r border-b`}>
+					<div className={$cx(stat_item_class, 'border-border-light border-r border-b')}>
 						<div className='text-std-400 text-xs font-medium uppercase'>Frozen Graph</div>
 						<div className='font-mono text-2xl font-semibold tracking-tight'>
 							{frozen_total.toLocaleString('en-US')}
@@ -76,9 +76,11 @@ const Index = () => {
 				>
 					{memory_health_items.map((item, index) => (
 						<div
-							className={`${stat_item_class}border-border-light border-b${
-								index < memory_health_items.length - 1 ? 'md:border-r' : ''
-							}`}
+							className={$cx(
+								stat_item_class,
+								'border-border-light border-b',
+								index < memory_health_items.length - 1 && 'md:border-r'
+							)}
 							key={item.key}
 						>
 							<div className='text-std-400 text-xs font-medium uppercase'>{item.title}</div>
@@ -99,9 +101,11 @@ const Index = () => {
 				>
 					{memory_depth_items.map((item, index) => (
 						<div
-							className={`${stat_item_class}border-border-light border-b${
-								index < memory_depth_items.length - 1 ? 'md:border-r' : ''
-							}`}
+							className={$cx(
+								stat_item_class,
+								'border-border-light border-b',
+								index < memory_depth_items.length - 1 && 'md:border-r'
+							)}
 							key={item.key}
 						>
 							<div className='text-std-400 text-xs font-medium uppercase'>{item.title}</div>
@@ -130,9 +134,11 @@ const Index = () => {
 				>
 					{ops_items.map((item, index) => (
 						<div
-							className={`${stat_item_class}border-border-light border-b md:border-b-0${
-								index < ops_items.length - 1 ? 'md:border-r' : ''
-							}`}
+							className={$cx(
+								stat_item_class,
+								'border-border-light border-b md:border-b-0',
+								index < ops_items.length - 1 && 'md:border-r'
+							)}
 							key={item.key}
 						>
 							<div className='text-std-400 text-xs font-medium uppercase'>{item.title}</div>
