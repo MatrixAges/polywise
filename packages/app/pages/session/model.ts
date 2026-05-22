@@ -49,6 +49,8 @@ export default class Index {
 	page_map = new Map<string, number>()
 	normal_session_page = 1
 	im_session_page = 1
+	normal_sessions_loaded = false
+	im_sessions_loaded = false
 	loading = false
 	normal_loading_more = false
 	im_loading_more = false
@@ -122,7 +124,15 @@ export default class Index {
 
 		this.util.acts = [deinit]
 
-		await Promise.all([this.getProjectList(), this.refreshSessions('sessions'), this.refreshSessions('im')])
+		await this.getProjectList({ wait_for_visible_sessions: false })
+
+		if (this.menu_tab === 'im') {
+			await this.refreshSessions('im')
+		} else if (this.menu_tab === 'sessions') {
+			await this.refreshSessions('sessions')
+		}
+
+		void this.prefetchInactiveMenuData()
 
 		this.watchSessionStatus()
 
@@ -147,6 +157,14 @@ export default class Index {
 			}
 
 			return
+		}
+
+		if (v === 'im') {
+			if (!this.im_sessions_loaded) {
+				void this.refreshSessions('im')
+			}
+		} else if (!this.normal_sessions_loaded) {
+			void this.refreshSessions('sessions')
 		}
 
 		const target_session_id = v === 'im' ? this.im_selected_session_id : this.normal_selected_session_id
@@ -394,6 +412,12 @@ export default class Index {
 			if (state.selected_session_id && !session_id_list.includes(state.selected_session_id)) {
 				state.setSelectedSessionId('')
 			}
+
+			if (kind === 'im') {
+				this.im_sessions_loaded = true
+			} else {
+				this.normal_sessions_loaded = true
+			}
 		} finally {
 			this.loading = false
 		}
@@ -438,7 +462,8 @@ export default class Index {
 		}
 	}
 
-	async getProjectList() {
+	async getProjectList(args: { wait_for_visible_sessions?: boolean } = {}) {
+		const { wait_for_visible_sessions = true } = args
 		const data = (await rpc.project.getList.query()) as Array<{
 			project: Project
 			sessions: Array<Session>
@@ -467,7 +492,13 @@ export default class Index {
 			}
 		}
 
-		await this.syncVisibleProjectSessions()
+		const sync_visible_project_sessions = this.syncVisibleProjectSessions()
+
+		if (wait_for_visible_sessions) {
+			await sync_visible_project_sessions
+		} else {
+			void sync_visible_project_sessions
+		}
 	}
 
 	async getMoreSessions(project_index: number) {
@@ -776,6 +807,22 @@ export default class Index {
 		this.util.deinit()
 	}
 
+	private prefetchInactiveMenuData() {
+		const tasks: Array<Promise<unknown>> = []
+
+		if (this.menu_tab !== 'sessions' && !this.normal_sessions_loaded) {
+			tasks.push(this.refreshSessions('sessions'))
+		}
+
+		if (this.menu_tab !== 'im' && !this.im_sessions_loaded) {
+			tasks.push(this.refreshSessions('im'))
+		}
+
+		if (!tasks.length) return
+
+		void Promise.allSettled(tasks)
+	}
+
 	private async syncVisibleProjectSessions() {
 		const visible_project_ids = new Set(this.expand_project_ids)
 
@@ -783,13 +830,17 @@ export default class Index {
 			visible_project_ids.add(this.selected_project_id)
 		}
 
-		for (const project_id of visible_project_ids) {
-			const project_index = this.projects.findIndex(item => item.project.id === project_id)
+		await Promise.all(
+			Array.from(visible_project_ids, project_id => {
+				const project_index = this.projects.findIndex(item => item.project.id === project_id)
 
-			if (project_index >= 0) {
-				await this.loadProjectSessions(project_index, { force: true })
-			}
-		}
+				if (project_index < 0) {
+					return Promise.resolve()
+				}
+
+				return this.loadProjectSessions(project_index, { force: true })
+			})
+		)
 	}
 
 	private async loadProjectSessions(

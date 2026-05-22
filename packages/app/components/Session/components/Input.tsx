@@ -98,6 +98,12 @@ const Index = (props: IPropsInput) => {
 	const [loading_agents, setLoadingAgents] = useState(false)
 	const [loading_files, setLoadingFiles] = useState(false)
 	const [active_index, setActiveIndex] = useState(0)
+	const skill_items_loaded = useRef(false)
+	const agent_items_loaded_session_id = useRef('')
+	const file_items_loaded_session_id = useRef('')
+	const skill_items_requested = useRef(false)
+	const agent_items_requested_session_id = useRef('')
+	const file_items_requested_session_id = useRef('')
 
 	const s = global.setting
 	const is_page = type === 'page' || type === 'dialog'
@@ -131,8 +137,19 @@ const Index = (props: IPropsInput) => {
 	}, [])
 
 	useEffect(() => {
+		if (active_mention?.trigger !== '/') {
+			skill_items_requested.current = false
+
+			return
+		}
+
+		if (skill_items_loaded.current || skill_items_requested.current) {
+			return
+		}
+
 		let canceled = false
 
+		skill_items_requested.current = true
 		setLoadingSkills(true)
 
 		void rpc.skill.query
@@ -166,6 +183,7 @@ const Index = (props: IPropsInput) => {
 				}
 
 				setSkillItems(Array.from(builtin_map.values()))
+				skill_items_loaded.current = true
 			})
 			.catch(() => {
 				if (!canceled) {
@@ -181,11 +199,26 @@ const Index = (props: IPropsInput) => {
 		return () => {
 			canceled = true
 		}
-	}, [])
+	}, [active_mention?.trigger])
 
 	useEffect(() => {
+		if (active_mention?.trigger !== '@') {
+			agent_items_requested_session_id.current = ''
+
+			return
+		}
+
+		if (
+			agent_items_loaded_session_id.current === session_id ||
+			agent_items_requested_session_id.current === session_id
+		) {
+			return
+		}
+
 		let canceled = false
 
+		agent_items_requested_session_id.current = session_id
+		setAgentItems([])
 		setLoadingAgents(true)
 
 		void rpc.session.getMentionAgents
@@ -206,6 +239,7 @@ const Index = (props: IPropsInput) => {
 							`${item.name} ${item.role || ''} ${item.description || ''}`.toLowerCase()
 					}))
 				)
+				agent_items_loaded_session_id.current = session_id
 			})
 			.catch(() => {
 				if (!canceled) {
@@ -221,11 +255,26 @@ const Index = (props: IPropsInput) => {
 		return () => {
 			canceled = true
 		}
-	}, [session_id])
+	}, [active_mention?.trigger, session_id])
 
 	useEffect(() => {
+		if (active_mention?.trigger !== '@') {
+			file_items_requested_session_id.current = ''
+
+			return
+		}
+
+		if (
+			file_items_loaded_session_id.current === session_id ||
+			file_items_requested_session_id.current === session_id
+		) {
+			return
+		}
+
 		let canceled = false
 
+		file_items_requested_session_id.current = session_id
+		setFileItems([])
 		setLoadingFiles(true)
 
 		void rpc.session.getMentionFiles
@@ -244,6 +293,7 @@ const Index = (props: IPropsInput) => {
 						search_text: item.path.toLowerCase()
 					}))
 				)
+				file_items_loaded_session_id.current = session_id
 			})
 			.catch(() => {
 				if (!canceled) {
@@ -259,7 +309,7 @@ const Index = (props: IPropsInput) => {
 		return () => {
 			canceled = true
 		}
-	}, [session_id])
+	}, [active_mention?.trigger, session_id])
 
 	useEffect(() => {
 		const el = ref.current
