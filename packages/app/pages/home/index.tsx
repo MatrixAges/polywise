@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { FileStack, History, Sparkles } from 'lucide-react'
+import { FileStack, Sparkles } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 import { container } from 'tsyringe'
 
@@ -12,7 +12,6 @@ import {
 	MemoryPanel,
 	OverviewGrid,
 	PthinkPanel,
-	RecentChanges,
 	TrendPanels
 } from './components'
 import { Context } from './context'
@@ -20,7 +19,6 @@ import Model from './model'
 
 const top_tab_items = [
 	{ key: 'stats', title: 'Stats', Icon: FileStack },
-	{ key: 'recent', title: 'Recent', Icon: History },
 	{ key: 'report', title: 'Report', Icon: Sparkles }
 ] as const
 
@@ -79,7 +77,6 @@ const Index = () => {
 									<OverviewGrid></OverviewGrid>
 								</>
 							) : null}
-							{active_tab === 'recent' ? <RecentChanges></RecentChanges> : null}
 							{active_tab === 'report' ? <PthinkPanel></PthinkPanel> : null}
 						</>
 					) : (

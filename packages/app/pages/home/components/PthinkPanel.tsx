@@ -1,6 +1,5 @@
 import { Bot, CalendarClock, Sparkles } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
-import { Link } from 'react-router'
 
 import { useModel } from '../context'
 import SectionCard from './SectionCard'
@@ -9,10 +8,7 @@ const Index = () => {
 	const x = useModel()
 
 	return (
-		<SectionCard
-			title='PThink'
-			desc='Autonomous reporting status, schedule pressure, and the latest generated reports.'
-		>
+		<SectionCard title='PThink' desc='Autonomous reporting status, schedule pressure, and runtime health.'>
 			<div className='grid gap-3'>
 				<div
 					className={`rounded-2xl border p-4${
@@ -99,60 +95,6 @@ const Index = () => {
 							) : null}
 						</div>
 					))}
-				</div>
-
-				<div className='border-border/70 rounded-2xl border p-4'>
-					<div
-						className='
-							flex
-							items-center
-							gap-2
-							text-sm font-medium
-						'
-					>
-						<Sparkles className='text-amber-600' />
-						<span>Recent reports</span>
-					</div>
-					<div className='divide-border/60 mt-3 divide-y'>
-						{x.recent_reports.length > 0 ? (
-							x.recent_reports.map(item => (
-								<Link
-									className='
-										block
-										py-3
-										transition-colors
-										hover:text-std-900
-										first:pt-0 last:pb-0
-									'
-									key={item.id}
-									to={`/post/${item.id}`}
-								>
-									<div className='flex items-center justify-between gap-3'>
-										<div className='truncate text-sm font-medium'>
-											{item.title || 'Untitled report'}
-										</div>
-										<div className='text-std-400 shrink-0 text-xs'>
-											{item.created_label}
-										</div>
-									</div>
-									<div className='text-std-400 mt-1 text-xs capitalize'>
-										{item.meta_label}
-									</div>
-								</Link>
-							))
-						) : (
-							<div
-								className='
-									px-3 py-4
-									rounded-2xl
-									text-sm text-std-400
-									border border-border/70 border-dashed
-								'
-							>
-								No autonomous report yet.
-							</div>
-						)}
-					</div>
 				</div>
 			</div>
 		</SectionCard>

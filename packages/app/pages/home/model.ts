@@ -11,9 +11,6 @@ import type {
 	HomeHeatmapCell,
 	HomeModelItem,
 	HomeOverviewCard,
-	HomeRecentNotificationItem,
-	HomeRecentPostItem,
-	HomeRecentSessionItem,
 	HomeRuntimeItem,
 	HomeSnapshot,
 	HomeTrendPoint
@@ -592,49 +589,6 @@ export default class Index {
 						: `${this.data.content.days_since_last_post} days since last post update`
 			}
 		]
-	}
-
-	get recent_sessions(): Array<HomeRecentSessionItem> {
-		return (this.data?.recent.sessions ?? []).map(item => ({
-			...item,
-			updated_label: fromNow(item.updated_at),
-			status_label: item.is_runing
-				? 'Running'
-				: item.unread
-					? 'Unread'
-					: item.is_im
-						? 'IM'
-						: item.is_cron
-							? 'Cron'
-							: 'Idle'
-		}))
-	}
-
-	get recent_posts(): Array<HomeRecentPostItem> {
-		return (this.data?.recent.posts ?? []).map(item => ({
-			...item,
-			updated_label: fromNow(item.updated_at),
-			status_label: item.is_pipelined ? 'Ready' : 'Pending pipeline'
-		}))
-	}
-
-	get recent_notifications(): Array<HomeRecentNotificationItem> {
-		return (this.data?.recent.notifications ?? []).map(item => ({
-			...item,
-			created_label: fromNow(item.created_at),
-			status_label: item.is_read ? 'Read' : 'Unread'
-		}))
-	}
-
-	get recent_reports() {
-		return (this.data?.recent.pthink_reports ?? []).map(item => ({
-			...item,
-			created_label: fromNow(item.created_at),
-			meta_label:
-				item.kind === 'trigger' && item.trigger_key
-					? `trigger · ${item.trigger_key}`
-					: item.kind || 'report'
-		}))
 	}
 
 	get active_projects(): Array<HomeActiveProjectItem> {

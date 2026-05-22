@@ -154,8 +154,6 @@ const readOrganicPostStreak = (today_key: string) => {
 	return streak
 }
 
-const toBoolean = (value: unknown) => Boolean(value)
-
 const parseModelConfig = (value: unknown) => {
 	if (!value || typeof value !== 'string') {
 		return null
@@ -1016,88 +1014,6 @@ export default p
 				: 0
 		const pthink_kind_counts_total = readPthinkKindCounts()
 		const pthink_kind_counts_week = readPthinkKindCounts(last_week)
-		const recent_sessions = env.sqlite
-			.prepare(
-				'SELECT id, title, runing, unread, im, cron, updated_at FROM session ORDER BY updated_at DESC LIMIT 6'
-			)
-			.all()
-			.map(row => {
-				const target = row as Record<string, unknown>
-
-				return {
-					id: String(target.id ?? ''),
-					title: String(target.title ?? ''),
-					is_runing: toBoolean(target.runing),
-					unread: toBoolean(target.unread),
-					is_im: toBoolean(target.im),
-					is_cron: toBoolean(target.cron),
-					updated_at: Number(target.updated_at ?? 0)
-				}
-			})
-
-		const recent_posts = env.sqlite
-			.prepare(
-				`SELECT id, title, "for" AS target_for, is_pipelined, updated_at
-			FROM article
-			WHERE "for" IN ('user', 'wiki', 'memory')
-				AND ${organic_post_filter}
-			ORDER BY updated_at DESC
-			LIMIT 6`
-			)
-			.all()
-			.map(row => {
-				const target = row as Record<string, unknown>
-
-				return {
-					id: String(target.id ?? ''),
-					title: String(target.title ?? ''),
-					for_type: String(target.target_for ?? ''),
-					is_pipelined: toBoolean(target.is_pipelined),
-					updated_at: Number(target.updated_at ?? 0)
-				}
-			})
-
-		const recent_notifications = env.sqlite
-			.prepare('SELECT id, title, is_read, created_at FROM notification ORDER BY created_at DESC LIMIT 5')
-			.all()
-			.map(row => {
-				const target = row as Record<string, unknown>
-
-				return {
-					id: String(target.id ?? ''),
-					title: String(target.title ?? ''),
-					is_read: toBoolean(target.is_read),
-					created_at: Number(target.created_at ?? 0)
-				}
-			})
-
-		const recent_pthink_reports = env.sqlite
-			.prepare(
-				`SELECT
-				id,
-				title,
-				created_at,
-				json_extract(metadata, '$.pthink.kind') AS pthink_kind,
-				json_extract(metadata, '$.pthink.trigger_key') AS trigger_key
-			FROM article
-			WHERE "for" = 'memory'
-				AND json_extract(metadata, '$.pthink.kind') IS NOT NULL
-			ORDER BY created_at DESC
-			LIMIT 5`
-			)
-			.all()
-			.map(row => {
-				const target = row as Record<string, unknown>
-
-				return {
-					id: String(target.id ?? ''),
-					title: String(target.title ?? ''),
-					kind: String(target.pthink_kind ?? ''),
-					trigger_key: target.trigger_key ? String(target.trigger_key) : null,
-					created_at: Number(target.created_at ?? 0)
-				}
-			})
-
 		const pthink_report_total = countValue(
 			"SELECT COUNT(*) AS value FROM article WHERE \"for\" = 'memory' AND json_extract(metadata, '$.pthink.kind') IS NOT NULL"
 		)
@@ -1240,12 +1156,6 @@ export default p
 				avg_edge_rewire_score: round(Number(edge_stats_row?.avg_rewire_score ?? 0), 2),
 				rewire_event_total,
 				rewire_event_week
-			},
-			recent: {
-				sessions: recent_sessions,
-				posts: recent_posts,
-				notifications: recent_notifications,
-				pthink_reports: recent_pthink_reports
 			},
 			pthink: {
 				status: pthink_status,

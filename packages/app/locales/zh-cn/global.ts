@@ -10,7 +10,6 @@ export default {
 	add: '添加',
 	save: '保存',
 	remove: '删除',
-	recent: '最近',
 	icon: '图标',
 	emoji: '表情',
 	to: '到',

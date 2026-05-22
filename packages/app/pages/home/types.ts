@@ -39,21 +39,6 @@ export interface HomeHeatmapCell extends HomeHeatmapPoint {
 	tooltip: string
 }
 
-export type HomeRecentSessionItem = HomeSnapshot['recent']['sessions'][number] & {
-	status_label: string
-	updated_label: string
-}
-
-export type HomeRecentPostItem = HomeSnapshot['recent']['posts'][number] & {
-	status_label: string
-	updated_label: string
-}
-
-export type HomeRecentNotificationItem = HomeSnapshot['recent']['notifications'][number] & {
-	status_label: string
-	created_label: string
-}
-
 export type HomeActiveProjectItem = HomeSnapshot['activity']['top_projects'][number] & {
 	updated_label: string
 }

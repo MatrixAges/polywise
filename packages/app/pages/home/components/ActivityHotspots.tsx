@@ -22,34 +22,53 @@ const weekday_labels = [
 	{ row_index: 4, label: 'Fri' }
 ] as const
 
+interface HeatmapSlot {
+	cell: HomeHeatmapCell | null
+	date: string
+	is_future: boolean
+}
+
 const groupByWeeks = (cells: Array<HomeHeatmapCell>) => {
 	if (cells.length === 0) {
-		return [] as Array<Array<HomeHeatmapCell | null>>
+		return [] as Array<Array<HeatmapSlot>>
 	}
 
-	const first_day_index = dayjs(cells[0]!.date).day()
+	const first_date = dayjs(cells[0]!.date)
+	const last_date = dayjs(cells[cells.length - 1]!.date)
+	const first_day_index = first_date.day()
 	const leading = (7 + first_day_index - week_start) % 7
-	const padded = [
-		...Array.from({ length: leading }, () => null),
-		...cells,
-		...Array.from({ length: (7 - ((leading + cells.length) % 7 || 7)) % 7 }, () => null)
-	]
+	const trailing = (7 - ((leading + cells.length) % 7 || 7)) % 7
+	const start_date = first_date.subtract(leading, 'day')
+	const total_slots = leading + cells.length + trailing
 
-	return Array.from({ length: Math.ceil(padded.length / 7) }, (_, index) => padded.slice(index * 7, index * 7 + 7))
+	return Array.from({ length: Math.ceil(total_slots / 7) }, (_, week_index) =>
+		Array.from({ length: 7 }, (_, day_index) => {
+			const offset = week_index * 7 + day_index
+			const date = start_date.add(offset, 'day')
+			const cell_index = offset - leading
+			const cell = cell_index >= 0 && cell_index < cells.length ? cells[cell_index]! : null
+
+			return {
+				cell,
+				date: date.format('YYYY-MM-DD'),
+				is_future: date.isAfter(last_date, 'day')
+			}
+		})
+	)
 }
 
 const Index = () => {
 	const x = useModel()
 	const weeks = groupByWeeks(x.activity_heatmap_cells)
 	const month_labels = weeks.map((week, week_index) => {
-		const first = week.find(Boolean)
+		const first = week.find(item => item.cell)?.cell
 
 		if (!first) {
 			return { week_index, label: '' }
 		}
 
 		const label = dayjs(first.date).format('MMM')
-		const previous = week_index > 0 ? weeks[week_index - 1]?.find(Boolean) : null
+		const previous = week_index > 0 ? weeks[week_index - 1]?.find(item => item.cell)?.cell : null
 
 		return {
 			week_index,
@@ -107,79 +126,108 @@ const Index = () => {
 					</div>
 				</div>
 
-				<div className='mt-5 overflow-x-auto pb-1'>
-					<div className='min-w-max'>
+				<div className='mt-5 min-w-0'>
+					<div
+						className='
+							grid
+							items-end
+							gap-x-2 gap-y-2
+						'
+						style={{ gridTemplateColumns: '40px minmax(0, 1fr)' }}
+					>
+						<div />
+						<div
+							className='
+								relative
+								h-4
+								min-w-0
+								text-[11px] text-std-400
+							'
+						>
+							{month_labels.map(item =>
+								item.label ? (
+									<div
+										className='absolute top-0 whitespace-nowrap'
+										key={`month-${item.week_index}`}
+										style={{
+											left: `calc(${(item.week_index / weeks.length) * 100}% + 1px)`
+										}}
+									>
+										{item.label}
+									</div>
+								) : null
+							)}
+						</div>
+
 						<div
 							className='
 								grid
-								items-end
+								h-full
 								gap-1
 								text-[11px] text-std-400
 							'
-							style={{
-								gridTemplateColumns: `32px repeat(${weeks.length}, minmax(0, 1fr))`
-							}}
+							style={{ gridTemplateRows: 'repeat(7, minmax(0, 1fr))' }}
 						>
-							<div />
-							{month_labels.map(item => (
-								<div className='h-4' key={`month-${item.week_index}`}>
-									{item.label}
-								</div>
-							))}
+							{Array.from({ length: 7 }, (_, row_index) => {
+								const label = weekday_labels.find(item => item.row_index === row_index)
+
+								return (
+									<div
+										className='
+										flex
+										items-center justify-end
+										h-full
+										pr-1
+										whitespace-nowrap
+									'
+										key={`weekday-${row_index}`}
+									>
+										{label?.label ?? ''}
+									</div>
+								)
+							})}
 						</div>
 
-						<div className='mt-2 flex items-start gap-2'>
-							<div
-								className='
-									grid grid-rows-7
-									gap-1
-									pr-1
-									text-[11px] text-std-400
-								'
-							>
-								{Array.from({ length: 7 }, (_, row_index) => {
-									const label = weekday_labels.find(
-										item => item.row_index === row_index
-									)
-
-									return (
-										<div
-											className='flex h-3 items-center justify-end'
-											key={`weekday-${row_index}`}
-										>
-											{label?.label ?? ''}
-										</div>
-									)
-								})}
-							</div>
-
-							<div
-								className='
-									grid grid-rows-7
-									auto-cols-max grid-flow-col
-									gap-1
-								'
-								style={{ gridTemplateRows: 'repeat(7, minmax(0, 1fr))' }}
-							>
-								{weeks.map((week, week_index) =>
-									week.map((item, day_index) => (
-										<div
-											className={
-												item
+						<div
+							className='grid min-w-0 gap-1'
+							style={{
+								gridTemplateColumns: `repeat(${weeks.length}, minmax(0, 1fr))`,
+								gridTemplateRows: 'repeat(7, minmax(0, 1fr))'
+							}}
+						>
+							{weeks.map((week, week_index) =>
+								week.map((item, day_index) => (
+									<div
+										className={
+											item.cell
+												? `
+											aspect-square
+											w-full
+											rounded-[3px]
+											border border-black/5
+											dark:border-white/6
+											${level_class_map[item.cell.level]}`
+												: item.is_future
 													? `
-												size-3
-												rounded-[3px]
-												border border-black/5
-												dark:border-white/6
-												${level_class_map[item.level]}`
-													: 'size-3 rounded-[3px] opacity-0'
-											}
-											key={`cell-${week_index}-${day_index}`}
-											title={item?.tooltip}
-										></div>
-									))
-								)}
-							</div>
+											aspect-square
+											w-full
+											rounded-[3px]
+											bg-[#f6f8f1]
+											border border-black/5
+											dark:border-white/6 dark:bg-[#182118]
+										`
+													: 'aspect-square w-full rounded-[3px] opacity-0'
+										}
+										key={`cell-${week_index}-${day_index}`}
+										title={
+											item.cell?.tooltip ??
+											(item.is_future
+												? `${dayjs(item.date).format('MMM D, YYYY')} · upcoming day`
+												: undefined)
+										}
+									></div>
+								))
+							)}
 						</div>
 					</div>
 				</div>

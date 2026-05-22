@@ -10,7 +10,6 @@ export default {
 	add: 'Add',
 	save: 'Save',
 	remove: 'Remove',
-	recent: 'Recent',
 	icon: 'Icon',
 	emoji: 'Emoji',
 	to: 'to',
