@@ -4,14 +4,14 @@ import { Flame } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 import { ActivityCalendar } from 'react-activity-calendar'
 
-import { useSize } from '@/hooks'
+import { useSize, useTheme } from '@/hooks'
 
 import { useModel } from '../context'
 
 import type { HomeHeatmapCell } from '../types'
 
 const level_class_map = {
-	0: 'bg-[#eef2e8] dark:bg-[#2a362b]',
+	0: 'bg-[#efefef] dark:bg-[#2a362b]',
 	1: 'bg-[#d9e7c8] dark:bg-[#294b2f]',
 	2: 'bg-[#9fd08f] dark:bg-[#3d7a45]',
 	3: 'bg-[#5ea961] dark:bg-[#58a55f]',
@@ -19,20 +19,17 @@ const level_class_map = {
 } as const satisfies Record<number, string>
 
 const heatmap_theme: { light: Array<string>; dark: Array<string> } = {
-	light: ['#eef2e8', '#d9e7c8', '#9fd08f', '#5ea961', '#2f6b3c'],
+	light: ['#efefef', '#d9e7c8', '#9fd08f', '#5ea961', '#2f6b3c'],
 	dark: ['#2a362b', '#294b2f', '#3d7a45', '#58a55f', '#8be28e']
 }
 
 const week_start = 1
-const calendar_weeks = 52
-const max_block_size = 11
+const calendar_weeks = 48
 
 const getCalendarLayout = (width?: number) => {
 	const font_size = width && width < 480 ? 10 : 11
-	const block_margin = width && width < 640 ? 2 : 3
-	const block_size = width
-		? Math.max(1, Math.min(max_block_size, Math.floor((width + block_margin) / calendar_weeks - block_margin)))
-		: max_block_size
+	const block_margin = 2
+	const block_size = width ? Math.max(1, (width + block_margin) / calendar_weeks - block_margin) : 11
 	const block_radius = Math.min(3, Math.max(1, Math.floor(block_size / 2)))
 
 	return { block_margin, block_radius, block_size, font_size }
@@ -88,9 +85,11 @@ const toCalendarData = (cells: Array<HomeHeatmapCell>) => {
 
 const Index = () => {
 	const x = useModel()
+	const theme = useTheme()
 	const calendar_ref = useRef<HTMLDivElement>(null)
 	const calendar_width = useSize(() => calendar_ref.current!, 'width') as number | undefined
 	const calendar_data = toCalendarData(x.activity_heatmap_cells)
+	const total_activities = calendar_data.reduce((sum, item) => sum + item.count, 0)
 	const { block_margin, block_radius, block_size, font_size } = getCalendarLayout(calendar_width)
 
 	return (
@@ -124,8 +123,8 @@ const Index = () => {
 					w-full
 					min-w-0
 					mt-5
-					dark:[--hotspot-future-fill:#243024]
-					[--hotspot-future-fill:#f6f8f1]
+					dark:[--hotspot-zero-fill:#2a362b] dark:[--hotspot-future-fill:#243024]
+					[--hotspot-zero-fill:#eff2f5] [--hotspot-future-fill:#f6f8f1]
 				'
 			>
 				<ActivityCalendar
@@ -139,10 +138,15 @@ const Index = () => {
 						cloneElement(block, {
 							fill: (activity as HeatmapActivity).is_future
 								? 'var(--hotspot-future-fill)'
-								: block.props.fill,
+								: activity.level === 0
+									? 'var(--hotspot-zero-fill)'
+									: block.props.fill,
+							stroke: 'none',
+							strokeWidth: 0,
 							title: (activity as HeatmapActivity).tooltip
 						})
 					}
+					colorScheme={theme}
 					showColorLegend={false}
 					showTotalCount={false}
 					showWeekdayLabels={false}
@@ -161,7 +165,7 @@ const Index = () => {
 					border-t border-border/60
 				'
 			>
-				<div>Hotspot score blends messages with sessions, posts, rewires, and report bursts.</div>
+				<div>{`${total_activities} activities in the last year`}</div>
 				<div className='flex items-center gap-2'>
 					<span>Less</span>
 					{([0, 1, 2, 3, 4] as const).map(level => (
@@ -169,8 +173,6 @@ const Index = () => {
 							className={`
 								size-3
 								rounded-[3px]
-								border border-black/5
-								dark:border-white/6
 								${level_class_map[level]}`}
 							key={`legend-${level}`}
 						></span>

@@ -8,7 +8,7 @@ const week_ms = 7 * 24 * 60 * 60 * 1000
 const day_ms = 24 * 60 * 60 * 1000
 const second_ms = 1000
 const trend_days = 14
-const heatmap_weeks = 52
+const heatmap_weeks = 48
 const heatmap_days = heatmap_weeks * 7
 const organic_post_filter = `json_extract(metadata, '$.pthink.kind') IS NULL`
 
