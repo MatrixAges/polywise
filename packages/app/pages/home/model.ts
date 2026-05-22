@@ -305,7 +305,7 @@ export default class Index {
 		const active_days = cells.filter(item => item.score > 0).length
 		const busiest_day = cells.reduce((best, item) => (item.score > best.score ? item : best), cells[0]!)
 
-		return `Last 24 weeks · ${active_days} active days · busiest ${formatDate(busiest_day.date, 'MMM D')} at ${busiest_day.score}`
+		return `Last 52 weeks · ${active_days} active days · busiest ${formatDate(busiest_day.date, 'MMM D')} at ${busiest_day.score}`
 	}
 
 	get usage_metrics(): Array<HomeModelItem> {
