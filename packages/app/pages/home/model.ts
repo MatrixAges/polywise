@@ -30,6 +30,11 @@ const formatCompact = (value: number) => compact_formatter.format(value)
 const formatInteger = (value: number) => value.toLocaleString('en-US')
 const formatPercent = (value: number) => `${value.toFixed(value % 1 === 0 ? 0 : 1)}%`
 const formatRatio = (value: number) => `${value.toFixed(value >= 10 ? 0 : 1)}x`
+const joinNonZeroMeta = (items: Array<[number, string]>) =>
+	items
+		.filter(([value]) => value !== 0)
+		.map(([, label]) => label)
+		.join(' · ')
 const activity_heatmap_weights = {
 	message: 1,
 	session: 4,
@@ -453,7 +458,11 @@ export default class Index {
 
 		const counts = this.data.content.post_for_counts
 
-		return `User ${counts.user} · Wiki ${counts.wiki} · Memory ${counts.memory}`
+		return joinNonZeroMeta([
+			[counts.user, `User ${counts.user}`],
+			[counts.wiki, `Wiki ${counts.wiki}`],
+			[counts.memory, `Memory ${counts.memory}`]
+		])
 	}
 
 	get pipeline_total() {
@@ -466,7 +475,11 @@ export default class Index {
 
 	get linkcase_meta() {
 		return this.data
-			? `${this.data.content.link_ready_total} ready · ${this.data.content.link_pending_total} waiting · ${this.data.content.link_fail_total} failed`
+			? joinNonZeroMeta([
+					[this.data.content.link_ready_total, 'ready'],
+					[this.data.content.link_pending_total, 'waiting'],
+					[this.data.content.link_fail_total, 'failed']
+				])
 			: ''
 	}
 
