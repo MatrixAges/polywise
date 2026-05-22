@@ -8,7 +8,7 @@ import { toast } from 'sonner'
 
 import { Message, MessageContent } from '@/__shadcn__/components/ai-elements'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/__shadcn__/components/ui/collapsible'
-import { copy, formatDateTime, formatTime, getAppRouteHref, rpc } from '@/utils'
+import { copy, formatDateTime, formatTime, rpc } from '@/utils'
 import getToolIcon from '@/utils/getToolIcon'
 
 import LoadingDots from './LoadingDots'
@@ -443,7 +443,9 @@ const Index = (props: IPropsMessage) => {
 	const { parts } = message
 	const [is_copied, setIsCopied] = useState(false)
 	const [is_wiki_saving, setIsWikiSaving] = useState(false)
+	const [is_wiki_saved, setIsWikiSaved] = useState(false)
 	const copy_reset_timeout_ref = useRef<number>(0)
+	const wiki_reset_timeout_ref = useRef<number>(0)
 	const copy_text = useMemo(() => getMessageCopyText(message), [message])
 	const wiki_text = useMemo(() => getMessageWikiText(message), [message])
 	const previous_user_text = useMemo(
@@ -513,6 +515,7 @@ const Index = (props: IPropsMessage) => {
 	useEffect(() => {
 		return () => {
 			window.clearTimeout(copy_reset_timeout_ref.current)
+			window.clearTimeout(wiki_reset_timeout_ref.current)
 		}
 	}, [])
 
@@ -545,16 +548,17 @@ const Index = (props: IPropsMessage) => {
 				question: previous_user_text,
 				answer: wiki_text
 			})
-			const saved = await rpc.save.mutate({
+			await rpc.save.mutate({
 				title: summary.title,
 				content: summary.content,
 				for: 'wiki',
 				exec_pipeline: true
 			})
-			const href = getAppRouteHref(`/article/${saved.id}`)
-
-			window.open(href, '_blank', 'noopener,noreferrer')
-			toast.success('Saved as wiki article.')
+			setIsWikiSaved(true)
+			window.clearTimeout(wiki_reset_timeout_ref.current)
+			wiki_reset_timeout_ref.current = window.setTimeout(() => {
+				setIsWikiSaved(false)
+			}, 2000)
 		} catch (error) {
 			toast.error(error instanceof Error ? error.message : 'Failed to save wiki article.')
 		} finally {
@@ -675,11 +679,17 @@ const Index = (props: IPropsMessage) => {
 						<button
 							className='icon_button small'
 							disabled={!wiki_text || !previous_user_text || is_wiki_saving}
-							title={is_wiki_saving ? 'Saving wiki' : 'Save as wiki article'}
+							title={
+								is_wiki_saved
+									? 'Saved'
+									: is_wiki_saving
+										? 'Saving wiki'
+										: 'Save as wiki article'
+							}
 							type='button'
 							onClick={() => void onSaveWiki()}
 						>
-							<Bookmark></Bookmark>
+							{is_wiki_saved ? <Check></Check> : <Bookmark></Bookmark>}
 						</button>
 					)}
 					<button
