@@ -99,8 +99,8 @@ const Index = () => {
 					overflow-hidden
 					w-full
 					min-w-0
-					dark:[--hotspot-zero-fill:#2a362b] dark:[--hotspot-future-fill:#243024]
-					[--hotspot-zero-fill:#eff2f5] [--hotspot-future-fill:#f6f8f1]
+					dark:[--hotspot-zero-fill:var(--color-std-100)] dark:[--hotspot-future-fill:var(--color-std-100)]
+					[--hotspot-zero-fill:var(--color-std-50)] [--hotspot-future-fill:var(--color-std-50)]
 				'
 			>
 				<ActivityCalendar
@@ -113,9 +113,9 @@ const Index = () => {
 					renderBlock={(block, activity) =>
 						cloneElement(block, {
 							fill: (activity as HeatmapActivity).is_future
-								? 'var(--color-std-50)'
+								? 'var(--hotspot-future-fill)'
 								: activity.level === 0
-									? 'var(--color-std-50)'
+									? 'var(--hotspot-zero-fill)'
 									: block.props.fill,
 							stroke: 'none',
 							strokeWidth: 0,
