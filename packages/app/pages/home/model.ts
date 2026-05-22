@@ -1,4 +1,4 @@
-import { makeAutoObservable, toJS } from 'mobx'
+import { makeAutoObservable } from 'mobx'
 import { injectable } from 'tsyringe'
 
 import GlobalModel from '@/models/global'
@@ -6,11 +6,12 @@ import { formatDate, formatDateTime, fromNow, rpc } from '@/utils'
 
 import type { ChartConfig } from '@/__shadcn__/components/ui/chart'
 import type {
+	HomeGeneratedReport,
 	HomeHeatmapCell,
 	HomeModelItem,
 	HomeOverviewCard,
-	HomeReportArticle,
-	HomeReportHistoryItem,
+	HomeReportPeriod,
+	HomeReportStatus,
 	HomeRuntimeItem,
 	HomeSnapshot,
 	HomeStatsPeriod,
@@ -54,6 +55,10 @@ const home_stats_period_items = stats_period_options.map(value => ({
 	value,
 	label: stats_period_title_map[value]
 }))
+const home_report_period_items = home_stats_period_items.filter(item => item.value !== 'total') as Array<{
+	value: HomeReportPeriod
+	label: string
+}>
 
 const formatCompact = (value: number) => compact_formatter.format(value)
 const formatInteger = (value: number) => value.toLocaleString('en-US')
@@ -256,6 +261,7 @@ export const activity_trend_config = {
 	rewire_events: { label: 'Rewires', color: '#f43f5e' }
 } satisfies ChartConfig
 export { home_stats_period_items }
+export { home_report_period_items }
 
 @injectable()
 export default class Index {
@@ -263,13 +269,16 @@ export default class Index {
 	snapshot = null as HomeSnapshot | null
 	last_loaded_at = 0
 	stats_period: HomeStatsPeriod = 'week'
+	report_period: HomeReportPeriod = 'day'
 	refresh_request_id = 0
 	report_window_offset = 0
-	report_article_loading = false
-	report_article_error = ''
-	report_article = null as HomeReportArticle | null
-	report_article_post_id = ''
-	report_article_request_id = 0
+	report_loading = false
+	report_error = ''
+	report_data = null as HomeGeneratedReport | null
+	report_status = null as HomeReportStatus | null
+	report_request_id = 0
+	report_trigger_loading = false
+	report_watch_unsubscribe = null as null | (() => void)
 
 	constructor(public global: GlobalModel) {
 		makeAutoObservable(this, { global: false }, { autoBind: true })
@@ -347,58 +356,45 @@ export default class Index {
 		}
 
 		this.stats_period = period
-		this.report_window_offset = 0
 		void this.refresh(period)
 	}
 
-	get report_history(): Array<HomeReportHistoryItem> {
-		return this.data?.pthink.status.report_history ? toJS(this.data.pthink.status.report_history) : []
-	}
-
 	get report_window_start() {
-		return getReportWindowStart(this.stats_period, this.report_window_offset)
+		return getReportWindowStart(this.report_period, this.report_window_offset)
 	}
 
 	get report_window_end() {
-		return getReportWindowEnd(this.stats_period, this.report_window_start)
+		return getReportWindowEnd(this.report_period, this.report_window_start)
 	}
 
 	get report_window_label() {
-		return formatReportWindowLabel(
-			this.stats_period,
-			this.report_window_offset,
-			this.report_window_start,
-			this.report_window_end
+		return (
+			this.report_data?.window.label ||
+			formatReportWindowLabel(
+				this.report_period,
+				this.report_window_offset,
+				this.report_window_start,
+				this.report_window_end
+			)
 		)
 	}
 
-	get report_window_records() {
-		if (this.stats_period === 'total') {
-			return this.report_history
-		}
-
-		const start_at = this.report_window_start.getTime()
-		const end_at = this.report_window_end?.getTime() ?? Infinity
-
-		return this.report_history.filter(item => item.created_at >= start_at && item.created_at < end_at)
-	}
-
-	get current_report_record() {
-		return this.report_window_records[0] ?? null
-	}
-
 	get can_move_to_prev_report_window() {
-		if (this.stats_period === 'total') {
-			return false
-		}
-
-		const start_at = this.report_window_start.getTime()
-
-		return this.report_history.some(item => item.created_at < start_at)
+		return true
 	}
 
 	get can_move_to_next_report_window() {
-		return this.stats_period !== 'total' && this.report_window_offset > 0
+		return this.report_window_offset > 0
+	}
+
+	setReportPeriod(period: HomeReportPeriod) {
+		if (period === this.report_period) {
+			return
+		}
+
+		this.report_period = period
+		this.report_window_offset = 0
+		void this.loadReport()
 	}
 
 	setReportWindowOffset(offset: number) {
@@ -409,7 +405,7 @@ export default class Index {
 		}
 
 		this.report_window_offset = next_offset
-		void this.syncCurrentReportArticle()
+		void this.loadReport()
 	}
 
 	moveToPrevReportWindow() {
@@ -428,50 +424,154 @@ export default class Index {
 		this.setReportWindowOffset(this.report_window_offset - 1)
 	}
 
-	async syncCurrentReportArticle() {
-		const record = this.current_report_record
-		const post_id = record?.post_id ?? ''
+	get report_content() {
+		return this.report_data?.content || ''
+	}
 
-		if (!post_id) {
-			this.report_article_request_id += 1
-			this.report_article_loading = false
-			this.report_article_error = ''
-			this.report_article = null
-			this.report_article_post_id = ''
-			return
+	get report_exists() {
+		return Boolean(this.report_data?.exists)
+	}
+
+	get report_path() {
+		return this.report_data?.path || ''
+	}
+
+	get report_updated_label() {
+		const value = this.report_data?.updated_at ?? 0
+
+		return value ? formatDateTime(value, 'YYYY-MM-DD HH:mm:ss') : 'not generated'
+	}
+
+	get report_action_loading() {
+		return this.report_trigger_loading || Boolean(this.report_status?.running)
+	}
+
+	get report_action_label() {
+		return this.report_status_matches_current_window && this.report_action_loading ? 'Reporting' : 'Report'
+	}
+
+	get report_status_detail() {
+		if (this.report_status_matches_current_window && this.report_status?.running) {
+			return this.report_status.detail || 'Report generation is running in the background.'
 		}
 
-		if (post_id === this.report_article_post_id && this.report_article && !this.report_article_error) {
-			return
+		if (this.report_status?.running) {
+			return `Another report window is being processed in the background: ${this.report_status.label || this.report_status.key}.`
 		}
 
-		const request_id = ++this.report_article_request_id
+		if (this.report_status?.error) {
+			return this.report_status.error
+		}
 
-		this.report_article_loading = true
-		this.report_article_error = ''
-		this.report_article = null
-		this.report_article_post_id = post_id
+		return this.report_exists
+			? `Stored at ${this.report_path}`
+			: 'No report file has been generated for this window yet.'
+	}
+
+	get report_plan_path() {
+		return this.report_status_matches_current_window ? this.report_status?.plan_path || '' : ''
+	}
+
+	get report_status_matches_current_window() {
+		const current_key = this.report_data?.window.key || ''
+
+		return (
+			Boolean(this.report_status?.period) &&
+			this.report_status?.period === this.report_period &&
+			(!current_key || this.report_status?.key === current_key)
+		)
+	}
+
+	async loadReport() {
+		const request_id = ++this.report_request_id
+
+		this.report_loading = true
+		this.report_error = ''
 
 		try {
-			const article = await rpc.article.read.query({ id: post_id })
+			const response = await rpc.report.query.query({
+				period: this.report_period,
+				offset: this.report_window_offset
+			})
 
-			if (request_id !== this.report_article_request_id) {
+			if (request_id !== this.report_request_id) {
 				return
 			}
 
-			this.report_article = article
+			this.report_data = response
+			this.report_status = response.status
 		} catch (error) {
-			if (request_id !== this.report_article_request_id) {
+			if (request_id !== this.report_request_id) {
 				return
 			}
 
-			this.report_article = null
-			this.report_article_error = error instanceof Error ? error.message : 'Failed to load report article.'
+			this.report_error = error instanceof Error ? error.message : 'Failed to load report.'
+			this.report_data = null
 		} finally {
-			if (request_id === this.report_article_request_id) {
-				this.report_article_loading = false
+			if (request_id === this.report_request_id) {
+				this.report_loading = false
 			}
 		}
+	}
+
+	async triggerReport() {
+		if (this.report_action_loading) {
+			return
+		}
+
+		this.report_trigger_loading = true
+		this.report_status = {
+			...(this.report_status || {
+				running: false,
+				period: this.report_period,
+				key: this.report_data?.window.key || '',
+				label: this.report_window_label,
+				stage: 'preparing',
+				detail: '',
+				progress: 0,
+				error: '',
+				report_path: this.report_path,
+				plan_path: '',
+				updated_at: Date.now(),
+				last_completed_at: 0
+			}),
+			running: true,
+			period: this.report_period,
+			key: this.report_data?.window.key || '',
+			label: this.report_window_label,
+			stage: 'preparing',
+			detail: 'Submitting background report job',
+			progress: 0.05,
+			error: '',
+			updated_at: Date.now()
+		}
+
+		try {
+			this.report_status = await rpc.report.trigger.mutate({
+				period: this.report_period,
+				offset: this.report_window_offset
+			})
+		} finally {
+			this.report_trigger_loading = false
+		}
+	}
+
+	watchReportStatus() {
+		const deinit = rpc.report.watch.subscribe(undefined, {
+			onData: response => {
+				this.report_status = response
+
+				const current_key = this.report_data?.window.key || ''
+				const is_current_window =
+					response.period === this.report_period && (!current_key || response.key === current_key)
+
+				if (is_current_window && (response.stage === 'writing' || !response.running)) {
+					void this.loadReport()
+				}
+			}
+		})
+
+		this.report_watch_unsubscribe = deinit.unsubscribe
 	}
 
 	get overview_cards(): Array<HomeOverviewCard> {
@@ -1064,6 +1164,8 @@ export default class Index {
 
 	init() {
 		void this.refresh()
+		void this.loadReport()
+		this.watchReportStatus()
 	}
 
 	async refresh(period = this.stats_period) {
@@ -1080,7 +1182,6 @@ export default class Index {
 
 			this.snapshot = snapshot
 			this.last_loaded_at = Date.now()
-			void this.syncCurrentReportArticle()
 		} finally {
 			if (request_id === this.refresh_request_id) {
 				this.loading = false
@@ -1088,5 +1189,8 @@ export default class Index {
 		}
 	}
 
-	deinit() {}
+	deinit() {
+		this.report_watch_unsubscribe?.()
+		this.report_watch_unsubscribe = null
+	}
 }

@@ -14,6 +14,7 @@ import post from './post'
 import project from './project'
 import provider from './provider'
 import remove from './remove'
+import report from './report'
 import save from './save'
 import search from './search'
 import session from './session'
@@ -43,6 +44,7 @@ export const router = r({
 	session,
 	sniffer,
 	provider,
+	report,
 	pipeline,
 	notification,
 	llama,

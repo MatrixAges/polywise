@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, FileText, Loader2 } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 import { container } from 'tsyringe'
 
+import { Button } from '@/__shadcn__/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/__shadcn__/components/ui/select'
 import { TextTabs } from '@/components'
 
@@ -19,9 +20,9 @@ import {
 	Trending
 } from './components'
 import { Context } from './context'
-import Model, { home_stats_period_items } from './model'
+import Model, { home_report_period_items, home_stats_period_items } from './model'
 
-import type { HomeStatsPeriod } from './types'
+import type { HomeReportPeriod, HomeStatsPeriod } from './types'
 
 type TopTabKey = 'stats' | 'memory' | 'report'
 
@@ -40,6 +41,8 @@ const Index = () => {
 	}
 
 	const x = ref_model.current
+	const period_items = active_tab === 'report' ? home_report_period_items : home_stats_period_items
+	const period_value = active_tab === 'report' ? x.report_period : x.stats_period
 
 	useEffect(() => {
 		void x.init()
@@ -66,7 +69,7 @@ const Index = () => {
 						setActive={value => setActiveTab(value as TopTabKey)}
 					></TextTabs>
 					<div className='flex items-center gap-2'>
-						{active_tab === 'report' && x.stats_period !== 'total' && (
+						{active_tab === 'report' && (
 							<>
 								<button
 									className={$cx(
@@ -90,11 +93,35 @@ const Index = () => {
 								>
 									<ChevronRight className='size-3.5'></ChevronRight>
 								</button>
+								<Button
+									variant='default'
+									size='sm'
+									disabled={x.report_action_loading}
+									onClick={() => void x.triggerReport()}
+								>
+									{x.report_action_loading ? (
+										<Loader2 className='size-4 animate-spin'></Loader2>
+									) : (
+										<FileText className='size-4'></FileText>
+									)}
+									<span>{x.report_action_label}</span>
+								</Button>
 							</>
 						)}
 						<Select
-							onValueChange={value => value && x.setStatsPeriod(value as HomeStatsPeriod)}
-							value={x.stats_period}
+							onValueChange={value => {
+								if (!value) {
+									return
+								}
+
+								if (active_tab === 'report') {
+									x.setReportPeriod(value as HomeReportPeriod)
+									return
+								}
+
+								x.setStatsPeriod(value as HomeStatsPeriod)
+							}}
+							value={period_value}
 						>
 							<SelectTrigger
 								className='
@@ -114,7 +141,7 @@ const Index = () => {
 								<SelectValue className='text-std-400 text-sm' />
 							</SelectTrigger>
 							<SelectContent align='end'>
-								{home_stats_period_items.map(item => (
+								{period_items.map(item => (
 									<SelectItem key={item.value} value={item.value}>
 										{item.label}
 									</SelectItem>

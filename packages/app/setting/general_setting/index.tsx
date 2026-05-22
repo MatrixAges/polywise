@@ -43,6 +43,7 @@ const pthink_report_limits = [
 	{ label: '4', value: '4' },
 	{ label: '5', value: '5' }
 ]
+const legacy_post_think_disabled = true
 
 const Index = () => {
 	const global = useGlobal()
@@ -142,12 +143,14 @@ const Index = () => {
 			<FieldGroup className='gap-0'>
 				<Field className='items-center! py-3' orientation='horizontal'>
 					<FieldContent>
-						<FieldTitle className='text-base'>Post-Think</FieldTitle>
+						<FieldTitle className='text-base'>Legacy Post-Think</FieldTitle>
 						<FieldDescription>
-							Run proactive idle-time analysis and generate scheduled personal reports
+							The old autonomous report runtime is disabled. Report generation now lives in
+							Home / Report and runs on demand.
 						</FieldDescription>
 					</FieldContent>
 					<Switch
+						disabled={legacy_post_think_disabled}
 						checked={Boolean(pthink?.enabled)}
 						onCheckedChange={checked => updatePthink({ enabled: checked })}
 					/>
@@ -160,6 +163,7 @@ const Index = () => {
 						</FieldDescription>
 					</FieldContent>
 					<Select
+						disabled={legacy_post_think_disabled}
 						items={pthink_idle_options}
 						value={String(Math.round((pthink?.idle_grace_ms ?? 20 * 60 * 1000) / 60000))}
 						onValueChange={value => updatePthink({ idle_grace_ms: Number(value) * 60 * 1000 })}
@@ -188,10 +192,12 @@ const Index = () => {
 					</FieldContent>
 					<div className='flex items-center gap-3'>
 						<Switch
+							disabled={legacy_post_think_disabled}
 							checked={Boolean(pthink?.daily_report_enabled)}
 							onCheckedChange={checked => updatePthink({ daily_report_enabled: checked })}
 						/>
 						<Select
+							disabled={legacy_post_think_disabled}
 							items={pthink_hours}
 							value={String(pthink?.daily_report_hour ?? 21)}
 							onValueChange={value => updatePthink({ daily_report_hour: Number(value) })}
@@ -221,10 +227,12 @@ const Index = () => {
 					</FieldContent>
 					<div className='flex items-center gap-3'>
 						<Switch
+							disabled={legacy_post_think_disabled}
 							checked={Boolean(pthink?.weekly_report_enabled)}
 							onCheckedChange={checked => updatePthink({ weekly_report_enabled: checked })}
 						/>
 						<Select
+							disabled={legacy_post_think_disabled}
 							items={pthink_weekdays}
 							value={pthink?.weekly_report_weekday ?? 'sun'}
 							onValueChange={value =>
@@ -249,6 +257,7 @@ const Index = () => {
 							</SelectContent>
 						</Select>
 						<Select
+							disabled={legacy_post_think_disabled}
 							items={pthink_hours}
 							value={String(pthink?.weekly_report_hour ?? 20)}
 							onValueChange={value => updatePthink({ weekly_report_hour: Number(value) })}
@@ -278,10 +287,12 @@ const Index = () => {
 					</FieldContent>
 					<div className='flex items-center gap-3'>
 						<Switch
+							disabled={legacy_post_think_disabled}
 							checked={Boolean(pthink?.trigger_enabled)}
 							onCheckedChange={checked => updatePthink({ trigger_enabled: checked })}
 						/>
 						<Select
+							disabled={legacy_post_think_disabled}
 							items={pthink_report_limits}
 							value={String(pthink?.max_reports_per_day ?? 3)}
 							onValueChange={value => updatePthink({ max_reports_per_day: Number(value) })}
