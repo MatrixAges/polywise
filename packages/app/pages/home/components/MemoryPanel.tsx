@@ -2,13 +2,15 @@ import { observer } from 'mobx-react-lite'
 
 import { useModel } from '../context'
 
-const stat_grid_class = 'grid gap-px border border-border-light bg-border-light'
-const stat_item_class = 'flex flex-col gap-2 bg-background px-4 py-3.5'
+const stat_item_class = 'flex flex-col gap-2 px-4 py-3.5'
 
 const Index = () => {
 	const x = useModel()
 	const memory = x.data!.memory
 	const frozen_total = memory.frozen_node_total + memory.frozen_edge_total
+	const memory_health_items = x.memory_health_items
+	const memory_depth_items = x.memory_depth_items
+	const ops_items = x.ops_items
 
 	return (
 		<div className='flex flex-col gap-3'>
@@ -27,22 +29,27 @@ const Index = () => {
 				Graph size, rewire pressure, and adjacent ops signals from the background memory system.
 			</div>
 			<div className='flex flex-col'>
-				<div className={`${stat_grid_class}grid-cols-2`}>
-					<div className={stat_item_class}>
+				<div
+					className='
+						grid grid-cols-2
+						border border-border-light border-b-0
+					'
+				>
+					<div className={`${stat_item_class}border-border-light border-r border-b`}>
 						<div className='text-std-400 text-xs font-medium uppercase'>Nodes</div>
 						<div className='font-mono text-2xl font-semibold tracking-tight'>
 							{x.node_total_label}
 						</div>
 						<div className='text-std-300 text-xs'>{memory.frozen_node_total} frozen</div>
 					</div>
-					<div className={stat_item_class}>
+					<div className={`${stat_item_class}border-border-light border-b`}>
 						<div className='text-std-400 text-xs font-medium uppercase'>Edges</div>
 						<div className='font-mono text-2xl font-semibold tracking-tight'>
 							{x.edge_total_label}
 						</div>
 						<div className='text-std-300 text-xs'>{memory.frozen_edge_total} frozen</div>
 					</div>
-					<div className={stat_item_class}>
+					<div className={`${stat_item_class}border-border-light border-r border-b`}>
 						<div className='text-std-400 text-xs font-medium uppercase'>Weekly Rewires</div>
 						<div className='font-mono text-2xl font-semibold tracking-tight'>
 							{memory.rewire_event_week.toLocaleString('en-US')}
@@ -51,7 +58,7 @@ const Index = () => {
 							{memory.rewire_event_total.toLocaleString('en-US')} total
 						</div>
 					</div>
-					<div className={stat_item_class}>
+					<div className={`${stat_item_class}border-border-light border-r border-b`}>
 						<div className='text-std-400 text-xs font-medium uppercase'>Frozen Graph</div>
 						<div className='font-mono text-2xl font-semibold tracking-tight'>
 							{frozen_total.toLocaleString('en-US')}
@@ -60,9 +67,20 @@ const Index = () => {
 					</div>
 				</div>
 
-				<div className={`${stat_grid_class}border-t-0 md:grid-cols-3`}>
-					{x.memory_health_items.map(item => (
-						<div className={stat_item_class} key={item.key}>
+				<div
+					className='
+						grid
+						border border-border-light border-t-0 border-b-0
+						md:grid-cols-3
+					'
+				>
+					{memory_health_items.map((item, index) => (
+						<div
+							className={`${stat_item_class}border-border-light border-b${
+								index < memory_health_items.length - 1 ? 'md:border-r' : ''
+							}`}
+							key={item.key}
+						>
 							<div className='text-std-400 text-xs font-medium uppercase'>{item.title}</div>
 							<div className='font-mono text-2xl font-semibold tracking-tight'>
 								{item.value}
@@ -72,9 +90,20 @@ const Index = () => {
 					))}
 				</div>
 
-				<div className={`${stat_grid_class}border-t-0 md:grid-cols-3`}>
-					{x.memory_depth_items.map(item => (
-						<div className={stat_item_class} key={item.key}>
+				<div
+					className='
+						grid
+						border border-border-light border-t-0 border-b-0
+						md:grid-cols-3
+					'
+				>
+					{memory_depth_items.map((item, index) => (
+						<div
+							className={`${stat_item_class}border-border-light border-b${
+								index < memory_depth_items.length - 1 ? 'md:border-r' : ''
+							}`}
+							key={item.key}
+						>
 							<div className='text-std-400 text-xs font-medium uppercase'>{item.title}</div>
 							<div className='font-mono text-2xl font-semibold tracking-tight'>
 								{item.value}
@@ -92,9 +121,20 @@ const Index = () => {
 				>
 					<div className='text-std-400 text-xs font-medium uppercase'>Ops Surface</div>
 				</div>
-				<div className={`${stat_grid_class}border-t-0 md:grid-cols-4`}>
-					{x.ops_items.map(item => (
-						<div className={stat_item_class} key={item.key}>
+				<div
+					className='
+						grid
+						border border-border-light border-t-0
+						md:grid-cols-4
+					'
+				>
+					{ops_items.map((item, index) => (
+						<div
+							className={`${stat_item_class}border-border-light border-b md:border-b-0${
+								index < ops_items.length - 1 ? 'md:border-r' : ''
+							}`}
+							key={item.key}
+						>
 							<div className='text-std-400 text-xs font-medium uppercase'>{item.title}</div>
 							<div className='font-mono text-2xl font-semibold tracking-tight'>
 								{item.value}

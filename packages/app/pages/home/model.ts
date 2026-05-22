@@ -537,13 +537,13 @@ export default class Index {
 			{
 				key: 'growth',
 				title: 'Weekly growth',
-				value: `+${this.data.memory.node_week_total} / +${this.data.memory.edge_week_total}`,
-				desc: 'Nodes / edges created this week'
+				value: `+${this.data.memory.node_week_total}/+${this.data.memory.edge_week_total}`,
+				desc: 'Nodes/edges created this week'
 			},
 			{
 				key: 'state',
-				title: 'Silent / unstable edges',
-				value: `${this.data.memory.silent_edge_total} / ${this.data.memory.unstable_edge_total}`,
+				title: 'Silent/unstable edges',
+				value: `${this.data.memory.silent_edge_total}/${this.data.memory.unstable_edge_total}`,
 				desc: `${formatPercent(this.data.memory.unstable_edge_ratio)} unstable ratio`
 			},
 			{
