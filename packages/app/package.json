@@ -89,6 +89,7 @@
 		"react-dom": "catalog:",
 		"react-error-boundary": "^6.1.1",
 		"react-hook-form": "^7.75.0",
+		"react-activity-calendar": "^3.2.0",
 		"react-horizontal-scrolling-menu": "^8.2.0",
 		"react-i18next": "catalog:",
 		"react-icons": "^5.6.0",
