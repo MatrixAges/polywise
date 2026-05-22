@@ -9,6 +9,8 @@ export type HomeReportHistoryItem = HomeSnapshot['pthink']['status']['report_his
 export type HomeReportArticle = RPCOutput['article']['read']
 export type HomeGeneratedReport = RPCOutput['report']['query']
 export type HomeReportStatus = RPCOutput['report']['watch']
+export type HomeAgentStatItem = HomeSnapshot['agents']['top_agents'][number]
+export type HomeGroupStatItem = HomeSnapshot['agents']['top_groups'][number]
 export type HomeOverviewTone =
 	| 'sessions'
 	| 'running'
@@ -37,6 +39,15 @@ export interface HomeRuntimeItem {
 	key: string
 	title: string
 	value: string
+}
+
+export interface HomeLeaderboardItem {
+	key: string
+	title: string
+	subtitle: string
+	meta: string
+	value: string
+	footnote: string
 }
 
 export interface HomeHeatmapCell extends HomeHeatmapPoint {

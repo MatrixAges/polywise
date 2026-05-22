@@ -8,6 +8,7 @@ import type { ChartConfig } from '@/__shadcn__/components/ui/chart'
 import type {
 	HomeGeneratedReport,
 	HomeHeatmapCell,
+	HomeLeaderboardItem,
 	HomeModelItem,
 	HomeOverviewCard,
 	HomeReportPeriod,
@@ -883,6 +884,106 @@ export default class Index {
 				desc: `${this.data.system.agents_active_week}/${this.data.system.agent_total} active ${this.stats_period_window} · ${this.data.system.agents_with_content_total}/${this.data.system.agent_total} with content`
 			}
 		]
+	}
+
+	get agent_overview_items(): Array<HomeModelItem> {
+		if (!this.data) {
+			return []
+		}
+
+		const { summary } = this.data.agents
+		const active_agent_share =
+			this.data.system.agent_total > 0 ? (summary.active_agents / this.data.system.agent_total) * 100 : 0
+		const active_group_share =
+			this.data.system.group_total > 0 ? (summary.active_groups / this.data.system.group_total) * 100 : 0
+
+		return [
+			{
+				key: 'active-agents',
+				title: 'Active agents',
+				value: `${summary.active_agents}/${this.data.system.agent_total}`,
+				desc: `${formatPercent(active_agent_share)} with messages ${this.stats_period_window}`
+			},
+			{
+				key: 'linked-agents',
+				title: 'Linked agents',
+				value: String(summary.agents_with_sessions_total),
+				desc: `${summary.agents_with_content_total} with content · ${this.data.system.agent_total} total`
+			},
+			{
+				key: 'active-groups',
+				title: 'Active groups',
+				value: `${summary.active_groups}/${this.data.system.group_total}`,
+				desc: `${formatPercent(active_group_share)} with messages ${this.stats_period_window}`
+			},
+			{
+				key: 'linked-groups',
+				title: 'Linked groups',
+				value: String(summary.groups_with_sessions_total),
+				desc: `${summary.groups_with_members_total} staffed · ${this.data.system.group_total} total`
+			}
+		]
+	}
+
+	get agent_activity_items(): Array<HomeModelItem> {
+		if (!this.data) {
+			return []
+		}
+
+		const { summary } = this.data.agents
+
+		return [
+			{
+				key: 'agent-sessions',
+				title: 'Agent sessions',
+				value: formatInteger(summary.agent_sessions_total),
+				desc: `${formatCompact(summary.period_messages_by_agents)} messages ${this.stats_period_window}`
+			},
+			{
+				key: 'agent-tokens',
+				title: 'Agent tokens',
+				value: formatCompact(summary.period_tokens_by_agents),
+				desc: `${formatCompact(summary.period_messages_by_agents)} messages ${this.stats_period_window}`
+			},
+			{
+				key: 'group-sessions',
+				title: 'Group sessions',
+				value: formatInteger(summary.group_sessions_total),
+				desc: `${formatCompact(summary.period_messages_by_groups)} messages ${this.stats_period_window}`
+			},
+			{
+				key: 'group-tokens',
+				title: 'Group tokens',
+				value: formatCompact(summary.period_tokens_by_groups),
+				desc: `${formatCompact(summary.period_messages_by_groups)} messages ${this.stats_period_window}`
+			}
+		]
+	}
+
+	get top_agent_items(): Array<HomeLeaderboardItem> {
+		return (this.data?.agents.top_agents ?? []).map(item => ({
+			key: item.id,
+			title: item.name,
+			subtitle: `${item.session_count} active sessions · ${item.message_count} messages · ${item.assistant_replies} replies`,
+			meta: `${item.post_count} posts · ${item.document_count} docs · ${item.article_count} articles`,
+			value: formatCompact(item.total_tokens),
+			footnote: item.last_active_at
+				? `Last active ${fromNow(item.last_active_at)}`
+				: `No ${this.stats_period_adjective.toLowerCase()} activity`
+		}))
+	}
+
+	get top_group_items(): Array<HomeLeaderboardItem> {
+		return (this.data?.agents.top_groups ?? []).map(item => ({
+			key: item.id,
+			title: item.name,
+			subtitle: `${item.agent_count} members · ${item.session_count} active sessions · ${item.message_count} messages`,
+			meta: `${item.assistant_replies} replies · ${item.session_total} linked sessions`,
+			value: formatCompact(item.total_tokens),
+			footnote: item.last_active_at
+				? `Last active ${fromNow(item.last_active_at)}`
+				: `No ${this.stats_period_adjective.toLowerCase()} activity`
+		}))
 	}
 
 	get posts_total() {

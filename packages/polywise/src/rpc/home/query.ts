@@ -504,6 +504,270 @@ const buildActivityHeatmapRows = (now: number) => {
 	return buckets
 }
 
+const buildAgentWorkspaceStats = (period_start: number | null) => {
+	const db_period_start = period_start === null ? null : toUnixSeconds(period_start)
+	const period_params = db_period_start === null ? [] : [db_period_start]
+	const agent_rows = env.sqlite.prepare('SELECT id, name FROM agent').all() as Array<{
+		id: string
+		name: string | null
+	}>
+	const group_rows = env.sqlite.prepare('SELECT id, name FROM "group"').all() as Array<{
+		id: string
+		name: string | null
+	}>
+	const agent_session_total_rows = env.sqlite
+		.prepare(
+			`SELECT
+				agent_id,
+				COUNT(DISTINCT session_id) AS session_total
+			FROM agent_session
+			GROUP BY agent_id`
+		)
+		.all() as Array<{ agent_id: string | null; session_total: number | null }>
+	const agent_activity_rows = env.sqlite
+		.prepare(
+			`SELECT
+				ag.agent_id AS agent_id,
+				COUNT(DISTINCT m.session_id) AS session_count,
+				COUNT(m.id) AS message_count,
+				MAX(m.created_at) AS last_active_at
+			FROM agent_session ag
+			LEFT JOIN message m
+				ON m.session_id = ag.session_id
+				${db_period_start === null ? '' : 'AND m.created_at >= ?'}
+			GROUP BY ag.agent_id`
+		)
+		.all(...period_params) as Array<{
+		agent_id: string | null
+		session_count: number | null
+		message_count: number | null
+		last_active_at: number | null
+	}>
+	const agent_usage_rows = env.sqlite
+		.prepare(
+			`SELECT
+				ag.agent_id AS agent_id,
+				COUNT(m.id) AS assistant_replies,
+				SUM(COALESCE(json_extract(m.content, '$.metadata.usage.totalTokens'), 0)) AS total_tokens
+			FROM agent_session ag
+			LEFT JOIN message m
+				ON m.session_id = ag.session_id
+				AND m.role = 'assistant'
+				AND json_extract(m.content, '$.metadata.usage.totalTokens') IS NOT NULL
+				${db_period_start === null ? '' : 'AND m.created_at >= ?'}
+			GROUP BY ag.agent_id`
+		)
+		.all(...period_params) as Array<{
+		agent_id: string | null
+		assistant_replies: number | null
+		total_tokens: number | null
+	}>
+	const agent_article_rows = env.sqlite
+		.prepare(
+			`SELECT
+				aa.agent_id AS agent_id,
+				COUNT(DISTINCT aa.article_id) AS article_count,
+				SUM(CASE WHEN ar."for" IN ('user', 'wiki', 'memory') AND ${organic_post_filter} THEN 1 ELSE 0 END) AS post_count
+			FROM agent_article aa
+			INNER JOIN article ar ON ar.id = aa.article_id
+			${db_period_start === null ? '' : 'WHERE aa.created_at >= ?'}
+			GROUP BY aa.agent_id`
+		)
+		.all(...period_params) as Array<{
+		agent_id: string | null
+		article_count: number | null
+		post_count: number | null
+	}>
+	const agent_document_rows = env.sqlite
+		.prepare(
+			`SELECT
+				agent_id,
+				COUNT(DISTINCT document_id) AS document_count
+			FROM agent_document
+			${db_period_start === null ? '' : 'WHERE created_at >= ?'}
+			GROUP BY agent_id`
+		)
+		.all(...period_params) as Array<{ agent_id: string | null; document_count: number | null }>
+	const group_member_rows = env.sqlite
+		.prepare(
+			`SELECT
+				group_id,
+				COUNT(agent_id) AS agent_count
+			FROM group_agent
+			GROUP BY group_id`
+		)
+		.all() as Array<{ group_id: string | null; agent_count: number | null }>
+	const group_session_total_rows = env.sqlite
+		.prepare(
+			`SELECT
+				group_id,
+				COUNT(DISTINCT session_id) AS session_total
+			FROM group_session
+			GROUP BY group_id`
+		)
+		.all() as Array<{ group_id: string | null; session_total: number | null }>
+	const group_activity_rows = env.sqlite
+		.prepare(
+			`SELECT
+				gs.group_id AS group_id,
+				COUNT(DISTINCT m.session_id) AS session_count,
+				COUNT(m.id) AS message_count,
+				MAX(m.created_at) AS last_active_at
+			FROM group_session gs
+			LEFT JOIN message m
+				ON m.session_id = gs.session_id
+				${db_period_start === null ? '' : 'AND m.created_at >= ?'}
+			GROUP BY gs.group_id`
+		)
+		.all(...period_params) as Array<{
+		group_id: string | null
+		session_count: number | null
+		message_count: number | null
+		last_active_at: number | null
+	}>
+	const group_usage_rows = env.sqlite
+		.prepare(
+			`SELECT
+				gs.group_id AS group_id,
+				COUNT(m.id) AS assistant_replies,
+				SUM(COALESCE(json_extract(m.content, '$.metadata.usage.totalTokens'), 0)) AS total_tokens
+			FROM group_session gs
+			LEFT JOIN message m
+				ON m.session_id = gs.session_id
+				AND m.role = 'assistant'
+				AND json_extract(m.content, '$.metadata.usage.totalTokens') IS NOT NULL
+				${db_period_start === null ? '' : 'AND m.created_at >= ?'}
+			GROUP BY gs.group_id`
+		)
+		.all(...period_params) as Array<{
+		group_id: string | null
+		assistant_replies: number | null
+		total_tokens: number | null
+	}>
+
+	const agent_session_total_map = new Map(
+		agent_session_total_rows.map(item => [String(item.agent_id ?? ''), Number(item.session_total ?? 0)])
+	)
+	const agent_activity_map = new Map(agent_activity_rows.map(item => [String(item.agent_id ?? ''), item]))
+	const agent_usage_map = new Map(agent_usage_rows.map(item => [String(item.agent_id ?? ''), item]))
+	const agent_article_map = new Map(agent_article_rows.map(item => [String(item.agent_id ?? ''), item]))
+	const agent_document_map = new Map(agent_document_rows.map(item => [String(item.agent_id ?? ''), item]))
+	const group_member_map = new Map(
+		group_member_rows.map(item => [String(item.group_id ?? ''), Number(item.agent_count ?? 0)])
+	)
+	const group_session_total_map = new Map(
+		group_session_total_rows.map(item => [String(item.group_id ?? ''), Number(item.session_total ?? 0)])
+	)
+	const group_activity_map = new Map(group_activity_rows.map(item => [String(item.group_id ?? ''), item]))
+	const group_usage_map = new Map(group_usage_rows.map(item => [String(item.group_id ?? ''), item]))
+
+	const agent_items = agent_rows.map(item => {
+		const activity = agent_activity_map.get(item.id)
+		const usage = agent_usage_map.get(item.id)
+		const article = agent_article_map.get(item.id)
+		const document = agent_document_map.get(item.id)
+
+		return {
+			id: item.id,
+			name: item.name || 'Untitled agent',
+			session_total: agent_session_total_map.get(item.id) ?? 0,
+			session_count: Number(activity?.session_count ?? 0),
+			message_count: Number(activity?.message_count ?? 0),
+			assistant_replies: Number(usage?.assistant_replies ?? 0),
+			total_tokens: Number(usage?.total_tokens ?? 0),
+			article_count: Number(article?.article_count ?? 0),
+			post_count: Number(article?.post_count ?? 0),
+			document_count: Number(document?.document_count ?? 0),
+			last_active_at: Number(activity?.last_active_at ?? 0)
+		}
+	})
+	const group_items = group_rows.map(item => {
+		const activity = group_activity_map.get(item.id)
+		const usage = group_usage_map.get(item.id)
+
+		return {
+			id: item.id,
+			name: item.name || 'Untitled group',
+			agent_count: group_member_map.get(item.id) ?? 0,
+			session_total: group_session_total_map.get(item.id) ?? 0,
+			session_count: Number(activity?.session_count ?? 0),
+			message_count: Number(activity?.message_count ?? 0),
+			assistant_replies: Number(usage?.assistant_replies ?? 0),
+			total_tokens: Number(usage?.total_tokens ?? 0),
+			last_active_at: Number(activity?.last_active_at ?? 0)
+		}
+	})
+	const top_agents = agent_items
+		.filter(
+			item =>
+				item.session_total > 0 ||
+				item.message_count > 0 ||
+				item.article_count > 0 ||
+				item.document_count > 0
+		)
+		.sort((left, right) => {
+			if (right.total_tokens !== left.total_tokens) {
+				return right.total_tokens - left.total_tokens
+			}
+
+			if (right.message_count !== left.message_count) {
+				return right.message_count - left.message_count
+			}
+
+			if (right.session_count !== left.session_count) {
+				return right.session_count - left.session_count
+			}
+
+			return left.name.localeCompare(right.name)
+		})
+		.slice(0, 8)
+	const top_groups = group_items
+		.filter(
+			item =>
+				item.agent_count > 0 ||
+				item.session_total > 0 ||
+				item.message_count > 0 ||
+				item.total_tokens > 0
+		)
+		.sort((left, right) => {
+			if (right.total_tokens !== left.total_tokens) {
+				return right.total_tokens - left.total_tokens
+			}
+
+			if (right.message_count !== left.message_count) {
+				return right.message_count - left.message_count
+			}
+
+			if (right.session_count !== left.session_count) {
+				return right.session_count - left.session_count
+			}
+
+			return left.name.localeCompare(right.name)
+		})
+		.slice(0, 8)
+
+	return {
+		summary: {
+			active_agents: agent_items.filter(item => item.message_count > 0).length,
+			active_groups: group_items.filter(item => item.message_count > 0).length,
+			agents_with_sessions_total: agent_items.filter(item => item.session_total > 0).length,
+			agents_with_content_total: agent_items.filter(
+				item => item.article_count > 0 || item.document_count > 0
+			).length,
+			groups_with_sessions_total: group_items.filter(item => item.session_total > 0).length,
+			groups_with_members_total: group_items.filter(item => item.agent_count > 0).length,
+			agent_sessions_total: countValue('SELECT COUNT(*) AS value FROM agent_session'),
+			group_sessions_total: countValue('SELECT COUNT(*) AS value FROM group_session'),
+			period_messages_by_agents: agent_items.reduce((sum, item) => sum + item.message_count, 0),
+			period_messages_by_groups: group_items.reduce((sum, item) => sum + item.message_count, 0),
+			period_tokens_by_agents: agent_items.reduce((sum, item) => sum + item.total_tokens, 0),
+			period_tokens_by_groups: group_items.reduce((sum, item) => sum + item.total_tokens, 0)
+		},
+		top_agents,
+		top_groups
+	}
+}
+
 export default p
 	.meta({
 		openapi: {
@@ -530,6 +794,7 @@ export default p
 		const period_metrics = getHomePeriodMetrics(period_start)
 		const trends = buildDailyTrendRows(now)
 		const activity_heatmap = buildActivityHeatmapRows(now)
+		const agent_workspace = buildAgentWorkspaceStats(period_start)
 		const pthink_analytics = buildPthinkAnalytics(now)
 		const pthink_status = await readPthinkStatus()
 		const top_alert = pthink_config.trigger_enabled
@@ -830,6 +1095,7 @@ export default p
 				im_account_enabled,
 				im_peer_total
 			},
+			agents: agent_workspace,
 			health: {
 				backlog_pending_total,
 				backlog_pressure_score,

@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { TextTabs } from '@/components'
 
 import {
+	Agent,
 	ContentReview,
 	Hotspots,
 	LoadingState,
@@ -24,10 +25,11 @@ import Model, { home_report_period_items, home_stats_period_items } from './mode
 
 import type { HomeReportPeriod, HomeStatsPeriod } from './types'
 
-type TopTabKey = 'stats' | 'memory' | 'report'
+type TopTabKey = 'stats' | 'agent' | 'memory' | 'report'
 
 const top_tab_items: Array<{ key: TopTabKey; title: string }> = [
 	{ key: 'stats', title: 'Stats' },
+	{ key: 'agent', title: 'Agent' },
 	{ key: 'memory', title: 'Memory' },
 	{ key: 'report', title: 'Report' }
 ]
@@ -169,6 +171,11 @@ const Index = () => {
 										<SessionActivity></SessionActivity>
 										<ContentReview></ContentReview>
 										<Pipeline></Pipeline>
+									</div>
+								)}
+								{active_tab === 'agent' && (
+									<div className='flex flex-col gap-10'>
+										<Agent></Agent>
 									</div>
 								)}
 								{active_tab === 'memory' && (
