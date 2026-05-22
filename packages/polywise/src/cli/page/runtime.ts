@@ -28,7 +28,10 @@ export const getPageRuntimeStatus = () => ({
 })
 
 export const syncPageRuntime = (input: PageBridgeSyncInput): PageBridgeSyncOutput => {
-	state.snapshot = input.snapshot
+	if (input.snapshot) {
+		state.snapshot = input.snapshot
+	}
+
 	state.last_sync_at = Date.now()
 	state.ack_seq = Math.max(state.ack_seq, input.last_ack_seq)
 	state.commands = state.commands.filter(item => item.seq > state.ack_seq - 8)

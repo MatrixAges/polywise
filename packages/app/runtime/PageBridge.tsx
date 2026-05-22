@@ -7,7 +7,7 @@ import { collectPageSnapshot } from './pageSnapshot'
 
 import type { PageBridgeSyncOutput, PageRuntimeCommand } from '@core/cli/types'
 
-const poll_interval_ms = 1200
+const command_attempt_cooldown_ms = 1200
 
 const readSearchParams = (search: string) => {
 	const entries = {} as Record<string, string>
@@ -71,19 +71,19 @@ const executeCommand = async (command: PageRuntimeCommand, navigate: ReturnType<
 }
 
 const syncBridge = async (args: {
+	snapshot: ReturnType<typeof collectPageSnapshot> | null
 	last_ack_seq: number
 	getSnapshot: () => ReturnType<typeof collectPageSnapshot>
 	navigate: ReturnType<typeof useNavigate>
 	command_attempts: Map<number, number>
 }) => {
-	const initial_snapshot = args.getSnapshot()
 	const res = await fetch(`${server_sys_url}/page/bridge`, {
 		method: 'POST',
 		headers: {
 			'content-type': 'application/json'
 		},
 		body: JSON.stringify({
-			snapshot: initial_snapshot,
+			snapshot: args.snapshot,
 			last_ack_seq: args.last_ack_seq
 		})
 	})
@@ -104,7 +104,7 @@ const syncBridge = async (args: {
 
 		const last_attempt_at = args.command_attempts.get(command.seq) || 0
 
-		if (Date.now() - last_attempt_at < poll_interval_ms) {
+		if (Date.now() - last_attempt_at < command_attempt_cooldown_ms) {
 			break
 		}
 
@@ -131,17 +131,16 @@ const syncBridge = async (args: {
 
 const Index = () => {
 	const navigate = useNavigate()
-	const { pathname, search } = useLocation()
+	const { pathname, search, key: location_key } = useLocation()
 	const params = useParams()
 	const params_key = JSON.stringify(params)
 	const last_ack_seq = useRef(0)
-	const last_mutation_signature = useRef('')
-	const inflight = useRef(false)
+	const last_state_signature = useRef('')
 	const command_attempts = useRef(new Map<number, number>())
+	const inflight = useRef(false)
 
 	useEffect(() => {
 		let disposed = false
-		let debounce_timer = 0 as number | null
 
 		const getSnapshot = () =>
 			collectPageSnapshot({
@@ -154,67 +153,69 @@ const Index = () => {
 				)
 			})
 
-		const run = async (reason: 'route' | 'poll' | 'mutation') => {
+		const getStateSignature = (snapshot: ReturnType<typeof collectPageSnapshot>) =>
+			JSON.stringify({
+				location_key,
+				pathname: snapshot.route.pathname,
+				search: snapshot.route.search,
+				params: snapshot.route.params,
+				route_page_id: snapshot.route_page_id,
+				panel_page_id: snapshot.panel.page_id,
+				panel_tab: snapshot.panel.active_tab
+			})
+
+		const syncSnapshot = async () => {
 			if (disposed || inflight.current) {
 				return
 			}
 
 			const snapshot = getSnapshot()
-			const signature = JSON.stringify(snapshot)
+			const state_signature = getStateSignature(snapshot)
 
-			if (reason === 'mutation' && signature === last_mutation_signature.current) {
+			if (state_signature === last_state_signature.current) {
 				return
 			}
 
 			inflight.current = true
+			let synced = false
 
 			try {
 				last_ack_seq.current = await syncBridge({
+					snapshot,
 					last_ack_seq: last_ack_seq.current,
 					getSnapshot,
 					navigate,
 					command_attempts: command_attempts.current
 				})
-				last_mutation_signature.current = signature
+				synced = true
 			} catch {
-				// Ignore transient bridge failures and let the next poll retry.
+				// Ignore transient bridge failures and let the next route-state sync retry.
 			} finally {
 				inflight.current = false
 			}
-		}
 
-		const scheduleRun = () => {
-			if (disposed || debounce_timer) {
-				return
+			if (synced) {
+				last_state_signature.current = getStateSignature(getSnapshot())
 			}
-
-			debounce_timer = window.setTimeout(() => {
-				debounce_timer = null
-				void run('mutation')
-			}, 140)
 		}
 
-		void run('route')
+		void syncSnapshot()
 
-		const timer = window.setInterval(() => void run('poll'), poll_interval_ms)
-		const observer = new MutationObserver(() => scheduleRun())
+		const observer = new MutationObserver(() => {
+			void syncSnapshot()
+		})
 
 		observer.observe(document.body, {
-			childList: true,
 			subtree: true,
 			attributes: true,
-			attributeFilter: ['data-active', 'data-page-section']
+			attributeFilter: ['data-active']
 		})
 
 		return () => {
 			disposed = true
-			if (debounce_timer) {
-				window.clearTimeout(debounce_timer)
-			}
-			window.clearInterval(timer)
 			observer.disconnect()
 		}
-	}, [pathname, search, navigate, params_key])
+	}, [pathname, search, location_key, navigate, params_key])
 
 	return null
 }
