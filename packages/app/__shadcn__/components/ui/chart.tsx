@@ -173,12 +173,12 @@ export const ChartTooltipContent = React.forwardRef<
 				min-w-[180px]
 				gap-2
 				px-3 py-2.5
-				rounded-2xl
+				rounded-lg
 				text-xs
-				bg-background/96
-				border border-border/70
-				shadow-xl
-				backdrop-blur-sm
+				bg-background/60
+				border border-border-light
+				shadow-xs
+				backdrop-blur-md
 			`,
 				className
 			)}
@@ -199,14 +199,14 @@ export const ChartTooltipContent = React.forwardRef<
 						<div className='flex items-center justify-between gap-4' key={key}>
 							<div className='flex min-w-0 items-center gap-2'>
 								<span
-									className='size-2.5 shrink-0 rounded-[999px]'
+									className='size-2 shrink-0 rounded-[999px]'
 									style={{ backgroundColor: item.color ?? `var(--color-${key})` }}
 								/>
 								<span className='truncate text-[rgba(var(--color_text_rgb),0.68)]'>
 									{found?.item.label ?? item.name ?? key}
 								</span>
 							</div>
-							<span className='text-foreground font-medium'>{value}</span>
+							<span className='text-foreground font-medium font-mono'>{value}</span>
 						</div>
 					)
 				})}

@@ -87,7 +87,7 @@ const token_trend_config = {
 const activity_trend_config = {
 	messages: { label: 'Messages', color: '#6366f1' },
 	new_posts: { label: 'Posts', color: '#10b981' },
-	new_sessions: { label: 'Sessions', color: '#8b5cf6' },
+	new_sessions: { label: 'Sessions', color: '#607D8B' },
 	rewire_events: { label: 'Rewires', color: '#f43f5e' }
 } satisfies ChartConfig
 

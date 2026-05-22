@@ -7,6 +7,12 @@ import { ChartContainer, ChartTooltipContent } from '@/__shadcn__/components/ui/
 import { useModel } from '../context'
 
 const chart_card_class = 'min-w-0 rounded-2xl border border-border/70 p-4'
+const chart_height_class = 'h-[180px] min-h-[180px]'
+const horizontal_grid_props = {
+	vertical: false,
+	stroke: 'var(--color-border-light)',
+	strokeDasharray: '4 4'
+} as const
 
 const InlineLegend = (props: {
 	items: Array<{
@@ -18,18 +24,16 @@ const InlineLegend = (props: {
 	return (
 		<div
 			className='
-				flex flex-wrap
-				items-center
+				flex
+				items-center justify-center
 				gap-3
-				pt-3
-				mt-4
-				text-xs text-[rgba(var(--color_text_rgb),0.68)]
-				border-border/60 border-t
+				mt-1
+				text-xs text-std-400
 			'
 		>
 			{props.items.map(item => (
-				<div className='flex items-center gap-2' key={item.key}>
-					<span className='size-2.5 rounded-[999px]' style={{ backgroundColor: item.color }} />
+				<div className='flex items-center gap-1.5' key={item.key}>
+					<span className='size-2 rounded-full' style={{ backgroundColor: item.color }} />
 					<span>{item.label}</span>
 				</div>
 			))}
@@ -83,7 +87,6 @@ const Index = () => {
 					<div
 						className='
 							flex flex-col
-							gap-4
 							p-4
 							border-border-light border-x
 						'
@@ -93,6 +96,7 @@ const Index = () => {
 								flex flex-wrap
 								items-start justify-between
 								gap-3
+								mb-4
 							'
 						>
 							<div className='flex flex-col gap-0.5 text-xs'>
@@ -102,9 +106,9 @@ const Index = () => {
 								<div className='text-std-300'>{x.token_trend_summary}</div>
 							</div>
 						</div>
-						<ChartContainer config={x.token_trend_config}>
+						<ChartContainer className='h-[210px] min-h-[210px]' config={x.token_trend_config}>
 							<LineChart data={x.trends} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
-								<CartesianGrid vertical={false} />
+								<CartesianGrid {...horizontal_grid_props} />
 								<XAxis
 									axisLine={false}
 									dataKey='label'
@@ -165,12 +169,15 @@ const Index = () => {
 							<span>Workspace activity</span>
 						</div>
 						<div className='text-std-400 mt-1 text-sm'>{x.activity_trend_summary}</div>
-						<ChartContainer className='mt-5 h-[240px]' config={x.activity_trend_config}>
+						<ChartContainer
+							className={`mt-5${chart_height_class}`}
+							config={x.activity_trend_config}
+						>
 							<LineChart
 								data={x.trends}
 								margin={{ top: 8, right: 8, left: -18, bottom: 0 }}
 							>
-								<CartesianGrid vertical={false} />
+								<CartesianGrid {...horizontal_grid_props} />
 								<XAxis
 									axisLine={false}
 									dataKey='label'
@@ -227,7 +234,7 @@ const Index = () => {
 							items={[
 								{ key: 'messages', label: 'Messages', color: '#6366f1' },
 								{ key: 'new_posts', label: 'Posts', color: '#10b981' },
-								{ key: 'new_sessions', label: 'Sessions', color: '#8b5cf6' },
+								{ key: 'new_sessions', label: 'Sessions', color: '#607D8B' },
 								{ key: 'rewire_events', label: 'Rewires', color: '#f43f5e' }
 							]}
 						/>
