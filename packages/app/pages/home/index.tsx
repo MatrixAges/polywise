@@ -45,14 +45,12 @@ const Index = () => {
 				>
 					{x.snapshot ? (
 						<>
-							<OverviewGrid></OverviewGrid>
-							<TrendPanels></TrendPanels>
 							<KnowledgeAssets></KnowledgeAssets>
+							<TrendPanels></TrendPanels>
 							<RecentChanges></RecentChanges>
-							<div className='grid gap-10 md:grid-cols-2 md:items-start'>
-								<MemoryPanel></MemoryPanel>
-								<PthinkPanel></PthinkPanel>
-							</div>
+							<MemoryPanel></MemoryPanel>
+							<PthinkPanel></PthinkPanel>
+							<OverviewGrid></OverviewGrid>
 						</>
 					) : (
 						<LoadingState></LoadingState>
