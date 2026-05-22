@@ -77,14 +77,14 @@ const getQuantile = (values: Array<number>, ratio: number) => {
 	return values[index] ?? 0
 }
 
-const token_trend_config = {
+export const token_trend_config = {
 	total_tokens: { label: 'Total tokens', color: '#f59e0b' },
 	input_tokens: { label: 'Input', color: '#38bdf8' },
 	output_tokens: { label: 'Output', color: '#34d399' },
 	reasoning_tokens: { label: 'Reasoning', color: '#f97316' }
 } satisfies ChartConfig
 
-const activity_trend_config = {
+export const activity_trend_config = {
 	messages: { label: 'Messages', color: '#6366f1' },
 	new_posts: { label: 'Posts', color: '#10b981' },
 	new_sessions: { label: 'Sessions', color: '#607D8B' },
@@ -218,14 +218,6 @@ export default class Index {
 
 	get trends(): Array<HomeTrendPoint> {
 		return this.data?.trends ? toJS(this.data.trends) : []
-	}
-
-	get token_trend_config() {
-		return token_trend_config
-	}
-
-	get activity_trend_config() {
-		return activity_trend_config
 	}
 
 	get token_trend_summary() {

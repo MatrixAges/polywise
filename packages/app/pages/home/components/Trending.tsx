@@ -5,6 +5,10 @@ import { CartesianGrid, Line, LineChart, Tooltip, XAxis, YAxis } from 'recharts'
 import { ChartContainer, ChartTooltipContent } from '@/__shadcn__/components/ui/chart'
 
 import { useModel } from '../context'
+import { activity_trend_config, token_trend_config } from '../model'
+
+import type { ChartConfig } from '@/__shadcn__/components/ui/chart'
+import type { ReactNode } from 'react'
 
 const chart_card_class = 'min-w-0 rounded-2xl border border-border/70 p-4'
 const chart_height_class = 'h-[180px] min-h-[180px]'
@@ -14,10 +18,27 @@ const horizontal_grid_props = {
 	strokeDasharray: '4 4'
 } as const
 
+const getLegendItems = (config: ChartConfig, keys: Array<string>) =>
+	keys.flatMap(key => {
+		const item = config[key]
+
+		if (!item?.color) {
+			return []
+		}
+
+		return [
+			{
+				key,
+				label: item.label ?? key,
+				color: item.color
+			}
+		]
+	})
+
 const InlineLegend = (props: {
 	items: Array<{
 		key: string
-		label: string
+		label: ReactNode
 		color: string
 	}>
 }) => {
@@ -43,6 +64,17 @@ const InlineLegend = (props: {
 
 const Index = () => {
 	const x = useModel()
+	const token_legend_items = getLegendItems(token_trend_config, [
+		'input_tokens',
+		'output_tokens',
+		'reasoning_tokens'
+	])
+	const activity_legend_items = getLegendItems(activity_trend_config, [
+		'messages',
+		'new_posts',
+		'new_sessions',
+		'rewire_events'
+	])
 
 	return (
 		<div className='flex flex-col gap-3'>
@@ -106,7 +138,7 @@ const Index = () => {
 								<div className='text-std-300'>{x.token_trend_summary}</div>
 							</div>
 						</div>
-						<ChartContainer className='h-[210px] min-h-[210px]' config={x.token_trend_config}>
+						<ChartContainer className='h-[210px] min-h-[210px]' config={token_trend_config}>
 							<LineChart data={x.trends} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
 								<CartesianGrid {...horizontal_grid_props} />
 								<XAxis
@@ -148,13 +180,7 @@ const Index = () => {
 								/>
 							</LineChart>
 						</ChartContainer>
-						<InlineLegend
-							items={[
-								{ key: 'input_tokens', label: 'Input', color: '#38bdf8' },
-								{ key: 'output_tokens', label: 'Output', color: '#34d399' },
-								{ key: 'reasoning_tokens', label: 'Reasoning', color: '#f97316' }
-							]}
-						/>
+						<InlineLegend items={token_legend_items} />
 					</div>
 					<div className={chart_card_class}>
 						<div
@@ -171,7 +197,7 @@ const Index = () => {
 						<div className='text-std-400 mt-1 text-sm'>{x.activity_trend_summary}</div>
 						<ChartContainer
 							className={`mt-5${chart_height_class}`}
-							config={x.activity_trend_config}
+							config={activity_trend_config}
 						>
 							<LineChart
 								data={x.trends}
@@ -230,14 +256,7 @@ const Index = () => {
 								/>
 							</LineChart>
 						</ChartContainer>
-						<InlineLegend
-							items={[
-								{ key: 'messages', label: 'Messages', color: '#6366f1' },
-								{ key: 'new_posts', label: 'Posts', color: '#10b981' },
-								{ key: 'new_sessions', label: 'Sessions', color: '#607D8B' },
-								{ key: 'rewire_events', label: 'Rewires', color: '#f43f5e' }
-							]}
-						/>
+						<InlineLegend items={activity_legend_items} />
 					</div>
 				</div>
 			</div>
