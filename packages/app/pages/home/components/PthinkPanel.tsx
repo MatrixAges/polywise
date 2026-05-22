@@ -1,34 +1,39 @@
-import { Bot, CalendarClock, Sparkles } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { useModel } from '../context'
-import SectionCard from './SectionCard'
+
+const stat_grid_class = 'grid gap-px border border-border-light bg-border-light'
+const stat_item_class = 'flex flex-col gap-2 bg-background px-4 py-3.5'
 
 const Index = () => {
 	const x = useModel()
 
 	return (
-		<SectionCard title='PThink' desc='Autonomous reporting status, schedule pressure, and runtime health.'>
-			<div className='grid gap-3'>
+		<div className='flex flex-col gap-3'>
+			<div
+				className='
+					flex
+					items-center
+					pl-2
+					text-std-600 text-sm font-semibold leading-none
+					border-l-2 border-std-500
+				'
+			>
+				Report
+			</div>
+			<div className='text-std-400 text-sm leading-6'>
+				Autonomous reporting status, schedule pressure, and runtime health.
+			</div>
+			<div className='flex flex-col'>
 				<div
-					className={`rounded-2xl border p-4${
-						x.pthink_enabled ? 'border-emerald-500/40' : 'border-border/70'
+					className={`px-4 py-3.5${
+						x.pthink_enabled ? 'border border-emerald-500/40' : 'border-border-light border'
 					}`}
 				>
-					<div
-						className='
-							flex
-							items-center
-							gap-2
-							text-sm font-medium
-						'
-					>
-						<Bot className={x.pthink_enabled ? 'text-emerald-600' : 'text-std-400'} />
-						<span>
-							{x.pthink_enabled
-								? 'Autonomous reporting enabled'
-								: 'Autonomous reporting disabled'}
-						</span>
+					<div className='text-sm font-medium'>
+						{x.pthink_enabled
+							? 'Autonomous Reporting Enabled'
+							: 'Autonomous Reporting Disabled'}
 					</div>
 					<div className='text-std-400 mt-2 text-sm leading-6'>
 						Idle trigger after {x.pthink_idle_mins} minutes. Daily report{' '}
@@ -44,60 +49,46 @@ const Index = () => {
 					<div className='text-std-400 mt-2 text-sm leading-6'>{x.pthink_runtime_label}</div>
 				</div>
 
-				<div className='border-border/70 rounded-2xl border p-4'>
-					<div
-						className='
-							flex
-							items-center
-							gap-2
-							text-sm font-medium
-						'
-					>
-						<Sparkles className='text-amber-600' />
-						<span>Top signal</span>
-					</div>
+				<div
+					className='
+						px-4 py-3.5
+						border border-border-light border-t-0
+					'
+				>
+					<div className='text-std-400 text-xs font-medium uppercase'>Top Signal</div>
 					<div className='mt-2 text-sm leading-6'>{x.pthink_alert_label}</div>
 				</div>
 
-				<div>
-					<div
-						className='
-							flex
-							items-center
-							gap-2
-							text-sm font-medium
-						'
-					>
-						<CalendarClock className='text-sky-600' />
-						<span>Runtime and config</span>
-					</div>
-					<div className='mt-3 grid gap-3 sm:grid-cols-2'>
-						{x.pthink_runtime_items.map(item => (
-							<div className='border-border/70 rounded-2xl border p-4' key={item.key}>
-								<div className='text-std-400 text-[11px] tracking-[0.18em] uppercase'>
-									{item.label}
-								</div>
-								<div className='mt-2 text-sm leading-6'>{item.value}</div>
-							</div>
-						))}
-					</div>
+				<div
+					className='
+						px-4 py-3.5
+						border border-border-light border-t-0
+					'
+				>
+					<div className='text-std-400 text-xs font-medium uppercase'>Runtime and Config</div>
+				</div>
+				<div className={`${stat_grid_class}border-t-0 md:grid-cols-2`}>
+					{x.pthink_runtime_items.map(item => (
+						<div className={stat_item_class} key={item.key}>
+							<div className='text-std-400 text-xs font-medium uppercase'>{item.title}</div>
+							<div className='text-sm leading-6'>{item.value}</div>
+						</div>
+					))}
 				</div>
 
-				<div className='grid gap-3 sm:grid-cols-3'>
+				<div className={`${stat_grid_class}border-t-0 md:grid-cols-3`}>
 					{x.pthink_depth_items.map(item => (
-						<div className='border-border/70 rounded-2xl border p-4' key={item.key}>
-							<div className='text-std-400 text-[11px] tracking-[0.18em] uppercase'>
-								{item.title}
+						<div className={stat_item_class} key={item.key}>
+							<div className='text-std-400 text-xs font-medium uppercase'>{item.title}</div>
+							<div className='font-mono text-2xl font-semibold tracking-tight'>
+								{item.value}
 							</div>
-							<div className='mt-2 text-xl font-semibold tracking-tight'>{item.value}</div>
-							{item.desc ? (
-								<div className='text-std-400 mt-2 text-sm leading-5'>{item.desc}</div>
-							) : null}
+							{item.desc ? <div className='text-std-300 text-xs'>{item.desc}</div> : null}
 						</div>
 					))}
 				</div>
 			</div>
-		</SectionCard>
+		</div>
 	)
 }
 

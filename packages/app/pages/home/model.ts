@@ -6,8 +6,6 @@ import { formatDate, formatDateTime, fromNow, rpc } from '@/utils'
 
 import type { ChartConfig } from '@/__shadcn__/components/ui/chart'
 import type {
-	HomeActiveProjectItem,
-	HomeActiveSessionItem,
 	HomeHeatmapCell,
 	HomeModelItem,
 	HomeOverviewCard,
@@ -17,7 +15,6 @@ import type {
 } from './types'
 
 const compact_formatter = Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 })
-const day_ms = 24 * 60 * 60 * 1000
 
 const weekday_label_map = {
 	sun: 'Sunday',
@@ -40,19 +37,6 @@ const activity_heatmap_weights = {
 	rewire: 2,
 	report: 8
 } as const
-const formatAgeDays = (timestamp?: number | null) => {
-	if (!timestamp) {
-		return 'Clear'
-	}
-
-	const age_days = Math.max(0, (Date.now() - timestamp * 1000) / day_ms)
-
-	if (age_days < 1) {
-		return `${Math.max(1, Math.round(age_days * 24))}h`
-	}
-
-	return `${Math.round(age_days)}d`
-}
 
 const getHeatmapScore = (item: {
 	messages: number
@@ -340,14 +324,6 @@ export default class Index {
 		}))
 	}
 
-	get usage_footer() {
-		if (!this.data) {
-			return ''
-		}
-
-		return `Cached input ${formatCompact(this.data.usage.cached_input_tokens)} · ${formatCompact(this.data.activity.today.tokens)} tokens today · ${this.data.usage.assistant_messages} assistant replies`
-	}
-
 	get session_recency_mix() {
 		if (!this.data) {
 			return ''
@@ -480,36 +456,8 @@ export default class Index {
 		return `User ${counts.user} · Wiki ${counts.wiki} · Memory ${counts.memory}`
 	}
 
-	get posts_pipeline_meta() {
-		return this.data
-			? `${this.data.content.posts_ready_total} ready · ${this.data.content.posts_pending} pending · ${formatPercent(this.data.content.post_completion_rate)} completion`
-			: ''
-	}
-
 	get pipeline_total() {
 		return this.data ? formatCompact(this.data.health.backlog_pending_total) : '0'
-	}
-
-	get backlog_breakdown() {
-		if (!this.data) {
-			return ''
-		}
-
-		return `${this.data.content.documents_pending} documents · ${this.data.content.articles_pending} articles · ${this.data.content.posts_pending} posts · ${this.data.content.link_pending_total} links`
-	}
-
-	get pipeline_meta() {
-		if (!this.data) {
-			return ''
-		}
-
-		return this.backlog_breakdown
-	}
-
-	get pipeline_detail() {
-		return this.data
-			? `+${this.data.content.pipeline_created_week_total} items this week · ${this.data.system.notification_unread} unread notifications`
-			: ''
 	}
 
 	get linkcase_total() {
@@ -519,28 +467,6 @@ export default class Index {
 	get linkcase_meta() {
 		return this.data
 			? `${this.data.content.link_ready_total} ready · ${this.data.content.link_pending_total} waiting · ${this.data.content.link_fail_total} failed`
-			: ''
-	}
-
-	get system_footprint_total() {
-		return this.data
-			? formatCompact(
-					this.data.system.agent_total +
-						this.data.system.project_total +
-						this.data.system.skill_total
-				)
-			: '0'
-	}
-
-	get system_footprint_meta() {
-		return this.data
-			? `${this.data.system.agent_total} agents · ${this.data.system.project_total} projects · ${this.data.system.skill_total} skills`
-			: ''
-	}
-
-	get system_footprint_detail() {
-		return this.data
-			? `${this.data.system.group_total} groups · ${this.data.system.notification_pushed}/${this.data.system.notification_total} notifications pushed`
 			: ''
 	}
 
@@ -561,59 +487,6 @@ export default class Index {
 				title: 'Post completion',
 				value: formatPercent(this.data.content.post_completion_rate),
 				desc: `${this.data.content.posts_ready_total} ready · ${this.data.content.posts_pending} pending`
-			}
-		]
-	}
-
-	get active_projects(): Array<HomeActiveProjectItem> {
-		return (this.data?.activity.top_projects ?? []).map(item => ({
-			...item,
-			updated_label: fromNow(item.last_message_at)
-		}))
-	}
-
-	get active_sessions(): Array<HomeActiveSessionItem> {
-		return (this.data?.activity.top_sessions ?? []).map(item => ({
-			...item,
-			updated_label: fromNow(item.last_message_at)
-		}))
-	}
-
-	get signal_cards(): Array<HomeModelItem> {
-		if (!this.data) {
-			return []
-		}
-
-		return [
-			{
-				key: 'alert',
-				title: 'Top alert',
-				value: this.data.health.top_alert?.label ?? 'Quiet',
-				desc: this.data.health.top_alert?.detail ?? 'No trigger signal above the threshold right now.'
-			},
-			{
-				key: 'backlog',
-				title: 'Backlog pressure',
-				value: String(this.data.health.backlog_pending_total),
-				desc: `${this.backlog_breakdown} queued now`
-			},
-			{
-				key: 'stale',
-				title: 'Stale unread',
-				value: `${this.data.health.stale_unread_sessions_24h}/${this.data.health.stale_unread_sessions_72h}`,
-				desc: '24h / 72h sessions waiting for follow-up'
-			},
-			{
-				key: 'delivery',
-				title: 'Push rate',
-				value: formatPercent(this.data.health.notification_push_rate),
-				desc: `${this.data.system.notification_pushed} pushed · ${this.data.system.notification_unpushed} waiting`
-			},
-			{
-				key: 'focus',
-				title: 'Project focus',
-				value: formatPercent(this.data.activity.project_focus_concentration),
-				desc: 'Top project share of weekly project messages'
 			}
 		]
 	}
@@ -760,29 +633,29 @@ export default class Index {
 		return [
 			{
 				key: 'reports',
-				label: 'Reports today/week/total',
+				title: 'Reports',
 				value: `${this.data.pthink.report_today} / ${this.data.pthink.report_week} / ${this.data.pthink.report_total}`
 			},
 			{
 				key: 'trigger',
-				label: 'Trigger insights',
+				title: 'Trigger Mode',
 				value: this.pthink_config?.trigger_enabled
 					? `enabled · ${this.data.health.top_alert?.label ?? 'no active alert'}`
 					: 'disabled'
 			},
 			{
 				key: 'cap',
-				label: 'Max reports per day',
+				title: 'Daily Cap',
 				value: String(this.pthink_config?.max_reports_per_day ?? 3)
 			},
 			{
 				key: 'last-report',
-				label: 'Last report',
+				title: 'Last Report',
 				value: this.pthink_last_label
 			},
 			{
 				key: 'refresh',
-				label: 'Last snapshot refresh',
+				title: 'Snapshot Refresh',
 				value: this.last_loaded_label
 			}
 		]

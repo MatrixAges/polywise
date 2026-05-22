@@ -75,8 +75,16 @@ const Index = () => {
 										<Pipeline></Pipeline>
 									</div>
 								)}
-								{active_tab === 'memory' && <MemoryPanel></MemoryPanel>}
-								{active_tab === 'report' && <PthinkPanel></PthinkPanel>}
+								{active_tab === 'memory' && (
+									<div className='flex flex-col gap-10'>
+										<MemoryPanel></MemoryPanel>
+									</div>
+								)}
+								{active_tab === 'report' && (
+									<div className='flex flex-col gap-10'>
+										<PthinkPanel></PthinkPanel>
+									</div>
+								)}
 							</>
 						) : (
 							<LoadingState></LoadingState>

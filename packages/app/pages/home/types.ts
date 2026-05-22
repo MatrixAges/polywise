@@ -29,7 +29,7 @@ export interface HomeModelItem {
 
 export interface HomeRuntimeItem {
 	key: string
-	label: string
+	title: string
 	value: string
 }
 
@@ -37,12 +37,4 @@ export interface HomeHeatmapCell extends HomeHeatmapPoint {
 	level: number
 	score: number
 	tooltip: string
-}
-
-export type HomeActiveProjectItem = HomeSnapshot['activity']['top_projects'][number] & {
-	updated_label: string
-}
-
-export type HomeActiveSessionItem = HomeSnapshot['activity']['top_sessions'][number] & {
-	updated_label: string
 }

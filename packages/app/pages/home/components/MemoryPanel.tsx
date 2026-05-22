@@ -1,8 +1,9 @@
-import { Database, Workflow } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { useModel } from '../context'
-import SectionCard from './SectionCard'
+
+const stat_grid_class = 'grid gap-px border border-border-light bg-border-light'
+const stat_item_class = 'flex flex-col gap-2 bg-background px-4 py-3.5'
 
 const Index = () => {
 	const x = useModel()
@@ -10,139 +11,99 @@ const Index = () => {
 	const frozen_total = memory.frozen_node_total + memory.frozen_edge_total
 
 	return (
-		<SectionCard
-			title='Memory'
-			desc='Graph size, rewrite pressure, and adjacent ops signals from the background memory system.'
-		>
-			<div className='grid gap-6'>
-				<div className='grid grid-cols-2 gap-3'>
-					<div className='border-border/70 rounded-2xl border p-4'>
-						<div
-							className='
-								flex
-								items-center
-								gap-2
-								text-sm font-medium
-							'
-						>
-							<Workflow className='size-4 text-rose-600' />
-							<span>Nodes</span>
-						</div>
-						<div className='mt-3 text-2xl font-semibold tracking-tight'>
+		<div className='flex flex-col gap-3'>
+			<div
+				className='
+					flex
+					items-center
+					pl-2
+					text-std-600 text-sm font-semibold leading-none
+					border-l-2 border-std-500
+				'
+			>
+				Memory
+			</div>
+			<div className='text-std-400 text-sm leading-6'>
+				Graph size, rewire pressure, and adjacent ops signals from the background memory system.
+			</div>
+			<div className='flex flex-col'>
+				<div className={`${stat_grid_class}grid-cols-2`}>
+					<div className={stat_item_class}>
+						<div className='text-std-400 text-xs font-medium uppercase'>Nodes</div>
+						<div className='font-mono text-2xl font-semibold tracking-tight'>
 							{x.node_total_label}
 						</div>
-						<div className='text-std-400 mt-2 text-sm'>{memory.frozen_node_total} frozen</div>
+						<div className='text-std-300 text-xs'>{memory.frozen_node_total} frozen</div>
 					</div>
-					<div className='border-border/70 rounded-2xl border p-4'>
-						<div
-							className='
-								flex
-								items-center
-								gap-2
-								text-sm font-medium
-							'
-						>
-							<Workflow className='size-4 text-rose-600' />
-							<span>Edges</span>
-						</div>
-						<div className='mt-3 text-2xl font-semibold tracking-tight'>
+					<div className={stat_item_class}>
+						<div className='text-std-400 text-xs font-medium uppercase'>Edges</div>
+						<div className='font-mono text-2xl font-semibold tracking-tight'>
 							{x.edge_total_label}
 						</div>
-						<div className='text-std-400 mt-2 text-sm'>{memory.frozen_edge_total} frozen</div>
+						<div className='text-std-300 text-xs'>{memory.frozen_edge_total} frozen</div>
 					</div>
-					<div className='border-border/70 rounded-2xl border p-4'>
-						<div
-							className='
-								flex
-								items-center
-								gap-2
-								text-sm font-medium
-							'
-						>
-							<Workflow className='size-4 text-rose-600' />
-							<span>Weekly rewires</span>
-						</div>
-						<div className='mt-3 text-2xl font-semibold tracking-tight'>
+					<div className={stat_item_class}>
+						<div className='text-std-400 text-xs font-medium uppercase'>Weekly Rewires</div>
+						<div className='font-mono text-2xl font-semibold tracking-tight'>
 							{memory.rewire_event_week.toLocaleString('en-US')}
 						</div>
-						<div className='text-std-400 mt-2 text-sm'>
+						<div className='text-std-300 text-xs'>
 							{memory.rewire_event_total.toLocaleString('en-US')} total
 						</div>
 					</div>
-					<div className='border-border/70 rounded-2xl border p-4'>
-						<div
-							className='
-								flex
-								items-center
-								gap-2
-								text-sm font-medium
-							'
-						>
-							<Workflow className='size-4 text-rose-600' />
-							<span>Frozen graph</span>
-						</div>
-						<div className='mt-3 text-2xl font-semibold tracking-tight'>
+					<div className={stat_item_class}>
+						<div className='text-std-400 text-xs font-medium uppercase'>Frozen Graph</div>
+						<div className='font-mono text-2xl font-semibold tracking-tight'>
 							{frozen_total.toLocaleString('en-US')}
 						</div>
-						<div className='text-std-400 mt-2 text-sm'>Nodes and edges combined</div>
+						<div className='text-std-300 text-xs'>Nodes and edges combined</div>
 					</div>
 				</div>
 
-				<div className='grid gap-3 sm:grid-cols-3'>
+				<div className={`${stat_grid_class}border-t-0 md:grid-cols-3`}>
 					{x.memory_health_items.map(item => (
-						<div className='border-border/70 rounded-2xl border p-4' key={item.key}>
-							<div className='text-std-400 text-[11px] tracking-[0.18em] uppercase'>
-								{item.title}
+						<div className={stat_item_class} key={item.key}>
+							<div className='text-std-400 text-xs font-medium uppercase'>{item.title}</div>
+							<div className='font-mono text-2xl font-semibold tracking-tight'>
+								{item.value}
 							</div>
-							<div className='mt-2 text-xl font-semibold tracking-tight'>{item.value}</div>
-							{item.desc ? (
-								<div className='text-std-400 mt-2 text-sm leading-5'>{item.desc}</div>
-							) : null}
+							{item.desc ? <div className='text-std-300 text-xs'>{item.desc}</div> : null}
 						</div>
 					))}
 				</div>
 
-				<div className='grid gap-3 sm:grid-cols-3'>
+				<div className={`${stat_grid_class}border-t-0 md:grid-cols-3`}>
 					{x.memory_depth_items.map(item => (
-						<div className='border-border/70 rounded-2xl border p-4' key={item.key}>
-							<div className='text-std-400 text-[11px] tracking-[0.18em] uppercase'>
-								{item.title}
+						<div className={stat_item_class} key={item.key}>
+							<div className='text-std-400 text-xs font-medium uppercase'>{item.title}</div>
+							<div className='font-mono text-2xl font-semibold tracking-tight'>
+								{item.value}
 							</div>
-							<div className='mt-2 text-xl font-semibold tracking-tight'>{item.value}</div>
-							{item.desc ? (
-								<div className='text-std-400 mt-2 text-sm leading-5'>{item.desc}</div>
-							) : null}
+							{item.desc ? <div className='text-std-300 text-xs'>{item.desc}</div> : null}
 						</div>
 					))}
 				</div>
 
-				<div>
-					<div
-						className='
-							flex
-							items-center
-							gap-2
-							text-sm font-medium
-						'
-					>
-						<Database className='size-4 text-indigo-600' />
-						<span>Ops surface</span>
-					</div>
-					<div className='mt-3 grid gap-3 sm:grid-cols-3'>
-						{x.ops_items.map(item => (
-							<div className='border-border/70 rounded-2xl border p-4' key={item.key}>
-								<div className='text-std-400 text-[11px] tracking-[0.18em] uppercase'>
-									{item.title}
-								</div>
-								<div className='mt-2 text-xl font-semibold tracking-tight'>
-									{item.value}
-								</div>
+				<div
+					className='
+						px-4 py-3.5
+						border border-border-light border-t-0
+					'
+				>
+					<div className='text-std-400 text-xs font-medium uppercase'>Ops Surface</div>
+				</div>
+				<div className={`${stat_grid_class}border-t-0 md:grid-cols-4`}>
+					{x.ops_items.map(item => (
+						<div className={stat_item_class} key={item.key}>
+							<div className='text-std-400 text-xs font-medium uppercase'>{item.title}</div>
+							<div className='font-mono text-2xl font-semibold tracking-tight'>
+								{item.value}
 							</div>
-						))}
-					</div>
+						</div>
+					))}
 				</div>
 			</div>
-		</SectionCard>
+		</div>
 	)
 }
 
