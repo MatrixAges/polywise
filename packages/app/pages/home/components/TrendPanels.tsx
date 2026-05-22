@@ -44,7 +44,7 @@ const Index = () => {
 	return (
 		<SectionCard
 			title='Trends'
-			desc='Two consistent charts for the last 14 days: model throughput on one side, workspace activity on the other.'
+			desc='Week activity is surfaced first, with today kept beside it for short-horizon comparison.'
 		>
 			<div className='grid gap-4'>
 				<div className='grid gap-3 md:grid-cols-2'>

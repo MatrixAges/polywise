@@ -77,6 +77,7 @@ export interface PthinkWindowStats {
 	new_notifications: number
 	unread_notifications: number
 	pending_posts: number
+	pending_articles: number
 	pending_documents: number
 	pending_links: number
 }

@@ -51,6 +51,10 @@ const formatModelName = (value: { provider?: string; model?: string } | null | u
 	return `${value.provider} / ${value.model}`
 }
 
+const getPendingPipelineItems = (
+	stats: Pick<PthinkWindowStats, 'pending_posts' | 'pending_articles' | 'pending_documents' | 'pending_links'>
+) => stats.pending_posts + stats.pending_articles + stats.pending_documents + stats.pending_links
+
 const readWindowStats = (start_at: number): PthinkWindowStats => {
 	const message_row = env.sqlite
 		.prepare(
@@ -110,6 +114,11 @@ const readWindowStats = (start_at: number): PthinkWindowStats => {
 			WHERE is_pipelined = 0
 				AND "for" IN ('user', 'wiki', 'memory')
 				AND ${organic_post_where}`
+		),
+		pending_articles: countValue(
+			`SELECT COUNT(*) AS value FROM article
+			WHERE is_pipelined = 0
+				AND "for" NOT IN ('user', 'wiki', 'memory')`
 		),
 		pending_documents: countValue('SELECT COUNT(*) AS value FROM document WHERE is_pipelined = 0'),
 		pending_links: countValue("SELECT COUNT(*) AS value FROM link WHERE status IN ('pending', 'none')")
@@ -312,6 +321,7 @@ export const pickPthinkTrigger = (args: {
 	const candidates = [] as Array<PthinkTriggerCandidate>
 	const recent = analytics.windows.six_hours
 	const day = analytics.windows.day
+	const pending_pipeline_items = getPendingPipelineItems(day)
 
 	if (recent.total_tokens >= 20_000 || recent.assistant_messages >= 18) {
 		candidates.push({
@@ -340,14 +350,12 @@ export const pickPthinkTrigger = (args: {
 		})
 	}
 
-	if (day.pending_posts + day.pending_documents + day.pending_links >= 5 || day.unread_notifications >= 6) {
+	if (pending_pipeline_items >= 5 || day.unread_notifications >= 6) {
 		candidates.push({
 			key: 'backlog_pressure',
 			label: 'Backlog pressure',
-			detail: `${day.pending_posts + day.pending_documents + day.pending_links} pending pipeline items, ${day.unread_notifications} unread notifications`,
-			score:
-				(day.pending_posts + day.pending_documents + day.pending_links) * 2500 +
-				day.unread_notifications * 400
+			detail: `${pending_pipeline_items} pending pipeline items, ${day.unread_notifications} unread notifications`,
+			score: pending_pipeline_items * 2500 + day.unread_notifications * 400
 		})
 	}
 

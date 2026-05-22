@@ -670,8 +670,17 @@ export default p
 		const messages_week = countValue('SELECT COUNT(*) AS value FROM message WHERE created_at >= ?', [last_week])
 
 		const documents_pending = countValue('SELECT COUNT(*) AS value FROM document WHERE is_pipelined = 0')
+		const documents_week_total = countValue('SELECT COUNT(*) AS value FROM document WHERE created_at >= ?', [
+			last_week
+		])
 		const articles_pending = countValue(
 			"SELECT COUNT(*) AS value FROM article WHERE is_pipelined = 0 AND \"for\" NOT IN ('user', 'wiki', 'memory')"
+		)
+		const articles_week_total = countValue(
+			`SELECT COUNT(*) AS value FROM article
+			WHERE created_at >= ?
+				AND "for" NOT IN ('user', 'wiki', 'memory')`,
+			[last_week]
 		)
 		const posts_pending = countValue(
 			`SELECT COUNT(*) AS value FROM article
@@ -684,6 +693,7 @@ export default p
 		const link_pending_total = countValue(
 			"SELECT COUNT(*) AS value FROM link WHERE status IN ('pending', 'none')"
 		)
+		const links_week_total = countValue('SELECT COUNT(*) AS value FROM link WHERE created_at >= ?', [last_week])
 		const link_fail_total = countValue("SELECT COUNT(*) AS value FROM link WHERE status = 'fail'")
 
 		const post_for_counts = readPostForCounts()
@@ -715,6 +725,8 @@ export default p
 		const days_since_last_post = last_post_at ? Math.floor((now - last_post_at) / day_ms) : null
 		const post_streak_days = readOrganicPostStreak(today_key)
 		const backlog_pending_total = documents_pending + articles_pending + posts_pending + link_pending_total
+		const pipeline_created_week_total =
+			documents_week_total + articles_week_total + posts_week + links_week_total
 		const backlog_pressure_score =
 			backlog_pending_total * 10 +
 			notification_unread * 4 +
@@ -880,11 +892,16 @@ export default p
 				link_pending_total,
 				link_fail_total,
 				documents_pending,
+				documents_week_total,
 				articles_pending,
+				articles_week_total,
 				posts_pending,
+				pipeline_created_week_total,
 				post_for_counts,
 				long_article_total,
-				avg_chunks_per_article: article_total > 0 ? Number((chunk_total / article_total).toFixed(1)) : 0
+				avg_chunks_per_article:
+					article_total > 0 ? Number((chunk_total / article_total).toFixed(1)) : 0,
+				links_week_total
 			},
 			system: {
 				agent_total,

@@ -10,7 +10,7 @@ const Index = () => {
 	return (
 		<SectionCard
 			title='Overview'
-			desc='Eight operational signals for the current workspace, kept dense enough to scan in a few seconds.'
+			desc='Week-first workspace signals, with total accumulation kept visible as supporting context.'
 		>
 			<div className='grid grid-cols-2 gap-3 md:grid-cols-4'>
 				{x.overview_cards.map(item => (

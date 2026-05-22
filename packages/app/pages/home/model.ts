@@ -117,60 +117,58 @@ export default class Index {
 			return []
 		}
 
-		const pending_total =
-			this.data.content.documents_pending +
-			this.data.content.articles_pending +
-			this.data.content.posts_pending
 		const post_counts = this.data.content.post_for_counts
+		const graph_total = this.data.memory.node_total + this.data.memory.edge_total
+		const graph_week_total = this.data.memory.node_week_total + this.data.memory.edge_week_total
 
 		return [
 			{
 				key: 'sessions',
 				title: 'Sessions',
-				value: formatCompact(this.data.overview.session_total),
-				desc: `${this.data.overview.sessions_today} today · ${this.data.overview.sessions_week} this week`
+				value: formatInteger(this.data.overview.sessions_week),
+				desc: `${formatCompact(this.data.overview.session_total)} total · ${this.data.overview.sessions_today} today`
 			},
 			{
 				key: 'running',
-				title: 'Running',
-				value: formatInteger(this.data.overview.sessions_running),
-				desc: `${this.data.overview.sessions_im} IM · ${this.data.overview.sessions_cron} cron · ${this.data.overview.sessions_with_messages_week} active this week`
+				title: 'Active week',
+				value: formatInteger(this.data.overview.sessions_with_messages_week),
+				desc: `${this.data.overview.sessions_running} running now · ${this.data.overview.sessions_im} IM · ${this.data.overview.sessions_cron} cron`
 			},
 			{
 				key: 'unread',
-				title: 'Unread',
+				title: 'Unread now',
 				value: formatInteger(this.data.overview.sessions_unread),
 				desc: `${this.data.overview.stale_unread_sessions_24h} stale 24h · ${this.data.overview.stale_unread_sessions_72h} stale 72h`
 			},
 			{
 				key: 'messages',
 				title: 'Messages',
-				value: formatCompact(this.data.overview.message_total),
-				desc: `${formatCompact(this.data.overview.messages_today)} today · ${formatCompact(this.data.overview.messages_week)} this week`
+				value: formatCompact(this.data.overview.messages_week),
+				desc: `${formatCompact(this.data.overview.message_total)} total · ${formatCompact(this.data.overview.messages_today)} today`
 			},
 			{
 				key: 'tokens',
 				title: 'Tokens',
-				value: formatCompact(this.data.usage.total_tokens),
-				desc: `${formatCompact(this.data.usage.week_total_tokens)} this week · ${formatCompact(this.data.usage.avg_total_tokens_per_reply)} per reply`
+				value: formatCompact(this.data.usage.week_total_tokens),
+				desc: `${formatCompact(this.data.usage.total_tokens)} total · ${formatCompact(this.data.usage.avg_total_tokens_per_reply)} per reply`
 			},
 			{
 				key: 'posts',
 				title: 'Posts',
-				value: formatCompact(post_counts.user + post_counts.wiki + post_counts.memory),
-				desc: `${post_counts.user} user · ${post_counts.wiki} wiki · ${post_counts.memory} memory`
+				value: formatInteger(this.data.activity.week.posts),
+				desc: `${formatCompact(this.data.content.post_total)} total · ${post_counts.user} user · ${post_counts.wiki} wiki · ${post_counts.memory} memory`
 			},
 			{
 				key: 'pipeline',
 				title: 'Pipeline',
-				value: formatCompact(pending_total),
-				desc: `${this.data.health.backlog_pending_total} queued · score ${this.data.health.backlog_pressure_score}`
+				value: `+${formatInteger(this.data.content.pipeline_created_week_total)}`,
+				desc: `${this.data.health.backlog_pending_total} queued now · ${this.backlog_breakdown}`
 			},
 			{
 				key: 'graph',
 				title: 'Graph',
-				value: formatCompact(this.data.memory.node_total + this.data.memory.edge_total),
-				desc: `+${this.data.memory.node_week_total} nodes · +${this.data.memory.edge_week_total} edges this week`
+				value: `+${formatCompact(graph_week_total)}`,
+				desc: `${formatCompact(graph_total)} total · +${this.data.memory.node_week_total} nodes · +${this.data.memory.edge_week_total} edges this week`
 			}
 		]
 	}
@@ -283,17 +281,25 @@ export default class Index {
 		return this.data ? formatCompact(this.data.health.backlog_pending_total) : '0'
 	}
 
+	get backlog_breakdown() {
+		if (!this.data) {
+			return ''
+		}
+
+		return `${this.data.content.documents_pending} documents · ${this.data.content.articles_pending} articles · ${this.data.content.posts_pending} posts · ${this.data.content.link_pending_total} links`
+	}
+
 	get pipeline_meta() {
 		if (!this.data) {
 			return ''
 		}
 
-		return `${this.data.content.documents_pending} documents · ${this.data.content.articles_pending} articles · ${this.data.content.posts_pending} posts pending`
+		return this.backlog_breakdown
 	}
 
 	get pipeline_detail() {
 		return this.data
-			? `Score ${this.data.health.backlog_pressure_score} · ${this.data.system.notification_unread} unread notifications`
+			? `+${this.data.content.pipeline_created_week_total} items this week · ${this.data.system.notification_unread} unread notifications`
 			: ''
 	}
 
@@ -432,7 +438,7 @@ export default class Index {
 				key: 'backlog',
 				title: 'Backlog pressure',
 				value: String(this.data.health.backlog_pending_total),
-				desc: `Score ${this.data.health.backlog_pressure_score}`
+				desc: `${this.backlog_breakdown} queued now`
 			},
 			{
 				key: 'stale',
@@ -526,16 +532,16 @@ export default class Index {
 
 		return [
 			{
-				key: 'today',
-				title: 'Today',
-				value: `${this.data.activity.today.messages} messages`,
-				desc: `${this.data.activity.today.sessions} sessions · ${this.data.activity.today.posts} posts · ${formatCompact(this.data.activity.today.tokens)} tokens`
-			},
-			{
 				key: 'week',
 				title: 'This week',
 				value: `${this.data.activity.week.messages} messages`,
 				desc: `${this.data.activity.week.sessions} sessions · ${this.data.activity.week.posts} posts · ${formatCompact(this.data.activity.week.tokens)} tokens`
+			},
+			{
+				key: 'today',
+				title: 'Today',
+				value: `${this.data.activity.today.messages} messages`,
+				desc: `${this.data.activity.today.sessions} sessions · ${this.data.activity.today.posts} posts · ${formatCompact(this.data.activity.today.tokens)} tokens`
 			}
 		]
 	}

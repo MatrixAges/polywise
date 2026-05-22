@@ -37,6 +37,9 @@ const resolveDefaultTextModel = async () => {
 	})
 }
 
+const getPendingPipelineItems = (stats: PthinkAnalyticsSnapshot['windows']['day']) =>
+	stats.pending_posts + stats.pending_articles + stats.pending_documents + stats.pending_links
+
 const buildFallback = (args: {
 	kind: PthinkReportKind
 	analytics: PthinkAnalyticsSnapshot
@@ -54,6 +57,7 @@ const buildFallback = (args: {
 					? `PThink Trigger · ${trigger?.label ?? 'Insight'}`
 					: 'PThink Idle Digest'
 	const title = `${title_prefix} · ${dayjs(analytics.generated_at).format('YYYY-MM-DD HH:mm')}`
+	const pending_pipeline_items = getPendingPipelineItems(day)
 	const summary_parts = [
 		`${day.messages} messages and ${day.total_tokens} tokens in the last 24 hours`,
 		`${day.new_posts} new posts`,
@@ -67,12 +71,12 @@ const buildFallback = (args: {
 		day.new_posts > 0 || day.new_memory_posts > 0
 			? `Knowledge assets kept moving: ${day.new_posts} new posts landed, including ${day.new_memory_posts} memory posts.`
 			: 'Knowledge assets did not expand much in the last day, so most momentum was operational rather than archival.',
-		day.pending_posts + day.pending_documents + day.pending_links > 0
-			? `There is still backlog pressure with ${day.pending_posts + day.pending_documents + day.pending_links} pending pipeline items.`
+		pending_pipeline_items > 0
+			? `There is still backlog pressure with ${pending_pipeline_items} pending pipeline items.`
 			: 'Pipeline pressure is low, so the workspace is mostly keeping up with throughput.'
 	]
 	const focus = [
-		day.pending_posts + day.pending_documents + day.pending_links > 0
+		pending_pipeline_items > 0
 			? 'Clear pending pipeline items before they turn into stale context.'
 			: 'Turn the freshest sessions into durable posts while context is still warm.',
 		week.total_tokens > 30_000
@@ -144,7 +148,7 @@ const buildMarkdown = (args: {
 			: []),
 		'',
 		'## Watchlist',
-		`- Pending pipeline: ${day.pending_posts} posts, ${day.pending_documents} documents, ${day.pending_links} links`,
+		`- Pending pipeline: ${day.pending_posts} posts, ${day.pending_articles} articles, ${day.pending_documents} documents, ${day.pending_links} links`,
 		`- Unread notifications: ${day.unread_notifications}`,
 		...(kind === 'trigger' && trigger ? [`- Trigger: ${trigger.label} · ${trigger.detail}`] : []),
 		'',
