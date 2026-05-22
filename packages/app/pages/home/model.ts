@@ -9,6 +9,8 @@ import type {
 	HomeHeatmapCell,
 	HomeModelItem,
 	HomeOverviewCard,
+	HomeReportArticle,
+	HomeReportHistoryItem,
 	HomeRuntimeItem,
 	HomeSnapshot,
 	HomeStatsPeriod,
@@ -48,6 +50,10 @@ const stats_period_adjective_map: Record<HomeStatsPeriod, string> = {
 	year: 'Yearly',
 	total: 'Total'
 }
+const home_stats_period_items = stats_period_options.map(value => ({
+	value,
+	label: stats_period_title_map[value]
+}))
 
 const formatCompact = (value: number) => compact_formatter.format(value)
 const formatInteger = (value: number) => value.toLocaleString('en-US')
@@ -89,6 +95,153 @@ const getQuantile = (values: Array<number>, ratio: number) => {
 	return values[index] ?? 0
 }
 
+const getStartOfLocalDay = (value: number) => {
+	const date = new Date(value)
+
+	date.setHours(0, 0, 0, 0)
+
+	return date
+}
+
+const getStartOfLocalWeek = (value: number) => {
+	const date = getStartOfLocalDay(value)
+	const weekday = (date.getDay() + 6) % 7
+
+	date.setDate(date.getDate() - weekday)
+
+	return date
+}
+
+const getStartOfLocalMonth = (value: number) => {
+	const date = getStartOfLocalDay(value)
+
+	date.setDate(1)
+
+	return date
+}
+
+const getStartOfLocalYear = (value: number) => {
+	const date = getStartOfLocalDay(value)
+
+	date.setMonth(0, 1)
+
+	return date
+}
+
+const getReportWindowStart = (period: HomeStatsPeriod, offset: number, now = Date.now()) => {
+	switch (period) {
+		case 'day': {
+			const date = getStartOfLocalDay(now)
+
+			date.setDate(date.getDate() - offset)
+
+			return date
+		}
+		case 'week': {
+			const date = getStartOfLocalWeek(now)
+
+			date.setDate(date.getDate() - offset * 7)
+
+			return date
+		}
+		case 'month': {
+			const date = getStartOfLocalMonth(now)
+
+			date.setMonth(date.getMonth() - offset)
+
+			return date
+		}
+		case 'year': {
+			const date = getStartOfLocalYear(now)
+
+			date.setFullYear(date.getFullYear() - offset)
+
+			return date
+		}
+		case 'total':
+			return new Date(0)
+	}
+}
+
+const getReportWindowEnd = (period: HomeStatsPeriod, start: Date) => {
+	if (period === 'total') {
+		return null
+	}
+
+	const end = new Date(start)
+
+	switch (period) {
+		case 'day':
+			end.setDate(end.getDate() + 1)
+			return end
+		case 'week':
+			end.setDate(end.getDate() + 7)
+			return end
+		case 'month':
+			end.setMonth(end.getMonth() + 1)
+			return end
+		case 'year':
+			end.setFullYear(end.getFullYear() + 1)
+			return end
+		case 'total':
+			return null
+	}
+}
+
+const formatReportWindowLabel = (period: HomeStatsPeriod, offset: number, start: Date, end: Date | null) => {
+	if (period === 'total') {
+		return 'All reports'
+	}
+
+	if (period === 'day') {
+		if (offset === 0) {
+			return 'Today'
+		}
+
+		if (offset === 1) {
+			return 'Yesterday'
+		}
+
+		return formatDate(start.getTime(), 'MMM D, YYYY')
+	}
+
+	if (period === 'week') {
+		if (offset === 0) {
+			return 'This week'
+		}
+
+		if (offset === 1) {
+			return 'Last week'
+		}
+
+		const end_label = end ? formatDate(end.getTime() - 1, 'MMM D') : ''
+
+		return `${formatDate(start.getTime(), 'MMM D')} - ${end_label}`
+	}
+
+	if (period === 'month') {
+		if (offset === 0) {
+			return 'This month'
+		}
+
+		if (offset === 1) {
+			return 'Last month'
+		}
+
+		return formatDate(start.getTime(), 'MMMM YYYY')
+	}
+
+	if (offset === 0) {
+		return 'This year'
+	}
+
+	if (offset === 1) {
+		return 'Last year'
+	}
+
+	return formatDate(start.getTime(), 'YYYY')
+}
+
 export const token_trend_config = {
 	total_tokens: { label: 'Total tokens', color: '#f59e0b' },
 	input_tokens: { label: 'Input', color: '#38bdf8' },
@@ -102,7 +255,7 @@ export const activity_trend_config = {
 	new_sessions: { label: 'Sessions', color: '#607D8B' },
 	rewire_events: { label: 'Rewires', color: '#f43f5e' }
 } satisfies ChartConfig
-export const home_stats_period_items = stats_period_options
+export { home_stats_period_items }
 
 @injectable()
 export default class Index {
@@ -111,6 +264,12 @@ export default class Index {
 	last_loaded_at = 0
 	stats_period: HomeStatsPeriod = 'week'
 	refresh_request_id = 0
+	report_window_offset = 0
+	report_article_loading = false
+	report_article_error = ''
+	report_article = null as HomeReportArticle | null
+	report_article_post_id = ''
+	report_article_request_id = 0
 
 	constructor(public global: GlobalModel) {
 		makeAutoObservable(this, { global: false }, { autoBind: true })
@@ -188,7 +347,131 @@ export default class Index {
 		}
 
 		this.stats_period = period
+		this.report_window_offset = 0
 		void this.refresh(period)
+	}
+
+	get report_history(): Array<HomeReportHistoryItem> {
+		return this.data?.pthink.status.report_history ? toJS(this.data.pthink.status.report_history) : []
+	}
+
+	get report_window_start() {
+		return getReportWindowStart(this.stats_period, this.report_window_offset)
+	}
+
+	get report_window_end() {
+		return getReportWindowEnd(this.stats_period, this.report_window_start)
+	}
+
+	get report_window_label() {
+		return formatReportWindowLabel(
+			this.stats_period,
+			this.report_window_offset,
+			this.report_window_start,
+			this.report_window_end
+		)
+	}
+
+	get report_window_records() {
+		if (this.stats_period === 'total') {
+			return this.report_history
+		}
+
+		const start_at = this.report_window_start.getTime()
+		const end_at = this.report_window_end?.getTime() ?? Infinity
+
+		return this.report_history.filter(item => item.created_at >= start_at && item.created_at < end_at)
+	}
+
+	get current_report_record() {
+		return this.report_window_records[0] ?? null
+	}
+
+	get can_move_to_prev_report_window() {
+		if (this.stats_period === 'total') {
+			return false
+		}
+
+		const start_at = this.report_window_start.getTime()
+
+		return this.report_history.some(item => item.created_at < start_at)
+	}
+
+	get can_move_to_next_report_window() {
+		return this.stats_period !== 'total' && this.report_window_offset > 0
+	}
+
+	setReportWindowOffset(offset: number) {
+		const next_offset = Math.max(0, Math.floor(offset))
+
+		if (next_offset === this.report_window_offset) {
+			return
+		}
+
+		this.report_window_offset = next_offset
+		void this.syncCurrentReportArticle()
+	}
+
+	moveToPrevReportWindow() {
+		if (!this.can_move_to_prev_report_window) {
+			return
+		}
+
+		this.setReportWindowOffset(this.report_window_offset + 1)
+	}
+
+	moveToNextReportWindow() {
+		if (!this.can_move_to_next_report_window) {
+			return
+		}
+
+		this.setReportWindowOffset(this.report_window_offset - 1)
+	}
+
+	async syncCurrentReportArticle() {
+		const record = this.current_report_record
+		const post_id = record?.post_id ?? ''
+
+		if (!post_id) {
+			this.report_article_request_id += 1
+			this.report_article_loading = false
+			this.report_article_error = ''
+			this.report_article = null
+			this.report_article_post_id = ''
+			return
+		}
+
+		if (post_id === this.report_article_post_id && this.report_article && !this.report_article_error) {
+			return
+		}
+
+		const request_id = ++this.report_article_request_id
+
+		this.report_article_loading = true
+		this.report_article_error = ''
+		this.report_article = null
+		this.report_article_post_id = post_id
+
+		try {
+			const article = await rpc.article.read.query({ id: post_id })
+
+			if (request_id !== this.report_article_request_id) {
+				return
+			}
+
+			this.report_article = article
+		} catch (error) {
+			if (request_id !== this.report_article_request_id) {
+				return
+			}
+
+			this.report_article = null
+			this.report_article_error = error instanceof Error ? error.message : 'Failed to load report article.'
+		} finally {
+			if (request_id === this.report_article_request_id) {
+				this.report_article_loading = false
+			}
+		}
 	}
 
 	get overview_cards(): Array<HomeOverviewCard> {
@@ -797,6 +1080,7 @@ export default class Index {
 
 			this.snapshot = snapshot
 			this.last_loaded_at = Date.now()
+			void this.syncCurrentReportArticle()
 		} finally {
 			if (request_id === this.refresh_request_id) {
 				this.loading = false

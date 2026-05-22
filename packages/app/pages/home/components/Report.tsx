@@ -1,4 +1,8 @@
+import { Loader2 } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+
+import { MessageResponse } from '@/__shadcn__/components/ai-elements/message'
+import { formatDateTime } from '@/utils'
 
 import { useModel } from '../context'
 
@@ -8,6 +12,12 @@ const Index = () => {
 	const x = useModel()
 	const pthink_runtime_items = x.pthink_runtime_items
 	const pthink_depth_items = x.pthink_depth_items
+	const current_report = x.current_report_record
+	const current_report_title = x.report_article?.title || current_report?.title || 'Untitled report'
+	const current_report_summary = current_report?.summary || ''
+	const current_report_kind = current_report
+		? `${current_report.kind[0]?.toUpperCase() ?? ''}${current_report.kind.slice(1)} report`
+		: ''
 
 	return (
 		<div className='flex flex-col gap-3'>
@@ -26,6 +36,53 @@ const Index = () => {
 				Autonomous reporting status, schedule pressure, and runtime health.
 			</div>
 			<div className='flex flex-col'>
+				<div className='border-border-light border px-4 py-3.5'>
+					<div className='text-std-400 text-xs font-medium uppercase'>Selected Report</div>
+					<div className='mt-2 text-sm font-medium'>{x.report_window_label}</div>
+					{current_report ? (
+						<div className='mt-3 flex flex-col gap-3'>
+							<div className='flex flex-col gap-1'>
+								<div className='text-base font-medium'>{current_report_title}</div>
+								<div className='text-std-400 text-xs uppercase'>
+									{current_report_kind} ·{' '}
+									{formatDateTime(current_report.created_at, 'YYYY-MM-DD HH:mm')}
+								</div>
+							</div>
+							{current_report_summary ? (
+								<div className='text-std-400 text-sm leading-6'>
+									{current_report_summary}
+								</div>
+							) : null}
+							{x.report_article_loading ? (
+								<div
+									className='
+										flex
+										items-center
+										gap-2
+										text-sm text-std-400
+									'
+								>
+									<Loader2 className='size-4 animate-spin'></Loader2>
+									Loading report content...
+								</div>
+							) : x.report_article_error ? (
+								<div className='text-std-400 text-sm'>{x.report_article_error}</div>
+							) : x.report_article?.content ? (
+								<div className='pt-1' data-streamdown>
+									<MessageResponse className='w-full leading-7'>
+										{x.report_article.content}
+									</MessageResponse>
+								</div>
+							) : (
+								<div className='text-std-400 text-sm'>Report content unavailable.</div>
+							)}
+						</div>
+					) : (
+						<div className='text-std-400 mt-2 text-sm leading-6'>
+							No report generated for {x.report_window_label.toLowerCase()}.
+						</div>
+					)}
+				</div>
 				<div className='border-border-light border px-4 py-3.5'>
 					<div className='text-sm font-medium'>
 						{x.pthink_enabled

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 import { container } from 'tsyringe'
 
@@ -64,25 +65,63 @@ const Index = () => {
 						active={active_tab}
 						setActive={value => setActiveTab(value as TopTabKey)}
 					></TextTabs>
-					<Select
-						onValueChange={value => value && x.setStatsPeriod(value as HomeStatsPeriod)}
-						value={x.stats_period}
-					>
-						<SelectTrigger
-							className='text-xsm text-std-500 bg-transparent p-0!'
-							noActiveStyle
-							noStyle
+					<div className='flex items-center gap-2'>
+						{active_tab === 'report' && x.stats_period !== 'total' && (
+							<>
+								<button
+									className={$cx(
+										'icon_button small',
+										!x.can_move_to_prev_report_window && 'opacity-40'
+									)}
+									disabled={!x.can_move_to_prev_report_window}
+									type='button'
+									onClick={x.moveToPrevReportWindow}
+								>
+									<ChevronLeft className='size-3.5'></ChevronLeft>
+								</button>
+								<button
+									className={$cx(
+										'icon_button small',
+										!x.can_move_to_next_report_window && 'opacity-40'
+									)}
+									disabled={!x.can_move_to_next_report_window}
+									type='button'
+									onClick={x.moveToNextReportWindow}
+								>
+									<ChevronRight className='size-3.5'></ChevronRight>
+								</button>
+							</>
+						)}
+						<Select
+							onValueChange={value => value && x.setStatsPeriod(value as HomeStatsPeriod)}
+							value={x.stats_period}
 						>
-							<SelectValue />
-						</SelectTrigger>
-						<SelectContent align='end'>
-							{home_stats_period_items.map(item => (
-								<SelectItem key={item} value={item}>
-									{item}
-								</SelectItem>
-							))}
-						</SelectContent>
-					</Select>
+							<SelectTrigger
+								className='
+									h-auto
+									px-0 py-0
+									rounded-none
+									text-sm text-std-400
+									bg-transparent
+									border-0
+									shadow-none
+									hover:bg-transparent
+									focus-visible:ring-0
+								'
+								arrowClassName='size-3.5 text-std-400'
+								noActiveStyle
+							>
+								<SelectValue className='text-std-400 text-sm' />
+							</SelectTrigger>
+							<SelectContent align='end'>
+								{home_stats_period_items.map(item => (
+									<SelectItem key={item.value} value={item.value}>
+										{item.label}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
+					</div>
 				</div>
 				<div className='min-h-0 flex-1 overflow-y-auto'>
 					<div
