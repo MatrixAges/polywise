@@ -16,34 +16,25 @@ const Leaderboard = (props: {
 		footnote: string
 	}>
 }) => (
-	<div className='border-border-light flex flex-col border'>
-		<div
-			className='
-					px-4 py-3
-					text-std-400 text-xs font-medium
-					uppercase
-					border-b border-border-light
-				'
-		>
-			{props.title}
-		</div>
-		<div className='flex flex-col'>
+	<div className='flex flex-col gap-3'>
+		<div className={section_title_class}>{props.title}</div>
+		<div className='border-border-light flex flex-col border'>
 			{props.items.length ? (
 				props.items.map((item, index) => (
 					<div
 						className={$cx(
-							'
+							`
 								flex
 								items-start justify-between
 								gap-3
 								px-4 py-3.5
-							',
+							`,
 							index !== props.items.length - 1 && 'border-border-light border-b'
 						)}
 						key={item.key}
 					>
 						<div className='min-w-0 flex-1'>
-							<div className='truncate text-sm font-medium'>{item.title}</div>
+							<div className='mb-2 truncate text-sm font-medium'>{item.title}</div>
 							<div className='text-std-300 mt-0.5 truncate text-xs'>{item.subtitle}</div>
 							<div className='text-std-300 mt-1 truncate text-xs'>{item.meta}</div>
 							<div className='text-std-300 mt-1 text-xs'>{item.footnote}</div>
@@ -122,10 +113,8 @@ const Index = () => {
 					))}
 				</div>
 			</div>
-			<div className='grid grid-cols-1 gap-4 xl:grid-cols-2'>
-				<Leaderboard items={x.top_agent_items} title='Top agents' />
-				<Leaderboard items={x.top_group_items} title='Top groups' />
-			</div>
+			<Leaderboard items={x.top_agent_items} title='Top Agents' />
+			<Leaderboard items={x.top_group_items} title='Top Groups' />
 		</div>
 	)
 }
