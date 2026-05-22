@@ -25,6 +25,7 @@ export default async () => {
 				current_workspace: 'Default',
 				default_model,
 				jina_api_key: '',
+				bookmark_auto_clean: false,
 				enbale_webfetch_chain: false,
 				fetch_fallback_chain: [...default_fetch_fallback_chain],
 				mcp: { enabled: true },

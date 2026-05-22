@@ -91,6 +91,11 @@ export default async () => {
 		has_changed_config = true
 	}
 
+	if (config.bookmark_auto_clean === undefined) {
+		config.bookmark_auto_clean = false
+		has_changed_config = true
+	}
+
 	if (!config.rewire || typeof config.rewire !== 'object') {
 		config.rewire = {
 			enabled: true,

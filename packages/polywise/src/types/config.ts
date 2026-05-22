@@ -77,6 +77,7 @@ export interface AppConfig {
 	submit_mode: 'enter' | 'ctrl+enter'
 	default_model: DefaultModel
 	jina_api_key?: string
+	bookmark_auto_clean?: boolean
 	enbale_webfetch_chain: boolean
 	fetch_fallback_chain: Array<WebfetchFallbackProvider>
 	mcp?: McpConfig

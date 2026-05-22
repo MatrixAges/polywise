@@ -14,22 +14,25 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/article/summarizeWiki',
-			summary: 'Summarize a conversation answer into wiki markdown'
+			summary: 'Summarize source content into wiki markdown'
 		}
 	})
 	.input(
 		object({
-			question: string(),
+			question: string().optional(),
 			answer: string()
 		})
 	)
 	.output(output_schema)
 	.mutation(async ({ input }) => {
+		const question = input.question?.trim()
+		const answer = input.answer.trim()
 		const model = await getDefaultModel()
 		const { output } = await generateText({
 			model,
 			system: [
-				'You rewrite a user question and assistant answer into concise, durable wiki content.',
+				'You rewrite source material into concise, durable wiki content.',
+				'The source may be either a user question plus assistant answer, or a standalone note to clean up.',
 				'Keep only objective, reusable knowledge or clearly useful guidance.',
 				'Remove conversational filler, hedging, repetition, and transient chat phrasing.',
 				'Write in the same language as the source content unless a different language is clearly dominant in both inputs.',
@@ -38,10 +41,9 @@ export default p
 				'Use short sections only when they materially improve clarity.',
 				'Do not mention that this came from a chat or Q&A.'
 			].join('\n'),
-			prompt: [
-				`User question:\n${input.question.trim()}`,
-				`Assistant answer:\n${input.answer.trim()}`
-			].join('\n\n'),
+			prompt: question
+				? [`User question:\n${question}`, `Assistant answer:\n${answer}`].join('\n\n')
+				: `Source content:\n${answer}`,
 			output: Output.object({ schema: output_schema })
 		})
 		const title = output.title.trim() || 'Wiki Note'
