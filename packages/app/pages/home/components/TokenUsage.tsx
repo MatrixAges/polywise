@@ -119,7 +119,7 @@ const Index = () => {
 							>
 								<div className='flex flex-col gap-0.5'>
 									<div className='text-sm font-medium'>{item.title}</div>
-									<div className='text-std-400 text-xs'>{item.subtitle}</div>
+									<div className='text-std-300 text-xs'>{item.subtitle}</div>
 								</div>
 								<div className='text-right font-mono text-sm font-semibold'>
 									{item.value}
@@ -127,7 +127,6 @@ const Index = () => {
 							</div>
 						))}
 					</div>
-					<div className='text-std-300 mt-1.5 text-xs'>{x.usage_footer}</div>
 				</div>
 			</div>
 		</div>

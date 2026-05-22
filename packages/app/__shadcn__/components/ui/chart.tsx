@@ -1,9 +1,8 @@
 import * as React from 'react'
 import * as RechartsPrimitive from 'recharts'
 
-import { useSize } from '@/hooks'
-
 import { cn } from '@/__shadcn__/lib/utils/index'
+import { useSize } from '@/hooks'
 
 export type ChartConfig = {
 	[key: string]: {
@@ -18,6 +17,12 @@ export type ChartConfig = {
 
 type ChartContextValue = {
 	config: ChartConfig
+}
+
+type ChartConfigLookupItem = {
+	dataKey?: unknown
+	name?: unknown
+	value?: unknown
 }
 
 const ChartContext = React.createContext<ChartContextValue | null>(null)
@@ -39,9 +44,7 @@ const buildChartStyles = (id: string, config: ChartConfig) => {
 		return ''
 	}
 
-	const light_vars = entries
-		.map(([key, item]) => `--color-${key}: ${item.theme?.light ?? item.color};`)
-		.join('')
+	const light_vars = entries.map(([key, item]) => `--color-${key}: ${item.theme?.light ?? item.color};`).join('')
 	const dark_vars = entries
 		.map(([key, item]) => `--color-${key}: ${item.theme?.dark ?? item.color ?? item.theme?.light};`)
 		.join('')
@@ -62,8 +65,8 @@ const ChartStyle = (props: { id: string; config: ChartConfig }) => {
 	return <style dangerouslySetInnerHTML={{ __html: styles }} />
 }
 
-const getConfigForItem = (config: ChartConfig, item: Record<string, unknown>) => {
-	const keys = [item.dataKey, item.name].filter(value => typeof value === 'string') as Array<string>
+const getConfigForItem = (config: ChartConfig, item: ChartConfigLookupItem | null | undefined) => {
+	const keys = [item?.dataKey, item?.name, item?.value].filter(value => typeof value === 'string') as Array<string>
 
 	for (const key of keys) {
 		if (config[key]) {
@@ -87,10 +90,9 @@ export const ChartContainer = React.forwardRef<
 	const auto_id = React.useId().replace(/:/g, '')
 	const chart_id = id ?? `chart-${auto_id}`
 	const inner_ref = React.useRef<HTMLDivElement | null>(null)
-	const size = useSize(() => inner_ref.current!, undefined) as
-		| { width: number; height: number }
-		| undefined
-	const ready = Boolean(size && size.width > 0 && size.height > 0)
+	const size = useSize(() => inner_ref.current!, undefined) as { width: number; height: number } | undefined
+	const initial_dimension =
+		size && size.width > 0 && size.height > 0 ? { width: size.width, height: size.height } : undefined
 
 	const set_ref = React.useCallback(
 		(node: HTMLDivElement | null) => {
@@ -114,17 +116,22 @@ export const ChartContainer = React.forwardRef<
 				ref={set_ref}
 				data-chart={chart_id}
 				className={cn(
-					'h-[220px] w-full min-w-0 min-h-[220px] text-xs [&_.recharts-cartesian-axis-tick_text]:fill-[rgba(var(--color_text_rgb),0.52)] [&_.recharts-cartesian-grid_line]:stroke-border/50 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-border [&_.recharts-sector]:outline-none [&_.recharts-surface]:outline-none',
+					`
+					w-full h-[220px]
+					min-w-0 min-h-[220px]
+					text-xs
+					[&_.recharts-cartesian-axis-tick_text]:fill-[rgba(var(--color_text_rgb),0.52)] [&_.recharts-cartesian-grid_line]:stroke-border/50 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-border [&_.recharts-sector]:outline-none [&_.recharts-surface]:outline-none
+				`,
 					className
 				)}
 				{...props}
 			>
 				<ChartStyle id={chart_id} config={config} />
-				{ready ? (
+				{initial_dimension ? (
 					<RechartsPrimitive.ResponsiveContainer
 						debounce={0}
 						height='100%'
-						initialDimension={{ width: size.width, height: size.height }}
+						initialDimension={initial_dimension}
 						minWidth={0}
 						width='100%'
 					>
@@ -143,7 +150,7 @@ export const ChartTooltip = RechartsPrimitive.Tooltip
 export const ChartTooltipContent = React.forwardRef<
 	HTMLDivElement,
 	React.ComponentProps<'div'> &
-		RechartsPrimitive.TooltipContentProps<number, string> & {
+		Partial<RechartsPrimitive.TooltipContentProps<number, string>> & {
 			hideLabel?: boolean
 			labelFormatter?: (
 				value: string,
@@ -161,20 +168,32 @@ export const ChartTooltipContent = React.forwardRef<
 		<div
 			ref={ref}
 			className={cn(
-				'grid min-w-[180px] gap-2 rounded-2xl border border-border/70 bg-background/96 px-3 py-2.5 text-xs shadow-xl backdrop-blur-sm',
+				`
+				grid
+				min-w-[180px]
+				gap-2
+				px-3 py-2.5
+				rounded-2xl
+				text-xs
+				bg-background/96
+				border border-border/70
+				shadow-xl
+				backdrop-blur-sm
+			`,
 				className
 			)}
 		>
 			{!hideLabel ? (
-				<div className='font-medium text-foreground'>
+				<div className='text-foreground font-medium'>
 					{labelFormatter ? labelFormatter(String(label ?? ''), payload) : label}
 				</div>
 			) : null}
 			<div className='grid gap-1.5'>
 				{payload.map(item => {
-					const found = getConfigForItem(config, item as Record<string, unknown>)
+					const found = getConfigForItem(config, item)
 					const key = found?.key ?? String(item.dataKey ?? item.name ?? '')
-					const value = typeof item.value === 'number' ? item.value.toLocaleString('en-US') : item.value
+					const value =
+						typeof item.value === 'number' ? item.value.toLocaleString('en-US') : item.value
 
 					return (
 						<div className='flex items-center justify-between gap-4' key={key}>
@@ -187,7 +206,7 @@ export const ChartTooltipContent = React.forwardRef<
 									{found?.item.label ?? item.name ?? key}
 								</span>
 							</div>
-							<span className='font-medium text-foreground'>{value}</span>
+							<span className='text-foreground font-medium'>{value}</span>
 						</div>
 					)
 				})}
@@ -202,7 +221,9 @@ export const ChartLegend = RechartsPrimitive.Legend
 
 export const ChartLegendContent = React.forwardRef<
 	HTMLDivElement,
-	React.ComponentProps<'div'> & RechartsPrimitive.LegendProps
+	React.ComponentProps<'div'> & {
+		payload?: ReadonlyArray<RechartsPrimitive.LegendPayload>
+	}
 >(({ className, payload }, ref) => {
 	const { config } = useChart()
 
@@ -211,13 +232,27 @@ export const ChartLegendContent = React.forwardRef<
 	}
 
 	return (
-		<div ref={ref} className={cn('flex flex-wrap items-center gap-3 text-xs', className)}>
+		<div
+			ref={ref}
+			className={cn(
+				`
+				flex flex-wrap
+				items-center
+				gap-3
+				text-xs
+			`,
+				className
+			)}
+		>
 			{payload.map(item => {
-				const found = getConfigForItem(config, item as Record<string, unknown>)
+				const found = getConfigForItem(config, item)
 				const key = found?.key ?? String(item.dataKey ?? item.value ?? '')
 
 				return (
-					<div className='flex items-center gap-2 text-[rgba(var(--color_text_rgb),0.68)]' key={key}>
+					<div
+						className='flex items-center gap-2 text-[rgba(var(--color_text_rgb),0.68)]'
+						key={key}
+					>
 						<span
 							className='size-2.5 rounded-[999px]'
 							style={{ backgroundColor: item.color ?? `var(--color-${key})` }}
