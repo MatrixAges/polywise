@@ -1,9 +1,8 @@
 import dayjs from 'dayjs'
-import { Flame, MessageSquareText, Network, Sparkles } from 'lucide-react'
+import { Flame } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { useModel } from '../context'
-import SectionCard from './SectionCard'
 
 import type { HomeHeatmapCell } from '../types'
 
@@ -13,7 +12,7 @@ const level_class_map = {
 	2: 'bg-[#9fd08f] dark:bg-[#3d7a45]',
 	3: 'bg-[#5ea961] dark:bg-[#58a55f]',
 	4: 'bg-[#2f6b3c] dark:bg-[#8be28e]'
-} as const
+} as Record<number, string>
 
 const week_start = 1
 const weekday_labels = [
@@ -77,191 +76,130 @@ const Index = () => {
 	})
 
 	return (
-		<SectionCard
-			title='Activity Hotspots'
-			desc='A GitHub-style daily map of messages, sessions, posts, rewires, and autonomous reports across the last 24 weeks.'
-		>
-			<div className='border-border/70 rounded-2xl border p-4'>
-				<div
-					className='
-						flex flex-wrap
-						items-start justify-between
-						gap-3
-					'
-				>
-					<div>
-						<div
-							className='
-								flex
-								items-center
-								gap-2
-								text-sm font-medium
-							'
-						>
-							<Flame className='text-emerald-600' />
-							<span>Daily intensity</span>
-						</div>
-						<div className='text-std-400 mt-1 text-sm'>{x.activity_heatmap_summary}</div>
-					</div>
+		<div className='flex flex-col'>
+			<div
+				className='
+					flex flex-wrap
+					items-start justify-between
+					gap-3
+				'
+			>
+				<div>
 					<div
 						className='
-							flex flex-wrap
+							flex
 							items-center
-							gap-3
-							text-xs text-std-400
+							gap-2
+							text-sm font-medium
 						'
 					>
-						<div className='flex items-center gap-1.5'>
-							<MessageSquareText className='size-3.5' />
-							<span>Messages weighted with creation events</span>
-						</div>
-						<div className='flex items-center gap-1.5'>
-							<Network className='size-3.5' />
-							<span>Rewires included</span>
-						</div>
-						<div className='flex items-center gap-1.5'>
-							<Sparkles className='size-3.5' />
-							<span>PThink spikes included</span>
-						</div>
+						<Flame className='text-emerald-600' />
+						<span>Daily intensity</span>
 					</div>
+					<div className='text-std-400 mt-1 text-sm'>{x.activity_heatmap_summary}</div>
 				</div>
-
-				<div className='mt-5 min-w-0'>
-					<div
-						className='
-							grid
-							items-end
-							gap-x-2 gap-y-2
-						'
-						style={{ gridTemplateColumns: '40px minmax(0, 1fr)' }}
-					>
-						<div />
-						<div
-							className='
-								relative
-								h-4
-								min-w-0
-								text-[11px] text-std-400
-							'
-						>
-							{month_labels.map(item =>
-								item.label ? (
-									<div
-										className='absolute top-0 whitespace-nowrap'
-										key={`month-${item.week_index}`}
-										style={{
-											left: `calc(${(item.week_index / weeks.length) * 100}% + 1px)`
-										}}
-									>
-										{item.label}
-									</div>
-								) : null
-							)}
-						</div>
-
-						<div
-							className='
-								grid
-								h-full
-								gap-1
-								text-[11px] text-std-400
-							'
-							style={{ gridTemplateRows: 'repeat(7, minmax(0, 1fr))' }}
-						>
-							{Array.from({ length: 7 }, (_, row_index) => {
-								const label = weekday_labels.find(item => item.row_index === row_index)
-
-								return (
-									<div
-										className='
-										flex
-										items-center justify-end
-										h-full
-										pr-1
-										whitespace-nowrap
-									'
-										key={`weekday-${row_index}`}
-									>
-										{label?.label ?? ''}
-									</div>
-								)
-							})}
-						</div>
-
-						<div
-							className='grid min-w-0 gap-1'
-							style={{
-								gridTemplateColumns: `repeat(${weeks.length}, minmax(0, 1fr))`,
-								gridTemplateRows: 'repeat(7, minmax(0, 1fr))'
-							}}
-						>
-							{weeks.map((week, week_index) =>
-								week.map((item, day_index) => (
-									<div
-										className={
-											item.cell
-												? `
-											aspect-square
-											w-full
-											rounded-[3px]
-											border border-black/5
-											dark:border-white/6
-											${level_class_map[item.cell.level]}`
-												: item.is_future
-													? `
-											aspect-square
-											w-full
-											rounded-[3px]
-											bg-[#f6f8f1]
-											border border-black/5
-											dark:border-white/6 dark:bg-[#182118]
-										`
-													: 'aspect-square w-full rounded-[3px] opacity-0'
-										}
-										key={`cell-${week_index}-${day_index}`}
-										title={
-											item.cell?.tooltip ??
-											(item.is_future
-												? `${dayjs(item.date).format('MMM D, YYYY')} · upcoming day`
-												: undefined)
-										}
-									></div>
-								))
-							)}
-						</div>
-					</div>
-				</div>
-
+			</div>
+			<div className='mt-5 min-w-0'>
 				<div
 					className='
-						flex flex-wrap
-						items-center justify-between
-						gap-3
-						pt-3
-						mt-4
-						text-xs text-std-400
-						border-t border-border/60
+						grid
+						items-end
+						gap-x-2 gap-y-2
 					'
+					style={{ gridTemplateColumns: 'minmax(0, 1fr)' }}
 				>
-					<div>Hotspot score blends messages with sessions, posts, rewires, and report bursts.</div>
-					<div className='flex items-center gap-2'>
-						<span>Less</span>
-						{([0, 1, 2, 3, 4] as const).map(level => (
-							<span
-								className={`
-									size-3
-									rounded-[3px]
-									border border-black/5
-									dark:border-white/6
-									${level_class_map[level]}`}
-								key={`legend-${level}`}
-							></span>
-						))}
-						<span>More</span>
+					<div
+						className='
+							relative
+							h-4
+							min-w-0
+							text-[11px] text-std-400
+						'
+					>
+						{month_labels.map(item =>
+							item.label ? (
+								<div
+									className='absolute top-0 whitespace-nowrap'
+									key={`month-${item.week_index}`}
+									style={{
+										left: `calc(${(item.week_index / weeks.length) * 100}% + 1px)`
+									}}
+								>
+									{item.label}
+								</div>
+							) : null
+						)}
+					</div>
+					<div
+						className='grid min-w-0 gap-1'
+						style={{
+							gridTemplateColumns: `repeat(${weeks.length}, minmax(0, 1fr))`,
+							gridTemplateRows: 'repeat(7, minmax(0, 1fr))'
+						}}
+					>
+						{weeks.map((week, week_index) =>
+							week.map((item, day_index) => (
+								<div
+									className={
+										item.cell
+											? `
+										w-full
+										rounded-[3px]
+										border border-black/5
+										dark:border-white/6
+										${level_class_map[item.cell.level]}`
+											: item.is_future
+												? `
+										w-full
+										rounded-[3px]
+										bg-[#f6f8f1]
+										border border-black/5
+										dark:border-white/6 dark:bg-[#182118]
+									`
+												: 'aspect-square w-full rounded-[3px] opacity-0'
+									}
+									key={`cell-${week_index}-${day_index}`}
+									title={
+										item.cell?.tooltip ??
+										(item.is_future
+											? `${dayjs(item.date).format('MMM D, YYYY')} · upcoming day`
+											: undefined)
+									}
+								></div>
+							))
+						)}
 					</div>
 				</div>
 			</div>
-		</SectionCard>
+			<div
+				className='
+					flex flex-wrap
+					items-center justify-between
+					gap-3
+					pt-3
+					mt-4
+					text-xs text-std-400
+					border-t border-border/60
+				'
+			>
+				<div>Hotspot score blends messages with sessions, posts, rewires, and report bursts.</div>
+				<div className='flex items-center gap-2'>
+					<span>Less</span>
+					{([0, 1, 2, 3, 4] as const).map(level => (
+						<span
+							className={`
+								size-3
+								rounded-[3px]
+								border border-black/5
+								dark:border-white/6
+								${level_class_map[level]}`}
+							key={`legend-${level}`}
+						></span>
+					))}
+					<span>More</span>
+				</div>
+			</div>
+		</div>
 	)
 }
 

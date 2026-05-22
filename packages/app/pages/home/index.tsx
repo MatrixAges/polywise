@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react'
-import { FileStack, Sparkles } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 import { container } from 'tsyringe'
 
@@ -7,20 +6,25 @@ import { TextTabs } from '@/components'
 
 import {
 	ActivityHotspots,
-	KnowledgeAssets,
+	ContentReview,
 	LoadingState,
 	MemoryPanel,
 	OverviewGrid,
+	Pipeline,
 	PthinkPanel,
-	TrendPanels
+	SessionActivity,
+	TokenUsage,
+	Trending
 } from './components'
 import { Context } from './context'
 import Model from './model'
 
+import type { LucideIcon } from 'lucide-react'
+
 const top_tab_items = [
-	{ key: 'stats', title: 'Stats', Icon: FileStack },
-	{ key: 'report', title: 'Report', Icon: Sparkles }
-] as const
+	{ key: 'stats', title: 'Stats' },
+	{ key: 'report', title: 'Report' }
+] as Array<{ key: string; title: string; Icon: LucideIcon }>
 
 const Index = () => {
 	const ref_model = useRef<Model | null>(null)
@@ -40,48 +44,44 @@ const Index = () => {
 
 	return (
 		<Context value={x}>
-			<div className='h-full overflow-y-auto'>
-				<div
-					className='
-						flex flex-col
-						w-full
-						min-h-full
-						gap-10
-						py-6
-						md:py-8
-						page_wrap
-					'
-				>
-					{x.snapshot ? (
-						<>
-							<div className='flex items-center'>
-								<div className='h-7'>
-									<TextTabs
-										className='gap-4'
-										items={top_tab_items}
-										active={active_tab}
-										setActive={value =>
-											setActiveTab(
-												value as (typeof top_tab_items)[number]['key']
-											)
-										}
-									></TextTabs>
-								</div>
-							</div>
-							{active_tab === 'stats' ? (
-								<>
-									<ActivityHotspots></ActivityHotspots>
-									<KnowledgeAssets></KnowledgeAssets>
-									<TrendPanels></TrendPanels>
-									<MemoryPanel></MemoryPanel>
-									<OverviewGrid></OverviewGrid>
-								</>
-							) : null}
-							{active_tab === 'report' ? <PthinkPanel></PthinkPanel> : null}
-						</>
-					) : (
-						<LoadingState></LoadingState>
-					)}
+			<div className='page_wrap flex flex-col'>
+				<div className='mb-6 h-7'>
+					<TextTabs
+						className='gap-3'
+						items={top_tab_items}
+						active={active_tab}
+						setActive={value => setActiveTab(value as (typeof top_tab_items)[number]['key'])}
+					></TextTabs>
+				</div>
+				<div className='min-h-0 flex-1 overflow-y-auto'>
+					<div
+						className='
+							flex flex-col
+							w-full
+							min-h-full
+						'
+					>
+						{x.snapshot ? (
+							<>
+								{active_tab === 'stats' && (
+									<div className='flex flex-col gap-10'>
+										{/* <ActivityHotspots></ActivityHotspots> */}
+										<TokenUsage></TokenUsage>
+										<Trending></Trending>
+										<SessionActivity></SessionActivity>
+										<ContentReview></ContentReview>
+										<Pipeline></Pipeline>
+
+										<MemoryPanel></MemoryPanel>
+										<OverviewGrid></OverviewGrid>
+									</div>
+								)}
+								{active_tab === 'report' && <PthinkPanel></PthinkPanel>}
+							</>
+						) : (
+							<LoadingState></LoadingState>
+						)}
+					</div>
 				</div>
 			</div>
 		</Context>

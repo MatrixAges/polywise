@@ -392,9 +392,7 @@ export default class Index {
 				key: 'top-model-share',
 				title: 'Top model share',
 				value: formatPercent(top_model_share),
-				desc: top_model
-					? `${top_model.label} · ${top_model.calls} calls this week`
-					: 'No weekly model activity'
+				desc: top_model ? `${top_model.label}` : 'No weekly model activity'
 			},
 			{
 				key: 'top-provider-share',
@@ -461,14 +459,6 @@ export default class Index {
 				title: 'Intake to output',
 				value: formatRatio(intake_to_output),
 				desc: `${this.data.activity.week.posts} posts from ${this.data.content.intake_week_total} new docs/articles/links this week`
-			},
-			{
-				key: 'backlog-age',
-				title: 'Oldest backlog age',
-				value: formatAgeDays(this.data.content.oldest_pending_item?.updated_at ?? null),
-				desc: this.data.content.oldest_pending_item
-					? `${this.data.content.oldest_pending_item.type} is the oldest queued item`
-					: 'No queued item right now'
 			},
 			{
 				key: 'agent-coverage',
@@ -569,8 +559,8 @@ export default class Index {
 		return [
 			{
 				key: 'docs',
-				title: 'Docs / Articles / Chunks',
-				value: `${formatCompact(this.data.content.document_total)} / ${formatCompact(this.data.content.article_total)} / ${formatCompact(this.data.content.chunk_total)}`,
+				title: 'Docs/Articles/Chunks',
+				value: `${formatCompact(this.data.content.document_total)}/${formatCompact(this.data.content.article_total)}/${formatCompact(this.data.content.chunk_total)}`,
 				desc: `${this.data.content.avg_chunks_per_article} avg chunks per article`
 			},
 			{
@@ -578,15 +568,6 @@ export default class Index {
 				title: 'Post completion',
 				value: formatPercent(this.data.content.post_completion_rate),
 				desc: `${this.data.content.posts_ready_total} ready · ${this.data.content.posts_pending} pending`
-			},
-			{
-				key: 'streak',
-				title: 'Creation streak',
-				value: `${this.data.content.post_streak_days}d`,
-				desc:
-					this.data.content.days_since_last_post === null
-						? 'No organic post yet'
-						: `${this.data.content.days_since_last_post} days since last post update`
 			}
 		]
 	}
