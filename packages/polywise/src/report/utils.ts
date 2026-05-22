@@ -1,7 +1,7 @@
 import path from 'path'
 import { app } from '@core/consts'
 import dayjs from 'dayjs'
-import isoWeek from 'dayjs/plugin/isoWeek'
+import isoWeek from 'dayjs/plugin/isoWeek.js'
 
 import type { ReportPeriod, ReportStatus, ReportWindow } from './types'
 

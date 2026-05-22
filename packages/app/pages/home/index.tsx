@@ -69,45 +69,6 @@ const Index = () => {
 						setActive={value => setActiveTab(value as TopTabKey)}
 					></TextTabs>
 					<div className='flex items-center gap-2'>
-						{active_tab === 'report' && (
-							<>
-								<button
-									className={$cx(
-										'icon_button small',
-										!x.can_move_to_prev_report_window && 'opacity-40'
-									)}
-									disabled={!x.can_move_to_prev_report_window}
-									type='button'
-									onClick={x.moveToPrevReportWindow}
-								>
-									<ChevronLeft className='size-3.5'></ChevronLeft>
-								</button>
-								<button
-									className={$cx(
-										'icon_button small',
-										!x.can_move_to_next_report_window && 'opacity-40'
-									)}
-									disabled={!x.can_move_to_next_report_window}
-									type='button'
-									onClick={x.moveToNextReportWindow}
-								>
-									<ChevronRight className='size-3.5'></ChevronRight>
-								</button>
-								<Button
-									variant='default'
-									size='sm'
-									disabled={x.report_action_loading}
-									onClick={() => void x.triggerReport()}
-								>
-									{x.report_action_loading ? (
-										<Loader2 className='size-4 animate-spin'></Loader2>
-									) : (
-										<FileText className='size-4'></FileText>
-									)}
-									<span>{x.report_action_label}</span>
-								</Button>
-							</>
-						)}
 						<Select
 							onValueChange={value => {
 								if (!value) {
@@ -148,6 +109,45 @@ const Index = () => {
 								))}
 							</SelectContent>
 						</Select>
+						{active_tab === 'report' && (
+							<>
+								<button
+									className={$cx(
+										'icon_button small',
+										!x.can_move_to_prev_report_window && 'opacity-40'
+									)}
+									disabled={!x.can_move_to_prev_report_window}
+									type='button'
+									onClick={x.moveToPrevReportWindow}
+								>
+									<ChevronLeft className='size-3.5'></ChevronLeft>
+								</button>
+								<button
+									className={$cx(
+										'icon_button small',
+										!x.can_move_to_next_report_window && 'opacity-40'
+									)}
+									disabled={!x.can_move_to_next_report_window}
+									type='button'
+									onClick={x.moveToNextReportWindow}
+								>
+									<ChevronRight className='size-3.5'></ChevronRight>
+								</button>
+								<Button
+									variant='default'
+									size='xs'
+									disabled={x.report_action_loading}
+									onClick={() => void x.triggerReport()}
+								>
+									{x.report_action_loading ? (
+										<Loader2 className='size-2.5 animate-spin'></Loader2>
+									) : (
+										<FileText className='size-2.5'></FileText>
+									)}
+									<span>{x.report_action_label}</span>
+								</Button>
+							</>
+						)}
 					</div>
 				</div>
 				<div className='min-h-0 flex-1 overflow-y-auto'>
