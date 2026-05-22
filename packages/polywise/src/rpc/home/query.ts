@@ -1,6 +1,12 @@
-import { config } from '@core/config'
+import {
+	getHomePeriodMetrics,
+	getHomePeriodStart,
+	getHomePthinkKindCounts,
+	getHomeUsageAnalytics
+} from '@core/db/services'
 import { buildPthinkAnalytics, getPthinkConfig, pickPthinkTrigger, readPthinkStatus } from '@core/pthink'
 import { p } from '@core/utils'
+import { enum as Enum, object } from 'zod'
 
 import { env } from '../../env'
 
@@ -11,6 +17,7 @@ const trend_days = 14
 const heatmap_weeks = 48
 const heatmap_days = heatmap_weeks * 7
 const organic_post_filter = `json_extract(metadata, '$.pthink.kind') IS NULL`
+const home_stats_period_schema = Enum(['day', 'week', 'month', 'year', 'total'])
 
 const normalizeDbParam = (value: unknown) =>
 	typeof value === 'number' && Number.isFinite(value) && Math.abs(value) >= 1_000_000_000_000
@@ -91,39 +98,6 @@ const readPostForCounts = () => {
 	return counts
 }
 
-const readPthinkKindCounts = (start_at?: number) => {
-	const rows = env.sqlite
-		.prepare(
-			`SELECT
-				json_extract(metadata, '$.pthink.kind') AS kind,
-				COUNT(*) AS value
-			FROM article
-			WHERE "for" = 'memory'
-				AND json_extract(metadata, '$.pthink.kind') IS NOT NULL
-				${start_at ? 'AND created_at >= ?' : ''}
-			GROUP BY kind`
-		)
-		.all(...(start_at ? [normalizeDbParam(start_at)] : [])) as Array<{
-		kind?: string | null
-		value?: number | null
-	}>
-
-	const counts = {
-		idle: 0,
-		daily: 0,
-		weekly: 0,
-		trigger: 0
-	}
-
-	for (const row of rows) {
-		if (row.kind === 'idle' || row.kind === 'daily' || row.kind === 'weekly' || row.kind === 'trigger') {
-			counts[row.kind] = Number(row.value ?? 0)
-		}
-	}
-
-	return counts
-}
-
 const readOrganicPostStreak = (today_key: string) => {
 	const rows = env.sqlite
 		.prepare(
@@ -152,231 +126,6 @@ const readOrganicPostStreak = (today_key: string) => {
 	}
 
 	return streak
-}
-
-const parseModelConfig = (value: unknown) => {
-	if (!value || typeof value !== 'string') {
-		return null
-	}
-
-	try {
-		const parsed = JSON.parse(value) as {
-			provider?: string
-			model?: string
-		}
-
-		if (typeof parsed.provider !== 'string' || typeof parsed.model !== 'string') {
-			return null
-		}
-
-		return parsed
-	} catch {
-		return null
-	}
-}
-
-const getModelKey = (value: { provider?: string; model?: string } | null | undefined) => {
-	if (!value?.provider || !value?.model) {
-		return 'unknown'
-	}
-
-	return `${value.provider}:${value.model}`
-}
-
-const formatModelName = (value: { provider?: string; model?: string } | null | undefined) => {
-	if (!value?.provider || !value?.model) {
-		return 'Unknown'
-	}
-
-	return `${value.provider} / ${value.model}`
-}
-
-const buildUsageAnalytics = (last_week: number) => {
-	const db_last_week = toUnixSeconds(last_week)
-	const assistant_messages = env.sqlite
-		.prepare(
-			`SELECT
-				session_id,
-				created_at,
-				json_extract(content, '$.metadata.sender_id') AS sender_id,
-				json_extract(content, '$.metadata.usage.inputTokens') AS input_tokens,
-				json_extract(content, '$.metadata.usage.outputTokens') AS output_tokens,
-				json_extract(content, '$.metadata.usage.totalTokens') AS total_tokens,
-				json_extract(content, '$.metadata.usage.reasoningTokens') AS reasoning_tokens,
-				json_extract(content, '$.metadata.usage.cachedInputTokens') AS cached_input_tokens
-			FROM message
-			WHERE role = 'assistant'
-				AND json_extract(content, '$.metadata.usage.totalTokens') IS NOT NULL`
-		)
-		.all() as Array<{
-		session_id: string
-		created_at: number
-		sender_id: string | null
-		input_tokens: number | null
-		output_tokens: number | null
-		total_tokens: number | null
-		reasoning_tokens: number | null
-		cached_input_tokens: number | null
-	}>
-
-	const agent_rows = env.sqlite.prepare('SELECT id, name, model FROM agent').all() as Array<{
-		id: string
-		name: string
-		model: string | null
-	}>
-	const agent_model_map = new Map(
-		agent_rows.map(item => [
-			item.id,
-			{
-				name: item.name,
-				model: parseModelConfig(item.model)
-			}
-		])
-	)
-
-	const session_agent_rows = env.sqlite
-		.prepare(
-			`SELECT
-				ag.session_id AS session_id,
-				a.name AS agent_name,
-				a.model AS agent_model
-			FROM agent_session ag
-			INNER JOIN agent a ON ag.agent_id = a.id`
-		)
-		.all() as Array<{ session_id: string; agent_name: string; agent_model: string | null }>
-	const session_agent_map = new Map(
-		session_agent_rows.map(item => [
-			item.session_id,
-			{
-				name: item.agent_name,
-				model: parseModelConfig(item.agent_model)
-			}
-		])
-	)
-
-	const session_project_rows = env.sqlite
-		.prepare(
-			`SELECT
-				ps.session_id AS session_id,
-				p.name AS project_name,
-				p.model AS project_model
-			FROM project_session ps
-			INNER JOIN project p ON ps.project_id = p.id`
-		)
-		.all() as Array<{ session_id: string; project_name: string; project_model: string | null }>
-	const session_project_map = new Map(
-		session_project_rows.map(item => [
-			item.session_id,
-			{
-				name: item.project_name,
-				model: parseModelConfig(item.project_model)
-			}
-		])
-	)
-
-	const default_model = config.default_model
-	const default_model_key = getModelKey(default_model)
-	const provider_totals = new Map<string, { provider: string; calls: number; total_tokens: number }>()
-	const model_totals = new Map<
-		string,
-		{
-			key: string
-			provider: string
-			model: string
-			label: string
-			source: string
-			calls: number
-			total_tokens: number
-			input_tokens: number
-			output_tokens: number
-			reasoning_tokens: number
-		}
-	>()
-
-	const totals = {
-		assistant_messages: 0,
-		input_tokens: 0,
-		output_tokens: 0,
-		total_tokens: 0,
-		reasoning_tokens: 0,
-		cached_input_tokens: 0,
-		week_total_tokens: 0
-	}
-
-	for (const row of assistant_messages) {
-		const input_tokens = Number(row.input_tokens ?? 0)
-		const output_tokens = Number(row.output_tokens ?? 0)
-		const total_tokens = Number(row.total_tokens ?? input_tokens + output_tokens)
-		const reasoning_tokens = Number(row.reasoning_tokens ?? 0)
-		const cached_input_tokens = Number(row.cached_input_tokens ?? 0)
-
-		totals.assistant_messages += 1
-		totals.input_tokens += input_tokens
-		totals.output_tokens += output_tokens
-		totals.total_tokens += total_tokens
-		totals.reasoning_tokens += reasoning_tokens
-		totals.cached_input_tokens += cached_input_tokens
-
-		if (Number(row.created_at ?? 0) >= db_last_week) {
-			totals.week_total_tokens += total_tokens
-		}
-
-		const sender_agent = row.sender_id ? agent_model_map.get(row.sender_id) : null
-		const owner_agent = session_agent_map.get(row.session_id)
-		const project_model = session_project_map.get(row.session_id)
-		const model_config = sender_agent?.model || owner_agent?.model || project_model?.model || default_model
-		const model_key = getModelKey(model_config) || default_model_key
-		const provider = model_config?.provider || default_model.provider
-		const model = model_config?.model || default_model.model
-		const label = formatModelName(model_config || default_model)
-		const source = sender_agent
-			? `sender:${sender_agent.name}`
-			: owner_agent
-				? `agent:${owner_agent.name}`
-				: project_model
-					? `project:${project_model.name}`
-					: 'default'
-
-		const provider_entry = provider_totals.get(provider) ?? {
-			provider,
-			calls: 0,
-			total_tokens: 0
-		}
-		provider_entry.calls += 1
-		provider_entry.total_tokens += total_tokens
-		provider_totals.set(provider, provider_entry)
-
-		const model_entry = model_totals.get(model_key) ?? {
-			key: model_key,
-			provider,
-			model,
-			label,
-			source,
-			calls: 0,
-			total_tokens: 0,
-			input_tokens: 0,
-			output_tokens: 0,
-			reasoning_tokens: 0
-		}
-		model_entry.calls += 1
-		model_entry.total_tokens += total_tokens
-		model_entry.input_tokens += input_tokens
-		model_entry.output_tokens += output_tokens
-		model_entry.reasoning_tokens += reasoning_tokens
-		model_totals.set(model_key, model_entry)
-	}
-
-	return {
-		...totals,
-		avg_total_tokens_per_reply:
-			totals.assistant_messages > 0
-				? Number((totals.total_tokens / totals.assistant_messages).toFixed(1))
-				: 0,
-		providers: Array.from(provider_totals.values()).sort((a, b) => b.total_tokens - a.total_tokens),
-		models: Array.from(model_totals.values())
-			.sort((a, b) => b.total_tokens - a.total_tokens)
-			.slice(0, 8)
-	}
 }
 
 const buildDailyTrendRows = (now: number) => {
@@ -763,14 +512,22 @@ export default p
 			summary: 'Read Query'
 		}
 	})
-	.query(async () => {
+	.input(
+		object({
+			period: home_stats_period_schema.optional()
+		})
+	)
+	.query(async ({ input }) => {
 		const now = Date.now()
+		const period = input.period ?? 'week'
+		const period_start = getHomePeriodStart(now, period)
 		const last_day = now - day_ms
 		const last_three_days = now - 3 * day_ms
 		const last_week = now - week_ms
 		const today_key = getDayKey(now)
 		const pthink_config = getPthinkConfig()
-		const usage = buildUsageAnalytics(last_week)
+		const usage = getHomeUsageAnalytics(period_start)
+		const period_metrics = getHomePeriodMetrics(period_start)
 		const trends = buildDailyTrendRows(now)
 		const activity_heatmap = buildActivityHeatmapRows(now)
 		const pthink_analytics = buildPthinkAnalytics(now)
@@ -803,19 +560,17 @@ export default p
 		const im_peer_total = countValue('SELECT COUNT(*) AS value FROM im_peer_state')
 		const node_total = countValue('SELECT COUNT(*) AS value FROM node')
 		const frozen_node_total = countValue('SELECT COUNT(*) AS value FROM node WHERE is_frozen = 1')
-		const node_week_total = countValue('SELECT COUNT(*) AS value FROM node WHERE created_at >= ?', [last_week])
+		const { node_week_total } = period_metrics
 		const edge_total = countValue('SELECT COUNT(*) AS value FROM edge')
 		const frozen_edge_total = countValue('SELECT COUNT(*) AS value FROM edge WHERE is_frozen = 1')
-		const edge_week_total = countValue('SELECT COUNT(*) AS value FROM edge WHERE created_at >= ?', [last_week])
+		const { edge_week_total } = period_metrics
 		const active_edge_total = countValue("SELECT COUNT(*) AS value FROM edge WHERE state = 'active'")
 		const silent_edge_total = countValue("SELECT COUNT(*) AS value FROM edge WHERE state = 'silent'")
 		const unstable_edge_total = countValue(
 			"SELECT COUNT(*) AS value FROM edge WHERE state = 'silent' OR stability < 0.3 OR rewire_score >= 0.5"
 		)
 		const rewire_event_total = countValue('SELECT COUNT(*) AS value FROM rewire_event')
-		const rewire_event_week = countValue('SELECT COUNT(*) AS value FROM rewire_event WHERE created_at >= ?', [
-			last_week
-		])
+		const { rewire_event_week } = period_metrics
 		const edge_stats_row = env.sqlite
 			.prepare(
 				`SELECT
@@ -830,7 +585,7 @@ export default p
 		const sessions_im = countValue('SELECT COUNT(*) AS value FROM session WHERE im = 1')
 		const sessions_cron = countValue('SELECT COUNT(*) AS value FROM session WHERE cron = 1')
 		const sessions_today = countValue('SELECT COUNT(*) AS value FROM session WHERE created_at >= ?', [last_day])
-		const sessions_week = countValue('SELECT COUNT(*) AS value FROM session WHERE created_at >= ?', [last_week])
+		const { sessions_week } = period_metrics
 		const sessions_active_24h = countValue('SELECT COUNT(*) AS value FROM session WHERE updated_at >= ?', [
 			last_day
 		])
@@ -846,10 +601,7 @@ export default p
 			'SELECT COUNT(*) AS value FROM session WHERE updated_at < ?',
 			[last_week]
 		)
-		const sessions_with_messages_week = countValue(
-			'SELECT COUNT(DISTINCT session_id) AS value FROM message WHERE created_at >= ?',
-			[last_week]
-		)
+		const { sessions_with_messages_week } = period_metrics
 		const stale_unread_sessions_24h = countValue(
 			'SELECT COUNT(*) AS value FROM session WHERE unread = 1 AND updated_at < ?',
 			[last_day]
@@ -858,30 +610,16 @@ export default p
 			'SELECT COUNT(*) AS value FROM session WHERE unread = 1 AND updated_at < ?',
 			[last_three_days]
 		)
-		const sessions_without_followup_week = countValue(
-			'SELECT COUNT(*) AS value FROM session WHERE unread = 1 AND updated_at < ?',
-			[last_week]
-		)
-		const idle_sessions_week = countValue(
-			'SELECT COUNT(*) AS value FROM session WHERE runing = 0 AND updated_at < ?',
-			[last_week]
-		)
+		const { sessions_without_followup_week, idle_sessions_week } = period_metrics
 		const messages_today = countValue('SELECT COUNT(*) AS value FROM message WHERE created_at >= ?', [last_day])
-		const messages_week = countValue('SELECT COUNT(*) AS value FROM message WHERE created_at >= ?', [last_week])
+		const { messages_week } = period_metrics
 
 		const documents_pending = countValue('SELECT COUNT(*) AS value FROM document WHERE is_pipelined = 0')
-		const documents_week_total = countValue('SELECT COUNT(*) AS value FROM document WHERE created_at >= ?', [
-			last_week
-		])
+		const { documents_week_total } = period_metrics
 		const articles_pending = countValue(
 			"SELECT COUNT(*) AS value FROM article WHERE is_pipelined = 0 AND \"for\" NOT IN ('user', 'wiki', 'memory')"
 		)
-		const articles_week_total = countValue(
-			`SELECT COUNT(*) AS value FROM article
-			WHERE created_at >= ?
-				AND "for" NOT IN ('user', 'wiki', 'memory')`,
-			[last_week]
-		)
+		const { articles_week_total } = period_metrics
 		const posts_pending = countValue(
 			`SELECT COUNT(*) AS value FROM article
 		WHERE is_pipelined = 0
@@ -893,7 +631,7 @@ export default p
 		const link_pending_total = countValue(
 			"SELECT COUNT(*) AS value FROM link WHERE status IN ('pending', 'none')"
 		)
-		const links_week_total = countValue('SELECT COUNT(*) AS value FROM link WHERE created_at >= ?', [last_week])
+		const { links_week_total } = period_metrics
 		const link_fail_total = countValue("SELECT COUNT(*) AS value FROM link WHERE status = 'fail'")
 		const intake_week_total = documents_week_total + articles_week_total + links_week_total
 		const posts_with_session_total = countValue(
@@ -910,31 +648,7 @@ export default p
 			WHERE a."for" IN ('user', 'wiki', 'memory')
 				AND ${organic_post_filter}`
 		)
-		const posts_week_with_session = countValue(
-			`SELECT COUNT(*) AS value
-			FROM post_session ps
-			INNER JOIN article a ON ps.post_id = a.id
-			WHERE a.created_at >= ?
-				AND a."for" IN ('user', 'wiki', 'memory')
-				AND ${organic_post_filter}`,
-			[last_week]
-		)
-		const posts_week_with_project = countValue(
-			`SELECT COUNT(DISTINCT pp.post_id) AS value
-			FROM post_project pp
-			INNER JOIN article a ON pp.post_id = a.id
-			WHERE a.created_at >= ?
-				AND a."for" IN ('user', 'wiki', 'memory')
-				AND ${organic_post_filter}`,
-			[last_week]
-		)
-		const agents_active_week = countValue(
-			`SELECT COUNT(DISTINCT ag.agent_id) AS value
-			FROM agent_session ag
-			INNER JOIN message m ON m.session_id = ag.session_id
-			WHERE m.created_at >= ?`,
-			[last_week]
-		)
+		const { posts_week_with_session, posts_week_with_project, agents_active_week } = period_metrics
 		const agents_with_content_total = countValue(
 			`SELECT COUNT(DISTINCT agent_id) AS value
 			FROM (
@@ -978,13 +692,7 @@ export default p
 				AND ${organic_post_filter}`,
 			[last_day]
 		)
-		const posts_week = countValue(
-			`SELECT COUNT(*) AS value FROM article
-			WHERE created_at >= ?
-				AND "for" IN ('user', 'wiki', 'memory')
-				AND ${organic_post_filter}`,
-			[last_week]
-		)
+		const { posts_week } = period_metrics
 		const last_post_at_row = env.sqlite
 			.prepare(
 				`SELECT MAX(updated_at) AS value
@@ -1012,14 +720,10 @@ export default p
 			total_project_messages > 0 && pthink_analytics.active_projects[0]
 				? round((pthink_analytics.active_projects[0].message_count / total_project_messages) * 100)
 				: 0
-		const pthink_kind_counts_total = readPthinkKindCounts()
-		const pthink_kind_counts_week = readPthinkKindCounts(last_week)
+		const pthink_kind_counts_total = getHomePthinkKindCounts()
+		const { pthink_kind_counts_week, pthink_report_week } = period_metrics
 		const pthink_report_total = countValue(
 			"SELECT COUNT(*) AS value FROM article WHERE \"for\" = 'memory' AND json_extract(metadata, '$.pthink.kind') IS NOT NULL"
-		)
-		const pthink_report_week = countValue(
-			"SELECT COUNT(*) AS value FROM article WHERE \"for\" = 'memory' AND json_extract(metadata, '$.pthink.kind') IS NOT NULL AND created_at >= ?",
-			[last_week]
 		)
 		const pthink_report_today = countValue(
 			"SELECT COUNT(*) AS value FROM article WHERE \"for\" = 'memory' AND json_extract(metadata, '$.pthink.kind') IS NOT NULL AND created_at >= ?",
@@ -1067,8 +771,8 @@ export default p
 					messages: messages_week,
 					posts: posts_week,
 					rewires: rewire_event_week,
-					tokens: usage.week_total_tokens,
-					assistant_messages: pthink_analytics.windows.week.assistant_messages
+					tokens: usage.period_total_tokens,
+					assistant_messages: usage.period_assistant_messages
 				},
 				top_projects: pthink_analytics.active_projects,
 				top_sessions: pthink_analytics.active_sessions,

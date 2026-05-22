@@ -50,7 +50,9 @@ const Index = () => {
 						<div className='text-std-300 text-xs'>{memory.frozen_edge_total} frozen</div>
 					</div>
 					<div className={$cx(stat_item_class, 'border-border-light border-r border-b')}>
-						<div className='text-std-400 text-xs font-medium uppercase'>Weekly Rewires</div>
+						<div className='text-std-400 text-xs font-medium uppercase'>
+							{x.stats_period_adjective} Rewires
+						</div>
 						<div className='font-mono text-2xl font-semibold tracking-tight'>
 							{memory.rewire_event_week.toLocaleString('en-US')}
 						</div>

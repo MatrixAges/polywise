@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { observer } from 'mobx-react-lite'
 import { container } from 'tsyringe'
 
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/__shadcn__/components/ui/select'
 import { TextTabs } from '@/components'
 
 import {
@@ -17,7 +18,9 @@ import {
 	Trending
 } from './components'
 import { Context } from './context'
-import Model from './model'
+import Model, { home_stats_period_items } from './model'
+
+import type { HomeStatsPeriod } from './types'
 
 type TopTabKey = 'stats' | 'memory' | 'report'
 
@@ -46,13 +49,40 @@ const Index = () => {
 	return (
 		<Context value={x}>
 			<div className='page_wrap flex flex-col pb-10'>
-				<div className='mb-6 h-7'>
+				<div
+					className='
+						flex
+						items-center justify-between
+						h-7
+						gap-4
+						mb-6
+					'
+				>
 					<TextTabs
 						className='gap-3'
 						items={top_tab_items}
 						active={active_tab}
 						setActive={value => setActiveTab(value as TopTabKey)}
 					></TextTabs>
+					<Select
+						onValueChange={value => value && x.setStatsPeriod(value as HomeStatsPeriod)}
+						value={x.stats_period}
+					>
+						<SelectTrigger
+							className='text-xsm text-std-500 bg-transparent p-0!'
+							noActiveStyle
+							noStyle
+						>
+							<SelectValue />
+						</SelectTrigger>
+						<SelectContent align='end'>
+							{home_stats_period_items.map(item => (
+								<SelectItem key={item} value={item}>
+									{item}
+								</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
 				</div>
 				<div className='min-h-0 flex-1 overflow-y-auto'>
 					<div

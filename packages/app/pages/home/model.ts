@@ -11,6 +11,7 @@ import type {
 	HomeOverviewCard,
 	HomeRuntimeItem,
 	HomeSnapshot,
+	HomeStatsPeriod,
 	HomeTrendPoint
 } from './types'
 
@@ -25,6 +26,28 @@ const weekday_label_map = {
 	fri: 'Friday',
 	sat: 'Saturday'
 } as const
+const stats_period_options = ['week', 'day', 'month', 'year', 'total'] as const
+const stats_period_title_map: Record<HomeStatsPeriod, string> = {
+	day: 'Today',
+	week: 'This week',
+	month: 'Last 30 days',
+	year: 'Last 365 days',
+	total: 'All time'
+}
+const stats_period_window_map: Record<HomeStatsPeriod, string> = {
+	day: 'today',
+	week: 'this week',
+	month: 'in the last 30 days',
+	year: 'in the last 365 days',
+	total: 'in total'
+}
+const stats_period_adjective_map: Record<HomeStatsPeriod, string> = {
+	day: 'Daily',
+	week: 'Weekly',
+	month: 'Monthly',
+	year: 'Yearly',
+	total: 'Total'
+}
 
 const formatCompact = (value: number) => compact_formatter.format(value)
 const formatInteger = (value: number) => value.toLocaleString('en-US')
@@ -79,12 +102,15 @@ export const activity_trend_config = {
 	new_sessions: { label: 'Sessions', color: '#607D8B' },
 	rewire_events: { label: 'Rewires', color: '#f43f5e' }
 } satisfies ChartConfig
+export const home_stats_period_items = stats_period_options
 
 @injectable()
 export default class Index {
 	loading = false
 	snapshot = null as HomeSnapshot | null
 	last_loaded_at = 0
+	stats_period: HomeStatsPeriod = 'week'
+	refresh_request_id = 0
 
 	constructor(public global: GlobalModel) {
 		makeAutoObservable(this, { global: false }, { autoBind: true })
@@ -144,6 +170,27 @@ export default class Index {
 		return this.last_loaded_at ? formatDateTime(this.last_loaded_at, 'YYYY-MM-DD HH:mm') : 'not loaded'
 	}
 
+	get stats_period_title() {
+		return stats_period_title_map[this.stats_period]
+	}
+
+	get stats_period_window() {
+		return stats_period_window_map[this.stats_period]
+	}
+
+	get stats_period_adjective() {
+		return stats_period_adjective_map[this.stats_period]
+	}
+
+	setStatsPeriod(period: HomeStatsPeriod) {
+		if (period === this.stats_period) {
+			return
+		}
+
+		this.stats_period = period
+		void this.refresh(period)
+	}
+
 	get overview_cards(): Array<HomeOverviewCard> {
 		if (!this.data) {
 			return []
@@ -158,13 +205,19 @@ export default class Index {
 				key: 'sessions',
 				title: 'Sessions',
 				value: formatInteger(this.data.overview.sessions_week),
-				desc: `${formatCompact(this.data.overview.session_total)} total · ${this.data.overview.sessions_running} running now · ${this.data.overview.sessions_today} created today`
+				desc:
+					this.stats_period === 'day'
+						? `${formatCompact(this.data.overview.session_total)} total · ${this.data.overview.sessions_running} running now`
+						: `${formatCompact(this.data.overview.session_total)} total · ${this.data.overview.sessions_running} running now · ${this.data.overview.sessions_today} created today`
 			},
 			{
 				key: 'messages',
 				title: 'Messages',
 				value: formatCompact(this.data.overview.messages_week),
-				desc: `${formatCompact(this.data.overview.message_total)} total · ${formatCompact(this.data.overview.messages_today)} today`
+				desc:
+					this.stats_period === 'day'
+						? `${formatCompact(this.data.overview.message_total)} total`
+						: `${formatCompact(this.data.overview.message_total)} total · ${formatCompact(this.data.overview.messages_today)} today`
 			},
 			{
 				key: 'running',
@@ -182,8 +235,8 @@ export default class Index {
 			{
 				key: 'tokens',
 				title: 'Tokens',
-				value: formatCompact(this.data.usage.week_total_tokens),
-				desc: `${formatCompact(this.data.usage.total_tokens)} total · ${formatCompact(this.data.usage.avg_total_tokens_per_reply)} per reply`
+				value: formatCompact(this.data.usage.period_total_tokens),
+				desc: `${formatCompact(this.data.usage.total_tokens)} total · ${formatCompact(this.data.usage.avg_period_total_tokens_per_reply)} per reply`
 			},
 			{
 				key: 'posts',
@@ -201,7 +254,7 @@ export default class Index {
 				key: 'graph',
 				title: 'Graph',
 				value: `+${formatCompact(graph_week_total)}`,
-				desc: `${formatCompact(graph_total)} total · +${this.data.memory.node_week_total} nodes · +${this.data.memory.edge_week_total} edges this week`
+				desc: `${formatCompact(graph_total)} total · +${this.data.memory.node_week_total} nodes · +${this.data.memory.edge_week_total} edges ${this.stats_period_window}`
 			}
 		]
 	}
@@ -303,10 +356,14 @@ export default class Index {
 		}
 
 		return [
-			{ key: 'total', title: 'Total', value: formatCompact(this.data.usage.total_tokens) },
-			{ key: 'input', title: 'Input', value: formatCompact(this.data.usage.input_tokens) },
-			{ key: 'output', title: 'Output', value: formatCompact(this.data.usage.output_tokens) },
-			{ key: 'reasoning', title: 'Reasoning', value: formatCompact(this.data.usage.reasoning_tokens) }
+			{ key: 'total', title: 'Total', value: formatCompact(this.data.usage.period_total_tokens) },
+			{ key: 'input', title: 'Input', value: formatCompact(this.data.usage.period_input_tokens) },
+			{ key: 'output', title: 'Output', value: formatCompact(this.data.usage.period_output_tokens) },
+			{
+				key: 'reasoning',
+				title: 'Reasoning',
+				value: formatCompact(this.data.usage.period_reasoning_tokens)
+			}
 		]
 	}
 
@@ -345,20 +402,20 @@ export default class Index {
 		const top_model = this.data.usage.models[0]
 		const top_provider = this.data.usage.providers[0]
 		const top_model_share =
-			this.data.usage.week_total_tokens > 0 && top_model
-				? (top_model.total_tokens / this.data.usage.week_total_tokens) * 100
+			this.data.usage.period_total_tokens > 0 && top_model
+				? (top_model.total_tokens / this.data.usage.period_total_tokens) * 100
 				: 0
 		const top_provider_share =
-			this.data.usage.total_tokens > 0 && top_provider
-				? (top_provider.total_tokens / this.data.usage.total_tokens) * 100
+			this.data.usage.period_total_tokens > 0 && top_provider
+				? (top_provider.total_tokens / this.data.usage.period_total_tokens) * 100
 				: 0
 		const cached_ratio =
-			this.data.usage.input_tokens > 0
-				? (this.data.usage.cached_input_tokens / this.data.usage.input_tokens) * 100
+			this.data.usage.period_input_tokens > 0
+				? (this.data.usage.period_cached_input_tokens / this.data.usage.period_input_tokens) * 100
 				: 0
 		const reasoning_share =
-			this.data.usage.total_tokens > 0
-				? (this.data.usage.reasoning_tokens / this.data.usage.total_tokens) * 100
+			this.data.usage.period_total_tokens > 0
+				? (this.data.usage.period_reasoning_tokens / this.data.usage.period_total_tokens) * 100
 				: 0
 
 		return [
@@ -366,27 +423,29 @@ export default class Index {
 				key: 'top-model-share',
 				title: 'Top model share',
 				value: formatPercent(top_model_share),
-				desc: top_model ? `${top_model.label}` : 'No weekly model activity'
+				desc: top_model
+					? `${top_model.label}`
+					: `No ${this.stats_period_adjective.toLowerCase()} model activity`
 			},
 			{
 				key: 'top-provider-share',
 				title: 'Provider concentration',
 				value: formatPercent(top_provider_share),
 				desc: top_provider
-					? `${top_provider.provider} · ${top_provider.calls} calls total`
+					? `${top_provider.provider} · ${top_provider.calls} calls`
 					: 'No provider activity'
 			},
 			{
 				key: 'cached-ratio',
 				title: 'Cached input ratio',
 				value: formatPercent(cached_ratio),
-				desc: `${formatCompact(this.data.usage.cached_input_tokens)} cached of ${formatCompact(this.data.usage.input_tokens)} input tokens`
+				desc: `${formatCompact(this.data.usage.period_cached_input_tokens)} cached of ${formatCompact(this.data.usage.period_input_tokens)} input tokens`
 			},
 			{
 				key: 'reasoning-share',
 				title: 'Reasoning share',
 				value: formatPercent(reasoning_share),
-				desc: `${formatCompact(this.data.usage.reasoning_tokens)} reasoning of ${formatCompact(this.data.usage.total_tokens)} total tokens`
+				desc: `${formatCompact(this.data.usage.period_reasoning_tokens)} reasoning of ${formatCompact(this.data.usage.period_total_tokens)} total tokens`
 			}
 		]
 	}
@@ -420,25 +479,25 @@ export default class Index {
 				key: 'grounding',
 				title: 'Session-grounded posts',
 				value: formatPercent(session_grounding_week),
-				desc: `${this.data.content.posts_week_with_session}/${this.data.activity.week.posts} this week · ${this.data.content.posts_with_session_total}/${this.data.content.post_total} total`
+				desc: `${this.data.content.posts_week_with_session}/${this.data.activity.week.posts} ${this.stats_period_window} · ${this.data.content.posts_with_session_total}/${this.data.content.post_total} total`
 			},
 			{
 				key: 'project-tagging',
 				title: 'Project-tagged posts',
 				value: formatPercent(project_tagging_week),
-				desc: `${this.data.content.posts_week_with_project}/${this.data.activity.week.posts} this week · ${this.data.content.posts_with_project_total}/${this.data.content.post_total} total`
+				desc: `${this.data.content.posts_week_with_project}/${this.data.activity.week.posts} ${this.stats_period_window} · ${this.data.content.posts_with_project_total}/${this.data.content.post_total} total`
 			},
 			{
 				key: 'intake-output',
 				title: 'Intake to output',
 				value: formatRatio(intake_to_output),
-				desc: `${this.data.activity.week.posts} posts from ${this.data.content.intake_week_total} new docs/articles/links this week`
+				desc: `${this.data.activity.week.posts} posts from ${this.data.content.intake_week_total} new docs/articles/links ${this.stats_period_window}`
 			},
 			{
 				key: 'agent-coverage',
 				title: 'Active agent coverage',
 				value: formatPercent(active_agent_share),
-				desc: `${this.data.system.agents_active_week}/${this.data.system.agent_total} active this week · ${this.data.system.agents_with_content_total}/${this.data.system.agent_total} with content`
+				desc: `${this.data.system.agents_active_week}/${this.data.system.agent_total} active ${this.stats_period_window} · ${this.data.system.agents_with_content_total}/${this.data.system.agent_total} with content`
 			}
 		]
 	}
@@ -549,9 +608,9 @@ export default class Index {
 		return [
 			{
 				key: 'growth',
-				title: 'Weekly growth',
+				title: `${this.stats_period_adjective} growth`,
 				value: `+${this.data.memory.node_week_total}/+${this.data.memory.edge_week_total}`,
-				desc: 'Nodes/edges created this week'
+				desc: `Nodes/edges created ${this.stats_period_window}`
 			},
 			{
 				key: 'state',
@@ -590,7 +649,7 @@ export default class Index {
 				key: 'rewire-intensity',
 				title: 'Rewire intensity',
 				value: formatPercent(rewire_intensity),
-				desc: `${this.data.memory.rewire_event_week} weekly rewires across ${formatCompact(this.data.memory.edge_total)} total edges`
+				desc: `${this.data.memory.rewire_event_week} rewires ${this.stats_period_window} across ${formatCompact(this.data.memory.edge_total)} total edges`
 			},
 			{
 				key: 'active-edge-share',
@@ -612,20 +671,28 @@ export default class Index {
 			return []
 		}
 
-		return [
-			{
-				key: 'week',
-				title: 'This week',
-				value: `${this.data.activity.week.messages} messages`,
-				desc: `${this.data.activity.week.sessions} sessions · ${this.data.activity.week.posts} posts · ${formatCompact(this.data.activity.week.tokens)} tokens`
-			},
-			{
-				key: 'today',
-				title: 'Today',
-				value: `${this.data.activity.today.messages} messages`,
-				desc: `${this.data.activity.today.sessions} sessions · ${this.data.activity.today.posts} posts · ${formatCompact(this.data.activity.today.tokens)} tokens`
-			}
-		]
+		const primary_item = {
+			key: this.stats_period,
+			title: this.stats_period_title,
+			value: `${this.data.activity.week.messages} messages`,
+			desc: `${this.data.activity.week.sessions} sessions · ${this.data.activity.week.posts} posts · ${formatCompact(this.data.activity.week.tokens)} tokens`
+		}
+		const comparison_item =
+			this.stats_period === 'day'
+				? {
+						key: 'total',
+						title: 'All time',
+						value: `${this.data.overview.message_total} messages`,
+						desc: `${this.data.overview.session_total} sessions · ${this.data.content.post_total} posts · ${formatCompact(this.data.usage.total_tokens)} tokens`
+					}
+				: {
+						key: 'today',
+						title: 'Today',
+						value: `${this.data.activity.today.messages} messages`,
+						desc: `${this.data.activity.today.sessions} sessions · ${this.data.activity.today.posts} posts · ${formatCompact(this.data.activity.today.tokens)} tokens`
+					}
+
+		return [primary_item, comparison_item]
 	}
 
 	get pthink_alert_label() {
@@ -647,7 +714,7 @@ export default class Index {
 			{
 				key: 'reports',
 				title: 'Reports',
-				value: `${this.data.pthink.report_today} / ${this.data.pthink.report_week} / ${this.data.pthink.report_total}`
+				value: `${this.data.pthink.report_today} / ${this.data.pthink.report_week} / ${this.data.pthink.report_total} (day / period / total)`
 			},
 			{
 				key: 'trigger',
@@ -693,7 +760,7 @@ export default class Index {
 				key: 'trigger-share',
 				title: 'Trigger share',
 				value: formatPercent(trigger_share),
-				desc: `${week_counts.trigger} trigger · ${scheduled_week} scheduled reports this week`
+				desc: `${week_counts.trigger} trigger · ${scheduled_week} scheduled reports ${this.stats_period_window}`
 			},
 			{
 				key: 'report-gap',
@@ -707,7 +774,7 @@ export default class Index {
 				key: 'report-mix',
 				title: 'Report mix',
 				value: `${week_counts.daily}/${week_counts.weekly}/${week_counts.trigger}/${week_counts.idle}`,
-				desc: `Daily / weekly / trigger / idle this week · ${total_counts.trigger} trigger total`
+				desc: `Daily / weekly / trigger / idle ${this.stats_period_window} · ${total_counts.trigger} trigger total`
 			}
 		]
 	}
@@ -716,14 +783,24 @@ export default class Index {
 		void this.refresh()
 	}
 
-	async refresh() {
+	async refresh(period = this.stats_period) {
+		const request_id = ++this.refresh_request_id
+
 		this.loading = true
 
 		try {
-			this.snapshot = await rpc.home.query.query()
+			const snapshot = await rpc.home.query.query({ period })
+
+			if (request_id !== this.refresh_request_id) {
+				return
+			}
+
+			this.snapshot = snapshot
 			this.last_loaded_at = Date.now()
 		} finally {
-			this.loading = false
+			if (request_id === this.refresh_request_id) {
+				this.loading = false
+			}
 		}
 	}
 

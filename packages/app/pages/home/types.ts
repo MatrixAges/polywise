@@ -1,5 +1,6 @@
 import type { RPCOutput } from '@/types'
 
+export type HomeStatsPeriod = 'day' | 'week' | 'month' | 'year' | 'total'
 export type HomeSnapshot = RPCOutput['home']['query']
 export type HomeTrendPoint = HomeSnapshot['trends'][number]
 export type HomeHeatmapPoint = HomeSnapshot['activity_heatmap'][number]
