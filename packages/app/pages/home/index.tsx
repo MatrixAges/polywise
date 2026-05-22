@@ -6,6 +6,7 @@ import { container } from 'tsyringe'
 import { TextTabs } from '@/components'
 
 import {
+	ActivityHotspots,
 	KnowledgeAssets,
 	LoadingState,
 	MemoryPanel,
@@ -71,6 +72,7 @@ const Index = () => {
 							</div>
 							{active_tab === 'stats' ? (
 								<>
+									<ActivityHotspots></ActivityHotspots>
 									<KnowledgeAssets></KnowledgeAssets>
 									<TrendPanels></TrendPanels>
 									<MemoryPanel></MemoryPanel>

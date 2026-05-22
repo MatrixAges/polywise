@@ -8,6 +8,8 @@ const week_ms = 7 * 24 * 60 * 60 * 1000
 const day_ms = 24 * 60 * 60 * 1000
 const second_ms = 1000
 const trend_days = 14
+const heatmap_weeks = 24
+const heatmap_days = heatmap_weeks * 7
 const organic_post_filter = `json_extract(metadata, '$.pthink.kind') IS NULL`
 
 const normalizeDbParam = (value: unknown) =>
@@ -615,6 +617,146 @@ const buildDailyTrendRows = (now: number) => {
 	return buckets
 }
 
+const buildActivityHeatmapRows = (now: number) => {
+	const start_at = getDayStart(now - (heatmap_days - 1) * day_ms)
+	const db_start_at = toUnixSeconds(start_at)
+	const buckets = Array.from({ length: heatmap_days }, (_, index) => {
+		const ts = start_at + index * day_ms
+
+		return {
+			date: getDayKey(ts),
+			timestamp: ts,
+			messages: 0,
+			new_sessions: 0,
+			new_posts: 0,
+			rewire_events: 0,
+			pthink_reports: 0
+		}
+	})
+	const bucket_map = new Map(buckets.map(item => [item.date, item]))
+
+	const message_rows = env.sqlite
+		.prepare(
+			`SELECT
+				strftime('%Y-%m-%d', created_at, 'unixepoch', 'localtime') AS day_key,
+				COUNT(*) AS value
+			FROM message
+			WHERE created_at >= ?
+			GROUP BY day_key`
+		)
+		.all(db_start_at) as Array<{ day_key: string | null; value: number | null }>
+
+	for (const row of message_rows) {
+		if (!row.day_key) {
+			continue
+		}
+
+		const target = bucket_map.get(row.day_key)
+
+		if (target) {
+			target.messages = Number(row.value ?? 0)
+		}
+	}
+
+	const session_rows = env.sqlite
+		.prepare(
+			`SELECT
+				strftime('%Y-%m-%d', created_at, 'unixepoch', 'localtime') AS day_key,
+				COUNT(*) AS value
+			FROM session
+			WHERE created_at >= ?
+			GROUP BY day_key`
+		)
+		.all(db_start_at) as Array<{ day_key: string | null; value: number | null }>
+
+	for (const row of session_rows) {
+		if (!row.day_key) {
+			continue
+		}
+
+		const target = bucket_map.get(row.day_key)
+
+		if (target) {
+			target.new_sessions = Number(row.value ?? 0)
+		}
+	}
+
+	const post_rows = env.sqlite
+		.prepare(
+			`SELECT
+				strftime('%Y-%m-%d', created_at, 'unixepoch', 'localtime') AS day_key,
+				COUNT(*) AS value
+			FROM article
+			WHERE created_at >= ?
+				AND "for" IN ('user', 'wiki', 'memory')
+				AND ${organic_post_filter}
+			GROUP BY day_key`
+		)
+		.all(db_start_at) as Array<{ day_key: string | null; value: number | null }>
+
+	for (const row of post_rows) {
+		if (!row.day_key) {
+			continue
+		}
+
+		const target = bucket_map.get(row.day_key)
+
+		if (target) {
+			target.new_posts = Number(row.value ?? 0)
+		}
+	}
+
+	const rewire_rows = env.sqlite
+		.prepare(
+			`SELECT
+				strftime('%Y-%m-%d', created_at, 'unixepoch', 'localtime') AS day_key,
+				COUNT(*) AS value
+			FROM rewire_event
+			WHERE created_at >= ?
+			GROUP BY day_key`
+		)
+		.all(db_start_at) as Array<{ day_key: string | null; value: number | null }>
+
+	for (const row of rewire_rows) {
+		if (!row.day_key) {
+			continue
+		}
+
+		const target = bucket_map.get(row.day_key)
+
+		if (target) {
+			target.rewire_events = Number(row.value ?? 0)
+		}
+	}
+
+	const pthink_rows = env.sqlite
+		.prepare(
+			`SELECT
+				strftime('%Y-%m-%d', created_at, 'unixepoch', 'localtime') AS day_key,
+				COUNT(*) AS value
+			FROM article
+			WHERE created_at >= ?
+				AND "for" = 'memory'
+				AND json_extract(metadata, '$.pthink.kind') IS NOT NULL
+			GROUP BY day_key`
+		)
+		.all(db_start_at) as Array<{ day_key: string | null; value: number | null }>
+
+	for (const row of pthink_rows) {
+		if (!row.day_key) {
+			continue
+		}
+
+		const target = bucket_map.get(row.day_key)
+
+		if (target) {
+			target.pthink_reports = Number(row.value ?? 0)
+		}
+	}
+
+	return buckets
+}
+
 export default p
 	.meta({
 		openapi: {
@@ -632,6 +774,7 @@ export default p
 		const pthink_config = getPthinkConfig()
 		const usage = buildUsageAnalytics(last_week)
 		const trends = buildDailyTrendRows(now)
+		const activity_heatmap = buildActivityHeatmapRows(now)
 		const pthink_analytics = buildPthinkAnalytics(now)
 		const pthink_status = await readPthinkStatus()
 		const top_alert = pthink_config.trigger_enabled
@@ -1113,6 +1256,7 @@ export default p
 				kind_counts_week: pthink_kind_counts_week
 			},
 			trends,
+			activity_heatmap,
 			coverage: {
 				has_usage_telemetry: true,
 				note: 'Token usage is aggregated directly from message.metadata.usage. Model usage is inferred from message sender, linked agent, linked project, then default model.'

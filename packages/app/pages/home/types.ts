@@ -2,6 +2,7 @@ import type { RPCOutput } from '@/types'
 
 export type HomeSnapshot = RPCOutput['home']['query']
 export type HomeTrendPoint = HomeSnapshot['trends'][number]
+export type HomeHeatmapPoint = HomeSnapshot['activity_heatmap'][number]
 export type HomeOverviewTone =
 	| 'sessions'
 	| 'running'
@@ -30,6 +31,12 @@ export interface HomeRuntimeItem {
 	key: string
 	label: string
 	value: string
+}
+
+export interface HomeHeatmapCell extends HomeHeatmapPoint {
+	level: number
+	score: number
+	tooltip: string
 }
 
 export type HomeRecentSessionItem = HomeSnapshot['recent']['sessions'][number] & {

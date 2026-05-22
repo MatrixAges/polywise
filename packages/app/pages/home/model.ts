@@ -2,12 +2,13 @@ import { makeAutoObservable, toJS } from 'mobx'
 import { injectable } from 'tsyringe'
 
 import GlobalModel from '@/models/global'
-import { formatDateTime, fromNow, rpc } from '@/utils'
+import { formatDate, formatDateTime, fromNow, rpc } from '@/utils'
 
 import type { ChartConfig } from '@/__shadcn__/components/ui/chart'
 import type {
 	HomeActiveProjectItem,
 	HomeActiveSessionItem,
+	HomeHeatmapCell,
 	HomeModelItem,
 	HomeOverviewCard,
 	HomeRecentNotificationItem,
@@ -35,6 +36,13 @@ const formatCompact = (value: number) => compact_formatter.format(value)
 const formatInteger = (value: number) => value.toLocaleString('en-US')
 const formatPercent = (value: number) => `${value.toFixed(value % 1 === 0 ? 0 : 1)}%`
 const formatRatio = (value: number) => `${value.toFixed(value >= 10 ? 0 : 1)}x`
+const activity_heatmap_weights = {
+	message: 1,
+	session: 4,
+	post: 6,
+	rewire: 2,
+	report: 8
+} as const
 const formatAgeDays = (timestamp?: number | null) => {
 	if (!timestamp) {
 		return 'Clear'
@@ -47,6 +55,29 @@ const formatAgeDays = (timestamp?: number | null) => {
 	}
 
 	return `${Math.round(age_days)}d`
+}
+
+const getHeatmapScore = (item: {
+	messages: number
+	new_sessions: number
+	new_posts: number
+	rewire_events: number
+	pthink_reports: number
+}) =>
+	item.messages * activity_heatmap_weights.message +
+	item.new_sessions * activity_heatmap_weights.session +
+	item.new_posts * activity_heatmap_weights.post +
+	item.rewire_events * activity_heatmap_weights.rewire +
+	item.pthink_reports * activity_heatmap_weights.report
+
+const getQuantile = (values: Array<number>, ratio: number) => {
+	if (values.length === 0) {
+		return 0
+	}
+
+	const index = Math.min(values.length - 1, Math.floor((values.length - 1) * ratio))
+
+	return values[index] ?? 0
 }
 
 const token_trend_config = {
@@ -226,6 +257,65 @@ export default class Index {
 		)
 
 		return `Last 14 days · ${totals.messages.toLocaleString('en-US')} messages · ${totals.sessions.toLocaleString('en-US')} sessions · ${totals.posts.toLocaleString('en-US')} posts · ${totals.rewire.toLocaleString('en-US')} rewires`
+	}
+
+	get activity_heatmap_cells(): Array<HomeHeatmapCell> {
+		if (!this.data?.activity_heatmap) {
+			return []
+		}
+
+		const base = toJS(this.data.activity_heatmap).map(item => ({
+			...item,
+			score: getHeatmapScore(item)
+		}))
+		const non_zero_scores = base
+			.map(item => item.score)
+			.filter(score => score > 0)
+			.sort((left, right) => left - right)
+		const thresholds = [
+			getQuantile(non_zero_scores, 0.25),
+			getQuantile(non_zero_scores, 0.5),
+			getQuantile(non_zero_scores, 0.75)
+		]
+
+		return base.map(item => {
+			const level =
+				item.score <= 0
+					? 0
+					: item.score <= thresholds[0]
+						? 1
+						: item.score <= thresholds[1]
+							? 2
+							: item.score <= thresholds[2]
+								? 3
+								: 4
+			const parts = [
+				`${item.messages} messages`,
+				`${item.new_sessions} sessions`,
+				`${item.new_posts} posts`,
+				`${item.rewire_events} rewires`,
+				`${item.pthink_reports} reports`
+			]
+
+			return {
+				...item,
+				level,
+				tooltip: `${formatDate(item.date, 'MMM D, YYYY')} · ${item.score} hotspot score · ${parts.join(' · ')}`
+			}
+		})
+	}
+
+	get activity_heatmap_summary() {
+		const cells = this.activity_heatmap_cells
+
+		if (cells.length === 0) {
+			return ''
+		}
+
+		const active_days = cells.filter(item => item.score > 0).length
+		const busiest_day = cells.reduce((best, item) => (item.score > best.score ? item : best), cells[0]!)
+
+		return `Last 24 weeks · ${active_days} active days · busiest ${formatDate(busiest_day.date, 'MMM D')} at ${busiest_day.score}`
 	}
 
 	get usage_metrics(): Array<HomeModelItem> {
