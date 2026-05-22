@@ -1,6 +1,5 @@
 import { cloneElement, useRef } from 'react'
 import dayjs from 'dayjs'
-import { Flame } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 import { ActivityCalendar } from 'react-activity-calendar'
 
@@ -11,7 +10,7 @@ import { useModel } from '../context'
 import type { HomeHeatmapCell } from '../types'
 
 const level_class_map = {
-	0: 'bg-[#efefef] dark:bg-[#2a362b]',
+	0: 'bg-[#fafafa] dark:bg-[#2a362b]',
 	1: 'bg-[#d9e7c8] dark:bg-[#294b2f]',
 	2: 'bg-[#9fd08f] dark:bg-[#3d7a45]',
 	3: 'bg-[#5ea961] dark:bg-[#58a55f]',
@@ -19,7 +18,7 @@ const level_class_map = {
 } as const satisfies Record<number, string>
 
 const heatmap_theme: { light: Array<string>; dark: Array<string> } = {
-	light: ['#efefef', '#d9e7c8', '#9fd08f', '#5ea961', '#2f6b3c'],
+	light: ['#fafafa', '#d9e7c8', '#9fd08f', '#5ea961', '#2f6b3c'],
 	dark: ['#2a362b', '#294b2f', '#3d7a45', '#58a55f', '#8be28e']
 }
 
@@ -95,34 +94,11 @@ const Index = () => {
 	return (
 		<div className='flex flex-col'>
 			<div
-				className='
-					flex flex-wrap
-					items-start justify-between
-					gap-3
-				'
-			>
-				<div>
-					<div
-						className='
-							flex
-							items-center
-							gap-2
-							text-sm font-medium
-						'
-					>
-						<Flame className='text-emerald-600' />
-						<span>Daily intensity</span>
-					</div>
-					<div className='text-std-400 mt-1 text-sm'>{x.activity_heatmap_summary}</div>
-				</div>
-			</div>
-			<div
 				ref={calendar_ref}
 				className='
 					overflow-hidden
 					w-full
 					min-w-0
-					mt-5
 					dark:[--hotspot-zero-fill:#2a362b] dark:[--hotspot-future-fill:#243024]
 					[--hotspot-zero-fill:#eff2f5] [--hotspot-future-fill:#f6f8f1]
 				'
@@ -137,15 +113,20 @@ const Index = () => {
 					renderBlock={(block, activity) =>
 						cloneElement(block, {
 							fill: (activity as HeatmapActivity).is_future
-								? 'var(--hotspot-future-fill)'
+								? 'var(--color-std-50)'
 								: activity.level === 0
-									? 'var(--hotspot-zero-fill)'
+									? 'var(--color-std-50)'
 									: block.props.fill,
 							stroke: 'none',
 							strokeWidth: 0,
 							title: (activity as HeatmapActivity).tooltip
 						})
 					}
+					tooltips={{
+						activity: {
+							text: activity => `${activity.level} activities on ${activity.date}`
+						}
+					}}
 					colorScheme={theme}
 					showColorLegend={false}
 					showTotalCount={false}
@@ -162,10 +143,10 @@ const Index = () => {
 					pt-3
 					mt-4
 					text-xs text-std-400
-					border-t border-border/60
+					border-t border-border-light
 				'
 			>
-				<div>{`${total_activities} activities in the last year`}</div>
+				<div>{`${total_activities} activities in the ${x.activity_heatmap_summary}`}</div>
 				<div className='flex items-center gap-2'>
 					<span>Less</span>
 					{([0, 1, 2, 3, 4] as const).map(level => (

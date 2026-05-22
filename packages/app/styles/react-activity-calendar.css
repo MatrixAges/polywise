@@ -1,0 +1,22 @@
+.react-activity-calendar__tooltip {
+	width: max-content;
+	max-width: calc(100vw - 20px);
+	padding: 0.2em 0.5em;
+	border-radius: 30px;
+	background-color: hsl(0 0% 10%);
+	color: hsl(0 0% 94%);
+	font-size: 11px;
+
+	.react-activity-calendar__tooltip-arrow {
+		fill: hsl(0 0% 10%);
+	}
+
+	&[data-color-scheme='dark'] {
+		background-color: hsl(0 0% 94%);
+		color: hsl(0 0% 6%);
+
+		.react-activity-calendar__tooltip-arrow {
+			fill: hsl(0 0% 94%);
+		}
+	}
+}

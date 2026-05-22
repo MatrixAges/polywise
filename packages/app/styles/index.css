@@ -8,8 +8,9 @@
 @import './custom.css';
 @import './streamdown.css';
 @import './tree.css';
-@import './react-horizontal-scrolling-menu.css';
 @import 'tw-animate-css';
+@import './react-activity-calendar.css';
+@import './react-horizontal-scrolling-menu.css';
 
 @source '../node_modules/streamdown/dist/*.js';
 @source '../node_modules/@streamdown/code/dist/*.js';
