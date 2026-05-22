@@ -1,21 +1,15 @@
 import { observer } from 'mobx-react-lite'
 
+import EntityAvatar from '@/setting/im/components/EntityAvatar'
+
 import { useModel } from '../context'
+
+import type { HomeLeaderboardItem } from '../types'
 
 const section_title_class =
 	'flex items-center pl-2 text-std-600 text-sm font-semibold leading-none border-l-2 border-std-500'
 
-const Leaderboard = (props: {
-	title: string
-	items: Array<{
-		key: string
-		title: string
-		subtitle: string
-		meta: string
-		value: string
-		footnote: string
-	}>
-}) => (
+const Leaderboard = (props: { title: string; items: Array<HomeLeaderboardItem> }) => (
 	<div className='flex flex-col gap-3'>
 		<div className={section_title_class}>{props.title}</div>
 		<div className='border-border-light flex flex-col border'>
@@ -33,11 +27,28 @@ const Leaderboard = (props: {
 						)}
 						key={item.key}
 					>
-						<div className='min-w-0 flex-1'>
-							<div className='mb-2 truncate text-sm font-medium'>{item.title}</div>
-							<div className='text-std-300 mt-0.5 truncate text-xs'>{item.subtitle}</div>
-							<div className='text-std-300 mt-1 truncate text-xs'>{item.meta}</div>
-							<div className='text-std-300 mt-1 text-xs'>{item.footnote}</div>
+						<div
+							className='
+									flex flex-1
+									items-start
+									min-w-0
+									gap-3
+								'
+						>
+							<EntityAvatar
+								name={item.title}
+								photo={item.photo ?? null}
+								avatar={item.avatar}
+								size={36}
+							/>
+							<div className='min-w-0 flex-1'>
+								<div className='mb-2 truncate text-sm font-medium'>{item.title}</div>
+								<div className='text-std-300 mt-0.5 truncate text-xs'>
+									{item.subtitle}
+								</div>
+								<div className='text-std-300 mt-1 truncate text-xs'>{item.meta}</div>
+								<div className='text-std-300 mt-1 text-xs'>{item.footnote}</div>
+							</div>
 						</div>
 						<div className='shrink-0 text-right'>
 							<div className='font-mono text-sm font-semibold'>{item.value}</div>

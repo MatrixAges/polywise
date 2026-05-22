@@ -48,6 +48,8 @@ export interface HomeLeaderboardItem {
 	meta: string
 	value: string
 	footnote: string
+	photo?: Uint8Array | null
+	avatar?: unknown
 }
 
 export interface HomeHeatmapCell extends HomeHeatmapPoint {

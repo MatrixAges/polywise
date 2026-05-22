@@ -1,4 +1,6 @@
 import {
+	getAgents,
+	getGroups,
 	getHomePeriodMetrics,
 	getHomePeriodStart,
 	getHomePthinkKindCounts,
@@ -504,17 +506,10 @@ const buildActivityHeatmapRows = (now: number) => {
 	return buckets
 }
 
-const buildAgentWorkspaceStats = (period_start: number | null) => {
+const buildAgentWorkspaceStats = async (period_start: number | null) => {
 	const db_period_start = period_start === null ? null : toUnixSeconds(period_start)
 	const period_params = db_period_start === null ? [] : [db_period_start]
-	const agent_rows = env.sqlite.prepare('SELECT id, name FROM agent').all() as Array<{
-		id: string
-		name: string | null
-	}>
-	const group_rows = env.sqlite.prepare('SELECT id, name FROM "group"').all() as Array<{
-		id: string
-		name: string | null
-	}>
+	const [agent_rows, group_rows] = await Promise.all([getAgents(), getGroups()])
 	const agent_session_total_rows = env.sqlite
 		.prepare(
 			`SELECT
@@ -670,6 +665,8 @@ const buildAgentWorkspaceStats = (period_start: number | null) => {
 		return {
 			id: item.id,
 			name: item.name || 'Untitled agent',
+			photo: item.photo ?? null,
+			avatar: item.avatar ?? null,
 			session_total: agent_session_total_map.get(item.id) ?? 0,
 			session_count: Number(activity?.session_count ?? 0),
 			message_count: Number(activity?.message_count ?? 0),
@@ -688,6 +685,7 @@ const buildAgentWorkspaceStats = (period_start: number | null) => {
 		return {
 			id: item.id,
 			name: item.name || 'Untitled group',
+			photo: item.photo ?? null,
 			agent_count: group_member_map.get(item.id) ?? 0,
 			session_total: group_session_total_map.get(item.id) ?? 0,
 			session_count: Number(activity?.session_count ?? 0),
@@ -794,7 +792,7 @@ export default p
 		const period_metrics = getHomePeriodMetrics(period_start)
 		const trends = buildDailyTrendRows(now)
 		const activity_heatmap = buildActivityHeatmapRows(now)
-		const agent_workspace = buildAgentWorkspaceStats(period_start)
+		const agent_workspace = await buildAgentWorkspaceStats(period_start)
 		const pthink_analytics = buildPthinkAnalytics(now)
 		const pthink_status = await readPthinkStatus()
 		const top_alert = pthink_config.trigger_enabled

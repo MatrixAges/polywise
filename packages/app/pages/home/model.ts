@@ -967,6 +967,8 @@ export default class Index {
 			subtitle: `${item.session_count} active sessions · ${item.message_count} messages · ${item.assistant_replies} replies`,
 			meta: `${item.post_count} posts · ${item.document_count} docs · ${item.article_count} articles`,
 			value: formatCompact(item.total_tokens),
+			photo: item.photo ?? null,
+			avatar: item.avatar ?? null,
 			footnote: item.last_active_at
 				? `Last active ${fromNow(item.last_active_at)}`
 				: `No ${this.stats_period_adjective.toLowerCase()} activity`
@@ -980,6 +982,7 @@ export default class Index {
 			subtitle: `${item.agent_count} members · ${item.session_count} active sessions · ${item.message_count} messages`,
 			meta: `${item.assistant_replies} replies · ${item.session_total} linked sessions`,
 			value: formatCompact(item.total_tokens),
+			photo: item.photo ?? null,
 			footnote: item.last_active_at
 				? `Last active ${fromNow(item.last_active_at)}`
 				: `No ${this.stats_period_adjective.toLowerCase()} activity`
