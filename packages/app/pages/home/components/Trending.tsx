@@ -182,39 +182,36 @@ const Index = () => {
 						</ChartContainer>
 						<InlineLegend items={token_legend_items} />
 					</div>
-					<div className={chart_card_class}>
+					<div
+						className='
+							flex flex-col
+							p-4
+							border border-border-light
+						'
+					>
 						<div
 							className='
-								flex
-								items-center
-								gap-2
-								text-sm font-medium
+								flex flex-wrap
+								items-start justify-between
+								gap-3
+								mb-4
 							'
 						>
-							<Activity className='text-sky-600' />
-							<span>Workspace activity</span>
+							<div className='flex flex-col gap-0.5 text-xs'>
+								<div className='text-std-400 font-medium uppercase'>
+									Workspace Activity
+								</div>
+								<div className='text-std-300'>{x.activity_trend_summary}</div>
+							</div>
 						</div>
-						<div className='text-std-400 mt-1 text-sm'>{x.activity_trend_summary}</div>
-						<ChartContainer
-							className={`mt-5${chart_height_class}`}
-							config={activity_trend_config}
-						>
-							<LineChart
-								data={x.trends}
-								margin={{ top: 8, right: 8, left: -18, bottom: 0 }}
-							>
+						<ChartContainer className='h-[210px] min-h-[210px]' config={activity_trend_config}>
+							<LineChart data={x.trends} margin={{ top: 8, right: 0, left: 0, bottom: 0 }}>
 								<CartesianGrid {...horizontal_grid_props} />
 								<XAxis
 									axisLine={false}
 									dataKey='label'
 									minTickGap={24}
 									tickLine={false}
-								/>
-								<YAxis
-									allowDecimals={false}
-									axisLine={false}
-									tickLine={false}
-									width={32}
 								/>
 								<Tooltip
 									cursor={false}
