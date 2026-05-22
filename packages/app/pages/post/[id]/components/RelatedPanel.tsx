@@ -3,6 +3,7 @@ import { observer } from 'mobx-react-lite'
 
 import { Button } from '@/__shadcn__/components/ui/button'
 import { Input } from '@/__shadcn__/components/ui/input'
+import { getAppRouteHref } from '@/utils'
 
 import { useModel } from '../context'
 
@@ -148,12 +149,28 @@ const Index = () => {
 											mb-1
 										'
 								>
-									<div className='text-xsm line-clamp-3 font-medium'>
+									<a
+										className='text-xsm line-clamp-3 font-medium hover:underline'
+										href={getAppRouteHref(`/article/${item.id}`)}
+										target='_blank'
+										rel='noreferrer'
+									>
 										{item.title || 'Untitled article'}
-									</div>
+									</a>
 								</div>
-								<div className='text-std-400 line-clamp-2 text-xs'>
-									{item.content_preview || 'Empty content'}
+								<div className='flex'>
+									<a
+										className='
+												text-std-400 text-xs
+												hover:text-foreground
+												line-clamp-2
+											'
+										href={getAppRouteHref(`/article/${item.id}`)}
+										target='_blank'
+										rel='noreferrer'
+									>
+										{item.content_preview || 'Empty content'}
+									</a>
 								</div>
 								<div className='mt-2 flex items-center justify-between'>
 									<span className='text-std-300 text-[10px] uppercase'>

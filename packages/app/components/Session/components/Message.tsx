@@ -1,13 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useMemoizedFn } from 'ahooks'
 import dayjs from 'dayjs'
-import { Check, ChevronRightIcon, Copy, Trash2 } from 'lucide-react'
+import { Bookmark, Check, ChevronRightIcon, Copy, Trash2 } from 'lucide-react'
 import NiceAvatar from 'react-nice-avatar'
 import NotionAvatar from 'react-notion-avatar'
+import { toast } from 'sonner'
 
 import { Message, MessageContent } from '@/__shadcn__/components/ai-elements'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/__shadcn__/components/ui/collapsible'
-import { copy, formatDateTime, formatTime } from '@/utils'
+import { copy, formatDateTime, formatTime, getAppRouteHref, rpc } from '@/utils'
 import getToolIcon from '@/utils/getToolIcon'
 
 import LoadingDots from './LoadingDots'
@@ -242,6 +243,19 @@ const getMessageCopyText = (message: SessionMessage) => {
 		.trim()
 }
 
+const getMessageWikiText = (message: SessionMessage) => {
+	return message.parts
+		.map(part => {
+			if (part.type === 'text') return part.text
+			if (part.type === 'source-url') return part.url
+
+			return ''
+		})
+		.filter(Boolean)
+		.join('\n\n')
+		.trim()
+}
+
 const getMessageTime = (message: SessionMessage) => {
 	if (typeof message.metadata?.timestamp === 'number') {
 		return new Date(message.metadata.timestamp)
@@ -417,11 +431,25 @@ const ProcessSummaryBlock = (props: { children: React.ReactNode; duration: numbe
 }
 
 const Index = (props: IPropsMessage) => {
-	const { streaming, is_streaming = false, message, answer, removeMessage, group_agents = [] } = props
+	const {
+		streaming,
+		is_streaming = false,
+		message,
+		previous_user_message,
+		answer,
+		removeMessage,
+		group_agents = []
+	} = props
 	const { parts } = message
 	const [is_copied, setIsCopied] = useState(false)
+	const [is_wiki_saving, setIsWikiSaving] = useState(false)
 	const copy_reset_timeout_ref = useRef<number>(0)
 	const copy_text = useMemo(() => getMessageCopyText(message), [message])
+	const wiki_text = useMemo(() => getMessageWikiText(message), [message])
+	const previous_user_text = useMemo(
+		() => (previous_user_message ? getMessageWikiText(previous_user_message as SessionMessage) : ''),
+		[previous_user_message]
+	)
 	const created_at_text = useMemo(
 		() => formatMessageTime(getMessageTime(message)),
 		[message.createdAt, message.metadata?.timestamp]
@@ -503,6 +531,35 @@ const Index = (props: IPropsMessage) => {
 		if (!removeMessage) return
 
 		void removeMessage(message.id)
+	})
+
+	const onSaveWiki = useMemoizedFn(async () => {
+		if (message.role !== 'assistant' || !wiki_text || !previous_user_text || is_wiki_saving) {
+			return
+		}
+
+		setIsWikiSaving(true)
+
+		try {
+			const summary = await rpc.article.summarizeWiki.mutate({
+				question: previous_user_text,
+				answer: wiki_text
+			})
+			const saved = await rpc.save.mutate({
+				title: summary.title,
+				content: summary.content,
+				for: 'wiki',
+				exec_pipeline: true
+			})
+			const href = getAppRouteHref(`/article/${saved.id}`)
+
+			window.open(href, '_blank', 'noopener,noreferrer')
+			toast.success('Saved as wiki article.')
+		} catch (error) {
+			toast.error(error instanceof Error ? error.message : 'Failed to save wiki article.')
+		} finally {
+			setIsWikiSaving(false)
+		}
 	})
 
 	const renderBlock = (block: RenderBlock, index: number, total_blocks: number) => {
@@ -614,6 +671,17 @@ const Index = (props: IPropsMessage) => {
 					>
 						<Trash2></Trash2>
 					</button>
+					{message.role === 'assistant' && (
+						<button
+							className='icon_button small'
+							disabled={!wiki_text || !previous_user_text || is_wiki_saving}
+							title={is_wiki_saving ? 'Saving wiki' : 'Save as wiki article'}
+							type='button'
+							onClick={() => void onSaveWiki()}
+						>
+							<Bookmark></Bookmark>
+						</button>
+					)}
 					<button
 						className='icon_button small'
 						disabled={!copy_text}

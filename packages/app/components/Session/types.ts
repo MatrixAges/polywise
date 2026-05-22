@@ -10,6 +10,7 @@ export interface IPropsMessage extends Pick<Model, 'answer'> {
 	streaming: boolean
 	is_streaming?: boolean
 	message: Message
+	previous_user_message?: Message | null
 	group_agents?: Model['group_agents']
 	removeMessage?: Model['removeMessage']
 }

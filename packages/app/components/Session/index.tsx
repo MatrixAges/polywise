@@ -105,6 +105,19 @@ const Index = (props: IProps) => {
 		[show_loading_dots, input_streaming, last_message]
 	)
 	const empty = x.messages.length === 0
+	const previous_user_messages = useMemo(() => {
+		let latest_user_message = null as (typeof x.messages)[number] | null
+
+		return x.messages.map(message => {
+			const previous_user_message = latest_user_message
+
+			if (message.role === 'user') {
+				latest_user_message = message
+			}
+
+			return previous_user_message
+		})
+	}, [x.messages])
 
 	return (
 		<div
@@ -189,6 +202,7 @@ const Index = (props: IProps) => {
 									streaming={index === x.messages.length - 1 && chat_streaming}
 									is_streaming={chat_streaming}
 									message={message}
+									previous_user_message={previous_user_messages[index]}
 									answer={x.answer}
 									group_agents={x.group_agents}
 									removeMessage={x.removeMessage}

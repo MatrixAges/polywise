@@ -1,6 +1,6 @@
-import { post_session, session as session_table } from '@core/db/schema'
-import { setSession } from '@core/db/services'
-import { getPostSessions } from '@core/db/services/externals'
+import { article, post_session, session as session_table } from '@core/db/schema'
+import { getArticle, setSession } from '@core/db/services'
+import { addPostArticle, getPostSessions } from '@core/db/services/externals'
 import { saveArticle } from '@core/io'
 import { tool } from 'ai'
 import { eq } from 'drizzle-orm'
@@ -12,6 +12,7 @@ import { array, boolean, enum as Enum, number, object, string } from 'zod'
 import {
 	getPostById,
 	getPostSessionTitle,
+	listPostRelatedArticles,
 	normalizePostForType,
 	searchPostRelatedArticleSources,
 	searchPostRelatedProjectSources
@@ -497,6 +498,7 @@ export const createPostTool = (session: Session) =>
 			'Use get_post before editing when you need the latest content.',
 			'Use search_related_projects when the user specifically asks about implementation details, code usage, or framework usage inside related projects.',
 			'Use search_related_articles when the user specifically wants only related article context.',
+			'After gathering external web content with web_search_tool and web_fetch_tool, use add_related_article to save the distilled result as a related article for this post.',
 			'Use get_outline and update_outline when you need to inspect or change the markdown heading structure.',
 			'Use get_selection to resolve a compact selection reference like ref: [start, end] into the current selected passage.',
 			'Use replace_selection for targeted rewrites from the user-selected passage or a compact selection reference.',
@@ -507,6 +509,7 @@ export const createPostTool = (session: Session) =>
 				'get_post',
 				'search_related_articles',
 				'search_related_projects',
+				'add_related_article',
 				'get_outline',
 				'get_selection',
 				'update_outline',
@@ -516,6 +519,7 @@ export const createPostTool = (session: Session) =>
 			title: string().optional(),
 			content: string().optional(),
 			for_type: string().optional(),
+			source_url: string().optional(),
 			query: string().optional(),
 			max_results: number().int().min(1).max(8).optional(),
 			outline_markdown: string().optional(),
@@ -595,6 +599,62 @@ export const createPostTool = (session: Session) =>
 						query: search_result.query,
 						related_project_count: search_result.related_project_count,
 						results: search_result.results
+					}
+				}
+				case 'add_related_article': {
+					const content = input.content?.trim()
+					const title = input.title?.trim() || null
+					const next_for_type =
+						input.for_type === 'linkcase' ||
+						input.for_type === 'wiki' ||
+						input.for_type === 'memory' ||
+						input.for_type === 'user'
+							? input.for_type
+							: input.source_url?.trim()
+								? 'linkcase'
+								: 'wiki'
+
+					if (!content) {
+						return {
+							ok: false,
+							error: 'content is required for add_related_article'
+						}
+					}
+
+					const article_id = await saveArticle({
+						title,
+						content,
+						for: next_for_type,
+						exec_pipeline: input.exec_pipeline
+					})
+					const related_articles = await listPostRelatedArticles(current_post.id)
+					const already_related = related_articles.some(item => item.id === article_id)
+
+					if (!already_related) {
+						await addPostArticle(current_post.id, article_id)
+					}
+
+					const saved_article = await getArticle(eq(article.id, article_id))
+
+					return {
+						ok: true,
+						article_id,
+						for_type: next_for_type,
+						already_related,
+						article:
+							saved_article && saved_article.id === article_id
+								? {
+										id: saved_article.id,
+										title: saved_article.title,
+										for_type: saved_article.for,
+										content_preview: saved_article.content.slice(0, 280)
+									}
+								: {
+										id: article_id,
+										title,
+										for_type: next_for_type,
+										content_preview: content.slice(0, 280)
+									}
 					}
 				}
 				case 'get_outline': {

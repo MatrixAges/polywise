@@ -4,6 +4,7 @@ import { boolean, object, string, enum as zod_enum } from 'zod'
 import { p } from '../utils/trpc'
 
 const input_type = object({
+	title: string().optional(),
 	content: string(),
 	for: zod_enum(['linkcase', 'wiki', 'memory', 'user']),
 	exec_pipeline: boolean().optional()
@@ -21,9 +22,9 @@ export default p
 	.input(input_type)
 	.output(output_type)
 	.mutation(async ({ input }) => {
-		const { content, for: for_type, exec_pipeline } = input
+		const { title, content, for: for_type, exec_pipeline } = input
 
-		const id = await saveArticle({ content: content, for: for_type, exec_pipeline })
+		const id = await saveArticle({ title, content, for: for_type, exec_pipeline })
 
 		return { ok: true, id }
 	})

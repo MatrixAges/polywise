@@ -42,6 +42,10 @@ const routes: Array<RouteObject> = [
 				lazy: () => import('@/pages/post/[id]')
 			},
 			{
+				path: '/article/:id',
+				lazy: () => import('@/pages/article/[id]')
+			},
+			{
 				path: '/setting',
 				lazy: () => import('@/setting'),
 				children: [
