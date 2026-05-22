@@ -6,6 +6,8 @@ import { formatDateTime, fromNow, rpc } from '@/utils'
 
 import type { ChartConfig } from '@/__shadcn__/components/ui/chart'
 import type {
+	HomeActiveProjectItem,
+	HomeActiveSessionItem,
 	HomeModelItem,
 	HomeOverviewCard,
 	HomeRecentNotificationItem,
@@ -30,6 +32,7 @@ const weekday_label_map = {
 
 const formatCompact = (value: number) => compact_formatter.format(value)
 const formatInteger = (value: number) => value.toLocaleString('en-US')
+const formatPercent = (value: number) => `${value.toFixed(value % 1 === 0 ? 0 : 1)}%`
 
 const token_trend_config = {
 	total_tokens: { label: 'Total tokens', color: '#f59e0b' },
@@ -125,25 +128,25 @@ export default class Index {
 				key: 'sessions',
 				title: 'Sessions',
 				value: formatCompact(this.data.overview.session_total),
-				desc: `${this.data.overview.sessions_week} created this week`
+				desc: `${this.data.overview.sessions_today} today · ${this.data.overview.sessions_week} this week`
 			},
 			{
 				key: 'running',
 				title: 'Running',
 				value: formatInteger(this.data.overview.sessions_running),
-				desc: `${this.data.overview.sessions_im} IM · ${this.data.overview.sessions_cron} cron`
+				desc: `${this.data.overview.sessions_im} IM · ${this.data.overview.sessions_cron} cron · ${this.data.overview.sessions_with_messages_week} active this week`
 			},
 			{
 				key: 'unread',
 				title: 'Unread',
 				value: formatInteger(this.data.overview.sessions_unread),
-				desc: 'Sessions waiting for follow-up'
+				desc: `${this.data.overview.stale_unread_sessions_24h} stale 24h · ${this.data.overview.stale_unread_sessions_72h} stale 72h`
 			},
 			{
 				key: 'messages',
 				title: 'Messages',
 				value: formatCompact(this.data.overview.message_total),
-				desc: `${formatCompact(this.data.overview.messages_week)} this week · ${this.data.overview.avg_messages_per_session} avg per session`
+				desc: `${formatCompact(this.data.overview.messages_today)} today · ${formatCompact(this.data.overview.messages_week)} this week`
 			},
 			{
 				key: 'tokens',
@@ -161,13 +164,13 @@ export default class Index {
 				key: 'pipeline',
 				title: 'Pipeline',
 				value: formatCompact(pending_total),
-				desc: `${this.data.content.documents_pending} docs · ${this.data.content.articles_pending} articles · ${this.data.content.posts_pending} posts`
+				desc: `${this.data.health.backlog_pending_total} queued · score ${this.data.health.backlog_pressure_score}`
 			},
 			{
 				key: 'graph',
 				title: 'Graph',
 				value: formatCompact(this.data.memory.node_total + this.data.memory.edge_total),
-				desc: `${this.data.memory.node_total} nodes · ${this.data.memory.rewire_event_week} rewires this week`
+				desc: `+${this.data.memory.node_week_total} nodes · +${this.data.memory.edge_week_total} edges this week`
 			}
 		]
 	}
@@ -249,7 +252,7 @@ export default class Index {
 			return ''
 		}
 
-		return `Cached input ${formatCompact(this.data.usage.cached_input_tokens)} · assistant replies ${this.data.usage.assistant_messages}`
+		return `Cached input ${formatCompact(this.data.usage.cached_input_tokens)} · ${formatCompact(this.data.activity.today.tokens)} tokens today · ${this.data.usage.assistant_messages} assistant replies`
 	}
 
 	get posts_total() {
@@ -257,9 +260,7 @@ export default class Index {
 			return '0'
 		}
 
-		const counts = this.data.content.post_for_counts
-
-		return formatCompact(counts.user + counts.wiki + counts.memory)
+		return formatCompact(this.data.content.post_total)
 	}
 
 	get posts_meta() {
@@ -274,14 +275,12 @@ export default class Index {
 
 	get posts_pipeline_meta() {
 		return this.data
-			? `${this.data.content.posts_pending} posts are still waiting for pipeline completion.`
+			? `${this.data.content.posts_ready_total} ready · ${this.data.content.posts_pending} pending · ${formatPercent(this.data.content.post_completion_rate)} completion`
 			: ''
 	}
 
 	get pipeline_total() {
-		return this.data
-			? formatCompact(this.data.content.documents_pending + this.data.content.articles_pending)
-			: '0'
+		return this.data ? formatCompact(this.data.health.backlog_pending_total) : '0'
 	}
 
 	get pipeline_meta() {
@@ -289,12 +288,12 @@ export default class Index {
 			return ''
 		}
 
-		return `${this.data.content.documents_pending} documents pending · ${this.data.content.articles_pending} non-post articles pending`
+		return `${this.data.content.documents_pending} documents · ${this.data.content.articles_pending} articles · ${this.data.content.posts_pending} posts pending`
 	}
 
 	get pipeline_detail() {
 		return this.data
-			? `Average ${this.data.content.avg_chunks_per_article} chunks per article · ${this.data.content.long_article_total} long articles`
+			? `Score ${this.data.health.backlog_pressure_score} · ${this.data.system.notification_unread} unread notifications`
 			: ''
 	}
 
@@ -304,7 +303,7 @@ export default class Index {
 
 	get linkcase_meta() {
 		return this.data
-			? `${this.data.content.link_ready_total} ready · ${this.data.content.link_pending_total} waiting or pending`
+			? `${this.data.content.link_ready_total} ready · ${this.data.content.link_pending_total} waiting · ${this.data.content.link_fail_total} failed`
 			: ''
 	}
 
@@ -326,8 +325,38 @@ export default class Index {
 
 	get system_footprint_detail() {
 		return this.data
-			? `${this.data.system.group_total} groups · ${this.data.system.im_account_enabled}/${this.data.system.im_account_total} IM accounts enabled`
+			? `${this.data.system.group_total} groups · ${this.data.system.notification_pushed}/${this.data.system.notification_total} notifications pushed`
 			: ''
+	}
+
+	get asset_health_items(): Array<HomeModelItem> {
+		if (!this.data) {
+			return []
+		}
+
+		return [
+			{
+				key: 'docs',
+				title: 'Docs / Articles / Chunks',
+				value: `${formatCompact(this.data.content.document_total)} / ${formatCompact(this.data.content.article_total)} / ${formatCompact(this.data.content.chunk_total)}`,
+				desc: `${this.data.content.avg_chunks_per_article} avg chunks per article`
+			},
+			{
+				key: 'completion',
+				title: 'Post completion',
+				value: formatPercent(this.data.content.post_completion_rate),
+				desc: `${this.data.content.posts_ready_total} ready · ${this.data.content.posts_pending} pending`
+			},
+			{
+				key: 'streak',
+				title: 'Creation streak',
+				value: `${this.data.content.post_streak_days}d`,
+				desc:
+					this.data.content.days_since_last_post === null
+						? 'No organic post yet'
+						: `${this.data.content.days_since_last_post} days since last post update`
+			}
+		]
 	}
 
 	get recent_sessions(): Array<HomeRecentSessionItem> {
@@ -373,6 +402,59 @@ export default class Index {
 		}))
 	}
 
+	get active_projects(): Array<HomeActiveProjectItem> {
+		return (this.data?.activity.top_projects ?? []).map(item => ({
+			...item,
+			updated_label: fromNow(item.last_message_at)
+		}))
+	}
+
+	get active_sessions(): Array<HomeActiveSessionItem> {
+		return (this.data?.activity.top_sessions ?? []).map(item => ({
+			...item,
+			updated_label: fromNow(item.last_message_at)
+		}))
+	}
+
+	get signal_cards(): Array<HomeModelItem> {
+		if (!this.data) {
+			return []
+		}
+
+		return [
+			{
+				key: 'alert',
+				title: 'Top alert',
+				value: this.data.health.top_alert?.label ?? 'Quiet',
+				desc: this.data.health.top_alert?.detail ?? 'No trigger signal above the threshold right now.'
+			},
+			{
+				key: 'backlog',
+				title: 'Backlog pressure',
+				value: String(this.data.health.backlog_pending_total),
+				desc: `Score ${this.data.health.backlog_pressure_score}`
+			},
+			{
+				key: 'stale',
+				title: 'Stale unread',
+				value: `${this.data.health.stale_unread_sessions_24h}/${this.data.health.stale_unread_sessions_72h}`,
+				desc: '24h / 72h sessions waiting for follow-up'
+			},
+			{
+				key: 'delivery',
+				title: 'Push rate',
+				value: formatPercent(this.data.health.notification_push_rate),
+				desc: `${this.data.system.notification_pushed} pushed · ${this.data.system.notification_unpushed} waiting`
+			},
+			{
+				key: 'focus',
+				title: 'Project focus',
+				value: formatPercent(this.data.activity.project_focus_concentration),
+				desc: 'Top project share of weekly project messages'
+			}
+		]
+	}
+
 	get ops_items(): Array<HomeModelItem> {
 		if (!this.data) {
 			return []
@@ -393,6 +475,11 @@ export default class Index {
 				key: 'accounts',
 				title: 'Enabled IM accounts',
 				value: `${this.data.system.im_account_enabled}/${this.data.system.im_account_total}`
+			},
+			{
+				key: 'delivery',
+				title: 'Push delivery',
+				value: formatPercent(this.data.health.notification_push_rate)
 			}
 		]
 	}
@@ -403,6 +490,64 @@ export default class Index {
 
 	get edge_total_label() {
 		return this.data ? formatInteger(this.data.memory.edge_total) : '0'
+	}
+
+	get memory_health_items(): Array<HomeModelItem> {
+		if (!this.data) {
+			return []
+		}
+
+		return [
+			{
+				key: 'growth',
+				title: 'Weekly growth',
+				value: `+${this.data.memory.node_week_total} / +${this.data.memory.edge_week_total}`,
+				desc: 'Nodes / edges created this week'
+			},
+			{
+				key: 'state',
+				title: 'Silent / unstable edges',
+				value: `${this.data.memory.silent_edge_total} / ${this.data.memory.unstable_edge_total}`,
+				desc: `${formatPercent(this.data.memory.unstable_edge_ratio)} unstable ratio`
+			},
+			{
+				key: 'stability',
+				title: 'Average stability',
+				value: String(this.data.memory.avg_edge_stability),
+				desc: `Average rewire score ${this.data.memory.avg_edge_rewire_score}`
+			}
+		]
+	}
+
+	get activity_window_items(): Array<HomeModelItem> {
+		if (!this.data) {
+			return []
+		}
+
+		return [
+			{
+				key: 'today',
+				title: 'Today',
+				value: `${this.data.activity.today.messages} messages`,
+				desc: `${this.data.activity.today.sessions} sessions · ${this.data.activity.today.posts} posts · ${formatCompact(this.data.activity.today.tokens)} tokens`
+			},
+			{
+				key: 'week',
+				title: 'This week',
+				value: `${this.data.activity.week.messages} messages`,
+				desc: `${this.data.activity.week.sessions} sessions · ${this.data.activity.week.posts} posts · ${formatCompact(this.data.activity.week.tokens)} tokens`
+			}
+		]
+	}
+
+	get pthink_alert_label() {
+		if (!this.data?.health.top_alert) {
+			return this.data?.health.has_meaningful_recent_activity
+				? 'Meaningful activity detected'
+				: 'No alert signal'
+		}
+
+		return `${this.data.health.top_alert.label} · ${this.data.health.top_alert.detail}`
 	}
 
 	get pthink_runtime_items(): Array<HomeRuntimeItem> {
@@ -419,7 +564,9 @@ export default class Index {
 			{
 				key: 'trigger',
 				label: 'Trigger insights',
-				value: this.pthink_config?.trigger_enabled ? 'enabled' : 'disabled'
+				value: this.pthink_config?.trigger_enabled
+					? `enabled · ${this.data.health.top_alert?.label ?? 'no active alert'}`
+					: 'disabled'
 			},
 			{
 				key: 'cap',

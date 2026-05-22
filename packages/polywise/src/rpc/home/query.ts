@@ -1,5 +1,5 @@
 import { config } from '@core/config'
-import { readPthinkStatus } from '@core/pthink'
+import { buildPthinkAnalytics, getPthinkConfig, pickPthinkTrigger, readPthinkStatus } from '@core/pthink'
 import { p } from '@core/utils'
 
 import { env } from '../../env'
@@ -13,6 +13,12 @@ const countValue = (query: string, params: Array<unknown> = []) => {
 	const row = env.sqlite.prepare(query).get(...params) as { value?: number } | undefined
 
 	return Number(row?.value ?? 0)
+}
+
+const round = (value: number, digits = 1) => {
+	const factor = 10 ** digits
+
+	return Math.round(value * factor) / factor
 }
 
 const getDayKey = (value: number) => {
@@ -36,6 +42,16 @@ const getDayStart = (value: number) => {
 	date.setHours(0, 0, 0, 0)
 
 	return date.getTime()
+}
+
+const getDateFromDayKey = (value: string) => {
+	const [year, month, day] = value.split('-').map(Number)
+
+	return new Date(year, (month || 1) - 1, day || 1)
+}
+
+const dayDiff = (left: string, right: string) => {
+	return Math.round((getDateFromDayKey(left).getTime() - getDateFromDayKey(right).getTime()) / day_ms)
 }
 
 const readPostForCounts = () => {
@@ -62,6 +78,36 @@ const readPostForCounts = () => {
 	}
 
 	return counts
+}
+
+const readOrganicPostStreak = (today_key: string) => {
+	const rows = env.sqlite
+		.prepare(
+			`SELECT DISTINCT strftime('%Y-%m-%d', created_at / 1000, 'unixepoch', 'localtime') AS day_key
+			FROM article
+			WHERE "for" IN ('user', 'wiki', 'memory')
+				AND ${organic_post_filter}
+			ORDER BY day_key DESC`
+		)
+		.all() as Array<{ day_key: string | null }>
+
+	const day_keys = rows.map(row => row.day_key).filter((item): item is string => Boolean(item))
+
+	if (day_keys[0] !== today_key) {
+		return 0
+	}
+
+	let streak = 1
+
+	for (let index = 1; index < day_keys.length; index += 1) {
+		if (dayDiff(day_keys[index - 1]!, day_keys[index]!) !== 1) {
+			break
+		}
+
+		streak += 1
+	}
+
+	return streak
 }
 
 const toBoolean = (value: unknown) => Boolean(value)
@@ -535,10 +581,23 @@ export default p
 	})
 	.query(async () => {
 		const now = Date.now()
+		const last_day = now - day_ms
+		const last_three_days = now - 3 * day_ms
 		const last_week = now - week_ms
+		const today_key = getDayKey(now)
+		const pthink_config = getPthinkConfig()
 		const usage = buildUsageAnalytics(last_week)
 		const trends = buildDailyTrendRows(now)
+		const pthink_analytics = buildPthinkAnalytics(now)
 		const pthink_status = await readPthinkStatus()
+		const top_alert = pthink_config.trigger_enabled
+			? pickPthinkTrigger({
+					analytics: pthink_analytics,
+					status: pthink_status,
+					now,
+					trigger_cooldown_ms: pthink_config.trigger_cooldown_ms
+				})
+			: null
 
 		const session_total = countValue('SELECT COUNT(*) AS value FROM session')
 		const message_total = countValue('SELECT COUNT(*) AS value FROM message')
@@ -552,23 +611,62 @@ export default p
 		const skill_total = countValue('SELECT COUNT(*) AS value FROM skill')
 		const notification_total = countValue('SELECT COUNT(*) AS value FROM notification')
 		const notification_unread = countValue('SELECT COUNT(*) AS value FROM notification WHERE is_read = 0')
+		const notification_pushed = countValue('SELECT COUNT(*) AS value FROM notification WHERE is_pushed = 1')
+		const notification_unpushed = countValue('SELECT COUNT(*) AS value FROM notification WHERE is_pushed = 0')
 		const im_account_total = countValue('SELECT COUNT(*) AS value FROM im_account')
 		const im_account_enabled = countValue('SELECT COUNT(*) AS value FROM im_account WHERE enabled = 1')
 		const im_peer_total = countValue('SELECT COUNT(*) AS value FROM im_peer_state')
 		const node_total = countValue('SELECT COUNT(*) AS value FROM node')
 		const frozen_node_total = countValue('SELECT COUNT(*) AS value FROM node WHERE is_frozen = 1')
+		const node_week_total = countValue('SELECT COUNT(*) AS value FROM node WHERE created_at >= ?', [last_week])
 		const edge_total = countValue('SELECT COUNT(*) AS value FROM edge')
 		const frozen_edge_total = countValue('SELECT COUNT(*) AS value FROM edge WHERE is_frozen = 1')
+		const edge_week_total = countValue('SELECT COUNT(*) AS value FROM edge WHERE created_at >= ?', [last_week])
+		const active_edge_total = countValue("SELECT COUNT(*) AS value FROM edge WHERE state = 'active'")
+		const silent_edge_total = countValue("SELECT COUNT(*) AS value FROM edge WHERE state = 'silent'")
+		const unstable_edge_total = countValue(
+			"SELECT COUNT(*) AS value FROM edge WHERE state = 'silent' OR stability < 0.3 OR rewire_score >= 0.5"
+		)
 		const rewire_event_total = countValue('SELECT COUNT(*) AS value FROM rewire_event')
 		const rewire_event_week = countValue('SELECT COUNT(*) AS value FROM rewire_event WHERE created_at >= ?', [
 			last_week
 		])
+		const edge_stats_row = env.sqlite
+			.prepare(
+				`SELECT
+					AVG(stability) AS avg_stability,
+					AVG(rewire_score) AS avg_rewire_score
+				FROM edge`
+			)
+			.get() as { avg_stability?: number | null; avg_rewire_score?: number | null } | undefined
 
 		const sessions_running = countValue('SELECT COUNT(*) AS value FROM session WHERE runing = 1')
 		const sessions_unread = countValue('SELECT COUNT(*) AS value FROM session WHERE unread = 1')
 		const sessions_im = countValue('SELECT COUNT(*) AS value FROM session WHERE im = 1')
 		const sessions_cron = countValue('SELECT COUNT(*) AS value FROM session WHERE cron = 1')
+		const sessions_today = countValue('SELECT COUNT(*) AS value FROM session WHERE created_at >= ?', [last_day])
 		const sessions_week = countValue('SELECT COUNT(*) AS value FROM session WHERE created_at >= ?', [last_week])
+		const sessions_with_messages_week = countValue(
+			'SELECT COUNT(DISTINCT session_id) AS value FROM message WHERE created_at >= ?',
+			[last_week]
+		)
+		const stale_unread_sessions_24h = countValue(
+			'SELECT COUNT(*) AS value FROM session WHERE unread = 1 AND updated_at < ?',
+			[last_day]
+		)
+		const stale_unread_sessions_72h = countValue(
+			'SELECT COUNT(*) AS value FROM session WHERE unread = 1 AND updated_at < ?',
+			[last_three_days]
+		)
+		const sessions_without_followup_week = countValue(
+			'SELECT COUNT(*) AS value FROM session WHERE unread = 1 AND updated_at < ?',
+			[last_week]
+		)
+		const idle_sessions_week = countValue(
+			'SELECT COUNT(*) AS value FROM session WHERE runing = 0 AND updated_at < ?',
+			[last_week]
+		)
+		const messages_today = countValue('SELECT COUNT(*) AS value FROM message WHERE created_at >= ?', [last_day])
 		const messages_week = countValue('SELECT COUNT(*) AS value FROM message WHERE created_at >= ?', [last_week])
 
 		const documents_pending = countValue('SELECT COUNT(*) AS value FROM document WHERE is_pipelined = 0')
@@ -586,8 +684,50 @@ export default p
 		const link_pending_total = countValue(
 			"SELECT COUNT(*) AS value FROM link WHERE status IN ('pending', 'none')"
 		)
+		const link_fail_total = countValue("SELECT COUNT(*) AS value FROM link WHERE status = 'fail'")
 
 		const post_for_counts = readPostForCounts()
+		const post_total = post_for_counts.user + post_for_counts.wiki + post_for_counts.memory
+		const posts_ready_total = Math.max(0, post_total - posts_pending)
+		const posts_today = countValue(
+			`SELECT COUNT(*) AS value FROM article
+			WHERE created_at >= ?
+				AND "for" IN ('user', 'wiki', 'memory')
+				AND ${organic_post_filter}`,
+			[last_day]
+		)
+		const posts_week = countValue(
+			`SELECT COUNT(*) AS value FROM article
+			WHERE created_at >= ?
+				AND "for" IN ('user', 'wiki', 'memory')
+				AND ${organic_post_filter}`,
+			[last_week]
+		)
+		const last_post_at_row = env.sqlite
+			.prepare(
+				`SELECT MAX(updated_at) AS value
+				FROM article
+				WHERE "for" IN ('user', 'wiki', 'memory')
+					AND ${organic_post_filter}`
+			)
+			.get() as { value?: number | null } | undefined
+		const last_post_at = Number(last_post_at_row?.value ?? 0)
+		const days_since_last_post = last_post_at ? Math.floor((now - last_post_at) / day_ms) : null
+		const post_streak_days = readOrganicPostStreak(today_key)
+		const backlog_pending_total = documents_pending + articles_pending + posts_pending + link_pending_total
+		const backlog_pressure_score =
+			backlog_pending_total * 10 +
+			notification_unread * 4 +
+			stale_unread_sessions_24h * 6 +
+			link_fail_total * 8
+		const total_project_messages = pthink_analytics.active_projects.reduce(
+			(acc, item) => acc + item.message_count,
+			0
+		)
+		const project_focus_concentration =
+			total_project_messages > 0 && pthink_analytics.active_projects[0]
+				? round((pthink_analytics.active_projects[0].message_count / total_project_messages) * 100)
+				: 0
 		const recent_sessions = env.sqlite
 			.prepare(
 				'SELECT id, title, runing, unread, im, cron, updated_at FROM session ORDER BY updated_at DESC LIMIT 6'
@@ -689,20 +829,56 @@ export default p
 				sessions_unread,
 				sessions_im,
 				sessions_cron,
+				sessions_today,
 				sessions_week,
+				sessions_with_messages_week,
+				stale_unread_sessions_24h,
+				stale_unread_sessions_72h,
+				sessions_without_followup_week,
+				idle_sessions_week,
 				message_total,
+				messages_today,
 				messages_week,
 				avg_messages_per_session:
 					session_total > 0 ? Number((message_total / session_total).toFixed(1)) : 0
 			},
 			usage,
+			activity: {
+				today: {
+					sessions: sessions_today,
+					messages: messages_today,
+					posts: posts_today,
+					rewires: countValue('SELECT COUNT(*) AS value FROM rewire_event WHERE created_at >= ?', [
+						last_day
+					]),
+					tokens: pthink_analytics.windows.day.total_tokens,
+					assistant_messages: pthink_analytics.windows.day.assistant_messages
+				},
+				week: {
+					sessions: sessions_week,
+					messages: messages_week,
+					posts: posts_week,
+					rewires: rewire_event_week,
+					tokens: usage.week_total_tokens,
+					assistant_messages: pthink_analytics.windows.week.assistant_messages
+				},
+				top_projects: pthink_analytics.active_projects,
+				top_sessions: pthink_analytics.active_sessions,
+				project_focus_concentration
+			},
 			content: {
 				document_total,
 				article_total,
 				chunk_total,
+				post_total,
+				posts_ready_total,
+				post_completion_rate: post_total > 0 ? round((posts_ready_total / post_total) * 100) : 100,
+				post_streak_days,
+				days_since_last_post,
 				link_total,
 				link_ready_total,
 				link_pending_total,
+				link_fail_total,
 				documents_pending,
 				articles_pending,
 				posts_pending,
@@ -717,15 +893,40 @@ export default p
 				skill_total,
 				notification_total,
 				notification_unread,
+				notification_pushed,
+				notification_unpushed,
 				im_account_total,
 				im_account_enabled,
 				im_peer_total
 			},
+			health: {
+				backlog_pending_total,
+				backlog_pressure_score,
+				stale_unread_sessions_24h,
+				stale_unread_sessions_72h,
+				notification_push_rate:
+					notification_total > 0 ? round((notification_pushed / notification_total) * 100) : 100,
+				top_alert,
+				has_meaningful_recent_activity:
+					pthink_analytics.windows.day.messages >= 20 ||
+					pthink_analytics.windows.day.total_tokens >= 6000 ||
+					pthink_analytics.windows.day.new_posts >= 1 ||
+					pthink_analytics.windows.day.rewire_events >= 10 ||
+					pthink_analytics.windows.day.new_notifications >= 4
+			},
 			memory: {
 				node_total,
 				frozen_node_total,
+				node_week_total,
 				edge_total,
 				frozen_edge_total,
+				edge_week_total,
+				active_edge_total,
+				silent_edge_total,
+				unstable_edge_total,
+				unstable_edge_ratio: edge_total > 0 ? round((unstable_edge_total / edge_total) * 100) : 0,
+				avg_edge_stability: round(Number(edge_stats_row?.avg_stability ?? 0), 2),
+				avg_edge_rewire_score: round(Number(edge_stats_row?.avg_rewire_score ?? 0), 2),
 				rewire_event_total,
 				rewire_event_week
 			},

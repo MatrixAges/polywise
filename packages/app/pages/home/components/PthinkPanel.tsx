@@ -48,6 +48,21 @@ const Index = () => {
 					<div className='text-std-400 mt-2 text-sm leading-6'>{x.pthink_runtime_label}</div>
 				</div>
 
+				<div className='border-border/70 rounded-2xl border p-4'>
+					<div
+						className='
+							flex
+							items-center
+							gap-2
+							text-sm font-medium
+						'
+					>
+						<Sparkles className='text-amber-600' />
+						<span>Top signal</span>
+					</div>
+					<div className='mt-2 text-sm leading-6'>{x.pthink_alert_label}</div>
+				</div>
+
 				<div>
 					<div
 						className='

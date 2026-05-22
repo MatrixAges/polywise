@@ -70,6 +70,20 @@ const Index = () => {
 					</div>
 				</div>
 
+				<div className='grid gap-3 md:grid-cols-3'>
+					{x.asset_health_items.map(item => (
+						<div className={metric_card_class} key={item.key}>
+							<div className='text-std-400 text-[11px] tracking-[0.18em] uppercase'>
+								{item.title}
+							</div>
+							<div className='mt-2 text-xl font-semibold tracking-tight'>{item.value}</div>
+							{item.desc ? (
+								<div className='text-std-400 mt-2 text-sm leading-5'>{item.desc}</div>
+							) : null}
+						</div>
+					))}
+				</div>
+
 				<div className='grid gap-3 md:grid-cols-2'>
 					<div className={list_panel_class}>
 						<div className='text-std-400 text-[11px] tracking-[0.18em] uppercase'>

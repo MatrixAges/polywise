@@ -6,6 +6,7 @@ import {
 	KnowledgeAssets,
 	LoadingState,
 	MemoryPanel,
+	OperationalSignals,
 	OverviewGrid,
 	PthinkPanel,
 	RecentChanges,
@@ -46,6 +47,7 @@ const Index = () => {
 					{x.snapshot ? (
 						<>
 							<OverviewGrid></OverviewGrid>
+							<OperationalSignals></OperationalSignals>
 							<TrendPanels></TrendPanels>
 							<KnowledgeAssets></KnowledgeAssets>
 							<RecentChanges></RecentChanges>

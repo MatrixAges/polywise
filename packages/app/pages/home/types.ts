@@ -23,6 +23,7 @@ export interface HomeModelItem {
 	key: string
 	title: string
 	value: string
+	desc?: string
 }
 
 export interface HomeRuntimeItem {
@@ -44,4 +45,12 @@ export type HomeRecentPostItem = HomeSnapshot['recent']['posts'][number] & {
 export type HomeRecentNotificationItem = HomeSnapshot['recent']['notifications'][number] & {
 	status_label: string
 	created_label: string
+}
+
+export type HomeActiveProjectItem = HomeSnapshot['activity']['top_projects'][number] & {
+	updated_label: string
+}
+
+export type HomeActiveSessionItem = HomeSnapshot['activity']['top_sessions'][number] & {
+	updated_label: string
 }
