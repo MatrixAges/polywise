@@ -5,11 +5,11 @@ import { container } from 'tsyringe'
 import { TextTabs } from '@/components'
 
 import {
-	ActivityHotspots,
 	ContentReview,
+	Hotspots,
 	LoadingState,
 	MemoryPanel,
-	OverviewGrid,
+	Overview,
 	Pipeline,
 	PthinkPanel,
 	SessionActivity,
@@ -19,16 +19,17 @@ import {
 import { Context } from './context'
 import Model from './model'
 
-import type { LucideIcon } from 'lucide-react'
+type TopTabKey = 'stats' | 'memory' | 'report'
 
-const top_tab_items = [
+const top_tab_items: Array<{ key: TopTabKey; title: string }> = [
 	{ key: 'stats', title: 'Stats' },
+	{ key: 'memory', title: 'Memory' },
 	{ key: 'report', title: 'Report' }
-] as Array<{ key: string; title: string; Icon: LucideIcon }>
+]
 
 const Index = () => {
 	const ref_model = useRef<Model | null>(null)
-	const [active_tab, setActiveTab] = useState<(typeof top_tab_items)[number]['key']>('stats')
+	const [active_tab, setActiveTab] = useState<TopTabKey>('stats')
 
 	if (!ref_model.current) {
 		ref_model.current = container.resolve(Model)
@@ -44,13 +45,13 @@ const Index = () => {
 
 	return (
 		<Context value={x}>
-			<div className='page_wrap flex flex-col'>
+			<div className='page_wrap flex flex-col pb-10'>
 				<div className='mb-6 h-7'>
 					<TextTabs
 						className='gap-3'
 						items={top_tab_items}
 						active={active_tab}
-						setActive={value => setActiveTab(value as (typeof top_tab_items)[number]['key'])}
+						setActive={value => setActiveTab(value as TopTabKey)}
 					></TextTabs>
 				</div>
 				<div className='min-h-0 flex-1 overflow-y-auto'>
@@ -65,17 +66,16 @@ const Index = () => {
 							<>
 								{active_tab === 'stats' && (
 									<div className='flex flex-col gap-10'>
-										{/* <ActivityHotspots></ActivityHotspots> */}
+										<Overview></Overview>
+										{/* <Hotspots></Hotspots> */}
 										<TokenUsage></TokenUsage>
 										<Trending></Trending>
 										<SessionActivity></SessionActivity>
 										<ContentReview></ContentReview>
 										<Pipeline></Pipeline>
-
-										<MemoryPanel></MemoryPanel>
-										<OverviewGrid></OverviewGrid>
 									</div>
 								)}
+								{active_tab === 'memory' && <MemoryPanel></MemoryPanel>}
 								{active_tab === 'report' && <PthinkPanel></PthinkPanel>}
 							</>
 						) : (

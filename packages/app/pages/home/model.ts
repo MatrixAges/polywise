@@ -172,6 +172,12 @@ export default class Index {
 				desc: `${formatCompact(this.data.overview.session_total)} total · ${this.data.overview.sessions_running} running now · ${this.data.overview.sessions_today} created today`
 			},
 			{
+				key: 'messages',
+				title: 'Messages',
+				value: formatCompact(this.data.overview.messages_week),
+				desc: `${formatCompact(this.data.overview.message_total)} total · ${formatCompact(this.data.overview.messages_today)} today`
+			},
+			{
 				key: 'running',
 				title: 'Active week',
 				value: formatInteger(this.data.overview.sessions_with_messages_week),
@@ -183,12 +189,7 @@ export default class Index {
 				value: formatInteger(this.data.overview.sessions_unread),
 				desc: `${this.data.overview.stale_unread_sessions_24h} stale 24h · ${this.data.overview.stale_unread_sessions_72h} stale 72h`
 			},
-			{
-				key: 'messages',
-				title: 'Messages',
-				value: formatCompact(this.data.overview.messages_week),
-				desc: `${formatCompact(this.data.overview.message_total)} total · ${formatCompact(this.data.overview.messages_today)} today`
-			},
+
 			{
 				key: 'tokens',
 				title: 'Tokens',
