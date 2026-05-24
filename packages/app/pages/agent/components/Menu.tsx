@@ -1,4 +1,4 @@
-import { Bot, MessagesSquare, PanelLeftOpen, Plus, Sparkles, Upload } from 'lucide-react'
+import { Bot, HardDriveDownload, MessagesSquare, PanelLeftOpen, Plus, Sparkles } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { Tabs } from '@/components'
@@ -70,7 +70,7 @@ const Index = () => {
 								type='button'
 								onClick={openImportDialog}
 							>
-								<Upload className='size-3'></Upload>
+								<HardDriveDownload className='size-3'></HardDriveDownload>
 							</button>
 						)}
 						{menu_scope === 'agent' && (

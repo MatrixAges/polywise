@@ -2,8 +2,8 @@ import {
 	BookOpenText,
 	Brain,
 	Database,
-	Download,
 	GitBranch,
+	HardDriveUpload,
 	Info,
 	MessageSquareText,
 	Sparkles,
@@ -78,8 +78,8 @@ const Index = ({ active_tab }: IProps) => {
 					disabled={!selected_agent_id || export_agent_loading}
 					onClick={() => void exportSelectedAgent()}
 				>
-					<Download className='size-3.5'></Download>
-					<span>{export_agent_loading ? 'Exporting...' : 'Export .papk'}</span>
+					<HardDriveUpload className='size-3.5'></HardDriveUpload>
+					<span>{export_agent_loading ? 'Exporting...' : 'Export Agent'}</span>
 				</button>
 			</div>
 		</div>
