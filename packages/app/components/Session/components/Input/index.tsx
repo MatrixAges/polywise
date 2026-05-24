@@ -77,7 +77,7 @@ const Index = (props: IPropsInput) => {
 
 	useEffect(() => {
 		void x.loadFileItems()
-	}, [x, x.active_mention?.trigger, x.session_id])
+	}, [x, x.active_mention?.trigger, x.active_mention?.query, x.session_id])
 
 	useEffect(() => {
 		x.syncDraftInput()

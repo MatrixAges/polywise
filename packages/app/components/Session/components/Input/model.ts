@@ -122,6 +122,12 @@ export default class Model {
 		return this.default_model?.effort ?? 'default'
 	}
 
+	get file_query_key() {
+		const query = this.active_mention?.trigger === '@' ? this.active_mention.query.trim().toLowerCase() : ''
+
+		return `${this.session_id}::${query}`
+	}
+
 	setEditor(editor: TiptapEditor | null) {
 		this.editor = editor
 	}
@@ -266,18 +272,21 @@ export default class Model {
 		}
 
 		if (
-			this.file_items_loaded_session_id === this.session_id ||
-			this.file_items_requested_session_id === this.session_id
+			this.file_items_loaded_session_id === this.file_query_key ||
+			this.file_items_requested_session_id === this.file_query_key
 		) {
 			return
 		}
 
-		this.file_items_requested_session_id = this.session_id
+		this.file_items_requested_session_id = this.file_query_key
 		this.file_items = []
 		this.loading_files = true
 
 		try {
-			const res = await rpc.session.getMentionFiles.query({ id: this.session_id })
+			const res = await rpc.session.getMentionFiles.query({
+				id: this.session_id,
+				query: this.active_mention.query
+			})
 
 			this.file_items = res.items.map(item => ({
 				key: item.absolute_path,
@@ -288,7 +297,7 @@ export default class Model {
 				file_kind: item.type,
 				search_text: item.path.toLowerCase()
 			}))
-			this.file_items_loaded_session_id = this.session_id
+			this.file_items_loaded_session_id = this.file_query_key
 		} catch {
 			this.file_items = []
 		} finally {
