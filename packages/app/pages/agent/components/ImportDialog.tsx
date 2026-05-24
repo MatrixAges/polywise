@@ -1,28 +1,22 @@
-import { useRef } from 'react'
-import { FileArchive, FolderUp, Loader2 } from 'lucide-react'
+import { FileArchive, Loader2 } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { Button } from '@/__shadcn__/components/ui/button'
-import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle
-} from '@/__shadcn__/components/ui/dialog'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/__shadcn__/components/ui/dialog'
 import { Input } from '@/__shadcn__/components/ui/input'
+import { FileTree } from '@/components'
 
 import { useModel } from '../context'
 
 const Index = () => {
-	const ref_file = useRef<HTMLInputElement>(null)
 	const {
 		import_dialog_open,
 		import_agent_file_path,
 		import_agent_loading,
+		import_dialog_files,
 		setImportDialogOpen,
 		setImportAgentFilePath,
+		selectImportDialogPath,
 		submitImportAgent
 	} = useModel()
 	const next_file_path = import_agent_file_path.trim()
@@ -32,9 +26,21 @@ const Index = () => {
 			open={import_dialog_open}
 			onOpenChange={next_open => !import_agent_loading && setImportDialogOpen(next_open)}
 		>
-			<DialogContent className='w-[560px] max-w-none!'>
+			<DialogContent
+				className='
+					overflow-hidden
+					flex flex-col
+					w-[560px] max-w-none!
+					max-h-[calc(100vh-2rem)]
+				'
+			>
 				<form
-					className='flex flex-col gap-4'
+					className='
+						overflow-hidden
+						flex flex-col
+						min-h-0
+						gap-4
+					'
 					onSubmit={async event => {
 						event.preventDefault()
 
@@ -45,69 +51,57 @@ const Index = () => {
 						await submitImportAgent()
 					}}
 				>
-					<input
-						ref={ref_file}
-						className='hidden'
-						type='file'
-						accept='.papk'
-						onChange={event => {
-							const file = event.target.files?.[0]
-							const local_file = file ? window.$shell?.getPathForFile(file) : null
-
-							if (local_file?.path) {
-								setImportAgentFilePath(local_file.path)
-							}
-
-							event.target.value = ''
-						}}
-					/>
 					<DialogHeader>
 						<DialogTitle>Import Agent</DialogTitle>
-						<DialogDescription>
-							Import a `.papk` snapshot to create a new agent. The pack is extracted into
-							`app_dir/.temp`, imported, and the temporary files are removed after success.
-						</DialogDescription>
 					</DialogHeader>
 					<div
 						className='
-							p-3
-							rounded-lg
-							text-sm text-std-400
-							border border-border-light
+							overflow-hidden
+							flex flex-col
+							min-h-0
+							gap-2
 						'
 					>
-						The import includes the agent record, private and related articles, documents,
-						chunks, nodes, edges, links, and vector snapshots.
-					</div>
-					<div className='flex flex-col gap-2'>
-						<div className='flex items-center gap-2'>
-							<div className='relative flex-1'>
-								<FileArchive
-									className='
-										absolute
-										top-1/2
-										left-2.5
-										size-4
-										text-std-300
-										-translate-y-1/2
-									'
-								></FileArchive>
-								<Input
-									className='pl-9'
-									value={import_agent_file_path}
-									placeholder='Select a .papk file'
-									onChange={event => setImportAgentFilePath(event.target.value)}
-								></Input>
-							</div>
+						<div className='flex gap-2'>
+							<Input
+								value={import_dialog_files.input_path}
+								placeholder='Choose a directory path'
+								onChange={event => import_dialog_files.setInputPath(event.target.value)}
+							></Input>
 							<Button
 								type='button'
 								variant='outline'
-								disabled={!window.$shell || import_agent_loading}
-								onClick={() => ref_file.current?.click()}
+								disabled={
+									!import_dialog_files.input_path.trim() || import_agent_loading
+								}
+								onClick={() => void import_dialog_files.fetchPath()}
 							>
-								<FolderUp className='size-3.5'></FolderUp>
-								Browse
+								Fetch
 							</Button>
+						</div>
+						<FileTree
+							className='border-border-gray! h-[min(48vh,360px)] rounded-xl border'
+							paths={$copy(import_dialog_files.paths)}
+							onSelectPath={path => void selectImportDialogPath(path)}
+							key={import_dialog_files.tree_version}
+						></FileTree>
+						<div className='relative flex-1'>
+							<FileArchive
+								className='
+									absolute
+									top-1/2
+									left-2.5
+									size-4
+									text-std-300
+									-translate-y-1/2
+								'
+							></FileArchive>
+							<Input
+								className='pl-9'
+								value={import_agent_file_path}
+								placeholder='Select a .papk file from the tree'
+								onChange={event => setImportAgentFilePath(event.target.value)}
+							></Input>
 						</div>
 						<div className='text-std-300 text-xs'>
 							Only `.papk` files exported from Agent Export are supported.

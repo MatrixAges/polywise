@@ -168,12 +168,19 @@ export default class Index {
 	constructor(
 		public util: Util,
 		public setting: Setting,
+		public import_dialog_files: Files,
 		public group_dialog_files: Files,
 		public group_files: Files
 	) {
 		makeAutoObservable(
 			this,
-			{ util: false, setting: false, group_dialog_files: false, group_files: false },
+			{
+				util: false,
+				setting: false,
+				import_dialog_files: false,
+				group_dialog_files: false,
+				group_files: false
+			},
 			{ autoBind: true }
 		)
 	}
@@ -609,12 +616,43 @@ export default class Index {
 
 		if (!open) {
 			this.import_agent_file_path = ''
+			this.import_dialog_files.reset()
 		}
 	}
 
-	openImportDialog() {
+	async initImportDialogFiles(root_path?: string) {
+		const configured_root = this.setting.config?.agent_export_dir?.trim()
+		const home_dir = await rpc.file.homedir.query()
+		const candidates = Array.from(
+			new Set([root_path, configured_root, home_dir].map(item => item?.trim()).filter(Boolean))
+		) as Array<string>
+
+		let last_error: unknown = null
+
+		for (const candidate of candidates) {
+			try {
+				await this.import_dialog_files.init(candidate, { dir_only: false, show_hidden: false })
+
+				return
+			} catch (error) {
+				last_error = error
+			}
+		}
+
+		if (last_error) {
+			throw last_error
+		}
+	}
+
+	async openImportDialog() {
 		this.import_agent_file_path = ''
 		this.import_dialog_open = true
+
+		try {
+			await this.initImportDialogFiles()
+		} catch (error) {
+			toast.error(error instanceof Error ? error.message : 'Failed to open import files.')
+		}
 	}
 
 	closeImportDialog() {
@@ -623,6 +661,24 @@ export default class Index {
 
 	setImportAgentFilePath(file_path: string) {
 		this.import_agent_file_path = file_path
+	}
+
+	async selectImportDialogPath(args: { directory: boolean; path: string }) {
+		if (args.directory) {
+			await this.import_dialog_files.selectPath(args)
+
+			return
+		}
+
+		const target_path = this.import_dialog_files.getAbsolutePath(args.path)
+
+		if (!target_path.toLowerCase().endsWith('.papk')) {
+			toast.error('Select a .papk file.')
+
+			return
+		}
+
+		this.import_agent_file_path = target_path
 	}
 
 	async submitImportAgent() {
