@@ -605,8 +605,8 @@ const Index = (props: IPropsInput) => {
 				full &&
 					`
 				absolute!
+				inset-0
 				z-50
-				h-full
 				pt-3
 				backdrop-blur-lg
 			`,
@@ -615,16 +615,19 @@ const Index = (props: IPropsInput) => {
 			)}
 		>
 			<Popover open={mention_open}>
-				<PopoverTrigger>
-					<div className={$cx('flex flex-col', full && 'h-full')}>
+				<PopoverTrigger className={$cx('block min-h-0 w-full', full && 'flex h-full flex-col')}>
+					<div className={$cx('flex min-h-0 flex-col', full && 'h-full')}>
 						<div
-							className='
+							className={$cx(
+								`
 								flex flex-col flex-1
 								rounded-lg
 								bg-card
 								border-t border-border-light/36
 								shadow
-							'
+							`,
+								full && 'h-full min-h-0'
+							)}
 						>
 							<div className={$cx(styles.input_editor, full && styles.input_editor_full)}>
 								<EditorContent
