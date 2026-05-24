@@ -11,8 +11,31 @@ const input_type = object({
 
 const normalize_path = (value: string) => value.replace(/\\/g, '/')
 const search_limit = 100
+const search_candidate_limit = 500
 const search_ignore = ['**/.DS_Store', '**/node_modules/**', '**/.git/**']
 const escape_glob = (value: string) => value.replace(/([*?[\]{}()!+@\\])/g, '[$1]')
+const get_query_terms = (value: string) =>
+	value
+		.trim()
+		.toLowerCase()
+		.split(/[\/\s]+/)
+		.map(item => item.trim())
+		.filter(Boolean)
+const matches_ordered_terms = (value: string, terms: Array<string>) => {
+	let index = 0
+
+	for (const term of terms) {
+		const found_index = value.indexOf(term, index)
+
+		if (found_index === -1) {
+			return false
+		}
+
+		index = found_index + term.length
+	}
+
+	return true
+}
 
 export default p
 	.meta({
@@ -50,8 +73,9 @@ export default p
 			}
 		}
 
-		const safe_query = escape_glob(query)
-		const paths = await globby([`**/*${safe_query}*`], {
+		const query_terms = get_query_terms(query)
+		const pivot_term = escape_glob(query_terms.at(-1) || query)
+		const paths = await globby([`**/*${pivot_term}*`], {
 			cwd: root,
 			onlyFiles: false,
 			absolute: false,
@@ -63,8 +87,12 @@ export default p
 		const items = (
 			await Promise.all(
 				paths
-					.filter(item => item !== '.DS_Store' && item !== '')
-					.slice(0, search_limit)
+					.filter(item => {
+						if (item === '.DS_Store' || item === '') return false
+
+						return matches_ordered_terms(normalize_path(item).toLowerCase(), query_terms)
+					})
+					.slice(0, search_candidate_limit)
 					.map(async item => {
 						const absolute_path = path.resolve(root, item.replace(/\/$/, ''))
 						const stat = await fs.stat(absolute_path).catch(() => null)
@@ -86,6 +114,7 @@ export default p
 		)
 			.filter(item => !!item)
 			.sort((a, b) => a.path.localeCompare(b.path))
+			.slice(0, search_limit)
 
 		return {
 			root: normalize_path(root),

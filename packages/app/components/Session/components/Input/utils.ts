@@ -122,6 +122,44 @@ export const getFileIcon = (item: FileMentionItem) => {
 export const getSkillTypeLabel = (value: string) =>
 	skill_type_label_map[value as keyof typeof skill_type_label_map] || 'Personal'
 
+export const getMentionQueryTerms = (query: string) =>
+	query
+		.trim()
+		.toLowerCase()
+		.split(/[\/\s]+/)
+		.map(item => item.trim())
+		.filter(Boolean)
+
+export const matchesOrderedTerms = (value: string, terms: Array<string>) => {
+	let index = 0
+
+	for (const term of terms) {
+		const found_index = value.indexOf(term, index)
+
+		if (found_index === -1) {
+			return false
+		}
+
+		index = found_index + term.length
+	}
+
+	return true
+}
+
+export const matchesMentionQuery = (item: MentionItem, query: string) => {
+	const normalized_query = query.trim().toLowerCase()
+
+	if (!normalized_query) {
+		return true
+	}
+
+	if (item.type === 'file') {
+		return matchesOrderedTerms(item.path.toLowerCase(), getMentionQueryTerms(query))
+	}
+
+	return getMentionQueryTerms(query).every(term => item.search_text.includes(term))
+}
+
 export const filterMentionItems = (items: Array<MentionItem>, query: string) => {
 	const normalized_query = query.trim().toLowerCase()
 
@@ -129,7 +167,7 @@ export const filterMentionItems = (items: Array<MentionItem>, query: string) => 
 		return items.slice(0, mention_limit)
 	}
 
-	return items.filter(item => item.search_text.includes(normalized_query)).slice(0, mention_limit)
+	return items.filter(item => matchesMentionQuery(item, query)).slice(0, mention_limit)
 }
 
 export const getMentionHeading = (active_mention: ActiveMention | null) =>
@@ -171,7 +209,7 @@ export const getActiveMentionFromEditor = (instance: TiptapEditor | null) => {
 	if (!instance) return null
 
 	const { $from } = instance.state.selection
-	const slash_match = findSuggestionMatch({
+	let slash_match = findSuggestionMatch({
 		char: '/',
 		$position: $from,
 		startOfLine: false,
@@ -187,9 +225,29 @@ export const getActiveMentionFromEditor = (instance: TiptapEditor | null) => {
 		allowedPrefixes: null,
 		allowToIncludeChar: false
 	})
-	const match = [slash_match, at_match]
-		.filter(Boolean)
-		.sort((a, b) => (b?.range.from ?? 0) - (a?.range.from ?? 0))[0]
+
+	if (slash_match) {
+		const prefix = instance.state.doc.textBetween(
+			Math.max(0, slash_match.range.from - 1),
+			slash_match.range.from,
+			'\n',
+			'\0'
+		)
+		const valid_prefix = prefix === '' || /\s|[([{:;,]/.test(prefix)
+
+		if (!valid_prefix) {
+			slash_match = null
+		}
+	}
+
+	const slash_inside_at =
+		!!slash_match &&
+		!!at_match &&
+		at_match.range.from <= slash_match.range.from &&
+		at_match.range.to >= slash_match.range.to
+	const match = slash_inside_at
+		? at_match
+		: [slash_match, at_match].filter(Boolean).sort((a, b) => (b?.range.from ?? 0) - (a?.range.from ?? 0))[0]
 
 	if (!match) return null
 
