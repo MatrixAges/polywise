@@ -6,6 +6,7 @@ import { and, eq } from 'drizzle-orm'
 import { object, string } from 'zod'
 
 import { p } from '../../utils/trpc'
+import { cleanupPrivateAgentArticle } from './privateArticle'
 
 const input_type = object({
 	agent_id: string(),
@@ -25,6 +26,10 @@ export default p
 		const target_article = await getArticle(eq(article.id, input.article_id))
 
 		if (target_article && target_article.scope_type === 'agent' && target_article.scope_id === input.agent_id) {
+			await cleanupPrivateAgentArticle({
+				agent_id: input.agent_id,
+				article_id: input.article_id
+			})
 			await remove(input.article_id)
 
 			return { ok: true }

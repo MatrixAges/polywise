@@ -4,6 +4,7 @@ import create from './create'
 import createSchedule from './createSchedule'
 import extract from './extract'
 import fetch from './fetch'
+import getAgentBindings from './getAgentBindings'
 import getContentProviders from './getContentProviders'
 import getSchedules from './getSchedules'
 import installContentProvider from './installContentProvider'
@@ -14,12 +15,14 @@ import remove from './remove'
 import removeSchedule from './removeSchedule'
 import runBatch from './runBatch'
 import update from './update'
+import updateAgentBindings from './updateAgentBindings'
 import updateSchedule from './updateSchedule'
 
 export default r({
 	create,
 	createSchedule,
 	extract,
+	getAgentBindings,
 	getContentProviders,
 	getSchedules,
 	fetch,
@@ -30,6 +33,7 @@ export default r({
 	remove,
 	removeSchedule,
 	update,
+	updateAgentBindings,
 	updateSchedule,
 	runBatch
 })

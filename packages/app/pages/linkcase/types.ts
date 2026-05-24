@@ -2,6 +2,7 @@ import type { RPCOutput } from '@/types'
 
 export type LinkcaseItem = RPCOutput['linkcase']['query']['items'][number]
 export type LinkcaseDetail = NonNullable<RPCOutput['linkcase']['read']>
+export type LinkcaseAgentItem = RPCOutput['agent']['query'][number]
 export type LinkcaseFilterType = 'title' | 'link'
 export type LinkcaseBatchIntervalUnit = 'second' | 'minute'
 export type LinkcaseBatchAction = 'fetch' | 'extract'

@@ -14,6 +14,7 @@ import pin from './pin'
 import query from './query'
 import remove from './remove'
 import removeArticle from './removeArticle'
+import savePrivateArticle from './savePrivateArticle'
 import searchArticles from './searchArticles'
 import setSkills from './setSkills'
 import sort from './sort'
@@ -35,6 +36,7 @@ export default r({
 	remove,
 	removeArticle,
 	query,
+	savePrivateArticle,
 	searchArticles,
 	setSkills,
 	sort,

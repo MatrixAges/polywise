@@ -14,6 +14,7 @@ import type { Message } from '@core/fst'
 import type { SessionStatusPayload } from '@core/rpc/session/watchSessionStatus'
 import type { MouseEvent, UIEvent } from 'react'
 import type {
+	LinkcaseAgentItem,
 	LinkcaseBatchAction,
 	LinkcaseBatchIntervalUnit,
 	LinkcaseBatchPanelTab,
@@ -68,6 +69,12 @@ export default class Index {
 	add_title = ''
 	add_url = ''
 	add_content = ''
+	agent_dialog_open = false
+	agent_dialog_loading = false
+	agent_dialog_submit_loading = false
+	agent_dialog_agents = [] as Array<LinkcaseAgentItem>
+	agent_dialog_assigned_agent_id = ''
+	agent_dialog_related_agent_ids = [] as Array<string>
 	session_dialog_open = false
 	start_dialog_open = false
 	sniffer_dialog_open = false
@@ -127,6 +134,24 @@ export default class Index {
 		}
 
 		return this.items.find(item => item.id === this.selected_id) ?? null
+	}
+
+	get current_agent_article_id() {
+		return this.detail?.article?.id || ''
+	}
+
+	get current_assigned_agent_id() {
+		const article = this.detail?.article
+
+		return article?.scope_type === 'agent' ? (article.scope_id ?? '') : ''
+	}
+
+	get current_related_agent_ids() {
+		return this.agent_dialog_related_agent_ids
+	}
+
+	get current_article_is_private() {
+		return this.detail?.article?.scope_type === 'agent'
 	}
 
 	get checked_items() {
@@ -348,6 +373,102 @@ export default class Index {
 		this.add_url = item.url || ''
 		this.add_content = detail?.article?.content || ''
 		this.add_dialog_open = true
+	}
+
+	async openAgentDialog() {
+		const item = this.selected_item
+
+		if (!item || !this.detail?.article?.id || this.agent_dialog_loading) {
+			return
+		}
+
+		this.agent_dialog_open = true
+		this.agent_dialog_loading = true
+
+		try {
+			const [agent_items, binding] = await Promise.all([
+				rpc.agent.query.query(),
+				rpc.linkcase.getAgentBindings.query({ link_id: item.id })
+			])
+
+			this.agent_dialog_agents = agent_items as Array<LinkcaseAgentItem>
+			this.agent_dialog_assigned_agent_id = binding.assigned_agent_id || ''
+			this.agent_dialog_related_agent_ids = binding.related_agent_ids || []
+		} catch (error) {
+			this.setAgentDialogOpen(false, { force: true })
+			toast.error(error instanceof Error ? error.message : 'Failed to load agent bindings.')
+		} finally {
+			this.agent_dialog_loading = false
+		}
+	}
+
+	setAgentDialogOpen(value: boolean, options?: { force?: boolean }) {
+		if (this.agent_dialog_submit_loading && !options?.force) {
+			return
+		}
+
+		this.agent_dialog_open = value
+
+		if (!value) {
+			this.agent_dialog_agents = []
+			this.agent_dialog_assigned_agent_id = ''
+			this.agent_dialog_related_agent_ids = []
+		}
+	}
+
+	setAgentDialogAssignedAgentId(agent_id: string) {
+		if (this.current_article_is_private && this.agent_dialog_assigned_agent_id === agent_id) {
+			return
+		}
+
+		this.agent_dialog_assigned_agent_id = this.agent_dialog_assigned_agent_id === agent_id ? '' : agent_id
+
+		if (this.agent_dialog_assigned_agent_id) {
+			this.agent_dialog_related_agent_ids = []
+		}
+	}
+
+	toggleAgentDialogRelatedAgent(agent_id: string) {
+		if (this.agent_dialog_assigned_agent_id) {
+			return
+		}
+
+		const next_ids = new Set(this.agent_dialog_related_agent_ids)
+
+		if (next_ids.has(agent_id)) {
+			next_ids.delete(agent_id)
+		} else {
+			next_ids.add(agent_id)
+		}
+
+		this.agent_dialog_related_agent_ids = Array.from(next_ids)
+	}
+
+	async submitAgentDialog() {
+		const item = this.selected_item
+
+		if (!item || !this.detail?.article?.id || this.agent_dialog_submit_loading) {
+			return
+		}
+
+		this.agent_dialog_submit_loading = true
+
+		try {
+			await rpc.linkcase.updateAgentBindings.mutate({
+				link_id: item.id,
+				assigned_agent_id: this.agent_dialog_assigned_agent_id || undefined,
+				related_agent_ids: this.agent_dialog_assigned_agent_id
+					? []
+					: this.agent_dialog_related_agent_ids
+			})
+			await this.loadDetail(item.id)
+			this.setAgentDialogOpen(false, { force: true })
+			toast.success('Agent bindings updated.')
+		} catch (error) {
+			toast.error(error instanceof Error ? error.message : 'Failed to update agent bindings.')
+		} finally {
+			this.agent_dialog_submit_loading = false
+		}
 	}
 
 	setAddDialogOpen(value: boolean) {
@@ -980,6 +1101,7 @@ export default class Index {
 	async loadDetail(id = this.selected_id) {
 		if (!id) {
 			this.detail = null
+			this.setAgentDialogOpen(false, { force: true })
 
 			return
 		}
@@ -997,6 +1119,9 @@ export default class Index {
 			}
 
 			this.detail = response
+			if (response?.id !== this.selected_id) {
+				this.setAgentDialogOpen(false)
+			}
 
 			if (response) {
 				this.patchListItem(response)
@@ -1009,6 +1134,7 @@ export default class Index {
 	}
 
 	async selectLink(id: string) {
+		this.setAgentDialogOpen(false, { force: true })
 		this.selected_id = id
 		await this.loadDetail(id)
 	}

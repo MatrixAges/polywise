@@ -1,4 +1,4 @@
-import { Album, BookOpenText, Brain, Loader2, Plus, Search, UserRound, X } from 'lucide-react'
+import { Album, BookOpenText, Brain, FilePenLine, Loader2, Plus, Search, UserRound, X } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { Button } from '@/__shadcn__/components/ui/button'
@@ -23,9 +23,13 @@ const Index = () => {
 		article_search,
 		article_search_list,
 		article_search_loading,
+		can_manage_private_articles,
+		selected_agent_id,
 		setArticleFor,
 		setArticleSearch,
 		clearArticleSearch,
+		openCreatePrivateArticleDialog,
+		openEditPrivateArticleDialog,
 		addArticle,
 		removeArticle
 	} = useModel()
@@ -63,48 +67,67 @@ const Index = () => {
 					</div>
 					<div
 						className='
-							relative
 							flex shrink-0
 							items-center
-							w-[180px]
+							gap-1.5
 						'
 					>
-						<Search
+						{can_manage_private_articles ? (
+							<Button
+								className='h-7 shrink-0 gap-1 px-2.5'
+								variant='outline'
+								size='xs'
+								onClick={openCreatePrivateArticleDialog}
+							>
+								<Plus className='size-3.5'></Plus>
+								<span>New</span>
+							</Button>
+						) : null}
+						<div
 							className='
-								absolute
-								top-1/2
-								left-2
-								size-3.5
-								text-std-300
-								pointer-events-none -translate-y-1/2
+								relative
+								flex
+								items-center
+								w-[180px]
 							'
-						></Search>
-						<Input
-							className='
-								h-7
-								pl-6.5 pr-8
-								rounded-full
-								text-sm
-								placeholder:text-xs!
-							'
-							value={article_search}
-							placeholder={`Search ${article_for}`}
-							onChange={event => setArticleSearch(event.target.value)}
-						></Input>
-						{article_search ? (
-							<button
+						>
+							<Search
 								className='
 									absolute
-									right-0
-									w-7 h-7
-									icon_button small
+									top-1/2
+									left-2
+									size-3.5
+									text-std-300
+									pointer-events-none -translate-y-1/2
 								'
-								type='button'
-								onClick={clearArticleSearch}
-							>
-								<X className='size-3.5'></X>
-							</button>
-						) : null}
+							></Search>
+							<Input
+								className='
+									h-7
+									pl-6.5 pr-8
+									rounded-full
+									text-sm
+									placeholder:text-xs!
+								'
+								value={article_search}
+								placeholder={`Search ${article_for}`}
+								onChange={event => setArticleSearch(event.target.value)}
+							></Input>
+							{article_search ? (
+								<button
+									className='
+										absolute
+										right-0
+										w-7 h-7
+										icon_button small
+									'
+									type='button'
+									onClick={clearArticleSearch}
+								>
+									<X className='size-3.5'></X>
+								</button>
+							) : null}
+						</div>
 					</div>
 				</div>
 				{article_search.trim() ? (
@@ -163,7 +186,7 @@ const Index = () => {
 										onClick={() => void addArticle(item.id)}
 									>
 										<Plus className='size-3.5'></Plus>
-										<span>Add</span>
+										<span>Relate</span>
 									</Button>
 								</div>
 							))
@@ -188,41 +211,95 @@ const Index = () => {
 							text-sm text-std-400
 						'
 					>
-						No related articles.
+						No articles yet.
 					</div>
 				) : (
 					<div className='flex flex-col gap-2 pb-3'>
-						{article_items.map(item => (
-							<div
-								className='
+						{article_items.map(item => {
+							const is_private_article =
+								item.scope_type === 'agent' && item.scope_id === selected_agent_id
+
+							return (
+								<div
+									className='
 									py-2
 									border-b border-border-light
 								'
-								key={item.id}
-							>
-								<div
-									className='
+									key={item.id}
+								>
+									<div
+										className='
 										flex
 										items-start justify-between
 										gap-2
 									'
-								>
-									<div className='line-clamp-3 text-sm font-medium'>
-										{item.title || 'Untitled article'}
-									</div>
-									<button
-										className='icon_button small text-std-300 shrink-0'
-										type='button'
-										onClick={() => void removeArticle(item.id)}
 									>
-										<X className='size-3.5'></X>
-									</button>
+										<div className='min-w-0 flex-1'>
+											<div className='flex items-center gap-2'>
+												<div className='line-clamp-3 text-sm font-medium'>
+													{item.title || 'Untitled article'}
+												</div>
+												<span
+													className={
+														is_private_article
+															? '
+													px-1.5 py-0.5
+													rounded-full
+													text-[10px] text-std-500 tracking-[0.08em]
+													uppercase
+													bg-secondary
+												'
+															: '
+													px-1.5 py-0.5
+													rounded-full
+													text-[10px] text-std-400 tracking-[0.08em]
+													uppercase
+													bg-std-100
+												'
+													}
+												>
+													{is_private_article
+														? 'Private'
+														: 'Related'}
+												</span>
+											</div>
+											<div
+												className='
+												mt-0.5
+												text-std-400 text-[11px] tracking-[0.08em]
+												uppercase
+											'
+											>
+												{item.for_type}
+											</div>
+										</div>
+										<div className='flex shrink-0 items-center gap-1'>
+											{is_private_article && can_manage_private_articles ? (
+												<button
+													className='icon_button small text-std-300'
+													type='button'
+													onClick={() =>
+														openEditPrivateArticleDialog(item)
+													}
+												>
+													<FilePenLine className='size-3.5'></FilePenLine>
+												</button>
+											) : null}
+											<button
+												className='icon_button small text-std-300'
+												type='button'
+												onClick={() => void removeArticle(item.id)}
+											>
+												<X className='size-3.5'></X>
+											</button>
+										</div>
+									</div>
+									<div className='text-std-400 text-xsm line-clamp-2'>
+										{item.content || 'Empty content'}
+									</div>
 								</div>
-								<div className='text-std-400 text-xsm line-clamp-2'>
-									{item.content || 'Empty content'}
-								</div>
-							</div>
-						))}
+							)
+						})}
 					</div>
 				)}
 				{!article_items.length && !article_search.trim() ? (
@@ -233,7 +310,9 @@ const Index = () => {
 							text-xs text-std-300
 						'
 					>
-						Use search to relate an existing article.
+						{can_manage_private_articles
+							? 'Use search to relate an existing article, or create a private one for this agent.'
+							: 'Use search to relate an existing article.'}
 					</div>
 				) : null}
 			</div>

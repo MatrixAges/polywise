@@ -9,6 +9,7 @@ import CreateDialog from './CreateDialog'
 import GroupDialog from './GroupDialog'
 import GroupsMenu from './GroupsMenu'
 import ImportDialog from './ImportDialog'
+import PrivateArticleDialog from './PrivateArticleDialog'
 import { SkillDialog } from './Skill'
 
 const Index = () => {
@@ -117,6 +118,7 @@ const Index = () => {
 			<CreateDialog></CreateDialog>
 			<ImportDialog></ImportDialog>
 			<GroupDialog></GroupDialog>
+			<PrivateArticleDialog></PrivateArticleDialog>
 			<SkillDialog></SkillDialog>
 		</>
 	)

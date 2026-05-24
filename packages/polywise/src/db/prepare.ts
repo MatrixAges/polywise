@@ -62,6 +62,10 @@ export const insertEdgeVector = (): Database.Statement => {
 	return env.sqlite.prepare('INSERT INTO vec.edge_vec(rowid, vectors) VALUES (?, ?)')
 }
 
+export const deleteEdgeVector = (): Database.Statement => {
+	return env.sqlite.prepare('DELETE FROM vec.edge_vec WHERE rowid = ?')
+}
+
 export const getAgentRowid = (): Database.Statement => {
 	return env.sqlite.prepare('SELECT rowid FROM agent WHERE id = ?')
 }
@@ -76,6 +80,10 @@ export const getNodeRowid = (): Database.Statement => {
 
 export const insertNodeVector = (): Database.Statement => {
 	return env.sqlite.prepare('INSERT INTO vec.node_vec(rowid, vectors) VALUES (?, ?)')
+}
+
+export const deleteNodeVector = (): Database.Statement => {
+	return env.sqlite.prepare('DELETE FROM vec.node_vec WHERE rowid = ?')
 }
 
 export const getAgentByName = (): Database.Statement => {

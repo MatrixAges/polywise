@@ -1,4 +1,4 @@
-import { ArrowUpRight, Bot, Database, Globe, Loader, PencilLine } from 'lucide-react'
+import { ArrowUpRight, Bot, Database, Globe, Loader, PencilLine, Users } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { Button } from '@/__shadcn__/components/ui/button'
@@ -80,6 +80,25 @@ const Index = () => {
 							onClick={x.openEditDialog}
 						>
 							<PencilLine className='size-3'></PencilLine>
+						</Button>
+					</div>
+				</Tooltip>
+				<Tooltip title='Assign or relate agents'>
+					<div>
+						<Button
+							className='size-7 px-0'
+							variant='outline'
+							size='xs'
+							disabled={
+								!item ||
+								!x.detail?.article?.id ||
+								Boolean(x.current_ai_fetching_id) ||
+								Boolean(x.current_extracting_id) ||
+								x.linkcase_session_running
+							}
+							onClick={() => void x.openAgentDialog()}
+						>
+							<Users className='size-3'></Users>
 						</Button>
 					</div>
 				</Tooltip>

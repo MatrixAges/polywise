@@ -82,6 +82,11 @@ export default class Index {
 	article_search_loading = false
 	article_search_request_key = ''
 	article_search_timer = 0
+	private_article_dialog_open = false
+	private_article_dialog_loading = false
+	private_article_dialog_article_id = ''
+	private_article_dialog_title = ''
+	private_article_dialog_content = ''
 	pins = [] as Array<AgentSessionItem>
 	session_items = [] as Array<AgentSessionItem>
 	pin_map = {} as Record<string, number>
@@ -163,6 +168,14 @@ export default class Index {
 
 	get selected_tool_names() {
 		return this.selected_agent?.tools || []
+	}
+
+	get can_manage_private_articles() {
+		return this.article_for === 'wiki' || this.article_for === 'memory' || this.article_for === 'user'
+	}
+
+	get private_article_dialog_editing() {
+		return Boolean(this.private_article_dialog_article_id)
 	}
 
 	constructor(
@@ -545,6 +558,7 @@ export default class Index {
 		this.selected_agent_id = agent_id
 		this.page_mode = page_mode
 		this.edit_field_key = ''
+		this.closePrivateArticleDialog()
 
 		if (this.current_tab === 'sessions') {
 			this.current_tab = 'info'
@@ -794,8 +808,98 @@ export default class Index {
 
 		this.article_for = for_type
 		this.clearArticleSearch()
+		this.closePrivateArticleDialog()
 
 		void this.refreshAgentRelated()
+	}
+
+	setPrivateArticleDialogOpen(open: boolean, options?: { force?: boolean }) {
+		if (this.private_article_dialog_loading && !options?.force) {
+			return
+		}
+
+		this.private_article_dialog_open = open
+
+		if (!open) {
+			this.private_article_dialog_article_id = ''
+			this.private_article_dialog_title = ''
+			this.private_article_dialog_content = ''
+		}
+	}
+
+	openCreatePrivateArticleDialog() {
+		if (!this.selected_agent_id || !this.can_manage_private_articles) {
+			return
+		}
+
+		this.private_article_dialog_article_id = ''
+		this.private_article_dialog_title = ''
+		this.private_article_dialog_content = ''
+		this.private_article_dialog_open = true
+	}
+
+	openEditPrivateArticleDialog(item: AgentArticleItem) {
+		if (
+			!this.selected_agent_id ||
+			item.scope_type !== 'agent' ||
+			item.scope_id !== this.selected_agent_id ||
+			!this.can_manage_private_articles
+		) {
+			return
+		}
+
+		this.private_article_dialog_article_id = item.id
+		this.private_article_dialog_title = item.title || ''
+		this.private_article_dialog_content = item.content || ''
+		this.private_article_dialog_open = true
+	}
+
+	closePrivateArticleDialog(options?: { force?: boolean }) {
+		this.setPrivateArticleDialogOpen(false, options)
+	}
+
+	setPrivateArticleDialogTitle(value: string) {
+		this.private_article_dialog_title = value
+	}
+
+	setPrivateArticleDialogContent(value: string) {
+		this.private_article_dialog_content = value
+	}
+
+	async submitPrivateArticleDialog() {
+		if (!this.selected_agent_id || !this.can_manage_private_articles || this.private_article_dialog_loading) {
+			return
+		}
+
+		const content = this.private_article_dialog_content.trim()
+
+		if (!content) {
+			toast.error('Content is required.')
+
+			return
+		}
+
+		this.private_article_dialog_loading = true
+
+		try {
+			const editing = this.private_article_dialog_editing
+
+			await rpc.agent.savePrivateArticle.mutate({
+				agent_id: this.selected_agent_id,
+				article_id: this.private_article_dialog_article_id || undefined,
+				for_type: this.article_for as Extract<ArticleForType, 'wiki' | 'memory' | 'user'>,
+				title: this.private_article_dialog_title.trim() || undefined,
+				content
+			})
+
+			this.closePrivateArticleDialog({ force: true })
+			await this.refreshAgentRelated()
+			toast.success(editing ? 'Article updated.' : 'Article added.')
+		} catch (error) {
+			toast.error(error instanceof Error ? error.message : 'Failed to save article.')
+		} finally {
+			this.private_article_dialog_loading = false
+		}
 	}
 
 	clearArticleSearchTimer() {

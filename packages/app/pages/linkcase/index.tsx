@@ -4,6 +4,7 @@ import { container } from 'tsyringe'
 
 import {
 	AddDialog,
+	AgentDialog,
 	BatchSessionDialog,
 	BatchStartDialog,
 	BookmarkSnifferDialog,
@@ -33,6 +34,7 @@ const Index = () => {
 				</div>
 			</div>
 			<AddDialog></AddDialog>
+			<AgentDialog></AgentDialog>
 			<BatchSessionDialog></BatchSessionDialog>
 			<BatchStartDialog></BatchStartDialog>
 			<BookmarkSnifferDialog></BookmarkSnifferDialog>
