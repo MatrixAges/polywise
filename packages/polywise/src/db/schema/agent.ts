@@ -27,6 +27,8 @@ export default sqliteTable(
 		identity: text('identity'),
 		// Core memory
 		memory: text('memory').default(''),
+		// Frozen agents keep imported behavior and graph state immutable.
+		is_frozen: integer('is_frozen', { mode: 'boolean' }).default(false).notNull(),
 		// Sort order for drag reordering
 		order: real('order').notNull(),
 		// Model provider

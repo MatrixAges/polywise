@@ -1,0 +1,41 @@
+{
+	"Cookie": {
+		"desc": "We use cookies solely to record user theme and language preferences.",
+		"btn_get": "Get"
+	},
+	"slogan": {
+		"line_1": "Build connected,",
+		"line_2": "Think with memory."
+	},
+	"title": {
+		"features": "Features",
+		"docs": "Docs",
+		"changelog": "Changelog",
+		"pricing": "Pricing",
+		"solutions": "Solutions",
+		"download": "Download",
+
+		"activate": "Activate",
+		"privacy": "Privacy",
+		"terms": "Terms",
+		"refund": "Refund",
+		"gallery": "Gallery",
+		"appstore": "App Store",
+
+		"about_us": "About us",
+		"contact": "Contact",
+		"journal": "Journal",
+		"blog": "Blog",
+		"brand": "Brand"
+	},
+	"Setting": {
+		"title": "Setting",
+		"theme": "Theme",
+		"language": "Language"
+	},
+	"Footer": {
+		"product": "Product",
+		"resources": "Resources",
+		"company": "Company"
+	}
+}

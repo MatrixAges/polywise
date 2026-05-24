@@ -1,0 +1,270 @@
+@keyframes user_to_if {
+	from {
+		top: -1px;
+	}
+
+	to {
+		z-index: 2;
+		top: calc(100% + 3px);
+		background: rgba(var(--color_text_rgb), 0.72);
+	}
+}
+
+@keyframes if_to_user {
+	from {
+		bottom: -3px;
+	}
+
+	to {
+		z-index: 2;
+		bottom: calc(100% + 3px);
+		background: rgba(var(--color_text_rgb), 0.72);
+	}
+}
+
+@keyframes if_to_ai {
+	0% {
+		top: -2.4px;
+		right: -2px;
+	}
+
+	50% {
+		top: -2.4px;
+		right: calc(100% - 3px);
+	}
+
+	100% {
+		z-index: 2;
+		top: calc(100% + 3px);
+		right: calc(100% - 1px);
+		background: rgba(var(--color_text_rgb), 0.72);
+	}
+}
+
+@keyframes ai_to_if {
+	0% {
+		bottom: -3px;
+		left: -3px;
+	}
+
+	50% {
+		bottom: calc(100% - 1px);
+		left: -3px;
+	}
+
+	100% {
+		z-index: 2;
+		bottom: calc(100% - 1px);
+		left: calc(100% + 21px);
+		background: rgba(var(--color_text_rgb), 0.72);
+	}
+}
+
+@keyframes if_to_dataflow {
+	0% {
+		top: -2.4px;
+		left: -3px;
+	}
+
+	50% {
+		top: -2.4px;
+		left: calc(100% - 1px);
+	}
+
+	100% {
+		z-index: 2;
+		top: calc(100% + 3px);
+		left: calc(100% - 1px);
+		background: rgba(var(--color_text_rgb), 0.72);
+	}
+}
+
+@keyframes dataflow_to_if {
+	0% {
+		right: -3px;
+		bottom: -5px;
+	}
+
+	50% {
+		right: -3px;
+		bottom: calc(100% - 1px);
+	}
+
+	100% {
+		z-index: 2;
+		right: calc(100% + 21px);
+		bottom: calc(100% - 1px);
+		background: rgba(var(--color_text_rgb), 0.72);
+	}
+}
+
+._local {
+	z-index: 10;
+	margin-top: -150px;
+
+	:global {
+		.role_wrap {
+			padding: 48px 6px;
+			background-image:
+				linear-gradient(rgba(var(--color_text_rgb), 0.024) 1px, transparent 1px),
+				linear-gradient(90deg, rgba(var(--color_text_rgb), 0.024) 1px, transparent 1px);
+			background-position:
+				0 0,
+				10px 10px;
+			background-size: 20px 20px;
+
+			.user_border {
+				top: 141px;
+				width: 2px;
+				height: 81px;
+				background-color: #2f2f2f;
+
+				&::before,
+				&::after {
+					position: absolute;
+					z-index: 10;
+					left: -1px;
+					width: 4px;
+					height: 4px;
+					border-radius: 50%;
+					background: radial-gradient(
+						rgba(var(--color_text_rgb), 0.18),
+						rgba(var(--color_text_rgb), 0.06)
+					);
+					content: '';
+					backdrop-filter: var(--blur);
+				}
+
+				&::before {
+					top: -1px;
+
+					:local {
+						animation: user_to_if ease 3s infinite;
+					}
+				}
+
+				&::after {
+					bottom: -3px;
+
+					:local {
+						animation: if_to_user ease 3s infinite;
+					}
+				}
+			}
+
+			.angled_border {
+				position: absolute;
+				top: -63px;
+				width: 120px;
+				height: 96px;
+				border-top: 1.8px solid #2f2f2f;
+
+				&::before,
+				&::after {
+					position: absolute;
+					z-index: 10;
+					width: 4px;
+					height: 4px;
+					border-radius: 50%;
+					background: radial-gradient(
+						rgba(var(--color_text_rgb), 0.18),
+						rgba(var(--color_text_rgb), 0.06)
+					);
+					content: '';
+					backdrop-filter: var(--blur);
+				}
+
+				&.angled_border_left {
+					left: 152px;
+					border-left: 1.8px solid #2f2f2f;
+					border-top-left-radius: 12px;
+
+					&::before {
+						top: -2.4px;
+						right: -2px;
+
+						:local {
+							animation: if_to_ai ease 3s infinite;
+						}
+					}
+
+					&::after {
+						bottom: -3px;
+						left: -3px;
+
+						:local {
+							animation: ai_to_if ease 3s infinite;
+						}
+					}
+				}
+
+				&.angled_border_right {
+					right: 152px;
+					border-right: 1.8px solid #2f2f2f;
+					border-top-right-radius: 12px;
+
+					&::before {
+						top: -2.4px;
+						left: -3px;
+
+						:local {
+							animation: if_to_dataflow ease 3s infinite;
+						}
+					}
+
+					&::after {
+						right: -3px;
+						bottom: -5px;
+
+						:local {
+							animation: dataflow_to_if ease 3s infinite;
+						}
+					}
+				}
+			}
+
+			.role_item {
+				z-index: 3;
+				width: 64px;
+				height: 64px;
+				margin: 30px 0;
+				border-radius: var(--radius_large);
+				font-size: 30px;
+				backdrop-filter: var(--blur);
+
+				&.if_wrap {
+					margin-top: 48px;
+				}
+
+				&.bottom {
+					margin-right: 120px;
+					margin-left: 120px;
+				}
+
+				svg {
+					opacity: 0.9;
+				}
+
+				.name {
+					line-height: 1;
+					margin-top: 3px;
+					color: var(--color_text_sub);
+					font-size: 10px;
+				}
+			}
+		}
+	}
+}
+
+@media (max-width: 720px) {
+	._local {
+		:global {
+			.role_wrap {
+				padding-right: 0;
+				padding-left: 0;
+				margin-top: -120px;
+				scale: 0.6;
+			}
+		}
+	}
+}

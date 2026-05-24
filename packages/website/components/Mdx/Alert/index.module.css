@@ -1,0 +1,19 @@
+._local {
+	margin-block-start: calc(var(--editor_padding_y) * 1.5);
+	margin-block-end: calc(var(--editor_padding_y) * 1.5);
+
+	:global {
+		img {
+			object-fit: contain;
+		}
+		.img_container {
+			padding-left: 24px;
+
+			p {
+				&:first-child {
+					margin-top: 0;
+				}
+			}
+		}
+	}
+}

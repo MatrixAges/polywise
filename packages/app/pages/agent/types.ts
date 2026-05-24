@@ -92,6 +92,7 @@ export interface IEditableFieldArgs {
 
 export interface IUpdateAgentArgs {
 	id: string
+	is_frozen?: boolean
 	name?: string
 	role?: string
 	description?: string

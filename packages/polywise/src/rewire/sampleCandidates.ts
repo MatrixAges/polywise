@@ -15,19 +15,13 @@ import {
 import type { ReplayGroup } from './types'
 
 interface SampleCandidatesArgs {
+	agent_id: string | null
 	group: ReplayGroup
 	now: number
 	budget: number
 }
 
-const edgeQuery = `
-	SELECT id, state, weight, confidence, bandwidth, stability, rewire_score
-	FROM edge
-	WHERE (source_id = ? AND target_id = ?) OR (source_id = ? AND target_id = ?)
-	LIMIT 1
-`
-
-export default ({ group, now, budget }: SampleCandidatesArgs) => {
+export default ({ agent_id, group, now, budget }: SampleCandidatesArgs) => {
 	if (budget <= 0) {
 		return { created: 0, touched_pairs: [] as Array<[string, string]> }
 	}
@@ -38,7 +32,22 @@ export default ({ group, now, budget }: SampleCandidatesArgs) => {
 		return { created: 0, touched_pairs: [] as Array<[string, string]> }
 	}
 
-	const getEdge = env.sqlite.prepare(edgeQuery)
+	const getEdge =
+		agent_id === null
+			? env.sqlite.prepare(`
+				SELECT id, state, weight, confidence, bandwidth, stability, rewire_score
+				FROM edge
+				WHERE agent_id is null
+					AND ((source_id = ? AND target_id = ?) OR (source_id = ? AND target_id = ?))
+				LIMIT 1
+			`)
+			: env.sqlite.prepare(`
+				SELECT id, state, weight, confidence, bandwidth, stability, rewire_score
+				FROM edge
+				WHERE agent_id = ?
+					AND ((source_id = ? AND target_id = ?) OR (source_id = ? AND target_id = ?))
+				LIMIT 1
+			`)
 	const updateEdge = env.sqlite.prepare(`
 		UPDATE edge
 		SET confidence = ?,
@@ -54,24 +63,37 @@ export default ({ group, now, budget }: SampleCandidatesArgs) => {
 			bandwidth, active_times, active_at, is_frozen, state, stability, rewire_score,
 			last_rewire_at, created_at
 		)
-		VALUES (?, ?, null, ?, ?, ?, 0.8, ?, 1.0, ?, 1, ?, 0, 'silent', ?, ?, ?, ?)
+		VALUES (?, ?, ?, ?, ?, ?, 0.8, ?, 1.0, ?, 1, ?, 0, 'silent', ?, ?, ?, ?)
 	`)
 
 	let created = 0
 	const touched_pairs = [] as Array<[string, string]>
 
 	for (const [source_id, target_id] of pairs) {
-		const existing = getEdge.get(source_id, target_id, target_id, source_id) as
-			| {
-					id: string
-					state: string
-					weight: number | null
-					confidence: number | null
-					bandwidth: number | null
-					stability: number | null
-					rewire_score: number | null
-			  }
-			| undefined
+		const existing =
+			agent_id === null
+				? (getEdge.get(source_id, target_id, target_id, source_id) as
+						| {
+								id: string
+								state: string
+								weight: number | null
+								confidence: number | null
+								bandwidth: number | null
+								stability: number | null
+								rewire_score: number | null
+						  }
+						| undefined)
+				: (getEdge.get(agent_id, source_id, target_id, target_id, source_id) as
+						| {
+								id: string
+								state: string
+								weight: number | null
+								confidence: number | null
+								bandwidth: number | null
+								stability: number | null
+								rewire_score: number | null
+						  }
+						| undefined)
 
 		if (existing) {
 			if (existing.state === 'silent') {
@@ -92,6 +114,7 @@ export default ({ group, now, budget }: SampleCandidatesArgs) => {
 		insertEdge.run(
 			getId(),
 			rewire_silent_relation,
+			agent_id,
 			source_id,
 			target_id,
 			rewire_silent_initial_weight,

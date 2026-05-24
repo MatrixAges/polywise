@@ -1,0 +1,78 @@
+{
+	"todo": {
+		"0": {
+			"title": "Mutually Exclusive Tasks",
+			"desc": "Link multiple tasks to create mutually exclusive tasks. Completing one automatically closes the others, allowing plans to adapt to changes."
+		},
+		"1": {
+			"title": "Todo Attributes",
+			"desc": "Add subtasks, notes, labels, priority, reminders, deadlines, loops, or schedule tasks."
+		},
+		"2": {
+			"title": "Kanban View",
+			"desc": "View all todos under different categories and adjust tasks between categories."
+		},
+		"3": {
+			"title": "Table View",
+			"desc": "Query and filter specified tasks and sort them by specific features."
+		},
+		"4": {
+			"title": "Mind Map View",
+			"desc": "Display all tasks in a mind map format, drag and zoom to start brainstorming."
+		},
+		"5": {
+			"title": "Multi-dimensional Classification",
+			"desc": "Support for multiple dimensions of classification to help you better categorize and find tasks."
+		},
+		"6": {
+			"title": "Auto Archiving",
+			"desc": "Automatically archive completed or closed tasks to keep your workspace clean."
+		}
+	},
+	"note": {
+		"0": {
+			"title": "Markdown Standard Support",
+			"desc": "Press / to quickly add standard Markdown content blocks, fully implemented and compatible across all platforms."
+		},
+		"1": {
+			"title": "Content Outline",
+			"desc": "Automatically generate a content outline on the right side, giving you an overview of the article's main structure."
+		},
+		"2": {
+			"title": "Personalization",
+			"desc": "Supports multiple settings to achieve content personalization."
+		}
+	},
+	"pomo": {
+		"0": {
+			"title": "Pomodoro Technique",
+			"desc": "A segmented work + rest approach that keeps both body and mind active."
+		},
+		"1": {
+			"title": "Multiple Segments Setup",
+			"desc": "Allow each focused segment to be tracked, with customizable durations."
+		},
+		"2": {
+			"title": "Flow Mode",
+			"desc": "Break the norm and make flow an integral part of your life."
+		}
+	},
+	"schedule": {
+		"0": {
+			"title": "Week View",
+			"desc": "Overview of daily tasks in the context of the entire week."
+		},
+		"1": {
+			"title": "Month View",
+			"desc": "Overview of all tasks in the context of the entire month."
+		},
+		"2": {
+			"title": "Timeline View",
+			"desc": "Use the timeline view to plan long-term tasks."
+		},
+		"3": {
+			"title": "Fixed View",
+			"desc": "Schedule recurring tasks for daily, weekly, or monthly intervals."
+		}
+	}
+}

@@ -1,0 +1,27 @@
+._local {
+	padding-bottom: 90px;
+
+	:global {
+		h1 {
+			margin-bottom: 21px;
+		}
+
+		.desc {
+			line-height: 1;
+			margin: 0;
+			color: var(--color_text_light);
+			font-size: 12px;
+			font-weight: 300;
+
+			&:nth-of-type(1) {
+				margin-bottom: 9px !important;
+			}
+		}
+	}
+}
+
+@media (max-width: 720px) {
+	._local {
+		padding-bottom: 36px;
+	}
+}

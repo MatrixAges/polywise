@@ -6,6 +6,7 @@ import type { ReplayGroup } from './types'
 
 interface RewireEventRow {
 	id: string
+	agent_id: string | null
 	stimulus_key: string
 	signal: string
 	role: 'center' | 'accepted' | 'rejected' | 'neighbor'
@@ -18,6 +19,7 @@ export const groupRewireRows = (rows: Array<RewireEventRow>, max_groups: number)
 	const groups = new Map<
 		string,
 		{
+			agent_id: string | null
 			stimulus_key: string
 			signal: string
 			event_ids: Array<string>
@@ -34,6 +36,7 @@ export const groupRewireRows = (rows: Array<RewireEventRow>, max_groups: number)
 
 		if (!group) {
 			group = {
+				agent_id: row.agent_id ?? null,
 				stimulus_key: row.stimulus_key,
 				signal: row.signal,
 				event_ids: [],
@@ -63,6 +66,7 @@ export const groupRewireRows = (rows: Array<RewireEventRow>, max_groups: number)
 		.map(
 			group =>
 				({
+					agent_id: group.agent_id,
 					stimulus_key: group.stimulus_key,
 					signal: group.signal,
 					event_ids: group.event_ids,
@@ -88,21 +92,34 @@ export const groupRewireRows = (rows: Array<RewireEventRow>, max_groups: number)
 		.slice(0, max_groups)
 }
 
-export default async () => {
+export default async (args: { agent_id: string | null }) => {
 	const current_config = getRewireConfig()
 	const limit = Math.max(current_config.max_groups_per_cycle * 20, rewire_event_fetch_limit_floor)
 	const window_start = Date.now() - current_config.replay_window_ms
-	const rows = env.sqlite
-		.prepare(
-			`
-			SELECT id, stimulus_key, signal, role, node_id, strength, created_at
-			FROM rewire_event
-			WHERE created_at >= ?
-			ORDER BY created_at DESC
-			LIMIT ?
-		`
-		)
-		.all(window_start, limit) as Array<RewireEventRow>
+	const rows =
+		args.agent_id === null
+			? (env.sqlite
+					.prepare(
+						`
+						SELECT id, agent_id, stimulus_key, signal, role, node_id, strength, created_at
+						FROM rewire_event
+						WHERE created_at >= ? AND agent_id is null
+						ORDER BY created_at DESC
+						LIMIT ?
+					`
+					)
+					.all(window_start, limit) as Array<RewireEventRow>)
+			: (env.sqlite
+					.prepare(
+						`
+						SELECT id, agent_id, stimulus_key, signal, role, node_id, strength, created_at
+						FROM rewire_event
+						WHERE created_at >= ? AND agent_id = ?
+						ORDER BY created_at DESC
+						LIMIT ?
+					`
+					)
+					.all(window_start, args.agent_id, limit) as Array<RewireEventRow>)
 
 	return groupRewireRows(rows, current_config.max_groups_per_cycle)
 }

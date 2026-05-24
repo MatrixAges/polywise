@@ -1,0 +1,10 @@
+._local {
+	:global {
+		iframe {
+			width: 100%;
+			height: 360px;
+			border: none;
+			border-radius: var(--radius);
+		}
+	}
+}

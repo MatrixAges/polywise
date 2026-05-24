@@ -1,0 +1,21 @@
+._local {
+	:global {
+		.page_items {
+			margin-bottom: 60px;
+			gap: 12px;
+
+			.page_item {
+				width: 30px;
+				height: 30px;
+				border-radius: var(--radius);
+				color: var(--color_text_sub);
+				background-color: var(--color_bg_1);
+
+				&.active {
+					color: var(--color_bg);
+					background-color: var(--color_text);
+				}
+			}
+		}
+	}
+}

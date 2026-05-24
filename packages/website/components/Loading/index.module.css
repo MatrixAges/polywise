@@ -1,0 +1,73 @@
+@keyframes light {
+	from {
+		clip: rect(var(--loading_size) var(--loading_size) var(--loading_size) 0);
+	}
+
+	to {
+		clip: rect(0 var(--loading_size) var(--loading_size) 0);
+	}
+}
+
+._local {
+	z-index: 10000;
+
+	&.dark {
+		:global {
+			.loading_wrap {
+				fill: white;
+			}
+
+			.desc {
+				color: white;
+			}
+		}
+	}
+
+	&.use_by_component {
+		&.dark {
+			:global {
+				.loading_wrap {
+					fill: #555;
+				}
+
+				.desc {
+					color: white;
+				}
+			}
+		}
+
+		:global {
+			.loading_wrap {
+				fill: var(--color_text_softlight);
+			}
+		}
+	}
+
+	:global {
+		.loading_wrap {
+			width: var(--loading_size);
+			height: var(--loading_size);
+			fill: var(--color_main);
+
+			.loading_icon {
+				&.top {
+					:local {
+						animation: light 1.2s infinite;
+						animation-direction: alternate-reverse;
+					}
+				}
+
+				&.bottom {
+					opacity: 0.3;
+				}
+			}
+		}
+
+		.desc {
+			width: 160px;
+			margin-top: 15px;
+			color: var(--color_main);
+			user-select: none;
+		}
+	}
+}

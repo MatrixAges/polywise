@@ -1,0 +1,118 @@
+[data-theme='dark'] {
+	.if-drawer {
+		.if-drawer-mask {
+			background-color: rgba(0, 0, 0, 0.75);
+		}
+	}
+}
+
+.if-drawer {
+	&:focus-visible {
+		outline: none;
+	}
+
+	&.useInPage {
+		--padding: 18px;
+
+		&.breakpoint {
+			.if-drawer-content-wrapper {
+				padding: 12px;
+
+				.if-drawer-content {
+					border: none;
+					border-radius: var(--radius);
+				}
+			}
+		}
+
+		.if-drawer-content-wrapper {
+			padding: 0;
+
+			.if-drawer-content {
+				border-left: var(--border);
+				border-radius: 0;
+
+				.if-drawer-header {
+					min-height: unset;
+					padding-top: calc(var(--padding) - 3px);
+					padding-right: var(--padding);
+					padding-bottom: 15px;
+					padding-left: var(--padding);
+					border-bottom: none;
+
+					&-title {
+						.if-drawer-title {
+							color: var(--color_text_light);
+							font-size: 14px;
+							font-weight: normal;
+						}
+
+						.if-drawer-close {
+							right: calc(var(--padding) - 3px);
+							font-size: 13px;
+						}
+					}
+				}
+
+				.if-drawer-body {
+					padding: 0px 0 60px 0;
+				}
+			}
+		}
+	}
+
+	&-content-wrapper {
+		box-sizing: content-box !important;
+		padding: 12px;
+		box-shadow: none !important;
+
+		.if-drawer-content {
+			border-radius: var(--radius);
+
+			.if-drawer-header {
+				position: relative;
+				min-height: 40px;
+				padding: 9px 18px;
+				background-color: transparent;
+
+				&-title {
+					.if-drawer-title {
+						line-height: 1;
+					}
+
+					.if-drawer-close {
+						position: absolute;
+						right: 12px;
+						width: 21px;
+						height: 21px;
+						line-height: 1;
+						padding: 0;
+						margin-right: 0;
+						border-radius: var(--radius_small);
+						color: rgba(var(--color_text_rgb), 0.45);
+						font-size: 14px;
+
+						&:hover {
+							color: rgba(var(--color_text_rgb), 0.88);
+							background-color: rgba(var(--color_text_rgb), 0.06);
+						}
+					}
+				}
+			}
+
+			.if-drawer-body {
+				padding: 18px;
+				outline: none;
+			}
+
+			.if-drawer-footer {
+				min-height: 40px;
+				padding: 9px 18px;
+			}
+		}
+	}
+
+	.if-drawer-mask {
+		background-color: rgba(0, 0, 0, 0.3);
+	}
+}

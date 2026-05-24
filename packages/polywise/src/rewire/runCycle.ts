@@ -19,6 +19,7 @@ import {
 	rewire_strengthen_weight_step
 } from './constants'
 import decay from './decay'
+import getRecentActiveAgentIds from './getRecentActiveAgentIds'
 import sampleCandidates from './sampleCandidates'
 import stabilizeEdges from './stabilizeEdges'
 
@@ -38,20 +39,34 @@ const buildInitialSummary = (cycle_at: number): RewireCycleSummary => ({
 	touched_nodes: 0
 })
 
-const strengthenCenterEdges = (groups: Array<ReplayGroup>, now: number, budget: number) => {
-	const getEdge = env.sqlite.prepare(`
-		SELECT id, state, weight, confidence, bandwidth, stability, rewire_score
-		FROM edge
-		WHERE source_id = ? AND target_id = ?
-		LIMIT 1
-	`)
+const strengthenCenterEdges = (args: {
+	agent_id: string | null
+	groups: Array<ReplayGroup>
+	now: number
+	budget: number
+}) => {
+	const { agent_id, groups, now, budget } = args
+	const getEdge =
+		agent_id === null
+			? env.sqlite.prepare(`
+				SELECT id, state, weight, confidence, bandwidth, stability, rewire_score
+				FROM edge
+				WHERE agent_id is null AND source_id = ? AND target_id = ?
+				LIMIT 1
+			`)
+			: env.sqlite.prepare(`
+				SELECT id, state, weight, confidence, bandwidth, stability, rewire_score
+				FROM edge
+				WHERE agent_id = ? AND source_id = ? AND target_id = ?
+				LIMIT 1
+			`)
 	const insertEdge = env.sqlite.prepare(`
 		INSERT INTO edge (
 			id, relation, agent_id, source_id, target_id, weight, growth, confidence, distance,
 			bandwidth, active_times, active_at, is_frozen, state, stability, rewire_score,
 			last_rewire_at, created_at
 		)
-		VALUES (?, ?, null, ?, ?, ?, 1.0, ?, 1.0, ?, 1, ?, 0, 'silent', ?, ?, ?, ?)
+		VALUES (?, ?, ?, ?, ?, ?, 1.0, ?, 1.0, ?, 1, ?, 0, 'silent', ?, ?, ?, ?)
 	`)
 	const updateEdge = env.sqlite.prepare(`
 		UPDATE edge
@@ -77,17 +92,30 @@ const strengthenCenterEdges = (groups: Array<ReplayGroup>, now: number, budget: 
 					continue
 				}
 
-				const existing = getEdge.get(center_id, accepted_id) as
-					| {
-							id: string
-							state: string
-							weight: number | null
-							confidence: number | null
-							bandwidth: number | null
-							stability: number | null
-							rewire_score: number | null
-					  }
-					| undefined
+				const existing =
+					agent_id === null
+						? (getEdge.get(center_id, accepted_id) as
+								| {
+										id: string
+										state: string
+										weight: number | null
+										confidence: number | null
+										bandwidth: number | null
+										stability: number | null
+										rewire_score: number | null
+								  }
+								| undefined)
+						: (getEdge.get(agent_id, center_id, accepted_id) as
+								| {
+										id: string
+										state: string
+										weight: number | null
+										confidence: number | null
+										bandwidth: number | null
+										stability: number | null
+										rewire_score: number | null
+								  }
+								| undefined)
 
 				if (!existing) {
 					if (remaining_budget <= 0) {
@@ -97,6 +125,7 @@ const strengthenCenterEdges = (groups: Array<ReplayGroup>, now: number, budget: 
 					insertEdge.run(
 						getId(),
 						rewire_query_relation,
+						agent_id,
 						center_id,
 						accepted_id,
 						rewire_silent_initial_weight,
@@ -150,13 +179,114 @@ const deleteProcessedEvents = (event_ids: Array<string>) => {
 	return Number(result.changes ?? 0)
 }
 
+const applyScopeGroups = (args: {
+	agent_id: string | null
+	groups: Array<ReplayGroup>
+	summary: RewireCycleSummary
+}) => {
+	const { agent_id, groups, summary } = args
+	const now = Date.now()
+	const current_config = getRewireConfig()
+	const touched_nodes = new Set<string>()
+	const peer_map = new Map<string, Set<string>>()
+	const processed_event_ids = [] as Array<string>
+	let creation_budget = current_config.max_edge_creations_per_cycle
+	let prune_budget = current_config.max_edge_prunes_per_cycle
+
+	const strengthen_result = strengthenCenterEdges({
+		agent_id,
+		groups,
+		now,
+		budget: creation_budget
+	})
+	summary.edges_strengthened += strengthen_result.strengthened
+	summary.edges_created += strengthen_result.created
+	creation_budget = Math.max(0, creation_budget - strengthen_result.created)
+
+	for (const group of groups) {
+		summary.groups_processed += 1
+		processed_event_ids.push(...group.event_ids)
+
+		for (const node_id of [...group.center_node_ids, ...group.accepted_node_ids, ...group.rejected_node_ids]) {
+			if (node_id) {
+				touched_nodes.add(node_id)
+			}
+		}
+
+		for (const source_id of group.accepted_node_ids) {
+			if (!peer_map.has(source_id)) {
+				peer_map.set(source_id, new Set())
+			}
+
+			for (const target_id of group.accepted_node_ids) {
+				if (target_id && target_id !== source_id) {
+					peer_map.get(source_id)?.add(target_id)
+				}
+			}
+		}
+
+		const candidate_result = sampleCandidates({
+			agent_id,
+			group,
+			now,
+			budget: creation_budget
+		})
+
+		summary.edges_created += candidate_result.created
+		creation_budget = Math.max(0, creation_budget - candidate_result.created)
+	}
+
+	const touched_node_ids = [...touched_nodes]
+	const stabilize_result = stabilizeEdges({
+		agent_id,
+		touched_node_ids,
+		now
+	})
+	summary.edges_promoted += stabilize_result.promoted
+
+	const homeostasis_result = applyHomeostasis({
+		agent_id,
+		touched_node_ids,
+		peer_map,
+		now,
+		budget: prune_budget
+	})
+	summary.edges_pruned += homeostasis_result.pruned
+	summary.edges_downgraded += homeostasis_result.downgraded
+	summary.edges_created += homeostasis_result.created
+	prune_budget = Math.max(0, prune_budget - homeostasis_result.pruned - homeostasis_result.downgraded)
+
+	const decay_result = decay({
+		agent_id,
+		now,
+		budget: prune_budget
+	})
+	summary.edges_decayed += decay_result.decayed
+	summary.edges_pruned += decay_result.pruned
+	summary.edges_downgraded += decay_result.downgraded
+	summary.events_deleted += deleteProcessedEvents(processed_event_ids)
+	summary.touched_nodes += touched_nodes.size
+}
+
 export default async () => {
 	const cycle_at = Date.now()
-	const current_config = getRewireConfig()
 	const summary = buildInitialSummary(cycle_at)
-	const groups = await collectReplayGroups()
+	const [global_groups, active_agent_ids] = await Promise.all([
+		collectReplayGroups({ agent_id: null }),
+		getRecentActiveAgentIds()
+	])
+	const agent_group_sets = await Promise.all(
+		active_agent_ids.map(async agent_id => ({
+			agent_id,
+			groups: await collectReplayGroups({ agent_id })
+		}))
+	)
+	const scoped_groups = [
+		{ agent_id: null, groups: global_groups },
+		...agent_group_sets.filter(item => item.groups.length > 0)
+	]
 
-	if (groups.length === 0) {
+	if (scoped_groups.every(item => item.groups.length === 0)) {
 		return {
 			...summary,
 			skipped: true,
@@ -164,85 +294,21 @@ export default async () => {
 		}
 	}
 
-	const now = Date.now()
-	const touched_nodes = new Set<string>()
-	const peer_map = new Map<string, Set<string>>()
-	const processed_event_ids = [] as Array<string>
-	let creation_budget = current_config.max_edge_creations_per_cycle
-	let prune_budget = current_config.max_edge_prunes_per_cycle
-
 	const transaction = env.sqlite.transaction(() => {
-		const strengthen_result = strengthenCenterEdges(groups, now, creation_budget)
-		summary.edges_strengthened = strengthen_result.strengthened
-		summary.edges_created += strengthen_result.created
-		creation_budget = Math.max(0, creation_budget - strengthen_result.created)
-
-		for (const group of groups) {
-			summary.groups_processed += 1
-			processed_event_ids.push(...group.event_ids)
-
-			for (const node_id of [
-				...group.center_node_ids,
-				...group.accepted_node_ids,
-				...group.rejected_node_ids
-			]) {
-				if (node_id) {
-					touched_nodes.add(node_id)
-				}
+		for (const scope_item of scoped_groups) {
+			if (scope_item.groups.length === 0) {
+				continue
 			}
 
-			for (const source_id of group.accepted_node_ids) {
-				if (!peer_map.has(source_id)) {
-					peer_map.set(source_id, new Set())
-				}
-
-				for (const target_id of group.accepted_node_ids) {
-					if (target_id && target_id !== source_id) {
-						peer_map.get(source_id)?.add(target_id)
-					}
-				}
-			}
-
-			const candidate_result = sampleCandidates({
-				group,
-				now,
-				budget: creation_budget
+			applyScopeGroups({
+				agent_id: scope_item.agent_id,
+				groups: scope_item.groups,
+				summary
 			})
-
-			summary.edges_created += candidate_result.created
-			creation_budget = Math.max(0, creation_budget - candidate_result.created)
 		}
-
-		const stabilize_result = stabilizeEdges({
-			touched_node_ids: [...touched_nodes],
-			now
-		})
-		summary.edges_promoted += stabilize_result.promoted
-
-		const homeostasis_result = applyHomeostasis({
-			touched_node_ids: [...touched_nodes],
-			peer_map,
-			now,
-			budget: prune_budget
-		})
-		summary.edges_pruned += homeostasis_result.pruned
-		summary.edges_downgraded += homeostasis_result.downgraded
-		summary.edges_created += homeostasis_result.created
-		prune_budget = Math.max(0, prune_budget - homeostasis_result.pruned - homeostasis_result.downgraded)
-
-		const decay_result = decay({
-			now,
-			budget: prune_budget
-		})
-		summary.edges_decayed += decay_result.decayed
-		summary.edges_pruned += decay_result.pruned
-		summary.edges_downgraded += decay_result.downgraded
-		summary.events_deleted = deleteProcessedEvents(processed_event_ids)
 	})
 
 	transaction()
-
-	summary.touched_nodes = touched_nodes.size
 
 	return summary
 }

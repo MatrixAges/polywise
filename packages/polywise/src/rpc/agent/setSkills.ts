@@ -1,3 +1,4 @@
+import { assertAgentWritableForBehavior } from '@core/db/services'
 import { array, object, string } from 'zod'
 
 import { replaceAgentSkills } from '../../db/services/externals'
@@ -18,5 +19,7 @@ export default p
 	})
 	.input(input_type)
 	.mutation(async ({ input }) => {
+		await assertAgentWritableForBehavior(input.agent_id)
+
 		return replaceAgentSkills(input)
 	})

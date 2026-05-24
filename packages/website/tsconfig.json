@@ -1,0 +1,31 @@
+{
+	"compilerOptions": {
+		"target": "ES2022",
+		"skipLibCheck": true,
+		"lib": ["ESNEXT", "DOM"],
+		"module": "ESNext",
+		"moduleResolution": "Bundler",
+		"strict": true,
+		"jsxImportSource": "react",
+		"jsx": "preserve",
+		"baseUrl": ".",
+		"esModuleInterop": true,
+		"resolveJsonModule": true,
+		"paths": {
+			"@website/*": ["./*"]
+		},
+		"emitDecoratorMetadata": true,
+		"experimentalDecorators": true,
+		"allowJs": true,
+		"noEmit": true,
+		"incremental": true,
+		"isolatedModules": true,
+		"plugins": [
+			{
+				"name": "next"
+			}
+		]
+	},
+	"include": ["**/*.ts", "**/*.tsx", ".vinext/types/**/*.ts", ".next/types/**/*.ts"],
+	"exclude": ["./node_modules"]
+}

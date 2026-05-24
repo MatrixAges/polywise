@@ -189,6 +189,18 @@ export default class Index {
 		return this.selected_agent?.tools || []
 	}
 
+	get is_selected_agent_frozen() {
+		return Boolean(this.selected_agent?.is_frozen)
+	}
+
+	get can_edit_selected_agent_behavior() {
+		return !this.is_selected_agent_frozen
+	}
+
+	get can_mutate_selected_agent_articles() {
+		return !this.is_selected_agent_frozen
+	}
+
 	get selected_article() {
 		return this.article_items.find(item => item.id === this.selected_article_id) || null
 	}
@@ -1089,7 +1101,13 @@ export default class Index {
 	async saveSelectedArticle(options?: { silent?: boolean }) {
 		const article_item = this.selected_article
 
-		if (!this.selected_agent_id || !article_item || this.article_saving || !this.article_dirty) {
+		if (
+			!this.selected_agent_id ||
+			!article_item ||
+			this.article_saving ||
+			!this.article_dirty ||
+			!this.can_mutate_selected_agent_articles
+		) {
 			return
 		}
 
@@ -1168,7 +1186,11 @@ export default class Index {
 	}
 
 	openCreatePrivateArticleDialog() {
-		if (!this.selected_agent_id || !this.can_manage_private_articles) {
+		if (
+			!this.selected_agent_id ||
+			!this.can_manage_private_articles ||
+			!this.can_mutate_selected_agent_articles
+		) {
 			return
 		}
 
@@ -1195,7 +1217,12 @@ export default class Index {
 	}
 
 	async submitPrivateArticleDialog() {
-		if (!this.selected_agent_id || !this.can_manage_private_articles || this.private_article_dialog_loading) {
+		if (
+			!this.selected_agent_id ||
+			!this.can_manage_private_articles ||
+			this.private_article_dialog_loading ||
+			!this.can_mutate_selected_agent_articles
+		) {
 			return
 		}
 
@@ -1285,6 +1312,13 @@ export default class Index {
 	}
 
 	startEditField(key: '' | 'name' | 'role' | 'description' | AgentTab) {
+		if (
+			this.is_selected_agent_frozen &&
+			(key === 'role' || key === 'prompt' || key === 'soul' || key === 'identity' || key === 'memory')
+		) {
+			return
+		}
+
 		this.edit_field_key = key
 	}
 
@@ -1775,18 +1809,25 @@ export default class Index {
 			return
 		}
 
+		if (
+			this.is_selected_agent_frozen &&
+			(key === 'role' || key === 'prompt' || key === 'soul' || key === 'identity' || key === 'memory')
+		) {
+			return
+		}
+
 		await this.updateAgent({ id, [key]: next_value })
 		this.edit_field_key = ''
 	}
 
 	async setModel(model: DefaultModel) {
-		if (!this.selected_agent_id) return
+		if (!this.selected_agent_id || !this.can_edit_selected_agent_behavior) return
 
 		await this.updateAgent({ id: this.selected_agent_id, model })
 	}
 
 	async setModelEffort(effort: string) {
-		if (!this.selected_agent_id) return
+		if (!this.selected_agent_id || !this.can_edit_selected_agent_behavior) return
 
 		const agent_item = this.selected_agent
 
@@ -1802,7 +1843,7 @@ export default class Index {
 	}
 
 	async setSkills(skill_ids: Array<string>) {
-		if (!this.selected_agent_id) return
+		if (!this.selected_agent_id || !this.can_edit_selected_agent_behavior) return
 
 		await rpc.agent.setSkills.mutate({
 			agent_id: this.selected_agent_id,
@@ -1815,7 +1856,7 @@ export default class Index {
 	}
 
 	async setTools(tool_names: Array<string>) {
-		if (!this.selected_agent_id) return
+		if (!this.selected_agent_id || !this.can_edit_selected_agent_behavior) return
 
 		await this.updateAgent({
 			id: this.selected_agent_id,
@@ -1848,7 +1889,7 @@ export default class Index {
 	}
 
 	async addArticle(article_id: string, for_type: ArticleForType) {
-		if (!this.selected_agent_id) return
+		if (!this.selected_agent_id || !this.can_mutate_selected_agent_articles) return
 
 		await rpc.agent.addArticle.mutate({
 			agent_id: this.selected_agent_id,
@@ -1864,10 +1905,34 @@ export default class Index {
 	}
 
 	async removeArticle(article_id: string) {
-		if (!this.selected_agent_id) return
+		if (!this.selected_agent_id || !this.can_mutate_selected_agent_articles) return
 
 		await rpc.agent.removeArticle.mutate({ agent_id: this.selected_agent_id, article_id })
 		await this.refreshRelatedArticles()
+	}
+
+	async toggleAgentFrozen(next_value: boolean) {
+		if (!this.selected_agent_id) return
+
+		await this.updateAgent({
+			id: this.selected_agent_id,
+			is_frozen: next_value
+		})
+
+		if (next_value) {
+			if (
+				this.edit_field_key === 'role' ||
+				this.edit_field_key === 'prompt' ||
+				this.edit_field_key === 'soul' ||
+				this.edit_field_key === 'identity' ||
+				this.edit_field_key === 'memory'
+			) {
+				this.edit_field_key = ''
+			}
+
+			this.related_articles_dialog_open = false
+			this.closePrivateArticleDialog({ force: true })
+		}
 	}
 
 	openAvatarDialog() {

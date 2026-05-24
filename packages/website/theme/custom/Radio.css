@@ -1,0 +1,33 @@
+.if-radio-group {
+	font-weight: 400;
+
+	.if-radio-wrapper {
+		margin-right: 12px;
+
+		&:last-child {
+			margin: 0;
+		}
+
+		span.if-radio + * {
+			padding-inline-start: 3px;
+			padding-inline-end: 0;
+		}
+
+		.if-radio {
+			&:not(.if-radio-checked) {
+				.if-radio-inner {
+					border-color: var(--color_border);
+				}
+			}
+		}
+
+		.if-radio-inner {
+			background-color: unset;
+
+			&::after {
+				background-color: var(--color_text);
+				transform: scale(0.42);
+			}
+		}
+	}
+}

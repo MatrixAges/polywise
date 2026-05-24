@@ -1,0 +1,15 @@
+.if-color-picker {
+	.if-color-picker-slider-container {
+		padding: 0 12px;
+		margin-bottom: 0 !important;
+	}
+
+	.if-color-picker-input-container {
+		padding: 12px;
+	}
+
+	.if-color-picker-palette {
+		border-bottom-right-radius: 0 !important;
+		border-bottom-left-radius: 0 !important;
+	}
+}

@@ -1,0 +1,48 @@
+:root {
+	--dirtree_width: 270px;
+	--limited_width: 1120px;
+	--limited_width_content: 1024px;
+	--limited_width_small: 870px;
+	--limited_padding: 48px;
+	--radius: 6px;
+	--radius_small: 4px;
+	--radius_small_1: 2px;
+	--radius_small_2: 1px;
+	--radius_large: 12px;
+	--radius_large_1: 18px;
+	--radius_large_2: 24px;
+
+	--blur: saturate(150%) blur(9px);
+	--blur_deep: saturate(150%) blur(24px);
+
+	--border: 1px solid var(--color_border_light);
+	--border_dashed: 1px dashed var(--color_border_light);
+	--border_light: 1px solid var(--color_border_soft);
+	--border_light_dashed: 1px dashed var(--color_border_soft);
+	--border_deep: 1px solid var(--color_border);
+	--border_deep_dashed: 1px dashed var(--color_border);
+
+	--editor_padding_y: 1.2em;
+	--editor_padding_x: 0;
+
+	--font_family:
+		'IBMPlexSans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans',
+		sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+	--font_serif: Georgia, 'Times New Roman', Times, serif;
+	--font_mono: 'GeistMono', monospace;
+}
+
+@media (max-width: 1200px) {
+	:root {
+		--limited_width_content: 100%;
+	}
+}
+
+@media (max-width: 720px) {
+	:root {
+		--dirtree_width: 0;
+		--limited_padding: 18px;
+		--limited_width: 100%;
+		--limited_width_small: 100%;
+	}
+}

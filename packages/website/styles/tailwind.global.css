@@ -1,0 +1,12 @@
+@import 'tailwindcss';
+
+@source '../app/**/*.{js,jsx,ts,tsx,mdx}';
+@source '../appdata/**/*.{js,jsx,ts,tsx,mdx}';
+@source '../appunits/**/*.{js,jsx,ts,tsx,mdx}';
+@source '../components/**/*.{js,jsx,ts,tsx,mdx}';
+@source '../hooks/**/*.{js,jsx,ts,tsx,mdx}';
+@source '../models/**/*.{js,jsx,ts,tsx,mdx}';
+@source '../services/**/*.{js,jsx,ts,tsx,mdx}';
+@source '../theme/**/*.{js,jsx,ts,tsx,mdx}';
+@source '../types/**/*.{js,jsx,ts,tsx,mdx}';
+@source '../utils/**/*.{js,jsx,ts,tsx,mdx}';

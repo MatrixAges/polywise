@@ -1,0 +1,1 @@
+ALTER TABLE `agent` ADD `is_frozen` integer DEFAULT false NOT NULL;

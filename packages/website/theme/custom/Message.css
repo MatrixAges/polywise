@@ -1,0 +1,30 @@
+.if-message {
+	top: initial !important;
+	bottom: 0px !important;
+
+	.if-message-notice-wrapper {
+		.if-message-notice {
+			padding: 0 !important;
+			margin-top: -8px;
+			text-align: right !important;
+
+			.if-message-notice-content {
+				padding: 3px 6px;
+				border-radius: 4px;
+				outline: var(--border);
+				background-color: var(--color_bg_1);
+				font-size: 12px;
+
+				.if-message-custom-content {
+					display: flex;
+					align-items: center;
+
+					.if-icon {
+						margin-inline-end: 4px;
+						font-size: 12px;
+					}
+				}
+			}
+		}
+	}
+}

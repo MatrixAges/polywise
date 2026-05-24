@@ -1,0 +1,52 @@
+._local {
+	--banner_color_sub: rgba(var(--color_text_rgb), 0.84);
+
+	gap: 12px;
+
+	:global {
+		.btn_app {
+			line-height: 1;
+			padding: 6px 9px;
+			border: 1px solid var(--banner_color_sub);
+			border-radius: var(--radius);
+			color: var(--banner_color_sub);
+			background-color: transparent;
+			transition-timing-function: ease;
+			transition-duration: 0.3s;
+			transition-property: color, background-color;
+			backdrop-filter: var(--blur);
+
+			&:hover {
+				color: black;
+				background-color: var(--banner_color_sub);
+
+				span {
+					color: black;
+				}
+			}
+
+			.logo_app_store {
+				margin-right: 6px;
+			}
+
+			.line_1 {
+				margin-bottom: 3px;
+				font-size: 10px;
+			}
+
+			.line_2 {
+				font-size: 16px;
+				font-weight: 500;
+			}
+
+			svg {
+				transition: color ease 0.18s;
+			}
+
+			span {
+				color: var(--banner_color_sub);
+				transition: color ease 0.3s;
+			}
+		}
+	}
+}

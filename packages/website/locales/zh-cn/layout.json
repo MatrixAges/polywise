@@ -1,0 +1,41 @@
+{
+	"Cookie": {
+		"desc": "我们使用cookie仅用作记录用户主题和语言偏好，不记录任何用户隐私信息",
+		"btn_get": "了解"
+	},
+	"slogan": {
+		"line_1": "Think different,",
+		"line_2": "Make different."
+	},
+	"title": {
+		"features": "特性",
+		"docs": "文档",
+		"changelog": "变更日志",
+		"pricing": "定价",
+		"solutions": "解决方案",
+		"download": "下载",
+
+		"activate": "激活码",
+		"gallery": "展厅",
+		"privacy": "隐私政策",
+		"terms": "服务条款",
+		"refund": "退款政策",
+		"appstore": "苹果商店",
+
+		"about_us": "关于我们",
+		"contact": "联系方式",
+		"journal": "开发者日志",
+		"blog": "博客",
+		"brand": "品牌"
+	},
+	"Setting": {
+		"title": "设置",
+		"theme": "主题",
+		"language": "语言"
+	},
+	"Footer": {
+		"product": "产品",
+		"resources": "资源",
+		"company": "公司"
+	}
+}

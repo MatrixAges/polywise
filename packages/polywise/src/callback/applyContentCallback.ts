@@ -98,31 +98,70 @@ export default async (args: ApplyContentCallbackArgs) => {
 
 	const feedback = await applyContentGraphFeedback({
 		center_node_id: trace.center_node_id,
+		query: trace.query,
 		hit_article_ids: next_hit_items,
 		miss_article_ids: next_miss_items
 	})
 
-	await recordRewireEvent({
-		session_id,
-		stimulus_key,
-		signal: 'content_callback',
-		events: [
-			{ node_id: trace.center_node_id, role: 'center', strength: 1 },
-			...feedback.hit_node_ids.map(node_id => ({
-				node_id,
-				role: 'accepted' as const,
-				strength: 1
-			})),
-			...feedback.miss_node_ids.map(node_id => ({
-				node_id,
-				role: 'rejected' as const,
-				strength: 0.35
-			}))
-		]
-	}).catch(error => {
+	const rewire_tasks = [] as Array<Promise<unknown>>
+
+	if (feedback.global_scope) {
+		rewire_tasks.push(
+			recordRewireEvent({
+				session_id,
+				stimulus_key,
+				signal: 'content_callback',
+				events: [
+					{ node_id: feedback.global_scope.center_node_id, role: 'center', strength: 1 },
+					...feedback.global_scope.hit_node_ids.map(node_id => ({
+						node_id,
+						role: 'accepted' as const,
+						strength: 1
+					})),
+					...feedback.global_scope.miss_node_ids.map(node_id => ({
+						node_id,
+						role: 'rejected' as const,
+						strength: 0.35
+					}))
+				]
+			})
+		)
+	}
+
+	for (const scope_item of feedback.agent_scopes) {
+		rewire_tasks.push(
+			recordRewireEvent({
+				agent_id: scope_item.agent_id,
+				session_id,
+				stimulus_key,
+				signal: 'content_callback',
+				events: [
+					{ node_id: scope_item.center_node_id, role: 'center', strength: 1 },
+					...scope_item.hit_node_ids.map(node_id => ({
+						node_id,
+						role: 'accepted' as const,
+						strength: 1
+					})),
+					...scope_item.miss_node_ids.map(node_id => ({
+						node_id,
+						role: 'rejected' as const,
+						strength: 0.35
+					}))
+				]
+			})
+		)
+	}
+
+	await Promise.allSettled(rewire_tasks).then(results => {
+		const first_error = results.find((result): result is PromiseRejectedResult => result.status === 'rejected')
+
+		if (!first_error) {
+			return
+		}
+
 		log('SYSTEM', 'rewireEventRecordFailed', () => ({
 			trace_id,
-			error: error instanceof Error ? error.message : String(error)
+			error: first_error.reason instanceof Error ? first_error.reason.message : String(first_error.reason)
 		}))
 	})
 

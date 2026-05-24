@@ -1,4 +1,5 @@
 import {
+	assertAgentWritableForBehavior,
 	deleteEdgeVector,
 	deleteNodeVector,
 	getEdgeRowid,
@@ -307,6 +308,7 @@ export const savePrivateAgentArticle = async (args: {
 	article_id?: string
 }) => {
 	await ensureAgentExists(args.agent_id)
+	await assertAgentWritableForBehavior(args.agent_id)
 
 	if (args.article_id) {
 		const current_article = await getArticle(eq(article.id, args.article_id))

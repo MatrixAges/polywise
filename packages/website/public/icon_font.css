@@ -1,0 +1,129 @@
+/** IBMPlexSans */
+@font-face {
+	font-family: 'IBMPlexSans';
+	font-style: normal;
+	font-weight: 100;
+	src:
+		local('IBMPlexSans'),
+		url('./font/IBMPlexSans/IBMPlexSans-Thin.ttf') format('truetype');
+}
+@font-face {
+	font-family: 'IBMPlexSans';
+	font-style: italic;
+	font-weight: 100;
+	src:
+		local('IBMPlexSans'),
+		url('./font/IBMPlexSans/IBMPlexSans-ThinItalic.ttf') format('truetype');
+}
+
+@font-face {
+	font-family: 'IBMPlexSans';
+	font-style: normal;
+	font-weight: 200;
+	src:
+		local('IBMPlexSans'),
+		url('./font/IBMPlexSans/IBMPlexSans-ExtraLight.ttf') format('truetype');
+}
+@font-face {
+	font-family: 'IBMPlexSans';
+	font-style: italic;
+	font-weight: 200;
+	src:
+		local('IBMPlexSans'),
+		url('./font/IBMPlexSans/IBMPlexSans-ExtraLightItalic.ttf') format('truetype');
+}
+
+@font-face {
+	font-family: 'IBMPlexSans';
+	font-style: normal;
+	font-weight: 300;
+	src:
+		local('IBMPlexSans'),
+		url('./font/IBMPlexSans/IBMPlexSans-Light.ttf') format('truetype');
+}
+@font-face {
+	font-family: 'IBMPlexSans';
+	font-style: italic;
+	font-weight: 300;
+	src:
+		local('IBMPlexSans'),
+		url('./font/IBMPlexSans/IBMPlexSans-LightItalic.ttf') format('truetype');
+}
+
+@font-face {
+	font-family: 'IBMPlexSans';
+	font-style: normal;
+	font-weight: 400;
+	src:
+		local('IBMPlexSans'),
+		url('./font/IBMPlexSans/IBMPlexSans-Regular.ttf') format('truetype');
+}
+@font-face {
+	font-family: 'IBMPlexSans';
+	font-style: italic;
+	font-weight: 400;
+	src:
+		local('IBMPlexSans'),
+		url('./font/IBMPlexSans/IBMPlexSans-Italic.ttf') format('truetype');
+}
+
+@font-face {
+	font-family: 'IBMPlexSans';
+	font-style: normal;
+	font-weight: 500;
+	src:
+		local('IBMPlexSans'),
+		url('./font/IBMPlexSans/IBMPlexSans-Medium.ttf') format('truetype');
+}
+@font-face {
+	font-family: 'IBMPlexSans';
+	font-style: italic;
+	font-weight: 500;
+	src:
+		local('IBMPlexSans'),
+		url('./font/IBMPlexSans/IBMPlexSans-MediumItalic.ttf') format('truetype');
+}
+
+@font-face {
+	font-family: 'IBMPlexSans';
+	font-style: normal;
+	font-weight: 600;
+	src:
+		local('IBMPlexSans'),
+		url('./font/IBMPlexSans/IBMPlexSans-SemiBold.ttf') format('truetype');
+}
+@font-face {
+	font-family: 'IBMPlexSans';
+	font-style: italic;
+	font-weight: 600;
+	src:
+		local('IBMPlexSans'),
+		url('./font/IBMPlexSans/IBMPlexSans-SemiBoldItalic.ttf') format('truetype');
+}
+
+@font-face {
+	font-family: 'IBMPlexSans';
+	font-style: normal;
+	font-weight: 700;
+	src:
+		local('IBMPlexSans'),
+		url('./font/IBMPlexSans/IBMPlexSans-Bold.ttf') format('truetype');
+}
+@font-face {
+	font-family: 'IBMPlexSans';
+	font-style: italic;
+	font-weight: 700;
+	src:
+		local('IBMPlexSans'),
+		url('./font/IBMPlexSans/IBMPlexSans-BoldItalic.ttf') format('truetype');
+}
+
+/** GeistMono */
+@font-face {
+	font-family: 'GeistMono';
+	font-style: normal;
+	font-weight: 400;
+	src:
+		local('IBMPlexSans'),
+		url('./font/GeistMono/GeistMono-Regular.ttf') format('truetype');
+}

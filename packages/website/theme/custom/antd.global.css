@@ -1,0 +1,21 @@
+@import './Button.css';
+@import './ColorPicker.css';
+@import './Datepicker.css';
+@import './Drawer.css';
+@import './Dropdown.css';
+@import './Input.css';
+@import './Message.css';
+@import './Modal.css';
+@import './Pagination.css';
+@import './Popover.css';
+@import './Radio.css';
+@import './Select.css';
+@import './Switch.css';
+@import './Table.css';
+@import './Tabs.css';
+@import './Tooltip.css';
+@import './Segmented.css';
+
+.if {
+	color: var(--color_text);
+}

@@ -1,0 +1,11 @@
+.if-segmented {
+	.if-segmented-item-label {
+		display: flex;
+		align-items: center;
+	}
+
+	.if-segmented-item-icon {
+		display: flex;
+		line-height: 1;
+	}
+}

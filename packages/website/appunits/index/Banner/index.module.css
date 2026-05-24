@@ -1,0 +1,139 @@
+._local {
+	--banner_color_sub: rgba(var(--color_text_rgb), 0.84);
+
+	:global {
+		.gradient {
+			z-index: 0;
+			top: -16px;
+			width: 360px;
+			height: 1600px;
+			border-radius: 30%;
+		}
+
+		.gradient_mask {
+			z-index: 0;
+			top: -16px;
+			height: 1600px;
+			background: linear-gradient(
+				to bottom,
+				rgba(var(--color_bg_rgb), 1),
+				transparent,
+				rgba(var(--color_bg_rgb), 1)
+			);
+			backdrop-filter: saturate(150%) blur(240px);
+		}
+
+		.limited_content_wrap {
+			padding-top: 72px;
+
+			.title_wrap {
+				width: calc(100% + 24px);
+				margin-bottom: 30px;
+				font-family: var(--font_serif);
+
+				h1 {
+					line-height: 1;
+					margin: 0;
+					font-size: 72px;
+					font-weight: 500;
+				}
+
+				.feature {
+					margin-right: -12px;
+					margin-bottom: 21px;
+				}
+
+				.with {
+					.module {
+						display: inline-block;
+						text-decoration-color: var(--banner_color_sub);
+						text-decoration-line: underline;
+						text-decoration-style: wavy;
+						text-decoration-thickness: 2px;
+						text-underline-offset: 9px;
+					}
+				}
+			}
+
+			.desc_wrap {
+				margin-bottom: 24px;
+
+				.desc {
+					line-height: 1.5;
+					margin: 0;
+					color: var(--banner_color_sub);
+					font-size: 18px;
+					font-weight: 400;
+				}
+			}
+
+			.tips {
+				margin-top: 18px;
+				margin-bottom: 48px;
+				color: rgba(var(--color_text_rgb), 0.6);
+				font-size: 12px;
+			}
+
+			.image_preview_wrap {
+				min-height: 647.71px;
+
+				.image {
+					width: 100%;
+					height: auto;
+					padding: 0;
+					margin: 0;
+					border: 3px solid rgba(var(--color_text_rgb), 0.06);
+					border-radius: 10px;
+					user-select: none;
+					pointer-events: none;
+					backdrop-filter: var(--blur);
+				}
+			}
+		}
+	}
+}
+
+@media (max-width: 720px) {
+	._local {
+		:global {
+			.gradient {
+				width: 100%;
+				height: 600px;
+				border-radius: unset;
+				opacity: 0.6;
+			}
+
+			.gradient_mask {
+				height: 600px;
+			}
+
+			.limited_content_wrap {
+				padding-top: 18px;
+
+				.title_wrap {
+					h1 {
+						font-size: 39px;
+					}
+				}
+
+				.desc_wrap {
+					display: block;
+					text-align: center;
+
+					.desc {
+						display: inline;
+						font-size: 14px;
+					}
+				}
+
+				.tips {
+					margin-bottom: 30px;
+				}
+
+				.image_preview_wrap {
+					min-height: unset;
+				}
+			}
+		}
+	}
+}

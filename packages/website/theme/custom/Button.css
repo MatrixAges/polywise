@@ -1,0 +1,28 @@
+.if-btn {
+	&-default {
+		&:active,
+		&:hover {
+			border-color: var(--color_text_grey) !important;
+			color: var(--color_text) !important;
+		}
+	}
+
+	&-primary {
+		&:disabled {
+			color: var(--color_text_light);
+			background-color: var(--color_bg_1);
+		}
+
+		&.if-btn-dangerous {
+			&:hover {
+				outline: 3px solid var(--color_border);
+				background-color: var(--color_danger) !important;
+			}
+		}
+	}
+
+	&.if-btn-two-chinese-chars > *:not(.if-icon) {
+		margin-inline-end: unset;
+		letter-spacing: unset;
+	}
+}

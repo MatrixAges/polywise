@@ -1,0 +1,132 @@
+._local {
+	padding-top: 36px;
+	padding-right: 0;
+
+	:global {
+		.changelog_wrap {
+			margin-bottom: 48px;
+
+			.if-affix,
+			.ant-affix {
+				height: unset !important;
+			}
+
+			.left_wrap {
+				width: 180px;
+				line-height: 1;
+				padding-top: 18px;
+				color: var(--color_text_sublight);
+
+				&:hover {
+					.version_wrap {
+						color: var(--color_text);
+					}
+				}
+
+				&.sticky {
+					position: sticky;
+					z-index: 100;
+					top: 90px;
+				}
+
+				.version {
+					font-size: 14px;
+					font-weight: 500;
+				}
+
+				.date {
+					margin-top: 12px;
+					font-size: 12px;
+				}
+			}
+
+			.md_wrap {
+				width: calc(100% - 180px);
+				padding: 30px;
+				padding-top: 0;
+				border-radius: var(--radius_large);
+				background-color: var(--color_bg_1);
+
+				.badge_link {
+					z-index: 10;
+					border-top: 45px solid var(--color_bg_2);
+					border-left: 45px solid transparent;
+					border-top-right-radius: var(--radius_large);
+
+					&:hover {
+						border-top-color: rgba(var(--color_text_rgb), 0.12);
+
+						.icon {
+							color: var(--color_text);
+						}
+					}
+
+					.icon {
+						top: -38px;
+						right: 4px;
+						color: var(--color_text_sublight);
+						font-size: 15px;
+					}
+				}
+			}
+		}
+	}
+}
+
+@media (max-width: 720px) {
+	._local {
+		:global {
+			.changelog_wrap {
+				flex-direction: column;
+
+				.if-affix,
+				.ant-affix {
+					top: 59px !important;
+					left: 0;
+					width: 100% !important;
+				}
+
+				.left_wrap {
+					align-items: center;
+					width: 100%;
+					padding-top: 0;
+					margin-bottom: 18px;
+
+					&.affixed {
+						left: 0;
+						align-items: center;
+						flex-direction: row;
+						justify-content: space-between;
+						height: 42px;
+						padding: 0 21px;
+						margin-bottom: 0;
+						background-color: var(--color_bg);
+
+						.date {
+							margin-top: 0;
+						}
+					}
+
+					.version {
+						color: var(--color_text);
+						font-weight: 500;
+					}
+
+					svg {
+						color: var(--color_text);
+					}
+
+					.date {
+						color: var(--color_text);
+					}
+				}
+
+				.md_wrap {
+					width: 100%;
+					padding: 0 6px;
+					background-color: unset;
+				}
+			}
+		}
+	}
+}

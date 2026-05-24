@@ -1,0 +1,8 @@
+export { default as Banner } from './Banner'
+export { default as Customers } from './Customers'
+export { default as LightTop } from './LightTop'
+export { default as WhyIF } from './WhyIF'
+export { default as Painpoint } from './Painpoint'
+export { default as Features } from './Features'
+export { default as Latest } from './Latest'
+export { default as Callback } from './Callback'

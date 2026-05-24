@@ -1,0 +1,130 @@
+@keyframes rotate {
+	from {
+		rotate: z 0;
+	}
+
+	to {
+		rotate: z 360deg;
+	}
+}
+
+._local {
+	padding: 0 !important;
+	border-top: var(--border);
+	border-bottom: var(--border);
+
+	:global {
+		.latest_item {
+			width: 50%;
+			padding: 21px 24px;
+			border-left: var(--border);
+
+			&:last-child {
+				border-right: var(--border);
+			}
+
+			&:hover {
+				.header_wrap {
+					img {
+						:local {
+							animation: rotate 3s linear infinite;
+						}
+					}
+				}
+			}
+
+			.header_wrap {
+				.latest_title {
+					line-height: 1;
+					padding-bottom: 2px;
+					margin: 0;
+					margin-bottom: 12px;
+					background: linear-gradient(
+							to bottom,
+							rgba(var(--color_text_rgb), 0.9),
+							rgba(var(--color_text_rgb), 0.3)
+						)
+						text;
+					font-weight: 500;
+					-webkit-text-fill-color: transparent;
+				}
+
+				.desc {
+					line-height: 1;
+					padding-bottom: 2px;
+					padding-bottom: 2px;
+					background: linear-gradient(
+							to bottom,
+							rgba(var(--color_text_rgb), 0.72),
+							rgba(var(--color_text_rgb), 0.3)
+						)
+						text;
+					-webkit-text-fill-color: transparent;
+				}
+
+				img {
+					width: 60px;
+					opacity: 0.72;
+				}
+			}
+
+			.items_wrap {
+				padding-top: 24px;
+
+				.item_wrap {
+					padding-bottom: 18px;
+					margin-bottom: 18px;
+					border-bottom: var(--border_dashed);
+					color: var(--color_text_sub);
+					cursor: pointer;
+
+					&:hover {
+						.content_title {
+							color: var(--color_text);
+							text-decoration: underline;
+						}
+					}
+
+					&:last-child {
+						padding-bottom: 0;
+						margin-bottom: 0;
+						border-bottom: none;
+					}
+
+					.item_title {
+						line-height: 1;
+						margin: 0;
+						margin-bottom: 9px;
+						font-size: 15px;
+						font-weight: 400;
+					}
+
+					.content_title {
+						overflow: hidden;
+						text-overflow: ellipsis;
+						white-space: nowrap;
+					}
+				}
+			}
+		}
+	}
+}
+
+@media (max-width: 720px) {
+	._local {
+		:global {
+			.limited_content_wrap {
+				flex-direction: column;
+
+				.latest_item {
+					width: 100%;
+
+					&:first-child {
+						border-right: var(--border);
+						border-bottom: var(--border);
+					}
+				}
+			}
+		}
+	}
+}

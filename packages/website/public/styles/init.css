@@ -1,0 +1,94 @@
+[data-theme='light'] {
+	--from: 100% 0 0 0;
+}
+
+[data-theme='dark'] {
+	--from: 0 0 100% 0;
+
+	::selection {
+		color: rgba(var(--color_bg_rgb), 1);
+		background-color: rgba(var(--color_text_rgb), 0.81);
+	}
+}
+
+@keyframes reveal {
+	from {
+		clip-path: inset(var(--from));
+	}
+}
+
+::view-transition-new(root) {
+	z-index: 1000;
+	animation: reveal 0.6s ease !important;
+	clip-path: inset(0 0 0 0);
+}
+
+::view-transition-old(root) {
+	z-index: -1;
+	animation: none;
+}
+
+html,
+body {
+	line-height: var(--line_height);
+	padding: 0;
+	margin: 0;
+	color: var(--color_text);
+	background-color: var(--color_bg);
+	font-family: var(--font_family);
+	font-size: 14px;
+	text-rendering: optimizeLegibility;
+	-webkit-text-size-adjust: 100%;
+	text-size-adjust: 100%;
+	unicode-bidi: isolate;
+
+	-webkit-tap-highlight-color: transparent;
+}
+
+body {
+	box-sizing: border-box;
+}
+
+::-webkit-scrollbar-thumb {
+	background-color: transparent;
+}
+
+::-webkit-scrollbar {
+	width: 0px;
+	height: 0px;
+}
+
+::-webkit-input-placeholder,
+.if-select-selection-placeholder {
+	color: var(--color_text_light) !important;
+}
+
+input:-internal-autofill-previewed,
+input:-internal-autofill-selected {
+	transition: background-color 5000000s ease-in-out 0s !important;
+}
+
+::selection {
+	color: var(--color_text);
+	background-color: rgba(var(--color_bg_rgb), 0.9);
+}
+
+a {
+	color: var(--color_text);
+}
+
+a:hover {
+	color: inherit;
+}
+
+input,
+button {
+	font-family: var(--font_family);
+}
+
+:where(button) {
+	border: none;
+	outline: none;
+	color: var(--color_text);
+	box-shadow: none;
+}

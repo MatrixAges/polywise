@@ -1,0 +1,67 @@
+._local {
+	:global {
+		.painpoint_items {
+			margin-top: 30px;
+			letter-spacing: 0.3px;
+			gap: 30px;
+
+			.painpoint_item {
+				width: calc((100% - 60px) / 3);
+				padding: 30px;
+				border-radius: var(--radius_large_1);
+
+				.painpoint_image {
+					top: -15px;
+					right: 15px;
+					width: 60px;
+				}
+
+				.pain_title {
+					line-height: 1;
+					margin: 0;
+					margin-bottom: 15px;
+					color: var(--color_text_grey);
+					font-size: 1em;
+					font-weight: 400;
+				}
+
+				.pain {
+					line-height: 1.32;
+					margin-bottom: 21px;
+					font-size: 1.5em;
+				}
+
+				.solution {
+					color: var(--color_text_sub);
+					font-size: 15px;
+					font-weight: 400;
+
+					.line {
+						margin-bottom: 12px;
+
+						&:last-child {
+							margin-bottom: 0;
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+@media (max-width: 720px) {
+	._local {
+		padding-top: 0;
+		margin-top: -120px;
+
+		:global {
+			.painpoint_items {
+				flex-direction: column;
+
+				.painpoint_item {
+					width: 100%;
+				}
+			}
+		}
+	}
+}

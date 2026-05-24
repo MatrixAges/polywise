@@ -1,0 +1,51 @@
+import '@website/global_css'
+
+import { Client, Router } from '@website/appunits/layout'
+import { getUserLocale, getUserTheme } from '@website/services'
+import { NextIntlClientProvider } from 'next-intl'
+import { getMessages } from 'next-intl/server'
+
+import type { IPropsClient } from '@website/appunits/layout/Client'
+import type { Metadata } from 'next'
+import type { PropsWithChildren } from 'react'
+
+export const metadata: Metadata = {
+	title: 'Polywise',
+	description: 'Polywise official website'
+}
+
+const RootLayout = async ({ children }: PropsWithChildren) => {
+	const messages = await getMessages()
+	const { locale, cookie: locale_cookie_exsit } = await getUserLocale()
+	const { theme, cookie: theme_cookie_exsit } = await getUserTheme()
+
+	const props_client: IPropsClient = {
+		locale,
+		locale_cookie_exsit,
+		theme,
+		theme_cookie_exsit
+	}
+
+	return (
+		<html lang={locale} data-theme={theme} style={{ colorScheme: theme }} suppressHydrationWarning>
+			<head>
+				<meta charSet='UTF-8' />
+				<link id='favicon' rel='icon' type='image/svg+xml' href='/logo.svg' />
+				<link rel='stylesheet' href='/styles/init.css' />
+				<link rel='stylesheet' href='/styles/atom.min.css' />
+				<link rel='stylesheet' href='/icon_font.css' />
+				<link rel='stylesheet' href='/theme/common.css' />
+				<link rel='stylesheet' href='/theme/light.css' />
+				<link rel='stylesheet' href='/theme/dark.css' />
+			</head>
+			<body>
+				<Router />
+				<NextIntlClientProvider locale={locale} messages={messages}>
+					<Client {...props_client}>{children}</Client>
+				</NextIntlClientProvider>
+			</body>
+		</html>
+	)
+}
+
+export default RootLayout

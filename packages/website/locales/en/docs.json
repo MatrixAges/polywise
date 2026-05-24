@@ -1,0 +1,78 @@
+{
+	"header": {
+		"title": "Docs",
+		"btn_search": "Search docs"
+	},
+	"search": {
+		"loading_index": "Loading index...",
+		"loading_items": "Searching...",
+		"placeholder": "Search in documents",
+		"to_navigate": "to navigate",
+		"to_select": "to select",
+		"to_close": "to close",
+		"history": "Search history"
+	},
+	"footer": {
+		"download": "Download",
+		"contact": "Contact support"
+	},
+	"page": {
+		"title": "Documentation",
+		"desc": "Get an overview of Polywise's features, settings, and how to use them.",
+		"popular": {
+			"title": "Most asked",
+			"0": {
+				"title": "Start Guide",
+				"desc": "How to use the app and follow best practices"
+			},
+			"1": {
+				"title": "Linked Todo",
+				"desc": "Link multiple todo items make them mutually exclusive"
+			},
+			"2": {
+				"title": "Cycle Todo",
+				"desc": "Set cycle for the todo, it will auto restore from the archive"
+			},
+			"3": {
+				"title": "Note Blocks",
+				"desc": "What blocks are supported by Note for Markdown standards"
+			},
+			"4": {
+				"title": "Schedule",
+				"desc": "How to use the schedule to plan your daily work and life"
+			},
+			"5": {
+				"title": "Global Settings",
+				"desc": "What settings does Polywise support to adjust user preferences"
+			}
+		},
+		"basics": {
+			"title": "Basics",
+			"desc": "Learn about Polywise's basic concepts and features",
+			"0": {
+				"title": "Auto Archive",
+				"desc": "Automatically archive when a todo is completed or closed"
+			},
+			"1": {
+				"title": "Todo Settings",
+				"desc": "Add angles, tags to Todo, and set automatic archiving cycle"
+			},
+			"2": {
+				"title": "Note",
+				"desc": "Learn how to use Note and what features are supported by Note"
+			},
+			"3": {
+				"title": "Note Table",
+				"desc": "Use Notes' powerful tables to record structured data"
+			},
+			"4": {
+				"title": "Flow Mode",
+				"desc": "Learn how to use Pomo's flow mode to maintain focus"
+			},
+			"5": {
+				"title": "Timeline View",
+				"desc": "Use the timeline to schedule cross-period tasks"
+			}
+		}
+	}
+}

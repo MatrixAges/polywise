@@ -988,6 +988,7 @@ export const importAgentPack = async (file_path: string) => {
 						soul: snapshot.agent.soul,
 						identity: snapshot.agent.identity,
 						memory: snapshot.agent.memory,
+						is_frozen: true,
 						order: next_agent_order,
 						model: snapshot.agent.model,
 						created_at: snapshot.agent.created_at ?? now,
@@ -1072,6 +1073,7 @@ export const importAgentPack = async (file_path: string) => {
 							...item.source,
 							id: item.next_id,
 							agent_id: next_agent_id,
+							is_frozen: true,
 							created_at: item.source.created_at ?? now
 						})
 						.run()
@@ -1086,6 +1088,7 @@ export const importAgentPack = async (file_path: string) => {
 							agent_id: next_agent_id,
 							source_id: item.source_id,
 							target_id: item.target_id,
+							is_frozen: true,
 							created_at: item.source.created_at ?? now
 						})
 						.run()

@@ -62,6 +62,7 @@ export interface RewireEventInput {
 }
 
 export interface ReplayGroup {
+	agent_id: string | null
 	stimulus_key: string
 	signal: string
 	event_ids: Array<string>

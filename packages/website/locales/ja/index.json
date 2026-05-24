@@ -1,0 +1,93 @@
+{
+	"Banner": {
+		"todo": {
+			"action": "Get Things Down"
+		},
+		"note": {
+			"action": "Writing"
+		},
+		"pomo": {
+			"action": "Focus"
+		},
+		"schedule": {
+			"action": "Planing"
+		},
+		"features": {
+			"action": "Thinking"
+		},
+		"with": "with Polywise's ",
+		"desc": {
+			"line_1": "A local-first productivity tool for content, planning and data.",
+			"line_2": "Not only effciency tool, but your business."
+		},
+		"tips": "Free to start. No need login and all in local."
+	},
+	"Why_if": {
+		"title": "Why Polywise",
+		"subtitle": "Own your data, local your business",
+		"roles": {
+			"user": "User",
+			"ai": "AI",
+			"dataflow": "Dataflow"
+		}
+	},
+	"Painpoint": {
+		"title": "Painpoint",
+		"subtitle": "Your pain, our mission",
+		"items": {
+			"0": {
+				"title": "Local First",
+				"pain": "Feel cloud content is slow and unable to ensure privacy?",
+				"solution": "With Polywise, all data is stored locally, supporting backup and recovery, and is ready to use right away.\nThere’s no need to worry about network unavailability or about your personal data being secretly used for AI training or shared with advertisers."
+			},
+			"1": {
+				"title": "User First",
+				"pain": "Worried that app providers sacrifice user experience for profit?",
+				"solution": "Polywise centers around localization to provide features, striving to deliver the best possible user experience.\nUnlike large cloud-based products, which incur bulky team and server costs, we prioritize user benefits over commercial interests."
+			},
+			"2": {
+				"title": "Keep It Simple Stupid",
+				"pain": "Dislike All in One and the design style of cluttered in colors?",
+				"solution": "Polywise adopts a modular design for its features, avoiding the mental burden caused by an all-in-one approach.\nIt also employs an ultra-minimalist, paper-like design style, providing users with a visually stress-free experience to support long hours of immersive content creation."
+			}
+		}
+	},
+	"Features": {
+		"title": "Features",
+		"subtitle": "Next-gen content and data solutions",
+		"origin": "Origin",
+		"items": {
+			"0": {
+				"title": "Todo",
+				"desc": "Constant effort leads to success.\nTrack your daily actions with to-do lists and gain self-affirming energy with each completed task."
+			},
+			"1": {
+				"title": "Note",
+				"desc": "Learning without reflection is a waste.\nBuilt on the Markdown standard, what you see is what you get, allowing you to enjoy an immersive writing experience."
+			},
+			"2": {
+				"title": "Pomo",
+				"desc": "A journey of a thousand miles begins with a single step.\nUse the Pomodoro technique to build small milestones and regain your focus."
+			},
+			"3": {
+				"title": "Schedule",
+				"desc": "Greatness cannot be planned, but creation can.\nUse the schedule to build your goals in the dimension of time, and it’s better to face change than without one."
+			}
+		}
+	},
+	"Latest": {
+		"all": "View All",
+		"journal": {
+			"title": "Journal",
+			"desc": "Latest developer's activities"
+		},
+		"changelog": {
+			"title": "Changelog",
+			"desc": "Log for the latest version"
+		}
+	},
+	"Callback": {
+		"line_1": "Shape Your Context, ",
+		"line_2": "Keep It Yours"
+	}
+}

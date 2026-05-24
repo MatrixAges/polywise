@@ -1,0 +1,78 @@
+import { CalendarCheck, CheckCircle, MarkdownLogo, Timer } from '@phosphor-icons/react'
+
+import type { ReactNode } from 'react'
+
+export const modules_map = {
+	0: {
+		Icon: <CheckCircle></CheckCircle>,
+		key: 'todo',
+		origin: '/blog/know_your_self?title=From%20Notes%20to%20Memory'
+	},
+	1: {
+		Icon: <MarkdownLogo></MarkdownLogo>,
+		key: 'note',
+		origin: '/blog/finding_your_self?title=Designing%20Local-First%20Workflows'
+	},
+	2: {
+		Icon: <Timer></Timer>,
+		key: 'pomo',
+		origin: '/blog/beyond_your_self?title=Agents%20Need%20Better%20Context'
+	},
+	3: {
+		Icon: <CalendarCheck></CalendarCheck>,
+		key: 'schedule',
+		origin: '/blog/facing_change_with_plan?title=Planning%20for%20an%20Evolving%20Knowledge%20Base'
+	}
+} as any
+
+export const modules_arr = Object.values(modules_map) as Array<{ Icon: ReactNode; key: string }>
+
+export const mas_link = 'https://github.com/MatrixAges/polywise'
+
+export const mac_arch_map = {
+	arm64: 'Apple Silicon',
+	x64: 'Intel'
+}
+
+export const os_map = {
+	darwin: 'macOS',
+	win32: 'Windows'
+}
+
+export const exec_map = {
+	darwin: 'dmg',
+	win32: 'exe'
+}
+
+export const version_file_link = 'https://github.com/MatrixAges/polywise/releases/latest'
+
+export const getReleaseLink = (_os: OS, _arch: Arch, _version: string) => {
+	return github_release_link
+}
+
+export const github_release_link = 'https://github.com/MatrixAges/polywise/releases'
+
+export const mails = {
+	support: 'mailto:hello@polywise.io',
+	enterprise: 'mailto:team@polywise.io',
+	member: 'mailto:community@polywise.io'
+}
+
+export const medias = {
+	x: 'https://x.com/xiewendao',
+	reddit: 'https://github.com/MatrixAges/polywise/discussions',
+	youtube: 'https://github.com/MatrixAges/polywise',
+	bilibili: 'https://github.com/MatrixAges/polywise',
+	github: 'https://github.com/MatrixAges/polywise',
+	discord: 'https://github.com/MatrixAges/polywise'
+}
+
+export const videos = {
+	intro: {
+		youtube: 'https://github.com/MatrixAges/polywise',
+		bilibili: 'https://github.com/MatrixAges/polywise'
+	}
+}
+
+export type OS = 'darwin' | 'win32'
+export type Arch = 'arm64' | 'x64'

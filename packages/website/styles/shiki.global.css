@@ -1,0 +1,6 @@
+[data-theme='dark'] {
+	.__editor_code,
+	.__editor_code span {
+		color: var(--shiki-dark) !important;
+	}
+}

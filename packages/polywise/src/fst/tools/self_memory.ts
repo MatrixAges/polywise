@@ -1,5 +1,5 @@
 import { agent } from '@core/db/schema'
-import { setAgent } from '@core/db/services'
+import { assertAgentWritableForBehavior, setAgent } from '@core/db/services'
 import { tool } from 'ai'
 import { eq } from 'drizzle-orm'
 import { enum as Enum, object, string } from 'zod'
@@ -51,6 +51,8 @@ export const createSelfMemoryTool = (s: Session) => {
 					error: 'self_memory_tool is only available in agent sessions'
 				}
 			}
+
+			await assertAgentWritableForBehavior(s.owner_agent.id)
 
 			const previous_memory = s.owner_agent.memory ?? ''
 			const next_memory = (() => {

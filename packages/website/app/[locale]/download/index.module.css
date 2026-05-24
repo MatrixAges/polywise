@@ -1,0 +1,146 @@
+._local {
+	min-height: calc(100vh - 80px);
+	padding-top: 72px !important;
+	padding-bottom: 120px !important;
+
+	:global {
+		.btn_light {
+			line-height: 1;
+			box-sizing: border-box;
+			padding: 0 12px;
+			margin: 0;
+			border: none;
+			border-radius: var(--radius);
+			color: var(--color_bg);
+			background-color: rgba(var(--color_text_rgb), 0.9);
+			cursor: pointer;
+			transition:
+				scale ease 0.12s,
+				background-color ease 0.3s;
+			text-align: center;
+			font-weight: 500;
+
+			&:hover {
+				color: var(--color_bg);
+				background-color: var(--color_text);
+				scale: 1.02;
+			}
+
+			&:active {
+				scale: 0.96;
+			}
+		}
+
+		.header_wrap {
+			line-height: 1;
+			margin-bottom: 60px;
+
+			.logo_wrap {
+				position: relative;
+				width: 90px;
+				height: 90px;
+				border-radius: 21px;
+				background: linear-gradient(
+					to bottom,
+					rgba(var(--color_text_rgb), 0.09),
+					rgba(var(--color_text_rgb), 0)
+				);
+				box-shadow: 0 12px 30px black;
+
+				&::before {
+					position: absolute;
+					z-index: 30;
+					top: 0px;
+					left: 0;
+					display: inline-block;
+					width: 100%;
+					height: 100%;
+					border-top: 1px solid rgba(var(--color_text_rgb), 0.12);
+					border-radius: inherit;
+					content: '';
+					user-select: none;
+					pointer-events: none;
+				}
+
+				.logo {
+					z-index: 1;
+				}
+			}
+
+			.title {
+				margin: 0;
+				margin-top: 42px;
+				margin-bottom: 12px;
+				font-weight: 500;
+			}
+
+			.desc {
+				margin-bottom: 30px;
+				color: var(--color_text_sub);
+				font-size: 18px;
+			}
+
+			.btn_download {
+				min-width: 120px;
+				height: 36px;
+			}
+
+			.version {
+				margin-top: 12px;
+				color: var(--color_text_sub);
+				font-size: 12px;
+			}
+		}
+
+		.download_items {
+			line-height: 1;
+			color: var(--color_text_sub);
+
+			.download_item {
+				padding: 18px 0;
+				border-bottom: var(--border_light);
+
+				.name {
+					margin-left: 12px;
+					font-size: 16px;
+				}
+
+				svg {
+					color: var(--color_text_grey);
+				}
+
+				.btn_download {
+					min-width: 84px;
+					height: 27px;
+					line-height: 27px;
+					padding: 0 12px;
+					margin: 0;
+					border-radius: var(--radius);
+					color: var(--color_text);
+					background-color: var(--color_bg_1);
+					font-size: 13px;
+
+					&:hover {
+						background-color: var(--color_bg_2);
+					}
+				}
+			}
+		}
+	}
+}
+
+@media (max-width: 720px) {
+	._local {
+		min-height: unset;
+		padding-top: 0 !important;
+		padding-bottom: 30px !important;
+
+		:global {
+			.download_items {
+				.download_item {
+					border-bottom: none;
+				}
+			}
+		}
+	}
+}

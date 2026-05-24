@@ -1,0 +1,146 @@
+._local {
+	min-height: calc(100vh - 80px);
+	padding-top: 72px;
+	padding-bottom: 72px;
+
+	:global {
+		.contact_items {
+			gap: 24px;
+
+			&.support {
+				margin-top: 30px;
+				margin-bottom: 24px;
+
+				.contact_item {
+					position: relative;
+					box-sizing: border-box;
+					padding-bottom: calc(21px + 27px);
+					border-radius: var(--radius_large_1);
+
+					.btn_link {
+						position: absolute;
+						bottom: 21px;
+						left: 24px;
+						height: 27px;
+						line-height: 27px;
+						background-color: var(--color_bg_2);
+					}
+				}
+			}
+
+			.contact_item {
+				width: calc((100% - 48px) / 3);
+				padding: 21px 24px;
+
+				svg {
+					margin-right: 9px;
+					font-size: 18px;
+				}
+
+				h2 {
+					margin: 0;
+					font-size: 18px;
+					font-weight: 500;
+				}
+
+				.desc {
+					margin-top: 6px;
+					margin-bottom: 15px;
+					color: var(--color_text_sub);
+				}
+
+				.btn_link {
+					color: var(--color_text);
+				}
+			}
+		}
+
+		.plan_wrap {
+			line-height: 1;
+			margin-top: 60px;
+
+			.plan_title {
+				margin: 0;
+				margin-bottom: 12px;
+				font-size: 18px;
+				font-weight: 500;
+			}
+
+			.plan_desc {
+				margin: 0;
+				font-size: 15px;
+			}
+
+			.plan_items {
+				width: 600px;
+				margin-top: 48px;
+				border: var(--border_light);
+				border-radius: var(--radius);
+
+				.plan_item {
+					border-bottom: var(--border_light);
+
+					&:last-child {
+						border-bottom: none;
+					}
+
+					.type {
+						width: 150px;
+						padding: 18px 24px;
+						border-right: var(--border_light);
+					}
+
+					.content {
+						padding: 18px 24px;
+					}
+				}
+			}
+		}
+
+		.wechat {
+			margin-top: 48px;
+			color: var(--color_text_grey);
+			font-size: 13px;
+		}
+	}
+}
+
+@media (max-width: 720px) {
+	._local {
+		min-height: calc(100vh - 80px);
+		padding-top: 72px;
+		padding-bottom: 72px;
+
+		:global {
+			.contact_items {
+				flex-wrap: wrap;
+
+				.contact_item {
+					width: 100% !important;
+				}
+			}
+
+			.plan_wrap {
+				.plan_items {
+					width: 100%;
+
+					.plan_item {
+						.type {
+							padding: 15px 18px;
+						}
+
+						.content {
+							padding: 15px 18px;
+						}
+					}
+				}
+			}
+
+			.wechat {
+				padding: 0 30px;
+				margin-top: 30px;
+				text-align: center;
+			}
+		}
+	}
+}

@@ -1,5 +1,10 @@
 import { agent, agent_article, article, link_article } from '@core/db/schema'
-import { getAgent, getArticle } from '@core/db/services'
+import {
+	assertAgentsWritableForBehavior,
+	assertAgentWritableForBehavior,
+	getAgent,
+	getArticle
+} from '@core/db/services'
 import { addLinkArticle, getLinkArticles, removeLinkArticle } from '@core/db/services/externals'
 import { env } from '@core/env'
 import removeArticle from '@core/io/remove'
@@ -111,6 +116,11 @@ export const updateLinkcaseAgentBindings = async (args: {
 	}
 
 	await ensureAgentIdsExist([...(assigned_agent_id ? [assigned_agent_id] : []), ...related_agent_ids])
+	await assertAgentsWritableForBehavior([...(assigned_agent_id ? [assigned_agent_id] : []), ...related_agent_ids])
+
+	if (current_article.scope_type === 'agent' && current_article.scope_id) {
+		await assertAgentWritableForBehavior(current_article.scope_id)
+	}
 
 	if (assigned_agent_id) {
 		if (current_article.scope_type === 'global') {

@@ -1,0 +1,54 @@
+._local {
+	background: linear-gradient(to bottom, var(--color_bg), rgba(var(--color_bg_1_rgb), 0.6));
+
+	:global {
+		.limited_content_wrap {
+			padding: 60px 0;
+		}
+
+		.logo_wrap {
+			overflow: hidden;
+			width: 81px;
+			height: 81px;
+			border: 1.5px solid var(--color_text);
+			border-radius: 18px;
+			box-shadow: 0 12px 30px black;
+
+			.mask {
+				background-color: rgba(var(--color_bg_rgb), 0.3);
+				backdrop-filter: var(--blur_deep);
+			}
+
+			.logo {
+				z-index: 1;
+			}
+		}
+
+		.subtitle {
+			width: 600px;
+			margin: 0;
+			margin-top: 24px;
+			margin-bottom: 45px;
+
+			.line {
+				line-height: 1.2;
+				font-size: 3em !important;
+				font-weight: 500;
+			}
+		}
+	}
+}
+
+@media (max-width: 720px) {
+	._local {
+		:global {
+			.subtitle {
+				width: 100%;
+
+				.line {
+					font-size: 1.5em !important;
+				}
+			}
+		}
+	}
+}

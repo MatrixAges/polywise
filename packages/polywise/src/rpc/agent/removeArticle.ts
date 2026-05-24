@@ -1,5 +1,5 @@
 import { agent_article, article } from '@core/db/schema'
-import { getArticle } from '@core/db/services'
+import { assertAgentWritableForBehavior, getArticle } from '@core/db/services'
 import { removeAgentArticle } from '@core/db/services/externals'
 import remove from '@core/io/remove'
 import { and, eq } from 'drizzle-orm'
@@ -23,6 +23,8 @@ export default p
 	})
 	.input(input_type)
 	.mutation(async ({ input }) => {
+		await assertAgentWritableForBehavior(input.agent_id)
+
 		const target_article = await getArticle(eq(article.id, input.article_id))
 
 		if (target_article && target_article.scope_type === 'agent' && target_article.scope_id === input.agent_id) {

@@ -1,0 +1,61 @@
+{
+	"title": "How can we help?",
+	"desc": "Get in touch with developer for product questions.",
+	"supports": {
+		"mailto": "Mailto",
+		"user": {
+			"title": "User support",
+			"desc": "Speak to developer about pricing, product features, or request a discount."
+		},
+		"team": {
+			"title": "Team support",
+			"desc": "Seeking guidance on team collaboration functions or other business development."
+		},
+		"influencer": {
+			"title": "Influencer support",
+			"desc": "Promote or distribute Polywise to get volume discounts and activation codes."
+		}
+	},
+	"references": {
+		"reddit": {
+			"title": "Join the community",
+			"desc": "Submit your thoughts and suggestions on Polywise and share your best practices.",
+			"bth": "Join Reddit"
+		},
+		"docs": {
+			"title": "Documentation",
+			"desc": "Get an overview of Polywise's features, integrations, and how to use them.",
+			"bth": "Polywise Docs"
+		},
+		"video": {
+			"title": "Youtube",
+			"desc": "Watch Polywise's tutorials and learn about Polywise's latest activities.",
+			"bth": "Watch Videos"
+		}
+	},
+	"plan": {
+		"title": "Sponsor Future Plan",
+		"desc": "Send proof to the developer, and Polywise will sponsor your future.",
+		"numbers": "5",
+		"0": {
+			"type": "Student",
+			"content": "1 year of Pro version"
+		},
+		"1": {
+			"type": "Designer",
+			"content": "1 year of Pro version"
+		},
+		"2": {
+			"type": "Programmer",
+			"content": "6 months of Pro version"
+		},
+		"3": {
+			"type": "Creator",
+			"content": "3 months of Pro version"
+		},
+		"4": {
+			"type": "Other Professionals",
+			"content": "2 months of Pro version"
+		}
+	}
+}

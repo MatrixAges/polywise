@@ -1,0 +1,7 @@
+{
+	"title": "下载 Polywise",
+	"desc": "适用于 macOS 和 Windows",
+	"btn_download": "下载 {platform} 版本",
+	"latest": "最新版本",
+	"github_release": "从 Github Release 下载"
+}

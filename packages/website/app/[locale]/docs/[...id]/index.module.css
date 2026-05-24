@@ -1,0 +1,8 @@
+._local {
+	:global {
+		.icon_wrap {
+			max-width: 300px;
+			font-size: 180px;
+		}
+	}
+}

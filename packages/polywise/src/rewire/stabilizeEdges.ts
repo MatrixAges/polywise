@@ -1,19 +1,18 @@
 import { env } from '@core/env'
 
 import {
-	clamp,
 	rewire_promote_confidence_threshold,
-	rewire_promote_score_threshold,
 	rewire_promote_stability_threshold,
 	shouldPromoteSilentEdge
 } from './constants'
 
 interface StabilizeEdgesArgs {
+	agent_id: string | null
 	touched_node_ids: Array<string>
 	now: number
 }
 
-export default ({ touched_node_ids, now }: StabilizeEdgesArgs) => {
+export default ({ agent_id, touched_node_ids, now }: StabilizeEdgesArgs) => {
 	const ids = Array.from(new Set(touched_node_ids.filter(Boolean)))
 
 	if (ids.length === 0) {
@@ -21,22 +20,44 @@ export default ({ touched_node_ids, now }: StabilizeEdgesArgs) => {
 	}
 
 	const placeholders = Array(ids.length).fill('?').join(',')
-	const rows = env.sqlite
-		.prepare(
-			`
-			SELECT id, weight, confidence, bandwidth, stability, rewire_score
-			FROM edge
-			WHERE state = 'silent' AND (source_id IN (${placeholders}) OR target_id IN (${placeholders}))
-		`
-		)
-		.all(...ids, ...ids) as Array<{
-		id: string
-		weight: number | null
-		confidence: number | null
-		bandwidth: number | null
-		stability: number | null
-		rewire_score: number | null
-	}>
+	const rows =
+		agent_id === null
+			? (env.sqlite
+					.prepare(
+						`
+						SELECT id, weight, confidence, bandwidth, stability, rewire_score
+						FROM edge
+						WHERE agent_id is null
+							AND state = 'silent'
+							AND (source_id IN (${placeholders}) OR target_id IN (${placeholders}))
+					`
+					)
+					.all(...ids, ...ids) as Array<{
+					id: string
+					weight: number | null
+					confidence: number | null
+					bandwidth: number | null
+					stability: number | null
+					rewire_score: number | null
+				}>)
+			: (env.sqlite
+					.prepare(
+						`
+						SELECT id, weight, confidence, bandwidth, stability, rewire_score
+						FROM edge
+						WHERE agent_id = ?
+							AND state = 'silent'
+							AND (source_id IN (${placeholders}) OR target_id IN (${placeholders}))
+					`
+					)
+					.all(agent_id, ...ids, ...ids) as Array<{
+					id: string
+					weight: number | null
+					confidence: number | null
+					bandwidth: number | null
+					stability: number | null
+					rewire_score: number | null
+				}>)
 
 	if (rows.length === 0) {
 		return { promoted: 0 }

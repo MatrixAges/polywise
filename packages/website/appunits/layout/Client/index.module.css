@@ -1,0 +1,9 @@
+._local {
+	color: var(--color_text);
+
+	:global {
+		.if {
+			color: var(--color_text);
+		}
+	}
+}

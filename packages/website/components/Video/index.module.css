@@ -1,0 +1,71 @@
+.cover {
+	z-index: 10;
+	border-radius: var(--radius);
+	color: white;
+	background-color: rgba(0, 0, 0, 0.18);
+	transition: background-color ease 0.3s;
+
+	&:hover {
+		background-color: rgba(0, 0, 0, 0.3);
+	}
+
+	&.disabled {
+		pointer-events: none;
+		backdrop-filter: var(--blur);
+
+		:global {
+			.btn_play {
+				opacity: 0.48;
+			}
+		}
+	}
+
+	:global {
+		.btn_play {
+			width: 60px;
+			height: 60px;
+			border-radius: 50%;
+			transition: background-color ease 0.3s;
+
+			&:hover {
+				background-color: rgba(0, 0, 0, 0.3);
+			}
+		}
+	}
+}
+
+._local {
+	position: relative;
+	border-radius: var(--radius);
+
+	&.unplayed {
+		&::before {
+			position: absolute;
+			width: 100%;
+			height: 100%;
+			background-color: red;
+			content: '';
+		}
+	}
+}
+
+@media (min-width: 720px) {
+	._local {
+		&::-webkit-media-controls-panel {
+			position: absolute;
+			right: 0;
+			bottom: 0;
+			flex-direction: column;
+			width: 270px;
+			border-top-left-radius: var(--radius_large);
+			background-color: rgba(0, 0, 0, 0.48);
+			background-image: none !important;
+			backdrop-filter: var(--blur);
+		}
+
+		&::-webkit-media-controls-timeline {
+			height: 3px;
+			padding: 0;
+		}
+	}
+}

@@ -16,36 +16,60 @@ import {
 } from './constants'
 
 interface DecayArgs {
+	agent_id: string | null
 	now: number
 	budget: number
 }
 
-export default ({ now, budget }: DecayArgs) => {
+export default ({ agent_id, now, budget }: DecayArgs) => {
 	if (budget <= 0) {
 		return { decayed: 0, pruned: 0, downgraded: 0 }
 	}
 
-	const rows = env.sqlite
-		.prepare(
-			`
-			SELECT id, state, weight, confidence, bandwidth, stability, rewire_score, active_at, last_rewire_at
-			FROM edge
-			WHERE is_frozen = 0
-			ORDER BY coalesce(last_rewire_at, active_at, created_at) ASC
-			LIMIT ?
-		`
-		)
-		.all(rewire_decay_scan_limit) as Array<{
-		id: string
-		state: string
-		weight: number | null
-		confidence: number | null
-		bandwidth: number | null
-		stability: number | null
-		rewire_score: number | null
-		active_at: number | null
-		last_rewire_at: number | null
-	}>
+	const rows =
+		agent_id === null
+			? (env.sqlite
+					.prepare(
+						`
+						SELECT id, state, weight, confidence, bandwidth, stability, rewire_score, active_at, last_rewire_at
+						FROM edge
+						WHERE is_frozen = 0 AND agent_id is null
+						ORDER BY coalesce(last_rewire_at, active_at, created_at) ASC
+						LIMIT ?
+					`
+					)
+					.all(rewire_decay_scan_limit) as Array<{
+					id: string
+					state: string
+					weight: number | null
+					confidence: number | null
+					bandwidth: number | null
+					stability: number | null
+					rewire_score: number | null
+					active_at: number | null
+					last_rewire_at: number | null
+				}>)
+			: (env.sqlite
+					.prepare(
+						`
+						SELECT id, state, weight, confidence, bandwidth, stability, rewire_score, active_at, last_rewire_at
+						FROM edge
+						WHERE is_frozen = 0 AND agent_id = ?
+						ORDER BY coalesce(last_rewire_at, active_at, created_at) ASC
+						LIMIT ?
+					`
+					)
+					.all(agent_id, rewire_decay_scan_limit) as Array<{
+					id: string
+					state: string
+					weight: number | null
+					confidence: number | null
+					bandwidth: number | null
+					stability: number | null
+					rewire_score: number | null
+					active_at: number | null
+					last_rewire_at: number | null
+				}>)
 
 	const deleteEdge = env.sqlite.prepare(`DELETE FROM edge WHERE id = ?`)
 	const downgradeEdge = env.sqlite.prepare(`

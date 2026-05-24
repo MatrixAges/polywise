@@ -1,0 +1,133 @@
+._local {
+	overflow-y: scroll;
+
+	&.as_content {
+		overflow-y: inherit;
+
+		:global {
+			.if-anchor-wrapper,
+			.ant-anchor-wrapper {
+				padding-block-start: 0;
+				margin-block-start: 0;
+
+				.if-anchor-ink-visible,
+				.ant-anchor-ink-visible {
+					display: none !important;
+				}
+
+				.if-anchor,
+				.ant-anchor {
+					&::before {
+						display: none;
+					}
+
+					.if-anchor-link,
+					.ant-anchor-link {
+						position: relative;
+						padding-left: 9px;
+
+						&:last-child {
+							margin-bottom: 0;
+
+							.if-anchor-link-title,
+							.ant-anchor-link-title {
+								margin-bottom: 0;
+							}
+						}
+
+						&::before {
+							position: absolute;
+							top: 9px;
+							left: 0;
+							width: 4px;
+							height: 4px;
+							border-radius: 50%;
+							background-color: var(--color_text_sublight);
+							content: '';
+						}
+					}
+
+					a {
+						text-decoration: none;
+
+						&:hover {
+							text-decoration: underline;
+							text-decoration-color: var(--color_contrast);
+
+							span {
+								color: var(--color_contrast);
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	:global {
+		.header_wrap {
+			z-index: 1;
+			top: 0;
+			height: 28px;
+			line-height: 1;
+			margin-bottom: 12px;
+			margin-left: -2px;
+			background-color: var(--color_bg);
+			font-size: 16px;
+
+			.title {
+				margin-left: 8px;
+				color: var(--color_text_grey);
+				font-size: 13px;
+			}
+		}
+
+		.if-anchor-wrapper,
+		.ant-anchor-wrapper {
+			max-height: unset !important;
+
+			.if-anchor,
+			.ant-anchor {
+				&::before {
+					border-color: var(--color_border) !important;
+				}
+
+				.if-anchor-ink,
+				.ant-anchor-ink {
+					height: 18px !important;
+					border-radius: 2px;
+					background-color: var(--color_text) !important;
+				}
+
+				.if-anchor-link,
+				.ant-anchor-link {
+					line-height: 21px;
+					padding-inline-start: 12px;
+					margin-bottom: 8px;
+					padding-block: 0 !important;
+
+					.if-anchor-link-title,
+					.ant-anchor-link-title {
+						margin-bottom: 8px;
+
+						&:has(span[data-level='1']) {
+							display: none;
+						}
+
+						&:is(.if-anchor-link-title-active, .ant-anchor-link-title-active) {
+							span {
+								color: var(--color_text);
+							}
+						}
+					}
+				}
+
+				span {
+					color: var(--color_text_sublight);
+					transition: color ease 0.3s;
+					font-size: 13px;
+				}
+			}
+		}
+	}
+}
