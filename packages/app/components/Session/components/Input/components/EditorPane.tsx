@@ -5,14 +5,20 @@ import { useModel } from '../context'
 
 import styles from '../index.module.css'
 
-const Index = () => {
+import type { Editor } from '@tiptap/react'
+
+interface Props {
+	editor: Editor | null
+}
+
+const Index = ({ editor }: Props) => {
 	const x = useModel()
 
 	return (
 		<div className={$cx(styles.input_editor, x.full && styles.input_editor_full)}>
 			<EditorContent
 				className='session-input-editor bg-transparent'
-				editor={x.editor}
+				editor={editor}
 				onKeyDownCapture={x.onSubmit}
 			/>
 		</div>

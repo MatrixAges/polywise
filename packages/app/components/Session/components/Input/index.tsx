@@ -135,7 +135,7 @@ const Index = (props: IPropsInput) => {
 							x.full && 'h-full min-h-0'
 						)}
 					>
-						<EditorPane />
+						<EditorPane editor={editor} />
 						<PrimaryBar />
 					</div>
 					<SecondaryBar />
