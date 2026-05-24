@@ -1,4 +1,3 @@
-export { default as ConfigProvider } from './ConfigProvider'
 export { default as Logo } from './Logo'
 export { default as LogoWithBg } from './LogoWithBg'
 export { default as Loading } from './Loading'

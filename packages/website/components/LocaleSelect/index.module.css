@@ -1,14 +1,3 @@
 ._local {
 	width: 90px;
-
-	:global {
-		.if-select-selector,
-		.ant-select-selector {
-			.if-select-selection-item,
-			.ant-select-selection-item {
-				color: var(--color_text_sub);
-				font-size: 12px !important;
-			}
-		}
-	}
 }

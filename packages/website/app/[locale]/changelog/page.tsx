@@ -19,12 +19,12 @@ const Index = async ({ searchParams }: IProps) => {
 	)
 
 	return (
-		<div className={`small_content_wrap flex_column flex${styles._local}`}>
+		<div className={`small_content_wrap flex flex-col${styles._local}`}>
 			<Mds changelogs={changelogs} mds={mds}></Mds>
 			<div className='page_items flex justify-center'>
 				{group_changelogs.map((_, index) => (
 					<Link
-						className={`page_item justify_center align_center flex${page === index ? 'active' : ''}`}
+						className={`page_item flex items-center justify-center${page === index ? 'active' : ''}`}
 						href={`/changelog?page=${index + 1}`}
 						key={index}
 					>

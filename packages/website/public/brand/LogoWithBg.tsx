@@ -15,7 +15,7 @@ const Index = (props: IProps) => {
 	return (
 		<div className={$.cx('flex', className)} style={{ maxWidth: size, maxHeight: size, fill: 'white' }}>
 			<svg
-				className='w_100 h_100'
+				className='h-full w-full'
 				xmlns='http://www.w3.org/2000/svg'
 				width='390'
 				height='390'

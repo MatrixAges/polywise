@@ -2,6 +2,27 @@ import type { ReactNode } from 'react'
 
 export type Theme = 'light' | 'dark'
 
+export interface TocItem {
+	key: string
+	title: ReactNode
+	href: string
+	level: number
+	children?: TocItem[]
+}
+
+export interface DocsMenuItem {
+	key: string
+	className: string
+	label: string
+	icon: ReactNode
+}
+
+export interface DocsMenuGroup {
+	key: string
+	label: string
+	children: DocsMenuItem[]
+}
+
 export type ArgsSmoothScroll = Partial<{
 	animationTime: number // [ms]
 	stepSize: number // [px]

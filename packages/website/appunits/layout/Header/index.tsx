@@ -3,10 +3,10 @@
 import { Fragment } from 'react'
 import { List } from '@phosphor-icons/react'
 import LogoWithBg from '@website/components/LogoWithBg'
+import Sheet from '@website/components/ui/Sheet'
 import { useToggle } from '@website/hooks/ahooks'
 import { Link } from '@website/i18n/navigation'
 import { $ } from '@website/utils'
-import { Drawer } from 'antd'
 import { useTranslations } from 'next-intl'
 
 import Item from './Item'
@@ -14,11 +14,56 @@ import nav_items from './nav_items'
 
 import styles from './index.module.css'
 
+const MobileMenu = ({ onClose }: { onClose: () => void }) => {
+	const t = useTranslations('layout')
+
+	return (
+		<div
+			className='
+				flex flex-col
+				px-6 pt-16
+				pb-6
+			'
+		>
+			<div className='flex flex-col'>
+				{nav_items.map(item => (
+					<Link
+						className='
+							py-3
+							text-sm text-[var(--color_text_sub)]
+							border-b border-dashed border-[var(--color_border_light)]
+							last:border-b-0
+						'
+						href={item.path}
+						key={item.name}
+						onClick={onClose}
+					>
+						{t(`title.${item.name}`)}
+					</Link>
+				))}
+			</div>
+			<Link
+				className='
+					flex
+					items-center justify-center
+					h-10
+					mt-5
+					btn_download btn_light
+				'
+				href='/download'
+				onClick={onClose}
+			>
+				{t('title.download')}
+			</Link>
+		</div>
+	)
+}
+
 const Index = () => {
 	const [open, { toggle }] = useToggle()
 	const t = useTranslations('layout')
 
-	const Content = (
+	return (
 		<Fragment>
 			<div className={$.cx('fixed top-0 left-0 w-screen', styles.mask)}></div>
 			<nav
@@ -78,11 +123,6 @@ const Index = () => {
 				</div>
 			</nav>
 			<div className={$.cx('header_placeholder w-screen', styles.placeholder)}></div>
-		</Fragment>
-	)
-
-	return (
-		<Fragment>
 			<div
 				className={$.cx(
 					`
@@ -112,29 +152,29 @@ const Index = () => {
 						fillColor='var(--color_bg)'
 					></LogoWithBg>
 				</Link>
-				<div
+				<button
 					className='
 						flex
 						items-center justify-center
 						btn_menu clickable
 					'
+					type='button'
 					onClick={toggle}
 				>
 					<List size={30}></List>
-				</div>
-				<Drawer
-					rootClassName={styles.drawer}
-					placement='top'
-					open={open}
-					maskClosable
-					closeIcon={false}
-					getContainer={false}
-					onClose={toggle}
-				>
-					{Content}
-				</Drawer>
+				</button>
 			</div>
-			{Content}
+			<Sheet
+				rootClassName={styles.drawer}
+				open={open}
+				placement='top'
+				maskClosable
+				closeIcon={false}
+				getContainer={false}
+				onClose={toggle}
+			>
+				<MobileMenu onClose={toggle} />
+			</Sheet>
 		</Fragment>
 	)
 }

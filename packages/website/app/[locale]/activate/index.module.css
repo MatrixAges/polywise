@@ -14,33 +14,17 @@
 				font-weight: 500;
 			}
 
-			.if-form-item,
-			.ant-form-item {
-				margin-bottom: 12px;
-			}
-
-			.if-form-item-label,
-			.ant-form-item-label {
-				line-height: 1;
-
-				label {
-					font-size: 12px;
-				}
-			}
-
 			.input_wrap {
 				overflow: hidden;
 				border-radius: var(--radius_large);
 			}
 
-			.if-input-affix-wrapper,
-			.ant-input-affix-wrapper {
+			.field {
 				display: flex;
 				align-items: center;
 				height: 42px;
 				margin-bottom: 0;
-				border: none;
-				border-radius: 0;
+				padding: 0 15px;
 				background-color: transparent;
 
 				&:first-child {
@@ -53,32 +37,25 @@
 					border-bottom-left-radius: var(--radius_large);
 				}
 
-				.if-input-prefix {
-					position: absolute;
+				.icon {
 					color: var(--color_text_grey);
 				}
 			}
 
-			.if-input-affix-wrapper-focused,
-			.ant-input-affix-wrapper-focused {
-				border-color: var(--color_text);
-
-				.if-input-prefix,
-				.ant-input-prefix {
-					color: var(--color_text) !important;
-				}
-			}
-
-			.if-input,
-			.ant-input {
+			.input {
 				width: 100%;
+				padding: 0 12px;
+				border: none;
+				outline: none;
+				color: var(--color_text);
+				background: transparent;
 				text-align: center;
 			}
 
-			.if-btn,
-			.ant-btn {
+			.btn_submit {
 				height: 36px;
 				margin-top: 18px;
+				border: none;
 				border-radius: var(--radius);
 				color: var(--color_bg);
 				background-color: rgba(var(--color_text_rgb), 0.9);
@@ -100,8 +77,7 @@
 				width: 100%;
 				margin-top: unset;
 
-				.if-btn,
-				.ant-btn {
+				.btn_submit {
 					margin-top: 24px;
 				}
 			}

@@ -89,25 +89,8 @@
 }
 
 .drawer {
-	height: 100vh;
-
-	:global {
-		.if-drawer-content-wrapper,
-		.ant-drawer-content-wrapper {
-			height: auto !important;
-			padding: 0;
-
-			.if-drawer-content,
-			.ant-drawer-content {
-				border-radius: 0;
-
-				.if-drawer-body,
-				.ant-drawer-body {
-					padding: 0;
-				}
-			}
-		}
-	}
+	height: auto;
+	background-color: var(--color_bg);
 }
 
 @media (max-width: 1200px) {

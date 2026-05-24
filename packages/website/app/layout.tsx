@@ -1,6 +1,10 @@
-import '@website/global_css'
+import '@website/styles/vars.global.css'
+import '@website/styles/tailwind.global.css'
+import '@website/styles/class.global.css'
+import '@website/styles/shiki.global.css'
 
 import { Client, Router } from '@website/appunits/layout'
+import ToastProvider from '@website/components/ui/ToastProvider'
 import { getUserLocale, getUserTheme } from '@website/services'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages } from 'next-intl/server'
@@ -32,7 +36,6 @@ const RootLayout = async ({ children }: PropsWithChildren) => {
 				<meta charSet='UTF-8' />
 				<link id='favicon' rel='icon' type='image/svg+xml' href='/logo.svg' />
 				<link rel='stylesheet' href='/styles/init.css' />
-				<link rel='stylesheet' href='/styles/atom.min.css' />
 				<link rel='stylesheet' href='/icon_font.css' />
 				<link rel='stylesheet' href='/theme/common.css' />
 				<link rel='stylesheet' href='/theme/light.css' />
@@ -41,7 +44,9 @@ const RootLayout = async ({ children }: PropsWithChildren) => {
 			<body>
 				<Router />
 				<NextIntlClientProvider locale={locale} messages={messages}>
-					<Client {...props_client}>{children}</Client>
+					<ToastProvider>
+						<Client {...props_client}>{children}</Client>
+					</ToastProvider>
 				</NextIntlClientProvider>
 			</body>
 		</html>

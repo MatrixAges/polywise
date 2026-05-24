@@ -6,6 +6,7 @@
 		"module": "ESNext",
 		"moduleResolution": "Bundler",
 		"strict": true,
+		"ignoreDeprecations": "6.0",
 		"jsxImportSource": "react",
 		"jsx": "preserve",
 		"baseUrl": ".",

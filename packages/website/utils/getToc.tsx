@@ -1,4 +1,4 @@
-import type { AnchorProps } from 'antd'
+import type { TocItem } from '@website/types'
 import type { BlockContent, DefinitionContent, Heading, Link, ListItem, Paragraph, PhrasingContent, Text } from 'mdast'
 
 const Index = (
@@ -7,7 +7,7 @@ const Index = (
 ) => {
 	if (!children) return null
 
-	const target: AnchorProps['items'] = []
+	const target: TocItem[] = []
 
 	children.map((item, index) => {
 		const { type } = item
@@ -19,12 +19,12 @@ const Index = (
 				const { value } = link.children[0] as Text
 				const level = map.get(value) as unknown as number
 
-				const anchor_item = {
+				const anchor_item: TocItem = {
 					key: `${value}${index}`,
 					title: <span data-level={`${level}`}>{value}</span>,
 					href: `#${value}`,
 					level
-				} as Required<AnchorProps>['items'][number]
+				}
 
 				if (item.children.length > 0) {
 					anchor_item['children'] = Index(map, item.children)!

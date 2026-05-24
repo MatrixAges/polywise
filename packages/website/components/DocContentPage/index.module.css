@@ -32,32 +32,6 @@
 
 	.drawer {
 		display: block;
-
-		:global {
-			.if-drawer-content-wrapper,
-			.ant-drawer-content-wrapper {
-				padding: 0;
-
-				.if-drawer-content,
-				.ant-drawer-content {
-					border-radius: 0;
-					background-color: var(--color_bg);
-
-					.if-drawer-body,
-					.ant-drawer-body {
-						padding: 0;
-					}
-				}
-			}
-
-			.doc_toc {
-				position: unset;
-				display: flex;
-				width: 100%;
-				padding-top: 24px;
-				padding-bottom: 24px;
-				padding-left: 24px;
-			}
-		}
+		background-color: var(--color_bg);
 	}
 }

@@ -1,23 +1,91 @@
 'use client'
 
+import { useEffect, useMemo, useState } from 'react'
 import tocIcon from '@website/svgs/toc.inline.svg'
 import { $ } from '@website/utils'
-import { Anchor } from 'antd'
 import { useTranslations } from 'next-intl'
 
 import styles from './index.module.css'
 
-import type { AnchorProps } from 'antd'
+import type { TocItem } from '@website/types'
 
 interface IProps {
-	list: AnchorProps['items']
+	list: TocItem[]
 	className?: string
 	as_content?: boolean
+}
+
+const flatten = (items: TocItem[]): string[] => {
+	return items.flatMap(item => [item.href, ...(item.children ? flatten(item.children) : [])])
+}
+
+const renderItems = (items: TocItem[], active_href: string) => {
+	return (
+		<ul className='toc_list flex flex-col'>
+			{items.map(item => (
+				<li className='toc_item' key={item.key}>
+					<a
+						className={$.cx(
+							'toc_link block transition-colors duration-200',
+							active_href === item.href && 'active'
+						)}
+						href={item.href}
+						style={{ paddingLeft: `${Math.max(item.level - 1, 0) * 12}px` }}
+					>
+						{item.title}
+					</a>
+					{item.children && item.children.length > 0 && renderItems(item.children, active_href)}
+				</li>
+			))}
+		</ul>
+	)
 }
 
 const Index = (props: IProps) => {
 	const { list, className, as_content } = props
 	const t = useTranslations('doc')
+	const hrefs = useMemo(() => flatten(list), [list])
+	const [active_href, setActiveHref] = useState(hrefs[0] ?? '')
+
+	useEffect(() => {
+		if (!hrefs.length) return
+
+		const syncFromHash = () => {
+			const hash = window.location.hash
+
+			if (hash && hrefs.includes(hash)) {
+				setActiveHref(hash)
+			}
+		}
+
+		syncFromHash()
+		window.addEventListener('hashchange', syncFromHash)
+
+		const observer = new IntersectionObserver(
+			entries => {
+				const visible = entries
+					.filter(entry => entry.isIntersecting)
+					.sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0]
+
+				if (!visible?.target.id) return
+
+				setActiveHref(`#${visible.target.id}`)
+			},
+			{ rootMargin: '-18% 0px -62% 0px', threshold: [0, 1] }
+		)
+
+		hrefs.forEach(href => {
+			const id = href.replace('#', '')
+			const element = document.getElementById(id)
+
+			if (element) observer.observe(element)
+		})
+
+		return () => {
+			window.removeEventListener('hashchange', syncFromHash)
+			observer.disconnect()
+		}
+	}, [hrefs])
 
 	return (
 		<div className={$.cx('box-border h-full', styles._local, as_content && styles.as_content, className)}>
@@ -28,7 +96,7 @@ const Index = (props: IProps) => {
 						<span className='title'>{t('toc.title')}</span>
 					</div>
 				)}
-				<Anchor items={list} affix={false} offsetTop={600}></Anchor>
+				<nav>{renderItems(list, active_href)}</nav>
 			</div>
 		</div>
 	)

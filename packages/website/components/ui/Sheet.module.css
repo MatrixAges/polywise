@@ -1,0 +1,51 @@
+.backdrop {
+	background: rgba(0, 0, 0, 0.42);
+	opacity: 1;
+	transition: opacity 0.18s ease-in-out;
+}
+
+.backdrop[data-starting-style],
+.backdrop[data-ending-style] {
+	opacity: 0;
+}
+
+.popup {
+	opacity: 1;
+	background-color: var(--color_bg);
+	transition:
+		transform 0.18s ease-in-out,
+		opacity 0.18s ease-in-out;
+}
+
+.popup.left {
+	inset: 0 auto 0 0;
+	height: 100vh;
+}
+
+.popup.left[data-starting-style],
+.popup.left[data-ending-style] {
+	transform: translate3d(-24px, 0, 0);
+	opacity: 0;
+}
+
+.popup.right {
+	inset: 0 0 0 auto;
+	height: 100vh;
+}
+
+.popup.right[data-starting-style],
+.popup.right[data-ending-style] {
+	transform: translate3d(24px, 0, 0);
+	opacity: 0;
+}
+
+.popup.top {
+	inset: 0 0 auto 0;
+	width: 100vw;
+}
+
+.popup.top[data-starting-style],
+.popup.top[data-ending-style] {
+	transform: translate3d(0, -24px, 0);
+	opacity: 0;
+}

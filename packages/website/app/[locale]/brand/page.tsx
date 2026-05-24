@@ -2,21 +2,19 @@
 
 import { useMemoizedFn } from '@website/hooks/ahooks'
 import useGradient from '@website/hooks/useGradient'
+import useToast from '@website/hooks/useToast'
 import { $ } from '@website/utils'
 import { downloadFileBySrc } from '@website/utils/file'
-import { message as ms } from 'antd'
 import { motion } from 'framer-motion'
 import { useTranslations } from 'next-intl'
 
 import styles from './index.module.css'
 
-const { useMessage } = ms
-
 const Index = () => {
 	const t = useTranslations('brand')
 	const t_global = useTranslations('global')
 	const { gradient } = useGradient()
-	const [message, context] = useMessage()
+	const toast = useToast()
 
 	const onDownloadAssert = useMemoizedFn(() => downloadFileBySrc('brand.zip'))
 
@@ -32,13 +30,12 @@ const Index = () => {
 		if (color) {
 			await window.navigator.clipboard.writeText(color)
 
-			message.success(t_global('copy', { name: color }))
+			toast.success(t_global('copy', { name: color }))
 		}
 	})
 
 	return (
 		<div className={$.cx('small_content_wrap', styles._local)}>
-			{context}
 			<section className='header_wrap flex flex-col items-center'>
 				<motion.span className='toptext' animate={gradient} transition={{ duration: 1.2 }}>
 					{t('header.toptext')}

@@ -1,10 +1,10 @@
-import type { ItemType, MenuItemGroupType } from 'antd/es/menu/interface'
+import type { DocsMenuGroup } from '@website/types'
 
-export default (menu: Array<ItemType>, key: string) => {
+export default (menu: DocsMenuGroup[], key: string) => {
 	let result = { parent_index: -1, index: -1 }
 
 	for (let i = 0; i < menu.length; i++) {
-		const item = menu[i]! as MenuItemGroupType
+		const item = menu[i]!
 
 		if (item.key === key) {
 			result.parent_index = i

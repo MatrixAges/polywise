@@ -4,7 +4,6 @@ import { GithubLogo } from '@phosphor-icons/react'
 import { github_release_link, medias } from '@website/appdata/app'
 import Logo from '@website/components/Logo'
 import { $ } from '@website/utils'
-import { Button } from 'antd'
 import { useTranslations } from 'next-intl'
 
 import styles from './index.module.css'
@@ -30,7 +29,7 @@ const Index = () => {
 				<span className='desc'>{t('desc')}</span>
 
 				<a href={github_release_link} target='_blank'>
-					<Button
+					<button
 						className='
 							flex
 							items-center justify-center
@@ -38,7 +37,7 @@ const Index = () => {
 						'
 					>
 						{t('btn_download', { platform: 'GitHub Releases' })}
-					</Button>
+					</button>
 				</a>
 				<span className='version'>{t('latest')}: mock build</span>
 			</div>
@@ -49,7 +48,7 @@ const Index = () => {
 						<span className='name'>{t('github_release')}</span>
 					</div>
 					<a href={github_release_link} target='_blank'>
-						<Button className='btn_download btn_light'>{t_global('visit')}</Button>
+						<button className='btn_download btn_light'>{t_global('visit')}</button>
 					</a>
 				</div>
 				<div className='download_item flex items-center justify-between'>
@@ -58,7 +57,7 @@ const Index = () => {
 						<span className='name'>Source repository</span>
 					</div>
 					<a href={medias.github} target='_blank'>
-						<Button className='btn_download btn_light'>{t_global('visit')}</Button>
+						<button className='btn_download btn_light'>{t_global('visit')}</button>
 					</a>
 				</div>
 			</div>

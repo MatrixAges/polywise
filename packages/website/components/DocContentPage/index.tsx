@@ -3,18 +3,18 @@
 import { useEffect, useState } from 'react'
 import MDXContent from '@website/components/MDXContent'
 import Toc from '@website/components/Toc'
+import Sheet from '@website/components/ui/Sheet'
 import { useMemoizedFn } from '@website/hooks/ahooks'
 import { $ } from '@website/utils'
-import { Drawer } from 'antd'
 
 import styles from './index.module.css'
 import md_styles from '@website/styles/markdown.module.css'
 
-import type { AnchorProps } from 'antd'
+import type { TocItem } from '@website/types'
 
 interface IProps {
 	md: string
-	toc: AnchorProps['items']
+	toc: TocItem[]
 }
 
 export const toc_emitter = new EventTarget()
@@ -56,18 +56,26 @@ const Index = (props: IProps) => {
 					<MDXContent md={md}></MDXContent>
 				</div>
 			</div>
-			<Drawer
+			<Sheet
 				rootClassName={styles.drawer}
 				open={open_toc}
 				placement='right'
 				maskClosable
 				width={300}
-				closeIcon={null}
 				onClose={closeToc}
-				getContainer={() => document.body}
 			>
-				{TocContent}
-			</Drawer>
+				<div
+					className='
+						flex
+						w-full
+						pt-6
+						pl-6 pr-0
+						doc_toc
+					'
+				>
+					<Toc list={toc}></Toc>
+				</div>
+			</Sheet>
 			{TocContent}
 		</div>
 	)

@@ -5,7 +5,7 @@ const config = {
 	pageExtensions: ['js', 'jsx', 'ts', 'tsx'],
 	typescript: { ignoreBuildErrors: false },
 	experimental: {
-		optimizePackageImports: ['antd', '@phosphor-icons/react', 'lucide-react']
+		optimizePackageImports: ['@phosphor-icons/react', 'lucide-react']
 	}
 }
 

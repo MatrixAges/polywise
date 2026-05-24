@@ -4,7 +4,6 @@ import { useMemo, useState } from 'react'
 import { CalendarCheck, Check, CheckCircle, MarkdownLogo, Timer } from '@phosphor-icons/react'
 import useLocale from '@website/hooks/useLocale'
 import { $ } from '@website/utils'
-import { Segmented } from 'antd'
 import { useTranslations } from 'next-intl'
 
 import styles from './index.module.css'
@@ -57,20 +56,36 @@ const Index = () => {
 					'
 				>
 					<div className='header_wrap flex items-center justify-between'>
-						<Segmented
-							options={[
-								{
-									label: t(`Items.pro.title`),
-									value: 'pro'
-								},
-								{
-									label: t(`Items.infinity.title`),
-									value: 'infinity'
-								}
-							]}
-							value={type}
-							onChange={setType}
-						></Segmented>
+						<div
+							className='
+								flex
+								p-1
+								rounded-full
+								bg-[var(--color_bg_1)]
+								border border-[var(--color_border_light)]
+							'
+						>
+							{(['pro', 'infinity'] as const).map(value => (
+								<button
+									className={$.cx(
+										`
+										px-3 py-1
+										rounded-full
+										text-xs
+										transition-colors duration-200
+									`,
+										type === value
+											? 'bg-[var(--color_bg)] text-[var(--color_text)]'
+											: 'text-[var(--color_text_sublight)]'
+									)}
+									key={value}
+									type='button'
+									onClick={() => setType(value)}
+								>
+									{t(`Items.${value}.title`)}
+								</button>
+							))}
+						</div>
 						<div className='price flex items-center'>
 							<span className='value mr-0.5'>
 								{currency}

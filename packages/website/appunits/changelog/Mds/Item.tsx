@@ -1,12 +1,9 @@
 'use client'
 
-import { useRef, useState } from 'react'
 import { ArrowUpRight } from '@phosphor-icons/react'
 import MDContentPage from '@website/components/MDContentPage'
 import { Link } from '@website/i18n/navigation'
 import { $ } from '@website/utils'
-import { Affix } from 'antd'
-import { useInView } from 'framer-motion'
 
 interface IProps {
 	item: { id: string; date: string }
@@ -15,13 +12,15 @@ interface IProps {
 
 const Index = (props: IProps) => {
 	const { item, md } = props
-	const ref = useRef(null)
-	const visible = useInView(ref)
-	const [affixed, setAffixed] = useState<boolean | undefined>(false)
 
 	const Left = (
 		<Link
-			className={$.cx('left_wrap box-border flex flex-col', affixed && 'affixed')}
+			className='
+				sticky
+				box-border
+				flex flex-col
+				left_wrap
+			'
 			href={`/changelog/${item.id}`}
 		>
 			<div className='version_wrap flex items-center'>
@@ -33,14 +32,8 @@ const Index = (props: IProps) => {
 	)
 
 	return (
-		<div className='changelog_wrap flex' ref={ref}>
-			{visible ? (
-				<Affix offsetTop={90} onChange={setAffixed}>
-					{Left}
-				</Affix>
-			) : (
-				Left
-			)}
+		<div className='changelog_wrap flex'>
+			{Left}
 			<div
 				className='
 					relative

@@ -70,6 +70,8 @@
 		top: 0;
 		left: 0;
 		display: flex;
+		width: 60%;
+		background-color: var(--color_bg);
 
 		._dirtree {
 			position: initial;
@@ -84,19 +86,6 @@
 					.module_item {
 						border-radius: var(--radius);
 					}
-				}
-			}
-		}
-
-		:global {
-			.if-drawer-content-wrapper,
-			.ant-drawer-content-wrapper {
-				width: 60% !important;
-				padding: 0;
-
-				.if-drawer-content,
-				.ant-drawer-content {
-					border-radius: 0;
 				}
 			}
 		}

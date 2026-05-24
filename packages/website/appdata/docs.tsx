@@ -22,7 +22,7 @@ import {
 import { useMemoizedFn } from '@website/hooks/ahooks'
 import useLocale from '@website/hooks/useLocale'
 
-import type { MenuProps } from 'antd'
+import type { DocsMenuGroup } from '@website/types'
 
 export const popular = [
 	{
@@ -264,5 +264,5 @@ export const useMenu = () => {
 				}
 			]
 		}
-	] as MenuProps['items']
+	] as DocsMenuGroup[]
 }

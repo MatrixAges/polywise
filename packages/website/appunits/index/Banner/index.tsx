@@ -32,8 +32,11 @@ const Index = () => {
 			image_names.map(image_name => `${base_url_files_website}/preview/${module_name}/${image_name}.png`)
 		)
 
-		import('image-preload').then(res => {
-			res.default(paths, { order: res.Order.AllAtOnce })
+		paths.forEach(path => {
+			const image = new Image()
+
+			image.decoding = 'async'
+			image.src = path
 		})
 	}, [])
 
