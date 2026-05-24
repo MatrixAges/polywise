@@ -16,6 +16,7 @@ export const rewire_path = path.resolve(`${app_path}/rewire.json`)
 export const pthink_path = path.resolve(`${app_path}/pthink.json`)
 export const agents_path = path.resolve(`${app_path}/agents`)
 export const pin_path = path.resolve(`${app_path}/pin.json`)
+export const runtime_pid_path = path.resolve(`${app_path}/runtime.pid`)
 
 export const embedding_model = {
 	uri: 'hf:Qwen/Qwen3-Embedding-0.6B-GGUF/Qwen3-Embedding-0.6B-Q8_0.gguf',

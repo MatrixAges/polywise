@@ -32,15 +32,20 @@ import {
 	node_chunk,
 	skill
 } from '@core/db/schema'
-import { getAgent, getAgents } from '@core/db/services'
+import { getAgent, getAgents, getSkills } from '@core/db/services'
 import { env } from '@core/env'
+import getToolDir from '@core/fst/tools/meta/getToolDir'
+import rebuildCustomToolsMap from '@core/fst/tools/meta/rebuild'
+import scanCustomToolsMap from '@core/fst/tools/meta/scan'
 import { and, eq, inArray } from 'drizzle-orm'
 import fs from 'fs-extra'
 import { getId } from 'stk/utils'
 
+import { getSkillDirPath, getSkillItemDirPath, rebuildGlobalSkillMap } from '../skill/utils'
+
 import type { Agent, Article, Chunk, Document, Edge, Link, Node, Skill } from '@core/db'
 
-const pack_version = 1
+const pack_version = 2
 export const agent_pack_extension = 'papk'
 const require = createRequire(import.meta.url)
 type ArchiveLike = {
@@ -62,10 +67,22 @@ type VectorRecord = {
 	vector: string
 }
 
+type SkillAssetRecord = {
+	skill_id: string
+	asset_dir: string
+}
+
+type ToolAssetRecord = {
+	tool_name: string
+	asset_dir: string
+}
+
 type AgentPackSnapshot = {
 	agent: Agent
 	skills: Array<Skill>
 	agent_skill_rows: Array<{ agent_id: string; skill_id: string; created_at: Date | null }>
+	skill_assets: Array<SkillAssetRecord>
+	tool_assets: Array<ToolAssetRecord>
 	related_articles: Array<{ agent_id: string; article_id: string; created_at: Date | null }>
 	documents: Array<Document>
 	agent_document_rows: Array<{ agent_id: string; document_id: string; created_at: Date | null }>
@@ -211,6 +228,8 @@ const sortByUpdated = <T extends { updated_at?: Date | null; created_at?: Date |
 const unique = <T>(values: Array<T>) => Array.from(new Set(values))
 
 const getDefaultAgentExportDir = () => path.resolve(os.homedir(), 'Downloads')
+const getSkillsDir = () => path.resolve(app.app_path, 'skills')
+const getToolsDir = () => path.resolve(app.app_path, 'tools')
 
 const getConfiguredExportDir = () => {
 	const configured = config.agent_export_dir?.trim()
@@ -246,6 +265,54 @@ const getExportFilePath = async (agent_name: string) => {
 	}
 
 	return { export_dir, file_path: next_path, file_name: path.basename(next_path) }
+}
+
+const buildSkillAssetDir = (index: number) => `skill-${index + 1}`
+const buildToolAssetDir = (index: number) => `tool-${index + 1}`
+
+const resolveToolSourceDir = (tool_name: string) => {
+	try {
+		return getToolDir(getToolsDir(), tool_name)
+	} catch {
+		return ''
+	}
+}
+
+const updateFrontmatterName = async (file_path: string, next_name: string) => {
+	if (!(await fs.pathExists(file_path))) {
+		return
+	}
+
+	const content = await fs.readFile(file_path, 'utf8')
+	const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---/)
+
+	if (!match) {
+		return
+	}
+
+	const frontmatter = match[1]
+	const next_frontmatter = /^name:\s*.+$/m.test(frontmatter)
+		? frontmatter.replace(/^name:\s*.+$/m, `name: ${next_name}`)
+		: `name: ${next_name}\n${frontmatter}`
+	const next_content = content.replace(match[0], `---\n${next_frontmatter}\n---`)
+
+	if (next_content !== content) {
+		await fs.writeFile(file_path, next_content, 'utf8')
+	}
+}
+
+const copyDirIfExists = async (source_dir: string, target_dir: string) => {
+	if (!source_dir || !(await fs.pathExists(source_dir))) {
+		return false
+	}
+
+	await fs.ensureDir(path.dirname(target_dir))
+	await fs.copy(source_dir, target_dir, {
+		overwrite: true,
+		errorOnExist: false
+	})
+
+	return true
 }
 
 const collectVectorRecords = (args: {
@@ -316,6 +383,7 @@ const collectSnapshot = async (agent_id: string): Promise<AgentPackSnapshot> => 
 	const article_document_ids = articles.map(item => item.document_id).filter(Boolean) as Array<string>
 	const document_ids = unique([...agent_document_rows.map(item => item.document_id), ...article_document_ids])
 	const skill_rows = skill_ids.length ? await env.db.select().from(skill).where(inArray(skill.id, skill_ids)) : []
+	const sorted_skills = sortByUpdated(skill_rows as Array<Skill>)
 	const documents = document_ids.length
 		? await env.db.select().from(document).where(inArray(document.id, document_ids))
 		: []
@@ -382,15 +450,49 @@ const collectSnapshot = async (agent_id: string): Promise<AgentPackSnapshot> => 
 		vec_table_name: 'edge_vec',
 		ids: edge_ids
 	})
+	const skill_assets = [] as Array<SkillAssetRecord>
+
+	for (let index = 0; index < sorted_skills.length; index += 1) {
+		const item = sorted_skills[index]
+		const source_dir = getSkillItemDirPath(item)
+
+		if (source_dir && (await fs.pathExists(source_dir))) {
+			skill_assets.push({
+				skill_id: item.id,
+				asset_dir: buildSkillAssetDir(index)
+			})
+		}
+	}
+
+	const tool_assets = [] as Array<ToolAssetRecord>
+	const selected_tool_names = unique(
+		Array.isArray(target_agent.tools)
+			? target_agent.tools.filter((item): item is string => typeof item === 'string' && item.trim() !== '')
+			: []
+	)
+
+	for (let index = 0; index < selected_tool_names.length; index += 1) {
+		const tool_name = selected_tool_names[index]
+		const source_dir = resolveToolSourceDir(tool_name)
+
+		if (source_dir && (await fs.pathExists(source_dir))) {
+			tool_assets.push({
+				tool_name,
+				asset_dir: buildToolAssetDir(index)
+			})
+		}
+	}
 
 	return {
 		agent: target_agent,
-		skills: sortByUpdated(skill_rows as Array<Skill>),
+		skills: sorted_skills,
 		agent_skill_rows: agent_skill_rows.map(item => ({
 			agent_id: item.agent_id,
 			skill_id: item.skill_id,
 			created_at: item.created_at
 		})),
+		skill_assets,
+		tool_assets,
 		related_articles: related_rows.map(item => ({
 			agent_id: item.agent_id,
 			article_id: item.article_id,
@@ -448,7 +550,10 @@ const buildManifest = (snapshot: AgentPackSnapshot): AgentPackManifest => ({
 		snapshot.node_chunk_rows.length > 0 ||
 		snapshot.edge_article_rows.length > 0,
 	counts: {
+		tools: unique(snapshot.agent.tools || []).length,
 		skills: snapshot.skills.length,
+		tool_assets: snapshot.tool_assets.length,
+		skill_assets: snapshot.skill_assets.length,
 		related_articles: snapshot.related_articles.length,
 		documents: snapshot.documents.length,
 		articles: snapshot.articles.length,
@@ -462,11 +567,15 @@ const buildManifest = (snapshot: AgentPackSnapshot): AgentPackManifest => ({
 const writeSnapshot = async (temp_dir: string, snapshot: AgentPackSnapshot) => {
 	const payload_dir = path.resolve(temp_dir, 'payload')
 	const vectors_dir = path.resolve(payload_dir, 'vectors')
+	const skill_assets_dir = path.resolve(payload_dir, 'assets', 'skills')
+	const tool_assets_dir = path.resolve(payload_dir, 'assets', 'tools')
 
 	await writeJsonFile(path.resolve(temp_dir, 'manifest.json'), buildManifest(snapshot))
 	await writeJsonFile(path.resolve(payload_dir, 'agent.json'), snapshot.agent)
 	await writeJsonFile(path.resolve(payload_dir, 'skills.json'), snapshot.skills)
 	await writeJsonFile(path.resolve(payload_dir, 'agent_skills.json'), snapshot.agent_skill_rows)
+	await writeJsonFile(path.resolve(payload_dir, 'skill_assets.json'), snapshot.skill_assets)
+	await writeJsonFile(path.resolve(payload_dir, 'tool_assets.json'), snapshot.tool_assets)
 	await writeJsonFile(path.resolve(payload_dir, 'related_articles.json'), snapshot.related_articles)
 	await writeJsonFile(path.resolve(payload_dir, 'documents.json'), snapshot.documents)
 	await writeJsonFile(path.resolve(payload_dir, 'agent_documents.json'), snapshot.agent_document_rows)
@@ -482,6 +591,27 @@ const writeSnapshot = async (temp_dir: string, snapshot: AgentPackSnapshot) => {
 	await writeVectorFile(path.resolve(vectors_dir, 'chunk_vec.ndjson'), snapshot.vectors.chunk)
 	await writeVectorFile(path.resolve(vectors_dir, 'node_vec.ndjson'), snapshot.vectors.node)
 	await writeVectorFile(path.resolve(vectors_dir, 'edge_vec.ndjson'), snapshot.vectors.edge)
+
+	for (const asset of snapshot.skill_assets) {
+		const current_skill = snapshot.skills.find(item => item.id === asset.skill_id)
+		const source_dir = current_skill ? getSkillItemDirPath(current_skill) : ''
+
+		if (!source_dir) {
+			continue
+		}
+
+		await copyDirIfExists(source_dir, path.resolve(skill_assets_dir, asset.asset_dir))
+	}
+
+	for (const asset of snapshot.tool_assets) {
+		const source_dir = resolveToolSourceDir(asset.tool_name)
+
+		if (!source_dir) {
+			continue
+		}
+
+		await copyDirIfExists(source_dir, path.resolve(tool_assets_dir, asset.asset_dir))
+	}
 }
 
 const createArchive = async (source_dir: string, file_path: string) => {
@@ -537,12 +667,14 @@ const extractArchive = async (file_path: string, target_dir: string) => {
 const readSnapshot = async (temp_dir: string) => {
 	const manifest = await readJsonFile<AgentPackManifest>(path.resolve(temp_dir, 'manifest.json'))
 
-	if (manifest.pack_version !== pack_version) {
+	if (![1, pack_version].includes(manifest.pack_version)) {
 		throw new Error(`Unsupported agent pack version: ${manifest.pack_version}`)
 	}
 
 	const payload_dir = path.resolve(temp_dir, 'payload')
 	const vectors_dir = path.resolve(payload_dir, 'vectors')
+	const readOptionalJson = async <T>(file_path: string, fallback: T) =>
+		(await fs.pathExists(file_path)) ? readJsonFile<T>(file_path) : fallback
 
 	return {
 		manifest,
@@ -551,6 +683,14 @@ const readSnapshot = async (temp_dir: string) => {
 		agent_skill_rows: await readJsonFile<
 			Array<{ agent_id: string; skill_id: string; created_at: Date | null }>
 		>(path.resolve(payload_dir, 'agent_skills.json')),
+		skill_assets: await readOptionalJson<Array<SkillAssetRecord>>(
+			path.resolve(payload_dir, 'skill_assets.json'),
+			[]
+		),
+		tool_assets: await readOptionalJson<Array<ToolAssetRecord>>(
+			path.resolve(payload_dir, 'tool_assets.json'),
+			[]
+		),
 		related_articles: await readJsonFile<
 			Array<{ agent_id: string; article_id: string; created_at: Date | null }>
 		>(path.resolve(payload_dir, 'related_articles.json')),
@@ -581,23 +721,36 @@ const readSnapshot = async (temp_dir: string) => {
 	}
 }
 
+const resolveUniqueName = (args: {
+	base_name: string
+	existing_names: Set<string>
+	exists?: (candidate: string) => Promise<boolean>
+}) => {
+	const { existing_names, exists } = args
+	const base_name = args.base_name.trim() || 'Imported Item'
+
+	return (async () => {
+		if (!existing_names.has(base_name) && !(await exists?.(base_name))) {
+			return base_name
+		}
+
+		let duplicate_index = 2
+		let next_name = `${base_name} (${duplicate_index})`
+
+		while (existing_names.has(next_name) || (await exists?.(next_name))) {
+			duplicate_index += 1
+			next_name = `${base_name} (${duplicate_index})`
+		}
+
+		return next_name
+	})()
+}
+
 const resolveImportedAgentName = async (name: string) => {
 	const base_name = name.trim() || 'Imported Agent'
 	const existing_names = new Set((await getAgents()).map(item => item.name))
 
-	if (!existing_names.has(base_name)) {
-		return base_name
-	}
-
-	let duplicate_index = 2
-	let next_name = `${base_name} (${duplicate_index})`
-
-	while (existing_names.has(next_name)) {
-		duplicate_index += 1
-		next_name = `${base_name} (${duplicate_index})`
-	}
-
-	return next_name
+	return resolveUniqueName({ base_name, existing_names })
 }
 
 export const exportAgentPack = async (agent_id: string) => {
@@ -661,6 +814,8 @@ export const importAgentPack = async (file_path: string) => {
 		const next_agent_id = getId()
 		const now = new Date()
 		const current_agents = await getAgents()
+		const current_skills = await getSkills()
+		const current_tools = await scanCustomToolsMap(getToolsDir())
 		const min_agent_order = current_agents.reduce(
 			(total, item) => Math.min(total, Number.isFinite(item.order) ? item.order : 0),
 			Number.POSITIVE_INFINITY
@@ -674,361 +829,458 @@ export const importAgentPack = async (file_path: string) => {
 		const node_id_map = new Map<string, string>()
 		const edge_id_map = new Map<string, string>()
 		const skill_base_order = Date.now()
+		const skill_import_map = new Map<string, { id: string; name: string; path: string }>()
+		const tool_name_map = new Map<string, string>()
+		const existing_skill_names = new Set(current_skills.map(item => item.name))
+		const existing_tool_names = new Set(current_tools.map(item => item.name))
+		const created_dirs = [] as Array<string>
+		const tool_asset_path_map = new Map(snapshot.tool_assets.map(item => [item.tool_name, item.asset_dir]))
+		const skill_asset_path_map = new Map(snapshot.skill_assets.map(item => [item.skill_id, item.asset_dir]))
+		const imported_tool_names = [] as Array<string>
 
-		const sorted_nodes = [...snapshot.nodes].sort(
-			(a, b) => Number(Boolean(b.agent_id)) - Number(Boolean(a.agent_id))
-		)
-		const node_name_map = new Map<string, string>()
-		const node_insert_rows = [] as Array<{ source: Node; next_id: string }>
+		for (const item of snapshot.skills) {
+			const next_name = await resolveUniqueName({
+				base_name: item.name,
+				existing_names: existing_skill_names,
+				exists: async candidate => fs.pathExists(getSkillDirPath(candidate))
+			})
 
-		for (const item of sorted_nodes) {
-			const key = item.name
-			const existing_id = node_name_map.get(key)
-
-			if (existing_id) {
-				node_id_map.set(item.id, existing_id)
-				continue
-			}
-
-			const next_id = getId()
-
-			node_name_map.set(key, next_id)
-			node_id_map.set(item.id, next_id)
-			node_insert_rows.push({ source: item, next_id })
+			existing_skill_names.add(next_name)
+			skill_import_map.set(item.id, {
+				id: skill_id_map.get(item.id)!,
+				name: next_name,
+				path: getSkillDirPath(next_name)
+			})
 		}
 
-		const sorted_edges = [...snapshot.edges].sort(
-			(a, b) => Number(Boolean(b.agent_id)) - Number(Boolean(a.agent_id))
-		)
-		const edge_pair_map = new Map<string, string>()
-		const edge_insert_rows = [] as Array<{
-			source: Edge
-			next_id: string
-			source_id: string
-			target_id: string
-		}>
+		for (const tool_name of unique(snapshot.agent.tools || [])) {
+			const has_asset = tool_asset_path_map.has(tool_name)
+			const next_name = has_asset
+				? await resolveUniqueName({
+						base_name: tool_name,
+						existing_names: existing_tool_names,
+						exists: async candidate => fs.pathExists(resolveToolSourceDir(candidate))
+					})
+				: tool_name
 
-		for (const item of sorted_edges) {
-			const source_id = node_id_map.get(item.source_id)
-			const target_id = node_id_map.get(item.target_id)
-
-			if (!source_id || !target_id) {
-				continue
+			if (has_asset) {
+				existing_tool_names.add(next_name)
+				tool_name_map.set(tool_name, next_name)
 			}
-
-			const pair_key = `${source_id}:${target_id}`
-			const existing_id = edge_pair_map.get(pair_key)
-
-			if (existing_id) {
-				edge_id_map.set(item.id, existing_id)
-				continue
-			}
-
-			const next_id = getId()
-
-			edge_pair_map.set(pair_key, next_id)
-			edge_id_map.set(item.id, next_id)
-			edge_insert_rows.push({ source: item, next_id, source_id, target_id })
 		}
 
-		const chunk_rowid_map = new Map<string, number>()
-		const node_rowid_map = new Map<string, number>()
-		const edge_rowid_map = new Map<string, number>()
-		const agent_rowid_map = new Map<string, number>()
+		for (const tool_name of snapshot.agent.tools || []) {
+			imported_tool_names.push(tool_name_map.get(tool_name) ?? tool_name)
+		}
 
-		env.sqlite.transaction(() => {
-			env.db
-				.insert(agent)
-				.values({
-					id: next_agent_id,
-					name: imported_name,
-					role: snapshot.agent.role,
-					description: snapshot.agent.description,
-					photo: snapshot.agent.photo ? new Uint8Array(snapshot.agent.photo as Uint8Array) : null,
-					avatar: snapshot.agent.avatar,
-					tools: snapshot.agent.tools,
-					prompt: snapshot.agent.prompt,
-					soul: snapshot.agent.soul,
-					identity: snapshot.agent.identity,
-					memory: snapshot.agent.memory,
-					order: next_agent_order,
-					model: snapshot.agent.model,
-					created_at: snapshot.agent.created_at ?? now,
-					updated_at: snapshot.agent.updated_at ?? now
-				})
-				.run()
+		try {
+			for (const item of snapshot.skills) {
+				const import_item = skill_import_map.get(item.id)
+				const asset_dir = skill_asset_path_map.get(item.id)
 
-			for (let index = 0; index < snapshot.skills.length; index += 1) {
-				const item = snapshot.skills[index]
+				if (!import_item || !asset_dir) {
+					continue
+				}
 
-				env.db
-					.insert(skill)
-					.values({
-						...item,
-						id: skill_id_map.get(item.id)!,
-						order: skill_base_order + index,
-						created_at: item.created_at ?? now,
-						updated_at: item.updated_at ?? now
-					})
-					.run()
+				const source_dir = path.resolve(work_dir, 'payload', 'assets', 'skills', asset_dir)
+
+				if (!(await copyDirIfExists(source_dir, import_item.path))) {
+					continue
+				}
+
+				created_dirs.push(import_item.path)
+				await updateFrontmatterName(path.resolve(import_item.path, 'SKILL.md'), import_item.name)
 			}
 
-			for (const item of snapshot.documents) {
-				env.db
-					.insert(document)
-					.values({
-						...item,
-						id: document_id_map.get(item.id)!,
-						created_at: item.created_at ?? now,
-						updated_at: item.updated_at ?? now
-					})
-					.run()
+			for (const [tool_name, asset_dir] of tool_asset_path_map) {
+				const next_name = tool_name_map.get(tool_name)
+
+				if (!next_name) {
+					continue
+				}
+
+				const target_dir = resolveToolSourceDir(next_name)
+				const source_dir = path.resolve(work_dir, 'payload', 'assets', 'tools', asset_dir)
+
+				if (!(await copyDirIfExists(source_dir, target_dir))) {
+					continue
+				}
+
+				created_dirs.push(target_dir)
+				await updateFrontmatterName(path.resolve(target_dir, 'readme.md'), next_name)
 			}
 
-			for (const item of snapshot.articles) {
+			const sorted_nodes = [...snapshot.nodes].sort(
+				(a, b) => Number(Boolean(b.agent_id)) - Number(Boolean(a.agent_id))
+			)
+			const node_name_map = new Map<string, string>()
+			const node_insert_rows = [] as Array<{ source: Node; next_id: string }>
+
+			for (const item of sorted_nodes) {
+				const key = item.name
+				const existing_id = node_name_map.get(key)
+
+				if (existing_id) {
+					node_id_map.set(item.id, existing_id)
+					continue
+				}
+
+				const next_id = getId()
+
+				node_name_map.set(key, next_id)
+				node_id_map.set(item.id, next_id)
+				node_insert_rows.push({ source: item, next_id })
+			}
+
+			const sorted_edges = [...snapshot.edges].sort(
+				(a, b) => Number(Boolean(b.agent_id)) - Number(Boolean(a.agent_id))
+			)
+			const edge_pair_map = new Map<string, string>()
+			const edge_insert_rows = [] as Array<{
+				source: Edge
+				next_id: string
+				source_id: string
+				target_id: string
+			}>
+
+			for (const item of sorted_edges) {
+				const source_id = node_id_map.get(item.source_id)
+				const target_id = node_id_map.get(item.target_id)
+
+				if (!source_id || !target_id) {
+					continue
+				}
+
+				const pair_key = `${source_id}:${target_id}`
+				const existing_id = edge_pair_map.get(pair_key)
+
+				if (existing_id) {
+					edge_id_map.set(item.id, existing_id)
+					continue
+				}
+
+				const next_id = getId()
+
+				edge_pair_map.set(pair_key, next_id)
+				edge_id_map.set(item.id, next_id)
+				edge_insert_rows.push({ source: item, next_id, source_id, target_id })
+			}
+
+			const chunk_rowid_map = new Map<string, number>()
+			const node_rowid_map = new Map<string, number>()
+			const edge_rowid_map = new Map<string, number>()
+			const agent_rowid_map = new Map<string, number>()
+
+			env.sqlite.transaction(() => {
 				env.db
-					.insert(article)
+					.insert(agent)
 					.values({
-						...item,
-						id: article_id_map.get(item.id)!,
-						document_id: item.document_id
-							? (document_id_map.get(item.document_id) ?? null)
+						id: next_agent_id,
+						name: imported_name,
+						role: snapshot.agent.role,
+						description: snapshot.agent.description,
+						photo: snapshot.agent.photo
+							? new Uint8Array(snapshot.agent.photo as Uint8Array)
 							: null,
-						scope_type: 'agent',
-						scope_id: next_agent_id,
-						hash: null,
-						created_at: item.created_at ?? now,
-						updated_at: item.updated_at ?? now
+						avatar: snapshot.agent.avatar,
+						tools: imported_tool_names,
+						prompt: snapshot.agent.prompt,
+						soul: snapshot.agent.soul,
+						identity: snapshot.agent.identity,
+						memory: snapshot.agent.memory,
+						order: next_agent_order,
+						model: snapshot.agent.model,
+						created_at: snapshot.agent.created_at ?? now,
+						updated_at: snapshot.agent.updated_at ?? now
 					})
 					.run()
-			}
 
-			for (const item of snapshot.chunks) {
-				const next_article_id = item.article_id ? article_id_map.get(item.article_id) : null
+				for (let index = 0; index < snapshot.skills.length; index += 1) {
+					const item = snapshot.skills[index]
+					const import_item = skill_import_map.get(item.id)
 
-				if (!next_article_id) {
-					continue
+					if (!import_item) {
+						continue
+					}
+
+					env.db
+						.insert(skill)
+						.values({
+							...item,
+							id: import_item.id,
+							name: import_item.name,
+							path: import_item.path,
+							order: skill_base_order + index,
+							created_at: item.created_at ?? now,
+							updated_at: item.updated_at ?? now
+						})
+						.run()
 				}
 
-				env.db
-					.insert(chunk)
-					.values({
-						...item,
-						id: chunk_id_map.get(item.id)!,
-						article_id: next_article_id,
-						created_at: item.created_at ?? now
-					})
-					.run()
-			}
-
-			for (const item of node_insert_rows) {
-				env.db
-					.insert(node)
-					.values({
-						...item.source,
-						id: item.next_id,
-						agent_id: next_agent_id,
-						created_at: item.source.created_at ?? now
-					})
-					.run()
-			}
-
-			for (const item of edge_insert_rows) {
-				env.db
-					.insert(edge)
-					.values({
-						...item.source,
-						id: item.next_id,
-						agent_id: next_agent_id,
-						source_id: item.source_id,
-						target_id: item.target_id,
-						created_at: item.source.created_at ?? now
-					})
-					.run()
-			}
-
-			for (const item of snapshot.links) {
-				env.db
-					.insert(link)
-					.values({
-						...item,
-						id: link_id_map.get(item.id)!,
-						hash: null,
-						created_at: item.created_at ?? now,
-						updated_at: item.updated_at ?? now
-					})
-					.run()
-			}
-
-			for (const item of snapshot.agent_skill_rows) {
-				const next_skill_id = skill_id_map.get(item.skill_id)
-
-				if (!next_skill_id) {
-					continue
+				for (const item of snapshot.documents) {
+					env.db
+						.insert(document)
+						.values({
+							...item,
+							id: document_id_map.get(item.id)!,
+							created_at: item.created_at ?? now,
+							updated_at: item.updated_at ?? now
+						})
+						.run()
 				}
 
-				env.db
-					.insert(agent_skill)
-					.values({
-						agent_id: next_agent_id,
-						skill_id: next_skill_id,
-						created_at: item.created_at ?? now
-					})
-					.onConflictDoNothing()
-					.run()
-			}
-
-			for (const item of snapshot.agent_document_rows) {
-				const next_document_id = document_id_map.get(item.document_id)
-
-				if (!next_document_id) {
-					continue
+				for (const item of snapshot.articles) {
+					env.db
+						.insert(article)
+						.values({
+							...item,
+							id: article_id_map.get(item.id)!,
+							document_id: item.document_id
+								? (document_id_map.get(item.document_id) ?? null)
+								: null,
+							scope_type: 'agent',
+							scope_id: next_agent_id,
+							hash: null,
+							created_at: item.created_at ?? now,
+							updated_at: item.updated_at ?? now
+						})
+						.run()
 				}
 
-				env.db
-					.insert(agent_document)
-					.values({
-						agent_id: next_agent_id,
-						document_id: next_document_id,
-						created_at: item.created_at ?? now
-					})
-					.onConflictDoNothing()
-					.run()
-			}
+				for (const item of snapshot.chunks) {
+					const next_article_id = item.article_id ? article_id_map.get(item.article_id) : null
 
-			for (const item of snapshot.related_articles) {
-				const next_article_id = article_id_map.get(item.article_id)
+					if (!next_article_id) {
+						continue
+					}
 
-				if (!next_article_id) {
-					continue
+					env.db
+						.insert(chunk)
+						.values({
+							...item,
+							id: chunk_id_map.get(item.id)!,
+							article_id: next_article_id,
+							created_at: item.created_at ?? now
+						})
+						.run()
 				}
 
-				env.db
-					.insert(agent_article)
-					.values({
-						agent_id: next_agent_id,
-						article_id: next_article_id,
-						created_at: item.created_at ?? now
-					})
-					.onConflictDoNothing()
-					.run()
-			}
-
-			for (const item of snapshot.node_chunk_rows) {
-				const next_node_id = node_id_map.get(item.node_id)
-				const next_chunk_id = chunk_id_map.get(item.chunk_id)
-
-				if (!next_node_id || !next_chunk_id) {
-					continue
+				for (const item of node_insert_rows) {
+					env.db
+						.insert(node)
+						.values({
+							...item.source,
+							id: item.next_id,
+							agent_id: next_agent_id,
+							created_at: item.source.created_at ?? now
+						})
+						.run()
 				}
 
-				env.db
-					.insert(node_chunk)
-					.values({
-						node_id: next_node_id,
-						chunk_id: next_chunk_id,
-						created_at: item.created_at ?? now
-					})
-					.onConflictDoNothing()
-					.run()
-			}
-
-			for (const item of snapshot.edge_article_rows) {
-				const next_edge_id = edge_id_map.get(item.edge_id)
-				const next_article_id = article_id_map.get(item.article_id)
-
-				if (!next_edge_id || !next_article_id) {
-					continue
+				for (const item of edge_insert_rows) {
+					env.db
+						.insert(edge)
+						.values({
+							...item.source,
+							id: item.next_id,
+							agent_id: next_agent_id,
+							source_id: item.source_id,
+							target_id: item.target_id,
+							created_at: item.source.created_at ?? now
+						})
+						.run()
 				}
 
-				env.db
-					.insert(edge_article)
-					.values({
-						edge_id: next_edge_id,
-						article_id: next_article_id,
-						created_at: item.created_at ?? now
-					})
-					.onConflictDoNothing()
-					.run()
-			}
-
-			for (const item of snapshot.link_article_rows) {
-				const next_link_id = link_id_map.get(item.link_id)
-				const next_article_id = article_id_map.get(item.article_id)
-
-				if (!next_link_id || !next_article_id) {
-					continue
+				for (const item of snapshot.links) {
+					env.db
+						.insert(link)
+						.values({
+							...item,
+							id: link_id_map.get(item.id)!,
+							hash: null,
+							created_at: item.created_at ?? now,
+							updated_at: item.updated_at ?? now
+						})
+						.run()
 				}
 
-				env.db
-					.insert(link_article)
-					.values({
-						link_id: next_link_id,
-						article_id: next_article_id,
-						created_at: item.created_at ?? now
-					})
-					.onConflictDoNothing()
-					.run()
-			}
+				for (const item of snapshot.agent_skill_rows) {
+					const next_skill_id = skill_id_map.get(item.skill_id)
 
-			const next_agent_rowid = getAgentRowid().get(next_agent_id) as { rowid: number } | undefined
+					if (!next_skill_id) {
+						continue
+					}
 
-			if (next_agent_rowid) {
-				agent_rowid_map.set(snapshot.agent.id, next_agent_rowid.rowid)
-			}
-
-			for (const [source_id, next_id] of chunk_id_map) {
-				const row = getChunkRowid().get(next_id) as { rowid: number } | undefined
-
-				if (row) {
-					chunk_rowid_map.set(source_id, row.rowid)
-				}
-			}
-
-			for (const [source_id, next_id] of node_id_map) {
-				const row = getNodeRowid().get(next_id) as { rowid: number } | undefined
-
-				if (row) {
-					node_rowid_map.set(source_id, row.rowid)
-				}
-			}
-
-			for (const [source_id, next_id] of edge_id_map) {
-				const row = getEdgeRowid().get(next_id) as { rowid: number } | undefined
-
-				if (row) {
-					edge_rowid_map.set(source_id, row.rowid)
-				}
-			}
-
-			insertVectorRecords(snapshot.vectors.agent, agent_rowid_map, (rowid, vector) =>
-				insertAgentVector().run(rowid, vector)
-			)
-			insertVectorRecords(snapshot.vectors.chunk, chunk_rowid_map, (rowid, vector) =>
-				insertChunkVector().run(rowid, vector)
-			)
-			insertVectorRecords(snapshot.vectors.node, node_rowid_map, (rowid, vector) =>
-				insertNodeVector().run(rowid, vector)
-			)
-			insertVectorRecords(snapshot.vectors.edge, edge_rowid_map, (rowid, vector) =>
-				insertEdgeVector().run(rowid, vector)
-			)
-
-			for (const [source_id, next_rowid] of chunk_rowid_map) {
-				const source_chunk = snapshot.chunks.find(item => item.id === source_id)
-
-				if (!source_chunk) {
-					continue
+					env.db
+						.insert(agent_skill)
+						.values({
+							agent_id: next_agent_id,
+							skill_id: next_skill_id,
+							created_at: item.created_at ?? now
+						})
+						.onConflictDoNothing()
+						.run()
 				}
 
-				insertChunkFts().run(BigInt(next_rowid), source_chunk.keywords)
-			}
-		})()
+				for (const item of snapshot.agent_document_rows) {
+					const next_document_id = document_id_map.get(item.document_id)
 
-		return {
-			ok: true as const,
-			agent_id: next_agent_id,
-			agent_name: imported_name
+					if (!next_document_id) {
+						continue
+					}
+
+					env.db
+						.insert(agent_document)
+						.values({
+							agent_id: next_agent_id,
+							document_id: next_document_id,
+							created_at: item.created_at ?? now
+						})
+						.onConflictDoNothing()
+						.run()
+				}
+
+				for (const item of snapshot.related_articles) {
+					const next_article_id = article_id_map.get(item.article_id)
+
+					if (!next_article_id) {
+						continue
+					}
+
+					env.db
+						.insert(agent_article)
+						.values({
+							agent_id: next_agent_id,
+							article_id: next_article_id,
+							created_at: item.created_at ?? now
+						})
+						.onConflictDoNothing()
+						.run()
+				}
+
+				for (const item of snapshot.node_chunk_rows) {
+					const next_node_id = node_id_map.get(item.node_id)
+					const next_chunk_id = chunk_id_map.get(item.chunk_id)
+
+					if (!next_node_id || !next_chunk_id) {
+						continue
+					}
+
+					env.db
+						.insert(node_chunk)
+						.values({
+							node_id: next_node_id,
+							chunk_id: next_chunk_id,
+							created_at: item.created_at ?? now
+						})
+						.onConflictDoNothing()
+						.run()
+				}
+
+				for (const item of snapshot.edge_article_rows) {
+					const next_edge_id = edge_id_map.get(item.edge_id)
+					const next_article_id = article_id_map.get(item.article_id)
+
+					if (!next_edge_id || !next_article_id) {
+						continue
+					}
+
+					env.db
+						.insert(edge_article)
+						.values({
+							edge_id: next_edge_id,
+							article_id: next_article_id,
+							created_at: item.created_at ?? now
+						})
+						.onConflictDoNothing()
+						.run()
+				}
+
+				for (const item of snapshot.link_article_rows) {
+					const next_link_id = link_id_map.get(item.link_id)
+					const next_article_id = article_id_map.get(item.article_id)
+
+					if (!next_link_id || !next_article_id) {
+						continue
+					}
+
+					env.db
+						.insert(link_article)
+						.values({
+							link_id: next_link_id,
+							article_id: next_article_id,
+							created_at: item.created_at ?? now
+						})
+						.onConflictDoNothing()
+						.run()
+				}
+
+				const next_agent_rowid = getAgentRowid().get(next_agent_id) as { rowid: number } | undefined
+
+				if (next_agent_rowid) {
+					agent_rowid_map.set(snapshot.agent.id, next_agent_rowid.rowid)
+				}
+
+				for (const [source_id, next_id] of chunk_id_map) {
+					const row = getChunkRowid().get(next_id) as { rowid: number } | undefined
+
+					if (row) {
+						chunk_rowid_map.set(source_id, row.rowid)
+					}
+				}
+
+				for (const [source_id, next_id] of node_id_map) {
+					const row = getNodeRowid().get(next_id) as { rowid: number } | undefined
+
+					if (row) {
+						node_rowid_map.set(source_id, row.rowid)
+					}
+				}
+
+				for (const [source_id, next_id] of edge_id_map) {
+					const row = getEdgeRowid().get(next_id) as { rowid: number } | undefined
+
+					if (row) {
+						edge_rowid_map.set(source_id, row.rowid)
+					}
+				}
+
+				insertVectorRecords(snapshot.vectors.agent, agent_rowid_map, (rowid, vector) =>
+					insertAgentVector().run(rowid, vector)
+				)
+				insertVectorRecords(snapshot.vectors.chunk, chunk_rowid_map, (rowid, vector) =>
+					insertChunkVector().run(rowid, vector)
+				)
+				insertVectorRecords(snapshot.vectors.node, node_rowid_map, (rowid, vector) =>
+					insertNodeVector().run(rowid, vector)
+				)
+				insertVectorRecords(snapshot.vectors.edge, edge_rowid_map, (rowid, vector) =>
+					insertEdgeVector().run(rowid, vector)
+				)
+
+				for (const [source_id, next_rowid] of chunk_rowid_map) {
+					const source_chunk = snapshot.chunks.find(item => item.id === source_id)
+
+					if (!source_chunk) {
+						continue
+					}
+
+					insertChunkFts().run(BigInt(next_rowid), source_chunk.keywords)
+				}
+			})()
+
+			await rebuildGlobalSkillMap()
+			await rebuildCustomToolsMap({ tools_dir: getToolsDir(), custom_tools_map: [] } as never)
+
+			return {
+				ok: true as const,
+				agent_id: next_agent_id,
+				agent_name: imported_name
+			}
+		} catch (error) {
+			await Promise.all(created_dirs.map(item => fs.remove(item).catch(() => undefined)))
+
+			throw error
 		}
 	} finally {
 		await fs.remove(work_dir)

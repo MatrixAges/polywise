@@ -43,6 +43,15 @@ export const manual_api_meta = {
 	},
 	'search.hybirdSearch': {
 		examples: ['polywise api search hybirdSearch --query "topic"']
+	},
+	stop: {
+		examples: ['polywise stop']
+	},
+	restart: {
+		examples: ['polywise restart']
+	},
+	upgrade: {
+		examples: ['polywise upgrade']
 	}
 } satisfies Record<
 	string,

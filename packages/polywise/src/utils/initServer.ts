@@ -7,16 +7,19 @@ import { WebSocketServer } from 'ws'
 
 import { router } from '../rpc'
 import { server } from '../server'
+import { clearRuntimePidFile, writeRuntimePidFile } from './runtimeControl'
 
 import type { Server } from 'http'
 
 export default async () => {
 	const { promise, resolve } = Promise.withResolvers()
+	let deinit_started = false
 
 	process.title = 'polywise_server'
 
 	const node_server = serve({ fetch: server.fetch, port: 3072 }, ({ port }) => {
 		console.log(`Listening on http://localhost:${port}`)
+		void writeRuntimePidFile()
 
 		resolve(port)
 	})
@@ -29,15 +32,35 @@ export default async () => {
 	})
 
 	const deinit = async () => {
-		await disposeModels()
+		if (deinit_started) return
 
-		env.sqlite.close()
-		config_watcher.close()
-		wss_handler.broadcastReconnectNotification()
-		wss.close()
-		node_server.close()
+		deinit_started = true
 
-		setTimeout(() => process.exit(0), 300)
+		await clearRuntimePidFile()
+		await disposeModels().catch(() => null)
+
+		try {
+			env.sqlite.close()
+		} catch {}
+
+		try {
+			config_watcher.close()
+		} catch {}
+
+		try {
+			wss_handler.broadcastReconnectNotification()
+		} catch {}
+
+		try {
+			wss.close()
+		} catch {}
+
+		try {
+			node_server.close()
+		} catch {}
+
+		const exit_timer = setTimeout(() => process.exit(0), 300)
+		exit_timer.unref?.()
 	}
 
 	process.on('SIGINT', deinit)

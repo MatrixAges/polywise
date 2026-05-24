@@ -15,16 +15,19 @@ import project from './project'
 import provider from './provider'
 import remove from './remove'
 import report from './report'
+import restart from './restart'
 import save from './save'
 import search from './search'
 import session from './session'
 import setActive from './setActive'
 import skill from './skill'
 import sniffer from './sniffer'
+import stop from './stop'
 import test from './test'
 import todo from './todo'
 import tool from './tool'
 import update from './update'
+import upgrade from './upgrade'
 
 import type { inferRouterInputs, inferRouterOutputs } from '@trpc/server'
 
@@ -51,6 +54,9 @@ export const router = r({
 	heartbeat,
 	search,
 	save,
+	stop,
+	restart,
+	upgrade,
 	setActive,
 	test,
 	update,

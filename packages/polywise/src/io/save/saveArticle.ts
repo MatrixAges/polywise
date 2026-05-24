@@ -100,7 +100,7 @@ const processPipelineTask = async (article_id: string, created_at: string) => {
 	const current_article = await getArticle(eq(article.id, article_id))
 
 	if (!current_article) {
-		await removePipelineTask(article_id)
+		await removePipelineTask(article_id, { archive: false })
 
 		return
 	}
@@ -110,7 +110,10 @@ const processPipelineTask = async (article_id: string, created_at: string) => {
 			is_pipelined: true,
 			updated_at: new Date()
 		})
-		await removePipelineTask(article_id)
+		await removePipelineTask(article_id, {
+			done_at: new Date().toISOString(),
+			status: 'done'
+		})
 
 		return
 	}
@@ -124,7 +127,10 @@ const processPipelineTask = async (article_id: string, created_at: string) => {
 			updated_at: new Date()
 		})
 
-		await removePipelineTask(article_id)
+		await removePipelineTask(article_id, {
+			done_at: new Date().toISOString(),
+			status: 'done'
+		})
 	} catch (error) {
 		await clearArticleChunks(article_id)
 

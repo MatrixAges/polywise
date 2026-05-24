@@ -34,6 +34,10 @@ export default class Index {
 		return this.list.filter(item => item.status === 'running')
 	}
 
+	get recent_list() {
+		return this.list.filter(item => item.status !== 'running')
+	}
+
 	watch() {
 		const deinit = rpc.pipeline.watch.subscribe(undefined, {
 			onData: () => {

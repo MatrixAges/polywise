@@ -28,7 +28,8 @@ const Index = () => {
 		return () => x.deinit()
 	}, [])
 
-	const list = x.running_list
+	const running_list = x.running_list
+	const recent_list = x.recent_list
 
 	if (x.loading) {
 		return (
@@ -45,7 +46,7 @@ const Index = () => {
 		)
 	}
 
-	if (list.length === 0) {
+	if (running_list.length === 0 && recent_list.length === 0) {
 		return (
 			<div
 				className='
@@ -55,7 +56,7 @@ const Index = () => {
 					text-sm text-std-400
 				'
 			>
-				No running pipeline tasks.
+				No recent pipeline tasks.
 			</div>
 		)
 	}
@@ -69,10 +70,13 @@ const Index = () => {
 				p-2
 			'
 		>
-			{list.map(item => {
+			{running_list.length > 0 ? (
+				<div className='text-std-400 px-1 text-xs font-medium'>Running</div>
+			) : null}
+			{running_list.map(item => {
 				return (
 					<div
-						key={item.article_id}
+						key={item.task_key}
 						className='
 						p-3
 						rounded-xl
@@ -112,6 +116,78 @@ const Index = () => {
 						>
 							<div>{fromNow(item.created_at)}</div>
 							<div>{formatDateTime(item.created_at, 'MM-DD HH:mm')}</div>
+						</div>
+					</div>
+				)
+			})}
+			{recent_list.length > 0 ? (
+				<div
+					className='
+						px-1
+						mt-2
+						text-xs text-std-400 font-medium
+					'
+				>
+					Recent
+				</div>
+			) : null}
+			{recent_list.map(item => {
+				const time_value = item.done_at || item.created_at
+
+				return (
+					<div
+						key={item.task_key}
+						className='
+						p-3
+						rounded-xl
+						bg-white/80
+						border border-black/6
+						dark:border-white/8 dark:bg-white/4
+					'
+					>
+						<div className='flex items-start justify-between gap-3'>
+							<div className='min-w-0 flex-1'>
+								<div className='truncate text-sm font-medium'>{item.title}</div>
+								<div className='text-std-400 mt-1 text-xs'>{item.article_id}</div>
+								{item.error_message ? (
+									<div
+										className='
+										mt-2
+										text-xs text-red-600
+										dark:text-red-300
+										line-clamp-2
+									'
+									>
+										{item.error_message}
+									</div>
+								) : null}
+							</div>
+							<div
+								className={`
+								inline-flex
+								shrink-0
+								items-center
+								gap-1
+								px-2 py-1
+								rounded-full
+								text-xs font-medium
+								${status_class_map[item.status]}`}
+							>
+								{status_icon_map[item.status]}
+								<span>{item.status}</span>
+							</div>
+						</div>
+						<div
+							className='
+							flex
+							items-center justify-between
+							gap-3
+							mt-3
+							text-xs text-std-400
+						'
+						>
+							<div>{fromNow(time_value)}</div>
+							<div>{formatDateTime(time_value, 'MM-DD HH:mm')}</div>
 						</div>
 					</div>
 				)

@@ -69,6 +69,7 @@ export default async () => {
 	const tools_dir = path.resolve(app.app_path, 'tools')
 	const patch_dir = path.resolve(app.app_path, 'patch')
 	const cron_logs_dir = path.resolve(app.app_path, '.logs/cron')
+	const pipeline_logs_dir = path.resolve(app.app_path, '.logs/pipeline')
 	const skill_creator_dir = path.resolve(skills_dir, 'skill-creator')
 	const skill_creator_path = path.resolve(skill_creator_dir, 'SKILL.md')
 
@@ -76,6 +77,7 @@ export default async () => {
 	await fs.ensureDir(tools_dir)
 	await fs.ensureDir(patch_dir)
 	await fs.ensureDir(cron_logs_dir)
+	await fs.ensureDir(pipeline_logs_dir)
 	await fs.ensureDir(skill_creator_dir)
 
 	if (!(await fs.pathExists(skill_creator_path))) {
