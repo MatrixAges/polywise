@@ -1,6 +1,6 @@
 import path from 'path'
 import fs from 'fs-extra'
-import { boolean, object, string } from 'zod'
+import { array, boolean, object, string } from 'zod'
 
 import { p } from '../../utils/trpc'
 
@@ -17,7 +17,8 @@ export interface IFileListItem {
 const input_type = object({
 	path: string(),
 	show_hidden: boolean().optional(),
-	dir_only: boolean().optional()
+	dir_only: boolean().optional(),
+	allowed_extensions: array(string()).optional()
 })
 
 const toListItem = (args: { base_path: string; entry: Dirent }) => {
@@ -47,6 +48,9 @@ export default p
 		const target_path = path.resolve(input.path)
 		const show_hidden = input.show_hidden ?? false
 		const dir_only = input.dir_only ?? false
+		const allowed_extensions = (input.allowed_extensions ?? [])
+			.map(item => item.trim().replace(/^\./, '').toLowerCase())
+			.filter(Boolean)
 
 		if (!(await fs.pathExists(target_path))) {
 			return [] as Array<IFileListItem>
@@ -74,5 +78,14 @@ export default p
 			.filter(entry => entry.name !== '.DS_Store')
 			.filter(entry => show_hidden || !entry.name.startsWith('.'))
 			.filter(entry => !dir_only || entry.isDirectory())
+			.filter(entry => {
+				if (entry.isDirectory() || !allowed_extensions.length) {
+					return true
+				}
+
+				const normalized_name = entry.name.trim().toLowerCase()
+
+				return allowed_extensions.some(extension => normalized_name.endsWith(`.${extension}`))
+			})
 			.map(entry => toListItem({ base_path: target_path, entry }))
 	})

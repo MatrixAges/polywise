@@ -237,8 +237,13 @@ const getExportFilePath = async (agent_name: string) => {
 		return { export_dir, file_path: base_path, file_name: path.basename(base_path) }
 	}
 
-	const timestamp = new Date().toISOString().replace(/[:]/g, '-').replace(/\..+$/, '')
-	const next_path = path.resolve(export_dir, `${stem} (${timestamp}).${agent_pack_extension}`)
+	let duplicate_index = 2
+	let next_path = path.resolve(export_dir, `${stem} (${duplicate_index}).${agent_pack_extension}`)
+
+	while (await fs.pathExists(next_path)) {
+		duplicate_index += 1
+		next_path = path.resolve(export_dir, `${stem} (${duplicate_index}).${agent_pack_extension}`)
+	}
 
 	return { export_dir, file_path: next_path, file_name: path.basename(next_path) }
 }

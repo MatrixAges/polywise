@@ -631,7 +631,11 @@ export default class Index {
 
 		for (const candidate of candidates) {
 			try {
-				await this.import_dialog_files.init(candidate, { dir_only: false, show_hidden: false })
+				await this.import_dialog_files.init(candidate, {
+					dir_only: false,
+					show_hidden: false,
+					file_extensions: ['papk']
+				})
 
 				return
 			} catch (error) {

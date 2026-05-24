@@ -17,6 +17,7 @@ interface IArgsSelectPath {
 export default class Index {
 	dir_only = true
 	show_hidden = false
+	file_extensions = [] as Array<string>
 	paths = [] as Array<string>
 	root_path = ''
 	input_path = ''
@@ -28,7 +29,7 @@ export default class Index {
 	constructor() {
 		makeAutoObservable(
 			this,
-			{ dir_only: false, show_hidden: false, loaded_path_map: false },
+			{ dir_only: false, show_hidden: false, file_extensions: false, loaded_path_map: false },
 			{ autoBind: true }
 		)
 	}
@@ -53,9 +54,10 @@ export default class Index {
 		return `${this.root_path}/${target_path}`
 	}
 
-	async init(dir: string, options?: Pick<Index, 'dir_only' | 'show_hidden'>) {
+	async init(dir: string, options?: Pick<Index, 'dir_only' | 'show_hidden' | 'file_extensions'>) {
 		if (options?.dir_only !== undefined) this.dir_only = options.dir_only
 		if (options?.show_hidden !== undefined) this.show_hidden = options.show_hidden
+		this.file_extensions = options?.file_extensions ? [...options.file_extensions] : []
 
 		this.paths = []
 		this.loaded_path_map = {}
@@ -109,7 +111,8 @@ export default class Index {
 		const list = await rpc.file.list.query({
 			path: next_path,
 			dir_only: this.dir_only,
-			show_hidden: this.show_hidden
+			show_hidden: this.show_hidden,
+			allowed_extensions: this.file_extensions
 		})
 
 		const next_paths = list.map(item => this.getRelativePath(item.dir))
@@ -129,6 +132,7 @@ export default class Index {
 	reset() {
 		this.dir_only = true
 		this.show_hidden = false
+		this.file_extensions = []
 		this.paths = []
 		this.root_path = ''
 		this.input_path = ''
