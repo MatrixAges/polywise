@@ -6,6 +6,7 @@ import getFilesDir from './getFilesDir'
 import getList from './getList'
 import getMentionAgents from './getMentionAgents'
 import getMentionFiles from './getMentionFiles'
+import getMentionTools from './getMentionTools'
 import getMoreList from './getMoreList'
 import getSessionStatus from './getSessionStatus'
 import getStatusList from './getStatusList'
@@ -23,6 +24,7 @@ export default r({
 	getFilesDir,
 	getMentionAgents,
 	getMentionFiles,
+	getMentionTools,
 	getList,
 	getMoreList,
 	getSessionStatus,

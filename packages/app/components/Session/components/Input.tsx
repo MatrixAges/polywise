@@ -1,5 +1,10 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { PauseIcon, PlayIcon } from '@phosphor-icons/react'
+import { Placeholder } from '@tiptap/extensions'
+import { Markdown } from '@tiptap/markdown'
+import { EditorContent, useEditor } from '@tiptap/react'
+import StarterKit from '@tiptap/starter-kit'
+import { findSuggestionMatch } from '@tiptap/suggestion'
 import { useMemoizedFn, useToggle } from 'ahooks'
 import { Archive, ArrowDownToLine, BrushCleaning, Layers2, Maximize, PackageOpen } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
@@ -14,17 +19,28 @@ import {
 	SelectTrigger,
 	SelectValue
 } from '@/__shadcn__/components/ui/select'
-import { Textarea } from '@/__shadcn__/components/ui/textarea'
 import { ModelSelect, Show, Tooltip } from '@/components'
 import { useGlobal } from '@/context'
 import { rpc } from '@/utils'
 
-import Mention, { filterMentionItems, formatMentionToken, getActiveMention, getBasename } from './Mention'
+import Mention, { filterMentionItems, formatMentionToken, getBasename } from './Mention'
+import SessionToken from './SessionToken'
+
+import styles from './InputEditor.module.css'
 
 import type { AppConfig } from '@core/types'
-import type { ChangeEvent, KeyboardEvent, SyntheticEvent } from 'react'
+import type { Editor as TiptapEditor } from '@tiptap/core'
+import type { KeyboardEvent as ReactKeyboardEvent } from 'react'
 import type { IPropsInput } from '../types'
-import type { AgentMentionItem, FileMentionItem, MentionItem, SkillMentionItem } from './Mention'
+import type {
+	ActiveMention,
+	AgentMentionItem,
+	FileMentionItem,
+	MentionItem,
+	SkillMentionItem,
+	ToolMentionItem
+} from './Mention'
+import type { SessionTokenAttrs } from './SessionToken'
 
 const submit_modes = [
 	{ label: 'Enter Mode', value: 'enter' },
@@ -86,120 +102,235 @@ const Index = (props: IPropsInput) => {
 		setAuditMode
 	} = props
 	const global = useGlobal()
-	const ref = useRef<HTMLTextAreaElement>(null)
 	const [compositing, { setLeft, setRight }] = useToggle(false)
 	const [full, { toggle: toggleFull }] = useToggle(false)
 	const [value, setValue] = useState('')
-	const [cursor, setCursor] = useState(0)
+	const [active_mention, setActiveMention] = useState<ActiveMention | null>(null)
 	const [skill_items, setSkillItems] = useState<Array<SkillMentionItem>>([])
+	const [tool_items, setToolItems] = useState<Array<ToolMentionItem>>([])
 	const [agent_items, setAgentItems] = useState<Array<AgentMentionItem>>([])
 	const [file_items, setFileItems] = useState<Array<FileMentionItem>>([])
 	const [loading_skills, setLoadingSkills] = useState(false)
+	const [loading_tools, setLoadingTools] = useState(false)
 	const [loading_agents, setLoadingAgents] = useState(false)
 	const [loading_files, setLoadingFiles] = useState(false)
 	const [active_index, setActiveIndex] = useState(0)
 	const skill_items_loaded = useRef(false)
+	const tool_items_loaded_session_id = useRef('')
 	const agent_items_loaded_session_id = useRef('')
 	const file_items_loaded_session_id = useRef('')
 	const skill_items_requested = useRef(false)
+	const tool_items_requested_session_id = useRef('')
 	const agent_items_requested_session_id = useRef('')
 	const file_items_requested_session_id = useRef('')
 
 	const s = global.setting
 	const is_page = type === 'page' || type === 'dialog'
-	const active_mention = getActiveMention(value, cursor)
 	const mention_items = active_mention
 		? filterMentionItems(
-				active_mention.trigger === '/' ? skill_items : [...agent_items, ...file_items],
+				active_mention.trigger === '/'
+					? [...tool_items, ...skill_items]
+					: [...agent_items, ...file_items],
 				active_mention.query
 			)
 		: []
 	const mention_open = !!active_mention
 	const mention_loading =
 		active_mention?.trigger === '/'
-			? loading_skills
+			? loading_tools || loading_skills
 			: active_mention?.trigger === '@'
 				? loading_agents || loading_files
 				: false
 
-	useLayoutEffect(() => {
-		const el = ref.current
+	const getActiveMentionFromEditor = useMemoizedFn((instance: TiptapEditor | null) => {
+		if (!instance) return null
 
-		if (!el) return
+		const { $from } = instance.state.selection
+		const slash_match = findSuggestionMatch({
+			char: '/',
+			$position: $from,
+			startOfLine: false,
+			allowSpaces: false,
+			allowedPrefixes: null,
+			allowToIncludeChar: false
+		})
+		const at_match = findSuggestionMatch({
+			char: '@',
+			$position: $from,
+			startOfLine: false,
+			allowSpaces: false,
+			allowedPrefixes: null,
+			allowToIncludeChar: false
+		})
+		const match = [slash_match, at_match]
+			.filter(Boolean)
+			.sort((a, b) => (b?.range.from ?? 0) - (a?.range.from ?? 0))[0]
 
-		el.addEventListener('compositionstart', setRight)
-		el.addEventListener('compositionend', setLeft)
+		if (!match) return null
 
-		return () => {
-			el.removeEventListener('compositionstart', setRight)
-			el.removeEventListener('compositionend', setLeft)
-		}
-	}, [])
+		return {
+			trigger: match.text[0] as ActiveMention['trigger'],
+			query: match.query,
+			start: match.range.from,
+			end: match.range.to
+		} satisfies ActiveMention
+	})
+
+	const syncEditorState = useMemoizedFn((instance: TiptapEditor | null) => {
+		if (!instance) return
+
+		setValue(instance.getMarkdown())
+		setActiveMention(getActiveMentionFromEditor(instance))
+	})
+
+	const editor = useEditor({
+		autofocus: true,
+		content: '',
+		contentType: 'markdown',
+		extensions: [
+			Markdown,
+			Placeholder.configure({
+				placeholder: 'What needs to be done?'
+			}),
+			SessionToken,
+			StarterKit
+		],
+		editorProps: {
+			attributes: {
+				class: 'session-input-tiptap bg-transparent text-base md:text-sm outline-none'
+			},
+			handleDOMEvents: {
+				compositionstart: () => {
+					setRight()
+
+					return false
+				},
+				compositionend: () => {
+					setLeft()
+
+					return false
+				}
+			}
+		},
+		onCreate: ({ editor: instance }) => syncEditorState(instance),
+		onSelectionUpdate: ({ editor: instance }) => setActiveMention(getActiveMentionFromEditor(instance)),
+		onUpdate: ({ editor: instance }) => syncEditorState(instance)
+	})
 
 	useEffect(() => {
 		if (active_mention?.trigger !== '/') {
 			skill_items_requested.current = false
+			tool_items_requested_session_id.current = ''
 
 			return
 		}
 
-		if (skill_items_loaded.current || skill_items_requested.current) {
+		if (!skill_items_loaded.current && !skill_items_requested.current) {
+			let canceled = false
+
+			skill_items_requested.current = true
+			setLoadingSkills(true)
+
+			void rpc.skill.query
+				.query()
+				.then(items => {
+					if (canceled) return
+
+					const builtin_map = new Map(
+						builtin_system_skills.map(item => [
+							item.label,
+							{
+								...item,
+								type: 'skill' as const,
+								path: `builtin://${item.label}`,
+								skill_type: 'system',
+								search_text: `${item.label} ${item.desc}`.toLowerCase()
+							}
+						])
+					)
+
+					for (const item of items) {
+						builtin_map.set(item.name, {
+							key: item.id,
+							type: 'skill',
+							label: item.name,
+							desc: item.desc || '',
+							path: item.path,
+							skill_type: builtin_map.has(item.name) ? 'system' : item.type || '',
+							search_text:
+								`${item.name} ${item.desc || ''} ${item.path || ''}`.toLowerCase()
+						})
+					}
+
+					setSkillItems(Array.from(builtin_map.values()))
+					skill_items_loaded.current = true
+				})
+				.catch(() => {
+					if (!canceled) {
+						setSkillItems([])
+					}
+				})
+				.finally(() => {
+					if (!canceled) {
+						setLoadingSkills(false)
+					}
+				})
+
+			return () => {
+				canceled = true
+			}
+		}
+	}, [active_mention?.trigger])
+
+	useEffect(() => {
+		if (active_mention?.trigger !== '/') {
+			return
+		}
+
+		if (
+			tool_items_loaded_session_id.current === session_id ||
+			tool_items_requested_session_id.current === session_id
+		) {
 			return
 		}
 
 		let canceled = false
 
-		skill_items_requested.current = true
-		setLoadingSkills(true)
+		tool_items_requested_session_id.current = session_id
+		setToolItems([])
+		setLoadingTools(true)
 
-		void rpc.skill.query
-			.query()
+		void rpc.session.getMentionTools
+			.query({ id: session_id })
 			.then(items => {
 				if (canceled) return
 
-				const builtin_map = new Map(
-					builtin_system_skills.map(item => [
-						item.label,
-						{
-							...item,
-							type: 'skill' as const,
-							path: `builtin://${item.label}`,
-							skill_type: 'system',
-							search_text: `${item.label} ${item.desc}`.toLowerCase()
-						}
-					])
-				)
-
-				for (const item of items) {
-					builtin_map.set(item.name, {
-						key: item.id,
-						type: 'skill',
+				setToolItems(
+					items.map(item => ({
+						key: item.name,
+						type: 'tool',
 						label: item.name,
-						desc: item.desc || '',
-						path: item.path,
-						skill_type: builtin_map.has(item.name) ? 'system' : item.type || '',
-						search_text: `${item.name} ${item.desc || ''} ${item.path || ''}`.toLowerCase()
-					})
-				}
-
-				setSkillItems(Array.from(builtin_map.values()))
-				skill_items_loaded.current = true
+						desc: item.description || '',
+						search_text: `${item.name} ${item.description || ''}`.toLowerCase()
+					}))
+				)
+				tool_items_loaded_session_id.current = session_id
 			})
 			.catch(() => {
 				if (!canceled) {
-					setSkillItems([])
+					setToolItems([])
 				}
 			})
 			.finally(() => {
 				if (!canceled) {
-					setLoadingSkills(false)
+					setLoadingTools(false)
 				}
 			})
 
 		return () => {
 			canceled = true
 		}
-	}, [active_mention?.trigger])
+	}, [active_mention?.trigger, session_id])
 
 	useEffect(() => {
 		if (active_mention?.trigger !== '@') {
@@ -233,7 +364,7 @@ const Index = (props: IPropsInput) => {
 						label: item.name,
 						role: item.role || '',
 						desc: item.description || '',
-						photo: item.photo ?? null,
+						photo: (item.photo as Uint8Array | null | undefined) ?? null,
 						avatar: item.avatar ?? null,
 						search_text:
 							`${item.name} ${item.role || ''} ${item.description || ''}`.toLowerCase()
@@ -312,22 +443,21 @@ const Index = (props: IPropsInput) => {
 	}, [active_mention?.trigger, session_id])
 
 	useEffect(() => {
-		const el = ref.current
-
-		if (!draft_input) {
+		if (!draft_input || !editor) {
 			return
 		}
 
 		setValue(draft_input.value)
-		setCursor(draft_input.value.length)
+		editor.commands.setContent(draft_input.value, {
+			contentType: 'markdown',
+			emitUpdate: false
+		})
+		setActiveMention(null)
 
 		requestAnimationFrame(() => {
-			if (!el) return
-
-			el.focus()
-			el.setSelectionRange(draft_input.value.length, draft_input.value.length)
+			editor.commands.focus('end')
 		})
-	}, [draft_input?.key])
+	}, [draft_input?.key, editor])
 
 	useEffect(() => {
 		setActiveIndex(0)
@@ -349,55 +479,81 @@ const Index = (props: IPropsInput) => {
 		s.setConfig('config', { submit_mode: v } as AppConfig, true)
 	})
 
-	const syncCursor = useMemoizedFn((target: HTMLTextAreaElement) => {
-		setCursor(target.selectionStart ?? 0)
-	})
+	const getMentionInsertContent = useMemoizedFn((item: MentionItem) => {
+		if (item.type === 'tool') {
+			return {
+				type: 'sessionToken',
+				attrs: {
+					tokenType: 'tool',
+					label: item.label,
+					refStart: null,
+					refEnd: null
+				} satisfies SessionTokenAttrs
+			}
+		}
 
-	const onChangeValue = useMemoizedFn((e: ChangeEvent<HTMLTextAreaElement>) => {
-		setValue(e.currentTarget.value)
-		syncCursor(e.currentTarget)
-	})
+		if (item.type === 'skill') {
+			return {
+				type: 'sessionToken',
+				attrs: {
+					tokenType: 'skill',
+					label: item.label,
+					refStart: null,
+					refEnd: null
+				} satisfies SessionTokenAttrs
+			}
+		}
 
-	const onSelectTextarea = useMemoizedFn((e: SyntheticEvent<HTMLTextAreaElement>) => {
-		syncCursor(e.currentTarget)
+		if (item.type === 'agent') {
+			return {
+				type: 'sessionToken',
+				attrs: {
+					tokenType: 'agent',
+					label: item.label,
+					refStart: null,
+					refEnd: null
+				} satisfies SessionTokenAttrs
+			}
+		}
+
+		return {
+			type: 'sessionToken',
+			attrs: {
+				tokenType: 'file',
+				label: item.path,
+				refStart: null,
+				refEnd: null
+			} satisfies SessionTokenAttrs
+		}
 	})
 
 	const applyMention = useMemoizedFn((item: MentionItem) => {
-		const mention = getActiveMention(value, cursor)
+		if (!editor || !active_mention) return
 
-		if (!mention) return
-
-		const token = formatMentionToken(item)
-		const next_value = `${value.slice(0, mention.start)}${token}${value.slice(mention.end)}`
-		const next_cursor = mention.start + token.length
-
-		setValue(next_value)
-		setCursor(next_cursor)
-
-		requestAnimationFrame(() => {
-			const el = ref.current
-
-			if (!el) return
-
-			el.focus()
-			el.setSelectionRange(next_cursor, next_cursor)
-		})
+		editor.chain()
+			.focus()
+			.deleteRange({ from: active_mention.start, to: active_mention.end })
+			.insertContent(getMentionInsertContent(item))
+			.run()
 	})
 
 	const onSend = useMemoizedFn(() => {
-		if (streaming || compositing) return
-		if (!value) return
+		if (streaming || compositing || !editor) return
 
-		send(value)
+		const next_value = editor.getMarkdown()
+
+		if (!next_value) return
+
+		send(next_value)
 		setValue('')
-		setCursor(0)
+		setActiveMention(null)
+		editor.commands.setContent('', { contentType: 'markdown', emitUpdate: false })
 	})
 
-	const onSubmit = useMemoizedFn((e: KeyboardEvent<HTMLTextAreaElement>) => {
+	const onSubmit = useMemoizedFn((e: ReactKeyboardEvent<HTMLDivElement>) => {
 		const submit_mode = s.config?.submit_mode || 'enter'
-		const textarea = e.currentTarget
 
-		if (streaming || compositing) return
+		if (streaming || compositing || !editor) return
 
 		if (mention_open && mention_items.length > 0) {
 			if (e.key === 'ArrowDown') {
@@ -428,9 +584,7 @@ const Index = (props: IPropsInput) => {
 
 			if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
 				e.preventDefault()
-
-				textarea.setRangeText('\n', textarea.selectionStart, textarea.selectionEnd, 'end')
-				textarea.dispatchEvent(new Event('input', { bubbles: true }))
+				editor.chain().focus().setHardBreak().run()
 
 				return
 			}
@@ -472,26 +626,13 @@ const Index = (props: IPropsInput) => {
 								shadow
 							'
 						>
-							<Textarea
-								className={$cx(
-									`
-									min-h-[54px] max-h-[300px]
-									pb-0
-									bg-transparent
-									border-none
-									focus-visible:ring-0
-								`,
-									full && 'h-full max-h-full'
-								)}
-								ref={ref}
-								autoFocus
-								placeholder='What would you like to know?'
-								maxLength={9999}
-								value={value}
-								onChange={onChangeValue}
-								onKeyDown={onSubmit}
-								onSelect={onSelectTextarea}
-							></Textarea>
+							<div className={$cx(styles.input_editor, full && styles.input_editor_full)}>
+								<EditorContent
+									className='session-input-editor bg-transparent'
+									editor={editor}
+									onKeyDownCapture={onSubmit}
+								/>
+							</div>
 							<div
 								className='
 									flex
@@ -709,6 +850,7 @@ const Index = (props: IPropsInput) => {
 						bg-transparent
 						ring-0
 						shadow-none
+						backdrop-blur-md
 					'
 					side='top'
 					align='start'

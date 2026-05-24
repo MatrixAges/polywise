@@ -11,6 +11,7 @@ import {
 } from 'lucide-react'
 
 import EntityAvatar from '@/setting/im/components/EntityAvatar'
+import getToolIcon from '@/utils/getToolIcon'
 
 import type { FC } from 'react'
 
@@ -28,6 +29,14 @@ export interface SkillMentionItem {
 	desc: string
 	path: string
 	skill_type: string
+	search_text: string
+}
+
+export interface ToolMentionItem {
+	key: string
+	type: 'tool'
+	label: string
+	desc: string
 	search_text: string
 }
 
@@ -52,7 +61,7 @@ export interface AgentMentionItem {
 	search_text: string
 }
 
-export type MentionItem = SkillMentionItem | FileMentionItem | AgentMentionItem
+export type MentionItem = SkillMentionItem | ToolMentionItem | FileMentionItem | AgentMentionItem
 
 export interface ActiveMention {
 	trigger: MentionTrigger
@@ -161,6 +170,7 @@ export const filterMentionItems = (items: Array<MentionItem>, query: string) => 
 
 export const formatMentionToken = (item: MentionItem) => {
 	if (item.type === 'skill') return `[SKILL: ${item.label}]`
+	if (item.type === 'tool') return `[TOOL: ${item.label}]`
 	if (item.type === 'agent') return `[AGENT: ${item.label}]`
 
 	return `[FILE: ${item.path}]`
@@ -178,13 +188,17 @@ const Mention: FC<MentionProps> = ({ activeMention, items, loading, activeIndex,
 	const agent_items = items.filter((item): item is AgentMentionItem => item.type === 'agent')
 	const file_items = items.filter((item): item is FileMentionItem => item.type === 'file')
 	const skill_items = items.filter((item): item is SkillMentionItem => item.type === 'skill')
+	const tool_items = items.filter((item): item is ToolMentionItem => item.type === 'tool')
 	const mention_sections =
 		activeMention?.trigger === '@'
 			? [
 					...(agent_items.length ? [{ key: 'agents', items: agent_items }] : []),
 					...(file_items.length ? [{ key: 'files', items: file_items }] : [])
 				]
-			: [...(skill_items.length ? [{ key: 'skills', items: skill_items }] : [])]
+			: [
+					...(tool_items.length ? [{ key: 'tools', items: tool_items }] : []),
+					...(skill_items.length ? [{ key: 'skills', items: skill_items }] : [])
+				]
 	let cursor_index = -1
 
 	return (
@@ -194,6 +208,7 @@ const Mention: FC<MentionProps> = ({ activeMention, items, loading, activeIndex,
 				rounded-lg
 				bg-background/90
 				border border-border-light
+				backdrop-blur-md
 			'
 		>
 			<div
@@ -205,7 +220,9 @@ const Mention: FC<MentionProps> = ({ activeMention, items, loading, activeIndex,
 					text-xs
 				'
 			>
-				<span className='text-std-600'>{activeMention?.trigger === '/' ? 'Skills' : 'Mentions'}</span>
+				<span className='text-std-600'>
+					{activeMention?.trigger === '/' ? 'Tools & Skills' : 'Mentions'}
+				</span>
 				<span className='text-std-400'>{activeMention?.query || 'Type to search'}</span>
 			</div>
 			<div
@@ -225,6 +242,16 @@ const Mention: FC<MentionProps> = ({ activeMention, items, loading, activeIndex,
 							{section_index > 0 && (
 								<div className='border-border-light mx-2 my-1 border-t' />
 							)}
+							<div
+								className='
+										px-3 pt-1
+										pb-0.5
+										text-[10px] text-std-400 font-medium tracking-[0.08em]
+										uppercase
+									'
+							>
+								{section.key}
+							</div>
 							{section.items.map(item => {
 								cursor_index += 1
 
@@ -296,15 +323,49 @@ const Mention: FC<MentionProps> = ({ activeMention, items, loading, activeIndex,
 													{item.desc || 'No description'}
 												</span>
 											</div>
+										) : item.type === 'tool' ? (
+											<div
+												className='
+															flex
+															items-center
+															w-full
+															min-w-0
+															gap-2
+														'
+											>
+												{(() => {
+													const Icon = getToolIcon(item.label)
+
+													return <Icon size={14} />
+												})()}
+												<span className='shrink-0 truncate text-sm font-medium'>
+													{item.label}
+												</span>
+												<span className='text-std-400 flex-1 truncate text-xs'>
+													{item.desc || 'No description'}
+												</span>
+												<span
+													className='
+																shrink-0
+																px-2 py-0.5
+																rounded-full
+																text-[10px] text-std-500
+																border
+																border-border-light
+															'
+												>
+													Tool
+												</span>
+											</div>
 										) : (
 											<div
 												className='
-														flex
-														items-center
-														w-full
-														min-w-0
-														gap-2
-													'
+															flex
+															items-center
+															w-full
+															min-w-0
+															gap-2
+														'
 											>
 												<Container size={14} />
 												<span className='shrink-0 truncate text-sm font-medium'>
@@ -315,12 +376,13 @@ const Mention: FC<MentionProps> = ({ activeMention, items, loading, activeIndex,
 												</span>
 												<span
 													className='
-															shrink-0
-															px-2 py-0.5
-															rounded-full
-															text-[10px] text-std-500
-															border border-border-light
-														'
+																shrink-0
+																px-2 py-0.5
+																rounded-full
+																text-[10px] text-std-500
+																border
+																border-border-light
+															'
 												>
 													{getSkillTypeLabel(item.skill_type)}
 												</span>
