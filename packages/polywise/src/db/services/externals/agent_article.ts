@@ -77,8 +77,13 @@ export const getAgentPrivateArticles = async (args: {
 		.offset(offset)
 }
 
-export const getAgentRelatedArticles = async (args: { agent_id: string; for_type?: string }) => {
-	const { agent_id, for_type } = args
+export const getAgentRelatedArticles = async (args: {
+	agent_id: string
+	for_type?: string
+	limit: number
+	offset: number
+}) => {
+	const { agent_id, for_type, limit, offset } = args
 	const target_for_type = normalizeForType(for_type)
 	const where = target_for_type
 		? and(eq(agent_article.agent_id, agent_id), eq(article.for, target_for_type))
@@ -90,6 +95,8 @@ export const getAgentRelatedArticles = async (args: { agent_id: string; for_type
 		.innerJoin(article, eq(agent_article.article_id, article.id))
 		.where(where)
 		.orderBy(desc(article.updated_at), asc(article.created_at))
+		.limit(limit)
+		.offset(offset)
 		.then(rows => rows.map(item => item.article))
 }
 

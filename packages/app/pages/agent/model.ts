@@ -22,6 +22,7 @@ import type {
 	AgentItem,
 	AgentMenuScope,
 	AgentPageMode,
+	AgentRelatedArticleResponse,
 	AgentSessionItem,
 	AgentSkillItem,
 	AgentSkillLogItem,
@@ -78,12 +79,18 @@ export default class Index {
 	article_items = [] as Array<AgentArticleItem>
 	related_article_items = [] as Array<AgentArticleItem>
 	article_for = 'memory' as ArticleForType
+	related_article_for = 'memory' as ArticleForType
 	selected_article_id = ''
 	article_page = 1
 	article_has_more = false
 	article_loading = false
 	article_loading_more = false
+	related_article_page = 1
+	related_article_has_more = false
+	related_article_loading = false
+	related_article_loading_more = false
 	article_request_key = 0
+	related_article_request_key = 0
 	article_search = ''
 	article_search_list = [] as Array<AgentArticleSearchItem>
 	article_search_loading = false
@@ -304,11 +311,16 @@ export default class Index {
 			this.skill_items = []
 			this.article_items = []
 			this.related_article_items = []
+			this.related_article_for = 'memory'
 			this.selected_article_id = ''
 			this.article_page = 1
 			this.article_has_more = false
 			this.article_loading = false
 			this.article_loading_more = false
+			this.related_article_page = 1
+			this.related_article_has_more = false
+			this.related_article_loading = false
+			this.related_article_loading_more = false
 			this.article_draft_title = ''
 			this.article_draft_content = ''
 			this.article_draft_for = 'memory'
@@ -401,7 +413,7 @@ export default class Index {
 		this.article_loading = true
 
 		try {
-			const [skill_items, article_response, related_articles] = await Promise.all([
+			const [skill_items, article_response, related_response] = await Promise.all([
 				rpc.agent.getSkills.query({ agent_id }),
 				rpc.agent.getPrivateArticles.query({
 					agent_id,
@@ -410,7 +422,8 @@ export default class Index {
 				}),
 				rpc.agent.getRelatedArticles.query({
 					agent_id,
-					for_type: this.article_for
+					for_type: this.related_article_for,
+					page: 1
 				})
 			])
 
@@ -420,9 +433,12 @@ export default class Index {
 
 			this.skill_items = skill_items as Array<AgentSkillItem>
 			this.article_items = article_response.list as Array<AgentArticleItem>
-			this.related_article_items = related_articles as Array<AgentArticleItem>
+			this.related_article_items = (related_response as AgentRelatedArticleResponse)
+				.list as Array<AgentArticleItem>
 			this.article_page = 1
 			this.article_has_more = article_response.has_more
+			this.related_article_page = 1
+			this.related_article_has_more = (related_response as AgentRelatedArticleResponse).has_more
 			this.syncSelectedArticleAfterRefresh()
 			this.scheduleArticleSearch()
 		} finally {
@@ -976,7 +992,98 @@ export default class Index {
 	}
 
 	openRelatedArticlesDialog() {
+		if (this.related_article_for !== this.article_for) {
+			this.related_article_for = this.article_for
+		}
+
 		this.related_articles_dialog_open = true
+		void this.refreshRelatedArticles()
+	}
+
+	setRelatedArticleFor(for_type: ArticleForType) {
+		if (this.related_article_for === for_type) {
+			return
+		}
+
+		this.related_article_for = for_type
+		void this.refreshRelatedArticles()
+	}
+
+	async refreshRelatedArticles() {
+		if (!this.selected_agent_id) {
+			this.related_article_items = []
+			this.related_article_page = 1
+			this.related_article_has_more = false
+			this.related_article_loading = false
+			this.related_article_loading_more = false
+
+			return
+		}
+
+		const agent_id = this.selected_agent_id
+		const request_key = this.related_article_request_key + 1
+
+		this.related_article_request_key = request_key
+		this.related_article_loading = true
+
+		try {
+			const response = await rpc.agent.getRelatedArticles.query({
+				agent_id,
+				for_type: this.related_article_for,
+				page: 1
+			})
+
+			if (this.related_article_request_key !== request_key || this.selected_agent_id !== agent_id) {
+				return
+			}
+
+			this.related_article_items = response.list as Array<AgentArticleItem>
+			this.related_article_page = 1
+			this.related_article_has_more = response.has_more
+		} finally {
+			if (this.related_article_request_key === request_key) {
+				this.related_article_loading = false
+			}
+		}
+	}
+
+	async loadMoreRelatedArticles() {
+		if (
+			!this.selected_agent_id ||
+			this.related_article_loading ||
+			this.related_article_loading_more ||
+			!this.related_article_has_more
+		) {
+			return
+		}
+
+		const agent_id = this.selected_agent_id
+		const next_page = this.related_article_page + 1
+
+		this.related_article_loading_more = true
+
+		try {
+			const response = await rpc.agent.getRelatedArticles.query({
+				agent_id,
+				for_type: this.related_article_for,
+				page: next_page
+			})
+
+			if (this.selected_agent_id !== agent_id) {
+				return
+			}
+
+			this.related_article_items = [
+				...this.related_article_items,
+				...(response.list as Array<AgentArticleItem>)
+			]
+			this.related_article_page = next_page
+			this.related_article_has_more = response.has_more
+		} finally {
+			if (this.selected_agent_id === agent_id) {
+				this.related_article_loading_more = false
+			}
+		}
 	}
 
 	async saveSelectedArticle(options?: { silent?: boolean }) {
@@ -1740,19 +1847,19 @@ export default class Index {
 		void this.refreshSkillLogs({ date: this.skill_log_date, page })
 	}
 
-	async addArticle(article_id: string) {
+	async addArticle(article_id: string, for_type: ArticleForType) {
 		if (!this.selected_agent_id) return
 
 		await rpc.agent.addArticle.mutate({
 			agent_id: this.selected_agent_id,
 			article_id,
-			for_type: this.article_for
+			for_type
 		})
 
-		this.related_article_items = (await rpc.agent.getRelatedArticles.query({
-			agent_id: this.selected_agent_id,
-			for_type: this.article_for
-		})) as Array<AgentArticleItem>
+		if (this.related_article_for === for_type) {
+			await this.refreshRelatedArticles()
+		}
+
 		this.article_search_list = this.article_search_list.filter(item => item.id !== article_id)
 	}
 
@@ -1760,7 +1867,7 @@ export default class Index {
 		if (!this.selected_agent_id) return
 
 		await rpc.agent.removeArticle.mutate({ agent_id: this.selected_agent_id, article_id })
-		await this.refreshAgentRelated()
+		await this.refreshRelatedArticles()
 	}
 
 	openAvatarDialog() {

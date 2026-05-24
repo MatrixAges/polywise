@@ -1,19 +1,13 @@
-import { Album, BookUser, Brain, Hash, Loader2, Paperclip, Plus } from 'lucide-react'
+import { Loader2, Paperclip, Plus } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { Button } from '@/__shadcn__/components/ui/button'
 import { Tabs } from '@/components'
 
+import { article_tab_items } from '../articleTabItems'
 import { useModel } from '../context'
 
 import type { ArticleForType } from '../types'
-
-const article_tab_items = [
-	{ key: 'wiki', title: 'wiki', Icon: Hash },
-	{ key: 'memory', title: 'memory', Icon: Brain },
-	{ key: 'user', title: 'user', Icon: BookUser },
-	{ key: 'linkcase', title: 'linkcase', Icon: Album }
-]
 
 const Index = () => {
 	const {
