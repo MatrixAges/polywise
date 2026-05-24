@@ -99,14 +99,12 @@ const SessionTokenView = ({ node }: NodeViewProps) => {
 	const attrs = node.attrs as SessionTokenAttrs
 	const Icon = getTokenIcon(attrs)
 	const is_file = attrs.tokenType === 'file'
-	const file_kind = is_file ? getFileKind(attrs.label) : null
 	const display_label =
 		attrs.tokenType === 'reference'
 			? getReferenceLabel(attrs)
 			: is_file
 				? getBasename(attrs.label)
 				: attrs.label
-	const type_label = is_file ? (file_kind === 'directory' ? 'dir' : 'file') : attrs.tokenType
 
 	return (
 		<NodeViewWrapper
@@ -116,10 +114,10 @@ const SessionTokenView = ({ node }: NodeViewProps) => {
 				inline-flex
 				items-center
 				max-w-full
-				gap-1.5
-				px-2 py-0.5
-				mx-0.5
-				rounded-sm
+				gap-1
+				px-1.5 py-0.5
+				mx-1
+				rounded-[5px]
 				text-xs text-std-700
 				align-baseline
 				bg-accent/48
@@ -128,15 +126,6 @@ const SessionTokenView = ({ node }: NodeViewProps) => {
 			data-session-token={attrs.tokenType}
 		>
 			<Icon className='size-3 shrink-0' />
-			<span
-				className='
-					shrink-0
-					text-[10px] text-std-500 font-medium tracking-[0.08em]
-					uppercase
-				'
-			>
-				{type_label}
-			</span>
 			<span className='truncate font-medium'>{display_label}</span>
 		</NodeViewWrapper>
 	)
