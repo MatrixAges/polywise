@@ -34,14 +34,10 @@ const Index = () => {
 				<button className='icon_button' onClick={x.toggleFull}>
 					<Maximize></Maximize>
 				</button>
-				<ModelSelect
-					ghost
-					value={x.setting.config?.default_model}
-					onChange={x.onChangeDefaultMode}
-				></ModelSelect>
+				<ModelSelect ghost value={x.default_model} onChange={x.onChangeDefaultMode}></ModelSelect>
 				<Select
 					items={effort_modes}
-					value={x.setting.config?.default_model?.effort ?? 'default'}
+					value={x.default_effort}
 					onValueChange={value => value && x.onChangeDefaultEffort(value)}
 				>
 					<SelectTrigger

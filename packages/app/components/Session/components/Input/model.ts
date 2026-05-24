@@ -33,7 +33,6 @@ export default class Model {
 
 	compositing = false
 	full = false
-	value = ''
 	active_mention = null as ActiveMention | null
 	skill_items = [] as Array<SkillMentionItem>
 	tool_items = [] as Array<ToolMentionItem>
@@ -113,6 +112,16 @@ export default class Model {
 				: false
 	}
 
+	get default_model() {
+		const model = this.setting.config?.default_model
+
+		return model ? { provider: model.provider, model: model.model, effort: model.effort } : undefined
+	}
+
+	get default_effort() {
+		return this.default_model?.effort ?? 'default'
+	}
+
 	setEditor(editor: TiptapEditor | null) {
 		this.editor = editor
 	}
@@ -128,7 +137,6 @@ export default class Model {
 	syncEditorState(instance: TiptapEditor | null) {
 		if (!instance) return
 
-		this.value = instance.getMarkdown()
 		this.active_mention = getActiveMentionFromEditor(instance)
 	}
 
@@ -293,7 +301,6 @@ export default class Model {
 			return
 		}
 
-		this.value = this.props.draft_input.value
 		this.editor.commands.setContent(this.props.draft_input.value, {
 			contentType: 'markdown',
 			emitUpdate: false
@@ -340,7 +347,6 @@ export default class Model {
 		if (!next_value) return
 
 		this.props.send(next_value)
-		this.value = ''
 		this.active_mention = null
 		this.editor.commands.setContent('', { contentType: 'markdown', emitUpdate: false })
 	}
