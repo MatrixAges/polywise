@@ -4,8 +4,8 @@ import { observer } from 'mobx-react-lite'
 
 import { Button } from '@/__shadcn__/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/__shadcn__/components/ui/dialog'
-import { Input } from '@/__shadcn__/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/__shadcn__/components/ui/select'
+import { Textarea } from '@/__shadcn__/components/ui/textarea'
 import Editor from '@/components/Editor'
 
 import { useModel } from '../context'
@@ -35,27 +35,29 @@ const Index = () => {
 				className='
 					overflow-hidden
 					flex flex-col
-					w-[720px] h-[min(80vh,720px)] max-w-[calc(100vw-32px)]!
+					w-[720px] h-[min(84vh,720px)] max-w-[calc(100vw-32px)]!
 					gap-0
 				'
 			>
 				<DialogHeader>
 					<DialogTitle>New article</DialogTitle>
 				</DialogHeader>
-				<div className='mt-3 flex'>
-					<Input
+				<div className='mt-6 mb-2 px-6.5'>
+					<Textarea
 						className='
 							flex-1
-							px-0
+							min-h-auto
+							px-0 py-0
 							rounded-none
-							text-base! font-medium
+							text-base! font-medium leading-6
 							bg-transparent
-							focus:bg-transparent
+							border-0
+							focus-visible:ring-0
 						'
 						value={private_article_dialog_title}
 						placeholder='Untitled article'
 						onChange={event => setPrivateArticleDialogTitle(event.target.value)}
-					></Input>
+					></Textarea>
 				</div>
 				<div
 					className='
@@ -68,7 +70,7 @@ const Index = () => {
 						<Editor
 							id='agent-private-article-dialog'
 							value={private_article_dialog_content}
-							className='min-h-full text-[14px]'
+							className='min-h-full px-2! text-[13px]'
 							rich_text
 							onChange={value => setPrivateArticleDialogContent(value)}
 							onCharacterCountChange={setCharacterCount}
