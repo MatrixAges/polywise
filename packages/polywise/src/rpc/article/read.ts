@@ -1,9 +1,10 @@
 import { article } from '@core/db/schema'
 import { getArticle } from '@core/db/services'
 import { eq } from 'drizzle-orm'
-import { boolean, date, object, string } from 'zod'
+import { object, string } from 'zod'
 
 import { p } from '../../utils/trpc'
+import { article_detail_schema, serializeArticleDetail } from './utils'
 
 export default p
 	.meta({
@@ -18,18 +19,7 @@ export default p
 			id: string()
 		})
 	)
-	.output(
-		object({
-			id: string(),
-			title: string().nullable(),
-			content: string(),
-			for_type: string(),
-			source: string().nullable(),
-			is_pipelined: boolean(),
-			created_at: date().nullable(),
-			updated_at: date().nullable()
-		})
-	)
+	.output(article_detail_schema)
 	.query(async ({ input }) => {
 		const target_article = await getArticle(eq(article.id, input.id))
 
@@ -37,14 +27,5 @@ export default p
 			throw new Error(`Article not found: ${input.id}`)
 		}
 
-		return {
-			id: target_article.id,
-			title: target_article.title,
-			content: target_article.content,
-			for_type: target_article.for,
-			source: target_article.source ?? null,
-			is_pipelined: target_article.is_pipelined,
-			created_at: target_article.created_at,
-			updated_at: target_article.updated_at
-		}
+		return serializeArticleDetail(target_article)
 	})
