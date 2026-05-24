@@ -35,7 +35,7 @@ const Index = () => {
 				className='
 					overflow-hidden
 					flex flex-col
-					w-[720px] h-[min(84vh,720px)] max-w-[calc(100vw-32px)]!
+					w-[720px] h-[min(88vh,750px)] max-w-[calc(100vw-32px)]!
 					gap-0
 				'
 			>
@@ -81,6 +81,7 @@ const Index = () => {
 							flex
 							items-center justify-end
 							gap-4
+							pt-2
 						'
 					>
 						<Select
