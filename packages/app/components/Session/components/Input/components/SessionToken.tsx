@@ -4,19 +4,10 @@ import { BookMarked, Bot, Container } from 'lucide-react'
 
 import getToolIcon from '@/utils/getToolIcon'
 
-import { getBasename, getFileIcon } from './Mention'
+import { getBasename, getFileIcon } from '../utils'
 
 import type { NodeViewProps } from '@tiptap/core'
-import type { FileMentionItem } from './Mention'
-
-export type SessionTokenType = 'agent' | 'skill' | 'tool' | 'file' | 'reference'
-
-export interface SessionTokenAttrs {
-	tokenType: SessionTokenType
-	label: string
-	refStart: number | null
-	refEnd: number | null
-}
+import type { FileMentionItem, SessionTokenAttrs } from '../types'
 
 const mention_token_pattern = /^\[(AGENT|SKILL|TOOL|FILE):\s*([^\]\n]+?)\]/
 const reference_token_pattern = /^REFERENCE:\s*\[(\d+)\s*,\s*(\d+)\]/
@@ -68,7 +59,7 @@ const getTokenMarkdown = (attrs: SessionTokenAttrs) => {
 }
 
 const parseMentionMatch = (match: RegExpMatchArray): SessionTokenAttrs => ({
-	tokenType: match[1].toLowerCase() as Extract<SessionTokenType, 'agent' | 'skill' | 'tool' | 'file'>,
+	tokenType: match[1].toLowerCase() as SessionTokenAttrs['tokenType'],
 	label: match[2].trim(),
 	refStart: null,
 	refEnd: null
@@ -82,7 +73,7 @@ const parseReferenceMatch = (match: RegExpMatchArray): SessionTokenAttrs => ({
 })
 
 const parseInputMentionMatch = (match: RegExpMatchArray): SessionTokenAttrs => ({
-	tokenType: match[2].toLowerCase() as Extract<SessionTokenType, 'agent' | 'skill' | 'tool' | 'file'>,
+	tokenType: match[2].toLowerCase() as SessionTokenAttrs['tokenType'],
 	label: match[3].trim(),
 	refStart: null,
 	refEnd: null
@@ -98,11 +89,10 @@ const parseInputReferenceMatch = (match: RegExpMatchArray): SessionTokenAttrs =>
 const SessionTokenView = ({ node }: NodeViewProps) => {
 	const attrs = node.attrs as SessionTokenAttrs
 	const Icon = getTokenIcon(attrs)
-	const is_file = attrs.tokenType === 'file'
 	const display_label =
 		attrs.tokenType === 'reference'
 			? getReferenceLabel(attrs)
-			: is_file
+			: attrs.tokenType === 'file'
 				? getBasename(attrs.label)
 				: attrs.label
 
@@ -117,7 +107,7 @@ const SessionTokenView = ({ node }: NodeViewProps) => {
 				gap-1
 				px-1.5 py-0.5
 				mx-1
-				rounded-[5px]
+				rounded-sm
 				text-xs text-std-700
 				align-baseline
 				bg-accent/48
@@ -174,18 +164,10 @@ export default Node.create({
 	selectable: false,
 	addAttributes() {
 		return {
-			tokenType: {
-				default: 'tool'
-			},
-			label: {
-				default: ''
-			},
-			refStart: {
-				default: null
-			},
-			refEnd: {
-				default: null
-			}
+			tokenType: { default: 'tool' },
+			label: { default: '' },
+			refStart: { default: null },
+			refEnd: { default: null }
 		}
 	},
 	addCommands() {

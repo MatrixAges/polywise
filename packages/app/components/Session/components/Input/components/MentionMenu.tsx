@@ -1,204 +1,23 @@
-import {
-	Container,
-	File,
-	FileArchive,
-	FileCode2,
-	FileImage,
-	FileJson2,
-	FileSpreadsheet,
-	FileText,
-	Folder
-} from 'lucide-react'
+import { Container } from 'lucide-react'
 
 import EntityAvatar from '@/setting/im/components/EntityAvatar'
 import getToolIcon from '@/utils/getToolIcon'
 
+import { useModel } from '../context'
+import { getFileIcon, getSkillTypeLabel } from '../utils'
+
 import type { FC } from 'react'
+import type { MentionItem } from '../types'
 
-const mention_limit = 50
-const skill_type_label_map = {
-	system: 'System'
-} as const
-
-type MentionTrigger = '/' | '@'
-
-export interface SkillMentionItem {
-	key: string
-	type: 'skill'
-	label: string
-	desc: string
-	path: string
-	skill_type: string
-	search_text: string
-}
-
-export interface ToolMentionItem {
-	key: string
-	type: 'tool'
-	label: string
-	desc: string
-	search_text: string
-}
-
-export interface FileMentionItem {
-	key: string
-	type: 'file'
-	label: string
-	path: string
-	basename: string
-	file_kind: 'directory' | 'file'
-	search_text: string
-}
-
-export interface AgentMentionItem {
-	key: string
-	type: 'agent'
-	label: string
-	role: string
-	desc: string
-	photo?: Uint8Array | null
-	avatar?: unknown
-	search_text: string
-}
-
-export type MentionItem = SkillMentionItem | ToolMentionItem | FileMentionItem | AgentMentionItem
-
-export interface ActiveMention {
-	trigger: MentionTrigger
-	query: string
-	start: number
-	end: number
-}
-
-export const getPathSegments = (value: string) => value.replace(/\/$/, '').split('/').filter(Boolean)
-
-export const getBasename = (value: string) => {
-	const segments = getPathSegments(value)
-
-	return segments.at(-1) || value
-}
-
-export const getFileExtension = (value: string) => {
-	const basename = getBasename(value)
-	const index = basename.lastIndexOf('.')
-
-	if (index === -1) return ''
-
-	return basename.slice(index + 1).toLowerCase()
-}
-
-export const getFileIcon = (item: FileMentionItem) => {
-	if (item.file_kind === 'directory') return Folder
-
-	const extension = getFileExtension(item.path)
-
-	if (
-		['ts', 'tsx', 'js', 'jsx', 'py', 'go', 'rs', 'java', 'c', 'cc', 'cpp', 'h', 'hpp', 'sh', 'rb'].includes(
-			extension
-		)
-	) {
-		return FileCode2
-	}
-
-	if (['json', 'jsonl'].includes(extension)) {
-		return FileJson2
-	}
-
-	if (['md', 'mdx', 'txt', 'rst'].includes(extension)) {
-		return FileText
-	}
-
-	if (['csv', 'tsv', 'xlsx', 'xls'].includes(extension)) {
-		return FileSpreadsheet
-	}
-
-	if (['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'ico'].includes(extension)) {
-		return FileImage
-	}
-
-	if (['zip', 'tar', 'gz', 'tgz', '7z'].includes(extension)) {
-		return FileArchive
-	}
-
-	return File
-}
-
-export const getSkillTypeLabel = (value: string) =>
-	skill_type_label_map[value as keyof typeof skill_type_label_map] || 'Personal'
-
-const is_whitespace = (value: string) => /\s/.test(value)
-
-export const getActiveMention = (value: string, cursor: number) => {
-	if (cursor < 0) return null
-
-	let segment_start = cursor
-
-	while (segment_start > 0 && !is_whitespace(value[segment_start - 1])) {
-		segment_start -= 1
-	}
-
-	const segment = value.slice(segment_start, cursor)
-	const slash_index = segment.lastIndexOf('/')
-	const at_index = segment.lastIndexOf('@')
-	const trigger_index = Math.max(slash_index, at_index)
-
-	if (trigger_index === -1) return null
-
-	const trigger = segment[trigger_index] as MentionTrigger
-
-	if (trigger_index > 0) {
-		return null
-	}
-
-	return {
-		trigger,
-		query: segment.slice(trigger_index + 1),
-		start: segment_start + trigger_index,
-		end: cursor
-	} satisfies ActiveMention
-}
-
-export const filterMentionItems = (items: Array<MentionItem>, query: string) => {
-	const normalized_query = query.trim().toLowerCase()
-
-	if (!normalized_query) {
-		return items.slice(0, mention_limit)
-	}
-
-	return items.filter(item => item.search_text.includes(normalized_query)).slice(0, mention_limit)
-}
-
-export const formatMentionToken = (item: MentionItem) => {
-	if (item.type === 'skill') return `[SKILL: ${item.label}]`
-	if (item.type === 'tool') return `[TOOL: ${item.label}]`
-	if (item.type === 'agent') return `[AGENT: ${item.label}]`
-
-	return `[FILE: ${item.path}]`
-}
-
-export interface MentionProps {
-	activeMention: ActiveMention | null
+interface Props {
 	items: Array<MentionItem>
 	loading: boolean
 	activeIndex: number
 	onSelect: (item: MentionItem) => void
 }
 
-const Mention: FC<MentionProps> = ({ activeMention, items, loading, activeIndex, onSelect }) => {
-	const agent_items = items.filter((item): item is AgentMentionItem => item.type === 'agent')
-	const file_items = items.filter((item): item is FileMentionItem => item.type === 'file')
-	const skill_items = items.filter((item): item is SkillMentionItem => item.type === 'skill')
-	const tool_items = items.filter((item): item is ToolMentionItem => item.type === 'tool')
-	const mention_sections =
-		activeMention?.trigger === '@'
-			? [
-					...(agent_items.length ? [{ key: 'agents', items: agent_items }] : []),
-					...(file_items.length ? [{ key: 'files', items: file_items }] : [])
-				]
-			: [
-					...(tool_items.length ? [{ key: 'tools', items: tool_items }] : []),
-					...(skill_items.length ? [{ key: 'skills', items: skill_items }] : [])
-				]
+const Index: FC<Props> = ({ items, loading, activeIndex, onSelect }) => {
+	const x = useModel()
 	let cursor_index = -1
 
 	return (
@@ -220,10 +39,8 @@ const Mention: FC<MentionProps> = ({ activeMention, items, loading, activeIndex,
 					text-xs
 				'
 			>
-				<span className='text-std-600'>
-					{activeMention?.trigger === '/' ? 'Tools & Skills' : 'Mentions'}
-				</span>
-				<span className='text-std-400'>{activeMention?.query || 'Type to search'}</span>
+				<span className='text-std-600'>{x.mention_heading}</span>
+				<span className='text-std-400'>{x.active_mention?.query || 'Type to search'}</span>
 			</div>
 			<div
 				className='
@@ -237,7 +54,7 @@ const Mention: FC<MentionProps> = ({ activeMention, items, loading, activeIndex,
 				{loading ? (
 					<div className='text-std-400 px-3 py-2 text-sm'>Loading...</div>
 				) : items.length > 0 ? (
-					mention_sections.map((section, section_index) => (
+					x.mention_sections.map((section, section_index) => (
 						<div className='flex flex-col gap-0.5' key={section.key}>
 							{section_index > 0 && (
 								<div className='border-border-light mx-2 my-1 border-t' />
@@ -401,4 +218,4 @@ const Mention: FC<MentionProps> = ({ activeMention, items, loading, activeIndex,
 	)
 }
 
-export default Mention
+export default Index
