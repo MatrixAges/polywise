@@ -42,10 +42,17 @@ const Index = () => {
 			<div
 				className='
 					shrink-0
-					px-2.5 py-1.5
+					px-2.5
 				'
 			>
-				<div className='flex items-center justify-between gap-3'>
+				<div
+					className='
+						flex
+						items-center justify-between
+						gap-3
+						mb-1.5
+					'
+				>
 					<div className='h-7 min-w-0'>
 						<TextTabs
 							className='gap-3'

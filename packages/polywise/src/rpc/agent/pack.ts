@@ -43,7 +43,16 @@ import type { Agent, Article, Chunk, Document, Edge, Link, Node, Skill } from '@
 const pack_version = 1
 export const agent_pack_extension = 'papk'
 const require = createRequire(import.meta.url)
-const archiver = require('archiver') as typeof import('archiver')
+type ArchiveLike = {
+	on(event: 'error', listener: (error: Error) => void): ArchiveLike
+	pipe(destination: NodeJS.WritableStream): NodeJS.WritableStream
+	directory(source: string, destination: string | false): void
+	finalize(): void | Promise<void>
+}
+
+const { ZipArchive } = require('archiver') as {
+	ZipArchive: new (options: { zlib: { level: number } }) => ArchiveLike
+}
 const unzipper = require('unzipper') as typeof import('unzipper')
 
 type VectorRecord = {
@@ -475,7 +484,7 @@ const createArchive = async (source_dir: string, file_path: string) => {
 
 	await new Promise<void>((resolve, reject) => {
 		const output = fs.createWriteStream(file_path)
-		const archive = archiver('zip', { zlib: { level: 9 } })
+		const archive = new ZipArchive({ zlib: { level: 9 } })
 
 		output.on('close', () => resolve())
 		output.on('error', reject)

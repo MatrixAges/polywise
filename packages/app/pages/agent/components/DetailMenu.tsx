@@ -47,7 +47,7 @@ const Index = ({ active_tab }: IProps) => {
 			<div
 				className='
 					overflow-y-auto
-					flex flex-col
+					flex flex-col flex-1
 					min-h-0
 					gap-1
 				'
@@ -73,13 +73,13 @@ const Index = ({ active_tab }: IProps) => {
 			</div>
 			<div className='shrink-0 pt-3'>
 				<button
-					className='click_button'
+					className='click_button w-full'
 					type='button'
 					disabled={!selected_agent_id || export_agent_loading}
 					onClick={() => void exportSelectedAgent()}
 				>
 					<HardDriveUpload className='size-3.5'></HardDriveUpload>
-					<span>{export_agent_loading ? 'Exporting...' : 'Export Agent'}</span>
+					<span>{export_agent_loading ? 'Exporting...' : 'Export'}</span>
 				</button>
 			</div>
 		</div>
