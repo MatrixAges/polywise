@@ -1,18 +1,18 @@
-import { Loader2, Paperclip, Plus } from 'lucide-react'
+import { Album, BookUser, Brain, Hash, Loader2, Paperclip, Plus } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { Button } from '@/__shadcn__/components/ui/button'
-import { TextTabs } from '@/components'
+import { Tabs } from '@/components'
 
 import { useModel } from '../context'
 
 import type { ArticleForType } from '../types'
 
 const article_tab_items = [
-	{ key: 'memory', title: 'memory' },
-	{ key: 'wiki', title: 'wiki' },
-	{ key: 'user', title: 'user' },
-	{ key: 'linkcase', title: 'linkcase' }
+	{ key: 'wiki', title: 'wiki', icon: Hash },
+	{ key: 'memory', title: 'memory', icon: Brain },
+	{ key: 'user', title: 'user', icon: BookUser },
+	{ key: 'linkcase', title: 'linkcase', icon: Album }
 ]
 
 const Index = () => {
@@ -48,12 +48,12 @@ const Index = () => {
 				'
 			>
 				<div className='h-7 min-w-0 flex-1'>
-					<TextTabs
-						className='gap-2'
+					<Tabs
+						small
 						items={article_tab_items}
 						active={article_for}
-						setActive={value => setArticleFor(value as ArticleForType)}
-					></TextTabs>
+						onClick={value => setArticleFor(value as ArticleForType)}
+					></Tabs>
 				</div>
 			</div>
 			<div className='min-h-0 flex-1 overflow-hidden'>
