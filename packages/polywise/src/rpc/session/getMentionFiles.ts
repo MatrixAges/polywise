@@ -80,6 +80,7 @@ export default p
 			onlyFiles: false,
 			absolute: false,
 			markDirectories: true,
+			caseSensitiveMatch: false,
 			gitignore: true,
 			ignore: search_ignore,
 			suppressErrors: true
