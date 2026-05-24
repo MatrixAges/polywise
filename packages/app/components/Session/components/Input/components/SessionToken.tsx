@@ -187,28 +187,30 @@ export default Node.create({
 				find: mention_input_pattern,
 				handler: ({ range, match, commands }) => {
 					const token = match[1]
+					const prefix = match[0].slice(0, match[0].lastIndexOf(token))
 
-					commands.insertContentAt(
-						{ from: range.to - token.length, to: range.to },
+					commands.insertContentAt(range, [
+						...(prefix ? [{ type: 'text', text: prefix }] : []),
 						{
 							type: this.name,
 							attrs: parseInputMentionMatch(match)
 						}
-					)
+					])
 				}
 			}),
 			new InputRule({
 				find: reference_input_pattern,
 				handler: ({ range, match, commands }) => {
 					const token = match[1]
+					const prefix = match[0].slice(0, match[0].lastIndexOf(token))
 
-					commands.insertContentAt(
-						{ from: range.to - token.length, to: range.to },
+					commands.insertContentAt(range, [
+						...(prefix ? [{ type: 'text', text: prefix }] : []),
 						{
 							type: this.name,
 							attrs: parseInputReferenceMatch(match)
 						}
-					)
+					])
 				}
 			})
 		]

@@ -1,4 +1,5 @@
 import { Archive, ArrowDownToLine, BrushCleaning, Layers2, PackageOpen } from 'lucide-react'
+import { observer } from 'mobx-react-lite'
 
 import {
 	Select,
@@ -122,4 +123,4 @@ const Index = () => {
 	)
 }
 
-export default Index
+export default observer(Index)

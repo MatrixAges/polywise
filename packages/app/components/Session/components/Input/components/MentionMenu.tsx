@@ -1,4 +1,5 @@
 import { Container } from 'lucide-react'
+import { observer } from 'mobx-react-lite'
 
 import EntityAvatar from '@/setting/im/components/EntityAvatar'
 import getToolIcon from '@/utils/getToolIcon'
@@ -218,4 +219,4 @@ const Index: FC<Props> = ({ items, loading, activeIndex, onSelect }) => {
 	)
 }
 
-export default Index
+export default observer(Index)

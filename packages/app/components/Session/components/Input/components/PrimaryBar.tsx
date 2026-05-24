@@ -1,5 +1,6 @@
 import { PauseIcon, PlayIcon } from '@phosphor-icons/react'
 import { Maximize } from 'lucide-react'
+import { observer } from 'mobx-react-lite'
 
 import {
 	Select,
@@ -105,4 +106,4 @@ const Index = () => {
 	)
 }
 
-export default Index
+export default observer(Index)

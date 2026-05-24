@@ -1,4 +1,5 @@
 import { EditorContent } from '@tiptap/react'
+import { observer } from 'mobx-react-lite'
 
 import { useModel } from '../context'
 
@@ -18,4 +19,4 @@ const Index = () => {
 	)
 }
 
-export default Index
+export default observer(Index)
