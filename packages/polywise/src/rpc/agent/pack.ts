@@ -658,6 +658,12 @@ export const importAgentPack = async (file_path: string) => {
 		const imported_name = await resolveImportedAgentName(snapshot.agent.name)
 		const next_agent_id = getId()
 		const now = new Date()
+		const current_agents = await getAgents()
+		const min_agent_order = current_agents.reduce(
+			(total, item) => Math.min(total, Number.isFinite(item.order) ? item.order : 0),
+			Number.POSITIVE_INFINITY
+		)
+		const next_agent_order = Number.isFinite(min_agent_order) ? min_agent_order - 1 : 0
 		const skill_id_map = new Map(snapshot.skills.map(item => [item.id, getId()]))
 		const document_id_map = new Map(snapshot.documents.map(item => [item.id, getId()]))
 		const article_id_map = new Map(snapshot.articles.map(item => [item.id, getId()]))
@@ -743,7 +749,7 @@ export const importAgentPack = async (file_path: string) => {
 					soul: snapshot.agent.soul,
 					identity: snapshot.agent.identity,
 					memory: snapshot.agent.memory,
-					order: Date.now(),
+					order: next_agent_order,
 					model: snapshot.agent.model,
 					created_at: snapshot.agent.created_at ?? now,
 					updated_at: snapshot.agent.updated_at ?? now

@@ -696,6 +696,7 @@ export default class Index {
 
 		try {
 			const result = await rpc.agent.importPack.mutate({ file_path })
+			this.closeImportDialog()
 
 			await this.refresh()
 			this.menu_scope = 'agent'
@@ -708,7 +709,6 @@ export default class Index {
 				this.refreshToolLogs(),
 				this.refreshSkillLogs()
 			])
-			this.closeImportDialog()
 			toast.success(`Imported ${result.agent_name}.`)
 		} catch (error) {
 			toast.error(error instanceof Error ? error.message : 'Agent import failed.')
