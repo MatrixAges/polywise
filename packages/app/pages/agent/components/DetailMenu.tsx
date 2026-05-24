@@ -61,7 +61,7 @@ const Index = ({ active_tab }: IProps) => {
 				flex flex-col shrink-0
 				w-[120px] h-full
 				min-h-0
-				p-2.5
+				px-2 py-1.5
 			'
 		>
 			<div
@@ -95,7 +95,7 @@ const Index = ({ active_tab }: IProps) => {
 				className='
 					flex shrink-0
 					items-center justify-between
-					pt-3
+					pt-1.5
 				'
 			>
 				<button

@@ -30,7 +30,7 @@ const Index = () => {
 			className='
 				flex flex-col shrink-0
 				w-[192px]
-				p-2.5
+				px-2 py-1.5
 			'
 		>
 			<div
@@ -105,12 +105,6 @@ const Index = () => {
 										<div className='line-clamp-2 text-sm font-medium'>
 											{item.title || 'Untitled article'}
 										</div>
-										<div className='text-std-400 line-clamp-2 text-xs'>
-											{item.content || 'Empty content'}
-										</div>
-										<div className='text-std-300 text-[10px] tracking-[0.08em] uppercase'>
-											{item.for}
-										</div>
 									</button>
 								))}
 								{article_has_more ? (
@@ -142,7 +136,7 @@ const Index = () => {
 								flex
 								items-center justify-between
 								gap-2
-								pt-3
+								pt-1.5
 							'
 						>
 							<button
@@ -150,7 +144,7 @@ const Index = () => {
 								onClick={openCreatePrivateArticleDialog}
 							>
 								<Plus className='size-3'></Plus>
-								<span>New</span>
+								<span>Private</span>
 							</button>
 							<button
 								className='click_button small text-xs'

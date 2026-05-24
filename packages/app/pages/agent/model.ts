@@ -78,8 +78,8 @@ export default class Index {
 	session_menu_open = true
 	article_items = [] as Array<AgentArticleItem>
 	related_article_items = [] as Array<AgentArticleItem>
-	article_for = 'memory' as ArticleForType
-	related_article_for = 'memory' as ArticleForType
+	article_for = 'wiki' as ArticleForType
+	related_article_for = 'wiki' as ArticleForType
 	selected_article_id = ''
 	article_page = 1
 	article_has_more = false

@@ -12,7 +12,7 @@ interface Item {
 }
 
 interface IProps {
-	items: Array<Item>
+	items: ReadonlyArray<Item>
 	active?: string | ((v: string) => boolean)
 	under?: boolean
 	deps?: DependencyList
