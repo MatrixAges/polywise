@@ -42,6 +42,7 @@ export const createGlobTool = (s: Session) => {
 				cwd: real_cwd,
 				absolute: true,
 				gitignore: input.disable_gitignore !== true,
+				ignore: ['**/.DS_Store'],
 				// Skip unreadable directories instead of failing the entire glob request.
 				suppressErrors: true
 			})
