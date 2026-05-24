@@ -12,7 +12,6 @@ const Index = () => {
 		article_for,
 		private_article_dialog_open,
 		private_article_dialog_loading,
-		private_article_dialog_editing,
 		private_article_dialog_title,
 		private_article_dialog_content,
 		setPrivateArticleDialogOpen,
@@ -29,9 +28,7 @@ const Index = () => {
 			<DialogContent className='w-[720px] max-w-[calc(100vw-32px)]!'>
 				<div className='flex max-h-[min(80vh,720px)] flex-col'>
 					<DialogHeader>
-						<DialogTitle>
-							{private_article_dialog_editing ? 'Edit' : 'New'} {article_for} article
-						</DialogTitle>
+						<DialogTitle>New {article_for} article</DialogTitle>
 					</DialogHeader>
 					<div
 						className='
@@ -86,13 +83,7 @@ const Index = () => {
 							}
 							onClick={() => void submitPrivateArticleDialog()}
 						>
-							{private_article_dialog_loading
-								? private_article_dialog_editing
-									? 'Saving...'
-									: 'Creating...'
-								: private_article_dialog_editing
-									? 'Save'
-									: 'Create'}
+							{private_article_dialog_loading ? 'Creating...' : 'Create'}
 						</Button>
 					</DialogFooter>
 				</div>

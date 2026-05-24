@@ -2,6 +2,9 @@ import { agent_article, article } from '@core/db/schema'
 import { env } from '@core/env'
 import { and, asc, desc, eq, SQL } from 'drizzle-orm'
 
+const normalizeForType = (for_type?: string) =>
+	for_type ? (for_type as 'linkcase' | 'wiki' | 'memory' | 'user') : undefined
+
 export const getAgentArticles = async (args: { agent_id: string; for_type?: string }) => {
 	const { agent_id, for_type } = args
 	const related_where = for_type
@@ -51,6 +54,43 @@ export const getAgentArticles = async (args: { agent_id: string; for_type?: stri
 
 		return a_created - b_created
 	})
+}
+
+export const getAgentPrivateArticles = async (args: {
+	agent_id: string
+	for_type?: string
+	limit: number
+	offset: number
+}) => {
+	const { agent_id, for_type, limit, offset } = args
+	const target_for_type = normalizeForType(for_type)
+	const where = target_for_type
+		? and(eq(article.scope_type, 'agent'), eq(article.scope_id, agent_id), eq(article.for, target_for_type))
+		: and(eq(article.scope_type, 'agent'), eq(article.scope_id, agent_id))
+
+	return env.db
+		.select()
+		.from(article)
+		.where(where)
+		.orderBy(desc(article.updated_at), asc(article.created_at))
+		.limit(limit)
+		.offset(offset)
+}
+
+export const getAgentRelatedArticles = async (args: { agent_id: string; for_type?: string }) => {
+	const { agent_id, for_type } = args
+	const target_for_type = normalizeForType(for_type)
+	const where = target_for_type
+		? and(eq(agent_article.agent_id, agent_id), eq(article.for, target_for_type))
+		: eq(agent_article.agent_id, agent_id)
+
+	return env.db
+		.select({ article })
+		.from(agent_article)
+		.innerJoin(article, eq(agent_article.article_id, article.id))
+		.where(where)
+		.orderBy(desc(article.updated_at), asc(article.created_at))
+		.then(rows => rows.map(item => item.article))
 }
 
 export const addAgentArticle = async (agent_id: string, article_id: string) => {

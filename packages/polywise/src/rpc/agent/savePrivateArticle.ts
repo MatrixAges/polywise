@@ -3,7 +3,7 @@ import { object, string, enum as zod_enum } from 'zod'
 import { p } from '../../utils/trpc'
 import { savePrivateAgentArticle } from './privateArticle'
 
-const private_article_for_type = ['wiki', 'memory', 'user'] as const
+const private_article_for_type = ['linkcase', 'wiki', 'memory', 'user'] as const
 
 export default p
 	.meta({

@@ -5,6 +5,8 @@ import create from './create'
 import createSession from './createSession'
 import exportPack from './exportPack'
 import getArticles from './getArticles'
+import getPrivateArticles from './getPrivateArticles'
+import getRelatedArticles from './getRelatedArticles'
 import getSessions from './getSessions'
 import getSkillLogs from './getSkillLogs'
 import getSkills from './getSkills'
@@ -27,6 +29,8 @@ export default r({
 	createSession,
 	exportPack,
 	getArticles,
+	getPrivateArticles,
+	getRelatedArticles,
 	getSkillLogs,
 	getSessions,
 	getSkills,

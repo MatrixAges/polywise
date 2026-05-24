@@ -76,15 +76,25 @@ export default class Index {
 	edit_field_key = '' as '' | 'name' | 'role' | 'description' | AgentTab
 	session_menu_open = true
 	article_items = [] as Array<AgentArticleItem>
+	related_article_items = [] as Array<AgentArticleItem>
 	article_for = 'memory' as ArticleForType
+	selected_article_id = ''
+	article_page = 1
+	article_has_more = false
+	article_loading = false
+	article_loading_more = false
+	article_request_key = 0
 	article_search = ''
 	article_search_list = [] as Array<AgentArticleSearchItem>
 	article_search_loading = false
 	article_search_request_key = ''
 	article_search_timer = 0
+	article_draft_title = ''
+	article_draft_content = ''
+	article_saving = false
+	related_articles_dialog_open = false
 	private_article_dialog_open = false
 	private_article_dialog_loading = false
-	private_article_dialog_article_id = ''
 	private_article_dialog_title = ''
 	private_article_dialog_content = ''
 	pins = [] as Array<AgentSessionItem>
@@ -170,12 +180,25 @@ export default class Index {
 		return this.selected_agent?.tools || []
 	}
 
-	get can_manage_private_articles() {
-		return this.article_for === 'wiki' || this.article_for === 'memory' || this.article_for === 'user'
+	get selected_article() {
+		return this.article_items.find(item => item.id === this.selected_article_id) || null
 	}
 
-	get private_article_dialog_editing() {
-		return Boolean(this.private_article_dialog_article_id)
+	get article_dirty() {
+		const article_item = this.selected_article
+
+		if (!article_item) {
+			return false
+		}
+
+		return (
+			(article_item.title || '') !== this.article_draft_title ||
+			(article_item.content || '') !== this.article_draft_content
+		)
+	}
+
+	get can_manage_private_articles() {
+		return this.article_for === 'wiki' || this.article_for === 'memory' || this.article_for === 'user'
 	}
 
 	constructor(
@@ -277,6 +300,16 @@ export default class Index {
 			this.selected_agent_id = ''
 			this.skill_items = []
 			this.article_items = []
+			this.related_article_items = []
+			this.selected_article_id = ''
+			this.article_page = 1
+			this.article_has_more = false
+			this.article_loading = false
+			this.article_loading_more = false
+			this.article_draft_title = ''
+			this.article_draft_content = ''
+			this.article_saving = false
+			this.related_articles_dialog_open = false
 			this.clearArticleSearch()
 			this.pins = []
 			this.session_items = []
@@ -341,23 +374,107 @@ export default class Index {
 		if (!this.selected_agent_id) {
 			this.skill_items = []
 			this.article_items = []
+			this.related_article_items = []
+			this.selected_article_id = ''
+			this.article_page = 1
+			this.article_has_more = false
+			this.article_loading = false
+			this.article_loading_more = false
+			this.article_draft_title = ''
+			this.article_draft_content = ''
+			this.article_saving = false
 			this.clearArticleSearch()
 
 			return
 		}
 
-		const [skill_items, article_items] = await Promise.all([
-			rpc.agent.getSkills.query({ agent_id: this.selected_agent_id }),
-			rpc.agent.getArticles.query({
-				agent_id: this.selected_agent_id,
-				for_type: this.article_for
+		const agent_id = this.selected_agent_id
+		const request_key = this.article_request_key + 1
+
+		this.article_request_key = request_key
+		this.article_loading = true
+
+		try {
+			const [skill_items, article_response, related_articles] = await Promise.all([
+				rpc.agent.getSkills.query({ agent_id }),
+				rpc.agent.getPrivateArticles.query({
+					agent_id,
+					for_type: this.article_for,
+					page: 1
+				}),
+				rpc.agent.getRelatedArticles.query({
+					agent_id,
+					for_type: this.article_for
+				})
+			])
+
+			if (this.article_request_key !== request_key || this.selected_agent_id !== agent_id) {
+				return
+			}
+
+			this.skill_items = skill_items as Array<AgentSkillItem>
+			this.article_items = article_response.list as Array<AgentArticleItem>
+			this.related_article_items = related_articles as Array<AgentArticleItem>
+			this.article_page = 1
+			this.article_has_more = article_response.has_more
+			this.syncSelectedArticleAfterRefresh()
+			this.scheduleArticleSearch()
+		} finally {
+			if (this.article_request_key === request_key) {
+				this.article_loading = false
+			}
+		}
+	}
+
+	syncSelectedArticleAfterRefresh() {
+		const next_selected_id = this.article_items.some(item => item.id === this.selected_article_id)
+			? this.selected_article_id
+			: (this.article_items[0]?.id ?? '')
+
+		this.selected_article_id = next_selected_id
+
+		const article_item = this.article_items.find(item => item.id === next_selected_id) || null
+
+		this.article_draft_title = article_item?.title || ''
+		this.article_draft_content = article_item?.content || ''
+	}
+
+	async loadMorePrivateArticles() {
+		if (
+			!this.selected_agent_id ||
+			this.article_loading ||
+			this.article_loading_more ||
+			!this.article_has_more
+		) {
+			return
+		}
+
+		const agent_id = this.selected_agent_id
+		const next_page = this.article_page + 1
+		const request_key = this.article_request_key + 1
+
+		this.article_request_key = request_key
+		this.article_loading_more = true
+
+		try {
+			const response = await rpc.agent.getPrivateArticles.query({
+				agent_id,
+				for_type: this.article_for,
+				page: next_page
 			})
-		])
 
-		this.skill_items = skill_items as Array<AgentSkillItem>
-		this.article_items = article_items as Array<AgentArticleItem>
+			if (this.article_request_key !== request_key || this.selected_agent_id !== agent_id) {
+				return
+			}
 
-		this.scheduleArticleSearch()
+			this.article_items = this.article_items.concat(response.list as Array<AgentArticleItem>)
+			this.article_page = next_page
+			this.article_has_more = response.has_more
+		} finally {
+			if (this.article_request_key === request_key) {
+				this.article_loading_more = false
+			}
+		}
 	}
 
 	async refreshSessions() {
@@ -555,9 +672,12 @@ export default class Index {
 			return
 		}
 
+		void this.saveSelectedArticle({ silent: true })
+
 		this.selected_agent_id = agent_id
 		this.page_mode = page_mode
 		this.edit_field_key = ''
+		this.related_articles_dialog_open = false
 		this.closePrivateArticleDialog()
 
 		if (this.current_tab === 'sessions') {
@@ -806,11 +926,99 @@ export default class Index {
 			return
 		}
 
+		void this.saveSelectedArticle({ silent: true })
+
 		this.article_for = for_type
+		this.related_articles_dialog_open = false
 		this.clearArticleSearch()
 		this.closePrivateArticleDialog()
 
 		void this.refreshAgentRelated()
+	}
+
+	setSelectedArticle(article_id: string) {
+		if (this.selected_article_id === article_id) {
+			return
+		}
+
+		void this.saveSelectedArticle({ silent: true })
+
+		this.selected_article_id = article_id
+
+		const article_item = this.article_items.find(item => item.id === article_id) || null
+
+		this.article_draft_title = article_item?.title || ''
+		this.article_draft_content = article_item?.content || ''
+	}
+
+	setArticleDraftTitle(value: string) {
+		this.article_draft_title = value
+	}
+
+	setArticleDraftContent(value: string) {
+		this.article_draft_content = value
+	}
+
+	setRelatedArticlesDialogOpen(open: boolean) {
+		this.related_articles_dialog_open = open
+	}
+
+	openRelatedArticlesDialog() {
+		this.related_articles_dialog_open = true
+	}
+
+	async saveSelectedArticle(options?: { silent?: boolean }) {
+		const article_item = this.selected_article
+
+		if (!this.selected_agent_id || !article_item || this.article_saving || !this.article_dirty) {
+			return
+		}
+
+		const agent_id = this.selected_agent_id
+		const target_for_type = article_item.for as ArticleForType
+
+		this.article_saving = true
+
+		try {
+			const saved_article = await rpc.agent.savePrivateArticle.mutate({
+				agent_id,
+				article_id: article_item.id,
+				for_type: target_for_type,
+				title: this.article_draft_title.trim() || undefined,
+				content: this.article_draft_content
+			})
+
+			if (this.selected_agent_id !== agent_id || this.article_for !== target_for_type) {
+				return
+			}
+
+			this.article_items = this.article_items
+				.map(item => (item.id === saved_article.id ? (saved_article as AgentArticleItem) : item))
+				.sort((a, b) => {
+					const a_updated = a.updated_at ? new Date(a.updated_at).getTime() : 0
+					const b_updated = b.updated_at ? new Date(b.updated_at).getTime() : 0
+
+					if (a_updated !== b_updated) {
+						return b_updated - a_updated
+					}
+
+					const a_created = a.created_at ? new Date(a.created_at).getTime() : 0
+					const b_created = b.created_at ? new Date(b.created_at).getTime() : 0
+
+					return a_created - b_created
+				})
+			this.selected_article_id = saved_article.id
+			this.article_draft_title = saved_article.title || ''
+			this.article_draft_content = saved_article.content || ''
+
+			if (!options?.silent) {
+				toast.success('Article saved.')
+			}
+		} catch (error) {
+			toast.error(error instanceof Error ? error.message : 'Failed to save article.')
+		} finally {
+			this.article_saving = false
+		}
 	}
 
 	setPrivateArticleDialogOpen(open: boolean, options?: { force?: boolean }) {
@@ -821,7 +1029,6 @@ export default class Index {
 		this.private_article_dialog_open = open
 
 		if (!open) {
-			this.private_article_dialog_article_id = ''
 			this.private_article_dialog_title = ''
 			this.private_article_dialog_content = ''
 		}
@@ -832,25 +1039,8 @@ export default class Index {
 			return
 		}
 
-		this.private_article_dialog_article_id = ''
 		this.private_article_dialog_title = ''
 		this.private_article_dialog_content = ''
-		this.private_article_dialog_open = true
-	}
-
-	openEditPrivateArticleDialog(item: AgentArticleItem) {
-		if (
-			!this.selected_agent_id ||
-			item.scope_type !== 'agent' ||
-			item.scope_id !== this.selected_agent_id ||
-			!this.can_manage_private_articles
-		) {
-			return
-		}
-
-		this.private_article_dialog_article_id = item.id
-		this.private_article_dialog_title = item.title || ''
-		this.private_article_dialog_content = item.content || ''
 		this.private_article_dialog_open = true
 	}
 
@@ -882,19 +1072,17 @@ export default class Index {
 		this.private_article_dialog_loading = true
 
 		try {
-			const editing = this.private_article_dialog_editing
-
-			await rpc.agent.savePrivateArticle.mutate({
+			const saved_article = await rpc.agent.savePrivateArticle.mutate({
 				agent_id: this.selected_agent_id,
-				article_id: this.private_article_dialog_article_id || undefined,
-				for_type: this.article_for as Extract<ArticleForType, 'wiki' | 'memory' | 'user'>,
+				for_type: this.article_for,
 				title: this.private_article_dialog_title.trim() || undefined,
 				content
 			})
 
 			this.closePrivateArticleDialog({ force: true })
 			await this.refreshAgentRelated()
-			toast.success(editing ? 'Article updated.' : 'Article added.')
+			this.setSelectedArticle(saved_article.id)
+			toast.success('Article added.')
 		} catch (error) {
 			toast.error(error instanceof Error ? error.message : 'Failed to save article.')
 		} finally {
@@ -1529,7 +1717,10 @@ export default class Index {
 			for_type: this.article_for
 		})
 
-		await this.refreshAgentRelated()
+		this.related_article_items = (await rpc.agent.getRelatedArticles.query({
+			agent_id: this.selected_agent_id,
+			for_type: this.article_for
+		})) as Array<AgentArticleItem>
 		this.article_search_list = this.article_search_list.filter(item => item.id !== article_id)
 	}
 
