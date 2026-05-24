@@ -57,7 +57,7 @@ const Inner = ({ children }: PropsWithChildren) => {
 								toast={toast}
 								key={toast.id}
 								className={$.cx(
-									'
+									`
 								w-full
 								p-4
 								rounded-2xl
@@ -68,7 +68,7 @@ const Inner = ({ children }: PropsWithChildren) => {
 								backdrop-blur-xl
 								duration-200
 								pointer-events-auto transition
-							',
+							`,
 									'data-[ending-style]:translate-y-2 data-[ending-style]:opacity-0 data-[starting-style]:translate-y-2 data-[starting-style]:opacity-0'
 								)}
 							>
