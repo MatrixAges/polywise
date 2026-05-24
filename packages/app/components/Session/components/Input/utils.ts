@@ -205,6 +205,12 @@ export const formatMentionToken = (item: MentionItem) => {
 	return `[FILE: ${item.path}]`
 }
 
+const hasValidMentionPrefix = (instance: TiptapEditor, from: number) => {
+	const prefix = instance.state.doc.textBetween(Math.max(0, from - 1), from, '\n', '\0')
+
+	return prefix === '' || /\s|[([{:;,]/.test(prefix)
+}
+
 export const getActiveMentionFromEditor = (instance: TiptapEditor | null) => {
 	if (!instance) return null
 
@@ -226,28 +232,22 @@ export const getActiveMentionFromEditor = (instance: TiptapEditor | null) => {
 		allowToIncludeChar: false
 	})
 
-	if (slash_match) {
-		const prefix = instance.state.doc.textBetween(
-			Math.max(0, slash_match.range.from - 1),
-			slash_match.range.from,
-			'\n',
-			'\0'
-		)
-		const valid_prefix = prefix === '' || /\s|[([{:;,]/.test(prefix)
-
-		if (!valid_prefix) {
-			slash_match = null
-		}
+	if (slash_match && !hasValidMentionPrefix(instance, slash_match.range.from)) {
+		slash_match = null
 	}
+
+	const valid_at_match = at_match && hasValidMentionPrefix(instance, at_match.range.from) ? at_match : null
 
 	const slash_inside_at =
 		!!slash_match &&
-		!!at_match &&
-		at_match.range.from <= slash_match.range.from &&
-		at_match.range.to >= slash_match.range.to
+		!!valid_at_match &&
+		valid_at_match.range.from <= slash_match.range.from &&
+		valid_at_match.range.to >= slash_match.range.to
 	const match = slash_inside_at
-		? at_match
-		: [slash_match, at_match].filter(Boolean).sort((a, b) => (b?.range.from ?? 0) - (a?.range.from ?? 0))[0]
+		? valid_at_match
+		: [slash_match, valid_at_match]
+				.filter(Boolean)
+				.sort((a, b) => (b?.range.from ?? 0) - (a?.range.from ?? 0))[0]
 
 	if (!match) return null
 
