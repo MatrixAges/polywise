@@ -108,7 +108,7 @@ const Index = ({ active_tab }: IProps) => {
 					<span>{export_agent_loading ? 'Exporting...' : 'Export'}</span>
 				</button>
 				<button
-					className='icon_button'
+					className='icon_button small'
 					type='button'
 					disabled={!selected_agent_id || export_agent_loading}
 					onClick={() => void onRemove()}

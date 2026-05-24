@@ -35,7 +35,7 @@ const Index = () => {
 				className='
 					overflow-hidden
 					flex flex-col
-					w-[960px] h-[min(80vh,720px)] max-w-[calc(100vw-32px)]!
+					w-[720px] h-[min(80vh,720px)] max-w-[calc(100vw-32px)]!
 					gap-0
 					p-0
 				'
@@ -80,11 +80,9 @@ const Index = () => {
 					<div
 						className='
 							flex
-							items-center justify-between
-							h-11
+							items-center justify-end
 							gap-4
-							px-3
-							border-t border-border-light
+							p-4
 						'
 					>
 						<Select
@@ -120,12 +118,14 @@ const Index = () => {
 							<span className='text-std-300 text-xs'>{character_count} characters</span>
 							<Button
 								variant='outline'
+								size='sm'
 								disabled={private_article_dialog_loading}
 								onClick={() => setPrivateArticleDialogOpen(false)}
 							>
 								Cancel
 							</Button>
 							<Button
+								size='sm'
 								disabled={
 									private_article_dialog_loading ||
 									!private_article_dialog_content.trim()

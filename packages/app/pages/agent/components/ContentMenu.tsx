@@ -9,10 +9,10 @@ import { useModel } from '../context'
 import type { ArticleForType } from '../types'
 
 const article_tab_items = [
-	{ key: 'wiki', title: 'wiki', icon: Hash },
-	{ key: 'memory', title: 'memory', icon: Brain },
-	{ key: 'user', title: 'user', icon: BookUser },
-	{ key: 'linkcase', title: 'linkcase', icon: Album }
+	{ key: 'wiki', title: 'wiki', Icon: Hash },
+	{ key: 'memory', title: 'memory', Icon: Brain },
+	{ key: 'user', title: 'user', Icon: BookUser },
+	{ key: 'linkcase', title: 'linkcase', Icon: Album }
 ]
 
 const Index = () => {
@@ -35,7 +35,8 @@ const Index = () => {
 		<div
 			className='
 				flex flex-col shrink-0
-				w-[210px]
+				w-[192px]
+				p-2.5
 			'
 		>
 			<div
@@ -144,17 +145,25 @@ const Index = () => {
 					{can_manage_private_articles ? (
 						<div
 							className='
-								grid grid-cols-[1fr_auto]
+								flex
+								items-center justify-between
 								gap-2
-								p-1.5
+								pt-3
 							'
 						>
-							<button className='click_button' onClick={openCreatePrivateArticleDialog}>
-								<Plus className='size-3.5'></Plus>
+							<button
+								className='click_button small text-xs'
+								onClick={openCreatePrivateArticleDialog}
+							>
+								<Plus className='size-3'></Plus>
 								<span>New</span>
 							</button>
-							<button className='icon_button shrink-0' onClick={openRelatedArticlesDialog}>
-								<Paperclip className='size-3.5'></Paperclip>
+							<button
+								className='click_button small text-xs'
+								onClick={openRelatedArticlesDialog}
+							>
+								<Paperclip className='size-3'></Paperclip>
+								<span>Related</span>
 							</button>
 						</div>
 					) : null}

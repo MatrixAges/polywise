@@ -54,7 +54,7 @@ export default class Index {
 		return `${this.root_path}/${target_path}`
 	}
 
-	async init(dir: string, options?: Pick<Index, 'dir_only' | 'show_hidden' | 'file_extensions'>) {
+	async init(dir: string, options?: Partial<Pick<Index, 'dir_only' | 'show_hidden' | 'file_extensions'>>) {
 		if (options?.dir_only !== undefined) this.dir_only = options.dir_only
 		if (options?.show_hidden !== undefined) this.show_hidden = options.show_hidden
 		this.file_extensions = options?.file_extensions ? [...options.file_extensions] : []

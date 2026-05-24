@@ -113,7 +113,7 @@ const Index = () => {
 							></Input>
 						</div>
 					)}
-					<DialogFooter className='flex items-center justify-between sm:justify-between'>
+					<DialogFooter className='flex items-center justify-between'>
 						<Tabs
 							items={[...create_mode_items]}
 							active={create_agent_mode}
