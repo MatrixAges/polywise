@@ -1,6 +1,5 @@
 import { article } from '@core/db/schema'
 import { setArticle } from '@core/db/services'
-import { addAgentArticle } from '@core/db/services/externals'
 import { fullTextSearch, hybirdSearch, relationSearch, remove, saveArticle, semanticSearch } from '@core/io'
 import { tool } from 'ai'
 import { eq } from 'drizzle-orm'
@@ -75,10 +74,6 @@ export const createContentTool = (scope: SessionScope) => {
 					source: 'superego',
 					exec_pipeline: true
 				})
-
-				if (scope.type === 'agent' && scope.id) {
-					await addAgentArticle(scope.id, article_id)
-				}
 
 				return `Content add queued for ${input.for}.`
 			}

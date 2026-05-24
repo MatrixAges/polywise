@@ -1,4 +1,4 @@
-import { Bot, MessagesSquare, PanelLeftOpen, Plus, Sparkles } from 'lucide-react'
+import { Bot, MessagesSquare, PanelLeftOpen, Plus, Sparkles, Upload } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { Tabs } from '@/components'
@@ -8,6 +8,7 @@ import AgentsMenu from './AgentsMenu'
 import CreateDialog from './CreateDialog'
 import GroupDialog from './GroupDialog'
 import GroupsMenu from './GroupsMenu'
+import ImportDialog from './ImportDialog'
 import { SkillDialog } from './Skill'
 
 const Index = () => {
@@ -19,6 +20,7 @@ const Index = () => {
 		setSessionMenuOpen,
 		openCreateAgentDialog,
 		openCreateGroupDialog,
+		openImportDialog,
 		openSkillDialog
 	} = useModel()
 
@@ -63,6 +65,15 @@ const Index = () => {
 							</button>
 						)}
 						{menu_scope === 'agent' && (
+							<button
+								className='icon_button small'
+								type='button'
+								onClick={openImportDialog}
+							>
+								<Upload className='size-3'></Upload>
+							</button>
+						)}
+						{menu_scope === 'agent' && (
 							<button className='icon_button small' type='button' onClick={openSkillDialog}>
 								<Sparkles className='size-3'></Sparkles>
 							</button>
@@ -83,21 +94,28 @@ const Index = () => {
 						</button>
 					</div>
 				</div>
-				<div className='flex min-h-0 flex-1 overflow-y-scroll'>
-					<div
-						className='
-							flex flex-col
-							w-full
-							gap-0.5
-							px-1.5
-						'
-					>
-						{menu_scope === 'agent' ? <AgentsMenu></AgentsMenu> : <GroupsMenu></GroupsMenu>}
-						<div className='h-1 opacity-0'>-</div>
+				<div className='flex min-h-0 flex-1 flex-col'>
+					<div className='flex min-h-0 flex-1 overflow-y-scroll'>
+						<div
+							className='
+								flex flex-col
+								w-full
+								gap-0.5
+								px-1.5
+							'
+						>
+							{menu_scope === 'agent' ? (
+								<AgentsMenu></AgentsMenu>
+							) : (
+								<GroupsMenu></GroupsMenu>
+							)}
+							<div className='h-1 shrink-0 opacity-0'>-</div>
+						</div>
 					</div>
 				</div>
 			</div>
 			<CreateDialog></CreateDialog>
+			<ImportDialog></ImportDialog>
 			<GroupDialog></GroupDialog>
 			<SkillDialog></SkillDialog>
 		</>

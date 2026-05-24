@@ -2,7 +2,7 @@ import path from 'path'
 import { getNodeRowid, insertNodeVector } from '@core/db/prepare'
 import { article, chunk, edge, node, post_article, post_project, post_session, project } from '@core/db/schema'
 import { addEdge, addNode, addSession, getArticle, getChunks, getEdge, getNode } from '@core/db/services'
-import { addNodeChunk, addPostSession, getPostSessions } from '@core/db/services/externals'
+import { addEdgeArticle, addNodeChunk, addPostSession, getPostSessions } from '@core/db/services/externals'
 import { env } from '@core/env'
 import { remove, saveArticle } from '@core/io'
 import { readPipelineStore } from '@core/io/save/pipelineStore'
@@ -314,7 +314,12 @@ const runPostExtractTask = (args: { id: string; article_id: string; content: str
 				continue
 			}
 
-			await ensureGlobalEdge(head_node.id, tail_node.id, relation)
+			const edge_item = await ensureGlobalEdge(head_node.id, tail_node.id, relation)
+
+			if (edge_item) {
+				await addEdgeArticle(edge_item.id, args.article_id)
+			}
+
 			await linkNodesToChunks([head_node.id, tail_node.id], content_chunks, [head_name, tail_name])
 		}
 	})()

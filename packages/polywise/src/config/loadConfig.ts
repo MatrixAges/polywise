@@ -96,6 +96,11 @@ export default async () => {
 		has_changed_config = true
 	}
 
+	if (config.agent_export_dir === undefined) {
+		config.agent_export_dir = ''
+		has_changed_config = true
+	}
+
 	if (!config.rewire || typeof config.rewire !== 'object') {
 		config.rewire = {
 			enabled: true,

@@ -40,8 +40,8 @@ export default p
 		const exclude_where = exclude_ids.length ? notInArray(article.id, exclude_ids) : undefined
 		const search_where = or(like(article.title, `%${keyword}%`), like(article.content, `%${keyword}%`))
 		const where = exclude_where
-			? and(eq(article.for, input.for_type), exclude_where, search_where)
-			: and(eq(article.for, input.for_type), search_where)
+			? and(eq(article.for, input.for_type), eq(article.scope_type, 'global'), exclude_where, search_where)
+			: and(eq(article.for, input.for_type), eq(article.scope_type, 'global'), search_where)
 
 		const rows = await env.db
 			.select({

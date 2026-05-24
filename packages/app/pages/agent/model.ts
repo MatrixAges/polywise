@@ -2,6 +2,7 @@ import { arrayMove } from '@dnd-kit/sortable'
 import dayjs from 'dayjs'
 import { makeAutoObservable } from 'mobx'
 import { genConfig } from 'react-nice-avatar'
+import { toast } from 'sonner'
 import { setStorageWhenChange } from 'stk/mobx'
 import { injectable } from 'tsyringe'
 
@@ -95,6 +96,10 @@ export default class Index {
 	session_initialized = false
 	session_status_map = {} as SessionStatusPayload
 	create_dialog_open = false
+	import_dialog_open = false
+	import_agent_file_path = ''
+	import_agent_loading = false
+	export_agent_loading = false
 	create_agent_mode = 'auto' as AgentCreateMode
 	create_agent_purpose = ''
 	create_agent_name = ''
@@ -595,6 +600,63 @@ export default class Index {
 		this.setCreateDialogOpen(false)
 	}
 
+	setImportDialogOpen(open: boolean) {
+		if (this.import_agent_loading) {
+			return
+		}
+
+		this.import_dialog_open = open
+
+		if (!open) {
+			this.import_agent_file_path = ''
+		}
+	}
+
+	openImportDialog() {
+		this.import_agent_file_path = ''
+		this.import_dialog_open = true
+	}
+
+	closeImportDialog() {
+		this.setImportDialogOpen(false)
+	}
+
+	setImportAgentFilePath(file_path: string) {
+		this.import_agent_file_path = file_path
+	}
+
+	async submitImportAgent() {
+		const file_path = this.import_agent_file_path.trim()
+
+		if (!file_path || this.import_agent_loading) {
+			return
+		}
+
+		this.import_agent_loading = true
+
+		try {
+			const result = await rpc.agent.importPack.mutate({ file_path })
+
+			await this.refresh()
+			this.menu_scope = 'agent'
+			this.selected_agent_id = result.agent_id
+			this.page_mode = 'detail'
+			this.current_tab = 'info'
+			await Promise.all([
+				this.refreshAgentRelated(),
+				this.refreshSessions(),
+				this.refreshToolLogs(),
+				this.refreshSkillLogs()
+			])
+			this.closeImportDialog()
+			toast.success(`Imported ${result.agent_name}.`)
+		} catch (error) {
+			toast.error(error instanceof Error ? error.message : 'Agent import failed.')
+		} finally {
+			this.import_agent_loading = false
+		}
+	}
+
 	setCreateAgentPurpose(value: string) {
 		this.create_agent_purpose = value
 	}
@@ -645,6 +707,24 @@ export default class Index {
 
 	closeSkillDialog() {
 		this.skill_dialog_open = false
+	}
+
+	async exportSelectedAgent() {
+		if (!this.selected_agent_id || this.export_agent_loading) {
+			return
+		}
+
+		this.export_agent_loading = true
+
+		try {
+			const result = await rpc.agent.exportPack.mutate({ agent_id: this.selected_agent_id })
+
+			toast.success(`Exported to ${result.file_path}.`)
+		} catch (error) {
+			toast.error(error instanceof Error ? error.message : 'Agent export failed.')
+		} finally {
+			this.export_agent_loading = false
+		}
 	}
 
 	setArticleFor(for_type: ArticleForType) {

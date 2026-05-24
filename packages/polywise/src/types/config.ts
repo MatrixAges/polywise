@@ -78,6 +78,7 @@ export interface AppConfig {
 	default_model: DefaultModel
 	jina_api_key?: string
 	bookmark_auto_clean?: boolean
+	agent_export_dir?: string
 	enbale_webfetch_chain: boolean
 	fetch_fallback_chain: Array<WebfetchFallbackProvider>
 	mcp?: McpConfig

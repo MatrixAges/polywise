@@ -1,7 +1,9 @@
 import { useMemoizedFn } from 'ahooks'
 import { observer } from 'mobx-react-lite'
 
+import { Button } from '@/__shadcn__/components/ui/button'
 import { Field, FieldContent, FieldDescription, FieldGroup, FieldTitle } from '@/__shadcn__/components/ui/field'
+import { Input } from '@/__shadcn__/components/ui/input'
 import {
 	Select,
 	SelectContent,
@@ -69,6 +71,28 @@ const Index = () => {
 		})
 	})
 
+	const resetAgentExportDir = useMemoizedFn(() => {
+		if (!s.config) {
+			return
+		}
+
+		s.setConfig('config', {
+			...(s.config as AppConfig),
+			agent_export_dir: ''
+		})
+	})
+
+	const setAgentExportDir = useMemoizedFn((value: string) => {
+		if (!s.config) {
+			return
+		}
+
+		s.setConfig('config', {
+			...(s.config as AppConfig),
+			agent_export_dir: value
+		})
+	})
+
 	return (
 		<div className='page_wrap flex w-full flex-col'>
 			<FieldGroup className='gap-0'>
@@ -128,6 +152,28 @@ const Index = () => {
 							</SelectContent>
 						</Select>
 					</Controller>
+				</Field>
+			</FieldGroup>
+			<div className='bg-border-light my-2 h-px w-full'></div>
+			<FieldGroup className='gap-0'>
+				<Field className='items-center! py-3' orientation='horizontal'>
+					<FieldContent>
+						<FieldTitle className='text-base'>Agent Export Directory</FieldTitle>
+						<FieldDescription>
+							Where exported `.papk` files are written. Leave empty to use the system
+							Downloads folder.
+						</FieldDescription>
+					</FieldContent>
+					<div className='flex w-[380px] items-center gap-2'>
+						<Input
+							value={s.config?.agent_export_dir || ''}
+							placeholder='Downloads'
+							onChange={event => setAgentExportDir(event.target.value)}
+						></Input>
+						<Button variant='ghost' type='button' onClick={resetAgentExportDir}>
+							Reset
+						</Button>
+					</div>
 				</Field>
 			</FieldGroup>
 			<div className='bg-border-light my-2 h-px w-full'></div>

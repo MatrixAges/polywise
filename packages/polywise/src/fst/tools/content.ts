@@ -1,5 +1,4 @@
 import { applyContentCallback, createContentSearchTrace } from '@core/callback'
-import { addAgentArticle } from '@core/db/services/externals'
 import { fullTextSearch, hybirdSearch, relationSearch, saveArticle, semanticSearch } from '@core/io'
 import { tool } from 'ai'
 import { array, enum as Enum, number, object, string } from 'zod'
@@ -94,10 +93,6 @@ export const createContentTool = (s: Session) => {
 					source: 'agent',
 					exec_pipeline: true
 				})
-
-				if (s.scope.type === 'agent' && s.scope.id) {
-					await addAgentArticle(s.scope.id, article_id)
-				}
 
 				return {
 					action: 'save' as const,

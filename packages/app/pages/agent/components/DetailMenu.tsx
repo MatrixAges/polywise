@@ -2,6 +2,7 @@ import {
 	BookOpenText,
 	Brain,
 	Database,
+	Download,
 	GitBranch,
 	Info,
 	MessageSquareText,
@@ -32,18 +33,25 @@ interface IProps {
 }
 
 const Index = ({ active_tab }: IProps) => {
-	const { setCurrentTab } = useModel()
+	const { export_agent_loading, selected_agent_id, setCurrentTab, exportSelectedAgent } = useModel()
 
 	return (
 		<div
 			className='
-				overflow-y-auto
 				flex flex-col shrink-0
-				w-[120px]
+				w-[120px] h-full
+				min-h-0
 				p-2.5
 			'
 		>
-			<div className='flex flex-col gap-1'>
+			<div
+				className='
+					overflow-y-auto
+					flex flex-col
+					min-h-0
+					gap-1
+				'
+			>
 				{tabs.map(item => {
 					const Icon = item.Icon
 
@@ -62,6 +70,17 @@ const Index = ({ active_tab }: IProps) => {
 						</button>
 					)
 				})}
+			</div>
+			<div className='shrink-0 pt-3'>
+				<button
+					className='click_button'
+					type='button'
+					disabled={!selected_agent_id || export_agent_loading}
+					onClick={() => void exportSelectedAgent()}
+				>
+					<Download className='size-3.5'></Download>
+					<span>{export_agent_loading ? 'Exporting...' : 'Export .papk'}</span>
+				</button>
 			</div>
 		</div>
 	)
