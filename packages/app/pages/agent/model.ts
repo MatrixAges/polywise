@@ -607,8 +607,8 @@ export default class Index {
 		this.setCreateDialogOpen(false)
 	}
 
-	setImportDialogOpen(open: boolean) {
-		if (this.import_agent_loading) {
+	setImportDialogOpen(open: boolean, options?: { force?: boolean }) {
+		if (this.import_agent_loading && !options?.force) {
 			return
 		}
 
@@ -659,8 +659,8 @@ export default class Index {
 		}
 	}
 
-	closeImportDialog() {
-		this.setImportDialogOpen(false)
+	closeImportDialog(options?: { force?: boolean }) {
+		this.setImportDialogOpen(false, options)
 	}
 
 	setImportAgentFilePath(file_path: string) {
@@ -696,7 +696,7 @@ export default class Index {
 
 		try {
 			const result = await rpc.agent.importPack.mutate({ file_path })
-			this.closeImportDialog()
+			this.closeImportDialog({ force: true })
 
 			await this.refresh()
 			this.menu_scope = 'agent'

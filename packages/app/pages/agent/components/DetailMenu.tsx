@@ -7,10 +7,13 @@ import {
 	Info,
 	MessageSquareText,
 	Sparkles,
+	Trash2,
 	UserRound,
 	Wrench
 } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+
+import { alert } from '@/utils'
 
 import { useModel } from '../context'
 
@@ -33,7 +36,24 @@ interface IProps {
 }
 
 const Index = ({ active_tab }: IProps) => {
-	const { export_agent_loading, selected_agent_id, setCurrentTab, exportSelectedAgent } = useModel()
+	const { export_agent_loading, selected_agent_id, setCurrentTab, exportSelectedAgent, removeAgent } = useModel()
+
+	const onRemove = async () => {
+		if (!selected_agent_id) {
+			return
+		}
+
+		const confirmed = await alert({
+			title: 'Remove Agent',
+			desc: 'Confirm remove this agent?'
+		})
+
+		if (!confirmed) {
+			return
+		}
+
+		await removeAgent(selected_agent_id)
+	}
 
 	return (
 		<div
@@ -71,15 +91,29 @@ const Index = ({ active_tab }: IProps) => {
 					)
 				})}
 			</div>
-			<div className='shrink-0 pt-3'>
+			<div
+				className='
+					flex shrink-0
+					items-center justify-between
+					pt-3
+				'
+			>
 				<button
-					className='click_button w-full'
+					className='click_button small text-xs'
 					type='button'
 					disabled={!selected_agent_id || export_agent_loading}
 					onClick={() => void exportSelectedAgent()}
 				>
-					<HardDriveUpload className='size-3.5'></HardDriveUpload>
+					<HardDriveUpload className='size-3'></HardDriveUpload>
 					<span>{export_agent_loading ? 'Exporting...' : 'Export'}</span>
+				</button>
+				<button
+					className='icon_button'
+					type='button'
+					disabled={!selected_agent_id || export_agent_loading}
+					onClick={() => void onRemove()}
+				>
+					<Trash2 className='size-3'></Trash2>
 				</button>
 			</div>
 		</div>

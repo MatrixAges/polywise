@@ -589,13 +589,15 @@ const resolveImportedAgentName = async (name: string) => {
 		return base_name
 	}
 
-	const imported_name = `${base_name} (Imported)`
+	let duplicate_index = 2
+	let next_name = `${base_name} (${duplicate_index})`
 
-	if (!existing_names.has(imported_name)) {
-		return imported_name
+	while (existing_names.has(next_name)) {
+		duplicate_index += 1
+		next_name = `${base_name} (${duplicate_index})`
 	}
 
-	return `${imported_name} ${new Date().toISOString().slice(0, 19).replace('T', ' ')}`
+	return next_name
 }
 
 export const exportAgentPack = async (agent_id: string) => {
