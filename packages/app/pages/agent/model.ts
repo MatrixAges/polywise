@@ -91,12 +91,14 @@ export default class Index {
 	article_search_timer = 0
 	article_draft_title = ''
 	article_draft_content = ''
+	article_draft_for = 'memory' as ArticleForType
 	article_saving = false
 	related_articles_dialog_open = false
 	private_article_dialog_open = false
 	private_article_dialog_loading = false
 	private_article_dialog_title = ''
 	private_article_dialog_content = ''
+	private_article_dialog_for = 'memory' as ArticleForType
 	pins = [] as Array<AgentSessionItem>
 	session_items = [] as Array<AgentSessionItem>
 	pin_map = {} as Record<string, number>
@@ -193,7 +195,8 @@ export default class Index {
 
 		return (
 			(article_item.title || '') !== this.article_draft_title ||
-			(article_item.content || '') !== this.article_draft_content
+			(article_item.content || '') !== this.article_draft_content ||
+			article_item.for !== this.article_draft_for
 		)
 	}
 
@@ -308,7 +311,9 @@ export default class Index {
 			this.article_loading_more = false
 			this.article_draft_title = ''
 			this.article_draft_content = ''
+			this.article_draft_for = 'memory'
 			this.article_saving = false
+			this.private_article_dialog_for = 'memory'
 			this.related_articles_dialog_open = false
 			this.clearArticleSearch()
 			this.pins = []
@@ -382,6 +387,7 @@ export default class Index {
 			this.article_loading_more = false
 			this.article_draft_title = ''
 			this.article_draft_content = ''
+			this.article_draft_for = 'memory'
 			this.article_saving = false
 			this.clearArticleSearch()
 
@@ -437,6 +443,7 @@ export default class Index {
 
 		this.article_draft_title = article_item?.title || ''
 		this.article_draft_content = article_item?.content || ''
+		this.article_draft_for = (article_item?.for as ArticleForType | undefined) || this.article_for
 	}
 
 	async loadMorePrivateArticles() {
@@ -949,6 +956,7 @@ export default class Index {
 
 		this.article_draft_title = article_item?.title || ''
 		this.article_draft_content = article_item?.content || ''
+		this.article_draft_for = (article_item?.for as ArticleForType | undefined) || this.article_for
 	}
 
 	setArticleDraftTitle(value: string) {
@@ -957,6 +965,10 @@ export default class Index {
 
 	setArticleDraftContent(value: string) {
 		this.article_draft_content = value
+	}
+
+	setArticleDraftFor(value: ArticleForType) {
+		this.article_draft_for = value
 	}
 
 	setRelatedArticlesDialogOpen(open: boolean) {
@@ -975,7 +987,7 @@ export default class Index {
 		}
 
 		const agent_id = this.selected_agent_id
-		const target_for_type = article_item.for as ArticleForType
+		const target_for_type = this.article_draft_for
 
 		this.article_saving = true
 
@@ -988,7 +1000,19 @@ export default class Index {
 				content: this.article_draft_content
 			})
 
-			if (this.selected_agent_id !== agent_id || this.article_for !== target_for_type) {
+			if (this.selected_agent_id !== agent_id) {
+				return
+			}
+
+			if (this.article_for !== target_for_type) {
+				this.article_for = target_for_type
+				this.selected_article_id = saved_article.id
+				await this.refreshAgentRelated()
+
+				if (!options?.silent) {
+					toast.success('Article saved.')
+				}
+
 				return
 			}
 
@@ -1010,6 +1034,7 @@ export default class Index {
 			this.selected_article_id = saved_article.id
 			this.article_draft_title = saved_article.title || ''
 			this.article_draft_content = saved_article.content || ''
+			this.article_draft_for = saved_article.for as ArticleForType
 
 			if (!options?.silent) {
 				toast.success('Article saved.')
@@ -1031,6 +1056,7 @@ export default class Index {
 		if (!open) {
 			this.private_article_dialog_title = ''
 			this.private_article_dialog_content = ''
+			this.private_article_dialog_for = this.can_manage_private_articles ? this.article_for : 'memory'
 		}
 	}
 
@@ -1041,6 +1067,7 @@ export default class Index {
 
 		this.private_article_dialog_title = ''
 		this.private_article_dialog_content = ''
+		this.private_article_dialog_for = this.article_for
 		this.private_article_dialog_open = true
 	}
 
@@ -1054,6 +1081,10 @@ export default class Index {
 
 	setPrivateArticleDialogContent(value: string) {
 		this.private_article_dialog_content = value
+	}
+
+	setPrivateArticleDialogFor(value: ArticleForType) {
+		this.private_article_dialog_for = value
 	}
 
 	async submitPrivateArticleDialog() {
@@ -1074,12 +1105,13 @@ export default class Index {
 		try {
 			const saved_article = await rpc.agent.savePrivateArticle.mutate({
 				agent_id: this.selected_agent_id,
-				for_type: this.article_for,
+				for_type: this.private_article_dialog_for,
 				title: this.private_article_dialog_title.trim() || undefined,
 				content
 			})
 
 			this.closePrivateArticleDialog({ force: true })
+			this.article_for = saved_article.for as ArticleForType
 			await this.refreshAgentRelated()
 			this.setSelectedArticle(saved_article.id)
 			toast.success('Article added.')

@@ -21,6 +21,8 @@ export type AgentToolLogItem = AgentToolLogResponse['items'][number]
 export type AgentPageMode = 'sessions' | 'detail'
 export type AgentMenuScope = 'agent' | 'group'
 export type AgentCreateMode = 'auto' | 'input'
+export const article_for_types = ['memory', 'wiki', 'user', 'linkcase'] as const
+export const private_article_for_types = ['memory', 'wiki', 'user'] as const
 export type AgentTab =
 	| 'sessions'
 	| 'info'
@@ -32,7 +34,7 @@ export type AgentTab =
 	| 'tools'
 	| 'content'
 	| 'graph'
-export type ArticleForType = 'linkcase' | 'wiki' | 'memory' | 'user'
+export type ArticleForType = (typeof article_for_types)[number]
 export type AvatarMode = 'upload' | 'nice' | 'notion'
 
 export interface ISkillOption {

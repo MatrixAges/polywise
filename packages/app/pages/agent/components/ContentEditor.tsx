@@ -3,10 +3,12 @@ import { Loader2, Plus, Save, Trash2 } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import { Input } from '@/__shadcn__/components/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/__shadcn__/components/ui/select'
 import Editor from '@/components/Editor'
 import { alert, fromNow } from '@/utils'
 
 import { useModel } from '../context'
+import { article_for_types } from '../types'
 
 const Index = () => {
 	const {
@@ -14,6 +16,7 @@ const Index = () => {
 		article_loading,
 		article_draft_title,
 		article_draft_content,
+		article_draft_for,
 		article_dirty,
 		article_saving,
 		can_manage_private_articles,
@@ -21,6 +24,7 @@ const Index = () => {
 		removeArticle,
 		setArticleDraftTitle,
 		setArticleDraftContent,
+		setArticleDraftFor,
 		saveSelectedArticle
 	} = useModel()
 	const [character_count, setCharacterCount] = useState(0)
@@ -139,7 +143,32 @@ const Index = () => {
 					'
 				>
 					<div className='flex items-center gap-3'>
-						<span className='capitalize'>{selected_article.for}</span>
+						<Select
+							value={article_draft_for}
+							onValueChange={value =>
+								value && setArticleDraftFor(value as (typeof article_for_types)[number])
+							}
+						>
+							<SelectTrigger
+								className='
+									min-w-0
+									gap-0
+									text-xs text-std-300
+									capitalize
+								'
+								noStyle
+								noActiveStyle
+							>
+								<SelectValue className='capitalize' />
+							</SelectTrigger>
+							<SelectContent align='start'>
+								{article_for_types.map(item => (
+									<SelectItem value={item} key={item}>
+										<span className='capitalize'>{item}</span>
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
 						<div>Updated {fromNow(selected_article.updated_at)}</div>
 					</div>
 					<div className='flex items-center gap-3'>
