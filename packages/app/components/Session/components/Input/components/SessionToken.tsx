@@ -107,7 +107,7 @@ const SessionTokenView = ({ node }: NodeViewProps) => {
 				gap-1
 				px-1.5 py-0.5
 				mx-1
-				rounded-sm
+				rounded-[5px]
 				text-xs text-std-700
 				align-baseline
 				bg-accent/48

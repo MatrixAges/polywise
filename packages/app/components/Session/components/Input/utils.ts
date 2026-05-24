@@ -122,19 +122,26 @@ export const getFileIcon = (item: FileMentionItem) => {
 export const getSkillTypeLabel = (value: string) =>
 	skill_type_label_map[value as keyof typeof skill_type_label_map] || 'Personal'
 
+const escapeRegex = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+
 export const getMentionQueryTerms = (query: string) =>
 	query
 		.trim()
-		.toLowerCase()
 		.split(/[\/\s]+/)
 		.map(item => item.trim())
 		.filter(Boolean)
+
+const findCaseInsensitiveIndex = (value: string, term: string, from: number) => {
+	const match = value.slice(from).match(new RegExp(escapeRegex(term), 'i'))
+
+	return match?.index === undefined ? -1 : from + match.index
+}
 
 export const matchesOrderedTerms = (value: string, terms: Array<string>) => {
 	let index = 0
 
 	for (const term of terms) {
-		const found_index = value.indexOf(term, index)
+		const found_index = findCaseInsensitiveIndex(value, term, index)
 
 		if (found_index === -1) {
 			return false
@@ -147,21 +154,21 @@ export const matchesOrderedTerms = (value: string, terms: Array<string>) => {
 }
 
 export const matchesMentionQuery = (item: MentionItem, query: string) => {
-	const normalized_query = query.trim().toLowerCase()
+	const normalized_query = query.trim()
 
 	if (!normalized_query) {
 		return true
 	}
 
 	if (item.type === 'file') {
-		return matchesOrderedTerms(item.path.toLowerCase(), getMentionQueryTerms(query))
+		return matchesOrderedTerms(item.path, getMentionQueryTerms(query))
 	}
 
-	return getMentionQueryTerms(query).every(term => item.search_text.includes(term))
+	return getMentionQueryTerms(query).every(term => new RegExp(escapeRegex(term), 'i').test(item.search_text))
 }
 
 export const filterMentionItems = (items: Array<MentionItem>, query: string) => {
-	const normalized_query = query.trim().toLowerCase()
+	const normalized_query = query.trim()
 
 	if (!normalized_query) {
 		return items.slice(0, mention_limit)

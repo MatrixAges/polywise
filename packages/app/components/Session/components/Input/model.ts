@@ -123,7 +123,7 @@ export default class Model {
 	}
 
 	get file_query_key() {
-		const query = this.active_mention?.trigger === '@' ? this.active_mention.query.trim().toLowerCase() : ''
+		const query = this.active_mention?.trigger === '@' ? this.active_mention.query.trim() : ''
 
 		return `${this.session_id}::${query}`
 	}
@@ -295,7 +295,7 @@ export default class Model {
 				path: item.path,
 				basename: getBasename(item.path),
 				file_kind: item.type,
-				search_text: item.path.toLowerCase()
+				search_text: item.path
 			}))
 			this.file_items_loaded_session_id = this.file_query_key
 		} catch {

@@ -14,18 +14,23 @@ const search_limit = 100
 const search_candidate_limit = 500
 const search_ignore = ['**/.DS_Store', '**/node_modules/**', '**/.git/**']
 const escape_glob = (value: string) => value.replace(/([*?[\]{}()!+@\\])/g, '[$1]')
+const escape_regex = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 const get_query_terms = (value: string) =>
 	value
 		.trim()
-		.toLowerCase()
 		.split(/[\/\s]+/)
 		.map(item => item.trim())
 		.filter(Boolean)
+const find_case_insensitive_index = (value: string, term: string, from: number) => {
+	const match = value.slice(from).match(new RegExp(escape_regex(term), 'i'))
+
+	return match?.index === undefined ? -1 : from + match.index
+}
 const matches_ordered_terms = (value: string, terms: Array<string>) => {
 	let index = 0
 
 	for (const term of terms) {
-		const found_index = value.indexOf(term, index)
+		const found_index = find_case_insensitive_index(value, term, index)
 
 		if (found_index === -1) {
 			return false
@@ -91,7 +96,7 @@ export default p
 					.filter(item => {
 						if (item === '.DS_Store' || item === '') return false
 
-						return matches_ordered_terms(normalize_path(item).toLowerCase(), query_terms)
+						return matches_ordered_terms(normalize_path(item), query_terms)
 					})
 					.slice(0, search_candidate_limit)
 					.map(async item => {
