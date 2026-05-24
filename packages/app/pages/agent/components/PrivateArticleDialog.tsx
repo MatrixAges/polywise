@@ -37,28 +37,25 @@ const Index = () => {
 					flex flex-col
 					w-[720px] h-[min(80vh,720px)] max-w-[calc(100vw-32px)]!
 					gap-0
-					p-0
 				'
 			>
-				<DialogHeader className='px-4 pt-4 pb-1'>
+				<DialogHeader>
 					<DialogTitle>New article</DialogTitle>
 				</DialogHeader>
-				<div className='h-9 px-3'>
-					<div className='flex items-center gap-2'>
-						<Input
-							className='
-								flex-1
-								px-0
-								rounded-none
-								text-xsm! font-medium
-								bg-transparent
-								focus:bg-transparent
-							'
-							value={private_article_dialog_title}
-							placeholder='Untitled article'
-							onChange={event => setPrivateArticleDialogTitle(event.target.value)}
-						></Input>
-					</div>
+				<div className='mt-3 flex'>
+					<Input
+						className='
+							flex-1
+							px-0
+							rounded-none
+							text-base! font-medium
+							bg-transparent
+							focus:bg-transparent
+						'
+						value={private_article_dialog_title}
+						placeholder='Untitled article'
+						onChange={event => setPrivateArticleDialogTitle(event.target.value)}
+					></Input>
 				</div>
 				<div
 					className='
@@ -71,7 +68,7 @@ const Index = () => {
 						<Editor
 							id='agent-private-article-dialog'
 							value={private_article_dialog_content}
-							className='min-h-full px-6! pt-4.5! text-[14px]'
+							className='min-h-full text-[14px]'
 							rich_text
 							onChange={value => setPrivateArticleDialogContent(value)}
 							onCharacterCountChange={setCharacterCount}
@@ -82,7 +79,6 @@ const Index = () => {
 							flex
 							items-center justify-end
 							gap-4
-							p-4
 						'
 					>
 						<Select
