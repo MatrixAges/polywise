@@ -42,43 +42,46 @@ const Index = () => {
 				<div className='flex max-h-[80vh] flex-col overflow-hidden'>
 					<div className='px-0.5 py-1.5'>
 						<Popover open={!!article_search.trim()}>
-							<PopoverTrigger>
-								<div className='relative'>
-									<Search
+							<div className='relative'>
+								<PopoverTrigger>
+									<div className='h-8 w-full rounded-md' aria-hidden='true'></div>
+								</PopoverTrigger>
+								<Search
+									className='
+										absolute
+										top-1/2
+										left-1.5
+										size-3.5
+										text-std-300
+										pointer-events-none -translate-y-1/2
+									'
+								></Search>
+								<Input
+									className='absolute inset-0 h-8 pl-6'
+									placeholder='Search article to relate'
+									value={article_search}
+									onChange={event => setArticleSearch(event.target.value)}
+								></Input>
+								{article_search ? (
+									<button
 										className='
 											absolute
-											top-1/2
-											left-1.5
-											size-3.5
+											top-2.5 right-2.5
 											text-std-300
-											pointer-events-none -translate-y-1/2
+											hover:text-foreground
 										'
-									></Search>
-									<Input
-										className='h-8 pl-6'
-										placeholder='Search article to relate'
-										value={article_search}
-										onChange={event => setArticleSearch(event.target.value)}
-									></Input>
-									{article_search ? (
-										<button
-											className='
-												absolute
-												top-2.5 right-2.5
-												text-std-300
-												hover:text-foreground
-											'
-											type='button'
-											onClick={clearArticleSearch}
-										>
-											<X className='size-4'></X>
-										</button>
-									) : null}
-								</div>
-							</PopoverTrigger>
+										type='button'
+										onClick={clearArticleSearch}
+									>
+										<X className='size-4'></X>
+									</button>
+								) : null}
+							</div>
 							<PopoverContent
 								side='bottom'
 								sideOffset={8}
+								initialFocus={false}
+								finalFocus={false}
 								className='max-h-64 overflow-y-auto p-1'
 							>
 								{article_search_loading ? (
