@@ -1,7 +1,6 @@
 import Banner from '@website/appunits/index/Banner'
 import Callback from '@website/appunits/index/Callback'
 import Features from '@website/appunits/index/Features'
-import Latest from '@website/appunits/index/Latest'
 import Painpoint from '@website/appunits/index/Painpoint'
 import WhyIF from '@website/appunits/index/WhyIF'
 
@@ -12,7 +11,6 @@ const Index = () => {
 			<WhyIF />
 			<Painpoint />
 			<Features />
-			<Latest />
 			<Callback />
 		</div>
 	)

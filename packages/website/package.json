@@ -4,8 +4,8 @@
 	"description": "Polywise official website",
 	"type": "module",
 	"scripts": {
-		"predev": "node ./build/search.mjs",
-		"prebuild": "node ./build/search.mjs",
+		"__predev": "node ./build/search.mjs",
+		"__prebuild": "node ./build/search.mjs",
 		"dev": "vinext dev",
 		"build": "vinext build",
 		"start": "vinext start",

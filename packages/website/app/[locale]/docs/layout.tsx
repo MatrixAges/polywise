@@ -12,7 +12,7 @@ import Sheet from '@website/components/ui/Sheet'
 import { useEventListener, useLocalStorageState, useMemoizedFn, useUpdateEffect } from '@website/hooks/ahooks'
 import useRouterHash from '@website/hooks/useRouterHash'
 import useTheme from '@website/hooks/useTheme'
-import { Link, usePathname, useRouter } from '@website/i18n/navigation'
+import { Link, usePathname } from '@website/i18n/navigation'
 import { $ } from '@website/utils'
 import getTargetIndex from '@website/utils/getTargetIndex'
 import { uniq } from 'lodash-es'
@@ -29,7 +29,6 @@ type BottomLinkItem = Pick<DocsMenuItem, 'label' | 'key'> | null
 
 const Index = (props: PropsWithChildren) => {
 	const { children } = props
-	const router = useRouter()
 	const params = useParams<{ id: Array<string> }>()
 	const pathname = usePathname()
 	const hash = useRouterHash()
@@ -58,6 +57,7 @@ const Index = (props: PropsWithChildren) => {
 	const closeSearch = useMemoizedFn(() => setOpenSearch(false))
 	const onOpenSidebar = useMemoizedFn(() => setOpenSidebar(true))
 	const onCloseSidebar = useMemoizedFn(() => setOpenSidebar(false))
+	const route_path = params?.id?.join('/') ?? ''
 
 	const toggleGroup = useMemoizedFn((key: string) => {
 		setLocalOpenkeys(value => {
@@ -70,15 +70,26 @@ const Index = (props: PropsWithChildren) => {
 	const onClickLink = useMemoizedFn(() => setOpenSidebar(false))
 
 	useEffect(() => {
-		const paths = params?.id || [pathname.replace('/docs/', '')]
+		const paths = route_path ? route_path.split('/') : []
 
-		if (!paths || !Array.isArray(paths)) return setSelectedkey('')
+		if (paths.length === 0) {
+			setSelectedkey('')
+			setBottomLinks({ prev_link: null, next_link: null })
+
+			return
+		}
 
 		const fold_key = paths[0]
 		const key = paths.join('/')
 
 		setSelectedkey(key)
-		setLocalOpenkeys(value => uniq([...(value || []), fold_key]))
+		if (fold_key) {
+			setLocalOpenkeys(value => {
+				const current = value ?? []
+
+				return current.includes(fold_key) ? current : uniq([...current, fold_key])
+			})
+		}
 
 		const target_item = menu.flatMap(group => group.children).find(item => item.key === key)
 
@@ -132,7 +143,7 @@ const Index = (props: PropsWithChildren) => {
 		}
 
 		setBottomLinks({ prev_link, next_link })
-	}, [menu, params, pathname, setLocalOpenkeys])
+	}, [menu, route_path, setLocalOpenkeys])
 
 	useEffect(() => {
 		if (!local_openkeys) return
