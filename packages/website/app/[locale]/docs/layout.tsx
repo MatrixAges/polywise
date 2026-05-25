@@ -393,7 +393,7 @@ const Index = (props: PropsWithChildren) => {
 					top-0
 					left-0
 					box-border
-					z-[100]
+					z-100
 					flex flex-col
 					h-screen
 					doc_sidebar
@@ -428,7 +428,7 @@ const Index = (props: PropsWithChildren) => {
 					top-0
 					left-0
 					box-border
-					z-[1000]
+					z-1000
 					flex
 					items-center justify-between
 					w-full

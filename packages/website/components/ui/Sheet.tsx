@@ -46,7 +46,7 @@ const Index = (props: IProps) => {
 
 	const content = (
 		<>
-			<Dialog.Backdrop className={$.cx(styles.backdrop, 'fixed inset-0 z-[1100]')} />
+			<Dialog.Backdrop className={$.cx(styles.backdrop, 'fixed inset-0 z-1100')} />
 			<Dialog.Popup
 				className={$.cx(
 					styles.popup,
@@ -55,7 +55,7 @@ const Index = (props: IProps) => {
 					`
 					fixed
 					box-border
-					overflow-hidden z-[1101]
+					overflow-hidden z-1101
 					shadow-[0_24px_72px_rgba(0,0,0,0.24)]
 				`
 				)}
@@ -67,7 +67,7 @@ const Index = (props: IProps) => {
 						className='
 							absolute
 							top-3 right-3
-							z-[1]
+							z-1
 							flex
 							items-center justify-center
 							w-8 h-8

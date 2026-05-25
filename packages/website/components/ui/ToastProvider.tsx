@@ -41,7 +41,7 @@ const Inner = ({ children }: PropsWithChildren) => {
 					className='
 						fixed
 						right-4 bottom-4
-						z-[1200]
+						z-1200
 						flex flex-col
 						w-[min(360px,calc(100vw-32px))]
 						gap-3

@@ -28,7 +28,7 @@ const Index = () => {
 	})
 
 	return !cookie_ok ? (
-		<div className={$.cx('fixed z-[100] flex justify-center', styles._local)}>
+		<div className={$.cx('fixed z-100 flex justify-center', styles._local)}>
 			<div className='cookie_wrap flex items-center'>
 				<div className='icon_wrap flex items-center justify-center'>
 					<Cookie weight='duotone' size={24}></Cookie>

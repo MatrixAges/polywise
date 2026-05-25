@@ -75,7 +75,7 @@ const Index = () => {
 					top-0
 					left-0
 					box-border
-					z-[1000]
+					z-1000
 					flex-col
 					w-screen
 				`,
@@ -137,7 +137,7 @@ const Index = () => {
 					top-0
 					left-0
 					box-border
-					z-[1000]
+					z-1000
 					items-center justify-between
 					w-screen
 				`,

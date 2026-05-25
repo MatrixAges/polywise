@@ -52,8 +52,8 @@ const Index = () => {
 				<Select.Positioner align='end' side='bottom' sideOffset={8}>
 					<Select.Popup
 						className='
-							z-[1200]
-							min-w-[120px]
+							z-1200
+							min-w-30
 							p-1
 							rounded-xl
 							bg-[var(--color_bg)]
