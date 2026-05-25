@@ -74,6 +74,9 @@ const Index = () => {
 					</Link>
 				</div>
 			</div>
+			{locale === 'zh' && (
+				<span className='mt-24 flex w-full justify-center'>开发者微信（无事勿扰 🤝）：Mrhehero</span>
+			)}
 		</div>
 	)
 }
