@@ -1,25 +1,25 @@
-import { CalendarCheck, CheckCircle, MarkdownLogo, Timer } from '@phosphor-icons/react'
+import { CalendarCheckIcon, CheckCircleIcon, MarkdownLogoIcon, TimerIcon } from '@phosphor-icons/react'
 
 import type { ReactNode } from 'react'
 
 export const modules_map = {
 	0: {
-		Icon: <CheckCircle></CheckCircle>,
+		Icon: <CheckCircleIcon></CheckCircleIcon>,
 		key: 'todo',
 		origin: '/blog/know_your_self?title=From%20Notes%20to%20Memory'
 	},
 	1: {
-		Icon: <MarkdownLogo></MarkdownLogo>,
+		Icon: <MarkdownLogoIcon></MarkdownLogoIcon>,
 		key: 'note',
 		origin: '/blog/finding_your_self?title=Designing%20Local-First%20Workflows'
 	},
 	2: {
-		Icon: <Timer></Timer>,
+		Icon: <TimerIcon></TimerIcon>,
 		key: 'pomo',
 		origin: '/blog/beyond_your_self?title=Agents%20Need%20Better%20Context'
 	},
 	3: {
-		Icon: <CalendarCheck></CalendarCheck>,
+		Icon: <CalendarCheckIcon></CalendarCheckIcon>,
 		key: 'schedule',
 		origin: '/blog/facing_change_with_plan?title=Planning%20for%20an%20Evolving%20Knowledge%20Base'
 	}

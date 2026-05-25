@@ -1,26 +1,26 @@
-import { CalendarCheck, CheckCircle, MarkdownLogo, SquaresFour, Timer } from '@phosphor-icons/react'
+import { CalendarCheckIcon, CheckCircleIcon, MarkdownLogoIcon, SquaresFourIcon, TimerIcon } from '@phosphor-icons/react'
 
 export default [
 	{
 		name: 'todo',
-		Icon: CheckCircle,
+		Icon: CheckCircleIcon,
 		extra_path: '/doc'
 	},
 	{
 		name: 'note',
-		Icon: MarkdownLogo
+		Icon: MarkdownLogoIcon
 	},
 	{
 		name: 'pomo',
-		Icon: Timer
+		Icon: TimerIcon
 	},
 	{
 		name: 'schedule',
-		Icon: CalendarCheck
+		Icon: CalendarCheckIcon
 	},
 	{
 		name: 'features',
-		Icon: SquaresFour
+		Icon: SquaresFourIcon
 	}
 ]
 

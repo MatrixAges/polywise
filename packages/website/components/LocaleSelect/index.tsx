@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react'
 import { Select } from '@base-ui/react/select'
-import { CaretDown, Check } from '@phosphor-icons/react'
+import { CaretDownIcon, CheckIcon } from '@phosphor-icons/react'
 import { locales } from '@website/app.config'
 import useLocale from '@website/hooks/useLocale'
 import { $ } from '@website/utils'
@@ -45,7 +45,7 @@ const Index = () => {
 			>
 				<Select.Value />
 				<Select.Icon className='text-(--color_text_light)'>
-					<CaretDown size={12} />
+					<CaretDownIcon size={12} />
 				</Select.Icon>
 			</Select.Trigger>
 			<Select.Portal>
@@ -82,7 +82,7 @@ const Index = () => {
 								>
 									<Select.ItemText>{option.label}</Select.ItemText>
 									<Select.ItemIndicator className='text-(--color_text)'>
-										<Check size={14} weight='bold' />
+										<CheckIcon size={14} weight='bold' />
 									</Select.ItemIndicator>
 								</Select.Item>
 							))}

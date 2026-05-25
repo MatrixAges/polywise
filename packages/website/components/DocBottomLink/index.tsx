@@ -1,4 +1,4 @@
-import { CaretLeft, CaretRight } from '@phosphor-icons/react'
+import { CaretLeftIcon, CaretRightIcon } from '@phosphor-icons/react'
 import { Link } from '@website/i18n/navigation'
 import { $ } from '@website/utils'
 import { useTranslations } from 'next-intl'
@@ -31,7 +31,7 @@ const Index = (props: IProps) => {
 						href={`/docs/${prev.key}`}
 					>
 						<div className='link_item_top flex items-center'>
-							<CaretLeft weight='bold'></CaretLeft>
+							<CaretLeftIcon weight='bold'></CaretLeftIcon>
 							<span className='link_item_direction'>{t('BottomLink.prev')}</span>
 						</div>
 						<span className='link_item_title'>{prev.label}</span>
@@ -48,7 +48,7 @@ const Index = (props: IProps) => {
 					>
 						<div className='link_item_top flex items-center'>
 							<span className='link_item_direction'>{t('BottomLink.next')}</span>
-							<CaretRight weight='bold'></CaretRight>
+							<CaretRightIcon weight='bold'></CaretRightIcon>
 						</div>
 						<span className='link_item_title'>{next.label}</span>
 					</Link>

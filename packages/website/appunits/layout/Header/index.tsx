@@ -1,7 +1,7 @@
 'use client'
 
 import { Fragment } from 'react'
-import { GithubLogoIcon, List } from '@phosphor-icons/react'
+import { GithubLogoIcon, ListIcon } from '@phosphor-icons/react'
 import { medias } from '@website/appdata/app'
 import LogoWithBg from '@website/components/LogoWithBg'
 import Sheet from '@website/components/ui/Sheet'
@@ -168,7 +168,7 @@ const Index = () => {
 					type='button'
 					onClick={toggle}
 				>
-					<List size={30}></List>
+					<ListIcon size={30}></ListIcon>
 				</button>
 			</div>
 			<Sheet

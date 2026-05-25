@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { CaretLeft, CaretRight } from '@phosphor-icons/react'
+import { CaretLeftIcon, CaretRightIcon } from '@phosphor-icons/react'
 import { modules_map } from '@website/appdata/app'
 import { images_map } from '@website/appdata/modules'
 import { useDeepCompareEffect, useMemoizedFn } from '@website/hooks/ahooks'
@@ -67,7 +67,7 @@ const Index = () => {
 								'
 								onClick={prev}
 							>
-								<CaretLeft></CaretLeft>
+								<CaretLeftIcon></CaretLeftIcon>
 							</button>
 							<button
 								className='
@@ -78,7 +78,7 @@ const Index = () => {
 								// @ts-ignore
 								onClick={next}
 							>
-								<CaretRight></CaretRight>
+								<CaretRightIcon></CaretRightIcon>
 							</button>
 						</div>
 					</div>

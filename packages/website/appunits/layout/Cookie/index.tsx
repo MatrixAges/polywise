@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Cookie } from '@phosphor-icons/react'
+import { CookieIcon } from '@phosphor-icons/react'
 import { useMemoizedFn } from '@website/hooks/ahooks'
 import { $ } from '@website/utils'
 import { is_server } from '@website/utils/const'
@@ -31,7 +31,7 @@ const Index = () => {
 		<div className={$.cx('fixed z-100 flex justify-center', styles._local)}>
 			<div className='cookie_wrap flex items-center'>
 				<div className='icon_wrap flex items-center justify-center'>
-					<Cookie weight='duotone' size={24}></Cookie>
+					<CookieIcon weight='duotone' size={24}></CookieIcon>
 				</div>
 				<div className='desc'>{t('Cookie.desc')}</div>
 				<button

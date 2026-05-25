@@ -2,7 +2,7 @@
 
 import { createContext, useContext } from 'react'
 import { Toast } from '@base-ui/react/toast'
-import { CheckCircle, Info, WarningCircle, X } from '@phosphor-icons/react'
+import { CheckCircleIcon, InfoIcon, WarningCircleIcon, XIcon } from '@phosphor-icons/react'
 import { $ } from '@website/utils'
 
 import type { PropsWithChildren } from 'react'
@@ -18,9 +18,9 @@ interface ToastApi {
 const ToastContext = createContext<ToastApi | null>(null)
 
 const icon_map = {
-	success: CheckCircle,
-	info: Info,
-	warning: WarningCircle
+	success: CheckCircleIcon,
+	info: InfoIcon,
+	warning: WarningCircleIcon
 } as const
 
 const Inner = ({ children }: PropsWithChildren) => {
@@ -97,7 +97,7 @@ const Inner = ({ children }: PropsWithChildren) => {
 										hover:bg-(--color_bg_1) hover:text-(--color_text)
 									'
 									>
-										<X size={14} />
+										<XIcon size={14} />
 									</Toast.Close>
 								</div>
 							</Toast.Root>

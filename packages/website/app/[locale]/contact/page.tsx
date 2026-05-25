@@ -1,6 +1,6 @@
 'use client'
 
-import { ChatDots, DiscordLogoIcon, Files, Users } from '@phosphor-icons/react'
+import { ChatDotsIcon, DiscordLogoIcon, FilesIcon, UsersIcon } from '@phosphor-icons/react'
 import { mails, medias } from '@website/appdata/app'
 import useLocale from '@website/hooks/useLocale'
 import { Link } from '@website/i18n/navigation'
@@ -28,7 +28,7 @@ const Index = () => {
 					'
 				>
 					<div className='flex items-center'>
-						<ChatDots weight='fill'></ChatDots>
+						<ChatDotsIcon weight='fill'></ChatDotsIcon>
 						<h2>{t('supports.user.title')}</h2>
 					</div>
 					<span className='desc'>{t('supports.user.desc')}</span>
@@ -43,7 +43,7 @@ const Index = () => {
 					'
 				>
 					<div className='flex items-center'>
-						<Users weight='fill'></Users>
+						<UsersIcon weight='fill'></UsersIcon>
 						<h2>{t('supports.team.title')}</h2>
 					</div>
 					<span className='desc'>{t('supports.team.desc')}</span>
@@ -65,7 +65,7 @@ const Index = () => {
 				</div>
 				<div className='contact_item flex flex-col'>
 					<div className='flex items-center'>
-						<Files weight='fill'></Files>
+						<FilesIcon weight='fill'></FilesIcon>
 						<h2>{t('references.docs.title')}</h2>
 					</div>
 					<span className='desc'>{t('references.docs.desc')}</span>

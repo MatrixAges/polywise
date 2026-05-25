@@ -1,5 +1,12 @@
 import { Fragment, useEffect, useRef, useState } from 'react'
-import { ArrowBendDownLeft, ArrowDown, ArrowUp, MagnifyingGlass, Trash, X } from '@phosphor-icons/react'
+import {
+	ArrowBendDownLeftIcon,
+	ArrowDownIcon,
+	ArrowUpIcon,
+	MagnifyingGlassIcon,
+	TrashIcon,
+	XIcon
+} from '@phosphor-icons/react'
 import Loading from '@website/components/Loading'
 import LoadingCircle from '@website/components/LoadingCircle'
 import SimpleEmpty from '@website/components/SimpleEmpty'
@@ -325,7 +332,7 @@ const Index = (props: IProps) => {
 						input_wrap
 					'
 				>
-					<MagnifyingGlass
+					<MagnifyingGlassIcon
 						className={$.cx(
 							`
 							absolute
@@ -335,7 +342,7 @@ const Index = (props: IProps) => {
 							focusing && 'focusing'
 						)}
 						size={18}
-					></MagnifyingGlass>
+					></MagnifyingGlassIcon>
 					<input
 						type='text'
 						className='input_search box-border w-full'
@@ -355,7 +362,7 @@ const Index = (props: IProps) => {
 							'
 							onClick={clear}
 						>
-							<X size={15}></X>
+							<XIcon size={15}></XIcon>
 						</div>
 					)}
 				</div>
@@ -416,7 +423,7 @@ const Index = (props: IProps) => {
 											'
 											onClick={clearHistory}
 										>
-											<Trash size={14}></Trash>
+											<TrashIcon size={14}></TrashIcon>
 										</div>
 									</div>
 									<div className='flex flex-wrap' onClick={onSearchItem}>
@@ -459,7 +466,7 @@ const Index = (props: IProps) => {
 									icon_key_wrap
 								'
 							>
-								<ArrowUp></ArrowUp>
+								<ArrowUpIcon></ArrowUpIcon>
 							</div>
 							<div
 								className='
@@ -469,7 +476,7 @@ const Index = (props: IProps) => {
 									icon_key_wrap
 								'
 							>
-								<ArrowDown></ArrowDown>
+								<ArrowDownIcon></ArrowDownIcon>
 							</div>
 							<span className='desc'>{t('search.to_navigate')}</span>
 						</div>
@@ -482,7 +489,7 @@ const Index = (props: IProps) => {
 									icon_key_wrap
 								'
 							>
-								<ArrowBendDownLeft></ArrowBendDownLeft>
+								<ArrowBendDownLeftIcon></ArrowBendDownLeftIcon>
 							</div>
 							<span className='desc'>{t('search.to_select')}</span>
 						</div>

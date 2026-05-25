@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef, useState } from 'react'
-import { Check, Copy } from '@phosphor-icons/react'
+import { CheckIcon, CopyIcon } from '@phosphor-icons/react'
 import { useMemoizedFn } from '@website/hooks/ahooks'
 import { $ } from '@website/utils'
 import { highlight } from '@website/utils/shiki'
@@ -57,7 +57,7 @@ const Index = (props: IProps) => {
 				'
 				onClick={copy}
 			>
-				{copyied ? <Check></Check> : <Copy></Copy>}
+				{copyied ? <CheckIcon></CheckIcon> : <CopyIcon></CopyIcon>}
 			</button>
 			<div className='flex w-full' dangerouslySetInnerHTML={{ __html: html }}></div>
 		</div>

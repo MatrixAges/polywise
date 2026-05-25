@@ -1,7 +1,7 @@
 'use client'
 
 import { Dialog } from '@base-ui/react/dialog'
-import { X } from '@phosphor-icons/react'
+import { XIcon } from '@phosphor-icons/react'
 import { $ } from '@website/utils'
 
 import styles from './Sheet.module.css'
@@ -77,7 +77,7 @@ const Index = (props: IProps) => {
 							hover:bg-(--color_bg_1) hover:text-(--color_text)
 						'
 					>
-						{closeIcon ?? <X size={16} />}
+						{closeIcon ?? <XIcon size={16} />}
 					</Dialog.Close>
 				)}
 				<div className={$.cx('h-full w-full', className)}>{children}</div>

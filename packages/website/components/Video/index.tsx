@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { Play } from '@phosphor-icons/react'
+import { PlayIcon } from '@phosphor-icons/react'
 import { useInViewport, useMemoizedFn } from '@website/hooks/ahooks'
 import { $ } from '@website/utils'
 
@@ -77,7 +77,7 @@ const Index = (props: IProps) => {
 							btn_play clickable
 						'
 					>
-						<Play size={30} weight='fill'></Play>
+						<PlayIcon size={30} weight='fill'></PlayIcon>
 					</div>
 				</div>
 			)}

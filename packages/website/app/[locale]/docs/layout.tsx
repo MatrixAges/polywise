@@ -1,7 +1,15 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { BoxArrowDown, CaretRight, ChatDots, MagnifyingGlass, Moon, SunDim, Tree } from '@phosphor-icons/react'
+import {
+	BoxArrowDownIcon,
+	CaretRightIcon,
+	ChatDotsIcon,
+	MagnifyingGlassIcon,
+	MoonIcon,
+	SunDimIcon,
+	TreeIcon
+} from '@phosphor-icons/react'
 import { useMenu } from '@website/appdata/docs'
 import { Search } from '@website/appunits/docs'
 import DocBottomLink from '@website/components/DocBottomLink'
@@ -218,7 +226,7 @@ const Index = (props: PropsWithChildren) => {
 							type='button'
 							onClick={setDark}
 						>
-							<Moon weight='fill'></Moon>
+							<MoonIcon weight='fill'></MoonIcon>
 						</button>
 						<button
 							className={$.cx(
@@ -232,7 +240,7 @@ const Index = (props: PropsWithChildren) => {
 							type='button'
 							onClick={setLight}
 						>
-							<SunDim weight='fill'></SunDim>
+							<SunDimIcon weight='fill'></SunDimIcon>
 						</button>
 					</div>
 				</div>
@@ -247,7 +255,7 @@ const Index = (props: PropsWithChildren) => {
 					'
 					onClick={openSearch}
 				>
-					<MagnifyingGlass className='icon_search absolute' weight='bold'></MagnifyingGlass>
+					<MagnifyingGlassIcon className='icon_search absolute' weight='bold'></MagnifyingGlassIcon>
 					<button className='btn_search box-border w-full cursor-pointer' type='button'>
 						{t('header.btn_search')}
 					</button>
@@ -281,7 +289,7 @@ const Index = (props: PropsWithChildren) => {
 									onClick={() => toggleGroup(group.key)}
 								>
 									<span>{group.label}</span>
-									<CaretRight
+									<CaretRightIcon
 										className={$.cx(
 											'icon transition-transform duration-200',
 											open && 'rotate-90'
@@ -324,7 +332,7 @@ const Index = (props: PropsWithChildren) => {
 				</div>
 				{openkeys.length < 2 && (
 					<div className='shadow_tree flex items-center justify-center'>
-						<Tree weight='thin'></Tree>
+						<TreeIcon weight='thin'></TreeIcon>
 					</div>
 				)}
 			</div>
@@ -355,7 +363,7 @@ const Index = (props: PropsWithChildren) => {
 					'
 					href='/download'
 				>
-					<BoxArrowDown size={15} weight='fill'></BoxArrowDown>
+					<BoxArrowDownIcon size={15} weight='fill'></BoxArrowDownIcon>
 					<span className='ml-2'>{t('footer.download')}</span>
 				</Link>
 				<Link
@@ -368,7 +376,7 @@ const Index = (props: PropsWithChildren) => {
 					'
 					href='/contact'
 				>
-					<ChatDots size={15} weight='fill'></ChatDots>
+					<ChatDotsIcon size={15} weight='fill'></ChatDotsIcon>
 					<span className='ml-2'>{t('footer.contact')}</span>
 				</Link>
 			</div>

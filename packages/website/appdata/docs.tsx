@@ -1,24 +1,24 @@
 import { useMemo } from 'react'
 import {
-	AlignCenterVertical,
-	AlignTopSimple,
-	Bandaids,
-	BoxArrowDown,
-	CalendarCheck,
-	CheckCircle,
-	Compass,
-	GearSix,
-	Graph,
-	Kanban,
-	MarkdownLogo,
-	Notebook,
-	Repeat,
-	Sliders,
-	Student,
-	Table,
-	Timer,
-	TreeStructure,
-	Wall
+	AlignCenterVerticalIcon,
+	AlignTopSimpleIcon,
+	BandaidsIcon,
+	BoxArrowDownIcon,
+	CalendarCheckIcon,
+	CheckCircleIcon,
+	CompassIcon,
+	GearSixIcon,
+	GraphIcon,
+	KanbanIcon,
+	MarkdownLogoIcon,
+	NotebookIcon,
+	RepeatIcon,
+	SlidersIcon,
+	StudentIcon,
+	TableIcon,
+	TimerIcon,
+	TreeStructureIcon,
+	WallIcon
 } from '@phosphor-icons/react'
 import { useMemoizedFn } from '@website/hooks/ahooks'
 import useLocale from '@website/hooks/useLocale'
@@ -28,54 +28,54 @@ import type { DocsMenuGroup } from '@website/types'
 export const popular = [
 	{
 		link: 'getting_started/start_guide',
-		icon: <Student weight='fill'></Student>
+		icon: <StudentIcon weight='fill'></StudentIcon>
 	},
 	{
 		link: 'todo/linked_todo',
-		icon: <Graph weight='fill'></Graph>
+		icon: <GraphIcon weight='fill'></GraphIcon>
 	},
 	{
 		link: 'todo/cycle_todo',
-		icon: <Repeat weight='fill'></Repeat>
+		icon: <RepeatIcon weight='fill'></RepeatIcon>
 	},
 	{
 		link: 'note/blocks',
-		icon: <Wall weight='fill'></Wall>
+		icon: <WallIcon weight='fill'></WallIcon>
 	},
 	{
 		link: 'schedule/schedule',
-		icon: <CalendarCheck weight='fill'></CalendarCheck>
+		icon: <CalendarCheckIcon weight='fill'></CalendarCheckIcon>
 	},
 	{
 		link: 'global_settings/settings',
-		icon: <Sliders weight='fill'></Sliders>
+		icon: <SlidersIcon weight='fill'></SlidersIcon>
 	}
 ]
 
 export const basics = [
 	{
 		link: 'todo/auto_archive',
-		icon: <BoxArrowDown weight='fill'></BoxArrowDown>
+		icon: <BoxArrowDownIcon weight='fill'></BoxArrowDownIcon>
 	},
 	{
 		link: 'todo/settings',
-		icon: <GearSix weight='fill'></GearSix>
+		icon: <GearSixIcon weight='fill'></GearSixIcon>
 	},
 	{
 		link: 'note/note',
-		icon: <MarkdownLogo weight='fill'></MarkdownLogo>
+		icon: <MarkdownLogoIcon weight='fill'></MarkdownLogoIcon>
 	},
 	{
 		link: 'note/table',
-		icon: <Table weight='fill'></Table>
+		icon: <TableIcon weight='fill'></TableIcon>
 	},
 	{
 		link: 'pomo/flow_mode',
-		icon: <AlignTopSimple weight='fill'></AlignTopSimple>
+		icon: <AlignTopSimpleIcon weight='fill'></AlignTopSimpleIcon>
 	},
 	{
 		link: 'schedule/timeline_view',
-		icon: <AlignCenterVertical weight='fill'></AlignCenterVertical>
+		icon: <AlignCenterVerticalIcon weight='fill'></AlignCenterVerticalIcon>
 	}
 ]
 
@@ -95,13 +95,13 @@ export const useMenu = () => {
 							key: 'getting_started/start_guide',
 							className: 'getting_started-start_guide',
 							label: l('Start guide', '使用指南'),
-							icon: <Student weight='fill'></Student>
+							icon: <StudentIcon weight='fill'></StudentIcon>
 						},
 						{
 							key: 'getting_started/concepts',
 							className: 'getting_started-concepts',
 							label: l('Concepts', '概念'),
-							icon: <Bandaids weight='fill'></Bandaids>
+							icon: <BandaidsIcon weight='fill'></BandaidsIcon>
 						}
 					]
 				},
@@ -113,55 +113,55 @@ export const useMenu = () => {
 							key: 'todo/todo',
 							className: 'todo-todo',
 							label: l('Todo', '待办'),
-							icon: <CheckCircle weight='fill'></CheckCircle>
+							icon: <CheckCircleIcon weight='fill'></CheckCircleIcon>
 						},
 						{
 							key: 'todo/linked_todo',
 							className: 'todo-linked_todo',
 							label: l('Linked Todo', '互斥任务'),
-							icon: <Graph weight='fill'></Graph>
+							icon: <GraphIcon weight='fill'></GraphIcon>
 						},
 						{
 							key: 'todo/cycle_todo',
 							className: 'todo-cycle_todo',
 							label: l('Cycle Todo', '循环任务'),
-							icon: <Repeat weight='fill'></Repeat>
+							icon: <RepeatIcon weight='fill'></RepeatIcon>
 						},
 						{
 							key: 'todo/to_schedule',
 							className: 'todo-to_schedule',
 							label: l('To Schedule', '推送至日程'),
-							icon: <CalendarCheck weight='fill'></CalendarCheck>
+							icon: <CalendarCheckIcon weight='fill'></CalendarCheckIcon>
 						},
 						{
 							key: 'todo/auto_archive',
 							className: 'todo-auto_archive',
 							label: l('Auto Archive', '自动归档'),
-							icon: <BoxArrowDown weight='fill'></BoxArrowDown>
+							icon: <BoxArrowDownIcon weight='fill'></BoxArrowDownIcon>
 						},
 						{
 							key: 'todo/kanban_view',
 							className: 'todo-kanban_view',
 							label: l('Kanban view', '看板视图'),
-							icon: <Kanban weight='fill'></Kanban>
+							icon: <KanbanIcon weight='fill'></KanbanIcon>
 						},
 						{
 							key: 'todo/table_view',
 							className: 'todo-table_view',
 							label: l('Table view', '表格视图'),
-							icon: <Table weight='fill'></Table>
+							icon: <TableIcon weight='fill'></TableIcon>
 						},
 						{
 							key: 'todo/mindmap_view',
 							className: 'todo-mindmap_view',
 							label: l('Mindmap view', '思维导图视图'),
-							icon: <TreeStructure weight='fill'></TreeStructure>
+							icon: <TreeStructureIcon weight='fill'></TreeStructureIcon>
 						},
 						{
 							key: 'todo/settings',
 							className: 'todo-settings',
 							label: l('Settings', '设置项'),
-							icon: <GearSix weight='fill'></GearSix>
+							icon: <GearSixIcon weight='fill'></GearSixIcon>
 						}
 					]
 				},
@@ -173,25 +173,25 @@ export const useMenu = () => {
 							key: 'note/note',
 							className: 'note-note',
 							label: l('Note', '笔记'),
-							icon: <MarkdownLogo weight='fill'></MarkdownLogo>
+							icon: <MarkdownLogoIcon weight='fill'></MarkdownLogoIcon>
 						},
 						{
 							key: 'note/blocks',
 							className: 'note-blocks',
 							label: l('Blocks', '内容块'),
-							icon: <Wall weight='fill'></Wall>
+							icon: <WallIcon weight='fill'></WallIcon>
 						},
 						{
 							key: 'note/table',
 							className: 'note-table',
 							label: l('Table', '表格'),
-							icon: <Table weight='fill'></Table>
+							icon: <TableIcon weight='fill'></TableIcon>
 						},
 						{
 							key: 'note/settings',
 							className: 'note-settings',
 							label: l('Settings', '设置项'),
-							icon: <GearSix weight='fill'></GearSix>
+							icon: <GearSixIcon weight='fill'></GearSixIcon>
 						}
 					]
 				},
@@ -203,13 +203,13 @@ export const useMenu = () => {
 							key: 'pomo/pomo',
 							className: 'pomo-pomo',
 							label: l('Pomo', '番茄钟'),
-							icon: <Timer weight='fill'></Timer>
+							icon: <TimerIcon weight='fill'></TimerIcon>
 						},
 						{
 							key: 'pomo/flow_mode',
 							className: 'pomo-flow_mode',
 							label: l('Flow Mode', '心流模式'),
-							icon: <AlignTopSimple weight='fill'></AlignTopSimple>
+							icon: <AlignTopSimpleIcon weight='fill'></AlignTopSimpleIcon>
 						}
 					]
 				},
@@ -221,31 +221,31 @@ export const useMenu = () => {
 							key: 'schedule/schedule',
 							className: 'schedule-schedule',
 							label: l('Schedule', '日程'),
-							icon: <CalendarCheck weight='fill'></CalendarCheck>
+							icon: <CalendarCheckIcon weight='fill'></CalendarCheckIcon>
 						},
 						{
 							key: 'schedule/month_view',
 							className: 'schedule-month_view',
 							label: l('Month View', '月视图'),
-							icon: <AlignCenterVertical weight='fill'></AlignCenterVertical>
+							icon: <AlignCenterVerticalIcon weight='fill'></AlignCenterVerticalIcon>
 						},
 						{
 							key: 'schedule/timeline_view',
 							className: 'schedule-timeline_view',
 							label: l('Timeline View', '时间线视图'),
-							icon: <AlignCenterVertical weight='fill'></AlignCenterVertical>
+							icon: <AlignCenterVerticalIcon weight='fill'></AlignCenterVerticalIcon>
 						},
 						{
 							key: 'schedule/fixed_view',
 							className: 'schedule-fixed_view',
 							label: l('Fixed View', '固定视图'),
-							icon: <Compass weight='fill'></Compass>
+							icon: <CompassIcon weight='fill'></CompassIcon>
 						},
 						{
 							key: 'schedule/settings',
 							className: 'schedule-settings',
 							label: l('Settings', '设置项'),
-							icon: <GearSix weight='fill'></GearSix>
+							icon: <GearSixIcon weight='fill'></GearSixIcon>
 						}
 					]
 				},
@@ -257,13 +257,13 @@ export const useMenu = () => {
 							key: 'global_settings/settings',
 							className: 'global_settings-settings',
 							label: l('Settings', '设置项'),
-							icon: <Sliders weight='fill'></Sliders>
+							icon: <SlidersIcon weight='fill'></SlidersIcon>
 						},
 						{
 							key: 'gtd',
 							className: 'gtd',
 							label: l('Way of GTD', 'GTD 之道'),
-							icon: <Notebook weight='fill'></Notebook>
+							icon: <NotebookIcon weight='fill'></NotebookIcon>
 						}
 					]
 				}

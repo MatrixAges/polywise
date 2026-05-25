@@ -1,7 +1,7 @@
 'use client'
 
 import { useRef, useState } from 'react'
-import { GpsFix } from '@phosphor-icons/react'
+import { GpsFixIcon } from '@phosphor-icons/react'
 import MDXContent from '@website/components/MDXContent'
 import Modal from '@website/components/Modal'
 import { useMemoizedFn } from '@website/hooks/ahooks'
@@ -91,7 +91,7 @@ const Index = (props: IProps) => {
 										'
 										onClick={show}
 									>
-										<GpsFix></GpsFix>
+										<GpsFixIcon></GpsFixIcon>
 									</button>
 									<Modal
 										className={styles.toc_modal}

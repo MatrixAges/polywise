@@ -1,6 +1,6 @@
 'use client'
 
-import { ArrowCircleDown, ChatTeardropText } from '@phosphor-icons/react'
+import { ArrowCircleDownIcon, ChatTeardropTextIcon } from '@phosphor-icons/react'
 import { Link } from '@website/i18n/navigation'
 import { $ } from '@website/utils'
 
@@ -17,7 +17,7 @@ const Index = () => {
 				'
 				href='/docs/getting_started/start_guide'
 			>
-				<ChatTeardropText className='logo_app_store' weight='fill' size={30}></ChatTeardropText>
+				<ChatTeardropTextIcon className='logo_app_store' weight='fill' size={30}></ChatTeardropTextIcon>
 				<div className='flex flex-col items-start'>
 					<span className='line_1'>Getting started</span>
 					<span className='line_2'>Document</span>
@@ -31,7 +31,7 @@ const Index = () => {
 				'
 				href='/download'
 			>
-				<ArrowCircleDown className='logo_app_store' weight='fill' size={30}></ArrowCircleDown>
+				<ArrowCircleDownIcon className='logo_app_store' weight='fill' size={30}></ArrowCircleDownIcon>
 				<div className='flex flex-col items-start'>
 					<span className='line_1'>Download release</span>
 					<span className='line_2'>Installs</span>

@@ -1,7 +1,7 @@
 'use client'
 
 import { ReactNode, useMemo, useState } from 'react'
-import { Link as LinkIcon } from '@phosphor-icons/react'
+import { LinkIcon } from '@phosphor-icons/react'
 import useLocale from '@website/hooks/useLocale'
 import { Link } from '@website/i18n/navigation'
 import { $ } from '@website/utils'

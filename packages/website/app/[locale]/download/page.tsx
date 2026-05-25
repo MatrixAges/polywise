@@ -1,6 +1,6 @@
 'use client'
 
-import { GithubLogo } from '@phosphor-icons/react'
+import { GithubLogoIcon } from '@phosphor-icons/react'
 import { github_release_link, medias } from '@website/appdata/app'
 import Logo from '@website/components/Logo'
 import { $ } from '@website/utils'
@@ -44,7 +44,7 @@ const Index = () => {
 			<div className='download_items flex flex-col'>
 				<div className='download_item flex items-center justify-between'>
 					<div className='flex items-center'>
-						<GithubLogo weight='fill' size={16} />
+						<GithubLogoIcon weight='fill' size={16} />
 						<span className='name'>{t('github_release')}</span>
 					</div>
 					<a href={github_release_link} target='_blank'>
@@ -53,7 +53,7 @@ const Index = () => {
 				</div>
 				<div className='download_item flex items-center justify-between'>
 					<div className='flex items-center'>
-						<GithubLogo weight='fill' size={16} />
+						<GithubLogoIcon weight='fill' size={16} />
 						<span className='name'>Source repository</span>
 					</div>
 					<a href={medias.github} target='_blank'>

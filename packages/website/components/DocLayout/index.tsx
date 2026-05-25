@@ -1,7 +1,7 @@
 'use client'
 
 import { Fragment } from 'react'
-import { ListBullets } from '@phosphor-icons/react'
+import { ListBulletsIcon } from '@phosphor-icons/react'
 import Sheet from '@website/components/ui/Sheet'
 import { useMemoizedFn, useToggle } from '@website/hooks/ahooks'
 import { Link, usePathname } from '@website/i18n/navigation'
@@ -81,7 +81,7 @@ const Index = (props: IProps) => {
 				type='button'
 				onClick={toggle}
 			>
-				<ListBullets size={15}></ListBullets>
+				<ListBulletsIcon size={15}></ListBulletsIcon>
 			</button>
 			<Sheet
 				rootClassName={styles.drawer}

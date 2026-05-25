@@ -1,7 +1,7 @@
 'use client'
 
 import { Fragment, useEffect, useRef, useState } from 'react'
-import { X } from '@phosphor-icons/react'
+import { XIcon } from '@phosphor-icons/react'
 import { useClickAway } from '@website/hooks/ahooks'
 import { $ } from '@website/utils'
 import { is_server } from '@website/utils/const'
@@ -164,7 +164,7 @@ const Index = (props: IProps) => {
 											'
 											onClick={onCancel}
 										>
-											<X size={14}></X>
+											<XIcon size={14}></XIcon>
 										</span>
 									)}
 								</div>
