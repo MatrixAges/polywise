@@ -22,11 +22,10 @@ const MobileMenu = ({ onClose }: { onClose: () => void }) => {
 		<div
 			className='
 				flex flex-col
-				px-6 pt-16
-				pb-6
+				p-6 pt-4
 			'
 		>
-			<div className='flex flex-col'>
+			<div className='mb-4 flex flex-col'>
 				{nav_items.map(item => (
 					<Link
 						className='
@@ -48,13 +47,15 @@ const MobileMenu = ({ onClose }: { onClose: () => void }) => {
 					flex
 					items-center justify-center
 					h-10
-					mt-5
+					gap-1.5
+					rounded-full!
 					btn_download btn_light
 				'
 				href={medias.github}
 				target='_blank'
 				onClick={onClose}
 			>
+				<GithubLogoIcon weight='bold'></GithubLogoIcon>
 				{t('title.github')}
 			</Link>
 		</div>

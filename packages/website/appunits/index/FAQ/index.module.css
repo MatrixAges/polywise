@@ -1,17 +1,16 @@
 ._local {
 	:global {
-		.faq_items {
-			gap: 15px;
-		}
-
 		.faq_item {
-			padding: 0 24px;
-			border-radius: var(--radius_large_1);
+			padding: 0 16px;
+
+			&:last-child {
+				border-bottom: none;
+			}
 
 			&[open] {
 				.summary {
 					.icon {
-						rotate: 180deg;
+						rotate: 90deg;
 					}
 				}
 			}
@@ -20,7 +19,7 @@
 				display: flex;
 				align-items: center;
 				justify-content: space-between;
-				padding: 24px 0;
+				padding: 16px 0;
 				cursor: pointer;
 				list-style: none;
 				gap: 18px;
@@ -30,21 +29,21 @@
 				}
 
 				.question {
-					font-family: var(--font_serif);
 					font-size: 1.2em;
 					font-weight: 500;
+					color: rgba(var(--color_text_rgb), 0.8);
 				}
 
 				.icon {
 					flex: none;
 					color: rgba(var(--color_text_rgb), 0.66);
-					font-size: 18px;
+					font-size: 14px;
 					transition: rotate ease 0.18s;
 				}
 			}
 
 			.answer {
-				padding: 0 0 24px;
+				padding: 0 0 16px;
 				margin: 0;
 				color: var(--color_text_sub);
 				font-size: 15px;
@@ -61,7 +60,7 @@
 				padding: 0 18px;
 
 				.summary {
-					padding: 18px 0;
+					padding: 12px 0;
 
 					.question {
 						font-size: 1em;

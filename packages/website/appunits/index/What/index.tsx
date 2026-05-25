@@ -18,7 +18,7 @@ const Index = () => {
 					className='
 						grid grid-cols-2
 						border-l border-t
-						items_wrap
+						items_wrap max-md:grid-cols-1
 					'
 				>
 					{items.map(index => (
@@ -32,7 +32,9 @@ const Index = () => {
 							'
 							key={index}
 						>
-							<span className='title font-semibold'>{t(`What.items.${index}.title`)}</span>
+							<span className='title font-semibold'>
+								{index + 1}. {t(`What.items.${index}.title`)}
+							</span>
 							<span className='desc'>{t(`What.items.${index}.desc`)}</span>
 						</div>
 					))}

@@ -96,6 +96,19 @@ const Index = () => {
 					limited_content_wrap
 				'
 			>
+				<div
+					className='
+						px-4 py-2
+						mb-8
+						rounded-2xl
+						text-sm
+						bg-black/20
+						opacity-80 backdrop-blur-md
+						-mt-9
+					'
+				>
+					npm i polywise -g
+				</div>
 				<div className='title_wrap flex flex-col items-center'>
 					<div className='feature_slot flex justify-center'>
 						{show_type && (
@@ -132,6 +145,7 @@ const Index = () => {
 					<h2 className='desc'>{t('Banner.desc.line_2')}</h2>
 				</div>
 				<LinkButtons></LinkButtons>
+
 				<div className='image_preview_wrap mt-16 w-full max-md:mt-10'>
 					<div className='image_preview relative flex w-full'>
 						<img

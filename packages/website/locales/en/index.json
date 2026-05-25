@@ -63,7 +63,7 @@
 	},
 	"Painpoint": {
 		"title": "Pain Points",
-		"subtitle": "Why agentic work breaks without a real content system",
+		"subtitle": "Context is all your need",
 		"items": {
 			"0": {
 				"title": "Stateless AI",
@@ -104,24 +104,13 @@
 			}
 		}
 	},
-	"Latest": {
-		"all": "View All",
-		"journal": {
-			"title": "Journal",
-			"desc": "Latest developer's activities"
-		},
-		"changelog": {
-			"title": "Changelog",
-			"desc": "Log for the latest version"
-		}
-	},
 	"Callback": {
 		"line_1": "Shape Your Context,",
 		"line_2": "Keep It Yours"
 	},
 	"FAQ": {
 		"title": "FAQ",
-		"subtitle": "Common questions about Polywise",
+		"subtitle": "Questions about Polywise",
 		"items": {
 			"0": {
 				"q": "What is Polywise?",

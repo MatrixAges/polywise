@@ -1,6 +1,6 @@
 'use client'
 
-import { CaretDownIcon } from '@phosphor-icons/react'
+import { CaretRightIcon } from '@phosphor-icons/react'
 import { $ } from '@website/utils'
 import { useTranslations } from 'next-intl'
 
@@ -15,12 +15,20 @@ const Index = () => {
 			<div className={$.cx('flex w-full flex-col', styles._local)}>
 				<h2 className='section_title'>{t('FAQ.title')}</h2>
 				<h3 className='section_desc'>{t('FAQ.subtitle')}</h3>
-				<div className='faq_items flex flex-col'>
+				<div
+					className='
+						flex flex-col
+						rounded-2xl
+						faq_items
+					'
+				>
 					{items.map(index => (
-						<details className='faq_item lightcard' key={index}>
+						<details className='faq_item' key={index}>
 							<summary className='summary'>
-								<span className='question'>{t(`FAQ.items.${index}.q`)}</span>
-								<CaretDownIcon className='icon' weight='bold'></CaretDownIcon>
+								<span className='question'>
+									{index + 1}. {t(`FAQ.items.${index}.q`)}
+								</span>
+								<CaretRightIcon className='icon' weight='bold'></CaretRightIcon>
 							</summary>
 							<p className='answer'>{t(`FAQ.items.${index}.a`)}</p>
 						</details>

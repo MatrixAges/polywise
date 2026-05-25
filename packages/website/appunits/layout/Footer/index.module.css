@@ -87,11 +87,21 @@
 					gap: 0;
 
 					.group_wrap {
-						width: calc(100% / 3);
-						padding-top: 24px;
+						width: 100%;
+						padding-top: 16px;
 						border-top: 1px solid white;
 						border-radius: unset;
 						background: unset;
+						flex-direction: row;
+						padding-left: 0;
+						padding-right: 0;
+						gap: 12px;
+						justify-content: space-between;
+
+						.link_items {
+							flex-direction: row;
+							gap: 12px;
+						}
 					}
 				}
 			}
