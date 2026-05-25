@@ -76,13 +76,6 @@
 				}
 			}
 
-			.tips {
-				margin-top: 18px;
-				margin-bottom: 48px;
-				color: rgba(var(--color_text_rgb), 0.6);
-				font-size: 12px;
-			}
-
 			.image_preview_wrap {
 				min-height: 647.71px;
 
@@ -110,6 +103,9 @@
 				.image_layer {
 					position: absolute;
 					inset: 0;
+					will-change: opacity, transform;
+					transform: translateZ(0);
+					backface-visibility: hidden;
 				}
 			}
 		}
@@ -135,7 +131,16 @@
 
 				.title_wrap {
 					h1 {
-						font-size: 39px;
+						font-size: 30px;
+					}
+
+					.feature_slot {
+						min-height: 48px;
+					}
+
+					.feature {
+						min-height: 42px;
+						margin-bottom: 0;
 					}
 				}
 
@@ -147,10 +152,6 @@
 						display: inline;
 						font-size: 14px;
 					}
-				}
-
-				.tips {
-					margin-bottom: 30px;
 				}
 
 				.image_preview_wrap {

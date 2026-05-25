@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { banner_images } from '@website/appdata/modules'
 import LinkButtons from '@website/components/LinkButtons'
 import useMounted from '@website/hooks/useMounted'
@@ -17,12 +17,44 @@ import type { TargetAndTransition } from 'framer-motion'
 
 const Index = () => {
 	const t = useTranslations('index')
-	const t_global = useTranslations('global')
 	const mounted = useMounted()
 	const [gradient, setGradient] = useState<TargetAndTransition>()
 	const [step, setStep] = useState(0)
 	const [show_type, setShowType] = useState(true)
 	const name = banner_images[step]
+	const requested_images = useRef(new Set<string>([name]))
+	const [loaded_images, setLoadedImages] = useState([name])
+
+	const ensureLoadedImage = (target: string) => {
+		setLoadedImages(prev => (prev.includes(target) ? prev : [...prev, target]))
+	}
+
+	useEffect(() => {
+		if (is_server) return
+
+		ensureLoadedImage(name)
+
+		const next_name = banner_images[(step + 1) % banner_images.length]
+		const next_path = `${base_url_files_website}/banner/${next_name}.png`
+
+		if (requested_images.current.has(next_name)) return
+
+		requested_images.current.add(next_name)
+
+		const image = new Image()
+
+		image.decoding = 'async'
+		image.src = next_path
+
+		if (typeof image.decode === 'function') {
+			image.decode()
+				.then(() => ensureLoadedImage(next_name))
+				.catch(() => ensureLoadedImage(next_name))
+		} else {
+			image.onload = () => ensureLoadedImage(next_name)
+			image.onerror = () => ensureLoadedImage(next_name)
+		}
+	}, [name, step])
 
 	useEffect(() => {
 		setGradient({ background: generateJSXMeshGradient(6).backgroundImage })
@@ -100,7 +132,7 @@ const Index = () => {
 					<h2 className='desc'>{t('Banner.desc.line_2')}</h2>
 				</div>
 				<LinkButtons></LinkButtons>
-				<div className='image_preview_wrap mt-16 w-full'>
+				<div className='image_preview_wrap mt-16 w-full max-md:mt-10'>
 					<div className='image_preview relative flex w-full'>
 						<img
 							className='image image_placeholder box-border'
@@ -108,29 +140,37 @@ const Index = () => {
 							alt=''
 							aria-hidden='true'
 						/>
-						{banner_images.map(item => {
-							const active = item === name
+						{banner_images
+							.filter(item => loaded_images.includes(item))
+							.map(item => {
+								const active = item === name
 
-							return (
-								<motion.img
-									className='image image_layer box-border'
-									src={`${base_url_files_website}/banner/${item}.png`}
-									alt={`image_preview_${item}`}
-									initial={false}
-									animate={
-										active
-											? { opacity: 0.6, scale: 1, visibility: 'visible' }
-											: {
-													opacity: 0,
-													scale: 0.99,
-													transitionEnd: { visibility: 'hidden' }
-												}
-									}
-									transition={{ duration: 0.6, ease: 'easeInOut' }}
-									key={item}
-								/>
-							)
-						})}
+								return (
+									<motion.img
+										className='image image_layer box-border'
+										src={`${base_url_files_website}/banner/${item}.png`}
+										alt={`image_preview_${item}`}
+										initial={false}
+										animate={
+											active
+												? {
+														opacity: 0.6,
+														scale: 1,
+														visibility: 'visible'
+													}
+												: {
+														opacity: 0,
+														scale: 0.99,
+														transitionEnd: {
+															visibility: 'hidden'
+														}
+													}
+										}
+										transition={{ duration: 0.6, ease: 'easeInOut' }}
+										key={item}
+									/>
+								)
+							})}
 					</div>
 				</div>
 			</div>

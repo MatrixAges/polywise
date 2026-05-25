@@ -25,8 +25,6 @@
 	"What": {
 		"title": "What",
 		"subtitle": "What is Polywise?",
-		"headline": "Polywise is a local-first agentic content system.",
-		"lead": "It helps you capture content, shape working context, and run agents against knowledge that stays under your control.",
 		"items": {
 			"0": {
 				"title": "Scoped knowledge",
