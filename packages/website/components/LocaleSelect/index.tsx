@@ -13,13 +13,19 @@ import styles from './index.module.css'
 const Index = () => {
 	const { locale, setLocale } = useLocale()
 	const t_common = useTranslations('common')
+	const select_id = 'footer-locale-select'
 
 	const locale_options = useMemo(() => {
 		return locales.map(item => ({ label: t_common(`lang.${item}`), value: item }))
 	}, [t_common])
 
 	return (
-		<Select.Root value={locale} items={locale_options} onValueChange={value => value && setLocale(value)}>
+		<Select.Root
+			id={select_id}
+			value={locale}
+			items={locale_options}
+			onValueChange={value => value && setLocale(value)}
+		>
 			<Select.Trigger
 				className={$.cx(
 					styles._local,
