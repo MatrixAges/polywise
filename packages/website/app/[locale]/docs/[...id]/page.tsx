@@ -8,8 +8,6 @@ interface IProps {
 	params: Promise<{ id: Array<string> }>
 }
 
-const notFoundImage = '/svgs/404.inline.svg'
-
 const Index = async ({ params }: IProps) => {
 	const id = (await params).id
 	const { err, md, toc } = await getDoc(id.join('/'))
@@ -27,7 +25,7 @@ const Index = async ({ params }: IProps) => {
 				)}
 			>
 				<div className='icon_wrap flex'>
-					<img src={notFoundImage} alt='Not found' />
+					<img src='/svgs/404.svg' alt='Not found' />
 				</div>
 			</div>
 		)

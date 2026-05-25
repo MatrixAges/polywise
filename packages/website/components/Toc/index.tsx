@@ -1,9 +1,10 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import TocIcon from '@website/svgs/toc.svg?react'
 import { $ } from '@website/utils'
 import { useTranslations } from 'next-intl'
+
+import TocIcon from './Icon'
 
 import styles from './index.module.css'
 
