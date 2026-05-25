@@ -120,9 +120,7 @@
 					.bottom_wrap {
 						padding: 24px;
 						border: var(--border);
-						border-top: none;
-						border-bottom-right-radius: var(--radius);
-						border-bottom-left-radius: var(--radius);
+						border-radius: var(--radius);
 						background-color: var(--color_bg_1);
 						transition: background-color ease 0.3s;
 
@@ -152,7 +150,7 @@
 				gap: 16px;
 
 				.basic_item {
-					padding: 16px 24px;
+					padding: 24px;
 					border: var(--border);
 					border-radius: var(--radius);
 					background-color: var(--color_bg_1);
