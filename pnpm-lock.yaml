@@ -1288,9 +1288,6 @@ importers:
       '@cloudflare/vite-plugin':
         specifier: ^1.38.0
         version: 1.38.0(bufferutil@4.1.0)(utf-8-validate@6.0.6)(vite@8.0.14(@types/node@25.9.1)(esbuild@0.27.3)(jiti@2.7.0)(terser@5.47.1)(yaml@2.9.0))(workerd@1.20260521.1)(wrangler@4.94.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))
-      '@svgr/plugin-jsx':
-        specifier: ^8.1.0
-        version: 8.1.0(@svgr/core@8.1.0(typescript@6.0.3))
       '@tailwindcss/postcss':
         specifier: ^4.3.0
         version: 4.3.0
