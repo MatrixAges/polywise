@@ -1,1 +1,12 @@
-<svg id="if_favicon" xmlns="http://www.w3.org/2000/svg" width="390" height="390" viewBox="0 0 390 390"><defs><style>:root{--color_main:red} .cls-2{fill:#fff}</style></defs><rect x="3" y="3" width="384" height="384" rx="72" ry="72" fill="var(--color_main)"/><path class="cls-2" d="M92 91h40v40H92zM92 133h40v40H92zM92 175h40v40H92zM92 217h40v40H92zM92 259h40v40H92z"/><g><path class="cls-2" d="M174 91h40v40h-40zM174 133h40v40h-40zM174 175h40v40h-40zM174 217h40v40h-40zM174 259h40v40h-40z"/><g><path class="cls-2" d="M216 175h40v40h-40zM258 175h40v40h-40z"/></g><g><path class="cls-2" d="M216 91h40v40h-40zM258 91h40v40h-40z"/></g></g></svg>
+<svg id="组_1" data-name="组 1" xmlns="http://www.w3.org/2000/svg" width="390" height="390" viewBox="0 0 390 390">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #fff;
+      }
+    </style>
+  </defs>
+  <rect id="矩形_2" data-name="矩形 2" class="cls-1" width="390" height="390" rx="90" ry="90"/>
+  <path id="矩形_1_拷贝" data-name="矩形 1 拷贝" d="M135,195h60a0,0,0,0,1,0,0V315a0,0,0,0,1,0,0H135a60,60,0,0,1-60-60v0A60,60,0,0,1,135,195Z"/>
+  <path id="矩形_1" data-name="矩形 1" d="M195,75h60a60,60,0,0,1,60,60v0a60,60,0,0,1-60,60H195a0,0,0,0,1,0,0V75A0,0,0,0,1,195,75Z"/>
+</svg>
