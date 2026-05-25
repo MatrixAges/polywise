@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import modules, { images_map } from '@website/appdata/modules'
+import modules, { banner_images } from '@website/appdata/modules'
 import LinkButtons from '@website/components/LinkButtons'
 import useMounted from '@website/hooks/useMounted'
 import { $ } from '@website/utils'
@@ -28,9 +28,7 @@ const Index = () => {
 	useEffect(() => {
 		if (is_server) return
 
-		const paths = Object.entries(images_map).flatMap(([module_name, image_names]) =>
-			image_names.map(image_name => `${base_url_files_website}/preview/${module_name}/${image_name}.png`)
-		)
+		const paths = Object.entries(banner_images).map(item => `${base_url_files_website}/banner/${item}.png`)
 
 		paths.forEach(path => {
 			const image = new Image()
