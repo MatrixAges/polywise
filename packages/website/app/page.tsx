@@ -10,12 +10,12 @@ const Index = () => {
 	return (
 		<div className='flex w-full flex-col'>
 			<Banner />
-			<Why />
 			<What />
+			{/* <Why />
 			<Painpoint />
 			<Features />
 			<FAQ />
-			<Callback />
+			<Callback /> */}
 		</div>
 	)
 }

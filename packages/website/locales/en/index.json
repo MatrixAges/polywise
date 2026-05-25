@@ -22,15 +22,6 @@
 			"line_2": "Capture content, shape context, and run agents on top of it."
 		}
 	},
-	"Why": {
-		"title": "Why",
-		"subtitle": "Most AI loses context between sessions. Polywise keeps it structured, searchable, and yours.",
-		"roles": {
-			"user": "You",
-			"ai": "Agents",
-			"dataflow": "Context"
-		}
-	},
 	"What": {
 		"title": "What",
 		"subtitle": "What is Polywise?",
@@ -38,33 +29,38 @@
 		"lead": "It helps you capture content, shape working context, and run agents against knowledge that stays under your control.",
 		"items": {
 			"0": {
-				"title": "Local-first storage",
-				"desc": "Content, memory, and agent state live on your machine first instead of starting in someone else’s cloud."
-			},
-			"1": {
 				"title": "Scoped knowledge",
 				"desc": "Store content globally, per project, or per agent so the same system can support both shared knowledge and focused runs."
 			},
-			"2": {
+			"1": {
 				"title": "Hybrid retrieval",
 				"desc": "Combine keyword search, vectors, recall, and reranking in one pipeline to recover the right context before an agent acts."
 			},
-			"3": {
+			"2": {
 				"title": "Multi-agent work",
 				"desc": "Run sessions for agents, groups, projects, and linked tasks instead of treating every workflow as a single chat thread."
 			},
-			"4": {
+			"3": {
 				"title": "Link capture",
 				"desc": "Save URLs, extract articles, bind them to agents, and schedule recurring fetch jobs to keep source material fresh."
 			},
-			"5": {
+			"4": {
 				"title": "Bring your models",
 				"desc": "Use remote providers, MCP tools, and local llama runtimes without locking the system to a single vendor."
 			},
-			"6": {
+			"5": {
 				"title": "Multiple surfaces",
 				"desc": "Use Polywise through desktop sessions, API routes, scheduled jobs, and IM connectors while keeping one context system underneath."
 			}
+		}
+	},
+	"Why": {
+		"title": "Why",
+		"subtitle": "Most AI loses context between sessions. Polywise keeps it structured, searchable, and yours.",
+		"roles": {
+			"user": "You",
+			"ai": "Agents",
+			"dataflow": "Context"
 		}
 	},
 	"Painpoint": {

@@ -7,11 +7,11 @@ import styles from './index.module.css'
 
 const Index = () => {
 	const t = useTranslations('index')
-	const items = Array.from({ length: 7 }, (_, index) => index)
+	const items = Array.from({ length: 6 }, (_, index) => index)
 
 	return (
 		<section className='limited_content_wrap section_wrap'>
-			<div className={$.cx('flex w-full flex-col', styles._local)}>
+			<div className={$.cx('relative flex w-full flex-col', styles._local)}>
 				<h2 className='section_title'>{t('What.title')}</h2>
 				<h3 className='section_desc'>{t('What.subtitle')}</h3>
 				<div className='hero lightcard'>
