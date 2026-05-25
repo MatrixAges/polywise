@@ -2,6 +2,7 @@
 
 import { Fragment } from 'react'
 import { List } from '@phosphor-icons/react'
+import { medias } from '@website/appdata/app'
 import LogoWithBg from '@website/components/LogoWithBg'
 import Sheet from '@website/components/ui/Sheet'
 import { useToggle } from '@website/hooks/ahooks'
@@ -50,10 +51,11 @@ const MobileMenu = ({ onClose }: { onClose: () => void }) => {
 					mt-5
 					btn_download btn_light
 				'
-				href='/download'
+				href={medias.github}
+				target='_blank'
 				onClick={onClose}
 			>
-				{t('title.download')}
+				{t('title.github')}
 			</Link>
 		</div>
 	)
@@ -115,9 +117,10 @@ const Index = () => {
 								items-center justify-center
 								btn_download btn_light clickable
 							'
-							href='/download'
+							href={medias.github}
+							target='_blank'
 						>
-							{t('title.download')}
+							{t('title.github')}
 						</Link>
 					</div>
 				</div>

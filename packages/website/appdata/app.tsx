@@ -27,8 +27,6 @@ export const modules_map = {
 
 export const modules_arr = Object.values(modules_map) as Array<{ Icon: ReactNode; key: string }>
 
-export const mas_link = 'https://github.com/MatrixAges/polywise'
-
 export const mac_arch_map = {
 	arm64: 'Apple Silicon',
 	x64: 'Intel'
@@ -60,18 +58,8 @@ export const mails = {
 
 export const medias = {
 	x: 'https://x.com/xiewendao',
-	reddit: 'https://github.com/MatrixAges/polywise/discussions',
-	youtube: 'https://github.com/MatrixAges/polywise',
-	bilibili: 'https://github.com/MatrixAges/polywise',
 	github: 'https://github.com/MatrixAges/polywise',
 	discord: 'https://github.com/MatrixAges/polywise'
-}
-
-export const videos = {
-	intro: {
-		youtube: 'https://github.com/MatrixAges/polywise',
-		bilibili: 'https://github.com/MatrixAges/polywise'
-	}
 }
 
 export type OS = 'darwin' | 'win32'

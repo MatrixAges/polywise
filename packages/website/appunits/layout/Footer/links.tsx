@@ -1,5 +1,5 @@
 import { DiscordLogo, GithubLogo, RedditLogo, XLogo, YoutubeLogo } from '@phosphor-icons/react'
-import { mas_link, medias } from '@website/appdata/app'
+import { medias } from '@website/appdata/app'
 
 export default ['/', '/doc', '/price', '/blog', '/gtd', '/activate']
 

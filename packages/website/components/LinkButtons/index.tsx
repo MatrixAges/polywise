@@ -1,7 +1,6 @@
 'use client'
 
 import { ArrowCircleDown, ChatTeardropText } from '@phosphor-icons/react'
-import { mas_link } from '@website/appdata/app'
 import { Link } from '@website/i18n/navigation'
 import { $ } from '@website/utils'
 
