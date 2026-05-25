@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { banner_images, modules } from '@website/appdata/modules'
+import { banner_images } from '@website/appdata/modules'
 import LinkButtons from '@website/components/LinkButtons'
 import useMounted from '@website/hooks/useMounted'
 import { $ } from '@website/utils'
@@ -22,8 +22,7 @@ const Index = () => {
 	const [gradient, setGradient] = useState<TargetAndTransition>()
 	const [step, setStep] = useState(0)
 	const [show_type, setShowType] = useState(true)
-	const name = modules[step]
-	const image_name = banner_images[step]
+	const name = banner_images[step]
 
 	useEffect(() => {
 		if (is_server) return
@@ -52,13 +51,13 @@ const Index = () => {
 		return () => clearTimeout(timer)
 	}, [t])
 
-	const module = useMemo(() => t_global(name), [t_global, name])
+	const title = useMemo(() => t(`Banner.${name}.title`), [name])
 
 	const sequence = useMemo(() => {
 		const target = [] as Array<any>
 
-		modules.forEach((item, index) => {
-			target.push(() => setStep(index), t(`Banner.${item}.action`), 2100)
+		banner_images.forEach((item, index) => {
+			target.push(() => setStep(index), t(`Banner.${item}.action`), 3600)
 		})
 
 		return target
@@ -100,9 +99,9 @@ const Index = () => {
 								animate={{ opacity: 1, y: 0 }}
 								exit={{ opacity: 0, y: 6 }}
 								transition={{ duration: 0.6 }}
-								key={module}
+								key={title}
 							>
-								{module}
+								{title}
 							</motion.span>
 						</AnimatePresence>
 					</h1>
@@ -120,12 +119,12 @@ const Index = () => {
 							animate={{ opacity: 0.6, scale: 1 }}
 							exit={{ opacity: 0 }}
 							transition={{ duration: 0.3, ease: 'easeInOut' }}
-							key={image_name}
+							key={name}
 						>
 							<img
 								className='image box-border'
-								src={`${base_url_files_website}/banner/${image_name}.png`}
-								alt={`image_preview_${image_name}`}
+								src={`${base_url_files_website}/banner/${name}.png`}
+								alt={`image_preview_${name}`}
 							/>
 						</motion.div>
 					</AnimatePresence>

@@ -1,28 +1,28 @@
 {
 	"Banner": {
-		"todo": {
-			"action": "Capture"
+		"linkcase": {
+			"action": "Capture",
+			"title": "Linkcase"
 		},
-		"note": {
-			"action": "Retrieve"
+		"agent_session": {
+			"action": "Chat",
+			"title": "Agents"
 		},
-		"pomo": {
-			"action": "Delegate"
+		"agent_detail": {
+			"action": "Extend",
+			"title": "Contents"
 		},
-		"schedule": {
-			"action": "Automate"
-		},
-		"features": {
-			"action": "Own"
+		"home": {
+			"action": "Analyze",
+			"title": "Dashboard"
 		},
 		"with": "with Polywise's ",
 		"desc": {
 			"line_1": "A local-first agentic content system.",
 			"line_2": "Capture content, shape context, and run agents on top of it."
-		},
-		"tips": "Free to start. No need login and all in local."
+		}
 	},
-	"Why_if": {
+	"Why": {
 		"title": "Why",
 		"subtitle": "Most AI loses context between sessions. Polywise keeps it structured, searchable, and yours.",
 		"roles": {

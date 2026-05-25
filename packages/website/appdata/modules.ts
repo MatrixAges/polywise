@@ -26,6 +26,5 @@ const module_cards = [
 
 export default module_cards
 
-export const modules = ['todo', 'note', 'pomo', 'schedule'] as const
 export const banner_images = ['linkcase', 'agent_session', 'agent_detail', 'home']
 export const features_images = ['post', 'group', 'project', 'im']

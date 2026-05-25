@@ -23,8 +23,8 @@ const Index = () => {
 					styles._local
 				)}
 			>
-				<h2 className='section_title'>{t('Why_if.title')}</h2>
-				<h3 className='section_desc'>{t('Why_if.subtitle')}</h3>
+				<h2 className='section_title'>{t('Why.title')}</h2>
+				<h3 className='section_desc'>{t('Why.subtitle')}</h3>
 				<div
 					className='
 						relative
@@ -44,7 +44,7 @@ const Index = () => {
 						'
 					>
 						<UserIcon weight='light'></UserIcon>
-						<span className='name'>{t('Why_if.roles.user')}</span>
+						<span className='name'>{t('Why.roles.user')}</span>
 					</div>
 					<div
 						className='
@@ -68,7 +68,7 @@ const Index = () => {
 							'
 						>
 							<ChatDotsIcon weight='thin'></ChatDotsIcon>
-							<span className='name'>{t('Why_if.roles.ai')}</span>
+							<span className='name'>{t('Why.roles.ai')}</span>
 						</div>
 						<div
 							className='
@@ -79,7 +79,7 @@ const Index = () => {
 							'
 						>
 							<TreeStructureIcon weight='thin'></TreeStructureIcon>
-							<span className='name'>{t('Why_if.roles.dataflow')}</span>
+							<span className='name'>{t('Why.roles.dataflow')}</span>
 						</div>
 					</div>
 				</div>

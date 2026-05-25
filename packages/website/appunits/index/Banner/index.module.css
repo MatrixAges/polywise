@@ -83,7 +83,7 @@
 					padding: 0;
 					margin: 0;
 					border: 3px solid rgba(var(--color_text_rgb), 0.06);
-					border-radius: 10px;
+					border-radius: 16px;
 					user-select: none;
 					pointer-events: none;
 					backdrop-filter: var(--blur);

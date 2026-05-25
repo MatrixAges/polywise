@@ -1,6 +1,6 @@
 export const heading_blogs = [
 	{
-		id: 'why_if',
+		id: 'why',
 		title: {
 			zh: '为什么做Polywise：新科技新设计新产品',
 			en: 'Why Polywise: new tech, new design, new product',
