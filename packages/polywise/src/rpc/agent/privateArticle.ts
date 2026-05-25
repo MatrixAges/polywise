@@ -1,5 +1,4 @@
 import {
-	assertAgentWritableForBehavior,
 	deleteEdgeVector,
 	deleteNodeVector,
 	getEdgeRowid,
@@ -8,7 +7,16 @@ import {
 	insertNodeVector
 } from '@core/db/prepare'
 import { agent, article, chunk, edge, edge_article, node, node_chunk } from '@core/db/schema'
-import { addEdge, addNode, getAgent, getArticle, getChunks, getEdge, getNode } from '@core/db/services'
+import {
+	addEdge,
+	addNode,
+	assertAgentWritableForKnowledge,
+	getAgent,
+	getArticle,
+	getChunks,
+	getEdge,
+	getNode
+} from '@core/db/services'
 import { addEdgeArticle, addNodeChunk } from '@core/db/services/externals'
 import { env } from '@core/env'
 import { saveArticle } from '@core/io'
@@ -308,7 +316,7 @@ export const savePrivateAgentArticle = async (args: {
 	article_id?: string
 }) => {
 	await ensureAgentExists(args.agent_id)
-	await assertAgentWritableForBehavior(args.agent_id)
+	await assertAgentWritableForKnowledge(args.agent_id)
 
 	if (args.article_id) {
 		const current_article = await getArticle(eq(article.id, args.article_id))

@@ -1,5 +1,5 @@
 import { article } from '@core/db/schema'
-import { assertAgentWritableForBehavior, getArticle } from '@core/db/services'
+import { assertAgentWritableForKnowledge, getArticle } from '@core/db/services'
 import { addAgentArticle } from '@core/db/services/externals'
 import { eq } from 'drizzle-orm'
 import { object, string, enum as zod_enum } from 'zod'
@@ -24,7 +24,7 @@ export default p
 		})
 	)
 	.mutation(async ({ input }) => {
-		await assertAgentWritableForBehavior(input.agent_id)
+		await assertAgentWritableForKnowledge(input.agent_id)
 
 		const target_article = await getArticle(eq(article.id, input.article_id))
 

@@ -20,6 +20,7 @@ import type { IToolOption } from '../types'
 
 const Index = () => {
 	const {
+		can_edit_selected_agent_behavior,
 		tool_options,
 		selected_tool_names,
 		setTools,
@@ -45,42 +46,44 @@ const Index = () => {
 				gap-3
 			'
 		>
-			<Combobox<IToolOption, true>
-				multiple
-				items={tool_options}
-				value={selected_items}
-				onValueChange={value => setTools(value.map(item => item.value))}
-				isItemEqualToValue={(item_value, value) => item_value.value === value.value}
-			>
-				<ComboboxChips
-					className='
-						w-full
-						bg-transparent!
-						focus-within:ring-0
-					'
-					ref={ref_anchor}
+			<div className={$cx(!can_edit_selected_agent_behavior && 'pointer-events-none opacity-50')}>
+				<Combobox<IToolOption, true>
+					multiple
+					items={tool_options}
+					value={selected_items}
+					onValueChange={value => setTools(value.map(item => item.value))}
+					isItemEqualToValue={(item_value, value) => item_value.value === value.value}
 				>
-					{selected_items.map(item => (
-						<ComboboxChip key={item.value}>{item.label}</ComboboxChip>
-					))}
-					<ComboboxChipsInput placeholder='Search and select custom tools for agent' />
-				</ComboboxChips>
-				<ComboboxContent anchor={ref_anchor}>
-					<ComboboxEmpty>No tools found.</ComboboxEmpty>
-					<ComboboxList>
-						{(item: IToolOption) => (
-							<ComboboxItem value={item} key={item.value}>
-								<div className='flex min-w-0 flex-col'>
-									<span>{item.label}</span>
-									<span className='text-std-400 truncate text-xs'>
-										{item.description}
-									</span>
-								</div>
-							</ComboboxItem>
-						)}
-					</ComboboxList>
-				</ComboboxContent>
-			</Combobox>
+					<ComboboxChips
+						className='
+							w-full
+							bg-transparent!
+							focus-within:ring-0
+						'
+						ref={ref_anchor}
+					>
+						{selected_items.map(item => (
+							<ComboboxChip key={item.value}>{item.label}</ComboboxChip>
+						))}
+						<ComboboxChipsInput placeholder='Search and select custom tools for agent' />
+					</ComboboxChips>
+					<ComboboxContent anchor={ref_anchor}>
+						<ComboboxEmpty>No tools found.</ComboboxEmpty>
+						<ComboboxList>
+							{(item: IToolOption) => (
+								<ComboboxItem value={item} key={item.value}>
+									<div className='flex min-w-0 flex-col'>
+										<span>{item.label}</span>
+										<span className='text-std-400 truncate text-xs'>
+											{item.description}
+										</span>
+									</div>
+								</ComboboxItem>
+							)}
+						</ComboboxList>
+					</ComboboxContent>
+				</Combobox>
+			</div>
 			<Separator />
 			<div className='flex flex-col'>
 				<CallLogPanel

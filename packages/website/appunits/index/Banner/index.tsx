@@ -128,8 +128,7 @@ const Index = () => {
 					<h2 className='desc'>{t('Banner.desc.line_2')}</h2>
 				</div>
 				<LinkButtons></LinkButtons>
-				<div className='tips'>{t('Banner.tips')}</div>
-				<div className='image_preview_wrap w-full'>
+				<div className='image_preview_wrap mt-16 w-full'>
 					<AnimatePresence mode='wait'>
 						<motion.div
 							className='image_preview flex'

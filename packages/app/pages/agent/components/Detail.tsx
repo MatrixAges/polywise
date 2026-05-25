@@ -30,11 +30,13 @@ const TextTabEditor = ({
 	agent_id,
 	text_tab,
 	field_value,
+	readonly,
 	onSubmit
 }: {
 	agent_id: string
 	text_tab: TextTab
 	field_value: string
+	readonly?: boolean
 	onSubmit: (value: string) => void
 }) => {
 	const [draft_value, setDraftValue] = useState(field_value)
@@ -56,6 +58,7 @@ const TextTabEditor = ({
 				id={`agent-${agent_id}-${text_tab}`}
 				className='pt-6!'
 				value={draft_value}
+				readonly={readonly}
 				onChange={setDraftValue}
 				onBlur={onSubmit}
 			></Editor>
@@ -112,6 +115,7 @@ const Index = () => {
 							agent_id={selected_agent.id}
 							text_tab={text_tab}
 							field_value={field_value}
+							readonly={Boolean(selected_agent.is_frozen)}
 							onSubmit={value => {
 								submitEditableField({
 									id: selected_agent.id,

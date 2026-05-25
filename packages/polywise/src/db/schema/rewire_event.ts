@@ -23,6 +23,8 @@ export default sqliteTable(
 			.notNull()
 	},
 	t => [
+		index('rewire_event_agent_idx').on(t.agent_id),
+		index('rewire_event_agent_created_idx').on(t.agent_id, t.created_at),
 		index('rewire_event_stimulus_idx').on(t.stimulus_key),
 		index('rewire_event_session_idx').on(t.session_id),
 		index('rewire_event_node_idx').on(t.node_id),

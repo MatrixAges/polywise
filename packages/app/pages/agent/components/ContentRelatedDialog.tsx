@@ -24,6 +24,7 @@ const Index = () => {
 		related_article_has_more,
 		related_article_loading,
 		related_article_loading_more,
+		can_mutate_selected_agent_articles,
 		setRelatedArticlesDialogOpen,
 		setArticleSearch,
 		setRelatedArticleFor,
@@ -59,6 +60,7 @@ const Index = () => {
 								<Input
 									className='absolute inset-0 h-8 pl-6'
 									placeholder='Search article to relate'
+									disabled={!can_mutate_selected_agent_articles}
 									value={article_search}
 									onChange={event => setArticleSearch(event.target.value)}
 								></Input>
@@ -129,6 +131,9 @@ const Index = () => {
 													className='h-7 shrink-0'
 													variant='outline'
 													size='xs'
+													disabled={
+														!can_mutate_selected_agent_articles
+													}
 													onClick={() =>
 														void addArticle(
 															item.id,
@@ -200,6 +205,7 @@ const Index = () => {
 											<button
 												className='icon_button small text-std-300'
 												type='button'
+												disabled={!can_mutate_selected_agent_articles}
 												onClick={() => void removeArticle(item.id)}
 											>
 												<X className='size-3.5'></X>
@@ -226,7 +232,10 @@ const Index = () => {
 								className='h-7 shrink-0'
 								variant='outline'
 								size='xs'
-								disabled={related_article_loading_more}
+								disabled={
+									!can_mutate_selected_agent_articles ||
+									related_article_loading_more
+								}
 								onClick={() => void loadMoreRelatedArticles()}
 							>
 								{related_article_loading_more ? (

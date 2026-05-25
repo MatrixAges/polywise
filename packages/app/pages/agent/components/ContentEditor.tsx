@@ -20,6 +20,7 @@ const Index = () => {
 		article_dirty,
 		article_saving,
 		can_manage_private_articles,
+		can_mutate_selected_agent_articles,
 		openCreatePrivateArticleDialog,
 		removeArticle,
 		setArticleDraftTitle,
@@ -79,6 +80,7 @@ const Index = () => {
 							focus:bg-transparent
 						'
 						placeholder='Untitled article'
+						disabled={!can_mutate_selected_agent_articles}
 						value={article_draft_title}
 						onChange={event => setArticleDraftTitle(event.target.value)}
 						onBlur={() => void saveSelectedArticle({ silent: true })}
@@ -87,6 +89,7 @@ const Index = () => {
 						<button
 							className='icon_button small text-std-800!'
 							type='button'
+							disabled={!can_mutate_selected_agent_articles}
 							onClick={openCreatePrivateArticleDialog}
 						>
 							<Plus className='size-3'></Plus>
@@ -95,7 +98,7 @@ const Index = () => {
 					<button
 						className='icon_button small text-std-800!'
 						type='button'
-						disabled={article_saving}
+						disabled={!can_mutate_selected_agent_articles || article_saving}
 						onClick={() => void onRemove()}
 					>
 						<Trash2 className='size-3'></Trash2>
@@ -103,7 +106,7 @@ const Index = () => {
 					<button
 						className='icon_button small text-std-800!'
 						type='button'
-						disabled={!article_dirty || article_saving}
+						disabled={!can_mutate_selected_agent_articles || !article_dirty || article_saving}
 						onClick={() => void saveSelectedArticle()}
 					>
 						{article_saving ? (
@@ -127,6 +130,7 @@ const Index = () => {
 						value={article_draft_content}
 						className='min-h-full px-6! pt-4.5! text-[14px]'
 						rich_text
+						readonly={!can_mutate_selected_agent_articles}
 						onChange={value => setArticleDraftContent(value)}
 						onCharacterCountChange={setCharacterCount}
 						onBlur={() => void saveSelectedArticle({ silent: true })}
@@ -144,6 +148,7 @@ const Index = () => {
 				>
 					<div className='flex items-center gap-3'>
 						<Select
+							disabled={!can_mutate_selected_agent_articles}
 							value={article_draft_for}
 							onValueChange={value =>
 								value && setArticleDraftFor(value as (typeof article_for_types)[number])

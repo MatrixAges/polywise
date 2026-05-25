@@ -52,12 +52,12 @@ const Index = (props: IProps) => {
 					styles.popup,
 					styles[placement],
 					rootClassName,
-					'
+					`
 					fixed
 					box-border
 					overflow-hidden z-[1101]
 					shadow-[0_24px_72px_rgba(0,0,0,0.24)]
-				'
+				`
 				)}
 				style={popup_style}
 			>

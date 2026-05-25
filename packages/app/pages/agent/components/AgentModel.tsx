@@ -31,12 +31,22 @@ interface IProps {
 }
 
 const Index = ({ agent }: IProps) => {
-	const { setModel, setModelEffort } = useModel()
+	const { can_edit_selected_agent_behavior, setModel, setModelEffort } = useModel()
 
 	return (
 		<div className='-mb-1 flex flex-col'>
-			<span className='text-std-400 text-xs'>Model</span>
 			<div className='flex items-center gap-2'>
+				<span className='text-std-400 text-xs'>Model</span>
+				{!can_edit_selected_agent_behavior ? (
+					<span className='text-std-300 text-[10px] uppercase'>Frozen</span>
+				) : null}
+			</div>
+			<div
+				className={$cx(
+					'flex items-center gap-2',
+					!can_edit_selected_agent_behavior && 'pointer-events-none opacity-50'
+				)}
+			>
 				<ModelSelect
 					ghost
 					inputGroupClassName='h-6'
@@ -49,6 +59,7 @@ const Index = ({ agent }: IProps) => {
 				<Select
 					items={effort_modes}
 					value={agent.model?.effort || 'Default'}
+					disabled={!can_edit_selected_agent_behavior}
 					onValueChange={value => {
 						if (!value) return
 

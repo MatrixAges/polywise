@@ -18,6 +18,7 @@ const Index = () => {
 		article_loading_more,
 		article_has_more,
 		can_manage_private_articles,
+		can_mutate_selected_agent_articles,
 		setArticleFor,
 		setSelectedArticle,
 		openCreatePrivateArticleDialog,
@@ -141,6 +142,7 @@ const Index = () => {
 						>
 							<button
 								className='click_button small text-xs'
+								disabled={!can_mutate_selected_agent_articles}
 								onClick={openCreatePrivateArticleDialog}
 							>
 								<Plus className='size-3'></Plus>
@@ -148,6 +150,7 @@ const Index = () => {
 							</button>
 							<button
 								className='click_button small text-xs'
+								disabled={!can_mutate_selected_agent_articles}
 								onClick={openRelatedArticlesDialog}
 							>
 								<Paperclip className='size-3'></Paperclip>

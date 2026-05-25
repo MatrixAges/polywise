@@ -13,6 +13,7 @@ import {
 } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
+import { Switch } from '@/__shadcn__/components/ui/switch'
 import { alert } from '@/utils'
 
 import { useModel } from '../context'
@@ -36,7 +37,15 @@ interface IProps {
 }
 
 const Index = ({ active_tab }: IProps) => {
-	const { export_agent_loading, selected_agent_id, setCurrentTab, exportSelectedAgent, removeAgent } = useModel()
+	const {
+		export_agent_loading,
+		selected_agent,
+		selected_agent_id,
+		setCurrentTab,
+		exportSelectedAgent,
+		removeAgent,
+		toggleAgentFrozen
+	} = useModel()
 
 	const onRemove = async () => {
 		if (!selected_agent_id) {
@@ -93,28 +102,54 @@ const Index = ({ active_tab }: IProps) => {
 			</div>
 			<div
 				className='
-					flex shrink-0
-					items-center justify-between
-					pt-1.5
+					flex flex-col shrink-0
+					gap-2
+					pt-2
 				'
 			>
-				<button
-					className='click_button small text-xs'
-					type='button'
-					disabled={!selected_agent_id || export_agent_loading}
-					onClick={() => void exportSelectedAgent()}
-				>
-					<HardDriveUpload className='size-3'></HardDriveUpload>
-					<span>{export_agent_loading ? 'Exporting...' : 'Export'}</span>
-				</button>
-				<button
-					className='icon_button small'
-					type='button'
-					disabled={!selected_agent_id || export_agent_loading}
-					onClick={() => void onRemove()}
-				>
-					<Trash2 className='size-3'></Trash2>
-				</button>
+				{selected_agent ? (
+					<div
+						className='
+							flex
+							items-center justify-between
+							gap-2
+							px-2 py-1.5
+							rounded-lg
+							border border-border-light
+						'
+					>
+						<div className='min-w-0'>
+							<div className='text-xs font-medium'>Frozen</div>
+							<div className='text-std-400 text-[11px]'>
+								{selected_agent.is_frozen ? 'Locked' : 'Writable'}
+							</div>
+						</div>
+						<Switch
+							size='sm'
+							checked={Boolean(selected_agent.is_frozen)}
+							onCheckedChange={next_value => void toggleAgentFrozen(Boolean(next_value))}
+						/>
+					</div>
+				) : null}
+				<div className='flex items-center justify-between gap-2'>
+					<button
+						className='click_button small text-xs'
+						type='button'
+						disabled={!selected_agent_id || export_agent_loading}
+						onClick={() => void exportSelectedAgent()}
+					>
+						<HardDriveUpload className='size-3'></HardDriveUpload>
+						<span>{export_agent_loading ? 'Exporting...' : 'Export'}</span>
+					</button>
+					<button
+						className='icon_button small'
+						type='button'
+						disabled={!selected_agent_id || export_agent_loading}
+						onClick={() => void onRemove()}
+					>
+						<Trash2 className='size-3'></Trash2>
+					</button>
+				</div>
 			</div>
 		</div>
 	)
