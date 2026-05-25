@@ -1,6 +1,6 @@
 export { default as Banner } from './Banner'
 export { default as FAQ } from './FAQ'
-export { default as WhyIF } from './WhyIF'
+export { default as Why } from './Why'
 export { default as Painpoint } from './Painpoint'
 export { default as Features } from './Features'
 export { default as What } from './What'

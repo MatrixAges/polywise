@@ -21,14 +21,14 @@ const Index = () => {
 	const mounted = useMounted()
 	const [gradient, setGradient] = useState<TargetAndTransition>()
 	const [step, setStep] = useState(0)
-	const [round, setRound] = useState(0)
 	const [show_type, setShowType] = useState(true)
 	const name = modules[step].name
+	const image_name = banner_images[step]
 
 	useEffect(() => {
 		if (is_server) return
 
-		const paths = Object.entries(banner_images).map(item => `${base_url_files_website}/banner/${item}.png`)
+		const paths = banner_images.map(item => `${base_url_files_website}/banner/${item}.png`)
 
 		paths.forEach(path => {
 			const image = new Image()
@@ -59,24 +59,10 @@ const Index = () => {
 
 		modules.forEach((item, index) => {
 			target.push(() => setStep(index), t(`Banner.${item.name}.action`), 2100)
-
-			if (index === modules.length - 1) {
-				target.push(() =>
-					setRound(v => {
-						const count = images_map[name]?.length ?? 1
-						const max = count - 1
-
-						return v >= max ? 0 : v + 1
-					})
-				)
-			}
 		})
 
 		return target
-	}, [name, t])
-
-	const image_names = images_map[name] ?? []
-	const image_name = image_names[round % Math.max(image_names.length, 1)] ?? image_names[0]
+	}, [t])
 
 	return (
 		<div className={$.cx('relative flex items-center justify-center', styles._local)}>

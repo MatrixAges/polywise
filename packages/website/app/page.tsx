@@ -4,13 +4,13 @@ import FAQ from '@website/appunits/index/FAQ'
 import Features from '@website/appunits/index/Features'
 import Painpoint from '@website/appunits/index/Painpoint'
 import What from '@website/appunits/index/What'
-import WhyIF from '@website/appunits/index/WhyIF'
+import Why from '@website/appunits/index/Why'
 
 const Index = () => {
 	return (
 		<div className='flex w-full flex-col'>
 			<Banner />
-			<WhyIF />
+			<Why />
 			<What />
 			<Painpoint />
 			<Features />
