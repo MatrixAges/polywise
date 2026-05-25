@@ -2,8 +2,8 @@
 
 import { LOCALE } from '@website/app.config'
 import { useMemoizedFn } from '@website/hooks/ahooks'
-import { usePathname, useRouter } from '@website/i18n/navigation'
 import { useLocale as useNextLocale } from 'next-intl'
+import { usePathname, useRouter } from 'next/navigation'
 
 import useCookie from './useCookie'
 
@@ -15,9 +15,10 @@ export default () => {
 	const router = useRouter()
 	const [, setLocaleCookie] = useCookie(LOCALE)
 
-	const setLocale = useMemoizedFn((next_locale: Locales) => {
-		setLocaleCookie(next_locale)
-		router.replace(pathname, { locale: next_locale })
+	const setLocale = useMemoizedFn((v: Locales) => {
+		console.log(v)
+		setLocaleCookie(v)
+		router.replace(pathname)
 
 		if (window.__search_index__) {
 			// @ts-ignore

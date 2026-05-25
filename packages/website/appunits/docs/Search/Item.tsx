@@ -1,8 +1,8 @@
 import { useMemo } from 'react'
 import { useMemoizedFn } from '@website/hooks/ahooks'
-import { Link } from '@website/i18n/navigation'
 import { $ } from '@website/utils'
 import { AlignLeft, Hash } from 'lucide-react'
+import Link from 'next/link'
 
 import type { IndexItem } from '.'
 

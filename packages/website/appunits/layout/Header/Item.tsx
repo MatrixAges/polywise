@@ -1,7 +1,8 @@
 import { useMemo } from 'react'
-import { Link, usePathname } from '@website/i18n/navigation'
 import { $ } from '@website/utils'
 import { useTranslations } from 'next-intl'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 
 import type { NavItem } from '../types'
 

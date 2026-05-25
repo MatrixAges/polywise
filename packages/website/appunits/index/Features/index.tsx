@@ -5,11 +5,11 @@ import { CaretLeftIcon, CaretRightIcon } from '@phosphor-icons/react'
 import { modules_map } from '@website/appdata/app'
 import { images_map } from '@website/appdata/modules'
 import { useDeepCompareEffect, useMemoizedFn } from '@website/hooks/ahooks'
-import { Link } from '@website/i18n/navigation'
 import { $, getArray } from '@website/utils'
 import { AnimatePresence, motion } from 'framer-motion'
 import { generateJSXMeshGradient } from 'meshgrad'
 import { useTranslations } from 'next-intl'
+import Link from 'next/link'
 
 import styles from './index.module.css'
 

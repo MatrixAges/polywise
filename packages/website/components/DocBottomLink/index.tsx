@@ -1,7 +1,7 @@
 import { CaretLeftIcon, CaretRightIcon } from '@phosphor-icons/react'
-import { Link } from '@website/i18n/navigation'
 import { $ } from '@website/utils'
 import { useTranslations } from 'next-intl'
+import Link from 'next/link'
 
 import styles from './index.module.css'
 

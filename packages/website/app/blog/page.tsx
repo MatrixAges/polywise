@@ -2,9 +2,9 @@
 
 import { heading_blogs } from '@website/appdata/blogs'
 import useLocale from '@website/hooks/useLocale'
-import { Link } from '@website/i18n/navigation'
 import { $ } from '@website/utils'
 import { useTranslations } from 'next-intl'
+import Link from 'next/link'
 
 import styles from './index.module.css'
 

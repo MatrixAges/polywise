@@ -1,8 +1,8 @@
 'use client'
 
 import { ArrowCircleDownIcon, ChatTeardropTextIcon } from '@phosphor-icons/react'
-import { Link } from '@website/i18n/navigation'
 import { $ } from '@website/utils'
+import Link from 'next/link'
 
 import styles from './index.module.css'
 

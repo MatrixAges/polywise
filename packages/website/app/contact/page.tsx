@@ -3,9 +3,9 @@
 import { ChatDotsIcon, DiscordLogoIcon, FilesIcon, UsersIcon } from '@phosphor-icons/react'
 import { mails, medias } from '@website/appdata/app'
 import useLocale from '@website/hooks/useLocale'
-import { Link } from '@website/i18n/navigation'
 import { $ } from '@website/utils'
 import { useTranslations } from 'next-intl'
+import Link from 'next/link'
 
 import styles from './index.module.css'
 

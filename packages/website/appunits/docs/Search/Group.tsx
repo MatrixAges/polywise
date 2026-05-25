@@ -1,8 +1,8 @@
 import { useMemo, useRef } from 'react'
 import { useMemoizedFn } from '@website/hooks/ahooks'
-import { Link } from '@website/i18n/navigation'
 import { $, UpperFirst } from '@website/utils'
 import { FileText } from 'lucide-react'
+import Link from 'next/link'
 
 import Item from './Item'
 

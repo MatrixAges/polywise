@@ -2,9 +2,9 @@
 
 import LocaleSelect from '@website/components/LocaleSelect'
 import LogoWithBg from '@website/components/LogoWithBg'
-import { Link } from '@website/i18n/navigation'
 import { $ } from '@website/utils'
 import { useTranslations } from 'next-intl'
+import Link from 'next/link'
 
 import { link_groups, media_items } from './links'
 

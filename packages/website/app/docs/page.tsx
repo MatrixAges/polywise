@@ -2,9 +2,9 @@
 
 import { basics, popular } from '@website/appdata/docs'
 import Logo from '@website/components/Logo'
-import { Link } from '@website/i18n/navigation'
 import { $ } from '@website/utils'
 import { useTranslations } from 'next-intl'
+import Link from 'next/link'
 
 import styles from './page.module.css'
 
@@ -32,11 +32,6 @@ const Index = () => {
 							href={`/docs/${item.link}`}
 							key={index}
 						>
-							<div className='top_wrap flex items-center justify-center'>
-								<div className='icon_wrap flex items-center justify-center'>
-									{item.icon}
-								</div>
-							</div>
 							<div className='bottom_wrap flex flex-col'>
 								<h3>{t(`page.popular.${index}.title`)}</h3>
 								<span className='desc'>{t(`page.popular.${index}.desc`)}</span>
@@ -55,7 +50,6 @@ const Index = () => {
 							href={`/docs/${item.link}`}
 							key={index}
 						>
-							<div className='icon_wrap flex'>{item.icon}</div>
 							<div className='body_wrap flex flex-col'>
 								<h3>{t(`page.basics.${index}.title`)}</h3>
 								<span className='desc'>{t(`page.basics.${index}.desc`)}</span>

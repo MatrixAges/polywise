@@ -20,13 +20,13 @@ import {
 } from '@website/hooks/ahooks'
 import useLocale from '@website/hooks/useLocale'
 import useRouterHash from '@website/hooks/useRouterHash'
-import { usePathname, useRouter } from '@website/i18n/navigation'
 import { $ } from '@website/utils'
 import { requestWeb } from '@website/utils/ofetch'
 import db from 'localforage'
 import { debounce, groupBy } from 'lodash-es'
 import { decompressFromUTF16 } from 'lz-string'
 import { useTranslations } from 'next-intl'
+import { usePathname, useRouter } from 'next/navigation'
 
 import Group from './Group'
 

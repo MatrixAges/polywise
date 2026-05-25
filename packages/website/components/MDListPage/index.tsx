@@ -3,8 +3,8 @@
 import { ReactNode, useMemo, useState } from 'react'
 import { LinkIcon } from '@phosphor-icons/react'
 import useLocale from '@website/hooks/useLocale'
-import { Link } from '@website/i18n/navigation'
 import { $ } from '@website/utils'
+import Link from 'next/link'
 
 import styles from './index.module.css'
 
