@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import modules, { banner_images } from '@website/appdata/modules'
+import { banner_images, modules } from '@website/appdata/modules'
 import LinkButtons from '@website/components/LinkButtons'
 import useMounted from '@website/hooks/useMounted'
 import { $ } from '@website/utils'
@@ -22,7 +22,7 @@ const Index = () => {
 	const [gradient, setGradient] = useState<TargetAndTransition>()
 	const [step, setStep] = useState(0)
 	const [show_type, setShowType] = useState(true)
-	const name = modules[step].name
+	const name = modules[step]
 	const image_name = banner_images[step]
 
 	useEffect(() => {
@@ -58,7 +58,7 @@ const Index = () => {
 		const target = [] as Array<any>
 
 		modules.forEach((item, index) => {
-			target.push(() => setStep(index), t(`Banner.${item.name}.action`), 2100)
+			target.push(() => setStep(index), t(`Banner.${item}.action`), 2100)
 		})
 
 		return target
@@ -124,7 +124,7 @@ const Index = () => {
 						>
 							<img
 								className='image box-border'
-								src={`${base_url_files_website}/preview/${name}/${image_name}.png`}
+								src={`${base_url_files_website}/banner/${image_name}.png`}
 								alt={`image_preview_${image_name}`}
 							/>
 						</motion.div>

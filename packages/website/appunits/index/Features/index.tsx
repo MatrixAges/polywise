@@ -3,9 +3,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { CaretLeftIcon, CaretRightIcon } from '@phosphor-icons/react'
 import { modules_map } from '@website/appdata/app'
-import { images_map } from '@website/appdata/modules'
+import { features_images } from '@website/appdata/modules'
 import { useDeepCompareEffect, useMemoizedFn } from '@website/hooks/ahooks'
-import { $, getArray } from '@website/utils'
+import { $ } from '@website/utils'
 import { AnimatePresence, motion } from 'framer-motion'
 import { generateJSXMeshGradient } from 'meshgrad'
 import { useTranslations } from 'next-intl'
@@ -15,13 +15,12 @@ import styles from './index.module.css'
 
 import type { TargetAndTransition } from 'framer-motion'
 
-const array_img = getArray(3)
-
 const Index = () => {
 	const t = useTranslations('index')
 	const [number, setNumber] = useState(0)
 	const [gradient, setGradient] = useState<TargetAndTransition>()
-	const timer = useRef<NodeJS.Timer>()
+	const timer = useRef<ReturnType<typeof setInterval> | null>(null)
+	const image_name = features_images[number]
 
 	useDeepCompareEffect(() => setGradient({ background: generateJSXMeshGradient(6).backgroundImage }), [number])
 
@@ -34,7 +33,9 @@ const Index = () => {
 	useEffect(() => {
 		tick()
 
-		return () => timer.current && clearInterval(timer.current)
+		return () => {
+			if (timer.current) clearInterval(timer.current)
+		}
 	}, [])
 
 	const prev = useMemoizedFn(() => {
@@ -171,16 +172,11 @@ const Index = () => {
 								transition={{ duration: 0.6 }}
 								key={number}
 							>
-								<div className='preview_images flex'>
-									{array_img.map((_, idx) => (
-										<img
-											className='preview_image w-full'
-											src={`/images/preview/${modules_map[number].key}/${images_map[modules_map[number].key]?.[idx]}.png`}
-											alt={modules_map[number].key}
-											key={idx}
-										/>
-									))}
-								</div>
+								<img
+									className='preview_image w-full'
+									src={`/images/features/${image_name}.png`}
+									alt={modules_map[number].key}
+								/>
 							</motion.div>
 						</AnimatePresence>
 					</div>

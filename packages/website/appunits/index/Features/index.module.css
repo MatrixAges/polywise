@@ -1,10 +1,14 @@
-@keyframes change {
-	from {
-		translate: 300px;
+@keyframes preview_loop {
+	0% {
+		transform: translate3d(180px, 0, 0) scale(1);
 	}
 
-	to {
-		translate: calc(1200px * -2.4);
+	50% {
+		transform: translate3d(-180px, 18px, 0) scale(1.015);
+	}
+
+	100% {
+		transform: translate3d(180px, 0, 0) scale(1);
 	}
 }
 
@@ -162,22 +166,15 @@
 				transform: perspective(1200px) rotate(-30deg) skewX(20deg);
 				transform-style: preserve-3d;
 
-				.preview_images {
-					will-change: translate;
-					gap: 24px;
-
-					:local {
-						animation: change 21s linear infinite;
-					}
-
-					.preview_image {
-						width: 1200px;
-						border: var(--border);
-						border-radius: var(--radius);
-						opacity: 0.6;
-						user-select: none;
-						pointer-events: none;
-					}
+				.preview_image {
+					will-change: transform;
+					animation: preview_loop 21s linear infinite;
+					width: 1200px;
+					border: var(--border);
+					border-radius: var(--radius);
+					opacity: 0.6;
+					user-select: none;
+					pointer-events: none;
 				}
 			}
 		}
