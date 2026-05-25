@@ -87,20 +87,20 @@
 		"subtitle": "Core capabilities for context, retrieval, and execution",
 		"items": {
 			"0": {
-				"title": "Content Layer",
-				"desc": "Capture notes, tasks, links, and source material locally.\nKeep content scoped to your global space, a project, or a specific agent."
+				"title": "Posts",
+				"desc": "Write structured posts with outline navigation, local editing, and saved drafts.\nTurn raw notes into readable long-form content inside the app."
 			},
 			"1": {
-				"title": "Memory Retrieval",
-				"desc": "Blend keywords, vectors, recall, and reranking in one search pipeline.\nBring the right context back before an agent responds or acts."
+				"title": "Groups",
+				"desc": "Organize agents into shared groups and compare their responses in one thread.\nCoordinate multiple specialists around the same prompt instead of isolated chats."
 			},
 			"2": {
-				"title": "Agent Sessions",
-				"desc": "Give each agent its own role, tools, model, and memory.\nRun reusable sessions and move behavior between machines with agent packs."
+				"title": "Projects",
+				"desc": "Bind sessions to projects and keep files, context, and outputs beside the working tree.\nReview agent results while staying anchored to the codebase or folder that matters."
 			},
 			"3": {
-				"title": "Workflow Engine",
-				"desc": "Tie together projects, todos, sessions, groups, schedules, and IM hooks.\nTurn saved context into repeatable execution instead of one-off chats."
+				"title": "IM Integration",
+				"desc": "Connect bots like WeChat or Discord and manage shared runtime settings from one place.\nRoute agent workflows into the channels where your team already communicates."
 			}
 		}
 	},

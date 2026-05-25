@@ -1,8 +1,14 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { CaretLeftIcon, CaretRightIcon } from '@phosphor-icons/react'
-import { modules_map } from '@website/appdata/app'
+import {
+	ArticleIcon,
+	CaretLeftIcon,
+	CaretRightIcon,
+	ChatsCircleIcon,
+	FolderNotchOpenIcon,
+	UsersThreeIcon
+} from '@phosphor-icons/react'
 import { features_images } from '@website/appdata/modules'
 import { useDeepCompareEffect, useMemoizedFn } from '@website/hooks/ahooks'
 import { $ } from '@website/utils'
@@ -16,6 +22,24 @@ import styles from './index.module.css'
 import type { TargetAndTransition } from 'framer-motion'
 
 const feature_cycle_ms = 3600
+const feature_items = [
+	{
+		Icon: <ArticleIcon></ArticleIcon>,
+		key: 'post'
+	},
+	{
+		Icon: <UsersThreeIcon></UsersThreeIcon>,
+		key: 'group'
+	},
+	{
+		Icon: <FolderNotchOpenIcon></FolderNotchOpenIcon>,
+		key: 'project'
+	},
+	{
+		Icon: <ChatsCircleIcon></ChatsCircleIcon>,
+		key: 'im'
+	}
+] as const
 
 const Index = () => {
 	const t = useTranslations('index')
@@ -134,7 +158,7 @@ const Index = () => {
 									key={number}
 								>
 									<div className='icon_wrap flex items-center justify-center'>
-										{modules_map[number].Icon}
+										{feature_items[number].Icon}
 									</div>
 									<h2 className='feature_title'>
 										{t(`Features.items.${number}.title`)}
@@ -172,7 +196,7 @@ const Index = () => {
 								<motion.img
 									className='preview_image'
 									src={`/images/features/${image_name}.png`}
-									alt={modules_map[number].key}
+									alt={feature_items[number].key}
 									initial={{ x: 220 }}
 									animate={{ x: -220 }}
 									transition={{ duration: feature_cycle_ms / 1000, ease: 'linear' }}
