@@ -25,19 +25,6 @@ const Index = () => {
 	const name = banner_images[step]
 
 	useEffect(() => {
-		if (is_server) return
-
-		const paths = banner_images.map(item => `${base_url_files_website}/banner/${item}.png`)
-
-		paths.forEach(path => {
-			const image = new Image()
-
-			image.decoding = 'async'
-			image.src = path
-		})
-	}, [])
-
-	useEffect(() => {
 		setGradient({ background: generateJSXMeshGradient(6).backgroundImage })
 	}, [step])
 
@@ -112,22 +99,37 @@ const Index = () => {
 				</div>
 				<LinkButtons></LinkButtons>
 				<div className='image_preview_wrap mt-16 w-full'>
-					<AnimatePresence mode='wait'>
-						<motion.div
-							className='image_preview flex'
-							initial={mounted ? { opacity: 0, scale: 0.99 } : { opacity: 0.6, scale: 1 }}
-							animate={{ opacity: 0.6, scale: 1 }}
-							exit={{ opacity: 0 }}
-							transition={{ duration: 0.3, ease: 'easeInOut' }}
-							key={name}
-						>
-							<img
-								className='image box-border'
-								src={`${base_url_files_website}/banner/${name}.png`}
-								alt={`image_preview_${name}`}
-							/>
-						</motion.div>
-					</AnimatePresence>
+					<div className='image_preview relative flex w-full'>
+						<img
+							className='image image_placeholder box-border'
+							src={`${base_url_files_website}/banner/${banner_images[0]}.png`}
+							alt=''
+							aria-hidden='true'
+						/>
+						{banner_images.map(item => {
+							const active = item === name
+
+							return (
+								<motion.img
+									className='image image_layer box-border'
+									src={`${base_url_files_website}/banner/${item}.png`}
+									alt={`image_preview_${item}`}
+									initial={false}
+									animate={
+										active
+											? { opacity: 0.6, scale: 1, visibility: 'visible' }
+											: {
+													opacity: 0,
+													scale: 0.99,
+													transitionEnd: { visibility: 'hidden' }
+												}
+									}
+									transition={{ duration: 0.6, ease: 'easeInOut' }}
+									key={item}
+								/>
+							)
+						})}
+					</div>
 				</div>
 			</div>
 		</div>

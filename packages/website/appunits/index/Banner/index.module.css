@@ -77,6 +77,11 @@
 			.image_preview_wrap {
 				min-height: 647.71px;
 
+				.image_preview {
+					position: relative;
+					width: 100%;
+				}
+
 				.image {
 					width: 100%;
 					height: auto;
@@ -87,6 +92,15 @@
 					user-select: none;
 					pointer-events: none;
 					backdrop-filter: var(--blur);
+				}
+
+				.image_placeholder {
+					visibility: hidden;
+				}
+
+				.image_layer {
+					position: absolute;
+					inset: 0;
 				}
 			}
 		}
