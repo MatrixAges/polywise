@@ -157,14 +157,6 @@ const Index = () => {
 												{it}
 											</span>
 										))}
-									<div className='link_wrap flex justify-center'>
-										<Link
-											className='btn_link clickable'
-											href={modules_map[number].origin}
-										>
-											{t(`Features.origin`)} &gt;
-										</Link>
-									</div>
 								</motion.div>
 							</AnimatePresence>
 						</div>

@@ -85,7 +85,6 @@
 	"Features": {
 		"title": "Features",
 		"subtitle": "Core capabilities for context, retrieval, and execution",
-		"origin": "Read the concept",
 		"items": {
 			"0": {
 				"title": "Content Layer",
