@@ -16,7 +16,6 @@
 			padding-right: 12px;
 			padding-left: 12px;
 			margin: 0 auto;
-			border-radius: var(--radius_large);
 			background: rgba(var(--color_bg_rgb), 0.3);
 			backdrop-filter: var(--blur_deep);
 

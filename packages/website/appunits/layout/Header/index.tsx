@@ -1,7 +1,7 @@
 'use client'
 
 import { Fragment } from 'react'
-import { List } from '@phosphor-icons/react'
+import { GithubLogoIcon, List } from '@phosphor-icons/react'
 import { medias } from '@website/appdata/app'
 import LogoWithBg from '@website/components/LogoWithBg'
 import Sheet from '@website/components/ui/Sheet'
@@ -87,6 +87,7 @@ const Index = () => {
 						box-border
 						flex
 						items-center justify-between
+						rounded-full
 						header_content_wrap
 					'
 				>
@@ -115,11 +116,14 @@ const Index = () => {
 							className='
 								flex
 								items-center justify-center
+								gap-1.5
+								rounded-full!
 								btn_download btn_light clickable
 							'
 							href={medias.github}
 							target='_blank'
 						>
+							<GithubLogoIcon weight='bold'></GithubLogoIcon>
 							{t('title.github')}
 						</Link>
 					</div>
