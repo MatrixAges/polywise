@@ -141,18 +141,32 @@
 
 			.menu_groups {
 				user-select: none;
-				gap: 6px;
+				gap: 4px;
 			}
 
 			.menu_group_button {
 				padding: 0 8px;
+				height: 32px;
 				border: none;
-				color: var(--color_text_sublight);
+				color: var(--color_text_light);
 				background: transparent;
 				text-align: left;
+				border-radius: var(--radius);
+
+				&:hover {
+					background-color: var(--color_bg_1);
+				}
+
+				&:active {
+					background-color: var(--color_bg_2);
+				}
 
 				&.active {
-					color: var(--color_text);
+					color: var(--color_text_sub);
+
+					.icon {
+						color: var(--color_text_sub);
+					}
 				}
 
 				.icon {
@@ -163,13 +177,13 @@
 			.menu_group_items {
 				gap: 1px;
 				margin-top: 4px;
-				padding-left: 12px;
+				padding-left: 8px;
 			}
 
 			.menu_item {
 				width: calc(100% - 12px);
-				padding: 8px;
-				margin-left: 12px;
+				padding-left: 8px;
+				height: 32px;
 				border-radius: var(--radius);
 				color: var(--color_text_sublight);
 
@@ -184,6 +198,10 @@
 
 				&:hover {
 					background-color: var(--color_bg_1);
+				}
+
+				&:active {
+					background-color: var(--color_bg_2);
 				}
 
 				svg {

@@ -281,7 +281,7 @@ const Index = (props: PropsWithChildren) => {
 									flex
 									items-center justify-between
 									w-full
-									menu_group_button
+									menu_group_button cursor-pointer
 								`,
 										active && 'active'
 									)}
@@ -303,7 +303,7 @@ const Index = (props: PropsWithChildren) => {
 										{group.children.map(item => (
 											<Link
 												className={$.cx(
-													'menu_item flex items-center',
+													'menu_item flex items-center gap-3',
 													item.className,
 													selectedkey === item.key && 'active'
 												)}
@@ -313,9 +313,8 @@ const Index = (props: PropsWithChildren) => {
 											>
 												<span
 													className='
-													flex
+													flex shrink-0
 													items-center justify-center
-													mr-2
 													text-[15px]
 												'
 												>
