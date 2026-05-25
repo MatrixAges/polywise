@@ -29,7 +29,7 @@
 			}
 
 			.contact_item {
-				width: calc((100% - 48px) / 3);
+				width: calc((100% - 48px) / 2);
 				padding: 21px 24px;
 
 				svg {
@@ -55,48 +55,6 @@
 			}
 		}
 
-		.plan_wrap {
-			line-height: 1;
-			margin-top: 60px;
-
-			.plan_title {
-				margin: 0;
-				margin-bottom: 12px;
-				font-size: 18px;
-				font-weight: 500;
-			}
-
-			.plan_desc {
-				margin: 0;
-				font-size: 15px;
-			}
-
-			.plan_items {
-				width: 600px;
-				margin-top: 48px;
-				border: var(--border_light);
-				border-radius: var(--radius);
-
-				.plan_item {
-					border-bottom: var(--border_light);
-
-					&:last-child {
-						border-bottom: none;
-					}
-
-					.type {
-						width: 150px;
-						padding: 18px 24px;
-						border-right: var(--border_light);
-					}
-
-					.content {
-						padding: 18px 24px;
-					}
-				}
-			}
-		}
-
 		.wechat {
 			margin-top: 48px;
 			color: var(--color_text_grey);
@@ -117,22 +75,6 @@
 
 				.contact_item {
 					width: 100% !important;
-				}
-			}
-
-			.plan_wrap {
-				.plan_items {
-					width: 100%;
-
-					.plan_item {
-						.type {
-							padding: 15px 18px;
-						}
-
-						.content {
-							padding: 15px 18px;
-						}
-					}
 				}
 			}
 
