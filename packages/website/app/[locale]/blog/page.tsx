@@ -11,7 +11,7 @@ import styles from './index.module.css'
 const Index = () => {
 	const t = useTranslations('blog')
 	const { locale } = useLocale()
-	const getTitle = (title: { zh: string; en: string }) => (locale === 'zh' ? title.zh : title.en)
+	const getTitle = (title: { zh: string; en: string; ja?: string }) => title[locale] ?? title.en
 
 	return (
 		<div className={$.cx('limited_content_wrap flex flex-col', styles._local)}>

@@ -1,77 +1,77 @@
 {
 	"header": {
-		"title": "Docs",
-		"btn_search": "Search docs"
+		"title": "ドキュメント",
+		"btn_search": "ドキュメントを検索"
 	},
 	"search": {
-		"loading_index": "Loading index...",
-		"loading_items": "Searching...",
-		"placeholder": "Search in documents",
-		"to_navigate": "to navigate",
-		"to_select": "to select",
-		"to_close": "to close",
-		"history": "Search history"
+		"loading_index": "インデックスを読み込み中...",
+		"loading_items": "検索中...",
+		"placeholder": "ドキュメントを検索",
+		"to_navigate": "移動",
+		"to_select": "選択",
+		"to_close": "閉じる",
+		"history": "検索履歴"
 	},
 	"footer": {
-		"download": "Download",
-		"contact": "Contact support"
+		"download": "ダウンロード",
+		"contact": "サポートに連絡"
 	},
 	"page": {
-		"title": "Documentation",
-		"desc": "Get an overview of Polywise's features, settings, and how to use them.",
+		"title": "ドキュメント",
+		"desc": "Polywise の機能、設定、使い方を確認できます。",
 		"popular": {
-			"title": "Most asked",
+			"title": "よく読まれている内容",
 			"0": {
-				"title": "Start Guide",
-				"desc": "How to use the app and follow best practices"
+				"title": "スタートガイド",
+				"desc": "アプリの使い方と基本のベストプラクティス"
 			},
 			"1": {
-				"title": "Linked Todo",
-				"desc": "Link multiple todo items make them mutually exclusive"
+				"title": "連携 Todo",
+				"desc": "複数の Todo を関連付けて相互排他にする方法"
 			},
 			"2": {
-				"title": "Cycle Todo",
-				"desc": "Set cycle for the todo, it will auto restore from the archive"
+				"title": "繰り返し Todo",
+				"desc": "Todo に周期を設定してアーカイブから自動復元する方法"
 			},
 			"3": {
-				"title": "Note Blocks",
-				"desc": "What blocks are supported by Note for Markdown standards"
+				"title": "ノートブロック",
+				"desc": "Note が対応する Markdown ブロックの種類"
 			},
 			"4": {
-				"title": "Schedule",
-				"desc": "How to use the schedule to plan your daily work and life"
+				"title": "スケジュール",
+				"desc": "日々の仕事や生活を計画するための使い方"
 			},
 			"5": {
-				"title": "Global Settings",
-				"desc": "What settings does Polywise support to adjust user preferences"
+				"title": "全体設定",
+				"desc": "ユーザー設定を調整するために使える項目"
 			}
 		},
 		"basics": {
-			"title": "Basics",
-			"desc": "Learn about Polywise's basic concepts and features",
+			"title": "基本",
+			"desc": "Polywise の基本概念と主要機能を学ぶ",
 			"0": {
-				"title": "Auto Archive",
-				"desc": "Automatically archive when a todo is completed or closed"
+				"title": "自動アーカイブ",
+				"desc": "Todo の完了や終了時に自動でアーカイブする方法"
 			},
 			"1": {
-				"title": "Todo Settings",
-				"desc": "Add angles, tags to Todo, and set automatic archiving cycle"
+				"title": "Todo 設定",
+				"desc": "カテゴリやタグの追加、自動アーカイブ周期の設定"
 			},
 			"2": {
 				"title": "Note",
-				"desc": "Learn how to use Note and what features are supported by Note"
+				"desc": "Note の使い方と対応機能を確認する"
 			},
 			"3": {
-				"title": "Note Table",
-				"desc": "Use Notes' powerful tables to record structured data"
+				"title": "Note テーブル",
+				"desc": "強力なテーブル機能で構造化データを記録する"
 			},
 			"4": {
-				"title": "Flow Mode",
-				"desc": "Learn how to use Pomo's flow mode to maintain focus"
+				"title": "フローモード",
+				"desc": "Pomo のフローモードで集中を維持する方法"
 			},
 			"5": {
-				"title": "Timeline View",
-				"desc": "Use the timeline to schedule cross-period tasks"
+				"title": "タイムライン表示",
+				"desc": "期間をまたぐタスクをタイムラインで配置する方法"
 			}
 		}
 	}

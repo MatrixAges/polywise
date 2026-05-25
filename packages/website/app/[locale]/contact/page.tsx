@@ -58,7 +58,7 @@ const Index = () => {
 						<DiscordLogoIcon weight='fill'></DiscordLogoIcon>
 						<h2>{t('references.discord.title')}</h2>
 					</div>
-					<span className='desc'>{t('references.reddit.desc')}</span>
+					<span className='desc'>{t('references.discord.desc')}</span>
 					<a className='btn_link' href={medias.discord} target='_blank'>
 						{t_global('visit')} &gt;
 					</a>

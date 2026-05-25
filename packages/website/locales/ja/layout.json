@@ -1,27 +1,27 @@
 {
 	"Cookie": {
-		"desc": "We use cookies solely to record user theme and language preferences.",
-		"btn_get": "Get"
+		"desc": "Cookie はテーマと言語設定の保存にのみ使用し、個人情報は記録しません。",
+		"btn_get": "確認"
 	},
 	"slogan": {
-		"line_1": "Shape Your Context,",
-		"line_2": "Keep It Yours."
+		"line_1": "あなたのコンテキストを形にし、",
+		"line_2": "それをあなたのものに。"
 	},
 	"title": {
-		"docs": "Docs",
-		"download": "Download",
-		"contact": "Contact",
-		"blog": "Blog",
+		"docs": "ドキュメント",
+		"download": "ダウンロード",
+		"contact": "お問い合わせ",
+		"blog": "ブログ",
 		"github": "Github"
 	},
 	"Setting": {
-		"title": "Setting",
-		"theme": "Theme",
-		"language": "Language"
+		"title": "設定",
+		"theme": "テーマ",
+		"language": "言語"
 	},
 	"Footer": {
-		"product": "Product",
-		"resources": "Resources",
-		"company": "Company"
+		"product": "製品",
+		"resources": "リソース",
+		"company": "会社"
 	}
 }

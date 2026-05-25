@@ -1,11 +1,11 @@
 {
 	"todo": "Todo",
-	"note": "Note",
-	"pomo": "Pomo",
-	"schedule": "Schedule",
-	"features": "Features",
-	"copy": "{name} has copied to clipboard.",
-	"download": "Download",
-	"visit": "Visit",
-	"scroll": "Scroll"
+	"note": "ノート",
+	"pomo": "ポモドーロ",
+	"schedule": "スケジュール",
+	"features": "機能",
+	"copy": "{name} をクリップボードにコピーしました。",
+	"download": "ダウンロード",
+	"visit": "開く",
+	"scroll": "スクロール"
 }

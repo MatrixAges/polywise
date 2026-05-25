@@ -1,27 +1,27 @@
 {
-	"title": "How can we help?",
-	"desc": "Get in touch with developer for product questions.",
+	"title": "どのようにお手伝いできますか？",
+	"desc": "製品に関するご質問は開発者までお問い合わせください。",
 	"supports": {
-		"mailto": "Mailto",
+		"mailto": "メールで連絡",
 		"user": {
-			"title": "User support",
-			"desc": "Speak to developer about pricing, product features, or request a discount."
+			"title": "ユーザーサポート",
+			"desc": "料金、機能、割引のご相談などは開発者までお問い合わせください。"
 		},
 		"team": {
-			"title": "Team support",
-			"desc": "Seeking guidance on team collaboration functions or other business development."
+			"title": "チームサポート",
+			"desc": "チーム協業機能やその他のビジネス活用についてご相談いただけます。"
 		}
 	},
 	"references": {
 		"discord": {
-			"title": "Join the community",
-			"desc": "Submit your thoughts and suggestions on Polywise and share your best practices.",
-			"bth": "Join Discord"
+			"title": "コミュニティに参加",
+			"desc": "Polywise への感想や提案を共有し、活用方法を交換しましょう。",
+			"bth": "Discord に参加"
 		},
 		"docs": {
-			"title": "Documentation",
-			"desc": "Get an overview of Polywise's features, integrations, and how to use them.",
-			"bth": "Polywise Docs"
+			"title": "ドキュメント",
+			"desc": "Polywise の機能、連携、使い方をまとめて確認できます。",
+			"bth": "Polywise ドキュメント"
 		}
 	}
 }

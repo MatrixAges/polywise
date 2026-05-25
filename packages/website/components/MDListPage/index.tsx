@@ -18,6 +18,7 @@ interface IProps {
 			title: {
 				zh: string
 				en: string
+				ja?: string
 			}
 			date?: string
 		}>
@@ -33,7 +34,7 @@ const Index = (props: IProps) => {
 
 	const [page] = useState(0)
 	const { locale } = useLocale()
-	const getTitle = (title: { zh: string; en: string }) => (locale === 'zh' ? title.zh : title.en)
+	const getTitle = (title: { zh: string; en: string; ja?: string }) => title[locale] ?? title.en
 
 	const items = useMemo(() => group[page], [page])
 

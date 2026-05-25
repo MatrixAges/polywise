@@ -1,93 +1,93 @@
 {
 	"Banner": {
 		"todo": {
-			"action": "Get Things Down"
+			"action": "書き出す"
 		},
 		"note": {
-			"action": "Writing"
+			"action": "書く"
 		},
 		"pomo": {
-			"action": "Focus"
+			"action": "集中する"
 		},
 		"schedule": {
-			"action": "Planing"
+			"action": "計画する"
 		},
 		"features": {
-			"action": "Thinking"
+			"action": "考える"
 		},
-		"with": "with Polywise's ",
+		"with": "Polywise の ",
 		"desc": {
-			"line_1": "A local-first productivity tool for content, planning and data.",
-			"line_2": "Not only effciency tool, but your business."
+			"line_1": "コンテンツ、計画、データのためのローカルファーストな生産性ツール。",
+			"line_2": "単なる効率化ツールではなく、あなたの仕事そのものを支えます。"
 		},
-		"tips": "Free to start. No need login and all in local."
+		"tips": "無料で開始でき、ログイン不要。すべてローカルで完結します。"
 	},
 	"Why_if": {
-		"title": "Why Polywise",
-		"subtitle": "Own your data, local your business",
+		"title": "なぜ Polywise なのか",
+		"subtitle": "データを自分の手に、仕事をローカルに",
 		"roles": {
-			"user": "User",
+			"user": "ユーザー",
 			"ai": "AI",
-			"dataflow": "Dataflow"
+			"dataflow": "データフロー"
 		}
 	},
 	"Painpoint": {
-		"title": "Painpoint",
-		"subtitle": "Your pain, our mission",
+		"title": "課題",
+		"subtitle": "あなたの悩みが、私たちの使命です",
 		"items": {
 			"0": {
-				"title": "Local First",
-				"pain": "Feel cloud content is slow and unable to ensure privacy?",
-				"solution": "With Polywise, all data is stored locally, supporting backup and recovery, and is ready to use right away.\nThere’s no need to worry about network unavailability or about your personal data being secretly used for AI training or shared with advertisers."
+				"title": "ローカルファースト",
+				"pain": "クラウド中心のツールは遅く、プライバシーも不安だと感じますか？",
+				"solution": "Polywise では、すべてのデータをローカルに保存し、バックアップと復元にも対応しています。\nネットワーク不調を気にせず使え、個人データが勝手に AI 学習や広告用途に使われる心配もありません。"
 			},
 			"1": {
-				"title": "User First",
-				"pain": "Worried that app providers sacrifice user experience for profit?",
-				"solution": "Polywise centers around localization to provide features, striving to deliver the best possible user experience.\nUnlike large cloud-based products, which incur bulky team and server costs, we prioritize user benefits over commercial interests."
+				"title": "ユーザーファースト",
+				"pain": "アプリ提供者が利益のために体験を犠牲にしていると感じますか？",
+				"solution": "Polywise はローカル中心の設計で機能を提供し、できる限り良いユーザー体験を目指しています。\n大規模なクラウド製品のように、巨大な組織やサーバー都合を優先するのではなく、ユーザーの利益を先に置きます。"
 			},
 			"2": {
-				"title": "Keep It Simple Stupid",
-				"pain": "Dislike All in One and the design style of cluttered in colors?",
-				"solution": "Polywise adopts a modular design for its features, avoiding the mental burden caused by an all-in-one approach.\nIt also employs an ultra-minimalist, paper-like design style, providing users with a visually stress-free experience to support long hours of immersive content creation."
+				"title": "シンプルであること",
+				"pain": "全部入りで雑然としたデザインのツールに疲れていませんか？",
+				"solution": "Polywise は機能をモジュール化し、オールインワン特有の重い認知負荷を避けています。\nさらに、紙のように静かなミニマルデザインで、長時間の没入的な作業でも視覚的な負担を抑えます。"
 			}
 		}
 	},
 	"Features": {
-		"title": "Features",
-		"subtitle": "Next-gen content and data solutions",
-		"origin": "Origin",
+		"title": "機能",
+		"subtitle": "次世代のコンテンツとデータのためのソリューション",
+		"origin": "背景",
 		"items": {
 			"0": {
 				"title": "Todo",
-				"desc": "Constant effort leads to success.\nTrack your daily actions with to-do lists and gain self-affirming energy with each completed task."
+				"desc": "継続は力なり。\n日々の行動を Todo に記録し、完了の積み重ねから前向きなエネルギーを得られます。"
 			},
 			"1": {
 				"title": "Note",
-				"desc": "Learning without reflection is a waste.\nBuilt on the Markdown standard, what you see is what you get, allowing you to enjoy an immersive writing experience."
+				"desc": "学んでも振り返らなければ身につきません。\nMarkdown を基盤にした WYSIWYG で、没入感のある執筆体験を提供します。"
 			},
 			"2": {
 				"title": "Pomo",
-				"desc": "A journey of a thousand miles begins with a single step.\nUse the Pomodoro technique to build small milestones and regain your focus."
+				"desc": "千里の道も一歩から。\nポモドーロ法で小さな節目を積み重ね、集中力を取り戻します。"
 			},
 			"3": {
 				"title": "Schedule",
-				"desc": "Greatness cannot be planned, but creation can.\nUse the schedule to build your goals in the dimension of time, and it’s better to face change than without one."
+				"desc": "偉大さは計画できなくても、創造は計画できます。\n時間軸で目標を組み立て、変化には無計画より計画で向き合えます。"
 			}
 		}
 	},
 	"Latest": {
-		"all": "View All",
+		"all": "すべて見る",
 		"journal": {
-			"title": "Journal",
-			"desc": "Latest developer's activities"
+			"title": "ジャーナル",
+			"desc": "最新の開発アクティビティ"
 		},
 		"changelog": {
-			"title": "Changelog",
-			"desc": "Log for the latest version"
+			"title": "変更履歴",
+			"desc": "最新バージョンの更新記録"
 		}
 	},
 	"Callback": {
-		"line_1": "Shape Your Context, ",
-		"line_2": "Keep It Yours"
+		"line_1": "あなたのコンテキストを形にし、",
+		"line_2": "あなたのものとして保つ"
 	}
 }

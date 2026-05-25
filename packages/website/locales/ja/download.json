@@ -1,7 +1,7 @@
 {
-	"title": "Download Polywise",
-	"desc": "Available for macOS and Windows.",
-	"btn_download": "Download for {platform}",
-	"latest": "Latest version",
-	"github_release": "Github Release"
+	"title": "Polywise をダウンロード",
+	"desc": "macOS と Windows に対応しています。",
+	"btn_download": "{platform} 版をダウンロード",
+	"latest": "最新バージョン",
+	"github_release": "GitHub Release"
 }
