@@ -38,7 +38,16 @@
 					font-weight: 500;
 				}
 
+				.feature_slot {
+					width: 100%;
+					min-height: 93px;
+					overflow: hidden;
+					contain: layout paint;
+				}
+
 				.feature {
+					display: block;
+					min-height: 72px;
 					margin-right: -12px;
 					margin-bottom: 21px;
 				}

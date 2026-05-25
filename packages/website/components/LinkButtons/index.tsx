@@ -1,6 +1,6 @@
 'use client'
 
-import { ArrowCircleDownIcon, ChatTeardropTextIcon } from '@phosphor-icons/react'
+import { ArrowCircleDownIcon, BookmarkIcon } from '@phosphor-icons/react'
 import { $ } from '@website/utils'
 import Link from 'next/link'
 
@@ -17,7 +17,7 @@ const Index = () => {
 				'
 				href='/docs/getting_started/start_guide'
 			>
-				<ChatTeardropTextIcon className='logo_app_store' weight='fill' size={30}></ChatTeardropTextIcon>
+				<BookmarkIcon className='logo_app_store' weight='fill' size={30}></BookmarkIcon>
 				<div className='flex flex-col items-start'>
 					<span className='line_1'>Getting started</span>
 					<span className='line_2'>Document</span>

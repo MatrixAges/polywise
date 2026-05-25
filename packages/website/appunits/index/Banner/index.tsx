@@ -65,18 +65,20 @@ const Index = () => {
 				'
 			>
 				<div className='title_wrap flex flex-col items-center'>
-					{show_type && (
-						<TypeAnimation
-							className='feature'
-							preRenderFirstString
-							wrapper='h1'
-							speed={{ type: 'keyStrokeDelayInMs', value: 90 }}
-							deletionSpeed={72}
-							cursor={true}
-							repeat={Infinity}
-							sequence={sequence}
-						/>
-					)}
+					<div className='feature_slot flex justify-center'>
+						{show_type && (
+							<TypeAnimation
+								className='feature'
+								preRenderFirstString
+								wrapper='h1'
+								speed={{ type: 'keyStrokeDelayInMs', value: 90 }}
+								deletionSpeed={72}
+								cursor={true}
+								repeat={Infinity}
+								sequence={sequence}
+							/>
+						)}
+					</div>
 					<h1 className='with'>
 						<span>{t('Banner.with')}</span>
 						<AnimatePresence mode='wait'>
