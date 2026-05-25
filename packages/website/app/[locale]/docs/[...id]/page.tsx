@@ -1,5 +1,4 @@
 import DocContentPage from '@website/components/DocContentPage'
-import notFoundImage from '@website/svgs/404.inline.svg'
 import { $ } from '@website/utils'
 import getDoc from '@website/utils/getDoc'
 
@@ -8,6 +7,8 @@ import styles from './index.module.css'
 interface IProps {
 	params: Promise<{ id: Array<string> }>
 }
+
+const notFoundImage = '/svgs/404.inline.svg'
 
 const Index = async ({ params }: IProps) => {
 	const id = (await params).id

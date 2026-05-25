@@ -1288,6 +1288,9 @@ importers:
       '@cloudflare/vite-plugin':
         specifier: ^1.38.0
         version: 1.38.0(bufferutil@4.1.0)(utf-8-validate@6.0.6)(vite@8.0.14(@types/node@25.9.1)(esbuild@0.27.3)(jiti@2.7.0)(terser@5.47.1)(yaml@2.9.0))(workerd@1.20260521.1)(wrangler@4.94.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))
+      '@svgr/plugin-jsx':
+        specifier: ^8.1.0
+        version: 8.1.0(@svgr/core@8.1.0(typescript@6.0.3))
       '@tailwindcss/postcss':
         specifier: ^4.3.0
         version: 4.3.0
@@ -17213,7 +17216,7 @@ snapshots:
       lru-cache: 11.5.0
       npm-pick-manifest: 11.0.3
       proc-log: 6.1.0
-      semver: 7.8.0
+      semver: 7.8.1
       which: 6.0.1
 
   '@npmcli/installed-package-contents@4.0.0':
@@ -17230,7 +17233,7 @@ snapshots:
       hosted-git-info: 9.0.3
       json-parse-even-better-errors: 5.0.0
       proc-log: 6.1.0
-      semver: 7.8.0
+      semver: 7.8.1
       spdx-expression-parse: 4.0.0
 
   '@npmcli/promise-spawn@9.0.1':
@@ -25170,7 +25173,7 @@ snapshots:
     dependencies:
       hosted-git-info: 9.0.3
       proc-log: 6.1.0
-      semver: 7.8.0
+      semver: 7.8.1
       validate-npm-package-name: 7.0.2
 
   npm-packlist@10.0.4:
@@ -25183,7 +25186,7 @@ snapshots:
       npm-install-checks: 8.0.0
       npm-normalize-package-bin: 5.0.0
       npm-package-arg: 13.0.2
-      semver: 7.8.0
+      semver: 7.8.1
 
   npm-registry-fetch@19.1.1:
     dependencies:
