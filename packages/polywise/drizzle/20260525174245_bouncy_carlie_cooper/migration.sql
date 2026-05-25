@@ -1,6 +1,7 @@
 CREATE TABLE `agent` (
 	`id` text PRIMARY KEY,
 	`name` text NOT NULL,
+	`role` text NOT NULL,
 	`description` text,
 	`photo` blob,
 	`avatar` text,
@@ -9,6 +10,7 @@ CREATE TABLE `agent` (
 	`soul` text,
 	`identity` text,
 	`memory` text DEFAULT '',
+	`is_frozen` integer DEFAULT false NOT NULL,
 	`order` real NOT NULL,
 	`model` text NOT NULL,
 	`created_at` integer,
@@ -73,6 +75,10 @@ CREATE TABLE `edge` (
 	`active_times` integer DEFAULT 1 NOT NULL,
 	`active_at` integer NOT NULL,
 	`is_frozen` integer DEFAULT false NOT NULL,
+	`state` text DEFAULT 'active' NOT NULL,
+	`stability` real DEFAULT 0 NOT NULL,
+	`rewire_score` real DEFAULT 0 NOT NULL,
+	`last_rewire_at` integer,
 	`created_at` integer NOT NULL,
 	CONSTRAINT `fk_edge_agent_id_agent_id_fk` FOREIGN KEY (`agent_id`) REFERENCES `agent`(`id`) ON DELETE CASCADE,
 	CONSTRAINT `fk_edge_source_id_node_id_fk` FOREIGN KEY (`source_id`) REFERENCES `node`(`id`) ON DELETE CASCADE,
@@ -90,6 +96,8 @@ CREATE TABLE `group` (
 	`id` text PRIMARY KEY,
 	`name` text NOT NULL,
 	`description` text,
+	`photo` blob,
+	`folders` text,
 	`created_at` integer,
 	`updated_at` integer
 );
@@ -117,8 +125,32 @@ CREATE TABLE `group_todo` (
 	CONSTRAINT `fk_group_todo_completed_by_agent_id_agent_id_fk` FOREIGN KEY (`completed_by_agent_id`) REFERENCES `agent`(`id`) ON DELETE SET NULL
 );
 --> statement-breakpoint
+CREATE TABLE `im_account` (
+	`id` text PRIMARY KEY,
+	`platform` text NOT NULL,
+	`account_id` text NOT NULL,
+	`label` text,
+	`enabled` integer DEFAULT true NOT NULL,
+	`config_json` text,
+	`status` text DEFAULT 'idle' NOT NULL,
+	`last_error` text,
+	`created_at` integer,
+	`updated_at` integer
+);
+--> statement-breakpoint
+CREATE TABLE `im_peer_state` (
+	`id` text PRIMARY KEY,
+	`platform` text NOT NULL,
+	`account_id` text NOT NULL,
+	`peer_key` text NOT NULL,
+	`state_json` text,
+	`created_at` integer,
+	`updated_at` integer
+);
+--> statement-breakpoint
 CREATE TABLE `link` (
 	`id` text PRIMARY KEY,
+	`hash` text,
 	`url` text NOT NULL,
 	`title` text NOT NULL,
 	`favicon` blob,
@@ -171,6 +203,21 @@ CREATE TABLE `project` (
 	`model` text,
 	`created_at` integer,
 	`updated_at` integer
+);
+--> statement-breakpoint
+CREATE TABLE `rewire_event` (
+	`id` text PRIMARY KEY,
+	`agent_id` text,
+	`session_id` text,
+	`stimulus_key` text NOT NULL,
+	`signal` text NOT NULL,
+	`role` text NOT NULL,
+	`node_id` text NOT NULL,
+	`strength` real DEFAULT 1 NOT NULL,
+	`created_at` integer NOT NULL,
+	CONSTRAINT `fk_rewire_event_agent_id_agent_id_fk` FOREIGN KEY (`agent_id`) REFERENCES `agent`(`id`) ON DELETE CASCADE,
+	CONSTRAINT `fk_rewire_event_session_id_session_id_fk` FOREIGN KEY (`session_id`) REFERENCES `session`(`id`) ON DELETE SET NULL,
+	CONSTRAINT `fk_rewire_event_node_id_node_id_fk` FOREIGN KEY (`node_id`) REFERENCES `node`(`id`) ON DELETE CASCADE
 );
 --> statement-breakpoint
 CREATE TABLE `session` (
@@ -259,6 +306,15 @@ CREATE TABLE `agent_todo` (
 	CONSTRAINT `fk_agent_todo_todo_id_todo_id_fk` FOREIGN KEY (`todo_id`) REFERENCES `todo`(`id`) ON DELETE CASCADE
 );
 --> statement-breakpoint
+CREATE TABLE `edge_article` (
+	`edge_id` text NOT NULL,
+	`article_id` text NOT NULL,
+	`created_at` integer,
+	CONSTRAINT `edge_article_pk` PRIMARY KEY(`edge_id`, `article_id`),
+	CONSTRAINT `fk_edge_article_edge_id_edge_id_fk` FOREIGN KEY (`edge_id`) REFERENCES `edge`(`id`) ON DELETE CASCADE,
+	CONSTRAINT `fk_edge_article_article_id_article_id_fk` FOREIGN KEY (`article_id`) REFERENCES `article`(`id`) ON DELETE CASCADE
+);
+--> statement-breakpoint
 CREATE TABLE `group_agent` (
 	`group_id` text NOT NULL,
 	`agent_id` text NOT NULL,
@@ -303,6 +359,32 @@ CREATE TABLE `notification_session` (
 	CONSTRAINT `notification_session_pk` PRIMARY KEY(`notification_id`, `session_id`),
 	CONSTRAINT `fk_notification_session_notification_id_notification_id_fk` FOREIGN KEY (`notification_id`) REFERENCES `notification`(`id`) ON DELETE CASCADE,
 	CONSTRAINT `fk_notification_session_session_id_session_id_fk` FOREIGN KEY (`session_id`) REFERENCES `session`(`id`) ON DELETE CASCADE
+);
+--> statement-breakpoint
+CREATE TABLE `post_article` (
+	`post_id` text NOT NULL,
+	`article_id` text NOT NULL,
+	`created_at` integer,
+	CONSTRAINT `post_article_pk` PRIMARY KEY(`post_id`, `article_id`),
+	CONSTRAINT `fk_post_article_post_id_article_id_fk` FOREIGN KEY (`post_id`) REFERENCES `article`(`id`) ON DELETE CASCADE,
+	CONSTRAINT `fk_post_article_article_id_article_id_fk` FOREIGN KEY (`article_id`) REFERENCES `article`(`id`) ON DELETE CASCADE
+);
+--> statement-breakpoint
+CREATE TABLE `post_project` (
+	`post_id` text NOT NULL,
+	`project_id` text NOT NULL,
+	`created_at` integer,
+	CONSTRAINT `post_project_pk` PRIMARY KEY(`post_id`, `project_id`),
+	CONSTRAINT `fk_post_project_post_id_article_id_fk` FOREIGN KEY (`post_id`) REFERENCES `article`(`id`) ON DELETE CASCADE,
+	CONSTRAINT `fk_post_project_project_id_project_id_fk` FOREIGN KEY (`project_id`) REFERENCES `project`(`id`) ON DELETE CASCADE
+);
+--> statement-breakpoint
+CREATE TABLE `post_session` (
+	`post_id` text NOT NULL,
+	`session_id` text NOT NULL,
+	`created_at` integer,
+	CONSTRAINT `fk_post_session_post_id_article_id_fk` FOREIGN KEY (`post_id`) REFERENCES `article`(`id`) ON DELETE CASCADE,
+	CONSTRAINT `fk_post_session_session_id_session_id_fk` FOREIGN KEY (`session_id`) REFERENCES `session`(`id`) ON DELETE CASCADE
 );
 --> statement-breakpoint
 CREATE TABLE `project_session` (
@@ -376,6 +458,7 @@ CREATE INDEX `document_updated_at_idx` ON `document` (`updated_at`);--> statemen
 CREATE INDEX `edge_agent_id_idx` ON `edge` (`agent_id`);--> statement-breakpoint
 CREATE INDEX `edge_source_idx` ON `edge` (`source_id`);--> statement-breakpoint
 CREATE INDEX `edge_target_idx` ON `edge` (`target_id`);--> statement-breakpoint
+CREATE INDEX `edge_state_idx` ON `edge` (`state`);--> statement-breakpoint
 CREATE INDEX `edge_created_at_idx` ON `edge` (`created_at`);--> statement-breakpoint
 CREATE UNIQUE INDEX `edge_source_target_idx` ON `edge` (`source_id`,`target_id`);--> statement-breakpoint
 CREATE INDEX `file_path_idx` ON `file` (`path`);--> statement-breakpoint
@@ -388,6 +471,13 @@ CREATE INDEX `group_todo_status_idx` ON `group_todo` (`status`);--> statement-br
 CREATE INDEX `group_todo_order_idx` ON `group_todo` (`order`);--> statement-breakpoint
 CREATE INDEX `group_todo_assignee_idx` ON `group_todo` (`assignee_agent_id`);--> statement-breakpoint
 CREATE INDEX `group_todo_updated_at_idx` ON `group_todo` (`updated_at`);--> statement-breakpoint
+CREATE UNIQUE INDEX `im_account_platform_account_idx` ON `im_account` (`platform`,`account_id`);--> statement-breakpoint
+CREATE INDEX `im_account_enabled_idx` ON `im_account` (`enabled`);--> statement-breakpoint
+CREATE INDEX `im_account_status_idx` ON `im_account` (`status`);--> statement-breakpoint
+CREATE UNIQUE INDEX `im_peer_state_platform_account_peer_idx` ON `im_peer_state` (`platform`,`account_id`,`peer_key`);--> statement-breakpoint
+CREATE INDEX `im_peer_state_platform_idx` ON `im_peer_state` (`platform`);--> statement-breakpoint
+CREATE INDEX `im_peer_state_account_idx` ON `im_peer_state` (`account_id`);--> statement-breakpoint
+CREATE UNIQUE INDEX `link_hash_idx` ON `link` (`hash`);--> statement-breakpoint
 CREATE INDEX `link_status_idx` ON `link` (`status`);--> statement-breakpoint
 CREATE INDEX `link_generate_at_idx` ON `link` (`generate_at`);--> statement-breakpoint
 CREATE INDEX `link_created_at_idx` ON `link` (`created_at`);--> statement-breakpoint
@@ -404,6 +494,12 @@ CREATE INDEX `notification_updated_at_idx` ON `notification` (`updated_at`);--> 
 CREATE INDEX `project_name_idx` ON `project` (`name`);--> statement-breakpoint
 CREATE INDEX `project_created_at_idx` ON `project` (`created_at`);--> statement-breakpoint
 CREATE INDEX `project_updated_at_idx` ON `project` (`updated_at`);--> statement-breakpoint
+CREATE INDEX `rewire_event_agent_idx` ON `rewire_event` (`agent_id`);--> statement-breakpoint
+CREATE INDEX `rewire_event_agent_created_idx` ON `rewire_event` (`agent_id`,`created_at`);--> statement-breakpoint
+CREATE INDEX `rewire_event_stimulus_idx` ON `rewire_event` (`stimulus_key`);--> statement-breakpoint
+CREATE INDEX `rewire_event_session_idx` ON `rewire_event` (`session_id`);--> statement-breakpoint
+CREATE INDEX `rewire_event_node_idx` ON `rewire_event` (`node_id`);--> statement-breakpoint
+CREATE INDEX `rewire_event_created_at_idx` ON `rewire_event` (`created_at`);--> statement-breakpoint
 CREATE INDEX `session_is_im_idx` ON `session` (`im`);--> statement-breakpoint
 CREATE INDEX `session_is_cron_idx` ON `session` (`cron`);--> statement-breakpoint
 CREATE INDEX `session_created_at_idx` ON `session` (`created_at`);--> statement-breakpoint
@@ -424,6 +520,7 @@ CREATE INDEX `agent_session_session_id_idx` ON `agent_session` (`session_id`);--
 CREATE UNIQUE INDEX `agent_session_agent_session_idx` ON `agent_session` (`agent_id`,`session_id`);--> statement-breakpoint
 CREATE INDEX `agent_skill_id_idx` ON `agent_skill` (`skill_id`);--> statement-breakpoint
 CREATE INDEX `agent_todo_todo_id_idx` ON `agent_todo` (`todo_id`);--> statement-breakpoint
+CREATE INDEX `edge_article_article_id_idx` ON `edge_article` (`article_id`);--> statement-breakpoint
 CREATE INDEX `group_agent_group_idx` ON `group_agent` (`group_id`);--> statement-breakpoint
 CREATE INDEX `group_agent_agent_idx` ON `group_agent` (`agent_id`);--> statement-breakpoint
 CREATE INDEX `group_session_group_idx` ON `group_session` (`group_id`);--> statement-breakpoint
@@ -431,6 +528,11 @@ CREATE UNIQUE INDEX `group_session_session_idx` ON `group_session` (`session_id`
 CREATE INDEX `link_article_article_id_idx` ON `link_article` (`article_id`);--> statement-breakpoint
 CREATE INDEX `node_chunk_chunk_id_idx` ON `node_chunk` (`chunk_id`);--> statement-breakpoint
 CREATE INDEX `notification_session_session_id_idx` ON `notification_session` (`session_id`);--> statement-breakpoint
+CREATE INDEX `post_article_article_id_idx` ON `post_article` (`article_id`);--> statement-breakpoint
+CREATE INDEX `post_project_project_id_idx` ON `post_project` (`project_id`);--> statement-breakpoint
+CREATE UNIQUE INDEX `post_session_post_id_idx` ON `post_session` (`post_id`);--> statement-breakpoint
+CREATE UNIQUE INDEX `post_session_session_id_idx` ON `post_session` (`session_id`);--> statement-breakpoint
+CREATE INDEX `post_session_created_at_idx` ON `post_session` (`created_at`);--> statement-breakpoint
 CREATE INDEX `project_session_project_id_idx` ON `project_session` (`project_id`);--> statement-breakpoint
 CREATE INDEX `project_session_session_id_idx` ON `project_session` (`session_id`);--> statement-breakpoint
 CREATE INDEX `project_todo_project_id_idx` ON `project_todo` (`project_id`);--> statement-breakpoint

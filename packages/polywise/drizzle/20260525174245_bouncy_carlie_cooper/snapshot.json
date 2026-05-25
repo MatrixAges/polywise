@@ -1,9 +1,9 @@
 {
   "version": "7",
   "dialect": "sqlite",
-  "id": "01e1f976-657e-4164-b58b-3cf063af479e",
+  "id": "b30667b6-a5ba-40cd-b81f-d2ff1a82ca76",
   "prevIds": [
-    "e909b56e-2f4c-4f4b-ad4e-1b6af3dfd6eb"
+    "00000000-0000-0000-0000-000000000000"
   ],
   "ddl": [
     {
@@ -39,6 +39,14 @@
       "entityType": "tables"
     },
     {
+      "name": "im_account",
+      "entityType": "tables"
+    },
+    {
+      "name": "im_peer_state",
+      "entityType": "tables"
+    },
+    {
       "name": "link",
       "entityType": "tables"
     },
@@ -56,6 +64,10 @@
     },
     {
       "name": "project",
+      "entityType": "tables"
+    },
+    {
+      "name": "rewire_event",
       "entityType": "tables"
     },
     {
@@ -91,6 +103,10 @@
       "entityType": "tables"
     },
     {
+      "name": "edge_article",
+      "entityType": "tables"
+    },
+    {
       "name": "group_agent",
       "entityType": "tables"
     },
@@ -108,6 +124,18 @@
     },
     {
       "name": "notification_session",
+      "entityType": "tables"
+    },
+    {
+      "name": "post_article",
+      "entityType": "tables"
+    },
+    {
+      "name": "post_project",
+      "entityType": "tables"
+    },
+    {
+      "name": "post_session",
       "entityType": "tables"
     },
     {
@@ -241,6 +269,16 @@
       "default": "''",
       "generated": null,
       "name": "memory",
+      "entityType": "columns",
+      "table": "agent"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "false",
+      "generated": null,
+      "name": "is_frozen",
       "entityType": "columns",
       "table": "agent"
     },
@@ -748,6 +786,46 @@
       "table": "edge"
     },
     {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "'active'",
+      "generated": null,
+      "name": "state",
+      "entityType": "columns",
+      "table": "edge"
+    },
+    {
+      "type": "real",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "0",
+      "generated": null,
+      "name": "stability",
+      "entityType": "columns",
+      "table": "edge"
+    },
+    {
+      "type": "real",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "0",
+      "generated": null,
+      "name": "rewire_score",
+      "entityType": "columns",
+      "table": "edge"
+    },
+    {
+      "type": "integer",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "last_rewire_at",
+      "entityType": "columns",
+      "table": "edge"
+    },
+    {
       "type": "integer",
       "notNull": true,
       "autoincrement": false,
@@ -1034,6 +1112,186 @@
       "default": null,
       "generated": null,
       "name": "id",
+      "entityType": "columns",
+      "table": "im_account"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "platform",
+      "entityType": "columns",
+      "table": "im_account"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "account_id",
+      "entityType": "columns",
+      "table": "im_account"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "label",
+      "entityType": "columns",
+      "table": "im_account"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "true",
+      "generated": null,
+      "name": "enabled",
+      "entityType": "columns",
+      "table": "im_account"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "config_json",
+      "entityType": "columns",
+      "table": "im_account"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "'idle'",
+      "generated": null,
+      "name": "status",
+      "entityType": "columns",
+      "table": "im_account"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "last_error",
+      "entityType": "columns",
+      "table": "im_account"
+    },
+    {
+      "type": "integer",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "table": "im_account"
+    },
+    {
+      "type": "integer",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "table": "im_account"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "im_peer_state"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "platform",
+      "entityType": "columns",
+      "table": "im_peer_state"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "account_id",
+      "entityType": "columns",
+      "table": "im_peer_state"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "peer_key",
+      "entityType": "columns",
+      "table": "im_peer_state"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "state_json",
+      "entityType": "columns",
+      "table": "im_peer_state"
+    },
+    {
+      "type": "integer",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "table": "im_peer_state"
+    },
+    {
+      "type": "integer",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "table": "im_peer_state"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "link"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "hash",
       "entityType": "columns",
       "table": "link"
     },
@@ -1406,6 +1664,96 @@
       "name": "updated_at",
       "entityType": "columns",
       "table": "project"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "rewire_event"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "agent_id",
+      "entityType": "columns",
+      "table": "rewire_event"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "session_id",
+      "entityType": "columns",
+      "table": "rewire_event"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "stimulus_key",
+      "entityType": "columns",
+      "table": "rewire_event"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "signal",
+      "entityType": "columns",
+      "table": "rewire_event"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "role",
+      "entityType": "columns",
+      "table": "rewire_event"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "node_id",
+      "entityType": "columns",
+      "table": "rewire_event"
+    },
+    {
+      "type": "real",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "1",
+      "generated": null,
+      "name": "strength",
+      "entityType": "columns",
+      "table": "rewire_event"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "table": "rewire_event"
     },
     {
       "type": "text",
@@ -1893,6 +2241,36 @@
       "autoincrement": false,
       "default": null,
       "generated": null,
+      "name": "edge_id",
+      "entityType": "columns",
+      "table": "edge_article"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "article_id",
+      "entityType": "columns",
+      "table": "edge_article"
+    },
+    {
+      "type": "integer",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "table": "edge_article"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
       "name": "group_id",
       "entityType": "columns",
       "table": "group_agent"
@@ -2046,6 +2424,96 @@
       "name": "created_at",
       "entityType": "columns",
       "table": "notification_session"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "post_id",
+      "entityType": "columns",
+      "table": "post_article"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "article_id",
+      "entityType": "columns",
+      "table": "post_article"
+    },
+    {
+      "type": "integer",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "table": "post_article"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "post_id",
+      "entityType": "columns",
+      "table": "post_project"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "project_id",
+      "entityType": "columns",
+      "table": "post_project"
+    },
+    {
+      "type": "integer",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "table": "post_project"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "post_id",
+      "entityType": "columns",
+      "table": "post_session"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "session_id",
+      "entityType": "columns",
+      "table": "post_session"
+    },
+    {
+      "type": "integer",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "table": "post_session"
     },
     {
       "type": "text",
@@ -2413,6 +2881,51 @@
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "nameExplicit": false,
+      "name": "fk_rewire_event_agent_id_agent_id_fk",
+      "entityType": "fks",
+      "table": "rewire_event"
+    },
+    {
+      "columns": [
+        "session_id"
+      ],
+      "tableTo": "session",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "SET NULL",
+      "nameExplicit": false,
+      "name": "fk_rewire_event_session_id_session_id_fk",
+      "entityType": "fks",
+      "table": "rewire_event"
+    },
+    {
+      "columns": [
+        "node_id"
+      ],
+      "tableTo": "node",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "nameExplicit": false,
+      "name": "fk_rewire_event_node_id_node_id_fk",
+      "entityType": "fks",
+      "table": "rewire_event"
+    },
+    {
+      "columns": [
+        "agent_id"
+      ],
+      "tableTo": "agent",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "nameExplicit": false,
       "name": "fk_agent_article_agent_id_agent_id_fk",
       "entityType": "fks",
       "table": "agent_article"
@@ -2551,6 +3064,36 @@
       "name": "fk_agent_todo_todo_id_todo_id_fk",
       "entityType": "fks",
       "table": "agent_todo"
+    },
+    {
+      "columns": [
+        "edge_id"
+      ],
+      "tableTo": "edge",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "nameExplicit": false,
+      "name": "fk_edge_article_edge_id_edge_id_fk",
+      "entityType": "fks",
+      "table": "edge_article"
+    },
+    {
+      "columns": [
+        "article_id"
+      ],
+      "tableTo": "article",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "nameExplicit": false,
+      "name": "fk_edge_article_article_id_article_id_fk",
+      "entityType": "fks",
+      "table": "edge_article"
     },
     {
       "columns": [
@@ -2701,6 +3244,96 @@
       "name": "fk_notification_session_session_id_session_id_fk",
       "entityType": "fks",
       "table": "notification_session"
+    },
+    {
+      "columns": [
+        "post_id"
+      ],
+      "tableTo": "article",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "nameExplicit": false,
+      "name": "fk_post_article_post_id_article_id_fk",
+      "entityType": "fks",
+      "table": "post_article"
+    },
+    {
+      "columns": [
+        "article_id"
+      ],
+      "tableTo": "article",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "nameExplicit": false,
+      "name": "fk_post_article_article_id_article_id_fk",
+      "entityType": "fks",
+      "table": "post_article"
+    },
+    {
+      "columns": [
+        "post_id"
+      ],
+      "tableTo": "article",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "nameExplicit": false,
+      "name": "fk_post_project_post_id_article_id_fk",
+      "entityType": "fks",
+      "table": "post_project"
+    },
+    {
+      "columns": [
+        "project_id"
+      ],
+      "tableTo": "project",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "nameExplicit": false,
+      "name": "fk_post_project_project_id_project_id_fk",
+      "entityType": "fks",
+      "table": "post_project"
+    },
+    {
+      "columns": [
+        "post_id"
+      ],
+      "tableTo": "article",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "nameExplicit": false,
+      "name": "fk_post_session_post_id_article_id_fk",
+      "entityType": "fks",
+      "table": "post_session"
+    },
+    {
+      "columns": [
+        "session_id"
+      ],
+      "tableTo": "session",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "nameExplicit": false,
+      "name": "fk_post_session_session_id_session_id_fk",
+      "entityType": "fks",
+      "table": "post_session"
     },
     {
       "columns": [
@@ -2909,6 +3542,16 @@
     },
     {
       "columns": [
+        "edge_id",
+        "article_id"
+      ],
+      "nameExplicit": false,
+      "name": "edge_article_pk",
+      "entityType": "pks",
+      "table": "edge_article"
+    },
+    {
+      "columns": [
         "group_id",
         "agent_id"
       ],
@@ -2956,6 +3599,26 @@
       "name": "notification_session_pk",
       "entityType": "pks",
       "table": "notification_session"
+    },
+    {
+      "columns": [
+        "post_id",
+        "article_id"
+      ],
+      "nameExplicit": false,
+      "name": "post_article_pk",
+      "entityType": "pks",
+      "table": "post_article"
+    },
+    {
+      "columns": [
+        "post_id",
+        "project_id"
+      ],
+      "nameExplicit": false,
+      "name": "post_project_pk",
+      "entityType": "pks",
+      "table": "post_project"
     },
     {
       "columns": [
@@ -3074,6 +3737,24 @@
         "id"
       ],
       "nameExplicit": false,
+      "name": "im_account_pk",
+      "table": "im_account",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "im_peer_state_pk",
+      "table": "im_peer_state",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
       "name": "link_pk",
       "table": "link",
       "entityType": "pks"
@@ -3112,6 +3793,15 @@
       "nameExplicit": false,
       "name": "project_pk",
       "table": "project",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "rewire_event_pk",
+      "table": "rewire_event",
       "entityType": "pks"
     },
     {
@@ -3441,6 +4131,20 @@
     {
       "columns": [
         {
+          "value": "state",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "edge_state_idx",
+      "entityType": "indexes",
+      "table": "edge"
+    },
+    {
+      "columns": [
+        {
           "value": "created_at",
           "isExpression": false
         }
@@ -3609,6 +4313,116 @@
       "name": "group_todo_updated_at_idx",
       "entityType": "indexes",
       "table": "group_todo"
+    },
+    {
+      "columns": [
+        {
+          "value": "platform",
+          "isExpression": false
+        },
+        {
+          "value": "account_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "origin": "manual",
+      "name": "im_account_platform_account_idx",
+      "entityType": "indexes",
+      "table": "im_account"
+    },
+    {
+      "columns": [
+        {
+          "value": "enabled",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "im_account_enabled_idx",
+      "entityType": "indexes",
+      "table": "im_account"
+    },
+    {
+      "columns": [
+        {
+          "value": "status",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "im_account_status_idx",
+      "entityType": "indexes",
+      "table": "im_account"
+    },
+    {
+      "columns": [
+        {
+          "value": "platform",
+          "isExpression": false
+        },
+        {
+          "value": "account_id",
+          "isExpression": false
+        },
+        {
+          "value": "peer_key",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "origin": "manual",
+      "name": "im_peer_state_platform_account_peer_idx",
+      "entityType": "indexes",
+      "table": "im_peer_state"
+    },
+    {
+      "columns": [
+        {
+          "value": "platform",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "im_peer_state_platform_idx",
+      "entityType": "indexes",
+      "table": "im_peer_state"
+    },
+    {
+      "columns": [
+        {
+          "value": "account_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "im_peer_state_account_idx",
+      "entityType": "indexes",
+      "table": "im_peer_state"
+    },
+    {
+      "columns": [
+        {
+          "value": "hash",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "origin": "manual",
+      "name": "link_hash_idx",
+      "entityType": "indexes",
+      "table": "link"
     },
     {
       "columns": [
@@ -3833,6 +4647,94 @@
       "name": "project_updated_at_idx",
       "entityType": "indexes",
       "table": "project"
+    },
+    {
+      "columns": [
+        {
+          "value": "agent_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "rewire_event_agent_idx",
+      "entityType": "indexes",
+      "table": "rewire_event"
+    },
+    {
+      "columns": [
+        {
+          "value": "agent_id",
+          "isExpression": false
+        },
+        {
+          "value": "created_at",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "rewire_event_agent_created_idx",
+      "entityType": "indexes",
+      "table": "rewire_event"
+    },
+    {
+      "columns": [
+        {
+          "value": "stimulus_key",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "rewire_event_stimulus_idx",
+      "entityType": "indexes",
+      "table": "rewire_event"
+    },
+    {
+      "columns": [
+        {
+          "value": "session_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "rewire_event_session_idx",
+      "entityType": "indexes",
+      "table": "rewire_event"
+    },
+    {
+      "columns": [
+        {
+          "value": "node_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "rewire_event_node_idx",
+      "entityType": "indexes",
+      "table": "rewire_event"
+    },
+    {
+      "columns": [
+        {
+          "value": "created_at",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "rewire_event_created_at_idx",
+      "entityType": "indexes",
+      "table": "rewire_event"
     },
     {
       "columns": [
@@ -4121,6 +5023,20 @@
     {
       "columns": [
         {
+          "value": "article_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "edge_article_article_id_idx",
+      "entityType": "indexes",
+      "table": "edge_article"
+    },
+    {
+      "columns": [
+        {
           "value": "group_id",
           "isExpression": false
         }
@@ -4215,6 +5131,76 @@
       "name": "notification_session_session_id_idx",
       "entityType": "indexes",
       "table": "notification_session"
+    },
+    {
+      "columns": [
+        {
+          "value": "article_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "post_article_article_id_idx",
+      "entityType": "indexes",
+      "table": "post_article"
+    },
+    {
+      "columns": [
+        {
+          "value": "project_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "post_project_project_id_idx",
+      "entityType": "indexes",
+      "table": "post_project"
+    },
+    {
+      "columns": [
+        {
+          "value": "post_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "origin": "manual",
+      "name": "post_session_post_id_idx",
+      "entityType": "indexes",
+      "table": "post_session"
+    },
+    {
+      "columns": [
+        {
+          "value": "session_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "origin": "manual",
+      "name": "post_session_session_id_idx",
+      "entityType": "indexes",
+      "table": "post_session"
+    },
+    {
+      "columns": [
+        {
+          "value": "created_at",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "post_session_created_at_idx",
+      "entityType": "indexes",
+      "table": "post_session"
     },
     {
       "columns": [
