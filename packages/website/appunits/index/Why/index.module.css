@@ -227,8 +227,8 @@
 				width: 64px;
 				height: 64px;
 				margin: 30px 0;
-				border-radius: var(--radius_large);
-				font-size: 30px;
+				border-radius: 50%;
+				font-size: 24px;
 				backdrop-filter: var(--blur);
 
 				&.if_wrap {

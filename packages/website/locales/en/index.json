@@ -53,8 +53,8 @@
 		}
 	},
 	"Why": {
-		"title": "Why",
-		"subtitle": "Most AI loses context between sessions. Polywise keeps it structured, searchable, and yours.",
+		"title": "Why Polywise",
+		"subtitle": "Grow when chat with agents",
 		"roles": {
 			"user": "You",
 			"ai": "Agents",
