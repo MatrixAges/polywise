@@ -306,7 +306,6 @@ const Index = (props: PropsWithChildren) => {
 									<div
 										className='
 										flex flex-col
-										text-[13px]
 										menu_group_items
 									'
 									>
