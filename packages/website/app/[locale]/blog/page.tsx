@@ -11,6 +11,7 @@ import styles from './index.module.css'
 const Index = () => {
 	const t = useTranslations('blog')
 	const { locale } = useLocale()
+	const getTitle = (title: { zh: string; en: string }) => (locale === 'zh' ? title.zh : title.en)
 
 	return (
 		<div className={$.cx('limited_content_wrap flex flex-col', styles._local)}>
@@ -28,7 +29,7 @@ const Index = () => {
 							box-border
 							heading_blog_item lightcard top clickable
 						'
-						href={`/blog/${item.id}?title=${item.title[locale]}`}
+						href={`/blog/${item.id}?title=${getTitle(item.title)}`}
 						key={item.id}
 					>
 						<div
@@ -50,7 +51,7 @@ const Index = () => {
 							'
 						>
 							<span className='date'>{item.date}</span>
-							<h2>{item.title[locale]}</h2>
+							<h2>{getTitle(item.title)}</h2>
 						</div>
 					</Link>
 				))}

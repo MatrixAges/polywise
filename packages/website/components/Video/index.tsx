@@ -50,7 +50,7 @@ const Index = (props: IProps) => {
 		video.pause()
 	}, [visible])
 
-	const play = useMemoizedFn(() => ref.current.play())
+	const play = useMemoizedFn(() => ref.current?.play())
 
 	return (
 		<div className={$.cx('relative w-full', styles.wrap)}>
@@ -88,7 +88,7 @@ const Index = (props: IProps) => {
 				controls={played}
 				{...rest_props}
 			>
-				<source src={src} type={type} />
+				<source src={src as string} type={type} />
 			</video>
 		</div>
 	)

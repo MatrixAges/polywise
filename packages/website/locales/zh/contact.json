@@ -13,10 +13,10 @@
 		}
 	},
 	"references": {
-		"reddit": {
+		"discord": {
 			"title": "加入社区",
 			"desc": "提交您的想法和建议，分享您的最佳实践。",
-			"bth": "加入Reddit"
+			"bth": "加入Discord"
 		},
 		"docs": {
 			"title": "文档",

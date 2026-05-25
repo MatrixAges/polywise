@@ -33,6 +33,7 @@ const Index = (props: IProps) => {
 
 	const [page] = useState(0)
 	const { locale } = useLocale()
+	const getTitle = (title: { zh: string; en: string }) => (locale === 'zh' ? title.zh : title.en)
 
 	const items = useMemo(() => group[page], [page])
 
@@ -57,14 +58,14 @@ const Index = (props: IProps) => {
 				{items.map((item, index) => (
 					<Link
 						className='item flex items-center'
-						href={`/${type}/${item.id}?title=${item.title[locale]}`}
+						href={`/${type}/${item.id}?title=${getTitle(item.title)}`}
 						key={index}
 					>
 						<span className='id box-border'>
 							{id_prefix}
 							{item.id}
 						</span>
-						<h3 className='title'>{item.title[locale]}</h3>
+						<h3 className='title'>{getTitle(item.title)}</h3>
 						<div className='right_wrap'>
 							{item.date ?? <LinkIcon className='icon'></LinkIcon>}
 						</div>

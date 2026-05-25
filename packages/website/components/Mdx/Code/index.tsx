@@ -6,7 +6,7 @@ import { highlight } from '@website/utils/shiki'
 
 import styles from './index.module.css'
 
-import type { ReactNode } from 'react'
+import type { ReactElement, ReactNode } from 'react'
 import type { BundledLanguage } from 'shiki/bundle/web'
 
 interface IProps {
@@ -18,24 +18,27 @@ const Index = (props: IProps) => {
 	const { children, language } = props
 	const [html, setHTML] = useState<string>('')
 	const [copyied, setCopyied] = useState(false)
-	const lang = useRef<BundledLanguage>()
-	const code = useRef()
+	const lang = useRef<BundledLanguage>('js')
+	const code = useRef('')
 
 	useLayoutEffect(() => {
-		const c = children as JSX.Element
+		const c = children as ReactElement<{
+			children?: string
+			className?: string
+		}>
 
 		if (!c || !c.props.children) return
 
 		code.current = c.props.children
 		lang.current = (c.props.className?.replace('language-', '') || 'js') as BundledLanguage
 
-		highlight(code.current!, lang.current).then(setHTML)
+		highlight(code.current, lang.current).then(setHTML)
 	}, [children, language])
 
 	const copy = useMemoizedFn(() => {
 		setCopyied(true)
 
-		navigator.clipboard.writeText(code.current!)
+		navigator.clipboard.writeText(code.current)
 
 		setTimeout(() => {
 			setCopyied(false)

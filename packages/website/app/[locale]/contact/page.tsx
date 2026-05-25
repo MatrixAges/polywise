@@ -1,6 +1,6 @@
 'use client'
 
-import { ChatDots, Files, Microphone, RedditLogo, Users, YoutubeLogo } from '@phosphor-icons/react'
+import { ChatDots, DiscordLogoIcon, Files, Users } from '@phosphor-icons/react'
 import { mails, medias } from '@website/appdata/app'
 import useLocale from '@website/hooks/useLocale'
 import { Link } from '@website/i18n/navigation'
@@ -55,11 +55,11 @@ const Index = () => {
 			<div className='contact_items flex'>
 				<div className='contact_item flex flex-col'>
 					<div className='flex items-center'>
-						<RedditLogo weight='fill'></RedditLogo>
-						<h2>{t('references.reddit.title')}</h2>
+						<DiscordLogoIcon weight='fill'></DiscordLogoIcon>
+						<h2>{t('references.discord.title')}</h2>
 					</div>
 					<span className='desc'>{t('references.reddit.desc')}</span>
-					<a className='btn_link' href={medias.reddit} target='_blank'>
+					<a className='btn_link' href={medias.discord} target='_blank'>
 						{t_global('visit')} &gt;
 					</a>
 				</div>

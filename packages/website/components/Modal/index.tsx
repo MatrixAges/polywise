@@ -10,7 +10,9 @@ import { createPortal } from 'react-dom'
 
 import styles from './index.module.css'
 
-import type { MouseEvent, ReactNode } from 'react'
+import type { MouseEvent as ReactMouseEvent, ReactNode } from 'react'
+
+type CancelEvent = ReactMouseEvent<HTMLElement> | globalThis.MouseEvent | globalThis.TouchEvent
 
 interface IProps {
 	children: ReactNode
@@ -25,7 +27,7 @@ interface IProps {
 	disablePadding?: boolean
 	hideClose?: boolean
 	zIndex?: number
-	onCancel?: (e?: MouseEvent<HTMLDivElement>) => void
+	onCancel?: (e?: CancelEvent) => void
 	getContainer?: () => Element
 	getRef?: (v: HTMLDivElement) => void
 }
@@ -85,7 +87,7 @@ const Index = (props: IProps) => {
 		if (!maskClosable) return
 		if (e.target !== ref_content_wrap.current) return
 
-		onCancel?.(e as unknown as MouseEvent<HTMLDivElement>)
+		onCancel?.(e)
 	}, ref_content)
 
 	useEffect(() => {

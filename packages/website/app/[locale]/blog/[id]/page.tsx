@@ -10,7 +10,7 @@ const Index = async ({ params, searchParams }: IProps) => {
 	const id = (await params).id
 	const md = await getMd('blog', id)
 
-	return <MDContentPage id={id} title={searchParams.title} md={md} hide_id by_blog></MDContentPage>
+	return <MDContentPage id={id} title={searchParams.title} md={md} hide_id></MDContentPage>
 }
 
 export default Index

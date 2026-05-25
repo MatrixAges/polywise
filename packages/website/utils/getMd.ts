@@ -4,7 +4,17 @@ import { getContent } from '@website/utils/content'
 import { fromMarkdown } from 'mdast-util-from-markdown'
 import { toc as genToc } from 'mdast-util-toc'
 
-export default async (type: 'journal' | 'changelog' | 'blog', id: string, with_toc?: boolean) => {
+type ContentType = 'journal' | 'changelog' | 'blog'
+
+interface MdWithToc {
+	md: string
+	toc: ReturnType<typeof getToc>
+}
+
+function getMd(type: ContentType, id: string): Promise<string>
+function getMd(type: ContentType, id: string, with_toc: false): Promise<string>
+function getMd(type: ContentType, id: string, with_toc: true): Promise<MdWithToc>
+async function getMd(type: ContentType, id: string, with_toc?: boolean) {
 	const { locale } = await getUserLocale()
 	const md = getContent(type, id, locale)
 
@@ -32,3 +42,5 @@ export default async (type: 'journal' | 'changelog' | 'blog', id: string, with_t
 
 	return md
 }
+
+export default getMd

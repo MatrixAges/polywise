@@ -13,10 +13,10 @@
 		}
 	},
 	"references": {
-		"reddit": {
+		"discord": {
 			"title": "Join the community",
 			"desc": "Submit your thoughts and suggestions on Polywise and share your best practices.",
-			"bth": "Join Reddit"
+			"bth": "Join Discord"
 		},
 		"docs": {
 			"title": "Documentation",
