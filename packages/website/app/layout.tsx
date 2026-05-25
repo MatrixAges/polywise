@@ -36,7 +36,7 @@ const RootLayout = async ({ children }: PropsWithChildren) => {
 				<meta charSet='UTF-8' />
 				<link id='favicon' rel='icon' type='image/svg+xml' href='/logo.svg' />
 				<link rel='stylesheet' href='/styles/init.css' />
-				<link rel='stylesheet' href='/icon_font.css' />
+				<link rel='stylesheet' href='/styles/icon_font.css' />
 				<link rel='stylesheet' href='/theme/common.css' />
 				<link rel='stylesheet' href='/theme/light.css' />
 				<link rel='stylesheet' href='/theme/dark.css' />

@@ -1,21 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://polywise.io/en</loc>
-  </url>
-  <url>
-    <loc>https://polywise.io/zh</loc>
-  </url>
-  <url>
-    <loc>https://polywise.io/ja</loc>
-  </url>
-  <url>
-    <loc>https://polywise.io/en/docs</loc>
-  </url>
-  <url>
-    <loc>https://polywise.io/en/blog</loc>
-  </url>
-  <url>
-    <loc>https://polywise.io/en/changelog</loc>
-  </url>
+	<url>
+		<loc>https://polywise.io/en</loc>
+	</url>
+	<url>
+		<loc>https://polywise.io/zh</loc>
+	</url>
+	<url>
+		<loc>https://polywise.io/ja</loc>
+	</url>
+	<url>
+		<loc>https://polywise.io/en/docs</loc>
+	</url>
 </urlset>

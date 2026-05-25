@@ -1,0 +1,50 @@
+/** Songti */
+@font-face {
+	font-family: 'Songti';
+	font-weight: 400;
+	src: local('STSongti-SC-Regular');
+}
+@font-face {
+	font-family: 'Songti';
+	font-weight: 500;
+	src: local('STSongti-SC-Bold');
+}
+@font-face {
+	font-family: 'Songti';
+	font-weight: 700;
+	src: local('STSongti-SC-Black');
+}
+
+/** Geist */
+@font-face {
+	font-family: 'Geist';
+	font-style: normal;
+	src:
+		local('Geist'),
+		url('../fonts/Geist/Geist.ttf') format('truetype');
+}
+
+@font-face {
+	font-family: 'Geist';
+	font-style: italic;
+	src:
+		local('Geist'),
+		url('../fonts/Geist/Geist-Italic.ttf') format('truetype');
+}
+
+/** GeistMono */
+@font-face {
+	font-family: 'GeistMono';
+	font-style: normal;
+	src:
+		local('GeistMono'),
+		url('../fonts/GeistMono/GeistMono.ttf') format('truetype');
+}
+
+@font-face {
+	font-family: 'GeistMono';
+	font-style: italic;
+	src:
+		local('GeistMono'),
+		url('../fonts/GeistMono/GeistMono-Italic.ttf') format('truetype');
+}

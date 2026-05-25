@@ -139,16 +139,11 @@
 			flex-grow: 1;
 			padding: 24px;
 
-			.menu_groups {
-				user-select: none;
-				gap: 4px;
-			}
-
 			.menu_group_button {
 				padding: 0 8px;
 				height: 32px;
 				border: none;
-				color: var(--color_text_light);
+				color: var(--color_text_sub);
 				background: transparent;
 				text-align: left;
 				border-radius: var(--radius);
@@ -162,22 +157,17 @@
 				}
 
 				&.active {
-					color: var(--color_text_sub);
+					color: var(--color_text);
+					font-weight: 500;
 
 					.icon {
-						color: var(--color_text_sub);
+						color: var(--color_text);
 					}
 				}
 
 				.icon {
 					color: var(--color_text_light);
 				}
-			}
-
-			.menu_group_items {
-				gap: 1px;
-				margin-top: 4px;
-				padding-left: 8px;
 			}
 
 			.menu_item {

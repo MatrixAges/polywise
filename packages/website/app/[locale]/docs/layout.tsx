@@ -274,7 +274,10 @@ const Index = (props: PropsWithChildren) => {
 							group.children.some(item => item.key === selectedkey)
 
 						return (
-							<section className='menu_group' key={group.key}>
+							<section
+								className={$.cx('menu_group', open ? 'mb-3' : 'mb-1')}
+								key={group.key}
+							>
 								<button
 									className={$.cx(
 										`
@@ -299,11 +302,11 @@ const Index = (props: PropsWithChildren) => {
 									/>
 								</button>
 								{open && (
-									<div className='menu_group_items flex flex-col'>
+									<div className='menu_group_items flex flex-col pl-4'>
 										{group.children.map(item => (
 											<Link
 												className={$.cx(
-													'menu_item flex items-center gap-3',
+													'menu_item flex items-center',
 													item.className,
 													selectedkey === item.key && 'active'
 												)}
@@ -311,15 +314,6 @@ const Index = (props: PropsWithChildren) => {
 												key={item.key}
 												onClick={onClickLink}
 											>
-												<span
-													className='
-													flex shrink-0
-													items-center justify-center
-													text-[15px]
-												'
-												>
-													{item.icon}
-												</span>
 												<span>{item.label}</span>
 											</Link>
 										))}
