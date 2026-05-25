@@ -141,7 +141,7 @@
 
 			.menu_group_button {
 				padding: 0 8px;
-				height: 32px;
+				height: 28px;
 				border: none;
 				color: var(--color_text_sub);
 				background: transparent;
@@ -173,7 +173,7 @@
 			.menu_item {
 				width: calc(100% - 12px);
 				padding-left: 8px;
-				height: 32px;
+				height: 28px;
 				border-radius: var(--radius);
 				color: var(--color_text_sublight);
 
@@ -278,5 +278,10 @@
 	.sidebar_drawer {
 		display: block;
 		background-color: var(--color_bg);
+
+		.sidebar {
+			display: flex !important;
+			width: 100%;
+		}
 	}
 }

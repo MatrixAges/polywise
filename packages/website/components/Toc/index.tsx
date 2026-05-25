@@ -32,7 +32,7 @@ const renderItems = (items: TocItem[], active_href: string) => {
 							flex
 							items-center
 							h-5
-							mb-3
+							my-1.5
 							transition-colors duration-200
 							toc_link
 						`,
@@ -59,6 +59,15 @@ const Index = (props: IProps) => {
 	useEffect(() => {
 		if (!hrefs.length) return
 
+		const headingElements = hrefs
+			.map(href => {
+				const id = href.replace('#', '')
+				const element = document.getElementById(id)
+
+				return element ? { href, element } : null
+			})
+			.filter(Boolean) as { href: string; element: HTMLElement }[]
+
 		const syncFromHash = () => {
 			const hash = window.location.hash
 
@@ -67,32 +76,60 @@ const Index = (props: IProps) => {
 			}
 		}
 
+		const syncFromScroll = () => {
+			if (!headingElements.length) return
+
+			const viewportHeight = window.innerHeight
+			const scrollBottom = window.scrollY + viewportHeight
+			const documentHeight = document.documentElement.scrollHeight
+			const remainingDistance = Math.max(documentHeight - scrollBottom, 0)
+			const topActivationLine = Math.min(Math.max(viewportHeight * 0.18, 72), 140)
+			const bottomActivationLine = viewportHeight * 0.8
+			const transitionDistance = viewportHeight * 0.75
+			const transitionProgress =
+				transitionDistance <= 0
+					? 1
+					: Math.min(Math.max(1 - remainingDistance / transitionDistance, 0), 1)
+			const activationLine =
+				topActivationLine + (bottomActivationLine - topActivationLine) * transitionProgress
+			let nextActiveHref = headingElements[0].href
+
+			for (const { href, element } of headingElements) {
+				if (element.getBoundingClientRect().top <= activationLine) {
+					nextActiveHref = href
+					continue
+				}
+
+				break
+			}
+
+			setActiveHref(prev => (prev === nextActiveHref ? prev : nextActiveHref))
+		}
+
+		let rafId = 0
+		const scheduleSyncFromScroll = () => {
+			if (rafId) return
+
+			rafId = window.requestAnimationFrame(() => {
+				rafId = 0
+				syncFromScroll()
+			})
+		}
+
 		syncFromHash()
+		syncFromScroll()
 		window.addEventListener('hashchange', syncFromHash)
-
-		const observer = new IntersectionObserver(
-			entries => {
-				const visible = entries
-					.filter(entry => entry.isIntersecting)
-					.sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0]
-
-				if (!visible?.target.id) return
-
-				setActiveHref(`#${visible.target.id}`)
-			},
-			{ rootMargin: '-18% 0px -62% 0px', threshold: [0, 1] }
-		)
-
-		hrefs.forEach(href => {
-			const id = href.replace('#', '')
-			const element = document.getElementById(id)
-
-			if (element) observer.observe(element)
-		})
+		window.addEventListener('scroll', scheduleSyncFromScroll, { passive: true })
+		window.addEventListener('resize', scheduleSyncFromScroll)
 
 		return () => {
 			window.removeEventListener('hashchange', syncFromHash)
-			observer.disconnect()
+			window.removeEventListener('scroll', scheduleSyncFromScroll)
+			window.removeEventListener('resize', scheduleSyncFromScroll)
+
+			if (rafId) {
+				window.cancelAnimationFrame(rafId)
+			}
 		}
 	}, [hrefs])
 

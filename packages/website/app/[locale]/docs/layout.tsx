@@ -275,7 +275,7 @@ const Index = (props: PropsWithChildren) => {
 
 						return (
 							<section
-								className={$.cx('menu_group', open ? 'mb-3' : 'mb-1')}
+								className={$.cx('menu_group', open ? 'mb-6' : 'mb-2')}
 								key={group.key}
 							>
 								<button
@@ -284,6 +284,7 @@ const Index = (props: PropsWithChildren) => {
 									flex
 									items-center justify-between
 									w-full
+									font-medium
 									menu_group_button cursor-pointer
 								`,
 										active && 'active'
@@ -302,7 +303,13 @@ const Index = (props: PropsWithChildren) => {
 									/>
 								</button>
 								{open && (
-									<div className='menu_group_items flex flex-col pl-4'>
+									<div
+										className='
+										flex flex-col
+										text-[13px]
+										menu_group_items
+									'
+									>
 										{group.children.map(item => (
 											<Link
 												className={$.cx(
@@ -414,11 +421,14 @@ const Index = (props: PropsWithChildren) => {
 				onClose={onCloseSidebar}
 			>
 				<div
-					className='
+					className={$.cx(
+						`
 						flex flex-col
 						w-full h-full
 						doc_sidebar
-					'
+					`,
+						styles.sidebar
+					)}
 				>
 					{SidebarContent}
 				</div>
