@@ -8,21 +8,7 @@ const localeFiles = import.meta.glob('../locales/*/*.json', {
 	eager: true
 }) as Record<string, Record<string, unknown>>
 
-const namespaces = [
-	'common',
-	'global',
-	'layout',
-	'index',
-	'price',
-	'brand',
-	'gtd',
-	'blog',
-	'download',
-	'contact',
-	'features',
-	'docs',
-	'doc'
-] as const
+const namespaces = ['common', 'global', 'layout', 'index', 'gtd', 'blog', 'download', 'contact', 'docs', 'doc'] as const
 
 export default getRequestConfig(async ({ requestLocale }) => {
 	const requested = await requestLocale
