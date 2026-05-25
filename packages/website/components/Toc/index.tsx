@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import tocIcon from '@website/svgs/toc.inline.svg'
+import TocIcon from '@website/svgs/toc.svg?react'
 import { $ } from '@website/utils'
 import { useTranslations } from 'next-intl'
 
@@ -92,7 +92,7 @@ const Index = (props: IProps) => {
 			<div className='flex flex-col'>
 				{!as_content && (
 					<div className='header_wrap sticky flex items-center'>
-						<img src={tocIcon} alt='' aria-hidden />
+						<TocIcon aria-hidden />
 						<span className='title'>{t('toc.title')}</span>
 					</div>
 				)}

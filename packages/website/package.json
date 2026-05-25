@@ -90,6 +90,7 @@
 		"typescript": "catalog:",
 		"vinext": "^0.0.52",
 		"vite": "^8.0.14",
+		"vite-plugin-svgr": "^5.2.0",
 		"vite-tsconfig-paths": "^6.1.1",
 		"wrangler": "^4.94.0"
 	}
