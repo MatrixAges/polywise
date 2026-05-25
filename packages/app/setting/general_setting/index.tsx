@@ -160,8 +160,7 @@ const Index = () => {
 					<FieldContent>
 						<FieldTitle className='text-base'>Agent Export Directory</FieldTitle>
 						<FieldDescription>
-							Where exported `.papk` files are written. Leave empty to use the system
-							Downloads folder.
+							Where exported `.papk` files are written. Default is Downloads folder.
 						</FieldDescription>
 					</FieldContent>
 					<div className='flex w-[380px] items-center gap-2'>
