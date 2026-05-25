@@ -1,77 +1,113 @@
 {
 	"Banner": {
 		"todo": {
-			"action": "Get Things Down"
+			"action": "Capture"
 		},
 		"note": {
-			"action": "Writing"
+			"action": "Retrieve"
 		},
 		"pomo": {
-			"action": "Focus"
+			"action": "Delegate"
 		},
 		"schedule": {
-			"action": "Planing"
+			"action": "Automate"
 		},
 		"features": {
-			"action": "Thinking"
+			"action": "Own"
 		},
 		"with": "with Polywise's ",
 		"desc": {
-			"line_1": "A local-first productivity tool for content, planning and data.",
-			"line_2": "Not only effciency tool, but your business."
+			"line_1": "A local-first agentic content system.",
+			"line_2": "Capture content, shape context, and run agents on top of it."
 		},
 		"tips": "Free to start. No need login and all in local."
 	},
 	"Why_if": {
-		"title": "Why Polywise",
-		"subtitle": "Own your data, local your business",
+		"title": "Why",
+		"subtitle": "Most AI loses context between sessions. Polywise keeps it structured, searchable, and yours.",
 		"roles": {
-			"user": "User",
-			"ai": "AI",
-			"dataflow": "Dataflow"
+			"user": "You",
+			"ai": "Agents",
+			"dataflow": "Context"
+		}
+	},
+	"What": {
+		"title": "What",
+		"subtitle": "What is Polywise?",
+		"headline": "Polywise is a local-first agentic content system.",
+		"lead": "It helps you capture content, shape working context, and run agents against knowledge that stays under your control.",
+		"items": {
+			"0": {
+				"title": "Local-first storage",
+				"desc": "Content, memory, and agent state live on your machine first instead of starting in someone else’s cloud."
+			},
+			"1": {
+				"title": "Scoped knowledge",
+				"desc": "Store content globally, per project, or per agent so the same system can support both shared knowledge and focused runs."
+			},
+			"2": {
+				"title": "Hybrid retrieval",
+				"desc": "Combine keyword search, vectors, recall, and reranking in one pipeline to recover the right context before an agent acts."
+			},
+			"3": {
+				"title": "Multi-agent work",
+				"desc": "Run sessions for agents, groups, projects, and linked tasks instead of treating every workflow as a single chat thread."
+			},
+			"4": {
+				"title": "Link capture",
+				"desc": "Save URLs, extract articles, bind them to agents, and schedule recurring fetch jobs to keep source material fresh."
+			},
+			"5": {
+				"title": "Bring your models",
+				"desc": "Use remote providers, MCP tools, and local llama runtimes without locking the system to a single vendor."
+			},
+			"6": {
+				"title": "Multiple surfaces",
+				"desc": "Use Polywise through desktop sessions, API routes, scheduled jobs, and IM connectors while keeping one context system underneath."
+			}
 		}
 	},
 	"Painpoint": {
-		"title": "Painpoint",
-		"subtitle": "Your pain, our mission",
+		"title": "Pain Points",
+		"subtitle": "Why agentic work breaks without a real content system",
 		"items": {
 			"0": {
-				"title": "Local First",
-				"pain": "Feel cloud content is slow and unable to ensure privacy?",
-				"solution": "With Polywise, all data is stored locally, supporting backup and recovery, and is ready to use right away.\nThere’s no need to worry about network unavailability or about your personal data being secretly used for AI training or shared with advertisers."
+				"title": "Stateless AI",
+				"pain": "Every new session starts cold, so you keep re-explaining the same work.",
+				"solution": "Polywise turns saved content into reusable context.\nAgents can retrieve scoped knowledge instead of depending on whatever still fits in the current chat window."
 			},
 			"1": {
-				"title": "User First",
-				"pain": "Worried that app providers sacrifice user experience for profit?",
-				"solution": "Polywise centers around localization to provide features, striving to deliver the best possible user experience.\nUnlike large cloud-based products, which incur bulky team and server costs, we prioritize user benefits over commercial interests."
+				"title": "Fragmented context",
+				"pain": "Tasks, notes, links, projects, and agent prompts usually live in separate tools.",
+				"solution": "Polywise keeps content, sessions, todos, projects, and agents in one local system.\nThat makes context easier to connect, search, reuse, and automate."
 			},
 			"2": {
-				"title": "Keep It Simple Stupid",
-				"pain": "Dislike All in One and the design style of cluttered in colors?",
-				"solution": "Polywise adopts a modular design for its features, avoiding the mental burden caused by an all-in-one approach.\nIt also employs an ultra-minimalist, paper-like design style, providing users with a visually stress-free experience to support long hours of immersive content creation."
+				"title": "Cloud lock-in",
+				"pain": "Many AI workflows run on opaque systems you cannot inspect, migrate, or truly own.",
+				"solution": "Polywise keeps the runtime local-first and model-flexible.\nYou can bring providers, local models, and custom tools without giving up ownership of the underlying system."
 			}
 		}
 	},
 	"Features": {
 		"title": "Features",
-		"subtitle": "Next-gen content and data solutions",
-		"origin": "Origin",
+		"subtitle": "Core capabilities for context, retrieval, and execution",
+		"origin": "Read the concept",
 		"items": {
 			"0": {
-				"title": "Todo",
-				"desc": "Constant effort leads to success.\nTrack your daily actions with to-do lists and gain self-affirming energy with each completed task."
+				"title": "Content Layer",
+				"desc": "Capture notes, tasks, links, and source material locally.\nKeep content scoped to your global space, a project, or a specific agent."
 			},
 			"1": {
-				"title": "Note",
-				"desc": "Learning without reflection is a waste.\nBuilt on the Markdown standard, what you see is what you get, allowing you to enjoy an immersive writing experience."
+				"title": "Memory Retrieval",
+				"desc": "Blend keywords, vectors, recall, and reranking in one search pipeline.\nBring the right context back before an agent responds or acts."
 			},
 			"2": {
-				"title": "Pomo",
-				"desc": "A journey of a thousand miles begins with a single step.\nUse the Pomodoro technique to build small milestones and regain your focus."
+				"title": "Agent Sessions",
+				"desc": "Give each agent its own role, tools, model, and memory.\nRun reusable sessions and move behavior between machines with agent packs."
 			},
 			"3": {
-				"title": "Schedule",
-				"desc": "Greatness cannot be planned, but creation can.\nUse the schedule to build your goals in the dimension of time, and it’s better to face change than without one."
+				"title": "Workflow Engine",
+				"desc": "Tie together projects, todos, sessions, groups, schedules, and IM hooks.\nTurn saved context into repeatable execution instead of one-off chats."
 			}
 		}
 	},
@@ -87,7 +123,53 @@
 		}
 	},
 	"Callback": {
-		"line_1": "Shape Your Context, ",
+		"line_1": "Shape Your Context,",
 		"line_2": "Keep It Yours"
+	},
+	"FAQ": {
+		"title": "FAQ",
+		"subtitle": "Common questions about Polywise",
+		"items": {
+			"0": {
+				"q": "What is Polywise?",
+				"a": "Polywise is a local-first agentic content system. It helps you capture content, build reusable context, and run agents against that context instead of starting from an empty chat every time."
+			},
+			"1": {
+				"q": "How do I use Polywise?",
+				"a": "You can save content, organize it by project or agent, search it through the retrieval pipeline, and then run sessions, tasks, or scheduled jobs that use that context."
+			},
+			"2": {
+				"q": "Is Polywise only for writing?",
+				"a": "No. Writing is one use case, but the system is built for broader agentic work: research, task execution, workflow coordination, link capture, and long-running project context."
+			},
+			"3": {
+				"q": "Do I need extra AI subscriptions to use Polywise?",
+				"a": "Not always. What you need depends on which models or providers you want to run. Polywise is designed to work with different providers rather than forcing one billing path."
+			},
+			"4": {
+				"q": "Can I use my existing model providers with Polywise?",
+				"a": "Yes. Polywise is built around provider flexibility, so you can connect the model stack that already fits your workflow instead of switching everything to a bundled vendor."
+			},
+			"5": {
+				"q": "Can I run local models?",
+				"a": "Yes. Polywise includes support for local runtimes such as llama-based setups, so part of the system can stay fully on your machine when you want tighter control."
+			},
+			"6": {
+				"q": "How does search work?",
+				"a": "Polywise uses a hybrid retrieval pipeline. It combines keywords, vectors, recall, and reranking so agents can recover relevant context instead of relying on a single search method."
+			},
+			"7": {
+				"q": "What about data and privacy?",
+				"a": "Polywise is local-first. Your content, memory, and runtime state can remain under your control, which makes backups, inspection, and privacy boundaries much clearer than cloud-only systems."
+			},
+			"8": {
+				"q": "Can Polywise automate recurring work?",
+				"a": "Yes. Polywise includes sessions, todos, schedules, link fetch jobs, and connector surfaces that can be composed into recurring workflows instead of manual one-off runs."
+			},
+			"9": {
+				"q": "Is Polywise open source?",
+				"a": "Yes. Polywise is available on GitHub, which means you can inspect the code, track changes, and understand the system you are building your workflow on."
+			}
+		}
 	}
 }

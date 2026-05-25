@@ -1,20 +1,20 @@
-import { CalendarCheckIcon, CheckCircleIcon, MarkdownLogoIcon, TimerIcon } from '@phosphor-icons/react'
+import { CalendarCheckIcon, ChatDotsIcon, FilesIcon, MagnifyingGlassIcon } from '@phosphor-icons/react'
 
 import type { ReactNode } from 'react'
 
 export const modules_map = {
 	0: {
-		Icon: <CheckCircleIcon></CheckCircleIcon>,
+		Icon: <FilesIcon></FilesIcon>,
 		key: 'todo',
 		origin: '/blog/know_your_self?title=From%20Notes%20to%20Memory'
 	},
 	1: {
-		Icon: <MarkdownLogoIcon></MarkdownLogoIcon>,
+		Icon: <MagnifyingGlassIcon></MagnifyingGlassIcon>,
 		key: 'note',
 		origin: '/blog/finding_your_self?title=Designing%20Local-First%20Workflows'
 	},
 	2: {
-		Icon: <TimerIcon></TimerIcon>,
+		Icon: <ChatDotsIcon></ChatDotsIcon>,
 		key: 'pomo',
 		origin: '/blog/beyond_your_self?title=Agents%20Need%20Better%20Context'
 	},
@@ -59,7 +59,7 @@ export const mails = {
 export const medias = {
 	x: 'https://x.com/xiewendao',
 	github: 'https://github.com/MatrixAges/polywise',
-	discord: 'https://github.com/MatrixAges/polywise'
+	discord: 'https://discord.gg/6MDTdVzR3Y'
 }
 
 export type OS = 'darwin' | 'win32'

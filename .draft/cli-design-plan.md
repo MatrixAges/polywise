@@ -1,182 +1,180 @@
-# Polywise CLI 支持方案设计与执行计划
+# Polywise CLI: Design Proposal and Execution Plan
 
 Last Updated: 2026-05-22
 
-## 目标
+## Objectives
 
-在 `packages/polywise/src/cli/` 下设计并后续实现一套可复用的 CLI 能力，覆盖两条链路：
+Design—and subsequently implement—a set of reusable CLI capabilities within the `packages/polywise/src/cli/` directory, covering two distinct pathways:
 
-1. 前端链路：给 `global_panel_session` 注册 `page_tool`，支持渐进式披露：
-      - 有哪些页面 / panel
-      - 当前在哪个页面
-      - 如何跳转
-      - 当前页面的可见 DOM / 语义摘要
-2. 后端链路：把可暴露的 RPC 变成可 CLI 化的 API 能力，遵循：
-      - `rpc -> openapi -> api_map -> cli`
-      - `subscribe` 类型 RPC 不纳入首版 CLI 暴露
-      - 给 `global_panel_session` 注册 `api_tool`
-      - `api_tool` 和终端 CLI 都支持多层级 `-h`，按索引渐进式披露，不一次性把全部 API 倾倒给 AI
+1.    **Frontend Pathway:** Register a `page_tool` with the `global_panel_session` to support progressive disclosure of information:
 
-本稿只给出方案和执行计划，不直接进入实现。
+- Available pages/panels
+- The currently active page
+- Navigation methods (how to switch pages)
+- Visible DOM elements / semantic summaries of the current page
 
----
+2.    **Backend Pathway:** Transform exposed RPCs into CLI-callable API capabilities, adhering to the following workflow:
 
-## 现状基线
+- `rpc -> openapi -> api_map -> cli`
+- `subscribe`-type RPCs will _not_ be included in the initial release of the CLI exposure.
+- Register an `api_tool` with the `global_panel_session`.
+- Both the `api_tool` and the terminal CLI must support multi-level `-h` (help) flags, enabling progressive disclosure via indexing rather than dumping the entire API surface to the AI ​​at once.
 
-### 已确认的代码现状
-
-- `packages/polywise/src/cli/` 目前为空目录，适合从零搭结构。
-- 服务端已经有：
-     - `/trpc/*`：原始 tRPC
-     - `/api/*`：`trpc-to-openapi` 转出的 OpenAPI handler
-     - `/sys/*`：少量 Hono API（当前主要是 session SSE / IM webhook）
-- `global_panel_session` 已存在，并由前端 panel 直接挂载：
-     - [packages/app/panel/session/index.tsx](/Users/xiewendao/Documents/MatrixAges/polywise/packages/app/panel/session/index.tsx)
-- 当前 app 路由真实入口来自：
-     - [packages/app/index.tsx](/Users/xiewendao/Documents/MatrixAges/polywise/packages/app/index.tsx)
-- 当前 panel tab 真实入口来自：
-     - [packages/app/appdata/panel.tsx](/Users/xiewendao/Documents/MatrixAges/polywise/packages/app/appdata/panel.tsx)
-- 当前 tRPC meta 只声明成 `OpenApiMeta`：
-     - [packages/polywise/src/utils/trpc.ts](/Users/xiewendao/Documents/MatrixAges/polywise/packages/polywise/src/utils/trpc.ts)
-- 当前只有少量 RPC 已显式打了 `meta.openapi`，大多数业务 RPC 还没有进入 OpenAPI 暴露面。
-
-### 与本需求直接相关的事实
-
-- `session.init` 支持 `global: true`，因此 `global_panel_session` 是一个天然的工具挂载点。
-- `global_panel_session` 已被排除在普通 session 列表之外，不会污染常规会话页。
-- 前端真实 DOM 在 app 进程/浏览器环境，服务端不能直接读取 React DOM。
-  这意味着 `page_tool` 不能只在 `polywise` 服务端闭门实现，必须有 app 侧桥接。
-
-### 首版明确排除
-
-- 所有 `subscription` RPC 的 CLI 化
-- 全量原始 DOM 返回
-- 让 AI 一次性看到全部页面、全部 API、全部参数细节
-- 在普通 session 中默认注册 `page_tool` / `api_tool`
+This document outlines the design proposal and execution plan only; it does not include the actual implementation code.
 
 ---
 
-## 设计原则
+## Current Baseline
 
-### 1. 渐进式披露优先于全量枚举
+### Confirmed Code Status
 
-无论是 `page_tool`、`api_tool` 还是终端 `polywise ... -h`，根节点只暴露一级索引：
+- The `packages/polywise/src/cli/` directory is currently empty, making it an ideal candidate for building the structure from scratch. - The server currently hosts:
+- `/trpc/*`: The original tRPC endpoints.
+- `/api/*`: OpenAPI handlers generated via `trpc-to-openapi`.
+- `/sys/*`: A small set of Hono APIs (currently consisting mainly of session SSE / IM webhooks).
+- `global_panel_session` already exists and is directly mounted by the frontend panel:
+- [packages/app/panel/session/index.tsx](/Users/xiewendao/Documents/MatrixAges/polywise/packages/app/panel/session/index.tsx)
+- The actual entry point for the current app routing is located at:
+- [packages/app/index.tsx](/Users/xiewendao/Documents/MatrixAges/polywise/packages/app/index.tsx)
+- The actual entry point for the current panel tabs is located at:
+- [packages/app/appdata/panel.tsx](/Users/xiewendao/Documents/MatrixAges/polywise/packages/app/appdata/panel.tsx)
+- The current tRPC metadata is declared solely as `OpenApiMeta`:
+- [packages/polywise/src/utils/trpc.ts](/Users/xiewendao/Documents/MatrixAges/polywise/packages/polywise/src/utils/trpc.ts)
+- Currently, only a few RPCs have been explicitly tagged with `meta.openapi`; the majority of business-logic RPCs have not yet been exposed via the OpenAPI interface.
 
-- 顶层分类
-- 少量摘要
-- 下一层怎么问
+### Facts Directly Relevant to This Requirement
 
-只有当调用方继续下钻时，才返回下一层命令、页面、参数或 DOM 摘要。
+- `session.init` supports the `global: true` option; therefore, `global_panel_session` serves as a natural mounting point for global tools.
+- `global_panel_session` has already been excluded from the standard list of sessions, ensuring it does not clutter the regular session pages.
+- The actual DOM resides within the frontend app process/browser environment; the server cannot directly access the React DOM.
+  This implies that `page_tool` cannot be implemented entirely within the confines of the `polywise` server; it requires a bridging mechanism on the app side. ### Explicit Exclusions for the Initial Release
 
-### 2. 共享一套索引模型
+- CLI wrappers for all `subscription` RPCs
+- Return of the full raw DOM
+- Enabling the AI ​​to view the entire page, all APIs, and all parameter details simultaneously
+- Default registration of `page_tool` / `api_tool` within standard sessions
 
-终端 CLI 与 AI tool 不能各自维护一份 help 文案。
+---
 
-应抽出统一的：
+## Design Principles
+
+### 1. Progressive Disclosure Over Full Enumeration
+
+Whether via `page_tool`, `api_tool`, or the terminal command `polywise ... -h`, the root node exposes only a single level of indexing:
+
+- Top-level categories
+- Brief summaries
+- Guidance on how to query the next level
+
+Subsequent commands, pages, parameters, or DOM summaries are returned only when the caller chooses to drill down further.
+
+### 2. Shared Indexing Model
+
+The terminal CLI and the AI ​​tools must not maintain separate sets of help documentation.
+
+The following components should be abstracted into a unified system:
 
 - `page_map`
 - `api_map`
 - `help index renderer`
 - `command resolver`
 
-这样终端 `-h` 和 `page_tool/api_tool action=help` 才会天然一致。
+This ensures that the terminal `-h` flag and the `page_tool/api_tool action=help` command remain inherently consistent.
 
-### 3. 前端页面能力必须走桥接，不走猜测
+### 3. Front-end Page Capabilities Must Rely on Bridging, Not Guesswork
 
-服务端只能知道“定义上有哪些页面”，看不到“用户当前打开了哪个页面、当前 DOM 是什么”。
+The server-side can only know "which pages are defined"; it cannot see "which page the user currently has open" or "what the current DOM structure is."
 
-因此必须拆成两层：
+Therefore, the system must be split into two layers:
 
-- 静态页面注册表：定义有哪些 page/panel、可接受哪些参数
-- 运行时页面状态桥：当前 route、panel tab、可见 section、DOM 语义快照
+- Static Page Registry: Defines which pages/panels exist and what parameters they accept.
+- Runtime Page State Bridge: Captures the current route, active panel tab, visible sections, and a semantic snapshot of the DOM.
 
-### 4. OpenAPI 是后端 CLI 化的准入门槛
+### 4. OpenAPI as the Prerequisite for Backend CLI Integration
 
-只有具备 `meta.openapi` 的非订阅 RPC 才能进入 `api_map`。
+Only non-subscription RPCs that possess a `meta.openapi` definition are eligible for inclusion in the `api_map`.
 
-这保证：
+This ensures that:
 
-- HTTP 调用途径清晰
-- CLI 能直接复用路径/方法/入参定义
-- 暴露面可控
+- The HTTP invocation path is clearly defined.
+- The CLI can directly reuse the defined paths, methods, and input parameters.
+- The exposed surface area remains controllable.
 
-### 5. 首版优先“可枚举、可跳转、可调用、可帮助”
+### 5. Initial Release Priority: "Enumerable, Navigable, Callable, and Documented"
 
-不先追求：
+The initial release will _not_ prioritize:
 
-- 自动生成极其华丽的 man page
-- 全量 schema 文档站
-- 前端所有组件级动作都可控
+- Automatically generating highly elaborate "man pages."
+- Creating a comprehensive documentation site based on full schemas.
+- Enabling control over every single component-level action within the front-end.
 
-先打通最小但完整的闭环。
+Instead, the focus is on first establishing a minimal yet complete closed-loop workflow. ---
 
----
+## Overall Architecture
 
-## 总体架构
-
-### 分层
+### Layering
 
 ```text
 frontend app runtime
-  -> page registry
-  -> page runtime bridge
-  -> page_map
-  -> page_tool / page CLI
+-> page registry
+-> page runtime bridge
+-> page_map
+-> page_tool / page CLI
 
 backend rpc
-  -> openapi meta
-  -> api_map builder
-  -> shared help index
-  -> api_tool / api CLI
+-> openapi meta
+-> api_map builder
+-> shared help index
+-> api_tool / api CLI
 ```
 
-### 建议目录
+### Suggested Directory Structure
 
 ```text
 packages/polywise/src/cli/
-  index.ts
-  types.ts
-  shared/
-    help.ts
-    tree.ts
-    render.ts
-  api/
-    meta.ts
-    collect.ts
-    apiMap.ts
-    call.ts
-    help.ts
-  page/
-    pageMap.ts
-    registry.ts
-    bridge.ts
-    help.ts
-  commands/
-    api.ts
-    page.ts
-    root.ts
+index.ts
+types.ts
+shared/
+help.ts
+tree.ts
+render.ts
+api/
+meta.ts
+collect.ts
+apiMap.ts
+call.ts
+help.ts
+page/
+pageMap.ts
+registry.ts
+bridge.ts
+help.ts
+commands/
+api.ts
+page.ts
+root.ts
 ```
 
-app 侧建议补充：
+Suggested additions on the App side:
 
 ```text
 packages/app/
-  appdata/page.ts
-  runtime/pageBridge.ts
-  runtime/pageSnapshot.ts
+appdata/page.ts
+runtime/pageBridge.ts
+runtime/pageSnapshot.ts
 ```
 
-> `page` 的静态注册可在 app 内维护，最终通过桥接同步给服务端或直接由 app 响应 `page_tool` 查询。
+> Static registration of `pages` can be maintained within the App; ultimately, this data can be synchronized to the server via a bridge, or the App can respond directly to queries from the `page_tool`.
 
 ---
 
-## 后端链路设计：`rpc -> openapi -> api_map -> cli`
+## Backend Pipeline Design: `rpc -> openapi -> api_map -> cli`
 
-## 1. 扩展 RPC meta
+## 1. Extending RPC Metadata
 
-当前 `p = initTRPC.meta<OpenApiMeta>()` 过窄，不足以描述 CLI 帮助层级。
+The current definition `p = initTRPC.meta<OpenApiMeta>()` is too narrow and insufficient to describe the hierarchical structure of the CLI help documentation.
 
-建议改成：
+It is suggested to change it to:
 
 ```ts
 type CliProcedureMeta = {
@@ -192,38 +190,36 @@ type CliProcedureMeta = {
 type ProcedureMeta = OpenApiMeta & CliProcedureMeta
 ```
 
-然后在 [packages/polywise/src/utils/trpc.ts](/Users/xiewendao/Documents/MatrixAges/polywise/packages/polywise/src/utils/trpc.ts) 中统一使用 `ProcedureMeta`。
+Then, consistently use `ProcedureMeta` throughout [packages/polywise/src/utils/trpc.ts](/Users/xiewendao/Documents/MatrixAges/polywise/packages/polywise/src/utils/trpc.ts). ### Objectives
 
-### 目的
+- `openapi` governs HTTP exposure.
+- `cli` governs the display of the command tree and help text.
+- Both coexist within the same procedure metadata.
 
-- `openapi` 决定 HTTP 暴露
-- `cli` 决定命令树展示与帮助文案
-- 两者共存于同一 procedure 元信息
+## 2. OpenAPI Exposure Strategy
 
-## 2. OpenAPI 暴露策略
-
-首版只纳入：
+The initial version includes only:
 
 - `query`
 - `mutation`
-- 且 `meta.openapi` 已定义的 procedure
+- And procedures where `meta.openapi` has been explicitly defined.
 
-明确排除：
+Explicitly excluded are:
 
 - `subscription`
-- 仅前端内部事件桥接 procedure
-- 需要长连接 / 实时推送的 watch 类接口
+- Procedures used solely for internal frontend event bridging.
+- "Watch-style" interfaces requiring long-lived connections or real-time push notifications.
 
-### 建议规则
+### Recommended Rules
 
-- `watch*`、`progress`、`heartbeat subscription` 默认不进入 CLI
-- 如果一个 namespace 里既有 `query/mutation` 又有 `subscription`，只收前者
+- `watch*`, `progress`, and `heartbeat subscription` procedures are excluded from the CLI by default.
+- If a namespace contains both `query`/`mutation` and `subscription` procedures, only the former are included.
 
-## 3. `api_map` 结构
+## 3. `api_map` Structure
 
-`api_map` 是 CLI 与 `api_tool` 的唯一后端能力索引。
+The `api_map` serves as the sole index of backend capabilities for both the CLI and `api_tool`.
 
-建议结构：
+Recommended structure:
 
 ```ts
 interface ApiMapItem {
@@ -240,47 +236,47 @@ interface ApiMapItem {
 }
 ```
 
-示例：
+Example:
 
 ```ts
 {
-  id: 'session.create',
-  rpc_path: 'session.create',
-  method: 'POST',
-  openapi_path: '/session/create',
-  cli_path: ['api', 'session', 'create'],
-  group_path: ['session'],
-  summary: 'Create a new session',
-  input_hint: ['--title <text>', '--project-id <id>'],
-  examples: ['polywise api session create --title "Daily Review"']
+id: 'session.create',
+rpc_path: 'session.create',
+method: 'POST',
+openapi_path: '/session/create',
+cli_path: ['api', 'session', 'create'],
+group_path: ['session'],
+summary: 'Create a new session',
+input_hint: ['--title <text>', '--project-id <id>'],
+examples: ['polywise api session create --title "Daily Review"']
 }
 ```
 
-## 4. `api_map` 构建方式
+## 4. `api_map` Construction Method
 
-建议不要手写整张表。
+It is recommended _not_ to manually write the entire table. Should be automatically collected from the router:
 
-应从 router 自动收集：
+1. Iterate through the `router` records.
+2. Identify the following for each procedure:
 
-1. 遍历 `router` record
-2. 找到每个 procedure 的：
-      - 类型：query / mutation / subscription
-      - `meta.openapi`
-      - `meta.cli`
-3. 过滤掉 subscription
-4. 产出 `api_map`
+- Type: query / mutation / subscription
+- `meta.openapi`
+- `meta.cli`
 
-### 这样做的好处
+3. Filter out subscriptions.
+4. Generate `a`.`api_map`
 
-- 新 RPC 进入 CLI 只需补 meta，不需要改两份表
-- CLI 与 OpenAPI 暴露面对齐
-- 后续还能复用到文档生成
+### Benefits of This Approach
 
-## 5. `api_tool` 设计
+- Adding a new RPC to the CLI requires only supplementing its metadata; there is no need to modify two separate tables.
+- The CLI's exposed interface remains aligned with the OpenAPI specification.
+- This structure can be reused later for automated documentation generation.
 
-`api_tool` 仅注册到 `global_panel_session`。
+## 5. `api_tool` Design
 
-建议 action：
+The `api_tool` is registered exclusively within the `global_panel_session`.
+
+Suggested Actions:
 
 - `help`
 - `list`
@@ -289,39 +285,39 @@ interface ApiMapItem {
 
 ### `help`
 
-用途：多层级帮助索引。
+Purpose: To provide a multi-level hierarchical help index.
 
-示例：
+Examples:
 
-- `help()`：只返回顶层 group，如 `session`, `project`, `agent`, `post`
-- `help({ path: ['session'] })`：返回 `session` 下的 commands
-- `help({ path: ['session', 'create'] })`：返回该命令摘要、参数提示、示例
+- `help()`: Returns only the top-level groups (e.g., `session`, `project`, `agent`, `post`).
+- `help({ path: ['session'] })`: Returns the commands available under the `session` group.
+- `help({ path: ['session', 'create'] })`: Returns a summary of the specific command, parameter hints, and usage examples.
 
 ### `list`
 
-用途：按关键词或 group 做模糊筛选，但默认结果数受限。
+Purpose: To perform fuzzy filtering based on keywords or groups, with the number of default results capped at a reasonable limit.
 
 ### `schema`
 
-用途：在需要时再暴露参数层，而不是 root help 就给全部字段。
+Purpose: To expose parameter details only when specifically requested, rather than dumping all available fields in the root-level help output.
 
-返回内容应是“压缩版 schema 摘要”，不是把整份 zod/openapi schema 原样倾倒给模型。
+The returned content should be a "compressed schema summary"—not a verbatim dump of the entire Zod or OpenAPI schema directly to the model.
 
 ### `call`
 
-用途：执行具体 API。
+Purpose: To execute a specific API endpoint.
 
-流程：
+Workflow:
 
-1. `api_tool` 根据 `api_map` 找到目标
-2. 校验 target 是否允许 CLI 调用
-3. 规范化输入
-4. 通过统一 HTTP client 调 `/api/*`
-5. 返回压缩后的 JSON 结果
+1.    The `api_tool` locates the target API endpoint using the `api_map`.
+2.    It validates whether the target endpoint is permitted for CLI invocation.
+3.    It normalizes the input parameters.
+4.    It calls the `/api/*` endpoint using a unified HTTP client.
+5.    It returns the compressed JSON result.
 
-## 6. 终端 CLI 设计
+## 6. Terminal CLI Design
 
-建议顶层入口：
+Suggested Top-Level Entry Points:
 
 ```bash
 polywise api -h
@@ -330,54 +326,50 @@ polywise api session create -h
 polywise api session create --title "Daily Review"
 ```
 
-### 核心点
+### Core Principles
 
-- `-h` 由共享 help engine 渲染
-- CLI 命令解析也基于 `api_map`
-- 不依赖硬编码的多层命令定义
+- The `-h` (help) flag is rendered by a shared help engine.
+- CLI command parsing is also driven by the `api_map`.
+- It avoids reliance on hard-coded, multi-level command definitions.
 
-### 为什么建议做自定义 help engine
+### Why a Custom Help Engine is Recommended
 
-因为这里的重点不是“能解析命令”而是“分层索引披露”。
+Because the primary objective here is not merely the ability to "parse commands," but rather the capability for "hierarchical indexing and disclosure." Conventional CLI frameworks excel at handling static command trees; however:
 
-常规 CLI 框架擅长静态命令树，但：
+- `api_tool` also needs to share the same set of help documentation.
+- Page-related tools must likewise utilize this same help mechanism.
 
-- `api_tool` 也要共用同一套 help 结果
-- 页面工具也要共用同一套 help 机制
+Therefore, a more logical approach is to:
 
-因此更合理的方式是：
-
-- 自建一个轻量 command tree
-- CLI 和 tool 都只是不同入口
+- Build a custom, lightweight command tree.
+- Treat both the CLI and the tools merely as different entry points into this shared structure.
 
 ---
 
-## 前端链路设计：`page_map -> page runtime bridge -> page_tool`
+## Frontend Workflow Design: `page_map -> page runtime bridge -> page_tool`
 
-## 1. 为什么需要两层 page 能力
+## 1. Why Are Two Layers of Page Functionality Necessary?
 
-仅靠文件系统或 React 路由定义，只能知道“有哪些页面”；
-但用户要求的还包括：
+Relying solely on the file system or React routing definitions allows us to identify _which pages exist_;
+however, user requirements extend beyond this to include:
 
-- 当前页面
-- 如何跳转
-- 当前 DOM 内容
+- The currently active page.
+- The mechanism for navigating between pages.
+- The current DOM content.
 
-这些必须依赖运行时状态。
+These specific requirements are entirely dependent on runtime state. Therefore, it should be split into:
 
-因此应拆成：
+1. Static `page_map`
+2. Runtime `page_bridge`
 
-1. 静态 `page_map`
-2. 运行时 `page_bridge`
+## 2. `page_map` Structure
 
-## 2. `page_map` 结构
+It is recommended that this cover two categories of entities:
 
-建议覆盖两类实体：
+- Route pages
+- Panel pages
 
-- route page
-- panel page
-
-建议结构：
+Suggested structure:
 
 ```ts
 interface PageMapItem {
@@ -393,13 +385,13 @@ interface PageMapItem {
 }
 ```
 
-建议首版静态来源：
+Suggested static sources for the initial version:
 
-- route：从 [packages/app/index.tsx](/Users/xiewendao/Documents/MatrixAges/polywise/packages/app/index.tsx) 对齐实际路由
-- 顶部导航：从 `nav_items`
-- panel：从 [packages/app/appdata/panel.tsx](/Users/xiewendao/Documents/MatrixAges/polywise/packages/app/appdata/panel.tsx)
+- Routes: Aligned with the actual routes defined in [packages/app/index.tsx](/Users/xiewendao/Documents/MatrixAges/polywise/packages/app/index.tsx)
+- Top Navigation: Sourced from `nav_items`
+- Panels: Sourced from [packages/app/appdata/panel.tsx](/Users/xiewendao/Documents/MatrixAges/polywise/packages/app/appdata/panel.tsx)
 
-### 首版 page 根索引建议
+### Suggested Root Indices for Pages (Initial Version)
 
 - `home`
 - `session`
@@ -412,30 +404,28 @@ interface PageMapItem {
 - `panel.pipeline`
 - `panel.notification`
 
-### 动态页面
+### Dynamic Pages
 
-像 `/post/:id` 这类页面应建成模板节点：
+Pages such as `/post/:id` should be structured as template nodes:
 
 - `post.detail`
-- 参数提示：`id`
+- Parameter Hint: `id`
 
-而不是为每个实例 post 生成静态 page id。
+Rather than generating a static page ID for every individual post instance. ## 3. `page_bridge`: Runtime Bridge
 
-## 3. `page_bridge` 运行时桥
+### Objective
 
-### 目标
+To enable the server/AI to access the app's current actual state:
 
-让服务端/AI 能够拿到 app 当前真实状态：
+- Current route
+- Route parameters
+- The active tab of the current panel
+- Visible sections on the current page
+- A semantic DOM summary of the current page
 
-- 当前 route
-- route params
-- 当前 panel active tab
-- 当前页面可见 section
-- 当前页面的语义化 DOM 摘要
+### Proposed Implementation
 
-### 建议实现方式
-
-app 侧维护一个 runtime bridge，周期性或事件触发式更新以下状态：
+The app side maintains a "runtime bridge" that updates the following state periodically or via event triggers:
 
 ```ts
 interface PageRuntimeSnapshot {
@@ -462,55 +452,53 @@ interface PageRuntimeSnapshot {
 }
 ```
 
-## 4. DOM 暴露策略
+## 4. DOM Exposure Strategy
 
-不建议首版直接返回整页 `innerHTML`。
+It is not recommended to return the entire page's `innerHTML` directly in the initial release.
 
-建议分三级：
+A three-tiered approach is recommended:
 
-### Level 1：语义摘要
+### Level 1: Semantic Summary
 
-默认返回：
+Returned by default:
 
-- 页面标题
-- section 列表
-- 每个 section 的短摘要
-- 可执行动作列表
+- Page title
+- List of sections
+- A brief summary for each section
+- List of actionable items
 
-### Level 2：结构化可见内容
+### Level 2: Structured Visible Content
 
-按 section 请求时返回：
+Returned when requested on a per-section basis:
 
-- heading
-- visible labels
-- list items
-- selected text excerpt
+- Headings
+- Visible labels
+- List items
+- Excerpt of selected text
 
-### Level 3：受限原始 DOM excerpt
+### Level 3: Restricted Raw DOM Excerpt
 
-只在显式请求时返回：
+Returned only upon explicit request:
 
-- 指定 section 的裁剪后 HTML / text
-- 有字符上限
+- Trimmed HTML/text for a specified section
+- Subject to a character limit
 
-### 建议配套标注
+### Recommended Annotations
 
-为关键页面逐步补充稳定标记，例如：
+Gradually add stable markers to key pages; for example:
 
 - `data-page-id`
 - `data-page-section`
 - `data-page-action`
 
-这样 `page_tool` 读取的是“产品语义结构”，而不是脆弱的 className 树。
+This ensures that the `page_tool` reads the "product's semantic structure" rather than relying on a fragile tree of CSS class names. ## 5. Page Navigation Capabilities
 
-## 5. 页面跳转能力
+The initial release of `page_tool` is proposed to support:
 
-`page_tool` 首版建议支持：
+- Route navigation
+- Panel tab switching
 
-- route navigation
-- panel tab switching
-
-建议 action：
+Suggested actions:
 
 - `help`
 - `list`
@@ -521,37 +509,35 @@ interface PageRuntimeSnapshot {
 
 ### `current`
 
-返回当前 page snapshot 的 Level 1 信息。
+Returns Level 1 information regarding the current page snapshot.
 
 ### `inspect`
 
-按 page 或 section 下钻，返回 Level 2/3 信息。
+Drills down by page or section to return Level 2/3 information.
 
 ### `navigate`
 
-支持两类 target：
+Supports two types of targets:
 
-- route target：如 `session`, `post.detail`
-- panel target：如 `panel.notification`
+- Route targets: e.g., `session`, `post.detail`
+- Panel targets: e.g., `panel.notification`
 
-如果 target 需要参数，则由 `help` 先提示，再由 `navigate` 接收参数。
+If a target requires parameters, the `help` action should first provide a prompt, after which `navigate` accepts the parameters.
 
-## 6. `page_tool` 注册范围
+## 6. `page_tool` Registration Scope
 
-`page_tool` 只挂到 `global_panel_session`。
+`page_tool` is attached exclusively to `global_panel_session`. Rationale:
 
-原因：
-
-- 这是面向 app 全局导航的能力，不是某个普通对话 session 的私有能力
-- 避免普通 session 的工具面被无关 UI 操作污染
+- This capability is designed for app-wide global navigation, rather than being a private feature exclusive to a specific, standard conversation session.
+- This prevents the "tooling surface" of standard sessions from being cluttered by unrelated UI operations.
 
 ---
 
-## 渐进式披露与多层 `-h` 机制
+## Progressive Disclosure and the Multi-Layer `-h` Mechanism
 
-## 1. 统一树模型
+## 1. Unified Tree Model
 
-`api` 和 `page` 都抽象成一棵 help tree：
+Both `api` and `page` are abstracted into a single "help tree":
 
 ```ts
 interface HelpNode {
@@ -565,21 +551,21 @@ interface HelpNode {
 }
 ```
 
-## 2. 根节点只暴露一级
+## 2. Root Nodes Expose Only the First Level
 
-示例：
+Example:
 
 ### `polywise api -h`
 
-只展示：
+Displays only:
 
-- 可用 namespace
-- 每个 namespace 一句话摘要
-- 下一步看法：`polywise api <namespace> -h`
+- Available namespaces
+- A one-sentence summary for each namespace
+- Next steps/suggestions: `polywise api <namespace> -h`
 
 ### `api_tool.help()`
 
-只展示：
+Displays only:
 
 - `session`
 - `project`
@@ -589,21 +575,21 @@ interface HelpNode {
 
 ### `polywise page -h`
 
-只展示：
+Displays only:
 
-- route pages
-- panel pages
+- Route pages
+- Panel pages
 - `current` / `inspect` / `navigate`
 
-## 3. 二级节点展示命令，不展示全部参数细节
+## 3. Second-Level Nodes Display Commands, Not Full Parameter Details
 
-例如：
+For example:
 
 ```bash
 polywise api session -h
 ```
 
-返回：
+Returns:
 
 - `create`
 - `rename`
@@ -611,220 +597,214 @@ polywise api session -h
 - `get-list`
 - ...
 
-每个命令只给一句摘要。
+Each command is accompanied by only a one-sentence summary. ## 4. Displaying Parameters and Examples at the Third-Level Node
 
-## 4. 三级节点再展示参数与示例
-
-例如：
+For example:
 
 ```bash
 polywise api session create -h
 ```
 
-才展示：
+Only then are the following displayed:
 
-- 参数
-- 默认值
-- 示例
-- 输出简述
+- Parameters
+- Default values
+- Examples
+- Output summary
 
-## 5. 对 AI 的意义
+## 5. Significance for AI
 
-这套机制可以防止：
+This mechanism prevents:
 
-- context window 被长 API 列表吞掉
-- 模型过早接触无关命令
-- 页面 / API 使用路径不清晰
-
----
-
-## 与现有 Session Tool Runtime 的集成
-
-## 1. 挂载点
-
-在 [packages/polywise/src/fst/session/stream/getStream.ts](/Users/xiewendao/Documents/MatrixAges/polywise/packages/polywise/src/fst/session/stream/getStream.ts) 中，对 `global_panel_session` 增加额外工具注入条件。
-
-建议逻辑：
-
-- 普通 session：保持现状
-- `global_panel_session`：在 shared runtime 基础上补充：
-     - `page_tool`
-     - `api_tool`
-
-## 2. 不建议做成所有 session 默认共享工具
-
-原因：
-
-- 会显著扩大普通 session 的工具面
-- UI 导航与全局 API 操作并不属于大多数会话的最小必需能力
-
-## 3. 与现有 `meta_tool` 的关系
-
-`meta_tool` 处理的是 custom tool 路由，不适合承接系统 API CLI 化。
-
-因此：
-
-- `meta_tool` 继续负责 custom tool
-- `api_tool` 负责系统业务 API
-- 二者职责分离
+- The context window from being consumed by a lengthy list of APIs
+- The model from encountering irrelevant commands prematurely
+- Unclear navigation paths for pages or APIs
 
 ---
 
-## 推荐实施步骤
+## Integration with the Existing Session Tool Runtime
 
-## Phase 0：基础元信息与共享树模型
+## 1. Mount Point
 
-目标：
+In [packages/polywise/src/fst/session/stream/getStream.ts](/Users/xiewendao/Documents/MatrixAges/polywise/packages/polywise/src/fst/session/stream/getStream.ts), add additional tool injection conditions for `global_panel_session`.
 
-- 定义 CLI 共用 types
-- 扩展 tRPC meta 类型
-- 定义 help tree / api_map / page_map 数据结构
+Suggested Logic:
 
-产物：
+- Standard sessions: Maintain current behavior
+- `global_panel_session`: Augmenting the shared runtime with:
+- `page_tool`
+- `api_tool`
+
+## 2. It is not recommended to make tools shared by default across all sessions.
+
+Reasons:
+
+- This would significantly expand the tool surface area for standard sessions.
+- UI navigation and global API operations do not constitute the minimum essential capabilities required for the majority of sessions.
+
+## 3. Relationship with the existing `meta_tool`
+
+`meta_tool` handles custom tool routing; it is not suitable for serving as the framework for exposing system APIs via a CLI interface. Therefore:
+
+- `meta_tool` continues to be responsible for custom tools.
+- `api_tool` is responsible for system business APIs.
+- The responsibilities of the two are kept separate.
+
+---
+
+## Recommended Implementation Steps
+
+## Phase 0: Basic Metadata and Shared Tree Model
+
+**Goal:**
+
+- Define common CLI types.
+- Extend tRPC meta types.
+- Define data structures for the `help tree`, `api_map`, and `page_map`.
+
+**Deliverables:**
 
 - `src/cli/types.ts`
 - `src/cli/shared/*`
-- `utils/trpc.ts` meta 扩展
+- `utils/trpc.ts` (meta extensions)
 
-验收：
+**Acceptance Criteria:**
 
-- 可以在不接入具体命令的情况下构造 help tree
+- It is possible to construct the `help tree` without integrating specific commands.
 
-## Phase 1：后端 `api_map` 构建
+## Phase 1: Backend `api_map` Construction
 
-目标：
+**Goal:**
 
-- 自动从 router 收集非订阅 OpenAPI procedure
-- 生成 `api_map`
+- Automatically collect non-subscription OpenAPI procedures from the router.
+- Generate the `api_map`.
 
-产物：
+**Deliverables:**
 
 - `src/cli/api/collect.ts`
 - `src/cli/api/apiMap.ts`
 
-验收：
+**Acceptance Criteria:**
 
-- 能列出首批已打 `meta.openapi` 的 RPC
-- `subscription` 不出现在结果中
+- The initial batch of RPCs tagged with `meta.openapi` can be listed.
+- `subscription` procedures do not appear in the results.
 
-## Phase 2：终端 `api` CLI 与 `api_tool`
+## Phase 2: Terminal `api` CLI and `api_tool`
 
-目标：
+**Goal:**
 
-- 打通 `polywise api ...`
-- 打通 `api_tool.help/schema/call`
+- Enable the `polywise api ...` command.
+- Enable `api_tool.help/schema/call` functionality.
 
-产物：
+**Deliverables:**
 
 - `src/cli/commands/api.ts`
 - `src/fst/tools/api.ts`
 
-验收：
+**Acceptance Criteria:**
 
-- `polywise api -h`
-- `polywise api <namespace> -h`
-- `polywise api <namespace> <command> -h`
-- `api_tool` 与 CLI 输出树结构一致
+- `polywise api -h` works.
+- `polywise api <namespace> -h` works.
+- `polywise api <namespace> <command> -h` works.
+- The tree structure output by `api_tool` is consistent with that of the CLI.
 
-## Phase 3：app 侧 `page_map` 与 runtime bridge
+## Phase 3: App-side `page_map` and Runtime Bridge
 
-目标：
+**Goal:**
 
-- 建立页面静态索引
-- 建立当前页面状态桥
+- Establish a static index for pages.
+- Establish a bridge for the current page's state.
 
-产物：
+**Deliverables:**
 
 - `packages/app/appdata/page.ts`
 - `packages/app/runtime/pageBridge.ts`
-- 服务端接收/读取当前页面状态的桥接接口
+- A bridging interface on the server side for receiving/reading the current page state.
 
-验收：
+**Acceptance Criteria:**
 
-- 能读取当前 route
-- 能读取当前 panel tab
-- 能拿到页面 section 摘要
+- The current route can be read.
+- The current panel tab can be read.
+- Summaries of page sections can be retrieved.
 
-## Phase 4：`page_tool` 与 page CLI
+## Phase 4: `page_tool` and the Page CLI
 
-目标：
+**Objectives:**
 
-- 给 `global_panel_session` 注入 `page_tool`
-- 提供 `polywise page ...`
+- Inject `page_tool` into the `global_panel_session`.
+- Provide the `polywise page ...` command interface.
 
-产物：
+**Deliverables:**
 
 - `src/fst/tools/page.ts`
 - `src/cli/commands/page.ts`
 
-验收：
+**Acceptance Criteria:**
 
-- `polywise page -h`
-- `polywise page current`
-- `polywise page navigate ...`
-- `page_tool.current/inspect/navigate`
+- `polywise page -h` executes successfully.
+- `polywise page current` executes successfully.
+- `polywise page navigate ...` executes successfully.
+- `page_tool.current/inspect/navigate` functions correctly.
 
-## Phase 5：扩面与治理
+## Phase 5: Expansion and Governance
 
-目标：
+**Objectives:**
 
-- 给更多 RPC 补 `meta.openapi` 与 `meta.cli`
-- 为关键页面补 `data-page-*` 标记
-- 完善测试
+- Populate `meta.openapi` and `meta.cli` for additional RPCs.
+- Add `data-page-*` markers to key pages.
+- Refine and complete test coverage.
 
-验收：
+**Acceptance Criteria:**
 
-- 新增 RPC 纳入 CLI 的流程稳定
-- 页面摘要在关键页面上稳定可用
-
----
-
-## 风险与关键决策
-
-## 1. 风险：OpenAPI 覆盖面目前过低
-
-当前只有少数 RPC 进入 `meta.openapi`。
-
-影响：
-
-- `api_map` 首版可用面会比较小
-
-应对：
-
-- 先跑通链路
-- 再按优先级补 meta，而不是先要求全量覆盖
-
-## 2. 风险：前端 DOM 摘要如果直接扫 DOM，会非常脆弱
-
-影响：
-
-- className 变化就可能导致摘要漂移
-
-应对：
-
-- 首版以页面注册和语义 section 为主
-- 关键页面逐步加 `data-page-*` 标记
-
-## 3. 风险：CLI 框架过重会与“共享 help engine”冲突
-
-应对：
-
-- 帮助树和命令解析逻辑优先自研轻量层
-- 外部框架只作为 argv 入口，不承载帮助体系本身
-
-## 4. 关键决策：`page_tool` 只挂 `global_panel_session`
-
-这是正确的边界。
-
-如果后续证明某些 agent/session 也需要页面操控，再单独放开，不要一开始泛化。
+- The workflow for integrating new RPCs into the CLI is stable.
+- Page summaries are consistently available and reliable on key pages.
 
 ---
 
-## 建议首批纳入的 API 与页面范围
+## Risks and Key Decisions
 
-## API
+## 1. Risk: Current OpenAPI Coverage Is Too Low
 
-建议先挑简单、同步、非 watch 的能力：
+Currently, only a small number of RPCs are included in `meta.openapi`.
+
+**Impact:**
+
+- The initial release of `api_map` will have limited scope and utility.
+
+**Mitigation:**
+
+- First, establish and validate the end-to-end workflow.
+- Then, populate the `meta` data based on priority, rather than requiring full coverage upfront.
+
+## 2. Risk: Front-end DOM Summarization Will Be Extremely Fragile If It Directly Scans the DOM
+
+**Impact:**
+
+- Changes to CSS class names could easily cause the page summary to become inaccurate or "drift."
+
+**Mitigation:**
+
+- The initial release will focus primarily on page registration and semantic sections.
+- `data-page-*` markers will be added to key pages incrementally over time.
+
+## 3. Risk: An Overly Heavy CLI Framework Could Conflict with the "Shared Help Engine"
+
+**Mitigation:**
+
+- Prioritize developing a lightweight, custom layer for the help tree and command parsing logic.
+- External frameworks should serve solely as the entry point for command-line arguments (`argv`) and should not host the help system itself.
+
+## 4. Key Decision: `page_tool` Will Be Attached _Only_ to the `global_panel_session`
+
+This establishes the correct scope and boundaries.
+
+If future requirements demonstrate that other agents or sessions also require page manipulation capabilities, we can enable that functionality separately at that time; we should avoid over-generalizing the design from the outset. ---
+
+## Proposed Scope for Initial API and Page Inclusion
+
+## APIs
+
+It is recommended to prioritize simple, synchronous, and non-watch capabilities first:
 
 - `session.create`
 - `session.rename`
@@ -835,11 +815,11 @@ polywise api session create -h
 - `post.query`
 - `post.read`
 
-前提：补齐 `meta.openapi`。
+Prerequisite: Complete the `meta.openapi` definitions.
 
-## 页面
+## Pages
 
-建议先覆盖稳定主路径：
+It is recommended to cover stable main routes first:
 
 - `/`
 - `/session`
@@ -850,34 +830,35 @@ polywise api session create -h
 - `panel.session`
 - `panel.notification`
 
-动态详情页如 `/post/:id` 放在第二批。
+Dynamic detail pages—such as `/post/:id`—should be deferred to the second batch.
 
 ---
 
-## 建议的评审结论格式
+## Suggested Format for Review Conclusions
 
-你审阅时可以直接给我以下结论之一：
+When reviewing this proposal, you may provide one of the following conclusions directly:
 
-1. 方案可执行，按本稿 Phase 0-2 先做后端 CLI 与 `api_tool`
-2. 方案可执行，按本稿全量推进
-3. 先缩范围，只做 `api_tool`，暂缓 `page_tool`
-4. 先缩范围，只做 `page_tool` 的 list/current/navigate，不做 DOM inspect
-5. 需要我先改稿，重点调整：
-      - `page_tool` 粒度
-      - `api_map` 生成方式
-      - 多层 `-h` 形态
-      - `global_panel_session` 挂载边界
+1.    **Feasible:** Proceed according to Phases 0–2 of this draft, prioritizing the backend CLI and `api_tool`.
+2.    **Feasible:** Proceed with the full scope as outlined in this draft.
+3.    **Narrow Scope:** Focus solely on the `api_tool` for now, deferring the `page_tool`.
+4.    **Narrow Scope:** Focus only on the `list`/`current`/`navigate` functions of the `page_tool`, excluding DOM inspection capabilities.
+5.    **Revision Required:** I need to revise the draft first, with a specific focus on adjusting:
+
+- The granularity of the `page_tool`.
+- The generation method for the `api_map`.
+- The structure of multi-level `-h` (help) outputs.
+- The mounting boundaries for `global_panel_session`.
 
 ---
 
-## 结论
+## Conclusion
 
-这项需求适合按“共享索引层”来做，而不是分别给终端、OpenAPI、AI tool、前端桥各写一套。
+This requirement is best addressed by establishing a "Shared Index Layer," rather than writing separate, distinct implementations for the terminal, OpenAPI, AI tools, and the frontend bridge.
 
-最重要的三个落点是：
+The three most critical focal points are:
 
-1. 扩展 procedure meta，让 `openapi` 与 `cli` 元信息同源
-2. 把 `api_map` / `page_map` 变成唯一索引层
-3. 明确 `page_tool` 必须通过 app runtime bridge 获得当前页面与 DOM 摘要
+1.    **Extend Procedure Metadata:** Ensure that `openapi` and `cli` metadata originate from a single, unified source.
+2.    **Establish a Unified Index Layer:** Designate the `api_map` and `page_map` as the sole, authoritative index layer.
+3.    **Define `page_tool` Access:** Explicitly mandate that the `page_tool` must access current page data and DOM summaries exclusively through the App Runtime Bridge.
 
-只要这三个决策不偏，后续实现可以分阶段推进，不会返工。
+As long as these three core decisions remain aligned, the subsequent implementation can proceed in stages without the need for rework.

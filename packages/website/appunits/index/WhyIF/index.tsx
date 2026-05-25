@@ -1,6 +1,6 @@
 'use client'
 
-import { OpenAiLogoIcon, TreeStructureIcon, UserIcon } from '@phosphor-icons/react'
+import { ChatDotsIcon, TreeStructureIcon, UserIcon } from '@phosphor-icons/react'
 import Logo from '@website/components/Logo'
 import { $ } from '@website/utils'
 import { useTranslations } from 'next-intl'
@@ -67,7 +67,7 @@ const Index = () => {
 								ai_wrap role_item lightcard top bottom
 							'
 						>
-							<OpenAiLogoIcon weight='thin'></OpenAiLogoIcon>
+							<ChatDotsIcon weight='thin'></ChatDotsIcon>
 							<span className='name'>{t('Why_if.roles.ai')}</span>
 						</div>
 						<div
