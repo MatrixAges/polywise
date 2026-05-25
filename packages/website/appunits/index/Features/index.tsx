@@ -15,11 +15,14 @@ import styles from './index.module.css'
 
 import type { TargetAndTransition } from 'framer-motion'
 
+const feature_cycle_ms = 3600
+
 const Index = () => {
 	const t = useTranslations('index')
 	const [number, setNumber] = useState(0)
 	const [gradient, setGradient] = useState<TargetAndTransition>()
 	const timer = useRef<ReturnType<typeof setInterval> | null>(null)
+	const max = features_images.length - 1
 	const image_name = features_images[number]
 
 	useDeepCompareEffect(() => setGradient({ background: generateJSXMeshGradient(6).backgroundImage }), [number])
@@ -27,7 +30,9 @@ const Index = () => {
 	const tick = useMemoizedFn(() => {
 		timer.current && clearInterval(timer.current)
 
-		timer.current = setInterval(() => next(true), 20 * 1000)
+		timer.current = setInterval(() => {
+			setNumber(value => (value >= max ? 0 : value + 1))
+		}, feature_cycle_ms)
 	})
 
 	useEffect(() => {
@@ -39,15 +44,15 @@ const Index = () => {
 	}, [])
 
 	const prev = useMemoizedFn(() => {
-		setNumber(number === 0 ? 3 : number - 1)
+		setNumber(value => (value === 0 ? max : value - 1))
 
 		tick()
 	})
 
-	const next = useMemoizedFn((auto?: boolean) => {
-		setNumber(number === 3 ? 0 : number + 1)
+	const next = useMemoizedFn(() => {
+		setNumber(value => (value >= max ? 0 : value + 1))
 
-		if (auto !== true) tick()
+		tick()
 	})
 
 	return (
@@ -169,13 +174,16 @@ const Index = () => {
 								initial={{ opacity: 0 }}
 								animate={{ opacity: 1 }}
 								exit={{ opacity: 0 }}
-								transition={{ duration: 0.6 }}
+								transition={{ duration: 0.35 }}
 								key={number}
 							>
-								<img
-									className='preview_image w-full'
+								<motion.img
+									className='preview_image'
 									src={`/images/features/${image_name}.png`}
 									alt={modules_map[number].key}
+									initial={{ x: 220 }}
+									animate={{ x: -220 }}
+									transition={{ duration: feature_cycle_ms / 1000, ease: 'linear' }}
 								/>
 							</motion.div>
 						</AnimatePresence>
