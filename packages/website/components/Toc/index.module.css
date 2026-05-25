@@ -7,6 +7,8 @@
 		:global {
 			.toc_list {
 				gap: 0;
+				margin: 0;
+				padding-inline-start: 0;
 			}
 
 			.toc_link {
@@ -14,17 +16,6 @@
 				padding-top: 2px;
 				padding-bottom: 6px;
 				text-decoration: none;
-
-				&::before {
-					position: absolute;
-					top: 10px;
-					left: 0;
-					width: 4px;
-					height: 4px;
-					border-radius: 999px;
-					background-color: var(--color_text_sublight);
-					content: '';
-				}
 
 				&:hover {
 					text-decoration: underline;
@@ -63,7 +54,9 @@
 		}
 
 		.toc_list {
-			gap: 2px;
+			list-style: none !important;
+			margin: 0;
+			padding-inline-start: 0;
 		}
 
 		.toc_link {
@@ -72,17 +65,7 @@
 			padding-top: 0;
 			padding-bottom: 0;
 			text-decoration: none;
-
-			&::before {
-				position: absolute;
-				top: 9px;
-				left: 0;
-				width: 4px;
-				height: 4px;
-				border-radius: 999px;
-				background-color: var(--color_text_sublight);
-				content: '';
-			}
+			color: var(--color_text_grey);
 
 			&:hover {
 				text-decoration: underline;
@@ -96,6 +79,15 @@
 			&.active {
 				span {
 					color: var(--color_text);
+				}
+
+				&::before {
+					content: '';
+					position: absolute;
+					width: 2px;
+					height: 100%;
+					left: -2px;
+					background-color: rgba(var(--color_text_rgb), 30);
 				}
 			}
 

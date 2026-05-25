@@ -131,6 +131,10 @@
 			list-style-type: disc;
 		}
 
+		ol {
+			list-style-type: decimal;
+		}
+
 		blockquote {
 			padding: calc(var(--editor_padding_y) * 0.5) 0;
 			margin-inline-start: var(--editor_padding_x);

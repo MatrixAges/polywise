@@ -27,7 +27,15 @@ const renderItems = (items: TocItem[], active_href: string) => {
 				<li className='toc_item' key={item.key}>
 					<a
 						className={$.cx(
-							'toc_link block transition-colors duration-200',
+							`
+							relative
+							flex
+							items-center
+							h-5
+							mb-3
+							transition-colors duration-200
+							toc_link
+						`,
 							active_href === item.href && 'active'
 						)}
 						href={item.href}
@@ -94,10 +102,10 @@ const Index = (props: IProps) => {
 				{!as_content && (
 					<div className='header_wrap sticky flex items-center'>
 						<TocIcon aria-hidden />
-						<span className='title'>{t('toc.title')}</span>
+						<span className='title font-medium'>{t('toc.title')}</span>
 					</div>
 				)}
-				<nav>{renderItems(list, active_href)}</nav>
+				<nav className='border-l-2 border-black/6'>{renderItems(list, active_href)}</nav>
 			</div>
 		</div>
 	)
