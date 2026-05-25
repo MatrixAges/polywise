@@ -31,8 +31,8 @@ const MobileMenu = ({ onClose }: { onClose: () => void }) => {
 					<Link
 						className='
 							py-3
-							text-sm text-[var(--color_text_sub)]
-							border-b border-dashed border-[var(--color_border_light)]
+							text-sm text-(--color_text_sub)
+							border-b border-dashed border-(--color_border_light)
 							last:border-b-0
 						'
 						href={item.path}

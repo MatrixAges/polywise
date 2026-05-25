@@ -32,19 +32,19 @@ const Index = () => {
 					`
 					flex
 					items-center justify-between
-					w-[90px] h-9
+					w-22.5 h-9
 					px-3
-					rounded-[var(--radius)]
-					text-xs text-[var(--color_text_sub)]
-					bg-[var(--color_bg_1)]
-					border border-[var(--color_border_light)]
+					rounded-(--radius)
+					text-xs text-(--color_text_sub)
+					bg-(--color_bg_1)
+					border border-(--color_border_light)
 					transition-colors duration-200
-					hover:bg-[var(--color_bg_2)]
+					hover:bg-(--color_bg_2)
 				`
 				)}
 			>
 				<Select.Value />
-				<Select.Icon className='text-[var(--color_text_light)]'>
+				<Select.Icon className='text-(--color_text_light)'>
 					<CaretDown size={12} />
 				</Select.Icon>
 			</Select.Trigger>
@@ -56,11 +56,11 @@ const Index = () => {
 							min-w-30
 							p-1
 							rounded-xl
-							bg-[var(--color_bg)]
-							border border-[var(--color_border_light)]
+							bg-(--color_bg)
+							border border-(--color_border_light)
 							shadow-[0_18px_48px_rgba(0,0,0,0.18)]
 							duration-200
-							transition data-[starting-style]:translate-y-1 data-[starting-style]:opacity-0 data-[ending-style]:translate-y-1 data-[ending-style]:opacity-0
+							transition data-starting-style:translate-y-1 data-starting-style:opacity-0 data-ending-style:translate-y-1 data-ending-style:opacity-0
 						'
 					>
 						<Select.List className='flex flex-col gap-1'>
@@ -71,17 +71,17 @@ const Index = () => {
 										items-center justify-between
 										px-3 py-2
 										rounded-lg
-										text-sm text-[var(--color_text_sub)]
+										text-sm text-(--color_text_sub)
 										outline-none
 										transition-colors duration-200
-										hover:bg-[var(--color_bg_1)]
-										cursor-pointer data-[highlighted]:bg-[var(--color_bg_1)] data-[selected]:text-[var(--color_text)]
+										hover:bg-(--color_bg_1)
+										cursor-pointer data-highlighted:bg-(--color_bg_1) data-selected:text-(--color_text)
 									'
 									key={option.value}
 									value={option.value}
 								>
 									<Select.ItemText>{option.label}</Select.ItemText>
-									<Select.ItemIndicator className='text-[var(--color_text)]'>
+									<Select.ItemIndicator className='text-(--color_text)'>
 										<Check size={14} weight='bold' />
 									</Select.ItemIndicator>
 								</Select.Item>

@@ -450,7 +450,7 @@ const Index = (props: IProps) => {
 					'
 				>
 					<div className='flex items-center'>
-						<div className='key_item mr-[18px] flex items-center'>
+						<div className='key_item mr-4.5 flex items-center'>
 							<div
 								className='
 									box-border

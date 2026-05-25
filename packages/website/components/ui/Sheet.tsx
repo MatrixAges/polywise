@@ -72,9 +72,9 @@ const Index = (props: IProps) => {
 							items-center justify-center
 							w-8 h-8
 							rounded-full
-							text-[var(--color_text_light)]
+							text-(--color_text_light)
 							transition-colors duration-200
-							hover:bg-[var(--color_bg_1)] hover:text-[var(--color_text)]
+							hover:bg-(--color_bg_1) hover:text-(--color_text)
 						'
 					>
 						{closeIcon ?? <X size={16} />}

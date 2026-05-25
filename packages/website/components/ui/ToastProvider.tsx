@@ -61,26 +61,26 @@ const Inner = ({ children }: PropsWithChildren) => {
 								w-full
 								p-4
 								rounded-2xl
-								text-[var(--color_text)]
+								text-(--color_text)
 								bg-[rgba(var(--color_bg_rgb),0.94)]
-								border border-[var(--color_border_light)]
+								border border-(--color_border_light)
 								shadow-[0_20px_60px_rgba(0,0,0,0.18)]
 								backdrop-blur-xl
 								duration-200
 								pointer-events-auto transition
 							`,
-									'data-[ending-style]:translate-y-2 data-[ending-style]:opacity-0 data-[starting-style]:translate-y-2 data-[starting-style]:opacity-0'
+									'data-ending-style:translate-y-2 data-ending-style:opacity-0 data-starting-style:translate-y-2 data-starting-style:opacity-0'
 								)}
 							>
 								<div className='flex items-start gap-3'>
-									<div className='mt-0.5 text-[var(--color_text)]'>
+									<div className='mt-0.5 text-(--color_text)'>
 										<Icon size={18} weight='fill' />
 									</div>
 									<div
 										className='
 										flex-1
 										min-w-0
-										text-sm text-[var(--color_text_sub)] leading-6
+										text-sm text-(--color_text_sub) leading-6
 									'
 									>
 										<Toast.Description />
@@ -92,9 +92,9 @@ const Inner = ({ children }: PropsWithChildren) => {
 										items-center justify-center
 										w-7 h-7
 										rounded-full
-										text-[var(--color_text_light)]
+										text-(--color_text_light)
 										transition-colors duration-200
-										hover:bg-[var(--color_bg_1)] hover:text-[var(--color_text)]
+										hover:bg-(--color_bg_1) hover:text-(--color_text)
 									'
 									>
 										<X size={14} />
