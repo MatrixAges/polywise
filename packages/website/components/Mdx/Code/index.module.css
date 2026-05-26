@@ -48,6 +48,14 @@
 			overflow-x: auto;
 			width: 100%;
 			margin: 0;
+
+			pre {
+				margin: 0;
+			}
+
+			code {
+				font-family: var(--font_mono);
+			}
 		}
 	}
 }

@@ -5,7 +5,7 @@ import type { BundledLanguage } from 'shiki/bundle/web'
 const light_theme = 'github-light'
 const dark_theme = 'github-dark'
 const fallback_language = 'text'
-const initial_languages: Array<BundledLanguage> = ['typescript', 'javascript']
+const initial_languages: Array<BundledLanguage> = ['text' as BundledLanguage, 'typescript', 'javascript']
 
 const known_languages = new Set<string>()
 
@@ -32,17 +32,10 @@ const getHighlighter = () => {
 
 const resolveLanguage = (lang: string) => (known_languages.has(lang) ? lang : fallback_language)
 
-export const highlight = async (code: string, lang: BundledLanguage | string) => {
-	const highlighter = await getHighlighter()
-	const normalized_language = resolveLanguage(lang)
-
-	if (!highlighter.getLoadedLanguages().includes(normalized_language)) {
-		await highlighter.loadLanguage(normalized_language as BundledLanguage)
-	}
-
+const renderHighlightedCode = (highlighter: Awaited<ReturnType<typeof getHighlighter>>, code: string, lang: string) => {
 	const code_text = highlighter
 		.codeToHtml(code, {
-			lang: normalized_language,
+			lang,
 			themes: {
 				light: light_theme,
 				dark: dark_theme
@@ -52,4 +45,15 @@ export const highlight = async (code: string, lang: BundledLanguage | string) =>
 		.replace('<code>', '<code class="shiki-code">')
 
 	return `<div class="pre_code_wrap">${code_text}</div>`
+}
+
+export const highlight = async (code: string, lang: BundledLanguage | string) => {
+	const highlighter = await getHighlighter()
+	const normalized_language = resolveLanguage(lang)
+
+	if (!highlighter.getLoadedLanguages().includes(normalized_language)) {
+		await highlighter.loadLanguage(normalized_language as BundledLanguage)
+	}
+
+	return renderHighlightedCode(highlighter, code, normalized_language)
 }
