@@ -10,8 +10,15 @@ interface DocCard {
 	desc: string
 }
 
-const popular_keys = ['intro', 'config', 'providers', 'cli', 'project_workspace', 'fst']
-const basics_keys = ['web', 'desktop', 'capture_contents', 'group_chat', 'memory_callback', 'troubleshooting']
+const popular_keys = ['intro', 'config', 'providers', 'usage/cli', 'guides/project_workspace', 'system/fst']
+const basics_keys = [
+	'usage/web',
+	'usage/desktop',
+	'guides/capture_contents',
+	'guides/group_chat',
+	'system/memory_callback',
+	'troubleshooting'
+]
 
 const classNameOf = (key: string) => key.replaceAll('/', '-')
 
@@ -60,20 +67,20 @@ const buildDocsData = (l: (en: string, zh?: string, ja?: string) => string) => {
 			label: l('Usage'),
 			children: [
 				{
-					key: 'cli',
-					className: classNameOf('cli'),
+					key: 'usage/cli',
+					className: classNameOf('usage/cli'),
 					label: l('CLI'),
 					desc: 'Run Polywise in the terminal and automate workflows.'
 				},
 				{
-					key: 'web',
-					className: classNameOf('web'),
+					key: 'usage/web',
+					className: classNameOf('usage/web'),
 					label: l('Web'),
 					desc: 'Use the browser app for lightweight access and tasks.'
 				},
 				{
-					key: 'desktop',
-					className: classNameOf('desktop'),
+					key: 'usage/desktop',
+					className: classNameOf('usage/desktop'),
 					label: l('Desktop'),
 					desc: 'Use the desktop app for local-first workflows.'
 				}
@@ -85,38 +92,38 @@ const buildDocsData = (l: (en: string, zh?: string, ja?: string) => string) => {
 			label: l('Guides'),
 			children: [
 				{
-					key: 'capture_contents',
-					className: classNameOf('capture_contents'),
+					key: 'guides/capture_contents',
+					className: classNameOf('guides/capture_contents'),
 					label: l('Capture Contents'),
 					desc: 'Capture pages, files, and live context into workspaces.'
 				},
 				{
-					key: 'agent_private_contents',
-					className: classNameOf('agent_private_contents'),
+					key: 'guides/agent_private_contents',
+					className: classNameOf('guides/agent_private_contents'),
 					label: l('Agent Private Contents'),
 					desc: 'Keep agent-only context separate from shared project content.'
 				},
 				{
-					key: 'group_chat',
-					className: classNameOf('group_chat'),
+					key: 'guides/group_chat',
+					className: classNameOf('guides/group_chat'),
 					label: l('Group Chat'),
 					desc: 'Coordinate shared conversations in one project context.'
 				},
 				{
-					key: 'project_workspace',
-					className: classNameOf('project_workspace'),
+					key: 'guides/project_workspace',
+					className: classNameOf('guides/project_workspace'),
 					label: l('Project Workspace'),
 					desc: 'Organize code, content, and runtime state together.'
 				},
 				{
-					key: 'im_integration',
-					className: classNameOf('im_integration'),
+					key: 'guides/im_integration',
+					className: classNameOf('guides/im_integration'),
 					label: l('IM Integration'),
 					desc: 'Connect messaging surfaces and route them into Polywise.'
 				},
 				{
-					key: 'content_service_providers',
-					className: classNameOf('content_service_providers'),
+					key: 'guides/content_service_providers',
+					className: classNameOf('guides/content_service_providers'),
 					label: l('Content Service Providers'),
 					desc: 'Integrate external content backends and ingestion sources.'
 				}
@@ -128,26 +135,26 @@ const buildDocsData = (l: (en: string, zh?: string, ja?: string) => string) => {
 			label: l('System'),
 			children: [
 				{
-					key: 'fst',
-					className: classNameOf('fst'),
+					key: 'system/fst',
+					className: classNameOf('system/fst'),
 					label: l('FST'),
 					desc: 'Understand how the FST layer structures state.'
 				},
 				{
-					key: 'memory_callback',
-					className: classNameOf('memory_callback'),
+					key: 'system/memory_callback',
+					className: classNameOf('system/memory_callback'),
 					label: l('Memory Callback'),
 					desc: 'Retrieve and persist memory at the right moments.'
 				},
 				{
-					key: 'post_think',
-					className: classNameOf('post_think'),
+					key: 'system/post_think',
+					className: classNameOf('system/post_think'),
 					label: l('Post Think'),
 					desc: 'Review what runs after reasoning and shapes results.'
 				},
 				{
-					key: 'rewire_mechanisms',
-					className: classNameOf('rewire_mechanisms'),
+					key: 'system/rewire_mechanisms',
+					className: classNameOf('system/rewire_mechanisms'),
 					label: l('Rewire Mechanisms'),
 					desc: 'Learn how context, tools, and control flow are rewired.'
 				}

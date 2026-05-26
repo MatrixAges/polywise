@@ -16,19 +16,19 @@ const docPaths = [
 	'config',
 	'providers',
 	'troubleshooting',
-	'cli',
-	'web',
-	'desktop',
-	'capture_contents',
-	'agent_private_contents',
-	'group_chat',
-	'project_workspace',
-	'im_integration',
-	'content_service_providers',
-	'fst',
-	'memory_callback',
-	'post_think',
-	'rewire_mechanisms'
+	'usage/cli',
+	'usage/web',
+	'usage/desktop',
+	'guides/capture_contents',
+	'guides/agent_private_contents',
+	'guides/group_chat',
+	'guides/project_workspace',
+	'guides/im_integration',
+	'guides/content_service_providers',
+	'system/fst',
+	'system/memory_callback',
+	'system/post_think',
+	'system/rewire_mechanisms'
 ]
 
 const docsByLocale = {
