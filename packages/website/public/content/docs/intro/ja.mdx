@@ -1,0 +1,195 @@
+# イントロ
+
+Polywise はオープンソースの agentic content system です。ターミナルツール、Web アプリ、デスクトップアプリとして使えますが、いちばん理解しやすいのはアプリそのものを触ることです。
+
+最初にいちばん良い印象を得る方法は、ひとつの小さなことをちゃんとやることです。モデルをひとつつなぎ、session を開き、実際の質問をひとつ投げ、そのあとで saved content、agents、posts へと広げていけば十分です。
+
+![linkcase](/images/linkcase.png)
+
+## インストール
+
+最初の利用で Polywise に主に必要なのは、使える model provider をひとつ用意することです。ほかはあとからでも構いません。
+
+**前提条件**
+
+### 必須
+
+- [Nodejs](https://nodejs.org)
+
+### 任意
+
+- [Agent Browser](https://agent-browser.dev/installation)
+- [OpenCli](https://opencli.info/docs/guide/installation.html)
+- [Crawl4ai](https://docs.crawl4ai.com/core/cli/)
+- [Dokobot](https://dokobot.ai/zh-CN/help/install-cli)
+- [Jina Reader](https://jina.ai/en-US/reader/)
+
+最初から全部そろっている必要はありません。provider がひとつ動き、chat model がひとつ返答してくれれば、それだけでこのプロダクトを学び始めるには十分です。
+
+## 設定
+
+![setting](/images/setting.png)
+
+最初のセットアップの流れはシンプルです。
+
+1. `Settings` を開く
+2. provider をひとつ接続する
+3. デフォルトのモデルを選ぶ
+4. `Session` に戻る
+
+### モデルプロバイダー
+
+![model_providers](/images/model_providers.png)
+
+まずは `Settings -> Model Provider` から始めてください。
+
+ここが本当のスタート地点です。実際に使える provider をひとつ選び、key を貼り付け、少なくともひとつの chat model を有効にして、そのまま先へ進みます。初日に provider 全体を完璧に整えようとする必要はありません。
+
+実際にアプリを見たとき、このページはかなり人間的な整理になっていました。左に provider の一覧、右に認証情報と有効化されたモデルがあります。つまり、やることは明確です。これは「インフラを設定する」作業ではなく、Polywise にひとつの話せる頭脳を渡す作業です。
+
+### ローカルモデル
+
+![local_model](/images/local_model.png)
+
+次に `Settings -> Model Setting` を開きます。
+
+このページは、3 つの役割として読むとわかりやすくなります。
+
+- `Default Model` は sessions であなたと対話します
+- `Embedding Model` は保存した内容にインデックスを付けます
+- `Rerank Model` は Polywise の検索をより良くします
+
+まずはこの 3 つを設定してください。triples の生成や search rewrite のような下の項目は、アプリをどう使いたいかが見えてからで十分です。
+
+同じページには local model の状態も表示されます。local generation、embedding、rerank model が使える場合はここに出てきますし、ダウンロードや確認もここで行います。
+
+### サービスプロバイダー
+
+![service_providers](/images/service_providers.png)
+
+Polywise に Web をもっと上手く読ませたくなったら、`Settings -> Service Provider` を開いてください。
+
+このページは実質的に Linkcase のためのページです。コンテンツの取得と処理に使う local providers と fallback chain を管理します。最初の目的が chat だけなら、ここは安全に後回しにできます。研究、クリッピング、知識ベース作りが目的なら、このページは早い段階で重要になります。
+
+実際のところ、ここは Polywise が外の世界をどう取り込みにいくかを学ぶ場所です。
+
+### IM 統合
+
+![im](/images/im.png)
+
+`IM Integration` は任意です。外部メッセージチャネルを Polywise に結び付けたいと、すでにわかっている場合を除いて、後回しで構いません。
+
+## 使い方
+
+provider がひとつつながり、デフォルトモデルも決まったら、いったん設定をやめて、そのままプロダクトを使い始めてください。
+
+### 質問する
+
+![ask_question](/images/ask_question.png)
+
+`Session` を開きます。
+
+ここがいちばん良い出発点です。すぐに価値が返ってくるからです。左側ではアプリが `Sessions`、`Projects`、`IM` を分けています。新規ユーザーにとっては、普通の sessions から始めるのが正解です。
+
+最初の一回を “hello” に使わないでください。ちゃんとしたことを聞きましょう。
+
+- 「この workspace が何のためのものか要約して」
+- 「機能の計画を手伝って」
+- 「repo を読んで、どこから始めるべきか教えて」
+- 「このメモをアウトラインにして」
+
+返答が地に足のついた、役に立つものに感じられたら、その時点で設定はもう十分です。
+
+入力バーは、Polywise が普通のチャットアプリと違って感じ始める場所です。特に大事なのは次の項目です。
+
+- model
+- effort
+- mode
+- audit
+- submit style
+
+特に重要なのが mode selector です。
+
+- `Normal` は日常の作業向け
+- `Plan` はまず構造がほしいとき向け
+- `Plan-Exec` は構造と前進の両方がほしいとき向け
+
+さらに、早めに覚えておくと良いショートカットが 2 つあります。
+
+`@` は agent や file のような文脈を持ち込みます。これによって session は抽象的なものではなくなり、workspace に根ざしたものになります。
+
+`/` は tools と skills を持ち込みます。会話が「これに答えて」から「このやり方で一緒に進めて」に変わる場所です。
+
+### コンテンツを取り込む
+
+![linkcase](/images/linkcase.png)
+
+session を使っていて、「このページをそのまま workspace に入れたい」と感じたら、`Linkcase` に移ってください。
+
+Linkcase は単なる bookmarks list ではありません。むしろ Web 上の資料を受け取る intake desk のように感じられます。左で links を見て、右で取り込まれた内容を読み、上にはいちばん重要な 2 つの操作がすぐ見えます。
+
+- `Fetch`
+- `Extract`
+
+初心者向けの流れはシンプルです。
+
+1. link を 1 つ追加する
+2. それを fetch する
+3. 結果を確認する
+4. extract する
+
+`Fetch` はページを Polywise に取り込むことです。`Extract` はそれをシステムのほかの部分がもっと使いやすい形に変えることです。この違いは早い段階で理解しておく価値があります。
+
+### Agents と Groups と話す
+
+同じ種類の指示を何度も繰り返していると気づいたら、繰り返すのをやめて `Agent` を作ってください。
+
+それが Agent ページを使う正しいタイミングです。もっと早くではありません。
+
+#### Agent Session
+
+![agent_session](/images/agent_session.png)
+
+Agents は、狭くて、信頼しやすいものがいちばん良いです。最初の agent として良いのは、repo guide、writing partner、research helper、code reviewer のようなものです。
+
+初日に完璧な agent system は必要ありません。必要なのは、役割がはっきりした agent をひとつだけ持つことです。
+
+#### Agent 内容
+
+![agent_detail](/images/agent_detail.png)
+
+Agent ページは、繰り返される作業スタイルが再利用できる構造に変わる場所です。prompt、memory、skills、tools、linked content が、毎回チャットで打ち直されるのではなく、ひとつの場所に住み始めます。
+
+ここが Polywise が複利的に効き始める地点です。良い agent は、自分のことを何度も説明し直す手間を減らしてくれます。
+
+#### Agents Group
+
+![group](/images/group.png)
+
+Groups は強力ですが、たいていは 2 歩目です。まずは良い agent をひとつ作ってください。異なる agents に本当に異なる役割を担わせたくなったときにだけ、groups を足せば十分です。
+
+この順番は重要です。ひとつの明快な agent のほうが、早すぎる multi-agent setup よりも、このプロダクトの使い方を多く教えてくれます。
+
+### Posts を書く
+
+![post](/images/post.png)
+
+チャットの返答よりも長く残すべきものが出てきたら、それを `Post` として保存してください。
+
+Post ページ自体が、想定されているリズムをすでに示しています。上部には `Wiki`、`Memory`、`User` があり、検索と新規 post の操作も並んでいます。公開システムというより、仕上がった考えを落ち着かせる場所のように感じられます。
+
+ここで大事なのはこの切り替わりです。
+
+chat は進めるため  
+posts は残すため
+
+## なぜ Polywise か
+
+**知識や経験の重要性が薄れていくとき、人の価値はいったいどこから生まれるのか。人の固有性はどこに現れるのか。**
+
+それは思考の「重み」から生まれます。より正確に言えば、それぞれの人が持つ固有の神経ネットワーク構造からです。
+人間の価値を AI 時代に引き直して言えば、それは知性の可塑性、つまり AI を使って自分自身のデジタル人格をどう構築するかにあります。
+
+私的所有という概念が残る限り、人間の個性に由来する能力は価値を持ち続けます。それは独自で貴重な個人資産になります。ただし、その能力は AI との継続的な相互作用を通じて育てられ、結晶化されなければなりません。Polywise はユーザーと AI を、進化し続け、反復し続けるひとつの知的存在として結び付け、人の価値を置き換えるのではなく増幅します。
+
+Polywise はまた、AI 時代に特徴的な「知識爆発」と、それに続く情報過多の問題にも取り組んでいます。AI の強力な帰納能力を使って「後思考」——つまり情報を統合し、蒸留するプロセス——を担わせることで、人間の認知エネルギーを、もっと重要なことのために解放します。

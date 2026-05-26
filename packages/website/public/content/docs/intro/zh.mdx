@@ -1,0 +1,195 @@
+# 介绍
+
+Polywise 是一个开源的 agentic content system。你可以把它当成终端工具、Web 应用或桌面应用来使用，但最容易理解它的方式，还是直接通过应用本身。
+
+最好的第一印象，通常来自把一件小事做好：连上一个模型，打开一个 session，问一个真实问题，然后再慢慢扩展到保存内容、agents 和 posts。
+
+![linkcase](/images/linkcase.png)
+
+## 安装
+
+第一次使用时，Polywise 主要只需要一个可用的模型提供方。其他东西都可以以后再配。
+
+**前置条件**
+
+### 必需
+
+- [Nodejs](https://nodejs.org)
+
+### 可选
+
+- [Agent Browser](https://agent-browser.dev/installation)
+- [OpenCli](https://opencli.info/docs/guide/installation.html)
+- [Crawl4ai](https://docs.crawl4ai.com/core/cli/)
+- [Dokobot](https://dokobot.ai/zh-CN/help/install-cli)
+- [Jina Reader](https://jina.ai/en-US/reader/)
+
+你不需要把这些全部配齐才能开始。只要有一个 provider 能用、一个聊天模型能回答你，这就足够开始理解这个产品了。
+
+## 配置
+
+![setting](/images/setting.png)
+
+最开始的配置路径很简单：
+
+1. 打开 `Settings`
+2. 连接一个 provider
+3. 选择默认模型
+4. 回到 `Session`
+
+### 模型提供方
+
+![model_providers](/images/model_providers.png)
+
+先从 `Settings -> Model Provider` 开始。
+
+这一页才是真正的起点。选一个你实际能用的 provider，贴上 key，启用至少一个聊天模型，然后继续往下走。第一天不用试图把整张 provider 矩阵都配置到完美。
+
+我在看应用时发现，这一页的组织方式其实很符合直觉：左边是 provider 列表，右边是凭证和启用的模型。这样事情就很清楚了。你不是在“配置基础设施”，你只是在给 Polywise 接上一颗能说话的大脑。
+
+### 本地模型
+
+![local_model](/images/local_model.png)
+
+然后打开 `Settings -> Model Setting`。
+
+如果你把这一页理解成三件事，它就会清楚很多：
+
+- `Default Model` 在 session 里和你对话
+- `Embedding Model` 给你保存的内容建索引
+- `Rerank Model` 帮 Polywise 搜得更准
+
+先把这三个设好。下面的内容，比如 triples 生成或 search rewrite，都可以等你已经知道自己想怎么用这个应用之后再回来配置。
+
+同一页也会显示本地模型状态。如果本地 generation、embedding 或 rerank 模型可用，它们会显示在这里；下载或确认状态也是在这里完成。
+
+### 服务提供方
+
+![service_providers](/images/service_providers.png)
+
+当你希望 Polywise 更擅长读网页时，再打开 `Settings -> Service Provider`。
+
+这一页本质上是给 Linkcase 用的。它控制用于抓取和处理内容的本地 providers 和 fallback chain。如果你第一步只是想聊天，可以放心先跳过它。如果你的目标是做研究、保存资料、建立知识库，这一页就会很早变得重要。
+
+实际一点说，这就是 Polywise 学会如何抓取外部世界的地方。
+
+### IM 集成
+
+![im](/images/im.png)
+
+`IM Integration` 是可选项。除非你已经明确知道自己想把外部消息渠道接进 Polywise，否则可以先留到后面。
+
+## 用法
+
+一旦有一个 provider 连好了，默认模型也设好了，就先别继续配置了，直接开始用产品。
+
+### 提问
+
+![ask_question](/images/ask_question.png)
+
+打开 `Session`。
+
+这里是最适合开始的地方，因为它能立刻给你价值。左侧应用把 `Sessions`、`Projects` 和 `IM` 分开了。对新用户来说，普通 sessions 才是正确的起点。
+
+第一次不要把机会浪费在“hello”上。问点真实的：
+
+- “总结一下这个 workspace 是做什么的。”
+- “帮我规划一个功能。”
+- “读一下 repo，告诉我该从哪里开始。”
+- “把这些笔记整理成一个大纲。”
+
+如果回答听起来足够贴地、足够有用，那你的配置其实已经够好了。
+
+输入栏是 Polywise 开始显得和普通聊天应用不一样的地方。最值得关注的控制项有：
+
+- model
+- effort
+- mode
+- audit
+- submit style
+
+其中 mode selector 尤其重要：
+
+- `Normal` 适合日常工作
+- `Plan` 适合你想先要结构的时候
+- `Plan-Exec` 适合你既要结构也要推进感的时候
+
+还有两个快捷方式值得尽早学会：
+
+`@` 会把 agent、file 这类上下文带进来。它意味着一个 session 不再是抽象的，而是开始扎根在你的 workspace 里。
+
+`/` 会把 tools 和 skills 带进来。它让对话开始从“回答这个问题”变成“按这种方式和我一起工作”。
+
+### 捕获内容
+
+![linkcase](/images/linkcase.png)
+
+一旦某个 session 让你产生“我真希望能直接把这个页面喂进 workspace”的念头，就切到 `Linkcase`。
+
+Linkcase 不只是一个书签列表。它更像一个网页资料的 intake desk。左边浏览 links，右边阅读抓进来的内容，顶部最关键的两个动作一眼就能看到：
+
+- `Fetch`
+- `Extract`
+
+对新手来说，流程很简单：
+
+1. 加一个 link
+2. fetch 它
+3. 看看结果
+4. extract 它
+
+`Fetch` 是把页面带进 Polywise。`Extract` 是把它变成系统其他部分更容易使用的东西。尽早理解这两者的差别很有价值。
+
+### 与 Agents 和 Groups 聊天
+
+当你发现自己不断重复同一种指令风格时，就别再重复了，去做一个 `Agent`。
+
+这才是使用 Agent 页的正确时机。不是更早。
+
+#### Agent Session
+
+![agent_session](/images/agent_session.png)
+
+Agent 最好是窄而清晰、容易信任的。好的第一个 agent，通常像是 repo guide、写作搭档、研究助手，或者代码 reviewer。
+
+第一天你不需要一整套完美的 agent system。你只需要一个职责清楚的 agent。
+
+#### Agent 内容
+
+![agent_detail](/images/agent_detail.png)
+
+Agent 页是把重复工作方式变成可复用结构的地方。prompt、memory、skills、tools 和关联内容，都开始住进同一个地方，而不是每次聊天都重打一遍。
+
+这就是 Polywise 开始产生复利的节点。一个好的 agent 会帮你省掉重复解释自己的过程。
+
+#### Agents Group
+
+![group](/images/group.png)
+
+Groups 很强，但通常是第二步。先做好一个 agent。只有当你真的希望不同 agents 扮演不同角色时，再加 groups。
+
+这个顺序很重要。一个清晰的 agent，比过早搭起一个 multi-agent setup 更能教会你怎么用这个产品。
+
+### 写 Posts
+
+![post](/images/post.png)
+
+当某些东西应该活得比一条聊天回复更久时，就把它保存成 `Post`。
+
+Post 页本身已经在暗示它的使用节奏：顶部就是 `Wiki`、`Memory` 和 `User`，旁边是搜索和新建 post 的动作。它感觉不像一个发布系统，更像一个让成型想法沉淀下来的地方。
+
+这里最重要的转变是：
+
+chat 用来推动  
+posts 用来保存
+
+## 为什么是 Polywise
+
+**当知识和经验不再那么关键时，人的价值究竟从哪里来？人的独特性又体现在哪里？**
+
+它来自思维的“权重”——更准确地说，来自每个人独特的神经网络结构。
+对人的价值的一种重新定义是：在 AI 时代，人的价值在于智能的可塑性，也就是你如何借助 AI 去构建自己的数字化人格分身。
+
+只要私人所有权的概念仍然存在，人类个体性的能力就依然有价值，它会成为一种独特而珍贵的个人资产。但这些能力必须通过与 AI 的持续互动来培养、沉淀和结晶。Polywise 把用户和 AI 融合成一个持续演化、持续迭代的智能体，从而放大人的价值，而不是替代人。
+
+Polywise 也致力于解决 AI 时代典型的“知识爆炸”及其带来的信息过载问题。通过借助 AI 强大的归纳能力来处理“后思考”——也就是综合、提炼信息的过程——它把人的认知精力释放出来，用在更重要的事情上。
