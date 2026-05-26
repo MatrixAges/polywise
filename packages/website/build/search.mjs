@@ -9,7 +9,7 @@ import lzString from 'lz-string'
 
 const { compressToUTF16 } = lzString
 
-const contentDir = `${process.cwd()}/content/docs`
+const contentDir = `${process.cwd()}/public/content/docs`
 const searchDir = `${process.cwd()}/public/search`
 const docPaths = [
 	'intro',

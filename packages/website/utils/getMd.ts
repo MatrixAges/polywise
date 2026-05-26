@@ -16,7 +16,7 @@ function getMd(type: ContentType, id: string, with_toc: false): Promise<string>
 function getMd(type: ContentType, id: string, with_toc: true): Promise<MdWithToc>
 async function getMd(type: ContentType, id: string, with_toc?: boolean) {
 	const { locale } = await getUserLocale()
-	const md = getContent(type, id, locale)
+	const md = await getContent(type, id, locale)
 
 	if (!md) {
 		throw new Error(`Missing content: ${type}/${id}/${locale}`)

@@ -6,7 +6,7 @@ import { toc as genToc } from 'mdast-util-toc'
 
 export default async (path: string) => {
 	const { locale } = await getUserLocale()
-	const md = getContent('docs', path, locale)
+	const md = await getContent('docs', path, locale)
 
 	if (!md) return { err: new Error(`Missing doc: ${path}`) }
 
