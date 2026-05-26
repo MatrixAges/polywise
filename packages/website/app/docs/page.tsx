@@ -1,6 +1,6 @@
 'use client'
 
-import { basics, popular } from '@website/appdata/docs'
+import { useDocsHome } from '@website/appdata/docs'
 import Logo from '@website/components/Logo'
 import { $ } from '@website/utils'
 import { useTranslations } from 'next-intl'
@@ -10,6 +10,7 @@ import styles from './page.module.css'
 
 const Index = () => {
 	const t = useTranslations('docs')
+	const { basics, popular } = useDocsHome()
 
 	return (
 		<div className={$.cx('box-border w-full', styles._local)}>
@@ -30,11 +31,11 @@ const Index = () => {
 						<Link
 							className='popular_item clickable flex flex-col'
 							href={`/docs/${item.link}`}
-							key={index}
+							key={item.link}
 						>
 							<div className='bottom_wrap flex flex-col'>
-								<h3>{t(`page.popular.${index}.title`)}</h3>
-								<span className='desc'>{t(`page.popular.${index}.desc`)}</span>
+								<h3>{item.label}</h3>
+								<span className='desc'>{item.desc}</span>
 							</div>
 						</Link>
 					))}
@@ -48,11 +49,11 @@ const Index = () => {
 						<Link
 							className='basic_item clickable box-border flex'
 							href={`/docs/${item.link}`}
-							key={index}
+							key={item.link}
 						>
 							<div className='body_wrap flex flex-col'>
-								<h3>{t(`page.basics.${index}.title`)}</h3>
-								<span className='desc'>{t(`page.basics.${index}.desc`)}</span>
+								<h3>{item.label}</h3>
+								<span className='desc'>{item.desc}</span>
 							</div>
 						</Link>
 					))}

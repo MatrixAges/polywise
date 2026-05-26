@@ -10,7 +10,7 @@ import {
 	SunDimIcon,
 	TreeIcon
 } from '@phosphor-icons/react'
-import { useMenu } from '@website/appdata/docs'
+import { flattenMenuItems, useMenu } from '@website/appdata/docs'
 import { Search } from '@website/appunits/docs'
 import DocBottomLink from '@website/components/DocBottomLink'
 import { toc_emitter } from '@website/components/DocContentPage'
@@ -21,7 +21,6 @@ import { useEventListener, useLocalStorageState, useMemoizedFn, useUpdateEffect 
 import useRouterHash from '@website/hooks/useRouterHash'
 import useTheme from '@website/hooks/useTheme'
 import { $ } from '@website/utils'
-import getTargetIndex from '@website/utils/getTargetIndex'
 import { uniq } from 'lodash-es'
 import { AlignJustify, AlignLeft } from 'lucide-react'
 import { useTranslations } from 'next-intl'
@@ -30,7 +29,7 @@ import { useParams, usePathname } from 'next/navigation'
 
 import styles from './layout.module.css'
 
-import type { DocsMenuGroup, DocsMenuItem } from '@website/types'
+import type { DocsMenuItem, DocsMenuSection } from '@website/types'
 import type { PropsWithChildren } from 'react'
 
 type BottomLinkItem = Pick<DocsMenuItem, 'label' | 'key'> | null
@@ -44,6 +43,7 @@ const Index = (props: PropsWithChildren) => {
 	const t = useTranslations('docs')
 	const { theme, setTheme } = useTheme()
 	const menu = useMenu()
+	const flat_items = useMemo(() => flattenMenuItems(menu), [menu])
 	const [local_openkeys, setLocalOpenkeys] = useLocalStorageState<Array<string>>('docs/openkeys', {
 		defaultValue: []
 	})
@@ -91,15 +91,19 @@ const Index = (props: PropsWithChildren) => {
 		const key = paths.join('/')
 
 		setSelectedkey(key)
-		if (fold_key) {
+		const parent_group = menu.find(
+			section => section.type === 'group' && section.children.some(item => item.key === key)
+		)
+
+		if (parent_group) {
 			setLocalOpenkeys(value => {
 				const current = value ?? []
 
-				return current.includes(fold_key) ? current : uniq([...current, fold_key])
+				return current.includes(parent_group.key) ? current : uniq([...current, parent_group.key])
 			})
 		}
 
-		const target_item = menu.flatMap(group => group.children).find(item => item.key === key)
+		const target_item = flat_items.find(item => item.key === key)
 
 		const menu_el = menu_ref.current
 
@@ -119,39 +123,15 @@ const Index = (props: PropsWithChildren) => {
 			}
 		}
 
-		const { parent_index, index } = getTargetIndex(menu, key)
+		const index = flat_items.findIndex(item => item.key === key)
 
-		if (parent_index === -1 || index === -1) return
+		if (index === -1) return
 
-		let prev_link = null as BottomLinkItem
-		let next_link = null as BottomLinkItem
-
-		const target_group = menu[parent_index]!.children
-		const prev = target_group[index - 1]
-		const next = target_group[index + 1]
-
-		if (prev) {
-			prev_link = prev
-		} else {
-			const prev_target = menu[parent_index - 1] as DocsMenuGroup | undefined
-
-			if (prev_target) {
-				prev_link = prev_target.children.at(-1) ?? null
-			}
-		}
-
-		if (next) {
-			next_link = next
-		} else {
-			const next_target = menu[parent_index + 1] as DocsMenuGroup | undefined
-
-			if (next_target) {
-				next_link = next_target.children.at(0) ?? null
-			}
-		}
+		const prev_link = flat_items[index - 1] ?? null
+		const next_link = flat_items[index + 1] ?? null
 
 		setBottomLinks({ prev_link, next_link })
-	}, [menu, route_path, setLocalOpenkeys])
+	}, [flat_items, menu, route_path, setLocalOpenkeys])
 
 	useEffect(() => {
 		if (!local_openkeys) return
@@ -175,7 +155,11 @@ const Index = (props: PropsWithChildren) => {
 		onCloseSidebar()
 	}, [pathname, hash])
 
-	const show_btn_doc = useMemo(() => !['/docs', '/docs/gtd'].includes(pathname), [pathname])
+	const show_btn_doc = useMemo(() => pathname !== '/docs', [pathname])
+	const open_group_count = useMemo(
+		() => openkeys.filter(key => menu.some(section => section.type === 'group' && section.key === key)).length,
+		[menu, openkeys]
+	)
 
 	const SidebarContent = (
 		<>
@@ -267,16 +251,33 @@ const Index = (props: PropsWithChildren) => {
 			</div>
 			<div className='menu_wrap box-border w-full' ref={menu_ref}>
 				<div className='menu_groups flex flex-col'>
-					{menu.map(group => {
-						const open = openkeys.includes(group.key)
+					{menu.map(section => {
+						if (section.type === 'link') {
+							return (
+								<Link
+									className={$.cx(
+										'menu_item mb-1 flex items-center',
+										section.className,
+										selectedkey === section.key && 'active'
+									)}
+									href={`/docs/${section.key}`}
+									key={section.key}
+									onClick={onClickLink}
+								>
+									<span>{section.label}</span>
+								</Link>
+							)
+						}
+
+						const open = openkeys.includes(section.key)
 						const active =
-							selectedkey === group.key ||
-							group.children.some(item => item.key === selectedkey)
+							selectedkey === section.key ||
+							section.children.some(item => item.key === selectedkey)
 
 						return (
 							<section
 								className={$.cx('menu_group', open ? 'mb-6' : 'mb-1')}
-								key={group.key}
+								key={section.key}
 							>
 								<button
 									className={$.cx(
@@ -291,9 +292,9 @@ const Index = (props: PropsWithChildren) => {
 										active && 'active'
 									)}
 									type='button'
-									onClick={() => toggleGroup(group.key)}
+									onClick={() => toggleGroup(section.key)}
 								>
-									<span>{group.label}</span>
+									<span>{section.label}</span>
 									<CaretRightIcon
 										className={$.cx(
 											'icon transition-transform duration-200',
@@ -312,7 +313,7 @@ const Index = (props: PropsWithChildren) => {
 										menu_group_items
 									'
 									>
-										{group.children.map(item => (
+										{section.children.map(item => (
 											<Link
 												className={$.cx(
 													'menu_item flex items-center',
@@ -332,7 +333,7 @@ const Index = (props: PropsWithChildren) => {
 						)
 					})}
 				</div>
-				{openkeys.length < 2 && (
+				{open_group_count < 2 && (
 					<div className='shadow_tree flex items-center justify-center'>
 						<TreeIcon weight='thin'></TreeIcon>
 					</div>

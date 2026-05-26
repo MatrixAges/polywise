@@ -14,14 +14,21 @@ export interface DocsMenuItem {
 	key: string
 	className: string
 	label: string
-	icon: ReactNode
+	desc?: string
+}
+
+export interface DocsMenuLink extends DocsMenuItem {
+	type: 'link'
 }
 
 export interface DocsMenuGroup {
+	type: 'group'
 	key: string
 	label: string
 	children: DocsMenuItem[]
 }
+
+export type DocsMenuSection = DocsMenuLink | DocsMenuGroup
 
 export type ArgsSmoothScroll = Partial<{
 	animationTime: number // [ms]

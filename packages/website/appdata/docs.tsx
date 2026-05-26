@@ -2,51 +2,172 @@ import { useMemo } from 'react'
 import { useMemoizedFn } from '@website/hooks/ahooks'
 import useLocale from '@website/hooks/useLocale'
 
-import type { DocsMenuGroup } from '@website/types'
+import type { DocsMenuGroup, DocsMenuItem, DocsMenuLink, DocsMenuSection } from '@website/types'
 
-export const popular = [
-	{
-		link: 'getting_started/start_guide'
-	},
-	{
-		link: 'todo/linked_todo'
-	},
-	{
-		link: 'todo/cycle_todo'
-	},
-	{
-		link: 'note/blocks'
-	},
-	{
-		link: 'schedule/schedule'
-	},
-	{
-		link: 'global_settings/settings'
+interface DocCard {
+	link: string
+	label: string
+	desc: string
+}
+
+const popular_keys = ['intro', 'config', 'providers', 'cli', 'project_workspace', 'fst']
+const basics_keys = ['web', 'desktop', 'capture_contents', 'group_chat', 'memory_callback', 'troubleshooting']
+
+const classNameOf = (key: string) => key.replaceAll('/', '-')
+
+const flattenMenuItems = (menu: DocsMenuSection[]) => {
+	return menu.flatMap(section => (section.type === 'group' ? section.children : [section]))
+}
+
+export { flattenMenuItems }
+
+const buildDocsData = (l: (en: string, zh?: string, ja?: string) => string) => {
+	const top_links = [
+		{
+			type: 'link',
+			key: 'intro',
+			className: classNameOf('intro'),
+			label: l('Intro'),
+			desc: 'Start here for the product overview, terminology, and documentation scope.'
+		},
+		{
+			type: 'link',
+			key: 'config',
+			className: classNameOf('config'),
+			label: l('Config'),
+			desc: 'Learn the core configuration model, setup patterns, and environment expectations.'
+		},
+		{
+			type: 'link',
+			key: 'providers',
+			className: classNameOf('providers'),
+			label: l('Providers'),
+			desc: 'Review provider roles, capability boundaries, and integration tradeoffs.'
+		},
+		{
+			type: 'link',
+			key: 'troubleshooting',
+			className: classNameOf('troubleshooting'),
+			label: l('Troubleshooting'),
+			desc: 'Use debugging checklists and recovery steps for common failures.'
+		}
+	] satisfies DocsMenuLink[]
+
+	const groups = [
+		{
+			type: 'group',
+			key: 'usage',
+			label: l('Usage'),
+			children: [
+				{
+					key: 'cli',
+					className: classNameOf('cli'),
+					label: l('CLI'),
+					desc: 'Run Polywise from the terminal and automate common workflows.'
+				},
+				{
+					key: 'web',
+					className: classNameOf('web'),
+					label: l('Web'),
+					desc: 'Use the web app for browser-based access and lightweight operations.'
+				},
+				{
+					key: 'desktop',
+					className: classNameOf('desktop'),
+					label: l('Desktop'),
+					desc: 'Use the desktop app for local-first workflows and richer integrations.'
+				}
+			]
+		},
+		{
+			type: 'group',
+			key: 'guides',
+			label: l('Guides'),
+			children: [
+				{
+					key: 'capture_contents',
+					className: classNameOf('capture_contents'),
+					label: l('Capture Contents'),
+					desc: 'Capture material from pages, files, and live context into the workspace.'
+				},
+				{
+					key: 'agent_private_contents',
+					className: classNameOf('agent_private_contents'),
+					label: l('Agent Private Contents'),
+					desc: 'Keep agent-only context isolated from user-visible project materials.'
+				},
+				{
+					key: 'group_chat',
+					className: classNameOf('group_chat'),
+					label: l('Group Chat'),
+					desc: 'Coordinate shared conversations around the same project context.'
+				},
+				{
+					key: 'project_workspace',
+					className: classNameOf('project_workspace'),
+					label: l('Project Workspace'),
+					desc: 'Organize repositories, content, and runtime state inside a workspace.'
+				},
+				{
+					key: 'im_integration',
+					className: classNameOf('im_integration'),
+					label: l('IM Integration'),
+					desc: 'Connect messaging surfaces and route conversations into Polywise.'
+				},
+				{
+					key: 'content_service_providers',
+					className: classNameOf('content_service_providers'),
+					label: l('Content Service Providers'),
+					desc: 'Integrate external content backends and ingestion sources.'
+				}
+			]
+		},
+		{
+			type: 'group',
+			key: 'system',
+			label: l('System'),
+			children: [
+				{
+					key: 'fst',
+					className: classNameOf('fst'),
+					label: l('FST'),
+					desc: 'Understand how the FST layer structures state and transitions.'
+				},
+				{
+					key: 'memory_callback',
+					className: classNameOf('memory_callback'),
+					label: l('Memory Callback'),
+					desc: 'See how callbacks retrieve and persist memory at the right moments.'
+				},
+				{
+					key: 'post_think',
+					className: classNameOf('post_think'),
+					label: l('Post Think'),
+					desc: 'Review what runs after reasoning and how post-think hooks shape results.'
+				},
+				{
+					key: 'rewire_mechanisms',
+					className: classNameOf('rewire_mechanisms'),
+					label: l('Rewire Mechanisms'),
+					desc: 'Learn how the system rewires context, tools, and control flow safely.'
+				}
+			]
+		}
+	] satisfies DocsMenuGroup[]
+
+	const menu = [...top_links, ...groups] as DocsMenuSection[]
+	const docs_by_key = Object.fromEntries(
+		flattenMenuItems(menu).map(item => [item.key, { link: item.key, label: item.label, desc: item.desc ?? '' }])
+	) as Record<string, DocCard>
+
+	return {
+		menu,
+		popular: popular_keys.map(key => docs_by_key[key]),
+		basics: basics_keys.map(key => docs_by_key[key])
 	}
-]
+}
 
-export const basics = [
-	{
-		link: 'todo/auto_archive'
-	},
-	{
-		link: 'todo/settings'
-	},
-	{
-		link: 'note/note'
-	},
-	{
-		link: 'note/table'
-	},
-	{
-		link: 'pomo/flow_mode'
-	},
-	{
-		link: 'schedule/timeline_view'
-	}
-]
-
-export const useMenu = () => {
+export const useDocsHome = () => {
 	const { locale } = useLocale()
 
 	const l = useMemoizedFn((en: string, zh?: string, ja?: string) => {
@@ -55,166 +176,11 @@ export const useMenu = () => {
 		return en
 	})
 
-	return useMemo(
-		() =>
-			[
-				{
-					key: 'getting_started',
-					label: l('Getting started', '开始使用', 'はじめに'),
-					children: [
-						{
-							key: 'getting_started/start_guide',
-							className: 'getting_started-start_guide',
-							label: l('Start guide', '使用指南', 'スタートガイド')
-						},
-						{
-							key: 'getting_started/concepts',
-							className: 'getting_started-concepts',
-							label: l('Concepts', '概念', 'コンセプト')
-						}
-					]
-				},
-				{
-					key: 'todo',
-					label: l('Todo', '待办', 'Todo'),
-					children: [
-						{
-							key: 'todo/todo',
-							className: 'todo-todo',
-							label: l('Todo', '待办', 'Todo')
-						},
-						{
-							key: 'todo/linked_todo',
-							className: 'todo-linked_todo',
-							label: l('Linked Todo', '互斥任务', '連携 Todo')
-						},
-						{
-							key: 'todo/cycle_todo',
-							className: 'todo-cycle_todo',
-							label: l('Cycle Todo', '循环任务', '繰り返し Todo')
-						},
-						{
-							key: 'todo/to_schedule',
-							className: 'todo-to_schedule',
-							label: l('To Schedule', '推送至日程', 'スケジュールへ送る')
-						},
-						{
-							key: 'todo/auto_archive',
-							className: 'todo-auto_archive',
-							label: l('Auto Archive', '自动归档', '自動アーカイブ')
-						},
-						{
-							key: 'todo/kanban_view',
-							className: 'todo-kanban_view',
-							label: l('Kanban view', '看板视图', 'カンバン表示')
-						},
-						{
-							key: 'todo/table_view',
-							className: 'todo-table_view',
-							label: l('Table view', '表格视图', 'テーブル表示')
-						},
-						{
-							key: 'todo/mindmap_view',
-							className: 'todo-mindmap_view',
-							label: l('Mindmap view', '思维导图视图', 'マインドマップ表示')
-						},
-						{
-							key: 'todo/settings',
-							className: 'todo-settings',
-							label: l('Settings', '设置项', '設定')
-						}
-					]
-				},
-				{
-					key: 'note',
-					label: l('Note', '笔记', 'ノート'),
-					children: [
-						{
-							key: 'note/note',
-							className: 'note-note',
-							label: l('Note', '笔记', 'ノート')
-						},
-						{
-							key: 'note/blocks',
-							className: 'note-blocks',
-							label: l('Blocks', '内容块', 'ブロック')
-						},
-						{
-							key: 'note/table',
-							className: 'note-table',
-							label: l('Table', '表格', 'テーブル')
-						},
-						{
-							key: 'note/settings',
-							className: 'note-settings',
-							label: l('Settings', '设置项', '設定')
-						}
-					]
-				},
-				{
-					key: 'pomo',
-					label: l('Pomo', '番茄钟', 'ポモドーロ'),
-					children: [
-						{
-							key: 'pomo/pomo',
-							className: 'pomo-pomo',
-							label: l('Pomo', '番茄钟', 'ポモドーロ')
-						},
-						{
-							key: 'pomo/flow_mode',
-							className: 'pomo-flow_mode',
-							label: l('Flow Mode', '心流模式', 'フローモード')
-						}
-					]
-				},
-				{
-					key: 'schedule',
-					label: l('Schedule', '日程', 'スケジュール'),
-					children: [
-						{
-							key: 'schedule/schedule',
-							className: 'schedule-schedule',
-							label: l('Schedule', '日程', 'スケジュール')
-						},
-						{
-							key: 'schedule/month_view',
-							className: 'schedule-month_view',
-							label: l('Month View', '月视图', '月表示')
-						},
-						{
-							key: 'schedule/timeline_view',
-							className: 'schedule-timeline_view',
-							label: l('Timeline View', '时间线视图', 'タイムライン表示')
-						},
-						{
-							key: 'schedule/fixed_view',
-							className: 'schedule-fixed_view',
-							label: l('Fixed View', '固定视图', '固定表示')
-						},
-						{
-							key: 'schedule/settings',
-							className: 'schedule-settings',
-							label: l('Settings', '设置项', '設定')
-						}
-					]
-				},
-				{
-					key: 'global_settings',
-					label: l('Global Settings', '全局设置', '全体設定'),
-					children: [
-						{
-							key: 'global_settings/settings',
-							className: 'global_settings-settings',
-							label: l('Settings', '设置项', '設定')
-						},
-						{
-							key: 'gtd',
-							className: 'gtd',
-							label: l('Way of GTD', 'GTD 之道', 'GTD の考え方')
-						}
-					]
-				}
-			] as DocsMenuGroup[],
-		[locale, l]
-	)
+	return useMemo(() => buildDocsData(l), [locale, l])
+}
+
+export const useMenu = () => {
+	const { menu } = useDocsHome()
+
+	return menu
 }

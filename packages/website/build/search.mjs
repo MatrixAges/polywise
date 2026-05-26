@@ -11,11 +11,36 @@ const { compressToUTF16 } = lzString
 
 const contentDir = `${process.cwd()}/content/docs`
 const searchDir = `${process.cwd()}/public/search`
+const docPaths = [
+	'intro',
+	'config',
+	'providers',
+	'troubleshooting',
+	'cli',
+	'web',
+	'desktop',
+	'capture_contents',
+	'agent_private_contents',
+	'group_chat',
+	'project_workspace',
+	'im_integration',
+	'content_service_providers',
+	'fst',
+	'memory_callback',
+	'post_think',
+	'rewire_mechanisms'
+]
 
 const docsByLocale = {
-	en: globbySync(['**/en.mdx'], { cwd: contentDir }),
-	zh: globbySync(['**/zh.mdx'], { cwd: contentDir }),
-	ja: globbySync(['**/en.mdx'], { cwd: contentDir })
+	en: docPaths.map(path => `${path}/en.mdx`),
+	zh: docPaths.map(path => {
+		const target = `${path}/zh.mdx`
+		return globbySync([target], { cwd: contentDir }).length ? target : `${path}/en.mdx`
+	}),
+	ja: docPaths.map(path => {
+		const target = `${path}/ja.mdx`
+		return globbySync([target], { cwd: contentDir }).length ? target : `${path}/en.mdx`
+	})
 }
 
 const commonOptions = {
@@ -115,7 +140,7 @@ const buildLocaleIndex = async locale => {
 	const docs = docsByLocale[locale] ?? []
 
 	for (const docPath of docs) {
-		const link = docPath.replace(/\/(en|zh)\.mdx$/, '')
+		const link = docPath.replace(/\/(en|zh|ja)\.mdx$/, '')
 		const doc = readFileSync(`${contentDir}/${docPath}`)
 		const ast = fromMarkdown(doc, { extensions: [mdxjs()], mdastExtensions: [mdxFromMarkdown()] })
 		const headings = []

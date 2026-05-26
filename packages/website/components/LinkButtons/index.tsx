@@ -15,12 +15,12 @@ const Index = () => {
 					items-center justify-center
 					btn_app clickable
 				'
-				href='/docs/getting_started/start_guide'
+				href='/docs/intro'
 			>
 				<BookmarkIcon className='logo_app_store' weight='fill' size={30}></BookmarkIcon>
 				<div className='flex flex-col items-start'>
-					<span className='line_1'>Getting started</span>
-					<span className='line_2'>Document</span>
+					<span className='line_1'>Read the docs</span>
+					<span className='line_2'>Intro</span>
 				</div>
 			</Link>
 			<Link
