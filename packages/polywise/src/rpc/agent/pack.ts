@@ -41,6 +41,7 @@ import { and, eq, inArray } from 'drizzle-orm'
 import fs from 'fs-extra'
 import { getId } from 'stk/utils'
 
+import { polywise_version } from '../../version'
 import { getSkillDirPath, getSkillItemDirPath, rebuildGlobalSkillMap } from '../skill/utils'
 
 import type { Agent, Article, Chunk, Document, Edge, Link, Node, Skill } from '@core/db'
@@ -536,7 +537,7 @@ const collectSnapshot = async (agent_id: string): Promise<AgentPackSnapshot> => 
 const buildManifest = (snapshot: AgentPackSnapshot): AgentPackManifest => ({
 	pack_version,
 	exported_at: new Date().toISOString(),
-	source_app_version: '0.0.1',
+	source_app_version: polywise_version,
 	agent_name: snapshot.agent.name,
 	mode: 'snapshot',
 	has_vectors:

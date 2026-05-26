@@ -28,6 +28,7 @@ import todo from './todo'
 import tool from './tool'
 import update from './update'
 import upgrade from './upgrade'
+import version from './version'
 
 import type { inferRouterInputs, inferRouterOutputs } from '@trpc/server'
 
@@ -60,7 +61,8 @@ export const router = r({
 	setActive,
 	test,
 	update,
-	remove
+	remove,
+	version
 })
 
 export type Router = typeof router

@@ -1,6 +1,7 @@
 import { generateOpenApiDocument } from 'trpc-to-openapi'
 
 import { router } from '../../rpc'
+import { polywise_version } from '../../version'
 import { renderHelpTree, root_help_id } from '../shared/help'
 import { manual_api_meta } from './meta'
 
@@ -167,7 +168,7 @@ const getOpenApiDoc = () => {
 	try {
 		openapi_doc_cache = generateOpenApiDocument(router, {
 			title: 'Polywise API',
-			version: '0.0.1',
+			version: polywise_version,
 			baseUrl: 'http://localhost:3072/api'
 		})
 	} catch {

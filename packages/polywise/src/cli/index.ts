@@ -2,13 +2,14 @@
 import { pathToFileURL } from 'node:url'
 import { command, number, run, string } from '@drizzle-team/brocli'
 
+import { polywise_version } from '../version'
 import { getApiMap, renderApiHelp } from './api/map'
 
 import type { ApiMapItem, RenderedHelp } from './types'
 
-const cli_version = '0.0.1'
 const server_base_url = (process.env.POLYWISE_SERVER_URL || 'http://localhost:3072').replace(/\/$/, '')
 const api_base_url = `${server_base_url}/api`
+const version_flags = new Set(['-v', '--version'])
 
 interface ApiCommandTreeNode {
 	name: string
@@ -72,6 +73,8 @@ const toCliHelp = (data: RenderedHelp | null): RenderedHelp | null => {
 const printRenderedCliHelp = (data: RenderedHelp | null) => {
 	printRenderedHelp('polywise', toCliHelp(data))
 }
+
+const shouldPrintVersion = (argv: Array<string>) => argv.length === 1 && version_flags.has(argv[0] || '')
 
 const buildApiUrl = (path: string) => new URL(path.replace(/^\//, ''), `${api_base_url}/`)
 
@@ -309,11 +312,16 @@ const buildApiCommands = (node: ApiCommandTreeNode): Array<any> =>
 const api_tree = createApiTree()
 const root_commands = buildApiCommands(api_tree)
 
-export const main = async () => {
+export const main = async (argv = process.argv.slice(2)) => {
+	if (shouldPrintVersion(argv)) {
+		printText(polywise_version)
+		return
+	}
+
 	await run(root_commands as any, {
 		name: 'polywise',
 		description: 'Polywise CLI',
-		version: cli_version,
+		version: polywise_version,
 		omitKeysOfUndefinedOptions: true,
 		help: () => {
 			printRenderedCliHelp(renderApiHelp([]))
