@@ -89,6 +89,7 @@ export default async (s: Index, message: Message) => {
 	if (s.prefill) messages.push({ role: 'assistant', content: s.prefill })
 
 	const has_todo_session_link = await s.has_todo_session_link
+	const report_enabled = config.report?.enabled !== false
 	const agent_system_prompt = await getAgentSystemPrompt(s.id)
 	const is_linkcase_batch_session = s.id === global_linkcase_session_id
 	const linked_post = await getPostSessions({
@@ -136,7 +137,9 @@ export default async (s: Index, message: Message) => {
 						skill_tool: createSkillTool(s),
 						cron_tool: createCronTool(s),
 						error_collect_tool: createErrorCollectTool(),
-						...(has_todo_session_link ? { report_tool: createReportTool(s) } : {}),
+						...(has_todo_session_link && report_enabled
+							? { report_tool: createReportTool(s) }
+							: {}),
 						...(s.id === blocked_session_id
 							? {
 									api_tool: createApiTool(),
@@ -183,13 +186,15 @@ export default async (s: Index, message: Message) => {
 					fst_system_prompt,
 					has_title_tool ? fst_title_tool_prompt : '',
 					agent_system_prompt,
-					has_todo_session_link ? fst_report_tool_prompt : '',
+					has_todo_session_link && report_enabled ? fst_report_tool_prompt : '',
 					shared_runtime.has_system_tool ? fst_system_tool_prompt : '',
 					shared_runtime.system_tools_prompt,
 					shared_runtime.custom_tools_prompt,
 					shared_runtime.skill_prompt,
 					`Current Session Title: ${s.session.title}`,
-					has_todo_session_link ? `Current Session Report: ${s.session.report ?? ''}` : '',
+					has_todo_session_link && report_enabled
+						? `Current Session Report: ${s.session.report ?? ''}`
+						: '',
 					getContextPrompt(s.context),
 					mode_prompt,
 					`Real World Date: ${dayjs().format('YYYY-MM-DD')}`

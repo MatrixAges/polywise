@@ -77,6 +77,10 @@ export interface AppPthinkConfig {
 	max_reports_per_day?: number
 }
 
+export interface AppReportConfig {
+	enabled: boolean
+}
+
 export interface AppConfig {
 	workspaces: Array<Workspace>
 	current_workspace: string
@@ -97,6 +101,7 @@ export interface AppConfig {
 	chaos_detect?: boolean
 	rewire?: AppRewireConfig
 	pthink?: AppPthinkConfig
+	report?: AppReportConfig
 }
 
 export interface ProviderConfig {

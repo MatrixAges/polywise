@@ -19,7 +19,7 @@ import { Controller } from '@/components'
 import { useGlobal } from '@/context'
 import { useForm } from '@/hooks'
 
-import type { AppConfig, AppPthinkConfig } from '@core/types'
+import type { AppConfig, AppPthinkConfig, AppReportConfig } from '@core/types'
 
 const pthink_idle_options = [
 	{ label: '10 min', value: '10' },
@@ -40,6 +40,7 @@ const Index = () => {
 	const l = global.locale
 	const s = global.setting
 	const pthink = s.config?.pthink
+	const report = s.config?.report
 
 	const onChange = useMemoizedFn((_, changed) => {
 		if ('theme' in changed) t.setTheme(changed['theme'])
@@ -62,6 +63,22 @@ const Index = () => {
 			...(current_config as AppConfig),
 			pthink: {
 				...current_config.pthink,
+				...patch
+			}
+		})
+	})
+
+	const updateReport = useMemoizedFn((patch: Partial<AppReportConfig>) => {
+		const current_config = s.config
+
+		if (!current_config) {
+			return
+		}
+
+		s.setConfig('config', {
+			...(current_config as AppConfig),
+			report: {
+				...(current_config.report || { enabled: true }),
 				...patch
 			}
 		})
@@ -169,6 +186,21 @@ const Index = () => {
 							Reset
 						</Button>
 					</div>
+				</Field>
+			</FieldGroup>
+			<div className='bg-border-light my-2 h-px w-full'></div>
+			<FieldGroup className='gap-0'>
+				<Field className='items-center! py-3' orientation='horizontal'>
+					<FieldContent>
+						<FieldTitle className='text-base'>Report</FieldTitle>
+						<FieldDescription>
+							Enable the existing report generation mechanism and report tool entry
+						</FieldDescription>
+					</FieldContent>
+					<Switch
+						checked={Boolean(report?.enabled ?? true)}
+						onCheckedChange={checked => updateReport({ enabled: checked })}
+					/>
 				</Field>
 			</FieldGroup>
 			<div className='bg-border-light my-2 h-px w-full'></div>

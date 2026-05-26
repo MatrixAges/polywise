@@ -138,7 +138,7 @@ const Index = () => {
 								<Button
 									variant='default'
 									size='xs'
-									disabled={x.report_action_loading}
+									disabled={!x.report_enabled || x.report_action_loading}
 									onClick={() => void x.triggerReport()}
 								>
 									{x.report_action_loading ? (

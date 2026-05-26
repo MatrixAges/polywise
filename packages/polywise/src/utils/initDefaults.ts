@@ -55,6 +55,9 @@ export default async () => {
 					max_articles_per_run: 4,
 					skill_generation_enabled: true,
 					tool_generation_enabled: true
+				},
+				report: {
+					enabled: true
 				}
 			} as AppConfig)
 		}

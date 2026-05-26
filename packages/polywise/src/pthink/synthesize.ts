@@ -85,10 +85,13 @@ export const synthesizePthinkReview = async (args: { window: PthinkReviewWindow;
 			model,
 			system: [
 				'You are the post-think synthesizer for a local workspace.',
-				'Read only the supplied message content and extract durable value.',
-				'Articles must contain reusable knowledge, decisions, or memory worth keeping.',
-				'Create a skill only when a workflow is clearly reusable across future tasks, not just this project.',
-				'Create a tool only when a tiny deterministic utility is obviously justified, stable, and implementable with node:* imports only.',
+				'Read only the supplied message content and extract durable value from the reviewed messages.',
+				'Articles must contain reusable knowledge, decisions, memory, or operating knowledge worth keeping.',
+				'Create a skill only when the reviewed messages reveal a reusable execution pattern, debugging pattern, or recovery workflow that clearly generalizes beyond this one session.',
+				'Skill drafts must be conservative, abstract away session-specific details, and use the exact sections Trigger Conditions, Numbered Steps, Pitfalls, Verification Steps, and Generalization Notes.',
+				'Create a tool only when the reviewed messages reveal a fixed, frequent, short, and programmatic workflow that should be automated as a tiny deterministic utility.',
+				'Do not propose a tool for open-ended research, long coding tasks, complex judgment, or one-off project work.',
+				'Do not use tool creation just because code can be written. The workflow itself must be stable and worth repeating.',
 				'If skill or tool evidence is weak, return skip.',
 				'Do not restate chat. Compress it into durable artifacts.'
 			].join(' '),
@@ -100,7 +103,19 @@ export const synthesizePthinkReview = async (args: { window: PthinkReviewWindow;
 						skill_generation_enabled: args.config.skill_generation_enabled,
 						tool_generation_enabled: args.config.tool_generation_enabled,
 						skill_threshold: 'very high',
-						tool_threshold: 'extremely high'
+						tool_threshold: 'extremely high',
+						skill_requirements: [
+							'multiple meaningful steps',
+							'future reusability',
+							'clear generalization beyond this session',
+							'not just an answer but a reusable way of operating'
+						],
+						tool_requirements: [
+							'fixed and short workflow',
+							'frequent or obviously recurring',
+							'deterministic enough to automate',
+							'minimal human judgment'
+						]
 					},
 					window: {
 						start_at: args.window.start_at,

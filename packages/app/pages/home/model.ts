@@ -275,6 +275,14 @@ export default class Index {
 		return this.global.setting.config?.pthink
 	}
 
+	get report_config() {
+		return this.global.setting.config?.report
+	}
+
+	get report_enabled() {
+		return this.report_config?.enabled !== false
+	}
+
 	get pthink_enabled() {
 		return Boolean(this.pthink_config?.enabled)
 	}
@@ -430,6 +438,10 @@ export default class Index {
 	}
 
 	get report_status_detail() {
+		if (!this.report_enabled) {
+			return 'Report is disabled in settings.'
+		}
+
 		if (this.report_status_matches_current_window && this.report_status?.running) {
 			return this.report_status.detail || 'Report generation is running in the background.'
 		}
@@ -494,7 +506,7 @@ export default class Index {
 	}
 
 	async triggerReport() {
-		if (this.report_action_loading) {
+		if (!this.report_enabled || this.report_action_loading) {
 			return
 		}
 

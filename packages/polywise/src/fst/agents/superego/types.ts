@@ -2,9 +2,9 @@ import type { PatchRecord } from '../../telemetry'
 
 export type ScopeType = 'global' | 'project' | 'agent'
 
-export type SuperegoToolName = 'content_tool' | 'skill_tool'
+export type SuperegoToolName = 'content_tool'
 
-export type SuperegoToolAction = 'add' | 'search' | 'update' | 'remove' | 'read' | 'create' | 'build'
+export type SuperegoToolAction = 'add' | 'search' | 'update' | 'remove'
 
 export interface ComplexitySignal {
 	recent_message_count: number

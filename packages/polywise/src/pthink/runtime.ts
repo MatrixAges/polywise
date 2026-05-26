@@ -32,6 +32,13 @@ import type {
 
 const report_history_limit = 60
 const idle_reason_persist_ms = 5 * 60 * 1000
+const required_skill_sections = [
+	'## Trigger Conditions',
+	'## Numbered Steps',
+	'## Pitfalls',
+	'## Verification Steps',
+	'## Generalization Notes'
+]
 
 const defaultSummary = (): PthinkRunSummary => ({
 	title: '',
@@ -120,6 +127,13 @@ const writeCustomTool = async (tool: PthinkGeneratedTool) => {
 
 const maybeWriteSkill = async (draft_skill: PthinkGeneratedSkill) => {
 	if (draft_skill.action === 'skip' || !draft_skill.name || !draft_skill.description || !draft_skill.content) {
+		return null
+	}
+
+	if (
+		draft_skill.keywords.length < 2 ||
+		required_skill_sections.some(section => !draft_skill.content.includes(section))
+	) {
 		return null
 	}
 
@@ -377,7 +391,8 @@ export const createPthinkRuntime = (): PthinkRuntime => {
 					review.tool.action === 'create' &&
 					review.tool.confidence >= 0.95 &&
 					review.tool.readme &&
-					review.tool.entry
+					review.tool.entry &&
+					review.tool.reason.length >= 24
 				) {
 					const created_tool = await writeCustomTool(review.tool).catch(() => null)
 

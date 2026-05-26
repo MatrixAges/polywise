@@ -33,7 +33,7 @@ export const createSkillTool = (s: Session) => {
 			'Search and read local skills from the skills/ directory.',
 			'Use action "search" with keywords to find relevant skills by name and description.',
 			'Use action "read" with an exact skill_name to get the full SKILL.md content.',
-			'Use action "create" to write a new skill to /skills/<skill-name>/SKILL.md.',
+			'Use action "create" to write a new skill to /skills/<skill-name>/SKILL.md when skill authoring is explicitly needed.',
 			'Use action "update" to overwrite an existing skill after reading it first.',
 			'Use action "build" after installing, updating, or removing skills to refresh the index.',
 			'',

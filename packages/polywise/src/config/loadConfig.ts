@@ -21,6 +21,9 @@ const default_pthink = {
 	skill_generation_enabled: true,
 	tool_generation_enabled: true
 }
+const default_report = {
+	enabled: true
+}
 
 const mergePresetProvider = (local_provider: ConfigProvider | undefined, preset_provider: PresetProvider) => {
 	if (!local_provider) return { provider: preset_provider, changed: true }
@@ -148,6 +151,18 @@ export default async () => {
 
 		if (JSON.stringify(config.pthink) !== JSON.stringify(next_pthink)) {
 			config.pthink = next_pthink
+			has_changed_config = true
+		}
+	}
+
+	if (!config.report || typeof config.report !== 'object') {
+		config.report = { ...default_report }
+		has_changed_config = true
+	} else {
+		const next_report = { ...default_report, ...config.report }
+
+		if (JSON.stringify(config.report) !== JSON.stringify(next_report)) {
+			config.report = next_report
 			has_changed_config = true
 		}
 	}
