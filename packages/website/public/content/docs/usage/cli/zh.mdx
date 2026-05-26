@@ -1,4 +1,42 @@
 # CLI
 
-即将上线。
+Polywise CLI 主要面向 agents、脚本和外部工具调用。
 
+## 启动服务
+
+先安装：
+
+```bash
+npm i polywise -g
+```
+
+以前台方式启动本地服务：
+
+```bash
+polywise start
+```
+
+后台启动并立刻退出：
+
+```bash
+polywise start -d
+```
+
+## 查看命令
+
+推荐逐级看帮助：
+
+```bash
+polywise -h
+polywise session -h
+polywise search fullTextSearch -h
+```
+
+常见例子：
+
+```bash
+polywise version
+polywise session create --title "Daily Review"
+polywise search fullTextSearch --query "vector database"
+polywise save --for user --content "Key takeaway..."
+```

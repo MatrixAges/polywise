@@ -14,6 +14,15 @@ You can use Polywise from the CLI or as a web app:
 npm i polywise -g
 ```
 
+Then start the local server:
+
+```bash
+polywise start
+polywise start -d
+```
+
+`polywise start` keeps the server in the foreground. `polywise start -d` exits immediately and leaves the server running in the background.
+
 Or download the desktop application from [GitHub Releases](https://github.com/MatrixAges/polywise/releases).
 
 For a first run, Polywise mainly needs one usable model provider. Everything else can come later.
@@ -115,6 +124,8 @@ For agent use, the important part is:
 Common examples:
 
 ```bash
+polywise start
+polywise start -d
 polywise version
 polywise session create --title "Daily Review"
 polywise search fullTextSearch --query "vector database"

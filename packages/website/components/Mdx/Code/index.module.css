@@ -1,5 +1,5 @@
 ._local {
-	padding: 18px;
+	padding: 15px 18px;
 	margin-block-start: calc(var(--editor_padding_y) * 1.5);
 	margin-block-end: calc(var(--editor_padding_y) * 1.5);
 	border-radius: var(--radius_large);

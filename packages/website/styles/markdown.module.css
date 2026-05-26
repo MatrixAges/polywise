@@ -180,7 +180,7 @@
 			outline: 1px solid rgba(var(--color_text_rgb), 0.06);
 		}
 
-		code {
+		code:not(.shiki-code) {
 			display: inline;
 			padding: 2px 4px;
 			margin: 0 4px;

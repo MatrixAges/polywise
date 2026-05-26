@@ -1,3 +1,42 @@
 # CLI
 
-Will be soon.
+Polywise CLI is mainly for agents, scripts, and external tools.
+
+## Start Server
+
+Install:
+
+```bash
+npm i polywise -g
+```
+
+Start the local server in the foreground:
+
+```bash
+polywise start
+```
+
+Start it in the background and exit immediately:
+
+```bash
+polywise start -d
+```
+
+## Explore Commands
+
+Use help progressively:
+
+```bash
+polywise -h
+polywise session -h
+polywise search fullTextSearch -h
+```
+
+Common examples:
+
+```bash
+polywise version
+polywise session create --title "Daily Review"
+polywise search fullTextSearch --query "vector database"
+polywise save --for user --content "Key takeaway..."
+```

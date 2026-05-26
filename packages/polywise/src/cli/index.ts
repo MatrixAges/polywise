@@ -1,7 +1,13 @@
 #!/usr/bin/env node
-import { pathToFileURL } from 'node:url'
-import { command, number, run, string } from '@drizzle-team/brocli'
+import { spawn } from 'child_process'
+import { closeSync, openSync } from 'fs'
+import { fileURLToPath, pathToFileURL } from 'node:url'
+import path from 'path'
+import { logs_dir, runtime_pid_path } from '@core/consts/app'
+import { boolean, command, number, run, string } from '@drizzle-team/brocli'
+import fs from 'fs-extra'
 
+import { getRuntimeCommandEnv } from '../utils/resolveCommand'
 import { polywise_version } from '../version'
 import { getApiMap, renderApiHelp } from './api/map'
 
@@ -9,6 +15,7 @@ import type { ApiMapItem, RenderedHelp } from './types'
 
 const server_base_url = (process.env.POLYWISE_SERVER_URL || 'http://localhost:3072').replace(/\/$/, '')
 const api_base_url = `${server_base_url}/api`
+const server_entrypoint_path = fileURLToPath(new URL('../index.js', import.meta.url))
 const version_flags = new Set(['-v', '--version'])
 
 interface ApiCommandTreeNode {
@@ -74,7 +81,137 @@ const printRenderedCliHelp = (data: RenderedHelp | null) => {
 	printRenderedHelp('polywise', toCliHelp(data))
 }
 
+const renderRootCliHelp = () => {
+	const data = toCliHelp(renderApiHelp([]))
+
+	if (!data) {
+		return null
+	}
+
+	return {
+		...data,
+		summary: 'Polywise CLI for starting the local server and calling the backend API.',
+		hints: [
+			'Use `polywise start` to run the local server.',
+			'Use `polywise start -d` to run it in the background.',
+			...data.hints
+		],
+		items: [
+			{
+				key: 'start',
+				title: 'start',
+				summary: 'Start the Polywise server',
+				kind: 'command' as const
+			},
+			...data.items
+		]
+	}
+}
+
 const shouldPrintVersion = (argv: Array<string>) => argv.length === 1 && version_flags.has(argv[0] || '')
+
+const readRuntimePid = async () => {
+	try {
+		const raw = await fs.readFile(runtime_pid_path, 'utf8')
+		const pid = Number.parseInt(raw.trim(), 10)
+
+		return Number.isFinite(pid) && pid > 0 ? pid : null
+	} catch {
+		return null
+	}
+}
+
+const isProcessAlive = (pid: number) => {
+	try {
+		process.kill(pid, 0)
+		return true
+	} catch {
+		return false
+	}
+}
+
+const getActiveRuntimePid = async () => {
+	const pid = await readRuntimePid()
+
+	if (!pid) {
+		return null
+	}
+
+	if (isProcessAlive(pid)) {
+		return pid
+	}
+
+	await fs.remove(runtime_pid_path).catch(() => null)
+
+	return null
+}
+
+const startDetachedServer = async () => {
+	const active_pid = await getActiveRuntimePid()
+
+	if (active_pid) {
+		printJson({
+			ok: true,
+			action: 'start',
+			detached: true,
+			already_running: true,
+			pid: active_pid
+		})
+		return
+	}
+
+	let log_path: string | null = null
+	let log_fd: number | null = null
+
+	try {
+		await fs.ensureDir(logs_dir)
+		log_path = path.resolve(logs_dir, 'server.log')
+		log_fd = openSync(log_path, 'a')
+	} catch {
+		log_path = null
+		log_fd = null
+	}
+
+	const child = spawn(process.execPath, [server_entrypoint_path], {
+		detached: true,
+		stdio: log_fd == null ? 'ignore' : ['ignore', log_fd, log_fd],
+		env: getRuntimeCommandEnv()
+	})
+
+	child.unref()
+
+	if (log_fd != null) {
+		closeSync(log_fd)
+	}
+
+	printJson({
+		ok: true,
+		action: 'start',
+		detached: true,
+		already_running: false,
+		pid: child.pid ?? null,
+		log_path
+	})
+}
+
+const startForegroundServer = async () => {
+	const active_pid = await getActiveRuntimePid()
+
+	if (active_pid) {
+		printJson({
+			ok: true,
+			action: 'start',
+			detached: false,
+			already_running: true,
+			pid: active_pid
+		})
+		return
+	}
+
+	printText('Starting Polywise server...')
+
+	await import('../index')
+}
 
 const buildApiUrl = (path: string) => new URL(path.replace(/^\//, ''), `${api_base_url}/`)
 
@@ -310,7 +447,35 @@ const buildApiCommands = (node: ApiCommandTreeNode): Array<any> =>
 		})
 
 const api_tree = createApiTree()
-const root_commands = buildApiCommands(api_tree)
+const start_command = command({
+	name: 'start',
+	desc: 'Start the Polywise server',
+	shortDesc: 'Start the Polywise server',
+	options: {
+		detach: boolean().alias('d').desc('Run in the background and exit immediately').default(false)
+	},
+	help: () => {
+		printText(
+			[
+				'polywise start',
+				'Start the Polywise server.',
+				'options:',
+				'- --detach, -d: Run in the background and exit immediately',
+				'example: polywise start',
+				'example: polywise start -d'
+			].join('\n')
+		)
+	},
+	handler: async (options: { detach?: boolean }) => {
+		if (options.detach) {
+			await startDetachedServer()
+			return
+		}
+
+		await startForegroundServer()
+	}
+})
+const root_commands = [start_command, ...buildApiCommands(api_tree)]
 
 export const main = async (argv = process.argv.slice(2)) => {
 	if (shouldPrintVersion(argv)) {
@@ -324,7 +489,7 @@ export const main = async (argv = process.argv.slice(2)) => {
 		version: polywise_version,
 		omitKeysOfUndefinedOptions: true,
 		help: () => {
-			printRenderedCliHelp(renderApiHelp([]))
+			printRenderedCliHelp(renderRootCliHelp())
 		}
 	})
 }

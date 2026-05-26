@@ -1,4 +1,42 @@
 # CLI
 
-近日公開予定です。
+Polywise CLI は主に agents、scripts、external tools 向けです。
 
+## サーバー起動
+
+まずインストールします。
+
+```bash
+npm i polywise -g
+```
+
+foreground でローカルサーバーを起動：
+
+```bash
+polywise start
+```
+
+background で起動してすぐ終了：
+
+```bash
+polywise start -d
+```
+
+## コマンドを見る
+
+help を段階的に見るのが確実です。
+
+```bash
+polywise -h
+polywise session -h
+polywise search fullTextSearch -h
+```
+
+よく使う例：
+
+```bash
+polywise version
+polywise session create --title "Daily Review"
+polywise search fullTextSearch --query "vector database"
+polywise save --for user --content "Key takeaway..."
+```

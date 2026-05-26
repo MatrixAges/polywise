@@ -14,6 +14,15 @@ Polywise 是一个开源的 agentic content system。你可以把它当成终端
 npm i polywise -g
 ```
 
+然后启动本地服务：
+
+```bash
+polywise start
+polywise start -d
+```
+
+`polywise start` 会以前台方式持续运行。`polywise start -d` 会立刻退出，并让服务在后台持续运行。
+
 或者从 [GitHub Releases](https://github.com/MatrixAges/polywise/releases) 下载桌面应用。
 
 第一次使用时，Polywise 主要只需要一个可用的模型提供方。其他东西都可以以后再配。
@@ -115,6 +124,8 @@ polywise search fullTextSearch -h
 常见例子：
 
 ```bash
+polywise start
+polywise start -d
 polywise version
 polywise session create --title "Daily Review"
 polywise search fullTextSearch --query "vector database"

@@ -40,13 +40,16 @@ export const highlight = async (code: string, lang: BundledLanguage | string) =>
 		await highlighter.loadLanguage(normalized_language as BundledLanguage)
 	}
 
-	const code_text = highlighter.codeToHtml(code, {
-		lang: normalized_language,
-		themes: {
-			light: light_theme,
-			dark: dark_theme
-		}
-	})
+	const code_text = highlighter
+		.codeToHtml(code, {
+			lang: normalized_language,
+			themes: {
+				light: light_theme,
+				dark: dark_theme
+			}
+		})
+		.replace('<pre class="', '<pre class="shiki-block ')
+		.replace('<code>', '<code class="shiki-code">')
 
 	return `<div class="pre_code_wrap">${code_text}</div>`
 }
