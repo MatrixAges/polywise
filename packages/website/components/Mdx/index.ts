@@ -8,8 +8,6 @@ import H3 from './H3'
 import H4 from './H4'
 import H5 from './H5'
 import H6 from './H6'
-import ImageLayout from './ImageLayout'
-import ImageWrap from './ImageWrap'
 import Tabs from './Tabs'
 import Video from './Video'
 
@@ -48,8 +46,6 @@ export const components = {
 	pre: Code,
 	Tabs,
 	Video,
-	ImageWrap,
-	ImageLayout,
 	Alert,
 	Row,
 	Col

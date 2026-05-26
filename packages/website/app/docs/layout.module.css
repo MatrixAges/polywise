@@ -171,7 +171,6 @@
 			}
 
 			.menu_item {
-				width: calc(100% - 12px);
 				padding-left: 8px;
 				height: 30px;
 				border-radius: var(--radius);

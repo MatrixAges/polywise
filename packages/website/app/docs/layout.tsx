@@ -275,7 +275,7 @@ const Index = (props: PropsWithChildren) => {
 
 						return (
 							<section
-								className={$.cx('menu_group', open ? 'mb-6' : 'mb-2')}
+								className={$.cx('menu_group', open ? 'mb-6' : 'mb-1')}
 								key={group.key}
 							>
 								<button
@@ -284,6 +284,7 @@ const Index = (props: PropsWithChildren) => {
 									flex
 									items-center justify-between
 									w-full
+									mb-1
 									font-medium
 									menu_group_button cursor-pointer
 								`,
@@ -306,6 +307,8 @@ const Index = (props: PropsWithChildren) => {
 									<div
 										className='
 										flex flex-col
+										w-full
+										gap-1
 										menu_group_items
 									'
 									>

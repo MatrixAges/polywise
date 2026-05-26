@@ -28,6 +28,14 @@ const post_session_ensure_tasks = new Map<
 const POST_PIPELINE_WAIT_MS = 90_000
 const POST_PIPELINE_POLL_MS = 250
 const post_for_type_set = new Set<string>(post_for_types)
+const global_post_scope_where = eq(article.scope_type, 'global')
+const visible_related_article_count = sql<number>`(
+	select count(*)
+	from post_article pa
+	inner join article related_article on pa.article_id = related_article.id
+	where pa.post_id = ${article.id}
+		and related_article.scope_type = 'global'
+)`
 
 export const isPostForType = (value?: string | null): value is PostForType =>
 	typeof value === 'string' && post_for_type_set.has(value)
@@ -90,13 +98,13 @@ export const getPostById = async (id: string) => {
 			is_pipelined: article.is_pipelined,
 			created_at: article.created_at,
 			updated_at: article.updated_at,
-			related_article_count: sql<number>`(select count(*) from ${post_article} where ${post_article.post_id} = ${article.id})`,
+			related_article_count: visible_related_article_count,
 			session_id: sql<
 				string | null
 			>`(select ${post_session.session_id} from ${post_session} where ${post_session.post_id} = ${article.id} limit 1)`
 		})
 		.from(article)
-		.where(and(eq(article.id, id), inArray(article.for, post_for_types)))
+		.where(and(eq(article.id, id), inArray(article.for, post_for_types), global_post_scope_where))
 		.limit(1)
 		.then(res => res[0])
 
@@ -453,7 +461,7 @@ export const listPostRelatedArticles = async (post_id: string) => {
 		})
 		.from(post_article)
 		.innerJoin(article, eq(post_article.article_id, article.id))
-		.where(eq(post_article.post_id, post_id))
+		.where(and(eq(post_article.post_id, post_id), global_post_scope_where))
 		.orderBy(desc(post_article.created_at), desc(article.updated_at), asc(article.created_at))
 		.then(rows =>
 			rows.map(row => ({
@@ -932,6 +940,7 @@ export const searchRelatedArticleCandidates = async (args: { post_id: string; qu
 		.from(article)
 		.where(
 			and(
+				global_post_scope_where,
 				notInArray(article.id, exclude_ids),
 				or(like(article.title, `%${keyword}%`), like(article.content, `%${keyword}%`))
 			)
@@ -961,7 +970,9 @@ export const queryPosts = async (args: { page: number; for_type?: string; query?
 	const search_where = keyword
 		? or(like(article.title, `%${keyword}%`), like(article.content, `%${keyword}%`))
 		: undefined
-	const where = search_where ? and(type_where, search_where) : type_where
+	const where = search_where
+		? and(global_post_scope_where, type_where, search_where)
+		: and(global_post_scope_where, type_where)
 	const rows = await env.db
 		.select({
 			id: article.id,
@@ -971,7 +982,7 @@ export const queryPosts = async (args: { page: number; for_type?: string; query?
 			is_pipelined: article.is_pipelined,
 			created_at: article.created_at,
 			updated_at: article.updated_at,
-			related_article_count: sql<number>`(select count(*) from ${post_article} where ${post_article.post_id} = ${article.id})`,
+			related_article_count: visible_related_article_count,
 			session_id: sql<
 				string | null
 			>`(select ${post_session.session_id} from ${post_session} where ${post_session.post_id} = ${article.id} limit 1)`

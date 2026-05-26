@@ -35,6 +35,10 @@ export default p
 			throw new Error(`Article not found: ${input.article_id}`)
 		}
 
+		if (target_article.scope_type !== 'global') {
+			throw new Error(`Post related article must be global: ${input.article_id}`)
+		}
+
 		if (input.post_id === input.article_id) {
 			throw new Error('Cannot relate a post to itself.')
 		}
