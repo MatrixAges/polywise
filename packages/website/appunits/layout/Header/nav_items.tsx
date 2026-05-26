@@ -1,7 +1,7 @@
 export default [
 	{
 		name: 'docs',
-		path: '/docs'
+		path: '/docs/intro'
 	},
 	{
 		name: 'download',
