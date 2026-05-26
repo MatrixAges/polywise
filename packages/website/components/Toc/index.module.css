@@ -93,6 +93,11 @@
 			}
 
 			span {
+				display: block;
+				min-width: 0;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				white-space: nowrap;
 				color: var(--color_text_sublight);
 				transition: color ease 0.3s;
 				font-size: 13px;
