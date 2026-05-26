@@ -127,6 +127,11 @@
 						.desc {
 							min-height: 45.36px;
 							color: var(--color_text_grey);
+							display: -webkit-box;
+							overflow: hidden;
+							-webkit-box-orient: vertical;
+							-webkit-line-clamp: 2;
+							line-clamp: 2;
 						}
 					}
 				}
@@ -171,6 +176,11 @@
 
 						.desc {
 							color: var(--color_text_sublight);
+							display: -webkit-box;
+							overflow: hidden;
+							-webkit-box-orient: vertical;
+							-webkit-line-clamp: 2;
+							line-clamp: 2;
 						}
 					}
 				}

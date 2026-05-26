@@ -28,28 +28,28 @@ const buildDocsData = (l: (en: string, zh?: string, ja?: string) => string) => {
 			key: 'intro',
 			className: classNameOf('intro'),
 			label: l('Intro'),
-			desc: 'Start here for the product overview, terminology, and documentation scope.'
+			desc: 'Overview, terminology, and documentation structure.'
 		},
 		{
 			type: 'link',
 			key: 'config',
 			className: classNameOf('config'),
 			label: l('Config'),
-			desc: 'Learn the core configuration model, setup patterns, and environment expectations.'
+			desc: 'Configuration model, setup patterns, and environments.'
 		},
 		{
 			type: 'link',
 			key: 'providers',
 			className: classNameOf('providers'),
 			label: l('Providers'),
-			desc: 'Review provider roles, capability boundaries, and integration tradeoffs.'
+			desc: 'Compare model providers, capabilities, and tradeoffs.'
 		},
 		{
 			type: 'link',
 			key: 'troubleshooting',
 			className: classNameOf('troubleshooting'),
 			label: l('Troubleshooting'),
-			desc: 'Use debugging checklists and recovery steps for common failures.'
+			desc: 'Debug common failures and recovery paths.'
 		}
 	] satisfies DocsMenuLink[]
 
@@ -63,19 +63,19 @@ const buildDocsData = (l: (en: string, zh?: string, ja?: string) => string) => {
 					key: 'cli',
 					className: classNameOf('cli'),
 					label: l('CLI'),
-					desc: 'Run Polywise from the terminal and automate common workflows.'
+					desc: 'Run Polywise in the terminal and automate workflows.'
 				},
 				{
 					key: 'web',
 					className: classNameOf('web'),
 					label: l('Web'),
-					desc: 'Use the web app for browser-based access and lightweight operations.'
+					desc: 'Use the browser app for lightweight access and tasks.'
 				},
 				{
 					key: 'desktop',
 					className: classNameOf('desktop'),
 					label: l('Desktop'),
-					desc: 'Use the desktop app for local-first workflows and richer integrations.'
+					desc: 'Use the desktop app for local-first workflows.'
 				}
 			]
 		},
@@ -88,31 +88,31 @@ const buildDocsData = (l: (en: string, zh?: string, ja?: string) => string) => {
 					key: 'capture_contents',
 					className: classNameOf('capture_contents'),
 					label: l('Capture Contents'),
-					desc: 'Capture material from pages, files, and live context into the workspace.'
+					desc: 'Capture pages, files, and live context into workspaces.'
 				},
 				{
 					key: 'agent_private_contents',
 					className: classNameOf('agent_private_contents'),
 					label: l('Agent Private Contents'),
-					desc: 'Keep agent-only context isolated from user-visible project materials.'
+					desc: 'Keep agent-only context separate from shared project content.'
 				},
 				{
 					key: 'group_chat',
 					className: classNameOf('group_chat'),
 					label: l('Group Chat'),
-					desc: 'Coordinate shared conversations around the same project context.'
+					desc: 'Coordinate shared conversations in one project context.'
 				},
 				{
 					key: 'project_workspace',
 					className: classNameOf('project_workspace'),
 					label: l('Project Workspace'),
-					desc: 'Organize repositories, content, and runtime state inside a workspace.'
+					desc: 'Organize code, content, and runtime state together.'
 				},
 				{
 					key: 'im_integration',
 					className: classNameOf('im_integration'),
 					label: l('IM Integration'),
-					desc: 'Connect messaging surfaces and route conversations into Polywise.'
+					desc: 'Connect messaging surfaces and route them into Polywise.'
 				},
 				{
 					key: 'content_service_providers',
@@ -131,25 +131,25 @@ const buildDocsData = (l: (en: string, zh?: string, ja?: string) => string) => {
 					key: 'fst',
 					className: classNameOf('fst'),
 					label: l('FST'),
-					desc: 'Understand how the FST layer structures state and transitions.'
+					desc: 'Understand how the FST layer structures state.'
 				},
 				{
 					key: 'memory_callback',
 					className: classNameOf('memory_callback'),
 					label: l('Memory Callback'),
-					desc: 'See how callbacks retrieve and persist memory at the right moments.'
+					desc: 'Retrieve and persist memory at the right moments.'
 				},
 				{
 					key: 'post_think',
 					className: classNameOf('post_think'),
 					label: l('Post Think'),
-					desc: 'Review what runs after reasoning and how post-think hooks shape results.'
+					desc: 'Review what runs after reasoning and shapes results.'
 				},
 				{
 					key: 'rewire_mechanisms',
 					className: classNameOf('rewire_mechanisms'),
 					label: l('Rewire Mechanisms'),
-					desc: 'Learn how the system rewires context, tools, and control flow safely.'
+					desc: 'Learn how context, tools, and control flow are rewired.'
 				}
 			]
 		}
