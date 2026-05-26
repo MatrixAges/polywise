@@ -1,0 +1,1 @@
+Generate a concise and accurate session title for the current user topic. Keep the title in the same language as the user topic. Return only the title field. Do not use quotes. Do not add explanation. Prefer short noun phrases over full sentences.

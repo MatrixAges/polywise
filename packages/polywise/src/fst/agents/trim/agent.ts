@@ -1,3 +1,4 @@
+import trim_agent_prompt from '@core/consts/prompts/trim_agent_prompt.md'
 import { Output, stepCountIs, ToolLoopAgent } from 'ai'
 import { boolean, object } from 'zod'
 
@@ -21,8 +22,7 @@ export type TrimAgentOutput = {
 export default (model: LanguageModel): ToolLoopAgent => {
 	return new ToolLoopAgent({
 		model,
-		instructions:
-			'You are a session context analyst. Analyze the trimmed messages, remaining messages, and current context. If the trimmed messages contain crucial information missing from the remaining messages and current context, output the necessary context updates. Otherwise, set should_update to false. Be concise.',
+		instructions: trim_agent_prompt,
 		output: Output.object({ schema }),
 		stopWhen: stepCountIs(5)
 	})

@@ -1,5 +1,6 @@
 import path from 'path'
 import { app } from '@core/consts'
+import getSuperegoPrompt from '@core/consts/prompts/getSuperegoPrompt'
 import { hasSessionSubAgent } from '@core/fst/session/config/shared'
 import { convertToModelMessages } from 'ai'
 import dayjs from 'dayjs'
@@ -73,20 +74,6 @@ const getConversationFragment = async (s: Session) => {
 		})
 		.filter(Boolean)
 		.join('\n\n')
-}
-
-const getSuperegoPrompt = (conversation: string) => {
-	return [
-		'Analyze the conversation fragment below.',
-		'Apply the learning loop defined in your system instructions.',
-		'Only store durable value.',
-		'For skills, prefer search -> read -> create or update when a reusable workflow exists.',
-		'If the complexity signal says the task is not complex, be conservative about skill creation.',
-		'',
-		'---',
-		'',
-		conversation
-	].join('\n')
 }
 
 const getSuperegoResult = (

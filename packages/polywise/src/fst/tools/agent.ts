@@ -1,3 +1,4 @@
+import { getAgentToolSystemPrompt } from '@core/consts/prompts/getAgentPrompt'
 import getContextPrompt from '@core/consts/prompts/getContextPrompt'
 import { getAgents } from '@core/db/services'
 import { generateText, tool } from 'ai'
@@ -15,21 +16,6 @@ const inputSchema = object({
 	prompt: string().trim().optional().describe('Question or task to send to the selected agents'),
 	agent_ids: array(string().trim().min(1)).max(8).optional().describe('Optional explicit list of agent ids to call')
 })
-
-const getAgentProfilePrompt = (agent: Agent) =>
-	[
-		'# Target Agent Profile',
-		`Name: ${agent.name}`,
-		`Role: ${agent.role}`,
-		agent.identity ? `Identity:\n${agent.identity}` : '',
-		agent.soul ? `Soul:\n${agent.soul}` : '',
-		agent.memory ? `Memory:\n${agent.memory}` : '',
-		agent.prompt ? `Prompt:\n${agent.prompt}` : '',
-		'Respond as this exact agent only.',
-		'Do not narrate internal coordination. Answer the request directly from this agent perspective.'
-	]
-		.filter(Boolean)
-		.join('\n\n')
 
 const toSearchHaystack = (agent: Agent) =>
 	[agent.id, agent.name, agent.role, agent.identity, agent.prompt].filter(Boolean).join('\n').toLowerCase()
@@ -106,14 +92,12 @@ export const createAgentTool = (s: Session) =>
 					const model = await getAgentModel(agent, { omit_effort: false })
 					const response = await generateText({
 						model: model.model,
-						system: [
-							getAgentProfilePrompt(agent),
-							getContextPrompt(s.context),
-							`Current Session Title: ${s.session.title}`,
-							`Real World Date: ${dayjs().format('YYYY-MM-DD')}`
-						]
-							.filter(Boolean)
-							.join('\n\n'),
+						system: getAgentToolSystemPrompt({
+							agent,
+							context_prompt: getContextPrompt(s.context),
+							session_title: s.session.title,
+							real_world_date: dayjs().format('YYYY-MM-DD')
+						}),
 						prompt: input.prompt!,
 						providerOptions: model.provider_options
 					})

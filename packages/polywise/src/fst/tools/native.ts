@@ -1,6 +1,7 @@
 import { spawn } from 'child_process'
 import os from 'os'
 import path from 'path'
+import { getNativeAccessPrompt } from '@core/consts/prompts/getNativePrompt'
 import { tool } from 'ai'
 import { readFile, writeFile } from 'atomically'
 import fs from 'fs-extra'
@@ -37,49 +38,6 @@ const truncateOutput = (output: string, stream_name: 'stdout' | 'stderr') => {
 	const truncated_length = output.length - MAX_OUTPUT_LENGTH
 
 	return `${output.slice(0, MAX_OUTPUT_LENGTH)}\n\n[${stream_name} truncated: ${truncated_length} characters removed]`
-}
-
-const getPathAnchorPrompt = (s: Session, host_cwd: string) => {
-	const lines = [
-		'Path anchors:',
-		`- user home directory -> ${USER_HOME_DIR}`,
-		`- default working directory -> ${host_cwd}`,
-		`- session scratch directory -> ${s.files_dir}`,
-		`- legacy virtual root / -> ${s.cwd}`
-	] as Array<string>
-
-	if (s.project?.dir) {
-		lines.push(`- project root -> ${s.project.dir}`)
-	}
-
-	if (s.skills_dir) {
-		lines.push(`- /skills -> ${s.skills_dir}`)
-	}
-
-	for (const mount of s.additional_mounts) {
-		lines.push(`- ${mount.mountPoint} -> ${mount.path}`)
-	}
-
-	return lines.join('\n')
-}
-
-const getAccessPrompt = (s: Session, host_cwd: string) => {
-	return [
-		'Full host access is enabled.',
-		'You are not restricted to the default working directory. It only controls how relative paths are resolved.',
-		'If the default working directory looks like a session scratch area, do not treat it as the main target automatically.',
-		'You may read, write, and execute against any absolute host path on disk.',
-		'When you need a broad filesystem starting point, begin from the user home directory or another explicit absolute path.',
-		'When the target is outside the default working directory, use an absolute host path directly.',
-		'For bash_tool, prefer the real host paths below instead of assuming virtual mounted paths exist in the shell.',
-		getPathAnchorPrompt(s, host_cwd),
-		'Environment variables exposed to shell commands:',
-		'- POLYWISE_USER_HOME',
-		'- POLYWISE_DEFAULT_CWD',
-		'- POLYWISE_SESSION_FILES_DIR',
-		'- POLYWISE_VIRTUAL_ROOT',
-		'- POLYWISE_PATH_MAPPINGS_JSON'
-	].join('\n')
 }
 
 const getCommandEnv = (s: Session, host_cwd: string) => ({
@@ -155,7 +113,15 @@ export const createNativeAccessTools = async (s: Session) => {
 	const shared_description = [
 		'This tool runs directly on the host system without just-bash sandboxing, approval, or audit filters.',
 		system_tools_prompt,
-		getAccessPrompt(s, host_cwd)
+		getNativeAccessPrompt({
+			user_home_dir: USER_HOME_DIR,
+			host_cwd,
+			files_dir: s.files_dir,
+			virtual_root: s.cwd,
+			project_dir: s.project?.dir,
+			skills_dir: s.skills_dir,
+			additional_mounts: s.additional_mounts
+		})
 	]
 		.filter(Boolean)
 		.join('\n\n')

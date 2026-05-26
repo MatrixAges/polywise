@@ -1,12 +1,12 @@
 import { config } from '@core/config'
 import { blocked_session_id, global_linkcase_session_id } from '@core/consts'
-import fst_linkcase_system_prompt from '@core/consts/prompts/fst_linkcase_system_prompt.md'
 import fst_post_system_prompt from '@core/consts/prompts/fst_post_system_prompt.md'
 import fst_report_tool_prompt from '@core/consts/prompts/fst_report_tool_prompt.md'
 import fst_system_prompt from '@core/consts/prompts/fst_system_prompt.md'
 import fst_system_tool_prompt from '@core/consts/prompts/fst_system_tool_prompt.md'
 import fst_title_tool_prompt from '@core/consts/prompts/fst_title_tool_prompt.md'
 import getContextPrompt from '@core/consts/prompts/getContextPrompt'
+import getLinkcaseSystemPrompt from '@core/consts/prompts/getLinkcaseSystemPrompt'
 import plan_mode_prompt from '@core/consts/prompts/plan_mode_prompt.md'
 import planexec_exec_prompt from '@core/consts/prompts/planexec_exec_prompt.md'
 import planexec_plan_prompt from '@core/consts/prompts/planexec_plan_prompt.md'
@@ -62,20 +62,6 @@ import type { Message, MessageDataParts, MessageMetadata, MessagePartDurationUIP
 import type Index from '../index'
 
 const model_threshold_value = 12
-const getLinkcaseSystemPrompt = (session_title: string) => {
-	const provider_chain =
-		Array.isArray(config.fetch_fallback_chain) && config.fetch_fallback_chain.length
-			? config.fetch_fallback_chain
-			: [...default_fetch_fallback_chain]
-
-	return [
-		fst_linkcase_system_prompt,
-		`Instead, use linkcase_tool action "fetch_preview" with exactly one provider at a time in this configured order: ${provider_chain.join(', ')}.`,
-		'`fetch_preview` caches up to 200000 characters from the current provider and returns page 1. Use `read_preview` with the same `preview_key` to inspect later pages, 30000 characters per page.',
-		`Current Session Title: ${session_title}`,
-		`Real World Date: ${dayjs().format('YYYY-MM-DD')}`
-	].join('\n')
-}
 
 export default async (s: Index, message: Message) => {
 	await s.getModel()
@@ -168,7 +154,14 @@ export default async (s: Index, message: Message) => {
 	const has_title_tool = 'title_tool' in shared_runtime.tools
 
 	const system_prompt = is_linkcase_batch_session
-		? getLinkcaseSystemPrompt(s.session.title)
+		? getLinkcaseSystemPrompt({
+				session_title: s.session.title,
+				provider_chain:
+					Array.isArray(config.fetch_fallback_chain) && config.fetch_fallback_chain.length
+						? config.fetch_fallback_chain
+						: [...default_fetch_fallback_chain],
+				real_world_date: dayjs().format('YYYY-MM-DD')
+			})
 		: is_post_session
 			? [
 					fst_system_prompt,

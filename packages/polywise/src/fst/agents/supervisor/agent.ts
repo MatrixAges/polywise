@@ -1,3 +1,4 @@
+import chaos_detector_prompt from '@core/consts/prompts/chaos_detector_prompt.md'
 import { Output, stepCountIs, ToolLoopAgent } from 'ai'
 import { boolean, infer as Infer, object, string } from 'zod'
 
@@ -13,8 +14,7 @@ export type ChaosDetectionOutput = Infer<typeof schema>
 export default (model: LanguageModel): ToolLoopAgent => {
 	return new ToolLoopAgent({
 		model,
-		instructions:
-			'You are a chaos detector. Analyze the provided assistant outputs and determine if the agent is stuck in chaotic behavior such as repeating itself, going in circles, or talking to itself without progress.',
+		instructions: chaos_detector_prompt,
 		output: Output.object({ schema }),
 		stopWhen: stepCountIs(5)
 	})

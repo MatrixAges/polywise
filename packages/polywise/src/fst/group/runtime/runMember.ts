@@ -1,6 +1,5 @@
-import fst_system_prompt from '@core/consts/prompts/fst_system_prompt.md'
-import fst_system_tool_prompt from '@core/consts/prompts/fst_system_tool_prompt.md'
 import getContextPrompt from '@core/consts/prompts/getContextPrompt'
+import { getGroupRunMemberPrompt } from '@core/consts/prompts/getGroupPrompt'
 import { createPartDurationTracker, getPartDurationChunk } from '@core/fst/duration'
 import { buildSharedRuntimeTools, createMessageTool } from '@core/fst/tools'
 import { consumeStream, smoothStream, stepCountIs, streamText } from 'ai'
@@ -18,40 +17,6 @@ import type { ModelMessage, UIMessageChunk } from 'ai'
 import type { Message, MessageDataParts, MessageMetadata, MessagePartDurationUIPart } from '../../types'
 import type Group from '../index'
 import type { GroupMemberEvaluation } from '../types'
-
-const getAgentProfilePrompt = (agent: Agent) =>
-	[
-		'# Group Member Profile',
-		`Name: ${agent.name}`,
-		`Role: ${agent.role}`,
-		agent.identity ? `Identity:\n${agent.identity}` : '',
-		agent.soul ? `Soul:\n${agent.soul}` : '',
-		agent.memory ? `Memory:\n${agent.memory}` : '',
-		agent.prompt ? `Prompt:\n${agent.prompt}` : '',
-		'You are this exact member only.',
-		'Never claim to be another group member unless your exact name is that member.',
-		'Do not introduce yourself unless the user explicitly asks who you are; the UI already shows your name and role.',
-		'Do not imitate, role-play, or speak as another member even if the user asked for that member.',
-		'Reply to the user or shared task directly. Do not critique other agents in this turn.'
-	]
-		.filter(Boolean)
-		.join('\n\n')
-
-const getMountedFolderPrompt = (s: Group) => {
-	if (!s.folders.length) {
-		return ''
-	}
-
-	const lines = ['# Mounted Group Folders', `- / -> ${s.cwd}`]
-
-	for (const mount of s.additional_mounts) {
-		lines.push(`- ${mount.mountPoint} -> ${mount.path}`)
-	}
-
-	lines.push('Use these mounted paths when reading or writing files for the group.')
-
-	return lines.join('\n')
-}
 
 const gateWriteTool = <T extends { execute?: (...args: Array<any>) => any }>(
 	tool_item: T,
@@ -114,54 +79,22 @@ export default async (args: {
 
 	const tools = wrapToolSetWithAgentLogging(s, sanitizeToolSet(shared_runtime.tools))
 
-	const system_prompt = [
-		fst_system_prompt,
-		getAgentProfilePrompt(agent),
-		'# Group Runtime Rules',
-		`Group Name: ${s.group.name}`,
-		s.group.description ? `Group Description: ${s.group.description}` : '',
-		getMountedFolderPrompt(s),
-		`Exclusive Turn: ${evaluation.exclusive ? 'true' : 'false'}`,
-		`Leadership Mode For This Turn: ${evaluation.leadership}`,
-		evaluation.reason ? `Selection Reason: ${evaluation.reason}` : '',
-		`Current Active Member: ${agent.name} (${agent.role})`,
-		evaluation.needs_write_lock
-			? 'Your work is expected to need shared writes. Acquire the group write lock before any write-capable tool use.'
-			: 'Only acquire the group write lock if you truly need shared writes.',
-		'Only your own full profile is preloaded. Use group_member_tool to inspect specific members on demand.',
-		'Only call tools that are actually declared in this run. Ignore any generic tool name that is not present in the available tool list.',
-		'If you need older chat history, use message_tool. Do not call messages_tool.',
-		'question_tool is not available in group member runtime.',
-		'Use group_progress_tool instead of context_tool for shared state updates in group runtime.',
-		'# Group Reply Style',
-		'In group chat, be even shorter and more selective than a normal agent session.',
-		'Default to one short sentence or two short sentences at most.',
-		'Say only the key point that materially moves the conversation forward.',
-		'Do not add setup, politeness filler, summaries of obvious context, or repeated caveats.',
-		'Do not use headings, bullet lists, or long structured explanations unless the user explicitly asks for them.',
-		'If a very short answer is enough, stop there.',
-		'If the user asked for another member or role, you still must not impersonate them. Answer only as yourself.',
-		'Do not speak on behalf of other members or summarize what they would say unless the user explicitly asked for a cross-member synthesis.',
-		'Do not address other members by name inside the final user-facing answer, do not assign them tasks, and do not ask them questions there.',
-		'Your final answer must be a self-contained response to the user from your own role only.',
-		evaluation.exclusive
-			? 'This turn is exclusive to you. Deliver the whole answer yourself and do not invite, dispatch, or tee up other members.'
-			: 'If you are speaking in a non-exclusive turn, still avoid turning the answer into a host-style roundtable summary.',
-		'You can update shared context with group_progress_tool and shared todos/lock state with group_coordination_tool.',
-		'Use group_coordination_tool and group_progress_tool silently for internal state only, not as a cue to narrate team dispatching in the final answer.',
-		'group_coordination_tool and group_progress_tool are terminal internal actions. If you call either one, end the turn immediately and do not generate any additional user-facing text after the tool call.',
-		'If you need those internal tools, call them before writing the final user-facing answer whenever possible.',
-		'Do not wait for or react to other agents in the same turn. Work from the shared history and current group context only.',
-		shared_runtime.has_system_tool ? fst_system_tool_prompt : '',
-		shared_runtime.system_tools_prompt,
-		shared_runtime.custom_tools_prompt,
-		shared_runtime.skill_prompt,
-		getContextPrompt(s.context),
-		`Current Session Title: ${s.session.title}`,
-		`Real World Date: ${dayjs().format('YYYY-MM-DD')}`
-	]
-		.filter(Boolean)
-		.join('\n\n')
+	const system_prompt = getGroupRunMemberPrompt({
+		agent,
+		evaluation,
+		group_name: s.group.name,
+		group_description: s.group.description,
+		has_mounted_folders: s.folders.length > 0,
+		cwd: s.cwd,
+		additional_mounts: s.additional_mounts,
+		has_system_tool: shared_runtime.has_system_tool,
+		system_tools_prompt: shared_runtime.system_tools_prompt,
+		custom_tools_prompt: shared_runtime.custom_tools_prompt,
+		skill_prompt: shared_runtime.skill_prompt,
+		context_prompt: getContextPrompt(s.context),
+		session_title: s.session.title,
+		real_world_date: dayjs().format('YYYY-MM-DD')
+	})
 
 	const tracker = createPartDurationTracker()
 	const stopAfterTerminalInternalTool = ({

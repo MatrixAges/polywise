@@ -1,4 +1,5 @@
 import getContextPrompt from '@core/consts/prompts/getContextPrompt'
+import { getGroupPickPrompt } from '@core/consts/prompts/getGroupPrompt'
 import { generateText, Output } from 'ai'
 import { array, boolean, object, string } from 'zod'
 
@@ -16,24 +17,12 @@ const pick_schema = object({
 export default async (s: Group, messages: Array<ModelMessage>) => {
 	try {
 		const agent_ids = new Set(s.agents.map(agent => agent.id))
-		const system_prompt = [
-			'# Group Candidate Pick Task',
-			'You are routing the current user turn for a multi-agent group.',
-			'Pick zero, one, or a few members who should enter self-evaluation for this turn.',
-			'This is only a preselection step. Picked members will still evaluate for themselves later.',
-			'Prefer the smallest candidate set that can plausibly own the turn.',
-			'Order candidate_agent_ids from strongest owner to weakest backup.',
-			'Do not pick every member unless the user explicitly asks for multiple perspectives, multiple named roles, a panel, or whole-team input.',
-			'Do not pick a member just because they could add useful supporting details.',
-			'Do not simulate answers. Do not produce user-facing content.',
-			'When one member is the clearest owner, pick only that member.',
-			`Group Name: ${s.group.name}`,
-			s.group.description ? `Group Description: ${s.group.description}` : '',
-			getAgentsMapPrompt(s, { include_description: true }),
-			getContextPrompt(s.context)
-		]
-			.filter(Boolean)
-			.join('\n\n')
+		const system_prompt = getGroupPickPrompt({
+			group_name: s.group.name,
+			group_description: s.group.description,
+			agents_map_prompt: getAgentsMapPrompt(s, { include_description: true }),
+			context_prompt: getContextPrompt(s.context)
+		})
 
 		const res = await generateText({
 			model: s.model.model,

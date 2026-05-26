@@ -1,3 +1,4 @@
+import title_agent_prompt from '@core/consts/prompts/title_agent_prompt.md'
 import { Output, stepCountIs, ToolLoopAgent } from 'ai'
 import { infer as Infer, object, string } from 'zod'
 
@@ -12,8 +13,7 @@ export type TitleAgentOutput = Infer<typeof schema>
 export default (model: LanguageModel): ToolLoopAgent => {
 	return new ToolLoopAgent({
 		model,
-		instructions:
-			'Generate a concise and accurate session title for the current user topic. Keep the title in the same language as the user topic. Return only the title field. Do not use quotes. Do not add explanation. Prefer short noun phrases over full sentences.',
+		instructions: title_agent_prompt,
 		output: Output.object({ schema }),
 		stopWhen: stepCountIs(3)
 	})

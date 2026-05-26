@@ -1,6 +1,8 @@
 import { embed, readUIMessageStream, tool, ToolLoopAgent } from 'ai'
 import { object, string } from 'zod'
 
+import google_search_agent_prompt from '../consts/prompts/google_search_agent_prompt.md'
+
 import type { GoogleEmbeddingModelOptions, GoogleLanguageModelOptions } from '@ai-sdk/google'
 import type { ProviderOptions } from '@ai-sdk/provider-utils'
 import type { LanguageModel, ToolSet } from 'ai'
@@ -348,7 +350,7 @@ export const getModel = async <T extends ModelType = 'text'>(args: GetModelArgs<
 
 				const search_agent = new ToolLoopAgent({
 					model: target_model,
-					instructions: `You are a google search agent.`,
+					instructions: google_search_agent_prompt,
 					tools: { googleSearch: google.tools.googleSearch({}) }
 				})
 

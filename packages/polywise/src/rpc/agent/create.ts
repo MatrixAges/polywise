@@ -2,12 +2,12 @@ import { agent_create_input_schema } from '@core/db/schemas'
 import { addAgent, getAgents, normalizeAgentModel } from '@core/db/services'
 import { getDefaultToolModel, runToolAgent } from '@core/fst/agents'
 import { p } from '@core/utils'
-import { infer as Infer, object, string } from 'zod'
+import { object, string } from 'zod'
 
+import { getAgentCreateInstructions, getAgentCreateProfilePrompt } from '../../consts/prompts/getAgentPrompt'
 import { readPinList } from './utils'
 
 const input_type = agent_create_input_schema
-type AgentCreateInput = Infer<typeof input_type>
 
 const generated_agent_schema = object({
 	name: string().describe('A short, distinctive agent name'),
@@ -71,37 +71,6 @@ const getFallbackAgentProfile = async () => {
 	}
 }
 
-const getAgentProfilePrompt = (input: AgentCreateInput) => {
-	const fields = [
-		['purpose', input.purpose],
-		['name', input.name],
-		['role', input.role],
-		['description', input.description],
-		['prompt', input.prompt],
-		['soul', input.soul],
-		['identity', input.identity],
-		['memory', input.memory]
-	]
-
-	return [
-		'Create a fresh AI agent profile.',
-		'Return a short, memorable name, a concise role, a concise description, and complete fields for prompt, soul, identity, and memory.',
-		'Use the purpose sentence as the main design anchor when it is present.',
-		'Make the result feel specific and varied instead of generic or numbered.',
-		'The role must be no more than 20 characters and should usually be one or two words.',
-		'The prompt should be directly usable as the agent system prompt.',
-		'The soul should capture tone and temperament.',
-		'The identity should define role and expertise.',
-		'The memory should contain durable standing context, not a transcript.',
-		'Prompt, soul, identity, and memory must each be structured Markdown, not a wall of prose.',
-		'Use short headings and bullet lists. Keep sections compact and directly usable.',
-		'Do not use code fences.',
-		'Use the same language as the most informative source text. If the source is mostly empty, respond in English.',
-		'Source fields:',
-		...fields.map(([label, value]) => `${label}: ${normalizeBlock(value) || '(empty)'}`)
-	].join('\n')
-}
-
 export default p
 	.meta({
 		openapi: {
@@ -129,9 +98,8 @@ export default p
 			generated_profile = await runToolAgent({
 				model,
 				schema: generated_agent_schema,
-				prompt: getAgentProfilePrompt(input),
-				instructions:
-					'Generate a concise AI agent profile. Keep the name short and distinctive. Keep the role within 20 characters and preferably one or two words. Keep the description to one sentence. For prompt, soul, identity, and memory, return valid structured Markdown with short headings and bullet lists. Do not use code fences. Do not wrap the fields in quotes.'
+				prompt: getAgentCreateProfilePrompt(input),
+				instructions: getAgentCreateInstructions()
 			})
 		} catch {}
 
