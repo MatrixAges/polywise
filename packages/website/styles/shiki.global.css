@@ -1,4 +1,16 @@
+.shiki {
+	background-color: transparent !important;
+	color: var(--shiki-dark) !important;
+
+	code {
+		background-color: transparent !important;
+		margin: 0;
+		padding: 0;
+	}
+}
+
 [data-theme='dark'] {
+	.shiki span,
 	.__editor_code,
 	.__editor_code span {
 		color: var(--shiki-dark) !important;

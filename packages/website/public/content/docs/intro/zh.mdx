@@ -8,6 +8,14 @@ Polywise 是一个开源的 agentic content system。你可以把它当成终端
 
 ## 安装
 
+你可以通过 CLI 使用 Polywise，也可以把它当成 Web 应用来用：
+
+```bash
+npm i polywise -g
+```
+
+或者从 [GitHub Releases](https://github.com/MatrixAges/polywise/releases) 下载桌面应用。
+
 第一次使用时，Polywise 主要只需要一个可用的模型提供方。其他东西都可以以后再配。
 
 **前置条件**
@@ -82,6 +90,44 @@ Polywise 是一个开源的 agentic content system。你可以把它当成终端
 ## 用法
 
 一旦有一个 provider 连好了，默认模型也设好了，就先别继续配置了，直接开始用产品。
+
+### CLI
+
+如果你是通过 agent 或脚本来调 Polywise，CLI 会比界面更直接。
+
+它本质上是后端 API 的一层薄封装：命令按资源分组，比如 `session`、`search`、`project`，也有少数直接动作，比如 `save`、`version`、`stop`。默认会请求 `http://localhost:3072`；如果服务不在这里，可以设置 `POLYWISE_SERVER_URL`。
+
+先从帮助开始，而不是记命令：
+
+```bash
+polywise -h
+polywise session -h
+polywise search fullTextSearch -h
+```
+
+对 agent 来说，最重要的原则是：
+
+- 先用 `-h` 逐级展开命令树
+- 简单参数直接用 `--key value`
+- 复杂对象或数组优先用 `--json`
+- 输出默认就是结构化 JSON，适合继续传给其他工具
+
+常见例子：
+
+```bash
+polywise version
+polywise session create --title "Daily Review"
+polywise search fullTextSearch --query "vector database"
+polywise save --for user --content "Key takeaway..."
+```
+
+当参数开始变复杂时，直接传 JSON 会更稳：
+
+```bash
+polywise search fullTextSearch --json '{"query":"agent memory","for_types":["wiki","memory"],"enable_recall":true}'
+```
+
+CLI 主要不是给人做长时间交互的，而是给 agents、自动化脚本和外部工具稳定调用 Polywise 服务用的。
 
 ### 提问
 

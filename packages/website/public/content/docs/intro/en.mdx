@@ -8,6 +8,14 @@ The best first impression usually comes from doing one small thing well: connect
 
 ## Install
 
+You can use Polywise from the CLI or as a web app:
+
+```bash
+npm i polywise -g
+```
+
+Or download the desktop application from [GitHub Releases](https://github.com/MatrixAges/polywise/releases).
+
 For a first run, Polywise mainly needs one usable model provider. Everything else can come later.
 
 **Prerequisites**
@@ -82,6 +90,44 @@ In practice, this is where Polywise learns how to fetch the outside world.
 ## Usage
 
 Once one provider is connected and the default model is set, stop configuring and go use the product.
+
+### CLI
+
+If you are driving Polywise from an agent or a script, the CLI is the more direct interface.
+
+It is basically a thin wrapper over the backend API: commands are grouped by resource such as `session`, `search`, and `project`, with a few direct actions like `save`, `version`, and `stop`. By default it talks to `http://localhost:3072`; set `POLYWISE_SERVER_URL` if your server lives elsewhere.
+
+Start with help instead of memorizing commands:
+
+```bash
+polywise -h
+polywise session -h
+polywise search fullTextSearch -h
+```
+
+For agent use, the important part is:
+
+- use `-h` to expand the command tree level by level
+- use `--key value` for simple inputs
+- prefer `--json` for objects or arrays
+- expect structured JSON output that can be piped into other tooling
+
+Common examples:
+
+```bash
+polywise version
+polywise session create --title "Daily Review"
+polywise search fullTextSearch --query "vector database"
+polywise save --for user --content "Key takeaway..."
+```
+
+When payloads get more complex, pass JSON directly:
+
+```bash
+polywise search fullTextSearch --json '{"query":"agent memory","for_types":["wiki","memory"],"enable_recall":true}'
+```
+
+The CLI is mainly there for agents, automations, and external tools to call the Polywise service reliably, not for long interactive use by humans.
 
 ### Ask Question
 

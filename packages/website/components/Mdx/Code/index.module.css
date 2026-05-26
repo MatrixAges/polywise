@@ -1,6 +1,5 @@
 ._local {
 	padding: 18px;
-	padding-left: 0;
 	margin-block-start: calc(var(--editor_padding_y) * 1.5);
 	margin-block-end: calc(var(--editor_padding_y) * 1.5);
 	border-radius: var(--radius_large);
@@ -45,23 +44,9 @@
 			}
 		}
 
-		.line_numbers_wrap {
-			display: flex;
-			flex-direction: column;
-			width: 30px;
-			margin-right: 12px;
-
-			.line_number {
-				display: inline-block;
-				width: 100%;
-				color: var(--color_text_light);
-				text-align: right;
-			}
-		}
-
 		.pre_code_wrap {
-			overflow-x: scroll;
-			width: calc(100% - 42px);
+			overflow-x: auto;
+			width: 100%;
 			margin: 0;
 		}
 	}
