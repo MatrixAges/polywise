@@ -98,11 +98,12 @@ const Index = () => {
 			>
 				<div
 					className='
-						px-4 py-2
+						px-4 py-1.5
 						mb-8
-						rounded-2xl
-						text-sm
-						bg-black/20
+						rounded-full
+						text-sm font-mono
+						bg-black/40
+						border border-white/10
 						opacity-80 backdrop-blur-md
 						-mt-9
 					'
@@ -145,7 +146,6 @@ const Index = () => {
 					<h2 className='desc'>{t('Banner.desc.line_2')}</h2>
 				</div>
 				<LinkButtons></LinkButtons>
-
 				<div className='image_preview_wrap mt-16 w-full max-md:mt-10'>
 					<div className='image_preview relative flex w-full'>
 						<img

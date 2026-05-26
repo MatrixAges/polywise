@@ -85,15 +85,17 @@ const Index = () => {
 			>
 				<div
 					className='
+						relative
 						box-border
 						flex
-						items-center justify-between
+						items-center justify-center
 						rounded-full
 						header_content_wrap
 					'
 				>
 					<Link
 						className='
+							absolute
 							flex
 							items-center justify-center
 							logo_wrap clickable
@@ -112,7 +114,14 @@ const Index = () => {
 							<Item {...item} key={item.name}></Item>
 						))}
 					</div>
-					<div className='right_wrap flex items-center justify-center'>
+					<div
+						className='
+							absolute
+							flex
+							items-center justify-center
+							right_wrap
+						'
+					>
 						<Link
 							className='
 								flex

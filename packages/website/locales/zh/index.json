@@ -23,8 +23,8 @@
 		}
 	},
 	"What": {
-		"title": "What",
-		"subtitle": "什么是 Polywise？",
+		"title": "什么是 Polywise？",
+		"subtitle": "演化，而不是用于记录的系统",
 		"items": {
 			"0": {
 				"title": "分层知识",

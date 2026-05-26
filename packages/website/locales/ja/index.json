@@ -23,8 +23,8 @@
 		}
 	},
 	"What": {
-		"title": "What",
-		"subtitle": "Polywise とは？",
+		"title": "Polywiseとは？",
+		"subtitle": "記録ではなく、進化するシステム",
 		"items": {
 			"0": {
 				"title": "スコープ付き知識",
