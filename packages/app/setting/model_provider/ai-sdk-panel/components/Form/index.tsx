@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useMemoizedFn } from 'ahooks'
 import { EyeClosed, Plus, RotateCw, Trash } from 'lucide-react'
 import { useFieldArray, useForm } from 'react-hook-form'
@@ -7,6 +7,7 @@ import { deepEqual } from 'stk/react'
 
 import { Switch } from '@/__shadcn__/components/ui/switch'
 import { Controller, ProviderIcon, Show } from '@/components'
+import { rpc } from '@/utils'
 
 import APIKey from './APIKey'
 import BaseUrl from './BaseUrl'
@@ -19,17 +20,15 @@ import styles from '../../index.module.css'
 import type { Model, SpecialProvider } from '@core/types'
 import type { DragEndEvent } from '@dnd-kit/core'
 import type { Control } from 'react-hook-form'
-import type { IPropsForm } from '../../types'
+import type { ApiTestState, IPropsForm } from '../../types'
 
 const Index = (props: IPropsForm) => {
 	const {
-		allProviders,
+		allProviders = [],
 		provider,
-		test,
 		currentModel,
 		addingModel,
 		custom,
-		onTest,
 		onChangeProvider,
 		onChangeCurrentModel,
 		toggleAddingModel,
@@ -41,6 +40,8 @@ const Index = (props: IPropsForm) => {
 	const { name, apiKey, baseURL } = provider
 
 	const [error, setError] = useState('')
+	const [test, setTest] = useState<ApiTestState>({ loading: false, res: null })
+	const timer_test = useRef<ReturnType<typeof setTimeout> | null>(null)
 
 	const { control, formState, getValues, setValue, register } = useForm<IPropsForm['provider']>({
 		values: provider
@@ -74,6 +75,18 @@ const Index = (props: IPropsForm) => {
 	useEffect(() => {
 		if (formState.isDirty) onChange()
 	}, [formState.isDirty])
+
+	useEffect(() => {
+		return () => {
+			if (timer_test.current) clearTimeout(timer_test.current)
+		}
+	}, [])
+
+	useEffect(() => {
+		if (timer_test.current) clearTimeout(timer_test.current)
+
+		setTest({ loading: false, res: null })
+	}, [name])
 
 	const clearError = useMemoizedFn(() => setError(''))
 
@@ -126,6 +139,26 @@ const Index = (props: IPropsForm) => {
 		const over_index = target_fields.findIndex(item => item.id === over.id)
 
 		move(active_index, over_index)
+	})
+
+	const onTest = useMemoizedFn(async () => {
+		if (timer_test.current) clearTimeout(timer_test.current)
+
+		setTest({ loading: true, res: null })
+
+		let res = false
+
+		try {
+			res = await rpc.provider.test.query(getValues())
+		} catch (error) {
+			console.error('[ai-sdk-panel] provider test failed', error)
+		}
+
+		setTest({ loading: false, res })
+
+		timer_test.current = setTimeout(() => {
+			setTest(prev => ({ ...prev, res: null }))
+		}, 2400)
 	})
 
 	return (

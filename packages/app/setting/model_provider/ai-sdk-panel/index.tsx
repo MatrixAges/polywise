@@ -10,7 +10,7 @@ import Model from './model'
 import type { IPropsCustom, IPropsDisabled, IPropsForm, IPropsPanel, IPropsTab } from './types'
 
 const Index = (props: IPropsPanel) => {
-	const { config, onChange, onTest } = props
+	const { config, onChange } = props
 	const [x] = useState(() => container.resolve(Model))
 
 	const target_config = $copy(x.config)
@@ -19,8 +19,8 @@ const Index = (props: IPropsPanel) => {
 	useLayoutEffect(() => {
 		if (deepEqual(config, x.config)) return
 
-		x.init({ config, onChange, onTest })
-	}, [config, onChange, onTest])
+		x.init({ config, onChange })
+	}, [config, onChange])
 
 	const props_tab: IPropsTab = {
 		items: $copy(x.tabs),
@@ -36,10 +36,8 @@ const Index = (props: IPropsPanel) => {
 	const props_form: IPropsForm = {
 		allProviders: x.all_providers,
 		provider: $copy(x.provider),
-		test: $copy(x.test),
 		currentModel: x.current_model,
 		addingModel: x.adding_model,
-		onTest: x.onTestModel,
 		onChangeProvider: x.onChangeProvider,
 
 		onChangeCurrentModel: useMemoizedFn((v: number | null) => {

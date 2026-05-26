@@ -1,4 +1,4 @@
-import type { Model, PresetProvider, Provider, ProviderConfig, SpecialProvider } from '@core/types'
+import type { Model, Provider, ProviderConfig, SpecialProvider } from '@core/types'
 import type { DragEndEvent } from '@dnd-kit/core'
 import type { Control, UseFieldArrayRemove, UseFieldArrayUpdate, UseFormRegister } from 'react-hook-form'
 import type M from './model'
@@ -6,10 +6,14 @@ import type M from './model'
 export interface IPropsPanel {
 	config: ProviderConfig
 	onChange: (v: ProviderConfig) => void
-	onTest?: (provider: PresetProvider | SpecialProvider) => Promise<boolean>
 }
 
-export interface ArgsInit extends Pick<IPropsPanel, 'config' | 'onChange' | 'onTest'> {}
+export interface ArgsInit extends Pick<IPropsPanel, 'config' | 'onChange'> {}
+
+export interface ApiTestState {
+	loading: boolean
+	res: boolean | null
+}
 
 export interface IPropsTab {
 	items: Array<string>
@@ -30,13 +34,11 @@ export interface IPropsTabItem extends Pick<IPropsTab, 'onChangeCurrentTab'> {
 }
 
 export interface IPropsForm {
-	allProviders: ProviderConfig['providers']
+	allProviders?: ProviderConfig['providers']
 	provider: ProviderConfig['providers'][number]
-	test?: M['test']
 	currentModel: M['current_model']
 	addingModel: M['adding_model']
 	custom?: boolean
-	onTest?: M['onTestModel']
 	onChangeProvider: M['onChangeProvider']
 	onChangeCurrentModel: (v: number | null) => void
 	toggleAddingModel: () => void
@@ -44,10 +46,12 @@ export interface IPropsForm {
 	onRemoveProvider?: () => void
 }
 
-export interface IPropsFormAPIKey extends Pick<IPropsForm, 'test' | 'onTest'> {
+export interface IPropsFormAPIKey {
 	title: string
 	apiKey: IPropsForm['provider']['apiKey']
 	custom?: boolean
+	test: ApiTestState
+	onTest: () => void
 	register: UseFormRegister<IPropsForm['provider']>
 }
 

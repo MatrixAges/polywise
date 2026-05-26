@@ -35,7 +35,7 @@ const Index = () => {
 							mask
 						'
 					></div>
-					<Logo className='logo' size={64} color='var(--color_text)'></Logo>
+					<Logo className='logo' size={54} color='var(--color_text)'></Logo>
 				</motion.div>
 				<h2 className='subtitle flex flex-col'>
 					<span className='line section_title'>{t('Callback.line_1')}</span>

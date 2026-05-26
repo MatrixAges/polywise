@@ -3,7 +3,8 @@ import { useMemoizedFn } from 'ahooks'
 
 import Form from '../Form'
 
-import type { IPropsCustomProvider, IPropsForm, Provider } from '../../types'
+import type { Provider } from '@core/types'
+import type { IPropsCustomProvider, IPropsForm } from '../../types'
 
 const Index = (props: IPropsCustomProvider) => {
 	const { index, item, update, remove } = props

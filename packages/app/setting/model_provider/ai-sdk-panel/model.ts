@@ -18,14 +18,11 @@ export default class Index {
 	config = null as ProviderConfig | null
 	current_tab = 0
 	current_model = null as number | null
-	test = { loading: false, res: null as boolean | null }
 	adding_model = false
 	adding_provider = false
 	all_providers = [] as Array<ConfigProvider>
 
-	timer_test = null as NodeJS.Timeout | null
 	onChange = null as unknown as IPropsPanel['onChange']
-	onTest = null as unknown as IPropsPanel['onTest']
 
 	get providers() {
 		const enabled = [] as Array<ConfigProvider>
@@ -61,14 +58,13 @@ export default class Index {
 	}
 
 	async init(args: ArgsInit) {
-		const { config, onChange, onTest } = args
+		const { config, onChange } = args
 
 		await this.getAll()
 
 		this.config = config
 
 		this.onChange = onChange
-		this.onTest = onTest
 	}
 
 	async getAll() {
@@ -154,20 +150,6 @@ export default class Index {
 
 	download() {
 		downloadFile('ai-sdk-panel.config', JSON.stringify(this.config, null, 6), 'json')
-	}
-
-	async onTestModel() {
-		if (this.timer_test) clearTimeout(this.timer_test)
-
-		this.test = { loading: true, res: null }
-
-		const res = await this.onTest!(this.provider)
-
-		this.test = { loading: false, res }
-
-		this.timer_test = setTimeout(() => {
-			this.test.res = null
-		}, 2400)
 	}
 
 	async upload() {

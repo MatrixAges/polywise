@@ -82,7 +82,7 @@ const Index = () => {
 						>
 							<img
 								className='painpoint_image absolute'
-								src={`/images/svg/${img_map[index]}.svg`}
+								src={`/svgs/${img_map[index]}.svg`}
 								alt='painpoint_image'
 							/>
 							<h2 className='pain_title'>{t(`Painpoint.items.${index}.title`)}</h2>

@@ -20,7 +20,7 @@ const Index = () => {
 				<BookmarkIcon className='logo_app_store' weight='fill' size={30}></BookmarkIcon>
 				<div className='flex flex-col items-start'>
 					<span className='line_1'>Read the docs</span>
-					<span className='line_2'>Intro</span>
+					<span className='line_2'>Document</span>
 				</div>
 			</Link>
 			<Link
