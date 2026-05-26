@@ -96,6 +96,16 @@
 				transition: color ease 0.3s;
 				font-size: 13px;
 			}
+
+			code {
+				padding: 1px 4px;
+				margin: 0 2px;
+				border-radius: 4px;
+				color: var(--color_text);
+				background: var(--color_bg_2);
+				font-family: var(--font_mono);
+				font-size: 0.9em;
+			}
 		}
 	}
 }

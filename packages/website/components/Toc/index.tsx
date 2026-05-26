@@ -33,6 +33,7 @@ const renderItems = (items: TocItem[], active_href: string) => {
 							items-center
 							h-5
 							my-1.5
+							truncate
 							transition-colors duration-200
 							toc_link
 						`,

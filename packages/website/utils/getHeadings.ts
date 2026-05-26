@@ -1,11 +1,13 @@
-import type { Root, Text } from 'mdast'
+import getMdastText from './getMdastText'
+
+import type { Root } from 'mdast'
 
 export default (ast: Root) => {
-	const map = new Map()
+	const map = new Map<string, number>()
 
 	ast.children.forEach(item => {
 		if (item.type === 'heading') {
-			const { value } = item.children[0] as Text
+			const value = getMdastText(item.children)
 
 			map.set(value, item.depth)
 		}

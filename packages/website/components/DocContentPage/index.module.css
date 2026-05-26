@@ -10,9 +10,9 @@
 
 .toc {
 	width: var(--dirtree_width);
-	padding-top: 87px;
+	padding-top: 30px;
 	padding-right: 24px;
-	padding-bottom: 48px;
+	padding-bottom: 30px;
 }
 
 .drawer {
