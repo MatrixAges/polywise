@@ -21,15 +21,6 @@ import type {
 
 const compact_formatter = Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 })
 
-const weekday_label_map = {
-	sun: 'Sunday',
-	mon: 'Monday',
-	tue: 'Tuesday',
-	wed: 'Wednesday',
-	thu: 'Thursday',
-	fri: 'Friday',
-	sat: 'Saturday'
-} as const
 const stats_period_options = ['week', 'day', 'month', 'year', 'total'] as const
 const stats_period_title_map: Record<HomeStatsPeriod, string> = {
 	day: 'Today',
@@ -65,6 +56,7 @@ const formatCompact = (value: number) => compact_formatter.format(value)
 const formatInteger = (value: number) => value.toLocaleString('en-US')
 const formatPercent = (value: number) => `${value.toFixed(value % 1 === 0 ? 0 : 1)}%`
 const formatRatio = (value: number) => `${value.toFixed(value >= 10 ? 0 : 1)}x`
+const toPhoto = (value: unknown) => value as Uint8Array | null
 const joinNonZeroMeta = (items: Array<[number, string]>) =>
 	items
 		.filter(([value]) => value !== 0)
@@ -169,11 +161,7 @@ const getReportWindowStart = (period: HomeStatsPeriod, offset: number, now = Dat
 	}
 }
 
-const getReportWindowEnd = (period: HomeStatsPeriod, start: Date) => {
-	if (period === 'total') {
-		return null
-	}
-
+const getReportWindowEnd = (period: HomeReportPeriod, start: Date) => {
 	const end = new Date(start)
 
 	switch (period) {
@@ -189,16 +177,10 @@ const getReportWindowEnd = (period: HomeStatsPeriod, start: Date) => {
 		case 'year':
 			end.setFullYear(end.getFullYear() + 1)
 			return end
-		case 'total':
-			return null
 	}
 }
 
-const formatReportWindowLabel = (period: HomeStatsPeriod, offset: number, start: Date, end: Date | null) => {
-	if (period === 'total') {
-		return 'All reports'
-	}
-
+const formatReportWindowLabel = (period: HomeReportPeriod, offset: number, start: Date, end: Date | null) => {
 	if (period === 'day') {
 		if (offset === 0) {
 			return 'Today'
@@ -301,10 +283,6 @@ export default class Index {
 		return Math.round((this.pthink_config?.idle_grace_ms ?? 20 * 60 * 1000) / 60000)
 	}
 
-	get pthink_weekly_day() {
-		return weekday_label_map[this.pthink_config?.weekly_report_weekday ?? 'sun']
-	}
-
 	get pthink_last_label() {
 		const last_summary = this.data?.pthink.status.last_summary
 
@@ -312,7 +290,7 @@ export default class Index {
 			return `${last_summary.title} · ${fromNow(last_summary.created_at)}`
 		}
 
-		return 'No report generated yet'
+		return 'No review generated yet'
 	}
 
 	get pthink_runtime_label() {
@@ -710,7 +688,7 @@ export default class Index {
 				`${item.new_sessions} sessions`,
 				`${item.new_posts} posts`,
 				`${item.rewire_events} rewires`,
-				`${item.pthink_reports} reports`
+				`${item.pthink_reports} reviews`
 			]
 
 			return {
@@ -967,7 +945,7 @@ export default class Index {
 			subtitle: `${item.session_count} active sessions · ${item.message_count} messages · ${item.assistant_replies} replies`,
 			meta: `${item.post_count} posts · ${item.document_count} docs · ${item.article_count} articles`,
 			value: formatCompact(item.total_tokens),
-			photo: item.photo ?? null,
+			photo: toPhoto(item.photo),
 			avatar: item.avatar ?? null,
 			footnote: item.last_active_at
 				? `Last active ${fromNow(item.last_active_at)}`
@@ -982,7 +960,7 @@ export default class Index {
 			subtitle: `${item.agent_count} members · ${item.session_count} active sessions · ${item.message_count} messages`,
 			meta: `${item.assistant_replies} replies · ${item.session_total} linked sessions`,
 			value: formatCompact(item.total_tokens),
-			photo: item.photo ?? null,
+			photo: toPhoto(item.photo),
 			footnote: item.last_active_at
 				? `Last active ${fromNow(item.last_active_at)}`
 				: `No ${this.stats_period_adjective.toLowerCase()} activity`
@@ -1199,25 +1177,23 @@ export default class Index {
 
 		return [
 			{
-				key: 'reports',
-				title: 'Reports',
+				key: 'reviews',
+				title: 'Reviews',
 				value: `${this.data.pthink.report_today} / ${this.data.pthink.report_week} / ${this.data.pthink.report_total} (day / period / total)`
 			},
 			{
-				key: 'trigger',
-				title: 'Trigger Mode',
-				value: this.pthink_config?.trigger_enabled
-					? `enabled · ${this.data.health.top_alert?.label ?? 'no active alert'}`
-					: 'disabled'
+				key: 'skill-generation',
+				title: 'Skill Generation',
+				value: this.pthink_config?.skill_generation_enabled === false ? 'disabled' : 'enabled'
 			},
 			{
-				key: 'cap',
-				title: 'Daily Cap',
-				value: String(this.pthink_config?.max_reports_per_day ?? 3)
+				key: 'tool-generation',
+				title: 'Tool Generation',
+				value: this.pthink_config?.tool_generation_enabled === false ? 'disabled' : 'enabled'
 			},
 			{
-				key: 'last-report',
-				title: 'Last Report',
+				key: 'last-review',
+				title: 'Last Review',
 				value: this.pthink_last_label
 			},
 			{
@@ -1235,33 +1211,37 @@ export default class Index {
 
 		const week_counts = this.data.pthink.kind_counts_week
 		const total_counts = this.data.pthink.kind_counts_total
-		const week_total = week_counts.idle + week_counts.daily + week_counts.weekly + week_counts.trigger
-		const trigger_share = week_total > 0 ? (week_counts.trigger / week_total) * 100 : 0
-		const scheduled_week = week_counts.idle + week_counts.daily + week_counts.weekly
+		const last_summary = this.data.pthink.status.last_summary
+		const last_output_total =
+			(last_summary?.article_ids.length ?? 0) +
+			(last_summary?.skill_names.length ?? 0) +
+			(last_summary?.tool_names.length ?? 0)
 		const last_report_gap_hours = this.data.pthink.status.last_report_at
 			? Math.max(0, Math.round((Date.now() - this.data.pthink.status.last_report_at) / (60 * 60 * 1000)))
 			: null
 
 		return [
 			{
-				key: 'trigger-share',
-				title: 'Trigger share',
-				value: formatPercent(trigger_share),
-				desc: `${week_counts.trigger} trigger · ${scheduled_week} scheduled reports ${this.stats_period_window}`
+				key: 'review-volume',
+				title: 'Review volume',
+				value: `${week_counts.review}`,
+				desc: `${total_counts.review} total post-think reviews`
 			},
 			{
-				key: 'report-gap',
-				title: 'Last report gap',
+				key: 'review-gap',
+				title: 'Last review gap',
 				value: last_report_gap_hours === null ? 'None' : `${last_report_gap_hours}h`,
 				desc: this.data.pthink.status.last_report_at
-					? `${this.data.pthink.status.last_status} · last report ${fromNow(this.data.pthink.status.last_report_at)}`
-					: 'No autonomous report generated yet'
+					? `${this.data.pthink.status.last_status} · last review ${fromNow(this.data.pthink.status.last_report_at)}`
+					: 'No post-think review generated yet'
 			},
 			{
-				key: 'report-mix',
-				title: 'Report mix',
-				value: `${week_counts.daily}/${week_counts.weekly}/${week_counts.trigger}/${week_counts.idle}`,
-				desc: `Daily / weekly / trigger / idle ${this.stats_period_window} · ${total_counts.trigger} trigger total`
+				key: 'last-output-mix',
+				title: 'Last output mix',
+				value: last_output_total ? String(last_output_total) : '0',
+				desc: last_summary
+					? `${last_summary.article_ids.length} articles · ${last_summary.skill_names.length} skills · ${last_summary.tool_names.length} tools`
+					: 'No durable output yet'
 			}
 		]
 	}

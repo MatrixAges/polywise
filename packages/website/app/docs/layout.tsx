@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import {
 	BoxArrowDownIcon,
 	CaretRightIcon,
@@ -17,7 +17,7 @@ import { toc_emitter } from '@website/components/DocContentPage'
 import Logo from '@website/components/Logo'
 import Modal from '@website/components/Modal'
 import Sheet from '@website/components/ui/Sheet'
-import { useEventListener, useLocalStorageState, useMemoizedFn, useUpdateEffect } from '@website/hooks/ahooks'
+import { useEventListener, useMemoizedFn, useUpdateEffect } from '@website/hooks/ahooks'
 import useRouterHash from '@website/hooks/useRouterHash'
 import useTheme from '@website/hooks/useTheme'
 import { $ } from '@website/utils'
@@ -30,31 +30,59 @@ import { useParams, usePathname } from 'next/navigation'
 import styles from './layout.module.css'
 
 import type { DocsMenuItem } from '@website/types'
-import type { JSX, PropsWithChildren } from 'react'
+import type { JSX, PropsWithChildren, ReactNode } from 'react'
 
 type BottomLinkItem = Pick<DocsMenuItem, 'label' | 'key'> | null
+const docs_openkeys_storage_key = 'docs/openkeys'
+const sidebar_scroll_top_map: Record<'desktop' | 'mobile', number> = {
+	desktop: 0,
+	mobile: 0
+}
+
+interface SidebarMenuWrapProps {
+	cache_key: 'desktop' | 'mobile'
+	children: ReactNode
+}
+
+const SidebarMenuWrap = $.memo((props: SidebarMenuWrapProps) => {
+	const { cache_key, children } = props
+	const ref = useRef<HTMLDivElement>(null)
+
+	useLayoutEffect(() => {
+		const element = ref.current
+
+		if (!element) return
+
+		element.scrollTop = sidebar_scroll_top_map[cache_key]
+	}, [cache_key, children])
+
+	const onScroll = useMemoizedFn(() => {
+		const element = ref.current
+
+		if (!element) return
+
+		sidebar_scroll_top_map[cache_key] = element.scrollTop
+	})
+
+	return (
+		<div className='menu_wrap box-border w-full' ref={ref} onScroll={onScroll}>
+			{children}
+		</div>
+	)
+})
 
 const Index = (props: PropsWithChildren) => {
 	const { children } = props
 	const params = useParams<{ id: Array<string> }>()
 	const pathname = usePathname()
 	const hash = useRouterHash()
-	const menu_ref = useRef<HTMLDivElement>(null)
 	const t = useTranslations('docs')
 	const { theme, setTheme } = useTheme()
 	const menu = useMenu()
 	const flat_items = useMemo(() => flattenMenuItems(menu), [menu])
-	const [local_openkeys, setLocalOpenkeys] = useLocalStorageState<Array<string>>('docs/openkeys', {
-		defaultValue: []
-	})
-	const [selectedkey, setSelectedkey] = useState<string>()
-	const [openkeys, setOpenkeys] = useState<Array<string>>([])
+	const [local_openkeys, setLocalOpenkeys] = useState<Array<string>>([])
 	const [open_search, setOpenSearch] = useState(false)
 	const [open_sidebar, setOpenSidebar] = useState(false)
-	const [bottom_links, setBottomLinks] = useState<{
-		prev_link: BottomLinkItem
-		next_link: BottomLinkItem
-	}>({ prev_link: null, next_link: null })
 
 	const setDark = useMemoizedFn(() => setTheme('dark'))
 	const setLight = useMemoizedFn(() => setTheme('light'))
@@ -66,6 +94,43 @@ const Index = (props: PropsWithChildren) => {
 	const onOpenSidebar = useMemoizedFn(() => setOpenSidebar(true))
 	const onCloseSidebar = useMemoizedFn(() => setOpenSidebar(false))
 	const route_path = params?.id?.join('/') ?? ''
+	const selectedkey = route_path
+	const current_group_key = useMemo(() => {
+		const current_group = menu.find(
+			section => section.type === 'group' && section.children.some(item => item.key === route_path)
+		)
+
+		return current_group?.key ?? ''
+	}, [menu, route_path])
+	const openkeys = useMemo(() => {
+		const target = local_openkeys ?? []
+
+		if (!current_group_key) return target
+
+		return target.includes(current_group_key) ? target : uniq([...target, current_group_key])
+	}, [current_group_key, local_openkeys])
+	const bottom_links = useMemo(() => {
+		if (!route_path) {
+			return { prev_link: null, next_link: null } as {
+				prev_link: BottomLinkItem
+				next_link: BottomLinkItem
+			}
+		}
+
+		const index = flat_items.findIndex(item => item.key === route_path)
+
+		if (index === -1) {
+			return { prev_link: null, next_link: null } as {
+				prev_link: BottomLinkItem
+				next_link: BottomLinkItem
+			}
+		}
+
+		return {
+			prev_link: flat_items[index - 1] ?? null,
+			next_link: flat_items[index + 1] ?? null
+		}
+	}, [flat_items, route_path])
 
 	const toggleGroup = useMemoizedFn((key: string) => {
 		setLocalOpenkeys(value => {
@@ -78,65 +143,25 @@ const Index = (props: PropsWithChildren) => {
 	const onClickLink = useMemoizedFn(() => setOpenSidebar(false))
 
 	useEffect(() => {
-		const paths = route_path ? route_path.split('/') : []
+		if (typeof window === 'undefined') return
 
-		if (paths.length === 0) {
-			setSelectedkey('')
-			setBottomLinks({ prev_link: null, next_link: null })
+		const raw = window.localStorage.getItem(docs_openkeys_storage_key)
 
-			return
+		if (raw == null) return
+
+		try {
+			const next = JSON.parse(raw) as Array<string>
+
+			setLocalOpenkeys(Array.isArray(next) ? next : [])
+		} catch {
+			setLocalOpenkeys([])
 		}
-
-		const fold_key = paths[0]
-		const key = paths.join('/')
-
-		setSelectedkey(key)
-		const parent_group = menu.find(
-			section => section.type === 'group' && section.children.some(item => item.key === key)
-		)
-
-		if (parent_group) {
-			setLocalOpenkeys(value => {
-				const current = value ?? []
-
-				return current.includes(parent_group.key) ? current : uniq([...current, parent_group.key])
-			})
-		}
-
-		const target_item = flat_items.find(item => item.key === key)
-
-		const menu_el = menu_ref.current
-
-		if (menu_el && target_item?.className) {
-			const el = menu_el.querySelector(`.${target_item.className}`) as HTMLElement | null
-
-			if (el) {
-				const timer = setTimeout(() => {
-					el.scrollIntoView({
-						behavior: 'smooth',
-						block: 'center',
-						inline: 'nearest'
-					})
-				}, 300)
-
-				return () => clearTimeout(timer)
-			}
-		}
-
-		const index = flat_items.findIndex(item => item.key === key)
-
-		if (index === -1) return
-
-		const prev_link = flat_items[index - 1] ?? null
-		const next_link = flat_items[index + 1] ?? null
-
-		setBottomLinks({ prev_link, next_link })
-	}, [flat_items, menu, route_path, setLocalOpenkeys])
+	}, [])
 
 	useEffect(() => {
-		if (!local_openkeys) return
+		if (typeof window === 'undefined') return
 
-		setOpenkeys(local_openkeys)
+		window.localStorage.setItem(docs_openkeys_storage_key, JSON.stringify(local_openkeys))
 	}, [local_openkeys])
 
 	useEventListener('keypress', event => {
@@ -161,75 +186,74 @@ const Index = (props: PropsWithChildren) => {
 		[menu, openkeys]
 	)
 
-	const SidebarContent = (
-		<>
-			<div
-				className='
+	const renderSidebarHeader = () => (
+		<div
+			className='
 					relative
 					box-border
 					flex flex-col
 					w-full
 					header_wrap
 				'
-			>
-				<div
-					className='
+		>
+			<div
+				className='
 						absolute
 						left-0
 						w-full
 						menu_mask top
 					'
-				></div>
-				<div className='top_row flex items-center justify-between'>
-					<div className='flex items-center'>
-						<Link
-							className='
+			></div>
+			<div className='top_row flex items-center justify-between'>
+				<div className='flex items-center'>
+					<Link
+						className='
 								flex
 								items-center justify-center
 								logo_wrap clickable
 							'
-							href='/'
-						>
-							<Logo size={13} color='var(--color_bg)'></Logo>
-						</Link>
-						<div className='d_line'></div>
-						<Link className='title clickable' href='/docs'>
-							{t('header.title')}
-						</Link>
-					</div>
-					<div className='theme_toggle flex'>
-						<button
-							className={$.cx(
-								`
-								flex
-								items-center justify-center
-								theme_item clickable
-							`,
-								theme === 'dark' && 'active'
-							)}
-							type='button'
-							onClick={setDark}
-						>
-							<MoonIcon weight='fill'></MoonIcon>
-						</button>
-						<button
-							className={$.cx(
-								`
-								flex
-								items-center justify-center
-								theme_item clickable
-							`,
-								theme === 'light' && 'active'
-							)}
-							type='button'
-							onClick={setLight}
-						>
-							<SunDimIcon weight='fill'></SunDimIcon>
-						</button>
-					</div>
+						href='/'
+					>
+						<Logo size={13} color='var(--color_bg)'></Logo>
+					</Link>
+					<div className='d_line'></div>
+					<Link className='title clickable' href='/docs'>
+						{t('header.title')}
+					</Link>
 				</div>
-				<div
-					className='
+				<div className='theme_toggle flex'>
+					<button
+						className={$.cx(
+							`
+								flex
+								items-center justify-center
+								theme_item clickable
+							`,
+							theme === 'dark' && 'active'
+						)}
+						type='button'
+						onClick={setDark}
+					>
+						<MoonIcon weight='fill'></MoonIcon>
+					</button>
+					<button
+						className={$.cx(
+							`
+								flex
+								items-center justify-center
+								theme_item clickable
+							`,
+							theme === 'light' && 'active'
+						)}
+						type='button'
+						onClick={setLight}
+					>
+						<SunDimIcon weight='fill'></SunDimIcon>
+					</button>
+				</div>
+			</div>
+			<div
+				className='
 						relative
 						box-border
 						flex
@@ -237,74 +261,77 @@ const Index = (props: PropsWithChildren) => {
 						w-full
 						btn_search_wrap clickable
 					'
-					onClick={openSearch}
-				>
-					<MagnifyingGlassIcon className='icon_search absolute' weight='bold'></MagnifyingGlassIcon>
-					<button className='btn_search box-border w-full cursor-pointer' type='button'>
-						{t('header.btn_search')}
-					</button>
-					<div className='shortcuts absolute flex'>
-						<kbd className='box-border flex items-center justify-center'>⌘</kbd>
-						<kbd className='box-border flex items-center justify-center'>K</kbd>
-					</div>
+				onClick={openSearch}
+			>
+				<MagnifyingGlassIcon className='icon_search absolute' weight='bold'></MagnifyingGlassIcon>
+				<button className='btn_search box-border w-full cursor-pointer' type='button'>
+					{t('header.btn_search')}
+				</button>
+				<div className='shortcuts absolute flex'>
+					<kbd className='box-border flex items-center justify-center'>⌘</kbd>
+					<kbd className='box-border flex items-center justify-center'>K</kbd>
 				</div>
 			</div>
-			<div className='menu_wrap box-border w-full' ref={menu_ref}>
-				<div className='menu_groups flex flex-col'>
-					{(() => {
-						const groups: Array<JSX.Element> = []
-						let flat_group_items: Array<JSX.Element> = []
+		</div>
+	)
 
-						const flushFlatGroup = () => {
-							if (flat_group_items.length === 0) return
+	const renderSidebarMenu = (cache_key: 'desktop' | 'mobile') => (
+		<SidebarMenuWrap cache_key={cache_key}>
+			<div className='menu_groups flex flex-col'>
+				{(() => {
+					const groups: Array<JSX.Element> = []
+					let flat_group_items: Array<JSX.Element> = []
 
-							groups.push(
-								<div
-									className='flat_group mb-6 flex flex-col'
-									key={`flat_group_${groups.length}`}
+					const flushFlatGroup = () => {
+						if (flat_group_items.length === 0) return
+
+						groups.push(
+							<div
+								className='flat_group mb-6 flex flex-col'
+								key={`flat_group_${groups.length}`}
+							>
+								{flat_group_items}
+							</div>
+						)
+
+						flat_group_items = []
+					}
+
+					menu.forEach(section => {
+						if (section.type === 'link') {
+							flat_group_items.push(
+								<Link
+									className={$.cx(
+										'menu_item mb-1 flex items-center',
+										section.className,
+										selectedkey === section.key && 'active'
+									)}
+									href={`/docs/${section.key}`}
+									key={section.key}
+									onClick={onClickLink}
 								>
-									{flat_group_items}
-								</div>
+									<span>{section.label}</span>
+								</Link>
 							)
 
-							flat_group_items = []
+							return
 						}
 
-						menu.forEach(section => {
-							if (section.type === 'link') {
-								flat_group_items.push(
-									<Link
-										className={$.cx(
-											'menu_item mb-1 flex items-center',
-											section.className,
-											selectedkey === section.key && 'active'
-										)}
-										href={`/docs/${section.key}`}
-										key={section.key}
-										onClick={onClickLink}
-									>
-										<span>{section.label}</span>
-									</Link>
-								)
+						flushFlatGroup()
 
-								return
-							}
+						const open = openkeys.includes(section.key)
+						const active =
+							selectedkey === section.key ||
+							section.children.some(item => item.key === selectedkey)
 
-							flushFlatGroup()
-
-							const open = openkeys.includes(section.key)
-							const active =
-								selectedkey === section.key ||
-								section.children.some(item => item.key === selectedkey)
-
-							groups.push(
-								<section
-									className={$.cx('menu_group', open ? 'mb-6' : 'mb-1')}
-									key={section.key}
-								>
-									<button
-										className={$.cx(
-											`
+						groups.push(
+							<section
+								className={$.cx('menu_group', open ? 'mb-6' : 'mb-1')}
+								key={section.key}
+							>
+								<button
+									className={$.cx(
+										`
 										flex
 										items-center justify-between
 										w-full
@@ -312,106 +339,108 @@ const Index = (props: PropsWithChildren) => {
 										font-medium
 										menu_group_button cursor-pointer
 									`,
-											active && 'active'
+										active && 'active'
+									)}
+									type='button'
+									onClick={() => toggleGroup(section.key)}
+								>
+									<span>{section.label}</span>
+									<CaretRightIcon
+										className={$.cx(
+											'icon transition-transform duration-200',
+											open && 'rotate-90'
 										)}
-										type='button'
-										onClick={() => toggleGroup(section.key)}
-									>
-										<span>{section.label}</span>
-										<CaretRightIcon
-											className={$.cx(
-												'icon transition-transform duration-200',
-												open && 'rotate-90'
-											)}
-											size={12}
-											weight='bold'
-										/>
-									</button>
-									{open && (
-										<div
-											className='
+										size={12}
+										weight='bold'
+									/>
+								</button>
+								{open && (
+									<div
+										className='
 											flex flex-col
 											w-full
 											gap-1
 											menu_group_items
 										'
-										>
-											{section.children.map(item => (
-												<Link
-													className={$.cx(
-														'menu_item flex items-center',
-														item.className,
-														selectedkey === item.key && 'active'
-													)}
-													href={`/docs/${item.key}`}
-													key={item.key}
-													onClick={onClickLink}
-												>
-													<span>{item.label}</span>
-												</Link>
-											))}
-										</div>
-									)}
-								</section>
-							)
-						})
+									>
+										{section.children.map(item => (
+											<Link
+												className={$.cx(
+													'menu_item flex items-center',
+													item.className,
+													selectedkey === item.key && 'active'
+												)}
+												href={`/docs/${item.key}`}
+												key={item.key}
+												onClick={onClickLink}
+											>
+												<span>{item.label}</span>
+											</Link>
+										))}
+									</div>
+								)}
+							</section>
+						)
+					})
 
-						flushFlatGroup()
+					flushFlatGroup()
 
-						return groups
-					})()}
-				</div>
-				{open_group_count < 2 && (
-					<div className='shadow_tree flex items-center justify-center'>
-						<TreeIcon weight='thin'></TreeIcon>
-					</div>
-				)}
+					return groups
+				})()}
 			</div>
-			<div
-				className='
+			{open_group_count < 2 && (
+				<div className='shadow_tree flex items-center justify-center'>
+					<TreeIcon weight='thin'></TreeIcon>
+				</div>
+			)}
+		</SidebarMenuWrap>
+	)
+
+	const renderSidebarFooter = () => (
+		<div
+			className='
 					relative
 					box-border
 					flex flex-col
 					w-full
 					footer_wrap
 				'
-			>
-				<div
-					className='
+		>
+			<div
+				className='
 						absolute
 						left-0
 						w-full
 						menu_mask bottom
 					'
-				></div>
-				<Link
-					className='
+			></div>
+			<Link
+				className='
 						box-border
 						flex
 						items-center
 						w-full
 						footer_item clickable
 					'
-					href='/download'
-				>
-					<BoxArrowDownIcon size={15} weight='fill'></BoxArrowDownIcon>
-					<span className='ml-2'>{t('footer.download')}</span>
-				</Link>
-				<Link
-					className='
+				href='/download'
+			>
+				<BoxArrowDownIcon size={15} weight='fill'></BoxArrowDownIcon>
+				<span className='ml-2'>{t('footer.download')}</span>
+			</Link>
+			<Link
+				className='
 						box-border
 						flex
 						items-center
 						w-full
 						footer_item clickable
 					'
-					href='/contact'
-				>
-					<ChatDotsIcon size={15} weight='fill'></ChatDotsIcon>
-					<span className='ml-2'>{t('footer.contact')}</span>
-				</Link>
-			</div>
-		</>
+				href='/contact'
+			>
+				<ChatDotsIcon size={15} weight='fill'></ChatDotsIcon>
+				<span className='ml-2'>{t('footer.contact')}</span>
+			</Link>
+		</div>
 	)
 
 	return (
@@ -440,7 +469,9 @@ const Index = (props: PropsWithChildren) => {
 					styles.sidebar
 				)}
 			>
-				{SidebarContent}
+				{renderSidebarHeader()}
+				{renderSidebarMenu('desktop')}
+				{renderSidebarFooter()}
 			</nav>
 			<Sheet
 				rootClassName={styles.sidebar_drawer}
@@ -461,7 +492,9 @@ const Index = (props: PropsWithChildren) => {
 						styles.sidebar
 					)}
 				>
-					{SidebarContent}
+					{renderSidebarHeader()}
+					{renderSidebarMenu('mobile')}
+					{renderSidebarFooter()}
 				</div>
 			</Sheet>
 			<div

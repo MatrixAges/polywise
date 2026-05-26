@@ -6,13 +6,44 @@ import { pick } from 'es-toolkit'
 import { z } from 'zod'
 
 import type { SpecialProvider } from '@core/types'
-import type { PthinkAnalyticsSnapshot, PthinkDraftReport, PthinkReportKind, PthinkTriggerCandidate } from './types'
+import type { PthinkConfig, PthinkDraftReview, PthinkReviewWindow } from './types'
+
+const article_schema = z.object({
+	title: z.string(),
+	for_type: z.enum(['memory', 'wiki']),
+	content: z.string(),
+	confidence: z.number().min(0).max(1),
+	reason: z.string()
+})
+
+const skill_schema = z.object({
+	action: z.enum(['skip', 'create', 'update']),
+	name: z.string(),
+	description: z.string(),
+	content: z.string(),
+	keywords: z.array(z.string()).max(8),
+	confidence: z.number().min(0).max(1),
+	reason: z.string()
+})
+
+const tool_schema = z.object({
+	action: z.enum(['skip', 'create']),
+	name: z.string(),
+	description: z.string(),
+	readme: z.string(),
+	entry: z.string(),
+	input_schema: z.string().optional(),
+	output_schema: z.string().optional(),
+	confidence: z.number().min(0).max(1),
+	reason: z.string()
+})
 
 const synthesis_schema = z.object({
 	title: z.string(),
 	summary: z.string(),
-	insights: z.array(z.string()).min(2).max(4),
-	focus: z.array(z.string()).min(1).max(3)
+	articles: z.array(article_schema).max(4),
+	skill: skill_schema.nullable(),
+	tool: tool_schema.nullable()
 })
 
 const resolveDefaultTextModel = async () => {
@@ -37,144 +68,52 @@ const resolveDefaultTextModel = async () => {
 	})
 }
 
-const getPendingPipelineItems = (stats: PthinkAnalyticsSnapshot['windows']['day']) =>
-	stats.pending_posts + stats.pending_articles + stats.pending_documents + stats.pending_links
+const getFallback = (window: PthinkReviewWindow): PthinkDraftReview => ({
+	title: `Post-Think Review · ${dayjs(window.end_at).format('YYYY-MM-DD HH:mm')}`,
+	summary: `Reviewed ${window.message_count} messages across ${window.session_count} sessions.`,
+	articles: [],
+	skill: null,
+	tool: null
+})
 
-const buildFallback = (args: {
-	kind: PthinkReportKind
-	analytics: PthinkAnalyticsSnapshot
-	trigger?: PthinkTriggerCandidate | null
-}) => {
-	const { kind, analytics, trigger } = args
-	const day = analytics.windows.day
-	const week = analytics.windows.week
-	const title_prefix =
-		kind === 'daily'
-			? 'PThink Daily Report'
-			: kind === 'weekly'
-				? 'PThink Weekly Report'
-				: kind === 'trigger'
-					? `PThink Trigger · ${trigger?.label ?? 'Insight'}`
-					: 'PThink Idle Digest'
-	const title = `${title_prefix} · ${dayjs(analytics.generated_at).format('YYYY-MM-DD HH:mm')}`
-	const pending_pipeline_items = getPendingPipelineItems(day)
-	const summary_parts = [
-		`${day.messages} messages and ${day.total_tokens} tokens in the last 24 hours`,
-		`${day.new_posts} new posts`,
-		`${day.rewire_events} rewire events`
-	]
-	const summary = summary_parts.join(' · ')
-	const insights = [
-		day.total_tokens > 0
-			? `AI activity stayed meaningful, with ${day.assistant_messages} assistant replies driving ${day.total_tokens} tokens over the last day.`
-			: 'Recent activity came more from content or task movement than from model calls.',
-		day.new_posts > 0 || day.new_memory_posts > 0
-			? `Knowledge assets kept moving: ${day.new_posts} new posts landed, including ${day.new_memory_posts} memory posts.`
-			: 'Knowledge assets did not expand much in the last day, so most momentum was operational rather than archival.',
-		pending_pipeline_items > 0
-			? `There is still backlog pressure with ${pending_pipeline_items} pending pipeline items.`
-			: 'Pipeline pressure is low, so the workspace is mostly keeping up with throughput.'
-	]
-	const focus = [
-		pending_pipeline_items > 0
-			? 'Clear pending pipeline items before they turn into stale context.'
-			: 'Turn the freshest sessions into durable posts while context is still warm.',
-		week.total_tokens > 30_000
-			? 'Review the heaviest model flows and decide whether the current default model is still the right cost/quality tradeoff.'
-			: 'Keep an eye on whether usage is concentrated in a small number of sessions or spreading across too many threads.'
-	]
-
-	return {
-		title,
-		summary,
-		content: buildMarkdown({
-			title,
-			summary,
-			insights,
-			focus,
-			kind,
-			analytics,
-			trigger
-		})
-	} satisfies PthinkDraftReport
-}
-
-const buildMarkdown = (args: {
-	title: string
-	summary: string
-	insights: Array<string>
-	focus: Array<string>
-	kind: PthinkReportKind
-	analytics: PthinkAnalyticsSnapshot
-	trigger?: PthinkTriggerCandidate | null
-}) => {
-	const { title, summary, insights, focus, kind, analytics, trigger } = args
-	const day = analytics.windows.day
-	const week = analytics.windows.week
-
-	return [
-		`# ${title}`,
-		'',
-		summary,
-		'',
-		'## Pulse',
-		`- Last 24h: ${day.messages} messages, ${day.sessions} new sessions, ${day.total_tokens} tokens, ${day.new_posts} new posts`,
-		`- Last 7d: ${week.messages} messages, ${week.sessions} new sessions, ${week.total_tokens} tokens, ${week.new_posts} new posts`,
-		`- Knowledge graph: ${day.rewire_events} rewire events in 24h, ${analytics.totals.nodes} nodes and ${analytics.totals.edges} edges total`,
-		'',
-		'## Insights',
-		...insights.map(item => `- ${item}`),
-		'',
-		'## Active Surfaces',
-		...(analytics.active_sessions.length > 0
-			? analytics.active_sessions.map(
-					item => `- Session: ${item.title || 'Untitled'} · ${item.message_count} messages`
-				)
-			: ['- No session concentration stood out in the last week.']),
-		...(analytics.active_projects.length > 0
-			? analytics.active_projects.map(
-					item =>
-						`- Project: ${item.name} · ${item.message_count} messages across ${item.session_count} sessions`
-				)
-			: []),
-		...(analytics.top_models.length > 0
-			? [
-					'',
-					'## Model Mix',
-					...analytics.top_models.map(
-						item => `- ${item.label} · ${item.calls} calls · ${item.total_tokens} tokens`
-					)
-				]
-			: []),
-		'',
-		'## Watchlist',
-		`- Pending pipeline: ${day.pending_posts} posts, ${day.pending_articles} articles, ${day.pending_documents} documents, ${day.pending_links} links`,
-		`- Unread notifications: ${day.unread_notifications}`,
-		...(kind === 'trigger' && trigger ? [`- Trigger: ${trigger.label} · ${trigger.detail}`] : []),
-		'',
-		'## Suggested Focus',
-		...focus.map(item => `- ${item}`)
-	].join('\n')
-}
-
-export const synthesizePthinkReport = async (args: {
-	kind: PthinkReportKind
-	analytics: PthinkAnalyticsSnapshot
-	trigger?: PthinkTriggerCandidate | null
-}) => {
-	const fallback = buildFallback(args)
+export const synthesizePthinkReview = async (args: { window: PthinkReviewWindow; config: PthinkConfig }) => {
+	const fallback = getFallback(args.window)
 
 	try {
 		const { model, provider_options } = await resolveDefaultTextModel()
 		const { output } = await generateText({
 			model,
-			system: 'You write compact autonomous analytics reports for a local agentic content workspace. Use only supplied metrics. Be concrete, avoid generic productivity language, and focus on behavior, content flow, backlog pressure, and model usage.',
+			system: [
+				'You are the post-think synthesizer for a local workspace.',
+				'Read only the supplied message content and extract durable value.',
+				'Articles must contain reusable knowledge, decisions, or memory worth keeping.',
+				'Create a skill only when a workflow is clearly reusable across future tasks, not just this project.',
+				'Create a tool only when a tiny deterministic utility is obviously justified, stable, and implementable with node:* imports only.',
+				'If skill or tool evidence is weak, return skip.',
+				'Do not restate chat. Compress it into durable artifacts.'
+			].join(' '),
 			prompt: JSON.stringify(
 				{
-					now: dayjs(args.analytics.generated_at).format('YYYY-MM-DD HH:mm:ss'),
-					kind: args.kind,
-					trigger: args.trigger,
-					analytics: args.analytics
+					now: dayjs(args.window.end_at).format('YYYY-MM-DD HH:mm:ss'),
+					review_policy: {
+						max_articles: args.config.max_articles_per_run,
+						skill_generation_enabled: args.config.skill_generation_enabled,
+						tool_generation_enabled: args.config.tool_generation_enabled,
+						skill_threshold: 'very high',
+						tool_threshold: 'extremely high'
+					},
+					window: {
+						start_at: args.window.start_at,
+						end_at: args.window.end_at,
+						message_count: args.window.message_count,
+						session_count: args.window.session_count
+					},
+					messages: args.window.messages.map(item => ({
+						session: item.session_title || 'Untitled',
+						role: item.role,
+						at: dayjs(item.created_at).format('HH:mm:ss'),
+						text: item.text
+					}))
 				},
 				null,
 				2
@@ -182,27 +121,43 @@ export const synthesizePthinkReport = async (args: {
 			providerOptions: provider_options,
 			output: Output.object({ schema: synthesis_schema })
 		})
+
 		const result = output as z.infer<typeof synthesis_schema>
 
 		return {
 			title: result.title.trim() || fallback.title,
 			summary: result.summary.trim() || fallback.summary,
-			content: buildMarkdown({
-				title: result.title.trim() || fallback.title,
-				summary: result.summary.trim() || fallback.summary,
-				insights: result.insights
-					.map(item => item.trim())
-					.filter(Boolean)
-					.slice(0, 4),
-				focus: result.focus
-					.map(item => item.trim())
-					.filter(Boolean)
-					.slice(0, 3),
-				kind: args.kind,
-				analytics: args.analytics,
-				trigger: args.trigger
-			})
-		} satisfies PthinkDraftReport
+			articles: result.articles
+				.map(item => ({
+					...item,
+					title: item.title.trim(),
+					content: item.content.trim(),
+					reason: item.reason.trim()
+				}))
+				.filter(item => item.title && item.content),
+			skill: result.skill
+				? {
+						...result.skill,
+						name: result.skill.name.trim(),
+						description: result.skill.description.trim(),
+						content: result.skill.content.trim(),
+						reason: result.skill.reason.trim(),
+						keywords: result.skill.keywords.map(item => item.trim()).filter(Boolean)
+					}
+				: null,
+			tool: result.tool
+				? {
+						...result.tool,
+						name: result.tool.name.trim(),
+						description: result.tool.description.trim(),
+						readme: result.tool.readme.trim(),
+						entry: result.tool.entry.trim(),
+						input_schema: result.tool.input_schema?.trim(),
+						output_schema: result.tool.output_schema?.trim(),
+						reason: result.tool.reason.trim()
+					}
+				: null
+		} satisfies PthinkDraftReview
 	} catch {
 		return fallback
 	}

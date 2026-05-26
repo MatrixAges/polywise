@@ -1,7 +1,15 @@
 import { config } from '@core/config'
 import { env } from '@core/env'
 
-import type { PthinkAnalyticsSnapshot, PthinkRuntimeStatus, PthinkTriggerCandidate, PthinkWindowStats } from './types'
+import type {
+	PthinkAnalyticsSnapshot,
+	PthinkConfig,
+	PthinkReviewMessage,
+	PthinkReviewWindow,
+	PthinkRuntimeStatus,
+	PthinkTriggerCandidate,
+	PthinkWindowStats
+} from './types'
 
 const hour_ms = 60 * 60 * 1000
 const day_ms = 24 * hour_ms
@@ -16,6 +24,7 @@ const normalizeDbParam = (value: unknown) =>
 
 const normalizeDbParams = (params: Array<unknown>) => params.map(normalizeDbParam)
 const toUnixSeconds = (value: number) => Math.floor(value / second_ms)
+const toUnixMilliseconds = (value: number) => (value > 1_000_000_000_000 ? value : value * second_ms)
 
 const countValue = (query: string, params: Array<unknown> = []) => {
 	const row = env.sqlite.prepare(query).get(...normalizeDbParams(params)) as { value?: number } | undefined
@@ -216,6 +225,183 @@ const readTopModels = (start_at: number) => {
 		.slice(0, 5)
 }
 
+const noise_patterns = [
+	/Called the [A-Za-z]+ tool with the following input:/gi,
+	/<system-reminder>[\s\S]*?<\/system-reminder>/gi,
+	/<content>[\s\S]*?<\/content>/gi,
+	/<path>[\s\S]*?<\/path>/gi,
+	/<type>[\s\S]*?<\/type>/gi,
+	/Plan Mode/gi,
+	/STRICTLY FORBIDDEN/gi,
+	/\(End of file - total \d+ lines\)/gi
+] as Array<RegExp>
+
+const stripNoise = (value: string) => {
+	return noise_patterns.reduce((target, pattern) => target.replace(pattern, ' '), value).trim()
+}
+
+const extractText = (content: string) => {
+	try {
+		const parsed = JSON.parse(content) as {
+			content?: string
+			parts?: Array<{
+				type?: string
+				text?: string
+			}>
+		}
+
+		if (Array.isArray(parsed.parts)) {
+			const text = parsed.parts
+				.map(part => (part?.type === 'text' ? String(part.text || '') : ''))
+				.filter(Boolean)
+				.join('\n')
+
+			return stripNoise(text).replace(/\s+/g, ' ').trim()
+		}
+
+		if (typeof parsed.content === 'string') {
+			return stripNoise(parsed.content).replace(/\s+/g, ' ').trim()
+		}
+	} catch {
+		return stripNoise(content).replace(/\s+/g, ' ').trim()
+	}
+
+	return ''
+}
+
+export const getPthinkWindowStart = (status: PthinkRuntimeStatus, now = Date.now()) => {
+	const day_start = new Date(now)
+	day_start.setHours(0, 0, 0, 0)
+
+	return Math.max(day_start.getTime(), Number(status.last_review_at ?? 0) || Number(status.boot_at ?? now))
+}
+
+export const readPthinkReviewWindow = (args: {
+	status: PthinkRuntimeStatus
+	config: PthinkConfig
+	now?: number
+}): PthinkReviewWindow => {
+	const now = args.now ?? Date.now()
+	const start_at = getPthinkWindowStart(args.status, now)
+	const rows = env.sqlite
+		.prepare(
+			`SELECT
+				m.id AS id,
+				m.session_id AS session_id,
+				s.title AS session_title,
+				m.role AS role,
+				m.content AS content,
+				m.created_at AS created_at
+			FROM message m
+			INNER JOIN session s ON s.id = m.session_id
+			WHERE m.created_at >= ? AND m.created_at <= ?
+			ORDER BY m.created_at ASC`
+		)
+		.all(toUnixSeconds(start_at), toUnixSeconds(now)) as Array<{
+		id: string
+		session_id: string
+		session_title: string | null
+		role: string
+		content: string
+		created_at: number
+	}>
+
+	const messages = rows
+		.map(row => {
+			const text = extractText(row.content)
+
+			return {
+				id: row.id,
+				session_id: row.session_id,
+				session_title: String(row.session_title ?? ''),
+				role: row.role,
+				text: text.length > 1200 ? `${text.slice(0, 1200)}...` : text,
+				created_at: toUnixMilliseconds(Number(row.created_at ?? 0))
+			} satisfies PthinkReviewMessage
+		})
+		.filter(item => item.text)
+
+	const trimmed_messages =
+		messages.length > args.config.max_messages
+			? messages.slice(messages.length - args.config.max_messages)
+			: messages
+	const session_count = new Set(trimmed_messages.map(item => item.session_id)).size
+
+	return {
+		start_at,
+		end_at: now,
+		message_count: trimmed_messages.length,
+		session_count,
+		messages: trimmed_messages
+	}
+}
+
+export const hasMeaningfulRecentActivity = (analytics: PthinkAnalyticsSnapshot) => {
+	const day = analytics.windows.day
+
+	return (
+		day.messages >= 20 ||
+		day.total_tokens >= 6000 ||
+		day.new_posts >= 1 ||
+		day.rewire_events >= 10 ||
+		day.new_notifications >= 4
+	)
+}
+
+export const hasReviewableMessages = (window: PthinkReviewWindow, config: PthinkConfig) => {
+	return window.message_count >= config.min_messages
+}
+
+export const pickPthinkTrigger = (args: {
+	analytics: PthinkAnalyticsSnapshot
+	status: PthinkRuntimeStatus
+	now?: number
+	trigger_cooldown_ms: number
+}) => {
+	const now = args.now ?? Date.now()
+	const window = readPthinkReviewWindow({
+		status: args.status,
+		config: {
+			enabled: true,
+			idle_grace_ms: 0,
+			review_cooldown_ms: args.trigger_cooldown_ms,
+			min_messages: 1,
+			max_messages: 200,
+			max_articles_per_run: 4,
+			skill_generation_enabled: true,
+			tool_generation_enabled: true,
+			monitor_ms: 60_000
+		},
+		now
+	})
+	const recent = args.analytics.windows.six_hours
+	const candidates = [] as Array<PthinkTriggerCandidate>
+
+	if (window.message_count >= 12) {
+		candidates.push({
+			key: 'review_backlog',
+			label: 'Review backlog',
+			detail: `${window.message_count} unreviewed messages across ${window.session_count} sessions today`,
+			score: window.message_count * 100 + window.session_count * 500
+		})
+	}
+
+	if (recent.total_tokens >= 20_000 || recent.assistant_messages >= 18) {
+		candidates.push({
+			key: 'dense_reasoning',
+			label: 'Dense reasoning burst',
+			detail: `${recent.assistant_messages} assistant replies and ${recent.total_tokens} tokens in the last 6 hours`,
+			score: recent.total_tokens + recent.assistant_messages * 500
+		})
+	}
+
+	if (!candidates.length) {
+		return null
+	}
+
+	return candidates.sort((a, b) => b.score - a.score)[0] ?? null
+}
+
 export const buildPthinkAnalytics = (now = Date.now()): PthinkAnalyticsSnapshot => {
 	const day_start = now - day_ms
 	const week_start = now - week_ms
@@ -322,76 +508,4 @@ export const buildPthinkAnalytics = (now = Date.now()): PthinkAnalyticsSnapshot 
 		active_projects,
 		recent_posts
 	}
-}
-
-export const pickPthinkTrigger = (args: {
-	analytics: PthinkAnalyticsSnapshot
-	status: PthinkRuntimeStatus
-	now?: number
-	trigger_cooldown_ms: number
-}) => {
-	const now = args.now ?? Date.now()
-	const { analytics, status, trigger_cooldown_ms } = args
-	const candidates = [] as Array<PthinkTriggerCandidate>
-	const recent = analytics.windows.six_hours
-	const day = analytics.windows.day
-	const pending_pipeline_items = getPendingPipelineItems(day)
-
-	if (recent.total_tokens >= 20_000 || recent.assistant_messages >= 18) {
-		candidates.push({
-			key: 'ai_usage_spike',
-			label: 'AI usage spike',
-			detail: `${recent.assistant_messages} assistant replies and ${recent.total_tokens} tokens in the last 6 hours`,
-			score: recent.total_tokens + recent.assistant_messages * 500
-		})
-	}
-
-	if (recent.sessions >= 4 || recent.messages >= 60) {
-		candidates.push({
-			key: 'session_burst',
-			label: 'Session burst',
-			detail: `${recent.sessions} new sessions and ${recent.messages} messages in the last 6 hours`,
-			score: recent.messages * 100 + recent.sessions * 1500
-		})
-	}
-
-	if (day.new_posts + day.new_memory_posts >= 3 || day.rewire_events >= 25) {
-		candidates.push({
-			key: 'knowledge_growth',
-			label: 'Knowledge growth',
-			detail: `${day.new_posts} new posts and ${day.rewire_events} rewire events in the last 24 hours`,
-			score: day.new_posts * 5000 + day.rewire_events * 120
-		})
-	}
-
-	if (pending_pipeline_items >= 5 || day.unread_notifications >= 6) {
-		candidates.push({
-			key: 'backlog_pressure',
-			label: 'Backlog pressure',
-			detail: `${pending_pipeline_items} pending pipeline items, ${day.unread_notifications} unread notifications`,
-			score: pending_pipeline_items * 2500 + day.unread_notifications * 400
-		})
-	}
-
-	return (
-		candidates
-			.filter(candidate => {
-				const last_fired = Number(status.trigger_last_fired[candidate.key] ?? 0)
-
-				return !last_fired || now - last_fired >= trigger_cooldown_ms
-			})
-			.sort((a, b) => b.score - a.score)[0] ?? null
-	)
-}
-
-export const hasMeaningfulRecentActivity = (analytics: PthinkAnalyticsSnapshot) => {
-	const day = analytics.windows.day
-
-	return (
-		day.messages >= 20 ||
-		day.total_tokens >= 6000 ||
-		day.new_posts >= 1 ||
-		day.rewire_events >= 10 ||
-		day.new_notifications >= 4
-	)
 }

@@ -79,14 +79,11 @@ export const getHomePthinkKindCounts = (start_at?: number) => {
 	}>
 
 	const counts = {
-		idle: 0,
-		daily: 0,
-		weekly: 0,
-		trigger: 0
+		review: 0
 	}
 
 	for (const row of rows) {
-		if (row.kind === 'idle' || row.kind === 'daily' || row.kind === 'weekly' || row.kind === 'trigger') {
+		if (row.kind === 'review') {
 			counts[row.kind] = Number(row.value ?? 0)
 		}
 	}

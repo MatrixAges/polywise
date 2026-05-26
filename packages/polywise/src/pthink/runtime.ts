@@ -1,39 +1,50 @@
-import { addArticle, addNotification, addSession } from '@core/db/services'
-import { addNotificationSession, addPostSession } from '@core/db/services/externals'
+import path from 'path'
+import { app } from '@core/consts'
+import { article, skill } from '@core/db/schema'
+import { getSkill, setArticle } from '@core/db/services'
 import { env } from '@core/env'
+import getToolDir from '@core/fst/tools/meta/getToolDir'
+import { parseJsonSchema, validateCustomToolImports } from '@core/fst/tools/meta/readSchemas'
+import scanCustomToolsMap from '@core/fst/tools/meta/scan'
+import { scanSkillMap } from '@core/fst/tools/skill'
+import searchSkillMap from '@core/fst/tools/skill/search'
+import { saveArticle } from '@core/io'
+import { createSkill, rebuildGlobalSkillMap, updateSkill } from '@core/rpc/skill/utils'
 import { log } from '@core/utils'
-import { Cron } from 'croner'
-import dayjs from 'dayjs'
+import { writeFile } from 'atomically'
+import { eq } from 'drizzle-orm'
+import fs from 'fs-extra'
 
-import { buildPthinkAnalytics, hasMeaningfulRecentActivity, pickPthinkTrigger } from './analytics'
-import { getPthinkConfig, weekday_to_cron } from './constants'
+import { hasReviewableMessages, readPthinkReviewWindow } from './analytics'
+import { getPthinkConfig } from './constants'
 import { defaultPthinkStatus, readPthinkStatus, writePthinkStatus } from './status'
-import { synthesizePthinkReport } from './synthesize'
+import { synthesizePthinkReview } from './synthesize'
 
 import type {
-	PthinkAnalyticsSnapshot,
-	PthinkReportKind,
+	PthinkGeneratedSkill,
+	PthinkGeneratedTool,
+	PthinkHistoryRecord,
+	PthinkOutputKind,
 	PthinkRunSummary,
 	PthinkRuntime,
-	PthinkRuntimeStatus,
-	PthinkTriggerCandidate
+	PthinkRuntimeStatus
 } from './types'
 
 const report_history_limit = 60
 const idle_reason_persist_ms = 5 * 60 * 1000
 
-const defaultSummary = (kind: PthinkReportKind): PthinkRunSummary => ({
-	kind,
+const defaultSummary = (): PthinkRunSummary => ({
 	title: '',
 	summary: '',
-	post_id: null,
-	session_id: null,
-	trigger_key: null,
+	kinds: [],
+	article_ids: [],
+	skill_names: [],
+	tool_names: [],
+	message_count: 0,
+	window_start_at: 0,
+	window_end_at: 0,
 	created_at: Date.now()
 })
-
-const getDayKey = (value: number) => dayjs(value).format('YYYY-MM-DD')
-const getWeekKey = (value: number) => dayjs(value).startOf('week').format('YYYY-MM-DD')
 
 const shouldRunInBackground = (status: PthinkRuntimeStatus) => {
 	const current_config = getPthinkConfig()
@@ -67,68 +78,131 @@ const shouldRunInBackground = (status: PthinkRuntimeStatus) => {
 	return { ok: true as const }
 }
 
-const createReportArtifacts = async (args: {
-	kind: PthinkReportKind
-	title: string
-	summary: string
-	content: string
-	analytics: PthinkAnalyticsSnapshot
-	trigger?: PthinkTriggerCandidate | null
-}) => {
-	const now = new Date(args.analytics.generated_at)
-	const post = await addArticle({
-		title: args.title,
-		content: args.content,
-		for: 'memory',
-		scope_type: 'global',
-		scope_id: null,
-		source: 'agent',
-		is_pipelined: true,
-		created_at: now,
-		updated_at: now,
-		metadata: {
-			pthink: {
-				kind: args.kind,
-				trigger_key: args.trigger?.key ?? null,
-				trigger_label: args.trigger?.label ?? null,
-				summary: args.summary,
-				created_at: args.analytics.generated_at,
-				windows: {
-					day: args.analytics.windows.day,
-					week: args.analytics.windows.week
-				},
-				top_models: args.analytics.top_models
-			}
-		}
-	})
-	const session = await addSession({
-		title: `PThink · ${args.title}`
-	})
+const rebuildCustomToolsMapByDir = async (tools_dir: string) => {
+	await fs.ensureDir(tools_dir)
 
-	await addPostSession(post.id, session.id)
+	const custom_tools_map = await scanCustomToolsMap(tools_dir)
+	const custom_tools_map_path = path.resolve(tools_dir, 'custom_tools_map.json')
 
-	const notification = await addNotification({
-		title: args.title,
-		description: args.summary
-	})
+	await writeFile(custom_tools_map_path, JSON.stringify(custom_tools_map, null, 4), 'utf8')
 
-	await addNotificationSession(notification.id, session.id)
+	return custom_tools_map
+}
+
+const writeCustomTool = async (tool: PthinkGeneratedTool) => {
+	const tool_dir = getToolDir(path.resolve(app.app_path, 'tools'), tool.name)
+
+	if (await fs.pathExists(tool_dir)) {
+		return null
+	}
+
+	const input_schema = parseJsonSchema(tool.input_schema, 'input_schema')
+	const output_schema = parseJsonSchema(tool.output_schema, 'output_schema')
+	const entry = tool.entry || ''
+	const readme = tool.readme.startsWith('---')
+		? tool.readme
+		: ['---', `name: ${tool.name}`, `description: ${tool.description}`, '---', '', tool.readme].join('\n')
+
+	validateCustomToolImports(entry)
+
+	await fs.ensureDir(tool_dir)
+	await writeFile(path.resolve(tool_dir, 'readme.md'), readme, 'utf8')
+	await writeFile(path.resolve(tool_dir, 'index.mjs'), entry, 'utf8')
+
+	await rebuildCustomToolsMapByDir(path.resolve(app.app_path, 'tools'))
 
 	return {
-		post_id: post.id,
-		session_id: session.id,
-		notification_id: notification.id
+		name: tool.name,
+		input_schema,
+		output_schema
+	}
+}
+
+const maybeWriteSkill = async (draft_skill: PthinkGeneratedSkill) => {
+	if (draft_skill.action === 'skip' || !draft_skill.name || !draft_skill.description || !draft_skill.content) {
+		return null
+	}
+
+	const skills_dir = path.resolve(app.app_path, 'skills')
+
+	await fs.ensureDir(skills_dir)
+
+	const skill_map = await scanSkillMap(skills_dir)
+	const matches = searchSkillMap(skill_map, `${draft_skill.name} ${draft_skill.keywords.join(' ')}`, 1)
+	const top_match = matches[0]
+
+	if (draft_skill.action === 'create') {
+		if (top_match?.score && top_match.score >= 0.75) {
+			return null
+		}
+
+		await createSkill({
+			name: draft_skill.name,
+			desc: draft_skill.description,
+			content: draft_skill.content
+		})
+		await rebuildGlobalSkillMap()
+
+		return draft_skill.name
+	}
+
+	if (draft_skill.action === 'update') {
+		const target_name = top_match?.name || draft_skill.name
+		const current_skill = await getSkill(eq(skill.name, target_name))
+
+		if (!current_skill) {
+			return null
+		}
+
+		await updateSkill({
+			id: current_skill.id,
+			name: target_name,
+			desc: draft_skill.description,
+			content: draft_skill.content
+		})
+		await rebuildGlobalSkillMap()
+
+		return target_name
+	}
+
+	return null
+}
+
+const createRecord = (args: {
+	title: string
+	summary: string
+	article_ids: Array<string>
+	skill_names: Array<string>
+	tool_names: Array<string>
+	message_count: number
+	window_start_at: number
+	window_end_at: number
+	created_at: number
+}): PthinkHistoryRecord => {
+	const kinds = [] as Array<PthinkOutputKind>
+
+	if (args.article_ids.length) kinds.push('article')
+	if (args.skill_names.length) kinds.push('skill')
+	if (args.tool_names.length) kinds.push('tool')
+
+	return {
+		title: args.title,
+		summary: args.summary,
+		kinds,
+		article_ids: args.article_ids,
+		skill_names: args.skill_names,
+		tool_names: args.tool_names,
+		message_count: args.message_count,
+		window_start_at: args.window_start_at,
+		window_end_at: args.window_end_at,
+		created_at: args.created_at
 	}
 }
 
 export const createPthinkRuntime = (): PthinkRuntime => {
 	const status = defaultPthinkStatus()
 	let monitor_timer: NodeJS.Timeout | null = null
-	let daily_job: Cron | null = null
-	let weekly_job: Cron | null = null
-	const pending_kinds = new Set<PthinkReportKind>()
 	let last_idle_persist_at = 0
-	let cron_signature = ''
 
 	const persistStatus = async () => {
 		status.report_history = status.report_history
@@ -148,107 +222,7 @@ export const createPthinkRuntime = (): PthinkRuntime => {
 		}
 	}
 
-	const countReportsToday = (now: number) => {
-		const today = getDayKey(now)
-
-		return status.report_history.filter(item => getDayKey(item.created_at) === today).length
-	}
-
-	const hasKindToday = (kind: PthinkReportKind, now: number) => {
-		const today = getDayKey(now)
-
-		return status.report_history.some(item => item.kind === kind && getDayKey(item.created_at) === today)
-	}
-
-	const hasKindThisWeek = (kind: PthinkReportKind, now: number) => {
-		const week = getWeekKey(now)
-
-		return status.report_history.some(item => item.kind === kind && getWeekKey(item.created_at) === week)
-	}
-
-	const canCreateReport = (args: {
-		kind: PthinkReportKind
-		now: number
-		trigger?: PthinkTriggerCandidate | null
-		force?: boolean
-		analytics: PthinkAnalyticsSnapshot
-	}) => {
-		const current_config = getPthinkConfig()
-
-		if (!current_config.enabled && !args.force) {
-			return { ok: false, reason: 'disabled' }
-		}
-
-		if (!args.force && countReportsToday(args.now) >= current_config.max_reports_per_day) {
-			return { ok: false, reason: 'daily_limit' }
-		}
-
-		if (args.kind === 'daily') {
-			if (!current_config.daily_report_enabled && !args.force) {
-				return { ok: false, reason: 'daily_disabled' }
-			}
-
-			if (hasKindToday('daily', args.now)) {
-				return { ok: false, reason: 'daily_exists' }
-			}
-		}
-
-		if (args.kind === 'weekly') {
-			if (!current_config.weekly_report_enabled && !args.force) {
-				return { ok: false, reason: 'weekly_disabled' }
-			}
-
-			if (hasKindThisWeek('weekly', args.now)) {
-				return { ok: false, reason: 'weekly_exists' }
-			}
-		}
-
-		if (args.kind === 'idle') {
-			if (!hasMeaningfulRecentActivity(args.analytics)) {
-				return { ok: false, reason: 'idle_no_signal' }
-			}
-
-			const last_idle = status.report_history.find(item => item.kind === 'idle')
-
-			if (last_idle && args.now - last_idle.created_at < current_config.idle_report_cooldown_ms) {
-				return { ok: false, reason: 'idle_cooldown' }
-			}
-
-			if (
-				status.last_report_at &&
-				args.now - status.last_report_at < current_config.idle_report_cooldown_ms / 2
-			) {
-				return { ok: false, reason: 'recent_report' }
-			}
-		}
-
-		if (args.kind === 'trigger') {
-			if (!current_config.trigger_enabled && !args.force) {
-				return { ok: false, reason: 'trigger_disabled' }
-			}
-
-			if (!args.trigger) {
-				return { ok: false, reason: 'trigger_missing' }
-			}
-
-			const last_fired = Number(status.trigger_last_fired[args.trigger.key] ?? 0)
-
-			if (last_fired && args.now - last_fired < current_config.trigger_cooldown_ms) {
-				return { ok: false, reason: 'trigger_cooldown' }
-			}
-		}
-
-		return { ok: true as const }
-	}
-
 	const runMonitor = async () => {
-		const next_signature = JSON.stringify(getPthinkConfig())
-
-		if (next_signature !== cron_signature) {
-			scheduleCronJobs()
-			cron_signature = next_signature
-		}
-
 		const allowed = shouldRunInBackground(status)
 
 		if (!allowed.ok) {
@@ -256,88 +230,28 @@ export const createPthinkRuntime = (): PthinkRuntime => {
 			return
 		}
 
-		if (pending_kinds.has('weekly')) {
-			pending_kinds.delete('weekly')
-			await runtime.runNow('weekly')
-			return
-		}
-
-		if (pending_kinds.has('daily')) {
-			pending_kinds.delete('daily')
-			await runtime.runNow('daily')
-			return
-		}
-
-		const analytics = buildPthinkAnalytics()
-		const trigger = getPthinkConfig().trigger_enabled
-			? pickPthinkTrigger({
-					analytics,
-					status,
-					trigger_cooldown_ms: getPthinkConfig().trigger_cooldown_ms
-				})
-			: null
-
-		if (trigger) {
-			await runtime.runNow('trigger', { analytics, trigger })
-			return
-		}
-
-		if (!hasMeaningfulRecentActivity(analytics)) {
-			await updateIdleReason('idle_waiting_signal')
-			return
-		}
-
-		await runtime.runNow('idle', { analytics })
-	}
-
-	const scheduleCronJobs = () => {
 		const current_config = getPthinkConfig()
 
-		daily_job?.stop()
-		weekly_job?.stop()
-		daily_job = null
-		weekly_job = null
-		runtime.daily_job = null
-		runtime.weekly_job = null
-
-		if (!current_config.enabled) {
-			pending_kinds.clear()
-			cron_signature = JSON.stringify(current_config)
+		if (status.last_run_at && Date.now() - status.last_run_at < current_config.review_cooldown_ms) {
+			await updateIdleReason('review_cooldown')
 			return
 		}
 
-		if (!current_config.daily_report_enabled) {
-			pending_kinds.delete('daily')
+		const window = readPthinkReviewWindow({
+			status,
+			config: current_config
+		})
+
+		if (!hasReviewableMessages(window, current_config)) {
+			await updateIdleReason(window.message_count > 0 ? 'not_enough_messages' : 'no_new_messages')
+			return
 		}
 
-		if (!current_config.weekly_report_enabled) {
-			pending_kinds.delete('weekly')
-		}
-
-		if (current_config.daily_report_enabled) {
-			daily_job = new Cron(`0 ${current_config.daily_report_hour} * * *`, () => {
-				pending_kinds.add('daily')
-			})
-			runtime.daily_job = daily_job
-		}
-
-		if (current_config.weekly_report_enabled) {
-			weekly_job = new Cron(
-				`0 ${current_config.weekly_report_hour} * * ${weekday_to_cron[current_config.weekly_report_weekday]}`,
-				() => {
-					pending_kinds.add('weekly')
-				}
-			)
-			runtime.weekly_job = weekly_job
-		}
-
-		cron_signature = JSON.stringify(current_config)
+		await runtime.runNow()
 	}
 
 	const runtime: PthinkRuntime = {
 		monitor_timer,
-		daily_job,
-		weekly_job,
 		status,
 		async start() {
 			const saved_status = await readPthinkStatus()
@@ -345,15 +259,10 @@ export const createPthinkRuntime = (): PthinkRuntime => {
 			Object.assign(status, {
 				...saved_status,
 				running: false,
-				last_status: saved_status.last_status ?? 'idle',
-				last_error: saved_status.last_error ?? null,
-				last_reason: saved_status.last_reason ?? null,
-				last_summary: saved_status.last_summary ?? null,
+				boot_at: Date.now(),
 				last_foreground_at: Date.now(),
 				last_visit_at: Number(saved_status.last_visit_at ?? Date.now())
 			})
-
-			scheduleCronJobs()
 
 			monitor_timer = setInterval(() => {
 				void runMonitor().catch(error => {
@@ -373,34 +282,25 @@ export const createPthinkRuntime = (): PthinkRuntime => {
 				runtime.monitor_timer = null
 			}
 
-			daily_job?.stop()
-			weekly_job?.stop()
-			daily_job = null
-			weekly_job = null
-			runtime.daily_job = null
-			runtime.weekly_job = null
-
 			await persistStatus()
 		},
-		async runNow(kind, args = {}) {
+		async runNow(args = {}) {
 			if (status.running) {
 				return null
 			}
 
+			const current_config = getPthinkConfig()
 			const now = Date.now()
-			const analytics = args.analytics ?? buildPthinkAnalytics(now)
-			const allowed = canCreateReport({
-				kind,
-				now,
-				trigger: args.trigger,
-				force: args.force,
-				analytics
+			const window = readPthinkReviewWindow({
+				status,
+				config: current_config,
+				now
 			})
 
-			if (!allowed.ok) {
+			if (!args.force && !hasReviewableMessages(window, current_config)) {
 				status.last_status = 'skipped'
-				status.last_reason = allowed.reason
-				status.last_summary = defaultSummary(kind)
+				status.last_reason = window.message_count > 0 ? 'not_enough_messages' : 'no_new_messages'
+				status.last_summary = defaultSummary()
 				status.last_summary.created_at = now
 				await persistStatus()
 				return null
@@ -413,60 +313,114 @@ export const createPthinkRuntime = (): PthinkRuntime => {
 			await persistStatus()
 
 			try {
-				const report = await synthesizePthinkReport({
-					kind,
-					analytics,
-					trigger: args.trigger
+				const review = await synthesizePthinkReview({
+					window,
+					config: current_config
 				})
-				const artifacts = await createReportArtifacts({
-					kind,
-					title: report.title,
-					summary: report.summary,
-					content: report.content,
-					analytics,
-					trigger: args.trigger
+				const article_ids = [] as Array<string>
+				const skill_names = [] as Array<string>
+				const tool_names = [] as Array<string>
+
+				for (const draft_article of review.articles.slice(0, current_config.max_articles_per_run)) {
+					if (draft_article.confidence < 0.62 || draft_article.content.length < 80) {
+						continue
+					}
+
+					try {
+						const article_id = await saveArticle({
+							title: draft_article.title,
+							content: draft_article.content,
+							for: draft_article.for_type,
+							source: 'superego',
+							scope_type: 'global',
+							scope_id: null,
+							exec_pipeline: true
+						})
+
+						await setArticle(eq(article.id, article_id), {
+							metadata: {
+								pthink: {
+									kind: 'review',
+									reason: draft_article.reason,
+									confidence: draft_article.confidence,
+									window_start_at: window.start_at,
+									window_end_at: window.end_at,
+									message_count: window.message_count
+								}
+							}
+						}).catch(() => null)
+
+						article_ids.push(article_id)
+					} catch (error) {
+						log('SYSTEM', 'pthinkArticleWriteError', () =>
+							error instanceof Error ? error.message : String(error)
+						)
+					}
+				}
+
+				if (
+					current_config.skill_generation_enabled &&
+					review.skill &&
+					review.skill.confidence >= 0.9 &&
+					review.skill.content.includes('# ')
+				) {
+					const skill_name = await maybeWriteSkill(review.skill).catch(() => null)
+
+					if (skill_name) {
+						skill_names.push(skill_name)
+					}
+				}
+
+				if (
+					current_config.tool_generation_enabled &&
+					review.tool &&
+					review.tool.action === 'create' &&
+					review.tool.confidence >= 0.95 &&
+					review.tool.readme &&
+					review.tool.entry
+				) {
+					const created_tool = await writeCustomTool(review.tool).catch(() => null)
+
+					if (created_tool) {
+						tool_names.push(created_tool.name)
+					}
+				}
+
+				const created_at = now
+				const summary = createRecord({
+					title: review.title,
+					summary: review.summary,
+					article_ids,
+					skill_names,
+					tool_names,
+					message_count: window.message_count,
+					window_start_at: window.start_at,
+					window_end_at: window.end_at,
+					created_at
 				})
-				const created_at = analytics.generated_at || now
 
 				status.last_run_at = created_at
 				status.last_report_at = created_at
-				status.last_status = 'success'
+				status.last_review_at = window.end_at
+				status.last_status = summary.kinds.length > 0 ? 'success' : 'skipped'
 				status.last_error = null
-				status.last_reason = null
-				status.last_summary = {
-					kind,
-					title: report.title,
-					summary: report.summary,
-					post_id: artifacts.post_id,
-					session_id: artifacts.session_id,
-					trigger_key: args.trigger?.key ?? null,
-					created_at
-				}
-				status.report_history.unshift({
-					post_id: artifacts.post_id,
-					session_id: artifacts.session_id,
-					notification_id: artifacts.notification_id,
-					kind,
-					title: report.title,
-					summary: report.summary,
-					trigger_key: args.trigger?.key ?? null,
-					created_at
-				})
+				status.last_reason = summary.kinds.length > 0 ? null : 'no_durable_output'
+				status.last_summary = summary
 
-				if (kind === 'trigger' && args.trigger?.key) {
-					status.trigger_last_fired[args.trigger.key] = created_at
+				if (summary.kinds.length > 0) {
+					status.report_history.unshift(summary)
 				}
 
 				await persistStatus()
 
-				return status.last_summary
+				return summary.kinds.length > 0 ? summary : null
 			} catch (error) {
 				const message = error instanceof Error ? error.message : String(error)
 				status.last_run_at = now
 				status.last_status = 'error'
 				status.last_error = message
-				status.last_reason = kind
-				status.last_summary = defaultSummary(kind)
+				status.last_reason = 'review_failed'
+				status.last_summary = defaultSummary()
 				status.last_summary.created_at = now
 				await persistStatus()
 				throw error

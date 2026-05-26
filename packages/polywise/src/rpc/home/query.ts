@@ -795,12 +795,12 @@ export default p
 		const agent_workspace = await buildAgentWorkspaceStats(period_start)
 		const pthink_analytics = buildPthinkAnalytics(now)
 		const pthink_status = await readPthinkStatus()
-		const top_alert = pthink_config.trigger_enabled
+		const top_alert = pthink_config.enabled
 			? pickPthinkTrigger({
 					analytics: pthink_analytics,
 					status: pthink_status,
 					now,
-					trigger_cooldown_ms: pthink_config.trigger_cooldown_ms
+					trigger_cooldown_ms: pthink_config.review_cooldown_ms
 				})
 			: null
 

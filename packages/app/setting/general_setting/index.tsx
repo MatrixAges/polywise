@@ -21,7 +21,6 @@ import { useForm } from '@/hooks'
 
 import type { AppConfig, AppPthinkConfig } from '@core/types'
 
-const pthink_hours = Array.from({ length: 24 }, (_, hour) => ({ label: `${hour}:00`, value: String(hour) }))
 const pthink_idle_options = [
 	{ label: '10 min', value: '10' },
 	{ label: '20 min', value: '20' },
@@ -29,14 +28,11 @@ const pthink_idle_options = [
 	{ label: '45 min', value: '45' },
 	{ label: '60 min', value: '60' }
 ]
-const pthink_weekdays = [
-	{ label: 'Sunday', value: 'sun' },
-	{ label: 'Monday', value: 'mon' },
-	{ label: 'Tuesday', value: 'tue' },
-	{ label: 'Wednesday', value: 'wed' },
-	{ label: 'Thursday', value: 'thu' },
-	{ label: 'Friday', value: 'fri' },
-	{ label: 'Saturday', value: 'sat' }
+const pthink_cooldown_options = [
+	{ label: '10 min', value: '10' },
+	{ label: '15 min', value: '15' },
+	{ label: '30 min', value: '30' },
+	{ label: '60 min', value: '60' }
 ]
 const Index = () => {
 	const global = useGlobal()
@@ -181,8 +177,9 @@ const Index = () => {
 					<FieldContent>
 						<FieldTitle className='text-base'>Post-Think</FieldTitle>
 						<FieldDescription>
-							Run automatic background reporting on schedule while keeping manual report
-							generation available in Home / Report.
+							When the app is idle, review today&apos;s newly accumulated messages and turn
+							durable findings into articles, and only when strongly justified, skills or
+							tools.
 						</FieldDescription>
 					</FieldContent>
 					<Switch
@@ -219,93 +216,58 @@ const Index = () => {
 				</Field>
 				<Field className='items-center! py-3' orientation='horizontal'>
 					<FieldContent>
-						<FieldTitle className='text-base'>Daily Report</FieldTitle>
+						<FieldTitle className='text-base'>Review Cooldown</FieldTitle>
 						<FieldDescription>
-							Generate a daily summary on a fixed schedule using Croner
+							Minimum time between two automatic post-think review runs
 						</FieldDescription>
 					</FieldContent>
-					<div className='flex items-center gap-3'>
-						<Switch
-							checked={Boolean(pthink?.daily_report_enabled)}
-							onCheckedChange={checked => updatePthink({ daily_report_enabled: checked })}
-						/>
-						<Select
-							items={pthink_hours}
-							value={String(pthink?.daily_report_hour ?? 21)}
-							onValueChange={value => updatePthink({ daily_report_hour: Number(value) })}
-						>
-							<SelectTrigger className='workspace_selector w-[110px]'>
-								<SelectValue />
-							</SelectTrigger>
-							<SelectContent align='start'>
-								<SelectGroup>
-									<SelectLabel>Daily Hour</SelectLabel>
-									{pthink_hours.map(item => (
-										<SelectItem value={item.value} key={item.value}>
-											{item.label}
-										</SelectItem>
-									))}
-								</SelectGroup>
-							</SelectContent>
-						</Select>
-					</div>
+					<Select
+						items={pthink_cooldown_options}
+						value={String(Math.round((pthink?.review_cooldown_ms ?? 15 * 60 * 1000) / 60000))}
+						onValueChange={value =>
+							updatePthink({ review_cooldown_ms: Number(value) * 60 * 1000 })
+						}
+					>
+						<SelectTrigger className='workspace_selector'>
+							<SelectValue />
+						</SelectTrigger>
+						<SelectContent align='start'>
+							<SelectGroup>
+								<SelectLabel>Review Cooldown</SelectLabel>
+								{pthink_cooldown_options.map(item => (
+									<SelectItem value={item.value} key={item.value}>
+										{item.label}
+									</SelectItem>
+								))}
+							</SelectGroup>
+						</SelectContent>
+					</Select>
 				</Field>
 				<Field className='items-center! py-3' orientation='horizontal'>
 					<FieldContent>
-						<FieldTitle className='text-base'>Weekly Report</FieldTitle>
+						<FieldTitle className='text-base'>Skill Generation</FieldTitle>
 						<FieldDescription>
-							Generate a longer weekly summary with behavior and content patterns
+							Allow post-think to write a local skill only when the extracted workflow is
+							clearly reusable
 						</FieldDescription>
 					</FieldContent>
-					<div className='flex items-center gap-3'>
-						<Switch
-							checked={Boolean(pthink?.weekly_report_enabled)}
-							onCheckedChange={checked => updatePthink({ weekly_report_enabled: checked })}
-						/>
-						<Select
-							items={pthink_weekdays}
-							value={pthink?.weekly_report_weekday ?? 'sun'}
-							onValueChange={value =>
-								updatePthink({
-									weekly_report_weekday:
-										value as AppPthinkConfig['weekly_report_weekday']
-								})
-							}
-						>
-							<SelectTrigger className='workspace_selector w-[130px]'>
-								<SelectValue />
-							</SelectTrigger>
-							<SelectContent align='start'>
-								<SelectGroup>
-									<SelectLabel>Weekday</SelectLabel>
-									{pthink_weekdays.map(item => (
-										<SelectItem value={item.value} key={item.value}>
-											{item.label}
-										</SelectItem>
-									))}
-								</SelectGroup>
-							</SelectContent>
-						</Select>
-						<Select
-							items={pthink_hours}
-							value={String(pthink?.weekly_report_hour ?? 20)}
-							onValueChange={value => updatePthink({ weekly_report_hour: Number(value) })}
-						>
-							<SelectTrigger className='workspace_selector w-[110px]'>
-								<SelectValue />
-							</SelectTrigger>
-							<SelectContent align='start'>
-								<SelectGroup>
-									<SelectLabel>Weekly Hour</SelectLabel>
-									{pthink_hours.map(item => (
-										<SelectItem value={item.value} key={item.value}>
-											{item.label}
-										</SelectItem>
-									))}
-								</SelectGroup>
-							</SelectContent>
-						</Select>
-					</div>
+					<Switch
+						checked={Boolean(pthink?.skill_generation_enabled ?? true)}
+						onCheckedChange={checked => updatePthink({ skill_generation_enabled: checked })}
+					/>
+				</Field>
+				<Field className='items-center! py-3' orientation='horizontal'>
+					<FieldContent>
+						<FieldTitle className='text-base'>Tool Generation</FieldTitle>
+						<FieldDescription>
+							Allow post-think to create a custom tool only under a much stricter confidence
+							bar
+						</FieldDescription>
+					</FieldContent>
+					<Switch
+						checked={Boolean(pthink?.tool_generation_enabled ?? true)}
+						onCheckedChange={checked => updatePthink({ tool_generation_enabled: checked })}
+					/>
 				</Field>
 			</FieldGroup>
 		</div>
