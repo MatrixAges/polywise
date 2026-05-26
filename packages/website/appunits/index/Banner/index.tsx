@@ -35,7 +35,7 @@ const Index = () => {
 		ensureLoadedImage(name)
 
 		const next_name = banner_images[(step + 1) % banner_images.length]
-		const next_path = `${base_url_files_website}/banner/${next_name}.png`
+		const next_path = `${base_url_files_website}/${next_name}.png`
 
 		if (requested_images.current.has(next_name)) return
 
@@ -150,7 +150,7 @@ const Index = () => {
 					<div className='image_preview relative flex w-full'>
 						<img
 							className='image image_placeholder box-border'
-							src={`${base_url_files_website}/banner/${banner_images[0]}.png`}
+							src={`${base_url_files_website}/${banner_images[0]}.png`}
 							alt=''
 							aria-hidden='true'
 						/>
@@ -162,7 +162,7 @@ const Index = () => {
 								return (
 									<motion.img
 										className='image image_layer box-border'
-										src={`${base_url_files_website}/banner/${item}.png`}
+										src={`${base_url_files_website}/${item}.png`}
 										alt={`image_preview_${item}`}
 										initial={false}
 										animate={

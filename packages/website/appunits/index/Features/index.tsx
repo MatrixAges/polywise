@@ -195,7 +195,7 @@ const Index = () => {
 							>
 								<motion.img
 									className='preview_image'
-									src={`/images/features/${image_name}.png`}
+									src={`/images/${image_name}.png`}
 									alt={feature_items[number].key}
 									initial={{ x: 220 }}
 									animate={{ x: -220 }}
