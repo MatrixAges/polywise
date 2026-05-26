@@ -62,6 +62,12 @@ export interface AppRewireConfig {
 export interface AppPthinkConfig {
 	enabled: boolean
 	idle_grace_ms?: number
+	review_cooldown_ms?: number
+	min_messages?: number
+	max_messages?: number
+	max_articles_per_run?: number
+	skill_generation_enabled?: boolean
+	tool_generation_enabled?: boolean
 	daily_report_enabled?: boolean
 	daily_report_hour?: number
 	weekly_report_enabled?: boolean

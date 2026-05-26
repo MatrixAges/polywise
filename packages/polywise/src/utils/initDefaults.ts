@@ -49,13 +49,12 @@ export default async () => {
 				pthink: {
 					enabled: true,
 					idle_grace_ms: 20 * 60 * 1000,
-					daily_report_enabled: true,
-					daily_report_hour: 21,
-					weekly_report_enabled: true,
-					weekly_report_weekday: 'sun',
-					weekly_report_hour: 20,
-					trigger_enabled: true,
-					max_reports_per_day: 3
+					review_cooldown_ms: 15 * 60 * 1000,
+					min_messages: 6,
+					max_messages: 60,
+					max_articles_per_run: 4,
+					skill_generation_enabled: true,
+					tool_generation_enabled: true
 				}
 			} as AppConfig)
 		}
@@ -94,10 +93,12 @@ export default async () => {
 		running: false,
 		last_run_at: null,
 		last_report_at: null,
+		last_review_at: null,
 		last_status: 'idle',
 		last_error: null,
 		last_reason: null,
 		last_summary: null,
+		boot_at: Date.now(),
 		last_foreground_at: Date.now(),
 		last_visit_at: Date.now(),
 		report_history: [],

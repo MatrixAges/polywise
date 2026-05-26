@@ -29,8 +29,8 @@ import { useParams, usePathname } from 'next/navigation'
 
 import styles from './layout.module.css'
 
-import type { DocsMenuItem, DocsMenuSection } from '@website/types'
-import type { PropsWithChildren } from 'react'
+import type { DocsMenuItem } from '@website/types'
+import type { JSX, PropsWithChildren } from 'react'
 
 type BottomLinkItem = Pick<DocsMenuItem, 'label' | 'key'> | null
 
@@ -251,87 +251,115 @@ const Index = (props: PropsWithChildren) => {
 			</div>
 			<div className='menu_wrap box-border w-full' ref={menu_ref}>
 				<div className='menu_groups flex flex-col'>
-					{menu.map(section => {
-						if (section.type === 'link') {
-							return (
-								<Link
-									className={$.cx(
-										'menu_item mb-1 flex items-center',
-										section.className,
-										selectedkey === section.key && 'active'
-									)}
-									href={`/docs/${section.key}`}
-									key={section.key}
-									onClick={onClickLink}
+					{(() => {
+						const groups: Array<JSX.Element> = []
+						let flat_group_items: Array<JSX.Element> = []
+
+						const flushFlatGroup = () => {
+							if (flat_group_items.length === 0) return
+
+							groups.push(
+								<div
+									className='flat_group mb-6 flex flex-col'
+									key={`flat_group_${groups.length}`}
 								>
-									<span>{section.label}</span>
-								</Link>
+									{flat_group_items}
+								</div>
 							)
+
+							flat_group_items = []
 						}
 
-						const open = openkeys.includes(section.key)
-						const active =
-							selectedkey === section.key ||
-							section.children.some(item => item.key === selectedkey)
-
-						return (
-							<section
-								className={$.cx('menu_group', open ? 'mb-6' : 'mb-1')}
-								key={section.key}
-							>
-								<button
-									className={$.cx(
-										`
-									flex
-									items-center justify-between
-									w-full
-									mb-1
-									font-medium
-									menu_group_button cursor-pointer
-								`,
-										active && 'active'
-									)}
-									type='button'
-									onClick={() => toggleGroup(section.key)}
-								>
-									<span>{section.label}</span>
-									<CaretRightIcon
+						menu.forEach(section => {
+							if (section.type === 'link') {
+								flat_group_items.push(
+									<Link
 										className={$.cx(
-											'icon transition-transform duration-200',
-											open && 'rotate-90'
+											'menu_item mb-1 flex items-center',
+											section.className,
+											selectedkey === section.key && 'active'
 										)}
-										size={12}
-										weight='bold'
-									/>
-								</button>
-								{open && (
-									<div
-										className='
-										flex flex-col
-										w-full
-										gap-1
-										menu_group_items
-									'
+										href={`/docs/${section.key}`}
+										key={section.key}
+										onClick={onClickLink}
 									>
-										{section.children.map(item => (
-											<Link
-												className={$.cx(
-													'menu_item flex items-center',
-													item.className,
-													selectedkey === item.key && 'active'
-												)}
-												href={`/docs/${item.key}`}
-												key={item.key}
-												onClick={onClickLink}
-											>
-												<span>{item.label}</span>
-											</Link>
-										))}
-									</div>
-								)}
-							</section>
-						)
-					})}
+										<span>{section.label}</span>
+									</Link>
+								)
+
+								return
+							}
+
+							flushFlatGroup()
+
+							const open = openkeys.includes(section.key)
+							const active =
+								selectedkey === section.key ||
+								section.children.some(item => item.key === selectedkey)
+
+							groups.push(
+								<section
+									className={$.cx('menu_group', open ? 'mb-6' : 'mb-1')}
+									key={section.key}
+								>
+									<button
+										className={$.cx(
+											`
+										flex
+										items-center justify-between
+										w-full
+										mb-1
+										font-medium
+										menu_group_button cursor-pointer
+									`,
+											active && 'active'
+										)}
+										type='button'
+										onClick={() => toggleGroup(section.key)}
+									>
+										<span>{section.label}</span>
+										<CaretRightIcon
+											className={$.cx(
+												'icon transition-transform duration-200',
+												open && 'rotate-90'
+											)}
+											size={12}
+											weight='bold'
+										/>
+									</button>
+									{open && (
+										<div
+											className='
+											flex flex-col
+											w-full
+											gap-1
+											menu_group_items
+										'
+										>
+											{section.children.map(item => (
+												<Link
+													className={$.cx(
+														'menu_item flex items-center',
+														item.className,
+														selectedkey === item.key && 'active'
+													)}
+													href={`/docs/${item.key}`}
+													key={item.key}
+													onClick={onClickLink}
+												>
+													<span>{item.label}</span>
+												</Link>
+											))}
+										</div>
+									)}
+								</section>
+							)
+						})
+
+						flushFlatGroup()
+
+						return groups
+					})()}
 				</div>
 				{open_group_count < 2 && (
 					<div className='shadow_tree flex items-center justify-center'>
