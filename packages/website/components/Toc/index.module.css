@@ -88,6 +88,7 @@
 					height: 100%;
 					left: -2px;
 					background-color: rgba(var(--color_text_rgb), 30);
+					z-index: 10;
 				}
 			}
 

@@ -4,8 +4,8 @@
 
 	:global {
 		.bottom_link_items {
-			max-width: 784px;
-			padding: 0 72px;
+			max-width: 720px;
+			padding: 0 36px;
 			margin: 0 auto;
 			gap: 24px;
 		}

@@ -143,7 +143,7 @@ const Index = (props: IProps) => {
 						<span className='title font-medium'>{t('toc.title')}</span>
 					</div>
 				)}
-				<nav className='border-l-2 border-black/6'>{renderItems(list, active_href)}</nav>
+				<nav className='border-l-2 border-(--color_border_light)'>{renderItems(list, active_href)}</nav>
 			</div>
 		</div>
 	)
