@@ -81,7 +81,7 @@ const Index = (props: IPropsInput) => {
 
 	useEffect(() => {
 		x.syncDraftInput()
-	}, [x, x.props.draft_input?.key, editor])
+	}, [x, props.draft_input?.key, editor])
 
 	useEffect(() => {
 		x.resetMentionIndex()
@@ -101,7 +101,7 @@ const Index = (props: IPropsInput) => {
 					backdrop-blur-lg
 				`,
 					x.is_page && 'page_wrap py-0',
-					x.props.type === 'dialog' && 'px-px!'
+					props.type === 'dialog' && 'px-px!'
 				)}
 			>
 				<div className={$cx('flex min-h-0 flex-col', x.full && 'h-full')}>
@@ -136,9 +136,25 @@ const Index = (props: IPropsInput) => {
 						)}
 					>
 						<EditorPane editor={editor} />
-						<PrimaryBar />
+						<PrimaryBar
+							mode={props.mode}
+							setMode={props.setMode}
+							show_session_mode_select={props.show_session_mode_select}
+							stop={props.stop}
+							streaming={props.streaming}
+						/>
 					</div>
-					<SecondaryBar />
+					<SecondaryBar
+						archive={props.archive}
+						archived={props.archived}
+						audit_mode={props.audit_mode}
+						clear={props.clear}
+						scrollToBottom={props.scrollToBottom}
+						setAuditMode={props.setAuditMode}
+						show_audit_mode_select={props.show_audit_mode_select}
+						toggleContextModal={props.toggleContextModal}
+						unarchive={props.unarchive}
+					/>
 				</div>
 			</div>
 		</Context>

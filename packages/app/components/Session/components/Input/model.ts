@@ -1,4 +1,4 @@
-import { makeAutoObservable, observable } from 'mobx'
+import { makeAutoObservable } from 'mobx'
 
 import Setting from '@/models/setting'
 import { rpc } from '@/utils'
@@ -60,7 +60,7 @@ export default class Model {
 		makeAutoObservable(
 			this,
 			{
-				props: observable.ref,
+				props: false,
 				setting: false,
 				editor: false
 			},

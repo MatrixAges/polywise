@@ -16,9 +16,13 @@ import { ModelSelect } from '@/components'
 import { useModel } from '../context'
 import { effort_modes, session_modes } from '../utils'
 
-const Index = () => {
+import type { IPropsInput } from '../../../types'
+
+type Props = Pick<IPropsInput, 'mode' | 'setMode' | 'show_session_mode_select' | 'stop' | 'streaming'>
+
+const Index = (props: Props) => {
 	const x = useModel()
-	const Icon = x.props.streaming ? PauseIcon : PlayIcon
+	const Icon = props.streaming ? PauseIcon : PlayIcon
 
 	return (
 		<div
@@ -66,11 +70,11 @@ const Index = () => {
 				</Select>
 			</div>
 			<div className='flex items-center gap-3'>
-				{x.props.show_session_mode_select && (
+				{props.show_session_mode_select && (
 					<Select
 						items={session_modes}
-						value={x.props.mode}
-						onValueChange={value => value && x.props.setMode(value)}
+						value={props.mode}
+						onValueChange={value => value && props.setMode(value)}
 					>
 						<SelectTrigger
 							className='
@@ -97,7 +101,7 @@ const Index = () => {
 				)}
 				<button
 					className='icon_button primary h-6 w-6'
-					onClick={x.props.streaming ? x.props.stop : x.onSend}
+					onClick={props.streaming ? props.stop : x.onSend}
 				>
 					<Icon className='fill-std-white h-[10px] w-[10px]' weight='fill'></Icon>
 				</button>

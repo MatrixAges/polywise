@@ -15,9 +15,24 @@ import { Show, Tooltip } from '@/components'
 import { useModel } from '../context'
 import { audit_modes, submit_modes } from '../utils'
 
-const Index = () => {
+import type { IPropsInput } from '../../../types'
+
+type Props = Pick<
+	IPropsInput,
+	| 'archive'
+	| 'archived'
+	| 'audit_mode'
+	| 'clear'
+	| 'scrollToBottom'
+	| 'setAuditMode'
+	| 'show_audit_mode_select'
+	| 'toggleContextModal'
+	| 'unarchive'
+>
+
+const Index = (props: Props) => {
 	const x = useModel()
-	const RightArchiveIcon = x.props.archived ? PackageOpen : Archive
+	const RightArchiveIcon = props.archived ? PackageOpen : Archive
 
 	return (
 		<div
@@ -30,11 +45,11 @@ const Index = () => {
 			'
 		>
 			<div className='flex gap-1.5'>
-				{x.props.show_audit_mode_select && (
+				{props.show_audit_mode_select && (
 					<Select
 						items={audit_modes}
-						value={x.props.audit_mode}
-						onValueChange={value => value && x.props.setAuditMode(value)}
+						value={props.audit_mode}
+						onValueChange={value => value && props.setAuditMode(value)}
 					>
 						<SelectTrigger
 							className={$cx(
@@ -44,7 +59,7 @@ const Index = () => {
 								text-xs
 								bg-transparent
 							`,
-								x.props.audit_mode === 'full'
+								props.audit_mode === 'full'
 									? 'text-red-700/72 dark:text-red-300/72'
 									: 'text-std-400'
 							)}
@@ -90,13 +105,13 @@ const Index = () => {
 					</SelectContent>
 				</Select>
 				<Tooltip title='Clear'>
-					<div className='icon_button h-5 w-5' onClick={x.props.clear}>
+					<div className='icon_button h-5 w-5' onClick={props.clear}>
 						<BrushCleaning className='stroke-std-400 h-[12px] w-[12px]'></BrushCleaning>
 					</div>
 				</Tooltip>
-				<Show visible={x.props.archived}>
+				<Show visible={props.archived}>
 					<Tooltip title='Unarchive'>
-						<div className='icon_button h-5 w-5' onClick={x.props.unarchive}>
+						<div className='icon_button h-5 w-5' onClick={props.unarchive}>
 							<RightArchiveIcon className='stroke-std-400 h-[12px] w-[12px]'></RightArchiveIcon>
 						</div>
 					</Tooltip>
@@ -104,17 +119,17 @@ const Index = () => {
 			</div>
 			<div className='flex gap-1'>
 				<Tooltip title='Context'>
-					<div className='icon_button h-5 w-5' onClick={x.props.toggleContextModal}>
+					<div className='icon_button h-5 w-5' onClick={props.toggleContextModal}>
 						<Layers2 className='stroke-std-400 h-[12px] w-[12px]'></Layers2>
 					</div>
 				</Tooltip>
 				<Tooltip title='Scroll to bottom'>
-					<div className='icon_button h-5 w-5' onClick={x.props.scrollToBottom}>
+					<div className='icon_button h-5 w-5' onClick={props.scrollToBottom}>
 						<ArrowDownToLine className='stroke-std-400 h-[12px] w-[12px]'></ArrowDownToLine>
 					</div>
 				</Tooltip>
 				<Tooltip title='Archive'>
-					<div className='icon_button h-5 w-5' onClick={x.props.archive}>
+					<div className='icon_button h-5 w-5' onClick={props.archive}>
 						<Archive className='stroke-std-400 h-[12px] w-[12px]'></Archive>
 					</div>
 				</Tooltip>
