@@ -13,7 +13,10 @@ export default class CustomTransport<
 	#options: CustomTransportOptions
 
 	constructor(options: CustomTransportOptions) {
-		super(options)
+		super({
+			...options,
+			credentials: 'include'
+		})
 		this.#options = options
 	}
 
