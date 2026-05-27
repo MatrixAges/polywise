@@ -149,6 +149,18 @@ const Index = () => {
 		toast.success(enabled ? 'Auth enabled.' : 'Auth disabled.')
 	})
 
+	const updatePageBridgeEnabled = useMemoizedFn(async (enabled: boolean) => {
+		await s.setConfig(
+			'config',
+			{
+				page_bridge_enabled: enabled
+			} as Partial<AppConfig>,
+			true
+		)
+
+		toast.success(enabled ? 'Page bridge enabled.' : 'Page bridge disabled.')
+	})
+
 	const submitBootstrapPassword = useMemoizedFn(async () => {
 		if (bootstrap_password.length < 8) {
 			toast.error('Password must be at least 8 characters.')
@@ -271,6 +283,19 @@ const Index = () => {
 				</FieldGroup>
 				<div className='bg-border-light my-2 h-px w-full'></div>
 				<FieldGroup className='gap-0'>
+					<Field className='items-center! py-3' orientation='horizontal'>
+						<FieldContent>
+							<FieldTitle className='text-base'>Page Bridge</FieldTitle>
+							<FieldDescription>
+								Allow the backend and page tools to observe and control the current app
+								page. Keep this off unless you need remote page control.
+							</FieldDescription>
+						</FieldContent>
+						<Switch
+							checked={Boolean(s.config?.page_bridge_enabled)}
+							onCheckedChange={checked => void updatePageBridgeEnabled(checked)}
+						/>
+					</Field>
 					<Field className='items-center! py-3' orientation='horizontal'>
 						<FieldContent>
 							<FieldTitle className='text-base'>Auth</FieldTitle>

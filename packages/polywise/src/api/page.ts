@@ -1,9 +1,11 @@
+import { config } from '@core/config'
 import { z } from 'zod'
 
 import { page_map } from '../cli/page/map'
 import {
 	enqueuePageRuntimeCommand,
 	getPageRuntimeStatus,
+	resetPageRuntime,
 	syncPageRuntime,
 	waitForPageRuntimeAck
 } from '../cli/page/runtime'
@@ -49,6 +51,10 @@ const bridge_input_schema = z.object({
 })
 
 export const get = async (c: HonoContext) => {
+	if (config.page_bridge_enabled !== true) {
+		resetPageRuntime()
+	}
+
 	return c.json({
 		page_map,
 		runtime: getPageRuntimeStatus()
@@ -56,6 +62,14 @@ export const get = async (c: HonoContext) => {
 }
 
 export const bridge = async (c: HonoContext) => {
+	if (config.page_bridge_enabled !== true) {
+		resetPageRuntime()
+		return c.json({
+			server_time: Date.now(),
+			pending_commands: []
+		})
+	}
+
 	const body = await c.req.json()
 	const input = bridge_input_schema.parse(body)
 
@@ -69,6 +83,11 @@ const command_input_schema = z.object({
 })
 
 export const command = async (c: HonoContext) => {
+	if (config.page_bridge_enabled !== true) {
+		resetPageRuntime()
+		return c.json({ error: 'Page bridge is disabled in settings.' }, 409)
+	}
+
 	const body = await c.req.json()
 	const input = command_input_schema.parse(body)
 	const command = enqueuePageRuntimeCommand({

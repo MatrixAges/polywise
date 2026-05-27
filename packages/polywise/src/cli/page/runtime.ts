@@ -1,3 +1,5 @@
+import { config } from '@core/config'
+
 import type { PageBridgeSyncInput, PageBridgeSyncOutput, PageRuntimeCommand, PageRuntimeSnapshot } from '../types'
 
 interface PageRuntimeState {
@@ -16,18 +18,42 @@ const state: PageRuntimeState = {
 	commands: []
 }
 
+const isPageBridgeEnabled = () => config.page_bridge_enabled === true
+
+const getEmptySyncOutput = (): PageBridgeSyncOutput => ({
+	server_time: Date.now(),
+	pending_commands: []
+})
+
+export const resetPageRuntime = () => {
+	state.snapshot = null
+	state.last_sync_at = null
+	state.ack_seq = 0
+	state.commands = []
+}
+
 export const getPageRuntimeSnapshot = () => state.snapshot
 
 export const getPageRuntimeStatus = () => ({
-	snapshot: state.snapshot,
-	last_sync_at: state.last_sync_at,
-	last_sync_age_ms: state.last_sync_at ? Date.now() - state.last_sync_at : null,
-	bridge_online: state.last_sync_at ? Date.now() - state.last_sync_at < 5000 : false,
-	ack_seq: state.ack_seq,
-	pending_count: state.commands.filter(item => item.seq > state.ack_seq).length
+	enabled: isPageBridgeEnabled(),
+	snapshot: isPageBridgeEnabled() ? state.snapshot : null,
+	last_sync_at: isPageBridgeEnabled() ? state.last_sync_at : null,
+	last_sync_age_ms: isPageBridgeEnabled() && state.last_sync_at ? Date.now() - state.last_sync_at : null,
+	bridge_online: isPageBridgeEnabled()
+		? state.last_sync_at
+			? Date.now() - state.last_sync_at < 5000
+			: false
+		: false,
+	ack_seq: isPageBridgeEnabled() ? state.ack_seq : 0,
+	pending_count: isPageBridgeEnabled() ? state.commands.filter(item => item.seq > state.ack_seq).length : 0
 })
 
 export const syncPageRuntime = (input: PageBridgeSyncInput): PageBridgeSyncOutput => {
+	if (!isPageBridgeEnabled()) {
+		resetPageRuntime()
+		return getEmptySyncOutput()
+	}
+
 	if (input.snapshot) {
 		state.snapshot = input.snapshot
 	}
@@ -45,6 +71,10 @@ export const syncPageRuntime = (input: PageBridgeSyncInput): PageBridgeSyncOutpu
 export const enqueuePageRuntimeCommand = (
 	command: Omit<PageRuntimeCommand, 'seq' | 'created_at'>
 ): PageRuntimeCommand => {
+	if (!isPageBridgeEnabled()) {
+		throw new Error('Page bridge is disabled in settings.')
+	}
+
 	const next_command: PageRuntimeCommand = {
 		...command,
 		seq: state.next_seq++,
@@ -57,6 +87,10 @@ export const enqueuePageRuntimeCommand = (
 }
 
 export const waitForPageRuntimeAck = async (seq: number, timeout_ms = 4000) => {
+	if (!isPageBridgeEnabled()) {
+		return false
+	}
+
 	const start = Date.now()
 
 	while (Date.now() - start < timeout_ms) {

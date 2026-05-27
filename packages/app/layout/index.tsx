@@ -56,7 +56,7 @@ const Index = () => {
 					value={{ size: '14px', className: 'rc-icons', attr: { strokeWidth: 1.6 } }}
 				>
 					<TooltipProvider delay={600} closeDelay={300}>
-						<PageBridge></PageBridge>
+						{s.config?.page_bridge_enabled && <PageBridge></PageBridge>}
 						<Toaster
 							position='top-center'
 							toastOptions={{ duration: 3000 }}

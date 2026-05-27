@@ -24,6 +24,7 @@ export default async () => {
 				workspaces: [{ name: 'Default' }],
 				current_workspace: 'Default',
 				default_model,
+				page_bridge_enabled: false,
 				jina_api_key: '',
 				bookmark_auto_clean: false,
 				agent_export_dir: '',

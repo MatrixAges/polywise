@@ -107,6 +107,11 @@ export default async () => {
 		has_changed_config = true
 	}
 
+	if (config.page_bridge_enabled === undefined) {
+		config.page_bridge_enabled = false
+		has_changed_config = true
+	}
+
 	if (config.bookmark_auto_clean === undefined) {
 		config.bookmark_auto_clean = false
 		has_changed_config = true

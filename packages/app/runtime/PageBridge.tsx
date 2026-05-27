@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { useLocation, useNavigate, useParams } from 'react-router'
+import { useLocation, useNavigate, useNavigation, useParams } from 'react-router'
 
 import { server_sys_url } from '@/appdata'
 
@@ -8,6 +8,9 @@ import { collectPageSnapshot } from './pageSnapshot'
 import type { PageBridgeSyncOutput, PageRuntimeCommand } from '@core/cli/types'
 
 const command_attempt_cooldown_ms = 1200
+const route_sync_delay_ms = 120
+const observer_resume_delay_ms = 260
+const mutation_sync_debounce_ms = 180
 
 const readSearchParams = (search: string) => {
 	const entries = {} as Record<string, string>
@@ -132,6 +135,7 @@ const syncBridge = async (args: {
 
 const Index = () => {
 	const navigate = useNavigate()
+	const navigation = useNavigation()
 	const { pathname, search, key: location_key } = useLocation()
 	const params = useParams()
 	const params_key = JSON.stringify(params)
@@ -142,6 +146,9 @@ const Index = () => {
 
 	useEffect(() => {
 		let disposed = false
+		let observer: MutationObserver | null = null
+		let sync_timer = null as ReturnType<typeof setTimeout> | null
+		let observer_timer = null as ReturnType<typeof setTimeout> | null
 
 		const getSnapshot = () =>
 			collectPageSnapshot({
@@ -200,23 +207,70 @@ const Index = () => {
 			}
 		}
 
-		void syncSnapshot()
+		const clearSyncTimer = () => {
+			if (sync_timer) {
+				clearTimeout(sync_timer)
+				sync_timer = null
+			}
+		}
 
-		const observer = new MutationObserver(() => {
-			void syncSnapshot()
-		})
+		const clearObserverTimer = () => {
+			if (observer_timer) {
+				clearTimeout(observer_timer)
+				observer_timer = null
+			}
+		}
 
-		observer.observe(document.body, {
-			subtree: true,
-			attributes: true,
-			attributeFilter: ['data-active']
-		})
+		const stopObserver = () => {
+			observer?.disconnect()
+			observer = null
+		}
+
+		const scheduleSync = (delay_ms = mutation_sync_debounce_ms) => {
+			clearSyncTimer()
+			sync_timer = setTimeout(() => {
+				void syncSnapshot()
+			}, delay_ms)
+		}
+
+		const startObserver = () => {
+			if (disposed || navigation.state !== 'idle') {
+				return
+			}
+
+			const target = document.querySelector('[data-page-tabs="panel"]')
+
+			if (!target) {
+				return
+			}
+
+			observer = new MutationObserver(() => {
+				scheduleSync()
+			})
+
+			observer.observe(target, {
+				subtree: true,
+				attributes: true,
+				attributeFilter: ['data-active']
+			})
+		}
+
+		scheduleSync(route_sync_delay_ms)
+
+		if (navigation.state === 'idle') {
+			observer_timer = setTimeout(() => {
+				stopObserver()
+				startObserver()
+			}, observer_resume_delay_ms)
+		}
 
 		return () => {
 			disposed = true
-			observer.disconnect()
+			clearSyncTimer()
+			clearObserverTimer()
+			stopObserver()
 		}
-	}, [pathname, search, location_key, navigate, params_key])
+	}, [pathname, search, location_key, navigate, navigation.state, params_key])
 
 	return null
 }
