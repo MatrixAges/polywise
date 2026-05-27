@@ -25,10 +25,6 @@ This routing table is scoped to folder-level matching. The matcher must use `pat
 		"path_scope": "packages/desktop/src/rpc",
 		"sample_pool": ["packages/desktop/src/rpc/memory/index.ts", "packages/desktop/src/utils/trpc.ts"]
 	},
-	"src/utils/saveWithUtilityProcess": {
-		"path_scope": "packages/desktop/src/utils/saveWithUtilityProcess",
-		"sample_pool": ["packages/desktop/src/workers/polywise.ts", "packages/desktop/src/utils/task.ts"]
-	},
 	"src/utils": {
 		"path_scope": "packages/desktop/src/utils",
 		"sample_pool": ["packages/desktop/src/utils/serve.ts", "packages/desktop/src/utils/path.ts"]

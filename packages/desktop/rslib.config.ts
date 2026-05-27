@@ -17,8 +17,7 @@ export default defineConfig({
 	lib: [{ format: 'cjs' }],
 	source: {
 		entry: {
-			index: './src/index.ts',
-			polywise: './src/workers/polywise.ts'
+			index: './src/index.ts'
 		},
 		define: {
 			'process.env.DEVTOOL': JSON.stringify(process.env.DEVTOOL)
@@ -35,18 +34,5 @@ export default defineConfig({
 	performance: {
 		chunkSplit: { strategy: 'split-by-module' },
 		buildCache: is_dev
-	},
-	tools: {
-		rspack: {
-			target: 'electron-main',
-			module: {
-				rules: [
-					{
-						test: /\.(md|txt)$/i,
-						type: 'asset/source'
-					}
-				]
-			}
-		}
 	}
 })

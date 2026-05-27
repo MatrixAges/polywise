@@ -92,16 +92,6 @@ This document provides an overview of the packages/desktop module structure and 
 				"protocol.ts": { "desc": "Protocol registration", "role": "Utility" },
 				"relaunch.ts": { "desc": "Relaunch helper", "role": "Utility" },
 				"request.ts": { "desc": "HTTP request helper", "role": "Utility" },
-				"saveWithUtilityProcess": {
-					"index.ts": {
-						"desc": "UtilityProcess memory bridge facade with startup init",
-						"role": "Utility"
-					},
-					"polywise.ts": {
-						"desc": "UtilityProcess memory worker lifecycle and call manager with debug tracing, heap tuning, stdio capture, and init call",
-						"role": "Utility"
-					}
-				},
 				"rstream": {
 					"index.ts": { "desc": "Stream module exports", "role": "Index" },
 					"pubsub.ts": { "desc": "Publish-Subscribe pattern", "role": "Utility" }
@@ -113,12 +103,6 @@ This document provides an overview of the packages/desktop module structure and 
 				"trpc.ts": {
 					"desc": "tRPC setup helper with utility-process memory bridge",
 					"role": "Utility"
-				}
-			},
-			"workers": {
-				"polywise.ts": {
-					"desc": "Utility process worker for full poly memory methods including init with debug tracing and crash hooks. Acts as the entry point for the polywise-worker bundle.",
-					"role": "Worker"
 				}
 			}
 		},
