@@ -27,6 +27,8 @@ export default class GlobalModel {
 	}
 
 	async init() {
+		if (is_electron) document.documentElement.setAttribute('data-electron', '1')
+
 		await this.locale.init()
 		await this.theme.init()
 		await this.auth.init()

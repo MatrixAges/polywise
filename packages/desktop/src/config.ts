@@ -1,8 +1,11 @@
 import { getAppPath, getPath, is_dev, show_devtool } from '@desktop/utils'
+import { nativeTheme } from 'electron'
 
 import { productName } from '../package.json'
 
 import type { BrowserWindowConstructorOptions } from 'electron'
+
+nativeTheme.themeSource = 'dark'
 
 export const window_options = {
 	frame: false,

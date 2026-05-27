@@ -27,28 +27,28 @@
 		"subtitle": "An Evolving System, Not a Record",
 		"items": {
 			"0": {
-				"title": "Scoped knowledge",
-				"desc": "Store content globally, per project, or per agent so the same system can support both shared knowledge and focused runs."
+				"title": "Agent Group",
+				"desc": "Each agent has its own private prompts, tools, skills, and knowledge graph to activate personalized capabilities.\nBy assembling agents into groups, Polywise can deliver distinct SOPs and collaborative workflows for the user."
 			},
 			"1": {
-				"title": "Hybrid retrieval",
-				"desc": "Combine keyword search, vectors, recall, and reranking in one pipeline to recover the right context before an agent acts."
+				"title": "FST",
+				"desc": "Full Self Thinking is a harness architecture built for effectively unbounded conversations within a single session.\nIt adds a dynamic sliding window, shadow context injection, and background sub-agents that asynchronously extract key information back into context."
 			},
 			"2": {
-				"title": "Multi-agent work",
-				"desc": "Run sessions for agents, groups, projects, and linked tasks instead of treating every workflow as a single chat thread."
+				"title": "Pipeline",
+				"desc": "Polywise offers full-text retrieval, vector retrieval, graph retrieval with depth-based iterative traversal, and hybrid retrieval.\nEntity relationships are built as content is ingested, so AI can decide which retrieval path to use without asking users to wire relationships by hand."
 			},
 			"3": {
-				"title": "Link capture",
-				"desc": "Save URLs, extract articles, bind them to agents, and schedule recurring fetch jobs to keep source material fresh."
+				"title": "Callback",
+				"desc": "Accepted knowledge increases the weight of key nodes and search edges inside the graph.\nMatched content is also reinforced, so the next retrieval cycle ranks proven knowledge higher."
 			},
 			"4": {
-				"title": "Bring your models",
-				"desc": "Use remote providers, MCP tools, and local llama runtimes without locking the system to a single vendor."
+				"title": "Post-Think",
+				"desc": "A background post-thinking loop actively reads recent messages and distills valuable information into knowledge.\nIt is an ongoing knowledge distillation process that makes the system understand you better over time."
 			},
 			"5": {
-				"title": "Multiple surfaces",
-				"desc": "Use Polywise through desktop sessions, API routes, scheduled jobs, and IM connectors while keeping one context system underneath."
+				"title": "Rewire",
+				"desc": "Inspired by Hebbian learning, Rewire prunes the knowledge graph so concepts activated together become more strongly connected.\nThe core of memory is not only remembering but also forgetting, and the point of recording is not storage alone but becoming part of the model's thinking context."
 			}
 		}
 	},

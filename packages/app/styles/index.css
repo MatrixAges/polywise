@@ -19,9 +19,11 @@
 @source '../node_modules/@streamdown/mermaid/dist/*.js';
 
 @custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+@custom-variant electron (&:where([data-electron='1'], [data-electron='1'] *));
 
 @theme {
 	--color-std-50: oklch(98.5% 0 0);
+	--color-std-75: oklch(97.7% 0 0);
 	--color-std-100: oklch(96.7% 0 0);
 	--color-std-150: oklch(94.2% 0 0);
 	--color-std-200: oklch(92.8% 0 0);
@@ -66,6 +68,7 @@
 
 [data-theme='dark'] {
 	--color-std-50: oklch(0.18 0 0);
+	--color-std-75: oklch(0.21 0 0);
 	--color-std-100: oklch(0.24 0 0);
 	--color-std-150: oklch(0.32 0 0);
 	--color-std-200: oklch(0.378 0 0);
@@ -89,4 +92,14 @@
 	--color-under: oklch(from var(--color-std-700) l c h / 1);
 	--color-layout-under: oklch(from var(--color-std-white) l c h / 1);
 	--color-layout-over: oklch(from var(--color-std-100) l c h / 0.72);
+}
+
+[data-electron='1'] {
+	body {
+		background-color: transparent;
+	}
+
+	&[data-theme='dark'] {
+		--color-layout-over: oklch(from var(--color-std-75) l c h / 1);
+	}
 }

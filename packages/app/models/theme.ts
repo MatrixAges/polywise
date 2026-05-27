@@ -5,7 +5,7 @@ import { local } from 'stk/storage'
 import { injectable } from 'tsyringe'
 
 import { Util } from '@/models/common'
-import { getSystemTheme, ipc, is_electron, setGlobalAnimation, theme_match_media } from '@/utils'
+import { getSystemTheme, setGlobalAnimation, theme_match_media } from '@/utils'
 
 import type { Theme } from '@/types'
 
@@ -44,8 +44,6 @@ export default class Index {
 	}
 
 	async setTheme(v: Index['theme_source'], initial?: boolean) {
-		if (is_electron) await ipc.app.setTheme.mutate({ theme: v })
-
 		if (v === 'system') {
 			this.onThemeChange()
 		} else {
