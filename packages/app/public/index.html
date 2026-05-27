@@ -8,7 +8,6 @@
 		<link rel="stylesheet" href="/icons/style.css" />
 
 		<script type="module">
-			// 解决 hydrateFallbackElement: <Fallback /> 提前渲染导致的白屏闪烁问题
 			const local_theme_source = localStorage.getItem('theme_source')
 			const theme_source = local_theme_source ? JSON.parse(local_theme_source).value : 'light'
 			const theme_match_media = window.matchMedia('(prefers-color-scheme: dark)')
@@ -22,10 +21,6 @@
 		<script type="module">
 			if (window.$shell?.type === 'electron') {
 				setTimeout(() => window.$shell?.stopLoading(), 300)
-
-				const res = await window.$shell.getEnv()
-
-				window.$env = res
 			}
 		</script>
 	</head>

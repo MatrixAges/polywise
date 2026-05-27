@@ -17,6 +17,7 @@
 			"@/*": ["./app/*"],
 			"@core/*": ["./polywise/src/*"],
 			"@desktop/*": ["./desktop/src/*"],
+			"erpc/renderer": ["./erpc/src/renderer/index.ts"],
 			"@/components/*": ["./app/components/*"],
 			"@/components": ["./app/components/index.ts"]
 		},

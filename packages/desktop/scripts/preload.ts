@@ -10,9 +10,6 @@ exposeConf()
 contextBridge.exposeInMainWorld('$shell', {
 	type: 'electron',
 	platform: process.platform,
-	getEnv: () => {
-		return ipcRenderer.invoke('get-env')
-	},
 	stopLoading: () => {
 		ipcRenderer.send('stop-loading')
 	},

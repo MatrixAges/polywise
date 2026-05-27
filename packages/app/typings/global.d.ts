@@ -32,7 +32,6 @@ declare global {
 		$shell?: {
 			type: 'electron'
 			platform: 'darwin' | 'win32'
-			getEnv: () => Promise<$Env>
 			stopLoading: () => void
 			getPathForFile: (file: File) => {
 				name: string

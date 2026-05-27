@@ -17,7 +17,6 @@ export default defineConfig({
 	lib: [
 		{
 			format: 'cjs',
-			externals: ['electron'],
 			tools: { rspack: { target: 'electron-main' } }
 		}
 	],
