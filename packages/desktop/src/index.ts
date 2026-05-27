@@ -30,6 +30,7 @@ class App {
 		app.whenReady().then(async () => {
 			try {
 				await polywise_runtime.ensureStarted()
+
 				registerProtocol()
 
 				this.window = new Main()
@@ -62,6 +63,7 @@ class App {
 				})
 			} catch (error) {
 				console.error('[app] failed to start polywise runtime', error)
+
 				app.exit(1)
 			}
 		})
@@ -93,7 +95,6 @@ class App {
 		)
 
 		loading_view.webContents.on('dom-ready', () => {
-			console.log('[app] loading_view dom-ready, showing window')
 			window.show()
 		})
 	}

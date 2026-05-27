@@ -1,4 +1,4 @@
-import { fork, spawnSync } from 'child_process'
+import { fork } from 'child_process'
 import { access } from 'fs/promises'
 import { createRequire } from 'module'
 import path from 'path'
@@ -12,7 +12,6 @@ const startup_poll_interval_ms = 250
 const startup_timeout_ms = 60_000
 const shutdown_timeout_ms = 5_000
 const log_history_limit = 30
-const node_exec_env_keys = ['POLYWISE_NODE_EXEC_PATH', 'npm_node_execpath', 'NODE']
 
 const wait = async (ms: number) => {
 	await new Promise(resolve => setTimeout(resolve, ms))
@@ -52,41 +51,6 @@ const resolvePolywiseEntrypoint = async () => {
 		package_dir,
 		entrypoint_path
 	}
-}
-
-const resolveNodeExecPath = async () => {
-	for (const key of node_exec_env_keys) {
-		const value = process.env[key]?.trim()
-
-		if (!value) continue
-
-		try {
-			await access(value)
-			return value
-		} catch {}
-	}
-
-	const command = process.platform === 'win32' ? 'where' : 'which'
-	const result = spawnSync(command, ['node'], {
-		encoding: 'utf8',
-		shell: false,
-		env: process.env
-	})
-	const candidate = result.stdout
-		.split(/\r?\n/g)
-		.map(line => line.trim())
-		.find(Boolean)
-
-	if (candidate) {
-		try {
-			await access(candidate)
-			return candidate
-		} catch {}
-	}
-
-	throw new Error(
-		'Unable to resolve a standalone Node.js executable for polywise runtime. Set POLYWISE_NODE_EXEC_PATH if needed.'
-	)
 }
 
 class PolywiseRuntime {
@@ -132,13 +96,12 @@ class PolywiseRuntime {
 
 		if (!this.child) {
 			const { entrypoint_path, package_dir } = await resolvePolywiseEntrypoint()
-			const node_exec_path = await resolveNodeExecPath()
 
 			this.log_history = []
 			this.started_by_desktop = true
 			this.child = fork(entrypoint_path, ['--platform=electron'], {
 				cwd: package_dir,
-				execPath: node_exec_path,
+				execPath: process.execPath,
 				env: {
 					...process.env,
 					POLYWISE_PLATFORM: 'electron'

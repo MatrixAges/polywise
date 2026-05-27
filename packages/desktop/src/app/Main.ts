@@ -9,7 +9,6 @@ export default class Index extends BrowserWindow {
 	constructor() {
 		super(config.window_options)
 
-		console.log('[app] Main window instance created')
 		this.window = this
 
 		this.loadURL(config.window_url)

@@ -4,7 +4,7 @@ export { default as setWindowGlass } from './setWindowGlass'
 export { default as registerProtocol } from './protocol'
 export { default as conf } from './conf'
 export { default as main_emitter } from './main_emitter'
-export { default as polywise_runtime } from './polywiseRuntime'
+export { default as polywise_runtime } from './polywise'
 
 export * from './is'
 export * from './trpc'

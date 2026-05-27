@@ -6,6 +6,7 @@
 	"main": "dist/index.js",
 	"scripts": {
 		"clean": "bun ./build/clean",
+		"rebuild": "electron-builder install-app-deps",
 		"watch": "delay 300ms && bun ./scripts/dev",
 		"shell": "electron .",
 		"dev": "concurrently \"npm run main:dev\" \"npm run watch\"",

@@ -20,8 +20,8 @@ export default async () => {
 
 	const node_server = serve({ fetch: server.fetch, port: 3072 }, ({ port }) => {
 		console.log(`Listening on http://localhost:${port}`)
-		void writeRuntimePidFile()
 
+		writeRuntimePidFile()
 		resolve(port)
 	})
 
