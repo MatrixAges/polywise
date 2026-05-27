@@ -25,15 +25,15 @@ const Index = () => {
 						<div
 							className='
 								flex flex-col
-								gap-2
-								p-6
+								gap-4
+								p-12
 								border-b border-r
 								item
 							'
 							key={index}
 						>
-							<span className='title font-semibold'>
-								{index + 1}. {t(`What.items.${index}.title`)}
+							<span className='title text-2xl font-semibold max-md:text-xl'>
+								{t(`What.items.${index}.title`)}
 							</span>
 							<span className='desc'>{t(`What.items.${index}.desc`)}</span>
 						</div>

@@ -8,6 +8,7 @@
 
 				.desc {
 					color: var(--color_text_sub);
+					font-size: 15px;
 				}
 			}
 		}
@@ -17,6 +18,13 @@
 @media (max-width: 720px) {
 	._local {
 		:global {
+			.items_wrap {
+				.item {
+					.desc {
+						font-size: 14px;
+					}
+				}
+			}
 		}
 	}
 }
