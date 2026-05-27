@@ -29,6 +29,7 @@ const Index = (props: IPropsHeader) => {
 				w-full h-[42px]
 				text-under/60
 				bg-over
+				is_drag
 			`,
 				styles._local
 			)}

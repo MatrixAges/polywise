@@ -12,6 +12,7 @@ import {
 	SelectValue
 } from '@/__shadcn__/components/ui/select'
 import Logo from '@/public/bare.svg?react'
+import { is_mac_electron } from '@/utils'
 
 import type { IPropsLeft } from '../types'
 
@@ -25,13 +26,16 @@ const Index = (props: IPropsLeft) => {
 
 	return (
 		<div
-			className='
+			className={$cx(
+				`
 				absolute
 				left-3.5
 				flex
 				items-center
 				h-full
-			'
+			`,
+				is_mac_electron && 'pl-20'
+			)}
 		>
 			<div
 				className='
@@ -52,14 +56,14 @@ const Index = (props: IPropsLeft) => {
 					bg-under/16
 				'
 			></div>
-			<button className='icon_button mr-1' onClick={toggleSidebar}>
+			<button className='icon_button no_drag mr-1' onClick={toggleSidebar}>
 				<PanelLeft></PanelLeft>
 			</button>
 			<Select
 				items={workspaces.map(item => ({ label: item.name, value: item.name }))}
 				value={current_workspace ?? null}
 			>
-				<SelectTrigger className='workspace_selector' noActiveStyle>
+				<SelectTrigger className='workspace_selector no_drag' noActiveStyle>
 					<SelectValue />
 				</SelectTrigger>
 				<SelectContent className='w-[180px]' align='start'>
@@ -73,7 +77,7 @@ const Index = (props: IPropsLeft) => {
 					</SelectGroup>
 				</SelectContent>
 			</Select>
-			<button className='icon_button ml-1' onClick={onClickCreateSession}>
+			<button className='icon_button no_drag ml-1' onClick={onClickCreateSession}>
 				<Plus></Plus>
 			</button>
 		</div>

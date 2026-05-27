@@ -28,6 +28,7 @@ const Index = () => {
 				h-9
 				gap-1.5
 				text-xs
+				no_drag
 			'
 		>
 			<Tabs items={nav_items} active={getActive} deps={[pathname]} under onClick={onClick}></Tabs>

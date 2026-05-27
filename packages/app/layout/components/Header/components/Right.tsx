@@ -28,15 +28,14 @@ const Index = (props: IPropsRight) => {
 				></span>
 				<span>Status</span>
 			</div>
-			<NavLink to='/setting'>
+			<NavLink className='no_drag' to='/setting'>
 				{({ isActive }) => (
 					<button className={$cx(`icon_button`, isActive && 'active')}>
 						<SlidersHorizontal></SlidersHorizontal>
 					</button>
 				)}
 			</NavLink>
-
-			<button className='icon_button' onClick={togglePanel}>
+			<button className='icon_button no_drag' onClick={togglePanel}>
 				<PanelRight></PanelRight>
 			</button>
 		</div>

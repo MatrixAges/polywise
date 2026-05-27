@@ -17,7 +17,7 @@ export const window_options = {
 	visualEffectState: 'active',
 	vibrancy: 'under-window',
 	backgroundMaterial: 'tabbed',
-	trafficLightPosition: { x: 12.5, y: 10.5 },
+	trafficLightPosition: { x: 10, y: 14 },
 	webPreferences: {
 		sandbox: false,
 		enableWebSQL: false,
