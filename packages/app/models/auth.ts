@@ -86,13 +86,36 @@ export default class AuthModel {
 		return data
 	}
 
+	async logout() {
+		const response = await fetch(`${server_base_url}/api/auth/sign-out`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			credentials: 'include',
+			body: JSON.stringify({})
+		})
+
+		const data = await response.json().catch(() => ({}))
+
+		if (!response.ok) {
+			throw new Error(
+				typeof data?.message === 'string' ? data.message : `Logout failed (${response.status})`
+			)
+		}
+
+		await this.refreshStatus()
+
+		return data
+	}
+
 	async bootstrapPassword(password: string) {
 		await rpc.auth.bootstrap.mutate({ password })
 		await this.refreshStatus()
 	}
 
-	async changePassword(current_password: string, new_password: string) {
-		await rpc.auth.changePassword.mutate({ current_password, new_password })
+	async changePassword(new_password: string) {
+		await rpc.auth.changePassword.mutate({ new_password })
 		await this.refreshStatus()
 	}
 

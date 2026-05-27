@@ -8,7 +8,6 @@ const password_input = object({
 })
 
 const change_password_input = object({
-	current_password: string().trim().min(1),
 	new_password: string().trim().min(8)
 })
 
@@ -46,7 +45,7 @@ export default r({
 			throw new Error('Please login first.')
 		}
 
-		await changeConfiguredPassword(input.current_password, input.new_password)
+		await changeConfiguredPassword(input.new_password)
 
 		return { ok: true }
 	})

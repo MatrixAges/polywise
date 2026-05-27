@@ -41,7 +41,6 @@ const Index = () => {
 				w-full
 				min-h-screen
 				px-6
-				bg-[radial-gradient(circle_at_top,_rgba(27,87,255,0.16),_transparent_38%),linear-gradient(160deg,_var(--bg-layout-under),_var(--bg-layout-over))]
 			'
 		>
 			<div
@@ -49,10 +48,8 @@ const Index = () => {
 					w-full max-w-[420px]
 					p-7
 					rounded-2xl
-					bg-layout-over/95
-					border border-border-light/80
-					shadow-2xl
-					backdrop-blur
+					bg-layout-over
+					border-2 border-std-black
 				'
 			>
 				<div className='mb-6 flex items-center gap-3'>

@@ -1,6 +1,6 @@
 import { drizzleAdapter } from '@better-auth/drizzle-adapter'
 import { betterAuth } from 'better-auth'
-import { hashPassword, verifyPassword } from 'better-auth/crypto'
+import { hashPassword } from 'better-auth/crypto'
 import { username } from 'better-auth/plugins'
 import { and, eq } from 'drizzle-orm'
 import { getId } from 'stk/utils'
@@ -194,20 +194,11 @@ export const bootstrapAuthPassword = async (password: string) => {
 	})()
 }
 
-export const changeConfiguredPassword = async (current_password: string, next_password: string) => {
+export const changeConfiguredPassword = async (next_password: string) => {
 	const account = await getConfiguredCredentialAccount()
 
 	if (!account?.password) {
 		throw new Error('Auth account is not configured.')
-	}
-
-	const is_valid = await verifyPassword({
-		hash: account.password,
-		password: current_password
-	})
-
-	if (!is_valid) {
-		throw new Error('Current password is incorrect.')
 	}
 
 	await env.db

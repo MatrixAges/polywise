@@ -46,8 +46,8 @@ const Index = () => {
 	const report = s.config?.report
 	const [bootstrap_password, setBootstrapPassword] = useState('')
 	const [bootstrap_confirm, setBootstrapConfirm] = useState('')
-	const [current_password, setCurrentPassword] = useState('')
 	const [next_password, setNextPassword] = useState('')
+	const [next_password_confirm, setNextPasswordConfirm] = useState('')
 
 	const onChange = useMemoizedFn((_, changed) => {
 		if ('theme' in changed) t.setTheme(changed['theme'])
@@ -155,11 +155,25 @@ const Index = () => {
 			return
 		}
 
+		if (next_password !== next_password_confirm) {
+			toast.error('Passwords do not match.')
+			return
+		}
+
 		try {
-			await a.changePassword(current_password, next_password)
-			setCurrentPassword('')
+			await a.changePassword(next_password)
 			setNextPassword('')
+			setNextPasswordConfirm('')
 			toast.success('Password updated.')
+		} catch (error) {
+			toast.error(error instanceof Error ? error.message : String(error))
+		}
+	})
+
+	const submitLogout = useMemoizedFn(async () => {
+		try {
+			await a.logout()
+			toast.success('Logged out.')
 		} catch (error) {
 			toast.error(error instanceof Error ? error.message : String(error))
 		}
@@ -259,17 +273,25 @@ const Index = () => {
 						</FieldContent>
 						<div
 							className='
-								flex
-								justify-end
+								flex flex-col
+								items-end
 								w-[380px]
+								gap-2
 								text-std-500 text-sm leading-6
 							'
 						>
-							{a.status?.bootstrap_required
-								? 'Auth is enabled and no account is configured yet.'
-								: a.status?.has_account
-									? 'Auth account is configured.'
-									: 'Auth is currently disabled.'}
+							<div>
+								{a.status?.bootstrap_required
+									? 'Auth is enabled and no account is configured yet.'
+									: a.status?.has_account
+										? 'Auth account is configured.'
+										: 'Auth is currently disabled.'}
+							</div>
+							{a.status?.has_account && a.authenticated && (
+								<Button variant='outline' size='sm' onClick={() => void submitLogout()}>
+									Logout
+								</Button>
+							)}
 						</div>
 					</Field>
 					{a.status?.bootstrap_required && (
@@ -313,16 +335,16 @@ const Index = () => {
 							<div className='flex w-[380px] flex-col gap-2'>
 								<Input
 									type='password'
-									placeholder='Current password'
-									value={current_password}
-									onChange={event => setCurrentPassword(event.target.value)}
+									placeholder='New password'
+									value={next_password}
+									onChange={event => setNextPassword(event.target.value)}
 									disabled={!a.canChangePassword}
 								></Input>
 								<Input
 									type='password'
-									placeholder='New password'
-									value={next_password}
-									onChange={event => setNextPassword(event.target.value)}
+									placeholder='Confirm password'
+									value={next_password_confirm}
+									onChange={event => setNextPasswordConfirm(event.target.value)}
 									disabled={!a.canChangePassword}
 								></Input>
 								<Button
