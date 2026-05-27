@@ -17,6 +17,7 @@ const server_base_url = (process.env.POLYWISE_SERVER_URL || 'http://localhost:30
 const api_base_url = `${server_base_url}/api`
 const server_entrypoint_path = fileURLToPath(new URL('../index.js', import.meta.url))
 const version_flags = new Set(['-v', '--version'])
+const server_start_hint = `Unable to reach the Polywise server at ${server_base_url}. Please run "polywise start" or "polywise start -d" first.`
 
 interface ApiCommandTreeNode {
 	name: string
@@ -241,6 +242,23 @@ const readResponseBody = async (response: Response) => {
 	}
 }
 
+const isServerUnavailableError = (error: unknown) => {
+	if (!(error instanceof Error)) {
+		return false
+	}
+
+	const message = error.message.toLowerCase()
+	const cause_code =
+		typeof (error as Error & { cause?: { code?: unknown } }).cause?.code === 'string'
+			? String((error as Error & { cause?: { code?: unknown } }).cause?.code)
+			: ''
+
+	return (
+		message.includes('fetch failed') ||
+		['ECONNREFUSED', 'ECONNRESET', 'EHOSTUNREACH', 'ENOTFOUND', 'ETIMEDOUT'].includes(cause_code)
+	)
+}
+
 const callApi = async (target: ApiMapItem, input: Record<string, unknown>) => {
 	const { resolved_path, rest } = resolveApiPath(target.openapi_path, input)
 	const url = buildApiUrl(resolved_path)
@@ -252,13 +270,23 @@ const callApi = async (target: ApiMapItem, input: Record<string, unknown>) => {
 		}
 	}
 
-	const response = await fetch(url, {
-		method: target.method,
-		headers: {
-			'content-type': 'application/json'
-		},
-		...(is_query_method ? {} : { body: JSON.stringify(rest) })
-	})
+	let response: Response
+
+	try {
+		response = await fetch(url, {
+			method: target.method,
+			headers: {
+				'content-type': 'application/json'
+			},
+			...(is_query_method ? {} : { body: JSON.stringify(rest) })
+		})
+	} catch (error) {
+		if (isServerUnavailableError(error)) {
+			throw new Error(server_start_hint)
+		}
+
+		throw error
+	}
 
 	printJson({
 		ok: response.ok,
