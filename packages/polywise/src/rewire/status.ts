@@ -17,7 +17,7 @@ const default_status = (): RewireRuntimeStatus => ({
 })
 
 const legacy_rewire_path = path.resolve(app.app_path, 'rewire.json')
-const mistaken_rewire_path = path.resolve(app.app_path, 'app_dir', 'rewire', 'status.json')
+const mistaken_rewire_path = path.resolve(app.app_path, 'rewire', 'status.json')
 const rewire_temp_dir = path.resolve(app.temp_dir, 'rewire')
 
 const readStatusFile = async (file_path: string) => {

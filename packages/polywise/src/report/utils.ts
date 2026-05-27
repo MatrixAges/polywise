@@ -7,7 +7,7 @@ import type { ReportPeriod, ReportStatus, ReportWindow } from './types'
 
 dayjs.extend(isoWeek)
 
-export const report_dir = path.resolve(app.app_path, 'app_dir', 'report')
+export const report_dir = path.resolve(app.app_path, 'report')
 export const report_status_path = path.resolve(report_dir, 'status.json')
 export const report_plan_path = path.resolve(report_dir, 'plan.md')
 
