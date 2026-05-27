@@ -21,10 +21,13 @@ import type {
 	ActiveMention,
 	AgentMentionItem,
 	FileMentionItem,
+	McpMentionItem,
 	MentionItem,
 	SkillMentionItem,
 	ToolMentionItem
 } from './types'
+
+type MentionToolResponseItem = Awaited<ReturnType<typeof rpc.session.getMentionTools.query>>[number]
 
 export default class Model {
 	props = null as unknown as IPropsInput
@@ -36,6 +39,7 @@ export default class Model {
 	active_mention = null as ActiveMention | null
 	skill_items = [] as Array<SkillMentionItem>
 	tool_items = [] as Array<ToolMentionItem>
+	mcp_items = [] as Array<McpMentionItem>
 	agent_items = [] as Array<AgentMentionItem>
 	file_items = [] as Array<FileMentionItem>
 	loading_skills = false
@@ -85,7 +89,7 @@ export default class Model {
 		return this.active_mention
 			? filterMentionItems(
 					this.active_mention.trigger === '/'
-						? [...this.tool_items, ...this.skill_items]
+						? [...this.tool_items, ...this.mcp_items, ...this.skill_items]
 						: [...this.agent_items, ...this.file_items],
 					this.active_mention.query
 				)
@@ -210,16 +214,36 @@ export default class Model {
 		try {
 			const items = await rpc.session.getMentionTools.query({ id: this.session_id })
 
-			this.tool_items = items.map(item => ({
-				key: item.name,
-				type: 'tool' as const,
-				label: item.name,
-				desc: item.description || '',
-				search_text: `${item.name} ${item.description || ''}`.toLowerCase()
-			}))
+			this.tool_items = items
+				.filter((item): item is MentionToolResponseItem & { kind: 'tool' } => item.kind === 'tool')
+				.map(item => ({
+					key: item.name,
+					type: 'tool' as const,
+					label: item.name,
+					desc: item.description || '',
+					search_text: `${item.name} ${item.description || ''}`.toLowerCase()
+				}))
+			this.mcp_items = items
+				.filter(
+					(
+						item
+					): item is MentionToolResponseItem & {
+						kind: 'mcp'
+						transport_type?: 'local' | 'remote'
+					} => item.kind === 'mcp'
+				)
+				.map(item => ({
+					key: item.name,
+					type: 'mcp' as const,
+					label: item.name,
+					desc: item.description || '',
+					transport_type: item.transport_type || 'local',
+					search_text: `${item.name} ${item.description || ''}`.toLowerCase()
+				}))
 			this.tool_items_loaded_session_id = this.session_id
 		} catch {
 			this.tool_items = []
+			this.mcp_items = []
 		} finally {
 			this.loading_tools = false
 		}

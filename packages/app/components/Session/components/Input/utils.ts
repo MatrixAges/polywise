@@ -16,6 +16,7 @@ import type {
 	ActiveMention,
 	AgentMentionItem,
 	FileMentionItem,
+	McpMentionItem,
 	MentionItem,
 	MentionSection,
 	SessionTokenAttrs,
@@ -178,7 +179,7 @@ export const filterMentionItems = (items: Array<MentionItem>, query: string) => 
 }
 
 export const getMentionHeading = (active_mention: ActiveMention | null) =>
-	active_mention?.trigger === '/' ? 'Tools & Skills' : 'Mentions'
+	active_mention?.trigger === '/' ? 'Tools, MCPs & Skills' : 'Mentions'
 
 export const getMentionSections = (
 	active_mention: ActiveMention | null,
@@ -186,6 +187,7 @@ export const getMentionSections = (
 ): Array<MentionSection> => {
 	const agent_items = items.filter((item): item is AgentMentionItem => item.type === 'agent')
 	const file_items = items.filter((item): item is FileMentionItem => item.type === 'file')
+	const mcp_items = items.filter((item): item is McpMentionItem => item.type === 'mcp')
 	const skill_items = items.filter((item): item is SkillMentionItem => item.type === 'skill')
 	const tool_items = items.filter((item): item is ToolMentionItem => item.type === 'tool')
 
@@ -200,6 +202,7 @@ export const getMentionSections = (
 
 	return [
 		...(tool_items.length ? ([{ key: 'tools', items: tool_items }] satisfies Array<MentionSection>) : []),
+		...(mcp_items.length ? ([{ key: 'mcps', items: mcp_items }] satisfies Array<MentionSection>) : []),
 		...(skill_items.length ? ([{ key: 'skills', items: skill_items }] satisfies Array<MentionSection>) : [])
 	]
 }
@@ -207,6 +210,7 @@ export const getMentionSections = (
 export const formatMentionToken = (item: MentionItem) => {
 	if (item.type === 'skill') return `[SKILL: ${item.label}]`
 	if (item.type === 'tool') return `[TOOL: ${item.label}]`
+	if (item.type === 'mcp') return `[MCP: ${item.label}]`
 	if (item.type === 'agent') return `[AGENT: ${item.label}]`
 
 	return `[FILE: ${item.path}]`
@@ -284,6 +288,18 @@ export const getMentionInsertContent = (item: MentionItem) => {
 			type: 'sessionToken',
 			attrs: {
 				tokenType: 'skill',
+				label: item.label,
+				refStart: null,
+				refEnd: null
+			} satisfies SessionTokenAttrs
+		}
+	}
+
+	if (item.type === 'mcp') {
+		return {
+			type: 'sessionToken',
+			attrs: {
+				tokenType: 'mcp',
 				label: item.label,
 				refStart: null,
 				refEnd: null

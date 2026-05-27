@@ -1,11 +1,19 @@
-import { loadMcpTools } from '@core/fst/mcp'
+import { listConfiguredMcps } from '@core/fst/mcp'
 import { configurable_session_tool_items, hasSessionSubAgent } from '@core/fst/session/config/shared'
 import { connectSession, p } from '@core/utils'
-import { object, string } from 'zod'
+import { array, enum as Enum, object, string } from 'zod'
 
 const input_type = object({
 	id: string()
 })
+const output_type = array(
+	object({
+		kind: Enum(['tool', 'mcp']),
+		name: string(),
+		description: string(),
+		transport_type: Enum(['local', 'remote']).optional()
+	})
+)
 
 const builtin_tool_descriptions = {
 	agent_tool: 'Consult available agents in the current session context.',
@@ -21,18 +29,26 @@ export default p
 		}
 	})
 	.input(input_type)
+	.output(output_type)
 	.query(async ({ input }) => {
 		const session = await connectSession({ id: input.id })
 		const disable_map = new Set(session.disable_map)
-		const items: Array<{ name: string; description: string }> = configurable_session_tool_items
+		const items: Array<{
+			kind: 'tool' | 'mcp'
+			name: string
+			description: string
+			transport_type?: 'local' | 'remote'
+		}> = configurable_session_tool_items
 			.filter(item => !disable_map.has(item.key))
 			.map(item => ({
+				kind: 'tool',
 				name: item.key,
 				description: item.description
 			}))
 
 		if (session.enable_agent_tool && !disable_map.has('agent_tool')) {
 			items.push({
+				kind: 'tool',
 				name: 'agent_tool',
 				description: builtin_tool_descriptions.agent_tool
 			})
@@ -44,27 +60,26 @@ export default p
 			!disable_map.has('system_tool')
 		) {
 			items.push({
+				kind: 'tool',
 				name: 'system_tool',
 				description: builtin_tool_descriptions.system_tool
 			})
 		}
 
-		const mcp_tools = await loadMcpTools(session)
-
-		for (const [name, tool_item] of Object.entries(mcp_tools)) {
-			const description =
-				typeof tool_item === 'object' &&
-				tool_item &&
-				'description' in tool_item &&
-				typeof tool_item.description === 'string'
-					? tool_item.description
-					: ''
-
+		for (const mcp_item of listConfiguredMcps(session.disable_map)) {
 			items.push({
-				name,
-				description
+				kind: 'mcp',
+				name: mcp_item.name,
+				description: mcp_item.description,
+				transport_type: mcp_item.type
 			})
 		}
 
-		return items.sort((a, b) => a.name.localeCompare(b.name))
+		return items.sort((a, b) => {
+			if (a.kind !== b.kind) {
+				return a.kind === 'tool' ? -1 : 1
+			}
+
+			return a.name.localeCompare(b.name)
+		})
 	})

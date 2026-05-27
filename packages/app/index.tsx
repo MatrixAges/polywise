@@ -71,6 +71,10 @@ const routes: Array<RouteObject> = [
 								lazy: () => import('@/setting/model_setting')
 							},
 							{
+								path: 'mcp',
+								lazy: () => import('@/setting/mcp')
+							},
+							{
 								path: 'service_provider',
 								lazy: () => import('@/setting/service_provider')
 							},

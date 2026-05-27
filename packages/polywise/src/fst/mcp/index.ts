@@ -1,5 +1,7 @@
 export { default as createMcpClient } from './createMcpClient'
+export { clearMcpClient, getMcpClient, hasMcpClient, mcp_client_map } from './client'
 export { default as getEnabledMcps } from './getEnabledMcps'
 export { default as initMcps } from './initMcps'
+export { default as listConfiguredMcps } from './listConfiguredMcps'
 export { default as loadConfig } from './loadConfig'
 export { default as loadMcpTools } from './loadMcpTools'

@@ -1,5 +1,4 @@
 import { createSystemTool } from '@core/fst/agents'
-import { loadMcpTools } from '@core/fst/mcp'
 import { hasSessionSubAgent } from '@core/fst/session/config/shared'
 import { getSystemTools } from '@core/utils'
 
@@ -8,6 +7,7 @@ import { createBashTool } from './bash'
 import { createContentTool } from './content'
 import { createEditFileTool } from './edit'
 import { createGlobTool } from './glob'
+import { createMcpTool } from './mcp'
 import { createMetaTool, getCustomToolsPrompt } from './meta'
 import { createNativeAccessTools } from './native'
 import { createSearchFileTool } from './search'
@@ -24,6 +24,7 @@ type SharedRuntimeToolKey =
 	| 'write_file_tool'
 	| 'edit_file_tool'
 	| 'meta_tool'
+	| 'mcp_tool'
 	| 'glob_tool'
 	| 'search_file_tool'
 	| 'content_tool'
@@ -53,16 +54,15 @@ export const buildSharedRuntimeTools = async (args: BuildSharedRuntimeToolsArgs)
 		s.audit_mode === 'auto' && hasSessionSubAgent(s, 'system_agent') && !disable_map.has('system_tool')
 	const has_agent_tool = s.enable_agent_tool && !disable_map.has('agent_tool')
 	const bash_tool = is_full_access ? await createNativeAccessTools(s) : await createBashTool(s)
-	const mcp_tools = await loadMcpTools(s)
 	const system_tools_prompt = await getSystemTools()
 	const custom_tools_prompt = getCustomToolsPrompt(s.custom_tools_map)
 	const skill_prompt = getSkillPrompt(s.skill_map)
 
 	const tools = {
 		...model_tools,
-		...mcp_tools,
 		...extra_tools,
 		meta_tool: applyTransform(transform_tool, 'meta_tool', createMetaTool(s)),
+		mcp_tool: applyTransform(transform_tool, 'mcp_tool', createMcpTool(s)),
 		glob_tool: applyTransform(transform_tool, 'glob_tool', createGlobTool(s)),
 		search_file_tool: applyTransform(transform_tool, 'search_file_tool', createSearchFileTool(s)),
 		content_tool: applyTransform(transform_tool, 'content_tool', createContentTool(s)),

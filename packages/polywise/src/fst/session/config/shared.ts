@@ -30,6 +30,11 @@ export const configurable_session_tool_items = [
 		description: 'Discover installed custom tools.'
 	},
 	{
+		key: 'mcp_tool',
+		label: 'MCP',
+		description: 'Search and execute configured MCP servers lazily.'
+	},
+	{
 		key: 'read_file_tool',
 		label: 'Read File',
 		description: 'Read specific files from the workspace.'

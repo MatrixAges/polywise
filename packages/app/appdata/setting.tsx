@@ -1,9 +1,10 @@
-import { Info, Layers2, MessageCircle, Settings2, Sparkles, Unplug } from 'lucide-react'
+import { Info, Layers2, MessageCircle, Server, Settings2, Sparkles, Unplug } from 'lucide-react'
 
 export const setting_items = [
 	{ key: '', title: 'General Setting', Icon: Settings2 },
 	{ key: 'model_provider', title: 'Model Provider', Icon: Layers2 },
 	{ key: 'model_setting', title: 'Model Setting', Icon: Sparkles },
+	{ key: 'mcp', title: 'MCP Config', Icon: Server },
 	{ key: 'service_provider', title: 'Service Provider', Icon: Unplug },
 	{ key: 'im', title: 'IM Integration', Icon: MessageCircle },
 	{ key: 'about_feedback', title: 'About & Feedback', Icon: Info }

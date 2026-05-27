@@ -1,5 +1,14 @@
 export type MentionTrigger = '/' | '@'
 
+export interface McpMentionItem {
+	key: string
+	type: 'mcp'
+	label: string
+	desc: string
+	transport_type: 'local' | 'remote'
+	search_text: string
+}
+
 export interface SkillMentionItem {
 	key: string
 	type: 'skill'
@@ -39,7 +48,7 @@ export interface AgentMentionItem {
 	search_text: string
 }
 
-export type MentionItem = SkillMentionItem | ToolMentionItem | FileMentionItem | AgentMentionItem
+export type MentionItem = SkillMentionItem | ToolMentionItem | FileMentionItem | AgentMentionItem | McpMentionItem
 
 export interface ActiveMention {
 	trigger: MentionTrigger
@@ -49,11 +58,11 @@ export interface ActiveMention {
 }
 
 export interface MentionSection<T extends MentionItem = MentionItem> {
-	key: 'agents' | 'files' | 'tools' | 'skills'
+	key: 'agents' | 'files' | 'tools' | 'mcps' | 'skills'
 	items: Array<T>
 }
 
-export type SessionTokenType = 'agent' | 'skill' | 'tool' | 'file' | 'reference'
+export type SessionTokenType = 'agent' | 'skill' | 'tool' | 'file' | 'reference' | 'mcp'
 
 export interface SessionTokenAttrs {
 	tokenType: SessionTokenType

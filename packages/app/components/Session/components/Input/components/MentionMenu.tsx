@@ -1,4 +1,4 @@
-import { Container } from 'lucide-react'
+import { Container, Server } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 
 import EntityAvatar from '@/setting/im/components/EntityAvatar'
@@ -175,15 +175,47 @@ const Index: FC<Props> = ({ items, loading, activeIndex, onSelect }) => {
 													Tool
 												</span>
 											</div>
+										) : item.type === 'mcp' ? (
+											<div
+												className='
+																flex
+																items-center
+																w-full
+																min-w-0
+																gap-2
+															'
+											>
+												<Server size={14} />
+												<span className='shrink-0 truncate text-sm font-medium'>
+													{item.label}
+												</span>
+												<span className='text-std-400 flex-1 truncate text-xs'>
+													{item.desc || 'No description'}
+												</span>
+												<span
+													className='
+																	shrink-0
+																	px-2 py-0.5
+																	rounded-full
+																	text-[10px] text-std-500
+																	border
+																	border-border-light
+																'
+												>
+													{item.transport_type === 'remote'
+														? 'Remote MCP'
+														: 'Local MCP'}
+												</span>
+											</div>
 										) : (
 											<div
 												className='
-															flex
-															items-center
-															w-full
-															min-w-0
-															gap-2
-														'
+																flex
+																items-center
+																w-full
+																min-w-0
+																gap-2
+															'
 											>
 												<Container size={14} />
 												<span className='shrink-0 truncate text-sm font-medium'>
@@ -194,13 +226,13 @@ const Index: FC<Props> = ({ items, loading, activeIndex, onSelect }) => {
 												</span>
 												<span
 													className='
-																shrink-0
-																px-2 py-0.5
-																rounded-full
-																text-[10px] text-std-500
-																border
-																border-border-light
-															'
+																	shrink-0
+																	px-2 py-0.5
+																	rounded-full
+																	text-[10px] text-std-500
+																	border
+																	border-border-light
+																'
 												>
 													{getSkillTypeLabel(item.skill_type)}
 												</span>

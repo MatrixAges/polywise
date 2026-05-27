@@ -1,6 +1,6 @@
 import { createInlineMarkdownSpec, InputRule, mergeAttributes, Node, nodePasteRule } from '@tiptap/core'
 import { NodeViewWrapper, ReactNodeViewRenderer } from '@tiptap/react'
-import { BookMarked, Bot, Container } from 'lucide-react'
+import { BookMarked, Bot, Container, Server } from 'lucide-react'
 
 import getToolIcon from '@/utils/getToolIcon'
 
@@ -9,11 +9,11 @@ import { getBasename, getFileIcon } from '../utils'
 import type { NodeViewProps } from '@tiptap/core'
 import type { FileMentionItem, SessionTokenAttrs } from '../types'
 
-const mention_token_pattern = /^\[(AGENT|SKILL|TOOL|FILE):\s*([^\]\n]+?)\]/
+const mention_token_pattern = /^\[(AGENT|SKILL|TOOL|FILE|MCP):\s*([^\]\n]+?)\]/
 const reference_token_pattern = /^REFERENCE:\s*\[(\d+)\s*,\s*(\d+)\]/
-const mention_input_pattern = /(?:^|\s)(\[(AGENT|SKILL|TOOL|FILE):\s*([^\]\n]+?)\])$/
+const mention_input_pattern = /(?:^|\s)(\[(AGENT|SKILL|TOOL|FILE|MCP):\s*([^\]\n]+?)\])$/
 const reference_input_pattern = /(?:^|\s)(REFERENCE:\s*\[(\d+)\s*,\s*(\d+)\])$/
-const mention_paste_pattern = /\[(AGENT|SKILL|TOOL|FILE):\s*([^\]\n]+?)\]/g
+const mention_paste_pattern = /\[(AGENT|SKILL|TOOL|FILE|MCP):\s*([^\]\n]+?)\]/g
 const reference_paste_pattern = /REFERENCE:\s*\[(\d+)\s*,\s*(\d+)\]/g
 
 const markdown_spec = createInlineMarkdownSpec({
@@ -27,6 +27,7 @@ const getFileKind = (label: string) => (label.endsWith('/') ? 'directory' : 'fil
 const getTokenIcon = (attrs: SessionTokenAttrs) => {
 	if (attrs.tokenType === 'agent') return Bot
 	if (attrs.tokenType === 'skill') return Container
+	if (attrs.tokenType === 'mcp') return Server
 	if (attrs.tokenType === 'reference') return BookMarked
 	if (attrs.tokenType === 'file') {
 		return getFileIcon({
@@ -53,6 +54,10 @@ const getTokenMarkdown = (attrs: SessionTokenAttrs) => {
 
 	if (attrs.tokenType === 'file') {
 		return `[FILE: ${attrs.label}]`
+	}
+
+	if (attrs.tokenType === 'mcp') {
+		return `[MCP: ${attrs.label}]`
 	}
 
 	return `[${attrs.tokenType.toUpperCase()}: ${attrs.label}]`

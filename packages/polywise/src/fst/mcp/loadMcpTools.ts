@@ -1,6 +1,6 @@
 import { getConfig } from '../session/config'
+import { getMcpClient } from './client'
 import getEnabledMcps from './getEnabledMcps'
-import { mcp_client_map } from './initMcps'
 import loadConfig from './loadConfig'
 
 import type Session from '../session'
@@ -12,13 +12,7 @@ export default async (s: Session) => {
 	const tools: Record<string, unknown> = {}
 
 	for (const [name, item] of enabled_mcps) {
-		let client = mcp_client_map.get(name)
-
-		if (!client) {
-			const { default: createMcpClient } = await import('./createMcpClient')
-			client = await createMcpClient(item)
-			mcp_client_map.set(name, client)
-		}
+		const client = await getMcpClient(name, item)
 
 		const mcp_tools = await client.tools()
 
