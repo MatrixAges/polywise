@@ -7,7 +7,7 @@ import { createIPCHandler } from 'erpc/main'
 import { Main, Menu, Tray } from './app'
 import config from './config'
 import { routers } from './rpc'
-import { conf, getThemeColor, is_mac, registerProtocol, show_devtool } from './utils'
+import { conf, getThemeColor, is_mac, polywise_runtime, registerProtocol, show_devtool } from './utils'
 
 import type { Tray as TrayType } from 'electron'
 
@@ -28,41 +28,48 @@ class App {
 
 	register() {
 		app.whenReady().then(async () => {
-			registerProtocol()
+			try {
+				await polywise_runtime.ensureStarted()
+				registerProtocol()
 
-			this.window = new Main()
-			this.loading_view = new WebContentsView()
-			this.tray = new Tray(this.window).get()
+				this.window = new Main()
+				this.loading_view = new WebContentsView()
+				this.tray = new Tray(this.window).get()
 
-			const win_bounds = conf.get('win_bounds')
+				const win_bounds = conf.get('win_bounds')
 
-			if (win_bounds) this.window.setBounds(win_bounds)
+				if (win_bounds) this.window.setBounds(win_bounds)
 
-			this.loading()
-			this.events()
+				this.loading()
+				this.events()
 
-			if (show_devtool) {
-				if (process.platform === 'win32') {
-					const win_devtools = new BrowserWindow()
-					this.window.webContents.setDevToolsWebContents(win_devtools.webContents)
+				if (show_devtool) {
+					if (process.platform === 'win32') {
+						const win_devtools = new BrowserWindow()
+						this.window.webContents.setDevToolsWebContents(win_devtools.webContents)
+					}
+
+					this.window.webContents.openDevTools({ mode: 'detach' })
 				}
 
-				this.window.webContents.openDevTools({ mode: 'detach' })
+				createIPCHandler({
+					createContext: async () => ({
+						win: this.window!,
+						tray: this.tray!
+					}),
+					router: routers,
+					windows: [this.window]
+				})
+			} catch (error) {
+				console.error('[app] failed to start polywise runtime', error)
+				app.exit(1)
 			}
-
-			createIPCHandler({
-				createContext: async () => ({
-					win: this.window!,
-					tray: this.tray!
-				}),
-				router: routers,
-				windows: [this.window]
-			})
 		})
 
 		app.on('before-quit', async () => {
 			this.tray?.destroy()
 			this.window?.destroy()
+			await polywise_runtime.stop()
 
 			this.off()
 		})
