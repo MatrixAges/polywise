@@ -1,7 +1,6 @@
 export { default as relaunch } from './relaunch'
 export { default as getThemeColor } from './getThemeColor'
 export { default as setWindowGlass } from './setWindowGlass'
-export { default as serve } from './serve'
 export { default as registerProtocol } from './protocol'
 export { default as conf } from './conf'
 export { default as main_emitter } from './main_emitter'

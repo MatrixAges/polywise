@@ -576,18 +576,9 @@ importers:
 
   packages/desktop:
     dependencies:
-      '@ai-sdk/openai':
-        specifier: 'catalog:'
-        version: 3.0.65(zod@4.4.3)
-      '@hono/node-server':
-        specifier: 'catalog:'
-        version: 2.0.4(hono@4.12.23)
       '@trpc/server':
         specifier: 'catalog:'
         version: 11.17.0(typescript@6.0.3)
-      ai:
-        specifier: 'catalog:'
-        version: 6.0.191(zod@4.4.3)
       atomically:
         specifier: ^2.1.1
         version: 2.1.1
@@ -621,9 +612,6 @@ importers:
       fs-extra:
         specifier: 'catalog:'
         version: 11.3.5
-      hono:
-        specifier: 'catalog:'
-        version: 4.12.23
       i18next:
         specifier: 'catalog:'
         version: 26.2.0(typescript@6.0.3)
@@ -639,9 +627,6 @@ importers:
       watchpack:
         specifier: ^2.5.1
         version: 2.5.1
-      workerpool:
-        specifier: ^10.0.2
-        version: 10.0.2
       zod:
         specifier: 'catalog:'
         version: 4.4.3
@@ -661,9 +646,6 @@ importers:
       '@types/watchpack':
         specifier: ^2.4.5
         version: 2.4.5
-      '@types/workerpool':
-        specifier: ^9.0.0
-        version: 9.0.0
       bun:
         specifier: 'catalog:'
         version: 1.3.14
@@ -6135,10 +6117,6 @@ packages:
 
   '@types/watchpack@2.4.5':
     resolution: {integrity: sha512-8CarnGOIYYRL342jwQyHrGwz4vCD3y5uwwYmzQVzT2Z24DqSd6wwBva6m0eNJX4S5pVmrx9xUEbOsOoqBVhWsg==}
-
-  '@types/workerpool@9.0.0':
-    resolution: {integrity: sha512-gEiZU7P4NzkhqcSwHlSx1CddtzzEjFD/uWegp2tV5DXQABOE4qlH4H8ptCm/S5DDvCViqFj7yMrN3yMBh1pkQg==}
-    deprecated: This is a stub types definition. workerpool provides its own type definitions, so you do not need this installed.
 
   '@types/ws@8.18.1':
     resolution: {integrity: sha512-ThVF6DCVhA8kUGy+aazFQ4kXQ7E1Ty7A3ypFOe0IcJV8O/M511G99AW24irKrW56Wt44yG9+ij8FaqoBGkuBXg==}
@@ -14357,9 +14335,6 @@ packages:
     engines: {node: '>=16'}
     hasBin: true
 
-  workerpool@10.0.2:
-    resolution: {integrity: sha512-8PCeZlCwu0+8hXruze1ahYNsY+M0LOCmbmySZ9BWWqWIXP9TAXa6FZCxACTDL/0j47pFcC4xW98Gr8nAC5oymg==}
-
   wrangler@4.94.0:
     resolution: {integrity: sha512-GsNw0DomGFfeXFtKVTwn2X69UKcCxcTB0CXykjsMineJIxOeyrw7LovlHQ/3JU8KJHH7repLB+kOHvfTBA/Eew==}
     engines: {node: '>=22.0.0'}
@@ -19121,10 +19096,6 @@ snapshots:
     dependencies:
       '@types/graceful-fs': 4.1.9
       '@types/node': 25.9.1
-
-  '@types/workerpool@9.0.0':
-    dependencies:
-      workerpool: 10.0.2
 
   '@types/ws@8.18.1':
     dependencies:
@@ -29088,8 +29059,6 @@ snapshots:
       '@cloudflare/workerd-linux-64': 1.20260521.1
       '@cloudflare/workerd-linux-arm64': 1.20260521.1
       '@cloudflare/workerd-windows-64': 1.20260521.1
-
-  workerpool@10.0.2: {}
 
   wrangler@4.94.0(bufferutil@4.1.0)(utf-8-validate@6.0.6):
     dependencies:

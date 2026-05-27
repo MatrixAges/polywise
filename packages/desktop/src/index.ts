@@ -4,29 +4,22 @@ import '@desktop/utils/entry'
 import { app, BrowserWindow, ipcMain, WebContentsView } from 'electron'
 import { createIPCHandler } from 'erpc/main'
 
-import config from '../config'
 import { Main, Menu, Tray } from './app'
+import config from './config'
 import { routers } from './rpc'
-import { conf, getAppDataPath, getThemeColor, is_mac, registerProtocol, serve, show_devtool } from './utils'
-import saveWithUtilityProcess from './utils/saveWithUtilityProcess'
+import { conf, getThemeColor, is_mac, registerProtocol, show_devtool } from './utils'
 
 import type { Tray as TrayType } from 'electron'
-
-const port = await serve()
-
-conf.set('serve_port', port)
 
 class App {
 	private window: BrowserWindow | null
 	private loading_view: WebContentsView | null
 	private tray: TrayType | null
-	private memory_data_dir: string
 
 	constructor() {
 		this.window = null
 		this.loading_view = null
 		this.tray = null
-		this.memory_data_dir = getAppDataPath('/memory')
 	}
 
 	async init() {
@@ -37,17 +30,6 @@ class App {
 		app.whenReady().then(async () => {
 			registerProtocol()
 
-			console.log('[memory-bootstrap] init_start')
-
-			try {
-				await saveWithUtilityProcess.init(this.memory_data_dir)
-				console.log('[memory-bootstrap] init_done')
-			} catch (error) {
-				const error_message = error instanceof Error ? error.message : String(error)
-
-				console.log('[memory-bootstrap] init_error', { error_message })
-			}
-
 			this.window = new Main()
 			this.loading_view = new WebContentsView()
 			this.tray = new Tray(this.window).get()
@@ -57,7 +39,7 @@ class App {
 			if (win_bounds) this.window.setBounds(win_bounds)
 
 			this.loading()
-			this.events(port as number)
+			this.events()
 
 			if (show_devtool) {
 				if (process.platform === 'win32') {
@@ -71,33 +53,7 @@ class App {
 			createIPCHandler({
 				createContext: async () => ({
 					win: this.window!,
-					tray: this.tray!,
-					memory: {
-						save: async input => {
-							return await saveWithUtilityProcess.save(input, this.memory_data_dir)
-						},
-						query: async input => {
-							return await saveWithUtilityProcess.query(input, this.memory_data_dir)
-						},
-						update: async input => {
-							return await saveWithUtilityProcess.update(input, this.memory_data_dir)
-						},
-						forget: async input => {
-							return await saveWithUtilityProcess.forget(input, this.memory_data_dir)
-						},
-						snapshot: async input => {
-							return await saveWithUtilityProcess.snapshot(input, this.memory_data_dir)
-						},
-						recall: async input => {
-							return await saveWithUtilityProcess.recall(input, this.memory_data_dir)
-						},
-						getNodeRelated: async input => {
-							return await saveWithUtilityProcess.getNodeRelated(
-								input,
-								this.memory_data_dir
-							)
-						}
-					}
+					tray: this.tray!
 				}),
 				router: routers,
 				windows: [this.window]
@@ -135,11 +91,7 @@ class App {
 		})
 	}
 
-	events(port: number) {
-		ipcMain.handle('get-env', () => {
-			return { port }
-		})
-
+	events() {
 		ipcMain.on('stop-loading', () => {
 			this.removeLoading()
 			this.window!.setResizable(true)

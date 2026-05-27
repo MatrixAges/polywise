@@ -1,7 +1,7 @@
 import { app, BrowserWindow, Menu, Tray } from 'electron'
 import { t } from 'i18next'
 
-import config from '../../config'
+import config from '../config'
 
 import type { Tray as ITray } from 'electron'
 

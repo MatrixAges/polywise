@@ -1,6 +1,6 @@
 import { getAppPath, getPath, is_dev, show_devtool } from '@desktop/utils'
 
-import { productName } from './package.json'
+import { productName } from '../package.json'
 
 import type { BrowserWindowConstructorOptions } from 'electron'
 
@@ -33,7 +33,7 @@ export default {
 		icon: getPath('public/icon.ico'),
 		...window_options
 	} as BrowserWindowConstructorOptions,
-	window_url: is_dev ? 'http://localhost:666' : `file://${getAppPath('index.html')}`,
+	window_url: is_dev ? 'http://localhost:3071' : `file://${getAppPath('index.html')}`,
 	loading_url: `file://${getPath('public/loading.html')}`,
 	dock_icon_path: getPath('public/icons/icon.png'),
 	getTrayIcon: () => getPath(`public/tray/tray.png`)
