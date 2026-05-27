@@ -2,6 +2,7 @@ import { initCron } from './cron'
 import { initDB, initDrizzle, initSql, migrate } from './db'
 import { initImRuntime } from './im'
 import { initPthinkRuntime } from './pthink'
+import initReportRuntime from './report/initReportRuntime'
 import { initRewireRuntime } from './rewire'
 import { initLinkcaseScheduleRuntime } from './rpc/linkcase/scheduler'
 
@@ -64,6 +65,7 @@ export const initEnv = async () => {
 	await initImRuntime()
 	await initRewireRuntime()
 	await initPthinkRuntime()
+	await initReportRuntime()
 	await initLinkcaseScheduleRuntime()
 }
 

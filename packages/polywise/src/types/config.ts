@@ -68,17 +68,23 @@ export interface AppPthinkConfig {
 	max_articles_per_run?: number
 	skill_generation_enabled?: boolean
 	tool_generation_enabled?: boolean
-	daily_report_enabled?: boolean
-	daily_report_hour?: number
-	weekly_report_enabled?: boolean
-	weekly_report_weekday?: 'sun' | 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat'
-	weekly_report_hour?: number
 	trigger_enabled?: boolean
 	max_reports_per_day?: number
 }
 
 export interface AppReportConfig {
 	enabled: boolean
+	daily_enabled?: boolean
+	daily_time?: string
+	weekly_enabled?: boolean
+	weekly_weekday?: 'sun' | 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat'
+	weekly_time?: string
+	monthly_enabled?: boolean
+	monthly_mode?: 'last_day' | 'next_month_first_day'
+	monthly_time?: string
+	yearly_enabled?: boolean
+	yearly_mode?: 'last_day' | 'next_year_first_day'
+	yearly_time?: string
 }
 
 export interface AppAuthConfig {

@@ -7,7 +7,7 @@ import fs from 'fs-extra'
 import { config_path, providers_path } from '../consts/app'
 import { config, providers } from './index'
 
-import type { ConfigProvider, PresetProvider, ProviderConfig } from '@core/types'
+import type { AppReportConfig, ConfigProvider, PresetProvider, ProviderConfig } from '@core/types'
 
 const mergeable_provider_keys = ['apiKey', 'baseURL', 'headers', 'models'] as const
 const fetch_fallback_provider_set = new Set<string>(default_fetch_fallback_chain)
@@ -21,8 +21,19 @@ const default_pthink = {
 	skill_generation_enabled: true,
 	tool_generation_enabled: true
 }
-const default_report = {
-	enabled: true
+const default_report: AppReportConfig = {
+	enabled: true,
+	daily_enabled: false,
+	daily_time: '18:00',
+	weekly_enabled: false,
+	weekly_weekday: 'sun',
+	weekly_time: '18:00',
+	monthly_enabled: false,
+	monthly_mode: 'last_day',
+	monthly_time: '18:00',
+	yearly_enabled: false,
+	yearly_mode: 'last_day',
+	yearly_time: '18:00'
 }
 const default_auth = {
 	enabled: false

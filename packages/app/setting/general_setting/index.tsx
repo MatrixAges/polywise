@@ -36,6 +36,27 @@ const pthink_cooldown_options = [
 	{ label: '30 min', value: '30' },
 	{ label: '60 min', value: '60' }
 ]
+const default_report_time = '18:00'
+const normalizeReportTime = (value: string) =>
+	/^([01]?\d|2[0-3]):([0-5]\d)$/.test(value) ? value : default_report_time
+const report_weekday_options = [
+	{ label: 'Monday', value: 'mon' },
+	{ label: 'Tuesday', value: 'tue' },
+	{ label: 'Wednesday', value: 'wed' },
+	{ label: 'Thursday', value: 'thu' },
+	{ label: 'Friday', value: 'fri' },
+	{ label: 'Saturday', value: 'sat' },
+	{ label: 'Sunday', value: 'sun' }
+]
+const report_monthly_mode_options = [
+	{ label: 'Last day', value: 'last_day' },
+	{ label: 'Next month first day', value: 'next_month_first_day' }
+]
+const report_yearly_mode_options = [
+	{ label: 'Last day', value: 'last_day' },
+	{ label: 'Next year first day', value: 'next_year_first_day' }
+]
+
 const Index = () => {
 	const global = useGlobal()
 	const t = global.theme
@@ -391,6 +412,177 @@ const Index = () => {
 							checked={Boolean(report?.enabled ?? true)}
 							onCheckedChange={checked => updateReport({ enabled: checked })}
 						/>
+					</Field>
+					<Field className='items-center! py-3' orientation='horizontal'>
+						<FieldContent>
+							<FieldTitle className='text-base'>Daily Report</FieldTitle>
+							<FieldDescription>
+								Generate the day report automatically at the configured local time.
+							</FieldDescription>
+						</FieldContent>
+						<div className='flex w-[380px] items-center gap-2'>
+							<Switch
+								checked={Boolean(report?.daily_enabled)}
+								onCheckedChange={checked => updateReport({ daily_enabled: checked })}
+							/>
+							<Input
+								type='time'
+								step={60}
+								value={normalizeReportTime(report?.daily_time || default_report_time)}
+								onChange={event =>
+									updateReport({
+										daily_time: normalizeReportTime(event.target.value)
+									})
+								}
+							></Input>
+						</div>
+					</Field>
+					<Field className='items-center! py-3' orientation='horizontal'>
+						<FieldContent>
+							<FieldTitle className='text-base'>Weekly Report</FieldTitle>
+							<FieldDescription>
+								Choose the weekday and local time for weekly report generation.
+							</FieldDescription>
+						</FieldContent>
+						<div className='flex w-[380px] items-center gap-2'>
+							<Switch
+								checked={Boolean(report?.weekly_enabled)}
+								onCheckedChange={checked => updateReport({ weekly_enabled: checked })}
+							/>
+							<Select
+								items={report_weekday_options}
+								value={report?.weekly_weekday || 'sun'}
+								onValueChange={value =>
+									updateReport({
+										weekly_weekday: value as NonNullable<
+											AppReportConfig['weekly_weekday']
+										>
+									})
+								}
+							>
+								<SelectTrigger className='workspace_selector'>
+									<SelectValue />
+								</SelectTrigger>
+								<SelectContent align='start'>
+									<SelectGroup>
+										<SelectLabel>Weekday</SelectLabel>
+										{report_weekday_options.map(item => (
+											<SelectItem value={item.value} key={item.value}>
+												{item.label}
+											</SelectItem>
+										))}
+									</SelectGroup>
+								</SelectContent>
+							</Select>
+							<Input
+								type='time'
+								step={60}
+								value={normalizeReportTime(report?.weekly_time || default_report_time)}
+								onChange={event =>
+									updateReport({
+										weekly_time: normalizeReportTime(event.target.value)
+									})
+								}
+							></Input>
+						</div>
+					</Field>
+					<Field className='items-center! py-3' orientation='horizontal'>
+						<FieldContent>
+							<FieldTitle className='text-base'>Monthly Report</FieldTitle>
+							<FieldDescription>
+								Run on the month&apos;s last day or on the next month&apos;s first day.
+							</FieldDescription>
+						</FieldContent>
+						<div className='flex w-[380px] items-center gap-2'>
+							<Switch
+								checked={Boolean(report?.monthly_enabled)}
+								onCheckedChange={checked => updateReport({ monthly_enabled: checked })}
+							/>
+							<Select
+								items={report_monthly_mode_options}
+								value={report?.monthly_mode || 'last_day'}
+								onValueChange={value =>
+									updateReport({
+										monthly_mode: value as NonNullable<
+											AppReportConfig['monthly_mode']
+										>
+									})
+								}
+							>
+								<SelectTrigger className='workspace_selector'>
+									<SelectValue />
+								</SelectTrigger>
+								<SelectContent align='start'>
+									<SelectGroup>
+										<SelectLabel>Monthly Mode</SelectLabel>
+										{report_monthly_mode_options.map(item => (
+											<SelectItem value={item.value} key={item.value}>
+												{item.label}
+											</SelectItem>
+										))}
+									</SelectGroup>
+								</SelectContent>
+							</Select>
+							<Input
+								type='time'
+								step={60}
+								value={normalizeReportTime(report?.monthly_time || default_report_time)}
+								onChange={event =>
+									updateReport({
+										monthly_time: normalizeReportTime(event.target.value)
+									})
+								}
+							></Input>
+						</div>
+					</Field>
+					<Field className='items-center! py-3' orientation='horizontal'>
+						<FieldContent>
+							<FieldTitle className='text-base'>Yearly Report</FieldTitle>
+							<FieldDescription>
+								Run on the year&apos;s last day or on the next year&apos;s first day.
+							</FieldDescription>
+						</FieldContent>
+						<div className='flex w-[380px] items-center gap-2'>
+							<Switch
+								checked={Boolean(report?.yearly_enabled)}
+								onCheckedChange={checked => updateReport({ yearly_enabled: checked })}
+							/>
+							<Select
+								items={report_yearly_mode_options}
+								value={report?.yearly_mode || 'last_day'}
+								onValueChange={value =>
+									updateReport({
+										yearly_mode: value as NonNullable<
+											AppReportConfig['yearly_mode']
+										>
+									})
+								}
+							>
+								<SelectTrigger className='workspace_selector'>
+									<SelectValue />
+								</SelectTrigger>
+								<SelectContent align='start'>
+									<SelectGroup>
+										<SelectLabel>Yearly Mode</SelectLabel>
+										{report_yearly_mode_options.map(item => (
+											<SelectItem value={item.value} key={item.value}>
+												{item.label}
+											</SelectItem>
+										))}
+									</SelectGroup>
+								</SelectContent>
+							</Select>
+							<Input
+								type='time'
+								step={60}
+								value={normalizeReportTime(report?.yearly_time || default_report_time)}
+								onChange={event =>
+									updateReport({
+										yearly_time: normalizeReportTime(event.target.value)
+									})
+								}
+							></Input>
+						</div>
 					</Field>
 				</FieldGroup>
 				<div className='bg-border-light my-2 h-px w-full'></div>

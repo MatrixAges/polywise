@@ -3,6 +3,7 @@ import { log } from '@core/utils'
 import fs from 'fs-extra'
 
 import { buildReportAnalytics } from './analytics'
+import { getScheduledReportCandidates } from './schedule'
 import { readReportStatus, writeReportStatus } from './status'
 import {
 	buildReportAnalysisMarkdown,
@@ -183,6 +184,37 @@ const createRuntime = (): ReportRuntime => {
 		}
 	}
 
+	const runScheduled = async () => {
+		await ensureLoaded()
+
+		if (status.running) {
+			return
+		}
+
+		const candidates = getScheduledReportCandidates()
+
+		for (const candidate of candidates) {
+			const window = getReportWindow(candidate.period, candidate.offset)
+			const exists = await fs.pathExists(window.file_path)
+			const updated_at = exists ? (await fs.stat(window.file_path)).mtimeMs : 0
+
+			if (exists && updated_at >= candidate.scheduled_at) {
+				continue
+			}
+
+			try {
+				await runNow({
+					period: candidate.period,
+					offset: candidate.offset
+				})
+			} catch (error) {
+				log('SYSTEM', 'reportScheduleError', () =>
+					error instanceof Error ? error.message : String(error)
+				)
+			}
+		}
+	}
+
 	return {
 		getStatus: async () => {
 			await ensureLoaded()
@@ -190,7 +222,8 @@ const createRuntime = (): ReportRuntime => {
 			return status
 		},
 		query: async args => readQuery(args.period, args.offset ?? 0),
-		runNow
+		runNow,
+		runScheduled
 	}
 }
 

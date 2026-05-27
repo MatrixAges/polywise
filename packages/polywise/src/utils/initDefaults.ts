@@ -57,7 +57,18 @@ export default async () => {
 					tool_generation_enabled: true
 				},
 				report: {
-					enabled: true
+					enabled: true,
+					daily_enabled: false,
+					daily_time: '18:00',
+					weekly_enabled: false,
+					weekly_weekday: 'sun',
+					weekly_time: '18:00',
+					monthly_enabled: false,
+					monthly_mode: 'last_day',
+					monthly_time: '18:00',
+					yearly_enabled: false,
+					yearly_mode: 'last_day',
+					yearly_time: '18:00'
 				},
 				auth: {
 					enabled: false

@@ -167,4 +167,5 @@ export interface ReportRuntime {
 	getStatus: () => Promise<ReportStatus>
 	query: (args: { period: ReportPeriod; offset?: number }) => Promise<ReportQueryResult>
 	runNow: (args: { period: ReportPeriod; offset?: number; force?: boolean }) => Promise<ReportStatus>
+	runScheduled: () => Promise<void>
 }
