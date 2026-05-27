@@ -2,6 +2,7 @@ import { HTTPException } from 'hono/http-exception'
 import { createOpenApiFetchHandler } from 'trpc-to-openapi'
 
 import { router } from '../rpc'
+import { create_trpc_context } from './trpc'
 
 import type { Handler } from 'hono'
 import type { ContentfulStatusCode } from 'hono/utils/http-status'
@@ -31,7 +32,12 @@ export default (async c => {
 		}
 	}
 
-	const res = await createOpenApiFetchHandler({ endpoint: '/api', req, router })
+	const res = await createOpenApiFetchHandler({
+		endpoint: '/api',
+		req,
+		router,
+		createContext: async ({ req, resHeaders }) => await create_trpc_context(req, resHeaders)
+	})
 
 	if (res.status >= 400) {
 		const data = await res.json()

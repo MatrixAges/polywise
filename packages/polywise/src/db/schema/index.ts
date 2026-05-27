@@ -17,5 +17,6 @@ export { default as notification } from './notification'
 export { default as im_account } from './im_account'
 export { default as im_peer_state } from './im_peer_state'
 export { default as rewire_event } from './rewire_event'
+export * from './auth'
 
 export * from './externals'

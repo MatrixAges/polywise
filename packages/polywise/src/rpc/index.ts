@@ -1,6 +1,7 @@
 import { r } from '../utils/trpc'
 import agent from './agent'
 import article from './article'
+import auth from './auth'
 import file from './file'
 import group from './group'
 import heartbeat from './heartbeat'
@@ -33,6 +34,7 @@ import version from './version'
 import type { inferRouterInputs, inferRouterOutputs } from '@trpc/server'
 
 export const router = r({
+	auth,
 	agent,
 	article,
 	group,

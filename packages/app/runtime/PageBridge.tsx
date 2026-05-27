@@ -82,6 +82,7 @@ const syncBridge = async (args: {
 		headers: {
 			'content-type': 'application/json'
 		},
+		credentials: 'include',
 		body: JSON.stringify({
 			snapshot: args.snapshot,
 			last_ack_seq: args.last_ack_seq

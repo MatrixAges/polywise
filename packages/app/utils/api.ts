@@ -4,4 +4,10 @@ import { server_sys_url } from '@/appdata'
 
 import type { Api } from '@core/api'
 
-export default hc<Api>(server_sys_url)
+export default hc<Api>(server_sys_url, {
+	fetch: (input, init) =>
+		fetch(input, {
+			...init,
+			credentials: 'include'
+		})
+})

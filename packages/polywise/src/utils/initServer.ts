@@ -8,6 +8,7 @@ import { WebSocketServer } from 'ws'
 import { router } from '../rpc'
 import { server } from '../server'
 import { clearRuntimePidFile, writeRuntimePidFile } from './runtimeControl'
+import { create_trpc_context } from './trpc'
 
 import type { Server } from 'http'
 
@@ -28,7 +29,15 @@ export default async () => {
 
 	const wss_handler = applyWSSHandler({
 		wss,
-		router
+		router,
+		createContext: async opts => {
+			const url = `http://localhost:3072${opts.req.url || '/trpc'}`
+			const req = new Request(url, {
+				headers: new Headers(opts.req.headers as Record<string, string>)
+			})
+
+			return await create_trpc_context(req, new Headers())
+		}
 	})
 
 	const deinit = async () => {

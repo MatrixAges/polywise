@@ -81,6 +81,10 @@ export interface AppReportConfig {
 	enabled: boolean
 }
 
+export interface AppAuthConfig {
+	enabled: boolean
+}
+
 export interface AppConfig {
 	workspaces: Array<Workspace>
 	current_workspace: string
@@ -102,6 +106,7 @@ export interface AppConfig {
 	rewire?: AppRewireConfig
 	pthink?: AppPthinkConfig
 	report?: AppReportConfig
+	auth?: AppAuthConfig
 }
 
 export interface ProviderConfig {

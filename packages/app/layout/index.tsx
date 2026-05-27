@@ -1,6 +1,5 @@
 import '@/styles/index.css'
 
-import { useLayoutEffect, useState } from 'react'
 import { IconContext } from '@phosphor-icons/react'
 import { useMemoizedFn } from 'ahooks'
 import { LucideProvider } from 'lucide-react'
@@ -9,14 +8,13 @@ import { IconContext as RCIconContext } from 'react-icons'
 import { useDefaultLayout } from 'react-resizable-panels'
 import { Outlet } from 'react-router'
 import { local } from 'stk/storage'
-import { container } from 'tsyringe'
 
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/__shadcn__/components/ui/resizable'
 import { Toaster } from '@/__shadcn__/components/ui/sonner'
 import { TooltipProvider } from '@/__shadcn__/components/ui/tooltip'
 import { PANEL_COLLAPSE_THRESHOLD, PANEL_WIDTH_DEFAULT } from '@/appdata'
 import { Fallback } from '@/components'
-import { GlobalModel, GlobalProvider } from '@/context'
+import { useGlobal } from '@/context'
 import Panel from '@/panel'
 import PageBridge from '@/runtime/PageBridge'
 
@@ -25,17 +23,11 @@ import { Alert, Header } from './components'
 import type { IPropsHeader } from './types'
 
 const Index = () => {
-	const [global] = useState(() => container.resolve(GlobalModel))
+	const global = useGlobal()
 
 	const { defaultLayout, onLayoutChanged: layoutChanged } = useDefaultLayout({ id: 'layout' })
 
 	const s = global.setting
-
-	useLayoutEffect(() => {
-		global.init()
-
-		return () => global.deinit()
-	}, [])
 
 	const props_header: IPropsHeader = {
 		workspaces: $copy(s.config?.workspaces) || [],
@@ -64,77 +56,75 @@ const Index = () => {
 					value={{ size: '14px', className: 'rc-icons', attr: { strokeWidth: 1.6 } }}
 				>
 					<TooltipProvider delay={600} closeDelay={300}>
-						<GlobalProvider value={global}>
-							<PageBridge></PageBridge>
-							<Toaster
-								position='top-center'
-								toastOptions={{ duration: 3000 }}
-								closeButton
-								theme={global.theme.theme_value}
-							></Toaster>
-							<Alert></Alert>
+						<PageBridge></PageBridge>
+						<Toaster
+							position='top-center'
+							toastOptions={{ duration: 3000 }}
+							closeButton
+							theme={global.theme.theme_value}
+						></Toaster>
+						<Alert></Alert>
+						<div
+							className='
+								overflow-hidden
+								flex flex-col
+								w-screen h-screen
+								bg-layout-under
+							'
+						>
+							<Header {...props_header}></Header>
 							<div
 								className='
-									overflow-hidden
-									flex flex-col
-									w-screen h-screen
-									bg-layout-under
+									flex
+									w-full h-[calc(100%-42px)]
+									px-2.5
+									pb-2.5
 								'
 							>
-								<Header {...props_header}></Header>
-								<div
+								<ResizablePanelGroup
 									className='
-										flex
-										w-full h-[calc(100%-42px)]
-										px-2.5
-										pb-2.5
+										overflow-hidden
+										h-full!
+										rounded-sm
+										bg-layout-over
+										dark:border-border-light/60 dark:border
 									'
+									defaultLayout={defaultLayout}
+									onLayoutChanged={onLayoutChanged}
 								>
-									<ResizablePanelGroup
-										className='
-											overflow-hidden
-											h-full!
-											rounded-sm
-											bg-layout-over
-											dark:border-border-light/60 dark:border
-										'
-										defaultLayout={defaultLayout}
-										onLayoutChanged={onLayoutChanged}
+									<ResizablePanel
+										id='layout_content'
+										className='h-full'
+										disabled={s.panel_collapsed}
 									>
-										<ResizablePanel
-											id='layout_content'
-											className='h-full'
-											disabled={s.panel_collapsed}
-										>
-											<div data-page-root='route' className='h-full'>
-												<Outlet></Outlet>
-											</div>
-										</ResizablePanel>
-										{!s.panel_collapsed && (
-											<ResizableHandle
-												className='
-													bg-border-light
-													transition-colors duration-200
-													hover:bg-std-100 focus:bg-std-150
-												'
-											/>
-										)}
-										<ResizablePanel
-											id='layout_panel'
-											className='h-full'
-											collapsible
-											defaultSize={PANEL_WIDTH_DEFAULT}
-											minSize={PANEL_COLLAPSE_THRESHOLD}
-											maxSize='50'
-											panelRef={s.setPanelRef}
-											onResize={s.updatePanelState}
-										>
-											<Panel></Panel>
-										</ResizablePanel>
-									</ResizablePanelGroup>
-								</div>
+										<div data-page-root='route' className='h-full'>
+											<Outlet></Outlet>
+										</div>
+									</ResizablePanel>
+									{!s.panel_collapsed && (
+										<ResizableHandle
+											className='
+												bg-border-light
+												transition-colors duration-200
+												hover:bg-std-100 focus:bg-std-150
+											'
+										/>
+									)}
+									<ResizablePanel
+										id='layout_panel'
+										className='h-full'
+										collapsible
+										defaultSize={PANEL_WIDTH_DEFAULT}
+										minSize={PANEL_COLLAPSE_THRESHOLD}
+										maxSize='50'
+										panelRef={s.setPanelRef}
+										onResize={s.updatePanelState}
+									>
+										<Panel></Panel>
+									</ResizablePanel>
+								</ResizablePanelGroup>
 							</div>
-						</GlobalProvider>
+						</div>
 					</TooltipProvider>
 				</RCIconContext.Provider>
 			</IconContext.Provider>

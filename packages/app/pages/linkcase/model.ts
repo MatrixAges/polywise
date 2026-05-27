@@ -1634,6 +1634,7 @@ export default class Index {
 			headers: {
 				'Content-Type': 'application/json'
 			},
+			credentials: 'include',
 			body: JSON.stringify({
 				id: this.global_session_id,
 				message,

@@ -58,6 +58,9 @@ export default async () => {
 				},
 				report: {
 					enabled: true
+				},
+				auth: {
+					enabled: false
 				}
 			} as AppConfig)
 		}

@@ -1,5 +1,4 @@
-import { renderPageHelp } from '@core/cli/page/map'
-import { buildRoutePath, page_map, page_map_by_id } from '@core/cli/page/registry'
+import { buildRoutePath, page_map, page_map_by_id, renderPageHelp } from '@core/cli/page/map'
 import {
 	enqueuePageRuntimeCommand,
 	getPageRuntimeSnapshot,

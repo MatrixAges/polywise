@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import { page_map } from '../cli/page/registry'
+import { page_map } from '../cli/page/map'
 import {
 	enqueuePageRuntimeCommand,
 	getPageRuntimeStatus,

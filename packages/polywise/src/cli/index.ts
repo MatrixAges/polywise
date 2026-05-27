@@ -18,6 +18,15 @@ const api_base_url = `${server_base_url}/api`
 const server_entrypoint_path = fileURLToPath(new URL('../index.js', import.meta.url))
 const version_flags = new Set(['-v', '--version'])
 const server_start_hint = `Unable to reach the Polywise server at ${server_base_url}. Please run "polywise start" or "polywise start -d" first.`
+const runtime_platform_values = new Set(['standalone', 'electron'])
+
+const normalizeRuntimePlatform = (value?: string | null) => {
+	if (!value) return null
+
+	const target = value.trim().toLowerCase()
+
+	return runtime_platform_values.has(target) ? target : null
+}
 
 interface ApiCommandTreeNode {
 	name: string
@@ -147,7 +156,7 @@ const getActiveRuntimePid = async () => {
 	return null
 }
 
-const startDetachedServer = async () => {
+const startDetachedServer = async (platform?: string | null) => {
 	const active_pid = await getActiveRuntimePid()
 
 	if (active_pid) {
@@ -173,11 +182,19 @@ const startDetachedServer = async () => {
 		log_fd = null
 	}
 
-	const child = spawn(process.execPath, [server_entrypoint_path], {
-		detached: true,
-		stdio: log_fd == null ? 'ignore' : ['ignore', log_fd, log_fd],
-		env: getRuntimeCommandEnv()
-	})
+	const runtime_platform = normalizeRuntimePlatform(platform)
+	const child = spawn(
+		process.execPath,
+		[server_entrypoint_path, ...(runtime_platform ? [`--platform=${runtime_platform}`] : [])],
+		{
+			detached: true,
+			stdio: log_fd == null ? 'ignore' : ['ignore', log_fd, log_fd],
+			env: {
+				...getRuntimeCommandEnv(),
+				...(runtime_platform ? { POLYWISE_PLATFORM: runtime_platform } : {})
+			}
+		}
+	)
 
 	child.unref()
 
@@ -195,7 +212,7 @@ const startDetachedServer = async () => {
 	})
 }
 
-const startForegroundServer = async () => {
+const startForegroundServer = async (platform?: string | null) => {
 	const active_pid = await getActiveRuntimePid()
 
 	if (active_pid) {
@@ -210,6 +227,12 @@ const startForegroundServer = async () => {
 	}
 
 	printText('Starting Polywise server...')
+
+	const runtime_platform = normalizeRuntimePlatform(platform)
+
+	if (runtime_platform) {
+		process.env.POLYWISE_PLATFORM = runtime_platform
+	}
 
 	await import('../index')
 }
@@ -480,7 +503,8 @@ const start_command = command({
 	desc: 'Start the Polywise server',
 	shortDesc: 'Start the Polywise server',
 	options: {
-		detach: boolean().alias('d').desc('Run in the background and exit immediately').default(false)
+		detach: boolean().alias('d').desc('Run in the background and exit immediately').default(false),
+		platform: string().desc('Runtime platform: standalone or electron')
 	},
 	help: () => {
 		printText(
@@ -489,18 +513,20 @@ const start_command = command({
 				'Start the Polywise server.',
 				'options:',
 				'- --detach, -d: Run in the background and exit immediately',
+				'- --platform: Runtime platform, supports "standalone" and "electron"',
 				'example: polywise start',
-				'example: polywise start -d'
+				'example: polywise start -d',
+				'example: polywise start --platform electron'
 			].join('\n')
 		)
 	},
-	handler: async (options: { detach?: boolean }) => {
+	handler: async (options: { detach?: boolean; platform?: string }) => {
 		if (options.detach) {
-			await startDetachedServer()
+			await startDetachedServer(options.platform)
 			return
 		}
 
-		await startForegroundServer()
+		await startForegroundServer(options.platform)
 	}
 })
 const root_commands = [start_command, ...buildApiCommands(api_tree)]

@@ -6,11 +6,11 @@ import { initAutoClean, initMcps } from './fst'
 import ensureSkillDefaults from './rpc/skill/ensureDefaults'
 import { calibrateRunningSessions, initDefaults, initServer } from './utils'
 
-await initServer()
 await initDefaults()
 await initConfig()
-await initMcps()
 await initEnv()
+await initServer()
+await initMcps()
 await calibrateRunningSessions()
 await ensureSkillDefaults()
 

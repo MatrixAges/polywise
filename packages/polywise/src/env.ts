@@ -15,6 +15,7 @@ import type { RewireRuntime } from './rewire'
 interface Env {
 	sqlite: Database
 	db: ReturnType<typeof initDrizzle>
+	platform: 'standalone' | 'electron'
 	llama: Llama
 	embedding_model: LlamaModel
 	embedding_context: LlamaEmbeddingContext
@@ -29,7 +30,29 @@ interface Env {
 	active: boolean
 }
 
-export const env = { active: true } as Env
+const runtime_platform_values = new Set<Env['platform']>(['standalone', 'electron'])
+
+const parseRuntimePlatform = () => {
+	const argv_value = process.argv.reduce<string | null>((current, item, index, list) => {
+		if (current) return current
+		if (item.startsWith('--platform=')) {
+			return item.slice('--platform='.length)
+		}
+
+		if (item === '--platform') {
+			return list[index + 1] || null
+		}
+
+		return null
+	}, null)
+
+	const env_value = process.env.POLYWISE_PLATFORM?.trim()
+	const target = (argv_value || env_value || 'standalone').toLowerCase()
+
+	return runtime_platform_values.has(target as Env['platform']) ? (target as Env['platform']) : 'standalone'
+}
+
+export const env = { active: true, platform: parseRuntimePlatform() } as Env
 
 export const initEnv = async () => {
 	initDB()

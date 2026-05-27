@@ -49,6 +49,7 @@ export default class CustomTransport<
 				'Content-Type': 'application/json',
 				...headers
 			},
+			credentials: 'include',
 			body: JSON.stringify(request_body),
 			signal: abortSignal
 		})

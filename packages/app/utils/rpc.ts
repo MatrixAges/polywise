@@ -12,7 +12,15 @@ export default createTRPCClient<Router>({
 		splitLink({
 			condition: op => op.type === 'subscription',
 			true: wsLink({ client: ws_client, transformer: superjson }),
-			false: httpBatchLink({ url: server_trpc_url, transformer: superjson })
+			false: httpBatchLink({
+				url: server_trpc_url,
+				transformer: superjson,
+				fetch: (input, init) =>
+					fetch(input, {
+						...init,
+						credentials: 'include'
+					})
+			})
 		})
 	]
 })

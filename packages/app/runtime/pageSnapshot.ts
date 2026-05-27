@@ -1,4 +1,4 @@
-import { page_map_by_id, resolvePageByPathname } from '@core/cli/page/registry'
+import { page_map_by_id, resolvePageByPathname } from '@core/cli/page/map'
 
 import type { PageRuntimeSnapshot, PageVisibleSection } from '@core/cli/types'
 

@@ -24,6 +24,9 @@ const default_pthink = {
 const default_report = {
 	enabled: true
 }
+const default_auth = {
+	enabled: false
+}
 
 const mergePresetProvider = (local_provider: ConfigProvider | undefined, preset_provider: PresetProvider) => {
 	if (!local_provider) return { provider: preset_provider, changed: true }
@@ -163,6 +166,18 @@ export default async () => {
 
 		if (JSON.stringify(config.report) !== JSON.stringify(next_report)) {
 			config.report = next_report
+			has_changed_config = true
+		}
+	}
+
+	if (!config.auth || typeof config.auth !== 'object') {
+		config.auth = { ...default_auth }
+		has_changed_config = true
+	} else {
+		const next_auth = { ...default_auth, ...config.auth }
+
+		if (JSON.stringify(config.auth) !== JSON.stringify(next_auth)) {
+			config.auth = next_auth
 			has_changed_config = true
 		}
 	}
