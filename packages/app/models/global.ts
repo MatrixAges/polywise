@@ -35,10 +35,7 @@ export default class GlobalModel {
 			await this.setting.init()
 			this.watchAuthConfig()
 
-			if (is_electron) {
-				this.onElectronMain()
-				this.onElectronApp()
-			}
+			if (is_electron) this.onElectronMain()
 
 			this.onHeartBeat()
 			this.onUserIdle()
@@ -68,17 +65,10 @@ export default class GlobalModel {
 
 	onElectronMain() {
 		const deinit = ipc.app.onMain.subscribe(undefined, {
-			onData: res => console.log(`[Electron main] ${res}`)
-		})
-
-		this.util.acts.push(deinit.unsubscribe)
-	}
-
-	onElectronApp() {
-		const deinit = ipc.app.onApp.subscribe(undefined, {
 			onData: res => {
 				if (res.type === 'maximize') {
 					this.setting.setMaximize(res.value)
+					return
 				}
 			}
 		})
