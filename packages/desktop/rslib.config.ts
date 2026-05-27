@@ -14,7 +14,13 @@ if (is_prod) prod_output!['minify'] = {}
 
 export default defineConfig({
 	mode: is_dev ? 'development' : 'production',
-	lib: [{ format: 'cjs' }],
+	lib: [
+		{
+			format: 'cjs',
+			externals: ['electron'],
+			tools: { rspack: { target: 'electron-main' } }
+		}
+	],
 	source: {
 		entry: {
 			index: './src/index.ts'
