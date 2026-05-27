@@ -39,6 +39,7 @@ const buildAdapter = (account: ImAccount, emit_inbound: (event: ImInboundEvent) 
 export const createImRuntime = (): ImRuntime => {
 	const adapters = new Map<string, ImAdapter>()
 	const routes = new Map<string, ImRouteState>()
+	let start_promise: Promise<void> | null = null
 
 	const getAdapter = (platform: ImInboundEvent['platform'], account_id: string) =>
 		adapters.get(getAdapterKey(platform, account_id)) || null
@@ -193,25 +194,37 @@ export const createImRuntime = (): ImRuntime => {
 		adapters,
 		routes,
 		async start() {
-			const accounts = await getImAccounts({
-				where: eq(im_account.enabled, true),
-				orderBy: asc(im_account.created_at)
-			})
+			if (start_promise) {
+				return await start_promise
+			}
 
-			for (const account of accounts) {
-				const adapter = buildAdapter(account, handleInboundEvent)
+			start_promise = (async () => {
+				const accounts = await getImAccounts({
+					where: eq(im_account.enabled, true),
+					orderBy: asc(im_account.created_at)
+				})
 
-				if (!adapter) continue
+				for (const account of accounts) {
+					const adapter = buildAdapter(account, handleInboundEvent)
 
-				adapters.set(getAdapterKey(adapter.platform, adapter.account_id), adapter)
+					if (!adapter) continue
 
-				try {
-					await adapter.connect()
-					await setAccountStatus(adapter.platform, adapter.account_id, 'connected', null)
-				} catch (error) {
-					const message = error instanceof Error ? error.message : String(error)
-					await setAccountStatus(account.platform, account.account_id, 'error', message)
+					adapters.set(getAdapterKey(adapter.platform, adapter.account_id), adapter)
+
+					try {
+						await adapter.connect()
+						await setAccountStatus(adapter.platform, adapter.account_id, 'connected', null)
+					} catch (error) {
+						const message = error instanceof Error ? error.message : String(error)
+						await setAccountStatus(account.platform, account.account_id, 'error', message)
+					}
 				}
+			})()
+
+			try {
+				await start_promise
+			} finally {
+				start_promise = null
 			}
 		},
 		async stop() {
