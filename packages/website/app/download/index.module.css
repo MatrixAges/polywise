@@ -70,8 +70,9 @@
 			.title {
 				margin: 0;
 				margin-top: 42px;
-				margin-bottom: 12px;
-				font-weight: 500;
+				margin-bottom: 15px;
+				font-weight: bold;
+				font-size: 1.6em;
 			}
 
 			.desc {

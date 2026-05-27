@@ -27,7 +27,6 @@ const Index = () => {
 				</div>
 				<h1 className='title'>{t('title')}</h1>
 				<span className='desc'>{t('desc')}</span>
-
 				<a href={github_release_link} target='_blank'>
 					<button
 						className='
@@ -39,7 +38,7 @@ const Index = () => {
 						{t('btn_download', { platform: 'GitHub Releases' })}
 					</button>
 				</a>
-				<span className='version'>{t('latest')}: mock build</span>
+				<span className='version'>{t('latest')}: v0.1.0</span>
 			</div>
 			<div className='download_items flex flex-col'>
 				<div className='download_item flex items-center justify-between'>

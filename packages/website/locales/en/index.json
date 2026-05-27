@@ -18,7 +18,7 @@
 		},
 		"with": "with Polywise's ",
 		"desc": {
-			"line_1": "A local-first agentic content system.",
+			"line_1": "An open source agentic content system.",
 			"line_2": "Capture content, shape context, and run agents on top of it."
 		}
 	},
@@ -78,7 +78,7 @@
 			"2": {
 				"title": "Cloud lock-in",
 				"pain": "Many AI workflows run on opaque systems you cannot inspect, migrate, or truly own.",
-				"solution": "Polywise keeps the runtime local-first and model-flexible.\nYou can bring providers, local models, and custom tools without giving up ownership of the underlying system."
+				"solution": "Polywise keeps the system open source and model-flexible.\nYou can bring providers, local models, and custom tools without giving up ownership of the underlying system."
 			}
 		}
 	},
@@ -114,7 +114,7 @@
 		"items": {
 			"0": {
 				"q": "What is Polywise?",
-				"a": "Polywise is a local-first agentic content system. It helps you capture content, build reusable context, and run agents against that context instead of starting from an empty chat every time."
+				"a": "Polywise is an open source agentic content system. It helps you capture content, build reusable context, and run agents against that context instead of starting from an empty chat every time."
 			},
 			"1": {
 				"q": "How do I use Polywise?",
@@ -142,7 +142,7 @@
 			},
 			"7": {
 				"q": "What about data and privacy?",
-				"a": "Polywise is local-first. Your content, memory, and runtime state can remain under your control, which makes backups, inspection, and privacy boundaries much clearer than cloud-only systems."
+				"a": "Polywise is open source. Your content, memory, and runtime state remain inspectable and under your control, which makes backups, inspection, and privacy boundaries much clearer than cloud-only systems."
 			},
 			"8": {
 				"q": "Can Polywise automate recurring work?",

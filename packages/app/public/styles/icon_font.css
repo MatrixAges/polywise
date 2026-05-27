@@ -15,21 +15,21 @@
 	src: local('STSongti-SC-Black');
 }
 
-/** Geist */
+/** GoogleSans */
 @font-face {
-	font-family: 'Geist';
+	font-family: 'GoogleSans';
 	font-style: normal;
 	src:
-		local('Geist'),
-		url('../fonts/Geist/Geist.ttf') format('truetype');
+		local('GoogleSans'),
+		url('../fonts/GoogleSans/GoogleSans.ttf') format('truetype');
 }
 
 @font-face {
-	font-family: 'Geist';
+	font-family: 'GoogleSans';
 	font-style: italic;
 	src:
-		local('Geist'),
-		url('../fonts/Geist/Geist-Italic.ttf') format('truetype');
+		local('GoogleSans'),
+		url('../fonts/GoogleSans/GoogleSans-Italic.ttf') format('truetype');
 }
 
 /** GeistMono */

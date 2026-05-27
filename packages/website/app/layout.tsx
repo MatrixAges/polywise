@@ -14,8 +14,8 @@ import type { Metadata } from 'next'
 import type { PropsWithChildren } from 'react'
 
 export const metadata: Metadata = {
-	title: 'Polywise',
-	description: 'Polywise official website'
+	title: 'Polywise - Agentic Content System',
+	description: 'Polywise is an open source agentic content system.'
 }
 
 const RootLayout = async ({ children }: PropsWithChildren) => {

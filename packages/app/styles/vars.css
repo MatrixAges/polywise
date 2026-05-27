@@ -1,8 +1,8 @@
 :root {
 	--line_height: 1.62;
 	--font_family:
-		'Geist', -apple-system, BlinkMacSystemFont, ui-sans-serif, 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans',
-		sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+		'GoogleSans', -apple-system, BlinkMacSystemFont, ui-sans-serif, 'Segoe UI', 'Helvetica Neue', Arial,
+		'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 	--font_serif: 'STIXTwoText', Georgia, 'Times New Roman', Times, '宋体', SimSun, 'Songti', serif;
 	--font_mono: 'Menlo', 'Consolas', monospace;
 	--font_stiff: 'Tektur';

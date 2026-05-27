@@ -6,7 +6,7 @@ import { default_fetch_fallback_chain } from '@core/types'
 import { ensureWithValue } from '@core/utils'
 import fs from 'fs-extra'
 
-import { cron_path, pipeline_path, pthink_path } from '../consts/app'
+import { cron_path, pipeline_path, pthink_path, rewire_dir, temp_dir } from '../consts/app'
 
 import type { AppConfig, ProviderConfig } from '@core/types'
 
@@ -81,8 +81,10 @@ export default async () => {
 	await fs.ensureDir(skills_dir)
 	await fs.ensureDir(tools_dir)
 	await fs.ensureDir(patch_dir)
+	await fs.ensureDir(temp_dir)
 	await fs.ensureDir(cron_logs_dir)
 	await fs.ensureDir(pipeline_logs_dir)
+	await fs.ensureDir(rewire_dir)
 	await fs.ensureDir(skill_creator_dir)
 
 	if (!(await fs.pathExists(skill_creator_path))) {

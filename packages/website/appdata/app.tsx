@@ -11,7 +11,7 @@ export const modules_map = {
 	1: {
 		Icon: <MagnifyingGlassIcon></MagnifyingGlassIcon>,
 		key: 'note',
-		origin: '/blog/finding_your_self?title=Designing%20Local-First%20Workflows'
+		origin: '/blog/finding_your_self?title=Designing%20Open-Source%20Workflows'
 	},
 	2: {
 		Icon: <ChatDotsIcon></ChatDotsIcon>,
@@ -52,8 +52,7 @@ export const github_release_link = 'https://github.com/MatrixAges/polywise/relea
 
 export const mails = {
 	support: 'mailto:hello@polywise.io',
-	enterprise: 'mailto:team@polywise.io',
-	member: 'mailto:community@polywise.io'
+	enterprise: 'mailto:team@polywise.io'
 }
 
 export const medias = {

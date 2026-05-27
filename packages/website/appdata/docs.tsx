@@ -107,9 +107,9 @@ const buildDocsData = (l: (en: string, zh?: string, ja?: string) => string) => {
 					className: classNameOf('usage/desktop'),
 					label: l('Desktop', '桌面端', 'デスクトップ'),
 					desc: l(
-						'Use the desktop app for local-first workflows.',
-						'使用桌面应用完成本地优先的工作流。',
-						'デスクトップアプリでローカル優先のワークフローを使う。'
+						'Use the desktop app for full open-source workflows.',
+						'通过桌面应用完成完整的开源工作流。',
+						'デスクトップアプリでフル機能のオープンソースワークフローを使う。'
 					)
 				}
 			]

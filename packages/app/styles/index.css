@@ -56,7 +56,7 @@
 	--color-border-gray: oklch(from var(--color-std-600) l c h / 0.1);
 	--color-border-light: oklch(from var(--color-std-400) l c h / 0.1);
 
-	--font-sans: 'Geist';
+	--font-sans: 'GoogleSans';
 	--font-mono: 'GeistMono';
 
 	--color-under: oklch(from var(--color-std-100) l c h / 1);

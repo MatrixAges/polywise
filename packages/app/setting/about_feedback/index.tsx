@@ -40,10 +40,10 @@ const Index = () => {
 				</h1>
 				<h2
 					className='
-						text-std-800 text-2xl font-medium
+						text-std-800 text-xl font-medium
 					'
 				>
-					agentic content system
+					Agentic Content System
 				</h2>
 			</div>
 			<div
