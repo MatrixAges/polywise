@@ -5,13 +5,12 @@ import { container } from 'tsyringe'
 
 import { Button } from '@/__shadcn__/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/__shadcn__/components/ui/select'
-import { TextTabs } from '@/components'
+import { Fallback, TextTabs } from '@/components'
 
 import {
 	Agent,
 	ContentReview,
 	Hotspots,
-	LoadingState,
 	Memory,
 	Overview,
 	Pipeline,
@@ -190,7 +189,7 @@ const Index = () => {
 								)}
 							</>
 						) : (
-							<LoadingState></LoadingState>
+							<Fallback></Fallback>
 						)}
 					</div>
 				</div>
