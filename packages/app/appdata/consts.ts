@@ -1,2 +1,2 @@
-export const PANEL_WIDTH_DEFAULT = 300
+export const PANEL_WIDTH_DEFAULT = 320
 export const PANEL_COLLAPSE_THRESHOLD = 222

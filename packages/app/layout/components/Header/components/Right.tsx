@@ -1,7 +1,11 @@
+import { Fragment } from 'react'
 import { PanelRight, SlidersHorizontal } from 'lucide-react'
 import { NavLink } from 'react-router'
 
+import { is_win_electron } from '@/utils'
+
 // import SessionsStatus from './SessionsStatus'
+import WinActions from './WinActions'
 
 import type { IPropsRight } from '../types'
 
@@ -10,13 +14,16 @@ const Index = (props: IPropsRight) => {
 
 	return (
 		<div
-			className='
+			className={$cx(
+				`
 				absolute
 				right-2.5
 				flex
 				items-center
 				gap-2
-			'
+			`,
+				is_win_electron && 'pr-20'
+			)}
 		>
 			{/* <SessionsStatus></SessionsStatus> */}
 			<div className='icon_button w-auto! px-2'>
@@ -38,6 +45,19 @@ const Index = (props: IPropsRight) => {
 			<button className='icon_button no_drag' onClick={togglePanel}>
 				<PanelRight></PanelRight>
 			</button>
+			{is_win_electron && (
+				<Fragment>
+					<div
+						className='
+							w-px h-[14px]
+							mx-3
+							ml-2
+							bg-under/16
+						'
+					></div>
+					<WinActions></WinActions>
+				</Fragment>
+			)}
 		</div>
 	)
 }

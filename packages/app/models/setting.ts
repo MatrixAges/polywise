@@ -17,6 +17,7 @@ export default class Index {
 	panel_ref = null as unknown as PanelImperativeHandle
 	panel_collapsed = false
 	sidebar_collapsed = false
+	maximize = false
 
 	config = null as unknown as AppConfig
 	providers = { providers: [] } as unknown as ProviderConfig
@@ -96,6 +97,10 @@ export default class Index {
 
 	toggleSidebar() {
 		this.sidebar_collapsed = !this.sidebar_collapsed
+	}
+
+	setMaximize(v: boolean) {
+		this.maximize = v
 	}
 
 	async getModelStatus() {

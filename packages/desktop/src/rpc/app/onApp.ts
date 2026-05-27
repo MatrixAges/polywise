@@ -18,6 +18,8 @@ export default p.subscription(async function* (args) {
 		ctx.win.on('maximize', onMaximize)
 		ctx.win.on('unmaximize', onMaximize)
 
+		yield { type: 'maximize', value: ctx.win.isMaximized() } satisfies Res
+
 		for await (const [data] of on(e, 'CHANGE', { signal })) {
 			yield data as Res
 		}
