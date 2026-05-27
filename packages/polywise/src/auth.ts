@@ -12,6 +12,7 @@ import { env } from './env'
 const auth_username = 'polywiser'
 const auth_email = 'polywiser@localhost'
 const auth_provider_id = 'credential'
+const default_auth_base_url = 'http://localhost:3072'
 const auth_trusted_origins = [
 	'http://localhost:3071',
 	'http://127.0.0.1:3071',
@@ -20,6 +21,27 @@ const auth_trusted_origins = [
 		.map(item => item.trim())
 		.filter(Boolean)
 ]
+
+const resolveAuthBaseUrl = () => {
+	for (const candidate of [
+		process.env.BETTER_AUTH_URL,
+		process.env.POLYWISE_AUTH_URL,
+		process.env.POLYWISE_SERVER_URL,
+		default_auth_base_url
+	]) {
+		const value = candidate?.trim()
+
+		if (!value) {
+			continue
+		}
+
+		try {
+			return new URL(value).toString().replace(/\/$/, '')
+		} catch {}
+	}
+
+	return default_auth_base_url
+}
 
 const auth_schema = {
 	user: auth_user,
@@ -44,6 +66,7 @@ const createAuth = () =>
 			expiresIn: 60 * 60 * 24 * 7,
 			updateAge: 60 * 60 * 24
 		},
+		baseURL: resolveAuthBaseUrl(),
 		trustedOrigins: auth_trusted_origins,
 		plugins: [username()]
 	})
