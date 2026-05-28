@@ -1,11 +1,8 @@
 {
 	"name": "polywise",
-	"version": "0.0.1",
+	"version": "0.1.0",
 	"type": "module",
 	"main": "./dist/index.js",
-	"bin": {
-		"polywise": "./dist/cli.js"
-	},
 	"sideEffects": false,
 	"exports": {
 		".": {
@@ -13,6 +10,9 @@
 			"import": "./dist/index.js",
 			"default": "./dist/index.js"
 		}
+	},
+	"bin": {
+		"polywise": "./dist/cli.js"
 	},
 	"files": [
 		"dist",
