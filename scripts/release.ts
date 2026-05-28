@@ -1,7 +1,7 @@
 import { readFile, writeFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 
-const version = '0.1.0'
+const version = process.env.VERSION
 const items = ['polywise', 'app', 'desktop']
 
 const updateVersion = async (name: string) => {
@@ -16,4 +16,4 @@ const updateVersion = async (name: string) => {
 	console.log(`${file_path} -> ${version}`)
 }
 
-items.forEach(item => updateVersion(item))
+if (version) items.forEach(item => updateVersion(item))
