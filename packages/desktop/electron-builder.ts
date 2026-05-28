@@ -19,7 +19,7 @@ export default {
 		'dist/**/*',
 		'!dist/notarize.js',
 		'!**/*.gguf',
-		'!**/node_modules/**/*.{ts,map,md,txt,map}',
+		'!**/node_modules/**/*.{ts,map,md,txt,map,LICENSE}',
 		'!**/node_modules/**/{test,tests,example,examples,docs,script}',
 		'!**/node_modules/polywise/.test',
 		'!**/node_modules/polywise/.test/**/*',
