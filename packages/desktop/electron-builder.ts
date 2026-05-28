@@ -21,7 +21,7 @@ export default {
 		'!**/*.gguf',
 		'!**/tsconfig.json',
 		'!**/node_modules/**/*.{ts,map,md,txt,map,d.ts,d.cts,d.mts}',
-		'!**/node_modules/**/{test,tests,example,examples,docs,script,LICENSE,@types}',
+		'!**/node_modules/**/{test,tests,example,examples,docs,script,LICENSE,\@types}',
 		'!**/node_modules/polywise/.test',
 		'!**/node_modules/polywise/.test/**/*',
 		'!**/node_modules/polywise/dist/app_dist',
