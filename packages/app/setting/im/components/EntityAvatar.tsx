@@ -2,6 +2,8 @@ import { useEffect, useMemo } from 'react'
 import NiceAvatar from 'react-nice-avatar'
 import NotionAvatar from 'react-notion-avatar'
 
+import { getPublicAssetUrl } from '@/utils'
+
 import type { CSSProperties } from 'react'
 
 interface IProps {
@@ -12,7 +14,7 @@ interface IProps {
 	shape?: 'circle' | 'rounded'
 }
 
-const default_avatar_url = '/images/bird.jpg'
+const default_avatar_url = getPublicAssetUrl('/images/bird.jpg')
 
 const Index = ({ name, photo, avatar, size = 36, shape = 'circle' }: IProps) => {
 	const wrapper_style = { width: size, height: size } as CSSProperties

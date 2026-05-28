@@ -30,8 +30,7 @@ export default defineConfig({
 		decorators: { version: 'legacy' }
 	},
 	output: {
-		sourceMap: is_dev,
-		cleanDistPath: false,
+		cleanDistPath: is_prod,
 		target: 'node',
 		filename: { js: '[name].js' },
 		...prod_output

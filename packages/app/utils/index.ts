@@ -30,6 +30,7 @@ export { default as onViewport } from './onViewport'
 export { default as getToolName } from './getToolName'
 export { default as getToolDesc } from './getToolDesc'
 export { default as getAppRouteHref } from './getAppRouteHref'
+export { default as getPublicAssetUrl } from './getPublicAssetUrl'
 
 export * from './theme'
 export * from './is'

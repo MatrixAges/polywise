@@ -8,7 +8,7 @@ import { toast } from 'sonner'
 
 import { Message, MessageContent } from '@/__shadcn__/components/ai-elements'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/__shadcn__/components/ui/collapsible'
-import { copy, formatDateTime, formatTime, rpc } from '@/utils'
+import { copy, formatDateTime, formatTime, getPublicAssetUrl, rpc } from '@/utils'
 import getToolIcon from '@/utils/getToolIcon'
 
 import LoadingDots from './LoadingDots'
@@ -67,7 +67,7 @@ const getFallbackSenderSummary = (args: { sender_id?: string; sender_name?: stri
 	} satisfies SenderAgentSummary
 }
 
-const default_avatar_url = '/images/bird.jpg'
+const default_avatar_url = getPublicAssetUrl('/images/bird.jpg')
 
 const isPartDurationPart = (part: SessionMessage['parts'][number] | undefined): part is MessagePartDurationUIPart => {
 	return part?.type === 'data-part-duration'

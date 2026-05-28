@@ -1,6 +1,8 @@
 import { useEffect, useMemo } from 'react'
 import { Upload, X } from 'lucide-react'
 
+import { getPublicAssetUrl } from '@/utils'
+
 import type { CSSProperties, MouseEvent } from 'react'
 import type { GroupItem } from '../types'
 
@@ -14,7 +16,7 @@ interface IProps {
 	disabled?: boolean
 }
 
-const default_avatar_url = '/images/bird.jpg'
+const default_avatar_url = getPublicAssetUrl('/images/bird.jpg')
 
 const size_map = {
 	small: 36,

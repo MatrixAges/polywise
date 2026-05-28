@@ -3,6 +3,8 @@ import { observer } from 'mobx-react-lite'
 import NiceAvatar from 'react-nice-avatar'
 import NotionAvatar from 'react-notion-avatar'
 
+import { getPublicAssetUrl } from '@/utils'
+
 import { useModel } from '../context'
 
 import type { CSSProperties } from 'react'
@@ -17,7 +19,7 @@ interface IProps {
 	avatar?: AgentAvatarConfig | null
 }
 
-const default_avatar_url = '/images/bird.jpg'
+const default_avatar_url = getPublicAssetUrl('/images/bird.jpg')
 
 const size_map = {
 	small: 36,
