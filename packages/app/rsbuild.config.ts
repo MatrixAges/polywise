@@ -6,16 +6,26 @@ import type { RsbuildConfig } from '@rsbuild/core'
 
 const is_dev = process.env.NODE_ENV === 'development'
 const is_prod = process.env.NODE_ENV === 'production'
+const platform = process.env.PLATFORM?.trim().toLowerCase() || 'electron'
+const is_standalone = platform === 'standalone'
+const asset_prefix = is_standalone ? '/app/' : './'
 const use_react_scan = false
 const require = createRequire(import.meta.url)
 const react_entry = require.resolve('react')
 const react_dom_entry = require.resolve('react-dom')
 const jsx_runtime_entry = require.resolve('react/jsx-runtime')
 const jsx_dev_runtime_entry = require.resolve('react/jsx-dev-runtime')
+const html_tags = [
+	{
+		tag: 'base',
+		append: false,
+		attrs: { href: asset_prefix }
+	}
+]
 
 const config = {
 	source: { entry: { index: './index.tsx' }, decorators: { version: 'legacy' } },
-	output: { legalComments: 'none', assetPrefix: './' },
+	output: { legalComments: 'none', assetPrefix: asset_prefix },
 	plugins: [pluginReact(), pluginSvgr()],
 	resolve: {
 		alias: {
@@ -34,7 +44,8 @@ const config = {
 	},
 	html: {
 		title: 'Polywise - agentic content system ◑',
-		template: './public/index.html'
+		template: './public/index.html',
+		tags: html_tags
 	},
 	tools: {
 		swc: { jsc: { experimental: { plugins: [['@axew/swc-plugin-jsx-control-statements', {}]] } } },
@@ -54,13 +65,11 @@ const config = {
 } as RsbuildConfig
 
 if (use_react_scan) {
-	config.html!.tags = [
-		{
-			tag: 'script',
-			append: false,
-			attrs: { src: 'https://cdn.jsdelivr.net/npm/react-scan/dist/auto.global.js' }
-		}
-	]
+	html_tags.push({
+		tag: 'script',
+		append: false,
+		attrs: { href: 'https://cdn.jsdelivr.net/npm/react-scan/dist/auto.global.js' }
+	})
 }
 
 export default config

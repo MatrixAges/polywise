@@ -13,7 +13,7 @@ import type { PostForType, PostListItem } from './types'
 
 @injectable()
 export default class Index {
-	for_type = 'user' as PostForType
+	for_type = 'wiki' as PostForType
 	list_map = createListStateMap()
 	menu_target_index = -1
 	removing_post_id = ''

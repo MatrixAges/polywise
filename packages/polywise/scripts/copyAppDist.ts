@@ -1,6 +1,6 @@
 import { dirname, resolve } from 'path'
 import { fileURLToPath } from 'url'
-import { copy, pathExists, remove } from 'fs-extra'
+import { copy, pathExists, readFile, remove } from 'fs-extra'
 
 const script_dir = dirname(fileURLToPath(import.meta.url))
 const polywise_root = resolve(script_dir, '..')
@@ -16,6 +16,15 @@ if (platform === 'electron') {
 
 if (!(await pathExists(source_dir))) {
 	throw new Error(`App dist not found: ${source_dir}. Build packages/app first.`)
+}
+
+const source_index_html = resolve(source_dir, 'index.html')
+const index_html = await readFile(source_index_html, 'utf8')
+
+if (!index_html.includes('<base href="/app/">')) {
+	throw new Error(
+		`App dist at ${source_dir} is not a standalone build. Run "pnpm --dir packages/app build:standalone" first.`
+	)
 }
 
 await remove(target_dir)
