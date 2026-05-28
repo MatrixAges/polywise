@@ -24,6 +24,7 @@ export default async (s: Group, message: Message) => {
 	const total_messages_count = s.context.total_messages_count ?? 0
 
 	if (!s.session.is_runing) {
+		s.resetAbort()
 		s.context.total_messages_count = total_messages_count + 1
 
 		await s.insertMessage(message)

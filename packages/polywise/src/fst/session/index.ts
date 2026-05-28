@@ -26,7 +26,7 @@ import { getSession, initSession, updateSession } from './session'
 import { getState, setState } from './state'
 import { abortStream, getStream } from './stream'
 import { clearTasks, getTasks, setTasks } from './task'
-import { active, clearPlan, resetAbort, runing, stop, sync } from './utils'
+import { active, clearPlan, resetAbort, runing, stop, sync, updateConfig } from './utils'
 
 import type { Agent, Project, Session, SessionInsert } from '@core/db'
 import type { ModelResult } from '../provider'
@@ -202,6 +202,7 @@ export default class Index {
 	setContext = (v: Partial<Context>) => setContext(this, v)
 	getState = () => getState(this)
 	setState = () => setState(this)
+	updateConfig = (config?: Awaited<ReturnType<typeof getConfig>>) => updateConfig(this, config)
 
 	loadSkillMap = () => loadSkillMap(this)
 	loadCustomToolsMap = () => loadCustomToolsMap(this)

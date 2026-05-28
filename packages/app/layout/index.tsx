@@ -70,7 +70,7 @@ const Index = () => {
 								flex flex-col
 								w-screen h-screen
 								bg-layout-under
-								electron:bg-layout-under/12
+								electron:bg-transparent
 							'
 						>
 							<Header {...props_header}></Header>

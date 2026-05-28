@@ -19,14 +19,7 @@ export default async (s: Index, is_cron?: boolean, title?: string) => {
 		await fs.writeJSON(s.config_dir, default_session_runtime_config, { spaces: 4 })
 	}
 
-	const session_config = await s.getConfig()
-	s.disable_map = session_config.disable_map
-	s.mode = session_config.mode
-	s.audit_mode = session_config.audit_mode
-	s.enable_sub_agent = session_config.enable_sub_agent
-	s.sub_agent_keys = session_config.sub_agent_keys
-	s.enable_agent_tool = session_config.enable_agent_tool
-	s.agent_ids = session_config.agent_ids
+	await s.updateConfig()
 
 	await s.getContext()
 	await s.getState()

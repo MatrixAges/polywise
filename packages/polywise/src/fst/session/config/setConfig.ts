@@ -10,14 +10,7 @@ export default async (s: Index, patch: Partial<Awaited<ReturnType<typeof getConf
 	const next = normalizeSessionRuntimeConfig({ ...current, ...patch })
 
 	await fs.writeJSON(s.config_dir, next, { spaces: 4 })
-
-	s.disable_map = next.disable_map
-	s.mode = next.mode
-	s.audit_mode = next.audit_mode
-	s.enable_sub_agent = next.enable_sub_agent
-	s.sub_agent_keys = next.sub_agent_keys
-	s.enable_agent_tool = next.enable_agent_tool
-	s.agent_ids = next.agent_ids
+	await s.updateConfig(next)
 
 	return next
 }

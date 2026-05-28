@@ -70,6 +70,7 @@ export default async (s: Index, message: Message) => {
 	const is_first_message = total_messages_count === 0
 
 	if (!s.session.is_runing) {
+		s.resetAbort()
 		s.context.total_messages_count = total_messages_count + 1
 
 		await s.insertMessage(message)

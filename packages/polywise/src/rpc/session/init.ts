@@ -17,6 +17,7 @@ export default p.input(input_type).subscription(async function* (args) {
 	let session = SessionStore.get(id)
 
 	if (session) {
+		await session.updateConfig()
 		yield session.getData()
 	} else {
 		if (!input.global) id = getId()

@@ -40,6 +40,8 @@ export default async (args: ConnectSessionArgs) => {
 		if (session instanceof Group) {
 			GroupStore.set(id, session)
 		}
+	} else {
+		await session.updateConfig()
 	}
 
 	return session

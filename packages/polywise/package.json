@@ -20,7 +20,7 @@
 	],
 	"scripts": {
 		"build:standalone": "npm run rebuild && cross-env NODE_ENV=production rslib build && bun ./scripts/copyAppDist.ts",
-		"build:electron": "npm run rebuild && cross-env NODE_ENV=production rslib build",
+		"build:electron": "cross-env NODE_ENV=production rslib build",
 		"build:watch": "cross-env NODE_ENV=development rslib build --watch",
 		"cli": "node ./dist/cli.js",
 		"copy:app-dist": "bun ./scripts/copyAppDist.ts",

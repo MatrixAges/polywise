@@ -22,7 +22,9 @@ export default {
 		'!**/node_modules/**/*.{ts,map,md,txt,map,LICENSE}',
 		'!**/node_modules/**/{test,tests,example,examples,docs,script}',
 		'!**/node_modules/polywise/.test',
-		'!**/node_modules/polywise/.test/**/*'
+		'!**/node_modules/polywise/.test/**/*',
+		'!**/node_modules/polywise/dist/app_dist',
+		'!**/node_modules/polywise/dist/app_dist/**/*'
 	],
 	extraResources: [{ from: '../app/dist', to: 'app_dist' }],
 	artifactName: '${productName}-${version}-${arch}.${ext}',
