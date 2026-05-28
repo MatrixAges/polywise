@@ -4,12 +4,13 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import {
 	BoxArrowDownIcon,
 	CaretRightIcon,
-	ChatDotsIcon,
+	GithubLogoIcon,
 	MagnifyingGlassIcon,
 	MoonIcon,
 	SunDimIcon,
 	TreeIcon
 } from '@phosphor-icons/react'
+import { medias } from '@website/appdata/app'
 import { flattenMenuItems, useMenu } from '@website/appdata/docs'
 import { Search } from '@website/appunits/docs'
 import DocBottomLink from '@website/components/DocBottomLink'
@@ -186,32 +187,32 @@ const Index = (props: PropsWithChildren) => {
 		[menu, openkeys]
 	)
 
-	const renderSidebarHeader = () => (
+	const Header = (
 		<div
 			className='
-					relative
-					box-border
-					flex flex-col
-					w-full
-					header_wrap
-				'
+				relative
+				box-border
+				flex flex-col
+				w-full
+				header_wrap
+			'
 		>
 			<div
 				className='
-						absolute
-						left-0
-						w-full
-						menu_mask top
-					'
+					absolute
+					left-0
+					w-full
+					menu_mask top
+				'
 			></div>
 			<div className='top_row flex items-center justify-between'>
 				<div className='flex items-center'>
 					<Link
 						className='
-								flex
-								items-center justify-center
-								logo_wrap clickable
-							'
+							flex
+							items-center justify-center
+							logo_wrap clickable
+						'
 						href='/'
 					>
 						<Logo size={13} color='var(--color_bg)'></Logo>
@@ -225,10 +226,10 @@ const Index = (props: PropsWithChildren) => {
 					<button
 						className={$.cx(
 							`
-								flex
-								items-center justify-center
-								theme_item clickable
-							`,
+							flex
+							items-center justify-center
+							theme_item clickable
+						`,
 							theme === 'dark' && 'active'
 						)}
 						type='button'
@@ -239,10 +240,10 @@ const Index = (props: PropsWithChildren) => {
 					<button
 						className={$.cx(
 							`
-								flex
-								items-center justify-center
-								theme_item clickable
-							`,
+							flex
+							items-center justify-center
+							theme_item clickable
+						`,
 							theme === 'light' && 'active'
 						)}
 						type='button'
@@ -254,13 +255,13 @@ const Index = (props: PropsWithChildren) => {
 			</div>
 			<div
 				className='
-						relative
-						box-border
-						flex
-						items-center
-						w-full
-						btn_search_wrap clickable
-					'
+					relative
+					box-border
+					flex
+					items-center
+					w-full
+					btn_search_wrap clickable
+				'
 				onClick={openSearch}
 			>
 				<MagnifyingGlassIcon className='icon_search absolute' weight='bold'></MagnifyingGlassIcon>
@@ -396,49 +397,50 @@ const Index = (props: PropsWithChildren) => {
 		</SidebarMenuWrap>
 	)
 
-	const renderSidebarFooter = () => (
+	const Footer = (
 		<div
 			className='
-					relative
-					box-border
-					flex flex-col
-					w-full
-					footer_wrap
-				'
+				relative
+				box-border
+				flex flex-col
+				w-full
+				footer_wrap
+			'
 		>
 			<div
 				className='
-						absolute
-						left-0
-						w-full
-						menu_mask bottom
-					'
+					absolute
+					left-0
+					w-full
+					menu_mask bottom
+				'
 			></div>
 			<Link
 				className='
-						box-border
-						flex
-						items-center
-						w-full
-						footer_item clickable
-					'
+					box-border
+					flex
+					items-center
+					w-full
+					footer_item clickable
+				'
+				target='_blank'
+				href={medias.github}
+			>
+				<GithubLogoIcon size={15} weight='fill'></GithubLogoIcon>
+				<span className='ml-2'>{t('footer.github')}</span>
+			</Link>
+			<Link
+				className='
+					box-border
+					flex
+					items-center
+					w-full
+					footer_item clickable
+				'
 				href='/download'
 			>
 				<BoxArrowDownIcon size={15} weight='fill'></BoxArrowDownIcon>
 				<span className='ml-2'>{t('footer.download')}</span>
-			</Link>
-			<Link
-				className='
-						box-border
-						flex
-						items-center
-						w-full
-						footer_item clickable
-					'
-				href='/contact'
-			>
-				<ChatDotsIcon size={15} weight='fill'></ChatDotsIcon>
-				<span className='ml-2'>{t('footer.contact')}</span>
 			</Link>
 		</div>
 	)
@@ -469,9 +471,9 @@ const Index = (props: PropsWithChildren) => {
 					styles.sidebar
 				)}
 			>
-				{renderSidebarHeader()}
+				{Header}
 				{renderSidebarMenu('desktop')}
-				{renderSidebarFooter()}
+				{Footer}
 			</nav>
 			<Sheet
 				rootClassName={styles.sidebar_drawer}
@@ -492,9 +494,9 @@ const Index = (props: PropsWithChildren) => {
 						styles.sidebar
 					)}
 				>
-					{renderSidebarHeader()}
+					{Header}
 					{renderSidebarMenu('mobile')}
-					{renderSidebarFooter()}
+					{Footer}
 				</div>
 			</Sheet>
 			<div
