@@ -1,6 +1,6 @@
 import { TEAM_ID } from './metadata'
 import { productName } from './package.json'
-import { afterPack } from './scripts/beforePack'
+import { beforePack } from './scripts/beforePack'
 
 import type { Configuration } from 'electron-builder'
 
@@ -19,7 +19,7 @@ export default {
 		'dist/**/*',
 		'!dist/notarize.js',
 		'!**/*.gguf',
-		'!**/node_modules/**/*.{ts,map,md,txt,map,.d.ts,.d.cts}',
+		'!**/node_modules/**/*.{ts,map,md,txt,map,.d.ts,.d.cts,.d.mts}',
 		'!**/node_modules/**/{test,tests,example,examples,docs,script,LICENSE}',
 		'!**/node_modules/polywise/.test',
 		'!**/node_modules/polywise/.test/**/*',
@@ -68,5 +68,5 @@ export default {
 	},
 	fileAssociations: [{ name: productName, ext: 'elefile' }],
 	publish: [{ provider: 'generic', url: 'http://localhost:8080/release/' }],
-	afterPack
+	beforePack
 } as Configuration
