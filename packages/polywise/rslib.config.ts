@@ -18,6 +18,7 @@ export default {
 					'pipeline/jieba.worker': './src/pipeline/getChunkWords/jieba.worker.ts'
 				}
 			},
+			bundle: true,
 			format: 'esm',
 			dts: true,
 			autoExternal: is_dev

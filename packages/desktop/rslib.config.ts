@@ -16,6 +16,8 @@ export default defineConfig({
 	mode: is_dev ? 'development' : 'production',
 	lib: [
 		{
+			bundle: true,
+			autoExternal: is_dev,
 			format: 'cjs',
 			tools: { rspack: { target: 'electron-main' } }
 		}

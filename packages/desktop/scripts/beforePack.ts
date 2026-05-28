@@ -27,9 +27,8 @@ const import_patterns = [
 	/\brequire\s*\(\s*['"]([^'"]+)['"]\s*\)/g,
 	/new\s+URL\(\s*['"]([^'"]+)['"]\s*,\s*import\.meta\.url\s*\)/g
 ]
-const package_call_pattern = /\b[A-Za-z_$][\w$]*\(\s*['"]([^'"]+)['"]\s*\)/g
-const package_like_pattern = /^(@[A-Za-z0-9._-]+\/[A-Za-z0-9._-]+|[A-Za-z0-9][A-Za-z0-9._-]*)(\/[A-Za-z0-9._-]+)*$/
-const force_keep_packages = new Set(['archiver', 'unzipper'])
+const js_file_pattern = /\.(m?js|cjs)$/
+const package_name_pattern = /^(@[A-Za-z0-9._-]+\/[A-Za-z0-9._-]+|[A-Za-z0-9][A-Za-z0-9._-]*)$/
 
 const resolvePackageName = (specifier: string) => {
 	if (!specifier || specifier.startsWith('.') || specifier.startsWith('/') || specifier.startsWith('node:')) {
@@ -43,37 +42,6 @@ const resolvePackageName = (specifier: string) => {
 	}
 
 	return specifier.split('/')[0] || null
-}
-
-const collectImportedPackages = (target_dir: string, imported_packages: Set<string>) => {
-	if (!fs.existsSync(target_dir)) return
-
-	for (const entry of fs.readdirSync(target_dir, { withFileTypes: true })) {
-		const entry_path = path.join(target_dir, entry.name)
-
-		if (entry.isDirectory()) {
-			collectImportedPackages(entry_path, imported_packages)
-			continue
-		}
-
-		if (!/\.(m?js|cjs)$/.test(entry.name)) continue
-
-		const source = fs.readFileSync(entry_path, 'utf8')
-
-		for (const pattern of import_patterns) {
-			pattern.lastIndex = 0
-
-			let match: RegExpExecArray | null = null
-
-			while ((match = pattern.exec(source))) {
-				const package_name = resolvePackageName(match[1])
-
-				if (package_name && !builtins.has(package_name)) {
-					imported_packages.add(package_name)
-				}
-			}
-		}
-	}
 }
 
 const resolvePackageDir = (node_modules_dir: string, package_name: string) => path.join(node_modules_dir, package_name)
@@ -196,6 +164,75 @@ const removeEmptyScopeDir = (package_dir: string) => {
 	if (remaining.length === 0) {
 		fs.removeSync(scope_dir)
 	}
+}
+
+const listJavaScriptFiles = (target_dir: string, filter?: (file_path: string) => boolean): Array<string> => {
+	if (!fs.existsSync(target_dir)) return []
+
+	const files: Array<string> = []
+
+	for (const entry of fs.readdirSync(target_dir, { withFileTypes: true })) {
+		const entry_path = path.join(target_dir, entry.name)
+
+		if (entry.isDirectory()) {
+			files.push(...listJavaScriptFiles(entry_path, filter))
+			continue
+		}
+
+		if (!js_file_pattern.test(entry.name)) continue
+		if (filter && !filter(entry_path)) continue
+
+		files.push(entry_path)
+	}
+
+	return files
+}
+
+const resolvePolywiseConfigPath = () => {
+	const candidates = [
+		path.resolve(process.cwd(), '../polywise/rslib.config.ts'),
+		path.resolve(process.cwd(), 'packages/polywise/rslib.config.ts')
+	]
+
+	for (const candidate of candidates) {
+		if (fs.existsSync(candidate)) return candidate
+	}
+
+	return null
+}
+
+const readPolywiseExternalPackages = () => {
+	const config_path = resolvePolywiseConfigPath()
+
+	if (!config_path) {
+		console.warn('[Cleanup] polywise rslib.config.ts not found, skipping explicit external keep list.')
+		return [] as Array<string>
+	}
+
+	const config_source = fs.readFileSync(config_path, 'utf8')
+	const packages = new Set<string>()
+
+	for (const line of config_source.split('\n')) {
+		const regex_match = line.match(/\/\^([^$]+)\$\/\s*,?\s*$/)
+
+		if (regex_match) {
+			const package_name = regex_match[1].replace(/\\\//g, '/').replace(/\(\/\.\*\)\?$/, '')
+
+			if (package_name_pattern.test(package_name)) {
+				packages.add(package_name)
+			}
+
+			continue
+		}
+
+		const object_match = line.match(/\{\s*['"]([^'"]+)['"]\s*:/)
+
+		if (object_match && package_name_pattern.test(object_match[1])) {
+			packages.add(object_match[1])
+		}
+	}
+
+	return [...packages].sort()
 }
 
 const resolvePathCandidates = (base_path: string) => {
@@ -321,15 +358,18 @@ const keepInstalledOptionalDependencies = (node_modules_dir: string, keep_packag
 	return added_packages
 }
 
-const buildKeepSetFromFileGraph = (app_dir: string) => {
+const buildKeepSetFromRuntimeGraph = (app_dir: string) => {
 	const node_modules_dir = path.join(app_dir, 'node_modules')
-	const keep_packages = new Set<string>(['polywise', ...force_keep_packages])
+	const polywise_dist_dir = path.join(node_modules_dir, 'polywise', 'dist')
+	const polywise_external_packages = readPolywiseExternalPackages()
+	const keep_packages = new Set<string>(['polywise'])
+	const referenced_packages = new Set<string>()
 	const scanned_files = new Set<string>()
 	const missing_resolutions = new Set<string>()
 	const queue = [
-		path.join(app_dir, 'dist', 'index.js'),
-		path.join(node_modules_dir, 'polywise', 'dist', 'index.js')
-	].filter(file_path => fs.existsSync(file_path))
+		...listJavaScriptFiles(path.join(app_dir, 'dist')),
+		...listJavaScriptFiles(polywise_dist_dir, file_path => path.basename(file_path) !== 'cli.js')
+	]
 
 	const enqueuePackageSpecifier = (owner_file: string, specifier: string) => {
 		if (!specifier || specifier.startsWith('node:')) return
@@ -346,6 +386,12 @@ const buildKeepSetFromFileGraph = (app_dir: string) => {
 			return
 		}
 
+		const package_name = resolvePackageName(specifier)
+
+		if (!package_name || !package_name_pattern.test(package_name)) {
+			return
+		}
+
 		const resolved_package = resolvePackageEntry(node_modules_dir, specifier)
 
 		if (!resolved_package) {
@@ -354,6 +400,7 @@ const buildKeepSetFromFileGraph = (app_dir: string) => {
 		}
 
 		keep_packages.add(resolved_package.package_name)
+		referenced_packages.add(package_name)
 
 		if (resolved_package.file_path) {
 			queue.push(resolved_package.file_path)
@@ -383,22 +430,44 @@ const buildKeepSetFromFileGraph = (app_dir: string) => {
 			}
 		}
 
-		package_call_pattern.lastIndex = 0
+		const require_factory_pattern = /\b([A-Za-z_$][\w$]*)\s*=\s*[A-Za-z_$][\w$]*\(\s*import\.meta\.url\s*\)/g
+		let factory_match: RegExpExecArray | null = null
 
-		let package_call_match: RegExpExecArray | null = null
+		while ((factory_match = require_factory_pattern.exec(source))) {
+			const require_name = factory_match[1]
+			const escaped_require_name = require_name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+			const require_call_pattern = new RegExp(
+				`\\b${escaped_require_name}\\(\\s*['"]([^'"]+)['"]\\s*\\)`,
+				'g'
+			)
+			let require_call_match: RegExpExecArray | null = null
 
-		while ((package_call_match = package_call_pattern.exec(source))) {
-			const specifier = package_call_match[1]
+			while ((require_call_match = require_call_pattern.exec(source))) {
+				enqueuePackageSpecifier(normalized_path, require_call_match[1])
+			}
+		}
 
-			if (!package_like_pattern.test(specifier)) continue
-			if (builtins.has(specifier)) continue
+		const inline_require_pattern = /[A-Za-z_$][\w$]*\(\s*import\.meta\.url\s*\)\(\s*['"]([^'"]+)['"]\s*\)/g
+		let inline_require_match: RegExpExecArray | null = null
 
-			const package_name = resolvePackageName(specifier)
+		while ((inline_require_match = inline_require_pattern.exec(source))) {
+			enqueuePackageSpecifier(normalized_path, inline_require_match[1])
+		}
+	}
 
-			if (!package_name) continue
-			if (!fs.existsSync(resolvePackageDir(node_modules_dir, package_name))) continue
+	for (const package_name of polywise_external_packages) {
+		const resolved_package = resolvePackageEntry(node_modules_dir, package_name)
 
-			enqueuePackageSpecifier(normalized_path, specifier)
+		if (!resolved_package) {
+			missing_resolutions.add(`[polywise externals] -> ${package_name}`)
+			continue
+		}
+
+		keep_packages.add(resolved_package.package_name)
+		referenced_packages.add(resolved_package.package_name)
+
+		if (resolved_package.file_path) {
+			queue.push(resolved_package.file_path)
 		}
 	}
 
@@ -414,6 +483,7 @@ const buildKeepSetFromFileGraph = (app_dir: string) => {
 
 	return {
 		keep_packages,
+		referenced_packages,
 		scanned_files,
 		missing_resolutions,
 		optional_packages
@@ -466,13 +536,8 @@ const trimUnusedPackages = (app_dir: string) => {
 		return
 	}
 
-	const imported_packages = new Set<string>()
-
-	collectImportedPackages(path.join(app_dir, 'dist'), imported_packages)
-	collectImportedPackages(path.join(node_modules_dir, 'polywise', 'dist'), imported_packages)
-
-	const { keep_packages, scanned_files, missing_resolutions, optional_packages } =
-		buildKeepSetFromFileGraph(app_dir)
+	const { keep_packages, referenced_packages, scanned_files, missing_resolutions, optional_packages } =
+		buildKeepSetFromRuntimeGraph(app_dir)
 	const trim_candidates: Array<TrimCandidate> = listTopLevelPackages(node_modules_dir)
 		.filter(entry => !keep_packages.has(entry.name))
 		.map(entry => ({
@@ -490,8 +555,12 @@ const trimUnusedPackages = (app_dir: string) => {
 	const total_saved = trim_candidates.reduce((sum, entry) => sum + entry.size_bytes, 0)
 
 	console.log(
-		`[Cleanup] imported=${imported_packages.size} scanned_files=${scanned_files.size} keep=${keep_packages.size} removable=${trim_candidates.length}`
+		`[Cleanup] referenced=${referenced_packages.size} scanned_files=${scanned_files.size} keep=${keep_packages.size} removable=${trim_candidates.length}`
 	)
+
+	if (referenced_packages.size > 0) {
+		console.log(`[Cleanup] runtime externals: ${[...referenced_packages].sort().join(', ')}`)
+	}
 
 	if (optional_packages.length > 0) {
 		console.log(
