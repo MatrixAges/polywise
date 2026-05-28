@@ -50,7 +50,7 @@
 		"cross-env": "catalog:",
 		"delay-cli": "catalog:",
 		"electron": "catalog:",
-		"electron-builder": "^26.8.1",
+		"electron-builder": "26.5.0",
 		"glob": "^13.0.6",
 		"tinyglobby": "catalog:",
 		"typescript": "catalog:"

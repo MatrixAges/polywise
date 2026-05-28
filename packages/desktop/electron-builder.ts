@@ -18,9 +18,13 @@ export default {
 		'public/**/*',
 		'dist/**/*',
 		'!dist/notarize.js',
+		'!**/*.gguf',
 		'!**/node_modules/**/*.{ts,map,md,txt,map}',
 		'!**/node_modules/**/{test,tests,example,examples,docs,script}',
-		'!**/node_modules/**/onnxruntime-common/**/esm'
+		'!**/node_modules/polywise/.test',
+		'!**/node_modules/polywise/.test/**/*',
+		'!**/node_modules/polywise/**/.polywise',
+		'!**/node_modules/polywise/**/.polywise/**/*'
 	],
 	extraResources: [{ from: '../app/dist', to: 'app_dist' }],
 	artifactName: '${productName}-${version}-${arch}.${ext}',
@@ -47,8 +51,8 @@ export default {
 		target: [{ target: 'nsis', arch: ['x64'] }],
 		icon: 'public/icons/icon.ico',
 		compression: 'maximum',
-		fileAssociations: [{ ext: 'elefile', icon: 'public/icons/icon.ico' }],
-		asarUnpack: ['**/node_modules/onnxruntime-node/bin/napi-v3/win32/${arch}/**/*']
+		fileAssociations: [{ ext: 'elefile', icon: 'public/icons/icon.ico' }]
+		// asarUnpack: ['**/node_modules/onnxruntime-node/bin/napi-v3/win32/${arch}/**/*']
 	},
 	nsis: {
 		oneClick: false,
