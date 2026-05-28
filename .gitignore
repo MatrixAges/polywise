@@ -12,6 +12,7 @@ npm-debug.log*
 .turbo
 .refs
 .vinext
+zip
 
 # misc
 .DS_Store

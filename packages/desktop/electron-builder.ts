@@ -5,12 +5,14 @@ import { afterPack } from './scripts/beforePack'
 import type { Configuration } from 'electron-builder'
 
 const { ZIP } = process.env
-const arch = ['x64', 'arm64']
+// const arch = ['x64', 'arm64']
+const arch = ['x64']
 
 export default {
 	productName,
 	asar: true,
 	compression: 'normal',
+	npmRebuild: false,
 	directories: { output: (ZIP ? 'zip' : 'release') + '/${platform}/${arch}' },
 	files: [
 		'public/**/*',
@@ -23,6 +25,7 @@ export default {
 	extraResources: [{ from: '../app/dist', to: 'app_dist' }],
 	artifactName: '${productName}-${version}-${arch}.${ext}',
 	mac: {
+		identity: null,
 		target: ZIP ? { target: 'zip', arch } : { target: 'dmg', arch },
 		hardenedRuntime: true,
 		gatekeeperAssess: false,
@@ -39,7 +42,7 @@ export default {
 		},
 		fileAssociations: [{ ext: 'elefile', icon: 'public/icons/logo.icns' }]
 	},
-	dmg: { sign: true },
+	// dmg: { sign: true },
 	win: {
 		target: [{ target: 'nsis', arch: ['x64'] }],
 		icon: 'public/icons/icon.ico',
