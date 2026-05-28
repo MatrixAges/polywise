@@ -1,10 +1,9 @@
-import { fork } from 'child_process'
 import { access } from 'fs/promises'
 import { createRequire } from 'module'
 import path from 'path'
-import { app } from 'electron'
+import { app, utilityProcess } from 'electron'
 
-import type { ChildProcess } from 'child_process'
+import type { UtilityProcess } from 'electron'
 
 const require = createRequire(__filename)
 const server_base_url = 'http://127.0.0.1:3072'
@@ -17,8 +16,6 @@ const log_history_limit = 30
 const wait = async (ms: number) => {
 	await new Promise(resolve => setTimeout(resolve, ms))
 }
-
-const isChildExited = (child: ChildProcess) => child.exitCode != null || child.signalCode != null
 
 const isServerReady = async () => {
 	const controller = new AbortController()
@@ -73,7 +70,8 @@ const resolvePolywiseEntrypoint = async () => {
 }
 
 class PolywiseRuntime {
-	private child: ChildProcess | null = null
+	private child: UtilityProcess | null = null
+	private child_exit_code: number | null = null
 	private started_by_desktop = false
 	private log_history: Array<string> = []
 
@@ -133,16 +131,17 @@ class PolywiseRuntime {
 			const { entrypoint_path, spawn_cwd } = await resolvePolywiseEntrypoint()
 
 			this.log_history = []
+			this.child_exit_code = null
 			this.started_by_desktop = true
-			this.child = fork(entrypoint_path, ['--platform=electron'], {
+			this.child = utilityProcess.fork(entrypoint_path, ['--platform=electron'], {
 				cwd: spawn_cwd,
-				execPath: process.execPath,
 				env: {
 					...process.env,
-					ELECTRON_RUN_AS_NODE: '1',
 					POLYWISE_PLATFORM: 'electron'
 				},
-				silent: true
+				stdio: 'pipe',
+				serviceName: 'Polywise Server',
+				allowLoadingUnsignedLibraries: process.platform === 'darwin'
 			})
 
 			this.child.stdout?.on('data', chunk => {
@@ -153,12 +152,17 @@ class PolywiseRuntime {
 				this.pushLog('stderr', chunk)
 			})
 
-			this.child.on('error', error => {
-				this.pushLog('stderr', error.message)
+			this.child.on('error', (type, location, report) => {
+				this.pushLog('stderr', `${type}: ${location}`)
+
+				if (report) {
+					this.pushLog('stderr', report)
+				}
 			})
 
 			this.child.on('exit', code => {
-				console.log(`[polywise] process exited with code ${code ?? 'null'}`)
+				this.child_exit_code = code
+				console.log(`[polywise] process exited with code ${code}`)
 			})
 		}
 
@@ -169,14 +173,13 @@ class PolywiseRuntime {
 				return
 			}
 
-			if (this.child && isChildExited(this.child)) {
-				const child = this.child
+			if (this.child && this.child_exit_code != null) {
+				const exit_code = this.child_exit_code
 
 				this.child = null
+				this.child_exit_code = null
 
-				throw new Error(
-					`${this.getStartupErrorMessage()}\nExit code: ${child.exitCode}, signal: ${child.signalCode}`
-				)
+				throw new Error(`${this.getStartupErrorMessage()}\nExit code: ${exit_code}`)
 			}
 
 			await wait(startup_poll_interval_ms)
@@ -190,31 +193,35 @@ class PolywiseRuntime {
 	async stop() {
 		if (!this.started_by_desktop || !this.child) {
 			this.child = null
+			this.child_exit_code = null
 			return
 		}
 
 		const child = this.child
 
 		this.child = null
+		this.child_exit_code = null
 		this.started_by_desktop = false
 
-		if (isChildExited(child)) {
+		if (child.pid == null) {
 			return
 		}
 
-		child.kill('SIGTERM')
+		child.kill()
 
 		const deadline = Date.now() + shutdown_timeout_ms
 
 		while (Date.now() < deadline) {
-			if (isChildExited(child)) {
+			if (child.pid == null) {
 				return
 			}
 
 			await wait(100)
 		}
 
-		child.kill('SIGKILL')
+		if (child.pid != null) {
+			process.kill(child.pid, 'SIGKILL')
+		}
 	}
 }
 
