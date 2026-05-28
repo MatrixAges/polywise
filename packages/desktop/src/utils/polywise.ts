@@ -2,6 +2,7 @@ import { fork } from 'child_process'
 import { access } from 'fs/promises'
 import { createRequire } from 'module'
 import path from 'path'
+import { app } from 'electron'
 
 import type { ChildProcess } from 'child_process'
 
@@ -38,6 +39,23 @@ const isServerReady = async () => {
 }
 
 const resolvePolywiseEntrypoint = async () => {
+	if (app.isPackaged) {
+		const package_dir = path.join(app.getAppPath(), 'node_modules', 'polywise')
+		const entrypoint_path = path.join(package_dir, 'dist', 'index.js')
+
+		try {
+			await access(entrypoint_path)
+		} catch {
+			throw new Error(`Packaged Polywise entrypoint not found: ${entrypoint_path}`)
+		}
+
+		return {
+			package_dir,
+			entrypoint_path,
+			spawn_cwd: package_dir
+		}
+	}
+
 	const entrypoint_path = require.resolve('polywise')
 	const package_dir = path.dirname(path.dirname(entrypoint_path))
 
@@ -49,7 +67,8 @@ const resolvePolywiseEntrypoint = async () => {
 
 	return {
 		package_dir,
-		entrypoint_path
+		entrypoint_path,
+		spawn_cwd: package_dir
 	}
 }
 
@@ -88,6 +107,22 @@ class PolywiseRuntime {
 		return tail ? `Polywise failed to start.\n${tail}` : 'Polywise failed to start.'
 	}
 
+	getStartupDiagnostics(error?: unknown) {
+		const lines = [this.getStartupErrorMessage()]
+
+		if (error instanceof Error) {
+			lines.push(`Error: ${error.message}`)
+
+			if (error.stack) {
+				lines.push(error.stack)
+			}
+		} else if (error != null) {
+			lines.push(`Error: ${String(error)}`)
+		}
+
+		return lines.join('\n\n')
+	}
+
 	async ensureStarted() {
 		if (await isServerReady()) {
 			this.started_by_desktop = false
@@ -95,15 +130,16 @@ class PolywiseRuntime {
 		}
 
 		if (!this.child) {
-			const { entrypoint_path, package_dir } = await resolvePolywiseEntrypoint()
+			const { entrypoint_path, spawn_cwd } = await resolvePolywiseEntrypoint()
 
 			this.log_history = []
 			this.started_by_desktop = true
 			this.child = fork(entrypoint_path, ['--platform=electron'], {
-				cwd: package_dir,
+				cwd: spawn_cwd,
 				execPath: process.execPath,
 				env: {
 					...process.env,
+					ELECTRON_RUN_AS_NODE: '1',
 					POLYWISE_PLATFORM: 'electron'
 				},
 				silent: true

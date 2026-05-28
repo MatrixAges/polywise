@@ -10,7 +10,7 @@ const arch = ['x64']
 
 export default {
 	productName,
-	asar: true,
+	asar: false,
 	compression: 'normal',
 	npmRebuild: false,
 	directories: { output: (ZIP ? 'zip' : 'release') + '/${platform}/${arch}' },
@@ -22,9 +22,7 @@ export default {
 		'!**/node_modules/**/*.{ts,map,md,txt,map,LICENSE}',
 		'!**/node_modules/**/{test,tests,example,examples,docs,script}',
 		'!**/node_modules/polywise/.test',
-		'!**/node_modules/polywise/.test/**/*',
-		'!**/node_modules/polywise/**/.polywise',
-		'!**/node_modules/polywise/**/.polywise/**/*'
+		'!**/node_modules/polywise/.test/**/*'
 	],
 	extraResources: [{ from: '../app/dist', to: 'app_dist' }],
 	artifactName: '${productName}-${version}-${arch}.${ext}',

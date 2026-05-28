@@ -1,8 +1,10 @@
 import '@desktop/utils/locale'
 import '@desktop/utils/entry'
 
-import { app, BrowserWindow, ipcMain, WebContentsView } from 'electron'
+import path from 'path'
+import { app, BrowserWindow, dialog, ipcMain, WebContentsView } from 'electron'
 import { createIPCHandler } from 'erpc/main'
+import { outputFile } from 'fs-extra'
 
 import { Main, Menu, Tray } from './app'
 import config from './config'
@@ -62,7 +64,15 @@ class App {
 					windows: [this.window]
 				})
 			} catch (error) {
-				console.error('[app] failed to start polywise runtime', error)
+				const diagnostics = polywise_runtime.getStartupDiagnostics(error)
+				const log_path = path.join(app.getPath('userData'), 'startup-error.log')
+
+				await outputFile(log_path, diagnostics)
+				console.error('[app] failed to start polywise runtime', diagnostics)
+				dialog.showErrorBox(
+					'Polywise failed to start',
+					`Desktop backend startup failed.\n\nA diagnostic log was written to:\n${log_path}`
+				)
 
 				app.exit(1)
 			}

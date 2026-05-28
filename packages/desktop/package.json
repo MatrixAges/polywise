@@ -15,7 +15,7 @@
 		"build": "npm run main:prod && npm run transform",
 		"build:mac": "npm run clean && npm run transform && npm run main:prod && concurrently \"cross-env ZIP=0 electron-builder -m\" \"electron-builder -m\"",
 		"build:win": "npm run clean && npm run transform && npm run main:prod && electron-builder -w",
-		"rebuild": "cross-env CI=true npm rebuild better-sqlite3 bufferutil lmdb node-llama-cpp simsimd sqlite-vec utf-8-validate @node-rs/jieba @node-rs/xxhash"
+		"rebuild": "node ./scripts/rebuild.mjs"
 	},
 	"dependencies": {
 		"@trpc/server": "catalog:",

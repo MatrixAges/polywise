@@ -982,6 +982,9 @@ importers:
       zod:
         specifier: 'catalog:'
         version: 4.4.3
+      zod-openapi:
+        specifier: ^5.4.6
+        version: 5.4.6(zod@4.4.3)
     devDependencies:
       '@rslib/core':
         specifier: 'catalog:'
