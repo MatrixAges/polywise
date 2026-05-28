@@ -1,6 +1,6 @@
 import { TEAM_ID } from './metadata'
 import { productName } from './package.json'
-import { beforePack } from './scripts/beforePack'
+import { afterPack } from './scripts/beforePack'
 
 import type { Configuration } from 'electron-builder'
 
@@ -19,8 +19,9 @@ export default {
 		'dist/**/*',
 		'!dist/notarize.js',
 		'!**/*.gguf',
-		'!**/node_modules/**/*.{ts,map,md,txt,map,.d.ts,.d.cts,.d.mts}',
-		'!**/node_modules/**/{test,tests,example,examples,docs,script,LICENSE}',
+		'!**/tsconfig.json',
+		'!**/node_modules/**/*.{ts,map,md,txt,map,d.ts,d.cts,d.mts}',
+		'!**/node_modules/**/{test,tests,example,examples,docs,script,LICENSE,@types}',
 		'!**/node_modules/polywise/.test',
 		'!**/node_modules/polywise/.test/**/*',
 		'!**/node_modules/polywise/dist/app_dist',
@@ -52,7 +53,6 @@ export default {
 		icon: 'public/icons/icon.ico',
 		compression: 'maximum',
 		fileAssociations: [{ ext: 'elefile', icon: 'public/icons/icon.ico' }]
-		// asarUnpack: ['**/node_modules/onnxruntime-node/bin/napi-v3/win32/${arch}/**/*']
 	},
 	nsis: {
 		oneClick: false,
@@ -68,5 +68,5 @@ export default {
 	},
 	fileAssociations: [{ name: productName, ext: 'elefile' }],
 	publish: [{ provider: 'generic', url: 'http://localhost:8080/release/' }],
-	beforePack
+	afterPack
 } as Configuration
