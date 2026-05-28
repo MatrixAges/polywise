@@ -93,7 +93,7 @@
 		"globby": "catalog:",
 		"hono": "catalog:",
 		"jina-ai-provider": "^1.0.0",
-		"just-bash": "^3.0.1",
+		"just-bash": "2.14.0",
 		"jws": "^4.0.1",
 		"lmdb": "^3.5.4",
 		"mammoth": "^1.12.0",
