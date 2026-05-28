@@ -1,9 +1,11 @@
+import { serveStatic } from '@hono/node-server/serve-static'
 import { trpcServer } from '@hono/trpc-server'
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 
 import api from './api'
 import { applyResponseHeaders, getAuth, getAuthTrustedOrigins, isAuthRequired, requireRequestSession } from './auth'
+import { env } from './env'
 import { router } from './rpc'
 import { create_trpc_context, error_handler, error_middleware, openapi_handler, visit_middleware } from './utils'
 
@@ -63,5 +65,26 @@ server.all(
 server.all('/api/*', openapi_handler)
 
 server.route('/sys', api)
+
+if (env.platform === 'standalone') {
+	server.get('/app', c => c.redirect('/app/'))
+	server.use(
+		'/app/*',
+		serveStatic({
+			root: './dist/app_dist',
+			rewriteRequestPath: path => path.replace(/^\/app\/?/, '')
+		})
+	)
+	server.get('/app/*', async c => {
+		const request_path = c.req.path.replace(/^\/app\/?/, '')
+		const last_segment = request_path.split('/').at(-1) || ''
+
+		if (last_segment.includes('.')) {
+			return c.text('Not Found', 404)
+		}
+
+		return await serveStatic({ path: './dist/app_dist/index.html' })(c, async () => {})
+	})
+}
 
 server.onError(error_handler)

@@ -47,7 +47,7 @@ const parseRuntimePlatform = () => {
 		return null
 	}, null)
 
-	const env_value = process.env.POLYWISE_PLATFORM?.trim()
+	const env_value = process.env.PLATFORM?.trim() || process.env.POLYWISE_PLATFORM?.trim()
 	const target = (argv_value || env_value || 'standalone').toLowerCase()
 
 	return runtime_platform_values.has(target as Env['platform']) ? (target as Env['platform']) : 'standalone'

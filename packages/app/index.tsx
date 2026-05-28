@@ -8,7 +8,7 @@ import { createBrowserRouter, createHashRouter, RouterProvider } from 'react-rou
 import { ErrorBoundary, Fallback } from '@/components'
 import Layout from '@/layout'
 import AppRoot from '@/runtime/AppRoot'
-import { is_electron } from '@/utils'
+import { browser_basename, is_electron } from '@/utils'
 
 import type { RouteObject } from 'react-router-dom'
 
@@ -95,6 +95,6 @@ const routes: Array<RouteObject> = [
 	}
 ]
 
-const router = is_electron ? createHashRouter(routes) : createBrowserRouter(routes)
+const router = is_electron ? createHashRouter(routes) : createBrowserRouter(routes, { basename: browser_basename })
 
 createRoot(document.getElementById('root')!).render(<RouterProvider router={router} />)

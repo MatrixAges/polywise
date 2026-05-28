@@ -1,3 +1,4 @@
+import { existsSync } from 'fs'
 import { config_watcher } from '@core/config'
 import { env } from '@core/env'
 import { disposeModels } from '@core/llama'
@@ -20,6 +21,16 @@ export default async () => {
 
 	const node_server = serve({ fetch: server.fetch, port: 3072 }, ({ port }) => {
 		console.log(`Listening on http://localhost:${port}`)
+		if (env.platform === 'standalone') {
+			const app_url = `http://localhost:${port}/app/`
+
+			if (existsSync('./dist/app_dist/index.html')) {
+				console.log(`App: ${app_url}`)
+			} else {
+				console.warn(`App dist missing for standalone runtime: ./dist/app_dist/index.html`)
+				console.log(`App: ${app_url}`)
+			}
+		}
 
 		writeRuntimePidFile()
 		resolve(port)

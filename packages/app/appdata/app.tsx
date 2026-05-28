@@ -49,8 +49,11 @@ export const local_models = {
 	gen: { name: 'Generation Model', model: 'Qwen3.5 4B', size: '5.95GB' }
 } as Record<string, { name: string; model: string; size: string }>
 
-export const server_base_url = 'http://localhost:3072'
+const browser_origin = window.location.origin
+const ws_protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
+
+export const server_base_url = is_electron ? 'http://localhost:3072' : browser_origin
 export const server_sys_url = server_base_url + '/sys'
 export const server_sys_session_url = server_sys_url + '/session'
 export const server_trpc_url = server_base_url + '/trpc'
-export const server_ws_url = 'ws://localhost:3072/trpc'
+export const server_ws_url = is_electron ? 'ws://localhost:3072/trpc' : `${ws_protocol}//${window.location.host}/trpc`
