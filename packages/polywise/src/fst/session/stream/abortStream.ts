@@ -5,7 +5,7 @@ import type Index from '../index'
 export default async (s: Index) => {
 	s.manual_abort = true
 
-	await s.runing(false)
+	await s.setRunning(false)
 	await syncTodoSessionStatusBySessionId({
 		session_id: s.id,
 		from_status_list: ['processing'],

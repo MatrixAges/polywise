@@ -8,6 +8,7 @@ import { injectable } from 'tsyringe'
 import { server_sys_session_url } from '@/appdata'
 import { Util } from '@/models/common'
 import { alert, Chat, CustomTransport, execUntil, rpc } from '@/utils'
+import { hasMeaningfulMessageContent } from '@/utils/chat/stream'
 
 import type { Session } from '@core/db'
 import type { Context, Message, Permission } from '@core/fst'
@@ -377,7 +378,7 @@ export default class Index {
 
 				const last_message = this.messages.at(-1)!
 
-				if (last_message.role === 'assistant' && !last_message.parts.length) {
+				if (!hasMeaningfulMessageContent(last_message)) {
 					this.messages.pop()
 
 					this.update()

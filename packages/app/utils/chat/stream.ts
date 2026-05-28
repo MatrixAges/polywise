@@ -51,6 +51,26 @@ const hasMessageContent = <UI_MESSAGE extends UIMessage>(state: StreamingUIMessa
 	Object.keys(state.activeReasoningParts).length > 0 ||
 	Object.keys(state.partialToolCalls).length > 0
 
+const hasMeaningfulPart = (part: UIMessage['parts'][number]) => {
+	if (part.type === 'step-start' || part.type === 'data-part-duration') {
+		return false
+	}
+
+	if ((part.type === 'text' || part.type === 'reasoning') && typeof part.text === 'string') {
+		return part.text.trim().length > 0
+	}
+
+	return true
+}
+
+export const hasMeaningfulMessageContent = (message?: UIMessage | null) => {
+	if (!message || message.role !== 'assistant') {
+		return false
+	}
+
+	return message.parts.some(hasMeaningfulPart)
+}
+
 const resetForNewMessage = <UI_MESSAGE extends UIMessage>(
 	state: StreamingUIMessageState<UI_MESSAGE>,
 	message_id: string

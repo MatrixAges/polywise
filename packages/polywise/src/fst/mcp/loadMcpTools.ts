@@ -1,4 +1,4 @@
-import { getConfig } from '../session/config'
+import getConfig from '../session/config/getConfig'
 import { getMcpClient } from './client'
 import getEnabledMcps from './getEnabledMcps'
 import loadConfig from './loadConfig'

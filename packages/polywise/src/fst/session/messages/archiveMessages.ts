@@ -9,7 +9,7 @@ export default async (s: Index) => {
 	s.context = {} as Context
 	s.archived_at = Date.now()
 
-	await s.runing(false)
+	await s.setRunning(false)
 	await s.setContext({})
 	await s.setState()
 	await s.clearTasks()

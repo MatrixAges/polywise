@@ -14,7 +14,7 @@ export default async (s: Index) => {
 	s.archived_at = null
 	s.context = {} as Context
 
-	await s.runing(false)
+	await s.setRunning(false)
 	await s.setContext({})
 	await s.setState()
 

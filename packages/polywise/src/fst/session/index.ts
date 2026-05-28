@@ -1,34 +1,40 @@
 import events from 'events'
 import path from 'path'
 import { app } from '@core/consts'
-import { todo_session } from '@core/db/schema'
-import { getTodoSession } from '@core/db/services'
-import { eq } from 'drizzle-orm'
+import getContextPrompt from '@core/consts/prompts/getContextPrompt'
 
 import { loadMcpTools } from '../mcp'
+import { updateTitle } from '../tools'
 import { loadCustomToolsMap } from '../tools/meta'
 import { loadSkillMap } from '../tools/skill'
-import { getConfig, setConfig } from './config'
-import { getContext, setContext } from './context'
-import { appendMessage, insertMessage } from './message'
-import {
-	archiveMessages,
-	clearMessages,
-	getMessages,
-	getMessagesCount,
-	loadMessages,
-	removeMessage,
-	trimMessages,
-	unarchiveMessages
-} from './messages'
-import { getAgents, getData, getModel, getOwnerAgent, getProject } from './related'
-import { getSession, initSession, updateSession } from './session'
-import { getState, setState } from './state'
-import { abortStream, getStream } from './stream'
-import { clearTasks, getTasks, setTasks } from './task'
-import { active, clearPlan, resetAbort, runing, stop, sync, updateConfig } from './utils'
+import getConfig from './config/getConfig'
+import setConfig from './config/setConfig'
+import createKernel from './core/createKernel'
+import runHooks from './hooks/runHooks'
+import appendMessage from './message/appendMessage'
+import insertMessage from './message/insertMessage'
+import archiveMessages from './messages/archiveMessages'
+import clearMessages from './messages/clearMessages'
+import getMessages from './messages/getMessages'
+import getMessagesCount from './messages/getMessagesCount'
+import loadMessages from './messages/loadMessages'
+import removeMessage from './messages/removeMessage'
+import trimMessages from './messages/trimMessages'
+import unarchiveMessages from './messages/unarchiveMessages'
+import getAgentsBase from './related/getAgents'
+import getModel from './related/getModel'
+import getOwnerAgentBase from './related/getOwnerAgent'
+import getProject from './related/getProject'
+import getSession from './session/getSession'
+import initSession from './session/initSession'
+import updateSession from './session/updateSession'
+import abortStream from './stream/abortStream'
+import active from './utils/active'
+import clearPlan from './utils/clearPlan'
+import setRunning from './utils/setRunning'
 
-import type { Agent, Project, Session, SessionInsert } from '@core/db'
+import type { Agent, Group as GroupRow, Project, SessionInsert, Session as SessionRow } from '@core/db'
+import type { GroupBarrierState, GroupReplyQueueItem, GroupWriteLock } from '../domains/group/types'
 import type { ModelResult } from '../provider'
 import type {
 	Context,
@@ -43,16 +49,35 @@ import type {
 	SkillMeta
 } from '../types'
 import type { SessionRuntimeConfig } from './config/shared'
+import type { Caps, Descriptor, HookMap } from './core/types'
 
-export default class Index {
+const kernel = createKernel()
+
+export default class Session {
 	id = ''
 	event = null as unknown as events.EventEmitter
-	session = null as unknown as Session
+	descriptor: Descriptor
+	caps = {} as Caps
+	hooks = {} as HookMap
+	session = null as unknown as SessionRow
 	model = null as unknown as ModelResult
 
 	agents = [] as Array<Agent>
 	owner_agent = null as Agent | null
 	project = null as Project | null
+	group = null as GroupRow | null
+	group_id = ''
+	folders = [] as Array<{ name: string; path: string }>
+	agents_map = [] as Array<{ id: string; name: string; role: string; description: string | null }>
+	active_turn_id = null as string | null
+	write_lock = {
+		agent_id: null,
+		agent_name: null,
+		acquired_at: null,
+		reason: null
+	} as GroupWriteLock
+	barrier = null as GroupBarrierState | null
+	reply_queue = [] as Array<GroupReplyQueueItem>
 	model_messages = [] as Array<Message>
 	context = {} as Context
 	prefill = ''
@@ -83,12 +108,21 @@ export default class Index {
 	enable_agent_tool = true
 	agent_ids = [] as SessionRuntimeConfig['agent_ids']
 
+	constructor(descriptor: Descriptor) {
+		this.descriptor = descriptor
+		this.group_id = descriptor.groupId || ''
+	}
+
+	get scope(): SessionScope {
+		return this.caps.env.scope(this)
+	}
+
 	get cwd() {
-		return this.project?.dir || this.files_dir
+		return this.caps.env.cwd(this)
 	}
 
 	get additional_mounts() {
-		return [] as Array<{ mountPoint: string; path: string }>
+		return this.caps.env.mounts(this)
 	}
 
 	get path_mappings() {
@@ -105,40 +139,40 @@ export default class Index {
 		return path_mappings
 	}
 
-	get scope(): SessionScope {
-		if (this.project) {
-			return { type: 'project', id: this.project.id }
-		}
-
-		if (this.owner_agent) {
-			return { type: 'agent', id: this.owner_agent.id }
-		}
-
-		return { type: 'global', id: null }
-	}
-
 	get session_dir() {
 		return path.resolve(`${app.app_path}/sessions/${this.id}`)
 	}
 
-	get context_dir() {
+	get base_context_dir() {
 		return path.resolve(`${this.session_dir}/context.json`)
 	}
 
-	get config_dir() {
-		return path.resolve(`${this.session_dir}/config.json`)
-	}
-
-	get state_dir() {
+	get base_state_dir() {
 		return path.resolve(`${this.session_dir}/state.json`)
 	}
 
-	get context_history_dir() {
+	get base_context_history_dir() {
 		return path.resolve(`${this.session_dir}/context_history`)
+	}
+
+	get context_dir() {
+		return this.caps.env.contextDir(this)
+	}
+
+	get state_dir() {
+		return this.caps.env.stateDir(this)
+	}
+
+	get context_history_dir() {
+		return this.caps.env.contextHistoryDir(this)
 	}
 
 	get files_dir() {
 		return path.resolve(`${this.session_dir}/files`)
+	}
+
+	get config_dir() {
+		return path.resolve(`${this.session_dir}/config.json`)
 	}
 
 	get skills_dir() {
@@ -152,32 +186,31 @@ export default class Index {
 	}
 
 	get has_todo_session_link() {
-		return getTodoSession(eq(todo_session.session_id, this.id)).then(Boolean)
+		return this.caps.env.hasTodoLink(this)
 	}
 
-	async init(args: InitArgs) {
-		const { id, event, is_cron, title } = args
+	getContextPrompt = () => getContextPrompt(this.context)
+	updateTitle = (focus: string) => updateTitle(this, focus)
 
-		this.id = id
-		this.event = event
-
-		await this.initSession(is_cron, title)
-		await this.getOwnerAgent()
-		await this.loadSkillMap()
-		await this.loadCustomToolsMap()
-
-		return this.getData()
-	}
+	init = (args: InitArgs & { group_id?: string }) => kernel.init(this, args)
+	getData = () => kernel.getData(this)
+	getSyncData = () =>
+		this.caps.sync
+			.getData(this)
+			.then(data => runHooks(this, 'onSync', { data }))
+			.then(state => state.data)
 
 	initSession = (is_cron?: boolean, title?: string) => initSession(this, is_cron, title)
 	getSession = () => getSession(this)
 	updateSession = (args: Partial<SessionInsert>) => updateSession(this, args)
 
-	getData = () => getData(this)
-	getAgents = () => getAgents(this)
-	getOwnerAgent = () => getOwnerAgent(this)
 	getModel = () => getModel(this)
 	getProject = () => getProject(this)
+	getAgentsBase = () => getAgentsBase(this)
+	getOwnerAgentBase = () => getOwnerAgentBase(this)
+	getAgents = () => this.caps.rel.getAgents(this)
+	getOwnerAgent = () => this.caps.rel.getOwnerAgent(this)
+	getFolders = () => this.caps.rel.getFolders?.(this) || Promise.resolve(this.folders)
 
 	getMessages = () => getMessages(this)
 	loadMessages = (type: 'prev' | 'next') => loadMessages(this, type)
@@ -191,29 +224,29 @@ export default class Index {
 	insertMessage = (v: Message) => insertMessage(this, v)
 	appendMessage = (v: Message) => appendMessage(this, v)
 
-	getTasks = () => getTasks(this)
-	setTasks = (v: Context['tasks']) => setTasks(this, v)
-	clearTasks = () => clearTasks(this)
+	getTasks = () => this.caps.store.getTasks(this)
+	setTasks = (v: Context['tasks'], args?: Record<string, unknown>) => this.caps.store.setTasks(this, v, args)
+	clearTasks = () => this.caps.store.clearTasks(this)
 	clearPlan = () => clearPlan(this)
 
-	getContext = () => getContext(this)
+	getContext = () => this.caps.store.getContext(this)
 	getConfig = () => getConfig(this)
 	setConfig = (patch: Parameters<typeof setConfig>[1]) => setConfig(this, patch)
-	setContext = (v: Partial<Context>) => setContext(this, v)
-	getState = () => getState(this)
-	setState = () => setState(this)
-	updateConfig = (config?: Awaited<ReturnType<typeof getConfig>>) => updateConfig(this, config)
+	setContext = (v: Partial<Context>, args?: Record<string, unknown>) => this.caps.store.setContext(this, v, args)
+	getState = () => this.caps.store.getState(this)
+	setState = () => this.caps.store.setState(this)
+	updateConfig = (config?: Awaited<ReturnType<typeof getConfig>>) => kernel.updateConfig(this, config)
 
 	loadSkillMap = () => loadSkillMap(this)
 	loadCustomToolsMap = () => loadCustomToolsMap(this)
 	loadMcps = () => loadMcpTools(this)
 
-	getStream = (message: Message) => getStream(this, message)
+	getStream = (message: Message) => kernel.send(this, message)
 	abortStream = () => abortStream(this)
 
 	active = () => active(this)
-	runing = (v: boolean) => runing(this, v)
-	sync = () => sync(this)
-	stop = () => stop(this)
-	resetAbort = () => resetAbort(this)
+	setRunning = (v: boolean) => setRunning(this, v)
+	sync = () => this.getSyncData().then(data => kernel.sync(this, data))
+	stop = () => kernel.stop(this)
+	resetAbort = () => kernel.resetAbort(this)
 }

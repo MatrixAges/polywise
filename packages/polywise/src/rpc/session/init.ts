@@ -28,12 +28,14 @@ export default p.input(input_type).subscription(async function* (args) {
 		yield res
 	}
 
-	const stop = () => session.abortStream()
-	const clear = () => session.clearMessages()
-	const removeMessage = (message_id: string) => session.removeMessage(message_id)
-	const archive = () => session.archiveMessages()
-	const unarchive = () => session.unarchiveMessages()
-	const load = (type: 'prev' | 'next') => session.loadMessages(type)
+	const getLive = () => SessionStore.get(id) || session
+
+	const stop = () => getLive().abortStream()
+	const clear = () => getLive().clearMessages()
+	const removeMessage = (message_id: string) => getLive().removeMessage(message_id)
+	const archive = () => getLive().archiveMessages()
+	const unarchive = () => getLive().unarchiveMessages()
+	const load = (type: 'prev' | 'next') => getLive().loadMessages(type)
 
 	const setConfig = async (patch: {
 		mode?: string
@@ -44,7 +46,7 @@ export default p.input(input_type).subscription(async function* (args) {
 		enable_agent_tool?: boolean
 		agent_ids?: Array<string>
 	}) => {
-		await session.setConfig({
+		await getLive().setConfig({
 			...(patch.mode ? { mode: patch.mode as 'normal' | 'plan' | 'plan-exec' } : {}),
 			...(patch.audit_mode ? { audit_mode: patch.audit_mode } : {}),
 			...(patch.disable_map ? { disable_map: patch.disable_map } : {}),
@@ -55,13 +57,13 @@ export default p.input(input_type).subscription(async function* (args) {
 				: {}),
 			...(patch.agent_ids ? { agent_ids: patch.agent_ids } : {})
 		})
-		const data = await session.getData()
+		const data = await getLive().getData()
 
 		SessionEventStore.emit(`${id}/change`, data)
 	}
 
 	const destroy = () => {
-		session.abortStream()
+		getLive().abortStream()
 
 		SessionStore.delete(id)
 		GroupStore.delete(id)

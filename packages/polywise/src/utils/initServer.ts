@@ -16,17 +16,19 @@ import type { Server } from 'http'
 export default async () => {
 	const { promise, resolve } = Promise.withResolvers()
 	let deinit_started = false
+	const is_dev = process.env.NODE_ENV === 'development'
 
 	process.title = 'polywise_server'
 
 	const node_server = serve({ fetch: server.fetch, port: 3072 }, ({ port }) => {
 		console.log(`Listening on http://localhost:${port}`)
+
 		if (env.platform === 'standalone') {
 			const app_url = `http://localhost:${port}/app/`
 
-			if (existsSync('./dist/app_dist/index.html')) {
+			if (!is_dev && existsSync('./dist/app_dist/index.html')) {
 				console.log(`App: ${app_url}`)
-			} else {
+			} else if (!is_dev) {
 				console.warn(`App dist missing for standalone runtime: ./dist/app_dist/index.html`)
 				console.log(`App: ${app_url}`)
 			}

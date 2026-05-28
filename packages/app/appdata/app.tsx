@@ -11,7 +11,7 @@ import {
 	ScrollText
 } from 'lucide-react'
 
-import { is_electron } from '@/utils/is'
+import { is_dev, is_electron } from '@/utils/is'
 
 import type { LucideIcon } from 'lucide-react'
 
@@ -51,9 +51,11 @@ export const local_models = {
 
 const browser_origin = window.location.origin
 const ws_protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
+const dev_server_origin = 'http://localhost:3072'
+const dev_server_ws_url = 'ws://localhost:3072/trpc'
 
-export const server_base_url = is_electron ? 'http://localhost:3072' : browser_origin
+export const server_base_url = is_dev || is_electron ? dev_server_origin : browser_origin
 export const server_sys_url = server_base_url + '/sys'
 export const server_sys_session_url = server_sys_url + '/session'
 export const server_trpc_url = server_base_url + '/trpc'
-export const server_ws_url = is_electron ? 'ws://localhost:3072/trpc' : `${ws_protocol}//${window.location.host}/trpc`
+export const server_ws_url = is_dev || is_electron ? dev_server_ws_url : `${ws_protocol}//${window.location.host}/trpc`

@@ -5,7 +5,7 @@ import { generateText, tool } from 'ai'
 import dayjs from 'dayjs'
 import { array, object, string, enum as zod_enum } from 'zod'
 
-import getAgentModel from '../group/runtime/getAgentModel'
+import getAgentModel from '../domains/group/runtime/getAgentModel'
 
 import type { Agent } from '@core/db'
 import type Session from '../session'

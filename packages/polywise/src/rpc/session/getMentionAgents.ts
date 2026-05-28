@@ -1,5 +1,4 @@
 import { getAgents } from '@core/db/services'
-import { Group } from '@core/fst'
 import { connectSession, p } from '@core/utils'
 import { object, string } from 'zod'
 
@@ -19,7 +18,7 @@ export default p
 	.query(async ({ input }) => {
 		const session = await connectSession({ id: input.id })
 
-		if (session instanceof Group) {
+		if (session.scope.type === 'group') {
 			await session.getAgents()
 
 			return session.agents.map(item => ({

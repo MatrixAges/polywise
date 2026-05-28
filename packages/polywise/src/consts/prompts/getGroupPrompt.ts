@@ -2,7 +2,7 @@ import fst_system_prompt from './fst_system_prompt.md'
 import fst_system_tool_prompt from './fst_system_tool_prompt.md'
 
 import type { Agent } from '@core/db'
-import type { GroupMemberEvaluation } from '@core/fst/group/types'
+import type { GroupMemberEvaluation } from '@core/fst/domains/group/types'
 
 type GroupAgentProfileSource = Pick<Agent, 'name' | 'role' | 'identity' | 'soul' | 'memory' | 'prompt'>
 

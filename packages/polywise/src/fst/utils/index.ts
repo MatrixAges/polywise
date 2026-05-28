@@ -1,6 +1,5 @@
 export { default as appendContextHistory } from './appendContextHistory'
 export { default as emitChange } from './emitChange'
-export { default as getAgentSystemPrompt } from './getAgentSystemPrompt'
 export { default as getBashResponse } from './getBashResponse'
 export { default as getBashTools } from './getBashTools'
 export { default as getErrorPayload } from './getErrorPayload'

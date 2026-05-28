@@ -1,4 +1,3 @@
-import { Group } from '@core/fst'
 import { GroupStreamStore, SessionStreamStore } from '@core/utils'
 import { createUIMessageStream, JsonToSseTransformStream } from 'ai'
 
@@ -21,7 +20,7 @@ export const post = async (c: HonoContext) => {
 	}
 
 	const stream = await session.getStream(message)
-	const target_store = session instanceof Group ? GroupStreamStore : SessionStreamStore
+	const target_store = session.scope.type === 'group' ? GroupStreamStore : SessionStreamStore
 
 	const target_stream = await target_store.resumableStream(id, () =>
 		stream.pipeThrough(new JsonToSseTransformStream())
@@ -38,7 +37,7 @@ export const get = async (c: HonoContext) => {
 	if (!id) return c.body(null)
 
 	const session = await connectSession({ id })
-	const target_store = session instanceof Group ? GroupStreamStore : SessionStreamStore
+	const target_store = session.scope.type === 'group' ? GroupStreamStore : SessionStreamStore
 
 	if (!target_store.hasExistingStream(id)) return c.body(null)
 

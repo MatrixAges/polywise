@@ -2,7 +2,7 @@ import { DefaultChatTransport, isToolUIPart } from 'ai'
 import { getId } from 'stk/utils'
 
 import State from './State'
-import { applyUIMessageChunk, createStreamingUIMessageState } from './stream'
+import { applyUIMessageChunk, createStreamingUIMessageState, hasMeaningfulMessageContent } from './stream'
 
 import type {
 	ChatInit,
@@ -451,9 +451,20 @@ export default class Index<UI_MESSAGE extends UIMessage = UIMessage> {
 
 			this.#setStatus({ status: 'error', error: err as Error })
 		} finally {
+			const active_message = this.#activeResponse?.state.message
+			const last_message = this.lastMessage
+
+			if (
+				active_message &&
+				last_message?.id === active_message.id &&
+				!hasMeaningfulMessageContent(active_message)
+			) {
+				this.#state.popMessage()
+			}
+
 			try {
 				this.#onFinish?.({
-					message: this.#activeResponse!.state.message,
+					message: active_message!,
 					messages: this.#state.messages,
 					isAbort: is_abort,
 					isDisconnect: is_disconnect,

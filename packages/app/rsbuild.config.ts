@@ -25,7 +25,7 @@ const html_tags = [
 
 const config = {
 	source: { entry: { index: './index.tsx' }, decorators: { version: 'legacy' } },
-	output: { legalComments: 'none', assetPrefix: asset_prefix },
+	output: { legalComments: 'none', assetPrefix: is_dev ? undefined : asset_prefix },
 	plugins: [pluginReact(), pluginSvgr()],
 	resolve: {
 		alias: {

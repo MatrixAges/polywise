@@ -25,7 +25,7 @@
 		"cli": "node ./dist/cli.js",
 		"copy:app-dist": "bun ./scripts/copyAppDist.ts",
 		"start": "node ./dist/index.js",
-		"start:watch": "delay 600ms && node --watch ./dist/index.js",
+		"start:watch": "delay 600ms && cross-env NODE_ENV=development node --watch ./dist/index.js",
 		"dev": "concurrently -c \"cyan,magenta\" \"npm run build:watch\" \"npm run start:watch\"",
 		"test": "rstest run $TEST_FILE",
 		"sql": "drizzle-kit generate",
