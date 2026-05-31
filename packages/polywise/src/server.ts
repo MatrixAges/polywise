@@ -5,10 +5,18 @@ import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 
 import api from './api'
-import { applyResponseHeaders, getAuth, getAuthTrustedOrigins, isAuthRequired, requireRequestSession } from './auth'
+import {
+	applyResponseHeaders,
+	getAuth,
+	getAuthTrustedOrigins,
+	isAuthRequired,
+	isLocalCliRequest,
+	requireRequestSession
+} from './auth'
 import { env } from './env'
 import { router } from './rpc'
 import { create_trpc_context, error_handler, error_middleware, openapi_handler, visit_middleware } from './utils'
+import { getRemoteAddress } from './utils/localCliAuth'
 
 export const server = new Hono()
 const cors_allowed_origins = new Set(getAuthTrustedOrigins())
@@ -48,6 +56,11 @@ server.use('/sys/*', async (c, next) => {
 		return
 	}
 
+	if (isLocalCliRequest(c.req.raw, getRemoteAddress(c.env))) {
+		await next()
+		return
+	}
+
 	const response_headers = new Headers()
 	const auth_state = await requireRequestSession(c.req.raw.headers, response_headers)
 
@@ -68,7 +81,8 @@ server.all(
 	'/trpc/*',
 	trpcServer({
 		router,
-		createContext: async opts => await create_trpc_context(opts.req, opts.resHeaders)
+		createContext: async (opts, c) =>
+			await create_trpc_context(opts.req, opts.resHeaders, getRemoteAddress(c.env))
 	})
 )
 server.all('/api/*', openapi_handler)

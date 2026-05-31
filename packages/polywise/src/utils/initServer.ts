@@ -8,6 +8,7 @@ import { WebSocketServer } from 'ws'
 
 import { router } from '../rpc'
 import { server } from '../server'
+import { getRemoteAddress } from './localCliAuth'
 import { clearRuntimePidFile, writeRuntimePidFile } from './runtimeControl'
 import { create_trpc_context } from './trpc'
 
@@ -49,7 +50,7 @@ export default async () => {
 				headers: new Headers(opts.req.headers as Record<string, string>)
 			})
 
-			return await create_trpc_context(req, new Headers())
+			return await create_trpc_context(req, new Headers(), getRemoteAddress({ incoming: opts.req }))
 		}
 	})
 

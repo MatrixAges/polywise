@@ -13,6 +13,7 @@ npm-debug.log*
 .refs
 .vinext
 zip
+.pnpm-store
 
 # misc
 .DS_Store

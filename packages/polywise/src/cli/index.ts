@@ -7,6 +7,7 @@ import { logs_dir, runtime_pid_path } from '@core/consts/app'
 import { boolean, command, number, run, string } from '@drizzle-team/brocli'
 import fs from 'fs-extra'
 
+import { polywise_cli_header } from '../utils/localCliAuth'
 import { getRuntimeCommandEnv } from '../utils/resolveCommand'
 import { polywise_version } from '../version'
 import { getApiMap, renderApiHelp } from './api/map'
@@ -299,7 +300,8 @@ const callApi = async (target: ApiMapItem, input: Record<string, unknown>) => {
 		response = await fetch(url, {
 			method: target.method,
 			headers: {
-				'content-type': 'application/json'
+				'content-type': 'application/json',
+				[polywise_cli_header]: '1'
 			},
 			...(is_query_method ? {} : { body: JSON.stringify(rest) })
 		})

@@ -2,12 +2,14 @@ import { HTTPException } from 'hono/http-exception'
 import { createOpenApiFetchHandler } from 'trpc-to-openapi'
 
 import { router } from '../rpc'
+import { getRemoteAddress } from './localCliAuth'
 import { create_trpc_context } from './trpc'
 
 import type { Handler } from 'hono'
 import type { ContentfulStatusCode } from 'hono/utils/http-status'
 
 export default (async c => {
+	const remote_address = getRemoteAddress(c.env)
 	let req = c.req.raw
 
 	if (req.method !== 'GET') {
@@ -36,7 +38,7 @@ export default (async c => {
 		endpoint: '/api',
 		req,
 		router,
-		createContext: async ({ req, resHeaders }) => await create_trpc_context(req, resHeaders)
+		createContext: async ({ req, resHeaders }) => await create_trpc_context(req, resHeaders, remote_address)
 	})
 
 	if (res.status >= 400) {

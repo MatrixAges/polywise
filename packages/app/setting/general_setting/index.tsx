@@ -16,7 +16,7 @@ import {
 	SelectValue
 } from '@/__shadcn__/components/ui/select'
 import { Switch } from '@/__shadcn__/components/ui/switch'
-import { locale_options, themes } from '@/appdata'
+import { themes } from '@/appdata'
 import { Controller } from '@/components'
 import { useGlobal } from '@/context'
 import { useForm } from '@/hooks'
@@ -60,7 +60,6 @@ const report_yearly_mode_options = [
 const Index = () => {
 	const global = useGlobal()
 	const t = global.theme
-	const l = global.locale
 	const s = global.setting
 	const a = global.auth
 	const pthink = s.config?.pthink
@@ -72,13 +71,9 @@ const Index = () => {
 
 	const onChange = useMemoizedFn((_, changed) => {
 		if ('theme' in changed) t.setTheme(changed['theme'])
-		if ('lang' in changed) l.setLang(changed['lang'])
 	})
 
-	const { control } = useForm<{ theme: string; lang: string }>(
-		{ values: { theme: t.theme_source, lang: l.lang } },
-		onChange
-	)
+	const { control } = useForm<{ theme: string }>({ values: { theme: t.theme_source } }, onChange)
 
 	const updatePthink = useMemoizedFn((patch: Partial<AppPthinkConfig>) => {
 		const current_config = s.config
@@ -247,32 +242,6 @@ const Index = () => {
 										{themes.map(item => (
 											<SelectItem value={item} key={item}>
 												{item}
-											</SelectItem>
-										))}
-									</SelectGroup>
-								</SelectContent>
-							</Select>
-						</Controller>
-					</Field>
-					<Field className='items-center! py-3' orientation='horizontal'>
-						<FieldContent>
-							<FieldTitle className='text-base'>Language</FieldTitle>
-							<FieldDescription>
-								Select your preferred language for the application interface and
-								notifications
-							</FieldDescription>
-						</FieldContent>
-						<Controller name='lang' control={control}>
-							<Select items={locale_options}>
-								<SelectTrigger className='workspace_selector'>
-									<SelectValue />
-								</SelectTrigger>
-								<SelectContent align='start'>
-									<SelectGroup>
-										<SelectLabel>Language</SelectLabel>
-										{locale_options.map(item => (
-											<SelectItem value={item.value} key={item.value}>
-												{item.label}
 											</SelectItem>
 										))}
 									</SelectGroup>

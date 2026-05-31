@@ -2,6 +2,7 @@ import { initTRPC, TRPCError } from '@trpc/server'
 import superjson from 'superjson'
 
 import { isAuthRequired, readRequestSession } from '../auth'
+import { isLocalCliRequest } from './localCliAuth'
 
 import type { OpenApiMeta } from 'trpc-to-openapi'
 
@@ -20,10 +21,15 @@ const t = initTRPC.context<TrpcContext>().meta<ProcedureMeta>().create({
 	transformer: superjson
 })
 
-export const create_trpc_context = async (req: Request, resHeaders = new Headers()): Promise<TrpcContext> => {
+export const create_trpc_context = async (
+	req: Request,
+	resHeaders = new Headers(),
+	remote_address?: string | null
+): Promise<TrpcContext> => {
 	const auth_required = await isAuthRequired()
+	const auth_bypassed = !auth_required || isLocalCliRequest(req, remote_address)
 
-	if (!auth_required) {
+	if (auth_bypassed) {
 		return {
 			req,
 			resHeaders,

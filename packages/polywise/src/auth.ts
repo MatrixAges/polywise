@@ -243,5 +243,6 @@ export const requireRequestSession = async (headers: Headers, resHeaders = new H
 }
 
 export const applyResponseHeaders = appendHeaders
+export { isLocalCliRequest, polywise_cli_header } from './utils/localCliAuth'
 
 export default getAuth
