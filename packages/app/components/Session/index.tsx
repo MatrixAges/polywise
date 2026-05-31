@@ -192,7 +192,7 @@ const Index = (props: IProps) => {
 								`
 								flex flex-col
 								w-full
-								gap-6
+								gap-2
 							`,
 								is_page && 'page_wrap py-0'
 							)}

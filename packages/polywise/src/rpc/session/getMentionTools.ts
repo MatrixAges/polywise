@@ -1,4 +1,5 @@
 import { config } from '@core/config'
+import { blocked_session_id } from '@core/consts'
 import { listConfiguredMcps } from '@core/fst/mcp'
 import { configurable_session_tool_items, hasSessionSubAgent } from '@core/fst/session/config/shared'
 import { connectSession, p } from '@core/utils'
@@ -21,6 +22,20 @@ const builtin_tool_descriptions = {
 	system_tool: 'Delegate work through the internal system agent path.'
 } as const
 
+const blocked_session_tool_items = [
+	{
+		kind: 'tool' as const,
+		name: 'polywise_tool',
+		description: 'Inspect and call Polywise local backend capabilities from the panel session.'
+	}
+] as const
+
+const blocked_session_page_tool_item = {
+	kind: 'tool' as const,
+	name: 'page_tool',
+	description: 'Inspect app pages and navigate the current panel session.'
+} as const
+
 export default p
 	.meta({
 		openapi: {
@@ -34,6 +49,10 @@ export default p
 	.query(async ({ input }) => {
 		const session = await connectSession({ id: input.id })
 		const disable_map = new Set(session.disable_map)
+		const extra_items =
+			input.id === blocked_session_id
+				? blocked_session_tool_items.filter(item => !disable_map.has(item.name))
+				: []
 		const items: Array<{
 			kind: 'tool' | 'mcp'
 			name: string
@@ -75,6 +94,16 @@ export default p
 				description: mcp_item.description,
 				transport_type: mcp_item.type
 			})
+		}
+
+		items.push(...extra_items)
+
+		if (
+			input.id === blocked_session_id &&
+			config.page_bridge_enabled === true &&
+			!disable_map.has(blocked_session_page_tool_item.name)
+		) {
+			items.push(blocked_session_page_tool_item)
 		}
 
 		return items.sort((a, b) => {

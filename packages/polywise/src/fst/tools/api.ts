@@ -2,7 +2,15 @@ import { getApiMap, getApiMapItem, renderApiHelp } from '@core/cli/api/map'
 import { tool } from 'ai'
 import { array, boolean, number, object, record, string, union, enum as zod_enum } from 'zod'
 
-type ApiInputValue = string | number | boolean
+export type ApiInputValue = string | number | boolean
+
+export interface ApiToolInput {
+	action: 'help' | 'list' | 'schema' | 'call'
+	path?: Array<string>
+	target?: string
+	keyword?: string
+	input?: Record<string, ApiInputValue>
+}
 
 const api_base_url = 'http://localhost:3072/api'
 
@@ -81,6 +89,59 @@ const callApi = async (
 	}
 }
 
+export const executeApiTool = async (input: ApiToolInput) => {
+	if (input.action === 'help') {
+		return renderApiHelp(input.path || [])
+	}
+
+	if (input.action === 'list') {
+		const keyword = input.keyword?.trim().toLowerCase()
+		const items = getApiMap()
+			.filter(item =>
+				keyword
+					? `${item.rpc_path}\n${item.summary}\n${item.group_path.join(' ')}`
+							.toLowerCase()
+							.includes(keyword)
+					: true
+			)
+			.sort((left, right) => left.rpc_path.localeCompare(right.rpc_path))
+			.slice(0, 20)
+
+		return {
+			count: items.length,
+			items: items.map(item => ({
+				rpc_path: item.rpc_path,
+				method: item.method,
+				path: item.openapi_path,
+				summary: item.summary
+			}))
+		}
+	}
+
+	if (!input.target) {
+		throw new Error('target is required for schema and call actions')
+	}
+
+	const target = getApiMapItem(input.target)
+
+	if (!target) {
+		throw new Error(`API target not found: ${input.target}`)
+	}
+
+	if (input.action === 'schema') {
+		return {
+			rpc_path: target.rpc_path,
+			method: target.method,
+			path: target.openapi_path,
+			summary: target.summary,
+			parameters: target.parameters,
+			examples: target.examples
+		}
+	}
+
+	return callApi(target, input.input)
+}
+
 export const createApiTool = () =>
 	tool({
 		description: [
@@ -90,56 +151,5 @@ export const createApiTool = () =>
 			'Use action "call" only for non-subscription APIs already exposed through api_map.'
 		].join('\n'),
 		inputSchema,
-		execute: async input => {
-			if (input.action === 'help') {
-				return renderApiHelp(input.path || [])
-			}
-
-			if (input.action === 'list') {
-				const keyword = input.keyword?.trim().toLowerCase()
-				const items = getApiMap()
-					.filter(item =>
-						keyword
-							? `${item.rpc_path}\n${item.summary}\n${item.group_path.join(' ')}`
-									.toLowerCase()
-									.includes(keyword)
-							: true
-					)
-					.sort((left, right) => left.rpc_path.localeCompare(right.rpc_path))
-					.slice(0, 20)
-
-				return {
-					count: items.length,
-					items: items.map(item => ({
-						rpc_path: item.rpc_path,
-						method: item.method,
-						path: item.openapi_path,
-						summary: item.summary
-					}))
-				}
-			}
-
-			if (!input.target) {
-				throw new Error('target is required for schema and call actions')
-			}
-
-			const target = getApiMapItem(input.target)
-
-			if (!target) {
-				throw new Error(`API target not found: ${input.target}`)
-			}
-
-			if (input.action === 'schema') {
-				return {
-					rpc_path: target.rpc_path,
-					method: target.method,
-					path: target.openapi_path,
-					summary: target.summary,
-					parameters: target.parameters,
-					examples: target.examples
-				}
-			}
-
-			return callApi(target, input.input)
-		}
+		execute: async input => executeApiTool(input)
 	})

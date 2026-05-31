@@ -21,6 +21,7 @@ export * from './post'
 export * from './runtime'
 export * from './agent'
 export * from './api'
+export * from './polywise'
 export * from './page'
 export * from './prompt'
 
