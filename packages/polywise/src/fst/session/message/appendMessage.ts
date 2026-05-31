@@ -1,5 +1,3 @@
-import { global_linkcase_session_id } from '@core/consts'
-
 import type { Message } from '../../types'
 import type Index from '../index'
 
@@ -17,12 +15,4 @@ export default async (s: Index, v: Message) => {
 	}
 
 	await s.insertMessage(v)
-
-	const should_reset_archived_state = s.archived_at !== null && s.id !== global_linkcase_session_id
-
-	if (should_reset_archived_state) {
-		s.archived_at = null
-
-		await s.setState()
-	}
 }

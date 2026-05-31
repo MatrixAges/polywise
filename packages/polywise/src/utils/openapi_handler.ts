@@ -72,6 +72,9 @@ const getRouteMatch = (method: string, path: string): RouteMatch | null => {
 const isRecord = (value: unknown): value is Record<string, unknown> =>
 	Boolean(value) && typeof value === 'object' && !Array.isArray(value)
 
+const isCallableRecord = (value: unknown): value is Record<string, unknown> | CallableFunction =>
+	Boolean(value) && (typeof value === 'object' || typeof value === 'function')
+
 const parseQueryValue = (req: Request) => {
 	const url = new URL(req.url)
 	const query = {} as Record<string, string | Array<string>>
@@ -155,7 +158,7 @@ const resolveProcedure = (caller: unknown, rpc_path: string) => {
 	let cursor = caller
 
 	for (const segment of rpc_path.split('.').filter(Boolean)) {
-		if (!cursor || typeof cursor !== 'object') {
+		if (!isCallableRecord(cursor)) {
 			return null
 		}
 

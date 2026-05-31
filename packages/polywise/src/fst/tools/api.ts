@@ -27,6 +27,9 @@ const getErrorMessage = (error: unknown) => {
 	return String(error)
 }
 
+const isCallableRecord = (value: unknown): value is Record<string, unknown> | CallableFunction =>
+	Boolean(value) && (typeof value === 'object' || typeof value === 'function')
+
 const getRequiredParameters = (target: ApiTarget) => target.parameters.filter(item => item.required)
 
 const getMissingParameters = (target: ApiTarget, input?: Record<string, ApiInputValue>) =>
@@ -49,7 +52,7 @@ const resolveCallerProcedure = (caller: unknown, rpc_path: string): CallerProced
 	let cursor = caller
 
 	for (const segment of rpc_path.split('.').filter(Boolean)) {
-		if (!cursor || typeof cursor !== 'object') {
+		if (!isCallableRecord(cursor)) {
 			return null
 		}
 
