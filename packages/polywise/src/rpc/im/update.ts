@@ -19,7 +19,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/im/update',
-			summary: 'Run Update'
+			description: 'Run Update'
 		}
 	})
 	.input(input_type)

@@ -14,7 +14,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/linkcase/runBatch',
-			summary: 'Run Run Batch'
+			description: 'Run Run Batch'
 		}
 	})
 	.input(input_type)

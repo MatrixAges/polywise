@@ -7,7 +7,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/sniffer/status',
-			summary: 'Read Status'
+			description: 'Read Status'
 		}
 	})
 	.query(async () => ({

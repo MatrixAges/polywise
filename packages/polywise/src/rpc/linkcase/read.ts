@@ -12,7 +12,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/linkcase/read',
-			summary: 'Read Read'
+			description: 'Read Read'
 		}
 	})
 	.input(input_type)

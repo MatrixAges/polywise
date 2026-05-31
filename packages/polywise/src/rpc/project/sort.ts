@@ -13,7 +13,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/project/sort',
-			summary: 'Run Sort'
+			description: 'Run Sort'
 		}
 	})
 	.input(input_type)

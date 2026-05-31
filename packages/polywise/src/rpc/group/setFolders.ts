@@ -20,7 +20,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/group/setFolders',
-			summary: 'Run Set Folders'
+			description: 'Run Set Folders'
 		}
 	})
 	.input(input_type)

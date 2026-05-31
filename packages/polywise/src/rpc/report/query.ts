@@ -7,7 +7,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/report/query',
-			summary: 'Read report window'
+			description: 'Read report window'
 		}
 	})
 	.input(

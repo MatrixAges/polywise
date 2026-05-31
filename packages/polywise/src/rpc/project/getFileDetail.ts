@@ -13,7 +13,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/project/getFileDetail',
-			summary: 'Read Get File Detail'
+			description: 'Read Get File Detail'
 		}
 	})
 	.input(input_type)

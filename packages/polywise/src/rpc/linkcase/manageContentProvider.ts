@@ -13,7 +13,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/linkcase/manageContentProvider',
-			summary: 'Run Manage Content Provider'
+			description: 'Run Manage Content Provider'
 		}
 	})
 	.input(input_type)

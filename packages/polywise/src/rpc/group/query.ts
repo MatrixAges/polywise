@@ -30,7 +30,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/group/query',
-			summary: 'Read Query'
+			description: 'Read Query'
 		}
 	})
 	.input(input_type)

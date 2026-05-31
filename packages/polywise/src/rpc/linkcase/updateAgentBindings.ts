@@ -8,7 +8,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/linkcase/updateAgentBindings',
-			summary: 'Update Linkcase Agent Bindings'
+			description: 'Update Linkcase Agent Bindings'
 		}
 	})
 	.input(

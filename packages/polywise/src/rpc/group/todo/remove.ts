@@ -10,7 +10,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/group/todo/remove',
-			summary: 'Run Remove'
+			description: 'Run Remove'
 		}
 	})
 	.input(string())

@@ -8,7 +8,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/post/extract',
-			summary: 'Run Extract'
+			description: 'Run Extract'
 		}
 	})
 	.input(

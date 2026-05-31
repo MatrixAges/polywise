@@ -13,7 +13,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/session/unread',
-			summary: 'Run Unread'
+			description: 'Run Unread'
 		}
 	})
 	.input(input_type)

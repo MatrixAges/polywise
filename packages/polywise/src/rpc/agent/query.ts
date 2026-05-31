@@ -6,7 +6,6 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/agent/query',
-			summary: 'List agents',
 			description:
 				'Return all saved agents with their names, roles, descriptions, and full profiles. Use this to answer how many agents exist and what each agent is for.'
 		}

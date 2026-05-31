@@ -11,7 +11,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/session/sortPin',
-			summary: 'Run Sort Pin'
+			description: 'Run Sort Pin'
 		}
 	})
 	.input(input_type)

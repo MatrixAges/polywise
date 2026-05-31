@@ -40,7 +40,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/file/list',
-			summary: 'Read List'
+			description: 'Read List'
 		}
 	})
 	.input(input_type)

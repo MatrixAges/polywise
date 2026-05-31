@@ -35,7 +35,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/todo/sort',
-			summary: 'Run Sort'
+			description: 'Run Sort'
 		}
 	})
 	.input(input_type)

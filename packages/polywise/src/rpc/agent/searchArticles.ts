@@ -20,7 +20,6 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/agent/searchArticles',
-			summary: 'Search candidate articles for agent',
 			description:
 				'Search global articles that could be linked to an agent, excluding articles already related to that agent.'
 		}

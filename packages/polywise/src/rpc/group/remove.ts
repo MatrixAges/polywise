@@ -14,7 +14,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/group/remove',
-			summary: 'Run Remove'
+			description: 'Run Remove'
 		}
 	})
 	.input(string())

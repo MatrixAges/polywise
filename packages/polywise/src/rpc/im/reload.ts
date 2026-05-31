@@ -28,7 +28,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/im/reload',
-			summary: 'Run Reload'
+			description: 'Run Reload'
 		}
 	})
 	.output(output_type)

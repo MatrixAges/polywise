@@ -6,7 +6,7 @@ export const stop = p
 		openapi: {
 			method: 'POST',
 			path: '/session/stop',
-			summary: 'Run Stop'
+			description: 'Run Stop'
 		}
 	})
 	.input(string())
@@ -19,7 +19,7 @@ export const destroy = p
 		openapi: {
 			method: 'POST',
 			path: '/session/destroy',
-			summary: 'Run Destroy'
+			description: 'Run Destroy'
 		}
 	})
 	.input(string())
@@ -32,7 +32,7 @@ export const load = p
 		openapi: {
 			method: 'POST',
 			path: '/session/load',
-			summary: 'Read Load'
+			description: 'Read Load'
 		}
 	})
 	.input(object({ id: string(), type: Enum(['prev', 'next']) }))
@@ -45,7 +45,7 @@ export const clear = p
 		openapi: {
 			method: 'POST',
 			path: '/session/clear',
-			summary: 'Run Clear'
+			description: 'Run Clear'
 		}
 	})
 	.input(string())
@@ -58,7 +58,7 @@ export const removeMessage = p
 		openapi: {
 			method: 'POST',
 			path: '/session/removeMessage',
-			summary: 'Run Remove Message'
+			description: 'Run Remove Message'
 		}
 	})
 	.input(object({ id: string(), message_id: string() }))
@@ -71,7 +71,7 @@ export const archive = p
 		openapi: {
 			method: 'POST',
 			path: '/session/archive',
-			summary: 'Run Archive'
+			description: 'Run Archive'
 		}
 	})
 	.input(string())
@@ -84,7 +84,7 @@ export const unarchive = p
 		openapi: {
 			method: 'POST',
 			path: '/session/unarchive',
-			summary: 'Run Unarchive'
+			description: 'Run Unarchive'
 		}
 	})
 	.input(string())
@@ -97,7 +97,7 @@ export const answer = p
 		openapi: {
 			method: 'POST',
 			path: '/session/answer',
-			summary: 'Run Answer'
+			description: 'Run Answer'
 		}
 	})
 	.input(object({ id: string(), answer: string() }))
@@ -110,7 +110,7 @@ export const permission = p
 		openapi: {
 			method: 'POST',
 			path: '/session/permission',
-			summary: 'Run Permission'
+			description: 'Run Permission'
 		}
 	})
 	.input(object({ id: string(), approved: boolean() }))
@@ -123,7 +123,7 @@ export const setConfig = p
 		openapi: {
 			method: 'POST',
 			path: '/session/setConfig',
-			summary: 'Run Set Config'
+			description: 'Run Set Config'
 		}
 	})
 	.input(

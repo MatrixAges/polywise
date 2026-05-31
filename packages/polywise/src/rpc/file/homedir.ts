@@ -7,7 +7,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/file/homedir',
-			summary: 'Read Homedir'
+			description: 'Read Homedir'
 		}
 	})
 	.query(() => {

@@ -16,7 +16,6 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/agent/getArticles',
-			summary: 'List linked articles for agent',
 			description: 'Return the articles already linked to an agent. Optionally filter by article type.'
 		}
 	})

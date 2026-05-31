@@ -69,7 +69,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/provider/test',
-			summary: 'Test provider connectivity'
+			description: 'Test provider connectivity'
 		}
 	})
 	.input(input_type)

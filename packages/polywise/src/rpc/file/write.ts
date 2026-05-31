@@ -18,7 +18,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/file/write',
-			summary: 'Run Write'
+			description: 'Run Write'
 		}
 	})
 	.input(input_type)

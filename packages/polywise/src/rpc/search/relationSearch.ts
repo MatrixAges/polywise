@@ -4,7 +4,13 @@ import { input_type, output_type } from '../../io/search/schema'
 import { p } from '../../utils/trpc'
 
 export default p
-	.meta({ openapi: { method: 'GET', path: '/search/relationSearch' } })
+	.meta({
+		openapi: {
+			method: 'GET',
+			path: '/search/relationSearch',
+			description: 'Run graph or relation-oriented search over linked knowledge.'
+		}
+	})
 	.input(input_type)
 	.output(output_type)
 	.query(async ({ input }) => {

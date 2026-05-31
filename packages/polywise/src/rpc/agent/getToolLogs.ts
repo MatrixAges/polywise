@@ -18,7 +18,6 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/agent/getToolLogs',
-			summary: 'Read tool usage logs for agent',
 			description: 'Return paginated daily logs showing which tools an agent used.'
 		}
 	})

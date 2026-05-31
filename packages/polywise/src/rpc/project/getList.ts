@@ -6,7 +6,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/project/getList',
-			summary: 'Read Get List'
+			description: 'Read Get List'
 		}
 	})
 	.query(async () => {

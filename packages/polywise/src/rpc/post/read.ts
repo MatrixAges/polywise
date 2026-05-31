@@ -21,7 +21,7 @@ export default p
 		openapi: {
 			method: 'GET',
 			path: '/post/read',
-			summary: 'Read a post'
+			description: 'Read a post'
 		}
 	})
 	.input(input_type)

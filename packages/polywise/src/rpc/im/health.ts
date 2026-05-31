@@ -25,7 +25,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/im/health',
-			summary: 'Read Health'
+			description: 'Read Health'
 		}
 	})
 	.output(output_type)

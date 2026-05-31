@@ -11,7 +11,7 @@ export default p
 		openapi: {
 			method: 'GET',
 			path: '/article/read',
-			summary: 'Read an article'
+			description: 'Read an article'
 		}
 	})
 	.input(

@@ -17,7 +17,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/session/rename',
-			summary: 'Rename a session'
+			description: 'Rename a session'
 		}
 	})
 	.input(input_type)

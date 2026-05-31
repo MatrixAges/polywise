@@ -9,7 +9,7 @@ export default p
 		openapi: {
 			method: 'GET',
 			path: '/project/list',
-			summary: 'List projects'
+			description: 'List projects'
 		}
 	})
 	.output(array(project_select_schema))

@@ -18,7 +18,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/skill/removeEntry',
-			summary: 'Run Remove Entry'
+			description: 'Run Remove Entry'
 		}
 	})
 	.input(input_type)

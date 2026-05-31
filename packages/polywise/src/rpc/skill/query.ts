@@ -6,7 +6,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/skill/query',
-			summary: 'Read Query'
+			description: 'Read Query'
 		}
 	})
 	.query(async () => {

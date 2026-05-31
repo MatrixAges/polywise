@@ -1,11 +1,9 @@
 import { getApiMap, getApiMapItem, renderApiHelp } from '@core/cli/api/map'
-import { tool } from 'ai'
-import { array, boolean, number, object, record, string, union, enum as zod_enum } from 'zod'
 
 export type ApiInputValue = string | number | boolean
 
-export interface ApiToolInput {
-	action: 'help' | 'list' | 'schema' | 'call'
+export interface ApiInput {
+	action: 'help' | 'list' | 'input_schema' | 'call'
 	path?: Array<string>
 	target?: string
 	keyword?: string
@@ -13,18 +11,6 @@ export interface ApiToolInput {
 }
 
 const api_base_url = 'http://localhost:3072/api'
-
-const inputSchema = object({
-	action: zod_enum(['help', 'list', 'schema', 'call']).default('help'),
-	path: array(string())
-		.optional()
-		.describe('Optional help path segments like ["session"] or ["session", "create"].'),
-	target: string().optional().describe('Target rpc path such as "session.create" for schema or call actions.'),
-	keyword: string().optional().describe('Optional fuzzy keyword for list action.'),
-	input: record(string(), union([string(), number(), boolean()]))
-		.optional()
-		.describe('Flat input object for call action. Values may be string, number, or boolean.')
-})
 
 const resolvePathInput = (path: string, input?: Record<string, ApiInputValue>) => {
 	const path_input = { ...(input || {}) }
@@ -89,7 +75,7 @@ const callApi = async (
 	}
 }
 
-export const executeApiTool = async (input: ApiToolInput) => {
+export const executeApi = async (input: ApiInput) => {
 	if (input.action === 'help') {
 		return renderApiHelp(input.path || [])
 	}
@@ -119,7 +105,7 @@ export const executeApiTool = async (input: ApiToolInput) => {
 	}
 
 	if (!input.target) {
-		throw new Error('target is required for schema and call actions')
+		throw new Error('target is required for input_schema and call actions')
 	}
 
 	const target = getApiMapItem(input.target)
@@ -128,7 +114,7 @@ export const executeApiTool = async (input: ApiToolInput) => {
 		throw new Error(`API target not found: ${input.target}`)
 	}
 
-	if (input.action === 'schema') {
+	if (input.action === 'input_schema') {
 		return {
 			rpc_path: target.rpc_path,
 			method: target.method,
@@ -141,15 +127,3 @@ export const executeApiTool = async (input: ApiToolInput) => {
 
 	return callApi(target, input.input)
 }
-
-export const createApiTool = () =>
-	tool({
-		description: [
-			'Inspect and call CLI-friendly backend APIs through a progressive disclosure index.',
-			'Use action "help" first to see top-level groups or the next level under a group.',
-			'Use action "schema" only after you have selected a concrete rpc path.',
-			'Use action "call" only for non-subscription APIs already exposed through api_map.'
-		].join('\n'),
-		inputSchema,
-		execute: async input => executeApiTool(input)
-	})

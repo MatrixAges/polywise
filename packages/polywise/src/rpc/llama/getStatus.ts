@@ -11,7 +11,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/llama/getStatus',
-			summary: 'Read Get Status'
+			description: 'Read Get Status'
 		}
 	})
 	.output(output_type)

@@ -9,7 +9,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/post/create',
-			summary: 'Run Create'
+			description: 'Run Create'
 		}
 	})
 	.input(

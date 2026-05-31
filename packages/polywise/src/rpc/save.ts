@@ -16,7 +16,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/save',
-			summary: 'Create an article'
+			description: 'Create an article'
 		}
 	})
 	.input(input_type)

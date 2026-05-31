@@ -14,7 +14,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/linkcase/fetch',
-			summary: 'Run Fetch'
+			description: 'Run Fetch'
 		}
 	})
 	.input(input_type)

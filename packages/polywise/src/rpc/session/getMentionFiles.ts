@@ -47,7 +47,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/session/getMentionFiles',
-			summary: 'Read Get Mention Files'
+			description: 'Read Get Mention Files'
 		}
 	})
 	.input(input_type)

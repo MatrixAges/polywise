@@ -23,7 +23,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/skill/moveEntries',
-			summary: 'Run Move Entries'
+			description: 'Run Move Entries'
 		}
 	})
 	.input(input_type)

@@ -11,7 +11,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/llama/download',
-			summary: 'Run Download'
+			description: 'Run Download'
 		}
 	})
 	.input(input_type)

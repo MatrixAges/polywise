@@ -8,7 +8,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/report/trigger',
-			summary: 'Trigger report generation'
+			description: 'Trigger report generation'
 		}
 	})
 	.input(

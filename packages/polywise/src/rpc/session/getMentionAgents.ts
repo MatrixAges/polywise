@@ -11,7 +11,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/session/getMentionAgents',
-			summary: 'Read Get Mention Agents'
+			description: 'Read Get Mention Agents'
 		}
 	})
 	.input(input_type)

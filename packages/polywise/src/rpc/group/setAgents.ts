@@ -15,7 +15,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/group/setAgents',
-			summary: 'Run Set Agents'
+			description: 'Run Set Agents'
 		}
 	})
 	.input(input_type)

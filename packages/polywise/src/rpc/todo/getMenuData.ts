@@ -9,7 +9,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/todo/getMenuData',
-			summary: 'Read Get Menu Data'
+			description: 'Read Get Menu Data'
 		}
 	})
 	.query(async () => {

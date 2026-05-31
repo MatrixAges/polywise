@@ -12,7 +12,7 @@ export default p
 		openapi: {
 			method: 'GET',
 			path: '/version',
-			summary: 'Get Polywise version'
+			description: 'Get Polywise version'
 		}
 	})
 	.output(output_type)

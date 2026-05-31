@@ -41,7 +41,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/session/getMentionTools',
-			summary: 'Read Get Mention Tools'
+			description: 'Read Get Mention Tools'
 		}
 	})
 	.input(input_type)

@@ -24,7 +24,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/group/create',
-			summary: 'Run Create'
+			description: 'Run Create'
 		}
 	})
 	.input(input_type)

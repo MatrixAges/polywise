@@ -8,7 +8,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/im/waitWechatQrLogin',
-			summary: 'Read Wait Wechat Qr Login'
+			description: 'Read Wait Wechat Qr Login'
 		}
 	})
 	.input(

@@ -105,7 +105,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/session/getList',
-			summary: 'Read Get List'
+			description: 'Read Get List'
 		}
 	})
 	.input(input_type)

@@ -20,7 +20,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/skill/saveFile',
-			summary: 'Run Save File'
+			description: 'Run Save File'
 		}
 	})
 	.input(input_type)

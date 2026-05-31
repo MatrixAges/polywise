@@ -7,7 +7,13 @@ const input_type = object({ id: string() })
 const output_type = object({ ok: boolean() })
 
 export default p
-	.meta({ openapi: { method: 'POST', path: '/remove' } })
+	.meta({
+		openapi: {
+			method: 'POST',
+			path: '/remove',
+			description: 'Remove one article or knowledge record by id.'
+		}
+	})
 	.input(input_type)
 	.output(output_type)
 	.mutation(async ({ input }) => {

@@ -51,7 +51,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/todo/drag',
-			summary: 'Run Drag'
+			description: 'Run Drag'
 		}
 	})
 	.input(input_type)

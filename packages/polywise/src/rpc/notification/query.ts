@@ -20,7 +20,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/notification/query',
-			summary: 'Read Query'
+			description: 'Read Query'
 		}
 	})
 	.query(async () => {

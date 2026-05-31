@@ -14,7 +14,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/sniffer/importBookmarks',
-			summary: 'Run Import Bookmarks'
+			description: 'Run Import Bookmarks'
 		}
 	})
 	.input(input_type)

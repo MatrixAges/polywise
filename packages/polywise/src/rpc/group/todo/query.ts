@@ -10,7 +10,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/group/todo/query',
-			summary: 'Read Query'
+			description: 'Read Query'
 		}
 	})
 	.input(string())

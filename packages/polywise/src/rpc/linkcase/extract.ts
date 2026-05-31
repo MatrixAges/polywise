@@ -13,7 +13,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/linkcase/extract',
-			summary: 'Run Extract'
+			description: 'Run Extract'
 		}
 	})
 	.input(input_type)

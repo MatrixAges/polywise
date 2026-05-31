@@ -17,7 +17,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/linkcase/query',
-			summary: 'Read Query'
+			description: 'Read Query'
 		}
 	})
 	.input(input_type)

@@ -16,6 +16,7 @@ Improve Polywise CLI and `polywise_tool` usability around API parameter discover
 6. Align `polywise_tool` action naming with the CLI by renaming `schema` to `input_schema` at the tool boundary while keeping the lower-level API helper unchanged.
 7. Replace vague agent API summaries with precise summaries and descriptions, and expose descriptions in list results so models can select the right endpoint.
 8. Remove redundant `summary` fields from AI-facing machine outputs and use `description` as the primary semantic field there.
+9. Remove stale `api_tool` surface semantics, simplify the internal helper naming, and migrate RPC OpenAPI metadata from `summary` to `description` across all CLI-callable routes.
 
 ## Validation
 

@@ -13,7 +13,6 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/agent/sort',
-			summary: 'Reorder agents',
 			description: 'Move one agent from one index to another in the global agent list.'
 		}
 	})

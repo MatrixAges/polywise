@@ -4,7 +4,13 @@ import { input_type, output_type } from '../../io/search/schema'
 import { p } from '../../utils/trpc'
 
 export default p
-	.meta({ openapi: { method: 'GET', path: '/search/fullTextSearch' } })
+	.meta({
+		openapi: {
+			method: 'GET',
+			path: '/search/fullTextSearch',
+			description: 'Run keyword-oriented full-text search across indexed knowledge.'
+		}
+	})
 	.input(input_type)
 	.output(output_type)
 	.query(async ({ input }) => {

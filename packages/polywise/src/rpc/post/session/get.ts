@@ -11,7 +11,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/post/session/get',
-			summary: 'Read Get'
+			description: 'Read Get'
 		}
 	})
 	.input(object({ post_id: string() }))

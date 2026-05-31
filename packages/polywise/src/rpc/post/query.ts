@@ -29,7 +29,7 @@ export default p
 		openapi: {
 			method: 'GET',
 			path: '/post/query',
-			summary: 'Query posts'
+			description: 'Query posts'
 		}
 	})
 	.input(input_type)

@@ -15,7 +15,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/group/createSession',
-			summary: 'Run Create Session'
+			description: 'Run Create Session'
 		}
 	})
 	.input(input_type)

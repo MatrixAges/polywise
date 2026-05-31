@@ -12,7 +12,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/post/article/add',
-			summary: 'Run Add'
+			description: 'Run Add'
 		}
 	})
 	.input(

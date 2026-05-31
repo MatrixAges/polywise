@@ -44,7 +44,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/todo/session/start',
-			summary: 'Run Start'
+			description: 'Run Start'
 		}
 	})
 	.input(input_type)

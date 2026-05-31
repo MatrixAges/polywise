@@ -14,7 +14,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/todo/getArchives',
-			summary: 'Read Get Archives'
+			description: 'Read Get Archives'
 		}
 	})
 	.input(input_type)

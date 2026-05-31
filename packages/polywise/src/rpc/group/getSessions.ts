@@ -10,7 +10,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/group/getSessions',
-			summary: 'Read Get Sessions'
+			description: 'Read Get Sessions'
 		}
 	})
 	.input(string())

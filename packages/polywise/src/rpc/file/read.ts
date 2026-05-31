@@ -19,7 +19,7 @@ export default p
 		openapi: {
 			method: 'GET',
 			path: '/file/read',
-			summary: 'Read a file'
+			description: 'Read a file'
 		}
 	})
 	.input(input_type)

@@ -18,7 +18,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/linkcase/updateSchedule',
-			summary: 'Run Update Schedule'
+			description: 'Run Update Schedule'
 		}
 	})
 	.input(input_type)

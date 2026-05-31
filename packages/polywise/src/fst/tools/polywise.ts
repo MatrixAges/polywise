@@ -2,10 +2,10 @@ import { renderApiHelp } from '@core/cli/api/map'
 import { tool } from 'ai'
 import { array, boolean, number, object, record, string, union, enum as zod_enum } from 'zod'
 
-import { executeApiTool } from './api'
+import { executeApi } from './api'
 
 import type { RenderedHelp } from '@core/cli/types'
-import type { ApiToolInput } from './api'
+import type { ApiInput } from './api'
 
 type PolywiseToolInput = {
 	action: 'help' | 'list' | 'input_schema' | 'call'
@@ -160,13 +160,8 @@ const renderPolywiseHelp = (path: Array<string>) => {
 	}
 }
 
-const toApiToolInput = (input: PolywiseToolInput): ApiToolInput => ({
-	...input,
-	action: input.action === 'input_schema' ? 'schema' : input.action
-})
-
 const executeApiAction = async (input: PolywiseToolInput) => {
-	const result = await executeApiTool(toApiToolInput(input))
+	const result = await executeApi(input as ApiInput)
 
 	if (result && typeof result === 'object' && !Array.isArray(result)) {
 		return {

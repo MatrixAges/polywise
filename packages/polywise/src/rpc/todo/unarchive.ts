@@ -28,7 +28,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/todo/unarchive',
-			summary: 'Run Unarchive'
+			description: 'Run Unarchive'
 		}
 	})
 	.input(input_type)

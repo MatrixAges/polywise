@@ -20,7 +20,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/skill/createEntry',
-			summary: 'Run Create Entry'
+			description: 'Run Create Entry'
 		}
 	})
 	.input(input_type)

@@ -11,7 +11,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/session/remove',
-			summary: 'Remove a session'
+			description: 'Remove a session'
 		}
 	})
 	.input(input_type)

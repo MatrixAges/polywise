@@ -15,7 +15,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/linkcase/update',
-			summary: 'Run Update'
+			description: 'Run Update'
 		}
 	})
 	.input(input_type)

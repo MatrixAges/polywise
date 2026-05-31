@@ -14,7 +14,6 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/agent/setSkills',
-			summary: 'Replace skills for agent',
 			description: 'Replace the full set of skills assigned to one agent.'
 		}
 	})

@@ -10,7 +10,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/session/pin',
-			summary: 'Run Pin'
+			description: 'Run Pin'
 		}
 	})
 	.input(input_type)

@@ -771,7 +771,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/home/query',
-			summary: 'Read Query'
+			description: 'Read Query'
 		}
 	})
 	.input(

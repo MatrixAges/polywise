@@ -13,7 +13,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/post/update',
-			summary: 'Run Update'
+			description: 'Run Update'
 		}
 	})
 	.input(

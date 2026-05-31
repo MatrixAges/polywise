@@ -20,7 +20,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/pipeline/query',
-			summary: 'Read Query'
+			description: 'Read Query'
 		}
 	})
 	.query(async () => {

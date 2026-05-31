@@ -16,7 +16,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/update',
-			summary: 'Update an article'
+			description: 'Update an article'
 		}
 	})
 	.input(input_type)

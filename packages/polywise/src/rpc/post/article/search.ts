@@ -8,7 +8,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/post/article/search',
-			summary: 'Read Search'
+			description: 'Read Search'
 		}
 	})
 	.input(

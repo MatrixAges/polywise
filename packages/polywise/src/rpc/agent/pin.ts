@@ -14,7 +14,6 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/agent/pin',
-			summary: 'Pin or unpin session for agent',
 			description: 'Set the pinned state of one session inside an agent-specific session list.'
 		}
 	})

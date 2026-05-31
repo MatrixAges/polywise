@@ -27,7 +27,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/session/getMoreList',
-			summary: 'Read Get More List'
+			description: 'Read Get More List'
 		}
 	})
 	.input(input_type)

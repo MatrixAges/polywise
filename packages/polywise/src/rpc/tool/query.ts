@@ -16,7 +16,7 @@ export default p
 		openapi: {
 			method: 'GET',
 			path: '/tool/query',
-			summary: 'List custom tools'
+			description: 'List custom tools'
 		}
 	})
 	.output(output_type)

@@ -8,7 +8,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/post/project/query',
-			summary: 'Read Query'
+			description: 'Read Query'
 		}
 	})
 	.input(object({ post_id: string() }))

@@ -9,7 +9,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/post/session/submit',
-			summary: 'Run Submit'
+			description: 'Run Submit'
 		}
 	})
 	.input(

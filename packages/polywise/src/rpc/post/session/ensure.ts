@@ -8,7 +8,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/post/session/ensure',
-			summary: 'Run Ensure'
+			description: 'Run Ensure'
 		}
 	})
 	.input(object({ post_id: string() }))

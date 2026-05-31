@@ -14,7 +14,6 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/agent/update',
-			summary: 'Update agent profile',
 			description: 'Update one agent profile, including editable behavior fields and frozen state.'
 		}
 	})

@@ -15,7 +15,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/im/query',
-			summary: 'Read Query'
+			description: 'Read Query'
 		}
 	})
 	.output(output_type)

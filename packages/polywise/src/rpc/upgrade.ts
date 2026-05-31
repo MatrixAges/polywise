@@ -22,7 +22,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/upgrade',
-			summary: 'Upgrade Polywise and restart the server'
+			description: 'Upgrade Polywise and restart the server'
 		}
 	})
 	.output(output_type)

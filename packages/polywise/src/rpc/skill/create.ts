@@ -15,7 +15,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/skill/create',
-			summary: 'Run Create'
+			description: 'Run Create'
 		}
 	})
 	.input(input_type)

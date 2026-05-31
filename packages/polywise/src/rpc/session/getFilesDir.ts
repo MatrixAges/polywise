@@ -14,7 +14,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/session/getFilesDir',
-			summary: 'Read Get Files Dir'
+			description: 'Read Get Files Dir'
 		}
 	})
 	.input(input_type)

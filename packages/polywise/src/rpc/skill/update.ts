@@ -16,7 +16,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/skill/update',
-			summary: 'Run Update'
+			description: 'Run Update'
 		}
 	})
 	.input(input_type)
