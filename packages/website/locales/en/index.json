@@ -18,7 +18,7 @@
 		},
 		"with": "with Polywise's ",
 		"desc": {
-			"line_1": "An open source agentic content system.",
+			"line_1": "The open source agentic content system.",
 			"line_2": "Capture content, shape context, and run agents on top of it."
 		}
 	},
@@ -114,7 +114,7 @@
 		"items": {
 			"0": {
 				"q": "What is Polywise?",
-				"a": "Polywise is an open source agentic content system. It helps you capture content, build reusable context, and run agents against that context instead of starting from an empty chat every time."
+				"a": "Polywise is the open source agentic content system. It helps you capture content, build reusable context, and run agents against that context instead of starting from an empty chat every time."
 			},
 			"1": {
 				"q": "How do I use Polywise?",

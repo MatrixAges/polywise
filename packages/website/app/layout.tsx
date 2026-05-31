@@ -15,7 +15,7 @@ import type { PropsWithChildren } from 'react'
 
 export const metadata: Metadata = {
 	title: 'Polywise - Agentic Content System',
-	description: 'Polywise is an open source agentic content system.'
+	description: 'Polywise is the open source agentic content system.'
 }
 
 const RootLayout = async ({ children }: PropsWithChildren) => {

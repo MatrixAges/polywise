@@ -18,7 +18,7 @@
 		},
 		"with": "通过 Polywise 的",
 		"desc": {
-			"line_1": "一个开源的 agentic content system。",
+			"line_1": "开源的 agentic content system。",
 			"line_2": "采集内容，塑造上下文，并在其上运行智能体。"
 		}
 	},
@@ -114,7 +114,7 @@
 		"items": {
 			"0": {
 				"q": "什么是 Polywise？",
-				"a": "Polywise 是一个开源的 agentic content system。它帮助你采集内容、构建可复用上下文，并让智能体基于这些上下文运行，而不是每次都从空白聊天开始。"
+				"a": "Polywise 是开源的 agentic content system。它帮助你采集内容、构建可复用上下文，并让智能体基于这些上下文运行，而不是每次都从空白聊天开始。"
 			},
 			"1": {
 				"q": "我应该怎么使用 Polywise？",
