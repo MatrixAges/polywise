@@ -10,7 +10,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/group/todo/query',
-			description: 'Read Query'
+			description: 'List todo items for a group workspace.'
 		}
 	})
 	.input(string())

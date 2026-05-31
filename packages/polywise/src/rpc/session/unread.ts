@@ -13,7 +13,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/session/unread',
-			description: 'Run Unread'
+			description: 'Mark a session as read and sync any linked todo review status.'
 		}
 	})
 	.input(input_type)

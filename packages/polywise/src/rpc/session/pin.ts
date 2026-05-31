@@ -10,7 +10,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/session/pin',
-			description: 'Run Pin'
+			description: 'Pin or unpin a session in the global session list.'
 		}
 	})
 	.input(input_type)

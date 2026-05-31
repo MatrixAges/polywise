@@ -44,7 +44,8 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/todo/session/start',
-			description: 'Run Start'
+			description:
+				'Create or reuse the work session linked to a todo, mark the todo as processing, and submit its title as the opening task.'
 		}
 	})
 	.input(input_type)

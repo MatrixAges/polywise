@@ -21,7 +21,7 @@ export default p
 		openapi: {
 			method: 'GET',
 			path: '/post/read',
-			description: 'Read a post'
+			description: 'Return one post by id.'
 		}
 	})
 	.input(input_type)

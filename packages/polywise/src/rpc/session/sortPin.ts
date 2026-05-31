@@ -11,7 +11,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/session/sortPin',
-			description: 'Run Sort Pin'
+			description: 'Reorder pinned sessions in the global session list.'
 		}
 	})
 	.input(input_type)

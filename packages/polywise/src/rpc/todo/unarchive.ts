@@ -28,7 +28,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/todo/unarchive',
-			description: 'Run Unarchive'
+			description: 'Restore an archived todo item to backlog and place it at the top of its list.'
 		}
 	})
 	.input(input_type)

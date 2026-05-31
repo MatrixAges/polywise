@@ -9,7 +9,8 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/post/session/submit',
-			description: 'Run Submit'
+			description:
+				'Send a message into the session linked to a post, creating that session first if needed.'
 		}
 	})
 	.input(

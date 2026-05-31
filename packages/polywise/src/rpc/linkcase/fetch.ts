@@ -14,7 +14,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/linkcase/fetch',
-			description: 'Run Fetch'
+			description: 'Fetch remote content for one linkcase item and optionally run the pipeline.'
 		}
 	})
 	.input(input_type)

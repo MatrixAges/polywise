@@ -28,7 +28,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/todo/create',
-			description: 'Run Create'
+			description: 'Create a standalone or project-linked todo item.'
 		}
 	})
 	.input(input_type)

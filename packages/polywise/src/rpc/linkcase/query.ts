@@ -17,7 +17,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/linkcase/query',
-			description: 'Read Query'
+			description: 'List linkcase items with pagination and optional keyword or filter_type filters.'
 		}
 	})
 	.input(input_type)

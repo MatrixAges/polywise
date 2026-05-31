@@ -15,7 +15,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/linkcase/update',
-			description: 'Run Update'
+			description: 'Update one linkcase item URL, title, or stored content.'
 		}
 	})
 	.input(input_type)

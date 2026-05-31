@@ -23,7 +23,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/skill/moveEntries',
-			description: 'Run Move Entries'
+			description: 'Move one or more files or folders inside a skill directory.'
 		}
 	})
 	.input(input_type)

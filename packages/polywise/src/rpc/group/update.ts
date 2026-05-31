@@ -17,7 +17,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/group/update',
-			description: 'Run Update'
+			description: 'Update a group profile, such as its name, description, or photo.'
 		}
 	})
 	.input(input_type)

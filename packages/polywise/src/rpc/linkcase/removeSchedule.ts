@@ -12,7 +12,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/linkcase/removeSchedule',
-			description: 'Run Remove Schedule'
+			description: 'Delete one linkcase schedule.'
 		}
 	})
 	.input(input_type)

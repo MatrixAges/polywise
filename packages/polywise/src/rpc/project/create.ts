@@ -11,7 +11,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/project/create',
-			description: 'Run Create'
+			description: 'Create a project from a local workspace directory.'
 		}
 	})
 	.input(input_type)

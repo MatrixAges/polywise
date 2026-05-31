@@ -51,7 +51,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/todo/drag',
-			description: 'Run Drag'
+			description: 'Move a todo across status columns or reorder it within a todo board.'
 		}
 	})
 	.input(input_type)

@@ -6,7 +6,7 @@ export const stop = p
 		openapi: {
 			method: 'POST',
 			path: '/session/stop',
-			description: 'Run Stop'
+			description: 'Request the current session stream to stop.'
 		}
 	})
 	.input(string())
@@ -19,7 +19,7 @@ export const destroy = p
 		openapi: {
 			method: 'POST',
 			path: '/session/destroy',
-			description: 'Run Destroy'
+			description: 'Request the current session runtime to destroy its live state.'
 		}
 	})
 	.input(string())
@@ -32,7 +32,7 @@ export const load = p
 		openapi: {
 			method: 'POST',
 			path: '/session/load',
-			description: 'Read Load'
+			description: 'Load older or newer message pages for a session.'
 		}
 	})
 	.input(object({ id: string(), type: Enum(['prev', 'next']) }))
@@ -45,7 +45,7 @@ export const clear = p
 		openapi: {
 			method: 'POST',
 			path: '/session/clear',
-			description: 'Run Clear'
+			description: 'Clear the message history of a session.'
 		}
 	})
 	.input(string())
@@ -58,7 +58,7 @@ export const removeMessage = p
 		openapi: {
 			method: 'POST',
 			path: '/session/removeMessage',
-			description: 'Run Remove Message'
+			description: 'Remove one message from a session conversation.'
 		}
 	})
 	.input(object({ id: string(), message_id: string() }))
@@ -71,7 +71,7 @@ export const archive = p
 		openapi: {
 			method: 'POST',
 			path: '/session/archive',
-			description: 'Run Archive'
+			description: 'Archive a session conversation.'
 		}
 	})
 	.input(string())
@@ -84,7 +84,7 @@ export const unarchive = p
 		openapi: {
 			method: 'POST',
 			path: '/session/unarchive',
-			description: 'Run Unarchive'
+			description: 'Restore an archived session conversation.'
 		}
 	})
 	.input(string())
@@ -97,7 +97,7 @@ export const answer = p
 		openapi: {
 			method: 'POST',
 			path: '/session/answer',
-			description: 'Run Answer'
+			description: 'Submit a manual answer string into a session event flow.'
 		}
 	})
 	.input(object({ id: string(), answer: string() }))
@@ -110,7 +110,7 @@ export const permission = p
 		openapi: {
 			method: 'POST',
 			path: '/session/permission',
-			description: 'Run Permission'
+			description: 'Approve or reject a pending permission request for a session.'
 		}
 	})
 	.input(object({ id: string(), approved: boolean() }))
@@ -123,7 +123,8 @@ export const setConfig = p
 		openapi: {
 			method: 'POST',
 			path: '/session/setConfig',
-			description: 'Run Set Config'
+			description:
+				'Update runtime configuration for a session, such as mode, audit, tools, and agent settings.'
 		}
 	})
 	.input(

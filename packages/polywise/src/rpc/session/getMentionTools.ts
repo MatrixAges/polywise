@@ -41,7 +41,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/session/getMentionTools',
-			description: 'Read Get Mention Tools'
+			description: 'List tools and MCP entries available for slash-mentions in the current session input.'
 		}
 	})
 	.input(input_type)

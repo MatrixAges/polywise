@@ -24,7 +24,8 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/group/create',
-			description: 'Run Create'
+			description:
+				'Create a multi-agent group with its initial members, folder mounts, and first linked session.'
 		}
 	})
 	.input(input_type)

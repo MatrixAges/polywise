@@ -30,7 +30,8 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/group/query',
-			description: 'Read Query'
+			description:
+				'List groups or read one group with its agents, sessions, folders, and latest message preview.'
 		}
 	})
 	.input(input_type)

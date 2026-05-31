@@ -14,7 +14,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/group/remove',
-			description: 'Run Remove'
+			description: 'Delete a group and remove its linked sessions.'
 		}
 	})
 	.input(string())

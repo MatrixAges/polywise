@@ -12,7 +12,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/todo/remove',
-			description: 'Run Remove'
+			description: 'Delete a todo item.'
 		}
 	})
 	.input(input_type)

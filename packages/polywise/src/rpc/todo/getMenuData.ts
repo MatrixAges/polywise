@@ -9,7 +9,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/todo/getMenuData',
-			description: 'Read Get Menu Data'
+			description: 'Return inbox and per-project todo counts for the todo sidebar.'
 		}
 	})
 	.query(async () => {

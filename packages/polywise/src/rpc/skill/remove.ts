@@ -10,7 +10,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/skill/remove',
-			description: 'Run Remove'
+			description: 'Delete a skill and remove its local files.'
 		}
 	})
 	.input(input_type)

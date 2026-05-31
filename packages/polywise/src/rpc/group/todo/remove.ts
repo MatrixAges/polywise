@@ -10,7 +10,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/group/todo/remove',
-			description: 'Run Remove'
+			description: 'Delete a todo item from a group workspace.'
 		}
 	})
 	.input(string())

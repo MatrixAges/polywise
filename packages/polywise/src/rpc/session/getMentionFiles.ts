@@ -47,7 +47,8 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/session/getMentionFiles',
-			description: 'Read Get Mention Files'
+			description:
+				'List workspace files available for @mentions in the current session, optionally filtered by a search query.'
 		}
 	})
 	.input(input_type)

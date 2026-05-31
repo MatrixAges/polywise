@@ -18,7 +18,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/linkcase/updateSchedule',
-			description: 'Run Update Schedule'
+			description: 'Update one linkcase schedule, including cadence, enablement, and extraction options.'
 		}
 	})
 	.input(input_type)

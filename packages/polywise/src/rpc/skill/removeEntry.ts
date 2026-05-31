@@ -18,7 +18,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/skill/removeEntry',
-			description: 'Run Remove Entry'
+			description: 'Delete one file or folder inside a skill directory.'
 		}
 	})
 	.input(input_type)

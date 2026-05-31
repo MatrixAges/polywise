@@ -12,7 +12,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/post/article/add',
-			description: 'Run Add'
+			description: 'Link a global article to a post as related source material.'
 		}
 	})
 	.input(

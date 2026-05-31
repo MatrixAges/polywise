@@ -13,7 +13,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/post/update',
-			description: 'Run Update'
+			description: 'Update a post title, content, type, and linked session title when needed.'
 		}
 	})
 	.input(

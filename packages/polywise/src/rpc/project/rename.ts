@@ -12,7 +12,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/project/rename',
-			description: 'Run Rename'
+			description: 'Rename a project record.'
 		}
 	})
 	.input(input_type)

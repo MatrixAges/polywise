@@ -38,7 +38,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/todo/assignProject',
-			description: 'Run Assign Project'
+			description: 'Move a todo into a project or back to the inbox and recalculate its order.'
 		}
 	})
 	.input(input_type)

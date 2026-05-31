@@ -16,7 +16,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/skill/update',
-			description: 'Run Update'
+			description: 'Update a skill metadata record and its SKILL.md content.'
 		}
 	})
 	.input(input_type)

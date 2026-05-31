@@ -14,7 +14,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/linkcase/create',
-			description: 'Run Create'
+			description: 'Create a new linkcase item from a URL and optional title or content.'
 		}
 	})
 	.input(input_type)

@@ -11,7 +11,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/post/session/get',
-			description: 'Read Get'
+			description: 'Return the session id currently linked to a post, if any.'
 		}
 	})
 	.input(object({ post_id: string() }))

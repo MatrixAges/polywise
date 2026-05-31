@@ -35,7 +35,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/todo/sort',
-			description: 'Run Sort'
+			description: 'Reorder todo items within the inbox or a project list.'
 		}
 	})
 	.input(input_type)

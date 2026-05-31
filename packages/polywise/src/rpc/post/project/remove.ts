@@ -11,7 +11,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/post/project/remove',
-			description: 'Run Remove'
+			description: 'Unlink a project from a post.'
 		}
 	})
 	.input(

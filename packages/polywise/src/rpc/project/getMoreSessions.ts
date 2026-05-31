@@ -12,7 +12,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/project/getMoreSessions',
-			description: 'Read Get More Sessions'
+			description: 'Load more sessions linked to one project.'
 		}
 	})
 	.input(input_type)

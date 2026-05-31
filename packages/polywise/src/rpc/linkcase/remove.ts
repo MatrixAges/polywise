@@ -12,7 +12,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/linkcase/remove',
-			description: 'Run Remove'
+			description: 'Delete one linkcase item.'
 		}
 	})
 	.input(input_type)

@@ -27,7 +27,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/session/getMoreList',
-			description: 'Read Get More List'
+			description: 'Load additional top-level sessions for pagination in the main session list.'
 		}
 	})
 	.input(input_type)

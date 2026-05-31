@@ -8,7 +8,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/post/project/query',
-			description: 'Read Query'
+			description: 'List projects currently linked to a post.'
 		}
 	})
 	.input(object({ post_id: string() }))

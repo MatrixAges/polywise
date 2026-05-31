@@ -6,7 +6,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/project/getList',
-			description: 'Read Get List'
+			description: 'List projects for the project page, each with initial session metadata placeholders.'
 		}
 	})
 	.query(async () => {

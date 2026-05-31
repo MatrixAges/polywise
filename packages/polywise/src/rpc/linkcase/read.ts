@@ -12,7 +12,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/linkcase/read',
-			description: 'Read Read'
+			description: 'Return one linkcase item with its detailed fields and derived state.'
 		}
 	})
 	.input(input_type)

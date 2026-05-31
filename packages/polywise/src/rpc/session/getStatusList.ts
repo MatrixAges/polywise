@@ -102,7 +102,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/session/getStatusList',
-			description: 'Read Get Status List'
+			description: 'List sessions by status, such as running, unread, or error.'
 		}
 	})
 	.input(input_type)

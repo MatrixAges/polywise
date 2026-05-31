@@ -15,7 +15,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/group/createSession',
-			description: 'Run Create Session'
+			description: 'Create a new chat session linked to a group.'
 		}
 	})
 	.input(input_type)

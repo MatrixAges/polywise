@@ -10,7 +10,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/group/getSessions',
-			description: 'Read Get Sessions'
+			description: 'List chat sessions linked to a group.'
 		}
 	})
 	.input(string())

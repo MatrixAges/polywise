@@ -13,7 +13,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/skill/sort',
-			description: 'Run Sort'
+			description: 'Reorder skills in the skill list.'
 		}
 	})
 	.input(input_type)

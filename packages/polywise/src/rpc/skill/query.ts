@@ -6,7 +6,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/skill/query',
-			description: 'Read Query'
+			description: 'List all installed skills with metadata.'
 		}
 	})
 	.query(async () => {

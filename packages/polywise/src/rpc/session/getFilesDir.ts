@@ -14,7 +14,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/session/getFilesDir',
-			description: 'Read Get Files Dir'
+			description: 'Return the attachment directory for a session, creating it if needed.'
 		}
 	})
 	.input(input_type)

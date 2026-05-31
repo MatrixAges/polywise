@@ -15,7 +15,8 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/todo/update',
-			description: 'Run Update'
+			description:
+				'Update a todo item, including title, status, priority, result, error, or scheduling fields.'
 		}
 	})
 	.input(input_type)

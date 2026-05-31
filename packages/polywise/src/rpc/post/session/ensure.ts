@@ -8,7 +8,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/post/session/ensure',
-			description: 'Run Ensure'
+			description: 'Create the chat session for a post if it does not already exist, then return it.'
 		}
 	})
 	.input(object({ post_id: string() }))

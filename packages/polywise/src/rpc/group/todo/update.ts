@@ -21,7 +21,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/group/todo/update',
-			description: 'Run Update'
+			description: 'Update one group todo item, including state, assignee, result, or error details.'
 		}
 	})
 	.input(input_type)

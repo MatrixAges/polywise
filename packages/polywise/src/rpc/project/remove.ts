@@ -13,7 +13,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/project/remove',
-			description: 'Run Remove'
+			description: 'Delete a project and remove all sessions linked to it.'
 		}
 	})
 	.input(input_type)

@@ -6,7 +6,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/linkcase/getSchedules',
-			description: 'Read Get Schedules'
+			description: 'List configured linkcase schedules.'
 		}
 	})
 	.query(async () => {

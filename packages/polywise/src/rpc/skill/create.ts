@@ -15,7 +15,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/skill/create',
-			description: 'Run Create'
+			description: 'Create a new reusable skill from its name, description, and SKILL.md content.'
 		}
 	})
 	.input(input_type)

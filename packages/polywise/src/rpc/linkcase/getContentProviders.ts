@@ -22,7 +22,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/linkcase/getContentProviders',
-			description: 'Read Get Content Providers'
+			description: 'List available linkcase content providers and optionally probe their runtime readiness.'
 		}
 	})
 	.input(input_type)

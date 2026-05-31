@@ -13,7 +13,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/linkcase/installContentProvider',
-			description: 'Run Install Content Provider'
+			description: 'Install the CLI or local dependency required by one linkcase content provider.'
 		}
 	})
 	.input(input_type)

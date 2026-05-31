@@ -17,7 +17,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/linkcase/createSchedule',
-			description: 'Run Create Schedule'
+			description: 'Create a recurring linkcase batch schedule.'
 		}
 	})
 	.input(input_type)

@@ -8,7 +8,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/post/remove',
-			description: 'Run Remove'
+			description: 'Delete one post.'
 		}
 	})
 	.input(object({ id: string() }))

@@ -15,7 +15,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/group/setAgents',
-			description: 'Run Set Agents'
+			description: 'Replace and reorder the agents assigned to a group.'
 		}
 	})
 	.input(input_type)

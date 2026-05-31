@@ -20,7 +20,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/skill/saveFile',
-			description: 'Run Save File'
+			description: 'Write content to a file inside a skill directory.'
 		}
 	})
 	.input(input_type)

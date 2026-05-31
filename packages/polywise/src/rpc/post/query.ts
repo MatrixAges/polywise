@@ -29,7 +29,7 @@ export default p
 		openapi: {
 			method: 'GET',
 			path: '/post/query',
-			description: 'Query posts'
+			description: 'List posts with pagination and optional type or text filters.'
 		}
 	})
 	.input(input_type)

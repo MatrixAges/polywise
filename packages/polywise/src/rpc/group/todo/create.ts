@@ -18,7 +18,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/group/todo/create',
-			description: 'Run Create'
+			description: 'Create a todo item inside a group workspace.'
 		}
 	})
 	.input(input_type)

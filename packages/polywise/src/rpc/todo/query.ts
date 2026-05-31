@@ -68,7 +68,8 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/todo/query',
-			description: 'Read Query'
+			description:
+				'List inbox or project todo items grouped by status, including linked session info when available.'
 		}
 	})
 	.input(input_type)

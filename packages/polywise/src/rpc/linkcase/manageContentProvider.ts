@@ -13,7 +13,8 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/linkcase/manageContentProvider',
-			description: 'Run Manage Content Provider'
+			description:
+				'Execute provider-specific maintenance actions, such as creating or recreating a managed profile.'
 		}
 	})
 	.input(input_type)

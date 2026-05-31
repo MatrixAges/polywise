@@ -13,7 +13,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/project/getFileDetail',
-			description: 'Read Get File Detail'
+			description: 'Return one file from a project workspace by relative path.'
 		}
 	})
 	.input(input_type)

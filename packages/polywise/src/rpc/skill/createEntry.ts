@@ -20,7 +20,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/skill/createEntry',
-			description: 'Run Create Entry'
+			description: 'Create an empty file or folder inside a skill directory.'
 		}
 	})
 	.input(input_type)

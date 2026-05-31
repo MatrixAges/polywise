@@ -8,7 +8,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/post/extract',
-			description: 'Run Extract'
+			description: 'Extract structured content or article data for one post.'
 		}
 	})
 	.input(

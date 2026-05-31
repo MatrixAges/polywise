@@ -12,7 +12,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/post/project/add',
-			description: 'Run Add'
+			description: 'Link a post to a project.'
 		}
 	})
 	.input(

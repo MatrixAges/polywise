@@ -20,7 +20,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/group/setFolders',
-			description: 'Run Set Folders'
+			description: 'Replace the workspace folders mounted for a group.'
 		}
 	})
 	.input(input_type)

@@ -13,7 +13,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/linkcase/extract',
-			description: 'Run Extract'
+			description: 'Extract article content or structured output for one linkcase item.'
 		}
 	})
 	.input(input_type)

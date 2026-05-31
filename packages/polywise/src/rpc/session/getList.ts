@@ -105,7 +105,8 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/session/getList',
-			description: 'Read Get List'
+			description:
+				'List top-level sessions for the main session view, including pinned sessions and the first page of unpinned sessions.'
 		}
 	})
 	.input(input_type)

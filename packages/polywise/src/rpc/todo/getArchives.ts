@@ -14,7 +14,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/todo/getArchives',
-			description: 'Read Get Archives'
+			description: 'List archived standalone todo items with pagination.'
 		}
 	})
 	.input(input_type)
