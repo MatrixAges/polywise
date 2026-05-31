@@ -1,127 +1,49 @@
 # Agent Map
 
-This document provides an overview of the packages/desktop module structure and architecture.
+This document is an outline-level map of `packages/desktop`. It highlights stable responsibility boundaries for the Electron shell.
 
 ## 1. Module Overview
 
-- **Description**: Electron main process and shell
-- **Architecture**: Electron + Hono + Rslib
+- **Description**: Electron main-process and packaging package for Polywise.
+- **Architecture**: Electron + Rslib + desktop RPC bridge.
 
-## 2. File Tree & Metadata
+## 2. Outline Tree
 
 ```json
 {
-	"project": "Polywise",
-	"module": "packages/desktop",
-	"structure": {
-		"build": {
-			"clean.ts": { "desc": "Clean build artifacts script", "role": "Script" },
-			"clean_win_release.ts": { "desc": "Clean Windows release artifacts", "role": "Script" },
-			"transform.ts": { "desc": "Build transformation script", "role": "Script" }
+	"entry": [
+		"package.json",
+		"rslib.config.ts",
+		"electron-builder.ts",
+		"tsconfig.json",
+		"README.md",
+		"test_build.sh"
+	],
+	"build_and_packaging": {
+		"build": "Package-local build and release preparation scripts.",
+		"scripts": "Development, preload, and native rebuild helpers.",
+		"metadata": "Packaging metadata such as entitlements.",
+		"public": "Desktop static assets such as icons, tray assets, and loading page."
+	},
+	"main_process_runtime": {
+		"src/index.ts": "Main-process bootstrap entry.",
+		"src/config.ts": "Desktop runtime configuration entry.",
+		"src/app": "Window, menu, and tray lifecycle controllers.",
+		"src/rpc": {
+			"app": "Renderer-facing desktop operations such as update, relaunch, install, and theme/window controls.",
+			"memory": "Bridge into Polywise memory/runtime capabilities."
 		},
-		"config.ts": { "desc": "Desktop app configuration", "role": "Config" },
-		"electron-builder.ts": { "desc": "Electron Builder configuration", "role": "Config" },
-		"metadata": {
-			"entitlements.plist": { "desc": "macOS entitlements", "role": "Config" },
-			"index.ts": { "desc": "Metadata exports", "role": "Index" }
-		},
-		"scripts": {
-			"dev.ts": { "desc": "Development server script", "role": "Script" },
-			"preload.ts": { "desc": "Electron preload script", "role": "Bridge" }
-		},
-		"src": {
-			"apis": { "index.ts": { "desc": "API module exports", "role": "Index" } },
-			"app": {
-				"Main.ts": { "desc": "Main Window controller", "role": "Controller" },
-				"Menu.ts": { "desc": "Application Menu controller", "role": "Controller" },
-				"Tray.ts": { "desc": "System Tray controller", "role": "Controller" },
-				"index.ts": { "desc": "App module exports", "role": "Index" }
-			},
-			"index.ts": {
-				"desc": "Main process entry point with startup memory worker init and utility process memory offloading",
-				"role": "Entry"
-			},
-			"locales": {
-				"en": {
-					"global.ts": { "desc": "English global strings", "role": "Locale" },
-					"index.ts": { "desc": "English locale entry", "role": "Index" }
-				},
-				"zh-cn": {
-					"global.ts": { "desc": "Chinese global strings", "role": "Locale" },
-					"index.ts": { "desc": "Chinese locale entry", "role": "Index" }
-				}
-			},
-			"rpcs": {
-				"app": {
-					"actions.ts": { "desc": "General app actions RPC", "role": "RPC" },
-					"checkUpdate.ts": { "desc": "Update check RPC", "role": "RPC" },
-					"download.ts": { "desc": "Download manager RPC", "role": "RPC" },
-					"exit.ts": { "desc": "App exit RPC", "role": "RPC" },
-					"index.ts": { "desc": "App RPCs exports", "role": "Index" },
-					"install.ts": { "desc": "App install RPC", "role": "RPC" },
-					"onApp.ts": { "desc": "App event subscription RPC", "role": "RPC" },
-					"onUpdate.ts": { "desc": "Update event subscription RPC", "role": "RPC" },
-					"relaunch.ts": { "desc": "App relaunch RPC", "role": "RPC" },
-					"setGlass.ts": { "desc": "Window glass effect RPC", "role": "RPC" },
-					"setTheme.ts": { "desc": "Theme setting RPC", "role": "RPC" }
-				},
-				"memory": {
-					"index.ts": {
-						"desc": "Polywise memory operations RPC delegated to utility process",
-						"role": "RPC"
-					}
-				},
-				"index.ts": { "desc": "RPC routers entry point", "role": "Index" }
-			},
-			"types": {
-				"hono.ts": { "desc": "Hono server types", "role": "Type" },
-				"index.ts": { "desc": "Types module exports", "role": "Index" }
-			},
-			"utils": {
-				"conf.ts": { "desc": "Config utility", "role": "Utility" },
-				"const.ts": { "desc": "Constants definitions", "role": "Utility" },
-				"electron.ts": { "desc": "Electron helpers", "role": "Utility" },
-				"entry.ts": { "desc": "Entry point helpers", "role": "Utility" },
-				"fs.ts": { "desc": "File system helpers", "role": "Utility" },
-				"getDarkIconPath.ts": { "desc": "Dark mode icon path helper", "role": "Utility" },
-				"getThemeColor.ts": { "desc": "Theme color helper", "role": "Utility" },
-				"index.ts": { "desc": "Utils module exports", "role": "Index" },
-				"is.ts": { "desc": "Type check helpers", "role": "Utility" },
-				"locale.ts": { "desc": "Locale management", "role": "Utility" },
-				"path.ts": { "desc": "Path manipulation helpers", "role": "Utility" },
-				"protocol.ts": { "desc": "Protocol registration", "role": "Utility" },
-				"relaunch.ts": { "desc": "Relaunch helper", "role": "Utility" },
-				"request.ts": { "desc": "HTTP request helper", "role": "Utility" },
-				"rstream": {
-					"index.ts": { "desc": "Stream module exports", "role": "Index" },
-					"pubsub.ts": { "desc": "Publish-Subscribe pattern", "role": "Utility" }
-				},
-				"safeStorage.ts": { "desc": "Safe storage encryption", "role": "Utility" },
-				"serve.ts": { "desc": "Internal server setup", "role": "Utility" },
-				"setWindowGlass.ts": { "desc": "Window vibrancy effect", "role": "Utility" },
-				"time.ts": { "desc": "Time manipulation", "role": "Utility" },
-				"trpc.ts": {
-					"desc": "tRPC setup helper with utility-process memory bridge",
-					"role": "Utility"
-				}
-			}
-		},
-		"config": {
-			"package.json": { "desc": "Desktop package configuration", "role": "Config" },
-			"rslib.config.ts": { "desc": "Rslib configuration with multi-entry worker build", "role": "Config" },
-			"tsconfig.json": { "desc": "TypeScript configuration", "role": "Config" },
-			"typings": {
-				"extension.d.ts": { "desc": "Extension type definitions", "role": "Type" },
-				"global.d.ts": { "desc": "Global type definitions", "role": "Type" },
-				"i18n.d.ts": { "desc": "i18n type definitions", "role": "Type" }
-			}
-		}
+		"src/utils": "Electron, filesystem, protocol, request, and runtime helper layer.",
+		"src/locales": "Desktop locale resources.",
+		"src/types": "Shared desktop-side types."
+	},
+	"supporting_types": {
+		"typings": "Ambient declarations used by build and runtime."
 	}
 }
 ```
 
-## 3. Operational Guidelines
+## 3. Notes
 
-- **IPC**: All cross-process features are defined in `src/rpcs`
-- **Server**: Internal Hono server setup in `src/utils/serve.ts`
-- **Communication**: Use `packages/erpc` for renderer communication
+- Generated or transient directories such as `dist`, `release`, `node_modules`, `.tmp`, and `.turbo` are intentionally omitted.
+- Add deeper nodes only when a new long-lived runtime domain appears under `src`.

@@ -29,8 +29,9 @@
 
 - **`agentmap.md` (architecture and state map)**
 
-1. **When to use**: After persisting context and before reading other code, it must be read first; before the task ends, if any file is added, removed, or modified, its JSON tree must be updated as well.
-2. **Purpose**: Ensure a consistent understanding of the target package's current physical structure and module responsibilities.
+1. **When to use**: After persisting context and before reading other code, read it first. Before the task ends, update it only when the package structure or responsibility boundaries changed in a way that affects the package outline.
+2. **Purpose**: Keep a stable, outline-level understanding of the target package's physical structure and module responsibilities.
+3. **Granularity**: Prefer top-level and major business-domain folders. Do not expand routine leaf files unless they are true entry points, public coordination nodes, or special infrastructure roots.
 
 - **`unify.md` (style routing table)**
 
