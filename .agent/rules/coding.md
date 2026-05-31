@@ -48,6 +48,7 @@ For development targeting different tech stacks and code modules, please strictl
 
 ### TypeScript Specifications
 
+- **Type-First Design**: Before writing business logic, first define reusable data structures and function type signatures in English. Implementation must then be built around that reusable type system instead of growing from ad hoc inline shapes.
 - **No Any**: The `any` type declaration is strictly prohibited in code. For uncertain types, forcefully declare as `unknown` and use typeof/instanceof and other type narrowing mechanisms.
 - **Type Inference**: Except for exported complex public APIs, manually declaring function return value types is prohibited; all type inference is left to the TS compiler.
 - **Type Imports**: When importing Types or Interfaces, the `import type` syntax must be used, and such imports must be placed at the very top block of the target file.
