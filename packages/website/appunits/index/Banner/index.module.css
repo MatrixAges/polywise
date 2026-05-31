@@ -76,6 +76,99 @@
 				}
 			}
 
+			.community_row {
+				margin-top: 14px;
+				min-height: 28px;
+			}
+
+			.community_link,
+			.community_wechat {
+				position: relative;
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				gap: 6px;
+				padding: 4px 12px;
+				border-radius: 999px;
+				color: var(--banner_color_sub);
+				font-size: 12px;
+				line-height: 1.4;
+				transition: color ease 0.2s;
+			}
+
+			.community_icon {
+				flex: none;
+				font-size: 15px;
+			}
+
+			.community_link:hover,
+			.community_wechat:hover,
+			.community_wechat:focus-visible {
+				color: white;
+			}
+
+			.community_wechat {
+				outline: none;
+				cursor: default;
+			}
+
+			.community_qrcode {
+				position: absolute;
+				left: 50%;
+				bottom: calc(100% + 12px);
+				display: flex;
+				width: 180px;
+				padding: 10px;
+				border: 1px solid rgba(255, 255, 255, 0.16);
+				border-radius: 16px;
+				background: rgba(8, 10, 18, 0.92);
+				box-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+				transform: translateX(-50%) translateY(6px);
+				opacity: 0;
+				pointer-events: none;
+				transition:
+					opacity ease 0.2s,
+					transform ease 0.2s;
+
+				img {
+					display: block;
+					flex: none;
+					width: 100%;
+					height: auto;
+					aspect-ratio: 1 / 1;
+					border-radius: 10px;
+					object-fit: contain;
+				}
+			}
+
+			.community_qrcode::before {
+				content: '';
+				position: absolute;
+				left: 50%;
+				top: 100%;
+				border-top: 9px solid rgba(255, 255, 255, 0.16);
+				border-right: 9px solid transparent;
+				border-left: 9px solid transparent;
+				transform: translateX(-50%);
+			}
+
+			.community_qrcode::after {
+				content: '';
+				position: absolute;
+				left: 50%;
+				top: 100%;
+				border-top: 8px solid rgba(8, 10, 18, 0.92);
+				border-right: 8px solid transparent;
+				border-left: 8px solid transparent;
+				transform: translateX(-50%);
+			}
+
+			.community_wechat:hover .community_qrcode,
+			.community_wechat:focus-visible .community_qrcode {
+				transform: translateX(-50%) translateY(0);
+				opacity: 1;
+			}
+
 			.image_preview_wrap {
 				min-height: 647.71px;
 
@@ -90,7 +183,6 @@
 					padding: 0;
 					margin: 0;
 					border: 3px solid rgba(var(--color_text_rgb), 0.06);
-					border-radius: 16px;
 					user-select: none;
 					pointer-events: none;
 					backdrop-filter: var(--blur);

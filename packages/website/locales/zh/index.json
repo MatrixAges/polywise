@@ -20,6 +20,11 @@
 		"desc": {
 			"line_1": "一套开源的智能体驱动的内容与决策系统。",
 			"line_2": "采集内容，塑造上下文，并在其上运行智能体。"
+		},
+		"community": {
+			"wechat_label": "加入微信用户群",
+			"wechat_qrcode_alt": "微信用户群二维码",
+			"discord_label": "加入 Discord 讨论群"
 		}
 	},
 	"What": {

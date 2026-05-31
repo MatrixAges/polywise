@@ -20,6 +20,11 @@
 		"desc": {
 			"line_1": "オープンソースの agentic content system。",
 			"line_2": "コンテンツを集め、文脈を形にし、その上でエージェントを動かします。"
+		},
+		"community": {
+			"wechat_label": "WeChat ユーザーグループに参加",
+			"wechat_qrcode_alt": "WeChat ユーザーグループの QR コード",
+			"discord_label": "Discord ディスカッションに参加"
 		}
 	},
 	"What": {

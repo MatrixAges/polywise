@@ -1,6 +1,5 @@
 ._local {
 	--banner_color_sub: rgba(var(--color_text_rgb), 0.84);
-
 	gap: 12px;
 
 	:global {

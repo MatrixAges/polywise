@@ -9,7 +9,7 @@
 - **Complex-request planning**: For complex requirements, first write a clear, specific, complete, and executable solution in English in `.draft`; during execution, update that plan in `.draft` in a timely manner based on actual progress and new findings.
 - **Temporary logging for failed fixes**: If the user reports that your solution did not work, add temporary `console.log` diagnostics first, ask the user to help restart the service and perform specific actions, locate the exact failure point, and only then implement the actual fix.
 - **Validation policy**: Do not use any build command as a verification step. If verification is needed, first run Prettier on the touched files, then run type-check validation only.
-- **Package install ban**: Never proactively run `pnpm install` or any equivalent full dependency installation command. If dependency synchronization is required, clearly tell the user which command to run and let the user execute it manually.
+- **Package install ban**: It is strictly prohibited to automatically run `pnpm install`, `pnpm i`, or any equivalent dependency synchronization or installation command from the AI environment. The AI command-line environment may create a project-local `.pnpm-store` directory and break the existing `node_modules` availability. If dependency synchronization is required, stop and clearly ask the user to execute the needed `pnpm` install command manually in their own environment.
 - **Protected directories**: Never read or modify any directory whose name starts with `__` (such as `__codegrave__`).
 - **Concise output**: Do not include pleasantries or unrelated explanation; give the result directly.
 

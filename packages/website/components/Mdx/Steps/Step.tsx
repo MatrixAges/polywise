@@ -51,7 +51,7 @@ const Index = (props: IProps) => {
 					className='
 						mt-4
 						text-[15px] leading-8
-						[&>*:first-child]:!mt-0 [&>*:last-child]:!mb-0 [&_a]:underline [&_a]:underline-offset-4 [&_ol]:my-4 [&_ol]:pl-5 [&_p]:!px-0 [&_pre]:my-5 [&_ul]:my-4 [&_ul]:pl-5
+						[&>*:first-child]:mt-0! [&>*:last-child]:mb-0! [&_a]:underline [&_a]:underline-offset-4 [&_ol]:my-4 [&_ol]:pl-5 [&_p]:px-0! [&_pre]:my-5 [&_ul]:my-4 [&_ul]:pl-5
 					'
 				>
 					{children}

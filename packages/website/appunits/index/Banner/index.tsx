@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { medias } from '@website/appdata/app'
 import { banner_images } from '@website/appdata/modules'
 import LinkButtons from '@website/components/LinkButtons'
 import useMounted from '@website/hooks/useMounted'
@@ -8,7 +9,9 @@ import { $ } from '@website/utils'
 import { base_url_files_website, is_server } from '@website/utils/const'
 import { AnimatePresence, motion } from 'framer-motion'
 import { generateJSXMeshGradient } from 'meshgrad'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
+import { FaDiscord } from 'react-icons/fa'
+import { IoLogoWechat } from 'react-icons/io5'
 import { TypeAnimation } from 'react-type-animation'
 
 import styles from './index.module.css'
@@ -17,10 +20,12 @@ import type { TargetAndTransition } from 'framer-motion'
 
 const Index = () => {
 	const t = useTranslations('index')
+	const locale = useLocale()
 	const mounted = useMounted()
 	const [gradient, setGradient] = useState<TargetAndTransition>()
 	const [step, setStep] = useState(0)
 	const [show_type, setShowType] = useState(true)
+	const is_chinese = locale === 'zh'
 	const name = banner_images[step]
 	const requested_images = useRef(new Set<string>([name]))
 	const [loaded_images, setLoadedImages] = useState([name])
@@ -146,7 +151,31 @@ const Index = () => {
 					<h2 className='desc'>{t('Banner.desc.line_2')}</h2>
 				</div>
 				<LinkButtons></LinkButtons>
-				<div className='image_preview_wrap mt-16 w-full max-md:mt-10'>
+				<div className='community_row flex justify-center opacity-60'>
+					{is_chinese ? (
+						<div className='community_wechat' tabIndex={0}>
+							<IoLogoWechat className='community_icon'></IoLogoWechat>
+							<span>{t('Banner.community.wechat_label')}</span>
+							<div className='community_qrcode'>
+								<img
+									src='/images/wechat%20_group_qrcode.png'
+									alt={t('Banner.community.wechat_qrcode_alt')}
+								/>
+							</div>
+						</div>
+					) : (
+						<a
+							className='community_link clickable'
+							href={medias.discord}
+							target='_blank'
+							rel='noreferrer'
+						>
+							<FaDiscord className='community_icon'></FaDiscord>
+							{t('Banner.community.discord_label')}
+						</a>
+					)}
+				</div>
+				<div className='image_preview_wrap mt-10 w-full max-md:mt-6'>
 					<div className='image_preview relative flex w-full'>
 						<img
 							className='image image_placeholder box-border'
@@ -161,7 +190,7 @@ const Index = () => {
 
 								return (
 									<motion.img
-										className='image image_layer box-border'
+										className='image image_layer rounded-2xl'
 										src={`${base_url_files_website}/${item}.png`}
 										alt={`image_preview_${item}`}
 										initial={false}

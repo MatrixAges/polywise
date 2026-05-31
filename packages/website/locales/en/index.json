@@ -20,6 +20,11 @@
 		"desc": {
 			"line_1": "The open source agentic content system.",
 			"line_2": "Capture content, shape context, and run agents on top of it."
+		},
+		"community": {
+			"wechat_label": "Join the WeChat user group",
+			"wechat_qrcode_alt": "WeChat user group QR code",
+			"discord_label": "Join the Discord discussion group"
 		}
 	},
 	"What": {
