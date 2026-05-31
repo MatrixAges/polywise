@@ -2,11 +2,14 @@ import { article } from '@core/db/schema'
 import { assertAgentWritableForKnowledge, getArticle } from '@core/db/services'
 import { addAgentArticle } from '@core/db/services/externals'
 import { eq } from 'drizzle-orm'
-import { object, string, enum as zod_enum } from 'zod'
+import { boolean, object, string, enum as zod_enum } from 'zod'
 
 import { p } from '../../utils/trpc'
 
 const article_for_type = article.for.enumValues
+const output_type = object({
+	ok: boolean()
+})
 
 export default p
 	.meta({
@@ -23,6 +26,7 @@ export default p
 			for_type: zod_enum(article_for_type)
 		})
 	)
+	.output(output_type)
 	.mutation(async ({ input }) => {
 		await assertAgentWritableForKnowledge(input.agent_id)
 

@@ -16,15 +16,23 @@ type PolywiseToolInput = {
 }
 
 const inputSchema = object({
-	action: zod_enum(['help', 'list', 'input_schema', 'call']).default('help'),
+	action: zod_enum(['help', 'list', 'input_schema', 'call'])
+		.default('help')
+		.describe(
+			'Use help/list/input_schema to inspect first. Use call only after the target input shape is known.'
+		),
 	path: array(string()).optional().describe('Help path segments like ["api"] or ["cli", "start"].'),
 	target: string()
 		.optional()
-		.describe('Target rpc path such as "session.create" for input_schema or call actions.'),
+		.describe(
+			'Target rpc path such as "session.create". Before action "call", inspect the same target with action "input_schema" unless the exact input shape is already known.'
+		),
 	keyword: string().optional().describe('Optional fuzzy keyword for list action.'),
 	input: record(string(), union([string(), number(), boolean()]))
 		.optional()
-		.describe('Flat input object for call action. Values may be string, number, or boolean.')
+		.describe(
+			'Flat input object for action "call". Do not guess keys for unfamiliar targets. Inspect action "input_schema" first.'
+		)
 })
 
 const createHelpItem = (args: { key: string; title: string; summary: string }) => ({
@@ -52,7 +60,7 @@ const renderRootHelp = (): RenderedHelp => ({
 	],
 	hints: [
 		'Use help path ["api"] first.',
-		'When the target input is not already known, use action "input_schema" before any "call".',
+		'Do not call an unfamiliar target directly. Inspect action "input_schema" for the exact target before any call.',
 		'Use help path ["cli"] to understand why this tool prefers API routing over shelling out to the polywise command.'
 	],
 	examples: [
@@ -182,7 +190,8 @@ export const createPolywiseTool = () =>
 			'Inspect and call Polywise local capabilities from the global panel session.',
 			'Prefer API-style actions because the Polywise CLI is mostly a thin wrapper over the same local backend map.',
 			'Use action "help" first.',
-			'For unfamiliar targets or after parameter-related failures, use action "input_schema" before action "call".'
+			'Before action "call", inspect action "input_schema" for the same target unless the user already gave the exact flat parameter names and types.',
+			'If a call fails because of missing or wrong parameters, immediately inspect action "input_schema" and retry with the exact shape.'
 		].join('\n'),
 		inputSchema,
 		execute: async input => {

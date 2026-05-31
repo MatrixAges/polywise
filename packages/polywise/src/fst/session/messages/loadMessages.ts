@@ -9,21 +9,29 @@ const ui_reduce_value = 10
 
 export default async (s: Index, type: 'prev' | 'next') => {
 	const is_older = type === 'prev'
-
 	const has_more = is_older ? s.ui_has_older : s.ui_has_newer
+	const archived_boundary = typeof s.archived_at === 'number' ? new Date(s.archived_at) : null
 
 	if (!has_more) return
+
+	if (archived_boundary) {
+		s.ui_messages = s.ui_messages.filter(item => !item.createdAt || item.createdAt > archived_boundary)
+	}
 
 	const boundary = is_older ? s.ui_messages[0] : s.ui_messages.at(-1)
 
 	if (!boundary?.createdAt) return
+	if (archived_boundary && is_older && boundary.createdAt <= archived_boundary) {
+		s.ui_has_older = false
+
+		return
+	}
 
 	const condition = is_older
 		? lt(message.created_at, boundary.createdAt)
 		: gt(message.created_at, boundary.createdAt)
 
-	const archived_condition =
-		typeof s.archived_at === 'number' ? gt(message.created_at, new Date(s.archived_at)) : undefined
+	const archived_condition = archived_boundary ? gt(message.created_at, archived_boundary) : undefined
 
 	const where_condition = archived_condition
 		? and(eq(message.session_id, s.id), condition, archived_condition)

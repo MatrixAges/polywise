@@ -3,7 +3,7 @@ import { assertAgentWritableForKnowledge, getArticle } from '@core/db/services'
 import { removeAgentArticle } from '@core/db/services/externals'
 import remove from '@core/io/remove'
 import { and, eq } from 'drizzle-orm'
-import { object, string } from 'zod'
+import { boolean, object, string } from 'zod'
 
 import { p } from '../../utils/trpc'
 import { cleanupPrivateAgentArticle } from './privateArticle'
@@ -11,6 +11,9 @@ import { cleanupPrivateAgentArticle } from './privateArticle'
 const input_type = object({
 	agent_id: string(),
 	article_id: string()
+})
+const output_type = object({
+	ok: boolean()
 })
 
 export default p
@@ -23,6 +26,7 @@ export default p
 		}
 	})
 	.input(input_type)
+	.output(output_type)
 	.mutation(async ({ input }) => {
 		await assertAgentWritableForKnowledge(input.agent_id)
 
