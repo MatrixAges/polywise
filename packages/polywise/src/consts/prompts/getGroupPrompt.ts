@@ -147,6 +147,7 @@ export const getGroupRunMemberPrompt = (args: {
 	system_tools_prompt: string
 	custom_tools_prompt: string
 	skill_prompt: string
+	prompt_injection_prompt?: string
 	context_prompt: string
 	session_title: string
 	real_world_date: string
@@ -198,6 +199,7 @@ export const getGroupRunMemberPrompt = (args: {
 		args.system_tools_prompt,
 		args.custom_tools_prompt,
 		args.skill_prompt,
+		args.prompt_injection_prompt,
 		args.context_prompt,
 		`Current Session Title: ${args.session_title}`,
 		`Real World Date: ${args.real_world_date}`

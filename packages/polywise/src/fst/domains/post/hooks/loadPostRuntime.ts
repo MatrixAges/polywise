@@ -1,12 +1,15 @@
+import { config } from '@core/config'
 import { post_session } from '@core/db/schema'
 import { getPostSessions } from '@core/db/services/externals'
 import { eq } from 'drizzle-orm'
 
 import {
+	buildPromptInjectionPrompt,
 	createContentTool,
 	createContextTool,
 	createMessageTool,
 	createPostTool,
+	createPromptTool,
 	createQuestionTool,
 	createWebFetchTool,
 	createWebSearchTool
@@ -33,12 +36,14 @@ export default async (s: Session, state: ToolState) => {
 			content_tool: createContentTool(s),
 			web_search_tool: createWebSearchTool(),
 			web_fetch_tool: createWebFetchTool(),
-			post_tool: createPostTool(s)
+			post_tool: createPostTool(s),
+			...(config.prompt_full_inject === true ? {} : { prompt_tool: createPromptTool(s) })
 		},
 		has_system_tool: false,
 		system_tools_prompt: '',
 		custom_tools_prompt: '',
-		skill_prompt: ''
+		skill_prompt: '',
+		prompt_injection_prompt: config.prompt_full_inject === true ? await buildPromptInjectionPrompt(s) : ''
 	}
 	state.hasTitleTool = false
 

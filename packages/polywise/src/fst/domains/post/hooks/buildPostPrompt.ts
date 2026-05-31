@@ -15,6 +15,7 @@ export default (s: Session, state: PromptState) => {
 	state.system = [
 		fst_system_prompt,
 		fst_post_system_prompt,
+		(state.tools.runtime as any)?.prompt_injection_prompt ?? '',
 		`Current Session Title: ${s.session.title}`,
 		[
 			`Current Post Title: ${linkedPost.article.title ?? ''}`,

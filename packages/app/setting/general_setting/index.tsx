@@ -156,6 +156,18 @@ const Index = () => {
 		toast.success(enabled ? 'Page bridge enabled.' : 'Page bridge disabled.')
 	})
 
+	const updatePromptFullInject = useMemoizedFn(async (enabled: boolean) => {
+		await s.setConfig(
+			'config',
+			{
+				prompt_full_inject: enabled
+			} as Partial<AppConfig>,
+			true
+		)
+
+		toast.success(enabled ? 'Prompt full injection enabled.' : 'Prompt full injection disabled.')
+	})
+
 	const submitBootstrapPassword = useMemoizedFn(async () => {
 		if (bootstrap_password.length < 8) {
 			toast.error('Password must be at least 8 characters.')
@@ -276,6 +288,20 @@ const Index = () => {
 						<Switch
 							checked={Boolean(s.config?.auth?.enabled ?? a.status?.enabled)}
 							onCheckedChange={checked => void updateAuthEnabled(checked)}
+						/>
+					</Field>
+					<Field className='items-center! py-3' orientation='horizontal'>
+						<FieldContent>
+							<FieldTitle className='text-base'>Prompt Full Inject</FieldTitle>
+							<FieldDescription>
+								Automatically inject all detected prompt files from the session prompt
+								root into system prompt construction. When enabled, `prompt_tool` is
+								removed from runtime.
+							</FieldDescription>
+						</FieldContent>
+						<Switch
+							checked={Boolean(s.config?.prompt_full_inject)}
+							onCheckedChange={checked => void updatePromptFullInject(checked)}
 						/>
 					</Field>
 					<Field className='items-center! py-3' orientation='horizontal'>

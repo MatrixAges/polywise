@@ -81,6 +81,7 @@ const getTargetTypeFromPart = (part: DurationAwarePart) => {
 
 const hidden_tool_types = new Set([
 	'tool-context_tool',
+	'tool-prompt_tool',
 	'tool-report_tool',
 	'tool-group_coordination_tool',
 	'tool-group_progress_tool'

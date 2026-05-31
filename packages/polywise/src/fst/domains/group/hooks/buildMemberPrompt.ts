@@ -44,6 +44,7 @@ export default (s: Session, state: GroupMemberPromptState) => {
 			system_tools_prompt: runtime.system_tools_prompt,
 			custom_tools_prompt: runtime.custom_tools_prompt,
 			skill_prompt: runtime.skill_prompt,
+			prompt_injection_prompt: runtime.prompt_injection_prompt,
 			context_prompt: getContextPrompt(s.context),
 			session_title: s.session.title,
 			real_world_date: dayjs().format('YYYY-MM-DD')

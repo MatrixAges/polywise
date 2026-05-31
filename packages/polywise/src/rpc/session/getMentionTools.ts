@@ -1,3 +1,4 @@
+import { config } from '@core/config'
 import { listConfiguredMcps } from '@core/fst/mcp'
 import { configurable_session_tool_items, hasSessionSubAgent } from '@core/fst/session/config/shared'
 import { connectSession, p } from '@core/utils'
@@ -39,6 +40,7 @@ export default p
 			description: string
 			transport_type?: 'local' | 'remote'
 		}> = configurable_session_tool_items
+			.filter(item => !(config.prompt_full_inject === true && item.key === 'prompt_tool'))
 			.filter(item => !disable_map.has(item.key))
 			.map(item => ({
 				kind: 'tool',

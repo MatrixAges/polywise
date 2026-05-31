@@ -22,6 +22,7 @@ export * from './runtime'
 export * from './agent'
 export * from './api'
 export * from './page'
+export * from './prompt'
 
 export { createContextTool } from './context'
 export type { ContextInput } from './context'

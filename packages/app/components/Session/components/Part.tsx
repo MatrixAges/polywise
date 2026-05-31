@@ -80,7 +80,7 @@ const Index = (props: IPropsPart) => {
 	if (isStaticToolUIPart(part)) {
 		const tool_part = part as ToolUIPart
 
-		if (tool_part.type === 'tool-context_tool') return null
+		if (tool_part.type === 'tool-context_tool' || tool_part.type === 'tool-prompt_tool') return null
 
 		if (tool_part.type === 'tool-question_tool' && tool_part.input) {
 			return (

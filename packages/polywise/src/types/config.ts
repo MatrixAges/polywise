@@ -97,6 +97,7 @@ export interface AppConfig {
 	submit_mode: 'enter' | 'ctrl+enter'
 	default_model: DefaultModel
 	page_bridge_enabled?: boolean
+	prompt_full_inject?: boolean
 	jina_api_key?: string
 	bookmark_auto_clean?: boolean
 	agent_export_dir?: string

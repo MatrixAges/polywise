@@ -1,3 +1,4 @@
+import { config } from '@core/config'
 import { createSystemTool } from '@core/fst/agents'
 import { hasSessionSubAgent } from '@core/fst/session/config/shared'
 import { getSystemTools } from '@core/utils'
@@ -10,6 +11,7 @@ import { createGlobTool } from './glob'
 import { createMcpTool } from './mcp'
 import { createMetaTool, getCustomToolsPrompt } from './meta'
 import { createNativeAccessTools } from './native'
+import { buildPromptInjectionPrompt, createPromptTool } from './prompt'
 import { createSearchFileTool } from './search'
 import { getSkillPrompt } from './skill'
 import { createWebFetchTool } from './webfetch'
@@ -32,6 +34,7 @@ type SharedRuntimeToolKey =
 	| 'web_fetch_tool'
 	| 'system_tool'
 	| 'agent_tool'
+	| 'prompt_tool'
 
 interface BuildSharedRuntimeToolsArgs {
 	s: Session
@@ -57,6 +60,8 @@ export const buildSharedRuntimeTools = async (args: BuildSharedRuntimeToolsArgs)
 	const system_tools_prompt = await getSystemTools()
 	const custom_tools_prompt = getCustomToolsPrompt(s.custom_tools_map)
 	const skill_prompt = getSkillPrompt(s.skill_map)
+	const prompt_full_inject = config.prompt_full_inject === true
+	const prompt_injection_prompt = prompt_full_inject ? await buildPromptInjectionPrompt(s) : ''
 
 	const tools = {
 		...model_tools,
@@ -73,6 +78,10 @@ export const buildSharedRuntimeTools = async (args: BuildSharedRuntimeToolsArgs)
 		write_file_tool: applyTransform(transform_tool, 'write_file_tool', bash_tool.writeFile),
 		edit_file_tool: applyTransform(transform_tool, 'edit_file_tool', createEditFileTool(s))
 	} as ToolSet
+
+	if (!prompt_full_inject) {
+		tools.prompt_tool = applyTransform(transform_tool, 'prompt_tool', createPromptTool(s))
+	}
 
 	if (has_agent_tool) {
 		tools.agent_tool = applyTransform(transform_tool, 'agent_tool', createAgentTool(s))
@@ -91,6 +100,7 @@ export const buildSharedRuntimeTools = async (args: BuildSharedRuntimeToolsArgs)
 		system_tools_prompt,
 		custom_tools_prompt,
 		skill_prompt,
-		has_system_tool
+		has_system_tool,
+		prompt_injection_prompt
 	}
 }

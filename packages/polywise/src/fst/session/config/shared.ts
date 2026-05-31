@@ -30,6 +30,11 @@ export const configurable_session_tool_items = [
 		description: 'Discover installed custom tools.'
 	},
 	{
+		key: 'prompt_tool',
+		label: 'Prompt Files',
+		description: 'Search and inspect workspace prompt files such as CLAUDE.md and .agent/*.md.'
+	},
+	{
 		key: 'mcp_tool',
 		label: 'MCP',
 		description: 'Search and execute configured MCP servers lazily.'

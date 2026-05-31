@@ -31,6 +31,7 @@ export default (s: Session, state: PromptState) => {
 		runtime.system_tools_prompt,
 		runtime.custom_tools_prompt,
 		runtime.skill_prompt,
+		runtime.prompt_injection_prompt,
 		`Current Session Title: ${s.session.title}`,
 		state.tools.hasReportTool ? `Current Session Report: ${s.session.report ?? ''}` : '',
 		s.getContextPrompt(),
