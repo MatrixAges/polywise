@@ -76,7 +76,9 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/agent/create',
-			summary: 'Run Create'
+			summary: 'Create agent',
+			description:
+				'Create a new agent profile, including role, description, prompt, memory, tools, and model settings.'
 		}
 	})
 	.input(input_type)

@@ -13,7 +13,8 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/agent/sort',
-			summary: 'Run Sort'
+			summary: 'Reorder agents',
+			description: 'Move one agent from one index to another in the global agent list.'
 		}
 	})
 	.input(input_type)

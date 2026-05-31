@@ -15,7 +15,8 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/agent/createSession',
-			summary: 'Run Create Session'
+			summary: 'Create session for agent',
+			description: 'Create a new chat session that is linked to a specific agent.'
 		}
 	})
 	.input(input_type)

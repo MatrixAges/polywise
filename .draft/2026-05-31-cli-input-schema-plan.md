@@ -14,6 +14,8 @@ Improve Polywise CLI and `polywise_tool` usability around API parameter discover
 4. Update CLI help text so users and models can discover `input_schema` from root and leaf helps.
 5. Strengthen `polywise_tool` descriptions and help hints so unknown targets should use `schema` before `call`.
 6. Align `polywise_tool` action naming with the CLI by renaming `schema` to `input_schema` at the tool boundary while keeping the lower-level API helper unchanged.
+7. Replace vague agent API summaries with precise summaries and descriptions, and expose descriptions in list results so models can select the right endpoint.
+8. Remove redundant `summary` fields from AI-facing machine outputs and use `description` as the primary semantic field there.
 
 ## Validation
 

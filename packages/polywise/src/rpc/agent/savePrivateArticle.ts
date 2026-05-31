@@ -10,7 +10,8 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/agent/savePrivateArticle',
-			summary: 'Run Save Private Article'
+			summary: 'Create or update private article for agent',
+			description: 'Create or update a private knowledge article owned by one agent.'
 		}
 	})
 	.input(

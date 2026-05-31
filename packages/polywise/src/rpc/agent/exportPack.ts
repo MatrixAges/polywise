@@ -8,7 +8,9 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/agent/exportPack',
-			summary: 'Run Export Agent Pack'
+			summary: 'Export agent pack',
+			description:
+				'Export one agent and its portable assets, such as profile, skills, and related metadata, into an importable pack.'
 		}
 	})
 	.input(

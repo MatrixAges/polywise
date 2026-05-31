@@ -30,7 +30,9 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/agent/getSessions',
-			summary: 'Read Get Sessions'
+			summary: 'List sessions for agent',
+			description:
+				'Return pinned and paginated chat sessions associated with one agent, including pin state and pagination.'
 		}
 	})
 	.input(input_type)

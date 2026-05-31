@@ -8,7 +8,9 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/agent/importPack',
-			summary: 'Run Import Agent Pack'
+			summary: 'Import agent pack',
+			description:
+				'Import an exported agent pack from a local archive path and recreate the agent with its packaged assets.'
 		}
 	})
 	.input(

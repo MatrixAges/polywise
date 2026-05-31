@@ -14,7 +14,8 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/agent/remove',
-			summary: 'Run Remove'
+			summary: 'Delete agent',
+			description: 'Remove one agent and delete its local agent directory.'
 		}
 	})
 	.input(input_type)

@@ -16,7 +16,8 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/agent/getArticles',
-			summary: 'Read Get Articles'
+			summary: 'List linked articles for agent',
+			description: 'Return the articles already linked to an agent. Optionally filter by article type.'
 		}
 	})
 	.input(input_type)

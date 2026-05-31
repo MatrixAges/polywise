@@ -99,7 +99,7 @@ export const executeApiTool = async (input: ApiToolInput) => {
 		const items = getApiMap()
 			.filter(item =>
 				keyword
-					? `${item.rpc_path}\n${item.summary}\n${item.group_path.join(' ')}`
+					? `${item.rpc_path}\n${item.description || item.summary}\n${item.group_path.join(' ')}`
 							.toLowerCase()
 							.includes(keyword)
 					: true
@@ -113,7 +113,7 @@ export const executeApiTool = async (input: ApiToolInput) => {
 				rpc_path: item.rpc_path,
 				method: item.method,
 				path: item.openapi_path,
-				summary: item.summary
+				description: item.description || item.summary
 			}))
 		}
 	}
@@ -133,7 +133,7 @@ export const executeApiTool = async (input: ApiToolInput) => {
 			rpc_path: target.rpc_path,
 			method: target.method,
 			path: target.openapi_path,
-			summary: target.summary,
+			description: target.description || target.summary,
 			parameters: target.parameters,
 			examples: target.examples
 		}

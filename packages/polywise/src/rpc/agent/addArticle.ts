@@ -13,7 +13,8 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/agent/addArticle',
-			summary: 'Run Add Article'
+			summary: 'Link article to agent',
+			description: 'Attach an existing article to an agent after validating the target article type.'
 		}
 	})
 	.input(

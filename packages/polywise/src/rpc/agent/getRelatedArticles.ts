@@ -11,7 +11,9 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/agent/getRelatedArticles',
-			summary: 'Read Get Related Articles'
+			summary: 'List related public articles for agent',
+			description:
+				'Return paginated non-private articles that are already related to one agent. Optionally filter by article type.'
 		}
 	})
 	.input(

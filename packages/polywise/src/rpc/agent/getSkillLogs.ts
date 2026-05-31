@@ -18,7 +18,8 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/agent/getSkillLogs',
-			summary: 'Read Get Skill Logs'
+			summary: 'Read skill usage logs for agent',
+			description: 'Return paginated daily logs showing which skills an agent used.'
 		}
 	})
 	.input(input_type)

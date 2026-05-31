@@ -7,6 +7,14 @@ import { executeApiTool } from './api'
 import type { RenderedHelp } from '@core/cli/types'
 import type { ApiToolInput } from './api'
 
+type PolywiseToolInput = {
+	action: 'help' | 'list' | 'input_schema' | 'call'
+	path?: Array<string>
+	target?: string
+	keyword?: string
+	input?: Record<string, string | number | boolean>
+}
+
 const inputSchema = object({
 	action: zod_enum(['help', 'list', 'input_schema', 'call']).default('help'),
 	path: array(string()).optional().describe('Help path segments like ["api"] or ["cli", "start"].'),
@@ -141,7 +149,7 @@ const renderPolywiseHelp = (path: Array<string>) => {
 		return (
 			renderCliHelp(rest) || {
 				error: `Unknown help path: cli/${rest.join('/')}`,
-				available_paths: ['cli', 'cli/start']
+				available_paths: ['cli', 'cli/input_schema', 'cli/start']
 			}
 		)
 	}
@@ -152,24 +160,12 @@ const renderPolywiseHelp = (path: Array<string>) => {
 	}
 }
 
-const toApiToolInput = (input: {
-	action: 'help' | 'list' | 'input_schema' | 'call'
-	path?: Array<string>
-	target?: string
-	keyword?: string
-	input?: Record<string, string | number | boolean>
-}): ApiToolInput => ({
+const toApiToolInput = (input: PolywiseToolInput): ApiToolInput => ({
 	...input,
 	action: input.action === 'input_schema' ? 'schema' : input.action
 })
 
-const executeApiAction = async (input: {
-	action: 'help' | 'list' | 'input_schema' | 'call'
-	path?: Array<string>
-	target?: string
-	keyword?: string
-	input?: Record<string, string | number | boolean>
-}) => {
+const executeApiAction = async (input: PolywiseToolInput) => {
 	const result = await executeApiTool(toApiToolInput(input))
 
 	if (result && typeof result === 'object' && !Array.isArray(result)) {

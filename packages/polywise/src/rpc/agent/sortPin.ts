@@ -15,7 +15,8 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/agent/sortPin',
-			summary: 'Run Sort Pin'
+			summary: 'Reorder pinned sessions for agent',
+			description: 'Reorder the pinned sessions inside one agent-specific session list.'
 		}
 	})
 	.input(input_type)

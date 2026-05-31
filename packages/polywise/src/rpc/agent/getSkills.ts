@@ -10,7 +10,8 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/agent/getSkills',
-			summary: 'Read Get Skills'
+			summary: 'List skills enabled for agent',
+			description: 'Return the reusable skills currently assigned to one agent.'
 		}
 	})
 	.input(input_type)

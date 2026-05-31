@@ -18,7 +18,9 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/agent/removeArticle',
-			summary: 'Run Remove Article'
+			summary: 'Unlink or delete article from agent',
+			description:
+				'Remove an article from an agent. If the article is a private article owned by that agent, delete it entirely.'
 		}
 	})
 	.input(input_type)

@@ -11,7 +11,9 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/agent/getPrivateArticles',
-			summary: 'Read Get Private Articles'
+			summary: 'List private articles owned by agent',
+			description:
+				'Return paginated private knowledge articles that belong to one agent. Optionally filter by article type.'
 		}
 	})
 	.input(
