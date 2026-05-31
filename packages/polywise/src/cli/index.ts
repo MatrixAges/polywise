@@ -18,7 +18,10 @@ const server_base_url = (process.env.POLYWISE_SERVER_URL || 'http://localhost:30
 const api_base_url = `${server_base_url}/api`
 const server_entrypoint_path = fileURLToPath(new URL('../index.js', import.meta.url))
 const version_flags = new Set(['-v', '--version'])
-const server_start_hint = `Unable to reach the Polywise server at ${server_base_url}. Please run "polywise start" or "polywise start -d" first.`
+const is_desktop_cli = process.env.POLYWISE_DESKTOP_CLI === '1'
+const server_start_hint = is_desktop_cli
+	? `Unable to reach the Polywise Desktop service at ${server_base_url}. Please open Polywise Desktop first.`
+	: `Unable to reach the Polywise server at ${server_base_url}. Please run "polywise start" or "polywise start -d" first.`
 const runtime_platform_values = new Set(['standalone', 'electron'])
 
 const normalizeRuntimePlatform = (value?: string | null) => {
@@ -99,23 +102,33 @@ const renderRootCliHelp = () => {
 		return null
 	}
 
+	const hints = is_desktop_cli
+		? ['Use Polywise Desktop to start the local server.', ...data.hints]
+		: [
+				'Use `polywise start` to run the local server.',
+				'Use `polywise start -d` to run it in the background.',
+				...data.hints
+			]
+
+	const items = is_desktop_cli
+		? data.items
+		: [
+				{
+					key: 'start',
+					title: 'start',
+					summary: 'Start the Polywise server',
+					kind: 'command' as const
+				},
+				...data.items
+			]
+
 	return {
 		...data,
-		summary: 'Polywise CLI for starting the local server and calling the backend API.',
-		hints: [
-			'Use `polywise start` to run the local server.',
-			'Use `polywise start -d` to run it in the background.',
-			...data.hints
-		],
-		items: [
-			{
-				key: 'start',
-				title: 'start',
-				summary: 'Start the Polywise server',
-				kind: 'command' as const
-			},
-			...data.items
-		]
+		summary: is_desktop_cli
+			? 'Polywise Desktop CLI for calling the running local backend API.'
+			: 'Polywise CLI for starting the local server and calling the backend API.',
+		hints,
+		items
 	}
 }
 
@@ -531,7 +544,7 @@ const start_command = command({
 		await startForegroundServer(options.platform)
 	}
 })
-const root_commands = [start_command, ...buildApiCommands(api_tree)]
+const root_commands = is_desktop_cli ? buildApiCommands(api_tree) : [start_command, ...buildApiCommands(api_tree)]
 
 export const main = async (argv = process.argv.slice(2)) => {
 	if (shouldPrintVersion(argv)) {
