@@ -151,11 +151,22 @@ const Index = () => {
 					<h2 className='desc'>{t('Banner.desc.line_2')}</h2>
 				</div>
 				<LinkButtons></LinkButtons>
-				<div className='community_row flex justify-center opacity-60'>
+				<div className='community_row flex justify-center'>
 					{is_chinese ? (
 						<div className='community_wechat' tabIndex={0}>
-							<IoLogoWechat className='community_icon'></IoLogoWechat>
-							<span>{t('Banner.community.wechat_label')}</span>
+							<div
+								className='
+									flex
+									items-center
+									gap-2
+									opacity-60
+									hover:opacity-100
+									cursor-pointer
+								'
+							>
+								<IoLogoWechat className='community_icon'></IoLogoWechat>
+								<span>{t('Banner.community.wechat_label')}</span>
+							</div>
 							<div className='community_qrcode'>
 								<img
 									src='/images/wechat%20_group_qrcode.png'
@@ -165,7 +176,12 @@ const Index = () => {
 						</div>
 					) : (
 						<a
-							className='community_link clickable'
+							className='
+								gap-2
+								opacity-60
+								hover:opacity-100
+								community_link clickable
+							'
 							href={medias.discord}
 							target='_blank'
 							rel='noreferrer'
