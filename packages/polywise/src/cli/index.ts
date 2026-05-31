@@ -4,13 +4,13 @@ import { closeSync, openSync } from 'fs'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import path from 'path'
 import { logs_dir, runtime_pid_path } from '@core/consts/app'
-import { boolean, command, number, run, string } from '@drizzle-team/brocli'
+import { boolean, command, number, positional, run, string } from '@drizzle-team/brocli'
 import fs from 'fs-extra'
 
 import { polywise_cli_header } from '../utils/localCliAuth'
 import { getRuntimeCommandEnv } from '../utils/resolveCommand'
 import { polywise_version } from '../version'
-import { getApiMap, renderApiHelp } from './api/map'
+import { getApiMap, getApiMapItem, renderApiHelp } from './api/map'
 
 import type { ApiMapItem, RenderedHelp } from './types'
 
@@ -95,6 +95,54 @@ const printRenderedCliHelp = (data: RenderedHelp | null) => {
 	printRenderedHelp('polywise', toCliHelp(data))
 }
 
+const createJsonTemplate = (item: ApiMapItem) =>
+	Object.fromEntries(
+		item.parameters
+			.filter(parameter => parameter.in !== 'path')
+			.map(parameter => [
+				parameter.name,
+				parameter.type === 'boolean'
+					? false
+					: parameter.type === 'number' || parameter.type === 'integer'
+						? 0
+						: parameter.type === 'array'
+							? []
+							: parameter.type === 'object'
+								? {}
+								: `<${parameter.type}>`
+			])
+	)
+
+const createCliCommandSkeleton = (item: ApiMapItem) => {
+	const command_parts = ['polywise', ...item.cli_path.slice(1)]
+
+	for (const parameter of item.parameters.filter(
+		parameter => parameter.in === 'path' || parameter.in === 'query'
+	)) {
+		command_parts.push(`--${parameter.name}`)
+		command_parts.push(`<${parameter.type}>`)
+	}
+
+	if (item.parameters.some(parameter => parameter.in === 'body')) {
+		command_parts.push('--json')
+		command_parts.push(`'${JSON.stringify(createJsonTemplate(item))}'`)
+	}
+
+	return command_parts.join(' ')
+}
+
+const renderInputSchemaPayload = (item: ApiMapItem) => ({
+	rpc_path: item.rpc_path,
+	method: item.method,
+	path: item.openapi_path,
+	summary: item.summary,
+	description: item.description || '',
+	parameters: item.parameters,
+	examples: item.examples.map(example => toCliText(example)),
+	cli_command: createCliCommandSkeleton(item),
+	json_template: createJsonTemplate(item)
+})
+
 const renderRootCliHelp = () => {
 	const data = toCliHelp(renderApiHelp([]))
 
@@ -103,10 +151,15 @@ const renderRootCliHelp = () => {
 	}
 
 	const hints = is_desktop_cli
-		? ['Use Polywise Desktop to start the local server.', ...data.hints]
+		? [
+				'Use Polywise Desktop to start the local server.',
+				'Use `polywise input_schema <rpc_path>` to inspect command input before calling an unfamiliar API.',
+				...data.hints
+			]
 		: [
 				'Use `polywise start` to run the local server.',
 				'Use `polywise start -d` to run it in the background.',
+				'Use `polywise input_schema <rpc_path>` to inspect command input before calling an unfamiliar API.',
 				...data.hints
 			]
 
@@ -117,6 +170,12 @@ const renderRootCliHelp = () => {
 					key: 'start',
 					title: 'start',
 					summary: 'Start the Polywise server',
+					kind: 'command' as const
+				},
+				{
+					key: 'input_schema',
+					title: 'input_schema',
+					summary: 'Inspect the input schema for a concrete RPC path',
 					kind: 'command' as const
 				},
 				...data.items
@@ -341,6 +400,8 @@ const renderApiCommandHelpText = (item: ApiMapItem) =>
 		item.summary,
 		`${item.method} ${item.openapi_path}`,
 		item.description || '',
+		'input schema:',
+		`- polywise input_schema ${item.rpc_path}`,
 		'fallback:',
 		`- --json '{"key":"value"}'`,
 		...(item.parameters.length
@@ -356,6 +417,16 @@ const renderApiCommandHelpText = (item: ApiMapItem) =>
 	]
 		.filter(Boolean)
 		.join('\n')
+
+const renderInputSchemaHelpText = () =>
+	[
+		'polywise input_schema <rpc_path>',
+		'Inspect the CLI/API input schema for a concrete RPC path.',
+		'options:',
+		'- <rpc_path>: Exact RPC path such as "session.create" or "agent.query"',
+		'example: polywise input_schema session.create',
+		'example: polywise input_schema agent.query'
+	].join('\n')
 
 const parseJsonOption = (value: string | undefined) => {
 	if (!value) {
@@ -513,6 +584,26 @@ const buildApiCommands = (node: ApiCommandTreeNode): Array<any> =>
 		})
 
 const api_tree = createApiTree()
+const input_schema_command = command({
+	name: 'input_schema',
+	desc: 'Inspect the input schema for a concrete RPC path',
+	shortDesc: 'Inspect the input schema for a concrete RPC path',
+	options: {
+		target: positional('rpc_path').required().desc('Exact RPC path such as "session.create" or "agent.query"')
+	},
+	help: () => {
+		printText(renderInputSchemaHelpText())
+	},
+	handler: async (options: { target: string }) => {
+		const target = getApiMapItem(options.target)
+
+		if (!target) {
+			throw new Error(`API target not found: ${options.target}`)
+		}
+
+		printJson(renderInputSchemaPayload(target))
+	}
+})
 const start_command = command({
 	name: 'start',
 	desc: 'Start the Polywise server',
@@ -544,7 +635,9 @@ const start_command = command({
 		await startForegroundServer(options.platform)
 	}
 })
-const root_commands = is_desktop_cli ? buildApiCommands(api_tree) : [start_command, ...buildApiCommands(api_tree)]
+const root_commands = is_desktop_cli
+	? [input_schema_command, ...buildApiCommands(api_tree)]
+	: [start_command, input_schema_command, ...buildApiCommands(api_tree)]
 
 export const main = async (argv = process.argv.slice(2)) => {
 	if (shouldPrintVersion(argv)) {
