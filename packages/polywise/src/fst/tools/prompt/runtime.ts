@@ -9,7 +9,7 @@ import { checkPermission, isPathInDir } from '../../utils'
 import type Session from '../../session'
 import type { PromptKind, PromptMapCache, PromptMeta } from './types'
 
-const prompt_patterns = ['CLAUDE.md', 'AGENT.md', '.agent/**/*.md'] as const
+const prompt_patterns = ['CLAUDE.md', 'AGENTS.md', '.agent/**/*.md'] as const
 
 const getPromptMapPath = (s: Session) => path.resolve(s.session_dir, 'prompt_map.json')
 
@@ -33,7 +33,7 @@ const getPromptRoot = async (s: Session) => {
 
 const getPromptKind = (relative_path: string): PromptKind => {
 	if (relative_path === 'CLAUDE.md') return 'claude'
-	if (relative_path === 'AGENT.md') return 'agent'
+	if (relative_path === 'AGENTS.md') return 'agent'
 
 	return 'agent-folder'
 }
@@ -53,7 +53,7 @@ const isAllowedPromptPath = (prompt_path: string) => {
 		return false
 	}
 
-	if (normalized === 'CLAUDE.md' || normalized === 'AGENT.md') {
+	if (normalized === 'CLAUDE.md' || normalized === 'AGENTS.md') {
 		return true
 	}
 
@@ -123,7 +123,7 @@ const createSummary = (content: string, kind: PromptKind) => {
 const comparePromptPath = (a: string, b: string) => {
 	const getPriority = (value: string) => {
 		if (value === 'CLAUDE.md') return 0
-		if (value === 'AGENT.md') return 1
+		if (value === 'AGENTS.md') return 1
 
 		return 2
 	}
@@ -291,7 +291,7 @@ export const writePromptFile = async (args: {
 
 	if (!isAllowedPromptPath(prompt_path)) {
 		return {
-			error: 'prompt_path must be exactly CLAUDE.md, AGENT.md, or a Markdown file under .agent/.'
+			error: 'prompt_path must be exactly CLAUDE.md, AGENTS.md, or a Markdown file under .agent/.'
 		}
 	}
 

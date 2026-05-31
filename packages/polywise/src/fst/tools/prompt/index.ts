@@ -17,7 +17,9 @@ const inputSchema = object({
 		.describe('[Required for search] Keyword to match against prompt file paths, kinds, and summaries'),
 	prompt_path: string()
 		.optional()
-		.describe('[Required for read/create/update] Exact prompt file path, such as CLAUDE.md or .agent/foo.md'),
+		.describe(
+			'[Required for read/create/update] Exact prompt file path, such as CLAUDE.md, AGENTS.md, or .agent/foo.md'
+		),
 	start_line: positiveIntField
 		.optional()
 		.describe('[Optional for read] 1-based start line for partial reads. Defaults to 1'),
@@ -38,7 +40,7 @@ export const createPromptTool = (s: Session) => {
 	return tool({
 		description: [
 			'Inspect workspace prompt files discovered under the current session prompt root.',
-			'The scan covers CLAUDE.md, AGENT.md, and Markdown files under .agent/.',
+			'The scan covers CLAUDE.md, AGENTS.md, and Markdown files under .agent/.',
 			'Use search to discover available prompt files by path, kind, or summary.',
 			'Use read with prompt_path to inspect a prompt file, optionally limited to a line range.',
 			'Use create or update to manage prompt files directly when prompt authoring is intended.',
