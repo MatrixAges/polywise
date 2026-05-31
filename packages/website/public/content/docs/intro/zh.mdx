@@ -43,16 +43,37 @@ polywise start -d
 
 你不需要把这些全部配齐才能开始。只要有一个 provider 能用、一个聊天模型能回答你，这就足够开始理解这个产品了。
 
+## 快速开始
+
+如果你想尽快确认 Polywise 已经跑通，按下面这条最短路径走：
+
+<Steps>
+  <Step title="配置 model provider">
+    打开 `Settings -> Model Provider`，选一个你实际能用的 provider，填好 key，并至少启用一个聊天模型。
+  </Step>
+  <Step title="下载本地模型，或配置云端 embedding 与 rerank">
+    然后打开 `Settings -> Model Setting`，确认 `Embedding Model` 和 `Rerank Model` 已经可用。你可以直接下载本地模型，也可以接云端模型；如果想先走云端，推荐 Jina：
+
+    - [Jina Embeddings](https://jina.ai/en-US/embeddings/)
+    - [Jina Reranker](https://jina.ai/en-US/reranker/)
+
+  </Step>
+  <Step title="开始对话，测试 provider 是否可用">
+    回到 `Session`，直接问一个真实问题，而不是只发 `hello`。只要回答正常返回，你的 provider 和默认模型基本就通了。
+  </Step>
+  <Step title="用 panel bookmark 保存一段内容">
+    打开 `Panel -> Bookmark`，把一小段笔记、网页摘要或刚才的回答保存进去。先保存一条很短的内容就够。
+  </Step>
+  <Step title="在对话里提及刚才保存的内容">
+    回到 `Session`，直接提到你刚才保存的那段内容，看看 Polywise 能不能把它重新带回上下文里。这样你就能同时验证聊天和内容可用性。
+  </Step>
+</Steps>
+
 ## 配置
 
 ![setting](/images/setting.png)
 
-最开始的配置路径很简单：
-
-1. 打开 `Settings`
-2. 连接一个 provider
-3. 选择默认模型
-4. 回到 `Session`
+上面的快速开始更适合第一次跑通。如果你想逐页理解设置项，再继续看下面这些页面。
 
 ### 模型提供方
 

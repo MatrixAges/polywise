@@ -43,16 +43,37 @@ For a first run, Polywise mainly needs one usable model provider. Everything els
 
 You do not need all of these to begin. If one provider works and one chat model answers you, that is enough to start learning the product.
 
+## Quick Start
+
+If you want the shortest path to confirm Polywise is working, use this loop:
+
+<Steps>
+  <Step title="Configure a model provider">
+    Open `Settings -> Model Provider`, choose one provider you can actually use, paste the key, and enable at least one chat model.
+  </Step>
+  <Step title="Download local models or configure cloud embedding and rerank">
+    Then open `Settings -> Model Setting` and make sure `Embedding Model` and `Rerank Model` are available. You can download the local models directly, or use hosted models instead. If you want a cloud default, Jina is a pragmatic place to start:
+
+    - [Jina Embeddings](https://jina.ai/en-US/embeddings/)
+    - [Jina Reranker](https://jina.ai/en-US/reranker/)
+
+  </Step>
+  <Step title="Start a chat and verify the provider">
+    Go back to `Session` and ask one real question instead of only sending `hello`. If the answer comes back normally, your provider and default model are already usable.
+  </Step>
+  <Step title="Save one piece of content with panel bookmark">
+    Open `Panel -> Bookmark` and save one short note, page summary, or answer from the chat. Keep the first saved item small.
+  </Step>
+  <Step title="Mention the saved content in chat">
+    Return to `Session` and mention the item you just saved. This is the fastest way to verify both chat and saved-content retrieval in one pass.
+  </Step>
+</Steps>
+
 ## Configure
 
 ![setting](/images/setting.png)
 
-The first setup path is simple:
-
-1. open `Settings`
-2. connect one provider
-3. choose your default models
-4. return to `Session`
+The quick-start loop above is the best way to get to first value. If you want to understand each settings page in more detail, keep going here.
 
 ### Model Providers
 

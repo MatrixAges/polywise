@@ -43,16 +43,37 @@ polywise start -d
 
 最初から全部そろっている必要はありません。provider がひとつ動き、chat model がひとつ返答してくれれば、それだけでこのプロダクトを学び始めるには十分です。
 
+## クイックスタート
+
+Polywise が実際に動くことを最短で確認したいなら、この順番で進めてください。
+
+<Steps>
+  <Step title="model provider を設定する">
+    `Settings -> Model Provider` を開き、実際に使える provider をひとつ選んで key を入れ、少なくともひとつの chat model を有効にします。
+  </Step>
+  <Step title="local model をダウンロードするか、cloud の embedding と rerank を設定する">
+    次に `Settings -> Model Setting` を開き、`Embedding Model` と `Rerank Model` が使える状態になっているか確認します。local model をそのままダウンロードしてもいいですし、hosted model を使っても構いません。cloud で始めるなら Jina が手堅い選択です。
+
+    - [Jina Embeddings](https://jina.ai/en-US/embeddings/)
+    - [Jina Reranker](https://jina.ai/en-US/reranker/)
+
+  </Step>
+  <Step title="対話を始めて provider を確認する">
+    `Session` に戻って、`hello` ではなく実際の質問をひとつ投げてください。普通に返答が返ってくれば、provider と default model はもう使えています。
+  </Step>
+  <Step title="panel bookmark で内容をひとつ保存する">
+    `Panel -> Bookmark` を開き、短いメモ、ページ要約、またはさっきの返答をひとつ保存します。最初は小さい内容で十分です。
+  </Step>
+  <Step title="保存した内容を会話で言及する">
+    `Session` に戻り、今保存した内容に直接触れてみてください。これで chat と saved content の両方が使えているかを一度に確認できます。
+  </Step>
+</Steps>
+
 ## 設定
 
 ![setting](/images/setting.png)
 
-最初のセットアップの流れはシンプルです。
-
-1. `Settings` を開く
-2. provider をひとつ接続する
-3. デフォルトのモデルを選ぶ
-4. `Session` に戻る
+上のクイックスタートが、最初に価値へ届くいちばん短いルートです。各設定ページを順に理解したいなら、このまま下へ進んでください。
 
 ### モデルプロバイダー
 
