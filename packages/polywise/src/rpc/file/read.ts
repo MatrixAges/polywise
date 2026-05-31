@@ -19,7 +19,7 @@ export default p
 		openapi: {
 			method: 'GET',
 			path: '/file/read',
-			description: 'Read a file'
+			description: 'Return one local file path and its text contents.'
 		}
 	})
 	.input(input_type)

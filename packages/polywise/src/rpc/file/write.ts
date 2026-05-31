@@ -18,7 +18,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/file/write',
-			description: 'Run Write'
+			description: 'Write JSON data to a local file and optionally deep-merge with existing content.'
 		}
 	})
 	.input(input_type)

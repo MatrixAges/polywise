@@ -19,7 +19,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/im/update',
-			description: 'Run Update'
+			description: 'Update one IM account configuration and detach stale route bindings when needed.'
 		}
 	})
 	.input(input_type)

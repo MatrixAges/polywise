@@ -40,7 +40,8 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/file/list',
-			description: 'Read List'
+			description:
+				'List files or folders under a local path with optional hidden-file and extension filters.'
 		}
 	})
 	.input(input_type)

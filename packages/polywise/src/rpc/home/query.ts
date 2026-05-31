@@ -771,7 +771,8 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/home/query',
-			description: 'Read Query'
+			description:
+				'Return dashboard analytics for the home page, including activity, usage, pthink, posts, and trend summaries.'
 		}
 	})
 	.input(

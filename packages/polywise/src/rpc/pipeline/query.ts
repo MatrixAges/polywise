@@ -20,7 +20,8 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/pipeline/query',
-			description: 'Read Query'
+			description:
+				'List recent pipeline tasks from active state and history logs, including article titles and status.'
 		}
 	})
 	.query(async () => {

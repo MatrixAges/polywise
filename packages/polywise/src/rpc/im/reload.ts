@@ -28,7 +28,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/im/reload',
-			description: 'Run Reload'
+			description: 'Reload the IM runtime and return its refreshed health state.'
 		}
 	})
 	.output(output_type)

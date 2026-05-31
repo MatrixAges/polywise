@@ -14,7 +14,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/sniffer/importBookmarks',
-			description: 'Run Import Bookmarks'
+			description: 'Import bookmarks from a supported browser into Polywise.'
 		}
 	})
 	.input(input_type)

@@ -16,7 +16,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/update',
-			description: 'Update an article'
+			description: 'Update an existing article or knowledge note by id.'
 		}
 	})
 	.input(input_type)

@@ -18,7 +18,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/restart',
-			description: 'Restart the Polywise server'
+			description: 'Schedule the Polywise runtime to restart.'
 		}
 	})
 	.output(output_type)

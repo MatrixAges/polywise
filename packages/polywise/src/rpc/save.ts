@@ -16,7 +16,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/save',
-			description: 'Create an article'
+			description: 'Create a new article or knowledge note from raw content.'
 		}
 	})
 	.input(input_type)

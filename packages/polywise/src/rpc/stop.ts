@@ -15,7 +15,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/stop',
-			description: 'Stop the Polywise server'
+			description: 'Schedule the Polywise runtime to stop.'
 		}
 	})
 	.output(output_type)

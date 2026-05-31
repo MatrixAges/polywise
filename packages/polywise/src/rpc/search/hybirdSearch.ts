@@ -8,7 +8,7 @@ export default p
 		openapi: {
 			method: 'GET',
 			path: '/search/hybirdSearch',
-			description: 'Run hybrid search that combines lexical and semantic retrieval.'
+			description: 'Perform hybrid search that combines lexical and semantic retrieval.'
 		}
 	})
 	.input(input_type)

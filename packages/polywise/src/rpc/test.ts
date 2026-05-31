@@ -10,7 +10,7 @@ export default p
 		openapi: {
 			method: 'GET',
 			path: '/test',
-			description: 'Test server connectivity'
+			description: 'Return a simple connectivity test response from the server.'
 		}
 	})
 	.input(input_type)

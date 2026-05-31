@@ -8,7 +8,7 @@ export default p
 		openapi: {
 			method: 'GET',
 			path: '/search/fullTextSearch',
-			description: 'Run keyword-oriented full-text search across indexed knowledge.'
+			description: 'Perform keyword-oriented full-text search across indexed knowledge.'
 		}
 	})
 	.input(input_type)

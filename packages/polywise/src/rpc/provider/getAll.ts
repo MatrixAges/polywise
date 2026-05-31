@@ -9,7 +9,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/provider/getAll',
-			description: 'Read Get All'
+			description: 'Return all built-in provider definitions.'
 		}
 	})
 	.output(output_type)

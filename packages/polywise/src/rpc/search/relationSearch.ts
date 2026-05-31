@@ -8,7 +8,7 @@ export default p
 		openapi: {
 			method: 'GET',
 			path: '/search/relationSearch',
-			description: 'Run graph or relation-oriented search over linked knowledge.'
+			description: 'Perform graph or relation-oriented search over linked knowledge.'
 		}
 	})
 	.input(input_type)

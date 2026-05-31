@@ -7,7 +7,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/report/query',
-			description: 'Read report window'
+			description: 'Return report data for a selected reporting period and offset window.'
 		}
 	})
 	.input(

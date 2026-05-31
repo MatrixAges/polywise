@@ -14,7 +14,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/article/summarizeWiki',
-			description: 'Summarize source content into wiki markdown'
+			description: 'Rewrite source content into concise wiki-style markdown with a generated title.'
 		}
 	})
 	.input(

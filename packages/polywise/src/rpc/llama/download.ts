@@ -11,7 +11,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/llama/download',
-			description: 'Run Download'
+			description: 'Initialize and download the selected local llama model family.'
 		}
 	})
 	.input(input_type)

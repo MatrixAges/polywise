@@ -11,7 +11,7 @@ export default p
 		openapi: {
 			method: 'GET',
 			path: '/article/read',
-			description: 'Read an article'
+			description: 'Return one article by id with its serialized detail fields.'
 		}
 	})
 	.input(

@@ -15,7 +15,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/im/query',
-			description: 'Read Query'
+			description: 'List configured IM accounts.'
 		}
 	})
 	.output(output_type)

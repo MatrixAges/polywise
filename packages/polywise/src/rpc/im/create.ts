@@ -10,7 +10,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/im/create',
-			description: 'Run Create'
+			description: 'Create a new IM account configuration.'
 		}
 	})
 	.input(im_account_input_schema)

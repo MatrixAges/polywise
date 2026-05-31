@@ -12,7 +12,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/article/update',
-			description: 'Update an article'
+			description: 'Update an existing article title, content, type, and optionally rerun the pipeline.'
 		}
 	})
 	.input(

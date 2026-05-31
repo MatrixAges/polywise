@@ -8,7 +8,7 @@ export default p
 		openapi: {
 			method: 'GET',
 			path: '/search/semanticSearch',
-			description: 'Run embedding-based semantic search over indexed knowledge.'
+			description: 'Perform embedding-based semantic search over indexed knowledge.'
 		}
 	})
 	.input(input_type)

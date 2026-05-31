@@ -14,7 +14,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/im/remove',
-			description: 'Run Remove'
+			description: 'Delete one IM account configuration and its peer state.'
 		}
 	})
 	.input(string())

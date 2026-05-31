@@ -20,7 +20,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/notification/query',
-			description: 'Read Query'
+			description: 'List notifications and their linked session metadata.'
 		}
 	})
 	.query(async () => {

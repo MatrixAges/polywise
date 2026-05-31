@@ -8,7 +8,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/im/startWechatQrLogin',
-			description: 'Run Start Wechat Qr Login'
+			description: 'Start a WeChat QR login flow and return the QR session payload.'
 		}
 	})
 	.output(

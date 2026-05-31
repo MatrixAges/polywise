@@ -8,7 +8,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/report/trigger',
-			description: 'Trigger report generation'
+			description: 'Trigger report generation for a selected period and offset.'
 		}
 	})
 	.input(

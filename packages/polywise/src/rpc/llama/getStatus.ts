@@ -11,7 +11,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/llama/getStatus',
-			description: 'Read Get Status'
+			description: 'Return which local llama model types are already available.'
 		}
 	})
 	.output(output_type)

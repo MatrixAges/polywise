@@ -25,7 +25,7 @@ export default p
 		openapi: {
 			method: 'POST',
 			path: '/im/health',
-			description: 'Read Health'
+			description: 'Return IM runtime adapter and route health status.'
 		}
 	})
 	.output(output_type)
