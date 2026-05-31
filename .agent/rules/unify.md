@@ -11,13 +11,14 @@ Each routing node must contain only:
 
 ### Routing Granularity
 
-`unify.md` must be maintained at folder-level granularity.
+`unify.md` must be maintained at outline-level folder granularity.
 
-1. Define nodes at second-level and third-level business directories.
-2. Add dedicated nodes for specialized subfolders.
-3. Do not use one broad node to cover multiple unrelated folders.
-4. Keep a parent fallback node only if child nodes already exist.
-5. Matching must use longest-prefix-wins on `path_scope`.
+1. Prefer package root and first-level business-domain folders.
+2. In most packages, stop at one or two levels deep.
+3. Add a third-level node only for very large, stable coordination roots such as runtime kernels, router hubs, or data layers.
+4. Do not create nodes for routine leaf components, one-off page folders, or incidental helper subfolders.
+5. Keep a parent fallback node when deeper child nodes exist.
+6. Matching must use longest-prefix-wins on `path_scope`.
 
 ### Hard Gate
 

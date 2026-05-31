@@ -36,7 +36,8 @@
 - **`unify.md` (style routing table)**
 
 1. **When to use**: It must be read before creating new files, refactoring modules, or writing core logic.
-2. **Purpose**: Match route-based template samples, perform pixel-level imitation, and control code entropy growth.
+2. **Purpose**: Match route-based template samples, perform structural imitation, and control code entropy growth.
+3. **Granularity**: Maintain `unify.md` at outline-level path scopes. Prefer package root and major business-domain folders; only add deeper nodes for very large, stable coordination roots.
 
 - **`coding.md` (coding rules)**
 
