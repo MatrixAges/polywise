@@ -1,2 +1,1 @@
-export const r2_url = ''
-export const default_temperature = 0.7
+export const r2_url = 'https://files.polywise.io'
