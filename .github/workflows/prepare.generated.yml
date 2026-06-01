@@ -55,6 +55,7 @@ jobs:
         shell: bash
         env: 
           INPUT_VERSION: "${{ inputs.version_number }}"
+          GH_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
         run: node ./scripts/resolve_release_version.mjs
       - name: Apply release version to repository files
         shell: bash
@@ -73,7 +74,7 @@ jobs:
         shell: bash
         env: 
           RELEASE_VERSION: "${{ steps.version.outputs.release_version }}"
-        run: "git config user.name \"github-actions[bot]\"\ngit config user.email \"41898282+github-actions[bot]@users.noreply.github.com\"\ngit add packages/polywise/package.json packages/app/package.json packages/desktop/package.json\ngit commit -m \"chore(release): v${RELEASE_VERSION}\"\ngit push origin HEAD:build\ngit push origin HEAD:master\necho \"release_commit=$(git rev-parse HEAD)\" >> \"$GITHUB_OUTPUT\""
+        run: "git config user.name \"github-actions[bot]\"\ngit config user.email \"41898282+github-actions[bot]@users.noreply.github.com\"\ngit add packages/polywise/package.json packages/app/package.json packages/desktop/package.json\nif ! git diff --cached --quiet; then\n\tgit commit -m \"chore(release): v${RELEASE_VERSION}\"\n\tgit push origin HEAD:build\n\tgit push origin HEAD:master\nfi\necho \"release_commit=$(git rev-parse HEAD)\" >> \"$GITHUB_OUTPUT\""
       - name: Generate release notes
         shell: bash
         env: 
@@ -89,3 +90,8 @@ jobs:
           name: "${{ steps.version.outputs.release_tag }}"
           target_commitish: "${{ steps.persist.outputs.release_commit }}"
           body_path: release-notes.md
+      - name: Verify draft release is visible
+        shell: bash
+        env: 
+          GH_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+        run: "release_is_draft=\"\"\nfor attempt in 1 2 3 4 5 6; do\n\trelease_is_draft=$(gh release view \"${{ steps.version.outputs.release_tag }}\" --json isDraft --jq '.isDraft' 2>/dev/null) && break\n\techo \"Draft release ${{ steps.version.outputs.release_tag }} is not visible yet. attempt=${attempt}\"\n\tsleep 10\ndone\n[ \"$release_is_draft\" = \"true\" ]"

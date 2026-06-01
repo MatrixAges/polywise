@@ -90,7 +90,8 @@ const workflow_definition = workflow({
 					id: 'version',
 					shell: 'bash',
 					env: {
-						INPUT_VERSION: '${{ inputs.version_number }}'
+						INPUT_VERSION: '${{ inputs.version_number }}',
+						GH_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
 					},
 					run: 'node ./scripts/resolve_release_version.mjs'
 				},
@@ -123,9 +124,11 @@ const workflow_definition = workflow({
 						'git config user.name "github-actions[bot]"',
 						'git config user.email "41898282+github-actions[bot]@users.noreply.github.com"',
 						'git add packages/polywise/package.json packages/app/package.json packages/desktop/package.json',
-						'git commit -m "chore(release): v${RELEASE_VERSION}"',
-						`git push origin HEAD:${release_branch_name}`,
-						`git push origin HEAD:${source_branch_name}`,
+						'if ! git diff --cached --quiet; then',
+						'	git commit -m "chore(release): v${RELEASE_VERSION}"',
+						`	git push origin HEAD:${release_branch_name}`,
+						`	git push origin HEAD:${source_branch_name}`,
+						'fi',
 						'echo "release_commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"'
 					].join('\n')
 				},
@@ -149,6 +152,22 @@ const workflow_definition = workflow({
 						target_commitish: '${{ steps.persist.outputs.release_commit }}',
 						body_path: 'release-notes.md'
 					}
+				},
+				{
+					name: 'Verify draft release is visible',
+					shell: 'bash',
+					env: {
+						GH_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
+					},
+					run: [
+						'release_is_draft=""',
+						'for attempt in 1 2 3 4 5 6; do',
+						'	release_is_draft=$(gh release view "${{ steps.version.outputs.release_tag }}" --json isDraft --jq \'.isDraft\' 2>/dev/null) && break',
+						'	echo "Draft release ${{ steps.version.outputs.release_tag }} is not visible yet. attempt=${attempt}"',
+						'	sleep 10',
+						'done',
+						'[ "$release_is_draft" = "true" ]'
+					].join('\n')
 				}
 			]
 		}

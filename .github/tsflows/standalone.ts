@@ -87,7 +87,15 @@ const workflow_definition = workflow({
 					env: {
 						GH_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
 					},
-					run: 'gh release view "${{ inputs.release_tag }}" --json isDraft,name,tagName >/dev/null'
+					run: [
+						'release_is_draft=""',
+						'for attempt in 1 2 3 4 5 6; do',
+						'	release_is_draft=$(gh release view "${{ inputs.release_tag }}" --json isDraft --jq \'.isDraft\' 2>/dev/null) && break',
+						'	echo "Draft release ${{ inputs.release_tag }} is not visible yet. attempt=${attempt}"',
+						'	sleep 10',
+						'done',
+						'[ "$release_is_draft" = "true" ]'
+					].join('\n')
 				},
 				{
 					name: 'Install dependencies',

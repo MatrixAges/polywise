@@ -24,6 +24,36 @@ const parseVersion = version => {
 
 const stringifyVersion = version_parts => version_parts.join('.')
 
+const readReleaseState = release_tag => {
+	const release_view_proc = spawnSync('gh', ['release', 'view', release_tag, '--json', 'isDraft,assets'], {
+		encoding: 'utf8',
+		stdio: ['ignore', 'pipe', 'pipe']
+	})
+
+	if (release_view_proc.status !== 0) {
+		const error_message = `${release_view_proc.stderr || release_view_proc.stdout}`.trim()
+
+		if (error_message.includes('release not found')) {
+			return {
+				exists: false,
+				is_draft: false,
+				asset_count: 0
+			}
+		}
+
+		throw new Error(`Failed to inspect release ${release_tag}: ${error_message}`)
+	}
+
+	const release_data = JSON.parse(release_view_proc.stdout || '{}')
+	const assets = Array.isArray(release_data?.assets) ? release_data.assets : []
+
+	return {
+		exists: true,
+		is_draft: Boolean(release_data?.isDraft),
+		asset_count: assets.length
+	}
+}
+
 const incrementVersion = version => {
 	const next_parts = parseVersion(version)
 
@@ -52,12 +82,22 @@ const appendOutput = async (key, value) => {
 const run = async () => {
 	const current_version = await readPackageVersion('packages/polywise/package.json')
 	const requested_version = process.env.INPUT_VERSION?.trim() || ''
+	const current_tag = `v${current_version}`
+	const current_release_state = readReleaseState(current_tag)
 
 	const resolved_version = requested_version
 		? stringifyVersion(parseVersion(requested_version))
-		: incrementVersion(current_version)
+		: !current_release_state.exists ||
+			  (current_release_state.is_draft && current_release_state.asset_count === 0)
+			? current_version
+			: incrementVersion(current_version)
 
-	if (resolved_version === current_version) {
+	if (
+		requested_version &&
+		resolved_version === current_version &&
+		current_release_state.exists &&
+		!current_release_state.is_draft
+	) {
 		throw new Error(`Resolved release version matches current version: ${resolved_version}`)
 	}
 

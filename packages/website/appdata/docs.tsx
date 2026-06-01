@@ -219,7 +219,7 @@ const buildDocsData = (l: (en: string, zh?: string, ja?: string) => string) => {
 				{
 					key: 'system/rewire_mechanisms',
 					className: classNameOf('system/rewire_mechanisms'),
-					label: l('Rewire Mechanisms', '重连机制', 'リワイヤ機構'),
+					label: l('Rewire Mechanisms', '重塑机制', 'リワイヤ機構'),
 					desc: l(
 						'Learn how context, tools, and control flow are rewired.',
 						'了解上下文、工具和控制流如何被重新组织。',
