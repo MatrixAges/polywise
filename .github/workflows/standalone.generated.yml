@@ -50,7 +50,7 @@ jobs:
         shell: bash
         env: 
           GH_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-        run: "release_is_draft=\"\"\nfor attempt in 1 2 3 4 5 6; do\n\trelease_is_draft=$(gh release view \"${{ inputs.release_tag }}\" --json isDraft --jq '.isDraft' 2>/dev/null) && break\n\techo \"Draft release ${{ inputs.release_tag }} is not visible yet. attempt=${attempt}\"\n\tsleep 10\ndone\n[ \"$release_is_draft\" = \"true\" ]"
+        run: "target_tag=\"${{ inputs.release_tag }}\"\nrelease_is_draft=\"\"\nfor attempt in 1 2 3 4 5 6; do\n\trelease_is_draft=$(gh api \"repos/${{ github.repository }}/releases?per_page=2\" 2>/dev/null | jq -r --arg tag \"$target_tag\" 'map(select(.tag_name == $tag)) | .[0].draft // empty')\n\t[ -n \"$release_is_draft\" ] && break\n\techo \"Draft release ${target_tag} is not visible yet. attempt=${attempt}\"\n\tsleep 10\ndone\n[ \"$release_is_draft\" = \"true\" ]"
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Upgrade npm

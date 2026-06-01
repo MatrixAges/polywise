@@ -160,10 +160,12 @@ const workflow_definition = workflow({
 						GH_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
 					},
 					run: [
+						'target_tag="${{ steps.version.outputs.release_tag }}"',
 						'release_is_draft=""',
 						'for attempt in 1 2 3 4 5 6; do',
-						'	release_is_draft=$(gh release view "${{ steps.version.outputs.release_tag }}" --json isDraft --jq \'.isDraft\' 2>/dev/null) && break',
-						'	echo "Draft release ${{ steps.version.outputs.release_tag }} is not visible yet. attempt=${attempt}"',
+						'	release_is_draft=$(gh api "repos/${{ github.repository }}/releases?per_page=2" 2>/dev/null | jq -r --arg tag "$target_tag" \'map(select(.tag_name == $tag)) | .[0].draft // empty\')',
+						'	[ -n "$release_is_draft" ] && break',
+						'	echo "Draft release ${target_tag} is not visible yet. attempt=${attempt}"',
 						'	sleep 10',
 						'done',
 						'[ "$release_is_draft" = "true" ]'
