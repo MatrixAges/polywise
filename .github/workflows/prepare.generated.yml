@@ -49,7 +49,7 @@ jobs:
         run: git fetch --tags -f
       - name: Sync build branch with latest master
         shell: bash
-        run: "git fetch origin master build --tags -f\ngit checkout build\ngit reset --hard origin/build\ngit pull --no-rebase origin master"
+        run: "git fetch origin master build --tags -f\ngit checkout build\ngit reset --hard origin/master"
       - name: Resolve release version
         id: version
         shell: bash

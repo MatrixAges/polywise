@@ -81,8 +81,7 @@ const workflow_definition = workflow({
 					run: [
 						`git fetch origin ${source_branch_name} ${release_branch_name} --tags -f`,
 						`git checkout ${release_branch_name}`,
-						`git reset --hard origin/${release_branch_name}`,
-						`git pull --no-rebase origin ${source_branch_name}`
+						`git reset --hard origin/${source_branch_name}`
 					].join('\n')
 				},
 				{

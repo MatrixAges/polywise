@@ -1,6 +1,8 @@
 import { spawnSync } from 'node:child_process'
 import { appendFile, writeFile } from 'node:fs/promises'
 
+const default_repo_slug = 'MatrixAges/polywise'
+
 const appendOutput = async (key, value) => {
 	if (!process.env.GITHUB_OUTPUT) {
 		throw new Error('GITHUB_OUTPUT is required')
@@ -19,20 +21,29 @@ const appendMultilineOutput = async (key, value) => {
 	await appendFile(process.env.GITHUB_OUTPUT, payload, 'utf8')
 }
 
-const formatCommitBullets = commit_lines =>
-	commit_lines
-		.filter(Boolean)
-		.map(line => {
-			const [hash, short_hash, ...subject_parts] = line.split('\t')
-			const subject = subject_parts.join('\t').trim()
+const getRepoSlug = () => process.env.GITHUB_REPOSITORY?.trim() || default_repo_slug
 
-			if (!hash || !short_hash || !subject) {
-				return null
-			}
+const parseCommitLine = line => {
+	const [hash, short_hash, ...subject_parts] = line.split('\t')
+	const subject = subject_parts.join('\t').trim()
 
-			return `- [${short_hash}] ${subject}`
-		})
-		.filter(Boolean)
+	if (!hash || !short_hash || !subject) {
+		return null
+	}
+
+	const repo_slug = getRepoSlug()
+
+	return {
+		hash,
+		short_hash,
+		subject,
+		url: `https://github.com/${repo_slug}/commit/${hash}`
+	}
+}
+
+const formatCommitBullets = commit_records =>
+	commit_records
+		.map(commit_record => `- ${commit_record.subject} ([${commit_record.short_hash}](${commit_record.url}))`)
 		.join('\n')
 
 const run = async () => {
@@ -54,9 +65,11 @@ const run = async () => {
 	}
 
 	const commit_lines = log_proc.stdout.split('\n').filter(Boolean)
-	const commit_bullets = formatCommitBullets(commit_lines) || '- No commit history available.'
+	const commit_records = commit_lines.map(parseCommitLine).filter(Boolean)
+	const commit_bullets = formatCommitBullets(commit_records) || '- No commit history available.'
 
 	await writeFile('commits.txt', commit_bullets, 'utf8')
+	await writeFile('commits.json', `${JSON.stringify(commit_records, null, 2)}\n`, 'utf8')
 	await appendOutput('commit_count', String(commit_lines.length))
 	await appendMultilineOutput('commit_bullets', commit_bullets)
 }
