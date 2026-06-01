@@ -1,6 +1,6 @@
-import { drizzleAdapter } from '@better-auth/drizzle-adapter'
-import { betterAuth } from 'better-auth'
+import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { hashPassword } from 'better-auth/crypto'
+import { betterAuth } from 'better-auth/minimal'
 import { username } from 'better-auth/plugins'
 import { and, eq } from 'drizzle-orm'
 import { getId } from 'stk/utils'
@@ -8,6 +8,8 @@ import { getId } from 'stk/utils'
 import { config } from './config'
 import { auth_account, auth_session, auth_user, auth_verification } from './db/schema'
 import { env } from './env'
+
+import type { Auth, BetterAuthOptions } from 'better-auth'
 
 const auth_username = 'polywiser'
 const auth_email = 'polywiser@localhost'
@@ -53,25 +55,28 @@ const auth_schema = {
 const auth_enabled = () => config.auth?.enabled === true
 const auth_platform_bypassed = () => env.platform === 'electron'
 
-const createAuth = () =>
-	betterAuth({
-		database: drizzleAdapter(env.db, {
-			provider: 'sqlite',
-			schema: auth_schema
-		}),
-		emailAndPassword: {
-			enabled: true
-		},
-		session: {
-			expiresIn: 60 * 60 * 24 * 7,
-			updateAge: 60 * 60 * 24
-		},
-		baseURL: resolveAuthBaseUrl(),
-		trustedOrigins: auth_trusted_origins,
-		plugins: [username()]
-	})
+const auth_options = {
+	database: drizzleAdapter(env.db, {
+		provider: 'sqlite',
+		schema: auth_schema
+	}),
+	emailAndPassword: {
+		enabled: true
+	},
+	session: {
+		expiresIn: 60 * 60 * 24 * 7,
+		updateAge: 60 * 60 * 24
+	},
+	baseURL: resolveAuthBaseUrl(),
+	trustedOrigins: auth_trusted_origins,
+	plugins: [username()]
+} satisfies BetterAuthOptions
 
-let auth_instance: ReturnType<typeof createAuth> | null = null
+const createAuth = () => betterAuth(auth_options)
+
+type AuthInstance = Auth<typeof auth_options>
+
+let auth_instance: AuthInstance | null = null
 
 const appendHeaders = (target: Headers, source: Headers) => {
 	source.forEach((value, key) => {
@@ -84,7 +89,7 @@ const appendHeaders = (target: Headers, source: Headers) => {
 	})
 }
 
-export const getAuth = () => {
+export const getAuth = (): AuthInstance => {
 	if (auth_instance) {
 		return auth_instance
 	}
