@@ -1,7 +1,7 @@
 {
   "version": "7",
   "dialect": "sqlite",
-  "id": "bfe95a60-21ca-44dd-8ce7-0633859eec94",
+  "id": "da04f2a5-73ff-4b62-b7e8-936ee99a8a55",
   "prevIds": [
     "00000000-0000-0000-0000-000000000000"
   ],
@@ -4446,6 +4446,14 @@
     },
     {
       "columns": [
+        {
+          "value": "scope_type",
+          "isExpression": false
+        },
+        {
+          "value": "scope_id",
+          "isExpression": false
+        },
         {
           "value": "hash",
           "isExpression": false

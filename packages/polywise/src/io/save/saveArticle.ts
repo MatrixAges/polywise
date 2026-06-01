@@ -178,7 +178,7 @@ const kickPipelineWorker = () => {
 
 export default async (args: ArgsSaveArticle) => {
 	const { title, content, article_id, scope_type = 'global', scope_id = null, source = 'agent' } = args
-	const hash = scope_type === 'global' ? getHash(`${args.for}\n${content}`) : null
+	const hash = getHash(`${scope_type}\n${scope_id || ''}\n${args.for}\n${content}`)
 	const exec_pipeline = Boolean(args.exec_pipeline)
 	const has_content = content.trim().length > 0
 

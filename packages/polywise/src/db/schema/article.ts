@@ -22,7 +22,7 @@ export default sqliteTable(
 		scope_id: text('scope_id'),
 		// Data origin: agent (main agent) / superego (superego agent)
 		source: text('source', { enum: ['agent', 'superego'] }).default('agent'),
-		// Content hash value, used for duplicate content verification
+		// Scope-aware content hash value, used for duplicate content verification
 		hash: text('hash'),
 		// Article metadata (for filtering)
 		metadata: text('metadata', { mode: 'json' }).default({}),
@@ -46,6 +46,6 @@ export default sqliteTable(
 		index('article_is_pipelined_idx').on(t.is_pipelined),
 		index('article_created_at_idx').on(t.created_at),
 		index('article_updated_at_idx').on(t.updated_at),
-		uniqueIndex('article_hash_idx').on(t.hash)
+		uniqueIndex('article_hash_idx').on(t.scope_type, t.scope_id, t.hash)
 	]
 )

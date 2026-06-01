@@ -499,7 +499,7 @@ CREATE INDEX `article_source_idx` ON `article` (`source`);--> statement-breakpoi
 CREATE INDEX `article_is_pipelined_idx` ON `article` (`is_pipelined`);--> statement-breakpoint
 CREATE INDEX `article_created_at_idx` ON `article` (`created_at`);--> statement-breakpoint
 CREATE INDEX `article_updated_at_idx` ON `article` (`updated_at`);--> statement-breakpoint
-CREATE UNIQUE INDEX `article_hash_idx` ON `article` (`hash`);--> statement-breakpoint
+CREATE UNIQUE INDEX `article_hash_idx` ON `article` (`scope_type`,`scope_id`,`hash`);--> statement-breakpoint
 CREATE INDEX `chunk_article_id_idx` ON `chunk` (`article_id`);--> statement-breakpoint
 CREATE INDEX `chunk_created_at_idx` ON `chunk` (`created_at`);--> statement-breakpoint
 CREATE INDEX `document_is_pipelined_idx` ON `document` (`is_pipelined`);--> statement-breakpoint
