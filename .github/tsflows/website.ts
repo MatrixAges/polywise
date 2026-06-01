@@ -45,17 +45,17 @@ const workflow_definition = workflow({
 					name: 'Validate Cloudflare secrets',
 					shell: 'bash',
 					env: {
-						CLOUDFLARE_API_TOKEN: '${{ secrets.CLOUDFLARE_API_TOKEN }}',
+						WEBSITE_API_TOKEN: '${{ secrets.WEBSITE_API_TOKEN }}',
 						CLOUDFLARE_ACCOUNT_ID: '${{ secrets.CLOUDFLARE_ACCOUNT_ID }}'
 					},
-					run: ['[ -n "$CLOUDFLARE_API_TOKEN" ]', '[ -n "$CLOUDFLARE_ACCOUNT_ID" ]'].join('\n')
+					run: ['[ -n "$WEBSITE_API_TOKEN" ]', '[ -n "$CLOUDFLARE_ACCOUNT_ID" ]'].join('\n')
 				},
 				{
 					name: 'Deploy website',
 					shell: 'bash',
 					env: {
 						CI: 'true',
-						CLOUDFLARE_API_TOKEN: '${{ secrets.CLOUDFLARE_API_TOKEN }}',
+						WEBSITE_API_TOKEN: '${{ secrets.WEBSITE_API_TOKEN }}',
 						CLOUDFLARE_ACCOUNT_ID: '${{ secrets.CLOUDFLARE_ACCOUNT_ID }}'
 					},
 					run: 'pnpm --dir packages/website run deploy'

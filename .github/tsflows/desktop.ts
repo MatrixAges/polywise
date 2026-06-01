@@ -78,9 +78,9 @@ const workflow_definition = workflow({
 					required: true,
 					description: 'Password for the certificate provided via CSC_LINK'
 				},
-				R2_ACCOUNT_ID: {
+				CLOUDFLARE_ACCOUNT_ID: {
 					required: true,
-					description: 'Cloudflare R2 account id'
+					description: 'Cloudflare account id'
 				},
 				R2_ACCESS_KEY_ID: {
 					required: true,
@@ -217,7 +217,7 @@ const workflow_definition = workflow({
 					name: 'Upload assets to Cloudflare R2',
 					uses: 'ryand56/r2-upload-action@latest',
 					with: {
-						'r2-account-id': '${{ secrets.R2_ACCOUNT_ID }}',
+						'r2-account-id': '${{ secrets.CLOUDFLARE_ACCOUNT_ID }}',
 						'r2-access-key-id': '${{ secrets.R2_ACCESS_KEY_ID }}',
 						'r2-secret-access-key': '${{ secrets.R2_SECRET_ACCESS_KEY }}',
 						'r2-bucket': '${{ secrets.R2_BUCKET }}',
