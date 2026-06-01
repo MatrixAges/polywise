@@ -1,14 +1,15 @@
-import { TEAM_ID } from './metadata'
+import { APP_ID, TEAM_ID } from './metadata'
 import { productName } from './package.json'
 import { afterPack } from './scripts/beforePack'
 
 import type { Configuration } from 'electron-builder'
 
 const { ZIP } = process.env
-// const arch = ['x64', 'arm64']
-const arch = ['x64']
+const arch = ['x64', 'arm64']
+// const arch = ['x64']
 
 export default {
+	appId: APP_ID,
 	productName,
 	asar: false,
 	compression: 'normal',
@@ -17,7 +18,6 @@ export default {
 	files: [
 		'public/**/*',
 		'dist/**/*',
-		'!dist/notarize.js',
 		'!**/*.gguf',
 		'!**/tsconfig.json',
 		'!**/node_modules/**/*.{ts,map,md,txt,map,d.ts,d.cts,d.mts}',
@@ -30,7 +30,7 @@ export default {
 	extraResources: [{ from: '../app/dist', to: 'app_dist' }],
 	artifactName: '${productName}-${version}-${arch}.${ext}',
 	mac: {
-		identity: null,
+		notarize: true,
 		target: ZIP ? { target: 'zip', arch } : { target: 'dmg', arch },
 		hardenedRuntime: true,
 		gatekeeperAssess: false,
@@ -47,7 +47,7 @@ export default {
 		},
 		fileAssociations: [{ ext: 'elefile', icon: 'public/icons/logo.icns' }]
 	},
-	// dmg: { sign: true },
+	dmg: { sign: true },
 	win: {
 		target: [{ target: 'nsis', arch: ['x64'] }],
 		icon: 'public/icons/icon.ico',

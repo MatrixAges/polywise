@@ -32,7 +32,8 @@
 		"auth:sql": "pnpx auth generate --adapter drizzle",
 		"auth:migrate": "pnpx auth migrate",
 		"studio": "drizzle-kit studio",
-		"rebuild": "cross-env CI=true npm rebuild better-sqlite3 bufferutil lmdb node-llama-cpp simsimd sqlite-vec utf-8-validate @node-rs/jieba @node-rs/xxhash"
+		"rebuild": "cross-env CI=true npm rebuild better-sqlite3 bufferutil lmdb node-llama-cpp simsimd sqlite-vec utf-8-validate @node-rs/jieba @node-rs/xxhash",
+		"pub": "npm publish --access public --no-git-checks"
 	},
 	"dependencies": {
 		"@abraham/reflection": "catalog:",

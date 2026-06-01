@@ -1,0 +1,2 @@
+- [abcd123] Example feature commit
+- [efgh456] Example bug fix commit
