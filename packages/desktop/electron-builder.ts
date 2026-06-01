@@ -5,8 +5,8 @@ import { afterPack } from './scripts/beforePack'
 import type { Configuration } from 'electron-builder'
 
 const { ZIP } = process.env
-const arch = ['x64', 'arm64']
-// const arch = ['x64']
+const build_arch = process.env.BUILD_ARCH
+const arch = build_arch === 'arm64' ? ['arm64'] : build_arch === 'x64' ? ['x64'] : ['x64', 'arm64']
 
 export default {
 	appId: APP_ID,

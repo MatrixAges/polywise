@@ -56,13 +56,22 @@ jobs:
                   fail-fast: false
                   matrix:
                         include:
-                              - runner: macos-13
+                              - runner: macos-latest
+                                args: '--x64'
                                 name: macOS (x64)
                                 artifact_name: polywise-macos-x64
                                 asset_glob: "packages/desktop/release/mac/x64/*.dmg\npackages/desktop/release/mac/x64/*.zip\npackages/desktop/release/mac/x64/*.blockmap\npackages/desktop/release/mac/x64/latest*.yml"
                                 source_dir: packages/desktop/release/mac/x64
                                 destination_dir: release/darwin/x64
-                                build_command: "pnpm --filter \"./packages/stk\" run build\npnpm --filter \"./packages/erpc\" run build\npnpm --filter \"./packages/app\" run build:electron\npnpm --filter \"./packages/polywise\" run build:electron\npnpm --dir packages/desktop run clean\npnpm --dir packages/desktop run main:prod\npnpm --dir packages/desktop run transform\npnpm --dir packages/desktop exec cross-env ZIP=0 electron-builder -m --publish never\npnpm --dir packages/desktop exec electron-builder -m --publish never"
+                                build_command: "pnpm --filter \"./packages/stk\" run build\npnpm --filter \"./packages/erpc\" run build\npnpm --filter \"./packages/app\" run build:electron\npnpm --filter \"./packages/polywise\" run build:electron\npnpm --dir packages/desktop run clean\npnpm --dir packages/desktop run main:prod\npnpm --dir packages/desktop run transform\npnpm --dir packages/desktop exec cross-env ZIP=0 BUILD_ARCH=x64 electron-builder -m --x64 --publish never\npnpm --dir packages/desktop exec cross-env BUILD_ARCH=x64 electron-builder -m --x64 --publish never"
+                              - runner: macos-latest
+                                args: '--arm64'
+                                name: macOS (arm64)
+                                artifact_name: polywise-macos-arm64
+                                asset_glob: "packages/desktop/release/mac/arm64/*.dmg\npackages/desktop/release/mac/arm64/*.zip\npackages/desktop/release/mac/arm64/*.blockmap\npackages/desktop/release/mac/arm64/latest*.yml"
+                                source_dir: packages/desktop/release/mac/arm64
+                                destination_dir: release/darwin/arm64
+                                build_command: "pnpm --filter \"./packages/stk\" run build\npnpm --filter \"./packages/erpc\" run build\npnpm --filter \"./packages/app\" run build:electron\npnpm --filter \"./packages/polywise\" run build:electron\npnpm --dir packages/desktop run clean\npnpm --dir packages/desktop run main:prod\npnpm --dir packages/desktop run transform\npnpm --dir packages/desktop exec cross-env ZIP=0 BUILD_ARCH=arm64 electron-builder -m --arm64 --publish never\npnpm --dir packages/desktop exec cross-env BUILD_ARCH=arm64 electron-builder -m --arm64 --publish never"
                               - runner: windows-latest
                                 name: Windows (x64)
                                 artifact_name: polywise-windows-x64
@@ -90,7 +99,7 @@ jobs:
                   - name: Install dependencies
                     run: pnpm install --frozen-lockfile
                   - name: Validate mac signing secrets
-                    if: "matrix.runner == 'macos-13'"
+                    if: "matrix.runner == 'macos-latest'"
                     shell: bash
                     env:
                           APPLE_ID: '${{ secrets.APPLE_ID }}'

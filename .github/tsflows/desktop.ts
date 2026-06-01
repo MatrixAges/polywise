@@ -13,6 +13,13 @@ const mac_asset_glob = [
 	'packages/desktop/release/mac/x64/latest*.yml'
 ].join('\n')
 
+const mac_arm_asset_glob = [
+	'packages/desktop/release/mac/arm64/*.dmg',
+	'packages/desktop/release/mac/arm64/*.zip',
+	'packages/desktop/release/mac/arm64/*.blockmap',
+	'packages/desktop/release/mac/arm64/latest*.yml'
+].join('\n')
+
 const win_asset_glob = [
 	'packages/desktop/release/win/x64/*.exe',
 	'packages/desktop/release/win/x64/*.blockmap',
@@ -104,7 +111,8 @@ const workflow_definition = workflow({
 				matrix: {
 					include: [
 						{
-							runner: 'macos-13',
+							runner: 'macos-latest',
+							args: '--x64',
 							name: 'macOS (x64)',
 							artifact_name: 'polywise-macos-x64',
 							asset_glob: mac_asset_glob,
@@ -112,8 +120,22 @@ const workflow_definition = workflow({
 							destination_dir: 'release/darwin/x64',
 							build_command: [
 								desktop_shared_build_command,
-								'pnpm --dir packages/desktop exec cross-env ZIP=0 electron-builder -m --publish never',
-								'pnpm --dir packages/desktop exec electron-builder -m --publish never'
+								'pnpm --dir packages/desktop exec cross-env ZIP=0 BUILD_ARCH=x64 electron-builder -m --x64 --publish never',
+								'pnpm --dir packages/desktop exec cross-env BUILD_ARCH=x64 electron-builder -m --x64 --publish never'
+							].join('\n')
+						},
+						{
+							runner: 'macos-latest',
+							args: '--arm64',
+							name: 'macOS (arm64)',
+							artifact_name: 'polywise-macos-arm64',
+							asset_glob: mac_arm_asset_glob,
+							source_dir: 'packages/desktop/release/mac/arm64',
+							destination_dir: 'release/darwin/arm64',
+							build_command: [
+								desktop_shared_build_command,
+								'pnpm --dir packages/desktop exec cross-env ZIP=0 BUILD_ARCH=arm64 electron-builder -m --arm64 --publish never',
+								'pnpm --dir packages/desktop exec cross-env BUILD_ARCH=arm64 electron-builder -m --arm64 --publish never'
 							].join('\n')
 						},
 						{
@@ -159,7 +181,7 @@ const workflow_definition = workflow({
 				},
 				{
 					name: 'Validate mac signing secrets',
-					if: "matrix.runner == 'macos-13'",
+					if: "matrix.runner == 'macos-latest'",
 					shell: 'bash',
 					env: {
 						APPLE_ID: '${{ secrets.APPLE_ID }}',
