@@ -7,6 +7,22 @@
 		"type": "git",
 		"url": "https://github.com/MatrixAges/polywise.git"
 	},
+	"keywords": [
+		"agent",
+		"decision",
+		"workflow",
+		"database",
+		"ai",
+		"memory",
+		"self-hosted",
+		"assistant",
+		"twin",
+		"rag",
+		"decision-system",
+		"graph-rag",
+		"polywise",
+		"llm-wiki"
+	],
 	"type": "module",
 	"main": "./dist/index.js",
 	"sideEffects": false,

@@ -45,9 +45,10 @@ const workflow_definition = workflow({
 			steps: [
 				checkout({ 'fetch-depth': 0 }),
 				setupNode({
+					'node-version': 'lts/*',
 					cache: 'pnpm',
 					'cache-dependency-path': 'pnpm-lock.yaml',
-					'registry-url': 'https://registry.npmjs.org'
+					'registry-url': 'https://npmjs.org'
 				}),
 				{
 					name: 'Setup pnpm',
@@ -81,6 +82,10 @@ const workflow_definition = workflow({
 					run: 'pnpm install --frozen-lockfile'
 				},
 				{
+					name: 'Upgrade npm',
+					run: 'npm install -g npm@latest'
+				},
+				{
 					name: 'Build standalone package',
 					shell: 'bash',
 					run: build_command
@@ -89,10 +94,7 @@ const workflow_definition = workflow({
 					name: 'Publish polywise',
 					shell: 'bash',
 					'working-directory': 'packages/polywise',
-					env: {
-						NODE_AUTH_TOKEN: '${{ secrets.NPM_TOKEN }}'
-					},
-					run: 'pnpm publish --access public --no-git-checks --provenance'
+					run: 'npm publish --access public --provenance --no-git-checks'
 				}
 			]
 		}
