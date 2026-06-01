@@ -38,7 +38,7 @@ const desktop_shared_build_command = [
 ].join('\n')
 
 const workflow_definition = workflow({
-	name: 'Release: Desktop',
+	name: 'Release: Step 3 - Desktop',
 	on: {
 		workflow_call: {
 			inputs: {

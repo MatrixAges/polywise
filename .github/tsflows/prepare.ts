@@ -9,7 +9,7 @@ const release_branch_name = 'build'
 const source_branch_name = 'master'
 
 const workflow_definition = workflow({
-	name: 'Release: Prepare',
+	name: 'Release: Step 1 - Prepare',
 	on: {
 		workflow_call: {
 			inputs: {

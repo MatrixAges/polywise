@@ -15,7 +15,7 @@ const build_command = [
 ].join('\n')
 
 const workflow_definition = workflow({
-	name: 'Release: Standalone',
+	name: 'Release: Step 2 - Standalone',
 	on: {
 		workflow_call: {
 			inputs: {
