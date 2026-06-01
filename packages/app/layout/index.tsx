@@ -33,6 +33,8 @@ const Index = () => {
 		workspaces: $copy(s.config?.workspaces) || [],
 		current_workspace: s.config?.current_workspace,
 		disconnected: global.disconnected,
+		update_status: global.update_status,
+		downloadUpdate: global.downloadUpdate,
 		toggleSidebar: s.toggleSidebar,
 		togglePanel: s.togglePanel
 	}

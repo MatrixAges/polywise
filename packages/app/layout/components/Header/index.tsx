@@ -11,7 +11,9 @@ const Index = (props: IPropsHeader) => {
 	const props_left: IPropsLeft = {
 		workspaces,
 		current_workspace,
-		toggleSidebar
+		toggleSidebar,
+		update_status: props.update_status,
+		downloadUpdate: props.downloadUpdate
 	}
 
 	const props_right: IPropsRight = {

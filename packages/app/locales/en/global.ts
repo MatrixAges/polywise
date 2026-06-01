@@ -32,6 +32,12 @@ export default {
 	confirm: 'Confirm',
 	preview: 'Preview',
 	insert: 'Insert',
+	app_update: {
+		available_tooltip: 'Update {{version}} available',
+		downloading_tooltip: 'Downloading update {{percent}}%',
+		restarting: 'Restarting to install update...',
+		error: 'Failed to update the desktop app.'
+	},
 	reset_confirm: 'Reset will remove all configuration changes, confirm reset?',
 	remove_confirm:
 		'Confirm removal? Deleting this item will also delete the corresponding local file. Please proceed with caution!',

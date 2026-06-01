@@ -23,7 +23,7 @@ export default p.subscription(async function* (args) {
 	autoUpdater.autoRunAppAfterInstall = true
 
 	const onCanUpdate = (args: UpdateInfo) => e.emit('UPDATE', { type: 'can_update', value: args.version })
-	const onCantUpdate = () => e.emit('UPDATE', { type: 'downloaded' })
+	const onCantUpdate = () => e.emit('UPDATE', { type: 'cant_update' })
 	const onProgress = (args: ProgressInfo) => e.emit('UPDATE', { type: 'progress', value: Math.floor(args.percent) })
 	const onDownloaded = () => e.emit('UPDATE', { type: 'downloaded' })
 	const onError = (args: Error) => e.emit('UPDATE', { type: 'error', value: args.message })

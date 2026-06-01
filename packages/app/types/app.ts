@@ -14,9 +14,20 @@ export interface Downloading {
 	percent: number
 }
 
+export interface DownloadedUpdate {
+	type: 'downloaded'
+}
+
 export interface UpdateError {
 	type: 'error'
 	message: string
 }
 
-export type UpdateState = null | HasUpdate | Downloading | UpdateError | { type: 'downloaded' }
+export type UpdateState = null | HasUpdate | Downloading | DownloadedUpdate | UpdateError
+
+export type DesktopUpdateEvent =
+	| { type: 'can_update'; value: string }
+	| { type: 'cant_update' }
+	| { type: 'progress'; value: number }
+	| { type: 'downloaded' }
+	| { type: 'error'; value: string }

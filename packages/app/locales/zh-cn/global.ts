@@ -32,6 +32,12 @@ export default {
 	confirm: '确认',
 	preview: '预览',
 	insert: '插入',
+	app_update: {
+		available_tooltip: '发现新版本 {{version}}',
+		downloading_tooltip: '正在下载更新 {{percent}}%',
+		restarting: '更新下载完成，正在重启安装...',
+		error: '桌面端更新失败。'
+	},
 	reset_confirm: '重置会移除所有配置变更，确认重置？',
 	remove_confirm: '确认删除？删除该项将会删除对应的本地文件，请谨慎操作！',
 	config_remove_confirm: '删除该项将会删除对应的配置数据，确认删除？'
