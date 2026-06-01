@@ -82,16 +82,14 @@ jobs:
           RELEASE_TAG: "${{ steps.version.outputs.release_tag }}"
           PREVIOUS_TAG: "${{ steps.version.outputs.previous_tag }}"
         run: node ./scripts/generate_release_notes.mjs
-      - name: Create draft release
-        uses: softprops/action-gh-release@v3
-        with: 
-          draft: true
-          tag_name: "${{ steps.version.outputs.release_tag }}"
-          name: "${{ steps.version.outputs.release_tag }}"
-          target_commitish: "${{ steps.persist.outputs.release_commit }}"
-          body_path: release-notes.md
-      - name: Verify draft release is visible
+      - name: Create or update draft release
+        id: create_release
         shell: bash
         env: 
           GH_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-        run: "target_tag=\"${{ steps.version.outputs.release_tag }}\"\nrelease_is_draft=\"\"\nfor attempt in 1 2 3 4 5 6; do\n\trelease_is_draft=$(gh api \"repos/${{ github.repository }}/releases?per_page=2\" 2>/dev/null | jq -r --arg tag \"$target_tag\" 'map(select(.tag_name == $tag)) | .[0].draft // empty')\n\t[ -n \"$release_is_draft\" ] && break\n\techo \"Draft release ${target_tag} is not visible yet. attempt=${attempt}\"\n\tsleep 10\ndone\n[ \"$release_is_draft\" = \"true\" ]"
+          RELEASE_TAG: "${{ steps.version.outputs.release_tag }}"
+          RELEASE_COMMIT: "${{ steps.persist.outputs.release_commit }}"
+        run: "set +e\ncreate_output=$(gh release create \"$RELEASE_TAG\" --draft --title \"$RELEASE_TAG\" --target \"$RELEASE_COMMIT\" --notes-file release-notes.md 2>&1)\ncreate_status=$?\nset -e\nif [ \"$create_status\" -ne 0 ]; then\n\tif printf '%s' \"$create_output\" | grep -qi 'already exists'; then\n\t\tgh release edit \"$RELEASE_TAG\" --draft --title \"$RELEASE_TAG\" --target \"$RELEASE_COMMIT\" --notes-file release-notes.md >/dev/null\n\telse\n\t\tprintf '%s\\n' \"$create_output\" >&2\n\t\texit \"$create_status\"\n\tfi\nfi\nrelease_row=$(gh api \"repos/${{ github.repository }}/releases?per_page=10\" --jq '.[] | select(.tag_name == env.RELEASE_TAG and .draft == true) | \"\\(.id)\\t\\(.html_url)\"' | head -n 1)\n[ -n \"$release_row\" ]\nrelease_id=\"${release_row%%$'\\t'*}\"\nrelease_url=\"${release_row#*$'\\t'}\"\necho \"id=${release_id}\" >> \"$GITHUB_OUTPUT\"\necho \"url=${release_url}\" >> \"$GITHUB_OUTPUT\""
+      - name: Verify draft release outputs
+        shell: bash
+        run: "release_id=\"${{ steps.create_release.outputs.id }}\"\nrelease_url=\"${{ steps.create_release.outputs.url }}\"\n[ -n \"$release_id\" ]\n[ -n \"$release_url\" ]"

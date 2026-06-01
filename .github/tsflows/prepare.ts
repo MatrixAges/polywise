@@ -143,32 +143,43 @@ const workflow_definition = workflow({
 					run: 'node ./scripts/generate_release_notes.mjs'
 				},
 				{
-					name: 'Create draft release',
-					uses: 'softprops/action-gh-release@v3',
-					with: {
-						draft: true,
-						tag_name: '${{ steps.version.outputs.release_tag }}',
-						name: '${{ steps.version.outputs.release_tag }}',
-						target_commitish: '${{ steps.persist.outputs.release_commit }}',
-						body_path: 'release-notes.md'
-					}
-				},
-				{
-					name: 'Verify draft release is visible',
+					name: 'Create or update draft release',
+					id: 'create_release',
 					shell: 'bash',
 					env: {
-						GH_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
+						GH_TOKEN: '${{ secrets.GITHUB_TOKEN }}',
+						RELEASE_TAG: '${{ steps.version.outputs.release_tag }}',
+						RELEASE_COMMIT: '${{ steps.persist.outputs.release_commit }}'
 					},
 					run: [
-						'target_tag="${{ steps.version.outputs.release_tag }}"',
-						'release_is_draft=""',
-						'for attempt in 1 2 3 4 5 6; do',
-						'	release_is_draft=$(gh api "repos/${{ github.repository }}/releases?per_page=2" 2>/dev/null | jq -r --arg tag "$target_tag" \'map(select(.tag_name == $tag)) | .[0].draft // empty\')',
-						'	[ -n "$release_is_draft" ] && break',
-						'	echo "Draft release ${target_tag} is not visible yet. attempt=${attempt}"',
-						'	sleep 10',
-						'done',
-						'[ "$release_is_draft" = "true" ]'
+						'set +e',
+						'create_output=$(gh release create "$RELEASE_TAG" --draft --title "$RELEASE_TAG" --target "$RELEASE_COMMIT" --notes-file release-notes.md 2>&1)',
+						'create_status=$?',
+						'set -e',
+						'if [ "$create_status" -ne 0 ]; then',
+						"	if printf '%s' \"$create_output\" | grep -qi 'already exists'; then",
+						'		gh release edit "$RELEASE_TAG" --draft --title "$RELEASE_TAG" --target "$RELEASE_COMMIT" --notes-file release-notes.md >/dev/null',
+						'	else',
+						'		printf \'%s\\n\' "$create_output" >&2',
+						'		exit "$create_status"',
+						'	fi',
+						'fi',
+						'release_row=$(gh api "repos/${{ github.repository }}/releases?per_page=10" --jq \'.[] | select(.tag_name == env.RELEASE_TAG and .draft == true) | "\\(.id)\\t\\(.html_url)"\' | head -n 1)',
+						'[ -n "$release_row" ]',
+						'release_id="${release_row%%$\'\\t\'*}"',
+						'release_url="${release_row#*$\'\\t\'}"',
+						'echo "id=${release_id}" >> "$GITHUB_OUTPUT"',
+						'echo "url=${release_url}" >> "$GITHUB_OUTPUT"'
+					].join('\n')
+				},
+				{
+					name: 'Verify draft release outputs',
+					shell: 'bash',
+					run: [
+						'release_id="${{ steps.create_release.outputs.id }}"',
+						'release_url="${{ steps.create_release.outputs.url }}"',
+						'[ -n "$release_id" ]',
+						'[ -n "$release_url" ]'
 					].join('\n')
 				}
 			]
