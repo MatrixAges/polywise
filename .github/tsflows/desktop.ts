@@ -58,6 +58,11 @@ const desktop_shared_build_command = [
 	'pnpm --dir packages/desktop run transform'
 ].join('\n')
 
+const install_command = [
+	"printf '\\ntrustLockfile: true\\n' >> pnpm-workspace.yaml",
+	'pnpm install --frozen-lockfile'
+].join('\n')
+
 const workflow_definition = workflow({
 	name: 'Release: Step 3 - Desktop',
 	on: {
@@ -211,7 +216,8 @@ const workflow_definition = workflow({
 				},
 				{
 					name: 'Install dependencies',
-					run: 'pnpm install --frozen-lockfile'
+					shell: 'bash',
+					run: install_command
 				},
 				{
 					name: 'Validate mac signing secrets',

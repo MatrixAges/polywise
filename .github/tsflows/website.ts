@@ -27,6 +27,11 @@ const readPnpmVersion = () => {
 
 const pnpm_version = readPnpmVersion()
 
+const install_command = [
+	"printf '\\ntrustLockfile: true\\n' >> pnpm-workspace.yaml",
+	'pnpm --filter website... install --frozen-lockfile'
+].join('\n')
+
 const workflow_definition = workflow({
 	name: 'Deploy Website',
 	on: {
@@ -67,7 +72,8 @@ const workflow_definition = workflow({
 				},
 				{
 					name: 'Install dependencies',
-					run: 'pnpm --filter website... install --frozen-lockfile'
+					shell: 'bash',
+					run: install_command
 				},
 				{
 					name: 'Validate Cloudflare secrets',

@@ -101,7 +101,8 @@ jobs:
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        shell: bash
+        run: "printf '\\ntrustLockfile: true\\n' >> pnpm-workspace.yaml\npnpm install --frozen-lockfile"
       - name: Validate mac signing secrets
         if: "matrix.runner == 'macos-latest'"
         shell: bash

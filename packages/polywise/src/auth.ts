@@ -55,26 +55,27 @@ const auth_schema = {
 const auth_enabled = () => config.auth?.enabled === true
 const auth_platform_bypassed = () => env.platform === 'electron'
 
-const auth_options = {
-	database: drizzleAdapter(env.db, {
-		provider: 'sqlite',
-		schema: auth_schema
-	}),
-	emailAndPassword: {
-		enabled: true
-	},
-	session: {
-		expiresIn: 60 * 60 * 24 * 7,
-		updateAge: 60 * 60 * 24
-	},
-	baseURL: resolveAuthBaseUrl(),
-	trustedOrigins: auth_trusted_origins,
-	plugins: [username()]
-} satisfies BetterAuthOptions
+const getAuthOptions = () =>
+	({
+		database: drizzleAdapter(env.db, {
+			provider: 'sqlite',
+			schema: auth_schema
+		}),
+		emailAndPassword: {
+			enabled: true
+		},
+		session: {
+			expiresIn: 60 * 60 * 24 * 7,
+			updateAge: 60 * 60 * 24
+		},
+		baseURL: resolveAuthBaseUrl(),
+		trustedOrigins: auth_trusted_origins,
+		plugins: [username()]
+	}) satisfies BetterAuthOptions
 
-const createAuth = () => betterAuth(auth_options)
+const createAuth = () => betterAuth(getAuthOptions())
 
-type AuthInstance = Auth<typeof auth_options>
+type AuthInstance = Auth<ReturnType<typeof getAuthOptions>>
 
 let auth_instance: AuthInstance | null = null
 

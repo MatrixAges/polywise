@@ -28,7 +28,8 @@ jobs:
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
       - name: Install dependencies
-        run: "pnpm --filter website... install --frozen-lockfile"
+        shell: bash
+        run: "printf '\\ntrustLockfile: true\\n' >> pnpm-workspace.yaml\npnpm --filter website... install --frozen-lockfile"
       - name: Validate Cloudflare secrets
         shell: bash
         env: 

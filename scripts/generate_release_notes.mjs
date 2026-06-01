@@ -264,7 +264,7 @@ const createGroupBullet = group => {
 	const remainder_text = hidden_summary_count > 0 ? `; and ${hidden_summary_count} more changes` : ''
 	const commit_count_text = group.commit_records.length > 1 ? ` across ${group.commit_records.length} commits` : ''
 
-	return `- ${humanizeScope(group.scope)}: ${summary_text}${remainder_text}${commit_count_text}. ${createLinkSuffix(group.commit_records)}`
+	return `- **${humanizeScope(group.scope)}**: ${summary_text}${remainder_text}${commit_count_text}. ${createLinkSuffix(group.commit_records)}`
 }
 
 const createOverflowBullet = args => {
