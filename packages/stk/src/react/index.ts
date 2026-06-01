@@ -4,7 +4,7 @@ import { deepEqual } from 'fast-equals'
 export { deepEqual }
 export { cx }
 
-export { default as Handle } from './Handle'
+export { default as Handle } from './handle'
 
 export { default as useDeepMemo } from './useDeepMemo'
 export { default as useDoubleClick } from './useDoubleClick'
