@@ -143,7 +143,7 @@ const rerankChunk = async (query: string, results: Array<SearchResult>) => {
 			}
 		})
 
-		log('SEARCH', 'reRank', () => `query: ${query.slice(0, 50)}, count: ${results.length}`)
+		log('SEARCH', 'rerank', () => `query: ${query.slice(0, 50)}, count: ${results.length}`)
 
 		const contents = results.map(doc => content_map.get(doc.chunk_id) || '')
 		const scores = await getRerankScores(query, contents)
@@ -169,7 +169,7 @@ const rerankChunk = async (query: string, results: Array<SearchResult>) => {
 			})
 		})
 
-		log('SEARCH', 'reRank done', () => `result_count: ${reranked.length}`)
+		log('SEARCH', 'rerank done', () => `result_count: ${reranked.length}`)
 
 		if (reranked.length === 0) {
 			const fallback_results = results
@@ -223,7 +223,7 @@ const rerankArticle = async (
 			}
 		})
 
-		log('SEARCH', 'reRankArticle', () => `query: ${query.slice(0, 50)}, count: ${results.length}`)
+		log('SEARCH', 'rerankArticle', () => `query: ${query.slice(0, 50)}, count: ${results.length}`)
 
 		const contents = results.map(doc => content_map.get(doc.article_id) || '')
 		const scores = await getRerankScores(query, contents)
@@ -257,7 +257,7 @@ const rerankArticle = async (
 			})
 		})
 
-		log('SEARCH', 'reRankArticle done', () => `result_count: ${reranked.length}`)
+		log('SEARCH', 'rerankArticle done', () => `result_count: ${reranked.length}`)
 
 		if (reranked.length === 0) {
 			const fallback_results = results
