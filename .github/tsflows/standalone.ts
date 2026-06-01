@@ -101,7 +101,7 @@ const workflow_definition = workflow({
 						'node-version': 'lts/*',
 						cache: 'pnpm',
 						'cache-dependency-path': 'pnpm-lock.yaml',
-						'registry-url': 'https://npmjs.org'
+						'registry-url': 'https://registry.npmjs.org'
 					}
 				},
 				{
