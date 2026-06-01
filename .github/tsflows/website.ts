@@ -39,24 +39,24 @@ const workflow_definition = workflow({
 				}),
 				{
 					name: 'Install dependencies',
-					run: 'pnpm install --frozen-lockfile'
+					run: 'pnpm --filter website... install --frozen-lockfile'
 				},
 				{
 					name: 'Validate Cloudflare secrets',
 					shell: 'bash',
 					env: {
-						WEBSITE_API_TOKEN: '${{ secrets.WEBSITE_API_TOKEN }}',
-						CLOUDFLARE_ACCOUNT_ID: '${{ secrets.CLOUDFLARE_ACCOUNT_ID }}'
+						CLOUDFLARE_ACCOUNT_ID: '${{ secrets.CLOUDFLARE_ACCOUNT_ID }}',
+						CLOUDFLARE_API_TOKEN: '${{ secrets.WEBSITE_API_TOKEN }}'
 					},
-					run: ['[ -n "$WEBSITE_API_TOKEN" ]', '[ -n "$CLOUDFLARE_ACCOUNT_ID" ]'].join('\n')
+					run: ['[ -n "$CLOUDFLARE_API_TOKEN" ]', '[ -n "$CLOUDFLARE_ACCOUNT_ID" ]'].join('\n')
 				},
 				{
 					name: 'Deploy website',
 					shell: 'bash',
 					env: {
 						CI: 'true',
-						WEBSITE_API_TOKEN: '${{ secrets.WEBSITE_API_TOKEN }}',
-						CLOUDFLARE_ACCOUNT_ID: '${{ secrets.CLOUDFLARE_ACCOUNT_ID }}'
+						CLOUDFLARE_ACCOUNT_ID: '${{ secrets.CLOUDFLARE_ACCOUNT_ID }}',
+						CLOUDFLARE_API_TOKEN: '${{ secrets.WEBSITE_API_TOKEN }}'
 					},
 					run: 'pnpm --dir packages/website run deploy'
 				}
