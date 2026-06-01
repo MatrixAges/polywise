@@ -10,7 +10,8 @@
 		"build": "vinext build",
 		"start": "vinext start",
 		"deploy": "vinext deploy",
-		"check": "vinext check"
+		"check": "vinext check",
+		"login": "wrangler login"
 	},
 	"author": "1yasa",
 	"dependencies": {

@@ -10,7 +10,8 @@ interface IProps {
 
 const Index = async ({ params }: IProps) => {
 	const id = (await params).id
-	const { err, md, toc } = await getDoc(id.join('/'))
+	const result = await getDoc(id.join('/'))
+	const { err, md, toc } = result
 
 	if (err) {
 		return (

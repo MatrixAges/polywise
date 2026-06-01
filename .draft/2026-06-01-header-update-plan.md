@@ -21,4 +21,5 @@ Reference `/Users/xiewendao/Documents/OpenAges/if` update flow and integrate upd
       - switch to circular progress during `downloading`
       - auto-trigger install when download completes
       - surface tooltip and error/no-update feedback through locale strings and toast
-4. Run Prettier on touched files, then run package type-check validation only.
+4. Restrict update UI and update flow to Electron runtime only so non-desktop surfaces neither subscribe nor render the button.
+5. Run Prettier on touched files, then run package type-check validation only.

@@ -2,6 +2,7 @@ import { ArrowUp } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import { Tooltip } from '@/components'
+import { is_electron } from '@/utils'
 
 import ProgressRing from './ProgressRing'
 
@@ -15,6 +16,10 @@ interface IProps {
 const Index = (props: IProps) => {
 	const { update_status, downloadUpdate } = props
 	const { t } = useTranslation()
+
+	if (!is_electron) {
+		return null
+	}
 
 	if (!update_status || update_status.type === 'error') {
 		return null

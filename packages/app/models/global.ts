@@ -88,6 +88,10 @@ export default class GlobalModel {
 	}
 
 	onAppUpdate() {
+		if (!is_electron) {
+			return
+		}
+
 		const deinit = ipc.app.onUpdate.subscribe(undefined, {
 			onData: args => {
 				this.handleUpdateEvent(args)
@@ -127,16 +131,28 @@ export default class GlobalModel {
 	}
 
 	checkUpdate() {
+		if (!is_electron) {
+			return
+		}
+
 		void ipc.app.checkUpdate.query().catch(this.handleUnexpectedUpdateError)
 	}
 
 	downloadUpdate() {
+		if (!is_electron) {
+			return
+		}
+
 		this.update_status = { type: 'downloading', percent: 0 }
 
 		void ipc.app.download.query().catch(this.handleUnexpectedUpdateError)
 	}
 
 	installUpdate() {
+		if (!is_electron) {
+			return
+		}
+
 		void ipc.app.install.query().catch(this.handleUnexpectedUpdateError)
 	}
 

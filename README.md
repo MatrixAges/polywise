@@ -16,7 +16,7 @@
 
 ---
 
-## 💭 Philosophy
+## 💭 Motivation
 
 Polywise is built upon the belief that **truly intelligent AI requires truly intelligent memory**. It is not merely about storage, but rather a system capable of organically forming connections, strengthening through use, strategically forgetting, and continuously evolving. ---
 

@@ -16,6 +16,10 @@ declare module '*.inline.svg' {
 	export default content
 }
 
+declare module 'cloudflare:workers' {
+	export const env: Env
+}
+
 declare function If(props: { condition: boolean; children: React.ReactNode }): any
 declare function Choose(props: { children: React.ReactNode }): any
 declare function When(props: { condition: boolean; children: React.ReactNode }): any
