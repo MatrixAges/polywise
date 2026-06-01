@@ -1,7 +1,6 @@
 #!/usr/bin/env bun
 import { dirname, resolve } from 'path'
 import { fileURLToPath } from 'url'
-import { checkout, setupNode } from '@jlarky/gha-ts/actions'
 import { createSerializer } from '@jlarky/gha-ts/render'
 import { workflow } from '@jlarky/gha-ts/workflow-types'
 import { YAML } from 'bun'
@@ -16,7 +15,7 @@ const build_command = [
 ].join('\n')
 
 const workflow_definition = workflow({
-	name: 'Publish NPM Package',
+	name: 'Release: Standalone',
 	on: {
 		workflow_call: {
 			inputs: {
@@ -50,26 +49,32 @@ const workflow_definition = workflow({
 		publish: {
 			'runs-on': 'ubuntu-latest',
 			steps: [
-				checkout({
-					'fetch-depth': 0,
-					ref: release_branch_name
-				}),
+				{
+					uses: 'actions/checkout@v6',
+					with: {
+						'fetch-depth': 0,
+						ref: release_branch_name
+					}
+				},
 				{
 					name: 'Pin build branch to release commit',
 					shell: 'bash',
 					run: 'git checkout --detach "${{ inputs.release_commit }}"'
 				},
-				setupNode({
-					'node-version': 'lts/*',
-					cache: 'pnpm',
-					'cache-dependency-path': 'pnpm-lock.yaml',
-					'registry-url': 'https://npmjs.org'
-				}),
 				{
 					name: 'Setup pnpm',
-					uses: 'pnpm/action-setup@v4',
+					uses: 'pnpm/action-setup@v6',
 					with: {
 						run_install: false
+					}
+				},
+				{
+					uses: 'actions/setup-node@v6',
+					with: {
+						'node-version': 'lts/*',
+						cache: 'pnpm',
+						'cache-dependency-path': 'pnpm-lock.yaml',
+						'registry-url': 'https://npmjs.org'
 					}
 				},
 				{

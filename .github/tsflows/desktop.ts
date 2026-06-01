@@ -1,7 +1,6 @@
 #!/usr/bin/env bun
 import { dirname, resolve } from 'path'
 import { fileURLToPath } from 'url'
-import { checkout, setupNode } from '@jlarky/gha-ts/actions'
 import { createSerializer } from '@jlarky/gha-ts/render'
 import { workflow } from '@jlarky/gha-ts/workflow-types'
 import { YAML } from 'bun'
@@ -39,7 +38,7 @@ const desktop_shared_build_command = [
 ].join('\n')
 
 const workflow_definition = workflow({
-	name: 'Build Desktop Release',
+	name: 'Release: Desktop',
 	on: {
 		workflow_call: {
 			inputs: {
@@ -158,24 +157,30 @@ const workflow_definition = workflow({
 			name: '${{ matrix.name }}',
 			'runs-on': '${{ matrix.runner }}',
 			steps: [
-				checkout({
-					'fetch-depth': 0,
-					ref: release_branch_name
-				}),
+				{
+					uses: 'actions/checkout@v6',
+					with: {
+						'fetch-depth': 0,
+						ref: release_branch_name
+					}
+				},
 				{
 					name: 'Pin build branch to release commit',
 					shell: 'bash',
 					run: 'git checkout --detach "${{ inputs.release_commit }}"'
 				},
-				setupNode({
-					cache: 'pnpm',
-					'cache-dependency-path': 'pnpm-lock.yaml'
-				}),
 				{
 					name: 'Setup pnpm',
-					uses: 'pnpm/action-setup@v4',
+					uses: 'pnpm/action-setup@v6',
 					with: {
 						run_install: false
+					}
+				},
+				{
+					uses: 'actions/setup-node@v6',
+					with: {
+						cache: 'pnpm',
+						'cache-dependency-path': 'pnpm-lock.yaml'
 					}
 				},
 				{
@@ -222,7 +227,7 @@ const workflow_definition = workflow({
 				},
 				{
 					name: 'Upload assets to Cloudflare R2',
-					uses: 'ryand56/r2-upload-action@latest',
+					uses: 'ryand56/r2-upload-action@v1.4',
 					with: {
 						'r2-account-id': '${{ secrets.CLOUDFLARE_ACCOUNT_ID }}',
 						'r2-access-key-id': '${{ secrets.R2_ACCESS_KEY_ID }}',
@@ -234,7 +239,7 @@ const workflow_definition = workflow({
 				},
 				{
 					name: 'Upload release assets',
-					uses: 'actions/upload-artifact@v4',
+					uses: 'actions/upload-artifact@v7',
 					with: {
 						name: '${{ matrix.artifact_name }}',
 						'if-no-files-found': 'error',
@@ -249,7 +254,7 @@ const workflow_definition = workflow({
 			steps: [
 				{
 					name: 'Download release assets',
-					uses: 'actions/download-artifact@v4',
+					uses: 'actions/download-artifact@v5',
 					with: {
 						path: 'release-assets',
 						'merge-multiple': true
@@ -257,7 +262,7 @@ const workflow_definition = workflow({
 				},
 				{
 					name: 'Attach assets to draft release',
-					uses: 'softprops/action-gh-release@v2',
+					uses: 'softprops/action-gh-release@v3',
 					with: {
 						draft: true,
 						tag_name: '${{ inputs.release_tag }}',

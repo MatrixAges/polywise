@@ -3,5 +3,6 @@
 	"desc": "macOS と Windows に対応しています。",
 	"btn_download": "{platform} 版をダウンロード",
 	"latest": "最新バージョン",
-	"github_release": "GitHub Release"
+	"github_release": "GitHub Release",
+	"source_repository": "ソースリポジトリ"
 }

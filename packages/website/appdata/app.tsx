@@ -42,11 +42,12 @@ export const exec_map = {
 	win32: 'exe'
 }
 
-export const version_file_link = 'https://github.com/MatrixAges/polywise/releases/latest'
+export const r2_release_root = 'https://files.polywise.io/release'
 
-export const getReleaseLink = (_os: OS, _arch: Arch, _version: string) => {
-	return github_release_link
-}
+export const version_file_link = `${r2_release_root}/darwin/x64/latest-mac.yml`
+
+export const getReleaseLink = (os: OS, arch: Arch, version: string) =>
+	`${r2_release_root}/${os}/${arch}/Polywise-${version}-${arch}.${exec_map[os]}`
 
 export const github_release_link = 'https://github.com/MatrixAges/polywise/releases'
 

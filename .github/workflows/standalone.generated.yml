@@ -27,23 +27,23 @@ jobs:
   publish: 
     runs-on: ubuntu-latest
     steps: 
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with: 
           fetch-depth: 0
           ref: build
       - name: Pin build branch to release commit
         shell: bash
         run: "git checkout --detach \"${{ inputs.release_commit }}\""
-      - uses: actions/setup-node@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with: 
+          run_install: false
+      - uses: actions/setup-node@v6
         with: 
           node-version: lts/*
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
           registry-url: https://npmjs.org
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with: 
-          run_install: false
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
       - name: Verify draft release exists

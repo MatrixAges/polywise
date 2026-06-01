@@ -40,11 +40,11 @@ jobs:
       previous_tag: "${{ steps.version.outputs.previous_tag }}"
       release_commit: "${{ steps.persist.outputs.release_commit }}"
     steps: 
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with: 
           fetch-depth: 0
           ref: build
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
       - name: Fetch tags
         run: git fetch --tags -f
       - name: Sync build branch with latest master
@@ -82,7 +82,7 @@ jobs:
           PREVIOUS_TAG: "${{ steps.version.outputs.previous_tag }}"
         run: node ./scripts/generate_release_notes.mjs
       - name: Create draft release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with: 
           draft: true
           tag_name: "${{ steps.version.outputs.release_tag }}"

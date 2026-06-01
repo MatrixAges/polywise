@@ -1,7 +1,6 @@
 #!/usr/bin/env bun
 import { dirname, resolve } from 'path'
 import { fileURLToPath } from 'url'
-import { checkout, setupNode } from '@jlarky/gha-ts/actions'
 import { createSerializer } from '@jlarky/gha-ts/render'
 import { workflow } from '@jlarky/gha-ts/workflow-types'
 import { YAML } from 'bun'
@@ -10,7 +9,7 @@ const release_branch_name = 'build'
 const source_branch_name = 'master'
 
 const workflow_definition = workflow({
-	name: 'Prepare Release',
+	name: 'Release: Prepare',
 	on: {
 		workflow_call: {
 			inputs: {
@@ -62,11 +61,16 @@ const workflow_definition = workflow({
 				release_commit: '${{ steps.persist.outputs.release_commit }}'
 			},
 			steps: [
-				checkout({
-					'fetch-depth': 0,
-					ref: release_branch_name
-				}),
-				setupNode(),
+				{
+					uses: 'actions/checkout@v6',
+					with: {
+						'fetch-depth': 0,
+						ref: release_branch_name
+					}
+				},
+				{
+					uses: 'actions/setup-node@v6'
+				},
 				{
 					name: 'Fetch tags',
 					run: 'git fetch --tags -f'
@@ -137,7 +141,7 @@ const workflow_definition = workflow({
 				},
 				{
 					name: 'Create draft release',
-					uses: 'softprops/action-gh-release@v2',
+					uses: 'softprops/action-gh-release@v3',
 					with: {
 						draft: true,
 						tag_name: '${{ steps.version.outputs.release_tag }}',

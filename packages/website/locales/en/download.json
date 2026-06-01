@@ -3,5 +3,6 @@
 	"desc": "Available for macOS and Windows.",
 	"btn_download": "Download for {platform}",
 	"latest": "Latest version",
-	"github_release": "Github Release"
+	"github_release": "GitHub Release",
+	"source_repository": "Source repository"
 }
