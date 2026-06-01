@@ -25,11 +25,6 @@ const workflow_definition = workflow({
 				checkout({
 					'fetch-depth': 0
 				}),
-				setupNode({
-					'node-version': 'lts/*',
-					cache: 'pnpm',
-					'cache-dependency-path': 'pnpm-lock.yaml'
-				}),
 				{
 					name: 'Setup pnpm',
 					uses: 'pnpm/action-setup@v4',
@@ -37,6 +32,11 @@ const workflow_definition = workflow({
 						run_install: false
 					}
 				},
+				setupNode({
+					'node-version': 'lts/*',
+					cache: 'pnpm',
+					'cache-dependency-path': 'pnpm-lock.yaml'
+				}),
 				{
 					name: 'Install dependencies',
 					run: 'pnpm install --frozen-lockfile'
