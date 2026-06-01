@@ -98,7 +98,7 @@ This document provides an overview of the packages/stk module structure and arch
 			},
 			"utils": {
 				"$.ts": { "desc": "DOM selector shortcut", "role": "Utility" },
-				"Handle.ts": { "desc": "Generic handler class", "role": "Utility" },
+				"handle.ts": { "desc": "Generic handler class", "role": "Utility" },
 				"StickyTableHeader.ts": { "desc": "Sticky header helper", "role": "Utility" },
 				"date.ts": { "desc": "Date manipulation", "role": "Utility" },
 				"file.ts": { "desc": "File manipulation", "role": "Utility" },
