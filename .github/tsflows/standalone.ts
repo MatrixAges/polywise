@@ -23,6 +23,11 @@ const workflow_definition = workflow({
 					type: 'string',
 					description: 'Resolved release version'
 				},
+				release_commit: {
+					required: true,
+					type: 'string',
+					description: 'Release commit persisted to the repository'
+				},
 				release_tag: {
 					required: true,
 					type: 'string',
@@ -43,7 +48,10 @@ const workflow_definition = workflow({
 		publish: {
 			'runs-on': 'ubuntu-latest',
 			steps: [
-				checkout({ 'fetch-depth': 0 }),
+				checkout({
+					'fetch-depth': 0,
+					ref: '${{ inputs.release_commit }}'
+				}),
 				setupNode({
 					'node-version': 'lts/*',
 					cache: 'pnpm',
@@ -60,14 +68,6 @@ const workflow_definition = workflow({
 				{
 					name: 'Setup Bun',
 					uses: 'oven-sh/setup-bun@v2'
-				},
-				{
-					name: 'Apply release version',
-					shell: 'bash',
-					env: {
-						RELEASE_VERSION: '${{ inputs.release_version }}'
-					},
-					run: 'node ./scripts/apply_release_version.mjs'
 				},
 				{
 					name: 'Verify draft release exists',

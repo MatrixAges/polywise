@@ -35,7 +35,7 @@ const workflow_definition = workflow({
 					value: '${{ jobs.prepare.outputs.previous_tag }}'
 				},
 				release_commit: {
-					description: 'Commit being released',
+					description: 'Release commit persisted to the repository',
 					value: '${{ jobs.prepare.outputs.release_commit }}'
 				}
 			}
@@ -56,7 +56,7 @@ const workflow_definition = workflow({
 				release_version: '${{ steps.version.outputs.release_version }}',
 				release_tag: '${{ steps.version.outputs.release_tag }}',
 				previous_tag: '${{ steps.version.outputs.previous_tag }}',
-				release_commit: '${{ steps.version.outputs.release_commit }}'
+				release_commit: '${{ steps.persist.outputs.release_commit }}'
 			},
 			steps: [
 				checkout({ 'fetch-depth': 0 }),
@@ -75,14 +75,38 @@ const workflow_definition = workflow({
 					run: 'node ./scripts/resolve_release_version.mjs'
 				},
 				{
+					name: 'Apply release version to repository files',
+					shell: 'bash',
+					env: {
+						RELEASE_VERSION: '${{ steps.version.outputs.release_version }}'
+					},
+					run: 'node ./scripts/apply_release_version.mjs'
+				},
+				{
 					name: 'Collect commits',
 					id: 'commits',
 					shell: 'bash',
 					env: {
 						PREVIOUS_TAG: '${{ steps.version.outputs.previous_tag }}',
-						RELEASE_COMMIT: '${{ steps.version.outputs.release_commit }}'
+						RELEASE_COMMIT: '${{ github.sha }}'
 					},
 					run: 'node ./scripts/collect_release_commits.mjs'
+				},
+				{
+					name: 'Commit and push release version',
+					id: 'persist',
+					shell: 'bash',
+					env: {
+						RELEASE_VERSION: '${{ steps.version.outputs.release_version }}'
+					},
+					run: [
+						'git config user.name "github-actions[bot]"',
+						'git config user.email "41898282+github-actions[bot]@users.noreply.github.com"',
+						'git add packages/polywise/package.json packages/app/package.json packages/desktop/package.json',
+						'git commit -m "chore(release): v${RELEASE_VERSION}"',
+						'git push origin HEAD:${GITHUB_REF_NAME}',
+						'echo "release_commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"'
+					].join('\n')
 				},
 				{
 					name: 'Generate release notes',
@@ -101,7 +125,7 @@ const workflow_definition = workflow({
 						draft: true,
 						tag_name: '${{ steps.version.outputs.release_tag }}',
 						name: '${{ steps.version.outputs.release_tag }}',
-						target_commitish: '${{ steps.version.outputs.release_commit }}',
+						target_commitish: '${{ steps.persist.outputs.release_commit }}',
 						body_path: 'release-notes.md'
 					}
 				}

@@ -52,15 +52,15 @@ const appendOutput = async (key, value) => {
 const run = async () => {
 	const current_version = await readPackageVersion('packages/polywise/package.json')
 	const requested_version = process.env.INPUT_VERSION?.trim() || ''
-	const release_commit = process.env.GITHUB_SHA?.trim()
-
-	if (!release_commit) {
-		throw new Error('GITHUB_SHA is required')
-	}
 
 	const resolved_version = requested_version
 		? stringifyVersion(parseVersion(requested_version))
 		: incrementVersion(current_version)
+
+	if (resolved_version === current_version) {
+		throw new Error(`Resolved release version matches current version: ${resolved_version}`)
+	}
+
 	const release_tag = `v${resolved_version}`
 	const previous_tag_proc = spawnSync(
 		'bash',
@@ -81,7 +81,6 @@ const run = async () => {
 	await appendOutput('release_version', resolved_version)
 	await appendOutput('release_tag', release_tag)
 	await appendOutput('previous_tag', previous_tag)
-	await appendOutput('release_commit', release_commit)
 }
 
 await run()

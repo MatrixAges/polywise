@@ -134,7 +134,10 @@ const workflow_definition = workflow({
 			name: '${{ matrix.name }}',
 			'runs-on': '${{ matrix.runner }}',
 			steps: [
-				checkout({ 'fetch-depth': 0 }),
+				checkout({
+					'fetch-depth': 0,
+					ref: '${{ inputs.release_commit }}'
+				}),
 				setupNode({
 					cache: 'pnpm',
 					'cache-dependency-path': 'pnpm-lock.yaml'
@@ -149,14 +152,6 @@ const workflow_definition = workflow({
 				{
 					name: 'Setup Bun',
 					uses: 'oven-sh/setup-bun@v2'
-				},
-				{
-					name: 'Apply release version',
-					shell: 'bash',
-					env: {
-						RELEASE_VERSION: '${{ inputs.release_version }}'
-					},
-					run: 'node ./scripts/apply_release_version.mjs'
 				},
 				{
 					name: 'Install dependencies',

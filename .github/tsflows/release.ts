@@ -40,6 +40,7 @@ const workflow_definition = workflow({
 			uses: './.github/workflows/standalone.generated.yml',
 			with: {
 				release_version: '${{ needs.prepare.outputs.release_version }}',
+				release_commit: '${{ needs.prepare.outputs.release_commit }}',
 				release_tag: '${{ needs.prepare.outputs.release_tag }}'
 			},
 			secrets: 'inherit'
