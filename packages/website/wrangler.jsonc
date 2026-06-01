@@ -5,7 +5,6 @@
 	"compatibility_date": "2026-05-21",
 	"compatibility_flags": ["nodejs_compat"],
 	"workers_dev": false,
-	"routes": [{ "pattern": "polywise.io", "custom_domain": true }],
 	"r2_buckets": [{ "binding": "R2", "bucket_name": "polywise" }],
 	"assets": {
 		"directory": "dist/client",

@@ -43,9 +43,13 @@ jobs:
       - uses: actions/checkout@v5
         with: 
           fetch-depth: 0
+          ref: build
       - uses: actions/setup-node@v4
       - name: Fetch tags
         run: git fetch --tags -f
+      - name: Sync build branch with latest master
+        shell: bash
+        run: "git fetch origin master build --tags -f\ngit checkout build\ngit reset --hard origin/build\ngit pull --no-rebase origin master"
       - name: Resolve release version
         id: version
         shell: bash
@@ -62,14 +66,14 @@ jobs:
         shell: bash
         env: 
           PREVIOUS_TAG: "${{ steps.version.outputs.previous_tag }}"
-          RELEASE_COMMIT: "${{ github.sha }}"
+          RELEASE_COMMIT: HEAD
         run: node ./scripts/collect_release_commits.mjs
       - name: Commit and push release version
         id: persist
         shell: bash
         env: 
           RELEASE_VERSION: "${{ steps.version.outputs.release_version }}"
-        run: "git config user.name \"github-actions[bot]\"\ngit config user.email \"41898282+github-actions[bot]@users.noreply.github.com\"\ngit add packages/polywise/package.json packages/app/package.json packages/desktop/package.json\ngit commit -m \"chore(release): v${RELEASE_VERSION}\"\ngit push origin HEAD:${GITHUB_REF_NAME}\necho \"release_commit=$(git rev-parse HEAD)\" >> \"$GITHUB_OUTPUT\""
+        run: "git config user.name \"github-actions[bot]\"\ngit config user.email \"41898282+github-actions[bot]@users.noreply.github.com\"\ngit add packages/polywise/package.json packages/app/package.json packages/desktop/package.json\ngit commit -m \"chore(release): v${RELEASE_VERSION}\"\ngit push origin HEAD:build\ngit push origin HEAD:master\necho \"release_commit=$(git rev-parse HEAD)\" >> \"$GITHUB_OUTPUT\""
       - name: Generate release notes
         shell: bash
         env: 

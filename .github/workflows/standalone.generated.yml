@@ -30,7 +30,10 @@ jobs:
       - uses: actions/checkout@v5
         with: 
           fetch-depth: 0
-          ref: "${{ inputs.release_commit }}"
+          ref: build
+      - name: Pin build branch to release commit
+        shell: bash
+        run: "git checkout --detach \"${{ inputs.release_commit }}\""
       - uses: actions/setup-node@v4
         with: 
           node-version: lts/*

@@ -6,6 +6,9 @@ import { createSerializer } from '@jlarky/gha-ts/render'
 import { workflow } from '@jlarky/gha-ts/workflow-types'
 import { YAML } from 'bun'
 
+const release_branch_name = 'build'
+const source_branch_name = 'master'
+
 const workflow_definition = workflow({
 	name: 'Prepare Release',
 	on: {
@@ -59,11 +62,24 @@ const workflow_definition = workflow({
 				release_commit: '${{ steps.persist.outputs.release_commit }}'
 			},
 			steps: [
-				checkout({ 'fetch-depth': 0 }),
+				checkout({
+					'fetch-depth': 0,
+					ref: release_branch_name
+				}),
 				setupNode(),
 				{
 					name: 'Fetch tags',
 					run: 'git fetch --tags -f'
+				},
+				{
+					name: 'Sync build branch with latest master',
+					shell: 'bash',
+					run: [
+						`git fetch origin ${source_branch_name} ${release_branch_name} --tags -f`,
+						`git checkout ${release_branch_name}`,
+						`git reset --hard origin/${release_branch_name}`,
+						`git pull --no-rebase origin ${source_branch_name}`
+					].join('\n')
 				},
 				{
 					name: 'Resolve release version',
@@ -88,7 +104,7 @@ const workflow_definition = workflow({
 					shell: 'bash',
 					env: {
 						PREVIOUS_TAG: '${{ steps.version.outputs.previous_tag }}',
-						RELEASE_COMMIT: '${{ github.sha }}'
+						RELEASE_COMMIT: 'HEAD'
 					},
 					run: 'node ./scripts/collect_release_commits.mjs'
 				},
@@ -104,7 +120,8 @@ const workflow_definition = workflow({
 						'git config user.email "41898282+github-actions[bot]@users.noreply.github.com"',
 						'git add packages/polywise/package.json packages/app/package.json packages/desktop/package.json',
 						'git commit -m "chore(release): v${RELEASE_VERSION}"',
-						'git push origin HEAD:${GITHUB_REF_NAME}',
+						`git push origin HEAD:${release_branch_name}`,
+						`git push origin HEAD:${source_branch_name}`,
 						'echo "release_commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"'
 					].join('\n')
 				},

@@ -6,6 +6,8 @@ import { createSerializer } from '@jlarky/gha-ts/render'
 import { workflow } from '@jlarky/gha-ts/workflow-types'
 import { YAML } from 'bun'
 
+const release_branch_name = 'build'
+
 const build_command = [
 	'pnpm --filter "./packages/stk" run build',
 	'pnpm --filter "./packages/erpc" run build',
@@ -50,8 +52,13 @@ const workflow_definition = workflow({
 			steps: [
 				checkout({
 					'fetch-depth': 0,
-					ref: '${{ inputs.release_commit }}'
+					ref: release_branch_name
 				}),
+				{
+					name: 'Pin build branch to release commit',
+					shell: 'bash',
+					run: 'git checkout --detach "${{ inputs.release_commit }}"'
+				},
 				setupNode({
 					'node-version': 'lts/*',
 					cache: 'pnpm',
