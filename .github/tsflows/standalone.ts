@@ -126,7 +126,17 @@ const workflow_definition = workflow({
 					name: 'Publish polywise',
 					shell: 'bash',
 					'working-directory': 'packages/polywise',
-					run: 'npm publish --access public --provenance --no-git-checks'
+					env: {
+						RELEASE_VERSION: '${{ inputs.release_version }}'
+					},
+					run: [
+						'published_version=$(npm view "polywise@${RELEASE_VERSION}" version 2>/dev/null || true)',
+						'if [ "$published_version" = "$RELEASE_VERSION" ]; then',
+						'	echo "polywise@${RELEASE_VERSION} already published, skipping npm publish."',
+						'	exit 0',
+						'fi',
+						'npm publish --access public --provenance --no-git-checks'
+					].join('\n')
 				}
 			]
 		}
