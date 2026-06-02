@@ -23,15 +23,43 @@ const appendOutput = async (key, value) => {
 
 const getRepoSlug = () => process.env.GITHUB_REPOSITORY?.trim() || default_repo_slug
 
-const readDraftRelease = release_tag => {
-	const repo_slug = getRepoSlug()
-	const release_proc = spawnSync('gh', ['api', `repos/${repo_slug}/releases?per_page=3`], {
+const runGh = args => {
+	const gh_proc = spawnSync('gh', args, {
 		encoding: 'utf8',
 		stdio: ['ignore', 'pipe', 'pipe']
 	})
-	const releases = JSON.parse(release_proc.status === 0 ? release_proc.stdout || '[]' : '[]')
 
-	return releases.find(release_item => release_item.tag_name === release_tag && release_item.draft === true) || null
+	if (gh_proc.status !== 0) {
+		const error_message = `${gh_proc.stderr || gh_proc.stdout}`.trim()
+
+		throw new Error(`Failed to run gh ${args.join(' ')}: ${error_message}`)
+	}
+
+	return gh_proc.stdout.trim()
+}
+
+const readDraftRelease = release_tag => {
+	const repo_slug = getRepoSlug()
+	let page_number = 1
+
+	while (true) {
+		const raw_output = runGh(['api', `repos/${repo_slug}/releases?per_page=3&page=${page_number}`])
+		const releases = JSON.parse(raw_output || '[]')
+
+		if (releases.length === 0) {
+			return null
+		}
+
+		const matched_release =
+			releases.find(release_item => release_item.tag_name === release_tag && release_item.draft === true) ||
+			null
+
+		if (matched_release) {
+			return matched_release
+		}
+
+		page_number += 1
+	}
 }
 
 const writeMissingOutputs = async () => {
