@@ -61,7 +61,7 @@ jobs:
                                 name: macOS (x64)
                                 artifact_name: polywise-macos-x64
                                 asset_glob: "packages/desktop/release/darwin/x64/*.dmg\npackages/desktop/release/darwin/x64/*.zip\npackages/desktop/release/darwin/x64/*.blockmap\npackages/desktop/release/darwin/x64/latest*.yml"
-                                source_dir: packages/desktop/release/darwin/x64
+                                upload_dir: packages/desktop/.release-upload/darwin/x64
                                 destination_dir: release/darwin/x64
                                 build_command: "pnpm --filter \"./packages/stk\" run build\npnpm --filter \"./packages/erpc\" run build\npnpm --filter \"./packages/app\" run build:electron\npnpm --filter \"./packages/polywise\" run build:electron\npnpm --dir packages/desktop run clean\npnpm --dir packages/desktop run main:prod\npnpm --dir packages/desktop run transform\nretryCommand() {\n\tmax_attempts=\"$1\"\n\tsleep_seconds=\"$2\"\n\tshift 2\n\tattempt=1\n\twhile true; do\n\t\t\"$@\" && return 0\n\t\tif [ \"$attempt\" -ge \"$max_attempts\" ]; then\n\t\t\treturn 1\n\t\tfi\n\t\tattempt=$((attempt + 1))\n\t\tsleep \"$sleep_seconds\"\n\tdone\n}\nretryCommand 3 12 pnpm --dir packages/desktop exec cross-env ZIP=0 BUILD_ARCH=x64 electron-builder -m --x64 --publish never\nretryCommand 3 12 pnpm --dir packages/desktop exec cross-env BUILD_ARCH=x64 electron-builder -m --x64 --publish never"
                               - runner: macos-latest
@@ -69,31 +69,29 @@ jobs:
                                 name: macOS (arm64)
                                 artifact_name: polywise-macos-arm64
                                 asset_glob: "packages/desktop/release/darwin/arm64/*.dmg\npackages/desktop/release/darwin/arm64/*.zip\npackages/desktop/release/darwin/arm64/*.blockmap\npackages/desktop/release/darwin/arm64/latest*.yml"
-                                source_dir: packages/desktop/release/darwin/arm64
+                                upload_dir: packages/desktop/.release-upload/darwin/arm64
                                 destination_dir: release/darwin/arm64
                                 build_command: "pnpm --filter \"./packages/stk\" run build\npnpm --filter \"./packages/erpc\" run build\npnpm --filter \"./packages/app\" run build:electron\npnpm --filter \"./packages/polywise\" run build:electron\npnpm --dir packages/desktop run clean\npnpm --dir packages/desktop run main:prod\npnpm --dir packages/desktop run transform\nretryCommand() {\n\tmax_attempts=\"$1\"\n\tsleep_seconds=\"$2\"\n\tshift 2\n\tattempt=1\n\twhile true; do\n\t\t\"$@\" && return 0\n\t\tif [ \"$attempt\" -ge \"$max_attempts\" ]; then\n\t\t\treturn 1\n\t\tfi\n\t\tattempt=$((attempt + 1))\n\t\tsleep \"$sleep_seconds\"\n\tdone\n}\nretryCommand 3 12 pnpm --dir packages/desktop exec cross-env ZIP=0 BUILD_ARCH=arm64 electron-builder -m --arm64 --publish never\nretryCommand 3 12 pnpm --dir packages/desktop exec cross-env BUILD_ARCH=arm64 electron-builder -m --arm64 --publish never"
                               - runner: windows-latest
                                 name: Windows (x64)
                                 artifact_name: polywise-windows-x64
                                 asset_glob: "packages/desktop/release/win32/x64/*.exe\npackages/desktop/release/win32/x64/*.blockmap\npackages/desktop/release/win32/x64/latest*.yml"
-                                source_dir: packages/desktop/release/win32/x64
+                                upload_dir: packages/desktop/.release-upload/win32/x64
                                 destination_dir: release/win32/x64
                                 build_command: "pnpm --filter \"./packages/stk\" run build\npnpm --filter \"./packages/erpc\" run build\npnpm --filter \"./packages/app\" run build:electron\npnpm --filter \"./packages/polywise\" run build:electron\npnpm --dir packages/desktop run clean\npnpm --dir packages/desktop run main:prod\npnpm --dir packages/desktop run transform\npnpm --dir packages/desktop exec electron-builder -w --publish never"
             name: '${{ matrix.name }}'
             runs-on: '${{ matrix.runner }}'
             steps:
-                  - name: Check platform asset on Cloudflare R2
-                    id: asset_status
-                    shell: bash
-                    env:
-                          RELEASE_VERSION: '${{ inputs.release_version }}'
-                          ASSET_GLOB: '${{ matrix.asset_glob }}'
-                    run: "first_asset=$(printf \"%s\\n\" \"$ASSET_GLOB\" | head -n 1)\nasset_path=\"${first_asset#packages/desktop/}\"\nasset_url=\"https://files.polywise.io/release/${asset_path}\"\nhttp_code=$(curl -L -s -o /dev/null -w \"%{http_code}\" \"$asset_url\")\nif [ \"$http_code\" = \"200\" ]; then\n\techo \"already_published=true\" >> \"$GITHUB_OUTPUT\"\n\texit 0\nfi\necho \"already_published=false\" >> \"$GITHUB_OUTPUT\""
-                  - if: "steps.asset_status.outputs.already_published != 'true'"
-                    uses: actions/checkout@v6
+                  - uses: actions/checkout@v6
                     with:
                           fetch-depth: 0
                           ref: build
+                  - name: Check platform asset on Cloudflare R2
+                    id: asset_status
+                    env:
+                          RELEASE_BASE_URL: https://files.polywise.io/release
+                          ASSET_GLOB: '${{ matrix.asset_glob }}'
+                    run: node ./scripts/check_platform_asset_on_r2.mjs
                   - if: "steps.asset_status.outputs.already_published != 'true'"
                     name: Pin build branch to release commit
                     shell: bash
@@ -160,6 +158,12 @@ jobs:
                           CSC_KEY_PASSWORD: '${{ secrets.CSC_KEY_PASSWORD }}'
                     run: '${{ matrix.build_command }}'
                   - if: "steps.asset_status.outputs.already_published != 'true'"
+                    name: Collect release assets for Cloudflare R2
+                    env:
+                          ASSET_GLOB: '${{ matrix.asset_glob }}'
+                          UPLOAD_DIR: '${{ matrix.upload_dir }}'
+                    run: node ./scripts/collect_release_assets.mjs
+                  - if: "steps.asset_status.outputs.already_published != 'true'"
                     name: Upload assets to Cloudflare R2
                     uses: ryand56/r2-upload-action@v1.4
                     with:
@@ -167,7 +171,7 @@ jobs:
                           r2-access-key-id: '${{ secrets.R2_ACCESS_KEY_ID }}'
                           r2-secret-access-key: '${{ secrets.R2_SECRET_ACCESS_KEY }}'
                           r2-bucket: '${{ secrets.R2_BUCKET }}'
-                          source-dir: '${{ matrix.source_dir }}'
+                          source-dir: '${{ matrix.upload_dir }}'
                           destination-dir: '${{ matrix.destination_dir }}'
                   - if: "steps.asset_status.outputs.already_published != 'true'"
                     name: Upload release assets

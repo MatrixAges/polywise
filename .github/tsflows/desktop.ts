@@ -173,7 +173,7 @@ const workflow_definition = workflow({
 							name: 'macOS (x64)',
 							artifact_name: 'polywise-macos-x64',
 							asset_glob: mac_asset_glob,
-							source_dir: 'packages/desktop/release/darwin/x64',
+							upload_dir: 'packages/desktop/.release-upload/darwin/x64',
 							destination_dir: 'release/darwin/x64',
 							build_command: [
 								desktop_shared_build_command,
@@ -188,7 +188,7 @@ const workflow_definition = workflow({
 							name: 'macOS (arm64)',
 							artifact_name: 'polywise-macos-arm64',
 							asset_glob: mac_arm_asset_glob,
-							source_dir: 'packages/desktop/release/darwin/arm64',
+							upload_dir: 'packages/desktop/.release-upload/darwin/arm64',
 							destination_dir: 'release/darwin/arm64',
 							build_command: [
 								desktop_shared_build_command,
@@ -202,7 +202,7 @@ const workflow_definition = workflow({
 							name: 'Windows (x64)',
 							artifact_name: 'polywise-windows-x64',
 							asset_glob: win_asset_glob,
-							source_dir: 'packages/desktop/release/win32/x64',
+							upload_dir: 'packages/desktop/.release-upload/win32/x64',
 							destination_dir: 'release/win32/x64',
 							build_command: [
 								desktop_shared_build_command,
@@ -216,32 +216,20 @@ const workflow_definition = workflow({
 			'runs-on': '${{ matrix.runner }}',
 			steps: [
 				{
-					name: 'Check platform asset on Cloudflare R2',
-					id: 'asset_status',
-					shell: 'bash',
-					env: {
-						RELEASE_VERSION: '${{ inputs.release_version }}',
-						ASSET_GLOB: '${{ matrix.asset_glob }}'
-					},
-					run: [
-						'first_asset=$(printf "%s\\n" "$ASSET_GLOB" | head -n 1)',
-						'asset_path="${first_asset#packages/desktop/}"',
-						'asset_url="' + `${release_base_url}/` + '${asset_path}"',
-						'http_code=$(curl -L -s -o /dev/null -w "%{http_code}" "$asset_url")',
-						'if [ "$http_code" = "200" ]; then',
-						'\techo "already_published=true" >> "$GITHUB_OUTPUT"',
-						'\texit 0',
-						'fi',
-						'echo "already_published=false" >> "$GITHUB_OUTPUT"'
-					].join('\n')
-				},
-				{
-					if: "steps.asset_status.outputs.already_published != 'true'",
 					uses: 'actions/checkout@v6',
 					with: {
 						'fetch-depth': 0,
 						ref: release_branch_name
 					}
+				},
+				{
+					name: 'Check platform asset on Cloudflare R2',
+					id: 'asset_status',
+					env: {
+						RELEASE_BASE_URL: release_base_url,
+						ASSET_GLOB: '${{ matrix.asset_glob }}'
+					},
+					run: 'node ./scripts/check_platform_asset_on_r2.mjs'
 				},
 				{
 					if: "steps.asset_status.outputs.already_published != 'true'",
@@ -347,6 +335,15 @@ const workflow_definition = workflow({
 				},
 				{
 					if: "steps.asset_status.outputs.already_published != 'true'",
+					name: 'Collect release assets for Cloudflare R2',
+					env: {
+						ASSET_GLOB: '${{ matrix.asset_glob }}',
+						UPLOAD_DIR: '${{ matrix.upload_dir }}'
+					},
+					run: 'node ./scripts/collect_release_assets.mjs'
+				},
+				{
+					if: "steps.asset_status.outputs.already_published != 'true'",
 					name: 'Upload assets to Cloudflare R2',
 					uses: 'ryand56/r2-upload-action@v1.4',
 					with: {
@@ -354,7 +351,7 @@ const workflow_definition = workflow({
 						'r2-access-key-id': '${{ secrets.R2_ACCESS_KEY_ID }}',
 						'r2-secret-access-key': '${{ secrets.R2_SECRET_ACCESS_KEY }}',
 						'r2-bucket': '${{ secrets.R2_BUCKET }}',
-						'source-dir': '${{ matrix.source_dir }}',
+						'source-dir': '${{ matrix.upload_dir }}',
 						'destination-dir': '${{ matrix.destination_dir }}'
 					}
 				},
