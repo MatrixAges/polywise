@@ -110,7 +110,7 @@ const Index = () => {
 			<div className='download_items flex flex-col'>
 				<div className='download_item flex items-center justify-between'>
 					<div className='flex items-center'>
-						<img src='/images/svg/macos.svg' alt='macos' />
+						<img src='/svgs/macos.svg' alt='macos' />
 						<span className='name'>{t_common('download.desktop.macos.arm64.title')}</span>
 					</div>
 					<a href={macos_arm_link} target='_blank'>
@@ -119,7 +119,7 @@ const Index = () => {
 				</div>
 				<div className='download_item flex items-center justify-between'>
 					<div className='flex items-center'>
-						<img src='/images/svg/macos.svg' alt='macos' />
+						<img src='/svgs/macos.svg' alt='macos' />
 						<span className='name'>{t_common('download.desktop.macos.x64.title')}</span>
 					</div>
 					<a href={macos_x64_link} target='_blank'>
@@ -128,7 +128,7 @@ const Index = () => {
 				</div>
 				<div className='download_item flex items-center justify-between'>
 					<div className='flex items-center'>
-						<img src='/images/svg/windows.svg' alt='windows' />
+						<img src='/svgs/windows.svg' alt='windows' />
 						<span className='name'>{t_common('download.desktop.windows.x64.title')}</span>
 					</div>
 					<a href={windows_x64_link} target='_blank'>
