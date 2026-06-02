@@ -3,7 +3,6 @@ import '@website/styles/tailwind.global.css'
 import '@website/styles/class.global.css'
 import '@website/styles/shiki.global.css'
 
-import { GoogleAnalytics } from '@next/third-parties/google'
 import { Client, Router } from '@website/appunits/layout'
 import ToastProvider from '@website/components/ui/ToastProvider'
 import { getUserLocale, getUserTheme } from '@website/services'
@@ -32,6 +31,13 @@ const RootLayout = async ({ children }: PropsWithChildren) => {
 		theme_cookie_exsit
 	}
 
+	const google_analytics_init = `
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		gtag('js', new Date());
+		gtag('config', '${google_analytics_id}');
+	`
+
 	return (
 		<html lang={locale} data-theme={theme} style={{ colorScheme: theme }} suppressHydrationWarning>
 			<head>
@@ -42,6 +48,8 @@ const RootLayout = async ({ children }: PropsWithChildren) => {
 				<link rel='stylesheet' href='/theme/common.css' />
 				<link rel='stylesheet' href='/theme/light.css' />
 				<link rel='stylesheet' href='/theme/dark.css' />
+				<script async src={`https://www.googletagmanager.com/gtag/js?id=${google_analytics_id}`} />
+				<script dangerouslySetInnerHTML={{ __html: google_analytics_init }} />
 			</head>
 			<body>
 				<Router />
@@ -51,7 +59,6 @@ const RootLayout = async ({ children }: PropsWithChildren) => {
 					</ToastProvider>
 				</NextIntlClientProvider>
 			</body>
-			<GoogleAnalytics gaId={google_analytics_id} />
 		</html>
 	)
 }
