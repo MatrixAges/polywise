@@ -1,10 +1,6 @@
 <p align="right"><a href="README.zh.md">Chinese</a> | English</p>
 
-<p align="center">
-<img src="packages/app/public/icon.svg" width="120" height="120" alt="Polywise Logo">
-</p>
-
-# <p align="center">Polywise</p>
+# <p align="center"> <img src="packages/app/public/icon.svg" width="21" height="21" alt="Polywise Logo"> Polywise </p>
 
 <p align="center"><strong>The open source agentic content system</strong></p>
 
@@ -13,6 +9,12 @@
 <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License"></a>
 <a href="https://x.com/xiewendao"><img src="https://img.shields.io/badge/FollowX-XWD-green?logo=Twitter" alt="Twitter"></a>
 </p>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="images/landing_dark.png">
+  <source media="(prefers-color-scheme: light)" srcset="images/landing_light.png">
+  <img alt="Shows an illustrated sun in light mode and a moon with stars in dark mode." src="images/landing_light.png">
+</picture>
 
 ---
 
