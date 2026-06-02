@@ -206,7 +206,7 @@ const Index = () => {
 
 								return (
 									<motion.img
-										className='image image_layer rounded-2xl'
+										className='image image_layer rounded-2xl max-md:rounded-xl'
 										src={`${base_url_files_website}/${item}.png`}
 										alt={`image_preview_${item}`}
 										initial={false}

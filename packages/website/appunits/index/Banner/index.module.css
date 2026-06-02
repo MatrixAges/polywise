@@ -222,15 +222,15 @@
 
 				.title_wrap {
 					h1 {
-						font-size: 30px;
+						font-size: 27px;
 					}
 
 					.feature_slot {
-						min-height: 48px;
+						min-height: 45px;
 					}
 
 					.feature {
-						min-height: 42px;
+						min-height: 39px;
 						margin-bottom: 0;
 					}
 				}
