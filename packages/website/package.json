@@ -16,6 +16,7 @@
 	"author": "1yasa",
 	"dependencies": {
 		"@abraham/reflection": "^0.13.0",
+		"@next/third-parties": "16.2.6",
 		"@base-ui/react": "^1.5.0",
 		"@date-fns/tz": "^1.5.0",
 		"@formatjs/intl-localematcher": "^0.8.8",

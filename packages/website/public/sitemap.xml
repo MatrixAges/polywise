@@ -1,15 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 	<url>
-		<loc>https://polywise.io/en</loc>
+		<loc>https://polywise.io</loc>
 	</url>
 	<url>
-		<loc>https://polywise.io/zh</loc>
+		<loc>https://polywise.io/docs</loc>
 	</url>
 	<url>
-		<loc>https://polywise.io/ja</loc>
+		<loc>https://polywise.io/docs/intro</loc>
 	</url>
 	<url>
-		<loc>https://polywise.io/en/docs</loc>
+		<loc>https://polywise.io/download</loc>
+	</url>
+	<url>
+		<loc>https://polywise.io/contact</loc>
 	</url>
 </urlset>

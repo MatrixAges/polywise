@@ -1152,6 +1152,9 @@ importers:
       '@formatjs/intl-localematcher':
         specifier: ^0.8.8
         version: 0.8.9
+      '@next/third-parties':
+        specifier: 16.2.6
+        version: 16.2.6(next@16.2.6(@opentelemetry/api@1.9.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react@19.2.6)
       '@phosphor-icons/react':
         specifier: ^2.1.10
         version: 2.1.10(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
@@ -2640,11 +2643,6 @@ packages:
   '@drizzle-team/brocli@0.12.0':
     resolution: {integrity: sha512-mlUE+rZ8CatQekLhnaiN91Iemdd+e2gFKooGlnRB3oPTL3VghLfX24dx7HrzMNeC1JrIB/0kpsfyty3f5HNfxQ==}
 
-  '@electron/asar@3.2.1':
-    resolution: {integrity: sha512-hE2cQMZ5+4o7+6T2lUaVbxIzrOjZZfX7dB02xuapyYFJZEAiWTelq6J3mMoxzd0iONDvYLPVKecB5tyjIoVDVA==}
-    engines: {node: '>=10.12.0'}
-    hasBin: true
-
   '@electron/asar@3.4.1':
     resolution: {integrity: sha512-i4/rNPRS84t0vSRa2HorerGRXWyF4vThfHesw0dmcWHp+cspK743UanA0suA5Q5y8kzY2y6YKrvbIUn69BCAiA==}
     engines: {node: '>=10.12.0'}
@@ -3735,6 +3733,12 @@ packages:
     cpu: [x64]
     os: [win32]
 
+  '@next/third-parties@16.2.6':
+    resolution: {integrity: sha512-PDPIPVj1NX6Taxsl8OJteAUJ7iwR+QrokwWig68eh0cOmuNjC6MBL+ZzBjO8Bv0n/HOSqjGArZpM5KMSUxm+MQ==}
+    peerDependencies:
+      next: ^13.0.0 || ^14.0.0 || ^15.0.0 || ^16.0.0-beta.0
+      react: ^18.2.0 || 19.0.0-rc-de68d2f4-20241204 || ^19.0.0
+
   '@nicolo-ribaudo/eslint-scope-5-internals@5.1.1-v1':
     resolution: {integrity: sha512-54/JRvkLIzzDWshCWfuhadfrfZVPiElY8Fcgmg1HroEly/EDSszzhBAsarCux+D/kOslTRquNzuyGSmUSTTHGg==}
 
@@ -3772,6 +3776,13 @@ packages:
 
   '@node-llama-cpp/linux-x64-cuda@3.18.1':
     resolution: {integrity: sha512-qOaYP4uwsUoBHQ/7xSOvyJIuXapS57Al+Sudgi00f96ldNZLKe1vuSGptAi5LTM2lIj66PKm6h8PlRWctwsZ2g==}
+    engines: {node: '>=20.0.0'}
+    cpu: [x64]
+    os: [linux]
+    libc: [glibc]
+
+  '@node-llama-cpp/linux-x64-vulkan@3.18.1':
+    resolution: {integrity: sha512-SIaNTK5pUPhwJD0gmiQfHa8OrRctVMmnqu+slJrz2Mzgg/XrwFndJlS9hvc+jSjTXCouwf7sYeQaaJWvQgBh/A==}
     engines: {node: '>=20.0.0'}
     cpu: [x64]
     os: [linux]
@@ -5905,9 +5916,6 @@ packages:
   '@types/geojson@7946.0.16':
     resolution: {integrity: sha512-6C8nqWur3j98U6+lXDfTUWIfgvZU+EumvpHKcYjujKH7woYyLj2sUmff0tRhrqM7BohUw7Pz3ZB1jj2gW9Fvmg==}
 
-  '@types/glob@7.2.0':
-    resolution: {integrity: sha512-ZUxbzKl0IfJILTS6t7ip5fQQM/J3TJYubDm3nMbgubNNYS62eXeUpoLUC8/7fJNiFYHTrGPQn7hspDUzIHX3UA==}
-
   '@types/graceful-fs@4.1.9':
     resolution: {integrity: sha512-olP3sd1qOEe5dXTSaFvQG+02VdRXcdytWLAZsAq1PecU8uqQAhkrnbli7DagjtXKW/Bl7YJbUsa8MPcuc8LHEQ==}
 
@@ -5967,10 +5975,6 @@ packages:
 
   '@types/mime@1.3.5':
     resolution: {integrity: sha512-/pyBZWSLD2n0dcHE3hq8s8ZvcETHtEuF+3E7XVt0Ig2nvsVQXdghHVcEkIWjy9A0wKfTn97a/PSDYohKIlnP/w==}
-
-  '@types/minimatch@6.0.0':
-    resolution: {integrity: sha512-zmPitbQ8+6zNutpwgcQuLcsEpn/Cj54Kbn7L5pX0Os5kdWplB7xPgEh/g+SWOB/qmows2gpuCaPyduq8ZZRnxA==}
-    deprecated: This is a stub types definition. minimatch provides its own type definitions, so you do not need this installed.
 
   '@types/ms@2.1.0':
     resolution: {integrity: sha512-GsCCIZDE/p3i96vtEqx+7dBUGXrc7zeSK3wwPHIaRThS+9OhWIXRqzs4d6k1SVU8g91DrNRWxWUGhp5KXQb2VA==}
@@ -9217,10 +9221,6 @@ packages:
     resolution: {integrity: sha512-4s+DyciWBV0eK148wqXxcmVAbFVPqtc3sEtUE/GTQfuU80rySLcMhUmHKSHI7/LDj8q0gDYI1lIhRRB7ieRAqg==}
     engines: {node: '>=0.10'}
 
-  globals@13.6.0:
-    resolution: {integrity: sha512-YFKCX0SiPg7l5oKYCJ2zZGxcXprVXHcSnVuvzrT3oSENQonVLqM5pf9fN5dLGZGyCjhw8TN8Btwe/jKnZ0pjvQ==}
-    engines: {node: '>=8'}
-
   globals@13.9.0:
     resolution: {integrity: sha512-74/FduwI/JaIrr1H8e71UbDE+5x7pIPs1C2rrwC52SszOo043CsWOZEMW7o2Y58xwm9b+0RBKDxY5n2sUpEFxA==}
     engines: {node: '>=8'}
@@ -9589,10 +9589,6 @@ packages:
 
   immer@9.0.7:
     resolution: {integrity: sha512-KGllzpbamZDvOIxnmJ0jI840g7Oikx58lBPWV0hUh7dtAyZpFqqrBZdKka5GlTwMTZ1Tjc/bKKW4VSFAt6BqMA==}
-
-  import-fresh@3.0.0:
-    resolution: {integrity: sha512-pOnA9tfM3Uwics+SaBLCNyZZZbK+4PTu0OPZtLlMIrv17EdBoC15S9Kn8ckJ9TZTyKb3ywNE5y1yeDxxGA7nTQ==}
-    engines: {node: '>=6'}
 
   import-fresh@3.1.0:
     resolution: {integrity: sha512-PpuksHKGt8rXfWEr9m9EHIpgyyaltBy8+eF6GJM0QCAxMgxCfucMF3mjecK2QsJr0amJW7gTqh5/wht0z2UhEQ==}
@@ -12496,6 +12492,7 @@ packages:
 
   re2js@1.4.0:
     resolution: {integrity: sha512-KTOIcZTSOpOxbu3i0+T6mFQ6tkxXKlTxfcMFs1trQbsMnG84qNq+DjXr8Afu+FEFjvF1NNlldpC7roPyazFI8g==}
+    deprecated: Accidental publish of breaking changes. Please downgrade to 1.3.3 or upgrade to the latest version.
 
   react-activity-calendar@3.2.0:
     resolution: {integrity: sha512-v+ZD61h7RB76YMDh1aGAZuoXsSymSixKMOMusMoYWxhDXkFUX6hiftHin/tWqIS9zSNA/NN+vzYDK4hPF0wuxQ==}
@@ -13842,6 +13839,7 @@ packages:
   tar@6.0.5:
     resolution: {integrity: sha512-0b4HOimQHj9nXNEAA7zWwMM91Zhhba3pspja6sQbgTpynOJf+bkjBnfybNYzbpLbnwXnbyB4LOREvlyXLkCHSg==}
     engines: {node: '>= 10'}
+    deprecated: Old versions of tar are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
 
   tar@7.5.15:
     resolution: {integrity: sha512-dzGK0boVlC4W5QFuQN1EFSl3bIDYsk7Tj40U6eIBnK2k/8ml7TZ5agbI5j5+qnoVcAA+rNtBml8SEiLxZpNqRQ==}
@@ -13850,6 +13848,7 @@ packages:
   tar@7.5.3:
     resolution: {integrity: sha512-ENg5JUHUm2rDD7IvKNFGzyElLXNjachNLp6RaGf4+JOgxXHkqA+gq81ZAMCUmtMtqBsoU62lcp6S27g1LCYGGQ==}
     engines: {node: '>=18'}
+    deprecated: Old versions of tar are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
 
   teex@1.0.1:
     resolution: {integrity: sha512-eYE6iEI62Ni1H8oIa7KlDU6uQBtqr4Eajni3wX7rpfXD8ysFx8z0+dri+KWEPWpBsxXfxu58x/0jvTVT1ekOSg==}
@@ -13937,6 +13936,9 @@ packages:
 
   thenify@3.3.1:
     resolution: {integrity: sha512-RVZSIV5IG10Hk3enotrhvz0T9em6cyHBLkH/YAZuKqd8hRkKhSfCGIcP2KUY0EPxndzANBmNllzWPwak+bheSw==}
+
+  third-party-capital@1.0.20:
+    resolution: {integrity: sha512-oB7yIimd8SuGptespDAZnNkzIz+NWaJCu2RMsbs4Wmp9zSDUM8Nhi3s2OOcqYuv3mN4hitXc8DVx+LyUmbUDiA==}
 
   throat@6.0.2:
     resolution: {integrity: sha512-WKexMoJj3vEuK0yFEapj8y64V0A6xcuPuK9Gt1d0R+dzCSJc0lHqQytAbSB4cDAK0dWh4T0E2ETkoLE2WZ41OQ==}
@@ -14407,6 +14409,7 @@ packages:
 
   uuid@8.3.2:
     resolution: {integrity: sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==}
+    deprecated: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
     hasBin: true
 
   v8-compile-cache@2.4.0:
@@ -14642,6 +14645,7 @@ packages:
 
   whatwg-encoding@1.0.5:
     resolution: {integrity: sha512-b5lim54JOPN9HtzvK9HFXvBma/rnfFeqsic0hSpjtDbVxR3dJKLc+KB4V6GgiGOvl7CY/KNh8rxSo9DKQrnUEw==}
+    deprecated: Use @exodus/bytes instead for a more spec-conformant and faster implementation
 
   whatwg-fetch@3.6.20:
     resolution: {integrity: sha512-EqhiFU6daOA8kpjOWTL0olhVOF3i7OrFzSYiGsEMB8GcXS+RrzauAERX65xMeNWVqxA6HXH2m69Z9LaKKdisfg==}
@@ -16349,15 +16353,6 @@ snapshots:
 
   '@drizzle-team/brocli@0.12.0': {}
 
-  '@electron/asar@3.2.1':
-    dependencies:
-      chromium-pickle-js: 0.2.0
-      commander: 5.0.0
-      glob: 7.2.0
-      minimatch: 3.1.5
-    optionalDependencies:
-      '@types/glob': 7.2.0
-
   '@electron/asar@3.4.1':
     dependencies:
       commander: 5.0.0
@@ -16639,7 +16634,7 @@ snapshots:
       espree: 9.0.0
       globals: 13.9.0
       ignore: 4.0.6
-      import-fresh: 3.2.1
+      import-fresh: 3.3.0
       js-yaml: 3.14.2
       minimatch: 3.1.5
       strip-json-comments: 3.1.1
@@ -16952,7 +16947,7 @@ snapshots:
   '@isaacs/cliui@8.0.2':
     dependencies:
       string-width: 5.1.2
-      string-width-cjs: string-width@4.2.0
+      string-width-cjs: string-width@4.2.3
       strip-ansi: 7.2.0
       strip-ansi-cjs: strip-ansi@6.0.1
       wrap-ansi: 8.1.0
@@ -17371,6 +17366,12 @@ snapshots:
   '@next/swc-win32-x64-msvc@16.2.6':
     optional: true
 
+  '@next/third-parties@16.2.6(next@16.2.6(@opentelemetry/api@1.9.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react@19.2.6)':
+    dependencies:
+      next: 16.2.6(@opentelemetry/api@1.9.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+      react: 19.2.6
+      third-party-capital: 1.0.20
+
   '@nicolo-ribaudo/eslint-scope-5-internals@5.1.1-v1':
     dependencies:
       eslint-scope: 5.1.1
@@ -17391,6 +17392,9 @@ snapshots:
     optional: true
 
   '@node-llama-cpp/linux-x64-cuda@3.18.1':
+    optional: true
+
+  '@node-llama-cpp/linux-x64-vulkan@3.18.1':
     optional: true
 
   '@node-llama-cpp/linux-x64@3.18.1':
@@ -19327,12 +19331,6 @@ snapshots:
 
   '@types/geojson@7946.0.16': {}
 
-  '@types/glob@7.2.0':
-    dependencies:
-      '@types/minimatch': 6.0.0
-      '@types/node': 25.9.1
-    optional: true
-
   '@types/graceful-fs@4.1.9':
     dependencies:
       '@types/node': 25.9.1
@@ -19393,11 +19391,6 @@ snapshots:
       '@types/unist': 3.0.3
 
   '@types/mime@1.3.5': {}
-
-  '@types/minimatch@6.0.0':
-    dependencies:
-      minimatch: 10.2.5
-    optional: true
 
   '@types/ms@2.1.0': {}
 
@@ -21978,7 +21971,7 @@ snapshots:
 
   electron-winstaller@5.4.0:
     dependencies:
-      '@electron/asar': 3.2.1
+      '@electron/asar': 3.4.1
       debug: 4.4.3
       fs-extra: 7.0.1
       lodash: 4.18.1
@@ -22463,7 +22456,7 @@ snapshots:
       escape-string-regexp: 4.0.0
       eslint-scope: 6.0.0
       eslint-utils: 3.0.0(eslint@8.1.0)
-      eslint-visitor-keys: 3.0.0
+      eslint-visitor-keys: 3.4.3
       espree: 9.0.0
       esquery: 1.7.0
       esutils: 2.0.3
@@ -22471,9 +22464,9 @@ snapshots:
       file-entry-cache: 6.0.1
       functional-red-black-tree: 1.0.1
       glob-parent: 6.0.2
-      globals: 13.6.0
+      globals: 13.9.0
       ignore: 4.0.6
-      import-fresh: 3.0.0
+      import-fresh: 3.3.0
       imurmurhash: 0.1.4
       is-glob: 4.0.3
       js-yaml: 4.1.1
@@ -22486,7 +22479,7 @@ snapshots:
       progress: 2.0.3
       regexpp: 3.2.0
       semver: 7.8.1
-      strip-ansi: 6.0.0
+      strip-ansi: 6.0.1
       strip-json-comments: 3.1.1
       text-table: 0.2.0
       v8-compile-cache: 2.4.0
@@ -22497,7 +22490,7 @@ snapshots:
     dependencies:
       acorn: 8.16.0
       acorn-jsx: 5.3.2(acorn@8.16.0)
-      eslint-visitor-keys: 3.0.0
+      eslint-visitor-keys: 3.4.3
 
   esprima@4.0.1: {}
 
@@ -23042,10 +23035,6 @@ snapshots:
       tunnel: 0.0.6
     optional: true
 
-  globals@13.6.0:
-    dependencies:
-      type-fest: 0.20.2
-
   globals@13.9.0:
     dependencies:
       type-fest: 0.20.2
@@ -23538,11 +23527,6 @@ snapshots:
   immer@11.1.8: {}
 
   immer@9.0.7: {}
-
-  import-fresh@3.0.0:
-    dependencies:
-      parent-module: 1.0.1
-      resolve-from: 4.0.0
 
   import-fresh@3.1.0:
     dependencies:
@@ -25843,6 +25827,7 @@ snapshots:
       '@node-llama-cpp/linux-x64': 3.18.1
       '@node-llama-cpp/linux-x64-cuda': 3.18.1
       '@node-llama-cpp/linux-x64-cuda-ext': 3.18.1
+      '@node-llama-cpp/linux-x64-vulkan': 3.18.1
       '@node-llama-cpp/mac-arm64-metal': 3.18.1
       '@node-llama-cpp/mac-x64': 3.18.1
       '@node-llama-cpp/win-arm64': 3.18.1
@@ -29009,6 +28994,8 @@ snapshots:
   thenify@3.3.1:
     dependencies:
       any-promise: 1.3.0
+
+  third-party-capital@1.0.20: {}
 
   throat@6.0.2: {}
 

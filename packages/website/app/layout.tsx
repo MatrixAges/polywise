@@ -3,9 +3,11 @@ import '@website/styles/tailwind.global.css'
 import '@website/styles/class.global.css'
 import '@website/styles/shiki.global.css'
 
+import { GoogleAnalytics } from '@next/third-parties/google'
 import { Client, Router } from '@website/appunits/layout'
 import ToastProvider from '@website/components/ui/ToastProvider'
 import { getUserLocale, getUserTheme } from '@website/services'
+import { google_analytics_id } from '@website/utils/const'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages } from 'next-intl/server'
 
@@ -49,6 +51,7 @@ const RootLayout = async ({ children }: PropsWithChildren) => {
 					</ToastProvider>
 				</NextIntlClientProvider>
 			</body>
+			<GoogleAnalytics gaId={google_analytics_id} />
 		</html>
 	)
 }
