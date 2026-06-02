@@ -209,8 +209,7 @@ const createReleaseMessages = prompt => [
 const createPrimaryRequestBody = prompt => ({
 	model: 'deepseek-v4-pro',
 	messages: createReleaseMessages(prompt),
-	thinking: { type: 'enabled' },
-	reasoning_effort: 'high',
+	thinking: { type: 'disabled' },
 	stream: false
 })
 
