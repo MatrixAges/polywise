@@ -32,6 +32,10 @@ export default async (s: Index, bash: Bash, system?: boolean) => {
 	const { tools } = await createBashTool({
 		destination: '/',
 		extraInstructions: [
+			'This bash tool always runs inside the session sandbox, including commands that require audit approval.',
+			'In this sandbox, `/` is the virtual session root mapped to the current workspace root, not the host filesystem root.',
+			'Prefer relative paths such as `src/...` or sandbox-root paths such as `/src/...` when working in the current project.',
+			'Do not assume host absolute paths such as `/Users/...` or `/home/...` are available here unless they are explicitly mounted.',
 			'Prefer narrow, scoped commands over broad recursive scans.',
 			'Do not scan from filesystem root such as `find /`, `grep -r /`, or similar whole-tree discovery commands unless the user explicitly requires it.',
 			'Start from the current working directory or another precise known path, and limit the search scope as much as possible.',

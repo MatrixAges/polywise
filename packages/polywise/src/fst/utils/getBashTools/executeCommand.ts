@@ -5,7 +5,6 @@ import checkPermission from '../checkPermission'
 import getBashResponse from '../getBashResponse'
 import { createSystemSpec } from '../system'
 import { detect_command } from './constants'
-import executeRiskyCommand from './executeRiskyCommand'
 import getCleanCommand from './getCleanCommand'
 import getMatchedRules from './getMatchedRules'
 
@@ -61,5 +60,7 @@ export default async (args: Args) => {
 		}
 	}
 
-	return executeRiskyCommand(clean_command, s.cwd)
+	const res = await bash.exec(command, { cwd: '/' })
+
+	return getBashResponse(res)
 }
