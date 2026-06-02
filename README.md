@@ -1,6 +1,6 @@
 <p align="right"><a href="README.zh.md">Chinese</a> | English</p>
 
-# <p align="center"> <img src="packages/app/public/icon.svg" width="21" height="21" alt="Polywise Logo"> Polywise </p>
+# <p align="center"> <img src="packages/app/public/icon.svg" width="22" height="22" alt="Polywise Logo"> Polywise </p>
 
 <p align="center"><strong>The open source agentic content system</strong></p>
 
@@ -18,9 +18,131 @@
 
 ---
 
+Polywise is the open-source agentic content system. You can use it from the command line or the desktop app to chat with models, save knowledge, retrieve context, and turn repeated working styles into reusable agents.
+
+## 🚀 Install
+
+Polywise has two practical entry points: the CLI and the desktop app.
+
+### CLI
+
+Install the CLI globally:
+
+```bash
+npm install -g polywise
+```
+
+Start the local Polywise service:
+
+```bash
+polywise start
+polywise start -d
+```
+
+`polywise start` keeps the service in the foreground. `polywise start -d` exits immediately and leaves the service running in the background.
+
+Then visit web UI at http://localhost:3072/app/ .
+
+You can enable Auth login within the settings. Once enabled and a password has been set, you will be required to log in when accessing the Web UI in order to access the API. This is crucial if you are deploying Polywise as a service on a server for remote access.
+
+### Desktop App
+
+Download the latest desktop build from [GitHub Releases](https://github.com/MatrixAges/polywise/releases).
+
+The desktop app is the easiest way to explore sessions, saved content, agents, and posts without working from the terminal.
+
+### First Run
+
+For a first run, Polywise mainly needs:
+
+- one available model provider
+- embedding and rerank models if you want saved-content retrieval
+
+You do not need to configure every provider or integration on day one.
+
+## ⬆️ Upgrade
+
+### CLI
+
+```bash
+polywise upgrade
+```
+
+### Desktop App
+
+Install the latest release from [GitHub Releases](https://github.com/MatrixAges/polywise/releases).
+
+## ⚡ Quick Start
+
+If you want the shortest path to first value:
+
+1. Open `Settings -> Model Provider` and configure one provider you can actually use.
+2. Open `Settings -> Model Setting` and make sure the default chat model is available.
+3. Go to `Session` and ask one real question instead of sending `hello`.
+4. Save one short note, page summary, or answer into Polywise.
+5. Mention that saved item again in chat to verify retrieval.
+
+## 🧭 Usage
+
+Once one provider is connected and the default model is set, stop configuring and go use the product.
+
+### Desktop App
+
+The app becomes easiest to understand when you use each area for one concrete job:
+
+- `Session` for asking real questions, planning work, and staying inside your workspace context
+- `Linkcase` for fetching and extracting web content into the system
+- `Agent` for turning repeated instruction styles into reusable collaborators
+- `Posts` for saving knowledge that should live longer than a chat reply
+
+Two shortcuts are worth learning early:
+
+- `@` brings files, agents, and other context into a session
+- `/` brings tools and skills into the workflow
+
+### CLI
+
+The CLI is a thin wrapper over the backend API. By default it talks to `http://localhost:3072`; set `POLYWISE_SERVER_URL` if your server lives elsewhere.
+
+Start with help instead of memorizing commands:
+
+```bash
+polywise -h
+polywise session -h
+polywise session create -h
+```
+
+Use `input_schema` when you need the exact input shape for a command:
+
+```bash
+polywise input_schema session.create
+```
+
+Common commands:
+
+```bash
+polywise start
+polywise start -d
+polywise version
+polywise session create --title "Daily Review"
+polywise search fullTextSearch --query "vector database"
+polywise save --for user --content "Key takeaway..."
+```
+
+When payloads become more complex, pass JSON directly:
+
+```bash
+polywise search fullTextSearch --json '{"query":"agent memory","for_types":["wiki","memory"],"enable_recall":true}'
+```
+
+## 📚 Docs
+
+- [Intro](https://polywise.io/docs/intro)
+- [CLI README](packages/polywise/README.md)
+
 ## 💭 Motivation
 
-Polywise is built upon the belief that **truly intelligent AI requires truly intelligent memory**. It is not merely about storage, but rather a system capable of organically forming connections, strengthening through use, strategically forgetting, and continuously evolving. ---
+Polywise is built upon the belief that **truly intelligent AI requires truly intelligent memory**. It is not merely about storage, but rather a system capable of organically forming connections, strengthening through use, strategically forgetting, and continuously evolving.
 
 ## 📄 References
 
