@@ -1,5 +1,5 @@
-import { basename } from 'path'
-import fs from 'fs-extra'
+import { cp, mkdir, rm } from 'node:fs/promises'
+import { basename } from 'node:path'
 import { globSync } from 'glob'
 
 const readAssetPatterns = () => {
@@ -42,13 +42,13 @@ const resolveMatchedFiles = asset_patterns => {
 }
 
 const copyMatchedFiles = async ({ matched_files, upload_dir }) => {
-	await fs.remove(upload_dir)
-	await fs.ensureDir(upload_dir)
+	await rm(upload_dir, { force: true, recursive: true })
+	await mkdir(upload_dir, { recursive: true })
 
 	for (const asset_file of matched_files) {
 		const target_path = `${upload_dir}/${basename(asset_file)}`
 
-		await fs.copy(asset_file, target_path, { overwrite: true })
+		await cp(asset_file, target_path, { force: true })
 	}
 }
 

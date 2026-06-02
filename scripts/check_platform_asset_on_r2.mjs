@@ -1,4 +1,4 @@
-import fs from 'fs-extra'
+import { appendFile } from 'node:fs/promises'
 
 const readAssetPatterns = () => {
 	const asset_glob = process.env.ASSET_GLOB?.trim() || ''
@@ -36,7 +36,7 @@ const readGithubOutputPath = () => {
 const writeOutput = async ({ key, value }) => {
 	const github_output = readGithubOutputPath()
 
-	await fs.appendFile(github_output, `${key}=${value}\n`, 'utf8')
+	await appendFile(github_output, `${key}=${value}\n`, 'utf8')
 }
 
 const resolveAssetUrl = () => {

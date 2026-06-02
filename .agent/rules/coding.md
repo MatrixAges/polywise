@@ -72,5 +72,5 @@ For development targeting different tech stacks and code modules, please strictl
 
 ### Node.js API Specifications
 
-- **File System**: All operations involving the local file system must introduce the third-party library `fs-extra` for processing. Using the native `fs` or `fs/promises` modules is strictly prohibited.
-- **No node Prefix**: When introducing Node.js native built-in modules (such as `path`, `crypto`), the import path is strictly prohibited from adding the `node:` character prefix.
+- **File System**: Business code should use `fs-extra` for local file-system operations. Exception: automation scripts under the workspace-root `scripts/` directory should prefer native `node:fs` or `node:fs/promises` APIs instead of `fs-extra`.
+- **No node Prefix**: Business code should not add the `node:` prefix when importing Node.js built-ins such as `path` or `crypto`. Exception: automation scripts under the workspace-root `scripts/` directory may use `node:`-prefixed built-ins, and should use `node:fs` or `node:fs/promises` for file-system access.
