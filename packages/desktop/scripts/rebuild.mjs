@@ -8,6 +8,7 @@ const __dirname = path.dirname(__filename)
 const packageDir = path.resolve(__dirname, '..')
 const repoRoot = path.resolve(packageDir, '..', '..')
 const pnpmStoreDir = path.join(repoRoot, 'node_modules', '.pnpm')
+const targetArch = process.env.BUILD_ARCH || process.arch
 
 const nativeModules = ['better-sqlite3', 'bufferutil', 'simsimd', 'utf-8-validate', '@mongodb-js/zstd', 'usearch']
 
@@ -38,7 +39,7 @@ const cliPath = resolveElectronRebuildCli()
 // because it expects system pkg-config/liblzma during Electron rebuilds.
 const result = spawnSync(
 	process.execPath,
-	[cliPath, '--force', '--module-dir', '.', '--only', resolvedNativeModules.join(',')],
+	[cliPath, '--force', '--module-dir', '.', '--arch', targetArch, '--only', resolvedNativeModules.join(',')],
 	{
 		cwd: packageDir,
 		stdio: 'inherit'

@@ -55,7 +55,6 @@ const desktop_shared_build_command = [
 	'pnpm --filter "./packages/app" run build:electron',
 	'pnpm --filter "./packages/polywise" run build:electron',
 	'pnpm --dir packages/desktop run clean',
-	'pnpm --dir packages/desktop run rebuild',
 	'pnpm --dir packages/desktop run main:prod',
 	'pnpm --dir packages/desktop run transform'
 ].join('\n')
@@ -178,6 +177,7 @@ const workflow_definition = workflow({
 							destination_dir: 'release/darwin/x64',
 							build_command: [
 								desktop_shared_build_command,
+								'cross-env BUILD_ARCH=x64 pnpm --dir packages/desktop run rebuild',
 								retry_command,
 								'retryCommand 3 12 pnpm --dir packages/desktop exec cross-env ZIP=0 BUILD_ARCH=x64 electron-builder -m --x64 --publish never',
 								'retryCommand 3 12 pnpm --dir packages/desktop exec cross-env BUILD_ARCH=x64 electron-builder -m --x64 --publish never'
@@ -193,6 +193,7 @@ const workflow_definition = workflow({
 							destination_dir: 'release/darwin/arm64',
 							build_command: [
 								desktop_shared_build_command,
+								'cross-env BUILD_ARCH=arm64 pnpm --dir packages/desktop run rebuild',
 								retry_command,
 								'retryCommand 3 12 pnpm --dir packages/desktop exec cross-env ZIP=0 BUILD_ARCH=arm64 electron-builder -m --arm64 --publish never',
 								'retryCommand 3 12 pnpm --dir packages/desktop exec cross-env BUILD_ARCH=arm64 electron-builder -m --arm64 --publish never'
@@ -207,6 +208,7 @@ const workflow_definition = workflow({
 							destination_dir: 'release/win32/x64',
 							build_command: [
 								desktop_shared_build_command,
+								'cross-env BUILD_ARCH=x64 pnpm --dir packages/desktop run rebuild',
 								'pnpm --dir packages/desktop exec electron-builder -w --publish never'
 							].join('\n')
 						}
