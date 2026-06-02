@@ -30,6 +30,9 @@ const workflow_definition = workflow({
 	jobs: {
 		prepare: {
 			uses: './.github/workflows/prepare.generated.yml',
+			permissions: {
+				contents: 'write'
+			},
 			with: {
 				version_number: '${{ github.event.inputs.version_number }}'
 			},
@@ -38,6 +41,10 @@ const workflow_definition = workflow({
 		standalone: {
 			needs: ['prepare'],
 			uses: './.github/workflows/standalone.generated.yml',
+			permissions: {
+				contents: 'read',
+				'id-token': 'write'
+			},
 			with: {
 				release_version: '${{ needs.prepare.outputs.release_version }}',
 				release_commit: '${{ needs.prepare.outputs.release_commit }}',
@@ -48,6 +55,9 @@ const workflow_definition = workflow({
 		desktop: {
 			needs: ['prepare', 'standalone'],
 			uses: './.github/workflows/desktop.generated.yml',
+			permissions: {
+				contents: 'write'
+			},
 			with: {
 				release_version: '${{ needs.prepare.outputs.release_version }}',
 				release_tag: '${{ needs.prepare.outputs.release_tag }}',
