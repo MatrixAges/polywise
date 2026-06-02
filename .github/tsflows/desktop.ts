@@ -31,14 +31,14 @@ const pnpm_version = readPnpmVersion()
 
 const mac_asset_glob = [
 	'packages/desktop/release/darwin/x64/*.dmg',
-	'packages/desktop/release/darwin/x64/*.zip',
+	'packages/desktop/zip/darwin/x64/*.zip',
 	'packages/desktop/release/darwin/x64/*.blockmap',
 	'packages/desktop/release/darwin/x64/latest*.yml'
 ].join('\n')
 
 const mac_arm_asset_glob = [
 	'packages/desktop/release/darwin/arm64/*.dmg',
-	'packages/desktop/release/darwin/arm64/*.zip',
+	'packages/desktop/zip/darwin/arm64/*.zip',
 	'packages/desktop/release/darwin/arm64/*.blockmap',
 	'packages/desktop/release/darwin/arm64/latest*.yml'
 ].join('\n')
@@ -268,7 +268,7 @@ const workflow_definition = workflow({
 				{
 					name: 'Cache Electron binaries (Windows)',
 					if: "matrix.runner == 'windows-latest' && steps.asset_status.outputs.already_published != 'true'",
-					uses: 'actions/cache@v4',
+					uses: 'actions/cache@v5',
 					with: {
 						path: [
 							'${{ env.LOCALAPPDATA }}\\electron\\Cache',
@@ -280,7 +280,7 @@ const workflow_definition = workflow({
 				{
 					name: 'Cache node-gyp (Windows)',
 					if: "matrix.runner == 'windows-latest' && steps.asset_status.outputs.already_published != 'true'",
-					uses: 'actions/cache@v4',
+					uses: 'actions/cache@v5',
 					with: {
 						path: '${{ env.LOCALAPPDATA }}\\node-gyp\\Cache',
 						key: "${{ runner.os }}-node-gyp-${{ hashFiles('pnpm-lock.yaml', 'packages/polywise/package.json', 'packages/desktop/package.json') }}"

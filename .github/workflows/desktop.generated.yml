@@ -60,7 +60,7 @@ jobs:
                                 args: '--x64'
                                 name: macOS (x64)
                                 artifact_name: polywise-macos-x64
-                                asset_glob: "packages/desktop/release/darwin/x64/*.dmg\npackages/desktop/release/darwin/x64/*.zip\npackages/desktop/release/darwin/x64/*.blockmap\npackages/desktop/release/darwin/x64/latest*.yml"
+                                asset_glob: "packages/desktop/release/darwin/x64/*.dmg\npackages/desktop/zip/darwin/x64/*.zip\npackages/desktop/release/darwin/x64/*.blockmap\npackages/desktop/release/darwin/x64/latest*.yml"
                                 upload_dir: packages/desktop/.release-upload/darwin/x64
                                 destination_dir: release/darwin/x64
                                 build_command: "pnpm --filter \"./packages/stk\" run build\npnpm --filter \"./packages/erpc\" run build\npnpm --filter \"./packages/app\" run build:electron\npnpm --filter \"./packages/polywise\" run build:electron\npnpm --dir packages/desktop run clean\npnpm --dir packages/desktop run main:prod\npnpm --dir packages/desktop run transform\nretryCommand() {\n\tmax_attempts=\"$1\"\n\tsleep_seconds=\"$2\"\n\tshift 2\n\tattempt=1\n\twhile true; do\n\t\t\"$@\" && return 0\n\t\tif [ \"$attempt\" -ge \"$max_attempts\" ]; then\n\t\t\treturn 1\n\t\tfi\n\t\tattempt=$((attempt + 1))\n\t\tsleep \"$sleep_seconds\"\n\tdone\n}\nretryCommand 3 12 pnpm --dir packages/desktop exec cross-env ZIP=0 BUILD_ARCH=x64 electron-builder -m --x64 --publish never\nretryCommand 3 12 pnpm --dir packages/desktop exec cross-env BUILD_ARCH=x64 electron-builder -m --x64 --publish never"
@@ -68,7 +68,7 @@ jobs:
                                 args: '--arm64'
                                 name: macOS (arm64)
                                 artifact_name: polywise-macos-arm64
-                                asset_glob: "packages/desktop/release/darwin/arm64/*.dmg\npackages/desktop/release/darwin/arm64/*.zip\npackages/desktop/release/darwin/arm64/*.blockmap\npackages/desktop/release/darwin/arm64/latest*.yml"
+                                asset_glob: "packages/desktop/release/darwin/arm64/*.dmg\npackages/desktop/zip/darwin/arm64/*.zip\npackages/desktop/release/darwin/arm64/*.blockmap\npackages/desktop/release/darwin/arm64/latest*.yml"
                                 upload_dir: packages/desktop/.release-upload/darwin/arm64
                                 destination_dir: release/darwin/arm64
                                 build_command: "pnpm --filter \"./packages/stk\" run build\npnpm --filter \"./packages/erpc\" run build\npnpm --filter \"./packages/app\" run build:electron\npnpm --filter \"./packages/polywise\" run build:electron\npnpm --dir packages/desktop run clean\npnpm --dir packages/desktop run main:prod\npnpm --dir packages/desktop run transform\nretryCommand() {\n\tmax_attempts=\"$1\"\n\tsleep_seconds=\"$2\"\n\tshift 2\n\tattempt=1\n\twhile true; do\n\t\t\"$@\" && return 0\n\t\tif [ \"$attempt\" -ge \"$max_attempts\" ]; then\n\t\t\treturn 1\n\t\tfi\n\t\tattempt=$((attempt + 1))\n\t\tsleep \"$sleep_seconds\"\n\tdone\n}\nretryCommand 3 12 pnpm --dir packages/desktop exec cross-env ZIP=0 BUILD_ARCH=arm64 electron-builder -m --arm64 --publish never\nretryCommand 3 12 pnpm --dir packages/desktop exec cross-env BUILD_ARCH=arm64 electron-builder -m --arm64 --publish never"
@@ -115,13 +115,13 @@ jobs:
                     uses: oven-sh/setup-bun@v2
                   - name: Cache Electron binaries (Windows)
                     if: "matrix.runner == 'windows-latest' && steps.asset_status.outputs.already_published != 'true'"
-                    uses: actions/cache@v4
+                    uses: actions/cache@v5
                     with:
                           path: "${{ env.LOCALAPPDATA }}\\electron\\Cache\n${{ env.LOCALAPPDATA }}\\electron-builder\\Cache"
                           key: "${{ runner.os }}-electron-cache-${{ hashFiles('pnpm-lock.yaml', 'packages/desktop/package.json') }}"
                   - name: Cache node-gyp (Windows)
                     if: "matrix.runner == 'windows-latest' && steps.asset_status.outputs.already_published != 'true'"
-                    uses: actions/cache@v4
+                    uses: actions/cache@v5
                     with:
                           path: "${{ env.LOCALAPPDATA }}\\node-gyp\\Cache"
                           key: "${{ runner.os }}-node-gyp-${{ hashFiles('pnpm-lock.yaml', 'packages/polywise/package.json', 'packages/desktop/package.json') }}"
