@@ -87,6 +87,7 @@ const windows_install_command = [
 ].join('\n')
 
 const windows_prepare_runtime_command = [
+	'pnpm rebuild bun',
 	'pnpm rebuild lmdb',
 	'pnpm rebuild electron node-llama-cpp sqlite-vec @node-rs/jieba @node-rs/xxhash',
 	'pnpm --dir packages/desktop run rebuild'

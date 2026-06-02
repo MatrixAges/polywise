@@ -135,7 +135,7 @@ jobs:
       - name: Prepare native runtime dependencies (Windows)
         if: "matrix.runner == 'windows-latest' && steps.asset_status.outputs.already_published != 'true'"
         shell: bash
-        run: "pnpm rebuild lmdb\npnpm rebuild electron node-llama-cpp sqlite-vec @node-rs/jieba @node-rs/xxhash\npnpm --dir packages/desktop run rebuild"
+        run: "pnpm rebuild bun\npnpm rebuild lmdb\npnpm rebuild electron node-llama-cpp sqlite-vec @node-rs/jieba @node-rs/xxhash\npnpm --dir packages/desktop run rebuild"
       - name: Validate mac signing secrets
         if: "matrix.runner == 'macos-latest' && steps.asset_status.outputs.already_published != 'true'"
         shell: bash

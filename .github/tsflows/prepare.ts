@@ -95,6 +95,31 @@ const workflow_definition = workflow({
 					run: 'node ./scripts/resolve_release_version.mjs'
 				},
 				{
+					name: 'Inspect existing draft release',
+					id: 'existing_draft',
+					shell: 'bash',
+					env: {
+						GH_TOKEN: '${{ secrets.GITHUB_TOKEN }}',
+						RELEASE_TAG: '${{ steps.version.outputs.release_tag }}'
+					},
+					run: [
+						'api_response=$(gh api "repos/${{ github.repository }}/releases?per_page=20" 2>/dev/null || true)',
+						"draft_payload=$(printf '%s' \"$api_response\" | node -e \"const fs=require('fs'); const tag=process.env.RELEASE_TAG; const releases=JSON.parse(fs.readFileSync(0,'utf8') || '[]'); const found=releases.find(item => item.tag_name === tag && item.draft === true); process.stdout.write(found ? JSON.stringify({ body: found.body || '', target_commitish: found.target_commitish || '', html_url: found.html_url || '' }) : '');\")",
+						'if [ -n "$draft_payload" ]; then',
+						"\tprintf '%s' \"$draft_payload\" | node -e \"const fs=require('fs'); const data=JSON.parse(fs.readFileSync(0,'utf8')); fs.writeFileSync('release-notes.md', data.body || '', 'utf8');\"",
+						"\tdraft_target_commitish=$(printf '%s' \"$draft_payload\" | node -e \"const fs=require('fs'); const data=JSON.parse(fs.readFileSync(0,'utf8')); process.stdout.write(data.target_commitish || '');\")",
+						"\tdraft_url=$(printf '%s' \"$draft_payload\" | node -e \"const fs=require('fs'); const data=JSON.parse(fs.readFileSync(0,'utf8')); process.stdout.write(data.html_url || '');\")",
+						'\techo "draft_exists=true" >> "$GITHUB_OUTPUT"',
+						'\techo "target_commitish=${draft_target_commitish}" >> "$GITHUB_OUTPUT"',
+						'\techo "url=${draft_url}" >> "$GITHUB_OUTPUT"',
+						'\texit 0',
+						'fi',
+						'echo "draft_exists=false" >> "$GITHUB_OUTPUT"',
+						'echo "target_commitish=" >> "$GITHUB_OUTPUT"',
+						'echo "url=" >> "$GITHUB_OUTPUT"'
+					].join('\n')
+				},
+				{
 					name: 'Apply release version to repository files',
 					shell: 'bash',
 					env: {
@@ -105,6 +130,7 @@ const workflow_definition = workflow({
 				{
 					name: 'Collect commits',
 					id: 'commits',
+					if: "steps.existing_draft.outputs.draft_exists != 'true'",
 					shell: 'bash',
 					env: {
 						PREVIOUS_TAG: '${{ steps.version.outputs.previous_tag }}',
@@ -133,6 +159,7 @@ const workflow_definition = workflow({
 				},
 				{
 					name: 'Generate release notes',
+					if: "steps.existing_draft.outputs.draft_exists != 'true'",
 					shell: 'bash',
 					env: {
 						DEEPSEEK_API_KEY: '${{ secrets.DEEPSEEK_API_KEY }}',
