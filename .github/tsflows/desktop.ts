@@ -81,6 +81,11 @@ const default_install_command = [
 	'pnpm install --frozen-lockfile --filter "./packages/desktop..." --filter "./packages/polywise..." --filter "./packages/app..." --filter "./packages/stk..." --filter "./packages/erpc..."'
 ].join('\n')
 
+const mac_x64_install_command = [
+	"printf '\\ntrustLockfile: true\\nsupportedArchitectures:\\n  os:\\n    - darwin\\n  cpu:\\n    - x64\\n' >> pnpm-workspace.yaml",
+	'pnpm install --frozen-lockfile --filter "./packages/desktop..." --filter "./packages/polywise..." --filter "./packages/app..." --filter "./packages/stk..." --filter "./packages/erpc..."'
+].join('\n')
+
 const windows_install_command = [
 	"printf '\\ntrustLockfile: true\\n' >> pnpm-workspace.yaml",
 	'pnpm install --frozen-lockfile --ignore-scripts --filter "./packages/desktop..." --filter "./packages/polywise..." --filter "./packages/app..." --filter "./packages/stk..." --filter "./packages/erpc..."'
@@ -175,6 +180,7 @@ const workflow_definition = workflow({
 							asset_glob: mac_asset_glob,
 							upload_dir: 'packages/desktop/.release-upload/darwin/x64',
 							destination_dir: 'release/darwin/x64',
+							install_command: mac_x64_install_command,
 							build_command: [
 								desktop_shared_build_command,
 								'pnpm --dir packages/desktop exec cross-env BUILD_ARCH=x64 node ./scripts/rebuild.mjs',
@@ -191,6 +197,7 @@ const workflow_definition = workflow({
 							asset_glob: mac_arm_asset_glob,
 							upload_dir: 'packages/desktop/.release-upload/darwin/arm64',
 							destination_dir: 'release/darwin/arm64',
+							install_command: default_install_command,
 							build_command: [
 								desktop_shared_build_command,
 								'pnpm --dir packages/desktop exec cross-env BUILD_ARCH=arm64 node ./scripts/rebuild.mjs',
@@ -206,6 +213,7 @@ const workflow_definition = workflow({
 							asset_glob: win_asset_glob,
 							upload_dir: 'packages/desktop/.release-upload/win32/x64',
 							destination_dir: 'release/win32/x64',
+							install_command: windows_install_command,
 							build_command: [
 								desktop_shared_build_command,
 								'pnpm --dir packages/desktop exec cross-env BUILD_ARCH=x64 node ./scripts/rebuild.mjs',
@@ -293,13 +301,13 @@ const workflow_definition = workflow({
 					name: 'Install dependencies',
 					if: "matrix.runner != 'windows-latest' && steps.asset_status.outputs.already_published != 'true'",
 					shell: 'bash',
-					run: default_install_command
+					run: '${{ matrix.install_command }}'
 				},
 				{
 					name: 'Install dependencies (Windows)',
 					if: "matrix.runner == 'windows-latest' && steps.asset_status.outputs.already_published != 'true'",
 					shell: 'bash',
-					run: windows_install_command
+					run: '${{ matrix.install_command }}'
 				},
 				{
 					name: 'Prepare native runtime dependencies (Windows)',
