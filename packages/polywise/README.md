@@ -20,6 +20,12 @@ polywise upgrade
 
 Polywise CLI is designed for progressive discovery: start from the root help, narrow to a command group, inspect a concrete command, then run it.
 
+```bash
+polywise start
+```
+
+Visit Web UI http://localhost:3072/app/ .
+
 ### Root help
 
 Use the root help to see the top-level command surface.
