@@ -23,6 +23,8 @@ const appendOutput = async (key, value) => {
 
 const getRepoSlug = () => process.env.GITHUB_REPOSITORY?.trim() || default_repo_slug
 
+const parseJson = raw_output => JSON.parse(raw_output || '{}')
+
 const runGh = ({ args, input }) => {
 	const gh_proc = spawnSync('gh', args, {
 		encoding: 'utf8',
@@ -42,71 +44,92 @@ const runGh = ({ args, input }) => {
 const readDraftRelease = release_tag => {
 	const repo_slug = getRepoSlug()
 	const raw_output = runGh({
-		args: ['api', `repos/${repo_slug}/releases?per_page=100`]
+		args: ['api', `repos/${repo_slug}/releases?per_page=3`]
 	})
 	const releases = JSON.parse(raw_output || '[]')
 
 	return releases.find(release_item => release_item.tag_name === release_tag && release_item.draft === true) || null
 }
 
-const updateDraftRelease = async args => {
-	const { existing_draft_id, release_commit, release_tag } = args
+const buildReleasePayload = async args => {
+	const { release_commit, release_tag } = args
 	const release_notes = await readFile('release-notes.md', 'utf8')
-	const payload = JSON.stringify({
+
+	return JSON.stringify({
+		tag_name: release_tag,
 		draft: true,
 		name: release_tag,
 		target_commitish: release_commit,
 		body: release_notes
 	})
-	const repo_slug = getRepoSlug()
-
-	runGh({
-		args: ['api', '--method', 'PATCH', `repos/${repo_slug}/releases/${existing_draft_id}`, '--input', '-'],
-		input: payload
-	})
 }
 
-const createDraftRelease = args => {
-	const { release_commit, release_tag } = args
-
-	runGh({
-		args: [
-			'release',
-			'create',
-			release_tag,
-			'--draft',
-			'--title',
-			release_tag,
-			'--target',
-			release_commit,
-			'--notes-file',
-			'release-notes.md'
-		]
+const updateDraftRelease = async args => {
+	const { existing_draft_id, release_commit, release_tag } = args
+	const payload = await buildReleasePayload({
+		release_commit,
+		release_tag
 	})
+	const repo_slug = getRepoSlug()
+
+	return parseJson(
+		runGh({
+			args: [
+				'api',
+				'--method',
+				'PATCH',
+				`repos/${repo_slug}/releases/${existing_draft_id}`,
+				'--input',
+				'-'
+			],
+			input: payload
+		})
+	)
+}
+
+const createDraftRelease = async args => {
+	const { release_commit, release_tag } = args
+	const payload = await buildReleasePayload({
+		release_commit,
+		release_tag
+	})
+	const repo_slug = getRepoSlug()
+
+	return parseJson(
+		runGh({
+			args: ['api', '--method', 'POST', `repos/${repo_slug}/releases`, '--input', '-'],
+			input: payload
+		})
+	)
 }
 
 const run = async () => {
 	const release_tag = readRequiredEnv('RELEASE_TAG')
 	const release_commit = readRequiredEnv('RELEASE_COMMIT')
 	const existing_draft_id = process.env.EXISTING_DRAFT_ID?.trim() || ''
+	let draft_release = null
 
 	if (existing_draft_id) {
-		await updateDraftRelease({
+		draft_release = await updateDraftRelease({
 			existing_draft_id,
 			release_commit,
 			release_tag
 		})
 	} else {
-		createDraftRelease({
+		draft_release = await createDraftRelease({
 			release_commit,
 			release_tag
 		})
 	}
 
-	const draft_release = readDraftRelease(release_tag)
-
 	if (!draft_release?.id || !draft_release?.html_url) {
-		throw new Error(`Failed to resolve draft release for ${release_tag}`)
+		const fallback_draft_release = readDraftRelease(release_tag)
+
+		if (!fallback_draft_release?.id || !fallback_draft_release?.html_url) {
+			throw new Error(`Failed to resolve draft release for ${release_tag}`)
+		}
+
+		draft_release = fallback_draft_release
 	}
 
 	await appendOutput('id', String(draft_release.id))

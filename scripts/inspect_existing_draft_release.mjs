@@ -25,7 +25,7 @@ const getRepoSlug = () => process.env.GITHUB_REPOSITORY?.trim() || default_repo_
 
 const readDraftRelease = release_tag => {
 	const repo_slug = getRepoSlug()
-	const release_proc = spawnSync('gh', ['api', `repos/${repo_slug}/releases?per_page=100`], {
+	const release_proc = spawnSync('gh', ['api', `repos/${repo_slug}/releases?per_page=3`], {
 		encoding: 'utf8',
 		stdio: ['ignore', 'pipe', 'pipe']
 	})
