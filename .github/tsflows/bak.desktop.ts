@@ -188,8 +188,7 @@ const workflow_definition = workflow({
 								'retryCommand 3 12 pnpm --dir packages/desktop exec cross-env ZIP=0 BUILD_ARCH=x64 electron-builder -m --x64 --publish never',
 								'retryCommand 3 12 pnpm --dir packages/desktop exec cross-env BUILD_ARCH=x64 electron-builder -m --x64 --publish never'
 							].join('\n')
-						}
-						/*,
+						},
 						{
 							runner: 'macos-latest',
 							args: '--arm64',
@@ -221,7 +220,6 @@ const workflow_definition = workflow({
 								'pnpm --dir packages/desktop exec electron-builder -w --publish never'
 							].join('\n')
 						}
-						*/
 					]
 				}
 			},
