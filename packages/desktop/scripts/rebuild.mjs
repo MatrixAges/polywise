@@ -1,7 +1,7 @@
+import { spawnSync } from 'node:child_process'
 import { existsSync, readdirSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { spawnSync } from 'node:child_process'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -9,19 +9,13 @@ const packageDir = path.resolve(__dirname, '..')
 const repoRoot = path.resolve(packageDir, '..', '..')
 const pnpmStoreDir = path.join(repoRoot, 'node_modules', '.pnpm')
 
-const nativeModules = [
-	'better-sqlite3',
-	'bufferutil',
-	'lmdb',
-	'simsimd',
-	'utf-8-validate',
-	'@mongodb-js/zstd',
-	'usearch'
-]
+const nativeModules = ['better-sqlite3', 'bufferutil', 'simsimd', 'utf-8-validate', '@mongodb-js/zstd', 'usearch']
+
+const resolvedNativeModules = process.platform === 'win32' ? nativeModules : ['lmdb', ...nativeModules]
 
 function resolveElectronRebuildCli() {
 	const entry = readdirSync(pnpmStoreDir)
-		.filter((name) => name.startsWith('@electron+rebuild@'))
+		.filter(name => name.startsWith('@electron+rebuild@'))
 		.sort()
 		.at(-1)
 
@@ -29,15 +23,7 @@ function resolveElectronRebuildCli() {
 		throw new Error('Unable to find @electron/rebuild in the pnpm store.')
 	}
 
-	const cliPath = path.join(
-		pnpmStoreDir,
-		entry,
-		'node_modules',
-		'@electron',
-		'rebuild',
-		'lib',
-		'cli.js'
-	)
+	const cliPath = path.join(pnpmStoreDir, entry, 'node_modules', '@electron', 'rebuild', 'lib', 'cli.js')
 
 	if (!existsSync(cliPath)) {
 		throw new Error(`Resolved @electron/rebuild entry does not contain lib/cli.js: ${cliPath}`)
@@ -52,14 +38,7 @@ const cliPath = resolveElectronRebuildCli()
 // because it expects system pkg-config/liblzma during Electron rebuilds.
 const result = spawnSync(
 	process.execPath,
-	[
-		cliPath,
-		'--force',
-		'--module-dir',
-		'.',
-		'--only',
-		nativeModules.join(',')
-	],
+	[cliPath, '--force', '--module-dir', '.', '--only', resolvedNativeModules.join(',')],
 	{
 		cwd: packageDir,
 		stdio: 'inherit'

@@ -123,7 +123,7 @@ jobs:
       - name: Prepare native runtime dependencies (Windows)
         if: "matrix.runner == 'windows-latest'"
         shell: bash
-        run: "pnpm rebuild electron node-llama-cpp sqlite-vec @node-rs/jieba @node-rs/xxhash\npnpm --dir packages/desktop run rebuild"
+        run: "pnpm rebuild lmdb\npnpm rebuild electron node-llama-cpp sqlite-vec @node-rs/jieba @node-rs/xxhash\npnpm --dir packages/desktop run rebuild"
       - name: Validate mac signing secrets
         if: "matrix.runner == 'macos-latest'"
         shell: bash
