@@ -223,6 +223,11 @@ const workflow_definition = workflow({
 					}
 				},
 				{
+					name: 'Pin build branch to release commit',
+					shell: 'bash',
+					run: 'git checkout --detach "${{ inputs.release_commit }}"'
+				},
+				{
 					name: 'Check platform asset on Cloudflare R2',
 					id: 'asset_status',
 					env: {
@@ -230,12 +235,6 @@ const workflow_definition = workflow({
 						ASSET_GLOB: '${{ matrix.asset_glob }}'
 					},
 					run: 'node ./scripts/check_platform_asset_on_r2.mjs'
-				},
-				{
-					if: "steps.asset_status.outputs.already_published != 'true'",
-					name: 'Pin build branch to release commit',
-					shell: 'bash',
-					run: 'git checkout --detach "${{ inputs.release_commit }}"'
 				},
 				{
 					if: "steps.asset_status.outputs.already_published != 'true'",
