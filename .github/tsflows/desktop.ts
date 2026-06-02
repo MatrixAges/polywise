@@ -30,17 +30,17 @@ const readPnpmVersion = () => {
 const pnpm_version = readPnpmVersion()
 
 const mac_asset_glob = [
-	'packages/desktop/release/mac/x64/*.dmg',
-	'packages/desktop/release/mac/x64/*.zip',
-	'packages/desktop/release/mac/x64/*.blockmap',
-	'packages/desktop/release/mac/x64/latest*.yml'
+	'packages/desktop/release/darwin/x64/*.dmg',
+	'packages/desktop/release/darwin/x64/*.zip',
+	'packages/desktop/release/darwin/x64/*.blockmap',
+	'packages/desktop/release/darwin/x64/latest*.yml'
 ].join('\n')
 
 const mac_arm_asset_glob = [
-	'packages/desktop/release/mac/arm64/*.dmg',
-	'packages/desktop/release/mac/arm64/*.zip',
-	'packages/desktop/release/mac/arm64/*.blockmap',
-	'packages/desktop/release/mac/arm64/latest*.yml'
+	'packages/desktop/release/darwin/arm64/*.dmg',
+	'packages/desktop/release/darwin/arm64/*.zip',
+	'packages/desktop/release/darwin/arm64/*.blockmap',
+	'packages/desktop/release/darwin/arm64/latest*.yml'
 ].join('\n')
 
 const win_asset_glob = [
@@ -173,7 +173,7 @@ const workflow_definition = workflow({
 							name: 'macOS (x64)',
 							artifact_name: 'polywise-macos-x64',
 							asset_glob: mac_asset_glob,
-							source_dir: 'packages/desktop/release/mac/x64',
+							source_dir: 'packages/desktop/release/darwin/x64',
 							destination_dir: 'release/darwin/x64',
 							build_command: [
 								desktop_shared_build_command,
@@ -188,7 +188,7 @@ const workflow_definition = workflow({
 							name: 'macOS (arm64)',
 							artifact_name: 'polywise-macos-arm64',
 							asset_glob: mac_arm_asset_glob,
-							source_dir: 'packages/desktop/release/mac/arm64',
+							source_dir: 'packages/desktop/release/darwin/arm64',
 							destination_dir: 'release/darwin/arm64',
 							build_command: [
 								desktop_shared_build_command,
