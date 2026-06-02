@@ -1,4 +1,4 @@
-import { getAppPath, getPath, is_dev, show_devtool } from '@desktop/utils'
+import { getAppPath, getPath, is_dev, is_win, show_devtool } from '@desktop/utils'
 import { nativeTheme } from 'electron'
 
 import { productName } from '../package.json'
@@ -8,7 +8,7 @@ import type { BrowserWindowConstructorOptions } from 'electron'
 nativeTheme.themeSource = 'dark'
 
 export const window_options = {
-	frame: false,
+	frame: is_win ? true : false,
 	fullscreen: false,
 	autoHideMenuBar: true,
 	titleBarStyle: 'hidden',
@@ -16,10 +16,11 @@ export const window_options = {
 	height: 720,
 	minWidth: 720,
 	minHeight: 510,
-	transparent: true,
+	transparent: is_win ? false : true,
 	visualEffectState: 'active',
 	vibrancy: 'under-window',
 	backgroundMaterial: 'tabbed',
+	backgroundColor: '#00000000',
 	trafficLightPosition: { x: 10, y: 14 },
 	webPreferences: {
 		sandbox: false,

@@ -33,7 +33,7 @@ export default class Index {
 	rename_project_id = ''
 	rename_session_id = ''
 	rename_value = ''
-	menu_tab = 'projects' as MenuTab
+	menu_tab = 'sessions' as MenuTab
 	projects = [] as Array<ProjectListItem>
 	normal_pins = [] as Array<Session>
 	normal_sessions = [] as Array<Session>
