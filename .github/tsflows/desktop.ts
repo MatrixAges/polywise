@@ -58,6 +58,23 @@ const desktop_shared_build_command = [
 	'pnpm --dir packages/desktop run transform'
 ].join('\n')
 
+const retry_command = [
+	'retryCommand() {',
+	'\tmax_attempts="$1"',
+	'\tsleep_seconds="$2"',
+	'\tshift 2',
+	'\tattempt=1',
+	'\twhile true; do',
+	'\t\t"$@" && return 0',
+	'\t\tif [ "$attempt" -ge "$max_attempts" ]; then',
+	'\t\t\treturn 1',
+	'\t\tfi',
+	'\t\tattempt=$((attempt + 1))',
+	'\t\tsleep "$sleep_seconds"',
+	'\tdone',
+	'}'
+].join('\n')
+
 const default_install_command = [
 	"printf '\\ntrustLockfile: true\\n' >> pnpm-workspace.yaml",
 	'pnpm install --frozen-lockfile --filter "./packages/desktop..." --filter "./packages/polywise..." --filter "./packages/app..." --filter "./packages/stk..." --filter "./packages/erpc..."'
@@ -158,8 +175,9 @@ const workflow_definition = workflow({
 							destination_dir: 'release/darwin/x64',
 							build_command: [
 								desktop_shared_build_command,
-								'pnpm --dir packages/desktop exec cross-env ZIP=0 BUILD_ARCH=x64 electron-builder -m --x64 --publish never',
-								'pnpm --dir packages/desktop exec cross-env BUILD_ARCH=x64 electron-builder -m --x64 --publish never'
+								retry_command,
+								'retryCommand 3 12 pnpm --dir packages/desktop exec cross-env ZIP=0 BUILD_ARCH=x64 electron-builder -m --x64 --publish never',
+								'retryCommand 3 12 pnpm --dir packages/desktop exec cross-env BUILD_ARCH=x64 electron-builder -m --x64 --publish never'
 							].join('\n')
 						},
 						{
@@ -172,8 +190,9 @@ const workflow_definition = workflow({
 							destination_dir: 'release/darwin/arm64',
 							build_command: [
 								desktop_shared_build_command,
-								'pnpm --dir packages/desktop exec cross-env ZIP=0 BUILD_ARCH=arm64 electron-builder -m --arm64 --publish never',
-								'pnpm --dir packages/desktop exec cross-env BUILD_ARCH=arm64 electron-builder -m --arm64 --publish never'
+								retry_command,
+								'retryCommand 3 12 pnpm --dir packages/desktop exec cross-env ZIP=0 BUILD_ARCH=arm64 electron-builder -m --arm64 --publish never',
+								'retryCommand 3 12 pnpm --dir packages/desktop exec cross-env BUILD_ARCH=arm64 electron-builder -m --arm64 --publish never'
 							].join('\n')
 						},
 						{
