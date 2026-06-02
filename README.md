@@ -12,27 +12,27 @@
 
 <p align="center">
   <a href="README.md">English</a> |
-  <a href="README.zh.md">简体中文</a> |
-  <a href="README.zht.md">繁體中文</a> |
-  <a href="README.ko.md">한국어</a> |
-  <a href="README.de.md">Deutsch</a> |
-  <a href="README.es.md">Español</a> |
-  <a href="README.fr.md">Français</a> |
-  <a href="README.it.md">Italiano</a> |
-  <a href="README.da.md">Dansk</a> |
-  <a href="README.ja.md">日本語</a> |
-  <a href="README.pl.md">Polski</a> |
-  <a href="README.ru.md">Русский</a> |
-  <a href="README.bs.md">Bosanski</a> |
-  <a href="README.ar.md">العربية</a> |
-  <a href="README.no.md">Norsk</a> |
-  <a href="README.br.md">Português (Brasil)</a> |
-  <a href="README.th.md">ไทย</a> |
-  <a href="README.tr.md">Türkçe</a> |
-  <a href="README.uk.md">Українська</a> |
-  <a href="README.bn.md">বাংলা</a> |
-  <a href="README.gr.md">Ελληνικά</a> |
-  <a href="README.vi.md">Tiếng Việt</a>
+  <a href="readme/README.zh.md">简体中文</a> |
+  <a href="readme/README.zht.md">繁體中文</a> |
+  <a href="readme/README.ko.md">한국어</a> |
+  <a href="readme/README.de.md">Deutsch</a> |
+  <a href="readme/README.es.md">Español</a> |
+  <a href="readme/README.fr.md">Français</a> |
+  <a href="readme/README.it.md">Italiano</a> |
+  <a href="readme/README.da.md">Dansk</a> |
+  <a href="readme/README.ja.md">日本語</a> |
+  <a href="readme/README.pl.md">Polski</a> |
+  <a href="readme/README.ru.md">Русский</a> |
+  <a href="readme/README.bs.md">Bosanski</a> |
+  <a href="readme/README.ar.md">العربية</a> |
+  <a href="readme/README.no.md">Norsk</a> |
+  <a href="readme/README.br.md">Português (Brasil)</a> |
+  <a href="readme/README.th.md">ไทย</a> |
+  <a href="readme/README.tr.md">Türkçe</a> |
+  <a href="readme/README.uk.md">Українська</a> |
+  <a href="readme/README.bn.md">বাংলা</a> |
+  <a href="readme/README.gr.md">Ελληνικά</a> |
+  <a href="readme/README.vi.md">Tiếng Việt</a>
 </p>
 
 <picture>
