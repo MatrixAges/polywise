@@ -225,9 +225,7 @@ const workflow_definition = workflow({
 				{
 					uses: 'actions/setup-node@v6',
 					with: {
-						'node-version': 'lts/*',
-						cache: 'pnpm',
-						'cache-dependency-path': 'pnpm-lock.yaml'
+						'node-version': 'lts/*'
 					}
 				},
 				{
@@ -251,6 +249,15 @@ const workflow_definition = workflow({
 					with: {
 						version: pnpm_version,
 						run_install: false
+					}
+				},
+				{
+					if: "steps.asset_status.outputs.already_published != 'true'",
+					uses: 'actions/setup-node@v6',
+					with: {
+						'node-version': 'lts/*',
+						cache: 'pnpm',
+						'cache-dependency-path': 'pnpm-lock.yaml'
 					}
 				},
 				{
