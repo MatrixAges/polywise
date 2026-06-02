@@ -400,10 +400,10 @@ const workflow_definition = workflow({
 				},
 				{
 					if: "steps.artifact_status.outputs.has_new_artifacts == 'true'",
-					name: 'Attach assets to draft release',
+					name: 'Upload release assets and publish release',
 					uses: 'softprops/action-gh-release@v3',
 					with: {
-						draft: true,
+						draft: false,
 						tag_name: '${{ inputs.release_tag }}',
 						name: '${{ inputs.release_tag }}',
 						target_commitish: '${{ inputs.release_commit }}',
