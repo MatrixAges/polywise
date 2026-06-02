@@ -169,7 +169,7 @@ const workflow_definition = workflow({
 				matrix: {
 					include: [
 						{
-							runner: 'macos-15-intel',
+							runner: 'macos-latest',
 							args: '--x64',
 							name: 'macOS (x64)',
 							artifact_name: 'polywise-macos-x64',
