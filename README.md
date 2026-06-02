@@ -1,6 +1,6 @@
 <p align="right"><a href="README.zh.md">Chinese</a> | English</p>
 
-# <p align="center"> <img src="images/logo.png" width="22" height="22" alt="Polywise Logo"> Polywise </p>
+# <p align="center"> <img src="images/logo.png" width="24" height="24" alt="Polywise Logo"> Polywise </p>
 
 <p align="center"><strong>The open source agentic content system</strong></p>
 
@@ -15,8 +15,6 @@
   <source media="(prefers-color-scheme: light)" srcset="images/landing_light.png">
   <img alt="Shows an illustrated sun in light mode and a moon with stars in dark mode." src="images/landing_light.png">
 </picture>
-
----
 
 Polywise is the open-source agentic content system. You can use it from the command line or the desktop app to chat with models, save knowledge, retrieve context, and turn repeated working styles into reusable agents.
 
