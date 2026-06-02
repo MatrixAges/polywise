@@ -43,28 +43,12 @@ const runGh = ({ args, input }) => {
 
 const readDraftRelease = release_tag => {
 	const repo_slug = getRepoSlug()
-	let page_number = 1
+	const raw_output = runGh({
+		args: ['api', `repos/${repo_slug}/releases?per_page=40`]
+	})
+	const releases = JSON.parse(raw_output || '[]')
 
-	while (true) {
-		const raw_output = runGh({
-			args: ['api', `repos/${repo_slug}/releases?per_page=3&page=${page_number}`]
-		})
-		const releases = JSON.parse(raw_output || '[]')
-
-		if (releases.length === 0) {
-			return null
-		}
-
-		const matched_release =
-			releases.find(release_item => release_item.tag_name === release_tag && release_item.draft === true) ||
-			null
-
-		if (matched_release) {
-			return matched_release
-		}
-
-		page_number += 1
-	}
+	return releases.find(release_item => release_item.tag_name === release_tag && release_item.draft === true) || null
 }
 
 const buildReleasePayload = async args => {

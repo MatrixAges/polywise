@@ -12,7 +12,7 @@ export default {
 	appId: APP_ID,
 	productName,
 	asar: false,
-	compression: 'maximum',
+	compression: 'normal',
 	npmRebuild: false,
 	directories: { output: (ZIP ? 'zip' : 'release') + '/${platform}/${arch}' },
 	files: [
