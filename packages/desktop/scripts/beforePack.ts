@@ -583,6 +583,39 @@ const trimUnusedPackages = (app_dir: string) => {
 	}
 }
 
+const shouldPruneDarwinArm64Packages = () =>
+	process.platform === 'darwin' && process.arch === 'arm64' && process.env.BUILD_ARCH === 'x64'
+
+const pruneMismatchedDarwinPackages = (app_dir: string) => {
+	if (!shouldPruneDarwinArm64Packages()) return
+
+	const node_modules_dir = path.join(app_dir, 'node_modules')
+
+	if (!fs.existsSync(node_modules_dir)) return
+
+	const trim_candidates = listTopLevelPackages(node_modules_dir).filter(entry =>
+		entry.name.endsWith('-darwin-arm64')
+	)
+
+	for (const candidate of trim_candidates) {
+		const x64_name = candidate.name.replace(/-darwin-arm64$/, '-darwin-x64')
+		const universal_name = candidate.name.replace(/-darwin-arm64$/, '-darwin-universal')
+		const has_x64_variant = fs.existsSync(resolvePackageDir(node_modules_dir, x64_name))
+		const has_universal_variant = fs.existsSync(resolvePackageDir(node_modules_dir, universal_name))
+
+		if (!has_x64_variant && !has_universal_variant) {
+			console.warn(
+				`[Cleanup] Keeping ${candidate.name} because no x64/universal variant exists in packaged node_modules.`
+			)
+			continue
+		}
+
+		fs.removeSync(candidate.path)
+		removeEmptyScopeDir(candidate.path)
+		console.log(`[Cleanup] Removed mismatched Darwin arm64 package for x64 build: ${candidate.name}`)
+	}
+}
+
 export const afterPack: Configuration['afterPack'] = async context => {
 	const app_dir = resolvePackagedAppDir(context.appOutDir)
 
@@ -595,4 +628,5 @@ export const afterPack: Configuration['afterPack'] = async context => {
 	}
 
 	trimUnusedPackages(app_dir)
+	pruneMismatchedDarwinPackages(app_dir)
 }
