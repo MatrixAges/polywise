@@ -7,7 +7,7 @@ import { readFile, writeFile } from 'atomically'
 import fs from 'fs-extra'
 import { object, string } from 'zod'
 
-import { createSystemSpec, getPathMappings, getRealPath, getSystemToolsPrompt } from '../utils'
+import { createSystemSpec, getPathMappings, getSystemToolsPrompt } from '../utils'
 
 import type Session from '../session'
 
@@ -49,7 +49,33 @@ const getCommandEnv = (s: Session, host_cwd: string) => ({
 	POLYWISE_PATH_MAPPINGS_JSON: JSON.stringify(s.path_mappings)
 })
 
+const buildShellCommand = (command: string) => {
+	return `set -o pipefail 2>/dev/null\n${command}`
+}
+
+const resolveHostPath = (args: { host_cwd: string; file_path: string; path_mappings: Record<string, string> }) => {
+	const { host_cwd, file_path, path_mappings } = args
+
+	const mapping_list = Object.entries(path_mappings).sort((left, right) => right[0].length - left[0].length)
+
+	for (const [prefix, real_dir] of mapping_list) {
+		if (file_path === prefix || file_path.startsWith(`${prefix}/`)) {
+			const relative_path = file_path.slice(prefix.length).replace(/^\/+/, '')
+
+			return path.resolve(real_dir, relative_path || '.')
+		}
+	}
+
+	if (path.isAbsolute(file_path)) {
+		return path.resolve(file_path)
+	}
+
+	return path.resolve(host_cwd, file_path)
+}
+
 const executeShellCommand = async (command: string, cwd: string, env: NodeJS.ProcessEnv) => {
+	const shell_command = buildShellCommand(command)
+
 	if (process.platform === 'win32') {
 		return new Promise<{ stdout: string; stderr: string; exitCode: number }>(resolve => {
 			const child = spawn(process.env.ComSpec ?? 'cmd.exe', ['/d', '/s', '/c', command], {
@@ -79,7 +105,7 @@ const executeShellCommand = async (command: string, cwd: string, env: NodeJS.Pro
 	}
 
 	return new Promise<{ stdout: string; stderr: string; exitCode: number }>(resolve => {
-		const child = spawn(process.env.SHELL ?? '/bin/sh', ['-lc', command], {
+		const child = spawn(process.env.SHELL ?? '/bin/sh', ['-lc', shell_command], {
 			cwd,
 			env
 		})
@@ -152,7 +178,7 @@ export const createNativeAccessTools = async (s: Session) => {
 			path: string().describe('The absolute or relative path to the file to read')
 		}),
 		execute: async ({ path: file_path }) => {
-			const real_path = getRealPath(host_cwd, file_path, path_mappings)
+			const real_path = resolveHostPath({ host_cwd, file_path, path_mappings })
 			const content = await readFile(real_path, 'utf8')
 
 			return { content }
@@ -171,7 +197,7 @@ export const createNativeAccessTools = async (s: Session) => {
 			content: string().describe('The content to write to the file')
 		}),
 		execute: async ({ path: file_path, content }) => {
-			const real_path = getRealPath(host_cwd, file_path, path_mappings)
+			const real_path = resolveHostPath({ host_cwd, file_path, path_mappings })
 
 			await fs.ensureDir(path.dirname(real_path))
 			await writeFile(real_path, content, 'utf8')

@@ -22,8 +22,8 @@ export const createGlobTool = (s: Session) => {
 			const path_mappings = getPathMappings(s)
 
 			const real_cwd = input.cwd ? getRealPath(s.cwd, input.cwd, path_mappings) : s.cwd
-			const permission_paths = extractPaths(input, s.cwd).map(path =>
-				path.startsWith('/') ? getRealPath(s.cwd, path, path_mappings) : path
+			const permission_paths = extractPaths(input, real_cwd).map(target_path =>
+				target_path.startsWith('/') ? getRealPath(s.cwd, target_path, path_mappings) : target_path
 			)
 
 			for (const path of permission_paths) {
@@ -55,12 +55,11 @@ export const createGlobTool = (s: Session) => {
 	})
 }
 
-const extractPaths = (input: { patterns: Array<string>; cwd?: string }, sessionCwd: string): Array<string> => {
+const extractPaths = (input: { patterns: Array<string>; cwd?: string }, resolved_cwd: string): Array<string> => {
 	const paths: Array<string> = []
 
-	const resolvedCwd = input.cwd ?? sessionCwd
-	if (resolvedCwd) {
-		paths.push(resolvedCwd)
+	if (resolved_cwd) {
+		paths.push(resolved_cwd)
 	}
 
 	for (const pattern of input.patterns) {
