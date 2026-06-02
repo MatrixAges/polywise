@@ -170,7 +170,7 @@ const workflow_definition = workflow({
 						'		exit "$create_status"',
 						'	fi',
 						'fi',
-						'release_tag_found=$(gh release list --limit 20 --json tagName,isDraft --jq ".[] | select(.tagName == \\"$RELEASE_TAG\\" and .isDraft == true) | .tagName" | head -n 1)',
+						'release_tag_found=$(gh release list --limit 20 --json tagName,isDraft --jq "map(select(.tagName == \\"$RELEASE_TAG\\" and .isDraft == true)) | .[0].tagName // empty")',
 						'[ "$release_tag_found" = "$RELEASE_TAG" ]',
 						'release_id="$RELEASE_TAG"',
 						'release_url="https://github.com/${{ github.repository }}/releases/tag/$RELEASE_TAG"',
