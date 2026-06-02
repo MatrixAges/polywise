@@ -23,6 +23,10 @@ polywise start -d
 
 `polywise start` keeps the server in the foreground. `polywise start -d` exits immediately and leaves the server running in the background.
 
+If you want the Web UI, open `http://localhost:3072/app/` in your browser.
+
+If you want the CLI, keep working in the terminal with `polywise ...` commands. The Web UI and CLI both talk to the same local service by default.
+
 Or download the desktop application from [GitHub Releases](https://github.com/MatrixAges/polywise/releases).
 
 For a first run, Polywise mainly needs one usable model provider. Everything else can come later.
@@ -120,6 +124,12 @@ In practice, this is where Polywise learns how to fetch the outside world.
 ## Usage
 
 Once one provider is connected and the default model is set, stop configuring and go use the product.
+
+### Web UI
+
+If you want to use Polywise in the browser, make sure the local service is running and then open `http://localhost:3072/app/`.
+
+This is usually the easiest entry point because `Session`, `Linkcase`, `Agent`, and `Posts` all live in one interface.
 
 ### CLI
 

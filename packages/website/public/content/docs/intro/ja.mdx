@@ -23,6 +23,10 @@ polywise start -d
 
 `polywise start` は foreground で動き続けます。`polywise start -d` はすぐに終了し、server は background で動き続けます。
 
+Web UI を使うなら、browser で `http://localhost:3072/app/` を開いてください。
+
+CLI を使うなら、そのまま terminal で `polywise ...` コマンドを実行してください。Web UI と CLI はデフォルトで同じ local service に接続します。
+
 または [GitHub Releases](https://github.com/MatrixAges/polywise/releases) からデスクトップアプリをダウンロードできます。
 
 最初の利用で Polywise に主に必要なのは、使える model provider をひとつ用意することです。ほかはあとからでも構いません。
@@ -120,6 +124,12 @@ Polywise に Web をもっと上手く読ませたくなったら、`Settings ->
 ## 使い方
 
 provider がひとつつながり、デフォルトモデルも決まったら、いったん設定をやめて、そのままプロダクトを使い始めてください。
+
+### Web UI
+
+browser で Polywise を使うなら、まず local service が起動していることを確認し、そのあとで `http://localhost:3072/app/` を開いてください。
+
+`Session`、`Linkcase`、`Agent`、`Posts` がひとつの画面系にまとまっているので、ここがいちばん理解しやすい入口です。
 
 ### CLI
 

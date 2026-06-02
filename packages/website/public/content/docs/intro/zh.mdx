@@ -23,6 +23,10 @@ polywise start -d
 
 `polywise start` 会以前台方式持续运行。`polywise start -d` 会立刻退出，并让服务在后台持续运行。
 
+如果你要用 Web UI，就在浏览器里打开 `http://localhost:3072/app/`。
+
+如果你要用 CLI，就继续在终端里执行 `polywise ...` 命令。Web UI 和 CLI 默认连接的是同一个本地服务。
+
 或者从 [GitHub Releases](https://github.com/MatrixAges/polywise/releases) 下载桌面应用。
 
 第一次使用时，Polywise 主要只需要一个可用的模型提供方。其他东西都可以以后再配。
@@ -120,6 +124,12 @@ polywise start -d
 ## 用法
 
 一旦有一个 provider 连好了，默认模型也设好了，就先别继续配置了，直接开始用产品。
+
+### Web UI
+
+如果你是通过浏览器来用 Polywise，先确认本地服务已经启动，然后直接访问 `http://localhost:3072/app/`。
+
+这里通常是最容易理解产品的入口，因为 `Session`、`Linkcase`、`Agent` 和 `Posts` 都在同一套界面里。
 
 ### CLI
 

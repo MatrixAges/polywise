@@ -1,6 +1,6 @@
 <p align="right"><a href="README.zh.md">Chinese</a> | English</p>
 
-# <p align="center"> <img src="packages/app/public/icon.svg" width="22" height="22" alt="Polywise Logo"> Polywise </p>
+# <p align="center"> <img src="images/logo.png" width="22" height="22" alt="Polywise Logo"> Polywise </p>
 
 <p align="center"><strong>The open source agentic content system</strong></p>
 
