@@ -17,6 +17,10 @@ body {
 	}
 }
 
+[data-sonner-toast] {
+	-webkit-app-region: no-drag;
+}
+
 @layer components {
 	.page_wrap {
 		margin: 0 auto;
