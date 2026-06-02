@@ -100,41 +100,57 @@ ${JSON.stringify(commit_payload, null, 2)}
 `.trim()
 }
 
-const readResponseText = async response => {
-	const response_data = await response.json()
-	const message_content = response_data?.choices?.[0]?.message?.content
-
-	if (typeof message_content !== 'string' || !message_content.trim()) {
-		throw new Error('DeepSeek response did not contain release notes')
+const readTextContent = content => {
+	if (typeof content === 'string' && content.trim()) {
+		return content.trim()
 	}
 
-	return message_content.trim()
+	if (!Array.isArray(content)) {
+		return ''
+	}
+
+	const text_content = content
+		.map(item => {
+			if (typeof item === 'string') {
+				return item
+			}
+
+			if (typeof item?.text === 'string') {
+				return item.text
+			}
+
+			if (typeof item?.content === 'string') {
+				return item.content
+			}
+
+			return ''
+		})
+		.join('')
+		.trim()
+
+	return text_content
+}
+
+const readResponseText = response_data => {
+	const message_content = response_data?.choices?.[0]?.message?.content
+	const text_content = readTextContent(message_content)
+
+	if (!text_content) {
+		return ''
+	}
+
+	return text_content
 }
 
 const requestReleaseNotes = async args => {
-	const { api_key, prompt } = args
+	const { api_key, request_body } = args
 	const response = await fetch('https://api.deepseek.com/chat/completions', {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
 			Authorization: `Bearer ${api_key}`
 		},
-		body: JSON.stringify({
-			model: 'deepseek-v4-pro',
-			messages: [
-				{
-					role: 'system',
-					content: 'You are the Product Release Manager for Polywise. Convert commit history into concise, accurate, user-facing release notes.'
-				},
-				{
-					role: 'user',
-					content: prompt
-				}
-			],
-			thinking: { type: 'enabled' },
-			reasoning_effort: 'high',
-			stream: false
-		})
+		body: JSON.stringify(request_body)
 	})
 
 	if (!response.ok) {
@@ -143,7 +159,16 @@ const requestReleaseNotes = async args => {
 		throw new Error(`DeepSeek API request failed: ${response.status} - ${error_text}`)
 	}
 
-	return readResponseText(response)
+	const response_data = await response.json()
+	const response_text = readResponseText(response_data)
+
+	if (!response_text) {
+		throw new Error(
+			`DeepSeek response did not contain release notes for ${request_body.model}: ${JSON.stringify(response_data)}`
+		)
+	}
+
+	return response_text
 }
 
 const stripMarkdownFence = release_notes =>
@@ -170,6 +195,32 @@ const createFallbackReleaseNotes = release_tag =>
 ### 🚀 Updates
 - This release mainly contains internal maintenance and dependency updates, with no major user-facing changes to highlight.`
 
+const createReleaseMessages = prompt => [
+	{
+		role: 'system',
+		content: 'You are the Product Release Manager for Polywise. Convert commit history into concise, accurate, user-facing release notes.'
+	},
+	{
+		role: 'user',
+		content: prompt
+	}
+]
+
+const createPrimaryRequestBody = prompt => ({
+	model: 'deepseek-v4-pro',
+	messages: createReleaseMessages(prompt),
+	thinking: { type: 'enabled' },
+	reasoning_effort: 'high',
+	stream: false
+})
+
+const createRetryRequestBody = prompt => ({
+	model: 'deepseek-v4-flash',
+	messages: createReleaseMessages(prompt),
+	thinking: { type: 'disabled' },
+	stream: false
+})
+
 const buildReleaseNotes = async args => {
 	const { api_key, release_tag, commit_records } = args
 
@@ -182,10 +233,26 @@ const buildReleaseNotes = async args => {
 		release_tag,
 		commit_payload
 	})
-	const release_notes = await requestReleaseNotes({
-		api_key,
-		prompt
-	})
+	let release_notes = ''
+
+	try {
+		release_notes = await requestReleaseNotes({
+			api_key,
+			prompt,
+			request_body: createPrimaryRequestBody(prompt)
+		})
+	} catch (error) {
+		const error_message = error instanceof Error ? error.message : String(error)
+
+		console.warn(
+			`Primary DeepSeek release-notes request failed, retrying with fallback model: ${error_message}`
+		)
+		release_notes = await requestReleaseNotes({
+			api_key,
+			prompt,
+			request_body: createRetryRequestBody(prompt)
+		})
+	}
 
 	return normalizeReleaseNotes({
 		release_tag,
