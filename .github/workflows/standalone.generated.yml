@@ -27,37 +27,52 @@ jobs:
   publish: 
     runs-on: ubuntu-latest
     steps: 
-      - uses: actions/checkout@v6
+      - name: Check npm publish status
+        id: npm_status
+        shell: bash
+        env: 
+          RELEASE_VERSION: "${{ inputs.release_version }}"
+        run: "published_version=$(npm view \"polywise@${RELEASE_VERSION}\" version 2>/dev/null || true)\nif [ \"$published_version\" = \"$RELEASE_VERSION\" ]; then\n\techo \"already_published=true\" >> \"$GITHUB_OUTPUT\"\n\texit 0\nfi\necho \"already_published=false\" >> \"$GITHUB_OUTPUT\""
+      - if: "steps.npm_status.outputs.already_published != 'true'"
+        uses: actions/checkout@v6
         with: 
           fetch-depth: 0
           ref: build
-      - name: Pin build branch to release commit
+      - if: "steps.npm_status.outputs.already_published != 'true'"
+        name: Pin build branch to release commit
         shell: bash
         run: "git checkout --detach \"${{ inputs.release_commit }}\""
-      - name: Setup pnpm
+      - if: "steps.npm_status.outputs.already_published != 'true'"
+        name: Setup pnpm
         uses: pnpm/action-setup@v6
         with: 
           version: 11.3.0
           run_install: false
-      - uses: actions/setup-node@v6
+      - if: "steps.npm_status.outputs.already_published != 'true'"
+        uses: actions/setup-node@v6
         with: 
           node-version: lts/*
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
           registry-url: https://registry.npmjs.org
-      - name: Setup Bun
+      - if: "steps.npm_status.outputs.already_published != 'true'"
+        name: Setup Bun
         uses: oven-sh/setup-bun@v2
-      - name: Install dependencies
+      - if: "steps.npm_status.outputs.already_published != 'true'"
+        name: Install dependencies
         shell: bash
         run: "printf '\\ntrustLockfile: true\\n' >> pnpm-workspace.yaml\npnpm install --frozen-lockfile"
-      - name: Upgrade npm
+      - if: "steps.npm_status.outputs.already_published != 'true'"
+        name: Upgrade npm
         run: npm install -g npm@latest
-      - name: Build standalone package
+      - if: "steps.npm_status.outputs.already_published != 'true'"
+        name: Build standalone package
         shell: bash
         run: "pnpm --filter \"./packages/stk\" run build\npnpm --filter \"./packages/erpc\" run build\npnpm --filter \"./packages/app\" run build:standalone\npnpm --dir packages/polywise run build:standalone"
-      - name: Publish polywise
+      - if: "steps.npm_status.outputs.already_published != 'true'"
+        name: Publish polywise
         shell: bash
         working-directory: packages/polywise
         env: 
           RELEASE_VERSION: "${{ inputs.release_version }}"
-        run: "published_version=$(npm view \"polywise@${RELEASE_VERSION}\" version 2>/dev/null || true)\nif [ \"$published_version\" = \"$RELEASE_VERSION\" ]; then\n\techo \"polywise@${RELEASE_VERSION} already published, skipping npm publish.\"\n\texit 0\nfi\npublish_userconfig=$(mktemp)\nprintf \"registry=https://registry.npmjs.org/\\n\" > \"$publish_userconfig\"\nexport NPM_CONFIG_USERCONFIG=\"$publish_userconfig\"\nunset NODE_AUTH_TOKEN\nnpm publish --access public --provenance --no-git-checks"
+        run: "publish_userconfig=$(mktemp)\nprintf \"registry=https://registry.npmjs.org/\\n\" > \"$publish_userconfig\"\nexport NPM_CONFIG_USERCONFIG=\"$publish_userconfig\"\nunset NODE_AUTH_TOKEN\nnpm publish --access public --provenance --no-git-checks"

@@ -8,6 +8,7 @@ import { YAML } from 'bun'
 
 const release_branch_name = 'build'
 const current_dir = dirname(fileURLToPath(import.meta.url))
+const release_base_url = 'https://files.polywise.io/release'
 
 const readPnpmVersion = () => {
 	const package_json = JSON.parse(readFileSync(resolve(current_dir, '../../package.json'), 'utf8'))
@@ -214,6 +215,27 @@ const workflow_definition = workflow({
 			'runs-on': '${{ matrix.runner }}',
 			steps: [
 				{
+					name: 'Check platform asset on Cloudflare R2',
+					id: 'asset_status',
+					shell: 'bash',
+					env: {
+						RELEASE_VERSION: '${{ inputs.release_version }}',
+						ASSET_GLOB: '${{ matrix.asset_glob }}'
+					},
+					run: [
+						'first_asset=$(printf "%s\\n" "$ASSET_GLOB" | head -n 1)',
+						'asset_path="${first_asset#packages/desktop/}"',
+						'asset_url="' + `${release_base_url}/` + '${asset_path}"',
+						'http_code=$(curl -L -s -o /dev/null -w "%{http_code}" "$asset_url")',
+						'if [ "$http_code" = "200" ]; then',
+						'\techo "already_published=true" >> "$GITHUB_OUTPUT"',
+						'\texit 0',
+						'fi',
+						'echo "already_published=false" >> "$GITHUB_OUTPUT"'
+					].join('\n')
+				},
+				{
+					if: "steps.asset_status.outputs.already_published != 'true'",
 					uses: 'actions/checkout@v6',
 					with: {
 						'fetch-depth': 0,
@@ -221,11 +243,13 @@ const workflow_definition = workflow({
 					}
 				},
 				{
+					if: "steps.asset_status.outputs.already_published != 'true'",
 					name: 'Pin build branch to release commit',
 					shell: 'bash',
 					run: 'git checkout --detach "${{ inputs.release_commit }}"'
 				},
 				{
+					if: "steps.asset_status.outputs.already_published != 'true'",
 					name: 'Setup pnpm',
 					uses: 'pnpm/action-setup@v6',
 					with: {
@@ -234,6 +258,7 @@ const workflow_definition = workflow({
 					}
 				},
 				{
+					if: "steps.asset_status.outputs.already_published != 'true'",
 					uses: 'actions/setup-node@v6',
 					with: {
 						cache: 'pnpm',
@@ -241,12 +266,13 @@ const workflow_definition = workflow({
 					}
 				},
 				{
+					if: "steps.asset_status.outputs.already_published != 'true'",
 					name: 'Setup Bun',
 					uses: 'oven-sh/setup-bun@v2'
 				},
 				{
 					name: 'Cache Electron binaries (Windows)',
-					if: "matrix.runner == 'windows-latest'",
+					if: "matrix.runner == 'windows-latest' && steps.asset_status.outputs.already_published != 'true'",
 					uses: 'actions/cache@v4',
 					with: {
 						path: [
@@ -258,7 +284,7 @@ const workflow_definition = workflow({
 				},
 				{
 					name: 'Cache node-gyp (Windows)',
-					if: "matrix.runner == 'windows-latest'",
+					if: "matrix.runner == 'windows-latest' && steps.asset_status.outputs.already_published != 'true'",
 					uses: 'actions/cache@v4',
 					with: {
 						path: '${{ env.LOCALAPPDATA }}\\node-gyp\\Cache',
@@ -267,25 +293,25 @@ const workflow_definition = workflow({
 				},
 				{
 					name: 'Install dependencies',
-					if: "matrix.runner != 'windows-latest'",
+					if: "matrix.runner != 'windows-latest' && steps.asset_status.outputs.already_published != 'true'",
 					shell: 'bash',
 					run: default_install_command
 				},
 				{
 					name: 'Install dependencies (Windows)',
-					if: "matrix.runner == 'windows-latest'",
+					if: "matrix.runner == 'windows-latest' && steps.asset_status.outputs.already_published != 'true'",
 					shell: 'bash',
 					run: windows_install_command
 				},
 				{
 					name: 'Prepare native runtime dependencies (Windows)',
-					if: "matrix.runner == 'windows-latest'",
+					if: "matrix.runner == 'windows-latest' && steps.asset_status.outputs.already_published != 'true'",
 					shell: 'bash',
 					run: windows_prepare_runtime_command
 				},
 				{
 					name: 'Validate mac signing secrets',
-					if: "matrix.runner == 'macos-latest'",
+					if: "matrix.runner == 'macos-latest' && steps.asset_status.outputs.already_published != 'true'",
 					shell: 'bash',
 					env: {
 						APPLE_ID: '${{ secrets.APPLE_ID }}',
@@ -303,6 +329,7 @@ const workflow_definition = workflow({
 					].join('\n')
 				},
 				{
+					if: "steps.asset_status.outputs.already_published != 'true'",
 					name: 'Build desktop assets',
 					shell: 'bash',
 					env: {
@@ -318,6 +345,7 @@ const workflow_definition = workflow({
 					run: '${{ matrix.build_command }}'
 				},
 				{
+					if: "steps.asset_status.outputs.already_published != 'true'",
 					name: 'Upload assets to Cloudflare R2',
 					uses: 'ryand56/r2-upload-action@v1.4',
 					with: {
@@ -330,6 +358,7 @@ const workflow_definition = workflow({
 					}
 				},
 				{
+					if: "steps.asset_status.outputs.already_published != 'true'",
 					name: 'Upload release assets',
 					uses: 'actions/upload-artifact@v7',
 					with: {
@@ -345,6 +374,19 @@ const workflow_definition = workflow({
 			'runs-on': 'ubuntu-latest',
 			steps: [
 				{
+					name: 'Check release artifacts',
+					id: 'artifact_status',
+					shell: 'bash',
+					run: [
+						'if [ "${{ needs.build.result }}" = "skipped" ]; then',
+						'\techo "has_new_artifacts=false" >> "$GITHUB_OUTPUT"',
+						'\texit 0',
+						'fi',
+						'echo "has_new_artifacts=true" >> "$GITHUB_OUTPUT"'
+					].join('\n')
+				},
+				{
+					if: "steps.artifact_status.outputs.has_new_artifacts == 'true'",
 					name: 'Download release assets',
 					uses: 'actions/download-artifact@v5',
 					with: {
@@ -353,6 +395,7 @@ const workflow_definition = workflow({
 					}
 				},
 				{
+					if: "steps.artifact_status.outputs.has_new_artifacts == 'true'",
 					name: 'Attach assets to draft release',
 					uses: 'softprops/action-gh-release@v3',
 					with: {

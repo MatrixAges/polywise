@@ -76,6 +76,23 @@ const workflow_definition = workflow({
 			'runs-on': 'ubuntu-latest',
 			steps: [
 				{
+					name: 'Check npm publish status',
+					id: 'npm_status',
+					shell: 'bash',
+					env: {
+						RELEASE_VERSION: '${{ inputs.release_version }}'
+					},
+					run: [
+						'published_version=$(npm view "polywise@${RELEASE_VERSION}" version 2>/dev/null || true)',
+						'if [ "$published_version" = "$RELEASE_VERSION" ]; then',
+						'	echo "already_published=true" >> "$GITHUB_OUTPUT"',
+						'	exit 0',
+						'fi',
+						'echo "already_published=false" >> "$GITHUB_OUTPUT"'
+					].join('\n')
+				},
+				{
+					if: "steps.npm_status.outputs.already_published != 'true'",
 					uses: 'actions/checkout@v6',
 					with: {
 						'fetch-depth': 0,
@@ -83,11 +100,13 @@ const workflow_definition = workflow({
 					}
 				},
 				{
+					if: "steps.npm_status.outputs.already_published != 'true'",
 					name: 'Pin build branch to release commit',
 					shell: 'bash',
 					run: 'git checkout --detach "${{ inputs.release_commit }}"'
 				},
 				{
+					if: "steps.npm_status.outputs.already_published != 'true'",
 					name: 'Setup pnpm',
 					uses: 'pnpm/action-setup@v6',
 					with: {
@@ -96,6 +115,7 @@ const workflow_definition = workflow({
 					}
 				},
 				{
+					if: "steps.npm_status.outputs.already_published != 'true'",
 					uses: 'actions/setup-node@v6',
 					with: {
 						'node-version': 'lts/*',
@@ -105,24 +125,29 @@ const workflow_definition = workflow({
 					}
 				},
 				{
+					if: "steps.npm_status.outputs.already_published != 'true'",
 					name: 'Setup Bun',
 					uses: 'oven-sh/setup-bun@v2'
 				},
 				{
+					if: "steps.npm_status.outputs.already_published != 'true'",
 					name: 'Install dependencies',
 					shell: 'bash',
 					run: install_command
 				},
 				{
+					if: "steps.npm_status.outputs.already_published != 'true'",
 					name: 'Upgrade npm',
 					run: 'npm install -g npm@latest'
 				},
 				{
+					if: "steps.npm_status.outputs.already_published != 'true'",
 					name: 'Build standalone package',
 					shell: 'bash',
 					run: build_command
 				},
 				{
+					if: "steps.npm_status.outputs.already_published != 'true'",
 					name: 'Publish polywise',
 					shell: 'bash',
 					'working-directory': 'packages/polywise',
@@ -130,11 +155,6 @@ const workflow_definition = workflow({
 						RELEASE_VERSION: '${{ inputs.release_version }}'
 					},
 					run: [
-						'published_version=$(npm view "polywise@${RELEASE_VERSION}" version 2>/dev/null || true)',
-						'if [ "$published_version" = "$RELEASE_VERSION" ]; then',
-						'	echo "polywise@${RELEASE_VERSION} already published, skipping npm publish."',
-						'	exit 0',
-						'fi',
 						'publish_userconfig=$(mktemp)',
 						'printf "registry=https://registry.npmjs.org/\\n" > "$publish_userconfig"',
 						'export NPM_CONFIG_USERCONFIG="$publish_userconfig"',
