@@ -43,9 +43,9 @@ const mac_arm_asset_glob = [
 ].join('\n')
 
 const win_asset_glob = [
-	'packages/desktop/release/win/x64/*.exe',
-	'packages/desktop/release/win/x64/*.blockmap',
-	'packages/desktop/release/win/x64/latest*.yml'
+	'packages/desktop/release/win32/x64/*.exe',
+	'packages/desktop/release/win32/x64/*.blockmap',
+	'packages/desktop/release/win32/x64/latest*.yml'
 ].join('\n')
 
 const desktop_shared_build_command = [
@@ -58,9 +58,19 @@ const desktop_shared_build_command = [
 	'pnpm --dir packages/desktop run transform'
 ].join('\n')
 
-const install_command = [
+const default_install_command = [
 	"printf '\\ntrustLockfile: true\\n' >> pnpm-workspace.yaml",
-	'pnpm install --frozen-lockfile'
+	'pnpm install --frozen-lockfile --filter "./packages/desktop..." --filter "./packages/polywise..." --filter "./packages/app..." --filter "./packages/stk..." --filter "./packages/erpc..."'
+].join('\n')
+
+const windows_install_command = [
+	"printf '\\ntrustLockfile: true\\n' >> pnpm-workspace.yaml",
+	'pnpm install --frozen-lockfile --ignore-scripts --filter "./packages/desktop..." --filter "./packages/polywise..." --filter "./packages/app..." --filter "./packages/stk..." --filter "./packages/erpc..."'
+].join('\n')
+
+const windows_prepare_runtime_command = [
+	'pnpm rebuild electron node-llama-cpp sqlite-vec @node-rs/jieba @node-rs/xxhash',
+	'pnpm --dir packages/desktop run rebuild'
 ].join('\n')
 
 const workflow_definition = workflow({
@@ -170,7 +180,7 @@ const workflow_definition = workflow({
 							name: 'Windows (x64)',
 							artifact_name: 'polywise-windows-x64',
 							asset_glob: win_asset_glob,
-							source_dir: 'packages/desktop/release/win/x64',
+							source_dir: 'packages/desktop/release/win32/x64',
 							destination_dir: 'release/win32/x64',
 							build_command: [
 								desktop_shared_build_command,
@@ -215,9 +225,43 @@ const workflow_definition = workflow({
 					uses: 'oven-sh/setup-bun@v2'
 				},
 				{
+					name: 'Cache Electron binaries (Windows)',
+					if: "matrix.runner == 'windows-latest'",
+					uses: 'actions/cache@v4',
+					with: {
+						path: [
+							'${{ env.LOCALAPPDATA }}\\electron\\Cache',
+							'${{ env.LOCALAPPDATA }}\\electron-builder\\Cache'
+						].join('\n'),
+						key: "${{ runner.os }}-electron-cache-${{ hashFiles('pnpm-lock.yaml', 'packages/desktop/package.json') }}"
+					}
+				},
+				{
+					name: 'Cache node-gyp (Windows)',
+					if: "matrix.runner == 'windows-latest'",
+					uses: 'actions/cache@v4',
+					with: {
+						path: '${{ env.LOCALAPPDATA }}\\node-gyp\\Cache',
+						key: "${{ runner.os }}-node-gyp-${{ hashFiles('pnpm-lock.yaml', 'packages/polywise/package.json', 'packages/desktop/package.json') }}"
+					}
+				},
+				{
 					name: 'Install dependencies',
+					if: "matrix.runner != 'windows-latest'",
 					shell: 'bash',
-					run: install_command
+					run: default_install_command
+				},
+				{
+					name: 'Install dependencies (Windows)',
+					if: "matrix.runner == 'windows-latest'",
+					shell: 'bash',
+					run: windows_install_command
+				},
+				{
+					name: 'Prepare native runtime dependencies (Windows)',
+					if: "matrix.runner == 'windows-latest'",
+					shell: 'bash',
+					run: windows_prepare_runtime_command
 				},
 				{
 					name: 'Validate mac signing secrets',

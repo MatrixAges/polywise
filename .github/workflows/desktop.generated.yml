@@ -75,8 +75,8 @@ jobs:
           - runner: windows-latest
             name: Windows (x64)
             artifact_name: polywise-windows-x64
-            asset_glob: "packages/desktop/release/win/x64/*.exe\npackages/desktop/release/win/x64/*.blockmap\npackages/desktop/release/win/x64/latest*.yml"
-            source_dir: packages/desktop/release/win/x64
+            asset_glob: "packages/desktop/release/win32/x64/*.exe\npackages/desktop/release/win32/x64/*.blockmap\npackages/desktop/release/win32/x64/latest*.yml"
+            source_dir: packages/desktop/release/win32/x64
             destination_dir: release/win32/x64
             build_command: "pnpm --filter \"./packages/stk\" run build\npnpm --filter \"./packages/erpc\" run build\npnpm --filter \"./packages/app\" run build:electron\npnpm --filter \"./packages/polywise\" run build:electron\npnpm --dir packages/desktop run clean\npnpm --dir packages/desktop run main:prod\npnpm --dir packages/desktop run transform\npnpm --dir packages/desktop exec electron-builder -w --publish never"
     name: "${{ matrix.name }}"
@@ -100,9 +100,30 @@ jobs:
           cache-dependency-path: pnpm-lock.yaml
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
+      - name: Cache Electron binaries (Windows)
+        if: "matrix.runner == 'windows-latest'"
+        uses: actions/cache@v4
+        with: 
+          path: "${{ env.LOCALAPPDATA }}\\electron\\Cache\n${{ env.LOCALAPPDATA }}\\electron-builder\\Cache"
+          key: "${{ runner.os }}-electron-cache-${{ hashFiles('pnpm-lock.yaml', 'packages/desktop/package.json') }}"
+      - name: Cache node-gyp (Windows)
+        if: "matrix.runner == 'windows-latest'"
+        uses: actions/cache@v4
+        with: 
+          path: "${{ env.LOCALAPPDATA }}\\node-gyp\\Cache"
+          key: "${{ runner.os }}-node-gyp-${{ hashFiles('pnpm-lock.yaml', 'packages/polywise/package.json', 'packages/desktop/package.json') }}"
       - name: Install dependencies
+        if: "matrix.runner != 'windows-latest'"
         shell: bash
-        run: "printf '\\ntrustLockfile: true\\n' >> pnpm-workspace.yaml\npnpm install --frozen-lockfile"
+        run: "printf '\\ntrustLockfile: true\\n' >> pnpm-workspace.yaml\npnpm install --frozen-lockfile --filter \"./packages/desktop...\" --filter \"./packages/polywise...\" --filter \"./packages/app...\" --filter \"./packages/stk...\" --filter \"./packages/erpc...\""
+      - name: Install dependencies (Windows)
+        if: "matrix.runner == 'windows-latest'"
+        shell: bash
+        run: "printf '\\ntrustLockfile: true\\n' >> pnpm-workspace.yaml\npnpm install --frozen-lockfile --ignore-scripts --filter \"./packages/desktop...\" --filter \"./packages/polywise...\" --filter \"./packages/app...\" --filter \"./packages/stk...\" --filter \"./packages/erpc...\""
+      - name: Prepare native runtime dependencies (Windows)
+        if: "matrix.runner == 'windows-latest'"
+        shell: bash
+        run: "pnpm rebuild electron node-llama-cpp sqlite-vec @node-rs/jieba @node-rs/xxhash\npnpm --dir packages/desktop run rebuild"
       - name: Validate mac signing secrets
         if: "matrix.runner == 'macos-latest'"
         shell: bash

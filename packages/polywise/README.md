@@ -2,10 +2,18 @@
 
 Polywise CLI for starting the local server and calling the backend API.
 
+Docs: https://polywise.io/docs/intro
+
 ## Install
 
 ```bash
 npm install -g polywise
+```
+
+## Upgrade
+
+```bash
+polywise upgrade
 ```
 
 ## Usage
@@ -76,5 +84,3 @@ polywise start
 polywise start -d
 polywise session create --title "Daily Review"
 ```
-
-Docs: https://polywise.io/docs/intro
