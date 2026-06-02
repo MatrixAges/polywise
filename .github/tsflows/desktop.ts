@@ -82,7 +82,7 @@ const default_install_command = [
 ].join('\n')
 
 const mac_x64_install_command = [
-	"printf '\\ntrustLockfile: true\\nsupportedArchitectures:\\n  os:\\n    - darwin\\n  cpu:\\n    - x64\\n' >> pnpm-workspace.yaml",
+	"printf '\\ntrustLockfile: true\\nsupportedArchitectures:\\n  os:\\n    - darwin\\n  cpu:\\n    - x64\\n    - arm64\\n' >> pnpm-workspace.yaml",
 	'pnpm install --frozen-lockfile --filter "./packages/desktop..." --filter "./packages/polywise..." --filter "./packages/app..." --filter "./packages/stk..." --filter "./packages/erpc..."'
 ].join('\n')
 
