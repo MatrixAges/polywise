@@ -100,27 +100,11 @@ const workflow_definition = workflow({
 				{
 					name: 'Inspect existing draft release',
 					id: 'existing_draft',
-					shell: 'bash',
 					env: {
 						GH_TOKEN: '${{ secrets.GITHUB_TOKEN }}',
 						RELEASE_TAG: '${{ steps.version.outputs.release_tag }}'
 					},
-					run: [
-						'api_response=$(gh api "repos/${{ github.repository }}/releases?per_page=20" 2>/dev/null || true)',
-						"draft_payload=$(printf '%s' \"$api_response\" | node -e \"const fs=require('fs'); const tag=process.env.RELEASE_TAG; const releases=JSON.parse(fs.readFileSync(0,'utf8') || '[]'); const found=releases.find(item => item.tag_name === tag && item.draft === true); process.stdout.write(found ? JSON.stringify({ body: found.body || '', target_commitish: found.target_commitish || '', html_url: found.html_url || '' }) : '');\")",
-						'if [ -n "$draft_payload" ]; then',
-						"\tprintf '%s' \"$draft_payload\" | node -e \"const fs=require('fs'); const data=JSON.parse(fs.readFileSync(0,'utf8')); fs.writeFileSync('release-notes.md', data.body || '', 'utf8');\"",
-						"\tdraft_target_commitish=$(printf '%s' \"$draft_payload\" | node -e \"const fs=require('fs'); const data=JSON.parse(fs.readFileSync(0,'utf8')); process.stdout.write(data.target_commitish || '');\")",
-						"\tdraft_url=$(printf '%s' \"$draft_payload\" | node -e \"const fs=require('fs'); const data=JSON.parse(fs.readFileSync(0,'utf8')); process.stdout.write(data.html_url || '');\")",
-						'\techo "draft_exists=true" >> "$GITHUB_OUTPUT"',
-						'\techo "target_commitish=${draft_target_commitish}" >> "$GITHUB_OUTPUT"',
-						'\techo "url=${draft_url}" >> "$GITHUB_OUTPUT"',
-						'\texit 0',
-						'fi',
-						'echo "draft_exists=false" >> "$GITHUB_OUTPUT"',
-						'echo "target_commitish=" >> "$GITHUB_OUTPUT"',
-						'echo "url=" >> "$GITHUB_OUTPUT"'
-					].join('\n')
+					run: 'node ./scripts/inspect_existing_draft_release.mjs'
 				},
 				{
 					name: 'Apply release version to repository files',
@@ -174,39 +158,13 @@ const workflow_definition = workflow({
 				{
 					name: 'Create or update draft release',
 					id: 'create_release',
-					shell: 'bash',
 					env: {
 						GH_TOKEN: '${{ secrets.GITHUB_TOKEN }}',
 						RELEASE_TAG: '${{ steps.version.outputs.release_tag }}',
-						RELEASE_COMMIT: '${{ steps.persist.outputs.release_commit }}'
+						RELEASE_COMMIT: '${{ steps.persist.outputs.release_commit }}',
+						EXISTING_DRAFT_ID: '${{ steps.existing_draft.outputs.id }}'
 					},
-					run: [
-						'set +e',
-						'create_output=$(gh release create "$RELEASE_TAG" --draft --title "$RELEASE_TAG" --target "$RELEASE_COMMIT" --notes-file release-notes.md 2>&1)',
-						'create_status=$?',
-						'set -e',
-						'if [ "$create_status" -ne 0 ]; then',
-						"	if printf '%s' \"$create_output\" | grep -qi 'already exists'; then",
-						'		set +e',
-						'		edit_output=$(gh release edit "$RELEASE_TAG" --draft --title "$RELEASE_TAG" --target "$RELEASE_COMMIT" --notes-file release-notes.md 2>&1)',
-						'		edit_status=$?',
-						'		set -e',
-						'		if [ "$edit_status" -ne 0 ]; then',
-						'			printf \'%s\\n\' "$edit_output" >&2',
-						'			exit "$edit_status"',
-						'		fi',
-						'	else',
-						'		printf \'%s\\n\' "$create_output" >&2',
-						'		exit "$create_status"',
-						'	fi',
-						'fi',
-						'release_tag_found=$(gh release list --limit 20 --json tagName,isDraft --jq "map(select(.tagName == \\"$RELEASE_TAG\\" and .isDraft == true)) | .[0].tagName // empty")',
-						'[ "$release_tag_found" = "$RELEASE_TAG" ]',
-						'release_id="$RELEASE_TAG"',
-						'release_url="https://github.com/${{ github.repository }}/releases/tag/$RELEASE_TAG"',
-						'echo "id=${release_id}" >> "$GITHUB_OUTPUT"',
-						'echo "url=${release_url}" >> "$GITHUB_OUTPUT"'
-					].join('\n')
+					run: 'node ./scripts/create_or_update_draft_release.mjs'
 				},
 				{
 					name: 'Verify draft release outputs',
