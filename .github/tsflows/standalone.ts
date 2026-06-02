@@ -135,6 +135,10 @@ const workflow_definition = workflow({
 						'	echo "polywise@${RELEASE_VERSION} already published, skipping npm publish."',
 						'	exit 0',
 						'fi',
+						'publish_userconfig=$(mktemp)',
+						'printf "registry=https://registry.npmjs.org/\\n" > "$publish_userconfig"',
+						'export NPM_CONFIG_USERCONFIG="$publish_userconfig"',
+						'unset NODE_AUTH_TOKEN',
 						'npm publish --access public --provenance --no-git-checks'
 					].join('\n')
 				}
