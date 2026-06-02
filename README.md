@@ -1,13 +1,38 @@
-<p align="right"><a href="README.zh.md">Chinese</a> | English</p>
-
 # <p align="center"> <img src="images/logo.png" width="24" height="24" alt="Polywise Logo"> Polywise </p>
 
 <p align="center"><strong>The open source agentic content system</strong></p>
 
 <p align="center">
-<a href="https://github.com/MatrixAges/polywise/stargazers"><img src="https://badgen.net/github/stars/MatrixAges/polywise?color=795548" alt="Stars"></a>
+<a href="https://x.com/xiewendao"><img src="https://img.shields.io/badge/Follow-222?logo=X" alt="X"></a>
+<a href="https://discord.com/invite/6MDTdVzR3Y"><img alt="Discord" src="https://img.shields.io/badge/Discord-eee?logo=discord" />
+</a>
 <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License"></a>
-<a href="https://x.com/xiewendao"><img src="https://img.shields.io/badge/FollowX-XWD-green?logo=Twitter" alt="Twitter"></a>
+ <a href="https://www.npmjs.com/package/polywise"><img alt="npm" src="https://img.shields.io/npm/v/polywise" /></a>
+</p>
+
+<p align="center">
+  <a href="README.md">English</a> |
+  <a href="README.zh.md">简体中文</a> |
+  <a href="README.zht.md">繁體中文</a> |
+  <a href="README.ko.md">한국어</a> |
+  <a href="README.de.md">Deutsch</a> |
+  <a href="README.es.md">Español</a> |
+  <a href="README.fr.md">Français</a> |
+  <a href="README.it.md">Italiano</a> |
+  <a href="README.da.md">Dansk</a> |
+  <a href="README.ja.md">日本語</a> |
+  <a href="README.pl.md">Polski</a> |
+  <a href="README.ru.md">Русский</a> |
+  <a href="README.bs.md">Bosanski</a> |
+  <a href="README.ar.md">العربية</a> |
+  <a href="README.no.md">Norsk</a> |
+  <a href="README.br.md">Português (Brasil)</a> |
+  <a href="README.th.md">ไทย</a> |
+  <a href="README.tr.md">Türkçe</a> |
+  <a href="README.uk.md">Українська</a> |
+  <a href="README.bn.md">বাংলা</a> |
+  <a href="README.gr.md">Ελληνικά</a> |
+  <a href="README.vi.md">Tiếng Việt</a>
 </p>
 
 <picture>
@@ -15,6 +40,8 @@
   <source media="(prefers-color-scheme: light)" srcset="images/landing_light.png">
   <img alt="Shows an illustrated sun in light mode and a moon with stars in dark mode." src="images/landing_light.png">
 </picture>
+
+## What's Polywise
 
 Polywise is the open-source agentic content system. You can use it from the command line or the desktop app to chat with models, save knowledge, retrieve context, and turn repeated working styles into reusable agents.
 
