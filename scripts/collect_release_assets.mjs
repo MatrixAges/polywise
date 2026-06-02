@@ -1,6 +1,5 @@
-import { cp, mkdir, rm } from 'node:fs/promises'
+import { cp, glob, mkdir, rm } from 'node:fs/promises'
 import { basename } from 'node:path'
-import { globSync } from 'glob'
 
 const readAssetPatterns = () => {
 	const asset_glob = process.env.ASSET_GLOB?.trim() || ''
@@ -25,18 +24,24 @@ const readUploadDir = () => {
 	return upload_dir
 }
 
-const resolveMatchedFiles = asset_patterns => {
-	const matched_files = asset_patterns.flatMap(asset_pattern => {
-		const asset_files = globSync(asset_pattern, { nodir: true }).sort((left, right) =>
-			left.localeCompare(right)
-		)
+const resolveMatchedFiles = async asset_patterns => {
+	const matched_files = []
+
+	for (const asset_pattern of asset_patterns) {
+		const asset_files = []
+
+		for await (const asset_file of glob(asset_pattern)) {
+			asset_files.push(asset_file)
+		}
+
+		asset_files.sort((left, right) => left.localeCompare(right))
 
 		if (asset_files.length === 0) {
 			throw new Error(`No files matched pattern: ${asset_pattern}`)
 		}
 
-		return asset_files
-	})
+		matched_files.push(...asset_files)
+	}
 
 	return Array.from(new Set(matched_files))
 }
@@ -55,7 +60,7 @@ const copyMatchedFiles = async ({ matched_files, upload_dir }) => {
 const run = async () => {
 	const asset_patterns = readAssetPatterns()
 	const upload_dir = readUploadDir()
-	const matched_files = resolveMatchedFiles(asset_patterns)
+	const matched_files = await resolveMatchedFiles(asset_patterns)
 
 	await copyMatchedFiles({ matched_files, upload_dir })
 }

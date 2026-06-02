@@ -69,7 +69,10 @@ const workflow_definition = workflow({
 					}
 				},
 				{
-					uses: 'actions/setup-node@v6'
+					uses: 'actions/setup-node@v6',
+					with: {
+						'node-version': 'lts/*'
+					}
 				},
 				{
 					name: 'Fetch tags',

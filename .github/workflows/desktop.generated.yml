@@ -86,6 +86,11 @@ jobs:
                     with:
                           fetch-depth: 0
                           ref: build
+                  - uses: actions/setup-node@v6
+                    with:
+                          node-version: lts/*
+                          cache: pnpm
+                          cache-dependency-path: pnpm-lock.yaml
                   - name: Pin build branch to release commit
                     shell: bash
                     run: 'git checkout --detach "${{ inputs.release_commit }}"'
@@ -101,11 +106,6 @@ jobs:
                     with:
                           version: 11.3.0
                           run_install: false
-                  - if: "steps.asset_status.outputs.already_published != 'true'"
-                    uses: actions/setup-node@v6
-                    with:
-                          cache: pnpm
-                          cache-dependency-path: pnpm-lock.yaml
                   - if: "steps.asset_status.outputs.already_published != 'true'"
                     name: Setup Bun
                     uses: oven-sh/setup-bun@v2
