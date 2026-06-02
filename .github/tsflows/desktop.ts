@@ -55,6 +55,7 @@ const desktop_shared_build_command = [
 	'pnpm --filter "./packages/app" run build:electron',
 	'pnpm --filter "./packages/polywise" run build:electron',
 	'pnpm --dir packages/desktop run clean',
+	'pnpm --dir packages/desktop run rebuild',
 	'pnpm --dir packages/desktop run main:prod',
 	'pnpm --dir packages/desktop run transform'
 ].join('\n')
