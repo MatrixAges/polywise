@@ -87,8 +87,7 @@ const run = async () => {
 
 	const resolved_version = requested_version
 		? stringifyVersion(parseVersion(requested_version))
-		: !current_release_state.exists ||
-			  (current_release_state.is_draft && current_release_state.asset_count === 0)
+		: current_release_state.exists && current_release_state.is_draft
 			? current_version
 			: incrementVersion(current_version)
 

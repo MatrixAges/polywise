@@ -16,7 +16,8 @@ const workflow_definition = workflow({
 				version_number: {
 					required: false,
 					type: 'string',
-					description: 'Optional release version in *.*.* format.'
+					description:
+						'Optional release version in *.*.* format. Leave empty to auto-increment from packages/polywise/package.json.'
 				}
 			},
 			outputs: {
