@@ -1,3 +1,4 @@
+import { config } from '@core/config'
 import getContextPrompt from '@core/consts/prompts/getContextPrompt'
 import { getGroupEvaluatePrompt } from '@core/consts/prompts/getGroupPrompt'
 import { generateText, Output } from 'ai'
@@ -57,31 +58,54 @@ export default async (
 	args?: { abort_signal?: AbortSignal }
 ) => {
 	try {
+		const model_config = agent.model || config.default_model
+		const use_deepseek_json_output = model_config.provider === 'deepseek'
 		const model = await getAgentModel(agent, { omit_effort: true })
 		const systemPrompt = getGroupEvaluatePrompt({
 			agent,
 			group_name: s.group!.name,
 			group_description: s.group!.description,
 			agents_map_prompt: getAgentsMapPrompt(s, { include_description: false }),
-			context_prompt: getContextPrompt(s.context)
+			context_prompt: getContextPrompt(s.context),
+			use_json_format_prompt: use_deepseek_json_output
 		})
 
-		const res = await generateText({
-			model: model.model,
-			system: systemPrompt,
-			messages,
-			output: Output.object({
-				schema: evaluationSchema,
-				name: 'group_member_evaluation',
-				description: 'Structured decision for whether this group member should answer now.'
-			}),
-			providerOptions: model.provider_options,
-			abortSignal: mergeAbortSignals(s.abort_controller.signal, args?.abort_signal)
-		})
+		const output = use_deepseek_json_output
+			? evaluationSchema.parse(
+					(
+						await generateText({
+							model: model.model,
+							system: systemPrompt,
+							messages,
+							output: Output.json({
+								name: 'group_member_evaluation',
+								description:
+									'Structured decision for whether this group member should answer now.'
+							}),
+							providerOptions: model.provider_options,
+							abortSignal: mergeAbortSignals(s.abort_controller.signal, args?.abort_signal)
+						})
+					).output as unknown
+				)
+			: (
+					await generateText({
+						model: model.model,
+						system: systemPrompt,
+						messages,
+						output: Output.object({
+							schema: evaluationSchema,
+							name: 'group_member_evaluation',
+							description:
+								'Structured decision for whether this group member should answer now.'
+						}),
+						providerOptions: model.provider_options,
+						abortSignal: mergeAbortSignals(s.abort_controller.signal, args?.abort_signal)
+					})
+				).output
 
 		return {
 			agent,
-			...res.output
+			...output
 		} satisfies GroupMemberEvaluation
 	} catch (error) {
 		const error_message = error instanceof Error ? error.message : 'evaluation failed'

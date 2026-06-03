@@ -55,6 +55,7 @@ export const getGroupPickPrompt = (args: {
 	group_description?: string | null
 	agents_map_prompt: string
 	context_prompt: string
+	use_json_format_prompt?: boolean
 }) => {
 	return [
 		'# Group Candidate Pick Task',
@@ -75,7 +76,19 @@ export const getGroupPickPrompt = (args: {
 		`Group Name: ${args.group_name}`,
 		args.group_description ? `Group Description: ${args.group_description}` : '',
 		args.agents_map_prompt,
-		args.context_prompt
+		args.context_prompt,
+		args.use_json_format_prompt
+			? [
+					'Return valid json only.',
+					'Use this json format exactly:',
+					'{',
+					'  "candidate_agent_ids": ["agent-id"],',
+					'  "reason": "short reason",',
+					'  "is_fallback": false',
+					'}',
+					'Do not wrap the json in markdown fences.'
+				].join('\n')
+			: ''
 	]
 		.filter(Boolean)
 		.join('\n\n')
@@ -87,6 +100,7 @@ export const getGroupEvaluatePrompt = (args: {
 	group_description?: string | null
 	agents_map_prompt: string
 	context_prompt: string
+	use_json_format_prompt?: boolean
 }) => {
 	return [
 		fst_system_prompt,
@@ -129,7 +143,22 @@ export const getGroupEvaluatePrompt = (args: {
 		args.group_description ? `Group Description: ${args.group_description}` : '',
 		args.agents_map_prompt,
 		getGroupMemberProfilePrompt(args.agent),
-		args.context_prompt
+		args.context_prompt,
+		args.use_json_format_prompt
+			? [
+					'Return valid json only.',
+					'Use this json format exactly:',
+					'{',
+					'  "should_answer": true,',
+					'  "reason": "short reason",',
+					'  "confidence": "high",',
+					'  "leadership": "none",',
+					'  "exclusive": true,',
+					'  "needs_write_lock": false',
+					'}',
+					'Do not wrap the json in markdown fences.'
+				].join('\n')
+			: ''
 	]
 		.filter(Boolean)
 		.join('\n\n')
