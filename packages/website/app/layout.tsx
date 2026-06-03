@@ -15,7 +15,7 @@ import type { Metadata } from 'next'
 import type { PropsWithChildren } from 'react'
 
 export const metadata: Metadata = {
-	title: 'Polywise - The open source agentic Content System',
+	title: 'Polywise - The open source agentic content system',
 	description: 'Polywise is the open source agentic content system to make your contents alive.'
 }
 

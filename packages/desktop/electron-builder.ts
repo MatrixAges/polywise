@@ -5,12 +5,12 @@ import { afterPack } from './scripts/beforePack'
 import type { Configuration } from 'electron-builder'
 
 const build_arch = process.env.BUILD_ARCH
-const arch = build_arch === 'arm64' ? ['arm64'] : build_arch === 'x64' ? ['x64'] : ['x64', 'arm64']
+const arch = build_arch === 'arm64' ? ['arm64'] : build_arch === 'x64' ? ['x64'] : ['x64']
 
 export default {
 	appId: APP_ID,
 	productName,
-	asar: false,
+	asar: true,
 	compression: 'maximum',
 	npmRebuild: false,
 	directories: { output: 'release/${platform}/${arch}' },
@@ -29,6 +29,8 @@ export default {
 	extraResources: [{ from: '../app/dist', to: 'app_dist' }],
 	artifactName: '${productName}-${version}-${arch}.${ext}',
 	mac: {
+		identity: null,
+
 		notarize: true,
 		target: [
 			{ target: 'dmg', arch },
