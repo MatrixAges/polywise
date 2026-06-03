@@ -46,7 +46,7 @@ jobs:
         name: Setup pnpm
         uses: pnpm/action-setup@v6
         with: 
-          version: 11.3.0
+          version: 11.5.1
           run_install: false
       - if: "steps.npm_status.outputs.already_published != 'true'"
         uses: actions/setup-node@v6
