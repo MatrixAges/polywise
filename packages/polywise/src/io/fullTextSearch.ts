@@ -37,6 +37,11 @@ interface ScoredChunk {
 	score: number
 }
 
+interface ScoredArticle {
+	article: Awaited<ReturnType<typeof getArticles>>[number]
+	score: number
+}
+
 const normalizeTerms = (query: string) => {
 	const raw = query.trim()
 
@@ -110,7 +115,46 @@ const getChunkScore = (item: ChunkMatch, query: string, terms: Array<string>, ft
 	return score
 }
 
+const getArticleScore = (
+	item: Awaited<ReturnType<typeof getArticles>>[number],
+	query: string,
+	terms: Array<string>
+) => {
+	const title = item.title || ''
+	const content = item.content || ''
+	const title_haystack = title.toLowerCase()
+	const content_haystack = content.toLowerCase()
+	const haystack = `${title}\n${content}`.toLowerCase()
+	const raw_query = query.trim().toLowerCase()
+
+	let score = 0
+
+	if (raw_query && title_haystack.includes(raw_query)) {
+		score += 10
+	} else if (raw_query && content_haystack.includes(raw_query)) {
+		score += 8
+	}
+
+	for (const term of terms) {
+		const normalized_term = term.toLowerCase()
+
+		if (title_haystack.includes(normalized_term)) {
+			score += term === raw_query ? 4 : 2
+			continue
+		}
+
+		if (haystack.includes(normalized_term)) {
+			score += term === raw_query ? 3 : 1.5
+		}
+	}
+
+	score += getRecencyScore(item.updated_at || item.created_at)
+
+	return score
+}
+
 const isScoredChunk = (item: ScoredChunk | null): item is ScoredChunk => item !== null
+const isScoredArticle = (item: ScoredArticle | null): item is ScoredArticle => item !== null
 
 export default async (args: ArgsSearch): Promise<SearchOutput> => {
 	const { query, type = 'article', for_types, scope_type, scope_id } = args
@@ -125,96 +169,101 @@ export default async (args: ArgsSearch): Promise<SearchOutput> => {
 		}
 	}
 
-	const [fts_results, direct_matches] = await Promise.all([
-		searchByKeywords(terms.join(',')),
-		getChunks({
-			where: or(
-				...terms.flatMap(term => [like(chunk.content, `%${term}%`), like(chunk.keywords, `%${term}%`)])
-			),
-			orderBy: desc(chunk.created_at),
-			limit: direct_search_limit
+	if (type === 'chunk') {
+		const [fts_results, direct_matches] = await Promise.all([
+			searchByKeywords(terms.join(',')),
+			getChunks({
+				where: or(
+					...terms.flatMap(term => [
+						like(chunk.content, `%${term}%`),
+						like(chunk.keywords, `%${term}%`)
+					])
+				),
+				orderBy: desc(chunk.created_at),
+				limit: direct_search_limit
+			})
+		])
+
+		const chunk_map = new Map<string, ChunkMatch>()
+
+		for (const item of direct_matches) {
+			chunk_map.set(item.id, item)
+		}
+
+		if (fts_results.length > 0) {
+			const fts_chunk_ids = fts_results.map(item => item.chunk_id).filter(id => !chunk_map.has(id))
+
+			if (fts_chunk_ids.length > 0) {
+				const fts_chunks = await getChunks({
+					where: inArray(chunk.id, fts_chunk_ids)
+				})
+
+				for (const item of fts_chunks) {
+					chunk_map.set(item.id, item)
+				}
+			}
+		}
+
+		const all_chunks = Array.from(chunk_map.values())
+
+		if (all_chunks.length === 0) {
+			return {
+				type: 'chunk',
+				results: []
+			}
+		}
+
+		const article_ids = Array.from(
+			new Set(all_chunks.map(item => item.article_id).filter(Boolean))
+		) as Array<string>
+
+		if (article_ids.length === 0) {
+			return {
+				type: 'chunk',
+				results: []
+			}
+		}
+
+		const chunk_article_filters = [inArray(article.id, article_ids)]
+
+		if (for_types?.length) {
+			chunk_article_filters.push(inArray(article.for, for_types))
+		}
+
+		const articles = await getArticles({
+			where: and(...chunk_article_filters)
 		})
-	])
 
-	const chunk_map = new Map<string, ChunkMatch>()
+		const article_map = new Map(articles.map(item => [item.id, item]))
+		const fts_rank_map = new Map(fts_results.map(item => [item.chunk_id, item.rank]))
 
-	for (const item of direct_matches) {
-		chunk_map.set(item.id, item)
-	}
+		const scored_chunks = all_chunks
+			.map(item => {
+				if (!item.article_id) return null
 
-	if (fts_results.length > 0) {
-		const fts_chunk_ids = fts_results.map(item => item.chunk_id).filter(id => !chunk_map.has(id))
+				const parent_article = article_map.get(item.article_id)
+				if (!parent_article) return null
+				if (!isAllowedScope(parent_article.scope_type, parent_article.scope_id, scope_type, scope_id))
+					return null
 
-		if (fts_chunk_ids.length > 0) {
-			const fts_chunks = await getChunks({
-				where: inArray(chunk.id, fts_chunk_ids)
+				return {
+					chunk: item,
+					article: parent_article,
+					score: getChunkScore(item, query, terms, fts_rank_map.get(item.id))
+				}
+			})
+			.filter(isScoredChunk)
+			.sort((a, b) => {
+				if (b.score !== a.score) return b.score - a.score
+
+				const b_time = b.article.updated_at?.getTime() || b.chunk.created_at?.getTime() || 0
+				const a_time = a.article.updated_at?.getTime() || a.chunk.created_at?.getTime() || 0
+
+				return b_time - a_time
 			})
 
-			for (const item of fts_chunks) {
-				chunk_map.set(item.id, item)
-			}
-		}
-	}
+		log('SEARCH', 'fullTextSearch:done', () => `chunk_count: ${scored_chunks.length}`)
 
-	const all_chunks = Array.from(chunk_map.values())
-
-	if (all_chunks.length === 0) {
-		return {
-			type,
-			results: []
-		}
-	}
-
-	const article_ids = Array.from(new Set(all_chunks.map(item => item.article_id).filter(Boolean))) as Array<string>
-
-	if (article_ids.length === 0) {
-		return {
-			type,
-			results: []
-		}
-	}
-
-	const article_filters = [inArray(article.id, article_ids)]
-
-	if (for_types?.length) {
-		article_filters.push(inArray(article.for, for_types))
-	}
-
-	const articles = await getArticles({
-		where: and(...article_filters)
-	})
-
-	const article_map = new Map(articles.map(item => [item.id, item]))
-	const fts_rank_map = new Map(fts_results.map(item => [item.chunk_id, item.rank]))
-
-	const scored_chunks = all_chunks
-		.map(item => {
-			if (!item.article_id) return null
-
-			const parent_article = article_map.get(item.article_id)
-			if (!parent_article) return null
-			if (!isAllowedScope(parent_article.scope_type, parent_article.scope_id, scope_type, scope_id))
-				return null
-
-			return {
-				chunk: item,
-				article: parent_article,
-				score: getChunkScore(item, query, terms, fts_rank_map.get(item.id))
-			}
-		})
-		.filter(isScoredChunk)
-		.sort((a, b) => {
-			if (b.score !== a.score) return b.score - a.score
-
-			const b_time = b.article.updated_at?.getTime() || b.chunk.created_at?.getTime() || 0
-			const a_time = a.article.updated_at?.getTime() || a.chunk.created_at?.getTime() || 0
-
-			return b_time - a_time
-		})
-
-	log('SEARCH', 'fullTextSearch:done', () => `chunk_count: ${scored_chunks.length}`)
-
-	if (type === 'chunk') {
 		return {
 			type: 'chunk',
 			results: scored_chunks.slice(0, keyword_search_limit).map(item => {
@@ -232,6 +281,41 @@ export default async (args: ArgsSearch): Promise<SearchOutput> => {
 		}
 	}
 
+	const article_filters = [
+		or(...terms.flatMap(term => [like(article.title, `%${term}%`), like(article.content, `%${term}%`)]))
+	]
+
+	if (for_types?.length) {
+		article_filters.push(inArray(article.for, for_types))
+	}
+
+	const direct_articles = await getArticles({
+		where: and(...article_filters),
+		orderBy: desc(article.updated_at),
+		limit: direct_search_limit
+	})
+
+	const scored_articles = direct_articles
+		.map(item => {
+			if (!isAllowedScope(item.scope_type, item.scope_id, scope_type, scope_id)) return null
+
+			return {
+				article: item,
+				score: getArticleScore(item, query, terms)
+			}
+		})
+		.filter(isScoredArticle)
+		.sort((a, b) => {
+			if (b.score !== a.score) return b.score - a.score
+
+			const b_time = b.article.updated_at?.getTime() || b.article.created_at?.getTime() || 0
+			const a_time = a.article.updated_at?.getTime() || a.article.created_at?.getTime() || 0
+
+			return b_time - a_time
+		})
+
+	log('SEARCH', 'fullTextSearch:done', () => `article_count: ${scored_articles.length}`)
+
 	const article_results = new Map<
 		string,
 		{
@@ -244,7 +328,7 @@ export default async (args: ArgsSearch): Promise<SearchOutput> => {
 		}
 	>()
 
-	for (const item of scored_chunks) {
+	for (const item of scored_articles) {
 		if (article_results.has(item.article.id)) continue
 
 		const scope = getScopeInfo(item.article.scope_type, item.article.scope_id)

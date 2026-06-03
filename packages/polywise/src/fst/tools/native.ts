@@ -53,6 +53,23 @@ const buildShellCommand = (command: string) => {
 	return `set -o pipefail 2>/dev/null\n${command}`
 }
 
+const getDirectoryReadError = async (real_path: string) => {
+	const entries = await fs.readdir(real_path).catch(() => [])
+	const preview = entries.slice(0, 12)
+	const suggestion_lines = [
+		`Path is a directory, not a file: ${real_path}`,
+		'Use glob_tool to list files in this directory by name or pattern.',
+		'Use search_file_tool to search inside files under this directory.',
+		'Use bash_tool with ls when you need raw directory structure output.'
+	]
+
+	if (preview.length > 0) {
+		suggestion_lines.push(`Directory entries preview: ${preview.join(', ')}`)
+	}
+
+	return suggestion_lines.join('\n')
+}
+
 const resolveHostPath = (args: { host_cwd: string; file_path: string; path_mappings: Record<string, string> }) => {
 	const { host_cwd, file_path, path_mappings } = args
 
@@ -179,6 +196,12 @@ export const createNativeAccessTools = async (s: Session) => {
 		}),
 		execute: async ({ path: file_path }) => {
 			const real_path = resolveHostPath({ host_cwd, file_path, path_mappings })
+			const stat = await fs.stat(real_path)
+
+			if (stat.isDirectory()) {
+				throw new Error(await getDirectoryReadError(real_path))
+			}
+
 			const content = await readFile(real_path, 'utf8')
 
 			return { content }

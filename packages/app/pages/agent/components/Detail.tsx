@@ -51,7 +51,7 @@ const TextTabEditor = ({
 				overflow-y-scroll
 				flex-1
 				h-full
-				min-h-0
+				min-w-0 min-h-0
 			'
 		>
 			<Editor
@@ -92,13 +92,13 @@ const Index = () => {
 		<div
 			className='
 				flex flex-1
-				min-h-0
+				min-w-0 min-h-0
 			'
 		>
 			<DetailMenu active_tab={active_tab}></DetailMenu>
 			<div
 				className={$cx(
-					'min-h-0 flex-1 overflow-y-scroll',
+					'min-h-0 min-w-0 flex-1 overflow-y-scroll',
 					active_tab !== 'content' && 'page_wrap p-0',
 					!['content', 'graph'].includes(active_tab) && !isTextTab(active_tab) && 'p-6'
 				)}

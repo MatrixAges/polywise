@@ -78,6 +78,7 @@ export interface GroupMemberEvaluation {
 	leadership: 'none' | 'advisory'
 	exclusive: boolean
 	needs_write_lock: boolean
+	error_message?: string | null
 }
 
 export interface GroupSyncPayload {

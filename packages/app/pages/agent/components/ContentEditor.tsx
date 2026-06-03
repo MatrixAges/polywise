@@ -68,11 +68,12 @@ const Index = () => {
 
 	return (
 		<Fragment>
-			<div className='h-9 px-3'>
-				<div className='flex items-center gap-2'>
+			<div className='h-9 min-w-0 px-3'>
+				<div className='flex min-w-0 items-center gap-2'>
 					<Input
 						className='
 							flex-1
+							min-w-0
 							px-0
 							rounded-none
 							text-xsm! font-medium
@@ -121,14 +122,19 @@ const Index = () => {
 				className='
 					overflow-hidden
 					flex flex-1 flex-col
-					min-h-0
+					min-w-0 min-h-0
 				'
 			>
-				<div className='min-h-0 flex-1 overflow-hidden'>
+				<div className='min-h-0 min-w-0 flex-1 overflow-hidden'>
 					<Editor
 						id={selected_article.id}
 						value={article_draft_content}
-						className='min-h-full px-6! pt-4.5! text-[14px]'
+						className='
+							min-w-0 min-h-full
+							px-6! pt-4.5!
+							text-[14px]
+						'
+						placeholderStyle={{ top: 18, paddingInline: 24 }}
 						rich_text
 						readonly={!can_mutate_selected_agent_articles}
 						onChange={value => setArticleDraftContent(value)}
@@ -141,12 +147,21 @@ const Index = () => {
 						flex
 						items-center justify-between
 						h-7
+						min-w-0
 						gap-4
 						px-3
 						text-xs text-std-300
 					'
 				>
-					<div className='flex items-center gap-3'>
+					<div
+						className='
+							overflow-hidden
+							flex flex-1
+							items-center
+							min-w-0
+							gap-3
+						'
+					>
 						<Select
 							disabled={!can_mutate_selected_agent_articles}
 							value={article_draft_for}
@@ -174,9 +189,9 @@ const Index = () => {
 								))}
 							</SelectContent>
 						</Select>
-						<div>Updated {fromNow(selected_article.updated_at)}</div>
+						<div className='truncate'>Updated {fromNow(selected_article.updated_at)}</div>
 					</div>
-					<div className='flex items-center gap-3'>
+					<div className='flex shrink-0 items-center gap-3'>
 						<span>{article_dirty ? 'Unsaved changes' : 'Saved'}</span>
 						<span>{character_count} characters</span>
 					</div>

@@ -21,6 +21,8 @@
 		}
 
 		.editor_container {
+			min-width: 0;
+
 			& > .placeholder {
 				top: calc(var(--page_padding) * 0.72);
 				max-width: var(--content_width);
@@ -37,19 +39,24 @@
 
 		.editor_wrap {
 			overflow-y: scroll;
+			min-width: 0;
 			height: 100%;
 			outline: none;
 		}
 
 		.tiptap {
+			width: 100%;
 			max-width: var(--content_width);
 			min-height: 100%;
+			min-width: 0;
 			box-sizing: border-box;
 			padding: var(--page_padding);
 			padding-top: calc(var(--page_padding) * 0.72);
 			padding-bottom: 120px;
 			margin: 0 auto;
 			outline: none;
+			overflow-wrap: anywhere;
+			word-break: break-word;
 
 			&.resize-cursor {
 				cursor: ew-resize;
@@ -89,6 +96,7 @@
 
 		pre {
 			position: relative;
+			overflow-x: auto;
 			padding: 12px 16px;
 			border-radius: var(--radius_12);
 			border-radius: var(--radius);
@@ -113,7 +121,9 @@
 				border-radius: unset;
 				color: inherit;
 				background-color: unset;
-				word-break: unset;
+				white-space: pre;
+				overflow-wrap: normal;
+				word-break: normal;
 				caret-color: var(--color_text);
 			}
 		}

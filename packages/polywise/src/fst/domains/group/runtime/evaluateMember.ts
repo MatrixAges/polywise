@@ -84,14 +84,17 @@ export default async (
 			...res.output
 		} satisfies GroupMemberEvaluation
 	} catch (error) {
+		const error_message = error instanceof Error ? error.message : 'evaluation failed'
+
 		return {
 			agent,
 			should_answer: false,
-			reason: error instanceof Error ? error.message : 'evaluation failed',
+			reason: error_message,
 			confidence: 'low',
 			leadership: 'none',
 			exclusive: false,
-			needs_write_lock: false
+			needs_write_lock: false,
+			error_message
 		} satisfies GroupMemberEvaluation
 	}
 }

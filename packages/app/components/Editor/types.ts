@@ -1,5 +1,5 @@
 import type { TableOfContentDataItem } from '@tiptap/extension-table-of-contents'
-import type { MouseEvent, ReactNode } from 'react'
+import type { CSSProperties, MouseEvent, ReactNode } from 'react'
 import type Model from './model'
 
 export interface ArgsInit extends Pick<
@@ -11,6 +11,7 @@ export interface IProps {
 	id: string
 	value: string
 	className?: string
+	placeholderStyle?: CSSProperties
 	readonly?: boolean
 	rich_text?: boolean
 	text_only?: boolean

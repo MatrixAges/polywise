@@ -20,6 +20,7 @@ const Index = (props: IProps) => {
 		id,
 		value,
 		className,
+		placeholderStyle,
 		readonly,
 		rich_text,
 		text_only,
@@ -133,7 +134,9 @@ const Index = (props: IProps) => {
 				`}
 			>
 				<If condition={x.counts === 0}>
-					<p className='placeholder absolute box-border w-full'>{t('editor.placeholder')}...</p>
+					<p className='placeholder absolute box-border w-full' style={placeholderStyle}>
+						{t('editor.placeholder')}...
+					</p>
 				</If>
 				<div className='editor_wrap box-border h-full w-full' ref={setContainer}></div>
 				<If condition={x.editor?.contentComponent}>{x.react_nodes}</If>

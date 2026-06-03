@@ -7,13 +7,13 @@ export default {
 	models: [
 		{
 			enabled: true,
-			id: 'deepseek-reasoner',
-			name: 'Deepseek R1'
+			id: 'deepseek-v4-pro',
+			name: 'Deepseek V4 Pro'
 		},
 		{
 			enabled: true,
-			id: 'deepseek-chat',
-			name: 'Deepseek Chat'
+			id: 'deepseek-v4-flash',
+			name: 'Deepseek V4 Flash'
 		}
 	]
 } as PresetProvider

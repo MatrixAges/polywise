@@ -4,7 +4,13 @@ import setBarrier from '../runtime/setBarrier'
 import type { GroupReplyQueueItem } from '../types'
 import type { GroupQueue } from './createGroupQueue'
 
-export default async (queue: GroupQueue, writer: { merge: (stream: ReadableStream) => void }) => {
+export default async (
+	queue: GroupQueue,
+	writer: {
+		merge: (stream: ReadableStream) => void
+		write: (chunk: any) => void
+	}
+) => {
 	const { s, message, turnId, evaluations, candidateIds } = queue
 
 	while (!s.manual_abort && s.active_turn_id === turnId) {

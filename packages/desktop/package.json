@@ -9,7 +9,7 @@
 		"clean": "bun ./build/clean",
 		"watch": "delay 300ms && bun ./scripts/dev",
 		"shell": "electron .",
-		"dev": "cross-env DEVTOOL=0 concurrently \"npm run main:dev\" \"npm run watch\"",
+		"dev": "cross-env DEVTOOL=1 concurrently \"npm run main:dev\" \"npm run watch\"",
 		"main:dev": "cross-env NODE_ENV=development rslib build --watch",
 		"main:prod": "cross-env NODE_ENV=production rslib build",
 		"transform": "cross-env NODE_ENV=production bun ./build/transform",
