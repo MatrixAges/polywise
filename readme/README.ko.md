@@ -165,6 +165,12 @@ polywise search fullTextSearch --json '{"query":"agent memory","for_types":["wik
 - [Intro](https://polywise.io/docs/intro)
 - [CLI README](../packages/polywise/README.md)
 
+## 🎬 Intro Video
+
+<video src="../videos/polywise_intro.mp4" controls width="100%"></video>
+
+[Open the intro video file](../videos/polywise_intro.mp4)
+
 ## 💭 왜 Polywise인가
 
 Polywise는 **정말 똑똑한 AI에는 정말 똑똑한 메모리 시스템이 필요하다**는 믿음 위에서 만들어졌습니다. 단순히 저장만 하는 것이 아니라, 연결을 스스로 만들고, 쓸수록 강해지고, 전략적으로 잊어버리기도 하며, 계속 진화하는 시스템을 지향합니다.

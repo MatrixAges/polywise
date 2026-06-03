@@ -165,6 +165,12 @@ polywise search fullTextSearch --json '{"query":"agent memory","for_types":["wik
 - [Intro](https://polywise.io/docs/intro)
 - [CLI README](../packages/polywise/README.md)
 
+## 🎬 Intro Video
+
+<video src="../videos/polywise_intro.mp4" controls width="100%"></video>
+
+[Open the intro video file](../videos/polywise_intro.mp4)
+
 ## 💭 Κίνητρο
 
 Το Polywise χτίστηκε πάνω στην πεποίθηση ότι **η πραγματικά έξυπνη AI χρειάζεται πραγματικά έξυπνη μνήμη**. Δεν πρόκειται απλώς για αποθήκευση, αλλά για ένα σύστημα που δημιουργεί συνδέσεις οργανικά, δυναμώνει όσο χρησιμοποιείται, ξεχνά στρατηγικά και εξελίσσεται συνεχώς.

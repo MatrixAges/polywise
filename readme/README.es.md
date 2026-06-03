@@ -165,6 +165,12 @@ polywise search fullTextSearch --json '{"query":"agent memory","for_types":["wik
 - [Intro](https://polywise.io/docs/intro)
 - [CLI README](../packages/polywise/README.md)
 
+## 🎬 Intro Video
+
+<video src="../videos/polywise_intro.mp4" controls width="100%"></video>
+
+[Open the intro video file](../videos/polywise_intro.mp4)
+
 ## 💭 Motivación
 
 Polywise nace de una idea muy simple: **una IA realmente inteligente necesita una memoria realmente inteligente**. No se trata solo de guardar cosas, sino de construir un sistema capaz de formar conexiones de manera orgánica, fortalecerse con el uso, olvidar con criterio y seguir evolucionando.

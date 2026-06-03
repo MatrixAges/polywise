@@ -165,6 +165,12 @@ polywise search fullTextSearch --json '{"query":"agent memory","for_types":["wik
 - [Intro](https://polywise.io/docs/intro)
 - [CLI README](../packages/polywise/README.md)
 
+## 🎬 Intro Video
+
+<video src="../videos/polywise_intro.mp4" controls width="100%"></video>
+
+[Open the intro video file](../videos/polywise_intro.mp4)
+
 ## 💭 為什麼要做 Polywise
 
 Polywise 背後的核心信念是：**真正聰明的 AI，需要真正聰明的記憶系統**。它不只是「把內容存起來」，而是一個能自然建立連結、越用越強、會有策略地遺忘，並持續演化的系統。

@@ -165,6 +165,12 @@ polywise search fullTextSearch --json '{"query":"agent memory","for_types":["wik
 - [Intro](https://polywise.io/docs/intro)
 - [CLI README](../packages/polywise/README.md)
 
+## 🎬 Intro Video
+
+<video src="../videos/polywise_intro.mp4" controls width="100%"></video>
+
+[Open the intro video file](../videos/polywise_intro.mp4)
+
 ## 💭 แนวคิดเบื้องหลัง
 
 Polywise ถูกสร้างขึ้นบนความเชื่อว่า **AI ที่ฉลาดจริง ต้องมีระบบความจำที่ฉลาดจริงด้วย** มันไม่ใช่แค่ที่เก็บข้อมูล แต่เป็นระบบที่สร้างความเชื่อมโยงได้อย่างเป็นธรรมชาติ แข็งแรงขึ้นเมื่อใช้งาน รู้จักลืมอย่างมีกลยุทธ์ และพัฒนาต่อเนื่องไปเรื่อย ๆ

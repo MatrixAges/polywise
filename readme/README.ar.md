@@ -165,6 +165,12 @@ polywise search fullTextSearch --json '{"query":"agent memory","for_types":["wik
 - [Intro](https://polywise.io/docs/intro)
 - [CLI README](../packages/polywise/README.md)
 
+## 🎬 Intro Video
+
+<video src="../videos/polywise_intro.mp4" controls width="100%"></video>
+
+[Open the intro video file](../videos/polywise_intro.mp4)
+
 ## 💭 الدافع
 
 تم بناء Polywise على قناعة بسيطة: **الذكاء الاصطناعي الذكي فعلًا يحتاج إلى ذاكرة ذكية فعلًا**. الفكرة ليست مجرد التخزين، بل بناء نظام يستطيع أن يكوّن الروابط بشكل طبيعي، ويزداد قوة مع الاستخدام، وينسى بشكل استراتيجي، ويواصل التطور.

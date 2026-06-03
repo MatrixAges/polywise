@@ -165,6 +165,12 @@ polywise search fullTextSearch --json '{"query":"agent memory","for_types":["wik
 - [Intro](https://polywise.io/docs/intro)
 - [CLI README](../packages/polywise/README.md)
 
+## 🎬 Intro Video
+
+<video src="../videos/polywise_intro.mp4" controls width="100%"></video>
+
+[Open the intro video file](../videos/polywise_intro.mp4)
+
 ## 💭 Động lực
 
 Polywise được xây dựng trên một niềm tin rất rõ ràng: **AI thực sự thông minh cần một hệ thống trí nhớ thực sự thông minh**. Đây không chỉ là chuyện lưu trữ, mà là một hệ thống có thể tự nhiên hình thành kết nối, mạnh lên khi được sử dụng, biết quên có chiến lược và liên tục tiến hoá.

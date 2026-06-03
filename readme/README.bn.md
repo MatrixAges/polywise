@@ -165,6 +165,12 @@ polywise search fullTextSearch --json '{"query":"agent memory","for_types":["wik
 - [Intro](https://polywise.io/docs/intro)
 - [CLI README](../packages/polywise/README.md)
 
+## 🎬 Intro Video
+
+<video src="../videos/polywise_intro.mp4" controls width="100%"></video>
+
+[Open the intro video file](../videos/polywise_intro.mp4)
+
 ## 💭 কেন Polywise
 
 Polywise তৈরি হয়েছে একটি সহজ বিশ্বাস থেকে: **সত্যিকারের বুদ্ধিমান AI-এর জন্য সত্যিকারের বুদ্ধিমান মেমরি দরকার**। বিষয়টা শুধু স্টোরেজ নয়; বরং এমন একটি সিস্টেম, যা স্বাভাবিকভাবে সংযোগ গড়ে তোলে, ব্যবহার বাড়লে শক্তিশালী হয়, প্রয়োজনমতো ভুলে যেতে পারে, আর সময়ের সঙ্গে সঙ্গে আরও ভালো হয়।

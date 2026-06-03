@@ -165,6 +165,12 @@ polywise search fullTextSearch --json '{"query":"agent memory","for_types":["wik
 - [Intro](https://polywise.io/docs/intro)
 - [CLI README](../packages/polywise/README.md)
 
+## 🎬 Intro Video
+
+<video src="../videos/polywise_intro.mp4" controls width="100%"></video>
+
+[Open the intro video file](../videos/polywise_intro.mp4)
+
 ## 💭 Motivasyon
 
 Polywise şu inanç üzerine kuruldu: **gerçekten akıllı bir yapay zekâ, gerçekten akıllı bir hafızaya ihtiyaç duyar**. Mesele sadece depolamak değil; bağlantıları doğal biçimde kurabilen, kullanım oldukça güçlenen, stratejik olarak unutabilen ve sürekli evrilen bir sistem kurmaktır.

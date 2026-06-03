@@ -165,6 +165,12 @@ polywise search fullTextSearch --json '{"query":"agent memory","for_types":["wik
 - [Intro](https://polywise.io/docs/intro)
 - [CLI README](../packages/polywise/README.md)
 
+## 🎬 Intro Video
+
+<video src="../videos/polywise_intro.mp4" controls width="100%"></video>
+
+[Open the intro video file](../videos/polywise_intro.mp4)
+
 ## 💭 Polywise の考え方
 
 Polywise は、**本当に賢い AI には、本当に賢い記憶が必要だ**という考えを土台に作られています。単に保存するだけではなく、つながりを自然に作り、使うほど強くなり、必要に応じて忘れ、時間とともに進化していく仕組みを目指しています。

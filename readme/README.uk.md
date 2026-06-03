@@ -165,6 +165,12 @@ polywise search fullTextSearch --json '{"query":"agent memory","for_types":["wik
 - [Intro](https://polywise.io/docs/intro)
 - [CLI README](../packages/polywise/README.md)
 
+## 🎬 Intro Video
+
+<video src="../videos/polywise_intro.mp4" controls width="100%"></video>
+
+[Open the intro video file](../videos/polywise_intro.mp4)
+
 ## 💭 Мотивація
 
 Polywise побудований на простій ідеї: **по-справжньому розумному ШІ потрібна по-справжньому розумна пам'ять**. Йдеться не просто про зберігання даних, а про систему, яка природно вибудовує зв'язки, стає сильнішою з використанням, уміє стратегічно забувати й постійно розвивається.

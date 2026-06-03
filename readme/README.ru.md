@@ -165,6 +165,12 @@ polywise search fullTextSearch --json '{"query":"agent memory","for_types":["wik
 - [Intro](https://polywise.io/docs/intro)
 - [CLI README](../packages/polywise/README.md)
 
+## 🎬 Intro Video
+
+<video src="../videos/polywise_intro.mp4" controls width="100%"></video>
+
+[Open the intro video file](../videos/polywise_intro.mp4)
+
 ## 💭 Зачем нужен Polywise
 
 Polywise строится на простой идее: **по-настоящему умному ИИ нужна по-настоящему умная память**. Речь не просто о хранении данных, а о системе, которая естественно выстраивает связи, становится сильнее по мере использования, умеет стратегически забывать и постоянно развивается.

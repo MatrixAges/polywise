@@ -165,6 +165,12 @@ polywise search fullTextSearch --json '{"query":"agent memory","for_types":["wik
 - [Intro](https://polywise.io/docs/intro)
 - [CLI README](../packages/polywise/README.md)
 
+## 🎬 Intro Video
+
+<video src="../videos/polywise_intro.mp4" controls width="100%"></video>
+
+[Open the intro video file](../videos/polywise_intro.mp4)
+
 ## 💭 Motivation
 
 Polywise bygger på troen på, at **virkelig intelligent AI kræver virkelig intelligent hukommelse**. Det handler ikke bare om at gemme data, men om et system, der kan danne forbindelser naturligt, blive stærkere gennem brug, glemme strategisk og udvikle sig løbende.
