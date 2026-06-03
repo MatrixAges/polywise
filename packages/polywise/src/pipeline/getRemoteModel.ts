@@ -4,7 +4,7 @@ import { pick } from 'es-toolkit'
 
 import type { SpecialProvider } from '@core/types'
 
-const local_providers = new Set(['ollama', 'lmstudio'])
+const local_providers = new Set(['local model', 'ollama', 'lmstudio'])
 
 export const isRemoteProvider = (provider: string) => {
 	return !local_providers.has(provider)

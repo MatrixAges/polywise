@@ -1,4 +1,6 @@
 import { preset_providers } from '@core/consts/providers'
+import { resetRemoteEmbeddingRunner } from '@core/pipeline/genEmbedding'
+import { resetRemoteRerankRunner } from '@core/pipeline/genRerank'
 import { default_fetch_fallback_chain } from '@core/types'
 import { clearObject, initDefaults, log } from '@core/utils'
 import { to } from 'await-to-js'
@@ -227,6 +229,9 @@ export default async () => {
 
 	clearObject(providers)
 	Object.assign(providers, provider_config)
+
+	resetRemoteEmbeddingRunner()
+	resetRemoteRerankRunner()
 
 	if (has_changed_config) {
 		await fs.writeJson(config_path, config, { spaces: 4 })

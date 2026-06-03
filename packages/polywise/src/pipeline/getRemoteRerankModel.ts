@@ -2,12 +2,16 @@ import { config, providers } from '@core/config'
 import { getModel } from '@core/fst/provider'
 import { pick } from 'es-toolkit'
 
+import { isRemoteProvider } from './getRemoteModel'
+
 import type { SpecialProvider } from '@core/types'
 
 export default async () => {
 	if (!config.rerank_model) return null
 
 	const { provider, model } = config.rerank_model
+
+	if (!isRemoteProvider(provider)) return null
 
 	const custom_list = providers.custom_providers ?? []
 	const found_provider = [...providers.providers, ...custom_list].find(item => item.name === provider)
