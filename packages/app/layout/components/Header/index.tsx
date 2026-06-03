@@ -6,19 +6,20 @@ import type { IPropsHeader } from '@/layout/types'
 import type { IPropsLeft, IPropsRight } from './types'
 
 const Index = (props: IPropsHeader) => {
-	const { workspaces, current_workspace, disconnected, toggleSidebar, togglePanel } = props
+	const { workspaces, current_workspace, disconnected, toggleSidebar, togglePanel, update_status, downloadUpdate } =
+		props
 
 	const props_left: IPropsLeft = {
 		workspaces,
 		current_workspace,
-		toggleSidebar,
-		update_status: props.update_status,
-		downloadUpdate: props.downloadUpdate
+		toggleSidebar
 	}
 
 	const props_right: IPropsRight = {
 		disconnected,
-		togglePanel
+		togglePanel,
+		update_status,
+		downloadUpdate
 	}
 
 	return (

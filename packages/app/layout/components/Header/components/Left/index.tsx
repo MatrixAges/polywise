@@ -14,12 +14,10 @@ import {
 import Logo from '@/public/bare.svg?react'
 import { is_mac_electron } from '@/utils'
 
-import UpdateButton from './UpdateButton'
-
 import type { IPropsLeft } from '../../types'
 
 const Index = (props: IPropsLeft) => {
-	const { workspaces, current_workspace, toggleSidebar, update_status, downloadUpdate } = props
+	const { workspaces, current_workspace, toggleSidebar } = props
 	const navigate = useNavigate()
 
 	const onClickCreateSession = useMemoizedFn(() => {
@@ -82,7 +80,6 @@ const Index = (props: IPropsLeft) => {
 			<button className='icon_button no_drag ml-1' onClick={onClickCreateSession}>
 				<Plus></Plus>
 			</button>
-			<UpdateButton update_status={update_status} downloadUpdate={downloadUpdate}></UpdateButton>
 		</div>
 	)
 }

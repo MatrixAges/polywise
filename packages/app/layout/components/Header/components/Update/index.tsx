@@ -6,6 +6,8 @@ import { is_electron } from '@/utils'
 
 import ProgressRing from './ProgressRing'
 
+import styles from './index.module.css'
+
 import type { UpdateState } from '@/types/app'
 
 interface IProps {
@@ -34,14 +36,7 @@ const Index = (props: IProps) => {
 
 		return (
 			<Tooltip title={title} className='no_drag'>
-				<div
-					className='
-						flex
-						items-center justify-center
-						w-7 h-7
-						ml-1
-					'
-				>
+				<div className='icon_button mr-1 h-6 w-6'>
 					<ProgressRing percent={percent}></ProgressRing>
 				</div>
 			</Tooltip>
@@ -52,14 +47,23 @@ const Index = (props: IProps) => {
 		<Tooltip title={t('app_update.available_tooltip', { version: update_status.version })} className='no_drag'>
 			<button
 				className='
-					ml-1
-					text-emerald-500/80
-					hover:bg-emerald-500/10 hover:text-emerald-500
-					icon_button no_drag
+					relative
+					overflow-hidden
+					flex
+					items-center justify-center
+					w-6 h-6
+					mr-1
+					hover:bg-std-100/30!
+					icon_button active no_drag
 				'
 				onClick={downloadUpdate}
 			>
-				<ArrowUp></ArrowUp>
+				<span className={styles.viewport}>
+					<span className={styles.track}>
+						<ArrowUp className={styles.arrow} aria-hidden='true'></ArrowUp>
+						<ArrowUp className={styles.arrow} aria-hidden='true'></ArrowUp>
+					</span>
+				</span>
 			</button>
 		</Tooltip>
 	)

@@ -119,7 +119,9 @@ export default class GlobalModel {
 				return
 			case 'downloaded':
 				this.update_status = { type: 'downloaded' }
+
 				toast.info($t('app_update.restarting'))
+
 				this.installUpdate()
 
 				return

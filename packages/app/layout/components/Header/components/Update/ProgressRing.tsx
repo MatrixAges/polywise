@@ -8,10 +8,6 @@ const Index = (props: IProps) => {
 
 	return (
 		<div
-			role='progressbar'
-			aria-valuemin={0}
-			aria-valuemax={100}
-			aria-valuenow={safe_percent}
 			className='
 				relative
 				flex
@@ -35,8 +31,8 @@ const Index = (props: IProps) => {
 			<span
 				className='
 					absolute
-					text-[8px] text-under/72 font-medium
-					tabular-nums
+					top-[8.5px]
+					text-[8px] text-under/72 font-medium font-mono
 				'
 			>
 				{safe_percent}

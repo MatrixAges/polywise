@@ -1,0 +1,36 @@
+@keyframes scrollUp {
+	0% {
+		transform: translateY(0);
+	}
+
+	100% {
+		transform: translateY(-14px);
+	}
+}
+
+.viewport {
+	display: flex;
+	overflow: hidden;
+	position: relative;
+	align-items: center;
+	justify-content: center;
+	width: 14px;
+	height: 14px;
+	-webkit-mask-image: linear-gradient(to top, transparent 0%, black 32%, black 68%, transparent 100%);
+	mask-image: linear-gradient(to top, transparent 0%, black 32%, black 68%, transparent 100%);
+}
+
+.track {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	will-change: transform;
+	animation: scrollUp 3s linear infinite;
+}
+
+.arrow {
+	flex: none;
+	width: 14px;
+	height: 14px;
+	opacity: 1;
+}

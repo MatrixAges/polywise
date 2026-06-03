@@ -5,12 +5,13 @@ import { NavLink } from 'react-router'
 import { is_win_electron } from '@/utils'
 
 // import SessionsStatus from './SessionsStatus'
+import Update from './Update'
 import WinActions from './WinActions'
 
 import type { IPropsRight } from '../types'
 
 const Index = (props: IPropsRight) => {
-	const { disconnected, togglePanel } = props
+	const { disconnected, togglePanel, update_status, downloadUpdate } = props
 
 	return (
 		<div
@@ -26,6 +27,7 @@ const Index = (props: IPropsRight) => {
 			)}
 		>
 			{/* <SessionsStatus></SessionsStatus> */}
+			<Update update_status={update_status} downloadUpdate={downloadUpdate}></Update>
 			<div className='icon_button w-auto! px-2'>
 				<span
 					className={$cx(
