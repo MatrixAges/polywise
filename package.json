@@ -9,7 +9,7 @@
 		"build:mac": "turbo run desktop#pack:mac",
 		"build:win": "turbo run desktop#pack:win",
 		"pcu": "pcu update -i --no-ai --no-backup",
-		"release": "VERSION=0.0.2 bun run ./scripts/release.ts"
+		"release": "VERSION=0.0.3 bun run ./scripts/release.ts"
 	},
 	"simple-git-hooks": {
 		"pre-commit": "pnpm pretty-quick --pattern \"**/*.*(md|css|js|jsx|ts|tsx)\" --staged"

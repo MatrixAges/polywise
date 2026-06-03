@@ -4,7 +4,6 @@ import { afterPack } from './scripts/beforePack'
 
 import type { Configuration } from 'electron-builder'
 
-const { ZIP } = process.env
 const build_arch = process.env.BUILD_ARCH
 const arch = build_arch === 'arm64' ? ['arm64'] : build_arch === 'x64' ? ['x64'] : ['x64', 'arm64']
 
@@ -14,7 +13,7 @@ export default {
 	asar: false,
 	compression: 'maximum',
 	npmRebuild: false,
-	directories: { output: (ZIP ? 'zip' : 'release') + '/${platform}/${arch}' },
+	directories: { output: 'release/${platform}/${arch}' },
 	files: [
 		'public/**/*',
 		'dist/**/*',
@@ -31,7 +30,10 @@ export default {
 	artifactName: '${productName}-${version}-${arch}.${ext}',
 	mac: {
 		notarize: true,
-		target: ZIP ? { target: 'zip', arch } : { target: 'dmg', arch },
+		target: [
+			{ target: 'dmg', arch },
+			{ target: 'zip', arch }
+		],
 		hardenedRuntime: true,
 		gatekeeperAssess: false,
 		icon: 'public/icons/app.icns',

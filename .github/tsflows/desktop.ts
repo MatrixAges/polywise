@@ -31,14 +31,14 @@ const pnpm_version = readPnpmVersion()
 
 const mac_asset_glob = [
 	'packages/desktop/release/darwin/x64/*.dmg',
-	'packages/desktop/zip/darwin/x64/*.zip',
+	'packages/desktop/release/darwin/x64/*.zip',
 	'packages/desktop/release/darwin/x64/*.blockmap',
 	'packages/desktop/release/darwin/x64/latest*.yml'
 ].join('\n')
 
 const mac_arm_asset_glob = [
 	'packages/desktop/release/darwin/arm64/*.dmg',
-	'packages/desktop/zip/darwin/arm64/*.zip',
+	'packages/desktop/release/darwin/arm64/*.zip',
 	'packages/desktop/release/darwin/arm64/*.blockmap',
 	'packages/desktop/release/darwin/arm64/latest*.yml'
 ].join('\n')
@@ -185,7 +185,6 @@ const workflow_definition = workflow({
 								desktop_shared_build_command,
 								'pnpm --dir packages/desktop exec cross-env BUILD_ARCH=x64 node ./scripts/rebuild.mjs',
 								retry_command,
-								'retryCommand 3 12 pnpm --dir packages/desktop exec cross-env ZIP=0 BUILD_ARCH=x64 electron-builder -m --x64 --publish never',
 								'retryCommand 3 12 pnpm --dir packages/desktop exec cross-env BUILD_ARCH=x64 electron-builder -m --x64 --publish never'
 							].join('\n')
 						}
@@ -203,7 +202,6 @@ const workflow_definition = workflow({
 								desktop_shared_build_command,
 								'pnpm --dir packages/desktop exec cross-env BUILD_ARCH=arm64 node ./scripts/rebuild.mjs',
 								retry_command,
-								'retryCommand 3 12 pnpm --dir packages/desktop exec cross-env ZIP=0 BUILD_ARCH=arm64 electron-builder -m --arm64 --publish never',
 								'retryCommand 3 12 pnpm --dir packages/desktop exec cross-env BUILD_ARCH=arm64 electron-builder -m --arm64 --publish never'
 							].join('\n')
 						},
