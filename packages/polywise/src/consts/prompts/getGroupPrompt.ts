@@ -11,6 +11,19 @@ type MountedFolder = {
 	path: string
 }
 
+const getStructuredJsonPrompt = (lines: Array<string>) => {
+	return [
+		'Return exactly one JSON object that matches the requested schema.',
+		'Include every required key exactly once.',
+		'Do not omit keys, rename keys, or add extra keys.',
+		'Use JSON booleans for boolean fields and JSON arrays for array fields.',
+		'Do not wrap the JSON in markdown fences.',
+		'Do not add any prose before or after the JSON.',
+		'Use this JSON shape exactly:',
+		...lines
+	].join('\n')
+}
+
 const getGroupMemberProfilePrompt = (agent: GroupAgentProfileSource) => {
 	return [
 		'# Group Member Profile',
@@ -55,7 +68,6 @@ export const getGroupPickPrompt = (args: {
 	group_description?: string | null
 	agents_map_prompt: string
 	context_prompt: string
-	use_json_format_prompt?: boolean
 }) => {
 	return [
 		'# Group Candidate Pick Task',
@@ -77,18 +89,13 @@ export const getGroupPickPrompt = (args: {
 		args.group_description ? `Group Description: ${args.group_description}` : '',
 		args.agents_map_prompt,
 		args.context_prompt,
-		args.use_json_format_prompt
-			? [
-					'Return valid json only.',
-					'Use this json format exactly:',
-					'{',
-					'  "candidate_agent_ids": ["agent-id"],',
-					'  "reason": "short reason",',
-					'  "is_fallback": false',
-					'}',
-					'Do not wrap the json in markdown fences.'
-				].join('\n')
-			: ''
+		getStructuredJsonPrompt([
+			'{',
+			'  "candidate_agent_ids": ["agent-id"],',
+			'  "reason": "short reason",',
+			'  "is_fallback": false',
+			'}'
+		])
 	]
 		.filter(Boolean)
 		.join('\n\n')
@@ -100,7 +107,6 @@ export const getGroupEvaluatePrompt = (args: {
 	group_description?: string | null
 	agents_map_prompt: string
 	context_prompt: string
-	use_json_format_prompt?: boolean
 }) => {
 	return [
 		fst_system_prompt,
@@ -144,21 +150,16 @@ export const getGroupEvaluatePrompt = (args: {
 		args.agents_map_prompt,
 		getGroupMemberProfilePrompt(args.agent),
 		args.context_prompt,
-		args.use_json_format_prompt
-			? [
-					'Return valid json only.',
-					'Use this json format exactly:',
-					'{',
-					'  "should_answer": true,',
-					'  "reason": "short reason",',
-					'  "confidence": "high",',
-					'  "leadership": "none",',
-					'  "exclusive": true,',
-					'  "needs_write_lock": false',
-					'}',
-					'Do not wrap the json in markdown fences.'
-				].join('\n')
-			: ''
+		getStructuredJsonPrompt([
+			'{',
+			'  "should_answer": true,',
+			'  "reason": "short reason",',
+			'  "confidence": "high",',
+			'  "leadership": "none",',
+			'  "exclusive": true,',
+			'  "needs_write_lock": false',
+			'}'
+		])
 	]
 		.filter(Boolean)
 		.join('\n\n')

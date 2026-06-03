@@ -59,49 +59,29 @@ export default async (
 ) => {
 	try {
 		const model_config = agent.model || config.default_model
-		const use_deepseek_json_output = model_config.provider === 'deepseek'
 		const model = await getAgentModel(agent, { omit_effort: true })
 		const systemPrompt = getGroupEvaluatePrompt({
 			agent,
 			group_name: s.group!.name,
 			group_description: s.group!.description,
 			agents_map_prompt: getAgentsMapPrompt(s, { include_description: false }),
-			context_prompt: getContextPrompt(s.context),
-			use_json_format_prompt: use_deepseek_json_output
+			context_prompt: getContextPrompt(s.context)
 		})
 
-		const output = use_deepseek_json_output
-			? evaluationSchema.parse(
-					(
-						await generateText({
-							model: model.model,
-							system: systemPrompt,
-							messages,
-							output: Output.json({
-								name: 'group_member_evaluation',
-								description:
-									'Structured decision for whether this group member should answer now.'
-							}),
-							providerOptions: model.provider_options,
-							abortSignal: mergeAbortSignals(s.abort_controller.signal, args?.abort_signal)
-						})
-					).output as unknown
-				)
-			: (
-					await generateText({
-						model: model.model,
-						system: systemPrompt,
-						messages,
-						output: Output.object({
-							schema: evaluationSchema,
-							name: 'group_member_evaluation',
-							description:
-								'Structured decision for whether this group member should answer now.'
-						}),
-						providerOptions: model.provider_options,
-						abortSignal: mergeAbortSignals(s.abort_controller.signal, args?.abort_signal)
-					})
-				).output
+		const output = (
+			await generateText({
+				model: model.model,
+				system: systemPrompt,
+				messages,
+				output: Output.object({
+					schema: evaluationSchema,
+					name: 'group_member_evaluation',
+					description: 'Structured decision for whether this group member should answer now.'
+				}),
+				providerOptions: model.provider_options,
+				abortSignal: mergeAbortSignals(s.abort_controller.signal, args?.abort_signal)
+			})
+		).output
 
 		return {
 			agent,
