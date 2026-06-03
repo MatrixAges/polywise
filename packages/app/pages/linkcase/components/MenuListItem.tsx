@@ -7,6 +7,7 @@ import { useModel } from '../context'
 import { getLinkFaviconSrc } from '../types'
 
 import type { LucideIcon } from 'lucide-react'
+import type { MouseEvent } from 'react'
 import type { LinkcaseItem } from '../types'
 
 const status_icon_map = {
@@ -73,7 +74,7 @@ const Index = ({ item, index }: IProps) => {
 						flex shrink-0
 						items-center justify-center
 					'
-					onClick={event => event.stopPropagation()}
+					onClick={(event: MouseEvent<HTMLDivElement>) => event.stopPropagation()}
 				>
 					<input
 						className='accent-primary size-3 cursor-pointer'

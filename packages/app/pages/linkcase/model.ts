@@ -141,9 +141,7 @@ export default class Index {
 	}
 
 	get current_assigned_agent_id() {
-		const article = this.detail?.article
-
-		return article?.scope_type === 'agent' ? (article.scope_id ?? '') : ''
+		return this.agent_dialog_assigned_agent_id
 	}
 
 	get current_related_agent_ids() {
@@ -151,7 +149,7 @@ export default class Index {
 	}
 
 	get current_article_is_private() {
-		return this.detail?.article?.scope_type === 'agent'
+		return Boolean(this.agent_dialog_assigned_agent_id)
 	}
 
 	get checked_items() {

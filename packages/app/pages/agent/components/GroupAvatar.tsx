@@ -86,7 +86,7 @@ const Index = ({
 							type='button'
 							title='Upload photo'
 							disabled={disabled}
-							onClick={event => {
+							onClick={(event: MouseEvent<HTMLButtonElement>) => {
 								stopPropagation(event)
 								void onUpload()
 							}}
@@ -100,7 +100,7 @@ const Index = ({
 							type='button'
 							title='Clear photo'
 							disabled={disabled || !has_custom_photo}
-							onClick={event => {
+							onClick={(event: MouseEvent<HTMLButtonElement>) => {
 								stopPropagation(event)
 								void onClear()
 							}}

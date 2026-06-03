@@ -14,6 +14,7 @@ import type {
 	CreateUIMessage,
 	UIDataTypes,
 	UIMessage,
+	UIMessageChunk,
 	UIMessagePart,
 	UITools
 } from 'ai'
@@ -253,9 +254,9 @@ export default class Index<UI_MESSAGE extends UIMessage = UIMessage> {
 		}
 	}
 
-	addToolOutput = async <TOOL extends keyof UI_MESSAGE['tools'] & string>(
+	addToolOutput = async (
 		args: {
-			tool: TOOL
+			tool: string
 			toolCallId: string
 			options?: ChatRequestOptions
 		} & (
@@ -342,7 +343,7 @@ export default class Index<UI_MESSAGE extends UIMessage = UIMessage> {
 		} & ChatRequestOptions
 	) {
 		const { trigger, metadata, headers, body, messageId } = args
-		let resume_stream = undefined as ReadableStream<any> | undefined
+		let resume_stream = undefined as ReadableStream<UIMessageChunk> | null | undefined
 
 		if (trigger === 'resume-stream') {
 			try {
@@ -423,7 +424,9 @@ export default class Index<UI_MESSAGE extends UIMessage = UIMessage> {
 					state: active_response.state,
 					chunk,
 					write: () => this.#writeActiveMessage(active_response),
-					onToolCall: this.#onToolCall,
+					onToolCall: this.#onToolCall
+						? tool_call_args => Promise.resolve(this.#onToolCall?.(tool_call_args))
+						: undefined,
 					onData: this.#onData
 				})
 			}

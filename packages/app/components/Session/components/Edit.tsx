@@ -10,7 +10,8 @@ import type { IPropsEdit } from '../types'
 
 const Index = (props: IPropsEdit) => {
 	const { streaming, output } = props
-	const { status, file_name, file_path, patch, message, add_lines, remove_lines } = output
+	const { status, file_path, patch, message, add_lines, remove_lines } = output
+	const file_name = file_path.split(/[\\/]/).pop() || file_path
 
 	const global = useGlobal()
 	const [open, { toggle, set }] = useToggle(false)

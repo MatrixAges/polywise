@@ -6,7 +6,7 @@ import { injectable } from 'tsyringe'
 import { Util } from '@/models/common'
 import { rpc } from '@/utils'
 
-import { normalizeHeadingText, parseOutline } from '../utils'
+import { normalizeHeadingText, parseOutline, post_for_types } from '../utils'
 
 import type { Editor as TiptapEditor } from '@tiptap/core'
 import type {
@@ -311,10 +311,14 @@ export default class Index {
 	}
 
 	applyPostDraft(response: PostDetail) {
+		const next_for_type = post_for_types.includes(response.for_type as PostForType)
+			? (response.for_type as PostForType)
+			: 'user'
+
 		this.selected_post = response
 		this.draft_title = response.title ?? ''
 		this.draft_content = response.content
-		this.draft_for_type = response.for_type
+		this.draft_for_type = next_for_type
 		this.session_id = response.session_id
 		this.dirty = false
 		this.clearSaveTimer()

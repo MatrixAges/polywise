@@ -25,12 +25,12 @@ const createAssistantMessage = <UI_MESSAGE extends UIMessage>(message_id = '') =
 		role: 'assistant',
 		metadata: undefined,
 		parts: []
-	}) as UI_MESSAGE
+	}) as unknown as UI_MESSAGE
 
 export const createStreamingUIMessageState = <UI_MESSAGE extends UIMessage>(args: {
 	lastMessage: UI_MESSAGE | undefined
 	messageId: string
-}) => {
+}): StreamingUIMessageState<UI_MESSAGE> => {
 	const { lastMessage, messageId } = args
 
 	return {
@@ -41,7 +41,7 @@ export const createStreamingUIMessageState = <UI_MESSAGE extends UIMessage>(args
 		activeTextParts: {},
 		activeReasoningParts: {},
 		partialToolCalls: {}
-	} satisfies StreamingUIMessageState<UI_MESSAGE>
+	}
 }
 
 const hasMessageContent = <UI_MESSAGE extends UIMessage>(state: StreamingUIMessageState<UI_MESSAGE>) =>

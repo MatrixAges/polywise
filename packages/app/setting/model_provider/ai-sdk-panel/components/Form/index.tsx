@@ -147,9 +147,13 @@ const Index = (props: IPropsForm) => {
 		setTest({ loading: true, res: null })
 
 		let res = false
+		const form_values = getValues()
 
 		try {
-			res = await rpc.provider.test.query(getValues())
+			res = await rpc.provider.test.query({
+				...form_values,
+				models: form_values.models ?? []
+			})
 		} catch (error) {
 			console.error('[ai-sdk-panel] provider test failed', error)
 		}

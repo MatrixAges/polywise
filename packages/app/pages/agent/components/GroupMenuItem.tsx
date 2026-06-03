@@ -8,6 +8,7 @@ import { ArrowLeft, Grip } from '@/components/animate'
 import { useModel } from '../context'
 import GroupAvatar from './GroupAvatar'
 
+import type { MouseEvent } from 'react'
 import type { GroupItem } from '../types'
 
 interface IProps {
@@ -84,7 +85,7 @@ const Index = ({ item, selected, onClick, onEdit }: IProps) => {
 				<button
 					className='icon_button small'
 					type='button'
-					onClick={event => {
+					onClick={(event: MouseEvent<HTMLButtonElement>) => {
 						event.stopPropagation()
 						onEdit()
 					}}
