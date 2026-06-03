@@ -279,19 +279,6 @@ const Index = () => {
 					</Field>
 					<Field className='items-center! py-3' orientation='horizontal'>
 						<FieldContent>
-							<FieldTitle className='text-base'>Auth</FieldTitle>
-							<FieldDescription>
-								Enable Better Auth password login for the standalone web runtime.
-								Electron keeps bypassing auth even when this is on.
-							</FieldDescription>
-						</FieldContent>
-						<Switch
-							checked={Boolean(s.config?.auth?.enabled ?? a.status?.enabled)}
-							onCheckedChange={checked => void updateAuthEnabled(checked)}
-						/>
-					</Field>
-					<Field className='items-center! py-3' orientation='horizontal'>
-						<FieldContent>
 							<FieldTitle className='text-base'>Prompt Full Inject</FieldTitle>
 							<FieldDescription>
 								Automatically inject all detected prompt files from the session prompt
@@ -302,6 +289,20 @@ const Index = () => {
 						<Switch
 							checked={Boolean(s.config?.prompt_full_inject)}
 							onCheckedChange={checked => void updatePromptFullInject(checked)}
+						/>
+					</Field>
+					<div className='bg-border-light my-2 h-px w-full'></div>
+					<Field className='items-center! py-3' orientation='horizontal'>
+						<FieldContent>
+							<FieldTitle className='text-base'>Auth</FieldTitle>
+							<FieldDescription>
+								Enable Better Auth password login for the standalone web runtime.
+								Electron keeps bypassing auth even when this is on.
+							</FieldDescription>
+						</FieldContent>
+						<Switch
+							checked={Boolean(s.config?.auth?.enabled ?? a.status?.enabled)}
+							onCheckedChange={checked => void updateAuthEnabled(checked)}
 						/>
 					</Field>
 					<Field className='items-center! py-3' orientation='horizontal'>
