@@ -1908,7 +1908,7 @@ export default class Index {
 		if (!this.selected_agent_id || !this.can_mutate_selected_agent_articles) return
 
 		await rpc.agent.removeArticle.mutate({ agent_id: this.selected_agent_id, article_id })
-		await this.refreshRelatedArticles()
+		await this.refreshAgentRelated()
 	}
 
 	async toggleAgentFrozen(next_value: boolean) {

@@ -55,8 +55,8 @@
 			padding-bottom: 120px;
 			margin: 0 auto;
 			outline: none;
-			overflow-wrap: anywhere;
-			word-break: break-word;
+			overflow-wrap: break-word;
+			word-break: normal;
 
 			&.resize-cursor {
 				cursor: ew-resize;
