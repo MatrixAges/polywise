@@ -23,6 +23,23 @@ export const link_groups = [
 	}
 ]
 
+export const getLinkGroups = ({ locale }: { locale: string }) => {
+	if (locale !== 'zh') return link_groups
+
+	return [
+		...link_groups,
+		{
+			title: 'friend_links',
+			items: [
+				{
+					title: 'linux_do',
+					link: 'https://linux.do'
+				}
+			]
+		}
+	]
+}
+
 export const media_items = [
 	{
 		link: medias.discord,

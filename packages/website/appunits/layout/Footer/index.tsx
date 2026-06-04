@@ -3,15 +3,17 @@
 import LocaleSelect from '@website/components/LocaleSelect'
 import LogoWithBg from '@website/components/LogoWithBg'
 import { $ } from '@website/utils'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import Link from 'next/link'
 
-import { link_groups, media_items } from './links'
+import { getLinkGroups, media_items } from './links'
 
 import styles from './index.module.css'
 
 const Index = () => {
 	const t = useTranslations('layout')
+	const locale = useLocale()
+	const link_groups_current = getLinkGroups({ locale })
 
 	return (
 		<div className={$.cx('box-border', styles._local)}>
@@ -41,7 +43,7 @@ const Index = () => {
 						</div>
 					</div>
 					<div className='right_wrap flex'>
-						{link_groups.map((item, index) => (
+						{link_groups_current.map((item, index) => (
 							<div className='group_wrap box-border flex flex-col' key={index}>
 								<h2>{t(`Footer.${item.title}`)}</h2>
 								<div className='link_items flex flex-col'>
