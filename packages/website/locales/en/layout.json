@@ -12,8 +12,7 @@
 		"download": "Download",
 		"contact": "Contact",
 		"blog": "Blog",
-		"github": "Github",
-		"linux_do": "Linux.do"
+		"github": "Github"
 	},
 	"Setting": {
 		"title": "Setting",
@@ -23,7 +22,6 @@
 	"Footer": {
 		"product": "Product",
 		"resources": "Resources",
-		"company": "Company",
-		"friend_links": "Friends"
+		"company": "Company"
 	}
 }

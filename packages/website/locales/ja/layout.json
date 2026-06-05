@@ -12,8 +12,7 @@
 		"download": "ダウンロード",
 		"contact": "お問い合わせ",
 		"blog": "ブログ",
-		"github": "Github",
-		"linux_do": "Linux.do"
+		"github": "Github"
 	},
 	"Setting": {
 		"title": "設定",
@@ -23,7 +22,6 @@
 	"Footer": {
 		"product": "製品",
 		"resources": "リソース",
-		"company": "会社",
-		"friend_links": "友達リンク"
+		"company": "会社"
 	}
 }

@@ -12,8 +12,7 @@
 		"download": "下载",
 		"contact": "联系方式",
 		"blog": "博客",
-		"github": "Github",
-		"linux_do": "Linux.do"
+		"github": "Github"
 	},
 	"Setting": {
 		"title": "设置",
@@ -23,7 +22,6 @@
 	"Footer": {
 		"product": "产品",
 		"resources": "资源",
-		"company": "公司",
-		"friend_links": "友链"
+		"company": "公司"
 	}
 }
