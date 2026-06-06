@@ -397,7 +397,7 @@ const Index = () => {
 						<span>Refresh</span>
 					</Button>
 				</div>
-				<DndContext sensors={sensors} onDragEnd={onDragEnd}>
+				{/* <DndContext sensors={sensors} onDragEnd={onDragEnd}>
 					<SortableContext
 						items={providers.map(provider => provider.id)}
 						strategy={verticalListSortingStrategy}
@@ -416,7 +416,7 @@ const Index = () => {
 							))}
 						</div>
 					</SortableContext>
-				</DndContext>
+				</DndContext> */}
 			</FieldGroup>
 			<FieldGroup className='gap-0'>
 				<Field className='items-center! py-3' orientation='vertical'>

@@ -15,13 +15,7 @@ const react_entry = require.resolve('react')
 const react_dom_entry = require.resolve('react-dom')
 const jsx_runtime_entry = require.resolve('react/jsx-runtime')
 const jsx_dev_runtime_entry = require.resolve('react/jsx-dev-runtime')
-const html_tags = [
-	{
-		tag: 'base',
-		append: false,
-		attrs: { href: asset_prefix }
-	}
-]
+const html_tags = [] as Array<{ tag: string; append: boolean; attrs: Record<string, string> }>
 
 const config = {
 	source: { entry: { index: './index.tsx' }, decorators: { version: 'legacy' } },
@@ -36,7 +30,10 @@ const config = {
 		}
 	},
 	performance: { removeConsole: false },
-	dev: { lazyCompilation: { imports: true } },
+	dev: {
+		lazyCompilation: { imports: true },
+		assetPrefix: '/'
+	},
 	server: {
 		open: false,
 		port: 3071,
