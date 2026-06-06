@@ -1,16 +1,15 @@
 import { useState } from 'react'
 import { ChevronDown, Eraser, LoaderCircle, Save } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
-import { toast } from 'sonner'
+import { container } from 'tsyringe'
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/__shadcn__/components/ui/select'
 import { Switch } from '@/__shadcn__/components/ui/switch'
 import Editor from '@/components/Editor'
-import { useGlobal } from '@/context'
-import { rpc } from '@/utils'
+
+import Model from './model'
 
 import type { RPCInput } from '@/types'
-import type { AppConfig } from '@core/types'
 
 type BookmarkForType = Extract<RPCInput['save']['for'], 'memory' | 'wiki' | 'user'>
 
@@ -21,51 +20,7 @@ const for_type_items: Array<{ value: BookmarkForType; label: string }> = [
 ]
 
 const Index = () => {
-	const global = useGlobal()
-	const s = global.setting
-	const [for_type, setForType] = useState<BookmarkForType>('memory')
-	const [content, setContent] = useState('')
-	const [saving, setSaving] = useState(false)
-	const bookmark_auto_clean = Boolean(s.config?.bookmark_auto_clean)
-
-	const clear = () => {
-		setContent('')
-	}
-
-	const save = async () => {
-		const trimmed = content.trim()
-
-		if (!trimmed || saving) return
-
-		setSaving(true)
-
-		try {
-			let title: string | undefined
-			let next_content = trimmed
-
-			if (bookmark_auto_clean) {
-				const summary = await rpc.article.summarizeWiki.mutate({
-					answer: trimmed
-				})
-
-				title = summary.title
-				next_content = summary.content
-			}
-
-			await rpc.save.mutate({
-				title,
-				content: next_content,
-				for: for_type,
-				exec_pipeline: true
-			})
-
-			setContent('')
-		} catch (error) {
-			toast.error(error instanceof Error ? error.message : 'Failed to save bookmark.')
-		} finally {
-			setSaving(false)
-		}
-	}
+	const [x] = useState(() => container.resolve(Model))
 
 	return (
 		<div
@@ -92,8 +47,8 @@ const Index = () => {
 					<Editor
 						id='panel-bookmark-editor'
 						className='px-4 pt-4 pb-8'
-						value={content}
-						onChange={setContent}
+						value={x.content}
+						onChange={x.setContent}
 					></Editor>
 				</div>
 			</div>
@@ -112,18 +67,19 @@ const Index = () => {
 					<Switch
 						className='mr-1'
 						aria-label='Auto clean bookmark before save'
-						checked={bookmark_auto_clean}
-						disabled={saving}
+						checked={x.bookmark_auto_clean}
+						disabled={x.saving}
 						size='sm'
 						title='Auto clean bookmark before save'
-						onCheckedChange={checked =>
-							s.setConfig('config', { bookmark_auto_clean: checked } as AppConfig, true)
-						}
+						onCheckedChange={x.setBookmarkAutoClean}
 					/>
 					<span className='mr-2 text-xs'>Auto Clean</span>
 				</div>
 				<div className='flex shrink-0 items-center gap-2'>
-					<Select value={for_type} onValueChange={value => setForType(value as BookmarkForType)}>
+					<Select
+						value={x.for_type}
+						onValueChange={value => x.setForType(value as BookmarkForType)}
+					>
 						<SelectTrigger
 							className='
 								flex
@@ -152,21 +108,21 @@ const Index = () => {
 					</Select>
 					<button
 						className='icon_button small text-std-800'
-						disabled={saving || content.length === 0}
+						disabled={x.saving || x.content.length === 0}
 						title='Clear'
 						type='button'
-						onClick={clear}
+						onClick={x.clear}
 					>
 						<Eraser className='size-3.5' />
 					</button>
 					<button
 						className='icon_button small text-std-800'
-						disabled={saving || content.trim().length === 0}
-						title={saving ? 'Saving' : 'Save'}
+						disabled={x.saving || x.content.trim().length === 0}
+						title={x.saving ? 'Saving' : 'Save'}
 						type='button'
-						onClick={() => void save()}
+						onClick={() => void x.save()}
 					>
-						{saving ? (
+						{x.saving ? (
 							<LoaderCircle className='size-3.5 animate-spin' />
 						) : (
 							<Save className='size-3.5' />
