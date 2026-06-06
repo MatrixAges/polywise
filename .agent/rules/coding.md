@@ -5,13 +5,13 @@ This is the highest constitution you must adhere to when generating any code:
 - **Atomicity (Single Responsibility and Physical Isolation)**:
      - A function or component is only allowed to do **one specific thing** (i.e., an "atom").
      - Strictly enforce the "**one atom, one physical file**" principle. It is strictly prohibited to stack multiple unrelated functions or components in a single file.
-     - All files must expose their core "atom" via `export default`. The specific export syntax (e.g., arrow function or Class) must strictly follow the matched outline-level route in the current package's `unify.md`.
+     - All files must expose their core "atom" via `export default`. The specific export syntax (e.g., arrow function or Class) must strictly follow the matched outline-level route in the current package's `agentmap.md`.
 
 - **Fractalization (Deep Directory and High Cohesion)**:
      - As business complexity increases, it is strictly prohibited to continuously add new files in the same flat directory (this will lead to code bloat and confusion).
      - When the internal logic of an "atom" becomes complex (e.g., code exceeds 40 lines, or needs to split into multiple sub-logics/sub-components working together), you must **create a deep folder with the same name as the atom in place**.
      - Move the original main logic into the `index.ts/tsx` of that folder, and place the split-out new sub-logics/sub-components within that folder, to be dispatched only by `index`.
-     - How to split sub-components for components and how to cluster functions into same-name folders, **must be inferred from the matched outline-level route and its sample files in the current package's `unify.md` before performing code generation**.
+     - How to split sub-components for components and how to cluster functions into same-name folders, **must be inferred from the matched outline-level route and its sample files in the current package's `agentmap.md` before performing code generation**.
      - The generated code must present a tree-like, highly cohesive hierarchical structure, ensuring extremely high readability and maintainability, and eliminating "noodle-style" code that is written wherever one thinks.
 
 ## Coding Standards

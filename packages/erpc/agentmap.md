@@ -1,55 +1,54 @@
 # Agent Map
 
-This document provides an overview of the packages/erpc module structure and architecture.
+This document is the outline-level map and code-style routing table for `packages/erpc`. It tracks stable IPC package responsibilities and the sample routes used for coding alignment.
 
 ## 1. Module Overview
 
-- **Description**: Type-safe IPC library
-- **Architecture**: tRPC + Electron IPC
+- **Description**: Type-safe IPC bridge package.
+- **Architecture**: tRPC-style contracts over Electron IPC for main and renderer processes.
 
-## 2. File Tree & Metadata
+## 2. Outline Tree
 
 ```json
 {
-	"project": "Polywise",
-	"module": "packages/erpc",
-	"structure": {
-		"src": {
-			"constants.ts": { "desc": "IPC Channel constants", "role": "Config" },
-			"main": {
-				"createIPCHandler.ts": { "desc": "IPC Handler creator", "role": "Provider" },
-				"exposeERPC.ts": { "desc": "Preload exposure utility", "role": "Provider" },
-				"handleIPCMessage.ts": { "desc": "Message handling logic", "role": "Internal" },
-				"index.ts": { "desc": "Main process exports", "role": "Index" },
-				"types.ts": { "desc": "Main process types", "role": "Type" },
-				"utils.ts": { "desc": "Main process utilities", "role": "Utility" }
-			},
-			"renderer": {
-				"index.ts": { "desc": "Renderer process exports", "role": "Index" },
-				"ipcLink.ts": { "desc": "tRPC IPC Link", "role": "Consumer" },
-				"utils.ts": { "desc": "Renderer utilities", "role": "Utility" }
-			},
-			"types.ts": { "desc": "Shared type definitions", "role": "Type" },
-			"vendor": {
-				"unpromise": {
-					"ATTRIBUTION.txt": { "desc": "Attribution file", "role": "Doc" },
-					"index.ts": { "desc": "Unpromise library exports", "role": "Index" },
-					"types.ts": { "desc": "Unpromise types", "role": "Type" },
-					"unpromise.ts": { "desc": "Unpromise implementation", "role": "Library" }
-				}
-			}
-		},
-		"config": {
-			"package.json": { "desc": "eRPC package configuration", "role": "Config" },
-			"rslib.config.ts": { "desc": "Rslib configuration", "role": "Config" },
-			"tsconfig.json": { "desc": "TypeScript configuration", "role": "Config" }
-		}
+	"entry": ["package.json", "rslib.config.ts", "tsconfig.json"],
+	"shared_contracts": {
+		"src/constants.ts": "IPC channel and protocol constants shared across processes.",
+		"src/types.ts": "Cross-process public type contracts."
+	},
+	"process_adapters": {
+		"src/main": "Main-process handler creation, message handling, and preload exposure utilities.",
+		"src/renderer": "Renderer-side IPC link and client helpers."
 	}
 }
 ```
 
-## 3. Operational Guidelines
+## 3. Code Style Routing
 
-- **Main Process**: IPC handlers defined in `src/main/`
-- **Renderer Process**: Client-side IPC in `src/renderer/`
-- **Cross-process Communication**: All inter-process communication flows through this package
+This routing table is scoped to outline-level folder matching. Match by `path_scope` with longest-prefix wins.
+
+```json
+{
+	"package root": {
+		"path_scope": "packages/erpc",
+		"sample_pool": ["packages/erpc/package.json", "packages/erpc/rslib.config.ts"]
+	},
+	"src root contracts": {
+		"path_scope": "packages/erpc/src",
+		"sample_pool": ["packages/erpc/src/types.ts", "packages/erpc/src/constants.ts"]
+	},
+	"src/main": {
+		"path_scope": "packages/erpc/src/main",
+		"sample_pool": ["packages/erpc/src/main/createIPCHandler.ts", "packages/erpc/src/main/exposeERPC.ts"]
+	},
+	"src/renderer": {
+		"path_scope": "packages/erpc/src/renderer",
+		"sample_pool": ["packages/erpc/src/renderer/index.ts", "packages/erpc/src/renderer/ipcLink.ts"]
+	}
+}
+```
+
+## 4. Notes
+
+- Generated or transient directories such as `dist`, `node_modules`, `.turbo`, and protected `__*` folders are intentionally omitted.
+- Keep the map at package and process-domain granularity. Do not expand routine leaf files beyond entry contracts and public coordination nodes.

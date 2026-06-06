@@ -1,6 +1,6 @@
 # Agent Map
 
-This document is an outline-level map of `packages/app`. It tracks stable package responsibilities rather than every component leaf.
+This document is the outline-level map and code-style routing table for `packages/app`. It tracks stable package responsibilities rather than every component leaf.
 
 ## 1. Module Overview
 
@@ -50,7 +50,70 @@ This document is an outline-level map of `packages/app`. It tracks stable packag
 }
 ```
 
-## 3. Notes
+## 3. Code Style Routing
+
+This routing table is scoped to outline-level folder matching. Match by `path_scope` with longest-prefix wins.
+
+```json
+{
+	"package root": {
+		"path_scope": "packages/app",
+		"sample_pool": ["packages/app/package.json", "packages/app/rsbuild.config.ts"]
+	},
+	"appdata": {
+		"path_scope": "packages/app/appdata",
+		"sample_pool": ["packages/app/appdata/app.tsx", "packages/app/appdata/panel.tsx"]
+	},
+	"components": {
+		"path_scope": "packages/app/components",
+		"sample_pool": ["packages/app/components/Session/index.tsx", "packages/app/components/Tooltip.tsx"]
+	},
+	"context": {
+		"path_scope": "packages/app/context",
+		"sample_pool": ["packages/app/context/global.ts", "packages/app/context/index.ts"]
+	},
+	"hooks": {
+		"path_scope": "packages/app/hooks",
+		"sample_pool": ["packages/app/hooks/useForm.ts", "packages/app/hooks/useTheme.ts"]
+	},
+	"layout": {
+		"path_scope": "packages/app/layout",
+		"sample_pool": ["packages/app/layout/index.tsx", "packages/app/layout/types.ts"]
+	},
+	"locales": {
+		"path_scope": "packages/app/locales",
+		"sample_pool": ["packages/app/locales/index.ts", "packages/app/locales/dayjs/en.ts"]
+	},
+	"models": {
+		"path_scope": "packages/app/models",
+		"sample_pool": ["packages/app/models/global.ts", "packages/app/models/theme.ts"]
+	},
+	"pages": {
+		"path_scope": "packages/app/pages",
+		"sample_pool": ["packages/app/pages/home/index.tsx", "packages/app/pages/session/index.tsx"]
+	},
+	"panel": {
+		"path_scope": "packages/app/panel",
+		"sample_pool": ["packages/app/panel/index.tsx", "packages/app/panel/model.ts"]
+	},
+	"runtime": {
+		"path_scope": "packages/app/runtime",
+		"sample_pool": ["packages/app/runtime/AppRoot.tsx", "packages/app/runtime/PageBridge.tsx"]
+	},
+	"setting": {
+		"path_scope": "packages/app/setting",
+		"sample_pool": ["packages/app/setting/index.tsx", "packages/app/setting/model_provider/index.tsx"]
+	},
+	"utils": {
+		"path_scope": "packages/app/utils",
+		"sample_pool": ["packages/app/utils/ipc.ts", "packages/app/utils/theme.ts"]
+	}
+}
+```
+
+## 4. Notes
 
 - Generated or transient directories such as `dist`, `node_modules`, `.turbo`, and protected `__*` folders are intentionally omitted.
 - Expand this map only when a new responsibility boundary or stable business domain appears.
+- Keep routes at package-domain granularity. Do not add nodes for routine component leaves or single page folders unless they become long-lived style islands.
+- Add a deeper route only when a subdomain has a clearly distinct structure that is reused across multiple edits.
