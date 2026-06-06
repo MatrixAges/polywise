@@ -15,7 +15,7 @@ import { eq } from 'drizzle-orm'
 
 import { readPipelineStore, removePipelineTask, setPipelineTask } from './pipelineStore'
 
-import type { Article } from '@core/db/types'
+import type { Article, ArticleInsert } from '@core/db/types'
 
 interface ArgsSaveArticle {
 	title?: string | null
@@ -25,6 +25,7 @@ interface ArgsSaveArticle {
 	scope_type?: 'global' | 'project' | 'agent'
 	scope_id?: string | null
 	source?: 'agent' | 'superego' | 'pthink'
+	metadata?: ArticleInsert['metadata']
 	exec_pipeline?: boolean
 }
 
@@ -182,7 +183,7 @@ export default async (args: ArgsSaveArticle) => {
 	const exec_pipeline = Boolean(args.exec_pipeline)
 	const has_content = content.trim().length > 0
 
-	if (!article_id && hash) {
+	if (!article_id && hash && args.metadata === undefined) {
 		const exist = await getArticle(eq(article.hash, hash))
 
 		if (exist && (!exec_pipeline || exist.is_pipelined)) return exist.id
@@ -203,6 +204,20 @@ export default async (args: ArgsSaveArticle) => {
 			throw new Error(`Article not found: ${current_article_id}`)
 		}
 
+		const existing_metadata =
+			existing_article.metadata &&
+			typeof existing_article.metadata === 'object' &&
+			!Array.isArray(existing_article.metadata)
+				? existing_article.metadata
+				: {}
+		const next_metadata =
+			args.metadata === undefined
+				? undefined
+				: {
+						...existing_metadata,
+						...args.metadata
+					}
+
 		await clearArticleChunks(current_article_id)
 
 		await setArticle(eq(article.id, current_article_id), {
@@ -213,6 +228,7 @@ export default async (args: ArgsSaveArticle) => {
 			scope_id,
 			source,
 			hash,
+			...(next_metadata === undefined ? {} : { metadata: next_metadata }),
 			is_pipelined: false,
 			updated_at: new Date()
 		})
@@ -227,6 +243,7 @@ export default async (args: ArgsSaveArticle) => {
 			scope_id,
 			source,
 			hash,
+			...(args.metadata === undefined ? {} : { metadata: args.metadata }),
 			is_pipelined: false
 		})
 

@@ -553,6 +553,7 @@ const Index = (props: IPropsMessage) => {
 				title: summary.title,
 				content: summary.content,
 				for: 'wiki',
+				save_origin: 'message_bookmark',
 				exec_pipeline: true
 			})
 			setIsWikiSaved(true)

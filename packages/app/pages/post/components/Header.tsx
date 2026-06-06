@@ -10,7 +10,7 @@ import { TextTabs } from '@/components'
 import { useModel } from '../context'
 import { for_type_tab_items } from '../utils'
 
-import type { PostForType } from '../types'
+import type { PostListTab } from '../types'
 
 const Index = () => {
 	const x = useModel()
@@ -40,8 +40,8 @@ const Index = () => {
 						title: item.title,
 						Icon: item.Icon
 					}))}
-					active={x.for_type}
-					setActive={value => x.setForType(value as PostForType)}
+					active={x.active_tab}
+					setActive={value => x.setForType(value as PostListTab)}
 				></TextTabs>
 			</div>
 			<div className='flex shrink-0 items-center gap-3'>
@@ -95,21 +95,23 @@ const Index = () => {
 						<Search className='size-3.5'></Search>
 					</Button>
 				)}
-				<Button
-					className='h-6 w-6'
-					variant='default'
-					size='xs'
-					title='New post'
-					onClick={async () => {
-						const id = await x.createPost()
+				{x.active_tab !== 'agent' && (
+					<Button
+						className='h-6 w-6'
+						variant='default'
+						size='xs'
+						title='New post'
+						onClick={async () => {
+							const id = await x.createPost()
 
-						if (id) {
-							navigate(`/post/${id}`)
-						}
-					}}
-				>
-					<Plus className='size-3.5'></Plus>
-				</Button>
+							if (id) {
+								navigate(`/post/${id}`)
+							}
+						}}
+					>
+						<Plus className='size-3.5'></Plus>
+					</Button>
+				)}
 			</div>
 		</div>
 	)

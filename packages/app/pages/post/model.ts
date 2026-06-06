@@ -6,29 +6,31 @@ import { injectable } from 'tsyringe'
 import { Util } from '@/models/common'
 import { rpc } from '@/utils'
 
-import { createListStateMap, mergePostList, post_for_types } from './utils'
+import { createListStateMap, isPostListTab, mergePostList } from './utils'
 
 import type { MouseEvent as ReactMouseEvent } from 'react'
-import type { PostForType, PostListItem } from './types'
+import type { PostListItem, PostListTab } from './types'
 
 @injectable()
 export default class Index {
-	for_type = 'wiki' as PostForType
+	active_tab = 'wiki' as PostListTab
 	list_map = createListStateMap()
 	menu_target_index = -1
 	removing_post_id = ''
 	extracting_post_id = ''
 	search_map = {
+		agent: '',
 		user: '',
 		wiki: '',
 		memory: ''
-	} as Record<PostForType, string>
+	} as Record<PostListTab, string>
 	search_timer = 0 as ReturnType<typeof setTimeout> | 0
 	list_request_key_map = {
+		agent: '',
 		user: '',
 		wiki: '',
 		memory: ''
-	} as Record<PostForType, string>
+	} as Record<PostListTab, string>
 
 	constructor(public util: Util) {
 		makeAutoObservable(
@@ -43,11 +45,15 @@ export default class Index {
 	}
 
 	get current_list_state() {
-		return this.list_map[this.for_type]
+		return this.list_map[this.active_tab]
 	}
 
 	get current_search() {
-		return this.search_map[this.for_type]
+		return this.search_map[this.active_tab]
+	}
+
+	get current_post_for_type() {
+		return this.active_tab === 'agent' ? 'wiki' : this.active_tab
 	}
 
 	get menu_target_item() {
@@ -58,16 +64,12 @@ export default class Index {
 		const deinit = setStorageWhenChange(
 			[
 				{
-					for_type: {
+					active_tab: {
 						local_key: 'post_for_type',
 						fromStorage: value =>
-							post_for_types.includes(value as PostForType)
-								? (value as PostForType)
-								: 'user',
+							isPostListTab(value as PostListTab) ? (value as PostListTab) : 'user',
 						toStorage: value =>
-							post_for_types.includes(value as PostForType)
-								? (value as PostForType)
-								: 'user'
+							isPostListTab(value as PostListTab) ? (value as PostListTab) : 'user'
 					}
 				}
 			],
@@ -75,7 +77,7 @@ export default class Index {
 		)
 
 		this.util.acts = [deinit]
-		await this.ensureListLoaded(this.for_type)
+		await this.ensureListLoaded(this.active_tab)
 	}
 
 	deinit() {
@@ -83,8 +85,8 @@ export default class Index {
 		this.util.deinit()
 	}
 
-	setForType(value: PostForType) {
-		this.for_type = value
+	setForType(value: PostListTab) {
+		this.active_tab = value
 		this.menu_target_index = -1
 		void this.ensureListLoaded(value)
 	}
@@ -92,7 +94,7 @@ export default class Index {
 	setSearch(value: string) {
 		this.search_map = {
 			...this.search_map,
-			[this.for_type]: value
+			[this.active_tab]: value
 		}
 		this.scheduleSearch()
 	}
@@ -109,30 +111,30 @@ export default class Index {
 
 		this.search_timer = setTimeout(() => {
 			this.menu_target_index = -1
-			void this.loadList(this.for_type, 1, false)
+			void this.loadList(this.active_tab, 1, false)
 		}, 220)
 	}
 
-	async ensureListLoaded(target_for_type: PostForType) {
-		const current_state = this.list_map[target_for_type]
-		const current_query = this.search_map[target_for_type].trim()
+	async ensureListLoaded(target_tab: PostListTab) {
+		const current_state = this.list_map[target_tab]
+		const current_query = this.search_map[target_tab].trim()
 
 		if ((current_state.inited && current_state.query === current_query) || current_state.loading) {
 			return
 		}
 
-		await this.loadList(target_for_type, 1, false)
+		await this.loadList(target_tab, 1, false)
 	}
 
-	async loadList(target_for_type: PostForType, page = 1, append = false) {
-		const query = this.search_map[target_for_type].trim()
-		const request_key = `${target_for_type}:${query}:${page}:${Date.now()}`
+	async loadList(target_tab: PostListTab, page = 1, append = false) {
+		const query = this.search_map[target_tab].trim()
+		const request_key = `${target_tab}:${query}:${page}:${Date.now()}`
 
-		this.list_request_key_map[target_for_type] = request_key
+		this.list_request_key_map[target_tab] = request_key
 		this.list_map = {
 			...this.list_map,
-			[target_for_type]: {
-				...this.list_map[target_for_type],
+			[target_tab]: {
+				...this.list_map[target_tab],
 				loading: true
 			}
 		}
@@ -140,19 +142,20 @@ export default class Index {
 		try {
 			const response = await rpc.post.query.query({
 				page,
-				for_type: target_for_type,
+				tab: target_tab,
+				for_type: target_tab === 'agent' ? undefined : target_tab,
 				query
 			})
 
-			if (this.list_request_key_map[target_for_type] !== request_key) {
+			if (this.list_request_key_map[target_tab] !== request_key) {
 				return
 			}
 
 			this.list_map = {
 				...this.list_map,
-				[target_for_type]: {
+				[target_tab]: {
 					list: append
-						? mergePostList(this.list_map[target_for_type].list, response.list)
+						? mergePostList(this.list_map[target_tab].list, response.list)
 						: response.list,
 					page,
 					query,
@@ -163,14 +166,14 @@ export default class Index {
 			}
 			this.menu_target_index = -1
 		} catch (error) {
-			if (this.list_request_key_map[target_for_type] !== request_key) {
+			if (this.list_request_key_map[target_tab] !== request_key) {
 				return
 			}
 
 			this.list_map = {
 				...this.list_map,
-				[target_for_type]: {
-					...this.list_map[target_for_type],
+				[target_tab]: {
+					...this.list_map[target_tab],
 					loading: false
 				}
 			}
@@ -181,7 +184,7 @@ export default class Index {
 
 	async createPost() {
 		const response = await rpc.post.create.mutate({
-			for_type: this.for_type,
+			for_type: this.current_post_for_type,
 			title: '',
 			content: ''
 		})
@@ -220,8 +223,8 @@ export default class Index {
 		this.menu_target_index = next_index
 	}
 
-	updateListItem(target_for_type: PostForType, post_id: string, updater: (item: PostListItem) => PostListItem) {
-		const current_state = this.list_map[target_for_type]
+	updateListItem(target_tab: PostListTab, post_id: string, updater: (item: PostListItem) => PostListItem) {
+		const current_state = this.list_map[target_tab]
 		let changed = false
 		const next_list = current_state.list.map(item => {
 			if (item.id !== post_id) {
@@ -239,15 +242,15 @@ export default class Index {
 
 		this.list_map = {
 			...this.list_map,
-			[target_for_type]: {
+			[target_tab]: {
 				...current_state,
 				list: next_list
 			}
 		}
 	}
 
-	removeListItem(target_for_type: PostForType, post_id: string) {
-		const current_state = this.list_map[target_for_type]
+	removeListItem(target_tab: PostListTab, post_id: string) {
+		const current_state = this.list_map[target_tab]
 		const next_list = current_state.list.filter(item => item.id !== post_id)
 
 		if (next_list.length === current_state.list.length) {
@@ -256,7 +259,7 @@ export default class Index {
 
 		this.list_map = {
 			...this.list_map,
-			[target_for_type]: {
+			[target_tab]: {
 				...current_state,
 				list: next_list
 			}
@@ -272,12 +275,12 @@ export default class Index {
 			return
 		}
 
-		const target_for_type = this.for_type
+		const target_tab = this.active_tab
 		this.removing_post_id = item.id
 
 		try {
 			await rpc.post.remove.mutate({ id: item.id })
-			this.removeListItem(target_for_type, item.id)
+			this.removeListItem(target_tab, item.id)
 			this.menu_target_index = -1
 			toast.success('Post removed.')
 		} finally {
@@ -292,7 +295,7 @@ export default class Index {
 			return
 		}
 
-		const target_for_type = this.for_type
+		const target_tab = this.active_tab
 		this.extracting_post_id = item.id
 
 		try {
@@ -302,7 +305,7 @@ export default class Index {
 			})
 
 			if (!result.queued) {
-				this.updateListItem(target_for_type, item.id, current => ({
+				this.updateListItem(target_tab, item.id, current => ({
 					...current,
 					is_pipelined: true
 				}))

@@ -16,6 +16,8 @@ import removeSessionById from '../session/utils/removeSessionById'
 
 export const post_for_types = ['user', 'wiki', 'memory'] as const
 export type PostForType = (typeof post_for_types)[number]
+export const post_list_tabs = ['user', 'wiki', 'memory', 'agent'] as const
+export type PostListTab = (typeof post_list_tabs)[number]
 
 const post_extract_running_tasks = new Map<string, Promise<void>>()
 const post_session_ensure_tasks = new Map<
@@ -28,7 +30,19 @@ const post_session_ensure_tasks = new Map<
 const POST_PIPELINE_WAIT_MS = 90_000
 const POST_PIPELINE_POLL_MS = 250
 const post_for_type_set = new Set<string>(post_for_types)
+const post_list_tab_set = new Set<string>(post_list_tabs)
 const global_post_scope_where = eq(article.scope_type, 'global')
+const pthink_post_where = sql`json_extract(${article.metadata}, '$.pthink.kind') IS NOT NULL`
+const message_bookmark_post_where = sql`json_extract(${article.metadata}, '$.save_origin') = 'message_bookmark'`
+const default_post_visibility_where = and(
+	global_post_scope_where,
+	sql`json_extract(${article.metadata}, '$.pthink.kind') IS NULL`,
+	sql`coalesce(json_extract(${article.metadata}, '$.save_origin'), '') != 'message_bookmark'`
+)
+const agent_post_visibility_where = and(
+	global_post_scope_where,
+	or(pthink_post_where, and(eq(article.for, 'wiki'), message_bookmark_post_where))
+)
 const visible_related_article_count = sql<number>`(
 	select count(*)
 	from post_article pa
@@ -40,7 +54,11 @@ const visible_related_article_count = sql<number>`(
 export const isPostForType = (value?: string | null): value is PostForType =>
 	typeof value === 'string' && post_for_type_set.has(value)
 
+export const isPostListTab = (value?: string | null): value is PostListTab =>
+	typeof value === 'string' && post_list_tab_set.has(value)
+
 export const normalizePostForType = (value?: string | null): PostForType => (isPostForType(value) ? value : 'user')
+export const normalizePostListTab = (value?: string | null): PostListTab => (isPostListTab(value) ? value : 'wiki')
 
 export const getPostSessionTitle = (post: { title: string | null; for_type: PostForType }) => {
 	const title = post.title?.trim()
@@ -962,17 +980,22 @@ export const searchRelatedArticleCandidates = async (args: { post_id: string; qu
 	return { list, has_more }
 }
 
-export const queryPosts = async (args: { page: number; for_type?: string; query?: string }) => {
+export const queryPosts = async (args: { page: number; tab?: string; for_type?: string; query?: string }) => {
 	const page_size = 12
+	const target_tab = normalizePostListTab(args.tab)
 	const target_for_type = args.for_type && isPostForType(args.for_type) ? args.for_type : undefined
 	const keyword = args.query?.trim() ?? ''
-	const type_where = target_for_type ? eq(article.for, target_for_type) : inArray(article.for, post_for_types)
+	const type_where =
+		target_tab === 'agent'
+			? inArray(article.for, post_for_types)
+			: target_for_type
+				? eq(article.for, target_for_type)
+				: inArray(article.for, post_for_types)
 	const search_where = keyword
 		? or(like(article.title, `%${keyword}%`), like(article.content, `%${keyword}%`))
 		: undefined
-	const where = search_where
-		? and(global_post_scope_where, type_where, search_where)
-		: and(global_post_scope_where, type_where)
+	const visibility_where = target_tab === 'agent' ? agent_post_visibility_where : default_post_visibility_where
+	const where = search_where ? and(visibility_where, type_where, search_where) : and(visibility_where, type_where)
 	const rows = await env.db
 		.select({
 			id: article.id,

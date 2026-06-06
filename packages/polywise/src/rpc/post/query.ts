@@ -5,6 +5,7 @@ import { queryPosts } from './utils'
 
 const input_type = object({
 	page: number().int().min(1),
+	tab: string().optional(),
 	for_type: string().optional(),
 	query: string().optional()
 })

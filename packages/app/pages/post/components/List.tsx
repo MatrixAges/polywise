@@ -104,7 +104,7 @@ const Index = () => {
 								size='sm'
 								disabled={x.current_list_state.loading}
 								onClick={() =>
-									void x.loadList(x.for_type, x.current_list_state.page + 1, true)
+									void x.loadList(x.active_tab, x.current_list_state.page + 1, true)
 								}
 							>
 								{x.current_list_state.loading ? (

@@ -1,6 +1,7 @@
 import type { RPCOutput } from '@/types/rpc'
 
 export type PostForType = 'user' | 'wiki' | 'memory'
+export type PostListTab = PostForType | 'agent'
 export type DetailTab = 'outline' | 'related' | 'project'
 export type PostListItem = RPCOutput['post']['query']['list'][number]
 export type PostDetail = RPCOutput['post']['read']
@@ -18,4 +19,4 @@ export type ListState = {
 	query: string
 }
 
-export type ListStateMap = Record<PostForType, ListState>
+export type ListStateMap = Record<PostListTab, ListState>

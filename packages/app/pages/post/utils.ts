@@ -1,8 +1,9 @@
-import { BookOpen, Brain, FolderGit2, Paperclip, TableOfContents, UserRound } from 'lucide-react'
+import { BookOpen, Bot, Brain, FolderGit2, Paperclip, TableOfContents, UserRound } from 'lucide-react'
 
-import type { ListState, ListStateMap } from './types'
+import type { ListState, ListStateMap, PostListTab } from './types'
 
 export const post_for_types = ['user', 'wiki', 'memory'] as const
+export const post_list_tabs = ['wiki', 'memory', 'user', 'agent'] as const
 
 export const createEmptyListState = (): ListState => ({
 	list: [],
@@ -14,6 +15,7 @@ export const createEmptyListState = (): ListState => ({
 })
 
 export const createListStateMap = (): ListStateMap => ({
+	agent: createEmptyListState(),
 	user: createEmptyListState(),
 	wiki: createEmptyListState(),
 	memory: createEmptyListState()
@@ -60,10 +62,14 @@ export const parseOutline = (content: string) => {
 
 export const normalizeHeadingText = (value: string) => value.replace(/\s+/g, ' ').trim()
 
+export const isPostListTab = (value?: string | null): value is PostListTab =>
+	typeof value === 'string' && post_list_tabs.includes(value as PostListTab)
+
 export const for_type_tab_items = [
 	{ key: 'wiki', title: 'wiki', Icon: BookOpen },
 	{ key: 'memory', title: 'memory', Icon: Brain },
-	{ key: 'user', title: 'user', Icon: UserRound }
+	{ key: 'user', title: 'user', Icon: UserRound },
+	{ key: 'agent', title: 'agent', Icon: Bot }
 ] as const
 
 export const detail_tab_items = [
