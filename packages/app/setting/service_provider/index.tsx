@@ -24,20 +24,17 @@ const Index = () => {
 
 	return (
 		<Context value={x}>
-			<div className='relative h-full'>
-				<div className='absolute inset-0 overflow-y-scroll'>
-					<div
-						className='
-							flex flex-col
-							w-full
-							gap-5
-							page_wrap
-						'
-					>
-						<ProviderSection></ProviderSection>
-						<ConfigSection control={control}></ConfigSection>
-					</div>
-				</div>
+			<div
+				className='
+					overflow-y-scroll
+					flex flex-col
+					w-full h-full
+					gap-5
+					page_wrap
+				'
+			>
+				<ProviderSection></ProviderSection>
+				<ConfigSection control={control}></ConfigSection>
 			</div>
 		</Context>
 	)

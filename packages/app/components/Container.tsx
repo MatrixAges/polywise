@@ -4,16 +4,20 @@ const Index = ({ children }: PropsWithChildren) => {
 	return (
 		<div
 			className='
-				overflow-x-hidden
+				relative
+				overflow-hidden
 				flex flex-1
 				h-full
-				px-2.5
 			'
 		>
 			<div
 				className='
-					overflow-y-hidden
+					absolute
+					inset-0
+					overflow-x-hidden overflow-y-hidden
 					w-full h-full
+					px-2.5
+					[overflow-anchor:none]
 				'
 			>
 				<div className='h-full w-full'>{children}</div>
