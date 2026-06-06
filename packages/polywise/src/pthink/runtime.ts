@@ -345,7 +345,7 @@ export const createPthinkRuntime = (): PthinkRuntime => {
 							title: draft_article.title,
 							content: draft_article.content,
 							for: draft_article.for_type,
-							source: 'superego',
+							source: 'pthink',
 							scope_type: 'global',
 							scope_id: null,
 							exec_pipeline: true

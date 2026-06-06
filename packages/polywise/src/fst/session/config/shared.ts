@@ -69,11 +69,6 @@ export const configurable_sub_agent_items = [
 		description: 'Expose the internal `system_tool` delegation path for runtime execution.'
 	},
 	{
-		key: 'superego_agent',
-		label: 'Superego Agent',
-		description: 'Run the reflection loop that extracts durable lessons from recent conversations.'
-	},
-	{
 		key: 'trim_agent',
 		label: 'Trim Agent',
 		description: 'Compact long message history automatically when the context grows too large.'

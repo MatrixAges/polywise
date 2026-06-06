@@ -24,7 +24,7 @@ interface ArgsSaveArticle {
 	article_id?: string
 	scope_type?: 'global' | 'project' | 'agent'
 	scope_id?: string | null
-	source?: 'agent' | 'superego'
+	source?: 'agent' | 'superego' | 'pthink'
 	exec_pipeline?: boolean
 }
 

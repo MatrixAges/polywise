@@ -20,8 +20,8 @@ export default sqliteTable(
 		scope_type: text('scope_type', { enum: ['global', 'project', 'agent'] }).default('global'),
 		// Scope owner id (project.id or agent.id), null for global
 		scope_id: text('scope_id'),
-		// Data origin: agent (main agent) / superego (superego agent)
-		source: text('source', { enum: ['agent', 'superego'] }).default('agent'),
+		// Data origin: agent (main agent) / superego (legacy reflection loop) / pthink (post-think review)
+		source: text('source', { enum: ['agent', 'superego', 'pthink'] }).default('agent'),
 		// Scope-aware content hash value, used for duplicate content verification
 		hash: text('hash'),
 		// Article metadata (for filtering)

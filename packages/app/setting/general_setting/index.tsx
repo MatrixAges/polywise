@@ -36,6 +36,13 @@ const pthink_cooldown_options = [
 	{ label: '30 min', value: '30' },
 	{ label: '60 min', value: '60' }
 ]
+const pthink_message_threshold_options = [
+	{ label: '3 messages', value: '3' },
+	{ label: '6 messages', value: '6' },
+	{ label: '10 messages', value: '10' },
+	{ label: '15 messages', value: '15' },
+	{ label: '20 messages', value: '20' }
+]
 const default_report_time = '18:00'
 const normalizeReportTime = (value: string) =>
 	/^([01]?\d|2[0-3]):([0-5]\d)$/.test(value) ? value : default_report_time
@@ -612,9 +619,10 @@ const Index = () => {
 						<FieldContent>
 							<FieldTitle className='text-base'>Post-Think</FieldTitle>
 							<FieldDescription>
-								When the app is idle, review today&apos;s newly accumulated messages and
-								turn durable findings into articles, and only when strongly justified,
-								skills or tools.
+								When the app is idle and the unreviewed message count reaches the
+								threshold, review today&apos;s newly accumulated messages and turn
+								durable findings into articles, and only when strongly justified, skills
+								or tools.
 							</FieldDescription>
 						</FieldContent>
 						<Switch
@@ -643,6 +651,34 @@ const Index = () => {
 								<SelectGroup>
 									<SelectLabel>Idle Grace</SelectLabel>
 									{pthink_idle_options.map(item => (
+										<SelectItem value={item.value} key={item.value}>
+											{item.label}
+										</SelectItem>
+									))}
+								</SelectGroup>
+							</SelectContent>
+						</Select>
+					</Field>
+					<Field className='items-center! py-3' orientation='horizontal'>
+						<FieldContent>
+							<FieldTitle className='text-base'>Message Threshold</FieldTitle>
+							<FieldDescription>
+								Start post-think after this many unreviewed messages have accumulated,
+								once the app becomes idle
+							</FieldDescription>
+						</FieldContent>
+						<Select
+							items={pthink_message_threshold_options}
+							value={String(pthink?.min_messages ?? 6)}
+							onValueChange={value => updatePthink({ min_messages: Number(value) })}
+						>
+							<SelectTrigger className='workspace_selector'>
+								<SelectValue />
+							</SelectTrigger>
+							<SelectContent align='start'>
+								<SelectGroup>
+									<SelectLabel>Message Threshold</SelectLabel>
+									{pthink_message_threshold_options.map(item => (
 										<SelectItem value={item.value} key={item.value}>
 											{item.label}
 										</SelectItem>

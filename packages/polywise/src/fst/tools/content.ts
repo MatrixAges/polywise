@@ -76,6 +76,13 @@ export const createContentTool = (s: Session) => {
 					return { action: 'save' as const, error: 'for is required for save action' }
 				}
 
+				if (input.for === 'memory' || input.for === 'wiki') {
+					return {
+						action: 'save' as const,
+						error: `${input.for} saves are reserved for pthink review`
+					}
+				}
+
 				if (!input.content) {
 					return { action: 'save' as const, error: 'content is required for save action' }
 				}
