@@ -8,7 +8,6 @@ import { parseJsonSchema, validateCustomToolImports } from '@core/fst/tools/meta
 import scanCustomToolsMap from '@core/fst/tools/meta/scan'
 import { scanSkillMap } from '@core/fst/tools/skill'
 import searchSkillMap from '@core/fst/tools/skill/search'
-import { saveArticle } from '@core/io'
 import { createSkill, rebuildGlobalSkillMap, updateSkill } from '@core/rpc/skill/utils'
 import { log } from '@core/utils'
 import { writeFile } from 'atomically'
@@ -16,7 +15,9 @@ import { eq } from 'drizzle-orm'
 import fs from 'fs-extra'
 
 import { hasReviewableMessages, readPthinkReviewWindow } from './analytics'
+import buildReviewGroups from './buildReviewGroups'
 import { getPthinkConfig } from './constants'
+import saveReviewArticle from './saveReviewArticle'
 import { defaultPthinkStatus, readPthinkStatus, writePthinkStatus } from './status'
 import { synthesizePthinkReview } from './synthesize'
 
@@ -25,6 +26,8 @@ import type {
 	PthinkGeneratedTool,
 	PthinkHistoryRecord,
 	PthinkOutputKind,
+	PthinkReviewGroup,
+	PthinkReviewWindow,
 	PthinkRunSummary,
 	PthinkRuntime,
 	PthinkRuntimeStatus
@@ -213,6 +216,46 @@ const createRecord = (args: {
 	}
 }
 
+const buildGroupWindow = (args: { window: PthinkReviewWindow; group: PthinkReviewGroup }): PthinkReviewWindow => {
+	const group_session_id_set = new Set(args.group.session_ids)
+
+	return {
+		start_at: args.window.start_at,
+		end_at: args.window.end_at,
+		message_count: args.group.message_count,
+		session_count: args.group.session_ids.length,
+		sessions: args.window.sessions.filter(session_item => group_session_id_set.has(session_item.id)),
+		messages: args.group.messages
+	}
+}
+
+const createCombinedReviewTitle = (groups: Array<PthinkReviewGroup>) => {
+	if (groups.length === 1) {
+		return `Post-Think Review · ${groups[0].label}`
+	}
+
+	return 'Post-Think Review'
+}
+
+const createCombinedReviewSummary = (args: {
+	window: PthinkReviewWindow
+	processed_groups: Array<PthinkReviewGroup>
+	skipped_project_groups: Array<PthinkReviewGroup>
+}) => {
+	const processed_scope_summary = args.processed_groups.length
+		? args.processed_groups.map(group_item => `${group_item.label} (${group_item.message_count})`).join(', ')
+		: 'none'
+	const skipped_project_count = args.skipped_project_groups.length
+
+	return [
+		`Reviewed ${args.window.message_count} messages across ${args.window.session_count} sessions.`,
+		`Processed scopes: ${processed_scope_summary}.`,
+		skipped_project_count > 0 ? `Skipped ${skipped_project_count} project scope group(s).` : null
+	]
+		.filter(Boolean)
+		.join(' ')
+}
+
 export const createPthinkRuntime = (): PthinkRuntime => {
 	const status = defaultPthinkStatus()
 	let monitor_timer: NodeJS.Timeout | null = null
@@ -327,87 +370,141 @@ export const createPthinkRuntime = (): PthinkRuntime => {
 			await persistStatus()
 
 			try {
-				const review = await synthesizePthinkReview({
-					window,
-					config: current_config
-				})
-				const article_ids = [] as Array<string>
-				const skill_names = [] as Array<string>
-				const tool_names = [] as Array<string>
+				const review_groups = buildReviewGroups(window)
+				const skipped_project_groups = review_groups.filter(
+					group_item => group_item.scope_type === 'project'
+				)
+				const processed_groups = review_groups.filter(group_item => group_item.scope_type !== 'project')
+				const article_id_set = new Set<string>()
+				const skill_name_set = new Set<string>()
+				const tool_name_set = new Set<string>()
 
-				for (const draft_article of review.articles.slice(0, current_config.max_articles_per_run)) {
-					if (draft_article.confidence < 0.62 || draft_article.content.length < 80) {
-						continue
-					}
+				for (const group_item of processed_groups) {
+					const group_window = buildGroupWindow({
+						window,
+						group: group_item
+					})
+					const review = await synthesizePthinkReview({
+						window: group_window,
+						config: current_config
+					})
 
-					try {
-						const article_id = await saveArticle({
-							title: draft_article.title,
-							content: draft_article.content,
-							for: draft_article.for_type,
-							source: 'pthink',
-							scope_type: 'global',
-							scope_id: null,
-							exec_pipeline: true
-						})
+					for (const draft_article of review.articles.slice(
+						0,
+						current_config.max_articles_per_run
+					)) {
+						if (draft_article.confidence < 0.62 || draft_article.content.length < 80) {
+							continue
+						}
 
-						await setArticle(eq(article.id, article_id), {
-							metadata: {
-								pthink: {
-									kind: 'review',
-									reason: draft_article.reason,
-									confidence: draft_article.confidence,
-									window_start_at: window.start_at,
-									window_end_at: window.end_at,
-									message_count: window.message_count
+						try {
+							const saved_article = await saveReviewArticle({
+								draft_article,
+								scope:
+									group_item.scope_type === 'agent' && group_item.scope_id
+										? {
+												scope_type: 'agent',
+												scope_id: group_item.scope_id
+											}
+										: {
+												scope_type: 'global',
+												scope_id: null
+											}
+							})
+
+							await setArticle(eq(article.id, saved_article.article_id), {
+								metadata: {
+									pthink: {
+										kind: 'review',
+										reason: draft_article.reason,
+										confidence: draft_article.confidence,
+										window_start_at: group_window.start_at,
+										window_end_at: group_window.end_at,
+										message_count: group_window.message_count,
+										session_ids: group_item.session_ids,
+										session_titles: group_item.session_titles,
+										scope_type: group_item.scope_type,
+										scope_id: group_item.scope_id,
+										action: saved_article.action,
+										target_match: saved_article.target_match
+											? {
+													article_id:
+														saved_article.target_match.article
+															.id,
+													score: saved_article.target_match.score,
+													scope_type:
+														saved_article.target_match.article
+															.scope_type,
+													scope_id: saved_article.target_match
+														.article.scope_id
+												}
+											: null,
+										global_match: saved_article.global_match
+											? {
+													article_id:
+														saved_article.global_match.article
+															.id,
+													score: saved_article.global_match.score,
+													scope_type:
+														saved_article.global_match.article
+															.scope_type,
+													scope_id: saved_article.global_match
+														.article.scope_id
+												}
+											: null
+									}
 								}
-							}
-						}).catch(() => null)
+							}).catch(() => null)
 
-						article_ids.push(article_id)
-					} catch (error) {
-						log('SYSTEM', 'pthinkArticleWriteError', () =>
-							error instanceof Error ? error.message : String(error)
-						)
+							article_id_set.add(saved_article.article_id)
+						} catch (error) {
+							log('SYSTEM', 'pthinkArticleWriteError', () =>
+								error instanceof Error ? error.message : String(error)
+							)
+						}
 					}
-				}
 
-				if (
-					current_config.skill_generation_enabled &&
-					review.skill &&
-					review.skill.confidence >= 0.9 &&
-					review.skill.content.includes('# ')
-				) {
-					const skill_name = await maybeWriteSkill(review.skill).catch(() => null)
+					if (
+						current_config.skill_generation_enabled &&
+						review.skill &&
+						review.skill.confidence >= 0.9 &&
+						review.skill.content.includes('# ')
+					) {
+						const skill_name = await maybeWriteSkill(review.skill).catch(() => null)
 
-					if (skill_name) {
-						skill_names.push(skill_name)
+						if (skill_name) {
+							skill_name_set.add(skill_name)
+						}
 					}
-				}
 
-				if (
-					current_config.tool_generation_enabled &&
-					review.tool &&
-					review.tool.action === 'create' &&
-					review.tool.confidence >= 0.95 &&
-					review.tool.readme &&
-					review.tool.entry &&
-					review.tool.reason.length >= 24
-				) {
-					const created_tool = await writeCustomTool(review.tool).catch(() => null)
+					if (
+						current_config.tool_generation_enabled &&
+						review.tool &&
+						review.tool.action === 'create' &&
+						review.tool.confidence >= 0.95 &&
+						review.tool.readme &&
+						review.tool.entry &&
+						review.tool.reason.length >= 24
+					) {
+						const created_tool = await writeCustomTool(review.tool).catch(() => null)
 
-					if (created_tool) {
-						tool_names.push(created_tool.name)
+						if (created_tool) {
+							tool_name_set.add(created_tool.name)
+						}
 					}
 				}
 
 				const created_at = now
 				const summary = createRecord({
-					title: review.title,
-					summary: review.summary,
-					article_ids,
-					skill_names,
-					tool_names,
+					title: createCombinedReviewTitle(processed_groups),
+					summary: createCombinedReviewSummary({
+						window,
+						processed_groups,
+						skipped_project_groups
+					}),
+					article_ids: Array.from(article_id_set),
+					skill_names: Array.from(skill_name_set),
+					tool_names: Array.from(tool_name_set),
 					message_count: window.message_count,
 					window_start_at: window.start_at,
 					window_end_at: window.end_at,
@@ -419,7 +516,12 @@ export const createPthinkRuntime = (): PthinkRuntime => {
 				status.last_review_at = window.end_at
 				status.last_status = summary.kinds.length > 0 ? 'success' : 'skipped'
 				status.last_error = null
-				status.last_reason = summary.kinds.length > 0 ? null : 'no_durable_output'
+				status.last_reason =
+					summary.kinds.length > 0
+						? null
+						: processed_groups.length === 0
+							? 'project_sessions_only'
+							: 'no_durable_output'
 				status.last_summary = summary
 
 				if (summary.kinds.length > 0) {

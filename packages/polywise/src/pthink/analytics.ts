@@ -289,11 +289,15 @@ export const readPthinkReviewWindow = (args: {
 				m.id AS id,
 				m.session_id AS session_id,
 				s.title AS session_title,
+				ps.project_id AS project_id,
+				ags.agent_id AS agent_id,
 				m.role AS role,
 				m.content AS content,
 				m.created_at AS created_at
 			FROM message m
 			INNER JOIN session s ON s.id = m.session_id
+			LEFT JOIN project_session ps ON ps.session_id = m.session_id
+			LEFT JOIN agent_session ags ON ags.session_id = m.session_id
 			WHERE m.created_at >= ? AND m.created_at <= ?
 			ORDER BY m.created_at ASC`
 		)
@@ -301,19 +305,41 @@ export const readPthinkReviewWindow = (args: {
 		id: string
 		session_id: string
 		session_title: string | null
+		project_id: string | null
+		agent_id: string | null
 		role: string
 		content: string
 		created_at: number
 	}>
 
+	const session_map = new Map<
+		string,
+		{
+			id: string
+			title: string
+			scope_type: 'global' | 'agent' | 'project'
+			scope_id: string | null
+		}
+	>()
 	const messages = rows
 		.map(row => {
 			const text = extractText(row.content)
+			const session_scope_type = row.project_id ? 'project' : row.agent_id ? 'agent' : 'global'
+			const session_scope_id = row.project_id ?? row.agent_id ?? null
+
+			session_map.set(row.session_id, {
+				id: row.session_id,
+				title: String(row.session_title ?? ''),
+				scope_type: session_scope_type,
+				scope_id: session_scope_id
+			})
 
 			return {
 				id: row.id,
 				session_id: row.session_id,
 				session_title: String(row.session_title ?? ''),
+				session_scope_type,
+				session_scope_id,
 				role: row.role,
 				text: text.length > 1200 ? `${text.slice(0, 1200)}...` : text,
 				created_at: toUnixMilliseconds(Number(row.created_at ?? 0))
@@ -332,6 +358,9 @@ export const readPthinkReviewWindow = (args: {
 		end_at: now,
 		message_count: trimmed_messages.length,
 		session_count,
+		sessions: Array.from(session_map.values()).filter(session_item =>
+			trimmed_messages.some(message_item => message_item.session_id === session_item.id)
+		),
 		messages: trimmed_messages
 	}
 }

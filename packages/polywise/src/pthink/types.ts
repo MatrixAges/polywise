@@ -16,9 +16,18 @@ export interface PthinkReviewMessage {
 	id: string
 	session_id: string
 	session_title: string
+	session_scope_type: 'global' | 'agent' | 'project'
+	session_scope_id: string | null
 	role: string
 	text: string
 	created_at: number
+}
+
+export interface PthinkReviewSession {
+	id: string
+	title: string
+	scope_type: 'global' | 'agent' | 'project'
+	scope_id: string | null
 }
 
 export interface PthinkReviewWindow {
@@ -26,6 +35,18 @@ export interface PthinkReviewWindow {
 	end_at: number
 	message_count: number
 	session_count: number
+	sessions: Array<PthinkReviewSession>
+	messages: Array<PthinkReviewMessage>
+}
+
+export interface PthinkReviewGroup {
+	key: string
+	label: string
+	scope_type: 'global' | 'agent' | 'project'
+	scope_id: string | null
+	session_ids: Array<string>
+	session_titles: Array<string>
+	message_count: number
 	messages: Array<PthinkReviewMessage>
 }
 
