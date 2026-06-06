@@ -112,6 +112,16 @@ export default async (s: Session, message: Message, turnId: string): Promise<Gro
 		notifyQueue()
 	}
 
+	const abortSessionQueue = () => {
+		closeEvaluationGate()
+	}
+
+	if (s.abort_controller.signal.aborted) {
+		abortSessionQueue()
+	} else {
+		s.abort_controller.signal.addEventListener('abort', abortSessionQueue, { once: true })
+	}
+
 	const markEvaluationCompleted = (agent_id: string) => {
 		if (completedCandidateIds.has(agent_id)) {
 			return
