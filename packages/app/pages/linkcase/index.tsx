@@ -3,6 +3,7 @@ import { observer } from 'mobx-react-lite'
 import { container } from 'tsyringe'
 
 import { useGlobal } from '@/context'
+import { usePageLocale } from '@/hooks'
 
 import {
 	AddDialog,
@@ -18,6 +19,8 @@ import { Context } from './context'
 import Model from './model'
 
 const Index = () => {
+	usePageLocale('linkcase')
+
 	const [x] = useState(() => container.resolve(Model))
 	const global = useGlobal()
 

@@ -1,5 +1,6 @@
 import { Bot, Boxes, Layers3 } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/__shadcn__/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/__shadcn__/components/ui/select'
@@ -7,22 +8,20 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useModel } from '../context'
 import SessionTargetIdentity from './SessionTargetIdentity'
 
-const targetItems = [
-	{ key: 'global', label: 'Global Session', Icon: Boxes },
-	{ key: 'agent', label: 'Agent Session', Icon: Bot },
-	{ key: 'group', label: 'Group Session', Icon: Layers3 }
-] as const
-
 const Index = () => {
 	const x = useModel()
+	const { t } = useTranslation('setting')
+	const targetItems = [
+		{ key: 'global', label: t('im.target_global'), Icon: Boxes },
+		{ key: 'agent', label: t('im.target_agent'), Icon: Bot },
+		{ key: 'group', label: t('im.target_group'), Icon: Layers3 }
+	] as const
 
 	return (
 		<div className='flex flex-col gap-4'>
 			<div className='flex flex-col gap-1'>
-				<div className='text-sm font-medium'>Session Target</div>
-				<div className='text-std-500 text-sm'>
-					Choose what kind of session each IM route should bind to.
-				</div>
+				<div className='text-sm font-medium'>{t('im.session_target')}</div>
+				<div className='text-std-500 text-sm'>{t('im.session_target_desc')}</div>
 			</div>
 
 			<div className='flex flex-wrap gap-2'>
@@ -56,27 +55,22 @@ const Index = () => {
 						border
 					'
 				>
-					Use a plain IM session with configurable runtime options, similar to the global panel
-					session behavior.
+					{t('im.target_global_desc')}
 				</div>
 			) : null}
 
 			{x.form.session_target_type === 'agent' ? (
 				<div className='bg-background/70 rounded-2xl border p-4'>
 					<div className='mb-3 flex flex-col gap-1'>
-						<div className='text-sm font-medium'>Owner Agent</div>
-						<div className='text-std-500 text-sm'>
-							Bind each IM route to an agent-owned session. The selected agent profile and
-							tools become the session identity. Runtime controls below still apply to the
-							linked session.
-						</div>
+						<div className='text-sm font-medium'>{t('im.owner_agent')}</div>
+						<div className='text-std-500 text-sm'>{t('im.owner_agent_desc')}</div>
 					</div>
 					<Select
 						value={x.form.session_target_agent_id}
 						onValueChange={value => x.updateForm('session_target_agent_id', value ?? '')}
 					>
 						<SelectTrigger className='w-[180px]!'>
-							<SelectValue placeholder='Select an agent' />
+							<SelectValue placeholder={t('im.select_agent')} />
 						</SelectTrigger>
 						<SelectContent>
 							{x.agents.map(agent => (
@@ -95,18 +89,15 @@ const Index = () => {
 			{x.form.session_target_type === 'group' ? (
 				<div className='bg-background/70 rounded-2xl border p-4'>
 					<div className='mb-3 flex flex-col gap-1'>
-						<div className='text-sm font-medium'>Group</div>
-						<div className='text-std-500 text-sm'>
-							Bind each IM route to a group session so the group runtime handles the
-							conversation. Runtime controls below still apply to the linked session.
-						</div>
+						<div className='text-sm font-medium'>{t('im.group')}</div>
+						<div className='text-std-500 text-sm'>{t('im.group_desc')}</div>
 					</div>
 					<Select
 						value={x.form.session_target_group_id}
 						onValueChange={value => x.updateForm('session_target_group_id', value ?? '')}
 					>
 						<SelectTrigger className='w-[240px]!'>
-							<SelectValue placeholder='Select a group' />
+							<SelectValue placeholder={t('im.select_group')} />
 						</SelectTrigger>
 						<SelectContent>
 							{x.groups.map(group => (

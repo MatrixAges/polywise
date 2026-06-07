@@ -1,5 +1,6 @@
 import { Fragment } from 'react'
 import { PanelRight, SlidersHorizontal } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { NavLink } from 'react-router'
 
 import { is_win_electron } from '@/utils'
@@ -12,6 +13,7 @@ import type { IPropsRight } from '../types'
 
 const Index = (props: IPropsRight) => {
 	const { disconnected, togglePanel, update_status, downloadUpdate } = props
+	const { t } = useTranslation('layout')
 
 	return (
 		<div
@@ -35,7 +37,7 @@ const Index = (props: IPropsRight) => {
 						disconnected ? 'bg-red-400' : 'bg-green-500/72'
 					)}
 				></span>
-				<span>Status</span>
+				<span>{t('header.status')}</span>
 			</div>
 			<NavLink className='no_drag' to='/setting'>
 				{({ isActive }) => (

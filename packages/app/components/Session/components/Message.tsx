@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useMemoizedFn } from 'ahooks'
 import dayjs from 'dayjs'
 import { Bookmark, Check, ChevronRightIcon, Copy, Trash2 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import NiceAvatar from 'react-nice-avatar'
 import NotionAvatar from 'react-notion-avatar'
 import { toast } from 'sonner'
@@ -94,9 +95,6 @@ const isToolPart = (part: DurationAwarePart) => part.type === 'dynamic-tool' || 
 const isRenderablePart = (part: DurationAwarePart) =>
 	part.type === 'text' || part.type === 'reasoning' || isToolPart(part)
 
-const pluralize = (count: number, singular: string, plural = `${singular}s`) =>
-	`${count} ${count === 1 ? singular : plural}`
-
 const getToolSummaryCategory = (part: DurationAwarePart) => {
 	switch (part.type) {
 		case 'tool-read_file_tool':
@@ -120,7 +118,11 @@ const getToolSummaryCategory = (part: DurationAwarePart) => {
 	}
 }
 
-const getToolsSummary = (items: Array<PartWithDuration>) => {
+const getToolsSummary = (args: {
+	items: Array<PartWithDuration>
+	t: (key: string, options?: Record<string, unknown>) => string
+}) => {
+	const { items, t } = args
 	const counts = {
 		file: 0,
 		search: 0,
@@ -135,30 +137,40 @@ const getToolsSummary = (items: Array<PartWithDuration>) => {
 		counts[getToolSummaryCategory(item.part)] += 1
 	})
 
+	const pluralize = (count: number, label: 'file' | 'search' | 'list' | 'fetch' | 'command' | 'edit' | 'tool') =>
+		t(`session.message.${label}`, { count })
+
 	const explored = [
 		counts.file ? pluralize(counts.file, 'file') : '',
-		counts.search ? pluralize(counts.search, 'search', 'searches') : '',
+		counts.search ? pluralize(counts.search, 'search') : '',
 		counts.list ? pluralize(counts.list, 'list') : '',
-		counts.fetch ? pluralize(counts.fetch, 'fetch', 'fetches') : ''
+		counts.fetch ? pluralize(counts.fetch, 'fetch') : ''
 	].filter(Boolean)
 	const actions = [
-		counts.command ? `Ran ${pluralize(counts.command, 'command')}` : '',
-		counts.edit ? `Made ${pluralize(counts.edit, 'edit')}` : '',
-		counts.tool ? `Used ${pluralize(counts.tool, 'tool')}` : ''
+		counts.command ? t('session.message.ran', { items: pluralize(counts.command, 'command') }) : '',
+		counts.edit ? t('session.message.made', { items: pluralize(counts.edit, 'edit') }) : '',
+		counts.tool ? t('session.message.used', { items: pluralize(counts.tool, 'tool') }) : ''
 	].filter(Boolean)
 
 	if (explored.length > 0 && actions.length > 0) {
-		return `Explored ${explored.join(', ')}, ${actions.join(', ')}`
+		return t('session.message.explored', { items: `${explored.join(', ')}, ${actions.join(', ')}` })
 	}
 
-	if (explored.length > 0) return `Explored ${explored.join(', ')}`
+	if (explored.length > 0) {
+		return t('session.message.explored', { items: explored.join(', ') })
+	}
 
 	if (actions.length > 0) return actions.join(', ')
 
-	return 'Used tools'
+	return t('session.message.used_tools')
 }
 
-const getRenderBlocks = (items: Array<PartWithDuration>, streaming: boolean) => {
+const getRenderBlocks = (args: {
+	items: Array<PartWithDuration>
+	streaming: boolean
+	t: (key: string, options?: Record<string, unknown>) => string
+}) => {
+	const { items, streaming, t } = args
 	const blocks = [] as Array<RenderBlock>
 	let current_tool_group = [] as Array<PartWithDuration>
 
@@ -177,7 +189,7 @@ const getRenderBlocks = (items: Array<PartWithDuration>, streaming: boolean) => 
 		blocks.push({
 			type: 'tools',
 			items: current_tool_group,
-			summary: getToolsSummary(current_tool_group)
+			summary: getToolsSummary({ items: current_tool_group, t })
 		})
 
 		current_tool_group = []
@@ -393,6 +405,7 @@ const ToolSummaryBlock = (props: {
 
 const ProcessSummaryBlock = (props: { children: React.ReactNode; duration: number }) => {
 	const { children, duration } = props
+	const { t } = useTranslation('components')
 
 	return (
 		<Collapsible className='group/process-summary mb-0! w-full'>
@@ -408,7 +421,7 @@ const ProcessSummaryBlock = (props: { children: React.ReactNode; duration: numbe
 					hover:text-std-700
 				'
 			>
-				<span>Worked for {formatDuration(duration)}</span>
+				<span>{t('session.message.worked_for', { duration: formatDuration(duration) })}</span>
 				<ChevronRightIcon
 					className='
 						size-4
@@ -441,6 +454,8 @@ const Index = (props: IPropsMessage) => {
 		removeMessage,
 		group_agents = []
 	} = props
+	const { t: raw_t } = useTranslation('components')
+	const t = raw_t as unknown as (key: string, options?: Record<string, unknown>) => string
 	const { parts } = message
 	const [is_copied, setIsCopied] = useState(false)
 	const [is_wiki_saving, setIsWikiSaving] = useState(false)
@@ -509,9 +524,9 @@ const Index = (props: IPropsMessage) => {
 
 		return {
 			source_urls,
-			render_blocks: getRenderBlocks(left_parts, streaming)
+			render_blocks: getRenderBlocks({ items: left_parts, streaming, t })
 		}
-	}, [parts, streaming])
+	}, [parts, streaming, t])
 
 	useEffect(() => {
 		return () => {
@@ -562,7 +577,7 @@ const Index = (props: IPropsMessage) => {
 				setIsWikiSaved(false)
 			}, 2000)
 		} catch (error) {
-			toast.error(error instanceof Error ? error.message : 'Failed to save wiki article.')
+			toast.error(error instanceof Error ? error.message : t('session.message.failed_save_wiki'))
 		} finally {
 			setIsWikiSaving(false)
 		}
@@ -671,7 +686,7 @@ const Index = (props: IPropsMessage) => {
 					<button
 						className='icon_button small'
 						disabled={is_streaming || !removeMessage}
-						title='Delete message'
+						title={t('session.message.delete_message')}
 						type='button'
 						onClick={onRemove}
 					>
@@ -683,10 +698,10 @@ const Index = (props: IPropsMessage) => {
 							disabled={!wiki_text || !previous_user_text || is_wiki_saving}
 							title={
 								is_wiki_saved
-									? 'Saved'
+									? t('session.message.saved')
 									: is_wiki_saving
-										? 'Saving wiki'
-										: 'Save as wiki article'
+										? t('session.message.saving_wiki')
+										: t('session.message.save_wiki_article')
 							}
 							type='button'
 							onClick={() => void onSaveWiki()}
@@ -697,7 +712,7 @@ const Index = (props: IPropsMessage) => {
 					<button
 						className='icon_button small'
 						disabled={!copy_text}
-						title={is_copied ? 'Copied' : 'Copy message'}
+						title={is_copied ? t('session.message.copied') : t('session.message.copy_message')}
 						type='button'
 						onClick={() => void onCopy()}
 					>

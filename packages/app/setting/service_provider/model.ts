@@ -106,7 +106,14 @@ export default class Index {
 			const res = await rpc.linkcase.getContentProviders.query({ probe_runtime })
 			this.providers = orderProvidersByChain(res.providers, this.fallback_chain)
 		} catch (error) {
-			toast.error(error instanceof Error ? error.message : 'Failed to load Linkcase providers')
+			toast.error(
+				error instanceof Error
+					? error.message
+					: $t('service_provider.load_failed', {
+							ns: 'setting',
+							defaultValue: 'Failed to load Linkcase providers'
+						})
+			)
 		} finally {
 			this.loading = false
 		}
@@ -117,10 +124,17 @@ export default class Index {
 
 		try {
 			await rpc.linkcase.installContentProvider.mutate({ id })
-			toast.success('Installed')
+			toast.success($t('service_provider.installed', { ns: 'setting' }))
 			await this.refreshProviders(false)
 		} catch (error) {
-			toast.error(error instanceof Error ? error.message : 'Install failed')
+			toast.error(
+				error instanceof Error
+					? error.message
+					: $t('service_provider.install_failed', {
+							ns: 'setting',
+							defaultValue: 'Install failed'
+						})
+			)
 		} finally {
 			this.installing_id = null
 		}
@@ -136,13 +150,29 @@ export default class Index {
 			toast.success(
 				res.created
 					? action === 'recreate_profile'
-						? 'Crawl4AI profile recreated from current Chrome session'
-						: 'Crawl4AI profile created from current Chrome session'
-					: 'Crawl4AI profile already exists'
+						? $t('service_provider.crawl4ai_recreated', {
+								ns: 'setting',
+								defaultValue: 'Crawl4AI profile recreated from current Chrome session'
+							})
+						: $t('service_provider.crawl4ai_created', {
+								ns: 'setting',
+								defaultValue: 'Crawl4AI profile created from current Chrome session'
+							})
+					: $t('service_provider.crawl4ai_exists', {
+							ns: 'setting',
+							defaultValue: 'Crawl4AI profile already exists'
+						})
 			)
 			await this.refreshProviders(false)
 		} catch (error) {
-			toast.error(error instanceof Error ? error.message : 'Provider action failed')
+			toast.error(
+				error instanceof Error
+					? error.message
+					: $t('service_provider.action_failed', {
+							ns: 'setting',
+							defaultValue: 'Provider action failed'
+						})
+			)
 		} finally {
 			this.managing_action_id = null
 		}

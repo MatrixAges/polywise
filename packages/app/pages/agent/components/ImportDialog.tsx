@@ -1,5 +1,6 @@
 import { FileArchive, Loader2 } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/__shadcn__/components/ui/button'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/__shadcn__/components/ui/dialog'
@@ -9,6 +10,7 @@ import { FileTree } from '@/components'
 import { useModel } from '../context'
 
 const Index = () => {
+	const { t } = useTranslation('agent')
 	const {
 		import_dialog_open,
 		import_agent_file_path,
@@ -52,7 +54,7 @@ const Index = () => {
 					}}
 				>
 					<DialogHeader>
-						<DialogTitle>Import Agent</DialogTitle>
+						<DialogTitle>{t('import.title')}</DialogTitle>
 					</DialogHeader>
 					<div
 						className='
@@ -65,7 +67,7 @@ const Index = () => {
 						<div className='flex gap-2'>
 							<Input
 								value={import_dialog_files.input_path}
-								placeholder='Choose a directory path'
+								placeholder={t('import.choose_dir')}
 								onChange={event => import_dialog_files.setInputPath(event.target.value)}
 							></Input>
 							<Button
@@ -76,7 +78,7 @@ const Index = () => {
 								}
 								onClick={() => void import_dialog_files.fetchPath()}
 							>
-								Fetch
+								{t('import.fetch')}
 							</Button>
 						</div>
 						<FileTree
@@ -99,13 +101,11 @@ const Index = () => {
 							<Input
 								className='pl-9'
 								value={import_agent_file_path}
-								placeholder='Select a .papk file from the tree'
+								placeholder={t('import.select_file')}
 								onChange={event => setImportAgentFilePath(event.target.value)}
 							></Input>
 						</div>
-						<div className='text-std-300 text-xs'>
-							Only `.papk` files exported from Agent Export are supported.
-						</div>
+						<div className='text-std-300 text-xs'>{t('import.supported')}</div>
 					</div>
 					<DialogFooter
 						className='
@@ -121,13 +121,13 @@ const Index = () => {
 							onClick={() => setImportDialogOpen(false)}
 							disabled={import_agent_loading}
 						>
-							Cancel
+							{t('import.cancel')}
 						</Button>
 						<Button type='submit' disabled={!next_file_path || import_agent_loading}>
 							{import_agent_loading ? (
 								<Loader2 className='size-3.5 animate-spin'></Loader2>
 							) : null}
-							{import_agent_loading ? 'Importing...' : 'Import'}
+							{import_agent_loading ? t('import.importing') : t('import.import')}
 						</Button>
 					</DialogFooter>
 				</form>

@@ -1,4 +1,5 @@
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import {
 	Combobox,
@@ -19,6 +20,7 @@ import CallLogPanel from './CallLogPanel'
 import type { IToolOption } from '../types'
 
 const Index = () => {
+	const { t } = useTranslation('agent')
 	const {
 		can_edit_selected_agent_behavior,
 		tool_options,
@@ -65,10 +67,10 @@ const Index = () => {
 						{selected_items.map(item => (
 							<ComboboxChip key={item.value}>{item.label}</ComboboxChip>
 						))}
-						<ComboboxChipsInput placeholder='Search and select custom tools for agent' />
+						<ComboboxChipsInput placeholder={t('tools.placeholder')} />
 					</ComboboxChips>
 					<ComboboxContent anchor={ref_anchor}>
-						<ComboboxEmpty>No tools found.</ComboboxEmpty>
+						<ComboboxEmpty>{t('tools.empty')}</ComboboxEmpty>
 						<ComboboxList>
 							{(item: IToolOption) => (
 								<ComboboxItem value={item} key={item.value}>
@@ -89,7 +91,7 @@ const Index = () => {
 				<CallLogPanel
 					available_dates={tool_log_available_dates}
 					date={tool_log_date}
-					empty_text='No tool call logs for this date.'
+					empty_text={t('tools.log_empty')}
 					has_more={tool_log_has_more}
 					items={tool_log_items}
 					loading={tool_log_loading}

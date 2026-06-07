@@ -1,8 +1,9 @@
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import { Tabs } from '@/components'
 
-import { detail_tab_items } from '../../utils'
+import { getDetailTabItems } from '../../utils'
 import { useModel } from '../context'
 import OutlinePanel from './OutlinePanel'
 import ProjectPanel from './ProjectPanel'
@@ -12,6 +13,9 @@ import type { DetailTab } from '../../types'
 
 const Index = () => {
 	const x = useModel()
+	const { t: raw_t } = useTranslation('post')
+	const t = raw_t as unknown as (key: string, options?: Record<string, unknown>) => string
+	const detail_tab_items = getDetailTabItems(t)
 
 	return (
 		<div
@@ -44,7 +48,7 @@ const Index = () => {
 						></Tabs>
 					</div>
 				) : (
-					<span className='text-std-400 text-sm'>Loading post</span>
+					<span className='text-std-400 text-sm'>{t('detail.loading_post')}</span>
 				)}
 			</div>
 			<div className='min-h-0 flex-1 overflow-hidden'>
@@ -59,7 +63,7 @@ const Index = () => {
 							text-center
 						'
 					>
-						{x.post_loading ? 'Loading post...' : 'Select a post from the list.'}
+						{x.post_loading ? t('detail.loading_post_detail') : t('detail.select_post')}
 					</div>
 				) : x.detail_tab === 'outline' ? (
 					<div className='h-full overflow-y-auto px-1.5'>

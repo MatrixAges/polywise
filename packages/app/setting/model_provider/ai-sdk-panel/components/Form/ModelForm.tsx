@@ -92,7 +92,7 @@ const Index = (props: IPropsFormModelForm) => {
 									focus:ring-0
 								'
 							>
-								<SelectValue placeholder='Select type' />
+								<SelectValue placeholder={t('provider.form.model_form.select_type')} />
 							</SelectTrigger>
 							<SelectContent>
 								<SelectGroup>

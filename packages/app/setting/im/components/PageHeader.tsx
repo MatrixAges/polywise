@@ -1,4 +1,5 @@
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 import { FaDiscord } from 'react-icons/fa'
 import { IoLogoWechat } from 'react-icons/io5'
 
@@ -9,29 +10,29 @@ import { useModel } from '../context'
 
 import type { ImPlatform } from '../model'
 
-const items = [
-	{ key: 'wechat', title: 'WeChat', Icon: IoLogoWechat },
-	{ key: 'discord', title: 'Discord', Icon: FaDiscord },
-	{ key: 'feishu', title: 'Feishu', Icon: Logo }
-]
-
 const docsMap = {
 	wechat: {
-		label: 'WeChat ClawBot guide',
+		label: 'im.wechat_docs',
 		href: 'https://www.runoob.com/ai-agent/openclaw-weixin.html'
 	},
 	discord: {
-		label: 'Discord Bot guide',
+		label: 'im.discord_docs',
 		href: 'https://docs.openclaw.ai/channels/discord'
 	},
 	feishu: {
-		label: 'Feishu Agent docs',
+		label: 'im.feishu_docs',
 		href: 'https://open.feishu.cn/document/mcp_open_tools/integrating-agents-with-feishu/overview'
 	}
 } as const
 
 const Index = () => {
 	const x = useModel()
+	const { t } = useTranslation('setting')
+	const items = [
+		{ key: 'wechat', title: t('im.wechat'), Icon: IoLogoWechat },
+		{ key: 'discord', title: t('im.discord'), Icon: FaDiscord },
+		{ key: 'feishu', title: t('im.feishu'), Icon: Logo }
+	]
 	const docs = docsMap[x.form.platform]
 
 	return (
@@ -54,7 +55,7 @@ const Index = () => {
 				href={docs.href}
 				target='_blank'
 			>
-				{docs.label}
+				{t(docs.label)}
 			</a>
 		</div>
 	)

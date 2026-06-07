@@ -79,12 +79,12 @@ const Index = (props: IPropsTab) => {
 					<SelectTrigger noStyle>
 						<div className='click_button'>
 							<Plus></Plus>
-							<span>Add Provider</span>
+							<span>{t('provider.form.custom.add_provider')}</span>
 						</div>
 					</SelectTrigger>
 					<SelectContent className='max-h-60 w-[180px]' align='start'>
 						<SelectGroup>
-							<SelectLabel>Builtin Providers</SelectLabel>
+							<SelectLabel>{t('provider.form.custom.providers')}</SelectLabel>
 							{builtinProviders.map((item, index) => (
 								<SelectItem value={index} key={item.name}>
 									{t(`provider.providers.${item.name}` as any)}
@@ -95,11 +95,11 @@ const Index = (props: IPropsTab) => {
 				</Select>
 				<div className='click_button' onClick={download}>
 					<Download></Download>
-					<span>Export Config</span>
+					<span>{t('provider.form.export_config')}</span>
 				</div>
 				<div className='click_button' onClick={upload}>
 					<Upload></Upload>
-					<span>Import Config</span>
+					<span>{t('provider.form.import_config')}</span>
 				</div>
 			</div>
 		</div>

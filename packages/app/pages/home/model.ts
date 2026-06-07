@@ -43,14 +43,19 @@ const stats_period_adjective_map: Record<HomeStatsPeriod, string> = {
 	year: 'Yearly',
 	total: 'Total'
 }
-const home_stats_period_items = stats_period_options.map(value => ({
-	value,
-	label: stats_period_title_map[value]
-}))
-const home_report_period_items = home_stats_period_items.filter(item => item.value !== 'total') as Array<{
-	value: HomeReportPeriod
-	label: string
-}>
+const getStatsPeriodTitle = (value: HomeStatsPeriod) => $t(`period.title.${value}`, { ns: 'home' })
+
+const getHomeStatsPeriodItems = () =>
+	stats_period_options.map(value => ({
+		value,
+		label: getStatsPeriodTitle(value)
+	}))
+
+const getHomeReportPeriodItems = () =>
+	getHomeStatsPeriodItems().filter(item => item.value !== 'total') as Array<{
+		value: HomeReportPeriod
+		label: string
+	}>
 
 const formatCompact = (value: number) => compact_formatter.format(value)
 const formatInteger = (value: number) => value.toLocaleString('en-US')
@@ -243,8 +248,8 @@ export const activity_trend_config = {
 	new_sessions: { label: 'Sessions', color: '#607D8B' },
 	rewire_events: { label: 'Rewires', color: '#f43f5e' }
 } satisfies ChartConfig
-export { home_stats_period_items }
-export { home_report_period_items }
+export { getHomeStatsPeriodItems }
+export { getHomeReportPeriodItems }
 
 @injectable()
 export default class Index {

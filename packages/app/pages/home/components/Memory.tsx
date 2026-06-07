@@ -1,4 +1,5 @@
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import { useModel } from '../context'
 
@@ -6,6 +7,7 @@ const stat_item_class = 'flex flex-col gap-2 px-4 py-3.5'
 
 const Index = () => {
 	const x = useModel()
+	const { t } = useTranslation('home')
 	const memory = x.data!.memory
 	const frozen_total = memory.frozen_node_total + memory.frozen_edge_total
 	const memory_health_items = x.memory_health_items
@@ -23,11 +25,9 @@ const Index = () => {
 					border-l-2 border-std-500
 				'
 			>
-				Memory
+				{t('sections.memory')}
 			</div>
-			<div className='text-std-400 text-sm leading-6'>
-				Graph size, rewire pressure, and adjacent ops signals from the background memory system.
-			</div>
+			<div className='text-std-400 text-sm leading-6'>{t('memory.desc')}</div>
 			<div className='flex flex-col'>
 				<div
 					className='
@@ -36,36 +36,47 @@ const Index = () => {
 					'
 				>
 					<div className={$cx(stat_item_class, 'border-border-light border-r border-b')}>
-						<div className='text-std-400 text-xs font-medium uppercase'>Nodes</div>
+						<div className='text-std-400 text-xs font-medium uppercase'>
+							{t('memory.nodes')}
+						</div>
 						<div className='font-mono text-2xl font-semibold tracking-tight'>
 							{x.node_total_label}
 						</div>
-						<div className='text-std-300 text-xs'>{memory.frozen_node_total} frozen</div>
+						<div className='text-std-300 text-xs'>
+							{memory.frozen_node_total} {t('memory.frozen')}
+						</div>
 					</div>
 					<div className={$cx(stat_item_class, 'border-border-light border-b')}>
-						<div className='text-std-400 text-xs font-medium uppercase'>Edges</div>
+						<div className='text-std-400 text-xs font-medium uppercase'>
+							{t('memory.edges')}
+						</div>
 						<div className='font-mono text-2xl font-semibold tracking-tight'>
 							{x.edge_total_label}
 						</div>
-						<div className='text-std-300 text-xs'>{memory.frozen_edge_total} frozen</div>
+						<div className='text-std-300 text-xs'>
+							{memory.frozen_edge_total} {t('memory.frozen')}
+						</div>
 					</div>
 					<div className={$cx(stat_item_class, 'border-border-light border-r border-b')}>
 						<div className='text-std-400 text-xs font-medium uppercase'>
 							{x.stats_period_adjective} Rewires
 						</div>
 						<div className='font-mono text-2xl font-semibold tracking-tight'>
-							{memory.rewire_event_week.toLocaleString('en-US')}
+							{memory.rewire_event_week.toLocaleString(navigator.language)}
 						</div>
 						<div className='text-std-300 text-xs'>
-							{memory.rewire_event_total.toLocaleString('en-US')} total
+							{memory.rewire_event_total.toLocaleString(navigator.language)}{' '}
+							{t('memory.total')}
 						</div>
 					</div>
 					<div className={$cx(stat_item_class, 'border-border-light border-r border-b')}>
-						<div className='text-std-400 text-xs font-medium uppercase'>Frozen Graph</div>
-						<div className='font-mono text-2xl font-semibold tracking-tight'>
-							{frozen_total.toLocaleString('en-US')}
+						<div className='text-std-400 text-xs font-medium uppercase'>
+							{t('memory.frozen_graph')}
 						</div>
-						<div className='text-std-300 text-xs'>Nodes and edges combined</div>
+						<div className='font-mono text-2xl font-semibold tracking-tight'>
+							{frozen_total.toLocaleString(navigator.language)}
+						</div>
+						<div className='text-std-300 text-xs'>{t('memory.nodes_and_edges_combined')}</div>
 					</div>
 				</div>
 
@@ -125,7 +136,9 @@ const Index = () => {
 						border border-border-light border-t-0
 					'
 				>
-					<div className='text-std-400 text-xs font-medium uppercase'>Ops Surface</div>
+					<div className='text-std-400 text-xs font-medium uppercase'>
+						{t('memory.ops_surface')}
+					</div>
 				</div>
 				<div
 					className='

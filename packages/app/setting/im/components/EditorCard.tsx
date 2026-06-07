@@ -1,5 +1,6 @@
 import { Trash2 } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import { Badge } from '@/__shadcn__/components/ui/badge'
 import { Button } from '@/__shadcn__/components/ui/button'
@@ -18,6 +19,7 @@ import WeChatFields from './WeChatFields'
 
 const Index = () => {
 	const x = useModel()
+	const { t } = useTranslation('setting')
 
 	return (
 		<div
@@ -41,8 +43,8 @@ const Index = () => {
 			<FieldGroup className='gap-0'>
 				<Field className='items-center! py-3' orientation='horizontal'>
 					<FieldContent>
-						<FieldTitle className='text-base'>Account ID</FieldTitle>
-						<FieldDescription>Unique identifier used by inbound events</FieldDescription>
+						<FieldTitle className='text-base'>{t('im.account_id')}</FieldTitle>
+						<FieldDescription>{t('im.account_id_desc')}</FieldDescription>
 					</FieldContent>
 					<Input
 						className='max-w-[280px]'
@@ -53,8 +55,8 @@ const Index = () => {
 				</Field>
 				<Field className='items-center! py-3' orientation='horizontal'>
 					<FieldContent>
-						<FieldTitle className='text-base'>Label</FieldTitle>
-						<FieldDescription>Optional display name for this account</FieldDescription>
+						<FieldTitle className='text-base'>{t('im.label')}</FieldTitle>
+						<FieldDescription>{t('im.label_desc')}</FieldDescription>
 					</FieldContent>
 					<Input
 						className='max-w-[280px]'
@@ -65,10 +67,8 @@ const Index = () => {
 				</Field>
 				<Field className='items-center! py-3' orientation='horizontal'>
 					<FieldContent>
-						<FieldTitle className='text-base'>Enabled</FieldTitle>
-						<FieldDescription>
-							Disabled accounts are not loaded into the runtime
-						</FieldDescription>
+						<FieldTitle className='text-base'>{t('im.enabled_title')}</FieldTitle>
+						<FieldDescription>{t('im.enabled_desc')}</FieldDescription>
 					</FieldContent>
 					<Switch
 						checked={x.form.enabled}
@@ -82,15 +82,17 @@ const Index = () => {
 			<RuntimeOptions />
 			<div className='flex items-center justify-end gap-2'>
 				{x.selectedAccount && (
-					<Badge variant='outline'>Active routes: {x.getActiveRouteCount(x.selectedAccount)}</Badge>
+					<Badge variant='outline'>
+						{t('im.active_routes', { count: x.getActiveRouteCount(x.selectedAccount) })}
+					</Badge>
 				)}
 				<Button type='button' variant='outline' onClick={() => void x.remove()} disabled={x.removing}>
 					{x.removing ? <Spinner className='size-4' /> : <Trash2 className='size-4' />}
-					<span>{x.editorMode === 'edit' ? 'Delete' : 'Clear'}</span>
+					<span>{x.editorMode === 'edit' ? t('im.delete') : t('im.clear')}</span>
 				</Button>
 				<Button type='button' onClick={() => void x.save()} disabled={x.saving}>
 					{x.saving ? <Spinner className='size-4' /> : null}
-					<span>{x.editorMode === 'edit' ? 'Save Changes' : 'Save Account'}</span>
+					<span>{x.editorMode === 'edit' ? t('im.save_changes') : t('im.save_account')}</span>
 				</Button>
 			</div>
 		</div>

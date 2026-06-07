@@ -1,5 +1,6 @@
 import { Loader2, Plus, Search, X } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/__shadcn__/components/ui/button'
 import { Input } from '@/__shadcn__/components/ui/input'
@@ -9,6 +10,7 @@ import { useModel } from '../context'
 
 const Index = () => {
 	const x = useModel()
+	const { t } = useTranslation('post')
 
 	return (
 		<div className='flex h-full flex-col overflow-hidden'>
@@ -20,9 +22,7 @@ const Index = () => {
 					px-2.5 py-1.5
 				'
 			>
-				<div className='text-std-400 text-xs'>
-					Related project files will be used as first-source search results
-				</div>
+				<div className='text-std-400 text-xs'>{t('detail.related_project_hint')}</div>
 				<Button
 					className='h-7 shrink-0'
 					variant='outline'
@@ -30,7 +30,7 @@ const Index = () => {
 					onClick={() => x.setProjectDialogOpen(true)}
 				>
 					<Plus className='size-3.5'></Plus>
-					<span>Add</span>
+					<span>{t('detail.add')}</span>
 				</Button>
 			</div>
 			<div
@@ -52,10 +52,10 @@ const Index = () => {
 						'
 					>
 						<Loader2 className='size-4 animate-spin'></Loader2>
-						Loading related projects...
+						{t('detail.loading_related_projects')}
 					</div>
 				) : x.related_projects.length === 0 ? (
-					<div className='text-std-400 px-3 py-4 text-sm'>No related projects.</div>
+					<div className='text-std-400 px-3 py-4 text-sm'>{t('detail.no_related_projects')}</div>
 				) : (
 					<div className='flex flex-col gap-2.5'>
 						{x.related_projects.map(item => (
@@ -94,8 +94,8 @@ const Index = () => {
 			</div>
 			<Dialog
 				open={x.project_dialog_open}
-				title='Add Related Project'
-				desc='Select one or more projects. Their files become first-source search inputs for this post.'
+				title={t('detail.add_related_project')}
+				desc={t('detail.add_related_project_desc')}
 				setOpen={x.setProjectDialogOpen}
 				className='w-[640px] max-w-none!'
 			>
@@ -113,7 +113,7 @@ const Index = () => {
 						></Search>
 						<Input
 							className='pl-8'
-							placeholder='Search projects'
+							placeholder={t('detail.search_projects')}
 							value={x.project_query}
 							onChange={event => x.setProjectQuery(event.target.value)}
 						></Input>
@@ -137,10 +137,12 @@ const Index = () => {
 								'
 							>
 								<Loader2 className='size-4 animate-spin'></Loader2>
-								Loading projects...
+								{t('detail.loading_projects')}
 							</div>
 						) : x.filtered_related_project_options.length === 0 ? (
-							<div className='text-std-400 px-3 py-4 text-sm'>No available projects.</div>
+							<div className='text-std-400 px-3 py-4 text-sm'>
+								{t('detail.no_available_projects')}
+							</div>
 						) : (
 							<div className='flex flex-col p-1.5'>
 								{x.filtered_related_project_options.map(item => (
@@ -172,7 +174,7 @@ const Index = () => {
 											}}
 										>
 											<Plus className='size-3.5'></Plus>
-											<span>Add</span>
+											<span>{t('detail.add')}</span>
 										</Button>
 									</div>
 								))}
@@ -182,7 +184,7 @@ const Index = () => {
 				</div>
 				<DialogFooter className='mt-4'>
 					<Button variant='outline' onClick={() => x.setProjectDialogOpen(false)}>
-						Close
+						{t('detail.close')}
 					</Button>
 				</DialogFooter>
 			</Dialog>

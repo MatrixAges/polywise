@@ -1,9 +1,11 @@
 import { ArrowLeft } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router'
 
 import { Button } from '@/__shadcn__/components/ui/button'
 
 const Index = () => {
+	const { t } = useTranslation('post')
 	const navigate = useNavigate()
 
 	return (
@@ -16,10 +18,10 @@ const Index = () => {
 				text-center
 			'
 		>
-			<div className='text-std-400 text-sm'>Post not found.</div>
+			<div className='text-std-400 text-sm'>{t('detail.not_found')}</div>
 			<Button variant='outline' onClick={() => navigate('/post')}>
 				<ArrowLeft className='size-4'></ArrowLeft>
-				<span>Back to posts</span>
+				<span>{t('detail.back_to_posts')}</span>
 			</Button>
 		</div>
 	)

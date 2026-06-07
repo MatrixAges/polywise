@@ -1,5 +1,6 @@
 import { FileStack, Loader2 } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import { MessageResponse } from '@/__shadcn__/components/ai-elements/message'
 
@@ -7,6 +8,7 @@ import { useModel } from '../context'
 
 const Index = () => {
 	const x = useModel()
+	const { t } = useTranslation('home')
 
 	return (
 		<div className='flex flex-col gap-4'>
@@ -19,13 +21,15 @@ const Index = () => {
 					border-l-2 border-std-500
 				'
 			>
-				Report
+				{t('sections.report')}
 			</div>
 			<div className='flex flex-col gap-3'>
 				<div className='flex flex-col gap-3'>
 					<div className='border-border-light border px-4 py-3.5'>
 						<div className='flex items-center justify-between text-xs'>
-							<div className='text-std-400 font-medium uppercase'>Runtime Status</div>
+							<div className='text-std-400 font-medium uppercase'>
+								{t('report.runtime_status')}
+							</div>
 							<div className='font-medium'>{x.report_action_label}</div>
 						</div>
 						<div className='text-std-400 mt-2 text-sm leading-6'>{x.report_status_detail}</div>
@@ -39,7 +43,9 @@ const Index = () => {
 					'
 				>
 					<div className='mt-2 text-base font-medium'>{x.report_window_label}</div>
-					<div className='text-std-400 mt-1 text-sm'>Updated {x.report_updated_label}</div>
+					<div className='text-std-400 mt-1 text-sm'>
+						{t('report.updated', { value: x.report_updated_label })}
+					</div>
 					{x.report_loading ? (
 						<div
 							className='
@@ -51,7 +57,7 @@ const Index = () => {
 							'
 						>
 							<Loader2 className='size-4 animate-spin'></Loader2>
-							Loading report content...
+							{t('report.loading')}
 						</div>
 					) : x.report_error ? (
 						<div className='text-std-400 mt-6 text-sm'>{x.report_error}</div>
@@ -62,10 +68,7 @@ const Index = () => {
 							</MessageResponse>
 						</div>
 					) : (
-						<div className='text-std-400 mt-6 text-sm leading-6'>
-							No report generated for this window yet. Use the `Report` button in the header
-							to generate one in the background.
-						</div>
+						<div className='text-std-400 mt-6 text-sm leading-6'>{t('report.empty')}</div>
 					)}
 				</div>
 			</div>

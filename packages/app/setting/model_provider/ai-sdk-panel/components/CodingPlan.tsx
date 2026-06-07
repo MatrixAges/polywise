@@ -1,12 +1,13 @@
 import { ArrowUpRight } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 import styles from '../index.module.css'
 
 const plans = [
 	{
 		name: 'OpenCode Go',
-		desc: 'Go empowers global developers with affordable agentic coding through reliable, high-limit access to powerful, leading open-source AI models.',
-		comment: 'Most affordable, reliable, and popular.',
+		desc: 'Go 通过稳定、高额度地接入强大的领先开源 AI 模型，以更低成本为全球开发者提供智能编码能力。',
+		comment: '最便宜、最稳定、也最流行。',
 		month: '$10',
 		link: 'https://opencode.ai/go',
 		tier1: true
@@ -45,9 +46,11 @@ const plans = [
 }>
 
 const Index = () => {
+	const { t } = useTranslation()
+
 	return (
 		<div className='flex flex-col gap-2.5 pb-20'>
-			<div className={styles.label}>Coding Plan</div>
+			<div className={styles.label}>{t('provider.coding_plan.title')}</div>
 			<div
 				className='
 					flex flex-col

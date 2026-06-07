@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import { Loader2, Save } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router'
 import { toast } from 'sonner'
 
 import { Input } from '@/__shadcn__/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/__shadcn__/components/ui/select'
 import Editor from '@/components/Editor'
+import { usePageLocale } from '@/hooks'
 import { formatDateTime, fromNow, rpc } from '@/utils'
 
 import type { RPCOutput } from '@/types/rpc'
@@ -16,6 +18,8 @@ type ArticleForType = (typeof article_for_types)[number]
 type ArticleDetail = RPCOutput['article']['read']
 
 const Index = () => {
+	const t_article = usePageLocale('article')
+	const { t: t_post } = useTranslation('post')
 	const params = useParams()
 	const article_id = params.id ?? ''
 	const [loading, setLoading] = useState(false)
@@ -100,14 +104,14 @@ const Index = () => {
 				}
 
 				if (!args?.silent) {
-					toast.success('Article saved.')
+					toast.success(t_article('toast.saved'))
 				}
 
 				return response
 			})
 			.catch(error => {
 				if (!args?.silent) {
-					toast.error(error instanceof Error ? error.message : 'Failed to save article.')
+					toast.error(error instanceof Error ? error.message : t_article('toast.save_failed'))
 				}
 
 				throw error
@@ -149,7 +153,7 @@ const Index = () => {
 
 		if (!article_id) {
 			setArticle(null)
-			setError('Article not found.')
+			setError(t_article('status.not_found'))
 			setDirty(false)
 
 			return
@@ -179,7 +183,7 @@ const Index = () => {
 				}
 
 				setArticle(null)
-				setError(err instanceof Error ? err.message : 'Failed to load article.')
+				setError(err instanceof Error ? err.message : t_article('status.load_failed'))
 			})
 			.finally(() => {
 				if (mounted) {
@@ -219,7 +223,7 @@ const Index = () => {
 				'
 			>
 				<Loader2 className='mr-2 size-4 animate-spin'></Loader2>
-				Loading article...
+				{t_article('status.loading', { defaultValue: 'Loading article...' })}
 			</div>
 		)
 	}
@@ -251,7 +255,7 @@ const Index = () => {
 					text-sm text-std-400
 				'
 			>
-				Article not found.
+				{t_article('status.not_found')}
 			</div>
 		)
 	}
@@ -269,7 +273,7 @@ const Index = () => {
 							bg-transparent
 							focus:bg-transparent
 						'
-						placeholder='Untitled article'
+						placeholder={t_article('form.untitled')}
 						value={draft_title}
 						onChange={event => {
 							setDraftTitle(event.target.value)
@@ -366,13 +370,15 @@ const Index = () => {
 							}
 						>
 							{article.updated_at
-								? `Updated ${fromNow(article.updated_at)}`
-								: 'Not updated'}
+								? t_article('status.updated', { value: fromNow(article.updated_at) })
+								: t_article('status.not_updated')}
 						</div>
 					</div>
 					<div className='flex items-center gap-3'>
-						<span>{dirty ? 'Unsaved changes' : 'Saved'}</span>
-						<span>{character_count} characters</span>
+						<span>
+							{dirty ? t_article('status.unsaved_changes') : t_article('status.saved')}
+						</span>
+						<span>{t_post('detail.characters', { count: character_count })}</span>
 					</div>
 				</div>
 			</div>

@@ -3,6 +3,7 @@ import { LocalModelType } from '@core/llama'
 import { useMemoizedFn } from 'ahooks'
 import { ArrowDownToLine, BadgeCheck } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import { Field, FieldContent, FieldDescription, FieldGroup, FieldTitle } from '@/__shadcn__/components/ui/field'
 import { Spinner } from '@/__shadcn__/components/ui/spinner'
@@ -18,6 +19,7 @@ import type { AppConfig } from '@core/types'
 const Index = () => {
 	const global = useGlobal()
 	const s = global.setting
+	const { t } = useTranslation('setting')
 
 	const { loading, click } = useClickLoading(2400)
 
@@ -44,8 +46,10 @@ const Index = () => {
 				<FieldGroup className='gap-0'>
 					<Field className='items-center! py-3' orientation='horizontal'>
 						<FieldContent>
-							<FieldTitle className='text-base'>Default Model</FieldTitle>
-							<FieldDescription>Select the default model for session</FieldDescription>
+							<FieldTitle className='text-base'>
+								{t('model_setting.default_model')}
+							</FieldTitle>
+							<FieldDescription>{t('model_setting.default_model_desc')}</FieldDescription>
 						</FieldContent>
 						<Controller name='default_model' control={control}>
 							<ModelSelect></ModelSelect>
@@ -53,10 +57,10 @@ const Index = () => {
 					</Field>
 					<Field className='items-center! py-3' orientation='horizontal'>
 						<FieldContent>
-							<FieldTitle className='text-base'>Embedding Model</FieldTitle>
-							<FieldDescription>
-								Select the embedding model for document embedding
-							</FieldDescription>
+							<FieldTitle className='text-base'>
+								{t('model_setting.embedding_model')}
+							</FieldTitle>
+							<FieldDescription>{t('model_setting.embedding_model_desc')}</FieldDescription>
 						</FieldContent>
 						<Controller name='embedding_model' control={control}>
 							<ModelSelect filterType='embedding' showLocalModel></ModelSelect>
@@ -64,10 +68,10 @@ const Index = () => {
 					</Field>
 					<Field className='items-center! py-3' orientation='horizontal'>
 						<FieldContent>
-							<FieldTitle className='text-base'>Rerank Model</FieldTitle>
-							<FieldDescription>
-								Select the rerank model for document retrieval
-							</FieldDescription>
+							<FieldTitle className='text-base'>
+								{t('model_setting.rerank_model')}
+							</FieldTitle>
+							<FieldDescription>{t('model_setting.rerank_model_desc')}</FieldDescription>
 						</FieldContent>
 						<Controller name='rerank_model' control={control}>
 							<ModelSelect filterType='rerank' showLocalModel></ModelSelect>
@@ -78,8 +82,12 @@ const Index = () => {
 				<FieldGroup className='gap-0'>
 					<Field className='items-center! py-3' orientation='horizontal'>
 						<FieldContent>
-							<FieldTitle className='text-base'>Generate Triples</FieldTitle>
-							<FieldDescription>Enable generate triples for article</FieldDescription>
+							<FieldTitle className='text-base'>
+								{t('model_setting.generate_triples')}
+							</FieldTitle>
+							<FieldDescription>
+								{t('model_setting.generate_triples_desc')}
+							</FieldDescription>
 						</FieldContent>
 						<Controller type='switch' name='enable_triple' control={control}>
 							<Switch></Switch>
@@ -87,10 +95,10 @@ const Index = () => {
 					</Field>
 					<Field className='items-center! py-3' orientation='horizontal'>
 						<FieldContent>
-							<FieldTitle className='text-base'>Triple Model</FieldTitle>
-							<FieldDescription>
-								Select triple model for generating triples for content
-							</FieldDescription>
+							<FieldTitle className='text-base'>
+								{t('model_setting.triple_model')}
+							</FieldTitle>
+							<FieldDescription>{t('model_setting.triple_model_desc')}</FieldDescription>
 						</FieldContent>
 						<Controller name='triple_model' control={control}>
 							<ModelSelect showLocalModel></ModelSelect>
@@ -101,8 +109,10 @@ const Index = () => {
 				<FieldGroup className='gap-0'>
 					<Field className='items-center! py-3' orientation='horizontal'>
 						<FieldContent>
-							<FieldTitle className='text-base'>Search Rewrite</FieldTitle>
-							<FieldDescription>Enable generation model to rewirte search</FieldDescription>
+							<FieldTitle className='text-base'>
+								{t('model_setting.search_rewrite')}
+							</FieldTitle>
+							<FieldDescription>{t('model_setting.search_rewrite_desc')}</FieldDescription>
 						</FieldContent>
 						<Controller type='switch' name='enable_rewrite' control={control}>
 							<Switch></Switch>
@@ -110,10 +120,10 @@ const Index = () => {
 					</Field>
 					<Field className='items-center! py-3' orientation='horizontal'>
 						<FieldContent>
-							<FieldTitle className='text-base'>Rewrite Model</FieldTitle>
-							<FieldDescription>
-								Select model to generate rewrited search params
-							</FieldDescription>
+							<FieldTitle className='text-base'>
+								{t('model_setting.rewrite_model')}
+							</FieldTitle>
+							<FieldDescription>{t('model_setting.rewrite_model_desc')}</FieldDescription>
 						</FieldContent>
 						<Controller name='rewrite_model' control={control}>
 							<ModelSelect showLocalModel></ModelSelect>
@@ -138,7 +148,7 @@ const Index = () => {
 								{s.model_status[key as LocalModelType] ? (
 									<div className='click_button'>
 										<BadgeCheck></BadgeCheck>
-										<span>Ready</span>
+										<span>{t('model_setting.ready')}</span>
 									</div>
 								) : s.model_progress[key as LocalModelType] ? (
 									<span className='text-xsm font-medium'>
@@ -158,7 +168,7 @@ const Index = () => {
 										) : (
 											<Fragment>
 												<ArrowDownToLine></ArrowDownToLine>
-												<span>Download</span>
+												<span>{t('model_setting.download')}</span>
 											</Fragment>
 										)}
 									</button>

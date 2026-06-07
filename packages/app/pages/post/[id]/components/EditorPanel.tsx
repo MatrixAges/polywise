@@ -2,6 +2,7 @@ import { Fragment, useState } from 'react'
 import { SparkleIcon } from '@phosphor-icons/react'
 import { Loader2 } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import Editor from '@/components/Editor'
 
@@ -13,6 +14,7 @@ import type { Editor as TiptapEditor } from '@tiptap/core'
 
 const EditorPanel = () => {
 	const x = useModel()
+	const { t } = useTranslation('post')
 	const [character_count, setCharacterCount] = useState(0)
 
 	if (!x.selected_post) {
@@ -25,7 +27,7 @@ const EditorPanel = () => {
 					text-sm text-std-400
 				'
 			>
-				Loading post...
+				{t('detail.loading_post_detail')}
 			</div>
 		)
 	}
@@ -52,7 +54,7 @@ const EditorPanel = () => {
 							'
 						>
 							<Loader2 className='mr-2 size-4 animate-spin'></Loader2>
-							Loading post...
+							{t('detail.loading_post_detail')}
 						</div>
 					) : (
 						<Editor
@@ -73,7 +75,9 @@ const EditorPanel = () => {
 									onClick={() =>
 										x.addReferenceToPostSessionInput(editor as TiptapEditor)
 									}
-									title='Add Reference'
+									title={t('detail.add_reference', {
+										defaultValue: 'Add Reference'
+									})}
 								>
 									<SparkleIcon className='size-3.5' weight='bold'></SparkleIcon>
 								</div>

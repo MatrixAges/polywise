@@ -2,11 +2,15 @@ import { useEffect, useRef } from 'react'
 import { observer } from 'mobx-react-lite'
 import { container } from 'tsyringe'
 
+import { usePageLocale } from '@/hooks'
+
 import { Header, List } from './components'
 import { Context } from './context'
 import Model from './model'
 
 const Index = () => {
+	usePageLocale('post')
+
 	const ref_model = useRef<Model | null>(null)
 
 	if (!ref_model.current) {

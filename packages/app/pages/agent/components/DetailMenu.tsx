@@ -12,6 +12,7 @@ import {
 	Wrench
 } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import { Switch } from '@/__shadcn__/components/ui/switch'
 import { alert } from '@/utils'
@@ -37,6 +38,7 @@ interface IProps {
 }
 
 const Index = ({ active_tab }: IProps) => {
+	const { t } = useTranslation('agent')
 	const {
 		export_agent_loading,
 		selected_agent,
@@ -53,8 +55,8 @@ const Index = ({ active_tab }: IProps) => {
 		}
 
 		const confirmed = await alert({
-			title: 'Remove Agent',
-			desc: 'Confirm remove this agent?'
+			title: t('detail.remove_title', { defaultValue: 'Remove Agent' }),
+			desc: t('detail.remove_desc', { defaultValue: 'Confirm remove this agent?' })
 		})
 
 		if (!confirmed) {
@@ -119,9 +121,13 @@ const Index = ({ active_tab }: IProps) => {
 						'
 					>
 						<div className='min-w-0'>
-							<div className='text-xs font-medium'>Frozen</div>
+							<div className='text-xs font-medium'>
+								{t('detail.frozen', { defaultValue: 'Frozen' })}
+							</div>
 							<div className='text-std-400 text-[11px]'>
-								{selected_agent.is_frozen ? 'Locked' : 'Writable'}
+								{selected_agent.is_frozen
+									? t('detail.locked', { defaultValue: 'Locked' })
+									: t('detail.writable', { defaultValue: 'Writable' })}
 							</div>
 						</div>
 						<Switch
@@ -139,7 +145,11 @@ const Index = ({ active_tab }: IProps) => {
 						onClick={() => void exportSelectedAgent()}
 					>
 						<HardDriveUpload className='size-3'></HardDriveUpload>
-						<span>{export_agent_loading ? 'Exporting...' : 'Export'}</span>
+						<span>
+							{export_agent_loading
+								? t('detail.exporting', { defaultValue: 'Exporting...' })
+								: t('detail.export', { defaultValue: 'Export' })}
+						</span>
 					</button>
 					<button
 						className='icon_button small'

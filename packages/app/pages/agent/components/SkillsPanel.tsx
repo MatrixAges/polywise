@@ -1,4 +1,5 @@
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import {
 	Combobox,
@@ -19,6 +20,7 @@ import CallLogPanel from './CallLogPanel'
 import type { ISkillOption } from '../types'
 
 const Index = () => {
+	const { t } = useTranslation('agent')
 	const {
 		can_edit_selected_agent_behavior,
 		skill_options,
@@ -65,10 +67,10 @@ const Index = () => {
 						{selected_items.map(item => (
 							<ComboboxChip key={item.value}>{item.label}</ComboboxChip>
 						))}
-						<ComboboxChipsInput placeholder='Search and select skills for agent' />
+						<ComboboxChipsInput placeholder={t('skills.placeholder')} />
 					</ComboboxChips>
 					<ComboboxContent anchor={ref_anchor}>
-						<ComboboxEmpty>No skills found.</ComboboxEmpty>
+						<ComboboxEmpty>{t('skills.empty')}</ComboboxEmpty>
 						<ComboboxList>
 							{(item: ISkillOption) => (
 								<ComboboxItem value={item} key={item.value}>
@@ -89,7 +91,7 @@ const Index = () => {
 				<CallLogPanel
 					available_dates={skill_log_available_dates}
 					date={skill_log_date}
-					empty_text='No skill call logs for this date.'
+					empty_text={t('skills.log_empty')}
 					has_more={skill_log_has_more}
 					items={skill_log_items}
 					loading={skill_log_loading}

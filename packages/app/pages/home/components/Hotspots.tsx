@@ -2,6 +2,7 @@ import { cloneElement, useRef } from 'react'
 import dayjs from 'dayjs'
 import { observer } from 'mobx-react-lite'
 import { ActivityCalendar } from 'react-activity-calendar'
+import { useTranslation } from 'react-i18next'
 
 import { useSize, useTheme } from '@/hooks'
 
@@ -84,6 +85,7 @@ const toCalendarData = (cells: Array<HomeHeatmapCell>) => {
 
 const Index = () => {
 	const x = useModel()
+	const { t } = useTranslation('home')
 	const theme = useTheme()
 	const calendar_ref = useRef<HTMLDivElement>(null)
 	const calendar_width = useSize(() => calendar_ref.current!, 'width') as number | undefined
@@ -146,9 +148,14 @@ const Index = () => {
 					border-t border-border-light
 				'
 			>
-				<div>{`${total_activities} activities in the ${x.activity_heatmap_summary}`}</div>
+				<div>
+					{t('common.activities_summary', {
+						count: total_activities,
+						summary: x.activity_heatmap_summary
+					})}
+				</div>
 				<div className='flex items-center gap-2'>
-					<span>Less</span>
+					<span>{t('common.less')}</span>
 					{([0, 1, 2, 3, 4] as const).map(level => (
 						<span
 							className={`
@@ -158,7 +165,7 @@ const Index = () => {
 							key={`legend-${level}`}
 						></span>
 					))}
-					<span>More</span>
+					<span>{t('common.more')}</span>
 				</div>
 			</div>
 		</div>

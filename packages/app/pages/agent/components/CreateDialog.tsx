@@ -1,5 +1,6 @@
 import { Keyboard, Sparkles } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/__shadcn__/components/ui/button'
 import {
@@ -17,6 +18,7 @@ import { Tabs } from '@/components'
 import { useModel } from '../context'
 
 const Index = () => {
+	const { t } = useTranslation('agent')
 	const {
 		create_dialog_open,
 		create_agent_mode,
@@ -37,8 +39,8 @@ const Index = () => {
 	const next_name = create_agent_name.trim()
 	const next_role = create_agent_role.trim()
 	const create_mode_items = [
-		{ key: 'auto', title: 'Auto', Icon: Sparkles },
-		{ key: 'input', title: 'Input', Icon: Keyboard }
+		{ key: 'auto', title: t('create.auto'), Icon: Sparkles },
+		{ key: 'input', title: t('create.input'), Icon: Keyboard }
 	] as const
 
 	return (
@@ -64,11 +66,11 @@ const Index = () => {
 					}}
 				>
 					<DialogHeader>
-						<DialogTitle>Create Agent</DialogTitle>
+						<DialogTitle>{t('create.title')}</DialogTitle>
 						<DialogDescription>
 							{create_agent_mode === 'auto'
-								? "Describe this agent's purpose in one sentence. The system will generate its role, prompt, soul, identity, and memory from that sentence."
-								: 'Enter the basic agent info manually. Name, role, and description are set here, and the remaining fields stay empty.'}
+								? t('create.auto_desc')
+								: t('create.input_desc')}
 						</DialogDescription>
 					</DialogHeader>
 					{create_agent_mode === 'auto' ? (
@@ -77,12 +79,10 @@ const Index = () => {
 								autoFocus
 								value={create_agent_purpose}
 								maxLength={120}
-								placeholder='Example: Break complex product requests into clear execution plans'
+								placeholder={t('create.purpose_placeholder')}
 								onChange={event => setCreateAgentPurpose(event.target.value)}
 							></Input>
-							<div className='text-std-400 text-xs'>
-								Role will be generated and kept within 20 characters.
-							</div>
+							<div className='text-std-400 text-xs'>{t('create.role_hint')}</div>
 						</div>
 					) : (
 						<div className='flex flex-col gap-3'>
@@ -90,25 +90,22 @@ const Index = () => {
 								autoFocus
 								value={create_agent_name}
 								maxLength={60}
-								placeholder='Agent name'
+								placeholder={t('create.name_placeholder')}
 								onChange={event => setCreateAgentName(event.target.value)}
 							></Input>
 							<div className='flex flex-col gap-2'>
 								<Input
 									value={create_agent_role}
 									maxLength={20}
-									placeholder='Role, e.g. Product Lead'
+									placeholder={t('create.role_placeholder')}
 									onChange={event => setCreateAgentRole(event.target.value)}
 								></Input>
-								<div className='text-std-400 text-xs'>
-									Required. Keep it under 20 characters; fewer than two words is
-									recommended.
-								</div>
+								<div className='text-std-400 text-xs'>{t('create.role_desc')}</div>
 							</div>
 							<Input
 								value={create_agent_description}
 								maxLength={160}
-								placeholder='Short description'
+								placeholder={t('create.description_placeholder')}
 								onChange={event => setCreateAgentDescription(event.target.value)}
 							></Input>
 						</div>
@@ -126,7 +123,7 @@ const Index = () => {
 								onClick={() => setCreateDialogOpen(false)}
 								disabled={create_agent_loading}
 							>
-								Cancel
+								{t('create.cancel')}
 							</Button>
 							<Button
 								type='submit'
@@ -138,7 +135,7 @@ const Index = () => {
 								}
 							>
 								{create_agent_loading && <Spinner className='size-3.5'></Spinner>}
-								{create_agent_loading ? 'Creating...' : 'Create'}
+								{create_agent_loading ? t('create.creating') : t('create.create')}
 							</Button>
 						</div>
 					</DialogFooter>

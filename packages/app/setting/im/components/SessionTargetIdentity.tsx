@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next'
+
 import EntityAvatar from './EntityAvatar'
 
 import type { AgentItem, GroupItem } from '../model'
@@ -9,6 +11,7 @@ interface IProps {
 }
 
 const Index = ({ agent, group, compact = false }: IProps) => {
+	const { t } = useTranslation('setting')
 	const avatar_size = compact ? 32 : 36
 	const agent_photo = agent?.photo as Uint8Array | null | undefined
 	const group_photo = group?.photo as Uint8Array | null | undefined
@@ -60,7 +63,7 @@ const Index = ({ agent, group, compact = false }: IProps) => {
 							truncate
 						'
 					>
-						{agent.role || 'No role'}
+						{agent.role || t('im.no_role')}
 					</div>
 				</div>
 			</div>
@@ -109,7 +112,7 @@ const Index = ({ agent, group, compact = false }: IProps) => {
 							truncate
 						'
 					>
-						{group.description || `${group.agents.length} agents`}
+						{group.description || t('im.agents_count', { count: group.agents.length })}
 					</div>
 				</div>
 			</div>
@@ -124,7 +127,7 @@ const Index = ({ agent, group, compact = false }: IProps) => {
 					: ['px-3 py-2', 'rounded-2xl', 'text-std-400 text-sm', 'bg-muted/35', 'border'].join(' ')
 			}
 		>
-			Nothing selected yet
+			{t('im.nothing_selected')}
 		</div>
 	)
 }

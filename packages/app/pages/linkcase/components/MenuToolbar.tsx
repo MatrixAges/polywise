@@ -1,5 +1,6 @@
 import { CheckCircle, PencilLine, Search } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import { Input } from '@/__shadcn__/components/ui/input'
 import {
@@ -16,6 +17,7 @@ import { useModel } from '../context'
 
 const Index = () => {
 	const x = useModel()
+	const { t } = useTranslation('linkcase')
 
 	return (
 		<div
@@ -49,7 +51,7 @@ const Index = () => {
 				<Input
 					className='h-8 bg-transparent! pl-6'
 					value={x.search_keyword}
-					placeholder='Search links'
+					placeholder={t('toolbar.search_placeholder')}
 					onChange={event => x.setSearchKeyword(event.target.value)}
 				></Input>
 				<Select value={x.filter_type} onValueChange={value => value && x.setFilterType(value)}>
@@ -69,9 +71,9 @@ const Index = () => {
 					</SelectTrigger>
 					<SelectContent align='end'>
 						<SelectGroup>
-							<SelectLabel>Filter</SelectLabel>
-							<SelectItem value='title'>title</SelectItem>
-							<SelectItem value='link'>link</SelectItem>
+							<SelectLabel>{t('toolbar.filter')}</SelectLabel>
+							<SelectItem value='title'>{t('toolbar.title')}</SelectItem>
+							<SelectItem value='link'>{t('toolbar.link')}</SelectItem>
 						</SelectGroup>
 					</SelectContent>
 				</Select>

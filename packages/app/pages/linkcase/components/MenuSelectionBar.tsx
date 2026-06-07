@@ -1,4 +1,5 @@
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/__shadcn__/components/ui/button'
 
@@ -6,6 +7,7 @@ import { useModel } from '../context'
 
 const Index = () => {
 	const x = useModel()
+	const { t } = useTranslation('linkcase')
 
 	if (!x.select_mode || (!x.has_checked_items && x.items.length === 0)) {
 		return null
@@ -28,9 +30,11 @@ const Index = () => {
 					text-std-400 text-xs
 				'
 			>
-				{x.has_checked_items ? `${x.checked_count} selected` : 'Select links'}
+				{x.has_checked_items
+					? t('selection.selected', { count: x.checked_count })
+					: t('selection.select_links')}
 				<Button variant='ghost' size='xs' onClick={x.toggleCheckAllLoadedLinks}>
-					{x.all_loaded_checked ? 'Unselect all' : 'Select all'}
+					{x.all_loaded_checked ? t('selection.unselect_all') : t('selection.select_all')}
 				</Button>
 			</div>
 			{x.has_checked_items && (
@@ -46,10 +50,12 @@ const Index = () => {
 						}
 						onClick={() => void x.fetchCheckedLinks()}
 					>
-						{x.selection_fetch_submit_loading ? 'Submitting' : 'Fetch'}
+						{x.selection_fetch_submit_loading
+							? t('selection.submitting')
+							: t('selection.fetch')}
 					</Button>
 					<Button className='flex-1' variant='outline' size='xs' onClick={x.clearCheckedLinks}>
-						Clear
+						{t('selection.clear')}
 					</Button>
 					<Button
 						className='flex-1'
@@ -58,7 +64,7 @@ const Index = () => {
 						disabled={x.selection_remove_loading}
 						onClick={() => void x.removeCheckedLinks()}
 					>
-						{x.selection_remove_loading ? 'Removing' : 'Delete'}
+						{x.selection_remove_loading ? t('selection.removing') : t('selection.delete')}
 					</Button>
 				</div>
 			)}

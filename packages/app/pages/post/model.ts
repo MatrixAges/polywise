@@ -271,7 +271,14 @@ export default class Index {
 			return
 		}
 
-		if (!window.confirm(`Delete post "${item.title || 'Untitled'}"?`)) {
+		if (
+			!window.confirm(
+				$t('confirm.delete_post', {
+					ns: 'post',
+					title: item.title || $t('detail.untitled_post', { ns: 'post' })
+				})
+			)
+		) {
 			return
 		}
 
@@ -282,7 +289,7 @@ export default class Index {
 			await rpc.post.remove.mutate({ id: item.id })
 			this.removeListItem(target_tab, item.id)
 			this.menu_target_index = -1
-			toast.success('Post removed.')
+			toast.success($t('toast.post_removed', { ns: 'post' }))
 		} finally {
 			if (this.removing_post_id === item.id) {
 				this.removing_post_id = ''
@@ -311,7 +318,11 @@ export default class Index {
 				}))
 			}
 
-			toast.success(result.queued ? 'Extract queued.' : 'Extract completed.')
+			toast.success(
+				result.queued
+					? $t('toast.extract_queued', { ns: 'post' })
+					: $t('toast.extract_completed', { ns: 'post' })
+			)
 		} finally {
 			if (this.extracting_post_id === item.id) {
 				this.extracting_post_id = ''

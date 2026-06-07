@@ -1,5 +1,6 @@
 import { Archive, ArrowDownToLine, BrushCleaning, Layers2, PackageOpen } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import {
 	Select,
@@ -32,6 +33,7 @@ type Props = Pick<
 
 const Index = (props: Props) => {
 	const x = useModel()
+	const { t } = useTranslation('components')
 	const RightArchiveIcon = props.archived ? PackageOpen : Archive
 
 	return (
@@ -68,7 +70,7 @@ const Index = (props: Props) => {
 						</SelectTrigger>
 						<SelectContent className='w-[150px]' align='start'>
 							<SelectGroup>
-								<SelectLabel>Audit Mode</SelectLabel>
+								<SelectLabel>{t('session.input.audit_mode')}</SelectLabel>
 								{audit_modes.map(item => (
 									<SelectItem value={item.value} key={item.value}>
 										{item.label}
@@ -95,7 +97,7 @@ const Index = (props: Props) => {
 					</SelectTrigger>
 					<SelectContent className='w-[150px]' align='start'>
 						<SelectGroup>
-							<SelectLabel>Submit Mode</SelectLabel>
+							<SelectLabel>{t('session.input.submit_mode')}</SelectLabel>
 							{submit_modes.map(item => (
 								<SelectItem value={item.value} key={item.value}>
 									{item.label}
@@ -104,13 +106,13 @@ const Index = (props: Props) => {
 						</SelectGroup>
 					</SelectContent>
 				</Select>
-				<Tooltip title='Clear'>
+				<Tooltip title={t('session.input.clear')}>
 					<div className='icon_button h-5 w-5' onClick={props.clear}>
 						<BrushCleaning className='stroke-std-400 h-[12px] w-[12px]'></BrushCleaning>
 					</div>
 				</Tooltip>
 				<Show visible={props.archived}>
-					<Tooltip title='Unarchive'>
+					<Tooltip title={t('session.input.unarchive')}>
 						<div className='icon_button h-5 w-5' onClick={props.unarchive}>
 							<RightArchiveIcon className='stroke-std-400 h-[12px] w-[12px]'></RightArchiveIcon>
 						</div>
@@ -118,17 +120,17 @@ const Index = (props: Props) => {
 				</Show>
 			</div>
 			<div className='flex gap-1'>
-				<Tooltip title='Context'>
+				<Tooltip title={t('session.input.context')}>
 					<div className='icon_button h-5 w-5' onClick={props.toggleContextModal}>
 						<Layers2 className='stroke-std-400 h-[12px] w-[12px]'></Layers2>
 					</div>
 				</Tooltip>
-				<Tooltip title='Scroll to bottom'>
+				<Tooltip title={t('session.input.scroll_to_bottom')}>
 					<div className='icon_button h-5 w-5' onClick={props.scrollToBottom}>
 						<ArrowDownToLine className='stroke-std-400 h-[12px] w-[12px]'></ArrowDownToLine>
 					</div>
 				</Tooltip>
-				<Tooltip title='Archive'>
+				<Tooltip title={t('session.input.archive')}>
 					<div className='icon_button h-5 w-5' onClick={props.archive}>
 						<Archive className='stroke-std-400 h-[12px] w-[12px]'></Archive>
 					</div>

@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next'
+
 import { ContextMenuContent, ContextMenuItem, ContextMenuSeparator } from '@/__shadcn__/components/ui/context-menu'
 import { useModel } from '@/pages/session/context'
 
@@ -10,15 +12,16 @@ interface IProps {
 const Index = (props: IProps) => {
 	const { session_item } = props
 	const { onRenameSession, removeSession } = useModel()
+	const { t } = useTranslation('session')
 
 	return (
 		<ContextMenuContent>
 			<ContextMenuItem onClick={() => onRenameSession(session_item.id, session_item.title)}>
-				Rename
+				{t('project.rename')}
 			</ContextMenuItem>
 			<ContextMenuSeparator />
 			<ContextMenuItem variant='destructive' onClick={() => removeSession(session_item.id)}>
-				Delete
+				{t('project.delete')}
 			</ContextMenuItem>
 		</ContextMenuContent>
 	)

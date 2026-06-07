@@ -1,9 +1,11 @@
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import { useModel } from '../context'
 
 const Index = () => {
 	const x = useModel()
+	const { t } = useTranslation('home')
 
 	return (
 		<div className='flex flex-col gap-3'>
@@ -16,7 +18,7 @@ const Index = () => {
 					border-l-2 border-std-500
 				'
 			>
-				Token Usage
+				{t('sections.token_usage')}
 			</div>
 			<div className='flex flex-col'>
 				<div className='border-border-light grid grid-cols-4 border'>
@@ -71,7 +73,7 @@ const Index = () => {
 						border border-border-light border-t-0
 					'
 				>
-					<div className='text-std-400 text-xs font-medium uppercase'>Top models</div>
+					<div className='text-std-400 text-xs font-medium uppercase'>{t('common.top_models')}</div>
 					<div className='gap-1.5'>
 						{x.top_models.map(item => (
 							<div
@@ -106,7 +108,7 @@ const Index = () => {
 						border border-border-light border-t-0
 					'
 				>
-					<div className='text-std-400 text-xs font-medium uppercase'>Providers</div>
+					<div className='text-std-400 text-xs font-medium uppercase'>{t('common.providers')}</div>
 					<div className='gap-1.5 font-mono'>
 						{x.top_providers.map(item => (
 							<div

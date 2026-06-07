@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useToggle } from 'ahooks'
 import { MessageCircleQuestionMark } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/__shadcn__/components/ui/button'
 import { Input } from '@/__shadcn__/components/ui/input'
@@ -10,6 +11,7 @@ import type { IPropsQuestion } from '../types'
 const Index = (props: IPropsQuestion) => {
 	const { streaming, input, output, answer } = props
 	const { question, options, multiple } = input
+	const { t } = useTranslation('components')
 
 	const [selected, setSelected] = useState<Array<string>>([])
 	const [custom_value, setCustomValue] = useState('')
@@ -68,7 +70,9 @@ const Index = (props: IPropsQuestion) => {
 				onClick={toggle}
 			>
 				<MessageCircleQuestionMark className='text-std-400 mr-2 inline-block size-3'></MessageCircleQuestionMark>
-				<span className='text-muted-foreground group-hover/header:text-foreground mr-2'>question</span>
+				<span className='text-muted-foreground group-hover/header:text-foreground mr-2'>
+					{t('session.question.label')}
+				</span>
 				<span
 					className='
 						wrap-break-word
@@ -77,7 +81,7 @@ const Index = (props: IPropsQuestion) => {
 					'
 				>
 					{question}
-					{multiple ? ' (Multiple)' : ''}
+					{multiple ? ` (${t('session.question.multiple')})` : ''}
 				</span>
 			</div>
 			{open && (
@@ -125,7 +129,7 @@ const Index = (props: IPropsQuestion) => {
 					{(!disabled || (disabled && typeof value === 'string')) && (
 						<Input
 							className='bg-card border-none text-sm focus-visible:ring-0'
-							placeholder='Type your answer...'
+							placeholder={t('session.question.placeholder')}
 							disabled={disabled}
 							value={custom_value}
 							onChange={e => setCustomValue(e.target.value)}
@@ -138,7 +142,7 @@ const Index = (props: IPropsQuestion) => {
 							disabled={!custom_value && selected.length === 0}
 							onClick={handleSubmit}
 						>
-							Submit
+							{t('session.question.submit')}
 						</Button>
 					)}
 				</div>

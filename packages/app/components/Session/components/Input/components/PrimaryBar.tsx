@@ -1,6 +1,7 @@
 import { PauseIcon, PlayIcon } from '@phosphor-icons/react'
 import { Maximize } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import {
 	Select,
@@ -22,6 +23,7 @@ type Props = Pick<IPropsInput, 'mode' | 'setMode' | 'show_session_mode_select' |
 
 const Index = (props: Props) => {
 	const x = useModel()
+	const { t } = useTranslation('components')
 	const Icon = props.streaming ? PauseIcon : PlayIcon
 
 	return (
@@ -59,7 +61,7 @@ const Index = (props: Props) => {
 					</SelectTrigger>
 					<SelectContent className='w-[120px]' alignItemWithTrigger={false} side='top'>
 						<SelectGroup>
-							<SelectLabel>Effort</SelectLabel>
+							<SelectLabel>{t('session.input.effort')}</SelectLabel>
 							{effort_modes.map(item => (
 								<SelectItem value={item.value} key={item.value}>
 									{item.label}
@@ -89,7 +91,7 @@ const Index = (props: Props) => {
 						</SelectTrigger>
 						<SelectContent className='w-[120px]' alignItemWithTrigger={false} side='top'>
 							<SelectGroup>
-								<SelectLabel>Mode</SelectLabel>
+								<SelectLabel>{t('session.input.mode')}</SelectLabel>
 								{session_modes.map(item => (
 									<SelectItem value={item.value} key={item.value}>
 										{item.label}

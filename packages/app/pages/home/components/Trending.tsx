@@ -1,5 +1,6 @@
 import { Activity, Sparkles } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 import { CartesianGrid, Line, LineChart, Tooltip, XAxis, YAxis } from 'recharts'
 
 import { ChartContainer, ChartTooltipContent } from '@/__shadcn__/components/ui/chart'
@@ -64,6 +65,7 @@ const InlineLegend = (props: {
 
 const Index = () => {
 	const x = useModel()
+	const { t } = useTranslation('home')
 	const token_legend_items = getLegendItems(token_trend_config, [
 		'input_tokens',
 		'output_tokens',
@@ -87,7 +89,7 @@ const Index = () => {
 					border-l-2 border-std-500
 				'
 			>
-				Trending
+				{t('sections.trending')}
 			</div>
 			<div className='flex flex-col'>
 				<div
@@ -133,7 +135,7 @@ const Index = () => {
 						>
 							<div className='flex flex-col gap-0.5 text-xs'>
 								<div className='text-std-400 font-medium uppercase'>
-									Token throughput
+									{t('trending.token_throughput')}
 								</div>
 								<div className='text-std-300'>{x.token_trend_summary}</div>
 							</div>
@@ -199,7 +201,7 @@ const Index = () => {
 						>
 							<div className='flex flex-col gap-0.5 text-xs'>
 								<div className='text-std-400 font-medium uppercase'>
-									Workspace Activity
+									{t('trending.workspace_activity')}
 								</div>
 								<div className='text-std-300'>{x.activity_trend_summary}</div>
 							</div>

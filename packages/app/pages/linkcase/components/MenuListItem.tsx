@@ -1,5 +1,6 @@
 import { CircleCheck, CircleDashed, CircleSlash, CircleX, Clock3, Globe, LoaderCircle } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import { Tooltip } from '@/components'
 
@@ -45,6 +46,7 @@ interface IProps {
 
 const Index = ({ item, index }: IProps) => {
 	const x = useModel()
+	const { t } = useTranslation('linkcase')
 	const favicon_src = getLinkFaviconSrc(item.favicon)
 	const selected = x.selected_id === item.id
 	const status_icon = status_icon_map[item.status]
@@ -112,7 +114,7 @@ const Index = ({ item, index }: IProps) => {
 				<div className='text-std-400/60 truncate text-xs'>{item.url}</div>
 			</div>
 			{item.status !== 'none' && status_icon && (
-				<Tooltip title={item.status}>
+				<Tooltip title={t(`status.${item.status}`)}>
 					<div
 						className='
 							flex shrink-0

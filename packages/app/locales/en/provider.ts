@@ -58,6 +58,7 @@ export default {
 			model_id: 'model ID',
 			model_name: 'model name',
 			model_type: 'model type',
+			select_type: 'Select type',
 			output_fee: 'output fee',
 			input_fee: 'input fee',
 			per_million: ' (per million)',
@@ -76,5 +77,8 @@ export default {
 			disabled_provider: 'Disabled Providers',
 			empty: 'No providers disabled'
 		}
+	},
+	coding_plan: {
+		title: 'Coding Plan'
 	}
 }

@@ -1,5 +1,6 @@
 import { Container, Server } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import EntityAvatar from '@/setting/im/components/EntityAvatar'
 import getToolIcon from '@/utils/getToolIcon'
@@ -19,6 +20,7 @@ interface Props {
 
 const Index: FC<Props> = ({ items, loading, activeIndex, onSelect }) => {
 	const x = useModel()
+	const { t } = useTranslation('components')
 	let cursor_index = -1
 
 	return (
@@ -41,7 +43,9 @@ const Index: FC<Props> = ({ items, loading, activeIndex, onSelect }) => {
 				'
 			>
 				<span className='text-std-600'>{x.mention_heading}</span>
-				<span className='text-std-400'>{x.active_mention?.query || 'Type to search'}</span>
+				<span className='text-std-400'>
+					{x.active_mention?.query || t('session.mention.type_to_search')}
+				</span>
 			</div>
 			<div
 				className='
@@ -53,7 +57,7 @@ const Index: FC<Props> = ({ items, loading, activeIndex, onSelect }) => {
 				'
 			>
 				{loading ? (
-					<div className='text-std-400 px-3 py-2 text-sm'>Loading...</div>
+					<div className='text-std-400 px-3 py-2 text-sm'>{t('session.mention.loading')}</div>
 				) : items.length > 0 ? (
 					x.mention_sections.map((section, section_index) => (
 						<div className='flex flex-col gap-0.5' key={section.key}>
@@ -135,10 +139,11 @@ const Index: FC<Props> = ({ items, loading, activeIndex, onSelect }) => {
 													{item.label}
 												</span>
 												<span className='text-std-500 shrink-0 truncate text-xs'>
-													{item.role || 'Agent'}
+													{item.role || t('session.mention.agent')}
 												</span>
 												<span className='text-std-300 flex-1 truncate text-xs'>
-													{item.desc || 'No description'}
+													{item.desc ||
+														t('session.mention.no_description')}
 												</span>
 											</div>
 										) : item.type === 'tool' ? (
@@ -160,7 +165,8 @@ const Index: FC<Props> = ({ items, loading, activeIndex, onSelect }) => {
 													{item.label}
 												</span>
 												<span className='text-std-400 flex-1 truncate text-xs'>
-													{item.desc || 'No description'}
+													{item.desc ||
+														t('session.mention.no_description')}
 												</span>
 												<span
 													className='
@@ -172,7 +178,7 @@ const Index: FC<Props> = ({ items, loading, activeIndex, onSelect }) => {
 																border-border-light
 															'
 												>
-													Tool
+													{t('session.mention.tool')}
 												</span>
 											</div>
 										) : item.type === 'mcp' ? (
@@ -190,7 +196,8 @@ const Index: FC<Props> = ({ items, loading, activeIndex, onSelect }) => {
 													{item.label}
 												</span>
 												<span className='text-std-400 flex-1 truncate text-xs'>
-													{item.desc || 'No description'}
+													{item.desc ||
+														t('session.mention.no_description')}
 												</span>
 												<span
 													className='
@@ -203,8 +210,8 @@ const Index: FC<Props> = ({ items, loading, activeIndex, onSelect }) => {
 																'
 												>
 													{item.transport_type === 'remote'
-														? 'Remote MCP'
-														: 'Local MCP'}
+														? t('session.mention.remote_mcp')
+														: t('session.mention.local_mcp')}
 												</span>
 											</div>
 										) : (
@@ -222,7 +229,8 @@ const Index: FC<Props> = ({ items, loading, activeIndex, onSelect }) => {
 													{item.label}
 												</span>
 												<span className='text-std-400 flex-1 truncate text-xs'>
-													{item.desc || 'No description'}
+													{item.desc ||
+														t('session.mention.no_description')}
 												</span>
 												<span
 													className='
@@ -244,7 +252,7 @@ const Index: FC<Props> = ({ items, loading, activeIndex, onSelect }) => {
 						</div>
 					))
 				) : (
-					<div className='text-std-400 px-3 py-2 text-sm'>No matches found.</div>
+					<div className='text-std-400 px-3 py-2 text-sm'>{t('session.mention.no_matches')}</div>
 				)}
 			</div>
 		</div>

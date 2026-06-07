@@ -1,4 +1,5 @@
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/__shadcn__/components/ui/button'
 import { Input } from '@/__shadcn__/components/ui/input'
@@ -9,12 +10,17 @@ import { useModel } from '../context'
 
 const Index = () => {
 	const x = useModel()
+	const { t } = useTranslation('linkcase')
 	const editing = x.add_dialog_mode === 'edit' && Boolean(x.editing_link_id)
-	const title = editing ? 'Edit Link' : 'Add Link'
-	const desc = editing
-		? 'Update the link metadata and optional cleaned content.'
-		: 'Create a Linkcase entry manually. Favicon is fetched from the website automatically.'
-	const submit_text = x.add_submit_loading ? (editing ? 'Saving...' : 'Adding...') : editing ? 'Save' : 'Add'
+	const title = editing ? t('dialog.edit_title') : t('dialog.add_title')
+	const desc = editing ? t('dialog.edit_desc') : t('dialog.add_desc')
+	const submit_text = x.add_submit_loading
+		? editing
+			? t('dialog.saving')
+			: t('dialog.adding')
+		: editing
+			? t('dialog.save')
+			: t('dialog.add')
 
 	return (
 		<Dialog
@@ -26,15 +32,15 @@ const Index = () => {
 		>
 			<div className='flex flex-col gap-4'>
 				<div className='flex flex-col gap-2'>
-					<div className='text-sm font-medium'>Title</div>
+					<div className='text-sm font-medium'>{t('dialog.title')}</div>
 					<Input
 						value={x.add_title}
-						placeholder='Optional. Defaults to the link URL.'
+						placeholder={t('dialog.title_placeholder')}
 						onChange={event => x.setAddTitle(event.target.value)}
 					></Input>
 				</div>
 				<div className='flex flex-col gap-2'>
-					<div className='text-sm font-medium'>Link</div>
+					<div className='text-sm font-medium'>{t('dialog.link')}</div>
 					<Input
 						value={x.add_url}
 						placeholder='https://example.com/article'
@@ -43,15 +49,13 @@ const Index = () => {
 				</div>
 				<div className='flex flex-col gap-2'>
 					<div className='flex items-center justify-between gap-3'>
-						<div className='text-sm font-medium'>Content</div>
-						<div className='text-std-400 text-xs'>
-							Optional. Paste cleaned main content directly.
-						</div>
+						<div className='text-sm font-medium'>{t('dialog.content')}</div>
+						<div className='text-std-400 text-xs'>{t('dialog.content_hint')}</div>
 					</div>
 					<Textarea
 						className='min-h-[240px] focus-within:ring-0!'
 						value={x.add_content}
-						placeholder='If you already have the main body content, paste it here. Leave empty to add the link only.'
+						placeholder={t('dialog.content_placeholder')}
 						onChange={event => x.setAddContent(event.target.value)}
 					></Textarea>
 				</div>
@@ -73,7 +77,7 @@ const Index = () => {
 						disabled={x.add_submit_loading}
 						onClick={() => x.setAddDialogOpen(false)}
 					>
-						Cancel
+						{t('dialog.cancel')}
 					</Button>
 					<Button
 						className='w-20'

@@ -1,5 +1,6 @@
 import { Loader2, Plus, Search, X } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/__shadcn__/components/ui/button'
 import { Input } from '@/__shadcn__/components/ui/input'
@@ -9,6 +10,7 @@ import { useModel } from '../context'
 
 const Index = () => {
 	const x = useModel()
+	const { t } = useTranslation(['post', 'agent', 'linkcase'])
 
 	return (
 		<div className='flex h-full flex-col overflow-hidden'>
@@ -26,7 +28,10 @@ const Index = () => {
 					></Search>
 					<Input
 						className='h-8 pl-6'
-						placeholder='Search article to relate'
+						placeholder={t('detail.search_related', {
+							ns: 'post',
+							defaultValue: 'Search article to relate'
+						})}
 						value={x.related_search}
 						onChange={event => x.setRelatedSearch(event.target.value)}
 					></Input>
@@ -68,10 +73,12 @@ const Index = () => {
 								'
 							>
 								<Loader2 className='size-4 animate-spin'></Loader2>
-								Searching...
+								{t('detail.searching', { ns: 'post', defaultValue: 'Searching...' })}
 							</div>
 						) : x.related_search_list.length === 0 ? (
-							<div className='text-std-400 p-1.5 text-sm'>No matches.</div>
+							<div className='text-std-400 p-1.5 text-sm'>
+								{t('detail.no_matches', { ns: 'post', defaultValue: 'No matches.' })}
+							</div>
 						) : (
 							x.related_search_list.map(item => (
 								<div
@@ -87,10 +94,12 @@ const Index = () => {
 								>
 									<div className='min-w-0'>
 										<div className='truncate text-sm font-medium'>
-											{item.title || 'Untitled article'}
+											{item.title ||
+												t('content.untitled_article', { ns: 'agent' })}
 										</div>
 										<div className='text-std-400 line-clamp-2 text-xs'>
-											{item.content_preview || 'Empty content'}
+											{item.content_preview ||
+												t('list.empty_content', { ns: 'post' })}
 										</div>
 									</div>
 									<Button
@@ -100,7 +109,7 @@ const Index = () => {
 										onClick={() => void x.addRelatedArticle(item.id)}
 									>
 										<Plus className='size-3.5'></Plus>
-										<span>Add</span>
+										<span>{t('dialog.add', { ns: 'linkcase' })}</span>
 									</Button>
 								</div>
 							))
@@ -127,10 +136,15 @@ const Index = () => {
 						'
 					>
 						<Loader2 className='size-4 animate-spin'></Loader2>
-						Loading related articles...
+						{t('detail.loading_related', {
+							ns: 'post',
+							defaultValue: 'Loading related articles...'
+						})}
 					</div>
 				) : x.related_articles.length === 0 ? (
-					<div className='text-std-400 px-1.5 py-4 text-sm'>No related articles.</div>
+					<div className='text-std-400 px-1.5 py-4 text-sm'>
+						{t('detail.no_related', { ns: 'post', defaultValue: 'No related articles.' })}
+					</div>
 				) : (
 					<div className='flex flex-col gap-2 pb-3'>
 						{x.related_articles.map(item => (
@@ -155,7 +169,8 @@ const Index = () => {
 										target='_blank'
 										rel='noreferrer'
 									>
-										{item.title || 'Untitled article'}
+										{item.title ||
+											t('content.untitled_article', { ns: 'agent' })}
 									</a>
 								</div>
 								<div className='flex'>
@@ -169,7 +184,8 @@ const Index = () => {
 										target='_blank'
 										rel='noreferrer'
 									>
-										{item.content_preview || 'Empty content'}
+										{item.content_preview ||
+											t('list.empty_content', { ns: 'post' })}
 									</a>
 								</div>
 								<div className='mt-2 flex items-center justify-between'>

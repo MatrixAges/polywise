@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 import { match } from 'ts-pattern'
 
 import Editor from '@/components/Editor'
@@ -15,16 +16,10 @@ import ToolsPanel from './ToolsPanel'
 import type { AgentTab } from '../types'
 
 type DetailTab = Exclude<AgentTab, 'sessions'>
-type TextTab = keyof typeof placeholder_map
+type TextTab = 'prompt' | 'soul' | 'identity' | 'memory'
 
-const placeholder_map = {
-	prompt: 'How agent run',
-	soul: "What's in agent's mind",
-	identity: 'Who agent is',
-	memory: 'Core memory'
-} as const
-
-const isTextTab = (tab: DetailTab): tab is TextTab => tab in placeholder_map
+const isTextTab = (tab: DetailTab): tab is TextTab =>
+	tab === 'prompt' || tab === 'soul' || tab === 'identity' || tab === 'memory'
 
 const TextTabEditor = ({
 	agent_id,
@@ -68,6 +63,7 @@ const TextTabEditor = ({
 
 const Index = () => {
 	const { selected_agent, current_tab, submitEditableField } = useModel()
+	const { t } = useTranslation('agent')
 	const active_tab: DetailTab = current_tab === 'sessions' ? 'info' : current_tab
 	const field_value =
 		selected_agent && isTextTab(active_tab)
@@ -83,7 +79,7 @@ const Index = () => {
 					text-sm text-std-400
 				'
 			>
-				Select an agent
+				{t('detail.select_agent')}
 			</div>
 		)
 	}

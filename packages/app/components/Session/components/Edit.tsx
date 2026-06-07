@@ -3,6 +3,7 @@ import { PatchDiff } from '@pierre/diffs/react'
 import { useToggle } from 'ahooks'
 import { ChevronDown, Columns2, PencilLine, SquareMenu } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import { useGlobal } from '@/context'
 
@@ -14,6 +15,7 @@ const Index = (props: IPropsEdit) => {
 	const file_name = file_path.split(/[\\/]/).pop() || file_path
 
 	const global = useGlobal()
+	const { t } = useTranslation('components')
 	const [open, { toggle, set }] = useToggle(false)
 	const [unified, { toggle: toggleStyle }] = useToggle(true)
 
@@ -50,7 +52,7 @@ const Index = (props: IPropsEdit) => {
 			>
 				<div className='flex items-center gap-2'>
 					<PencilLine className='text-std-400 size-3'></PencilLine>
-					<span className='group-data-[open=true]:font-medium'>edit_file_tool</span>
+					<span className='group-data-[open=true]:font-medium'>{t('session.edit_file_tool')}</span>
 				</div>
 				<div
 					className='
@@ -118,7 +120,7 @@ const Index = (props: IPropsEdit) => {
 						</div>
 					)}
 					{!is_error && !has_patch && !streaming && (
-						<div className='text-muted-foreground text-sm'>No changes</div>
+						<div className='text-muted-foreground text-sm'>{t('session.no_changes')}</div>
 					)}
 				</div>
 			)}

@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { CheckCircle2, ExternalLink, LoaderCircle, QrCode, ShieldEllipsis } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import { Badge } from '@/__shadcn__/components/ui/badge'
 import { Button } from '@/__shadcn__/components/ui/button'
@@ -19,13 +20,13 @@ import { Spinner } from '@/__shadcn__/components/ui/spinner'
 import { useModel } from '../context'
 
 const statusLabel = (x: ReturnType<typeof useModel>) => {
-	if (x.wechat_qr_status === 'scanned') return 'Waiting confirmation'
-	if (x.wechat_qr_status === 'needs_verify_code') return 'Needs code'
-	if (x.wechat_qr_status === 'already_connected') return 'Already connected'
-	if (x.wechat_qr_status === 'error') return 'Error'
-	if (x.wechat_qr_loading || x.wechat_qr_polling) return 'Connecting'
-	if (x.wechatConnectionReady) return 'Connected'
-	return 'Not connected'
+	if (x.wechat_qr_status === 'scanned') return 'im.wechat_status_waiting_confirmation'
+	if (x.wechat_qr_status === 'needs_verify_code') return 'im.wechat_status_needs_code'
+	if (x.wechat_qr_status === 'already_connected') return 'im.wechat_status_already_connected'
+	if (x.wechat_qr_status === 'error') return 'im.wechat_status_error'
+	if (x.wechat_qr_loading || x.wechat_qr_polling) return 'im.wechat_status_connecting'
+	if (x.wechatConnectionReady) return 'im.wechat_status_connected'
+	return 'im.wechat_status_not_connected'
 }
 
 const statusVariant = (x: ReturnType<typeof useModel>) => {
@@ -36,6 +37,7 @@ const statusVariant = (x: ReturnType<typeof useModel>) => {
 
 const Index = () => {
 	const x = useModel()
+	const { t } = useTranslation('setting')
 	const last_opened_qr_url_ref = useRef('')
 
 	useEffect(() => {
@@ -68,13 +70,10 @@ const Index = () => {
 				>
 					<div className='flex min-w-0 flex-col gap-3'>
 						<div className='flex flex-wrap items-center gap-2'>
-							<div className='text-sm font-medium'>WeChat ClawBot</div>
-							<Badge variant={statusVariant(x)}>{statusLabel(x)}</Badge>
+							<div className='text-sm font-medium'>{t('im.wechat_title')}</div>
+							<Badge variant={statusVariant(x)}>{t(statusLabel(x))}</Badge>
 						</div>
-						<div className='text-std-500 text-sm'>
-							Use a Hermes-style QR authorization flow. Once connected, an IM account is
-							created automatically and the current form is filled from the saved account.
-						</div>
+						<div className='text-std-500 text-sm'>{t('im.wechat_desc')}</div>
 						<div className='grid gap-2 text-sm sm:grid-cols-2'>
 							<div
 								className='
@@ -84,8 +83,12 @@ const Index = () => {
 									border
 								'
 							>
-								<div className='text-std-400 text-xs'>Connect flow</div>
-								<div className='mt-1 font-medium'>Scan QR and confirm on phone</div>
+								<div className='text-std-400 text-xs'>
+									{t('im.wechat_connect_flow')}
+								</div>
+								<div className='mt-1 font-medium'>
+									{t('im.wechat_connect_flow_desc')}
+								</div>
 							</div>
 							<div
 								className='
@@ -95,7 +98,9 @@ const Index = () => {
 									border
 								'
 							>
-								<div className='text-std-400 text-xs'>Current endpoint</div>
+								<div className='text-std-400 text-xs'>
+									{t('im.wechat_current_endpoint')}
+								</div>
 								<div className='mt-1 font-medium break-all'>
 									{x.form.wechat_api_base_url || 'https://ilinkai.weixin.qq.com'}
 								</div>
@@ -111,7 +116,7 @@ const Index = () => {
 								'
 							>
 								<CheckCircle2 className='size-4' />
-								<span>Credentials are ready for this form.</span>
+								<span>{t('im.wechat_credentials_ready')}</span>
 							</div>
 						) : null}
 					</div>
@@ -126,7 +131,9 @@ const Index = () => {
 						) : (
 							<QrCode className='size-4' />
 						)}
-						<span>{x.wechatConnectionReady ? 'Reconnect' : 'Connect WeChat'}</span>
+						<span>
+							{x.wechatConnectionReady ? t('im.wechat_reconnect') : t('im.wechat_connect')}
+						</span>
 					</Button>
 				</div>
 
@@ -142,13 +149,10 @@ const Index = () => {
 						<div className='flex items-start gap-3'>
 							<ShieldEllipsis className='text-std-400 mt-0.5 size-4' />
 							<div className='flex flex-col gap-1'>
-								<FieldTitle className='text-base'>How it works</FieldTitle>
-								<FieldDescription>
-									Click connect to generate a QR login session. The QR code opens in
-									a browser window. After you scan and confirm on your phone, the
-									account is created automatically and the form is filled with the
-									required `bot token`, `account id`, and API endpoint.
-								</FieldDescription>
+								<FieldTitle className='text-base'>
+									{t('im.wechat_how_it_works')}
+								</FieldTitle>
+								<FieldDescription>{t('im.wechat_how_it_works_desc')}</FieldDescription>
 							</div>
 						</div>
 					</div>
@@ -158,15 +162,15 @@ const Index = () => {
 			<Dialog open={x.wechat_qr_dialog_open} onOpenChange={open => !open && x.closeWechatQrDialog()}>
 				<DialogContent className='w-[560px] max-w-none!'>
 					<DialogHeader>
-						<DialogTitle>Connect WeChat</DialogTitle>
+						<DialogTitle>{t('im.wechat_dialog_title')}</DialogTitle>
 						<DialogDescription>
-							{x.wechat_qr_message || 'Waiting for QR code...'}
+							{x.wechat_qr_message || t('im.wechat_waiting_qr')}
 						</DialogDescription>
 					</DialogHeader>
 
 					<div className='flex flex-col gap-4'>
 						<div className='flex items-center gap-2'>
-							<Badge variant={statusVariant(x)}>{statusLabel(x)}</Badge>
+							<Badge variant={statusVariant(x)}>{t(statusLabel(x))}</Badge>
 							{x.wechat_qr_polling ? (
 								<LoaderCircle className='text-std-400 size-4 animate-spin' />
 							) : null}
@@ -186,11 +190,10 @@ const Index = () => {
 								<QrCode className='text-std-400 mt-0.5 size-4 shrink-0' />
 								<div className='flex flex-col gap-1'>
 									<div className='text-sm font-medium'>
-										QR code opens in your browser
+										{t('im.wechat_qr_browser_title')}
 									</div>
 									<div className='text-std-500 text-sm'>
-										Inline rendering is skipped here. A new browser window is
-										opened automatically when a QR session starts or refreshes.
+										{t('im.wechat_qr_browser_desc')}
 									</div>
 								</div>
 							</div>
@@ -203,11 +206,9 @@ const Index = () => {
 									disabled={!x.wechat_qr_code_url}
 								>
 									<ExternalLink className='size-4' />
-									<span>Open QR Window</span>
+									<span>{t('im.wechat_open_qr_window')}</span>
 								</Button>
-								<div className='text-std-400 text-xs'>
-									If nothing opened, allow pop-ups for this app and try again.
-								</div>
+								<div className='text-std-400 text-xs'>{t('im.wechat_popup_hint')}</div>
 							</div>
 						</div>
 
@@ -222,10 +223,11 @@ const Index = () => {
 									border
 								'
 							>
-								<div className='text-sm font-medium'>Phone verification code</div>
+								<div className='text-sm font-medium'>
+									{t('im.wechat_phone_code_title')}
+								</div>
 								<div className='text-std-500 text-sm'>
-									If WeChat shows a numeric verification challenge after scanning,
-									enter the code from your phone here.
+									{t('im.wechat_phone_code_desc')}
 								</div>
 								<div className='flex items-center gap-2'>
 									<Input
@@ -234,7 +236,7 @@ const Index = () => {
 										onChange={event => {
 											x.wechat_qr_verify_code = event.target.value
 										}}
-										placeholder='Enter digits from your phone'
+										placeholder={t('im.wechat_phone_code_placeholder')}
 									/>
 								</div>
 							</div>
@@ -242,9 +244,7 @@ const Index = () => {
 					</div>
 
 					<DialogFooter className='items-center justify-between sm:justify-between'>
-						<div className='text-std-400 text-xs'>
-							After the connection succeeds, the IM account is saved automatically.
-						</div>
+						<div className='text-std-400 text-xs'>{t('im.wechat_saved_hint')}</div>
 						<div className='flex items-center gap-2'>
 							{x.wechat_qr_status === 'needs_verify_code' ? (
 								<Button
@@ -255,7 +255,7 @@ const Index = () => {
 									{x.wechat_qr_verify_loading ? (
 										<Spinner className='size-4' />
 									) : null}
-									<span>Submit Code</span>
+									<span>{t('im.wechat_submit_code')}</span>
 								</Button>
 							) : null}
 							<Button
@@ -263,7 +263,7 @@ const Index = () => {
 								variant='outline'
 								onClick={() => x.closeWechatQrDialog()}
 							>
-								Close
+								{t('im.close')}
 							</Button>
 						</div>
 					</DialogFooter>

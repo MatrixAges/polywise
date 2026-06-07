@@ -1,5 +1,6 @@
 import { Database, Loader2, Trash2 } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router'
 
 import { Button } from '@/__shadcn__/components/ui/button'
@@ -16,6 +17,7 @@ import { useModel } from '../context'
 
 const Index = () => {
 	const x = useModel()
+	const { t } = useTranslation('post')
 	const navigate = useNavigate()
 	const menu_target = x.menu_target_item
 
@@ -30,7 +32,7 @@ const Index = () => {
 					text-center
 				'
 			>
-				No posts yet.
+				{t('list.no_posts')}
 			</div>
 		)
 	}
@@ -69,7 +71,7 @@ const Index = () => {
 									line-clamp-1
 								'
 								>
-									{item.title || 'Untitled post'}
+									{item.title || t('detail.untitled_post')}
 								</div>
 								<div
 									className='
@@ -78,7 +80,7 @@ const Index = () => {
 									line-clamp-2
 								'
 								>
-									{item.content_preview || 'Empty content'}
+									{item.content_preview || t('list.empty_content')}
 								</div>
 								<div
 									className='
@@ -90,7 +92,11 @@ const Index = () => {
 								>
 									<span>{fromNow(item.updated_at)}</span>
 									{item.related_article_count > 0 && (
-										<span>{item.related_article_count} related</span>
+										<span>
+											{t('list.related', {
+												count: item.related_article_count
+											})}
+										</span>
 									)}
 								</div>
 							</div>
@@ -110,7 +116,7 @@ const Index = () => {
 								{x.current_list_state.loading ? (
 									<Loader2 className='size-3.5 animate-spin'></Loader2>
 								) : null}
-								<span>Load more</span>
+								<span>{t('list.load_more')}</span>
 							</Button>
 						</div>
 					) : null}
@@ -127,7 +133,7 @@ const Index = () => {
 						) : (
 							<Database></Database>
 						)}
-						<span>{menu_target.is_pipelined ? 'Re-extract' : 'Extract'}</span>
+						<span>{menu_target.is_pipelined ? t('list.reextract') : t('list.extract')}</span>
 					</ContextMenuItem>
 					<ContextMenuSeparator></ContextMenuSeparator>
 					<ContextMenuItem
@@ -140,7 +146,7 @@ const Index = () => {
 						) : (
 							<Trash2></Trash2>
 						)}
-						<span>Remove</span>
+						<span>{t('list.remove')}</span>
 					</ContextMenuItem>
 				</ContextMenuContent>
 			) : null}

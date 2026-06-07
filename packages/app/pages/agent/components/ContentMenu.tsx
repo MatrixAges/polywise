@@ -1,15 +1,18 @@
 import { Loader2, Paperclip, Plus } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/__shadcn__/components/ui/button'
 import { Tabs } from '@/components'
 
-import { article_tab_items } from '../articleTabItems'
+import { getArticleTabItems } from '../articleTabItems'
 import { useModel } from '../context'
 
 import type { ArticleForType } from '../types'
 
 const Index = () => {
+	const { t: raw_t } = useTranslation(['agent', 'post', 'linkcase'])
+	const t = raw_t as unknown as (key: string, options?: Record<string, unknown>) => string
 	const {
 		article_items,
 		article_for,
@@ -25,6 +28,7 @@ const Index = () => {
 		openRelatedArticlesDialog,
 		loadMorePrivateArticles
 	} = useModel()
+	const article_tab_items = getArticleTabItems(t)
 
 	return (
 		<div
@@ -74,13 +78,13 @@ const Index = () => {
 								'
 							>
 								<Loader2 className='size-4 animate-spin'></Loader2>
-								Loading articles...
+								{t('content.loading_articles', { ns: 'agent' })}
 							</div>
 						) : article_items.length === 0 ? (
 							<div className='text-std-400 px-3 py-4 text-sm'>
 								{can_manage_private_articles
-									? 'No private articles yet.'
-									: 'No private articles.'}
+									? t('content.empty_manageable', { ns: 'agent' })
+									: t('content.empty_readonly', { ns: 'agent' })}
 							</div>
 						) : (
 							<div className='flex flex-col gap-1 pb-2'>
@@ -104,7 +108,8 @@ const Index = () => {
 										onClick={() => setSelectedArticle(item.id)}
 									>
 										<div className='line-clamp-2 text-sm font-medium'>
-											{item.title || 'Untitled article'}
+											{item.title ||
+												t('content.untitled_article', { ns: 'agent' })}
 										</div>
 									</button>
 								))}
@@ -122,8 +127,8 @@ const Index = () => {
 											) : null}
 											<span>
 												{article_loading_more
-													? 'Loading...'
-													: 'Load more'}
+													? t('content.loading', { ns: 'agent' })
+													: t('content.load_more', { ns: 'agent' })}
 											</span>
 										</Button>
 									</div>
@@ -146,7 +151,7 @@ const Index = () => {
 								onClick={openCreatePrivateArticleDialog}
 							>
 								<Plus className='size-3'></Plus>
-								<span>Private</span>
+								<span>{t('content.private', { ns: 'agent' })}</span>
 							</button>
 							<button
 								className='click_button small text-xs'
@@ -154,7 +159,7 @@ const Index = () => {
 								onClick={openRelatedArticlesDialog}
 							>
 								<Paperclip className='size-3'></Paperclip>
-								<span>Related</span>
+								<span>{t('content.related', { ns: 'agent' })}</span>
 							</button>
 						</div>
 					) : null}

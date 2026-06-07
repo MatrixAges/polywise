@@ -3,6 +3,7 @@ import { DndContext, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { useMemoizedFn } from 'ahooks'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import { ContextMenu, ContextMenuTrigger } from '@/__shadcn__/components/ui/context-menu'
 
@@ -21,6 +22,7 @@ interface IMenuTarget {
 }
 
 const Index = () => {
+	const { t } = useTranslation('session')
 	const {
 		pins,
 		sessions,
@@ -187,7 +189,9 @@ const Index = () => {
 									onClick={() => loadMore()}
 									disabled={loading || loading_more}
 								>
-									{loading || loading_more ? 'Loading...' : 'Show more'}
+									{loading || loading_more
+										? t('menu.loading')
+										: t('menu.show_more')}
 								</button>
 							)}
 						</div>

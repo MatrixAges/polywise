@@ -2,6 +2,7 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { ArrowDownToLine, GripVertical, SquareArrowOutUpRight } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import { Badge } from '@/__shadcn__/components/ui/badge'
 import { Button } from '@/__shadcn__/components/ui/button'
@@ -19,9 +20,9 @@ type ProviderCardProps = {
 }
 
 const getProviderStatusText = (provider: LinkcaseProvider) => {
-	if (!provider.installed) return 'Not installed'
-	if (provider.runtime_probe_deferred) return 'Check on refresh'
-	return provider.ready ? 'Ready' : 'Needs setup'
+	if (!provider.installed) return 'status_not_installed'
+	if (provider.runtime_probe_deferred) return 'status_check_on_refresh'
+	return provider.ready ? 'status_ready' : 'status_needs_setup'
 }
 
 const getProviderStatusVariant = (provider: LinkcaseProvider) => {
@@ -39,6 +40,7 @@ const getCheckStatusVariant = (status: LinkcaseProvider['checks'][number]['statu
 
 const Index = (props: ProviderCardProps) => {
 	const { provider, drag_disabled, installing_id, managing_action_id, onInstall, onManage } = props
+	const { t } = useTranslation('setting')
 	const { attributes, listeners, transform, transition, isDragging, setNodeRef } = useSortable({
 		id: provider.id,
 		disabled: drag_disabled
@@ -63,7 +65,7 @@ const Index = (props: ProviderCardProps) => {
 					<div className='flex flex-wrap items-center gap-2'>
 						<span className='font-medium'>{provider.name}</span>
 						<Badge variant={getProviderStatusVariant(provider)}>
-							{getProviderStatusText(provider)}
+							{t(`service_provider.${getProviderStatusText(provider)}`)}
 						</Badge>
 						<a
 							className='
@@ -74,7 +76,7 @@ const Index = (props: ProviderCardProps) => {
 							href={provider.docs_url}
 							target='_blank'
 						>
-							Installation docs
+							{t('service_provider.installation_docs')}
 						</a>
 					</div>
 					<div className='text-std-500 text-sm'>{provider.description}</div>
@@ -96,7 +98,11 @@ const Index = (props: ProviderCardProps) => {
 						) : (
 							<ArrowDownToLine className='size-4' />
 						)}
-						<span>{provider.installed ? 'Installed' : 'Install'}</span>
+						<span>
+							{provider.installed
+								? t('service_provider.installed')
+								: t('service_provider.install')}
+						</span>
 					</Button>
 					<button
 						type='button'
@@ -130,7 +136,7 @@ const Index = (props: ProviderCardProps) => {
 						{managing_action_id === 'crawl4ai:create_profile' ? (
 							<Spinner className='size-4' />
 						) : null}
-						<span>Create From Chrome</span>
+						<span>{t('service_provider.create_from_chrome')}</span>
 					</Button>
 					<Button
 						type='button'
@@ -146,7 +152,7 @@ const Index = (props: ProviderCardProps) => {
 						{managing_action_id === 'crawl4ai:recreate_profile' ? (
 							<Spinner className='size-4' />
 						) : null}
-						<span>Recreate Profile</span>
+						<span>{t('service_provider.recreate_profile')}</span>
 					</Button>
 				</div>
 			) : null}

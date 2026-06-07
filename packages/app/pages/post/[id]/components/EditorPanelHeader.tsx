@@ -1,5 +1,6 @@
 import { Database, Loader2, MessageCircleCheck, Save } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import { Input } from '@/__shadcn__/components/ui/input'
 
@@ -7,6 +8,7 @@ import { useModel } from '../context'
 
 const EditorPanelHeader = () => {
 	const x = useModel()
+	const { t } = useTranslation('post')
 
 	return (
 		<div className='h-9 px-3'>
@@ -20,14 +22,14 @@ const EditorPanelHeader = () => {
 						bg-transparent
 						focus:bg-transparent
 					'
-					placeholder='Untitled post'
+					placeholder={t('detail.untitled_post')}
 					value={x.draft_title}
 					onChange={event => x.setDraftTitle(event.target.value)}
 					onBlur={() => void x.saveCurrentPost({ silent: true })}
 				></Input>
 				<button
 					className={$cx('icon_button small', x.session_panel_open && 'text-std-800!')}
-					title='Toggle session panel'
+					title={t('detail.toggle_session_panel')}
 					onClick={() => x.toggleSessionPanel()}
 				>
 					<MessageCircleCheck className='size-3'></MessageCircleCheck>

@@ -6,6 +6,7 @@ import { container } from 'tsyringe'
 import { Button } from '@/__shadcn__/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/__shadcn__/components/ui/select'
 import { Fallback, TextTabs } from '@/components'
+import { usePageLocale } from '@/hooks'
 
 import {
 	Agent,
@@ -20,20 +21,14 @@ import {
 	Trending
 } from './components'
 import { Context } from './context'
-import Model, { home_report_period_items, home_stats_period_items } from './model'
+import Model, { getHomeReportPeriodItems, getHomeStatsPeriodItems } from './model'
 
 import type { HomeReportPeriod, HomeStatsPeriod } from './types'
 
 type TopTabKey = 'stats' | 'agent' | 'memory' | 'report'
 
-const top_tab_items: Array<{ key: TopTabKey; title: string }> = [
-	{ key: 'stats', title: 'Stats' },
-	{ key: 'agent', title: 'Agent' },
-	{ key: 'memory', title: 'Memory' },
-	{ key: 'report', title: 'Report' }
-]
-
 const Index = () => {
+	const t_home = usePageLocale('home')
 	const ref_model = useRef<Model | null>(null)
 	const [active_tab, setActiveTab] = useState<TopTabKey>('stats')
 
@@ -42,7 +37,13 @@ const Index = () => {
 	}
 
 	const x = ref_model.current
-	const period_items = active_tab === 'report' ? home_report_period_items : home_stats_period_items
+	const top_tab_items: Array<{ key: TopTabKey; title: string }> = [
+		{ key: 'stats', title: t_home('tabs.stats') },
+		{ key: 'agent', title: t_home('tabs.agent') },
+		{ key: 'memory', title: t_home('tabs.memory') },
+		{ key: 'report', title: t_home('tabs.report') }
+	]
+	const period_items = active_tab === 'report' ? getHomeReportPeriodItems() : getHomeStatsPeriodItems()
 	const period_value = active_tab === 'report' ? x.report_period : x.stats_period
 
 	useEffect(() => {

@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next'
+
 import type { SourceUrlUIPart } from 'ai'
 
 export interface IProps {
@@ -6,10 +8,11 @@ export interface IProps {
 
 const Index = (props: IProps) => {
 	const { items } = props
+	const { t } = useTranslation('components')
 
 	return (
 		<div className='flex flex-col pt-2'>
-			<span className='mb-1 font-medium'>Sources: </span>
+			<span className='mb-1 font-medium'>{t('session.sources', { defaultValue: 'Sources' })}: </span>
 			<div className='flex flex-wrap gap-1.5 underline'>
 				{items.map((item, index) => (
 					<a href={item.url} target='_blank' key={index}>

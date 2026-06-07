@@ -1,5 +1,6 @@
 import { Loader2, Plus, Search, X } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/__shadcn__/components/ui/button'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/__shadcn__/components/ui/dialog'
@@ -8,12 +9,15 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/__shadcn__/components
 import { Tabs } from '@/components'
 import { getAppRouteHref } from '@/utils'
 
-import { article_tab_items } from '../articleTabItems'
+import { getArticleTabItems } from '../articleTabItems'
 import { useModel } from '../context'
 
 import type { ArticleForType } from '../types'
 
 const Index = () => {
+	const { t: raw_t } = useTranslation(['agent', 'post', 'linkcase'])
+	const t = raw_t as unknown as (key: string, options?: Record<string, unknown>) => string
+	const article_tab_items = getArticleTabItems(t)
 	const {
 		related_articles_dialog_open,
 		article_search,
@@ -38,7 +42,7 @@ const Index = () => {
 		<Dialog open={related_articles_dialog_open} onOpenChange={setRelatedArticlesDialogOpen}>
 			<DialogContent className='w-[640px] max-w-[calc(100vw-32px)]!'>
 				<DialogHeader>
-					<DialogTitle>Related Articles</DialogTitle>
+					<DialogTitle>{t('related_articles.title', { ns: 'agent' })}</DialogTitle>
 				</DialogHeader>
 				<div className='flex max-h-[80vh] flex-col overflow-hidden'>
 					<div className='px-0.5 py-1.5'>
@@ -59,7 +63,9 @@ const Index = () => {
 								></Search>
 								<Input
 									className='absolute inset-0 h-8 pl-6'
-									placeholder='Search article to relate'
+									placeholder={t('related_articles.search_placeholder', {
+										ns: 'agent'
+									})}
 									disabled={!can_mutate_selected_agent_articles}
 									value={article_search}
 									onChange={event => setArticleSearch(event.target.value)}
@@ -97,10 +103,12 @@ const Index = () => {
 										'
 									>
 										<Loader2 className='size-4 animate-spin'></Loader2>
-										Searching...
+										{t('related_articles.searching', { ns: 'agent' })}
 									</div>
 								) : article_search_list.length === 0 ? (
-									<div className='text-std-400 p-2 text-sm'>No matches.</div>
+									<div className='text-std-400 p-2 text-sm'>
+										{t('related_articles.no_matches', { ns: 'agent' })}
+									</div>
 								) : (
 									<div className='flex flex-col gap-1'>
 										{article_search_list.map(item => (
@@ -117,11 +125,18 @@ const Index = () => {
 											>
 												<div className='min-w-0'>
 													<div className='truncate text-sm font-medium'>
-														{item.title || 'Untitled article'}
+														{item.title ||
+															t(
+																'related_articles.untitled_article',
+																{ ns: 'agent' }
+															)}
 													</div>
 													<div className='text-std-400 line-clamp-2 text-xs'>
 														{item.content_preview ||
-															'Empty content'}
+															t(
+																'related_articles.empty_content',
+																{ ns: 'agent' }
+															)}
 													</div>
 													<div className='text-std-300 mt-1 text-[10px] uppercase'>
 														{item.for_type}
@@ -142,7 +157,11 @@ const Index = () => {
 													}
 												>
 													<Plus className='size-3.5'></Plus>
-													<span>Relate</span>
+													<span>
+														{t('related_articles.relate', {
+															ns: 'agent'
+														})}
+													</span>
 												</Button>
 											</div>
 										))}
@@ -163,10 +182,12 @@ const Index = () => {
 								'
 							>
 								<Loader2 className='size-4 animate-spin'></Loader2>
-								Loading related articles...
+								{t('related_articles.loading', { ns: 'agent' })}
 							</div>
 						) : related_article_items.length === 0 ? (
-							<div className='text-std-400 px-1.5 py-4 text-sm'>No related articles.</div>
+							<div className='text-std-400 px-1.5 py-4 text-sm'>
+								{t('related_articles.empty', { ns: 'agent' })}
+							</div>
 						) : (
 							<div className='flex flex-col gap-2 pb-3'>
 								{related_article_items.map(item => (
@@ -185,7 +206,10 @@ const Index = () => {
 												target='_blank'
 												rel='noreferrer'
 											>
-												{item.title || 'Untitled article'}
+												{item.title ||
+													t('related_articles.untitled_article', {
+														ns: 'agent'
+													})}
 											</a>
 										</div>
 										<div className='flex'>
@@ -195,7 +219,10 @@ const Index = () => {
 												target='_blank'
 												rel='noreferrer'
 											>
-												{item.content || 'Empty content'}
+												{item.content ||
+													t('related_articles.empty_content', {
+														ns: 'agent'
+													})}
 											</a>
 										</div>
 										<div className='mt-2 flex items-center justify-between'>
@@ -241,12 +268,16 @@ const Index = () => {
 								{related_article_loading_more ? (
 									<Loader2 className='size-3.5 animate-spin'></Loader2>
 								) : null}
-								<span>{related_article_loading_more ? 'Loading...' : 'Load more'}</span>
+								<span>
+									{related_article_loading_more
+										? t('content.loading', { ns: 'agent' })
+										: t('related_articles.load_more', { ns: 'agent' })}
+								</span>
 							</Button>
 						) : null}
 					</div>
 					<Button variant='outline' onClick={() => setRelatedArticlesDialogOpen(false)}>
-						Close
+						{t('related_articles.close', { ns: 'agent' })}
 					</Button>
 				</DialogFooter>
 			</DialogContent>

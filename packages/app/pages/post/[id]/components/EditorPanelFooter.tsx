@@ -1,4 +1,5 @@
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/__shadcn__/components/ui/select'
 import { fromNow } from '@/utils'
@@ -14,6 +15,7 @@ type Props = {
 
 const EditorPanelFooter = ({ character_count }: Props) => {
 	const x = useModel()
+	const { t } = useTranslation('post')
 
 	if (!x.selected_post) {
 		return null
@@ -55,11 +57,11 @@ const EditorPanelFooter = ({ character_count }: Props) => {
 						))}
 					</SelectContent>
 				</Select>
-				<div>Updated {fromNow(x.selected_post.updated_at)}</div>
+				<div>{t('detail.updated', { value: fromNow(x.selected_post.updated_at) })}</div>
 			</div>
 			<div className='flex items-center gap-3'>
-				<span>{x.dirty ? 'Unsaved changes' : 'Saved'}</span>
-				<span>{character_count} characters</span>
+				<span>{x.dirty ? t('detail.unsaved_changes') : t('detail.saved')}</span>
+				<span>{t('detail.characters', { count: character_count })}</span>
 			</div>
 		</div>
 	)

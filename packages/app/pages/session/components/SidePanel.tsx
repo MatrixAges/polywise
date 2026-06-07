@@ -1,6 +1,7 @@
 import { useMemoizedFn } from 'ahooks'
 import { File, MessageCircleCheck, X } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import { FileTree, Tabs } from '@/components'
 
@@ -8,6 +9,7 @@ import { useModel } from '../context'
 
 const Index = () => {
 	const { content_tab, project_files, setSidePanelTab, closeFiles, setContentTab } = useModel()
+	const { t } = useTranslation('session')
 
 	const onSelectPath = useMemoizedFn(args => {
 		project_files.selectPath(args)
@@ -33,7 +35,7 @@ const Index = () => {
 					border-border-light border-b
 				'
 			>
-				<span className='text-sm font-medium'>Files</span>
+				<span className='text-sm font-medium'>{t('side_panel.files')}</span>
 				<div className='flex items-center'>
 					<Tabs
 						items={[

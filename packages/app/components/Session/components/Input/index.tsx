@@ -4,6 +4,7 @@ import { Markdown } from '@tiptap/markdown'
 import { useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import { useGlobal } from '@/context'
 
@@ -19,6 +20,7 @@ import type { IPropsInput } from '../../types'
 
 const Index = (props: IPropsInput) => {
 	const global = useGlobal()
+	const { t } = useTranslation('components')
 	const [x] = useState(() => new Model(props, global.setting))
 
 	x.sync(props, global.setting)
@@ -30,7 +32,7 @@ const Index = (props: IPropsInput) => {
 		extensions: [
 			Markdown,
 			Placeholder.configure({
-				placeholder: 'What needs to be done?'
+				placeholder: t('session.input.placeholder')
 			}),
 			SessionToken,
 			StarterKit

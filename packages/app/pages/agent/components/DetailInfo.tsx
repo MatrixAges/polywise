@@ -1,4 +1,5 @@
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import { useModel } from '../context'
 import AgentAvatar from './AgentAvatar'
@@ -13,6 +14,7 @@ interface IProps {
 
 const Index = ({ agent }: IProps) => {
 	const { edit_field_key, startEditField, cancelEditField, submitEditableField } = useModel()
+	const { t } = useTranslation('agent')
 
 	return (
 		<div className='flex w-full flex-col'>
@@ -55,7 +57,7 @@ const Index = ({ agent }: IProps) => {
 										class_name='text-std-400 text-sm! font-medium leading-4.5'
 										active
 										value={agent.role}
-										placeholder='Agent role'
+										placeholder={t('info.role_placeholder')}
 										max_length={20}
 										on_submit={value =>
 											submitEditableField({
@@ -85,7 +87,7 @@ const Index = ({ agent }: IProps) => {
 								class_name='text-std-400 text-sm! leading-4.5'
 								active
 								value={agent.description || ''}
-								placeholder='Add a short description for this agent'
+								placeholder={t('info.description_placeholder')}
 								max_length={60}
 								on_submit={value =>
 									submitEditableField({
@@ -102,7 +104,7 @@ const Index = ({ agent }: IProps) => {
 								type='button'
 								onClick={() => startEditField('description')}
 							>
-								{agent.description || 'Add a short description for this agent'}
+								{agent.description || t('info.description_placeholder')}
 							</button>
 						)}
 					</div>

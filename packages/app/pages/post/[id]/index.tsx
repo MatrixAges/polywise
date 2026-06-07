@@ -4,12 +4,15 @@ import { useParams } from 'react-router'
 import { container } from 'tsyringe'
 
 import { useGlobal } from '@/context'
+import { usePageLocale } from '@/hooks'
 
 import { EditorPanel, NotFound, SessionPanel, Sidebar } from './components'
 import { Context } from './context'
 import Model from './model'
 
 const Index = () => {
+	usePageLocale('post')
+
 	const params = useParams()
 	const global = useGlobal()
 	const route_post_id = params.id ?? ''

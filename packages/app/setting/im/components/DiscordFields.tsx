@@ -1,4 +1,5 @@
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import { Field, FieldContent, FieldDescription, FieldGroup, FieldTitle } from '@/__shadcn__/components/ui/field'
 import { Input } from '@/__shadcn__/components/ui/input'
@@ -9,13 +10,14 @@ import { useModel } from '../context'
 
 const Index = () => {
 	const x = useModel()
+	const { t } = useTranslation('setting')
 
 	return (
 		<FieldGroup className='gap-0'>
 			<Field className='items-center! py-3' orientation='horizontal'>
 				<FieldContent>
-					<FieldTitle className='text-base'>Bot Token</FieldTitle>
-					<FieldDescription>Discord bot token for gateway and API access</FieldDescription>
+					<FieldTitle className='text-base'>{t('im.discord_bot_token')}</FieldTitle>
+					<FieldDescription>{t('im.discord_bot_token_desc')}</FieldDescription>
 				</FieldContent>
 				<Input
 					className='max-w-[420px]'
@@ -26,10 +28,8 @@ const Index = () => {
 			</Field>
 			<Field className='items-center! py-3' orientation='horizontal'>
 				<FieldContent>
-					<FieldTitle className='text-base'>Require Mention</FieldTitle>
-					<FieldDescription>
-						Only respond in guild channels when mentioned or replied to
-					</FieldDescription>
+					<FieldTitle className='text-base'>{t('im.discord_require_mention')}</FieldTitle>
+					<FieldDescription>{t('im.discord_require_mention_desc')}</FieldDescription>
 				</FieldContent>
 				<Switch
 					checked={x.form.discord_require_mention}
@@ -38,8 +38,8 @@ const Index = () => {
 			</Field>
 			<Field className='items-start! py-3' orientation='horizontal'>
 				<FieldContent>
-					<FieldTitle className='text-base'>Allowed Guild IDs</FieldTitle>
-					<FieldDescription>One per line or comma-separated. Leave empty for all.</FieldDescription>
+					<FieldTitle className='text-base'>{t('im.discord_allowed_guild_ids')}</FieldTitle>
+					<FieldDescription>{t('im.discord_allowed_common_desc')}</FieldDescription>
 				</FieldContent>
 				<Textarea
 					className='min-h-[88px] max-w-[420px]'
@@ -50,8 +50,8 @@ const Index = () => {
 			</Field>
 			<Field className='items-start! py-3' orientation='horizontal'>
 				<FieldContent>
-					<FieldTitle className='text-base'>Allowed Channel IDs</FieldTitle>
-					<FieldDescription>One per line or comma-separated. Leave empty for all.</FieldDescription>
+					<FieldTitle className='text-base'>{t('im.discord_allowed_channel_ids')}</FieldTitle>
+					<FieldDescription>{t('im.discord_allowed_common_desc')}</FieldDescription>
 				</FieldContent>
 				<Textarea
 					className='min-h-[88px] max-w-[420px]'
@@ -62,8 +62,8 @@ const Index = () => {
 			</Field>
 			<Field className='items-start! py-3' orientation='horizontal'>
 				<FieldContent>
-					<FieldTitle className='text-base'>Allowed User IDs</FieldTitle>
-					<FieldDescription>One per line or comma-separated. Leave empty for all.</FieldDescription>
+					<FieldTitle className='text-base'>{t('im.discord_allowed_user_ids')}</FieldTitle>
+					<FieldDescription>{t('im.discord_allowed_common_desc')}</FieldDescription>
 				</FieldContent>
 				<Textarea
 					className='min-h-[88px] max-w-[420px]'

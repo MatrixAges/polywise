@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Plus, Search, X } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router'
 
 import { Button } from '@/__shadcn__/components/ui/button'
@@ -8,15 +9,18 @@ import { Input } from '@/__shadcn__/components/ui/input'
 import { TextTabs } from '@/components'
 
 import { useModel } from '../context'
-import { for_type_tab_items } from '../utils'
+import { getForTypeTabItems } from '../utils'
 
 import type { PostListTab } from '../types'
 
 const Index = () => {
 	const x = useModel()
+	const { t: raw_t } = useTranslation('post')
+	const t = raw_t as unknown as (key: string, options?: Record<string, unknown>) => string
 	const navigate = useNavigate()
 	const [search_open, setSearchOpen] = useState(() => !!x.current_search)
 	const is_search_open = search_open || !!x.current_search
+	const for_type_tab_items = getForTypeTabItems(t)
 
 	const closeSearch = () => {
 		x.setSearch('')
@@ -66,7 +70,7 @@ const Index = () => {
 								text-sm
 								placeholder:text-xs!
 							'
-							placeholder='Search articles'
+							placeholder={t('list.search_articles')}
 							value={x.current_search}
 							onChange={event => x.setSearch(event.target.value)}
 						></Input>
@@ -78,7 +82,7 @@ const Index = () => {
 								icon_button small
 							'
 							type='button'
-							title='Close search'
+							title={t('list.close_search')}
 							onClick={closeSearch}
 						>
 							<X className='size-3.5'></X>
@@ -89,7 +93,7 @@ const Index = () => {
 						className='h-6 w-6'
 						variant='secondary'
 						size='xs'
-						title='Search posts'
+						title={t('list.search_posts')}
 						onClick={() => setSearchOpen(true)}
 					>
 						<Search className='size-3.5'></Search>
@@ -100,7 +104,7 @@ const Index = () => {
 						className='h-6 w-6'
 						variant='default'
 						size='xs'
-						title='New post'
+						title={t('list.new_post')}
 						onClick={async () => {
 							const id = await x.createPost()
 

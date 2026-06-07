@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useMemoizedFn } from 'ahooks'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
 import { Button } from '@/__shadcn__/components/ui/button'
@@ -23,54 +24,56 @@ import { useForm } from '@/hooks'
 
 import type { AppConfig, AppPthinkConfig, AppReportConfig } from '@core/types'
 
-const pthink_idle_options = [
-	{ label: '10 min', value: '10' },
-	{ label: '20 min', value: '20' },
-	{ label: '30 min', value: '30' },
-	{ label: '45 min', value: '45' },
-	{ label: '60 min', value: '60' }
-]
-const pthink_cooldown_options = [
-	{ label: '10 min', value: '10' },
-	{ label: '15 min', value: '15' },
-	{ label: '30 min', value: '30' },
-	{ label: '60 min', value: '60' }
-]
-const pthink_message_threshold_options = [
-	{ label: '3 messages', value: '3' },
-	{ label: '6 messages', value: '6' },
-	{ label: '10 messages', value: '10' },
-	{ label: '15 messages', value: '15' },
-	{ label: '20 messages', value: '20' }
-]
 const default_report_time = '18:00'
 const normalizeReportTime = (value: string) =>
 	/^([01]?\d|2[0-3]):([0-5]\d)$/.test(value) ? value : default_report_time
-const report_weekday_options = [
-	{ label: 'Monday', value: 'mon' },
-	{ label: 'Tuesday', value: 'tue' },
-	{ label: 'Wednesday', value: 'wed' },
-	{ label: 'Thursday', value: 'thu' },
-	{ label: 'Friday', value: 'fri' },
-	{ label: 'Saturday', value: 'sat' },
-	{ label: 'Sunday', value: 'sun' }
-]
-const report_monthly_mode_options = [
-	{ label: 'Last day', value: 'last_day' },
-	{ label: 'Next month first day', value: 'next_month_first_day' }
-]
-const report_yearly_mode_options = [
-	{ label: 'Last day', value: 'last_day' },
-	{ label: 'Next year first day', value: 'next_year_first_day' }
-]
 
 const Index = () => {
 	const global = useGlobal()
+	const { t: raw_t } = useTranslation('setting')
+	const tt = raw_t as unknown as (key: string, options?: Record<string, unknown>) => string
 	const t = global.theme
 	const s = global.setting
 	const a = global.auth
 	const pthink = s.config?.pthink
 	const report = s.config?.report
+	const pthink_idle_options = [
+		{ label: tt('general.option_minutes', { count: 10 }), value: '10' },
+		{ label: tt('general.option_minutes', { count: 20 }), value: '20' },
+		{ label: tt('general.option_minutes', { count: 30 }), value: '30' },
+		{ label: tt('general.option_minutes', { count: 45 }), value: '45' },
+		{ label: tt('general.option_minutes', { count: 60 }), value: '60' }
+	]
+	const pthink_cooldown_options = [
+		{ label: tt('general.option_minutes', { count: 10 }), value: '10' },
+		{ label: tt('general.option_minutes', { count: 15 }), value: '15' },
+		{ label: tt('general.option_minutes', { count: 30 }), value: '30' },
+		{ label: tt('general.option_minutes', { count: 60 }), value: '60' }
+	]
+	const pthink_message_threshold_options = [
+		{ label: tt('general.option_messages', { count: 3 }), value: '3' },
+		{ label: tt('general.option_messages', { count: 6 }), value: '6' },
+		{ label: tt('general.option_messages', { count: 10 }), value: '10' },
+		{ label: tt('general.option_messages', { count: 15 }), value: '15' },
+		{ label: tt('general.option_messages', { count: 20 }), value: '20' }
+	]
+	const report_weekday_options = [
+		{ label: tt('general.option_monday'), value: 'mon' },
+		{ label: tt('general.option_tuesday'), value: 'tue' },
+		{ label: tt('general.option_wednesday'), value: 'wed' },
+		{ label: tt('general.option_thursday'), value: 'thu' },
+		{ label: tt('general.option_friday'), value: 'fri' },
+		{ label: tt('general.option_saturday'), value: 'sat' },
+		{ label: tt('general.option_sunday'), value: 'sun' }
+	]
+	const report_monthly_mode_options = [
+		{ label: tt('general.option_last_day'), value: 'last_day' },
+		{ label: tt('general.option_next_month_first_day'), value: 'next_month_first_day' }
+	]
+	const report_yearly_mode_options = [
+		{ label: tt('general.option_last_day'), value: 'last_day' },
+		{ label: tt('general.option_next_year_first_day'), value: 'next_year_first_day' }
+	]
 	const [bootstrap_password, setBootstrapPassword] = useState('')
 	const [bootstrap_confirm, setBootstrapConfirm] = useState('')
 	const [next_password, setNextPassword] = useState('')
@@ -148,7 +151,7 @@ const Index = () => {
 		)
 
 		await a.refreshStatus()
-		toast.success(enabled ? 'Auth enabled.' : 'Auth disabled.')
+		toast.success(enabled ? tt('general.toast_auth_enabled') : tt('general.toast_auth_disabled'))
 	})
 
 	const updatePageBridgeEnabled = useMemoizedFn(async (enabled: boolean) => {
@@ -160,7 +163,7 @@ const Index = () => {
 			true
 		)
 
-		toast.success(enabled ? 'Page bridge enabled.' : 'Page bridge disabled.')
+		toast.success(enabled ? tt('general.toast_page_bridge_enabled') : tt('general.toast_page_bridge_disabled'))
 	})
 
 	const updatePromptFullInject = useMemoizedFn(async (enabled: boolean) => {
@@ -172,17 +175,21 @@ const Index = () => {
 			true
 		)
 
-		toast.success(enabled ? 'Prompt full injection enabled.' : 'Prompt full injection disabled.')
+		toast.success(
+			enabled
+				? tt('general.toast_prompt_full_injection_enabled')
+				: tt('general.toast_prompt_full_injection_disabled')
+		)
 	})
 
 	const submitBootstrapPassword = useMemoizedFn(async () => {
 		if (bootstrap_password.length < 8) {
-			toast.error('Password must be at least 8 characters.')
+			toast.error(tt('general.toast_password_too_short'))
 			return
 		}
 
 		if (bootstrap_password !== bootstrap_confirm) {
-			toast.error('Passwords do not match.')
+			toast.error(tt('general.toast_password_mismatch'))
 			return
 		}
 
@@ -190,7 +197,7 @@ const Index = () => {
 			await a.bootstrapPassword(bootstrap_password)
 			setBootstrapPassword('')
 			setBootstrapConfirm('')
-			toast.success('Password configured. You can now sign in.')
+			toast.success(tt('general.toast_password_configured'))
 		} catch (error) {
 			toast.error(error instanceof Error ? error.message : String(error))
 		}
@@ -198,12 +205,12 @@ const Index = () => {
 
 	const submitPasswordChange = useMemoizedFn(async () => {
 		if (next_password.length < 8) {
-			toast.error('New password must be at least 8 characters.')
+			toast.error(tt('general.toast_new_password_too_short'))
 			return
 		}
 
 		if (next_password !== next_password_confirm) {
-			toast.error('Passwords do not match.')
+			toast.error(tt('general.toast_password_mismatch'))
 			return
 		}
 
@@ -211,7 +218,7 @@ const Index = () => {
 			await a.changePassword(next_password)
 			setNextPassword('')
 			setNextPasswordConfirm('')
-			toast.success('Password updated.')
+			toast.success(tt('general.toast_password_updated'))
 		} catch (error) {
 			toast.error(error instanceof Error ? error.message : String(error))
 		}
@@ -220,7 +227,7 @@ const Index = () => {
 	const submitLogout = useMemoizedFn(async () => {
 		try {
 			await a.logout()
-			toast.success('Logged out.')
+			toast.success(tt('general.toast_logged_out'))
 		} catch (error) {
 			toast.error(error instanceof Error ? error.message : String(error))
 		}
@@ -244,11 +251,8 @@ const Index = () => {
 						orientation='horizontal'
 					>
 						<FieldContent>
-							<FieldTitle className='text-base'>Theme</FieldTitle>
-							<FieldDescription>
-								Customize the visual interface, including color modes and system
-								synchronization
-							</FieldDescription>
+							<FieldTitle className='text-base'>{tt('general.theme')}</FieldTitle>
+							<FieldDescription>{tt('general.theme_desc')}</FieldDescription>
 						</FieldContent>
 						<Controller name='theme' control={control}>
 							<Select items={themes.map(item => ({ label: item, value: item }))}>
@@ -257,7 +261,7 @@ const Index = () => {
 								</SelectTrigger>
 								<SelectContent align='start'>
 									<SelectGroup>
-										<SelectLabel>Theme</SelectLabel>
+										<SelectLabel>{tt('general.theme_label')}</SelectLabel>
 										{themes.map(item => (
 											<SelectItem value={item} key={item}>
 												{item}
@@ -273,11 +277,8 @@ const Index = () => {
 				<FieldGroup className='gap-0'>
 					<Field className='items-center! py-3' orientation='horizontal'>
 						<FieldContent>
-							<FieldTitle className='text-base'>Page Bridge</FieldTitle>
-							<FieldDescription>
-								Allow the backend and page tools to observe and control the current app
-								page. Keep this off unless you need remote page control.
-							</FieldDescription>
+							<FieldTitle className='text-base'>{tt('general.page_bridge')}</FieldTitle>
+							<FieldDescription>{tt('general.page_bridge_desc')}</FieldDescription>
 						</FieldContent>
 						<Switch
 							checked={Boolean(s.config?.page_bridge_enabled)}
@@ -286,12 +287,10 @@ const Index = () => {
 					</Field>
 					<Field className='items-center! py-3' orientation='horizontal'>
 						<FieldContent>
-							<FieldTitle className='text-base'>Prompt Full Inject</FieldTitle>
-							<FieldDescription>
-								Automatically inject all detected prompt files from the session prompt
-								root into system prompt construction. When enabled, `prompt_tool` is
-								removed from runtime.
-							</FieldDescription>
+							<FieldTitle className='text-base'>
+								{tt('general.prompt_full_inject')}
+							</FieldTitle>
+							<FieldDescription>{tt('general.prompt_full_inject_desc')}</FieldDescription>
 						</FieldContent>
 						<Switch
 							checked={Boolean(s.config?.prompt_full_inject)}
@@ -301,11 +300,8 @@ const Index = () => {
 					<div className='bg-border-light my-2 h-px w-full'></div>
 					<Field className='items-center! py-3' orientation='horizontal'>
 						<FieldContent>
-							<FieldTitle className='text-base'>Auth</FieldTitle>
-							<FieldDescription>
-								Enable Better Auth password login for the standalone web runtime.
-								Electron keeps bypassing auth even when this is on.
-							</FieldDescription>
+							<FieldTitle className='text-base'>{tt('general.auth')}</FieldTitle>
+							<FieldDescription>{tt('general.auth_desc')}</FieldDescription>
 						</FieldContent>
 						<Switch
 							checked={Boolean(s.config?.auth?.enabled ?? a.status?.enabled)}
@@ -314,10 +310,12 @@ const Index = () => {
 					</Field>
 					<Field className='items-center! py-3' orientation='horizontal'>
 						<FieldContent>
-							<FieldTitle className='text-base'>Auth Runtime</FieldTitle>
+							<FieldTitle className='text-base'>{tt('general.auth_runtime')}</FieldTitle>
 							<FieldDescription>
-								Username is fixed to `{a.status?.username || 'polywiser'}`. Current
-								server platform is `{a.status?.platform || 'standalone'}`.
+								{tt('general.auth_runtime_desc', {
+									username: a.status?.username || 'polywiser',
+									platform: a.status?.platform || 'standalone'
+								})}
 							</FieldDescription>
 						</FieldContent>
 						<div
@@ -331,14 +329,14 @@ const Index = () => {
 						>
 							<div>
 								{a.status?.bootstrap_required
-									? 'Auth is enabled and no account is configured yet.'
+									? tt('general.auth_status_bootstrap')
 									: a.status?.has_account
-										? 'Auth account is configured.'
-										: 'Auth is currently disabled.'}
+										? tt('general.auth_status_ready')
+										: tt('general.auth_status_disabled')}
 							</div>
 							{a.status?.has_account && a.authenticated && (
 								<Button variant='outline' size='sm' onClick={() => void submitLogout()}>
-									Logout
+									{tt('general.logout')}
 								</Button>
 							)}
 						</div>
@@ -346,27 +344,30 @@ const Index = () => {
 					{a.status?.bootstrap_required && (
 						<Field className='items-start! py-3' orientation='horizontal'>
 							<FieldContent>
-								<FieldTitle className='text-base'>Set Initial Password</FieldTitle>
+								<FieldTitle className='text-base'>
+									{tt('general.set_initial_password')}
+								</FieldTitle>
 								<FieldDescription>
-									Create the only local auth account for username `
-									{a.status.username}`.
+									{tt('general.set_initial_password_desc', {
+										username: a.status.username
+									})}
 								</FieldDescription>
 							</FieldContent>
 							<div className='flex w-[380px] flex-col gap-2'>
 								<Input
 									type='password'
-									placeholder='New password'
+									placeholder={tt('general.new_password')}
 									value={bootstrap_password}
 									onChange={event => setBootstrapPassword(event.target.value)}
 								></Input>
 								<Input
 									type='password'
-									placeholder='Confirm password'
+									placeholder={tt('general.confirm_password')}
 									value={bootstrap_confirm}
 									onChange={event => setBootstrapConfirm(event.target.value)}
 								></Input>
 								<Button onClick={() => void submitBootstrapPassword()}>
-									Set Password
+									{tt('general.set_password')}
 								</Button>
 							</div>
 						</Field>
@@ -374,24 +375,26 @@ const Index = () => {
 					{a.status?.has_account && (
 						<Field className='items-start! py-3' orientation='horizontal'>
 							<FieldContent>
-								<FieldTitle className='text-base'>Change Password</FieldTitle>
+								<FieldTitle className='text-base'>
+									{tt('general.change_password')}
+								</FieldTitle>
 								<FieldDescription>
 									{a.canChangePassword
-										? 'Update the password for the fixed account.'
-										: 'Login is required in web mode before changing the password.'}
+										? tt('general.change_password_desc_ready')
+										: tt('general.change_password_desc_login')}
 								</FieldDescription>
 							</FieldContent>
 							<div className='flex w-[380px] flex-col gap-2'>
 								<Input
 									type='password'
-									placeholder='New password'
+									placeholder={tt('general.new_password')}
 									value={next_password}
 									onChange={event => setNextPassword(event.target.value)}
 									disabled={!a.canChangePassword}
 								></Input>
 								<Input
 									type='password'
-									placeholder='Confirm password'
+									placeholder={tt('general.confirm_password')}
 									value={next_password_confirm}
 									onChange={event => setNextPasswordConfirm(event.target.value)}
 									disabled={!a.canChangePassword}
@@ -400,7 +403,7 @@ const Index = () => {
 									disabled={!a.canChangePassword}
 									onClick={() => void submitPasswordChange()}
 								>
-									Change Password
+									{tt('general.change_password_action')}
 								</Button>
 							</div>
 						</Field>
@@ -410,19 +413,19 @@ const Index = () => {
 				<FieldGroup className='gap-0'>
 					<Field className='items-center! py-3' orientation='horizontal'>
 						<FieldContent>
-							<FieldTitle className='text-base'>Agent Export Directory</FieldTitle>
-							<FieldDescription>
-								Where exported `.papk` files are written. Default is Downloads folder.
-							</FieldDescription>
+							<FieldTitle className='text-base'>
+								{tt('general.agent_export_dir')}
+							</FieldTitle>
+							<FieldDescription>{tt('general.agent_export_dir_desc')}</FieldDescription>
 						</FieldContent>
 						<div className='flex w-[380px] items-center gap-2'>
 							<Input
 								value={s.config?.agent_export_dir || ''}
-								placeholder='Downloads'
+								placeholder={tt('general.downloads_placeholder')}
 								onChange={event => setAgentExportDir(event.target.value)}
 							></Input>
 							<Button variant='ghost' type='button' onClick={resetAgentExportDir}>
-								Reset
+								{tt('general.reset')}
 							</Button>
 						</div>
 					</Field>
@@ -431,10 +434,8 @@ const Index = () => {
 				<FieldGroup className='gap-0'>
 					<Field className='items-center! py-3' orientation='horizontal'>
 						<FieldContent>
-							<FieldTitle className='text-base'>Report</FieldTitle>
-							<FieldDescription>
-								Enable the existing report generation mechanism and report tool entry
-							</FieldDescription>
+							<FieldTitle className='text-base'>{tt('general.report')}</FieldTitle>
+							<FieldDescription>{tt('general.report_desc')}</FieldDescription>
 						</FieldContent>
 						<Switch
 							checked={Boolean(report?.enabled ?? true)}
@@ -443,10 +444,8 @@ const Index = () => {
 					</Field>
 					<Field className='items-center! py-3' orientation='horizontal'>
 						<FieldContent>
-							<FieldTitle className='text-base'>Daily Report</FieldTitle>
-							<FieldDescription>
-								Generate the day report automatically at the configured local time.
-							</FieldDescription>
+							<FieldTitle className='text-base'>{tt('general.daily_report')}</FieldTitle>
+							<FieldDescription>{tt('general.daily_report_desc')}</FieldDescription>
 						</FieldContent>
 						<div className='flex w-[380px] items-center gap-2'>
 							<Switch
@@ -467,10 +466,8 @@ const Index = () => {
 					</Field>
 					<Field className='items-center! py-3' orientation='horizontal'>
 						<FieldContent>
-							<FieldTitle className='text-base'>Weekly Report</FieldTitle>
-							<FieldDescription>
-								Choose the weekday and local time for weekly report generation.
-							</FieldDescription>
+							<FieldTitle className='text-base'>{tt('general.weekly_report')}</FieldTitle>
+							<FieldDescription>{tt('general.weekly_report_desc')}</FieldDescription>
 						</FieldContent>
 						<div className='flex w-[380px] items-center gap-2'>
 							<Switch
@@ -493,7 +490,7 @@ const Index = () => {
 								</SelectTrigger>
 								<SelectContent align='start'>
 									<SelectGroup>
-										<SelectLabel>Weekday</SelectLabel>
+										<SelectLabel>{tt('general.weekday_label')}</SelectLabel>
 										{report_weekday_options.map(item => (
 											<SelectItem value={item.value} key={item.value}>
 												{item.label}
@@ -516,10 +513,8 @@ const Index = () => {
 					</Field>
 					<Field className='items-center! py-3' orientation='horizontal'>
 						<FieldContent>
-							<FieldTitle className='text-base'>Monthly Report</FieldTitle>
-							<FieldDescription>
-								Run on the month&apos;s last day or on the next month&apos;s first day.
-							</FieldDescription>
+							<FieldTitle className='text-base'>{tt('general.monthly_report')}</FieldTitle>
+							<FieldDescription>{tt('general.monthly_report_desc')}</FieldDescription>
 						</FieldContent>
 						<div className='flex w-[380px] items-center gap-2'>
 							<Switch
@@ -542,7 +537,9 @@ const Index = () => {
 								</SelectTrigger>
 								<SelectContent align='start'>
 									<SelectGroup>
-										<SelectLabel>Monthly Mode</SelectLabel>
+										<SelectLabel>
+											{tt('general.monthly_mode_label')}
+										</SelectLabel>
 										{report_monthly_mode_options.map(item => (
 											<SelectItem value={item.value} key={item.value}>
 												{item.label}
@@ -565,10 +562,8 @@ const Index = () => {
 					</Field>
 					<Field className='items-center! py-3' orientation='horizontal'>
 						<FieldContent>
-							<FieldTitle className='text-base'>Yearly Report</FieldTitle>
-							<FieldDescription>
-								Run on the year&apos;s last day or on the next year&apos;s first day.
-							</FieldDescription>
+							<FieldTitle className='text-base'>{tt('general.yearly_report')}</FieldTitle>
+							<FieldDescription>{tt('general.yearly_report_desc')}</FieldDescription>
 						</FieldContent>
 						<div className='flex w-[380px] items-center gap-2'>
 							<Switch
@@ -591,7 +586,7 @@ const Index = () => {
 								</SelectTrigger>
 								<SelectContent align='start'>
 									<SelectGroup>
-										<SelectLabel>Yearly Mode</SelectLabel>
+										<SelectLabel>{tt('general.yearly_mode_label')}</SelectLabel>
 										{report_yearly_mode_options.map(item => (
 											<SelectItem value={item.value} key={item.value}>
 												{item.label}
@@ -617,13 +612,8 @@ const Index = () => {
 				<FieldGroup className='gap-0'>
 					<Field className='items-center! py-3' orientation='horizontal'>
 						<FieldContent>
-							<FieldTitle className='text-base'>Post-Think</FieldTitle>
-							<FieldDescription>
-								When the app is idle and the unreviewed message count reaches the
-								threshold, review today&apos;s newly accumulated messages and turn
-								durable findings into articles, and only when strongly justified, skills
-								or tools.
-							</FieldDescription>
+							<FieldTitle className='text-base'>{tt('general.post_think')}</FieldTitle>
+							<FieldDescription>{tt('general.post_think_desc')}</FieldDescription>
 						</FieldContent>
 						<Switch
 							checked={Boolean(pthink?.enabled)}
@@ -632,10 +622,8 @@ const Index = () => {
 					</Field>
 					<Field className='items-center! py-3' orientation='horizontal'>
 						<FieldContent>
-							<FieldTitle className='text-base'>Idle Grace</FieldTitle>
-							<FieldDescription>
-								How long the app should stay inactive before post-think can start
-							</FieldDescription>
+							<FieldTitle className='text-base'>{tt('general.idle_grace')}</FieldTitle>
+							<FieldDescription>{tt('general.idle_grace_desc')}</FieldDescription>
 						</FieldContent>
 						<Select
 							items={pthink_idle_options}
@@ -649,7 +637,7 @@ const Index = () => {
 							</SelectTrigger>
 							<SelectContent align='start'>
 								<SelectGroup>
-									<SelectLabel>Idle Grace</SelectLabel>
+									<SelectLabel>{tt('general.idle_grace')}</SelectLabel>
 									{pthink_idle_options.map(item => (
 										<SelectItem value={item.value} key={item.value}>
 											{item.label}
@@ -661,11 +649,10 @@ const Index = () => {
 					</Field>
 					<Field className='items-center! py-3' orientation='horizontal'>
 						<FieldContent>
-							<FieldTitle className='text-base'>Message Threshold</FieldTitle>
-							<FieldDescription>
-								Start post-think after this many unreviewed messages have accumulated,
-								once the app becomes idle
-							</FieldDescription>
+							<FieldTitle className='text-base'>
+								{tt('general.message_threshold')}
+							</FieldTitle>
+							<FieldDescription>{tt('general.message_threshold_desc')}</FieldDescription>
 						</FieldContent>
 						<Select
 							items={pthink_message_threshold_options}
@@ -677,7 +664,7 @@ const Index = () => {
 							</SelectTrigger>
 							<SelectContent align='start'>
 								<SelectGroup>
-									<SelectLabel>Message Threshold</SelectLabel>
+									<SelectLabel>{tt('general.message_threshold')}</SelectLabel>
 									{pthink_message_threshold_options.map(item => (
 										<SelectItem value={item.value} key={item.value}>
 											{item.label}
@@ -689,10 +676,8 @@ const Index = () => {
 					</Field>
 					<Field className='items-center! py-3' orientation='horizontal'>
 						<FieldContent>
-							<FieldTitle className='text-base'>Review Cooldown</FieldTitle>
-							<FieldDescription>
-								Minimum time between two automatic post-think review runs
-							</FieldDescription>
+							<FieldTitle className='text-base'>{tt('general.review_cooldown')}</FieldTitle>
+							<FieldDescription>{tt('general.review_cooldown_desc')}</FieldDescription>
 						</FieldContent>
 						<Select
 							items={pthink_cooldown_options}
@@ -708,7 +693,7 @@ const Index = () => {
 							</SelectTrigger>
 							<SelectContent align='start'>
 								<SelectGroup>
-									<SelectLabel>Review Cooldown</SelectLabel>
+									<SelectLabel>{tt('general.review_cooldown')}</SelectLabel>
 									{pthink_cooldown_options.map(item => (
 										<SelectItem value={item.value} key={item.value}>
 											{item.label}
@@ -720,11 +705,10 @@ const Index = () => {
 					</Field>
 					<Field className='items-center! py-3' orientation='horizontal'>
 						<FieldContent>
-							<FieldTitle className='text-base'>Skill Generation</FieldTitle>
-							<FieldDescription>
-								Allow post-think to write a local skill only when the extracted workflow
-								is clearly reusable
-							</FieldDescription>
+							<FieldTitle className='text-base'>
+								{tt('general.skill_generation')}
+							</FieldTitle>
+							<FieldDescription>{tt('general.skill_generation_desc')}</FieldDescription>
 						</FieldContent>
 						<Switch
 							checked={Boolean(pthink?.skill_generation_enabled ?? true)}
@@ -735,11 +719,8 @@ const Index = () => {
 					</Field>
 					<Field className='items-center! py-3' orientation='horizontal'>
 						<FieldContent>
-							<FieldTitle className='text-base'>Tool Generation</FieldTitle>
-							<FieldDescription>
-								Allow post-think to create a custom tool only under a much stricter
-								confidence bar
-							</FieldDescription>
+							<FieldTitle className='text-base'>{tt('general.tool_generation')}</FieldTitle>
+							<FieldDescription>{tt('general.tool_generation_desc')}</FieldDescription>
 						</FieldContent>
 						<Switch
 							checked={Boolean(pthink?.tool_generation_enabled ?? true)}

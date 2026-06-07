@@ -2,6 +2,7 @@ import { Fragment, useMemo, useState } from 'react'
 import { global_linkcase_session_id } from '@core/consts'
 import { useMemoizedFn } from 'ahooks'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 import { container } from 'tsyringe'
 
 import { Drawer } from '@/components'
@@ -54,6 +55,7 @@ const Index = (props: IProps) => {
 		useSyncState = use_empty_sync_state
 	} = props
 	const [x] = useState(() => container.resolve(Model))
+	const { t } = useTranslation('components')
 
 	const chat_streaming = x.status === 'streaming' || x.status === 'submitted'
 	const sync_state = useSyncState({ id, chat_streaming })
@@ -183,7 +185,7 @@ const Index = (props: IProps) => {
 						>
 							<Logo width='100%' height='100%'></Logo>
 						</div>
-						<span className='font-medium'>New Beginning</span>
+						<span className='font-medium'>{t('session.empty_title')}</span>
 					</div>
 				) : (
 					<Fragment>
@@ -230,8 +232,8 @@ const Index = (props: IProps) => {
 				maskClosable
 				height='100%'
 				width={is_page ? 480 : '100%'}
-				title='Session Context'
-				desc='Current session state and env'
+				title={t('session.drawer.title')}
+				desc={t('session.drawer.desc')}
 				open={x.open_context_modal}
 				onClose={toggleContextModal}
 			>

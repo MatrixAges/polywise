@@ -7,7 +7,7 @@ import { injectable } from 'tsyringe'
 import { config, locales } from 'zod'
 
 import { Util } from '@/models/common'
-import { alert, conf, getLang, relaunch, resourcesToBackend } from '@/utils'
+import { alert, conf, eager_locale_namespaces, getLang, relaunch, resourcesToBackend } from '@/utils'
 
 import type { Lang } from '@/types'
 
@@ -28,15 +28,20 @@ export default class Index {
 	}
 
 	async setLocale(lang: Lang) {
+		this.lang = lang
+
 		$t = await i18next
 			.use(resourcesToBackend)
 			.use(initReactI18next)
 			.init({
 				lng: lang,
+				ns: [...eager_locale_namespaces],
+				defaultNS: 'translation',
 				fallbackLng: 'en',
 				load: 'currentOnly',
 				returnObjects: true,
-				interpolation: { escapeValue: false }
+				interpolation: { escapeValue: false },
+				react: { useSuspense: false }
 			})
 
 		const res = await import(`@/locales/dayjs/${lang}`)
@@ -62,8 +67,8 @@ export default class Index {
 
 		const res = await alert({
 			icon: 'lang',
-			title: 'Change Language',
-			desc: 'Changing the application language will force a page refresh'
+			title: $t('lang_change.title'),
+			desc: $t('lang_change.desc')
 		})
 
 		if (!res) return

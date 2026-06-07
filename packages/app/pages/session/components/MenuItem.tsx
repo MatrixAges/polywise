@@ -4,6 +4,7 @@ import { DotsSixVerticalIcon } from '@phosphor-icons/react'
 import { useMemoizedFn } from 'ahooks'
 import { ChevronDown, ChevronRight, Folders, Plus } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import RenameInput from '@/pages/session/components/RenameInput'
 
@@ -15,6 +16,7 @@ import type { IPropsMenuItem } from '../types'
 
 const Index = (props: IPropsMenuItem) => {
 	const { item, index, renaming, selected, expand } = props
+	const { t } = useTranslation('session')
 	const { project, sessions, has_more, loading } = item
 	const { attributes, listeners, transform, transition, isDragging, setNodeRef } = useSortable({ id: project.id })
 	const {
@@ -129,7 +131,7 @@ const Index = (props: IPropsMenuItem) => {
 			{expand && (
 				<div className='flex flex-col gap-1'>
 					{loading && sessions.length === 0 && (
-						<div className='text-muted-foreground pl-6 text-xs'>Loading...</div>
+						<div className='text-muted-foreground pl-6 text-xs'>{t('menu.loading')}</div>
 					)}
 					{sessions.map((it, idx) => (
 						<ProjectMenuItem
@@ -144,7 +146,7 @@ const Index = (props: IPropsMenuItem) => {
 					))}
 					{has_more && !loading && (
 						<div className='click_button pl-6' onClick={() => getMoreSessions(index)}>
-							Loadmore
+							{t('menu.load_more')}
 						</div>
 					)}
 				</div>

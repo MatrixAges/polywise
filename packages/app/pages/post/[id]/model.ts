@@ -428,7 +428,7 @@ export default class Index {
 				}
 
 				if (!args?.silent) {
-					toast.success('Post saved.')
+					toast.success($t('toast.saved', { ns: 'post' }))
 				}
 
 				return response
@@ -658,12 +658,19 @@ export default class Index {
 			return false
 		}
 
-		if (!window.confirm(`Delete post "${deleting_post.title || 'Untitled'}"?`)) {
+		if (
+			!window.confirm(
+				$t('confirm.delete_post', {
+					ns: 'post',
+					title: deleting_post.title || $t('detail.untitled_post', { ns: 'post' })
+				})
+			)
+		) {
 			return false
 		}
 
 		await rpc.post.remove.mutate({ id: deleting_post.id })
-		toast.success('Post removed.')
+		toast.success($t('toast.post_removed', { ns: 'post' }))
 
 		return true
 	}
@@ -682,7 +689,11 @@ export default class Index {
 				force: this.selected_post.is_pipelined
 			})
 
-			toast.success(result.queued ? 'Extract queued.' : 'Extract completed.')
+			toast.success(
+				result.queued
+					? $t('toast.extract_queued', { ns: 'post' })
+					: $t('toast.extract_completed', { ns: 'post' })
+			)
 			await this.reloadCurrentPost()
 		} finally {
 			this.extracting = false

@@ -3,12 +3,15 @@ import { observer } from 'mobx-react-lite'
 import { container } from 'tsyringe'
 
 import { useGlobal } from '@/context'
+import { usePageLocale } from '@/hooks'
 
 import { AvatarDialog, Detail, GroupPanel, Menu, SessionsPanel } from './components'
 import { Context } from './context'
 import Model from './model'
 
 const Index = () => {
+	usePageLocale('agent')
+
 	const x = useMemo(() => container.resolve(Model), [])
 	const global = useGlobal()
 

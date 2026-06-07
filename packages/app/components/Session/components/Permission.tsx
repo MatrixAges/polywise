@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next'
+
 import { Button } from '@/__shadcn__/components/ui/button'
 
 import type { IPropsPermission } from '../types'
@@ -5,6 +7,7 @@ import type { IPropsPermission } from '../types'
 const Index = (props: IPropsPermission) => {
 	const { permission, approvePermission } = props
 	const { tool, action, path } = permission
+	const { t } = useTranslation('components')
 
 	return (
 		<div
@@ -17,30 +20,30 @@ const Index = (props: IPropsPermission) => {
 			'
 		>
 			<div className='flex items-center gap-2'>
-				<span className='text-warning text-sm font-medium'>Permission Request</span>
+				<span className='text-warning text-sm font-medium'>{t('session.permission.title')}</span>
 			</div>
 			<div className='flex flex-col gap-1.5 text-xs'>
 				<div className='flex gap-2'>
-					<span className='text-std-500 w-10'>Tool</span>
+					<span className='text-std-500 w-10'>{t('session.permission.tool')}</span>
 					<span className='font-mono'>{tool}</span>
 				</div>
 
 				<div className='flex gap-2'>
-					<span className='text-std-500 w-10'>Action</span>
+					<span className='text-std-500 w-10'>{t('session.permission.action')}</span>
 					<span className='font-mono'>{action}</span>
 				</div>
 
 				<div className='flex gap-2'>
-					<span className='text-std-500 w-10'>Path</span>
+					<span className='text-std-500 w-10'>{t('session.permission.path')}</span>
 					<span className='flex-1 font-mono break-all'>{path}</span>
 				</div>
 			</div>
 			<div className='flex gap-2 self-end'>
 				<Button size='sm' variant='outline' onClick={() => approvePermission(false)}>
-					Deny
+					{t('session.permission.deny')}
 				</Button>
 				<Button size='sm' variant='default' onClick={() => approvePermission(true)}>
-					Allow
+					{t('session.permission.allow')}
 				</Button>
 			</div>
 		</div>

@@ -1,9 +1,11 @@
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import { useModel } from '../context'
 
 const Index = () => {
 	const x = useModel()
+	const { t } = useTranslation('home')
 
 	return (
 		<div className='flex flex-col gap-3'>
@@ -16,7 +18,7 @@ const Index = () => {
 					border-l-2 border-std-500
 				'
 			>
-				Content Review
+				{t('sections.content_review')}
 			</div>
 			<div className='border-border-light grid grid-cols-2 border'>
 				<div
@@ -28,7 +30,7 @@ const Index = () => {
 						last:border-r-0
 					'
 				>
-					<div className='text-std-400 text-xs font-medium uppercase'>Links</div>
+					<div className='text-std-400 text-xs font-medium uppercase'>{t('common.links')}</div>
 					<div className='font-mono text-2xl font-semibold tracking-tight'>{x.linkcase_total}</div>
 					<div className='text-std-300 text-xs'>{x.linkcase_meta}</div>
 				</div>
@@ -41,7 +43,7 @@ const Index = () => {
 						last:border-r-0
 					'
 				>
-					<div className='text-std-400 text-xs font-medium uppercase'>Posts</div>
+					<div className='text-std-400 text-xs font-medium uppercase'>{t('common.posts')}</div>
 					<div className='font-mono text-2xl font-semibold tracking-tight'>{x.posts_total}</div>
 					<div className='text-std-300 text-xs'>{x.posts_meta}</div>
 				</div>

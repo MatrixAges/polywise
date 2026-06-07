@@ -1,4 +1,5 @@
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import { Badge } from '@/__shadcn__/components/ui/badge'
 import { Separator } from '@/__shadcn__/components/ui/separator'
@@ -16,6 +17,7 @@ const statusVariant = (status: string, enabled: boolean) => {
 
 const Index = () => {
 	const x = useModel()
+	const { t } = useTranslation('setting')
 
 	return (
 		<div
@@ -33,10 +35,8 @@ const Index = () => {
 				'
 			>
 				<div>
-					<div className='text-sm font-medium'>Existing Accounts</div>
-					<div className='text-std-500 text-sm'>
-						Select an account to edit, or switch the header tabs to start a new draft
-					</div>
+					<div className='text-sm font-medium'>{t('im.accounts_title')}</div>
+					<div className='text-std-500 text-sm'>{t('im.accounts_desc')}</div>
 				</div>
 				<Badge variant='outline'>{x.accounts.length}</Badge>
 			</div>
@@ -77,7 +77,7 @@ const Index = () => {
 										{account.label || account.account_id}
 									</span>
 									<Badge variant={statusVariant(account.status, account.enabled)}>
-										{account.enabled ? account.status : 'disabled'}
+										{account.enabled ? account.status : t('im.disabled')}
 									</Badge>
 								</div>
 								<div className='text-std-500 text-sm'>
@@ -114,7 +114,7 @@ const Index = () => {
 
 										return (
 											<div className='text-std-400 text-sm'>
-												Global session with shared IM runtime controls
+												{t('im.global_session')}
 											</div>
 										)
 									})()}
@@ -136,10 +136,7 @@ const Index = () => {
 								bg-muted/35
 							'
 					>
-						<div className='text-std-500 text-sm'>
-							No IM accounts configured yet. Choose Discord or WeChat in the header and fill
-							the form above.
-						</div>
+						<div className='text-std-500 text-sm'>{t('im.empty')}</div>
 					</div>
 				)}
 			</div>

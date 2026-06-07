@@ -1,8 +1,12 @@
+import { useTranslation } from 'react-i18next'
+
 import { about } from '@/appdata'
 import { version } from '@/package.json'
 import Logo from '@/public/bare.svg?react'
 
 const Index = () => {
+	const { t } = useTranslation('setting')
+
 	return (
 		<div
 			className='
@@ -43,7 +47,7 @@ const Index = () => {
 						text-std-800 text-xl font-medium
 					'
 				>
-					Agentic Content System
+					{t('about.subtitle')}
 				</h2>
 			</div>
 			<div
@@ -65,27 +69,27 @@ const Index = () => {
 				>
 					<div className='flex gap-3'>
 						<a href={about.github} target='_blank'>
-							Github
+							{t('about.github')}
 						</a>
 						<a href={about.site} target='_blank'>
-							Website
+							{t('about.website')}
 						</a>
 						<a href={about.docs} target='_blank'>
-							Docs
+							{t('about.docs')}
 						</a>
 						<a href={about.changelog} target='_blank'>
-							Changelog
+							{t('about.changelog')}
 						</a>
 					</div>
 					<div className='flex gap-3'>
 						<a href={about.issues} target='_blank'>
-							Feedback
+							{t('about.feedback')}
 						</a>
 						<a href={`mailto:${about.email}`} target='_blank'>
-							Email
+							{t('about.email')}
 						</a>
 						<a href={about.x} target='_blank'>
-							X
+							{t('about.x')}
 						</a>
 					</div>
 				</div>

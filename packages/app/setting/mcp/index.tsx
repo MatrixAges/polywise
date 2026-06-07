@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useMemoizedFn } from 'ahooks'
 import { Plus, RotateCcw, Save, Trash2 } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
 import { Badge } from '@/__shadcn__/components/ui/badge'
@@ -220,15 +221,16 @@ const buildConfig = (draft: DraftState): McpConfig => {
 	return next_config
 }
 
-const type_options = [
-	{ label: 'Local', value: 'local' },
-	{ label: 'Remote', value: 'remote' }
-] as const
-
 const Index = () => {
 	const global = useGlobal()
 	const s = global.setting
+	const { t: raw_t } = useTranslation('setting')
+	const t = raw_t as unknown as (key: string, options?: Record<string, unknown>) => string
 	const [draft, setDraft] = useState<DraftState>(() => toDraftState())
+	const type_options = [
+		{ label: t('mcp.option_local'), value: 'local' },
+		{ label: t('mcp.option_remote'), value: 'remote' }
+	] as const
 
 	useEffect(() => {
 		setDraft(toDraftState(s.config?.mcp))
@@ -268,7 +270,7 @@ const Index = () => {
 			const mcp = buildConfig(draft)
 
 			await s.setConfig('config', { mcp } as Partial<AppConfig>, true)
-			toast.success('MCP config saved.')
+			toast.success(t('mcp.toast_saved'))
 		} catch (error) {
 			toast.error(error instanceof Error ? error.message : String(error))
 		}
@@ -293,26 +295,24 @@ const Index = () => {
 				'
 			>
 				<div className='flex flex-col gap-3'>
-					<h1 className='text-xl font-semibold'>MCP Config</h1>
-					<p className='text-std-500 text-sm'>
-						Configure MCP servers once, then load them lazily through `mcp_tool`
-					</p>
+					<h1 className='text-xl font-semibold'>{t('mcp.title')}</h1>
+					<p className='text-std-500 text-sm'>{t('mcp.desc')}</p>
 				</div>
 				<div className='flex flex-wrap items-center gap-2'>
 					<Button type='button' variant='outline' size='sm' onClick={resetDraft}>
 						<RotateCcw className='size-4' />
-						<span>Reset</span>
+						<span>{t('mcp.reset')}</span>
 					</Button>
 					<Button type='button' size='sm' onClick={() => void saveDraft()}>
 						<Save className='size-4' />
-						<span>Save</span>
+						<span>{t('mcp.save')}</span>
 					</Button>
 				</div>
 			</div>
 			<FieldGroup className='gap-0'>
 				<Field className='items-center! py-3' orientation='horizontal'>
 					<FieldContent>
-						<FieldTitle className='text-base'>Enable MCP</FieldTitle>
+						<FieldTitle className='text-base'>{t('mcp.enable')}</FieldTitle>
 					</FieldContent>
 					<Switch
 						checked={draft.enabled}
@@ -328,15 +328,12 @@ const Index = () => {
 			<div className='bg-border-light my-2 h-px w-full' />
 			<div className='flex items-center justify-between py-1'>
 				<div className='flex flex-col gap-1'>
-					<span className='text-base font-medium'>Servers</span>
-					<span className='text-std-500 text-sm'>
-						Local servers use a command array. Remote servers use URL, headers, and optional
-						OAuth metadata.
-					</span>
+					<span className='text-base font-medium'>{t('mcp.servers')}</span>
+					<span className='text-std-500 text-sm'>{t('mcp.servers_desc')}</span>
 				</div>
 				<Button type='button' variant='outline' onClick={addItem}>
 					<Plus className='size-4' />
-					<span>Add Server</span>
+					<span>{t('mcp.add_server')}</span>
 				</Button>
 			</div>
 			<div
@@ -369,10 +366,12 @@ const Index = () => {
 							>
 								<div className='flex flex-wrap items-center gap-2'>
 									<Badge variant='outline'>
-										{item.type === 'remote' ? 'Remote MCP' : 'Local MCP'}
+										{item.type === 'remote'
+											? t('mcp.remote_badge')
+											: t('mcp.local_badge')}
 									</Badge>
 									<Badge variant={item.enabled ? 'secondary' : 'outline'}>
-										{item.enabled ? 'Enabled' : 'Disabled'}
+										{item.enabled ? t('mcp.enabled') : t('mcp.disabled')}
 									</Badge>
 								</div>
 								<Button
@@ -382,17 +381,14 @@ const Index = () => {
 									onClick={() => removeItem(item.id)}
 								>
 									<Trash2 className='size-4' />
-									<span>Remove</span>
+									<span>{t('mcp.remove')}</span>
 								</Button>
 							</div>
 							<div className='grid gap-4 md:grid-cols-2'>
 								<Field className='gap-2' orientation='vertical'>
 									<FieldContent>
-										<FieldTitle>Type</FieldTitle>
-										<FieldDescription>
-											Choose whether this MCP server is launched locally or
-											accessed remotely.
-										</FieldDescription>
+										<FieldTitle>{t('mcp.type')}</FieldTitle>
+										<FieldDescription>{t('mcp.type_desc')}</FieldDescription>
 									</FieldContent>
 									<Select
 										value={item.type}
@@ -408,7 +404,9 @@ const Index = () => {
 										</SelectTrigger>
 										<SelectContent align='start'>
 											<SelectGroup>
-												<SelectLabel>Server Type</SelectLabel>
+												<SelectLabel>
+													{t('mcp.server_type')}
+												</SelectLabel>
 												{type_options.map(option => (
 													<SelectItem
 														value={option.value}
@@ -423,10 +421,8 @@ const Index = () => {
 								</Field>
 								<Field className='gap-2' orientation='vertical'>
 									<FieldContent>
-										<FieldTitle>Name</FieldTitle>
-										<FieldDescription>
-											Stable MCP server key used in config and mentions.
-										</FieldDescription>
+										<FieldTitle>{t('mcp.name')}</FieldTitle>
+										<FieldDescription>{t('mcp.name_desc')}</FieldDescription>
 									</FieldContent>
 									<Input
 										value={item.name}
@@ -438,11 +434,8 @@ const Index = () => {
 								</Field>
 								<Field className='gap-2' orientation='vertical'>
 									<FieldContent>
-										<FieldTitle>Timeout (ms)</FieldTitle>
-										<FieldDescription>
-											Optional request timeout. Leave blank to use runtime
-											defaults.
-										</FieldDescription>
+										<FieldTitle>{t('mcp.timeout')}</FieldTitle>
+										<FieldDescription>{t('mcp.timeout_desc')}</FieldDescription>
 									</FieldContent>
 									<Input
 										value={item.timeout}
@@ -454,11 +447,8 @@ const Index = () => {
 								</Field>
 								<Field className='gap-2' orientation='vertical'>
 									<FieldContent>
-										<FieldTitle>Enabled</FieldTitle>
-										<FieldDescription>
-											Disable a single MCP server without deleting its
-											configuration.
-										</FieldDescription>
+										<FieldTitle>{t('mcp.enabled_title')}</FieldTitle>
+										<FieldDescription>{t('mcp.enabled_desc')}</FieldDescription>
 									</FieldContent>
 									<div className='flex h-10 items-center'>
 										<Switch
@@ -474,11 +464,9 @@ const Index = () => {
 								<div className='grid gap-4'>
 									<Field className='gap-2' orientation='vertical'>
 										<FieldContent>
-											<FieldTitle>Command JSON</FieldTitle>
+											<FieldTitle>{t('mcp.command_json')}</FieldTitle>
 											<FieldDescription>
-												JSON string array. Example: `["npx",
-												"@modelcontextprotocol/server-filesystem",
-												"/tmp"]`
+												{t('mcp.command_json_desc')}
 											</FieldDescription>
 										</FieldContent>
 										<Textarea
@@ -493,10 +481,9 @@ const Index = () => {
 									</Field>
 									<Field className='gap-2' orientation='vertical'>
 										<FieldContent>
-											<FieldTitle>Environment JSON</FieldTitle>
+											<FieldTitle>{t('mcp.environment_json')}</FieldTitle>
 											<FieldDescription>
-												Optional JSON object with string values passed
-												to the local process.
+												{t('mcp.environment_json_desc')}
 											</FieldDescription>
 										</FieldContent>
 										<Textarea
@@ -514,9 +501,9 @@ const Index = () => {
 								<div className='grid gap-4'>
 									<Field className='gap-2' orientation='vertical'>
 										<FieldContent>
-											<FieldTitle>URL</FieldTitle>
+											<FieldTitle>{t('mcp.url')}</FieldTitle>
 											<FieldDescription>
-												Remote MCP endpoint, usually HTTP transport.
+												{t('mcp.url_desc')}
 											</FieldDescription>
 										</FieldContent>
 										<Input
@@ -529,9 +516,9 @@ const Index = () => {
 									</Field>
 									<Field className='gap-2' orientation='vertical'>
 										<FieldContent>
-											<FieldTitle>Headers JSON</FieldTitle>
+											<FieldTitle>{t('mcp.headers_json')}</FieldTitle>
 											<FieldDescription>
-												Optional JSON object with string header values.
+												{t('mcp.headers_json_desc')}
 											</FieldDescription>
 										</FieldContent>
 										<Textarea
@@ -546,10 +533,9 @@ const Index = () => {
 									</Field>
 									<Field className='gap-2' orientation='vertical'>
 										<FieldContent>
-											<FieldTitle>OAuth</FieldTitle>
+											<FieldTitle>{t('mcp.oauth')}</FieldTitle>
 											<FieldDescription>
-												Store optional OAuth client metadata for
-												authenticated remote MCP servers.
+												{t('mcp.oauth_desc')}
 											</FieldDescription>
 										</FieldContent>
 										<div className='flex h-10 items-center'>
@@ -567,7 +553,9 @@ const Index = () => {
 										<div className='grid gap-4 md:grid-cols-2'>
 											<Field className='gap-2' orientation='vertical'>
 												<FieldContent>
-													<FieldTitle>Client ID</FieldTitle>
+													<FieldTitle>
+														{t('mcp.client_id')}
+													</FieldTitle>
 												</FieldContent>
 												<Input
 													value={item.oauth_client_id}
@@ -581,7 +569,9 @@ const Index = () => {
 											</Field>
 											<Field className='gap-2' orientation='vertical'>
 												<FieldContent>
-													<FieldTitle>Client Secret</FieldTitle>
+													<FieldTitle>
+														{t('mcp.client_secret')}
+													</FieldTitle>
 												</FieldContent>
 												<Input
 													value={item.oauth_client_secret}
@@ -595,7 +585,7 @@ const Index = () => {
 											</Field>
 											<Field className='gap-2' orientation='vertical'>
 												<FieldContent>
-													<FieldTitle>Scope</FieldTitle>
+													<FieldTitle>{t('mcp.scope')}</FieldTitle>
 												</FieldContent>
 												<Input
 													value={item.oauth_scope}
@@ -609,7 +599,9 @@ const Index = () => {
 											</Field>
 											<Field className='gap-2' orientation='vertical'>
 												<FieldContent>
-													<FieldTitle>Redirect URI</FieldTitle>
+													<FieldTitle>
+														{t('mcp.redirect_uri')}
+													</FieldTitle>
 												</FieldContent>
 												<Input
 													value={item.oauth_redirect_uri}
@@ -639,11 +631,8 @@ const Index = () => {
 							border border-dashed border-border-light
 						'
 					>
-						<div className='text-sm font-medium'>No MCP servers configured</div>
-						<div className='text-std-500 mt-1 text-sm'>
-							Add a local or remote server here, then use `mcp_tool` or `/` in a session to
-							pick it.
-						</div>
+						<div className='text-sm font-medium'>{t('mcp.no_servers')}</div>
+						<div className='text-std-500 mt-1 text-sm'>{t('mcp.no_servers_desc')}</div>
 					</div>
 				)}
 			</div>

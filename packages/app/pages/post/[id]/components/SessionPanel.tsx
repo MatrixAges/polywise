@@ -1,5 +1,6 @@
 import { Loader2 } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/__shadcn__/components/ui/button'
 import { Session } from '@/components'
@@ -8,6 +9,7 @@ import { useModel } from '../context'
 
 const Index = () => {
 	const x = useModel()
+	const { t } = useTranslation('post')
 
 	return (
 		<div className='flex h-full flex-col overflow-hidden'>
@@ -32,7 +34,9 @@ const Index = () => {
 						'
 					>
 						<div className='text-std-400 text-sm'>
-							Create a dedicated post session for AI-assisted writing.
+							{t('detail.create_session_desc', {
+								defaultValue: 'Create a dedicated post session for AI-assisted writing.'
+							})}
 						</div>
 						<Button
 							size='sm'
@@ -40,7 +44,7 @@ const Index = () => {
 							onClick={() => void x.ensureSession()}
 						>
 							{x.ensuring_session && <Loader2 className='size-4 animate-spin'></Loader2>}
-							<span>Create session</span>
+							<span>{t('detail.create_session')}</span>
 						</Button>
 					</div>
 				)}

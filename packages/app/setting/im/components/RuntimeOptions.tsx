@@ -1,5 +1,6 @@
 import { Bot, Wrench } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import { Badge } from '@/__shadcn__/components/ui/badge'
 import { Button } from '@/__shadcn__/components/ui/button'
@@ -13,6 +14,7 @@ import SessionTargetIdentity from './SessionTargetIdentity'
 
 const Index = () => {
 	const x = useModel()
+	const { t } = useTranslation('setting')
 	const disable_map = x.runtimeDisableMap
 	const use_all_agents = x.form.runtime_agent_ids.length === 0
 
@@ -21,11 +23,8 @@ const Index = () => {
 			<div className='flex items-start gap-3'>
 				<Wrench className='text-std-400 mt-0.5 size-4 shrink-0' />
 				<div className='flex flex-col gap-1'>
-					<div className='text-sm font-medium'>Runtime Options</div>
-					<div className='text-std-500 text-sm'>
-						These options are copied into the IM-linked session before the runtime handles a
-						message, regardless of whether the target is global, agent, or group.
-					</div>
+					<div className='text-sm font-medium'>{t('im.runtime_options')}</div>
+					<div className='text-std-500 text-sm'>{t('im.runtime_options_desc')}</div>
 				</div>
 			</div>
 
@@ -40,10 +39,8 @@ const Index = () => {
 			>
 				<Field className='items-center! py-3' orientation='horizontal'>
 					<FieldContent>
-						<FieldTitle className='text-base'>Audit Mode</FieldTitle>
-						<FieldDescription>
-							Control how much runtime access this IM-linked session gets.
-						</FieldDescription>
+						<FieldTitle className='text-base'>{t('im.audit_mode')}</FieldTitle>
+						<FieldDescription>{t('im.audit_mode_desc')}</FieldDescription>
 					</FieldContent>
 					<Select
 						value={x.form.runtime_audit_mode}
@@ -55,19 +52,17 @@ const Index = () => {
 							<SelectValue />
 						</SelectTrigger>
 						<SelectContent>
-							<SelectItem value='limited'>Limited</SelectItem>
-							<SelectItem value='auto'>Auto</SelectItem>
-							<SelectItem value='full'>Full</SelectItem>
+							<SelectItem value='limited'>{t('im.audit_limited')}</SelectItem>
+							<SelectItem value='auto'>{t('im.audit_auto')}</SelectItem>
+							<SelectItem value='full'>{t('im.audit_full')}</SelectItem>
 						</SelectContent>
 					</Select>
 				</Field>
 				<Separator className='bg-border/80 h-px w-full' />
 				<Field className='items-center! py-3' orientation='horizontal'>
 					<FieldContent>
-						<FieldTitle className='text-base'>Agent Tool</FieldTitle>
-						<FieldDescription>
-							Expose `agent_tool` so the runtime can search and consult selected agents
-						</FieldDescription>
+						<FieldTitle className='text-base'>{t('im.agent_tool')}</FieldTitle>
+						<FieldDescription>{t('im.agent_tool_desc')}</FieldDescription>
 					</FieldContent>
 					<Switch
 						checked={x.form.runtime_enable_agent_tool}
@@ -78,10 +73,8 @@ const Index = () => {
 
 			<div className='bg-background/70 rounded-2xl border p-4'>
 				<div className='flex flex-col gap-1'>
-					<div className='text-sm font-medium'>Sub-agents</div>
-					<div className='text-std-500 text-sm'>
-						Enable only the internal helper agents this IM-linked session is allowed to use.
-					</div>
+					<div className='text-sm font-medium'>{t('im.sub_agents')}</div>
+					<div className='text-std-500 text-sm'>{t('im.sub_agents_desc')}</div>
 				</div>
 				<div className='mt-4 grid gap-3 md:grid-cols-2'>
 					{x.runtimeSubAgentItems.map(item => {
@@ -112,8 +105,10 @@ const Index = () => {
 				</div>
 				<div className='text-std-400 mt-3 text-xs'>
 					{x.form.runtime_sub_agent_keys.length
-						? `${x.form.runtime_sub_agent_keys.length} sub-agents enabled`
-						: 'All internal helper agents are disabled'}
+						? t('im.sub_agents_enabled', {
+								count: x.form.runtime_sub_agent_keys.length
+							})
+						: t('im.sub_agents_disabled')}
 				</div>
 			</div>
 
@@ -128,11 +123,8 @@ const Index = () => {
 					<div className='flex min-w-0 items-start gap-3'>
 						<Bot className='text-std-400 mt-0.5 size-4 shrink-0' />
 						<div className='flex flex-col gap-1'>
-							<div className='text-sm font-medium'>Allowed Agents</div>
-							<div className='text-std-500 text-sm'>
-								Empty selection means `agent_tool` can search all agents. Select one or
-								more agents to restrict it.
-							</div>
+							<div className='text-sm font-medium'>{t('im.allowed_agents')}</div>
+							<div className='text-std-500 text-sm'>{t('im.allowed_agents_desc')}</div>
 						</div>
 					</div>
 					<Button
@@ -142,13 +134,13 @@ const Index = () => {
 						onClick={() => x.updateForm('runtime_agent_ids', [])}
 						disabled={use_all_agents}
 					>
-						Use All Agents
+						{t('im.use_all_agents')}
 					</Button>
 				</div>
 
 				<div className='mt-4 grid gap-3 md:grid-cols-2'>
 					{!x.agents.length ? (
-						<Badge variant='outline'>No agents found</Badge>
+						<Badge variant='outline'>{t('im.no_agents_found')}</Badge>
 					) : (
 						x.agents.map(agent => {
 							const selected = x.form.runtime_agent_ids.includes(agent.id)
@@ -169,17 +161,15 @@ const Index = () => {
 				</div>
 				<div className='text-std-400 mt-3 text-xs'>
 					{use_all_agents
-						? 'Current scope: all agents'
-						: `Current scope: ${x.form.runtime_agent_ids.length} selected`}
+						? t('im.current_scope_all')
+						: t('im.current_scope_selected', { count: x.form.runtime_agent_ids.length })}
 				</div>
 			</div>
 
 			<div className='bg-background/70 rounded-2xl border p-4'>
 				<div className='flex flex-col gap-1'>
-					<div className='text-sm font-medium'>Enabled Tools</div>
-					<div className='text-std-500 text-sm'>
-						Turn off tools that should not be available in IM-linked sessions.
-					</div>
+					<div className='text-sm font-medium'>{t('im.enabled_tools')}</div>
+					<div className='text-std-500 text-sm'>{t('im.enabled_tools_desc')}</div>
 				</div>
 				<FieldGroup className='mt-4 gap-0'>
 					{x.runtimeToolItems.map((item, index) => (

@@ -1,5 +1,6 @@
 import { useMemoizedFn } from 'ahooks'
 import { PanelLeft, Plus } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router'
 
 import {
@@ -18,6 +19,7 @@ import type { IPropsLeft } from '../../types'
 
 const Index = (props: IPropsLeft) => {
 	const { workspaces, current_workspace, toggleSidebar } = props
+	const { t } = useTranslation('layout')
 	const navigate = useNavigate()
 
 	const onClickCreateSession = useMemoizedFn(() => {
@@ -68,7 +70,7 @@ const Index = (props: IPropsLeft) => {
 				</SelectTrigger>
 				<SelectContent className='w-[180px]' align='start'>
 					<SelectGroup>
-						<SelectLabel>Workspaces</SelectLabel>
+						<SelectLabel>{t('header.workspaces')}</SelectLabel>
 						{workspaces.map(item => (
 							<SelectItem value={item.name} key={item.name}>
 								{item.name}

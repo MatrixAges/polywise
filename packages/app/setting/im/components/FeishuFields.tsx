@@ -1,4 +1,5 @@
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import { Field, FieldContent, FieldDescription, FieldGroup, FieldTitle } from '@/__shadcn__/components/ui/field'
 import { Input } from '@/__shadcn__/components/ui/input'
@@ -10,26 +11,21 @@ import { useModel } from '../context'
 
 const Index = () => {
 	const x = useModel()
+	const { t } = useTranslation('setting')
 
 	return (
 		<FieldGroup className='gap-0'>
 			<Field className='items-start! py-3' orientation='horizontal'>
 				<FieldContent>
-					<FieldTitle className='text-base'>Connection Mode</FieldTitle>
-					<FieldDescription>
-						Polywise uses Feishu long connection mode by default. No public callback URL is
-						required.
-					</FieldDescription>
+					<FieldTitle className='text-base'>{t('im.feishu_connection_mode')}</FieldTitle>
+					<FieldDescription>{t('im.feishu_connection_mode_desc')}</FieldDescription>
 				</FieldContent>
-				<div className='text-std-500 max-w-[420px] text-sm leading-6'>
-					The Feishu SDK is installed as a normal Polywise dependency and loaded lazily at runtime
-					only when a Feishu account is enabled.
-				</div>
+				<div className='text-std-500 max-w-[420px] text-sm leading-6'>{t('im.feishu_sdk_desc')}</div>
 			</Field>
 			<Field className='items-center! py-3' orientation='horizontal'>
 				<FieldContent>
-					<FieldTitle className='text-base'>App ID</FieldTitle>
-					<FieldDescription>Feishu self-built app App ID</FieldDescription>
+					<FieldTitle className='text-base'>{t('im.feishu_app_id')}</FieldTitle>
+					<FieldDescription>{t('im.feishu_app_id_desc')}</FieldDescription>
 				</FieldContent>
 				<Input
 					className='max-w-[420px]'
@@ -40,8 +36,8 @@ const Index = () => {
 			</Field>
 			<Field className='items-center! py-3' orientation='horizontal'>
 				<FieldContent>
-					<FieldTitle className='text-base'>App Secret</FieldTitle>
-					<FieldDescription>Feishu self-built app App Secret</FieldDescription>
+					<FieldTitle className='text-base'>{t('im.feishu_app_secret')}</FieldTitle>
+					<FieldDescription>{t('im.feishu_app_secret_desc')}</FieldDescription>
 				</FieldContent>
 				<Input
 					className='max-w-[420px]'
@@ -52,10 +48,8 @@ const Index = () => {
 			</Field>
 			<Field className='items-center! py-3' orientation='horizontal'>
 				<FieldContent>
-					<FieldTitle className='text-base'>Require Mention</FieldTitle>
-					<FieldDescription>
-						Only respond in Feishu group chats when the bot is mentioned.
-					</FieldDescription>
+					<FieldTitle className='text-base'>{t('im.feishu_require_mention')}</FieldTitle>
+					<FieldDescription>{t('im.feishu_require_mention_desc')}</FieldDescription>
 				</FieldContent>
 				<Switch
 					checked={x.form.feishu_require_mention}
@@ -64,10 +58,8 @@ const Index = () => {
 			</Field>
 			<Field className='items-start! py-3' orientation='horizontal'>
 				<FieldContent>
-					<FieldTitle className='text-base'>Allowed Group IDs</FieldTitle>
-					<FieldDescription>
-						One per line or comma-separated. Leave empty for all Feishu groups.
-					</FieldDescription>
+					<FieldTitle className='text-base'>{t('im.feishu_allowed_group_ids')}</FieldTitle>
+					<FieldDescription>{t('im.feishu_allowed_group_ids_desc')}</FieldDescription>
 				</FieldContent>
 				<Textarea
 					className='min-h-[88px] max-w-[420px]'
@@ -78,10 +70,8 @@ const Index = () => {
 			</Field>
 			<Field className='items-start! py-3' orientation='horizontal'>
 				<FieldContent>
-					<FieldTitle className='text-base'>Allowed User IDs</FieldTitle>
-					<FieldDescription>
-						One per line or comma-separated. Leave empty for all Feishu users.
-					</FieldDescription>
+					<FieldTitle className='text-base'>{t('im.feishu_allowed_user_ids')}</FieldTitle>
+					<FieldDescription>{t('im.feishu_allowed_user_ids_desc')}</FieldDescription>
 				</FieldContent>
 				<Textarea
 					className='min-h-[88px] max-w-[420px]'
@@ -93,40 +83,32 @@ const Index = () => {
 			<Separator className='my-3 h-px w-full' />
 			<Field className='items-center! py-3' orientation='horizontal'>
 				<FieldContent>
-					<FieldTitle className='text-base'>Verification Token (Optional)</FieldTitle>
-					<FieldDescription>
-						Optional. Only used when you enable webhook callback mode instead of long
-						connection.
-					</FieldDescription>
+					<FieldTitle className='text-base'>{t('im.feishu_verification_token')}</FieldTitle>
+					<FieldDescription>{t('im.feishu_verification_token_desc')}</FieldDescription>
 				</FieldContent>
 				<Input
 					className='max-w-[420px]'
 					value={x.form.feishu_verification_token}
 					onChange={event => x.updateForm('feishu_verification_token', event.target.value)}
-					placeholder='Verification Token (optional)'
+					placeholder={t('im.feishu_verification_token')}
 				/>
 			</Field>
 			<Field className='items-center! py-3' orientation='horizontal'>
 				<FieldContent>
-					<FieldTitle className='text-base'>Encrypt Key</FieldTitle>
-					<FieldDescription>
-						Optional. Only used when Feishu webhook encryption is enabled.
-					</FieldDescription>
+					<FieldTitle className='text-base'>{t('im.feishu_encrypt_key')}</FieldTitle>
+					<FieldDescription>{t('im.feishu_encrypt_key_desc')}</FieldDescription>
 				</FieldContent>
 				<Input
 					className='max-w-[420px]'
 					value={x.form.feishu_encrypt_key}
 					onChange={event => x.updateForm('feishu_encrypt_key', event.target.value)}
-					placeholder='Encrypt Key (optional)'
+					placeholder={t('im.feishu_encrypt_key')}
 				/>
 			</Field>
 			<Field className='items-start! py-3' orientation='horizontal'>
 				<FieldContent>
-					<FieldTitle className='text-base'>Webhook Callback</FieldTitle>
-					<FieldDescription>
-						Optional webhook fallback only. You do not need this for the default long connection
-						mode.
-					</FieldDescription>
+					<FieldTitle className='text-base'>{t('im.feishu_webhook_callback')}</FieldTitle>
+					<FieldDescription>{t('im.feishu_webhook_callback_desc')}</FieldDescription>
 				</FieldContent>
 				<div className='text-std-500 max-w-[420px] text-sm leading-6'>POST `/sys/im/feishu/events`</div>
 			</Field>

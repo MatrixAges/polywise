@@ -65,15 +65,17 @@ export const normalizeHeadingText = (value: string) => value.replace(/\s+/g, ' '
 export const isPostListTab = (value?: string | null): value is PostListTab =>
 	typeof value === 'string' && post_list_tabs.includes(value as PostListTab)
 
-export const for_type_tab_items = [
-	{ key: 'wiki', title: 'wiki', Icon: BookOpen },
-	{ key: 'memory', title: 'memory', Icon: Brain },
-	{ key: 'user', title: 'user', Icon: UserRound },
-	{ key: 'agent', title: 'agent', Icon: Bot }
-] as const
+export const getForTypeTabItems = (t: (key: string, options?: Record<string, unknown>) => string) =>
+	[
+		{ key: 'wiki', title: t('tab.wiki'), Icon: BookOpen },
+		{ key: 'memory', title: t('tab.memory'), Icon: Brain },
+		{ key: 'user', title: t('tab.user'), Icon: UserRound },
+		{ key: 'agent', title: t('tab.agent'), Icon: Bot }
+	] as const
 
-export const detail_tab_items = [
-	{ key: 'outline', title: 'Outline', Icon: TableOfContents },
-	{ key: 'related', title: 'Related', Icon: Paperclip },
-	{ key: 'project', title: 'Project', Icon: FolderGit2 }
-] as const
+export const getDetailTabItems = (t: (key: string, options?: Record<string, unknown>) => string) =>
+	[
+		{ key: 'outline', title: t('tab.outline'), Icon: TableOfContents },
+		{ key: 'related', title: t('tab.related'), Icon: Paperclip },
+		{ key: 'project', title: t('tab.project'), Icon: FolderGit2 }
+	] as const

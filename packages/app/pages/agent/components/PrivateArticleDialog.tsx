@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Loader2 } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/__shadcn__/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/__shadcn__/components/ui/dialog'
@@ -12,6 +13,7 @@ import { useModel } from '../context'
 import { private_article_for_types } from '../types'
 
 const Index = () => {
+	const { t } = useTranslation(['agent', 'post'])
 	const {
 		private_article_dialog_open,
 		private_article_dialog_loading,
@@ -40,7 +42,7 @@ const Index = () => {
 				'
 			>
 				<DialogHeader>
-					<DialogTitle>New article</DialogTitle>
+					<DialogTitle>{t('private_article.title', { ns: 'agent' })}</DialogTitle>
 				</DialogHeader>
 				<div className='mt-6 mb-2 px-6.5'>
 					<Textarea
@@ -55,7 +57,7 @@ const Index = () => {
 							focus-visible:ring-0
 						'
 						value={private_article_dialog_title}
-						placeholder='Untitled article'
+						placeholder={t('private_article.untitled', { ns: 'agent' })}
 						onChange={event => setPrivateArticleDialogTitle(event.target.value)}
 					></Textarea>
 				</div>
@@ -114,14 +116,19 @@ const Index = () => {
 							</SelectContent>
 						</Select>
 						<div className='flex items-center gap-3'>
-							<span className='text-std-300 text-xs'>{character_count} characters</span>
+							<span className='text-std-300 text-xs'>
+								{t('private_article.characters', {
+									ns: 'agent',
+									count: character_count
+								})}
+							</span>
 							<Button
 								variant='outline'
 								size='sm'
 								disabled={private_article_dialog_loading}
 								onClick={() => setPrivateArticleDialogOpen(false)}
 							>
-								Cancel
+								{t('private_article.cancel', { ns: 'agent' })}
 							</Button>
 							<Button
 								size='sm'
@@ -134,7 +141,11 @@ const Index = () => {
 								{private_article_dialog_loading ? (
 									<Loader2 className='size-3 animate-spin'></Loader2>
 								) : null}
-								<span>{private_article_dialog_loading ? 'Creating...' : 'Create'}</span>
+								<span>
+									{private_article_dialog_loading
+										? t('private_article.creating', { ns: 'agent' })
+										: t('private_article.create', { ns: 'agent' })}
+								</span>
 							</Button>
 						</div>
 					</div>

@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next'
+
 import { ContextMenuContent, ContextMenuItem, ContextMenuSeparator } from '@/__shadcn__/components/ui/context-menu'
 
 import { useModel } from '../context'
@@ -12,20 +14,27 @@ interface IProps {
 const Index = (props: IProps) => {
 	const { item, pin } = props
 	const { createSession, menu_tab, onRenameSession, togglePinSession, removeSession } = useModel()
+	const { t } = useTranslation('session')
 
 	return (
 		<ContextMenuContent>
 			{menu_tab !== 'im' ? (
 				<>
-					<ContextMenuItem onClick={() => createSession()}>New Session</ContextMenuItem>
+					<ContextMenuItem onClick={() => createSession()}>
+						{t('project.new_session')}
+					</ContextMenuItem>
 					<ContextMenuSeparator />
 				</>
 			) : null}
-			<ContextMenuItem onClick={() => onRenameSession(item.id, item.title)}>Rename</ContextMenuItem>
-			<ContextMenuItem onClick={() => togglePinSession(item.id)}>{pin ? 'Unpin' : 'Pin'}</ContextMenuItem>
+			<ContextMenuItem onClick={() => onRenameSession(item.id, item.title)}>
+				{t('project.rename')}
+			</ContextMenuItem>
+			<ContextMenuItem onClick={() => togglePinSession(item.id)}>
+				{pin ? t('menu.unpin', { defaultValue: 'Unpin' }) : t('menu.pin', { defaultValue: 'Pin' })}
+			</ContextMenuItem>
 			<ContextMenuSeparator />
 			<ContextMenuItem variant='destructive' onClick={() => removeSession(item.id)}>
-				Delete
+				{t('project.delete')}
 			</ContextMenuItem>
 		</ContextMenuContent>
 	)

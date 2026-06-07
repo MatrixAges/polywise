@@ -6,12 +6,15 @@ import { container } from 'tsyringe'
 
 import { Session } from '@/components'
 import { useGlobal } from '@/context'
+import { usePageLocale } from '@/hooks'
 
 import { AddModal, Menu, Preview, SidePanel } from './components'
 import { Context } from './context'
 import Model from './model'
 
 const Index = () => {
+	usePageLocale('session')
+
 	const [x] = useState(() => container.resolve(Model))
 	const global = useGlobal()
 	const { pathname, state } = useLocation()

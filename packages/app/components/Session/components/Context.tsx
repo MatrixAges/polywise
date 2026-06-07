@@ -1,4 +1,5 @@
 import { BookMarked, CalendarClock, CircleCheckBig, CircleQuestionMark, Files, Rss, ShieldBan } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 import { todo_status_icon_map } from '@/appdata'
 
@@ -6,6 +7,7 @@ import type { Context } from '@core/fst'
 
 const Index = (props: Context) => {
 	const { intent, context, tasks, files, constraints, learned, blockers } = props || {}
+	const { t } = useTranslation('components')
 
 	return (
 		<div
@@ -25,7 +27,7 @@ const Index = (props: Context) => {
 				>
 					<div className='flex items-center gap-1'>
 						<CircleQuestionMark size={12}></CircleQuestionMark>
-						<span className='font-medium'>Intent</span>
+						<span className='font-medium'>{t('session.context.intent')}</span>
 					</div>
 					<span className='text-std-500'>{intent}</span>
 				</div>
@@ -39,7 +41,7 @@ const Index = (props: Context) => {
 				>
 					<div className='flex items-center gap-1'>
 						<Rss size={12}></Rss>
-						<span className='font-medium'>Context</span>
+						<span className='font-medium'>{t('session.context.context')}</span>
 					</div>
 					<span className='text-std-500'>{context}</span>
 				</div>
@@ -53,7 +55,7 @@ const Index = (props: Context) => {
 				>
 					<div className='mb-0.5 flex items-center gap-1'>
 						<CircleCheckBig size={12}></CircleCheckBig>
-						<span className='font-medium'>Tasks</span>
+						<span className='font-medium'>{t('session.context.tasks')}</span>
 					</div>
 					<div className='flex flex-col gap-2'>
 						{tasks.map((item, index) => {
@@ -90,7 +92,7 @@ const Index = (props: Context) => {
 				>
 					<div className='mb-0.5 flex items-center gap-1'>
 						<Files size={12}></Files>
-						<span className='font-medium'>Files</span>
+						<span className='font-medium'>{t('session.context.files')}</span>
 					</div>
 					<div className='flex flex-col gap-2'>
 						{files.map((item, index) => (
@@ -122,7 +124,7 @@ const Index = (props: Context) => {
 				>
 					<div className='mb-0.5 flex items-center gap-1'>
 						<ShieldBan size={12}></ShieldBan>
-						<span className='font-medium'>Constraints</span>
+						<span className='font-medium'>{t('session.context.constraints')}</span>
 					</div>
 					<div
 						className='
@@ -151,7 +153,7 @@ const Index = (props: Context) => {
 				>
 					<div className='mb-0.5 flex items-center gap-1'>
 						<BookMarked size={12}></BookMarked>
-						<span className='font-medium'>Learned</span>
+						<span className='font-medium'>{t('session.context.learned')}</span>
 					</div>
 					<div
 						className='
@@ -180,7 +182,7 @@ const Index = (props: Context) => {
 				>
 					<div className='mb-0.5 flex items-center gap-1'>
 						<CalendarClock size={12}></CalendarClock>
-						<span className='font-medium'>Constraints</span>
+						<span className='font-medium'>{t('session.context.blockers')}</span>
 					</div>
 					<div
 						className='

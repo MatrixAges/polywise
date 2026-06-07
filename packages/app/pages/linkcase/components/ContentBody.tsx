@@ -1,5 +1,6 @@
 import { Globe, Loader } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import { MessageResponse } from '@/__shadcn__/components/ai-elements/message'
 
@@ -7,6 +8,7 @@ import { useModel } from '../context'
 
 const Index = () => {
 	const x = useModel()
+	const { t } = useTranslation('linkcase')
 	const has_content = Boolean(x.detail?.article?.content?.trim())
 
 	return (
@@ -29,7 +31,7 @@ const Index = () => {
 					'
 				>
 					<Loader className='size-4 animate-spin'></Loader>
-					<span>Loading content</span>
+					<span>{t('content.loading')}</span>
 				</div>
 			) : has_content ? (
 				<div className='page_wrap' data-streamdown>
@@ -48,9 +50,7 @@ const Index = () => {
 						'
 				>
 					<Globe className='size-5'></Globe>
-					<span>
-						{x.selected_item ? 'No fetched markdown yet' : 'Select a link to inspect content'}
-					</span>
+					<span>{x.selected_item ? t('content.empty_markdown') : t('content.select_hint')}</span>
 				</div>
 			)}
 		</div>
