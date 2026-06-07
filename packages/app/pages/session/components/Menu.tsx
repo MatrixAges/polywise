@@ -1,5 +1,6 @@
 import { Bot, FolderPlus, Folders, MessageCircleCheck, Plus } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import { Tabs, Tooltip } from '@/components'
 
@@ -8,6 +9,7 @@ import ProjectsMenu from './ProjectsMenu'
 import SessionMenu from './SessionMenu'
 
 const Index = () => {
+	const { t } = useTranslation('session')
 	const { menu_tab, setMenuTab, onToggleAddModal, createSession } = useModel()
 	const allow_create = menu_tab !== 'im'
 
@@ -35,14 +37,14 @@ const Index = () => {
 						items={[
 							{ key: 'sessions', Icon: MessageCircleCheck },
 							{ key: 'projects', Icon: Folders },
-							{ key: 'im', title: 'IM', Icon: Bot }
+							{ key: 'im', title: t('menu.im'), Icon: Bot }
 						]}
 						active={menu_tab}
 						onClick={v => setMenuTab(v as 'projects' | 'sessions' | 'im')}
 					></Tabs>
 				</div>
 				{allow_create ? (
-					<Tooltip title={menu_tab === 'projects' ? 'New Project' : 'New Session'}>
+					<Tooltip title={menu_tab === 'projects' ? t('project.new') : t('project.new_session')}>
 						<div
 							className='icon_button small'
 							onClick={menu_tab === 'projects' ? onToggleAddModal : () => createSession()}

@@ -1,3 +1,4 @@
+import i18next from 'i18next'
 import { makeAutoObservable } from 'mobx'
 
 import Setting from '@/models/setting'
@@ -30,8 +31,8 @@ import type {
 type MentionToolResponseItem = Awaited<ReturnType<typeof rpc.session.getMentionTools.query>>[number]
 
 export default class Model {
-	props = null as unknown as IPropsInput
-	setting = null as unknown as Setting
+	props: IPropsInput
+	setting: Setting
 	editor = null as TiptapEditor | null
 
 	compositing = false
@@ -101,7 +102,10 @@ export default class Model {
 	}
 
 	get mention_heading() {
-		return getMentionHeading(this.active_mention)
+		return getMentionHeading({
+			active_mention: this.active_mention,
+			t: i18next.getFixedT(null, 'components')
+		})
 	}
 
 	get mention_sections() {
@@ -186,7 +190,7 @@ export default class Model {
 
 			this.skill_items = createSkillItems({
 				items,
-				t: $t
+				t: i18next.getFixedT(null, 'components')
 			})
 			this.skill_items_loaded = true
 		} catch {

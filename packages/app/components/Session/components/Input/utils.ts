@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 
 import type { Editor as TiptapEditor } from '@tiptap/core'
+import type { TFunction } from 'i18next'
 import type {
 	ActiveMention,
 	AgentMentionItem,
@@ -24,7 +25,7 @@ import type {
 	ToolMentionItem
 } from './types'
 
-type Translate = (...args: Array<any>) => unknown
+type Translate = TFunction<'components'>
 
 export const getSubmitModes = (t: Translate) => [
 	{ label: String(t('session.input.submit_enter')), value: 'enter' },
@@ -180,8 +181,11 @@ export const filterMentionItems = (items: Array<MentionItem>, query: string) => 
 	return items.filter(item => matchesMentionQuery(item, query)).slice(0, mention_limit)
 }
 
-export const getMentionHeading = (active_mention: ActiveMention | null) =>
-	active_mention?.trigger === '/' ? 'Tools, MCPs & Skills' : 'Mentions'
+export const getMentionHeading = (args: { active_mention: ActiveMention | null; t: Translate }) => {
+	const { active_mention, t } = args
+
+	return active_mention?.trigger === '/' ? t('session.mention.tools_mcps_skills') : t('session.mention.mentions')
+}
 
 export const getMentionSections = (
 	active_mention: ActiveMention | null,

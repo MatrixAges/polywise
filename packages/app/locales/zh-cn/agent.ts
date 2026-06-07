@@ -1,9 +1,13 @@
 export default {
 	detail: {
+		info: '信息',
 		prompt: '智能体如何运行',
 		soul: '智能体在想什么',
 		identity: '智能体是谁',
 		memory: '核心记忆',
+		skills: '技能',
+		tools: '工具',
+		content: '内容',
 		select_agent: '选择一个智能体',
 		remove_title: '删除智能体',
 		remove_desc: '确认删除这个智能体吗？',
@@ -20,6 +24,10 @@ export default {
 		files: '文件',
 		select_file: '选择一个文件',
 		save: '保存'
+	},
+	menu: {
+		agents: '智能体',
+		groups: '群组'
 	},
 	skills: {
 		placeholder: '搜索并为智能体选择技能',
@@ -163,5 +171,17 @@ export default {
 		max: '最高',
 		title: '模型',
 		reasoning_effort: '推理强度'
+	},
+	toast: {
+		import_open_failed: '打开导入文件失败。',
+		import_file_required: '请选择一个 `.papk` 文件。',
+		imported: '已导入 {{name}}。',
+		import_failed: '导入智能体失败。',
+		exported: '已导出到 {{path}}。',
+		export_failed: '导出智能体失败。',
+		article_saved: '文章已保存。',
+		article_save_failed: '保存文章失败。',
+		content_required: '内容不能为空。',
+		article_added: '文章已添加。'
 	}
 } as const

@@ -107,12 +107,7 @@ export default class Index {
 			this.providers = orderProvidersByChain(res.providers, this.fallback_chain)
 		} catch (error) {
 			toast.error(
-				error instanceof Error
-					? error.message
-					: $t('service_provider.load_failed', {
-							ns: 'setting',
-							defaultValue: 'Failed to load Linkcase providers'
-						})
+				error instanceof Error ? error.message : $t('service_provider.load_failed', { ns: 'setting' })
 			)
 		} finally {
 			this.loading = false
@@ -130,10 +125,7 @@ export default class Index {
 			toast.error(
 				error instanceof Error
 					? error.message
-					: $t('service_provider.install_failed', {
-							ns: 'setting',
-							defaultValue: 'Install failed'
-						})
+					: $t('service_provider.install_failed', { ns: 'setting' })
 			)
 		} finally {
 			this.installing_id = null
@@ -150,28 +142,14 @@ export default class Index {
 			toast.success(
 				res.created
 					? action === 'recreate_profile'
-						? $t('service_provider.crawl4ai_recreated', {
-								ns: 'setting',
-								defaultValue: 'Crawl4AI profile recreated from current Chrome session'
-							})
-						: $t('service_provider.crawl4ai_created', {
-								ns: 'setting',
-								defaultValue: 'Crawl4AI profile created from current Chrome session'
-							})
-					: $t('service_provider.crawl4ai_exists', {
-							ns: 'setting',
-							defaultValue: 'Crawl4AI profile already exists'
-						})
+						? $t('service_provider.crawl4ai_recreated', { ns: 'setting' })
+						: $t('service_provider.crawl4ai_created', { ns: 'setting' })
+					: $t('service_provider.crawl4ai_exists', { ns: 'setting' })
 			)
 			await this.refreshProviders(false)
 		} catch (error) {
 			toast.error(
-				error instanceof Error
-					? error.message
-					: $t('service_provider.action_failed', {
-							ns: 'setting',
-							defaultValue: 'Provider action failed'
-						})
+				error instanceof Error ? error.message : $t('service_provider.action_failed', { ns: 'setting' })
 			)
 		} finally {
 			this.managing_action_id = null

@@ -824,7 +824,7 @@ export default class Index {
 		try {
 			await this.initImportDialogFiles()
 		} catch (error) {
-			toast.error(error instanceof Error ? error.message : 'Failed to open import files.')
+			toast.error(error instanceof Error ? error.message : $t('toast.import_open_failed', { ns: 'agent' }))
 		}
 	}
 
@@ -846,7 +846,7 @@ export default class Index {
 		const target_path = this.import_dialog_files.getAbsolutePath(args.path)
 
 		if (!target_path.toLowerCase().endsWith('.papk')) {
-			toast.error('Select a .papk file.')
+			toast.error($t('toast.import_file_required', { ns: 'agent' }))
 
 			return
 		}
@@ -878,9 +878,9 @@ export default class Index {
 				this.refreshToolLogs(),
 				this.refreshSkillLogs()
 			])
-			toast.success(`Imported ${result.agent_name}.`)
+			toast.success($t('toast.imported', { ns: 'agent', name: result.agent_name }))
 		} catch (error) {
-			toast.error(error instanceof Error ? error.message : 'Agent import failed.')
+			toast.error(error instanceof Error ? error.message : $t('toast.import_failed', { ns: 'agent' }))
 		} finally {
 			this.import_agent_loading = false
 		}
@@ -948,9 +948,9 @@ export default class Index {
 		try {
 			const result = await rpc.agent.exportPack.mutate({ agent_id: this.selected_agent_id })
 
-			toast.success(`Exported to ${result.file_path}.`)
+			toast.success($t('toast.exported', { ns: 'agent', path: result.file_path }))
 		} catch (error) {
-			toast.error(error instanceof Error ? error.message : 'Agent export failed.')
+			toast.error(error instanceof Error ? error.message : $t('toast.export_failed', { ns: 'agent' }))
 		} finally {
 			this.export_agent_loading = false
 		}
@@ -1135,7 +1135,7 @@ export default class Index {
 				await this.refreshAgentRelated()
 
 				if (!options?.silent) {
-					toast.success('Article saved.')
+					toast.success($t('toast.article_saved', { ns: 'agent' }))
 				}
 
 				return
@@ -1162,10 +1162,10 @@ export default class Index {
 			this.article_draft_for = saved_article.for as ArticleForType
 
 			if (!options?.silent) {
-				toast.success('Article saved.')
+				toast.success($t('toast.article_saved', { ns: 'agent' }))
 			}
 		} catch (error) {
-			toast.error(error instanceof Error ? error.message : 'Failed to save article.')
+			toast.error(error instanceof Error ? error.message : $t('toast.article_save_failed', { ns: 'agent' }))
 		} finally {
 			this.article_saving = false
 		}
@@ -1229,7 +1229,7 @@ export default class Index {
 		const content = this.private_article_dialog_content.trim()
 
 		if (!content) {
-			toast.error('Content is required.')
+			toast.error($t('toast.content_required', { ns: 'agent' }))
 
 			return
 		}
@@ -1248,9 +1248,9 @@ export default class Index {
 			this.article_for = saved_article.for as ArticleForType
 			await this.refreshAgentRelated()
 			this.setSelectedArticle(saved_article.id)
-			toast.success('Article added.')
+			toast.success($t('toast.article_added', { ns: 'agent' }))
 		} catch (error) {
-			toast.error(error instanceof Error ? error.message : 'Failed to save article.')
+			toast.error(error instanceof Error ? error.message : $t('toast.article_save_failed', { ns: 'agent' }))
 		} finally {
 			this.private_article_dialog_loading = false
 		}

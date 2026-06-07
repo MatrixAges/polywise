@@ -14,13 +14,13 @@ import type { PanelImperativeHandle } from 'react-resizable-panels'
 
 @injectable()
 export default class Index {
-	panel_ref = null as unknown as PanelImperativeHandle
+	panel_ref: PanelImperativeHandle = null!
 	panel_collapsed = false
 	sidebar_collapsed = false
 	maximize = false
 
-	config = null as unknown as AppConfig
-	providers = { providers: [] } as unknown as ProviderConfig
+	config: AppConfig = null!
+	providers = { providers: [] } as ProviderConfig
 	model_status = {} as ModelStatus
 	model_progress = {} as ModelProgress
 
@@ -63,7 +63,7 @@ export default class Index {
 		this.util.acts.push(deinit.unsubscribe)
 	}
 
-	setConfig(type: 'config' | 'providers', data: any, merge?: boolean) {
+	setConfig(type: 'config' | 'providers', data: unknown, merge?: boolean) {
 		return rpc.file.write.mutate({ path: `${type}.json`, data, merge })
 	}
 

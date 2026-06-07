@@ -30,49 +30,49 @@ const normalizeReportTime = (value: string) =>
 
 const Index = () => {
 	const global = useGlobal()
-	const { t: tt } = useTranslation('setting')
-	const t = global.theme
+	const { t } = useTranslation('setting')
+	const tm = global.theme
 	const l = global.locale
 	const s = global.setting
 	const a = global.auth
 	const pthink = s.config?.pthink
 	const report = s.config?.report
 	const pthink_idle_options = [
-		{ label: tt('general.option_minutes', { count: 10 }), value: '10' },
-		{ label: tt('general.option_minutes', { count: 20 }), value: '20' },
-		{ label: tt('general.option_minutes', { count: 30 }), value: '30' },
-		{ label: tt('general.option_minutes', { count: 45 }), value: '45' },
-		{ label: tt('general.option_minutes', { count: 60 }), value: '60' }
+		{ label: t('general.option_minutes', { count: 10 }), value: '10' },
+		{ label: t('general.option_minutes', { count: 20 }), value: '20' },
+		{ label: t('general.option_minutes', { count: 30 }), value: '30' },
+		{ label: t('general.option_minutes', { count: 45 }), value: '45' },
+		{ label: t('general.option_minutes', { count: 60 }), value: '60' }
 	]
 	const pthink_cooldown_options = [
-		{ label: tt('general.option_minutes', { count: 10 }), value: '10' },
-		{ label: tt('general.option_minutes', { count: 15 }), value: '15' },
-		{ label: tt('general.option_minutes', { count: 30 }), value: '30' },
-		{ label: tt('general.option_minutes', { count: 60 }), value: '60' }
+		{ label: t('general.option_minutes', { count: 10 }), value: '10' },
+		{ label: t('general.option_minutes', { count: 15 }), value: '15' },
+		{ label: t('general.option_minutes', { count: 30 }), value: '30' },
+		{ label: t('general.option_minutes', { count: 60 }), value: '60' }
 	]
 	const pthink_message_threshold_options = [
-		{ label: tt('general.option_messages', { count: 3 }), value: '3' },
-		{ label: tt('general.option_messages', { count: 6 }), value: '6' },
-		{ label: tt('general.option_messages', { count: 10 }), value: '10' },
-		{ label: tt('general.option_messages', { count: 15 }), value: '15' },
-		{ label: tt('general.option_messages', { count: 20 }), value: '20' }
+		{ label: t('general.option_messages', { count: 3 }), value: '3' },
+		{ label: t('general.option_messages', { count: 6 }), value: '6' },
+		{ label: t('general.option_messages', { count: 10 }), value: '10' },
+		{ label: t('general.option_messages', { count: 15 }), value: '15' },
+		{ label: t('general.option_messages', { count: 20 }), value: '20' }
 	]
 	const report_weekday_options = [
-		{ label: tt('general.option_monday'), value: 'mon' },
-		{ label: tt('general.option_tuesday'), value: 'tue' },
-		{ label: tt('general.option_wednesday'), value: 'wed' },
-		{ label: tt('general.option_thursday'), value: 'thu' },
-		{ label: tt('general.option_friday'), value: 'fri' },
-		{ label: tt('general.option_saturday'), value: 'sat' },
-		{ label: tt('general.option_sunday'), value: 'sun' }
+		{ label: t('general.option_monday'), value: 'mon' },
+		{ label: t('general.option_tuesday'), value: 'tue' },
+		{ label: t('general.option_wednesday'), value: 'wed' },
+		{ label: t('general.option_thursday'), value: 'thu' },
+		{ label: t('general.option_friday'), value: 'fri' },
+		{ label: t('general.option_saturday'), value: 'sat' },
+		{ label: t('general.option_sunday'), value: 'sun' }
 	]
 	const report_monthly_mode_options = [
-		{ label: tt('general.option_last_day'), value: 'last_day' },
-		{ label: tt('general.option_next_month_first_day'), value: 'next_month_first_day' }
+		{ label: t('general.option_last_day'), value: 'last_day' },
+		{ label: t('general.option_next_month_first_day'), value: 'next_month_first_day' }
 	]
 	const report_yearly_mode_options = [
-		{ label: tt('general.option_last_day'), value: 'last_day' },
-		{ label: tt('general.option_next_year_first_day'), value: 'next_year_first_day' }
+		{ label: t('general.option_last_day'), value: 'last_day' },
+		{ label: t('general.option_next_year_first_day'), value: 'next_year_first_day' }
 	]
 	const [bootstrap_password, setBootstrapPassword] = useState('')
 	const [bootstrap_confirm, setBootstrapConfirm] = useState('')
@@ -80,12 +80,12 @@ const Index = () => {
 	const [next_password_confirm, setNextPasswordConfirm] = useState('')
 
 	const onChange = useMemoizedFn((_, changed) => {
-		if ('theme' in changed) t.setTheme(changed['theme'])
+		if ('theme' in changed) tm.setTheme(changed['theme'])
 		if ('lang' in changed) void l.setLang(changed['lang'])
 	})
 
 	const { control } = useForm<{ theme: string; lang: string }>(
-		{ values: { theme: t.theme_source, lang: l.lang } },
+		{ values: { theme: tm.theme_source, lang: l.lang } },
 		onChange
 	)
 
@@ -155,7 +155,7 @@ const Index = () => {
 		)
 
 		await a.refreshStatus()
-		toast.success(enabled ? tt('general.toast_auth_enabled') : tt('general.toast_auth_disabled'))
+		toast.success(enabled ? t('general.toast_auth_enabled') : t('general.toast_auth_disabled'))
 	})
 
 	const updatePageBridgeEnabled = useMemoizedFn(async (enabled: boolean) => {
@@ -167,7 +167,7 @@ const Index = () => {
 			true
 		)
 
-		toast.success(enabled ? tt('general.toast_page_bridge_enabled') : tt('general.toast_page_bridge_disabled'))
+		toast.success(enabled ? t('general.toast_page_bridge_enabled') : t('general.toast_page_bridge_disabled'))
 	})
 
 	const updatePromptFullInject = useMemoizedFn(async (enabled: boolean) => {
@@ -181,19 +181,19 @@ const Index = () => {
 
 		toast.success(
 			enabled
-				? tt('general.toast_prompt_full_injection_enabled')
-				: tt('general.toast_prompt_full_injection_disabled')
+				? t('general.toast_prompt_full_injection_enabled')
+				: t('general.toast_prompt_full_injection_disabled')
 		)
 	})
 
 	const submitBootstrapPassword = useMemoizedFn(async () => {
 		if (bootstrap_password.length < 8) {
-			toast.error(tt('general.toast_password_too_short'))
+			toast.error(t('general.toast_password_too_short'))
 			return
 		}
 
 		if (bootstrap_password !== bootstrap_confirm) {
-			toast.error(tt('general.toast_password_mismatch'))
+			toast.error(t('general.toast_password_mismatch'))
 			return
 		}
 
@@ -201,7 +201,7 @@ const Index = () => {
 			await a.bootstrapPassword(bootstrap_password)
 			setBootstrapPassword('')
 			setBootstrapConfirm('')
-			toast.success(tt('general.toast_password_configured'))
+			toast.success(t('general.toast_password_configured'))
 		} catch (error) {
 			toast.error(error instanceof Error ? error.message : String(error))
 		}
@@ -209,12 +209,12 @@ const Index = () => {
 
 	const submitPasswordChange = useMemoizedFn(async () => {
 		if (next_password.length < 8) {
-			toast.error(tt('general.toast_new_password_too_short'))
+			toast.error(t('general.toast_new_password_too_short'))
 			return
 		}
 
 		if (next_password !== next_password_confirm) {
-			toast.error(tt('general.toast_password_mismatch'))
+			toast.error(t('general.toast_password_mismatch'))
 			return
 		}
 
@@ -222,7 +222,7 @@ const Index = () => {
 			await a.changePassword(next_password)
 			setNextPassword('')
 			setNextPasswordConfirm('')
-			toast.success(tt('general.toast_password_updated'))
+			toast.success(t('general.toast_password_updated'))
 		} catch (error) {
 			toast.error(error instanceof Error ? error.message : String(error))
 		}
@@ -231,7 +231,7 @@ const Index = () => {
 	const submitLogout = useMemoizedFn(async () => {
 		try {
 			await a.logout()
-			toast.success(tt('general.toast_logged_out'))
+			toast.success(t('general.toast_logged_out'))
 		} catch (error) {
 			toast.error(error instanceof Error ? error.message : String(error))
 		}
@@ -249,16 +249,16 @@ const Index = () => {
 				<FieldGroup className='gap-0'>
 					<Field className='items-center! py-3' orientation='horizontal'>
 						<FieldContent>
-							<FieldTitle className='text-base'>{tt('general.language')}</FieldTitle>
-							<FieldDescription>{tt('general.language_desc')}</FieldDescription>
+							<FieldTitle className='text-base'>{t('general.language')}</FieldTitle>
+							<FieldDescription>{t('general.language_desc')}</FieldDescription>
 						</FieldContent>
 						<Controller name='lang' control={control}>
 							<Select
 								items={locale_options.map(item => ({
 									label:
 										item.value === 'en'
-											? tt('general.option_english')
-											: tt('general.option_simplified_chinese'),
+											? t('general.option_english')
+											: t('general.option_simplified_chinese'),
 									value: item.value
 								}))}
 							>
@@ -267,12 +267,12 @@ const Index = () => {
 								</SelectTrigger>
 								<SelectContent align='start'>
 									<SelectGroup>
-										<SelectLabel>{tt('general.language')}</SelectLabel>
+										<SelectLabel>{t('general.language')}</SelectLabel>
 										{locale_options.map(item => (
 											<SelectItem value={item.value} key={item.value}>
 												{item.value === 'en'
-													? tt('general.option_english')
-													: tt('general.option_simplified_chinese')}
+													? t('general.option_english')
+													: t('general.option_simplified_chinese')}
 											</SelectItem>
 										))}
 									</SelectGroup>
@@ -288,8 +288,8 @@ const Index = () => {
 						orientation='horizontal'
 					>
 						<FieldContent>
-							<FieldTitle className='text-base'>{tt('general.theme')}</FieldTitle>
-							<FieldDescription>{tt('general.theme_desc')}</FieldDescription>
+							<FieldTitle className='text-base'>{t('general.theme')}</FieldTitle>
+							<FieldDescription>{t('general.theme_desc')}</FieldDescription>
 						</FieldContent>
 						<Controller name='theme' control={control}>
 							<Select items={themes.map(item => ({ label: item, value: item }))}>
@@ -298,7 +298,7 @@ const Index = () => {
 								</SelectTrigger>
 								<SelectContent align='start'>
 									<SelectGroup>
-										<SelectLabel>{tt('general.theme_label')}</SelectLabel>
+										<SelectLabel>{t('general.theme_label')}</SelectLabel>
 										{themes.map(item => (
 											<SelectItem value={item} key={item}>
 												{item}
@@ -314,8 +314,8 @@ const Index = () => {
 				<FieldGroup className='gap-0'>
 					<Field className='items-center! py-3' orientation='horizontal'>
 						<FieldContent>
-							<FieldTitle className='text-base'>{tt('general.page_bridge')}</FieldTitle>
-							<FieldDescription>{tt('general.page_bridge_desc')}</FieldDescription>
+							<FieldTitle className='text-base'>{t('general.page_bridge')}</FieldTitle>
+							<FieldDescription>{t('general.page_bridge_desc')}</FieldDescription>
 						</FieldContent>
 						<Switch
 							checked={Boolean(s.config?.page_bridge_enabled)}
@@ -325,9 +325,9 @@ const Index = () => {
 					<Field className='items-center! py-3' orientation='horizontal'>
 						<FieldContent>
 							<FieldTitle className='text-base'>
-								{tt('general.prompt_full_inject')}
+								{t('general.prompt_full_inject')}
 							</FieldTitle>
-							<FieldDescription>{tt('general.prompt_full_inject_desc')}</FieldDescription>
+							<FieldDescription>{t('general.prompt_full_inject_desc')}</FieldDescription>
 						</FieldContent>
 						<Switch
 							checked={Boolean(s.config?.prompt_full_inject)}
@@ -337,8 +337,8 @@ const Index = () => {
 					<div className='bg-border-light my-2 h-px w-full'></div>
 					<Field className='items-center! py-3' orientation='horizontal'>
 						<FieldContent>
-							<FieldTitle className='text-base'>{tt('general.auth')}</FieldTitle>
-							<FieldDescription>{tt('general.auth_desc')}</FieldDescription>
+							<FieldTitle className='text-base'>{t('general.auth')}</FieldTitle>
+							<FieldDescription>{t('general.auth_desc')}</FieldDescription>
 						</FieldContent>
 						<Switch
 							checked={Boolean(s.config?.auth?.enabled ?? a.status?.enabled)}
@@ -347,9 +347,9 @@ const Index = () => {
 					</Field>
 					<Field className='items-center! py-3' orientation='horizontal'>
 						<FieldContent>
-							<FieldTitle className='text-base'>{tt('general.auth_runtime')}</FieldTitle>
+							<FieldTitle className='text-base'>{t('general.auth_runtime')}</FieldTitle>
 							<FieldDescription>
-								{tt('general.auth_runtime_desc', {
+								{t('general.auth_runtime_desc', {
 									username: a.status?.username || 'polywiser',
 									platform: a.status?.platform || 'standalone'
 								})}
@@ -366,14 +366,14 @@ const Index = () => {
 						>
 							<div>
 								{a.status?.bootstrap_required
-									? tt('general.auth_status_bootstrap')
+									? t('general.auth_status_bootstrap')
 									: a.status?.has_account
-										? tt('general.auth_status_ready')
-										: tt('general.auth_status_disabled')}
+										? t('general.auth_status_ready')
+										: t('general.auth_status_disabled')}
 							</div>
 							{a.status?.has_account && a.authenticated && (
 								<Button variant='outline' size='sm' onClick={() => void submitLogout()}>
-									{tt('general.logout')}
+									{t('general.logout')}
 								</Button>
 							)}
 						</div>
@@ -382,10 +382,10 @@ const Index = () => {
 						<Field className='items-start! py-3' orientation='horizontal'>
 							<FieldContent>
 								<FieldTitle className='text-base'>
-									{tt('general.set_initial_password')}
+									{t('general.set_initial_password')}
 								</FieldTitle>
 								<FieldDescription>
-									{tt('general.set_initial_password_desc', {
+									{t('general.set_initial_password_desc', {
 										username: a.status.username
 									})}
 								</FieldDescription>
@@ -393,18 +393,18 @@ const Index = () => {
 							<div className='flex w-[380px] flex-col gap-2'>
 								<Input
 									type='password'
-									placeholder={tt('general.new_password')}
+									placeholder={t('general.new_password')}
 									value={bootstrap_password}
 									onChange={event => setBootstrapPassword(event.target.value)}
 								></Input>
 								<Input
 									type='password'
-									placeholder={tt('general.confirm_password')}
+									placeholder={t('general.confirm_password')}
 									value={bootstrap_confirm}
 									onChange={event => setBootstrapConfirm(event.target.value)}
 								></Input>
 								<Button onClick={() => void submitBootstrapPassword()}>
-									{tt('general.set_password')}
+									{t('general.set_password')}
 								</Button>
 							</div>
 						</Field>
@@ -413,25 +413,25 @@ const Index = () => {
 						<Field className='items-start! py-3' orientation='horizontal'>
 							<FieldContent>
 								<FieldTitle className='text-base'>
-									{tt('general.change_password')}
+									{t('general.change_password')}
 								</FieldTitle>
 								<FieldDescription>
 									{a.canChangePassword
-										? tt('general.change_password_desc_ready')
-										: tt('general.change_password_desc_login')}
+										? t('general.change_password_desc_ready')
+										: t('general.change_password_desc_login')}
 								</FieldDescription>
 							</FieldContent>
 							<div className='flex w-[380px] flex-col gap-2'>
 								<Input
 									type='password'
-									placeholder={tt('general.new_password')}
+									placeholder={t('general.new_password')}
 									value={next_password}
 									onChange={event => setNextPassword(event.target.value)}
 									disabled={!a.canChangePassword}
 								></Input>
 								<Input
 									type='password'
-									placeholder={tt('general.confirm_password')}
+									placeholder={t('general.confirm_password')}
 									value={next_password_confirm}
 									onChange={event => setNextPasswordConfirm(event.target.value)}
 									disabled={!a.canChangePassword}
@@ -440,7 +440,7 @@ const Index = () => {
 									disabled={!a.canChangePassword}
 									onClick={() => void submitPasswordChange()}
 								>
-									{tt('general.change_password_action')}
+									{t('general.change_password_action')}
 								</Button>
 							</div>
 						</Field>
@@ -450,19 +450,17 @@ const Index = () => {
 				<FieldGroup className='gap-0'>
 					<Field className='items-center! py-3' orientation='horizontal'>
 						<FieldContent>
-							<FieldTitle className='text-base'>
-								{tt('general.agent_export_dir')}
-							</FieldTitle>
-							<FieldDescription>{tt('general.agent_export_dir_desc')}</FieldDescription>
+							<FieldTitle className='text-base'>{t('general.agent_export_dir')}</FieldTitle>
+							<FieldDescription>{t('general.agent_export_dir_desc')}</FieldDescription>
 						</FieldContent>
 						<div className='flex w-[380px] items-center gap-2'>
 							<Input
 								value={s.config?.agent_export_dir || ''}
-								placeholder={tt('general.downloads_placeholder')}
+								placeholder={t('general.downloads_placeholder')}
 								onChange={event => setAgentExportDir(event.target.value)}
 							></Input>
 							<Button variant='ghost' type='button' onClick={resetAgentExportDir}>
-								{tt('general.reset')}
+								{t('general.reset')}
 							</Button>
 						</div>
 					</Field>
@@ -471,8 +469,8 @@ const Index = () => {
 				<FieldGroup className='gap-0'>
 					<Field className='items-center! py-3' orientation='horizontal'>
 						<FieldContent>
-							<FieldTitle className='text-base'>{tt('general.report')}</FieldTitle>
-							<FieldDescription>{tt('general.report_desc')}</FieldDescription>
+							<FieldTitle className='text-base'>{t('general.report')}</FieldTitle>
+							<FieldDescription>{t('general.report_desc')}</FieldDescription>
 						</FieldContent>
 						<Switch
 							checked={Boolean(report?.enabled ?? true)}
@@ -481,8 +479,8 @@ const Index = () => {
 					</Field>
 					<Field className='items-center! py-3' orientation='horizontal'>
 						<FieldContent>
-							<FieldTitle className='text-base'>{tt('general.daily_report')}</FieldTitle>
-							<FieldDescription>{tt('general.daily_report_desc')}</FieldDescription>
+							<FieldTitle className='text-base'>{t('general.daily_report')}</FieldTitle>
+							<FieldDescription>{t('general.daily_report_desc')}</FieldDescription>
 						</FieldContent>
 						<div className='flex w-[380px] items-center gap-2'>
 							<Switch
@@ -503,8 +501,8 @@ const Index = () => {
 					</Field>
 					<Field className='items-center! py-3' orientation='horizontal'>
 						<FieldContent>
-							<FieldTitle className='text-base'>{tt('general.weekly_report')}</FieldTitle>
-							<FieldDescription>{tt('general.weekly_report_desc')}</FieldDescription>
+							<FieldTitle className='text-base'>{t('general.weekly_report')}</FieldTitle>
+							<FieldDescription>{t('general.weekly_report_desc')}</FieldDescription>
 						</FieldContent>
 						<div className='flex w-[380px] items-center gap-2'>
 							<Switch
@@ -527,7 +525,7 @@ const Index = () => {
 								</SelectTrigger>
 								<SelectContent align='start'>
 									<SelectGroup>
-										<SelectLabel>{tt('general.weekday_label')}</SelectLabel>
+										<SelectLabel>{t('general.weekday_label')}</SelectLabel>
 										{report_weekday_options.map(item => (
 											<SelectItem value={item.value} key={item.value}>
 												{item.label}
@@ -550,8 +548,8 @@ const Index = () => {
 					</Field>
 					<Field className='items-center! py-3' orientation='horizontal'>
 						<FieldContent>
-							<FieldTitle className='text-base'>{tt('general.monthly_report')}</FieldTitle>
-							<FieldDescription>{tt('general.monthly_report_desc')}</FieldDescription>
+							<FieldTitle className='text-base'>{t('general.monthly_report')}</FieldTitle>
+							<FieldDescription>{t('general.monthly_report_desc')}</FieldDescription>
 						</FieldContent>
 						<div className='flex w-[380px] items-center gap-2'>
 							<Switch
@@ -574,9 +572,7 @@ const Index = () => {
 								</SelectTrigger>
 								<SelectContent align='start'>
 									<SelectGroup>
-										<SelectLabel>
-											{tt('general.monthly_mode_label')}
-										</SelectLabel>
+										<SelectLabel>{t('general.monthly_mode_label')}</SelectLabel>
 										{report_monthly_mode_options.map(item => (
 											<SelectItem value={item.value} key={item.value}>
 												{item.label}
@@ -599,8 +595,8 @@ const Index = () => {
 					</Field>
 					<Field className='items-center! py-3' orientation='horizontal'>
 						<FieldContent>
-							<FieldTitle className='text-base'>{tt('general.yearly_report')}</FieldTitle>
-							<FieldDescription>{tt('general.yearly_report_desc')}</FieldDescription>
+							<FieldTitle className='text-base'>{t('general.yearly_report')}</FieldTitle>
+							<FieldDescription>{t('general.yearly_report_desc')}</FieldDescription>
 						</FieldContent>
 						<div className='flex w-[380px] items-center gap-2'>
 							<Switch
@@ -623,7 +619,7 @@ const Index = () => {
 								</SelectTrigger>
 								<SelectContent align='start'>
 									<SelectGroup>
-										<SelectLabel>{tt('general.yearly_mode_label')}</SelectLabel>
+										<SelectLabel>{t('general.yearly_mode_label')}</SelectLabel>
 										{report_yearly_mode_options.map(item => (
 											<SelectItem value={item.value} key={item.value}>
 												{item.label}
@@ -649,8 +645,8 @@ const Index = () => {
 				<FieldGroup className='gap-0'>
 					<Field className='items-center! py-3' orientation='horizontal'>
 						<FieldContent>
-							<FieldTitle className='text-base'>{tt('general.post_think')}</FieldTitle>
-							<FieldDescription>{tt('general.post_think_desc')}</FieldDescription>
+							<FieldTitle className='text-base'>{t('general.post_think')}</FieldTitle>
+							<FieldDescription>{t('general.post_think_desc')}</FieldDescription>
 						</FieldContent>
 						<Switch
 							checked={Boolean(pthink?.enabled)}
@@ -659,8 +655,8 @@ const Index = () => {
 					</Field>
 					<Field className='items-center! py-3' orientation='horizontal'>
 						<FieldContent>
-							<FieldTitle className='text-base'>{tt('general.idle_grace')}</FieldTitle>
-							<FieldDescription>{tt('general.idle_grace_desc')}</FieldDescription>
+							<FieldTitle className='text-base'>{t('general.idle_grace')}</FieldTitle>
+							<FieldDescription>{t('general.idle_grace_desc')}</FieldDescription>
 						</FieldContent>
 						<Select
 							items={pthink_idle_options}
@@ -674,7 +670,7 @@ const Index = () => {
 							</SelectTrigger>
 							<SelectContent align='start'>
 								<SelectGroup>
-									<SelectLabel>{tt('general.idle_grace')}</SelectLabel>
+									<SelectLabel>{t('general.idle_grace')}</SelectLabel>
 									{pthink_idle_options.map(item => (
 										<SelectItem value={item.value} key={item.value}>
 											{item.label}
@@ -687,9 +683,9 @@ const Index = () => {
 					<Field className='items-center! py-3' orientation='horizontal'>
 						<FieldContent>
 							<FieldTitle className='text-base'>
-								{tt('general.message_threshold')}
+								{t('general.message_threshold')}
 							</FieldTitle>
-							<FieldDescription>{tt('general.message_threshold_desc')}</FieldDescription>
+							<FieldDescription>{t('general.message_threshold_desc')}</FieldDescription>
 						</FieldContent>
 						<Select
 							items={pthink_message_threshold_options}
@@ -701,7 +697,7 @@ const Index = () => {
 							</SelectTrigger>
 							<SelectContent align='start'>
 								<SelectGroup>
-									<SelectLabel>{tt('general.message_threshold')}</SelectLabel>
+									<SelectLabel>{t('general.message_threshold')}</SelectLabel>
 									{pthink_message_threshold_options.map(item => (
 										<SelectItem value={item.value} key={item.value}>
 											{item.label}
@@ -713,8 +709,8 @@ const Index = () => {
 					</Field>
 					<Field className='items-center! py-3' orientation='horizontal'>
 						<FieldContent>
-							<FieldTitle className='text-base'>{tt('general.review_cooldown')}</FieldTitle>
-							<FieldDescription>{tt('general.review_cooldown_desc')}</FieldDescription>
+							<FieldTitle className='text-base'>{t('general.review_cooldown')}</FieldTitle>
+							<FieldDescription>{t('general.review_cooldown_desc')}</FieldDescription>
 						</FieldContent>
 						<Select
 							items={pthink_cooldown_options}
@@ -730,7 +726,7 @@ const Index = () => {
 							</SelectTrigger>
 							<SelectContent align='start'>
 								<SelectGroup>
-									<SelectLabel>{tt('general.review_cooldown')}</SelectLabel>
+									<SelectLabel>{t('general.review_cooldown')}</SelectLabel>
 									{pthink_cooldown_options.map(item => (
 										<SelectItem value={item.value} key={item.value}>
 											{item.label}
@@ -742,10 +738,8 @@ const Index = () => {
 					</Field>
 					<Field className='items-center! py-3' orientation='horizontal'>
 						<FieldContent>
-							<FieldTitle className='text-base'>
-								{tt('general.skill_generation')}
-							</FieldTitle>
-							<FieldDescription>{tt('general.skill_generation_desc')}</FieldDescription>
+							<FieldTitle className='text-base'>{t('general.skill_generation')}</FieldTitle>
+							<FieldDescription>{t('general.skill_generation_desc')}</FieldDescription>
 						</FieldContent>
 						<Switch
 							checked={Boolean(pthink?.skill_generation_enabled ?? true)}
@@ -756,8 +750,8 @@ const Index = () => {
 					</Field>
 					<Field className='items-center! py-3' orientation='horizontal'>
 						<FieldContent>
-							<FieldTitle className='text-base'>{tt('general.tool_generation')}</FieldTitle>
-							<FieldDescription>{tt('general.tool_generation_desc')}</FieldDescription>
+							<FieldTitle className='text-base'>{t('general.tool_generation')}</FieldTitle>
+							<FieldDescription>{t('general.tool_generation_desc')}</FieldDescription>
 						</FieldContent>
 						<Switch
 							checked={Boolean(pthink?.tool_generation_enabled ?? true)}

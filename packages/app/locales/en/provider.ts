@@ -33,7 +33,9 @@ export default {
 	},
 	upload: {
 		validate_error_prefix: '[Validate error]: ',
-		upload_error: '[Upload error]: please check config format.'
+		upload_error: '[Upload error]: please check config format.',
+		import_error_title: 'Import Error',
+		import_error_desc: 'The fields in the imported configuration do not match. {{error}}'
 	},
 	form: {
 		apiKey: 'API Key',
@@ -79,6 +81,24 @@ export default {
 		}
 	},
 	coding_plan: {
-		title: 'Coding Plan'
+		title: 'Coding Plan',
+		per_month: '/Month',
+		open_code_go: {
+			name: 'OpenCode Go',
+			desc: 'Use strong leading open-source AI models through stable, high-quota access at lower cost for developers worldwide.',
+			comment: 'Cheapest, most stable, and most popular.'
+		},
+		xiaomi_mimo: {
+			name: 'Xiaomi Mimo Coding Plan'
+		},
+		minimax: {
+			name: 'MiniMax Coding Plan'
+		},
+		bytedance_ark: {
+			name: 'Bytedance Ark Coding Plan'
+		},
+		aliyun_bailian: {
+			name: 'Aliyun Bailian Coding Plan'
+		}
 	}
 }

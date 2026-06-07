@@ -566,14 +566,14 @@ export default class Model {
 				}
 				this.wechat_qr_verify_code = ''
 				await this.persistForm({
-					success_message: 'WeChat connected and saved.'
+					success_message: $t('im.toast_wechat_connected_saved', { ns: 'setting' })
 				})
 				this.closeWechatQrDialog()
 				return
 			}
 
 			if (result.status === 'already_connected') {
-				toast.success('This WeChat account is already connected.')
+				toast.success($t('im.toast_wechat_already_connected', { ns: 'setting' }))
 				return
 			}
 
@@ -598,7 +598,7 @@ export default class Model {
 
 	async submitWechatQrVerifyCode() {
 		if (!this.wechat_qr_verify_code.trim()) {
-			toast.error('Verification code is required')
+			toast.error($t('im.toast_verification_code_required', { ns: 'setting' }))
 			return
 		}
 
@@ -647,7 +647,12 @@ export default class Model {
 		await this.load(saved.id)
 
 		if (!options?.silent) {
-			toast.success(options?.success_message || (is_editing ? 'IM account updated' : 'IM account created'))
+			toast.success(
+				options?.success_message ||
+					(is_editing
+						? $t('im.toast_account_updated', { ns: 'setting' })
+						: $t('im.toast_account_created', { ns: 'setting' }))
+			)
 		}
 
 		return saved
@@ -799,7 +804,7 @@ export default class Model {
 			await rpc.im.remove.mutate(this.form.id)
 			await rpc.im.reload.mutate()
 			await this.load('')
-			toast.success('IM account removed')
+			toast.success($t('im.toast_account_removed', { ns: 'setting' }))
 		} catch (error) {
 			toast.error(error instanceof Error ? error.message : String(error))
 		} finally {
@@ -814,7 +819,7 @@ export default class Model {
 			const res = await rpc.im.reload.mutate()
 			this.health = res.health
 			await this.load(this.selectedId)
-			toast.success('IM runtime reloaded')
+			toast.success($t('im.toast_runtime_reloaded', { ns: 'setting' }))
 		} catch (error) {
 			toast.error(error instanceof Error ? error.message : String(error))
 		} finally {

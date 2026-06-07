@@ -19,18 +19,14 @@ import type { ArgsInit, Toc } from './types'
 
 export default class Index {
 	id = ''
-	editor = null as unknown as EditorWithContentComponent
+	editor: EditorWithContentComponent = null!
 	mounted = false
-	debounced_on_change = null as unknown as {
-		(v: string): void
-		cancel: () => void
-		flush: () => void
-	}
+	debounced_on_change: ((v: string) => void) & { cancel: () => void; flush: () => void } = null!
 	on_character_count_change = null as ((count: number) => void) | null
 
-	ref_container = null as unknown as HTMLDivElement
-	ref_action_bar = null as unknown as HTMLDivElement
-	ref_menu = null as unknown as HTMLDivElement
+	ref_container: HTMLDivElement = null!
+	ref_action_bar: HTMLDivElement = null!
+	ref_menu: HTMLDivElement = null!
 
 	signal = 0
 	focus = null as 'table' | null
@@ -132,7 +128,7 @@ export default class Index {
 
 				this.emitCharacterCount(onCharacterCountChange, editor)
 			}
-		}) as Index['editor']
+		}) as EditorWithContentComponent
 
 		this.on()
 	}
@@ -373,7 +369,8 @@ export default class Index {
 
 		window.$app.Event.off(`${this.id}/editor/ShowModal`, this.showModal)
 
-		this.ref_container = null as unknown as Index['ref_container']
-		this.ref_action_bar = null as unknown as Index['ref_container']
+		this.ref_container = null!
+		this.ref_action_bar = null!
+		this.ref_menu = null!
 	}
 }

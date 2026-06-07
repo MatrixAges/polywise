@@ -80,7 +80,7 @@ const Index = (props: DrawerProps) => {
 	useClickAway(e => {
 		if (!maskClosable || e.target !== ref_content_wrap.current) return
 
-		onClose?.(e as unknown as MouseEvent<HTMLDivElement>)
+		onClose?.()
 	}, ref_content)
 
 	const { align, transform, style } = useMemo(() => {

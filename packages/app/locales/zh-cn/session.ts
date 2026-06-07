@@ -7,9 +7,12 @@ export default {
 		confirm: '确认',
 		new_session: '新建会话',
 		rename: '重命名',
-		delete: '删除'
+		delete: '删除',
+		remove_title: '删除项目',
+		remove_desc: '确认删除这个项目以及所有相关会话吗？'
 	},
 	menu: {
+		im: 'IM',
 		loading: '加载中...',
 		load_more: '加载更多',
 		show_more: '显示更多',

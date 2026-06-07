@@ -1,5 +1,6 @@
 import { Bot, HardDriveDownload, MessagesSquare, PanelLeftOpen, Plus, Sparkles } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import { Tabs } from '@/components'
 
@@ -13,6 +14,7 @@ import PrivateArticleDialog from './PrivateArticleDialog'
 import { SkillDialog } from './Skill'
 
 const Index = () => {
+	const { t } = useTranslation('agent')
 	const {
 		menu_scope,
 		page_mode,
@@ -48,8 +50,8 @@ const Index = () => {
 						<Tabs
 							small
 							items={[
-								{ key: 'agent', title: 'Agents', Icon: Bot },
-								{ key: 'group', title: 'Groups', Icon: MessagesSquare }
+								{ key: 'agent', title: t('menu.agents'), Icon: Bot },
+								{ key: 'group', title: t('menu.groups'), Icon: MessagesSquare }
 							]}
 							active={menu_scope}
 							onClick={v => setMenuScope(v as 'agent' | 'group')}

@@ -185,7 +185,13 @@ export default {
 		installed: '已安装',
 		install: '安装',
 		create_from_chrome: '从 Chrome 创建',
-		recreate_profile: '重建配置档'
+		recreate_profile: '重建配置档',
+		load_failed: '加载 Linkcase 内容提供方失败',
+		install_failed: '安装失败',
+		crawl4ai_recreated: '已基于当前 Chrome 会话重建 Crawl4AI 配置档',
+		crawl4ai_created: '已基于当前 Chrome 会话创建 Crawl4AI 配置档',
+		crawl4ai_exists: 'Crawl4AI 配置档已存在',
+		action_failed: '提供方操作失败'
 	},
 	im: {
 		accounts_title: '已有账号',
@@ -308,6 +314,13 @@ export default {
 		current_scope_all: '当前范围：全部智能体',
 		current_scope_selected: '当前范围：已选择 {{count}} 个',
 		enabled_tools: '已启用工具',
-		enabled_tools_desc: '关闭那些不应在 IM 绑定会话中可用的工具。'
+		enabled_tools_desc: '关闭那些不应在 IM 绑定会话中可用的工具。',
+		toast_wechat_connected_saved: '微信已连接并保存。',
+		toast_wechat_already_connected: '这个微信账号已经连接。',
+		toast_verification_code_required: '验证码不能为空。',
+		toast_account_updated: 'IM 账号已更新。',
+		toast_account_created: 'IM 账号已创建。',
+		toast_account_removed: 'IM 账号已删除。',
+		toast_runtime_reloaded: 'IM 运行时已重新加载。'
 	}
 } as const

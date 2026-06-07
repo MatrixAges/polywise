@@ -26,8 +26,8 @@ interface GroupAgentSummary {
 @injectable()
 export default class Index {
 	id = ''
-	ref_container = null as unknown as HTMLDivElement
-	ref_bottom_signal = null as unknown as HTMLDivElement
+	ref_container: HTMLDivElement = null!
+	ref_bottom_signal: HTMLDivElement = null!
 
 	inited = false
 	wheeled = false
@@ -35,12 +35,12 @@ export default class Index {
 	has_older = false
 	has_newer = false
 
-	chat = null as unknown as Chat<Message>
-	session = {} as unknown as Session
-	context = null as unknown as Context
+	chat: Chat<Message> = null!
+	session = {} as Session
+	context: Context = null!
 	status = 'ready' as AbstractChat<Message>['status']
 	messages = [] as AbstractChat<Message>['messages']
-	permission = null as unknown as Permission
+	permission: Permission = null!
 	archived_at = null as null | number
 	mode = 'normal' as 'normal' | 'plan' | 'plan-exec'
 	audit_mode = 'auto' as 'limited' | 'auto' | 'full'
@@ -141,7 +141,7 @@ export default class Index {
 							this.runtime_config = runtime_config ?? { ...default_session_runtime_config }
 							this.group_agents = res.data.group?.agents ?? []
 
-							const target_messages = messages as unknown as Array<Message>
+							const target_messages = messages as Array<Message>
 
 							if (this.session.unread) rpc.session.unread.mutate(this.id)
 
@@ -158,7 +158,7 @@ export default class Index {
 								}
 							}
 
-							this.chat.setMessages(target_messages as unknown as Array<Message>)
+							this.chat.setMessages(target_messages as Array<Message>)
 
 							if (
 								this.session.is_runing &&
@@ -274,7 +274,7 @@ export default class Index {
 
 		this.chat.clearMessages()
 
-		this.permission = null as unknown as Permission
+		this.permission = null!
 		this.messages = []
 
 		this.update()
@@ -289,15 +289,15 @@ export default class Index {
 	async approvePermission(approved: boolean) {
 		rpc.session.permission.mutate({ id: this.id, approved })
 
-		this.permission = null as unknown as Permission
+		this.permission = null!
 
 		this.update()
 	}
 
 	async clear() {
 		const res = await alert({
-			title: 'Clear Messages',
-			desc: 'Confirm clearing all message history?'
+			title: $t('session.alerts.clear_title', { ns: 'components' }),
+			desc: $t('session.alerts.clear_desc', { ns: 'components' })
 		})
 
 		if (!res) return
@@ -311,8 +311,8 @@ export default class Index {
 		if (this.status === 'streaming' || this.status === 'submitted') return
 
 		const res = await alert({
-			title: 'Delete Message',
-			desc: 'Confirm deleting this message?'
+			title: $t('session.alerts.delete_title', { ns: 'components' }),
+			desc: $t('session.alerts.delete_desc', { ns: 'components' })
 		})
 
 		if (!res) return
@@ -322,8 +322,8 @@ export default class Index {
 
 	async archive() {
 		const res = await alert({
-			title: 'Archive Session Messages',
-			desc: 'Confirm archiving current context and loaded messages?'
+			title: $t('session.alerts.archive_title', { ns: 'components' }),
+			desc: $t('session.alerts.archive_desc', { ns: 'components' })
 		})
 
 		if (!res) return
@@ -398,12 +398,12 @@ export default class Index {
 		this.has_older = false
 		this.has_newer = false
 
-		this.chat = null as unknown as Chat<Message>
-		this.session = {} as unknown as Session
-		this.context = null as unknown as Context
+		this.chat = null!
+		this.session = {} as Session
+		this.context = null!
 		this.status = 'ready' as AbstractChat<Message>['status']
 		this.messages = [] as AbstractChat<Message>['messages']
-		this.permission = null as unknown as Permission
+		this.permission = null!
 		this.archived_at = null as null | number
 		this.mode = 'normal'
 		this.audit_mode = 'auto'

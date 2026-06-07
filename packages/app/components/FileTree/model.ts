@@ -9,8 +9,8 @@ import type { IProps } from '.'
 
 @injectable()
 export default class Index {
-	container = null as unknown as HTMLDivElement
-	tree = null as unknown as FileTree
+	container: HTMLDivElement = null!
+	tree: FileTree = null!
 	paths = [] as Array<string>
 	off_mutation = null as null | (() => void)
 

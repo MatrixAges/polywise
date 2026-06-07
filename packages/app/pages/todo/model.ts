@@ -23,7 +23,7 @@ export default class Index {
 	menu_data = {} as RPCOutput['todo']['getMenuData']
 	kanban_data = {} as KanbanData
 	selected_todo_id = ''
-	detail_todo = null as unknown as Todo
+	detail_todo: Todo = null!
 	drag_todo = null as KanbanTodo | null
 	archive_open = false
 	archive_page = 1
@@ -69,7 +69,7 @@ export default class Index {
 	setType(v: string) {
 		this.type = v
 		this.selected_todo_id = ''
-		this.detail_todo = null as unknown as Todo
+		this.detail_todo = null!
 
 		this.getTodos()
 	}
@@ -106,7 +106,7 @@ export default class Index {
 
 	closeTodoDetail() {
 		this.selected_todo_id = ''
-		this.detail_todo = null as unknown as Todo
+		this.detail_todo = null!
 	}
 
 	onDragStart(args: DragStartEvent) {
@@ -116,7 +116,7 @@ export default class Index {
 		const active_index = active.data.current?.index
 
 		this.selected_todo_id = ''
-		this.detail_todo = null as unknown as Todo
+		this.detail_todo = null!
 		this.drag_todo = this.kanban_data[active_status][active_index]
 	}
 
@@ -184,7 +184,7 @@ export default class Index {
 		if (!res) return
 
 		this.selected_todo_id = ''
-		this.detail_todo = null as unknown as Todo
+		this.detail_todo = null!
 
 		await rpc.todo.remove.mutate({ id })
 

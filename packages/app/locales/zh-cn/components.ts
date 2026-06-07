@@ -34,6 +34,8 @@ export default {
 			archive: '归档'
 		},
 		mention: {
+			tools_mcps_skills: '工具、MCP 与技能',
+			mentions: '提及项',
 			type_to_search: '输入开始搜索',
 			loading: '加载中...',
 			no_matches: '未找到匹配项。',
@@ -58,6 +60,14 @@ export default {
 			path: '路径',
 			deny: '拒绝',
 			allow: '允许'
+		},
+		alerts: {
+			clear_title: '清空消息',
+			clear_desc: '确认清空全部消息历史吗？',
+			delete_title: '删除消息',
+			delete_desc: '确认删除这条消息吗？',
+			archive_title: '归档会话消息',
+			archive_desc: '确认归档当前上下文和已加载的消息吗？'
 		},
 		question: {
 			label: '问题',

@@ -34,6 +34,8 @@ export default {
 			archive: 'Archive'
 		},
 		mention: {
+			tools_mcps_skills: 'Tools, MCPs & Skills',
+			mentions: 'Mentions',
 			type_to_search: 'Type to search',
 			loading: 'Loading...',
 			no_matches: 'No matches found.',
@@ -59,6 +61,14 @@ export default {
 			path: 'Path',
 			deny: 'Deny',
 			allow: 'Allow'
+		},
+		alerts: {
+			clear_title: 'Clear Messages',
+			clear_desc: 'Confirm clearing all message history?',
+			delete_title: 'Delete Message',
+			delete_desc: 'Confirm deleting this message?',
+			archive_title: 'Archive Session Messages',
+			archive_desc: 'Confirm archiving current context and loaded messages?'
 		},
 		question: {
 			label: 'question',

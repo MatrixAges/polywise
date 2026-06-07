@@ -191,7 +191,13 @@ export default {
 		installed: 'Installed',
 		install: 'Install',
 		create_from_chrome: 'Create From Chrome',
-		recreate_profile: 'Recreate Profile'
+		recreate_profile: 'Recreate Profile',
+		load_failed: 'Failed to load Linkcase providers',
+		install_failed: 'Install failed',
+		crawl4ai_recreated: 'Crawl4AI profile recreated from current Chrome session',
+		crawl4ai_created: 'Crawl4AI profile created from current Chrome session',
+		crawl4ai_exists: 'Crawl4AI profile already exists',
+		action_failed: 'Provider action failed'
 	},
 	im: {
 		accounts_title: 'Existing Accounts',
@@ -321,6 +327,13 @@ export default {
 		current_scope_all: 'Current scope: all agents',
 		current_scope_selected: 'Current scope: {{count}} selected',
 		enabled_tools: 'Enabled Tools',
-		enabled_tools_desc: 'Turn off tools that should not be available in IM-linked sessions.'
+		enabled_tools_desc: 'Turn off tools that should not be available in IM-linked sessions.',
+		toast_wechat_connected_saved: 'WeChat connected and saved.',
+		toast_wechat_already_connected: 'This WeChat account is already connected.',
+		toast_verification_code_required: 'Verification code is required.',
+		toast_account_updated: 'IM account updated.',
+		toast_account_created: 'IM account created.',
+		toast_account_removed: 'IM account removed.',
+		toast_runtime_reloaded: 'IM runtime reloaded.'
 	}
 } as const

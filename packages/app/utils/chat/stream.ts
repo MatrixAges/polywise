@@ -19,13 +19,16 @@ export interface StreamingUIMessageState<UI_MESSAGE extends UIMessage> {
 	finishReason?: string
 }
 
-const createAssistantMessage = <UI_MESSAGE extends UIMessage>(message_id = '') =>
-	({
+const createAssistantMessage = <UI_MESSAGE extends UIMessage>(message_id = '') => {
+	const message: UIMessage = {
 		id: message_id,
 		role: 'assistant',
 		metadata: undefined,
 		parts: []
-	}) as unknown as UI_MESSAGE
+	}
+
+	return message as UI_MESSAGE
+}
 
 export const createStreamingUIMessageState = <UI_MESSAGE extends UIMessage>(args: {
 	lastMessage: UI_MESSAGE | undefined

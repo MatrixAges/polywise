@@ -104,10 +104,10 @@ export type MessageResponseProps = ComponentProps<typeof Streamdown>
 // `streamdown` and the standalone plugin packages can resolve different
 // `unified` instances, so we normalize them to `streamdown`'s plugin types here.
 const streamdownPlugins: PluginConfig = {
-	cjk: cjk as unknown as StreamdownCjkPlugin,
-	code: code as unknown as StreamdownCodeHighlighterPlugin,
-	math: math as unknown as StreamdownMathPlugin,
-	mermaid: mermaid as unknown as StreamdownDiagramPlugin
+	cjk: cjk as StreamdownCjkPlugin,
+	code: code as StreamdownCodeHighlighterPlugin,
+	math: math as StreamdownMathPlugin,
+	mermaid: mermaid as StreamdownDiagramPlugin
 }
 
 export const MessageResponse = memo(

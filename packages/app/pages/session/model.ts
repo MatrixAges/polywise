@@ -581,8 +581,8 @@ export default class Index {
 
 	async removeProject(project_item: Project) {
 		const res = await alert({
-			title: 'Remove Project',
-			desc: 'Confirm remove project and all related sessions?'
+			title: $t('project.remove_title', { ns: 'session' }),
+			desc: $t('project.remove_desc', { ns: 'session' })
 		})
 
 		if (!res) return

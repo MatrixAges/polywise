@@ -22,15 +22,15 @@ import { useModel } from '../context'
 import type { AgentTab } from '../types'
 
 const tabs = [
-	{ key: 'info', title: 'info', Icon: Info },
-	{ key: 'prompt', title: 'prompt', Icon: MessageSquareText },
-	{ key: 'soul', title: 'soul', Icon: Brain },
-	{ key: 'identity', title: 'identity', Icon: UserRound },
-	{ key: 'memory', title: 'memory', Icon: Database },
-	{ key: 'skills', title: 'skills', Icon: Sparkles },
-	{ key: 'tools', title: 'tools', Icon: Wrench },
-	{ key: 'content', title: 'content', Icon: BookOpenText },
-	{ key: 'graph', title: 'graph', Icon: GitBranch }
+	{ key: 'info', Icon: Info },
+	{ key: 'prompt', Icon: MessageSquareText },
+	{ key: 'soul', Icon: Brain },
+	{ key: 'identity', Icon: UserRound },
+	{ key: 'memory', Icon: Database },
+	{ key: 'skills', Icon: Sparkles },
+	{ key: 'tools', Icon: Wrench },
+	{ key: 'content', Icon: BookOpenText },
+	{ key: 'graph', Icon: GitBranch }
 ] as const
 
 interface IProps {
@@ -66,6 +66,29 @@ const Index = ({ active_tab }: IProps) => {
 		await removeAgent(selected_agent_id)
 	}
 
+	const getTabTitle = (key: (typeof tabs)[number]['key']) => {
+		switch (key) {
+			case 'info':
+				return t('detail.info')
+			case 'prompt':
+				return t('detail.prompt')
+			case 'soul':
+				return t('detail.soul')
+			case 'identity':
+				return t('detail.identity')
+			case 'memory':
+				return t('detail.memory')
+			case 'skills':
+				return t('detail.skills')
+			case 'tools':
+				return t('detail.tools')
+			case 'content':
+				return t('detail.content')
+			case 'graph':
+				return t('detail.graph')
+		}
+	}
+
 	return (
 		<div
 			className='
@@ -97,7 +120,7 @@ const Index = ({ active_tab }: IProps) => {
 							onClick={() => setCurrentTab(item.key)}
 						>
 							<Icon className='size-3.5'></Icon>
-							<span>{item.title}</span>
+							<span>{getTabTitle(item.key)}</span>
 						</button>
 					)
 				})}

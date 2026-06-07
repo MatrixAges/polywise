@@ -3,50 +3,49 @@ import { useTranslation } from 'react-i18next'
 
 import styles from '../index.module.css'
 
-const plans = [
-	{
-		name: 'OpenCode Go',
-		desc: 'Go 通过稳定、高额度地接入强大的领先开源 AI 模型，以更低成本为全球开发者提供智能编码能力。',
-		comment: '最便宜、最稳定、也最流行。',
-		month: '$10',
-		link: 'https://opencode.ai/go',
-		tier1: true
-	},
-	{
-		name: 'Xiaomi Mimo Coding Plan',
-		month: '$50',
-		link: 'https://platform.xiaomimimo.com/token-plan',
-		tier2: true
-	},
-	{
-		name: 'MiniMax Coding Plan',
-		month: '$20',
-		link: 'https://platform.minimax.io/subscribe/coding-plan',
-		tier2: true
-	},
-	{
-		name: 'Bytedance Ark Coding Plan',
-		link: 'https://www.volcengine.com/activity/codingplan',
-		tier3: true
-	},
-	{
-		name: 'Aliyun Bailian Coding Plan',
-		link: 'https://www.aliyun.com/benefit/scene/codingplan',
-		tier3: true
-	}
-] as Array<{
-	name: string
-	desc: string
-	month: string
-	link: string
-	comment?: string
-	tier1?: boolean
-	tier2?: boolean
-	tier3?: boolean
-}>
-
 const Index = () => {
 	const { t } = useTranslation()
+	const plans = [
+		{
+			name: t('provider.coding_plan.open_code_go.name'),
+			desc: t('provider.coding_plan.open_code_go.desc'),
+			comment: t('provider.coding_plan.open_code_go.comment'),
+			month: '$10',
+			link: 'https://opencode.ai/go',
+			tier1: true
+		},
+		{
+			name: t('provider.coding_plan.xiaomi_mimo.name'),
+			month: '$50',
+			link: 'https://platform.xiaomimimo.com/token-plan',
+			tier2: true
+		},
+		{
+			name: t('provider.coding_plan.minimax.name'),
+			month: '$20',
+			link: 'https://platform.minimax.io/subscribe/coding-plan',
+			tier2: true
+		},
+		{
+			name: t('provider.coding_plan.bytedance_ark.name'),
+			link: 'https://www.volcengine.com/activity/codingplan',
+			tier3: true
+		},
+		{
+			name: t('provider.coding_plan.aliyun_bailian.name'),
+			link: 'https://www.aliyun.com/benefit/scene/codingplan',
+			tier3: true
+		}
+	] as Array<{
+		name: string
+		desc?: string
+		month?: string
+		link: string
+		comment?: string
+		tier1?: boolean
+		tier2?: boolean
+		tier3?: boolean
+	}>
 
 	return (
 		<div className='flex flex-col gap-2.5 pb-20'>
@@ -134,7 +133,12 @@ const Index = () => {
 								group-hover:text-std-black
 							'
 						>
-							{month && <span className='font-mono'>{month}/Month</span>}
+							{month && (
+								<span className='font-mono'>
+									{month}
+									{t('provider.coding_plan.per_month')}
+								</span>
+							)}
 							<ArrowUpRight size={16}></ArrowUpRight>
 						</div>
 					</a>

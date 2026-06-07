@@ -22,7 +22,7 @@ export default class Index {
 	adding_provider = false
 	all_providers = [] as Array<ConfigProvider>
 
-	onChange = null as unknown as IPropsPanel['onChange']
+	onChange: IPropsPanel['onChange'] = () => undefined
 
 	get providers() {
 		const enabled = [] as Array<ConfigProvider>
@@ -192,8 +192,8 @@ export default class Index {
 			alert({
 				icon: 'error',
 				info: true,
-				title: 'Import Error',
-				desc: `The fields in the imported configuration do not match. ${upload_error}`
+				title: $t('provider.upload.import_error_title'),
+				desc: $t('provider.upload.import_error_desc', { error: upload_error })
 			})
 		}
 	}

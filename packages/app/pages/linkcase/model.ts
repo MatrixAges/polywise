@@ -204,48 +204,40 @@ export default class Index {
 			.sort((a, b) => new Date(a.next_run_at ?? 0).getTime() - new Date(b.next_run_at ?? 0).getTime())[0]
 
 		if (this.linkcase_session_running) {
-			return $t('control.batch_session_running', {
-				ns: 'linkcase',
-				defaultValue: 'Batch fetch session is running'
-			})
+			return $t('control.batch_session_running', { ns: 'linkcase' })
 		}
 
 		if (this.batch_submit_loading) {
 			return $t('control.running_scheduled', {
 				ns: 'linkcase',
-				defaultValue: 'Running scheduled {{action}}',
-				action:
-					this.batch_running_action || $t('control.task', { ns: 'linkcase', defaultValue: 'task' })
+				action: this.batch_running_action || $t('control.task', { ns: 'linkcase' })
 			})
 		}
 
 		if (this.selection_fetch_submit_loading) {
-			return $t('control.submitting_selected_links', {
-				ns: 'linkcase',
-				defaultValue: 'Submitting selected links to batch session'
-			})
+			return $t('control.submitting_selected_links', { ns: 'linkcase' })
 		}
 
 		if (this.batch_last_error) {
-			return `Batch warning: ${this.batch_last_error}`
+			return $t('control.batch_warning', {
+				ns: 'linkcase',
+				message: this.batch_last_error
+			})
 		}
 
 		if (next_task?.next_run_at) {
-			return `${$t('control.active_tasks', {
+			return `${$t('control.active_task', {
 				ns: 'linkcase',
-				defaultValue: '{{count}} active task',
 				count: active_task_count
 			})} · ${$t('control.next_in', {
 				ns: 'linkcase',
-				defaultValue: 'next in {{value}}',
 				value: this.formatBatchRelativeTime(next_task.next_run_at)
 			})}`
 		}
 
 		if (paused_task_count > 0) {
-			return $t('control.paused_tasks', {
+			return $t('control.paused_task', {
 				ns: 'linkcase',
-				defaultValue: '{{count}} paused task',
 				count: paused_task_count
 			})
 		}
@@ -417,7 +409,11 @@ export default class Index {
 			this.agent_dialog_related_agent_ids = binding.related_agent_ids || []
 		} catch (error) {
 			this.setAgentDialogOpen(false, { force: true })
-			toast.error(error instanceof Error ? error.message : 'Failed to load agent bindings.')
+			toast.error(
+				error instanceof Error
+					? error.message
+					: $t('toast.agent_bindings_load_failed', { ns: 'linkcase' })
+			)
 		} finally {
 			this.agent_dialog_loading = false
 		}
@@ -484,9 +480,13 @@ export default class Index {
 			})
 			await this.loadDetail(item.id)
 			this.setAgentDialogOpen(false, { force: true })
-			toast.success('Agent bindings updated.')
+			toast.success($t('toast.agent_bindings_updated', { ns: 'linkcase' }))
 		} catch (error) {
-			toast.error(error instanceof Error ? error.message : 'Failed to update agent bindings.')
+			toast.error(
+				error instanceof Error
+					? error.message
+					: $t('toast.agent_bindings_update_failed', { ns: 'linkcase' })
+			)
 		} finally {
 			this.agent_dialog_submit_loading = false
 		}
@@ -812,10 +812,7 @@ export default class Index {
 			this.batch_last_error =
 				error instanceof Error
 					? error.message
-					: $t('control.failed_load_tasks', {
-							ns: 'linkcase',
-							defaultValue: 'Failed to load scheduled tasks'
-						})
+					: $t('control.failed_load_scheduled_tasks', { ns: 'linkcase' })
 		}
 	}
 
@@ -827,7 +824,7 @@ export default class Index {
 
 	formatBatchAbsoluteTime(value: string | null) {
 		if (!value) {
-			return $t('control.never', { ns: 'linkcase', defaultValue: 'Never' })
+			return $t('control.never', { ns: 'linkcase' })
 		}
 
 		return new Date(value).toLocaleString()
@@ -835,7 +832,7 @@ export default class Index {
 
 	formatBatchRelativeTime(value: string | null) {
 		if (!value) {
-			return $t('control.not_scheduled', { ns: 'linkcase', defaultValue: 'not scheduled' })
+			return $t('control.not_scheduled', { ns: 'linkcase' })
 		}
 
 		const diff_ms = Math.max(new Date(value).getTime() - this.batch_clock, 0)
@@ -860,7 +857,7 @@ export default class Index {
 
 	getBatchTaskStatusText(task: LinkcaseBatchTask) {
 		if (task.last_status === 'running') {
-			return $t('control.running_now', { ns: 'linkcase', defaultValue: 'Running now' })
+			return $t('control.running_now', { ns: 'linkcase' })
 		}
 
 		if (!task.enabled) {
@@ -868,23 +865,18 @@ export default class Index {
 		}
 
 		if (task.next_run_at) {
-			return `Next in ${this.formatBatchRelativeTime(task.next_run_at)}`
+			return $t('control.next_in', {
+				ns: 'linkcase',
+				value: this.formatBatchRelativeTime(task.next_run_at)
+			})
 		}
 
-		return $t('control.waiting_to_schedule', {
-			ns: 'linkcase',
-			defaultValue: 'Waiting to schedule'
-		})
+		return $t('control.waiting_to_schedule', { ns: 'linkcase' })
 	}
 
 	async startBatchSchedule() {
 		if (!this.batch_action_fetch_enabled && !this.batch_action_extract_enabled) {
-			toast.error(
-				$t('control.select_batch_action', {
-					ns: 'linkcase',
-					defaultValue: 'Select at least one batch action.'
-				})
-			)
+			toast.error($t('control.select_batch_action', { ns: 'linkcase' }))
 
 			return
 		}
@@ -921,9 +913,12 @@ export default class Index {
 			await this.loadBatchTasks()
 			this.batch_last_error = ''
 			this.batch_panel_tab = 'tasks'
-			toast.success(`Added ${creates.length} scheduled task${creates.length === 1 ? '' : 's'}.`)
+			toast.success($t('toast.scheduled_tasks_added', { ns: 'linkcase', count: creates.length }))
 		} catch (error) {
-			const message = error instanceof Error ? error.message : 'Failed to create scheduled tasks'
+			const message =
+				error instanceof Error
+					? error.message
+					: $t('toast.scheduled_tasks_create_failed', { ns: 'linkcase' })
 			this.batch_last_error = message
 			toast.error(message)
 		}
@@ -943,7 +938,10 @@ export default class Index {
 			})
 			await this.loadBatchTasks()
 		} catch (error) {
-			const message = error instanceof Error ? error.message : 'Failed to update scheduled task'
+			const message =
+				error instanceof Error
+					? error.message
+					: $t('toast.scheduled_task_update_failed', { ns: 'linkcase' })
 			this.batch_last_error = message
 			toast.error(message)
 		}
@@ -954,7 +952,10 @@ export default class Index {
 			await rpc.linkcase.removeSchedule.mutate({ id: task_id })
 			await this.loadBatchTasks()
 		} catch (error) {
-			const message = error instanceof Error ? error.message : 'Failed to remove scheduled task'
+			const message =
+				error instanceof Error
+					? error.message
+					: $t('toast.scheduled_task_remove_failed', { ns: 'linkcase' })
 			this.batch_last_error = message
 			toast.error(message)
 		}
@@ -1206,16 +1207,18 @@ export default class Index {
 			})
 
 			if (result.queued) {
-				toast.success(
-					`Queued extract for ${result.title || result.url}. Pipeline will continue in the background.`
-				)
+				toast.success($t('toast.extract_queued', { ns: 'linkcase', title: result.title || result.url }))
 			} else {
 				toast.success(
-					`Extracted ${result.title || result.url} with ${result.triple_count} triple${result.triple_count === 1 ? '' : 's'}.`
+					$t('toast.extract_done', {
+						ns: 'linkcase',
+						title: result.title || result.url,
+						count: result.triple_count
+					})
 				)
 			}
 		} catch (error) {
-			toast.error(error instanceof Error ? error.message : 'Failed to extract link content')
+			toast.error(error instanceof Error ? error.message : $t('toast.extract_failed', { ns: 'linkcase' }))
 		} finally {
 			this.current_extracting_id = ''
 		}
@@ -1238,7 +1241,7 @@ export default class Index {
 			this.batch_submit_loading ||
 			this.linkcase_session_running
 		) {
-			toast.error('Linkcase batch session is busy. Wait for the current run to finish.')
+			toast.error($t('toast.batch_busy', { ns: 'linkcase' }))
 
 			return
 		}
@@ -1251,7 +1254,7 @@ export default class Index {
 			await this.submitSessionPrompt(this.buildAIFetchPrompt(item))
 			this.batch_runs += 1
 			this.session_dialog_open = true
-			toast.success(`Submitted AI fetch for ${item.title || item.url}.`)
+			toast.success($t('toast.ai_fetch_submitted', { ns: 'linkcase', title: item.title || item.url }))
 		} catch (error) {
 			const message = error instanceof Error ? error.message : String(error)
 
@@ -1271,7 +1274,11 @@ export default class Index {
 			this.sniffer_statuses = response.browsers
 			this.syncSnifferSelections(response.browsers)
 		} catch (error) {
-			toast.error(error instanceof Error ? error.message : 'Failed to inspect browser bookmarks')
+			toast.error(
+				error instanceof Error
+					? error.message
+					: $t('toast.inspect_bookmarks_failed', { ns: 'linkcase' })
+			)
 		} finally {
 			this.sniffer_status_loading = false
 		}
@@ -1291,7 +1298,7 @@ export default class Index {
 		const folder_keys = this.getSnifferSelectedFolderKeysForImport(browser)
 
 		if (folder_keys.length === 0) {
-			toast.error('Select at least one bookmark folder.')
+			toast.error($t('toast.bookmark_folder_required', { ns: 'linkcase' }))
 
 			return
 		}
@@ -1303,20 +1310,14 @@ export default class Index {
 				browser,
 				folder_keys
 			})
-			const summary = [
-				`${result.name}: imported ${result.inserted_count} link(s).`,
-				result.ignored_existing_count > 0
-					? `Ignored ${result.ignored_existing_count} existing item(s).`
-					: '',
-				result.ignored_duplicate_count > 0
-					? `Ignored ${result.ignored_duplicate_count} duplicate item(s).`
-					: '',
-				result.ignored_invalid_count > 0
-					? `Ignored ${result.ignored_invalid_count} invalid item(s).`
-					: ''
-			]
-				.filter(Boolean)
-				.join(' ')
+			const summary = $t('toast.bookmark_import_summary', {
+				ns: 'linkcase',
+				name: result.name,
+				inserted_count: result.inserted_count,
+				ignored_existing_count: result.ignored_existing_count,
+				ignored_duplicate_count: result.ignored_duplicate_count,
+				ignored_invalid_count: result.ignored_invalid_count
+			})
 
 			if (!result.available) {
 				toast.error(result.message)
@@ -1328,7 +1329,9 @@ export default class Index {
 			await this.reloadList()
 			await this.loadSnifferStatus()
 		} catch (error) {
-			toast.error(error instanceof Error ? error.message : 'Bookmark import failed')
+			toast.error(
+				error instanceof Error ? error.message : $t('toast.bookmark_import_failed', { ns: 'linkcase' })
+			)
 		} finally {
 			this.sniffer_importing_browser = ''
 		}
@@ -1346,7 +1349,7 @@ export default class Index {
 		const editing = this.add_dialog_mode === 'edit' && Boolean(editing_id)
 
 		if (!url) {
-			toast.error('Link is required.')
+			toast.error($t('toast.link_required', { ns: 'linkcase' }))
 
 			return
 		}
@@ -1377,14 +1380,18 @@ export default class Index {
 			this.resetAddDraft()
 
 			await this.reloadList()
-			toast.success(`${editing ? 'Updated' : 'Added'} ${response.title || response.url}.`)
+			toast.success(
+				editing
+					? $t('toast.link_updated', { ns: 'linkcase', title: response.title || response.url })
+					: $t('toast.link_added', { ns: 'linkcase', title: response.title || response.url })
+			)
 		} catch (error) {
 			toast.error(
 				error instanceof Error
 					? error.message
 					: editing
-						? 'Failed to update link'
-						: 'Failed to add link'
+						? $t('toast.link_update_failed', { ns: 'linkcase' })
+						: $t('toast.link_add_failed', { ns: 'linkcase' })
 			)
 		} finally {
 			this.add_submit_loading = false
@@ -1446,7 +1453,7 @@ export default class Index {
 		}
 
 		if (this.selection_fetch_submit_loading || this.batch_submit_loading || this.linkcase_session_running) {
-			toast.error('Linkcase batch session is busy. Wait for the current run to finish.')
+			toast.error($t('toast.batch_busy', { ns: 'linkcase' }))
 
 			return
 		}
@@ -1459,7 +1466,7 @@ export default class Index {
 			await this.submitSessionPrompt(this.buildTargetFetchPrompt(target_items))
 			this.batch_runs += 1
 			this.session_dialog_open = true
-			toast.success(`Submitted ${target_items.length} link(s) to Linkcase batch session.`)
+			toast.success($t('toast.fetch_batch_submitted', { ns: 'linkcase', count: target_items.length }))
 		} catch (error) {
 			const message = error instanceof Error ? error.message : String(error)
 
@@ -1525,11 +1532,20 @@ export default class Index {
 		}
 
 		const confirmed = await alert({
-			title: count > 1 ? 'Remove Links' : 'Remove Link',
+			title:
+				count > 1
+					? $t('toast.remove_links_title_other', { ns: 'linkcase' })
+					: $t('toast.remove_links_title_one', { ns: 'linkcase' }),
 			desc:
 				count > 1
-					? `Remove ${count} links and their unattached fetched articles?`
-					: `Remove ${target_items[0]?.title || target_items[0]?.url || 'this link'} and its unattached fetched articles?`
+					? $t('toast.remove_links_desc_other', { ns: 'linkcase', count })
+					: $t('toast.remove_links_desc_one', {
+							ns: 'linkcase',
+							title:
+								target_items[0]?.title ||
+								target_items[0]?.url ||
+								$t('toast.this_link', { ns: 'linkcase' })
+						})
 		})
 
 		if (!confirmed) {
@@ -1551,14 +1567,16 @@ export default class Index {
 			this.applyRemovedLinks(removed_ids)
 
 			if (removed_ids.length > 0) {
-				toast.success(`Removed ${removed_ids.length} link(s).`)
+				toast.success($t('toast.removed_links', { ns: 'linkcase', count: removed_ids.length }))
 			}
 		} catch (error) {
 			if (removed_ids.length > 0) {
 				this.applyRemovedLinks(removed_ids)
 			}
 
-			toast.error(error instanceof Error ? error.message : 'Failed to remove selected links')
+			toast.error(
+				error instanceof Error ? error.message : $t('toast.remove_links_failed', { ns: 'linkcase' })
+			)
 		} finally {
 			this.selection_remove_loading = false
 		}

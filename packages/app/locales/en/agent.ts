@@ -1,9 +1,13 @@
 export default {
 	detail: {
+		info: 'Info',
 		prompt: 'How agent run',
 		soul: "What's in agent's mind",
 		identity: 'Who agent is',
 		memory: 'Core memory',
+		skills: 'Skills',
+		tools: 'Tools',
+		content: 'Content',
 		select_agent: 'Select an agent',
 		remove_title: 'Remove Agent',
 		remove_desc: 'Confirm remove this agent?',
@@ -20,6 +24,10 @@ export default {
 		files: 'Files',
 		select_file: 'Select a file',
 		save: 'Save'
+	},
+	menu: {
+		agents: 'Agents',
+		groups: 'Groups'
 	},
 	skills: {
 		placeholder: 'Search and select skills for agent',
@@ -167,5 +175,17 @@ export default {
 		max: 'Max',
 		title: 'Model',
 		reasoning_effort: 'Reasoning Effort'
+	},
+	toast: {
+		import_open_failed: 'Failed to open import files.',
+		import_file_required: 'Select a `.papk` file.',
+		imported: 'Imported {{name}}.',
+		import_failed: 'Agent import failed.',
+		exported: 'Exported to {{path}}.',
+		export_failed: 'Agent export failed.',
+		article_saved: 'Article saved.',
+		article_save_failed: 'Failed to save article.',
+		content_required: 'Content is required.',
+		article_added: 'Article added.'
 	}
 } as const

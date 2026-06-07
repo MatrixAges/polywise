@@ -7,9 +7,12 @@ export default {
 		confirm: 'Confirm',
 		new_session: 'New Session',
 		rename: 'Rename',
-		delete: 'Delete'
+		delete: 'Delete',
+		remove_title: 'Remove Project',
+		remove_desc: 'Confirm removing this project and all related sessions?'
 	},
 	menu: {
+		im: 'IM',
 		loading: 'Loading...',
 		load_more: 'Load more',
 		show_more: 'Show more',

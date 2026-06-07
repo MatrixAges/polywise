@@ -33,7 +33,9 @@ export default {
 	},
 	upload: {
 		validate_error_prefix: '[校验错误]：',
-		upload_error: '[上传错误]：请检查配置格式。'
+		upload_error: '[上传错误]：请检查配置格式。',
+		import_error_title: '导入错误',
+		import_error_desc: '导入配置中的字段不匹配。{{error}}'
 	},
 	form: {
 		apiKey: 'API Key',
@@ -79,6 +81,24 @@ export default {
 		}
 	},
 	coding_plan: {
-		title: '编码套餐'
+		title: '编程套餐',
+		per_month: '/月',
+		open_code_go: {
+			name: 'OpenCode Go',
+			desc: '通过稳定、高额度地接入强大的领先开源 AI 模型，以更低成本为全球开发者提供智能编码能力。',
+			comment: '最便宜、最稳定，也最流行。'
+		},
+		xiaomi_mimo: {
+			name: '小米 Mimo Coding Plan'
+		},
+		minimax: {
+			name: 'MiniMax Coding Plan'
+		},
+		bytedance_ark: {
+			name: '字节跳动 Ark Coding Plan'
+		},
+		aliyun_bailian: {
+			name: '阿里云百炼 Coding Plan'
+		}
 	}
 }
