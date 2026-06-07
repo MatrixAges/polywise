@@ -30,7 +30,7 @@ const Index = (props: IProps) => {
 				{t('project.rename')}
 			</ContextMenuItem>
 			<ContextMenuItem onClick={() => togglePinSession(item.id)}>
-				{pin ? t('menu.unpin', { defaultValue: 'Unpin' }) : t('menu.pin', { defaultValue: 'Pin' })}
+				{pin ? t('menu.unpin') : t('menu.pin')}
 			</ContextMenuItem>
 			<ContextMenuSeparator />
 			<ContextMenuItem variant='destructive' onClick={() => removeSession(item.id)}>

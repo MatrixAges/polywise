@@ -1,11 +1,13 @@
 import { X } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import { FileTree, TextTabs } from '@/components'
 
 import { useModel } from '../context'
 
 const Index = () => {
+	const { t } = useTranslation(['agent', 'components'])
 	const {
 		selected_group_folders,
 		selected_group_folder_path,
@@ -33,7 +35,9 @@ const Index = () => {
 					border-border-light border-b
 				'
 			>
-				<span className='text-sm font-medium'>Folders</span>
+				<span className='text-sm font-medium'>
+					{t('detail.folders', { ns: 'agent', defaultValue: 'Folders' })}
+				</span>
 				<div className='flex items-center gap-2'>
 					<TextTabs
 						items={selected_group_folders.map(item => ({
@@ -67,7 +71,10 @@ const Index = () => {
 							text-sm text-std-400
 						'
 					>
-						No folders linked
+						{t('detail.no_folders_linked', {
+							ns: 'agent',
+							defaultValue: 'No folders linked'
+						})}
 					</div>
 				)}
 			</div>

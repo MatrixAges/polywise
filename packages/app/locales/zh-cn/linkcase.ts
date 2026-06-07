@@ -16,6 +16,24 @@ export default {
 		content_placeholder: '如果你已经有正文内容，可以直接粘贴到这里。留空则只添加链接。',
 		cancel: '取消'
 	},
+	control: {
+		batch_session: '批处理会话',
+		import_bookmarks: '导入书签',
+		add_link: '添加链接',
+		scheduled_tasks: '定时任务',
+		batch_session_title: 'Linkcase 批处理会话',
+		agent_access: '智能体访问',
+		assign: '分配',
+		none: '无',
+		relate: '关联',
+		close: '关闭',
+		save: '保存',
+		saving: '保存中...',
+		edit_link: '编辑链接',
+		assign_agents: '分配或关联智能体',
+		fetch: '抓取',
+		reextract: '重新抽取'
+	},
 	content: {
 		loading: '正在加载内容',
 		empty_markdown: '还没有抓取到 Markdown 内容',

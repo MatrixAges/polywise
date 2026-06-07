@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { useMemoizedFn } from 'ahooks'
 import { FileText, PencilLine } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/__shadcn__/components/ui/button'
 import { Textarea } from '@/__shadcn__/components/ui/textarea'
@@ -10,6 +11,7 @@ import { FileContent, FileTree, Tabs } from '@/components'
 import { useModel } from './context'
 
 const Index = () => {
+	const { t } = useTranslation('agent')
 	const {
 		selected_skill,
 		skill_files,
@@ -44,7 +46,7 @@ const Index = () => {
 					text-sm text-std-400
 				'
 			>
-				Select a skill
+				{t('skills.select_skill', { defaultValue: 'Select a skill' })}
 			</div>
 		)
 	}
@@ -68,7 +70,9 @@ const Index = () => {
 						border-b border-border-light
 					'
 				>
-					<div className='text-xsm text-std-500 font-medium'>Files</div>
+					<div className='text-xsm text-std-500 font-medium'>
+						{t('detail.files', { defaultValue: 'Files' })}
+					</div>
 				</div>
 				<div className='flex-1'>
 					<FileTree
@@ -113,7 +117,7 @@ const Index = () => {
 									text-sm text-std-400
 								'
 						>
-							Select a file
+							{t('detail.select_file', { defaultValue: 'Select a file' })}
 						</div>
 					)}
 				</div>
@@ -141,7 +145,7 @@ const Index = () => {
 							onClick={value => setDetailMode(value as 'preview' | 'edit')}
 						></Tabs>
 						<Button size='xs' onClick={() => void saveSkill()}>
-							Save
+							{t('detail.save', { defaultValue: 'Save' })}
 						</Button>
 					</div>
 				</div>

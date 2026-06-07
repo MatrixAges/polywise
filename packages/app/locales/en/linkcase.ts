@@ -17,6 +17,24 @@ export default {
 			'If you already have the main body content, paste it here. Leave empty to add the link only.',
 		cancel: 'Cancel'
 	},
+	control: {
+		batch_session: 'Batch session',
+		import_bookmarks: 'Import bookmarks',
+		add_link: 'Add link',
+		scheduled_tasks: 'Scheduled tasks',
+		batch_session_title: 'Linkcase Batch Session',
+		agent_access: 'Agent Access',
+		assign: 'Assign',
+		none: 'None',
+		relate: 'Relate',
+		close: 'Close',
+		save: 'Save',
+		saving: 'Saving...',
+		edit_link: 'Edit link',
+		assign_agents: 'Assign or relate agents',
+		fetch: 'Fetch',
+		reextract: 'Re-extract'
+	},
 	content: {
 		loading: 'Loading content',
 		empty_markdown: 'No fetched markdown yet',

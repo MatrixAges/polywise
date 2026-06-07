@@ -1,5 +1,6 @@
 import { ArrowDownToLine, Plus, TimerReset } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import { Tooltip } from '@/components'
 
@@ -7,6 +8,7 @@ import { useModel } from '../context'
 
 const Index = () => {
 	const x = useModel()
+	const { t } = useTranslation('linkcase')
 	const should_highlight_import = !x.loading && x.items.length === 0
 
 	return (
@@ -30,7 +32,7 @@ const Index = () => {
 					backdrop-blur-xl
 				'
 			>
-				<Tooltip title='Batch session'>
+				<Tooltip title={t('control.batch_session')}>
 					<div
 						className='icon_button text-std-150 hover:bg-std-black'
 						onClick={() => x.setSessionDialogOpen(true)}
@@ -43,7 +45,7 @@ const Index = () => {
 						></span>
 					</div>
 				</Tooltip>
-				<Tooltip title='Import bookmarks'>
+				<Tooltip title={t('control.import_bookmarks')}>
 					<div
 						className='
 							relative
@@ -94,12 +96,12 @@ const Index = () => {
 						<ArrowDownToLine className='relative z-10 size-3.5'></ArrowDownToLine>
 					</div>
 				</Tooltip>
-				<Tooltip title='Add link'>
+				<Tooltip title={t('control.add_link')}>
 					<div className='icon_button text-std-150 hover:bg-std-black' onClick={x.openAddDialog}>
 						<Plus className='size-3.5'></Plus>
 					</div>
 				</Tooltip>
-				<Tooltip title='Scheduled tasks'>
+				<Tooltip title={t('control.scheduled_tasks')}>
 					<div
 						className={$cx(
 							'icon_button text-std-150 hover:bg-std-black relative',

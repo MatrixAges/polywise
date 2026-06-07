@@ -1,5 +1,6 @@
 import { ArrowUpRight, Bot, Database, Globe, Loader, PencilLine, Users } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/__shadcn__/components/ui/button'
 import { Tooltip } from '@/components'
@@ -9,6 +10,7 @@ import { getLinkFaviconSrc } from '../types'
 
 const Index = () => {
 	const x = useModel()
+	const { t } = useTranslation('linkcase')
 	const item = x.selected_item
 	const favicon_src = getLinkFaviconSrc(item?.favicon)
 	const has_content = Boolean(x.detail?.article?.content?.trim())
@@ -56,7 +58,7 @@ const Index = () => {
 							truncate
 						'
 					>
-						<span>{item?.title || 'Select a link'}</span>
+						<span>{item?.title || t('content.select_hint')}</span>
 						<a className='icon_button small' target='_blank' href={item?.url || ''}>
 							<ArrowUpRight></ArrowUpRight>
 						</a>
@@ -65,7 +67,7 @@ const Index = () => {
 				</div>
 			</div>
 			<div className='flex shrink-0 items-center gap-2'>
-				<Tooltip title='Edit link'>
+				<Tooltip title={t('control.edit_link')}>
 					<div>
 						<Button
 							className='size-7 px-0'
@@ -83,7 +85,7 @@ const Index = () => {
 						</Button>
 					</div>
 				</Tooltip>
-				<Tooltip title='Assign or relate agents'>
+				<Tooltip title={t('control.assign_agents')}>
 					<div>
 						<Button
 							className='size-7 px-0'
@@ -114,7 +116,7 @@ const Index = () => {
 					) : (
 						<Bot className='size-3.5'></Bot>
 					)}
-					<span>Fetch</span>
+					<span>{t('control.fetch')}</span>
 				</Button>
 				<Button
 					className='h-7'
@@ -128,7 +130,7 @@ const Index = () => {
 					) : (
 						<Database className='size-3.5'></Database>
 					)}
-					<span>{extracted ? 'Re-extract' : 'Extract'}</span>
+					<span>{extracted ? t('control.reextract') : t('selection.fetch')}</span>
 				</Button>
 			</div>
 		</div>

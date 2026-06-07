@@ -12,7 +12,7 @@ const Index = (props: IProps) => {
 
 	return (
 		<div className='flex flex-col pt-2'>
-			<span className='mb-1 font-medium'>{t('session.sources', { defaultValue: 'Sources' })}: </span>
+			<span className='mb-1 font-medium'>{t('session.sources')}: </span>
 			<div className='flex flex-wrap gap-1.5 underline'>
 				{items.map((item, index) => (
 					<a href={item.url} target='_blank' key={index}>

@@ -1,4 +1,5 @@
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import {
 	Select,
@@ -15,30 +16,32 @@ import { useModel } from '../context'
 
 import type { AgentItem } from '../types'
 
-const effort_modes = [
-	{ label: 'Default', value: 'default' },
-	{ label: 'None', value: 'none' },
-	{ label: 'Minimal', value: 'minimal' },
-	{ label: 'Low', value: 'low' },
-	{ label: 'Medium', value: 'medium' },
-	{ label: 'High', value: 'high' },
-	{ label: 'XHigh', value: 'xhigh' },
-	{ label: 'Max', value: 'max' }
-]
-
 interface IProps {
 	agent: AgentItem
 }
 
 const Index = ({ agent }: IProps) => {
 	const { can_edit_selected_agent_behavior, setModel, setModelEffort } = useModel()
+	const { t } = useTranslation('agent')
+	const effort_modes = [
+		{ label: t('model.default', { defaultValue: 'Default' }), value: 'default' },
+		{ label: t('model.none', { defaultValue: 'None' }), value: 'none' },
+		{ label: t('model.minimal', { defaultValue: 'Minimal' }), value: 'minimal' },
+		{ label: t('model.low', { defaultValue: 'Low' }), value: 'low' },
+		{ label: t('model.medium', { defaultValue: 'Medium' }), value: 'medium' },
+		{ label: t('model.high', { defaultValue: 'High' }), value: 'high' },
+		{ label: t('model.xhigh', { defaultValue: 'XHigh' }), value: 'xhigh' },
+		{ label: t('model.max', { defaultValue: 'Max' }), value: 'max' }
+	]
 
 	return (
 		<div className='-mb-1 flex flex-col'>
 			<div className='flex items-center gap-2'>
-				<span className='text-std-400 text-xs'>Model</span>
+				<span className='text-std-400 text-xs'>{t('model.title', { defaultValue: 'Model' })}</span>
 				{!can_edit_selected_agent_behavior ? (
-					<span className='text-std-300 text-[10px] uppercase'>Frozen</span>
+					<span className='text-std-300 text-[10px] uppercase'>
+						{t('detail.frozen', { defaultValue: 'Frozen' })}
+					</span>
 				) : null}
 			</div>
 			<div
@@ -81,7 +84,9 @@ const Index = ({ agent }: IProps) => {
 					</SelectTrigger>
 					<SelectContent>
 						<SelectGroup>
-							<SelectLabel>Reasoning Effort</SelectLabel>
+							<SelectLabel>
+								{t('model.reasoning_effort', { defaultValue: 'Reasoning Effort' })}
+							</SelectLabel>
 							{effort_modes.map(item => (
 								<SelectItem value={item.value} key={item.value}>
 									{item.label}

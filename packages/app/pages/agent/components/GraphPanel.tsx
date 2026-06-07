@@ -1,5 +1,6 @@
 import { GitBranch } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import type { AgentItem } from '../types'
 
@@ -8,6 +9,8 @@ interface IProps {
 }
 
 const Index = ({ agent }: IProps) => {
+	const { t } = useTranslation('agent')
+
 	return (
 		<div
 			className='
@@ -38,9 +41,14 @@ const Index = ({ agent }: IProps) => {
 				>
 					<GitBranch className='size-5'></GitBranch>
 				</div>
-				<div className='text-std-900 text-sm font-medium'>Graph</div>
+				<div className='text-std-900 text-sm font-medium'>
+					{t('detail.graph', { defaultValue: 'Graph' })}
+				</div>
 				<div className='text-std-400 text-sm'>
-					Graph view for {agent.name || 'this agent'} is not available yet.
+					{t('detail.graph_unavailable', {
+						defaultValue: 'Graph view for {{name}} is not available yet.',
+						name: agent.name || t('detail.this_agent', { defaultValue: 'this agent' })
+					})}
 				</div>
 			</div>
 		</div>

@@ -1,5 +1,6 @@
 import { Bot, Check } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/__shadcn__/components/ui/button'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/__shadcn__/components/ui/dialog'
@@ -8,6 +9,7 @@ import { useModel } from '../context'
 
 const Index = () => {
 	const x = useModel()
+	const { t } = useTranslation('linkcase')
 
 	return (
 		<Dialog
@@ -16,7 +18,7 @@ const Index = () => {
 		>
 			<DialogContent className='w-[720px] max-w-[calc(100vw-32px)]!'>
 				<DialogHeader>
-					<DialogTitle>Agent Access</DialogTitle>
+					<DialogTitle>{t('control.agent_access')}</DialogTitle>
 				</DialogHeader>
 				<div
 					className='
@@ -28,7 +30,7 @@ const Index = () => {
 					'
 				>
 					<div className='flex flex-col gap-2'>
-						<div className='text-sm font-medium'>Assign</div>
+						<div className='text-sm font-medium'>{t('control.assign')}</div>
 						<div className='grid grid-cols-2 gap-2'>
 							{!x.current_article_is_private ? (
 								<button
@@ -39,7 +41,7 @@ const Index = () => {
 									type='button'
 									onClick={() => x.setAgentDialogAssignedAgentId('')}
 								>
-									<span>None</span>
+									<span>{t('control.none')}</span>
 								</button>
 							) : null}
 							{x.agent_dialog_agents.map(agent => (
@@ -60,7 +62,7 @@ const Index = () => {
 					</div>
 					{!x.current_article_is_private ? (
 						<div className='flex flex-col gap-2'>
-							<div className='text-sm font-medium'>Relate</div>
+							<div className='text-sm font-medium'>{t('control.relate')}</div>
 							<div className='grid grid-cols-2 gap-2'>
 								{x.agent_dialog_agents.map(agent => {
 									const checked = x.agent_dialog_related_agent_ids.includes(
@@ -101,7 +103,7 @@ const Index = () => {
 						disabled={x.agent_dialog_submit_loading}
 						onClick={() => x.setAgentDialogOpen(false)}
 					>
-						Cancel
+						{t('dialog.cancel')}
 					</Button>
 					<Button
 						disabled={
@@ -111,7 +113,7 @@ const Index = () => {
 						}
 						onClick={() => void x.submitAgentDialog()}
 					>
-						{x.agent_dialog_submit_loading ? 'Saving...' : 'Save'}
+						{x.agent_dialog_submit_loading ? t('control.saving') : t('control.save')}
 					</Button>
 				</DialogFooter>
 			</DialogContent>
