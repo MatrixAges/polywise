@@ -15,8 +15,7 @@ import type { PostListTab } from '../types'
 
 const Index = () => {
 	const x = useModel()
-	const { t: raw_t } = useTranslation('post')
-	const t = raw_t as unknown as (key: string, options?: Record<string, unknown>) => string
+	const { t } = useTranslation('post')
 	const navigate = useNavigate()
 	const [search_open, setSearchOpen] = useState(() => !!x.current_search)
 	const is_search_open = search_open || !!x.current_search

@@ -25,8 +25,8 @@ const Index = (props: Props) => {
 	const x = useModel()
 	const { t } = useTranslation('components')
 	const Icon = props.streaming ? PauseIcon : PlayIcon
-	const effort_modes = getEffortModes(t as unknown as (key: string, options?: Record<string, unknown>) => string)
-	const session_modes = getSessionModes(t as unknown as (key: string, options?: Record<string, unknown>) => string)
+	const effort_modes = getEffortModes(t)
+	const session_modes = getSessionModes(t)
 
 	return (
 		<div

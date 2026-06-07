@@ -224,8 +224,7 @@ const buildConfig = (draft: DraftState): McpConfig => {
 const Index = () => {
 	const global = useGlobal()
 	const s = global.setting
-	const { t: raw_t } = useTranslation('setting')
-	const t = raw_t as unknown as (key: string, options?: Record<string, unknown>) => string
+	const { t } = useTranslation('setting')
 	const [draft, setDraft] = useState<DraftState>(() => toDraftState())
 	const type_options = [
 		{ label: t('mcp.option_local'), value: 'local' },

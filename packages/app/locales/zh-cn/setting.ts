@@ -40,6 +40,8 @@ export default {
 		download: '下载'
 	},
 	general: {
+		language: '语言',
+		language_desc: '选择应用界面和通知使用的首选语言。',
 		theme: '主题',
 		theme_desc: '自定义界面外观，包括色彩模式和系统同步。',
 		page_bridge: '页面桥接',
@@ -105,6 +107,8 @@ export default {
 		option_last_day: '最后一天',
 		option_next_month_first_day: '次月第一天',
 		option_next_year_first_day: '次年第一天',
+		option_english: 'English',
+		option_simplified_chinese: '简体中文',
 		option_minutes: '{{count}} 分钟',
 		option_messages: '{{count}} 条消息',
 		toast_auth_enabled: '已启用认证。',

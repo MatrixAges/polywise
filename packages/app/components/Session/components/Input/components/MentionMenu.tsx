@@ -244,13 +244,7 @@ const Index: FC<Props> = ({ items, loading, activeIndex, onSelect }) => {
 												>
 													{getSkillTypeLabel({
 														value: item.skill_type,
-														t: t as unknown as (
-															key: string,
-															options?: Record<
-																string,
-																unknown
-															>
-														) => string
+														t
 													})}
 												</span>
 											</div>

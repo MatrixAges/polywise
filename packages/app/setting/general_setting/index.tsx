@@ -17,7 +17,7 @@ import {
 	SelectValue
 } from '@/__shadcn__/components/ui/select'
 import { Switch } from '@/__shadcn__/components/ui/switch'
-import { themes } from '@/appdata'
+import { locale_options, themes } from '@/appdata'
 import { Controller } from '@/components'
 import { useGlobal } from '@/context'
 import { useForm } from '@/hooks'
@@ -30,9 +30,9 @@ const normalizeReportTime = (value: string) =>
 
 const Index = () => {
 	const global = useGlobal()
-	const { t: raw_t } = useTranslation('setting')
-	const tt = raw_t as unknown as (key: string, options?: Record<string, unknown>) => string
+	const { t: tt } = useTranslation('setting')
 	const t = global.theme
+	const l = global.locale
 	const s = global.setting
 	const a = global.auth
 	const pthink = s.config?.pthink
@@ -81,9 +81,13 @@ const Index = () => {
 
 	const onChange = useMemoizedFn((_, changed) => {
 		if ('theme' in changed) t.setTheme(changed['theme'])
+		if ('lang' in changed) void l.setLang(changed['lang'])
 	})
 
-	const { control } = useForm<{ theme: string }>({ values: { theme: t.theme_source } }, onChange)
+	const { control } = useForm<{ theme: string; lang: string }>(
+		{ values: { theme: t.theme_source, lang: l.lang } },
+		onChange
+	)
 
 	const updatePthink = useMemoizedFn((patch: Partial<AppPthinkConfig>) => {
 		const current_config = s.config
@@ -243,6 +247,39 @@ const Index = () => {
 				'
 			>
 				<FieldGroup className='gap-0'>
+					<Field className='items-center! py-3' orientation='horizontal'>
+						<FieldContent>
+							<FieldTitle className='text-base'>{tt('general.language')}</FieldTitle>
+							<FieldDescription>{tt('general.language_desc')}</FieldDescription>
+						</FieldContent>
+						<Controller name='lang' control={control}>
+							<Select
+								items={locale_options.map(item => ({
+									label:
+										item.value === 'en'
+											? tt('general.option_english')
+											: tt('general.option_simplified_chinese'),
+									value: item.value
+								}))}
+							>
+								<SelectTrigger className='workspace_selector'>
+									<SelectValue />
+								</SelectTrigger>
+								<SelectContent align='start'>
+									<SelectGroup>
+										<SelectLabel>{tt('general.language')}</SelectLabel>
+										{locale_options.map(item => (
+											<SelectItem value={item.value} key={item.value}>
+												{item.value === 'en'
+													? tt('general.option_english')
+													: tt('general.option_simplified_chinese')}
+											</SelectItem>
+										))}
+									</SelectGroup>
+								</SelectContent>
+							</Select>
+						</Controller>
+					</Field>
 					<Field
 						className='
 							items-center!

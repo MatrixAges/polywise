@@ -15,8 +15,7 @@ import { useModel } from '../context'
 import type { ArticleForType } from '../types'
 
 const Index = () => {
-	const { t: raw_t } = useTranslation(['agent', 'post', 'linkcase'])
-	const t = raw_t as unknown as (key: string, options?: Record<string, unknown>) => string
+	const { t } = useTranslation(['agent', 'post', 'linkcase'])
 	const article_tab_items = getArticleTabItems(t)
 	const {
 		related_articles_dialog_open,

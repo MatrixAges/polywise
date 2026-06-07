@@ -35,8 +35,8 @@ const Index = (props: Props) => {
 	const x = useModel()
 	const { t } = useTranslation('components')
 	const RightArchiveIcon = props.archived ? PackageOpen : Archive
-	const audit_modes = getAuditModes(t as unknown as (key: string, options?: Record<string, unknown>) => string)
-	const submit_modes = getSubmitModes(t as unknown as (key: string, options?: Record<string, unknown>) => string)
+	const audit_modes = getAuditModes(t)
+	const submit_modes = getSubmitModes(t)
 
 	return (
 		<div

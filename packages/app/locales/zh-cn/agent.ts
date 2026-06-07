@@ -133,6 +133,10 @@ export default {
 		loading: '加载中...',
 		show_more: '显示更多'
 	},
+	call_log: {
+		input: '输入',
+		output: '输出'
+	},
 	avatar: {
 		title: '智能体头像',
 		desc: '编辑头像、上传照片，或生成新的外观。',

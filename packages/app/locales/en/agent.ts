@@ -137,6 +137,10 @@ export default {
 		loading: 'Loading...',
 		show_more: 'Show more'
 	},
+	call_log: {
+		input: 'Input',
+		output: 'Output'
+	},
 	avatar: {
 		title: 'Agent Avatar',
 		desc: 'Edit avatar, upload a photo, or generate a new look.',

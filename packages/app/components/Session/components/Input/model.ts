@@ -186,8 +186,7 @@ export default class Model {
 
 			this.skill_items = createSkillItems({
 				items,
-				t: (key: string, options?: Record<string, unknown>) =>
-					$t(key as never, { ns: 'components', ...(options || {}) }) as string
+				t: $t
 			})
 			this.skill_items_loaded = true
 		} catch {

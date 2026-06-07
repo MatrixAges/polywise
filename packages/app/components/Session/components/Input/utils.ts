@@ -24,31 +24,31 @@ import type {
 	ToolMentionItem
 } from './types'
 
-type Translate = (key: string, options?: Record<string, unknown>) => string
+type Translate = (...args: Array<any>) => unknown
 
 export const getSubmitModes = (t: Translate) => [
-	{ label: t('session.input.submit_enter'), value: 'enter' },
-	{ label: t('session.input.submit_ctrl_enter'), value: 'ctrl+enter' }
+	{ label: String(t('session.input.submit_enter')), value: 'enter' },
+	{ label: String(t('session.input.submit_ctrl_enter')), value: 'ctrl+enter' }
 ]
 
 export const getSessionModes = (t: Translate) => [
-	{ label: t('session.input.mode_normal'), value: 'normal' },
-	{ label: t('session.input.mode_plan'), value: 'plan' },
-	{ label: t('session.input.mode_plan_exec'), value: 'plan-exec' }
+	{ label: String(t('session.input.mode_normal')), value: 'normal' },
+	{ label: String(t('session.input.mode_plan')), value: 'plan' },
+	{ label: String(t('session.input.mode_plan_exec')), value: 'plan-exec' }
 ]
 
 export const getAuditModes = (t: Translate) => [
-	{ label: t('session.input.audit_limited'), value: 'limited' },
-	{ label: t('session.input.audit_auto'), value: 'auto' },
-	{ label: t('session.input.audit_full'), value: 'full' }
+	{ label: String(t('session.input.audit_limited')), value: 'limited' },
+	{ label: String(t('session.input.audit_auto')), value: 'auto' },
+	{ label: String(t('session.input.audit_full')), value: 'full' }
 ]
 
 export const getEffortModes = (t: Translate) => [
-	{ label: t('session.input.effort_default'), value: 'default' },
-	{ label: t('session.input.effort_low'), value: 'low' },
-	{ label: t('session.input.effort_medium'), value: 'medium' },
-	{ label: t('session.input.effort_high'), value: 'high' },
-	{ label: t('session.input.effort_xhigh'), value: 'xhigh' }
+	{ label: String(t('session.input.effort_default')), value: 'default' },
+	{ label: String(t('session.input.effort_low')), value: 'low' },
+	{ label: String(t('session.input.effort_medium')), value: 'medium' },
+	{ label: String(t('session.input.effort_high')), value: 'high' },
+	{ label: String(t('session.input.effort_xhigh')), value: 'xhigh' }
 ]
 
 const mention_limit = 50
@@ -56,13 +56,13 @@ export const getBuiltinSystemSkills = (t: Translate) =>
 	[
 		{
 			key: 'builtin-skill-creator',
-			label: t('session.skill.creator_label'),
-			desc: t('session.skill.creator_desc')
+			label: String(t('session.skill.creator_label')),
+			desc: String(t('session.skill.creator_desc'))
 		},
 		{
 			key: 'builtin-skill-installer',
-			label: t('session.skill.installer_label'),
-			desc: t('session.skill.installer_desc')
+			label: String(t('session.skill.installer_label')),
+			desc: String(t('session.skill.installer_desc'))
 		}
 	] satisfies Array<Pick<SkillMentionItem, 'key' | 'label' | 'desc'>>
 
@@ -122,7 +122,7 @@ export const getFileIcon = (item: FileMentionItem) => {
 export const getSkillTypeLabel = (args: { value: string; t: Translate }) => {
 	const { value, t } = args
 
-	return value === 'system' ? t('session.skill.system') : t('session.skill.personal')
+	return value === 'system' ? String(t('session.skill.system')) : String(t('session.skill.personal'))
 }
 
 const escapeRegex = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
@@ -337,7 +337,7 @@ export const createSkillItems = (args: {
 	t: Translate
 }) => {
 	const { items, t } = args
-	const builtin_map = new Map(
+	const builtin_map = new Map<string, SkillMentionItem>(
 		getBuiltinSystemSkills(t).map(item => [
 			item.label,
 			{

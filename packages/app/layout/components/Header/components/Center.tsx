@@ -5,7 +5,9 @@ import { useLocation, useNavigate } from 'react-router'
 import { nav_items } from '@/appdata'
 import { Tabs } from '@/components'
 
-const getNavTitle = (args: { title?: string; t: (key: string, options?: Record<string, unknown>) => string }) => {
+import type { TFunction } from 'i18next'
+
+const getNavTitle = (args: { title?: string; t: TFunction<'layout'> }) => {
 	const { title, t } = args
 
 	switch (title) {
@@ -25,8 +27,7 @@ const getNavTitle = (args: { title?: string; t: (key: string, options?: Record<s
 }
 
 const Index = () => {
-	const { t: raw_t } = useTranslation('layout')
-	const t = raw_t as unknown as (key: string, options?: Record<string, unknown>) => string
+	const { t } = useTranslation('layout')
 	const { pathname } = useLocation()
 	const navigate = useNavigate()
 

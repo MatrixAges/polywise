@@ -1,5 +1,6 @@
 import { BookOpen, Bot, Brain, FolderGit2, Paperclip, TableOfContents, UserRound } from 'lucide-react'
 
+import type { TFunction } from 'i18next'
 import type { ListState, ListStateMap, PostListTab } from './types'
 
 export const post_for_types = ['user', 'wiki', 'memory'] as const
@@ -65,7 +66,7 @@ export const normalizeHeadingText = (value: string) => value.replace(/\s+/g, ' '
 export const isPostListTab = (value?: string | null): value is PostListTab =>
 	typeof value === 'string' && post_list_tabs.includes(value as PostListTab)
 
-export const getForTypeTabItems = (t: (key: string, options?: Record<string, unknown>) => string) =>
+export const getForTypeTabItems = (t: TFunction<'post'>) =>
 	[
 		{ key: 'wiki', title: t('tab.wiki'), Icon: BookOpen },
 		{ key: 'memory', title: t('tab.memory'), Icon: Brain },
@@ -73,7 +74,7 @@ export const getForTypeTabItems = (t: (key: string, options?: Record<string, unk
 		{ key: 'agent', title: t('tab.agent'), Icon: Bot }
 	] as const
 
-export const getDetailTabItems = (t: (key: string, options?: Record<string, unknown>) => string) =>
+export const getDetailTabItems = (t: TFunction<'post'>) =>
 	[
 		{ key: 'outline', title: t('tab.outline'), Icon: TableOfContents },
 		{ key: 'related', title: t('tab.related'), Icon: Paperclip },

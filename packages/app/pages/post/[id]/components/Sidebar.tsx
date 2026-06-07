@@ -13,8 +13,7 @@ import type { DetailTab } from '../../types'
 
 const Index = () => {
 	const x = useModel()
-	const { t: raw_t } = useTranslation('post')
-	const t = raw_t as unknown as (key: string, options?: Record<string, unknown>) => string
+	const { t } = useTranslation('post')
 	const detail_tab_items = getDetailTabItems(t)
 
 	return (

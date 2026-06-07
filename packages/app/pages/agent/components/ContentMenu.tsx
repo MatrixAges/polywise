@@ -11,8 +11,7 @@ import { useModel } from '../context'
 import type { ArticleForType } from '../types'
 
 const Index = () => {
-	const { t: raw_t } = useTranslation(['agent', 'post', 'linkcase'])
-	const t = raw_t as unknown as (key: string, options?: Record<string, unknown>) => string
+	const { t } = useTranslation(['agent', 'post', 'linkcase'])
 	const {
 		article_items,
 		article_for,

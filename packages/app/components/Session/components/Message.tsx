@@ -19,6 +19,7 @@ import SourceUrls from './SourceUrls'
 import type { AgentAvatarConfig } from '@/pages/agent/types'
 import type { MessagePartDurationUIPart, Message as SessionMessage } from '@core/fst'
 import type { FileUIPart, SourceUrlUIPart, ToolUIPart } from 'ai'
+import type { TFunction } from 'i18next'
 import type { CSSProperties } from 'react'
 import type { IPropsMessage } from '../types'
 
@@ -118,10 +119,7 @@ const getToolSummaryCategory = (part: DurationAwarePart) => {
 	}
 }
 
-const getToolsSummary = (args: {
-	items: Array<PartWithDuration>
-	t: (key: string, options?: Record<string, unknown>) => string
-}) => {
+const getToolsSummary = (args: { items: Array<PartWithDuration>; t: TFunction<'components'> }) => {
 	const { items, t } = args
 	const counts = {
 		file: 0,
@@ -165,11 +163,7 @@ const getToolsSummary = (args: {
 	return t('session.message.used_tools')
 }
 
-const getRenderBlocks = (args: {
-	items: Array<PartWithDuration>
-	streaming: boolean
-	t: (key: string, options?: Record<string, unknown>) => string
-}) => {
+const getRenderBlocks = (args: { items: Array<PartWithDuration>; streaming: boolean; t: TFunction<'components'> }) => {
 	const { items, streaming, t } = args
 	const blocks = [] as Array<RenderBlock>
 	let current_tool_group = [] as Array<PartWithDuration>
@@ -454,8 +448,7 @@ const Index = (props: IPropsMessage) => {
 		removeMessage,
 		group_agents = []
 	} = props
-	const { t: raw_t } = useTranslation('components')
-	const t = raw_t as unknown as (key: string, options?: Record<string, unknown>) => string
+	const { t } = useTranslation('components')
 	const { parts } = message
 	const [is_copied, setIsCopied] = useState(false)
 	const [is_wiki_saving, setIsWikiSaving] = useState(false)

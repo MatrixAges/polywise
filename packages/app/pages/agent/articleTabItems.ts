@@ -1,6 +1,8 @@
 import { Album, BookUser, Brain, Hash } from 'lucide-react'
 
-export const getArticleTabItems = (t: (key: string, options?: Record<string, unknown>) => string) =>
+import type { TFunction } from 'i18next'
+
+export const getArticleTabItems = (t: TFunction<readonly ['agent', 'post', 'linkcase']>) =>
 	[
 		{ key: 'wiki', title: t('tab.wiki', { ns: 'post' }), Icon: Hash },
 		{ key: 'memory', title: t('tab.memory', { ns: 'post' }), Icon: Brain },

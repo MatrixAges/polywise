@@ -72,8 +72,7 @@ const JsonBlock = ({ title, value }: { title: string; value: unknown }) => {
 }
 
 const Index = <T extends ILogItemBase>(props: IProps<T>) => {
-	const { t: raw_t } = useTranslation('agent')
-	const t = raw_t as unknown as (key: string, options?: Record<string, unknown>) => string
+	const { t } = useTranslation('agent')
 	const {
 		available_dates,
 		date,
@@ -183,8 +182,8 @@ const Index = <T extends ILogItemBase>(props: IProps<T>) => {
 							{dayjs(item.created_at).format('YYYY-MM-DD HH:mm:ss')} · session{' '}
 							{item.session_id}
 						</div>
-						<JsonBlock title={t('model.input')} value={item.input} />
-						<JsonBlock title={t('model.output')} value={item.output} />
+						<JsonBlock title={t('call_log.input')} value={item.input} />
+						<JsonBlock title={t('call_log.output')} value={item.output} />
 					</div>
 				))}
 			</div>

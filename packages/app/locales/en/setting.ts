@@ -40,6 +40,8 @@ export default {
 		download: 'Download'
 	},
 	general: {
+		language: 'Language',
+		language_desc: 'Select your preferred language for the application interface and notifications',
 		theme: 'Theme',
 		theme_desc: 'Customize the visual interface, including color modes and system synchronization',
 		page_bridge: 'Page Bridge',
@@ -109,6 +111,8 @@ export default {
 		option_last_day: 'Last day',
 		option_next_month_first_day: 'Next month first day',
 		option_next_year_first_day: 'Next year first day',
+		option_english: 'English',
+		option_simplified_chinese: 'Simplified Chinese',
 		option_minutes: '{{count}} min',
 		option_messages: '{{count}} messages',
 		toast_auth_enabled: 'Auth enabled.',
