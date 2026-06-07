@@ -1,5 +1,6 @@
 import { useEffect, useMemo } from 'react'
 import { Upload, X } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 import { getPublicAssetUrl } from '@/utils'
 
@@ -32,6 +33,7 @@ const Index = ({
 	onClear,
 	disabled = false
 }: IProps) => {
+	const { t } = useTranslation('agent')
 	const box_size = typeof size === 'number' ? size : size_map[size]
 	const photo = item.photo as Uint8Array | null
 	const wrapper_style = { width: box_size, height: box_size } as CSSProperties
@@ -84,7 +86,7 @@ const Index = ({
 						<button
 							className='icon_button small'
 							type='button'
-							title='Upload photo'
+							title={t('avatar.upload_photo')}
 							disabled={disabled}
 							onClick={(event: MouseEvent<HTMLButtonElement>) => {
 								stopPropagation(event)
@@ -98,7 +100,7 @@ const Index = ({
 						<button
 							className='icon_button small'
 							type='button'
-							title='Clear photo'
+							title={t('avatar.clear_photo_title')}
 							disabled={disabled || !has_custom_photo}
 							onClick={(event: MouseEvent<HTMLButtonElement>) => {
 								stopPropagation(event)

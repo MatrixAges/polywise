@@ -28,10 +28,7 @@ const Index = () => {
 					></Search>
 					<Input
 						className='h-8 pl-6'
-						placeholder={t('detail.search_related', {
-							ns: 'post',
-							defaultValue: 'Search article to relate'
-						})}
+						placeholder={t('detail.search_related', { ns: 'post' })}
 						value={x.related_search}
 						onChange={event => x.setRelatedSearch(event.target.value)}
 					></Input>
@@ -73,11 +70,11 @@ const Index = () => {
 								'
 							>
 								<Loader2 className='size-4 animate-spin'></Loader2>
-								{t('detail.searching', { ns: 'post', defaultValue: 'Searching...' })}
+								{t('detail.searching', { ns: 'post' })}
 							</div>
 						) : x.related_search_list.length === 0 ? (
 							<div className='text-std-400 p-1.5 text-sm'>
-								{t('detail.no_matches', { ns: 'post', defaultValue: 'No matches.' })}
+								{t('detail.no_matches', { ns: 'post' })}
 							</div>
 						) : (
 							x.related_search_list.map(item => (
@@ -137,13 +134,12 @@ const Index = () => {
 					>
 						<Loader2 className='size-4 animate-spin'></Loader2>
 						{t('detail.loading_related', {
-							ns: 'post',
-							defaultValue: 'Loading related articles...'
+							ns: 'post'
 						})}
 					</div>
 				) : x.related_articles.length === 0 ? (
 					<div className='text-std-400 px-1.5 py-4 text-sm'>
-						{t('detail.no_related', { ns: 'post', defaultValue: 'No related articles.' })}
+						{t('detail.no_related', { ns: 'post' })}
 					</div>
 				) : (
 					<div className='flex flex-col gap-2 pb-3'>

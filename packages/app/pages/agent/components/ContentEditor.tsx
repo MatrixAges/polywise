@@ -1,6 +1,7 @@
 import { Fragment, useState } from 'react'
 import { Loader2, Plus, Save, Trash2 } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import { Input } from '@/__shadcn__/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/__shadcn__/components/ui/select'
@@ -11,6 +12,7 @@ import { useModel } from '../context'
 import { article_for_types } from '../types'
 
 const Index = () => {
+	const { t } = useTranslation('agent')
 	const {
 		selected_article,
 		article_loading,
@@ -36,8 +38,8 @@ const Index = () => {
 		}
 
 		const confirmed = await alert({
-			title: 'Remove Article',
-			desc: 'Confirm remove this private article?'
+			title: t('private_article.remove_title'),
+			desc: t('private_article.remove_desc')
 		})
 
 		if (!confirmed) {
@@ -58,10 +60,10 @@ const Index = () => {
 				'
 			>
 				{article_loading
-					? 'Loading articles...'
+					? t('content.loading_articles')
 					: can_manage_private_articles
-						? 'Select a private article or create a new one.'
-						: 'Select a private article.'}
+						? t('private_article.select_or_create')
+						: t('private_article.select_only')}
 			</div>
 		)
 	}
@@ -80,7 +82,7 @@ const Index = () => {
 							bg-transparent
 							focus:bg-transparent
 						'
-						placeholder='Untitled article'
+						placeholder={t('private_article.untitled')}
 						disabled={!can_mutate_selected_agent_articles}
 						value={article_draft_title}
 						onChange={event => setArticleDraftTitle(event.target.value)}

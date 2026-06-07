@@ -43,7 +43,7 @@ const Index = () => {
 					className='max-w-[420px]'
 					value={x.form.feishu_app_secret}
 					onChange={event => x.updateForm('feishu_app_secret', event.target.value)}
-					placeholder='App Secret'
+					placeholder={t('im.feishu_app_secret')}
 				/>
 			</Field>
 			<Field className='items-center! py-3' orientation='horizontal'>
@@ -110,7 +110,9 @@ const Index = () => {
 					<FieldTitle className='text-base'>{t('im.feishu_webhook_callback')}</FieldTitle>
 					<FieldDescription>{t('im.feishu_webhook_callback_desc')}</FieldDescription>
 				</FieldContent>
-				<div className='text-std-500 max-w-[420px] text-sm leading-6'>POST `/sys/im/feishu/events`</div>
+				<div className='text-std-500 max-w-[420px] text-sm leading-6'>
+					{t('im.feishu_webhook_path')}
+				</div>
 			</Field>
 		</FieldGroup>
 	)

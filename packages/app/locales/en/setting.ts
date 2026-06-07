@@ -265,6 +265,7 @@ export default {
 		feishu_webhook_callback: 'Webhook Callback',
 		feishu_webhook_callback_desc:
 			'Optional webhook fallback only. You do not need this for the default long connection mode.',
+		feishu_webhook_path: 'Callback path: `/sys/im/feishu/events`',
 		account_id: 'Account ID',
 		account_id_desc: 'Unique identifier used by inbound events',
 		label: 'Label',

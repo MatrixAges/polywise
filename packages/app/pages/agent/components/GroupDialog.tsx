@@ -1,6 +1,7 @@
 import { Fragment } from 'react'
 import { Folder, Info, Plus, X } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/__shadcn__/components/ui/button'
 import {
@@ -23,6 +24,7 @@ import GroupAvatar from './GroupAvatar'
 const accept = '.jpg,.jpeg,.svg,.png,.webp,image/jpeg,image/png,image/svg+xml,image/webp'
 
 const Index = () => {
+	const { t } = useTranslation('agent')
 	const {
 		agents,
 		editing_group,
@@ -75,8 +77,8 @@ const Index = () => {
 		}
 
 		const res = await alert({
-			title: 'Remove Group',
-			desc: 'Confirm remove this group and all linked group sessions?'
+			title: t('group.remove_title'),
+			desc: t('group.remove_desc')
 		})
 
 		if (!res) {
@@ -100,11 +102,9 @@ const Index = () => {
 					}}
 				>
 					<DialogHeader>
-						<DialogTitle>{mode === 'create' ? 'Create Group' : 'Edit Group'}</DialogTitle>
+						<DialogTitle>{mode === 'create' ? t('group.create') : t('group.edit')}</DialogTitle>
 						<DialogDescription>
-							{group_dialog_tab === 'info'
-								? 'Set the group name and description, then choose which agents participate in the shared group chat.'
-								: 'Associate multiple folders with this group. These folders will be mounted read-write for all group agents.'}
+							{group_dialog_tab === 'info' ? t('group.info_desc') : t('group.folders_desc')}
 						</DialogDescription>
 					</DialogHeader>
 					<div
@@ -127,7 +127,10 @@ const Index = () => {
 								>
 									<GroupAvatar
 										item={{
-											name: next_name || group_dialog_name || 'Group',
+											name:
+												next_name ||
+												group_dialog_name ||
+												t('group.group_name'),
 											photo: group_dialog_photo
 										}}
 										size={72}
@@ -142,20 +145,22 @@ const Index = () => {
 										autoFocus
 										value={group_dialog_name}
 										maxLength={120}
-										placeholder='Group name'
+										placeholder={t('group.group_name')}
 										onChange={event => setGroupDialogName(event.target.value)}
 									></Input>
 									<Input
 										value={group_dialog_description}
 										maxLength={500}
-										placeholder='Describe what this group is for'
+										placeholder={t('group.group_desc_placeholder')}
 										onChange={event =>
 											setGroupDialogDescription(event.target.value)
 										}
 									></Input>
 								</div>
 								<div className='grid gap-2'>
-									<div className='text-xsm text-std-500 font-medium'>Agents</div>
+									<div className='text-xsm text-std-500 font-medium'>
+										{t('group.agents')}
+									</div>
 									<div
 										className='
 											grid grid-cols-4
@@ -207,7 +212,8 @@ const Index = () => {
 															{agent.name}
 														</div>
 														<div className='text-std-400 truncate text-xs font-medium'>
-															{agent.role || 'No role'}
+															{agent.role ||
+																t('group.no_role')}
 														</div>
 													</div>
 												</button>
@@ -221,7 +227,7 @@ const Index = () => {
 								<div className='flex gap-2'>
 									<Input
 										value={group_dialog_files.input_path}
-										placeholder='Choose a folder path'
+										placeholder={t('group.choose_folder_path')}
 										onChange={event =>
 											group_dialog_files.setInputPath(event.target.value)
 										}
@@ -231,7 +237,7 @@ const Index = () => {
 										variant='outline'
 										onClick={group_dialog_files.fetchPath}
 									>
-										Fetch
+										{t('import.fetch')}
 									</Button>
 									<Button
 										type='button'
@@ -239,7 +245,7 @@ const Index = () => {
 										disabled={!group_dialog_files.input_path.trim()}
 									>
 										<Plus className='size-3.5'></Plus>
-										Add
+										{t('group.add')}
 									</Button>
 								</div>
 								<FileTree
@@ -249,7 +255,9 @@ const Index = () => {
 								></FileTree>
 								<div className='grid gap-2'>
 									<div className='text-xsm text-std-500 font-medium'>
-										Selected Folders ({group_dialog_folders.length})
+										{t('group.selected_folders', {
+											count: group_dialog_folders.length
+										})}
 									</div>
 									<div
 										className='
@@ -301,7 +309,7 @@ const Index = () => {
 													text-center
 												'
 											>
-												No folders selected
+												{t('group.no_folders_selected')}
 											</div>
 										)}
 									</div>
@@ -312,8 +320,8 @@ const Index = () => {
 					<DialogFooter className='flex items-center justify-between sm:justify-between'>
 						<Tabs
 							items={[
-								{ key: 'info', title: 'Info', Icon: Info },
-								{ key: 'folders', title: 'Folders', Icon: Folder }
+								{ key: 'info', title: t('group.info'), Icon: Info },
+								{ key: 'folders', title: t('group.folders'), Icon: Folder }
 							]}
 							active={group_dialog_tab}
 							onClick={tab => setGroupDialogTab(tab as 'info' | 'folders')}
@@ -327,7 +335,7 @@ const Index = () => {
 										onClick={onRemove}
 										disabled={loading}
 									>
-										Remove Group
+										{t('group.remove_title')}
 									</Button>
 									<div className='bg-border-light mx-2 h-4 w-px'></div>
 								</Fragment>
@@ -338,7 +346,7 @@ const Index = () => {
 								onClick={() => setGroupDialogOpen(false)}
 								disabled={loading}
 							>
-								Cancel
+								{t('create.cancel')}
 							</Button>
 							<Button
 								type='submit'
@@ -349,11 +357,11 @@ const Index = () => {
 								{loading && <Spinner className='size-3.5'></Spinner>}
 								{mode === 'create'
 									? create_group_loading
-										? 'Creating...'
-										: 'Create'
+										? t('create.creating')
+										: t('create.create')
 									: update_group_loading
-										? 'Saving...'
-										: 'Save'}
+										? t('control.saving', { ns: 'linkcase' })
+										: t('detail.save')}
 							</Button>
 						</div>
 					</DialogFooter>

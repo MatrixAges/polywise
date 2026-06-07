@@ -11,12 +11,21 @@ export default {
 		locked: '锁定',
 		writable: '可编辑',
 		exporting: '导出中...',
-		export: '导出'
+		export: '导出',
+		graph: '图谱',
+		graph_unavailable: '{{name}} 的图谱视图暂时不可用。',
+		this_agent: '当前智能体',
+		folders: '文件夹',
+		no_folders_linked: '还没有关联文件夹',
+		files: '文件',
+		select_file: '选择一个文件',
+		save: '保存'
 	},
 	skills: {
 		placeholder: '搜索并为智能体选择技能',
 		empty: '没有找到技能。',
-		log_empty: '该日期没有技能调用日志。'
+		log_empty: '该日期没有技能调用日志。',
+		select_skill: '选择一个技能'
 	},
 	info: {
 		role_placeholder: '智能体角色',
@@ -75,6 +84,10 @@ export default {
 		title: '新建文章',
 		untitled: '未命名文章',
 		characters: '{{count}} 个字符',
+		remove_title: '删除文章',
+		remove_desc: '确认删除这篇私有文章吗？',
+		select_or_create: '选择一篇私有文章，或新建一篇。',
+		select_only: '选择一篇私有文章。',
 		cancel: '取消',
 		creating: '创建中...',
 		create: '创建'
@@ -83,5 +96,68 @@ export default {
 		placeholder: '搜索并为智能体选择自定义工具',
 		empty: '没有找到工具。',
 		log_empty: '该日期没有工具调用日志。'
+	},
+	group: {
+		create: '创建群组',
+		edit: '编辑群组',
+		remove_title: '删除群组',
+		remove_desc: '确认删除这个群组以及所有关联的群组会话吗？',
+		info: '信息',
+		info_desc: '设置群组名称和描述，然后选择哪些智能体参与共享群聊。',
+		folders_desc: '为该群组关联多个文件夹。这些文件夹会以可读写方式挂载给群组内所有智能体。',
+		group_name: '群组名称',
+		group_desc_placeholder: '描述这个群组的用途',
+		agents: '智能体',
+		add: '添加',
+		no_role: '无角色',
+		choose_folder_path: '选择文件夹路径',
+		selected_folders: '已选文件夹（{{count}}）',
+		no_folders_selected: '还没有选择文件夹',
+		folders: '文件夹'
+	},
+	skill: {
+		title: '技能',
+		desc: '无需离开智能体页面即可管理技能文件和元数据。',
+		edit_title: '编辑技能',
+		edit_desc: '更新技能名称和描述。',
+		name: '技能名称',
+		description: '技能描述',
+		save: '保存',
+		remove: '移除',
+		cancel: '取消',
+		skills: '技能',
+		no_description: '暂无描述'
+	},
+	session_menu: {
+		sessions: '会话',
+		loading: '加载中...',
+		show_more: '显示更多'
+	},
+	avatar: {
+		title: '智能体头像',
+		desc: '编辑头像、上传照片，或生成新的外观。',
+		upload: '上传',
+		colorful: '彩色',
+		notion: 'Notion',
+		choose_file: '选择文件',
+		clear_photo: '清除照片',
+		random_nice: '随机生成彩色头像',
+		random_notion: '随机生成 Notion 头像',
+		cancel: '取消',
+		save: '保存',
+		upload_photo: '上传照片',
+		clear_photo_title: '清除照片'
+	},
+	model: {
+		default: '默认',
+		none: '无',
+		minimal: '极简',
+		low: '低',
+		medium: '中',
+		high: '高',
+		xhigh: '超高',
+		max: '最高',
+		title: '模型',
+		reasoning_effort: '推理强度'
 	}
 } as const

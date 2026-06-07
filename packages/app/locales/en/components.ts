@@ -14,6 +14,19 @@ export default {
 			mode: 'Mode',
 			audit_mode: 'Audit Mode',
 			submit_mode: 'Submit Mode',
+			submit_enter: 'Enter Mode',
+			submit_ctrl_enter: 'Ctrl+Enter Mode',
+			mode_normal: 'Normal',
+			mode_plan: 'Plan',
+			mode_plan_exec: 'Plan-Exec',
+			audit_limited: 'Limited',
+			audit_auto: 'Auto',
+			audit_full: 'Full Access',
+			effort_default: 'Default',
+			effort_low: 'Low',
+			effort_medium: 'Medium',
+			effort_high: 'High',
+			effort_xhigh: 'XHigh',
 			clear: 'Clear',
 			unarchive: 'Unarchive',
 			context: 'Context',
@@ -29,6 +42,15 @@ export default {
 			tool: 'Tool',
 			remote_mcp: 'Remote MCP',
 			local_mcp: 'Local MCP'
+		},
+		skill: {
+			system: 'System',
+			personal: 'Personal',
+			creator_label: 'skill-creator',
+			creator_desc: 'Create or update reusable local skills from repeated workflows or failure patterns.',
+			installer_label: 'skill-installer',
+			installer_desc:
+				'Install a curated skill or a skill from another repository into the local skills directory.'
 		},
 		permission: {
 			title: 'Permission Request',

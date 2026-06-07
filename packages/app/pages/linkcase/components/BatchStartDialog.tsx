@@ -1,5 +1,6 @@
 import { ListCheck, Plus } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/__shadcn__/components/ui/button'
 import { Input } from '@/__shadcn__/components/ui/input'
@@ -22,12 +23,13 @@ const extract_concurrency_options = Array.from({ length: 10 }, (_, index) => Str
 
 const Index = () => {
 	const x = useModel()
+	const { t } = useTranslation('linkcase')
 
 	return (
 		<Dialog
 			open={x.start_dialog_open}
-			title='Scheduled Tasks'
-			desc='Create Croner-managed fetch or extract tasks, then pause, resume, or delete them from the list.'
+			title={t('control.scheduled_tasks_title')}
+			desc={t('control.scheduled_tasks_desc')}
 			className='w-[560px] max-w-[92vw]! pb-4'
 			maxHeight='max-h-[76vh]'
 			setOpen={x.setStartDialogOpen}
@@ -48,7 +50,7 @@ const Index = () => {
 				{x.batch_panel_tab === 'create' && (
 					<div className='flex flex-col gap-4'>
 						<div className='flex flex-col gap-3'>
-							<div className='text-sm font-medium'>Actions</div>
+							<div className='text-sm font-medium'>{t('control.actions')}</div>
 							<div
 								className='
 									p-3
@@ -59,9 +61,11 @@ const Index = () => {
 							>
 								<div className='flex items-center justify-between gap-3'>
 									<div>
-										<div className='text-sm font-medium'>Fetch</div>
+										<div className='text-sm font-medium'>
+											{t('control.fetch')}
+										</div>
 										<div className='text-std-400 text-xs'>
-											Pull fresh markdown into Linkcase.
+											{t('control.fetch_desc')}
 										</div>
 									</div>
 									<Switch
@@ -97,9 +101,13 @@ const Index = () => {
 										</SelectTrigger>
 										<SelectContent>
 											<SelectGroup>
-												<SelectLabel>Unit</SelectLabel>
-												<SelectItem value='second'>seconds</SelectItem>
-												<SelectItem value='minute'>minutes</SelectItem>
+												<SelectLabel>{t('control.unit')}</SelectLabel>
+												<SelectItem value='second'>
+													{t('control.seconds')}
+												</SelectItem>
+												<SelectItem value='minute'>
+													{t('control.minutes')}
+												</SelectItem>
 											</SelectGroup>
 										</SelectContent>
 									</Select>
@@ -115,10 +123,11 @@ const Index = () => {
 							>
 								<div className='flex items-center justify-between gap-3'>
 									<div>
-										<div className='text-sm font-medium'>Extract</div>
+										<div className='text-sm font-medium'>
+											{t('selection.fetch')}
+										</div>
 										<div className='text-std-400 text-xs'>
-											Save content into vectors and generate triples through
-											a Croner + fastq background queue.
+											{t('control.extract_desc')}
 										</div>
 									</div>
 									<Switch
@@ -154,9 +163,13 @@ const Index = () => {
 										</SelectTrigger>
 										<SelectContent>
 											<SelectGroup>
-												<SelectLabel>Unit</SelectLabel>
-												<SelectItem value='second'>seconds</SelectItem>
-												<SelectItem value='minute'>minutes</SelectItem>
+												<SelectLabel>{t('control.unit')}</SelectLabel>
+												<SelectItem value='second'>
+													{t('control.seconds')}
+												</SelectItem>
+												<SelectItem value='minute'>
+													{t('control.minutes')}
+												</SelectItem>
 											</SelectGroup>
 										</SelectContent>
 									</Select>
@@ -170,7 +183,7 @@ const Index = () => {
 									'
 								>
 									<div className='text-std-400 text-xs'>
-										fastq concurrency for scheduled extract runs
+										{t('control.extract_concurrency_desc')}
 									</div>
 									<Select
 										value={String(x.batch_extract_concurrency)}
@@ -191,7 +204,9 @@ const Index = () => {
 										</SelectTrigger>
 										<SelectContent>
 											<SelectGroup>
-												<SelectLabel>Concurrency</SelectLabel>
+												<SelectLabel>
+													{t('control.concurrency')}
+												</SelectLabel>
 												{extract_concurrency_options.map(value => (
 													<SelectItem value={value} key={value}>
 														{value}
@@ -204,7 +219,7 @@ const Index = () => {
 							</div>
 						</div>
 						<div className='flex flex-col gap-2'>
-							<div className='text-sm font-medium'>Each run processes</div>
+							<div className='text-sm font-medium'>{t('control.each_run_processes')}</div>
 							<Select
 								value={String(x.batch_count)}
 								onValueChange={value => value && x.setBatchCount(value)}
@@ -221,7 +236,7 @@ const Index = () => {
 								</SelectTrigger>
 								<SelectContent>
 									<SelectGroup>
-										<SelectLabel>Count</SelectLabel>
+										<SelectLabel>{t('control.count')}</SelectLabel>
 										{count_options.map(value => (
 											<SelectItem value={value} key={value}>
 												{value}
@@ -241,10 +256,11 @@ const Index = () => {
 						>
 							<div className='flex items-center justify-between gap-3'>
 								<div>
-									<div className='text-sm font-medium'>Auto-remove dead links</div>
+									<div className='text-sm font-medium'>
+										{t('control.auto_remove_dead_links')}
+									</div>
 									<div className='text-std-400 text-xs'>
-										Only for scheduled fetch. Removes obvious gone or empty
-										pages, but keeps links blocked by verification.
+										{t('control.auto_remove_dead_links_desc')}
 									</div>
 								</div>
 								<Switch
@@ -289,17 +305,24 @@ const Index = () => {
 										<div className='text-sm font-medium'>
 											{x.getBatchTaskActionLabel(task.action)}
 											{' · '}
-											{task.count} link{task.count === 1 ? '' : 's'}
+											{t('control.task_links', { count: task.count })}
 										</div>
 										<div className='text-std-400 text-xs'>
-											Every {task.interval_value} {task.interval_unit}
-											{task.interval_value === 1 ? '' : 's'}
+											{t('control.every', {
+												value: task.interval_value,
+												unit:
+													task.interval_unit === 'second'
+														? t('control.seconds')
+														: t('control.minutes')
+											})}
 											{task.action === 'fetch' &&
 											task.auto_remove_dead_links
-												? ' · auto-remove dead links'
+												? ` · ${t('control.auto_remove_dead_links_short')}`
 												: ''}
 											{task.action === 'extract'
-												? ` · fastq x${task.extract_concurrency}`
+												? ` · ${t('control.fastq_concurrency', {
+														count: task.extract_concurrency
+													})}`
 												: ''}
 										</div>
 									</div>
@@ -308,16 +331,24 @@ const Index = () => {
 											{x.getBatchTaskStatusText(task)}
 										</div>
 										<div className='text-std-400 text-xs'>
-											Run count: {task.runs}
+											{t('control.run_count', { count: task.runs })}
 										</div>
 									</div>
 								</div>
 								<div className='text-std-400 grid gap-1 text-xs'>
-									<div>Next run: {x.formatBatchAbsoluteTime(task.next_run_at)}</div>
-									<div>Last run: {x.formatBatchAbsoluteTime(task.last_run_at)}</div>
+									<div>
+										{t('control.next_run', {
+											value: x.formatBatchAbsoluteTime(task.next_run_at)
+										})}
+									</div>
+									<div>
+										{t('control.last_run', {
+											value: x.formatBatchAbsoluteTime(task.last_run_at)
+										})}
+									</div>
 									{task.last_error && (
 										<div className='text-red-500'>
-											Last error: {task.last_error}
+											{t('control.last_error', { value: task.last_error })}
 										</div>
 									)}
 								</div>
@@ -327,14 +358,14 @@ const Index = () => {
 										size='sm'
 										onClick={() => x.toggleBatchTaskEnabled(task.id)}
 									>
-										{task.enabled ? 'Pause' : 'Resume'}
+										{task.enabled ? t('control.pause') : t('control.resume')}
 									</Button>
 									<Button
 										variant='destructive'
 										size='sm'
 										onClick={() => x.removeBatchTask(task.id)}
 									>
-										Delete
+										{t('selection.delete')}
 									</Button>
 								</div>
 							</div>
@@ -359,10 +390,10 @@ const Index = () => {
 					<div className='flex h-8 flex-1'>
 						<Tabs
 							items={[
-								{ key: 'create', title: 'Add Task', Icon: Plus },
+								{ key: 'create', title: t('control.add_task_short'), Icon: Plus },
 								{
 									key: 'tasks',
-									title: `Task List (${x.batch_task_count})`,
+									title: t('control.task_list', { count: x.batch_task_count }),
 									Icon: ListCheck
 								}
 							]}
@@ -372,7 +403,7 @@ const Index = () => {
 					</div>
 					<div className='flex items-center gap-2'>
 						<Button variant='ghost' size='sm' onClick={() => x.setStartDialogOpen(false)}>
-							Close
+							{t('control.close')}
 						</Button>
 						{x.batch_panel_tab === 'create' && (
 							<Button
@@ -382,7 +413,7 @@ const Index = () => {
 								}
 								onClick={x.startBatchSchedule}
 							>
-								Add tasks
+								{t('control.add_tasks')}
 							</Button>
 						)}
 					</div>

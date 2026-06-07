@@ -2,6 +2,7 @@ import { DndContext, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { Plus } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import { useModel } from './context'
 import MenuItem from './MenuItem'
@@ -10,6 +11,7 @@ import type { DragEndEvent } from '@dnd-kit/core'
 
 const Index = () => {
 	const { skill_items, selected_skill_id, createSkill, sortSkill } = useModel()
+	const { t } = useTranslation('agent')
 	const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }))
 
 	const onDragEnd = (args: DragEndEvent) => {
@@ -48,7 +50,7 @@ const Index = () => {
 					border-b border-border-light
 				'
 			>
-				<span className='text-xsm text-std-500 font-medium'>Skills</span>
+				<span className='text-xsm text-std-500 font-medium'>{t('skill.skills')}</span>
 				<button className='icon_button small' type='button' onClick={() => void createSkill()}>
 					<Plus className='size-3.5'></Plus>
 				</button>

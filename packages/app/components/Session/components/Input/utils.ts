@@ -24,48 +24,47 @@ import type {
 	ToolMentionItem
 } from './types'
 
-export const submit_modes = [
-	{ label: 'Enter Mode', value: 'enter' },
-	{ label: 'Ctrl+Enter Mode', value: 'ctrl+enter' }
+type Translate = (key: string, options?: Record<string, unknown>) => string
+
+export const getSubmitModes = (t: Translate) => [
+	{ label: t('session.input.submit_enter'), value: 'enter' },
+	{ label: t('session.input.submit_ctrl_enter'), value: 'ctrl+enter' }
 ]
 
-export const session_modes = [
-	{ label: 'Normal', value: 'normal' },
-	{ label: 'Plan', value: 'plan' },
-	{ label: 'Plan-Exec', value: 'plan-exec' }
+export const getSessionModes = (t: Translate) => [
+	{ label: t('session.input.mode_normal'), value: 'normal' },
+	{ label: t('session.input.mode_plan'), value: 'plan' },
+	{ label: t('session.input.mode_plan_exec'), value: 'plan-exec' }
 ]
 
-export const audit_modes = [
-	{ label: 'Limited', value: 'limited' },
-	{ label: 'Auto', value: 'auto' },
-	{ label: 'Full Access', value: 'full' }
+export const getAuditModes = (t: Translate) => [
+	{ label: t('session.input.audit_limited'), value: 'limited' },
+	{ label: t('session.input.audit_auto'), value: 'auto' },
+	{ label: t('session.input.audit_full'), value: 'full' }
 ]
 
-export const effort_modes = [
-	{ label: 'Default', value: 'default' },
-	{ label: 'Low', value: 'low' },
-	{ label: 'Medium', value: 'medium' },
-	{ label: 'High', value: 'high' },
-	{ label: 'XHigh', value: 'xhigh' }
+export const getEffortModes = (t: Translate) => [
+	{ label: t('session.input.effort_default'), value: 'default' },
+	{ label: t('session.input.effort_low'), value: 'low' },
+	{ label: t('session.input.effort_medium'), value: 'medium' },
+	{ label: t('session.input.effort_high'), value: 'high' },
+	{ label: t('session.input.effort_xhigh'), value: 'xhigh' }
 ]
 
 const mention_limit = 50
-const skill_type_label_map = {
-	system: 'System'
-} as const
-
-export const builtin_system_skills = [
-	{
-		key: 'builtin-skill-creator',
-		label: 'skill-creator',
-		desc: 'Create or update reusable local skills from repeated workflows or failure patterns.'
-	},
-	{
-		key: 'builtin-skill-installer',
-		label: 'skill-installer',
-		desc: 'Install a curated skill or a skill from another repository into the local skills directory.'
-	}
-] satisfies Array<Pick<SkillMentionItem, 'key' | 'label' | 'desc'>>
+export const getBuiltinSystemSkills = (t: Translate) =>
+	[
+		{
+			key: 'builtin-skill-creator',
+			label: t('session.skill.creator_label'),
+			desc: t('session.skill.creator_desc')
+		},
+		{
+			key: 'builtin-skill-installer',
+			label: t('session.skill.installer_label'),
+			desc: t('session.skill.installer_desc')
+		}
+	] satisfies Array<Pick<SkillMentionItem, 'key' | 'label' | 'desc'>>
 
 export const getPathSegments = (value: string) => value.replace(/\/$/, '').split('/').filter(Boolean)
 
@@ -120,8 +119,11 @@ export const getFileIcon = (item: FileMentionItem) => {
 	return File
 }
 
-export const getSkillTypeLabel = (value: string) =>
-	skill_type_label_map[value as keyof typeof skill_type_label_map] || 'Personal'
+export const getSkillTypeLabel = (args: { value: string; t: Translate }) => {
+	const { value, t } = args
+
+	return value === 'system' ? t('session.skill.system') : t('session.skill.personal')
+}
 
 const escapeRegex = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
@@ -330,11 +332,13 @@ export const getMentionInsertContent = (item: MentionItem) => {
 	}
 }
 
-export const createSkillItems = (
+export const createSkillItems = (args: {
 	items: Array<{ id: string; name: string; desc?: string; path: string; type?: string | null }>
-) => {
+	t: Translate
+}) => {
+	const { items, t } = args
 	const builtin_map = new Map(
-		builtin_system_skills.map(item => [
+		getBuiltinSystemSkills(t).map(item => [
 			item.label,
 			{
 				...item,

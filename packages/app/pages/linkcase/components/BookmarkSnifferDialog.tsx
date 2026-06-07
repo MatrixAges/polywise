@@ -1,5 +1,6 @@
 import { ArrowDownToLine, ChevronDown, ChevronRight, Loader, RefreshCw, TriangleAlert } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/__shadcn__/components/ui/button'
 import { Dialog } from '@/components'
@@ -82,6 +83,7 @@ const FolderNode = observer(
 
 const SourceSection = observer((props: { browser: LinkcaseSnifferBrowserId; source: LinkcaseSnifferSourceStatus }) => {
 	const { browser, source } = props
+	const { t } = useTranslation('linkcase')
 
 	return (
 		<div
@@ -99,7 +101,9 @@ const SourceSection = observer((props: { browser: LinkcaseSnifferBrowserId; sour
 					<div className='truncate text-sm font-semibold'>{source.profile_name}</div>
 					<div className='text-std-400 truncate text-xs'>{source.path}</div>
 				</div>
-				<div className='text-std-300 shrink-0 text-xs'>{source.bookmark_count} bookmarks</div>
+				<div className='text-std-300 shrink-0 text-xs'>
+					{t('control.bookmarks_count', { count: source.bookmark_count })}
+				</div>
 			</div>
 			{source.error ? (
 				<div
@@ -127,7 +131,7 @@ const SourceSection = observer((props: { browser: LinkcaseSnifferBrowserId; sour
 							bg-secondary/30
 						'
 				>
-					No bookmark folders with importable links were found in this profile.
+					{t('control.no_importable_bookmarks')}
 				</div>
 			)}
 		</div>
@@ -137,6 +141,7 @@ const SourceSection = observer((props: { browser: LinkcaseSnifferBrowserId; sour
 const BrowserCard = observer((props: { browser: LinkcaseSnifferBrowserStatus }) => {
 	const { browser } = props
 	const x = useModel()
+	const { t } = useTranslation('linkcase')
 	const importing = x.sniffer_importing_browser === browser.id
 	const expanded = x.isSnifferBrowserExpanded(browser.id)
 	const folder_keys = getLinkcaseSnifferBrowserFolderKeys(browser)
@@ -167,7 +172,7 @@ const BrowserCard = observer((props: { browser: LinkcaseSnifferBrowserStatus }) 
 									: 'bg-slate-100 text-slate-600'
 							)}
 						>
-							{browser.available ? 'ready' : 'unavailable'}
+							{browser.available ? t('control.ready') : t('control.unavailable')}
 						</div>
 					</div>
 					<div
@@ -178,9 +183,9 @@ const BrowserCard = observer((props: { browser: LinkcaseSnifferBrowserStatus }) 
 							text-std-300 text-xs
 						'
 					>
-						<span>Profiles: {browser.source_count}</span>
-						<span>Folders: {folder_keys.length}</span>
-						<span>Selected: {selected_folder_count}</span>
+						<span>{t('control.profiles_count', { count: browser.source_count })}</span>
+						<span>{t('control.folders_count', { count: folder_keys.length })}</span>
+						<span>{t('control.selected_count', { count: selected_folder_count })}</span>
 					</div>
 				</div>
 				<div className='flex shrink-0 items-center gap-2'>
@@ -205,7 +210,7 @@ const BrowserCard = observer((props: { browser: LinkcaseSnifferBrowserStatus }) 
 						) : (
 							<ChevronRight className='size-3.5'></ChevronRight>
 						)}
-						<span>Folders</span>
+						<span>{t('control.folders')}</span>
 					</button>
 					<Button
 						size='sm'
@@ -217,7 +222,11 @@ const BrowserCard = observer((props: { browser: LinkcaseSnifferBrowserStatus }) 
 						) : (
 							<ArrowDownToLine className='size-3.5'></ArrowDownToLine>
 						)}
-						<span>{importing ? 'Importing' : `Import ${browser.name}`}</span>
+						<span>
+							{importing
+								? t('control.importing_browser')
+								: t('control.import_browser', { name: browser.name })}
+						</span>
 					</Button>
 				</div>
 			</div>
@@ -232,7 +241,7 @@ const BrowserCard = observer((props: { browser: LinkcaseSnifferBrowserStatus }) 
 				>
 					<div className='flex items-center justify-between gap-3'>
 						<div className='text-std-400 text-xs'>
-							Expand the browser card, then check the folders you want to import.
+							{t('control.import_browser_bookmarks_desc')}
 						</div>
 						<div className='flex items-center gap-2'>
 							<button
@@ -240,14 +249,14 @@ const BrowserCard = observer((props: { browser: LinkcaseSnifferBrowserStatus }) 
 								type='button'
 								onClick={() => x.setSnifferSelectedFolderKeys(browser.id, folder_keys)}
 							>
-								Select all
+								{t('control.select_all')}
 							</button>
 							<button
 								className='text-std-400 text-xs'
 								type='button'
 								onClick={() => x.setSnifferSelectedFolderKeys(browser.id, [])}
 							>
-								Clear
+								{t('control.clear_selection')}
 							</button>
 						</div>
 					</div>
@@ -268,20 +277,19 @@ const BrowserCard = observer((props: { browser: LinkcaseSnifferBrowserStatus }) 
 
 const Index = () => {
 	const x = useModel()
+	const { t } = useTranslation('linkcase')
 
 	return (
 		<Dialog
 			open={x.sniffer_dialog_open}
-			title='Import Browser Bookmarks'
-			desc='Choose one browser at a time. Click Folders to open the folder selector, then import only the checked bookmark folders.'
+			title={t('control.import_browser_bookmarks')}
+			desc={t('control.import_browser_bookmarks_desc')}
 			className='w-[600px] max-w-[90vw]!'
 			setOpen={x.setSnifferDialogOpen}
 		>
 			<div className='flex flex-col gap-4'>
 				<div className='flex items-center justify-between gap-3'>
-					<div className='text-std-400 text-sm'>
-						Chrome, Firefox, and Edge stay separated here. There is no combined import action.
-					</div>
+					<div className='text-std-400 text-sm'>{t('control.separate_browser_notice')}</div>
 					<Button
 						variant='outline'
 						size='sm'
@@ -293,7 +301,7 @@ const Index = () => {
 						) : (
 							<RefreshCw className='size-3.5'></RefreshCw>
 						)}
-						<span>Refresh Status</span>
+						<span>{t('control.refresh_status')}</span>
 					</Button>
 				</div>
 				<div className='flex flex-col gap-3'>
@@ -313,7 +321,7 @@ const Index = () => {
 							'
 						>
 							<TriangleAlert className='size-4'></TriangleAlert>
-							<span>No browser status available yet</span>
+							<span>{t('control.no_browser_status')}</span>
 						</div>
 					)}
 				</div>

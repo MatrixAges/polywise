@@ -14,7 +14,7 @@ import {
 import { Show, Tooltip } from '@/components'
 
 import { useModel } from '../context'
-import { audit_modes, submit_modes } from '../utils'
+import { getAuditModes, getSubmitModes } from '../utils'
 
 import type { IPropsInput } from '../../../types'
 
@@ -35,6 +35,8 @@ const Index = (props: Props) => {
 	const x = useModel()
 	const { t } = useTranslation('components')
 	const RightArchiveIcon = props.archived ? PackageOpen : Archive
+	const audit_modes = getAuditModes(t as unknown as (key: string, options?: Record<string, unknown>) => string)
+	const submit_modes = getSubmitModes(t as unknown as (key: string, options?: Record<string, unknown>) => string)
 
 	return (
 		<div

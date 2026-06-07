@@ -184,7 +184,11 @@ export default class Model {
 		try {
 			const items = await rpc.skill.query.query()
 
-			this.skill_items = createSkillItems(items)
+			this.skill_items = createSkillItems({
+				items,
+				t: (key: string, options?: Record<string, unknown>) =>
+					$t(key as never, { ns: 'components', ...(options || {}) }) as string
+			})
 			this.skill_items_loaded = true
 		} catch {
 			this.skill_items = []

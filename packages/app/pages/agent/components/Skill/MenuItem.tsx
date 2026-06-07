@@ -3,6 +3,7 @@ import { CSS } from '@dnd-kit/utilities'
 import { DotsSixVerticalIcon } from '@phosphor-icons/react'
 import { Pencil } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import { useModel } from './context'
 
@@ -16,6 +17,7 @@ interface IProps {
 const Index = (props: IProps) => {
 	const { item, selected } = props
 	const { setSelectedSkill, openEditDialog } = useModel()
+	const { t } = useTranslation('agent')
 	const { attributes, listeners, transform, transition, isDragging, setNodeRef } = useSortable({
 		id: item.id
 	})
@@ -67,7 +69,7 @@ const Index = (props: IProps) => {
 					</button>
 				</div>
 			</div>
-			<div className='text-std-400 line-clamp-2 text-xs'>{item.desc || 'No description'}</div>
+			<div className='text-std-400 line-clamp-2 text-xs'>{item.desc || t('skill.no_description')}</div>
 		</div>
 	)
 }

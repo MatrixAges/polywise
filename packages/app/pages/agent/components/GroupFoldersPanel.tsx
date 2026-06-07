@@ -35,9 +35,7 @@ const Index = () => {
 					border-border-light border-b
 				'
 			>
-				<span className='text-sm font-medium'>
-					{t('detail.folders', { ns: 'agent', defaultValue: 'Folders' })}
-				</span>
+				<span className='text-sm font-medium'>{t('detail.folders', { ns: 'agent' })}</span>
 				<div className='flex items-center gap-2'>
 					<TextTabs
 						items={selected_group_folders.map(item => ({
@@ -71,10 +69,7 @@ const Index = () => {
 							text-sm text-std-400
 						'
 					>
-						{t('detail.no_folders_linked', {
-							ns: 'agent',
-							defaultValue: 'No folders linked'
-						})}
+						{t('detail.no_folders_linked', { ns: 'agent' })}
 					</div>
 				)}
 			</div>

@@ -254,6 +254,7 @@ export default {
 		feishu_encrypt_key_desc: '可选。只有启用了飞书 webhook 加密时才需要。',
 		feishu_webhook_callback: 'Webhook 回调地址',
 		feishu_webhook_callback_desc: '仅作为可选 webhook 兜底模式使用。默认长连接模式不需要它。',
+		feishu_webhook_path: '回调路径：`/sys/im/feishu/events`',
 		account_id: '账号 ID',
 		account_id_desc: '入站事件使用的唯一标识',
 		label: '标签',

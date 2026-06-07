@@ -41,13 +41,10 @@ const Index = ({ agent }: IProps) => {
 				>
 					<GitBranch className='size-5'></GitBranch>
 				</div>
-				<div className='text-std-900 text-sm font-medium'>
-					{t('detail.graph', { defaultValue: 'Graph' })}
-				</div>
+				<div className='text-std-900 text-sm font-medium'>{t('detail.graph')}</div>
 				<div className='text-std-400 text-sm'>
 					{t('detail.graph_unavailable', {
-						defaultValue: 'Graph view for {{name}} is not available yet.',
-						name: agent.name || t('detail.this_agent', { defaultValue: 'this agent' })
+						name: agent.name || t('detail.this_agent')
 					})}
 				</div>
 			</div>

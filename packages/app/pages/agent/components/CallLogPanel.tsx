@@ -1,4 +1,5 @@
 import dayjs from 'dayjs'
+import { useTranslation } from 'react-i18next'
 
 import { Badge } from '@/__shadcn__/components/ui/badge'
 import { Button } from '@/__shadcn__/components/ui/button'
@@ -71,6 +72,8 @@ const JsonBlock = ({ title, value }: { title: string; value: unknown }) => {
 }
 
 const Index = <T extends ILogItemBase>(props: IProps<T>) => {
+	const { t: raw_t } = useTranslation('agent')
+	const t = raw_t as unknown as (key: string, options?: Record<string, unknown>) => string
 	const {
 		available_dates,
 		date,
@@ -180,8 +183,8 @@ const Index = <T extends ILogItemBase>(props: IProps<T>) => {
 							{dayjs(item.created_at).format('YYYY-MM-DD HH:mm:ss')} · session{' '}
 							{item.session_id}
 						</div>
-						<JsonBlock title='Input' value={item.input} />
-						<JsonBlock title='Output' value={item.output} />
+						<JsonBlock title={t('model.input')} value={item.input} />
+						<JsonBlock title={t('model.output')} value={item.output} />
 					</div>
 				))}
 			</div>

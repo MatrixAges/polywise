@@ -55,8 +55,8 @@ const Index = ({ active_tab }: IProps) => {
 		}
 
 		const confirmed = await alert({
-			title: t('detail.remove_title', { defaultValue: 'Remove Agent' }),
-			desc: t('detail.remove_desc', { defaultValue: 'Confirm remove this agent?' })
+			title: t('detail.remove_title'),
+			desc: t('detail.remove_desc')
 		})
 
 		if (!confirmed) {
@@ -121,13 +121,9 @@ const Index = ({ active_tab }: IProps) => {
 						'
 					>
 						<div className='min-w-0'>
-							<div className='text-xs font-medium'>
-								{t('detail.frozen', { defaultValue: 'Frozen' })}
-							</div>
+							<div className='text-xs font-medium'>{t('detail.frozen')}</div>
 							<div className='text-std-400 text-[11px]'>
-								{selected_agent.is_frozen
-									? t('detail.locked', { defaultValue: 'Locked' })
-									: t('detail.writable', { defaultValue: 'Writable' })}
+								{selected_agent.is_frozen ? t('detail.locked') : t('detail.writable')}
 							</div>
 						</div>
 						<Switch
@@ -145,11 +141,7 @@ const Index = ({ active_tab }: IProps) => {
 						onClick={() => void exportSelectedAgent()}
 					>
 						<HardDriveUpload className='size-3'></HardDriveUpload>
-						<span>
-							{export_agent_loading
-								? t('detail.exporting', { defaultValue: 'Exporting...' })
-								: t('detail.export', { defaultValue: 'Export' })}
-						</span>
+						<span>{export_agent_loading ? t('detail.exporting') : t('detail.export')}</span>
 					</button>
 					<button
 						className='icon_button small'

@@ -33,11 +33,7 @@ const Index = () => {
 							text-center
 						'
 					>
-						<div className='text-std-400 text-sm'>
-							{t('detail.create_session_desc', {
-								defaultValue: 'Create a dedicated post session for AI-assisted writing.'
-							})}
-						</div>
+						<div className='text-std-400 text-sm'>{t('detail.create_session_desc')}</div>
 						<Button
 							size='sm'
 							disabled={x.ensuring_session}

@@ -46,7 +46,7 @@ const Index = () => {
 					text-sm text-std-400
 				'
 			>
-				{t('skills.select_skill', { defaultValue: 'Select a skill' })}
+				{t('skills.select_skill')}
 			</div>
 		)
 	}
@@ -70,9 +70,7 @@ const Index = () => {
 						border-b border-border-light
 					'
 				>
-					<div className='text-xsm text-std-500 font-medium'>
-						{t('detail.files', { defaultValue: 'Files' })}
-					</div>
+					<div className='text-xsm text-std-500 font-medium'>{t('detail.files')}</div>
 				</div>
 				<div className='flex-1'>
 					<FileTree
@@ -117,7 +115,7 @@ const Index = () => {
 									text-sm text-std-400
 								'
 						>
-							{t('detail.select_file', { defaultValue: 'Select a file' })}
+							{t('detail.select_file')}
 						</div>
 					)}
 				</div>
@@ -145,7 +143,7 @@ const Index = () => {
 							onClick={value => setDetailMode(value as 'preview' | 'edit')}
 						></Tabs>
 						<Button size='xs' onClick={() => void saveSkill()}>
-							{t('detail.save', { defaultValue: 'Save' })}
+							{t('detail.save')}
 						</Button>
 					</div>
 				</div>

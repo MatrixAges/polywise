@@ -4,6 +4,7 @@ import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { useMemoizedFn } from 'ahooks'
 import { MessageCircleCheck, PanelLeftClose, Plus } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import { ContextMenu, ContextMenuTrigger } from '@/__shadcn__/components/ui/context-menu'
 import { Spinner } from '@/__shadcn__/components/ui/spinner'
@@ -23,6 +24,7 @@ interface IMenuTarget {
 }
 
 const Index = () => {
+	const { t } = useTranslation('agent')
 	const {
 		pins,
 		session_items,
@@ -142,7 +144,7 @@ const Index = () => {
 			>
 				<div className='flex items-center gap-1 pl-1'>
 					<MessageCircleCheck size={11}></MessageCircleCheck>
-					<span className='text-xs font-medium'>Sessions</span>
+					<span className='text-xs font-medium'>{t('session_menu.sessions')}</span>
 				</div>
 				<div className='flex gap-1'>
 					<button
@@ -264,7 +266,9 @@ const Index = () => {
 											onClick={() => loadMoreSessions()}
 											disabled={session_loading || session_loading_more}
 										>
-											{session_loading_more ? 'Loading...' : 'Show more'}
+											{session_loading_more
+												? t('session_menu.loading')
+												: t('session_menu.show_more')}
 										</button>
 									)}
 								</div>

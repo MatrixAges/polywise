@@ -75,9 +75,7 @@ const EditorPanel = () => {
 									onClick={() =>
 										x.addReferenceToPostSessionInput(editor as TiptapEditor)
 									}
-									title={t('detail.add_reference', {
-										defaultValue: 'Add Reference'
-									})}
+									title={t('detail.add_reference')}
 								>
 									<SparkleIcon className='size-3.5' weight='bold'></SparkleIcon>
 								</div>

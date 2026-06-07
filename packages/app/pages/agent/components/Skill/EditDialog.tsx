@@ -1,5 +1,6 @@
 import { useMemoizedFn } from 'ahooks'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/__shadcn__/components/ui/button'
 import { Input } from '@/__shadcn__/components/ui/input'
@@ -9,6 +10,7 @@ import { Dialog, DialogFooter } from '@/components'
 import { useModel } from './context'
 
 const Index = () => {
+	const { t } = useTranslation('agent')
 	const {
 		selected_skill,
 		edit_dialog_open,
@@ -42,20 +44,20 @@ const Index = () => {
 	return (
 		<Dialog
 			open={edit_dialog_open}
-			title='Edit Skill'
-			desc='Update skill name and description.'
+			title={t('skill.edit_title')}
+			desc={t('skill.edit_desc')}
 			className='max-w-lg gap-4 sm:max-w-lg'
 			setOpen={onOpenChange}
 		>
 			<div className='flex flex-col gap-3'>
 				<Input
-					placeholder='Skill name'
+					placeholder={t('skill.name')}
 					value={edit_name}
 					onChange={event => setEditName(event.target.value)}
 				></Input>
 				<Textarea
 					className='min-h-24'
-					placeholder='Skill description'
+					placeholder={t('skill.description')}
 					value={edit_desc}
 					onChange={event => setEditDesc(event.target.value)}
 				></Textarea>
@@ -70,13 +72,13 @@ const Index = () => {
 				'
 			>
 				<Button variant='destructive' onClick={onRemove}>
-					Remove
+					{t('skill.remove')}
 				</Button>
 				<div className='flex items-center gap-2'>
 					<Button variant='outline' onClick={closeEditDialog}>
-						Cancel
+						{t('skill.cancel')}
 					</Button>
-					<Button onClick={onSave}>Save</Button>
+					<Button onClick={onSave}>{t('skill.save')}</Button>
 				</div>
 			</DialogFooter>
 		</Dialog>

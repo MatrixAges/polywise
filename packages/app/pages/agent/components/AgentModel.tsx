@@ -24,24 +24,22 @@ const Index = ({ agent }: IProps) => {
 	const { can_edit_selected_agent_behavior, setModel, setModelEffort } = useModel()
 	const { t } = useTranslation('agent')
 	const effort_modes = [
-		{ label: t('model.default', { defaultValue: 'Default' }), value: 'default' },
-		{ label: t('model.none', { defaultValue: 'None' }), value: 'none' },
-		{ label: t('model.minimal', { defaultValue: 'Minimal' }), value: 'minimal' },
-		{ label: t('model.low', { defaultValue: 'Low' }), value: 'low' },
-		{ label: t('model.medium', { defaultValue: 'Medium' }), value: 'medium' },
-		{ label: t('model.high', { defaultValue: 'High' }), value: 'high' },
-		{ label: t('model.xhigh', { defaultValue: 'XHigh' }), value: 'xhigh' },
-		{ label: t('model.max', { defaultValue: 'Max' }), value: 'max' }
+		{ label: t('model.default'), value: 'default' },
+		{ label: t('model.none'), value: 'none' },
+		{ label: t('model.minimal'), value: 'minimal' },
+		{ label: t('model.low'), value: 'low' },
+		{ label: t('model.medium'), value: 'medium' },
+		{ label: t('model.high'), value: 'high' },
+		{ label: t('model.xhigh'), value: 'xhigh' },
+		{ label: t('model.max'), value: 'max' }
 	]
 
 	return (
 		<div className='-mb-1 flex flex-col'>
 			<div className='flex items-center gap-2'>
-				<span className='text-std-400 text-xs'>{t('model.title', { defaultValue: 'Model' })}</span>
+				<span className='text-std-400 text-xs'>{t('model.title')}</span>
 				{!can_edit_selected_agent_behavior ? (
-					<span className='text-std-300 text-[10px] uppercase'>
-						{t('detail.frozen', { defaultValue: 'Frozen' })}
-					</span>
+					<span className='text-std-300 text-[10px] uppercase'>{t('detail.frozen')}</span>
 				) : null}
 			</div>
 			<div
@@ -84,9 +82,7 @@ const Index = ({ agent }: IProps) => {
 					</SelectTrigger>
 					<SelectContent>
 						<SelectGroup>
-							<SelectLabel>
-								{t('model.reasoning_effort', { defaultValue: 'Reasoning Effort' })}
-							</SelectLabel>
+							<SelectLabel>{t('model.reasoning_effort')}</SelectLabel>
 							{effort_modes.map(item => (
 								<SelectItem value={item.value} key={item.value}>
 									{item.label}

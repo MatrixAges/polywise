@@ -1,5 +1,6 @@
 import { Layers2, RefreshCw, Sparkles, Upload } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 import { genConfig } from 'react-nice-avatar'
 import { getRandomConfig } from 'react-notion-avatar'
 
@@ -13,6 +14,7 @@ import AgentAvatar from './AgentAvatar'
 const accept = '.jpg,.jpeg,.svg,.png,.webp,image/jpeg,image/png,image/svg+xml,image/webp'
 
 const Index = () => {
+	const { t } = useTranslation('agent')
 	const {
 		selected_agent,
 		avatar_dialog_open,
@@ -33,9 +35,9 @@ const Index = () => {
 	}
 
 	const avatar_mode_items = [
-		{ key: 'upload', title: 'Upload', Icon: Upload },
-		{ key: 'nice', title: 'Colorful', Icon: Sparkles },
-		{ key: 'notion', title: 'Notion', Icon: Layers2 }
+		{ key: 'upload', title: t('avatar.upload'), Icon: Upload },
+		{ key: 'nice', title: t('avatar.colorful'), Icon: Sparkles },
+		{ key: 'notion', title: t('avatar.notion'), Icon: Layers2 }
 	] as const
 
 	const onUpload = async () => {
@@ -67,8 +69,8 @@ const Index = () => {
 		<Dialog
 			open={avatar_dialog_open}
 			maxHeight='max-h-[80vh]'
-			title='Agent Avatar'
-			desc='Edit avatar, upload a photo, or generate a new look.'
+			title={t('avatar.title')}
+			desc={t('avatar.desc')}
 			className='w-[360px]'
 			setOpen={open => (!open ? closeAvatarDialog() : undefined)}
 		>
@@ -102,10 +104,10 @@ const Index = () => {
 					<div className='flex flex-col items-center gap-3'>
 						<div className='flex gap-2'>
 							<Button variant='outline' onClick={onUpload}>
-								Choose File
+								{t('avatar.choose_file')}
 							</Button>
 							<Button variant='outline' onClick={clearAvatarPhoto}>
-								Clear Photo
+								{t('avatar.clear_photo')}
 							</Button>
 						</div>
 					</div>
@@ -114,7 +116,7 @@ const Index = () => {
 					<div className='flex items-center gap-2'>
 						<Button variant='outline' onClick={onGenerateNice}>
 							<RefreshCw className='size-3.5'></RefreshCw>
-							Random Nice Config
+							{t('avatar.random_nice')}
 						</Button>
 					</div>
 				)}
@@ -122,16 +124,16 @@ const Index = () => {
 					<div className='flex items-center gap-2'>
 						<Button variant='outline' onClick={onGenerateNotion}>
 							<RefreshCw className='size-3.5'></RefreshCw>
-							Random Notion Config
+							{t('avatar.random_notion')}
 						</Button>
 					</div>
 				)}
 			</div>
 			<DialogFooter className='mt-6'>
 				<Button variant='outline' onClick={closeAvatarDialog}>
-					Cancel
+					{t('avatar.cancel')}
 				</Button>
-				<Button onClick={submitAvatar}>Save</Button>
+				<Button onClick={submitAvatar}>{t('avatar.save')}</Button>
 			</DialogFooter>
 		</Dialog>
 	)

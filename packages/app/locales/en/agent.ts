@@ -11,12 +11,21 @@ export default {
 		locked: 'Locked',
 		writable: 'Writable',
 		exporting: 'Exporting...',
-		export: 'Export'
+		export: 'Export',
+		graph: 'Graph',
+		graph_unavailable: 'Graph view for {{name}} is not available yet.',
+		this_agent: 'this agent',
+		folders: 'Folders',
+		no_folders_linked: 'No folders linked',
+		files: 'Files',
+		select_file: 'Select a file',
+		save: 'Save'
 	},
 	skills: {
 		placeholder: 'Search and select skills for agent',
 		empty: 'No skills found.',
-		log_empty: 'No skill call logs for this date.'
+		log_empty: 'No skill call logs for this date.',
+		select_skill: 'Select a skill'
 	},
 	info: {
 		role_placeholder: 'Agent role',
@@ -77,6 +86,10 @@ export default {
 		title: 'New article',
 		untitled: 'Untitled article',
 		characters: '{{count}} characters',
+		remove_title: 'Remove Article',
+		remove_desc: 'Confirm remove this private article?',
+		select_or_create: 'Select a private article or create a new one.',
+		select_only: 'Select a private article.',
 		cancel: 'Cancel',
 		creating: 'Creating...',
 		create: 'Create'
@@ -85,5 +98,70 @@ export default {
 		placeholder: 'Search and select custom tools for agent',
 		empty: 'No tools found.',
 		log_empty: 'No tool call logs for this date.'
+	},
+	group: {
+		create: 'Create Group',
+		edit: 'Edit Group',
+		remove_title: 'Remove Group',
+		remove_desc: 'Confirm remove this group and all linked group sessions?',
+		info: 'Info',
+		info_desc:
+			'Set the group name and description, then choose which agents participate in the shared group chat.',
+		folders_desc:
+			'Associate multiple folders with this group. These folders will be mounted read-write for all group agents.',
+		group_name: 'Group name',
+		group_desc_placeholder: 'Describe what this group is for',
+		agents: 'Agents',
+		add: 'Add',
+		no_role: 'No role',
+		choose_folder_path: 'Choose a folder path',
+		selected_folders: 'Selected Folders ({{count}})',
+		no_folders_selected: 'No folders selected',
+		folders: 'Folders'
+	},
+	skill: {
+		title: 'Skills',
+		desc: 'Manage skill files and metadata without leaving agents.',
+		edit_title: 'Edit Skill',
+		edit_desc: 'Update skill name and description.',
+		name: 'Skill name',
+		description: 'Skill description',
+		save: 'Save',
+		remove: 'Remove',
+		cancel: 'Cancel',
+		skills: 'Skills',
+		no_description: 'No description'
+	},
+	session_menu: {
+		sessions: 'Sessions',
+		loading: 'Loading...',
+		show_more: 'Show more'
+	},
+	avatar: {
+		title: 'Agent Avatar',
+		desc: 'Edit avatar, upload a photo, or generate a new look.',
+		upload: 'Upload',
+		colorful: 'Colorful',
+		notion: 'Notion',
+		choose_file: 'Choose File',
+		clear_photo: 'Clear Photo',
+		random_nice: 'Random Nice Config',
+		random_notion: 'Random Notion Config',
+		cancel: 'Cancel',
+		save: 'Save',
+		upload_photo: 'Upload photo',
+		clear_photo_title: 'Clear photo'
+	},
+	model: {
+		default: 'Default',
+		none: 'None',
+		minimal: 'Minimal',
+		low: 'Low',
+		medium: 'Medium',
+		high: 'High',
+		xhigh: 'XHigh',
+		max: 'Max',
+		title: 'Model',
+		reasoning_effort: 'Reasoning Effort'
 	}
 } as const
