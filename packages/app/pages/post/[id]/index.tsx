@@ -4,7 +4,7 @@ import { useParams } from 'react-router'
 import { container } from 'tsyringe'
 
 import { useGlobal } from '@/context'
-import { usePageLocale } from '@/hooks'
+import { loadPageLocale, usePageLocale } from '@/hooks'
 
 import { EditorPanel, NotFound, SessionPanel, Sidebar } from './components'
 import { Context } from './context'
@@ -72,4 +72,5 @@ const Index = () => {
 	)
 }
 
+export const loader = () => loadPageLocale('post')
 export const Component = new $app.Handle(Index).by(observer).by($app.memo).get()

@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import { observer } from 'mobx-react-lite'
 import { container } from 'tsyringe'
 
-import { usePageLocale } from '@/hooks'
+import { loadPageLocale, usePageLocale } from '@/hooks'
 
 import { Header, List } from './components'
 import { Context } from './context'
@@ -49,4 +49,5 @@ const Index = () => {
 	)
 }
 
+export const loader = () => loadPageLocale('post')
 export const Component = new $app.Handle(Index).by(observer).by($app.memo).get()

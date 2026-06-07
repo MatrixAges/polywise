@@ -7,7 +7,7 @@ import { toast } from 'sonner'
 import { Input } from '@/__shadcn__/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/__shadcn__/components/ui/select'
 import Editor from '@/components/Editor'
-import { usePageLocale } from '@/hooks'
+import { loadPageLocale, usePageLocaleCleanup } from '@/hooks'
 import { formatDateTime, fromNow, rpc } from '@/utils'
 
 import type { RPCOutput } from '@/types/rpc'
@@ -18,7 +18,9 @@ type ArticleForType = (typeof article_for_types)[number]
 type ArticleDetail = RPCOutput['article']['read']
 
 const Index = () => {
-	const t_article = usePageLocale('article')
+	usePageLocaleCleanup(['article', 'post'])
+
+	const { t: t_article } = useTranslation('article')
 	const { t: t_post } = useTranslation('post')
 	const params = useParams()
 	const article_id = params.id ?? ''
@@ -386,4 +388,9 @@ const Index = () => {
 	)
 }
 
+export const loader = async () => {
+	await Promise.all([loadPageLocale('article'), loadPageLocale('post')])
+
+	return null
+}
 export const Component = new $app.Handle(Index).by($app.memo).get()

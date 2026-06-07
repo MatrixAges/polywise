@@ -6,7 +6,7 @@ import { container } from 'tsyringe'
 import { Button } from '@/__shadcn__/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/__shadcn__/components/ui/select'
 import { Fallback, TextTabs } from '@/components'
-import { usePageLocale } from '@/hooks'
+import { loadPageLocale, usePageLocale } from '@/hooks'
 
 import {
 	Agent,
@@ -199,4 +199,5 @@ const Index = () => {
 	)
 }
 
+export const loader = () => loadPageLocale('home')
 export const Component = new $app.Handle(Index).by(observer).by($app.memo).get()

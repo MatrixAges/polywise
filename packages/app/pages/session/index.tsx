@@ -6,7 +6,7 @@ import { container } from 'tsyringe'
 
 import { Session } from '@/components'
 import { useGlobal } from '@/context'
-import { usePageLocale } from '@/hooks'
+import { loadPageLocale, usePageLocale } from '@/hooks'
 
 import { AddModal, Menu, Preview, SidePanel } from './components'
 import { Context } from './context'
@@ -74,4 +74,5 @@ const Index = () => {
 	)
 }
 
+export const loader = () => loadPageLocale('session')
 export const Component = new $app.Handle(Index).by(observer).by($app.memo).get()

@@ -7,7 +7,7 @@ import { container } from 'tsyringe'
 import { setting_items } from '@/appdata'
 import { Container, Sidebar } from '@/components'
 import { useGlobal } from '@/context'
-import { usePageLocale } from '@/hooks'
+import { loadPageLocale, usePageLocale } from '@/hooks'
 
 import Model from './model'
 
@@ -74,4 +74,5 @@ const Index = () => {
 	)
 }
 
+export const loader = () => loadPageLocale('setting')
 export const Component = new $app.Handle(Index).by(observer).by($app.memo).get()

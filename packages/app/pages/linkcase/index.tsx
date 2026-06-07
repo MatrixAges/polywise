@@ -3,7 +3,7 @@ import { observer } from 'mobx-react-lite'
 import { container } from 'tsyringe'
 
 import { useGlobal } from '@/context'
-import { usePageLocale } from '@/hooks'
+import { loadPageLocale, usePageLocale } from '@/hooks'
 
 import {
 	AddDialog,
@@ -48,4 +48,5 @@ const Index = () => {
 	)
 }
 
+export const loader = () => loadPageLocale('linkcase')
 export const Component = new $app.Handle(Index).by(observer).by($app.memo).get()

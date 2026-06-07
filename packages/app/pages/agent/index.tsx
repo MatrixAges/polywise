@@ -3,7 +3,7 @@ import { observer } from 'mobx-react-lite'
 import { container } from 'tsyringe'
 
 import { useGlobal } from '@/context'
-import { usePageLocale } from '@/hooks'
+import { loadPageLocale, usePageLocale } from '@/hooks'
 
 import { AvatarDialog, Detail, GroupPanel, Menu, SessionsPanel } from './components'
 import { Context } from './context'
@@ -40,4 +40,5 @@ const Index = () => {
 	)
 }
 
+export const loader = () => loadPageLocale('agent')
 export const Component = new $app.Handle(Index).by(observer).by($app.memo).get()
