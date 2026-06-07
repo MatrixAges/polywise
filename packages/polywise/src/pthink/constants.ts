@@ -7,7 +7,7 @@ export const default_pthink_config: PthinkConfig = {
 	enabled: true,
 	idle_grace_ms: 20 * 60 * 1000,
 	review_cooldown_ms: 15 * 60 * 1000,
-	min_messages: 6,
+	min_messages: 60,
 	max_messages: 60,
 	max_articles_per_run: 4,
 	skill_generation_enabled: true,

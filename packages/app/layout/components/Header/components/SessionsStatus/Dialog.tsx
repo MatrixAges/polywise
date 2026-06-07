@@ -1,5 +1,6 @@
 import { ArrowLeft, CircleAlert, Grip, Loader, MessageSquareDot } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import { Dialog, Session, Tabs } from '@/components'
 
@@ -18,12 +19,18 @@ const tab_items = [
 const Index = (props: IProps) => {
 	const { x } = props
 	const current_list = x.list
+	const { t } = useTranslation('layout')
+	const tab_items = [
+		{ key: 'unread', title: t('sessions_status.unread'), Icon: MessageSquareDot },
+		{ key: 'running', title: t('sessions_status.running'), Icon: Loader },
+		{ key: 'error', title: t('sessions_status.error'), Icon: CircleAlert }
+	]
 
 	return (
 		<Dialog
 			open={x.open}
-			title='Active Sessions'
-			desc='A panel for quickly viewing dynamic session changes'
+			title={t('sessions_status.title')}
+			desc={t('sessions_status.desc')}
 			className='w-[800px] max-w-none! gap-4'
 			maxHeight='h-[80vh]'
 			setOpen={x.toggleOpen}
@@ -95,7 +102,7 @@ const Index = (props: IProps) => {
 									text-sm text-std-300
 								'
 							>
-								No sessions
+								{t('sessions_status.empty')}
 							</div>
 						)}
 					</div>
@@ -112,7 +119,7 @@ const Index = (props: IProps) => {
 								text-sm text-std-300
 							'
 						>
-							No session selected
+							{t('sessions_status.not_selected')}
 						</div>
 					)}
 				</div>

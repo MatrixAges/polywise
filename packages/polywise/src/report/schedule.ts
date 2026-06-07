@@ -7,7 +7,7 @@ import type { ReportPeriod } from './types'
 
 dayjs.extend(isoWeek)
 
-const default_report_time = '18:00'
+const default_report_time = '21:00'
 const weekday_index_map = {
 	mon: 0,
 	tue: 1,

@@ -17,7 +17,7 @@ const default_pthink = {
 	enabled: true,
 	idle_grace_ms: 20 * 60 * 1000,
 	review_cooldown_ms: 15 * 60 * 1000,
-	min_messages: 6,
+	min_messages: 60,
 	max_messages: 60,
 	max_articles_per_run: 4,
 	skill_generation_enabled: true,
@@ -25,17 +25,17 @@ const default_pthink = {
 }
 const default_report: AppReportConfig = {
 	enabled: true,
-	daily_enabled: false,
-	daily_time: '18:00',
+	daily_enabled: true,
+	daily_time: '21:00',
 	weekly_enabled: false,
 	weekly_weekday: 'sun',
-	weekly_time: '18:00',
+	weekly_time: '21:00',
 	monthly_enabled: false,
 	monthly_mode: 'last_day',
-	monthly_time: '18:00',
+	monthly_time: '21:00',
 	yearly_enabled: false,
 	yearly_mode: 'last_day',
-	yearly_time: '18:00'
+	yearly_time: '21:00'
 }
 const default_auth = {
 	enabled: false

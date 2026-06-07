@@ -18,6 +18,11 @@ import { useModel } from '../context'
 const Index = () => {
 	const x = useModel()
 	const { t } = useTranslation('linkcase')
+	const filter_items = [
+		{ value: 'title', label: t('toolbar.title') },
+		{ value: 'link', label: t('toolbar.link') }
+	] as const
+	const current_filter_label = filter_items.find(item => item.value === x.filter_type)?.label || x.filter_type
 
 	return (
 		<div
@@ -67,13 +72,16 @@ const Index = () => {
 						'
 						noStyle
 					>
-						<SelectValue />
+						<SelectValue>{current_filter_label}</SelectValue>
 					</SelectTrigger>
 					<SelectContent align='end'>
 						<SelectGroup>
 							<SelectLabel>{t('toolbar.filter')}</SelectLabel>
-							<SelectItem value='title'>{t('toolbar.title')}</SelectItem>
-							<SelectItem value='link'>{t('toolbar.link')}</SelectItem>
+							{filter_items.map(item => (
+								<SelectItem value={item.value} key={item.value}>
+									{item.label}
+								</SelectItem>
+							))}
 						</SelectGroup>
 					</SelectContent>
 				</Select>

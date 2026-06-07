@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next'
+
 type TodoItem = {
 	id: string
 	title: string
@@ -31,10 +33,11 @@ const Index = (props: IProps) => {
 		onCancelRenameTodo,
 		onClickRemoveTodo
 	} = props
+	const { t } = useTranslation()
 
 	return (
 		<div className='flex flex-col gap-2'>
-			<div className='text-std-400 text-xs font-medium'>Todos</div>
+			<div className='text-std-400 text-xs font-medium'>{t('todos_panel.title')}</div>
 			<div className='flex gap-2'>
 				<input
 					className='
@@ -45,7 +48,7 @@ const Index = (props: IProps) => {
 						bg-transparent
 						border border-border-light
 					'
-					placeholder='New todo'
+					placeholder={t('todos_panel.new_placeholder')}
 					value={todoInputValue}
 					onChange={event => onChangeTodoInput(event.target.value)}
 					onKeyDown={event => {
@@ -62,7 +65,7 @@ const Index = (props: IProps) => {
 						onClickCreateTodo()
 					}}
 				>
-					Add
+					{t('todos_panel.add')}
 				</button>
 			</div>
 			<div className='flex flex-col gap-1'>
@@ -111,7 +114,7 @@ const Index = (props: IProps) => {
 								className='text-std-400 text-xs'
 								onClick={() => onStartRenameTodo(item.id, item.title)}
 							>
-								Rename
+								{t('todos_panel.rename')}
 							</button>
 							{todoEditingId === item.id && (
 								<button

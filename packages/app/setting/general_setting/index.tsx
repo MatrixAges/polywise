@@ -24,7 +24,7 @@ import { useForm } from '@/hooks'
 
 import type { AppConfig, AppPthinkConfig, AppReportConfig } from '@core/types'
 
-const default_report_time = '18:00'
+const default_report_time = '21:00'
 const normalizeReportTime = (value: string) =>
 	/^([01]?\d|2[0-3]):([0-5]\d)$/.test(value) ? value : default_report_time
 
@@ -51,11 +51,11 @@ const Index = () => {
 		{ label: t('general.option_minutes', { count: 60 }), value: '60' }
 	]
 	const pthink_message_threshold_options = [
-		{ label: t('general.option_messages', { count: 3 }), value: '3' },
-		{ label: t('general.option_messages', { count: 6 }), value: '6' },
-		{ label: t('general.option_messages', { count: 10 }), value: '10' },
-		{ label: t('general.option_messages', { count: 15 }), value: '15' },
-		{ label: t('general.option_messages', { count: 20 }), value: '20' }
+		{ label: t('general.option_messages', { count: 30 }), value: '30' },
+		{ label: t('general.option_messages', { count: 60 }), value: '60' },
+		{ label: t('general.option_messages', { count: 100 }), value: '100' },
+		{ label: t('general.option_messages', { count: 150 }), value: '150' },
+		{ label: t('general.option_messages', { count: 300 }), value: '300' }
 	]
 	const report_weekday_options = [
 		{ label: t('general.option_monday'), value: 'mon' },
@@ -74,6 +74,15 @@ const Index = () => {
 		{ label: t('general.option_last_day'), value: 'last_day' },
 		{ label: t('general.option_next_year_first_day'), value: 'next_year_first_day' }
 	]
+	const theme_options = themes.map(item => ({
+		label:
+			item === 'light'
+				? t('general.option_light')
+				: item === 'dark'
+					? t('general.option_dark')
+					: t('general.option_system'),
+		value: item
+	}))
 	const [bootstrap_password, setBootstrapPassword] = useState('')
 	const [bootstrap_confirm, setBootstrapConfirm] = useState('')
 	const [next_password, setNextPassword] = useState('')
@@ -292,16 +301,16 @@ const Index = () => {
 							<FieldDescription>{t('general.theme_desc')}</FieldDescription>
 						</FieldContent>
 						<Controller name='theme' control={control}>
-							<Select items={themes.map(item => ({ label: item, value: item }))}>
+							<Select items={theme_options}>
 								<SelectTrigger className='workspace_selector'>
 									<SelectValue />
 								</SelectTrigger>
 								<SelectContent align='start'>
 									<SelectGroup>
 										<SelectLabel>{t('general.theme_label')}</SelectLabel>
-										{themes.map(item => (
-											<SelectItem value={item} key={item}>
-												{item}
+										{theme_options.map(item => (
+											<SelectItem value={item.value} key={item.value}>
+												{item.label}
 											</SelectItem>
 										))}
 									</SelectGroup>
@@ -689,7 +698,7 @@ const Index = () => {
 						</FieldContent>
 						<Select
 							items={pthink_message_threshold_options}
-							value={String(pthink?.min_messages ?? 6)}
+							value={String(pthink?.min_messages ?? 60)}
 							onValueChange={value => updatePthink({ min_messages: Number(value) })}
 						>
 							<SelectTrigger className='workspace_selector'>

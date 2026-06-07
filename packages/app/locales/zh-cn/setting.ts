@@ -80,7 +80,7 @@ export default {
 		monthly_report_desc: '在当月最后一天或次月第一天运行。',
 		yearly_report: '每年报告',
 		yearly_report_desc: '在当年最后一天或次年第一天运行。',
-		post_think: 'Post-Think',
+		post_think: '后思考',
 		post_think_desc:
 			'当应用空闲且未审阅消息数达到阈值时，回顾今天新增的消息，并把值得长期保留的结论沉淀为文章；只有在理由充分时，才进一步产出技能或工具。',
 		idle_grace: '空闲宽限',
@@ -109,6 +109,9 @@ export default {
 		option_next_year_first_day: '次年第一天',
 		option_english: 'English',
 		option_simplified_chinese: '简体中文',
+		option_light: '浅色',
+		option_dark: '深色',
+		option_system: '跟随系统',
 		option_minutes: '{{count}} 分钟',
 		option_messages: '{{count}} 条消息',
 		toast_auth_enabled: '已启用认证。',

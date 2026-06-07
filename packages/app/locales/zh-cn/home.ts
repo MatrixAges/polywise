@@ -101,7 +101,7 @@ export default {
 		frozen_nodes_edges_combined: '{{total}} 个冻结节点与边合计',
 		window_messages: '{{value}} 条消息',
 		window_activity_desc: '{{sessions}} 个会话 · {{posts}} 篇帖子 · {{tokens}} tokens',
-		total_post_think_reviews: '{{count}} 次 post-think 复盘总计',
+		total_post_think_reviews: '{{count}} 次后思考复盘总计',
 		last_review_relative: '{{status}} · 最近复盘于 {{value}}',
 		last_output_mix: '{{articles}} 篇文章 · {{skills}} 个技能 · {{tools}} 个工具'
 	},
@@ -198,7 +198,7 @@ export default {
 		review_volume: '复盘数量',
 		last_review_gap: '距上次复盘',
 		last_output_mix: '最近输出构成',
-		no_post_think_review_generated: '还没有生成 post-think 复盘。',
+		no_post_think_review_generated: '还没有生成后思考复盘。',
 		no_durable_output_yet: '还没有产生可持久化输出。',
 		none: '无',
 		avg_chunks_per_article: '平均每篇 {{count}} 个分块',

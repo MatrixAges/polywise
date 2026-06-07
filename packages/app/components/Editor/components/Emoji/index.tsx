@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useMemoizedFn } from 'ahooks'
+import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/__shadcn__/components/ui/button'
 import { Input } from '@/__shadcn__/components/ui/input'
@@ -10,6 +11,7 @@ const emojis = ['😀', '😂', '😍', '🤔', '😭', '🎉', '🔥', '✅', '
 
 const Index = (props: IPropsModal) => {
 	const { editor } = props
+	const { t } = useTranslation()
 	const [value, setValue] = useState('')
 
 	const onSelect = useMemoizedFn((v: string) => {
@@ -49,9 +51,13 @@ const Index = (props: IPropsModal) => {
 				))}
 			</div>
 			<div className='flex gap-2'>
-				<Input placeholder='Emoji' value={value} onChange={e => setValue(e.target.value)}></Input>
+				<Input
+					placeholder={t('emoji_panel.placeholder')}
+					value={value}
+					onChange={e => setValue(e.target.value)}
+				></Input>
 				<Button type='button' onClick={() => value && onSelect(value)}>
-					Insert
+					{t('emoji_panel.insert')}
 				</Button>
 			</div>
 		</div>

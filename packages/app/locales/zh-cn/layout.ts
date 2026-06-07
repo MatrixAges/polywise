@@ -20,5 +20,14 @@ export default {
 		collapse: '收起',
 		loading_notifications: '正在加载通知...',
 		empty_notifications: '暂无通知。'
+	},
+	sessions_status: {
+		title: '活跃会话',
+		desc: '用于快速查看动态会话变化的面板',
+		unread: '未读',
+		running: '运行中',
+		error: '异常',
+		empty: '暂无会话',
+		not_selected: '尚未选择会话'
 	}
 } as const

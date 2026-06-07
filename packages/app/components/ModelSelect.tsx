@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { useMemoizedFn } from 'ahooks'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import {
 	Combobox,
@@ -92,6 +93,7 @@ const Index = (props: IProps) => {
 		props
 
 	const global = useGlobal()
+	const { t } = useTranslation()
 
 	const s = global.setting
 	const providers = $copy([...s.providers.providers, ...(s.providers.custom_providers || [])])
@@ -177,10 +179,10 @@ const Index = (props: IProps) => {
 				className={inputClassName}
 				ghost={ghost}
 				showTrigger={showTrigger}
-				placeholder='Select a default model'
+				placeholder={t('model_select.placeholder')}
 			/>
 			<ComboboxContent ghost={ghost}>
-				<ComboboxEmpty>No providers found.</ComboboxEmpty>
+				<ComboboxEmpty>{t('model_select.empty')}</ComboboxEmpty>
 				<ComboboxList>
 					{(group, index) => (
 						<ComboboxGroup key={group.value} items={group.items}>

@@ -20,5 +20,29 @@ export default {
 		save: 'Save',
 		saving: 'Saving',
 		save_failed: 'Failed to save bookmark.'
+	},
+	login: {
+		title: 'Polywise Login',
+		desc: 'Sign in to the standalone web runtime.',
+		account: 'Account',
+		password: 'Password',
+		password_required: 'Password is required.',
+		sign_in: 'Sign In',
+		signing_in: 'Signing in...',
+		no_password_configured: 'No password configured yet. Set it in Settings.'
+	},
+	model_select: {
+		placeholder: 'Select a default model',
+		empty: 'No providers found.'
+	},
+	emoji_panel: {
+		placeholder: 'Emoji',
+		insert: 'Insert'
+	},
+	todos_panel: {
+		title: 'Todos',
+		new_placeholder: 'New todo',
+		add: 'Add',
+		rename: 'Rename'
 	}
 } as const

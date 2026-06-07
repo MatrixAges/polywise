@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { ShieldCheck } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import { toast } from 'sonner'
 
@@ -12,12 +13,13 @@ import getAppRouteHref from '@/utils/getAppRouteHref'
 const Index = () => {
 	const global = useGlobal()
 	const auth = global.auth
+	const { t } = useTranslation()
 	const [password, setPassword] = useState('')
 	const [loading, setLoading] = useState(false)
 
 	const onSubmit = async () => {
 		if (!password.trim()) {
-			toast.error('Password is required.')
+			toast.error(t('login.password_required'))
 			return
 		}
 
@@ -66,8 +68,8 @@ const Index = () => {
 						<ShieldCheck className='size-5'></ShieldCheck>
 					</div>
 					<div>
-						<div className='text-lg font-semibold'>Polywise Login</div>
-						<div className='text-std-500 text-sm'>Sign in to the standalone web runtime.</div>
+						<div className='text-lg font-semibold'>{t('login.title')}</div>
+						<div className='text-std-500 text-sm'>{t('login.desc')}</div>
 					</div>
 				</div>
 				<div className='mb-4 space-y-3'>
@@ -79,7 +81,7 @@ const Index = () => {
 								uppercase
 							'
 						>
-							Account
+							{t('login.account')}
 						</div>
 						<Input readOnly value={auth.status?.username || 'polywiser'}></Input>
 					</div>
@@ -91,7 +93,7 @@ const Index = () => {
 								uppercase
 							'
 						>
-							Password
+							{t('login.password')}
 						</div>
 						<Input
 							type='password'
@@ -107,7 +109,7 @@ const Index = () => {
 				</div>
 				<div className='space-y-3'>
 					<Button className='w-full' onClick={() => void onSubmit()} disabled={loading}>
-						{loading ? 'Signing in...' : 'Sign In'}
+						{loading ? t('login.signing_in') : t('login.sign_in')}
 					</Button>
 					{auth.bootstrapRequired && (
 						<Link
@@ -120,7 +122,7 @@ const Index = () => {
 							'
 							to='/setting'
 						>
-							No password configured yet. Set it in Settings.
+							{t('login.no_password_configured')}
 						</Link>
 					)}
 				</div>
