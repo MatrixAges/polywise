@@ -631,7 +631,7 @@ export default class Index {
 				key: 'posts',
 				title: $t('model.posts', { ns: 'home' }),
 				value: formatInteger(this.data.activity.week.posts),
-				desc: `${formatCompact(this.data.content.post_total)} total · ${post_counts.user} user · ${post_counts.wiki} wiki · ${post_counts.memory} memory`
+				desc: `${formatCompact(this.data.content.post_total)} ${t_home('model.total')} · ${t_home('model.user_count', { count: post_counts.user })} · ${t_home('model.wiki_count', { count: post_counts.wiki })} · ${t_home('model.memory_count', { count: post_counts.memory })}`
 			},
 			{
 				key: 'pipeline',
@@ -643,7 +643,7 @@ export default class Index {
 				key: 'graph',
 				title: $t('model.graph', { ns: 'home' }),
 				value: `+${formatCompact(graph_week_total)}`,
-				desc: `${formatCompact(graph_total)} total · +${this.data.memory.node_week_total} nodes · +${this.data.memory.edge_week_total} edges ${this.stats_period_window}`
+				desc: `${formatCompact(graph_total)} ${t_home('model.total')} · +${this.data.memory.node_week_total} ${t_home('memory.nodes').toLowerCase()} · +${this.data.memory.edge_week_total} ${t_home('memory.edges').toLowerCase()} ${this.stats_period_window}`
 			}
 		]
 	}
@@ -711,17 +711,17 @@ export default class Index {
 								? 3
 								: 4
 			const parts = [
-				`${item.messages} messages`,
-				`${item.new_sessions} sessions`,
-				`${item.new_posts} posts`,
-				`${item.rewire_events} rewires`,
-				`${item.pthink_reports} reviews`
+				`${item.messages} ${t_home('model.messages').toLowerCase()}`,
+				`${item.new_sessions} ${t_home('model.sessions').toLowerCase()}`,
+				`${item.new_posts} ${t_home('model.posts').toLowerCase()}`,
+				`${item.rewire_events} ${t_home('model.rewires').toLowerCase()}`,
+				`${item.pthink_reports} ${t_home('model.reviews').toLowerCase()}`
 			]
 
 			return {
 				...item,
 				level,
-				tooltip: `${formatDate(item.date, 'MMM D, YYYY')} · ${item.score} hotspot score · ${parts.join(' · ')}`
+				tooltip: `${formatDate(item.date, 'MMM D, YYYY')} · ${t_home('model.hotspot_score', { score: item.score })} · ${parts.join(' · ')}`
 			}
 		})
 	}
@@ -736,7 +736,7 @@ export default class Index {
 		const active_days = cells.filter(item => item.score > 0).length
 		const busiest_day = cells.reduce((best, item) => (item.score > best.score ? item : best), cells[0]!)
 
-		return `Last 48 weeks · ${active_days} active days · busiest ${formatDate(busiest_day.date, 'MMM D')} at ${busiest_day.score}`
+		return `${t_home('model.last_48_weeks', { defaultValue: 'Last 48 weeks' })} · ${active_days} ${t_home('model.active_days')} · ${t_home('model.busiest')} ${formatDate(busiest_day.date, 'MMM D')} ${t_home('model.at')} ${busiest_day.score}`
 	}
 
 	get usage_metrics(): Array<HomeModelItem> {
@@ -745,12 +745,24 @@ export default class Index {
 		}
 
 		return [
-			{ key: 'total', title: 'Total', value: formatCompact(this.data.usage.period_total_tokens) },
-			{ key: 'input', title: 'Input', value: formatCompact(this.data.usage.period_input_tokens) },
-			{ key: 'output', title: 'Output', value: formatCompact(this.data.usage.period_output_tokens) },
+			{
+				key: 'total',
+				title: t_home('model.total'),
+				value: formatCompact(this.data.usage.period_total_tokens)
+			},
+			{
+				key: 'input',
+				title: t_home('model.input'),
+				value: formatCompact(this.data.usage.period_input_tokens)
+			},
+			{
+				key: 'output',
+				title: t_home('model.output'),
+				value: formatCompact(this.data.usage.period_output_tokens)
+			},
 			{
 				key: 'reasoning',
-				title: 'Reasoning',
+				title: t_home('model.reasoning'),
 				value: formatCompact(this.data.usage.period_reasoning_tokens)
 			}
 		]
@@ -762,7 +774,7 @@ export default class Index {
 			title: item.label,
 			subtitle: `${item.calls} calls · source ${item.source}`,
 			value: formatCompact(item.total_tokens),
-			meta: 'tokens'
+			meta: t_home('common.tokens')
 		}))
 	}
 
@@ -780,7 +792,7 @@ export default class Index {
 			return ''
 		}
 
-		return `24h ${this.data.overview.sessions_active_24h} · 72h ${this.data.overview.sessions_warm_72h} · 7d ${this.data.overview.sessions_cooling_week} · dormant ${this.data.overview.sessions_dormant_over_week}`
+		return `24h ${this.data.overview.sessions_active_24h} · 72h ${this.data.overview.sessions_warm_72h} · 7d ${this.data.overview.sessions_cooling_week} · ${t_home('model.dormant', { defaultValue: 'dormant' })} ${this.data.overview.sessions_dormant_over_week}`
 	}
 
 	get usage_depth_items(): Array<HomeModelItem> {

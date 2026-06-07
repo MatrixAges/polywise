@@ -204,15 +204,26 @@ export default class Index {
 			.sort((a, b) => new Date(a.next_run_at ?? 0).getTime() - new Date(b.next_run_at ?? 0).getTime())[0]
 
 		if (this.linkcase_session_running) {
-			return 'Batch fetch session is running'
+			return $t('control.batch_session_running', {
+				ns: 'linkcase',
+				defaultValue: 'Batch fetch session is running'
+			})
 		}
 
 		if (this.batch_submit_loading) {
-			return `Running scheduled ${this.batch_running_action || 'task'}`
+			return $t('control.running_scheduled', {
+				ns: 'linkcase',
+				defaultValue: 'Running scheduled {{action}}',
+				action:
+					this.batch_running_action || $t('control.task', { ns: 'linkcase', defaultValue: 'task' })
+			})
 		}
 
 		if (this.selection_fetch_submit_loading) {
-			return 'Submitting selected links to batch session'
+			return $t('control.submitting_selected_links', {
+				ns: 'linkcase',
+				defaultValue: 'Submitting selected links to batch session'
+			})
 		}
 
 		if (this.batch_last_error) {
@@ -220,14 +231,26 @@ export default class Index {
 		}
 
 		if (next_task?.next_run_at) {
-			return `${active_task_count} active task${active_task_count === 1 ? '' : 's'} · next in ${this.formatBatchRelativeTime(next_task.next_run_at)}`
+			return `${$t('control.active_tasks', {
+				ns: 'linkcase',
+				defaultValue: '{{count}} active task',
+				count: active_task_count
+			})} · ${$t('control.next_in', {
+				ns: 'linkcase',
+				defaultValue: 'next in {{value}}',
+				value: this.formatBatchRelativeTime(next_task.next_run_at)
+			})}`
 		}
 
 		if (paused_task_count > 0) {
-			return `${paused_task_count} paused task${paused_task_count === 1 ? '' : 's'}`
+			return $t('control.paused_tasks', {
+				ns: 'linkcase',
+				defaultValue: '{{count}} paused task',
+				count: paused_task_count
+			})
 		}
 
-		return 'No scheduled tasks'
+		return $t('control.no_scheduled_tasks', { ns: 'linkcase' })
 	}
 
 	get batch_scheduler_enabled() {
@@ -786,17 +809,25 @@ export default class Index {
 			this.batch_tasks = response.tasks
 			this.batch_last_error = ''
 		} catch (error) {
-			this.batch_last_error = error instanceof Error ? error.message : 'Failed to load scheduled tasks'
+			this.batch_last_error =
+				error instanceof Error
+					? error.message
+					: $t('control.failed_load_tasks', {
+							ns: 'linkcase',
+							defaultValue: 'Failed to load scheduled tasks'
+						})
 		}
 	}
 
 	getBatchTaskActionLabel(action: LinkcaseBatchAction) {
-		return action === 'fetch' ? 'Fetch' : 'Extract'
+		return action === 'fetch'
+			? $t('control.fetch', { ns: 'linkcase' })
+			: $t('selection.fetch', { ns: 'linkcase' })
 	}
 
 	formatBatchAbsoluteTime(value: string | null) {
 		if (!value) {
-			return 'Never'
+			return $t('control.never', { ns: 'linkcase', defaultValue: 'Never' })
 		}
 
 		return new Date(value).toLocaleString()
@@ -804,7 +835,7 @@ export default class Index {
 
 	formatBatchRelativeTime(value: string | null) {
 		if (!value) {
-			return 'not scheduled'
+			return $t('control.not_scheduled', { ns: 'linkcase', defaultValue: 'not scheduled' })
 		}
 
 		const diff_ms = Math.max(new Date(value).getTime() - this.batch_clock, 0)
@@ -829,23 +860,31 @@ export default class Index {
 
 	getBatchTaskStatusText(task: LinkcaseBatchTask) {
 		if (task.last_status === 'running') {
-			return 'Running now'
+			return $t('control.running_now', { ns: 'linkcase', defaultValue: 'Running now' })
 		}
 
 		if (!task.enabled) {
-			return 'Paused'
+			return $t('control.pause', { ns: 'linkcase' })
 		}
 
 		if (task.next_run_at) {
 			return `Next in ${this.formatBatchRelativeTime(task.next_run_at)}`
 		}
 
-		return 'Waiting to schedule'
+		return $t('control.waiting_to_schedule', {
+			ns: 'linkcase',
+			defaultValue: 'Waiting to schedule'
+		})
 	}
 
 	async startBatchSchedule() {
 		if (!this.batch_action_fetch_enabled && !this.batch_action_extract_enabled) {
-			toast.error('Select at least one batch action.')
+			toast.error(
+				$t('control.select_batch_action', {
+					ns: 'linkcase',
+					defaultValue: 'Select at least one batch action.'
+				})
+			)
 
 			return
 		}
